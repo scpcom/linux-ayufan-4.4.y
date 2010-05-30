@@ -5562,6 +5562,9 @@ static void mem_cgroup_move_task(struct cgroup_subsys *ss,
 
 struct cgroup_subsys mem_cgroup_subsys = {
 	.name = "memory",
+#ifdef CONFIG_CGROUP_MEM_RES_CTLR_DISABLED
+	.disabled = 1,
+#endif
 	.subsys_id = mem_cgroup_subsys_id,
 	.create = mem_cgroup_create,
 	.pre_destroy = mem_cgroup_pre_destroy,
