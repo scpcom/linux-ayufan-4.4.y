@@ -713,6 +713,14 @@ next_menu:
 	return 0;
 }
 
+void conf_write_new_symbol(FILE *fp, struct symbol *sym, bool verbose)
+{
+	if (verbose)
+		conf_write_symbol(fp, sym, &kconfig_printer_cb, NULL);
+	else
+		fprintf(fp, "%s%s\n", CONFIG_, sym->name);
+}
+
 int conf_write(const char *name)
 {
 	FILE *out;
@@ -1102,6 +1110,7 @@ void conf_set_all_new_symbols(enum conf_def_mode mode)
 	for_all_symbols(i, sym) {
 		if (sym_has_value(sym))
 			continue;
+		sym->flags |= SYMBOL_NEW;
 		switch (sym_get_type(sym)) {
 		case S_BOOLEAN:
 		case S_TRISTATE:
