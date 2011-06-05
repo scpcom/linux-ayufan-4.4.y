@@ -42,6 +42,8 @@ nouveau-y := nouveau_drv.o nouveau_state.o nouveau_channel.o nouveau_mem.o \
 nouveau-$(CONFIG_DRM_NOUVEAU_DEBUG) += nouveau_debugfs.o
 nouveau-$(CONFIG_COMPAT) += nouveau_ioc32.o
 nouveau-$(CONFIG_DRM_NOUVEAU_BACKLIGHT) += nouveau_backlight.o
+ifdef CONFIG_X86
 nouveau-$(CONFIG_ACPI) += nouveau_acpi.o
+endif
 
 obj-$(CONFIG_DRM_NOUVEAU)+= nouveau.o

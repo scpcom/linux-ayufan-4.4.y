@@ -1095,7 +1095,7 @@ extern int  nouveau_dma_wait(struct nouveau_channel *, int slots, int size);
 
 /* nouveau_acpi.c */
 #define ROM_BIOS_PAGE 4096
-#if defined(CONFIG_ACPI)
+#if defined(CONFIG_ACPI) && defined(CONFIG_X86)
 void nouveau_register_dsm_handler(void);
 void nouveau_unregister_dsm_handler(void);
 void nouveau_switcheroo_optimus_dsm(void);
