@@ -427,6 +427,7 @@ int core_tpg_del_initiator_node_acl(
 	int force)
 {
 	struct se_session *sess, *sess_tmp;
+	unsigned long flags;
 	int dynamic_acl = 0;
 
 	spin_lock_irq(&tpg->acl_node_lock);
@@ -438,7 +439,7 @@ int core_tpg_del_initiator_node_acl(
 	tpg->num_node_acls--;
 	spin_unlock_irq(&tpg->acl_node_lock);
 
-	spin_lock_bh(&tpg->session_lock);
+	spin_lock_irqsave(&tpg->session_lock, flags);
 	list_for_each_entry_safe(sess, sess_tmp,
 				&tpg->tpg_sess_list, sess_list) {
 		if (sess->se_node_acl != acl)
@@ -449,16 +450,16 @@ int core_tpg_del_initiator_node_acl(
 		if (!tpg->se_tpg_tfo->shutdown_session(sess))
 			continue;
 
-		spin_unlock_bh(&tpg->session_lock);
+		spin_unlock_irqrestore(&tpg->session_lock, flags);
 		/*
 		 * If the $FABRIC_MOD session for the Initiator Node ACL exists,
 		 * forcefully shutdown the $FABRIC_MOD session/nexus.
 		 */
 		tpg->se_tpg_tfo->close_session(sess);
 
-		spin_lock_bh(&tpg->session_lock);
+		spin_lock_irqsave(&tpg->session_lock, flags);
 	}
-	spin_unlock_bh(&tpg->session_lock);
+	spin_unlock_irqrestore(&tpg->session_lock, flags);
 
 	core_tpg_wait_for_nacl_pr_ref(acl);
 	core_clear_initiator_node_from_tpg(acl, tpg);
@@ -485,6 +486,7 @@ int core_tpg_set_initiator_node_queue_depth(
 {
 	struct se_session *sess, *init_sess = NULL;
 	struct se_node_acl *acl;
+	unsigned long flags;
 	int dynamic_acl = 0;
 
 	spin_lock_irq(&tpg->acl_node_lock);
@@ -503,7 +505,7 @@ int core_tpg_set_initiator_node_queue_depth(
 	}
 	spin_unlock_irq(&tpg->acl_node_lock);
 
-	spin_lock_bh(&tpg->session_lock);
+	spin_lock_irqsave(&tpg->session_lock, flags);
 	list_for_each_entry(sess, &tpg->tpg_sess_list, sess_list) {
 		if (sess->se_node_acl != acl)
 			continue;
@@ -515,7 +517,7 @@ int core_tpg_set_initiator_node_queue_depth(
 				" depth and force session reinstatement"
 				" use the \"force=1\" parameter.\n",
 				tpg->se_tpg_tfo->get_fabric_name(), initiatorname);
-			spin_unlock_bh(&tpg->session_lock);
+			spin_unlock_irqrestore(&tpg->session_lock, flags);
 
 			spin_lock_irq(&tpg->acl_node_lock);
 			if (dynamic_acl)
@@ -545,7 +547,7 @@ int core_tpg_set_initiator_node_queue_depth(
 	acl->queue_depth = queue_depth;
 
 	if (core_set_queue_depth_for_node(tpg, acl) < 0) {
-		spin_unlock_bh(&tpg->session_lock);
+		spin_unlock_irqrestore(&tpg->session_lock, flags);
 		/*
 		 * Force session reinstatement if
 		 * core_set_queue_depth_for_node() failed, because we assume
@@ -561,7 +563,7 @@ int core_tpg_set_initiator_node_queue_depth(
 		spin_unlock_irq(&tpg->acl_node_lock);
 		return -EINVAL;
 	}
-	spin_unlock_bh(&tpg->session_lock);
+	spin_unlock_irqrestore(&tpg->session_lock, flags);
 	/*
 	 * If the $FABRIC_MOD session for the Initiator Node ACL exists,
 	 * forcefully shutdown the $FABRIC_MOD session/nexus.
