@@ -77,6 +77,19 @@ enum dma_transaction_type {
 /* last transaction type for creation of the capabilities mask */
 #define DMA_TX_TYPE_END (DMA_CYCLIC + 1)
 
+/**
+ * enum dma_transfer_direction - dma transfer mode and direction indicator
+ * @DMA_MEM_TO_MEM: Async/Memcpy mode
+ * @DMA_MEM_TO_DEV: Slave mode & From Memory to Device
+ * @DMA_DEV_TO_MEM: Slave mode & From Device to Memory
+ * @DMA_DEV_TO_DEV: Slave mode & From Device to Device
+ */
+enum dma_transfer_direction {
+	DMA_MEM_TO_MEM,
+	DMA_MEM_TO_DEV,
+	DMA_DEV_TO_MEM,
+	DMA_DEV_TO_DEV,
+};
 
 /**
  * enum dma_ctrl_flags - DMA flags to augment operation preparation,
