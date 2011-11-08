@@ -971,8 +971,7 @@ static int storvsc_remove(struct hv_device *dev)
 {
 	struct storvsc_device *stor_device = hv_get_drvdata(dev);
 	struct Scsi_Host *host = stor_device->host;
-	struct hv_host_device *host_dev =
-			(struct hv_host_device *)host->hostdata;
+	struct hv_host_device *host_dev = shost_priv(host);
 
 	scsi_remove_host(host);
 
@@ -1065,8 +1064,7 @@ static int storvsc_host_reset(struct hv_device *device)
  */
 static int storvsc_host_reset_handler(struct scsi_cmnd *scmnd)
 {
-	struct hv_host_device *host_dev =
-		(struct hv_host_device *)scmnd->device->host->hostdata;
+	struct hv_host_device *host_dev = shost_priv(scmnd->device->host);
 	struct hv_device *dev = host_dev->dev;
 
 	return storvsc_host_reset(dev);
@@ -1081,8 +1079,7 @@ static void storvsc_command_completion(struct hv_storvsc_request *request)
 	struct storvsc_cmd_request *cmd_request =
 		(struct storvsc_cmd_request *)request->context;
 	struct scsi_cmnd *scmnd = cmd_request->cmd;
-	struct hv_host_device *host_dev =
-		(struct hv_host_device *)scmnd->device->host->hostdata;
+	struct hv_host_device *host_dev = shost_priv(scmnd->device->host);
 	void (*scsi_done_fn)(struct scsi_cmnd *);
 	struct scsi_sense_hdr sense_hdr;
 	struct vmscsi_request *vm_srb;
@@ -1162,8 +1159,7 @@ static int storvsc_queuecommand_lck(struct scsi_cmnd *scmnd,
 				void (*done)(struct scsi_cmnd *))
 {
 	int ret;
-	struct hv_host_device *host_dev =
-		(struct hv_host_device *)scmnd->device->host->hostdata;
+	struct hv_host_device *host_dev = shost_priv(scmnd->device->host);
 	struct hv_device *dev = host_dev->dev;
 	struct hv_storvsc_request *request;
 	struct storvsc_cmd_request *cmd_request;
@@ -1378,7 +1374,7 @@ static int storvsc_probe(struct hv_device *device,
 	if (!host)
 		return -ENOMEM;
 
-	host_dev = (struct hv_host_device *)host->hostdata;
+	host_dev = shost_priv(host);
 	memset(host_dev, 0, sizeof(struct hv_host_device));
 
 	host_dev->port = host->host_no;
