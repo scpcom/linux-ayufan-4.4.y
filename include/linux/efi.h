@@ -510,6 +510,13 @@ static inline int efi_enabled(int facility)
 				EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS | \
 				EFI_VARIABLE_APPEND_WRITE)
 /*
+ * The type of search to perform when calling boottime->locate_handle
+ */
+#define EFI_LOCATE_ALL_HANDLES			0
+#define EFI_LOCATE_BY_REGISTER_NOTIFY		1
+#define EFI_LOCATE_BY_PROTOCOL			2
+
+/*
  * EFI Device Path information
  */
 #define EFI_DEV_HW			0x01
