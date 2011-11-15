@@ -147,7 +147,7 @@ static bool igb_clean_rx_irq(struct igb_q_vector *, int);
 static int igb_ioctl(struct net_device *, struct ifreq *, int cmd);
 static void igb_tx_timeout(struct net_device *);
 static void igb_reset_task(struct work_struct *);
-static void igb_vlan_mode(struct net_device *netdev, u32 features);
+static void igb_vlan_mode(struct net_device *netdev, netdev_features_t features);
 static void igb_vlan_rx_add_vid(struct net_device *, u16);
 static void igb_vlan_rx_kill_vid(struct net_device *, u16);
 static void igb_restore_vlan(struct igb_adapter *);
@@ -1748,7 +1748,8 @@ void igb_reset(struct igb_adapter *adapter)
 	igb_get_phy_info(hw);
 }
 
-static u32 igb_fix_features(struct net_device *netdev, u32 features)
+static netdev_features_t igb_fix_features(struct net_device *netdev,
+	netdev_features_t features)
 {
 	/*
 	 * Since there is no support for separate rx/tx vlan accel
@@ -1762,9 +1763,10 @@ static u32 igb_fix_features(struct net_device *netdev, u32 features)
 	return features;
 }
 
-static int igb_set_features(struct net_device *netdev, u32 features)
+static int igb_set_features(struct net_device *netdev,
+	netdev_features_t features)
 {
-	u32 changed = netdev->features ^ features;
+	netdev_features_t changed = netdev->features ^ features;
 
 	if (changed & NETIF_F_HW_VLAN_RX)
 		igb_vlan_mode(netdev, features);
@@ -6481,7 +6483,7 @@ s32 igb_write_pcie_cap_reg(struct e1000_hw *hw, u32 reg, u16 *value)
 	return 0;
 }
 
-static void igb_vlan_mode(struct net_device *netdev, u32 features)
+static void igb_vlan_mode(struct net_device *netdev, netdev_features_t features)
 {
 	struct igb_adapter *adapter = netdev_priv(netdev);
 	struct e1000_hw *hw = &adapter->hw;
