@@ -228,6 +228,11 @@ enum tcm_sense_reason_table {
 	TCM_ADDRESS_OUT_OF_RANGE		= 0x11,
 };
 
+enum target_sc_flags_table {
+	TARGET_SCF_BIDI_OP		= 0x01,
+	TARGET_SCF_ACK_KREF		= 0x02,
+};
+
 /* fabric independent task management function values */
 enum tcm_tmreq_table {
 	TMR_ABORT_TASK		= 1,
