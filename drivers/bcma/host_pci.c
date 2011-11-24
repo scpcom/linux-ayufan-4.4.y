@@ -263,11 +263,13 @@ static int bcma_host_pci_resume(struct pci_dev *dev)
 #endif /* CONFIG_PM */
 
 static DEFINE_PCI_DEVICE_TABLE(bcma_pci_bridge_tbl) = {
+#if !IS_ENABLED(CONFIG_BRCMSMAC)
 	{ PCI_DEVICE(PCI_VENDOR_ID_BROADCOM, 0x0576) },
-	{ PCI_DEVICE(PCI_VENDOR_ID_BROADCOM, 0x4331) },
 	{ PCI_DEVICE(PCI_VENDOR_ID_BROADCOM, 0x4353) },
 	{ PCI_DEVICE(PCI_VENDOR_ID_BROADCOM, 0x4357) },
 	{ PCI_DEVICE(PCI_VENDOR_ID_BROADCOM, 0x4727) },
+#endif
+	{ PCI_DEVICE(PCI_VENDOR_ID_BROADCOM, 0x4331) },
 	{ 0, },
 };
 MODULE_DEVICE_TABLE(pci, bcma_pci_bridge_tbl);
