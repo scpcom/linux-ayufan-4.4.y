@@ -232,6 +232,12 @@ config XPS
 	depends on SMP && SYSFS && USE_GENERIC_SMP_HELPERS
 	default y
 
+config BQL
+	boolean
+	depends on SYSFS
+	select DQL
+	default y
+
 config BPF_JIT
 	bool "enable BPF Just In Time compiler"
 	depends on HAVE_BPF_JIT
