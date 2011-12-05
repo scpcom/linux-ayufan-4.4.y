@@ -96,21 +96,7 @@ int line6_pcm_start(struct snd_line6_pcm *line6pcm, int channels)
 		flags_new = flags_old | channels;
 	} while (cmpxchg(&line6pcm->flags, flags_old, flags_new) != flags_old);
 
-#if LINE6_BACKUP_MONITOR_SIGNAL
-	if (!(line6pcm->line6->properties->capabilities & LINE6_BIT_HWMON)) {
-		line6pcm->prev_fbuf =
-		    kmalloc(LINE6_ISO_PACKETS * line6pcm->max_packet_size,
-			    GFP_KERNEL);
-
-		if (!line6pcm->prev_fbuf) {
-			dev_err(line6pcm->line6->ifcdev,
-				"cannot malloc monitor buffer\n");
-			return -ENOMEM;
-		}
-	}
-#else
 	line6pcm->prev_fbuf = NULL;
-#endif
 
 	if (((flags_old & MASK_CAPTURE) == 0) &&
 	    ((flags_new & MASK_CAPTURE) != 0)) {
@@ -174,9 +160,6 @@ int line6_pcm_stop(struct snd_line6_pcm *line6pcm, int channels)
 	    ((flags_new & MASK_PLAYBACK) == 0)) {
 		line6_unlink_audio_out_urbs(line6pcm);
 	}
-#if LINE6_BACKUP_MONITOR_SIGNAL
-	kfree(line6pcm->prev_fbuf);
-#endif
 
 	return 0;
 }
