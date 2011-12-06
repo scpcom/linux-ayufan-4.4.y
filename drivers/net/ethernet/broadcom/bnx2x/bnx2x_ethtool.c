@@ -1740,6 +1740,7 @@ static int bnx2x_run_loopback(struct bnx2x *bp, int loopback_mode)
 	struct sw_rx_bd *rx_buf;
 	u16 len;
 	int rc = -ENODEV;
+	struct netdev_queue *txq = netdev_get_tx_queue(bp->dev, txdata->txq_index);
 
 	/* check the loopback mode */
 	switch (loopback_mode) {
@@ -1783,6 +1784,8 @@ static int bnx2x_run_loopback(struct bnx2x *bp, int loopback_mode)
 	num_pkts = 0;
 	tx_start_idx = le16_to_cpu(*txdata->tx_cons_sb);
 	rx_start_idx = le16_to_cpu(*fp_rx->rx_cons_sb);
+
+	netdev_tx_sent_queue(txq, skb->len);
 
 	pkt_prod = txdata->tx_pkt_prod++;
 	tx_buf = &txdata->tx_buf_ring[TX_BD(pkt_prod)];
