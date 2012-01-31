@@ -1768,7 +1768,6 @@ static void e1000_gate_hw_phy_config_ich8lan(struct e1000_hw *hw, bool gate)
 		extcnf_ctrl &= ~E1000_EXTCNF_CTRL_GATE_PHY_CFG;
 
 	ew32(EXTCNF_CTRL, extcnf_ctrl);
-	return;
 }
 
 /**
@@ -3774,8 +3773,6 @@ void e1000_resume_workarounds_pchlan(struct e1000_hw *hw)
 
 release:
 	hw->phy.ops.release(hw);
-
-	return;
 }
 
 /**
