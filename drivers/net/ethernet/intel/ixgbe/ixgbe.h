@@ -629,4 +629,9 @@ extern u8 ixgbe_fcoe_setapp(struct ixgbe_adapter *adapter, u8 up);
 extern int ixgbe_fcoe_get_wwn(struct net_device *netdev, u64 *wwn, int type);
 #endif /* IXGBE_FCOE */
 
+static inline struct netdev_queue *txring_txq(const struct ixgbe_ring *ring)
+{
+	return netdev_get_tx_queue(ring->netdev, ring->queue_index);
+}
+
 #endif /* _IXGBE_H_ */
