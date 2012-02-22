@@ -708,7 +708,6 @@ static s32 e1000_set_default_fc_generic(struct e1000_hw *hw)
  **/
 s32 e1000e_setup_link_generic(struct e1000_hw *hw)
 {
-	struct e1000_mac_info *mac = &hw->mac;
 	s32 ret_val;
 
 	/*
@@ -737,7 +736,7 @@ s32 e1000e_setup_link_generic(struct e1000_hw *hw)
 	e_dbg("After fix-ups FlowControl is now = %x\n", hw->fc.current_mode);
 
 	/* Call the necessary media_type subroutine to configure the link. */
-	ret_val = mac->ops.setup_physical_interface(hw);
+	ret_val = hw->mac.ops.setup_physical_interface(hw);
 	if (ret_val)
 		return ret_val;
 
