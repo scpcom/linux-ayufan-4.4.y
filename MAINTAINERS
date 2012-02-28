@@ -1321,6 +1321,17 @@ W:	http://atl1.sourceforge.net
 S:	Maintained
 F:	drivers/net/ethernet/atheros/
 
+ALX ETHERNET DRIVERS
+M:	Cloud Ren <cjren@qca.qualcomm.com>
+M:	Stevent Li <steventl@qca.qualcomm.com>
+M:	Wu Ken <kenw@qca.qualcomm.com>
+M:	David Liu <dwliu@qca.qualcomm.com>
+L:	netdev@vger.kernel.org
+L:	nic-devel@qualcomm.com
+W:	http://wireless.kernel.org/en/users/Drivers/ethernet/alx
+S:	Supported
+F:	drivers/net/ethernet/atheros/alx/
+
 ATM
 M:	Chas Williams <chas@cmf.nrl.navy.mil>
 L:	linux-atm-general@lists.sourceforge.net (moderated for non-subscribers)

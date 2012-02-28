@@ -56,15 +56,55 @@ config ATL1E
 	  will be called atl1e.
 
 config ATL1C
-	tristate "Atheros L1C Gigabit Ethernet support (EXPERIMENTAL)"
+	tristate "Atheros L1C Gigabit Ethernet support (DEPRECATED)"
 	depends on PCI && EXPERIMENTAL
 	select CRC32
 	select NET_CORE
 	select MII
 	---help---
 	  This driver supports the Atheros L1C gigabit ethernet adapter.
+	  This driver is deprecated in favor for the alx (CONFIG_ALX) driver.
+	  This driver supports the following chipsets:
+
+	  1969:1063 - AR8131 Gigabit Ethernet
+	  1969:1062 - AR8132 Fast Ethernet (10/100 Mbit/s)
+	  1969:2062 - AR8152 v2.0 Fast Ethernet
+	  1969:2060 - AR8152 v1.1 Fast Ethernet
+	  1969:1073 - AR8151 v1.0 Gigabit Ethernet
+	  1969:1083 - AR8151 v2.0 Gigabit Ethernet
 
 	  To compile this driver as a module, choose M here.  The module
 	  will be called atl1c.
+
+config ALX
+	tristate "Atheros ALX Gigabit Ethernet support"
+	depends on PCI
+	select CRC32
+	select NET_CORE
+	select MII
+	---help---
+	  This driver supports the Atheros L1C/L1D/L1F gigabit ethernet
+	  adapter. The alx driver is intended to replace completely the
+	  atl1c driver with proper support and commitment from Qualcomm
+	  Atheros (QCA). Both atl1c and alx supports the following chipsets:
+
+	  1969:1063 - AR8131 Gigabit Ethernet
+	  1969:1062 - AR8132 Fast Ethernet (10/100 Mbit/s)
+	  1969:2062 - AR8152 v2.0 Fast Ethernet
+	  1969:2060 - AR8152 v1.1 Fast Ethernet
+	  1969:1073 - AR8151 v1.0 Gigabit Ethernet
+	  1969:1083 - AR8151 v2.0 Gigabit Ethernet
+
+	  Only alx supports the following chipsets:
+
+	  1969:1091 - AR8161
+	  1969:1090 - AR8162
+
+	  For more information see:
+
+	  https://www.linuxfoundation.org/collaborate/workgroups/networking/alx
+
+	  To compile this driver as a module, choose M here.  The module
+	  will be called alx.
 
 endif # NET_VENDOR_ATHEROS
