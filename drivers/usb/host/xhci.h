@@ -1686,6 +1686,17 @@ static inline int xhci_register_pci(void) { return 0; }
 static inline void xhci_unregister_pci(void) {}
 #endif
 
+#if defined(CONFIG_USB_XHCI_PLATFORM) \
+	|| defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
+int xhci_register_plat(void);
+void xhci_unregister_plat(void);
+#else
+static inline int xhci_register_plat(void)
+{ return 0; }
+static inline void xhci_unregister_plat(void)
+{  }
+#endif
+
 /* xHCI host controller glue */
 typedef void (*xhci_get_quirks_t)(struct device *, struct xhci_hcd *);
 int handshake(struct xhci_hcd *xhci, void __iomem *ptr,
