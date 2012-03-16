@@ -2064,7 +2064,8 @@ const struct e1000_info e1000_82574_info = {
 	.flags2			= FLAG2_CHECK_PHY_HANG
 				  | FLAG2_DISABLE_ASPM_L0S
 				  | FLAG2_DISABLE_ASPM_L1
-				  | FLAG2_NO_DISABLE_RX,
+				  | FLAG2_NO_DISABLE_RX
+				  | FLAG2_DMA_BURST,
 	.pba			= 32,
 	.max_hw_frame_size	= DEFAULT_JUMBO,
 	.get_variants		= e1000_get_variants_82571,
