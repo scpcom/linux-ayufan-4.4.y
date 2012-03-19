@@ -75,6 +75,10 @@ struct md_rdev {
 	unsigned long	flags;
 #define	Faulty		1		/* device is known to have a fault */
 #define	In_sync		2		/* device is in_sync with rest of array */
+#define Unmerged	3		/* device is being added to array and should
+							 * be considerred for bvec_merge_fn but not
+							 * yet for actual IO
+							 */
 #define	WriteMostly	4		/* Avoid reading if at all possible */
 #define	AutoDetected	7		/* added by auto-detect */
 #define Blocked		8		/* An error occurred but has not yet
@@ -334,6 +338,10 @@ struct mddev {
 	int				degraded;	/* whether md should consider
 							 * adding a spare
 							 */
+	int				merge_check_needed; /* at least one
+							     * member device
+							     * has a
+							     * merge_bvec_fn */
 
 	atomic_t			recovery_active; /* blocks scheduled, but not written */
 	wait_queue_head_t		recovery_wait;
