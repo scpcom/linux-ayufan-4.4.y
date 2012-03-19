@@ -30,6 +30,8 @@
 #define NFSD_MAY_NOT_BREAK_LEASE	0x200
 #define NFSD_MAY_BYPASS_GSS		0x400
 #define NFSD_MAY_READ_IF_EXEC		0x800
+#define NFSD_MAY_64BIT_COOKIE		0x1000 /* 64 bit readdir cookies for >= NFSv3 */
+
 #ifdef CONFIG_NFSV4_FS_RICHACL
 #define NFSD_MAY_CREATE_DIR             0x2000
 #define NFSD_MAY_CREATE_FILE            0x4000
