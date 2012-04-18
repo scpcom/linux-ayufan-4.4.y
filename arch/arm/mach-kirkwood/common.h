@@ -58,6 +58,12 @@ void dreamplug_init(void);
 static inline void dreamplug_init(void) {};
 #endif
 
+#ifdef CONFIG_MACH_ICONNECT_DT
+void iconnect_init(void);
+#else
+static inline void iconnect_init(void) {};
+#endif
+
 /* early init functions not converted to fdt yet */
 char *kirkwood_id(void);
 void kirkwood_l2_init(void);
