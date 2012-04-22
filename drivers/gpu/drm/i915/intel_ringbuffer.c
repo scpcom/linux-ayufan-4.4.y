@@ -686,16 +686,26 @@ static void
 i915_enable_irq(drm_i915_private_t *dev_priv, u32 mask)
 {
 	dev_priv->irq_mask &= ~mask;
-	I915_WRITE(IMR, dev_priv->irq_mask);
-	POSTING_READ(IMR);
+	if (IS_GEN2(dev_priv->dev)) {
+		I915_WRITE16(IMR, dev_priv->irq_mask);
+		POSTING_READ16(IMR);
+	} else {
+		I915_WRITE(IMR, dev_priv->irq_mask);
+		POSTING_READ(IMR);
+	}
 }
 
 static void
 i915_disable_irq(drm_i915_private_t *dev_priv, u32 mask)
 {
 	dev_priv->irq_mask |= mask;
-	I915_WRITE(IMR, dev_priv->irq_mask);
-	POSTING_READ(IMR);
+	if (IS_GEN2(dev_priv->dev)) {
+		I915_WRITE16(IMR, dev_priv->irq_mask);
+		POSTING_READ16(IMR);
+	} else {
+		I915_WRITE(IMR, dev_priv->irq_mask);
+		POSTING_READ(IMR);
+	}
 }
 
 static bool
