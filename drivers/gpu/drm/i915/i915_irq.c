@@ -1806,10 +1806,6 @@ static void ironlake_irq_preinstall(struct drm_device *dev)
 
 	atomic_set(&dev_priv->irq_received, 0);
 
-	INIT_WORK(&dev_priv->hotplug_work, i915_hotplug_work_func);
-	INIT_WORK(&dev_priv->error_work, i915_error_work_func);
-	if (IS_GEN6(dev) || IS_IVYBRIDGE(dev))
-		INIT_WORK(&dev_priv->rps_work, gen6_pm_rps_work);
 
 	I915_WRITE(HWSTAM, 0xeffe);
 
@@ -1982,9 +1978,6 @@ static void i915_driver_irq_preinstall(struct drm_device * dev)
 	int pipe;
 
 	atomic_set(&dev_priv->irq_received, 0);
-
-	INIT_WORK(&dev_priv->hotplug_work, i915_hotplug_work_func);
-	INIT_WORK(&dev_priv->error_work, i915_error_work_func);
 
 	if (I915_HAS_HOTPLUG(dev)) {
 		I915_WRITE(PORT_HOTPLUG_EN, 0);
@@ -2290,6 +2283,12 @@ static void i8xx_irq_uninstall(struct drm_device * dev)
 
 void intel_irq_init(struct drm_device *dev)
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
+
+	INIT_WORK(&dev_priv->hotplug_work, i915_hotplug_work_func);
+	INIT_WORK(&dev_priv->error_work, i915_error_work_func);
+	INIT_WORK(&dev_priv->rps_work, gen6_pm_rps_work);
+
 	dev->driver->get_vblank_counter = i915_get_vblank_counter;
 	dev->max_vblank_count = 0xffffff; /* only 24 bits of frame count */
 	if (IS_G4X(dev) || IS_GEN5(dev) || IS_GEN6(dev) || IS_IVYBRIDGE(dev)) {
