@@ -722,7 +722,7 @@ static int validate_ec_hdr(const struct ubi_device *ubi,
 
 bad:
 	ubi_err("bad EC header");
-	ubi_dbg_dump_ec_hdr(ec_hdr);
+	ubi_dump_ec_hdr(ec_hdr);
 	dump_stack();
 	return 1;
 }
@@ -804,7 +804,7 @@ int ubi_io_read_ec_hdr(struct ubi_device *ubi, int pnum,
 		if (verbose) {
 			ubi_warn("bad magic number at PEB %d: %08x instead of "
 				 "%08x", pnum, magic, UBI_EC_HDR_MAGIC);
-			ubi_dbg_dump_ec_hdr(ec_hdr);
+			ubi_dump_ec_hdr(ec_hdr);
 		}
 		dbg_bld("bad magic number at PEB %d: %08x instead of "
 			"%08x", pnum, magic, UBI_EC_HDR_MAGIC);
@@ -818,7 +818,7 @@ int ubi_io_read_ec_hdr(struct ubi_device *ubi, int pnum,
 		if (verbose) {
 			ubi_warn("bad EC header CRC at PEB %d, calculated "
 				 "%#08x, read %#08x", pnum, crc, hdr_crc);
-			ubi_dbg_dump_ec_hdr(ec_hdr);
+			ubi_dump_ec_hdr(ec_hdr);
 		}
 		dbg_bld("bad EC header CRC at PEB %d, calculated "
 			"%#08x, read %#08x", pnum, crc, hdr_crc);
@@ -998,7 +998,7 @@ static int validate_vid_hdr(const struct ubi_device *ubi,
 
 bad:
 	ubi_err("bad VID header");
-	ubi_dbg_dump_vid_hdr(vid_hdr);
+	ubi_dump_vid_hdr(vid_hdr);
 	dump_stack();
 	return 1;
 }
@@ -1055,7 +1055,7 @@ int ubi_io_read_vid_hdr(struct ubi_device *ubi, int pnum,
 		if (verbose) {
 			ubi_warn("bad magic number at PEB %d: %08x instead of "
 				 "%08x", pnum, magic, UBI_VID_HDR_MAGIC);
-			ubi_dbg_dump_vid_hdr(vid_hdr);
+			ubi_dump_vid_hdr(vid_hdr);
 		}
 		dbg_bld("bad magic number at PEB %d: %08x instead of "
 			"%08x", pnum, magic, UBI_VID_HDR_MAGIC);
@@ -1069,7 +1069,7 @@ int ubi_io_read_vid_hdr(struct ubi_device *ubi, int pnum,
 		if (verbose) {
 			ubi_warn("bad CRC at PEB %d, calculated %#08x, "
 				 "read %#08x", pnum, crc, hdr_crc);
-			ubi_dbg_dump_vid_hdr(vid_hdr);
+			ubi_dump_vid_hdr(vid_hdr);
 		}
 		dbg_bld("bad CRC at PEB %d, calculated %#08x, "
 			"read %#08x", pnum, crc, hdr_crc);
@@ -1192,7 +1192,7 @@ static int paranoid_check_ec_hdr(const struct ubi_device *ubi, int pnum,
 	return 0;
 
 fail:
-	ubi_dbg_dump_ec_hdr(ec_hdr);
+	ubi_dump_ec_hdr(ec_hdr);
 	dump_stack();
 	return -EINVAL;
 }
@@ -1227,7 +1227,7 @@ static int paranoid_check_peb_ec_hdr(const struct ubi_device *ubi, int pnum)
 	if (hdr_crc != crc) {
 		ubi_err("bad CRC, calculated %#08x, read %#08x", crc, hdr_crc);
 		ubi_err("paranoid check failed for PEB %d", pnum);
-		ubi_dbg_dump_ec_hdr(ec_hdr);
+		ubi_dump_ec_hdr(ec_hdr);
 		dump_stack();
 		err = -EINVAL;
 		goto exit;
@@ -1275,7 +1275,7 @@ static int paranoid_check_vid_hdr(const struct ubi_device *ubi, int pnum,
 
 fail:
 	ubi_err("paranoid check failed for PEB %d", pnum);
-	ubi_dbg_dump_vid_hdr(vid_hdr);
+	ubi_dump_vid_hdr(vid_hdr);
 	dump_stack();
 	return -EINVAL;
 
@@ -1315,7 +1315,7 @@ static int paranoid_check_peb_vid_hdr(const struct ubi_device *ubi, int pnum)
 		ubi_err("bad VID header CRC at PEB %d, calculated %#08x, "
 			"read %#08x", pnum, crc, hdr_crc);
 		ubi_err("paranoid check failed for PEB %d", pnum);
-		ubi_dbg_dump_vid_hdr(vid_hdr);
+		ubi_dump_vid_hdr(vid_hdr);
 		dump_stack();
 		err = -EINVAL;
 		goto exit;
