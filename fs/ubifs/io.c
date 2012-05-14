@@ -123,7 +123,7 @@ int ubifs_leb_write(struct ubifs_info *c, int lnum, const void *buf, int offs,
 	if (c->ro_error)
 		return -EROFS;
 	if (!dbg_is_tst_rcvry(c))
-		err = ubi_leb_write(c->ubi, lnum, buf, offs, len, dtype);
+		err = ubi_leb_write(c->ubi, lnum, buf, offs, len);
 	else
 		err = dbg_leb_write(c, lnum, buf, offs, len, dtype);
 	if (err) {
@@ -144,7 +144,7 @@ int ubifs_leb_change(struct ubifs_info *c, int lnum, const void *buf, int len,
 	if (c->ro_error)
 		return -EROFS;
 	if (!dbg_is_tst_rcvry(c))
-		err = ubi_leb_change(c->ubi, lnum, buf, len, dtype);
+		err = ubi_leb_change(c->ubi, lnum, buf, len);
 	else
 		err = dbg_leb_change(c, lnum, buf, len, dtype);
 	if (err) {
@@ -183,7 +183,7 @@ int ubifs_leb_map(struct ubifs_info *c, int lnum, int dtype)
 	if (c->ro_error)
 		return -EROFS;
 	if (!dbg_is_tst_rcvry(c))
-		err = ubi_leb_map(c->ubi, lnum, dtype);
+		err = ubi_leb_map(c->ubi, lnum);
 	else
 		err = dbg_leb_map(c, lnum, dtype);
 	if (err) {
