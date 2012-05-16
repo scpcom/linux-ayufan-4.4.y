@@ -886,7 +886,7 @@ int ubi_attach_mtd_dev(struct mtd_info *mtd, int ubi_num, int vid_hdr_offset)
 	for (i = 0; i < UBI_MAX_DEVICES; i++) {
 		ubi = ubi_devices[i];
 		if (ubi && mtd->index == ubi->mtd->index) {
-			dbg_err("mtd%d is already attached to ubi%d",
+			ubi_err("mtd%d is already attached to ubi%d",
 				mtd->index, i);
 			return -EEXIST;
 		}
@@ -912,7 +912,7 @@ int ubi_attach_mtd_dev(struct mtd_info *mtd, int ubi_num, int vid_hdr_offset)
 			if (!ubi_devices[ubi_num])
 				break;
 		if (ubi_num == UBI_MAX_DEVICES) {
-			dbg_err("only %d UBI devices may be created",
+			ubi_err("only %d UBI devices may be created",
 				UBI_MAX_DEVICES);
 			return -ENFILE;
 		}
@@ -922,7 +922,7 @@ int ubi_attach_mtd_dev(struct mtd_info *mtd, int ubi_num, int vid_hdr_offset)
 
 		/* Make sure ubi_num is not busy */
 		if (ubi_devices[ubi_num]) {
-			dbg_err("ubi%d already exists", ubi_num);
+			ubi_err("ubi%d already exists", ubi_num);
 			return -EEXIST;
 		}
 	}
@@ -960,7 +960,7 @@ int ubi_attach_mtd_dev(struct mtd_info *mtd, int ubi_num, int vid_hdr_offset)
 
 	err = attach_by_scanning(ubi);
 	if (err) {
-		dbg_err("failed to attach by scanning, error %d", err);
+		ubi_err("failed to attach by scanning, error %d", err);
 		goto out_debugging;
 	}
 
