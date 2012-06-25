@@ -464,6 +464,7 @@ static int wacom_query_tablet_data(struct usb_interface *intf, struct wacom_feat
 		}
 	} else if (features->type != TABLETPC &&
 		   features->type != WIRELESS &&
+		   features->type != TABLETPC2FG &&
 		   features->device_type == BTN_TOOL_PEN) {
 		do {
 			rep_data[0] = 2;
