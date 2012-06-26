@@ -49,7 +49,7 @@ const struct file_operations aa_fs_matching_fops = {
 static ssize_t aa_features_read(struct file *file, char __user *buf,
 				size_t size, loff_t *ppos)
 {
-	const char features[] = "file=3.1 capability=2.0 network=1.0 "
+	const char features[] = "file=3.1 capability=2.0 "
 	    "change_hat=1.5 change_profile=1.1 " "aanamespaces=1.1 rlimit=1.1";
 
 	return simple_read_from_buffer(buf, size, ppos, features,
