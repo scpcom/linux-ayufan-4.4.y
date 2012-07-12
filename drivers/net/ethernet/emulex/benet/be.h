@@ -440,6 +440,10 @@ struct be_adapter {
 #define lancer_chip(adapter)	((adapter->pdev->device == OC_DEVICE_ID3) || \
 				 (adapter->pdev->device == OC_DEVICE_ID4))
 
+#define skyhawk_chip(adapter)	(adapter->pdev->device == OC_DEVICE_ID5)
+
+
+
 extern const struct ethtool_ops be_ethtool_ops;
 
 #define msix_enabled(adapter)		(adapter->num_msix_vec > 0)
