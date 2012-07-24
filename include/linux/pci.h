@@ -284,6 +284,10 @@ struct pci_dev {
 	unsigned int	mmio_always_on:1;	/* disallow turning off io/mem
 						   decoding during bar sizing */
 	unsigned int	wakeup_prepared:1;
+#ifndef __GENKSYMS__
+	unsigned int	:4;		/* spare */
+	unsigned int	pcie_flags_reg:16; /* cached PCI-E Capabilities Register */
+#endif
 	unsigned int	d3_delay;	/* D3->D0 transition time in ms */
 
 #ifdef CONFIG_PCIEASPM
@@ -1545,6 +1549,15 @@ static inline int pci_pcie_cap(struct pci_dev *dev)
 static inline bool pci_is_pcie(struct pci_dev *dev)
 {
 	return !!pci_pcie_cap(dev);
+}
+
+/**
+ * pci_pcie_type - get the PCIe device/port type
+ * @dev: PCI device
+ */
+static inline int pci_pcie_type(const struct pci_dev *dev)
+{
+	return (dev->pcie_flags_reg & PCI_EXP_FLAGS_TYPE) >> 4;
 }
 
 void pci_request_acs(void);
