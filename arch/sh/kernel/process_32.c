@@ -22,6 +22,7 @@
 #include <linux/ftrace.h>
 #include <linux/hw_breakpoint.h>
 #include <linux/prefetch.h>
+#include <generated/package.h>
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 #include <asm/system.h>
@@ -32,10 +33,11 @@ void show_regs(struct pt_regs * regs)
 {
 	printk("\n");
 	printk("Pid : %d, Comm: \t\t%s\n", task_pid_nr(current), current->comm);
-	printk("CPU : %d        \t\t%s  (%s %.*s)\n\n",
+	printk("CPU : %d        \t\t%s  (%s %.*s%s)\n\n",
 	       smp_processor_id(), print_tainted(), init_utsname()->release,
 	       (int)strcspn(init_utsname()->version, " "),
-	       init_utsname()->version);
+	       init_utsname()->version,
+	       LINUX_PACKAGE_ID);
 
 	print_symbol("PC is at %s\n", instruction_pointer(regs));
 	print_symbol("PR is at %s\n", regs->pr);

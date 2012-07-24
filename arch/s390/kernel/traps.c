@@ -33,6 +33,7 @@
 #include <linux/kprobes.h>
 #include <linux/bug.h>
 #include <linux/utsname.h>
+#include <generated/package.h>
 #include <asm/system.h>
 #include <asm/uaccess.h>
 #include <asm/io.h>
@@ -166,11 +167,12 @@ static void show_last_breaking_event(struct pt_regs *regs)
  */
 void dump_stack(void)
 {
-	printk("CPU: %d %s %s %.*s\n",
+	printk("CPU: %d %s %s %.*s%s\n",
 	       task_thread_info(current)->cpu, print_tainted(),
 	       init_utsname()->release,
 	       (int)strcspn(init_utsname()->version, " "),
-	       init_utsname()->version);
+	       init_utsname()->version,
+	       LINUX_PACKAGE_ID);
 	printk("Process %s (pid: %d, task: %p, ksp: %p)\n",
 	       current->comm, current->pid, current,
 	       (void *) current->thread.ksp);
@@ -217,11 +219,12 @@ void show_registers(struct pt_regs *regs)
 void show_regs(struct pt_regs *regs)
 {
 	print_modules();
-	printk("CPU: %d %s %s %.*s\n",
+	printk("CPU: %d %s %s %.*s%s\n",
 	       task_thread_info(current)->cpu, print_tainted(),
 	       init_utsname()->release,
 	       (int)strcspn(init_utsname()->version, " "),
-	       init_utsname()->version);
+	       init_utsname()->version,
+	       LINUX_PACKAGE_ID);
 	printk("Process %s (pid: %d, task: %p, ksp: %p)\n",
 	       current->comm, current->pid, current,
 	       (void *) current->thread.ksp);

@@ -14,6 +14,7 @@
 #include <linux/utsname.h>
 #include <trace/events/power.h>
 #include <linux/hw_breakpoint.h>
+#include <generated/package.h>
 #include <asm/cpu.h>
 #include <asm/system.h>
 #include <asm/apic.h>
@@ -105,11 +106,12 @@ void show_regs_common(void)
 	board = dmi_get_system_info(DMI_BOARD_NAME);
 
 	printk(KERN_CONT "\n");
-	printk(KERN_DEFAULT "Pid: %d, comm: %.20s %s %s %.*s",
+	printk(KERN_DEFAULT "Pid: %d, comm: %.20s %s %s %.*s%s",
 		current->pid, current->comm, print_tainted(),
 		init_utsname()->release,
 		(int)strcspn(init_utsname()->version, " "),
-		init_utsname()->version);
+		init_utsname()->version,
+		LINUX_PACKAGE_ID);
 	printk(KERN_CONT " %s %s", vendor, product);
 	if (board)
 		printk(KERN_CONT "/%s", board);
