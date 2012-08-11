@@ -23,6 +23,16 @@ struct input_mt_slot {
 	int abs[ABS_MT_LAST - ABS_MT_FIRST + 1];
 };
 
+/**
+ * struct input_mt - state of tracked contacts
+ * @flags: input_mt operation flags
+ * @slots: array of slots holding current values of tracked contacts
+ */
+struct input_mt {
+	unsigned int flags;
+	struct input_mt_slot slots[];
+};
+
 static inline void input_mt_set_value(struct input_mt_slot *slot,
 				      unsigned code, int value)
 {
@@ -36,6 +46,8 @@ static inline int input_mt_get_value(const struct input_mt_slot *slot,
 }
 
 int input_mt_init_slots(struct input_dev *dev, unsigned int num_slots);
+int input_mt_init_slots_flags(struct input_dev *dev, unsigned int num_slots,
+			unsigned int flags);
 void input_mt_destroy_slots(struct input_dev *dev);
 
 static inline int input_mt_new_trkid(struct input_dev *dev)

@@ -14,6 +14,9 @@
 
 #define TRKID_SGN	((TRKID_MAX + 1) >> 1)
 
+#define input_dev_to_mt(dev)						\
+	((dev)->mt ? container_of((dev)->mt, struct input_mt, slots[0]) : NULL)
+
 /**
  * input_mt_init_slots() - initialize MT input slots
  * @dev: input device supporting MT events and finger tracking
@@ -25,8 +28,10 @@
  * May be called repeatedly. Returns -EINVAL if attempting to
  * reinitialize with a different number of slots.
  */
-int input_mt_init_slots(struct input_dev *dev, unsigned int num_slots)
+int input_mt_init_slots_flags(struct input_dev *dev, unsigned int num_slots,
+			unsigned int flags)
 {
+	struct input_mt *mt;
 	int i;
 
 	if (!num_slots)
@@ -34,20 +39,28 @@ int input_mt_init_slots(struct input_dev *dev, unsigned int num_slots)
 	if (dev->mt)
 		return dev->mtsize != num_slots ? -EINVAL : 0;
 
-	dev->mt = kcalloc(num_slots, sizeof(struct input_mt_slot), GFP_KERNEL);
-	if (!dev->mt)
+	mt = kzalloc(sizeof(*mt) + num_slots * sizeof(*mt->slots), GFP_KERNEL);
+	if (!mt)
 		return -ENOMEM;
 
 	dev->mtsize = num_slots;
+	mt->flags = flags;
 	input_set_abs_params(dev, ABS_MT_SLOT, 0, num_slots - 1, 0, 0);
 	input_set_abs_params(dev, ABS_MT_TRACKING_ID, 0, TRKID_MAX, 0, 0);
 	input_set_events_per_packet(dev, 6 * num_slots);
 
 	/* Mark slots as 'unused' */
 	for (i = 0; i < num_slots; i++)
-		input_mt_set_value(&dev->mt[i], ABS_MT_TRACKING_ID, -1);
+		input_mt_set_value(&mt->slots[i], ABS_MT_TRACKING_ID, -1);
 
+	dev->mt = &mt->slots[0];
 	return 0;
+}
+EXPORT_SYMBOL(input_mt_init_slots_flags);
+
+int input_mt_init_slots(struct input_dev *dev, unsigned int num_slots)
+{
+	return input_mt_init_slots_flags(dev, num_slots, 0);
 }
 EXPORT_SYMBOL(input_mt_init_slots);
 
@@ -60,7 +73,7 @@ EXPORT_SYMBOL(input_mt_init_slots);
  */
 void input_mt_destroy_slots(struct input_dev *dev)
 {
-	kfree(dev->mt);
+	kfree(input_dev_to_mt(dev));
 	dev->mt = NULL;
 	dev->mtsize = 0;
 	dev->slot = 0;
