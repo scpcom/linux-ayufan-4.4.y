@@ -18,6 +18,8 @@
 #define INPUT_MT_POINTER	0x0001	/* pointer device, e.g. trackpad */
 #define INPUT_MT_DIRECT		0x0002	/* direct device, e.g. touchscreen */
 #define INPUT_MT_DROP_UNUSED	0x0004	/* drop contacts not seen in frame */
+#define INPUT_MT_TRACK		0x0008	/* use in-kernel tracking */
+
 /**
  * struct input_mt_slot - represents the state of an input MT slot
  * @abs: holds current values of ABS_MT axes for this slot
@@ -39,6 +41,7 @@ struct input_mt {
 	unsigned int flags;
 	unsigned int frame;
 	unsigned int *slot_frame;
+	int *red;
 	struct input_mt_slot slots[];
 };
 
@@ -52,6 +55,11 @@ static inline int input_mt_get_value(const struct input_mt_slot *slot,
 				     unsigned code)
 {
 	return slot->abs[code - ABS_MT_FIRST];
+}
+
+static inline bool input_mt_is_active(const struct input_mt_slot *slot)
+{
+	return input_mt_get_value(slot, ABS_MT_TRACKING_ID) >= 0;
 }
 
 int input_mt_init_slots(struct input_dev *dev, unsigned int num_slots);
@@ -82,5 +90,17 @@ void input_mt_report_finger_count(struct input_dev *dev, int count);
 void input_mt_report_pointer_emulation(struct input_dev *dev, bool use_count);
 
 void input_mt_sync_frame(struct input_dev *dev);
+
+/**
+ * struct input_mt_pos - contact position
+ * @x: horizontal coordinate
+ * @y: vertical coordinate
+ */
+struct input_mt_pos {
+	s16 x, y;
+};
+
+int input_mt_assign_slots(struct input_dev *dev, int *slots,
+			  const struct input_mt_pos *pos, int num_pos);
 
 #endif
