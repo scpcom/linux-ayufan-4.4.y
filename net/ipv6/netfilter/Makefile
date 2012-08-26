@@ -31,4 +31,5 @@ obj-$(CONFIG_IP6_NF_MATCH_RT) += ip6t_rt.o
 
 # targets
 obj-$(CONFIG_IP6_NF_TARGET_LOG) += ip6t_LOG.o
+obj-$(CONFIG_IP6_NF_TARGET_NPT) += ip6t_NPT.o
 obj-$(CONFIG_IP6_NF_TARGET_REJECT) += ip6t_REJECT.o
