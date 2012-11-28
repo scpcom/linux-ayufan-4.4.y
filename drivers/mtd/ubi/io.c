@@ -1133,7 +1133,7 @@ static int self_check_not_bad(const struct ubi_device *ubi, int pnum)
 {
 	int err;
 
-	if (!ubi->dbg->chk_io)
+	if (!ubi_dbg_chk_io(ubi))
 		return 0;
 
 	err = ubi_io_is_bad(ubi, pnum);
@@ -1160,7 +1160,7 @@ static int self_check_ec_hdr(const struct ubi_device *ubi, int pnum,
 	int err;
 	uint32_t magic;
 
-	if (!ubi->dbg->chk_io)
+	if (!ubi_dbg_chk_io(ubi))
 		return 0;
 
 	magic = be32_to_cpu(ec_hdr->magic);
@@ -1198,7 +1198,7 @@ static int self_check_peb_ec_hdr(const struct ubi_device *ubi, int pnum)
 	uint32_t crc, hdr_crc;
 	struct ubi_ec_hdr *ec_hdr;
 
-	if (!ubi->dbg->chk_io)
+	if (!ubi_dbg_chk_io(ubi))
 		return 0;
 
 	ec_hdr = kzalloc(ubi->ec_hdr_alsize, GFP_NOFS);
@@ -1242,7 +1242,7 @@ static int self_check_vid_hdr(const struct ubi_device *ubi, int pnum,
 	int err;
 	uint32_t magic;
 
-	if (!ubi->dbg->chk_io)
+	if (!ubi_dbg_chk_io(ubi))
 		return 0;
 
 	magic = be32_to_cpu(vid_hdr->magic);
@@ -1283,7 +1283,7 @@ static int self_check_peb_vid_hdr(const struct ubi_device *ubi, int pnum)
 	struct ubi_vid_hdr *vid_hdr;
 	void *p;
 
-	if (!ubi->dbg->chk_io)
+	if (!ubi_dbg_chk_io(ubi))
 		return 0;
 
 	vid_hdr = ubi_zalloc_vid_hdr(ubi, GFP_NOFS);
@@ -1335,7 +1335,7 @@ static int self_check_write(struct ubi_device *ubi, const void *buf, int pnum,
 	void *buf1;
 	loff_t addr = (loff_t)pnum * ubi->peb_size + offset;
 
-	if (!ubi->dbg->chk_io)
+	if (!ubi_dbg_chk_io(ubi))
 		return 0;
 
 	buf1 = __vmalloc(len, GFP_NOFS, PAGE_KERNEL);
@@ -1399,7 +1399,7 @@ int ubi_self_check_all_ff(struct ubi_device *ubi, int pnum, int offset, int len)
 	void *buf;
 	loff_t addr = (loff_t)pnum * ubi->peb_size + offset;
 
-	if (!ubi->dbg->chk_io)
+	if (!ubi_dbg_chk_io(ubi))
 		return 0;
 
 	buf = __vmalloc(len, GFP_NOFS, PAGE_KERNEL);
