@@ -199,11 +199,8 @@ static int rtl92s_init_sw_vars(struct ieee80211_hw *hw)
 	/* request fw */
 	err = request_firmware(&firmware, rtlpriv->cfg->fw_name,
 			rtlpriv->io.dev);
-	if (err) {
-		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG,
-			 ("Failed to request firmware!\n"));
+	if (err)
 		return 1;
-	}
 	if (firmware->size > sizeof(struct rt_firmware)) {
 		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG,
 			 ("Firmware is too big!\n"));

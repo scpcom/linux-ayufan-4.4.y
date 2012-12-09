@@ -1071,10 +1071,8 @@ static int wl1271_fetch_firmware(struct wl1271 *wl)
 
 	ret = request_firmware(&fw, fw_name, wl1271_wl_to_dev(wl));
 
-	if (ret < 0) {
-		wl1271_error("could not get firmware: %d", ret);
+	if (ret)
 		return ret;
-	}
 
 	if (fw->size % 4) {
 		wl1271_error("firmware size is not multiple of 32 bits: %zu",
@@ -1109,10 +1107,8 @@ static int wl1271_fetch_nvs(struct wl1271 *wl)
 
 	ret = request_firmware(&fw, WL12XX_NVS_NAME, wl1271_wl_to_dev(wl));
 
-	if (ret < 0) {
-		wl1271_error("could not get nvs file: %d", ret);
+	if (ret)
 		return ret;
-	}
 
 	wl->nvs = kmemdup(fw->data, fw->size, GFP_KERNEL);
 

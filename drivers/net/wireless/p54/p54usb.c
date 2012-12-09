@@ -857,9 +857,6 @@ static int p54u_load_firmware(struct ieee80211_hw *dev)
 
 	err = request_firmware(&priv->fw, p54u_fwlist[i].fw, &priv->udev->dev);
 	if (err) {
-		dev_err(&priv->udev->dev, "(p54usb) cannot load firmware %s "
-					  "(%d)!\n", p54u_fwlist[i].fw, err);
-
 		err = request_firmware(&priv->fw, p54u_fwlist[i].fw_legacy,
 				       &priv->udev->dev);
 		if (err)

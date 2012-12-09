@@ -278,16 +278,8 @@ static int load_all_firmwares(struct dvb_frontend *fe)
 
 	tuner_dbg("Reading firmware %s\n", fname);
 	rc = request_firmware(&fw, fname, priv->i2c_props.adap->dev.parent);
-	if (rc < 0) {
-		if (rc == -ENOENT)
-			tuner_err("Error: firmware %s not found.\n",
-				   fname);
-		else
-			tuner_err("Error %d while requesting firmware %s \n",
-				   rc, fname);
-
+	if (rc)
 		return rc;
-	}
 	p = fw->data;
 	endp = p + fw->size;
 

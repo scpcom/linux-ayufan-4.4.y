@@ -1870,8 +1870,6 @@ static int iwl3945_read_ucode(struct iwl_priv *priv)
 		sprintf(buf, "%s%u%s", name_pre, index, ".ucode");
 		ret = request_firmware(&ucode_raw, buf, &priv->pci_dev->dev);
 		if (ret < 0) {
-			IWL_ERR(priv, "%s firmware file req failed: %d\n",
-				  buf, ret);
 			if (ret == -ENOENT)
 				continue;
 			else

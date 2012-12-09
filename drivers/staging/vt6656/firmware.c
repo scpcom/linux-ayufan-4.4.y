@@ -76,11 +76,8 @@ FIRMWAREbDownload(
 		int rc;
 
 		rc = request_firmware(&pDevice->firmware, FIRMWARE_NAME, dev);
-		if (rc) {
-			dev_err(dev, "firmware file %s request failed (%d)\n",
-				FIRMWARE_NAME, rc);
+		if (rc)
 			goto out;
-		}
 	}
 	fw = pDevice->firmware;
 

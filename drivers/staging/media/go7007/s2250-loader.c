@@ -98,12 +98,8 @@ static int s2250loader_probe(struct usb_interface *interface,
 
 	mutex_unlock(&s2250_dev_table_mutex);
 
-	if (request_firmware(&fw, S2250_LOADER_FIRMWARE, &usbdev->dev)) {
-		printk(KERN_ERR
-			"s2250: unable to load firmware from file \"%s\"\n",
-			S2250_LOADER_FIRMWARE);
+	if (request_firmware(&fw, S2250_LOADER_FIRMWARE, &usbdev->dev))
 		goto failed2;
-	}
 	ret = usb_cypress_load_firmware(usbdev, fw, CYPRESS_FX2);
 	release_firmware(fw);
 	if (0 != ret) {
@@ -111,12 +107,8 @@ static int s2250loader_probe(struct usb_interface *interface,
 		goto failed2;
 	}
 
-	if (request_firmware(&fw, S2250_FIRMWARE, &usbdev->dev)) {
-		printk(KERN_ERR
-			"s2250: unable to load firmware from file \"%s\"\n",
-			S2250_FIRMWARE);
+	if (request_firmware(&fw, S2250_FIRMWARE, &usbdev->dev))
 		goto failed2;
-	}
 	ret = usb_cypress_load_firmware(usbdev, fw, CYPRESS_FX2);
 	release_firmware(fw);
 	if (0 != ret) {

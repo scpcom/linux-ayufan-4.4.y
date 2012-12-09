@@ -304,18 +304,11 @@ static int whiteheat_firmware_download(struct usb_serial *serial,
 	dbg("%s", __func__);
 
 	if (request_ihex_firmware(&firmware_fw, "whiteheat.fw",
-				  &serial->dev->dev)) {
-		dev_err(&serial->dev->dev,
-			"%s - request \"whiteheat.fw\" failed\n", __func__);
+				  &serial->dev->dev))
 		goto out;
-	}
 	if (request_ihex_firmware(&loader_fw, "whiteheat_loader.fw",
-			     &serial->dev->dev)) {
-		dev_err(&serial->dev->dev,
-			"%s - request \"whiteheat_loader.fw\" failed\n",
-			__func__);
+			     &serial->dev->dev))
 		goto out;
-	}
 	ret = 0;
 	response = ezusb_set_reset (serial, 1);
 

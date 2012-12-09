@@ -168,10 +168,8 @@ static int iwm_load_img(struct iwm_priv *iwm, const char *img_name)
 	char *build_tag;
 
 	ret = request_firmware(&fw, img_name, iwm_to_dev(iwm));
-	if (ret) {
-		IWM_ERR(iwm, "Request firmware failed");
+	if (ret)
 		return ret;
-	}
 
 	IWM_DBG_FW(iwm, INFO, "Start to load FW %s\n", img_name);
 

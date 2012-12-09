@@ -1207,19 +1207,13 @@ int lbs_get_firmware(struct device *dev, const char *user_helper,
 	/* Try user-specified firmware first */
 	if (user_helper) {
 		ret = request_firmware(helper, user_helper, dev);
-		if (ret) {
-			dev_err(dev, "couldn't find helper firmware %s\n",
-				user_helper);
+		if (ret)
 			goto fail;
-		}
 	}
 	if (user_mainfw) {
 		ret = request_firmware(mainfw, user_mainfw, dev);
-		if (ret) {
-			dev_err(dev, "couldn't find main firmware %s\n",
-				user_mainfw);
+		if (ret)
 			goto fail;
-		}
 	}
 
 	if (*helper && *mainfw)

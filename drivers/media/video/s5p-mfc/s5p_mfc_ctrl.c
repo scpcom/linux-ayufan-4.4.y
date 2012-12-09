@@ -39,10 +39,8 @@ int s5p_mfc_alloc_and_load_firmware(struct s5p_mfc_dev *dev)
 	mfc_debug_enter();
 	err = request_firmware((const struct firmware **)&fw_blob,
 				     "s5p-mfc.fw", dev->v4l2_dev.dev);
-	if (err != 0) {
-		mfc_err("Firmware is not present in the /lib/firmware directory nor compiled in kernel\n");
+	if (err != 0)
 		return -EINVAL;
-	}
 	dev->fw_size = ALIGN(fw_blob->size, FIRMWARE_ALIGN);
 	if (s5p_mfc_bitproc_buf) {
 		mfc_err("Attempting to allocate firmware when it seems that it is already loaded\n");
@@ -117,10 +115,8 @@ int s5p_mfc_reload_firmware(struct s5p_mfc_dev *dev)
 	mfc_debug_enter();
 	err = request_firmware((const struct firmware **)&fw_blob,
 				     "s5p-mfc.fw", dev->v4l2_dev.dev);
-	if (err != 0) {
-		mfc_err("Firmware is not present in the /lib/firmware directory nor compiled in kernel\n");
+	if (err != 0)
 		return -EINVAL;
-	}
 	if (fw_blob->size > dev->fw_size) {
 		mfc_err("MFC firmware is too big to be loaded\n");
 		release_firmware(fw_blob);

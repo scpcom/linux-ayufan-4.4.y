@@ -673,10 +673,8 @@ static int snd_emu1010_load_firmware(struct snd_emu10k1 *emu, const char *filena
 	const struct firmware *fw_entry;
 
 	err = request_firmware(&fw_entry, filename, &emu->pci->dev);
-	if (err != 0) {
-		snd_printk(KERN_ERR "firmware: %s not found. Err = %d\n", filename, err);
+	if (err != 0)
 		return err;
-	}
 	snd_printk(KERN_INFO "firmware size = 0x%zx\n", fw_entry->size);
 
 	/* The FPGA is a Xilinx Spartan IIE XC2S50E */

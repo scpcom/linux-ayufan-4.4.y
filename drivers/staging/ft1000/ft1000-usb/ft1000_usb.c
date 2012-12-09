@@ -139,10 +139,8 @@ static int ft1000_probe(struct usb_interface *interface,
 	      ft1000dev->bulk_out_endpointAddr);
 
 	ret = request_firmware(&dsp_fw, "ft3000.img", &dev->dev);
-	if (ret < 0) {
-		printk(KERN_ERR "Error request_firmware().\n");
+	if (ret)
 		goto err_fw;
-	}
 
 	size = max_t(uint, dsp_fw->size, 4096);
 	pFileStart = kmalloc(size, GFP_KERNEL);

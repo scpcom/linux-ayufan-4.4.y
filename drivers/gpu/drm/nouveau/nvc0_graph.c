@@ -740,10 +740,8 @@ nvc0_graph_create_fw(struct drm_device *dev, const char *fwname,
 	if (ret) {
 		snprintf(f, sizeof(f), "nouveau/%s", fwname);
 		ret = request_firmware(&fw, f, &dev->pdev->dev);
-		if (ret) {
-			NV_ERROR(dev, "failed to load %s\n", fwname);
+		if (ret)
 			return ret;
-		}
 	}
 
 	fuc->size = fw->size;

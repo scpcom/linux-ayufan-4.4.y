@@ -66,10 +66,8 @@ int sst_download_fw(void)
 
 	pr_debug("Downloading %s FW now...\n", name);
 	retval = request_firmware(&fw_sst, name, &sst_drv_ctx->pci->dev);
-	if (retval) {
-		pr_err("request fw failed %d\n", retval);
+	if (retval)
 		return retval;
-	}
 	sst_drv_ctx->alloc_block[0].sst_id = FW_DWNL_ID;
 	sst_drv_ctx->alloc_block[0].ops_block.condition = false;
 	retval = sst_load_fw(fw_sst, NULL);

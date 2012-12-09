@@ -399,10 +399,8 @@ static int kaweth_download_firmware(struct kaweth_device *kaweth,
 	int ret;
 
 	ret = request_firmware(&fw, fwname, &kaweth->dev->dev);
-	if (ret) {
-		err("Firmware request failed\n");
+	if (ret)
 		return ret;
-	}
 
 	if (fw->size > KAWETH_FIRMWARE_BUF_SIZE) {
 		err("Firmware too big: %zu", fw->size);

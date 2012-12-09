@@ -379,12 +379,8 @@ static int or51211_init(struct dvb_frontend* fe)
 		       "(%s)...\n", OR51211_DEFAULT_FIRMWARE);
 		ret = config->request_firmware(fe, &fw,
 					       OR51211_DEFAULT_FIRMWARE);
-		printk(KERN_INFO "or51211:Got Hotplug firmware\n");
-		if (ret) {
-			printk(KERN_WARNING "or51211: No firmware uploaded "
-			       "(timeout or file not found?)\n");
+		if (ret)
 			return ret;
-		}
 
 		ret = or51211_load_firmware(fe, fw);
 		release_firmware(fw);

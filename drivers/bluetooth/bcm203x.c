@@ -194,7 +194,6 @@ static int bcm203x_probe(struct usb_interface *intf, const struct usb_device_id 
 	}
 
 	if (request_firmware(&firmware, "BCM2033-MD.hex", &udev->dev) < 0) {
-		BT_ERR("Mini driver request failed");
 		usb_free_urb(data->urb);
 		kfree(data);
 		return -EIO;
@@ -221,7 +220,6 @@ static int bcm203x_probe(struct usb_interface *intf, const struct usb_device_id 
 	release_firmware(firmware);
 
 	if (request_firmware(&firmware, "BCM2033-FW.bin", &udev->dev) < 0) {
-		BT_ERR("Firmware request failed");
 		usb_free_urb(data->urb);
 		kfree(data->buffer);
 		kfree(data);

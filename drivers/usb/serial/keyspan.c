@@ -1419,10 +1419,8 @@ static int keyspan_fake_startup(struct usb_serial *serial)
 		return 1;
 	}
 
-	if (request_ihex_firmware(&fw, fw_name, &serial->dev->dev)) {
-		dev_err(&serial->dev->dev, "Required keyspan firmware image (%s) unavailable.\n", fw_name);
+	if (request_ihex_firmware(&fw, fw_name, &serial->dev->dev))
 		return(1);
-	}
 
 	dbg("Uploading Keyspan %s firmware.", fw_name);
 

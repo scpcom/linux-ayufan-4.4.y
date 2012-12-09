@@ -792,11 +792,8 @@ int snd_hda_load_patch(struct hda_bus *bus, const char *patch)
 	if (snd_BUG_ON(!dev))
 		return -ENODEV;
 	err = request_firmware(&fw, patch, dev);
-	if (err < 0) {
-		printk(KERN_ERR "hda-codec: Cannot load the patch '%s'\n",
-		       patch);
+	if (!err)
 		return err;
-	}
 
 	tmp = *fw;
 	line_mode = LINE_MODE_NONE;

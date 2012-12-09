@@ -881,11 +881,8 @@ static int nxt2002_init(struct dvb_frontend* fe)
 	printk("nxt2002: Waiting for firmware upload (%s)...\n", NXT2002_DEFAULT_FIRMWARE);
 	ret = request_firmware(&fw, NXT2002_DEFAULT_FIRMWARE,
 			       state->i2c->dev.parent);
-	printk("nxt2002: Waiting for firmware upload(2)...\n");
-	if (ret) {
-		printk("nxt2002: No firmware uploaded (timeout or file not found?)\n");
+	if (ret)
 		return ret;
-	}
 
 	ret = nxt2002_load_firmware(fe, fw);
 	release_firmware(fw);
@@ -946,11 +943,8 @@ static int nxt2004_init(struct dvb_frontend* fe)
 	printk("nxt2004: Waiting for firmware upload (%s)...\n", NXT2004_DEFAULT_FIRMWARE);
 	ret = request_firmware(&fw, NXT2004_DEFAULT_FIRMWARE,
 			       state->i2c->dev.parent);
-	printk("nxt2004: Waiting for firmware upload(2)...\n");
-	if (ret) {
-		printk("nxt2004: No firmware uploaded (timeout or file not found?)\n");
+	if (ret)
 		return ret;
-	}
 
 	ret = nxt2004_load_firmware(fe, fw);
 	release_firmware(fw);

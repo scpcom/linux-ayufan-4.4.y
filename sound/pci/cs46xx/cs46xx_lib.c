@@ -411,10 +411,8 @@ static int snd_cs46xx_download_image(struct snd_cs46xx *chip)
 
 	err = request_firmware(&firmware, "cs46xx/cs46xx-old.fw",
 			       &chip->pci->dev);
-	if (err < 0) {
-		snd_printk(KERN_ERR "cs46xx: no firmware\n");
+	if (err)
 		return err;
-	}
 
 	err = snd_cs46xx_check_image_size(firmware);
 	if (err < 0)

@@ -3413,10 +3413,8 @@ static int brcmf_sdbrcm_download_code_file(struct brcmf_bus *bus)
 	bus->fw_name = BCM4329_FW_NAME;
 	ret = request_firmware(&bus->firmware, bus->fw_name,
 			       &bus->sdiodev->func[2]->dev);
-	if (ret) {
-		brcmf_dbg(ERROR, "Fail to request firmware %d\n", ret);
+	if (ret)
 		return ret;
-	}
 	bus->fw_ptr = 0;
 
 	memptr = memblock = kmalloc(MEMBLOCK + BRCMF_SDALIGN, GFP_ATOMIC);
@@ -3511,10 +3509,8 @@ static int brcmf_sdbrcm_download_nvram(struct brcmf_bus *bus)
 	bus->nv_name = BCM4329_NV_NAME;
 	ret = request_firmware(&bus->firmware, bus->nv_name,
 			       &bus->sdiodev->func[2]->dev);
-	if (ret) {
-		brcmf_dbg(ERROR, "Fail to request nvram %d\n", ret);
+	if (ret)
 		return ret;
-	}
 	bus->fw_ptr = 0;
 
 	memblock = kmalloc(MEMBLOCK, GFP_ATOMIC);

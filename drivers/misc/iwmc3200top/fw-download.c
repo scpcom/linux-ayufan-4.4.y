@@ -311,11 +311,8 @@ int iwmct_fw_load(struct iwmct_priv *priv)
 
 	/* get the firmware */
 	ret = request_firmware(&raw, fw_name, &priv->func->dev);
-	if (ret < 0) {
-		LOG_ERROR(priv, FW_DOWNLOAD, "%s request_firmware failed %d\n",
-			  fw_name, ret);
+	if (ret)
 		goto exit;
-	}
 
 	if (raw->size < sizeof(struct iwmct_fw_sec_hdr)) {
 		LOG_ERROR(priv, FW_DOWNLOAD, "%s smaller then (%zd) (%zd)\n",

@@ -9595,11 +9595,8 @@ static int tg3_request_firmware(struct tg3 *tp)
 {
 	const __be32 *fw_data;
 
-	if (request_firmware(&tp->fw, tp->fw_needed, &tp->pdev->dev)) {
-		netdev_err(tp->dev, "Failed to load firmware \"%s\"\n",
-			   tp->fw_needed);
+	if (request_firmware(&tp->fw, tp->fw_needed, &tp->pdev->dev))
 		return -ENOENT;
-	}
 
 	fw_data = (void *)tp->fw->data;
 

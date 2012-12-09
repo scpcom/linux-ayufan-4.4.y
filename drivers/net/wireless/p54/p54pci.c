@@ -564,7 +564,6 @@ static int __devinit p54p_probe(struct pci_dev *pdev,
 	err = request_firmware(&priv->firmware, "isl3886pci",
 			       &priv->pdev->dev);
 	if (err) {
-		dev_err(&pdev->dev, "Cannot find firmware (isl3886pci)\n");
 		err = request_firmware(&priv->firmware, "isl3886",
 				       &priv->pdev->dev);
 		if (err)

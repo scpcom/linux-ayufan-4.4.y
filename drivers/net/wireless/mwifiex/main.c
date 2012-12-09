@@ -311,8 +311,6 @@ static int mwifiex_init_hw_fw(struct mwifiex_adapter *adapter)
 	err = request_firmware(&adapter->firmware, adapter->fw_name,
 			       adapter->dev);
 	if (err < 0) {
-		dev_err(adapter->dev, "request_firmware() returned"
-				" error code %#x\n", err);
 		ret = -1;
 		goto done;
 	}

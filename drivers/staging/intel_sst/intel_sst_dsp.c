@@ -471,10 +471,8 @@ int sst_load_library(struct snd_sst_lib_download *lib, u8 ops)
 	pr_debug("Requesting %s\n", buf);
 
 	error = request_firmware(&fw_lib, buf, &sst_drv_ctx->pci->dev);
-	if (error) {
-		pr_err("library load failed %d\n", error);
+	if (error)
 		goto wake;
-	}
 	error = sst_validate_library(fw_lib, &lib->slot_info, &entry_point);
 	if (error)
 		goto wake_free;

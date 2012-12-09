@@ -97,11 +97,8 @@ static int go7007_load_encoder(struct go7007 *go)
 	int fw_len, rv = 0;
 	u16 intr_val, intr_data;
 
-	if (request_firmware(&fw_entry, fw_name, go->dev)) {
-		v4l2_err(go, "unable to load firmware from file "
-			"\"%s\"\n", fw_name);
+	if (request_firmware(&fw_entry, fw_name, go->dev))
 		return -1;
-	}
 	if (fw_entry->size < 16 || memcmp(fw_entry->data, "WISGO7007FW", 11)) {
 		v4l2_err(go, "file \"%s\" does not appear to be "
 				"go7007 firmware\n", fw_name);
