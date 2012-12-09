@@ -251,7 +251,8 @@ static ssize_t firmware_loading_store(struct device *dev,
 						 fw_priv->nr_pages,
 						 0, PAGE_KERNEL_RO);
 			if (!fw_priv->fw->data) {
-				dev_err(dev, "%s: vmap() failed\n", __func__);
+				dev_err(dev->parent, "%s: vmap() failed\n",
+					__func__);
 				goto err;
 			}
 			/* Pages are now owned by 'struct firmware' */
@@ -266,9 +267,14 @@ static ssize_t firmware_loading_store(struct device *dev,
 		}
 		/* fallthrough */
 	default:
-		dev_err(dev, "%s: unexpected value (%d)\n", __func__, loading);
-		/* fallthrough */
+		dev_err(dev->parent, "%s: unexpected value (%d)\n",
+			__func__, loading);
+		goto err;
 	case -1:
+		dev_err(dev->parent,
+			"firmware: agent aborted loading %s (not found?)\n",
+			fw_priv->fw_id);
+		/* fallthrough */
 	err:
 		fw_load_abort(fw_priv);
 		break;
@@ -431,6 +437,9 @@ static void firmware_class_timeout(u_long data)
 {
 	struct firmware_priv *fw_priv = (struct firmware_priv *) data;
 
+	dev_err(fw_priv->dev.parent,
+		"firmware: agent did not handle request for %s\n",
+		fw_priv->fw_id);
 	fw_load_abort(fw_priv);
 }
 
@@ -533,7 +542,8 @@ static int _request_firmware(const struct firmware **firmware_p,
 	}
 
 	if (fw_get_builtin_firmware(firmware, name)) {
-		dev_dbg(device, "firmware: using built-in firmware %s\n", name);
+		dev_info(device, "firmware: using built-in firmware %s\n",
+			 name);
 		return 0;
 	}
 
@@ -567,8 +577,15 @@ static int _request_firmware(const struct firmware **firmware_p,
 	del_timer_sync(&fw_priv->timeout);
 
 	mutex_lock(&fw_lock);
-	if (!fw_priv->fw->size || test_bit(FW_STATUS_ABORT, &fw_priv->status))
+	if (test_bit(FW_STATUS_ABORT, &fw_priv->status)) {
+		/* failure has already been logged */
 		retval = -ENOENT;
+	} else if (!fw_priv->fw->size) {
+		dev_err(device,
+			"firmware: agent loaded no data for %s (not found?)\n",
+			name);
+		retval = -ENOENT;
+	}
 	fw_priv->fw = NULL;
 	mutex_unlock(&fw_lock);
 
@@ -578,6 +595,9 @@ out:
 	if (retval) {
 		release_firmware(firmware);
 		*firmware_p = NULL;
+	} else {
+		dev_info(device, "firmware: agent loaded %s into memory\n",
+			 name);
 	}
 
 	return retval;
