@@ -4539,6 +4539,8 @@ netdev_tx_t igb_xmit_frame_ring(struct sk_buff *skb,
 	first->bytecount = skb->len;
 	first->gso_segs = 1;
 
+	skb_tx_timestamp(skb);
+
 #ifdef CONFIG_IGB_PTP
 	if (unlikely((skb_shinfo(skb)->tx_flags & SKBTX_HW_TSTAMP) &&
 		     !(adapter->ptp_tx_skb))) {
