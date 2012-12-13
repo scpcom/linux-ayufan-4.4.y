@@ -94,6 +94,7 @@ static const struct igb_stats igb_gstrings_stats[] = {
 	IGB_STAT("os2bmc_rx_by_host", stats.b2ogprc),
 #ifdef CONFIG_IGB_PTP
 	IGB_STAT("tx_hwtstamp_timeouts", tx_hwtstamp_timeouts),
+	IGB_STAT("rx_hwtstamp_cleared", rx_hwtstamp_cleared),
 #endif /* CONFIG_IGB_PTP */
 };
 
