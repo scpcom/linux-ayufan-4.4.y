@@ -417,9 +417,11 @@ struct igb_adapter {
 	struct delayed_work ptp_overflow_work;
 	struct work_struct ptp_tx_work;
 	struct sk_buff *ptp_tx_skb;
+	unsigned long ptp_tx_start;
 	spinlock_t tmreg_lock;
 	struct cyclecounter cc;
 	struct timecounter tc;
+	u32 tx_hwtstamp_timeouts;
 #endif /* CONFIG_IGB_PTP */
 
 	char fw_version[32];
