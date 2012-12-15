@@ -73,7 +73,7 @@
 
 /* AUDIT_NAMES is the number of slots we reserve in the audit_context
  * for saving names from getname(). */
-#define AUDIT_NAMES    20
+#define AUDIT_NAMES    30
 
 /* Indicates that audit should log the full pathname. */
 #define AUDIT_NAME_FULL -1
