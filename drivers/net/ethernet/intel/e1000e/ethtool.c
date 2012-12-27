@@ -107,6 +107,7 @@ static const struct e1000_stats e1000_gstrings_stats[] = {
 	E1000_STAT("dropped_smbus", stats.mgpdc),
 	E1000_STAT("rx_dma_failed", rx_dma_failed),
 	E1000_STAT("tx_dma_failed", tx_dma_failed),
+	E1000_STAT("rx_hwtstamp_cleared", rx_hwtstamp_cleared),
 };
 
 #define E1000_GLOBAL_STATS_LEN	ARRAY_SIZE(e1000_gstrings_stats)
