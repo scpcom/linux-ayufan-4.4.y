@@ -37,6 +37,8 @@
 #include "drm_pciids.h"
 #include <linux/console.h>
 #include <linux/module.h>
+#include <linux/namei.h>
+#include <linux/path.h>
 
 
 /*
@@ -257,6 +259,35 @@ static struct drm_driver driver_old = {
 
 static struct drm_driver kms_driver;
 
+/* Test that /lib/firmware/radeon is a directory (or symlink to a
+ * directory).  We could try to match the udev search path, but let's
+ * assume people take the easy route and install
+ * firmware-linux-nonfree.
+ */
+static bool __devinit radeon_firmware_installed(void)
+{
+	struct path path;
+
+	if (kern_path("/lib/firmware/radeon", LOOKUP_DIRECTORY | LOOKUP_FOLLOW,
+		      &path) == 0) {
+		path_put(&path);
+		return true;
+	}
+
+	return false;
+}
+
+static int __devinit
+radeon_ums_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
+{
+	if (!radeon_firmware_installed()) {
+		DRM_ERROR("radeon DRM requires firmware-linux-nonfree.\n");
+		return -ENODEV;
+	}
+
+	return 0;
+}
+
 static void radeon_kick_out_firmware_fb(struct pci_dev *pdev)
 {
 	struct apertures_struct *ap;
@@ -276,6 +307,12 @@ static void radeon_kick_out_firmware_fb(struct pci_dev *pdev)
 static int __devinit
 radeon_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
+	if ((ent->driver_data & RADEON_FAMILY_MASK) >= CHIP_R600 &&
+	    !radeon_firmware_installed()) {
+		DRM_ERROR("radeon kernel modesetting for R600 or later requires firmware-linux-nonfree.\n");
+		return -ENODEV;
+	}
+
 	/* Get rid of things like offb */
 	radeon_kick_out_firmware_fb(pdev);
 
@@ -367,6 +404,7 @@ static struct pci_driver *pdriver;
 static struct pci_driver radeon_pci_driver = {
 	.name = DRIVER_NAME,
 	.id_table = pciidlist,
+	.probe = radeon_ums_pci_probe,
 };
 
 static struct pci_driver radeon_kms_pci_driver = {
