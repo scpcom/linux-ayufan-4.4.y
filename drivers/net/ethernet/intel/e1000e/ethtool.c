@@ -129,7 +129,6 @@ static int e1000_get_settings(struct net_device *netdev,
 	u32 speed;
 
 	if (hw->phy.media_type == e1000_media_type_copper) {
-
 		ecmd->supported = (SUPPORTED_10baseT_Half |
 				   SUPPORTED_10baseT_Full |
 				   SUPPORTED_100baseT_Half |
