@@ -1326,10 +1326,8 @@ M:	Cloud Ren <cjren@qca.qualcomm.com>
 M:	Stevent Li <steventl@qca.qualcomm.com>
 M:	Wu Ken <kenw@qca.qualcomm.com>
 M:	David Liu <dwliu@qca.qualcomm.com>
-L:	netdev@vger.kernel.org
 L:	nic-devel@qualcomm.com
 W:	http://wireless.kernel.org/en/users/Drivers/ethernet/alx
-S:	Supported
 F:	drivers/net/ethernet/atheros/alx/
 
 ATM

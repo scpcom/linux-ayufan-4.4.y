@@ -41,6 +41,7 @@ MODULE_DEVICE_TABLE(pci, alx_pci_tbl);
 MODULE_AUTHOR("Qualcomm Corporation, <nic-devel@qualcomm.com>");
 MODULE_DESCRIPTION("Qualcomm Atheros Gigabit Ethernet Driver");
 MODULE_LICENSE("Dual BSD/GPL");
+MODULE_INFO(staging, "Y");
 
 static int alx_open_internal(struct alx_adapter *adpt, u32 ctrl);
 static void alx_stop_internal(struct alx_adapter *adpt, u32 ctrl);
