@@ -57,6 +57,8 @@ struct netpoll_info;
 struct phy_device;
 /* 802.11 specific */
 struct wireless_dev;
+
+typedef u32 netdev_features_t;
 					/* source back-compat hooks */
 #define SET_ETHTOOL_OPS(netdev,ops) \
 	( (netdev)->ethtool_ops = (ops) )
