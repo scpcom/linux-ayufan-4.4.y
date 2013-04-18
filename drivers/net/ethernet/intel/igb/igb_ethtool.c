@@ -182,18 +182,29 @@ static int igb_get_settings(struct net_device *netdev, struct ethtool_cmd *ecmd)
 		ecmd->phy_address = hw->phy.addr;
 		ecmd->transceiver = XCVR_INTERNAL;
 	} else {
-		ecmd->supported   = (SUPPORTED_1000baseT_Full |
-				     SUPPORTED_100baseT_Full |
-				     SUPPORTED_Autoneg |
-				     SUPPORTED_FIBRE |
-				     SUPPORTED_Pause);
+		ecmd->supported = (SUPPORTED_1000baseT_Full |
+				   SUPPORTED_100baseT_Full |
+				   SUPPORTED_FIBRE |
+				   SUPPORTED_Autoneg |
+				   SUPPORTED_Pause);
+		if (hw->mac.type == e1000_i354)
+				ecmd->supported |= SUPPORTED_2500baseX_Full;
 
 		ecmd->advertising = ADVERTISED_FIBRE;
 
-		if (adapter->link_speed == SPEED_100)
-			ecmd->advertising = ADVERTISED_100baseT_Full;
-		else if (adapter->link_speed == SPEED_1000)
+		switch (adapter->link_speed) {
+		case SPEED_2500:
+			ecmd->advertising = ADVERTISED_2500baseX_Full;
+			break;
+		case SPEED_1000:
 			ecmd->advertising = ADVERTISED_1000baseT_Full;
+			break;
+		case SPEED_100:
+			ecmd->advertising = ADVERTISED_100baseT_Full;
+			break;
+		default:
+			break;
+		}
 
 		if (hw->mac.autoneg == 1)
 			ecmd->advertising |= ADVERTISED_Autoneg;
@@ -205,21 +216,23 @@ static int igb_get_settings(struct net_device *netdev, struct ethtool_cmd *ecmd)
 	status = rd32(E1000_STATUS);
 
 	if (status & E1000_STATUS_LU) {
-
-		if (status & E1000_STATUS_SPEED_1000)
-			ethtool_cmd_speed_set(ecmd, SPEED_1000);
+		if ((hw->mac.type == e1000_i354) &&
+		    (status & E1000_STATUS_2P5_SKU) &&
+		    !(status & E1000_STATUS_2P5_SKU_OVER))
+			ecmd->speed = SPEED_2500;
+		else if (status & E1000_STATUS_SPEED_1000)
+			ecmd->speed = SPEED_1000;
 		else if (status & E1000_STATUS_SPEED_100)
-			ethtool_cmd_speed_set(ecmd, SPEED_100);
+			ecmd->speed = SPEED_100;
 		else
-			ethtool_cmd_speed_set(ecmd, SPEED_10);
-
+			ecmd->speed = SPEED_10;
 		if ((status & E1000_STATUS_FD) ||
 		    hw->phy.media_type != e1000_media_type_copper)
 			ecmd->duplex = DUPLEX_FULL;
 		else
 			ecmd->duplex = DUPLEX_HALF;
 	} else {
-		ethtool_cmd_speed_set(ecmd, -1);
+		ecmd->speed = -1;
 		ecmd->duplex = -1;
 	}
 
@@ -254,12 +267,22 @@ static int igb_set_settings(struct net_device *netdev, struct ethtool_cmd *ecmd)
 			hw->phy.autoneg_advertised = ecmd->advertising |
 						     ADVERTISED_FIBRE |
 						     ADVERTISED_Autoneg;
-			if (adapter->link_speed == SPEED_1000)
+			switch (adapter->link_speed) {
+			case SPEED_2500:
+				hw->phy.autoneg_advertised =
+					ADVERTISED_2500baseX_Full;
+				break;
+			case SPEED_1000:
 				hw->phy.autoneg_advertised =
 					ADVERTISED_1000baseT_Full;
-			else if (adapter->link_speed == SPEED_100)
+				break;
+			case SPEED_100:
 				hw->phy.autoneg_advertised =
 					ADVERTISED_100baseT_Full;
+				break;
+			default:
+				break;
+			}
 		} else {
 			hw->phy.autoneg_advertised = ecmd->advertising |
 						     ADVERTISED_TP |
@@ -1186,6 +1209,7 @@ static int igb_reg_test(struct igb_adapter *adapter, u64 *data)
 
 	switch (adapter->hw.mac.type) {
 	case e1000_i350:
+	case e1000_i354:
 		test = reg_test_i350;
 		toggle = 0x7FEFF3FF;
 		break;
@@ -1348,6 +1372,7 @@ static int igb_intr_test(struct igb_adapter *adapter, u64 *data)
 		ics_mask = 0x77DCFED5;
 		break;
 	case e1000_i350:
+	case e1000_i354:
 	case e1000_i210:
 	case e1000_i211:
 		ics_mask = 0x77DCFED5;
@@ -1839,6 +1864,13 @@ static int igb_loopback_test(struct igb_adapter *adapter, u64 *data)
 	if (igb_check_reset_block(&adapter->hw)) {
 		dev_err(&adapter->pdev->dev,
 			"Cannot do PHY loopback test when SoL/IDER is active.\n");
+		*data = 0;
+		goto out;
+	}
+
+	if (adapter->hw.mac.type == e1000_i354) {
+		dev_info(&adapter->pdev->dev,
+			"Loopback test not supported on i354.\n");
 		*data = 0;
 		goto out;
 	}
