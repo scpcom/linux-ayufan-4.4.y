@@ -6590,7 +6590,7 @@ static void igb_process_skb_fields(struct igb_ring *rx_ring,
 	igb_rx_checksum(rx_ring, rx_desc, skb);
 
 #ifdef CONFIG_IGB_PTP
-	igb_ptp_rx_hwtstamp(rx_ring->q_vector, rx_desc, skb);
+	igb_ptp_rx_hwtstamp(rx_ring, rx_desc, skb);
 #endif /* CONFIG_IGB_PTP */
 
 	if ((dev->features & NETIF_F_HW_VLAN_RX) &&
