@@ -23,6 +23,14 @@ config MTD_TESTS
 	  WARNING: some of the tests will ERASE entire MTD device which they
 	  test. Do not use these tests unless you really know what you do.
 
+config MTD_ROOTFS_ROOT_DEV
+	bool "Automatically set 'rootfs' partition to be root filesystem"
+	default y
+
+config MTD_ROOTFS_SPLIT
+	bool "Automatically split 'rootfs' partition for squashfs"
+	default y
+
 config MTD_REDBOOT_PARTS
 	tristate "RedBoot partition table parsing"
 	---help---

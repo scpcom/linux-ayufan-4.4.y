@@ -35,13 +35,16 @@
  * Note: writeable partitions require their size and offset be
  * erasesize aligned (e.g. use MTDPART_OFS_NEXTBLK).
  */
+struct mtd_info;
 
+struct mtd_partition;
 struct mtd_partition {
 	char *name;			/* identifier string */
 	uint64_t size;			/* partition size */
 	uint64_t offset;		/* offset within the master MTD space */
 	uint32_t mask_flags;		/* master MTD flags to mask out for this partition */
 	struct nand_ecclayout *ecclayout;	/* out of band layout for this partition (NAND only) */
+	int (*refresh_partition)(struct mtd_info *);
 };
 
 #define MTDPART_OFS_RETAIN	(-3)
@@ -50,7 +53,6 @@ struct mtd_partition {
 #define MTDPART_SIZ_FULL	(0)
 
 
-struct mtd_info;
 struct device_node;
 
 /**

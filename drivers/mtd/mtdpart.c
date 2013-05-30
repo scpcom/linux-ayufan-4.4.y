@@ -29,9 +29,13 @@
 #include <linux/kmod.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
+#include <linux/root_dev.h>
+#include <linux/magic.h>
 #include <linux/err.h>
 
 #include "mtdcore.h"
+
+#define MTD_ERASE_PARTIAL	0x8000 /* partition only covers parts of an erase block */
 
 /* Our partition linked list */
 static LIST_HEAD(mtd_partitions);
@@ -50,7 +54,7 @@ struct mtd_part {
  * the pointer to that structure with this macro.
  */
 #define PART(x)  ((struct mtd_part *)(x))
-
+#define IS_PART(mtd) (mtd->read == part_read)
 
 /*
  * MTD methods which simply translate the effective address and pass through
@@ -256,13 +260,60 @@ static int part_erase(struct mtd_info *mtd, struct erase_info *instr)
 		return -EROFS;
 	if (instr->addr >= mtd->size)
 		return -EINVAL;
+
+	instr->partial_start = false;
+	if (mtd->flags & MTD_ERASE_PARTIAL) {
+		size_t readlen = 0;
+		u64 mtd_ofs;
+
+		instr->erase_buf = kmalloc(part->master->erasesize, GFP_ATOMIC);
+		if (!instr->erase_buf)
+			return -ENOMEM;
+
+		mtd_ofs = part->offset + instr->addr;
+		instr->erase_buf_ofs = do_div(mtd_ofs, part->master->erasesize);
+
+		if (instr->erase_buf_ofs > 0) {
+			instr->addr -= instr->erase_buf_ofs;
+			ret = part->master->read(part->master,
+				instr->addr + part->offset,
+				part->master->erasesize,
+				&readlen, instr->erase_buf);
+
+			instr->partial_start = true;
+		} else {
+			mtd_ofs = part->offset + part->mtd.size;
+			instr->erase_buf_ofs = part->master->erasesize -
+				do_div(mtd_ofs, part->master->erasesize);
+
+			if (instr->erase_buf_ofs > 0) {
+				instr->len += instr->erase_buf_ofs;
+				ret = part->master->read(part->master,
+					part->offset + instr->addr +
+					instr->len - part->master->erasesize,
+					part->master->erasesize, &readlen,
+					instr->erase_buf);
+			} else {
+				ret = 0;
+			}
+		}
+		if (ret < 0) {
+			kfree(instr->erase_buf);
+			return ret;
+		}
+
+	}
+
 	instr->addr += part->offset;
 	ret = part->master->erase(part->master, instr);
 	if (ret) {
 		if (instr->fail_addr != MTD_FAIL_ADDR_UNKNOWN)
 			instr->fail_addr -= part->offset;
 		instr->addr -= part->offset;
+		if (mtd->flags & MTD_ERASE_PARTIAL)
+			kfree(instr->erase_buf);
 	}
+
 	return ret;
 }
 
@@ -270,7 +321,25 @@ void mtd_erase_callback(struct erase_info *instr)
 {
 	if (instr->mtd->erase == part_erase) {
 		struct mtd_part *part = PART(instr->mtd);
+		size_t wrlen = 0;
 
+		if (instr->mtd->flags & MTD_ERASE_PARTIAL) {
+			if (instr->partial_start) {
+				part->master->write(part->master,
+					instr->addr, instr->erase_buf_ofs,
+					&wrlen, instr->erase_buf);
+				instr->addr += instr->erase_buf_ofs;
+			} else {
+				instr->len -= instr->erase_buf_ofs;
+				part->master->write(part->master,
+					instr->addr + instr->len,
+					instr->erase_buf_ofs, &wrlen,
+					instr->erase_buf +
+					part->master->erasesize -
+					instr->erase_buf_ofs);
+			}
+			kfree(instr->erase_buf);
+		}
 		if (instr->fail_addr != MTD_FAIL_ADDR_UNKNOWN)
 			instr->fail_addr -= part->offset;
 		instr->addr -= part->offset;
@@ -541,18 +610,24 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	if ((slave->mtd.flags & MTD_WRITEABLE) &&
 	    mtd_mod_by_eb(slave->offset, &slave->mtd)) {
 		/* Doesn't start on a boundary of major erase size */
-		/* FIXME: Let it be writable if it is on a boundary of
-		 * _minor_ erase size though */
-		slave->mtd.flags &= ~MTD_WRITEABLE;
-		printk(KERN_WARNING"mtd: partition \"%s\" doesn't start on an erase block boundary -- force read-only\n",
-			part->name);
+		slave->mtd.flags |= MTD_ERASE_PARTIAL;
+		if (((u32) slave->mtd.size) > master->erasesize)
+			slave->mtd.flags &= ~MTD_WRITEABLE;
+		else
+			slave->mtd.erasesize = slave->mtd.size;
 	}
 	if ((slave->mtd.flags & MTD_WRITEABLE) &&
-	    mtd_mod_by_eb(slave->mtd.size, &slave->mtd)) {
-		slave->mtd.flags &= ~MTD_WRITEABLE;
-		printk(KERN_WARNING"mtd: partition \"%s\" doesn't end on an erase block -- force read-only\n",
-			part->name);
+	    mtd_mod_by_eb(slave->offset + slave->mtd.size, &slave->mtd)) {
+		slave->mtd.flags |= MTD_ERASE_PARTIAL;
+
+		if ((u32) slave->mtd.size > master->erasesize)
+			slave->mtd.flags &= ~MTD_WRITEABLE;
+		else
+			slave->mtd.erasesize = slave->mtd.size;
 	}
+	if ((slave->mtd.flags & (MTD_ERASE_PARTIAL|MTD_WRITEABLE)) == MTD_ERASE_PARTIAL)
+		printk(KERN_WARNING"mtd: partition \"%s\" must either start or end on erase block boundary or be smaller than an erase block -- forcing read-only\n",
+				part->name);
 
 	slave->mtd.ecclayout = master->ecclayout;
 	if (master->block_isbad) {
@@ -650,6 +725,155 @@ int mtd_del_partition(struct mtd_info *master, int partno)
 }
 EXPORT_SYMBOL_GPL(mtd_del_partition);
 
+#ifdef CONFIG_MTD_ROOTFS_SPLIT
+#define ROOTFS_SPLIT_NAME "rootfs_data"
+#define ROOTFS_REMOVED_NAME "<removed>"
+
+struct squashfs_super_block {
+	__le32 s_magic;
+	__le32 pad0[9];
+	__le64 bytes_used;
+};
+
+
+static int split_squashfs(struct mtd_info *master, int offset, int *split_offset)
+{
+	struct squashfs_super_block sb;
+	int len, ret;
+
+	ret = master->read(master, offset, sizeof(sb), &len, (void *) &sb);
+	if (ret || (len != sizeof(sb))) {
+		printk(KERN_ALERT "split_squashfs: error occured while reading "
+			"from \"%s\"\n", master->name);
+		return -EINVAL;
+	}
+
+	if (SQUASHFS_MAGIC != le32_to_cpu(sb.s_magic) ) {
+		printk(KERN_ALERT "split_squashfs: no squashfs found in \"%s\"\n",
+			master->name);
+		*split_offset = 0;
+		return 0;
+	}
+
+	if (le64_to_cpu((sb.bytes_used)) <= 0) {
+		printk(KERN_ALERT "split_squashfs: squashfs is empty in \"%s\"\n",
+			master->name);
+		*split_offset = 0;
+		return 0;
+	}
+
+	len = (u32) le64_to_cpu(sb.bytes_used);
+	len += (offset & 0x000fffff);
+	len +=  (master->erasesize - 1);
+	len &= ~(master->erasesize - 1);
+	len -= (offset & 0x000fffff);
+	*split_offset = offset + len;
+
+	return 0;
+}
+
+static int split_rootfs_data(struct mtd_info *master, struct mtd_info *rpart, const struct mtd_partition *part)
+{
+	struct mtd_partition *dpart;
+	struct mtd_part *slave = NULL;
+	struct mtd_part *spart;
+	int ret, split_offset = 0;
+
+	spart = PART(rpart);
+	ret = split_squashfs(master, spart->offset, &split_offset);
+	if (ret)
+		return ret;
+
+	if (split_offset <= 0)
+		return 0;
+
+	dpart = kmalloc(sizeof(*part)+sizeof(ROOTFS_SPLIT_NAME)+1, GFP_KERNEL);
+	if (dpart == NULL) {
+		printk(KERN_INFO "split_squashfs: no memory for partition \"%s\"\n",
+			ROOTFS_SPLIT_NAME);
+		return -ENOMEM;
+	}
+
+	memcpy(dpart, part, sizeof(*part));
+	dpart->name = (unsigned char *)&dpart[1];
+	strcpy(dpart->name, ROOTFS_SPLIT_NAME);
+
+	dpart->size = rpart->size - (split_offset - spart->offset);
+	dpart->offset = split_offset;
+
+	if (dpart == NULL)
+		return 1;
+
+	printk(KERN_INFO "mtd: partition \"%s\" created automatically, ofs=%llX, len=%llX \n",
+		ROOTFS_SPLIT_NAME, dpart->offset, dpart->size);
+
+	slave = allocate_partition(master, dpart, 0, split_offset);
+	if (IS_ERR(slave))
+		return PTR_ERR(slave);
+	mutex_lock(&mtd_partitions_mutex);
+	list_add(&slave->list, &mtd_partitions);
+	mutex_unlock(&mtd_partitions_mutex);
+
+	add_mtd_device(&slave->mtd);
+
+	rpart->split = &slave->mtd;
+
+	return 0;
+}
+
+static int refresh_rootfs_split(struct mtd_info *mtd)
+{
+	struct mtd_partition tpart;
+	struct mtd_part *part;
+	char *name;
+	//int index = 0;
+	int offset, size;
+	int ret;
+
+	part = PART(mtd);
+
+	/* check for the new squashfs offset first */
+	ret = split_squashfs(part->master, part->offset, &offset);
+	if (ret)
+		return ret;
+
+	if ((offset > 0) && !mtd->split) {
+		printk(KERN_INFO "%s: creating new split partition for \"%s\"\n", __func__, mtd->name);
+		/* if we don't have a rootfs split partition, create a new one */
+		tpart.name = (char *) mtd->name;
+		tpart.size = mtd->size;
+		tpart.offset = part->offset;
+
+		return split_rootfs_data(part->master, &part->mtd, &tpart);
+	} else if ((offset > 0) && mtd->split) {
+		/* update the offsets of the existing partition */
+		size = mtd->size + part->offset - offset;
+
+		part = PART(mtd->split);
+		part->offset = offset;
+		part->mtd.size = size;
+		printk(KERN_INFO "%s: %s partition \"" ROOTFS_SPLIT_NAME "\", offset: 0x%06x (0x%06x)\n",
+			__func__, (!strcmp(part->mtd.name, ROOTFS_SPLIT_NAME) ? "updating" : "creating"),
+			(u32) part->offset, (u32) part->mtd.size);
+		name = kmalloc(sizeof(ROOTFS_SPLIT_NAME) + 1, GFP_KERNEL);
+		strcpy(name, ROOTFS_SPLIT_NAME);
+		part->mtd.name = name;
+	} else if ((offset <= 0) && mtd->split) {
+		printk(KERN_INFO "%s: removing partition \"%s\"\n", __func__, mtd->split->name);
+
+		/* mark existing partition as removed */
+		part = PART(mtd->split);
+		name = kmalloc(sizeof(ROOTFS_SPLIT_NAME) + 1, GFP_KERNEL);
+		strcpy(name, ROOTFS_REMOVED_NAME);
+		part->mtd.name = name;
+		part->offset = 0;
+		part->mtd.size = 0;
+	}
+
+	return 0;
+}
+#endif /* CONFIG_MTD_ROOTFS_SPLIT */
+
 /*
  * This function, given a master MTD object and a partition table, creates
  * and registers slave MTD objects which are bound to the master according to
@@ -666,6 +890,9 @@ int add_mtd_partitions(struct mtd_info *master,
 	struct mtd_part *slave;
 	uint64_t cur_offset = 0;
 	int i;
+#ifdef CONFIG_MTD_ROOTFS_SPLIT
+	int ret;
+#endif
 
 	printk(KERN_NOTICE "Creating %d MTD partitions on \"%s\":\n", nbparts, master->name);
 
@@ -680,11 +907,52 @@ int add_mtd_partitions(struct mtd_info *master,
 
 		add_mtd_device(&slave->mtd);
 
+		if (!strcmp(parts[i].name, "rootfs")) {
+#ifdef CONFIG_MTD_ROOTFS_ROOT_DEV
+			if (ROOT_DEV == 0) {
+				printk(KERN_NOTICE "mtd: partition \"rootfs\" "
+					"set to be root filesystem\n");
+				ROOT_DEV = MKDEV(MTD_BLOCK_MAJOR, slave->mtd.index);
+			}
+#endif
+#ifdef CONFIG_MTD_ROOTFS_SPLIT
+			ret = split_rootfs_data(master, &slave->mtd, &parts[i]);
+			/* if (ret == 0)
+			 * 	j++; */
+#endif
+		}
+
 		cur_offset = slave->offset + slave->mtd.size;
 	}
 
 	return 0;
 }
+
+int mtd_device_refresh(struct mtd_info *mtd)
+{
+	int ret = 0;
+
+	if (IS_PART(mtd)) {
+		struct mtd_part *part;
+		struct mtd_info *master;
+
+		part = PART(mtd);
+		master = part->master;
+		if (master->refresh_device)
+			ret = master->refresh_device(master);
+	}
+
+	if (!ret && mtd->refresh_device)
+		ret = mtd->refresh_device(mtd);
+
+#ifdef CONFIG_MTD_ROOTFS_SPLIT
+	if (!ret && IS_PART(mtd) && !strcmp(mtd->name, "rootfs"))
+		refresh_rootfs_split(mtd);
+#endif
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(mtd_device_refresh);
 
 static DEFINE_SPINLOCK(part_parser_lock);
 static LIST_HEAD(part_parsers);

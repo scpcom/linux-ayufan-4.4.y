@@ -163,7 +163,6 @@ config NF_CONNTRACK_FTP
 
 config NF_CONNTRACK_H323
 	tristate "H.323 protocol support"
-	depends on (IPV6 || IPV6=n)
 	depends on NETFILTER_ADVANCED
 	help
 	  H.323 is a VoIP signalling protocol from ITU-T. As one of the most
@@ -609,7 +608,6 @@ config NETFILTER_XT_TARGET_SECMARK
 
 config NETFILTER_XT_TARGET_TCPMSS
 	tristate '"TCPMSS" target support'
-	depends on (IPV6 || IPV6=n)
 	default m if NETFILTER_ADVANCED=n
 	---help---
 	  This option adds a `TCPMSS' target, which allows you to alter the
@@ -832,6 +830,27 @@ config NETFILTER_XT_MATCH_IPVS
 
 	  If unsure, say N.
 
+config NETFILTER_XT_MATCH_LAYER7
+	tristate '"layer7" match support'
+	depends on EXPERIMENTAL
+	depends on NETFILTER_XTABLES
+	depends on NETFILTER_ADVANCED
+	depends on NF_CONNTRACK
+	help
+	  Say Y if you want to be able to classify connections (and their
+	  packets) based on regular expression matching of their application
+	  layer data.   This is one way to classify applications such as
+	  peer-to-peer filesharing systems that do not always use the same
+	  port.
+
+	  To compile it as a module, choose M here.  If unsure, say N.
+
+config NETFILTER_XT_MATCH_LAYER7_DEBUG
+	bool 'Layer 7 debugging output'
+	depends on NETFILTER_XT_MATCH_LAYER7
+	help
+	  Say Y to get lots of debugging output.
+
 config NETFILTER_XT_MATCH_LENGTH
 	tristate '"length" match support'
 	depends on NETFILTER_ADVANCED
@@ -1017,6 +1036,12 @@ config NETFILTER_XT_MATCH_STATE
 	  is a powerful tool for packet classification.
 
 	  To compile it as a module, choose M here.  If unsure, say N.
+
+config NETFILTER_XT_MATCH_LAYER7_DEBUG
+	bool 'Layer 7 debugging output'
+	depends on NETFILTER_XT_MATCH_LAYER7
+	help
+	  Say Y to get lots of debugging output.
 
 config NETFILTER_XT_MATCH_STATISTIC
 	tristate '"statistic" match support'
