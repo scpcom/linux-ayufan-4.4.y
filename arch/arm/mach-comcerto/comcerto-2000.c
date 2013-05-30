@@ -325,22 +325,15 @@ static void armv7_aux_ctrl_setup(void *info)
 }
 
 #ifdef CONFIG_CACHE_L2X0
-void l2x0_latency( __u32 tag_ram_wr_lat, __u32 tag_ram_rd_lat, __u32 data_ram_wr_lat, __u32 data_ram_rd_lat)
+void l2x0_latency(u32 tag_ram_setup_lat, u32 tag_ram_rd_lat, u32 tag_ram_wr_lat, u32 data_ram_setup_lat, u32 data_ram_rd_lat, u32 data_ram_wr_lat)
 {
-        __u32 val, tag_lat, data_lat;
+	u32 val;
 
-		tag_lat = (tag_ram_wr_lat << COMCERTO_L2CC_WR_LAT_SHIFT) | (tag_ram_rd_lat << COMCERTO_L2CC_RD_LAT_SHIFT);
-		data_lat = (data_ram_wr_lat << COMCERTO_L2CC_WR_LAT_SHIFT) | (data_ram_rd_lat << COMCERTO_L2CC_RD_LAT_SHIFT);
+	val = ((tag_ram_wr_lat - 1) << COMCERTO_L2CC_WR_LAT_SHIFT) | ((tag_ram_rd_lat - 1) << COMCERTO_L2CC_RD_LAT_SHIFT) | (tag_ram_setup_lat - 1);
+	writel(val, l2cache_base + L2X0_TAG_LATENCY_CTRL);
 
-        val = readl(l2cache_base + L2X0_TAG_LATENCY_CTRL);
-        val &= ~COMCERTO_L2CC_RD_WR_LAT_MASK;
-        val |= tag_lat;
-        writel(val, l2cache_base + L2X0_TAG_LATENCY_CTRL);
-
-        val = readl(l2cache_base + L2X0_DATA_LATENCY_CTRL);
-        val &= ~COMCERTO_L2CC_RD_WR_LAT_MASK;
-        val |= data_lat;
-        writel(val, l2cache_base + L2X0_DATA_LATENCY_CTRL);
+	val = ((data_ram_wr_lat - 1) << COMCERTO_L2CC_WR_LAT_SHIFT) | ((data_ram_rd_lat - 1) << COMCERTO_L2CC_RD_LAT_SHIFT) | (data_ram_setup_lat - 1);
+	writel(val, l2cache_base + L2X0_DATA_LATENCY_CTRL);
 }
 
 void comcerto_l2cc_init(void)
@@ -372,12 +365,16 @@ void comcerto_l2cc_init(void)
 	BUG_ON(!l2cache_base);
 
 	/* Set Latency of L2CC to minimum (i.e. 1 cycle) */
-	l2x0_latency(1, 1, 1, 1);
+	l2x0_latency(1, 1, 1, 1, 1, 1);
 
 	associativity = (COMCERTO_L2CC_ASSOCIATIVITY_8WAY << COMCERTO_L2CC_ASSOCIATIVITY_SHIFT) & COMCERTO_L2CC_ASSOCIATIVITY_MASK;
 	waysize = (COMCERTO_L2CC_ASSOCIATIVITY_32KB << COMCERTO_L2CC_WAYSIZE_SHIFT) & COMCERTO_L2CC_WAYSIZE_MASK;
 	aux_val = associativity | waysize;
 	aux_mask = (COMCERTO_L2CC_ASSOCIATIVITY_MASK | COMCERTO_L2CC_WAYSIZE_MASK);
+
+	/* Write allocate override, no write allocate */
+	aux_val |= (1 << 23);
+	aux_mask |= (3 << 23);
 
 #ifdef CONFIG_PL310_FULL_LINE_OF_ZERO
 	aux_val |= (1 << 0);
