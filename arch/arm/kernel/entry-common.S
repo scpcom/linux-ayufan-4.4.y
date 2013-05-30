@@ -14,7 +14,7 @@
 #include <asm/unwind.h>
 
 #include "entry-header.S"
-
+#include <asm/page.h>
 
 	.align	5
 /*
@@ -583,6 +583,7 @@ ENDPROC(sys_fstatfs64_wrapper)
  */
 sys_mmap2:
 #if PAGE_SHIFT > 12
+#define PGOFF_MASK ((1 << (PAGE_SHIFT - 12)) - 1)
 		tst	r5, #PGOFF_MASK
 		moveq	r5, r5, lsr #PAGE_SHIFT - 12
 		streq	r5, [sp, #4]

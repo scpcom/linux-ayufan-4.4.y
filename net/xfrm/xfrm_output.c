@@ -43,11 +43,32 @@ static int xfrm_output_one(struct sk_buff *skb, int err)
 	struct dst_entry *dst = skb_dst(skb);
 	struct xfrm_state *x = dst->xfrm;
 	struct net *net = xs_net(x);
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	struct xfrm_state *xfrm_vec[XFRM_MAX_DEPTH];
+	int xfrm_nr = 0;
+	int i;
+#endif
 
 	if (err <= 0)
 		goto resume;
 
 	do {
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+		if (x->offloaded)  {
+
+			if (xfrm_nr == XFRM_MAX_DEPTH) {
+				err = -ENOBUFS;
+				goto out_exit;
+			}
+
+			if (!x->curlft.use_time) 
+				x->curlft.use_time = get_seconds();
+
+			xfrm_vec[xfrm_nr++] = x;
+			skb->ipsec_offload = 1;
+			goto next_dst;
+		}
+#endif
 		err = xfrm_state_check_space(x, skb);
 		if (err) {
 			XFRM_INC_STATS(net, LINUX_MIB_XFRMOUTERROR);
@@ -90,6 +111,9 @@ resume:
 			goto error_nolock;
 		}
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+next_dst:
+#endif
 		dst = skb_dst_pop(skb);
 		if (!dst) {
 			XFRM_INC_STATS(net, LINUX_MIB_XFRMOUTERROR);
@@ -101,6 +125,26 @@ resume:
 	} while (x && !(x->outer_mode->flags & XFRM_MODE_FLAG_TUNNEL));
 
 	err = 0;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	if (!skb->sp || atomic_read(&skb->sp->refcnt) != 1) {
+		struct sec_path *sp;
+
+		sp = secpath_dup(skb->sp);
+		if (!sp)
+			goto error_nolock;
+		if (skb->sp)
+			secpath_put(skb->sp);
+		skb->sp = sp;
+	}
+	if (xfrm_nr + skb->sp->len > XFRM_MAX_DEPTH)
+		goto error_nolock;
+
+	memcpy(skb->sp->xvec + skb->sp->len, xfrm_vec,
+	       xfrm_nr * sizeof(xfrm_vec[0]));
+	skb->sp->len += xfrm_nr;
+	for (i = 0; i < skb->sp->len; i++)
+		xfrm_state_hold(skb->sp->xvec[i]);
+#endif
 
 out_exit:
 	return err;

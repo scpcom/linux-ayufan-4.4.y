@@ -81,6 +81,16 @@ int ip_xfrm_me_harder(struct sk_buff *skb)
 
 	if (IPCB(skb)->flags & IPSKB_XFRM_TRANSFORMED)
 		return 0;
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	/* Mindspeed added WA: required to support 4o6 ipsec offload */
+	if(skb->ipsec_offload)
+	{
+		if (IP6CB(skb)->flags & IP6SKB_XFRM_TRANSFORMED)
+			return 0;
+	}
+#endif
+
 	if (xfrm_decode_session(skb, &fl, AF_INET) < 0)
 		return -1;
 

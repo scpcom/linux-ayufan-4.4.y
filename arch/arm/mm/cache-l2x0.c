@@ -299,8 +299,10 @@ static void l2x0_unlock(__u32 cache_id)
 		lockregs = 1;
 
 	for (i = 0; i < lockregs; i++) {
+#ifndef CONFIG_L2X0_INSTRUCTION_ONLY
 		writel_relaxed(0x0, l2x0_base + L2X0_LOCKDOWN_WAY_D_BASE +
 			       i * L2X0_LOCKDOWN_STRIDE);
+#endif
 		writel_relaxed(0x0, l2x0_base + L2X0_LOCKDOWN_WAY_I_BASE +
 			       i * L2X0_LOCKDOWN_STRIDE);
 	}
@@ -311,6 +313,7 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 	__u32 aux;
 	__u32 cache_id;
 	__u32 way_size = 0;
+	__u32 prefetch = 0;
 	int ways;
 	const char *type;
 
@@ -330,11 +333,23 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 		else
 			ways = 8;
 		type = "L310";
+
 #ifdef CONFIG_PL310_ERRATA_753970
 		/* Unmapped register. */
 		sync_reg_offset = L2X0_DUMMY_REG;
 #endif
 		outer_cache.set_debug = pl310_set_debug;
+
+		prefetch = readl_relaxed(l2x0_base + L2X0_PREFETCH_CTRL);
+
+#ifdef CONFIG_PL310_DOUBLE_LINE_FILL
+		prefetch |= (1 << 30) | (1 << 24);
+#ifdef CONFIG_PL310_INCR_DOUBLE_LINE_FILL
+		prefetch |= (1 << 23);
+#endif
+#endif
+		writel_relaxed(prefetch, l2x0_base + L2X0_PREFETCH_CTRL);
+
 		break;
 	case L2X0_CACHE_ID_PART_L210:
 		ways = (aux >> 13) & 0xf;
@@ -385,8 +400,8 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 	outer_cache.disable = l2x0_disable;
 
 	printk(KERN_INFO "%s cache controller enabled\n", type);
-	printk(KERN_INFO "l2x0: %d ways, CACHE_ID 0x%08x, AUX_CTRL 0x%08x, Cache size: %d B\n",
-			ways, cache_id, aux, l2x0_size);
+	printk(KERN_INFO "l2x0: %d ways, CACHE_ID 0x%08x, AUX_CTRL 0x%08x, PREFETCH_CTRL 0x%08x, Cache size: %d B\n",
+			ways, cache_id, aux, prefetch, l2x0_size);
 }
 
 #ifdef CONFIG_OF

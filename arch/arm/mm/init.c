@@ -288,7 +288,11 @@ static void __init arm_bootmem_free(unsigned long min, unsigned long max_low,
 	if (arm_dma_zone_size) {
 		arm_adjust_dma_zone(zone_size, zhole_size,
 			arm_dma_zone_size >> PAGE_SHIFT);
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+		arm_dma_limit = 0xffffffff;
+#else
 		arm_dma_limit = PHYS_OFFSET + arm_dma_zone_size - 1;
+#endif
 	} else
 		arm_dma_limit = 0xffffffff;
 #endif

@@ -281,6 +281,18 @@ static struct mem_type mem_types[] = {
 				PMD_SECT_UNCACHED | PMD_SECT_XN,
 		.domain    = DOMAIN_KERNEL,
 	},
+	[MT_MSP] = {
+		.prot_pte  = PROT_PTE_DEVICE | L_PTE_MT_DEV_CACHED | L_PTE_XN,
+		.prot_l1   = PMD_TYPE_TABLE,
+		.prot_sect = PROT_SECT_DEVICE | PMD_SECT_WB,
+		.domain    = DOMAIN_IO,
+	},
+	[MT_MSP_NCNB] = {
+		.prot_pte  = PROT_PTE_DEVICE | L_PTE_XN,
+		.prot_l1   = PMD_TYPE_TABLE,
+		.prot_sect = PROT_SECT_DEVICE | PMD_SECT_S,
+		.domain    = DOMAIN_IO,
+	},
 };
 
 const struct mem_type *get_mem_type(unsigned int type)
@@ -572,8 +584,7 @@ static void __init alloc_init_section(pud_t *pud, unsigned long addr,
 	if (((addr | end | phys) & ~SECTION_MASK) == 0) {
 		pmd_t *p = pmd;
 
-		if (addr & SECTION_SIZE)
-			pmd++;
+		pmd += (addr & (~PGDIR_MASK)) >> SECTION_SHIFT;
 
 		do {
 			*pmd = __pmd(phys | type->prot_sect);
@@ -1013,7 +1024,10 @@ static void __init kmap_init(void)
 static void __init map_lowmem(void)
 {
 	struct memblock_region *reg;
-
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	extern unsigned long arm_dma_zone_size;
+	phys_addr_t length_ncnb = arm_dma_zone_size, length_ncnb_now = 0;
+#endif
 	/* Map all the lowmem memory banks. */
 	for_each_memblock(memory, reg) {
 		phys_addr_t start = reg->base;
@@ -1024,7 +1038,23 @@ static void __init map_lowmem(void)
 			end = lowmem_limit;
 		if (start >= end)
 			break;
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+		if (length_ncnb > 0)
+		{
+			length_ncnb_now = min(length_ncnb, end - start);
+			map.pfn = __phys_to_pfn(start);
+			map.virtual = __phys_to_virt(start);
+			map.length = length_ncnb_now;
+			map.type = MT_MSP_NCNB;
+			printk("Comcerto: zone_dma mapping size=%lx type=%lx\n", (unsigned long) map.length, (unsigned long) map.type);
+			create_mapping(&map);
+			start += length_ncnb_now;
+			length_ncnb -= length_ncnb_now;
+			if (start == end)
+				continue;
 
+		}
+#endif
 		map.pfn = __phys_to_pfn(start);
 		map.virtual = __phys_to_virt(start);
 		map.length = end - start;

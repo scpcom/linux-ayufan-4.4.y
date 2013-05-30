@@ -229,6 +229,20 @@ static void __flush_dcache_aliases(struct address_space *mapping, struct page *p
 	flush_dcache_mmap_unlock(mapping);
 }
 
+#if defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+
+void __sync_outer_cache(pte_t *ptep, pte_t pteval)
+{
+	if (pte_present(*ptep) && pte_exec(*ptep) && (!pte_present(pteval) || !pte_exec(pteval))) {
+		unsigned long phys = __pfn_to_phys(pte_pfn(*ptep));
+
+//		printk(KERN_INFO "outer flush range: %x %x %lx-%lx\n", pte_val(*ptep), pteval, phys, phys + PAGE_SIZE);
+		outer_flush_range(phys, phys + PAGE_SIZE);
+	}
+}
+
+#endif
+
 #if __LINUX_ARM_ARCH__ >= 6
 void __sync_icache_dcache(pte_t pteval)
 {

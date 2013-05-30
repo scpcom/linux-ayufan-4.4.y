@@ -339,6 +339,12 @@ config INET_ESP
 
 	  If unsure, say Y.
 
+config INET_IPSEC_OFFLOAD
+	bool "IPsec Fast Path Processing offload"
+	depends on (INET_ESP || INET_AH) && COMCERTO_FP
+		---help---
+	  Support for IPsec Fast Path offload.
+
 config INET_IPCOMP
 	tristate "IP: IPComp transformation"
 	select INET_XFRM_TUNNEL

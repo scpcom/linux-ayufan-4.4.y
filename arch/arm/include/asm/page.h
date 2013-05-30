@@ -11,7 +11,11 @@
 #define _ASMARM_PAGE_H
 
 /* PAGE_SHIFT determines the page size */
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 #define PAGE_SHIFT		12
+#else
+#define PAGE_SHIFT		16
+#endif
 #define PAGE_SIZE		(_AC(1,UL) << PAGE_SHIFT)
 #define PAGE_MASK		(~(PAGE_SIZE-1))
 

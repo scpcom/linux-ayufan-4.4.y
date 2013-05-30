@@ -292,10 +292,35 @@ static void death_by_timeout(unsigned long ul_conntrack)
 {
 	struct nf_conn *ct = (void *)ul_conntrack;
 	struct nf_conn_tstamp *tstamp;
+#ifdef CONFIG_COMCERTO_FP
+	struct nf_conntrack_l4proto *l4proto;
+#endif
 
 	tstamp = nf_conn_tstamp_find(ct);
 	if (tstamp && tstamp->stop == 0)
 		tstamp->stop = ktime_to_ns(ktime_get_real());
+
+#ifdef CONFIG_COMCERTO_FP
+	l4proto = __nf_ct_l4proto_find(nf_ct_l3num(ct), nf_ct_protonum(ct));
+
+	if (test_bit(IPS_DYING_BIT, &ct->status) ||
+	   (!test_bit(IPS_PERMANENT_BIT, &ct->status)) ||
+	   ((l4proto->l4proto == IPPROTO_TCP) && (ct->proto.tcp.state != TCP_CONNTRACK_ESTABLISHED))) {
+		if (!test_bit(IPS_DYING_BIT, &ct->status) &&
+		    unlikely(nf_conntrack_event(IPCT_DESTROY, ct) < 0)) {
+			/* destroy event was not delivered */
+			nf_ct_delete_from_lists(ct);
+			nf_ct_insert_dying_list(ct);
+			return;
+		}
+		set_bit(IPS_DYING_BIT, &ct->status);
+		nf_ct_delete_from_lists(ct);
+		nf_ct_put(ct);
+	} else {
+		ct->timeout.expires = jiffies + COMCERTO_PERMANENT_TIMEOUT * HZ;
+		add_timer(&ct->timeout);
+	}
+#else
 
 	if (!test_bit(IPS_DYING_BIT, &ct->status) &&
 	    unlikely(nf_conntrack_event(IPCT_DESTROY, ct) < 0)) {
@@ -307,6 +332,7 @@ static void death_by_timeout(unsigned long ul_conntrack)
 	set_bit(IPS_DYING_BIT, &ct->status);
 	nf_ct_delete_from_lists(ct);
 	nf_ct_put(ct);
+#endif
 }
 
 /*
@@ -610,7 +636,13 @@ static noinline int early_drop(struct net *net, unsigned int hash)
 	if (!ct)
 		return dropped;
 
+#ifdef CONFIG_COMCERTO_FP
+	clear_bit(IPS_PERMANENT_BIT, &ct->status);
+	/* Avoid race with timer expiration */
+	if (del_timer_sync(&ct->timeout)) {
+#else
 	if (del_timer(&ct->timeout)) {
+#endif
 		death_by_timeout((unsigned long)ct);
 		dropped = 1;
 		NF_CT_STAT_INC_ATOMIC(net, early_drop);
@@ -1079,7 +1111,13 @@ bool __nf_ct_kill_acct(struct nf_conn *ct,
 		}
 	}
 
+#ifdef CONFIG_COMCERTO_FP
+	clear_bit(IPS_PERMANENT_BIT, &ct->status);
+	/* Avoid race with timer expiration */
+	if (del_timer_sync(&ct->timeout)) {
+#else
 	if (del_timer(&ct->timeout)) {
+#endif
 		ct->timeout.function((unsigned long)ct);
 		return true;
 	}
@@ -1200,7 +1238,14 @@ void nf_ct_iterate_cleanup(struct net *net,
 
 	while ((ct = get_next_corpse(net, iter, data, &bucket)) != NULL) {
 		/* Time to push up daises... */
+
+#ifdef CONFIG_COMCERTO_FP
+		clear_bit(IPS_PERMANENT_BIT, &ct->status);
+		/* Avoid race with timer expiration */
+		if (del_timer_sync(&ct->timeout))
+#else
 		if (del_timer(&ct->timeout))
+#endif
 			death_by_timeout((unsigned long)ct);
 		/* ... else the timer will get him soon. */
 
@@ -1361,6 +1406,42 @@ void *nf_ct_alloc_hashtable(unsigned int *sizep, int nulls)
 	return hash;
 }
 EXPORT_SYMBOL_GPL(nf_ct_alloc_hashtable);
+
+int nf_conntrack_set_dpi_allow_report(struct sk_buff *skb)
+{
+	int err = 0;
+	struct nf_conn *ct = (struct nf_conn *)skb->nfct;
+
+	nf_conntrack_get(skb->nfct);
+
+	set_bit(IPS_DPI_ALLOWED_BIT, &ct->status);
+
+	nf_conntrack_event_cache(IPCT_PROTOINFO, ct);
+
+	nf_conntrack_put(skb->nfct);
+
+	return err;
+}
+EXPORT_SYMBOL(nf_conntrack_set_dpi_allow_report);
+
+int nf_conntrack_set_dpi_allow_and_mark(struct sk_buff *skb, int mark)
+{
+	int err = 0;
+	struct nf_conn *ct = (struct nf_conn *)skb->nfct;
+
+	nf_conntrack_get(skb->nfct);
+
+	set_bit(IPS_DPI_ALLOWED_BIT, &ct->status);
+
+	ct->mark = mark;
+
+	nf_conntrack_event_cache(IPCT_PROTOINFO, ct);
+
+	nf_conntrack_put(skb->nfct);
+
+	return err;
+}
+EXPORT_SYMBOL(nf_conntrack_set_dpi_allow_and_mark);
 
 int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp)
 {
