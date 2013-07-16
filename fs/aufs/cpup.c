@@ -27,7 +27,7 @@
 void au_cpup_attr_flags(struct inode *dst, struct inode *src)
 {
 	const unsigned int mask = S_DEAD | S_SWAPFILE | S_PRIVATE
-		| S_NOATIME | S_NOCMTIME;
+		| S_NOATIME | S_NOCMTIME | S_AUTOMOUNT;
 
 	dst->i_flags |= src->i_flags & ~mask;
 	if (au_test_fs_notime(dst->i_sb))
