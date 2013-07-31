@@ -2483,6 +2483,100 @@ static void igb_ethtool_complete(struct net_device *netdev)
 	pm_runtime_put(&adapter->pdev->dev);
 }
 
+static int igb_get_rxfh_indir(struct net_device *netdev,
+			      struct ethtool_rxfh_indir *indir)
+{
+	struct igb_adapter *adapter = netdev_priv(netdev);
+	int i;
+
+	/* Handle size query */
+	if (indir->size == 0) {
+		indir->size = IGB_RETA_SIZE;
+		return 0;
+	}
+
+	/* Check buffer size */
+	if (indir->size < IGB_RETA_SIZE)
+		return -EINVAL;
+
+	indir->size = IGB_RETA_SIZE;
+	for (i = 0; i < IGB_RETA_SIZE; i++)
+		indir->ring_index[i] = adapter->rss_indir_tbl[i];
+
+	return 0;
+}
+
+void igb_write_rss_indir_tbl(struct igb_adapter *adapter)
+{
+	struct e1000_hw *hw = &adapter->hw;
+	u32 reg = E1000_RETA(0);
+	u32 shift = 0;
+	int i = 0;
+
+	switch (hw->mac.type) {
+	case e1000_82575:
+		shift = 6;
+		break;
+	case e1000_82576:
+		/* 82576 supports 2 RSS queues for SR-IOV */
+		if (adapter->vfs_allocated_count)
+			shift = 3;
+		break;
+	default:
+		break;
+	}
+
+	while (i < IGB_RETA_SIZE) {
+		u32 val = 0;
+		int j;
+
+		for (j = 3; j >= 0; j--) {
+			val <<= 8;
+			val |= adapter->rss_indir_tbl[i + j];
+		}
+
+		wr32(reg, val << shift);
+		reg += 4;
+		i += 4;
+	}
+}
+
+static int igb_set_rxfh_indir(struct net_device *netdev,
+			      const struct ethtool_rxfh_indir *indir)
+{
+	struct igb_adapter *adapter = netdev_priv(netdev);
+	struct e1000_hw *hw = &adapter->hw;
+	int i;
+	u32 num_queues;
+
+	num_queues = adapter->rss_queues;
+
+	switch (hw->mac.type) {
+	case e1000_82576:
+		/* 82576 supports 2 RSS queues for SR-IOV */
+		if (adapter->vfs_allocated_count)
+			num_queues = 2;
+		break;
+	default:
+		break;
+	}
+
+	/* Verify user input. */
+	if (indir->size != IGB_RETA_SIZE)
+		return -EINVAL;
+	for (i = 0; i < IGB_RETA_SIZE; i++)
+		if (indir->ring_index[i] >= num_queues)
+			return -EINVAL;
+
+
+	for (i = 0; i < IGB_RETA_SIZE; i++)
+		adapter->rss_indir_tbl[i] = indir->ring_index[i];
+
+	igb_write_rss_indir_tbl(adapter);
+
+	return 0;
+}
+
 static const struct ethtool_ops igb_ethtool_ops = {
 	.get_settings		= igb_get_settings,
 	.set_settings		= igb_set_settings,
@@ -2511,6 +2605,8 @@ static const struct ethtool_ops igb_ethtool_ops = {
 	.set_coalesce		= igb_set_coalesce,
 	.get_rxnfc		= igb_get_rxnfc,
 	.set_rxnfc		= igb_set_rxnfc,
+	.get_rxfh_indir		= igb_get_rxfh_indir,
+	.set_rxfh_indir		= igb_set_rxfh_indir,
 	.begin			= igb_ethtool_begin,
 	.complete		= igb_ethtool_complete,
 };
