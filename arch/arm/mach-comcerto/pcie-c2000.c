@@ -1420,6 +1420,11 @@ static int comcerto_pcie_bsp_init(struct pcie_port *pp, int nr)
 		}
         }
 
+	if (system_rev == 1) {
+		// C2K RevA1 devices use a different serdes clk divider
+		p_pcie_phy_reg_file[0x61].val = 0x6;
+	}
+
 	for(polarity = 0 ; polarity < polarity_max; polarity++)
 	{
 
