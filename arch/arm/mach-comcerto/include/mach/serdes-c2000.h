@@ -28,7 +28,7 @@
 /* SER-DES Address space */
 
 
-#define SATA_SERDES_48MHZ 1
+#define SATA_SERDES_24MHZ 1
 
 
 typedef struct serdes_regs_s
@@ -41,17 +41,18 @@ int serdes_phy_init(int phy_num, struct serdes_regs_s *regs, int size, int type)
 void serdes_phy_reset(int phy_num);
 
  /*  Initialize values of the Snowbush PHY (Serdes1) for SATA0 */
-#ifdef SATA_SERDES_48MHZ
+#ifdef SATA_SERDES_24MHZ
 /* 24MHz internal ref clock configuration */
+//SATA_SERDES_24MHZ config
 static struct serdes_regs_s sata0_phy_reg_file[] =
         {
           { 0x000 << 2, 0x06},
           { 0x001 << 2, 0x00},
           { 0x002 << 2, 0x88},
           { 0x003 << 2, 0x00},
-          { 0x004 << 2, 0x84},
-          { 0x005 << 2, 0x10},
-          { 0x006 << 2, 0x20},
+          { 0x004 << 2, 0x7b},
+          { 0x005 << 2, 0xc9},
+          { 0x006 << 2, 0x03},
           { 0x007 << 2, 0x00},
           { 0x008 << 2, 0x00},
           { 0x009 << 2, 0x00},
@@ -80,7 +81,7 @@ static struct serdes_regs_s sata0_phy_reg_file[] =
           { 0x020 << 2, 0x00},
           { 0x021 << 2, 0x00},
           { 0x022 << 2, 0xa0},
-          { 0x023 << 2, 0x62},
+          { 0x023 << 2, 0x54},
           { 0x024 << 2, 0x00},
           { 0x025 << 2, 0x00},
           { 0x026 << 2, 0x00},
@@ -142,18 +143,19 @@ static struct serdes_regs_s sata0_phy_reg_file[] =
           { 0x05E << 2, 0x00},
           { 0x05F << 2, 0x00},
           { 0x060 << 2, 0x00},
-          { 0x061 << 2, 0x2e},
-          { 0x062 << 2, 0x08},
+          //{ 0x061 << 2, 0x2e}, //for Rev-A0 device
+          { 0x061 << 2, 0x2e}, //for Rev-A1 device
+          { 0x062 << 2, 0x00},
           { 0x063 << 2, 0x5e},
           { 0x064 << 2, 0x00},
           { 0x065 << 2, 0x42},
           { 0x066 << 2, 0xd1},
-          { 0x067 << 2, 0xa0},
+          { 0x067 << 2, 0x20},
           { 0x068 << 2, 0x28},
           { 0x069 << 2, 0x78},
-          { 0x06A << 2, 0xcc},
-          { 0x06B << 2, 0xc1},
-          { 0x06C << 2, 0x4e},
+          { 0x06A << 2, 0x2c},
+          { 0x06B << 2, 0xb9},
+          { 0x06C << 2, 0x5e},
           { 0x06D << 2, 0x03},
           { 0x06E << 2, 0x00},
           { 0x06F << 2, 0x00},
@@ -167,17 +169,17 @@ static struct serdes_regs_s sata0_phy_reg_file[] =
           { 0x204 << 2, 0x00},
           { 0x205 << 2, 0x10},
           { 0x206 << 2, 0x84},
-          { 0x207 << 2, 0x3C}, 
+          { 0x207 << 2, 0x3c},
           { 0x208 << 2, 0xe0},
           { 0x210 << 2, 0x23},
           { 0x211 << 2, 0x00},
           { 0x212 << 2, 0x40},
           { 0x213 << 2, 0x05},
-          { 0x214 << 2, 0x20},/* */
+          { 0x214 << 2, 0xd0},/* */
           { 0x215 << 2, 0x17},
           { 0x216 << 2, 0x00},
           { 0x217 << 2, 0x68},
-          { 0x218 << 2, 0xe2},
+          { 0x218 << 2, 0xf2},
           { 0x219 << 2, 0x1e},
           { 0x21A << 2, 0x18},
           { 0x21B << 2, 0x0d},
@@ -244,9 +246,9 @@ static struct serdes_regs_s sata0_phy_reg_file[] =
           { 0xA06 << 2, 0x19},
           { 0xA07 << 2, 0x49},
           { 0xA08 << 2, 0x04},
-          { 0xA09 << 2, 0xc3},
-          { 0xA0A << 2, 0x2a},
-          { 0xA0B << 2, 0xc6},
+          { 0xA09 << 2, 0x83},
+          { 0xA0A << 2, 0x4b},
+          { 0xA0B << 2, 0xc5},
           { 0xA0C << 2, 0x01},
           { 0xA0D << 2, 0x03},
           { 0xA0E << 2, 0x28},
@@ -274,7 +276,7 @@ static struct serdes_regs_s sata0_phy_reg_file[] =
           { 0xA3C << 2, 0xa0},
           { 0xA3D << 2, 0xa0},
           { 0xA3E << 2, 0xa0},
-          { 0xA3F << 2, 0xa0},
+          { 0xA3F << 2, 0x54},
           { 0xA40 << 2, 0x62},
           { 0xA41 << 2, 0x00},
           { 0xA42 << 2, 0x80},
