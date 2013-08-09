@@ -34,6 +34,8 @@
 	/***** Board *****/
 	#if defined(CONFIG_C2K_ASIC)
 		#include <mach/board-c2kasic.h>
+	#elif defined(CONFIG_GOOGLE_FIBER_OPTIMUS)
+		#include <mach/board-optimus.h>
 	#elif defined(CONFIG_C2K_EVM)
 		#include <mach/board-c2kevm.h>
 	#elif defined(CONFIG_RTSM_C2K)

@@ -46,6 +46,12 @@ choice
 	prompt "Comcerto Board type"
 	default RTSM_C2K
 
+config GOOGLE_FIBER_OPTIMUS
+	bool "Google Fiber Optimus"
+	depends on ARCH_M86XXX
+	help
+	  Say Y here if you intend to run this kernel with a Google Fiber Optimus board.
+
 config C2K_EVM
 	bool "EVM"
 	depends on ARCH_M86XXX

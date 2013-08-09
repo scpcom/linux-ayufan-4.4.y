@@ -20,6 +20,7 @@ endif
 obj-$(CONFIG_COMCERTO_MEMBUF)                   += membuf.o
 obj-$(CONFIG_COMCERTO_TDM_CLOCK)                += sysfstdm.o
 obj-$(CONFIG_RTSM_C2K) 				+= board-c2krtsm.o
+obj-$(CONFIG_GOOGLE_FIBER_OPTIMUS)		+= board-optimus.o
 obj-$(CONFIG_C2K_EVM) 				+= board-c2kevm.o
 obj-$(CONFIG_C2K_ASIC) 				+= board-c2kasic.o
 obj-$(CONFIG_SMP)				+= platsmp.o headsmp.o
