@@ -112,7 +112,8 @@ static void comcerto_usb3_phy_init(void)
 	//Configuration for internal clock
 	if(usb3_clk_internal)
 	{
-		writel(0x420E82A9, USB3_PHY_BASE + 0x20);
+		//writel(0x420E82A9, USB3_PHY_BASE + 0x20); //48Mhz ref clock
+		writel(0x420E82A8, USB3_PHY_BASE + 0x20); //24Mhz Ref clock
 		printk(KERN_INFO "USB3.0 clock selected: internal\n", __func__);
 	}
 	else
