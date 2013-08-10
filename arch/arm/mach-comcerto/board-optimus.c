@@ -483,29 +483,29 @@ static struct resource comcerto_pfe_resources[] = {
 
 static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 	.comcerto_eth_pdata[0] = {
-		.name = GEM0_ITF_NAME,
+		.name = "lan0",
+		.device_flags = CONFIG_COMCERTO_GEMAC,
+		.mii_config = CONFIG_COMCERTO_USE_RGMII,
+		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
+		.phy_flags = GEMAC_NO_PHY,
+		.gem_id = 0,
+		.mac_addr = (u8[])GEM0_MAC,
+	},
+
+	.comcerto_eth_pdata[1] = {
+		.name = "wan0",
 		.device_flags = CONFIG_COMCERTO_GEMAC,
 		.mii_config = CONFIG_COMCERTO_USE_RGMII,
 		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
 		.phy_flags = GEMAC_PHY_RGMII_ADD_DELAY,
 		.bus_id = 0,
 		.phy_id = 4,
-		.gem_id = 0,
-		.mac_addr = (u8[])GEM0_MAC,
-	},
-
-	.comcerto_eth_pdata[1] = {
-		.name = GEM1_ITF_NAME,
-		.device_flags = CONFIG_COMCERTO_GEMAC,
-		.mii_config = CONFIG_COMCERTO_USE_RGMII,
-		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
-		.phy_flags = GEMAC_NO_PHY,
 		.gem_id = 1,
 		.mac_addr = (u8[])GEM1_MAC,
 	},
 
 	.comcerto_eth_pdata[2] = {
-		.name = GEM2_ITF_NAME,
+		.name = "moca0",
 		.device_flags = CONFIG_COMCERTO_GEMAC,
 		.mii_config = CONFIG_COMCERTO_USE_RGMII,
 		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
