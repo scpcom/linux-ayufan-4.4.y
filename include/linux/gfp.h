@@ -141,7 +141,12 @@ struct vm_area_struct;
 /* Flag - indicates that the buffer will be suitable for DMA.  Ignored on some
    platforms, used as appropriate on others */
 
+#if defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#define GFP_DMA		__GFP_DMA32
+#define GFP_DMA_NCNB	__GFP_DMA
+#else
 #define GFP_DMA		__GFP_DMA
+#endif
 
 /* 4GB DMA on some platforms */
 #define GFP_DMA32	__GFP_DMA32

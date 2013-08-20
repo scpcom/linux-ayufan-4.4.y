@@ -52,6 +52,10 @@ void scu_enable(void __iomem *scu_base)
 	if (scu_ctrl & 1)
 		return;
 
+#ifdef CONFIG_SCU_SPECULATIVE_LINE_FILLS
+	scu_ctrl |= (1 << 3);
+#endif
+
 	scu_ctrl |= 1;
 	__raw_writel(scu_ctrl, scu_base + SCU_CTRL);
 

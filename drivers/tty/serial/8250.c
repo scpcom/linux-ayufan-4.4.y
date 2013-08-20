@@ -48,6 +48,12 @@
 #include "suncore.h"
 #endif
 
+#ifdef CONFIG_ARCH_M86XXX
+#include <linux/clk.h>
+#include <mach/reset.h>
+static struct clk *uart_clk;     /*UART Clock(DUS) depends upon the AXI*/
+#endif 
+
 /*
  * Configuration:
  *   share_irqs - whether we pass IRQF_SHARED to request_irq().  This option
@@ -3055,6 +3061,31 @@ static int __devinit serial8250_probe(struct platform_device *dev)
 	struct uart_port port;
 	int ret, i, irqflag = 0;
 
+#ifdef CONFIG_ARCH_M86XXX
+	unsigned long uart_rate;
+
+	/* Take the Fast-UART device Out-Of-Reset*/
+	c2000_block_reset(COMPONENT_AXI_FAST_UART,0);
+
+	/* Get the FAST-UART clk structure from DUS */	
+	uart_clk = clk_get(NULL,"DUS");
+	
+	if (IS_ERR(uart_clk)) {
+		pr_err("%s: Unable to get UART clock: %ld\n",__func__,PTR_ERR(uart_clk));
+		return PTR_ERR(uart_clk);
+        }
+	
+	/* Enable the FAST-UART Clock */
+	ret = clk_enable(uart_clk);
+	if (ret){
+                pr_err("%s: UART clock failed to enable:\n",__func__);
+		return  ret;       
+	}
+	
+	/* Get the UART Clock in Hz */
+	uart_rate = clk_get_rate(uart_clk);
+#endif
+
 	memset(&port, 0, sizeof(struct uart_port));
 
 	if (share_irqs)
@@ -3065,7 +3096,11 @@ static int __devinit serial8250_probe(struct platform_device *dev)
 		port.membase		= p->membase;
 		port.irq		= p->irq;
 		port.irqflags		= p->irqflags;
-		port.uartclk		= p->uartclk;
+#ifdef CONFIG_ARCH_M86XXX
+		port.uartclk		= uart_rate;    /* Assigning the rate value to the ports */
+#else	
+		port.uartclk		= p->uartclk;   /* Assigning the rate value got from Platfrom device*/
+#endif
 		port.regshift		= p->regshift;
 		port.iotype		= p->iotype;
 		port.flags		= p->flags;
@@ -3088,6 +3123,7 @@ static int __devinit serial8250_probe(struct platform_device *dev)
 				p->irq, ret);
 		}
 	}
+
 	return 0;
 }
 
@@ -3104,9 +3140,19 @@ static int __devexit serial8250_remove(struct platform_device *dev)
 		if (up->port.dev == &dev->dev)
 			serial8250_unregister_port(i);
 	}
+#ifdef CONFIG_ARCH_M86XXX
+	/*Disable the Fast-UART clock here*/
+	clk_disable(uart_clk);	
+	clk_put(uart_clk);
+
+	/* Put the  Fast-UART device in Reset*/
+	c2000_block_reset(COMPONENT_AXI_FAST_UART,1);
+#endif
+
 	return 0;
 }
 
+#if CONFIG_PM
 static int serial8250_suspend(struct platform_device *dev, pm_message_t state)
 {
 	int i;
@@ -3118,12 +3164,36 @@ static int serial8250_suspend(struct platform_device *dev, pm_message_t state)
 			uart_suspend_port(&serial8250_reg, &up->port);
 	}
 
+#ifdef CONFIG_ARCH_M86XXX
+	/* Now Do the FAST_UART_CLOCK gating here, be sure no other devices
+	 * are using the DUS clock to shutdown the clock. 
+	 * Here above clock is derived from DUS , henece it will be not
+	 * gated , unless and until DMA/FAST-SPI will disable the DUS clock 
+	 * to make the usecount 0.
+	*/
+	clk_disable(uart_clk);
+#endif
+
 	return 0;
 }
 
 static int serial8250_resume(struct platform_device *dev)
 {
 	int i;
+
+#ifdef CONFIG_ARCH_M86XXX
+	/* Now Enable the FAST_UART_CLOCK here , before 
+	 * before resuming any opertions.
+	 */
+	if (clk_enable(uart_clk)){
+                pr_err("%s: Unable to enable FAST-UART clock: \n",__func__);
+		/* Here we are not able to enable the FAST-UART clock , 
+		 * beacause of clk_disable unable to shutdown( usecount is 
+		 * not zero ,due to dependancy with DMA and FAST-SPI) clock
+		 * so Let resume the port only .
+		 */ 
+        }
+#endif
 
 	for (i = 0; i < UART_NR; i++) {
 		struct uart_8250_port *up = &serial8250_ports[i];
@@ -3134,12 +3204,15 @@ static int serial8250_resume(struct platform_device *dev)
 
 	return 0;
 }
+#endif
 
 static struct platform_driver serial8250_isa_driver = {
 	.probe		= serial8250_probe,
 	.remove		= __devexit_p(serial8250_remove),
+#if CONFIG_PM
 	.suspend	= serial8250_suspend,
 	.resume		= serial8250_resume,
+#endif
 	.driver		= {
 		.name	= "serial8250",
 		.owner	= THIS_MODULE,

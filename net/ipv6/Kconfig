@@ -94,6 +94,12 @@ config INET6_ESP
 
 	  If unsure, say Y.
 
+config INET6_IPSEC_OFFLOAD
+	bool "IPsec IPv6 Fast Path Processing offload"
+	depends on (INET6_ESP && COMCERTO_FP)
+		---help---
+	  Support for IPsec IPv6 Fast Path offload.
+
 config INET6_IPCOMP
 	tristate "IPv6: IPComp transformation"
 	select INET6_XFRM_TUNNEL
@@ -219,6 +225,15 @@ config IPV6_SUBTREES
 	  may sometimes lead to unintended routing behavior.  This can be
 	  avoided by defining different routing tables for the normal and
 	  source prefix specific routes.
+
+	  If unsure, say N.
+
+config IPV6_ETHERIP
+	tristate "EtherIP over IPv6: EtherIP-in-IPv6 tunnel"
+	depends on IPV6
+	select INET6_TUNNEL
+	---help---
+	  Support for EtherIP-in-IPv6 tunnels described in RFC 3378.
 
 	  If unsure, say N.
 

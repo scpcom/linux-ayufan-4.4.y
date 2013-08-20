@@ -26,3 +26,5 @@ obj-$(CONFIG_PL330_DMA) += pl330.o
 obj-$(CONFIG_PCH_DMA) += pch_dma.o
 obj-$(CONFIG_AMBA_PL08X) += amba-pl08x.o
 obj-$(CONFIG_EP93XX_DMA) += ep93xx_dma.o
+obj-$(CONFIG_COMCERTO_XOR) += comcerto_xor.o
+obj-$(CONFIG_COMCERTO_DMA_BASIC) += c2k_dma.o

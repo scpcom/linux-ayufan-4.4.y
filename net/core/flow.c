@@ -22,6 +22,9 @@
 #include <linux/cpumask.h>
 #include <linux/mutex.h>
 #include <net/flow.h>
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+#include <net/xfrm.h>
+#endif
 #include <linux/atomic.h>
 #include <linux/security.h>
 
@@ -36,6 +39,10 @@ struct flow_cache_entry {
 	u32				genid;
 	struct flowi			key;
 	struct flow_cache_object	*object;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	u8				flags;
+	#define FLOW_CACHE_FLAG_IPSEC_OFFLOAD 0x01
+#endif
 };
 
 struct flow_cache_percpu {
@@ -71,6 +78,10 @@ static LIST_HEAD(flow_cache_gc_list);
 
 #define flow_cache_hash_size(cache)	(1 << (cache)->hash_shift)
 #define FLOW_HASH_RND_PERIOD		(10 * 60 * HZ)
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+extern int ipsec_nlkey_flow_remove(struct flowi *fl, u16 family, u16 dir);
+#endif
 
 static void flow_cache_new_hashrnd(unsigned long arg)
 {
@@ -110,8 +121,14 @@ static void flow_cache_gc_task(struct work_struct *work)
 	list_splice_tail_init(&flow_cache_gc_list, &gc_list);
 	spin_unlock_bh(&flow_cache_gc_lock);
 
-	list_for_each_entry_safe(fce, n, &gc_list, u.gc_list)
+	list_for_each_entry_safe(fce, n, &gc_list, u.gc_list) {
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+		/*call nl_key_flow_remove*/
+		if (fce->flags & FLOW_CACHE_FLAG_IPSEC_OFFLOAD)
+			ipsec_nlkey_flow_remove(&fce->key, fce->family, fce->dir);
+#endif
 		flow_entry_kill(fce);
+	}
 }
 static DECLARE_WORK(flow_cache_gc_work, flow_cache_gc_task);
 
@@ -204,9 +221,15 @@ static int flow_key_compare(const struct flowi *key1, const struct flowi *key2,
 	return 0;
 }
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+struct flow_cache_object *
+flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
+			u8 *new_flow, flow_resolve_t resolver, void *ctx)
+#else
 struct flow_cache_object *
 flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
 		  flow_resolve_t resolver, void *ctx)
+#endif
 {
 	struct flow_cache *fc = &flow_cache_global;
 	struct flow_cache_percpu *fcp;
@@ -215,6 +238,11 @@ flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
 	struct flow_cache_object *flo;
 	size_t keysize;
 	unsigned int hash;
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	if (new_flow)
+		*new_flow = 0;
+#endif
 
 	local_bh_disable();
 	fcp = this_cpu_ptr(fc->percpu);
@@ -281,8 +309,15 @@ nocache:
 	flo = resolver(net, key, family, dir, flo, ctx);
 	if (fle) {
 		fle->genid = atomic_read(&flow_cache_genid);
-		if (!IS_ERR(flo))
+		if (!IS_ERR(flo)) {
 			fle->object = flo;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+			if (new_flow) {
+				*new_flow = 1;
+				fle->flags |= FLOW_CACHE_FLAG_IPSEC_OFFLOAD;
+			}
+#endif
+		}
 		else
 			fle->genid--;
 	} else {
@@ -357,6 +392,39 @@ void flow_cache_flush(void)
 	mutex_unlock(&flow_flush_sem);
 	put_online_cpus();
 }
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+void flow_cache_remove(const struct flowi *key, 
+			unsigned short family, unsigned short dir)
+{
+	struct flow_cache *fc = &flow_cache_global;
+	struct flow_cache_percpu *fcp;
+	struct flow_cache_entry *fle;
+	struct hlist_node *entry;
+	size_t keysize;
+	unsigned int hash;
+
+	local_bh_disable();
+	fcp = this_cpu_ptr(fc->percpu);
+	
+	keysize = flow_key_size(family);
+	if (!keysize)
+		goto nocache;
+
+	hash = flow_hash_code(fc, fcp, key, keysize);
+	
+	hlist_for_each_entry(fle, entry, &fcp->hash_table[hash], u.hlist) {
+		if((fle->family == family) && (fle->dir == dir) && (flow_key_compare(&fle->key, key, keysize) == 0)) {
+			hlist_del(&fle->u.hlist);
+			flow_entry_kill(fle);
+			break;
+		}
+	}
+		
+nocache:	
+	local_bh_enable();
+}
+#endif
 
 static void flow_cache_flush_task(struct work_struct *work)
 {

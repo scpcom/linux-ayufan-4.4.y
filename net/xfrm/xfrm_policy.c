@@ -46,7 +46,15 @@ static struct xfrm_policy_afinfo *xfrm_policy_afinfo[NPROTO];
 
 static struct kmem_cache *xfrm_dst_cache __read_mostly;
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+extern int ipsec_nlkey_flow(u16 xfrm_nr, u16 *xfrm_handle,
+                const struct flowi *fl, u16 family, u16 dir);
+#endif
+
+#if !defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD)
 static struct xfrm_policy_afinfo *xfrm_policy_get_afinfo(unsigned short family);
+#endif
+
 static void xfrm_policy_put_afinfo(struct xfrm_policy_afinfo *afinfo);
 static void xfrm_init_pmtu(struct dst_entry *dst);
 static int stale_bundle(struct dst_entry *dst);
@@ -94,7 +102,10 @@ int xfrm_selector_match(const struct xfrm_selector *sel, const struct flowi *fl,
 	return 0;
 }
 
-static inline struct dst_entry *__xfrm_dst_lookup(struct net *net, int tos,
+#if !defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD) 
+static inline 
+#endif
+struct dst_entry *__xfrm_dst_lookup(struct net *net, int tos,
 						  const xfrm_address_t *saddr,
 						  const xfrm_address_t *daddr,
 						  int family)
@@ -112,8 +123,14 @@ static inline struct dst_entry *__xfrm_dst_lookup(struct net *net, int tos,
 
 	return dst;
 }
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+EXPORT_SYMBOL(__xfrm_dst_lookup);
+#endif
 
-static inline struct dst_entry *xfrm_dst_lookup(struct xfrm_state *x, int tos,
+#if !defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD) 
+static inline 
+#endif
+struct dst_entry *xfrm_dst_lookup(struct xfrm_state *x, int tos,
 						xfrm_address_t *prev_saddr,
 						xfrm_address_t *prev_daddr,
 						int family)
@@ -143,6 +160,9 @@ static inline struct dst_entry *xfrm_dst_lookup(struct xfrm_state *x, int tos,
 
 	return dst;
 }
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+EXPORT_SYMBOL(xfrm_dst_lookup);
+#endif
 
 static inline unsigned long make_jiffies(long secs)
 {
@@ -1264,7 +1284,10 @@ xfrm_tmpl_resolve(struct xfrm_policy **pols, int npols, const struct flowi *fl,
  * still valid.
  */
 
-static inline int xfrm_get_tos(const struct flowi *fl, int family)
+#if !defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD)
+static inline 
+#endif
+int xfrm_get_tos(const struct flowi *fl, int family)
 {
 	struct xfrm_policy_afinfo *afinfo = xfrm_policy_get_afinfo(family);
 	int tos;
@@ -1278,6 +1301,9 @@ static inline int xfrm_get_tos(const struct flowi *fl, int family)
 
 	return tos;
 }
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+EXPORT_SYMBOL(xfrm_get_tos);
+#endif
 
 static struct flow_cache_object *xfrm_bundle_flo_get(struct flow_cache_object *flo)
 {
@@ -1461,7 +1487,12 @@ static struct dst_entry *xfrm_bundle_create(struct xfrm_policy *policy,
 		xdst->route = dst;
 		dst_copy_metrics(dst1, dst);
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+		if ((xfrm[i]->props.mode != XFRM_MODE_TRANSPORT) &&
+			(!xfrm[i]->offloaded)) {
+#else
 		if (xfrm[i]->props.mode != XFRM_MODE_TRANSPORT) {
+#endif
 			family = xfrm[i]->props.family;
 			dst = xfrm_dst_lookup(xfrm[i], tos, &saddr, &daddr,
 					      family);
@@ -1786,6 +1817,9 @@ struct dst_entry *xfrm_lookup(struct net *net, struct dst_entry *dst_orig,
 	u16 family = dst_orig->ops->family;
 	u8 dir = policy_to_flow_dir(XFRM_POLICY_OUT);
 	int i, err, num_pols, num_xfrms = 0, drop_pols = 0;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	u8 new_flow = 0;
+#endif
 
 restart:
 	dst = NULL;
@@ -1836,8 +1870,13 @@ restart:
 		    !net->xfrm.policy_count[XFRM_POLICY_OUT])
 			goto nopol;
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+		flo = flow_cache_lookup(net, fl, family, dir, &new_flow,
+					xfrm_bundle_lookup, dst_orig);
+#else
 		flo = flow_cache_lookup(net, fl, family, dir,
 					xfrm_bundle_lookup, dst_orig);
+#endif
 		if (flo == NULL)
 			goto nopol;
 		if (IS_ERR(flo)) {
@@ -1917,6 +1956,30 @@ no_transform:
 		dst_release(dst);
 		dst = dst_orig;
 	}
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	if (new_flow) {
+		struct dst_entry *dst1 = dst;
+		struct xfrm_state *x; 
+		u16	xfrm_handle[XFRM_POLICY_TYPE_MAX];
+
+		num_xfrms = 0;
+		memset(xfrm_handle, 0, XFRM_POLICY_TYPE_MAX*sizeof(u16));
+		while((x = dst1->xfrm) != NULL) {
+			if (!x->offloaded)
+				goto ok;
+			xfrm_handle[num_xfrms++] = x->handle;
+			dst1 = dst1->child;
+			if (dst1 == NULL) {
+				err = -EHOSTUNREACH;
+				goto error;
+			}
+		}
+		// sent flow notification to cmm with sa_handle
+		ipsec_nlkey_flow(num_xfrms, xfrm_handle, fl, family, (unsigned short)dir);
+	}
+#endif
+
 ok:
 	xfrm_pols_put(pols, drop_pols);
 	if (dst && dst->xfrm &&
@@ -2042,9 +2105,14 @@ int __xfrm_policy_check(struct sock *sk, int dir, struct sk_buff *skb,
 	int xfrm_nr;
 	int pi;
 	int reverse;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	u8 new_flow = 0;
+#endif
 	struct flowi fl;
 	u8 fl_dir;
 	int xerr_idx = -1;
+	
+	//printk(KERN_INFO "%s\n", __func__);
 
 	reverse = dir & ~XFRM_POLICY_MASK;
 	dir &= XFRM_POLICY_MASK;
@@ -2081,9 +2149,13 @@ int __xfrm_policy_check(struct sock *sk, int dir, struct sk_buff *skb,
 
 	if (!pol) {
 		struct flow_cache_object *flo;
-
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+		flo = flow_cache_lookup(net, &fl, family, fl_dir, &new_flow,
+					xfrm_policy_lookup, NULL);
+#else
 		flo = flow_cache_lookup(net, &fl, family, fl_dir,
 					xfrm_policy_lookup, NULL);
+#endif
 		if (IS_ERR_OR_NULL(flo))
 			pol = ERR_CAST(flo);
 		else
@@ -2177,6 +2249,28 @@ int __xfrm_policy_check(struct sock *sk, int dir, struct sk_buff *skb,
 			goto reject;
 		}
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+		if (new_flow) {
+			struct xfrm_state *x;
+			u16	xfrm_handle[XFRM_POLICY_TYPE_MAX];
+
+			xfrm_nr = 0;
+			memset(xfrm_handle, 0, XFRM_POLICY_TYPE_MAX*sizeof(u16));
+			for (i=skb->sp->len-1; i>=0; i--) 
+			{
+				x = skb->sp->xvec[i];
+				
+				if (!x->offloaded)
+					goto std_path;
+				
+				xfrm_handle[xfrm_nr++] = x->handle;
+			}
+			// sent flow notification to cmm with sa_handle
+			ipsec_nlkey_flow(xfrm_nr, xfrm_handle, (const struct flowi *)&fl, family, fl_dir);
+		}
+
+std_path:
+#endif
 		xfrm_pols_put(pols, npols);
 		return 1;
 	}
@@ -2506,7 +2600,10 @@ static void __net_init xfrm_dst_ops_init(struct net *net)
 	read_unlock_bh(&xfrm_policy_afinfo_lock);
 }
 
-static struct xfrm_policy_afinfo *xfrm_policy_get_afinfo(unsigned short family)
+#if !defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD)
+static 
+#endif
+struct xfrm_policy_afinfo *xfrm_policy_get_afinfo(unsigned short family)
 {
 	struct xfrm_policy_afinfo *afinfo;
 	if (unlikely(family >= NPROTO))
@@ -2517,6 +2614,9 @@ static struct xfrm_policy_afinfo *xfrm_policy_get_afinfo(unsigned short family)
 		read_unlock(&xfrm_policy_afinfo_lock);
 	return afinfo;
 }
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+EXPORT_SYMBOL(xfrm_policy_get_afinfo);
+#endif
 
 static void xfrm_policy_put_afinfo(struct xfrm_policy_afinfo *afinfo)
 {
