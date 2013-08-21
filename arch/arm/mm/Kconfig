@@ -757,8 +757,15 @@ config CPU_SPECULATIVE_ACCESS_DISABLED
 	bool "Disable speculative accesses"
 	depends on CPU_V7 && ARCH_COMCERTO
 	help
-	  Disable speculative accesses for the processor. This reduces overhead of cache maintenance for
-	  DMA mapped memory zones but may reduce overall system memory performance. If unsure, say N.
+	  Disable speculative accesses for the processor. This may reduce overall system memory performance but
+	  can allow other, potentially unsafe, optimizations (see below). If unsure, say N.
+
+config CPU_DMA_PARTIAL_INVALIDATES
+	bool "Do partial invalidates in the DMA management functions"
+	depends on CPU_V7 && ARCH_COMCERTO && CPU_SPECULATIVE_ACCESS_DISABLED
+	help
+	  Say Y here to reduce the overhead of cache maintenance for DMA mapped memory zones. 
+	  WARNING: UNSAFE, this may lead to random memory corruption. If unsure, say N.
 
 config CPU_BPREDICT_DISABLE
 	bool "Disable branch prediction"

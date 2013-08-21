@@ -164,6 +164,7 @@ int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, struct page *page, uns
 
 		phys_addr = dma_acp_map_page(sg, page, offset, len, DMA_TO_DEVICE, use_acp);
 
+		sg->in_bdesc[sg->input_idx].split = 0;
 		sg->in_bdesc[sg->input_idx].phys_addr = phys_addr;
 		sg->in_bdesc[sg->input_idx].len = len;
 		sg->input_idx++;
@@ -176,9 +177,11 @@ int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, struct page *page, uns
 
 		phys_addr = dma_acp_map_page(sg, page, offset, len, DMA_TO_DEVICE, use_acp);
 
+		sg->in_bdesc[sg->input_idx].split = 1;
 		sg->in_bdesc[sg->input_idx].phys_addr = phys_addr;
 		sg->in_bdesc[sg->input_idx].len = MDMA_SPLIT_BUF_SIZE;
 		sg->input_idx++;
+		sg->in_bdesc[sg->input_idx].split = 0;
 		sg->in_bdesc[sg->input_idx].phys_addr = phys_addr + MDMA_SPLIT_BUF_SIZE;
 		sg->in_bdesc[sg->input_idx].len = MDMA_SPLIT_BUF_SIZE;
 		sg->input_idx++;
@@ -203,6 +206,7 @@ int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, struct page *page, un
 
 		phys_addr = dma_acp_map_page(sg, page, offset, len, DMA_FROM_DEVICE, use_acp);
 
+		sg->out_bdesc[sg->output_idx].split = 0;
 		sg->out_bdesc[sg->output_idx].phys_addr = phys_addr;
 		sg->out_bdesc[sg->output_idx].len = len;
 		sg->output_idx++;
@@ -215,9 +219,11 @@ int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, struct page *page, un
 
 		phys_addr = dma_acp_map_page(sg, page, offset, len, DMA_FROM_DEVICE, use_acp);
 
+		sg->out_bdesc[sg->output_idx].split = 1;
 		sg->out_bdesc[sg->output_idx].phys_addr = phys_addr;
 		sg->out_bdesc[sg->output_idx].len = MDMA_SPLIT_BUF_SIZE;
 		sg->output_idx++;
+		sg->out_bdesc[sg->output_idx].split = 0;
 		sg->out_bdesc[sg->output_idx].phys_addr = phys_addr + MDMA_SPLIT_BUF_SIZE;
 		sg->out_bdesc[sg->output_idx].len = MDMA_SPLIT_BUF_SIZE;
 		sg->output_idx++;
@@ -283,10 +289,15 @@ void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg, unsigned int len)
 	remaining = len;
 	i = 0;
 	while (remaining > sg->in_bdesc[i].len) {
-		if (sg->in_bdesc[i].phys_addr < COMCERTO_AXI_ACP_BASE)
-			dma_unmap_page(NULL, sg->in_bdesc[i].phys_addr, sg->in_bdesc[i].len, DMA_TO_DEVICE);
-
-		remaining -= sg->in_bdesc[i].len;
+		if (sg->in_bdesc[i].split) {
+			sg->in_bdesc[i+1].phys_addr = sg->in_bdesc[i].phys_addr;
+			sg->in_bdesc[i+1].len += sg->in_bdesc[i].len;
+		}
+		else {
+			if (sg->in_bdesc[i].phys_addr < COMCERTO_AXI_ACP_BASE)
+				dma_unmap_page(NULL, sg->in_bdesc[i].phys_addr, sg->in_bdesc[i].len, DMA_TO_DEVICE);
+			remaining -= sg->in_bdesc[i].len;
+		}
 		i++;
 	}
 
@@ -296,10 +307,15 @@ void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg, unsigned int len)
 	remaining = len;
 	i = 0;
 	while (remaining > sg->out_bdesc[i].len) {
-		if (sg->out_bdesc[i].phys_addr < COMCERTO_AXI_ACP_BASE)
-			dma_unmap_page(NULL, sg->out_bdesc[i].phys_addr, sg->out_bdesc[i].len, DMA_FROM_DEVICE);
-
-		remaining -= sg->out_bdesc[i].len;
+		if (sg->out_bdesc[i].split) {
+			sg->out_bdesc[i+1].phys_addr = sg->out_bdesc[i].phys_addr;
+			sg->out_bdesc[i+1].len += sg->out_bdesc[i].len;
+		}
+		else {
+			if (sg->out_bdesc[i].phys_addr < COMCERTO_AXI_ACP_BASE)
+				dma_unmap_page(NULL, sg->out_bdesc[i].phys_addr, sg->out_bdesc[i].len, DMA_FROM_DEVICE);
+			remaining -= sg->out_bdesc[i].len;
+		}
 		i++;
 	}
 

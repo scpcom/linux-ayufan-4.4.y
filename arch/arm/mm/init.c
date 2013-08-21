@@ -427,9 +427,15 @@ static inline int free_area(unsigned long pfn, unsigned long end, char *s)
 
 	for (; pfn < end; pfn++) {
 		struct page *page = pfn_to_page(pfn);
+#if defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+		unsigned long phys = page_to_phys(page);
+#endif
 		ClearPageReserved(page);
 		init_page_count(page);
 		__free_page(page);
+#if defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+		outer_flush_range(phys, phys + PAGE_SIZE);
+#endif
 		pages++;
 	}
 

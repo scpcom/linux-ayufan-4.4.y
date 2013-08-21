@@ -22,6 +22,8 @@
 
 #include <mach/hardware.h>
 #include <mach/io.h>
+#include <mach/comcerto-2000/clk-rst.h>
+#include <mach/reset.h>
 
 static inline void arch_idle(void)
 {
@@ -34,7 +36,7 @@ static inline void arch_idle(void)
 
 static inline void arch_reset(char mode, const char *cmd)
 {
-	 __raw_writel(0x1,DEVICE_RST_CNTRL);
+	comcerto_rst_cntrl_set(PWR_ON_SOFT_RST);
 }
 
 #endif /* __ASM_ARCH_SYSTEM_H */

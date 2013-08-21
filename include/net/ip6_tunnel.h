@@ -22,6 +22,7 @@ struct ip6_tnl {
 #if defined(CONFIG_INET6_IPSEC_OFFLOAD)
 	u32 genid;
 #endif
+       struct ip6_tnl_4rd_parm ip4rd; /* 4rd parameters for the tunnel */ 
 };
 
 /* Tunnel encapsulation limit destination sub-option */

@@ -179,6 +179,7 @@ static void clock_ppm_adjust(long ppm)
 
 	clc_data = clc_data * freq_set + tdmntg_ref_clk / 2; /* with rounding to nearest integer */
 	clc_data *= comcerto_block_clk_div[block_selected];
+	do_div(clc_data, tdmntg_ref_clk);
 
 	if (clc_data & ~0x3FFFFFFF) {
 		/* unaccounted bits dangerous */

@@ -250,6 +250,7 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 #define mk_pte(page,prot)	pfn_pte(page_to_pfn(page), prot)
 
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte_val(pte),ext)
+#define uncache_pte_ext(ptep) cpu_uncache_pte_ext(ptep)
 #define pte_clear(mm,addr,ptep)	do {__sync_outer_cache(ptep, __pte(0)); set_pte_ext(ptep, __pte(0), 0); } while (0)
 
 #if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)

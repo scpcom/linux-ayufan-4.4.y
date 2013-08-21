@@ -336,7 +336,11 @@ __generic_file_splice_read(struct file *in, loff_t *ppos,
 	/*
 	 * Lookup the (hopefully) full range of pages we need.
 	 */
+#ifdef CONFIG_COMCERTO_SPLICE_READ_NOCONTIG
+	spd.nr_pages = find_get_pages(mapping, index, nr_pages, spd.pages);
+#else
 	spd.nr_pages = find_get_pages_contig(mapping, index, nr_pages, spd.pages);
+#endif
 	index += spd.nr_pages;
 
 	/*

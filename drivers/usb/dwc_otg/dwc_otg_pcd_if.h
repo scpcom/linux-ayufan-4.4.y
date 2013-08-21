@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_pcd_if.h $
- * $Revision: #10 $
- * $Date: 2010/11/04 $
- * $Change: 1621728 $
+ * $Revision: #11 $
+ * $Date: 2011/10/26 $
+ * $Change: 1873028 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -168,15 +168,15 @@ extern void dwc_otg_pcd_start(dwc_otg_pcd_t * pcd,
  *
  * @param pcd The PCD
  * @param ep_desc Endpoint descriptor
- * @param ep_handle Handle on endpoint, that will be used to identify endpoint.
+ * @param usb_ep Handle on endpoint, that will be used to identify endpoint.
  */
 extern int dwc_otg_pcd_ep_enable(dwc_otg_pcd_t * pcd,
-				 const uint8_t * ep_desc, void *ep_handle);
+				 const uint8_t * ep_desc, void *usb_ep);
 
 /** Disable the endpoint referenced by ep_handle.
  *
  * Returns -DWC_E_INVALID if invalid parameters were passed.
- * Returns -DWC_E_SHUTDOWN if any other error ocurred.
+ * Returns -DWC_E_SHUTDOWN if any other error occurred.
  * Returns 0 on success. */
 extern int dwc_otg_pcd_ep_disable(dwc_otg_pcd_t * pcd, void *ep_handle);
 

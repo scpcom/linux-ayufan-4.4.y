@@ -218,6 +218,10 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	skb->mac_header = ~0U;
 #endif
 
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	skb->mspd_data = NULL;
+	skb->mspd_len = 0;
+#endif
 	/* make sure we initialize shinfo sequentially */
 	shinfo = skb_shinfo(skb);
 	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
@@ -301,6 +305,11 @@ struct sk_buff *__alloc_skb_header(unsigned int size, void *data, gfp_t gfp_mask
 	skb->end = skb->tail + size;
 #ifdef NET_SKBUFF_DATA_USES_OFFSET
 	skb->mac_header = ~0U;
+#endif
+
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	skb->mspd_data = NULL;
+	skb->mspd_len = 0;
 #endif
 
 	/* make sure we initialize shinfo sequentially */
@@ -438,6 +447,13 @@ static void skb_release_data(struct sk_buff *skb)
 			skb_drop_fraglist(skb);
 
 		kfree(skb->head);
+
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+		if (skb->mspd_data) {
+			kfree(skb->mspd_data);
+			skb->mspd_data = NULL;
+		}
+#endif
 	}
 }
 
@@ -579,6 +595,9 @@ void skb_recycle(struct sk_buff *skb)
 {
 	struct skb_shared_info *shinfo;
 
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	WARN_ON(skb->mspd_len);
+#endif
 	skb_release_head_state(skb);
 
 	shinfo = skb_shinfo(skb);
@@ -685,6 +704,12 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	C(data);
 	C(truesize);
 	atomic_set(&n->users, 1);
+
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	C(mspd_data);
+	C(mspd_len);
+	C(mspd_ofst);
+#endif
 
 	atomic_inc(&(skb_shinfo(skb)->dataref));
 	skb->cloned = 1;
@@ -859,6 +884,9 @@ struct sk_buff *skb_copy(const struct sk_buff *skb, gfp_t gfp_mask)
 	unsigned int size = (skb_end_pointer(skb) - skb->head) + skb->data_len;
 	struct sk_buff *n = alloc_skb(size, gfp_mask);
 
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	WARN_ON(skb->mspd_len);
+#endif
 	if (!n)
 		return NULL;
 
@@ -892,6 +920,10 @@ struct sk_buff *pskb_copy(struct sk_buff *skb, gfp_t gfp_mask)
 {
 	unsigned int size = skb_end_pointer(skb) - skb->head;
 	struct sk_buff *n = alloc_skb(size, gfp_mask);
+
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	WARN_ON(skb->mspd_len);
+#endif
 
 	if (!n)
 		goto out;

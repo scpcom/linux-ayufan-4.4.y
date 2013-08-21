@@ -1610,11 +1610,7 @@ static inline int event2keytype(int event)
 }
 
 /* ADD/UPD/DEL */
-#if NLKEY_SUPPORT
-static int key_notify_sa(struct net *net, struct xfrm_state *x, const struct km_event *c)
-#else
 static int key_notify_sa(struct xfrm_state *x, const struct km_event *c)
-#endif
 {
 	struct sk_buff *skb;
 	struct sadb_msg *hdr;
@@ -1635,10 +1631,6 @@ static int key_notify_sa(struct xfrm_state *x, const struct km_event *c)
 
 	pfkey_broadcast(skb, GFP_ATOMIC, BROADCAST_ALL, NULL, xs_net(x));
 
-#ifdef NLKEY_SUPPORT
-	/* now sent message also to the user space through NETLINK_KEY socket*/
-	ipsec_nlkey_send(net, x, c);
-#endif
 	return 0;
 }
 
@@ -1877,11 +1869,7 @@ static int unicast_flush_resp(struct sock *sk, const struct sadb_msg *ihdr)
 	return pfkey_broadcast(skb, GFP_ATOMIC, BROADCAST_ONE, sk, sock_net(sk));
 }
 
-#if defined(NLKEY_SUPPORT)
-static int key_notify_sa_flush(struct net *net, const struct km_event *c)
-#else
 static int key_notify_sa_flush(const struct km_event *c)
-#endif
 {
 	struct sk_buff *skb;
 	struct sadb_msg *hdr;
@@ -1899,11 +1887,6 @@ static int key_notify_sa_flush(const struct km_event *c)
 	hdr->sadb_msg_len = (sizeof(struct sadb_msg) / sizeof(uint64_t));
 
 	pfkey_broadcast(skb, GFP_ATOMIC, BROADCAST_ALL, NULL, c->net);
-
-#ifdef NLKEY_SUPPORT
-	/* now sent message also to the user space through NETLINK_KEY socket*/
-	ipsec_nlkey_send(net, NULL, c);
-#endif
 
 	return 0;
 }
@@ -3129,11 +3112,7 @@ static int key_notify_policy_expire(struct xfrm_policy *xp, const struct km_even
 	return 0;
 }
 
-#if defined(NLKEY_SUPPORT)
-static int key_notify_sa_expire(struct net *net, struct xfrm_state *x, const struct km_event *c)
-#else
 static int key_notify_sa_expire(struct xfrm_state *x, const struct km_event *c)
-#endif
 {
 	struct sk_buff *out_skb;
 	struct sadb_msg *out_hdr;
@@ -3161,10 +3140,6 @@ static int key_notify_sa_expire(struct xfrm_state *x, const struct km_event *c)
 
 	pfkey_broadcast(out_skb, GFP_ATOMIC, BROADCAST_REGISTERED, NULL, xs_net(x));
 
-#ifdef NLKEY_SUPPORT
-	/* now sent message also to the user space through NETLINK_KEY socket*/
-	ipsec_nlkey_send(net, x, c);
-#endif
 	return 0;
 }
 
@@ -3173,30 +3148,24 @@ static int pfkey_send_notify(struct xfrm_state *x, const struct km_event *c)
 	struct net *net = x ? xs_net(x) : c->net;
 	struct netns_pfkey *net_pfkey = net_generic(net, pfkey_net_id);
 
+
+#ifdef NLKEY_SUPPORT
+	/* send message to the user space through NETLINK_KEY socket*/
+	ipsec_nlkey_send(net, x, c);
+#endif
+
 	if (atomic_read(&net_pfkey->socks_nr) == 0)
 		return 0;
 
 	switch (c->event) {
 	case XFRM_MSG_EXPIRE:
-#if NLKEY_SUPPORT
-		return key_notify_sa_expire(net, x, c);
-#else
 		return key_notify_sa_expire(x, c);
-#endif
 	case XFRM_MSG_DELSA:
 	case XFRM_MSG_NEWSA:
 	case XFRM_MSG_UPDSA:
-#if NLKEY_SUPPORT
-		return key_notify_sa(net, x, c);
-#else
-	return key_notify_sa(x, c);
-#endif
+		return key_notify_sa(x, c);
 	case XFRM_MSG_FLUSHSA:
-#if NLKEY_SUPPORT
-		return key_notify_sa_flush(net, c);
-#else
 		return key_notify_sa_flush(c);
-#endif
 	case XFRM_MSG_NEWAE: /* not yet supported */
 		break;
 	default:
@@ -4487,6 +4456,60 @@ int ipsec_nlkey_flow(u16 xfrm_nr, u16 *xfrm_handle, const struct flowi *fl, u16 
 	return(netlink_broadcast(nlkey_socket, skb, 0, 1, allocation));
 }
 EXPORT_SYMBOL(ipsec_nlkey_flow);
+
+
+int ipsec_nlkey_flow_remove(struct flowi *fl, u16 family, u16 dir)
+{
+	struct sk_buff *skb;
+	struct nlkey_msg msg;
+	struct nlmsghdr *nlh = NULL;
+	unsigned short *p;
+	gfp_t allocation = in_interrupt() ? GFP_ATOMIC : GFP_KERNEL;
+
+	
+	//printk(KERN_INFO "ipsec_nlkey_flow_remove\n");
+
+	/* next message to build */
+	memset(&msg, 0, sizeof(struct nlkey_msg));
+	msg.fcode = NLKEY_FLOW_REMOVE;
+
+	p = msg.payload;
+	// flow family
+	*p++ = family;
+	msg.length += sizeof(unsigned short);
+	// flow family
+	*p++ = dir;
+	msg.length += sizeof(unsigned short);
+	// flow descriptor
+	memcpy(p, fl, sizeof(struct flowi));
+	msg.length +=sizeof(struct flowi);
+	p+=sizeof(struct flowi) / sizeof(u16);
+
+	skb = alloc_skb(NLMSG_SPACE(NLKEY_MSG_LEN + NLKEY_HDR_LEN), allocation);
+	if (skb == NULL)
+		return -ENOMEM;
+
+	/* prepare netlink message for kernel to user space direction */
+	nlh = (struct nlmsghdr *)skb_put(skb, NLMSG_SPACE(NLKEY_HDR_LEN + msg.length));
+	memcpy(NLMSG_DATA(nlh), (unsigned char *)&msg, (NLKEY_HDR_LEN + msg.length));
+	
+	/* whole length of the message i.e. header + payload */
+	nlh->nlmsg_len = NLMSG_SPACE(NLKEY_HDR_LEN + msg.length);
+
+	/* from kernel */
+	nlh->nlmsg_pid = 0; 
+	nlh->nlmsg_flags = 0;
+        nlh->nlmsg_type = 0;
+	NETLINK_CB(skb).pid = 0;
+	NETLINK_CB(skb).dst_group = 1;	
+
+		
+        return(netlink_broadcast(nlkey_socket, skb, 0, 1, allocation));
+
+	
+}
+EXPORT_SYMBOL(ipsec_nlkey_flow_remove);
+
 
 
 static void ipsec_nlkey_init(void)

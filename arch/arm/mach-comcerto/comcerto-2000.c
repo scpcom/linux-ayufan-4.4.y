@@ -36,6 +36,8 @@
 #include <linux/dma-mapping.h>
 
 #include <linux/serial_8250.h>
+#include <linux/serial_core.h>
+#include <linux/serial_reg.h>
 #include <linux/smp.h>
 #include <linux/uio_driver.h>
 
@@ -344,22 +346,6 @@ void comcerto_l2cc_init(void)
 	int i;
 #endif
 
-	struct clk *l2cc_clk;
-
-	/* Get the L2CC clock */
-	l2cc_clk = clk_get(NULL,"l2cc");
-	if (IS_ERR(l2cc_clk)) {
-		pr_err("%s: Unable to obtain L2CC clock: %ld\n",__func__,PTR_ERR(l2cc_clk));
-		/* L2CC initilization cannot proceed from here */
-		BUG();
-	}
-
-	/* Enable the L2CC clk  */
-	if (clk_enable(l2cc_clk)){
-		pr_err("%s: Unable to enable L2CC clock:\n",__func__);
-		/* L2CC initilization cannot proceed from here */
-		BUG();
-	}
 
 	l2cache_base = (void *)COMCERTO_L310_VADDR;
 	BUG_ON(!l2cache_base);
@@ -367,10 +353,20 @@ void comcerto_l2cc_init(void)
 	/* Set Latency of L2CC to minimum (i.e. 1 cycle) */
 	l2x0_latency(1, 1, 1, 1, 1, 1);
 
+	/* Set L2 address filtering, use L2CC M1 port for DDR accesses */
+	writel(0x80000000, l2cache_base + L2X0_ADDR_FILTER_END);
+	writel(0x00000000 | L2X0_ADDR_FILTER_EN, l2cache_base + L2X0_ADDR_FILTER_START);
+
 	associativity = (COMCERTO_L2CC_ASSOCIATIVITY_8WAY << COMCERTO_L2CC_ASSOCIATIVITY_SHIFT) & COMCERTO_L2CC_ASSOCIATIVITY_MASK;
 	waysize = (COMCERTO_L2CC_ASSOCIATIVITY_32KB << COMCERTO_L2CC_WAYSIZE_SHIFT) & COMCERTO_L2CC_WAYSIZE_MASK;
 	aux_val = associativity | waysize;
 	aux_mask = (COMCERTO_L2CC_ASSOCIATIVITY_MASK | COMCERTO_L2CC_WAYSIZE_MASK);
+
+	/* Shareable attribute override enable */
+	/* This prevents the cache from changing "normal memory/non-cacheable" accesses to
+	"normal memory/cacheable/writethrough no read/write allocate"*/
+	aux_val |= (1 << 22);
+	aux_mask |= (1 << 22);
 
 	/* Write allocate override, no write allocate */
 	aux_val |= (1 << 23);
@@ -430,10 +426,30 @@ void comcerto_l2cc_init(void)
 
 static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 {
+	struct serdes_regs_s *p_sata_phy_reg_file;
+	int serdes_regs_size;
         u32 val;
-        val = readl(COMCERTO_GPIO_SYSTEM_CONFIG);
+	int ref_clk_24;
 
- 	//Bring SATA PMU and OOB out of reset
+	val = readl(COMCERTO_GPIO_SYSTEM_CONFIG);
+	ref_clk_24 = val & (BIT_5_MSK|BIT_7_MSK);
+
+	if(ref_clk_24)
+	{
+		p_sata_phy_reg_file = &sata_phy_reg_file_24[0];
+		serdes_regs_size = sizeof(sata_phy_reg_file_24);
+		printk(KERN_INFO "SATA Serdes: 24Mhz ref clk\n");
+	}
+	else
+	{
+		p_sata_phy_reg_file = &sata_phy_reg_file_48[0];
+		serdes_regs_size = sizeof(sata_phy_reg_file_48);
+		printk(KERN_INFO "SATA Serdes: 48Mhz ref clk\n");
+	}
+
+	//Take SATA AXI domain out of reset
+	c2000_block_reset(COMPONENT_AXI_SATA,0);
+	//Bring SATA PMU and OOB out of reset
 	c2000_block_reset(COMPONENT_SATA_PMU,0);
 	c2000_block_reset(COMPONENT_SATA_OOB,0);
 
@@ -447,8 +463,8 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 			c2000_block_reset(COMPONENT_SERDES_SATA0,0);
 
                         /* Serdes Initialization. */
-                        if( serdes_phy_init(SERDES_PHY1,  sata0_phy_reg_file,
-                                                sizeof(sata0_phy_reg_file) / sizeof(serdes_regs_t),
+                        if( serdes_phy_init(SERDES_PHY1,  p_sata_phy_reg_file,
+                                                serdes_regs_size / sizeof(serdes_regs_t),
                                                 SD_DEV_TYPE_SATA) )
                         {
                                 printk(KERN_ERR "%s: Failed to initialize serdes1 !!\n", __func__);
@@ -465,8 +481,8 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 			c2000_block_reset(COMPONENT_SERDES_SATA1,0);
 
                         /* Serdes Initialization. */
-                        if( serdes_phy_init(SERDES_PHY2,  sata0_phy_reg_file,
-                                                sizeof(sata0_phy_reg_file) / sizeof(serdes_regs_t),
+                        if( serdes_phy_init(SERDES_PHY2,  p_sata_phy_reg_file,
+                                                serdes_regs_size / sizeof(serdes_regs_t),
                                                 SD_DEV_TYPE_SATA) )
                         {
                                 printk(KERN_ERR "%s: Failed to initialize serdes2 !!\n", __func__);
@@ -477,6 +493,24 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
                 return -1;
 
         return 0;
+}
+#endif
+
+#if defined(CONFIG_COMCERTO_UART0_SUPPORT) || defined(CONFIG_COMCERTO_UART1_SUPPORT)
+#define UART_DWC_USR	0x1F
+static int fastuart_handle_irq(struct uart_port *p)
+{
+	unsigned int iir = p->serial_in(p, UART_IIR);
+	unsigned int dummy;
+	if (serial8250_handle_irq(p, iir)) {
+		return 1;
+	} else if ((iir & UART_IIR_BUSY) == UART_IIR_BUSY) {
+		/* Clear the USR */
+		dummy = p->serial_in(p, UART_DWC_USR);
+		return 1;
+	}
+
+	return 0;
 }
 #endif
 
@@ -510,6 +544,7 @@ static struct plat_serial8250_port comcerto_uart_data[] = {
                 .mapbase        = COMCERTO_AXI_UART1_BASE,
 		.membase	= (void *)COMCERTO_AXI_UART1_VADDR,
                 .irq            = IRQ_UART1,
+		.handle_irq	= fastuart_handle_irq,
                 .flags          = UPF_BOOT_AUTOCONF | UPF_SKIP_TEST | UPF_IOREMAP,
                 .iotype         = UPIO_MEM,
                 .regshift       = 2,
@@ -520,6 +555,7 @@ static struct plat_serial8250_port comcerto_uart_data[] = {
                 .mapbase        = COMCERTO_AXI_UART0_BASE,
                 .membase        = (void *)COMCERTO_AXI_UART0_VADDR,
                 .irq            = IRQ_UART0,
+		.handle_irq	= fastuart_handle_irq,
                 .flags          = UPF_BOOT_AUTOCONF | UPF_SKIP_TEST | UPF_IOREMAP,
                 .iotype         = UPIO_MEM,
                 .regshift       = 2,
@@ -747,6 +783,16 @@ struct platform_device comcerto_device_epavis_decomp = {
 };
 #endif
 
+#if defined(CONFIG_COMCERTO_CSYS_TPI_CLOCK) 
+struct platform_device comcerto_device_tpi_csys_clk = {
+	.name		= "tpi_csys",
+	.id		= -1,
+	.dev		=  {
+		.platform_data		= NULL,
+	},
+};
+#endif
+
 int usb3_clk_internal = 1;
 static int __init get_usb3_clk_mode(char *str)
 {
@@ -857,11 +903,14 @@ static struct platform_device *comcerto_common_devices[] __initdata = {
 	&comcerto_device_epavis_cie,
 	&comcerto_device_epavis_decomp,
 #endif
+#if defined(CONFIG_COMCERTO_CSYS_TPI_CLOCK)
+	&comcerto_device_tpi_csys_clk,
+#endif
 };
 
 void __init device_init(void)
 {
-	struct clk *axi_clk,*ddr_clk,*arm_clk;
+	struct clk *axi_clk,*ddr_clk,*arm_clk,*l2cc_clk;
 	HAL_clk_div_backup_relocate_table ();
 	system_rev = (readl(COMCERTO_GPIO_DEVICE_ID_REG) >> 24) & 0xf;
 
@@ -914,6 +963,21 @@ void __init device_init(void)
 	if (clk_enable(arm_clk)){
 		pr_err("%s: Unable to enable A9(arm) clock:\n",__func__);
 		/* System cannot proceed from here */
+		BUG();
+	}
+
+	/* Get the L2CC clock */
+	l2cc_clk = clk_get(NULL,"l2cc");
+	if (IS_ERR(l2cc_clk)) {
+		pr_err("%s: Unable to obtain L2CC clock: %ld\n",__func__,PTR_ERR(l2cc_clk));
+		/* L2CC initilization cannot proceed from here */
+		BUG();
+	}
+
+	/* Enable the L2CC clk  */
+	if (clk_enable(l2cc_clk)){
+		pr_err("%s: Unable to enable L2CC clock:\n",__func__);
+		/* L2CC initilization cannot proceed from here */
 		BUG();
 	}
 	

@@ -97,6 +97,7 @@ struct comcerto_xor_outbound_fdesc {
 struct comcerto_dma_buf {
 	dma_addr_t phys_addr;
 	unsigned int len;
+	unsigned int split;
 };
 
 struct comcerto_dma_sg {

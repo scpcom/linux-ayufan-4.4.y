@@ -231,21 +231,33 @@ struct spi_platform_data {
 	int dummy;
 };
 
+struct spi_controller_data {
+        u8 poll_mode;   /* 0 for contoller polling mode */
+        u8 type;        /* SPI/SSP/Micrwire */
+        u8 enable_dma;
+        void (*cs_control)(u32 command);
+};
+
 struct spi_platform_data spi_pdata = {
 	.type = 0,
 	.dummy = 0,
 };
 
+struct spi_controller_data spi_ctrl_data =  {
+        .poll_mode = 1,
+};
+
 static struct spi_board_info comcerto_spi_board_info[] = {
 	{
 		/* FIXME: for chipselect-0 */
-		.modalias = "comcerto_spi1",
+		.modalias = "s25fl256s0",
 		.chip_select = 0,
 		.max_speed_hz = 4*1000*1000,
 		.bus_num = 0,
 		.irq = -1,
 		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
 	},
 
 	{
@@ -257,6 +269,7 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.irq = -1,
 		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
 	},
 
 	{
@@ -267,6 +280,7 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.irq = -1,
 		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
 	},
 
 	{
@@ -277,6 +291,7 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.irq = -1,
 		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
 	},
 
 };
@@ -378,6 +393,47 @@ static struct platform_device comcerto_i2c = {
 };
 #endif
 
+/* --------------------------------------------------------------------
+*  Watchdog
+* -------------------------------------------------------------------- */
+#ifdef CONFIG_MPCORE_WATCHDOG
+static struct resource comcerto_a9wd_resources[] = {
+	{
+		.start	= COMCERTO_TWD_BASE,
+		.end	= COMCERTO_TWD_BASE + 0xFF,
+		.flags	= IORESOURCE_MEM,
+	},
+	{
+		.name	= "mpcore_wdt",
+		.start	= IRQ_LOCALWDOG,
+		.flags	= IORESOURCE_IRQ,
+	},
+};
+
+static struct platform_device comcerto_a9wd = {
+	.name		= "mpcore_wdt",
+	.id             = -1,
+	.num_resources  = ARRAY_SIZE(comcerto_a9wd_resources),
+	.resource       = comcerto_a9wd_resources,
+};
+#endif
+
+#ifdef CONFIG_COMCERTO_WATCHDOG
+static struct resource comcerto_wdt_resources[] = {
+	{
+		.start	= COMCERTO_APB_TIMER_BASE + 0xD0,
+		.end	= COMCERTO_APB_TIMER_BASE + 0xD8,
+		.flags	= IORESOURCE_MEM,
+	},
+};
+
+static struct platform_device comcerto_wdt = {
+        .name   = "comcerto_wdt",
+        .id     = -1,
+	.num_resources  = ARRAY_SIZE(comcerto_wdt_resources),
+	.resource       = comcerto_wdt_resources,
+};
+#endif
 
 #if defined(CONFIG_COMCERTO_ELP_SUPPORT)
 /* --------------------------------------------------------------------
@@ -554,6 +610,15 @@ static struct platform_device *comcerto_devices[] __initdata = {
 #if defined(CONFIG_COMCERTO_I2C_SUPPORT)
 		&comcerto_i2c,
 #endif
+
+#if defined (CONFIG_MPCORE_WATCHDOG)
+		&comcerto_a9wd,
+#endif
+
+#if defined(CONFIG_COMCERTO_WATCHDOG)
+		&comcerto_wdt,
+#endif
+
 #if defined(CONFIG_SPI_MSPD_HIGH_SPEED) || defined(CONFIG_SPI2_MSPD_HIGH_SPEED)
 		&comcerto_fast_spi,
 #endif

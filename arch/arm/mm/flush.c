@@ -241,6 +241,12 @@ void __sync_outer_cache(pte_t *ptep, pte_t pteval)
 	}
 }
 
+static void sync_outer_cache(struct page *page)
+{
+	unsigned long phys = page_to_phys(page);
+
+	outer_flush_range(phys, phys + PAGE_SIZE);
+}
 #endif
 
 #if __LINUX_ARM_ARCH__ >= 6
@@ -314,6 +320,10 @@ void flush_dcache_page(struct page *page)
 			__flush_dcache_aliases(mapping, page);
 		else if (mapping)
 			__flush_icache_all();
+
+#if defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+		sync_outer_cache(page);
+#endif
 		set_bit(PG_dcache_clean, &page->flags);
 	}
 }

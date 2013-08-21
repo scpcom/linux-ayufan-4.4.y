@@ -2874,12 +2874,15 @@ ppp_connect_channel(struct channel *pch, int unit)
 
 	write_unlock_bh(&pch->upl);
 
+/*We need to revisit below changes when PPPoE automode is introduced to C2K*/
+#if 0
 #if defined(CONFIG_COMCERTO_FP)
 	if ((ppp->dev) && (!ppp->closing)) {
 		rtnl_lock();
 		rtmsg_ifinfo(RTM_NEWLINK, ppp->dev, 0);
 		rtnl_unlock();
 	}
+#endif
 #endif
 
 	ret = 0;
@@ -2909,12 +2912,15 @@ ppp_disconnect_channel(struct channel *pch)
 			wake_up_interruptible(&ppp->file.rwait);
 		ppp_unlock(ppp);
 
+/*We need to revisit below changes when PPPoE automode is introduced to C2K*/
+#if 0
 #if defined(CONFIG_COMCERTO_FP)
 		if ((ppp->dev) && (!ppp->closing)) {
 			rtnl_lock();
 			rtmsg_ifinfo(RTM_NEWLINK, ppp->dev, 0);
 			rtnl_unlock();
 		}
+#endif
 #endif
 
 		if (atomic_dec_and_test(&ppp->file.refcnt))

@@ -471,6 +471,11 @@ struct sk_buff {
 	sk_buff_data_t		end;
 	unsigned char		*head,
 				*data;
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	unsigned char 		*mspd_data;
+	__u32 			mspd_len;
+	__u32 			mspd_ofst;
+#endif
 	unsigned int		truesize;
 	atomic_t		users;
 };

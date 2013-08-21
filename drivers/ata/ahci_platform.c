@@ -30,6 +30,9 @@
 static struct clk *sata_oob_clk; /* Core clock */
 static struct clk *sata_pmu_clk; /* PMU alive clock */
 static struct clk *sata_clk;	/* Sata AXI ref clock */
+#if defined(CONFIG_COMCERTO_SATA_OCC_CLOCK)
+static struct clk *sata_occ_clk; /* sata OCC clock */
+#endif
 #endif 
 
 enum ahci_type {
@@ -170,7 +173,20 @@ static int __init ahci_probe(struct platform_device *pdev)
 		pr_err("%s: SATA_PMU clock enable failed \n",__func__);
 		return rc;
 	}
-
+#if defined(CONFIG_COMCERTO_SATA_OCC_CLOCK)
+	sata_occ_clk = clk_get(NULL,"sata_occ");
+	/* Error Handling , if no sata occ clock reference: return error */
+	if (IS_ERR(sata_occ_clk)) {
+		pr_err("%s: Unable to obtain sata occ clock: %ld\n",__func__,PTR_ERR(sata_occ_clk));
+		return PTR_ERR(sata_occ_clk);
+ 	}
+	/*Enable the sata_occ clocks here */
+        rc = clk_enable(sata_occ_clk);
+	if (rc){
+		pr_err("%s: sata occ clock enable failed \n",__func__);
+		return rc;
+	}
+#endif
 	/* Set the SATA PMU clock to 30 MHZ and OOB clock to 125MHZ */
 	clk_set_rate(sata_oob_clk,125000000);
 	clk_set_rate(sata_pmu_clk,30000000);
@@ -311,7 +327,10 @@ static int __devexit ahci_remove(struct platform_device *pdev)
 	clk_put(sata_oob_clk);
 	clk_disable(sata_pmu_clk);
 	clk_put(sata_pmu_clk);
-
+#if defined(CONFIG_COMCERTO_SATA_OCC_CLOCK)
+	clk_disable(sata_occ_clk);
+	clk_put(sata_occ_clk);
+#endif
 	/*Putting  SATA in reset state 
 	 * Sata axi clock domain in reset state
 	 * Serdes 1/2 in reset state, this depends upon PCIE1 and SGMII 

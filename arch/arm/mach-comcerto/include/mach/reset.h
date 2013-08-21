@@ -106,6 +106,7 @@ typedef enum {
 	COMPONENT_TDMNTG,
 }C2000_RESET_COMPONENT;
 
+extern void comcerto_rst_cntrl_set(unsigned int dev_rst_cntrl_bit);
 extern void c2000_block_reset(int block,int state);
 extern void reset_init(void);
 

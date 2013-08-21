@@ -39,6 +39,10 @@ struct flow_cache_entry {
 	u32				genid;
 	struct flowi			key;
 	struct flow_cache_object	*object;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	u8				flags;
+	#define FLOW_CACHE_FLAG_IPSEC_OFFLOAD 0x01
+#endif
 };
 
 struct flow_cache_percpu {
@@ -74,6 +78,10 @@ static LIST_HEAD(flow_cache_gc_list);
 
 #define flow_cache_hash_size(cache)	(1 << (cache)->hash_shift)
 #define FLOW_HASH_RND_PERIOD		(10 * 60 * HZ)
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+extern int ipsec_nlkey_flow_remove(struct flowi *fl, u16 family, u16 dir);
+#endif
 
 static void flow_cache_new_hashrnd(unsigned long arg)
 {
@@ -113,8 +121,14 @@ static void flow_cache_gc_task(struct work_struct *work)
 	list_splice_tail_init(&flow_cache_gc_list, &gc_list);
 	spin_unlock_bh(&flow_cache_gc_lock);
 
-	list_for_each_entry_safe(fce, n, &gc_list, u.gc_list)
+	list_for_each_entry_safe(fce, n, &gc_list, u.gc_list) {
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+		/*call nl_key_flow_remove*/
+		if (fce->flags & FLOW_CACHE_FLAG_IPSEC_OFFLOAD)
+			ipsec_nlkey_flow_remove(&fce->key, fce->family, fce->dir);
+#endif
 		flow_entry_kill(fce);
+	}
 }
 static DECLARE_WORK(flow_cache_gc_work, flow_cache_gc_task);
 
@@ -298,8 +312,10 @@ nocache:
 		if (!IS_ERR(flo)) {
 			fle->object = flo;
 #if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
-			if (new_flow)
+			if (new_flow) {
 				*new_flow = 1;
+				fle->flags |= FLOW_CACHE_FLAG_IPSEC_OFFLOAD;
+			}
 #endif
 		}
 		else

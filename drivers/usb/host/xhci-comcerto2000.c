@@ -10,13 +10,11 @@
 #include <linux/slab.h>
 #include "xhci.h"
 
-#include <mach/comcerto-2000.h>
-#include <mach/comcerto-2000/clk-rst.h>
 #include <linux/clk.h>
 #include <mach/reset.h>
+#include <mach/hardware.h>
 
 extern int usb3_clk_internal;
-
 /* USB 3.0 clock */
 static struct clk *usb3_clk;
 
@@ -107,21 +105,27 @@ int comcerto_xhci_bus_resume(struct usb_hcd *hcd)
 
 static void comcerto_usb3_phy_init(void)
 {
+	u32 val;
+
         writel(0x00E00080, USB3_PHY_BASE + 0x10);
 
 	//Configuration for internal clock
 	if(usb3_clk_internal)
 	{
-		//writel(0x420E82A9, USB3_PHY_BASE + 0x20); //48Mhz ref clock
-		writel(0x420E82A8, USB3_PHY_BASE + 0x20); //24Mhz Ref clock
 		printk(KERN_INFO "USB3.0 clock selected: internal\n", __func__);
+
+		if(HAL_get_ref_clk() == REF_CLK_24MHZ)
+			val = 0x420E82A8;
+		else
+			val = 0x420E82A9;
 	}
 	else
 	{
-		writel(0x4209927A, USB3_PHY_BASE + 0x20);
+		val = 0x4209927A;
 		printk(KERN_INFO "USB3.0 clock selected: external\n", __func__);
 	}
 
+	writel(val, USB3_PHY_BASE + 0x20);
         writel(0x69C34F53, USB3_PHY_BASE + 0x24);
         writel(0x0005D815, USB3_PHY_BASE + 0x28);
         writel(0x00000801, USB3_PHY_BASE + 0x2C);

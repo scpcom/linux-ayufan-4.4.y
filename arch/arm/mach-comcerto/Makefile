@@ -10,6 +10,7 @@ obj-n :=
 obj- :=
 
 obj-$(CONFIG_ARCH_M86XXX) 		    	+= comcerto-2000.o
+obj-$(CONFIG_ARCH_M86XXX) 		    	+= comcerto-vwd.o
 
 obj-$(CONFIG_ARCH_M86XXX)               	+= serdes-c2000.o
 
@@ -25,4 +26,5 @@ obj-$(CONFIG_C2K_EVM) 				+= board-c2kevm.o
 obj-$(CONFIG_C2K_ASIC) 				+= board-c2kasic.o
 obj-$(CONFIG_SMP)				+= platsmp.o headsmp.o
 obj-$(CONFIG_COMCERTO_MSP)			+= msp/
-obj-$(CONFIG_HOTPLUG_CPU)               	+= hotplug.o
+obj-$(CONFIG_HOTPLUG_CPU)			+= hotplug.o
+obj-$(CONFIG_COMCERTO_CSYS_TPI_CLOCK)		+= comcerto-tpicsys.o

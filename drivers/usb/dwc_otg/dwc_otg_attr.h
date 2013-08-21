@@ -73,7 +73,6 @@ void dwc_otg_attr_create(
 #elif  PCI_INTERFACE
 				struct pci_dev *dev
 #else				
-				//struct device *dev
 				struct platform_device *dev
 #endif
     );
@@ -84,7 +83,6 @@ void dwc_otg_attr_remove(
 #elif  PCI_INTERFACE
 				struct pci_dev *dev
 #else				
-				//struct device *dev
 				struct platform_device *dev
 #endif
     );

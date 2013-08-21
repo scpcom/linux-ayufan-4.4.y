@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd_linux.c $
- * $Revision: #18 $
- * $Date: 2011/05/17 $
- * $Change: 1774126 $
+ * $Revision: #20 $
+ * $Date: 2011/10/26 $
+ * $Change: 1872981 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -51,8 +51,11 @@
 #include <linux/version.h>
 #include <asm/io.h>
 #include <linux/usb.h>
-//#include <../drivers/usb/core/hcd.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
+#include <../drivers/usb/core/hcd.h>
+#else
 #include <linux/usb/hcd.h>
+#endif
 
 #include "dwc_otg_hcd_if.h"
 #include "dwc_otg_dbg.h"
@@ -65,7 +68,6 @@
 #define dwc_ep_addr_to_endpoint(_bEndpointAddress_) ((_bEndpointAddress_ & USB_ENDPOINT_NUMBER_MASK) | \
 						     ((_bEndpointAddress_ & USB_DIR_IN) != 0) << 4)
 
-//static const char dwc_otg_hcd_name[] = "dwc_otg_hcd";
 static const char dwc_otg_hcd_name[] = "dwc_otg";
 
 /** @name Linux HC Driver API Functions */
@@ -110,10 +112,10 @@ static struct hc_driver dwc_otg_hc_driver = {
 
 	.flags = HCD_MEMORY | HCD_USB2,
 
-	//.reset =              
+	//.reset =
 	.start = hcd_start,
-	//.suspend =            
-	//.resume =             
+	//.suspend =
+	//.resume =
 	.stop = hcd_stop,
 
 	.urb_enqueue = urb_enqueue,
@@ -126,8 +128,8 @@ static struct hc_driver dwc_otg_hc_driver = {
 
 	.hub_status_data = hub_status_data,
 	.hub_control = hub_control,
-	//.bus_suspend =                
-	//.bus_resume =         
+	//.bus_suspend =
+	//.bus_resume =
 };
 
 /** Gets the dwc_otg_hcd from a struct usb_hcd */
@@ -337,7 +339,7 @@ void dwc_otg_host_port_suspend(struct usb_hcd *hcd)
 	dwc_otg_host_if_t host_if;
 	hprt0_data_t hprt;
 
-	host_if.hprt0 = hcd->regs + DWC_OTG_HOST_PORT_REGS_OFFSET;	
+	host_if.hprt0 = hcd->regs + DWC_OTG_HOST_PORT_REGS_OFFSET;
 
 	hprt.d32= DWC_READ_REG32(host_if.hprt0);
 	hprt.b.prtsusp = 1;
@@ -353,7 +355,7 @@ void dwc_otg_host_port_resume(struct usb_hcd *hcd)
 	dwc_otg_host_if_t host_if;
 	hprt0_data_t hprt;
 
-	host_if.hprt0 = hcd->regs + DWC_OTG_HOST_PORT_REGS_OFFSET;	
+	host_if.hprt0 = hcd->regs + DWC_OTG_HOST_PORT_REGS_OFFSET;
 
 	hprt.d32= DWC_READ_REG32(host_if.hprt0);
 	hprt.b.prtsusp = 0;
@@ -372,10 +374,9 @@ int hcd_init(
 		    struct lm_device *_dev
 #elif  defined(PCI_INTERFACE)
 		    struct pci_dev *_dev
-#else 
+#else
 			struct platform_device *_dev
 #endif
-
     )
 {
 	struct usb_hcd *hcd = NULL;
@@ -446,8 +447,10 @@ int hcd_init(
 
 	otg_dev->hcd->otg_dev = otg_dev;
 	hcd->self.otg_port = dwc_otg_hcd_otg_port(dwc_otg_hcd);
-	//hcd->self.otg_version = dwc_otg_get_otg_version(otg_dev->core_if);
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33) //don't support for LM(with 2.6.20.1 kernel)
+	/* Don't support SG list at this point */
+	hcd->self.sg_tablesize = 0;
+#endif
 	/*
 	 * Finish generic HCD initialization and start the HCD. This function
 	 * allocates the DMA buffer pool, registers the USB bus, requests the
@@ -476,10 +479,9 @@ void hcd_remove(
 		       struct lm_device *_dev
 #elif  defined(PCI_INTERFACE)
 		       struct pci_dev *_dev
-#else 
+#else
 				struct platform_device *_dev
 #endif
-
     )
 {
 #ifdef LM_INTERFACE
@@ -489,7 +491,6 @@ void hcd_remove(
 #else
 	dwc_otg_device_t *otg_dev = platform_get_drvdata(_dev);
 #endif
-
 
 	dwc_otg_hcd_t *dwc_otg_hcd;
 	struct usb_hcd *hcd;
@@ -663,15 +664,6 @@ static int urb_enqueue(struct usb_hcd *hcd,
 		break;
 	case PIPE_BULK:
 		ep_type = USB_ENDPOINT_XFER_BULK;
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
-/* FIXME : Makarand - Need to comment this warning */
-#if 0
-		if (urb->sg) {
-			DWC_WARN("SG LIST received - we don't support it\n");
-		}
-#endif		
-#endif
 		break;
 	case PIPE_INTERRUPT:
 		ep_type = USB_ENDPOINT_XFER_INT;
@@ -796,7 +788,7 @@ static void endpoint_disable(struct usb_hcd *hcd, struct usb_host_endpoint *ep)
 }
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,30)
-/* Resets endpoint specific parameter values, in current version used to reset 
+/* Resets endpoint specific parameter values, in current version used to reset
  * the data toggle(as a WA). This function can be called from usb_clear_halt routine */
 static void endpoint_reset(struct usb_hcd *hcd, struct usb_host_endpoint *ep)
 {
@@ -815,7 +807,7 @@ static void endpoint_reset(struct usb_hcd *hcd, struct usb_host_endpoint *ep)
 #endif
 
 	if (_dev)
-		udev = to_usb_device(_dev); // udev = to_usb_device(&_dev->dev);
+		udev = to_usb_device(_dev);
 	else
 		return;
 

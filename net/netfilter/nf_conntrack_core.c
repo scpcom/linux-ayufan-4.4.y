@@ -1407,6 +1407,7 @@ void *nf_ct_alloc_hashtable(unsigned int *sizep, int nulls)
 }
 EXPORT_SYMBOL_GPL(nf_ct_alloc_hashtable);
 
+#ifdef CONFIG_COMCERTO_FP
 int nf_conntrack_set_dpi_allow_report(struct sk_buff *skb)
 {
 	int err = 0;
@@ -1433,7 +1434,9 @@ int nf_conntrack_set_dpi_allow_and_mark(struct sk_buff *skb, int mark)
 
 	set_bit(IPS_DPI_ALLOWED_BIT, &ct->status);
 
+#ifdef CONFIG_NF_CONNTRACK_MARK
 	ct->mark = mark;
+#endif
 
 	nf_conntrack_event_cache(IPCT_PROTOINFO, ct);
 
@@ -1442,6 +1445,7 @@ int nf_conntrack_set_dpi_allow_and_mark(struct sk_buff *skb, int mark)
 	return err;
 }
 EXPORT_SYMBOL(nf_conntrack_set_dpi_allow_and_mark);
+#endif
 
 int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp)
 {

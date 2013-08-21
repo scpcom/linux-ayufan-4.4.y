@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd.h $
- * $Revision: #57 $
- * $Date: 2010/11/29 $
- * $Change: 1636033 $
+ * $Revision: #58 $
+ * $Date: 2011/09/15 $
+ * $Change: 1846647 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -471,6 +471,11 @@ struct dwc_otg_hcd {
 	 * DWC_HFNUM_MAX_FRNUM.
 	 */
 	uint16_t frame_number;
+
+	/**
+	 * Count of periodic QHs, if using several eps. For SOF enable/disable.
+	 */
+	uint16_t periodic_qh_count;
 
 	/**
 	 * Free host channels in the controller. This is a list of

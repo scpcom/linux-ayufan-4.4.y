@@ -310,7 +310,7 @@ EXPORT_SYMBOL(HAL_clk_div_backup_relocate_table);
 /*
  * Get the reference clock after reading bootstrap
  */
-static unsigned long HAL_get_ref_clk (void)
+unsigned long HAL_get_ref_clk (void)
 {
 	unsigned long clock_freq = 0;
 	unsigned int boot_strap, tmp;
@@ -335,6 +335,7 @@ static unsigned long HAL_get_ref_clk (void)
 
 	return clock_freq;
 }
+EXPORT_SYMBOL(HAL_get_ref_clk);
 
 static unsigned long HAL_get_pll_freq(int pll_no)
 {
@@ -516,248 +517,30 @@ static unsigned long HAL_get_clk_freq(u32 ctrl_reg, u32 div_reg)
 	return clk_out;
 }
 
-/* All get rate APIs callbacks */
-static unsigned long HAL_get_arm_clk(struct clk *clk)
+/* Get rate API callback */
+static unsigned long HAL_get_clk(struct clk *clk)
 {
 	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
 }
 
-static unsigned long HAL_get_axi_clk(struct clk *clk)
-{
-	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
-}
-
-static unsigned long HAL_get_ddr_clk(struct clk *clk)
-{
-	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
-}
-
-static unsigned long HAL_get_ipsec_eape_clk(struct clk *clk)
-{
-	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
-}
-
-static unsigned long  HAL_get_ipsec_spacc_clk(struct clk *clk)
+/* Get rate API callback for those clocks having Parent */
+static unsigned long HAL_get_parent_clk(struct clk *clk)
 {
 	return clk_get_rate(clk->parent);
 }
-
-static unsigned long  HAL_get_dpi_cie_clk(struct clk *clk)
-{
-	return clk_get_rate(clk->parent);
-}
-
-static unsigned long  HAL_get_dpi_decomp_clk(struct clk *clk)
-{
-	return clk_get_rate(clk->parent);
-}
-
-static unsigned long  HAL_get_gemtx_clk(struct clk *clk)
-{
-	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
-}
-
-static unsigned long HAL_get_hfe_core_clk(struct clk *clk)
-{
-	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
-}
-
-static unsigned long HAL_get_spi_i2c_clk(struct clk *clk)
-{
-	return clk_get_rate(clk->parent);
-}
-
-static unsigned long HAL_get_sata_oob_clk(struct clk *clk)
-{
-	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
-}
-
-static unsigned long HAL_get_sata_pmu_clk(struct clk *clk)
-{
-	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
-}
-
-static unsigned long HAL_get_ext_phy_clk(struct clk *clk)
-{
-	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
-}
-
-static unsigned long  HAL_get_tdmNTG_clk(struct clk *clk)
-{
-	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
-}
-static unsigned long HAL_get_l2cc_clk(struct clk *clk)
-{
-	return HAL_get_clk_freq(clk->clkgen_reg, clk->div_reg);
-}
-
-static unsigned long HAL_get_uart_clk(struct clk *clk)
-{
-	return clk_get_rate(clk->parent);
-}
-
-static unsigned long  HAL_get_dus_clk(struct clk *clk)
-{
-	return clk_get_rate(clk->parent);
-}
-
-static unsigned long  HAL_get_pcie0_clk(struct clk *clk)
-{
-	return clk_get_rate(clk->parent);
-}
-
-static unsigned long  HAL_get_pcie1_clk(struct clk *clk)
-{
-	return clk_get_rate(clk->parent);
-}
-
-static unsigned long  HAL_get_usb0_clk(struct clk *clk)
-{
-	return clk_get_rate(clk->parent);
-}
-
-static unsigned long  HAL_get_usb1_clk(struct clk *clk)
-{
-	return clk_get_rate(clk->parent);
-}
-
-static unsigned long  HAL_get_sata_clk(struct clk *clk)
-{
-	return clk_get_rate(clk->parent);
-}
-
+/* Specific Get rate API callback for arm peripherals */
 static unsigned long  HAL_get_arm_peri_clk(struct clk *clk)
 {
 	return clk_get_rate(clk->parent)/4 ;
 }
 
-/* All set rate APIs callbacks */
-static int HAL_set_gemtx_clk(struct clk *clk,unsigned long rate)
+/* Set rate APIs callbacks */
+static int HAL_set_clk(struct clk *clk,unsigned long rate)
 {
 	struct clk *clk_parent;
 	/* Get the parent clock */
 	clk_parent=clk_get_parent(clk);
 	if ( clk_parent || rate <= clk_parent->rate){
-		/* Set the divider value to reg */
-		HAL_set_clk_divider(rate,clk->clkgen_reg,clk->div_reg);
-		/* Set the rate value to clk structure */
-		clk->rate=rate;
-		return 0;
-	}else
-		return -EINVAL;
-}
-
-static int HAL_set_arm_clk(struct clk *clk,unsigned long rate)
-{
-	struct clk *clk_parent;
-	/* Get the parent clock */
-	clk_parent=clk_get_parent(clk);
-	if ( clk_parent && rate <= clk_parent->rate ){
-		/* Set the divider value to reg */
-		HAL_set_clk_divider(rate,clk->clkgen_reg,clk->div_reg);
-		/* Set the rate value to clk structure */
-		clk->rate=rate;
-		return 0;
-	}else
-		return -EINVAL;
-}
-
-static int HAL_set_l2cc_clk(struct clk *clk,unsigned long rate)
-{
-	struct clk *clk_parent;
-	/* Get the parent clock */
-	clk_parent=clk_get_parent(clk);
-	if ( clk_parent && rate <= clk_parent->rate ){
-		/* Set the divider value to reg */
-		HAL_set_clk_divider(rate,clk->clkgen_reg,clk->div_reg);
-		/* Set the rate value to clk structure */
-		clk->rate=rate;
-		return 0;
-	}else
-		return -EINVAL;
-}
-
-static int HAL_set_axi_clk(struct clk *clk,unsigned long rate)
-{
-	struct clk *clk_parent;
-	/* Get the parent clock */
-	clk_parent=clk_get_parent(clk);
-	if ( clk_parent && rate <= clk_parent->rate ){
-		/* Set the divider value to reg */
-		HAL_set_clk_divider(rate,clk->clkgen_reg,clk->div_reg);
-		/* Set the rate value to clk structure */
-		clk->rate=rate;
-		return 0;
-	}else
-		return -EINVAL;
-}
-
-static int HAL_set_hfe_core_clk(struct clk *clk,unsigned long rate)
-{
-	struct clk *clk_parent;
-	/* Get the parent clock */
-	clk_parent=clk_get_parent(clk);
-	if ( clk_parent && rate <= clk_parent->rate ){
-		/* Set the divider value to reg */
-		HAL_set_clk_divider(rate,clk->clkgen_reg,clk->div_reg);
-		/* Set the rate value to clk structure */
-		clk->rate=rate;
-		return 0;
-	}else
-		return -EINVAL;
-}
-
-static int HAL_set_tdmNTG_clk(struct clk *clk,unsigned long rate)
-{
-	struct clk *clk_parent;
-	/* Get the parent clock */
-	clk_parent=clk_get_parent(clk);
-	if ( clk_parent && rate <= clk_parent->rate ){
-		/* Set the divider value to reg */
-		HAL_set_clk_divider(rate,clk->clkgen_reg,clk->div_reg);
-		/* Set the rate value to clk structure */
-		clk->rate=rate;
-		return 0;
-	}else
-		return -EINVAL;
-}
-
-static int HAL_set_sata_oob_clk(struct clk *clk,unsigned long rate)
-{
-	struct clk *clk_parent;
-	/* Get the parent clock */
-	clk_parent=clk_get_parent(clk);
-	if ( clk_parent && rate <= clk_parent->rate ){
-		/* Set the divider value to reg */
-		HAL_set_clk_divider(rate,clk->clkgen_reg,clk->div_reg);
-		/* Set the rate value to clk structure */
-		clk->rate=rate;
-		return 0;
-	}else
-		return -EINVAL;
-}
-
-static int HAL_set_sata_pmu_clk(struct clk *clk,unsigned long rate)
-{
-	struct clk *clk_parent;
-	/* Get the parent clock */
-	clk_parent=clk_get_parent(clk);
-	if ( clk_parent && rate <= clk_parent->rate ){
-		/* Set the divider value to reg */
-		HAL_set_clk_divider(rate,clk->clkgen_reg,clk->div_reg);
-		/* Set the rate value to clk structure */
-		clk->rate=rate;
-		return 0;
-	}else
-		return -EINVAL;
-}
-
-static int HAL_set_ext_phy_clk(struct clk *clk,unsigned long rate)
-{
-	struct clk *clk_parent;
-	/* Get the parent clock */
-	clk_parent=clk_get_parent(clk);
-	if ( clk_parent && rate <= clk_parent->rate ){
 		/* Set the divider value to reg */
 		HAL_set_clk_divider(rate,clk->clkgen_reg,clk->div_reg);
 		/* Set the rate value to clk structure */
@@ -793,8 +576,8 @@ static struct clk gemtx_clk = {
 	.clkgen_reg  = GEMTX_CLK_CNTRL,
 	.div_reg     = GEMTX_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_gemtx_clk,
-	.set_rate    = HAL_set_gemtx_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
 static struct clk ddr_clk = {
@@ -803,7 +586,7 @@ static struct clk ddr_clk = {
 	.clkgen_reg  = DDR_CLK_CNTRL,
 	.div_reg     = DDR_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_ddr_clk,
+	.get_rate    = HAL_get_clk,
 };
 
 static struct clk arm_clk = {
@@ -812,8 +595,8 @@ static struct clk arm_clk = {
 	.clkgen_reg  = A9DP_CLK_CNTRL,
 	.div_reg     = A9DP_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_arm_clk,
-	.set_rate    = HAL_set_arm_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
 static struct clk l2cc_clk = {
@@ -822,8 +605,8 @@ static struct clk l2cc_clk = {
 	.clkgen_reg  = L2CC_CLK_CNTRL,
 	.div_reg     = L2CC_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_l2cc_clk,
-	.set_rate    = HAL_set_l2cc_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
 static struct clk axi_clk = {
@@ -832,8 +615,8 @@ static struct clk axi_clk = {
 	.clkgen_reg  = AXI_CLK_CNTRL_0,
 	.div_reg     = AXI_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_axi_clk,
-	.set_rate    = HAL_set_axi_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
 static struct clk uart_clk = { /* Legacy UART */
@@ -841,7 +624,7 @@ static struct clk uart_clk = { /* Legacy UART */
 	.name        = "uart",
 	.enable_reg  = AXI_CLK_CNTRL_1,
 	.enable_mask = CLK_DOMAIN_UART_MASK,
-	.get_rate    = HAL_get_uart_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 
 static struct clk ipsec_eape_clk = {
@@ -850,7 +633,7 @@ static struct clk ipsec_eape_clk = {
 	.clkgen_reg  = IPSEC_CLK_CNTRL,
 	.div_reg     = IPSEC_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_ipsec_eape_clk,
+	.get_rate    = HAL_get_clk,
 };
 
 static struct clk ipsec_spacc_clk = {       /* IPSEC spacc clock for Elliptic EPN1802*/
@@ -858,7 +641,7 @@ static struct clk ipsec_spacc_clk = {       /* IPSEC spacc clock for Elliptic EP
 	.name        = "ipsec_spacc",
 	.enable_reg  = AXI_CLK_CNTRL_1,
 	.enable_mask = CLK_DOMAIN_IPSEC_SPACC_MASK,
-	.get_rate    = HAL_get_ipsec_spacc_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 
 static struct clk dpi_cie_clk = {       /* DPI cie clock*/
@@ -866,7 +649,7 @@ static struct clk dpi_cie_clk = {       /* DPI cie clock*/
 	.name        = "dpi_cie",
 	.enable_reg  = AXI_CLK_CNTRL_0,
 	.enable_mask = CLK_DOMAIN_DPI_CIE_MASK,
-	.get_rate    = HAL_get_dpi_cie_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 
 static struct clk dpi_decomp_clk = {       /* DPI decomp clock*/
@@ -874,7 +657,7 @@ static struct clk dpi_decomp_clk = {       /* DPI decomp clock*/
 	.name        = "dpi_decomp",
 	.enable_reg  = AXI_CLK_CNTRL_0,
 	.enable_mask = CLK_DOMAIN_DPI_DECOMP_MASK,
-	.get_rate    = HAL_get_dpi_decomp_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 
 static struct clk DUS_clk = { /* DMA,FAST-UART and SMI clock */
@@ -882,7 +665,7 @@ static struct clk DUS_clk = { /* DMA,FAST-UART and SMI clock */
 	.name        = "DUS",
 	.enable_reg  = AXI_CLK_CNTRL_1,
 	.enable_mask = CLK_DOMAIN_DUS_MASK,
-	.get_rate    = HAL_get_dus_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 
 static struct clk arm_peri_clk = {
@@ -899,8 +682,8 @@ static struct clk hfe_core_clk = {
 	.clkgen_reg  = PFE_CLK_CNTRL,
 	.div_reg     = PFE_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_hfe_core_clk,
-	.set_rate    = HAL_set_hfe_core_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
 static struct clk spi_i2c_clk = {
@@ -908,7 +691,7 @@ static struct clk spi_i2c_clk = {
 	.name        = "spi_i2c",
 	.enable_reg  = AXI_CLK_CNTRL_1,
 	.enable_mask = CLK_DOMAIN_SPI_I2C_MASK,
-	.get_rate    = HAL_get_spi_i2c_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 
 static struct clk tdmNTG_clk = {
@@ -917,8 +700,8 @@ static struct clk tdmNTG_clk = {
 	.clkgen_reg  = TDMNTG_REF_CLK_CNTRL,
 	.div_reg     = TDMNTG_REF_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_tdmNTG_clk,
-	.set_rate    = HAL_set_tdmNTG_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
 static struct clk pcie0_clk = {
@@ -926,7 +709,7 @@ static struct clk pcie0_clk = {
 	.name        = "pcie0",
 	.enable_reg  = AXI_CLK_CNTRL_2,
 	.enable_mask = CLK_DOMAIN_PCIE0_MASK,
-	.get_rate    = HAL_get_pcie0_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 
 static struct clk pcie1_clk = {
@@ -934,7 +717,7 @@ static struct clk pcie1_clk = {
 	.name        = "pcie1",
 	.enable_reg  = AXI_CLK_CNTRL_2,
 	.enable_mask = CLK_DOMAIN_PCIE1_MASK,
-	.get_rate    = HAL_get_pcie1_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 
 static struct clk usb0_clk = {
@@ -942,7 +725,7 @@ static struct clk usb0_clk = {
 	.name        = "usb0",
 	.enable_reg  = AXI_CLK_CNTRL_2,
 	.enable_mask = CLK_DOMAIN_USB0_MASK,
-	.get_rate    = HAL_get_usb0_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 
 static struct clk usb1_clk = {
@@ -950,7 +733,7 @@ static struct clk usb1_clk = {
 	.name        = "usb1",
 	.enable_reg  = AXI_CLK_CNTRL_2,
 	.enable_mask = CLK_DOMAIN_USB1_MASK,
-	.get_rate    = HAL_get_usb1_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 
 static struct clk sata_clk = {            /* SATA AXI clock */
@@ -958,7 +741,7 @@ static struct clk sata_clk = {            /* SATA AXI clock */
 	.name        = "sata",
 	.enable_reg  = AXI_CLK_CNTRL_2,
 	.enable_mask = CLK_DOMAIN_SATA_MASK,
-	.get_rate    = HAL_get_sata_clk,
+	.get_rate    = HAL_get_parent_clk,
 };
 static struct clk sata_oob_clk = {
 	.name        = "sata_oob",	  /* SATA PMU alive clock */
@@ -966,8 +749,8 @@ static struct clk sata_oob_clk = {
 	.clkgen_reg  = SATA_OOB_CLK_CNTRL,
 	.div_reg     = SATA_OOB_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_sata_oob_clk,
-	.set_rate    = HAL_set_sata_oob_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
 static struct clk sata_pmu_clk = {
@@ -976,40 +759,99 @@ static struct clk sata_pmu_clk = {
 	.clkgen_reg  = SATA_PMU_CLK_CNTRL,
 	.div_reg     = SATA_PMU_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_sata_pmu_clk,
-	.set_rate    = HAL_set_sata_pmu_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
 static struct clk ext_phy0_clk = {
 	.name	     = "ext_phy0",
-        .enable_reg  = EXTPHY0_CLK_CNTRL,
-        .clkgen_reg  = EXTPHY0_CLK_CNTRL,
+	.enable_reg  = EXTPHY0_CLK_CNTRL,
+	.clkgen_reg  = EXTPHY0_CLK_CNTRL,
 	.div_reg     = EXTPHY0_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_ext_phy_clk,
-	.set_rate    = HAL_set_ext_phy_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
 static struct clk ext_phy1_clk = {
 	.name	     = "ext_phy1",
-        .enable_reg  = EXTPHY1_CLK_CNTRL,
-        .clkgen_reg  = EXTPHY1_CLK_CNTRL,
+	.enable_reg  = EXTPHY1_CLK_CNTRL,
+	.clkgen_reg  = EXTPHY1_CLK_CNTRL,
 	.div_reg     = EXTPHY1_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_ext_phy_clk,
-	.set_rate    = HAL_set_ext_phy_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
 static struct clk ext_phy2_clk = {
 	.name	     = "ext_phy2",
-        .enable_reg  = EXTPHY2_CLK_CNTRL,
-        .clkgen_reg  = EXTPHY2_CLK_CNTRL,
+	.enable_reg  = EXTPHY2_CLK_CNTRL,
+	.clkgen_reg  = EXTPHY2_CLK_CNTRL,
 	.div_reg     = EXTPHY2_CLK_DIV_CNTRL,
 	.enable_mask = CLK_DOMAIN_MASK,
-	.get_rate    = HAL_get_ext_phy_clk,
-	.set_rate    = HAL_set_ext_phy_clk,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
 };
 
+static struct clk tpi_clk = {
+	.name	     = "tpi",
+	.enable_reg  = TPI_CLK_CNTRL,
+	.clkgen_reg  = TPI_CLK_CNTRL,
+	.div_reg     = TPI_CLK_DIV_CNTRL,
+	.enable_mask = CLK_DOMAIN_MASK,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
+};
+
+static struct clk csys_clk = {
+	.name	     = "csys",
+	.enable_reg  = CSYS_CLK_CNTRL,
+	.clkgen_reg  = CSYS_CLK_CNTRL,
+	.div_reg     = CSYS_CLK_DIV_CNTRL,
+	.enable_mask = CLK_DOMAIN_MASK,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
+};
+
+static struct clk tsuntg_clk = {
+	.name	     = "tsuntg",
+	.enable_reg  = TSUNTG_REF_CLK_CNTRL,
+	.clkgen_reg  = TSUNTG_REF_CLK_CNTRL,
+	.div_reg     = TSUNTG_REF_CLK_DIV_CNTRL,
+	.enable_mask = CLK_DOMAIN_MASK,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
+};
+
+static struct clk sata_occ_clk = {
+	.name	     = "sata_occ",
+	.enable_reg  = SATA_OCC_CLK_CNTRL,
+	.clkgen_reg  = SATA_OCC_CLK_CNTRL,
+	.div_reg     = SATA_OCC_CLK_DIV_CNTRL,
+	.enable_mask = CLK_DOMAIN_MASK,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
+};
+
+static struct clk pcie_occ_clk = {
+	.name	     = "pcie_occ",
+	.enable_reg  = PCIE_OCC_CLK_CNTRL,
+	.clkgen_reg  = PCIE_OCC_CLK_CNTRL,
+	.div_reg     = PCIE_OCC_CLK_DIV_CNTRL,
+	.enable_mask = CLK_DOMAIN_MASK,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
+};
+
+static struct clk sgmii_occ_clk = {
+	.name	     = "sgmii_occ",
+	.enable_reg  = SGMII_OCC_CLK_CNTRL,
+	.clkgen_reg  = SGMII_OCC_CLK_CNTRL,
+	.div_reg     = SGMII_OCC_CLK_DIV_CNTRL,
+	.enable_mask = CLK_DOMAIN_MASK,
+	.get_rate    = HAL_get_clk,
+	.set_rate    = HAL_set_clk,
+};
 
 /* These clocks are visible outside this module
  * and can be initialized , this list could be expanded
@@ -1045,6 +887,12 @@ static struct clk *c2k_clks[] __initdata = {
 	&ext_phy0_clk,
 	&ext_phy1_clk,
 	&ext_phy2_clk,
+	&tpi_clk,
+	&csys_clk,
+	&tsuntg_clk,
+	&sata_occ_clk,
+	&pcie_occ_clk,
+	&sgmii_occ_clk,
 };
 
 static struct clk_lookup c2k_clksreg[] = {
@@ -1077,6 +925,12 @@ static struct clk_lookup c2k_clksreg[] = {
 	{ .clk = &ext_phy0_clk,     .con_id = "ext_phy0"},
 	{ .clk = &ext_phy1_clk,     .con_id = "ext_phy1"},
 	{ .clk = &ext_phy2_clk,     .con_id = "ext_phy2"},
+	{ .clk = &tpi_clk,     	    .con_id = "tpi"},
+	{ .clk = &csys_clk,         .con_id = "csys"},
+	{ .clk = &tsuntg_clk,       .con_id = "tsuntg"},
+	{ .clk = &sata_occ_clk,     .con_id = "sata_occ"},
+	{ .clk = &pcie_occ_clk,     .con_id = "pcie_occ"},
+	{ .clk = &sgmii_occ_clk,    .con_id = "sgmii_occ"},
 };
 
 /* Initilize all the available clocks */
@@ -1150,13 +1004,17 @@ static int __init clk_disable_unused(void)
 		if (clk->usecount > 0)
 			continue;
 
-		/* FIXME Currently We Are Only Disabling The EXT PHY0/1/2 
-		 * Clock For No Harm.
+		/* FIXME Currently there is no clock FW support for the
+                 * following clocks in corresponding driver . So skipping these
+		 * clocks from by default disable state.
+                 * All other unused clocks will be disabled.
                 */
-		if ( !strcmp(clk->name, "ext_phy0") || !strcmp(clk->name, "ext_phy1")
-						   || !strcmp(clk->name, "ext_phy2") ) 
+		if ( strcmp(clk->name, "hfe_core") &&
+				strcmp(clk->name, "ipsec_eape") &&
+				strcmp(clk->name, "pll3") &&
+				strcmp(clk->name, "arm_peri") )
 		{
-			pr_debug("Clocks: disabled unused %s\n", clk->name);
+			pr_info("Clocks: disabled unused %s\n", clk->name);
 			__clk_disable_unused(clk);
 		}
 	}

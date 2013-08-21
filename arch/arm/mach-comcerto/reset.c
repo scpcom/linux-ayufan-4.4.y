@@ -23,16 +23,28 @@
  */
 
 #include <linux/module.h>
-#include <mach/reset.h> 
+#include <mach/reset.h>
 #include <asm/io.h>
 #include <linux/spinlock.h>
 
 static char i2cspi_state[2],dus_state[3];
 spinlock_t reset_lock;
 
-/* @ int block : Id of device block to be put in reset 
- * @ int state : State value 0->OUT-OF-RESET , 1->RESET. 
- * API for block reset to all the device blocks 
+
+void comcerto_rst_cntrl_set(unsigned int dev_rst_cntrl_bit)
+{
+	unsigned long flags;
+	spin_lock_irqsave(&reset_lock, flags);
+
+	__raw_writel((dev_rst_cntrl_bit | __raw_readl(DEVICE_RST_CNTRL)), DEVICE_RST_CNTRL);
+
+	spin_unlock_irqrestore(&reset_lock,flags);
+}
+EXPORT_SYMBOL(comcerto_rst_cntrl_set);
+
+/* @ int block : Id of device block to be put in reset
+ * @ int state : State value 0->OUT-OF-RESET , 1->RESET.
+ * API for block reset to all the device blocks
  * available for C2000 devices.
  */
 void c2000_block_reset(int block,int state)
@@ -360,14 +372,14 @@ if(state){
 			break;
 		default :
 			break;
-	}	
+	}
 }
 spin_unlock_irqrestore(&reset_lock,flags);
 }
 EXPORT_SYMBOL(c2000_block_reset);
 
 void reset_init(void){
-	
+
 	/*Initilize the DUS ,serde0/1/2 and I2CSPI dependancy values */
 	i2cspi_state[0]=i2cspi_state[1]=dus_state[0]=dus_state[1]=dus_state[2]=0;
 

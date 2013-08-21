@@ -38,7 +38,7 @@ static unsigned int fp_netfilter_pre_routing(int family, unsigned int hooknum, s
 		goto done;
 
 	protonum = nf_ct_protonum(ct);
-	if ((protonum != IPPROTO_TCP) && (protonum != IPPROTO_UDP))
+	if ((protonum != IPPROTO_TCP) && (protonum != IPPROTO_UDP) && (protonum != IPPROTO_IPIP))
 		goto done;
 
 	dir = CTINFO2DIR(ctinfo);

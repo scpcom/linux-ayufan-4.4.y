@@ -1,8 +1,8 @@
  /* ==========================================================================
   * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_pcd_linux.c $
-  * $Revision: #17 $
-  * $Date: 2011/05/17 $
-  * $Change: 1774110 $
+  * $Revision: #19 $
+  * $Date: 2011/10/26 $
+  * $Change: 1873028 $
   *
   * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
   * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -361,7 +361,7 @@ static int ep_queue(struct usb_ep *usb_ep, struct usb_request *usb_req,
 	if (GET_CORE_IF(pcd)->dma_enable) {
 		struct pci_dev *dev = gadget_wrapper->pcd->otg_dev->os_dep.pcidev;
 		if (usb_req->length != 0 && usb_req->dma == DWC_DMA_ADDR_INVALID) {
-			dma_addr = pci_map_single(dev, usb_req->buf, usb_req->length, 
+			dma_addr = pci_map_single(dev, usb_req->buf, usb_req->length,
 					ep->dwc_ep.is_in ? PCI_DMA_TODEVICE : PCI_DMA_FROMDEVICE);
 		}
 	}
@@ -1143,10 +1143,9 @@ int pcd_init(
 	struct lm_device *_dev
 #elif  defined(PCI_INTERFACE)
 	struct pci_dev *_dev
-#else 
+#else
 	struct platform_device *_dev
 #endif
-
     )
 {
 #ifdef LM_INTERFACE
@@ -1229,8 +1228,14 @@ void pcd_remove(
  * then a host may connect again, or the driver might get unbound.
  *
  * @param driver The driver being registered
+ * @param bind The bind function of gadget driver
  */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
 int usb_gadget_register_driver(struct usb_gadget_driver *driver)
+#else
+int usb_gadget_probe_driver(struct usb_gadget_driver *driver,
+		int (*bind)(struct usb_gadget *))
+#endif
 {
 	int retval;
 
@@ -1238,7 +1243,11 @@ int usb_gadget_register_driver(struct usb_gadget_driver *driver)
 		    driver->driver.name);
 
 	if (!driver || driver->speed == USB_SPEED_UNKNOWN ||
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
 	    !driver->bind ||
+#else
+		!bind ||
+#endif
 	    !driver->unbind || !driver->disconnect || !driver->setup) {
 		DWC_DEBUGPL(DBG_PCDV, "EINVAL\n");
 		return -EINVAL;
@@ -1257,7 +1266,11 @@ int usb_gadget_register_driver(struct usb_gadget_driver *driver)
 	gadget_wrapper->gadget.dev.driver = &driver->driver;
 
 	DWC_DEBUGPL(DBG_PCD, "bind to driver %s\n", driver->driver.name);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
 	retval = driver->bind(&gadget_wrapper->gadget);
+#else
+	retval = bind(&gadget_wrapper->gadget);
+#endif
 	if (retval) {
 		DWC_ERROR("bind to driver %s --> error %d\n",
 			  driver->driver.name, retval);
@@ -1269,8 +1282,11 @@ int usb_gadget_register_driver(struct usb_gadget_driver *driver)
 		    driver->driver.name);
 	return 0;
 }
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
 EXPORT_SYMBOL(usb_gadget_register_driver);
+#else
+EXPORT_SYMBOL(usb_gadget_probe_driver);
+#endif
 
 /**
  * This function unregisters a gadget driver
