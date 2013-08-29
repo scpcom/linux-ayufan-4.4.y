@@ -16,14 +16,12 @@
 	 ***********************************/
 
 	#define COMCERTO_EXPCLK		50000000	/* 50MHz */
+	#define MOCA_RESET_GPIO_PIN	GPIO_PIN_11
 
 	/***********************************
 	 * GPIO
 	 ***********************************/
-	#define COMCERTO_OUTPUT_GPIO		(COMCERTO_NAND_CE)
-	#define COMCERTO_IRQ_RISING_EDGE_GPIO	0 // [FIXME]
-	#define COMCERTO_IRQ_FALLING_EDGE_GPIO	(GPIO_2 | GPIO_0) // [FIXME]
-	#define COMCERTO_IRQ_LEVEL_GPIO 	GPIO_2 // [FIXME]
+	#define COMCERTO_OUTPUT_GPIO	(COMCERTO_NAND_CE|MOCA_RESET_GPIO_PIN)
 	/*Are pins used either as GPIO or as pins for others IP blocks*/
 	#define COMCERTO_GPIO_PIN_USAGE		(SPI_BUS) // [FIXME]
 

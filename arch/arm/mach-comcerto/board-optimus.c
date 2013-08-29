@@ -105,6 +105,14 @@ static void __init board_gpio_init(void)
 	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~NOR_GPIO) | NOR_BUS, COMCERTO_GPIO_PIN_SELECT_REG1);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= NOR_GPIO_PIN;
 #endif
+
+#ifdef MOCA_RESET_GPIO_PIN
+	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | MOCA_RESET_GPIO_PIN, COMCERTO_GPIO_OUTPUT_REG);
+#endif
+
+	// enable GPIO0 interrupt (for MoCA) as level triggered, active high.
+	__raw_writel(__raw_readl(COMCERTO_GPIO_INT_CFG_REG) | (0x3),
+			COMCERTO_GPIO_INT_CFG_REG);
 }
 
 /* --------------------------------------------------------------------
@@ -253,51 +261,18 @@ struct spi_controller_data spi_ctrl_data =  {
 
 static struct spi_board_info comcerto_spi_board_info[] = {
 	{
-		/* FIXME: for chipselect-0 */
-		.modalias = "s25fl256s0",
+		/* for chipselect-0 */
+		.modalias = "bmoca",
 		.chip_select = 0,
-		.max_speed_hz = 4*1000*1000,
+		.max_speed_hz = 30*1000*1000,
 		.bus_num = 0,
-		.irq = -1,
+		.irq = IRQ_G0,
 		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
                 .controller_data = &spi_ctrl_data,
 	},
 
-	{
-		/* FIXME: for chipselect-1 */
-		.modalias = "proslic",
-		.chip_select = 1,
-		.max_speed_hz = 4*1000*1000,
-		.bus_num = 0,
-		.irq = -1,
-		.mode = SPI_MODE_3,
-		.platform_data = &spi_pdata,
-                .controller_data = &spi_ctrl_data,
-	},
-
-	{
-		.modalias = "comcerto_spi3",
-		.chip_select = 2,
-		.max_speed_hz = 4*1000*1000,
-		.bus_num = 0,
-		.irq = -1,
-		.mode = SPI_MODE_3,
-		.platform_data = &spi_pdata,
-                .controller_data = &spi_ctrl_data,
-	},
-
-	{
-		.modalias = "legerity",
-		.chip_select = 3,
-		.max_speed_hz = 4*1000*1000,
-		.bus_num = 0,
-		.irq = -1,
-		.mode = SPI_MODE_3,
-		.platform_data = &spi_pdata,
-                .controller_data = &spi_ctrl_data,
-	},
-
+	/* on optimus, chipselect-1 through 3 are not connected */
 };
 #endif
 

@@ -201,18 +201,11 @@ static __init void gpio_init(void)
 	/*[FIXME]: GPIO Output, others are input*/
 	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG) | COMCERTO_OUTPUT_GPIO, COMCERTO_GPIO_OE_REG);
 
-	/*[FIXME]: GPIO IRQ Configuration */
-	__raw_writel(COMCERTO_IRQ_RISING_EDGE_GPIO, COMCERTO_GPIO_INT_CFG_REG);
-
-	/* [FIXME]: Need to have proper defines for enabling the GPIO irq */
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG)     | (0x1 << 5), COMCERTO_GPIO_OE_REG);		// enable GPIO5 (SLIC_RESET_n) as output
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);     // clear reset
-	udelay(15);
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);	// put in reset
-	udelay(15);
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG); 	// clear reset after some time
-	__raw_writel(0x4, COMCERTO_GPIO_INT_CFG_REG); /* si3227 is falling edge interrupt(gpio1) */
-
+	/*
+	 * Default GPIO IRQ Configuration. Enable specific IRQs in the
+	 * board-*.c file
+	 */
+	__raw_writel(0, COMCERTO_GPIO_INT_CFG_REG);
 
 	/* [FIXME]: Are pins GPIO or pins used by another block*/
 	//__raw_writel(COMCERTO_GPIO_PIN_USAGE, COMCERTO_GPIO_IOCTRL_REG);
