@@ -106,22 +106,24 @@ void hotplug_cpu1_die(void)
 wait_for_cpu1_hotplug_done:
 
 	/* Waiting for hotplug event invoked by CPU hotplug framework */
-	wait_event(cpu1_hotplug, cpu1_hotplug_done>0);
+	pr_info("cpu1 waiting for hotplug event.\n");
+	wait_event_interruptible(cpu1_hotplug, cpu1_hotplug_done>0);
+	pr_info("cpu1 hotplug done!\n");
 
+	if (cpu1_hotplug_done > 0) {
 #ifdef CONFIG_NEON
-	__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) & ~NEON1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
-	__raw_writel((__raw_readl(A9DP_CPU_RESET) | NEON1_RST), A9DP_CPU_RESET);
+		__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) & ~NEON1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
+		__raw_writel((__raw_readl(A9DP_CPU_RESET) | NEON1_RST), A9DP_CPU_RESET);
 #endif
-	__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) & ~CPU1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
-	__raw_writel((__raw_readl(A9DP_PWR_CNTRL) | CLAMP_CORE1), A9DP_PWR_CNTRL);
-	__raw_writel((__raw_readl(A9DP_PWR_CNTRL) | CORE_PWRDWN1), A9DP_PWR_CNTRL);
-	__raw_writel((__raw_readl(A9DP_CPU_RESET) | CPU1_RST), A9DP_CPU_RESET);
-	__raw_writel((__raw_readl(A9DP_PWR_CNTRL) & ~CORE_PWRDWN1), A9DP_PWR_CNTRL);
+		__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) & ~CPU1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
+		__raw_writel((__raw_readl(A9DP_PWR_CNTRL) | CLAMP_CORE1), A9DP_PWR_CNTRL);
+		__raw_writel((__raw_readl(A9DP_PWR_CNTRL) | CORE_PWRDWN1), A9DP_PWR_CNTRL);
+		__raw_writel((__raw_readl(A9DP_CPU_RESET) | CPU1_RST), A9DP_CPU_RESET);
+		__raw_writel((__raw_readl(A9DP_PWR_CNTRL) & ~CORE_PWRDWN1), A9DP_PWR_CNTRL);
 
-	cpu1_hotplug_done = 0;
+		cpu1_hotplug_done = 0;
+	}
 	goto wait_for_cpu1_hotplug_done;
-
-	return;
 }
 
 void __init platform_smp_prepare_cpus(unsigned int max_cpus)
