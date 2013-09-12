@@ -276,10 +276,9 @@ static __init void exp_bus_init(void)
 			__raw_writel(comcerto_exp_values[cs][2], COMCERTO_EXP_CSx_SEG_R(cs));
 
 			/*Chip select timing configuration*/
-			/* [FIXME] : Using default timing values */
-			//__raw_writel(comcerto_exp_values[cs][4], COMCERTO_EXP_CSx_TMG1_R(cs));
-			//__raw_writel(comcerto_exp_values[cs][5], COMCERTO_EXP_CSx_TMG2_R(cs));
-			//__raw_writel(comcerto_exp_values[cs][6], COMCERTO_EXP_CSx_TMG3_R(cs));
+			__raw_writel(comcerto_exp_values[cs][4], COMCERTO_EXP_CSx_TMG1_R(cs));
+			__raw_writel(comcerto_exp_values[cs][5], COMCERTO_EXP_CSx_TMG2_R(cs));
+			__raw_writel(comcerto_exp_values[cs][6], COMCERTO_EXP_CSx_TMG3_R(cs));
 		}
 	}
 
