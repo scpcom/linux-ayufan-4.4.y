@@ -632,7 +632,7 @@ static int comcerto_i2c_probe(struct platform_device *pdev)
 	else
 		i2c->irq = -1;
 
-	if (i2c_add_adapter(&comcerto_i2c_adapter) != 0) {
+	if (i2c_add_numbered_adapter(&comcerto_i2c_adapter) != 0) {
 		dev_err(i2c->dev, "%s: failed to add I2C adapter\n", __FUNCTION__);
 		goto err3;
 	}
