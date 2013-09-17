@@ -34,6 +34,10 @@
 #include <linux/spi/spi.h>
 #endif
 
+#if defined(CONFIG_COMCERTO_I2C_SUPPORT)
+#include <linux/i2c.h>
+#endif
+
 #include <asm/sizes.h>
 #include <asm/setup.h>
 #include <asm/mach-types.h>
@@ -385,9 +389,18 @@ static struct resource comcerto_i2c_resources[] = {
 	},
 };
 
+static struct i2c_board_info comcerto_i2c_board_info[] __initdata = {
+	{
+		I2C_BOARD_INFO("lm96163", 0x4c),
+	},
+	{
+		I2C_BOARD_INFO("24c512", 0x50),
+	},
+};
+
 static struct platform_device comcerto_i2c = {
 	.name           = "comcerto_i2c",
-	.id             = -1,
+	.id             = 0,
 	.num_resources  = ARRAY_SIZE(comcerto_i2c_resources),
 	.resource       = comcerto_i2c_resources,
 };
@@ -672,6 +685,9 @@ static void __init platform_init(void)
 
 #if defined(CONFIG_SPI_MSPD_LOW_SPEED) || defined(CONFIG_SPI_MSPD_HIGH_SPEED)
 	spi_register_board_info(comcerto_spi_board_info, ARRAY_SIZE(comcerto_spi_board_info));
+#endif
+#if defined(CONFIG_COMCERTO_I2C_SUPPORT)
+	i2c_register_board_info(0, comcerto_i2c_board_info, ARRAY_SIZE(comcerto_i2c_board_info));
 #endif
 	mac_addr_init(&comcerto_pfe_pdata);
 
