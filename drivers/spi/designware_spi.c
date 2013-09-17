@@ -434,7 +434,7 @@ static void designware_spi_do_transfers(struct designware_spi *dwspi)
 	/* This delay should be good enough for 100KHz spi transfers. Slower
 	 * transfers may need a longer delay.
 	 */
-	udelay(10);
+	//udelay(10);
 
 	/* get remaining rx bytes */
     do {
