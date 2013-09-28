@@ -28,6 +28,7 @@
 #include <linux/mtd/nand.h>
 #include <linux/mtd/nand_bch.h>
 #include <linux/bch.h>
+#include <linux/ratelimit.h>
 
 /**
  * struct nand_bch_control - private NAND BCH control structure
@@ -97,7 +98,7 @@ int nand_bch_correct_data(struct mtd_info *mtd, unsigned char *buf,
 					errloc[i]);
 		}
 	} else if (count < 0) {
-		printk(KERN_ERR "ecc unrecoverable error\n");
+		printk_ratelimited(KERN_ERR "ecc unrecoverable error\n");
 		count = -1;
 	}
 	return count;

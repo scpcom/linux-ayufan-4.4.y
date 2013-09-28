@@ -23,6 +23,7 @@
 #include <linux/mtd/partitions.h>
 #include <asm/io.h>
 #include <linux/delay.h>
+#include <linux/ratelimit.h>
 #include <linux/platform_device.h>
 #include <mach/ecc.h>
 
@@ -293,7 +294,7 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 
 	/* Check if the block has uncorrectable number of errors */
 	if ((readl_relaxed(ecc_base_addr + ECC_CORR_STAT)) & ECC_UNCORR) {
-		printk(KERN_WARNING "ECC: uncorrectable error  2 !!!\n");
+		printk_ratelimited(KERN_WARNING "ECC: uncorrectable error  2 !!!\n");
 		temp_nand_ecc_errors[1] += 1 ;
 		return -EIO;
 	}
