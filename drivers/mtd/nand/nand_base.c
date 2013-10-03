@@ -39,6 +39,7 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/types.h>
+#include <linux/ratelimit.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/nand_ecc.h>
@@ -1420,6 +1421,49 @@ static uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
 	return NULL;
 }
 
+/*
+ * NOTE(apenwarr): Newer kernels do this much better.
+ *  Among other things, they report a max_flips value that's the largest
+ *  number of flips in any 1024-byte ECC calculation, as opposed to the total
+ *  flips in the whole 4096-byte page.  The latter is dangerous because
+ *  you could see 24 flips in a single 1024-byte region, which is the edge
+ *  of disaster, even though it's only 1/4 of the maximum 96 flips we could
+ *  handle if averaged across 4 pages.  So where we'd like to set a threshold
+ *  per 1024-byte region, we instead have to set a threshold per
+ *  4096-byte region that *still* must be well under 24.
+ *
+ *  Anyway, this code can go away someday when we use a newer kernel.
+ */
+static int unclean_if_too_many_flips(struct mtd_info *mtd,
+		struct mtd_ecc_stats *stats) {
+	uint32_t flips = mtd->ecc_stats.corrected - stats->corrected;
+	uint32_t threshold;
+	switch (mtd->oobsize) {
+	case 8:
+	case 16:
+	case 64:
+		threshold = 0;
+		break;
+	case 128:
+		threshold = 4;
+		break;
+	case 224:
+		threshold = 18;
+		break;
+	default:
+		threshold = 0;
+		break;
+	}
+	if (flips > threshold / 2) {
+		// This should be very rare, bu we want to know as we
+		// approach our threshold, which should be even more rare.
+		printk_ratelimited(KERN_WARNING
+			"ECC: corrected %d bits (threshold=%d)\n",
+			flips, threshold);
+	}
+	return  flips > threshold ? -EUCLEAN : 0;
+}
+
 /**
  * nand_do_read_ops - [INTERN] Read data with ECC
  * @mtd: MTD device structure
@@ -1566,7 +1610,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 	if (mtd->ecc_stats.failed - stats.failed)
 		return -EBADMSG;
 
-	return  mtd->ecc_stats.corrected - stats.corrected ? -EUCLEAN : 0;
+	return unclean_if_too_many_flips(mtd, &stats);
 }
 
 /**
@@ -1848,7 +1892,7 @@ static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 	if (mtd->ecc_stats.failed - stats.failed)
 		return -EBADMSG;
 
-	return  mtd->ecc_stats.corrected - stats.corrected ? -EUCLEAN : 0;
+	return unclean_if_too_many_flips(mtd, &stats);
 }
 
 /**
