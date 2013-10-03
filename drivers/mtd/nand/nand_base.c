@@ -2637,8 +2637,13 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 					chip->page_shift, 0, allowbbt)) {
 			pr_warn("%s: attempt to erase a bad block at page 0x%08x\n",
 				    __func__, page);
+#if 0
+			// NOTE(apenwarr): for us it's ok to erase bad blocks.
+			//  UBI deals with bad blocks a different way.
+			//  And we don't trust our bad block detection logic.
 			instr->state = MTD_ERASE_FAILED;
 			goto erase_exit;
+#endif
 		}
 
 		/*

@@ -654,9 +654,11 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	nand_device->ecc.total = nand_device->ecc.steps * nand_device->ecc.bytes;
 
 
+#if 0
 	nand_device->bbt_td = &bbt_main_descr;
 	nand_device->bbt_md = &bbt_mirror_descr;
 	nand_device->badblock_pattern = &c2000_badblock_pattern;
+#endif
 
 	} else {
 		printk("using soft ecc.\n");
