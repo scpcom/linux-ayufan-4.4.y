@@ -562,8 +562,8 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	/* 20 us command delay time */
 	nand_device->chip_delay = 20;
 
-	nand_device->ecc.mode = NAND_ECC_HW_SYNDROME;
-//	nand_device->ecc.mode = NAND_ECC_SOFT_BCH;
+//	nand_device->ecc.mode = NAND_ECC_HW_SYNDROME;
+	nand_device->ecc.mode = NAND_ECC_SOFT_BCH;
 
 #if defined(CONFIG_C2K_ASIC) && defined(CONFIG_NAND_TYPE_SLC)
 	nand_device->options = NAND_BUSWIDTH_16;
@@ -584,6 +584,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 		nand_device->ecc.read_page = comcerto_nand_read_page_hwecc;
 		nand_device->ecc.calculate = comcerto_calculate_ecc;
 		nand_device->ecc.correct = comcerto_correct_ecc;
+		printk("hw_syndrome correction %d.\n", mtd->writesize);
 
 		switch (mtd->writesize) {
 		case 512:
@@ -658,7 +659,8 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	nand_device->badblock_pattern = &c2000_badblock_pattern;
 
 	} else {
-		nand_device->ecc.mode = NAND_ECC_SOFT;
+		printk("using soft ecc.\n");
+		nand_device->ecc.mode = NAND_ECC_SOFT_BCH;
 	}
 
 #endif
