@@ -259,9 +259,11 @@ struct spi_controller_data spi_ctrl_data =  {
         .poll_mode = 1,
 };
 
+// We list more than one bmoca in here because it was attached to different
+// chip selects in different variations of the board. We have to trust the
+// driver to reject instances that aren't actually present.
 static struct spi_board_info comcerto_spi_board_info[] = {
 	{
-		/* for chipselect-0 */
 		.modalias = "bmoca",
 		.chip_select = 0,
 		.max_speed_hz = 30*1000*1000,
@@ -272,7 +274,16 @@ static struct spi_board_info comcerto_spi_board_info[] = {
                 .controller_data = &spi_ctrl_data,
 	},
 
-	/* on optimus, chipselect-1 through 3 are not connected */
+	{
+		.modalias = "bmoca",
+		.chip_select = 0,
+		.max_speed_hz = 30*1000*1000,
+		.bus_num = 1,
+		.irq = IRQ_G0,
+		.mode = SPI_MODE_3,
+		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
+	},
 };
 #endif
 
@@ -281,7 +292,7 @@ struct spi_controller_pdata fast_spi_pdata = {
 	.use_dma = 0,
 	.num_chipselects = 2,
 	.bus_num = 1,
-	.max_freq = 60 * 1000 * 1000,
+	.max_freq = 30 * 1000 * 1000,
 	.clk_name = "DUS",
 };
 #endif
