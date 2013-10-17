@@ -562,8 +562,8 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	/* 20 us command delay time */
 	nand_device->chip_delay = 20;
 
-//	nand_device->ecc.mode = NAND_ECC_HW_SYNDROME;
-	nand_device->ecc.mode = NAND_ECC_SOFT_BCH;
+	nand_device->ecc.mode = NAND_ECC_HW_SYNDROME;
+//	nand_device->ecc.mode = NAND_ECC_SOFT_BCH;
 
 #if defined(CONFIG_C2K_ASIC) && defined(CONFIG_NAND_TYPE_SLC)
 	nand_device->options = NAND_BUSWIDTH_16;
@@ -657,8 +657,8 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 #if 0
 	nand_device->bbt_td = &bbt_main_descr;
 	nand_device->bbt_md = &bbt_mirror_descr;
-	nand_device->badblock_pattern = &c2000_badblock_pattern;
 #endif
+	nand_device->badblock_pattern = &c2000_badblock_pattern;
 
 	} else {
 		printk("using soft ecc.\n");
