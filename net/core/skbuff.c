@@ -834,6 +834,24 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 		n->fclone = SKB_FCLONE_UNAVAILABLE;
 	}
 
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	if (skb->mspd_data) {
+		if (skb->mspd_len) {
+			int ofst = skb->len - skb->mspd_len;
+
+			memcpy(skb->data + ofst, skb->mspd_data + skb->mspd_ofst, skb->mspd_len);
+			skb->mspd_len = 0;
+		}
+
+		WARN_ON(skb_shared(skb));
+
+		if (!skb_shared(skb)) {
+			kfree(skb->mspd_data);
+			skb->mspd_data = NULL;
+		}
+	}
+#endif
+
 	return __skb_clone(n, skb);
 }
 EXPORT_SYMBOL(skb_clone);
@@ -884,11 +902,26 @@ struct sk_buff *skb_copy(const struct sk_buff *skb, gfp_t gfp_mask)
 	unsigned int size = (skb_end_pointer(skb) - skb->head) + skb->data_len;
 	struct sk_buff *n = alloc_skb(size, gfp_mask);
 
-#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
-	WARN_ON(skb->mspd_len);
-#endif
 	if (!n)
 		return NULL;
+
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	if (skb->mspd_data) {
+		if (skb->mspd_len) {
+			int ofst = skb->len - skb->mspd_len;
+
+			memcpy(skb->data + ofst, skb->mspd_data + skb->mspd_ofst, skb->mspd_len);
+			((struct sk_buff *)skb)->mspd_len = 0;
+		}
+
+		WARN_ON(skb_shared(skb));
+
+		if (!skb_shared(skb)) {
+			kfree(skb->mspd_data);
+			((struct sk_buff *)skb)->mspd_data = NULL;
+		}
+	}
+#endif
 
 	/* Set the data pointer */
 	skb_reserve(n, headerlen);
