@@ -29,6 +29,7 @@
 #include <linux/types.h>
 #include <linux/watchdog.h>
 #include <linux/clk.h>
+#include <linux/timer.h>
 #include <asm/bitops.h>
 #include <asm/uaccess.h>
 #include <asm/io.h>
@@ -37,25 +38,38 @@
 #include <mach/reset.h>
 
 #define WDT_NAME					"comcerto_wdt"
+
+/* these are the actual wdt limits */
 #define WDT_DEFAULT_TIMEOUT				5
 #define WDT_MAX_TIMEOUT					(0xffffffff / COMCERTO_AHBCLK)
 
+/* these are for the virtual wdt */
+#define WDT_DEFAULT_TIME				70	/* seconds */
+#define WDT_MAX_TIME					255	/* seconds */
+
 static unsigned long COMCERTO_AHBCLK;
 static int wd_heartbeat = WDT_DEFAULT_TIMEOUT;
+static int wd_time = WDT_DEFAULT_TIME;
 static int nowayout = WATCHDOG_NOWAYOUT;
 static struct clk *clk_axi;
 
 module_param(wd_heartbeat, int, 0);
 MODULE_PARM_DESC(wd_heartbeat, "Watchdog heartbeat in seconds. (default="__MODULE_STRING(WDT_DEFAULT_TIMEOUT) ")");
 
+module_param(wd_time, int, 0);
+MODULE_PARM_DESC(wd_time, "Watchdog time in seconds. (default="__MODULE_STRING(WDT_DEFAULT_TIME) ")");
+
 #ifdef CONFIG_WATCHDOG_NOWAYOUT
 module_param(nowayout, int, 0);
 MODULE_PARM_DESC(nowayout, "Watchdog cannot be stopped once started (default=" __MODULE_STRING(WATCHDOG_NOWAYOUT) ")");
 #endif
 
+static struct timer_list wdt_timer;
+
 static unsigned long comcerto_wdt_busy;
 static char expect_close;
 static spinlock_t wdt_lock;
+static atomic_t ticks;
 
 /*
  * Inform whether the boot was caused by AXI watchdog or not.
@@ -95,9 +109,43 @@ static int comcerto_wdt_set_heartbeat(int t)
 /*
  * Write wd_heartbeat to high bound register.
  */
-static void comcerto_wdt_set_timeout(void)
+static void comcerto_wdt_pet_watchdog_physical(void)
 {
 	__raw_writel(wd_heartbeat * COMCERTO_AHBCLK, COMCERTO_TIMER_WDT_HIGH_BOUND);
+}
+
+/*
+ * reset virtual wdt timer
+ */
+static void comcerto_wdt_pet_watchdog_virtual(void)
+{
+	atomic_set(&ticks, wd_time);
+}
+
+/*
+ * set virtual wd timeout reset value
+ */
+static int comcerto_wdt_settimeout(int new_time)
+{
+	if ((new_time <= 0) || (new_time > WDT_MAX_TIME))
+		return -EINVAL;
+
+	wd_time = new_time;
+	return 0;
+}
+
+/*
+ * implement virtual wdt on physical wdt with timer
+ */
+static void comcerto_timer_tick(unsigned long unused)
+{
+	if (!atomic_dec_and_test(&ticks)) {
+		comcerto_wdt_pet_watchdog_physical();
+		mod_timer(&wdt_timer, jiffies + HZ);
+		//printk(KERN_CRIT WDT_NAME ": Watchdog will fire in %d secs\n", atomic_read(&ticks));
+	} else {
+		printk(KERN_CRIT WDT_NAME ": Watchdog will fire soon!!!\n");
+	}
 }
 
 /*
@@ -110,13 +158,15 @@ static void comcerto_wdt_stop(void)
 
 	spin_lock_irqsave(&wdt_lock, flags);
 
+	del_timer(&wdt_timer);
+
 	wdt_control = __raw_readl(COMCERTO_TIMER_WDT_CONTROL);
 
 	__raw_writel(wdt_control & ~COMCERTO_TIMER_WDT_CONTROL_TIMER_ENABLE, COMCERTO_TIMER_WDT_CONTROL);
 
 	spin_unlock_irqrestore(&wdt_lock, flags);
 
-	comcerto_wdt_set_timeout();
+	comcerto_wdt_pet_watchdog_physical();
 }
 
 /*
@@ -135,6 +185,8 @@ static void comcerto_wdt_start(void)
 
 	comcerto_rst_cntrl_set(AXI_WD_RST_EN);
 
+	mod_timer(&wdt_timer, jiffies + HZ);
+
 	spin_unlock_irqrestore(&wdt_lock, flags);
 }
 
@@ -150,7 +202,7 @@ static void comcerto_wdt_config(void)
 {
 	comcerto_wdt_stop();
 
-	__raw_writel(~0, COMCERTO_TIMER_WDT_HIGH_BOUND);			/* write max timout */
+	__raw_writel(~0, COMCERTO_TIMER_WDT_HIGH_BOUND);			/* write max timeout */
 }
 
 /*
@@ -161,7 +213,8 @@ static int comcerto_wdt_open(struct inode *inode, struct file *file)
 	if (test_and_set_bit(0, &comcerto_wdt_busy))
 		return -EBUSY;
 
-	comcerto_wdt_set_timeout();
+	comcerto_wdt_pet_watchdog_virtual();
+	comcerto_wdt_pet_watchdog_physical();
 	comcerto_wdt_start();
 
 	return nonseekable_open(inode, file);
@@ -204,7 +257,7 @@ static long comcerto_wdt_ioctl(struct file *file, uint cmd, ulong arg)
 
 	switch(cmd) {
 	case WDIOC_KEEPALIVE:
-		comcerto_wdt_set_timeout();
+		comcerto_wdt_pet_watchdog_virtual();
 		break;
 
 	case WDIOC_GETSUPPORT:
@@ -221,18 +274,18 @@ static long comcerto_wdt_ioctl(struct file *file, uint cmd, ulong arg)
 			goto err;
 		}
 
-		if (comcerto_wdt_set_heartbeat(new_value)) {
+		if (comcerto_wdt_settimeout(new_value)) {
 			err = -EINVAL;
 			goto err;
 		}
 
-		comcerto_wdt_set_timeout();
+		comcerto_wdt_pet_watchdog_virtual();
 
-		return put_user(wd_heartbeat, p);
+		return put_user(wd_time, p);
 		break;
 
 	case WDIOC_GETTIMEOUT:
-		return put_user(wd_heartbeat, p);
+		return put_user(wd_time, p);
 		break;
 
 	case WDIOC_GETSTATUS:
@@ -291,7 +344,7 @@ static ssize_t comcerto_wdt_write(struct file *file, const char *buf, size_t len
 			}
 		}
 
-		comcerto_wdt_set_timeout();
+		comcerto_wdt_pet_watchdog_virtual();
 	}
 
 	return len;
@@ -351,6 +404,16 @@ static int __init comcerto_wdt_probe(struct platform_device *pdev)
                 printk(KERN_INFO "%s: wd_heartbeat value is out of range: 1..%lu, using %d\n",
                         WDT_NAME, WDT_MAX_TIMEOUT, WDT_DEFAULT_TIMEOUT);
         }
+
+        /* check that the time value is within range; if not reset to the default */
+        if (comcerto_wdt_settimeout(wd_time)) {
+                comcerto_wdt_settimeout(WDT_DEFAULT_TIMEOUT);
+
+                printk(KERN_INFO "%s: wd_time value is out of range: 1..%lu, using %d\n",
+                        WDT_NAME, WDT_MAX_TIME, WDT_DEFAULT_TIME);
+        }
+
+	setup_timer(&wdt_timer, comcerto_timer_tick, 0L);
 
 	return 0;
 
