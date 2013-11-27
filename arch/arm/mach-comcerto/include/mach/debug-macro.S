@@ -22,14 +22,14 @@
 
 
 	.macro	addruart, rx, rv, tmp
-	moveq	\rx, #0x96000000	@ physical base address
-	@movne	\rv, #0xf1600000	@ virtual base
+	ldr	\rx, =0x96000000	@ physical base address
+	ldr	\rv, =0xf1600000	@ virtual base
 	#ifdef CONFIG_COMCERTO_UART1_SUPPORT
-		orr	\rx, \rx, #0x00400000
-		orr	\rv, \rv, #0x00400000
+		add	\rx, \rx, #0x00400000
+		add	\rv, \rv, #0x00400000
 	#elif CONFIG_COMCERTO_UART0_SUPPORT
-		orr	\rx, \rx, #0x00300000
-		orr	\rv, \rv, #0x00300000
+		add	\rx, \rx, #0x00300000
+		add	\rv, \rv, #0x00300000
 	#else
 		#error no uart defined
 	#endif
