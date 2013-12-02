@@ -28,3 +28,4 @@ obj-$(CONFIG_SMP)				+= platsmp.o headsmp.o
 obj-$(CONFIG_COMCERTO_MSP)			+= msp/
 obj-$(CONFIG_HOTPLUG_CPU)			+= hotplug.o
 obj-$(CONFIG_COMCERTO_CSYS_TPI_CLOCK)		+= comcerto-tpicsys.o
+obj-$(CONFIG_BOOTLOG_COPY)			+= bootlog.o
