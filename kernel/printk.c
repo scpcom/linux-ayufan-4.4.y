@@ -317,7 +317,13 @@ error:
 #endif	 /* CONFIG_PRINTK_PERSIST */
 
 /* requested log_buf_len from kernel cmdline */
-static unsigned long __initdata new_log_buf_len;
+static unsigned long __initdata new_log_buf_len =
+#ifdef CONFIG_PRINTK_PERSIST_BUF_SHIFT
+	(1 << CONFIG_PRINTK_PERSIST_BUF_SHIFT)
+#else
+	0
+#endif
+;
 
 /* save requested log_buf_len since it's too early to process it */
 static int __init log_buf_len_setup(char *str)
@@ -326,7 +332,7 @@ static int __init log_buf_len_setup(char *str)
 
 	if (size)
 		size = roundup_pow_of_two(size);
-	if (size > log_buf_len)
+	if (size > log_buf_len || size == 0)
 		new_log_buf_len = size;
 
 	return 0;
