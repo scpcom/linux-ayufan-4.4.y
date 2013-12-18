@@ -2802,6 +2802,8 @@ static ssize_t dfs_file_read(struct file *file, char __user *u, size_t count,
 		val = d->chk_fs;
 	else if (dent == d->dfs_tst_rcvry)
 		val = d->tst_rcvry;
+	else if (dent == d->dfs_readonly)
+		val = c->ro_error;
 	else
 		return -EINVAL;
 
@@ -2992,6 +2994,12 @@ int dbg_debugfs_init_fs(struct ubifs_info *c)
 	if (IS_ERR_OR_NULL(dent))
 		goto out_remove;
 	d->dfs_tst_rcvry = dent;
+
+	fname = "readonly";
+	dent = debugfs_create_file(fname, S_IRUSR, d->dfs_dir, c, &dfs_fops);
+	if (IS_ERR_OR_NULL(dent))
+		goto out_remove;
+	d->dfs_readonly = dent;
 
 	return 0;
 
