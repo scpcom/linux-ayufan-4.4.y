@@ -129,7 +129,9 @@ static void dwspi_init_hw(struct designware_spi *dwspi)
 
 static void dwspi_baudcfg(struct designware_spi *dwspi, u32 speed_hz)
 {
-	u16 div = (speed_hz) ? dwspi->ssi_clk/speed_hz : 0xffff;
+	/* Divisor must be an even number */
+	u16 div = (speed_hz) ? DIV_ROUND_UP(dwspi->ssi_clk, speed_hz) + 1 &
+		0xfffe : 0xffff;
 
 	writew(div, dwspi->regs + DWSPI_BAUDR);
 }
