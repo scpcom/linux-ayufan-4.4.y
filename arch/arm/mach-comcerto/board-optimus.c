@@ -266,7 +266,7 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 	{
 		.modalias = "bmoca",
 		.chip_select = 0,
-		.max_speed_hz = 25*1000*1000,
+		.max_speed_hz = 20*1000*1000,
 		.bus_num = 0,
 		.irq = IRQ_G0,
 		.mode = SPI_MODE_3,
@@ -277,7 +277,7 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 	{
 		.modalias = "bmoca",
 		.chip_select = 0,
-		.max_speed_hz = 25*1000*1000,
+		.max_speed_hz = 20*1000*1000,
 		.bus_num = 1,
 		.irq = IRQ_G0,
 		.mode = SPI_MODE_3,
