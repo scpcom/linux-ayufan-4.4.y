@@ -35,6 +35,7 @@
 #define PHY_ID_AR8035			0x004dd072
 #define PHY_ID_AR8033			0x004dd074
 #define PHY_ID_AR8327			0x004dd033
+#define PHY_ID_AR8337			0x004dd034
 
 MODULE_DESCRIPTION("Atheros PHY driver");
 MODULE_LICENSE("GPL");
@@ -152,6 +153,25 @@ static struct phy_driver ar8327_driver = {
 	.driver 	= { .owner = THIS_MODULE,},
 };
 
+/* Atheros Ar8337 */
+static struct phy_driver ar8337_driver = {
+	.phy_id		= PHY_ID_AR8337,
+	.name		= "Atheros AR8337",
+	.phy_id_mask	= 0xffffff00,
+	.features	= PHY_GBIT_FEATURES,
+	.flags		= PHY_HAS_INTERRUPT,
+	.config_init	= &ar8x_config_init,
+	.config_aneg	= &genphy_config_aneg,
+	.read_status	= &genphy_read_status,
+	.ack_interrupt	= &ar8x_ack_interrupt,
+	.config_intr	= &ar8x_config_intr,
+#ifdef CONFIG_PM
+	.suspend	= &genphy_suspend,
+	.resume		= &genphy_resume,
+#endif
+	.driver 	= { .owner = THIS_MODULE,},
+};
+
 static int __init ar8x_init(void)
 {
 	int err;
@@ -164,6 +184,12 @@ static int __init ar8x_init(void)
 	if (err < 0)
 		phy_driver_unregister(&ar8035_driver);
 
+	err = phy_driver_register(&ar8337_driver);
+	if (err < 0) {
+		phy_driver_unregister(&ar8035_driver);
+		phy_driver_unregister(&ar8327_driver);
+	}
+
 	return err;
 }
 
@@ -171,6 +197,7 @@ static void __exit ar8x_exit(void)
 {
 	phy_driver_unregister(&ar8035_driver);
 	phy_driver_unregister(&ar8327_driver);
+	phy_driver_unregister(&ar8337_driver);
 }
 
 module_init(ar8x_init);
@@ -179,6 +206,7 @@ module_exit(ar8x_exit);
 static struct mdio_device_id __maybe_unused atheros_tbl[] = {
 	{ PHY_ID_AR8035, 0xffffff00 },
 	{ PHY_ID_AR8327, 0xffffff00 },
+	{ PHY_ID_AR8337, 0xffffff00 },
 	{ }
 };
 
