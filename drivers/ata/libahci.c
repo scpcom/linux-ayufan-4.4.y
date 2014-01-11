@@ -1724,6 +1724,8 @@ static void ahci_port_intr(struct ata_port *ap)
 	}
 }
 
+/*
+*/
 irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 {
 	struct ata_host *host = dev_instance;
@@ -1807,6 +1809,57 @@ static unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 		writel(fbs, port_mmio + PORT_FBS);
 		pp->fbs_last_dev = qc->dev->link->pmp;
 	}
+
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+	if (enable_ahci_prof) {
+		struct ahci_port_stats *stats = &ahci_port_stats[ap->port_no];
+		struct timeval now;
+		int bin;
+
+		do_gettimeofday(&now);
+
+		if (stats->init_prof) {
+			int diff_time_us;
+
+			diff_time_us = (now.tv_sec - stats->last_req.tv_sec) * 1000 * 1000 + (now.tv_usec - stats->last_req.tv_usec);
+
+			bin = diff_time_us >> US_SHIFT;
+			if (bin >= MAX_BINS)
+				bin = MAX_BINS - 1;
+
+			stats->time_counter[bin]++;
+		}
+		else {
+			stats->init_prof = 1;
+		}
+
+		stats->last_req = now;
+
+		bin = qc->nbytes >> BYTE_SHIFT;
+		if (bin >= MAX_BINS)
+			bin = MAX_BINS - 1;
+
+		stats->data_counter[bin]++;
+
+		if (!stats->nb_pending) {
+			stats->first_issue = now;
+			stats->nb_pending_total = 0;
+		}
+
+		stats->nb_pending_total++;
+
+		/* This should never overflow */
+		stats->pending_counter[stats->nb_pending & (MAX_AHCI_SLOTS - 1)]++;
+
+		stats->nb_pending++;
+
+		if (stats->nb_pending_total > stats->nb_pending_max)
+			stats->nb_pending_max = stats->nb_pending_total;
+
+		stats->bytes_pending += qc->nbytes;
+		stats->pending_flag |= 1 << qc->tag;
+	}
+#endif
 
 	writel(1 << qc->tag, port_mmio + PORT_CMD_ISSUE);
 

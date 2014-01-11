@@ -30,8 +30,184 @@
 #include <net/net_namespace.h>
 #include <net/netns/generic.h>
 #include <net/xfrm.h>
+#include <net/netlink.h>
 
 #include <net/sock.h>
+#include <net/ip6_route.h>
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD)|| defined(CONFIG_INET6_IPSEC_OFFLOAD)
+#define NLKEY_SUPPORT 1
+#else 
+#undef NLKEY_SUPPORT
+#endif 
+
+#ifdef NLKEY_SUPPORT
+#include <net/dsfield.h>
+#include <net/inet_ecn.h>
+#include <net/ipv6.h>
+
+
+extern struct dst_entry *xfrm_dst_lookup(struct xfrm_state *x, int tos,
+						xfrm_address_t *prev_saddr,
+						xfrm_address_t *prev_daddr,
+						int family);
+extern int xfrm_get_tos(struct flowi *fl, int family);
+extern int ipsec_nlkey_flow(u16 xfrm_nr, u16 *xfrm_handle, 
+		const struct flowi *fl, u16 family, u16 dir);
+
+
+#define	NLKEY_SA_CREATE		0x0A01
+#define NLKEY_SA_DELETE		0x0A02
+#define NLKEY_SA_FLUSH 		0x0A03
+#define NLKEY_SA_SET_KEYS	0x0A04
+#define NLKEY_SA_SET_TUNNEL	0x0A05
+#define NLKEY_SA_SET_NATT	0x0A06
+#define	NLKEY_SA_SET_STATE	0x0A07
+#define	NLKEY_SA_SET_LIFETIME	0x0A08
+#define	NLKEY_SA_NOTIFY		0x0A09
+#define NLKEY_SA_INFO_UPDATE	0x0A0C
+#define	NLKEY_FLOW_ADD		0x0A11
+#define NLKEY_FLOW_REMOVE	0x0A12
+#define NLKEY_FLOW_NOTIFY	0x0A13
+#define NLKEY_NULL_MSG		0x0000
+
+#define NLKEY_HDR_LEN		4
+#define NLKEY_MSG_LEN 		256
+
+#define NLKEY_MAX_NUM_KEYS	2
+#define NLKEY_MAX_KEY_LEN	(256 / 8)
+
+struct nlkey_msg {
+	/* message data */
+	unsigned short fcode;
+	unsigned short length;
+	unsigned short payload[(NLKEY_MSG_LEN /sizeof(unsigned short))];
+};
+/* sizeof(nlkey_msg) = 4 + 256 */
+
+struct nlkey_sa_id {
+	unsigned int spi;
+	unsigned char sa_type;
+	unsigned char proto_family;
+	unsigned char replay_window;
+#define NLKEY_SAFLAGS_ESN	0x1
+	unsigned char flags;
+	unsigned int dst_ip[4];
+	unsigned int src_ip[4];
+	unsigned short mtu;
+	unsigned short dev_mtu;
+
+};
+/* sizeof(nlkey_sa_id) = 24 */
+
+struct nlkey_sa_create {
+	unsigned short sagd;
+	unsigned short rsvd;
+	struct nlkey_sa_id said;
+};
+/* sizeof(nlkey_sa_delete) = 28 */
+
+struct nlkey_sa_delete {
+	unsigned short sagd;
+	unsigned short rsvd;
+};
+/* sizeof(nlkey_sa_delete) = 4 */
+
+struct nlkey_sa_set_tunnel {
+	unsigned short sagd;
+	unsigned char rsvd;
+	unsigned char proto_family;
+	union {
+		struct iphdr 	 ipv4h;
+		struct ipv6hdr ipv6h;
+	} h;
+};
+/* sizeof(nlkey_sa_set_tunnel) = 36 */
+
+struct nlkey_sa_set_natt {
+	unsigned short sagd;
+	unsigned short sport;
+	unsigned short dport;
+	unsigned short rsvd;
+};
+/* sizeof(nlkey_sa_set_natt) = 4 */
+
+struct nlkey_sa_set_state {
+	unsigned short sagd;
+	unsigned short rsvd;
+	unsigned short state;
+	unsigned short rsvd2;
+};
+/* sizeof(nlkey_sa_set_natt) = 8 */
+
+struct nlkey_key_desc {
+	unsigned short key_bits;
+	unsigned char key_alg;
+	unsigned char  key_type;
+	unsigned char key[NLKEY_MAX_KEY_LEN]; 
+};
+/* sizeof(nlkey_key_desc) =  36 */
+
+struct nlkey_sa_set_keys {
+	unsigned short sagd;
+	unsigned short rsvd;	
+	unsigned short num_keys;
+	unsigned short rsvd2;
+	struct nlkey_key_desc keys[NLKEY_MAX_NUM_KEYS];
+};
+/* sizeof(nlkey_sa_set_keys) =  80 */
+
+struct nlkey_lifetime_desc {
+	unsigned int allocations;
+	unsigned int bytes[2];
+};
+/* sizeof(nlkey_sa_set_lifetime) =  12 */
+
+struct nlkey_sa_set_lifetime {
+	unsigned short sagd;
+	unsigned short rsvd;
+	struct nlkey_lifetime_desc hard_time;
+	struct nlkey_lifetime_desc soft_time;
+	struct nlkey_lifetime_desc current_time;
+};
+/* sizeof(nlkey_sa_set_lifetime) =  40 */
+
+/* SA notifications */
+#define IPSEC_SOFT_EXPIRE 0
+#define IPSEC_HARD_EXPIRE 1
+
+struct nlkey_sa_notify {
+	unsigned short sagd;
+	unsigned short rsvd;
+	unsigned int  action;
+};
+/* sizeof(nlkey_sa_notify) = 8 */
+
+/* SA Info update */
+
+struct nlkey_sa_info {
+        unsigned short sagd;
+        unsigned short rsvd;
+        unsigned long long bytes;
+        unsigned long long packets;
+};
+/* sizeof(nlkey_sa_info) =  */
+
+
+static int ipsec_nlkey_send(struct net *net, struct xfrm_state *x, const struct km_event *c);
+static void ipsec_nlkey_rcv(struct sk_buff *skb);
+static void ipsec_nlkey_init(void);
+static unsigned short ipsec_sacode_to_nlkeycode(unsigned short sa_code);
+static struct sk_buff * ipsec_xfrm2nlkey (struct net *net, struct xfrm_state *x, 
+					const struct km_event *c, unsigned short *msg_id);
+static int ipsec_nlkey_set_said(struct net *net, struct xfrm_state *x, const struct km_event *c, struct nlkey_sa_id *said);
+
+/* netlink NETLINK_KEY socket */
+struct sock *nlkey_socket = NULL;
+
+#endif
+/************************************************************************************/
+
 
 #define _X2KEY(x) ((x) == XFRM_INF ? 0 : (x))
 #define _KEY2X(x) ((x) == 0 ? XFRM_INF : (x))
@@ -837,6 +1013,8 @@ static struct sk_buff *__pfkey_xfrm_state2msg(const struct xfrm_state *x,
 		sa->sadb_sa_flags |= SADB_SAFLAGS_DECAP_DSCP;
 	if (x->props.flags & XFRM_STATE_NOPMTUDISC)
 		sa->sadb_sa_flags |= SADB_SAFLAGS_NOPMTUDISC;
+	if (x->props.flags & XFRM_STATE_ESN)
+		sa->sadb_sa_flags |= SADB_SAFLAGS_ESN;
 
 	/* hard time */
 	if (hsc & 2) {
@@ -1104,6 +1282,8 @@ static struct xfrm_state * pfkey_msg2xfrm_state(struct net *net,
 		x->props.flags |= XFRM_STATE_DECAP_DSCP;
 	if (sa->sadb_sa_flags & SADB_SAFLAGS_NOPMTUDISC)
 		x->props.flags |= XFRM_STATE_NOPMTUDISC;
+	if (sa->sadb_sa_flags & SADB_SAFLAGS_ESN)
+		x->props.flags |= XFRM_STATE_ESN;
 
 	lifetime = ext_hdrs[SADB_EXT_LIFETIME_HARD - 1];
 	if (lifetime != NULL) {
@@ -2959,6 +3139,7 @@ static int key_notify_sa_expire(struct xfrm_state *x, const struct km_event *c)
 	out_hdr->sadb_msg_pid = 0;
 
 	pfkey_broadcast(out_skb, GFP_ATOMIC, BROADCAST_REGISTERED, NULL, xs_net(x));
+
 	return 0;
 }
 
@@ -2966,6 +3147,12 @@ static int pfkey_send_notify(struct xfrm_state *x, const struct km_event *c)
 {
 	struct net *net = x ? xs_net(x) : c->net;
 	struct netns_pfkey *net_pfkey = net_generic(net, pfkey_net_id);
+
+
+#ifdef NLKEY_SUPPORT
+	/* send message to the user space through NETLINK_KEY socket*/
+	ipsec_nlkey_send(net, x, c);
+#endif
 
 	if (atomic_read(&net_pfkey->socks_nr) == 0)
 		return 0;
@@ -3748,6 +3935,593 @@ static struct xfrm_mgr pfkeyv2_mgr =
 	.migrate	= pfkey_send_migrate,
 };
 
+
+#ifdef NLKEY_SUPPORT
+extern struct xfrm_state *xfrm_state_lookup_byhandle(struct net *net, u16 handle);
+
+static unsigned short ipsec_sacode_to_nlkeycode(unsigned short sa_code)
+{
+	unsigned nlkey_code;
+
+	switch (sa_code) 
+	{
+		case XFRM_MSG_DELSA:
+			nlkey_code = NLKEY_SA_DELETE;
+			break;
+		case XFRM_MSG_NEWSA:
+		case XFRM_MSG_UPDSA:
+			nlkey_code = NLKEY_SA_CREATE;
+			break;
+		case XFRM_MSG_FLUSHSA:
+			nlkey_code = NLKEY_SA_FLUSH;
+			break;
+		case XFRM_MSG_EXPIRE:
+			nlkey_code = NLKEY_SA_SET_STATE;
+			break;
+		default:
+			nlkey_code = NLKEY_NULL_MSG;
+			break;
+	}
+
+	return nlkey_code;
+}
+
+static void ipsec_nlkey_rcv(struct sk_buff *skb)
+{
+	struct nlmsghdr *nlh = NULL;
+	struct nlkey_msg *msg = NULL;
+	struct flowi flow;
+	unsigned short *p;
+	unsigned short family, dir;
+	struct xfrm_state *x;
+	struct nlkey_sa_notify sa_notify_msg;
+	struct nlkey_sa_info sa_info_msg;
+
+	/* extract message from skb */
+	nlh = (struct nlmsghdr *)skb->data;
+
+	msg = (struct nlkey_msg *)NLMSG_DATA(nlh);
+
+	//printk(KERN_INFO "ipsec_nlkey_rcv fcode: 0x%x length: %d bytes\n",msg->fcode,msg->length);
+
+	/* process command received from user space */
+	switch(msg->fcode)
+	{
+		case NLKEY_FLOW_REMOVE:
+			//printk(KERN_INFO "ipsec_nlkey_rcv NLKEY_FLOW_REMOVE\n");
+			p = msg->payload;
+			memcpy(&flow, p, sizeof(struct flowi)); p += sizeof(struct flowi)/2;
+			family = *p; p++;
+			dir = *p; p++;
+			flow_cache_remove(&flow, family, dir);
+			break;
+
+		case NLKEY_SA_NOTIFY:
+			//printk(KERN_INFO "ipsec_nlkey_rcv NLKEY_SA_NOTIFY\n");
+			memcpy(&sa_notify_msg, msg->payload, sizeof(struct nlkey_sa_notify));
+			x = xfrm_state_lookup_byhandle(&init_net, sa_notify_msg.sagd);
+			if (x) {
+				spin_lock(&x->lock);
+
+				if (sa_notify_msg.action) { 
+					// hard expired
+					x->km.state = XFRM_STATE_EXPIRED;
+					tasklet_hrtimer_start(&x->mtimer, ktime_set(0,0), HRTIMER_MODE_REL);
+				}
+				else if (!x->km.dying) {
+					 x->km.dying = 1;
+					 km_state_expired(x, 0, 0);
+				}
+
+				spin_unlock(&x->lock);
+				xfrm_state_put(x);
+			}
+			break;
+
+		case NLKEY_SA_INFO_UPDATE:
+			memcpy(&sa_info_msg, msg->payload, sizeof(struct nlkey_sa_info));
+
+			x = xfrm_state_lookup_byhandle(&init_net,sa_info_msg.sagd);
+			if (x) {
+				spin_lock(&x->lock);
+
+				x->curlft.bytes = sa_info_msg.bytes;
+				x->curlft.packets = sa_info_msg.packets;
+
+				spin_unlock(&x->lock);
+				xfrm_state_put(x);
+			}
+			break;
+		default:
+			//printk(KERN_INFO "ipsec_nlkey_rcv fcode 0x%x not supported\n", msg->fcode);
+			break;
+	}
+
+}
+
+extern struct dst_entry *__xfrm_dst_lookup(struct net *net, int tos,
+						  xfrm_address_t *saddr,
+						  xfrm_address_t *daddr,
+						  int family);
+static int ipsec_nlkey_set_said(struct net *net, struct xfrm_state *x, 
+				const struct km_event *c, struct nlkey_sa_id *said)
+{
+
+	struct flowi fl;
+	int tos;
+	xfrm_address_t saddr, daddr;
+	struct dst_entry *dst;
+	int rc = 0;
+
+	memset(&fl, 0, sizeof(struct flowi));
+
+	/* SPI */
+	said->spi = x->id.spi;
+	/* SA Type (AH or ESP) */
+	said->sa_type = x->id.proto;
+	/* Protocol Family (IPv4 or IPv6) */
+	said->proto_family = x->props.family;
+	/* Replay window */
+	said->replay_window = x->props.replay_window;
+	/* Destination IP Address */
+	if(x->props.family == AF_INET6) {
+		memcpy(&said->dst_ip, x->id.daddr.a6, sizeof(struct in6_addr));
+		ipv6_addr_copy(&fl.u.ip6.daddr, (struct in6_addr *)x->id.daddr.a6);
+		memcpy(&said->src_ip, x->props.saddr.a6, sizeof(struct in6_addr));
+	}
+	else {
+		said->dst_ip[0] = x->id.daddr.a4;
+		fl.u.ip4.daddr = x->id.daddr.a4;
+		said->src_ip[0] = x->props.saddr.a4;
+	}
+	said->mtu = 0;
+
+	if(x->props.flags & XFRM_STATE_ESN)
+		said->flags = NLKEY_SAFLAGS_ESN;
+	xfrm_flowi_addr_get(&fl, &saddr, &daddr, x->props.family);
+
+	tos = xfrm_get_tos(&fl, x->props.family);
+	if (tos < 0) {
+		printk(KERN_ERR "%s:%d: FIXME\n",__FUNCTION__,__LINE__);	
+		rc = -1;
+		goto error;
+	}
+	
+	dst = __xfrm_dst_lookup(net, tos, NULL, &daddr, x->props.family);
+	if (IS_ERR(dst)) {
+		printk(KERN_ERR "%s:%d: FIXME\n",__FUNCTION__,__LINE__);
+		rc = -1;
+		goto error;
+	}
+	said->dev_mtu = dst_mtu(dst);
+	said->mtu = xfrm_state_mtu(x,dst_mtu(dst));	
+
+	dst_release(dst);
+error:
+	return rc;
+}
+
+static struct sk_buff * ipsec_xfrm2nlkey (struct net *net, struct xfrm_state *x, 
+					const struct km_event *c, unsigned short *msg_id)
+{
+	struct nlkey_sa_id sa_id_msg;
+	struct nlkey_sa_create sa_create_msg;
+	struct nlkey_sa_delete sa_delete_msg;
+	struct nlkey_sa_set_keys sa_set_keys_msg;
+	struct nlkey_sa_set_tunnel sa_set_tunnel_msg;
+	struct nlkey_sa_set_natt sa_set_natt_msg;
+	struct nlkey_sa_set_state sa_set_state_msg;
+	struct nlkey_sa_set_lifetime sa_set_lifetime_msg;
+	struct nlkey_msg msg;
+	struct sk_buff *skb = NULL;
+	struct nlmsghdr *nlh = NULL;
+	gfp_t allocation = in_interrupt() ? GFP_ATOMIC : GFP_KERNEL;
+	unsigned char tunnel, keys, natt, state, lifetime;
+
+	/* supported SA informations */
+	keys = 1; state = 1; tunnel = 1; lifetime = 1; natt = 1; 
+
+	/* next message to build */
+	memset(&msg, 0, sizeof(struct nlkey_msg));
+	msg.fcode = *msg_id;
+	
+	//printk(KERN_INFO "\n\nipsec_xfrm2nlkey: processing event 0x%x\n", msg.fcode);
+
+	switch (msg.fcode)
+	{
+		case NLKEY_SA_CREATE:
+			//printk(KERN_INFO "ipsec_xfrm2nlkey: NLKEY_SA_CREATE\n");
+			if(x) {
+				/* some check before builing message */
+				if((x->id.proto != IPPROTO_ESP) && (x->id.proto != IPPROTO_AH)) {
+					printk(KERN_ERR "ipsec_xfrm2nlkey: protocol %d not supported\n", x->id.proto);
+					*msg_id = NLKEY_NULL_MSG;
+					goto exit;
+				}	
+				memset(&sa_create_msg, 0, sizeof(struct nlkey_sa_create));	
+
+				/* SA global handler */
+				sa_create_msg.sagd = x->handle;
+
+				/* SA identifier */
+				if(ipsec_nlkey_set_said(net, x, c, &sa_create_msg.said) < 0)
+				{
+					printk(KERN_ERR "%s: set sa ID failed\n", __func__);
+					*msg_id = NLKEY_NULL_MSG; /* next message */
+					goto exit;
+				}
+				memcpy(msg.payload, &sa_create_msg, sizeof(struct nlkey_sa_create));
+				msg.length = sizeof(struct nlkey_sa_create);
+				*msg_id = NLKEY_SA_SET_KEYS; /* next message */
+			} else {
+				*msg_id = NLKEY_NULL_MSG; /* next message */
+				goto exit;
+			}
+			
+			break;
+
+		case NLKEY_SA_SET_KEYS:
+			//printk(KERN_INFO "ipsec_xfrm2nlkey: NLKEY_SA_SET_KEYS\n");
+			if(keys) {
+				memset(&sa_set_keys_msg, 0, sizeof(struct nlkey_sa_set_keys));
+
+				/* SA global handler */
+				sa_set_keys_msg.sagd = x->handle; 
+				
+				/* auth key */
+				if(x->aalg) {
+					if (x->aalg->alg_key_len) {
+						sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_bits = x->aalg->alg_key_len;
+						sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_alg = x->props.aalgo;
+						sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_type = 0;
+						memcpy(sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key, x->aalg->alg_key,(sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_bits / 8));
+						//printk(KERN_INFO "ipsec_xfrm2nlkey: AUTH - algo %d key %d bits\n", sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_alg, sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_bits);
+						sa_set_keys_msg.num_keys++;
+					}
+				}
+				/* encrypt key */
+				if(x->ealg) {
+					if (x->ealg->alg_key_len) {
+
+						sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_bits = x->ealg->alg_key_len;
+						sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_alg = x->props.ealgo;
+						sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_type = 1;
+						memcpy(sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key, x->ealg->alg_key,(sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_bits / 8));
+						//printk(KERN_INFO "ipsec_xfrm2nlkey: ENCRYPT - algo %d key %d bits\n", sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_alg, sa_set_keys_msg.keys[sa_set_keys_msg.num_keys].key_bits);
+						sa_set_keys_msg.num_keys++;
+					}
+				}
+				memcpy(msg.payload, &sa_set_keys_msg, sizeof(struct nlkey_sa_set_keys));
+				msg.length = sizeof(struct nlkey_sa_set_keys);
+				*msg_id = NLKEY_SA_SET_TUNNEL; /* next message */
+			} else {
+				*msg_id = NLKEY_SA_SET_TUNNEL; /* next message */
+				goto exit;
+			}
+			break;
+
+		case NLKEY_SA_SET_TUNNEL:
+			//printk(KERN_INFO "ipsec_xfrm2nlkey: NLKEY_SA_SET_TUNNEL\n");
+			if(tunnel && (x->props.mode == XFRM_MODE_TUNNEL)) {
+				memset(&sa_set_tunnel_msg, 0, sizeof(struct nlkey_sa_set_tunnel));
+
+				/* SA global handler */
+				sa_set_tunnel_msg.sagd = x->handle; 
+
+				/* Tunnel */
+				sa_set_tunnel_msg.proto_family = x->props.family;
+				if(x->props.family == AF_INET6) {
+					struct ipv6hdr *top_iph = &sa_set_tunnel_msg.h.ipv6h;
+					int dsfield;
+					top_iph->version = 6;
+					top_iph->priority = 0;
+					top_iph->flow_lbl[0] = 0;
+					top_iph->flow_lbl[1] = 0;
+					top_iph->flow_lbl[2] = 0;
+					top_iph->nexthdr = IPPROTO_IPIP;	
+					dsfield = ipv6_get_dsfield(top_iph);
+					dsfield = INET_ECN_encapsulate(dsfield, dsfield);
+					if (x->props.flags & XFRM_STATE_NOECN)
+						dsfield &= ~INET_ECN_MASK;
+					ipv6_change_dsfield(top_iph, 0, dsfield);
+					top_iph->hop_limit = 64;
+					memcpy(&top_iph->daddr, x->id.daddr.a6, sizeof(struct in6_addr));
+					memcpy(&top_iph->saddr, x->props.saddr.a6, sizeof(struct in6_addr));
+					//printk(KERN_INFO "ipsec_xfrm2nlkey: IPv6 tunnel\n");
+					//printk(KERN_INFO "dst: %x %x %x %x\n", x->id.daddr.a6[0], x->id.daddr.a6[1], x->id.daddr.a6[2], x->id.daddr.a6[3]);
+					//(KERN_INFO "src: %x %x %x %x\n", x->props.saddr.a6[0], x->props.saddr.a6[1], x->props.saddr.a6[2], x->props.saddr.a6[3]);
+				}
+				else {
+					struct iphdr *top_iph = &sa_set_tunnel_msg.h.ipv4h;
+					top_iph->ihl = 5;
+					top_iph->version = 4;
+					top_iph->tos = 0;
+					top_iph->frag_off = 0; 
+					top_iph->ttl = 64;
+					top_iph->saddr = x->props.saddr.a4;
+					top_iph->daddr = x->id.daddr.a4;
+					//printk(KERN_INFO "ipsec_xfrm2nlkey: IPv4 tunnel dst:%x - src:%x \n", x->id.daddr.a4, x->props.saddr.a4);
+				}
+				memcpy(msg.payload, &sa_set_tunnel_msg, sizeof(struct nlkey_sa_set_tunnel));
+				msg.length = sizeof(struct nlkey_sa_set_tunnel);
+				*msg_id = NLKEY_SA_SET_NATT; /* next message */
+			} else {
+				*msg_id = NLKEY_SA_SET_NATT; /* next message */
+				goto exit;	
+			} 
+			break;
+
+		case NLKEY_SA_SET_NATT:
+			//printk(KERN_INFO "ipsec_xfrm2nlkey: NLKEY_SA_SET_NATT\n");
+			if((natt) && (x->encap)){
+				memset(&sa_set_natt_msg, 0, sizeof(struct nlkey_sa_set_natt));
+
+				/* SA global handler */
+				sa_set_natt_msg.sagd = x->handle; 
+				sa_set_natt_msg.sport = x->encap->encap_sport;
+				sa_set_natt_msg.dport = x->encap->encap_dport;
+				//printk(KERN_INFO "src port: %d  dst port: %d \n", ntohs(sa_set_natt_msg.sport), ntohs( sa_set_natt_msg.dport));
+				memcpy(msg.payload, &sa_set_natt_msg, sizeof(struct nlkey_sa_set_natt));
+				msg.length = sizeof(struct nlkey_sa_set_natt);
+				*msg_id = NLKEY_SA_SET_LIFETIME; /* next message */
+			} else {
+				*msg_id = NLKEY_SA_SET_LIFETIME; /* next message */
+				goto exit;	
+			}
+			break;
+
+		case NLKEY_SA_SET_LIFETIME:
+			//printk(KERN_INFO "ipsec_xfrm2nlkey: NLKEY_SA_SET_LIFETIME\n");
+			if(lifetime) {
+				memset(&sa_set_lifetime_msg, 0, sizeof(struct nlkey_sa_set_lifetime));
+
+				/* SA global handler */
+				sa_set_lifetime_msg.sagd = x->handle;
+
+				/* hard time */
+				sa_set_lifetime_msg.hard_time.allocations =  _X2KEY(x->lft.hard_packet_limit);
+				if(_X2KEY(x->lft.hard_byte_limit))
+					memcpy(sa_set_lifetime_msg.hard_time.bytes, &x->lft.hard_byte_limit, sizeof(uint64_t));
+
+				/* soft time */
+				sa_set_lifetime_msg.soft_time.allocations =  _X2KEY(x->lft.soft_packet_limit);
+				if(_X2KEY(x->lft.soft_byte_limit))
+					memcpy(sa_set_lifetime_msg.soft_time.bytes, &x->lft.soft_byte_limit, sizeof(uint64_t));
+
+				/* current time */
+				sa_set_lifetime_msg.current_time.allocations = x->curlft.packets;
+				memcpy(sa_set_lifetime_msg.current_time.bytes, &x->curlft.bytes, sizeof(uint64_t));
+
+				memcpy(msg.payload, &sa_set_lifetime_msg, sizeof(struct nlkey_sa_set_lifetime));
+				msg.length = sizeof(struct nlkey_sa_set_lifetime);
+				*msg_id = NLKEY_SA_SET_STATE; /* next message */
+			} else {
+				*msg_id = NLKEY_SA_SET_STATE; /* next message */
+				goto exit;	
+			}
+			break;
+
+		case NLKEY_SA_SET_STATE:
+			//printk(KERN_INFO "ipsec_xfrm2nlkey: NLKEY_SET_STATE\n");
+			if(state) {
+				memset(&sa_set_state_msg, 0, sizeof(struct nlkey_sa_set_state));
+				memset(&sa_id_msg, 0, sizeof(struct nlkey_sa_id));
+
+				/* SA global handler */
+				sa_set_state_msg.sagd = x->handle; 
+				/* State */
+				sa_set_state_msg.state = x->km.state;
+				// TODO: set the offloaded state once ack received !
+				x->offloaded = 1;
+				atomic_inc(&flow_cache_genid);
+
+				memcpy(msg.payload, &sa_set_state_msg, sizeof(struct nlkey_sa_set_state));
+				msg.length = sizeof(struct nlkey_sa_set_state);
+				*msg_id = NLKEY_NULL_MSG; /* next message */
+			} else {
+				*msg_id = NLKEY_NULL_MSG; /* next message */
+				goto exit;
+			}
+			break;
+		
+		case NLKEY_SA_DELETE:
+			//printk(KERN_INFO "ipsec_xfrm2nlkey: NLKEY_SA_DELETE\n");
+			memset(&sa_delete_msg, 0, sizeof(struct nlkey_sa_delete));
+			
+			/* SA global handler */
+			sa_delete_msg.sagd = x->handle;
+			memcpy(msg.payload, &sa_delete_msg, sizeof(struct nlkey_sa_delete));
+			msg.length = sizeof(struct nlkey_sa_delete);
+			atomic_inc(&flow_cache_genid);
+
+
+			*msg_id = NLKEY_NULL_MSG; /* next message */
+			break;
+
+		case NLKEY_SA_FLUSH:
+			//printk(KERN_INFO "ipsec_xfrm2nlkey: NLKEY_SA_FLUSH\n");
+			/* No data required for flush SA command */
+			atomic_inc(&flow_cache_genid);
+
+			*msg_id = NLKEY_NULL_MSG; /* next message */
+			break;
+
+		default:
+			printk(KERN_ERR "ipsec_xfrm2nlkey: event 0x%x not supported\n", c->event);
+			*msg_id = NLKEY_NULL_MSG; /* next message */
+			break;
+	}
+
+	/* prepare netlink message for kernel to user space direction */
+	if(msg.length > NLKEY_MSG_LEN)
+	{
+		printk(KERN_ERR "ipsec_xfrm2nlkey: maximum message size reached (%d bytes)\n", msg.length);
+		goto exit;
+	}
+
+	skb = alloc_skb(NLMSG_SPACE(NLKEY_MSG_LEN + NLKEY_HDR_LEN), allocation);
+	if (skb == NULL)
+		goto exit;
+		
+	nlh = (struct nlmsghdr *)skb_put(skb, NLMSG_SPACE(NLKEY_HDR_LEN + msg.length));
+	memcpy(NLMSG_DATA(nlh), (unsigned char *)&msg, (NLKEY_HDR_LEN + msg.length));
+	
+	/* whole length of the message i.e. header + payload */
+	nlh->nlmsg_len = NLMSG_SPACE(NLKEY_HDR_LEN + msg.length);
+
+	/* from kernel */
+	nlh->nlmsg_pid = 0;
+	nlh->nlmsg_flags = 0;
+        nlh->nlmsg_type = 0;
+	NETLINK_CB(skb).pid = 0;
+	NETLINK_CB(skb).dst_group = 1;
+exit:
+	return skb;
+}
+
+static int ipsec_nlkey_send(struct net *net, struct xfrm_state *x, const struct km_event *c)
+{
+	struct sk_buff *skb;
+	unsigned short msg_type;
+	int rc = 0;
+
+	/* We may generate more than one message when adding new SA (sa_create + sa_set_state + sa_set_tunnel...) */
+	msg_type = ipsec_sacode_to_nlkeycode((unsigned short)c->event);
+
+	while(msg_type != NLKEY_NULL_MSG)
+	{
+		/* build nlkey message */
+		skb = ipsec_xfrm2nlkey(net, x, c, &msg_type);
+
+		if(skb != NULL)
+			if((rc = netlink_broadcast(nlkey_socket, skb, 0, 1, GFP_ATOMIC)) < 0)
+				return rc;
+	}
+
+	return rc;
+}
+
+
+int ipsec_nlkey_flow(u16 xfrm_nr, u16 *xfrm_handle, const struct flowi *fl, u16 family, u16 dir)
+{
+	struct sk_buff *skb;
+	struct nlkey_msg msg;
+	struct nlmsghdr *nlh = NULL;
+	unsigned short *p;
+	gfp_t allocation = in_interrupt() ? GFP_ATOMIC : GFP_KERNEL;
+
+	//printk(KERN_INFO "ipsec_nlkey_flow \n");
+
+	/* next message to build */
+	memset(&msg, 0, sizeof(struct nlkey_msg));
+	msg.fcode = NLKEY_FLOW_ADD;
+
+	// Number of SA for this flow
+	p = msg.payload;
+	*p++ = xfrm_nr;
+	msg.length += sizeof(unsigned short);
+	// SA handles list
+	memcpy(p, xfrm_handle, xfrm_nr*sizeof(unsigned short));
+	msg.length += xfrm_nr*sizeof(unsigned short);
+	p+=xfrm_nr;
+	// flow family
+	*p++ = family;
+	msg.length += sizeof(unsigned short);
+	// flow family
+	*p++ = dir;
+	msg.length += sizeof(unsigned short);
+	// flow descriptor
+	memcpy(p, fl, sizeof(struct flowi));
+	msg.length +=sizeof(struct flowi);
+	p+=sizeof(struct flowi) / sizeof(u16);
+
+	skb = alloc_skb(NLMSG_SPACE(NLKEY_MSG_LEN + NLKEY_HDR_LEN), allocation);
+	if (skb == NULL)
+		return -ENOMEM;
+
+	/* prepare netlink message for kernel to user space direction */
+	nlh = (struct nlmsghdr *)skb_put(skb, NLMSG_SPACE(NLKEY_HDR_LEN + msg.length));
+	memcpy(NLMSG_DATA(nlh), (unsigned char *)&msg, (NLKEY_HDR_LEN + msg.length));
+
+	/* whole length of the message i.e. header + payload */
+	nlh->nlmsg_len = NLMSG_SPACE(NLKEY_HDR_LEN + msg.length);
+
+	/* from kernel */
+	nlh->nlmsg_pid = 0; 
+	nlh->nlmsg_flags = 0;
+        nlh->nlmsg_type = 0;
+	NETLINK_CB(skb).pid = 0;
+	NETLINK_CB(skb).dst_group = 1;
+
+	return(netlink_broadcast(nlkey_socket, skb, 0, 1, allocation));
+}
+EXPORT_SYMBOL(ipsec_nlkey_flow);
+
+
+int ipsec_nlkey_flow_remove(struct flowi *fl, u16 family, u16 dir)
+{
+	struct sk_buff *skb;
+	struct nlkey_msg msg;
+	struct nlmsghdr *nlh = NULL;
+	unsigned short *p;
+	gfp_t allocation = in_interrupt() ? GFP_ATOMIC : GFP_KERNEL;
+
+	
+	//printk(KERN_INFO "ipsec_nlkey_flow_remove\n");
+
+	/* next message to build */
+	memset(&msg, 0, sizeof(struct nlkey_msg));
+	msg.fcode = NLKEY_FLOW_REMOVE;
+
+	p = msg.payload;
+	// flow family
+	*p++ = family;
+	msg.length += sizeof(unsigned short);
+	// flow family
+	*p++ = dir;
+	msg.length += sizeof(unsigned short);
+	// flow descriptor
+	memcpy(p, fl, sizeof(struct flowi));
+	msg.length +=sizeof(struct flowi);
+	p+=sizeof(struct flowi) / sizeof(u16);
+
+	skb = alloc_skb(NLMSG_SPACE(NLKEY_MSG_LEN + NLKEY_HDR_LEN), allocation);
+	if (skb == NULL)
+		return -ENOMEM;
+
+	/* prepare netlink message for kernel to user space direction */
+	nlh = (struct nlmsghdr *)skb_put(skb, NLMSG_SPACE(NLKEY_HDR_LEN + msg.length));
+	memcpy(NLMSG_DATA(nlh), (unsigned char *)&msg, (NLKEY_HDR_LEN + msg.length));
+	
+	/* whole length of the message i.e. header + payload */
+	nlh->nlmsg_len = NLMSG_SPACE(NLKEY_HDR_LEN + msg.length);
+
+	/* from kernel */
+	nlh->nlmsg_pid = 0; 
+	nlh->nlmsg_flags = 0;
+        nlh->nlmsg_type = 0;
+	NETLINK_CB(skb).pid = 0;
+	NETLINK_CB(skb).dst_group = 1;	
+
+		
+        return(netlink_broadcast(nlkey_socket, skb, 0, 1, allocation));
+
+	
+}
+EXPORT_SYMBOL(ipsec_nlkey_flow_remove);
+
+
+
+static void ipsec_nlkey_init(void)
+{
+	printk(KERN_INFO "Initializing NETLINK_KEY socket\n");
+
+	nlkey_socket = netlink_kernel_create(&init_net, NETLINK_KEY, 1,
+				     ipsec_nlkey_rcv, NULL, THIS_MODULE);
+}
+#endif
+
+
 static int __net_init pfkey_net_init(struct net *net)
 {
 	struct netns_pfkey *net_pfkey = net_generic(net, pfkey_net_id);
@@ -3782,6 +4556,11 @@ static void __exit ipsec_pfkey_exit(void)
 	sock_unregister(PF_KEY);
 	unregister_pernet_subsys(&pfkey_net_ops);
 	proto_unregister(&key_proto);
+
+#ifdef NLKEY_SUPPORT
+	/* release NETLINK_KEY socket */
+	sock_release(nlkey_socket->sk_socket);
+#endif
 }
 
 static int __init ipsec_pfkey_init(void)
@@ -3800,6 +4579,12 @@ static int __init ipsec_pfkey_init(void)
 	err = xfrm_register_km(&pfkeyv2_mgr);
 	if (err != 0)
 		goto out_sock_unregister;
+
+#ifdef NLKEY_SUPPORT
+	/* create NETLINK_KEY socket for IPSec offload on Comcerto */
+	ipsec_nlkey_init();
+#endif
+
 out:
 	return err;
 

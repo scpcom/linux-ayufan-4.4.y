@@ -65,7 +65,7 @@ extern struct processor {
 	 * Set a possibly extended PTE.  Non-extended PTEs should
 	 * ignore 'ext'.
 	 */
-	void (*set_pte_ext)(pte_t *ptep, pte_t pte, unsigned int ext);
+	void (*set_pte_ext)(pte_t *ptep, pteval_t pte, unsigned int ext);
 
 	/* Suspend/resume */
 	unsigned int suspend_size;
@@ -79,7 +79,8 @@ extern void cpu_proc_fin(void);
 extern int cpu_do_idle(void);
 extern void cpu_dcache_clean_area(void *, int);
 extern void cpu_do_switch_mm(unsigned long pgd_phys, struct mm_struct *mm);
-extern void cpu_set_pte_ext(pte_t *ptep, pte_t pte, unsigned int ext);
+extern void cpu_set_pte_ext(pte_t *ptep, pteval_t pte, unsigned int ext);
+extern void cpu_uncache_pte_ext(pte_t *ptep);
 extern void cpu_reset(unsigned long addr) __attribute__((noreturn));
 
 /* These three are private to arch/arm/kernel/suspend.c */
@@ -92,6 +93,7 @@ extern void cpu_do_resume(void *);
 #define cpu_do_idle			processor._do_idle
 #define cpu_dcache_clean_area		processor.dcache_clean_area
 #define cpu_set_pte_ext			processor.set_pte_ext
+#define cpu_uncache_pte_ext		processor.uncache_pte_ext
 #define cpu_do_switch_mm		processor.switch_mm
 
 /* These three are private to arch/arm/kernel/suspend.c */

@@ -44,7 +44,7 @@ config I2C_CHARDEV
 	  programs use the I2C bus.  Information on how to do this is
 	  contained in the file <file:Documentation/i2c/dev-interface>.
 
-	  This support is also available as a module.  If so, the module 
+	  This support is also available as a module.  If so, the module
 	  will be called i2c-dev.
 
 config I2C_MUX
@@ -86,6 +86,7 @@ config I2C_SMBUS
 
 source drivers/i2c/algos/Kconfig
 source drivers/i2c/busses/Kconfig
+source drivers/i2c/chips/Kconfig
 
 config I2C_DEBUG_CORE
 	bool "I2C Core debugging messages"

@@ -594,7 +594,15 @@ static int __tcp_splice_read(struct sock *sk, struct tcp_splice_state *tss)
 
 	return tcp_read_sock(sk, &rd_desc, tcp_splice_data_recv);
 }
-
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+unsigned int splicer_time_counter[256];
+unsigned int splicer_reqtime_counter[256];
+unsigned int splicer_data_counter[256];
+unsigned int splicer_tcp_rsock_counter[64];
+static struct timeval last_splicer;
+unsigned int init_splicer_prof = 0;
+extern unsigned int enable_splice_prof;
+#endif
 /**
  *  tcp_splice_read - splice data from TCP socket to a pipe
  * @sock:	socket to splice from
@@ -620,7 +628,28 @@ ssize_t tcp_splice_read(struct socket *sock, loff_t *ppos,
 	long timeo;
 	ssize_t spliced;
 	int ret;
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+	struct timeval now;
+	int diff_time_ms;
 
+	if (enable_splice_prof) {
+		do_gettimeofday(&now);
+		if (init_splicer_prof) {
+			diff_time_ms = ((now.tv_sec - last_splicer.tv_sec) * 1000) + ((now.tv_usec - last_splicer.tv_usec) / 1000);
+			if (diff_time_ms < 1000) {
+				splicer_time_counter[diff_time_ms >> 3]++;
+			}
+			else {
+				splicer_time_counter[255]++;
+			}
+		}
+		if (len < (1 <<21))
+			splicer_data_counter[(len >> 13) & 0xFF]++;
+		else
+			splicer_data_counter[255]++;
+		last_splicer = now;
+	}
+#endif
 	sock_rps_record_flow(sk);
 	/*
 	 * We can't seek on a socket input
@@ -631,7 +660,18 @@ ssize_t tcp_splice_read(struct socket *sock, loff_t *ppos,
 	ret = spliced = 0;
 
 	lock_sock(sk);
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+	/* Need locked socket*/
+	if (enable_splice_prof) {
+		const struct tcp_sock *tp = tcp_sk(sk);
+		int rsock_qsize = tp->rcv_nxt - tp->copied_seq;
 
+		if (rsock_qsize < (4 * 1024 * 1024))
+			splicer_tcp_rsock_counter[(rsock_qsize >> 16) & 0x3F]++;
+		else
+			splicer_tcp_rsock_counter[63]++;
+	}
+#endif
 	timeo = sock_rcvtimeo(sk, sock->file->f_flags & O_NONBLOCK);
 	while (tss.len) {
 		ret = __tcp_splice_read(sk, &tss);
@@ -684,6 +724,23 @@ ssize_t tcp_splice_read(struct socket *sock, loff_t *ppos,
 
 	release_sock(sk);
 
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+	if (enable_splice_prof) {
+		do_gettimeofday(&now);
+
+		diff_time_ms = ((now.tv_sec - last_splicer.tv_sec) * 1000) + ((now.tv_usec - last_splicer.tv_usec) / 1000);
+		if (diff_time_ms < 1000) {//Don't record useless data
+			splicer_reqtime_counter[diff_time_ms >> 3]++;
+		}
+		else
+			splicer_reqtime_counter[255]++;
+
+		if(!init_splicer_prof)
+			init_splicer_prof = 1;
+
+		last_splicer = now;
+	}
+#endif
 	if (spliced)
 		return spliced;
 
@@ -1459,6 +1516,23 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	do {
 		u32 offset;
 
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+		if (flags & MSG_NOCATCHSIG) {
+			if (signal_pending(current)) {
+				if (sigismember(&current->pending.signal, SIGQUIT) ||
+				    sigismember(&current->pending.signal, SIGABRT) ||
+				    sigismember(&current->pending.signal, SIGKILL) ||
+				    sigismember(&current->pending.signal, SIGTERM) ||
+				    sigismember(&current->pending.signal, SIGSTOP)) {
+
+					if (copied)
+						break;
+					copied = timeo ? sock_intr_errno(timeo) : -EAGAIN;
+					break;
+				}
+			}
+		} else
+#endif
 		/* Are we at urgent data? Stop if we have read anything or have SIGURG pending. */
 		if (tp->urg_data && tp->urg_seq == *seq) {
 			if (copied)
@@ -1687,8 +1761,16 @@ do_prequeue:
 			} else
 #endif
 			{
-				err = skb_copy_datagram_iovec(skb, offset,
-						msg->msg_iov, used);
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+				if (msg->msg_flags & MSG_KERNSPACE)
+				{
+					err = skb_copy_datagram_to_kernel_iovec(skb,
+							offset, msg->msg_iov, used);
+				}				
+				else
+#endif
+					err = skb_copy_datagram_iovec(skb, offset,
+							msg->msg_iov, used);
 				if (err) {
 					/* Exception. Bailout! */
 					if (!copied)

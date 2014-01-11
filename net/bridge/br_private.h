@@ -359,6 +359,10 @@ extern int br_fdb_insert(struct net_bridge *br,
 extern void br_fdb_update(struct net_bridge *br,
 			  struct net_bridge_port *source,
 			  const unsigned char *addr);
+#if defined(CONFIG_ARCH_COMCERTO)
+	extern void br_fdb_register_can_expire_cb(int(*cb)(unsigned char *mac_addr, struct net_device *dev)); 
+	extern void br_fdb_deregister_can_expire_cb(void);
+#endif 
 extern int br_fdb_dump(struct sk_buff *skb, struct netlink_callback *cb);
 extern int br_fdb_add(struct sk_buff *skb, struct nlmsghdr *nlh, void *arg);
 extern int br_fdb_delete(struct sk_buff *skb, struct nlmsghdr *nlh, void *arg);
