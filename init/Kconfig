@@ -1039,6 +1039,7 @@ config PRINTK_PERSIST_BUF_SHIFT
 
 config BOOTLOG_COPY
 	default n
+	depends on PRINTK_PERSIST
 	bool "copy boot log to printk log" if PRINTK
 	help
 	  This option copies the boot log stored in bootlog memory and save it
