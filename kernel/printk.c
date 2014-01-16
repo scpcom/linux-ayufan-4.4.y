@@ -378,7 +378,6 @@ void __init setup_log_buf(int early)
 	raw_spin_lock_irqsave(&logbuf_lock, flags);
 	log_buf_len = new_log_buf_len;
 	log_buf = new_log_buf;
-	new_log_buf_len = 0;
 	free = __LOG_BUF_LEN - log_end;
 
 #ifdef CONFIG_BOOTLOG_COPY
