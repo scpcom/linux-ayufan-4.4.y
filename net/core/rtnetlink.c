@@ -1935,14 +1935,14 @@ static int rtnl_dump_all(struct sk_buff *skb, struct netlink_callback *cb)
 	return skb->len;
 }
 
-void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
+void __rtmsg_ifinfo(int type, struct net_device *dev, unsigned change, gfp_t flags)
 {
 	struct net *net = dev_net(dev);
 	struct sk_buff *skb;
 	int err = -ENOBUFS;
 	size_t if_info_size;
 
-	skb = nlmsg_new((if_info_size = if_nlmsg_size(dev)), GFP_KERNEL);
+	skb = nlmsg_new((if_info_size = if_nlmsg_size(dev)), flags);
 	if (skb == NULL)
 		goto errout;
 
@@ -1955,11 +1955,19 @@ void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, 0, RTNLGRP_LINK, NULL, GFP_KERNEL);
+	rtnl_notify(skb, net, 0, RTNLGRP_LINK, NULL, flags);
 	return;
 errout:
 	if (err < 0)
 		rtnl_set_sk_err(net, RTNLGRP_LINK, err);
+}
+#if defined(CONFIG_ARCH_COMCERTO)
+EXPORT_SYMBOL(__rtmsg_ifinfo);
+#endif
+
+void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
+{
+	__rtmsg_ifinfo(type, dev, change, GFP_KERNEL);
 }
 #if defined(CONFIG_COMCERTO_FP)
 EXPORT_SYMBOL(rtmsg_ifinfo);

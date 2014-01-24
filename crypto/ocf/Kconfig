@@ -39,4 +39,10 @@ config OCF_BENCH
 	  of OCF.  Also includes code to benchmark the IXP Access library
 	  for comparison.
 
+config OCF_DM_CRYPT
+	bool "ocf-dm-crypt (HW crypto engine)"
+	depends on OCF_OCF
+	help
+	OCF support for crypto offloading of dm-crypt
+
 endmenu

@@ -1,5 +1,5 @@
 /*
- * arch/arm/mach-comcerto/board-c2kasic.c
+ * arch/arm/mach-comcerto/board-c2kmfcnevm.c
  *
  *  Copyright (C) 2012 Mindspeed Technologies, Inc.
  *
@@ -56,6 +56,7 @@
 #include <asm/mach/time.h>
 #include <mach/gpio.h>
 
+
 extern void platform_reserve(void);
 extern void device_map_io (void);
 extern void device_irq_init(void);
@@ -100,18 +101,7 @@ static void __init board_gpio_init(void)
 	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~NOR_GPIO) | NOR_BUS, COMCERTO_GPIO_PIN_SELECT_REG1);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= NOR_GPIO_PIN;
 #endif
-
-        /* TDM bus configuration */
-        /* Fix for C2KASIC RevA. Correct/lower TDM bus strength to avoid noise distorting voice with si3227 */
-	/* TODO: Check on RevB. */
-        /* Setting TDM_CK strangth [7:6] equal X3 */
-        #define X1 0
-        #define X2 2
-        #define X3 1
-        #define X4 3
-        writel((X3 << 6) |(readl(COMCERTO_GPIO_PAD_CONFIG0) & ~(0x3 << 6)), COMCERTO_GPIO_PAD_CONFIG0);
 }
-
 
 /* --------------------------------------------------------------------
  *  NOR device
@@ -121,7 +111,7 @@ static void __init board_gpio_init(void)
 static struct resource comcerto_nor_resources[] = {
 	{
 		.start	= NORFLASH_MEMORY_PHY1,
-		.end	= NORFLASH_MEMORY_PHY1 + SZ_128M - 1,
+		.end	= NORFLASH_MEMORY_PHY1 + SZ_64M - 1,
 		.flags	= IORESOURCE_MEM,
 	},
 };
@@ -143,25 +133,25 @@ static struct platform_device comcerto_nor = {
 #endif
 
 static struct resource rtc_res[] = {
-	{
-		.start = COMCERTO_APB_RTC_BASE,
-		.end = COMCERTO_APB_RTC_BASE + SZ_32 - 1,
-		.flags = IORESOURCE_MEM,
-	},
-	{
-		.start = IRQ_RTC_ALM,
-		.flags = IORESOURCE_IRQ,
-	},
-	{
-		.start = IRQ_RTC_PRI,
-		.flags = IORESOURCE_IRQ,
-	},
+       {
+               .start = COMCERTO_APB_RTC_BASE,
+               .end = COMCERTO_APB_RTC_BASE + SZ_32 - 1,
+               .flags = IORESOURCE_MEM,
+       },
+       {
+               .start = IRQ_RTC_ALM,
+               .flags = IORESOURCE_IRQ,
+       },
+       {
+               .start = IRQ_RTC_PRI,
+               .flags = IORESOURCE_IRQ,
+       },
 };
 static struct platform_device rtc_dev = {
-	.name = "c2k-rtc",
-	.id = -1,
-	.num_resources = ARRAY_SIZE(rtc_res),
-	.resource = rtc_res,
+       .name = "c2k-rtc",
+       .id = -1,
+       .num_resources = ARRAY_SIZE(rtc_res),
+       .resource = rtc_res,
 };
 
 /* --------------------------------------------------------------------
@@ -260,7 +250,7 @@ struct spi_controller_data spi_ctrl_data =  {
 static struct spi_board_info comcerto_spi_board_info[] = {
 	{
 		/* FIXME: for chipselect-0 */
-		.modalias = "comcerto_spi1",
+		.modalias = "s25fl256s0",
 		.chip_select = 0,
 		.max_speed_hz = 4*1000*1000,
 		.bus_num = 0,
@@ -277,6 +267,7 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.mode = SPI_MODE_3,
 		.bus_num = 0,
 		.irq = -1,
+		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
                 .controller_data = &spi_ctrl_data,
 	},
@@ -297,9 +288,10 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.modalias = "proslic",
 		.max_speed_hz = 2*1000*1000,
 		.chip_select = 3,
-                .mode = SPI_MODE_1,
+		.mode = SPI_MODE_1,
 		.bus_num = 0,
 		.irq = -1,
+		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
                 .controller_data = &spi_ctrl_data,
 	},
@@ -489,14 +481,13 @@ static struct platform_device  comcerto_elp_device = {
 };
 #endif
 
-
 static struct comcerto_tdm_data comcerto_tdm_pdata = {
 	.fsoutput = 1, /* Generic Pad Control and Version ID Register[2] */
 	.fspolarity = 0, /* 28 FSYNC_FALL(RISE)_EDGE */
 	.fshwidth = 1, /* High_Phase_Width[10:0] */
 	.fslwidth = 0xFF, /* Low_Phase_Width[10:0] */
-	.clockhz = 2048000, /* INC_VALUE[29:0] According to the desired TDM clock output 
-			frequency, this field should be configured */
+	.clockhz = 2048000, /* INC_VALUE[29:0] According to the desired TDM clock output \
+			       frequency, this field should be configured */
 	.clockout = 1, /* 0 -> set bit 21, clear bit 20 in COMCERTO_GPIO_IOCTRL_REG
 			  (software control, clock input)
 			  1 -> set bit 21 and 20 in COMCERTO_GPIO_IOCTRL_REG
@@ -580,12 +571,13 @@ static struct resource comcerto_pfe_resources[] = {
 		.end	= COMCERTO_PFE_IRAM_BASE + COMCERTO_PFE_IRAM_SIZE - 1,
 		.flags  = IORESOURCE_MEM,
 	},
-	{
-		.name	= "ipsec",
-		.start  = COMCERTO_AXI_IPSEC_BASE,
-		.end	= COMCERTO_AXI_IPSEC_BASE + COMCERTO_AXI_IPSEC_SIZE - 1,
-		.flags  = IORESOURCE_MEM,
-	},
+        {
+                .name   = "ipsec",
+                .start  = COMCERTO_AXI_IPSEC_BASE,
+                .end    = COMCERTO_AXI_IPSEC_BASE + COMCERTO_AXI_IPSEC_SIZE - 1,
+                .flags  = IORESOURCE_MEM,
+        },
+
 	{
 		.name	= "hif",
 		.start  = IRQ_PFE_HIF,
@@ -611,9 +603,7 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.device_flags = CONFIG_COMCERTO_GEMAC,
 		.mii_config = CONFIG_COMCERTO_USE_RGMII,
 		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
-		.phy_flags = GEMAC_PHY_RGMII_ADD_DELAY,
-		.bus_id = 0,
-		.phy_id = 5,
+		.phy_flags = GEMAC_NO_PHY,
 		.gem_id = 1,
 		.mac_addr = (u8[])GEM1_MAC,
 	},
@@ -623,9 +613,7 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.device_flags = CONFIG_COMCERTO_GEMAC,
 		.mii_config = CONFIG_COMCERTO_USE_RGMII,
 		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
-		.phy_flags = GEMAC_PHY_RGMII_ADD_DELAY,
-		.bus_id = 0,
-		.phy_id = 6,
+		.phy_flags = GEMAC_NO_PHY,
 		.gem_id = 2,
 		.mac_addr = (u8[])GEM2_MAC,
 	},
@@ -638,12 +626,10 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 	 */
 	.comcerto_mdio_pdata[0] = {
 		.enabled = 1,
-		.phy_mask = 0xFFFFFF8F,
+		.phy_mask = 0xFFFFFFEF,
 		.mdc_div = 96,
 		.irq = {
 			[4] = PHY_POLL,
-			[5] = PHY_POLL,
-			[6] = PHY_POLL,
 		},
 	},
 };
@@ -709,11 +695,11 @@ static struct platform_device *comcerto_devices[] __initdata = {
 /* This variable is used by comcerto-2000.c to initialize the expansion bus */
 int comcerto_exp_values[5][7]= {
 	/* ENABLE, BASE, SEG_SZ, CFG, TMG1, TMG2, TMG3 */
-	{1, (EXP_BUS_REG_BASE_CS0 >> 12), ((EXP_BUS_REG_BASE_CS0 + EXP_CS0_SEG_SIZE - 1) >> 12), EXP_MEM_BUS_SIZE_16, 0x1A1A401F, 0x06060A04, 0x00000002},		/*TODO Values to check*/
+	{1, (EXP_BUS_REG_BASE_CS0 >> 12), ((EXP_BUS_REG_BASE_CS0 + EXP_CS0_SEG_SIZE - 1) >> 12), EXP_MEM_BUS_SIZE_16, 0x03034007, 0x04040502, 0x00000002},		/*TODO Values to check*/
 	{0, (EXP_BUS_REG_BASE_CS1 >> 12), ((EXP_BUS_REG_BASE_CS1 + EXP_CS1_SEG_SIZE - 1) >> 12), EXP_RDY_EN|EXP_MEM_BUS_SIZE_32, 0x1A1A401F, 0x06060A04, 0x00000002},	/*TODO Values to check*/
 	{0, (EXP_BUS_REG_BASE_CS2 >> 12), ((EXP_BUS_REG_BASE_CS2 + EXP_CS2_SEG_SIZE - 1) >> 12), EXP_STRB_MODE|EXP_ALE_MODE|EXP_MEM_BUS_SIZE_8, 0x1A10201A, 0x03080403, 0x0000002},	/*TODO Values to check*/
 	{0, (EXP_BUS_REG_BASE_CS3 >> 12), ((EXP_BUS_REG_BASE_CS3 + EXP_CS3_SEG_SIZE - 1) >> 12), EXP_STRB_MODE|EXP_ALE_MODE|EXP_MEM_BUS_SIZE_8, 0x1A10201A, 0x03080403, 0x0000002},	/*BT8370*/
-	{0, (EXP_BUS_REG_BASE_CS4 >> 12), ((EXP_BUS_REG_BASE_CS4 + EXP_CS4_SEG_SIZE - 1) >> 12), EXP_NAND_MODE|EXP_MEM_BUS_SIZE_8, 0x1A1A401F, 0x06060A04, 0x00000002},	/* NAND: TODO Values to check */
+	{1, (EXP_BUS_REG_BASE_CS4 >> 12), ((EXP_BUS_REG_BASE_CS4 + EXP_CS4_SEG_SIZE - 1) >> 12), EXP_NAND_MODE|EXP_MEM_BUS_SIZE_8, 0x00000001, 0x01010001, 0x00000002},	/* NAND: TODO Values to check */
 };
 
 /************************************************************************
@@ -735,7 +721,7 @@ static void __init platform_init(void)
 	device_init();
 	board_gpio_init();
 
-#if defined(CONFIG_SPI_MSPD_HIGH_SPEED) || defined(CONFIG_SPI_MSPD_LOW_SPEED)
+#if defined(CONFIG_SPI_MSPD_LOW_SPEED) || defined(CONFIG_SPI_MSPD_HIGH_SPEED)
 	spi_register_board_info(comcerto_spi_board_info, ARRAY_SIZE(comcerto_spi_board_info));
 #endif
 	mac_addr_init(&comcerto_pfe_pdata);
@@ -743,7 +729,7 @@ static void __init platform_init(void)
 	platform_add_devices(comcerto_devices, ARRAY_SIZE(comcerto_devices));
 }
 
-MACHINE_START(COMCERTO, "Comcerto 2000 ASIC")
+MACHINE_START(COMCERTO, "Comcerto 2000 MFCN EVM")
 	/* Mindspeed Technologies Inc. */
 	.atag_offset    = COMCERTO_AXI_DDR_BASE + 0x100,
 	.reserve	= platform_reserve,
@@ -752,6 +738,6 @@ MACHINE_START(COMCERTO, "Comcerto 2000 ASIC")
 	.init_machine	= platform_init,
 	.timer		= &comcerto_timer,
 #ifdef CONFIG_ZONE_DMA
-	.dma_zone_size	= SZ_32M + 3*SZ_4M,  /* Up to start of memory reserved for PFE+MSP */
+	.dma_zone_size	= SZ_32M + 3*SZ_4M,
 #endif
 MACHINE_END

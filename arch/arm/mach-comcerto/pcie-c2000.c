@@ -46,6 +46,7 @@
 
 #include <linux/platform_device.h>
 #include <linux/clk.h>
+#include <mach/comcerto-2000/pm.h>
 //#define COMCERTO_PCIE_DEBUG
 
 #ifdef CONFIG_PCI_MSI
@@ -286,6 +287,13 @@ static void comcerto_dbi_write_reg(struct pcie_port *pp, int where, int size,
 	writel_relaxed(val1, va_address);
 }
 
+static inline void nop_delay(void)
+{
+        int k;
+        for(k = 0 ; k < 1000; k++)
+                nop();
+}
+
 static int comcerto_pcie_rd_conf(struct pcie_port *pp, int bus_nr,
 		u32 devfn, int where, int size, u32 *val)
 {
@@ -318,6 +326,15 @@ static int comcerto_pcie_rd_conf(struct pcie_port *pp, int bus_nr,
 
 
 	*val = readl_relaxed(address);
+
+	/* Because of the imprecise external abort the processor is not able to get the exact instruction 
+           which caused the abort and hence when the abort handler tries to restore the PC to the next 
+           instruction to resume it is often wrong and it results in skipping few instruction after the 
+           readl_relaxed which has caused abort. So nop instructions are added after readl so that even 
+           if the some instructions are missed out it will miss the nop instruction only.
+	*/
+	nop_delay();
+
 	if (size == 1)
 		*val = (*val >> (8 * (where & 3))) & 0xff;
 	else if (size == 2)
@@ -564,9 +581,14 @@ static struct hw_pci comcerto_pcie __initdata = {
 static void handle_msi(struct pcie_port *pp)
 {
 	unsigned long val, mask;
-	unsigned int pos = 0, mask0;
+	unsigned int pos, mask0;
+
 
 	val = readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_STATUS);
+
+continue_handle:
+
+	pos = 0;
 
 	while (val) {
 		mask0 = 1 << pos;
@@ -580,13 +602,18 @@ static void handle_msi(struct pcie_port *pp)
 			mask = readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE);
 			writel_relaxed(mask & ~mask0, pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE);
 			writel_relaxed(mask0, pp->va_dbi_base + PCIE_MSI_INTR0_STATUS);
-			writel_relaxed(mask & mask0, pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE);
+			writel_relaxed(mask, pp->va_dbi_base + PCIE_MSI_INTR0_ENABLE);
 			spin_unlock(&pp->intr_lock);
 			generic_handle_irq(pp->msi_base	+ pos);
 			val = val & ~mask0;
 		}
 		pos++;
 	}
+
+	val = readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_STATUS);
+	if(val)
+		goto continue_handle;
+
 #if 0
 	for (i = 0; i < (PCIE_NUM_MSI_IRQS >> 5); i++) {
 		val = readl_relaxed(pp->va_dbi_base + PCIE_MSI_INTR0_STATUS + (i * 12));
@@ -1113,12 +1140,12 @@ static void comcerto_pcie_rc_init(struct pcie_port *pp)
 		val &= ~(0xFF);
 		val |= 0xF1;
 		comcerto_dbi_write_reg(pp, PCIE_G2CTRL_REG, 4, val);
-	}
 
-	// instruct pcie to switch to gen2 after init
-        comcerto_dbi_read_reg(pp, PCIE_G2CTRL_REG, 4, &val);
-        val |= (1 << 17);
-        comcerto_dbi_write_reg(pp, PCIE_G2CTRL_REG, 4, val);
+		// instruct pcie to switch to gen2 after init
+		comcerto_dbi_read_reg(pp, PCIE_G2CTRL_REG, 4, &val);
+		val |= (1 << 17);
+		comcerto_dbi_write_reg(pp, PCIE_G2CTRL_REG, 4, val);
+	}
 
 	/*setup iATU for outbound translation */
 	PCIE_SETUP_iATU_OB_ENTRY( pp, iATU_ENTRY_MEM, iATU_GET_MEM_BASE(pp->remote_mem_baseaddr),
@@ -1408,7 +1435,7 @@ static ssize_t comcerto_pcie_set_reset(struct device *dev, struct device_attribu
 {
 	struct platform_device *pdev = to_platform_device(dev);
         struct pcie_port *pp = &pcie_port[pdev->id];
-	int reset = 0;
+	int reset = 0, rc;
 
 	if (!pcie_port_is_host(pdev->id) ||  !(pp->link_state))
 			return count;
@@ -1451,11 +1478,24 @@ static ssize_t comcerto_pcie_set_reset(struct device *dev, struct device_attribu
 			udelay(1000);
 		}
 
+		printk(KERN_INFO "Disabling PCIe%d Controler Clock\n", pdev->id);
+
+		if (pcie_port[pdev->id].port_mode != PCIE_PORT_MODE_NONE)
+			clk_disable(pcie_port[pdev->id].ref_clock);
+
 		printk(KERN_INFO "EXIT : Putting PCIe%d device into reset\n", pdev->id);
 	}
 	else {
 
 		printk(KERN_INFO "ENTER: Bringing PCIe%d device outof reset\n", pdev->id);
+
+		printk(KERN_INFO "Enabling PCIe%d Controler Clock\n", pdev->id);
+
+		if(pcie_port[pdev->id].port_mode != PCIE_PORT_MODE_NONE) {
+			rc = clk_enable(pcie_port[pdev->id].ref_clock);
+			if (rc)
+				pr_err("%s: PCIe%d clock enable failed\n", __func__, pdev->id);
+		}
 
 		if (!comcerto_pcie_device_reset_exit(pp)) {
 			pp->reset = 0;
@@ -1467,58 +1507,147 @@ static ssize_t comcerto_pcie_set_reset(struct device *dev, struct device_attribu
 
 static DEVICE_ATTR(device_reset, 0644, comcerto_pcie_show_reset, comcerto_pcie_set_reset);
 
-#ifdef CONFIG_PM
-static int comcerto_pcie_suspend(struct platform_device *pdev, pm_message_t state)
+
+static ssize_t comcerto_pcie_serdes_pd(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-	unsigned int val, i;
+	struct platform_device *pdev = to_platform_device(dev);
+        struct pcie_port *pp = &pcie_port[pdev->id];
+	int reset = 0, rc;
 
-	printk(KERN_INFO "%s: pcie device %p (id = %d): state %d\n", 
-		__func__, pdev, pdev->id, state.event);
+	sscanf(buf, "%d", &reset);
 
-	if (pcie_port[pdev->id].port_mode != PCIE_PORT_MODE_NONE) {
-		if (comcerto_pcie_link_up(&pcie_port[pdev->id])){
+	reset = reset ? 1:0;
 
-		    /* Enable PME to root Port */
-		    comcerto_dbi_read_reg(&pcie_port[pdev->id], (PCI_CAP_PM + PCI_PM_CTRL), 4, &val);
-		    comcerto_dbi_write_reg(&pcie_port[pdev->id], (PCI_CAP_PM + PCI_PM_CTRL), 4, val | PCI_PM_CTRL_STATE_MASK);
+	if (reset) {
+		printk(KERN_INFO "%s: Putting Serdes to Low Power and CMU Power Off\n", __func__);
 
-			/* Required PM Delay */
-		    for (i = 0 ; i < 40 ; i++)
-			    udelay(500);
-	    }
+		if (pdev->id)
+			writel(readl(USBPHY_SERDES_STAT_BASE+0x44) | ((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x44);
+		else
+			writel(readl(USBPHY_SERDES_STAT_BASE+0x34) | ((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x34);
+	} else {
+		printk(KERN_INFO "%s: Getting Serdes out of Low Power and CMU Power On\n", __func__);
+
+		if (pdev->id)
+			writel(readl(USBPHY_SERDES_STAT_BASE+0x44) & ~((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x44);
+		else
+			writel(readl(USBPHY_SERDES_STAT_BASE+0x34) & ~((0x3 << 2)|(0x1 << 7)) , USBPHY_SERDES_STAT_BASE+0x34);
 	}
 
+	return count;
+}
+
+static DEVICE_ATTR(serdes_pd, 0644, NULL, comcerto_pcie_serdes_pd);
+
+
+#ifdef CONFIG_PM
+static int no_irq_resume ;
+
+static int comcerto_pcie_suspend(struct device *dev)
+{
+	unsigned int val, i;
+	struct platform_device *pdev = to_platform_device(dev);
+
+	printk(KERN_INFO "%s: pcie device %p (id = %d):\n",
+			 __func__, pdev, pdev->id);
+
+	/* Check for the BitMask bit for PCIe, if it is enabled
+	 * then we are not going suspend the PCIe device , as by
+	 * this device , we will wake from System Resume.
+	 */
+	if ( !(host_utilpe_shared_pmu_bitmask & PCIe0_IRQ) || !(host_utilpe_shared_pmu_bitmask & PCIe1_IRQ) ){
+ 		/* We will Just return from here */
+		return 0;
+	}
+	if (pcie_port[pdev->id].port_mode != PCIE_PORT_MODE_NONE) {
+		if (comcerto_pcie_link_up(&pcie_port[pdev->id])){
+			/* Enable PME to root Port */
+			comcerto_dbi_read_reg(&pcie_port[pdev->id], (PCI_CAP_PM + PCI_PM_CTRL), 4, &val);
+			comcerto_dbi_write_reg(&pcie_port[pdev->id], (PCI_CAP_PM + PCI_PM_CTRL), 4, val | PCI_PM_CTRL_STATE_MASK);
+			/* Required PM Delay */
+			for (i = 0 ; i < 40 ; i++)
+				udelay(500);
+		}
+	}
+	no_irq_resume =0 ;
 	return 0;
 }
 
-static int comcerto_pcie_resume(struct platform_device *pdev)
+static int comcerto_pcie_resume(struct device *dev)
 {
 	unsigned int val, i;
+	struct platform_device *pdev = to_platform_device(dev);
 
 	printk(KERN_INFO "%s: pcie device %p (id = %d)\n", 
 		__func__, pdev, pdev->id);
+ 	/* Check for the Bit_Mask bit for PCIe, if it is enabled
+ 	 * then we are not going suspend the PCIe device , as by
+	 * this device , we will wake from System Resume.
+ 	*/
+	if ( !(host_utilpe_shared_pmu_bitmask & PCIe0_IRQ) || !(host_utilpe_shared_pmu_bitmask & PCIe1_IRQ) ){
 
-	if(pcie_port[pdev->id].port_mode != PCIE_PORT_MODE_NONE) {
-		if (comcerto_pcie_link_up(&pcie_port[pdev->id])){
-
-		    /* Put In D0 State */
-		    comcerto_dbi_read_reg(&pcie_port[pdev->id], (PCI_CAP_PM + PCI_PM_CTRL), 4, &val);
-		    comcerto_dbi_write_reg(&pcie_port[pdev->id], (PCI_CAP_PM + PCI_PM_CTRL), 4, val & (~PCI_PM_CTRL_STATE_MASK));
-
-			/* Required PM Delay */
-		    for (i = 0 ; i < 40 ; i++)
-			    udelay(500);
-	    }
+ 		/* We will Just return
+ 		*/
+		return 0;
 	}
+	if( no_irq_resume == 0)
+       	{
+		if(pcie_port[pdev->id].port_mode != PCIE_PORT_MODE_NONE) {
+			if (comcerto_pcie_link_up(&pcie_port[pdev->id])){
+		    		/* Put In D0 State */
+		    		comcerto_dbi_read_reg(&pcie_port[pdev->id], (PCI_CAP_PM + PCI_PM_CTRL), 4, &val);
+		    		comcerto_dbi_write_reg(&pcie_port[pdev->id], (PCI_CAP_PM + PCI_PM_CTRL), 4, val & (~PCI_PM_CTRL_STATE_MASK));
 
+				/* Required PM Delay */
+		    		for (i = 0 ; i < 40 ; i++)
+			    		udelay(500);
+	    		}	
+		}	
+	}
 	return 0;
 }
 
-static struct platform_driver comcerto_pcie_driver = {
+static int comcerto_pcie_noirq_resume(struct device *dev)
+{
+	int val,i;
+	struct platform_device *pdev = to_platform_device(dev);
+
+	printk(KERN_INFO "%s: pcie device %p (id = %d)\n",
+			 __func__, pdev, pdev->id);
+
+	/* Check for the Bit_Mask bit for PCIe, if it is enabled
+	 * then we are not going suspend the PCIe device , as by
+	 * this device , we will wake from System Resume.
+	 */
+	if ( !(host_utilpe_shared_pmu_bitmask & PCIe0_IRQ) || !(host_utilpe_shared_pmu_bitmask & PCIe1_IRQ) ){
+               /* We will Just return
+                */
+		return 0;
+	}
+	if(pcie_port[pdev->id].port_mode != PCIE_PORT_MODE_NONE) {
+		if (comcerto_pcie_link_up(&pcie_port[pdev->id])){
+			/* Put In D0 State */
+			comcerto_dbi_read_reg(&pcie_port[pdev->id], (PCI_CAP_PM + PCI_PM_CTRL), 4, &val);
+			comcerto_dbi_write_reg(&pcie_port[pdev->id], (PCI_CAP_PM + PCI_PM_CTRL), 4, val & (~PCI_PM_CTRL_STATE_MASK));
+			/* Required PM Delay */
+			for (i = 0 ; i < 40 ; i++)
+				udelay(500);
+	    	}
+	}	
+	return 0;
+}
+
+static const struct dev_pm_ops pcie_platform_pm_ops = {
 	.suspend = comcerto_pcie_suspend,
 	.resume = comcerto_pcie_resume,
+	.resume_noirq = comcerto_pcie_noirq_resume,
+};
+
+
+static struct platform_driver comcerto_pcie_driver = {
 	.driver = {
 		.name = "pcie",
+		.pm   = &pcie_platform_pm_ops,
 		.owner = THIS_MODULE,
 	},
 };
@@ -1617,6 +1746,15 @@ static int comcerto_pcie_bsp_link_init(struct pcie_port *pp, int nr, struct serd
 
 	mdelay(1); //After CMU locks wait for sometime
 
+#if defined(CONFIG_C2K_MFCN_EVM)
+	if(nr == 0){
+		GPIO_reset_external_device(COMPONENT_PCIE0,0);
+	}else{
+		GPIO_reset_external_device(COMPONENT_PCIE1,0);
+	}
+
+	mdelay(1);
+#endif
 	//Bring PCIe out of reset
 	c2000_block_reset(pcie_component,0);
 
@@ -1669,6 +1807,7 @@ static int comcerto_pcie_bsp_init(struct pcie_port *pp, int nr)
 	int polarity_max = 4;
 	int polarity;
 	int ret;
+
 
 	if (nr >= NUM_PCIE_PORTS) {
 		printk("%s : Invalid PCIe port number\n", __func__);
@@ -1740,6 +1879,13 @@ linkup:
 
 }
 
+static int comcerto_pcie_abort_handler(unsigned long addr, unsigned int fsr,
+                                      struct pt_regs *regs)
+{
+        if (fsr & (1 << 10))
+                regs->ARM_pc += 4;
+        return 0;
+}
 
 
 static int __init comcerto_pcie_init(void)
@@ -1767,6 +1913,8 @@ static int __init comcerto_pcie_init(void)
 	pcibios_min_mem = COMCERTO_AXI_PCIe0_SLAVE_BASE;
 	pci_add_flags(PCI_REASSIGN_ALL_RSRC);
 
+	hook_fault_code(16 + 6, comcerto_pcie_abort_handler, SIGBUS, 0, "imprecise external abort");
+
 	pci_common_init(&comcerto_pcie);
 
 	for ( i = 0; i < num_pcie_port; i++ )
@@ -1792,11 +1940,17 @@ static int __init comcerto_pcie_init(void)
 	if (device_create_file(&pcie_pwr0.dev, &dev_attr_device_reset))
 		printk(KERN_ERR "%s: Unable to create pcie0 reset sysfs entry\n", __func__);
 
+	if (device_create_file(&pcie_pwr0.dev, &dev_attr_serdes_pd))
+		printk(KERN_ERR "%s: Unable to create pcie0 serdes_pd sysfs entry\n", __func__);
+
 	if(num_pcie_port > 1) {
 		platform_device_register(&pcie_pwr1);
 
 		if (device_create_file(&pcie_pwr1.dev, &dev_attr_device_reset))
 			printk(KERN_ERR "%s: Unable to create pcie1 reset sysfs entry\n", __func__);
+
+		if (device_create_file(&pcie_pwr1.dev, &dev_attr_serdes_pd))
+			printk(KERN_ERR "%s: Unable to create pcie1 serdes_pd sysfs entry\n", __func__);
 	}
 
 	platform_driver_register(&comcerto_pcie_driver);

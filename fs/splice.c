@@ -34,6 +34,10 @@
 #include <linux/socket.h>
 #include <linux/time.h>
 
+#include <net/sock.h>
+#include <linux/net.h>
+#include <linux/genalloc.h>
+
 /*
  * Attempt to steal a page from a pipe buffer. This should perhaps go into
  * a vm helper function, it's already simplified quite a bit by the
@@ -864,7 +868,8 @@ int comcerto_splice_from_pipe_feed(struct pipe_inode_info *pipe, struct splice_d
 	struct pipe_buffer *buf;
 	const struct pipe_buf_operations *ops;
 	int ret, ret2 = 0, remaining;
-	unsigned int curbuf, nrbufs, len, nrbufs_len, pos, offset, done;
+	unsigned int curbuf, nrbufs, len, nrbufs_len, done;
+	loff_t pos, offset;
 	struct file *file = sd->u.file;
 	struct address_space *mapping = file->f_mapping;
 	struct page **page;
@@ -916,7 +921,7 @@ start:
 
 #if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
 		// Is there a risk of getting the same page more than once (several buffers in a single page)?
-		ret = comcerto_dma_sg_add_input(sg, buf->page, buf->offset, buf->len, 0);
+		ret = comcerto_dma_sg_add_input(sg, page_address(buf->page) + buf->offset, buf->len, 0);
 		if (unlikely(ret)) {
 			printk(KERN_WARNING "%s: out of input bdescs\n", __func__);
 			break; //We will transfer what we could up to the previous buffer, based on nrbufs_len
@@ -967,7 +972,7 @@ start:
 		goto err;		// We failed early, so we still have an easy way out
 
 #if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
-	comcerto_dma_sg_add_output(sg, *page, offset, len, 1); //Don't check result since we should have at least one entry at this point
+	comcerto_dma_sg_add_output(sg, page_address(*page) + offset, len, 1); //Don't check result since we should have at least one entry at this point
 #endif
 
 	pos += len;
@@ -983,7 +988,7 @@ start:
 			goto write_begin_done;
 
 #if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
-		ret = comcerto_dma_sg_add_output(sg, *page, 0, PAGE_CACHE_SIZE, 1);
+		ret = comcerto_dma_sg_add_output(sg, page_address(*page), PAGE_CACHE_SIZE, 1);
 		if (unlikely(ret)) {
 			pagecache_write_end(file, mapping, pos, PAGE_CACHE_SIZE, 0, *page, *fsdata);
 			goto write_begin_done;
@@ -1003,7 +1008,7 @@ start:
 			goto write_begin_done;
 
 #if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
-		ret = comcerto_dma_sg_add_output(sg, *page, 0, remaining, 1);
+		ret = comcerto_dma_sg_add_output(sg, page_address(*page), remaining, 1);
 		if (unlikely(ret)) {
 			pagecache_write_end(file, mapping, pos, remaining, 0, *page, *fsdata);
 			goto write_begin_done;
@@ -2177,30 +2182,39 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		int, fd_out, loff_t __user *, off_out,
 		size_t, len, unsigned int, flags)
 {
-	long error;
-	struct file *in, *out;
+	int error = -EBADF;
+	struct file *in, *out = NULL;
 	int fput_in, fput_out;
+	struct socket *sock = NULL;
 
 	if (unlikely(!len))
 		return 0;
 
-	error = -EBADF;
-	in = fget_light(fd_in, &fput_in);
-	if (in) {
-		if (in->f_mode & FMODE_READ) {
-			out = fget_light(fd_out, &fput_out);
-			if (out) {
-				if (out->f_mode & FMODE_WRITE)
-					error = do_splice(in, off_in,
-							  out, off_out,
-							  len, flags);
-				fput_light(out, fput_out);
-			}
-		}
+	if (!(out = fget_light(fd_out, &fput_out)))
+		return -EBADF;
 
+	if (!(out->f_mode & FMODE_WRITE))
+		goto out;
+
+	/* Check if fd_in is a socket while out_fd is NOT a pipe. */
+	if (!get_pipe_info(out) &&
+		(sock = sockfd_lookup(fd_in, &error))) {
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+		if (sock->sk && out->f_op->splice_from_socket)
+			error = out->f_op->splice_from_socket(out, sock,
+								off_out, len);
+#endif
+		fput(sock->file);
+	} else
+	{
+		if (!(in = fget_light(fd_in, &fput_in)))
+			goto out;
+		if ((in->f_mode & FMODE_READ))
+			error = do_splice(in, off_in, out, off_out, len, flags);
 		fput_light(in, fput_in);
 	}
-
+out:
+	fput_light(out, fput_out);
 	return error;
 }
 
@@ -2210,7 +2224,7 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
  */
 static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 {
-	int ret;
+	int ret = 0;
 
 	/*
 	 * Check ->nrbufs without the inode lock first. This function
@@ -2219,7 +2233,6 @@ static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 	if (pipe->nrbufs)
 		return 0;
 
-	ret = 0;
 	pipe_lock(pipe);
 
 	while (!pipe->nrbufs) {
@@ -2248,7 +2261,7 @@ static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
  */
 static int opipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 {
-	int ret;
+	int ret = 0;
 
 	/*
 	 * Check ->nrbufs without the inode lock first. This function
@@ -2257,7 +2270,6 @@ static int opipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 	if (pipe->nrbufs < pipe->buffers)
 		return 0;
 
-	ret = 0;
 	pipe_lock(pipe);
 
 	while (pipe->nrbufs >= pipe->buffers) {

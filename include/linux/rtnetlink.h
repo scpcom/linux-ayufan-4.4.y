@@ -750,6 +750,7 @@ __rta_reserve(struct sk_buff *skb, int attrtype, int attrlen)
    	__rta_reserve(skb, attrtype, attrlen); })
 
 extern void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change);
+extern void __rtmsg_ifinfo(int type, struct net_device *dev, unsigned change, gfp_t flags);
 
 /* RTNL is used as a global lock for all changes to network configuration  */
 extern void rtnl_lock(void);

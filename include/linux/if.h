@@ -52,6 +52,9 @@
 #define IFF_DORMANT	0x20000		/* driver signals dormant	*/
 
 #define IFF_ECHO	0x40000		/* echo sent packets		*/
+#if defined(CONFIG_ARCH_COMCERTO)
+#define IFF_WIFI_OFLD 	0x80000		/* Offload interface		*/
+#endif
 
 #define IFF_VOLATILE	(IFF_LOOPBACK|IFF_POINTOPOINT|IFF_BROADCAST|IFF_ECHO|\
 		IFF_MASTER|IFF_SLAVE|IFF_RUNNING|IFF_LOWER_UP|IFF_DORMANT)

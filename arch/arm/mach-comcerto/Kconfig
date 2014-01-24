@@ -58,6 +58,12 @@ config C2K_EVM
 	help
 	  Say Y here if you intend to run this kernel with a C2K EVM.
 
+config C2K_MFCN_EVM
+	bool "MFCN EVM"
+	depends on ARCH_M86XXX
+	help
+	  Say Y here if you intend to run this kernel with a C2K MFCN EVM.
+
 config C2K_ASIC
 	bool "ASIC"
 	depends on ARCH_M86XXX

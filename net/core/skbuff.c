@@ -687,6 +687,24 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 {
 #define C(x) n->x = skb->x
 
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	if (skb->mspd_data) {
+		if (skb->mspd_len) {
+			int ofst = skb->len - skb->mspd_len;
+
+			memcpy(skb->data + ofst, skb->mspd_data + skb->mspd_ofst, skb->mspd_len);
+			skb->mspd_len = 0;
+		}
+
+		WARN_ON(skb_shared(skb));
+
+		if (!skb_shared(skb)) {
+			kfree(skb->mspd_data);
+			skb->mspd_data = NULL;
+		}
+	}
+#endif
+
 	n->next = n->prev = NULL;
 	n->sk = NULL;
 	__copy_skb_header(n, skb);
@@ -706,6 +724,7 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	atomic_set(&n->users, 1);
 
 #if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	WARN_ON(skb->mspd_data);
 	C(mspd_data);
 	C(mspd_len);
 	C(mspd_ofst);

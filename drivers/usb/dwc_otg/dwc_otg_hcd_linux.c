@@ -102,6 +102,19 @@ struct wrapper_priv_data {
 
 /** @} */
 
+int comcerto_dwc_dummy_bus_suspend(struct usb_hcd *hcd)
+{
+	printk("\n comcerto_dwc_dummy_bus_suspend...");
+	return 0;
+}
+
+int comcerto_dwc_dummy_bus_resume(struct usb_hcd *hcd)
+{
+	printk("\n comcerto_dwc_dummy_bus_resume...");
+	return 0;
+}
+
+
 static struct hc_driver dwc_otg_hc_driver = {
 
 	.description = dwc_otg_hcd_name,
@@ -128,8 +141,8 @@ static struct hc_driver dwc_otg_hc_driver = {
 
 	.hub_status_data = hub_status_data,
 	.hub_control = hub_control,
-	//.bus_suspend =
-	//.bus_resume =
+	.bus_suspend = comcerto_dwc_dummy_bus_suspend,
+	.bus_resume = comcerto_dwc_dummy_bus_resume,
 };
 
 /** Gets the dwc_otg_hcd from a struct usb_hcd */

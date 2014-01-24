@@ -786,6 +786,7 @@ static void release_channel(dwc_otg_hcd_t * hcd,
 {
 	dwc_otg_transaction_type_e tr_type;
 	int free_qtd;
+    gintmsk_data_t intr_mask = {.d32 = 0 };
 
 	DWC_DEBUGPL(DBG_HCDV, "  %s: channel %d, halt_status %d\n",
 		    __func__, hc->hc_num, halt_status);
@@ -861,10 +862,13 @@ cleanup:
 	}
 
 	/* Try to queue more transfers now that there's a free channel. */
-	tr_type = dwc_otg_hcd_select_transactions(hcd);
-	if (tr_type != DWC_OTG_TRANSACTION_NONE) {
-		dwc_otg_hcd_queue_transactions(hcd, tr_type);
-	}
+    intr_mask.d32 = DWC_READ_REG32(&hcd->core_if->core_global_regs->gintmsk);
+    if (!intr_mask.b.sofintr) {
+        tr_type = dwc_otg_hcd_select_transactions(hcd);
+        if (tr_type != DWC_OTG_TRANSACTION_NONE) {
+            dwc_otg_hcd_queue_transactions(hcd, tr_type);
+        }
+    }
 }
 
 /**
@@ -1975,6 +1979,8 @@ static void handle_hc_chhltd_intr_dma(dwc_otg_hcd_t * hcd,
 				     DWC_READ_REG32(&hcd->
 						    core_if->core_global_regs->
 						    gintsts));
+				halt_channel(hcd, hc, qtd,
+					     DWC_OTG_HC_XFER_PERIODIC_INCOMPLETE);
 			}
 
 		}

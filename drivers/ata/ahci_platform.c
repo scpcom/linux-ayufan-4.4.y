@@ -23,7 +23,9 @@
 #include <linux/ahci_platform.h>
 #include <linux/clk.h>
 #include <mach/reset.h>
+#include <mach/comcerto-2000/pm.h>
 #include "ahci.h"
+#include <mach/serdes-c2000.h>
 
 #ifdef CONFIG_ARCH_M86XXX 
 /* SATA Clocks */
@@ -79,6 +81,20 @@ static int ahci_platform_suspend(struct platform_device *pdev, pm_message_t stat
 {
         struct ata_host *host = platform_get_drvdata(pdev);
 	int ret=0;
+
+#ifdef CONFIG_ARCH_M86XXX
+	 /* Check for the Bit_Mask bit for SATA, if it is enabled
+	  * then we are not going suspend the SATA device , as by
+	  * this device , we will wake from System Resume.
+	 */
+	if ( !(host_utilpe_shared_pmu_bitmask & SATA_IRQ )){
+
+                /* We will Just return
+                */
+		return ret;
+	}
+#endif
+
         if (host)
 		ret = ata_host_suspend(host, state);
 
@@ -89,6 +105,14 @@ static int ahci_platform_suspend(struct platform_device *pdev, pm_message_t stat
 		clk_disable(sata_clk);
 		clk_disable(sata_oob_clk);
 		clk_disable(sata_pmu_clk);
+
+		/* PM Performance Enhancement : SRDS1 PD SATA1/SRDS2 PD SATA2 - P2 state, */
+		/* Resets the entire PHY module and CMU power down */
+		if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES1_CNF_SATA0)
+			writel((readl((COMCERTO_DWC1_CFG_BASE+0x44)) | 0xCC), (COMCERTO_DWC1_CFG_BASE+0x44));
+		else if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES2_CNF_SATA1)
+			writel((readl((COMCERTO_DWC1_CFG_BASE+0x54)) | 0xCC), (COMCERTO_DWC1_CFG_BASE+0x54));
+
 	}
 #endif
 	
@@ -100,6 +124,25 @@ static int ahci_platform_resume(struct platform_device *pdev)
         struct ata_host *host = platform_get_drvdata(pdev);
 
 #ifdef CONFIG_ARCH_M86XXX
+	/* PM Performance Enhancement : SRDS1 PD SATA1/SRDS2 PD SATA2 - P2 state, */
+	/* Enable PHY module and CMU power UP */
+	if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES1_CNF_SATA0)
+ 		writel((readl((COMCERTO_DWC1_CFG_BASE+0x44)) & ~0xCC), (COMCERTO_DWC1_CFG_BASE+0x44));
+	else if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES2_CNF_SATA1)
+		writel((readl((COMCERTO_DWC1_CFG_BASE+0x54)) & ~0xCC), (COMCERTO_DWC1_CFG_BASE+0x54));
+
+	/* Check for the Bit_Mask bit for SATA, if it is enabled
+	 * then we are not going suspend the SATA device , as by
+	 * this device , we will wake from System Resume.
+	*/
+
+	if ( !(host_utilpe_shared_pmu_bitmask & SATA_IRQ )){
+
+                /* We will Just return
+                */
+		return 0;
+	}
+
 	/* Do the  clock enable here  PMU,OOB,AXI */
 	clk_enable(sata_clk);
 	clk_enable(sata_oob_clk);
@@ -281,8 +324,8 @@ static int __init ahci_probe(struct platform_device *pdev)
 
 #ifdef CONFIG_ARCH_M86XXX
 		/* Optimized PFE/SATA DDR interaction,
-		limit burst size of SATA controller */
-		writel(0 , ahci_port_base(ap) + 0x70);
+		limit read burst size of SATA controller */
+		writel(0x41, ahci_port_base(ap) + 0x70);
 #endif
 
 		/* disabled/not-implemented port */

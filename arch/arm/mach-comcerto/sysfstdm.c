@@ -21,6 +21,7 @@
 #include <linux/string.h>
 #include <linux/platform_device.h>
 #include <asm/io.h>
+#include <asm/delay.h>
 #include <mach/comcerto-common.h>
 #include <asm/div64.h>
 #include <mach/comcerto-2000/clk-rst.h>
@@ -246,6 +247,13 @@ static void tdm_mux_set(u32 tdmmux)
 		writel(TDM_CTRL_SLIC_RESET | COMCERTO_BLOCK_MSIF_DIV, TDM_CLK_CNTRL); /* TDM = NTG out / 12 */
 		writel((0x3 << 4) |(readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~(0x3 << 4)), COMCERTO_GPIO_MISC_PIN_SELECT);
 		writel(COMCERTO_BLOCK_MSIF_DIV, TDM_CLK_CNTRL); /* Remove out of reset */
+
+		/* Delay 100us after C2k TDM block has been un-reset, before SLIC is un-reset.
+		   Ensures MSIF interface clock is active well before SLIC is un-reset (SiLabs spec). 
+		*/
+		udelay(100);
+
+		writel(0x1 << 30, COMCERTO_GPIO_63_32_PIN_OUTPUT); /* remove slic out of reset */
 		break;
 
 	default:

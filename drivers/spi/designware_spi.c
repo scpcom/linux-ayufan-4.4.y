@@ -180,8 +180,8 @@ static int designware_spi_setup_transfer(struct spi_device *spi,
 	struct designware_spi *dwspi = spi_master_get_devdata(spi->master);
 	u16 ctrlr0 = readw(dwspi->regs + DWSPI_CTRLR0);
 
-	bits_per_word = (t) ? t->bits_per_word : spi->bits_per_word;
-	hz = (t) ? t->speed_hz : spi->max_speed_hz;
+	bits_per_word = (t) ? (t->bits_per_word ? t->bits_per_word : spi->bits_per_word) : spi->bits_per_word;
+	hz = (t) ? (t->speed_hz ? t->speed_hz : spi->max_speed_hz) : spi->max_speed_hz;
 
 	if (bits_per_word < 4 || bits_per_word > 16) {
 		dev_err(&spi->dev, "%s, unsupported bits_per_word=%d\n",
@@ -272,8 +272,16 @@ static void designware_spi_do_tx(struct designware_spi *dwspi)
 			writew(dr, dwspi->regs + DWSPI_DR);
 			dwspi->remaining_tx_bytes -= 2;
 		}
-		if (--tx_limit <= 0)
+
+		if(dwspi->bits_per_word <= 8){
+			--tx_limit;
+		}else{
+			tx_limit -= 2;
+		}
+
+		if (tx_limit <= 0)
 			break;
+
 		sr = readb(dwspi->regs + DWSPI_SR);
 	}
 
@@ -295,15 +303,6 @@ static int designware_spi_fill_tx_fifo(struct designware_spi *dwspi)
 			dwspi->tx_ptr = dwspi->tx_t->tx_buf;
 			dwspi->remaining_tx_bytes = dwspi->tx_t->len;
 			dwspi->status = 0;
-
-			/* can't change speed or bits in the middle of a
-			 * message. must disable the controller for this.
-			 */
-			if (dwspi->tx_t->speed_hz
-					|| dwspi->tx_t->bits_per_word) {
-				dwspi->status = -ENOPROTOOPT;
-				break;
-			}
 
 			if (!dwspi->tx_t->tx_buf && !dwspi->tx_t->rx_buf
 					&& dwspi->tx_t->len) {
@@ -329,6 +328,7 @@ static int designware_spi_fill_tx_fifo(struct designware_spi *dwspi)
 	}
 
 	complete(&dwspi->done);
+
 	return 1;
 }
 
@@ -518,7 +518,7 @@ static void designware_work(struct work_struct *work)
 			dwspi->remaining_tx_bytes =
 				dwspi->remaining_rx_bytes = 0;
 			dwspi->tx_count = dwspi->rx_count = 0;
-			designware_spi_setup_transfer(m->spi, NULL);
+			designware_spi_setup_transfer(m->spi, dwspi->tx_t);
 			dwspi_enable(dwspi, 1);
 			designware_spi_do_transfers(dwspi);
 			dwspi_enable(dwspi, 0);
@@ -530,7 +530,6 @@ static void designware_work(struct work_struct *work)
 
 		m->status = dwspi->status;
 		m->complete(m->context);
-
 		spin_lock(&dwspi->qlock);
 	}
 	spin_unlock(&dwspi->qlock);

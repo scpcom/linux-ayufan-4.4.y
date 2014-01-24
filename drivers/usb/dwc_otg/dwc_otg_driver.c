@@ -60,6 +60,7 @@
 #include <mach/hardware.h>
 
 #include <linux/clk.h>
+#include <mach/comcerto-2000/pm.h>
 
 /* USB 3.0 clock */
 static struct clk *usb2_clk;
@@ -1152,6 +1153,19 @@ int comcerto_usb2_bus_suspend(struct platform_device * pd, pm_message_t state)
 	int error_status = 0, val = 0;
 	struct usb_hcd *hcd = NULL;
 
+	/* Check for the Bit Mask bit for USB2, if not enabled
+         * then we are not going suspend the USB2 device , as by
+         * this device , we will wake from resume.
+         */
+        if ( !(host_utilpe_shared_pmu_bitmask & USB2p0_IRQ )){
+
+                /* We will return here.
+                 * Not prepared yet for suspend , so that device suspend
+                 * will not occur.
+                */
+		return error_status;
+	}
+
 	hcd = (struct usb_hcd *) platform_get_drvdata(pd);
 
 	/* Do the port suspend for USB 2.0 Controller */
@@ -1162,6 +1176,10 @@ int comcerto_usb2_bus_suspend(struct platform_device * pd, pm_message_t state)
 
 	/* Disable the Clock */
 	clk_disable(usb2_clk);
+
+	/* PM Performance Enhancement : USB0 PD */
+	/* Common Block Power-Down Control and powering down all analog blocks */
+	writel(0x01220040, COMCERTO_USB0_PHY_CTRL_REG0);
 
 	return error_status;
 }
@@ -1175,6 +1193,24 @@ int comcerto_usb2_bus_resume(struct platform_device *pd)
 {
 	int error_status = 0;
 	struct usb_hcd *hcd = NULL;
+
+
+	/* Check for the Bit Mask bit for USB2, if not enabled
+         * then we are not going suspend the USB2 device , as by
+         * this device , we will wake from resume.
+         */
+        if ( host_utilpe_shared_pmu_bitmask & USB2p0_IRQ ){
+
+                /* We will return here.
+                 * Not prepared yet for suspend , so that device suspend
+                 * will not occur.
+                */
+		return error_status;
+	}
+
+	/* PM Performance Enhancement : USB0 PD */
+	/* Common Block Power-Down Control and powering down all analog blocks */
+	writel(0x00220000, COMCERTO_USB0_PHY_CTRL_REG0);
 
 	/* Enable the Clock */
 	if (clk_enable(usb2_clk)){

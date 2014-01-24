@@ -1668,6 +1668,11 @@ zonelist_scan:
 			!cpuset_zone_allowed_softwall(zone, gfp_mask))
 				continue;
 
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+		if (!(gfp_mask & __GFP_DMA) && (zone_idx(zone) == ZONE_DMA))
+			continue;
+#endif
+
 		BUILD_BUG_ON(ALLOC_NO_WATERMARKS < NR_WMARK);
 		if (!(alloc_flags & ALLOC_NO_WATERMARKS)) {
 			unsigned long mark;

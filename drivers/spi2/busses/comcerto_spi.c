@@ -222,13 +222,14 @@ static int do_write_only_transfer8(struct comcerto_spi *spi, u8 *buf, unsigned i
  *
  *
  */
-static int do_write_only_transfer16(struct comcerto_spi *spi, u16 *buf, unsigned int *len)
+static int do_write_only_transfer16(struct comcerto_spi *spi, u16 *buf, unsigned int *len, u32 ser_reg)
 {
 	unsigned int len_now;
 	int rc = 0;
 	unsigned int tmp = *len;
 	u32 dr = spi->membase + COMCERTO_SPI_DR;
 	u32 txflr = spi->membase + COMCERTO_SPI_TXFLR;
+	int ser_done = 0;
 
 //      printk(KERN_INFO "do_write_only_transfer(%#lx, %#lx, %d)\n", (unsigned long)spi, (unsigned long)buf, *len);
 
@@ -241,6 +242,12 @@ static int do_write_only_transfer16(struct comcerto_spi *spi, u16 *buf, unsigned
 
 		while (len_now--)
 			__raw_writew(cpu_to_le16(*buf++), dr);
+
+		if (!ser_done)
+		{
+			__raw_writel(ser_reg, spi->membase + COMCERTO_SPI_SER);
+			ser_done = 1;
+		}
 	}
 
 	*len -= tmp;
@@ -370,7 +377,7 @@ static int comcerto_spi_do_transfer(struct spi_adapter *adapter, struct spi_tran
 		if (transfer->fs <= 8)
 			rc = do_write_only_transfer8(spi, transfer->wbuf, &transfer->wlen, ser);
 		else
-			rc = do_write_only_transfer16(spi, (u16 *) transfer->wbuf, &transfer->wlen);
+			rc = do_write_only_transfer16(spi, (u16 *) transfer->wbuf, &transfer->wlen, ser);
 
 		break;
 

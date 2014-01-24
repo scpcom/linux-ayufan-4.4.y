@@ -57,6 +57,7 @@
 #include <linux/clockchips.h>
 #include <linux/clk.h>
 #include <mach/comcerto-2000/clock.h>
+#include <mach/comcerto-2000/pm.h>
 #include <mach/gpio.h>
 
 struct c2k_gpio_pin_stat_info c2k_gpio_pin_stat =
@@ -154,7 +155,12 @@ static struct map_desc comcerto_io_desc[] __initdata =
 	},
 };
 
-#define PFE_DMA_SIZE		SZ_4M
+#if defined(CONFIG_COMCERTO_64K_PAGES)
+#define PFE_DMA_SIZE		(4 * SZ_1M)
+#else
+#define PFE_DMA_SIZE            (16 * SZ_1M)
+#endif
+
 #define DSPG_DECT_CSS_DMA_SIZE	(10 * SZ_1M)
 
 void __init device_map_io(void)
@@ -422,6 +428,9 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 	int serdes_regs_size;
         u32 val;
 	int ref_clk_24;
+
+	/* Move SATA controller to DDRC2 port */
+	writel(readl(COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2, COMCERTO_GPIO_FABRIC_CTRL_REG);
 
 	val = readl(COMCERTO_GPIO_SYSTEM_CONFIG);
 	ref_clk_24 = val & (BIT_5_MSK|BIT_7_MSK);
@@ -902,6 +911,8 @@ static struct platform_device *comcerto_common_devices[] __initdata = {
 
 void __init device_init(void)
 {
+	/* Default value for the bit mask */
+	unsigned int default_host_utilpe_shared_bitmask = ~(USB2p0_IRQ|WOL_IRQ);
 	struct clk *axi_clk,*ddr_clk,*arm_clk,*l2cc_clk;
 	HAL_clk_div_backup_relocate_table ();
 	system_rev = (readl(COMCERTO_GPIO_DEVICE_ID_REG) >> 24) & 0xf;
@@ -985,6 +996,8 @@ void __init device_init(void)
 	// [FIXME] Take TDM out of reset
 	//writel(readl(COMCERTO_BLOCK_RESET_REG) | TDM_RST, COMCERTO_BLOCK_RESET_REG);
 #endif
+	/* Default bit mask is applied here , which will be passed to Util-Pe*/
+	c2k_pm_bitmask_store(default_host_utilpe_shared_bitmask);
 
 	platform_add_devices(comcerto_common_devices, ARRAY_SIZE(comcerto_common_devices));
 }

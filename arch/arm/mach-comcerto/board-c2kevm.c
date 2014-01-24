@@ -259,19 +259,18 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.platform_data = &spi_pdata,
                 .controller_data = &spi_ctrl_data,
 	},
-
 	{
 		/* FIXME: for chipselect-1 */
 		.modalias = "proslic",
-		.chip_select = 1,
 		.max_speed_hz = 4*1000*1000,
+		.chip_select = 1,
+		.mode = SPI_MODE_3,
 		.bus_num = 0,
 		.irq = -1,
 		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
                 .controller_data = &spi_ctrl_data,
 	},
-
 	{
 		.modalias = "comcerto_spi3",
 		.chip_select = 2,
@@ -283,6 +282,20 @@ static struct spi_board_info comcerto_spi_board_info[] = {
                 .controller_data = &spi_ctrl_data,
 	},
 
+#if 0 //MSIF
+
+	{
+		.modalias = "proslic",
+		.max_speed_hz = 2*1000*1000,
+		.chip_select = 3,
+		.mode = SPI_MODE_1,
+		.bus_num = 0,
+		.irq = -1,
+		.mode = SPI_MODE_3,
+		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
+	},
+#else
 	{
 		.modalias = "legerity",
 		.chip_select = 3,
@@ -293,7 +306,7 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.platform_data = &spi_pdata,
                 .controller_data = &spi_ctrl_data,
 	},
-
+#endif
 };
 #endif
 
@@ -473,7 +486,8 @@ static struct comcerto_tdm_data comcerto_tdm_pdata = {
 	.fspolarity = 0, /* 28 FSYNC_FALL(RISE)_EDGE */
 	.fshwidth = 1, /* High_Phase_Width[10:0] */
 	.fslwidth = 0xFF, /* Low_Phase_Width[10:0] */
-	.clockhz = 2048000, /* INC_VALUE[29:0] According to the desired TDM clock output frequency, this field should be configured */
+	.clockhz = 2048000, /* INC_VALUE[29:0] According to the desired TDM clock output \
+			       frequency, this field should be configured */
 	.clockout = 1, /* 0 -> set bit 21, clear bit 20 in COMCERTO_GPIO_IOCTRL_REG
 			  (software control, clock input)
 			  1 -> set bit 21 and 20 in COMCERTO_GPIO_IOCTRL_REG
@@ -497,6 +511,40 @@ static struct platform_device comcerto_tdm_device = {
 	.num_resources	= 0,
 	.resource = NULL,
 };
+
+#if defined(CONFIG_DSPG_DECT_CSS)
+#define CSS_ITCM_BASE		COMCERTO_AXI_DECT_BASE
+#define CSS_ITCM_SIZE		(SZ_1M)
+
+#define CSS_DTCM_BASE		(CSS_ITCM_BASE + CSS_ITCM_SIZE)
+#define CSS_DTCM_SIZE		(SZ_1M)
+
+static struct resource comcerto_css_resources[] = {
+	{
+		.name	= "itcm",
+		.start	= CSS_ITCM_BASE,
+		.end	= CSS_ITCM_BASE + CSS_ITCM_SIZE - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+	{
+		.name	= "dtcm",
+		.start	= CSS_DTCM_BASE,
+		.end	= CSS_DTCM_BASE + CSS_DTCM_SIZE - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+};
+
+static struct platform_device comcerto_css_device = {
+	.name		= "css",
+	.id		= 0,
+	.dev		= {
+		.platform_data = 0,
+		.coherent_dma_mask = DMA_BIT_MASK(32),
+	},
+	.num_resources	= ARRAY_SIZE(comcerto_css_resources),
+	.resource	= comcerto_css_resources,
+};
+#endif
 
 static struct resource comcerto_pfe_resources[] = {
 	{
@@ -631,6 +679,9 @@ static struct platform_device *comcerto_devices[] __initdata = {
 		&comcerto_tdm_device,
 		&comcerto_pfe_device,
 		&rtc_dev,
+#if defined(CONFIG_DSPG_DECT_CSS)
+		&comcerto_css_device,
+#endif
 #if defined(CONFIG_COMCERTO_ELP_SUPPORT)
 	&comcerto_elp_device,
 #endif
@@ -644,11 +695,11 @@ static struct platform_device *comcerto_devices[] __initdata = {
 /* This variable is used by comcerto-2000.c to initialize the expansion bus */
 int comcerto_exp_values[5][7]= {
 	/* ENABLE, BASE, SEG_SZ, CFG, TMG1, TMG2, TMG3 */
-	{1, (EXP_BUS_REG_BASE_CS0 >> 12), ((EXP_BUS_REG_BASE_CS0 + EXP_CS0_SEG_SIZE - 1) >> 12), EXP_MEM_BUS_SIZE_16, 0x1A1A401F, 0x06060A04, 0x00000002},		/*TODO Values to check*/
+	{1, (EXP_BUS_REG_BASE_CS0 >> 12), ((EXP_BUS_REG_BASE_CS0 + EXP_CS0_SEG_SIZE - 1) >> 12), EXP_MEM_BUS_SIZE_16, 0x03034007, 0x04040502, 0x00000002},		/*TODO Values to check*/
 	{0, (EXP_BUS_REG_BASE_CS1 >> 12), ((EXP_BUS_REG_BASE_CS1 + EXP_CS1_SEG_SIZE - 1) >> 12), EXP_RDY_EN|EXP_MEM_BUS_SIZE_32, 0x1A1A401F, 0x06060A04, 0x00000002},	/*TODO Values to check*/
 	{0, (EXP_BUS_REG_BASE_CS2 >> 12), ((EXP_BUS_REG_BASE_CS2 + EXP_CS2_SEG_SIZE - 1) >> 12), EXP_STRB_MODE|EXP_ALE_MODE|EXP_MEM_BUS_SIZE_8, 0x1A10201A, 0x03080403, 0x0000002},	/*TODO Values to check*/
 	{0, (EXP_BUS_REG_BASE_CS3 >> 12), ((EXP_BUS_REG_BASE_CS3 + EXP_CS3_SEG_SIZE - 1) >> 12), EXP_STRB_MODE|EXP_ALE_MODE|EXP_MEM_BUS_SIZE_8, 0x1A10201A, 0x03080403, 0x0000002},	/*BT8370*/
-	{0, (EXP_BUS_REG_BASE_CS4 >> 12), ((EXP_BUS_REG_BASE_CS4 + EXP_CS4_SEG_SIZE - 1) >> 12), EXP_NAND_MODE|EXP_MEM_BUS_SIZE_8, 0x1A1A401F, 0x06060A04, 0x00000002},	/* NAND: TODO Values to check */
+	{1, (EXP_BUS_REG_BASE_CS4 >> 12), ((EXP_BUS_REG_BASE_CS4 + EXP_CS4_SEG_SIZE - 1) >> 12), EXP_NAND_MODE|EXP_MEM_BUS_SIZE_8, 0x00000001, 0x01010001, 0x00000002},	/* NAND: TODO Values to check */
 };
 
 /************************************************************************

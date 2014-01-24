@@ -489,7 +489,7 @@ struct cryptkop {
 	int		(*krp_callback)(struct cryptkop *);
 };
 
-#include <ocf-compat.h>
+#include <linux/ocf-compat.h>
 
 /*
  * Session ids are 64 bits.  The lower 32 bits contain a "local id" which

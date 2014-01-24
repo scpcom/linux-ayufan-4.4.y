@@ -288,6 +288,15 @@ config ASYNC_TX_DMA
 
 	  If unsure, say N.
 
+config RAID_ZERO_COPY
+        bool "Optimized DMA/XOR offload: reduce raid5 memcpy which offloaded for dma"
+        depends on ASYNC_TX_DMA
+        help
+          This allows the async_tx api try to reduce raid5 memcpy operations for
+          dma. If you have dma device to support memcpy offloading, you can set
+          it as Y, else N.
+
+
 config DMATEST
 	tristate "DMA Test client"
 	depends on DMA_ENGINE

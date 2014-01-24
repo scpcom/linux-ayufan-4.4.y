@@ -36,8 +36,24 @@
 #define BLAST	(1 << 16)
 #define BFIX	(1 << 17)
 
-#define MDMA_INBOUND_BUF_DESC	256
+// Block Size
+#define XOR_BLOCK_SIZE_256	0
+#define XOR_BLOCK_SIZE_512	1
+#define XOR_BLOCK_SIZE_1024	2
+#define XOR_BLOCK_SIZE_2048	3
+#define XOR_BLOCK_SIZE_4096	4
+
+#define COMCERTO_XOR_MAX_SRC    6
+
+#define MDMA_INBOUND_BUF_DESC		256
 #define MDMA_OUTBOUND_BUF_DESC	256
+
+#define XOR_INBOUND_BUF_DESC	6
+#define XOR_OUTBOUND_BUF_DESC	2
+
+/* FLEN => Maximum no. of fdescs mdma can process at a time is 4k-1 */
+/* Need to verify if these many can be created in aram_pool. Don't know whether someone else use iram_pool */
+//#define XOR_FDESC_COUNT	256
 
 #define MDMA_MAX_BUF_SIZE		0xffff
 #define MDMA_SPLIT_BUF_SIZE		0x8000	/* half a page with 64kB pages */
@@ -72,18 +88,39 @@
 #define ARPROT(x)			((x) << 4)
 #define ARCACHE(x)			((x) << 0)
 
+enum mdma_transaction_type {
+	MDMA_MEMCPY,
+	MDMA_XOR,
+	MDMA_XOR_VAL,
+};
 
-struct comcerto_xor_buffer_desc {
+struct comcerto_mdma_buffer_desc {
 	u32 bpointer;
 	u32 bcontrol;
 }__attribute__ ((aligned(8)));
+
+struct comcerto_memcpy_inbound_fdesc {
+	u32  next_desc;
+	u32  fcontrol;
+	u32  fstatus0;
+	u32  fstatus1;
+	struct comcerto_mdma_buffer_desc bdesc[MDMA_INBOUND_BUF_DESC];
+}__attribute__ ((aligned(16)));
+
+struct comcerto_memcpy_outbound_fdesc {
+	u32  next_desc;
+	u32  fcontrol;
+	u32  fstatus0;
+	u32  fstatus1;
+	struct comcerto_mdma_buffer_desc bdesc[MDMA_OUTBOUND_BUF_DESC];
+}__attribute__ ((aligned(16)));
 
 struct comcerto_xor_inbound_fdesc {
 	u32  next_desc;
 	u32  fcontrol;
 	u32  fstatus0;
 	u32  fstatus1;
-	struct comcerto_xor_buffer_desc bdesc[MDMA_INBOUND_BUF_DESC];
+	struct comcerto_mdma_buffer_desc bdesc[XOR_INBOUND_BUF_DESC];
 }__attribute__ ((aligned(16)));
 
 struct comcerto_xor_outbound_fdesc {
@@ -91,7 +128,7 @@ struct comcerto_xor_outbound_fdesc {
 	u32  fcontrol;
 	u32  fstatus0;
 	u32  fstatus1;
-	struct comcerto_xor_buffer_desc bdesc[MDMA_OUTBOUND_BUF_DESC];
+	struct comcerto_mdma_buffer_desc bdesc[XOR_OUTBOUND_BUF_DESC];
 }__attribute__ ((aligned(16)));
 
 struct comcerto_dma_buf {
@@ -113,9 +150,20 @@ struct comcerto_dma_sg {
 	struct comcerto_dma_buf out_bdesc[MDMA_OUTBOUND_BUF_DESC];
 };
 
+struct mdma_xor_struct {
+	int transaction_type;
+	int xor_block_size;
+	int xor_src_cnt;
+	dma_addr_t **xor_srcs;
+	dma_addr_t *xor_dest;
+};
 
-extern struct comcerto_xor_inbound_fdesc *mdma_in_desc;
-extern struct comcerto_xor_outbound_fdesc *mdma_out_desc;
+
+extern struct comcerto_memcpy_inbound_fdesc *mdma_in_desc;
+extern struct comcerto_memcpy_outbound_fdesc *mdma_out_desc;
+
+extern struct comcerto_xor_inbound_fdesc *xor_in_fdesc[];
+extern struct comcerto_xor_outbound_fdesc *xor_out_fdesc[];
 
 
 static inline void comcerto_dma_set_in_bdesc(u32 idx, u32 addr, u32 ctrl)
@@ -140,15 +188,42 @@ static inline void comcerto_dma_out_bdesc_ctrl_update(u32 idx, u32 ctrl)
 	mdma_out_desc->bdesc[idx].bcontrol |= ctrl;
 }
 
+/****************** XOR functions ********************/
+static inline void mdma_xor_set_in_bdesc(u32 xor_cbuf_wr_cntr, u32 idx, u32 addr, u32 ctrl)
+{
+	xor_in_fdesc[xor_cbuf_wr_cntr]->bdesc[idx].bpointer = addr;
+	xor_in_fdesc[xor_cbuf_wr_cntr]->bdesc[idx].bcontrol = ctrl;
+}
+
+static inline void mdma_xor_set_out_bdesc(u32 xor_cbuf_wr_cntr, u32 idx, u32 addr, u32 ctrl)
+{
+	xor_out_fdesc[xor_cbuf_wr_cntr]->bdesc[idx].bpointer = addr;
+	xor_out_fdesc[xor_cbuf_wr_cntr]->bdesc[idx].bcontrol = ctrl;
+}
+
+static inline void mdma_xor_in_bdesc_ctrl_update(u32 xor_cbuf_wr_cntr,u32 idx, u32 ctrl)
+{
+	xor_in_fdesc[xor_cbuf_wr_cntr]->bdesc[idx].bcontrol |= ctrl;
+}
+
+static inline void mdma_xor_out_bdesc_ctrl_update(u32 xor_cbuf_wr_cntr,u32 idx, u32 ctrl)
+{
+	xor_out_fdesc[xor_cbuf_wr_cntr]->bdesc[idx].bcontrol |= ctrl;
+}
+
+/****************** XOR functions end ********************/
+
 extern void comcerto_dma_get(void);
 extern void comcerto_dma_put(void);
 extern void comcerto_dma_set_in_bdesc(u32 idx, u32 addr, u32 ctrl);
 extern void comcerto_dma_set_out_bdesc(u32 idx, u32 addr, u32 ctrl);
 extern void comcerto_dma_start(void);
 extern void comcerto_dma_wait(void);
+extern void comcerto_do_mdma_xor(unsigned int src_count, unsigned int bytes, dma_addr_t dest, dma_addr_t *srcs);
+extern void comcerto_do_mdma_memcpy(void);
 
-int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, struct page *page, unsigned int offset, unsigned int len, int use_acp);
-int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, struct page *page, unsigned int offset, unsigned int len, int use_acp);
+int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, void *p, unsigned int len, int use_acp);
+int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, void *p, unsigned int len, int use_acp);
 void comcerto_dma_sg_setup(struct comcerto_dma_sg *sg, unsigned int len);
 void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg, unsigned int len);
 
@@ -163,3 +238,4 @@ static inline void comcerto_dma_sg_init(struct comcerto_dma_sg *sg)
 #endif
 
 #endif /* C2K_DMA_H_ */
+

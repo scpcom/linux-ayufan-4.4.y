@@ -812,11 +812,11 @@ crypto_dispatch(struct cryptop *crp)
 	cryptostats.cs_ops++;
 
 	CRYPTO_Q_LOCK();
-	if (crypto_q_cnt >= crypto_q_max) {
+	/*if (crypto_q_cnt >= crypto_q_max) {
 		cryptostats.cs_drops++;
 		CRYPTO_Q_UNLOCK();
 		return ENOMEM;
-	}
+	}*/
 	crypto_q_cnt++;
 
 	/* make sure we are starting a fresh run on this crp. */
