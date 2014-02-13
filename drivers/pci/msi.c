@@ -521,6 +521,7 @@ error_attrs:
 		++count;
 		msi_attr = msi_attrs[count];
 	}
+	kfree(msi_attrs);
 	return ret;
 }
 
