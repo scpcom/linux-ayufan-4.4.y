@@ -45,7 +45,7 @@ static struct clk *clk_i2c;
 module_param(force_poll, bool, S_IRUGO);
 MODULE_PARM_DESC(force_poll, "Force polling mode: 0=interrupt mode, polling mode otherwise");
 
-static int speed = 1;
+static int speed = 0;
 module_param(speed, int, S_IRUGO);
 MODULE_PARM_DESC(speed, "I2C speed: 0=standard, 1=fast, 2=high speed");
 
