@@ -94,6 +94,21 @@ static void fdb_rcu_free(struct rcu_head *head)
 
 static inline void fdb_delete(struct net_bridge_fdb_entry *f)
 {
+#if defined(CONFIG_COMCERTO_FP)
+	struct net_bridge_port *this_port = f->dst, *p;
+	struct net_bridge *br = this_port->br;
+
+	if (f->is_local) {
+		list_for_each_entry(p, &br->port_list, list) {
+			if (this_port == p)
+				continue;
+
+			dev_uc_del(this_port->dev, p->dev->dev_addr);
+			dev_uc_del(p->dev, f->addr.addr);
+		}
+	}
+#endif
+
 	fdb_notify(f, RTM_DELNEIGH);
 	hlist_del_rcu(&f->hlist);
 	call_rcu(&f->rcu, fdb_rcu_free);
@@ -378,6 +393,9 @@ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 {
 	struct hlist_head *head = &br->hash[br_mac_hash(addr)];
 	struct net_bridge_fdb_entry *fdb;
+#if defined(CONFIG_COMCERTO_FP)
+	struct net_bridge_port *p;
+#endif
 
 	if (!is_valid_ether_addr(addr))
 		return -EINVAL;
@@ -399,6 +417,15 @@ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 	if (!fdb)
 		return -ENOMEM;
 
+#if defined(CONFIG_COMCERTO_FP)
+	list_for_each_entry(p, &br->port_list, list) {
+		if (source == p)
+			continue;
+
+		dev_uc_add(source->dev, p->dev->dev_addr);
+		dev_uc_add(p->dev, addr);
+	}
+#endif
 	fdb->is_local = fdb->is_static = 1;
 	return 0;
 }
