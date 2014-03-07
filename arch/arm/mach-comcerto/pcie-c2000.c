@@ -20,6 +20,7 @@
 
 #include <linux/kernel.h>
 #include <linux/version.h>
+#include <linux/ratelimit.h>
 #include <linux/init.h>
 #include <linux/pci.h>
 #include <linux/spinlock.h>
@@ -1882,6 +1883,16 @@ linkup:
 static int comcerto_pcie_abort_handler(unsigned long addr, unsigned int fsr,
                                       struct pt_regs *regs)
 {
+	static DEFINE_RATELIMIT_STATE(rs, 5 * HZ, 5);
+	if (__ratelimit(&rs)) {
+		pr_err("PCIe external abort detected at 0x%08lx\n", addr);
+	} else {
+		/*
+		 * Things are getting out of control.  Give up before we
+		 * just freeze the CPU and can't report about it.
+		 */
+		panic("PCIe: too many external aborts in a short time");
+	}
         if (fsr & (1 << 10))
                 regs->ARM_pc += 4;
         return 0;
