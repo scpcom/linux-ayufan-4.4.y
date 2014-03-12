@@ -357,7 +357,7 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 
 		}
 #endif
-	return 0;
+	return err_count;
 }
 
 /** writes single page to the NAND device along with the ECC bytes
