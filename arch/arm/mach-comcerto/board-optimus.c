@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <linux/delay.h>
 #include <linux/sched.h>
 #include <linux/device.h>
 #include <linux/serial_8250.h>
@@ -108,6 +109,21 @@ static void __init board_gpio_init(void)
 
 #ifdef MOCA_RESET_GPIO_PIN
 	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | MOCA_RESET_GPIO_PIN, COMCERTO_GPIO_OUTPUT_REG);
+#endif
+
+#ifdef PCIE_ADDITIONAL_RESET_PIN
+	printk(KERN_WARNING "Pulsing GPIO_62 to reset PCIe");
+	writel((0x2 << 4) | (readl(COMCERTO_GPIO_MISC_PIN_SELECT) & ~(0x3 << 4)),
+			COMCERTO_GPIO_MISC_PIN_SELECT);
+	writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~(PCIE_ADDITIONAL_RESET_PIN),
+			COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+	c2k_gpio_pin_stat.c2k_gpio_pins_32_63 |= PCIE_ADDITIONAL_RESET_PIN;
+	writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~(PCIE_ADDITIONAL_RESET_PIN),
+			COMCERTO_GPIO_63_32_PIN_OUTPUT);
+	udelay(1000);
+	writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | (PCIE_ADDITIONAL_RESET_PIN),
+			COMCERTO_GPIO_63_32_PIN_OUTPUT);
+	udelay(1000);
 #endif
 
 	// enable GPIO0 interrupt (for MoCA) as level triggered, active high.
@@ -478,7 +494,7 @@ static struct comcerto_tdm_data comcerto_tdm_pdata = {
 			  1 -> set bit 21 and 20 in COMCERTO_GPIO_IOCTRL_REG
 			  (software control, clock output)
 			  2 -> clear bit 21 in COMCERTO_GPIO_IOCTRL_REG (hardware control) */
-	.tdmmux = 0x1, /* TDM interface Muxing:0x0 - TDM block, 0x1 - ZDS block,
+	.tdmmux = 0x2, /* TDM interface Muxing:0x0 - TDM block, 0x1 - ZDS block,
 		0x2 - GPIO[63:60] signals and 0x3 - MSIF block is selected */
 #if 0
 	/* FIX ME - Need correct values for TDM_DR, TDM_DX, TDM_FS and TDM_CK */

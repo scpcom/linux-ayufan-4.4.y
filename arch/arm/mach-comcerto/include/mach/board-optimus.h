@@ -17,6 +17,7 @@
 
 	#define COMCERTO_EXPCLK		50000000	/* 50MHz */
 	#define MOCA_RESET_GPIO_PIN	GPIO_PIN_11
+	#define PCIE_ADDITIONAL_RESET_PIN	GPIO_PIN_62
 
 	/***********************************
 	 * GPIO
