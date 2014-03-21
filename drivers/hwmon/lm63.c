@@ -73,6 +73,7 @@ static const unsigned short normal_i2c[] = { 0x18, 0x4c, 0x4e, I2C_CLIENT_END };
 #define LM63_REG_TACH_LIMIT_MSB		0x49
 #define LM63_REG_TACH_LIMIT_LSB		0x48
 
+#define LM63_REG_SPINUP			0x4B
 #define LM63_REG_PWM_VALUE		0x4C
 #define LM63_REG_PWM_FREQ		0x4D
 #define LM63_REG_LUT_TEMP_HYST		0x4F
@@ -996,6 +997,9 @@ static void lm63_init_client(struct i2c_client *client)
 		if (config_enhanced & 0x08)
 			data->remote_unsigned = true;
 	}
+
+	/* 50% spinup for 3.2 seconds */
+	i2c_smbus_write_byte_data(client, LM63_REG_SPINUP, 0x0f);
 
 	/* Show some debug info about the LM63 configuration */
 	if (data->kind == lm63)
