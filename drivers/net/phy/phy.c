@@ -359,6 +359,12 @@ int phy_mii_ioctl(struct phy_device *phydev,
 		if (mii_data->reg_num == MII_BMCR &&
 		    val & BMCR_RESET &&
 		    phydev->drv->config_init) {
+#ifdef CONFIG_GOOGLE_FIBER_OPTIMUS
+			if (mii_data->phy_id >= 16) {
+				printk(KERN_WARNING "phy_mii_ioctl: skipping config_init() on optimus\n");
+				break;
+			}
+#endif
 			phy_scan_fixups(phydev);
 			phydev->drv->config_init(phydev);
 		}
