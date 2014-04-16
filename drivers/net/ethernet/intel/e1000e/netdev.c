@@ -470,6 +470,7 @@ static int e1000_desc_unused(struct e1000_ring *ring)
 	return ring->count + ring->next_to_clean - ring->next_to_use - 1;
 }
 
+#ifdef CONFIG_E1000E_PTP
 /**
  * e1000e_systim_to_hwtstamp - convert system time value to hw time stamp
  * @adapter: board private structure
@@ -533,6 +534,11 @@ static void e1000e_rx_hwtstamp(struct e1000_adapter *adapter, u32 status,
 
 	adapter->flags2 &= ~FLAG2_CHECK_RX_HWTSTAMP;
 }
+#else
+static void e1000e_rx_hwtstamp(struct e1000_adapter *adapter, u32 status,
+			       struct sk_buff *skb)
+{}
+#endif
 
 /**
  * e1000_receive_skb - helper function to handle Rx indications
@@ -1124,6 +1130,7 @@ static void e1000_print_hw_hang(struct work_struct *work)
 		e_err("Try turning off Tx pause (flow control) via ethtool\n");
 }
 
+#ifdef CONFIG_E1000E_PTP
 /**
  * e1000e_tx_hwtstamp_work - check for Tx time stamp
  * @work: pointer to work struct
@@ -1158,6 +1165,7 @@ static void e1000e_tx_hwtstamp_work(struct work_struct *work)
 		schedule_work(&adapter->tx_hwtstamp_work);
 	}
 }
+#endif
 
 /**
  * e1000_clean_tx_irq - Reclaim resources after transmit completes
@@ -3369,6 +3377,7 @@ static void e1000e_setup_rss_hash(struct e1000_adapter *adapter)
 	ew32(MRQC, mrqc);
 }
 
+#ifdef CONFIG_E1000E_PTP
 /**
  * e1000e_get_base_timinca - get default SYSTIM time increment attributes
  * @adapter: board private structure
@@ -3605,6 +3614,7 @@ static int e1000e_config_hwtstamp(struct e1000_adapter *adapter,
 
 	return 0;
 }
+#endif
 
 /**
  * e1000_configure - configure the hardware for Rx and Tx
@@ -3836,8 +3846,10 @@ void e1000e_reset(struct e1000_adapter *adapter)
 
 	e1000e_reset_adaptive(hw);
 
+#ifdef CONFIG_E1000E_PTP
 	/* initialize systim and reset the ns time counter */
 	e1000e_config_hwtstamp(adapter, &adapter->hwtstamp_config);
+#endif
 
 	/* Set EEE advertisement as appropriate */
 	if (adapter->flags2 & FLAG2_HAS_EEE) {
@@ -4014,6 +4026,7 @@ void e1000e_reinit_locked(struct e1000_adapter *adapter)
 	clear_bit(__E1000_RESETTING, &adapter->state);
 }
 
+#ifdef CONFIG_E1000E_PTP
 /**
  * e1000e_cyclecounter_read - read raw cycle counter (used by time counter)
  * @cc: cyclecounter structure
@@ -4031,6 +4044,7 @@ static cycle_t e1000e_cyclecounter_read(const struct cyclecounter *cc)
 
 	return systim;
 }
+#endif
 
 /**
  * e1000_sw_init - Initialize general software structures (struct e1000_adapter)
@@ -4058,6 +4072,7 @@ static int e1000_sw_init(struct e1000_adapter *adapter)
 	if (e1000_alloc_queues(adapter))
 		return -ENOMEM;
 
+#ifdef CONFIG_E1000E_PTP
 	/* Setup hardware time stamping cyclecounter */
 	if (adapter->flags & FLAG_HAS_HW_TIMESTAMP) {
 		adapter->cc.read = e1000e_cyclecounter_read;
@@ -4068,6 +4083,7 @@ static int e1000_sw_init(struct e1000_adapter *adapter)
 		spin_lock_init(&adapter->systim_lock);
 		INIT_WORK(&adapter->tx_hwtstamp_work, e1000e_tx_hwtstamp_work);
 	}
+#endif
 
 	/* Explicitly disable IRQ since the NIC can be in any state. */
 	e1000_irq_disable(adapter);
@@ -4992,6 +5008,7 @@ link_up:
 	if (adapter->flags2 & FLAG2_CHECK_PHY_HANG)
 		e1000e_check_82574_phy_workaround(adapter);
 
+#ifdef CONFIG_E1000E_PTP
 	/* Clear valid timestamp stuck in RXSTMPL/H due to a Rx error */
 	if (adapter->hwtstamp_config.rx_filter != HWTSTAMP_FILTER_NONE) {
 		if ((adapter->flags2 & FLAG2_CHECK_RX_HWTSTAMP) &&
@@ -5002,6 +5019,7 @@ link_up:
 			adapter->flags2 |= FLAG2_CHECK_RX_HWTSTAMP;
 		}
 	}
+#endif
 
 	/* Reset the timer */
 	if (!test_bit(__E1000_DOWN, &adapter->state))
@@ -5490,13 +5508,16 @@ static netdev_tx_t e1000_xmit_frame(struct sk_buff *skb,
 	count = e1000_tx_map(tx_ring, skb, first, adapter->tx_fifo_limit,
 			     nr_frags);
 	if (count) {
+#ifdef CONFIG_E1000E_PTP
 		if (unlikely((skb_shinfo(skb)->tx_flags & SKBTX_HW_TSTAMP) &&
 			     !adapter->tx_hwtstamp_skb)) {
 			skb_shinfo(skb)->tx_flags |= SKBTX_IN_PROGRESS;
 			tx_flags |= E1000_TX_FLAGS_HWTSTAMP;
 			adapter->tx_hwtstamp_skb = skb_get(skb);
 			schedule_work(&adapter->tx_hwtstamp_work);
-		} else {
+		} else
+#endif
+		{
 			skb_tx_timestamp(skb);
 		}
 
@@ -5723,6 +5744,7 @@ static int e1000_mii_ioctl(struct net_device *netdev, struct ifreq *ifr,
 	return 0;
 }
 
+#ifdef CONFIG_E1000E_PTP
 /**
  * e1000e_hwtstamp_ioctl - control hardware time stamping
  * @netdev: network interface device structure
@@ -5773,6 +5795,12 @@ static int e1000e_hwtstamp_ioctl(struct net_device *netdev, struct ifreq *ifr)
 	return copy_to_user(ifr->ifr_data, &config,
 			    sizeof(config)) ? -EFAULT : 0;
 }
+#else
+static int e1000e_hwtstamp_ioctl(struct net_device *netdev, struct ifreq *ifr)
+{
+	return -EOPNOTSUPP;
+}
+#endif
 
 static int e1000_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
 {
@@ -6749,8 +6777,10 @@ static int e1000_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	/* carrier off reporting is important to ethtool even BEFORE open */
 	netif_carrier_off(netdev);
 
+#ifdef CONFIG_E1000E_PTP
 	/* init PTP hardware clock */
 	e1000e_ptp_init(adapter);
+#endif
 
 	e1000_print_device_info(adapter);
 
@@ -6800,7 +6830,9 @@ static void e1000_remove(struct pci_dev *pdev)
 	struct e1000_adapter *adapter = netdev_priv(netdev);
 	bool down = test_bit(__E1000_DOWN, &adapter->state);
 
+#ifdef CONFIG_E1000E_PTP
 	e1000e_ptp_remove(adapter);
+#endif
 
 	/* The timers may be rescheduled, so explicitly disable them
 	 * from being rescheduled.
@@ -6816,6 +6848,7 @@ static void e1000_remove(struct pci_dev *pdev)
 	cancel_work_sync(&adapter->update_phy_task);
 	cancel_work_sync(&adapter->print_hang_task);
 
+#ifdef CONFIG_E1000E_PTP
 	if (adapter->flags & FLAG_HAS_HW_TIMESTAMP) {
 		cancel_work_sync(&adapter->tx_hwtstamp_work);
 		if (adapter->tx_hwtstamp_skb) {
@@ -6823,6 +6856,7 @@ static void e1000_remove(struct pci_dev *pdev)
 			adapter->tx_hwtstamp_skb = NULL;
 		}
 	}
+#endif
 
 	if (!(netdev->flags & IFF_UP))
 		e1000_power_down_phy(adapter);
