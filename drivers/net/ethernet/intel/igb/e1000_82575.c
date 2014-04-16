@@ -351,11 +351,8 @@ static s32 igb_init_mac_params_82575(struct e1000_hw *hw)
 	mac->arc_subsystem_valid =
 		(rd32(E1000_FWSM) & E1000_FWSM_MODE_MASK)
 			? true : false;
-	/* enable EEE on i350 parts and later parts */
-	if (mac->type >= e1000_i350)
-		dev_spec->eee_disable = false;
-	else
-		dev_spec->eee_disable = true;
+	/* bwh: disable EEE as it can't be controlled through ethtool */
+	dev_spec->eee_disable = true;
 	/* Allow a single clear of the SW semaphore on I210 and newer */
 	if (mac->type >= e1000_i210)
 		dev_spec->clear_semaphore_once = true;
