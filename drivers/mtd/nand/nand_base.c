@@ -1448,7 +1448,7 @@ static int unclean_if_too_many_flips(struct mtd_info *mtd,
 		threshold = 4;
 		break;
 	case 224:
-		threshold = 18;
+		threshold = 72;
 		break;
 	default:
 		threshold = 0;
