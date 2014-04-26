@@ -422,6 +422,7 @@ static int comcerto_nand_read_page_hwecc(struct mtd_info *mtd,
 	uint8_t *oob = nand_device->oob_poi;
 
 	for (; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
+
 		chip->ecc.hwctl(mtd, NAND_ECC_READ);
 		chip->read_buf(mtd, p, eccsize);
 		chip->read_buf(mtd, ecc_code, ecc_bytes);
@@ -429,8 +430,15 @@ static int comcerto_nand_read_page_hwecc(struct mtd_info *mtd,
 		stat = chip->ecc.correct(mtd, p, oob, NULL);
 		if (stat < 0)
 			mtd->ecc_stats.failed++;
-		else
+		else {
+			int idx = eccsteps;
+			if (idx >= MTD_ECC_STAT_SUBPAGES) {
+				idx = MTD_ECC_STAT_SUBPAGES - 1;
+			}
+
 			mtd->ecc_stats.corrected += stat;
+			mtd->ecc_subpage_stats.subpage_corrected[idx] += stat;
+		}
 
 		comcerto_ecc_shift(ECC_SHIFT_DISABLE);
 

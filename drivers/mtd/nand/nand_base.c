@@ -1422,46 +1422,73 @@ static uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
 }
 
 /*
- * NOTE(apenwarr): Newer kernels do this much better.
- *  Among other things, they report a max_flips value that's the largest
- *  number of flips in any 1024-byte ECC calculation, as opposed to the total
- *  flips in the whole 4096-byte page.  The latter is dangerous because
- *  you could see 24 flips in a single 1024-byte region, which is the edge
- *  of disaster, even though it's only 1/4 of the maximum 96 flips we could
- *  handle if averaged across 4 pages.  So where we'd like to set a threshold
- *  per 1024-byte region, we instead have to set a threshold per
- *  4096-byte region that *still* must be well under 24.
+ * NOTE(dgentry): Newer kernels do this in a different, and much better, way.
+ *  The upstream mtd APIs to NAND drivers know about subpages and allow errors
+ *  to be reported on a per-subpage level.
+ *
+ *  Here, we judge errors in two ways:
+ *  1. If the underlying NAND driver reported errors per sub-page
+ *     via mtd_ecc_subpage_stats, we check that the number of corrected
+ *     bits is within a safe distance from the maximum number of bits
+ *     we can correct. At the time of this writing only comcerto_nand.c
+ *     reports per-subpage errors.
+ *  2. We check the number of bits corrected on the entire page. For
+ *     example, we might allow up to 72 bits to be corrected on a 4096
+ *     byte page. This is dangerous because there is a big difference between
+ *     having 18 bits corrected on each 1024 byte sub-page versus having
+ *     72 bits corrected all on one subpage.
+ *     Nonetheless if the NAND driver only reports stats using struct
+ *     mtd_ecc_stats, this is the best we can do.
  *
  *  Anyway, this code can go away someday when we use a newer kernel.
  */
 static int unclean_if_too_many_flips(struct mtd_info *mtd,
-		struct mtd_ecc_stats *stats) {
+		struct mtd_ecc_stats *stats,
+		struct mtd_ecc_subpage_stats *subpage_stats) {
 	uint32_t flips = mtd->ecc_stats.corrected - stats->corrected;
-	uint32_t threshold;
+	uint32_t threshold, subpage_threshold;
+	int i, rc = 0;
+
 	switch (mtd->oobsize) {
 	case 8:
 	case 16:
 	case 64:
 		threshold = 0;
+		subpage_threshold = 0;
 		break;
 	case 128:
 		threshold = 4;
+		subpage_threshold = 2;
 		break;
 	case 224:
 		threshold = 72;
+		subpage_threshold = 18;
 		break;
 	default:
 		threshold = 0;
+		subpage_threshold = 0;
 		break;
 	}
 	if (flips > threshold / 2) {
-		// This should be very rare, bu we want to know as we
+		// This should be very rare, but we want to know as we
 		// approach our threshold, which should be even more rare.
 		printk_ratelimited(KERN_WARNING
 			"ECC: corrected %d bits (threshold=%d)\n",
 			flips, threshold);
 	}
-	return  flips > threshold ? -EUCLEAN : 0;
+	if (flips > threshold) rc = -EUCLEAN;
+	for (i = 0; i < MTD_ECC_STAT_SUBPAGES; i++) {
+		flips = mtd->ecc_subpage_stats.subpage_corrected[i] -
+		    subpage_stats->subpage_corrected[i];
+		if (flips > subpage_threshold / 2) {
+			printk_ratelimited(KERN_WARNING
+				"ECC: corrected %d bits in one subpage "
+				"(threshold=%d)\n", flips, subpage_threshold);
+		}
+		if (flips > subpage_threshold) rc = -EUCLEAN;
+	}
+
+	return rc;
 }
 
 /**
@@ -1478,6 +1505,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 	int chipnr, page, realpage, col, bytes, aligned;
 	struct nand_chip *chip = mtd->priv;
 	struct mtd_ecc_stats stats;
+	struct mtd_ecc_subpage_stats subpage_stats;
 	int blkcheck = (1 << (chip->phys_erase_shift - chip->page_shift)) - 1;
 	int sndcmd = 1;
 	int ret = 0;
@@ -1489,6 +1517,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 	uint8_t *bufpoi, *oob, *buf;
 
 	stats = mtd->ecc_stats;
+	subpage_stats = mtd->ecc_subpage_stats;
 
 	chipnr = (int)(from >> chip->chip_shift);
 	chip->select_chip(mtd, chipnr);
@@ -1610,7 +1639,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 	if (mtd->ecc_stats.failed - stats.failed)
 		return -EBADMSG;
 
-	return unclean_if_too_many_flips(mtd, &stats);
+	return unclean_if_too_many_flips(mtd, &stats, &subpage_stats);
 }
 
 /**
@@ -1805,6 +1834,7 @@ static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 	int page, realpage, chipnr, sndcmd = 1;
 	struct nand_chip *chip = mtd->priv;
 	struct mtd_ecc_stats stats;
+	struct mtd_ecc_subpage_stats subpage_stats;
 	int blkcheck = (1 << (chip->phys_erase_shift - chip->page_shift)) - 1;
 	int readlen = ops->ooblen;
 	int len;
@@ -1814,6 +1844,7 @@ static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 			__func__, (unsigned long long)from, readlen);
 
 	stats = mtd->ecc_stats;
+	subpage_stats = mtd->ecc_subpage_stats;
 
 	if (ops->mode == MTD_OPS_AUTO_OOB)
 		len = chip->ecc.layout->oobavail;
@@ -1892,7 +1923,7 @@ static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 	if (mtd->ecc_stats.failed - stats.failed)
 		return -EBADMSG;
 
-	return unclean_if_too_many_flips(mtd, &stats);
+	return unclean_if_too_many_flips(mtd, &stats, &subpage_stats);
 }
 
 /**

@@ -251,6 +251,11 @@ struct mtd_ecc_stats {
 	__u32 bbtblocks;
 };
 
+struct mtd_ecc_subpage_stats {
+#define MTD_ECC_STAT_SUBPAGES 8
+	__u32 subpage_corrected[MTD_ECC_STAT_SUBPAGES];
+};
+
 /*
  * MTD file modes - for read/write access to MTD
  *
