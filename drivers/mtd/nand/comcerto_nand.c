@@ -262,9 +262,8 @@ static int comcerto_calculate_ecc(struct mtd_info *mtd,
 static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 		uint8_t *read_ecc, uint8_t *calc_ecc)
 {
-#if !defined (CONFIG_NAND_COMCERTO_ECC_8_HW_BCH) && !defined (CONFIG_NAND_COMCERTO_ECC_24_HW_BCH)
 	struct nand_chip *nand_device = mtd->priv;
-#else
+#if defined (CONFIG_NAND_COMCERTO_ECC_8_HW_BCH) || defined (CONFIG_NAND_COMCERTO_ECC_24_HW_BCH)
 	uint8_t err_count = 0;
 	uint32_t err_corr_data_prev;
 #endif
@@ -321,6 +320,12 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 		err_corr_data_prev = err_corr_data;
 		index = (err_corr_data >> 16) & 0x7FF;
 		mask = err_corr_data & 0xFFFF;
+		if (index * 2 >= nand_device->ecc.size) {
+			pr_warn_ratelimited("ECC correction index out of "
+					"bounds. ECC_CORR_DATA_STAT %08x",
+					err_corr_data);
+			continue;
+		}
 		*((uint16_t *)(dat + (index * 2))) ^= mask;
 		while (mask) {
 			if (mask & 1)
