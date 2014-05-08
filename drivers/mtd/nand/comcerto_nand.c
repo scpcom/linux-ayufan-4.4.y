@@ -274,11 +274,13 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 	unsigned long timeo = jiffies + 2;
 
 	 /* Wait for syndrome calculation to complete */
-	do {
-		if ((readl_relaxed(ecc_base_addr + ECC_IDLE_STAT)) & ECC_IDLE)
-			break;
+	while (!(readl_relaxed(ecc_base_addr + ECC_IDLE_STAT) & ECC_IDLE)) {
 		touch_softlockup_watchdog();
-	} while (time_before(jiffies, timeo));
+		if (time_after_eq(jiffies, timeo)) {
+			pr_warn_ratelimited("Timeout waiting for parity module to become idle");
+			return -EIO;
+		}
+	}
 
 	 /* If no correction is required */
 	if (likely(!((readl_relaxed(ecc_base_addr + ECC_POLY_STAT)) & ECC_CORR_REQ))) {
@@ -292,15 +294,20 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 
 	udelay(25);
 
+	timeo = jiffies + 2;
 	err_corr_data_prev = 0;
 	/* Read Correction data status register till header is 0x7FD */
-	do {
+	while(1) {
 		err_corr_data_prev = readl_relaxed(ecc_base_addr + ECC_CORR_DATA_STAT);
 		if ((err_corr_data_prev >> ECC_BCH_INDEX_SHIFT) == 0x87FD)
 			break;
 
 		touch_softlockup_watchdog();
-	} while (time_before(jiffies, timeo));
+		if (time_after_eq(jiffies, timeo)) {
+			pr_warn_ratelimited("Timeout waiting for ECC correction data");
+			return -EIO;
+		}
+	}
 
 	udelay(25);
 	err_corr_data = 0x0;
