@@ -4299,6 +4299,7 @@ long ext4_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 	int retries = 0;
 	int flags;
 	struct ext4_map_blocks map;
+	struct ext4_sb_info *sbi;
 	unsigned int credits, blkbits = inode->i_blkbits;
 
 	/*
@@ -4309,11 +4310,22 @@ long ext4_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 		return -EOPNOTSUPP;
 
 	/* Return error if mode is not supported */
-	if (mode & ~(FALLOC_FL_KEEP_SIZE | FALLOC_FL_PUNCH_HOLE))
+	if (mode & ~(FALLOC_FL_KEEP_SIZE | FALLOC_FL_PUNCH_HOLE |
+		     FALLOC_FL_NO_HIDE_STALE))
 		return -EOPNOTSUPP;
 
 	if (mode & FALLOC_FL_PUNCH_HOLE)
 		return ext4_punch_hole(file, offset, len);
+
+	sbi = EXT4_SB(inode->i_sb);
+	/* Must have RAWIO to see stale data. */
+	if ((mode & FALLOC_FL_NO_HIDE_STALE) &&
+	    !in_egroup_p(sbi->no_hide_stale_gid))
+		return -EACCES;
+
+	/* preallocation to directories is currently not supported */
+	if (S_ISDIR(inode->i_mode))
+		return -ENODEV;
 
 	trace_ext4_fallocate_enter(inode, offset, len, mode);
 	map.m_lblk = offset >> blkbits;
@@ -4353,6 +4365,8 @@ retry:
 			ret = PTR_ERR(handle);
 			break;
 		}
+		if (mode & FALLOC_FL_NO_HIDE_STALE)
+			flags &= ~EXT4_GET_BLOCKS_UNINIT_EXT;
 		ret = ext4_map_blocks(handle, inode, &map, flags);
 		if (ret <= 0) {
 #ifdef EXT4FS_DEBUG

@@ -1161,6 +1161,9 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_printf(seq, ",init_itable=%u",
 			   (unsigned) sbi->s_li_wait_mult);
 
+	if (sbi->no_hide_stale_gid != -1)
+		seq_printf(seq, ",nohide_stale_gid=%u", sbi->no_hide_stale_gid);
+
 	ext4_show_quota_options(seq, sb);
 
 	return 0;
@@ -1335,6 +1338,7 @@ enum {
 	Opt_inode_readahead_blks, Opt_journal_ioprio,
 	Opt_dioread_nolock, Opt_dioread_lock,
 	Opt_discard, Opt_nodiscard, Opt_init_itable, Opt_noinit_itable,
+	Opt_nohide_stale_gid,
 };
 
 static const match_table_t tokens = {
@@ -1410,6 +1414,7 @@ static const match_table_t tokens = {
 	{Opt_init_itable, "init_itable=%u"},
 	{Opt_init_itable, "init_itable"},
 	{Opt_noinit_itable, "noinit_itable"},
+	{Opt_nohide_stale_gid, "nohide_stale_gid=%u"},
 	{Opt_err, NULL},
 };
 
@@ -1902,6 +1907,12 @@ set_qf_format:
 			if (option < 0)
 				return 0;
 			sbi->s_li_wait_mult = option;
+			break;
+		case Opt_nohide_stale_gid:
+			if (match_int(&args[0], &option))
+				return 0;
+			/* -1 for disabled, otherwise it's valid. */
+			sbi->no_hide_stale_gid = option;
 			break;
 		case Opt_noinit_itable:
 			clear_opt(sb, INIT_INODE_TABLE);
@@ -3320,6 +3331,9 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	sbi->s_commit_interval = JBD2_DEFAULT_MAX_COMMIT_AGE * HZ;
 	sbi->s_min_batch_time = EXT4_DEF_MIN_BATCH_TIME;
 	sbi->s_max_batch_time = EXT4_DEF_MAX_BATCH_TIME;
+
+	/* Default to having no-hide-stale disabled. */
+	sbi->no_hide_stale_gid = -1;
 
 	if ((def_mount_opts & EXT4_DEFM_NOBARRIER) == 0)
 		set_opt(sb, BARRIER);

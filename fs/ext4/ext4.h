@@ -1205,6 +1205,9 @@ struct ext4_sb_info {
 	unsigned long s_mb_last_group;
 	unsigned long s_mb_last_start;
 
+	/* gid that's allowed to see stale data via falloc flag. */
+	gid_t no_hide_stale_gid;
+
 	/* stats for buddy allocator */
 	atomic_t s_bal_reqs;	/* number of reqs with len > 1 */
 	atomic_t s_bal_success;	/* we found long enough chunks */
