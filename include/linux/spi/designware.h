@@ -3,8 +3,8 @@
  */
 
 #define        CLK_NAME       10
-#define        TX_FIFO_DEPTH  8
-#define        RX_FIFO_DEPTH  8
+#define        TX_FIFO_DEPTH  32
+#define        RX_FIFO_DEPTH  32
 
 struct spi_controller_pdata {
 	int use_dma;
