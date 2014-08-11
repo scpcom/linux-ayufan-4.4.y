@@ -400,4 +400,18 @@ config DM_VERITY
 
 	If unsure, say N.
 
+config DM_VERITY_BRUNO
+	tristate "Verity bruno specific error handling"
+	depends on DM_VERITY
+	---help---
+	This device-mapper target handles verity check error
+	specifically for bruno platform.
+
+	To compile this code as a module, choose M here: the module will
+	be called dm-verity-bruno.
+
+	If unsure, say N.
+
+
+
 endif # MD
