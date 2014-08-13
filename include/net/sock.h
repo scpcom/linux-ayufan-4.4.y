@@ -562,6 +562,7 @@ enum sock_flags {
 	SOCK_TIMESTAMPING_SYS_HARDWARE, /* %SOF_TIMESTAMPING_SYS_HARDWARE */
 	SOCK_FASYNC, /* fasync() active */
 	SOCK_RXQ_OVFL,
+	SOCK_RXQ_ALLOC,
 	SOCK_ZEROCOPY, /* buffers from userspace */
 };
 
@@ -1762,6 +1763,14 @@ static inline void sock_recv_ts_and_drops(struct msghdr *msg, struct sock *sk,
 		__sock_recv_ts_and_drops(msg, sk, skb);
 	else
 		sk->sk_stamp = skb->tstamp;
+}
+
+extern void __sock_recv_alloc(struct msghdr *msg, struct sock *sk);
+
+static inline void sock_recv_alloc(struct msghdr *msg, struct sock *sk)
+{
+	if (sock_flag(sk, SOCK_RXQ_ALLOC))
+		__sock_recv_alloc(msg, sk);
 }
 
 /**

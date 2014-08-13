@@ -690,6 +690,18 @@ void __sock_recv_ts_and_drops(struct msghdr *msg, struct sock *sk,
 }
 EXPORT_SYMBOL_GPL(__sock_recv_ts_and_drops);
 
+void __sock_recv_alloc(struct msghdr *msg, struct sock *sk)
+{
+	__u32 rmem_alloc;
+
+	if (sock_flag(sk, SOCK_RXQ_ALLOC)) {
+		rmem_alloc = atomic_read(&sk->sk_rmem_alloc);
+		put_cmsg(msg, SOL_SOCKET, SO_RXQ_ALLOC,
+			sizeof(rmem_alloc), &rmem_alloc);
+	}
+}
+EXPORT_SYMBOL_GPL(__sock_recv_alloc);
+
 static inline int __sock_recvmsg_nosec(struct kiocb *iocb, struct socket *sock,
 				       struct msghdr *msg, size_t size, int flags)
 {
