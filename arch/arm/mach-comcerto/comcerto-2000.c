@@ -1004,6 +1004,12 @@ void __init device_init(void)
 
 void __init platform_reserve(void)
 {
+	/* boot_secondary() in arch/arm/mach-comcerto/platsmp.c uses this range
+	 * to store a jump instruction. The second CPU executes this
+	 * instruction when it comes out of reset.*/
+	if (memblock_reserve(0, 0x24) < 0)
+		BUG();
+
 	/* Allocate DDR block used by PFE/MSP, the base address is fixed so that util-pe code can
 	be linked at a fixed address */
 	if (memblock_reserve(COMCERTO_DDR_SHARED_BASE, COMCERTO_DDR_SHARED_SIZE) < 0)
