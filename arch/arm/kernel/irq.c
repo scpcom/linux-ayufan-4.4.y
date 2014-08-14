@@ -34,6 +34,7 @@
 #include <linux/list.h>
 #include <linux/kallsyms.h>
 #include <linux/proc_fs.h>
+#include <linux/ratelimit.h>
 
 #include <asm/exception.h>
 #include <asm/system.h>
@@ -71,6 +72,8 @@ int arch_show_interrupts(struct seq_file *p, int prec)
 void handle_IRQ(unsigned int irq, struct pt_regs *regs)
 {
 	struct pt_regs *old_regs = set_irq_regs(regs);
+	ktime_t kstart, kend, kdiff;
+	unsigned int usdiff;
 
 	irq_enter();
 
@@ -78,6 +81,7 @@ void handle_IRQ(unsigned int irq, struct pt_regs *regs)
 	 * Some hardware gives randomly wrong interrupts.  Rather
 	 * than crashing, do something sensible.
 	 */
+	kstart = ktime_get();
 	if (unlikely(irq >= nr_irqs)) {
 		if (printk_ratelimit())
 			printk(KERN_WARNING "Bad IRQ%u\n", irq);
@@ -85,6 +89,11 @@ void handle_IRQ(unsigned int irq, struct pt_regs *regs)
 	} else {
 		generic_handle_irq(irq);
 	}
+	kend = ktime_get();
+	kdiff = ktime_sub(kend, kstart);
+	usdiff = ktime_to_ns(kdiff) / 1024;
+	if (usdiff >= 3000)
+		pr_notice_ratelimited("slowirq %d (%uus)\n", irq, usdiff);
 
 	/* AT91 specific workaround */
 	irq_finish(irq);
