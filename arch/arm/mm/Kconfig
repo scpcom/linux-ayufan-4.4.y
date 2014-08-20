@@ -429,6 +429,9 @@ config CPU_V7
 	select CPU_COPY_V6 if MMU
 	select CPU_TLB_V7 if MMU
 
+config CPU_CORETEXA8
+	bool "Enables some compiler optimizations for coretexa8"
+
 # Figure out what processor architecture version we should be using.
 # This defines the compiler instruction set which depends on the machine type.
 config CPU_32v3
