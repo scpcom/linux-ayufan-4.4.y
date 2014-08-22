@@ -37,6 +37,7 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/cfi.h>
 #include <linux/mtd/xip.h>
+#include <linux/mtd/exp_lock.h>
 
 #define AMD_BOOTLOC_BUG
 #define FORCE_WORD_WRITE 0
@@ -670,8 +671,12 @@ static int get_chip(struct map_info *map, struct flchip *chip, unsigned long adr
 				return -EIO;
 			}
 			mutex_unlock(&chip->mutex);
+			/* mutex to prevent concurrent NOR/NAND access on the EXP bus */
+			mutex_unlock(&exp_bus_lock);
 			cfi_udelay(1);
 			mutex_lock(&chip->mutex);
+			/* mutex to prevent concurrent NOR/NAND access on the EXP bus */
+			mutex_lock(&exp_bus_lock);
 			/* Someone else might have been playing with it. */
 			goto retry;
 		}
@@ -714,8 +719,12 @@ static int get_chip(struct map_info *map, struct flchip *chip, unsigned long adr
 			}
 
 			mutex_unlock(&chip->mutex);
+			/* mutex to prevent concurrent NOR/NAND access on the EXP bus */
+			mutex_unlock(&exp_bus_lock);
 			cfi_udelay(1);
 			mutex_lock(&chip->mutex);
+			/* mutex to prevent concurrent NOR/NAND access on the EXP bus */
+			mutex_lock(&exp_bus_lock);
 			/* Nobody will touch it while it's in state FL_ERASE_SUSPENDING.
 			   So we can just loop here. */
 		}
@@ -744,9 +753,13 @@ static int get_chip(struct map_info *map, struct flchip *chip, unsigned long adr
 		set_current_state(TASK_UNINTERRUPTIBLE);
 		add_wait_queue(&chip->wq, &wait);
 		mutex_unlock(&chip->mutex);
+		/* mutex to prevent concurrent NOR/NAND access on the EXP bus */
+		mutex_unlock(&exp_bus_lock);
 		schedule();
 		remove_wait_queue(&chip->wq, &wait);
 		mutex_lock(&chip->mutex);
+		/* mutex to prevent concurrent NOR/NAND access on the EXP bus */
+		mutex_lock(&exp_bus_lock);
 		goto resettime;
 	}
 }
@@ -878,6 +891,8 @@ static void __xipram xip_udelay(struct map_info *map, struct flchip *chip,
 			xip_iprefetch();
 			local_irq_enable();
 			mutex_unlock(&chip->mutex);
+			/* mutex to prevent concurrent NOR/NAND access on the EXP bus */
+			mutex_unlock(&exp_bus_lock);
 			xip_iprefetch();
 			cond_resched();
 
@@ -888,14 +903,20 @@ static void __xipram xip_udelay(struct map_info *map, struct flchip *chip,
 			 * until it's done.
 			 */
 			mutex_lock(&chip->mutex);
+			/* mutex to prevent concurrent NOR/NAND access on the EXP bus */
+			mutex_lock(&exp_bus_lock);
 			while (chip->state != FL_XIP_WHILE_ERASING) {
 				DECLARE_WAITQUEUE(wait, current);
 				set_current_state(TASK_UNINTERRUPTIBLE);
 				add_wait_queue(&chip->wq, &wait);
 				mutex_unlock(&chip->mutex);
+				/* mutex to prevent concurrent NOR/NAND access on the EXP bus */
+				mutex_unlock(&exp_bus_lock);
 				schedule();
 				remove_wait_queue(&chip->wq, &wait);
 				mutex_lock(&chip->mutex);
+				/* mutex to prevent concurrent NOR/NAND access on the EXP bus */
+				mutex_lock(&exp_bus_lock);
 			}
 			/* Disallow XIP again */
 			local_irq_disable();
@@ -958,16 +979,20 @@ static void __xipram xip_udelay(struct map_info *map, struct flchip *chip,
 #define UDELAY(map, chip, adr, usec)  \
 do {  \
 	mutex_unlock(&chip->mutex);  \
+	mutex_unlock(&exp_bus_lock); \
 	cfi_udelay(usec);  \
 	mutex_lock(&chip->mutex);  \
+	mutex_lock(&exp_bus_lock); \
 } while (0)
 
 #define INVALIDATE_CACHE_UDELAY(map, chip, adr, len, usec)  \
 do {  \
 	mutex_unlock(&chip->mutex);  \
+	mutex_unlock(&exp_bus_lock); \
 	INVALIDATE_CACHED_RANGE(map, adr, len);  \
 	cfi_udelay(usec);  \
 	mutex_lock(&chip->mutex);  \
+	mutex_lock(&exp_bus_lock); \
 } while (0)
 
 #endif
@@ -984,9 +1009,14 @@ static inline int do_read_onechip(struct map_info *map, struct flchip *chip, lof
 	cmd_addr = adr & ~(map_bankwidth(map)-1);
 
 	mutex_lock(&chip->mutex);
+	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_lock(&exp_bus_lock);
+
 	ret = get_chip(map, chip, cmd_addr, FL_READY);
 	if (ret) {
 		mutex_unlock(&chip->mutex);
+		// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_unlock(&exp_bus_lock);
 		return ret;
 	}
 
@@ -1000,6 +1030,8 @@ static inline int do_read_onechip(struct map_info *map, struct flchip *chip, lof
 	put_chip(map, chip, cmd_addr);
 
 	mutex_unlock(&chip->mutex);
+	// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_unlock(&exp_bus_lock);
 	return 0;
 }
 
@@ -1054,12 +1086,16 @@ static inline int do_read_secsi_onechip(struct map_info *map, struct flchip *chi
 
  retry:
 	mutex_lock(&chip->mutex);
+	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_lock(&exp_bus_lock);
 
 	if (chip->state != FL_READY){
 		set_current_state(TASK_UNINTERRUPTIBLE);
 		add_wait_queue(&chip->wq, &wait);
 
 		mutex_unlock(&chip->mutex);
+		// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_unlock(&exp_bus_lock);
 
 		schedule();
 		remove_wait_queue(&chip->wq, &wait);
@@ -1085,6 +1121,8 @@ static inline int do_read_secsi_onechip(struct map_info *map, struct flchip *chi
 
 	wake_up(&chip->wq);
 	mutex_unlock(&chip->mutex);
+	// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_unlock(&exp_bus_lock);
 
 	return 0;
 }
@@ -1154,9 +1192,15 @@ static int __xipram do_write_oneword(struct map_info *map, struct flchip *chip, 
 	adr += chip->start;
 
 	mutex_lock(&chip->mutex);
+	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_lock(&exp_bus_lock);
+
+
 	ret = get_chip(map, chip, adr, FL_WRITING);
 	if (ret) {
 		mutex_unlock(&chip->mutex);
+		// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_unlock(&exp_bus_lock);
 		return ret;
 	}
 
@@ -1200,10 +1244,14 @@ static int __xipram do_write_oneword(struct map_info *map, struct flchip *chip, 
 			set_current_state(TASK_UNINTERRUPTIBLE);
 			add_wait_queue(&chip->wq, &wait);
 			mutex_unlock(&chip->mutex);
+			// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_unlock(&exp_bus_lock);
 			schedule();
 			remove_wait_queue(&chip->wq, &wait);
 			timeo = jiffies + (HZ / 2); /* FIXME */
 			mutex_lock(&chip->mutex);
+			// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_lock(&exp_bus_lock);
 			continue;
 		}
 
@@ -1236,6 +1284,8 @@ static int __xipram do_write_oneword(struct map_info *map, struct flchip *chip, 
 	chip->state = FL_READY;
 	put_chip(map, chip, adr);
 	mutex_unlock(&chip->mutex);
+	// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_unlock(&exp_bus_lock);
 
 	return ret;
 }
@@ -1389,9 +1439,14 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 	cmd_adr = adr;
 
 	mutex_lock(&chip->mutex);
+	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_lock(&exp_bus_lock);
+
 	ret = get_chip(map, chip, adr, FL_WRITING);
 	if (ret) {
 		mutex_unlock(&chip->mutex);
+		// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_unlock(&exp_bus_lock);
 		return ret;
 	}
 
@@ -1409,6 +1464,9 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 
 	/* Write Buffer Load */
 	map_write(map, CMD(0x25), cmd_adr);
+
+	/* patch from https://dev.openwrt.org/browser/trunk/target/linux/generic/patches-3.2/475-mtd_cfi_cmdset_0002-add-buffer-write-cmd-timeout.patch?rev=31000 */
+	(void) map_read(map, cmd_adr);
 
 	chip->state = FL_WRITING_TO_BUFFER;
 
@@ -1446,10 +1504,14 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 			set_current_state(TASK_UNINTERRUPTIBLE);
 			add_wait_queue(&chip->wq, &wait);
 			mutex_unlock(&chip->mutex);
+			// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_unlock(&exp_bus_lock);
 			schedule();
 			remove_wait_queue(&chip->wq, &wait);
 			timeo = jiffies + (HZ / 2); /* FIXME */
 			mutex_lock(&chip->mutex);
+			// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_lock(&exp_bus_lock);
 			continue;
 		}
 
@@ -1490,6 +1552,8 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 	chip->state = FL_READY;
 	put_chip(map, chip, adr);
 	mutex_unlock(&chip->mutex);
+	// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_unlock(&exp_bus_lock);
 
 	return ret;
 }
@@ -1590,9 +1654,14 @@ static int __xipram do_erase_chip(struct map_info *map, struct flchip *chip)
 	adr = cfi->addr_unlock1;
 
 	mutex_lock(&chip->mutex);
+	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_lock(&exp_bus_lock);
+
 	ret = get_chip(map, chip, adr, FL_WRITING);
 	if (ret) {
 		mutex_unlock(&chip->mutex);
+		// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_unlock(&exp_bus_lock);
 		return ret;
 	}
 
@@ -1626,9 +1695,13 @@ static int __xipram do_erase_chip(struct map_info *map, struct flchip *chip)
 			set_current_state(TASK_UNINTERRUPTIBLE);
 			add_wait_queue(&chip->wq, &wait);
 			mutex_unlock(&chip->mutex);
+			// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_unlock(&exp_bus_lock);
 			schedule();
 			remove_wait_queue(&chip->wq, &wait);
 			mutex_lock(&chip->mutex);
+			// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_lock(&exp_bus_lock);
 			continue;
 		}
 		if (chip->erase_suspended) {
@@ -1663,6 +1736,8 @@ static int __xipram do_erase_chip(struct map_info *map, struct flchip *chip)
 	xip_enable(map, chip, adr);
 	put_chip(map, chip, adr);
 	mutex_unlock(&chip->mutex);
+	// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_unlock(&exp_bus_lock);
 
 	return ret;
 }
@@ -1678,9 +1753,14 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 	adr += chip->start;
 
 	mutex_lock(&chip->mutex);
+	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_lock(&exp_bus_lock);
+
 	ret = get_chip(map, chip, adr, FL_ERASING);
 	if (ret) {
 		mutex_unlock(&chip->mutex);
+		// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_unlock(&exp_bus_lock);
 		return ret;
 	}
 
@@ -1714,9 +1794,13 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 			set_current_state(TASK_UNINTERRUPTIBLE);
 			add_wait_queue(&chip->wq, &wait);
 			mutex_unlock(&chip->mutex);
+			// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_unlock(&exp_bus_lock);
 			schedule();
 			remove_wait_queue(&chip->wq, &wait);
 			mutex_lock(&chip->mutex);
+			// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_lock(&exp_bus_lock);
 			continue;
 		}
 		if (chip->erase_suspended) {
@@ -1753,6 +1837,9 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 	chip->state = FL_READY;
 	put_chip(map, chip, adr);
 	mutex_unlock(&chip->mutex);
+	// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_unlock(&exp_bus_lock);
+
 	return ret;
 }
 
@@ -1805,6 +1892,9 @@ static int do_atmel_lock(struct map_info *map, struct flchip *chip,
 	int ret;
 
 	mutex_lock(&chip->mutex);
+	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_lock(&exp_bus_lock);
+
 	ret = get_chip(map, chip, adr + chip->start, FL_LOCKING);
 	if (ret)
 		goto out_unlock;
@@ -1830,6 +1920,8 @@ static int do_atmel_lock(struct map_info *map, struct flchip *chip,
 
 out_unlock:
 	mutex_unlock(&chip->mutex);
+	// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_unlock(&exp_bus_lock);
 	return ret;
 }
 
@@ -1840,6 +1932,9 @@ static int do_atmel_unlock(struct map_info *map, struct flchip *chip,
 	int ret;
 
 	mutex_lock(&chip->mutex);
+	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_lock(&exp_bus_lock);
+
 	ret = get_chip(map, chip, adr + chip->start, FL_UNLOCKING);
 	if (ret)
 		goto out_unlock;
@@ -1857,6 +1952,8 @@ static int do_atmel_unlock(struct map_info *map, struct flchip *chip,
 
 out_unlock:
 	mutex_unlock(&chip->mutex);
+	// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_unlock(&exp_bus_lock);
 	return ret;
 }
 
@@ -1885,6 +1982,8 @@ static void cfi_amdstd_sync (struct mtd_info *mtd)
 
 	retry:
 		mutex_lock(&chip->mutex);
+		// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_lock(&exp_bus_lock);
 
 		switch(chip->state) {
 		case FL_READY:
@@ -1899,6 +1998,8 @@ static void cfi_amdstd_sync (struct mtd_info *mtd)
 			 */
 		case FL_SYNCING:
 			mutex_unlock(&chip->mutex);
+			// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_unlock(&exp_bus_lock);
 			break;
 
 		default:
@@ -1907,6 +2008,8 @@ static void cfi_amdstd_sync (struct mtd_info *mtd)
 			add_wait_queue(&chip->wq, &wait);
 
 			mutex_unlock(&chip->mutex);
+			// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_unlock(&exp_bus_lock);
 
 			schedule();
 
@@ -1922,12 +2025,16 @@ static void cfi_amdstd_sync (struct mtd_info *mtd)
 		chip = &cfi->chips[i];
 
 		mutex_lock(&chip->mutex);
+		// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_lock(&exp_bus_lock);
 
 		if (chip->state == FL_SYNCING) {
 			chip->state = chip->oldstate;
 			wake_up(&chip->wq);
 		}
 		mutex_unlock(&chip->mutex);
+		// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_unlock(&exp_bus_lock);
 	}
 }
 
@@ -1944,6 +2051,8 @@ static int cfi_amdstd_suspend(struct mtd_info *mtd)
 		chip = &cfi->chips[i];
 
 		mutex_lock(&chip->mutex);
+		// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_lock(&exp_bus_lock);
 
 		switch(chip->state) {
 		case FL_READY:
@@ -1964,6 +2073,9 @@ static int cfi_amdstd_suspend(struct mtd_info *mtd)
 			break;
 		}
 		mutex_unlock(&chip->mutex);
+		// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_unlock(&exp_bus_lock);
+
 	}
 
 	/* Unlock the chips again */
@@ -1973,12 +2085,16 @@ static int cfi_amdstd_suspend(struct mtd_info *mtd)
 			chip = &cfi->chips[i];
 
 			mutex_lock(&chip->mutex);
+			// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_lock(&exp_bus_lock);
 
 			if (chip->state == FL_PM_SUSPENDED) {
 				chip->state = chip->oldstate;
 				wake_up(&chip->wq);
 			}
 			mutex_unlock(&chip->mutex);
+			// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+			mutex_unlock(&exp_bus_lock);
 		}
 	}
 
@@ -1998,6 +2114,8 @@ static void cfi_amdstd_resume(struct mtd_info *mtd)
 		chip = &cfi->chips[i];
 
 		mutex_lock(&chip->mutex);
+		// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_lock(&exp_bus_lock);
 
 		if (chip->state == FL_PM_SUSPENDED) {
 			chip->state = FL_READY;
@@ -2008,6 +2126,8 @@ static void cfi_amdstd_resume(struct mtd_info *mtd)
 			printk(KERN_ERR "Argh. Chip not in PM_SUSPENDED state upon resume()\n");
 
 		mutex_unlock(&chip->mutex);
+		// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_unlock(&exp_bus_lock);
 	}
 }
 
@@ -2030,6 +2150,8 @@ static int cfi_amdstd_reset(struct mtd_info *mtd)
 		chip = &cfi->chips[i];
 
 		mutex_lock(&chip->mutex);
+		// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_lock(&exp_bus_lock);
 
 		ret = get_chip(map, chip, chip->start, FL_SHUTDOWN);
 		if (!ret) {
@@ -2039,6 +2161,8 @@ static int cfi_amdstd_reset(struct mtd_info *mtd)
 		}
 
 		mutex_unlock(&chip->mutex);
+		// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+		mutex_unlock(&exp_bus_lock);
 	}
 
 	return 0;

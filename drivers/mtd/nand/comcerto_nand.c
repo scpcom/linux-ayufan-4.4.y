@@ -26,6 +26,7 @@
 #include <linux/ratelimit.h>
 #include <linux/platform_device.h>
 #include <mach/ecc.h>
+#include <linux/mtd/exp_lock.h>
 
 /*
  * MTD structure for Comcerto board
@@ -285,7 +286,7 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 	if (likely(!((readl_relaxed(ecc_base_addr + ECC_POLY_STAT)) & ECC_CORR_REQ))) {
 		return 0;
 	}
- 
+
 	/* Error found! Correction required */
 #if defined (CONFIG_NAND_COMCERTO_ECC_8_HW_BCH) || defined (CONFIG_NAND_COMCERTO_ECC_24_HW_BCH)
 	/* Initiate correction operation */
@@ -389,6 +390,8 @@ static void comcerto_nand_write_page_hwecc(struct mtd_info *mtd,
 	const uint8_t *p = buf;
 	uint8_t *oob = chip->oob_poi;
 
+	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_lock(&exp_bus_lock);
 	/* CS4 will have the option for ECC calculation */
 	writel_relaxed(ECC_CS4_SEL, ecc_base_addr + ECC_CS_SEL_CFG);
 
@@ -410,6 +413,9 @@ static void comcerto_nand_write_page_hwecc(struct mtd_info *mtd,
 	i = mtd->oobsize - (oob - chip->oob_poi);
 	if (i)
 		chip->write_buf(mtd, oob, i);
+
+	// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_unlock(&exp_bus_lock);
 }
 
 /** reads single page from the NAND device and will read ECC bytes from flash. A
@@ -432,6 +438,9 @@ static int comcerto_nand_read_page_hwecc(struct mtd_info *mtd,
 	uint8_t ecc_bytes = nand_device->ecc.bytes;
 	uint8_t stat;
 	uint8_t *oob = nand_device->oob_poi;
+
+	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_lock(&exp_bus_lock);
 
 	for (; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
 
@@ -464,6 +473,8 @@ static int comcerto_nand_read_page_hwecc(struct mtd_info *mtd,
 	if (i)
 		chip->read_buf(mtd, oob, i);
 
+	// unlock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
+	mutex_unlock(&exp_bus_lock);
 	return 0;
 }
 
