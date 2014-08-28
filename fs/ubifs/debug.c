@@ -538,7 +538,14 @@ void dbg_dump_node(const struct ubifs_info *c, const void *node)
 	case UBIFS_DATA_NODE:
 	{
 		const struct ubifs_data_node *dn = node;
-		int dlen = le32_to_cpu(ch->len) - UBIFS_DATA_NODE_SZ;
+		uint32_t dlen = le32_to_cpu(ch->len);
+
+		if (dlen > UBIFS_MAX_DATA_NODE_SZ)
+			dlen = UBIFS_MAX_DATA_NODE_SZ;
+		if (dlen < UBIFS_DATA_NODE_SZ)
+			dlen = 0;
+		else
+			dlen -= UBIFS_DATA_NODE_SZ;
 
 		key_read(c, &dn->key, &key);
 		printk(KERN_DEBUG "\tkey            %s\n", DBGKEY(&key));
@@ -591,13 +598,21 @@ void dbg_dump_node(const struct ubifs_info *c, const void *node)
 	case UBIFS_ORPH_NODE:
 	{
 		const struct ubifs_orph_node *orph = node;
+		uint32_t dlen = le32_to_cpu(ch->len);
+
+		if (dlen > c->leb_size)
+			dlen = c->leb_size;
+		if (dlen < UBIFS_ORPH_NODE_SZ)
+			dlen = 0;
+		else
+			dlen -= UBIFS_ORPH_NODE_SZ;
 
 		printk(KERN_DEBUG "\tcommit number  %llu\n",
 		       (unsigned long long)
 				le64_to_cpu(orph->cmt_no) & LLONG_MAX);
 		printk(KERN_DEBUG "\tlast node flag %llu\n",
 		       (unsigned long long)(le64_to_cpu(orph->cmt_no)) >> 63);
-		n = (le32_to_cpu(ch->len) - UBIFS_ORPH_NODE_SZ) >> 3;
+		n = dlen >> 3;
 		printk(KERN_DEBUG "\t%d orphan inode numbers:\n", n);
 		for (i = 0; i < n; i++)
 			printk(KERN_DEBUG "\t  ino %llu\n",
