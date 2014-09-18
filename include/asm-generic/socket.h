@@ -64,5 +64,6 @@
 #define SO_DOMAIN		39
 
 #define SO_RXQ_OVFL             40
-#define SO_RXQ_ALLOC		41
+#define SO_RXQ_ALLOC		101  /* non-upstreamed sockopt */
+
 #endif /* __ASM_GENERIC_SOCKET_H */
