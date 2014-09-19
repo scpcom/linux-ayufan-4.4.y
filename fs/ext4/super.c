@@ -753,6 +753,33 @@ fail:
 }
 
 /*
+ * Manage pinning (and unpinning) block bitmaps
+ */
+static void ext4_pin_block_bitmaps(struct super_block *sb)
+{
+	ext4_group_t i, ngroups = ext4_get_groups_count(sb);
+	struct ext4_group_info *grinfo;
+
+	for (i = 0; i < ngroups; i++) {
+		grinfo = ext4_get_group_info(sb, i);
+		if (!grinfo->bb_bh)
+			grinfo->bb_bh = ext4_read_block_bitmap(sb, i);
+	}
+}
+
+static void ext4_unpin_block_bitmaps(struct super_block *sb)
+{
+	ext4_group_t i, ngroups = ext4_get_groups_count(sb);
+	struct ext4_group_info *grinfo;
+
+	for (i = 0; i < ngroups; i++) {
+		grinfo = ext4_get_group_info(sb, i);
+		brelse(grinfo->bb_bh);
+		grinfo->bb_bh = NULL;
+	}
+}
+
+/*
  * Release the journal device
  */
 static int ext4_blkdev_put(struct block_device *bdev)
@@ -821,6 +848,7 @@ static void ext4_put_super(struct super_block *sb)
 
 	del_timer(&sbi->s_err_report);
 	ext4_release_system_zone(sb);
+	ext4_unpin_block_bitmaps(sb);
 	ext4_mb_release(sb);
 	ext4_ext_release(sb);
 	ext4_xattr_put_super(sb);
@@ -1164,6 +1192,9 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 	if (sbi->no_hide_stale_gid != -1)
 		seq_printf(seq, ",nohide_stale_gid=%u", sbi->no_hide_stale_gid);
 
+	if (test_opt(sb, PIN_BLOCK_BITMAPS))
+		seq_puts(seq, ",pin_block_bitmaps");
+
 	ext4_show_quota_options(seq, sb);
 
 	return 0;
@@ -1339,6 +1370,7 @@ enum {
 	Opt_dioread_nolock, Opt_dioread_lock,
 	Opt_discard, Opt_nodiscard, Opt_init_itable, Opt_noinit_itable,
 	Opt_nohide_stale_gid,
+	Opt_pin_block_bitmaps, Opt_nopin_block_bitmaps,
 };
 
 static const match_table_t tokens = {
@@ -1415,6 +1447,8 @@ static const match_table_t tokens = {
 	{Opt_init_itable, "init_itable"},
 	{Opt_noinit_itable, "noinit_itable"},
 	{Opt_nohide_stale_gid, "nohide_stale_gid=%u"},
+	{Opt_pin_block_bitmaps, "pin_block_bitmaps"},
+	{Opt_nopin_block_bitmaps, "nopin_block_bitmaps"},
 	{Opt_err, NULL},
 };
 
@@ -1916,6 +1950,12 @@ set_qf_format:
 			break;
 		case Opt_noinit_itable:
 			clear_opt(sb, INIT_INODE_TABLE);
+			break;
+		case Opt_pin_block_bitmaps:
+			set_opt(sb, PIN_BLOCK_BITMAPS);
+			break;
+		case Opt_nopin_block_bitmaps:
+			clear_opt(sb, PIN_BLOCK_BITMAPS);
 			break;
 		default:
 			ext4_msg(sb, KERN_ERR,
@@ -3937,6 +3977,8 @@ no_journal:
 	} else
 		descr = "out journal";
 
+	if (test_opt(sb, PIN_BLOCK_BITMAPS))
+		ext4_pin_block_bitmaps(sb);
 	ext4_msg(sb, KERN_INFO, "mounted filesystem with%s. "
 		 "Opts: %s%s%s", descr, sbi->s_es->s_mount_opts,
 		 *sbi->s_es->s_mount_opts ? "; " : "", orig_data);
@@ -4678,6 +4720,11 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 	unlock_super(sb);
 	if (enable_quota)
 		dquot_resume(sb, -1);
+
+	if (test_opt(sb, PIN_BLOCK_BITMAPS))
+		ext4_pin_block_bitmaps(sb);
+	if (!test_opt(sb, PIN_BLOCK_BITMAPS))
+		ext4_unpin_block_bitmaps(sb);
 
 	ext4_msg(sb, KERN_INFO, "re-mounted. Opts: %s", orig_data);
 	kfree(orig_data);
