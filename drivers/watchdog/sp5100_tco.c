@@ -287,6 +287,10 @@ static unsigned char __devinit sp5100_tco_setupdevice(void)
 	if (!sp5100_tco_pci)
 		return 0;
 
+	/* Higher revisions are SB8x0 which have a different register set */
+	if (sp5100_tco_pci->revision >= 0x40)
+		return 0;
+
 	/* Request the IO ports used by this driver */
 	pm_iobase = SP5100_IO_PM_INDEX_REG;
 	if (!request_region(pm_iobase, SP5100_PM_IOPORTS_SIZE, "SP5100 TCO")) {
