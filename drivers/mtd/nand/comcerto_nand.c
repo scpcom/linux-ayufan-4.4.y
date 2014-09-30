@@ -225,17 +225,25 @@ static int comcerto_calculate_ecc(struct mtd_info *mtd,
 				  uint8_t *ecc_code)
 {
 	struct nand_chip *nand_device = mtd->priv;
-	uint32_t ecc_bytes = nand_device->ecc.bytes;
+	int ecc_bytes = nand_device->ecc.bytes;
 	uint8_t dummy_var = 0xFF;
-	unsigned long timeo = jiffies + 2;
+	unsigned long timeo;
 
 	comcerto_ecc_shift(ECC_SHIFT_DISABLE);
 
-	do {
-		if ((readl_relaxed(ecc_base_addr + ECC_IDLE_STAT)) & ECC_IDLE)
+	/* Wait for syndrome calculation to complete */
+	timeo = jiffies + 4;
+	for (;;) {
+		int is_timeout = time_after_eq(jiffies, timeo);
+		int is_idle = readl_relaxed(ecc_base_addr + ECC_IDLE_STAT) & ECC_IDLE;
+		if (is_idle)
 			break;
+		if (is_timeout) {
+			pr_err("ECC Timeout waiting for parity module to become idle 1\n");
+			return -EIO;
+		}
 		touch_softlockup_watchdog();
-	} while (time_before(jiffies, timeo));
+	}
 
 	comcerto_ecc_shift(ECC_SHIFT_ENABLE);
 
@@ -271,15 +279,20 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 	uint32_t err_corr_data;
 	uint16_t mask, index;
 	uint32_t temp_nand_ecc_errors[4];
-	unsigned long timeo = jiffies + 2;
+	unsigned long timeo;
 
-	 /* Wait for syndrome calculation to complete */
-	while (!(readl_relaxed(ecc_base_addr + ECC_IDLE_STAT) & ECC_IDLE)) {
-		touch_softlockup_watchdog();
-		if (time_after_eq(jiffies, timeo)) {
-			pr_warn_ratelimited("Timeout waiting for parity module to become idle");
+	/* Wait for syndrome calculation to complete */
+	timeo = jiffies + 4;
+	for (;;) {
+		int is_timeout = time_after_eq(jiffies, timeo);
+		int is_idle = readl_relaxed(ecc_base_addr + ECC_IDLE_STAT) & ECC_IDLE;
+		if (is_idle)
+			break;
+		if (is_timeout) {
+			pr_err("ECC Timeout waiting for parity module to become idle 2\n");
 			return -EIO;
 		}
+		touch_softlockup_watchdog();
 	}
 
 	 /* If no correction is required */
@@ -294,19 +307,22 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 
 	udelay(25);
 
-	timeo = jiffies + 2;
+	timeo = jiffies + 4;
 	err_corr_data_prev = 0;
 	/* Read Correction data status register till header is 0x7FD */
-	while(1) {
+	for (;;) {
+		int is_startcode;
+		int is_timeout = time_after_eq(jiffies, timeo);
 		err_corr_data_prev = readl_relaxed(ecc_base_addr + ECC_CORR_DATA_STAT);
-		if ((err_corr_data_prev >> ECC_BCH_INDEX_SHIFT) == 0x87FD)
+		is_startcode = (err_corr_data_prev >> ECC_BCH_INDEX_SHIFT) == 0x87FD;
+		if (is_startcode)
 			break;
-
-		touch_softlockup_watchdog();
-		if (time_after_eq(jiffies, timeo)) {
-			pr_warn_ratelimited("Timeout waiting for ECC correction data");
+		if (is_timeout) {
+			pr_err("Timeout waiting for ECC correction data, reg=%08x\n",
+				err_corr_data_prev);
 			return -EIO;
 		}
+		touch_softlockup_watchdog();
 	}
 
 	udelay(25);
@@ -322,8 +338,8 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 		index = (err_corr_data >> 16) & 0x7FF;
 		mask = err_corr_data & 0xFFFF;
 		if (index * 2 >= nand_device->ecc.size) {
-			pr_warn_ratelimited("ECC correction index out of "
-					"bounds. ECC_CORR_DATA_STAT %08x",
+			pr_err("ECC correction index out of "
+					"bounds. ECC_CORR_DATA_STAT %08x\n",
 					err_corr_data);
 			continue;
 		}
@@ -337,13 +353,13 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 
 	if (!((readl_relaxed(ecc_base_addr + ECC_CORR_DONE_STAT)) & ECC_DONE)) {
 		temp_nand_ecc_errors[0] += 1 ;
-		printk_ratelimited(KERN_WARNING "ECC: uncorrectable error 1 !!!\n");
+		pr_err("ECC: uncorrectable error 1 !!!\n");
 		return -1;
 	}
 
 	/* Check if the block has uncorrectable number of errors */
 	if ((readl_relaxed(ecc_base_addr + ECC_CORR_STAT)) & ECC_UNCORR) {
-		printk_ratelimited(KERN_WARNING "ECC: uncorrectable error  2 !!!\n");
+		pr_err("ECC: uncorrectable error 2 !!!\n");
 		temp_nand_ecc_errors[1] += 1 ;
 		return -EIO;
 	}
@@ -435,8 +451,8 @@ static int comcerto_nand_read_page_hwecc(struct mtd_info *mtd,
 	int eccsteps = nand_device->ecc.steps;
 	uint8_t *p = buf;
 	uint8_t *ecc_code = nand_device->buffers->ecccode;
-	uint8_t ecc_bytes = nand_device->ecc.bytes;
-	uint8_t stat;
+	int ecc_bytes = nand_device->ecc.bytes;
+	int stat;
 	uint8_t *oob = nand_device->oob_poi;
 
 	// lock mutex to prevent simultaneous NAND and NOR access to Comcerto2000 EXP bus
@@ -449,9 +465,10 @@ static int comcerto_nand_read_page_hwecc(struct mtd_info *mtd,
 		chip->read_buf(mtd, ecc_code, ecc_bytes);
 
 		stat = chip->ecc.correct(mtd, p, oob, NULL);
-		if (stat < 0)
+		if (stat < 0) {
 			mtd->ecc_stats.failed++;
-		else {
+			pr_err("ECC correction failed for page 0x%08x\n", page);
+		} else {
 			int idx = eccsteps;
 			if (idx >= MTD_ECC_STAT_SUBPAGES) {
 				idx = MTD_ECC_STAT_SUBPAGES - 1;
@@ -529,8 +546,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	/* Allocate memory for info structure */
 	info = kmalloc(sizeof(struct comcerto_nand_info), GFP_KERNEL);
 	if (!info) {
-		printk(KERN_ERR
-		       "comcerto nand: unable to allocate info structure\n");
+		pr_err("comcerto nand: unable to allocate info structure\n");
 		err = -ENOMEM;
 		goto out;
 	}
@@ -539,8 +555,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	/* Allocate memory for MTD device structure */
 	mtd = kmalloc(sizeof(struct mtd_info), GFP_KERNEL);
 	if (!mtd) {
-		printk(KERN_ERR
-		       "comcerto nand: unable to allocate mtd info structure\n");
+		pr_err("comcerto nand: unable to allocate mtd info structure\n");
 		err = -ENOMEM;
 		goto out_info;
 	}
@@ -553,8 +568,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	/* Allocate pointer to nand_device data */
 	nand_device = kmalloc(sizeof(struct nand_chip), GFP_KERNEL);
 	if (!nand_device) {
-		printk(KERN_ERR
-		       "comcerto nand: unable to allocate nand chip structure\n");
+		pr_err("comcerto nand: unable to allocate nand chip structure\n");
 		err = -ENOMEM;
 		goto out_mtd;
 	}
@@ -563,19 +577,19 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	/* Link the private data with the MTD structure */
 	mtd->priv = nand_device;
 
-	printk(KERN_INFO "pdev->resource->start = %x, pdev->resource->end = %x\n", pdev->resource->start, pdev->resource->end);
+	pr_info("pdev->resource->start = %x, pdev->resource->end = %x\n", pdev->resource->start, pdev->resource->end);
 
 	/*Map physical address of nand into virtual space */
 	nand_device->IO_ADDR_R = ioremap_nocache(pdev->resource->start, pdev->resource->end - pdev->resource->start + 1);
 	if (nand_device->IO_ADDR_R == NULL) {
-		printk(KERN_ERR "comcerto nand: cannot map nand memory\n");
+		pr_err("comcerto nand: cannot map nand memory\n");
 		err = -EIO;
 		goto out_ior;
 	}
 
 	ecc_base_addr = ioremap(COMCERTO_AXI_EXP_ECC_BASE, 0xFFFF);
 	if (!ecc_base_addr) {
-		printk(KERN_ERR "comcerto nand: cannot map ecc config\n");
+		pr_err("comcerto nand: cannot map ecc config\n");
 		err = -EIO;
 		goto out_ior;
 	}
@@ -583,7 +597,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	/* This is the same address to read and write */
 	nand_device->IO_ADDR_W = nand_device->IO_ADDR_R;
 
-	printk(KERN_INFO "nand_probe: %s base: 0x%08x \n", pdev->name, (resource_size_t) nand_device->IO_ADDR_R);
+	pr_info("nand_probe: %s base: 0x%08x \n", pdev->name, (resource_size_t) nand_device->IO_ADDR_R);
 
 	/* Set address of hardware control function */
 	nand_device->cmd_ctrl = comcerto_nand_hwcontrol;
@@ -614,7 +628,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 		nand_device->ecc.read_page = comcerto_nand_read_page_hwecc;
 		nand_device->ecc.calculate = comcerto_calculate_ecc;
 		nand_device->ecc.correct = comcerto_correct_ecc;
-		printk("hw_syndrome correction %d.\n", mtd->writesize);
+		pr_info("hw_syndrome correction %d.\n", mtd->writesize);
 
 		switch (mtd->writesize) {
 		case 512:
@@ -656,7 +670,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 #endif
 			break;
 		default:
-			printk(KERN_ERR "Using default values for hw ecc\n");
+			pr_err("Using default values for hw ecc\n");
 			nand_device->ecc.size =  1024;
 #ifdef CONFIG_NAND_COMCERTO_ECC_24_HW_BCH
 			nand_device->ecc.layout = &comcerto_ecc_info_1024_bch;
@@ -678,7 +692,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 		}
 	nand_device->ecc.steps = mtd->writesize / nand_device->ecc.size;
 	if(nand_device->ecc.steps * nand_device->ecc.size != mtd->writesize) {
-		printk(KERN_ERR "Invalid ecc parameters\n");
+		pr_err("Invalid ecc parameters\n");
 		BUG();
 	}
 	nand_device->ecc.total = nand_device->ecc.steps * nand_device->ecc.bytes;
@@ -690,7 +704,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	nand_device->bbt_options |= NAND_BBT_USE_FLASH;
 
 	} else {
-		printk("using soft ecc.\n");
+		pr_info("using soft ecc.\n");
 		nand_device->ecc.mode = NAND_ECC_SOFT_BCH;
 	}
 
@@ -699,7 +713,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	nand_device->options |= NAND_NO_SUBPAGE_WRITE;
 
 	if(nand_scan_tail(mtd)) {
-		printk(KERN_ERR "nand_scan_tail returned error\n");
+		pr_err("nand_scan_tail returned error\n");
 		err = -ENXIO;
 		goto out_ior;
 	}
@@ -713,7 +727,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	err = mtd_device_parse_register(mtd, part_probes, NULL, NULL, 4);
 
 	if (err) {
-                printk(KERN_ERR "Could not parse partitions\n");
+                pr_err("Could not parse partitions\n");
 		return err;
 	}
 
