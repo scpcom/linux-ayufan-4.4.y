@@ -77,7 +77,7 @@ static struct nand_ecclayout comcerto_ecc_info_1024_bch = {
 	}
 };
 
-#elif CONFIG_NAND_COMCERTO_ECC_8_HW_BCH
+#elif defined(CONFIG_NAND_COMCERTO_ECC_8_HW_BCH)
 
 /*
  * spare area layout for BCH ECC bytes calculated over 512-Bytes ECC block size
@@ -161,7 +161,7 @@ static struct nand_bbt_descr c2000_badblock_pattern = {
 	.len = 1,
 	.pattern = scan_ff_pattern
 };
-#elif CONFIG_NAND_COMCERTO_ECC_8_HW_BCH
+#elif defined(CONFIG_NAND_COMCERTO_ECC_8_HW_BCH)
 static struct nand_bbt_descr c2000_badblock_pattern = {
 	.offs = 14,
 	.len = 1,
@@ -624,7 +624,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 			nand_device->ecc.bytes = 42;
 			nand_device->ecc.prepad = 0;
 			nand_device->ecc.postpad = 14;
-#elif defined (CONFIG_NAND_COMCERTO_ECC_8_HW_BCH)
+#elif defined(CONFIG_NAND_COMCERTO_ECC_8_HW_BCH)
 			nand_device->ecc.layout = &comcerto_ecc_info_512_bch;
 			nand_device->ecc.bytes = 14;
 			nand_device->ecc.prepad = 0;
@@ -643,7 +643,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 			nand_device->ecc.bytes = 42;
 			nand_device->ecc.prepad = 0;
 			nand_device->ecc.postpad = 14;
-#elif CONFIG_NAND_COMCERTO_ECC_8_HW_BCH
+#elif defined(CONFIG_NAND_COMCERTO_ECC_8_HW_BCH)
 			nand_device->ecc.layout = &comcerto_ecc_info_1024_bch;
 			nand_device->ecc.bytes = 14;
 			nand_device->ecc.prepad = 0;
@@ -663,7 +663,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 			nand_device->ecc.bytes = 42;
 			nand_device->ecc.prepad = 0;
 			nand_device->ecc.postpad = 14;
-#elif CONFIG_NAND_COMCERTO_ECC_8_HW_BCH
+#elif defined(CONFIG_NAND_COMCERTO_ECC_8_HW_BCH)
 			nand_device->ecc.layout = &comcerto_ecc_info_1024_bch;
 			nand_device->ecc.bytes = 14;
 			nand_device->ecc.prepad = 0;

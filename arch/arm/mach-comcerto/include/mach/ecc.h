@@ -89,7 +89,6 @@
 #define ECC_SHIFT_DISABLE	0x0
 #define ECC_PARITY_OUT_EN	0x1
 #define ECC_PARITY_OUT_DISABLE	0x0
-#define ECC_UNCORR_ERR_HAMM	0x4
 
 /* Polynomial Start Configuration (ECC_POLY_START_CFG) */
 #define ECC_POLY_START		(1 << 0)
