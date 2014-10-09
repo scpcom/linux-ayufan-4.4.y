@@ -1255,15 +1255,31 @@ err0:
 }
 
 #if defined(CONFIG_C2K_EVM) || defined(CONFIG_C2K_ASIC)
-#define PCIE_DEV_EXT_RESET_DEASSERT(_id) \
+#define PCIE_DEV_EXT_RESET_ASSERT(_id) \
 	writel(readl(COMCERTO_GPIO_OUTPUT_REG) & ~(GPIO_PIN_27), COMCERTO_GPIO_OUTPUT_REG);
 
-#define PCIE_DEV_EXT_RESET_ASSERT(_id) \
+#define PCIE_DEV_EXT_RESET_DEASSERT(_id) \
 	writel(readl(COMCERTO_GPIO_OUTPUT_REG) | (GPIO_PIN_27), COMCERTO_GPIO_OUTPUT_REG);
+
+#elif defined(CONFIG_GOOGLE_FIBER_OPTIMUS)
+/* Older revisions of optimus boards had only a single reset line, like
+ * C2K_EVM.  Newer ones have two.  But it's harmless to twiddle both even
+ * on older boards.
+ */
+#define PCIE_DEV_EXT_RESET_ASSERT(_id) do { \
+	writel(readl(COMCERTO_GPIO_OUTPUT_REG) & ~(GPIO_PIN_27), COMCERTO_GPIO_OUTPUT_REG); \
+	writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~(PCIE_ADDITIONAL_RESET_PIN), \
+		COMCERTO_GPIO_63_32_PIN_OUTPUT); \
+	} while(0)
+
+#define PCIE_DEV_EXT_RESET_DEASSERT(_id) do { \
+	writel(readl(COMCERTO_GPIO_OUTPUT_REG) | (GPIO_PIN_27), COMCERTO_GPIO_OUTPUT_REG); \
+	writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | (PCIE_ADDITIONAL_RESET_PIN), \
+		COMCERTO_GPIO_63_32_PIN_OUTPUT); \
+	} while(0)
 #else
 /* Board specific */
-#define PCIE_DEV_EXT_RESET_DEASSERT(_id)
-#define PCIE_DEV_EXT_RESET_ASSERT(_id)
+#error "you must define proper PCIE_DEV_EXT_RESET_* macros for this board"
 #endif
 
 static int comcerto_pcie_device_reset(struct pcie_port *pp)
@@ -1289,7 +1305,7 @@ static int comcerto_pcie_device_reset(struct pcie_port *pp)
          *        invoking pcie device supend. If we invoke pcie device suspend it will
 	 *	  take care of saving pcie config space.
          */
-#if 0
+#if 1
 	/* Now save the PCIe device configuration space.*/
 	while((pci_dev = pci_get_subsys(PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID, pci_dev))) {
 		if (pp->root_bus_nr == pci_dev->bus->number) {
@@ -1301,7 +1317,7 @@ static int comcerto_pcie_device_reset(struct pcie_port *pp)
 	 * save configuration of devices on other PCIe also.
 	 * This may not be applicable for other cutomer boards.
 	 */
-#if defined(CONFIG_C2K_EVM) || defined(CONFIG_C2K_ASIC)
+#if defined(CONFIG_GOOGLE_FIBER_OPTIMUS) || defined(CONFIG_C2K_EVM) || defined(CONFIG_C2K_ASIC)
 	l_pp = &pcie_port[!pp->port];
 	pci_dev = NULL;
 
@@ -1316,8 +1332,8 @@ static int comcerto_pcie_device_reset(struct pcie_port *pp)
 #endif
 
 	/************** Ready to issue rest *****************/
-	/* De-assert external reset (GPIO-27) */
-	PCIE_DEV_EXT_RESET_DEASSERT(pp->port);
+	/* assert external reset (GPIO-27) */
+	PCIE_DEV_EXT_RESET_ASSERT(pp->port);
 	printk(KERN_INFO "EXIT: Bringing PCIe%d device reset\n", pp->port);
 
 	return 0;
@@ -1335,9 +1351,8 @@ static int comcerto_pcie_device_reset_exit(struct pcie_port *pp)
 	if (!pp->link_state && pp->reset)
 		return -1;
 
-	/* Pull up external reset */
-	/* assert external reset (GPIO-27) */
-	PCIE_DEV_EXT_RESET_ASSERT(pp->port);
+	/* deassert external reset (GPIO-27) */
+	PCIE_DEV_EXT_RESET_DEASSERT(pp->port);
 
 	udelay(1000);
 	udelay(1000);
@@ -1409,7 +1424,7 @@ static int comcerto_pcie_device_reset_exit(struct pcie_port *pp)
          *	  without invoking pcie device supend. If we invoke pcie device resume it will
 	 *	  take care of restoring, saved pcie config space.
          */
-#if 0
+#if 1
 		pci_dev = NULL;
 		while((pci_dev = pci_get_subsys(PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID, pci_dev))) {
 			if (pp->root_bus_nr == pci_dev->bus->number) {
