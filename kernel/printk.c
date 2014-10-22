@@ -43,6 +43,7 @@
 #include <linux/rculist.h>
 
 #include <asm/uaccess.h>
+#include <asm/cacheflush.h>
 
 /*
  * Architectures can override it:
@@ -1019,12 +1020,28 @@ static inline void printk_delay(void)
 	}
 }
 
+static inline void flush_persist(void *ptr, size_t len) {
+#ifdef CONFIG_PRINTK_PERSIST
+	/*
+	 * If PRINTK_PERSIST, we need to make sure log messages are fully
+	 * flushed all the way to RAM in case the system gets reset
+	 * suddenly (eg. by a watchdog).  Such a case is exactly when
+	 * PRINTK_PERSIST is most useful.
+	 */
+	if (cpu_cache.flush_kern_dcache_area)
+		cpu_cache.flush_kern_dcache_area(ptr, len);
+	outer_flush_range(virt_to_phys(ptr),
+			  virt_to_phys(ptr) + len);
+#endif
+}
+
 asmlinkage int vprintk(const char *fmt, va_list args)
 {
 	int printed_len = 0;
 	int current_log_level = default_message_loglevel;
 	unsigned long flags;
 	int this_cpu;
+	unsigned orig_end = log_end & LOG_BUF_MASK, new_end;
 	char *p;
 	size_t plen;
 	char special;
@@ -1151,6 +1168,14 @@ asmlinkage int vprintk(const char *fmt, va_list args)
 
 	lockdep_on();
 out_restore_irqs:
+	new_end = log_end & LOG_BUF_MASK;
+	if (new_end >= orig_end) {
+		flush_persist(log_buf + orig_end, new_end - orig_end);
+	} else {
+		flush_persist(log_buf + orig_end, log_buf_len - orig_end);
+		flush_persist(log_buf, new_end);
+	}
+	flush_persist(logbits, sizeof(*logbits));
 	raw_local_irq_restore(flags);
 
 	preempt_enable();
