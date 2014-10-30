@@ -854,6 +854,7 @@ static void __init create_mapping(struct map_desc *md)
 		return;
 	}
 
+	printk("Virtual 0x%08lx phys 0x%08llx length 0x%08lx\n", md->virtual, (long long)__pfn_to_phys((u64)md->pfn), md->length);
 	if ((md->type == MT_DEVICE || md->type == MT_ROM) &&
 	    md->virtual >= PAGE_OFFSET &&
 	    (md->virtual < VMALLOC_START || md->virtual >= VMALLOC_END)) {

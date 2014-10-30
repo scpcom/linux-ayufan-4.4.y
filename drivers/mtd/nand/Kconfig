@@ -448,6 +448,25 @@ config MTD_NAND_FSL_UPM
 	  Enables support for NAND Flash chips wired onto Freescale PowerPC
 	  processor localbus with User-Programmable Machine support.
 
+config MTD_NAND_LS1024A
+	tristate "Support for NAND on Freescale LS1024A"
+	depends on ARCH_COMCERTO
+	help
+	  Enables support for NAND flash controller on the Freescale LS1024A
+          SoC.
+
+config NAND_LS1024A_ECC_8_HW_BCH
+	bool
+	depends on MTD_NAND_LS1024A
+	default n
+	prompt "LS1024A ECC-8 syndrome calculation using BCH"
+
+config NAND_LS1024A_ECC_24_HW_BCH
+	bool
+	depends on MTD_NAND_LS1024A
+	default y
+	prompt "LS1024A ECC-24 syndrome calculation using BCH"
+
 config MTD_NAND_MPC5121_NFC
 	tristate "MPC5121 built-in NAND Flash Controller support"
 	depends on PPC_MPC512x

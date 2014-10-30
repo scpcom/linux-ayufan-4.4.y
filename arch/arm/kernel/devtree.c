@@ -8,6 +8,8 @@
  * published by the Free Software Foundation.
  */
 
+#define DEBUG
+
 #include <linux/init.h>
 #include <linux/export.h>
 #include <linux/errno.h>
@@ -86,6 +88,7 @@ void __init arm_dt_init_cpu_maps(void)
 	if (!cpus)
 		return;
 
+	pr_debug("is_smp %d MPIDR %08x\n", is_smp(), read_cpuid_mpidr());
 	for_each_child_of_node(cpus, cpu) {
 		u32 hwid;
 

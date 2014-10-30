@@ -181,7 +181,6 @@ static void dw8250_serial_out32(struct uart_port *p, int offset, int value)
 		d->last_mcr = value;
 
 	writel(value, p->membase + (offset << p->regshift));
-
 	/* Make sure LCR write wasn't ignored */
 	if (offset == UART_LCR) {
 		int tries = 1000;

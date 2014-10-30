@@ -30,6 +30,12 @@ config PCI_IMX6
 	select PCIEPORTBUS
 	select PCIE_DW
 
+config PCI_LS1024A
+	bool "Freescale LS1024A PCIe controller"
+	depends on ARCH_COMCERTO
+	select PCIEPORTBUS
+	select PCIE_DW
+
 config PCI_TEGRA
 	bool "NVIDIA Tegra PCIe controller"
 	depends on ARCH_TEGRA && !ARM64

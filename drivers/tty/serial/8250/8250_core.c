@@ -1632,6 +1632,15 @@ int serial8250_handle_irq(struct uart_port *port, unsigned int iir)
 
 	DEBUG_INTR("status = %x...", status);
 
+	/* The Synopsys DesignWare UART (DW_apb_uart) sometimes gets into a
+	 * weird state where the IIR reads "Character timeout" but the Data
+	 * Ready bit in the LSR is not set. To avoid a stuck interrupt, we need
+	 * to clear it by reading the receive buffer register. We achieve this
+	 * by faking the Data Ready bit (DR) */
+	if ( (iir & UART_IIR_TOD) == UART_IIR_TOD && ! (status & UART_LSR_DR)) {
+		status |= UART_LSR_DR;
+	}
+
 	if (status & (UART_LSR_DR | UART_LSR_BI)) {
 		if (up->dma)
 			dma_err = up->dma->rx_dma(up, iir);

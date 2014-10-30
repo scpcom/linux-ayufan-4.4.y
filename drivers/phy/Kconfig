@@ -313,4 +313,13 @@ config PHY_QCOM_UFS
 	help
 	  Support for UFS PHY on QCOM chipsets.
 
+config PHY_LS1024A_SNOWBUSH
+	tristate "LS1024A Snowbush PHY driver"
+	depends on OF && ARCH_COMCERTO
+	select GENERIC_PHY
+	help
+	  Support for Snowbush PHY in Freescale's LS1024A. This is required for
+	  PCIe and SATA support.
+
+
 endmenu

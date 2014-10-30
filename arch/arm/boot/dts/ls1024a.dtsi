@@ -1,0 +1,497 @@
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/pinctrl/omap.h>
+#include <dt-bindings/phy/phy.h>
+#include <dt-bindings/reset-controller/ls1024a-resets.h>
+
+#include "skeleton.dtsi"
+
+/ {
+	compatible = "fsl,ls1024a";
+	interrupt-parent = <&gic>;
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		enable-method = "fsl,ls1024a-smp";
+
+		cpu@900 {
+			compatible = "arm,cortex-a9";
+			device_type = "cpu";
+			next-level-cache = <&L2>;
+			reg = <0x900>;
+
+			clocks = <&arm_clk>;
+			clock-names = "cpu";
+
+			// clock-latency = <300000>; /* From omap-cpufreq driver */
+		};
+		cpu@901 {
+			compatible = "arm,cortex-a9";
+			device_type = "cpu";
+			next-level-cache = <&L2>;
+			reg = <0x901>;
+		};
+	};
+
+	clk_rst_syscon: clk_rst_syscon@904B0000 {
+		compatible = "syscon";
+		reg = <0x904B0000 0x1AC>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+	};
+
+	reboot: syscon-reboot {
+		compatible = "syscon-reboot";
+		regmap = <&clk_rst_syscon>;
+		offset = <0x0>;
+		mask = <0x1>;
+	};
+
+	flash@c0000000 {
+		compatible = "cfi-flash";
+		reg = <0xc0000000 0x04000000>;
+		bank-width = <2>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		uloader@0 {
+			label = "uloader";
+			reg = <0x0 0x20000>;
+		};
+		loader0@20000 {
+			label = "loader0";
+			reg = <0x20000 0x80000>;
+		};
+		loader1@a0000 {
+			label = "loader1";
+			reg = <0xa0000 0x80000>;
+		};
+		env@120000 {
+			label = "env";
+			reg = <0x120000 0x20000>;
+		};
+		hnvram@140000 {
+			label = "hnvram";
+			reg = <0x140000 0x200000>;
+		};
+		norreserved0@340000 {
+			label = "norreserved0";
+			reg = <0x340000 0x3cc0000>;
+		};
+	};
+
+	nand0: nand@c8300000 {
+		compatible = "fsl,ls1024a-nand";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		reg = <0xc8300000 0x2000
+		       0xCFFF0000 0x2c>;
+		ce-gpios = <&gpio0 28 GPIO_ACTIVE_HIGH>;
+		br-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+		reserved@0 {
+			label = "reserved";
+			reg = <0x0 0x800000>;
+		};
+		kernel0@800000 {
+			label = "kernel0";
+			reg = <0x800000 0x2000000>;
+		};
+		kernel1@2800000 {
+			label = "kernel1";
+			reg = <0x2800000 0x2000000>;
+		};
+		rootfs0@4800000 {
+			label = "rootfs0";
+			reg = <0x4800000 0x12000000>;
+		};
+		rootfs1@16800000 {
+			label = "rootfs1";
+			reg = <0x16800000 0x12000000>;
+		};
+		emergency@28800000 {
+			label = "emergency";
+			reg = <0x28800000 0x2000000>;
+		};
+		data+ubi@2a800000 {
+			label = "data+ubi";
+			reg = <0x2a800000 0x10000000>;
+		};
+	};
+
+	gic: interrupt-controller@fff01000 {
+		compatible = "arm,cortex-a9-gic";
+		interrupt-controller;
+		#interrupt-cells = <3>;
+		reg = <0xFFF01000 0x1000>,
+		      <0xFFF00100 0x0100>;
+	};
+
+	L2: l2-cache-controller@fff10000 {
+		compatible = "arm,pl310-cache";
+		reg = <0xFFF10000 0x1000>;
+		cache-unified;
+		cache-level = <2>;
+	};
+
+	reset: reset-controller {
+		compatible = "fsl,ls1024a-reset";
+		#reset-cells = <1>;
+		syscon = <&clk_rst_syscon>;
+	};
+
+	ref_clk: ref_clk {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <24000000>;
+	};
+
+	pll0: pll0 {
+		#clock-cells = <0>;
+		compatible = "fixed-factor-clock";
+		clock-div = <6>;
+		clock-mult = <450>;
+		clocks = <&ref_clk>;
+	};
+
+	pll1: pll1 {
+		#clock-cells = <0>;
+		compatible = "fixed-factor-clock";
+		clock-div = <12>;
+		clock-mult = <500>;
+		clocks = <&ref_clk>;
+	};
+
+	pll2: pll2 {
+		#clock-cells = <0>;
+		compatible = "fixed-factor-clock";
+		clock-div = <6>;
+		clock-mult = <375>;
+		clocks = <&ref_clk>;
+	};
+
+	pll3: pll3 {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <1066000000>;
+	};
+
+	gemtx_clk: gemtx_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0130 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	ddr_clk: ddr_clk {
+		#clock-cells = <0>;
+		reg = <0x904B00F0 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	arm_clk: arm_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0080 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	l2cc_clk: l2cc_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0090 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	axi_clk: axi_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0040 0x10>;
+		fsl,divreg-offset = <0xC>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	ipsec_eape_clk: ipsec_eape_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0110 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	hfe_core_clk: hfe_core_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0100 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	ntgref_clk: ntgref_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0140 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	sata_oob_clk: sata_oob_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0170 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	sata_pmu_clk: sata_pmu_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0160 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	ext_phy0_clk: ext_phy0_clk {
+		#clock-cells = <0>;
+		reg = <0x904B00C0 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	ext_phy1_clk: ext_phy1_clk {
+		#clock-cells = <0>;
+		reg = <0x904B00D0 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	ext_phy2_clk: ext_phy2_clk {
+		#clock-cells = <0>;
+		reg = <0x904B00E0 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	tpi_clk: tpi_clk {
+		#clock-cells = <0>;
+		reg = <0x904B00A0 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	csys_clk: csys_clk {
+		#clock-cells = <0>;
+		reg = <0x904B00B0 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	tsuntg_clk: tsuntg_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0150 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	sata_occ_clk: sata_occ_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0180 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	pcie_occ_clk: pcie_occ_clk {
+		#clock-cells = <0>;
+		reg = <0x904B0190 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+
+	sgmii_occ_clk: sgmii_occ_clk {
+		#clock-cells = <0>;
+		reg = <0x904B01A0 0x8>;
+		compatible = "fsl,ls1024a-clock";
+		clocks = <&pll0 &pll1 &pll2 &pll3 &ref_clk>;
+	};
+	local-timer@fff00600 {
+		compatible = "arm,cortex-a9-twd-timer";
+		clocks = <&axi_clk>;
+		reg = <0xFFF00600 0x20>;
+		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_RAW(3) | IRQ_TYPE_LEVEL_HIGH)>;
+	};
+	gp-timer@90450000 {
+		compatible = "fsl,ls1024a-gpt";
+		clocks = <&axi_clk>;
+		reg = <0x90450000 0xDC>;
+		interrupts = <GIC_SPI 55 IRQ_TYPE_EDGE_RISING
+			      GIC_SPI 56 IRQ_TYPE_EDGE_RISING
+			      GIC_SPI 57 IRQ_TYPE_EDGE_RISING
+			      GIC_SPI 58 IRQ_TYPE_EDGE_RISING
+			      GIC_SPI 59 IRQ_TYPE_EDGE_RISING
+			      GIC_SPI 60 IRQ_TYPE_EDGE_RISING>;
+	};
+	gpio0: gpio@90470000 {
+		compatible = "fsl,ls1024a-gpio";
+		reg = <0x90470000 0x1000>; /* TODO: Check size */
+		gpio-controller;
+		#gpio-cells = <2>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+		interrupt-parent = <&gic>;
+		interrupts = <GIC_SPI 45 IRQ_TYPE_NONE>;
+	};
+	leds {
+		compatible = "gpio-leds";
+		/* pinctrl-names = "default"; */
+		/* pinctrl-0 = <&pinctrl_led>; */
+
+		ledblue: ledblue {
+			label = "blue";
+			gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+		ledred: ledred {
+			label = "red";
+			gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+	};
+
+	/* We are not using uart0, only uart1 */
+	uart1: serial@96400000 {
+		compatible = "snps,dw-apb-uart";
+		reg = <0x96400000 0x100>;
+		interrupts = <GIC_SPI 27 IRQ_TYPE_LEVEL_HIGH>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+		clocks = <&axi_clk>;
+		clock-names = "baudclk";
+	};
+
+	spi0: spi@fff00000 {
+		compatible = "snps,dw-apb-ssi";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x96500000 0x1000>;
+		interrupts = <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
+		num-cs = <1>;
+		clocks = <&axi_clk>; /* TODO: Should be DUS clock */
+
+		BCM6803@0 {
+			compatible = "brcm,bcm6803-spi";
+			spi-max-frequency = <20000000>;
+			interrupt-parent = <&gpio0>;
+			interrupts = <0 IRQ_TYPE_LEVEL_HIGH>;
+			reg = <0>;
+			spi-cpol;
+			spi-cpha;
+			rf-band = "e";
+			i2c-base = <0x10406200>;
+			i2c-addr = <0x70>;
+			reset-gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	snowbush_phy: phy@90590000 {
+		compatible      = "fsl,ls1024a-snowbush-phy";
+		#address-cells	= <1>;
+		#size-cells	= <1>;
+		ranges;
+
+		phy_port0: port@90590000 {
+			#phy-cells = <1>;
+			reg = <0x90590000 0x4000>, <0x9041002C 0x10>;
+			reg-names = "serdes", "dwc1_cfg";
+			resets = <&reset LS1024A_SERDES0_RESET>,
+				 <&reset LS1024A_SERDES_PCIE0_RESET>;
+			reset-names = "serdes", "serdes_pcie";
+		};
+
+		phy_port1: port@90594000 {
+			#phy-cells = <1>;
+			reg = <0x90594000 0x4000>, <0x9041003C 0x10>;
+			reg-names = "serdes", "dwc1_cfg";
+			resets = <&reset LS1024A_SERDES1_RESET>,
+				 <&reset LS1024A_SERDES_PCIE1_RESET>,
+				 <&reset LS1024A_SERDES_SATA0_RESET>;
+			reset-names = "serdes", "serdes_pcie", "serdes_sata";
+		};
+		phy_port2: port@90598000 {
+			#phy-cells = <1>;
+			reg = <0x90598000 0x4000>, <0x9041004C 0x10>;
+			reg-names = "serdes", "dwc1_cfg";
+			resets = <&reset LS1024A_SERDES2_RESET>,
+				 <&reset LS1024A_SERDES_SATA1_RESET>;
+			reset-names = "serdes", "serdes_sata";
+		};
+	};
+
+	pci_sata_usb_ctrl: pci_sata_usb_ctrl@90460000 {
+		compatible = "syscon";
+		reg = <0x90460000 0x120>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+	};
+	ahci0: ahci@9d000000 {
+		compatible = "generic-ahci";
+		reg = <0x9d000000 0x10000>;
+		interrupts = <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		sata0: sata-port@0 {
+			reg = <0>;
+			phys = <&phy_port2 PHY_TYPE_SATA>;
+		};
+	};
+	pcie0: pcie@98000000 {
+		compatible = "fsl,ls1024a-pcie", "snps,dw-pcie";
+		reg = <0x98000000 0x04000>, /* TODO: verify size */
+		      <0xaff10000 0x20000>;
+		reg-names = "dbi", "config";
+		app-syscon = <&pci_sata_usb_ctrl>;
+		app-profile = <0>;
+		#address-cells = <3>;
+		#size-cells = <2>;
+		device_type = "pci";
+		ranges = <0x81000000 0 0          0xaff00000 0 0x00010000 /* downstream I/O */
+			  0x82000000 0 0xa0000000 0xa0000000 0 0x0fe00000>; /* non-prefetchable memory */
+		num-lanes = <1>;
+		phys	        = <&phy_port0 PHY_TYPE_PCIE>;
+		phy-names       = "pcie-phy";
+		reset-gpios = <&gpio0 62 GPIO_ACTIVE_LOW>;
+		interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "msi";
+		#interrupt-cells = <1>;
+		interrupt-map-mask = <0 0 0 0>;
+		interrupt-map = <0 0 0 0 &gic GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&axi_clk>; /* TODO: Should be pcie0 */
+		clock-names = "pcie";
+		resets = <&reset LS1024A_AXI_PCIE0_RESET>;
+		reset-names = "axi";
+	};
+
+	pcie1: pcie@99000000 {
+		compatible = "fsl,ls1024a-pcie", "snps,dw-pcie";
+		reg = <0x99000000 0x04000>, /* TODO: verify size */
+		      <0xbff10000 0x20000>;
+		reg-names = "dbi", "config";
+		app-syscon = <&pci_sata_usb_ctrl>;
+		app-profile = <1>;
+		#address-cells = <3>;
+		#size-cells = <2>;
+		device_type = "pci";
+		ranges = <0x81000000 0 0          0xbff00000 0 0x00010000 /* downstream I/O */
+			  0x82000000 0 0xb0000000 0xb0000000 0 0x0fe00000>; /* non-prefetchable memory */
+		num-lanes = <1>;
+		phys	        = <&phy_port1 PHY_TYPE_PCIE>;
+		phy-names       = "pcie-phy";
+		reset-gpios = <&gpio0 27 GPIO_ACTIVE_LOW>;
+		interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "msi";
+		#interrupt-cells = <1>;
+		interrupt-map-mask = <0 0 0 0>;
+		interrupt-map = <0 0 0 0 &gic GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&axi_clk>; /* TODO: Should be pcie0 */
+		clock-names = "pcie";
+		resets = <&reset LS1024A_AXI_PCIE1_RESET>;
+		reset-names = "axi";
+	};
+};
+
+/include/ "c2k-clocks.dtsi"

@@ -185,6 +185,14 @@ choice
 		  If you have a Broadcom STB chip and would like early print
 		  messages to appear over the UART, select this option.
 
+	config DEBUG_COMCERTO2000_UART
+		bool "Freescale Comcerto 2000 SoC Debug UART"
+		depends on ARCH_COMCERTO
+		select DEBUG_UART_8250
+		help
+		  Say Y here if you want kernel low-level debugging support
+		  on Freescale Comcerto 2000 SoC based platforms.
+
 	config DEBUG_CLPS711X_UART1
 		bool "Kernel low-level debugging messages via UART1"
 		depends on ARCH_CLPS711X
@@ -1376,6 +1384,7 @@ config DEBUG_UART_PHYS
 	default 0x80230000 if DEBUG_PICOXCELL_UART
 	default 0x808c0000 if ARCH_EP93XX
 	default 0x90020000 if DEBUG_NSPIRE_CLASSIC_UART || DEBUG_NSPIRE_CX_UART
+	default 0x96400000 if DEBUG_COMCERTO2000_UART
 	default 0xb0060000 if DEBUG_SIRFPRIMA2_UART1
 	default 0xb0090000 if DEBUG_VEXPRESS_UART0_CRX
 	default 0xc0013000 if DEBUG_U300_UART
@@ -1444,6 +1453,7 @@ config DEBUG_UART_VIRT
 	default 0xf1009000 if DEBUG_MT8135_UART3
 	default 0xf11f1000 if ARCH_VERSATILE
 	default 0xf1600000 if ARCH_INTEGRATOR
+	default 0xf1a00000 if DEBUG_COMCERTO2000_UART
 	default 0xf1c28000 if DEBUG_SUNXI_UART0
 	default 0xf1c28400 if DEBUG_SUNXI_UART1
 	default 0xf1f02800 if DEBUG_SUNXI_R_UART

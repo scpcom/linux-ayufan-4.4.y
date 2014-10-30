@@ -523,6 +523,7 @@ static void clk_disable_unused_subtree(struct clk_core *clk)
 	if (clk->flags & CLK_IGNORE_UNUSED)
 		goto unlock_out;
 
+	pr_err("Disabling unused clock %s\n", clk->name);
 	/*
 	 * some gate clocks have special needs during the disable-unused
 	 * sequence.  call .disable_unused if available, otherwise fall

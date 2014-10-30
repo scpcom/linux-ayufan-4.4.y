@@ -1913,6 +1913,7 @@ struct pci_bus *pci_create_root_bus(struct device *parent, int bus,
 	pci_bus_assign_domain_nr(b, parent);
 	b2 = pci_find_bus(pci_domain_nr(b), bus);
 	if (b2) {
+		dump_stack();
 		/* If we already got to this bus through a different bridge, ignore it */
 		dev_dbg(&b2->dev, "bus already known\n");
 		goto err_out;

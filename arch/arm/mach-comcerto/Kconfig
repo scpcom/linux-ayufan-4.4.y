@@ -1,0 +1,15 @@
+menu "Freescale Comerto 2000"
+	depends on ARCH_MULTI_V7
+
+config ARCH_COMCERTO
+	bool "Freescale Comerto 2000"
+	depends on ARCH_MULTI_V7
+	select ARM_GIC
+	select PCI_DOMAINS if PCI
+	select CLKSRC_MMIO
+	select MFD_SYSCON
+	select HAVE_ARM_SCU if SMP
+	select HAVE_ARM_TWD if SMP
+	select ARCH_HAS_RESET_CONTROLLER
+
+endmenu
