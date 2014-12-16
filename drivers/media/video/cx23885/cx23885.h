@@ -87,6 +87,11 @@
 #define CX23885_BOARD_NETUP_DUAL_DVB_T_C_CI_RF 30
 #define CX23885_BOARD_LEADTEK_WINFAST_PXDVR3200_H_XC4000 31
 #define CX23885_BOARD_MPX885                   32
+#define CX23885_BOARD_BST_PS8512               33
+#define CX23885_BOARD_DVBSKY_S952              34
+#define CX23885_BOARD_DVBSKY_S950              35
+#define CX23885_BOARD_DVBSKY_S950_CI           36
+#define CX23885_BOARD_DVBSKY_C2800E_CI         37
 
 #define GPIO_0 0x00000001
 #define GPIO_1 0x00000002
@@ -225,7 +230,7 @@ struct cx23885_board {
 	 */
 	u32			clk_freq;
 	struct cx23885_input    input[MAX_CX23885_INPUT];
-	int			ci_type; /* for NetUP */
+	int			ci_type; /* 1 and 2 for NetUP, 3 for DVBSky. */
 };
 
 struct cx23885_subid {
