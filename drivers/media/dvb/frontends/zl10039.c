@@ -46,6 +46,21 @@ struct zl10039_state {
 	u8 id;
 };
 
+// The following PLL0-3 could conflict with those in
+// arch/arm/mach-comcerto/include/mach/comcerto-2000/clk-rst.h
+// Hence undefine them.
+#ifdef PLL0
+#undef PLL0
+#endif /* PLL0 */
+#ifdef PLL1
+#undef PLL1
+#endif /* PLL1 */
+#ifdef PLL2
+#undef PLL2
+#endif /* PLL2 */
+#ifdef PLL3
+#undef PLL3
+#endif /* PLL3 */
 enum zl10039_reg_addr {
 	PLL0 = 0,
 	PLL1,
