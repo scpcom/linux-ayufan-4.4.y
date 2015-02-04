@@ -221,6 +221,13 @@ config DVB_M88DS3103
 	help
 	  A DVB-S/S2 tuner module. Say Y when you want to support this frontend.
 
+config DVB_DVBSKY_M88RS6000
+	tristate "Montage RS6000 based"
+	depends on DVB_CORE && I2C
+	default m if DVB_FE_CUSTOMISE
+	help
+	  A DVB-S/S2 tuner module. Say Y when you want to support this frontend.
+
 config DVB_M88DC2800
 	tristate "Montage DC2800 DVB-C"
 	depends on DVB_CORE && I2C

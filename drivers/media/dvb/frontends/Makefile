@@ -75,6 +75,7 @@ obj-$(CONFIG_DVB_DUMMY_FE) += dvb_dummy_fe.o
 obj-$(CONFIG_DVB_AF9013) += af9013.o
 obj-$(CONFIG_DVB_M88DS3103) += m88ds3103.o
 obj-$(CONFIG_DVB_M88DC2800) += m88dc2800.o
+obj-$(CONFIG_DVB_DVBSKY_M88RS6000) += dvbsky_m88rs6000.o
 obj-$(CONFIG_DVB_CX24116) += cx24116.o
 obj-$(CONFIG_DVB_SI21XX) += si21xx.o
 obj-$(CONFIG_DVB_STV0288) += stv0288.o
