@@ -10,7 +10,7 @@
 
 #define FW_DOWN_SIZE 32
 #define FW_DOWN_LOOP (8192/FW_DOWN_SIZE)
-#define RS6000_DEFAULT_FIRMWARE "dvb-fe-rs6000.fw"
+#define RS6000_DEFAULT_FIRMWARE "dvbsky-firmware/dvb-fe-rs6000.fw"
 #define MT_FE_MCLK_KHZ 96000 /* in kHz */
 #define MT_FE_CRYSTAL_KHZ   27000 /* in kHz */
 #define FREQ_OFFSET_AT_SMALL_SYM_RATE_KHz 3000

@@ -1370,7 +1370,7 @@ static int  m88rs6000_select_mclk(struct m88rs6000_state *state, u32 tuner_freq_
 	return 0;
 }
 
-static int m88rs6000_set_frontend(struct dvb_frontend *fe)
+static int m88rs6000_set_frontend(struct dvb_frontend *fe, struct dvb_frontend_parameters* params)
 {
 	struct m88rs6000_state *state = fe->demodulator_priv;
 	struct dtv_frontend_properties *c = &fe->dtv_property_cache;
@@ -1443,7 +1443,7 @@ static int m88rs6000_set_frontend(struct dvb_frontend *fe)
 }
 
 static int m88rs6000_tune(struct dvb_frontend *fe,
-			bool re_tune,
+			struct dvb_frontend_parameters* params,
 			unsigned int mode_flags,
 			unsigned int *delay,
 			fe_status_t *status)
@@ -1451,10 +1451,10 @@ static int m88rs6000_tune(struct dvb_frontend *fe,
 	*delay = HZ / 5;
 	
 	dprintk("%s() ", __func__);
-	dprintk("re_tune = %d\n", re_tune);
+	dprintk("re_tune = %d\n", params ? 1 : 0);
 	
-	if (re_tune) {
-		int ret = m88rs6000_set_frontend(fe);
+	if (params) {
+		int ret = m88rs6000_set_frontend(fe, params);
 		if (ret)
 			return ret;
 	}
@@ -1622,7 +1622,6 @@ static int m88rs6000_initilaze(struct dvb_frontend *fe)
 }
 
 static struct dvb_frontend_ops m88rs6000_ops = {
-	.delsys = { SYS_DVBS, SYS_DVBS2 },
 	.info = {
 		.name = "Montage RS6000(DVBSky)",
 		.type = FE_QPSK,

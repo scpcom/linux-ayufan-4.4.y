@@ -1226,7 +1226,7 @@ static int m88ds3103_demod_connect(struct dvb_frontend *fe, s32 carrier_offset_k
 	return 0;
 }
 
-static int m88ds3103_set_frontend(struct dvb_frontend *fe)
+static int m88ds3103_set_frontend(struct dvb_frontend *fe, struct dvb_frontend_parameters* params)
 {
 	struct m88ds3103_state *state = fe->demodulator_priv;
 	struct dtv_frontend_properties *c = &fe->dtv_property_cache;
@@ -1530,7 +1530,7 @@ static int m88ds3103_set_frontend(struct dvb_frontend *fe)
 }
 
 static int m88ds3103_tune(struct dvb_frontend *fe,
-			bool re_tune,
+			struct dvb_frontend_parameters* params,
 			unsigned int mode_flags,
 			unsigned int *delay,
 			fe_status_t *status)
@@ -1538,10 +1538,10 @@ static int m88ds3103_tune(struct dvb_frontend *fe,
 	*delay = HZ / 5;
 	
 	dprintk("%s() ", __func__);
-	dprintk("re_tune = %d\n", re_tune);
+	dprintk("re_tune = %d\n", params ? 1 : 0);
 	
-	if (re_tune) {
-		int ret = m88ds3103_set_frontend(fe);
+	if (params) {
+		int ret = m88ds3103_set_frontend(fe, params);
 		if (ret)
 			return ret;
 	}
