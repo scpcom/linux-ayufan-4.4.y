@@ -50,4 +50,15 @@
 	 ***********************************/
 	#define COMCERTO_SLIC_GPIO_IRQ		IRQ_G2
 
+	/*****************************************
+	 * Spacecast board specific configuration
+	 *****************************************/
+	#if defined(CONFIG_GOOGLE_SPACECAST)
+		#undef COMCERTO_OUTPUT_GPIO
+		#undef MOCA_RESET_GPIO_PIN
+		#define TUNER_RESET_GPIO_PIN	GPIO_PIN_11
+		#define USB_BRG_RESET_GPIO_PIN	GPIO_PIN_9
+		#define COMCERTO_OUTPUT_GPIO	(USB_BRG_RESET_GPIO_PIN|TUNER_RESET_GPIO_PIN)
+	#endif
+
 #endif

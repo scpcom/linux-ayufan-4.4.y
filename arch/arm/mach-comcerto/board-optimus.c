@@ -71,6 +71,8 @@ extern struct sys_timer comcerto_timer;
 
 static void __init board_gpio_init(void)
 {
+	uint32_t mask = 0xFFFFFFFC;
+	uint32_t value = 0x0;
 #ifdef CONFIG_COMCERTO_PFE_UART_SUPPORT
 	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~PFE_UART_GPIO) | PFE_UART_BUS, COMCERTO_GPIO_PIN_SELECT_REG);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= PFE_UART_GPIO_PIN; /* GPIOs 12 & 13 are used for PFE_UART */
@@ -107,9 +109,18 @@ static void __init board_gpio_init(void)
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= NOR_GPIO_PIN;
 #endif
 
-#ifdef MOCA_RESET_GPIO_PIN
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | MOCA_RESET_GPIO_PIN, COMCERTO_GPIO_OUTPUT_REG);
+#ifdef TUNER_RESET_GPIO_PIN
+	value |= TUNER_RESET_GPIO_PIN;
 #endif
+
+#ifdef USB_BRG_RESET_GPIO_PIN
+	value |= USB_BRG_RESET_GPIO_PIN;
+#endif
+
+#ifdef MOCA_RESET_GPIO_PIN
+	value |= MOCA_RESET_GPIO_PIN;
+#endif
+	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (value), COMCERTO_GPIO_OUTPUT_REG);
 
 #ifdef PCIE_ADDITIONAL_RESET_PIN
 	printk(KERN_WARNING "Pulsing GPIO_62 to reset PCIe");
@@ -125,9 +136,14 @@ static void __init board_gpio_init(void)
 			COMCERTO_GPIO_63_32_PIN_OUTPUT);
 	udelay(1000);
 #endif
-
+#if defined(CONFIG_GOOGLE_SPACECAST)
+	// enable TPM interrupt as level triggered, falling edge.
+	value = COMCERTO_GPIO_INTR_FALLING_EDGE;
+#else
 	// enable GPIO0 interrupt (for MoCA) as level triggered, active high.
-	__raw_writel(__raw_readl(COMCERTO_GPIO_INT_CFG_REG) | (0x3),
+	value = COMCERTO_GPIO_INTR_ACTIVE_HIGH;
+#endif
+	__raw_writel((__raw_readl(COMCERTO_GPIO_INT_CFG_REG) & (mask)) | value,
 			COMCERTO_GPIO_INT_CFG_REG);
 }
 
@@ -707,7 +723,11 @@ static void __init platform_init(void)
 	platform_add_devices(comcerto_devices, ARRAY_SIZE(comcerto_devices));
 }
 
+#if defined(CONFIG_GOOGLE_SPACECAST)
+MACHINE_START(COMCERTO, "Google Fiber Spacecast")
+#else
 MACHINE_START(COMCERTO, "Google Fiber Optimus")
+#endif
 	.atag_offset    = COMCERTO_AXI_DDR_BASE + 0x100,
 	.reserve	= platform_reserve,
 	.map_io		= platform_map_io,
