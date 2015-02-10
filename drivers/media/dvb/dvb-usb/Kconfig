@@ -403,3 +403,10 @@ config DVB_USB_MXL111SF
 	select VIDEO_TVEEPROM
 	help
 	  Say Y here to support the MxL111SF USB2.0 DTV receiver.
+
+config DVB_USB_SC100
+	tristate "Google SC100 DVB-S/S2 USB2.0 support"
+	depends on DVB_USB && GOOGLE_SPACECAST
+	select DVB_DVBSKY_M88RS6000 if !DVB_FE_CUSTOMISE
+	help
+	  Say Y here to support the Google SC100 DVB-S/S2 USB2.0 receiver.

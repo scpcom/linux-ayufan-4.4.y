@@ -848,6 +848,7 @@ static int __init mac_addr_atoi(u8 mac_addr[], char *mac_addr_str)
 }
 
 u8 c2k_mac_addr[3][14];
+EXPORT_SYMBOL(c2k_mac_addr);
 
 static void __init mac_addr_setup(char *str)
 {

@@ -105,6 +105,9 @@ obj-$(CONFIG_DVB_USB_MXL111SF) += dvb-usb-mxl111sf.o
 obj-$(CONFIG_DVB_USB_MXL111SF) += mxl111sf-demod.o
 obj-$(CONFIG_DVB_USB_MXL111SF) += mxl111sf-tuner.o
 
+dvb-usb-sc100-objs = sc100.o
+obj-$(CONFIG_DVB_USB_SC100) += dvb-usb-sc100.o
+
 ccflags-y += -Idrivers/media/dvb/dvb-core/ -Idrivers/media/dvb/frontends/
 # due to tuner-xc3028
 ccflags-y += -Idrivers/media/common/tuners
