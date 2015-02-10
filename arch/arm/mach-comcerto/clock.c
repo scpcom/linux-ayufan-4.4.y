@@ -348,12 +348,12 @@ static unsigned long HAL_get_pll_freq(int pll_no)
 	unsigned long ref_clk = HAL_get_ref_clk();
 	unsigned long pll_div = 0;
 
-	if (pll_no < PLL3)
+	if (pll_no < C2K_CLK_PLL3)
 	{
 		//get NF, NR and OD values
 		switch (pll_no)
 		{
-		case PLL0:
+		case C2K_CLK_PLL0:
 			m = readl(PLL0_M_LSB) & 0xff;
 			m |= (readl(PLL0_M_MSB) & 0x3) << 8;
 			p = readl(PLL0_P) & 0x3f;
@@ -362,7 +362,7 @@ static unsigned long HAL_get_pll_freq(int pll_no)
 			pll_div = readl(PLL0_DIV_CNTRL);
 			break;
 
-		case PLL1:
+		case C2K_CLK_PLL1:
 			m = readl(PLL1_M_LSB) & 0xff;
 			m |= (readl(PLL1_M_MSB) & 0x3) << 8;
 			p = readl(PLL1_P) & 0x3f;
@@ -371,7 +371,7 @@ static unsigned long HAL_get_pll_freq(int pll_no)
 			pll_div = readl(PLL1_DIV_CNTRL);
 			break;
 
-		case PLL2:
+		case C2K_CLK_PLL2:
 			m = readl(PLL2_M_LSB) & 0xff;
 			m |= (readl(PLL2_M_MSB) & 0x3) << 8;
 			p = readl(PLL2_P) & 0x3f;
@@ -397,7 +397,7 @@ static unsigned long HAL_get_pll_freq(int pll_no)
 			pll_clk = pll_clk/pll_div;
 
 	}
-	else if (pll_no == PLL3)
+	else if (pll_no == C2K_CLK_PLL3)
 	{
 		m = readl(PLL3_M_LSB) & 0xff;
 		m |= (readl(PLL3_M_MSB) & 0x3) << 8;
@@ -467,16 +467,16 @@ static void HAL_set_clock_pll_source(u32 ctrl_reg,int pll_src){
 
 	switch(pll_src)
 	{
-		case PLL0:
+		case C2K_CLK_PLL0:
 			writel(readl(ctrl_reg) | (1 << 0) , ctrl_reg);
                 	break;
-		case PLL1:
+		case C2K_CLK_PLL1:
 			writel(readl(ctrl_reg) | (1 << 1) , ctrl_reg);
                 	break;
-		case PLL3:
+		case C2K_CLK_PLL3:
 			writel(readl(ctrl_reg) | (1 << 3), ctrl_reg);
                 	break;
-		case PLL2:
+		case C2K_CLK_PLL2:
 		default:
 			writel(readl(ctrl_reg) | (1 << 2), ctrl_reg);
                 	break;
@@ -941,10 +941,10 @@ int clk_init(void){
 	spin_lock_init(&clock_lock);
 
         /* Determine the barebox configured pll0,pll1,pll2,pll3 rate value */
-        clk_pll0.rate = HAL_get_pll_freq(PLL0);
-        clk_pll1.rate = HAL_get_pll_freq(PLL1);
-        clk_pll2.rate = HAL_get_pll_freq(PLL2);
-        clk_pll3.rate = HAL_get_pll_freq(PLL3);
+        clk_pll0.rate = HAL_get_pll_freq(C2K_CLK_PLL0);
+        clk_pll1.rate = HAL_get_pll_freq(C2K_CLK_PLL1);
+        clk_pll2.rate = HAL_get_pll_freq(C2K_CLK_PLL2);
+        clk_pll3.rate = HAL_get_pll_freq(C2K_CLK_PLL3);
 
 	/* Set the NTG ref clock to PLL src (gemtx PLL source)
 	 * Currently it is not set from barebox,set here.
@@ -965,13 +965,13 @@ int clk_init(void){
 				pll_no = HAL_get_clock_pll_source(clk->clkgen_reg);
 				switch (pll_no)
 				{
-					case PLL0:
+					case C2K_CLK_PLL0:
 						clk_set_parent(clk,&clk_pll0);
 						break;
-					case PLL1:
+					case C2K_CLK_PLL1:
 						clk_set_parent(clk,&clk_pll1);
 						break;
-					case PLL2:
+					case C2K_CLK_PLL2:
 						clk_set_parent(clk,&clk_pll2);
 						break;
 					default:

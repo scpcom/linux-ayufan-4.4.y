@@ -143,10 +143,10 @@
 #define PLL3_MFR 			APB_VADDR(COMCERTO_APB_CLK_BASE + 0x248)
 #define PLL3_MRR 			APB_VADDR(COMCERTO_APB_CLK_BASE + 0x24C)
 
-#define PLL0				0
-#define PLL1				1
-#define PLL2				2
-#define PLL3				3
+#define C2K_CLK_PLL0				0
+#define C2K_CLK_PLL1				1
+#define C2K_CLK_PLL2				2
+#define C2K_CLK_PLL3				3
 
 /* Device Reset Control Register (DEVICE_RST_CNTRL)*/
 
