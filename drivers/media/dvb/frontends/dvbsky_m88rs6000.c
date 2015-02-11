@@ -1528,8 +1528,9 @@ static int m88rs6000_initilaze(struct dvb_frontend *fe)
 
 	dprintk("%s()\n", __func__);
 	
-	val = m88rs6000_readreg(state, 0x29);
-	state->tuner_addr = ( val & 0x80) ? 0x20 : 0x21;	
+	/* Use 0x21 for tuner address since 0x20 is used by TPM. */
+	m88rs6000_writereg(state, 0x29, 0x7f & m88rs6000_readreg(state, 0x29));
+	state->tuner_addr = 0x21;
 	
 	m88rs6000_initfe(fe);
 	
