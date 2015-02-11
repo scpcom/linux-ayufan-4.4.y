@@ -398,6 +398,17 @@ static struct i2c_board_info comcerto_i2c_board_info[] __initdata = {
 	{
 		I2C_BOARD_INFO("24c512", 0x50),
 	},
+#if defined(CONFIG_GOOGLE_SPACECAST)
+	{
+		I2C_BOARD_INFO("slb9645", 0x20),
+	},
+	{
+		I2C_BOARD_INFO("tps65233", 0x60),
+	},
+	{
+		I2C_BOARD_INFO("m88rs6000", 0x69),
+	},
+#endif
 };
 
 static struct platform_device comcerto_i2c = {
