@@ -882,7 +882,11 @@ static struct i2c_driver tpm_st33_i2c_driver = {
 	.id_table = tpm_st33_i2c_id
 };
 
-module_i2c_driver(tpm_st33_i2c_driver);
+static int __init tpm_st33_i2c_module_register(void)
+{
+        i2c_add_driver(&tpm_st33_i2c_driver);
+}
+module_init(tpm_st33_i2c_module_register);
 
 MODULE_AUTHOR("Christophe Ricard (tpmsupport@st.com)");
 MODULE_DESCRIPTION("STM TPM I2C ST33 Driver");

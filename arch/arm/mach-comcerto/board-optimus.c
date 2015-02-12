@@ -416,7 +416,7 @@ static struct i2c_board_info comcerto_i2c_board_info[] __initdata = {
 	},
 #if defined(CONFIG_GOOGLE_SPACECAST)
 	{
-		I2C_BOARD_INFO("slb9645", 0x20),
+		I2C_BOARD_INFO("tpm_i2c_infineon", 0x20),
 	},
 	{
 		I2C_BOARD_INFO("tps65233", 0x60),
