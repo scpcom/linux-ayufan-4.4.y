@@ -787,7 +787,11 @@ static struct i2c_driver tpm_tis_i2c_driver = {
 		   },
 };
 
-module_i2c_driver(tpm_tis_i2c_driver);
+static int __init tpm_tis_i2c_module_register(void)
+{
+	i2c_add_driver(&tpm_tis_i2c_driver);
+}
+module_init(tpm_tis_i2c_module_register);
 MODULE_AUTHOR("Peter Huewe <peter.huewe@infineon.com>");
 MODULE_DESCRIPTION("TPM TIS I2C Infineon Driver");
 MODULE_VERSION("2.2.0");
