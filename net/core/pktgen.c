@@ -262,6 +262,7 @@ struct pktgen_dev {
 	u64 delay;		/* nano-seconds */
 
 	__u64 count;		/* Default No packets to send */
+	__u64 duration;		/* Duration to send in microseconds */
 	__u64 sofar;		/* How many pkts we've sent so far */
 	__u64 tx_bytes;		/* How many bytes we've transmitted */
 	__u64 errors;		/* Errors when trying to transmit, */
@@ -549,6 +550,9 @@ static int pktgen_if_show(struct seq_file *seq, void *v)
 		   "     queue_map_min: %u  queue_map_max: %u\n",
 		   pkt_dev->queue_map_min,
 		   pkt_dev->queue_map_max);
+
+	seq_printf(seq, "     duration: %llu\n",
+		   (unsigned long long)pkt_dev->duration);
 
 	if (pkt_dev->skb_priority)
 		seq_printf(seq, "     skb_priority: %u\n",
@@ -1098,6 +1102,16 @@ static ssize_t pktgen_if_write(struct file *file,
 		pkt_dev->count = value;
 		sprintf(pg_result, "OK: count=%llu",
 			(unsigned long long)pkt_dev->count);
+		return count;
+	}
+	if (!strcmp(name, "duration")) {
+		len = num_arg(&user_buffer[i], 10, &value);
+		if (len < 0)
+			return len;
+		i += len;
+		pkt_dev->duration = value;
+		sprintf(pg_result, "OK: duration=%llu",
+			(unsigned long long)pkt_dev->duration);
 		return count;
 	}
 	if (!strcmp(name, "src_mac_count")) {
@@ -3319,6 +3333,7 @@ static void pktgen_xmit(struct pktgen_dev *pkt_dev)
 	struct net_device *odev = pkt_dev->odev;
 	struct netdev_queue *txq;
 	int ret;
+	u64 elapsed;
 
 	/* If device is offline, then don't send */
 	if (unlikely(!netif_running(odev) || !netif_carrier_ok(odev))) {
@@ -3404,8 +3419,10 @@ unlock:
 
 	local_bh_enable();
 
-	/* If pkt_dev->count is zero, then run forever */
-	if ((pkt_dev->count != 0) && (pkt_dev->sofar >= pkt_dev->count)) {
+	/* If pkt_dev->count and pkt_dev->duration are zero, then run forever */
+	elapsed = ktime_us_delta(ktime_get(), pkt_dev->started_at);
+	if (((pkt_dev->count != 0) && (pkt_dev->sofar >= pkt_dev->count)) ||
+	    ((pkt_dev->duration != 0) && (elapsed >= pkt_dev->duration))) {
 		pktgen_wait_for_skb(pkt_dev);
 
 		/* Done with this */
@@ -3586,6 +3603,7 @@ static int pktgen_add_device(struct pktgen_thread *t, const char *ifname)
 	pkt_dev->nfrags = 0;
 	pkt_dev->delay = pg_delay_d;
 	pkt_dev->count = pg_count_d;
+	pkt_dev->duration = 0;
 	pkt_dev->sofar = 0;
 	pkt_dev->udp_src_min = 9;	/* sink port */
 	pkt_dev->udp_src_max = 9;
