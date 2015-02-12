@@ -79,6 +79,12 @@ config RTSM_C2K
 	  
 endchoice
 
+config GOOGLE_SPACECAST
+	bool "Google Spacecast"
+	select GOOGLE_FIBER_OPTIMUS
+	help
+	  Say Y here if you intend to run this kernel with a Google Fiber Spacecast board
+	  (a variation of Optimus board).
 
 config MTD_COMCERTO_NOR
 	bool
