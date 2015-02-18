@@ -2125,6 +2125,7 @@ static void pktgen_setup_inject(struct pktgen_dev *pkt_dev)
 	pkt_dev->cur_daddr = pkt_dev->daddr_min;
 	pkt_dev->cur_udp_dst = pkt_dev->udp_dst_min;
 	pkt_dev->cur_udp_src = pkt_dev->udp_src_min;
+	pkt_dev->cur_queue_map = pkt_dev->queue_map_min;
 	pkt_dev->nflows = 0;
 }
 
