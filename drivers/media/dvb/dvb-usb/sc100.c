@@ -60,7 +60,7 @@ static int sc100_set_voltage(struct dvb_frontend *fe, fe_sec_voltage_t voltage)
 
 static struct dvbsky_m88rs6000_config sc100_config = {
 	.demod_address = 0x69,
-	.ci_mode = 1,
+	.ci_mode = 0,
 	.pin_ctrl = 0x80,
 	.ts_mode = 0,
 	.tuner_readstops = 1,
