@@ -466,10 +466,16 @@ static int m88rs6000_read_snr(struct dvb_frontend *fe, u16 *p_snr)
 			snr_total += val;
 			cnt--;
 		}
+		/* TODO(kedong): The following code is based on the formula
+		 * from data sheet. The formula is basically
+		 * 10*ln(snr/8)/ln(10). The result SNR seems very low though
+		 * more reasonable at magnitude level compared to the original
+		 * setting. Need to double check with vendor on this.
+		 */
 		tmp = (u16)(snr_total/80);
 		if(tmp > 0){
 			if (tmp > 32) tmp = 32;
-			snr = (mes_loge[tmp - 1] * 100) / 45;
+			snr = (mes_loge[tmp - 1] * 10) / 23026;
 		}else{
 			snr = 0;
 		}
@@ -724,7 +730,7 @@ struct dvb_frontend *dvbsky_m88rs6000_attach(const struct dvbsky_m88rs6000_confi
 
 	state->config = config;
 	state->i2c = i2c;
-	state->preBer = 0xffff;
+	state->preBer = 0x0;
 	state->delivery_system = SYS_DVBS; /*Default to DVB-S.*/
 	state->iMclkKHz = 96000;
 	
@@ -1030,7 +1036,7 @@ static int  m88rs6000_get_ts_mclk(struct m88rs6000_state *state, u32 *p_MCLK_KHz
 
 static int  m88rs6000_set_ts_mclk(struct m88rs6000_state *state, u32 MCLK_KHz, u32 iSymRateKSs)
 {
-	u8 reg11 = 0x0A, reg15, reg16, reg1D, reg1E, reg1F, tmp;
+	u8 reg15, reg16, reg1D, reg1E, reg1F, tmp;
 	u8 sm, f0 = 0, f1 = 0, f2 = 0, f3 = 0;
 	u16 pll_div_fb, N;
 	u32 div;
@@ -1041,14 +1047,16 @@ static int  m88rs6000_set_ts_mclk(struct m88rs6000_state *state, u32 MCLK_KHz, u
 	reg16 = m88rs6000_tuner_readreg(state, 0x16);
 	reg1D = m88rs6000_tuner_readreg(state, 0x1D);
 
-	if(reg16 == 92)
-		tmp = 93;
-	else if (reg16 == 100)
-		tmp = 99;
-	else
-		tmp = 96;
-	MCLK_KHz *= tmp;
-	MCLK_KHz /= 96;
+	if(state->config->ts_mode == 0) {
+		if(reg16 == 92)
+			tmp = 93;
+		else if (reg16 == 100)
+			tmp = 99;
+		else
+			tmp = 96;
+		MCLK_KHz *= tmp;
+		MCLK_KHz /= 96;
+	}
 
 	pll_div_fb = (reg15 & 0x01) << 8;
 	pll_div_fb += reg16;
@@ -1057,35 +1065,33 @@ static int  m88rs6000_set_ts_mclk(struct m88rs6000_state *state, u32 MCLK_KHz, u
 	div = 9000 * pll_div_fb * 4;
 	div /= MCLK_KHz;
 
+	if(div <= 32) {
+		N = 2;
+		f0 = 0;
+		f1 = div / N;
+		f2 = div - f1;
+		f3 = 0;
+	} else if (div <= 34) {
+		N = 3;
+		f0 = div / N;
+		f1 = (div - f0) / (N - 1);
+		f2 = div - f0 - f1;
+		f3 = 0;
+	} else if (div <= 64) {
+		N = 4;
+		f0 = div / N;
+		f1 = (div - f0) / (N - 1);
+		f2 = (div - f0 - f1) / (N - 2);
+		f3 = div - f0 - f1 - f2;
+	} else {
+		N = 4;
+		f0 = 16;
+		f1 = 16;
+		f2 = 16;
+		f3 = 16;
+	}
+
 	if(state->config->ts_mode == 1) {
-		reg11 |= 0x02;
-
-		if(div <= 32) {
-			N = 2;
-			f0 = 0;
-			f1 = div / N;
-			f2 = div - f1;
-			f3 = 0;
-		} else if (div <= 34) {
-			N = 3;
-			f0 = div / N;
-			f1 = (div - f0) / (N - 1);
-			f2 = div - f0 - f1;
-			f3 = 0;
-		} else if (div <= 64) {
-			N = 4;
-			f0 = div / N;
-			f1 = (div - f0) / (N - 1);
-			f2 = (div - f0 - f1) / (N - 2);
-			f3 = div - f0 - f1 - f2;
-		} else {
-			N = 4;
-			f0 = 16;
-			f1 = 16;
-			f2 = 16;
-			f3 = 16;
-		}
-
 		if(f0 == 16)
 			f0 = 0;
 		else if((f0 < 8) && (f0 != 0))
@@ -1106,33 +1112,6 @@ static int  m88rs6000_set_ts_mclk(struct m88rs6000_state *state, u32 MCLK_KHz, u
 		else if((f3 < 8) && (f3 != 0))
 			f3 = 8;
 	} else {
-		reg11 &= ~0x02;
-		if(div <= 32) {
-			N = 2;
-			f0 = 0;
-			f1 = div / N;
-			f2 = div - f1;
-			f3 = 0;
-		} else if(div <= 48) {
-			N = 3;
-			f0 = div / N;
-			f1 = (div - f0) / (N - 1);
-			f2 = div - f0 - f1;
-			f3 = 0;
-		} else if(div <= 64) {
-			N = 4;
-			f0 = div / N;
-			f1 = (div - f0) / (N - 1);
-			f2 = (div - f0 - f1) / (N - 2);
-			f3 = div - f0 - f1 - f2;
-		} else {
-			N = 4;
-			f0 = 16;
-			f1 = 16;
-			f2 = 16;
-			f3 = 16;
-		}
-
 		if(f0 == 16)
 			f0 = 0;
 		else if((f0 < 9) && (f0 != 0))
@@ -1192,6 +1171,7 @@ static int  m88rs6000_set_ts_divide_ratio(struct m88rs6000_state *state, u8 dr_h
 
 	val = m88rs6000_readreg(state, 0xfe); 
 	val &= 0xF0;
+	val |= (tmp1 >> 2) & 0x0f;
 	m88rs6000_writereg(state, 0xfe, val);
 
 	val = (u8)((tmp1 & 0x03) << 6);
@@ -1292,7 +1272,7 @@ static int m88rs6000_demod_connect(struct dvb_frontend *fe, s32 carrier_offset_k
 	/* set others.*/
 	tmp = m88rs6000_readreg(state, 0xca);
 	tmp &= 0xFE;
-	tmp |= (m88rs6000_readreg(state, 0xfd) >> 3) & 0x01;
+	tmp |= (m88rs6000_readreg(state, 0xca) >> 3) & 0x01;
 	m88rs6000_writereg(state, 0xca, tmp);
 	
 	m88rs6000_writereg(state, 0x33, 0x99);
@@ -1339,17 +1319,12 @@ static int  m88rs6000_select_mclk(struct m88rs6000_state *state, u32 tuner_freq_
 	u32 offset_MHz[3];
 	u32 max_offset = 0;
 	u8 i;
+	u8 big_symbol = (iSymRateKSs > 45010) ? 1 : 0;
 
-	if(iSymRateKSs > 45010) {
+	if(big_symbol) {
 		reg16 = 115;
 		state->iMclkKHz = 110250;
 	} else {
-		adc_Freq_MHz[0] = 96;
-		adc_Freq_MHz[1] = 93;
-		adc_Freq_MHz[2] = 99;
-		reg16_list[0] = 96;
-		reg16_list[1] = 92;
-		reg16_list[2] = 100;
 		reg16 = 96;
 		for(i = 0; i < 3; i++) {
 			offset_MHz[i] = tuner_freq_MHz % adc_Freq_MHz[i];
@@ -1361,16 +1336,30 @@ static int  m88rs6000_select_mclk(struct m88rs6000_state *state, u32 tuner_freq_
 				max_offset = offset_MHz[i];
 				reg16 = reg16_list[i];
 				state->iMclkKHz = adc_Freq_MHz[i] * 1000;
-
-				if(iSymRateKSs > 45010)
-					state->iMclkKHz /= 2;
 			}
 		}
+	}
+	switch(state->iMclkKHz) {
+		case 93000:
+			m88rs6000_writereg(state, 0xa0, 0x42);
+			break;
+		case 96000:
+			m88rs6000_writereg(state, 0xa0, 0x44);
+			break;
+		case 99000:
+			m88rs6000_writereg(state, 0xa0, 0x46);
+			break;
+		case 110250:
+			m88rs6000_writereg(state, 0xa0, 0x4e);
+			break;
+		default:
+			m88rs6000_writereg(state, 0xa0, 0x44);
+			break;
 	}
 	reg15 = m88rs6000_tuner_readreg(state, 0x15);
 	m88rs6000_tuner_writereg(state, 0x05, 0x40);
 	m88rs6000_tuner_writereg(state, 0x11, 0x08);
-	if(iSymRateKSs > 45010)
+	if(big_symbol)
 		reg15 |= 0x02;
 	else
 		reg15 &= ~0x02;
@@ -1378,7 +1367,7 @@ static int  m88rs6000_select_mclk(struct m88rs6000_state *state, u32 tuner_freq_
 	m88rs6000_tuner_writereg(state, 0x16, reg16);
 	msleep(5);
 	m88rs6000_tuner_writereg(state, 0x05, 0x00);
-	m88rs6000_tuner_writereg(state, 0x11, (iSymRateKSs > 45010) ? 0x0E : 0x0A);
+	m88rs6000_tuner_writereg(state, 0x11, (big_symbol) ? 0x0E : 0x0A);
 	msleep(5);
 	return 0;
 }
