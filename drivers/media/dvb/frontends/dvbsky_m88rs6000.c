@@ -376,15 +376,28 @@ static int m88rs6000_read_signal_strength(struct dvb_frontend *fe,
 	
 	val = m88rs6000_tuner_readreg(state, 0x5A);
 	RF_GC = val & 0x0f;
+	if(RF_GC >= ARRAY_SIZE(RFGS)) {
+		printk(KERN_ERR "%s: Invalid, RFGC=%d\n", __func__, RF_GC);
+		return -EINVAL;
+	}
 
 	val = m88rs6000_tuner_readreg(state, 0x5F);
 	IF_GC = val & 0x0f;
+	if(IF_GC >= ARRAY_SIZE(IFGS)) {
+		printk(KERN_ERR "%s: Invalid, IFGC=%d\n", __func__, IF_GC);
+		return -EINVAL;
+	}
+
 	
 	val = m88rs6000_tuner_readreg(state, 0x3F);
 	TIA_GC = (val >> 4) & 0x07;
 	
 	val = m88rs6000_tuner_readreg(state, 0x77);
 	BB_GC = (val >> 4) & 0x0f;
+	if(BB_GC >= ARRAY_SIZE(BBGS)) {
+		printk(KERN_ERR "%s: Invalid, BBGC=%d\n", __func__, BB_GC);
+		return -EINVAL;
+	}
 
 	val = m88rs6000_tuner_readreg(state, 0x76);
 	PGA2_GC = val & 0x3f;
