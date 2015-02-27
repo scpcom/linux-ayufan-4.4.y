@@ -1273,7 +1273,7 @@ static int m88rs6000_demod_connect(struct dvb_frontend *fe, s32 carrier_offset_k
 	}else if(state->config->ts_mode)
 		tmp = 0x06;
 	else
-		tmp = 0x42;
+		tmp = 0x02;
 	m88rs6000_writereg(state, 0xfd, tmp);
 	
 	/* set others.*/
