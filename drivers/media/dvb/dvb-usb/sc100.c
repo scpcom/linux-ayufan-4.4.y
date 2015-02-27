@@ -11,6 +11,7 @@
  */
 #include "sc100.h"
 #include "dvbsky_m88rs6000.h"
+#include "mach/comcerto-2000.h"
 
 #define SC100_VOLTAGE_CTRL (0x60)
 #define SC100_READ_MSG 0
@@ -29,12 +30,9 @@ MODULE_PARM_DESC(debug, "set debugging level (1=info 2=xfer 4=rc(or-able))."
 
 DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 
-extern u8 c2k_mac_addr[3][14];
-
 static int sc100_read_mac_address(struct dvb_usb_device *d, u8 mac[6])
 {
-	memcpy(mac, c2k_mac_addr[SC100_MAC_ADDR_INDEX], 6);
-	return 0;
+	return comcerto_mac_addr_get(mac, SC100_MAC_ADDR_INDEX);
 };
 
 static int sc100_set_voltage(struct dvb_frontend *fe, fe_sec_voltage_t voltage)

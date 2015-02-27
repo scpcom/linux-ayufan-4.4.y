@@ -231,6 +231,10 @@
 #include <mach/comcerto-2000/memory.h>
 #include <mach/c2k_dma.h>
 
+#ifndef __ASSEMBLY__
+extern int comcerto_mac_addr_get(uint8_t mac[6], uint8_t index);
+#endif
+
 #define comcerto_timer4_set(hbound)	__raw_writel((hbound), COMCERTO_TIMER4_HIGH_BOUND)
 
 #define comcerto_timer4_get()		__raw_readl(COMCERTO_TIMER4_CURRENT_COUNT)

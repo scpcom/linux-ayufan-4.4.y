@@ -61,6 +61,8 @@
 #include <mach/comcerto-2000/pm.h>
 #include <mach/gpio.h>
 
+#include <linux/module.h>
+
 struct c2k_gpio_pin_stat_info c2k_gpio_pin_stat =
 {
 	.c2k_gpio_pins_0_31 = 0x0,
@@ -847,8 +849,16 @@ static int __init mac_addr_atoi(u8 mac_addr[], char *mac_addr_str)
 	return str_incr_cnt;
 }
 
-u8 c2k_mac_addr[3][14];
-EXPORT_SYMBOL(c2k_mac_addr);
+static u8 c2k_mac_addr[3][14];
+
+int comcerto_mac_addr_get(uint8_t mac[6], uint8_t index)
+{
+	if(index>=3)
+		return -EINVAL;
+	memcpy(mac, c2k_mac_addr[index], 6);
+	return 0;
+}
+EXPORT_SYMBOL(comcerto_mac_addr_get);
 
 static void __init mac_addr_setup(char *str)
 {
