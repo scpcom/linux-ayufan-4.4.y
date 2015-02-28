@@ -336,8 +336,10 @@ int32_t dwc_otg_handle_conn_id_status_change_intr(dwc_otg_core_if_t * core_if)
 		    " ++Connector ID Status Change Interrupt++  (%s)\n",
 		    (dwc_otg_is_host_mode(core_if) ? "Host" : "Device"));
 	
-	if (core_if->lock)
-		DWC_SPINUNLOCK(core_if->lock);
+	if ((core_if == NULL) || (core_if->lock == NULL) || (core_if->wq_otg == NULL))
+		return 1;
+
+	DWC_SPINUNLOCK(core_if->lock);
 
 	/*
 	 * Need to schedule a work, as there are possible DELAY function calls

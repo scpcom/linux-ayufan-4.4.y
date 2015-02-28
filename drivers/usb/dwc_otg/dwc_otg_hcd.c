@@ -449,6 +449,9 @@ int dwc_otg_hcd_urb_enqueue(dwc_otg_hcd_t * hcd,
 	dwc_otg_qtd_t *qtd;
 	gintmsk_data_t intr_mask = {.d32 = 0 };
 
+	if (NULL ==  dwc_otg_urb)
+		return 0;
+
 	if (!hcd->flags.b.port_connect_status) {
 		/* No longer connected. */
 		DWC_ERROR("Not connected\n");
@@ -495,7 +498,14 @@ int dwc_otg_hcd_urb_dequeue(dwc_otg_hcd_t * hcd,
 	dwc_otg_qh_t *qh;
 	dwc_otg_qtd_t *urb_qtd;
 
+	if (NULL ==  dwc_otg_urb)
+		return 0;
+
 	urb_qtd = dwc_otg_urb->qtd;
+
+	if (NULL ==  urb_qtd->qh)
+		return 0;
+
 	qh = urb_qtd->qh;
 #ifdef DEBUG
 	if (CHK_DEBUG_LEVEL(DBG_HCDV | DBG_HCD_URB)) {
