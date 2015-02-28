@@ -1422,18 +1422,6 @@ static int m88rs6000_set_frontend(struct dvb_frontend *fe, struct dvb_frontend_p
 		msleep(20);
 	}
 	
-	if((status & FE_HAS_LOCK) == 0){
-		state->delivery_system = (state->delivery_system == SYS_DVBS) ? SYS_DVBS2 : SYS_DVBS;
-		m88rs6000_demod_connect(fe, lpf_offset_KHz);
-	
-		for (i = 0; i < 30 ; i++) {
-			m88rs6000_read_status(fe, &status);
-			if (status & FE_HAS_LOCK)
-				break;
-			msleep(20);
-		}
-	}	
-		
 	if (status & FE_HAS_LOCK){
 		if (state->config->set_ts_params)
 			state->config->set_ts_params(fe, 0);
