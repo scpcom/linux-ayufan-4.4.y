@@ -102,11 +102,11 @@ static struct dvb_usb_device_properties sc100_properties = {
 			.frontend_attach = sc100_frontend_attach,
 			.stream = {
 				.type = USB_BULK,
-				.count = 4,
-				.endpoint = 0x02,
+				.count = 8,
+				.endpoint = 0x82,
 				.u = {
 					.bulk = {
-						.buffersize = 512,
+						.buffersize = 4096,
 					}
 				}
 			},
