@@ -70,7 +70,8 @@ DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
 	<< (LNB_CONTROL_REGISTER_1_ ## field ## _ ## SHIFT); \
 }
 
-struct i2c_adapter *i2c_adap;
+struct i2c_adapter *sc100_i2c_adap;
+struct usb_device *sc100_udev;
 
 static int sc100_read_mac_address(struct dvb_usb_device *d, u8 mac[6])
 {
@@ -86,7 +87,7 @@ static int sc100_writereg(u8 reg, u8 data)
 
 	deb_info("%s: [W] R:0x%02x, V:0x%02x", __func__, reg, data);
 
-	ret = i2c_transfer(i2c_adap, &msg, 1);
+	ret = i2c_transfer(sc100_i2c_adap, &msg, 1);
 	if (ret != 1) {
 		err("%s: [W] R:0x%02x, V:0x02x, E:%d", __func__, reg, data, ret);
 		return -EREMOTEIO;
@@ -104,7 +105,7 @@ static u8 sc100_readreg(u8 reg)
 		{ .addr = LNB_I2C_ADDRESS, .flags = 0, .buf = b0, .len = 1 },
 		{ .addr = LNB_I2C_ADDRESS, .flags = I2C_M_RD, .buf = b1, .len = 1 }
 	};
-	ret = i2c_transfer(i2c_adap, msg, 2);
+	ret = i2c_transfer(sc100_i2c_adap, msg, 2);
 
 	if (ret != 2) {
 		err("%s: [R] R:0x%x, E:%d", __func__, reg, ret);
@@ -161,12 +162,19 @@ static int sc100_set_voltage(struct dvb_frontend *fe, fe_sec_voltage_t voltage)
 	return sc100_writereg(LNB_CONTROL_REGISTER_1, lnb_reg);
 }
 
+static int sc100_set_ts_params(struct dvb_frontend* fe, int is_punctured)
+{
+	return usb_control_msg(sc100_udev, usb_sndctrlpipe(sc100_udev,0),
+			0xa4, USB_TYPE_VENDOR, 0, 0, 0, 0, 5000);
+}
+
 static struct dvbsky_m88rs6000_config sc100_config = {
 	.demod_address = 0x69,
-	.ci_mode = 0,
+	.ci_mode = 2,
 	.pin_ctrl = 0x80,
 	.ts_mode = 0,
 	.tuner_readstops = 1,
+	.set_ts_params = sc100_set_ts_params,
 };
 
 static struct dvb_usb_device_properties sc100_properties;
@@ -174,9 +182,9 @@ static struct dvb_usb_device_properties sc100_properties;
 static int sc100_frontend_attach(struct dvb_usb_adapter *d)
 {
 	/* Initializes i2c adapter when the frontend is attached. */
-	i2c_adap = i2c_get_adapter(0);
+	sc100_i2c_adap = i2c_get_adapter(0);
 	d->fe_adap[0].fe = dvb_attach(dvbsky_m88rs6000_attach, &sc100_config,
-				i2c_adap);
+				sc100_i2c_adap);
 	if (d->fe_adap[0].fe != NULL) {
 		d->fe_adap[0].fe->ops.set_tone = sc100_set_tone;
 		d->fe_adap[0].fe->ops.set_voltage = sc100_set_voltage;
@@ -231,6 +239,7 @@ static struct dvb_usb_device_properties sc100_properties = {
 static int sc100_probe(struct usb_interface *intf,
 		const struct usb_device_id *id)
 {
+	sc100_udev = interface_to_usbdev(intf);
 	if (0 == dvb_usb_device_init(intf, &sc100_properties,
 			THIS_MODULE, NULL, adapter_nr))
 		return 0;
