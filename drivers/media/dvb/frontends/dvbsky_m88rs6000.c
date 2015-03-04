@@ -526,11 +526,11 @@ static int m88rs6000_read_snr(struct dvb_frontend *fe, u16 *p_snr)
 			snr_total += val;
 			cnt--;
 		}
-		/* TODO(kedong): The following code is based on the formula
-		 * from data sheet. The formula is basically
-		 * 10*ln(snr/8)/ln(10). The result SNR seems very low though
-		 * more reasonable at magnitude level compared to the original
-		 * setting. Need to double check with vendor on this.
+		/* The following code is based on the formula from data sheet.
+		 * The formula is basically 10*ln(snr/8)/ln(10). The result SNR
+		 * seems can go up to 14. The real SNR could be large than 14,
+		 * but the vendor only supports up to 14. Any value beyond 14
+		 * displays as 14.
 		 */
 		tmp = (u16)(snr_total/80);
 		if(tmp > 0){
