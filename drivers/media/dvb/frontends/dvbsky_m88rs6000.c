@@ -296,7 +296,7 @@ static int m88rs6000_read_ber(struct dvb_frontend *fe, u32* ber)
 {
 	struct m88rs6000_state *state = fe->demodulator_priv;
 	u8 tmp1, tmp2, tmp3;
-	u32 ldpc_frame_cnt, pre_err_packags, code_rate_fac = 0;
+	u32 ldpc_frame_cnt, pre_err_packags;
 
 	dprintk("%s()\n", __func__);
 
@@ -313,21 +313,6 @@ static int m88rs6000_read_ber(struct dvb_frontend *fe, u32* ber)
 		}
 		break;
 	case SYS_DVBS2:
-		tmp1 = m88rs6000_readreg(state, 0x7e) & 0x0f;
-		switch(tmp1){
-		case 0:	code_rate_fac = 16008 - 80; break;
-		case 1:	code_rate_fac = 21408 - 80; break;
-		case 2:	code_rate_fac = 25728 - 80; break;
-		case 3:	code_rate_fac = 32208 - 80; break;
-		case 4:	code_rate_fac = 38688 - 80; break;
-		case 5:	code_rate_fac = 43040 - 80; break;
-		case 6:	code_rate_fac = 48408 - 80; break;
-		case 7:	code_rate_fac = 51648 - 80; break;
-		case 8:	code_rate_fac = 53840 - 80; break;
-		case 9:	code_rate_fac = 57472 - 80; break;
-		case 10: code_rate_fac = 58192 - 80; break;
-		}
-		
 		tmp1 = m88rs6000_readreg(state, 0xd7) & 0xff;
 		tmp2 = m88rs6000_readreg(state, 0xd6) & 0xff;
 		tmp3 = m88rs6000_readreg(state, 0xd5) & 0xff;		
@@ -479,8 +464,6 @@ static int m88rs6000_read_signal_strength(struct dvb_frontend *fe,
 						u16 *signal_strength)
 {
 	u16 gain = 0;
-
-	fe_status_t status;
 
 	int ret = m88rs6000_tuner_get_gain(fe, &gain);
 	if(ret) return ret;
