@@ -1415,6 +1415,95 @@ static int  m88rs6000_select_mclk(struct m88rs6000_state *state, u32 tuner_freq_
 	return 0;
 }
 
+static int m88rs6000_get_frontend(struct dvb_frontend *fe,
+	struct dvb_frontend_parameters *params)
+{
+	struct m88rs6000_state *state = fe->demodulator_priv;
+	struct dtv_frontend_properties *c = &fe->dtv_property_cache;
+	u8 fec;
+	u32 rate;
+	fe_status_t status;
+	dprintk("%s()\n", __func__);
+
+	rate = (m88rs6000_readreg(state, 0x6e) << 8) | m88rs6000_readreg(state, 0x6d);
+	params->u.qpsk.symbol_rate = rate * ((state->iMclkKHz * 1000) >> 16);
+
+	switch (state->delivery_system){
+	case SYS_DVBS:
+		fec = m88rs6000_readreg(state, 0xe6) >> 5;
+		switch(fec){
+			case 0:
+				params->u.qpsk.fec_inner = FEC_7_8;
+				break;
+			case 1:
+				params->u.qpsk.fec_inner = FEC_5_6;
+				break;
+			case 2:
+				params->u.qpsk.fec_inner = FEC_3_4;
+				break;
+			case 3:
+				params->u.qpsk.fec_inner = FEC_2_3;
+				break;
+			case 4:
+				params->u.qpsk.fec_inner = FEC_1_2;
+				break;
+			default:
+				return -EINVAL;
+		}
+
+		params->inversion = m88rs6000_readreg(state, 0xe0) & 0x40 ?
+				INVERSION_ON : INVERSION_OFF;
+		break;
+	case SYS_DVBS2:
+		fec = m88rs6000_readreg(state, 0x7e) & 0x0f;
+		switch(fec){
+			case 3:
+				params->u.qpsk.fec_inner = FEC_1_2;
+				break;
+			case 4:
+				params->u.qpsk.fec_inner = FEC_3_5;
+				break;
+			case 5:
+				params->u.qpsk.fec_inner = FEC_2_3;
+				break;
+			case 6:
+				params->u.qpsk.fec_inner = FEC_3_4;
+				break;
+			case 7:
+				params->u.qpsk.fec_inner = FEC_4_5;
+				break;
+			case 8:
+				params->u.qpsk.fec_inner = FEC_5_6;
+				break;
+			case 9:
+				params->u.qpsk.fec_inner = FEC_8_9;
+				break;
+			case 10:
+				params->u.qpsk.fec_inner = FEC_9_10;
+				break;
+			case 0:  /* FEC_1_4 is not supported in this kernel */
+			case 1:  /* FEC_1_3 is not supported in this kernel */
+			case 2:  /* FEC_2_5 is not supported in this kernel */
+			default:
+				return -EINVAL;
+		}
+
+		m88rs6000_read_status(fe, &status);
+		if (status & FE_HAS_LOCK)
+			params->inversion = m88rs6000_readreg(state, 0x89) & 0x80 ?
+				INVERSION_ON : INVERSION_OFF;
+		else
+			params->inversion = INVERSION_OFF;
+		break;
+	default:
+		return -EINVAL;
+	}
+
+	params->frequency = c->frequency;
+
+	return 0;
+}
+
 static int m88rs6000_set_frontend(struct dvb_frontend *fe, struct dvb_frontend_parameters* params)
 {
 	struct m88rs6000_state *state = fe->demodulator_priv;
@@ -1685,6 +1774,7 @@ static struct dvb_frontend_ops m88rs6000_ops = {
 	.set_voltage = m88rs6000_set_voltage,
 	.diseqc_send_master_cmd = m88rs6000_send_diseqc_msg,
 	.diseqc_send_burst = m88rs6000_diseqc_send_burst,
+	.get_frontend = m88rs6000_get_frontend,
 	.get_frontend_algo = m88rs6000_get_algo,
 	.tune = m88rs6000_tune,
 	.set_frontend = m88rs6000_set_frontend,
