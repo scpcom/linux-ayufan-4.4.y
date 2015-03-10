@@ -18,6 +18,8 @@ struct dvbsky_m88rs6000_config {
 	u8 tuner_readstops;
 	/* Set device param to start dma */
 	int (*set_ts_params)(struct dvb_frontend *fe, int is_punctured);
+	/* Set LNB tone */
+	int (*set_tone)(struct dvb_frontend *fe, const fe_sec_tone_mode_t t);
 	/* Set LNB voltage */
 	int (*set_voltage)(struct dvb_frontend* fe, fe_sec_voltage_t voltage);
 };

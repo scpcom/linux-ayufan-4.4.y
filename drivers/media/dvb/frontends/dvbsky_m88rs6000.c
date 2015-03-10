@@ -610,6 +610,9 @@ static int m88rs6000_set_tone(struct dvb_frontend *fe, fe_sec_tone_mode_t tone)
 		return -EINVAL;
 	}
 
+	if(state->config->set_tone)
+		state->config->set_tone(fe, tone);
+
 	data_a1 = m88rs6000_readreg(state, 0xa1);
 	data_a2 = m88rs6000_readreg(state, 0xa2);
 
