@@ -1908,8 +1908,6 @@ static int comcerto_pcie_abort_handler(unsigned long addr, unsigned int fsr,
 		 */
 		panic("PCIe: too many external aborts in a short time");
 	}
-        if (fsr & (1 << 10))
-                regs->ARM_pc += 4;
         return 0;
 }
 
