@@ -580,6 +580,29 @@ static struct resource comcerto_pfe_resources[] = {
 };
 
 static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
+#ifdef CONFIG_GOOGLE_SPACECAST
+	.comcerto_eth_pdata[0] = {
+		.name = "wan0",
+		.device_flags = CONFIG_COMCERTO_GEMAC,
+		.mii_config = CONFIG_COMCERTO_USE_RGMII,
+		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
+		.phy_flags = GEMAC_NO_PHY,
+		.gem_id = 0,
+		.mac_addr = (u8[])GEM0_MAC,
+	},
+
+	.comcerto_eth_pdata[1] = {
+		.name = "lan0",
+		.device_flags = CONFIG_COMCERTO_GEMAC,
+		.mii_config = CONFIG_COMCERTO_USE_RGMII,
+		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
+		.phy_flags = GEMAC_PHY_RGMII_ADD_DELAY,
+		.bus_id = 0,
+		.phy_id = 1,
+		.gem_id = 1,
+		.mac_addr = (u8[])GEM1_MAC,
+	},
+#else
 	.comcerto_eth_pdata[0] = {
 		.name = "lan0",
 		.device_flags = CONFIG_COMCERTO_GEMAC,
@@ -601,6 +624,7 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.gem_id = 1,
 		.mac_addr = (u8[])GEM1_MAC,
 	},
+#endif
 
 	.comcerto_eth_pdata[2] = {
 		.name = "moca0",
@@ -620,7 +644,15 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 	 */
 	.comcerto_mdio_pdata[0] = {
 		.enabled = 1,
+		/* The bitmask .phy_mask specifies the set of PHYs to */
+		/* probe. On Optimus, the kernel controls PHY 4 (WAN  */
+		/* port). On SpaceCast, it controls PHY 1 (LAN port). */
+		/* Do not waste time probing other PHYs.              */
+#ifdef CONFIG_GOOGLE_SPACECAST
+		.phy_mask = 0xFFFFFFFD,
+#else
 		.phy_mask = 0xFFFFFFEF,
+#endif
 		.mdc_div = 96,
 		.irq = {
 			[4] = PHY_POLL,
