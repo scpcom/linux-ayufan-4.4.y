@@ -52,37 +52,42 @@ static void ar8x_phy_dbg_write(struct phy_device *phydev,  int reg_addr, u32 val
 	phy_write(phydev, AR8x_DEBUG_PORT_DATA, val);
 }
 
-int ar8x_add_skew(struct phy_device *phydev)
+void ar8x_add_skew_tx(struct phy_device *phydev)
 {
-	int tmp, err;
+	int tmp;
+
+	/* Enable Tx delay */
+	tmp = ar8x_phy_dbg_read(phydev, AR8x_DBG_RGMII_TXCLK_CTRL);
+	tmp |= AR8x_DBG_RGMII_TXCLK_MASK;
+	ar8x_phy_dbg_write(phydev, AR8x_DBG_RGMII_TXCLK_CTRL, tmp);
+}
+
+void ar8x_add_skew_rx(struct phy_device *phydev)
+{
+	int tmp;
 
 	/* Enable Rx delay */
 	tmp = ar8x_phy_dbg_read(phydev, AR8x_DBG_RGMII_RXCLK_CTRL);
 	tmp |= AR8x_DBG_RGMII_RXCLK_MASK;
 	ar8x_phy_dbg_write(phydev, AR8x_DBG_RGMII_RXCLK_CTRL, tmp);
-	/* Enable Tx delay */
-	tmp = ar8x_phy_dbg_read(phydev, AR8x_DBG_RGMII_TXCLK_CTRL);
-	tmp |= AR8x_DBG_RGMII_TXCLK_MASK;
-	ar8x_phy_dbg_write(phydev, AR8x_DBG_RGMII_TXCLK_CTRL, tmp);
-
-	err = genphy_restart_aneg(phydev);
-
-	if (err < 0)
-		return err;
-
-	return 0;
 }
-EXPORT_SYMBOL(ar8x_add_skew);
 
 static int ar8x_config_init(struct phy_device *phydev)
 {
 	int err = 0;
 
-	if (phydev->interface == PHY_INTERFACE_MODE_RGMII)
-		err = ar8x_add_skew(phydev);
+	if (phydev->interface == PHY_INTERFACE_MODE_RGMII_ID) {
+		ar8x_add_skew_rx(phydev);
+		ar8x_add_skew_tx(phydev);
+	}
+	else if (phydev->interface == PHY_INTERFACE_MODE_RGMII_RXID)
+		ar8x_add_skew_rx(phydev);
+	else if (phydev->interface == PHY_INTERFACE_MODE_RGMII_TXID)
+		ar8x_add_skew_tx(phydev);
+
+	err = genphy_restart_aneg(phydev);
 
 	return err;
-
 }
 
 
