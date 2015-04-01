@@ -1279,6 +1279,8 @@ static int m88rs6000_demod_connect(struct dvb_frontend *fe, s32 carrier_offset_k
 	/* set ts clock */
 	if(state->config->ci_mode == 0)
 		ts_clk = 7000;
+	else if(state->config->ci_mode == 2)
+		ts_clk = 16000;
 	else
 		ts_clk = 8000;
 		
