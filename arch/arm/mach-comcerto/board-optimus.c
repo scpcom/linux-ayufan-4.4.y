@@ -652,13 +652,16 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		/* Do not waste time probing other PHYs.              */
 #ifdef CONFIG_GOOGLE_SPACECAST
 		.phy_mask = 0xFFFFFFFD,
+		.irq = {
+			[1] = PHY_POLL,
+		},
 #else
 		.phy_mask = 0xFFFFFFEF,
-#endif
-		.mdc_div = 96,
 		.irq = {
 			[4] = PHY_POLL,
 		},
+#endif
+		.mdc_div = 96,
 	},
 };
 
