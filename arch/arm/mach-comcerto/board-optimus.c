@@ -582,13 +582,9 @@ static struct resource comcerto_pfe_resources[] = {
 static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 #ifdef CONFIG_GOOGLE_SPACECAST
 	.comcerto_eth_pdata[0] = {
-		.name = "wan0",
-		.device_flags = CONFIG_COMCERTO_GEMAC,
-		.mii_config = CONFIG_COMCERTO_USE_RGMII,
-		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
+		.name = "unused",
 		.phy_flags = GEMAC_NO_PHY,
 		.gem_id = 0,
-		.mac_addr = (u8[])GEM0_MAC,
 	},
 
 	.comcerto_eth_pdata[1] = {
@@ -601,6 +597,12 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.phy_id = 1,
 		.gem_id = 1,
 		.mac_addr = (u8[])GEM1_MAC,
+	},
+
+	.comcerto_eth_pdata[2] = {
+		.name = "unused",
+		.phy_flags = GEMAC_NO_PHY,
+		.gem_id = 2,
 	},
 #else
 	.comcerto_eth_pdata[0] = {
@@ -624,7 +626,6 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.gem_id = 1,
 		.mac_addr = (u8[])GEM1_MAC,
 	},
-#endif
 
 	.comcerto_eth_pdata[2] = {
 		.name = "moca0",
@@ -635,6 +636,7 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.gem_id = 2,
 		.mac_addr = (u8[])GEM2_MAC,
 	},
+#endif
 
 	/**
 	 * There is a single mdio bus coming out of C2K.  And that's the one
