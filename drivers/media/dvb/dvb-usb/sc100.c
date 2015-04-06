@@ -89,7 +89,7 @@ static int sc100_writereg(u8 reg, u8 data)
 
 	ret = i2c_transfer(sc100_i2c_adap, &msg, 1);
 	if (ret != 1) {
-		err("%s: [W] R:0x%02x, V:0x02x, E:%d", __func__, reg, data, ret);
+		err("%s: [W] R:0x%02x, V:0x%02x, E:%d", __func__, reg, data, ret);
 		return -EREMOTEIO;
 	}
 	return 0;
