@@ -11,7 +11,6 @@
  */
 #include "sc100.h"
 #include "dvbsky_m88rs6000.h"
-#include "mach/comcerto-2000.h"
 
 #define SC100_READ_MSG 0
 #define SC100_WRITE_MSG 1
@@ -24,6 +23,8 @@
 /* debug */
 static int dvb_usb_sc100_debug;
 module_param_named(debug, dvb_usb_sc100_debug, int, 0644);
+static char *mac_addr_str = "90:09:1e:f1:be:33";
+module_param_named(mac_addr, mac_addr_str, charp, 0000);
 MODULE_PARM_DESC(debug, "set debugging level (1=info)." DVB_USB_DEBUG_STATUS);
 
 DVB_DEFINE_MOD_OPT_ADAPTER_NR(adapter_nr);
@@ -75,7 +76,10 @@ struct usb_device *sc100_udev;
 
 static int sc100_read_mac_address(struct dvb_usb_device *d, u8 mac[6])
 {
-	return comcerto_mac_addr_get(mac, SC100_MAC_ADDR_INDEX);
+	if (!mac_pton(mac_addr_str, mac)) {
+		return -EINVAL;
+	}
+	return 0;
 };
 
 static int sc100_writereg(u8 reg, u8 data)
