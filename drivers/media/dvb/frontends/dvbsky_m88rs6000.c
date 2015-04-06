@@ -11,6 +11,7 @@
 #include <linux/moduleparam.h>
 #include <linux/init.h>
 #include <linux/firmware.h>
+#include <asm/div64.h>
 
 #include "dvb_frontend.h"
 #include "dvbsky_m88rs6000.h"
@@ -292,11 +293,66 @@ static int m88rs6000_read_status(struct dvb_frontend *fe, fe_status_t* status)
 	return 0;
 }
 
+static int m88rs6000_get_fec(struct dvb_frontend *fe)
+{
+	struct m88rs6000_state *state = fe->demodulator_priv;
+	u8 fec;
+	switch (state->delivery_system){
+	case SYS_DVBS:
+		fec = m88rs6000_readreg(state, 0xe6) >> 5;
+		switch(fec){
+			case 0:
+				return FEC_7_8;
+			case 1:
+				return FEC_5_6;
+			case 2:
+				return FEC_3_4;
+			case 3:
+				return FEC_2_3;
+			case 4:
+				return FEC_1_2;
+			default:
+				return FEC_NONE;
+		}
+		break;
+	case SYS_DVBS2:
+		fec = m88rs6000_readreg(state, 0x7e) & 0x0f;
+		switch(fec){
+			case 3:
+				return FEC_1_2;
+			case 4:
+				return FEC_3_5;
+			case 5:
+				return FEC_2_3;
+			case 6:
+				return FEC_3_4;
+			case 7:
+				return FEC_4_5;
+			case 8:
+				return FEC_5_6;
+			case 9:
+				return FEC_8_9;
+			case 10:
+				return FEC_9_10;
+			case 0:  /* FEC_1_4 is not supported in this kernel */
+			case 1:  /* FEC_1_3 is not supported in this kernel */
+			case 2:  /* FEC_2_5 is not supported in this kernel */
+			default:
+				return FEC_NONE;
+		}
+		break;
+	default:
+		break;
+	}
+	return FEC_NONE;
+}
+
 static int m88rs6000_read_ber(struct dvb_frontend *fe, u32* ber)
 {
 	struct m88rs6000_state *state = fe->demodulator_priv;
 	u8 tmp1, tmp2, tmp3;
-	u32 ldpc_frame_cnt, pre_err_packags;
+	u32 bch_payload = 0, ldpc_frame_cnt, pre_err_packages, pre_total_packages;
+	u64 tmp4;
 
 	dprintk("%s()\n", __func__);
 
@@ -304,30 +360,75 @@ static int m88rs6000_read_ber(struct dvb_frontend *fe, u32* ber)
 	case SYS_DVBS:
 		m88rs6000_writereg(state, 0xf9, 0x04);
 		tmp3 = m88rs6000_readreg(state, 0xf8);
+		if((tmp3&0x08) == 0) {
+			pre_total_packages = 0x800000;
+		} else {
+			pre_total_packages = 0x100000;
+		}
 		if ((tmp3&0x10) == 0){
 			tmp1 = m88rs6000_readreg(state, 0xf7);
 			tmp2 = m88rs6000_readreg(state, 0xf6);
 			tmp3 |= 0x10;
 			m88rs6000_writereg(state, 0xf8, tmp3);
-			state->preBer = (tmp1<<8) | tmp2;
+			pre_err_packages = (tmp1<<8) | tmp2;
+			tmp4 = 1000000000ULL * pre_err_packages;
+			do_div(tmp4, pre_total_packages);
+			state->preBer = (u32)tmp4;
 		}
 		break;
 	case SYS_DVBS2:
+		switch (m88rs6000_get_fec(fe))
+		{
+			/* THe FEC coding equation:
+			 * FEC length (64800b) * (LDPC ratio)
+			 * = K(LDPC)
+			 * = K(BCH) + T(BCH) * 16
+			 * = BB Header (80b) + data + padding + T(BCH) * 16
+			 * FEC Frame - LDPC - K(BCH) - K(LDPC) - T(BCH)
+			 * 64800     - 1/4  - 16008  - 16200   - 12
+			 * 64800     - 1/3  - 21408  - 21600   - 12
+			 * 64800     - 2/5  - 25728  - 25920   - 12
+			 * 64800     - 1/2  - 32208  - 32400   - 12
+			 * 64800     - 3/5  - 38688  - 38880   - 12
+			 * 64800     - 2/3  - 43040  - 43200   - 10
+			 * 64800     - 3/4  - 48408  - 48600   - 12
+			 * 64800     - 4/5  - 51648  - 51840   - 12
+			 * 64800     - 5/6  - 53840  - 54000   - 10
+			 * 64800     - 8/9  - 57472  - 57600   - 8
+			 * 64800     - 9/10 - 58192  - 58320   - 8
+			 */
+			case FEC_1_2:	bch_payload = 32128;	break;
+			case FEC_3_5:	bch_payload = 38608;	break;
+			case FEC_2_3:	bch_payload = 42960;	break;
+			case FEC_3_4:	bch_payload = 48328;	break;
+			case FEC_4_5:	bch_payload = 51568;	break;
+			case FEC_5_6:	bch_payload = 53760;	break;
+			case FEC_8_9:	bch_payload = 57392;	break;
+			case FEC_9_10:	bch_payload = 58112;	break;
+			/* FEC_1_4 is not supported in this kernel */
+			/* FEC_1_3 is not supported in this kernel */
+			/* FEC_2_5 is not supported in this kernel */
+			default:	return -EINVAL;
+		}
+
 		tmp1 = m88rs6000_readreg(state, 0xd7) & 0xff;
 		tmp2 = m88rs6000_readreg(state, 0xd6) & 0xff;
 		tmp3 = m88rs6000_readreg(state, 0xd5) & 0xff;		
 		ldpc_frame_cnt = (tmp1 << 16) | (tmp2 << 8) | tmp3;
+		pre_total_packages = bch_payload * ldpc_frame_cnt / (188 * 8);
 
 		tmp1 = m88rs6000_readreg(state, 0xf8) & 0xff;
 		tmp2 = m88rs6000_readreg(state, 0xf7) & 0xff;
-		pre_err_packags = tmp1<<8 | tmp2;
+		pre_err_packages = tmp1<<8 | tmp2;
 		
-		if (ldpc_frame_cnt > 1000){
+		if (ldpc_frame_cnt > 3000){
 			m88rs6000_writereg(state, 0xd1, 0x01);
 			m88rs6000_writereg(state, 0xf9, 0x01);
 			m88rs6000_writereg(state, 0xf9, 0x00);
 			m88rs6000_writereg(state, 0xd1, 0x00);
-			state->preBer = pre_err_packags;
+			tmp4 = 1000000000ULL * pre_err_packages;
+			do_div(tmp4, pre_total_packages);
+			state->preBer = (u32)tmp4;
 		} 				
 		break;
 	default:
@@ -1425,74 +1526,23 @@ static int m88rs6000_get_frontend(struct dvb_frontend *fe,
 {
 	struct m88rs6000_state *state = fe->demodulator_priv;
 	struct dtv_frontend_properties *c = &fe->dtv_property_cache;
-	u8 fec;
 	u32 rate;
 	fe_status_t status;
 	dprintk("%s()\n", __func__);
 
 	rate = (m88rs6000_readreg(state, 0x6e) << 8) | m88rs6000_readreg(state, 0x6d);
 	params->u.qpsk.symbol_rate = rate * ((state->iMclkKHz * 1000) >> 16);
+	params->u.qpsk.fec_inner = m88rs6000_get_fec(fe);
+	if (params->u.qpsk.fec_inner == FEC_NONE) {
+		return -EINVAL;
+	}
 
 	switch (state->delivery_system){
 	case SYS_DVBS:
-		fec = m88rs6000_readreg(state, 0xe6) >> 5;
-		switch(fec){
-			case 0:
-				params->u.qpsk.fec_inner = FEC_7_8;
-				break;
-			case 1:
-				params->u.qpsk.fec_inner = FEC_5_6;
-				break;
-			case 2:
-				params->u.qpsk.fec_inner = FEC_3_4;
-				break;
-			case 3:
-				params->u.qpsk.fec_inner = FEC_2_3;
-				break;
-			case 4:
-				params->u.qpsk.fec_inner = FEC_1_2;
-				break;
-			default:
-				return -EINVAL;
-		}
-
 		params->inversion = m88rs6000_readreg(state, 0xe0) & 0x40 ?
 				INVERSION_ON : INVERSION_OFF;
 		break;
 	case SYS_DVBS2:
-		fec = m88rs6000_readreg(state, 0x7e) & 0x0f;
-		switch(fec){
-			case 3:
-				params->u.qpsk.fec_inner = FEC_1_2;
-				break;
-			case 4:
-				params->u.qpsk.fec_inner = FEC_3_5;
-				break;
-			case 5:
-				params->u.qpsk.fec_inner = FEC_2_3;
-				break;
-			case 6:
-				params->u.qpsk.fec_inner = FEC_3_4;
-				break;
-			case 7:
-				params->u.qpsk.fec_inner = FEC_4_5;
-				break;
-			case 8:
-				params->u.qpsk.fec_inner = FEC_5_6;
-				break;
-			case 9:
-				params->u.qpsk.fec_inner = FEC_8_9;
-				break;
-			case 10:
-				params->u.qpsk.fec_inner = FEC_9_10;
-				break;
-			case 0:  /* FEC_1_4 is not supported in this kernel */
-			case 1:  /* FEC_1_3 is not supported in this kernel */
-			case 2:  /* FEC_2_5 is not supported in this kernel */
-			default:
-				return -EINVAL;
-		}
-
 		m88rs6000_read_status(fe, &status);
 		if (status & FE_HAS_LOCK)
 			params->inversion = m88rs6000_readreg(state, 0x89) & 0x80 ?
