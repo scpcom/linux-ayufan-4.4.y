@@ -202,7 +202,7 @@ static int comcerto_i2c_wait(struct comcerto_i2c *i2c, u8 cntr)
 				schedule();
 
 			if (time_after(jiffies, jiffies_mark)) {
-				dev_dbg(i2c->dev, "%s: polling transfer timeout\n", __FUNCTION__);
+				dev_warn(i2c->dev, "%s: polling transfer timeout\n", __FUNCTION__);
 				comcerto_i2c_message_complete(i2c, -ETIME);
 				comcerto_i2c_reset(i2c);
 				break;
@@ -247,7 +247,7 @@ static void comcerto_i2c_state_start_ack(struct comcerto_i2c *i2c, u8 *cntr)
 
 		WR_DATA(i2c, addr);		/* write address and read/write bit */
 	} else {
-		dev_dbg(i2c->dev, "%s: unexpected state (%#x) on start phase, %s\n",
+		dev_warn(i2c->dev, "%s: unexpected state (%#x) on start phase, %s\n",
 			__FUNCTION__, status, i2c->msg_retries > 1 ? "retrying":"aborting");
 
 		if (--i2c->msg_retries < 0)
@@ -302,7 +302,7 @@ restart:
 			}
 		}
 		else {
-			dev_dbg(i2c->dev, "%s: unexpected state (%#x) on address phase, %s\n",
+			dev_warn(i2c->dev, "%s: unexpected state (%#x) on address phase, %s\n",
 				__FUNCTION__, status, i2c->msg_retries > 1 ? "retrying":"aborting");
 
 			if (--i2c->msg_retries < 0)
@@ -326,7 +326,7 @@ restart:
 			}
 		}
 		else {
-			dev_dbg(i2c->dev, "%s: unexpected state (%#x) on read phase\n", __FUNCTION__, status);
+			dev_warn(i2c->dev, "%s: unexpected state (%#x) on read phase\n", __FUNCTION__, status);
 			comcerto_i2c_message_complete(i2c, -1);
 		}
 		break;
@@ -338,7 +338,7 @@ restart:
 			comcerto_i2c_message_complete(i2c, 0);
 		}
 		else {
-			dev_dbg(i2c->dev, "%s: unexpected state (%#x) on finishing read phase\n", __FUNCTION__, status);
+			dev_warn(i2c->dev, "%s: unexpected state (%#x) on finishing read phase\n", __FUNCTION__, status);
 			comcerto_i2c_message_complete(i2c, -1);
 		}
 	}
@@ -391,7 +391,7 @@ restart:
 			}
 		}
 		else {
-			dev_dbg(i2c->dev, "%s: unexpected state (%#x) on address phase, %s\n",
+			dev_warn(i2c->dev, "%s: unexpected state (%#x) on address phase, %s\n",
 				__FUNCTION__, status, i2c->msg_retries > 1 ? "retrying":"aborting");
 
 			if (--i2c->msg_retries < 0)
@@ -413,7 +413,7 @@ restart:
 				comcerto_i2c_message_complete(i2c, 0);
 		}
 		else {
-			dev_dbg(i2c->dev, "%s: unexpected state (%#x) on read data phase\n", __FUNCTION__, status);
+			dev_warn(i2c->dev, "%s: unexpected state (%#x) on read data phase\n", __FUNCTION__, status);
 			comcerto_i2c_message_complete(i2c, -1);
 		}
 		break;
@@ -478,7 +478,7 @@ polling_mode:
 		/* check if we timed out and set respective error codes */
 		if (res == 0) {
 			if (comcerto_i2c_message_in_progress(i2c)) {
-				dev_dbg(i2c->dev, "%s: interrupt transfer timeout\n", __FUNCTION__);
+				dev_warn(i2c->dev, "%s: interrupt transfer timeout\n", __FUNCTION__);
 				comcerto_i2c_message_complete(i2c, -ETIME);
 				comcerto_i2c_reset(i2c);
 			}
@@ -506,7 +506,7 @@ static int comcerto_i2c_master_xfer(struct i2c_adapter *adapter, struct i2c_msg 
 		comcerto_i2c_message_process(i2c, &msgs[i]);
 
 		if (i2c->msg_status < 0) {
-			dev_dbg(i2c->dev, "%s: transfer failed on message #%d (addr=%#x, flags=%#x, len=%u)\n",
+			dev_warn(i2c->dev, "%s: transfer failed on message #%d (addr=%#x, flags=%#x, len=%u)\n",
 				__FUNCTION__, i, msgs[i].addr, msgs[i].flags, msgs[i].len);
 			break;
 		}
