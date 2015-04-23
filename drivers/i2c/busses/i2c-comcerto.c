@@ -166,7 +166,7 @@ static void comcerto_i2c_reset(struct comcerto_i2c *i2c)
 
 	status = RD_STAT(i2c);
 	if (status != STAT_NO_RELEVANT_INFO)
-		dev_warn(i2c->dev, "%s: unexpected status after reset: 0x%02x\n", __FUNCTION__, status);
+		dev_printk(KERN_DEBUG, i2c->dev, "%s: unexpected status after reset: 0x%02x\n", __FUNCTION__, status);
 
 	/* dividers should be placed in CCRH for high-sped mode and in CCRFS for standard/full modes */
 	dividers = comcerto_i2c_calculate_dividers(i2c);
@@ -183,7 +183,7 @@ static inline void comcerto_i2c_message_complete(struct comcerto_i2c *i2c, int s
 	d = ktime_us_delta(ktime_get(), i2c->msg_start_time);
 	if (d > 22000) {
 		i2c->msg_status = -ETIME;
-		dev_warn(i2c->dev,
+		dev_printk(KERN_DEBUG, i2c->dev,
 			"I2C transaction took too long: %lld us. Returning error.\n",
 			(long long) d);
 	} else {
@@ -213,7 +213,7 @@ static int comcerto_i2c_wait(struct comcerto_i2c *i2c, u8 cntr)
 				schedule();
 
 			if (time_after(jiffies, jiffies_mark)) {
-				dev_warn(i2c->dev, "%s: polling transfer timeout\n", __FUNCTION__);
+				dev_printk(KERN_DEBUG, i2c->dev, "%s: polling transfer timeout\n", __FUNCTION__);
 				comcerto_i2c_message_complete(i2c, -ETIME);
 				comcerto_i2c_reset(i2c);
 				break;
@@ -258,7 +258,7 @@ static void comcerto_i2c_state_start_ack(struct comcerto_i2c *i2c, u8 *cntr)
 
 		WR_DATA(i2c, addr);		/* write address and read/write bit */
 	} else {
-		dev_warn(i2c->dev, "%s: unexpected state (%#x) on start phase, %s\n",
+		dev_printk(KERN_DEBUG, i2c->dev, "%s: unexpected state (%#x) on start phase, %s\n",
 			__FUNCTION__, status, i2c->msg_retries > 1 ? "retrying":"aborting");
 
 		if (--i2c->msg_retries < 0)
@@ -313,7 +313,7 @@ restart:
 			}
 		}
 		else {
-			dev_warn(i2c->dev, "%s: unexpected state (%#x) on address phase, %s\n",
+			dev_printk(KERN_DEBUG, i2c->dev, "%s: unexpected state (%#x) on address phase, %s\n",
 				__FUNCTION__, status, i2c->msg_retries > 1 ? "retrying":"aborting");
 
 			if (--i2c->msg_retries < 0)
@@ -337,7 +337,7 @@ restart:
 			}
 		}
 		else {
-			dev_warn(i2c->dev, "%s: unexpected state (%#x) on read phase\n", __FUNCTION__, status);
+			dev_printk(KERN_DEBUG, i2c->dev, "%s: unexpected state (%#x) on read phase\n", __FUNCTION__, status);
 			comcerto_i2c_message_complete(i2c, -1);
 		}
 		break;
@@ -349,7 +349,7 @@ restart:
 			comcerto_i2c_message_complete(i2c, 0);
 		}
 		else {
-			dev_warn(i2c->dev, "%s: unexpected state (%#x) on finishing read phase\n", __FUNCTION__, status);
+			dev_printk(KERN_DEBUG, i2c->dev, "%s: unexpected state (%#x) on finishing read phase\n", __FUNCTION__, status);
 			comcerto_i2c_message_complete(i2c, -1);
 		}
 	}
@@ -402,7 +402,7 @@ restart:
 			}
 		}
 		else {
-			dev_warn(i2c->dev, "%s: unexpected state (%#x) on address phase, %s\n",
+			dev_printk(KERN_DEBUG, i2c->dev, "%s: unexpected state (%#x) on address phase, %s\n",
 				__FUNCTION__, status, i2c->msg_retries > 1 ? "retrying":"aborting");
 
 			if (--i2c->msg_retries < 0)
@@ -424,7 +424,7 @@ restart:
 				comcerto_i2c_message_complete(i2c, 0);
 		}
 		else {
-			dev_warn(i2c->dev, "%s: unexpected state (%#x) on read data phase\n", __FUNCTION__, status);
+			dev_printk(KERN_DEBUG, i2c->dev, "%s: unexpected state (%#x) on read data phase\n", __FUNCTION__, status);
 			comcerto_i2c_message_complete(i2c, -1);
 		}
 		break;
@@ -490,7 +490,7 @@ polling_mode:
 		/* check if we timed out and set respective error codes */
 		if (res == 0) {
 			if (comcerto_i2c_message_in_progress(i2c)) {
-				dev_warn(i2c->dev, "%s: interrupt transfer timeout\n", __FUNCTION__);
+				dev_printk(KERN_DEBUG, i2c->dev, "%s: interrupt transfer timeout\n", __FUNCTION__);
 				comcerto_i2c_message_complete(i2c, -ETIME);
 				comcerto_i2c_reset(i2c);
 			}
@@ -518,7 +518,7 @@ static int comcerto_i2c_master_xfer(struct i2c_adapter *adapter, struct i2c_msg 
 		comcerto_i2c_message_process(i2c, &msgs[i]);
 
 		if (i2c->msg_status < 0) {
-			dev_warn(i2c->dev, "%s: transfer failed on message #%d (addr=%#x, flags=%#x, len=%u)\n",
+			dev_printk(KERN_DEBUG, i2c->dev, "%s: transfer failed on message #%d (addr=%#x, flags=%#x, len=%u)\n",
 				__FUNCTION__, i, msgs[i].addr, msgs[i].flags, msgs[i].len);
 			break;
 		}
