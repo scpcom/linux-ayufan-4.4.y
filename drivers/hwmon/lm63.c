@@ -231,31 +231,39 @@ struct lm63_data {
 	bool trutherm;
 };
 
+#define MAX_SMBUS_RETRIES	10
+
 static s32 lm63_i2c_smbus_write_byte_data(const struct i2c_client *client,
 		u8 command, u8 value) {
 	s32 ret;
-	int retries = 10;
+	int retries = MAX_SMBUS_RETRIES;
 	while (retries-- > 0) {
 		ret = i2c_smbus_write_byte_data(client, command, value);
 		if (!ret) return ret;
-		dev_warn(&client->dev,
+		dev_printk(KERN_DEBUG, &client->dev,
 			"Failed to write value 0x%02x to register 0x%02x: rc %d. Retries left: %d\n",
 			value, command, ret, retries);
 	}
+	dev_warn(&client->dev,
+		"Failed %d times to write value 0x%02x to register 0x%02x: rc %d\n",
+		MAX_SMBUS_RETRIES, value, command, ret);
 	return ret;
 }
 
 static s32 lm63_i2c_smbus_read_byte_data(const struct i2c_client *client,
 		u8 command) {
 	s32 ret;
-	int retries = 10;
+	int retries = MAX_SMBUS_RETRIES;
 	while (retries-- > 0) {
 		ret = i2c_smbus_read_byte_data(client, command);
 		if (ret >= 0) return ret;
-		dev_warn(&client->dev,
+		dev_printk(KERN_DEBUG, &client->dev,
 			"Failed to read from register 0x%02x: rc %d. Retries left: %d\n",
 			command, ret, retries);
 	}
+	dev_warn(&client->dev,
+		"Failed %d times to read from register 0x%02x: rc %d\n",
+		MAX_SMBUS_RETRIES, command, ret);
 	return ret;
 }
 
