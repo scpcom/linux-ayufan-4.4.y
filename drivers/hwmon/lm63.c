@@ -48,6 +48,7 @@
 #include <linux/mutex.h>
 #include <linux/sysfs.h>
 #include <linux/types.h>
+#include <linux/delay.h>
 
 /*
  * Addresses to scan
@@ -243,6 +244,7 @@ static s32 lm63_i2c_smbus_write_byte_data(const struct i2c_client *client,
 		dev_printk(KERN_DEBUG, &client->dev,
 			"Failed to write value 0x%02x to register 0x%02x: rc %d. Retries left: %d\n",
 			value, command, ret, retries);
+		msleep(100);
 	}
 	dev_warn(&client->dev,
 		"Failed %d times to write value 0x%02x to register 0x%02x: rc %d\n",
@@ -260,6 +262,7 @@ static s32 lm63_i2c_smbus_read_byte_data(const struct i2c_client *client,
 		dev_printk(KERN_DEBUG, &client->dev,
 			"Failed to read from register 0x%02x: rc %d. Retries left: %d\n",
 			command, ret, retries);
+		msleep(100);
 	}
 	dev_warn(&client->dev,
 		"Failed %d times to read from register 0x%02x: rc %d\n",
