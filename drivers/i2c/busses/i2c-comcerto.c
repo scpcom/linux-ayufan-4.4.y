@@ -180,14 +180,17 @@ static inline void comcerto_i2c_message_complete(struct comcerto_i2c *i2c, int s
 {
 	s64 d;
 	WR_CNTR(i2c, CNTR_STP);
-	d = ktime_us_delta(ktime_get(), i2c->msg_start_time);
-	if (d > 22000) {
-		i2c->msg_status = -ETIME;
-		dev_printk(KERN_DEBUG, i2c->dev,
-			"I2C transaction took too long: %lld us. Returning error.\n",
-			(long long) d);
-	} else {
-		i2c->msg_status = status;
+
+	i2c->msg_status = status;
+
+	if (i2c->msg_len < 10) {
+		d = ktime_us_delta(ktime_get(), i2c->msg_start_time);
+		if (d > 22000) {
+			i2c->msg_status = -ETIME;
+			dev_printk(KERN_DEBUG, i2c->dev,
+				"I2C transaction took too long: %lld us. Returning error.\n",
+				(long long) d);
+		}
 	}
 }
 
@@ -753,4 +756,3 @@ static void __exit comcerto_i2c_exit(void)
 
 module_init(comcerto_i2c_init);
 module_exit(comcerto_i2c_exit);
-
