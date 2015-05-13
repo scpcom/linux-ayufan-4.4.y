@@ -28,7 +28,7 @@ MODULE_PARM_DESC(debug, "Activates frontend debugging (default:0)");
 	} while (0)
 
 /*demod register operations.*/
-static int m88rs6000_writereg(struct m88rs6000_state *state, int reg, int data)
+static int __m88rs6000_writereg(struct m88rs6000_state *state, int reg, int data)
 {
 	u8 buf[] = { reg, data };
 	struct i2c_msg msg = { .addr = state->config->demod_address,
@@ -39,7 +39,7 @@ static int m88rs6000_writereg(struct m88rs6000_state *state, int reg, int data)
 		printk("m88rs6000: %s: write reg 0x%02x, value 0x%02x\n",
 			__func__, reg, data);
 
-	ret = i2c_transfer(state->i2c, &msg, 1);
+	ret = __i2c_transfer(state->i2c, &msg, 1);
 	if (ret != 1) {
 		printk(KERN_ERR "%s: writereg error(err == %i, reg == 0x%02x,"
 			 " value == 0x%02x)\n", __func__, ret, reg, data);
@@ -48,7 +48,16 @@ static int m88rs6000_writereg(struct m88rs6000_state *state, int reg, int data)
 	return 0;
 }
 
-static int m88rs6000_readreg(struct m88rs6000_state *state, u8 reg)
+static int m88rs6000_writereg(struct m88rs6000_state *state, int reg, int data)
+{
+	int ret;
+	i2c_lock_adapter(state->i2c);
+	ret = __m88rs6000_writereg(state, reg, data);
+	i2c_unlock_adapter(state->i2c);
+	return ret;
+}
+
+static int __m88rs6000_readreg(struct m88rs6000_state *state, u8 reg)
 {
 	int ret;
 	u8 b0[] = { reg };
@@ -59,7 +68,7 @@ static int m88rs6000_readreg(struct m88rs6000_state *state, u8 reg)
 		{ .addr = state->config->demod_address, .flags = I2C_M_RD,
 			.buf = b1, .len = 1 }
 	};
-	ret = i2c_transfer(state->i2c, msg, 2);
+	ret = __i2c_transfer(state->i2c, msg, 2);
 
 	if (ret != 2) {
 		printk(KERN_ERR "%s: reg=0x%x (error=%d)\n",
@@ -74,6 +83,15 @@ static int m88rs6000_readreg(struct m88rs6000_state *state, u8 reg)
 	return b1[0];
 }
 
+static int m88rs6000_readreg(struct m88rs6000_state *state, u8 reg)
+{
+	int ret;
+	i2c_lock_adapter(state->i2c);
+	ret = __m88rs6000_readreg(state, reg);
+	i2c_unlock_adapter(state->i2c);
+	return ret;
+}
+
 /*tuner register operations.*/
 static int m88rs6000_tuner_writereg(struct m88rs6000_state *state, int reg, int data)
 {
@@ -82,9 +100,11 @@ static int m88rs6000_tuner_writereg(struct m88rs6000_state *state, int reg, int 
 		.flags = 0, .buf = buf, .len = 2 };
 	int ret;
 
-	m88rs6000_writereg(state, 0x03, 0x11);
-	ret = i2c_transfer(state->i2c, &msg, 1);
-	
+	i2c_lock_adapter(state->i2c);
+	__m88rs6000_writereg(state, 0x03, 0x11);
+	ret = __i2c_transfer(state->i2c, &msg, 1);
+	i2c_unlock_adapter(state->i2c);
+
 	if (ret != 1) {
 		printk("%s: writereg error(err == %i, reg == 0x%02x,"
 			 " value == 0x%02x)\n", __func__, ret, reg, data);
@@ -106,8 +126,10 @@ static int m88rs6000_tuner_readreg(struct m88rs6000_state *state, u8 reg)
 			.buf = b1, .len = 1 }
 	};
 
-	m88rs6000_writereg(state, 0x03, (0x11 + state->config->tuner_readstops));	
-	ret = i2c_transfer(state->i2c, msg, 2);
+	i2c_lock_adapter(state->i2c);
+	__m88rs6000_writereg(state, 0x03, (0x11 + state->config->tuner_readstops));
+	ret = __i2c_transfer(state->i2c, msg, 2);
+	i2c_unlock_adapter(state->i2c);
 
 	if (ret != 2) {
 		printk(KERN_ERR "%s: reg=0x%x(error=%d)\n", __func__, reg, ret);
