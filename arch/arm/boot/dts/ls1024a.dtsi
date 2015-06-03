@@ -388,6 +388,19 @@
 		};
 	};
 
+	i2c0: i2c@9049C000 {
+		compatible = "fsl,ls1024a-i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x9049C000 0x1000>;
+		interrupts = <GIC_SPI 30 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&axi_clk>; /* TODO: Should be spi_i2c */
+		lm63: lm63@4c {
+			compatible = "national,lm63";
+			reg = <0x4c>;
+		};
+	};
+
 	snowbush_phy: phy@90590000 {
 		compatible      = "fsl,ls1024a-snowbush-phy";
 		#address-cells	= <1>;
