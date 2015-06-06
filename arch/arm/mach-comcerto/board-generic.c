@@ -388,15 +388,92 @@ static struct platform_device comcerto_pfe_device = {
 	.resource	= comcerto_pfe_resources,
 };
 
+static int is_mac_zero(u8 *buf)
+{
+        unsigned long dm;
+        for (dm = 0; dm < 6; dm++){
+		if ((*(buf+dm)) != 0)
+			return 1;
+	}
+	return 0;
+}
+
+static int __init mac_addr_atoi(u8 mac_addr[], char *mac_addr_str)
+{
+	int i, j, k;
+	int str_incr_cnt = 0;
+
+	if (*mac_addr_str == ',') {
+		mac_addr_str++;
+		str_incr_cnt++;
+		return str_incr_cnt;
+	}
+
+	for (i = 0; i < 6; i++) {
+
+		j = hex_to_bin(*mac_addr_str++);
+		str_incr_cnt++;
+		if (j == -1)
+			return str_incr_cnt;
+
+		k = hex_to_bin(*mac_addr_str++);
+		str_incr_cnt++;
+		if (k == -1)
+			return str_incr_cnt;
+
+		mac_addr_str++;
+		str_incr_cnt++;
+		mac_addr[i] = (j << 4) + k;
+	}
+
+	return str_incr_cnt;
+}
+
+static u8 c2k_mac_addr[3][14];
+
+static int __init mac_addr_setup(char *str)
+{
+	int str_incr_cnt = 0;
+
+	if (*str++ != '=' || !*str)  /* No mac addr specified */
+		return -1;
+
+	str_incr_cnt = mac_addr_atoi(c2k_mac_addr[0], str);
+
+	str += str_incr_cnt;
+
+	str_incr_cnt = mac_addr_atoi(c2k_mac_addr[1], str);
+
+	str += str_incr_cnt;
+
+	mac_addr_atoi(c2k_mac_addr[2], str);
+
+	return 0;
+}
+__setup("mac_addr", mac_addr_setup);
+
+void __init mac_addr_init(struct comcerto_pfe_platform_data * comcerto_pfe_data_ptr)
+{
+	u8 gem_port_id;
+
+	for (gem_port_id = 0; gem_port_id < NUM_GEMAC_SUPPORT; gem_port_id++) {
+		if (is_mac_zero(c2k_mac_addr[gem_port_id]))  /* If mac is non-zero */
+			comcerto_pfe_data_ptr->comcerto_eth_pdata[gem_port_id].mac_addr = c2k_mac_addr[gem_port_id];
+	}
+
+}
+
+
 static int __init register_pfe_device(void) {
 	int rc;
+	mac_addr_init(&comcerto_pfe_pdata);
 	rc = platform_device_register(&comcerto_pfe_device);
 	return 0;
 }
 late_initcall(register_pfe_device);
 
 
-static const char *c2k_boards_compat[] __initconst = {
+static const char * const c2k_boards_compat[] __initconst = {
 	"fsl,ls1024a",
 	NULL,
 };
