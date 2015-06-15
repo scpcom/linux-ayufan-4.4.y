@@ -282,10 +282,6 @@ static void __init ls1024a_timer_init_dt(struct device_node *np)
 CLOCKSOURCE_OF_DECLARE(ls1024a_timer, "fsl,ls1024a-gpt", ls1024a_timer_init_dt);
 
 
-/* Copied from arch/arm/mach-comcerto/include/mach/comcerto-2000/irqs.h */
-#define LSPI_IRQ(x)		(32 + (x))	/* ID32 - ID62 */
-#define IRQ_PFE_HIF		LSPI_IRQ(4)
-
 static struct resource comcerto_pfe_resources[] = {
 	{
 		.name	= "apb",
@@ -318,11 +314,6 @@ static struct resource comcerto_pfe_resources[] = {
                 .flags  = IORESOURCE_MEM,
         },
 
-	{
-		.name	= "hif",
-		.start  = IRQ_PFE_HIF,
-		.flags  = IORESOURCE_IRQ,
-	},
 };
 
 static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
