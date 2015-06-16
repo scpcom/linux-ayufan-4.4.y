@@ -11,6 +11,7 @@
 #include <linux/irqdomain.h>
 #include <linux/interrupt.h>
 
+#include <asm/hardware/cache-l2x0.h>
 
 /* PFE */
 #include <linux/phy.h>
@@ -470,8 +471,8 @@ static const char * const c2k_boards_compat[] __initconst = {
 };
 
 DT_MACHINE_START(C2K_DT, "Generic Freescale LS1024A (Flattened Device Tree)")
-	.l2c_aux_val	= 0,
-	.l2c_aux_mask	= ~0,
+	.l2c_aux_val	= L2C_AUX_CTRL_SHARED_OVERRIDE | (1<<L220_AUX_CTRL_FWA_SHIFT), // 0,
+	.l2c_aux_mask	= ~( L2C_AUX_CTRL_SHARED_OVERRIDE | L220_AUX_CTRL_FWA_MASK ), //~0,
 	.reserve	= c2k_reserve,
 	.map_io		= c2k_map_io,
 	.init_early	= c2k_init_early,
