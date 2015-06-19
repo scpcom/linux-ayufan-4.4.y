@@ -28,6 +28,9 @@
 #define NETLINK_RDMA		20
 #define NETLINK_CRYPTO		21	/* Crypto layer */
 
+/* Freescale LS1024A specific. Needed for fci module */
+#define NETLINK_FF              30
+
 #define NETLINK_INET_DIAG	NETLINK_SOCK_DIAG
 
 #define MAX_LINKS 32		
