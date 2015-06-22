@@ -6049,6 +6049,44 @@ static unsigned long capacity_spare_wake(int cpu, struct task_struct *p)
 	return max_t(long, capacity_of(cpu) - cpu_util_wake(cpu, p), 0);
 }
 
+#ifdef CONFIG_SCHED_TUNE
+
+static unsigned long
+schedtune_margin(unsigned long signal, unsigned long boost)
+{
+	unsigned long long margin = 0;
+
+	/*
+	 * Signal proportional compensation (SPC)
+	 *
+	 * The Boost (B) value is used to compute a Margin (M) which is
+	 * proportional to the complement of the original Signal (S):
+	 *   M = B * (SCHED_LOAD_SCALE - S)
+	 * The obtained M could be used by the caller to "boost" S.
+	 */
+	margin  = SCHED_LOAD_SCALE - signal;
+	margin *= boost;
+
+	/*
+	 * Fast integer division by constant:
+	 *  Constant   :                 (C) = 100
+	 *  Precision  : 0.1%            (P) = 0.1
+	 *  Reference  : C * 100 / P     (R) = 100000
+	 *
+	 * Thus:
+	 *  Shift bits : ceil(log(R,2))  (S) = 17
+	 *  Mult const : round(2^S/C)    (M) = 1311
+	 *
+	 *
+	 */
+	margin  *= 1311;
+	margin >>= 17;
+
+	return margin;
+}
+
+#endif /* CONFIG_SCHED_TUNE */
+
 /*
  * find_idlest_group finds and returns the least busy CPU group within the
  * domain.
