@@ -158,6 +158,9 @@ static struct irq_chip dw_msi_irq_chip = {
 	.irq_unmask = pci_msi_unmask_irq,
 };
 
+static void dw_pcie_msi_clear_irq(struct pcie_port *pp, int irq);
+static void dw_pcie_msi_set_irq(struct pcie_port *pp, int irq);
+
 /* MSI int handler */
 irqreturn_t dw_handle_msi_irq(struct pcie_port *pp)
 {
@@ -174,9 +177,22 @@ irqreturn_t dw_handle_msi_irq(struct pcie_port *pp)
 			while ((pos = find_next_bit(&val, 32, pos)) != 32) {
 				irq = irq_find_mapping(pp->irq_domain,
 						i * 32 + pos);
+				/* On the Freescale LS1024A (formerly Mindspeed
+				 * Comcerto 2000) SoC, it appears to be
+				 * necessary for the interrupt to be masked
+				 * while we clear it. We found this workaround
+				 * in the source code provided by Mindspeed.
+				 * They added the following comment:
+				 *
+				 * FIXME : WA for bz69520
+				 * To avoid race condition during avk the interrupt disabling interrupt before
+				 * Ack and enabling after Ack.
+				 */
+				dw_pcie_msi_clear_irq(pp, i * 32 + pos);
 				dw_pcie_wr_own_conf(pp,
 						PCIE_MSI_INTR0_STATUS + i * 12,
 						4, 1 << pos);
+				dw_pcie_msi_set_irq(pp, i * 32 + pos);
 				generic_handle_irq(irq);
 				pos++;
 			}
