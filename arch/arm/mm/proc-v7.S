@@ -261,6 +261,7 @@ __v7_ca5mp_setup:
 __v7_ca9mp_setup:
 __v7_cr7mp_setup:
 	mov	r10, #(1 << 0)			@ Cache/TLB ops broadcasting
+	orr     r10, #(3 << 1)                  @ L1 data prefetch, L2 prefetch hints enable
 	b	1f
 __v7_ca7mp_setup:
 __v7_ca12mp_setup:
