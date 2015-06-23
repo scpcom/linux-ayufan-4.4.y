@@ -503,7 +503,7 @@
 		#interrupt-cells = <1>;
 		interrupt-map-mask = <0 0 0 0>;
 		interrupt-map = <0 0 0 0 &gic GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
-		clocks = <&axi_clk>; /* TODO: Should be pcie0 */
+		clocks = <&axi_clk>; /* TODO: Should be pcie1 */
 		clock-names = "pcie";
 		resets = <&reset LS1024A_AXI_PCIE1_RESET>;
 		reset-names = "axi";
