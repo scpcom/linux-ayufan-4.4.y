@@ -37,6 +37,11 @@ static void fdb_notify(struct net_bridge *br,
 
 static u32 fdb_salt __read_mostly;
 
+#if defined(CONFIG_ARCH_COMCERTO)
+	int(*br_fdb_can_expire)(unsigned char *mac_addr, struct net_device *dev) = NULL;
+	DEFINE_SPINLOCK(br_fdb_cb_lock);
+#endif
+
 int __init br_fdb_init(void)
 {
 	br_fdb_cache = kmem_cache_create("bridge_fdb_cache",
@@ -47,6 +52,9 @@ int __init br_fdb_init(void)
 		return -ENOMEM;
 
 	get_random_bytes(&fdb_salt, sizeof(fdb_salt));
+#if defined(CONFIG_ARCH_COMCERTO)
+	spin_lock_init(&br_fdb_cb_lock);
+#endif
 	return 0;
 }
 
@@ -282,6 +290,15 @@ void br_fdb_cleanup(unsigned long _data)
 			unsigned long this_timer;
 			if (f->is_static)
 				continue;
+#if defined(CONFIG_ARCH_COMCERTO)
+			spin_lock(&br_fdb_cb_lock);
+			if(br_fdb_can_expire && !(*br_fdb_can_expire)(f->addr.addr, f->dst->dev)){
+				f->updated = jiffies;
+				spin_unlock(&br_fdb_cb_lock);
+				continue;
+			}
+			spin_unlock(&br_fdb_cb_lock);
+#endif
 			this_timer = f->updated + delay;
 			if (time_before_eq(this_timer, jiffies))
 				fdb_delete(br, f);
@@ -558,6 +575,18 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 					source->dev->name);
 		} else {
 			/* fastpath: update of existing entry */
+#if defined(CONFIG_ARCH_COMCERTO)
+			if (fdb->dst != source) {
+				struct brevent_fdb_update fdb_update;
+
+				fdb_update.dev = source->dev;
+				fdb_update.mac_addr = fdb->addr.addr;
+				//FIXME
+				//__rtmsg_ifinfo(RTM_NEWLINK, br->dev, 0, GFP_ATOMIC);
+				//FIXME
+				call_brevent_notifiers(BREVENT_FDB_UPDATE, &fdb_update);
+			}
+#endif
 			if (unlikely(source != fdb->dst)) {
 				fdb->dst = source;
 				fdb_modified = true;
@@ -584,6 +613,24 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 		spin_unlock(&br->hash_lock);
 	}
 }
+
+#if defined(CONFIG_ARCH_COMCERTO)
+void br_fdb_register_can_expire_cb(int(*cb)(unsigned char *mac_addr, struct net_device *dev))
+{
+        spin_lock_bh(&br_fdb_cb_lock);
+        br_fdb_can_expire = cb;
+        spin_unlock_bh(&br_fdb_cb_lock);
+}
+EXPORT_SYMBOL(br_fdb_register_can_expire_cb);
+
+void br_fdb_deregister_can_expire_cb()
+{
+        spin_lock_bh(&br_fdb_cb_lock);
+        br_fdb_can_expire = NULL;
+        spin_unlock_bh(&br_fdb_cb_lock);
+}
+EXPORT_SYMBOL(br_fdb_deregister_can_expire_cb);
+#endif
 
 static int fdb_to_nud(const struct net_bridge_fdb_entry *fdb)
 {

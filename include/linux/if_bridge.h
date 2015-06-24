@@ -56,6 +56,21 @@ int br_multicast_list_adjacent(struct net_device *dev,
 			       struct list_head *br_ip_list);
 bool br_multicast_has_querier_anywhere(struct net_device *dev, int proto);
 bool br_multicast_has_querier_adjacent(struct net_device *dev, int proto);
+#if defined(CONFIG_ARCH_COMCERTO)
+struct brevent_fdb_update{
+	char * mac_addr;
+	struct net_device * dev;
+};
+
+enum brevent_notif_type {
+	BREVENT_PORT_DOWN = 1,	/* arg is struct net_device ptr */
+	BREVENT_FDB_UPDATE	/* arg is struct brevent_fdb_update ptr */
+};
+
+int register_brevent_notifier(struct notifier_block *nb);
+int unregister_brevent_notifier(struct notifier_block *nb);
+int call_brevent_notifiers(unsigned long val, void *v);
+#endif
 #else
 static inline int br_multicast_list_adjacent(struct net_device *dev,
 					     struct list_head *br_ip_list)
