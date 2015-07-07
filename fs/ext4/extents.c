@@ -4677,6 +4677,9 @@ static int ext4_alloc_file_blocks(struct file *file, ext4_lblk_t offset,
 	if (len <= EXT_UNWRITTEN_MAX_LEN)
 		flags |= EXT4_GET_BLOCKS_NO_NORMALIZE;
 
+	if (mode & FALLOC_FL_NO_HIDE_STALE)
+		flags &= ~EXT4_GET_BLOCKS_UNWRIT_EXT;
+
 	/*
 	 * credits to insert 1 extent into extent tree
 	 */
@@ -4900,6 +4903,7 @@ long ext4_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 	int flags;
 	ext4_lblk_t lblk;
 	unsigned int blkbits = inode->i_blkbits;
+	struct ext4_sb_info *sbi;
 
 	/*
 	 * Encrypted inodes can't handle collapse range or insert
@@ -4917,8 +4921,19 @@ long ext4_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 
 	/* Return error if mode is not supported */
 	if (mode & ~(FALLOC_FL_KEEP_SIZE | FALLOC_FL_PUNCH_HOLE |
+		     FALLOC_FL_NO_HIDE_STALE |
 		     FALLOC_FL_COLLAPSE_RANGE | FALLOC_FL_ZERO_RANGE))
 		return -EOPNOTSUPP;
+
+	sbi = EXT4_SB(inode->i_sb);
+	/* Must have RAWIO to see stale data. */
+	if ((mode & FALLOC_FL_NO_HIDE_STALE) &&
+	    !in_egroup_p(sbi->nohide_stale_gid))
+		return -EACCES;
+
+	/* preallocation to directories is currently not supported */
+	if (S_ISDIR(inode->i_mode))
+		return -ENODEV;
 
 	if (mode & FALLOC_FL_PUNCH_HOLE)
 		return ext4_punch_hole(inode, offset, len);
