@@ -706,6 +706,33 @@ fail:
 }
 
 /*
+ * Manage pinning (and unpinning) block bitmaps
+ */
+static void ext4_pin_block_bitmaps(struct super_block *sb)
+{
+	ext4_group_t i, ngroups = ext4_get_groups_count(sb);
+	struct ext4_group_info *grinfo;
+
+	for (i = 0; i < ngroups; i++) {
+		grinfo = ext4_get_group_info(sb, i);
+		if (!grinfo->bb_bh)
+			grinfo->bb_bh = ext4_read_block_bitmap(sb, i);
+	}
+}
+
+static void ext4_unpin_block_bitmaps(struct super_block *sb)
+{
+	ext4_group_t i, ngroups = ext4_get_groups_count(sb);
+	struct ext4_group_info *grinfo;
+
+	for (i = 0; i < ngroups; i++) {
+		grinfo = ext4_get_group_info(sb, i);
+		brelse(grinfo->bb_bh);
+		grinfo->bb_bh = NULL;
+	}
+}
+
+/*
  * Release the journal device
  */
 static void ext4_blkdev_put(struct block_device *bdev)
@@ -768,6 +795,7 @@ static void ext4_put_super(struct super_block *sb)
 	ext4_es_unregister_shrinker(sbi);
 	del_timer_sync(&sbi->s_err_report);
 	ext4_release_system_zone(sb);
+	ext4_unpin_block_bitmaps(sb);
 	ext4_mb_release(sb);
 	ext4_ext_release(sb);
 	ext4_xattr_put_super(sb);
@@ -1121,6 +1149,7 @@ enum {
 	Opt_discard, Opt_nodiscard, Opt_init_itable, Opt_noinit_itable,
 	Opt_max_dir_size_kb, Opt_nojournal_checksum,
 	Opt_nohide_stale_gid,
+	Opt_pin_block_bitmaps, Opt_nopin_block_bitmaps,
 };
 
 static const match_table_t tokens = {
@@ -1202,6 +1231,8 @@ static const match_table_t tokens = {
 	{Opt_max_dir_size_kb, "max_dir_size_kb=%u"},
 	{Opt_test_dummy_encryption, "test_dummy_encryption"},
 	{Opt_nohide_stale_gid, "nohide_stale_gid=%u"},
+	{Opt_pin_block_bitmaps, "pin_block_bitmaps"},
+	{Opt_nopin_block_bitmaps, "nopin_block_bitmaps"},
 	{Opt_removed, "check=none"},	/* mount option from ext2/3 */
 	{Opt_removed, "nocheck"},	/* mount option from ext2/3 */
 	{Opt_removed, "reservation"},	/* mount option from ext2/3 */
@@ -1405,6 +1436,8 @@ static const struct mount_opts {
 	{Opt_max_dir_size_kb, 0, MOPT_GTE0},
 	{Opt_test_dummy_encryption, 0, MOPT_GTE0},
 	{Opt_nohide_stale_gid, 0, MOPT_GTE0},
+	{Opt_pin_block_bitmaps, EXT4_MOUNT_PIN_BLOCK_BITMAPS, MOPT_SET},
+	{Opt_nopin_block_bitmaps, EXT4_MOUNT_PIN_BLOCK_BITMAPS, MOPT_CLEAR},
 	{Opt_err, 0, 0}
 };
 
@@ -4265,6 +4298,8 @@ no_journal:
 				 "the device does not support discard");
 	}
 
+	if (test_opt(sb, PIN_BLOCK_BITMAPS))
+		ext4_pin_block_bitmaps(sb);
 	ext4_msg(sb, KERN_INFO, "mounted filesystem with%s. "
 		 "Opts: %s%s%s", descr, sbi->s_es->s_mount_opts,
 		 *sbi->s_es->s_mount_opts ? "; " : "", orig_data);
@@ -5084,6 +5119,11 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 		}
 	}
 #endif
+
+	if (test_opt(sb, PIN_BLOCK_BITMAPS))
+		ext4_pin_block_bitmaps(sb);
+	if (!test_opt(sb, PIN_BLOCK_BITMAPS))
+		ext4_unpin_block_bitmaps(sb);
 
 	*flags = (*flags & ~MS_LAZYTIME) | (sb->s_flags & MS_LAZYTIME);
 	ext4_msg(sb, KERN_INFO, "re-mounted. Opts: %s", orig_data);
