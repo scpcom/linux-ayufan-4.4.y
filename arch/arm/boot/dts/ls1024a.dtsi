@@ -388,6 +388,7 @@
 			i2c-base = <0x10406200>;
 			i2c-addr = <0x70>;
 			reset-gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
+			if-name = "moca0";
 		};
 	};
 
