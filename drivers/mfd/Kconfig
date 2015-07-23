@@ -849,6 +849,16 @@ config AB3100_OTP
 	  programmable memory) support. This exposes a sysfs file to read
 	  out OTP values.
 
+config LS1024A_OTP
+	tristate "Freescale LS1024A On-Chip OTP Memory Support"
+	depends on ARCH_COMCERTO
+	default y
+	help
+		If you say Y here, you will get support for a proc file,
+		/proc/otp/islocked, that reports whether the LS1024A
+		One-Time Programmable (and thus the device) is locked or
+		not.
+
 config AB8500_CORE
 	bool "ST-Ericsson AB8500 Mixed Signal Power Management chip"
 	depends on ABX500_CORE && MFD_DB8500_PRCMU
