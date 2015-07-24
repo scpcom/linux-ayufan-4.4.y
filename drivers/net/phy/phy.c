@@ -421,8 +421,13 @@ int phy_mii_ioctl(struct phy_device *phydev, struct ifreq *ifr, int cmd)
 			      mii_data->reg_num, val);
 
 		if (mii_data->reg_num == MII_BMCR &&
-		    val & BMCR_RESET)
+		    val & BMCR_RESET) {
+#ifdef CONFIG_ARCH_COMCERTO
+			if (mii_data->phy_id >= 16)
+				return 0;
+#endif
 			return phy_init_hw(phydev);
+		}
 
 		if (change_autoneg)
 			return phy_start_aneg(phydev);
