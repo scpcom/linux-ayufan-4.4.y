@@ -42,6 +42,7 @@
 #define ATH8030_PHY_ID 0x004dd076
 #define ATH8031_PHY_ID 0x004dd074
 #define ATH8035_PHY_ID 0x004dd072
+#define ATH8337_PHY_ID 0x004dd036
 
 MODULE_DESCRIPTION("Atheros 803x PHY driver");
 MODULE_AUTHOR("Matus Ujhelyi");
@@ -351,6 +352,25 @@ static struct phy_driver at803x_driver[] = {
 	.driver			= {
 		.owner = THIS_MODULE,
 	},
+}, {
+	/* ATHEROS 8337 */
+	.phy_id			= ATH8337_PHY_ID,
+	.name			= "Atheros 8337 ethernet",
+	.phy_id_mask		= 0xffffffff,
+	.probe			= at803x_probe,
+	.config_init		= at803x_config_init,
+	.link_change_notify	= at803x_link_change_notify,
+	.set_wol		= at803x_set_wol,
+	.get_wol		= at803x_get_wol,
+	.suspend		= at803x_suspend,
+	.resume			= at803x_resume,
+	.features		= PHY_GBIT_FEATURES,
+	.flags			= PHY_HAS_INTERRUPT,
+	.config_aneg		= genphy_config_aneg,
+	.read_status		= genphy_read_status,
+	.driver			= {
+		.owner = THIS_MODULE,
+	},
 } };
 
 module_phy_driver(at803x_driver);
@@ -359,6 +379,7 @@ static struct mdio_device_id __maybe_unused atheros_tbl[] = {
 	{ ATH8030_PHY_ID, 0xffffffef },
 	{ ATH8031_PHY_ID, 0xffffffef },
 	{ ATH8035_PHY_ID, 0xffffffef },
+	{ ATH8337_PHY_ID, 0xffffffff },
 	{ }
 };
 
