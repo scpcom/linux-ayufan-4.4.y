@@ -115,7 +115,7 @@
 			reg = <0>;
 			spi-cpol;
 			spi-cpha;
-			rf-band = "e";
+			rf-band = "ext_d";
 			i2c-base = <0x10406200>;
 			i2c-addr = <0x70>;
 			reset-gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
