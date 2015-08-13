@@ -22,6 +22,8 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/partitions.h>
+#include <linux/bch.h>
+#include <linux/bitrev.h>
 #include <asm/io.h>
 #include <linux/delay.h>
 #include <linux/ratelimit.h>
@@ -136,6 +138,11 @@
 #define ECC_HAMM_INDEX_SHIFT	16
 #define ECC_HAMM_VALID		(1 << 31)
 
+struct comcerto_bch_control {
+	struct bch_control   *bch;
+	unsigned int         *errloc;
+};
+
 /*
  * MTD structure for Comcerto board
  */
@@ -144,7 +151,8 @@ struct comcerto_nand_info {
 	struct mtd_info		mtd;
 	struct gpio_desc	*ce_gpio;
 	struct gpio_desc	*br_gpio;
-
+	uint8_t			*bit_reversed;
+	struct comcerto_bch_control	cbc;
 };
 
 static inline
@@ -283,7 +291,6 @@ static struct nand_bbt_descr c2000_badblock_pattern = {
 };
 #endif
 
-#if 1
 /** Disable/Enable shifting of data to parity module
  *
  * @param[in] en_dis_shift  Enable or disable shift to parity module.
@@ -551,6 +558,94 @@ static int comcerto_nand_write_page_hwecc(struct mtd_info *mtd,
 	return 0;
 }
 
+
+static void comcerto_hybrid_hwctl (struct mtd_info *mtd, int mode) {
+	if (mode == NAND_ECC_READ) comcerto_enable_hw_ecc(mtd, mode);
+}
+
+#if 0
+static void comcerto_fake_hwctl (struct mtd_info *mtd, int mode) {
+}
+#endif
+
+/* Replicate the LS1024A HW ECC engine in software. Compared to the BCH
+ * implemenation in Linux, the LS1024A HW ECC engine (seemingly licensed from
+ * Cyclic Design) does a few things differently:
+ *
+ * - They use 0x4443 as the primitive polynomial for BCH (Linux uses 0x402b by
+ *   default).
+ * - They reverse the 8 bits in every byte before they calculate the ECC code.
+ *   They then also reverse the bits in the ECC code before they write it to
+ *   flash.
+ * - They don't XOR the inverse of the ECC code of an empty page (all 0xFF's)
+ *   onto every calculated ECC code. (Linux does this to ensure that an empty
+ *   page has a valid ECC code).
+ *   */
+static int comcerto_bch_calculate_ecc (struct mtd_info *mtd, const uint8_t *dat,
+		uint8_t *ecc_code) {
+	struct nand_chip *chip = mtd->priv;
+	struct comcerto_nand_info *info = to_comerto_nand_info(chip);
+	int i;
+
+	for (i=0;i<chip->ecc.size;i++) {
+		info->bit_reversed[i] = bitrev8(dat[i]);
+	}
+	memset(ecc_code, 0, chip->ecc.bytes);
+	encode_bch(info->cbc.bch, info->bit_reversed, chip->ecc.size, ecc_code);
+	for (i=0;i<chip->ecc.bytes;i++) {
+		ecc_code[i] = bitrev8(ecc_code[i]);
+	}
+	return 0;
+}
+
+/* We currently don't need comcerto_bch_correct_ecc() because we are using a
+ * hybrid approach where we use the HW ECC engine when we read from NAND. We
+ * only calculate the ECC code in software when we write to the flash.  */
+#if 0
+/*
+ * This function replicates the Cyclic Design ECC engine that can
+ * be found in the LS1024A. It calculates the ECC code a little different from
+ * nand_bch_correct_data() (nand_bch.c)
+ * */
+static int comcerto_bch_correct_ecc (struct mtd_info *mtd, uint8_t *dat, uint8_t *read_ecc,
+		uint8_t *dummy) {
+	struct nand_chip *chip = mtd->priv;
+	struct comcerto_nand_info *info = to_comerto_nand_info(chip);
+	int i, count;
+
+	for (i=0;i<chip->ecc.size;i++) {
+		if (dat[i] != 0xFF)
+			goto decode;
+	}
+	for (i=0;i<chip->ecc.bytes;i++) {
+		if (read_ecc[i] != 0xFF)
+			goto decode;
+	}
+	return 0;
+decode:
+	for (i=0;i<chip->ecc.size;i++) {
+		info->bit_reversed[i] = bitrev8(dat[i]);
+	}
+	for (i=0;i<chip->ecc.bytes;i++) {
+		read_ecc[i] = bitrev8(read_ecc[i]);
+	}
+	count = decode_bch(info->cbc.bch, info->bit_reversed, chip->ecc.size, read_ecc, NULL,
+			NULL, info->cbc.errloc);
+	if (count > 0) {
+		for (i = 0; i < count; i++) {
+			if (info->cbc.errloc[i] < (chip->ecc.size*8))
+				/* error is located in data, correct it */
+				dat[info->cbc.errloc[i] >> 3] ^= (1 << (7 - (info->cbc.errloc[i] & 7)));
+			/* else error in ecc, no action needed */
+		}
+	} else if (count < 0) {
+		pr_err_ratelimited("ecc unrecoverable error\n");
+		count = -1;
+	}
+	return count;
+}
+#endif
+
 /** reads single page from the NAND device and will read ECC bytes from flash. A
  * function call to comcerto_correct_ecc() will be used to validate the data.
  *
@@ -606,8 +701,6 @@ static int comcerto_nand_read_page_hwecc(struct mtd_info *mtd,
 
 	return 0;
 }
-#endif
-
 #endif
 
 /*********************************************************************
@@ -721,10 +814,91 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	/* Scan to find existence of the device */
 	if (nand_scan_ident(mtd, 1, NULL)) {
 		err = -ENXIO;
-		goto out_info;
+		goto out_ior;
 	}
 
-	if (chip->ecc.mode == NAND_ECC_HW_SYNDROME) {
+	if (1 && chip->ecc.mode == NAND_ECC_HW_SYNDROME) {
+		/* We use a hybrid approach here where we use the ECC hardware
+		 * in the read path to correct ECC errors on read. For writing,
+		 * we calculate the ECC code in software. The reason for this
+		 * is to work around a silicon bug where the ECC hardware would
+		 * disturb and corrupt the NOR flash if the user tries to write
+		 * to NOR flash and NAND flash concurrently.
+		 */
+		unsigned int m, t;
+
+		chip->ecc.hwctl = comcerto_hybrid_hwctl;
+		chip->ecc.calculate = comcerto_bch_calculate_ecc;
+		chip->ecc.correct = comcerto_correct_ecc;
+		dev_info(&pdev->dev, "Using hybrid hw/sw ECC\n");
+		chip->ecc.size =  1024;
+		chip->ecc.layout = &comcerto_ecc_info_1024_bch;
+		chip->ecc.strength = 24;
+		chip->ecc.prepad = 0;
+		chip->ecc.postpad = 14;
+
+		chip->ecc.steps = mtd->writesize / chip->ecc.size;
+		if(chip->ecc.steps * chip->ecc.size != mtd->writesize) {
+			dev_err(&pdev->dev, "Invalid ecc parameters\n");
+			BUG();
+		}
+		chip->ecc.total = chip->ecc.steps * chip->ecc.bytes;
+		chip->ecc.bytes = DIV_ROUND_UP(
+				chip->ecc.strength * fls(8 * chip->ecc.size), 8);
+		if (chip->ecc.bytes != 42) {
+			dev_warn(&pdev->dev, "ecc->bytes != 42\n");
+		}
+
+		m = fls(1+8*chip->ecc.size);
+		t = (chip->ecc.bytes*8)/m;
+
+		/* The LS1024A HW ECC engine (seemingly licensed from Cyclic
+		 * Design) uses 0x4443 as the primitive polynomial for BCH
+		 * (Linux uses 0x402b by default). */
+		info->cbc.bch = init_bch(m, t, 0x4443);
+		if (!info->cbc.bch) {
+			err = -EINVAL;
+			goto out_ior;
+		}
+
+		/* verify that eccbytes has the expected value */
+		if (info->cbc.bch->ecc_bytes != chip->ecc.bytes) {
+			dev_warn(&pdev->dev, "invalid eccbytes %u, should be %u\n",
+					chip->ecc.bytes, info->cbc.bch->ecc_bytes);
+			free_bch(info->cbc.bch);
+			err = -EINVAL;
+			goto out_ior;
+		}
+
+		/* sanity checks */
+		if (8*(chip->ecc.size+chip->ecc.bytes) >= (1 << m)) {
+			dev_warn(&pdev->dev, "eccsize %u is too large\n", chip->ecc.size);
+			free_bch(info->cbc.bch);
+			err = -EINVAL;
+			goto out_ior;
+		}
+
+#if 0
+		info->cbc.errloc = devm_kmalloc(&pdev->dev, t*sizeof(*info->cbc.errloc), GFP_KERNEL);
+		if (!info->cbc.errloc) {
+			free_bch(info->cbc.bch);
+			err = -ENOMEM;
+			goto out_ior;
+		}
+#endif
+
+		info->bit_reversed = devm_kzalloc(&pdev->dev, chip->ecc.size, GFP_KERNEL);
+		if (!info->bit_reversed) {
+			free_bch(info->cbc.bch);
+			err = -ENOMEM;
+			goto out_ior;
+		}
+		chip->bbt_td = &bbt_main_descr;
+		chip->bbt_md = &bbt_mirror_descr;
+		chip->badblock_pattern = &c2000_badblock_pattern;
+		chip->bbt_options |= NAND_BBT_USE_FLASH;
+
+	} else if (chip->ecc.mode == NAND_ECC_HW_SYNDROME) {
 		chip->ecc.hwctl = comcerto_enable_hw_ecc;
 		chip->ecc.write_page = comcerto_nand_write_page_hwecc;
 		// chip->ecc.read_page = comcerto_nand_read_page_hwecc;
@@ -814,6 +988,7 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	} else {
 		pr_info("using soft ecc.\n");
 		chip->ecc.size =  1024;
+		chip->ecc.strength = 24;
 		chip->ecc.bytes = 42;
 		chip->ecc.mode = NAND_ECC_SOFT_BCH;
 	}
