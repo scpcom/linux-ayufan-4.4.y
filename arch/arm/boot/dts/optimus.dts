@@ -86,24 +86,20 @@
 		};
 	};
 
-	leds {
-		compatible = "gpio-leds";
-		/* pinctrl-names = "default"; */
-		/* pinctrl-0 = <&pinctrl_led>; */
+	pwmleds {
+		compatible = "pwm-leds";
 
-		ledblue: ledblue {
+		pwmledblue: pwmledblue {
 			label = "blue";
-			gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>;
-			default-state = "off";
+			pwms = <&pwm 4 1000000>;
+			max-brightness = <100>;
 		};
-
-		ledred: ledred {
+		pwmledred: pwmledred {
 			label = "red";
-			gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
-			default-state = "on";
+			pwms = <&pwm 5 1000000>;
+			max-brightness = <100>;
 		};
 	};
-
 };
 
 &spi0 {

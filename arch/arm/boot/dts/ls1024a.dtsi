@@ -265,6 +265,13 @@
 		clocks = <&axi_clk>;
 	};
 
+	pwm: pwm@12dd0000 {
+		compatible = "fsl,ls1024a-pwm";
+		reg = <0x90458000 0x38>;
+		#pwm-cells = <2>;
+		clocks = <&axi_clk>;
+	};
+
 	gpio0: gpio@90470000 {
 		compatible = "fsl,ls1024a-gpio";
 		reg = <0x90470000 0x1000>; /* TODO: Check size */
