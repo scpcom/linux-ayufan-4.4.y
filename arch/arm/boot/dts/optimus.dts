@@ -54,8 +54,8 @@
 		#size-cells = <1>;
 		reg = <0xc8300000 0x2000
 		       0xCFFF0000 0x2c>;
-		ce-gpios = <&gpio0 28 GPIO_ACTIVE_HIGH>;
-		br-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+		ce-gpios = <&pinctrl0 28 GPIO_ACTIVE_HIGH>;
+		br-gpios = <&pinctrl0 29 GPIO_ACTIVE_HIGH>;
 		reserved@0 {
 			label = "reserved";
 			reg = <0x0 0x800000>;
@@ -88,6 +88,8 @@
 
 	pwmleds {
 		compatible = "pwm-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_optimus_leds>;
 
 		pwmledblue: pwmledblue {
 			label = "blue";
@@ -103,11 +105,118 @@
 	};
 };
 
+&pinctrl0 {
+	fan_control_alert {
+		gpio-hog;
+		gpios = <1 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "fan_control_alert";
+	};
+	moca_sideband_0 {
+		gpio-hog;
+		gpios = <2 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "moca_sideband_0";
+	};
+	moca_sideband_1 {
+		gpio-hog;
+		gpios = <3 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "moca_sideband_1";
+	};
+	mini_wake0n {
+		gpio-hog;
+		gpios = <4 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "mini_wake0n";
+	};
+	mini_wake1n {
+		gpio-hog;
+		gpios = <5 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "mini_wake1n";
+	};
+	qca8337n_reset {
+		gpio-hog;
+		gpios = <14 GPIO_ACTIVE_LOW>;
+		output-low;
+		line-name = "qca8337n_reset";
+	};
+	usb_power {
+		gpio-hog;
+		gpios = <15 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "usb_power";
+	};
+	11ac_power {
+		gpio-hog;
+		gpios = <48 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "wifi_11ac_power";
+	};
+	hw_rev_0 {
+		gpio-hog;
+		gpios = <52 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "hw_rev_0";
+	};
+	hw_rev_1 {
+		gpio-hog;
+		gpios = <53 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "hw_rev_1";
+	};
+	hw_rev_2 {
+		gpio-hog;
+		gpios = <54 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "hw_rev_2";
+	};
+	board_id_0 {
+		gpio-hog;
+		gpios = <55 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "board_id_0";
+	};
+	board_id_1 {
+		gpio-hog;
+		gpios = <56 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "board_id_1";
+	};
+	board_id_2 {
+		gpio-hog;
+		gpios = <57 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "board_id_2";
+	};
+	pinctrl_optimus_leds: optimus-leds-grp {
+		leds {
+			groups = "pwm4", "pwm5";
+			function = "pwm";
+		};
+	};
+	pinctrl_i2c: i2cgrp {
+		i2c {
+			groups = "i2c";
+			function = "i2c";
+		};
+	};
+	pinctrl_spi: spigrp {
+		spi {
+			groups = "spi_2", "spi_2_ss0";
+			function = "spi_2";
+		};
+	};
+};
+
 &spi0 {
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_spi>;
 		BCM6803@0 {
 			compatible = "brcm,bcm6803-spi";
 			spi-max-frequency = <20000000>;
-			interrupt-parent = <&gpio0>;
+			interrupt-parent = <&pinctrl0>;
 			interrupts = <0 IRQ_TYPE_LEVEL_HIGH>;
 			reg = <0>;
 			spi-cpol;
@@ -115,12 +224,14 @@
 			rf-band = "ext_d";
 			i2c-base = <0x10406200>;
 			i2c-addr = <0x70>;
-			reset-gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
+			reset-gpios = <&pinctrl0 11 GPIO_ACTIVE_LOW>;
 			if-name = "moca0";
 		};
 };
 
 &i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c>;
 	lm63: lm63@4c {
 		compatible = "national,lm63";
 		reg = <0x4c>;

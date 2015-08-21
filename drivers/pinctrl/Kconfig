@@ -93,6 +93,12 @@ config PINCTRL_FALCON
 	depends on SOC_FALCON
 	depends on PINCTRL_LANTIQ
 
+config PINCTRL_LS1024A
+	bool
+	depends on OF
+	select PINMUX
+	select GENERIC_PINCONF
+
 config PINCTRL_MESON
 	bool
 	depends on OF

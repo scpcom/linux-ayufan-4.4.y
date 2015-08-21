@@ -272,11 +272,13 @@
 		clocks = <&axi_clk>;
 	};
 
-	gpio0: gpio@90470000 {
-		compatible = "fsl,ls1024a-gpio";
-		reg = <0x90470000 0x1000>; /* TODO: Check size */
+	pinctrl0: pinctrl@90470000 {
+		compatible = "fsl,ls1024a-pinctrl";
+		reg = <0x90470000 0x100>;
 		gpio-controller;
 		#gpio-cells = <2>;
+		gpio-ranges = <&pinctrl0 0 0 0>;
+		gpio-ranges-group-names = "gpio";
 		interrupt-controller;
 		#interrupt-cells = <2>;
 		interrupt-parent = <&gic>;
@@ -379,7 +381,7 @@
 		num-lanes = <1>;
 		phys	        = <&phy_port0 PHY_TYPE_PCIE>;
 		phy-names       = "pcie-phy";
-		reset-gpios = <&gpio0 62 GPIO_ACTIVE_LOW>;
+		reset-gpios = <&pinctrl0 62 GPIO_ACTIVE_LOW>;
 		interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
 		interrupt-names = "msi";
 		#interrupt-cells = <1>;
@@ -406,7 +408,7 @@
 		num-lanes = <1>;
 		phys	        = <&phy_port1 PHY_TYPE_PCIE>;
 		phy-names       = "pcie-phy";
-		reset-gpios = <&gpio0 27 GPIO_ACTIVE_LOW>;
+		reset-gpios = <&pinctrl0 27 GPIO_ACTIVE_LOW>;
 		interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
 		interrupt-names = "msi";
 		#interrupt-cells = <1>;

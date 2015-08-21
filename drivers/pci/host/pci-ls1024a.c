@@ -345,6 +345,9 @@ static int __init ls1024a_pcie_probe(struct platform_device *pdev)
 		return PTR_ERR(ls1024a_pcie->axi_rst);
 
 	ls1024a_pcie->gpiod_reset = devm_gpiod_get_optional(pp->dev, "reset", GPIOD_OUT_LOW);
+	if (IS_ERR(ls1024a_pcie->gpiod_reset)) {
+		ls1024a_pcie->gpiod_reset = 0;
+	}
 	if (ls1024a_pcie->gpiod_reset) {
 		pr_err("Pulsing GPIO reset line\n");
 		gpiod_set_value(ls1024a_pcie->gpiod_reset, 1);

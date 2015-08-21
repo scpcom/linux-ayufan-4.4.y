@@ -11,5 +11,7 @@ config ARCH_COMCERTO
 	select HAVE_ARM_SCU if SMP
 	select HAVE_ARM_TWD if SMP
 	select ARCH_HAS_RESET_CONTROLLER
+	select PINCTRL
+	select PINCTRL_LS1024A
 
 endmenu
