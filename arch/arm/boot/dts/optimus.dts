@@ -98,6 +98,7 @@
 			label = "red";
 			pwms = <&pwm 5 1000000>;
 			max-brightness = <200>;
+			linux,default-trigger = "default-on";
 		};
 	};
 };
