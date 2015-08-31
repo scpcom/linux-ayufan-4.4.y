@@ -92,12 +92,12 @@
 		pwmledblue: pwmledblue {
 			label = "blue";
 			pwms = <&pwm 4 1000000>;
-			max-brightness = <100>;
+			max-brightness = <200>;
 		};
 		pwmledred: pwmledred {
 			label = "red";
 			pwms = <&pwm 5 1000000>;
-			max-brightness = <100>;
+			max-brightness = <200>;
 		};
 	};
 };
