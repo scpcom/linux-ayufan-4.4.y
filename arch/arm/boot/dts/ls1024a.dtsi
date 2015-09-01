@@ -259,6 +259,24 @@
 			      GIC_SPI 60 IRQ_TYPE_EDGE_RISING>;
 	};
 
+	nor0: flash@c0000000 {
+		compatible = "cfi-flash";
+		reg = <0xc0000000 0x04000000>;
+		bank-width = <2>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+	};
+
+	nand0: nand@c8300000 {
+		compatible = "fsl,ls1024a-nand";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		reg = <0xc8300000 0x2000
+		       0xCFFF0000 0x2c>;
+		ce-gpios = <&pinctrl0 28 GPIO_ACTIVE_HIGH>;
+		br-gpios = <&pinctrl0 29 GPIO_ACTIVE_HIGH>;
+	};
+
 	otp0: otp@904F0000 {
 		compatible = "fsl,ls1024a-otp";
 		reg = <0x904F0000 0x58>;
@@ -381,7 +399,6 @@
 		num-lanes = <1>;
 		phys	        = <&phy_port0 PHY_TYPE_PCIE>;
 		phy-names       = "pcie-phy";
-		reset-gpios = <&pinctrl0 62 GPIO_ACTIVE_LOW>;
 		interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
 		interrupt-names = "msi";
 		#interrupt-cells = <1>;
@@ -408,7 +425,6 @@
 		num-lanes = <1>;
 		phys	        = <&phy_port1 PHY_TYPE_PCIE>;
 		phy-names       = "pcie-phy";
-		reset-gpios = <&pinctrl0 27 GPIO_ACTIVE_LOW>;
 		interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
 		interrupt-names = "msi";
 		#interrupt-cells = <1>;

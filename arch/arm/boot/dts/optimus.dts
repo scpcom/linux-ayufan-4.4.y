@@ -10,82 +10,6 @@
 		reg = <0x80000000 0x40000000>; /* 1 GB */
 	};
 
-	refclk: oscillator {
-		compatible = "fixed-clock";
-		#clock-cells = <0>;
-		clock-frequency = <24000000>;
-	};
-
-	nor0: flash@c0000000 {
-		compatible = "cfi-flash";
-		reg = <0xc0000000 0x04000000>;
-		bank-width = <2>;
-		#address-cells = <1>;
-		#size-cells = <1>;
-		uloader@0 {
-			label = "uloader";
-			reg = <0x0 0x20000>;
-		};
-		loader0@20000 {
-			label = "loader0";
-			reg = <0x20000 0x80000>;
-		};
-		loader1@a0000 {
-			label = "loader1";
-			reg = <0xa0000 0x80000>;
-		};
-		env@120000 {
-			label = "env";
-			reg = <0x120000 0x20000>;
-		};
-		hnvram@140000 {
-			label = "hnvram";
-			reg = <0x140000 0x200000>;
-		};
-		norreserved0@340000 {
-			label = "norreserved0";
-			reg = <0x340000 0x3cc0000>;
-		};
-	};
-
-	nand0: nand@c8300000 {
-		compatible = "fsl,ls1024a-nand";
-		#address-cells = <1>;
-		#size-cells = <1>;
-		reg = <0xc8300000 0x2000
-		       0xCFFF0000 0x2c>;
-		ce-gpios = <&pinctrl0 28 GPIO_ACTIVE_HIGH>;
-		br-gpios = <&pinctrl0 29 GPIO_ACTIVE_HIGH>;
-		reserved@0 {
-			label = "reserved";
-			reg = <0x0 0x800000>;
-		};
-		kernel0@800000 {
-			label = "kernel0";
-			reg = <0x800000 0x2000000>;
-		};
-		kernel1@2800000 {
-			label = "kernel1";
-			reg = <0x2800000 0x2000000>;
-		};
-		rootfs0@4800000 {
-			label = "rootfs0";
-			reg = <0x4800000 0x12000000>;
-		};
-		rootfs1@16800000 {
-			label = "rootfs1";
-			reg = <0x16800000 0x12000000>;
-		};
-		emergency@28800000 {
-			label = "emergency";
-			reg = <0x28800000 0x2000000>;
-		};
-		data+ubi@2a800000 {
-			label = "data+ubi";
-			reg = <0x2a800000 0x55800000>;
-		};
-	};
-
 	pwmleds {
 		compatible = "pwm-leds";
 		pinctrl-names = "default";
@@ -208,6 +132,72 @@
 			function = "spi_2";
 		};
 	};
+};
+
+&nor0 {
+		uloader@0 {
+			label = "uloader";
+			reg = <0x0 0x20000>;
+		};
+		loader0@20000 {
+			label = "loader0";
+			reg = <0x20000 0x80000>;
+		};
+		loader1@a0000 {
+			label = "loader1";
+			reg = <0xa0000 0x80000>;
+		};
+		env@120000 {
+			label = "env";
+			reg = <0x120000 0x20000>;
+		};
+		hnvram@140000 {
+			label = "hnvram";
+			reg = <0x140000 0x200000>;
+		};
+		norreserved0@340000 {
+			label = "norreserved0";
+			reg = <0x340000 0x3cc0000>;
+		};
+};
+
+&nand0 {
+		reserved@0 {
+			label = "reserved";
+			reg = <0x0 0x800000>;
+		};
+		kernel0@800000 {
+			label = "kernel0";
+			reg = <0x800000 0x2000000>;
+		};
+		kernel1@2800000 {
+			label = "kernel1";
+			reg = <0x2800000 0x2000000>;
+		};
+		rootfs0@4800000 {
+			label = "rootfs0";
+			reg = <0x4800000 0x12000000>;
+		};
+		rootfs1@16800000 {
+			label = "rootfs1";
+			reg = <0x16800000 0x12000000>;
+		};
+		emergency@28800000 {
+			label = "emergency";
+			reg = <0x28800000 0x2000000>;
+		};
+		data+ubi@2a800000 {
+			label = "data+ubi";
+			reg = <0x2a800000 0x55800000>;
+		};
+};
+
+&pcie0 {
+		reset-gpios = <&pinctrl0 62 GPIO_ACTIVE_LOW>;
+};
+
+&pcie1 {
+		reset-gpios = <&pinctrl0 27 GPIO_ACTIVE_LOW>;
 };
 
 &spi0 {
