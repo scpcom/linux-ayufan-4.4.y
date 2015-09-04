@@ -333,6 +333,14 @@
 		clocks = <&axi_clk>; /* TODO: Should be spi_i2c */
 	};
 
+	usb3_phy: usb3_phy@904a0000 {
+		compatible	= "fsl,ls1024a-usb3-phy";
+		reg		= <0x904A0000 0x100>;
+		#phy-cells	= <0>;
+		resets		= <&reset LS1024A_USB1_PHY_RESET>;
+		reset-names	= "phy";
+	};
+
 	snowbush_phy: phy@90590000 {
 		compatible      = "fsl,ls1024a-snowbush-phy";
 		#address-cells	= <1>;
@@ -434,6 +442,25 @@
 		clock-names = "pcie";
 		resets = <&reset LS1024A_AXI_PCIE1_RESET>;
 		reset-names = "axi";
+	};
+
+	usbdrd3: usb@9f000000 {
+		compatible = "fsl,ls1024a-dwc3";
+		clocks = <&axi_clk>; /* TODO: Should be usb1 */
+		clock-names = "usb";
+		resets = <&reset LS1024A_UTMI_USB1_RESET &reset LS1024A_AXI_USB1_RESET>;
+		reset-names = "utmi", "axi";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		usbdrd_dwc3: dwc3 {
+			compatible = "snps,dwc3";
+			reg = <0x9F000000 0x00800000>;
+			interrupts = <GIC_SPI 22 IRQ_TYPE_LEVEL_HIGH>;
+			phys = <&usb3_phy>;
+			phy-names = "usb3-phy";
+		};
 	};
 };
 

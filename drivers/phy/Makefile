@@ -41,3 +41,4 @@ obj-$(CONFIG_PHY_QCOM_UFS) 	+= phy-qcom-ufs.o
 obj-$(CONFIG_PHY_QCOM_UFS) 	+= phy-qcom-ufs-qmp-20nm.o
 obj-$(CONFIG_PHY_QCOM_UFS) 	+= phy-qcom-ufs-qmp-14nm.o
 obj-$(CONFIG_PHY_LS1024A_SNOWBUSH)	+= phy-snowbush.o
+obj-$(CONFIG_PHY_LS1024A_USB3)	+= phy-ls1024a-usb3.o
