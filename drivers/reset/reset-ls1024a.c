@@ -133,9 +133,30 @@ static int ls1024a_reset_deassert(struct reset_controller_dev *rcdev,
 	return ls1024a_reset_program_hw(rcdev, idx, false);
 }
 
+static int ls1024a_reset_status(struct reset_controller_dev *rcdev,
+				   unsigned long idx)
+{
+	struct ls1024a_reset_data *rst = to_ls1024a_reset_data(rcdev);
+	const struct reset_channel *ch;
+	unsigned cur_val;
+	int err;
+
+	if (idx >= rcdev->nr_resets)
+		return -EINVAL;
+
+	ch = &rst->channels[idx];
+
+	err = regmap_field_read(ch->reset, &cur_val);
+	if (err)
+		return err;
+
+	return cur_val;
+}
+
 static struct reset_control_ops ls1024a_reset_ops = {
 	.assert		= ls1024a_reset_assert,
 	.deassert	= ls1024a_reset_deassert,
+	.status		= ls1024a_reset_status,
 };
 
 static int ls1024a_reset_probe(struct platform_device *pdev)
@@ -144,7 +165,6 @@ static int ls1024a_reset_probe(struct platform_device *pdev)
 	size_t size;
 	int i;
 
-	pr_err("Reset controller probe\n");
 	data = devm_kzalloc(&pdev->dev, sizeof(*data), GFP_KERNEL);
 	if (!data)
 		return -ENOMEM;
@@ -184,15 +204,6 @@ static int ls1024a_reset_probe(struct platform_device *pdev)
 	return reset_controller_register(&data->rcdev);
 }
 
-static int ls1024a_reset_remove(struct platform_device *pdev)
-{
-	struct ls1024a_reset_data *data = platform_get_drvdata(pdev);
-
-	reset_controller_unregister(&data->rcdev);
-
-	return 0;
-}
-
 static const struct of_device_id ls1024a_reset_dt_ids[] = {
 	 { .compatible = "fsl,ls1024a-reset", },
 	 { /* sentinel */ },
@@ -201,7 +212,6 @@ MODULE_DEVICE_TABLE(of, ls1024a_reset_dt_ids);
 
 static struct platform_driver ls1024a_reset_driver = {
 	.probe	= ls1024a_reset_probe,
-	.remove	= ls1024a_reset_remove,
 	.driver = {
 		.name		= "ls1024a-reset",
 		.of_match_table	= ls1024a_reset_dt_ids,
