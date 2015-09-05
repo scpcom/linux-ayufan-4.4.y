@@ -463,5 +463,3 @@
 		};
 	};
 };
-
-/include/ "c2k-clocks.dtsi"
