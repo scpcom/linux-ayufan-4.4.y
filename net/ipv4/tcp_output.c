@@ -2565,8 +2565,6 @@ int __tcp_retransmit_skb(struct sock *sk, struct sk_buff *skb)
 	unsigned int cur_mss;
 	int err;
 
-	trace_printk("TCP retransmit snd_una %u\n",tp->snd_una);
-
 	/* Inconslusive MTU probe */
 	if (icsk->icsk_mtup.probe_size) {
 		icsk->icsk_mtup.probe_size = 0;
