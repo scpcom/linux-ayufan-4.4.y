@@ -44,6 +44,7 @@
 #include <linux/i2c.h>
 #include <linux/hwmon-sysfs.h>
 #include <linux/hwmon.h>
+#include <linux/ktime.h>
 #include <linux/err.h>
 #include <linux/mutex.h>
 #include <linux/sysfs.h>
@@ -238,9 +239,19 @@ static s32 lm63_i2c_smbus_write_byte_data(const struct i2c_client *client,
 		u8 command, u8 value) {
 	s32 ret;
 	int retries = MAX_SMBUS_RETRIES;
+	ktime_t start_time;
+	s64 d;
 	while (retries-- > 0) {
+		start_time = ktime_get();
 		ret = i2c_smbus_write_byte_data(client, command, value);
-		if (!ret) return ret;
+		if (!ret) {
+			d = ktime_us_delta(ktime_get(), start_time);
+			if (d <= 22000) return 0;
+			dev_printk(KERN_DEBUG, &client->dev,
+				"I2C transaction took too long: %lld us.\n",
+				(long long) d);
+			ret = -ETIME;
+		}
 		dev_printk(KERN_DEBUG, &client->dev,
 			"Failed to write value 0x%02x to register 0x%02x: rc %d. Retries left: %d\n",
 			value, command, ret, retries);
@@ -256,9 +267,19 @@ static s32 lm63_i2c_smbus_read_byte_data(const struct i2c_client *client,
 		u8 command) {
 	s32 ret;
 	int retries = MAX_SMBUS_RETRIES;
+	ktime_t start_time;
+	s64 d;
 	while (retries-- > 0) {
+		start_time = ktime_get();
 		ret = i2c_smbus_read_byte_data(client, command);
-		if (ret >= 0) return ret;
+		if (ret >= 0) {
+			d = ktime_us_delta(ktime_get(), start_time);
+			if (d <= 22000) return 0;
+			dev_printk(KERN_DEBUG, &client->dev,
+				"I2C transaction took too long: %lld us.\n",
+				(long long) d);
+			ret = -ETIME;
+		}
 		dev_printk(KERN_DEBUG, &client->dev,
 			"Failed to read from register 0x%02x: rc %d. Retries left: %d\n",
 			command, ret, retries);
