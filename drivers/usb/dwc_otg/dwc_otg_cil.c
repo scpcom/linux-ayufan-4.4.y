@@ -367,7 +367,9 @@ static void dwc_otg_enable_common_interrupts(dwc_otg_core_if_t * core_if)
 		intr_mask.b.rxstsqlvl = 1;
 	}
 
+#if !defined(CONFIG_DWC_OTG_HOST_ONLY) && !defined(CONFIG_DWC_OTG_DEVICE_ONLY)
 	intr_mask.b.conidstschng = 1;
+#endif
 	intr_mask.b.wkupintr = 1;
 	intr_mask.b.disconnect = 0;
 	intr_mask.b.usbsuspend = 1;
