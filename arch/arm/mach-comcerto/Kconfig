@@ -13,5 +13,6 @@ config ARCH_COMCERTO
 	select ARCH_HAS_RESET_CONTROLLER
 	select PINCTRL
 	select PINCTRL_LS1024A
+	select MII
 
 endmenu
