@@ -179,7 +179,6 @@ struct sk_buff *__alloc_skb_head(gfp_t gfp_mask, int node)
 out:
 	return skb;
 }
-EXPORT_SYMBOL(__alloc_skb_head);
 
 /**
  *	__alloc_skb	-	allocate a network buffer
