@@ -46,6 +46,7 @@
 #include <linux/utsname.h>
 #include <linux/ctype.h>
 #include <linux/uio.h>
+#include <linux/crc32.h>
 
 #include <asm/uaccess.h>
 
@@ -218,6 +219,9 @@ struct printk_log {
 	u16 text_len;		/* length of text buffer */
 	u16 dict_len;		/* length of dictionary buffer */
 	u8 facility;		/* syslog facility */
+#ifdef CONFIG_PRINTK_PERSIST
+	u32 crc;		/* the flags may change, so don't include them */
+#endif
 	u8 flags:5;		/* internal record flags */
 	u8 level:3;		/* syslog level */
 };
@@ -231,6 +235,99 @@ static DEFINE_RAW_SPINLOCK(logbuf_lock);
 
 #ifdef CONFIG_PRINTK
 DECLARE_WAIT_QUEUE_HEAD(log_wait);
+
+#define PREFIX_MAX		32
+#define LOG_LINE_MAX		(1024 - PREFIX_MAX)
+
+/* record buffer */
+#if defined(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS)
+#define LOG_ALIGN 4
+#else
+#define LOG_ALIGN __alignof__(struct printk_log)
+#endif
+#define __LOG_BUF_LEN (1 << CONFIG_LOG_BUF_SHIFT)
+static char __log_buf[__LOG_BUF_LEN] __aligned(LOG_ALIGN);
+static char *log_buf = __log_buf;
+
+static int log_make_free_space(u32 msg_size);
+static int log_store(int facility, int level,
+		     enum log_flags flags, u64 ts_nsec,
+		     const char *dict, u16 dict_len,
+		     const char *text, u16 text_len);
+
+#ifdef CONFIG_BOOTLOG_COPY
+#define BOOTLOG_MAGIC (0x1090091e)
+struct bloghdr {
+	unsigned int magic; /* for kernel verification */
+	unsigned int offset; /* current log offset */
+};
+
+extern unsigned long bootlog_get_addr(void);
+extern unsigned long bootlog_get_size(void);
+
+static __init inline struct bloghdr *get_bootlog_hdr(void)
+{
+	unsigned long bootlog_size = bootlog_get_size();
+	if (bootlog_size) {
+		struct bloghdr *blog_hdr = (struct bloghdr *)
+				phys_to_virt(bootlog_get_addr());
+		if (BOOTLOG_MAGIC != blog_hdr->magic ||
+		    (blog_hdr->offset + sizeof(struct bloghdr) >
+                     bootlog_size)) {
+			printk(KERN_INFO "bootlog: header invalid m:0x%08x "
+			       "o:0x%08x s:0x%08lx\n", blog_hdr->magic,
+                               blog_hdr->offset, bootlog_size);
+			return NULL;
+		}
+		return blog_hdr;
+	}
+        printk(KERN_INFO "bootlog: bootlog_size was 0.\n");
+	return NULL;
+}
+
+#define printable(c) (((c)=='\t') || ((c)=='\n') || (0x20<=(c) && (c)<=0x7e))
+
+static inline void __init copy_bootlog(struct bloghdr *blog_hdr)
+{
+	if (blog_hdr) {
+		char *blog_buf = (char *)(blog_hdr + 1);
+		int i,j;
+		char *tmp;
+		/* Strip out nonprintable characters from the bootlog. */
+		for (i=0,j=0; i < blog_hdr->offset; i++) {
+			if (printable(blog_buf[i])) {
+				blog_buf[j++] = blog_buf[i];
+			}
+		}
+		/* Loop over each line in the boot loader log, and insert them into the
+		 * kernel log one at a time.  Attempting to insert the entire thing fails due
+		 * to some logic that truncates long messages.
+		 */
+		tmp = &blog_buf[0];
+		for (i=0; i < j; i++) {
+			if (blog_buf[i] == '\n') {
+				/* Insert with facility=0, level=INFO, time=0, No dict. */
+				log_store(0, 6, LOG_NEWLINE, 0,
+					NULL, 0, tmp, &blog_buf[i] - tmp);
+				tmp = &blog_buf[i+1];
+			}
+		}
+
+		/* Insert any trailing line into the kernel buffer. */
+		if (tmp != &blog_buf[i]) {
+			log_store(0, 6, 0, 0,
+				NULL, 0, tmp, &blog_buf[i] - tmp);
+		}
+	}
+}
+
+static inline void __init free_bootlog(void)
+{
+	free_bootmem(bootlog_get_addr(), bootlog_get_size());
+}
+#endif
+
+#ifndef CONFIG_PRINTK_PERSIST
 /* the next printk record to read by syslog(READ) or /proc/kmsg */
 static u64 syslog_seq;
 static u32 syslog_idx;
@@ -254,19 +351,191 @@ static enum log_flags console_prev;
 static u64 clear_seq;
 static u32 clear_idx;
 
-#define PREFIX_MAX		32
-#define LOG_LINE_MAX		(1024 - PREFIX_MAX)
-
-/* record buffer */
-#if defined(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS)
-#define LOG_ALIGN 4
-#else
-#define LOG_ALIGN __alignof__(struct printk_log)
-#endif
-#define __LOG_BUF_LEN (1 << CONFIG_LOG_BUF_SHIFT)
-static char __log_buf[__LOG_BUF_LEN] __aligned(LOG_ALIGN);
-static char *log_buf = __log_buf;
 static u32 log_buf_len = __LOG_BUF_LEN;
+
+#else  /*  CONFIG_PRINTK_PERSIST */
+
+struct logbits {
+	int magic; /* needed to verify the memory across reboots */
+	u32 _log_buf_len;
+	u64 _syslog_seq; /* leading _ so they aren't replaced by #define */
+	u32 _syslog_idx;
+	enum log_flags _syslog_prev;
+	size_t _syslog_partial;
+
+/* index and sequence number of the first record stored in the buffer */
+	u64 _log_first_seq;
+	u32 _log_first_idx;
+
+/* index and sequence number of the next record to store in the buffer */
+	u64 _log_next_seq;
+	u32 _log_next_idx;
+
+/* the next printk record to write to the console */
+	u64 _console_seq;
+	u32 _console_idx;
+	enum log_flags _console_prev;
+
+/* the next printk record to read after the last 'clear' command */
+	u64 _clear_seq;
+	u32 _clear_idx;
+};
+
+static struct logbits __logbits = {
+	._log_buf_len = __LOG_BUF_LEN,
+};
+static struct logbits *logbits = &__logbits;
+
+#define log_buf_len    logbits->_log_buf_len
+#define syslog_seq     logbits->_syslog_seq
+#define syslog_idx     logbits->_syslog_idx
+#define syslog_prev    logbits->_syslog_prev
+#define syslog_partial logbits->_syslog_partial
+#define log_first_seq  logbits->_log_first_seq
+#define log_first_idx  logbits->_log_first_idx
+#define log_next_seq   logbits->_log_next_seq
+#define log_next_idx   logbits->_log_next_idx
+#define console_seq    logbits->_console_seq
+#define console_idx    logbits->_console_idx
+#define console_prev   logbits->_console_prev
+#define clear_seq      logbits->_clear_seq
+#define clear_idx      logbits->_clear_idx
+
+#define PERSIST_SEARCH_START 0
+#define PERSIST_SEARCH_END 0xfe000000
+#define PERSIST_SEARCH_JUMP (16*1024*1024)
+#define PERSIST_MAGIC 0xba5eba11
+
+/*
+ * arm uses one memory model, mips uses another
+ */
+static __init phys_addr_t physmem_reserve(phys_addr_t size) {
+#ifdef CONFIG_NO_BOOTMEM
+	phys_addr_t alloc;
+	alloc = memblock_find_in_range_node(size, SMP_CACHE_BYTES,
+			PERSIST_SEARCH_START, PERSIST_SEARCH_END,
+			NUMA_NO_NODE);
+	if (!alloc) return alloc;
+	if (memblock_reserve(alloc, size)) {
+		pr_err("printk_persist: memblock_reserve failed\n");
+		return 0;
+	}
+	return alloc;
+#else
+	unsigned long where;
+	for (where = PERSIST_SEARCH_END - size;
+	     where >= PERSIST_SEARCH_START && where <= PERSIST_SEARCH_END - size;
+	     where -= PERSIST_SEARCH_JUMP) {
+		if (reserve_bootmem(where, size, BOOTMEM_EXCLUSIVE))
+			continue;
+		else
+			return where;
+	}
+	return 0;
+#endif
+}
+
+/*
+ * size is a power of 2 so that the printk offset mask will work.  We'll add
+ * a bit more space to the end of the buffer for our extra data, but that
+ * won't change the offset of the buffers.
+ */
+static __init struct logbits *log_buf_alloc(unsigned long size, char **new_logbuf)
+{
+	char *buf;
+	phys_addr_t alloc;
+	unsigned long full_size = size + sizeof(struct logbits);
+	struct logbits *new_logbits;
+	u64 seq;
+	int idx, lost_entries;
+	struct printk_log *prlog;
+	u32 curr_crc;
+
+	alloc = physmem_reserve(full_size);
+	if (alloc) {
+		buf = phys_to_virt(alloc);
+		*new_logbuf = buf;
+		new_logbits = (void*)buf + size;
+		printk(KERN_INFO "printk_persist: memory reserved @ 0x%08x\n",
+			alloc);
+		if ((new_logbits->magic != PERSIST_MAGIC) ||
+		    (new_logbits->_log_buf_len != size) ||
+			(new_logbits->_log_first_seq >
+				new_logbits->_log_next_seq) ||
+			(new_logbits->_log_first_idx > size) ||
+			(new_logbits->_syslog_idx > size) ||
+			(new_logbits->_syslog_seq >
+				new_logbits->_log_next_seq) ||
+			(new_logbits->_log_next_idx > size) ||
+			(new_logbits->_console_seq >
+				new_logbits->_log_next_seq) ||
+			(new_logbits->_console_idx > size) ||
+			(new_logbits->_clear_seq >
+				new_logbits->_log_next_seq) ||
+			(new_logbits->_clear_idx > size)) {
+			printk(KERN_INFO "printk_persist: header invalid, "
+				"cleared.\n");
+			memset(buf, 0, full_size);
+			memset(new_logbits, 0, sizeof(*new_logbits));
+			new_logbits->magic = PERSIST_MAGIC;
+			new_logbits->_log_buf_len = size;
+		} else {
+			printk(KERN_INFO "printk_persist: header valid; "
+				"log_first_idx=%d\n"
+				"log_next_idx=%d\n"
+				"log_first_seq=%lld\n"
+				"log_next_seq=%lld\n"
+				"console_seq=%lld\n"
+				"console_idx=%d\n"
+				"syslog_seq=%lld\n"
+				"syslog_idx=%d\n",
+				new_logbits->_log_first_idx,
+				new_logbits->_log_next_idx,
+				new_logbits->_log_first_seq,
+				new_logbits->_log_next_seq,
+				new_logbits->_console_seq,
+				new_logbits->_console_idx,
+				new_logbits->_syslog_seq,
+				new_logbits->_syslog_idx);
+			printk(KERN_INFO "printk_persist: validating records\n");
+			for (seq = new_logbits->_log_first_seq, idx = new_logbits->_log_first_idx;
+				seq < new_logbits->_log_next_seq; ++seq) {
+				prlog = (struct printk_log *) &buf[idx];
+				// Verify validity of this record. If its bad, then move the next
+				// pointer to be where this record is at.
+				curr_crc = crc32(~0, prlog, offsetof(struct printk_log, crc));
+				if (prlog->crc != curr_crc) {
+					lost_entries = (int)(new_logbits->_log_next_seq - seq);
+					printk(KERN_INFO "printk_persist: corruption found, lost %d entries\n",
+						lost_entries);
+					new_logbits->_log_next_seq = seq;
+					new_logbits->_log_next_idx = idx;
+					break;
+				}
+				if (prlog->len == 0) {
+					idx = 0;
+					// Do not increment the sequence counter for the
+					// record that's used to indicate wrapping. We
+					// do still want to verify its CRC above though.
+					--seq;
+				}
+				else
+					idx += prlog->len;
+			}
+		}
+	} else {
+		/* replace the buffer, but don't bother to swap struct logbits */
+		printk(KERN_ERR "printk_persist: failed to reserve bootmem "
+			"area. disabled.\n");
+		buf = alloc_bootmem(full_size);
+		*new_logbuf = buf;
+		new_logbits = (struct logbits*)(buf + size);
+		memset(buf, 0, full_size);
+	}
+
+	return new_logbits;
+}
+#endif
 
 /* Return log buffer address */
 char *log_buf_addr_get(void)
@@ -433,11 +702,19 @@ static int log_store(int facility, int level,
 		 * to signify a wrap around.
 		 */
 		memset(log_buf + log_next_idx, 0, sizeof(struct printk_log));
+#ifdef CONFIG_PRINTK_PERSIST
+		((struct printk_log*) (log_buf + log_next_idx))->crc =
+			crc32(~0, log_buf + log_next_idx, offsetof(struct printk_log, crc));
+#endif
 		log_next_idx = 0;
 	}
 
+	/* insert message */
+	log_next_idx += size;
+	log_next_seq++;
+
 	/* fill message */
-	msg = (struct printk_log *)(log_buf + log_next_idx);
+	msg = (struct printk_log *)(log_buf + log_next_idx - size);
 	memcpy(log_text(msg), text, text_len);
 	msg->text_len = text_len;
 	if (trunc_msg_len) {
@@ -455,10 +732,9 @@ static int log_store(int facility, int level,
 		msg->ts_nsec = local_clock();
 	memset(log_dict(msg) + dict_len, 0, pad_len);
 	msg->len = size;
-
-	/* insert message */
-	log_next_idx += msg->len;
-	log_next_seq++;
+#ifdef CONFIG_PRINTK_PERSIST
+	msg->crc = crc32(~0, msg, offsetof(struct printk_log, crc));
+#endif
 
 	return msg->text_len;
 }
@@ -886,6 +1162,17 @@ void __init setup_log_buf(int early)
 	unsigned long flags;
 	char *new_log_buf;
 	int free;
+#ifdef CONFIG_PRINTK_PERSIST
+	struct logbits *new_logbits;
+	struct logbits *old_logbits;
+	struct printk_log *prlog;
+	u64 seq;
+	int idx;
+	int console_found=0, syslog_found=0;
+#endif
+#ifdef CONFIG_BOOTLOG_COPY
+	struct bloghdr *blog_hdr = NULL;
+#endif
 
 	if (log_buf != __log_buf)
 		return;
@@ -896,6 +1183,7 @@ void __init setup_log_buf(int early)
 	if (!new_log_buf_len)
 		return;
 
+#ifndef CONFIG_PRINTK_PERSIST
 	if (early) {
 		new_log_buf =
 			memblock_virt_alloc(new_log_buf_len, LOG_ALIGN);
@@ -903,6 +1191,9 @@ void __init setup_log_buf(int early)
 		new_log_buf = memblock_virt_alloc_nopanic(new_log_buf_len,
 							  LOG_ALIGN);
 	}
+#else
+	new_logbits = log_buf_alloc(new_log_buf_len, &new_log_buf);
+#endif
 
 	if (unlikely(!new_log_buf)) {
 		pr_err("log_buf_len: %ld bytes not available\n",
@@ -910,13 +1201,92 @@ void __init setup_log_buf(int early)
 		return;
 	}
 
+#ifdef CONFIG_BOOTLOG_COPY
+	/* Read out the blog_hdr before logbuf is locked in case print
+	 * is needed. */
+	blog_hdr = get_bootlog_hdr();
+#endif
+
 	raw_spin_lock_irqsave(&logbuf_lock, flags);
 	log_buf_len = new_log_buf_len;
 	log_buf = new_log_buf;
 	new_log_buf_len = 0;
 	free = __LOG_BUF_LEN - log_next_idx;
+
+#ifndef CONFIG_PRINTK_PERSIST
 	memcpy(log_buf, __log_buf, __LOG_BUF_LEN);
+#else
+	/* We have to copy over entries one at a time from the old
+	 * buffer to the new buffer.
+	 */
+	old_logbits = logbits;
+	logbits = new_logbits;
+
+#ifdef CONFIG_BOOTLOG_COPY
+	copy_bootlog(blog_hdr);
+#endif
+
+	for (seq = old_logbits->_log_first_seq, idx = old_logbits->_log_first_idx;
+		 seq < old_logbits->_log_next_seq; ++seq) {
+		prlog = (struct printk_log *)&__log_buf[idx];
+		if (prlog->len == 0) {
+			idx = 0;
+			prlog = (struct printk_log *)&__log_buf[0];
+		}
+
+		if (log_make_free_space(prlog->len)) {
+			pr_err("not copying entry due to it being too huge\n");
+			idx += prlog->len;
+			continue;
+		}
+
+		if (log_next_idx + prlog->len + sizeof(struct printk_log) > log_buf_len) {
+			/*
+			 * This message + an additional empty header does not fit
+			 * at the end of the buffer. Add an empty header with len == 0
+			 * to signify a wrap around.
+			 */
+			memset(log_buf + log_next_idx, 0, sizeof(struct printk_log));
+#ifdef CONFIG_PRINTK_PERSIST
+			((struct printk_log*) (log_buf + log_next_idx))->crc =
+				crc32(~0, log_buf + log_next_idx, offsetof(struct printk_log, crc));
+#endif
+			log_next_idx = 0;
+		}
+		memcpy(&log_buf[log_next_idx], &__log_buf[idx], prlog->len);
+
+		if (old_logbits->_syslog_seq == seq) {
+			syslog_seq = log_next_seq;
+			syslog_idx = log_next_idx;
+			syslog_found = 1;
+		}
+
+		if (old_logbits->_console_seq == seq) {
+			console_seq = log_next_seq;
+			console_idx = log_next_idx;
+			console_found = 1;
+		}
+
+		idx += prlog->len;
+		log_next_seq++;
+		log_next_idx += prlog->len;
+	}
+
+	if (!syslog_found) {
+		syslog_seq = log_next_seq;
+		syslog_idx = log_next_idx;
+	}
+
+	if (!console_found) {
+		console_seq = log_next_seq;
+		console_idx = log_next_idx;
+	}
+#endif
 	raw_spin_unlock_irqrestore(&logbuf_lock, flags);
+
+#ifdef CONFIG_BOOTLOG_COPY
+	free_bootlog();
+#endif
 
 	pr_info("log_buf_len: %d bytes\n", log_buf_len);
 	pr_info("early log buf free: %d(%d%%)\n",
