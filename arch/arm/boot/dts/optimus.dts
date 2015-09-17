@@ -5,6 +5,10 @@
 	model = "Google Fiber Optimus";
 	compatible = "google,optimus", "fsl,ls1024a";
 
+	chosen {
+		bootargs = "log_buf_len=8M";
+	};
+
 	memory {
 		device_type = "memory";
 		reg = <0x80000000 0x40000000>; /* 1 GB */
