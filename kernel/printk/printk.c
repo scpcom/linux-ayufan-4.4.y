@@ -968,6 +968,10 @@ static loff_t devkmsg_llseek(struct file *file, loff_t offset, int whence)
 	struct devkmsg_user *user = file->private_data;
 	loff_t ret = 0;
 
+	/* glibc's fdopen() calls _llseek(..., SEEK_CUR). Let's make it happy
+	 * by returning 0 instead of an error. */
+	if (offset == 0 && whence == SEEK_CUR)
+		return 0;
 	if (!user)
 		return -EBADF;
 	if (offset)
