@@ -220,6 +220,12 @@ static int ct_seq_show(struct seq_file *s, void *v)
 	if (test_bit(IPS_ASSURED_BIT, &ct->status))
 		seq_printf(s, "[ASSURED] ");
 
+#ifdef CONFIG_COMCERTO_FP
+	if (test_bit(IPS_PERMANENT_BIT, &ct->status))
+		if (seq_printf(s, "[PERMANENT] "))
+			goto release;
+#endif
+
 	if (seq_has_overflowed(s))
 		goto release;
 

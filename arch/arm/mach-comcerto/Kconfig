@@ -16,3 +16,8 @@ config ARCH_COMCERTO
 	select MII
 
 endmenu
+
+config COMCERTO_FP
+	bool "Comcerto Fast Path Support"
+	depends on ARCH_COMCERTO
+	default y

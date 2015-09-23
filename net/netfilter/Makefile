@@ -8,6 +8,8 @@ nf_conntrack-$(CONFIG_NF_CONNTRACK_LABELS) += nf_conntrack_labels.o
 
 obj-$(CONFIG_NETFILTER) = netfilter.o
 
+obj-$(CONFIG_COMCERTO_FP) += comcerto_fp_netfilter.o
+
 obj-$(CONFIG_NETFILTER_NETLINK) += nfnetlink.o
 obj-$(CONFIG_NETFILTER_NETLINK_ACCT) += nfnetlink_acct.o
 nfnetlink_queue-y := nfnetlink_queue_core.o

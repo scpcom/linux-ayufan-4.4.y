@@ -86,4 +86,8 @@ extern spinlock_t nf_conntrack_locks[CONNTRACK_LOCKS];
 
 extern spinlock_t nf_conntrack_expect_lock;
 
+#ifdef CONFIG_COMCERTO_FP
+#define COMCERTO_PERMANENT_TIMEOUT 1000
+#endif
+
 #endif /* _NF_CONNTRACK_CORE_H */

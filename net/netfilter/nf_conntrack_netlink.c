@@ -330,6 +330,41 @@ nla_put_failure:
 #define ctnetlink_dump_secctx(a, b) (0)
 #endif
 
+#if defined(CONFIG_COMCERTO_FP)
+static int
+ctnetlink_dump_comcerto_fp(struct sk_buff *skb, const struct nf_conn *ct)
+{
+	struct nlattr *nest_count;
+
+	nest_count = nla_nest_start(skb, CTA_COMCERTO_FP_ORIG | NLA_F_NESTED);
+	if (!nest_count)
+		goto nla_put_failure;
+
+	nla_put_u32(skb, CTA_COMCERTO_FP_MARK, ct->fp_info[IP_CT_DIR_ORIGINAL].mark);
+	nla_put_u32(skb, CTA_COMCERTO_FP_IFINDEX, ct->fp_info[IP_CT_DIR_ORIGINAL].ifindex);
+	nla_put_u32(skb, CTA_COMCERTO_FP_IIF, ct->fp_info[IP_CT_DIR_ORIGINAL].iif);
+
+	nla_nest_end(skb, nest_count);
+
+	nest_count = nla_nest_start(skb, CTA_COMCERTO_FP_REPLY | NLA_F_NESTED);
+	if (!nest_count)
+		goto nla_put_failure;
+
+	nla_put_u32(skb, CTA_COMCERTO_FP_MARK, ct->fp_info[IP_CT_DIR_REPLY].mark);
+	nla_put_u32(skb, CTA_COMCERTO_FP_IFINDEX, ct->fp_info[IP_CT_DIR_REPLY].ifindex);
+	nla_put_u32(skb, CTA_COMCERTO_FP_IIF, ct->fp_info[IP_CT_DIR_REPLY].iif);
+
+	nla_nest_end(skb, nest_count);
+
+	return 0;
+
+nla_put_failure:
+	return -1;
+}
+#else
+#define ctnetlink_dump_comcerto_fp(a, b) (0)
+#endif
+
 #ifdef CONFIG_NF_CONNTRACK_LABELS
 static int ctnetlink_label_size(const struct nf_conn *ct)
 {
@@ -499,6 +534,7 @@ ctnetlink_fill_info(struct sk_buff *skb, u32 portid, u32 seq, u32 type,
 	    ctnetlink_dump_helpinfo(skb, ct) < 0 ||
 	    ctnetlink_dump_mark(skb, ct) < 0 ||
 	    ctnetlink_dump_secctx(skb, ct) < 0 ||
+	    ctnetlink_dump_comcerto_fp(skb, ct) < 0 ||
 	    ctnetlink_dump_labels(skb, ct) < 0 ||
 	    ctnetlink_dump_id(skb, ct) < 0 ||
 	    ctnetlink_dump_use(skb, ct) < 0 ||
@@ -590,6 +626,12 @@ ctnetlink_nlmsg_size(const struct nf_conn *ct)
 	       + nla_total_size(0) /* CTA_HELP */
 	       + nla_total_size(NF_CT_HELPER_NAME_LEN) /* CTA_HELP_NAME */
 	       + ctnetlink_secctx_size(ct)
+#ifdef CONFIG_COMCERTO_FP
+	       + 2 * nla_total_size(0) /* CTA_COMCERTO_FP_ORIG|REPL */
+	       + 2 * nla_total_size(sizeof(uint32_t)) /* CTA_COMCERTO_FP_MARK */
+	       + 2 * nla_total_size(sizeof(uint32_t)) /* CTA_COMCERTO_FP_IFINDEX */
+	       + 2 * nla_total_size(sizeof(uint32_t)) /* CTA_COMCERTO_FP_IIF */
+#endif
 #ifdef CONFIG_NF_NAT_NEEDED
 	       + 2 * nla_total_size(0) /* CTA_NAT_SEQ_ADJ_ORIG|REPL */
 	       + 6 * nla_total_size(sizeof(u_int32_t)) /* CTA_NAT_SEQ_OFFSET */
@@ -671,6 +713,9 @@ ctnetlink_conntrack_event(unsigned int events, struct nf_ct_event *item)
 
 	if (nf_ct_zone(ct) &&
 	    nla_put_be16(skb, CTA_ZONE, htons(nf_ct_zone(ct))))
+		goto nla_put_failure;
+
+	if (ctnetlink_dump_comcerto_fp(skb, ct) < 0)
 		goto nla_put_failure;
 
 	if (ctnetlink_dump_id(skb, ct) < 0)
@@ -1371,6 +1416,37 @@ ctnetlink_change_status(struct nf_conn *ct, const struct nlattr * const cda[])
 	return 0;
 }
 
+#if defined(CONFIG_COMCERTO_FP)
+/*
+ * This function detects ctnetlink messages that require
+ * to set the conntrack status to IPS_PERMANENT.
+ * It updates only this bit regardless of other possible
+ * changes.
+ * Return 0 if succesfull
+ */
+static int
+ctnetlink_change_permanent(struct nf_conn *ct, const struct nlattr * const cda[])
+{
+	unsigned int status;
+	u_int32_t id;
+
+	if (cda[CTA_STATUS] && cda[CTA_ID]) {
+		status = ntohl(nla_get_be32(cda[CTA_STATUS]));
+		id = ntohl(nla_get_be32(cda[CTA_ID]));
+
+		if (status & IPS_PERMANENT) {
+			if ((u32)(unsigned long)ct == id) {
+				ct->status |= IPS_PERMANENT;
+				return 0;
+			}
+			else
+				return -ENOENT;
+		}
+	}
+	return -1;
+}
+#endif
+
 static int
 ctnetlink_setup_nat(struct nf_conn *ct, const struct nlattr * const cda[])
 {
@@ -1870,6 +1946,13 @@ ctnetlink_new_conntrack(struct sock *ctnl, struct sk_buff *skb,
 	ct = nf_ct_tuplehash_to_ctrack(h);
 	if (!(nlh->nlmsg_flags & NLM_F_EXCL)) {
 		spin_lock_bh(&nf_conntrack_expect_lock);
+#if defined(CONFIG_COMCERTO_FP)
+		/* If the permanent status has been set, this is a specific
+		 * message. Don't broadcast the event and don't update the ct */
+		err = ctnetlink_change_permanent(ct, cda);
+		if ((err == 0) || (err == -ENOENT))
+			return err;
+#endif
 		err = ctnetlink_change_conntrack(ct, cda);
 		spin_unlock_bh(&nf_conntrack_expect_lock);
 		if (err == 0) {

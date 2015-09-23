@@ -382,7 +382,23 @@ EXPORT_SYMBOL_GPL(nf_ct_delete);
 
 static void death_by_timeout(unsigned long ul_conntrack)
 {
+#ifdef CONFIG_COMCERTO_FP
+	struct nf_conn *ct = (void *)ul_conntrack;
+	struct nf_conntrack_l4proto *l4proto;
+
+	l4proto = __nf_ct_l4proto_find(nf_ct_l3num(ct), nf_ct_protonum(ct));
+
+	if (test_bit(IPS_DYING_BIT, &ct->status) ||
+	   (!test_bit(IPS_PERMANENT_BIT, &ct->status)) ||
+	   ((l4proto->l4proto == IPPROTO_TCP) && (ct->proto.tcp.state != TCP_CONNTRACK_ESTABLISHED))) {
+		nf_ct_delete((struct nf_conn *)ul_conntrack, 0, 0);
+	} else {
+		ct->timeout.expires = jiffies + COMCERTO_PERMANENT_TIMEOUT * HZ;
+		add_timer(&ct->timeout);
+	}
+#else
 	nf_ct_delete((struct nf_conn *)ul_conntrack, 0, 0);
+#endif
 }
 
 static inline bool
@@ -762,7 +778,13 @@ restart:
 	if (!ct)
 		return dropped;
 
+#ifdef CONFIG_COMCERTO_FP
+	clear_bit(IPS_PERMANENT_BIT, &ct->status);
+	/* Avoid race with timer expiration */
+	if (del_timer_sync(&ct->timeout)) {
+#else
 	if (del_timer(&ct->timeout)) {
+#endif
 		if (nf_ct_delete(ct, 0, 0)) {
 			dropped = 1;
 			NF_CT_STAT_INC_ATOMIC(net, early_drop);
@@ -1260,7 +1282,13 @@ bool __nf_ct_kill_acct(struct nf_conn *ct,
 		}
 	}
 
+#ifdef CONFIG_COMCERTO_FP
+	clear_bit(IPS_PERMANENT_BIT, &ct->status);
+	/* Avoid race with timer expiration */
+	if (del_timer_sync(&ct->timeout)) {
+#else
 	if (del_timer(&ct->timeout)) {
+#endif
 		ct->timeout.function((unsigned long)ct);
 		return true;
 	}
@@ -1399,7 +1427,13 @@ void nf_ct_iterate_cleanup(struct net *net,
 
 	while ((ct = get_next_corpse(net, iter, data, &bucket)) != NULL) {
 		/* Time to push up daises... */
+#ifdef CONFIG_COMCERTO_FP
+		clear_bit(IPS_PERMANENT_BIT, &ct->status);
+		/* Avoid race with timer expiration */
+		if (del_timer_sync(&ct->timeout))
+#else
 		if (del_timer(&ct->timeout))
+#endif
 			nf_ct_delete(ct, portid, report);
 
 		/* ... else the timer will get him soon. */
