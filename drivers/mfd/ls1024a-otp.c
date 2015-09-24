@@ -125,7 +125,6 @@ static int islocked_proc_show(struct seq_file *m, void *v)
 {
 	struct ls1024a_otp *otp = (struct ls1024a_otp *) m->private;
 	char status_buf[1];
-	u32 d;
 
 	otp_read(otp, 8, status_buf, 1);
 
@@ -150,7 +149,6 @@ static struct file_operations islocked_proc_fops = {
 static int ls1024a_otp_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
-	struct device_node *node = dev->of_node;
 	struct resource *res;
 	struct ls1024a_otp *otp;
 	int rc;
