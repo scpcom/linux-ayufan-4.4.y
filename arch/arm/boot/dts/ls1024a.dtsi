@@ -250,13 +250,20 @@
 	gp-timer@90450000 {
 		compatible = "fsl,ls1024a-gpt";
 		clocks = <&axi_clk>;
-		reg = <0x90450000 0xDC>;
+		reg = <0x90450000 0xD0>;
 		interrupts = <GIC_SPI 55 IRQ_TYPE_EDGE_RISING
 			      GIC_SPI 56 IRQ_TYPE_EDGE_RISING
 			      GIC_SPI 57 IRQ_TYPE_EDGE_RISING
 			      GIC_SPI 58 IRQ_TYPE_EDGE_RISING
 			      GIC_SPI 59 IRQ_TYPE_EDGE_RISING
 			      GIC_SPI 60 IRQ_TYPE_EDGE_RISING>;
+	};
+
+	watchdog@904500D0 {
+		compatible = "fsl,ls1024a-wdt";
+		reg = <0x904500D0 0xC>;
+		regmap = <&clk_rst_syscon>;
+		clocks = <&axi_clk>;
 	};
 
 	nor0: flash@c0000000 {
