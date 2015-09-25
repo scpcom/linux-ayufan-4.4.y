@@ -514,6 +514,15 @@ config MEDIATEK_WATCHDOG
 	  To compile this driver as a module, choose M here: the
 	  module will be called mtk_wdt.
 
+config LS1024A_WATCHDOG
+	tristate "LS1024A Watchdog"
+	depends on ARCH_COMCERTO
+	help
+	  Say Y here to include support for the watchdog timer
+	  in Freescale QorIQ LS1024A device.
+	  To compile this driver as a module, choose M here: the
+	  module will be called ls1024a_wdt.
+
 # AVR32 Architecture
 
 config AT32AP700X_WDT
