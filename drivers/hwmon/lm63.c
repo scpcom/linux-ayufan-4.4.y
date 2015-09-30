@@ -274,7 +274,7 @@ static s32 lm63_i2c_smbus_read_byte_data(const struct i2c_client *client,
 		ret = i2c_smbus_read_byte_data(client, command);
 		if (ret >= 0) {
 			d = ktime_us_delta(ktime_get(), start_time);
-			if (d <= 22000) return 0;
+			if (d <= 22000) return ret;
 			dev_printk(KERN_DEBUG, &client->dev,
 				"I2C transaction took too long: %lld us.\n",
 				(long long) d);
