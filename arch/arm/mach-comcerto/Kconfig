@@ -30,6 +30,7 @@ config ARCH_M86XXX
 	select GENERIC_CLOCKEVENTS
 	select HAVE_SCHED_CLOCK
 	select COMCERTO_DW_DMA_SUPPORT
+	select ZONE_DMA
 	select CLKDEV_LOOKUP
 	select ARCH_HAS_CPUFREQ
 	select ARCH_HAS_OPP
@@ -220,7 +221,7 @@ config COMCERTO_SPLICE_USE_MDMA
 
 config COMCERTO_ZONE_DMA_NCNB
 	bool "Comcerto Zone DMA"
-	select ZONE_DMA
+	depends on ZONE_DMA
 	default n
 
 config COMCERTO_CUSTOM_SKB_LAYOUT
