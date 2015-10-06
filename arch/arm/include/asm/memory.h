@@ -50,7 +50,7 @@
  */
 #define TASK_SIZE_26		UL(0x04000000)
 
-#ifndef CONFIG_COMCERTO_ZONE_DMA_NCNB
+#ifndef CONFIG_ZONE_DMA
 /*
  * The module space lives between the addresses given by TASK_SIZE
  * and PAGE_OFFSET - it must be within 32MB of the kernel text.
