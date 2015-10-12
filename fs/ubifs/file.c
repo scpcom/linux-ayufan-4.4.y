@@ -169,6 +169,7 @@ static int do_readpage(struct page *page)
 		}
 		ubifs_err(c, "cannot read page %lu of inode %lu, error %d",
 			  page->index, inode->i_ino, err);
+		ubifs_ro_mode(c, err);
 		goto error;
 	}
 
