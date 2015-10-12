@@ -160,6 +160,7 @@ static int do_readpage(struct page *page)
 		addr += UBIFS_BLOCK_SIZE;
 	}
 	if (err) {
+		struct ubifs_info *c = inode->i_sb->s_fs_info;
 		if (err == -ENOENT) {
 			/* Not found, so it must be a hole */
 			SetPageChecked(page);
@@ -168,6 +169,7 @@ static int do_readpage(struct page *page)
 		}
 		ubifs_err("cannot read page %lu of inode %lu, error %d",
 			  page->index, inode->i_ino, err);
+		ubifs_ro_mode(c, err);
 		goto error;
 	}
 
