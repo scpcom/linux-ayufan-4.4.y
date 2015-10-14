@@ -36,7 +36,6 @@ struct ls1024a_i2c_dev {
 	int			msg_status;	/* < 0: error, == 0: success, > 0: message in progress */
 	int			msg_len;
 	int			msg_retries;
-	ktime_t			msg_start_time;
 };
 
 #define SPEED_NORMAL_KHZ	100
@@ -182,20 +181,9 @@ static void comcerto_i2c_reset(struct ls1024a_i2c_dev *i2c)
 
 static inline void comcerto_i2c_message_complete(struct ls1024a_i2c_dev *i2c, int status)
 {
-	s64 d;
 	WR_CNTR(i2c, CNTR_STP);
 
 	i2c->msg_status = status;
-
-	if (i2c->msg_len < 10) {
-		d = ktime_us_delta(ktime_get(), i2c->msg_start_time);
-		if (d > 22000) {
-			i2c->msg_status = -ETIME;
-			dev_printk(KERN_DEBUG, i2c->dev,
-				"I2C transaction took too long: %lld us. Returning error.\n",
-				(long long) d);
-		}
-	}
 }
 
 static inline int comcerto_i2c_message_in_progress(struct ls1024a_i2c_dev *i2c)
@@ -472,7 +460,6 @@ static void comcerto_i2c_message_process(struct ls1024a_i2c_dev *i2c, struct i2c
 	i2c->msg_state = TR_IDLE;
 	i2c->msg_status = 1;
 	i2c->msg_retries = i2c->adapter.retries;
-	i2c->msg_start_time = ktime_get();
 
 polling_mode:
 	if (msg->flags & I2C_M_RD)
