@@ -1000,6 +1000,7 @@ static void lm63_init_client(struct i2c_client *client)
 {
 	struct lm63_data *data = i2c_get_clientdata(client);
 	u8 convrate;
+	u8 config2;
 
 	data->config = lm63_i2c_smbus_read_byte_data(client, LM63_REG_CONFIG1);
 	data->config_fan = lm63_i2c_smbus_read_byte_data(client,
@@ -1012,6 +1013,19 @@ static void lm63_init_client(struct i2c_client *client)
 		lm63_i2c_smbus_write_byte_data(client, LM63_REG_CONFIG1,
 					  data->config);
 	}
+
+	/* Enable digital filter */
+	/* From the LM96063 datasheet:
+	 * "In order to suppress erroneous remote temperature readings due to
+	 * noise as well as increase the resolution of the temperature, the
+	 * LM96063 incorporates a digital filter for remote temperature
+	 * readings." */
+	config2 = lm63_i2c_smbus_read_byte_data(client, LM63_REG_CONFIG2);
+	config2 |= 0x6; /* Enhanced Filter (Filter with transient noise
+			   clipping) */
+	lm63_i2c_smbus_write_byte_data(client, LM63_REG_CONFIG2,
+			config2);
+
 	/* Tachometer is always enabled on LM64 */
 	if (data->kind == lm64)
 		data->config |= 0x04;
