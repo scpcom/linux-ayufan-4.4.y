@@ -44,10 +44,12 @@
 #include <linux/i2c.h>
 #include <linux/hwmon-sysfs.h>
 #include <linux/hwmon.h>
+#include <linux/ktime.h>
 #include <linux/err.h>
 #include <linux/mutex.h>
 #include <linux/sysfs.h>
 #include <linux/types.h>
+#include <linux/delay.h>
 
 /*
  * Addresses to scan
@@ -188,6 +190,64 @@ struct lm63_data {
 	bool trutherm;
 };
 
+#define MAX_SMBUS_RETRIES	10
+
+static s32 lm63_i2c_smbus_write_byte_data(const struct i2c_client *client,
+		u8 command, u8 value) {
+	s32 ret;
+	int retries = MAX_SMBUS_RETRIES;
+	ktime_t start_time;
+	s64 d;
+	while (retries-- > 0) {
+		start_time = ktime_get();
+		ret = i2c_smbus_write_byte_data(client, command, value);
+		if (!ret) {
+			d = ktime_us_delta(ktime_get(), start_time);
+			if (d <= 22000) return 0;
+			dev_printk(KERN_DEBUG, &client->dev,
+				"I2C transaction took too long: %lld us.\n",
+				(long long) d);
+			ret = -ETIME;
+		}
+		dev_printk(KERN_DEBUG, &client->dev,
+			"Failed to write value 0x%02x to register 0x%02x: rc %d. Retries left: %d\n",
+			value, command, ret, retries);
+		msleep(100);
+	}
+	dev_warn(&client->dev,
+		"Failed %d times to write value 0x%02x to register 0x%02x: rc %d\n",
+		MAX_SMBUS_RETRIES, value, command, ret);
+	return ret;
+}
+
+static s32 lm63_i2c_smbus_read_byte_data(const struct i2c_client *client,
+		u8 command) {
+	s32 ret;
+	int retries = MAX_SMBUS_RETRIES;
+	ktime_t start_time;
+	s64 d;
+	while (retries-- > 0) {
+		start_time = ktime_get();
+		ret = i2c_smbus_read_byte_data(client, command);
+		if (ret >= 0) {
+			d = ktime_us_delta(ktime_get(), start_time);
+			if (d <= 22000) return ret;
+			dev_printk(KERN_DEBUG, &client->dev,
+				"I2C transaction took too long: %lld us.\n",
+				(long long) d);
+			ret = -ETIME;
+		}
+		dev_printk(KERN_DEBUG, &client->dev,
+			"Failed to read from register 0x%02x: rc %d. Retries left: %d\n",
+			command, ret, retries);
+		msleep(100);
+	}
+	dev_warn(&client->dev,
+		"Failed %d times to read from register 0x%02x: rc %d\n",
+		MAX_SMBUS_RETRIES, command, ret);
+	return ret;
+}
+
 static inline int temp8_from_reg(struct lm63_data *data, int nr)
 {
 	if (data->remote_unsigned)
@@ -221,12 +281,12 @@ static void lm63_update_lut(struct lm63_data *data)
 	if (time_after(jiffies, data->lut_last_updated + 5 * HZ) ||
 	    !data->lut_valid) {
 		for (i = 0; i < data->lut_size; i++) {
-			data->pwm1[1 + i] = i2c_smbus_read_byte_data(client,
+			data->pwm1[1 + i] = lm63_i2c_smbus_read_byte_data(client,
 					    LM63_REG_LUT_PWM(i));
-			data->temp8[3 + i] = i2c_smbus_read_byte_data(client,
+			data->temp8[3 + i] = lm63_i2c_smbus_read_byte_data(client,
 					     LM63_REG_LUT_TEMP(i));
 		}
-		data->lut_temp_hyst = i2c_smbus_read_byte_data(client,
+		data->lut_temp_hyst = lm63_i2c_smbus_read_byte_data(client,
 				      LM63_REG_LUT_TEMP_HYST);
 
 		data->lut_last_updated = jiffies;
@@ -247,58 +307,58 @@ static struct lm63_data *lm63_update_device(struct device *dev)
 	if (time_after(jiffies, next_update) || !data->valid) {
 		if (data->config & 0x04) { /* tachometer enabled  */
 			/* order matters for fan1_input */
-			data->fan[0] = i2c_smbus_read_byte_data(client,
+			data->fan[0] = lm63_i2c_smbus_read_byte_data(client,
 				       LM63_REG_TACH_COUNT_LSB) & 0xFC;
-			data->fan[0] |= i2c_smbus_read_byte_data(client,
+			data->fan[0] |= lm63_i2c_smbus_read_byte_data(client,
 					LM63_REG_TACH_COUNT_MSB) << 8;
-			data->fan[1] = (i2c_smbus_read_byte_data(client,
+			data->fan[1] = (lm63_i2c_smbus_read_byte_data(client,
 					LM63_REG_TACH_LIMIT_LSB) & 0xFC)
-				     | (i2c_smbus_read_byte_data(client,
+				     | (lm63_i2c_smbus_read_byte_data(client,
 					LM63_REG_TACH_LIMIT_MSB) << 8);
 		}
 
-		data->pwm1_freq = i2c_smbus_read_byte_data(client,
+		data->pwm1_freq = lm63_i2c_smbus_read_byte_data(client,
 				  LM63_REG_PWM_FREQ);
 		if (data->pwm1_freq == 0)
 			data->pwm1_freq = 1;
-		data->pwm1[0] = i2c_smbus_read_byte_data(client,
+		data->pwm1[0] = lm63_i2c_smbus_read_byte_data(client,
 				LM63_REG_PWM_VALUE);
 
-		data->temp8[0] = i2c_smbus_read_byte_data(client,
+		data->temp8[0] = lm63_i2c_smbus_read_byte_data(client,
 				 LM63_REG_LOCAL_TEMP);
-		data->temp8[1] = i2c_smbus_read_byte_data(client,
+		data->temp8[1] = lm63_i2c_smbus_read_byte_data(client,
 				 LM63_REG_LOCAL_HIGH);
 
 		/* order matters for temp2_input */
-		data->temp11[0] = i2c_smbus_read_byte_data(client,
+		data->temp11[0] = lm63_i2c_smbus_read_byte_data(client,
 				  LM63_REG_REMOTE_TEMP_MSB) << 8;
-		data->temp11[0] |= i2c_smbus_read_byte_data(client,
+		data->temp11[0] |= lm63_i2c_smbus_read_byte_data(client,
 				   LM63_REG_REMOTE_TEMP_LSB);
-		data->temp11[1] = (i2c_smbus_read_byte_data(client,
+		data->temp11[1] = (lm63_i2c_smbus_read_byte_data(client,
 				  LM63_REG_REMOTE_LOW_MSB) << 8)
-				| i2c_smbus_read_byte_data(client,
+				| lm63_i2c_smbus_read_byte_data(client,
 				  LM63_REG_REMOTE_LOW_LSB);
-		data->temp11[2] = (i2c_smbus_read_byte_data(client,
+		data->temp11[2] = (lm63_i2c_smbus_read_byte_data(client,
 				  LM63_REG_REMOTE_HIGH_MSB) << 8)
-				| i2c_smbus_read_byte_data(client,
+				| lm63_i2c_smbus_read_byte_data(client,
 				  LM63_REG_REMOTE_HIGH_LSB);
-		data->temp11[3] = (i2c_smbus_read_byte_data(client,
+		data->temp11[3] = (lm63_i2c_smbus_read_byte_data(client,
 				  LM63_REG_REMOTE_OFFSET_MSB) << 8)
-				| i2c_smbus_read_byte_data(client,
+				| lm63_i2c_smbus_read_byte_data(client,
 				  LM63_REG_REMOTE_OFFSET_LSB);
 
 		if (data->kind == lm96163)
-			data->temp11u = (i2c_smbus_read_byte_data(client,
+			data->temp11u = (lm63_i2c_smbus_read_byte_data(client,
 					LM96163_REG_REMOTE_TEMP_U_MSB) << 8)
-				      | i2c_smbus_read_byte_data(client,
+				      | lm63_i2c_smbus_read_byte_data(client,
 					LM96163_REG_REMOTE_TEMP_U_LSB);
 
-		data->temp8[2] = i2c_smbus_read_byte_data(client,
+		data->temp8[2] = lm63_i2c_smbus_read_byte_data(client,
 				 LM63_REG_REMOTE_TCRIT);
-		data->temp2_crit_hyst = i2c_smbus_read_byte_data(client,
+		data->temp2_crit_hyst = lm63_i2c_smbus_read_byte_data(client,
 					LM63_REG_REMOTE_TCRIT_HYST);
 
-		data->alarms = i2c_smbus_read_byte_data(client,
+		data->alarms = lm63_i2c_smbus_read_byte_data(client,
 			       LM63_REG_ALERT_STATUS) & 0x7F;
 
 		data->last_updated = jiffies;
@@ -363,9 +423,9 @@ static ssize_t set_fan(struct device *dev, struct device_attribute *dummy,
 
 	mutex_lock(&data->update_lock);
 	data->fan[1] = FAN_TO_REG(val);
-	i2c_smbus_write_byte_data(client, LM63_REG_TACH_LIMIT_LSB,
+	lm63_i2c_smbus_write_byte_data(client, LM63_REG_TACH_LIMIT_LSB,
 				  data->fan[1] & 0xFF);
-	i2c_smbus_write_byte_data(client, LM63_REG_TACH_LIMIT_MSB,
+	lm63_i2c_smbus_write_byte_data(client, LM63_REG_TACH_LIMIT_MSB,
 				  data->fan[1] >> 8);
 	mutex_unlock(&data->update_lock);
 	return count;
@@ -413,7 +473,7 @@ static ssize_t set_pwm1(struct device *dev, struct device_attribute *devattr,
 	mutex_lock(&data->update_lock);
 	data->pwm1[nr] = data->pwm_highres ? val :
 			(val * data->pwm1_freq * 2 + 127) / 255;
-	i2c_smbus_write_byte_data(client, reg, data->pwm1[nr]);
+	lm63_i2c_smbus_write_byte_data(client, reg, data->pwm1[nr]);
 	mutex_unlock(&data->update_lock);
 	return count;
 }
@@ -448,13 +508,13 @@ static ssize_t set_pwm1_enable(struct device *dev,
 		return -EPERM;
 
 	mutex_lock(&data->update_lock);
-	data->config_fan = i2c_smbus_read_byte_data(client,
+	data->config_fan = lm63_i2c_smbus_read_byte_data(client,
 						    LM63_REG_CONFIG_FAN);
 	if (val == 1)
 		data->config_fan |= 0x20;
 	else
 		data->config_fan &= ~0x20;
-	i2c_smbus_write_byte_data(client, LM63_REG_CONFIG_FAN,
+	lm63_i2c_smbus_write_byte_data(client, LM63_REG_CONFIG_FAN,
 				  data->config_fan);
 	mutex_unlock(&data->update_lock);
 	return count;
@@ -529,7 +589,7 @@ static ssize_t set_temp8(struct device *dev, struct device_attribute *devattr,
 		temp = lut_temp_to_reg(data, val);
 	}
 	data->temp8[nr] = temp;
-	i2c_smbus_write_byte_data(client, reg, temp);
+	lm63_i2c_smbus_write_byte_data(client, reg, temp);
 	mutex_unlock(&data->update_lock);
 	return count;
 }
@@ -589,9 +649,9 @@ static ssize_t set_temp11(struct device *dev, struct device_attribute *devattr,
 	else
 		data->temp11[nr] = TEMP11_TO_REG(val - data->temp2_offset);
 
-	i2c_smbus_write_byte_data(client, reg[(nr - 1) * 2],
+	lm63_i2c_smbus_write_byte_data(client, reg[(nr - 1) * 2],
 				  data->temp11[nr] >> 8);
-	i2c_smbus_write_byte_data(client, reg[(nr - 1) * 2 + 1],
+	lm63_i2c_smbus_write_byte_data(client, reg[(nr - 1) * 2 + 1],
 				  data->temp11[nr] & 0xff);
 	mutex_unlock(&data->update_lock);
 	return count;
@@ -641,7 +701,7 @@ static ssize_t set_temp2_crit_hyst(struct device *dev,
 
 	mutex_lock(&data->update_lock);
 	hyst = temp8_from_reg(data, 2) + data->temp2_offset - val;
-	i2c_smbus_write_byte_data(client, LM63_REG_REMOTE_TCRIT_HYST,
+	lm63_i2c_smbus_write_byte_data(client, LM63_REG_REMOTE_TCRIT_HYST,
 				  HYST_TO_REG(hyst));
 	mutex_unlock(&data->update_lock);
 	return count;
@@ -667,7 +727,7 @@ static void lm63_set_convrate(struct lm63_data *data, unsigned int interval)
 		if (interval >= update_interval * 3 / 4)
 			break;
 
-	i2c_smbus_write_byte_data(client, LM63_REG_CONVRATE, i);
+	lm63_i2c_smbus_write_byte_data(client, LM63_REG_CONVRATE, i);
 	data->update_interval = UPDATE_INTERVAL(data->max_convrate_hz, i);
 }
 
@@ -723,8 +783,8 @@ static ssize_t set_type(struct device *dev, struct device_attribute *attr,
 
 	mutex_lock(&data->update_lock);
 	data->trutherm = val == 1;
-	reg = i2c_smbus_read_byte_data(client, LM96163_REG_TRUTHERM) & ~0x02;
-	i2c_smbus_write_byte_data(client, LM96163_REG_TRUTHERM,
+	reg = lm63_i2c_smbus_read_byte_data(client, LM96163_REG_TRUTHERM) & ~0x02;
+	lm63_i2c_smbus_write_byte_data(client, LM96163_REG_TRUTHERM,
 				  reg | (data->trutherm ? 0x02 : 0x00));
 	data->valid = 0;
 	mutex_unlock(&data->update_lock);
@@ -990,14 +1050,14 @@ static int lm63_detect(struct i2c_client *client,
 	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
 		return -ENODEV;
 
-	man_id = i2c_smbus_read_byte_data(client, LM63_REG_MAN_ID);
-	chip_id = i2c_smbus_read_byte_data(client, LM63_REG_CHIP_ID);
+	man_id = lm63_i2c_smbus_read_byte_data(client, LM63_REG_MAN_ID);
+	chip_id = lm63_i2c_smbus_read_byte_data(client, LM63_REG_CHIP_ID);
 
-	reg_config1 = i2c_smbus_read_byte_data(client, LM63_REG_CONFIG1);
-	reg_config2 = i2c_smbus_read_byte_data(client, LM63_REG_CONFIG2);
-	reg_alert_status = i2c_smbus_read_byte_data(client,
+	reg_config1 = lm63_i2c_smbus_read_byte_data(client, LM63_REG_CONFIG1);
+	reg_config2 = lm63_i2c_smbus_read_byte_data(client, LM63_REG_CONFIG2);
+	reg_alert_status = lm63_i2c_smbus_read_byte_data(client,
 			   LM63_REG_ALERT_STATUS);
-	reg_alert_mask = i2c_smbus_read_byte_data(client, LM63_REG_ALERT_MASK);
+	reg_alert_mask = lm63_i2c_smbus_read_byte_data(client, LM63_REG_ALERT_MASK);
 
 	if (man_id != 0x01 /* National Semiconductor */
 	 || (reg_config1 & 0x18) != 0x00
@@ -1032,15 +1092,15 @@ static void lm63_init_client(struct lm63_data *data)
 	struct device *dev = &client->dev;
 	u8 convrate;
 
-	data->config = i2c_smbus_read_byte_data(client, LM63_REG_CONFIG1);
-	data->config_fan = i2c_smbus_read_byte_data(client,
+	data->config = lm63_i2c_smbus_read_byte_data(client, LM63_REG_CONFIG1);
+	data->config_fan = lm63_i2c_smbus_read_byte_data(client,
 						    LM63_REG_CONFIG_FAN);
 
 	/* Start converting if needed */
 	if (data->config & 0x40) { /* standby */
 		dev_dbg(dev, "Switching to operational mode\n");
 		data->config &= 0xA7;
-		i2c_smbus_write_byte_data(client, LM63_REG_CONFIG1,
+		lm63_i2c_smbus_write_byte_data(client, LM63_REG_CONFIG1,
 					  data->config);
 	}
 	/* Tachometer is always enabled on LM64 */
@@ -1048,7 +1108,7 @@ static void lm63_init_client(struct lm63_data *data)
 		data->config |= 0x04;
 
 	/* We may need pwm1_freq before ever updating the client data */
-	data->pwm1_freq = i2c_smbus_read_byte_data(client, LM63_REG_PWM_FREQ);
+	data->pwm1_freq = lm63_i2c_smbus_read_byte_data(client, LM63_REG_PWM_FREQ);
 	if (data->pwm1_freq == 0)
 		data->pwm1_freq = 1;
 
@@ -1062,11 +1122,11 @@ static void lm63_init_client(struct lm63_data *data)
 		data->max_convrate_hz = LM96163_MAX_CONVRATE_HZ;
 		data->lut_size = 12;
 		data->trutherm
-		  = i2c_smbus_read_byte_data(client,
+		  = lm63_i2c_smbus_read_byte_data(client,
 					     LM96163_REG_TRUTHERM) & 0x02;
 		break;
 	}
-	convrate = i2c_smbus_read_byte_data(client, LM63_REG_CONVRATE);
+	convrate = lm63_i2c_smbus_read_byte_data(client, LM63_REG_CONVRATE);
 	if (unlikely(convrate > LM63_MAX_CONVRATE))
 		convrate = LM63_MAX_CONVRATE;
 	data->update_interval = UPDATE_INTERVAL(data->max_convrate_hz,
@@ -1078,7 +1138,7 @@ static void lm63_init_client(struct lm63_data *data)
 	 */
 	if (data->kind == lm96163) {
 		u8 config_enhanced
-		  = i2c_smbus_read_byte_data(client,
+		  = lm63_i2c_smbus_read_byte_data(client,
 					     LM96163_REG_CONFIG_ENHANCED);
 		if (config_enhanced & 0x20)
 			data->lut_temp_highres = true;
@@ -1090,7 +1150,7 @@ static void lm63_init_client(struct lm63_data *data)
 	}
 
 	/* 50% spinup for 3.2 seconds */
-	i2c_smbus_write_byte_data(client, LM63_REG_SPINUP, 0x0f);
+	lm63_i2c_smbus_write_byte_data(client, LM63_REG_SPINUP, 0x0f);
 
 	/* Show some debug info about the LM63 configuration */
 	if (data->kind == lm63)
