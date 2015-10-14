@@ -1275,6 +1275,17 @@ config RELAY
 
 	  If unsure, say N.
 
+config ANTIREBOOTLOOP
+	bool "Anti reboot loop"
+	depends on HAVE_MEMBLOCK
+	help
+	  The anti reboot loop feature is a communication protocol between the
+	  kernel and the bootloader. It is basically a counter at a pre-defined
+	  location in DRAM that is incremented by the bootloader and reset to
+	  zero by the kernel when some user space process determined that the
+	  system came up ok. This mechanism allows the bootloader to switch to
+	  a different kernel/rootfs image if the system keeps on rebooting.
+
 config BLK_DEV_INITRD
 	bool "Initial RAM filesystem and RAM disk (initramfs/initrd) support"
 	depends on BROKEN || !FRV
