@@ -712,6 +712,7 @@ enum sock_flags {
 	SOCK_TIMESTAMPING_RX_SOFTWARE,  /* %SOF_TIMESTAMPING_RX_SOFTWARE */
 	SOCK_FASYNC, /* fasync() active */
 	SOCK_RXQ_OVFL,
+	SOCK_RXQ_ALLOC,
 	SOCK_ZEROCOPY, /* buffers from userspace */
 	SOCK_WIFI_STATUS, /* push wifi status to userspace */
 	SOCK_NOFCS, /* Tell NIC not to do the Ethernet FCS.
@@ -2147,6 +2148,14 @@ static inline void sock_recv_ts_and_drops(struct msghdr *msg, struct sock *sk,
 		__sock_recv_ts_and_drops(msg, sk, skb);
 	else
 		sk->sk_stamp = skb->tstamp;
+}
+
+void __sock_recv_alloc(struct msghdr *msg, struct sock *sk);
+
+static inline void sock_recv_alloc(struct msghdr *msg, struct sock *sk)
+{
+	if (sock_flag(sk, SOCK_RXQ_ALLOC))
+		__sock_recv_alloc(msg, sk);
 }
 
 void __sock_tx_timestamp(const struct sock *sk, __u8 *tx_flags);

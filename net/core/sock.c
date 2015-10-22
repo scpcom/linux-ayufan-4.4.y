@@ -948,6 +948,10 @@ set_rcvbuf:
 		sock_valbool_flag(sk, SOCK_RXQ_OVFL, valbool);
 		break;
 
+	case SO_RXQ_ALLOC:
+		sock_valbool_flag(sk, SOCK_RXQ_ALLOC, valbool);
+		break;
+
 	case SO_WIFI_STATUS:
 		sock_valbool_flag(sk, SOCK_WIFI_STATUS, valbool);
 		break;
@@ -1195,6 +1199,10 @@ int sock_getsockopt(struct socket *sock, int level, int optname,
 
 	case SO_RXQ_OVFL:
 		v.val = sock_flag(sk, SOCK_RXQ_OVFL);
+		break;
+
+	case SO_RXQ_ALLOC:
+		v.val = sock_flag(sk, SOCK_RXQ_ALLOC);
 		break;
 
 	case SO_WIFI_STATUS:
