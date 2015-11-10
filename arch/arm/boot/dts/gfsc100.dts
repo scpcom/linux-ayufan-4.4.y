@@ -1,0 +1,182 @@
+/dts-v1/;
+
+#include "ls1024a.dtsi"
+/ {
+	model = "Google SpaceCast (GFSC100)";
+	compatible = "google,gfsc100", "fsl,ls1024a";
+
+	chosen {
+		bootargs = "log_buf_len=8M";
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <0x80000000 0x40000000>; /* 1 GB */
+	};
+
+	pwmleds {
+		compatible = "pwm-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_gfsc100_leds>;
+
+		pwmledblue: pwmledblue {
+			label = "blue";
+			pwms = <&pwm 4 1000000>;
+			max-brightness = <200>;
+		};
+		pwmledred: pwmledred {
+			label = "red";
+			pwms = <&pwm 5 1000000>;
+			max-brightness = <200>;
+			linux,default-trigger = "default-on";
+		};
+	};
+};
+
+&pinctrl0 {
+	tpm_int {
+		gpio-hog;
+		gpios = <0 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "tpm_int";
+	};
+	fan_control_alert {
+		gpio-hog;
+		gpios = <1 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "fan_control_alert";
+	};
+	usb_brg_rst_n {
+		gpio-hog;
+		gpios = <9 GPIO_ACTIVE_LOW>;
+		output-low;
+		line-name = "usb_brg_rst_n";
+	};
+	m88rs6k_rst_n {
+		gpio-hog;
+		gpios = <11 GPIO_ACTIVE_LOW>;
+		output-low;
+		line-name = "m88rs6k_rst_n";
+	};
+	mv88E1512_rst_n {
+		gpio-hog;
+		gpios = <14 GPIO_ACTIVE_LOW>;
+		output-low;
+		line-name = "mv88E1512_rst_n";
+	};
+	usb_power {
+		gpio-hog;
+		gpios = <15 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "usb_power";
+	};
+	lnb_fault_n {
+		gpio-hog;
+		gpios = <47 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "lnb_fault_n";
+	};
+	lnb_pwr_sel {
+		gpio-hog;
+		gpios = <51 GPIO_ACTIVE_HIGH>;
+		output-low;
+		line-name = "lnb_pwr_sel";
+	};
+	hw_rev_0 {
+		gpio-hog;
+		gpios = <52 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "hw_rev_0";
+	};
+	hw_rev_1 {
+		gpio-hog;
+		gpios = <53 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "hw_rev_1";
+	};
+	hw_rev_2 {
+		gpio-hog;
+		gpios = <54 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "hw_rev_2";
+	};
+	board_id_0 {
+		gpio-hog;
+		gpios = <55 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "board_id_0";
+	};
+	board_id_1 {
+		gpio-hog;
+		gpios = <56 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "board_id_1";
+	};
+	board_id_2 {
+		gpio-hog;
+		gpios = <57 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "board_id_2";
+	};
+	pinctrl_gfsc100_leds: gfsc100-leds-grp {
+		leds {
+			groups = "pwm4", "pwm5";
+			function = "pwm";
+		};
+	};
+	pinctrl_i2c: i2cgrp {
+		i2c {
+			groups = "i2c";
+			function = "i2c";
+		};
+	};
+};
+
+/* TODO(mka@): specify the partition layout only in the bootloader */
+&nor0 {
+	uloader@0 {
+		label = "uloader";
+		reg = <0x0 0x20000>;
+	};
+	loader0@20000 {
+		label = "loader0";
+		reg = <0x20000 0x80000>;
+	};
+	loader1@a0000 {
+		label = "loader1";
+		reg = <0xa0000 0x80000>;
+	};
+	env@120000 {
+		label = "env";
+		reg = <0x120000 0x20000>;
+	};
+	hnvram@140000 {
+		label = "hnvram";
+		reg = <0x140000 0x200000>;
+	};
+	kernel0@340000 {
+		label = "kernel0";
+		reg = <0x340000 0x600000>;
+	};
+	kernel1@940000 {
+		label = "kernel1";
+		reg = <0x940000 0x600000>;
+	};
+	norreserved0@F40000 {
+		label = "norreserved0";
+		reg = <0xF40000 0x00c0000>;
+	};
+};
+
+&i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c>;
+	tpm_i2c_infineon: tpm_i2c_infineon@20 {
+		compatible = "infineon,tpm_i2c_infineon";
+		reg = <0x20>;
+	};
+	lm63: lm63@4c {
+		compatible = "national,lm63";
+		reg = <0x4c>;
+	};
+};
