@@ -6654,9 +6654,15 @@ uint32_t dwc_otg_get_gsnpsid(dwc_otg_core_if_t * core_if)
 
 uint32_t dwc_otg_get_mode(dwc_otg_core_if_t * core_if)
 {
+#if defined(CONFIG_DWC_OTG_HOST_ONLY)
+	return DWC_HOST_MODE;
+#elif defined(CONFIG_DWC_OTG_DEVICE_ONLY)
+	return 0;
+#else
 	gintsts_data_t gintsts;
 	gintsts.d32 = DWC_READ_REG32(&core_if->core_global_regs->gintsts);
 	return gintsts.b.curmode;
+#endif
 }
 
 uint32_t dwc_otg_get_hnpcapable(dwc_otg_core_if_t * core_if)

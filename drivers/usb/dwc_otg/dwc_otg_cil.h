@@ -1292,7 +1292,7 @@ static inline uint32_t dwc_otg_read_host_channel_intr(dwc_otg_core_if_t *
  */
 static inline uint32_t dwc_otg_mode(dwc_otg_core_if_t * _core_if)
 {
-	return (DWC_READ_REG32(&_core_if->core_global_regs->gintsts) & 0x1);
+	return dwc_otg_get_mode(_core_if);
 }
 
 /**@}*/
