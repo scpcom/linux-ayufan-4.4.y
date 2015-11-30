@@ -317,7 +317,7 @@ static struct resource comcerto_pfe_resources[] = {
 
 };
 
-static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
+static struct comcerto_pfe_platform_data optimus_pfe_pdata = {
 	.comcerto_eth_pdata[0] = {
 		.name = "lan0",
 		.device_flags = CONFIG_COMCERTO_GEMAC,
@@ -366,13 +366,53 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 	},
 };
 
+static struct comcerto_pfe_platform_data gfsc100_pfe_pdata = {
+	.comcerto_eth_pdata[0] = {
+		.name = "unused",
+		.phy_flags = GEMAC_NO_PHY,
+		.gem_id = 0,
+	},
+
+	.comcerto_eth_pdata[1] = {
+		.name = "lan0",
+		.device_flags = CONFIG_COMCERTO_GEMAC,
+		.mii_config = CONFIG_COMCERTO_USE_RGMII,
+		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
+		.phy_flags = GEMAC_PHY_RGMII_ADD_DELAY,
+		.bus_id = 0,
+		.phy_id = 1,
+		.gem_id = 1,
+		.mac_addr = (u8[])GEM1_MAC,
+	},
+
+	.comcerto_eth_pdata[2] = {
+		.name = "unused",
+		.phy_flags = GEMAC_NO_PHY,
+		.gem_id = 2,
+	},
+
+	/**
+	 * There is a single mdio bus coming out of C2K.  And that's the one
+	 * connected to GEM0. All PHY's, switchs will be connected to the same
+	 * bus using different addresses. Typically .bus_id is always 0, only
+	 * .phy_id will change in the different comcerto_eth_pdata[] structures above.
+	 */
+	.comcerto_mdio_pdata[0] = {
+		.enabled = 1,
+		.phy_mask = 0xFFFFFFFD,
+		.mdc_div = 96,
+		.irq = {
+			[1] = PHY_POLL,
+		},
+	},
+};
+
 static u64 comcerto_pfe_dma_mask = DMA_BIT_MASK(32);
 
 static struct platform_device comcerto_pfe_device = {
 	.name		= "pfe",
 	.id		= 0,
 	.dev		= {
-		.platform_data		= &comcerto_pfe_pdata,
 		.dma_mask		= &comcerto_pfe_dma_mask,
 		.coherent_dma_mask	= DMA_BIT_MASK(32),
 	},
@@ -455,10 +495,18 @@ void __init mac_addr_init(struct comcerto_pfe_platform_data * comcerto_pfe_data_
 
 }
 
+static void __init pfe_init_pdata(void) {
+	if (of_machine_is_compatible("google,gfsc100")) {
+		comcerto_pfe_device.dev.platform_data = &gfsc100_pfe_pdata;
+	} else {
+		comcerto_pfe_device.dev.platform_data = &optimus_pfe_pdata;
+	}
+}
 
 static int __init register_pfe_device(void) {
 	int rc;
-	mac_addr_init(&comcerto_pfe_pdata);
+	pfe_init_pdata();
+	mac_addr_init(comcerto_pfe_device.dev.platform_data);
 	rc = platform_device_register(&comcerto_pfe_device);
 	return 0;
 }
