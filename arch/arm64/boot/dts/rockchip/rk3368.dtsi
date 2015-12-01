@@ -531,6 +531,11 @@
 		status = "disabled";
 	};
 
+	ddrpctl: syscon@ff610000 {
+		compatible = "rockchip,rk3368-ddrpctl", "syscon";
+		reg = <0x0 0xff610000 0x0 0x400>;
+	};
+
 	i2c0: i2c@ff650000 {
 		compatible = "rockchip,rk3368-i2c", "rockchip,rk3288-i2c";
 		reg = <0x0 0xff650000 0x0 0x1000>;
@@ -623,6 +628,11 @@
 		clock-names = "pclk_mailbox";
 		#mbox-cells = <1>;
 		status = "disabled";
+	};
+
+	pmu: power-management@ff730000 {
+		compatible = "rockchip,rk3368-pmu", "syscon";
+		reg = <0x0 0xff730000 0x0 0x1000>;
 	};
 
 	pmugrf: syscon@ff738000 {
