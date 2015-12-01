@@ -328,6 +328,7 @@ struct sk_buff *__build_skb(void *data, unsigned int frag_size)
 
 	return skb;
 }
+EXPORT_SYMBOL(__build_skb);
 
 /* build_skb() is wrapper over __build_skb(), that specifically
  * takes care of skb->head and skb->pfmemalloc
@@ -346,6 +347,28 @@ struct sk_buff *build_skb(void *data, unsigned int frag_size)
 	return skb;
 }
 EXPORT_SYMBOL(build_skb);
+
+struct sk_buff *alloc_dma_coherent_skb(unsigned int size)
+{
+	struct sk_buff *skb = NULL;
+	dma_addr_t dma_handle;
+	void *buf;
+
+	size = SKB_DATA_ALIGN(size);
+	size += SKB_DATA_ALIGN(sizeof(struct skb_shared_info));
+	buf = dma_alloc_coherent(NULL, size, &dma_handle, GFP_ATOMIC);
+	if (buf) {
+		skb = __build_skb(buf, size);
+		if (skb) {
+			skb->dma_coherent = 1;
+		} else {
+			dma_free_coherent(NULL, size, buf, dma_handle);
+		}
+	}
+	return skb;
+	/* dma_handle is thrown away */
+}
+EXPORT_SYMBOL(alloc_dma_coherent_skb);
 
 struct netdev_alloc_cache {
 	struct page_frag	frag;
@@ -613,7 +636,12 @@ static void skb_free_head(struct sk_buff *skb)
 {
 	if (skb->head_frag)
 		put_page(virt_to_head_page(skb->head));
-	else
+	else if (skb->dma_coherent) {
+		unsigned int size;
+		size = skb->end - skb->head;
+		size += SKB_DATA_ALIGN(sizeof(struct skb_shared_info));
+		dma_free_coherent(NULL, size, skb->head, 0);
+	} else
 		kfree(skb->head);
 }
 
@@ -861,6 +889,7 @@ static void __copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
  */
 static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 {
+	BUG_ON(skb->dma_coherent);
 #define C(x) n->x = skb->x
 
 	n->next = n->prev = NULL;
@@ -878,6 +907,7 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	C(end);
 	C(head);
 	C(head_frag);
+	C(dma_coherent);
 	C(data);
 	C(truesize);
 	atomic_set(&n->users, 1);

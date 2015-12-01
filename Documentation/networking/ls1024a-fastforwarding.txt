@@ -1,0 +1,100 @@
+NXP's (formerly Freescale) QorIQ LS1024A SoC (formerly known as Mindspeed
+Comcerto 2000) provides fast hardware forwarding between its three Ethernet
+MACs. For forwarding between an Ethernet MAC and WLAN, it depends on the ARM
+CPU to pass frames between the forwarding engine called PPFE (programmable
+packet forwarding engine) and the WLAN hardware connected via PCIe. Most
+forwarding decisions as well as NAT are handled inside the PPFE hardware. The
+role of Linux is reduced to forwarding descriptors between PPFE and the WLAN
+hardware.  Linux rarely accesses the data inside the Ethernet frames.
+
+Performance can be improved by using DMA coherent memory for data buffers
+because they do not require L1/L2 cache flushing, invalidation, etc. which
+turned out to be expensive on the LS1024A.  The PPFE driver allocates buffers
+using dma_alloc_coherent() and builds an skb around it. A few changes to the
+kernel were necessary to support DMA coherent skbs. We added the field
+dma_coherent to struct sk_buff to indicate that the skb head is in DMA coherent
+memory. skb_free_head() in skbuff.c checks for this flag and calls
+dma_free_coherent() instead of put_page() or kfree() on skb->head.
+
+dma_alloc_coherent() returns two values: (1) the CPU address which is a regular
+pointer i.e. a virtual address and (2) a dma handle which is basically a
+physical address that can be communicated to the hardware. For our fast
+forwarding approach to work, the virtual address must be in lowmem which means
+that there is a simple mapping from virtual address space to physical address
+space. In many situation, dma_alloc_coherent() returns an address from the
+vmalloc space which does not work for our purposes because dma_map_single()
+uses virt_to_page() to map a pointer (virtual address) to a page, and
+virt_to_page() does not work with addresses from the vmalloc space. For
+dma_alloc_coherent() to return an address in lowmem, a few conditions need to
+be met: (1) The caller needs to pass in GFP_ATOMIC for arm_dma_alloc() to
+allocate memory from its atomic pool. (2) The atomic pool needs to be allocated
+from CMA (CONFIG_CMA and CONFIG_DMA_CMA need to be set)
+
+dma_free_coherent() requires the cpu address (virtual address) and the dma
+handle (physical address) to be passed in. However, in our approach, the dma
+handle gets lost, because we do not store it in the skb. This turns out not to
+be a problem because the dma handle is not required if the memory came from the
+atomic pool. Although it does work in practice, the DMA-API debug feature
+complains about the incorrect dma handle passed into dma_free_coherent().
+Examples of these error messages can be found below. They can be ignored.
+
+December 9, 2015
+Daniel Mentz <danielmentz@google.com>
+
+
+[   10.468709] ------------[ cut here ]------------
+[   10.473383] WARNING: CPU: 0 PID: 0 at lib/dma-debug.c:1093 check_unmap+0x695/0x84c()
+[   10.481163] NULL NULL: DMA-API: device driver tries to free DMA memory it has not allocated [device address=0x0000000000000000] [size=2048 bytes]
+[   10.494246] Modules linked in: pfe(O)
+[   10.497952] CPU: 0 PID: 0 Comm: swapper/0 Tainted: G           O    4.1.0-gfiber0+ #298
+[   10.505988] Hardware name: Generic Freescale LS1024A (Flattened Device Tree)
+[   10.513095] [<800142a5>] (unwind_backtrace) from [<80011441>] (show_stack+0x11/0x14)
+[   10.520885] [<80011441>] (show_stack) from [<803dd59b>] (dump_stack+0x6f/0x98)
+[   10.528139] [<803dd59b>] (dump_stack) from [<80020f87>] (warn_slowpath_common+0x6b/0x94)
+[   10.536270] [<80020f87>] (warn_slowpath_common) from [<80020fd3>] (warn_slowpath_fmt+0x23/0x2c)
+[   10.545009] [<80020fd3>] (warn_slowpath_fmt) from [<802097d5>] (check_unmap+0x695/0x84c)
+[   10.553139] [<802097d5>] (check_unmap) from [<80209a41>] (debug_dma_free_coherent+0x61/0x68)
+[   10.561692] [<80209a41>] (debug_dma_free_coherent) from [<7f8042eb>] (pfe_eth_poll+0x3f6/0x644 [pfe])
+[   10.571001] [<7f8042eb>] (pfe_eth_poll [pfe]) from [<7f8045e7>] (pfe_eth_low_poll+0x36/0x3c [pfe])
+[   10.580027] [<7f8045e7>] (pfe_eth_low_poll [pfe]) from [<8031be17>] (net_rx_action+0x153/0x240)
+[   10.588759] [<8031be17>] (net_rx_action) from [<800233d1>] (__do_softirq+0xd5/0x294)
+[   10.596541] [<800233d1>] (__do_softirq) from [<80023813>] (irq_exit+0x8f/0xd8)
+[   10.603803] [<80023813>] (irq_exit) from [<8004b4a1>] (__handle_domain_irq+0x49/0x84)
+[   10.611670] [<8004b4a1>] (__handle_domain_irq) from [<800092ef>] (gic_handle_irq+0x27/0x50)
+[   10.620069] [<800092ef>] (gic_handle_irq) from [<803e1b3f>] (__irq_svc+0x3f/0x88)
+[   10.627573] Exception stack(0x80631f58 to 0x80631fa0)
+[   10.632649] 1f40:                                                       00000000 80633350
+[   10.640861] 1f60: 00000000 00000000 80630000 806324e8 80632400 8069b6b4 806324a0 8062a304
+[   10.649064] 1f80: 803e6a00 8069b6b4 8063003c 80631fa0 8000f14b 8000f14c 40070033 ffffffff
+[   10.657285] [<803e1b3f>] (__irq_svc) from [<8000f14c>] (arch_cpu_idle+0x30/0x34)
+[   10.664728] [<8000f14c>] (arch_cpu_idle) from [<80045fdb>] (cpu_startup_entry+0x11f/0x204)
+[   10.673035] [<80045fdb>] (cpu_startup_entry) from [<805dba31>] (start_kernel+0x309/0x314)
+[   10.681244] ---[ end trace 62a3b00cc739c0de ]---
+
+[   11.212979] ------------[ cut here ]------------
+[   11.217643] WARNING: CPU: 0 PID: 0 at lib/dma-debug.c:509 add_dma_entry+0xb1/0xd4()
+[   11.225323] DMA-API: exceeded 7 overlapping mappings of cacheline 0x03e00000
+[   11.232390] Modules linked in: pfe(O)
+[   11.236094] CPU: 0 PID: 0 Comm: swapper/0 Tainted: G        W  O    4.1.0-gfiber0+ #298
+[   11.244121] Hardware name: Generic Freescale LS1024A (Flattened Device Tree)
+[   11.251216] [<800142a5>] (unwind_backtrace) from [<80011441>] (show_stack+0x11/0x14)
+[   11.258994] [<80011441>] (show_stack) from [<803dd59b>] (dump_stack+0x6f/0x98)
+[   11.266247] [<803dd59b>] (dump_stack) from [<80020f87>] (warn_slowpath_common+0x6b/0x94)
+[   11.274366] [<80020f87>] (warn_slowpath_common) from [<80020fd3>] (warn_slowpath_fmt+0x23/0x2c)
+[   11.283094] [<80020fd3>] (warn_slowpath_fmt) from [<80208efd>] (add_dma_entry+0xb1/0xd4)
+[   11.291283] [<80208efd>] (add_dma_entry) from [<7f801861>] (pfe_hif_rx_poll+0x1c8/0x594 [pfe])
+[   11.299949] [<7f801861>] (pfe_hif_rx_poll [pfe]) from [<8031be17>] (net_rx_action+0x153/0x240)
+[   11.308593] [<8031be17>] (net_rx_action) from [<800233d1>] (__do_softirq+0xd5/0x294)
+[   11.316363] [<800233d1>] (__do_softirq) from [<80023813>] (irq_exit+0x8f/0xd8)
+[   11.323616] [<80023813>] (irq_exit) from [<8004b4a1>] (__handle_domain_irq+0x49/0x84)
+[   11.331474] [<8004b4a1>] (__handle_domain_irq) from [<800092ef>] (gic_handle_irq+0x27/0x50)
+[   11.339863] [<800092ef>] (gic_handle_irq) from [<803e1b3f>] (__irq_svc+0x3f/0x88)
+[   11.347366] Exception stack(0x80631f58 to 0x80631fa0)
+[   11.352433] 1f40:                                                       00000000 80633350
+[   11.360636] 1f60: 00000000 00000000 80630000 806324e8 80632400 8069b6b4 806324a0 8062a304
+[   11.368838] 1f80: 803e6a00 8069b6b4 8063003c 80631fa0 8000f14b 8000f14c 400f0033 ffffffff
+[   11.377049] [<803e1b3f>] (__irq_svc) from [<8000f14c>] (arch_cpu_idle+0x30/0x34)
+[   11.384480] [<8000f14c>] (arch_cpu_idle) from [<80045fdb>] (cpu_startup_entry+0x11f/0x204)
+[   11.392776] [<80045fdb>] (cpu_startup_entry) from [<805dba31>] (start_kernel+0x309/0x314)
+[   11.400978] ---[ end trace 62a3b00cc739c0df ]---
+

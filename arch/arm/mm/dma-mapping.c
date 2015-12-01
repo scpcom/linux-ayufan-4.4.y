@@ -42,6 +42,21 @@
 #include "mm.h"
 
 /*
+ * Experiments showed that, on the NXP (formerly Freescale) QorIQ LS1024A (fka
+ * Mindspeed Comcerto 2000), we need approx. 10 MB of DMA coherent memory for
+ * fast forwarding between wired Ethernet ports and ath10k.
+ */
+#define DEFAULT_DMA_COHERENT_POOL_SIZE	SZ_16M
+static struct gen_pool *atomic_pool;
+static size_t atomic_pool_size = DEFAULT_DMA_COHERENT_POOL_SIZE;
+
+static inline bool __in_atomic_pool(void *start, size_t size)
+{
+	return atomic_pool && addr_in_gen_pool(atomic_pool,
+			(unsigned long)start, size);
+}
+
+/*
  * The DMA API is built upon the notion of "buffer ownership".  A buffer
  * is either exclusively owned by the CPU (and therefore may be accessed
  * by it) or exclusively owned by the DMA device.  These helper functions
@@ -76,8 +91,13 @@ static dma_addr_t arm_dma_map_page(struct device *dev, struct page *page,
 	     unsigned long offset, size_t size, enum dma_data_direction dir,
 	     struct dma_attrs *attrs)
 {
-	if (!dma_get_attr(DMA_ATTR_SKIP_CPU_SYNC, attrs))
-		__dma_page_cpu_to_dev(page, offset, size, dir);
+	if (unlikely(!__in_atomic_pool(phys_to_virt(page_to_phys(page)),
+					size))) {
+		if (!dma_get_attr(DMA_ATTR_SKIP_CPU_SYNC, attrs))
+			__dma_page_cpu_to_dev(page, offset, size, dir);
+	} else {
+		wmb();
+	}
 	return pfn_to_dma(dev, page_to_pfn(page)) + offset;
 }
 
@@ -106,9 +126,11 @@ static void arm_dma_unmap_page(struct device *dev, dma_addr_t handle,
 		size_t size, enum dma_data_direction dir,
 		struct dma_attrs *attrs)
 {
-	if (!dma_get_attr(DMA_ATTR_SKIP_CPU_SYNC, attrs))
-		__dma_page_dev_to_cpu(pfn_to_page(dma_to_pfn(dev, handle)),
-				      handle & ~PAGE_MASK, size, dir);
+	if (unlikely(!__in_atomic_pool(phys_to_virt(handle), size))) {
+		if (!dma_get_attr(DMA_ATTR_SKIP_CPU_SYNC, attrs))
+			__dma_page_dev_to_cpu(pfn_to_page(dma_to_pfn(dev, handle)),
+					      handle & ~PAGE_MASK, size, dir);
+	}
 }
 
 static void arm_dma_sync_single_for_cpu(struct device *dev,
@@ -314,10 +336,6 @@ static void __dma_free_remap(void *cpu_addr, size_t size)
 			VM_ARM_DMA_CONSISTENT | VM_USERMAP);
 }
 
-#define DEFAULT_DMA_COHERENT_POOL_SIZE	SZ_256K
-static struct gen_pool *atomic_pool;
-
-static size_t atomic_pool_size = DEFAULT_DMA_COHERENT_POOL_SIZE;
 
 static int __init early_coherent_pool(char *p)
 {
@@ -347,7 +365,9 @@ void __init init_dma_coherent_pool_size(unsigned long size)
 static int __init atomic_pool_init(void)
 {
 	pgprot_t prot = pgprot_dmacoherent(PAGE_KERNEL);
+#ifndef CONFIG_COMCERTO_DMA_COHERENT_SKB
 	gfp_t gfp = GFP_KERNEL | GFP_DMA;
+#endif
 	struct page *page;
 	void *ptr;
 
@@ -358,9 +378,24 @@ static int __init atomic_pool_init(void)
 	if (dev_get_cma_area(NULL))
 		ptr = __alloc_from_contiguous(NULL, atomic_pool_size, prot,
 					      &page, atomic_pool_init, true);
-	else
+	else {
+#ifdef CONFIG_COMCERTO_DMA_COHERENT_SKB
+		/*
+		 * For CONFIG_COMCERTO_DMA_COHERENT_SKB, we must not use
+		 * __alloc_remap_buffer(), because it maps the DMA coherent
+		 * pages into vmalloc space which is incompatible with
+		 * dma_map_single(). You can't pass a pointer from vmalloc
+		 * space into dma_map_single().
+		 */
+		WARN(1, "If CONFIG_COMCERTO_DMA_COHERENT_SKB is enabled, the "
+				"DMA coherent pool must come from CMA. "
+				"Consider enabling CMA.");
+		ptr = 0;
+#else
 		ptr = __alloc_remap_buffer(NULL, atomic_pool_size, gfp, prot,
 					   &page, atomic_pool_init, true);
+#endif
+	}
 	if (ptr) {
 		int ret;
 
@@ -507,11 +542,6 @@ static void *__alloc_from_pool(size_t size, struct page **ret_page)
 	}
 
 	return ptr;
-}
-
-static bool __in_atomic_pool(void *start, size_t size)
-{
-	return addr_in_gen_pool(atomic_pool, (unsigned long)start, size);
 }
 
 static int __free_from_pool(void *start, size_t size)

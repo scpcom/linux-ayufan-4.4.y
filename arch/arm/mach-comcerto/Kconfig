@@ -21,3 +21,8 @@ config COMCERTO_FP
 	bool "Comcerto Fast Path Support"
 	depends on ARCH_COMCERTO
 	default y
+
+config COMCERTO_DMA_COHERENT_SKB
+	bool "Support for DMA coherent SKB heads"
+	depends on ARCH_COMCERTO
+	default y
