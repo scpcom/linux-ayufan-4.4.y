@@ -37,6 +37,7 @@ struct i2c_mux_priv {
 	u32 chan_id;
 
 	int (*select)(struct i2c_adapter *, void *mux_priv, u32 chan_id);
+	int (*select_num)(struct i2c_adapter *, void *mux_priv, u32 chan_id, int num);
 	int (*deselect)(struct i2c_adapter *, void *mux_priv, u32 chan_id);
 };
 
@@ -49,7 +50,12 @@ static int i2c_mux_master_xfer(struct i2c_adapter *adap,
 
 	/* Switch to the right mux port and perform the transfer. */
 
-	ret = priv->select(parent, priv->mux_priv, priv->chan_id);
+	if (priv->select_num)
+		ret = priv->select_num(parent, priv->mux_priv, priv->chan_id,
+				num);
+	else
+		ret = priv->select(parent, priv->mux_priv, priv->chan_id);
+
 	if (ret >= 0)
 		ret = parent->algo->master_xfer(parent, msgs, num);
 	if (priv->deselect)
@@ -69,7 +75,12 @@ static int i2c_mux_smbus_xfer(struct i2c_adapter *adap,
 
 	/* Select the right mux port and perform the transfer. */
 
-	ret = priv->select(parent, priv->mux_priv, priv->chan_id);
+	if (priv->select_num)
+		ret = priv->select_num(parent, priv->mux_priv,
+				priv->chan_id, read_write? 2 : 1);
+	else
+		ret = priv->select(parent, priv->mux_priv, priv->chan_id);
+
 	if (ret >= 0)
 		ret = parent->algo->smbus_xfer(parent, addr, flags,
 					read_write, command, size, data);
@@ -101,12 +112,14 @@ static unsigned int i2c_mux_parent_classes(struct i2c_adapter *parent)
 	return class;
 }
 
-struct i2c_adapter *i2c_add_mux_adapter(struct i2c_adapter *parent,
+static struct i2c_adapter *__i2c_add_mux_adapter(struct i2c_adapter *parent,
 				struct device *mux_dev,
 				void *mux_priv, u32 force_nr, u32 chan_id,
 				unsigned int class,
 				int (*select) (struct i2c_adapter *,
 					       void *, u32),
+				int (*select_num) (struct i2c_adapter *,
+					       void *, u32, int),
 				int (*deselect) (struct i2c_adapter *,
 						 void *, u32))
 {
@@ -124,6 +137,7 @@ struct i2c_adapter *i2c_add_mux_adapter(struct i2c_adapter *parent,
 	priv->mux_priv = mux_priv;
 	priv->chan_id = chan_id;
 	priv->select = select;
+	priv->select_num = select_num;
 	priv->deselect = deselect;
 
 	/* Need to do algo dynamically because we don't know ahead
@@ -197,7 +211,34 @@ struct i2c_adapter *i2c_add_mux_adapter(struct i2c_adapter *parent,
 
 	return &priv->adap;
 }
+
+struct i2c_adapter *i2c_add_mux_adapter(struct i2c_adapter *parent,
+				struct device *mux_dev,
+				void *mux_priv, u32 force_nr, u32 chan_id,
+				unsigned int class,
+				int (*select) (struct i2c_adapter *,
+					       void *, u32),
+				int (*deselect) (struct i2c_adapter *,
+						 void *, u32))
+{
+	return __i2c_add_mux_adapter(parent, mux_dev, mux_priv, force_nr,
+				chan_id, class, select, NULL, deselect);
+}
 EXPORT_SYMBOL_GPL(i2c_add_mux_adapter);
+
+struct i2c_adapter *i2c_add_mux_adapter_num(struct i2c_adapter *parent,
+				struct device *mux_dev,
+				void *mux_priv, u32 force_nr, u32 chan_id,
+				unsigned int class,
+				int (*select_num) (struct i2c_adapter *,
+						void *, u32, int),
+				int (*deselect) (struct i2c_adapter *,
+						 void *, u32))
+{
+	return __i2c_add_mux_adapter(parent, mux_dev, mux_priv, force_nr,
+				chan_id, class, NULL, select_num, deselect);
+}
+EXPORT_SYMBOL_GPL(i2c_add_mux_adapter_num);
 
 void i2c_del_mux_adapter(struct i2c_adapter *adap)
 {

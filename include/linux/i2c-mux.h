@@ -42,6 +42,23 @@ struct i2c_adapter *i2c_add_mux_adapter(struct i2c_adapter *parent,
 				int (*deselect) (struct i2c_adapter *,
 						 void *mux_dev, u32 chan_id));
 
+/*
+ * Called to create a i2c bus on a multiplexed bus segment.
+ * The mux_dev and chan_id parameters are passed to the select
+ * and deselect callback functions to perform hardware-specific
+ * mux control. Additionaly the number of i2c transfers is passed
+ * to the select callback.
+ */
+struct i2c_adapter *i2c_add_mux_adapter_num(struct i2c_adapter *parent,
+				struct device *mux_dev,
+				void *mux_priv, u32 force_nr, u32 chan_id,
+				unsigned int class,
+				int (*select_num) (struct i2c_adapter *,
+						   void *mux_dev, u32 chan_id,
+					           int num),
+				int (*deselect) (struct i2c_adapter *,
+						 void *mux_dev, u32 chan_id));
+
 void i2c_del_mux_adapter(struct i2c_adapter *adap);
 
 #endif /* __KERNEL__ */
