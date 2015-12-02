@@ -1320,18 +1320,23 @@ static void m88ds3103_release(struct dvb_frontend *fe)
 	kfree(priv);
 }
 
-static int m88ds3103_select(struct i2c_adapter *adap, void *mux_priv, u32 chan)
+static int m88ds3103_select(struct i2c_adapter *adap, void *mux_priv, u32 chan,
+			    int num)
 {
 	struct m88ds3103_priv *priv = mux_priv;
 	int ret;
+	u8 buf[2] = {0x03, 0x10};
 	struct i2c_msg gate_open_msg[1] = {
 		{
 			.addr = priv->cfg->i2c_addr,
 			.flags = 0,
 			.len = 2,
-			.buf = "\x03\x11",
+			.buf = buf,
 		}
 	};
+
+	BUG_ON(num+0x10 > U8_MAX);
+	buf[1] += (u8)num;
 
 	mutex_lock(&priv->i2c_mutex);
 
@@ -1432,7 +1437,7 @@ struct dvb_frontend *m88ds3103_attach(const struct m88ds3103_config *cfg,
 		goto err;
 
 	/* create mux i2c adapter for tuner */
-	priv->i2c_adapter = i2c_add_mux_adapter(i2c, &i2c->dev, priv, 0, 0, 0,
+	priv->i2c_adapter = i2c_add_mux_adapter_num(i2c, &i2c->dev, priv, 0, 0, 0,
 			m88ds3103_select, m88ds3103_deselect);
 	if (priv->i2c_adapter == NULL)
 		goto err;
