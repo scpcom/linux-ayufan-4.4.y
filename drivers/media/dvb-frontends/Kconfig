@@ -42,6 +42,13 @@ config DVB_M88DS3103
 	help
 	  Say Y when you want to support this frontend.
 
+config DVB_M88DS3103_M88RS6000_FIRMWARE
+	string "M88RS6000 firmware"
+	depends on DVB_M88DS3103
+	default "dvb-demod-m88rs6000.fw"
+	help
+	  Name of the M88RS6000 firmware file.
+
 comment "Multistandard (cable + terrestrial) frontends"
 	depends on DVB_CORE
 
