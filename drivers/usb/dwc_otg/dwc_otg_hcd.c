@@ -904,6 +904,15 @@ static void dwc_otg_hcd_reinit(dwc_otg_hcd_t * hcd)
 	dwc_hc_t *channel;
 	dwc_hc_t *channel_tmp;
 
+	/*
+	 * It has been observed that the controller doesn't work properly
+	 * when the kernel console is connected to a vterm (which affects
+	 * timing). Experiments have shown that the problem can be fixed
+	 * with a delay of at least 60ms before starting the controller
+	 * initialization. A delay of 200ms is used to add some margin
+	 */
+        msleep(200);
+
 	hcd->flags.d32 = 0;
 
 	hcd->non_periodic_qh_ptr = &hcd->non_periodic_sched_active;
