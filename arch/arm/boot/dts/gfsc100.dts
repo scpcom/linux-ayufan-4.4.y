@@ -62,7 +62,7 @@
 		gpio-hog;
 		gpios = <14 GPIO_ACTIVE_LOW>;
 		output-low;
-		line-name = "mv88E1512_rst_n";
+		line-name = "mv88e1512_rst_n";
 	};
 	usb_power {
 		gpio-hog;
