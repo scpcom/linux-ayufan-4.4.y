@@ -40,6 +40,9 @@ obj-$(CONFIG_DVB_USB_RTL28XXU) += dvb-usb-rtl28xxu.o
 dvb-usb-dvbsky-objs := dvbsky.o
 obj-$(CONFIG_DVB_USB_DVBSKY) += dvb-usb-dvbsky.o
 
+dvb-usb-sc100-objs := sc100.o
+obj-$(CONFIG_DVB_USB_SC100) += dvb-usb-sc100.o
+
 ccflags-y += -I$(srctree)/drivers/media/dvb-core
 ccflags-y += -I$(srctree)/drivers/media/dvb-frontends
 ccflags-y += -I$(srctree)/drivers/media/tuners
