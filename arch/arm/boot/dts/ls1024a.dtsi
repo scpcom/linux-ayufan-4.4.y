@@ -469,4 +469,27 @@
 			phy-names = "usb3-phy";
 		};
 	};
+
+	usb2_phy: usb2_phy@90410000 {
+		compatible	= "fsl,ls1024a-usb2-phy";
+		reg		= <0x90410000 0x4>;
+		syscon		= <&pci_sata_usb_ctrl>;
+		#phy-cells	= <0>;
+		resets		= <&reset LS1024A_USB0_PHY_RESET &reset LS1024A_UTMI_USB0_RESET &reset LS1024A_AXI_USB0_RESET>;
+		reset-names	= "phy", "utmi", "axi";
+		clocks = <&axi_clk>; /* TODO: Should be usb0 */
+		clock-names = "usb";
+		status = "disabled";
+	};
+
+	/* USB 2.0 Synopsys DesignWare controller */
+	usb2: usb2@92000000 {
+		compatible = "snps,dwc2";
+		reg = <0x92000000 0x1000000>;
+		interrupts = <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH>;
+		phys = <&usb2_phy>;
+		phy-names = "usb2-phy";
+		status = "disabled";
+	};
+
 };

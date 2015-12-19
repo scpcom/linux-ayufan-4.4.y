@@ -321,6 +321,14 @@ config PHY_LS1024A_SNOWBUSH
 	  Support for Snowbush PHY in Freescale's LS1024A. This is required for
 	  PCIe and SATA support.
 
+config PHY_LS1024A_USB2
+	tristate "NXP QorIQ LS1024A USB2 PHY driver"
+	depends on OF && ARCH_COMCERTO
+	select GENERIC_PHY
+	help
+	  Support for USB2 PHY in NXP's QorIQ LS1024A. This is required
+	  for USB2 support.
+
 config PHY_LS1024A_USB3
 	tristate "Freescale QorIQ LS1024A USB3 PHY driver"
 	depends on OF && ARCH_COMCERTO

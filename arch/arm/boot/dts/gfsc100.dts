@@ -180,3 +180,12 @@
 		reg = <0x4c>;
 	};
 };
+
+&usb2_phy {
+	status = "okay";
+};
+
+&usb2 {
+	status = "okay";
+	dr_mode = "host";
+};
