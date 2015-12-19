@@ -225,21 +225,9 @@ static int ls1024a_pcie_link_up(struct pcie_port *pp)
 {
 	struct ls1024a_pcie *ls1024a_pcie = to_ls1024a_pcie(pp);
 	u32 rc = 0;
-	int count = 5;
 
-	while (1) {
-		regmap_read(ls1024a_pcie->app, app_regs[ls1024a_pcie->app_profile].sts0, &rc);
-		if (rc & STS0_RDLH_LINK_UP)
-			return 1;
-		if (!count--)
-			break;
-		/*
-		 * Wait a little bit, then re-check if the link finished
-		 * the training.
-		 */
-		usleep_range(1000, 2000);
-	}
-	return 0;
+	regmap_read(ls1024a_pcie->app, app_regs[ls1024a_pcie->app_profile].sts0, &rc);
+	return !!(rc & STS0_RDLH_LINK_UP);
 }
 
 static struct pcie_host_ops ls1024a_pcie_host_ops = {
