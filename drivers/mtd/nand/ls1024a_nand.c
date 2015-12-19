@@ -1018,9 +1018,9 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	goto out;
 
       out_ior:
-	iounmap(ecc_base_addr);
+	devm_iounmap(&pdev->dev, ecc_base_addr);
       out_iorc:
-	iounmap(chip->IO_ADDR_R);
+	devm_iounmap(&pdev->dev, chip->IO_ADDR_R);
       out_info:
 	devm_kfree(&pdev->dev, info);
       out:
