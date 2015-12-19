@@ -533,15 +533,31 @@ static int ls1024a_pinmux_set_mux(struct pinctrl_dev *pctldev,
 
 static void _ls1024a_gpio_set_direction(struct ls1024a_pinctrl *lpc, unsigned int gpio, int out);
 
+static inline unsigned int pin_to_gpio(struct pinctrl_gpio_range *range,
+				unsigned int pin)
+{
+	int idx;
+	BUG_ON(!range->pins);
+	for (idx = 0; idx < range->npins; idx++) {
+		if (pin == range->pins[idx])
+			break;
+	}
+	BUG_ON(idx >= range->npins);
+	return idx;
+}
+
 static int ls1024a_gpio_request_enable (struct pinctrl_dev *pctldev,
 				struct pinctrl_gpio_range *range,
 				unsigned offset)
 {
 	struct ls1024a_pinctrl *lpc = pinctrl_dev_get_drvdata(pctldev);
 	unsigned long flags;
+	unsigned int gpio;
 	u32 val;
 	u32 newval;
-	int i;
+	unsigned int i;
+
+	gpio = pin_to_gpio(range, offset);
 
 	spin_lock_irqsave(&lpc->lock, flags);
 	if (offset >= LS1024A_PIN_TDM_CK && offset <= LS1024A_PIN_TDM_DX) {
@@ -549,8 +565,10 @@ static int ls1024a_gpio_request_enable (struct pinctrl_dev *pctldev,
 		val = readl(lpc->reg + LS1024A_MISC_PIN_SELECT);
 		newval = (val & ~GENMASK(5,4)) | 2<<4;
 		if (newval != val) {
-			for (i=60;i<=63;i++) {
-				_ls1024a_gpio_set_direction(lpc, i, 0);
+			BUILD_BUG_ON(!(LS1024A_PIN_TDM_CK < LS1024A_PIN_TDM_DX));
+			for (i = LS1024A_PIN_TDM_CK; i <= LS1024A_PIN_TDM_DX; i++) {
+				gpio = pin_to_gpio(range, i);
+				_ls1024a_gpio_set_direction(lpc, gpio, 0);
 			}
 			writel(newval, lpc->reg + LS1024A_MISC_PIN_SELECT);
 		}
@@ -560,7 +578,7 @@ static int ls1024a_gpio_request_enable (struct pinctrl_dev *pctldev,
 		val = readl(lpc->reg + LS1024A_GPIO_63_32_PIN_SELECT);
 		newval = val | BIT(i);
 		if (newval != val) {
-			_ls1024a_gpio_set_direction(lpc, i, 0);
+			_ls1024a_gpio_set_direction(lpc, gpio, 0);
 			writel(newval, lpc->reg + LS1024A_GPIO_63_32_PIN_SELECT);
 		}
 	} else if ( (offset >= LS1024A_PIN_I2C_SCL && offset <= LS1024A_PIN_EXP_RDY) ||
@@ -575,7 +593,7 @@ static int ls1024a_gpio_request_enable (struct pinctrl_dev *pctldev,
 		val = readl(lpc->reg + LS1024A_PIN_SELECT_31_16_REG);
 		newval = (val & ~GENMASK(i*2 + 1, i*2)) | (1<<i*2);
 		if (newval != val) {
-			_ls1024a_gpio_set_direction(lpc, i, 0);
+			_ls1024a_gpio_set_direction(lpc, gpio, 0);
 			writel(newval, lpc->reg + LS1024A_PIN_SELECT_31_16_REG);
 		}
 	} else if (offset >= LS1024A_PIN_GPIO04 && offset <= LS1024A_PIN_GPIO15) {
@@ -584,7 +602,7 @@ static int ls1024a_gpio_request_enable (struct pinctrl_dev *pctldev,
 		val = readl(lpc->reg + LS1024A_PIN_SELECT_15_0_REG);
 		newval = val & ~GENMASK(i*2 + 1, i*2);
 		if (newval != val) {
-			_ls1024a_gpio_set_direction(lpc, i, 0);
+			_ls1024a_gpio_set_direction(lpc, gpio, 0);
 			writel(newval, lpc->reg + LS1024A_PIN_SELECT_15_0_REG);
 		}
 	} else if (offset >= LS1024A_PIN_GPIO00 && offset <= LS1024A_PIN_GPIO03) {
