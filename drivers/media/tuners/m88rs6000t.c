@@ -494,9 +494,29 @@ static int m88rs6000t_get_if_frequency(struct dvb_frontend *fe, u32 *frequency)
 static int m88rs6000t_get_rf_strength(struct dvb_frontend *fe, u16 *strength)
 {
 	struct m88rs6000t_dev *dev = fe->tuner_priv;
+	struct dtv_frontend_properties *c = &fe->dtv_property_cache;
+	static u32 bb_list_dBm_negated[16][16] =
+		{
+			{5000, 4999, 4397, 4044, 3795, 3601, 3442, 3309, 3193, 3090, 2999, 2916, 2840, 2771, 2706, 2647},
+			{2590, 2538, 2488, 2441, 2397, 2354, 2314, 2275, 2238, 2203, 2169, 2136, 2104, 2074, 2044, 2016},
+			{1988, 1962, 1936, 1911, 1886, 1862, 1839, 1817, 1795, 1773, 1752, 1732, 1712, 1692, 1673, 1655},
+			{1636, 1618, 1601, 1584, 1567, 1550, 1534, 1518, 1502, 1487, 1472, 1457, 1442, 1428, 1414, 1400},
+			{1386, 1373, 1360, 1347, 1334, 1321, 1309, 1296, 1284, 1272, 1260, 1249, 1237, 1226, 1215, 1203},
+			{1193, 1182, 1171, 1161, 1150, 1140, 1130, 1120, 1110, 1100, 1090, 1081, 1071, 1062, 1052, 1043},
+			{1034, 1025, 1016, 1007,  999,  990,  982,  973,  965,  956,  948,  940,  932,  924,  916,  908},
+			{ 900,  893,  885,  877,  870,  862,  855,  848,  840,  833,  826,  819,  812,  805,  798,  791},
+			{ 784,  778,  771,  764,  758,  751,  745,  738,  732,  725,  719,  713,  706,  700,  694,  688},
+			{ 682,  676,  670,  664,  658,  652,  647,  641,  635,  629,  624,  618,  612,  607,  601,  596},
+			{ 590,  585,  580,  574,  569,  564,  558,  553,  548,  543,  538,  533,  528,  523,  518,  513},
+			{ 508,  503,  498,  493,  488,  483,  479,  474,  469,  464,  460,  455,  450,  446,  441,  437},
+			{ 432,  428,  423,  419,  414,  410,  405,  401,  397,  392,  388,  384,  379,  375,  371,  367},
+			{ 363,  358,  354,  350,  346,  342,  338,  334,  330,  326,  322,  318,  314,  310,  306,  302},
+			{ 298,  294,  290,  287,  283,  279,  275,  271,  268,  264,  260,  257,  253,  249,  246,  242},
+			{ 238,  235,  231,  227,  224,  220,  217,  213,  210,  206,  203,  199,  196,  192,  189,  186}
+		};
+
 	unsigned int val, i;
 	int ret;
-	u16 gain;
 	u32 PGA2_cri_GS = 46, PGA2_crf_GS = 290, TIA_GS = 290;
 	u32 RF_GC = 1200, IF_GC = 1100, BB_GC = 300;
 	u32 PGA2_GC = 300, TIA_GC = 300, PGA2_cri = 0, PGA2_crf = 0;
@@ -507,6 +527,7 @@ static int m88rs6000t_get_rf_strength(struct dvb_frontend *fe, u16 *strength)
 			295, 285, 290, 295, 295, 310};
 	u32 BBGS[14] = {0, 286, 275, 290, 294, 300, 290,
 			290, 285, 283, 260, 295, 290, 260};
+	u32 bb_power, total_gain, delta, freq_mhz;
 
 	ret = regmap_read(dev->regmap, 0x5A, &val);
 	if (ret)
@@ -557,11 +578,25 @@ static int m88rs6000t_get_rf_strength(struct dvb_frontend *fe, u16 *strength)
 
 	PGA2G = PGA2_cri * PGA2_cri_GS + PGA2_crf * PGA2_crf_GS;
 
-	gain = RFG + IFG - TIAG + BBG + PGA2G;
+	total_gain = RFG + IFG - TIAG + BBG + PGA2G;
 
-	/* scale value to 0x0000-0xffff */
-	gain = clamp_val(gain, 1000U, 10500U);
-	*strength = (10500 - gain) * 0xffff / (10500 - 1000);
+	ret = regmap_read(dev->regmap, 0x96, &val);
+	if (ret)
+		goto err;
+	bb_power = bb_list_dBm_negated[(val >> 4) & 0x0f][val & 0x0f];
+
+	freq_mhz = (c->frequency + 500) / 1000;
+	if (freq_mhz > 1750) {
+		delta = 14;
+	} else if (freq_mhz > 1350) {
+		delta = 12;
+	} else {
+		delta = 13;
+	}
+
+	val = (total_gain + bb_power) / 100;
+	*strength = val < delta ? 0 : val - delta;
+
 err:
 	if (ret)
 		dev_dbg(&dev->client->dev, "failed=%d\n", ret);
