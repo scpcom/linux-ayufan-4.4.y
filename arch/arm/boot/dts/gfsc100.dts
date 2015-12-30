@@ -189,3 +189,12 @@
 	status = "okay";
 	dr_mode = "host";
 };
+
+&usb3_phy {
+	status = "okay";
+};
+
+&usb3 {
+	status = "okay";
+	dr_mode = "host";
+};
