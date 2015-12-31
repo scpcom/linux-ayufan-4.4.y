@@ -426,6 +426,8 @@ static int ls1024a_wdt_probe(struct platform_device *pdev)
 		goto err_misc;
 	}
 
+	setup_timer(&wdt_timer, ls1024a_timer_tick, 0L);
+
 	ls1024a_wdt_miscdev.parent = dev;
 	ls1024a_wdt_config();
 
@@ -448,8 +450,6 @@ static int ls1024a_wdt_probe(struct platform_device *pdev)
 		dev_err(dev, "wd_time value is out of range: 1..%d, using %d\n",
 			WDT_MAX_TIME, WDT_DEFAULT_TIME);
 	}
-
-	setup_timer(&wdt_timer, ls1024a_timer_tick, 0L);
 
 	return 0;
 
