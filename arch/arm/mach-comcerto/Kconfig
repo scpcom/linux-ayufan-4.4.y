@@ -25,4 +25,5 @@ config COMCERTO_FP
 config COMCERTO_DMA_COHERENT_SKB
 	bool "Support for DMA coherent SKB heads"
 	depends on ARCH_COMCERTO
-	default y
+	depends on DMA_CMA
+	default n
