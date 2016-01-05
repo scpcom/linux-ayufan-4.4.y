@@ -1206,11 +1206,13 @@ void dwc_otg_core_init(dwc_otg_core_if_t * core_if)
 	gahbcfg_data_t ahbcfg = {.d32 = 0 };
 	gusbcfg_data_t usbcfg = {.d32 = 0 };
 	gi2cctl_data_t i2cctl = {.d32 = 0 };
+	gusbcfg_data_t usbcfg_prev;
 
 	DWC_DEBUGPL(DBG_CILV, "dwc_otg_core_init(%p)\n", core_if);
 
 	/* Common Initialization */
 	usbcfg.d32 = DWC_READ_REG32(&global_regs->gusbcfg);
+	usbcfg_prev.d32 = usbcfg.d32;
 
 	/* Program the ULPI External VBUS bit if needed */
 	usbcfg.b.ulpi_ext_vbus_drv =
@@ -1465,7 +1467,21 @@ void dwc_otg_core_init(dwc_otg_core_if_t * core_if)
 		break;
 	}
 
+#if defined(CONFIG_DWC_OTG_HOST_ONLY)
+	usbcfg.b.force_dev_mode = 0;
+	usbcfg.b.force_host_mode = 1;
+#elif defined(CONFIG_DWC_OTG_DEVICE_ONLY)
+	usbcfg.b.force_dev_mode = 1;
+	usbcfg.b.force_host_mode = 0;
+#endif
+
 	DWC_WRITE_REG32(&global_regs->gusbcfg, usbcfg.d32);
+
+	if ((usbcfg.b.force_dev_mode != usbcfg_prev.b.force_dev_mode) ||
+		(usbcfg.b.force_host_mode != usbcfg_prev.b.force_host_mode)) {
+		/* wait for mode change to become effective */
+		dwc_mdelay(25);
+	}
 
 #ifdef CONFIG_USB_DWC_OTG_LPM
 	if (core_if->core_params->lpm_enable) {
