@@ -41,12 +41,17 @@
 
 #include "mm.h"
 
+#ifndef CONFIG_COMCERTO_DMA_COHERENT_SKB
+#define DEFAULT_DMA_COHERENT_POOL_SIZE	SZ_256K
+#else
 /*
  * Experiments showed that, on the NXP (formerly Freescale) QorIQ LS1024A (fka
  * Mindspeed Comcerto 2000), we need approx. 10 MB of DMA coherent memory for
  * fast forwarding between wired Ethernet ports and ath10k.
  */
 #define DEFAULT_DMA_COHERENT_POOL_SIZE	SZ_16M
+#endif
+
 static struct gen_pool *atomic_pool;
 static size_t atomic_pool_size = DEFAULT_DMA_COHERENT_POOL_SIZE;
 
