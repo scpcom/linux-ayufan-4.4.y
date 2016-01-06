@@ -677,7 +677,8 @@ static int m88rs6000_read_snr(struct dvb_frontend *fe, u16 *p_snr)
 	default:
 		break;
 	}
-	*p_snr = snr;
+	/* report SNR in 0.1 dB */
+	*p_snr = snr * 10;
 
 	return 0;
 }
