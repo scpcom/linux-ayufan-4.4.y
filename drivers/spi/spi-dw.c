@@ -138,17 +138,27 @@ static inline void dw_spi_debugfs_remove(struct dw_spi *dws)
 }
 #endif /* CONFIG_DEBUG_FS */
 
-static void dw_spi_set_cs(struct spi_device *spi, bool enable)
+static void __dw_spi_set_cs(struct spi_device *spi, bool enable)
 {
 	struct dw_spi *dws = spi_master_get_devdata(spi->master);
+
+	if (!enable)
+		dw_writel(dws, DW_SPI_SER, BIT(spi->chip_select));
+	else
+		dw_writel(dws, DW_SPI_SER, 0);
+}
+
+static void dw_spi_set_cs(struct spi_device *spi, bool enable)
+{
+
 	struct chip_data *chip = spi_get_ctldata(spi);
 
 	/* Chip select logic is inverted from spi_set_cs() */
 	if (chip && chip->cs_control)
 		chip->cs_control(!enable);
 
-	if (!enable)
-		dw_writel(dws, DW_SPI_SER, BIT(spi->chip_select));
+	if (enable)
+		__dw_spi_set_cs(spi, enable);
 }
 
 /* Return the max entries we can fill into tx fifo */
@@ -197,6 +207,7 @@ static void dw_writer(struct dw_spi *dws)
 		dw_writel(dws, DW_SPI_DR, txw);
 		dws->tx += dws->n_bytes;
 	}
+	__dw_spi_set_cs(dws->master->cur_msg->spi, 0);
 }
 
 static void dw_reader(struct dw_spi *dws)
@@ -371,6 +382,7 @@ static int dw_spi_transfer_one(struct spi_master *master,
 	if (dws->dma_mapped) {
 		ret = dws->dma_ops->dma_setup(dws, transfer);
 		if (ret < 0) {
+			__dw_spi_set_cs(spi, 0);
 			spi_enable_chip(dws, 1);
 			return ret;
 		}
