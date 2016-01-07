@@ -385,12 +385,18 @@ static void death_by_timeout(unsigned long ul_conntrack)
 #ifdef CONFIG_COMCERTO_FP
 	struct nf_conn *ct = (void *)ul_conntrack;
 	struct nf_conntrack_l4proto *l4proto;
+	u_int8_t l4proto_num;
+
+	rcu_read_lock();
 
 	l4proto = __nf_ct_l4proto_find(nf_ct_l3num(ct), nf_ct_protonum(ct));
+	l4proto_num = l4proto->l4proto;
+
+	rcu_read_unlock();
 
 	if (test_bit(IPS_DYING_BIT, &ct->status) ||
 	   (!test_bit(IPS_PERMANENT_BIT, &ct->status)) ||
-	   ((l4proto->l4proto == IPPROTO_TCP) && (ct->proto.tcp.state != TCP_CONNTRACK_ESTABLISHED))) {
+	   ((l4proto_num == IPPROTO_TCP) && (ct->proto.tcp.state != TCP_CONNTRACK_ESTABLISHED))) {
 		nf_ct_delete((struct nf_conn *)ul_conntrack, 0, 0);
 	} else {
 		ct->timeout.expires = jiffies + COMCERTO_PERMANENT_TIMEOUT * HZ;
