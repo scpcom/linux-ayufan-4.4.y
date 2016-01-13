@@ -16,6 +16,8 @@
 
 #include "m88ds3103_priv.h"
 
+#define TS_PACKET_SIZE		188
+
 static struct dvb_frontend_ops m88ds3103_ops;
 
 /* write multiple registers */
@@ -991,6 +993,9 @@ static int m88ds3103_read_ber(struct dvb_frontend *fe, u32 *ber)
 	int ret;
 	unsigned int utmp;
 	u8 buf[3], u8tmp;
+	u32 err_count;
+	u64 u64tmp;
+	uint32_t bch_payload, ts_packets;
 
 	dev_dbg(&priv->i2c->dev, "%s:\n", __func__);
 
@@ -1011,27 +1016,74 @@ static int m88ds3103_read_ber(struct dvb_frontend *fe, u32 *ber)
 			if (ret)
 				goto err;
 
-			priv->ber = (buf[1] << 8) | (buf[0] << 0);
+			err_count = (buf[1] << 8) | (buf[0] << 0);
+			if (u8tmp & 0x08) {
+				/* counter represents byte errors */
+				err_count *= 8;
+			}
 
 			/* restart counters */
 			ret = m88ds3103_wr_reg(priv, 0xf8, u8tmp);
 			if (ret)
 				goto err;
+
+			u64tmp = 1000000000ULL * err_count;
+			/* counter / total number of bits */
+			do_div(u64tmp, 0x800000);
+
+			priv->ber = (u32)u64tmp;
 		}
 		break;
 	case SYS_DVBS2:
+		/* DVB-S2 uses the FER (Frame Error Rate) as approximate BER */
+
+		switch (c->fec_inner) {
+			/* THe FEC coding equation:
+			 * FEC length (64800b) * (LDPC ratio)
+			 * = K(LDPC)
+			 * = K(BCH) + T(BCH) * 16
+			 * = BB Header (80b) + data + padding + T(BCH) * 16
+			 * FEC Frame - LDPC - K(BCH) - K(LDPC) - T(BCH)
+			 * 64800     - 1/4  - 16008  - 16200   - 12
+			 * 64800     - 1/3  - 21408  - 21600   - 12
+			 * 64800     - 2/5  - 25728  - 25920   - 12
+			 * 64800     - 1/2  - 32208  - 32400   - 12
+			 * 64800     - 3/5  - 38688  - 38880   - 12
+			 * 64800     - 2/3  - 43040  - 43200   - 10
+			 * 64800     - 3/4  - 48408  - 48600   - 12
+			 * 64800     - 4/5  - 51648  - 51840   - 12
+			 * 64800     - 5/6  - 53840  - 54000   - 10
+			 * 64800     - 8/9  - 57472  - 57600   - 8
+			 * 64800     - 9/10 - 58192  - 58320   - 8
+			 */
+			case FEC_1_2:	bch_payload = 32128;	break;
+			case FEC_3_5:	bch_payload = 38608;	break;
+			case FEC_2_3:	bch_payload = 42960;	break;
+			case FEC_3_4:	bch_payload = 48328;	break;
+			case FEC_4_5:	bch_payload = 51568;	break;
+			case FEC_5_6:	bch_payload = 53760;	break;
+			case FEC_8_9:	bch_payload = 57392;	break;
+			case FEC_9_10:	bch_payload = 58112;	break;
+			/* FEC_1_4 is not supported in this kernel */
+			/* FEC_1_3 is not supported in this kernel */
+			/* FEC_2_5 is not supported in this kernel */
+			default:	return -EINVAL;
+		}
+
+		/* determine number of LDPC frames */
 		ret = m88ds3103_rd_regs(priv, 0xd5, buf, 3);
 		if (ret)
 			goto err;
-
 		utmp = (buf[2] << 16) | (buf[1] << 8) | (buf[0] << 0);
 
 		if (utmp > 3000) {
+			ts_packets = bch_payload * utmp / (TS_PACKET_SIZE * 8);
+
+			/* get UPL (User Package Length) CRC error counter */
 			ret = m88ds3103_rd_regs(priv, 0xf7, buf, 2);
 			if (ret)
 				goto err;
-
-			priv->ber = (buf[1] << 8) | (buf[0] << 0);
+			err_count = (buf[1] << 8) | (buf[0] << 0);
 
 			/* restart counters */
 			ret = m88ds3103_wr_reg(priv, 0xd1, 0x01);
@@ -1049,6 +1101,10 @@ static int m88ds3103_read_ber(struct dvb_frontend *fe, u32 *ber)
 			ret = m88ds3103_wr_reg(priv, 0xd1, 0x00);
 			if (ret)
 				goto err;
+
+			u64tmp = 1000000000ULL * err_count;
+			do_div(u64tmp, ts_packets);
+			priv->ber = (u32)u64tmp;
 		}
 		break;
 	default:
