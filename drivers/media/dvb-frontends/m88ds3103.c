@@ -1122,6 +1122,76 @@ err:
 	return ret;
 }
 
+static int m88ds3103_read_ucblocks(struct dvb_frontend *fe, u32 *ucblocks)
+{
+	struct m88ds3103_priv *priv = fe->demodulator_priv;
+	struct dtv_frontend_properties *c = &fe->dtv_property_cache;
+	int ret;
+	u8 buf[3], u8tmp;
+
+	switch (c->delivery_system) {
+	case SYS_DVBS:
+		/* hold packet counter */
+		ret = m88ds3103_rd_reg(priv, 0xf8, &u8tmp);
+		if (ret)
+			goto err;
+		u8tmp |= 0x40;
+		ret = m88ds3103_wr_reg(priv, 0xf8, u8tmp);
+		if (ret)
+			goto err;
+
+		ret = m88ds3103_rd_regs(priv, 0xf4, buf, 2);
+		if (ret)
+			goto err;
+		*ucblocks = (buf[1] << 8) | (buf[0] << 0);
+
+		/* clear packet counter */
+		u8tmp &= ~0x20;
+		ret = m88ds3103_wr_reg(priv, 0xf8, u8tmp);
+		if (ret)
+			goto err;
+		u8tmp |= 0x20;
+
+		/* re-enable packet counter update */
+		u8tmp &= ~0x40;
+		ret = m88ds3103_wr_reg(priv, 0xf8, u8tmp);
+		if (ret)
+			goto err;
+
+		break;
+	case SYS_DVBS2:
+		ret = m88ds3103_rd_regs(priv, 0xd8, buf, 3);
+		if (ret)
+			goto err;
+		*ucblocks = (buf[2] << 16) | (buf[1] << 8) | (buf[0] << 0);
+
+		/* clear LDPC counter */
+		ret = m88ds3103_rd_reg(priv, 0xd1, &u8tmp);
+		if (ret)
+			goto err;
+
+		u8tmp |= 0x01;
+		ret = m88ds3103_wr_reg(priv, 0xd1, u8tmp);
+		if (ret)
+			goto err;
+
+		u8tmp &= ~0x01;
+		ret = m88ds3103_wr_reg(priv, 0xd1, u8tmp);
+		if (ret)
+			goto err;
+
+		break;
+	default:
+		break;
+	}
+
+	return 0;
+
+err:
+	dev_dbg(&priv->i2c->dev, "%s: failed=%d\n", __func__, ret);
+	return ret;
+}
+
 static int m88ds3103_set_tone(struct dvb_frontend *fe,
 	fe_sec_tone_mode_t fe_sec_tone_mode)
 {
@@ -1552,6 +1622,7 @@ static struct dvb_frontend_ops m88ds3103_ops = {
 	.read_status = m88ds3103_read_status,
 	.read_snr = m88ds3103_read_snr,
 	.read_ber = m88ds3103_read_ber,
+	.read_ucblocks = m88ds3103_read_ucblocks,
 
 	.diseqc_send_master_cmd = m88ds3103_diseqc_send_master_cmd,
 	.diseqc_send_burst = m88ds3103_diseqc_send_burst,
