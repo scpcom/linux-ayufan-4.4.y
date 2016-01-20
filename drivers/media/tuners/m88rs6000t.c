@@ -533,11 +533,19 @@ static int m88rs6000t_get_rf_strength(struct dvb_frontend *fe, u16 *strength)
 	if (ret)
 		goto err;
 	RF_GC = val & 0x0f;
+	if (RF_GC >= ARRAY_SIZE(RFGS)) {
+		dev_err(&dev->client->dev, "Invalid, RFGC=%d\n", RF_GC);
+		return -EINVAL;
+	}
 
 	ret = regmap_read(dev->regmap, 0x5F, &val);
 	if (ret)
 		goto err;
 	IF_GC = val & 0x0f;
+	if (IF_GC >= ARRAY_SIZE(IFGS)) {
+		dev_err(&dev->client->dev, "Invalid, IFGC=%d\n", IF_GC);
+		return -EINVAL;
+	}
 
 	ret = regmap_read(dev->regmap, 0x3F, &val);
 	if (ret)
@@ -548,6 +556,10 @@ static int m88rs6000t_get_rf_strength(struct dvb_frontend *fe, u16 *strength)
 	if (ret)
 		goto err;
 	BB_GC = (val >> 4) & 0x0f;
+	if (BB_GC >= ARRAY_SIZE(BBGS)) {
+		dev_err(&dev->client->dev, "Invalid, BBGC=%d\n", __func__, BB_GC);
+		return -EINVAL;
+	}
 
 	ret = regmap_read(dev->regmap, 0x76, &val);
 	if (ret)
