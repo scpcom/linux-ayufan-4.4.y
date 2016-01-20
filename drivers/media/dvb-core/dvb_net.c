@@ -344,7 +344,7 @@ static void dvb_net_ule( struct net_device *dev, const u8 *buf, size_t buf_len )
 
 			/* Check TS error conditions: sync_byte, transport_error_indicator, scrambling_control . */
 			if ((ts[0] != TS_SYNC) || (ts[1] & TS_TEI) || ((ts[3] & TS_SC) != 0)) {
-				printk(KERN_WARNING "%lu: Invalid TS cell: SYNC %#x, TEI %u, SC %#x.\n",
+				printk_ratelimited(KERN_WARNING "%lu: Invalid TS cell: SYNC %#x, TEI %u, SC %#x.\n",
 				       priv->ts_count, ts[0],
 				       (ts[1] & TS_TEI) >> 7,
 				       (ts[3] & TS_SC) >> 6);
@@ -376,7 +376,7 @@ static void dvb_net_ule( struct net_device *dev, const u8 *buf, size_t buf_len )
 				priv->tscc = ts[3] & 0x0F;
 				/* There is a pointer field here. */
 				if (ts[4] > ts_remain) {
-					printk(KERN_ERR "%lu: Invalid ULE packet "
+					printk_ratelimited(KERN_ERR "%lu: Invalid ULE packet "
 					       "(pointer field %d)\n", priv->ts_count, ts[4]);
 					ts += TS_SZ;
 					priv->ts_count++;
@@ -400,7 +400,7 @@ static void dvb_net_ule( struct net_device *dev, const u8 *buf, size_t buf_len )
 				priv->tscc = (priv->tscc + 1) & 0x0F;
 			else {
 				/* TS discontinuity handling: */
-				printk(KERN_WARNING "%lu: TS discontinuity: got %#x, "
+				printk_ratelimited(KERN_WARNING "%lu: TS discontinuity: got %#x, "
 				       "expected %#x.\n", priv->ts_count, ts[3] & 0x0F, priv->tscc);
 				/* Drop partly decoded SNDU, reset state, resync on PUSI. */
 				if (priv->ule_skb) {
@@ -423,7 +423,7 @@ static void dvb_net_ule( struct net_device *dev, const u8 *buf, size_t buf_len )
 				if (! priv->need_pusi) {
 					if (!(*from_where < (ts_remain-1)) || *from_where != priv->ule_sndu_remain) {
 						/* Pointer field is invalid.  Drop this TS cell and any started ULE SNDU. */
-						printk(KERN_WARNING "%lu: Invalid pointer "
+						printk_ratelimited(KERN_WARNING "%lu: Invalid pointer "
 						       "field: %u.\n", priv->ts_count, *from_where);
 
 						/* Drop partly decoded SNDU, reset state, resync on PUSI. */
@@ -454,7 +454,7 @@ static void dvb_net_ule( struct net_device *dev, const u8 *buf, size_t buf_len )
 					 * current TS cell. */
 					dev->stats.rx_errors++;
 					dev->stats.rx_length_errors++;
-					printk(KERN_WARNING "%lu: Expected %d more SNDU bytes, but "
+					printk_ratelimited(KERN_WARNING "%lu: Expected %d more SNDU bytes, but "
 					       "got PUSI (pf %d, ts_remain %d).  Flushing incomplete payload.\n",
 					       priv->ts_count, priv->ule_sndu_remain, ts[4], ts_remain);
 					dev_kfree_skb(priv->ule_skb);
@@ -475,7 +475,7 @@ static void dvb_net_ule( struct net_device *dev, const u8 *buf, size_t buf_len )
 			 * TS.
 			 * Check ts_remain has to be >= 2 here. */
 			if (ts_remain < 2) {
-				printk(KERN_WARNING "Invalid payload packing: only %d "
+				printk_ratelimited(KERN_WARNING "Invalid payload packing: only %d "
 				       "bytes left in TS.  Resyncing.\n", ts_remain);
 				priv->ule_sndu_len = 0;
 				priv->need_pusi = 1;
@@ -494,7 +494,7 @@ static void dvb_net_ule( struct net_device *dev, const u8 *buf, size_t buf_len )
 					priv->ule_dbit = 0;
 
 				if (priv->ule_sndu_len < 5) {
-					printk(KERN_WARNING "%lu: Invalid ULE SNDU length %u. "
+					printk_ratelimited(KERN_WARNING "%lu: Invalid ULE SNDU length %u. "
 					       "Resyncing.\n", priv->ts_count, priv->ule_sndu_len);
 					dev->stats.rx_errors++;
 					dev->stats.rx_length_errors++;
@@ -550,7 +550,7 @@ static void dvb_net_ule( struct net_device *dev, const u8 *buf, size_t buf_len )
 			 * prepare for the largest case: bridged SNDU with MAC address (dbit = 0). */
 			priv->ule_skb = dev_alloc_skb( priv->ule_sndu_len + ETH_HLEN + ETH_ALEN );
 			if (priv->ule_skb == NULL) {
-				printk(KERN_NOTICE "%s: Memory squeeze, dropping packet.\n",
+				printk_ratelimited(KERN_NOTICE "%s: Memory squeeze, dropping packet.\n",
 				       dev->name);
 				dev->stats.rx_dropped++;
 				return;
@@ -595,7 +595,7 @@ static void dvb_net_ule( struct net_device *dev, const u8 *buf, size_t buf_len )
 				       *(tail - 2) << 8 |
 				       *(tail - 1);
 			if (ule_crc != expected_crc) {
-				printk(KERN_WARNING "%lu: CRC32 check FAILED: %08x / %08x, SNDU len %d type %#x, ts_remain %d, next 2: %x.\n",
+				printk_ratelimited(KERN_WARNING "%lu: CRC32 check FAILED: %08x / %08x, SNDU len %d type %#x, ts_remain %d, next 2: %x.\n",
 				       priv->ts_count, ule_crc, expected_crc, priv->ule_sndu_len, priv->ule_sndu_type, ts_remain, ts_remain > 2 ? *(unsigned short *)from_where : 0);
 
 #ifdef ULE_DEBUG
