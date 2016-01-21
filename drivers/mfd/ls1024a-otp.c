@@ -143,7 +143,7 @@ static struct file_operations islocked_proc_fops = {
 	.open = islocked_proc_open,
 	.read = seq_read,
 	.llseek = seq_lseek,
-	.release = seq_release,
+	.release = single_release,
 };
 
 static int ls1024a_otp_probe(struct platform_device *pdev)
