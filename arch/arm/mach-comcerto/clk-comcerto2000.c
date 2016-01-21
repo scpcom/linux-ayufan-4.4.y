@@ -176,12 +176,17 @@ static void __init of_c2k_clk_setup(struct device_node *node) {
 		goto cleanup;
 	of_clk_add_provider(node, of_clk_src_simple_get, clk);
 
-	return;
+	goto out;
 
 cleanup:
-	kfree(parent_names);
 	kfree(mux);
 	kfree(gate);
 	kfree(rate);
+out:
+	/*
+	 * We don't need to retain parent_names. This array is only used for
+	 * initialization.
+	 * */
+	kfree(parent_names);
 }
 CLK_OF_DECLARE(c2k_pll_clock, "fsl,ls1024a-clock", of_c2k_clk_setup);
