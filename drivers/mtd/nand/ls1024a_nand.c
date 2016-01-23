@@ -394,6 +394,8 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 		uint8_t *read_ecc, uint8_t *calc_ecc)
 {
 	struct nand_chip *nand_device = mtd->priv;
+	int num_zero_bits = 0;
+	int empty = 0;
 #if defined (CONFIG_NAND_LS1024A_ECC_8_HW_BCH) || defined (CONFIG_NAND_LS1024A_ECC_24_HW_BCH)
 	uint8_t err_count = 0;
 	uint32_t err_corr_data_prev;
@@ -402,6 +404,23 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 	uint16_t mask, index;
 	unsigned long timeo;
 	int ret;
+
+	num_zero_bits = nand_check_erased_ecc_chunk(dat, nand_device->ecc.size,
+			read_ecc, nand_device->ecc.bytes,
+			NULL, 0,
+			nand_device->ecc.strength);
+	if (num_zero_bits >= 0) {
+		/* Consider ECC chunk empty */
+		empty = 1;
+		if (num_zero_bits > 2) {
+			pr_err_ratelimited("ECC: ECC chunk is mostly empty but has %d zero bits\n", num_zero_bits);
+		}
+		/*
+		 * Even though the ECC chunk is empty, we still continue, wait
+		 * for the syndrome calculation to complete and read out all
+		 * syndromes even though there should be none.
+		 * */
+	}
 
 	/* Wait for syndrome calculation to complete */
 	timeo = jiffies + 4;
@@ -460,6 +479,12 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 		if (err_corr_data == err_corr_data_prev)
 			continue;
 		err_corr_data_prev = err_corr_data;
+		/*
+		 * If we determined that the ECC chunk is empty, we ignore all
+		 * syndromes.
+		 * */
+		if (empty)
+			continue;
 		index = (err_corr_data >> 16) & 0x7FF;
 		mask = err_corr_data & 0xFFFF;
 		if (index * 2 >= nand_device->ecc.size) {
@@ -484,7 +509,8 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 
 	/* Check if the block has uncorrectable number of errors */
 	if ((readl_relaxed(ecc_base_addr + ECC_CORR_STAT)) & ECC_UNCORR) {
-		pr_err("ECC: uncorrectable error 2 !!!\n");
+		if (!empty)
+			pr_err("ECC: uncorrectable error 2 !!!\n");
 		ret = -EIO;
 		goto out;
 	}
@@ -514,6 +540,16 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 
 	ret = err_count;
 out:
+
+	if (empty) {
+		/*
+		 * If we previously determined that this ECC chunk is empty,
+		 * just ignore whatever errors were detected while reading
+		 * syndromes from the ECC engine.
+		 * */
+		ret = num_zero_bits;
+	}
+
 	comcerto_ecc_shift(ECC_SHIFT_DISABLE);
 
 	return ret;
@@ -611,18 +647,20 @@ static int comcerto_bch_correct_ecc (struct mtd_info *mtd, uint8_t *dat, uint8_t
 		uint8_t *dummy) {
 	struct nand_chip *chip = mtd->priv;
 	struct comcerto_nand_info *info = to_comerto_nand_info(chip);
+	int num_zero_bits = 0;
 	int i, count;
 
-	for (i=0;i<chip->ecc.size;i++) {
-		if (dat[i] != 0xFF)
-			goto decode;
+	num_zero_bits = nand_check_erased_ecc_chunk(dat, chip->ecc.size,
+			read_ecc, chip->ecc.bytes,
+			NULL, 0,
+			chip->ecc.strength);
+	if (num_zero_bits >= 0) {
+		if (num_zero_bits > 2) {
+			pr_err_ratelimited("ECC: ECC chunk is mostly empty but has %d zero bits\n", num_zero_bits);
+		}
+		return num_zero_bits;
 	}
-	for (i=0;i<chip->ecc.bytes;i++) {
-		if (read_ecc[i] != 0xFF)
-			goto decode;
-	}
-	return 0;
-decode:
+
 	for (i=0;i<chip->ecc.size;i++) {
 		info->bit_reversed[i] = bitrev8(dat[i]);
 	}
