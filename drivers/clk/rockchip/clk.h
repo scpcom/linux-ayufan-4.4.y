@@ -220,6 +220,7 @@ enum rockchip_pll_type {
 	pll_rk3036,
 	pll_rk3066,
 	pll_rk3328,
+	pll_rk3366,
 	pll_rk3399,
 };
 
