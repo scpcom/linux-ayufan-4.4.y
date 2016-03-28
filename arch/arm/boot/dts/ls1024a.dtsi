@@ -34,6 +34,12 @@
 		};
 	};
 
+	pmu {
+		compatible = "arm,cortex-a9-pmu";
+		interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>,
+			   <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
 	clk_rst_syscon: clk_rst_syscon@904B0000 {
 		compatible = "syscon";
 		reg = <0x904B0000 0x1AC>;
