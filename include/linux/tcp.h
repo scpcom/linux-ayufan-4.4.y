@@ -331,6 +331,10 @@ struct tcp_sock {
 	 * socket. Used to retransmit SYNACKs etc.
 	 */
 	struct request_sock *fastopen_rsk;
+
+/* TCP congestion control overrides */
+	u8	is_rate_controlled:1;	/* Is flow using externally set rate? */
+	u8	is_aggressive_rto:1;    /* Using aggressive retry timeout? */
 };
 
 enum tsq_flags {

@@ -443,6 +443,7 @@ void tcp_parse_options(const struct sk_buff *skb,
 		       struct tcp_options_received *opt_rx,
 		       int estab, struct tcp_fastopen_cookie *foc);
 const u8 *tcp_parse_md5sig_option(const struct tcphdr *th);
+extern bool tcp_rate_control(struct sock *sk);
 
 /*
  *	TCP v4 functions exported for the inet6 API
@@ -606,7 +607,10 @@ static inline void tcp_bound_rto(const struct sock *sk)
 
 static inline u32 __tcp_set_rto(const struct tcp_sock *tp)
 {
-	return usecs_to_jiffies((tp->srtt_us >> 3) + tp->rttvar_us);
+	return usecs_to_jiffies(
+		tp->is_aggressive_rto
+		? ((tcp_min_rtt(tp) + (tp->srtt_us >> 3)) / 2)
+		: ((tp->srtt_us >> 3) + tp->rttvar_us));
 }
 
 static inline void __tcp_fast_path_on(struct tcp_sock *tp, u32 snd_wnd)
@@ -835,6 +839,8 @@ struct tcp_congestion_ops {
 	void (*in_ack_event)(struct sock *sk, u32 flags);
 	/* new value of cwnd after loss (optional) */
 	u32  (*undo_cwnd)(struct sock *sk);
+	/* adjust fixed-rate stream rate control (optional) */
+	bool (*rate_control)(struct sock *sk, unsigned int current_mss);
 	/* hook for packet ack accounting (optional) */
 	void (*pkts_acked)(struct sock *sk, u32 num_acked, s32 rtt_us);
 	/* get info for inet_diag (optional) */
@@ -1554,7 +1560,8 @@ static inline void tcp_highest_sack_combine(struct sock *sk,
  */
 static inline bool tcp_stream_is_thin(struct tcp_sock *tp)
 {
-	return tp->packets_out < 4 && !tcp_in_initial_slowstart(tp);
+	return (tp->packets_out < 4 && !tcp_in_initial_slowstart(tp))
+		|| tp->is_rate_controlled;
 }
 
 /* /proc */

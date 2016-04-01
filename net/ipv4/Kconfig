@@ -485,6 +485,42 @@ config TCP_CONG_CUBIC
 	among other techniques.
 	See http://www.csc.ncsu.edu/faculty/rhee/export/bitcp/cubic-paper.pdf
 
+config TCP_CONG_ACUBIC
+	tristate "ACUBIC TCP"
+	default m
+	---help---
+	ACUBIC is just CUBIC TCP, but with a much more agressive RTO
+	(retransmit timeout).  This prevents long dropouts when packets get
+	lost in a large burst on a low-quality link.  It is somewhat
+	dangerous to use on the open Internet, but may be useful in some
+	cases on LANs, where congestion collapse is very unlikely due to the
+	small number of participants, and "real" round trip times are small.
+	ACUBIC stands for "aggressive CUBIC."  It definitely does not stand
+	for "Avery's CUBIC."
+
+config TCP_CONG_TRANSONIC
+	tristate "Transonic TCP"
+	default m
+	---help---
+	Transonic switches to a hard coded fixed-rate congestion control
+	system.  It refuses to back off in the face of congestion, which is
+	a very bad idea on the open Internet, but which may be useful in
+	some cases on LANs.  The congestion window scales up and down
+	relative to the desired(!) throughput (rather than the observed
+	throughput) and the round trip time, which keeps latency reasonably
+	low.
+
+config TCP_CONG_TURBULENT
+	tristate "Turbulent TCP"
+	default m
+	---help---
+	Turbulent is similar to transonic, but always uses an oversized
+	congestion window.  This leads to large queues and a large number of
+	retries.  The advantage is that it fills the receiver window as fast
+	as it can, allowing for more lost data to be retransmitted per round
+	trip time when the link is extremely bad.  You should never use this
+	on the open Internet, because it actively disrupts other traffic.
+
 config TCP_CONG_WESTWOOD
 	tristate "TCP Westwood+"
 	default m

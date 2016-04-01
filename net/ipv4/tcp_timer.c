@@ -469,8 +469,10 @@ void tcp_retransmit_timer(struct sock *sk)
 	 * implemented ftp to mars will work nicely. We will have to fix
 	 * the 120 second clamps though!
 	 */
-	icsk->icsk_backoff++;
-	icsk->icsk_retransmits++;
+	if (!tcp_stream_is_thin(tp)) {
+		icsk->icsk_backoff++;
+		icsk->icsk_retransmits++;
+	}
 
 out_reset_timer:
 	/* If stream is thin, use linear timeouts. Since 'icsk_backoff' is
@@ -483,8 +485,9 @@ out_reset_timer:
 	 * linear-timeout retransmissions into a black hole
 	 */
 	if (sk->sk_state == TCP_ESTABLISHED &&
+	    (tp->is_aggressive_rto || (
 	    (tp->thin_lto || sysctl_tcp_thin_linear_timeouts) &&
-	    tcp_stream_is_thin(tp) &&
+	    tcp_stream_is_thin(tp))) &&
 	    icsk->icsk_retransmits <= TCP_THIN_LINEAR_RETRIES) {
 		icsk->icsk_backoff = 0;
 		icsk->icsk_rto = min(__tcp_set_rto(tp), TCP_RTO_MAX);

@@ -276,6 +276,11 @@ static bool tcp_ecn_rcv_ecn_echo(const struct tcp_sock *tp, const struct tcphdr 
 	return false;
 }
 
+static inline bool tcp_is_rate_controlled(const struct sock *sk)
+{
+	return tcp_sk(sk)->is_rate_controlled;
+}
+
 /* Buffer size and advertised window tuning.
  *
  * 1. Tuning sk->sk_sndbuf, when connection enters established state.
@@ -758,6 +763,9 @@ static void tcp_update_pacing_rate(struct sock *sk)
 
 	/* set sk_pacing_rate to 200 % of current rate (mss * cwnd / srtt) */
 	rate = (u64)tp->mss_cache * 2 * (USEC_PER_SEC << 3);
+
+	if (tcp_is_rate_controlled(sk))
+		return;
 
 	rate *= max(tp->snd_cwnd, tp->packets_out);
 
@@ -1916,6 +1924,18 @@ static inline void tcp_init_undo(struct tcp_sock *tp)
 	tp->undo_retrans = tp->retrans_out ? : -1;
 }
 
+/* Disable built-in CC by fixing cwnd based on qdisc or user specified rate,
+ * and min RTT. The minimum of qdisc and user rate is used to adjust cwnd.
+ * Returns true if built-in CC is overridden, and false otherwise.
+ */
+bool tcp_rate_control(struct sock *sk)
+{
+	const struct inet_connection_sock *icsk = inet_csk(sk);
+	if (!tcp_is_rate_controlled(sk) || !icsk->icsk_ca_ops->rate_control)
+		return false;
+	return icsk->icsk_ca_ops->rate_control(sk, tcp_current_mss(sk));
+}
+
 /* Enter Loss state. If we detect SACK reneging, forget all SACK information
  * and reset tags completely, otherwise preserve SACKs. If receiver
  * dropped its ofo queue, we will know this due to reneging detection.
@@ -1938,9 +1958,11 @@ void tcp_enter_loss(struct sock *sk)
 		tcp_ca_event(sk, CA_EVENT_LOSS);
 		tcp_init_undo(tp);
 	}
-	tp->snd_cwnd	   = 1;
-	tp->snd_cwnd_cnt   = 0;
-	tp->snd_cwnd_stamp = tcp_time_stamp;
+	if (!tcp_is_rate_controlled(sk)) {
+		tp->snd_cwnd       = 1;
+		tp->snd_cwnd_cnt   = 0;
+		tp->snd_cwnd_stamp = tcp_time_stamp;
+	}
 
 	tp->retrans_out = 0;
 	tp->lost_out = 0;
@@ -2391,6 +2413,10 @@ static void tcp_undo_cwnd_reduction(struct sock *sk, bool unmark_loss)
 		tcp_clear_all_retrans_hints(tp);
 	}
 
+	tp->undo_marker = 0;
+	if (tcp_is_rate_controlled(sk))
+		return;
+
 	if (tp->prior_ssthresh) {
 		const struct inet_connection_sock *icsk = inet_csk(sk);
 
@@ -2407,7 +2433,6 @@ static void tcp_undo_cwnd_reduction(struct sock *sk, bool unmark_loss)
 		tp->snd_cwnd = max(tp->snd_cwnd, tp->snd_ssthresh);
 	}
 	tp->snd_cwnd_stamp = tcp_time_stamp;
-	tp->undo_marker = 0;
 }
 
 static inline bool tcp_may_undo(const struct tcp_sock *tp)
@@ -2439,7 +2464,8 @@ static bool tcp_try_undo_recovery(struct sock *sk)
 		/* Hold old state until something *above* high_seq
 		 * is ACKed. For Reno it is MUST to prevent false
 		 * fast retransmits (RFC2582). SACK TCP is safe. */
-		tcp_moderate_cwnd(tp);
+		if (!tcp_is_rate_controlled(sk))
+			tcp_moderate_cwnd(tp);
 		if (!tcp_any_retrans_done(sk))
 			tp->retrans_stamp = 0;
 		return true;
@@ -2516,6 +2542,9 @@ static void tcp_cwnd_reduction(struct sock *sk, const int prior_unsacked,
 	int newly_acked_sacked = prior_unsacked -
 				 (tp->packets_out - tp->sacked_out);
 
+	if (tcp_is_rate_controlled(sk))
+		return;
+
 	tp->prr_delivered += newly_acked_sacked;
 	if (tcp_packets_in_flight(tp) > tp->snd_ssthresh) {
 		u64 dividend = (u64)tp->snd_ssthresh * tp->prr_delivered +
@@ -2534,6 +2563,9 @@ static void tcp_cwnd_reduction(struct sock *sk, const int prior_unsacked,
 static inline void tcp_end_cwnd_reduction(struct sock *sk)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
+
+	if (tcp_is_rate_controlled(sk))
+		return;
 
 	/* Reset cwnd to ssthresh in CWR or Recovery (unless it's undone) */
 	if (inet_csk(sk)->icsk_ca_state == TCP_CA_CWR ||
@@ -3025,6 +3057,9 @@ static void tcp_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 {
 	const struct inet_connection_sock *icsk = inet_csk(sk);
 
+	if (tcp_is_rate_controlled(sk))
+		return;
+
 	icsk->icsk_ca_ops->cong_avoid(sk, ack, acked);
 	tcp_sk(sk)->snd_cwnd_stamp = tcp_time_stamp;
 }
@@ -3510,6 +3545,8 @@ static void tcp_process_tlp_ack(struct sock *sk, u32 ack, int flag)
 		/* ACK advances: there was a loss, so reduce cwnd. Reset
 		 * tlp_high_seq in tcp_init_cwnd_reduction()
 		 */
+		if (tcp_is_rate_controlled(sk))
+			return;
 		tcp_init_cwnd_reduction(sk);
 		tcp_set_ca_state(sk, TCP_CA_CWR);
 		tcp_end_cwnd_reduction(sk);
@@ -3575,6 +3612,8 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 		flag |= FLAG_SND_UNA_ADVANCED;
 		icsk->icsk_retransmits = 0;
 	}
+
+	tcp_rate_control(sk);
 
 	prior_fackets = tp->fackets_out;
 
