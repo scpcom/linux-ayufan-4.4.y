@@ -2925,6 +2925,8 @@ static void tcp_update_rtt_min(struct sock *sk, u32 rtt_us)
 	struct rtt_meas rttm = { .rtt = (rtt_us ? : 1), .ts = now };
 	u32 elapsed;
 
+	if (!rtt_us) return;
+
 	/* Check if the new measurement updates the 1st, 2nd, or 3rd choices */
 	if (unlikely(rttm.rtt <= m[0].rtt))
 		m[0] = m[1] = m[2] = rttm;

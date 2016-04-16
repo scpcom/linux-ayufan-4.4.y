@@ -592,6 +592,12 @@ int tcp_mss_to_mtu(struct sock *sk, int mss);
 void tcp_mtup_init(struct sock *sk);
 void tcp_init_buffer_space(struct sock *sk);
 
+/* Minimum RTT in usec. ~0 means not available. */
+static inline u32 tcp_min_rtt(const struct tcp_sock *tp)
+{
+	return min(tp->rtt_min[0].rtt, tp->srtt_us>>3);
+}
+
 static inline void tcp_bound_rto(const struct sock *sk)
 {
 	if (inet_csk(sk)->icsk_rto > TCP_RTO_MAX)
@@ -645,12 +651,6 @@ static inline u32 tcp_rto_min_us(struct sock *sk)
 static inline bool tcp_ca_dst_locked(const struct dst_entry *dst)
 {
 	return dst_metric_locked(dst, RTAX_CC_ALGO);
-}
-
-/* Minimum RTT in usec. ~0 means not available. */
-static inline u32 tcp_min_rtt(const struct tcp_sock *tp)
-{
-	return tp->rtt_min[0].rtt;
 }
 
 /* Compute the actual receive window we are currently advertising.
