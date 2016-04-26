@@ -23,6 +23,7 @@
  */
 #include <linux/i2c.h>
 #include <linux/module.h>
+#include <linux/reboot.h>
 #include <linux/wait.h>
 #include "tpm.h"
 
@@ -69,6 +70,8 @@ struct tpm_inf_dev {
 	u8 buf[TPM_BUFSIZE + sizeof(u8)]; /* max. buffer size + addr */
 	struct tpm_chip *chip;
 	enum i2c_chip_type chip_type;
+	bool reboot_in_progress;
+	struct mutex reboot_lock;
 };
 
 static struct tpm_inf_dev tpm_dev;
@@ -114,6 +117,16 @@ static int iic_tpm_read(u8 addr, u8 *buffer, size_t len)
 	/* Lock the adapter for the duration of the whole sequence. */
 	if (!tpm_dev.client->adapter->algo->master_xfer)
 		return -EOPNOTSUPP;
+
+	mutex_lock(&tpm_dev.reboot_lock);
+
+	if (tpm_dev.reboot_in_progress) {
+		dev_warn(tpm_dev.chip->pdev, "reboot in progress, aborting %s\n",
+			__func__);
+		mutex_unlock(&tpm_dev.reboot_lock);
+		return -EIO;
+	}
+
 	i2c_lock_adapter(tpm_dev.client->adapter);
 
 	if (tpm_dev.chip_type == SLB9645) {
@@ -156,6 +169,9 @@ static int iic_tpm_read(u8 addr, u8 *buffer, size_t len)
 
 out:
 	i2c_unlock_adapter(tpm_dev.client->adapter);
+
+	mutex_unlock(&tpm_dev.reboot_lock);
+
 	/* take care of 'guard time' */
 	usleep_range(SLEEP_DURATION_LOW, SLEEP_DURATION_HI);
 
@@ -187,6 +203,13 @@ static int iic_tpm_write_generic(u8 addr, u8 *buffer, size_t len,
 
 	if (!tpm_dev.client->adapter->algo->master_xfer)
 		return -EOPNOTSUPP;
+
+	if (tpm_dev.reboot_in_progress) {
+                dev_warn(tpm_dev.chip->pdev, "reboot in progress, aborting %s\n",
+                        __func__);
+                return -EIO;
+        }
+
 	i2c_lock_adapter(tpm_dev.client->adapter);
 
 	/* prepend the 'register address' to the buffer */
@@ -642,6 +665,22 @@ static const struct i2c_device_id tpm_tis_i2c_table[] = {
 
 MODULE_DEVICE_TABLE(i2c, tpm_tis_i2c_table);
 
+static int tpm_reboot_handler(struct notifier_block *nb,unsigned long action, void *data)
+{
+	/* The assignment of the variable is atomic, the main purpose of the
+	   lock is to avoid returning from the handler while communicating with
+	   the TPM in iic_tpm_read() */
+	mutex_lock(&tpm_dev.reboot_lock);
+	tpm_dev.reboot_in_progress = true;
+	mutex_unlock(&tpm_dev.reboot_lock);
+
+	return 0;
+}
+
+static struct notifier_block tpm_reboot_notifier = {
+	.notifier_call  = tpm_reboot_handler
+};
+
 #ifdef CONFIG_OF
 static const struct of_device_id tpm_tis_i2c_of_match[] = {
 	{
@@ -685,12 +724,18 @@ static int tpm_tis_i2c_probe(struct i2c_client *client,
 		return -ENODEV;
 	}
 
+	mutex_init(&tpm_dev.reboot_lock);
+
 	tpm_dev.client = client;
 	rc = tpm_tis_i2c_init(&client->dev);
 	if (rc != 0) {
 		tpm_dev.client = NULL;
 		rc = -ENODEV;
 	}
+
+	tpm_dev.reboot_in_progress = false;
+	register_reboot_notifier(&tpm_reboot_notifier);
+
 	return rc;
 }
 
