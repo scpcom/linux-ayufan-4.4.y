@@ -456,8 +456,8 @@ static __init struct logbits *log_buf_alloc(unsigned long size, char **new_logbu
 		buf = phys_to_virt(alloc);
 		*new_logbuf = buf;
 		new_logbits = (void*)buf + size;
-		printk(KERN_INFO "printk_persist: memory reserved @ 0x%08x\n",
-			alloc);
+		printk(KERN_INFO "printk_persist: memory reserved @ %pa\n",
+			&alloc);
 		if ((new_logbits->magic != PERSIST_MAGIC) ||
 		    (new_logbits->_log_buf_len != size) ||
 			(new_logbits->_log_first_seq >
