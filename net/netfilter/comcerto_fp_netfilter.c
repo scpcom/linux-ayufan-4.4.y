@@ -44,7 +44,7 @@ static unsigned int fp_netfilter_pre_routing(int family, struct sk_buff *skb)
 	dir = CTINFO2DIR(ctinfo);
 
 //	if (printk_ratelimit())
-//		printk(KERN_INFO "ct: %lx, dir: %x, mark: %x, ifindex: %d iif: %d\n", (unsigned long)ct, dir, skb->mark, skb->dev->ifindex, skb->skb_iif);
+//		printk(KERN_INFO "ct: %lx, dir: %x, mark: %x, ifindex: %d iif: %d\n", (unsigned long)ct, dir, skb->mark, skb->dev->ifindex, skb->skb_orig_iif);
 
 	/* We could also check for changes and notify userspace (or print message) */
 	if (dir == IP_CT_DIR_ORIGINAL) {
@@ -61,13 +61,13 @@ static unsigned int fp_netfilter_pre_routing(int family, struct sk_buff *skb)
 		if (printk_ratelimit())
 			printk(KERN_INFO "ct: ifindex changed %d, %d\n", fp_info->ifindex, skb->dev->ifindex);
 
-	if (fp_info->iif && (fp_info->iif != skb->skb_iif))
+	if (fp_info->iif && (fp_info->iif != skb->skb_orig_iif))
 		if (printk_ratelimit())
-			printk(KERN_INFO "ct: iif changed %d, %d\n", fp_info->iif, skb->skb_iif);
+			printk(KERN_INFO "ct: iif changed %d, %d\n", fp_info->iif, skb->skb_orig_iif);
 
 	fp_info->mark = skb->mark;
 	fp_info->ifindex = skb->dev->ifindex;
-	fp_info->iif = skb->skb_iif;
+	fp_info->iif = skb->skb_orig_iif;
 
 done:
 	return NF_ACCEPT;

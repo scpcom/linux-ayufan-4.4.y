@@ -857,6 +857,7 @@ static void __copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	CHECK_SKB_FIELD(hash);
 	CHECK_SKB_FIELD(priority);
 	CHECK_SKB_FIELD(skb_iif);
+	CHECK_SKB_FIELD(skb_orig_iif);
 	CHECK_SKB_FIELD(vlan_proto);
 	CHECK_SKB_FIELD(vlan_tci);
 	CHECK_SKB_FIELD(transport_header);
@@ -4180,6 +4181,7 @@ void skb_scrub_packet(struct sk_buff *skb, bool xnet)
 	skb->tstamp.tv64 = 0;
 	skb->pkt_type = PACKET_HOST;
 	skb->skb_iif = 0;
+	skb->skb_orig_iif = 0;
 	skb->ignore_df = 0;
 	skb_dst_drop(skb);
 	skb_sender_cpu_clear(skb);

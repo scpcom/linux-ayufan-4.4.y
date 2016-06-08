@@ -3673,6 +3673,8 @@ static int __netif_receive_skb_core(struct sk_buff *skb, bool pfmemalloc)
 
 another_round:
 	skb->skb_iif = skb->dev->ifindex;
+	if (!skb->skb_orig_iif)
+		skb->skb_orig_iif = skb->dev->ifindex;
 
 	__this_cpu_inc(softnet_data.processed);
 
@@ -3724,9 +3726,12 @@ ncls:
 			ret = deliver_skb(skb, pt_prev, orig_dev);
 			pt_prev = NULL;
 		}
-		if (vlan_do_receive(&skb))
+		if (vlan_do_receive(&skb)) {
+			/* For VLANs, we want skb_orig_iif to point to the
+			 * virtual VLAN device not the physical device. */
+			skb->skb_orig_iif = 0;
 			goto another_round;
-		else if (unlikely(!skb))
+		} else if (unlikely(!skb))
 			goto out;
 	}
 
@@ -4215,6 +4220,7 @@ static void napi_reuse_skb(struct napi_struct *napi, struct sk_buff *skb)
 	skb->vlan_tci = 0;
 	skb->dev = napi->dev;
 	skb->skb_iif = 0;
+	skb->skb_orig_iif = 0;
 	skb->encapsulation = 0;
 	skb_shinfo(skb)->gso_type = 0;
 	skb->truesize = SKB_TRUESIZE(skb_end_offset(skb));
