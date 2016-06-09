@@ -108,6 +108,14 @@ static void check_hung_task(struct task_struct *t, unsigned long timeout)
 	 * Ok, the task did not get scheduled for more than 2 minutes,
 	 * complain:
 	 */
+	if (sysctl_hung_task_panic) {
+		/* If we are going to panic later, then run console_verbose()
+		 * now to ensure important debug information is printed to the
+		 * console. The information printed by panic() alone is less
+		 * useful.
+		 * */
+		console_verbose();
+	}
 	pr_err("INFO: task %s:%d blocked for more than %ld seconds.\n",
 		t->comm, t->pid, timeout);
 	pr_err("      %s %s %.*s\n",
