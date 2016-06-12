@@ -96,7 +96,12 @@ static void br_port_set_promisc(struct net_bridge_port *p)
 	if (err)
 		return;
 
+#ifndef CONFIG_ARCH_COMCERTO
+	/* Even if we set the interface to promiscuous mode, we want all local
+	 * MAC addresses programmed into the interface.
+	 * Required for NXP QorIQ LS1024A fast forwarding feature. */
 	br_fdb_unsync_static(p->br, p);
+#endif
 	p->flags |= BR_PROMISC;
 }
 
@@ -132,6 +137,11 @@ void br_manage_promisc(struct net_bridge *br)
 {
 	struct net_bridge_port *p;
 	bool set_all = false;
+
+#ifdef CONFIG_ARCH_COMCERTO
+	/* Always use promiscuous mode */
+	set_all = true;
+#endif
 
 	/* If vlan filtering is disabled or bridge interface is placed
 	 * into promiscuous mode, place all ports in promiscuous mode.
@@ -186,7 +196,12 @@ static void nbp_delete_promisc(struct net_bridge_port *p)
 	dev_set_allmulti(p->dev, -1);
 	if (br_promisc_port(p))
 		dev_set_promiscuity(p->dev, -1);
+#ifndef CONFIG_ARCH_COMCERTO
 	else
+	/* We always program the unicast MAC addresses even if the interface is
+	 * in promiscuous mode.
+	 * Required for NXP QorIQ LS1024A fast forwarding feature. */
+#endif
 		br_fdb_unsync_static(p->br, p);
 }
 
@@ -498,6 +513,13 @@ int br_add_if(struct net_bridge *br, struct net_device *dev)
 	list_add_rcu(&p->list, &br->port_list);
 
 	nbp_update_port_count(br);
+
+#ifdef CONFIG_ARCH_COMCERTO
+	/* Program all local unicast addresses of the bridge into Ethernet
+	 * interface.  Required for NXP QorIQ LS1024A fast forwarding feature.
+	 * */
+	br_fdb_sync_static(p->br, p);
+#endif
 
 	netdev_update_features(br->dev);
 

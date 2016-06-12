@@ -106,17 +106,23 @@ static void fdb_add_hw_addr(struct net_bridge *br, const unsigned char *addr)
 	ASSERT_RTNL();
 
 	list_for_each_entry(p, &br->port_list, list) {
-		if (!br_promisc_port(p)) {
+		/* Program all local unicast addresses of the bridge into
+		 * Ethernet interface.  Required for NXP QorIQ LS1024A fast
+		 * forwarding feature. */
+		if (IS_ENABLED(CONFIG_ARCH_COMCERTO) || !br_promisc_port(p)) {
 			err = dev_uc_add(p->dev, addr);
-			if (err)
+			if (err) {
+				pr_err("bridge: dev_uc_add(%s, %pM) failed with %d\n",
+					netdev_name(p->dev), addr, err);
 				goto undo;
+			}
 		}
 	}
 
 	return;
 undo:
 	list_for_each_entry_continue_reverse(p, &br->port_list, list) {
-		if (!br_promisc_port(p))
+		if (IS_ENABLED(CONFIG_ARCH_COMCERTO) || !br_promisc_port(p))
 			dev_uc_del(p->dev, addr);
 	}
 }
@@ -133,7 +139,10 @@ static void fdb_del_hw_addr(struct net_bridge *br, const unsigned char *addr)
 	ASSERT_RTNL();
 
 	list_for_each_entry(p, &br->port_list, list) {
-		if (!br_promisc_port(p))
+		/* Remove all previously added local unicast addresses of the
+		 * bridge from Ethernet interface.  Required for NXP QorIQ
+		 * LS1024A fast forwarding feature. */
+		if (IS_ENABLED(CONFIG_ARCH_COMCERTO) || !br_promisc_port(p))
 			dev_uc_del(p->dev, addr);
 	}
 }
@@ -997,8 +1006,11 @@ int br_fdb_sync_static(struct net_bridge *br, struct net_bridge_port *p)
 				continue;
 
 			err = dev_uc_add(p->dev, fdb->addr.addr);
-			if (err)
+			if (err) {
+				pr_err("bridge: dev_uc_add(%s, %pM) failed with %d\n",
+					netdev_name(p->dev), fdb->addr.addr, err);
 				goto rollback;
+			}
 		}
 	}
 	return 0;
