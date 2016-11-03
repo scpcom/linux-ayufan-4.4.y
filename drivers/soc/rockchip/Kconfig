@@ -64,4 +64,12 @@ config ROCKCHIP_PM_DOMAINS
 
           If unsure, say N.
 
+config ROCKCHIP_PVTM
+	tristate "Rockchip PVTM support"
+	help
+	  Say y here to enable pvtm support.
+	  The Process-Voltage-Temperature Monitor (PVTM) is used to monitor
+	  the chip performance variance caused by chip process, voltage and
+	  temperature.
+
 endif
