@@ -49,6 +49,7 @@
 #include <linux/crc32.h>
 
 #include <asm/uaccess.h>
+#include <asm/cacheflush.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/printk.h>
@@ -356,29 +357,34 @@ static u32 log_buf_len = __LOG_BUF_LEN;
 #else  /*  CONFIG_PRINTK_PERSIST */
 
 struct logbits {
+	/* Cache line 1 (32 bytes) */
 	int magic; /* needed to verify the memory across reboots */
-	u32 _log_buf_len;
-	u64 _syslog_seq; /* leading _ so they aren't replaced by #define */
-	u32 _syslog_idx;
-	enum log_flags _syslog_prev;
-	size_t _syslog_partial;
-
-/* index and sequence number of the first record stored in the buffer */
+	u32 _log_buf_len; /* leading _ so they aren't replaced by #define */
 	u64 _log_first_seq;
-	u32 _log_first_idx;
-
-/* index and sequence number of the next record to store in the buffer */
 	u64 _log_next_seq;
+	u32 _log_first_idx;
 	u32 _log_next_idx;
 
-/* the next printk record to write to the console */
-	u64 _console_seq;
-	u32 _console_idx;
-	enum log_flags _console_prev;
+	/*
+	 * All fields up to but not including _console_seq are flushed from the
+	 * L1 and L2 caches at certain times to ensure that most of the printk
+	 * buffer can be recovered after a watchdog reset. If you make changes
+	 * to this struct, make sure to take the cache flushing code into
+	 * account. Search for __sync_cache_range_w.
+	 */
 
-/* the next printk record to read after the last 'clear' command */
+	/* Cache line 2 (32 bytes) */
+	u64 _console_seq;
+	u64 _syslog_seq;
 	u64 _clear_seq;
+	u32 _console_idx;
+	u32 _syslog_idx;
+
+	/* Cache line 3 (first 16 bytes only) */
 	u32 _clear_idx;
+	enum log_flags _syslog_prev;
+	size_t _syslog_partial;
+	enum log_flags _console_prev;
 };
 
 static struct logbits __logbits = {
@@ -447,57 +453,57 @@ static __init struct logbits *log_buf_alloc(unsigned long size, char **new_logbu
 	unsigned long full_size = size + sizeof(struct logbits);
 	struct logbits *new_logbits;
 	u64 seq;
-	int idx, lost_entries;
+	int idx, lost_entries, recovered_entries;
 	struct printk_log *prlog;
 	u32 curr_crc;
 
 	alloc = physmem_reserve(full_size);
 	if (alloc) {
+		const char *bad_header;
 		buf = phys_to_virt(alloc);
 		*new_logbuf = buf;
 		new_logbits = (void*)buf + size;
-		printk(KERN_INFO "printk_persist: memory reserved @ %pa\n",
-			&alloc);
-		if ((new_logbits->magic != PERSIST_MAGIC) ||
-		    (new_logbits->_log_buf_len != size) ||
-			(new_logbits->_log_first_seq >
-				new_logbits->_log_next_seq) ||
-			(new_logbits->_log_first_idx > size) ||
-			(new_logbits->_syslog_idx > size) ||
-			(new_logbits->_syslog_seq >
-				new_logbits->_log_next_seq) ||
-			(new_logbits->_log_next_idx > size) ||
-			(new_logbits->_console_seq >
-				new_logbits->_log_next_seq) ||
-			(new_logbits->_console_idx > size) ||
-			(new_logbits->_clear_seq >
-				new_logbits->_log_next_seq) ||
-			(new_logbits->_clear_idx > size)) {
-			printk(KERN_INFO "printk_persist: header invalid, "
-				"cleared.\n");
+		printk(KERN_INFO "printk_persist: memory reserved @ 0x%p size %lu\n",
+				buf, size);
+		printk(KERN_INFO "printk_persist: header:\n"
+			"          magic=0x%08x\n"
+			"    log_buf_len=%u\n"
+			"  log_first_idx=%u\n"
+			"   log_next_idx=%u\n"
+			"  log_first_seq=%llu\n"
+			"   log_next_seq=%llu\n",
+			new_logbits->magic,
+			new_logbits->_log_buf_len,
+			new_logbits->_log_first_idx,
+			new_logbits->_log_next_idx,
+			new_logbits->_log_first_seq,
+			new_logbits->_log_next_seq);
+		bad_header = NULL;
+		if (new_logbits->magic != PERSIST_MAGIC) {
+			bad_header = "incorrect magic value";
+		} else if (new_logbits->_log_buf_len != size) {
+			bad_header = "log_buf_len does not match";
+		} else if (new_logbits->_log_first_seq > new_logbits->_log_next_seq) {
+			bad_header = "log_first_seq > log_next_seq";
+		} else if (new_logbits->_log_next_seq - new_logbits->_log_first_seq >
+				size / sizeof(struct printk_log)) {
+			bad_header = "too many entries";
+		} else if (new_logbits->_log_first_idx > size) {
+			bad_header = "log_first_idx > size";
+		} else if (new_logbits->_log_next_idx > size) {
+			bad_header = "log_next_idx > size";
+		}
+		if (bad_header) {
+			printk(KERN_INFO "printk_persist: header invalid (%s), cleared.\n", bad_header);
+			/*
+			 * full_size includes struct logbits at the end of the
+			 * message buffer
+			 */
 			memset(buf, 0, full_size);
-			memset(new_logbits, 0, sizeof(*new_logbits));
 			new_logbits->magic = PERSIST_MAGIC;
 			new_logbits->_log_buf_len = size;
 		} else {
-			printk(KERN_INFO "printk_persist: header valid; "
-				"log_first_idx=%d\n"
-				"log_next_idx=%d\n"
-				"log_first_seq=%lld\n"
-				"log_next_seq=%lld\n"
-				"console_seq=%lld\n"
-				"console_idx=%d\n"
-				"syslog_seq=%lld\n"
-				"syslog_idx=%d\n",
-				new_logbits->_log_first_idx,
-				new_logbits->_log_next_idx,
-				new_logbits->_log_first_seq,
-				new_logbits->_log_next_seq,
-				new_logbits->_console_seq,
-				new_logbits->_console_idx,
-				new_logbits->_syslog_seq,
-				new_logbits->_syslog_idx);
-			printk(KERN_INFO "printk_persist: validating records\n");
+			int corruption = 0;
 			for (seq = new_logbits->_log_first_seq, idx = new_logbits->_log_first_idx;
 				seq < new_logbits->_log_next_seq; ++seq) {
 				prlog = (struct printk_log *) &buf[idx];
@@ -506,10 +512,21 @@ static __init struct logbits *log_buf_alloc(unsigned long size, char **new_logbu
 				curr_crc = crc32(~0, prlog, offsetof(struct printk_log, crc));
 				if (prlog->crc != curr_crc) {
 					lost_entries = (int)(new_logbits->_log_next_seq - seq);
-					printk(KERN_INFO "printk_persist: corruption found, lost %d entries\n",
-						lost_entries);
+					recovered_entries = (int)(seq - new_logbits->_log_first_seq);
+					printk(KERN_INFO "printk_persist: corruption found at %p, "
+							"recovered %d entries, lost %d entries\n",
+						prlog, recovered_entries, lost_entries);
+					printk(KERN_INFO "Expected CRC %08x, stored CRC %08x\n",
+							curr_crc, prlog->crc);
+					{
+						char *p = (char*) (((unsigned) prlog) & ~0x1f) - 256;
+						unsigned size = new_logbits->_log_next_idx - idx + ((char*)prlog - p);
+						if (size > 1024) size = 1024;
+						print_hex_dump(KERN_INFO, "corrupt: ", DUMP_PREFIX_ADDRESS, 16, 1, p, size, 1);
+					}
 					new_logbits->_log_next_seq = seq;
 					new_logbits->_log_next_idx = idx;
+					corruption = 1;
 					break;
 				}
 				if (prlog->len == 0) {
@@ -522,11 +539,13 @@ static __init struct logbits *log_buf_alloc(unsigned long size, char **new_logbu
 				else
 					idx += prlog->len;
 			}
+			if (!corruption)
+				printk(KERN_INFO "printk_persist: successfully validated %llu entries\n",
+					(new_logbits->_log_next_seq - new_logbits->_log_first_seq));
 		}
 	} else {
 		/* replace the buffer, but don't bother to swap struct logbits */
-		printk(KERN_ERR "printk_persist: failed to reserve bootmem "
-			"area. disabled.\n");
+		printk(KERN_ERR "printk_persist: failed to reserve bootmem area. disabled.\n");
 		buf = alloc_bootmem(full_size);
 		*new_logbuf = buf;
 		new_logbits = (struct logbits*)(buf + size);
@@ -706,12 +725,16 @@ static int log_store(int facility, int level,
 		((struct printk_log*) (log_buf + log_next_idx))->crc =
 			crc32(~0, log_buf + log_next_idx, offsetof(struct printk_log, crc));
 #endif
+		/* Flush L1 and L2 cache */
+		__sync_cache_range_w(log_buf + log_next_idx, sizeof(struct printk_log));
 		log_next_idx = 0;
 	}
 
 	/* insert message */
 	log_next_idx += size;
 	log_next_seq++;
+	/* Flush L1 and L2 cache */
+	__sync_cache_range_w(logbits, offsetof(struct logbits, _console_seq));
 
 	/* fill message */
 	msg = (struct printk_log *)(log_buf + log_next_idx - size);
@@ -735,6 +758,8 @@ static int log_store(int facility, int level,
 #ifdef CONFIG_PRINTK_PERSIST
 	msg->crc = crc32(~0, msg, offsetof(struct printk_log, crc));
 #endif
+	/* Flush L1 and L2 cache */
+	__sync_cache_range_w(msg, size);
 
 	return msg->text_len;
 }
@@ -1259,6 +1284,7 @@ void __init setup_log_buf(int early)
 			log_next_idx = 0;
 		}
 		memcpy(&log_buf[log_next_idx], &__log_buf[idx], prlog->len);
+		__sync_cache_range_w(&log_buf[log_next_idx], prlog->len);
 
 		if (old_logbits->_syslog_seq == seq) {
 			syslog_seq = log_next_seq;
@@ -1286,6 +1312,9 @@ void __init setup_log_buf(int early)
 		console_seq = log_next_seq;
 		console_idx = log_next_idx;
 	}
+	clear_seq = log_first_seq;
+	clear_idx = log_first_idx;
+	__sync_cache_range_w(logbits, offsetof(struct logbits, _console_seq));
 #endif
 	raw_spin_unlock_irqrestore(&logbuf_lock, flags);
 
@@ -1293,9 +1322,9 @@ void __init setup_log_buf(int early)
 	free_bootlog();
 #endif
 
-	pr_info("log_buf_len: %d bytes\n", log_buf_len);
-	pr_info("early log buf free: %d(%d%%)\n",
-		free, (free * 100) / __LOG_BUF_LEN);
+	if (free < __LOG_BUF_LEN / 2)
+		pr_info("early log buf free: %d(%d%%)\n",
+			free, (free * 100) / __LOG_BUF_LEN);
 }
 
 static bool __read_mostly ignore_loglevel;
