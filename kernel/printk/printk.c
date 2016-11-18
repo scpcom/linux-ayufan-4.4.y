@@ -3195,6 +3195,8 @@ void kmsg_dump(enum kmsg_dump_reason reason)
 	struct kmsg_dumper *dumper;
 	unsigned long flags;
 
+	cont_flush(LOG_NEWLINE);
+
 	if ((reason > KMSG_DUMP_OOPS) && !always_kmsg_dump)
 		return;
 
