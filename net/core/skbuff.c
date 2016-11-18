@@ -1024,6 +1024,9 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 	if (skb_orphan_frags(skb, gfp_mask))
 		return NULL;
 
+	if (skb->dma_coherent)
+		return skb_copy(skb, gfp_mask);
+
 	if (skb->fclone == SKB_FCLONE_ORIG &&
 	    atomic_read(&fclones->fclone_ref) == 1) {
 		n = &fclones->skb2;
