@@ -2477,6 +2477,7 @@ static const struct panel_desc lg_lp079qx1_sp0v = {
 		.width = 129,
 		.height = 171,
 	},
+	.bus_format = MEDIA_BUS_FMT_RGB666_1X18,
 };
 
 static const struct drm_display_mode lg_lp097qx1_spa1_mode = {
