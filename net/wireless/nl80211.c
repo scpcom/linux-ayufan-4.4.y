@@ -9774,6 +9774,11 @@ static int nl80211_start_radar_detection(struct sk_buff *skb,
 		goto unlock;
 	}
 
+	if (rdev->wiphy.flags & WIPHY_FLAG_DFS_OFFLOAD) {
+		err = -EOPNOTSUPP;
+		goto unlock;
+	}
+
 	if (netif_carrier_ok(dev)) {
 		err = -EBUSY;
 		goto unlock;
