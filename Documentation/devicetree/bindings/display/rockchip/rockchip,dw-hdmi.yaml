@@ -123,6 +123,10 @@ properties:
     description:
       phandle to the GRF to mux vopl/vopb.
 
+  rockchip,phy-table:
+    description:
+      the parameter table of hdmi phy configuration.
+
 required:
   - compatible
   - reg
