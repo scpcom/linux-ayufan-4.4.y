@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: (GPL-2.0 OR MIT)
 
+snd-soc-meson-audio-core-objs	 := audio-core.o
+
 snd-soc-meson-axg-fifo-objs := axg-fifo.o
 snd-soc-meson-axg-frddr-objs := axg-frddr.o
 snd-soc-meson-axg-toddr-objs := axg-toddr.o
@@ -9,6 +11,8 @@ snd-soc-meson-axg-tdmin-objs := axg-tdmin.o
 snd-soc-meson-axg-tdmout-objs := axg-tdmout.o
 snd-soc-meson-axg-sound-card-objs := axg-card.o
 snd-soc-meson-axg-spdifout-objs := axg-spdifout.o
+
+obj-$(CONFIG_SND_SOC_MESON)		+= snd-soc-meson-audio-core.o
 
 obj-$(CONFIG_SND_MESON_AXG_FIFO) += snd-soc-meson-axg-fifo.o
 obj-$(CONFIG_SND_MESON_AXG_FRDDR) += snd-soc-meson-axg-frddr.o
