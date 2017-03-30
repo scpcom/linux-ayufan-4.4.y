@@ -15,6 +15,14 @@ config SND_SOC_MESON_I2S
 	  Say Y or M if you want to add support for i2s driver for Amlogic
 	  Meson SoCs.
 
+config SND_SOC_MESON_SPDIF
+	tristate "Meson spdif interface"
+	depends on SND_SOC_MESON
+	select SND_PCM_IEC958
+	help
+	  Say Y or M if you want to add support for spdif driver for Amlogic
+	  Meson SoCs.
+
 menu "ASoC support for Amlogic platforms"
 	depends on ARCH_MESON || COMPILE_TEST
 
