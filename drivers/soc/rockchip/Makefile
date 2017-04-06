@@ -2,5 +2,6 @@
 #
 # Rockchip Soc drivers
 #
+obj-$(CONFIG_ROCKCHIP_CPUINFO)	+= rockchip-cpuinfo.o
 obj-$(CONFIG_ROCKCHIP_GRF) += grf.o
 obj-$(CONFIG_ROCKCHIP_PM_DOMAINS) += pm_domains.o
