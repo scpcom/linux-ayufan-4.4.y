@@ -24,11 +24,11 @@
 #define RTL821x_INER		0x12
 #define RTL821x_INER_INIT	0x6400
 #define RTL821x_INSR		0x13
+#define RTL821x_PAGE_SELECT	0x1f
 #define RTL8211E_INER_LINK_STATUS 0x400
 
 #define RTL8211F_INER_LINK_STATUS 0x0010
 #define RTL8211F_INSR		0x1d
-#define RTL8211F_PAGE_SELECT	0x1f
 #define RTL8211F_TX_DELAY	0x100
 
 #define RTL8211_PAGSEL			0x1f
@@ -60,10 +60,10 @@ static int rtl8211f_ack_interrupt(struct phy_device *phydev)
 {
 	int err;
 
-	phy_write(phydev, RTL8211F_PAGE_SELECT, 0xa43);
+	phy_write(phydev, RTL821x_PAGE_SELECT, 0xa43);
 	err = phy_read(phydev, RTL8211F_INSR);
 	/* restore to default page 0 */
-	phy_write(phydev, RTL8211F_PAGE_SELECT, 0x0);
+	phy_write(phydev, RTL821x_PAGE_SELECT, 0x0);
 
 	return (err < 0) ? err : 0;
 }
@@ -274,7 +274,7 @@ static int rtl8211f_config_init(struct phy_device *phydev)
 	if (ret < 0)
 		return ret;
 
-	phy_write(phydev, RTL8211F_PAGE_SELECT, 0xd08);
+	phy_write(phydev, RTL821x_PAGE_SELECT, 0xd08);
 	reg = phy_read(phydev, 0x11);
 
 	/* enable TX-delay for rgmii-id and rgmii-txid, otherwise disable it */
@@ -286,7 +286,7 @@ static int rtl8211f_config_init(struct phy_device *phydev)
 
 	phy_write(phydev, 0x11, reg);
 	/* restore to default page 0 */
-	phy_write(phydev, RTL8211F_PAGE_SELECT, 0x0);
+	phy_write(phydev, RTL821x_PAGE_SELECT, 0x0);
 
 	return 0;
 }
