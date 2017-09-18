@@ -1056,6 +1056,14 @@ struct drm_connector_helper_funcs {
 	void (*atomic_commit)(struct drm_connector *connector,
 			      struct drm_connector_state *state);
 
+	/**
+	 * @atomic_flush:
+	 *
+	 * flush atomic update.
+	 */
+	void (*atomic_flush)(struct drm_connector *connector,
+			     struct drm_connector_state *conn_state);
+
 	int (*prepare_writeback_job)(struct drm_writeback_connector *connector,
 				     struct drm_writeback_job *job);
 	void (*cleanup_writeback_job)(struct drm_writeback_connector *connector,
