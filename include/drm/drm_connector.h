@@ -660,6 +660,8 @@ struct drm_connector_state {
 	 * DRM blob property for HDR output metadata
 	 */
 	struct drm_property_blob *hdr_output_metadata;
+
+	struct drm_property_blob *hdr_panel_blob_ptr;
 };
 
 /**
@@ -1544,6 +1546,9 @@ int drm_connector_set_path_property(struct drm_connector *connector,
 int drm_connector_set_tile_property(struct drm_connector *connector);
 int drm_connector_update_edid_property(struct drm_connector *connector,
 				       const struct edid *edid);
+int
+drm_mode_connector_update_hdr_property(struct drm_connector *connector,
+				       const struct hdr_static_metadata *data);
 void drm_connector_set_link_status_property(struct drm_connector *connector,
 					    uint64_t link_status);
 void drm_connector_set_vrr_capable_property(

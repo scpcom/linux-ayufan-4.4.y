@@ -843,6 +843,8 @@ struct drm_mode_config {
 	 */
 	struct drm_property *hdr_output_metadata_property;
 
+	struct drm_property *hdr_panel_metadata_property;
+
 	/**
 	 * @content_protection_property: DRM ENUM property for content
 	 * protection. See drm_connector_attach_content_protection_property().
