@@ -797,12 +797,6 @@
 	status = "disabled";
 };
 
-&uart0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart0_xfer &uart0_cts>;
-	status = "okay";
-};
-
 &uart2 {
 	status = "okay";
 };
