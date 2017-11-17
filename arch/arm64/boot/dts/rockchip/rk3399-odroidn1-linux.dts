@@ -621,6 +621,7 @@
 	assigned-clock-rates = <100000000>;
 	ep-gpios = <&gpio2 18 GPIO_ACTIVE_HIGH>;
 	num-lanes = <1>;
+	max-link-speed = <2>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pcie_clkreqn>;
 	status = "okay";
