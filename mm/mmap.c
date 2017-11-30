@@ -1788,6 +1788,18 @@ int expand_downwards(struct vm_area_struct *vma,
 	/* Check that both stack segments have the same anon_vma? */
 	if (prev && !(prev->vm_flags & VM_GROWSDOWN) &&
 			(prev->vm_flags & (VM_WRITE|VM_READ|VM_EXEC))) {
+		/*
+		 * bwh: Reduce the stack guard gap if this looks like
+		 * Hotspot JVM craziness - see Debian bug #865303
+		 */
+#ifdef CONFIG_X86
+		if ((prev->vm_flags & VM_FIXED) &&
+		    prev->vm_end - prev->vm_start == PAGE_SIZE) {
+			if (address - prev->vm_end <
+			    min(stack_guard_gap, 4UL << PAGE_SHIFT))
+				return -ENOMEM;
+		} else
+#endif
 		if (address - prev->vm_end < stack_guard_gap)
 			return -ENOMEM;
 	}
