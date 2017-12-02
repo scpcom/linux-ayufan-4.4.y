@@ -19,21 +19,25 @@
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
 
-#define RTL821x_PHYSR		0x11
-#define RTL821x_PHYSR_DUPLEX	BIT(13)
-#define RTL821x_PHYSR_SPEED	GENMASK(15, 14)
+#define RTL821x_PHYSR				0x11
+#define RTL821x_PHYSR_DUPLEX			BIT(13)
+#define RTL821x_PHYSR_SPEED			GENMASK(15, 14)
 
-#define RTL821x_INER		0x12
-#define RTL8211B_INER_INIT	0x6400
-#define RTL8211E_INER_LINK_STATUS	BIT(10)
-#define RTL8211F_INER_LINK_STATUS	BIT(4)
+#define RTL821x_INER				0x12
+#define RTL8211B_INER_INIT			0x6400
+#define RTL8211E_INER_LINK_STATUS		BIT(10)
+#define RTL8211F_INER_LINK_STATUS		BIT(4)
 
-#define RTL821x_INSR		0x13
+#define RTL821x_INSR				0x13
 
-#define RTL821x_PAGE_SELECT	0x1f
+#define RTL821x_PAGE_SELECT			0x1f
 
-#define RTL8211F_INSR		0x1d
-#define RTL8211F_TX_DELAY	BIT(8)
+#define RTL8211F_INSR				0x1d
+
+#define RTL8211F_TX_DELAY			BIT(8)
+
+#define RTL8201F_ISR				0x1e
+#define RTL8201F_IER				0x13
 
 #define RTL8211_PAGSEL			0x1f
 #define RTL8211_PAGSEL_EXT		0x0007
@@ -41,9 +45,6 @@
 #define RTL8211_EXTPAGE_110		0x006e
 #define RTL8211_EXTPAGE_109		0x006d
 #define RTL8211_MAGIC_PACKET_EVT	0x1000
-
-#define RTL8201F_ISR		0x1e
-#define RTL8201F_IER		0x13
 
 MODULE_DESCRIPTION("Realtek PHY driver");
 MODULE_AUTHOR("Johnson Leung");
