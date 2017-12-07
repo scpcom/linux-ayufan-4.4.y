@@ -48,3 +48,4 @@ obj-$(CONFIG_XILLYBUS)		+= xillybus/
 obj-$(CONFIG_POWERNV_OP_PANEL)	+= powernv-op-panel.o
 obj-$(CONFIG_ADI)		+= adi.o
 obj-$(CONFIG_ARCH_ROCKCHIP) += rk3568-gpiomem.o
+obj-$(CONFIG_ROCK_GPIOMEM)	+= rock-gpiomem.o
