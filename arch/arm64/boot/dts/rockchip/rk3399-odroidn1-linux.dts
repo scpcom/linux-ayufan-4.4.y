@@ -126,27 +126,6 @@
 		cooling-levels = <0 125 102 51>; /* PWM duty cycle */
 	};	
 
-	rt5651-sound {
-		compatible = "simple-audio-card";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,name = "realtek,rt5651-codec";
-		simple-audio-card,mclk-fs = <256>;
-		simple-audio-card,widgets =
-			"Microphone", "Mic Jack",
-			"Headphone", "Headphone Jack";
-		simple-audio-card,routing =
-			"Mic Jack", "MICBIAS1",
-			"IN1P", "Mic Jack",
-			"Headphone Jack", "HPOL",
-			"Headphone Jack", "HPOR";
-		simple-audio-card,cpu {
-			sound-dai = <&i2s0>;
-		};
-		simple-audio-card,codec {
-			sound-dai = <&rt5651>;
-		};
-	};
-
 	dw_hdmi_audio: dw-hdmi-audio {
 		status = "disabled";
 		compatible = "rockchip,dw-hdmi-audio";
@@ -181,24 +160,6 @@
 		simple-audio-card,codec {
 			sound-dai = <&hdmi>;
 		};
-	};
-
-	spdif-sound {
-		status = "okay";
-		compatible = "simple-audio-card";
-		simple-audio-card,name = "ROCKCHIP,SPDIF";
-		simple-audio-card,cpu {
-			sound-dai = <&spdif>;
-		};
-		simple-audio-card,codec {
-			sound-dai = <&spdif_out>;
-		};
-	};
-
-	spdif_out: spdif-out {
-		status = "okay";
-		compatible = "linux,spdif-dit";
-		#sound-dai-cells = <0>;
 	};
 
 	vccadc_ref: vccadc-ref {
@@ -577,16 +538,6 @@
 	status = "okay";
 	i2c-scl-rising-time-ns = <300>;
 	i2c-scl-falling-time-ns = <15>;
-
-	rt5651: rt5651@1a {
-		#sound-dai-cells = <0>;
-		compatible = "rockchip,rt5651";
-		reg = <0x1a>;
-		clocks = <&cru SCLK_I2S_8CH_OUT>;
-		clock-names = "mclk";
-		spk-con-gpio = <&gpio0 11 GPIO_ACTIVE_HIGH>;
-		hp-det-gpio = <&gpio4 28 GPIO_ACTIVE_LOW>;
-	};
 };
 
 &i2c4 {
@@ -675,12 +626,6 @@
 		};
 	};
 
-	rt5640 {
-		rt5640_hpcon: rt5640-hpcon {
-			rockchip,pins = <4 21 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
-
 	usb2 {
 		host_vbus_drv: host-vbus-drv {
 			rockchip,pins =
@@ -754,14 +699,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_cd &sdmmc_bus4>;
 	status = "okay";
-};
-
-&spdif {
-	status = "okay";
-	pinctrl-0 = <&spdif_bus_1>;
-	i2c-scl-rising-time-ns = <450>;
-	i2c-scl-falling-time-ns = <15>;
-	#sound-dai-cells = <0>;
 };
 
 &tcphy0 {
