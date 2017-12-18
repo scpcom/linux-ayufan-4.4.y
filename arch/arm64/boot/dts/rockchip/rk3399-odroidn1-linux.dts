@@ -110,8 +110,10 @@
 
 	gpiomem {
 		compatible = "rockchip,rock-gpiomem";
-		reg = <0 0xff720000 0 0x20000>,
-		      <0 0xff780000 0 0x18000>;
+		reg = 	<0 0xff320000 0 0x10000>,	/* PMUGRF */
+			<0 0xff720000 0 0x20000>,	/* GPIO0/GPIO1 */
+			<0 0xff770000 0 0x10000>,	/* GRF */
+			<0 0xff780000 0 0x18000>;	/* GPIO2/GPIO3/GPIO4 */
 		status = "okay";
 	};
 
