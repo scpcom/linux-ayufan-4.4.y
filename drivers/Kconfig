@@ -246,4 +246,6 @@ source "drivers/rknpu/Kconfig"
 
 source "drivers/gator/Kconfig"
 
+source "drivers/hardkernel/Kconfig"
+
 endmenu

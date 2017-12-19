@@ -197,5 +197,6 @@ obj-$(CONFIG_GATOR)		+= gator/
 ifneq ($(CONFIG_GATOR),)
 obj-y += gator/gator_builtin.o
 endif
+obj-$(CONFIG_ODROIDN1_SYSFS)	+= hardkernel/
 
 obj-y				+= vendor/
