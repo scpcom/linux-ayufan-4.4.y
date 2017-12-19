@@ -63,7 +63,6 @@
 struct regs_phys {
 	unsigned long start;
 	unsigned long end;
-	unsigned long size;
 };
 
 struct rock_gpiomem_instance {
@@ -117,8 +116,8 @@ static int rock_gpiomem_mmap(struct file *file, struct vm_area_struct *vma)
 	unsigned long end   = start + vma->vm_end - vma->vm_start;
 
 	while (gpio_area < inst->gpio_area_count) {
-		if ((inst->gpio_regs_phys[gpio_area].start >= start) &&
-		    (inst->gpio_regs_phys[gpio_area].end   <= end))
+		if ((inst->gpio_regs_phys[gpio_area].start <= start) &&
+		    (inst->gpio_regs_phys[gpio_area].end   >= end))
 			goto found;
 		gpio_area++;
 	}
@@ -127,14 +126,14 @@ static int rock_gpiomem_mmap(struct file *file, struct vm_area_struct *vma)
 
 found:
 	vma->vm_page_prot = phys_mem_access_prot(file, vma->vm_pgoff,
-			inst->gpio_regs_phys[gpio_area].size,
+			vma->vm_end - vma->vm_start,
 			vma->vm_page_prot);
 
 	vma->vm_ops = &rock_gpiomem_vm_ops;
 
 	if (remap_pfn_range(vma, vma->vm_start,
 				vma->vm_pgoff,
-				inst->gpio_regs_phys[gpio_area].size,
+				vma->vm_end - vma->vm_start,
 				vma->vm_page_prot)) {
 		return -EAGAIN;
 	}
@@ -184,7 +183,6 @@ static int rock_gpiomem_probe(struct platform_device *pdev)
 		if (res) {
 			inst->gpio_regs_phys[i].start = res->start;
 			inst->gpio_regs_phys[i].end   = res->end;
-			inst->gpio_regs_phys[i].size  = res->end - res->start +1;
 		} else {
 			dev_err(inst->dev, "failed to get IO resource area %d", i);
 			err = -ENOENT;
@@ -225,7 +223,7 @@ static int rock_gpiomem_probe(struct platform_device *pdev)
 			"Initialised: Registers at start:0x%08lx end:0x%08lx size:0x%08lx",
 			inst->gpio_regs_phys[i].start,
 			inst->gpio_regs_phys[i].end,
-			inst->gpio_regs_phys[i].size);
+			inst->gpio_regs_phys[i].end - inst->gpio_regs_phys[i].start);
 	}
 
 	return 0;
