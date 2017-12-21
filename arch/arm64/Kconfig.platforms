@@ -233,6 +233,13 @@ config ARCH_ROCKCHIP_ODROIDGOA
 	  (ODROID-GO2 Rev 1.0, Rev 1.1 with built-in WIFI module
 	  and ODROID-GO3)
 
+config PLAT_RK3399_ODROIDN1
+	bool "ODROID-N1 Platform based on Rockchip RK3399"
+	depends on ARCH_ROCKCHIP
+	help
+	  This enables ODROID-N1 platform support
+	  based on Rockchip RK3399 chipset.
+
 config ARCH_S32
 	bool "NXP S32 SoC Family"
 	help
