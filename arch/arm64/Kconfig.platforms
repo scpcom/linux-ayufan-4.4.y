@@ -63,6 +63,13 @@ config ARCH_ROCKCHIP
 	  This enables support for the ARMv8 based Rockchip chipsets,
 	  like the RK3368.
 
+config PLAT_RK3399_ODROIDN1
+	bool "ODROID-N1 Platform based on Rockchip RK3399"
+	depends on ARCH_ROCKCHIP
+	help
+	  This enables ODROID-N1 platform support
+	  based on Rockchip RK3399 chipset.
+
 config ARCH_SEATTLE
 	bool "AMD Seattle SoC Family"
 	help
