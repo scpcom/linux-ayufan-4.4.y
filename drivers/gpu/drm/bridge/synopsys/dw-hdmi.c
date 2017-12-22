@@ -71,6 +71,14 @@ enum hdmi_datamap {
 	YCbCr422_12B = 0x12,
 };
 
+#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
+#define VOUT_MODE_UNKNOWN	0x0
+#define VOUT_MODE_HDMI		0x1
+#define VOUT_MODE_DVI		0x2
+
+static int vout_mode;
+#endif
+
 /*
  * Unless otherwise noted, entries in this table are 100% optimization.
  * Values can be obtained from hdmi_compute_n() but that function is
@@ -2758,6 +2766,22 @@ static void dw_hdmi_update_power(struct dw_hdmi *hdmi)
 {
 	int force = hdmi->force;
 
+#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
+	/*
+	 * if vout is not defined in bootargs or
+	 * it's invalid (VOUT_MODE_UNKNOWN),
+	 * hdmi sink parameters are set based on
+	 * auto detection rule of dw-hdmi driver.
+	 */
+	if (vout_mode == VOUT_MODE_HDMI) {
+		hdmi->sink_is_hdmi = true;
+		hdmi->sink_has_audio = true;
+	} else if (vout_mode == VOUT_MODE_DVI) {
+		hdmi->sink_is_hdmi = false;
+		hdmi->sink_has_audio = false;
+	}
+#endif
+
 	if (hdmi->disabled) {
 		force = DRM_FORCE_OFF;
 	} else if (force == DRM_FORCE_UNSPECIFIED) {
@@ -4358,6 +4382,21 @@ static int get_force_logo_property(struct dw_hdmi *hdmi)
 
 	return 0;
 }
+
+#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
+static int __init setup_vout_mode(char *str)
+{
+	if (str && strncmp("hdmi", str, 4) == 0)
+		vout_mode = VOUT_MODE_HDMI;
+	else if (str && strncmp("dvi", str, 3) == 0)
+		vout_mode = VOUT_MODE_DVI;
+	else
+		vout_mode = VOUT_MODE_UNKNOWN;
+
+	return 1;
+}
+__setup("vout=", setup_vout_mode);
+#endif
 
 /* -----------------------------------------------------------------------------
  * Probe/remove API, used from platforms based on the DRM bridge API.
