@@ -116,10 +116,21 @@
 
 	gpiomem {
 		compatible = "rockchip,rock-gpiomem";
-		reg = 	<0 0xff320000 0 0x10000>,	/* PMUGRF */
-			<0 0xff720000 0 0x20000>,	/* GPIO0/GPIO1 */
-			<0 0xff770000 0 0x10000>,	/* GRF */
-			<0 0xff780000 0 0x18000>;	/* GPIO2/GPIO3/GPIO4 */
+
+		/* gpio mmap area define */
+			/* GPIO0 64K    : 0xff720000 - 0xff72ffff */
+			/* GPIO1 64K    : 0xff730000 - 0xff73ffff */
+			/* Reserved 64K : 0xff740000 - 0xff74ffff */
+			/* PMUCRU 64K   : 0xff750000 - 0xff75ffff */
+			/* CRU 64K      : 0xff760000 - 0xff76ffff */
+			/* GRF 64K      : 0xff770000 - 0xff77ffff */
+			/* GPIO2 32K    : 0xff780000 - 0xff777fff */
+			/* GPIO3 32K    : 0xff788000 - 0xff78ffff */
+			/* GPIO4 32K    : 0xff790000 - 0xff797fff */
+		reg = 	<0 0xff720000 0 0x78000>,
+
+			/* PMUGRF 64K   : 0xff320000 - 0xff32ffff */
+			<0 0xff320000 0 0x10000>;
 		status = "okay";
 	};
 
