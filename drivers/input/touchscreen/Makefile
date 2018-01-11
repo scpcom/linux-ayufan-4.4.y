@@ -47,7 +47,9 @@ obj-$(CONFIG_TOUCHSCREEN_GSLX680_VR)	+= gslx680.o gsl_point_id.o
 obj-$(CONFIG_TOUCHSCREEN_GSLX680_FIREFLY)	+= gslx680_firefly.o gsl_point_id.o
 obj-$(CONFIG_TOUCHSCREEN_GSL3673)	+= gsl3673.o gsl_point_id.o
 obj-$(CONFIG_TOUCHSCREEN_GSL3673_800X1280)	+= gsl3673_800x1280.o gsl_point_id.o
+ifndef CONFIG_TOUCHSCREEN_FE_PANELS
 obj-$(CONFIG_TOUCHSCREEN_GT9XX)		+= gt9xx/
+endif
 obj-$(CONFIG_TOUCHSCREEN_ILI210X)	+= ili210x.o
 obj-$(CONFIG_TOUCHSCREEN_IMX6UL_TSC)	+= imx6ul_tsc.o
 obj-$(CONFIG_TOUCHSCREEN_INEXIO)	+= inexio.o
@@ -104,4 +106,5 @@ obj-$(CONFIG_TOUCHSCREEN_ROHM_BU21023)	+= rohm_bu21023.o
 obj-$(CONFIG_TOUCHSCREEN_VTL_CT36X)	+= vtl_ts/
 obj-$(CONFIG_TOUCHSCREEN_GT1X)		+= gt1x/
 obj-$(CONFIG_TOUCHSCREEN_DWAV_USB_MT)	+= dwav-usb-mt.o
+obj-$(CONFIG_TOUCHSCREEN_FE_PANELS)	+= friendlyelec/
 obj-$(CONFIG_TOUCHSCREEN_ROCKPI_FT5406) += rockpi_ft5406.o
