@@ -586,7 +586,7 @@ static bool has_pid_permissions(struct pid_namespace *pid,
 		return true;
 	if (in_group_p(pid->pid_gid))
 		return true;
-	return ptrace_may_access(task, PTRACE_MODE_READ);
+	return ptrace_may_access(task, PTRACE_MODE_READ_FSCREDS);
 }
 
 
