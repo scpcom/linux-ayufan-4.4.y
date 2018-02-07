@@ -1195,6 +1195,13 @@ enum {
 	RK818_ID = 0x8180,
 };
 
+struct rk808_pin_info {
+	struct pinctrl *p;
+	struct pinctrl_state *reset;
+	struct pinctrl_state *power_off;
+	struct pinctrl_state *sleep;
+};
+
 struct rk808 {
 	struct device			*dev;
 	struct regmap_irq_chip_data	*irq_data;
@@ -1202,6 +1209,7 @@ struct rk808 {
 	long				variant;
 	const struct regmap_config	*regmap_cfg;
 	const struct regmap_irq_chip	*regmap_irq_chip;
+	struct rk808_pin_info *pins;
 };
 
 void rk8xx_shutdown(struct device *dev);
