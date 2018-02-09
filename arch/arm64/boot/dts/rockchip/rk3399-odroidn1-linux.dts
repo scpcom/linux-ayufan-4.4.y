@@ -977,8 +977,48 @@
 	status = "disabled";
 };
 
-&uart2 {
+&uart0 {
 	status = "okay";
+	dmas = <&dmac_peri 0>, <&dmac_peri 1>;
+	dma-names = "tx", "rx";
+};
+
+&spi1 {
+	status = "okay";
+
+	// It is not recommended that the normal communication byte
+	// be less than 32 bytes when DMA mode is enabled.
+
+	// dmas = <&dmac_peri 12>, <&dmac_peri 13>;
+	// dma-names = "tx", "rx";
+
+	cs-gpios = <&gpio1 10 GPIO_ACTIVE_LOW>, <&gpio1 22 GPIO_ACTIVE_LOW>;
+	max-freq = <48000000>;
+
+	spidev: spidev@0 {
+		reg = <0>;
+		compatible = "linux,spidev";
+		spi-max-frequency = <1000000>;
+	};
+
+	ads7846: ads7846@1 {
+		reg = <1>;
+		compatible = "ti,ads7846";
+		interrupt-parent = <&gpio1>;
+		interrupts = <1 IRQ_TYPE_LEVEL_LOW>;
+		spi-max-frequency = <1000000>;
+		pendown-gpio = <&gpio1 1 GPIO_ACTIVE_LOW>;
+		vcc-supply = <&vcc3v0_tp>;
+		ti,swap-xy = <1>;
+		ti,x-min = /bits/ 16 <0>;
+		ti,x-max = /bits/ 16 <8000>;
+		ti,y-min = /bits/ 16 <0>;
+		ti,y-max = /bits/ 16 <4800>;
+		ti,x-plate-ohms = /bits/ 16 <40>;
+		ti,pressure-max = /bits/ 16 <255>;
+
+		linux,wakeup;
+	};
 };
 
 &usbdrd3_0 {
