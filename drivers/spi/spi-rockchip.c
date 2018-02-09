@@ -22,7 +22,7 @@
 #include <linux/pm_runtime.h>
 #include <linux/scatterlist.h>
 
-#include < linux/of_gpio.h>
+#include <linux/of_gpio.h>
 
 #define DRIVER_NAME "rockchip-spi"
 
