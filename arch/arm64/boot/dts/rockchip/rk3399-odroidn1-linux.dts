@@ -106,12 +106,11 @@
 			debounce-interval = <100>;
 		};
 	};
-	
-	gpio-restart {
-		compatible = "gpio-restart";
+
+	rk3399-restart {
+		compatible = "rockchip,rk3399-restart";
 		gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
 		open-source;
-		priority = <255>; /* Highest priority */
 	};
 
 	gpiomem {
