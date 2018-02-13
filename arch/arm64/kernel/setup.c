@@ -64,6 +64,10 @@
 #include <asm/xen/hypervisor.h>
 #include <asm/mmu_context.h>
 
+#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
+#include <asm/system_info.h>
+#endif
+
 phys_addr_t __fdt_pointer __initdata;
 
 /*
@@ -181,6 +185,10 @@ static void __init setup_machine_fdt(phys_addr_t dt_phys)
 {
 	void *dt_virt = fixmap_remap_fdt(dt_phys);
 
+#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
+	const char *name;
+#endif
+
 	if (!dt_virt || !early_init_dt_scan(dt_virt)) {
 		pr_crit("\n"
 			"Error: invalid device tree blob at physical address %pa (virtual address 0x%p)\n"
@@ -192,7 +200,15 @@ static void __init setup_machine_fdt(phys_addr_t dt_phys)
 			cpu_relax();
 	}
 
-	dump_stack_set_arch_desc("%s (DT)", of_flat_dt_get_machine_name());
+#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
+	name = of_flat_dt_get_machine_name();
+	if (!name)
+		return;
+	machine_name = name;
+
+	pr_info("Machine model: %s\n", name);
+	dump_stack_set_arch_desc("%s (DT)", name);
+#endif
 }
 
 static void __init request_standard_resources(void)

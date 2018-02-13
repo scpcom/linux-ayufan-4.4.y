@@ -42,6 +42,10 @@
 
 #define SARADC_TIMEOUT			msecs_to_jiffies(100)
 
+#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
+extern unsigned int system_rev;
+#endif
+
 struct rockchip_saradc_data {
 	int				num_bits;
 	const struct iio_chan_spec	*channels;
@@ -324,6 +328,10 @@ static int rockchip_saradc_probe(struct platform_device *pdev)
 	ret = iio_device_register(indio_dev);
 	if (ret)
 		goto err_clk;
+
+#if defined(CONFIG_PLAT_RK3399_ODROIDN1)
+	system_rev = 0x0301;
+#endif
 
 	return 0;
 
