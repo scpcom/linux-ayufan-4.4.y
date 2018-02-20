@@ -188,6 +188,11 @@ struct cec_adapter {
 
 	u32 tx_timeouts;
 
+#ifdef CONFIG_MEDIA_CEC_RC
+	bool rc_repeating;
+	int rc_last_scancode;
+	u64 rc_last_keypress;
+#endif
 #ifdef CONFIG_CEC_NOTIFIER
 	struct cec_notifier *notifier;
 #endif
@@ -226,7 +231,7 @@ static inline bool cec_is_sink(const struct cec_adapter *adap)
 
 struct edid;
 
-#if IS_ENABLED(CONFIG_CEC_CORE)
+#if IS_REACHABLE(CONFIG_CEC_CORE)
 struct cec_adapter *cec_allocate_adapter(const struct cec_adap_ops *ops,
 		void *priv, const char *name, u32 caps, u8 available_las);
 int cec_register_adapter(struct cec_adapter *adap, struct device *parent);
@@ -373,11 +378,6 @@ u16 cec_phys_addr_for_input(u16 phys_addr, u8 input);
  */
 int cec_phys_addr_validate(u16 phys_addr, u16 *parent, u16 *port);
 
-#ifdef CONFIG_CEC_NOTIFIER
-void cec_register_cec_notifier(struct cec_adapter *adap,
-			       struct cec_notifier *notifier);
-#endif
-
 #else
 
 static inline int cec_register_adapter(struct cec_adapter *adap,
@@ -424,6 +424,10 @@ static inline u16 cec_phys_addr_for_input(u16 phys_addr, u8 input)
 
 static inline int cec_phys_addr_validate(u16 phys_addr, u16 *parent, u16 *port)
 {
+	if (parent)
+		*parent = phys_addr;
+	if (port)
+		*port = 0;
 	return 0;
 }
 
