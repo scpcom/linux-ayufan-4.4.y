@@ -662,7 +662,7 @@
 		reg-shift = <2>;
 		reg-io-width = <4>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&uart0_xfer &uart0_cts &uart0_rts>;
+		pinctrl-0 = <&uart0_xfer>;
 		status = "disabled";
 	};
 
@@ -2827,16 +2827,6 @@
 				rockchip,pins =
 					<2 16 RK_FUNC_1 &pcfg_pull_up>,
 					<2 17 RK_FUNC_1 &pcfg_pull_none>;
-			};
-
-			uart0_cts: uart0-cts {
-				rockchip,pins =
-					<2 18 RK_FUNC_1 &pcfg_pull_none>;
-			};
-
-			uart0_rts: uart0-rts {
-				rockchip,pins =
-					<2 19 RK_FUNC_1 &pcfg_pull_none>;
 			};
 		};
 
