@@ -136,13 +136,12 @@
 	fan0: pwm-fan {
 		compatible = "pwm-fan";
 		status = "okay";
-		pwms = <&pwm0 0 40000 PWM_POLARITY_INVERTED>; /* 25 kHz */
-
+		pwms = <&pwm0 0 40000 0>; /* 25 kHz */
 		cooling-min-state = <0>;
 		cooling-max-state = <3>;
 		#cooling-cells = <2>;
-		cooling-levels = <255 125 102 51>; /* PWM duty cycle */
-	};	
+		cooling-levels = <0 120 180 240>;
+	};
 
 	dw_hdmi_audio: dw-hdmi-audio {
 		status = "disabled";
