@@ -1655,6 +1655,7 @@ CONFIG_ZD1211RW=m
 # CONFIG_MWIFIEX is not set
 # CONFIG_CW1200 is not set
 # CONFIG_RSI_91X is not set
+CONFIG_RTL8821AU=m
 
 #
 # Enable WiMAX (Networking options) to see the WiMAX drivers
