@@ -409,7 +409,7 @@
 		regulator-name = "vdd_cpu_b";
 		regulator-min-microvolt = <712500>;
 		regulator-max-microvolt = <1500000>;
-		regulator-ramp-delay = <1000>;
+		regulator-ramp-delay = <40000>;
 		vsel-gpios = <&gpio1 17 GPIO_ACTIVE_HIGH>;
 		fcs,suspend-voltage-selector = <1>;
 		regulator-always-on;
