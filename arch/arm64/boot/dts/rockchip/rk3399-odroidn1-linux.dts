@@ -140,7 +140,7 @@
 		cooling-min-state = <0>;
 		cooling-max-state = <3>;
 		#cooling-cells = <2>;
-		cooling-levels = <0 120 180 240>;
+		cooling-levels = <0 150 195 240>;
 	};
 
 	dw_hdmi_audio: dw-hdmi-audio {
