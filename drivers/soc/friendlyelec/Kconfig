@@ -1,0 +1,11 @@
+#
+# Machine drivers
+#
+
+if ARCH_ROCKCHIP
+
+config MACH_NANOPI4
+	bool "FriendlyElec NanoPi 4 Series Machine"
+	default y
+
+endif
