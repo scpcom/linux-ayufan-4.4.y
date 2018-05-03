@@ -255,35 +255,17 @@
 		default-brightness-level = <200>;
 	};
 
-	panel: panel {
-		compatible = "simple-panel";
+	panel: edp-panel {
+		compatible = "lcds", "simple-panel";
+		status = "okay";
+
 		backlight = <&pwm_bl>;
 		power-supply = <&vcc_lcd>;
 		prepare-delay-ms = <20>;
 		enable-delay-ms = <20>;
 
-		display-timings {
-			native-mode = <&timing0>;
-
-			timing0: timing0 {
-				clock-frequency = <67185000>;
-				hactive = <800>;
-				vactive = <1280>;
-				hfront-porch = <20>;
-				hsync-len = <24>;
-				hback-porch = <20>;
-				vfront-porch = <4>;
-				vsync-len = <8>;
-				vback-porch = <4>;
-				hsync-active = <0>;
-				vsync-active = <0>;
-				de-active = <0>;
-				pixelclk-active = <0>;
-			};
-		};
-
 		ports {
-			panel_in: endpoint {
+			edp_panel: endpoint {
 				remote-endpoint = <&edp_out>;
 			};
 		};
@@ -497,7 +479,7 @@
 			reg = <1>;
 
 			edp_out: endpoint {
-				remote-endpoint = <&panel_in>;
+				remote-endpoint = <&edp_panel>;
 			};
 		};
 	};

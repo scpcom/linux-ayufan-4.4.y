@@ -60,4 +60,11 @@ config DRM_PANEL_TOSHIBA_TC358762
 	  Say Y here if you want to enable support for toshiba tc358762 bridge.
 	  To compile this driver as a module, choose M here.
 
+config DRM_PANEL_FRIENDLYELEC
+	tristate "FriendlyElec panels"
+	depends on OF
+	select VIDEOMODE_HELPERS
+	help
+	  Say Y here if you want to enable support for FriendlyElec panels.
+
 endmenu
