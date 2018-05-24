@@ -1645,7 +1645,7 @@ static int rt5651_set_bias_level(struct snd_soc_codec *codec,
 		snd_soc_write(codec, RT5651_PWR_DIG2, 0x0000);
 		snd_soc_write(codec, RT5651_PWR_VOL, 0x0000);
 		snd_soc_write(codec, RT5651_PWR_MIXER, 0x0000);
-		snd_soc_write(codec, RT5651_PWR_ANLG1, 0x0000);
+		snd_soc_write(codec, RT5651_PWR_ANLG1, RT5651_PWR_MB);
 		snd_soc_write(codec, RT5651_PWR_ANLG2, 0x0000);
 		if (SND_SOC_BIAS_PREPARE ==
 				snd_soc_codec_get_bias_level(codec))
