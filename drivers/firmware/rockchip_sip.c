@@ -38,6 +38,11 @@ static struct arm_smccc_res __invoke_sip_fn_smc(unsigned long function_id,
 	struct arm_smccc_res res;
 
 	arm_smccc_smc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
+
+	pr_debug("rockchip-sip: function[%lx]: args:[%lx,%lx,%lx] => res:[%lx,%lx,%lx,%lx]\n",
+		function_id, arg0, arg1, arg2,
+		res.a0, res.a1, res.a2, res.a3);
+
 	return res;
 }
 
