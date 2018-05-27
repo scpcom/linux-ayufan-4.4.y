@@ -2528,9 +2528,7 @@ static __maybe_unused int rk3399_dmc_init(struct platform_device *pdev,
 		timing = (u32 *)dram_timing;
 		size = sizeof(struct rk3399_dram_timing) / 4;
 		for (index = 0; index < size; index++) {
-			arm_smccc_smc(ROCKCHIP_SIP_DRAM_FREQ, *timing++, index,
-				      ROCKCHIP_SIP_CONFIG_DRAM_SET_PARAM,
-				      0, 0, 0, 0, &res);
+			res = sip_smc_dram(*timing++, index, ROCKCHIP_SIP_CONFIG_DRAM_SET_PARAM);
 			if (res.a0) {
 				dev_err(dev, "Failed to set dram param: %ld\n",
 					res.a0);
@@ -2539,9 +2537,7 @@ static __maybe_unused int rk3399_dmc_init(struct platform_device *pdev,
 		}
 	}
 
-	arm_smccc_smc(ROCKCHIP_SIP_DRAM_FREQ, 0, 0,
-		      ROCKCHIP_SIP_CONFIG_DRAM_INIT,
-		      0, 0, 0, 0, &res);
+	res = sip_smc_dram(0, 0, ROCKCHIP_SIP_CONFIG_DRAM_INIT);
 
 	dmcfreq->set_msch_readlatency = rk3399_set_msch_readlatency;
 

@@ -100,9 +100,7 @@ static int rockchip_ddrclk_sip_set_rate(struct clk_hw *hw, unsigned long drate,
 {
 	struct arm_smccc_res res;
 
-	arm_smccc_smc(ROCKCHIP_SIP_DRAM_FREQ, drate, 0,
-		      ROCKCHIP_SIP_CONFIG_DRAM_SET_RATE,
-		      0, 0, 0, 0, &res);
+	res = sip_smc_dram(drate, 0, ROCKCHIP_SIP_CONFIG_DRAM_SET_RATE);
 
 	return res.a0;
 }
@@ -113,9 +111,7 @@ rockchip_ddrclk_sip_recalc_rate(struct clk_hw *hw,
 {
 	struct arm_smccc_res res;
 
-	arm_smccc_smc(ROCKCHIP_SIP_DRAM_FREQ, 0, 0,
-		      ROCKCHIP_SIP_CONFIG_DRAM_GET_RATE,
-		      0, 0, 0, 0, &res);
+	res = sip_smc_dram(0, 0, ROCKCHIP_SIP_CONFIG_DRAM_GET_RATE);
 
 	return res.a0;
 }
@@ -126,9 +122,7 @@ static long rockchip_ddrclk_sip_round_rate(struct clk_hw *hw,
 {
 	struct arm_smccc_res res;
 
-	arm_smccc_smc(ROCKCHIP_SIP_DRAM_FREQ, rate, 0,
-		      ROCKCHIP_SIP_CONFIG_DRAM_ROUND_RATE,
-		      0, 0, 0, 0, &res);
+	res = sip_smc_dram(rate, 0, ROCKCHIP_SIP_CONFIG_DRAM_ROUND_RATE);
 
 	return res.a0;
 }
