@@ -96,6 +96,12 @@ config ROCKCHIP_SYSTEM_MONITOR
 	help
 	  Say y here to enable rockchip system monitor support.
 
+config ROCKCHIP_VENDOR_STORAGE
+	bool "Use Rockchip Vendor Storage"
+	depends on MMC_DW_ROCKCHIP
+	help
+	  Say Y here if you want to read parameters from eMMC/SD card
+
 config ROCKCHIP_VENDOR_STORAGE_UPDATE_LOADER
 	bool "Rockchip vendor storage update loader support"
 	default n
