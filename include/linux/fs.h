@@ -1447,7 +1447,6 @@ struct super_block {
 	const struct quotactl_ops	*s_qcop;
 	const struct export_operations *s_export_op;
 	unsigned long		s_flags;
-	unsigned long		s_iflags;	/* internal SB_I_* flags */
 	unsigned long		s_magic;
 	struct dentry		*s_root;
 	struct rw_semaphore	s_umount;
@@ -1524,6 +1523,11 @@ struct super_block {
 	 * Indicates how deep in a filesystem stack this SB is
 	 */
 	int s_stack_depth;
+
+#ifndef __GENKSYMS__
+	/* Only guaranteed to be present if you call sget_iflags() */
+	unsigned long		s_iflags;	/* internal SB_I_* flags */
+#endif
 };
 
 /* superblock cache pruning functions */
@@ -1948,6 +1952,10 @@ struct super_block *sget(struct file_system_type *type,
 			int (*test)(struct super_block *,void *),
 			int (*set)(struct super_block *,void *),
 			void *data);
+struct super_block *sget_iflags(struct file_system_type *type,
+				int (*test)(struct super_block *,void *),
+				int (*set)(struct super_block *,void *),
+				void *data);
 extern struct dentry *mount_pseudo(struct file_system_type *, char *,
 	const struct super_operations *ops,
 	const struct dentry_operations *dops,

@@ -473,6 +473,15 @@ retry:
 
 EXPORT_SYMBOL(sget);
 
+struct super_block *sget_iflags(struct file_system_type *type,
+				int (*test)(struct super_block *,void *),
+				int (*set)(struct super_block *,void *),
+				void *data)
+{
+	return sget(type, test, set, data);
+}
+EXPORT_SYMBOL(sget_iflags);
+
 void drop_super(struct super_block *sb)
 {
 	up_read(&sb->s_umount);
