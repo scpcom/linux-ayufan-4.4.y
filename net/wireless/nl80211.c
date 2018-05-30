@@ -6657,9 +6657,14 @@ void nl80211_send_reg_change_event(struct regulatory_request *request)
 		NLA_PUT_U8(msg, NL80211_ATTR_REG_TYPE,
 			   NL80211_REGDOM_TYPE_INTERSECTION);
 	else {
+		u8 alpha2[3];
+
 		NLA_PUT_U8(msg, NL80211_ATTR_REG_TYPE,
 			   NL80211_REGDOM_TYPE_COUNTRY);
-		NLA_PUT_STRING(msg, NL80211_ATTR_REG_ALPHA2, request->alpha2);
+		alpha2[0] = request->alpha2[0];
+		alpha2[1] = request->alpha2[1];
+		alpha2[2] = 0;
+		NLA_PUT_STRING(msg, NL80211_ATTR_REG_ALPHA2, alpha2);
 	}
 
 	if (wiphy_idx_valid(request->wiphy_idx))
