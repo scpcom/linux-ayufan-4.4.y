@@ -506,13 +506,14 @@
 };
 
 &hdmi {
-	/* remove the hdmi_cec, reused by edp_hpd */
-	pinctrl-0 = <&hdmi_i2c_xfer>;
+	/* remove the hdmi_i2c_xfer */
+	pinctrl-0 = <&hdmi_cec>;
 	#address-cells = <1>;
 	#size-cells = <0>;
 	#sound-dai-cells = <0>;
 	status = "okay";
 	ddc-i2c-bus = <&i2c7>;
+	rockchip,defaultmode = <16>; /* CEA 1920x1080@60Hz */
 };
 
 &cif_isp0 {
@@ -1084,6 +1085,10 @@
 };
 
 &pinctrl {
+	hdmi {
+		/delete-node/ hdmi-i2c-xfer;
+	};
+
 	pmic {
 		pmic_int_l: pmic-int-l {
 			rockchip,pins = <1 21 RK_FUNC_GPIO &pcfg_pull_up>;
