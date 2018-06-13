@@ -521,9 +521,6 @@ static int panel_probe(struct device *dev)
 		panel_setup_lcd(lcd);
 	}
 
-	if (!lcd_connected)
-		return -ENODEV;
-
 	panel = devm_kzalloc(dev, sizeof(*panel), GFP_KERNEL);
 	if (!panel)
 		return -ENOMEM;
