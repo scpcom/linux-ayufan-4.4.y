@@ -117,8 +117,8 @@ static struct lcd_desc hd101 = {
 static struct lcd_desc hdmi_def = {
 	.width = 1920,
 	.height = 1080,
-	.p_width = 480,
-	.p_height = 320,
+	.p_width = 508,
+	.p_height = 286,
 	.bpp = 24,
 	.freq = 60,
 
@@ -159,22 +159,22 @@ static struct {
 	struct lcd_desc *lcd;
 	int ctp;
 } panel_lcd_list[] = {
-	{ "HD702",	&hd700,	CTP_GOODIX  },
+	{ "HDMI",	&hdmi_def,       0  },
+
+	{ "HD702E",	&hd700,	CTP_GOODIX  },
 	{ "HD101B",	&hd101,	CTP_GOODIX  },
 	{ "S701",	&s70,	CTP_GOODIX  },
-
-	{ "HDMI",	&hdmi_def,	0 },	/* Pls keep it at last */
 };
 
 static int lcd_idx = 0;
-static int lcd_connected = true;
+static int lcd_connected = false;
 
 static struct lcd_desc *panel_get_lcd_desc(void)
 {
 	return panel_lcd_list[lcd_idx].lcd;
 }
 
-static int __init panel_setup_lcd(char *str)
+static int panel_setup_lcd(char *str)
 {
 	char *delim;
 	int i;
@@ -194,7 +194,6 @@ static int __init panel_setup_lcd(char *str)
 			if (!strcasecmp(cfg->name, str)) {
 				lcd->width = cfg->width;
 				lcd->height = cfg->height;
-				lcd_connected = false;
 				goto __ret;
 			}
 		}
@@ -203,6 +202,7 @@ static int __init panel_setup_lcd(char *str)
 	for (i = 0; i < ARRAY_SIZE(panel_lcd_list); i++) {
 		if (!strcasecmp(panel_lcd_list[i].name, str)) {
 			lcd_idx = i;
+			lcd_connected = true;
 			break;
 		}
 	}
