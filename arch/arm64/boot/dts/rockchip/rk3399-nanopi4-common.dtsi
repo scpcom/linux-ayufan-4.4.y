@@ -444,6 +444,10 @@
 	status = "okay";
 };
 
+&uart4 {
+	status = "okay";
+};
+
 &vopb {
 	status = "okay";
 };
@@ -479,6 +483,7 @@
 &edp {
 	status = "okay";
 	force-hpd;
+	/delete-property/ pinctrl-0;
 
 	ports {
 		port@1 {
@@ -1085,6 +1090,10 @@
 };
 
 &pinctrl {
+	edp {
+		/delete-node/ edp-hpd;
+	};
+
 	hdmi {
 		/delete-node/ hdmi-i2c-xfer;
 	};
