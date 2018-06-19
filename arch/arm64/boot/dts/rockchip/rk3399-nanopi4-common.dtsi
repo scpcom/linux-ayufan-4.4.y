@@ -477,7 +477,7 @@
 };
 
 &edp {
-	status = "disabled";
+	status = "okay";
 	force-hpd;
 
 	ports {
