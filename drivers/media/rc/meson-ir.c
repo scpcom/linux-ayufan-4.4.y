@@ -77,7 +77,8 @@ static irqreturn_t meson_ir_irq(int irqno, void *dev_id)
 	regmap_read(ir->reg, IR_DEC_STATUS, &status);
 	rawir.pulse = !!(status & IR_DEC_STATUS_PULSE);
 
-	ir_raw_event_store_with_timeout(ir->rc, &rawir);
+	if (ir_raw_event_store_with_filter(ir->rc, &rawir))
+		ir_raw_event_handle(ir->rc);
 
 	spin_unlock(&ir->lock);
 
