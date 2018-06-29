@@ -515,6 +515,7 @@
 
 &route_edp {
 	status = "okay";
+	logo,mode = "center";
 };
 
 &cdn_dp {
@@ -532,6 +533,11 @@
 	status = "okay";
 	ddc-i2c-bus = <&i2c7>;
 	rockchip,defaultmode = <16>; /* CEA 1920x1080@60Hz */
+};
+
+&route_hdmi {
+	status = "okay";
+	logo,mode = "center";
 };
 
 &cif_isp0 {
