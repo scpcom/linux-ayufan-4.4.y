@@ -102,6 +102,11 @@ static void es8316_enable_spk(struct es8316_priv *es8316, bool enable)
 {
 	bool level;
 
+	// silence kernel warnings due to invalid gpio
+	if (es8316->spk_ctl_gpio == INVALID_GPIO) {
+		return;
+	}
+
 	level = enable ? es8316->spk_active_level : !es8316->spk_active_level;
 
 	if (INVALID_GPIO != es8316->spk_ctl_gpio)
