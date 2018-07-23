@@ -1070,6 +1070,23 @@
 	status = "okay";
 };
 
+&vpu_codec {
+	status = "okay";
+};
+
 &vpu {
 	status = "okay";
 };
+
+&iep_mmu {
+	status = "okay";
+};
+
+&iep {
+	status = "okay";
+};
+
+&rga {
+	status = "okay";
+};
+
