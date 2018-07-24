@@ -1070,10 +1070,6 @@
 	status = "okay";
 };
 
-&vpu_codec {
-	status = "okay";
-};
-
 &vpu {
 	status = "okay";
 };
