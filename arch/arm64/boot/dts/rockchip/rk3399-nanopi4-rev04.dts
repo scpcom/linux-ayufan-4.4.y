@@ -1,0 +1,63 @@
+/*
+ * Copyright (c) 2018 FriendlyElec Computer Tech. Co., Ltd.
+ * (http://www.friendlyarm.com)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/dts-v1/;
+#include "rk3399-nanopi4-common.dtsi"
+
+/ {
+	model = "FriendlyElec NanoPi NEO4";
+	compatible = "friendlyelec,nanopi-neo4", "rockchip,rk3399";
+};
+
+&mach {
+	hwrev = <4>;
+	model = "NanoPi NEO4";
+};
+
+&sdhci {
+	mmc-hs200-1_8v;
+	/delete-property/ mmc-hs400-1_8v;
+	/delete-property/ mmc-hs400-enhanced-strobe;
+};
+
+&i2s1 {
+	status = "disabled";
+	rockchip,i2s-broken-burst-len;
+	rockchip,playback-channels = <2>;
+	rockchip,capture-channels = <2>;
+	#sound-dai-cells = <0>;
+};
+
+&rt5651_card {
+	status = "disabled";
+	/delete-property/ pinctrl-0;
+	/delete-property/ simple-audio-card,hp-det-gpio;
+
+	simple-audio-card,cpu {
+		sound-dai = <&i2s1>;
+	};
+};
+
+&rk_wlan {
+	status = "okay";
+	wifi_chip_type = "rtl8189es";
+};
+
+&rk_bluetooth {
+	status = "disabled";
+};
