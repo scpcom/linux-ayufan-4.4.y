@@ -164,6 +164,9 @@ static struct {
 	{ "HD702E",	&hd700,	CTP_GOODIX  },
 	{ "HD101B",	&hd101,	CTP_GOODIX  },
 	{ "S701",	&s70,	CTP_GOODIX  },
+	{ "G101E",	&hd101,	         0  },
+
+	{ "EDID",	NULL,	CTP_AUTO    },
 };
 
 static int lcd_idx = 0;
@@ -199,8 +202,9 @@ static int panel_setup_lcd(char *str)
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(panel_lcd_list); i++) {
-		if (!strcasecmp(panel_lcd_list[i].name, str)) {
+	for (i = 1; i < ARRAY_SIZE(panel_lcd_list); i++) {
+		if (!strcasecmp(panel_lcd_list[i].name, str) ||
+			(panel_lcd_list[i].lcd == NULL)) {
 			lcd_idx = i;
 			lcd_connected = true;
 			break;
@@ -210,7 +214,7 @@ static int panel_setup_lcd(char *str)
 __ret:
 	panel_set_touch_id(panel_lcd_list[lcd_idx].ctp);
 
-	printk("Display: %s selected\n", panel_lcd_list[lcd_idx].name);
+	printk("Display: %s selected\n", str);
 	return 0;
 }
 early_param("lcd", panel_setup_lcd);
@@ -224,7 +228,7 @@ void panel_init_display_mode(struct drm_display_mode *dmode)
 {
 	struct lcd_desc *lcd = panel_lcd_list[lcd_idx].lcd;
 
-	if (!lcd_connected) {
+	if (!lcd_connected && lcd) {
 		dmode->hdisplay = lcd->width;
 		dmode->vdisplay = lcd->height;
 	}
@@ -238,12 +242,12 @@ void panel_get_display_size(int *w, int *h)
 {
 	struct lcd_desc *lcd = panel_lcd_list[lcd_idx].lcd;
 
-	if (w)
-		*w = lcd->width;
-	if (h)
-		*h = lcd->height;
-
-	return;
+	if (lcd) {
+		if (w)
+			*w = lcd->width;
+		if (h)
+			*h = lcd->height;
+	}
 }
 EXPORT_SYMBOL(panel_get_display_size);
 
@@ -415,6 +419,12 @@ static int panel_get_modes(struct drm_panel *panel)
 	struct drm_device *drm = ctx->base.drm;
 	struct drm_display_mode *mode;
 
+	if (!ctx->mode) {
+		dev_warn_once(panel->dev,
+			"unable to get mode from builtin timings\n");
+		return 0;
+	}
+
 	mode = drm_mode_duplicate(drm, ctx->mode);
 	if (!mode) {
 		dev_err(drm->dev, "failed to add mode %ux%u@%u\n",
@@ -467,6 +477,8 @@ static int panel_display_mode_init(struct panel_desc *ctx)
 	struct lcd_desc *lcd;
 
 	lcd = panel_get_lcd_desc();
+	if (!lcd)
+		return -ENODEV;
 
 	ctx->mode = dmode;
 	ctx->bpc = 8;
