@@ -680,6 +680,14 @@
 	status = "okay";
 };
 
+&pvtm {
+        status = "okay";
+};
+
+&pmu_pvtm {
+        status = "okay";
+};
+
 &pmu_io_domains {
 	status = "okay";
 	pmu1830-supply = <&vcc_3v0>;
@@ -1055,6 +1063,7 @@
 };
 
 &vopb {
+	rockchip,grf = <&grf>;
 	status = "okay";
 };
 
@@ -1063,6 +1072,7 @@
 };
 
 &vopl {
+	rockchip,grf = <&grf>;
 	status = "okay";
 };
 
