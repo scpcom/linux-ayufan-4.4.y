@@ -55,9 +55,9 @@
 
 &rk_wlan {
 	status = "okay";
-	wifi_chip_type = "rtl8189es";
+	wifi_chip_type = "ap6212";
 };
 
 &rk_bluetooth {
-	status = "disabled";
+	status = "okay";
 };
