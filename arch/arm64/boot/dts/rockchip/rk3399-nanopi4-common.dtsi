@@ -505,7 +505,7 @@
 };
 
 &rga {
-	status = "okay";
+	status = "disabled";
 };
 
 &display_subsystem {
