@@ -182,6 +182,9 @@ static int vdec_queue_setup(struct vb2_queue *q,
 			sizes[1] = amvdec_get_output_size(sess) / 4;
 			sizes[2] = amvdec_get_output_size(sess) / 4;
 			*num_planes = 3;
+		} else if (pixfmt_cap == V4L2_PIX_FMT_AM21C) {
+			sizes[0] = amvdec_am21c_size(sess->width, sess->height);
+			*num_planes = 1;
 		}
 		*num_buffers = min(max(*num_buffers, fmt_out->min_buffers),
 				   fmt_out->max_buffers);
@@ -444,6 +447,10 @@ vdec_try_fmt_common(struct amvdec_session *sess, u32 size,
 			      get_output_size(pixmp->width, pixmp->height) / 4;
 			pfmt[2].bytesperline = ALIGN(pixmp->width, 64) / 2;
 			pixmp->num_planes = 3;
+		} else if (pixmp->pixelformat == V4L2_PIX_FMT_AM21C) {
+			pfmt[0].sizeimage =
+				amvdec_am21c_size(pixmp->width, pixmp->height);
+			pfmt[0].bytesperline = 0;
 		}
 	} else {
 		return NULL;
