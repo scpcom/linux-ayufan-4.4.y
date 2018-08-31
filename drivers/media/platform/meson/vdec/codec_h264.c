@@ -28,14 +28,8 @@
 #define CMD_BAD_HEIGHT		8
 
 /* Picture type */
-#define PIC_SINGLE_FRAME	0
-#define PIC_TOP_BOT_TOP		1
-#define PIC_BOT_TOP_BOT		2
-#define PIC_DOUBLE_FRAME	3
-#define PIC_TRIPLE_FRAME	4
 #define PIC_TOP_BOT		5
 #define PIC_BOT_TOP		6
-#define PIC_INVALID		7
 
 /* Size of Motion Vector per macroblock */
 #define MB_MV_SIZE 96
@@ -84,16 +78,16 @@ static int codec_h264_start(struct amvdec_session *sess) {
 	struct codec_h264 *h264 = sess->priv;
 
 	/* Allocate some memory for the H.264 decoder's state */
-	h264->workspace_vaddr =
-		dma_alloc_coherent(core->dev, SIZE_WORKSPACE, &h264->workspace_paddr, GFP_KERNEL);
+	h264->workspace_vaddr = dma_alloc_coherent(core->dev, SIZE_WORKSPACE,
+					   &h264->workspace_paddr, GFP_KERNEL);
 	if (!h264->workspace_vaddr) {
 		dev_err(core->dev, "Failed to alloc H.264 Workspace\n");
 		return -ENOMEM;
 	}
 
 	/* Allocate some memory for the H.264 SEI dump */
-	h264->sei_vaddr =
-		dma_alloc_coherent(core->dev, SIZE_SEI, &h264->sei_paddr, GFP_KERNEL);
+	h264->sei_vaddr = dma_alloc_coherent(core->dev, SIZE_SEI,
+					     &h264->sei_paddr, GFP_KERNEL);
 	if (!h264->sei_vaddr) {
 		dev_err(core->dev, "Failed to alloc H.264 SEI\n");
 		return -ENOMEM;
@@ -114,7 +108,9 @@ static int codec_h264_start(struct amvdec_session *sess) {
 	amvdec_write_dos(core, AV_SCRATCH_9, 0);
 
 	/* Enable "error correction" */
-	amvdec_write_dos(core, AV_SCRATCH_F, (amvdec_read_dos(core, AV_SCRATCH_F) & 0xffffffc3) | BIT(4) | BIT(7));
+	amvdec_write_dos(core, AV_SCRATCH_F,
+			 (amvdec_read_dos(core, AV_SCRATCH_F) & 0xffffffc3) |
+			 BIT(4) | BIT(7));
 
 	amvdec_write_dos(core, MDEC_PIC_DC_THRESH, 0x404038aa);
 
@@ -145,7 +141,8 @@ static int codec_h264_stop(struct amvdec_session *sess)
 	return 0;
 }
 
-static int codec_h264_load_extended_firmware(struct amvdec_session *sess, const u8 *data, u32 len)
+static int codec_h264_load_extended_firmware(struct amvdec_session *sess,
+					     const u8 *data, u32 len)
 {
 	struct codec_h264 *h264;
 	struct amvdec_core *core = sess->core;
@@ -160,7 +157,7 @@ static int codec_h264_load_extended_firmware(struct amvdec_session *sess, const 
 		return -EINVAL;
 
 	h264->ext_fw_vaddr = dma_alloc_coherent(core->dev, SIZE_EXT_FW,
-						&h264->ext_fw_paddr, GFP_KERNEL);
+					      &h264->ext_fw_paddr, GFP_KERNEL);
 	if (!h264->ext_fw_vaddr) {
 		dev_err(core->dev, "Failed to alloc H.264 extended fw\n");
 		return -ENOMEM;
@@ -275,6 +272,7 @@ static void codec_h264_frames_ready(struct amvdec_session *sess, u32 status)
 
 		amvdec_dst_buf_done_idx(sess, buffer_index, field);
 
+		/* 2 src packets per dst frame ; delete additional timestamp */
 		if (field != V4L2_FIELD_NONE && !h264->received_0)
 			amvdec_rm_first_ts(sess);
 
