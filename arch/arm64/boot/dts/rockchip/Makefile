@@ -147,6 +147,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-roc-pc-exp.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-roc-pc-mipi.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-khadas-edge-linux.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-khadas-edgev-linux.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-khadas-captain-linux.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-leez-linux.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev00.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev01.dtb
