@@ -385,6 +385,9 @@
 	#size-cells = <0>;
 	#sound-dai-cells = <0>;
 	status = "okay";
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&hdmi_i2c_xfer>, <&hdmi_cec>;
 };
 
 &hdmi_in_vopl {
