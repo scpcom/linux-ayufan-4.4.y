@@ -39,6 +39,11 @@
 #include <linux/input/mt.h>
 #include <linux/input/touchscreen.h>
 #include <linux/of_device.h>
+#include <linux/platform_data/ctouch.h>
+
+#if defined(CONFIG_DRM_PANEL_FRIENDLYELEC)
+extern void panel_get_display_size(int *w, int *h);
+#endif
 
 #define WORK_REGISTER_THRESHOLD		0x00
 #define WORK_REGISTER_REPORT_RATE	0x08
@@ -176,6 +181,9 @@ static irqreturn_t edt_ft5x06_ts_isr(int irq, void *dev_id)
 	int i, type, x, y, id;
 	int offset, tplen, datalen, crclen;
 	int error;
+#if defined(CONFIG_TOUCHSCREEN_PROT_MT_SYNC)
+	int touch_point = 0;
+#endif
 
 	switch (tsdata->version) {
 	case M06:
@@ -240,6 +248,16 @@ static irqreturn_t edt_ft5x06_ts_isr(int irq, void *dev_id)
 		id = (buf[2] >> 4) & 0x0f;
 		down = type != TOUCH_EVENT_UP;
 
+#if defined(CONFIG_TOUCHSCREEN_PROT_MT_SYNC)
+		if (down) {
+			touch_point++;
+			input_report_abs(tsdata->input, ABS_MT_POSITION_X, x);
+			input_report_abs(tsdata->input, ABS_MT_POSITION_Y, y);
+			input_report_abs(tsdata->input, ABS_MT_TOUCH_MAJOR, 64);
+			input_report_abs(tsdata->input, ABS_MT_TRACKING_ID, id);
+			input_mt_sync(tsdata->input);
+		}
+#else
 		input_mt_slot(tsdata->input, id);
 		input_mt_report_slot_state(tsdata->input, MT_TOOL_FINGER, down);
 
@@ -248,9 +266,15 @@ static irqreturn_t edt_ft5x06_ts_isr(int irq, void *dev_id)
 
 		input_report_abs(tsdata->input, ABS_MT_POSITION_X, x);
 		input_report_abs(tsdata->input, ABS_MT_POSITION_Y, y);
+#endif
 	}
 
+#if defined(CONFIG_TOUCHSCREEN_PROT_MT_SYNC)
+	if (!touch_point)
+		input_mt_sync(tsdata->input);
+#else
 	input_mt_report_pointer_emulation(tsdata->input, true);
+#endif
 	input_sync(tsdata->input);
 
 out:
@@ -800,7 +824,7 @@ static int edt_ft5x06_ts_identify(struct i2c_client *client,
 		if (error)
 			return error;
 
-		strlcpy(fw_version, rdbuf, 2);
+		sprintf(fw_version, "%d.%d", rdbuf[0], rdbuf[1]);
 
 		error = edt_ft5x06_ts_readwrite(client, 1, "\xA8",
 						1, rdbuf);
@@ -883,10 +907,16 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 	u8 buf[2] = { 0xfc, 0x00 };
 	struct input_dev *input;
 	unsigned long irq_flags;
+	int ctp_id, max_x, max_y;
 	int error;
 	char fw_version[EDT_NAME_LEN];
 
 	dev_dbg(&client->dev, "probing for EDT FT5x06 I2C\n");
+
+	ctp_id = panel_get_touch_id();
+	if (ctp_id != CTP_FT5X06 && ctp_id != CTP_AUTO) {
+		return -ENODEV;
+	}
 
 	tsdata = devm_kzalloc(&client->dev, sizeof(*tsdata), GFP_KERNEL);
 	if (!tsdata) {
@@ -968,19 +998,33 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 	input->id.bustype = BUS_I2C;
 	input->dev.parent = &client->dev;
 
+	max_x = tsdata->num_x * 64 - 1;
+	max_y = tsdata->num_y * 64 - 1;
+#if defined(CONFIG_DRM_PANEL_FRIENDLYELEC)
+	panel_get_display_size(&max_x, &max_y);
+#endif
+
 	input_set_abs_params(input, ABS_MT_POSITION_X,
-			     0, tsdata->num_x * 64 - 1, 0, 0);
+			     0, max_x, 0, 0);
 	input_set_abs_params(input, ABS_MT_POSITION_Y,
-			     0, tsdata->num_y * 64 - 1, 0, 0);
+			     0, max_y, 0, 0);
 
 	touchscreen_parse_properties(input, true);
 
+#if defined(CONFIG_TOUCHSCREEN_PROT_MT_SYNC)
+	input_set_abs_params(input, ABS_MT_TOUCH_MAJOR, 0, 100, 0, 0);
+	input_set_abs_params(input, ABS_MT_TRACKING_ID,
+			     0, tsdata->max_support_points, 0, 0);
+
+	set_bit(INPUT_PROP_DIRECT, input->propbit);
+#else
 	error = input_mt_init_slots(input, tsdata->max_support_points,
 				INPUT_MT_DIRECT);
 	if (error) {
 		dev_err(&client->dev, "Unable to init MT slots.\n");
 		return error;
 	}
+#endif
 
 	input_set_drvdata(input, tsdata);
 	i2c_set_clientdata(client, tsdata);
@@ -1008,6 +1052,8 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 
 	edt_ft5x06_ts_prepare_debugfs(tsdata, dev_driver_string(&client->dev));
 	device_init_wakeup(&client->dev, 1);
+
+	panel_set_touch_id(CTP_FT5X06);
 
 	dev_dbg(&client->dev,
 		"EDT FT5x06 initialized: IRQ %d, WAKE pin %d, Reset pin %d.\n",
