@@ -139,6 +139,32 @@ static struct lcd_desc hd079 = {
 	},
 };
 
+static struct lcd_desc k116e = {
+	.width = 1920,
+	.height = 1080,
+	.p_width = 256,
+	.p_height = 144,
+	.bpp = 24,
+	.freq = 60,
+
+	.timing = {
+		.h_fp = 48,
+		.h_bp = 80,
+		.h_sw = 32,
+		.v_fp = 3,
+		.v_fpe = 1,
+		.v_bp = 23,
+		.v_bpe = 1,
+		.v_sw = 5,
+	},
+	.polarity = {
+		.rise_vclk = 0,
+		.inv_hsync = 0,
+		.inv_vsync = 0,
+		.inv_vden = 0,
+	},
+};
+
 /* HDMI */
 static struct lcd_desc hdmi_def = {
 	.width = 1920,
@@ -193,6 +219,7 @@ static struct {
 
 	{ "G101E",	&hd101,	         0  },
 	{ "079L1JY41",	&hd079,	         0  },
+	{ "LC116LF1L01",&k116e,	CTP_FT5X06  },
 
 	{ "EDID",	NULL,	CTP_AUTO    },
 };
