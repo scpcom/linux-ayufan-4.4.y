@@ -96,6 +96,10 @@ struct edt_ft5x06_ts_data {
 
 	struct gpio_desc *reset_gpio;
 	struct gpio_desc *wake_gpio;
+	int max_x;
+	int max_y;
+	bool invert_x;
+	bool invert_y;
 
 #if defined(CONFIG_DEBUG_FS)
 	struct dentry *debug_dir;
@@ -248,9 +252,16 @@ static irqreturn_t edt_ft5x06_ts_isr(int irq, void *dev_id)
 		id = (buf[2] >> 4) & 0x0f;
 		down = type != TOUCH_EVENT_UP;
 
+		if (tsdata->invert_x)
+			x = tsdata->max_x - x;
+
+		if (tsdata->invert_y)
+			y = tsdata->max_y - y;
+
 #if defined(CONFIG_TOUCHSCREEN_PROT_MT_SYNC)
 		if (down) {
 			touch_point++;
+
 			input_report_abs(tsdata->input, ABS_MT_POSITION_X, x);
 			input_report_abs(tsdata->input, ABS_MT_POSITION_Y, y);
 			input_report_abs(tsdata->input, ABS_MT_TOUCH_MAJOR, 64);
@@ -845,6 +856,9 @@ static void edt_ft5x06_ts_get_defaults(struct device *dev,
 	u32 val;
 	int error;
 
+	tsdata->invert_x = device_property_read_bool(dev, "touchscreen-inverted-x");
+	tsdata->invert_y = device_property_read_bool(dev, "touchscreen-inverted-y");
+
 	error = device_property_read_u32(dev, "threshold", &val);
 	if (!error)
 		reg_addr->reg_threshold = val;
@@ -907,14 +921,16 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 	u8 buf[2] = { 0xfc, 0x00 };
 	struct input_dev *input;
 	unsigned long irq_flags;
-	int ctp_id, max_x, max_y;
+	int ctp_id;
 	int error;
 	char fw_version[EDT_NAME_LEN];
 
 	dev_dbg(&client->dev, "probing for EDT FT5x06 I2C\n");
 
 	ctp_id = panel_get_touch_id();
-	if (ctp_id != CTP_FT5X06 && ctp_id != CTP_AUTO) {
+	if (ctp_id != CTP_FT5X06 &&
+		ctp_id != CTP_FT5526_KR &&
+		ctp_id != CTP_AUTO) {
 		return -ENODEV;
 	}
 
@@ -998,16 +1014,24 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 	input->id.bustype = BUS_I2C;
 	input->dev.parent = &client->dev;
 
-	max_x = tsdata->num_x * 64 - 1;
-	max_y = tsdata->num_y * 64 - 1;
+	tsdata->max_x = tsdata->num_x * 64 - 1;
+	tsdata->max_y = tsdata->num_y * 64 - 1;
+
 #if defined(CONFIG_DRM_PANEL_FRIENDLYELEC)
-	panel_get_display_size(&max_x, &max_y);
+	panel_get_display_size(&tsdata->max_x, &tsdata->max_y);
+
+	if (ctp_id == CTP_FT5526_KR) {
+		tsdata->invert_x = true;
+		tsdata->invert_y = true;
+		tsdata->max_support_points = 10;
+		dev_info(&client->dev, "FT5526_KR, Rev%s\n", fw_version);
+	}
 #endif
 
 	input_set_abs_params(input, ABS_MT_POSITION_X,
-			     0, max_x, 0, 0);
+			     0, tsdata->max_x, 0, 0);
 	input_set_abs_params(input, ABS_MT_POSITION_Y,
-			     0, max_y, 0, 0);
+			     0, tsdata->max_y, 0, 0);
 
 	touchscreen_parse_properties(input, true);
 
