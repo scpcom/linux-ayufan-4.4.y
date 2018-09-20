@@ -474,8 +474,6 @@
 
 &vopb {
 	status = "okay";
-	assigned-clocks = <&cru DCLK_VOP0_DIV>;
-	assigned-clock-parents = <&cru PLL_VPLL>;
 };
 
 &vopb_mmu {
@@ -484,8 +482,6 @@
 
 &vopl {
 	status = "okay";
-	assigned-clocks = <&cru DCLK_VOP1_DIV>;
-	assigned-clock-parents = <&cru PLL_CPLL>;
 };
 
 &vopl_mmu {
@@ -528,28 +524,19 @@
 	};
 };
 
-&edp_in_vopb {
+&edp_in_vopl {
 	status = "disabled";
 };
 
 &route_edp {
 	status = "okay";
 	logo,mode = "center";
-	connect = <&vopl_out_edp>;
 };
 
 &cdn_dp {
 	status = "okay";
 	extcon = <&fusb0>;
 	phys = <&tcphy0_dp>;
-};
-
-&dp_in_vopl {
-	status = "disabled";
-};
-
-&hdmi_in_vopl {
-	status = "disabled";
 };
 
 &hdmi {
@@ -564,9 +551,8 @@
 };
 
 &route_hdmi {
-	status = "disabled";
+	status = "okay";
 	logo,mode = "center";
-	connect = <&vopb_out_hdmi>;
 };
 
 &cif_isp0 {
@@ -921,7 +907,6 @@
 
 &i2c7 {
 	status = "okay";
-	clock-frequency = <100000>;
 };
 
 &spdif {
