@@ -902,6 +902,14 @@
 		status = "okay";
 	};
 
+	ft5x06_ts@38 {
+		compatible = "edt,edt-ft5x06", "ft5x06";
+		reg = <0x38>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <20 IRQ_TYPE_EDGE_FALLING>;
+		status = "okay";
+	};
+
 	/*
 	onewire_ts@2f {
 		compatible = "onewire";
