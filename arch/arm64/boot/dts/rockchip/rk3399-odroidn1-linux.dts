@@ -819,18 +819,18 @@
 	trips {
 		/* fan active thermal point */
 		cpu_alert0: trip-point-0 {
-			temperature = <50000>; /* millicelsius */
-			hysteresis = <10000>; /* millicelsius */
+			temperature = <55000>; /* millicelsius */
+			hysteresis = <2000>; /* millicelsius */
 			type = "active";
 		};
 		cpu_alert1: trip-point-1 {
-			temperature = <55000>; /* millicelsius */
-			hysteresis = <10000>; /* millicelsius */
+			temperature = <65000>; /* millicelsius */
+			hysteresis = <2000>; /* millicelsius */
 			type = "active";
 		};
 		cpu_alert2: trip-point-2 {
-			temperature = <60000>; /* millicelsius */
-			hysteresis = <10000>; /* millicelsius */
+			temperature = <75000>; /* millicelsius */
+			hysteresis = <2000>; /* millicelsius */
 			type = "active";
 		};
 
