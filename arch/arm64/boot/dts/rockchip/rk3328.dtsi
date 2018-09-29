@@ -1261,10 +1261,10 @@
 	emmc: dwmmc@ff520000 {
 		compatible = "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc";
 		reg = <0x0 0xff520000 0x0 0x4000>;
-		clock-freq-min-max = <400000 150000000>;
+		max-frequency = <150000000>;
 		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>,
 			 <&cru SCLK_EMMC_DRV>, <&cru SCLK_EMMC_SAMPLE>;
-		clock-names = "biu", "ciu", "ciu-drv", "ciu-sample";
+		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
 		fifo-depth = <0x100>;
 		interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
 		status = "disabled";
@@ -2147,35 +2147,35 @@
 		sdmmc0 {
 			sdmmc0_clk: sdmmc0-clk {
 				rockchip,pins =
-					<1 RK_PA6 RK_FUNC_1 &pcfg_pull_none_4ma>;
+					<1 RK_PA6 RK_FUNC_1 &pcfg_pull_none_8ma>;
 			};
 
 			sdmmc0_cmd: sdmmc0-cmd {
 				rockchip,pins =
-					<1 RK_PA4 RK_FUNC_1 &pcfg_pull_up_4ma>;
+					<1 RK_PA4 RK_FUNC_1 &pcfg_pull_up_8ma>;
 			};
 
 			sdmmc0_dectn: sdmmc0-dectn {
 				rockchip,pins =
-					<1 RK_PA5 RK_FUNC_1 &pcfg_pull_up_4ma>;
+					<1 RK_PA5 RK_FUNC_1 &pcfg_pull_up_8ma>;
 			};
 
 			sdmmc0_wrprt: sdmmc0-wrprt {
 				rockchip,pins =
-					<1 RK_PA7 RK_FUNC_1 &pcfg_pull_up_4ma>;
+					<1 RK_PA7 RK_FUNC_1 &pcfg_pull_up_8ma>;
 			};
 
 			sdmmc0_bus1: sdmmc0-bus1 {
 				rockchip,pins =
-					<1 RK_PA0 RK_FUNC_1 &pcfg_pull_up_4ma>;
+					<1 RK_PA0 RK_FUNC_1 &pcfg_pull_up_8ma>;
 			};
 
 			sdmmc0_bus4: sdmmc0-bus4 {
 				rockchip,pins =
-					<1 RK_PA0 RK_FUNC_1 &pcfg_pull_up_4ma>,
-					<1 RK_PA1 RK_FUNC_1 &pcfg_pull_up_4ma>,
-					<1 RK_PA2 RK_FUNC_1 &pcfg_pull_up_4ma>,
-					<1 RK_PA3 RK_FUNC_1 &pcfg_pull_up_4ma>;
+					<1 RK_PA0 RK_FUNC_1 &pcfg_pull_up_8ma>,
+					<1 RK_PA1 RK_FUNC_1 &pcfg_pull_up_8ma>,
+					<1 RK_PA2 RK_FUNC_1 &pcfg_pull_up_8ma>,
+					<1 RK_PA3 RK_FUNC_1 &pcfg_pull_up_8ma>;
 			};
 
 			sdmmc0_gpio: sdmmc0-gpio {
