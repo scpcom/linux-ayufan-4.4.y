@@ -40,5 +40,6 @@ struct dw_mipi_dsi *dw_mipi_dsi_bind(struct platform_device *pdev,
 				     const struct dw_mipi_dsi_plat_data
 				     *plat_data);
 void dw_mipi_dsi_unbind(struct dw_mipi_dsi *dsi);
+void dw_mipi_dsi_set_slave(struct dw_mipi_dsi *dsi, struct dw_mipi_dsi *slave);
 
 #endif /* __DW_MIPI_DSI__ */
