@@ -1184,4 +1184,12 @@ config TOUCHSCREEN_DWAV_USB_MT
 	  To compile this driver as a module, choose M here: the
 	  module will be called dwav-usb-mt.
 
+config TOUCHSCREEN_ROCKPI_FT5406   
+	tristate "rockpi ft5406"
+    default y
+    depends on I2C
+    help
+      Control ft5406 touch ic.
+
+
 endif
