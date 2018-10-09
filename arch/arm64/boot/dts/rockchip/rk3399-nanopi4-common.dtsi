@@ -56,7 +56,7 @@
 
 	cpuinfo {
 		compatible = "rockchip,cpuinfo";
-		nvmem-cells = <&efuse_id>;
+		nvmem-cells = <&cpu_id>;
 		nvmem-cell-names = "id";
 	};
 
@@ -76,6 +76,13 @@
 		rockchip,baudrate = <1500000>;  /* Only 115200 and 1500000 */
 		pinctrl-names = "default";
 		pinctrl-0 = <&uart2c_xfer>;
+	};
+
+	xin32k: xin32k {
+		compatible = "fixed-clock";
+		clock-frequency = <32768>;
+		clock-output-names = "xin32k";
+		#clock-cells = <0>;
 	};
 
 	clkin_gmac: external-gmac-clock {
@@ -418,23 +425,24 @@
 	system-status-freq = <
 		/*system status         freq(KHz)*/
 		SYS_STATUS_NORMAL       800000
-		SYS_STATUS_REBOOT       528000
-		SYS_STATUS_SUSPEND      200000
-		SYS_STATUS_VIDEO_1080P  200000
-		SYS_STATUS_VIDEO_4K     600000
+		SYS_STATUS_REBOOT       400000
+		SYS_STATUS_SUSPEND      400000
+		SYS_STATUS_VIDEO_1080P  400000
+		SYS_STATUS_VIDEO_4K     800000
 		SYS_STATUS_VIDEO_4K_10B 800000
 		SYS_STATUS_PERFORMANCE  800000
 		SYS_STATUS_BOOST        400000
-		SYS_STATUS_DUALVIEW     600000
-		SYS_STATUS_ISP          600000
+		SYS_STATUS_DUALVIEW     800000
+		SYS_STATUS_ISP          800000
 	>;
 	vop-bw-dmc-freq = <
 	/* min_bw(MB/s) max_bw(MB/s) freq(KHz) */
-		0       577      200000
-		578     1701     300000
-		1702    99999    400000
+		0       762      200000
+		763     1893     400000
+		1894    3012     600000
+		3013    99999    800000
 	>;
-	auto-min-freq = <200000>;
+	auto-min-freq = <400000>;
 };
 
 &gpu {
@@ -630,7 +638,7 @@
 		rockchip,system-power-controller;
 		wakeup-source;
 		#clock-cells = <1>;
-		clock-output-names = "xin32k", "rk808-clkout2";
+		clock-output-names = "rk808-clkout1", "rk808-clkout2";
 
 		vcc1-supply = <&vcc3v3_sys>;
 		vcc2-supply = <&vcc3v3_sys>;
@@ -729,7 +737,7 @@
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <1800000>;
-				regulator-max-microvolt = <3300000>;
+				regulator-max-microvolt = <3000000>;
 				regulator-init-microvolt = <3000000>;
 				regulator-name = "vccio_sd";
 				regulator-state-mem {
@@ -974,6 +982,8 @@
 
 &pwm2 {
 	status = "okay";
+	pinctrl-names = "active";
+	pinctrl-0 = <&pwm2_pin_pull_down>;
 };
 
 &rockchip_suspend {
