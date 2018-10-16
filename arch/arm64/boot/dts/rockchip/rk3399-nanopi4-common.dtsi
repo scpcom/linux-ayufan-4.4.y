@@ -67,6 +67,10 @@
 		model = "NanoPi 4 Series";
 	};
 
+	aliases {
+		spi1 = &spi1;
+	};
+
 	fiq_debugger: fiq-debugger {
 		compatible = "rockchip,fiq-debugger";
 		rockchip,serial-id = <2>;
@@ -464,6 +468,18 @@
 	tx_delay = <0x28>;
 	rx_delay = <0x11>;
 	status = "okay";
+};
+
+&spi1 {
+	status = "disabled";
+	cs-gpios = <&gpio1 10 GPIO_ACTIVE_LOW>;
+
+	spidev0: spidev@0 {
+		compatible = "rockchip,spidev";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+		status = "okay";
+	};
 };
 
 &uart0 {
