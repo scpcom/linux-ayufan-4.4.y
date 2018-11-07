@@ -82,6 +82,18 @@ static int of_thermal_get_trip_type(struct thermal_zone_device *tz, int trip,
 	return 0;
 }
 
+static int
+of_thermal_get_trip_irq_mode(struct thermal_zone_device *tz, int trip,
+			     bool *mode)
+{
+	if (trip >= tz->num_trips || trip < 0)
+		return -EDOM;
+
+	*mode = tz->trips[trip].irq_mode;
+
+	return 0;
+}
+
 static int of_thermal_get_trip_temp(struct thermal_zone_device *tz, int trip,
 				    int *temp)
 {
@@ -226,6 +238,8 @@ static int thermal_of_populate_trip(struct device_node *np,
 		pr_err("wrong trip type property\n");
 		return ret;
 	}
+
+	trip->irq_mode = of_property_read_bool(np, "irq-mode");
 
 	return 0;
 }
@@ -629,6 +643,7 @@ struct thermal_zone_device *thermal_of_zone_register(struct device_node *sensor,
 	}
 
 	of_ops->get_trip_type = of_ops->get_trip_type ? : of_thermal_get_trip_type;
+	of_ops->get_trip_irq_mode = of_ops->get_trip_irq_mode ? : of_thermal_get_trip_irq_mode;
 	of_ops->get_trip_temp = of_ops->get_trip_temp ? : of_thermal_get_trip_temp;
 	of_ops->get_trip_hyst = of_ops->get_trip_hyst ? : of_thermal_get_trip_hyst;
 	of_ops->set_trip_hyst = of_ops->set_trip_hyst ? : of_thermal_set_trip_hyst;

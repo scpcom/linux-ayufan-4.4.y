@@ -341,7 +341,7 @@ static void handle_critical_trips(struct thermal_zone_device *tz,
 		tz->ops->critical(tz);
 }
 
-static void handle_thermal_trip(struct thermal_zone_device *tz, int trip)
+static void handle_thermal_trip(struct thermal_zone_device *tz, int trip, bool *pirq_mode)
 {
 	enum thermal_trip_type type;
 	int trip_temp, hyst = 0;
@@ -370,6 +370,9 @@ static void handle_thermal_trip(struct thermal_zone_device *tz, int trip)
 		handle_critical_trips(tz, trip, trip_temp, type);
 	else
 		handle_non_critical_trips(tz, trip);
+
+	if (tz->ops->get_trip_irq_mode)
+		tz->ops->get_trip_irq_mode(tz, trip, pirq_mode);
 }
 
 static void update_temperature(struct thermal_zone_device *tz)
@@ -458,6 +461,7 @@ void thermal_zone_device_update(struct thermal_zone_device *tz,
 				enum thermal_notify_event event)
 {
 	int count;
+	bool irq_mode = false;
 
 	if (atomic_read(&in_suspend))
 		return;
@@ -478,9 +482,10 @@ void thermal_zone_device_update(struct thermal_zone_device *tz,
 	tz->notify_event = event;
 
 	for (count = 0; count < tz->num_trips; count++)
-		handle_thermal_trip(tz, count);
+		handle_thermal_trip(tz, count, &irq_mode);
 
-	monitor_thermal_zone(tz);
+	if (!irq_mode)
+		monitor_thermal_zone(tz);
 out:
 	mutex_unlock(&tz->lock);
 }
