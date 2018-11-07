@@ -362,6 +362,7 @@ static void handle_thermal_trip(struct thermal_zone_device *tz, int trip)
 {
 	enum thermal_trip_type type;
 	int trip_temp, hyst = 0;
+	bool irq_mode = false;
 
 	/* Ignore disabled trip points */
 	if (test_bit(trip, &tz->trips_disabled))
@@ -387,9 +388,14 @@ static void handle_thermal_trip(struct thermal_zone_device *tz, int trip)
 		handle_non_critical_trips(tz, trip);
 	/*
 	 * Alright, we handled this trip successfully.
-	 * So, start monitoring again.
+	 * So, start monitoring in polling mode if
+	 * trip is not using irq HW support.
 	 */
-	monitor_thermal_zone(tz);
+	if (tz->ops->get_trip_irq_mode)
+		tz->ops->get_trip_irq_mode(tz, trip, &irq_mode);
+
+	if (!irq_mode)
+		monitor_thermal_zone(tz);
 }
 
 static void update_temperature(struct thermal_zone_device *tz)
