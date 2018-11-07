@@ -77,12 +77,15 @@ int power_actor_set_power(struct thermal_cooling_device *cdev,
  * @temperature: temperature value in miliCelsius
  * @hysteresis: relative hysteresis in miliCelsius
  * @type: trip point type
+ * @irq_mode: to not use polling in framework set support of HW irq (which will
+ *	      be triggered when temperature reaches this level).
  */
 struct thermal_trip {
 	struct device_node *np;
 	int temperature;
 	int hysteresis;
 	enum thermal_trip_type type;
+	bool irq_mode;
 };
 
 int get_tz_trend(struct thermal_zone_device *tz, int trip);
