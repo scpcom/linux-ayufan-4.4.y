@@ -22,7 +22,7 @@
 #include <linux/slab.h>
 #include "ov_camera_module.h"
 
-#define ov4689_DRIVER_NAME "ov4689"
+#define ov4689_DRIVER_NAME "rk-ov4689"
 
 #define ov4689_AEC_PK_LONG_GAIN_HIGH_REG 0x3508	/* Bit 6-13 */
 #define ov4689_AEC_PK_LONG_GAIN_LOW_REG	 0x3509	/* Bits 0 -5 */
@@ -77,9 +77,6 @@
 
 #define ov4689_FULL_SIZE_RESOLUTION_WIDTH 2688
 #define ov4689_BINING_SIZE_RESOLUTION_WIDTH 1280
-
-static struct ov_camera_module ov4689;
-static struct ov_camera_module_custom_config ov4689_custom_config;
 
 /* ======================================================================== */
 /* Base sensor configs */
@@ -937,14 +934,21 @@ static int ov4689_probe(
 	struct i2c_client *client,
 	const struct i2c_device_id *id)
 {
+	struct ov_camera_module *priv;
+
 	dev_info(&client->dev, "probing...\n");
 
-	ov4689_filltimings(&ov4689_custom_config);
-	v4l2_i2c_subdev_init(&ov4689.sd, client, &ov4689_camera_module_ops);
-	ov4689.sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
-	ov4689.custom = ov4689_custom_config;
+	priv = devm_kzalloc(&client->dev, sizeof(*priv), GFP_KERNEL);
+	if (!priv)
+		return -ENOMEM;
 
-	mutex_init(&ov4689.lock);
+	v4l2_i2c_subdev_init(&priv->sd, client, &ov4689_camera_module_ops);
+	priv->sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
+
+	ov4689_filltimings(&ov4689_custom_config);
+	priv->custom = ov4689_custom_config;
+
+	mutex_init(&priv->lock);
 	dev_info(&client->dev, "probing successful\n");
 	return 0;
 }
@@ -971,7 +975,7 @@ static const struct i2c_device_id ov4689_id[] = {
 };
 
 static const struct of_device_id ov4689_of_match[] = {
-	{.compatible = "omnivision,ov4689-v4l2-i2c-subdev"},
+	{ .compatible = "omnivision,ov4689-v4l2-i2c-subdev" },
 	{},
 };
 

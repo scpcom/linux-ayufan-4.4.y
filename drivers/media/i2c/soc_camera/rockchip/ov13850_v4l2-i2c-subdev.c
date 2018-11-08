@@ -22,7 +22,7 @@
 #include <linux/slab.h>
 #include "ov_camera_module.h"
 
-#define ov13850_DRIVER_NAME "ov13850"
+#define ov13850_DRIVER_NAME "rk-ov13850"
 
 /* Bit 2-0    gain 10 -8 */
 #define ov13850_AEC_PK_LONG_GAIN_HIGH_REG 0x350A
@@ -89,9 +89,6 @@
 //#define OV13850_ONE_LANE
 
 //#define OV13850_COLORBAR_TEST
-
-static struct ov_camera_module ov13850;
-static struct ov_camera_module_custom_config ov13850_custom_config;
 
 /* ======================================================================== */
 /* Base sensor configs */
@@ -1940,14 +1937,21 @@ static struct ov_camera_module_custom_config ov13850_custom_config = {
 static int ov13850_probe(struct i2c_client *client,
 	const struct i2c_device_id *id)
 {
+	struct ov_camera_module *priv;
+
 	dev_info(&client->dev, "probing...\n");
 
-	ov13850_filltimings(&ov13850_custom_config);
-	v4l2_i2c_subdev_init(&ov13850.sd, client, &ov13850_camera_module_ops);
-	ov13850.sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
-	ov13850.custom = ov13850_custom_config;
+	priv = devm_kzalloc(&client->dev, sizeof(*priv), GFP_KERNEL);
+	if (!priv)
+		return -ENOMEM;
 
-	mutex_init(&ov13850.lock);
+	v4l2_i2c_subdev_init(&priv->sd, client, &ov13850_camera_module_ops);
+	priv->sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
+
+	ov13850_filltimings(&ov13850_custom_config);
+	priv->custom = ov13850_custom_config;
+
+	mutex_init(&priv->lock);
 	dev_info(&client->dev, "probing successful\n");
 	return 0;
 }
@@ -1974,7 +1978,7 @@ static const struct i2c_device_id ov13850_id[] = {
 };
 
 static const struct of_device_id ov13850_of_match[] = {
-	{.compatible = "omnivision,ov13850-v4l2-i2c-subdev"},
+	{ .compatible = "omnivision,ov13850-v4l2-i2c-subdev" },
 	{},
 };
 
