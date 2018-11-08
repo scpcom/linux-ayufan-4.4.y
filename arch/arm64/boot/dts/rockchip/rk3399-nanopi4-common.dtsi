@@ -49,6 +49,9 @@
 #include "rk3399-linux.dtsi"
 #include <dt-bindings/input/input.h>
 
+#define NANOPI4_RK_CIF_ISP10
+#include "rk3399-nanopi4-cifisp.dtsi"
+
 / {
 	model = "FriendlyElec boards based on Rockchip RK3399";
 	compatible = "friendlyelec,nanopi4",
@@ -579,23 +582,6 @@
 	logo,mode = "center";
 };
 
-&cif_isp0 {
-	rockchip,camera-modules-attached = <&camera0>;
-	status = "okay";
-};
-
-&isp0_mmu {
-	status = "okay";
-};
-
-&cif_isp1 {
-	status = "disabled";
-};
-
-&isp1_mmu {
-	status = "okay";
-};
-
 &i2c0 {
 	status = "okay";
 	i2c-scl-rising-time-ns = <160>;
@@ -845,41 +831,6 @@
 		pinctrl-0 = <&i2s_8ch_mclk>;
 		status = "okay";
 	};
-
-	camera0: ov13850@10 {
-		status = "okay";
-		compatible = "omnivision,ov13850-v4l2-i2c-subdev";
-		reg = <0x10>;
-		device_type = "v4l2-i2c-subdev";
-
-		clocks = <&cru SCLK_CIF_OUT>;
-		clock-names = "clk_cif_out";
-		pinctrl-names = "rockchip,camera_default", "rockchip,camera_sleep";
-		pinctrl-0 = <&cam0_default_pins>;
-		pinctrl-1 = <&cam0_sleep_pins>;
-
-		rockchip,pd-gpio = <&gpio2 28 GPIO_ACTIVE_LOW>;
-		rockchip,rst-gpio = <&gpio2 27 GPIO_ACTIVE_LOW>;
-
-		rockchip,camera-module-mclk-name = "clk_cif_out";
-		rockchip,camera-module-facing = "back";
-		rockchip,camera-module-name = "CAM1320-P13V03D";
-		rockchip,camera-module-len-name = "50013A1";
-		rockchip,camera-module-fov-h = "66.0";
-		rockchip,camera-module-fov-v = "50.1";
-		rockchip,camera-module-orientation = <0>;
-		rockchip,camera-module-iq-flip = <0>;
-		rockchip,camera-module-iq-mirror = <0>;
-		rockchip,camera-module-flip = <1>;
-		rockchip,camera-module-mirror = <0>;
-
-		rockchip,camera-module-defrect0 = <2112 1568 0 0 2112 1568>;
-		rockchip,camera-module-defrect1 = <4224 3136 0 0 4224 3136>;
-		rockchip,camera-module-defrect3 = <3264 2448 0 0 3264 2448>;
-		rockchip,camera-module-flash-support = <0>;
-		rockchip,camera-module-mipi-dphy-index = <0>;
-	};
-
 };
 
 &i2c2 {
@@ -1234,6 +1185,28 @@
 	gpio-leds {
 		leds_gpio: leds-gpio {
 			rockchip,pins = <0 13 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	cam_pins {
+		cif_clkout_a: cif-clkout-a {
+			rockchip,pins = <2 11 RK_FUNC_3 &pcfg_pull_none>;
+		};
+
+		cif_clkout_a_sleep: cif-clkout-a-sleep {
+			rockchip,pins = <2 11 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+
+		cam0_default_pins: cam0-default-pins {
+			rockchip,pins =
+				<2 28 RK_FUNC_GPIO &pcfg_pull_down>,
+				<2 27 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+
+		cam1_default_pins: cam1-default-pins {
+			rockchip,pins =
+				<0 12 RK_FUNC_GPIO &pcfg_pull_down>,
+				<0  8 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 };

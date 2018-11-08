@@ -1,0 +1,176 @@
+/*
+ * Copyright (c) 2018 FriendlyElec Computer Tech. Co., Ltd.
+ * (http://www.friendlyarm.com)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, you can access it online at
+ * http://www.gnu.org/licenses/gpl-2.0.html.
+ */
+
+#if defined(NANOPI4_RK_CIF_ISP10)
+
+&cif_isp0 {
+	rockchip,camera-modules-attached = <&ov13850p0 &ov4689p0>;
+	status = "okay";
+};
+
+&isp0_mmu {
+	status = "okay";
+};
+
+&cif_isp1 {
+	rockchip,camera-modules-attached = <&ov13850p1 &ov4689p1>;
+	status = "okay";
+};
+
+&isp1_mmu {
+	status = "okay";
+};
+
+&i2c1 {
+	ov13850p0: ov13850@10 {
+		status = "okay";
+		compatible = "omnivision,ov13850-v4l2-i2c-subdev";
+		reg = <0x10>;
+		device_type = "v4l2-i2c-subdev";
+
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "clk_cif_out";
+		pinctrl-names = "rockchip,camera_default", "rockchip,camera_sleep";
+		pinctrl-0 = <&cam0_default_pins &cif_clkout_a>;
+		pinctrl-1 = <&cam0_default_pins>;
+
+		rockchip,pd-gpio = <&gpio2 28 GPIO_ACTIVE_LOW>;
+		rockchip,rst-gpio = <&gpio2 27 GPIO_ACTIVE_LOW>;
+
+		rockchip,camera-module-mclk-name = "clk_cif_out";
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "CAM1320-P13V03D";
+		rockchip,camera-module-len-name = "50013A1";
+		rockchip,camera-module-fov-h = "66.0";
+		rockchip,camera-module-fov-v = "50.1";
+		rockchip,camera-module-orientation = <0>;
+		rockchip,camera-module-iq-flip = <0>;
+		rockchip,camera-module-iq-mirror = <0>;
+		rockchip,camera-module-flip = <1>;
+		rockchip,camera-module-mirror = <0>;
+
+		rockchip,camera-module-defrect0 = <2112 1568 0 0 2112 1568>;
+		rockchip,camera-module-defrect1 = <4224 3136 0 0 4224 3136>;
+		rockchip,camera-module-defrect3 = <3264 2448 0 0 3264 2448>;
+		rockchip,camera-module-flash-support = <0>;
+		rockchip,camera-module-mipi-dphy-index = <0>;
+	};
+
+	ov4689p0: ov4689@36 {
+		status = "okay";
+		compatible = "omnivision,ov4689-v4l2-i2c-subdev";
+		reg = <0x36>;
+		device_type = "v4l2-i2c-subdev";
+
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "clk_cif_out";
+		pinctrl-names = "rockchip,camera_default", "rockchip,camera_sleep";
+		pinctrl-0 = <&cam0_default_pins &cif_clkout_a>;
+		pinctrl-1 = <&cam0_default_pins>;
+
+		rockchip,pd-gpio = <&gpio2 28 GPIO_ACTIVE_LOW>;
+		rockchip,rst-gpio = <&gpio2 27 GPIO_ACTIVE_LOW>;
+
+		rockchip,camera-module-mclk-name = "clk_cif_out";
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "CAM400M";
+		rockchip,camera-module-len-name = "YM6011P";
+		rockchip,camera-module-fov-h = "116";
+		rockchip,camera-module-fov-v = "61";
+		rockchip,camera-module-orientation = <0>;
+		rockchip,camera-module-iq-flip = <0>;
+		rockchip,camera-module-iq-mirror = <0>;
+		rockchip,camera-module-flip = <0>;
+		rockchip,camera-module-mirror = <1>;
+
+		rockchip,camera-module-defrect0 = <2688 1520 0 0 2688 1520>;
+		rockchip,camera-module-flash-support = <0>;
+		rockchip,camera-module-mipi-dphy-index = <0>;
+	};
+};
+
+&i2c2 {
+	ov13850p1: ov13850@10 {
+		status = "okay";
+		compatible = "omnivision,ov13850-v4l2-i2c-subdev";
+		reg = <0x10>;
+		device_type = "v4l2-i2c-subdev";
+
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "clk_cif_out";
+		pinctrl-names = "rockchip,camera_default", "rockchip,camera_sleep";
+		pinctrl-0 = <&cam1_default_pins &cif_clkout_a>;
+		pinctrl-1 = <&cam1_default_pins>;
+
+		rockchip,pd-gpio = <&gpio0 12 GPIO_ACTIVE_LOW>;
+		rockchip,rst-gpio = <&gpio0 8 GPIO_ACTIVE_LOW>;
+
+		rockchip,camera-module-mclk-name = "clk_cif_out";
+		rockchip,camera-module-facing = "front";
+		rockchip,camera-module-name = "CAM1320-P13V03D";
+		rockchip,camera-module-len-name = "50013A1";
+		rockchip,camera-module-fov-h = "66.0";
+		rockchip,camera-module-fov-v = "50.1";
+		rockchip,camera-module-orientation = <0>;
+		rockchip,camera-module-iq-flip = <0>;
+		rockchip,camera-module-iq-mirror = <0>;
+		rockchip,camera-module-flip = <1>;
+		rockchip,camera-module-mirror = <0>;
+
+		rockchip,camera-module-defrect0 = <2112 1568 0 0 2112 1568>;
+		rockchip,camera-module-defrect1 = <4224 3136 0 0 4224 3136>;
+		rockchip,camera-module-defrect3 = <3264 2448 0 0 3264 2448>;
+		rockchip,camera-module-flash-support = <0>;
+		rockchip,camera-module-mipi-dphy-index = <1>;
+	};
+
+	ov4689p1: ov4689@36 {
+		status = "okay";
+		compatible = "omnivision,ov4689-v4l2-i2c-subdev";
+		reg = <0x36>;
+		device_type = "v4l2-i2c-subdev";
+
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "clk_cif_out";
+		pinctrl-names = "rockchip,camera_default", "rockchip,camera_sleep";
+		pinctrl-0 = <&cam1_default_pins &cif_clkout_a>;
+		pinctrl-1 = <&cam1_default_pins>;
+
+		rockchip,pd-gpio = <&gpio0 12 GPIO_ACTIVE_LOW>;
+		rockchip,rst-gpio = <&gpio0 8 GPIO_ACTIVE_LOW>;
+
+		rockchip,camera-module-mclk-name = "clk_cif_out";
+		rockchip,camera-module-facing = "front";
+		rockchip,camera-module-name = "CAM400M";
+		rockchip,camera-module-len-name = "YM6011P";
+		rockchip,camera-module-fov-h = "116";
+		rockchip,camera-module-fov-v = "61";
+		rockchip,camera-module-orientation = <0>;
+		rockchip,camera-module-iq-flip = <0>;
+		rockchip,camera-module-iq-mirror = <0>;
+		rockchip,camera-module-flip = <0>;
+		rockchip,camera-module-mirror = <1>;
+
+		rockchip,camera-module-defrect0 = <2688 1520 0 0 2688 1520>;
+		rockchip,camera-module-flash-support = <0>;
+		rockchip,camera-module-mipi-dphy-index = <1>;
+	};
+};
+
+#endif /* NANOPI4_RK_CIF_ISP10 */
