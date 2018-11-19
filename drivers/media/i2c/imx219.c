@@ -17,6 +17,7 @@
 #include <linux/of_graph.h>
 #include <linux/slab.h>
 #include <linux/videodev2.h>
+#include <linux/gpio/consumer.h>
 #include <linux/version.h>
 #include <linux/rk-camera-module.h>
 #include <media/v4l2-ctrls.h>
@@ -222,6 +223,7 @@ struct imx219 {
 	struct media_pad pad;
 	struct v4l2_ctrl_handler ctrl_handler;
 	struct clk *clk;
+	struct gpio_desc *pwdn_gpio;
 	struct v4l2_rect crop_rect;
 	int hflip;
 	int vflip;
@@ -429,7 +431,17 @@ static int imx219_s_power(struct v4l2_subdev *sd, int on)
 	if (on)	{
 		dev_dbg(&client->dev, "imx219 power on\n");
 		clk_prepare_enable(priv->clk);
+
+		if(!IS_ERR(priv->pwdn_gpio)) {
+			gpiod_set_value_cansleep(priv->pwdn_gpio, 1);
+			msleep(10);	
+		}
 	} else if (!on) {
+
+		if(!IS_ERR(priv->pwdn_gpio)) {
+		gpiod_set_value_cansleep(priv->pwdn_gpio, 0);
+		}
+
 		dev_dbg(&client->dev, "imx219 power off\n");
 		clk_disable_unprepare(priv->clk);
 	}
@@ -1047,6 +1059,12 @@ static int imx219_probe(struct i2c_client *client,
 		return -EPROBE_DEFER;
 	}
 
+	priv->pwdn_gpio = devm_gpiod_get(&client->dev, "pwdn", GPIOD_OUT_LOW);
+	if (IS_ERR(priv->pwdn_gpio))
+		dev_info(&client->dev, "Failed to get pwdn-gpios\n"); 
+
+	gpiod_set_value_cansleep(priv->pwdn_gpio, 1);
+	msleep(5);
 	/* 1920 * 1080 by default */
 	priv->cur_mode = &supported_modes[0];
 	priv->cfg_num = ARRAY_SIZE(supported_modes);
