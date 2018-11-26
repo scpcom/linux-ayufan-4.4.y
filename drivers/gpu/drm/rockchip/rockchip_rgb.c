@@ -56,7 +56,7 @@ rockchip_rgb_encoder_atomic_check(struct drm_encoder *encoder,
 		break;
 	}
 
-	s->output_type = DRM_MODE_CONNECTOR_LVDS;
+	s->output_type = DRM_MODE_CONNECTOR_DPI;
 
 	return 0;
 }
@@ -125,7 +125,7 @@ struct rockchip_rgb *rockchip_rgb_init(struct device *dev,
 	encoder->possible_crtcs = drm_crtc_mask(crtc);
 
 	ret = drm_encoder_init(drm_dev, encoder, &rockchip_rgb_encoder_funcs,
-			       DRM_MODE_ENCODER_NONE, NULL);
+			       DRM_MODE_ENCODER_DPI, NULL);
 	if (ret < 0) {
 		DRM_DEV_ERROR(drm_dev->dev,
 			      "failed to initialize encoder: %d\n", ret);
@@ -135,7 +135,7 @@ struct rockchip_rgb *rockchip_rgb_init(struct device *dev,
 	drm_encoder_helper_add(encoder, &rockchip_rgb_encoder_helper_funcs);
 
 	if (panel) {
-		bridge = drm_panel_bridge_add(panel, DRM_MODE_CONNECTOR_LVDS);
+		bridge = drm_panel_bridge_add(panel, DRM_MODE_CONNECTOR_DPI);
 		if (IS_ERR(bridge))
 			return ERR_CAST(bridge);
 	}
