@@ -20,6 +20,7 @@ obj-$(CONFIG_WLAN_VENDOR_ST) += st/
 obj-$(CONFIG_WLAN_VENDOR_TI) += ti/
 obj-$(CONFIG_WLAN_VENDOR_ZYDAS) += zydas/
 obj-$(CONFIG_WLAN_VENDOR_QUANTENNA) += quantenna/
+obj-$(CONFIG_RTL8188EU) += rtl8188eu/
 obj-$(CONFIG_RTL8812AU) += rtl8812au/
 obj-$(CONFIG_RTL8192CU) += rtl8192cu/
 obj-$(CONFIG_RTL8822BU) += rtl88x2bu/
