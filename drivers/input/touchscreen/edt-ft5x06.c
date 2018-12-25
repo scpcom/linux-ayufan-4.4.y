@@ -114,6 +114,8 @@ struct edt_ft5x06_ts_data {
 	int offset;
 	int report_rate;
 	int max_support_points;
+	int x_resolution;
+	int y_resolution;
 
 	char name[EDT_NAME_LEN];
 
@@ -123,6 +125,8 @@ struct edt_ft5x06_ts_data {
 
 struct edt_i2c_chip_data {
 	int  max_support_points;
+	int x_resolution;
+	int y_resolution;
 };
 
 static int edt_ft5x06_ts_readwrite(struct i2c_client *client,
@@ -884,8 +888,8 @@ edt_ft5x06_ts_get_parameters(struct edt_ft5x06_ts_data *tsdata)
 	if (reg_addr->reg_report_rate != NO_REGISTER)
 		tsdata->report_rate = edt_ft5x06_register_read(tsdata,
 						reg_addr->reg_report_rate);
-	tsdata->num_x = edt_ft5x06_register_read(tsdata, reg_addr->reg_num_x);
-	tsdata->num_y = edt_ft5x06_register_read(tsdata, reg_addr->reg_num_y);
+//	tsdata->num_x = edt_ft5x06_register_read(tsdata, reg_addr->reg_num_x);
+//	tsdata->num_y = edt_ft5x06_register_read(tsdata, reg_addr->reg_num_y);
 }
 
 static void
@@ -925,7 +929,7 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 	int error;
 	char fw_version[EDT_NAME_LEN];
 
-	dev_dbg(&client->dev, "probing for EDT FT5x06 I2C\n");
+	dev_info(&client->dev, "probing for EDT FT5x06 I2C\n");
 
 	ctp_id = panel_get_touch_id();
 	if (ctp_id != CTP_FT5X06 &&
@@ -949,6 +953,8 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 	}
 
 	tsdata->max_support_points = chip_data->max_support_points;
+	tsdata->num_x = chip_data->x_resolution;
+	tsdata->num_y = chip_data->y_resolution;
 
 	tsdata->reset_gpio = devm_gpiod_get_optional(&client->dev,
 						     "reset", GPIOD_OUT_HIGH);
@@ -977,6 +983,7 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 		usleep_range(5000, 6000);
 		gpiod_set_value_cansleep(tsdata->reset_gpio, 0);
 		msleep(300);
+		gpiod_set_value_cansleep(tsdata->reset_gpio, 1);
 	}
 
 	input = devm_input_allocate_device(&client->dev);
@@ -1006,7 +1013,7 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 	edt_ft5x06_ts_get_defaults(&client->dev, tsdata);
 	edt_ft5x06_ts_get_parameters(tsdata);
 
-	dev_dbg(&client->dev,
+	dev_info(&client->dev,
 		"Model \"%s\", Rev. \"%s\", %dx%d sensors\n",
 		tsdata->name, fw_version, tsdata->num_x, tsdata->num_y);
 
@@ -1079,7 +1086,7 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 
 	panel_set_touch_id(CTP_FT5X06);
 
-	dev_dbg(&client->dev,
+	dev_info(&client->dev,
 		"EDT FT5x06 initialized: IRQ %d, WAKE pin %d, Reset pin %d.\n",
 		client->irq,
 		tsdata->wake_gpio ? desc_to_gpio(tsdata->wake_gpio) : -1,
@@ -1133,6 +1140,13 @@ static const struct edt_i2c_chip_data edt_ft5506_data = {
 	.max_support_points = 10,
 };
 
+static const struct edt_i2c_chip_data edt_ft5336_data = {
+	.max_support_points = 5,
+	.x_resolution = 1080,
+	.y_resolution = 1920,
+};
+
+
 static const struct i2c_device_id edt_ft5x06_ts_id[] = {
 	{ .name = "edt-ft5x06", .driver_data = (long)&edt_ft5x06_data },
 	{ .name = "edt-ft5506", .driver_data = (long)&edt_ft5506_data },
@@ -1146,6 +1160,7 @@ static const struct of_device_id edt_ft5x06_of_match[] = {
 	{ .compatible = "edt,edt-ft5306", .data = &edt_ft5x06_data },
 	{ .compatible = "edt,edt-ft5406", .data = &edt_ft5x06_data },
 	{ .compatible = "edt,edt-ft5506", .data = &edt_ft5506_data },
+	{ .compatible = "edt,edt-ft5336", .data = &edt_ft5336_data },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, edt_ft5x06_of_match);
