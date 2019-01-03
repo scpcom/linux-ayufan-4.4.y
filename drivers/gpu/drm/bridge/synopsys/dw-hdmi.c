@@ -4452,6 +4452,9 @@ static void dw_hdmi_reg_initial(struct dw_hdmi *hdmi)
 
 void dw_hdmi_suspend(struct dw_hdmi *hdmi)
 {
+	if (!hdmi)
+		return;
+
 	mutex_lock(&hdmi->mutex);
 
 	/*
@@ -4477,6 +4480,9 @@ EXPORT_SYMBOL_GPL(dw_hdmi_suspend);
 
 void dw_hdmi_resume(struct dw_hdmi *hdmi)
 {
+	if (!hdmi)
+		return;
+
 	pinctrl_pm_select_default_state(hdmi->dev);
 	mutex_lock(&hdmi->mutex);
 	dw_hdmi_reg_initial(hdmi);
