@@ -127,6 +127,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-vr-android.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev00.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev01.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev04.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev06.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-odroidn1-linux.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += ficus-linux.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rock960-model-ab-linux.dtb
