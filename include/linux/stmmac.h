@@ -28,6 +28,7 @@
 
 #include <linux/platform_device.h>
 #include <linux/ethtool.h>
+#include <linux/wakelock.h>
 
 #define STMMAC_RX_COE_NONE	0
 #define STMMAC_RX_COE_TYPE1	1
@@ -128,5 +129,11 @@ struct plat_stmmacenet_data {
 	void (*get_wol)(struct net_device *, struct ethtool_wolinfo *);
 	int (*set_wol)(struct net_device *, struct ethtool_wolinfo *);
 	void *bsp_priv;
+	int wolirq_io;
+	int wolirq_io_level;
+	int wol_irq;
+	struct wake_lock wol_wake_lock;
+	int wol_suspended;
+	int wol_suspend_count;
 };
 #endif
