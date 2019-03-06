@@ -69,6 +69,9 @@
 		serial0 = &uart0;
 		serial1 = &uart1;
 		serial2 = &uart2;
+		mmc0 = &emmc;
+		mmc1 = &sdmmc;
+		mmc2 = &sdmmc_ext;
 	};
 
 	cpus {
@@ -951,6 +954,8 @@
 	vop: vop@ff370000 {
 		compatible = "rockchip,rk3328-vop";
 		reg = <0x0 0xff370000 0x0 0x3efc>;
+		reg-names = "regs", "gamma_lut";
+		rockchip,grf = <&grf>;
 		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
 		clocks = <&cru ACLK_VOP>, <&cru DCLK_LCDC>, <&cru HCLK_VOP>;
 		clock-names = "aclk_vop", "dclk_vop", "hclk_vop";
@@ -1253,6 +1258,18 @@
 		};
 	};
 
+	emmc: dwmmc@ff520000 {
+		compatible = "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc";
+		reg = <0x0 0xff520000 0x0 0x4000>;
+		clock-freq-min-max = <400000 150000000>;
+		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>,
+			 <&cru SCLK_EMMC_DRV>, <&cru SCLK_EMMC_SAMPLE>;
+		clock-names = "biu", "ciu", "ciu-drv", "ciu-sample";
+		fifo-depth = <0x100>;
+		interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
+		status = "disabled";
+	};
+
 	sdmmc: dwmmc@ff500000 {
 		compatible = "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc";
 		reg = <0x0 0xff500000 0x0 0x4000>;
@@ -1274,18 +1291,6 @@
 		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
 		fifo-depth = <0x100>;
 		interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>;
-		status = "disabled";
-	};
-
-	emmc: dwmmc@ff520000 {
-		compatible = "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc";
-		reg = <0x0 0xff520000 0x0 0x4000>;
-		max-frequency = <150000000>;
-		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>,
-			 <&cru SCLK_EMMC_DRV>, <&cru SCLK_EMMC_SAMPLE>;
-		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
-		fifo-depth = <0x100>;
-		interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
 		status = "disabled";
 	};
 
