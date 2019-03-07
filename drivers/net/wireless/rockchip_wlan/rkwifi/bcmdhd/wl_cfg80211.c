@@ -9990,7 +9990,7 @@ wl_cfg80211_stop_ap(
 			}
 		}
 
-		 wl_cfg80211_clear_per_bss_ies(cfg, bssidx);
+		wl_cfg80211_clear_per_bss_ies(cfg, bssidx);
 #ifdef SUPPORT_AP_RADIO_PWRSAVE
 		wl_set_ap_rps(dev, FALSE, dev->name);
 		wl_cfg80211_init_ap_rps(cfg);
@@ -10312,7 +10312,7 @@ wl_cfg80211_del_beacon(struct wiphy *wiphy, struct net_device *dev)
 	if (err < 0) {
 		WL_ERR(("SET INFRA error %d\n", err));
 	}
-	 wl_cfg80211_clear_per_bss_ies(cfg, bssidx);
+	wl_cfg80211_clear_per_bss_ies(cfg, bssidx);
 
 	if (wdev->iftype == NL80211_IFTYPE_AP) {
 		/* clear the AP mode */
@@ -15867,8 +15867,12 @@ fail:
 struct bcm_cfg80211 *wl_get_cfg(struct net_device *ndev)
 {
 	struct wireless_dev *wdev = ndev->ieee80211_ptr;
+	struct device *pdev = wl_cfg80211_get_parent_dev();
 
 	if (!wdev || !wdev->wiphy)
+		return NULL;
+
+	if (pdev && pdev != wiphy_dev(wdev->wiphy))
 		return NULL;
 
 	return wiphy_priv(wdev->wiphy);
