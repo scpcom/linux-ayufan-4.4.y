@@ -258,7 +258,7 @@
 	assigned-clocks = <&cru SCLK_MAC2IO>, <&cru SCLK_MAC2IO_EXT>;
 	assigned-clock-parents = <&gmac_clkin>, <&gmac_clkin>;
 	clock_in_out = "input";
-	snps,force_thresh_dma_mode;
+	rockchip,bugged_tx_coe;
 	snps,reset-gpio = <&gpio1 18 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	snps,reset-delays-us = <0 10000 50000>;
