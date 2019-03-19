@@ -9,6 +9,7 @@
 #include <dt-bindings/input/input.h>
 #include "rk3399.dtsi"
 #include "rk3399-opp.dtsi"
+#include "rk3399-vop-clk-set.dtsi"
 
 / {
 	model = "Pine64 RockPro64";
@@ -241,7 +242,7 @@
 		cooling-max-state = <3>;
 		#cooling-cells = <2>;
 		cooling-levels = <0 80 170 230>;
-	}; 
+	};
 
 	rk_key: rockchip-key {
 		compatible = "rockchip,key";
@@ -650,10 +651,10 @@
 	i2c-scl-rising-time-ns = <168>;
 	i2c-scl-falling-time-ns = <4>;
 
-	es8316: es8316@10 {
+	es8316: es8316@11 {
 		#sound-dai-cells = <0>;
 		compatible = "everest,es8316";
-		reg = <0x10>;
+		reg = <0x11>;
 		clocks = <&cru SCLK_I2S_8CH_OUT>;
 		clock-names = "mclk";
 		pinctrl-names = "default";
@@ -709,6 +710,15 @@
 &gpu {
 	status = "okay";
 	mali-supply = <&vdd_gpu>;
+};
+
+/* HACK: keep MALI version on linux */
+&gpu_power_model {
+	// for DDK r14.
+	voltage = <900>;
+	frequency = <500>;
+	static-power = <300>;
+	dynamic-power = <396>;
 };
 
 &hdmi {
