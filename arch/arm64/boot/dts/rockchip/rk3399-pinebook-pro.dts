@@ -79,6 +79,8 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&panel_en>;
 		enable-gpios = <&gpio4 RK_PD2 GPIO_ACTIVE_HIGH>;
+		prepare-delay-ms = <20>;
+		enable-delay-ms = <20>;
 		status = "okay";
 
 		ports {
