@@ -195,9 +195,9 @@
 		pinctrl-names = "default", "rts_gpio";
 		pinctrl-0 = <&uart0_rts>;
 		pinctrl-1 = <&uart0_gpios>;
-		BT,reset_gpio    = <&gpio0 9 GPIO_ACTIVE_HIGH>;
-		BT,wake_gpio     = <&gpio2 27 GPIO_ACTIVE_HIGH>;
-		BT,wake_host_irq = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+		BT,reset_gpio    = <&gpio0 RK_PB1 GPIO_ACTIVE_HIGH>;
+		BT,wake_gpio     = <&gpio2 RK_PD2 GPIO_ACTIVE_HIGH>;
+		BT,wake_host_irq = <&gpio0 RK_PA4 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
 
@@ -650,7 +650,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&i2s_8ch_mclk>;
 		spk-con-gpio = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
-		hp-det-gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_LOW>;
+		hp-det-gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_HIGH>;
 	};
 };
 
@@ -937,7 +937,7 @@
 	pmic {
 		pmic_int_l: pmic-int-l {
 			rockchip,pins =
-				<3 RK_PB2 RK_FUNC_GPIO &pcfg_pull_up>;
+				<1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 
 		vsel1_gpio: vsel1-gpio {
