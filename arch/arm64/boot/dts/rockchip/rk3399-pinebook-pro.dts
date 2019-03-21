@@ -150,7 +150,7 @@
 		regulator-always-on;
 	};
 
-	vcc5v0-usb3-host-regulator {
+	vcc5v0_usb3_host: vcc5v0-usb3-host-regulator {
 		compatible = "regulator-fixed";
 		enable-active-high;
 		gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
@@ -981,7 +981,7 @@
 		};
 
 		host_usb3_drv: host-usb3-drv {
-			rockchip,pins = <0 RK_PA6 0 &pcfg_pull_none>;
+			rockchip,pins = <0 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
