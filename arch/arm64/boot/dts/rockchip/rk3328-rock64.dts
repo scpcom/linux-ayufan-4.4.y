@@ -143,13 +143,6 @@
 		#clock-cells = <0>;
 	};
 
-	ir-receiver {
-		compatible = "gpio-ir-receiver";
-		pinctrl-0 = <&ir_int>;
-		pinctrl-names = "default";
-		status = "okay";
-	};
-
 	dummy_codec: dummy-codec {
 		compatible = "linux,snd-soc-dummy";
 		#sound-dai-cells = <0>;
