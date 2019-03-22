@@ -13,7 +13,7 @@
 
 / {
 	model = "Pine64 Pinebook Pro";
-	compatible = "pine64,rockpro64", "rockchip,rk3399";
+	compatible = "pine64,pinebook-pro", "rockchip,rk3399";
 
 	chosen {
 		bootargs = "earlycon=uart8250,mmio32,0xff1a0000 swiotlb=1";
