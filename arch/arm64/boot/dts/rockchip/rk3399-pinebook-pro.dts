@@ -370,14 +370,6 @@
 	logo-memory-region = <&drm_logo>;
 
 	route {
-		route_hdmi: route-hdmi {
-			logo,uboot = "logo.bmp";
-			logo,kernel = "logo_kernel.bmp";
-			logo,mode = "center";
-			charge_logo,mode = "center";
-			connect = <&vopl_out_hdmi>;
-		};
-
 		route_dp: route-dp {
 			logo,uboot = "logo.bmp";
 			logo,kernel = "logo_kernel.bmp";
@@ -710,21 +702,6 @@
 	dynamic-power = <396>;
 };
 
-&hdmi {
-	status = "okay";
-	rockchip,phy-table =
-		<74250000 0x8009 0x0004 0x0272>,
-		<165000000 0x802b 0x0004 0x0209>,
-		<297000000 0x8039 0x0005 0x028d>,
-		<594000000 0x8039 0x0000 0x019d>,
-		<000000000 0x0000 0x0000 0x0000>;
-	clocks = <&cru PCLK_HDMI_CTRL>,
-			<&cru SCLK_HDMI_SFR>,
-			<&cru PLL_VPLL>,
-			<&cru PCLK_VIO_GRF>;
-	clock-names = "iahb", "isfr", "vpll", "grf";
-};
-
 &io_domains {
 	status = "okay";
 
@@ -1053,7 +1030,7 @@
 	assigned-clock-parents = <&cru PLL_CPLL>;
 };
 
-&vopb_mmu {
+&vopl_mmu {
 	status = "okay";
 };
 
