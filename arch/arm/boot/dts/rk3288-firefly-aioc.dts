@@ -45,7 +45,7 @@
 #include "rk3288-linux.dtsi"
 
 / {
-	model = "Firefly-RK3288 Board (Linux Opensource)";
+	model = "AIO-3288C Board (Linux Opensource)";
 	compatible = "rockchip,rk3288-firefly", "rockchip,rk3288";
 
 	sdio_pwrseq: sdio-pwrseq {
@@ -62,6 +62,34 @@
 		 * - PDN (power down when low)
 		 */
 		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
+	};
+
+	/delete-node/ vsys-regulator;
+	vcc_sys: vsys-regulator {
+		compatible = "regulator-fixed";
+		enable-active-high;
+		gpio = <&gpio7 3 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pwr5v_en>;
+		regulator-name = "vcc_sys";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		work {
+			gpios = <&gpio8 6 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+
+		user {
+			gpios = <&gpio8 1 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
 	};
 };
 
@@ -242,8 +270,25 @@
 	status = "okay";
 };
 
+&es8323 {
+	spk-ctl-gpio = <&gpio7 2 GPIO_ACTIVE_HIGH>;
+};
+
+&uart1 {
+	status = "okay";
+};
+
 &uart2 {
 	status = "okay";
+};
+
+&uart3 {
+	status = "okay";
+};
+
+&usb_otg {
+	status = "okay";
+	dr_mode = "host";
 };
 
 &hdmi_in_vopl {
@@ -258,6 +303,12 @@
 
 		pwr_hold: pwr-hold {
 			rockchip,pins = <0 6 RK_FUNC_GPIO &pcfg_output_high>;
+		};
+	};
+
+	vcc-sys {
+		pwr5v_en: pwr5v-en {
+			rockchip,pins = <7 3 RK_FUNC_GPIO &pcfg_output_high>;
 		};
 	};
 };

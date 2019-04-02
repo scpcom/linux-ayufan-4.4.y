@@ -93,3 +93,8 @@ obj-$(CONFIG_SPI_XILINX)		+= spi-xilinx.o
 obj-$(CONFIG_SPI_XLP)			+= spi-xlp.o
 obj-$(CONFIG_SPI_XTENSA_XTFPGA)		+= spi-xtensa-xtfpga.o
 obj-$(CONFIG_SPI_ZYNQMP_GQSPI)		+= spi-zynqmp-gqspi.o
+ifeq ($(CONFIG_ARM64),y)
+spi-wk2xxx-objs                        := spi-wk2xxx_64bit
+else
+spi-wk2xxx-objs                        := spi-wk2xxx_32bit
+endif

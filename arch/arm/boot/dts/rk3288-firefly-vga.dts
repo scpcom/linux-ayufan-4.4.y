@@ -46,7 +46,7 @@
 
 / {
 	model = "Firefly-RK3288 Board (Linux Opensource)";
-	compatible = "rockchip,rk3288-firefly", "rockchip,rk3288";
+	compatible = "firefly,rk3288-firefly", "rockchip,rk3288";
 
 	sdio_pwrseq: sdio-pwrseq {
 		compatible = "mmc-pwrseq-simple";
@@ -62,6 +62,45 @@
 		 * - PDN (power down when low)
 		 */
 		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
+	};
+
+	vga_bridge: vga-bridge {
+		compatible = "adi,adv7123";
+		psave-gpios = <&gpio0 17 GPIO_ACTIVE_HIGH>;
+		rockchip,output = "rgb";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+				adv7123_in: endpoint {
+					remote-endpoint = <&rgb_out>;
+				};
+			};
+
+			port@1 {
+				reg = <1>;
+				adv7123_out: endpoint {
+					remote-endpoint = <&vga_in>;
+				};
+			};
+		};
+	};
+
+	vga {
+		compatible = "vga-connector";
+		label = "vga";
+		ddc-i2c-bus = <&i2c4>;
+
+		 port {
+			vga_in: endpoint {
+				remote-endpoint = <&adv7123_out>;
+			};
+		};
 	};
 };
 
@@ -248,6 +287,29 @@
 
 &hdmi_in_vopl {
 	status = "disabled";
+};
+
+&lvds_in_vopb {
+	status = "disabled";
+};
+
+&lvds {
+	pinctrl-names = "default";
+	pinctrl-0 = <&lcdc_ctl>;
+	status = "okay";
+
+	ports {
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			rgb_out: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&adv7123_in>;
+			};
+		};
+	};
 };
 
 &pinctrl {
