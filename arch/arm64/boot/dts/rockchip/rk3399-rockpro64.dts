@@ -1134,6 +1134,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pcie_clkreqn>;
 	vpcie3v3-supply = <&vcc3v3_pcie>;
+	bus-scan-delay-ms = <1000>;
 	status = "okay";
 };
 
