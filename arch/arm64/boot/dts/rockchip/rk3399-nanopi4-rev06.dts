@@ -18,6 +18,7 @@
 
 /dts-v1/;
 #include "rk3399-nanopi4-common.dtsi"
+#include <dt-bindings/sensor-dev.h>
 
 / {
 	model = "FriendlyElec SOM-RK3399";
@@ -27,6 +28,25 @@
 &mach {
 	hwrev = <6>;
 	model = "SOM-RK3399";
+};
+
+&i2c3 {
+	status = "okay";
+	i2c-scl-rising-time-ns = <160>;
+	i2c-scl-falling-time-ns = <30>;
+	clock-frequency = <400000>;
+
+	sensor@18 {
+		status = "okay";
+		compatible = "gs_lis3dh";
+		reg = <0x18>;
+		type = <SENSOR_TYPE_ACCEL>;
+		irq-gpio = <&gpio1 22 IRQ_TYPE_LEVEL_LOW>;
+		irq_enable = <0>;
+		poll_delay_ms = <64>;
+		layout = <2>;
+		reprobe_en = <1>;
+	};
 };
 
 &i2s1 {
