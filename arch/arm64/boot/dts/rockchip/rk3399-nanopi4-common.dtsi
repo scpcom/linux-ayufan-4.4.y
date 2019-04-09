@@ -475,7 +475,8 @@
 
 &spi1 {
 	status = "disabled";
-	cs-gpios = <&gpio1 10 GPIO_ACTIVE_LOW>;
+	pinctrl-names = "default", "sleep";
+	pinctrl-1 = <&spi1_gpio>;
 
 	spidev0: spidev@0 {
 		compatible = "rockchip,spidev";
@@ -1207,6 +1208,16 @@
 			rockchip,pins =
 				<0 12 RK_FUNC_GPIO &pcfg_pull_down>,
 				<0  8 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	spi1 {
+		spi1_gpio: spi1-gpio {
+			rockchip,pins =
+				<1 7 RK_FUNC_GPIO &pcfg_output_low>,
+				<1 8 RK_FUNC_GPIO &pcfg_output_low>,
+				<1 9 RK_FUNC_GPIO &pcfg_output_low>,
+				<1 10 RK_FUNC_GPIO &pcfg_output_low>;
 		};
 	};
 };
