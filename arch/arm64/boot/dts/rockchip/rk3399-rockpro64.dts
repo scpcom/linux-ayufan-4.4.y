@@ -37,6 +37,19 @@
 		reg = <0x0 0xff8d0000 0x0 0x20000>; /* 128k */
 	};
 
+	ion {
+		compatible = "rockchip,ion";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cma-heap {
+			reg = <0x00000000 0x02000000>;
+		};
+
+		system-heap {
+		};
+	};
+
 	aliases {
 		ethernet0 = &gmac;
 	};
