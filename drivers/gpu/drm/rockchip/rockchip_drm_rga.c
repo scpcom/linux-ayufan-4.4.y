@@ -1014,7 +1014,7 @@ static struct platform_driver rga_pltfm_driver = {
 	.probe  = rga_probe,
 	.remove = rga_remove,
 	.driver = {
-		.name = "rockchip-rga",
+		.name = "rockchip-drm-rga",
 		.pm = &rga_pm,
 		.of_match_table = rockchip_rga_dt_ids,
 	},
@@ -1025,4 +1025,4 @@ module_platform_driver(rga_pltfm_driver);
 MODULE_AUTHOR("Yakir Yang <ykk@rock-chips.com>");
 MODULE_DESCRIPTION("Rockchip RGA Driver Extension");
 MODULE_LICENSE("GPL");
-MODULE_ALIAS("platform:rockchip-rga");
+MODULE_ALIAS("platform:rockchip-drm-rga");
