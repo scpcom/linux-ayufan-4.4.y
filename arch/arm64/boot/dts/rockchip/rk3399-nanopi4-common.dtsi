@@ -49,8 +49,8 @@
 #include "rk3399-linux.dtsi"
 #include <dt-bindings/input/input.h>
 
-#define NANOPI4_RK_CIF_ISP10
-#include "rk3399-nanopi4-cifisp.dtsi"
+#define NANOPI4_RK_RK_ISP1	1
+#include "rk3399-nanopi4-rkisp1.dtsi"
 
 / {
 	model = "FriendlyElec boards based on Rockchip RK3399";

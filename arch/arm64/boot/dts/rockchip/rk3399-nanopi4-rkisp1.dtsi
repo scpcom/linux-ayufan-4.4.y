@@ -1,0 +1,230 @@
+/*
+ * Copyright (c) 2018 FriendlyElec Computer Tech. Co., Ltd.
+ * (http://www.friendlyarm.com)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, you can access it online at
+ * http://www.gnu.org/licenses/gpl-2.0.html.
+ */
+
+#if defined(NANOPI4_RK_RK_ISP1)
+
+&cif_isp0 {
+	status = "disabled";
+};
+
+&cif_isp1 {
+	status = "disabled";
+};
+
+&i2c1 {
+	ov4689p0: ov4689@36 {
+		compatible = "ovti,ov4689";
+		status = "okay";
+		reg = <0x36>;
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "xvclk";
+
+		reset-gpios = <&gpio2 27 GPIO_ACTIVE_HIGH>;
+		pwdn-gpios = <&gpio2 28 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "rockchip,camera_default", "rockchip,camera_sleep";
+		pinctrl-0 = <&cam0_default_pins &cif_clkout_a>;
+		pinctrl-1 = <&cam0_default_pins>;
+
+		port {
+			ucam_out0a: endpoint {
+				remote-endpoint = <&mipi_in_ucam0a>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+	ov13850p0: ov13850@10 {
+		compatible = "ovti,ov13850";
+		status = "okay";
+		reg = <0x10>;
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "xvclk";
+
+		reset-gpios = <&gpio2 27 GPIO_ACTIVE_HIGH>;
+		pwdn-gpios = <&gpio2 28 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "rockchip,camera_default", "rockchip,camera_sleep";
+		pinctrl-0 = <&cam0_default_pins &cif_clkout_a>;
+		pinctrl-1 = <&cam0_default_pins>;
+
+		port {
+			ucam_out0b: endpoint {
+				remote-endpoint = <&mipi_in_ucam0b>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+};
+
+&rkisp1_0 {
+	status = "okay";
+
+	port {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		isp0_mipi_in: endpoint@0 {
+			reg = <0>;
+			remote-endpoint = <&dphy_rx0_out>;
+		};
+	};
+};
+
+&isp0_mmu {
+	status = "okay";
+};
+
+&mipi_dphy_rx0 {
+	status = "okay";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			mipi_in_ucam0a: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&ucam_out0a>;
+				data-lanes = <1 2>;
+			};
+
+			mipi_in_ucam0b: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&ucam_out0b>;
+				data-lanes = <1 2>;
+			};
+		};
+
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			dphy_rx0_out: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&isp0_mipi_in>;
+			};
+		};
+	};
+};
+
+&i2c2 {
+	ov4689p1: ov4689@36 {
+		compatible = "ovti,ov4689";
+		status = "okay";
+		reg = <0x36>;
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "xvclk";
+
+		reset-gpios = <&gpio0 8 GPIO_ACTIVE_HIGH>;
+		pwdn-gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "rockchip,camera_default", "rockchip,camera_sleep";
+		pinctrl-0 = <&cam1_default_pins &cif_clkout_a>;
+		pinctrl-1 = <&cam1_default_pins>;
+
+		port {
+			ucam_out1a: endpoint {
+				remote-endpoint = <&mipi_in_ucam1a>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+	ov13850p1: ov13850@10 {
+		compatible = "ovti,ov13850";
+		status = "okay";
+		reg = <0x10>;
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "xvclk";
+
+		reset-gpios = <&gpio0 8 GPIO_ACTIVE_HIGH>;
+		pwdn-gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "rockchip,camera_default", "rockchip,camera_sleep";
+		pinctrl-0 = <&cam1_default_pins &cif_clkout_a>;
+		pinctrl-1 = <&cam1_default_pins>;
+
+		port {
+			ucam_out1b: endpoint {
+				remote-endpoint = <&mipi_in_ucam1b>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+};
+
+&rkisp1_1 {
+	status = "okay";
+
+	port {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		isp1_mipi_in: endpoint@0 {
+			reg = <0>;
+			remote-endpoint = <&dphy_tx1rx1_out>;
+		};
+	};
+};
+
+&isp1_mmu {
+	status = "okay";
+};
+
+&mipi_dphy_tx1rx1 {
+	status = "okay";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			mipi_in_ucam1a: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&ucam_out1a>;
+				data-lanes = <1 2>;
+			};
+
+			mipi_in_ucam1b: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&ucam_out1b>;
+				data-lanes = <1 2>;
+			};
+		};
+
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			dphy_tx1rx1_out: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&isp1_mipi_in>;
+			};
+		};
+	};
+};
+
+#endif /* NANOPI4_RK_RK_ISP1 */
