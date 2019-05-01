@@ -160,6 +160,8 @@ struct tc35874x_state {
 	u8 csi_lanes_in_use;
 
 	struct gpio_desc *reset_gpio;
+	struct gpio_desc *stanby_gpio;
+	struct gpio_desc *power33_gpio;
 
 	u32 module_index;
 	const char *module_facing;
@@ -1881,16 +1883,24 @@ static const struct v4l2_ctrl_ops tc35874x_ctrl_ops = {
 
 /* --------------- PROBE / REMOVE --------------- */
 
-#ifdef CONFIG_OF
-static void tc35874x_gpio_reset(struct tc35874x_state *state)
+static void tc35874x_set_power(struct tc35874x_state *state, int on)
 {
-	usleep_range(5000, 10000);
-	gpiod_set_value(state->reset_gpio, 1);
-	usleep_range(1000, 2000);
-	gpiod_set_value(state->reset_gpio, 0);
-	msleep(20);
+	if (on) {
+		gpiod_direction_output(state->power33_gpio, 1);
+		gpiod_direction_output(state->stanby_gpio, 1);
+
+		gpiod_set_value(state->reset_gpio, 1);
+		usleep_range(1000, 2000);
+		gpiod_set_value(state->reset_gpio, 0);
+		msleep(10);
+	} else {
+		gpiod_direction_output(state->stanby_gpio, 0);
+		gpiod_direction_output(state->power33_gpio, 0);
+		gpiod_direction_output(state->reset_gpio, 0);
+	}
 }
 
+#ifdef CONFIG_OF
 static int tc35874x_probe_of(struct tc35874x_state *state)
 {
 	struct device *dev = &state->i2c_client->dev;
@@ -1990,6 +2000,16 @@ static int tc35874x_probe_of(struct tc35874x_state *state)
 	state->pdata.ths_trailcnt = 0x2;
 	state->pdata.hstxvregcnt = 0;
 
+	state->power33_gpio = devm_gpiod_get_optional(dev,
+			"power33", GPIOD_OUT_LOW);
+	if (IS_ERR(state->power33_gpio))
+		dev_warn(dev, "no power33 gpio\n");
+
+	state->stanby_gpio = devm_gpiod_get_optional(dev,
+			"stanby", GPIOD_OUT_LOW);
+	if (IS_ERR(state->stanby_gpio))
+		dev_warn(dev, "no stanby gpio\n");
+
 	state->reset_gpio = devm_gpiod_get_optional(dev, "reset",
 						    GPIOD_OUT_LOW);
 	if (IS_ERR(state->reset_gpio)) {
@@ -1997,9 +2017,6 @@ static int tc35874x_probe_of(struct tc35874x_state *state)
 		ret = PTR_ERR(state->reset_gpio);
 		goto disable_clk;
 	}
-
-	if (state->reset_gpio)
-		tc35874x_gpio_reset(state);
 
 	ret = 0;
 	goto free_endpoint;
@@ -2077,8 +2094,11 @@ static int tc35874x_probe(struct i2c_client *client,
 	v4l2_i2c_subdev_init(sd, client, &tc35874x_ops);
 	sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE | V4L2_SUBDEV_FL_HAS_EVENTS;
 
+	tc35874x_set_power(state, 1);
+
 	/* i2c access */
 	data = i2c_rd16(sd, CHIPID) & MASK_CHIPID;
+
 	switch (data) {
 	case 0x0000:
 	case 0x4700:
