@@ -145,6 +145,7 @@ struct tc35874x_state {
 	struct v4l2_ctrl *detect_tx_5v_ctrl;
 	struct v4l2_ctrl *audio_sampling_rate_ctrl;
 	struct v4l2_ctrl *audio_present_ctrl;
+	struct v4l2_ctrl *vblank;
 
 	struct delayed_work delayed_work_enable_hotplug;
 
@@ -1852,6 +1853,32 @@ static const struct v4l2_ctrl_config tc35874x_ctrl_audio_present = {
 	.flags = V4L2_CTRL_FLAG_READ_ONLY,
 };
 
+/* --------------- RKISP CTRLS --------------- */
+
+static int tc35874x_s_ctrl(struct v4l2_ctrl *ctrl)
+{
+	struct tc35874x_state *state = container_of(ctrl->handler,
+			struct tc35874x_state, hdl);
+
+	switch (ctrl->id) {
+	case V4L2_CID_VBLANK:
+	case V4L2_CID_EXPOSURE:
+	case V4L2_CID_TEST_PATTERN:
+		break;
+
+	default:
+		v4l2_dbg(3, debug, &state->sd, "%s Unhandled id:0x%x, val:0x%x\n",
+				__func__, ctrl->id, ctrl->val);
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
+static const struct v4l2_ctrl_ops tc35874x_ctrl_ops = {
+	.s_ctrl = tc35874x_s_ctrl,
+};
+
 /* --------------- PROBE / REMOVE --------------- */
 
 #ifdef CONFIG_OF
@@ -2063,7 +2090,7 @@ static int tc35874x_probe(struct i2c_client *client,
 	}
 
 	/* control handlers */
-	v4l2_ctrl_handler_init(&state->hdl, 4);
+	v4l2_ctrl_handler_init(&state->hdl, 6);
 
 	v4l2_ctrl_new_int_menu(&state->hdl, NULL, V4L2_CID_LINK_FREQ,
 			       0, 0, link_freq_menu_items);
@@ -2073,6 +2100,9 @@ static int tc35874x_probe(struct i2c_client *client,
 
 	state->detect_tx_5v_ctrl = v4l2_ctrl_new_std(&state->hdl, NULL,
 			V4L2_CID_DV_RX_POWER_PRESENT, 0, 1, 0, 0);
+
+	state->vblank = v4l2_ctrl_new_std(&state->hdl, &tc35874x_ctrl_ops,
+			V4L2_CID_VBLANK, 1, 8, 1, 4);
 
 	/* custom controls */
 	state->audio_sampling_rate_ctrl = v4l2_ctrl_new_custom(&state->hdl,
