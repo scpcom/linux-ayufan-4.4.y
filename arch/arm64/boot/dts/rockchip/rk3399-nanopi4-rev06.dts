@@ -42,3 +42,11 @@
 		sound-dai = <&i2s1>;
 	};
 };
+
+&tc358749x {
+	status = "okay";
+};
+
+&mipi_in_ucam0c {
+	status = "okay";
+};

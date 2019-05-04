@@ -99,6 +99,13 @@
 		#clock-cells = <0>;
 	};
 
+	ext_cam_clk: external-camera-clock {
+		compatible = "fixed-clock";
+		clock-frequency = <27000000>;
+		clock-output-names = "CLK_CAMERA_27MHZ";
+		#clock-cells = <0>;
+	};
+
 	vcc3v3_sys: vcc3v3-sys {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc3v3_sys";
@@ -1218,6 +1225,16 @@
 				<1 8 RK_FUNC_GPIO &pcfg_output_low>,
 				<1 9 RK_FUNC_GPIO &pcfg_output_low>,
 				<1 10 RK_FUNC_GPIO &pcfg_output_low>;
+		};
+	};
+
+	hdmiin {
+		hdmiin_gpios: hdmiin-gpios {
+			rockchip,pins =
+				<1 0 RK_FUNC_GPIO &pcfg_output_high>,
+				<2 6 RK_FUNC_GPIO &pcfg_output_high>,
+				<2 5 RK_FUNC_GPIO &pcfg_pull_none>,
+				<0 2 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 };

@@ -69,6 +69,31 @@
 			};
 		};
 	};
+
+	tc358749x: tc358749x@0f {
+		compatible = "toshiba,tc358749";
+		reg = <0x0f>;
+		clocks = <&ext_cam_clk>;
+		clock-names = "refclk";
+		power33-gpios = <&gpio1 0 GPIO_ACTIVE_HIGH>;
+		stanby-gpios = <&gpio2 6 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio2 5 GPIO_ACTIVE_LOW>;
+		int-gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+		interrupt-parent = <&gpio0>;
+		interrupts = <2 IRQ_TYPE_LEVEL_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&hdmiin_gpios>;
+		status = "disabled";
+
+		port {
+			hdmiin_out0: endpoint {
+				remote-endpoint = <&mipi_in_ucam0c>;
+				data-lanes = <1 2 3 4>;
+				clock-noncontinuous;
+				link-frequencies = /bits/ 64 <297000000>;
+			};
+		};
+	};
 };
 
 &rkisp1_0 {
@@ -111,6 +136,13 @@
 				reg = <1>;
 				remote-endpoint = <&ucam_out0b>;
 				data-lanes = <1 2>;
+			};
+
+			mipi_in_ucam0c: endpoint@2 {
+				reg = <2>;
+				remote-endpoint = <&hdmiin_out0>;
+				data-lanes = <1 2 3 4>;
+				status = "disabled";
 			};
 		};
 
