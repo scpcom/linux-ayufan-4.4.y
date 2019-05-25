@@ -111,8 +111,7 @@
 
 	vcc_host1_5v: vcc_otg_5v: vcc-host1-5v-regulator {
 		compatible = "regulator-fixed";
-		enable-active-high;
-		gpio = <&gpio0 27 GPIO_ACTIVE_HIGH>;
+		gpio = <&gpio0 2 GPIO_ACTIVE_LOW>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&usb20_host_drv>;
 		regulator-name = "vcc_host1_5v";
@@ -542,7 +541,7 @@
 
 	usb2 {
 		usb20_host_drv: usb20-host-drv {
-			rockchip,pins = <0 27 RK_FUNC_GPIO &pcfg_pull_none>;
+			rockchip,pins = <0 2 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
