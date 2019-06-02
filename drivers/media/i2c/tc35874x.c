@@ -2046,7 +2046,7 @@ static int tc35874x_probe(struct i2c_client *client,
 	struct device *dev = &client->dev;
 	struct device_node *node = dev->of_node;
 	char facing[2];
-	int err, data;
+	int err, data = -1;
 
 	dev_info(dev, "driver version: %02x.%02x.%02x",
 		DRIVER_VERSION >> 16,
@@ -2097,9 +2097,9 @@ static int tc35874x_probe(struct i2c_client *client,
 	tc35874x_set_power(state, 1);
 
 	/* i2c access */
-	data = i2c_rd16(sd, CHIPID) & MASK_CHIPID;
+	i2c_rd(sd, CHIPID, (u8 __force *)&data, 2);
 
-	switch (data) {
+	switch (data & MASK_CHIPID) {
 	case 0x0000:
 	case 0x4700:
 		break;
