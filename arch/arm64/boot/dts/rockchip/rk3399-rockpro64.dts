@@ -677,14 +677,6 @@
 	};
 };
 
-&i2s0 {
-	status = "okay";
-	rockchip,i2s-broken-burst-len;
-	rockchip,playback-channels = <8>;
-	rockchip,capture-channels = <8>;
-	#sound-dai-cells = <0>;
-};
-
 &i2c1 {
 	status = "okay";
 	i2c-scl-rising-time-ns = <168>;
