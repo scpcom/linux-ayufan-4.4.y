@@ -510,6 +510,10 @@
 		vcc12-supply = <&vcc3v3_sys>;
 		vddio-supply = <&vcc_1v8>;
 
+		rtc {
+			status = "okay";
+		};
+
 		regulators {
 			vdd_center: DCDC_REG1 {
 				regulator-name = "vdd_center";
