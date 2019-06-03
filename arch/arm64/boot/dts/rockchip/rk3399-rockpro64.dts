@@ -707,6 +707,10 @@
 	};
 };
 
+&i2c8 {
+	status = "okay";
+};
+
 &i2s1 {
 	status = "okay";
 	rockchip,i2s-broken-burst-len;
