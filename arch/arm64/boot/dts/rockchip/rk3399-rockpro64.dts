@@ -156,18 +156,6 @@
 		#clock-cells = <0>;
 	};
 
-	spdif-sound {
-		status = "okay";
-		compatible = "simple-audio-card";
-		simple-audio-card,name = "ROCKCHIP,SPDIF";
-		simple-audio-card,cpu {
-			sound-dai = <&spdif>;
-		};
-		simple-audio-card,codec {
-			sound-dai = <&spdif_out>;
-		};
-	};
-
 	spdif_out: spdif-out {
 		status = "okay";
 		compatible = "linux,spdif-dit";
@@ -211,28 +199,6 @@
 		BT,wake_gpio     = <&gpio2 27 GPIO_ACTIVE_HIGH>;
 		BT,wake_host_irq = <&gpio0 4 GPIO_ACTIVE_HIGH>;
 		status = "okay";
-	};
-
-	es8316-sound {
-		status = "okay";
-		compatible = "simple-audio-card";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,name = "rockchip,es8316-codec";
-		simple-audio-card,mclk-fs = <256>;
-		simple-audio-card,widgets =
-			"Microphone", "Mic Jack",
-			"Headphone", "Headphone Jack";
-		simple-audio-card,routing =
-			"Mic Jack", "MICBIAS1",
-			"IN1P", "Mic Jack",
-			"Headphone Jack", "HPOL",
-			"Headphone Jack", "HPOR";
-		simple-audio-card,cpu {
-			sound-dai = <&i2s1>;
-		};
-		simple-audio-card,codec {
-			sound-dai = <&es8316>;
-		};
 	};
 
 	test-power {
@@ -290,6 +256,40 @@
 		compatible = "rockchip,rk3399-hdmi-dp";
 		rockchip,cpu = <&i2s2>;
 		rockchip,codec = <&hdmi>, <&cdn_dp>;
+	};
+
+	es8316-sound {
+		status = "okay";
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,name = "rockchip,es8316-codec";
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,widgets =
+			"Microphone", "Mic Jack",
+			"Headphone", "Headphone Jack";
+		simple-audio-card,routing =
+			"Mic Jack", "MICBIAS1",
+			"IN1P", "Mic Jack",
+			"Headphone Jack", "HPOL",
+			"Headphone Jack", "HPOR";
+		simple-audio-card,cpu {
+			sound-dai = <&i2s1>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&es8316>;
+		};
+	};
+
+	spdif-sound {
+		status = "okay";
+		compatible = "simple-audio-card";
+		simple-audio-card,name = "ROCKCHIP,SPDIF";
+		simple-audio-card,cpu {
+			sound-dai = <&spdif>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&spdif_out>;
+		};
 	};
 };
 
