@@ -217,7 +217,7 @@
 		compatible = "bluetooth-platdata";
 		clocks = <&rk808 1>;
 		clock-names = "ext_clock";
-		uart_rts_gpios = <&gpio2 RK_PC2 GPIO_ACTIVE_LOW>;
+		uart_rts_gpios = <&gpio2 RK_PC3 GPIO_ACTIVE_LOW>;
 		pinctrl-names = "default", "rts_gpio";
 		pinctrl-0 = <&uart0_rts>;
 		pinctrl-1 = <&uart0_gpios>;
@@ -661,6 +661,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&i2s_8ch_mclk>;
 		spk-con-gpio = <&gpio4 RK_PD3 GPIO_ACTIVE_HIGH>;
+		hp-det-gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_HIGH>;
 	};
 };
 
