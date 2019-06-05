@@ -654,7 +654,7 @@
 
 	es8316: es8316@11 {
 		#sound-dai-cells = <0>;
-		compatible = "everest,es8323";
+		compatible = "everest,es8316";
 		reg = <0x11>;
 		clocks = <&cru SCLK_I2S_8CH_OUT>;
 		clock-names = "mclk";
