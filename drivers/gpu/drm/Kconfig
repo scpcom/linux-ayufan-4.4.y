@@ -28,6 +28,10 @@ config DRM_MIPI_DBI
 	tristate
 	depends on DRM
 
+config DRM_IGNORE_IOTCL_PERMIT
+	bool "Ignore drm ioctl permission"
+	depends on DRM && ANDROID
+
 config DRM_MIPI_DSI
 	bool
 	depends on DRM
