@@ -22,7 +22,7 @@
 
 	chosen {
 		// disable USB autosuspend as this solves USB stability issues
-		bootargs = "earlycon=uart8250,mmio32,0xff1a0000 swiotlb=1 usbcore.autosuspend=-1 video=eDP-1:1920x1080@60";
+		bootargs = "earlycon=uart8250,mmio32,0xff1a0000 swiotlb=1 no_console_suspend=1 usbcore.autosuspend=-1 video=eDP-1:1920x1080@60";
 		stdout-path = "serial2:1500000n8";
 	};
 
