@@ -87,6 +87,14 @@
 		};
 	};
 
+	dc-charger {
+		compatible = "gpio-charger";
+		charger-type = "mains";
+		gpios = <&gpio4 RK_PD0 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&dc_det_gpio>;
+	};
+
 	edp_panel: edp-panel {
 		compatible = "simple-panel";
 		backlight = <&backlight>;
@@ -929,6 +937,12 @@
 };
 
 &pinctrl {
+	dc-charger {
+		dc_det_gpio: dc-det-gpio {
+			rockchip,pins = <4 RK_PD0 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
 	fusb30x {
 		fusb0_int: fusb0-int {
 			rockchip,pins =
