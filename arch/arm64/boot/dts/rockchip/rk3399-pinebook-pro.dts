@@ -78,6 +78,30 @@
 		status = "okay";
 	};
 
+	gpio-keys {
+		compatible = "gpio-keys";
+		autorepeat;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pwrbtn &lidbtn>;
+
+		power {
+			debounce-interval = <20>;
+			gpios = <&gpio0 RK_PA5 GPIO_ACTIVE_LOW>;
+			label = "Power";
+			linux,code = <KEY_POWER>;
+			wakeup-source;
+		};
+
+		lid {
+			debounce-interval = <20>;
+			gpios = <&gpio1 RK_PA1 GPIO_ACTIVE_LOW>;
+			label = "Lid";
+			linux,code = <0>; /* SW_LID */
+			linux,input-type = <5>; /* EV_SW */
+			wakeup-source;
+		};
+	};
+
 	switches {
 		compatible = "gpio-leds";
 
@@ -253,38 +277,11 @@
 		};
 	};
 
-	test-power {
-		status = "okay";
-	};
-
-	rk_key: rockchip-key {
-		compatible = "rockchip,key";
-		status = "okay";
-
-		io-channels = <&saradc 1>;
-
-		power-key {
-			gpios = <&gpio0 RK_PA5 GPIO_ACTIVE_LOW>;
-			linux,code = <116>;
-			label = "power";
-			gpio-key,wakeup;
-		};
-	};
-
 	hdmi_dp_sound: hdmi-dp-sound {
 		status = "okay";
 		compatible = "rockchip,rk3399-hdmi-dp";
 		rockchip,cpu = <&i2s2>;
 		rockchip,codec = <&hdmi>, <&cdn_dp>;
-	};
-
-	hall_sensor: hall-mh248 {
-		compatible = "hall-mh248";
-		pinctrl-names = "default";
-		pinctrl-0 = <&mh248_irq_gpio>;
-		irq-gpio = <&gpio1 RK_PA1 IRQ_TYPE_EDGE_BOTH>;
-		hall-active = <1>;
-		status = "okay";
 	};
 };
 
@@ -937,6 +934,16 @@
 };
 
 &pinctrl {
+	buttons {
+		pwrbtn: pwrbtn {
+			rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+
+		lidbtn: lidbtn {
+			rockchip,pins = <1 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
 	dc-charger {
 		dc_det_gpio: dc-det-gpio {
 			rockchip,pins = <4 RK_PD0 RK_FUNC_GPIO &pcfg_pull_none>;
@@ -947,12 +954,6 @@
 		fusb0_int: fusb0-int {
 			rockchip,pins =
 				<1 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>;
-		};
-	};
-
-	hallsensor {
-		mh248_irq_gpio: mh248-irq-gpio {
-			rockchip,pins = <1 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
