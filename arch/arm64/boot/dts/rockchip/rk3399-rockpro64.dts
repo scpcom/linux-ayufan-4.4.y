@@ -727,6 +727,7 @@
 	phy-mode = "rgmii";
 	clock_in_out = "input";
 	rockchip,bugged_tx_coe;
+	disable,wake-on-lan; // device does not resume
 	snps,reset-gpio = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	snps,reset-delays-us = <0 10000 50000>;
