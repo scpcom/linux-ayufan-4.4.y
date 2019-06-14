@@ -202,8 +202,19 @@
 		status = "okay";
 	};
 
-	test-power {
-		status = "okay";
+	gpio-keys {
+		compatible = "gpio-keys";
+		autorepeat;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pwrbtn>;
+
+		power {
+			debounce-interval = <100>;
+			gpios = <&gpio0 RK_PA5 GPIO_ACTIVE_LOW>;
+			label = "Power";
+			linux,code = <KEY_POWER>;
+			wakeup-source;
+		};
 	};
 
 	leds {
@@ -236,20 +247,6 @@
 		cooling-max-state = <3>;
 		#cooling-cells = <2>;
 		cooling-levels = <0 80 170 230>;
-	};
-
-	rk_key: rockchip-key {
-		compatible = "rockchip,key";
-		status = "okay";
-
-		io-channels = <&saradc 1>;
-
-		power-key {
-			gpios = <&gpio0 RK_PA5 GPIO_ACTIVE_LOW>;
-			linux,code = <116>;
-			label = "power";
-			gpio-key,wakeup;
-		};
 	};
 
 	hdmi_dp_sound: hdmi-dp-sound {
@@ -1084,6 +1081,12 @@
 };
 
 &pinctrl {
+	buttons {
+		pwrbtn: pwrbtn {
+			rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
 	fusb30x {
 		fusb0_int: fusb0-int {
 			rockchip,pins =
