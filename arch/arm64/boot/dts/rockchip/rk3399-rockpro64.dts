@@ -1206,7 +1206,7 @@
 	>;
 	rockchip,wakeup-config = <
 		(0
-		| RKPM_GPIO_WKUP_EN
+		| RKPM_CLUSTER_L_WKUP_EN
 		| RKPM_PWM_WKUP_EN
 		)
 	>;
