@@ -230,6 +230,7 @@ stmmac_probe_config_dt(struct platform_device *pdev, const char **mac)
 	}
 
 	plat->bugged_tx_coe = of_property_read_bool(np, "rockchip,bugged_tx_coe");
+	plat->disable_wake_on_lan = of_property_read_bool(np, "disable,wake-on-lan");
 	return plat;
 }
 #else

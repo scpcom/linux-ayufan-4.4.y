@@ -110,6 +110,7 @@ struct plat_stmmacenet_data {
 	int pmt;
 	int force_sf_dma_mode;
 	int force_thresh_dma_mode;
+	int disable_wake_on_lan;
 	int bugged_tx_coe;
 	int riwt_off;
 	int max_speed;

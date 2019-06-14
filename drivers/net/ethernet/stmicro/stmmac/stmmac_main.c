@@ -2845,7 +2845,7 @@ static int stmmac_hw_init(struct stmmac_priv *priv)
 	if (priv->plat->tx_coe)
 		pr_info(" TX Checksum insertion supported\n");
 
-	if (priv->plat->pmt) {
+	if (priv->plat->pmt && !priv->plat->disable_wake_on_lan) {
 		pr_info(" Wake-Up On Lan supported\n");
 		device_set_wakeup_capable(priv->device, 1);
 	}
