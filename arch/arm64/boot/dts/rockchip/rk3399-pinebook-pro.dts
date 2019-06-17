@@ -259,11 +259,11 @@
 		status = "okay";
 	};
 
-	es8316-sound {
+	speaker-sound {
 		status = "okay";
 		compatible = "simple-audio-card";
 		simple-audio-card,format = "i2s";
-		simple-audio-card,name = "rockchip,es8316-codec";
+		simple-audio-card,name = "rk-es8316-spk-sound";
 		simple-audio-card,mclk-fs = <256>;
 
 		simple-audio-card,cpu {
@@ -276,7 +276,7 @@
 		};
 	};
 
-	hdmi_dp_sound: hdmi-dp-sound {
+	hdmi-sound {
 		status = "okay";
 		compatible = "rockchip,rk3399-hdmi-dp";
 		rockchip,cpu = <&i2s2>;
