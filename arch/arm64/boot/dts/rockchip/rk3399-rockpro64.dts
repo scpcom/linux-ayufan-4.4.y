@@ -249,27 +249,21 @@
 		cooling-levels = <0 80 170 230>;
 	};
 
-	hdmi_dp_sound: hdmi-dp-sound {
+	hdmi-sound {
 		status = "okay";
 		compatible = "rockchip,rk3399-hdmi-dp";
 		rockchip,cpu = <&i2s2>;
 		rockchip,codec = <&hdmi>, <&cdn_dp>;
 	};
 
-	es8316-sound {
+	headphones-sound {
 		status = "okay";
 		compatible = "simple-audio-card";
 		simple-audio-card,format = "i2s";
-		simple-audio-card,name = "rockchip,es8316-codec";
+		simple-audio-card,name = "rk-es8316-hp-sound";
 		simple-audio-card,mclk-fs = <256>;
-		simple-audio-card,widgets =
-			"Microphone", "Mic Jack",
-			"Headphone", "Headphone Jack";
-		simple-audio-card,routing =
-			"Mic Jack", "MICBIAS1",
-			"IN1P", "Mic Jack",
-			"Headphone Jack", "HPOL",
-			"Headphone Jack", "HPOR";
+		simple-audio-card,hp-det-gpio =
+			<&gpio0 RK_PB0 GPIO_ACTIVE_LOW>;
 		simple-audio-card,cpu {
 			sound-dai = <&i2s1>;
 		};
@@ -281,7 +275,7 @@
 	spdif-sound {
 		status = "okay";
 		compatible = "simple-audio-card";
-		simple-audio-card,name = "ROCKCHIP,SPDIF";
+		simple-audio-card,name = "rk-spdif-sound";
 		simple-audio-card,cpu {
 			sound-dai = <&spdif>;
 		};
@@ -689,7 +683,7 @@
 		clock-names = "mclk";
 		pinctrl-names = "default";
 		pinctrl-0 = <&i2s_8ch_mclk>;
-		hp-det-gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
+		hp-det-gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_LOW>;
 	};
 };
 
