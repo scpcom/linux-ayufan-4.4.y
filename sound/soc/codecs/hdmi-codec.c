@@ -416,11 +416,11 @@ static struct snd_soc_codec_driver hdmi_codec = {
 static void hdmi_codec_jack_report(struct hdmi_codec_priv *hcp,
 				   unsigned int jack_status)
 {
-	if (!hcp->jack)
-		return;
-
 	if (jack_status != hcp->jack_status) {
-		snd_soc_jack_report(hcp->jack, jack_status, SND_JACK_LINEOUT);
+		if (hcp->jack) {
+			snd_soc_jack_report(hcp->jack, jack_status, SND_JACK_LINEOUT);
+		}
+
 		hcp->jack_status = jack_status;
 	}
 }
@@ -433,9 +433,6 @@ static int hdmi_codec_notify(struct notifier_block *nb, unsigned long event,
 	union hdmi_event *event_block = data;
 
 	if (hcp->dev->parent != event_block->base.source)
-		return NOTIFY_OK;
-
-	if (!hcp->jack)
 		return NOTIFY_OK;
 
 	switch (event) {
@@ -462,9 +459,8 @@ int hdmi_codec_set_jack_detect(struct snd_soc_codec *codec,
 	struct hdmi_codec_priv *hcp = snd_soc_codec_get_drvdata(codec);
 
 	hcp->jack = jack;
-	hcp->nb.notifier_call = hdmi_codec_notify;
 
-	hdmi_register_notifier(&hcp->nb);
+	snd_soc_jack_report(jack, hcp->jack_status, SND_JACK_LINEOUT);
 
 	return 0;
 }
@@ -526,6 +522,9 @@ static int hdmi_codec_probe(struct platform_device *pdev)
 	}
 
 	hcp->dev = dev;
+
+	hcp->nb.notifier_call = hdmi_codec_notify;
+	hdmi_register_notifier(&hcp->nb);
 
 	return 0;
 }
