@@ -80,7 +80,44 @@ static int rk_hdmi_dp_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
-static struct snd_soc_jack hdmi_dp_card_jack;
+static int rockchip_sound_register_jack(struct snd_soc_card *card, struct snd_soc_codec *codec, int index)
+{
+	struct snd_soc_jack *jack;
+	char jack_name[60];
+	const char *dev_name = NULL;
+	int ret;
+
+	jack = devm_kzalloc(card->dev, sizeof(*jack), GFP_KERNEL);
+	if (!jack) {
+		dev_err(card->dev, "Can't allocate HDMI Jack %d\n", ret);
+		return -ENOMEM;
+	}
+
+	if (codec->dev->parent && codec->dev->parent->of_node) {
+		dev_name = of_node_full_name(codec->dev->parent->of_node);
+	}
+
+	if (dev_name) {
+		snprintf(jack_name, sizeof(jack_name), "%s Jack", dev_name);
+	} else {
+		snprintf(jack_name, sizeof(jack_name), "Codec %d Jack", index);
+	}
+
+	ret = snd_soc_card_jack_new(card, jack_name, SND_JACK_LINEOUT,
+						jack, NULL, 0);
+	if (ret) {
+		dev_err(card->dev, "Can't create HDMI Jack %d\n", ret);
+		return ret;
+	}
+
+	ret = hdmi_codec_set_jack_detect(codec, jack);
+	if (ret) {
+		dev_warn(codec->dev, "Failed to register HDMI Jack %d\n", ret);
+		ret = 0;
+	}
+
+	return ret;
+}
 
 static int rockchip_sound_hdmi_dp_init(struct snd_soc_pcm_runtime *runtime)
 {
@@ -88,20 +125,13 @@ static int rockchip_sound_hdmi_dp_init(struct snd_soc_pcm_runtime *runtime)
 	int i;
 	int ret;
 
-	/* enable jack detection */
-	ret = snd_soc_card_jack_new(card, "HDMI Jack", SND_JACK_LINEOUT,
-				    &hdmi_dp_card_jack, NULL, 0);
-	if (ret) {
-		dev_err(card->dev, "Can't create HDMI Jack %d\n", ret);
-		return ret;
-	}
-
 	for (i = 0; i < runtime->num_codecs; ++i) {
 		struct snd_soc_codec *codec = runtime->codec_dais[i]->codec;
 
-		ret = hdmi_codec_set_jack_detect(codec, &hdmi_dp_card_jack);
+		ret = rockchip_sound_register_jack(card, codec, i);
 		if (ret) {
-			dev_warn(codec->dev, "Failed to register HDMI Jack %d\n", ret);
+			dev_err(card->dev, "Failed to register codec jack: %d\n", ret);
+			return ret;
 		}
 	}
 
