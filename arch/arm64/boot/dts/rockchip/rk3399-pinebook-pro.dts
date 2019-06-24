@@ -40,7 +40,7 @@
 	backlight: edp-backlight {
 		compatible = "pwm-backlight";
 		pwms = <&pwm0 0 740740 0>;
-		power-supply = <&dc_12v>;
+		power-supply = <&vcc3v3_s3>;
 		brightness-levels = <
 			  0   1   2   3   4   5   6   7
 			  8   9  10  11  12  13  14  15
@@ -176,6 +176,10 @@
 		pinctrl-0 = <&host_vbus_drv>;
 		regulator-name = "vcc5v0_host";
 		regulator-always-on;
+
+		regulator-state-mem {
+			regulator-off-in-suspend;
+		};
 	};
 
 	vcc5v0_usb3_host: vcc5v0-usb3-host-regulator {
@@ -186,6 +190,10 @@
 		pinctrl-0 = <&host_usb3_drv>;
 		regulator-name = "vcc5v0_usb3_host";
 		regulator-always-on;
+
+		regulator-state-mem {
+			regulator-off-in-suspend;
+		};
 	};
 
 	vdd_log: vdd-log {
@@ -337,7 +345,7 @@
 		/*system status         freq(KHz)*/
 		SYS_STATUS_NORMAL       933000
 		SYS_STATUS_REBOOT       400000
-		SYS_STATUS_SUSPEND      400000
+		SYS_STATUS_SUSPEND      200000
 		SYS_STATUS_VIDEO_1080P  933000
 		SYS_STATUS_VIDEO_4K     933000
 		SYS_STATUS_VIDEO_4K_10B 933000
@@ -356,6 +364,10 @@
 };
 
 &dmc_opp_table {
+	opp-200000000 {
+		opp-suspend;
+	};
+
 	opp-928000000 {
 		opp-hz = /bits/ 64 <928000000>;
 		opp-microvolt = <925000>;
@@ -484,7 +496,7 @@
 		regulators {
 			vdd_center: DCDC_REG1 {
 				regulator-name = "vdd_center";
-				regulator-min-microvolt = <900000>;
+				regulator-min-microvolt = <750000>;
 				regulator-max-microvolt = <1350000>;
 				regulator-ramp-delay = <6001>;
 				regulator-always-on;
@@ -534,8 +546,7 @@
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-state-mem {
-					regulator-on-in-suspend;
-					regulator-suspend-microvolt = <1800000>;
+					regulator-off-in-suspend;
 				};
 			};
 
@@ -546,8 +557,7 @@
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-state-mem {
-					regulator-on-in-suspend;
-					regulator-suspend-microvolt = <3000000>;
+					regulator-off-in-suspend;
 				};
 			};
 
@@ -582,8 +592,7 @@
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-state-mem {
-					regulator-on-in-suspend;
-					regulator-suspend-microvolt = <3000000>;
+					regulator-off-in-suspend;
 				};
 			};
 
@@ -606,8 +615,7 @@
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-state-mem {
-					regulator-on-in-suspend;
-					regulator-suspend-microvolt = <1800000>;
+					regulator-off-in-suspend;
 				};
 			};
 
@@ -628,7 +636,7 @@
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-state-mem {
-					regulator-on-in-suspend;
+					regulator-off-in-suspend;
 				};
 			};
 
@@ -637,7 +645,7 @@
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-state-mem {
-					regulator-on-in-suspend;
+					regulator-off-in-suspend;
 				};
 			};
 		};
@@ -722,7 +730,7 @@
 &io_domains {
 	status = "okay";
 
-	bt656-supply = <&vcc1v8_dvp>; /* bt656_gpio2ab_ms */
+	bt656-supply = <&vcc_3v0>; /* bt656_gpio2ab_ms */
 	audio-supply = <&vcc_3v0>; /* audio_gpio3d4a_ms */
 	sdmmc-supply = <&vcc_sd>; /* sdmmc_gpio4b_ms */
 	gpio1830-supply = <&vcc_3v0>; /* gpio1833_gpio4cd_ms */
@@ -1043,7 +1051,7 @@
 	>;
 	rockchip,wakeup-config = <
 		(0
-		| RKPM_CLUSTER_L_WKUP_EN
+		| RKPM_GPIO_WKUP_EN
 		)
 	>;
 	rockchip,pwm-regulator-config = <
