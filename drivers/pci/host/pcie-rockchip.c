@@ -1657,6 +1657,9 @@ static int rockchip_pcie_probe(struct platform_device *pdev)
 		}
 	}
 
+	if (rockchip->dma_trx_enabled == 0)
+		return 0;
+
 	rockchip->dma_obj = rk_pcie_dma_obj_probe(dev);
 	if (IS_ERR(rockchip->dma_obj)) {
 		dev_err(dev, "failed to prepare dma object\n");
