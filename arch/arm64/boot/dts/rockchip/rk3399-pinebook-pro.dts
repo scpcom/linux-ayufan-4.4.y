@@ -699,6 +699,7 @@
 		>;
 		monitor_sec = <5>;
 		virtual_power = <0>;
+		design_capacity = <9800>;
 	};
 };
 
