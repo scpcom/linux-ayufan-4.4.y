@@ -603,7 +603,8 @@ static void cw_bat_work(struct work_struct *work)
 
 static bool cw_battery_valid_time_to_empty(struct cw_battery *cw_bat)
 {
-	return cw_bat->time_to_empty > 0 && cw_bat->time_to_empty < 0x1FFF;
+	return cw_bat->time_to_empty > 0 && cw_bat->time_to_empty < 0x1FFF &&
+		cw_bat->status == POWER_SUPPLY_STATUS_DISCHARGING;
 }
 
 static int cw_battery_get_property(struct power_supply *psy,
