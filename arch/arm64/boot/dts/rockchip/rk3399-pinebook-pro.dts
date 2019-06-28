@@ -109,6 +109,12 @@
 		pinctrl-0 = <&dc_det_gpio>;
 	};
 
+	usb-charger {
+		status = "okay";
+		compatible = "universal-charger";
+		extcon = <&fusb0>;
+	};
+
 	edp_panel: edp-panel {
 		compatible = "simple-panel";
 		backlight = <&backlight>;
