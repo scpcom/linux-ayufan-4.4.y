@@ -67,6 +67,15 @@ struct display_timing;
  */
 struct drm_panel_funcs {
 	/**
+	 * @loader_protect:
+	 *
+	 * protect loader logo panel's power.
+	 *
+	 * This function is optional.
+	 */
+	int (*loader_protect)(struct drm_panel *panel, bool on);
+
+	/**
 	 * @prepare:
 	 *
 	 * Turn on panel and perform set up.
@@ -184,6 +193,14 @@ struct drm_panel {
 	 */
 	struct list_head list;
 };
+
+static inline int drm_panel_loader_protect(struct drm_panel *panel, bool on)
+{
+	if (panel && panel->funcs && panel->funcs->loader_protect)
+		return panel->funcs->loader_protect(panel, on);
+
+	return -EINVAL;
+}
 
 void drm_panel_init(struct drm_panel *panel, struct device *dev,
 		    const struct drm_panel_funcs *funcs,
