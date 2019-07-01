@@ -146,6 +146,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399pro-evb-v14-linux.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399pro-evb-v14-multi-cam-avb.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399pro-npu-evb-v10.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399pro-npu-evb-v10-multi-cam.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-odroidgo2-linux.dtb
 
 targets += dtbs dtbs_instal
 targets += $(dtb-y)
