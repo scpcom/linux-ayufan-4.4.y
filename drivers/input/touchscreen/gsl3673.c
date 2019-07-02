@@ -1033,7 +1033,7 @@ error_unreg_device:
 	return rc;
 }
 
-static int gsl_ts_suspend(struct device *dev)
+static int __maybe_unused gsl_ts_suspend(struct device *dev)
 {
 	struct gsl_ts *ts = dev_get_drvdata(dev);
 	int i;
@@ -1069,7 +1069,7 @@ static int gsl_ts_suspend(struct device *dev)
 	return 0;
 }
 
-static int gsl_ts_resume(struct device *dev)
+static int __maybe_unused gsl_ts_resume(struct device *dev)
 {
 	struct gsl_ts *ts = dev_get_drvdata(dev);
 	int i;
@@ -1134,21 +1134,6 @@ static int __maybe_unused gsl_ts_pm_resume(struct device *dev)
 	return gsl_ts_resume(dev);
 }
 
-static int gsl_ts_early_suspend(struct tp_device *tp_d)
-
-{
-	struct gsl_ts *ts = container_of(tp_d, struct gsl_ts, tp);
-
-	return gsl_ts_suspend(&ts->client->dev);
-}
-
-static int gsl_ts_late_resume(struct tp_device *tp_d)
-{
-	struct gsl_ts *ts = container_of(tp_d, struct gsl_ts, tp);
-
-	return gsl_ts_resume(&ts->client->dev);
-}
-
 static void gsl_download_fw_work(struct work_struct *work)
 {
 	struct gsl_ts *ts = container_of(work, struct gsl_ts, download_fw_work);
@@ -1177,8 +1162,6 @@ static int  gsl_ts_probe(struct i2c_client *client,
 	ts = devm_kzalloc(&client->dev, sizeof(*ts), GFP_KERNEL);
 	if (!ts)
 		return -ENOMEM;
-	ts->tp.tp_resume = gsl_ts_late_resume;
-	ts->tp.tp_suspend = gsl_ts_early_suspend;
 	tp_register_fb(&ts->tp);
 	ts->client = client;
 	i2c_set_clientdata(client, ts);
@@ -1242,9 +1225,7 @@ static int gsl_ts_remove(struct i2c_client *client)
 	return 0;
 }
 
-static const struct dev_pm_ops gsl_ts_pm = {
-	SET_SYSTEM_SLEEP_PM_OPS(gsl_ts_pm_suspend, gsl_ts_pm_resume)
-};
+static SIMPLE_DEV_PM_OPS(gsl_ts_pm, gsl_ts_suspend, gsl_ts_resume);
 
 static const struct of_device_id gsl_ts_ids[] = {
 	{.compatible = "GSL,GSL3673"},
