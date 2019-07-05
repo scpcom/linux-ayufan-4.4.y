@@ -53,6 +53,11 @@ module_param_named(dbg_level, dbg_enable, int, 0644);
  */
 #define OUT_VOLUME	(0x03)
 
+#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
+#define RK817_DAC_VOLUME \
+	SOC_DOUBLE_R("Playback Volume", RK817_CODEC_DDAC_VOLL, RK817_CODEC_DDAC_VOLR, 0, 0xFF, 1)
+#endif
+
 /*
  * DADC L/R volume setting
  * 0db~-95db,0.375db/step,for example:
@@ -65,6 +70,12 @@ module_param_named(dbg_level, dbg_enable, int, 0644);
 
 #define CODEC_SET_SPK 1
 #define CODEC_SET_HP 2
+
+#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
+#define RK817_ADC_VOLUME \
+	SOC_DOUBLE_R("Record Volume", RK817_CODEC_DADC_VOLL, RK817_CODEC_DADC_VOLR, 0, 0xFF, 1)
+#endif
+
 
 struct rk817_codec_priv {
 	struct snd_soc_codec *codec;
@@ -151,6 +162,13 @@ static const struct reg_default rk817_reg_defaults[] = {
 	{ RK817_CODEC_DI2S_TXCR2, 0x17 },
 	{ RK817_CODEC_DI2S_TXCR3_TXCMD, 0x00 },
 };
+
+#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
+static const struct snd_kcontrol_new rk817_dac_controls[] = {
+	RK817_DAC_VOLUME,
+	RK817_ADC_VOLUME
+};
+#endif
 
 static bool rk817_volatile_register(struct device *dev, unsigned int reg)
 {
@@ -944,6 +962,10 @@ static struct snd_soc_codec_driver soc_codec_dev_rk817 = {
 	.get_regmap = rk817_get_regmap,
 	.suspend = rk817_suspend,
 	.resume = rk817_resume,
+#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
+	.controls = rk817_dac_controls,
+	.num_controls = ARRAY_SIZE(rk817_dac_controls),
+#endif
 };
 
 static int rk817_codec_parse_dt_property(struct device *dev,
