@@ -461,16 +461,24 @@ static int rk817_codec_power_down(struct snd_soc_codec *codec, int type)
 
 /* For tiny alsa playback/capture/voice call path */
 static const char * const rk817_playback_path_mode[] = {
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 	"OFF", "RCV", "SPK", "HP", "HP_NO_MIC", "BT", "SPK_HP", /* 0-6 */
 	"RING_SPK", "RING_HP", "RING_HP_NO_MIC", "RING_SPK_HP"}; /* 7-10 */
+#else
+	"OFF", "SPK", "HP", "SPK_HP"};
+#endif
 
 static const char * const rk817_capture_path_mode[] = {
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 	"MIC OFF", "Main Mic", "Hands Free Mic", "BT Sco Mic"};
 
 static const char * const rk817_call_path_mode[] = {
 	"OFF", "RCV", "SPK", "HP", "HP_NO_MIC", "BT"}; /* 0-5 */
 
 static const char * const rk817_modem_input_mode[] = {"OFF", "ON"};
+#else
+	"MIC OFF", "Main Mic"};
+#endif
 
 static SOC_ENUM_SINGLE_DECL(rk817_playback_path_type,
 	0, 0, rk817_playback_path_mode);
@@ -478,11 +486,13 @@ static SOC_ENUM_SINGLE_DECL(rk817_playback_path_type,
 static SOC_ENUM_SINGLE_DECL(rk817_capture_path_type,
 	0, 0, rk817_capture_path_mode);
 
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 static SOC_ENUM_SINGLE_DECL(rk817_call_path_type,
 	0, 0, rk817_call_path_mode);
 
 static SOC_ENUM_SINGLE_DECL(rk817_modem_input_type,
 	0, 0, rk817_modem_input_mode);
+#endif
 
 static int rk817_playback_path_get(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_value *ucontrol)
@@ -523,6 +533,7 @@ static int rk817_playback_path_put(struct snd_kcontrol *kcontrol,
 
 	switch (rk817->playback_path) {
 	case OFF:
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 		if (pre_path != OFF && (pre_path != HP_PATH &&
 			pre_path != HP_NO_MIC && pre_path != RING_HP &&
 			pre_path != RING_HP_NO_MIC)) {
@@ -534,6 +545,15 @@ static int rk817_playback_path_put(struct snd_kcontrol *kcontrol,
 	case RCV:
 	case SPK_PATH:
 	case RING_SPK:
+#else
+		if (pre_path != OFF && (pre_path != HP_PATH)) {
+			rk817_codec_power_down(codec, RK817_CODEC_PLAYBACK);
+			if (rk817->capture_path == 0)
+				rk817_codec_power_down(codec, RK817_CODEC_ALL);
+		}
+		break;
+	case SPK_PATH:
+#endif
 		if (pre_path == OFF)
 			rk817_codec_power_up(codec, RK817_CODEC_PLAYBACK);
 		if (!rk817->use_ext_amplifier) {
@@ -562,12 +582,15 @@ static int rk817_playback_path_put(struct snd_kcontrol *kcontrol,
 #ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 		snd_soc_write(codec, RK817_CODEC_DDAC_VOLL, rk817->spk_volume);
 		snd_soc_write(codec, RK817_CODEC_DDAC_VOLR, rk817->spk_volume);
-#endif
 		break;
 	case HP_PATH:
 	case HP_NO_MIC:
 	case RING_HP:
 	case RING_HP_NO_MIC:
+#else
+		break;
+	case HP_PATH:
+#endif
 		if (pre_path == OFF)
 			rk817_codec_power_up(codec, RK817_CODEC_PLAYBACK);
 		/* HP_CP_EN , CP 2.3V */
@@ -584,12 +607,15 @@ static int rk817_playback_path_put(struct snd_kcontrol *kcontrol,
 #ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 		snd_soc_write(codec, RK817_CODEC_DDAC_VOLL, rk817->hp_volume);
 		snd_soc_write(codec, RK817_CODEC_DDAC_VOLR, rk817->hp_volume);
-#endif
 		break;
 	case BT:
 		break;
 	case SPK_HP:
 	case RING_SPK_HP:
+#else
+		break;
+	case SPK_HP:
+#endif
 		if (pre_path == OFF)
 			rk817_codec_power_up(codec, RK817_CODEC_PLAYBACK);
 
@@ -687,6 +713,7 @@ static int rk817_capture_path_put(struct snd_kcontrol *kcontrol,
 					    PWD_PGA_R_MASK, PWD_PGA_R_EN);
 		}
 		break;
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 	case HANDS_FREE_MIC:
 		if (pre_path == MIC_OFF)
 			rk817_codec_power_up(codec, RK817_CODEC_CAPTURE);
@@ -702,13 +729,14 @@ static int rk817_capture_path_put(struct snd_kcontrol *kcontrol,
 		if (!rk817->mic_in_differential) {
 			snd_soc_write(codec, RK817_CODEC_DADC_VOLL, 0xff);
 			snd_soc_update_bits(codec, RK817_CODEC_AADC_CFG0,
-					    ADC_L_PWD_MASK, ADC_L_PWD_EN);
-			snd_soc_update_bits(codec, RK817_CODEC_AMIC_CFG0,
-					    PWD_PGA_L_MASK, PWD_PGA_L_EN);
-		}
-		break;
+	 				    ADC_L_PWD_MASK, ADC_L_PWD_EN);
+	 		snd_soc_update_bits(codec, RK817_CODEC_AMIC_CFG0,
+	 				    PWD_PGA_L_MASK, PWD_PGA_L_EN);
+	 	}
+	 	break;
 	case BT_SCO_MIC:
 		break;
+#endif
 	default:
 		return -EINVAL;
 	}
@@ -812,19 +840,25 @@ static int rk817_digital_mute(struct snd_soc_dai *dai, int mute)
 	} else {
 		switch (rk817->playback_path) {
 		case SPK_PATH:
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 		case RING_SPK:
+#endif
 			rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 1);
 			rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 0);
 			break;
 		case HP_PATH:
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 		case HP_NO_MIC:
 		case RING_HP:
 		case RING_HP_NO_MIC:
+#endif
 			rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 0);
 			rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 1);
 			break;
 		case SPK_HP:
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 		case RING_SPK_HP:
+#endif
 			rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 1);
 			rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 1);
 			break;
