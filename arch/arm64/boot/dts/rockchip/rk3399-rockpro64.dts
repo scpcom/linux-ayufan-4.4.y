@@ -7,6 +7,7 @@
 /dts-v1/;
 #include <dt-bindings/pwm/pwm.h>
 #include <dt-bindings/input/input.h>
+#include <dt-bindings/display/drm_mipi_dsi.h>
 #include "rk3399.dtsi"
 #include "rk3399-opp.dtsi"
 #include "rk3399-vop-clk-set.dtsi"
@@ -418,6 +419,14 @@
 	status = "okay";
 };
 
+&display_subsystem {
+	/delete-property/ devfreq;
+	status = "okay";
+
+	ports = <&vopb_out>, <&vopl_out>;
+	logo-memory-region = <&drm_logo>;
+};
+
 &dmc {
 	status = "okay";
 	center-supply = <&vdd_center>;
@@ -453,28 +462,52 @@
 	};
 };
 
-&display_subsystem {
-	/delete-property/ devfreq;
-	status = "okay";
+&dsi {
+	status = "disabled";
+	rockchip,lane-rate = <360>;
 
-	ports = <&vopb_out>, <&vopl_out>;
-	logo-memory-region = <&drm_logo>;
+	panel@0 {
+		compatible = "simple-panel-dsi";
+		reg = <0>;
+		backlight = <&backlight>;
+		power-supply = <&vcc3v3_s0>;
 
-	route {
-		route_hdmi: route-hdmi {
-			logo,uboot = "logo.bmp";
-			logo,kernel = "logo_kernel.bmp";
-			logo,mode = "center";
-			charge_logo,mode = "center";
-			connect = <&vopb_out_hdmi>;
-		};
+		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST)>;
+		dsi,format = <MIPI_DSI_FMT_RGB888>;
+		dsi,lanes = <4>;
 
-		route_dp: route-dp {
-			logo,uboot = "logo.bmp";
-			logo,kernel = "logo_kernel.bmp";
-			logo,mode = "center";
-			charge_logo,mode = "center";
-			connect = <&vopl_out_dp>;
+		delay,enable = <100>;
+		
+		prepare-delay-ms = <200>;
+		
+		panel-init-sequence = [
+			15 00 02 80 58
+			15 00 02 81 47
+			15 00 02 82 d4
+			15 00 02 83 88
+			15 00 02 84 a9
+			15 00 02 85 c3
+			15 00 02 86 82
+		];
+
+		display-timings {
+			native-mode = <&timing0>;
+
+			timing0: timing0 {
+				clock-frequency = <50000000>;
+				hactive = <1024>;
+				vactive = <600>;
+				hback-porch = <160>;
+				hfront-porch = <160>;
+				vback-porch = <23>;
+				vfront-porch = <12>;
+				hsync-len = <10>;
+				vsync-len = <1>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <0>;
+			};
 		};
 	};
 };
@@ -766,6 +799,7 @@
 
 &i2c4 {
 	status = "okay";
+
 	fusb0: fusb30x@22 {
 		compatible = "fairchild,fusb302";
 		reg = <0x22>;
@@ -774,6 +808,18 @@
 		vbus-5v-gpios = <&gpio1 RK_PA3 GPIO_ACTIVE_HIGH>;
 		int-n-gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_HIGH>;
 		status = "okay";
+	};
+
+	gt9xx: gt9xx@14 {
+		compatible = "goodix,gt9xx";
+		reg = <0x14>;
+		touch-gpio = <&gpio4 RK_PD5 IRQ_TYPE_LEVEL_LOW>;
+		reset-gpio = <&gpio4 RK_PD6 GPIO_ACTIVE_HIGH>;
+		max-x = <1200>;
+		max-y = <1900>;
+		tp-size = <911>;
+		tp-supply = <&vcc3v0_touch>;
+		status = "disabled";
 	};
 };
 
