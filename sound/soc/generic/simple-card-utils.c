@@ -757,7 +757,11 @@ int asoc_simple_init_jack(struct snd_soc_card *card,
 
 	if (is_hp) {
 		snprintf(prop, sizeof(prop), "%shp-det", prefix);
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 		pin_name	= pin ? pin : "Headphones";
+#else
+		pin_name	= pin ? pin : "Headphone Jack";
+#endif
 		gpio_name	= "Headphone detection";
 		mask		= SND_JACK_HEADPHONE;
 	} else {
