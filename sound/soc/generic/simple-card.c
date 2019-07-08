@@ -115,7 +115,11 @@ static struct snd_soc_ops asoc_simple_card_ops = {
 static struct snd_soc_jack simple_card_hp_jack;
 static struct snd_soc_jack_pin simple_card_hp_jack_pins[] = {
 	{
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 		.pin = "Headphones",
+#else
+		.pin = "Headphone Jack",
+#endif
 		.mask = SND_JACK_HEADPHONE,
 	},
 };
@@ -218,12 +222,15 @@ static int asoc_simple_card_dai_init(struct snd_soc_pcm_runtime *rtd)
 				       &simple_card_mic_jack_gpio);
 	}
 
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
+	//Once is enough
 	if (priv->codec_hp_det)
 		snd_soc_card_jack_new(rtd->card, "Headphones",
 				      SND_JACK_HEADPHONE,
 				      &simple_card_hp_jack,
 				      simple_card_hp_jack_pins,
 				      ARRAY_SIZE(simple_card_hp_jack_pins));
+#endif
 
 	return 0;
 }
