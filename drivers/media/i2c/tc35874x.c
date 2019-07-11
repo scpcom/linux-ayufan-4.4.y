@@ -2271,4 +2271,15 @@ static struct i2c_driver tc35874x_driver = {
 	.id_table = tc35874x_id,
 };
 
-module_i2c_driver(tc35874x_driver);
+static int __init tc35874x_driver_init(void)
+{
+	return i2c_add_driver(&tc35874x_driver);
+}
+
+static void __exit tc35874x_driver_exit(void)
+{
+	i2c_del_driver(&tc35874x_driver);
+}
+
+late_initcall(tc35874x_driver_init);
+module_exit(tc35874x_driver_exit);
