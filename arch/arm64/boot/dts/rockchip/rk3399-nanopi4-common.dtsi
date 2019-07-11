@@ -941,8 +941,7 @@
 
 &pcie0 {
 	status = "okay";
-	ep-gpios = <&gpio2 4 GPIO_ACTIVE_HIGH>;
-	num-lanes = <4>;
+	num-lanes = <2>;
 	max-link-speed = <2>;
 };
 
@@ -1235,6 +1234,15 @@
 				<2 6 RK_FUNC_GPIO &pcfg_output_high>,
 				<2 5 RK_FUNC_GPIO &pcfg_pull_none>,
 				<0 2 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	pcie {
+		pcie_gpios: pcie-gpios {
+			rockchip,pins =
+				<2 4 RK_FUNC_GPIO &pcfg_output_high>,
+				<2 3 RK_FUNC_GPIO &pcfg_pull_up>,
+				<2 2 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 };

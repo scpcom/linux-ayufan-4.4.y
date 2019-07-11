@@ -57,6 +57,13 @@
 	#sound-dai-cells = <0>;
 };
 
+&pcie0 {
+	ep-gpios = <&gpio2 4 GPIO_ACTIVE_HIGH>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pcie_gpios>;
+	num-lanes = <4>;
+};
+
 &rt5651_card {
 	simple-audio-card,cpu {
 		sound-dai = <&i2s1>;
