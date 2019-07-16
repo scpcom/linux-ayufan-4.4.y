@@ -1048,15 +1048,13 @@ static int rk817_reboot_notifier_handler(struct notifier_block *nb,
 	struct rk817_reboot_data_t *data;
 	int ret;
 	struct device *dev;
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 	int value, power_en_active0, power_en_active1;
 
-	data = container_of(nb, struct rk817_reboot_data_t, reboot_notifier);
-	dev = &data->rk808->i2c->dev;
-
 	regmap_read(data->rk808->regmap, RK817_POWER_EN_SAVE0,
-		    &power_en_active0);
+		&power_en_active0);
 	regmap_read(data->rk808->regmap, RK817_POWER_EN_SAVE1,
-		    &power_en_active1);
+		&power_en_active1);
 	value = power_en_active0 & 0x0f;
 	regmap_write(data->rk808->regmap, RK817_POWER_EN_REG(0), value | 0xf0);
 	value = (power_en_active0 & 0xf0) >> 4;
@@ -1065,6 +1063,7 @@ static int rk817_reboot_notifier_handler(struct notifier_block *nb,
 	regmap_write(data->rk808->regmap, RK817_POWER_EN_REG(2), value | 0xf0);
 	value = (power_en_active1 & 0xf0) >> 4;
 	regmap_write(data->rk808->regmap, RK817_POWER_EN_REG(3), value | 0xf0);
+#endif
 
 	if (action != SYS_RESTART)
 		return NOTIFY_OK;
@@ -1072,6 +1071,8 @@ static int rk817_reboot_notifier_handler(struct notifier_block *nb,
 	if (!cmd || !strlen(cmd) || !strcmp(cmd, "normal"))
 		return NOTIFY_OK;
 
+	data = container_of(nb, struct rk817_reboot_data_t, reboot_notifier);
+	dev = &data->rk808->i2c->dev;
 
 	ret = regmap_update_bits(data->rk808->regmap, RK817_SYS_CFG(3),
 				 RK817_RST_FUNC_MSK, RK817_RST_FUNC_REG);
