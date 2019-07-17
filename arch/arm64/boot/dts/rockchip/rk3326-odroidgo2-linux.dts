@@ -115,7 +115,6 @@
 		headset_gpio = <&gpio2 RK_PC6 GPIO_ACTIVE_LOW>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&hp_det>;
-		io-channels = <&saradc 1>;
 	};
 */
 
@@ -127,84 +126,14 @@
 		regulator-min-microvolt = <3800000>;
 		regulator-max-microvolt = <3800000>;
 	};
-/*
-	wireless-wlan {
-		compatible = "wlan-platdata";
-		wifi_chip_type = "AP6210";
-		WIFI,host_wake_irq = <&gpio0 RK_PB2 GPIO_ACTIVE_HIGH>;
-		status = "disabled";
-	};
 
-	wireless-bluetooth {
-		compatible = "bluetooth-platdata";
-		clocks = <&rk817 1>;
-		clock-names = "ext_clock";
-		uart_rts_gpios = <&gpio1 RK_PC3 GPIO_ACTIVE_LOW>;
-		pinctrl-names = "default","rts_gpio";
-		pinctrl-0 = <&uart1_rts>;
-		pinctrl-1 = <&uart1_rts_gpio>;
-		BT,reset_gpio = <&gpio0 RK_PC1 GPIO_ACTIVE_HIGH>;
-		BT,wake_gpio = <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
-		BT,wake_host_irq = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
-		status = "disabled";
-	};
-*/
-/*
-	vcc18_lcd_n: vcc18-lcd-n {
+	vcclcd: vcclcd {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc18_lcd_n";
 		regulator-boot-on;
 		gpio = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 	};
-*/
-
-	panel: panel {
-		status = "okay";
-		compatible = "elida,kd35t133", "simple-panel";
-		backlight = <&backlight>;
-		power-supply = <&vccsys>;
-		// enable-gpios = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>;
-		prepare-delay-ms = <20>;
-		enable-delay-ms = <20>;
-		disable-delay-ms = <20>;
-		unprepare-delay-ms = <20>;
-		bus-format = <MEDIA_BUS_FMT_RGB565_1X16>;
-		width-mm = <49>;
-		height-mm = <73>;
-
-		display-timings {
-			native-mode = <&timing1>;
-
-			timing1: timing1 {
-				clock-frequency = <20000000>;
-				
-				hactive = <320>;
-				hfront-porch = <170>;
-				hsync-len = <40>;
-				hback-porch = <50>;
-
-				vactive = <480>;												
-				vfront-porch = <1>;
-				vsync-len = <1>;
-				vback-porch = <1>;
-				
-				hsync-active = <0>;
-				vsync-active = <0>;
-				de-active = <0>;
-				pixelclk-active = <0>;
-			};
-		};
-
-
-		port {
-			panel_in: endpoint {
-				remote-endpoint = <&rgb_out_panel>;
-			};
-		};
-
-	};
-
 };
 
 
@@ -212,20 +141,6 @@
 	bus-supply = <&vdd_logic>;
 	status = "okay";
 };
-
-/*
-&cif_new {
-	status = "disabled";
-
-	port {
-		cif_in: endpoint {
-			remote-endpoint = <&gc2155_out>;
-			vsync-active = <0>;
-			hsync-active = <1>;
-		};
-	};
-};
-*/
 
 &cpu0 {
 	cpu-supply = <&vdd_arm>;
@@ -239,13 +154,101 @@
 	status = "okay";
 };
 
-/*
 &dsi {
-	status = "disabled";
+	status = "okay";
+
+	panel@0 {
+		compatible = "sitronix,st7703", "simple-panel-dsi";
+		reg = <0>;
+		backlight = <&backlight>;
+		power-supply = <&vcclcd>;
+		prepare-delay-ms = <2>;
+		reset-delay-ms = <1>;
+		init-delay-ms = <20>;
+		enable-delay-ms = <120>;
+		disable-delay-ms = <50>;
+		unprepare-delay-ms = <20>;
+
+		width-mm = <68>;
+		height-mm = <121>;
+
+		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST |
+			      MIPI_DSI_MODE_LPM | MIPI_DSI_MODE_EOT_PACKET)>;
+		dsi,format = <MIPI_DSI_FMT_RGB888>;
+		dsi,lanes = <4>;
+
+		panel-init-sequence = [
+			05 fa 01 11
+			39 00 04 b9 f1 12 83
+			39 00 1c ba 33 81 05 f9 0e 0e 00 00 00
+				 00 00 00 00 00 44 25 00 91 0a
+				 00 00 02 4f 01 00 00 37
+			15 00 02 b8 25
+			39 00 04 bf 02 11 00
+			39 00 0b b3 0c 10 0a 50 03 ff 00 00 00
+				 00
+			39 00 0a c0 73 73 50 50 00 00 08 70 00
+			15 00 02 bc 46
+			15 00 02 cc 0b
+			15 00 02 b4 80
+			39 00 04 b2 c8 12 30
+			39 00 0f e3 07 07 0b 0b 03 0b 00 00 00
+				 00 ff 00 c0 10
+			39 00 0d c1 53 00 1e 1e 77 e1 cc dd 67
+				 77 33 33
+			39 00 07 c6 00 00 ff ff 01 ff
+			39 00 03 b5 09 09
+			39 00 03 b6 87 95
+			39 00 40 e9 c2 10 05 05 10 05 a0 12 31
+				 23 3f 81 0a a0 37 18 00 80 01
+				 00 00 00 00 80 01 00 00 00 48
+				 f8 86 42 08 88 88 80 88 88 88
+				 58 f8 87 53 18 88 88 81 88 88
+				 88 00 00 00 01 00 00 00 00 00
+				 00 00 00 00
+			39 00 3e ea 00 1a 00 00 00 00 02 00 00
+				 00 00 00 1f 88 81 35 78 88 88
+				 85 88 88 88 0f 88 80 24 68 88
+				 88 84 88 88 88 23 10 00 00 1c
+				 00 00 00 00 00 00 00 00 00 00
+				 00 00 00 00 00 30 05 a0 00 00
+				 00 00
+			39 00 23 e0 00 06 08 2a 31 3f 38 36 07
+				 0c 0d 11 13 12 13 11 18 00 06
+				 08 2a 31 3f 38 36 07 0c 0d 11
+				 13 12 13 11 18
+			05 32 01 29
+		];
+
+		panel-exit-sequence = [
+			05 00 01 28
+			05 00 01 10
+		];
+
+		display-timings {
+			native-mode = <&timing0>;
+
+			timing0: timing0 {
+				clock-frequency = <66000000>;
+				hactive = <720>;
+				vactive = <1280>;
+				hfront-porch = <40>;
+				hsync-len = <10>;
+				hback-porch = <40>;
+				vfront-porch = <22>;
+				vsync-len = <4>;
+				vback-porch = <11>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <0>;
+			};
+		};
+	};
 };
 
 &dsi_in_vopb {
-	status = "disabled";
+	status = "okay";
 };
 
 &dsi_in_vopl {
@@ -254,38 +257,6 @@
 
 &route_dsi {
 	connect = <&vopb_out_dsi>;
-	status = "disabled";
-};
-*/
-
-&rgb {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&lcdc_go2_rgb_pins>;
-	pinctrl-1 = <&lcdc_go2_sleep_pins>;
-	status = "okay";
-
-	ports {
-		port@1 {
-			reg = <1>;
-
-			rgb_out_panel: endpoint {
-				remote-endpoint = <&panel_in>;
-			};
-		};
-	};
-};
-
-&rgb_in_vopb {
-	status = "okay";
-};
-
-/*
-&rgb_in_vopl {
-	status = "okay";
-};
-*/
-
-&route_rgb {
 	status = "okay";
 };
 
@@ -299,13 +270,6 @@
 };
 
 &emmc {
-	bus-width = <8>;
-	cap-mmc-highspeed;
-	mmc-hs200-1_8v;
-	supports-emmc;
-	disable-wp;
-	non-removable;
-	num-slots = <1>;
 	status = "disabled";
 };
 
@@ -324,7 +288,7 @@
 		compatible = "rockchip,rk817";
 		reg = <0x20>;
 		interrupt-parent = <&gpio0>;
-		interrupts = <7 IRQ_TYPE_LEVEL_LOW>;
+		interrupts = <10 IRQ_TYPE_LEVEL_LOW>;
 		pinctrl-names = "default", "pmic-sleep",
 				"pmic-power-off", "pmic-reset";
 		pinctrl-0 = <&pmic_int>;
@@ -336,6 +300,7 @@
 		#clock-cells = <1>;
 		clock-output-names = "rk808-clkout1", "rk808-clkout2";
 		//fb-inner-reg-idxs = <2>;
+
 		/* 1: rst regs (default in codes), 0: rst the pmic */
 		pmic-reset-func = <1>;
 
@@ -345,7 +310,7 @@
 		vcc4-supply = <&vccsys>;
 		vcc5-supply = <&vccsys>;
 		vcc6-supply = <&vccsys>;
-		vcc7-supply = <&vcc_3v0>;
+		vcc7-supply = <&vccsys>;
 		vcc8-supply = <&vccsys>;
 		vcc9-supply = <&dcdc_boost>;
 
@@ -626,52 +591,19 @@
 	};
 };
 
+/* EXT Header(P2) : 7(SCL:GPIO0.C2), 8(SDA:GPIO0.C3) */
 &i2c1 {
 	status = "okay";
 	clock-frequency = <400000>;
-
-/*	
-	i2c-scl-rising-time-ns = <275>;
-	i2c-scl-falling-time-ns = <16>;
-
-	sensor@f {
-		status = "okay";
-		compatible = "ak8963";
-		reg = <0x0f>;
-		type = <SENSOR_TYPE_COMPASS>;
-		irq_enable = <0>;
-		poll_delay_ms = <30>;
-		layout = <1>;
-		reprobe_en = <1>;
-	};
-
-	gt1x: gt1x@14 {
-		compatible = "goodix,gt1x";
-		reg = <0x14>;
-		power-supply = <&vcc18_lcd_n>;
-		goodix,rst-gpio = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
-		goodix,irq-gpio = <&gpio0 RK_PA5 IRQ_TYPE_LEVEL_LOW>;
-	};
-
-	sensor@4c {
-		status = "okay";
-		compatible = "gs_mma7660";
-		reg = <0x4c>;
-		type = <SENSOR_TYPE_ACCEL>;
-		irq-gpio = <&gpio0 RK_PB5 IRQ_TYPE_LEVEL_LOW>;
-		irq_enable = <0>;
-		poll_delay_ms = <30>;
-		layout = <1>;
-		reprobe_en = <1>;
-	};
-*/
 };
 
+/* MIPI CSI I2C */
 &i2c2 {
 	status = "okay";
 	clock-frequency = <400000>;
 };
 
+/* I2S 1 Channel Used */
 &i2s1_2ch {
 	status = "okay";
 	#sound-dai-cells = <0>;
@@ -691,47 +623,6 @@
 	status = "okay";
 };
 
-/*
-&mipi_dphy_rx0 {
-	status = "okay";
-
-	ports {
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		port@0 {
-			reg = <0>;
-			#address-cells = <1>;
-			#size-cells = <0>;
-
-			mipi_in_ucam: endpoint@1 {
-				reg = <1>;
-				remote-endpoint = <&ucam_out>;
-				data-lanes = <1 2>;
-			};
-		};
-
-		port@1 {
-			reg = <1>;
-			#address-cells = <1>;
-			#size-cells = <0>;
-
-			dphy_rx0_out: endpoint@0 {
-				reg = <0>;
-				remote-endpoint = <&isp0_mipi_in>;
-			};
-		};
-	};
-};
-*/
-
-/*
-&nandc0 {
-	status = "okay";
-};
-*/
-
-
 &spi0 {
 	status = "okay";
 
@@ -746,22 +637,6 @@
 	};
 };
 
-/*
-&rkisp1 {
-	status = "okay";
-
-	port {
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		isp0_mipi_in: endpoint@0 {
-			reg = <0>;
-			remote-endpoint = <&dphy_rx0_out>;
-		};
-	};
-};
-*/
-
 &pmu_io_domains {
 	status = "okay";
 
@@ -769,6 +644,7 @@
 	pmuio2-supply = <&vcc3v0_pmu>;
 };
 
+/* LCD Backlight PWM */
 &pwm1 {
 	status = "okay";
 };
@@ -789,10 +665,10 @@
 
 &sdmmc {
 	bus-width = <4>;
-	//cap-mmc-highspeed;
+	cap-mmc-highspeed;
 	cap-sd-highspeed;
 	supports-sd;
-	card-detect-delay = <1200>;
+	card-detect-delay = <800>;
 	ignore-pm-notify;
 	cd-gpios = <&gpio0 RK_PA3 GPIO_ACTIVE_LOW>; /*[> CD GPIO <]*/
 	sd-uhs-sdr12;
@@ -801,18 +677,6 @@
 	sd-uhs-sdr104;
 	vqmmc-supply = <&vccio_sd>;
 	vmmc-supply = <&vcc_sd>;
-	status = "okay";
-};
-
-&sdio {
-	bus-width = <4>;
-	cap-sd-highspeed;
-	supports-sdio;
-	ignore-pm-notify;
-	keep-power-in-suspend;
-	non-removable;
-	//mmc-pwrseq = <&sdio_pwrseq>;
-	sd-uhs-sdr104;
 	status = "okay";
 };
 
@@ -831,14 +695,14 @@
 	};
 
 	u2phy_otg: otg-port {
-		status = "okay";
+		status = "disabled";
 	};
 };
 
-&usb20_otg {
-	status = "okay";
-};
-
+/*
+	EXT Header(P2) UART :
+	2(RXD:GPIO1.C0),3(TXD:GPIO1.C1),4(CTS:GPIO1.C2),5(RTS:GPIO1.C3)
+*/
 &uart1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart1_xfer &uart1_cts>;
@@ -889,6 +753,7 @@
 
 /*
 	headphone {
+		//High : HeadPhone remove, Low : HeadPhone insert
 		hp_det: hp-det {
 			rockchip,pins = <2 RK_PC6 RK_FUNC_GPIO &pcfg_pull_down>;
 		};
@@ -896,11 +761,13 @@
 */
 
 	pmic {
+		/* ODROID-GO2 : PMIC_INT(GPIO0.PB2) */
 		pmic_int: pmic_int {
 			rockchip,pins =
-				<0 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>;
+				<0 RK_PB2 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 
+		/* ODROID-GO2 : PMIC_INT(GPIO0.PA4) */
 		soc_slppin_gpio: soc_slppin_gpio {
 			rockchip,pins =
 				<0 RK_PA4 RK_FUNC_GPIO &pcfg_output_low>;
@@ -917,66 +784,9 @@
 		};
 	};
 
-/*
-	sdio-pwrseq {
-		wifi_enable_h: wifi-enable-h {
-			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
-*/
 	leds {
 		led_pins: led-pins {
 			rockchip,pins = <0 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
-
-	lcdc {
-		lcdc_go2_rgb_pins: lcdc-go2-rgb-pins {
-			rockchip,pins =
-				<3 RK_PA0 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_DCLK */
-				// <3 RK_PA1 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_HSYNC */
-				// <3 RK_PA2 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_VSYNC */
-				// <3 RK_PA3 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_DEN */
-				<3 RK_PA4 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D0 */
-				<3 RK_PA5 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D1 */
-				<3 RK_PA6 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D2 */
-				<3 RK_PA7 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D3 */
-				<3 RK_PB0 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D4 */
-				<3 RK_PB1 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D5 */
-				<3 RK_PB2 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D6 */
-				<3 RK_PB3 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D7 */
-				<3 RK_PB4 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D8 */
-				<3 RK_PB5 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D9 */
-				<3 RK_PB6 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D10 */
-				<3 RK_PB7 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D11 */
-				<3 RK_PC0 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D12 */
-				<3 RK_PC1 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D13 */
-				<3 RK_PC2 RK_FUNC_1 &pcfg_pull_none_8ma>,	/* LCDC_D14 */
-				<3 RK_PC3 RK_FUNC_1 &pcfg_pull_none_8ma>;	/* LCDC_D15 */
-		};
-
-		lcdc_go2_sleep_pins: lcdc-go2-sleep-pins {
-			rockchip,pins =
-				<3 RK_PA0 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_DCLK */
-				// <3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_HSYNC */
-				// <3 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_VSYNC */
-				// <3 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_DEN */
-				<3 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D0 */
-				<3 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D1 */
-				<3 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D2 */
-				<3 RK_PA7 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D3 */
-				<3 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D4 */
-				<3 RK_PB1 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D5 */
-				<3 RK_PB2 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D6 */
-				<3 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D7 */
-				<3 RK_PB4 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D8 */
-				<3 RK_PB5 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D9 */
-				<3 RK_PB6 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D10 */
-				<3 RK_PB7 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D11 */
-				<3 RK_PC0 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D12 */
-				<3 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D13 */
-				<3 RK_PC2 RK_FUNC_GPIO &pcfg_pull_none>,	/* LCDC_D14 */
-				<3 RK_PC3 RK_FUNC_GPIO &pcfg_pull_none>;	/* LCDC_D15 */
 		};
 	};
 };
