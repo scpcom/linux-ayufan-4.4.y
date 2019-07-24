@@ -52,10 +52,10 @@
 		poll-interval = <100>;
 		keyup-threshold-microvolt = <1800000>;
 
-		vol-up-key {
-			linux,code = <KEY_VOLUMEUP>;
-			label = "volume up";
-			press-threshold-microvolt = <17000>;
+		adc-power-key {
+			linux,code = <KEY_POWER>;
+			label = "power key";
+			press-threshold-microvolt = <0>;
 		};
 	};
 
