@@ -183,6 +183,9 @@ struct panel_simple {
 
 	const struct panel_desc *desc;
 
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	struct regulator *backlight_supply;
+#endif
 	struct regulator *supply;
 	struct i2c_adapter *ddc;
 
@@ -459,8 +462,14 @@ static int panel_simple_regulator_enable(struct panel_simple *p)
 		if (err < 0)
 			return err;
 	}
-
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	err = regulator_enable(p->backlight_supply);
+	if (err < 0)
+		dev_err(p->base.dev, "failed to enable supply: %d\n", err);
+	return err;
+#else
 	return 0;
+#endif
 }
 
 static int panel_simple_regulator_disable(struct panel_simple *p)
@@ -477,7 +486,12 @@ static int panel_simple_regulator_disable(struct panel_simple *p)
 		regulator_disable(p->supply);
 	}
 
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	regulator_disable(p->backlight_supply);
+	return err;
+#else
 	return 0;
+#endif
 }
 
 int panel_simple_loader_protect(struct drm_panel *panel)
@@ -521,7 +535,11 @@ static int panel_simple_suspend(struct device *dev)
 		if (p->dsi)
 			panel_simple_xfer_dsi_cmd_seq(p, p->desc->exit_seq);
 
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	gpiod_direction_output(p->reset_gpio, 0);
+#else
 	gpiod_direction_output(p->reset_gpio, 1);
+#endif
 	gpiod_direction_output(p->enable_gpio, 0);
 	panel_simple_regulator_disable(p);
 	p->unprepared_time = ktime_get();
@@ -568,12 +586,20 @@ static int panel_simple_resume(struct device *dev)
 	if (p->desc->delay.prepare)
 		msleep(p->desc->delay.prepare);
 
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	gpiod_direction_output(p->reset_gpio, 0);
+#else
 	gpiod_direction_output(p->reset_gpio, 1);
+#endif
 
 	if (p->desc->delay.reset)
 		msleep(p->desc->delay.reset);
 
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	gpiod_direction_output(p->reset_gpio, 1);
+#else
 	gpiod_direction_output(p->reset_gpio, 0);
+#endif
 
 	if (p->desc->delay.init)
 		msleep(p->desc->delay.init);
@@ -853,6 +879,11 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 		return err;
 	}
 
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	panel->backlight_supply = devm_regulator_get(dev, "backlight");
+	if (IS_ERR(panel->backlight_supply))
+		return PTR_ERR(panel->backlight_supply);
+#endif
 	panel->enable_gpio = devm_gpiod_get_optional(dev, "enable", GPIOD_ASIS);
 	if (IS_ERR(panel->enable_gpio))
 		return dev_err_probe(dev, PTR_ERR(panel->enable_gpio),
