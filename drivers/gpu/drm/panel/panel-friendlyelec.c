@@ -201,6 +201,10 @@ static struct hdmi_config {
 } panel_hdmi_modes[] = {
 	{ "HDMI1080P60",	1920, 1080 },
 	{ "HDMI720P60",		1280,  720 },
+
+	/* Non-CEA modes */
+	{ "HDMI1280x800",	1280,  800 },
+	{ "HDMI1024x768",	1024,  768 },
 };
 
 /* Try to identify LCD panel by kernel command line, or
@@ -244,14 +248,24 @@ static int panel_setup_lcd(char *str)
 	if (!strncasecmp("HDMI", str, 4)) {
 		struct hdmi_config *cfg = &panel_hdmi_modes[0];
 		struct lcd_desc *lcd;
+		int w = 0, h = 0;
 
-		lcd_idx = ARRAY_SIZE(panel_lcd_list) - 1;
+		lcd_idx = 0;
 		lcd = panel_lcd_list[lcd_idx].lcd;
 
 		for (i = 0; i < ARRAY_SIZE(panel_hdmi_modes); i++, cfg++) {
 			if (!strcasecmp(cfg->name, str)) {
 				lcd->width = cfg->width;
 				lcd->height = cfg->height;
+				goto __ret;
+			}
+		}
+
+		/* parse <xres>x<yres> */
+		if (sscanf(str + 4, "%dx%d", &w, &h) == 2) {
+			if (w >= 640 && w < 1920 && h >= 480 && h < 1080) {
+				lcd->width = w;
+				lcd->height = h;
 				goto __ret;
 			}
 		}
