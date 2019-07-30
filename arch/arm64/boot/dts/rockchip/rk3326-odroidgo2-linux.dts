@@ -20,6 +20,116 @@
                 bootargs = "";
 	};
 
+	gpio-keys {
+                compatible = "gpio-keys";
+
+                pinctrl-names = "default";
+                pinctrl-0 = <&btn_pins>;
+
+		/* sw15						sw16
+		      sw1			  	   sw8
+                   sw3   sw4			     	sw7      sw5
+                      sw2			   	      sw6
+                          sw9 sw10   sw11 sw12   sw13 sw14
+		*/
+                sw1 {
+                        gpios = <&gpio1 RK_PA0 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY UP";
+                        linux,code = <KEY_UP>; // 103
+                        wakeup-source;
+                };
+                sw2 {
+                        gpios = <&gpio1 RK_PA1 GPIO_ACTIVE_LOW>;
+                        label = "GPIO Key DOWN";
+                        linux,code = <KEY_DOWN>; // 108
+                        wakeup-source;
+                };
+                sw3 {
+                        gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY LEFT";
+                        linux,code = <KEY_LEFT>; // 105
+                        wakeup-source;
+                };
+                sw4 {
+                        gpios = <&gpio1 RK_PA3 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY RIGHT";
+                        linux,code = <KEY_RIGHT>; // 106
+                        wakeup-source;
+                };
+                sw5 {
+                        gpios = <&gpio1 RK_PA4 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY BTN-A";
+                        linux,code = <BTN_A>; // 0x130
+                        wakeup-source;
+                };
+                sw6 {
+                        gpios = <&gpio1 RK_PA5 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY BTN-B";
+                        linux,code = <BTN_B>; // 0x131
+                        wakeup-source;
+                };
+                sw7 {
+                        gpios = <&gpio1 RK_PA6 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY BTN-X";
+                        linux,code = <BTN_X>; // 0x133
+                        wakeup-source;
+                };
+                sw8 {
+                        gpios = <&gpio1 RK_PA7 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY BTN-Y";
+                        linux,code = <BTN_Y>; // 0x134
+                        wakeup-source;
+                };
+                sw9 {
+                        gpios = <&gpio2 RK_PA0 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY VOL-UP";
+                        linux,code = <KEY_VOLUMEUP>; // 115
+                        wakeup-source;
+                };
+                sw10 {
+                        gpios = <&gpio2 RK_PA1 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY VOL-DOWN";
+                        linux,code = <KEY_VOLUMEDOWN>; // 114
+                        wakeup-source;
+                };
+                sw11 {
+                        gpios = <&gpio2 RK_PA2 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY START";
+                        linux,code = <BTN_START>; // 0x13b
+                        wakeup-source;
+                };
+                sw12 {
+                        gpios = <&gpio2 RK_PA3 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY STOP";
+                        linux,code = <KEY_STOP>; // 128
+                        wakeup-source;
+                };
+                sw13 {
+                        gpios = <&gpio2 RK_PA4 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY MENU";
+                        linux,code = <KEY_MENU>; // 139
+                        wakeup-source;
+                };
+                sw14 {
+                        gpios = <&gpio2 RK_PA5 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY MODE";
+                        linux,code = <BTN_MODE>; // 0x13c
+                        wakeup-source;
+                };
+                sw15 {
+                        gpios = <&gpio2 RK_PA6 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY SHIFT-LEFT";
+                        linux,code = <ABS_Z>; // 0x02
+                        wakeup-source;
+                };
+                sw16 {
+                        gpios = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>;
+                        label = "GPIO KEY SHIFT-RIGHT";
+                        linux,code = <ABS_RZ>; // 0x05
+                        wakeup-source;
+                };
+        };
+
 	fiq-debugger {
 		compatible = "rockchip,fiq-debugger";
 		rockchip,serial-id = <2>;
@@ -835,6 +945,27 @@
 	leds {
 		led_pins: led-pins {
 			rockchip,pins = <0 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+	btns {
+		btn_pins: btn-pins {
+			rockchip,pins = <1 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>,
+					<1 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>,
+					<1 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>,
+					<1 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>,
+					<1 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>,
+					<1 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>,
+					<1 RK_PA6 RK_FUNC_GPIO &pcfg_pull_up>,
+					<1 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>,
+
+					<2 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>,
+					<2 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>,
+					<2 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>,
+					<2 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>,
+					<2 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>,
+					<2 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>,
+					<2 RK_PA6 RK_FUNC_GPIO &pcfg_pull_up>,
+					<2 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 };
