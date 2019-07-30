@@ -330,4 +330,10 @@ config JOYSTICK_MAPLE
 	  To compile this as a module choose M here: the module will be called
 	  maplecontrol.
 
+config JOYSTICK_ADC
+	tristate "SARADC-JOYSTICK"
+	depends on ARCH_ROCKCHIP_ODROIDGO2
+	help
+	  This driver is a joystick driver using the saradc driver.
+	  Made for ODROIDGO-Advance.
 endif

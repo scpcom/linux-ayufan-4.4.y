@@ -20,17 +20,49 @@
                 bootargs = "";
 	};
 
+	joystick: adc_joystick {
+		/* drivers/input/joystick/adc-joystick.c */
+		compatible = "adc-joystick";
+
+		/* JOY_X, JOY_Y Channel define */
+		io-channel-names = "joy_x", "joy_y";
+		io-channels = <&saradc 2>, <&saradc 1>;
+
+		/* poll device read interval(ms) */
+		poll-interval = <1>;
+
+		/* x channel adc read max(mV) */
+		report-x-max = <1800>;
+		/* x channel adc read min(mV) */
+		report-x-min = <0>;
+
+		/* y channel adc read max(mV) */
+		report-y-max = <1800>;
+		/* y channel adc read min(mV) */
+		report-y-min = <0>;
+
+		/* report threshold(mV) */
+		report-threshold = <1>;
+	};
+
 	gpio-keys {
                 compatible = "gpio-keys";
 
                 pinctrl-names = "default";
                 pinctrl-0 = <&btn_pins>;
 
-		/* sw15						sw16
-		      sw1			  	   sw8
-                   sw3   sw4			     	sw7      sw5
-                      sw2			   	      sw6
-                          sw9 sw10   sw11 sw12   sw13 sw14
+		/*
+		      *** ODROIDGO-Advance Switch layoout ***
+		|------------------------------------------------|
+		| sw15                                      sw16 |
+		|------------------------------------------------|
+		|     sw1      |-------------------|      sw8    |
+		|  sw3   sw4   |                   |   sw7   sw5 |
+		|     sw2      |    LCD Display    |      sw6    |
+		|              |                   |             |
+		|              |-------------------|             |
+		|         sw9 sw10   sw11 sw12   sw13 sw14       |
+		|------------------------------------------------|
 		*/
                 sw1 {
                         gpios = <&gpio1 RK_PA0 GPIO_ACTIVE_LOW>;
@@ -366,8 +398,8 @@
 				vfront-porch = <8>;
 				vsync-len = <8>;
 				vback-porch = <8>;
-				hsync-active = <8>;
-				vsync-active = <8>;
+				hsync-active = <0>;
+				vsync-active = <0>;
 				de-active = <0>;
 				pixelclk-active = <0>;
 			};
@@ -641,7 +673,7 @@
 
 				regulator-name = "vcc_lcd";
 				regulator-state-mem {
-					regulator-on-in-suspend;
+					regulator-off-in-suspend;
 					regulator-suspend-microvolt = <2800000>;
 				};
 			};
