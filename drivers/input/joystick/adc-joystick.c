@@ -69,6 +69,93 @@ struct adc_joystick_state {
 	int old_x, old_y, x, y;
 	/* input device init value (mV) */
 	int abs_x_max, abs_x_min, abs_y_max, abs_y_min;
+
+	struct mutex lock;
+};
+
+/*----------------------------------------------------------------------------*/
+/*
+ * ATTRIBUTES:
+ *
+ * /sys/devices/platform/adc_joystick/interval [rw]
+ */
+/*----------------------------------------------------------------------------*/
+static ssize_t adc_joystick_store_interval(struct device *dev,
+				      struct device_attribute *attr,
+				      const char *buf,
+				      size_t count)
+{
+	struct platform_device *pdev  = to_platform_device(dev);
+	struct adc_joystick_state *st = platform_get_drvdata(pdev);
+
+	mutex_lock(&st->lock);
+	st->interval = simple_strtoul(buf, NULL, 10);
+	mutex_unlock(&st->lock);
+
+	return count;
+}
+
+/*----------------------------------------------------------------------------*/
+static ssize_t adc_joystick_show_interval(struct device *dev,
+				     struct device_attribute *attr,
+				     char *buf)
+{
+	struct platform_device *pdev  = to_platform_device(dev);
+	struct adc_joystick_state *st = platform_get_drvdata(pdev);
+
+	return sprintf(buf, "%d\n", st->interval);
+}
+
+/*----------------------------------------------------------------------------*/
+/*
+ * ATTRIBUTES:
+ *
+ * /sys/devices/platform/adc_joystick/threshold [rw]
+ */
+/*----------------------------------------------------------------------------*/
+static ssize_t adc_joystick_store_threshold(struct device *dev,
+				      struct device_attribute *attr,
+				      const char *buf,
+				      size_t count)
+{
+	struct platform_device *pdev  = to_platform_device(dev);
+	struct adc_joystick_state *st = platform_get_drvdata(pdev);
+
+	mutex_lock(&st->lock);
+	st->threshold = simple_strtoul(buf, NULL, 10);
+	mutex_unlock(&st->lock);
+
+	return count;
+}
+
+/*----------------------------------------------------------------------------*/
+static ssize_t adc_joystick_show_threshold(struct device *dev,
+				     struct device_attribute *attr,
+				     char *buf)
+{
+	struct platform_device *pdev  = to_platform_device(dev);
+	struct adc_joystick_state *st = platform_get_drvdata(pdev);
+
+	return sprintf(buf, "%d\n", st->threshold);
+}
+
+/*----------------------------------------------------------------------------*/
+static DEVICE_ATTR(interval, S_IWUSR | S_IRUGO,
+		   adc_joystick_show_interval,
+		   adc_joystick_store_interval);
+
+static DEVICE_ATTR(threshold, S_IWUSR | S_IRUGO,
+		   adc_joystick_show_threshold,
+		   adc_joystick_store_threshold);
+
+static struct attribute *adc_joystick_attrs[] = {
+	&dev_attr_interval.attr,
+	&dev_attr_threshold.attr,
+	NULL,
+};
+
+static struct attribute_group adc_joystick_attr_group = {
+	.attrs = adc_joystick_attrs,
 };
 
 /*----------------------------------------------------------------------------*/
@@ -82,6 +169,8 @@ static void adc_joystick_poll(struct input_polled_dev *dev)
 		return;
 	}
 
+	mutex_lock(&st->lock);
+
 	if ((abs(st->x - st->old_x) > st->threshold) ||
 	    (abs(st->y - st->old_y) > st->threshold)) {
 		/* report joystick event */
@@ -90,6 +179,11 @@ static void adc_joystick_poll(struct input_polled_dev *dev)
 		input_sync(dev->input);
 		st->old_x = st->x;	st->old_y = st->y;
 	}
+
+	if (dev->poll_interval != st->interval)
+		dev->poll_interval = st->interval;
+
+	mutex_unlock(&st->lock);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -140,15 +234,18 @@ static int adc_joystick_register(struct platform_device *pdev,
 
 	input = poll_dev->input;
 
-	input->phys = "adc-joystick/js0";
+	input->phys = "adc-joystick/input0";
 	input->name = pdev->name;
 
-	input->evbit[0]   = BIT_MASK(EV_ABS);
+	input->evbit[0]  |= BIT_MASK(EV_ABS) | BIT_MASK(EV_KEY);
+	input->absbit[0] |= BIT_MASK(ABS_X)  | BIT_MASK(ABS_Y);
+
 	input->id.bustype = BUS_HOST;
 	input->id.vendor  = 0x0001;
 	input->id.product = 0x0001;
 	input->id.version = 0x0100;
 
+	input_set_capability(input, EV_KEY, BTN_JOYSTICK);
 	input_set_abs_params(input, ABS_X, st->abs_x_min, st->abs_x_max, 0, 0);
 	input_set_abs_params(input, ABS_Y, st->abs_y_min, st->abs_y_max, 0, 0);
 
@@ -171,6 +268,8 @@ static int adc_joystick_probe(struct platform_device *pdev)
 	st = devm_kzalloc(dev, sizeof(*st), GFP_KERNEL);
 	if (!st)
 		return -ENOMEM;
+
+	mutex_init(&st->lock);
 
 	for (i = 0; i < 2; i++) {
 		if (i)
@@ -197,9 +296,19 @@ static int adc_joystick_probe(struct platform_device *pdev)
 
 	adc_joystick_dt_parse(pdev, st);
 
-	if ((error = adc_joystick_register(pdev, st)))
+	error = adc_joystick_register(pdev, st);
+	if (error) {
+		dev_err(dev, "adc_joystick register fail, error: %d\n",
+			error);
 		return error;
+	}
 
+	error = sysfs_create_group(&pdev->dev.kobj, &adc_joystick_attr_group);
+	if (error) {
+		dev_err(dev, "create sysfs group fail, error: %d\n",
+			error);
+		return error;
+	}
 	dev_info(dev, "poll-interval    = %d\n", st->interval);
 	dev_info(dev, "report-x-max     = %d\n", st->abs_x_max);
 	dev_info(dev, "report-y-max     = %d\n", st->abs_y_max);
