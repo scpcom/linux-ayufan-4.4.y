@@ -671,7 +671,10 @@ static long ov4689_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg)
 
 	switch (cmd) {
 	case RKMODULE_GET_MODULE_INFO:
-		ov4689_get_module_inf(ov4689, (struct rkmodule_inf *)arg);
+		if (ov4689->module_name)
+			ov4689_get_module_inf(ov4689, (struct rkmodule_inf *)arg);
+		else
+			ret = -ENOIOCTLCMD;
 		break;
 	default:
 		ret = -ENOIOCTLCMD;
@@ -1183,8 +1186,7 @@ static int ov4689_probe(struct i2c_client *client,
 	ret |= of_property_read_string(node, RKMODULE_CAMERA_LENS_NAME,
 				       &ov4689->len_name);
 	if (ret) {
-		dev_err(dev, "could not get module information!\n");
-		return -EINVAL;
+		dev_warn(dev, "could not get module information!\n");
 	}
 
 	ov4689->client = client;
@@ -1255,15 +1257,18 @@ static int ov4689_probe(struct i2c_client *client,
 		goto err_power_off;
 #endif
 
-	memset(facing, 0, sizeof(facing));
-	if (strcmp(ov4689->module_facing, "back") == 0)
-		facing[0] = 'b';
-	else
-		facing[0] = 'f';
+	if (ov4689->module_facing && ov4689->module_name) {
+		memset(facing, 0, sizeof(facing));
+		if (strcmp(ov4689->module_facing, "back") == 0)
+			facing[0] = 'b';
+		else
+			facing[0] = 'f';
 
-	snprintf(sd->name, sizeof(sd->name), "m%02d_%s_%s %s",
-		 ov4689->module_index, facing,
-		 OV4689_NAME, dev_name(sd->dev));
+		snprintf(sd->name, sizeof(sd->name), "m%02d_%s_%s %s",
+			 ov4689->module_index, facing,
+			 OV4689_NAME, dev_name(sd->dev));
+	}
+
 	ret = v4l2_async_register_subdev_sensor_common(sd);
 	if (ret) {
 		dev_err(dev, "v4l2 async register subdev failed\n");

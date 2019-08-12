@@ -1736,7 +1736,10 @@ static long tc35874x_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg)
 
 	switch (cmd) {
 	case RKMODULE_GET_MODULE_INFO:
-		tc35874x_get_module_inf(tc35874x, (struct rkmodule_inf *)arg);
+		if (tc35874x->module_name)
+			tc35874x_get_module_inf(tc35874x, (struct rkmodule_inf *)arg);
+		else
+			ret = -ENOIOCTLCMD;
 		break;
 	default:
 		ret = -ENOIOCTLCMD;
@@ -2072,8 +2075,7 @@ static int tc35874x_probe(struct i2c_client *client,
 	err |= of_property_read_string(node, RKMODULE_CAMERA_LENS_NAME,
 				       &state->len_name);
 	if (err) {
-		dev_err(dev, "could not get module information!\n");
-		return -EINVAL;
+		dev_warn(dev, "could not get module information!\n");
 	}
 
 	state->i2c_client = client;
@@ -2151,15 +2153,18 @@ static int tc35874x_probe(struct i2c_client *client,
 	state->mbus_fmt_code = MEDIA_BUS_FMT_UYVY8_2X8;
 
 	sd->dev = &client->dev;
-	memset(facing, 0, sizeof(facing));
-	if (strcmp(state->module_facing, "back") == 0)
-		facing[0] = 'b';
-	else
-		facing[0] = 'f';
+	if (state->module_facing && state->module_name) {
+		memset(facing, 0, sizeof(facing));
+		if (strcmp(state->module_facing, "back") == 0)
+			facing[0] = 'b';
+		else
+			facing[0] = 'f';
 
-	snprintf(sd->name, sizeof(sd->name), "m%02d_%s_%s %s",
-		 state->module_index, facing,
-		 TC35874X_NAME, dev_name(sd->dev));
+		snprintf(sd->name, sizeof(sd->name), "m%02d_%s_%s %s",
+			 state->module_index, facing,
+			 TC35874X_NAME, dev_name(sd->dev));
+	}
+
 	err = v4l2_async_register_subdev(sd);
 	if (err < 0)
 		goto err_hdl;
