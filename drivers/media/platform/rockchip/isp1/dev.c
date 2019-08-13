@@ -1385,7 +1385,19 @@ static struct platform_driver rkisp1_plat_drv = {
 	.remove = rkisp1_plat_remove,
 };
 
-module_platform_driver(rkisp1_plat_drv);
+static int __init rkisp1_plat_drv_init(void)
+{
+	return platform_driver_register(&rkisp1_plat_drv);
+}
+
+static void __exit rkisp1_plat_drv_exit(void)
+{
+	platform_driver_unregister(&rkisp1_plat_drv);
+}
+
+late_initcall(rkisp1_plat_drv_init);
+module_exit(rkisp1_plat_drv_exit);
+
 MODULE_AUTHOR("Rockchip Camera/ISP team");
 MODULE_DESCRIPTION("Rockchip ISP1 platform driver");
 MODULE_LICENSE("Dual BSD/GPL");
