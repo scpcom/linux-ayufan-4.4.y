@@ -70,6 +70,13 @@ config ROCKCHIP_LVDS
 	  support LVDS, rgb, dual LVDS output mode. say Y to enable its
 	  driver.
 
+config ROCKCHIP_DRM_TVE
+	bool "Rockchip TVE support"
+	depends on DRM_ROCKCHIP
+	help
+	  Choose this option to enable support for Rockchip TVE controllers.
+	  say Y to enable its driver.
+
 config ROCKCHIP_RGB
 	bool "Rockchip RGB support"
 	depends on DRM_ROCKCHIP
