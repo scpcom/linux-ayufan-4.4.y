@@ -101,6 +101,23 @@
 		};
 	};
 
+	leds {
+		status = "okay";
+		compatible = "gpio-leds";
+
+		work-led {
+			gpios = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "none";
+			default-state = "on";
+		};
+
+		standby-led {
+			gpios = <&gpio0 RK_PA2 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "none";
+			default-state = "on";
+		};
+	};
+
 	dc-charger {
 		compatible = "gpio-charger";
 		charger-type = "mains";
