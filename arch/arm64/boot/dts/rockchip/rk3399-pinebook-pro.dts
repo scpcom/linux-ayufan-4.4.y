@@ -196,6 +196,21 @@
 		};
 	};
 
+	vcc_lcd_en: vcc-lcd-en-regulator {
+		compatible = "regulator-fixed";
+		enable-active-high;
+		gpio = <&gpio1 RK_PC6 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&vcc_lcd_en_drv>;
+		regulator-name = "vcc_lcd_en";
+		regulator-enable-ramp-delay = <100000>;
+		vin-supply = <&vcc3v3_sys>;
+
+		regulator-state-mem {
+			regulator-off-in-suspend;
+		};
+	};
+
 	vdd_log: vdd-log {
 		compatible = "pwm-regulator";
 		pwms = <&pwm2 0 25000 1>;
@@ -486,11 +501,11 @@
 		vcc4-supply = <&vcc_sys>;
 		vcc6-supply = <&vcc_sys>;
 		vcc7-supply = <&vcc_sys>;
-		vcc8-supply = <&vcc3v3_sys>;
+		vcc8-supply = <&vcc_lcd_en>;
 		vcc9-supply = <&vcc_sys>;
 		vcc10-supply = <&vcc_sys>;
 		vcc11-supply = <&vcc_sys>;
-		vcc12-supply = <&vcc3v3_sys>;
+		vcc12-supply = <&vcc_lcd_en>;
 		vddio-supply = <&vcc_1v8>;
 
 		regulators {
@@ -960,6 +975,10 @@
 	};
 
 	panel {
+		vcc_lcd_en_drv: vcc-lcd-en-drv {
+			rockchip,pins = <1 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+
 		panel_en: panel-en {
 			rockchip,pins = <1 RK_PA0 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
@@ -995,7 +1014,7 @@
 				<4 RK_PD2 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 
-		host_usb3_drv: host-usb3-drv {
+		pwr_5v_drv: pwr-5v-drv {
 			rockchip,pins = <1 RK_PB5 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
