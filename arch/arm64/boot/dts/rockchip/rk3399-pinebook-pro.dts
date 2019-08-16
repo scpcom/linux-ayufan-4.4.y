@@ -9,6 +9,7 @@
 #include <dt-bindings/input/input.h>
 #include "rk3399.dtsi"
 #include "rk3399-opp.dtsi"
+#include "rk3399k-opp.dtsi"
 #include "rk3399-vop-clk-set.dtsi"
 
 // TODO:
@@ -320,26 +321,6 @@
 	extcon = <&fusb0>;
 };
 
-&cluster0_opp {
-	opp-1512000000 {
-		opp-hz = /bits/ 64 <1512000000>;
-		opp-microvolt = <1200000>;
-		opp-microvolt-L0 = <1200000>;
-		opp-microvolt-L1 = <1175000>;
-		opp-microvolt-L2 = <1150000>;
-		opp-microvolt-L3 = <1125000>;
-		clock-latency-ns = <40000>;
-	};
-};
-
-&cluster1_opp {
-	opp-1992000000 {
-		opp-hz = /bits/ 64 <1992000000>;
-		opp-microvolt = <1300000>;
-		clock-latency-ns = <40000>;
-	};
-};
-
 &cpu_l0 {
 	cpu-supply = <&vdd_cpu_l>;
 };
@@ -397,12 +378,41 @@
 
 &dmc_opp_table {
 	opp-200000000 {
-		opp-suspend;
+		opp-hz = /bits/ 64 <200000000>;
+		opp-microvolt = <825000>;
+		status = "disabled";
 	};
-
+	opp-300000000 {
+		opp-hz = /bits/ 64 <300000000>;
+		opp-microvolt = <850000>;
+		status = "disabled";
+	};
+	opp-400000000 {
+		opp-hz = /bits/ 64 <400000000>;
+		opp-microvolt = <900000>;
+	};
+	opp-528000000 {
+		opp-hz = /bits/ 64 <528000000>;
+		opp-microvolt = <900000>;
+		status = "disabled";
+	};
+	opp-600000000 {
+		opp-hz = /bits/ 64 <600000000>;
+		opp-microvolt = <900000>;
+		status = "disabled";
+	};
+	opp-800000000 {
+		opp-hz = /bits/ 64 <800000000>;
+		opp-microvolt = <900000>;
+	};
 	opp-928000000 {
 		opp-hz = /bits/ 64 <928000000>;
-		opp-microvolt = <925000>;
+		opp-microvolt = <900000>;
+		status = "disabled";
+	};
+	opp-1056000000 {
+		opp-hz = /bits/ 64 <1056000000>;
+		opp-microvolt = <900000>;
 		status = "disabled";
 	};
 };
