@@ -272,9 +272,20 @@
 		compatible = "regulator-fixed";
 		regulator-name = "vcc3v8_sys";
 		regulator-always-on;
-		regulator-boot-on;
 		regulator-min-microvolt = <3800000>;
 		regulator-max-microvolt = <3800000>;
+	};
+
+	vcc_host: vcc_host {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_host";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+
+		gpio = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-always-on;
+		vin-supply = <&vccsys>;
 	};
 };
 
@@ -755,7 +766,7 @@
 
 			/* P.C.B rev0.2 DC Detect & Charger Status LED GPIO */
 			dc_det_gpio  = <&gpio0 RK_PB3 GPIO_ACTIVE_LOW>;
-			chg_led_gpio = <&gpio0 RK_PB5 GPIO_ACTIVE_LOW>;
+			chg_led_gpio = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>;
 
 			extcon = <&u2phy>;
 		};
