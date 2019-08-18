@@ -58,14 +58,14 @@
 	leds {
 		compatible = "gpio-leds";
 
-		standby-led {
-			linux,default-trigger = "disk-activity";
-			gpios = <&rk805 0 GPIO_ACTIVE_LOW>;
+		work-led {
+			gpios = <&rk805 1 GPIO_ACTIVE_LOW>;
 			default-state = "on";
 		};
 
-		power-led {
-			gpios = <&rk805 1 GPIO_ACTIVE_LOW>;
+		standby-led {
+			linux,default-trigger = "disk-activity";
+			gpios = <&rk805 0 GPIO_ACTIVE_LOW>;
 			default-state = "on";
 		};
 	};
