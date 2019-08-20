@@ -40,6 +40,11 @@
 #include <linux/of_graph.h>
 #include <video/videomode.h>
 
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	#include <linux/gpio.h>
+	#include <linux/of_gpio.h>
+#endif
+
 struct cmd_ctrl_hdr {
 	u8 dtype;	/* data type */
 	u8 wait;	/* ms */
@@ -116,7 +121,12 @@ struct panel_simple {
 	struct i2c_adapter *ddc;
 
 	struct gpio_desc *enable_gpio;
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	int	reset_gpio;
+	bool	reset_gpio_active;
+#else
 	struct gpio_desc *reset_gpio;
+#endif
 	int cmd_type;
 
 	struct gpio_desc *spi_sdi_gpio;
@@ -617,10 +627,11 @@ static int panel_simple_unprepare(struct drm_panel *panel)
 			dev_err(p->dev, "failed to send off cmds\n");
 	}
 
-	if (p->reset_gpio)
 #if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
-		gpiod_direction_output(p->reset_gpio, 0);
+	if (p->reset_gpio)
+		gpio_set_value(p->reset_gpio, p->reset_gpio_active);
 #else
+	if (p->reset_gpio)
 		gpiod_direction_output(p->reset_gpio, 1);
 #endif
 
@@ -657,20 +668,22 @@ static int panel_simple_prepare(struct drm_panel *panel)
 	if (p->desc && p->desc->delay.prepare)
 		panel_simple_sleep(p->desc->delay.prepare);
 
-	if (p->reset_gpio)
 #if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
-		gpiod_direction_output(p->reset_gpio, 0);
+	if (p->reset_gpio)
+		gpio_set_value(p->reset_gpio, p->reset_gpio_active);
 #else
+	if (p->reset_gpio)
 		gpiod_direction_output(p->reset_gpio, 1);
 #endif
 
 	if (p->desc && p->desc->delay.reset)
 		panel_simple_sleep(p->desc->delay.reset);
 
-	if (p->reset_gpio)
 #if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
-		gpiod_direction_output(p->reset_gpio, 1);
+	if (p->reset_gpio)
+		gpio_set_value(p->reset_gpio, !p->reset_gpio_active);
 #else
+	if (p->reset_gpio)
 		gpiod_direction_output(p->reset_gpio, 0);
 #endif
 
@@ -882,12 +895,43 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 		return err;
 	}
 
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+{
+	enum of_gpio_flags flags;
+	panel->reset_gpio = of_get_named_gpio_flags(dev->of_node,
+				"reset-gpios", 0, &flags);
+
+	if (gpio_is_valid(panel->reset_gpio)) {
+		err = devm_gpio_request(dev, panel->reset_gpio,	"reset-gpios");
+		if (err < 0) {
+			dev_err(dev, "failed to request reset-gpios %d\n",
+				panel->reset_gpio);
+			return err;
+		}
+		err = gpio_direction_output(panel->reset_gpio,
+			panel->reset_gpio_active);
+		if (err < 0) {
+			dev_err(dev, "failed to request output reset-gpios %d\n",
+				panel->reset_gpio);
+			return err;
+		}
+		panel->reset_gpio_active =
+			(flags & OF_GPIO_ACTIVE_LOW) ? 0 : 1;
+
+		dev_info(dev, "reset-pin gpio = %d, active = %d\n",
+			panel->reset_gpio, panel->reset_gpio_active);
+	}
+	else
+		dev_info(dev, "Do not use reset-pin\n");
+}
+#else
 	panel->reset_gpio = devm_gpiod_get_optional(dev, "reset", 0);
 	if (IS_ERR(panel->reset_gpio)) {
 		err = PTR_ERR(panel->reset_gpio);
 		dev_err(dev, "failed to request reset GPIO: %d\n", err);
 		return err;
 	}
+#endif
 
 	if (of_property_read_string(dev->of_node, "rockchip,cmd-type",
 				    &cmd_type))
@@ -1017,10 +1061,12 @@ static void panel_simple_shutdown(struct device *dev)
 	panel_simple_disable(&panel->base);
 
 	if (panel->prepared) {
-		if (panel->reset_gpio)
 #if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
-			gpiod_direction_output(panel->reset_gpio, 0);
+		if (panel->reset_gpio)
+			gpio_set_value(panel->reset_gpio,
+				panel->reset_gpio_active);
 #else
+		if (panel->reset_gpio)
 			gpiod_direction_output(panel->reset_gpio, 1);
 #endif
 		if (panel->enable_gpio)
