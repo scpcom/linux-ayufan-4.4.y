@@ -35,6 +35,11 @@
 #include <video/of_display_timing.h>
 #include <video/videomode.h>
 
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	#include <linux/gpio.h>
+	#include <linux/of_gpio.h>
+#endif
+
 #include <drm/drm_crtc.h>
 #include <drm/drm_device.h>
 #include <drm/drm_dp_aux_bus.h>
@@ -230,7 +235,12 @@ struct panel_simple {
 	struct drm_dp_aux *aux;
 
 	struct gpio_desc *enable_gpio;
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+	int	reset_gpio;
+	bool	reset_gpio_active;
+#else
 	struct gpio_desc *reset_gpio;
+#endif
 	struct gpio_desc *hpd_gpio;
 
 	struct edid *edid;
@@ -577,7 +587,7 @@ static int panel_simple_suspend(struct device *dev)
 			panel_simple_xfer_dsi_cmd_seq(p, p->desc->exit_seq);
 
 #if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
-	gpiod_direction_output(p->reset_gpio, 0);
+	gpio_set_value(p->reset_gpio, p->reset_gpio_active);
 #else
 	gpiod_direction_output(p->reset_gpio, 1);
 #endif
@@ -671,7 +681,7 @@ static int panel_simple_prepare_once(struct panel_simple *p)
 	}
 
 #if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
-	gpiod_direction_output(p->reset_gpio, 0);
+	gpio_set_value(p->reset_gpio, p->reset_gpio_active);
 #else
 	gpiod_direction_output(p->reset_gpio, 1);
 #endif
@@ -680,7 +690,7 @@ static int panel_simple_prepare_once(struct panel_simple *p)
 		msleep(p->desc->delay.reset);
 
 #if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
-	gpiod_direction_output(p->reset_gpio, 1);
+	gpio_set_value(p->reset_gpio, !p->reset_gpio_active);
 #else
 	gpiod_direction_output(p->reset_gpio, 0);
 #endif
@@ -1010,6 +1020,36 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc,
 		return err;
 	}
 
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+{
+	enum of_gpio_flags flags;
+	panel->reset_gpio = of_get_named_gpio_flags(dev->of_node,
+				"reset-gpios", 0, &flags);
+
+	if (gpio_is_valid(panel->reset_gpio)) {
+		err = devm_gpio_request(dev, panel->reset_gpio,	"reset-gpios");
+		if (err < 0) {
+			dev_err(dev, "failed to request reset-gpios %d\n",
+				panel->reset_gpio);
+			return err;
+		}
+		err = gpio_direction_output(panel->reset_gpio,
+			panel->reset_gpio_active);
+		if (err < 0) {
+			dev_err(dev, "failed to request output reset-gpios %d\n",
+				panel->reset_gpio);
+			return err;
+		}
+		panel->reset_gpio_active =
+			(flags & OF_GPIO_ACTIVE_LOW) ? 0 : 1;
+
+		dev_info(dev, "reset-pin gpio = %d, active = %d\n",
+			panel->reset_gpio, panel->reset_gpio_active);
+	}
+	else
+		dev_info(dev, "Do not use reset-pin\n");
+}
+#else
 	panel->reset_gpio = devm_gpiod_get_optional(dev, "reset", GPIOD_ASIS);
 	if (IS_ERR(panel->reset_gpio)) {
 		err = PTR_ERR(panel->reset_gpio);
@@ -1017,6 +1057,7 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc,
 			dev_err(dev, "failed to get reset GPIO: %d\n", err);
 		return err;
 	}
+#endif
 
 	err = of_drm_get_panel_orientation(dev->of_node, &panel->orientation);
 	if (err) {
