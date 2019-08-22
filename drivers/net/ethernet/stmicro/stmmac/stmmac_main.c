@@ -55,6 +55,8 @@
 #include <linux/reset.h>
 #include <linux/of_mdio.h>
 
+#define RTL_8211F_PHY_ID  0x001cc916
+
 #define	STMMAC_ALIGN(x)		__ALIGN_KERNEL(x, SMP_CACHE_BYTES)
 #define RTL_8201F_PHY_ID  0x001cc816
 /* Module parameters */
@@ -2865,6 +2867,27 @@ static void stmmac_scan_delayline_dwork(struct work_struct *work)
 };
 #endif
 
+
+static int phy_rtl8211f_led_fixup(struct phy_device *phydev)
+{
+	int value;
+    	printk("%s in\n", __func__);
+
+    	value = phy_read(phydev, 31);
+    	phy_write(phydev, 31, 0xd04);
+
+    	mdelay(10);
+    	value = phy_read(phydev, 16);
+    	value =0x2340;
+    	phy_write(phydev, 16, value);
+
+    	mdelay(10);
+    	phy_read(phydev, 31);
+    	phy_write(phydev, 31, 0x00);
+
+    	return 0;
+}
+
 static int phy_rtl8201f_led_fixup(struct phy_device *phydev)
 {
        int value;
@@ -3045,7 +3068,11 @@ int stmmac_dvr_probe(struct device *device,
     ret = phy_register_fixup_for_uid(RTL_8201F_PHY_ID, 0xffffffff, phy_rtl8201f_led_fixup);
     if (ret)
          pr_warn("Cannot register PHY board fixup.\n");
-	
+    
+    ret = phy_register_fixup_for_uid(RTL_8211F_PHY_ID, 0xffffffff, phy_rtl8211f_led_fixup);
+    if (ret)
+         pr_warn("Cannot register 8211f PHY board fixup.\n");
+
 	ret = register_netdev(ndev);
 	if (ret) {
 		netdev_err(priv->dev, "%s: ERROR %i registering the device\n",
