@@ -45,6 +45,13 @@ struct hdmi_codec_params {
 	int sample_rate;
 	int sample_width;
 	int channels;
+	int mode;
+};
+
+enum {
+	LPCM = 0,
+	NLPCM,
+	HBR,
 };
 
 typedef void (*hdmi_codec_plugged_cb)(struct device *dev,
