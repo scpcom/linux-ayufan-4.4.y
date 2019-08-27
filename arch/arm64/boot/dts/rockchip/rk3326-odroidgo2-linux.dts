@@ -1011,23 +1011,6 @@
 };
 
 &pinctrl {
-	cif-pin-m0 {
-		cif_pin_m0: cif-pin-m0 {
-			rockchip,pins =
-				<2 RK_PA0 RK_FUNC_1 &pcfg_pull_none>,/* cif_data2 */
-				<2 RK_PA1 RK_FUNC_1 &pcfg_pull_none>,/* cif_data3 */
-				<2 RK_PA2 RK_FUNC_1 &pcfg_pull_none>,/* cif_data4 */
-				<2 RK_PA3 RK_FUNC_1 &pcfg_pull_none>,/* cif_data5 */
-				<2 RK_PA4 RK_FUNC_1 &pcfg_pull_none>,/* cif_data6 */
-				<2 RK_PA5 RK_FUNC_1 &pcfg_pull_none>,/* cif_data7 */
-				<2 RK_PA6 RK_FUNC_1 &pcfg_pull_none>,/* cif_data8 */
-				<2 RK_PA7 RK_FUNC_1 &pcfg_pull_none>,/* cif_data9 */
-				<2 RK_PB0 RK_FUNC_1 &pcfg_pull_none>,/* cif_sync */
-				<2 RK_PB1 RK_FUNC_1 &pcfg_pull_none>,/* cif_href */
-				<2 RK_PB2 RK_FUNC_1 &pcfg_pull_none>;/* cif_clkin */
-		};
-	};
-
 /*
 	headphone {
 		//High : HeadPhone remove, Low : HeadPhone insert
