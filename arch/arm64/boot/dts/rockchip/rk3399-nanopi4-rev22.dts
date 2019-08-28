@@ -1,0 +1,103 @@
+/*
+ * Copyright (c) 2018 FriendlyElec Computer Tech. Co., Ltd.
+ * (http://www.friendlyarm.com)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/dts-v1/;
+#include "rk3399-nanopi4-common.dtsi"
+
+/ {
+	model = "FriendlyElec NanoPi M4B";
+	compatible = "friendlyelec,nanopi-m4", "rockchip,rk3399";
+
+	vcc_otg_vbus: otg-vbus-regulator {
+		compatible = "regulator-fixed";
+		gpio = <&gpio4 26 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&otg_vbus_drv>;
+		regulator-name = "vcc_otg_vbus";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		enable-active-high;
+	};
+};
+
+&mach {
+	hwrev = <0x22>;
+	model = "NanoPi M4B";
+};
+
+&sdhci {
+	mmc-hs200-1_8v;
+	/delete-property/ mmc-hs400-1_8v;
+	/delete-property/ mmc-hs400-enhanced-strobe;
+};
+
+&i2s1 {
+	status = "okay";
+	rockchip,i2s-broken-burst-len;
+	rockchip,playback-channels = <2>;
+	rockchip,capture-channels = <2>;
+	#sound-dai-cells = <0>;
+};
+
+&rt5651_card {
+	/delete-property/ pinctrl-0;
+	/delete-property/ simple-audio-card,hp-det-gpio;
+
+	simple-audio-card,cpu {
+		sound-dai = <&i2s1>;
+	};
+};
+
+&rk_wlan {
+	status = "okay";
+	wifi_chip_type = "ap6256";
+};
+
+&fusb0 {
+	status = "disabled";
+};
+
+&cdn_dp {
+	/delete-property/ extcon;
+	status = "disabled";
+};
+
+&tcphy0 {
+	/delete-property/ extcon;
+};
+
+&u2phy0_otg {
+	vbus-supply = <&vcc_otg_vbus>;
+};
+
+&u2phy0 {
+	/delete-property/ extcon;
+};
+
+&usbdrd3_0 {
+	/delete-property/ extcon;
+	extcon = <&u2phy0>;
+};
+
+&pinctrl {
+	usb {
+		otg_vbus_drv: otg-vbus-drv {
+			rockchip,pins = <4 26 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+};
