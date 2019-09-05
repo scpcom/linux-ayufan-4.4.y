@@ -53,6 +53,13 @@ choice
 	prompt "Comcerto Board type"
 	default RTSM_C2K
 
+config SEQUOIA
+	bool "SEQUOIA"
+	depends on ARCH_M86XXX
+	help
+	  Say Y here if you intend to run this kernel with a WD MyCloud
+          Gen1 (Sequoia) board.
+
 config C2K_EVM
 	bool "EVM"
 	depends on ARCH_M86XXX
