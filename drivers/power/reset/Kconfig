@@ -159,5 +159,10 @@ config POWER_RESET_SYSCON
 	help
 	  Reboot support for generic SYSCON mapped register reset.
 
-endif
+config POWER_RESET_LAYERSCAPE
+	bool "Freescale LayerScape reset driver"
+	depends on ARCH_FSL_LS2085A
+	help
+	  Reboot support for the Freescale LayerScape SoCs.
 
+endif

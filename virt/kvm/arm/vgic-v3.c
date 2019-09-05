@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef CONFIG_ARM_GIC_V3
 #include <linux/cpu.h>
 #include <linux/kvm.h>
 #include <linux/kvm_host.h>
@@ -245,3 +246,4 @@ out:
 	of_node_put(vgic_node);
 	return ret;
 }
+#endif

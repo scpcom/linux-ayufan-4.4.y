@@ -15,8 +15,6 @@ config ARM64
 	select ARM_GIC
 	select AUDIT_ARCH_COMPAT_GENERIC
 	select ARM_GIC_V2M if PCI_MSI
-	select ARM_GIC_V3
-	select ARM_GIC_V3_ITS if PCI_MSI
 	select BUILDTIME_EXTABLE_SORT
 	select CLONE_BACKWARDS
 	select COMMON_CLK
@@ -153,8 +151,33 @@ config ARCH_SEATTLE
 	help
 	  This enables support for AMD Seattle SOC Family
 
+config LS2085A_ERRATA_ERR008585
+	bool "Freescale LS2085A SOC Errata ERR008585"
+	help
+	  This enables support for Freescale LS2085A SOC Errata ERR008585, which
+	  is related to ARM generic timers. The Errata is related to spurious
+	  arriving from ARM generic timers. Software should read registers
+	  CNTHP_TVAL, CNTP_TVAL, CNTPS_TVAL, CNTV_TVAL, CNTPCT, or CNTVCT twice.
+	  If the value read differs, then re-read the register, and continue to
+	  read until two consecutive reads return the same value.
+
+config ARCH_FSL_LS2085A
+	bool "Freescale LS2085A SOC"
+	select LS2085A_ERRATA_ERR008585
+	select ARM_GIC_V3
+	select ARM_GIC_V3_ITS if PCI_MSI
+	help
+	  This enables support for Freescale LS2085A SOC.
+
+config ARCH_FSL_LS1043A
+	bool "Freescale LS1043A SOC"
+	help
+	  This enables support for Freescale LS1043A SOC.
+
 config ARCH_THUNDER
 	bool "Cavium Inc. Thunder SoC Family"
+	select ARM_GIC_V3
+	select ARM_GIC_V3_ITS if PCI_MSI
 	help
 	  This enables support for Cavium's Thunder Family of SoCs.
 
@@ -164,12 +187,16 @@ config ARCH_VEXPRESS
 	select COMMON_CLK_VERSATILE
 	select POWER_RESET_VEXPRESS
 	select VEXPRESS_CONFIG
+	select ARM_GIC_V3
+	select ARM_GIC_V3_ITS if PCI_MSI
 	help
 	  This enables support for the ARMv8 software model (Versatile
 	  Express).
 
 config ARCH_XGENE
 	bool "AppliedMicro X-Gene SOC Family"
+	select ARM_GIC_V3
+	select ARM_GIC_V3_ITS if PCI_MSI
 	help
 	  This enables support for AppliedMicro X-Gene SOC Family
 
@@ -349,7 +376,6 @@ config ARM64_VA_BITS_42
 
 config ARM64_VA_BITS_48
 	bool "48-bit"
-	depends on !ARM_SMMU
 
 endchoice
 

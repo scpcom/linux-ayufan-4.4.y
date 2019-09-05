@@ -2345,7 +2345,11 @@ static int rt_fill_info(struct net *net,  __be32 dst, __be32 src,
 	memcpy(metrics, dst_metrics_ptr(&rt->dst), sizeof(metrics));
 	if (rt->rt_pmtu && expires)
 		metrics[RTAX_MTU - 1] = rt->rt_pmtu;
+#ifdef CONFIG_ARCH_COMCERTO
+	if (rtnetlink_put_metrics_2(skb, dst_metrics_ptr(&rt->dst), &rt->dst) < 0)
+#else
 	if (rtnetlink_put_metrics(skb, metrics) < 0)
+#endif
 		goto nla_put_failure;
 
 	if (fl4->flowi4_mark &&

@@ -35,26 +35,26 @@
 
 static void sdhci_hlwd_writel(struct sdhci_host *host, u32 val, int reg)
 {
-	sdhci_be32bs_writel(host, val, reg);
+	sdhci_32bs_writel(host, val, reg);
 	udelay(SDHCI_HLWD_WRITE_DELAY);
 }
 
 static void sdhci_hlwd_writew(struct sdhci_host *host, u16 val, int reg)
 {
-	sdhci_be32bs_writew(host, val, reg);
+	sdhci_32bs_writew(host, val, reg);
 	udelay(SDHCI_HLWD_WRITE_DELAY);
 }
 
 static void sdhci_hlwd_writeb(struct sdhci_host *host, u8 val, int reg)
 {
-	sdhci_be32bs_writeb(host, val, reg);
+	sdhci_32bs_writeb(host, val, reg);
 	udelay(SDHCI_HLWD_WRITE_DELAY);
 }
 
 static const struct sdhci_ops sdhci_hlwd_ops = {
-	.read_l = sdhci_be32bs_readl,
-	.read_w = sdhci_be32bs_readw,
-	.read_b = sdhci_be32bs_readb,
+	.read_l = sdhci_32bs_readl,
+	.read_w = sdhci_32bs_readw,
+	.read_b = sdhci_32bs_readb,
 	.write_l = sdhci_hlwd_writel,
 	.write_w = sdhci_hlwd_writew,
 	.write_b = sdhci_hlwd_writeb,

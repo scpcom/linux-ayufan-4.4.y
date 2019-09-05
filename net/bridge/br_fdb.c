@@ -18,6 +18,10 @@
 #include <linux/times.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
+#if defined(CONFIG_ARCH_COMCERTO)
+#include <linux/rtnetlink.h>
+#include <linux/module.h>
+#endif
 #include <linux/jhash.h>
 #include <linux/random.h>
 #include <linux/slab.h>
@@ -37,6 +41,11 @@ static void fdb_notify(struct net_bridge *br,
 
 static u32 fdb_salt __read_mostly;
 
+#if defined(CONFIG_ARCH_COMCERTO)
+	int(*br_fdb_can_expire)(unsigned char *mac_addr, struct net_device *dev) = NULL;
+	DEFINE_SPINLOCK(br_fdb_cb_lock);
+#endif
+
 int __init br_fdb_init(void)
 {
 	br_fdb_cache = kmem_cache_create("bridge_fdb_cache",
@@ -47,6 +56,9 @@ int __init br_fdb_init(void)
 		return -ENOMEM;
 
 	get_random_bytes(&fdb_salt, sizeof(fdb_salt));
+#if defined(CONFIG_ARCH_COMCERTO)
+	spin_lock_init(&br_fdb_cb_lock);
+#endif
 	return 0;
 }
 
@@ -132,6 +144,28 @@ static void fdb_del_hw_addr(struct net_bridge *br, const unsigned char *addr)
 
 static void fdb_delete(struct net_bridge *br, struct net_bridge_fdb_entry *f)
 {
+#if defined(CONFIG_CPE_FAST_PATH)
+	struct net_bridge_port *this_port = f->dst, *p;
+
+	if (f->is_local) {
+		list_for_each_entry(p, &br->port_list, list) {
+			if (this_port == p)
+				continue;
+
+			/*
+			* Here this_port(f->dst) can be NULL, because in fdb_delete_local()
+			* function f->dst is set to NULL when bridge MAC address matches with
+			* the bridge port MAC address. So, this deletion is done in fdb_delete_local()
+			* function itself. 
+			*/
+			if (this_port) {
+				dev_uc_del(this_port->dev, p->dev->dev_addr);
+			}
+			dev_uc_del(p->dev, f->addr.addr);
+		}
+	}
+#endif
+
 	if (f->is_static)
 		fdb_del_hw_addr(br, f->addr.addr);
 
@@ -162,8 +196,22 @@ static void fdb_delete_local(struct net_bridge *br,
 	/* Maybe bridge device has same hw addr? */
 	if (p && ether_addr_equal(br->dev->dev_addr, addr) &&
 	    (!vid || br_vlan_find(br, vid))) {
+#if defined(CONFIG_CPE_FAST_PATH)
+		struct net_bridge_port *this_port = f->dst, *p1;
+#endif
 		f->dst = NULL;
 		f->added_by_user = 0;
+#if defined(CONFIG_CPE_FAST_PATH)
+		/*
+		* This entry can not be delete in fdb_delete() because f->dst is setting NULL here.
+		* It can not get this information, so deleting the entry here itself.
+		*/
+		list_for_each_entry(p1, &br->port_list, list) {
+			if (this_port == p1)
+				continue;
+			dev_uc_del(this_port->dev, p1->dev->dev_addr);
+		}
+#endif
 		return;
 	}
 
@@ -282,6 +330,15 @@ void br_fdb_cleanup(unsigned long _data)
 			unsigned long this_timer;
 			if (f->is_static)
 				continue;
+#if defined(CONFIG_ARCH_COMCERTO)
+				spin_lock(&br_fdb_cb_lock);
+				if(br_fdb_can_expire && !(*br_fdb_can_expire)(f->addr.addr, f->dst->dev)){
+					f->updated = jiffies;
+					spin_unlock(&br_fdb_cb_lock);
+					continue;
+				}
+				spin_unlock(&br_fdb_cb_lock);
+#endif
 			this_timer = f->updated + delay;
 			if (time_before_eq(this_timer, jiffies))
 				fdb_delete(br, f);
@@ -493,6 +550,9 @@ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 {
 	struct hlist_head *head = &br->hash[br_mac_hash(addr, vid)];
 	struct net_bridge_fdb_entry *fdb;
+#if defined(CONFIG_CPE_FAST_PATH)
+   struct net_bridge_port *p;
+#endif
 
 	if (!is_valid_ether_addr(addr))
 		return -EINVAL;
@@ -514,6 +574,15 @@ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 	if (!fdb)
 		return -ENOMEM;
 
+#if defined(CONFIG_CPE_FAST_PATH)
+	list_for_each_entry(p, &br->port_list, list) {
+		if (source == p)
+			continue;
+
+		dev_uc_add(source->dev, p->dev->dev_addr);
+		dev_uc_add(p->dev, addr);
+	}
+#endif
 	fdb->is_local = fdb->is_static = 1;
 	fdb_add_hw_addr(br, addr);
 	fdb_notify(br, fdb, RTM_NEWNEIGH);
@@ -559,6 +628,16 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 		} else {
 			/* fastpath: update of existing entry */
 			if (unlikely(source != fdb->dst)) {
+#if defined(CONFIG_ARCH_COMCERTO)
+				struct brevent_fdb_update fdb_update;
+
+				fdb_update.dev = source->dev;
+				fdb_update.mac_addr = fdb->addr.addr;
+				//FIXME
+				//__rtmsg_ifinfo(RTM_NEWLINK, br->dev, 0, GFP_ATOMIC);
+				//FIXME
+				call_brevent_notifiers(BREVENT_FDB_UPDATE, &fdb_update);
+#endif
 				fdb->dst = source;
 				fdb_modified = true;
 			}
@@ -584,6 +663,24 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 		spin_unlock(&br->hash_lock);
 	}
 }
+
+#if defined(CONFIG_ARCH_COMCERTO)
+void br_fdb_register_can_expire_cb(int(*cb)(unsigned char *mac_addr, struct net_device *dev))
+{
+        spin_lock_bh(&br_fdb_cb_lock);
+        br_fdb_can_expire = cb;
+        spin_unlock_bh(&br_fdb_cb_lock);
+}
+EXPORT_SYMBOL(br_fdb_register_can_expire_cb);
+
+void br_fdb_deregister_can_expire_cb()
+{
+        spin_lock_bh(&br_fdb_cb_lock);
+        br_fdb_can_expire = NULL;
+        spin_unlock_bh(&br_fdb_cb_lock);
+}
+EXPORT_SYMBOL(br_fdb_deregister_can_expire_cb);
+#endif
 
 static int fdb_to_nud(const struct net_bridge_fdb_entry *fdb)
 {

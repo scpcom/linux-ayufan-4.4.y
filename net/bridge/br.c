@@ -215,6 +215,60 @@ static void __exit br_deinit(void)
 	br_fdb_fini();
 }
 
+#if defined(CONFIG_ARCH_COMCERTO)
+static ATOMIC_NOTIFIER_HEAD(brevent_notif_chain);
+
+/**
+ *	register_brevent_notifier - register a netevent notifier block
+ *	@nb: notifier
+ *
+ *	Register a notifier to be called when a bridge event occurs.
+ *	The notifier passed is linked into the kernel structures and must
+ *	not be reused until it has been unregistered. A negative errno code
+ *	is returned on a failure.
+ */
+int register_brevent_notifier(struct notifier_block *nb)
+{
+	int err;
+
+	err = atomic_notifier_chain_register(&brevent_notif_chain, nb);
+	return err;
+}
+
+/**
+ *	unregister_brevent_notifier - unregister a netevent notifier block
+ *	@nb: notifier
+ *
+ *	Unregister a notifier previously registered by
+ *	register_neigh_notifier(). The notifier is unlinked into the
+ *	kernel structures and may then be reused. A negative errno code
+ *	is returned on a failure.
+ */
+
+int unregister_brevent_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_unregister(&brevent_notif_chain, nb);
+}
+
+/**
+ *	call_brevent_notifiers - call all netevent notifier blocks
+ *      @val: value passed unmodified to notifier function
+ *      @v:   pointer passed unmodified to notifier function
+ *
+ *	Call all neighbour notifier blocks.  Parameters and return value
+ *	are as for notifier_call_chain().
+ */
+
+int call_brevent_notifiers(unsigned long val, void *v)
+{
+	return atomic_notifier_call_chain(&brevent_notif_chain, val, v);
+}
+
+EXPORT_SYMBOL_GPL(register_brevent_notifier);
+EXPORT_SYMBOL_GPL(unregister_brevent_notifier);
+EXPORT_SYMBOL_GPL(call_brevent_notifiers);
+#endif
+
 module_init(br_init)
 module_exit(br_deinit)
 MODULE_LICENSE("GPL");

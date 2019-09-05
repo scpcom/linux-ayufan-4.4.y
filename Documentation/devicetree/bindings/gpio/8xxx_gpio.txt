@@ -21,7 +21,8 @@ details.
 Required properties:
 - compatible:		"fsl,<chip>-gpio" followed by "fsl,mpc8349-gpio"
 			for 83xx, "fsl,mpc8572-gpio" for 85xx, or
-			"fsl,mpc8610-gpio" for 86xx.
+			"fsl,mpc8610-gpio" for 86xx, "fsl,ls2085a-gpio"
+			for ls2085a.
 - #gpio-cells:		Should be two. The first cell is the pin number
 			and the second cell is used to specify optional
 			parameters (currently unused).

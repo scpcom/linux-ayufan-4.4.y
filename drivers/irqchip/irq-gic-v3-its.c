@@ -1003,7 +1003,7 @@ static void its_cpu_init_collection(void)
 			 * This ITS wants a linear CPU number.
 			 */
 			target = readq_relaxed(gic_data_rdist_rd_base() + GICR_TYPER);
-			target = GICR_TYPER_CPU_NUMBER(target);
+			target = GICR_TYPER_CPU_NUMBER(target) << 16;
 		}
 
 		/* Perform collection mapping */
@@ -1112,20 +1112,15 @@ static int its_alloc_device_irq(struct its_device *dev, irq_hw_number_t *hwirq)
 	return 0;
 }
 
-static int its_msi_prepare(struct irq_domain *domain, struct device *dev,
-			   int nvec, msi_alloc_info_t *info)
+
+int __its_msi_prepare(struct irq_domain *domain, u32 dev_id,
+	struct device *dev, int nvec, msi_alloc_info_t *info)
 {
-	struct pci_dev *pdev;
 	struct its_node *its;
-	u32 dev_id;
 	struct its_device *its_dev;
 
-	if (!dev_is_pci(dev))
-		return -EINVAL;
 
-	pdev = to_pci_dev(dev);
-	dev_id = PCI_DEVID(pdev->bus->number, pdev->devfn);
-	its = domain->parent->host_data;
+	its = domain->host_data;
 
 	its_dev = its_find_device(its, dev_id);
 	if (WARN_ON(its_dev))
@@ -1135,11 +1130,25 @@ static int its_msi_prepare(struct irq_domain *domain, struct device *dev,
 	if (!its_dev)
 		return -ENOMEM;
 
-	dev_dbg(&pdev->dev, "ITT %d entries, %d bits\n", nvec, ilog2(nvec));
-
 	info->scratchpad[0].ptr = its_dev;
 	info->scratchpad[1].ptr = dev;
+
 	return 0;
+}
+
+static int its_msi_prepare(struct irq_domain *domain, struct device *dev,
+			   int nvec, msi_alloc_info_t *info)
+{
+	struct pci_dev *pdev;
+	u32 dev_id;
+
+	if (!dev_is_pci(dev))
+		return -EINVAL;
+
+	pdev = to_pci_dev(dev);
+	dev_dbg(dev, "ITT %d entries, %d bits\n", nvec, ilog2(nvec));
+	dev_id = PCI_DEVID(pdev->bus->number, pdev->devfn);
+	return __its_msi_prepare(domain->parent, dev_id, dev, nvec, info);
 }
 
 static struct msi_domain_ops its_pci_msi_ops = {

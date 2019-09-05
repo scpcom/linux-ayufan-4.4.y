@@ -209,12 +209,12 @@ config GPIO_MPC5200
 	depends on PPC_MPC52xx
 
 config GPIO_MPC8XXX
-	bool "MPC512x/MPC8xxx GPIO support"
+	bool "MPC512x/MPC8xxx/Layerscape GPIO support"
 	depends on PPC_MPC512x || PPC_MPC831x || PPC_MPC834x || PPC_MPC837x || \
-		   FSL_SOC_BOOKE || PPC_86xx
+		   FSL_SOC_BOOKE || PPC_86xx || SOC_LS1021A || ARCH_FSL_LS2085A
 	help
 	  Say Y here if you're going to use hardware that connects to the
-	  MPC512x/831x/834x/837x/8572/8610 GPIOs.
+	  MPC512x/831x/834x/837x/8572/8610/LS1021A/LS2085A GPIOs.
 
 config GPIO_MSM_V1
 	tristate "Qualcomm MSM GPIO v1"
@@ -241,7 +241,7 @@ config GPIO_MVEBU
 
 config GPIO_MXC
 	def_bool y
-	depends on ARCH_MXC
+	depends on ARCH_MXC && !SOC_LS1021A
 	select GPIO_GENERIC
 	select GENERIC_IRQ_CHIP
 
@@ -386,6 +386,13 @@ config GPIO_XTENSA
 	help
 	  Say yes here to support the Xtensa internal GPIO32 IMPWIRE (input)
 	  and EXPSTATE (output) ports
+
+config GPIO_C2K
+	def_bool y
+	depends on ARCH_M86XXX
+	bool "Comcerto 2000 GPIO support"
+	help
+	  Say yes here to support the Comcerto 2000 GPIO device
 
 config GPIO_VR41XX
 	tristate "NEC VR4100 series General-purpose I/O Uint support"

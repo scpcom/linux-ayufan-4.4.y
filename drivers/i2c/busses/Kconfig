@@ -382,6 +382,17 @@ config I2C_BCM_KONA
 
 	  If you do not need KONA I2C interface, say N.
 
+config I2C_COMCERTO
+	tristate "Comcerto I2C interface"
+	depends on I2C && (ARCH_COMCERTO)
+	help
+		If you say yes to this option, support will be included for the
+		Comcerto I2C interface.
+
+		This driver can also be built as a module.  If so, the module
+		will be called i2c-comcerto.
+
+
 config I2C_BLACKFIN_TWI
 	tristate "Blackfin TWI I2C support"
 	depends on BLACKFIN
@@ -536,10 +547,10 @@ config I2C_IMG
 
 config I2C_IMX
 	tristate "IMX I2C interface"
-	depends on ARCH_MXC
+	depends on ARCH_MXC || ARCH_FSL_LS2085A
 	help
 	  Say Y here if you want to use the IIC bus controller on
-	  the Freescale i.MX/MXC processors.
+	  the Freescale i.MX/MXC or LS2085A processors.
 
 	  This driver can also be built as a module.  If so, the module
 	  will be called i2c-imx.

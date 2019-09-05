@@ -50,6 +50,22 @@ extern void brioctl_set(int (*ioctl_hook)(struct net *, unsigned int, void __use
 typedef int br_should_route_hook_t(struct sk_buff *skb);
 extern br_should_route_hook_t __rcu *br_should_route_hook;
 
+#if defined(CONFIG_ARCH_COMCERTO)
+struct brevent_fdb_update{
+	char * mac_addr;
+	struct net_device * dev;
+};
+
+enum brevent_notif_type {
+	BREVENT_PORT_DOWN = 1,	/* arg is struct net_device ptr */
+	BREVENT_FDB_UPDATE	/* arg is struct brevent_fdb_update ptr */
+};
+
+int register_brevent_notifier(struct notifier_block *nb);
+int unregister_brevent_notifier(struct notifier_block *nb);
+int call_brevent_notifiers(unsigned long val, void *v);
+#endif
+
 #if IS_ENABLED(CONFIG_BRIDGE)
 int br_fdb_external_learn_add(struct net_device *dev,
 			      const unsigned char *addr, u16 vid);

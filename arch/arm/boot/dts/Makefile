@@ -269,6 +269,8 @@ dtb-$(CONFIG_ARCH_MXC) += \
 	imx6sx-sdb.dtb \
 	ls1021a-qds.dtb \
 	ls1021a-twr.dtb \
+	ls1043a-qds-intpsr.dtb \
+	ls1043a-rdb-intpsr.dtb \
 	vf500-colibri-eval-v3.dtb \
 	vf610-colibri-eval-v3.dtb \
 	vf610-cosmic.dtb \

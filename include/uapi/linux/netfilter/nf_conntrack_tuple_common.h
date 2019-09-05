@@ -7,6 +7,8 @@ enum ip_conntrack_dir {
 	IP_CT_DIR_MAX
 };
 
+#define IP_NAT_RANGE_4RD_NAPT 16
+
 /* The protocol-specific manipulable parts of the tuple: always in
  * network order
  */

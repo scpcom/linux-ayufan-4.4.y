@@ -226,7 +226,6 @@ struct vgic_v2_cpu_if {
 };
 
 struct vgic_v3_cpu_if {
-#ifdef CONFIG_ARM_GIC_V3
 	u32		vgic_hcr;
 	u32		vgic_vmcr;
 	u32		vgic_misr;	/* Saved only */
@@ -235,7 +234,6 @@ struct vgic_v3_cpu_if {
 	u32		vgic_ap0r[4];
 	u32		vgic_ap1r[4];
 	u64		vgic_lr[VGIC_V3_MAX_LRS];
-#endif
 };
 
 struct vgic_cpu {

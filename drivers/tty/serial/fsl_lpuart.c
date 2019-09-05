@@ -1110,8 +1110,8 @@ static int lpuart_startup(struct uart_port *port)
 		writeb(temp | UARTCR5_TDMAS, port->membase + UARTCR5);
 	}
 
-	ret = devm_request_irq(port->dev, port->irq, lpuart_int, 0,
-				DRIVER_NAME, sport);
+	ret = devm_request_irq(port->dev, port->irq, lpuart_int,
+				IRQF_NO_SUSPEND, DRIVER_NAME, sport);
 	if (ret)
 		return ret;
 
@@ -1835,6 +1835,12 @@ static int lpuart_probe(struct platform_device *pdev)
 		return ret;
 	}
 
+	/*
+	 * Make device's PM flags reflect the wake-up capability, but
+	 * let the user space enable it to wake up the system as needed.
+	 */
+	device_set_wakeup_capable(&pdev->dev, true);
+
 	return 0;
 }
 
@@ -1853,6 +1859,23 @@ static int lpuart_remove(struct platform_device *pdev)
 static int lpuart_suspend(struct device *dev)
 {
 	struct lpuart_port *sport = dev_get_drvdata(dev);
+	unsigned long temp;
+
+	if (sport->lpuart32) {
+		/* disable Rx/Tx and interrupts */
+		temp = lpuart32_read(sport->port.membase + UARTCTRL);
+		temp &= ~(UARTCTRL_TE | UARTCTRL_TIE | UARTCTRL_TCIE);
+		if (!device_may_wakeup(dev))
+			temp &= ~(UARTCTRL_RIE | UARTCTRL_RE);
+		lpuart32_write(temp, sport->port.membase + UARTCTRL);
+	} else {
+		/* disable Rx/Tx and interrupts */
+		temp = readb(sport->port.membase + UARTCR2);
+		temp &= ~(UARTCR2_TE | UARTCR2_TIE | UARTCR2_TCIE);
+		if (!device_may_wakeup(dev))
+			temp &= ~(UARTCR2_RIE | UARTCR2_RE);
+		writeb(temp, sport->port.membase + UARTCR2);
+	}
 
 	uart_suspend_port(&lpuart_reg, &sport->port);
 

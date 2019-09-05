@@ -31,6 +31,9 @@
 
 #include "xhci.h"
 #include "xhci-trace.h"
+#ifdef CONFIG_ARCH_M86XXX
+#include "xhci-comcerto2000.h"
+#endif
 
 #define DRIVER_AUTHOR "Sarah Sharp"
 #define DRIVER_DESC "'eXtensible' Host Controller (xHC) Driver"
@@ -4965,8 +4968,13 @@ static const struct hc_driver xhci_hc_driver = {
 	 */
 	.hub_control =		xhci_hub_control,
 	.hub_status_data =	xhci_hub_status_data,
+#if defined(CONFIG_ARCH_M86XXX) && defined (CONFIG_PM)
+	.bus_suspend =		comcerto_xhci_bus_suspend,
+	.bus_resume =		comcerto_xhci_bus_resume,
+#else
 	.bus_suspend =		xhci_bus_suspend,
 	.bus_resume =		xhci_bus_resume,
+#endif
 
 	/*
 	 * call back when device connected and addressed

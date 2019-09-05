@@ -222,10 +222,18 @@ typedef struct flow_cache_object *(*flow_resolve_t)(
 		struct net *net, const struct flowi *key, u16 family,
 		u8 dir, struct flow_cache_object *oldobj, void *ctx);
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+extern struct flow_cache_object *flow_cache_lookup(
+		struct net *net, const struct flowi *key, u16 family,
+		u8 dir, u8 *new_flow, flow_resolve_t resolver, void *ctx);
+extern void flow_cache_remove(
+				const struct flowi *fl, unsigned short family, unsigned short dir);
+#else
 struct flow_cache_object *flow_cache_lookup(struct net *net,
 					    const struct flowi *key, u16 family,
 					    u8 dir, flow_resolve_t resolver,
 					    void *ctx);
+#endif
 int flow_cache_init(struct net *net);
 void flow_cache_fini(struct net *net);
 

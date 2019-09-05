@@ -120,6 +120,10 @@ void br_stp_disable_port(struct net_bridge_port *p)
 
 	if (br_is_root_bridge(br) && !wasroot)
 		br_become_root_bridge(br);
+
+#if defined(CONFIG_ARCH_COMCERTO)
+	call_brevent_notifiers(BREVENT_PORT_DOWN, p->dev);
+#endif
 }
 
 static void br_stp_start(struct net_bridge *br)

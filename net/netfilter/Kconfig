@@ -198,7 +198,6 @@ config NF_CONNTRACK_FTP
 
 config NF_CONNTRACK_H323
 	tristate "H.323 protocol support"
-	depends on (IPV6 || IPV6=n)
 	depends on NETFILTER_ADVANCED
 	help
 	  H.323 is a VoIP signalling protocol from ITU-T. As one of the most
@@ -912,7 +911,6 @@ config NETFILTER_XT_TARGET_SECMARK
 
 config NETFILTER_XT_TARGET_TCPMSS
 	tristate '"TCPMSS" target support'
-	depends on (IPV6 || IPV6=n)
 	default m if NETFILTER_ADVANCED=n
 	---help---
 	  This option adds a `TCPMSS' target, which allows you to alter the
@@ -1163,6 +1161,13 @@ config NETFILTER_XT_MATCH_IPCOMP
 	  inside IPComp header of IPSec packets.
 
 	  To compile it as a module, choose M here.  If unsure, say N.
+
+config NETFILTER_XT_MATCH_ID
+	tristate '"id" match support'
+	depends on NETFILTER_ADVANCED
+	---help---
+	This option adds a `id' dummy-match, which allows you to put
+	numeric IDs into your iptables ruleset.
 
 config NETFILTER_XT_MATCH_IPRANGE
 	tristate '"iprange" address range match support'

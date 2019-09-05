@@ -21,7 +21,7 @@
 #endif
 
 #include "entry-header.S"
-
+#include <asm/page.h>
 
 	.align	5
 /*

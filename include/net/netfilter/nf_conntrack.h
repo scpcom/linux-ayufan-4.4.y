@@ -71,6 +71,14 @@ struct nf_conn_help {
 #include <net/netfilter/ipv4/nf_conntrack_ipv4.h>
 #include <net/netfilter/ipv6/nf_conntrack_ipv6.h>
 
+#if defined(CONFIG_CPE_FAST_PATH)
+struct comcerto_fp_info {
+      int ifindex;
+      int iif;
+      u32 mark;
+};
+#endif
+
 struct nf_conn {
 	/* Usage count in here is 1 for hash table/destruct timer, 1 per skb,
 	 * plus 1 for any connection(s) we are `master' for
@@ -112,6 +120,9 @@ struct nf_conn {
 	u_int32_t secmark;
 #endif
 
+#if defined(CONFIG_CPE_FAST_PATH)
+    struct comcerto_fp_info fp_info[IP_CT_DIR_MAX];
+#endif
 	/* Extensions */
 	struct nf_ct_ext *ext;
 
@@ -275,6 +286,13 @@ static inline int nf_ct_is_dying(struct nf_conn *ct)
 	return test_bit(IPS_DYING_BIT, &ct->status);
 }
 
+#ifdef CONFIG_CPE_FAST_PATH
+static inline int nf_ct_is_permanent(struct nf_conn *ct)
+{
+	return test_bit(IPS_PERMANENT_BIT, &ct->status);
+}
+#endif
+
 static inline int nf_ct_is_untracked(const struct nf_conn *ct)
 {
 	return test_bit(IPS_UNTRACKED_BIT, &ct->status);
@@ -288,6 +306,10 @@ static inline bool nf_is_loopback_packet(const struct sk_buff *skb)
 
 struct kernel_param;
 
+#if defined(CONFIG_CPE_FAST_PATH)
+extern int nf_conntrack_set_dpi_allow_report(struct sk_buff *skb);
+extern int nf_conntrack_set_dpi_allow_and_mark(struct sk_buff *skb, int mark);
+#endif
 int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp);
 extern unsigned int nf_conntrack_htable_size;
 extern unsigned int nf_conntrack_max;

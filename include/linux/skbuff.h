@@ -561,6 +561,11 @@ struct sk_buff {
 	/* one bit hole */
 	kmemcheck_bitfield_end(flags1);
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	__u16			ipsec_offload;
+	__u16			ipsec_xfrm_dir;
+#endif
+
 	/* fields enclosed in headers_start/headers_end are copied
 	 * using a single memcpy() in __copy_skb_header()
 	 */
@@ -661,6 +666,11 @@ struct sk_buff {
 	sk_buff_data_t		end;
 	unsigned char		*head,
 				*data;
+#if defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	unsigned char 		*mspd_data;
+	__u32 			mspd_len;
+	__u32 			mspd_ofst;
+#endif
 	unsigned int		truesize;
 	atomic_t		users;
 };
@@ -809,6 +819,18 @@ static inline struct sk_buff *alloc_skb_fclone(unsigned int size,
 {
 	return __alloc_skb(size, priority, SKB_ALLOC_FCLONE, NUMA_NO_NODE);
 }
+
+#if defined(CONFIG_ARCH_COMCERTO)
+extern struct sk_buff *__alloc_skb_header(unsigned int size, void *data, gfp_t gfp_mask,
+			    int fclone, int node);
+static inline struct sk_buff *alloc_skb_header(unsigned int size, 
+					u8* data,
+					gfp_t priority)
+{
+	return __alloc_skb_header(size, data, priority, 0, -1);
+}
+#endif
+
 
 struct sk_buff *__alloc_skb_head(gfp_t priority, int node);
 static inline struct sk_buff *alloc_skb_head(gfp_t priority)

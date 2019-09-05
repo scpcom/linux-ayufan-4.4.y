@@ -48,6 +48,8 @@
 #define PCIE_ATU_VIEWPORT		0x900
 #define PCIE_ATU_REGION_INBOUND		(0x1 << 31)
 #define PCIE_ATU_REGION_OUTBOUND	(0x0 << 31)
+#define PCIE_ATU_REGION_INDEX3		(0x3 << 0)
+#define PCIE_ATU_REGION_INDEX2		(0x2 << 0)
 #define PCIE_ATU_REGION_INDEX1		(0x1 << 0)
 #define PCIE_ATU_REGION_INDEX0		(0x0 << 0)
 #define PCIE_ATU_CR1			0x904
@@ -150,6 +152,7 @@ static int dw_pcie_wr_own_conf(struct pcie_port *pp, int where, int size,
 	return ret;
 }
 
+#if 0
 static struct irq_chip dw_msi_irq_chip = {
 	.name = "PCI-MSI",
 	.irq_enable = pci_msi_unmask_irq,
@@ -319,6 +322,7 @@ static struct msi_controller dw_pcie_msi_chip = {
 	.setup_irq = dw_msi_setup_irq,
 	.teardown_irq = dw_msi_teardown_irq,
 };
+#endif
 
 int dw_pcie_link_up(struct pcie_port *pp)
 {
@@ -328,12 +332,13 @@ int dw_pcie_link_up(struct pcie_port *pp)
 		return 0;
 }
 
+#if 0
 static int dw_pcie_msi_map(struct irq_domain *domain, unsigned int irq,
 			irq_hw_number_t hwirq)
 {
 	irq_set_chip_and_handler(irq, &dw_msi_irq_chip, handle_simple_irq);
 	irq_set_chip_data(irq, domain->host_data);
-	set_irq_flags(irq, IRQF_VALID);
+	/* set_irq_flags(irq, IRQF_VALID); */
 
 	return 0;
 }
@@ -341,6 +346,7 @@ static int dw_pcie_msi_map(struct irq_domain *domain, unsigned int irq,
 static const struct irq_domain_ops msi_domain_ops = {
 	.map = dw_pcie_msi_map,
 };
+#endif
 
 int __init dw_pcie_host_init(struct pcie_port *pp)
 {
@@ -349,7 +355,7 @@ int __init dw_pcie_host_init(struct pcie_port *pp)
 	struct of_pci_range range;
 	struct of_pci_range_parser parser;
 	struct resource *cfg_res;
-	u32 val, na, ns;
+	u32 num_atus = 2, val, na, ns;
 	const __be32 *addrp;
 	int i, index, ret;
 
@@ -470,7 +476,7 @@ int __init dw_pcie_host_init(struct pcie_port *pp)
 		dev_err(pp->dev, "Failed to parse the number of lanes\n");
 		return -EINVAL;
 	}
-
+#if 0
 	if (IS_ENABLED(CONFIG_PCI_MSI)) {
 		if (!pp->ops->msi_host_init) {
 			pp->irq_domain = irq_domain_add_linear(pp->dev->of_node,
@@ -489,6 +495,19 @@ int __init dw_pcie_host_init(struct pcie_port *pp)
 				return ret;
 		}
 	}
+#endif
+	of_property_read_u32(np, "num-atus", &num_atus);
+	if (num_atus >= 4) {
+		pp->atu_idx[ATU_TYPE_CFG0] = PCIE_ATU_REGION_INDEX0;
+		pp->atu_idx[ATU_TYPE_CFG1] = PCIE_ATU_REGION_INDEX1;
+		pp->atu_idx[ATU_TYPE_MEM] = PCIE_ATU_REGION_INDEX2;
+		pp->atu_idx[ATU_TYPE_IO] = PCIE_ATU_REGION_INDEX3;
+	} else {
+		pp->atu_idx[ATU_TYPE_CFG0] = PCIE_ATU_REGION_INDEX0;
+		pp->atu_idx[ATU_TYPE_MEM] = PCIE_ATU_REGION_INDEX0;
+		pp->atu_idx[ATU_TYPE_CFG1] = PCIE_ATU_REGION_INDEX1;
+		pp->atu_idx[ATU_TYPE_IO] = PCIE_ATU_REGION_INDEX1;
+	}
 
 	if (pp->ops->host_init)
 		pp->ops->host_init(pp);
@@ -503,8 +522,10 @@ int __init dw_pcie_host_init(struct pcie_port *pp)
 	dw_pcie_wr_own_conf(pp, PCIE_LINK_WIDTH_SPEED_CONTROL, 4, val);
 
 #ifdef CONFIG_PCI_MSI
+#if 0
 	dw_pcie_msi_chip.dev = pp->dev;
 	dw_pci.msi_ctrl = &dw_pcie_msi_chip;
+#endif
 #endif
 
 	dw_pci.nr_controllers = 1;
@@ -520,8 +541,9 @@ int __init dw_pcie_host_init(struct pcie_port *pp)
 
 static void dw_pcie_prog_viewport_cfg0(struct pcie_port *pp, u32 busdev)
 {
-	/* Program viewport 0 : OUTBOUND : CFG0 */
-	dw_pcie_writel_rc(pp, PCIE_ATU_REGION_OUTBOUND | PCIE_ATU_REGION_INDEX0,
+	/* Program viewport : OUTBOUND : CFG0 */
+	dw_pcie_writel_rc(pp,
+			  PCIE_ATU_REGION_OUTBOUND | pp->atu_idx[ATU_TYPE_CFG0],
 			  PCIE_ATU_VIEWPORT);
 	dw_pcie_writel_rc(pp, pp->cfg0_mod_base, PCIE_ATU_LOWER_BASE);
 	dw_pcie_writel_rc(pp, (pp->cfg0_mod_base >> 32), PCIE_ATU_UPPER_BASE);
@@ -535,8 +557,9 @@ static void dw_pcie_prog_viewport_cfg0(struct pcie_port *pp, u32 busdev)
 
 static void dw_pcie_prog_viewport_cfg1(struct pcie_port *pp, u32 busdev)
 {
-	/* Program viewport 1 : OUTBOUND : CFG1 */
-	dw_pcie_writel_rc(pp, PCIE_ATU_REGION_OUTBOUND | PCIE_ATU_REGION_INDEX1,
+	/* Program viewport : OUTBOUND : CFG1 */
+	dw_pcie_writel_rc(pp,
+			  PCIE_ATU_REGION_OUTBOUND | pp->atu_idx[ATU_TYPE_CFG1],
 			  PCIE_ATU_VIEWPORT);
 	dw_pcie_writel_rc(pp, PCIE_ATU_TYPE_CFG1, PCIE_ATU_CR1);
 	dw_pcie_writel_rc(pp, pp->cfg1_mod_base, PCIE_ATU_LOWER_BASE);
@@ -550,8 +573,9 @@ static void dw_pcie_prog_viewport_cfg1(struct pcie_port *pp, u32 busdev)
 
 static void dw_pcie_prog_viewport_mem_outbound(struct pcie_port *pp)
 {
-	/* Program viewport 0 : OUTBOUND : MEM */
-	dw_pcie_writel_rc(pp, PCIE_ATU_REGION_OUTBOUND | PCIE_ATU_REGION_INDEX0,
+	/* Program viewport : OUTBOUND : MEM */
+	dw_pcie_writel_rc(pp,
+			  PCIE_ATU_REGION_OUTBOUND | pp->atu_idx[ATU_TYPE_MEM],
 			  PCIE_ATU_VIEWPORT);
 	dw_pcie_writel_rc(pp, PCIE_ATU_TYPE_MEM, PCIE_ATU_CR1);
 	dw_pcie_writel_rc(pp, pp->mem_mod_base, PCIE_ATU_LOWER_BASE);
@@ -566,8 +590,9 @@ static void dw_pcie_prog_viewport_mem_outbound(struct pcie_port *pp)
 
 static void dw_pcie_prog_viewport_io_outbound(struct pcie_port *pp)
 {
-	/* Program viewport 1 : OUTBOUND : IO */
-	dw_pcie_writel_rc(pp, PCIE_ATU_REGION_OUTBOUND | PCIE_ATU_REGION_INDEX1,
+	/* Program viewport : OUTBOUND : IO */
+	dw_pcie_writel_rc(pp,
+			  PCIE_ATU_REGION_OUTBOUND | pp->atu_idx[ATU_TYPE_IO],
 			  PCIE_ATU_VIEWPORT);
 	dw_pcie_writel_rc(pp, PCIE_ATU_TYPE_IO, PCIE_ATU_CR1);
 	dw_pcie_writel_rc(pp, pp->io_mod_base, PCIE_ATU_LOWER_BASE);
@@ -594,12 +619,14 @@ static int dw_pcie_rd_other_conf(struct pcie_port *pp, struct pci_bus *bus,
 		dw_pcie_prog_viewport_cfg0(pp, busdev);
 		ret = dw_pcie_cfg_read(pp->va_cfg0_base + address, where, size,
 				val);
-		dw_pcie_prog_viewport_mem_outbound(pp);
+		if (pp->atu_idx[ATU_TYPE_MEM] == pp->atu_idx[ATU_TYPE_CFG0])
+			dw_pcie_prog_viewport_mem_outbound(pp);
 	} else {
 		dw_pcie_prog_viewport_cfg1(pp, busdev);
 		ret = dw_pcie_cfg_read(pp->va_cfg1_base + address, where, size,
 				val);
-		dw_pcie_prog_viewport_io_outbound(pp);
+		if (pp->atu_idx[ATU_TYPE_IO] == pp->atu_idx[ATU_TYPE_CFG1])
+			dw_pcie_prog_viewport_io_outbound(pp);
 	}
 
 	return ret;
@@ -619,12 +646,14 @@ static int dw_pcie_wr_other_conf(struct pcie_port *pp, struct pci_bus *bus,
 		dw_pcie_prog_viewport_cfg0(pp, busdev);
 		ret = dw_pcie_cfg_write(pp->va_cfg0_base + address, where, size,
 				val);
-		dw_pcie_prog_viewport_mem_outbound(pp);
+		if (pp->atu_idx[ATU_TYPE_MEM] == pp->atu_idx[ATU_TYPE_CFG0])
+			dw_pcie_prog_viewport_mem_outbound(pp);
 	} else {
 		dw_pcie_prog_viewport_cfg1(pp, busdev);
 		ret = dw_pcie_cfg_write(pp->va_cfg1_base + address, where, size,
 				val);
-		dw_pcie_prog_viewport_io_outbound(pp);
+		if (pp->atu_idx[ATU_TYPE_IO] == pp->atu_idx[ATU_TYPE_CFG1])
+			dw_pcie_prog_viewport_io_outbound(pp);
 	}
 
 	return ret;
@@ -712,7 +741,7 @@ static int dw_pcie_setup(int nr, struct pci_sys_data *sys)
 
 	if (global_io_offset < SZ_1M && pp->io_size > 0) {
 		sys->io_offset = global_io_offset - pp->io_bus_addr;
-		pci_ioremap_io(global_io_offset, pp->io_base);
+		/* pci_ioremap_io(global_io_offset, pp->io_base); */
 		global_io_offset += SZ_64K;
 		pci_add_resource_offset(&sys->resources, &pp->io,
 					sys->io_offset);
@@ -767,6 +796,10 @@ void dw_pcie_setup_rc(struct pcie_port *pp)
 	u32 val;
 	u32 membase;
 	u32 memlimit;
+
+	/* set ATUs setting for MEM and IO */
+	dw_pcie_prog_viewport_mem_outbound(pp);
+	dw_pcie_prog_viewport_io_outbound(pp);
 
 	/* set the number of lanes */
 	dw_pcie_readl_rc(pp, PCIE_PORT_LINK_CONTROL, &val);

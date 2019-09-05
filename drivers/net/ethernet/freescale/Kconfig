@@ -5,9 +5,7 @@
 config NET_VENDOR_FREESCALE
 	bool "Freescale devices"
 	default y
-	depends on FSL_SOC || QUICC_ENGINE || CPM1 || CPM2 || PPC_MPC512x || \
-		   M523x || M527x || M5272 || M528x || M520x || M532x || \
-		   ARCH_MXC || ARCH_MXS || (PPC_MPC52xx && PPC_BESTCOMM)
+	depends on M68K || PPC || ARM || ARM64
 	---help---
 	  If you have a network (Ethernet) card belonging to this class, say Y
 	  and read the Ethernet-HOWTO, available from
@@ -58,18 +56,17 @@ source "drivers/net/ethernet/freescale/fs_enet/Kconfig"
 
 config FSL_PQ_MDIO
 	tristate "Freescale PQ MDIO"
-	depends on FSL_SOC
 	select PHYLIB
 	---help---
 	  This driver supports the MDIO bus used by the gianfar and UCC drivers.
 
 config FSL_XGMAC_MDIO
 	tristate "Freescale XGMAC MDIO"
-	depends on FSL_SOC
 	select PHYLIB
 	select OF_MDIO
 	---help---
-	  This driver supports the MDIO bus on the Fman 10G Ethernet MACs.
+	  This driver supports the MDIO bus on the Fman 10G Ethernet MACs, and
+	  on the FMan mEMAC (which supports both Clauses 22 and 45)
 
 config UCC_GETH
 	tristate "Freescale QE Gigabit Ethernet"

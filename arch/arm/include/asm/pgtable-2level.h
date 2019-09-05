@@ -28,6 +28,15 @@
  * which contain the state information Linux needs.  We, therefore, end up
  * with 512 entries in the "PTE" level.
  *
+ * 64k pages support (Mindspeed COMCERTO):
+ * We cheat even more and tell Linux that we have 256 entries in the first
+ * level, each of which is 64 bytes (16 hardware pointers). The 2nd level
+ * contains 16 hardware PTE tables, or 4096 hardware entries. However,
+ * since 64kB pages are done by duplicating 4kB entries, there will only by
+ * 256 entries in the Linux "PTE" level (and the PTE entry will be larger).
+ * All defines are now also derived from the LINKED_PMDS_SHIFT macro, which
+ * determines how many PMDs point into a single 2nd-level table.
+ *
  * This leads to the page tables having the following layout:
  *
  *    pgd             pte
@@ -68,6 +77,7 @@
  * until either the TLB entry is evicted under pressure, or a context
  * switch which changes the user space mapping occurs.
  */
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 #define PTRS_PER_PTE		512
 #define PTRS_PER_PMD		1
 #define PTRS_PER_PGD		2048
@@ -82,6 +92,22 @@
  */
 #define PMD_SHIFT		21
 #define PGDIR_SHIFT		21
+
+#else
+#define LINKED_PMDS_SHIFT	4
+#define LINKED_PMDS			(1 << LINKED_PMDS_SHIFT)	/* number of PMDs pointing to the same 2nd-level page */
+#define PTRS_PER_PGD		(4096 / LINKED_PMDS)		/* one pgdir table contains 4096 entries */
+#define PGDIR_SHIFT			(20 + LINKED_PMDS_SHIFT)	/* one pgdir entry can map 1MB (2^20) */
+#define PMD_SHIFT			(PGDIR_SHIFT)
+#define PTET_SIZE_SHIFT		6							/* a HW PTE entry is 16*4bytes */
+#define PTE_HWTABLE_PTRS	(1 << (10 + LINKED_PMDS_SHIFT - PTET_SIZE_SHIFT)) /* one HW PTE table is 1kB (2^10) */
+
+#define PTRS_PER_PTE		(PTE_HWTABLE_PTRS)
+#define PTRS_PER_PMD		1
+
+#define PTE_HWTABLE_OFF		32768 //(PTRS_PER_PTE * sizeof(pte_t))
+#define PTE_HWTABLE_SIZE	(1 << (10 + LINKED_PMDS_SHIFT))
+#endif
 
 #define PMD_SIZE		(1UL << PMD_SHIFT)
 #define PMD_MASK		(~(PMD_SIZE-1))

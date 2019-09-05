@@ -26,3 +26,4 @@ Optional properties:
 - bus-range: PCI bus numbers covered (it is recommended for new devicetrees to
   specify this property, to keep backwards compatibility a range of 0x00-0xff
   is assumed if not present)
+- num-atus: number of ATUs. The default value is 2 if not present

@@ -42,6 +42,11 @@ struct ip6_tnl {
 	struct dst_entry *dst_cache;    /* cached dst */
 	u32 dst_cookie;
 
+#if defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	u32 genid;
+#endif
+    struct ip6_tnl_4rd_parm ip4rd; /* 4rd parameters for the tunnel */ 
+
 	int err_count;
 	unsigned long err_time;
 

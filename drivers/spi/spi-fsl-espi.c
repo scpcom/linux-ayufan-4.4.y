@@ -250,19 +250,30 @@ static int fsl_espi_bufs(struct spi_device *spi, struct spi_transfer *t)
 	return mpc8xxx_spi->count;
 }
 
-static inline void fsl_espi_addr2cmd(unsigned int addr, u8 *cmd)
+static inline void fsl_espi_addr2cmd(unsigned int addr, u8 *cmd, u8 addr_width)
 {
 	if (cmd) {
-		cmd[1] = (u8)(addr >> 16);
-		cmd[2] = (u8)(addr >> 8);
-		cmd[3] = (u8)(addr >> 0);
+		if (addr_width == 3) {
+			cmd[1] = (u8)(addr >> 16);
+			cmd[2] = (u8)(addr >> 8);
+			cmd[3] = (u8)(addr >> 0);
+		} else if (addr_width == 4) {
+			cmd[1] = (u8)(addr >> 24);
+			cmd[2] = (u8)(addr >> 16);
+			cmd[3] = (u8)(addr >> 8);
+			cmd[4] = (u8)(addr >> 0);
+		}
 	}
 }
 
-static inline unsigned int fsl_espi_cmd2addr(u8 *cmd)
+static inline unsigned int fsl_espi_cmd2addr(u8 *cmd, u8 addr_width)
 {
-	if (cmd)
-		return cmd[1] << 16 | cmd[2] << 8 | cmd[3] << 0;
+	if (cmd) {
+		if (addr_width == 3)
+			return cmd[1] << 16 | cmd[2] << 8 | cmd[3] << 0;
+		else if (addr_width == 4)
+			return cmd[1] << 24 |cmd[2] << 16 | cmd[3] << 8 | cmd[4] << 0;
+	}
 
 	return 0;
 }
@@ -367,7 +378,9 @@ static void fsl_espi_rw_trans(struct spi_message *m,
 	unsigned int trans_len;
 	unsigned int addr;
 	int i, pos, loop;
+	u8 addr_width;
 
+	addr_width = m->addr_width;
 	local_buf = kzalloc(SPCOM_TRANLEN_MAX, GFP_KERNEL);
 	if (!local_buf) {
 		espi_trans->status = -ENOMEM;
@@ -388,9 +401,9 @@ static void fsl_espi_rw_trans(struct spi_message *m,
 		}
 
 		if (pos > 0) {
-			addr = fsl_espi_cmd2addr(local_buf);
+			addr = fsl_espi_cmd2addr(local_buf, addr_width);
 			addr += pos;
-			fsl_espi_addr2cmd(addr, local_buf);
+			fsl_espi_addr2cmd(addr, local_buf, addr_width);
 		}
 
 		espi_trans->n_tx = n_tx;

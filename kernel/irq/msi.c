@@ -10,10 +10,14 @@
  * PCI compatible and non PCI compatible devices.
  */
 #include <linux/types.h>
+#include <linux/version.h>
 #include <linux/device.h>
 #include <linux/irq.h>
 #include <linux/irqdomain.h>
 #include <linux/msi.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
+#include <linux/slab.h>
+#endif
 
 /* Temparory solution for building, will be removed later */
 #include <linux/pci.h>
@@ -89,8 +93,10 @@ static int msi_domain_alloc(struct irq_domain *domain, unsigned int virq,
 	irq_hw_number_t hwirq = ops->get_hwirq(info, arg);
 	int i, ret;
 
+#if 0
 	if (irq_find_mapping(domain, hwirq) > 0)
 		return -EEXIST;
+#endif
 
 	ret = irq_domain_alloc_irqs_parent(domain, virq, nr_irqs, arg);
 	if (ret < 0)
@@ -325,6 +331,18 @@ void msi_domain_free_irqs(struct irq_domain *domain, struct device *dev)
 struct msi_domain_info *msi_get_domain_info(struct irq_domain *domain)
 {
 	return (struct msi_domain_info *)domain->host_data;
+}
+
+struct msi_desc *alloc_msi_entry(struct device *dev)
+{
+	struct msi_desc *desc = kzalloc(sizeof(*desc), GFP_KERNEL);
+	if (!desc)
+		return NULL;
+
+	INIT_LIST_HEAD(&desc->list);
+	desc->dev = dev;
+
+	return desc;
 }
 
 #endif /* CONFIG_GENERIC_MSI_IRQ_DOMAIN */

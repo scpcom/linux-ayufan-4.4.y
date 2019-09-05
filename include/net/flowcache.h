@@ -12,6 +12,9 @@ struct flow_cache_percpu {
 	u32				hash_rnd;
 	int				hash_rnd_recalc;
 	struct tasklet_struct		flush_tasklet;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	struct tasklet_struct		flowcache_rem_tasklet;
+#endif
 };
 
 struct flow_cache {

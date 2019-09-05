@@ -91,6 +91,16 @@ enum ip_conntrack_status {
 	/* Conntrack got a helper explicitly attached via CT target. */
 	IPS_HELPER_BIT = 13,
 	IPS_HELPER = (1 << IPS_HELPER_BIT),
+
+#ifdef CONFIG_CPE_FAST_PATH
+	/* Connection  cannot expire */
+	IPS_PERMANENT_BIT = 14,
+	IPS_PERMANENT = (1 << IPS_PERMANENT_BIT),
+
+	/* Connection is assured by DPI application */
+	IPS_DPI_ALLOWED_BIT = 15,
+	IPS_DPI_ALLOWED = (1 << IPS_DPI_ALLOWED_BIT),
+#endif
 };
 
 /* Connection tracking event types */

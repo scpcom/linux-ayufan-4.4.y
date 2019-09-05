@@ -39,13 +39,21 @@
  * TASK_SIZE - the maximum size of a user space task.
  * TASK_UNMAPPED_BASE - the lower boundary of the mmap VM area
  */
+/* #include <asm/pgtable-2level.h> */
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 #define TASK_SIZE		(UL(CONFIG_PAGE_OFFSET) - UL(SZ_16M))
 #define TASK_UNMAPPED_BASE	ALIGN(TASK_SIZE / 3, SZ_16M)
+#else
+#define TASK_SIZE		((UL(CONFIG_PAGE_OFFSET) - UL(0x01000000)) & ~(UL((1 << PMD_SHIFT)-1)))  // Must be aligned on PMD size (kernel/user space can share same PMD)
+#define TASK_UNMAPPED_BASE	(UL(CONFIG_PAGE_OFFSET) / 3)
+#endif
 
 /*
  * The maximum size of a 26-bit user space task.
  */
 #define TASK_SIZE_26		(UL(1) << 26)
+
+#ifndef CONFIG_COMCERTO_ZONE_DMA_NCNB
 
 /*
  * The module space lives between the addresses given by TASK_SIZE
@@ -58,9 +66,6 @@
 #define MODULES_VADDR		(PAGE_OFFSET - SZ_8M)
 #endif
 
-#if TASK_SIZE > MODULES_VADDR
-#error Top of user space clashes with start of module space
-#endif
 
 /*
  * The highmem pkmap virtual space shares the end of the module area.
@@ -69,6 +74,26 @@
 #define MODULES_END		(PAGE_OFFSET - PMD_SIZE)
 #else
 #define MODULES_END		(PAGE_OFFSET)
+#endif
+
+#else
+/* Move module space into the hole reserved for MSP/PFE so we can have a bigger DMA zone */
+/* #define MODULES_END		((COMCERTO_DDR_SHARED_BASE + COMCERTO_DDR_SHARED_SIZE - PLAT_PHYS_OFFSET + PAGE_OFFSET) & PMD_MASK) // convert SHARED_END to virt and align on lower PMD boundary */
+#define MODULES_END		((COMCERTO_DDR_SHARED_BASE + COMCERTO_DDR_SHARED_SIZE - PLAT_PHYS_OFFSET + PAGE_OFFSET)) // convert SHARED_END to virt and align on lower PMD boundary
+
+#ifndef CONFIG_THUMB2_KERNEL
+#define MODULES_VADDR	(MODULES_END - 16*1024*1024)
+#else
+#define MODULES_VADDR	(MODULES_END - 10*1024*1024) // Relocations will be guaranteed to work as long as kernel size is less than 6MB
+#endif
+
+#endif
+
+#define XSTR(x) STR(x)
+#define STR(x) #x
+
+#if TASK_SIZE > MODULES_VADDR
+#error Top of user space clashes with start of module space
 #endif
 
 /*
@@ -152,7 +177,9 @@
  * have CONFIG_ARM_PATCH_PHYS_VIRT. Assembly code must always use
  * PLAT_PHYS_OFFSET and not PHYS_OFFSET.
  */
+#ifndef PLAT_PHYS_OFFSET
 #define PLAT_PHYS_OFFSET	UL(CONFIG_PHYS_OFFSET)
+#endif
 
 #ifndef __ASSEMBLY__
 

@@ -573,6 +573,7 @@ static inline void __flush_bp_all(void)
  *	these operations.  This is typically used when we are removing
  *	PMD entries.
  */
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 static inline void flush_pmd_entry(void *pmd)
 {
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
@@ -591,6 +592,39 @@ static inline void clean_pmd_entry(void *pmd)
 	tlb_op(TLB_DCLEAN, "c7, c10, 1	@ flush_pmd", pmd);
 	tlb_l2_op(TLB_L2CLEAN_FR, "c15, c9, 1  @ L2 flush_pmd", pmd);
 }
+#else
+static inline void flush_pmd_entry(void *pmd)
+{
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+	char *p = (char *)pmd;
+
+	if (tlb_flag(TLB_DCLEAN)) {
+		while (p < ((char *)pmd + (LINKED_PMDS * sizeof(u32)))) { // A PMD contains LINKED_PMDS pointers to the 2nd-level table
+			asm("mcr	p15, 0, %0, c7, c10, 1	@ flush_pmd"
+					: : "r" (p) : "cc");
+			p += 32; //Next cache line
+		}
+	}
+
+	if (tlb_flag(TLB_WB))
+		dsb();
+}
+
+static inline void clean_pmd_entry(void *pmd)
+{
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+	char *p = (char *)pmd;
+
+	if (tlb_flag(TLB_DCLEAN)) {
+		while (p < ((char *)pmd + (LINKED_PMDS * sizeof(u32)))) { // A PMD contains LINKED_PMDS pointers to the 2nd-level table
+			asm("mcr	p15, 0, %0, c7, c10, 1	@ flush_pmd"
+					: : "r" (p) : "cc");
+			p += 32; //Next cache line
+		}
+	}
+}
+
+#endif
 
 #undef tlb_op
 #undef tlb_flag

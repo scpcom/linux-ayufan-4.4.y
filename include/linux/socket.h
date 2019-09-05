@@ -193,7 +193,8 @@ struct ucred {
 #define AF_ALG		38	/* Algorithm sockets		*/
 #define AF_NFC		39	/* NFC sockets			*/
 #define AF_VSOCK	40	/* vSockets			*/
-#define AF_MAX		41	/* For now.. */
+#define AF_COMA		41	/* COMA sockets			*/
+#define AF_MAX		42	/* For now.. */
 
 /* Protocol families, same as address families. */
 #define PF_UNSPEC	AF_UNSPEC
@@ -238,6 +239,7 @@ struct ucred {
 #define PF_ALG		AF_ALG
 #define PF_NFC		AF_NFC
 #define PF_VSOCK	AF_VSOCK
+#define PF_COMA		AF_COMA
 #define PF_MAX		AF_MAX
 
 /* Maximum queue length specifiable by listen.  */
@@ -266,6 +268,10 @@ struct ucred {
 #define MSG_MORE	0x8000	/* Sender will send more */
 #define MSG_WAITFORONE	0x10000	/* recvmmsg(): block until 1+ packets avail */
 #define MSG_SENDPAGE_NOTLAST 0x20000 /* sendpage() internal : not the last page */
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#define MSG_KERNSPACE   0x40000
+#define MSG_NOCATCHSIG	0x80000
+#endif
 #define MSG_EOF         MSG_FIN
 
 #define MSG_FASTOPEN	0x20000000	/* Send data in TCP SYN */
@@ -327,6 +333,9 @@ extern unsigned long iov_pages(const struct iovec *iov, int offset,
 
 extern int move_addr_to_kernel(void __user *uaddr, int ulen, struct sockaddr_storage *kaddr);
 extern int put_cmsg(struct msghdr*, int level, int type, int len, void *data);
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+extern void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len);
+#endif
 
 struct timespec;
 

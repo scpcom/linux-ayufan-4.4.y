@@ -118,8 +118,22 @@ static inline u64 arch_counter_get_cntvct(void)
 {
 	u64 cval;
 
+#ifdef CONFIG_LS2085A_ERRATA_ERR008585
+	u64 cval_new, timeout = 200;
+#endif
+
 	isb();
 	asm volatile("mrs %0, cntvct_el0" : "=r" (cval));
+
+#ifdef CONFIG_LS2085A_ERRATA_ERR008585
+	asm volatile("mrs %0, cntvct_el0" : "=r" (cval_new));
+	while (cval != cval_new && timeout) {
+		cval = cval_new;
+		asm volatile("mrs %0, cntvct_el0" : "=r" (cval_new));
+		timeout--;
+	}
+	BUG_ON((timeout <= 0) && (cval != cval_new));
+#endif
 
 	return cval;
 }

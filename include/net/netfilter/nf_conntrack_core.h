@@ -84,6 +84,10 @@ print_tuple(struct seq_file *s, const struct nf_conntrack_tuple *tuple,
 #endif
 extern spinlock_t nf_conntrack_locks[CONNTRACK_LOCKS];
 
+#ifdef CONFIG_CPE_FAST_PATH
+#define COMCERTO_PERMANENT_TIMEOUT  1000
+#endif
+
 extern spinlock_t nf_conntrack_expect_lock;
 
 #endif /* _NF_CONNTRACK_CORE_H */

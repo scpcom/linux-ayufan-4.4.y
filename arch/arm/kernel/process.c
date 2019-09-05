@@ -41,6 +41,7 @@
 #include <asm/system_misc.h>
 #include <asm/mach/time.h>
 #include <asm/tls.h>
+#include <mach/system.h>
 
 #ifdef CONFIG_CC_STACKPROTECTOR
 #include <linux/stackprotector.h>
@@ -87,9 +88,13 @@ static void __soft_restart(void *addr)
 	/* Push out any further dirty data, and ensure cache is empty */
 	flush_cache_all();
 
+#ifdef CONFIG_ARCH_COMCERTO
+	arch_reset(' ', "");
+#else
 	/* Switch to the identity mapping. */
 	phys_reset = (phys_reset_t)(unsigned long)virt_to_phys(cpu_reset);
 	phys_reset((unsigned long)addr);
+#endif
 
 	/* Should never get here. */
 	BUG();
@@ -223,7 +228,9 @@ void machine_power_off(void)
 void machine_restart(char *cmd)
 {
 	local_irq_disable();
+#ifdef CONFIG_SMP
 	smp_send_stop();
+#endif
 
 	if (arm_pm_restart)
 		arm_pm_restart(reboot_mode, cmd);

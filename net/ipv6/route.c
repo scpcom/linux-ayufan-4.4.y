@@ -2656,8 +2656,11 @@ static int rt6_fill_node(struct net *net,
 		if (nla_put(skb, RTA_PREFSRC, 16, &saddr_buf))
 			goto nla_put_failure;
 	}
-
+#ifdef CONFIG_ARCH_COMCERTO
+	if (rtnetlink_put_metrics_2(skb, dst_metrics_ptr(&rt->dst), &rt->dst) < 0)
+#else
 	if (rtnetlink_put_metrics(skb, dst_metrics_ptr(&rt->dst)) < 0)
+#endif
 		goto nla_put_failure;
 
 	if (rt->rt6i_flags & RTF_GATEWAY) {

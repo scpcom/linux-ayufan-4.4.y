@@ -20,9 +20,16 @@
 
 #include "mm.h"
 
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 #if SHMLBA > 16384
 #error FIX ME
 #endif
+#else
+#if SHMLBA > PAGE_SIZE
+#error FIX ME
+#endif
+#endif
+
 
 static DEFINE_RAW_SPINLOCK(v6_lock);
 

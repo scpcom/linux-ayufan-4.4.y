@@ -355,11 +355,39 @@ static void nf_ct_delete_from_lists(struct nf_conn *ct)
 bool nf_ct_delete(struct nf_conn *ct, u32 portid, int report)
 {
 	struct nf_conn_tstamp *tstamp;
+#ifdef CONFIG_CPE_FAST_PATH
+	struct nf_conntrack_l4proto *l4proto;
+#endif
 
 	tstamp = nf_conn_tstamp_find(ct);
 	if (tstamp && tstamp->stop == 0)
 		tstamp->stop = ktime_get_real_ns();
 
+#ifdef CONFIG_CPE_FAST_PATH
+	rcu_read_lock();
+	l4proto = __nf_ct_l4proto_find(nf_ct_l3num(ct), nf_ct_protonum(ct));
+	if(nf_ct_is_dying(ct) || (!nf_ct_is_permanent(ct)) ||
+			((l4proto->l4proto == IPPROTO_TCP) && (ct->proto.tcp.state != TCP_CONNTRACK_ESTABLISHED))) {
+		if(!nf_ct_is_dying(ct) &&
+		 (nf_conntrack_event_report(IPCT_DESTROY, ct,
+				    portid, report) < 0)) {
+		/* destroy event was not delivered */
+		nf_ct_delete_from_lists(ct);
+		nf_conntrack_ecache_delayed_work(nf_ct_net(ct));
+		rcu_read_unlock();
+		return false;
+		}
+		nf_conntrack_ecache_work(nf_ct_net(ct));
+		set_bit(IPS_DYING_BIT, &ct->status);
+		nf_ct_delete_from_lists(ct);
+		nf_ct_put(ct);
+	} else {
+		ct->timeout.expires = jiffies + COMCERTO_PERMANENT_TIMEOUT * HZ;
+		add_timer(&ct->timeout);
+	}
+	rcu_read_unlock();
+	return true;
+#else
 	if (nf_ct_is_dying(ct))
 		goto delete;
 
@@ -377,6 +405,7 @@ bool nf_ct_delete(struct nf_conn *ct, u32 portid, int report)
 	nf_ct_delete_from_lists(ct);
 	nf_ct_put(ct);
 	return true;
+#endif
 }
 EXPORT_SYMBOL_GPL(nf_ct_delete);
 
@@ -762,7 +791,13 @@ restart:
 	if (!ct)
 		return dropped;
 
+#ifdef CONFIG_CPE_FAST_PATH
+	clear_bit(IPS_PERMANENT_BIT, &ct->status);
+	/* Avoid race with timer expiration */
+	if (del_timer_sync(&ct->timeout)) {
+#else
 	if (del_timer(&ct->timeout)) {
+#endif
 		if (nf_ct_delete(ct, 0, 0)) {
 			dropped = 1;
 			NF_CT_STAT_INC_ATOMIC(net, early_drop);
@@ -1260,7 +1295,13 @@ bool __nf_ct_kill_acct(struct nf_conn *ct,
 		}
 	}
 
+#ifdef CONFIG_CPE_FAST_PATH
+	clear_bit(IPS_PERMANENT_BIT, &ct->status);
+	/* Avoid race with timer expiration */
+	if (del_timer_sync(&ct->timeout)) {
+#else
 	if (del_timer(&ct->timeout)) {
+#endif
 		ct->timeout.function((unsigned long)ct);
 		return true;
 	}
@@ -1399,7 +1440,14 @@ void nf_ct_iterate_cleanup(struct net *net,
 
 	while ((ct = get_next_corpse(net, iter, data, &bucket)) != NULL) {
 		/* Time to push up daises... */
+
+#ifdef CONFIG_CPE_FAST_PATH
+		clear_bit(IPS_PERMANENT_BIT, &ct->status);
+		/* Avoid race with timer expiration */
+		if (del_timer_sync(&ct->timeout))
+#else
 		if (del_timer(&ct->timeout))
+#endif
 			nf_ct_delete(ct, portid, report);
 
 		/* ... else the timer will get him soon. */
@@ -1540,6 +1588,46 @@ void *nf_ct_alloc_hashtable(unsigned int *sizep, int nulls)
 	return hash;
 }
 EXPORT_SYMBOL_GPL(nf_ct_alloc_hashtable);
+
+#ifdef CONFIG_CPE_FAST_PATH
+int nf_conntrack_set_dpi_allow_report(struct sk_buff *skb)
+{
+	int err = 0;
+	struct nf_conn *ct = (struct nf_conn *)skb->nfct;
+
+	nf_conntrack_get(skb->nfct);
+
+	set_bit(IPS_DPI_ALLOWED_BIT, &ct->status);
+
+	nf_conntrack_event_cache(IPCT_PROTOINFO, ct);
+
+	nf_conntrack_put(skb->nfct);
+
+	return err;
+}
+EXPORT_SYMBOL(nf_conntrack_set_dpi_allow_report);
+
+int nf_conntrack_set_dpi_allow_and_mark(struct sk_buff *skb, int mark)
+{
+	int err = 0;
+	struct nf_conn *ct = (struct nf_conn *)skb->nfct;
+
+	nf_conntrack_get(skb->nfct);
+
+	set_bit(IPS_DPI_ALLOWED_BIT, &ct->status);
+
+#ifdef CONFIG_NF_CONNTRACK_MARK
+	ct->mark = mark;
+#endif
+
+	nf_conntrack_event_cache(IPCT_PROTOINFO, ct);
+
+	nf_conntrack_put(skb->nfct);
+
+	return err;
+}
+EXPORT_SYMBOL(nf_conntrack_set_dpi_allow_and_mark);
+#endif
 
 int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp)
 {

@@ -415,7 +415,7 @@ static __always_inline void *kmalloc(size_t size, gfp_t flags)
 		if (size > KMALLOC_MAX_CACHE_SIZE)
 			return kmalloc_large(size, flags);
 #ifndef CONFIG_SLOB
-		if (!(flags & GFP_DMA)) {
+		if (!(flags & __GFP_DMA)) {
 			int index = kmalloc_index(size);
 
 			if (!index)

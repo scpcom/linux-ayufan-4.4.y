@@ -313,7 +313,6 @@ static void pppoe_flush_dev(struct net_device *dev)
 			if (po->pppoe_dev == dev &&
 			    sk->sk_state & (PPPOX_CONNECTED | PPPOX_BOUND | PPPOX_ZOMBIE)) {
 				pppox_unbind_sock(sk);
-				sk->sk_state = PPPOX_ZOMBIE;
 				sk->sk_state_change(sk);
 				po->pppoe_dev = NULL;
 				dev_put(dev);
@@ -379,6 +378,9 @@ static int pppoe_rcv_core(struct sock *sk, struct sk_buff *skb)
 	 * executing in lock_sock()/release_sock() bounds; meaning sk->sk_state
 	 * can't change.
 	 */
+
+	if (skb->pkt_type == PACKET_OTHERHOST)
+		goto abort_kfree;
 
 	if (sk->sk_state & PPPOX_BOUND) {
 		ppp_input(&po->chan, skb);
@@ -455,6 +457,22 @@ out:
 	return NET_RX_DROP;
 }
 
+static void pppoe_unbind_sock_work(struct work_struct *work)
+{
+	struct pppox_sock *po = container_of(work, struct pppox_sock,
+					     proto.pppoe.padt_work);
+	struct sock *sk = sk_pppox(po);
+
+	lock_sock(sk);
+	if (po->pppoe_dev) {
+		dev_put(po->pppoe_dev);
+		po->pppoe_dev = NULL;
+	}
+	pppox_unbind_sock(sk);
+	release_sock(sk);
+	sock_put(sk);
+}
+
 /************************************************************************
  *
  * Receive a PPPoE Discovery frame.
@@ -482,26 +500,9 @@ static int pppoe_disc_rcv(struct sk_buff *skb, struct net_device *dev,
 
 	pn = pppoe_pernet(dev_net(dev));
 	po = get_item(pn, ph->sid, eth_hdr(skb)->h_source, dev->ifindex);
-	if (po) {
-		struct sock *sk = sk_pppox(po);
-
-		bh_lock_sock(sk);
-
-		/* If the user has locked the socket, just ignore
-		 * the packet.  With the way two rcv protocols hook into
-		 * one socket family type, we cannot (easily) distinguish
-		 * what kind of SKB it is during backlog rcv.
-		 */
-		if (sock_owned_by_user(sk) == 0) {
-			/* We're no longer connect at the PPPOE layer,
-			 * and must wait for ppp channel to disconnect us.
-			 */
-			sk->sk_state = PPPOX_ZOMBIE;
-		}
-
-		bh_unlock_sock(sk);
-		sock_put(sk);
-	}
+	if (po)
+		if (!schedule_work(&po->proto.pppoe.padt_work))
+			sock_put(sk_pppox(po));
 
 abort:
 	kfree_skb(skb);
@@ -549,6 +550,9 @@ static int pppoe_create(struct net *net, struct socket *sock)
 	sk->sk_family		= PF_PPPOX;
 	sk->sk_protocol		= PX_PROTO_OE;
 
+	INIT_WORK(&pppox_sk(sk)->proto.pppoe.padt_work,
+		  pppoe_unbind_sock_work);
+
 	return 0;
 }
 
@@ -570,7 +574,7 @@ static int pppoe_release(struct socket *sock)
 
 	po = pppox_sk(sk);
 
-	if (sk->sk_state & (PPPOX_CONNECTED | PPPOX_BOUND | PPPOX_ZOMBIE)) {
+	if (po->pppoe_dev) {
 		dev_put(po->pppoe_dev);
 		po->pppoe_dev = NULL;
 	}
@@ -642,8 +646,13 @@ static int pppoe_connect(struct socket *sock, struct sockaddr *uservaddr,
 			po->pppoe_dev = NULL;
 		}
 
-		memset(sk_pppox(po) + 1, 0,
-		       sizeof(struct pppox_sock) - sizeof(struct sock));
+		po->pppoe_ifindex = 0;
+		memset(&po->pppoe_pa, 0, sizeof(po->pppoe_pa));
+		memset(&po->pppoe_relay, 0, sizeof(po->pppoe_relay));
+		memset(&po->chan, 0, sizeof(po->chan));
+		po->next = NULL;
+		po->num = 0;
+
 		sk->sk_state = PPPOX_NONE;
 	}
 
@@ -850,7 +859,7 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 		goto end;
 
 
-	skb = sock_wmalloc(sk, total_len + dev->hard_header_len + 32,
+	skb = sock_wmalloc(sk, total_len + dev->hard_header_len + 32 + NET_SKB_PAD,
 			   0, GFP_KERNEL);
 	if (!skb) {
 		error = -ENOMEM;
@@ -858,7 +867,7 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 	}
 
 	/* Reserve space for headers. */
-	skb_reserve(skb, dev->hard_header_len);
+	skb_reserve(skb, dev->hard_header_len + NET_SKB_PAD);
 	skb_reset_network_header(skb);
 
 	skb->dev = dev;
@@ -934,7 +943,15 @@ static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb)
 
 	skb->protocol = cpu_to_be16(ETH_P_PPP_SES);
 	skb->dev = dev;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)	
+	if((skb->ipsec_offload == 1) && (!skb->sp))
+	{
+		  dev_hard_header(skb, dev, ETH_P_PPP_SES,
+			 dev->dev_addr, po->pppoe_pa.remote, data_len);
 
+	}
+	else
+#endif
 	dev_hard_header(skb, dev, ETH_P_PPP_SES,
 			po->pppoe_pa.remote, NULL, data_len);
 
@@ -998,17 +1015,32 @@ static int pppoe_seq_show(struct seq_file *seq, void *v)
 {
 	struct pppox_sock *po;
 	char *dev_name;
+#if defined(CONFIG_CPE_FAST_PATH)
+	char *ppp_name;
+#endif
 
 	if (v == SEQ_START_TOKEN) {
-		seq_puts(seq, "Id       Address              Device\n");
+#if defined(CONFIG_CPE_FAST_PATH)
+		seq_puts(seq, "Id   Address           Device     PPPDevice  Unit\n");
+#else
+ 		seq_puts(seq, "Id       Address              Device\n");
+#endif
 		goto out;
 	}
 
 	po = v;
 	dev_name = po->pppoe_pa.dev;
+#if defined(CONFIG_CPE_FAST_PATH)
+	ppp_name = ppp_dev_name(&po->chan);
+	if (!ppp_name)
+		goto out;
 
+	seq_printf(seq, "%04X %pM %-10s %-10s %d\n",
+		ntohs(po->pppoe_pa.sid), po->pppoe_pa.remote, dev_name, ppp_name, ppp_unit_number(&po->chan));
+#else
 	seq_printf(seq, "%08X %pM %8s\n",
 		po->pppoe_pa.sid, po->pppoe_pa.remote, dev_name);
+#endif
 out:
 	return 0;
 }

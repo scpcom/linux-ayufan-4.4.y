@@ -2107,6 +2107,10 @@ zonelist_scan:
 		if (consider_zone_dirty && !zone_dirty_ok(zone))
 			continue;
 
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+		if (!(gfp_mask & __GFP_DMA) && (zone_idx(zone) == ZONE_DMA))
+			continue;
+#endif
 		mark = zone->watermark[alloc_flags & ALLOC_WMARK_MASK];
 		if (!zone_watermark_ok(zone, order, mark,
 				       classzone_idx, alloc_flags)) {

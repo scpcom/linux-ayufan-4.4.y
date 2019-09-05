@@ -55,6 +55,7 @@ struct flash_info {
 #define	SPI_NOR_DUAL_READ	0x20    /* Flash supports Dual Read */
 #define	SPI_NOR_QUAD_READ	0x40    /* Flash supports Quad Read */
 #define	USE_FSR			0x80	/* use flag status register */
+#define	SPI_NOR_DDR_QUAD_READ	0x100   /* Flash supports DDR Quad Read */
 };
 
 #define JEDEC_MFR(info)	((info)->id[0])
@@ -125,7 +126,20 @@ static int read_cr(struct spi_nor *nor)
  */
 static inline int spi_nor_read_dummy_cycles(struct spi_nor *nor)
 {
+	u32 dummy;
+
 	switch (nor->flash_read) {
+	case SPI_NOR_DDR_QUAD:
+		/*
+		 * The m25p80.c can not support the DDR quad read.
+		 * We set the dummy cycles to 8 by default. The SPI NOR
+		 * controller driver can set it in its child DT node.
+		 * We parse it out here.
+		 */
+		if (nor->np && !of_property_read_u32(nor->np,
+				"spi-nor,ddr-quad-read-dummy", &dummy)) {
+			return dummy;
+		}
 	case SPI_NOR_FAST:
 	case SPI_NOR_DUAL:
 	case SPI_NOR_QUAD:
@@ -524,6 +538,7 @@ static const struct spi_device_id spi_nor_ids[] = {
 	{ "en25q64",    INFO(0x1c3017, 0, 64 * 1024,  128, SECT_4K) },
 	{ "en25qh128",  INFO(0x1c7018, 0, 64 * 1024,  256, 0) },
 	{ "en25qh256",  INFO(0x1c7019, 0, 64 * 1024,  512, 0) },
+	{ "en25s64",    INFO(0x1c3817, 0, 64 * 1024,  128, SECT_4K) },
 
 	/* ESMT */
 	{ "f25l32pa", INFO(0x8c2016, 0, 64 * 1024, 64, SECT_4K) },
@@ -563,9 +578,12 @@ static const struct spi_device_id spi_nor_ids[] = {
 	{ "n25q032",	 INFO(0x20ba16, 0, 64 * 1024,   64, 0) },
 	{ "n25q064",     INFO(0x20ba17, 0, 64 * 1024,  128, 0) },
 	{ "n25q128a11",  INFO(0x20bb18, 0, 64 * 1024,  256, 0) },
-	{ "n25q128a13",  INFO(0x20ba18, 0, 64 * 1024,  256, 0) },
-	{ "n25q256a",    INFO(0x20ba19, 0, 64 * 1024,  512, SECT_4K) },
-	{ "n25q512a",    INFO(0x20bb20, 0, 64 * 1024, 1024, SECT_4K) },
+	{ "n25q128a13",  INFO(0x20ba18, 0, 64 * 1024,  256,
+			SPI_NOR_QUAD_READ) },
+	{ "n25q256a",    INFO(0x20ba19, 0, 64 * 1024,  512,
+	  SPI_NOR_DUAL_READ | SPI_NOR_QUAD_READ | SPI_NOR_DDR_QUAD_READ) },
+	{ "n25q512a",    INFO(0x20bb20, 0, 64 * 1024, 1024,
+	  SECT_4K | USE_FSR) },
 	{ "n25q512ax3",  INFO(0x20ba20, 0, 64 * 1024, 1024, USE_FSR) },
 	{ "n25q00",      INFO(0x20ba21, 0, 64 * 1024, 2048, USE_FSR) },
 
@@ -608,6 +626,7 @@ static const struct spi_device_id spi_nor_ids[] = {
 	{ "sst25wf010",  INFO(0xbf2502, 0, 64 * 1024,  2, SECT_4K | SST_WRITE) },
 	{ "sst25wf020",  INFO(0xbf2503, 0, 64 * 1024,  4, SECT_4K | SST_WRITE) },
 	{ "sst25wf040",  INFO(0xbf2504, 0, 64 * 1024,  8, SECT_4K | SST_WRITE) },
+	{ "sst25wf040b", INFO(0x621613, 0, 64 * 1024,  8, SECT_4K) },
 	{ "sst25wf080",  INFO(0xbf2505, 0, 64 * 1024, 16, SECT_4K | SST_WRITE) },
 
 	/* ST Microelectronics -- newer production may have feature updates */
@@ -670,6 +689,7 @@ static const struct spi_device_id spi_nor_ids[] = {
 	{ "cat25128", CAT25_INFO(2048, 8, 64, 2, SPI_NOR_NO_ERASE | SPI_NOR_NO_FR) },
 	{ },
 };
+EXPORT_SYMBOL_GPL(spi_nor_ids);
 
 static const struct spi_device_id *spi_nor_read_id(struct spi_nor *nor)
 {
@@ -891,6 +911,27 @@ static int spansion_quad_enable(struct spi_nor *nor)
 	return 0;
 }
 
+static int set_ddr_quad_mode(struct spi_nor *nor, u32 jedec_id)
+{
+	int status;
+
+	switch (JEDEC_MFR(jedec_id)) {
+	case CFI_MFR_AMD: /* Spansion, actually */
+		status = spansion_quad_enable(nor);
+		if (status) {
+			dev_err(nor->dev,
+				"Spansion DDR quad-read not enabled\n");
+			return status;
+		}
+		return status;
+	case CFI_MFR_ST: /* Micron, actually */
+		/* DTR quad read works with the Extended SPI protocol. */
+		return 0;
+	default:
+		return -EINVAL;
+	}
+}
+
 static int set_quad_mode(struct spi_nor *nor, struct flash_info *info)
 {
 	int status;
@@ -903,6 +944,8 @@ static int set_quad_mode(struct spi_nor *nor, struct flash_info *info)
 			return -EINVAL;
 		}
 		return status;
+	case CFI_MFR_ST:
+		return 0;
 	default:
 		status = spansion_quad_enable(nor);
 		if (status) {
@@ -930,7 +973,7 @@ int spi_nor_scan(struct spi_nor *nor, const char *name, enum read_mode mode)
 	struct flash_info		*info;
 	struct device *dev = nor->dev;
 	struct mtd_info *mtd = nor->mtd;
-	struct device_node *np = dev->of_node;
+	struct device_node *np = nor->np;
 	int ret;
 	int i;
 
@@ -1048,8 +1091,15 @@ int spi_nor_scan(struct spi_nor *nor, const char *name, enum read_mode mode)
 	if (info->flags & SPI_NOR_NO_FR)
 		nor->flash_read = SPI_NOR_NORMAL;
 
-	/* Quad/Dual-read mode takes precedence over fast/normal */
-	if (mode == SPI_NOR_QUAD && info->flags & SPI_NOR_QUAD_READ) {
+	/* DDR Quad/Quad/Dual-read mode takes precedence over fast/normal */
+	if (mode == SPI_NOR_DDR_QUAD && info->flags & SPI_NOR_DDR_QUAD_READ) {
+		ret = set_ddr_quad_mode(nor, info->jedec_id);
+		if (ret) {
+			dev_err(dev, "DDR quad mode not supported\n");
+			return ret;
+		}
+		nor->flash_read = SPI_NOR_DDR_QUAD;
+	} else if (mode == SPI_NOR_QUAD && info->flags & SPI_NOR_QUAD_READ) {
 		ret = set_quad_mode(nor, info);
 		if (ret) {
 			dev_err(dev, "quad mode not supported\n");
@@ -1062,6 +1112,16 @@ int spi_nor_scan(struct spi_nor *nor, const char *name, enum read_mode mode)
 
 	/* Default commands */
 	switch (nor->flash_read) {
+	case SPI_NOR_DDR_QUAD:
+		if (JEDEC_MFR(info->jedec_id) == CFI_MFR_AMD) { /* Spansion */
+			nor->read_opcode = SPINOR_OP_READ_1_4_4_D;
+		} else if (JEDEC_MFR(info->jedec_id) == CFI_MFR_ST) {
+			nor->read_opcode = SPINOR_OP_READ_1_1_4_D;
+		} else {
+			dev_err(dev, "DDR Quad Read is not supported.\n");
+			return -EINVAL;
+		}
+		break;
 	case SPI_NOR_QUAD:
 		nor->read_opcode = SPINOR_OP_READ_1_1_4;
 		break;
@@ -1089,6 +1149,9 @@ int spi_nor_scan(struct spi_nor *nor, const char *name, enum read_mode mode)
 		if (JEDEC_MFR(info) == CFI_MFR_AMD) {
 			/* Dedicated 4-byte command set */
 			switch (nor->flash_read) {
+			case SPI_NOR_DDR_QUAD:
+				nor->read_opcode = SPINOR_OP_READ4_1_4_4_D;
+				break;
 			case SPI_NOR_QUAD:
 				nor->read_opcode = SPINOR_OP_READ4_1_1_4;
 				break;
@@ -1148,6 +1211,7 @@ static const struct spi_device_id *spi_nor_match_id(const char *name)
 	}
 	return NULL;
 }
+EXPORT_SYMBOL_GPL(spi_nor_match_id);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Huang Shijie <shijie8@gmail.com>");

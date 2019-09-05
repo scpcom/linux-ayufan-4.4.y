@@ -1,0 +1,29 @@
+Freescale Reference Board Bindings
+
+This document describes device tree bindings for various devices that
+exist on some Freescale reference boards.
+
+* Freescale on-board FPGA connected to IFC controller
+
+Some Freescale boards like LS2085AQDS/LS2085ARDB have an on-board FPGA/CPLD
+connected to the IFC controller.
+
+Required properties:
+- compatible: Should be a board-specific string followed by a string
+  indicating the type of FPGA.  Example:
+	"fsl,ls2085a-qds-qixis", "fsl,fpga-qixis"
+	"fsl,ls2085a-rdb-qixis", "fsl,fpga-qixis"
+- reg: The register set for the device
+
+Example:
+	&ifc {
+		status = "okay";
+		#address-cells = <2>;
+		#size-cells <1>;
+		ranges = <0x3 0x0 0x5 0x20000000 0x00010000>;
+
+		cpld@3,0 {
+			compatible = "fsl,ls2085a-qds-qixis", "fsl,fpga-qixis";
+			reg = <0x3 0 0x10000>;
+		};
+	};

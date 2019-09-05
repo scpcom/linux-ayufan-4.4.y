@@ -34,6 +34,11 @@ config MARVELL_PHY
 	tristate "Drivers for Marvell PHYs"
 	---help---
 	  Currently has a driver for the 88E1011S
+
+config ATHEROS_PHY
+	tristate "Drivers for Atheros PHYs"
+	---help---
+	  Currently supports AR8035 and AR8327
 	
 config DAVICOM_PHY
 	tristate "Drivers for Davicom PHYs"

@@ -87,6 +87,9 @@ enum net_device_flags {
 	IFF_LOWER_UP			= 1<<16, /* volatile */
 	IFF_DORMANT			= 1<<17, /* volatile */
 	IFF_ECHO			= 1<<18, /* volatile */
+#if defined(CONFIG_ARCH_COMCERTO)
+	IFF_WIFI_OFLD		= 1<<19, /*Offload interface */
+#endif
 };
 
 #define IFF_UP				IFF_UP
@@ -108,6 +111,9 @@ enum net_device_flags {
 #define IFF_LOWER_UP			IFF_LOWER_UP
 #define IFF_DORMANT			IFF_DORMANT
 #define IFF_ECHO			IFF_ECHO
+#if defined(CONFIG_ARCH_COMCERTO)
+#define IFF_WIFI_OFLD		IFF_WIFI_OFLD
+#endif
 
 #define IFF_VOLATILE	(IFF_LOOPBACK|IFF_POINTOPOINT|IFF_BROADCAST|IFF_ECHO|\
 		IFF_MASTER|IFF_SLAVE|IFF_RUNNING|IFF_LOWER_UP|IFF_DORMANT)

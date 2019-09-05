@@ -1529,6 +1529,10 @@ struct net_device {
 	netdev_features_t	hw_features;
 	netdev_features_t	wanted_features;
 	netdev_features_t	vlan_features;
+#if defined(CONFIG_ARCH_COMCERTO)
+	/* This is pointing to network device that offload WiFi data to PFE */
+	struct net_device 	*wifi_offload_dev;
+#endif
 	netdev_features_t	hw_enc_features;
 	netdev_features_t	mpls_features;
 
@@ -2144,6 +2148,9 @@ int dev_close(struct net_device *dev);
 void dev_disable_lro(struct net_device *dev);
 int dev_loopback_xmit(struct sk_buff *newskb);
 int dev_queue_xmit(struct sk_buff *skb);
+#if defined(CONFIG_ARCH_COMCERTO)
+int original_dev_queue_xmit(struct sk_buff *skb);
+#endif
 int dev_queue_xmit_accel(struct sk_buff *skb, void *accel_priv);
 int register_netdevice(struct net_device *dev);
 void unregister_netdevice_queue(struct net_device *dev, struct list_head *head);
@@ -2855,6 +2862,9 @@ static inline void dev_consume_skb_any(struct sk_buff *skb)
 int netif_rx(struct sk_buff *skb);
 int netif_rx_ni(struct sk_buff *skb);
 int netif_receive_skb(struct sk_buff *skb);
+#if defined(CONFIG_ARCH_COMCERTO)
+int capture_receive_skb(struct sk_buff *skb);
+#endif
 gro_result_t napi_gro_receive(struct napi_struct *napi, struct sk_buff *skb);
 void napi_gro_flush(struct napi_struct *napi, bool flush_old);
 struct sk_buff *napi_get_frags(struct napi_struct *napi);

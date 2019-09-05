@@ -108,6 +108,10 @@ u32 arch_timer_reg_read(int access, enum arch_timer_reg reg,
 {
 	u32 val;
 
+#ifdef CONFIG_LS2085A_ERRATA_ERR008585
+	u32 val_new, timeout = 200;
+#endif
+
 	if (access == ARCH_TIMER_MEM_PHYS_ACCESS) {
 		struct arch_timer *timer = to_arch_timer(clk);
 		switch (reg) {
@@ -116,6 +120,17 @@ u32 arch_timer_reg_read(int access, enum arch_timer_reg reg,
 			break;
 		case ARCH_TIMER_REG_TVAL:
 			val = readl_relaxed(timer->base + CNTP_TVAL);
+#ifdef CONFIG_LS2085A_ERRATA_ERR008585
+			val_new = readl_relaxed(timer->base + CNTP_TVAL);
+			while (val != val_new && timeout) {
+				val = val_new;
+				val_new = readl_relaxed(timer->base +
+							CNTP_TVAL);
+				timeout--;
+
+			}
+			BUG_ON((timeout <= 0) && (val != val_new));
+#endif
 			break;
 		}
 	} else if (access == ARCH_TIMER_MEM_VIRT_ACCESS) {
@@ -126,10 +141,30 @@ u32 arch_timer_reg_read(int access, enum arch_timer_reg reg,
 			break;
 		case ARCH_TIMER_REG_TVAL:
 			val = readl_relaxed(timer->base + CNTV_TVAL);
+#ifdef CONFIG_LS2085A_ERRATA_ERR008585
+			val_new = readl_relaxed(timer->base + CNTV_TVAL);
+			while (val != val_new && timeout) {
+				val = val_new;
+				val_new = readl_relaxed(timer->base +
+							CNTV_TVAL);
+				timeout--;
+			}
+			BUG_ON((timeout <= 0) && (val != val_new));
+#endif
+
 			break;
 		}
 	} else {
 		val = arch_timer_reg_read_cp15(access, reg);
+#ifdef CONFIG_LS2085A_ERRATA_ERR008585
+		val_new = arch_timer_reg_read_cp15(access, reg);
+		while (val != val_new && timeout) {
+			val = val_new;
+			val_new = arch_timer_reg_read_cp15(access, reg);
+			timeout--;
+		}
+		BUG_ON((timeout <= 0) && (val != val_new));
+#endif
 	}
 
 	return val;

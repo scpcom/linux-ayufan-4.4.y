@@ -91,6 +91,7 @@ static inline int atomic_##op##_return(int i, atomic_t *v)		\
 #endif /* CONFIG_SMP */
 
 #ifndef atomic_add_return
+#error "This is it"
 ATOMIC_OP_RETURN(add, +)
 #endif
 

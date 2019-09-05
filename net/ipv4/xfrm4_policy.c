@@ -27,6 +27,21 @@ static struct dst_entry *__xfrm4_dst_lookup(struct net *net, struct flowi4 *fl4,
 
 	memset(fl4, 0, sizeof(*fl4));
 	fl4->daddr = daddr->a4;
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+/*
+In 3.19 kernel, "rt_gateway" in IPv4 route is not set if the src and dst are directly connected.  If set,
+rt->rt_gateway else destination in IPv4 header of the packet is used as nexthop during neighbor resolution.
+
+For IPsec packets with directly connected IPv4 tunnel end points, neighbor resolution is done for inner
+destination since we do not add tunnel headers in slow path to IPsec packets. To fix this issue, flag
+"FLOWI_FLAG_KNOWN_NH" is passed during tunnel route lookup. This flag will ensure that if the src and dst
+are directly connected then a new route entry is created with "rt_gateway" set to dst address (in this case
+tunnel dst address).This new route is not cached, will not be used by any other packet, and will be deleted
+during the release of sk_buff structure.
+*/
+	fl4->flowi4_flags = FLOWI_FLAG_KNOWN_NH;
+#endif
 	fl4->flowi4_tos = tos;
 	if (saddr)
 		fl4->saddr = saddr->a4;

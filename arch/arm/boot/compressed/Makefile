@@ -42,6 +42,11 @@ GCOV_PROFILE		:= n
 #
 # Architecture dependencies
 #
+
+ifeq ($(CONFIG_ARCH_COMCERTO),y)
+OBJS		+= head-comcerto.o
+endif
+
 ifeq ($(CONFIG_ARCH_ACORN),y)
 OBJS		+= ll_char_wr.o font.o
 endif
@@ -122,6 +127,7 @@ ifeq ($(CONFIG_FUNCTION_TRACER),y)
 ORIG_CFLAGS := $(KBUILD_CFLAGS)
 KBUILD_CFLAGS = $(subst -pg, , $(ORIG_CFLAGS))
 endif
+KBUILD_CFLAGS_KERNEL := $(patsubst -f%-sections,,$(KBUILD_CFLAGS_KERNEL))
 
 ccflags-y := -fpic -mno-single-pic-base -fno-builtin -I$(obj)
 asflags-y := -DZIMAGE

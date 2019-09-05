@@ -22,6 +22,9 @@
 #include <linux/cpumask.h>
 #include <linux/mutex.h>
 #include <net/flow.h>
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+#include <net/xfrm.h>
+#endif
 #include <linux/atomic.h>
 #include <linux/security.h>
 #include <net/net_namespace.h>
@@ -37,6 +40,10 @@ struct flow_cache_entry {
 	u32				genid;
 	struct flowi			key;
 	struct flow_cache_object	*object;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	u8				flags;
+	#define FLOW_CACHE_FLAG_IPSEC_OFFLOAD 0x01
+#endif
 };
 
 struct flow_flush_info {
@@ -45,10 +52,27 @@ struct flow_flush_info {
 	struct completion		completion;
 };
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+struct flow_remove_info {
+	struct flow_cache		*cache;
+	struct flowi			*key;
+	unsigned short			family;
+	unsigned short			dir;
+	atomic_t			cpuleft;
+	struct completion		completion;
+};
+
+struct flow_cache       *flow_cache_global;
+#endif
+
 static struct kmem_cache *flow_cachep __read_mostly;
 
 #define flow_cache_hash_size(cache)	(1 << (cache)->hash_shift)
 #define FLOW_HASH_RND_PERIOD		(10 * 60 * HZ)
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+extern int ipsec_nlkey_flow_remove(struct flowi *fl, u16 family, u16 dir);
+#endif
 
 static void flow_cache_new_hashrnd(unsigned long arg)
 {
@@ -92,8 +116,14 @@ static void flow_cache_gc_task(struct work_struct *work)
 	list_splice_tail_init(&xfrm->flow_cache_gc_list, &gc_list);
 	spin_unlock_bh(&xfrm->flow_cache_gc_lock);
 
-	list_for_each_entry_safe(fce, n, &gc_list, u.gc_list)
+	list_for_each_entry_safe(fce, n, &gc_list, u.gc_list) {
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+		/*call nl_key_flow_remove*/
+		if (fce->flags & FLOW_CACHE_FLAG_IPSEC_OFFLOAD)
+			ipsec_nlkey_flow_remove(&fce->key, fce->family, fce->dir);
+#endif
 		flow_entry_kill(fce, xfrm);
+	}
 }
 
 static void flow_cache_queue_garbage(struct flow_cache_percpu *fcp,
@@ -188,9 +218,15 @@ static int flow_key_compare(const struct flowi *key1, const struct flowi *key2,
 	return 0;
 }
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+struct flow_cache_object *
+flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
+			u8 *new_flow, flow_resolve_t resolver, void *ctx)
+#else
 struct flow_cache_object *
 flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
 		  flow_resolve_t resolver, void *ctx)
+#endif
 {
 	struct flow_cache *fc = &net->xfrm.flow_cache_global;
 	struct flow_cache_percpu *fcp;
@@ -198,6 +234,11 @@ flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
 	struct flow_cache_object *flo;
 	size_t keysize;
 	unsigned int hash;
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	if (new_flow)
+		*new_flow = 0;
+#endif
 
 	local_bh_disable();
 	fcp = this_cpu_ptr(fc->percpu);
@@ -264,8 +305,15 @@ nocache:
 	flo = resolver(net, key, family, dir, flo, ctx);
 	if (fle) {
 		fle->genid = atomic_read(&net->xfrm.flow_cache_genid);
-		if (!IS_ERR(flo))
+		if (!IS_ERR(flo)) {
 			fle->object = flo;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+			if (new_flow) {
+				*new_flow = 1;
+				fle->flags |= FLOW_CACHE_FLAG_IPSEC_OFFLOAD;
+			}
+#endif
+		}
 		else
 			fle->genid--;
 	} else {
@@ -376,6 +424,83 @@ done:
 	free_cpumask_var(mask);
 }
 
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+static void flow_cache_remove_per_cpu(void *data)
+{
+	struct flow_remove_info* info = data;
+	int cpu;
+	struct tasklet_struct *tasklet;
+
+	cpu = smp_processor_id();
+	tasklet = &per_cpu_ptr(info->cache->percpu, cpu)->flowcache_rem_tasklet;
+	tasklet->data = (unsigned long)info;
+	tasklet_schedule(tasklet);
+}
+
+void flow_cache_remove_tasklet(unsigned long data) 
+{
+	struct flow_remove_info* info = (struct flow_remove_info*) data;
+	struct flow_cache *fc = flow_cache_global;
+	struct flow_cache_percpu *fcp;
+	struct flow_cache_entry *fle;
+	struct hlist_node *entry;
+	size_t keysize;
+	unsigned int hash;
+	struct flowi *key = info->key;
+	unsigned short family = info->family;
+	unsigned short dir = info->dir;
+
+	fcp = this_cpu_ptr(fc->percpu);
+	
+	keysize = flow_key_size(family);
+	if (!keysize)
+		goto nocache;
+
+	hash = flow_hash_code(fc, fcp, key, keysize);
+#if 0 // FIXME
+	hlist_for_each_entry(fle, entry, &fcp->hash_table[hash], u.hlist) {
+		if((fle->family == family) && (fle->dir == dir) && (flow_key_compare(&fle->key, key, keysize) == 0)) {
+			hlist_del(&fle->u.hlist);
+			flow_entry_kill(fle);
+			break;
+		}
+	}
+#endif
+nocache:	
+	if (atomic_dec_and_test(&info->cpuleft))
+		complete(&info->completion);
+	return;
+}
+
+void flow_cache_remove(const struct flowi *key,
+			unsigned short family, unsigned short dir)
+{
+	struct flow_remove_info info;
+	static DEFINE_MUTEX(flow_rem_sem);
+
+	/* Don't want cpus going down or up during this. */
+	get_online_cpus();
+	mutex_lock(&flow_rem_sem);
+	info.cache = flow_cache_global;
+	info.key = (struct flowi*)key;
+	//memcpy(&info.key, key, sizeof(struct flowi));
+	info.family = family;
+	info.dir = dir;
+        atomic_set(&info.cpuleft, num_online_cpus());
+        init_completion(&info.completion);
+
+        local_bh_disable();
+	smp_call_function(flow_cache_remove_per_cpu, &info, 1);
+	flow_cache_remove_tasklet((unsigned long)&info);
+        local_bh_enable();
+
+        wait_for_completion(&info.completion);
+        mutex_unlock(&flow_rem_sem);
+        put_online_cpus();
+}
+
+#endif
+
 static void flow_cache_flush_task(struct work_struct *work)
 {
 	struct netns_xfrm *xfrm = container_of(work, struct netns_xfrm,
@@ -404,6 +529,9 @@ static int flow_cache_cpu_prepare(struct flow_cache *fc, int cpu)
 		fcp->hash_rnd_recalc = 1;
 		fcp->hash_count = 0;
 		tasklet_init(&fcp->flush_tasklet, flow_cache_flush_tasklet, 0);
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+		tasklet_init(&fcp->flowcache_rem_tasklet, flow_cache_remove_tasklet, 0);
+#endif
 	}
 	return 0;
 }
@@ -436,6 +564,9 @@ int flow_cache_init(struct net *net)
 {
 	int i;
 	struct flow_cache *fc = &net->xfrm.flow_cache_global;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	flow_cache_global = fc;
+#endif
 
 	if (!flow_cachep)
 		flow_cachep = kmem_cache_create("flow_cache",

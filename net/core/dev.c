@@ -2968,9 +2968,22 @@ out:
 
 int dev_queue_xmit(struct sk_buff *skb)
 {
+#if defined(CONFIG_ARCH_COMCERTO)
+	if (skb->dev->flags & IFF_WIFI_OFLD)
+		skb->dev = skb->dev->wifi_offload_dev;
+
+	return original_dev_queue_xmit(skb);
+}
+
+int original_dev_queue_xmit(struct sk_buff *skb)
+{
+#endif
 	return __dev_queue_xmit(skb, NULL);
 }
 EXPORT_SYMBOL(dev_queue_xmit);
+#if defined(CONFIG_ARCH_COMCERTO)
+EXPORT_SYMBOL(original_dev_queue_xmit);
+#endif
 
 int dev_queue_xmit_accel(struct sk_buff *skb, void *accel_priv)
 {

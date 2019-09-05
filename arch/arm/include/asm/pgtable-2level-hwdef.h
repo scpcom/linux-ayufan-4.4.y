@@ -67,7 +67,13 @@
 /*
  *   - extended small page/tiny page
  */
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 #define PTE_EXT_XN		(_AT(pteval_t, 1) << 0)		/* v6 */
+#define PTE_EXT_TEX(x)		(_AT(pteval_t, (x)) << 6)	/* v5 */
+#else
+#define PTE_EXT_XN		(_AT(pteval_t, 1) << 15)		/* v6 */
+#define PTE_EXT_TEX(x)		(_AT(pteval_t, (x)) << 12)	/* v5 */
+#endif
 #define PTE_EXT_AP_MASK		(_AT(pteval_t, 3) << 4)
 #define PTE_EXT_AP0		(_AT(pteval_t, 1) << 4)
 #define PTE_EXT_AP1		(_AT(pteval_t, 2) << 4)

@@ -27,6 +27,28 @@
 #include <net/checksum.h>
 #include <net/sock.h>
 
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+/*
+ *	In kernel copy to iovec. Returns -EFAULT on error.
+ *
+ *	Note: this modifies the original iovec.
+ */
+void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len)
+{
+	while (len > 0) {
+		if (iov->iov_len) {
+			int copy = min_t(unsigned int, iov->iov_len, len);
+			memcpy(iov->iov_base, kdata, copy);
+			len -= copy;
+			kdata += copy;
+			iov->iov_base += copy;
+			iov->iov_len -= copy;
+		}
+		iov++;
+	}
+}
+#endif
+
 /*
  *	And now for the all-in-one: copy and checksum from a user iovec
  *	directly to a datagram

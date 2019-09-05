@@ -320,6 +320,7 @@ static inline unsigned read_seqretry(const seqlock_t *sl, unsigned start)
  * Acts like a normal spin_lock/unlock.
  * Don't need preempt_disable() because that is in the spin_lock already.
  */
+//#include <linux/spinlock.h>
 static inline void write_seqlock(seqlock_t *sl)
 {
 	spin_lock(&sl->lock);

@@ -27,10 +27,25 @@
 #define NETLINK_ECRYPTFS	19
 #define NETLINK_RDMA		20
 #define NETLINK_CRYPTO		21	/* Crypto layer */
+#define NETLINK_FF              30
+#define NETLINK_VOP             31
+#define NETLINK_KEY             32
+#define NETLINK_L2FLOW          33
 
 #define NETLINK_INET_DIAG	NETLINK_SOCK_DIAG
 
-#define MAX_LINKS 32		
+#define NETLINK_VOIP		34
+#define NETLINK_DTAM		35
+#define NETLINK_MCH		36
+#define NETLINK_CONFIG		37
+#define NETLINK_GENPLAY		38
+#define NETLINK_COMADEBUG	39
+#define NETLINK_EEPROM		40
+#define NETLINK_SS7		41
+#define NETLINK_DSR		42
+#define NETLINK_MMI		43
+
+#define MAX_LINKS 44
 
 struct sockaddr_nl {
 	__kernel_sa_family_t	nl_family;	/* AF_NETLINK	*/

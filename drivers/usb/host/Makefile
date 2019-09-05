@@ -30,6 +30,9 @@ obj-$(CONFIG_PCI)		+= pci-quirks.o
 
 obj-$(CONFIG_USB_XHCI_PCI)	+= xhci-pci.o
 obj-$(CONFIG_USB_XHCI_PLATFORM) += xhci-plat-hcd.o
+ifneq ($(CONFIG_ARCH_M86XXX), )
+obj-$(CONFIG_USB_XHCI_PLATFORM) += xhci-comcerto2000.o
+endif
 
 obj-$(CONFIG_USB_EHCI_HCD)	+= ehci-hcd.o
 obj-$(CONFIG_USB_EHCI_PCI)	+= ehci-pci.o

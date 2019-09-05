@@ -3252,7 +3252,7 @@ int sdhci_add_host(struct sdhci_host *host)
 		ocr_avail = mmc->ocr_avail;
 
 	if (host->ocr_mask)
-		ocr_avail &= host->ocr_mask;
+		ocr_avail |= host->ocr_mask;
 
 	mmc->ocr_avail = ocr_avail;
 	mmc->ocr_avail_sdio = ocr_avail;

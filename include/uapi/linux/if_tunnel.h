@@ -17,6 +17,16 @@
 #define SIOCADD6RD      (SIOCDEVPRIVATE + 9)
 #define SIOCDEL6RD      (SIOCDEVPRIVATE + 10)
 #define SIOCCHG6RD      (SIOCDEVPRIVATE + 11)
+#define SIOCGET4RD      (SIOCDEVPRIVATE + 12)
+#define SIOCADD4RD      (SIOCDEVPRIVATE + 13)
+#define SIOCDEL4RD      (SIOCDEVPRIVATE + 14)
+#define SIOCCHG4RD      (SIOCDEVPRIVATE + 15)
+#define COMCERTO_ETHERIPV4
+#ifdef COMCERTO_ETHERIPV4
+/* SIOCCHG4RD is currently not used and even if it were, these two tunnels would never co-inside*/
+/* MSPD Added */
+#define SIOCISETHIPV4TUNNEL  (SIOCDEVPRIVATE + 15)
+#endif
 
 #define GRE_CSUM	__cpu_to_be16(0x8000)
 #define GRE_ROUTING	__cpu_to_be16(0x4000)
@@ -92,6 +102,20 @@ struct ip_tunnel_6rd {
 	__u16			prefixlen;
 	__u16			relay_prefixlen;
 };
+
+/* ip6 tnl 4rd parm -start  */ 
+struct ip6_tnl_4rd {
+       __be32                  prefix;
+       struct in6_addr         relay_prefix;
+       struct in6_addr         relay_suffix;
+       __u16                   prefixlen;
+       __u16                   relay_prefixlen;
+       __u16                   relay_suffixlen;
+       __u16                   psid_offsetlen;
+       __u16                   eabit_len;
+       __u16                   entry_num;
+};
+/* ip6 tnl 4rd parm -end  */ 
 
 enum {
 	IFLA_GRE_UNSPEC,

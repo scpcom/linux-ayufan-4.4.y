@@ -6,7 +6,11 @@
 #endif
 
 #ifndef EXEC_PAGESIZE
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
 #define EXEC_PAGESIZE	4096
+#else
+#define EXEC_PAGESIZE  65536
+#endif
 #endif
 
 #ifndef NOGROUP

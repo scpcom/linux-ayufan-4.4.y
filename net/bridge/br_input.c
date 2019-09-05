@@ -145,6 +145,10 @@ int br_handle_frame_finish(struct sk_buff *skb)
 
 	BR_INPUT_SKB_CB(skb)->brdev = br->dev;
 
+#if defined(CONFIG_ARCH_COMCERTO)
+	skb->cb[4] = 0;
+#endif
+
 	/* The packet skb2 goes to the local host (NULL to skip). */
 	skb2 = NULL;
 
@@ -187,6 +191,10 @@ int br_handle_frame_finish(struct sk_buff *skb)
 	if (skb) {
 		if (dst) {
 			dst->used = jiffies;
+#if defined(CONFIG_ARCH_COMCERTO)
+			/* Used by ABM module */
+			skb->cb[4] = 1;
+#endif
 			br_forward(dst->dst, skb, skb2);
 		} else
 			br_flood_forward(br, skb, skb2, unicast);

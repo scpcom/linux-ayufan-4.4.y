@@ -42,6 +42,8 @@ endif
 
 lib-$(CONFIG_ARCH_RPC)		+= ecard.o io-acorn.o floppydma.o
 
+lib-$(CONFIG_COMCERTO_ZONE_DMA_NCNB) += atomic.o
+
 $(obj)/csumpartialcopy.o:	$(obj)/csumpartialcopygeneric.S
 $(obj)/csumpartialcopyuser.o:	$(obj)/csumpartialcopygeneric.S
 

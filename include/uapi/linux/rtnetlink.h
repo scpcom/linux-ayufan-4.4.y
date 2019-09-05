@@ -132,6 +132,12 @@ enum {
 	RTM_GETMDB = 86,
 #define RTM_GETMDB RTM_GETMDB
 
+       RTM_NEW4RD = 80,
+#define RTM_NEW4RD      RTM_NEW4RD
+       RTM_DEL4RD,
+#define RTM_DEL4RD      RTM_DEL4RD
+       RTM_GET4RD,
+#define RTM_GET4RD      RTM_GET4RD
 	__RTM_MAX,
 #define RTM_MAX		(((__RTM_MAX + 3) & ~3) - 1)
 };

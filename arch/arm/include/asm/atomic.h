@@ -32,6 +32,49 @@
 
 #if __LINUX_ARM_ARCH__ >= 6
 
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+
+int comcerto_atomic_add(int i, atomic_t *v);
+int comcerto_atomic_cmpxchg(atomic_t *v, int old, int new);
+int comcerto_atomic_add_unless(atomic_t *v, int a, int u);
+void comcerto_atomic_clear_mask(unsigned long mask, unsigned long *addr);
+
+
+struct virtual_zone {
+	void *start;
+	void *end;
+};
+
+extern struct virtual_zone arm_dma_zone;
+
+static inline bool is_dma_zone_virtual_address(void *addr)
+{
+	return ((addr < arm_dma_zone.end) && (addr >= arm_dma_zone.start));
+}
+
+#define comcerto_op_factor_add 	(1)
+#define comcerto_op_factor_sub 	(-1)
+
+#define comcerto_atomic_op(asm_op)				\
+{								\
+	if (unlikely(is_dma_zone_virtual_address(v))) {		\
+		comcerto_atomic_add(i*(comcerto_op_factor_##asm_op), v);		\
+		return;						\
+	}							\
+}
+
+#define comcerto_atomic_op_return(asm_op)				\
+{									\
+	if (unlikely(is_dma_zone_virtual_address(v))) {			\
+		return comcerto_atomic_add(i*(comcerto_op_factor_##asm_op), v);		\
+	}								\
+}
+
+#else
+#define comcerto_atomic_op(asm_op) {}
+#define comcerto_atomic_op_return(asm_op) {}
+#endif
+
 /*
  * ARMv6 UP and SMP safe atomic ops.  We use load exclusive and
  * store exclusive to ensure that these are atomic.  We may loop
@@ -44,6 +87,7 @@ static inline void atomic_##op(int i, atomic_t *v)			\
 	unsigned long tmp;						\
 	int result;							\
 									\
+	comcerto_atomic_op(asm_op);					\
 	prefetchw(&v->counter);						\
 	__asm__ __volatile__("@ atomic_" #op "\n"			\
 "1:	ldrex	%0, [%3]\n"						\
@@ -62,6 +106,7 @@ static inline int atomic_##op##_return(int i, atomic_t *v)		\
 	unsigned long tmp;						\
 	int result;							\
 									\
+	comcerto_atomic_op_return(asm_op);				\
 	smp_mb();							\
 	prefetchw(&v->counter);						\
 									\
@@ -84,6 +129,11 @@ static inline int atomic_cmpxchg(atomic_t *ptr, int old, int new)
 {
 	int oldval;
 	unsigned long res;
+
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if (unlikely(is_dma_zone_virtual_address(ptr)))
+		return comcerto_atomic_cmpxchg(ptr, old, new);
+#endif
 
 	smp_mb();
 	prefetchw(&ptr->counter);
@@ -108,6 +158,11 @@ static inline int __atomic_add_unless(atomic_t *v, int a, int u)
 {
 	int oldval, newval;
 	unsigned long tmp;
+
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if (unlikely(is_dma_zone_virtual_address(v)))
+		return comcerto_atomic_add_unless(v, a, u);
+#endif
 
 	smp_mb();
 	prefetchw(&v->counter);

@@ -81,6 +81,13 @@
 	status = "okay";
 };
 
+&i2c2 {
+	status = "okay";
+	monitor: ltc2945@67 {
+		reg = <0x67>;
+	};
+};
+
 &ifc {
 	#address-cells = <2>;
 	#size-cells = <1>;

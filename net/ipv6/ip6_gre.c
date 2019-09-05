@@ -635,7 +635,14 @@ static netdev_tx_t ip6gre_xmit2(struct sk_buff *skb,
 	if (!fl6->flowi6_mark)
 		dst = ip6_tnl_dst_check(tunnel);
 
-	if (!dst) {
+	if ((dst)
+#if defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	&& (tunnel->genid  == atomic_read(&net->xfrm.flow_cache_genid))
+#endif
+		) {
+			dst_hold(dst);
+	}
+	else {
 		ndst = ip6_route_output(net, NULL, fl6);
 
 		if (ndst->error)
@@ -647,6 +654,9 @@ static netdev_tx_t ip6gre_xmit2(struct sk_buff *skb,
 			goto tx_err_link_failure;
 		}
 		dst = ndst;
+#if defined(CONFIG_INET6_IPSEC_OFFLOAD)
+		tunnel->genid = atomic_read(&net->xfrm.flow_cache_genid);
+#endif
 	}
 
 	tdev = dst->dev;

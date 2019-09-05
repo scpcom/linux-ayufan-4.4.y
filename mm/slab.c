@@ -2245,7 +2245,7 @@ __kmem_cache_create (struct kmem_cache *cachep, unsigned long flags)
 	cachep->flags = flags;
 	cachep->allocflags = __GFP_COMP;
 	if (CONFIG_ZONE_DMA_FLAG && (flags & SLAB_CACHE_DMA))
-		cachep->allocflags |= GFP_DMA;
+		cachep->allocflags |= __GFP_DMA;
 	cachep->size = size;
 	cachep->reciprocal_buffer_size = reciprocal_value(size);
 
@@ -2518,10 +2518,10 @@ static void cache_init_objs(struct kmem_cache *cachep,
 static void kmem_flagcheck(struct kmem_cache *cachep, gfp_t flags)
 {
 	if (CONFIG_ZONE_DMA_FLAG) {
-		if (flags & GFP_DMA)
-			BUG_ON(!(cachep->allocflags & GFP_DMA));
+		if (flags & __GFP_DMA)
+			BUG_ON(!(cachep->allocflags & __GFP_DMA));
 		else
-			BUG_ON(cachep->allocflags & GFP_DMA);
+			BUG_ON(cachep->allocflags & __GFP_DMA);
 	}
 }
 

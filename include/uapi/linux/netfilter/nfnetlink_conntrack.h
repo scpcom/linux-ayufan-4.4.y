@@ -53,6 +53,8 @@ enum ctattr_type {
 	CTA_MARK_MASK,
 	CTA_LABELS,
 	CTA_LABELS_MASK,
+    CTA_COMCERTO_FP_ORIG,
+    CTA_COMCERTO_FP_REPLY,
 	__CTA_MAX
 };
 #define CTA_MAX (__CTA_MAX - 1)
@@ -224,6 +226,15 @@ enum ctattr_secctx {
 	__CTA_SECCTX_MAX
 };
 #define CTA_SECCTX_MAX (__CTA_SECCTX_MAX - 1)
+
+enum ctattr_comcerto_fp {
+    CTA_COMCERTO_FP_UNSPEC,
+    CTA_COMCERTO_FP_MARK,
+    CTA_COMCERTO_FP_IFINDEX,
+    CTA_COMCERTO_FP_IIF,
+    __CTA_COMCERTO_FP_MAX
+};
+#define CTA_COMCERTO_FP_MAX (__CTA_COMCERTO_FP_MAX - 1)
 
 enum ctattr_stats_cpu {
 	CTA_STATS_UNSPEC,

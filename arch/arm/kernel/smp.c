@@ -377,7 +377,10 @@ asmlinkage void secondary_start_kernel(void)
 	complete(&cpu_running);
 
 	local_irq_enable();
+
+#ifndef CONFIG_COMCERTO_MSP
 	local_fiq_enable();
+#endif  /* !CONFIG_COMCERTO_MSP */
 
 	/*
 	 * OK, it's off to the idle thread for us

@@ -41,6 +41,9 @@ struct netns_xfrm {
 	struct hlist_head	*state_bydst;
 	struct hlist_head	*state_bysrc;
 	struct hlist_head	*state_byspi;
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	struct hlist_head	*state_byh;
+#endif
 	unsigned int		state_hmask;
 	unsigned int		state_num;
 	struct work_struct	state_hash_work;
