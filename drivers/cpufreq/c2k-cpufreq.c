@@ -9,8 +9,6 @@
 #include <linux/compiler.h>
 #include <linux/gfp.h>
 
-#include <asm/system.h>
-
 #include <mach/hardware.h>
 #include <linux/netdevice.h>
 #include <linux/clk.h>
@@ -23,8 +21,6 @@
 #else
 	#define c2k_cpufreq_debug(fmt, arg...)     ;
 #endif
-
-extern struct cpufreq_governor cpufreq_gov_ondemand;
 
 static struct cpufreq_frequency_table comcerto_clk_frqs[NR_FREQS + 1];
 
@@ -45,7 +41,7 @@ static unsigned int comcerto_getspeed(unsigned int cpu)
 
 	c2k_cpufreq_debug ("%s: Get speed for cpu(%d)\n", __func__, cpu);
 
-	clk_arm = clk_get(NULL,"arm");
+	clk_arm = clk_get(NULL, "arm");
 	if (IS_ERR(clk_arm)) {
 		pr_err("cpufreq: Unable to obtain ARMCLK: %ld\n",
 				PTR_ERR(clk_arm));
@@ -59,11 +55,10 @@ static int comcerto_set_target(struct cpufreq_policy *policy,
                              unsigned int target_freq,
                              unsigned int relation)
 {
-	struct cpufreq_freqs freqs;
 	unsigned int index;
+	unsigned int old_freq, new_freq;
 	struct clk *clk_arm;
 	int ret;
-	int j = 0;
 
 	ret = cpufreq_frequency_table_target(policy, comcerto_clk_frqs, target_freq, relation, &index);
 	if (ret < 0)
@@ -82,73 +77,31 @@ static int comcerto_set_target(struct cpufreq_policy *policy,
 		return PTR_ERR(clk_arm);
 	}
 
-	freqs.old = comcerto_getspeed(policy->cpu);
-	if (freqs.old == target_freq)
+	old_freq = comcerto_getspeed(policy->cpu);
+	if (old_freq == target_freq)
 	{
 		c2k_cpufreq_debug ("%s: old freq (%d) equals new freq(%d).\n", \
-			__func__, freqs.old, target_freq);
+			__func__, old_freq, target_freq);
 		return 0;
 	}
 
-	freqs.new = comcerto_clk_frqs[index].frequency;
+	new_freq = comcerto_clk_frqs[index].frequency;
 
 	c2k_cpufreq_debug("%s: Transition(cpu:%d) %d-%dHz\n", __func__,\
-				policy->cpu, freqs.old, freqs.new);
+				policy->cpu, old_freq, new_freq);
 
-	while (j < NR_CPUS)
-	{
-		if (!cpu_online(j))
-		{
-			j++;
-			continue;
-		}
-		freqs.cpu = j;
-		cpufreq_notify_transition(&freqs, CPUFREQ_PRECHANGE);
-		j++;
-	}
-	j = 0;
-
-	policy->cur = freqs.new;
-	ret = clk_set_rate(clk_arm, freqs.new);
+	policy->cur = new_freq;
+	ret = clk_set_rate(clk_arm, new_freq);
 	if (ret < 0) {
 		pr_debug("cpufreq: Failed to set rate %dHz: %d\n",
-				freqs.new, ret);
-		j = 0;
-		goto err;
-	}
-
-	while (j < NR_CPUS)
-	{
-		if (!cpu_online(j))
-		{
-			j++;
-			continue;
-		}
-		freqs.cpu = j;
-		cpufreq_notify_transition(&freqs, CPUFREQ_POSTCHANGE);
-		j++;
+				new_freq, ret);
+		return ret;
 	}
 
 	c2k_cpufreq_debug("%s:Set actual frequency %luHz\n", __func__, \
 			clk_get_rate(clk_arm));
 
 	return 0;
-err:
-	policy->cur = freqs.old;
-	freqs.new = freqs.old;
-	while (j < NR_CPUS)
-	{
-		if (!cpu_online(j))
-		{
-			j++;
-			continue;
-		}
-		freqs.cpu = j;
-		cpufreq_notify_transition(&freqs, CPUFREQ_POSTCHANGE);
-		j++;
-	}
-
-        return ret;
 }
 
 static int comcerto_init_table(int cpu)
@@ -170,22 +123,22 @@ static int comcerto_init_table(int cpu)
 	clk_pll = clk_get_parent(clk_arm);
 
 	comcerto_clk_frqs[0].frequency = clk_get_rate(clk_arm);
-	comcerto_clk_frqs[0].index = clk_get_rate(clk_pll)/clk_get_rate(clk_arm);
+	comcerto_clk_frqs[0].driver_data = clk_get_rate(clk_pll)/clk_get_rate(clk_arm);
 
 	c2k_cpufreq_debug("\n\n ### cpufreq Table ###\n");
 
-	c2k_cpufreq_debug ("comcerto_clk_frqs[0].index = %d, comcerto_clk_frqs[0].frequency = %d\n",\
-				comcerto_clk_frqs[0].index, comcerto_clk_frqs[0].frequency);
+	c2k_cpufreq_debug ("comcerto_clk_frqs[0].driver_data = %d, comcerto_clk_frqs[0].frequency = %d\n",\
+				comcerto_clk_frqs[0].driver_data, comcerto_clk_frqs[0].frequency);
 
-	for (i = 1; comcerto_clk_frqs[0].index + i <= NR_FREQS; i++) 
+	for (i = 1; comcerto_clk_frqs[0].driver_data + i <= NR_FREQS; i++)
 	{
 		comcerto_clk_frqs[i].frequency = (comcerto_clk_frqs[0].frequency \
-			* comcerto_clk_frqs[0].index) / (comcerto_clk_frqs[0].index + i);
+			* comcerto_clk_frqs[0].driver_data) / (comcerto_clk_frqs[0].driver_data + i);
 
-		comcerto_clk_frqs[i].index = comcerto_clk_frqs[0].index + i;
+		comcerto_clk_frqs[i].driver_data = comcerto_clk_frqs[0].driver_data + i;
 
-		c2k_cpufreq_debug ("comcerto_clk_frqs[%d].index = %d, comcerto_clk_frqs[%d].frequency = %d\n",\
-					i, comcerto_clk_frqs[i].index, i, comcerto_clk_frqs[i].frequency);
+		c2k_cpufreq_debug ("comcerto_clk_frqs[%d].driver_data = %d, comcerto_clk_frqs[%d].frequency = %d\n",\
+					i, comcerto_clk_frqs[i].driver_data, i, comcerto_clk_frqs[i].frequency);
 	}
 
 	comcerto_clk_frqs[i].frequency = CPUFREQ_TABLE_END;
@@ -197,20 +150,8 @@ static int comcerto_cpu_init(struct cpufreq_policy *policy)
 {
 	comcerto_init_table(policy->cpu);
 
-	cpufreq_frequency_table_cpuinfo(policy, comcerto_clk_frqs);
-
-	cpufreq_frequency_table_get_attr(comcerto_clk_frqs, policy->cpu);
-
-	/* PLL stabalisation time */
-	policy->cpuinfo.transition_latency = 10000; /* 10us */
-
-	/* Current Frequency */
-	policy->cur = comcerto_clk_frqs[0].frequency;
-
-	/* Governor used */
-	policy->governor = CPUFREQ_DEFAULT_GOVERNOR;
-
-	return 0;
+	/* PLL stabilisation time - 10us */
+	return cpufreq_generic_init(policy, comcerto_clk_frqs, 10000);
 }
 
 static struct freq_attr *comcerto_cpufreq_attr[] = {
@@ -226,7 +167,6 @@ static struct cpufreq_driver comcerto_driver = {
 	.get = comcerto_getspeed,
 	.attr = comcerto_cpufreq_attr,
 	.flags = CPUFREQ_STICKY,
-	.owner = THIS_MODULE,
 };
 
 static int __init comcerto_cpufreq_init(void)
