@@ -1281,7 +1281,7 @@ err0:
 
 }
 
-#if defined(CONFIG_C2K_EVM) || defined(CONFIG_C2K_ASIC)
+#if defined(CONFIG_C2K_EVM) || defined(CONFIG_C2K_ASIC) || defined(CONFIG_SEQUOIA)
 #define PCIE_DEV_EXT_RESET_DEASSERT(_id) \
 	writel(readl(COMCERTO_GPIO_OUTPUT_REG) & ~(GPIO_PIN_27), COMCERTO_GPIO_OUTPUT_REG);
 
@@ -1328,7 +1328,7 @@ static int comcerto_pcie_device_reset(struct pcie_port *pp)
 	 * save configuration of devices on other PCIe also.
 	 * This may not be applicable for other cutomer boards.
 	 */
-#if defined(CONFIG_C2K_EVM) || defined(CONFIG_C2K_ASIC)
+#if defined(CONFIG_C2K_EVM) || defined(CONFIG_C2K_ASIC) || defined(CONFIG_SEQUOIA)
 	l_pp = &pcie_port[!pp->port];
 	pci_dev = NULL;
 

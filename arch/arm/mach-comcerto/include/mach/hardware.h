@@ -40,6 +40,8 @@
 		#include <mach/board-c2kmfcnevm.h>
 	#elif defined(CONFIG_RTSM_C2K)
 		#include <mach/board-c2krtsm.h>
+	#elif defined(CONFIG_SEQUOIA)
+		#include <mach/board-sequoia.h>
 	
 	#else
 		#error "mach/board_XXX.h :  Unknown board"
