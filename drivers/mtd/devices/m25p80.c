@@ -85,6 +85,7 @@ static void m25p80_write(struct spi_nor *nor, loff_t to, size_t len,
 	int cmd_sz = m25p_cmdsz(nor);
 
 	spi_message_init(&m);
+	m.addr_width = flash->spi_nor.addr_width;
 
 	if (nor->program_opcode == SPINOR_OP_AAI_WP && nor->sst_write_second)
 		cmd_sz = 1;
@@ -137,6 +138,7 @@ static int m25p80_read(struct spi_nor *nor, loff_t from, size_t len,
 		return ret;
 
 	spi_message_init(&m);
+	m.addr_width = flash->spi_nor.addr_width;
 	memset(t, 0, (sizeof t));
 
 	flash->command[0] = nor->read_opcode;
@@ -215,6 +217,7 @@ static int m25p_probe(struct spi_device *spi)
 	nor->read_reg = m25p80_read_reg;
 
 	nor->dev = &spi->dev;
+	nor->np = spi->dev.of_node;
 	nor->mtd = &flash->mtd;
 	nor->priv = flash;
 
@@ -311,10 +314,42 @@ static const struct spi_device_id m25p_ids[] = {
 MODULE_DEVICE_TABLE(spi, m25p_ids);
 
 
+#ifdef CONFIG_PM_SLEEP
+static int m25p_suspend(struct device *dev)
+{
+	struct m25p *flash = dev_get_drvdata(dev);
+	struct spi_nor *nor = &flash->spi_nor;
+
+	/* Wait till previous write/erase is done. */
+	if (nor->wait_till_ready)
+		return nor->wait_till_ready(nor);
+
+	return 0;
+}
+
+static int m25p_resume(struct device *dev)
+{
+	struct m25p *flash = dev_get_drvdata(dev);
+	struct spi_device *spi = flash->spi;
+	struct spi_nor *nor = &flash->spi_nor;
+	enum read_mode mode = SPI_NOR_NORMAL;
+
+	if (spi->mode & SPI_RX_QUAD)
+		mode = SPI_NOR_QUAD;
+	else if (spi->mode & SPI_RX_DUAL)
+		mode = SPI_NOR_DUAL;
+
+	return spi_nor_scan(nor, spi_get_device_id(spi), mode);
+}
+#endif /* CONFIG_PM_SLEEP */
+
+static SIMPLE_DEV_PM_OPS(m25p_pm_ops, m25p_suspend, m25p_resume);
+
 static struct spi_driver m25p80_driver = {
 	.driver = {
 		.name	= "m25p80",
 		.owner	= THIS_MODULE,
+		.pm	= &m25p_pm_ops,
 	},
 	.id_table	= m25p_ids,
 	.probe	= m25p_probe,

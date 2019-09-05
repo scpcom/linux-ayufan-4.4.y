@@ -34,4 +34,8 @@ struct twd_local_timer name __initdata = {	\
 
 int twd_local_timer_register(struct twd_local_timer *);
 
+/* int twd_timer_ack(void); */
+static int __cpuinit twd_timer_setup(void);
+extern void __iomem *twd_base;
+
 #endif

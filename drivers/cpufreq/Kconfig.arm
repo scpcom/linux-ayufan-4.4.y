@@ -90,6 +90,11 @@ config ARM_EXYNOS_CPU_FREQ_BOOST_SW
 
 	  If in doubt, say N.
 
+config CPU_FREQ_C2K
+	bool "CPUfreq driver for Comcerto"
+	depends on ARCH_COMCERTO && CPU_FREQ
+	default y
+
 config ARM_HIGHBANK_CPUFREQ
 	tristate "Calxeda Highbank-based"
 	depends on ARCH_HIGHBANK && GENERIC_CPUFREQ_CPU0 && REGULATOR

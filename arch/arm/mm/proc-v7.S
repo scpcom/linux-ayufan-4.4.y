@@ -33,7 +33,7 @@ ENTRY(cpu_v7_proc_fin)
 	mrc	p15, 0, r0, c1, c0, 0		@ ctrl register
 	bic	r0, r0, #0x1000			@ ...i............
 	bic	r0, r0, #0x0006			@ .............ca.
-	mcr	p15, 0, r0, c1, c0, 0		@ disable caches
+#	mcr	p15, 0, r0, c1, c0, 0		@ disable caches
 	mov	pc, lr
 ENDPROC(cpu_v7_proc_fin)
 
@@ -87,6 +87,42 @@ ENTRY(cpu_v7_dcache_clean_area)
 	mov	pc, lr
 ENDPROC(cpu_v7_dcache_clean_area)
 
+/* Make the memory uncached, but keep Linux settings as is so memory may be
+ * reset to original attributes later on.
+ */
+ENTRY(cpu_v7_uncache_pte_ext)
+#ifdef CONFIG_MMU
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
+ ARM(	ldr	r3, [r0, #2048]! )
+ THUMB(	add	r0, r0, #2048 )
+ THUMB( ldr r3, [r0] )
+		bic r3, r3, #0x48		@ clear TEX[0],C bits (see below)
+		orr r3, r3, #0x4  		@ set B bit (see below)
+ ARM(	str	r3, [r0, #2048]! )
+ THUMB(	str	r3, [r0] )
+ #else
+	ldr r1, =32768		@ PTE_HWTABLE_OFF
+	add r1, r1, r0
+	ldr r3, [r1]
+	add r2, r1, #64		@ 16*4 bytes
+ARM(	bic r3, r3, #0x1008 ) 	@ clear TEX[0],C bits (see below)
+THUMB(	bic r3, r3, #0x8 )
+THUMB(	bic r3, r3, #0x1000 )
+	orr r3, r3, #0x4			@ set B bit (see below)
+ 1:
+	sub r2, r2, #4
+	str	r3, [r2]!
+	cmp r1, r2
+	blo 1b
+ #endif
+
+
+#endif
+	mov	pc, lr
+ENDPROC(cpu_v7_uncache_pte_ext)
+
+
+
 	string	cpu_v7_name, "ARMv7 Processor"
 	.align
 
@@ -134,6 +170,9 @@ ENTRY(cpu_v7_do_resume)
 	ALT_UP(orr	r1, r1, #TTB_FLAGS_UP)
 	mcr	p15, 0, r1, c2, c0, 0	@ TTB 0
 	mcr	p15, 0, r7, c2, c0, 1	@ TTB 1
+#if defined(CONFIG_COMCERTO_HW_KERNEL_PAGETABLE)
+	mov ip, #1                      @ set TTBRCR.N to 1, so that addresses above 2GB will use TTB1
+#endif
 #endif
 	mcr	p15, 0, r11, c2, c0, 2	@ TTB control register
 	ldr	r4, =PRRR		@ PRRR
@@ -209,7 +248,13 @@ ENDPROC(cpu_pj4b_do_resume)
  *	- cache type register is implemented
  */
 __v7_ca5mp_setup:
+	mov	r10, #(1 << 0)			@ TLB ops broadcasting
+	b	1f
+
 __v7_ca9mp_setup:
+#if !defined(CONFIG_CPU_SPECULATIVE_ACCESS_DISABLED)
+	orr	r10, #(3 << 1)			@ L1 data prefetch, L2 prefetch hints enable
+#endif
 __v7_cr7mp_setup:
 	mov	r10, #(1 << 0)			@ Cache/TLB ops broadcasting
 	b	1f
@@ -375,6 +420,9 @@ __v7_setup:
 	mcr	p15, 0, r10, c7, c5, 0		@ I+BTB cache invalidate
 #ifdef CONFIG_MMU
 	mcr	p15, 0, r10, c8, c7, 0		@ invalidate I + D TLBs
+#if defined(CONFIG_COMCERTO_HW_KERNEL_PAGETABLE)
+    mov r10, #1                     @ set TTBRCR.N to 1, so that addresses above 2GB will use TTB1
+#endif
 	v7_ttb_setup r10, r4, r8, r5		@ TTBCR, TTBRx setup
 	ldr	r5, =PRRR			@ PRRR
 	ldr	r6, =NMRR			@ NMRR

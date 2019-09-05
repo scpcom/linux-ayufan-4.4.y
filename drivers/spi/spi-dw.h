@@ -93,6 +93,7 @@ struct dw_spi_dma_ops {
 struct dw_spi {
 	struct spi_master	*master;
 	struct spi_device	*cur_dev;
+	struct clk		*clk_spi;
 	enum dw_ssi_type	type;
 	char			name[16];
 

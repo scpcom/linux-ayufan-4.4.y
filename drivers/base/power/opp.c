@@ -352,6 +352,7 @@ struct dev_pm_opp *dev_pm_opp_find_freq_floor(struct device *dev,
 {
 	struct device_opp *dev_opp;
 	struct dev_pm_opp *temp_opp, *opp = ERR_PTR(-ERANGE);
+	int c = 0;
 
 	if (!dev || !freq) {
 		dev_err(dev, "%s: Invalid argument freq=%p\n", __func__, freq);
@@ -363,10 +364,15 @@ struct dev_pm_opp *dev_pm_opp_find_freq_floor(struct device *dev,
 		return ERR_CAST(dev_opp);
 
 	list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
+		++c;
 		if (temp_opp->available) {
 			/* go to the next node, before choosing prev */
 			if (temp_opp->rate > *freq)
+			{
+				if (c == 1)
+					opp = temp_opp;
 				break;
+			}
 			else
 				opp = temp_opp;
 		}

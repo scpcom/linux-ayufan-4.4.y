@@ -9,6 +9,7 @@
  *
  *  DMA uncached mapping support.
  */
+#include <linux/version.h>
 #include <linux/bootmem.h>
 #include <linux/module.h>
 #include <linux/mm.h>
@@ -38,6 +39,11 @@
 #include <asm/dma-contiguous.h>
 
 #include "mm.h"
+#if defined(CONFIG_COMCERTO_UNCACHED_DMA)
+#include <linux/hugetlb.h>
+#include <asm/pgalloc.h>
+#include <asm/mach/map.h>
+#endif
 
 #define NORMAL	    0
 #define COHERENT    1
@@ -58,6 +64,71 @@ static void __dma_page_cpu_to_dev(struct page *, unsigned long,
 		size_t, enum dma_data_direction);
 static void __dma_page_dev_to_cpu(struct page *, unsigned long,
 		size_t, enum dma_data_direction);
+
+
+#if defined(CONFIG_COMCERTO_UNCACHED_DMA)
+static pgd_t *shadow_pg_dir;
+static u16 *shadow_pmd_count;
+
+static int __init init_shadow_page_table(void)
+{
+	pmd_t *pmd, *shadow_pmd;
+	pte_t *shadow_pte, *ptep;
+	unsigned long start, addr, end, pfn;
+	const struct mem_type *mt;
+	int count;
+
+	shadow_pg_dir = (pgd_t *)__get_free_pages(GFP_KERNEL | GFP_ATOMIC, get_order(16384));
+	if (!shadow_pg_dir)
+		return -ENOMEM;
+	shadow_pmd_count = (u16 *)__get_free_pages(GFP_KERNEL | GFP_ATOMIC, get_order(sizeof(u16) * PTRS_PER_PGD));
+	if (!shadow_pmd_count)
+		goto err1;
+
+	memset(shadow_pg_dir, 0, 16384);
+	memset(shadow_pmd_count, 0, sizeof(u16) * PTRS_PER_PGD);
+
+	mt = get_mem_type(MT_MEMORY);
+	start = 0;
+	count = 0;
+	do {
+		pmd = pmd_off_k((unsigned long) start);
+		if (!pmd_none(*pmd)) {
+			if (pmd_bad(*pmd) && ((pmd_val(*pmd) & ~SECTION_MASK) == mt->prot_sect)) {  // Only do it for MT_MEMORY areas
+				shadow_pmd = (pmd_t *)shadow_pg_dir + (pmd - pmd_off_k(0));
+				addr = (unsigned long)start & PMD_MASK;
+				end = addr + PMD_SIZE;
+
+				shadow_pte = (pte_t *)__get_free_page(PGALLOC_GFP | GFP_ATOMIC);
+				if (!shadow_pte)
+					goto err2;
+				pfn = __phys_to_pfn(pmd_val(*pmd) & PMD_MASK);
+				ptep = shadow_pte;
+				do {
+					set_pte_ext(ptep, pfn_pte(pfn, __pgprot(mt->prot_pte)), 0);
+					pfn++;
+				} while (ptep++, addr += PAGE_SIZE, addr != end);
+				__pmd_populate(shadow_pmd, __pa(shadow_pte), mt->prot_l1);
+			} else {
+				// Mark the shadow in use, so we never replace the already existing 2nd-level
+				shadow_pmd_count[pgd_index(start)]++;
+			}
+		}
+	} while (count++, start += PMD_SIZE, count < PTRS_PER_PGD);
+
+	return 0;
+
+err2:
+	__free_pages((struct page *)shadow_pmd_count, get_order(sizeof(u16) * PTRS_PER_PGD));
+	shadow_pmd_count = NULL;
+	//TODO: free already allocated shadow_pte tables
+err1:
+	__free_pages((struct page *)shadow_pg_dir, get_order(16384));
+	return -ENOMEM;
+}
+core_initcall(init_shadow_page_table);
+#endif
+
 
 /**
  * arm_dma_map_page - map a portion of a page for streaming DMA
@@ -338,7 +409,19 @@ static void __dma_free_remap(void *cpu_addr, size_t size)
 	vunmap(cpu_addr);
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
+#if defined(CONFIG_COMCERTO_64K_PAGES)
+#define PFE_DMA_SIZE		(8 * SZ_1M)
+#else
+#define PFE_DMA_SIZE            (16 * SZ_1M)
+#endif /* endif for CONFIG_COMCERTO_64K_PAGES*/
+
+#define DSPG_DECT_CSS_DMA_SIZE	(10 * SZ_1M)
+
+#define DEFAULT_DMA_COHERENT_POOL_SIZE	PFE_DMA_SIZE
+#else /* else part of LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0) */
 #define DEFAULT_DMA_COHERENT_POOL_SIZE	SZ_256K
+#endif
 
 struct dma_pool {
 	size_t size;
@@ -350,7 +433,11 @@ struct dma_pool {
 };
 
 static struct dma_pool atomic_pool = {
+#if defined(CONFIG_DSPG_DECT_CSS)
+	.size = ((DEFAULT_DMA_COHERENT_POOL_SIZE) + (DSPG_DECT_CSS_DMA_SIZE)),
+#else
 	.size = DEFAULT_DMA_COHERENT_POOL_SIZE,
+#endif
 };
 
 static int __init early_coherent_pool(char *p)
@@ -373,6 +460,210 @@ void __init init_dma_coherent_pool_size(unsigned long size)
 	 */
 	if (atomic_pool.size == DEFAULT_DMA_COHERENT_POOL_SIZE)
 		atomic_pool.size = size;
+}
+#if defined(CONFIG_COMCERTO_UNCACHED_DMA)
+static inline void shadow_pmd_inc(const void *kaddr, int incr)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&init_mm.page_table_lock, flags);
+	shadow_pmd_count[pgd_index((unsigned long) kaddr)] += incr;
+	spin_unlock_irqrestore(&init_mm.page_table_lock, flags);
+}
+
+static inline void copy_pmd_fast(pmd_t *pmdpd, pmd_t *pmdps)
+{
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
+	pmdpd[0] = pmdps[0];
+	pmdpd[1] = pmdps[1];
+#else
+	int i;
+	for(i = 0; i < LINKED_PMDS; i++)
+		pmdpd[i] = pmdps[i];
+#endif
+}
+#endif
+
+static inline void __dmac_map_area(const void *kaddr, size_t size,
+	int dir)
+{
+#if defined(CONFIG_COMCERTO_UNCACHED_DMA)
+	pmd_t *pmd, *shadow_pmd;
+	pte_t *pte;
+	const void *kaddr_page;
+	const struct mem_type *mt;
+	unsigned int nr_pages, nr_pages_pmd;
+
+	if (!shadow_pmd_count)
+		goto op;
+
+	// For now, be safe and only uncache full pages so we don't have to handle
+	// the case of pages being DMA-mapped multiple times
+	if ((dir == DMA_FROM_DEVICE) && ((((unsigned long) kaddr|size) & ~PAGE_MASK) == 0)) {
+		mt = get_mem_type(MT_MEMORY_RWX_NONCACHED);
+		kaddr_page = kaddr;
+		pmd = pmd_off_k((unsigned long) kaddr_page);
+		shadow_pmd = (pmd_t *)shadow_pg_dir + (pmd - pmd_off_k(0));
+		nr_pages = __phys_to_pfn(size);
+
+		if (nr_pages == 1) { // Optimize for the common case
+			shadow_pmd_inc(kaddr_page, 1);
+			if (pmd_bad(*pmd)) { //No 2nd-level page table, retrieve it from the shadows
+				// Small race condition here, but at worst we'll end up copying the shadow_pmd to the actual pmd twice.
+				// For now, map the whole PMD. TODO: try and map only 1 section (1MB).
+				copy_pmd_fast(pmd, shadow_pmd);
+			}
+
+			pte = pte_offset_kernel(pmd, (int) kaddr_page);
+			uncache_pte_ext(pte);
+			flush_tlb_kernel_page((unsigned long) kaddr_page);
+			goto op;
+		}
+
+		nr_pages_pmd = __phys_to_pfn(PMD_SIZE - ((unsigned long) kaddr_page & ~PMD_MASK));
+
+		while (nr_pages) {
+
+			nr_pages_pmd = min(nr_pages, nr_pages_pmd);
+			nr_pages -= nr_pages_pmd;
+
+			shadow_pmd_inc(kaddr_page, nr_pages_pmd);
+
+			if (pmd_bad(*pmd)) { //No 2nd-level page table, retrieve it from the shadows
+				// Small race condition here, but at worst we'll end up copying the shadow_pmd to the actual pmd twice.
+				// For now, map the whole PMD. TODO: try and map only 1 section (1MB).
+				copy_pmd_fast(pmd, shadow_pmd);
+			}
+
+			pte = pte_offset_kernel(pmd, (int) kaddr_page);
+			while (nr_pages_pmd) {
+				uncache_pte_ext(pte);
+				flush_tlb_kernel_page((unsigned long) kaddr_page);
+				pte++;
+				kaddr_page += PAGE_SIZE;
+				nr_pages_pmd--;
+			}
+
+			nr_pages_pmd = PTRS_PER_PTE;
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
+			pmd += 2;
+			shadow_pmd += 2;
+#else
+			pmd += LINKED_PMDS;
+			shadow_pmd += LINKED_PMDS;
+#endif
+		}
+	}
+	op:
+#endif
+	dmac_map_area(kaddr, size, dir);
+}
+
+static inline void __dmac_unmap_area(const void *kaddr, size_t size,
+	int dir)
+{
+
+#if defined(CONFIG_COMCERTO_UNCACHED_DMA)
+	pmd_t *pmd;
+	pte_t *pte;
+	const struct mem_type *mt;
+	unsigned long pa;
+	const void *kaddr_page;
+	unsigned long flags;
+	unsigned int nr_pages, nr_pages_pmd, page_count;
+
+	if (!shadow_pmd_count)
+		goto op;
+
+	if ((dir == DMA_FROM_DEVICE) && ((((unsigned long) kaddr|size) & ~PAGE_MASK) == 0)) {
+		mt = get_mem_type(MT_MEMORY);
+		kaddr_page = kaddr;
+
+		pmd = pmd_off_k((unsigned long) kaddr_page);
+		pa = __virt_to_phys((unsigned long)kaddr_page & PMD_MASK);
+
+		nr_pages = __phys_to_pfn(size);
+
+		if (nr_pages == 1) { // Optimize for the common case
+			if (pmd_bad(*pmd)) // No 2nd-level page table, so page was never made non-cacheable.
+				goto op;
+			pte = pte_offset_kernel(pmd, (int) kaddr_page);
+			set_pte_ext(pte, *pte, 0);
+
+			spin_lock_irqsave(&init_mm.page_table_lock, flags);
+			shadow_pmd_count[pgd_index((unsigned long) kaddr_page)]--;
+			if (shadow_pmd_count[pgd_index((unsigned long) kaddr_page)] == 0) {
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
+				*pmd = __pmd(pa | mt->prot_sect);
+				pmd++;
+				pa += SECTION_SIZE;
+				*pmd = __pmd(pa | mt->prot_sect);
+#else
+				pmd_t *orig_pmd = pmd;
+				while (pmd < (orig_pmd + LINKED_PMDS)) {
+					*pmd = __pmd(pa | mt->prot_sect);
+					pa += SECTION_SIZE;
+					pmd++;
+				}
+#endif
+			}
+			spin_unlock_irqrestore(&init_mm.page_table_lock, flags);
+
+			flush_tlb_kernel_page((unsigned long) kaddr_page);
+			return;
+		}
+
+		nr_pages_pmd = __phys_to_pfn(PMD_SIZE - ((unsigned long) kaddr_page & ~PMD_MASK));
+
+		while (nr_pages) {
+			if (pmd_bad(*pmd)) // No 2nd-level page table, so page was never made non-cacheable.
+				goto op;
+			nr_pages_pmd = min(nr_pages, nr_pages_pmd);
+			nr_pages -= nr_pages_pmd;
+
+			pte = pte_offset_kernel(pmd, (int) kaddr_page);
+			page_count = nr_pages_pmd;
+			while (page_count) {
+				set_pte_ext(pte, *pte, 0);
+				pte++;
+				page_count--;
+			}
+
+			spin_lock_irqsave(&init_mm.page_table_lock, flags);
+			shadow_pmd_count[pgd_index((unsigned long) kaddr_page)] -= nr_pages_pmd;
+			if (shadow_pmd_count[pgd_index((unsigned long) kaddr_page)] == 0) {
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
+				*pmd = __pmd(pa | mt->prot_sect);
+				pmd++;
+				pa += SECTION_SIZE;
+				*pmd = __pmd(pa | mt->prot_sect);
+				pmd++;
+				pa += SECTION_SIZE;
+#else
+				pmd_t *orig_pmd = pmd;
+				while (pmd < (orig_pmd + LINKED_PMDS)) {
+					*pmd = __pmd(pa | mt->prot_sect);
+					pmd++;
+					pa += SECTION_SIZE;
+				}
+#endif
+			}
+			spin_unlock_irqrestore(&init_mm.page_table_lock, flags);
+
+			while (nr_pages_pmd) {
+				flush_tlb_kernel_page((unsigned long) kaddr_page);
+				kaddr_page += PAGE_SIZE;
+				nr_pages_pmd--;
+			}
+
+			nr_pages_pmd = PTRS_PER_PTE;
+		}
+
+		return;
+	}
+	op:
+#endif
+	dmac_unmap_area(kaddr, size, dir);
 }
 
 /*
@@ -896,6 +1187,7 @@ static void dma_cache_maint_page(struct page *page, unsigned long offset,
 			vaddr = page_address(page) + offset;
 			op(vaddr, len, dir);
 		}
+
 		offset = 0;
 		pfn++;
 		left -= len;
@@ -911,17 +1203,27 @@ static void dma_cache_maint_page(struct page *page, unsigned long offset,
 static void __dma_page_cpu_to_dev(struct page *page, unsigned long off,
 	size_t size, enum dma_data_direction dir)
 {
-	phys_addr_t paddr;
+	unsigned long paddr = page_to_phys(page) + off;
 
-	dma_cache_maint_page(page, off, size, dir, dmac_map_area);
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if ((paddr + size) <= arm_dma_zone_size) {
+		if (dir != DMA_FROM_DEVICE)
+			wmb();
 
-	paddr = page_to_phys(page) + off;
+		return;
+	}
+#endif
+
+	dma_cache_maint_page(page, off, size, dir, __dmac_map_area);
+
+#if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	if (dir == DMA_FROM_DEVICE) {
 		outer_inv_range(paddr, paddr + size);
 	} else {
 		outer_clean_range(paddr, paddr + size);
 	}
 	/* FIXME: non-speculating: flush on bidirectional mappings? */
+#endif
 }
 
 static void __dma_page_dev_to_cpu(struct page *page, unsigned long off,
@@ -929,12 +1231,20 @@ static void __dma_page_dev_to_cpu(struct page *page, unsigned long off,
 {
 	phys_addr_t paddr = page_to_phys(page) + off;
 
-	/* FIXME: non-speculating: not required */
+#ifdef CONFIG_COMCERTO_ZONE_DMA_NCNB
+	if ((paddr + size) <= arm_dma_zone_size) {
+		if (dir != DMA_FROM_DEVICE)
+			wmb();
+		return;
+	}
+#endif
 	/* in any case, don't bother invalidating if DMA to device */
 	if (dir != DMA_TO_DEVICE) {
+#if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 		outer_inv_range(paddr, paddr + size);
+#endif
 
-		dma_cache_maint_page(page, off, size, dir, dmac_unmap_area);
+		dma_cache_maint_page(page, off, size, dir, __dmac_unmap_area);
 	}
 
 	/*

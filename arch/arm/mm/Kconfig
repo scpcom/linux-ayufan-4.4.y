@@ -771,6 +771,20 @@ config CPU_CACHE_ROUND_ROBIN
 	  Say Y here to use the predictable round-robin cache replacement
 	  policy.  Unless you specifically require this or are unsure, say N.
 
+config CPU_SPECULATIVE_ACCESS_DISABLED
+	bool "Disable speculative accesses"
+	depends on CPU_V7 && ARCH_COMCERTO
+	help
+	  Disable speculative accesses for the processor. This may reduce overall system memory performance but
+	  can allow other, potentially unsafe, optimizations (see below). If unsure, say N.
+
+config CPU_DMA_PARTIAL_INVALIDATES
+	bool "Do partial invalidates in the DMA management functions"
+	depends on CPU_V7 && ARCH_COMCERTO && CPU_SPECULATIVE_ACCESS_DISABLED
+	help
+	  Sa Y here to reduce the overhead of cache maintenance for DMA mapped memory zones. 
+	  WARNING: UNSAFE, this may lead to random memory corruption. If unsure, say N.
+
 config CPU_BPREDICT_DISABLE
 	bool "Disable branch prediction"
 	depends on CPU_ARM1020 || CPU_V6 || CPU_V6K || CPU_MOHAWK || CPU_XSC3 || CPU_V7 || CPU_FA526
@@ -884,6 +898,7 @@ config MIGHT_HAVE_CACHE_L2X0
 
 config CACHE_L2X0
 	bool "Enable the L2x0 outer cache controller" if MIGHT_HAVE_CACHE_L2X0
+	depends on ARCH_COMCERTO
 	default MIGHT_HAVE_CACHE_L2X0
 	select OUTER_CACHE
 	select OUTER_CACHE_SYNC
@@ -898,6 +913,52 @@ config CACHE_PL310
 	help
 	  This option enables optimisations for the PL310 cache
 	  controller.
+
+config L2X0_INSTRUCTION_ONLY
+	bool "Use L2 cache for instructions only"
+	depends on CACHE_PL310
+	default n
+
+config PL310_EXCLUSIVE_CACHE
+	bool "Exclusive cache"
+	depends on CACHE_PL310
+	default n
+
+config PL310_EARLY_WRITE_RESPONSE
+	bool "Early write response"
+	depends on CACHE_PL310
+	default n
+
+config PL310_FULL_LINE_OF_ZERO
+	bool "Full line of zero"
+	depends on CACHE_PL310
+	default n
+
+config PL310_STORE_BUFFER_DEVICE_LIMITATION
+	bool "Store buffer device limitation"
+	depends on CACHE_PL310
+	default n
+
+config PL310_INSTRUCTION_PREFETCH
+	bool "Instruction prefetch"
+	depends on CACHE_PL310
+	default n
+
+config PL310_DATA_PREFETCH
+	bool "Data prefetch"
+	depends on CACHE_PL310
+	default n
+
+config PL310_DOUBLE_LINE_FILL
+	bool "Double line fill"
+	depends on CACHE_PL310
+	default n
+
+config PL310_INCR_DOUBLE_LINE_FILL
+	bool "Incremental double line fill"
+	depends on PL310_DOUBLE_LINE_FILL
+	default n
+
 
 config PL310_ERRATA_588369
 	bool "PL310 errata: Clean & Invalidate maintenance operations do not invalidate clean lines"
@@ -967,7 +1028,7 @@ config CACHE_XSC3L2
 
 config ARM_L1_CACHE_SHIFT_6
 	bool
-	default y if CPU_V7
+	default y if CPU_V7 && !ARCH_COMCERTO
 	help
 	  Setting ARM L1 cache line size to 64 Bytes.
 
@@ -979,7 +1040,7 @@ config ARM_L1_CACHE_SHIFT
 config ARM_DMA_MEM_BUFFERABLE
 	bool "Use non-cacheable memory for DMA" if (CPU_V6 || CPU_V6K) && !CPU_V7
 	depends on !(MACH_REALVIEW_PB1176 || REALVIEW_EB_ARM11MP || \
-		     MACH_REALVIEW_PB11MP)
+		     MACH_REALVIEW_PB11MP || COMCERTO_DDR_ECC_SUPPORT)
 	default y if CPU_V6 || CPU_V6K || CPU_V7
 	help
 	  Historically, the kernel has used strongly ordered mappings to

@@ -90,6 +90,12 @@
  *	value are used only if the driver calls pm_runtime_use_autosuspend().
  *
  *	wakeup_count - Report the number of wakeup events related to the device
+ *      
+ *      MSPD: Added the support for manual PM operation for NON-CPU devices.
+ *      This is operated through power/state file . operates in two states
+ *      PM_EVENT_SUSPEND= Power off L1 state (device Clock gating )
+ *	PM_EVENT_SUSPEND_L2=Power off L2 state ( device Clock gating + reset). 
+ *      
  */
 
 static const char enabled[] = "enabled";
@@ -97,6 +103,45 @@ static const char disabled[] = "disabled";
 
 const char power_group_name[] = "power";
 EXPORT_SYMBOL_GPL(power_group_name);
+
+#ifdef CONFIG_PM_SYSFS_MANUAL
+static ssize_t state_show(struct device * dev, struct device_attribute *attr, char * buf)
+{
+	if (dev->power.power_state.event == PM_EVENT_SUSPEND) /* Power off L1 state */
+		return sprintf(buf, "2\n");
+#if 0
+	else if (dev->power.power_state.event == PM_EVENT_SUSPEND_L2) /* Power off L2 state */
+		return sprintf(buf, "3\n");
+#endif
+	else 
+		return sprintf(buf, "0\n");
+}
+
+static ssize_t state_store(struct device * dev, struct device_attribute *attr, const char * buf, size_t n)
+{
+	pm_message_t state;
+	int error = -EINVAL;
+	
+	if ((n == 2) && (buf[0] == '2')) {
+                state.event = PM_EVENT_SUSPEND; 
+                error = dpm_manual_suspend_start(dev, state); /* Power off L1 state */
+        }
+#if 0
+	if ((n == 2) && (buf[0] == '3')) {
+                state.event = PM_EVENT_SUSPEND_L2;
+                error = dpm_manual_suspend(dev, state);       /* Power off L2 state */
+        }	
+#endif
+	if ((n == 2) && (buf[0] == '0')) {
+                state.event = PM_EVENT_RESUME;
+                dpm_manual_resume_start(dev, state);
+		error = 0;
+        }
+	return error ? error : n;
+}
+static DEVICE_ATTR(state, 0644, state_show, state_store);
+#endif
+
 
 #ifdef CONFIG_PM_RUNTIME
 static const char ctrl_auto[] = "auto";
@@ -599,6 +644,9 @@ static DEVICE_ATTR(async, 0644, async_show, async_store);
 #endif /* CONFIG_PM_ADVANCED_DEBUG */
 
 static struct attribute *power_attrs[] = {
+#ifdef CONFIG_PM_SYSFS_MANUAL
+	 &dev_attr_state.attr,
+#endif
 #ifdef CONFIG_PM_ADVANCED_DEBUG
 #ifdef CONFIG_PM_SLEEP
 	&dev_attr_async.attr,

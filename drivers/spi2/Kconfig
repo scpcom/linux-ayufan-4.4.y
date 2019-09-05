@@ -1,0 +1,15 @@
+#
+# Character device configuration
+#
+
+menu "SPI2 support"
+	depends on (ARCH_COMCERTO)
+config SPI2
+	tristate "Mindspeed SPI support"
+	help
+	  Mindspeed SPI (Serial Pheripheral Interface bus) core support
+
+source drivers/spi2/busses/Kconfig
+
+endmenu
+

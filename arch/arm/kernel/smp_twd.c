@@ -27,10 +27,10 @@
 #include <asm/smp_twd.h>
 
 /* set up by the platform code */
-static void __iomem *twd_base;
+/*static */void __iomem *twd_base;
 
 static struct clk *twd_clk;
-static unsigned long twd_timer_rate;
+static long twd_timer_rate;
 static DEFINE_PER_CPU(bool, percpu_setup_called);
 
 static struct clock_event_device __percpu *twd_evt;
@@ -267,7 +267,7 @@ static void twd_get_clock(struct device_node *np)
 /*
  * Setup the local clock events for a CPU.
  */
-static void twd_timer_setup(void)
+static int __cpuinit twd_timer_setup(void)
 {
 	struct clock_event_device *clk = __this_cpu_ptr(twd_evt);
 	int cpu = smp_processor_id();
@@ -280,7 +280,7 @@ static void twd_timer_setup(void)
 		writel_relaxed(0, twd_base + TWD_TIMER_CONTROL);
 		clockevents_register_device(clk);
 		enable_percpu_irq(clk->irq, 0);
-		return;
+		return 0;
 	}
 	per_cpu(percpu_setup_called, cpu) = true;
 
@@ -304,6 +304,8 @@ static void twd_timer_setup(void)
 	clockevents_config_and_register(clk, twd_timer_rate,
 					0xf, 0xffffffff);
 	enable_percpu_irq(clk->irq, 0);
+
+	return 0;
 }
 
 static int twd_timer_cpu_notify(struct notifier_block *self,
@@ -345,6 +347,7 @@ static int __init twd_local_timer_common_register(struct device_node *np)
 	if (err)
 		goto out_irq;
 
+#if 0
 	twd_get_clock(np);
 
 	/*
@@ -352,6 +355,7 @@ static int __init twd_local_timer_common_register(struct device_node *np)
 	 * jiffies to be incrementing to calibrate the rate in which case
 	 * setup the timer in late_time_init.
 	 */
+#endif
 	if (twd_timer_rate)
 		twd_timer_setup();
 	else

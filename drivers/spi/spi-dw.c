@@ -25,6 +25,12 @@
 #include <linux/slab.h>
 #include <linux/spi/spi.h>
 #include <linux/gpio.h>
+#include <linux/clk.h>
+
+#ifdef CONFIG_C2K_DEVFREQ_DW
+#include <linux/c2k-devfreq.h>
+#include <linux/devfreq.h>
+#endif
 
 #include "spi-dw.h"
 
@@ -56,6 +62,48 @@ struct chip_data {
 	u32 speed_hz;		/* baud rate */
 	void (*cs_control)(u32 command);
 };
+
+#ifdef CONFIG_C2K_DEVFREQ_DW
+static devfreq_counters dc;
+
+static int set_spi_freq(struct c2k_devfreq_data *data, unsigned long *freq)
+{
+	struct spi_device *spi = container_of(data->dev, struct spi_device, dev);
+	struct dw_spi *dws = container_of(&spi, struct dw_spi, cur_dev);
+	struct chip_data *chip;
+	u32 clk_div;
+
+	/* Only alloc on first setup */
+	chip = spi_get_ctldata(spi);
+
+	if (!chip)
+	{
+		chip = spi_get_ctldata(spi);
+		if (!chip) {
+			chip = kzalloc(sizeof(struct chip_data), GFP_KERNEL);
+			if (!chip)
+				return -ENOMEM;
+		}
+	}
+
+	if ((*freq <= data->max_freq) && (*freq >= data->min_freq))
+	{
+		chip->speed_hz = (u32)*freq;
+		clk_div = dws->max_freq / chip->speed_hz;
+		clk_div = (clk_div + 1) & 0xfffe;
+
+		chip->clk_div = clk_div;
+		spi_set_clk(dws, chip->clk_div);
+	}
+	else
+	{
+		printk (KERN_ERR "%s: Trying to set out of range spi freq: %lu\n\
+			", __func__, *freq);
+	}
+
+	return 0;
+}
+#endif
 
 #ifdef CONFIG_DEBUG_FS
 #define SPI_REGS_BUFSIZE	1024
@@ -383,6 +431,10 @@ static void pump_transfers(unsigned long data)
 	u32 speed = 0;
 	u32 cr0 = 0;
 
+#ifdef CONFIG_C2K_DEVFREQ_DW
+	devfreq_func_start(&dc);
+#endif
+
 	/* Get current state information */
 	message = dws->cur_msg;
 	transfer = dws->cur_transfer;
@@ -517,6 +569,10 @@ static void pump_transfers(unsigned long data)
 	if (chip->poll_mode)
 		poll_transfer(dws);
 
+#ifdef CONFIG_C2K_DEVFREQ_DW
+	devfreq_func_end(&dc);
+#endif
+
 	return;
 
 early_exit:
@@ -642,6 +698,49 @@ static void spi_hw_init(struct dw_spi *dws)
 	}
 }
 
+#ifdef CONFIG_C2K_DEVFREQ_DW
+#define	SPI_MAXFREQ_MHZ	2000000
+#define	SPI_MINFREQ_MHZ	1000000
+#define	POLLING_MS	1000
+#define	OPP_TABLE_SIZE	4
+
+struct devfreq_dev_profile spi_devfreq_profile; 
+struct c2k_devfreq_data devfreq_spi_data;
+static struct c2k_devfreq_opp_table spi_opp_tbl[OPP_TABLE_SIZE];
+
+/* 
+ * intialize OPP table, profile data (initial freq, polling interval),
+ * max/min freq supported by SPI controller.
+ */
+static void init_spi_devfreq_data(struct dw_spi *dws)
+{
+	int i = 0;
+	struct c2k_devfreq_opp_table opp_tbl[OPP_TABLE_SIZE] = {
+		{1, 1000000, 0},
+		{2, 2000000, 0},
+		{3, 4000000, 0},
+		{0, 0, 0},
+	};
+
+	while (i < sizeof(opp_tbl))
+	{
+		spi_opp_tbl[i].idx = opp_tbl[i].idx;
+		spi_opp_tbl[i].freq = opp_tbl[i].freq;
+		spi_opp_tbl[i].volt = opp_tbl[i].volt;
+		i++;
+	}
+
+	spi_devfreq_profile.initial_freq = dws->max_freq;
+	spi_devfreq_profile.polling_ms = POLLING_MS;
+
+	devfreq_spi_data.devfreq_profile = &spi_devfreq_profile;
+	devfreq_spi_data.opp_table = &spi_opp_tbl[0];
+	devfreq_spi_data.set_freq = set_spi_freq;
+	devfreq_spi_data.max_freq = SPI_MAXFREQ_MHZ;
+	devfreq_spi_data.min_freq = SPI_MINFREQ_MHZ;
+}
+#endif
+
 int dw_spi_add_host(struct device *dev, struct dw_spi *dws)
 {
 	struct spi_master *master;
@@ -652,6 +751,8 @@ int dw_spi_add_host(struct device *dev, struct dw_spi *dws)
 	master = spi_alloc_master(dev, 0);
 	if (!master)
 		return -ENOMEM;
+
+	clk_enable(dws->clk_spi);
 
 	dws->master = master;
 	dws->type = SSI_MOTO_SPI;
@@ -698,6 +799,14 @@ int dw_spi_add_host(struct device *dev, struct dw_spi *dws)
 	}
 
 	mrst_spi_debugfs_init(dws);
+
+#ifdef CONFIG_C2K_DEVFREQ_DW
+	init_spi_devfreq_data(dws);
+
+	ret = c2k_driver_devfreq(&master->dev, &devfreq_spi_data);
+	if(ret < 0)
+		goto err_dma_exit;
+#endif
 	return 0;
 
 err_dma_exit:
@@ -706,6 +815,7 @@ err_dma_exit:
 	spi_enable_chip(dws, 0);
 	free_irq(dws->irq, master);
 err_free_master:
+	clk_disable(dws->clk_spi);
 	spi_master_put(master);
 	return ret;
 }
@@ -735,7 +845,9 @@ int dw_spi_suspend_host(struct dw_spi *dws)
 	if (ret)
 		return ret;
 	spi_enable_chip(dws, 0);
-	spi_set_clk(dws, 0);
+
+	clk_disable(dws->clk_spi);
+
 	return ret;
 }
 EXPORT_SYMBOL_GPL(dw_spi_suspend_host);
@@ -744,6 +856,7 @@ int dw_spi_resume_host(struct dw_spi *dws)
 {
 	int ret;
 
+	clk_enable(dws->clk_spi);
 	spi_hw_init(dws);
 	ret = spi_master_resume(dws->master);
 	if (ret)

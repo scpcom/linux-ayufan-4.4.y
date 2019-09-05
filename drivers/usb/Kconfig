@@ -147,4 +147,6 @@ source "drivers/usb/phy/Kconfig"
 
 source "drivers/usb/gadget/Kconfig"
 
+source "drivers/usb/dwc_otg/Kconfig"
+
 endif # USB_SUPPORT

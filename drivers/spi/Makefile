@@ -25,8 +25,29 @@ obj-$(CONFIG_SPI_BUTTERFLY)		+= spi-butterfly.o
 obj-$(CONFIG_SPI_CADENCE)		+= spi-cadence.o
 obj-$(CONFIG_SPI_CLPS711X)		+= spi-clps711x.o
 obj-$(CONFIG_SPI_COLDFIRE_QSPI)		+= spi-coldfire-qspi.o
+obj-$(CONFIG_SPI_COMCERTO)		+= spi-c2000-dma.o
+obj-$(CONFIG_SPI_COMCERTO)		+= spi-c2000.o
+
+SPI_MSPD=n
+ifeq ($(CONFIG_SPI_MSPD_HIGH_SPEED),m)
+    SPI_MSPD=m
+endif
+ifeq ($(CONFIG_SPI_MSPD_LOW_SPEED),m)
+    SPI_MSPD=m
+endif
+ifeq ($(CONFIG_SPI_MSPD_HIGH_SPEED),y)
+    SPI_MSPD=y
+endif
+ifeq ($(CONFIG_SPI_MSPD_LOW_SPEED),y)
+    SPI_MSPD=y
+endif
+#obj-$(SPI_MSPD)				+= spi-c2000-dma.o
+#obj-$(SPI_MSPD)				+= spi-c2000.o
+
+
 obj-$(CONFIG_SPI_DAVINCI)		+= spi-davinci.o
-obj-$(CONFIG_SPI_DESIGNWARE)		+= spi-dw.o
+obj-$(CONFIG_SPI_DESIGNWARE)		+= designware_spi.o
+obj-$(CONFIG_SPI_DESIGNWARE)		+= designware_spi_dma.o
 obj-$(CONFIG_SPI_DW_MMIO)		+= spi-dw-mmio.o
 obj-$(CONFIG_SPI_DW_PCI)		+= spi-dw-midpci.o
 spi-dw-midpci-objs			:= spi-dw-pci.o spi-dw-mid.o

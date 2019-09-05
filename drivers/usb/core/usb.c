@@ -50,8 +50,11 @@ const char *usbcore_name = "usbcore";
 static bool nousb;	/* Disable USB when built into kernel image */
 
 #ifdef	CONFIG_PM_RUNTIME
-static int usb_autosuspend_delay = 2;		/* Default delay value,
-						 * in seconds */
+#ifdef	CONFIG_ARCH_M86XXX
+static int usb_autosuspend_delay = -1;		/* Auto suspend disabled. If Autosuspend enabled it is not working. */
+#else
+static int usb_autosuspend_delay = 2;		/* Default delay value in seconds */
+#endif
 module_param_named(autosuspend, usb_autosuspend_delay, int, 0644);
 MODULE_PARM_DESC(autosuspend, "default autosuspend delay");
 
@@ -433,6 +436,7 @@ struct usb_device *usb_alloc_dev(struct usb_device *parent,
 	dev->dev.groups = usb_device_groups;
 	dev->dev.dma_mask = bus->controller->dma_mask;
 	set_dev_node(&dev->dev, dev_to_node(bus->controller));
+	dev->dev.of_node = bus->controller->of_node;
 	dev->state = USB_STATE_ATTACHED;
 	dev->lpm_disable_count = 1;
 	atomic_set(&dev->urbnum, 0);

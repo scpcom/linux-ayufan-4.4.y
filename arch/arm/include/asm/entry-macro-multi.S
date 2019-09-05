@@ -4,8 +4,8 @@
  * Interrupt handling.  Preserves r7, r8, r9
  */
 	.macro	arch_irq_handler_default
-	get_irqnr_preamble r6, lr
-1:	get_irqnr_and_base r0, r2, r6, lr
+	get_irqnr_preamble r6, r3, lr
+1:	get_irqnr_and_base r0, r2, r6, r3, lr
 	movne	r1, sp
 	@
 	@ routine called with r0 = irq number, r1 = struct pt_regs *

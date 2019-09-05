@@ -164,6 +164,10 @@ static int ina2xx_get_value(struct ina2xx_data *data, u8 reg)
 		/* signed register, LSB=1mA (selected), in mA */
 		val = (s16)data->regs[reg];
 		break;
+	case INA2XX_CONFIG:
+	case INA2XX_CALIBRATION:
+		val = data->regs[reg];
+		break;
 	default:
 		/* programmer goofed */
 		WARN_ON_ONCE(1);
@@ -172,6 +176,32 @@ static int ina2xx_get_value(struct ina2xx_data *data, u8 reg)
 	}
 
 	return val;
+}
+
+static ssize_t ina2xx_set_value(struct device *dev,
+				struct device_attribute *da,
+				const char *buf,
+				size_t count)
+{
+	struct ina2xx_data *data = ina2xx_update_device(dev);
+	struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
+	int reg = attr->index;
+	long val;
+	int ret;
+
+	if (IS_ERR(data))
+		return PTR_ERR(data);
+
+	ret = kstrtol(buf, 10, &val);
+	if (ret < 0)
+		return ret;
+
+	mutex_lock(&data->update_lock);
+	ret = val & 0xffff;
+	i2c_smbus_write_word_swapped(data->client, reg, ret);
+	data->regs[reg] = ret;
+	mutex_unlock(&data->update_lock);
+	return count;
 }
 
 static ssize_t ina2xx_show_value(struct device *dev,
@@ -202,6 +232,12 @@ static SENSOR_DEVICE_ATTR(curr1_input, S_IRUGO, ina2xx_show_value, NULL,
 /* calculated power */
 static SENSOR_DEVICE_ATTR(power1_input, S_IRUGO, ina2xx_show_value, NULL,
 			  INA2XX_POWER);
+/* config */
+static SENSOR_DEVICE_ATTR(config, S_IRUGO | S_IWUSR, ina2xx_show_value,
+			  ina2xx_set_value, INA2XX_CONFIG);
+/* calibration */
+static SENSOR_DEVICE_ATTR(calibration, S_IRUGO | S_IWUSR, ina2xx_show_value,
+			  ina2xx_set_value, INA2XX_CALIBRATION);
 
 /* pointers to created device attributes */
 static struct attribute *ina2xx_attrs[] = {
@@ -209,6 +245,8 @@ static struct attribute *ina2xx_attrs[] = {
 	&sensor_dev_attr_in1_input.dev_attr.attr,
 	&sensor_dev_attr_curr1_input.dev_attr.attr,
 	&sensor_dev_attr_power1_input.dev_attr.attr,
+	&sensor_dev_attr_config.dev_attr.attr,
+	&sensor_dev_attr_calibration.dev_attr.attr,
 	NULL,
 };
 ATTRIBUTE_GROUPS(ina2xx);

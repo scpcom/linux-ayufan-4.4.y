@@ -1455,14 +1455,18 @@ static int ahci_hardreset(struct ata_link *link, unsigned int *class,
 	struct ata_port *ap = link->ap;
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_host_priv *hpriv = ap->host->private_data;
+	void __iomem *port_mmio = ahci_port_base(link->ap);
 	u8 *d2h_fis = pp->rx_fis + RX_FIS_D2H_REG;
 	struct ata_taskfile tf;
 	bool online;
 	int rc;
+	u32 save_cmd, tmp;
 
 	DPRINTK("ENTER\n");
 
 	ahci_stop_engine(ap);
+
+	save_cmd = readl(port_mmio + PORT_CMD);
 
 	/* clear D2H reception area to properly wait for D2H FIS */
 	ata_tf_init(link->device, &tf);
@@ -1471,6 +1475,11 @@ static int ahci_hardreset(struct ata_link *link, unsigned int *class,
 
 	rc = sata_link_hardreset(link, timing, deadline, &online,
 				 ahci_check_ready);
+
+	/* Revert the saved cmd value, if not match with original */
+	tmp = readl(port_mmio + PORT_CMD);
+	if (tmp != save_cmd)
+		writel(save_cmd, port_mmio + PORT_CMD);
 
 	hpriv->start_engine(ap);
 

@@ -118,6 +118,22 @@ config MV_XOR
 	---help---
 	  Enable support for the Marvell XOR engine.
 
+config COMCERTO_XOR
+	tristate "Mindspeed Comcerto 2000 XOR engine support"
+	depends on ARCH_M86XXX
+	select DMA_ENGINE
+	select ASYNC_TX_ENABLE_CHANNEL_SWITCH
+	---help---
+	  Enable support for the Mindspeed XOR engine.
+
+config COMCERTO_DMA_BASIC
+	tristate "Mindspeed Comcerto 2000 MDMA engine basic support"
+	depends on ARCH_M86XXX
+	select DMA_ENGINE
+	select ASYNC_TX_ENABLE_CHANNEL_SWITCH
+	---help---
+	  Enable support for the Mindspeed mdma engine.
+
 config MX3_IPU
 	bool "MX3x Image Processing Unit support"
 	depends on ARCH_MXC

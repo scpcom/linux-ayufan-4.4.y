@@ -287,8 +287,14 @@ static struct platform_driver dw_driver = {
 	.driver = {
 		.name	= DRV_NAME,
 		.pm	= &dw_dev_pm_ops,
+#ifndef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
 		.of_match_table = of_match_ptr(dw_dma_of_id_table),
 		.acpi_match_table = ACPI_PTR(dw_dma_acpi_id_table),
+#endif
 	},
 };
 

@@ -358,6 +358,17 @@ config I2C_BCM_KONA
 
 	  If you do not need KONA I2C inteface, say N.
 
+config I2C_COMCERTO
+	tristate "Comcerto I2C interface"
+	depends on I2C && (ARCH_COMCERTO)
+	help
+		If you say yes to this option, support will be included for the
+		Comcerto I2C interface.
+
+		This driver can also be built as a module.  If so, the module
+		will be called i2c-comcerto.
+
+
 config I2C_BLACKFIN_TWI
 	tristate "Blackfin TWI I2C support"
 	depends on BLACKFIN

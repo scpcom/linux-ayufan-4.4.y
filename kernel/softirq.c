@@ -188,7 +188,12 @@ EXPORT_SYMBOL(__local_bh_enable_ip);
  * should not be able to lock up the box.
  */
 #define MAX_SOFTIRQ_TIME  msecs_to_jiffies(2)
+
+#if defined(CONFIG_ARCH_COMCERTO)
+#define MAX_SOFTIRQ_RESTART 2
+#else
 #define MAX_SOFTIRQ_RESTART 10
+#endif
 
 #ifdef CONFIG_TRACE_IRQFLAGS
 /*

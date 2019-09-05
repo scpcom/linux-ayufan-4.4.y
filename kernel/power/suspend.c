@@ -30,6 +30,9 @@
 #include <linux/compiler.h>
 
 #include "power.h"
+#ifdef CONFIG_ARCH_M86XXX
+#include <mach/comcerto-2000/pm.h>
+#endif
 
 struct pm_sleep_state pm_states[PM_SUSPEND_MAX] = {
 	[PM_SUSPEND_FREEZE] = { .label = "freeze", .state = PM_SUSPEND_FREEZE },
@@ -255,8 +258,12 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 
 	arch_suspend_disable_irqs();
 	BUG_ON(!irqs_disabled());
-
+#ifndef CONFIG_ARCH_M86XXX
+	/* FIXME syscore suspend/resume is not working for HGW build */
 	error = syscore_suspend();
+#else
+	error = 0;
+#endif
 	if (!error) {
 		*wakeup = pm_wakeup_pending();
 		if (!(suspend_test(TEST_CORE) || *wakeup)) {
@@ -267,7 +274,9 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 				state, false);
 			events_check_enabled = false;
 		}
+#ifndef CONFIG_ARCH_M86XXX
 		syscore_resume();
+#endif
 	}
 
 	arch_suspend_enable_irqs();
@@ -311,7 +320,10 @@ int suspend_devices_and_enter(suspend_state_t state)
 		if (error)
 			goto Close;
 	}
-	suspend_console();
+#ifdef CONFIG_ARCH_M86XXX
+	if ( host_utilpe_shared_pmu_bitmask & DUS_UART0UARTS2_IRQ)
+#endif
+		suspend_console();
 	suspend_test_start();
 	error = dpm_suspend_start(PMSG_SUSPEND);
 	if (error) {

@@ -28,6 +28,7 @@ if USB_XHCI_HCD
 
 config USB_XHCI_PLATFORM
 	tristate
+	default y if ARCH_M86XXX
 
 config USB_XHCI_MVEBU
 	tristate "xHCI support for Marvell Armada 375/38x"

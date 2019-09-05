@@ -37,6 +37,19 @@ config MTD_NAND_ECC_BCH
 	  ECC codes. They are used with NAND devices requiring more than 1 bit
 	  of error correction.
 
+config NAND_COMCERTO_ECC_8_HW_BCH
+	bool
+	depends on MTD_NAND_COMCERTO
+	default n
+	prompt "Comcerto ECC-8 syndrome calculation using BCH"
+
+config NAND_COMCERTO_ECC_24_HW_BCH
+	bool
+	depends on MTD_NAND_COMCERTO
+	default y
+	prompt "Comcerto ECC-24 syndrome calculation using BCH"
+
+
 config MTD_SM_COMMON
 	tristate
 	default n
@@ -512,5 +525,19 @@ config MTD_NAND_XWAY
 	help
 	  Enables support for NAND Flash chips on Lantiq XWAY SoCs. NAND is attached
 	  to the External Bus Unit (EBU).
+
+config MTD_NAND_COMCERTO
+        tristate "Comcerto NAND driver"
+	depends on MTD_NAND && (ARCH_COMCERTO)
+	help
+		Comcerto NAND Driver.
+
+config SMARTNAND
+	bool "Support for TOSHIBA SmartNAND memory"
+	depends on MTD_NAND
+	default n
+	help
+	 Toshiba SmartNAND
+
 
 endif # MTD_NAND

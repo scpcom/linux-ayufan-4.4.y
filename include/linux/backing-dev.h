@@ -108,6 +108,10 @@ struct backing_dev_info {
 	struct dentry *debug_dir;
 	struct dentry *debug_stats;
 #endif
+
+#ifdef CONFIG_ARCH_M86XXX
+	unsigned int cpu0_bind;
+#endif
 };
 
 int __must_check bdi_init(struct backing_dev_info *bdi);

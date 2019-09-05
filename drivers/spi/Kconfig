@@ -558,6 +558,20 @@ config SPI_XTENSA_XTFPGA
 	  start and deasserting on end.
 
 
+config SPI_MSPD_LOW_SPEED
+	tristate "MSPD SPI low-speed controller module"
+	select SPI_DESIGNWARE
+	default SPI_MASTER
+	help
+		This exposes the MSPD SPI low-speed controller.
+
+config SPI_MSPD_HIGH_SPEED
+	tristate "MSPD SPI high-speed controller module"
+	select SPI_DESIGNWARE
+	default SPI_MASTER
+	help
+		This exposes the MSPD SPI high-speed controller.
+
 config SPI_NUC900
 	tristate "Nuvoton NUC900 series SPI"
 	depends on ARCH_W90X900

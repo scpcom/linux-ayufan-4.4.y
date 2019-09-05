@@ -21,6 +21,11 @@
 #define SCU_CPU_STATUS		0x08
 #define SCU_INVALIDATE		0x0c
 #define SCU_FPGA_REVISION	0x10
+#define SCU_DIAG_CTRL		0x30
+#define SCU_FILTER_START	0x40
+#define SCU_FILTER_END		0x44
+#define SCU_SAC			0x50
+#define SCU_SNSAC		0x54
 
 #ifdef CONFIG_SMP
 /*
@@ -53,6 +58,10 @@ void scu_enable(void __iomem *scu_base)
 	if (scu_ctrl & 1)
 		return;
 
+#ifdef CONFIG_SCU_SPECULATIVE_LINE_FILLS
+	scu_ctrl |= (1 << 3);
+#endif
+
 	scu_ctrl |= 1;
 	writel_relaxed(scu_ctrl, scu_base + SCU_CTRL);
 
@@ -72,10 +81,9 @@ void scu_enable(void __iomem *scu_base)
  * has the side effect of disabling coherency, caches must have been
  * flushed.  Interrupts must also have been disabled.
  */
-int scu_power_mode(void __iomem *scu_base, unsigned int mode)
+int __scu_power_mode(void __iomem *scu_base, int cpu, unsigned int mode)
 {
 	unsigned int val;
-	int cpu = MPIDR_AFFINITY_LEVEL(cpu_logical_map(smp_processor_id()), 0);
 
 	if (mode > 3 || mode == 1 || cpu > 3)
 		return -EINVAL;
@@ -85,4 +93,46 @@ int scu_power_mode(void __iomem *scu_base, unsigned int mode)
 	writeb_relaxed(val, scu_base + SCU_CPU_STATUS + cpu);
 
 	return 0;
+}
+
+int scu_power_mode(void __iomem *scu_base, unsigned int mode)
+{
+	int cpu = smp_processor_id();
+
+	return __scu_power_mode(scu_base, cpu, mode);
+}
+
+void scu_save(void __iomem *scu_base, struct scu_context *scu)
+{
+	scu->ctrl = readl_relaxed(scu_base + SCU_CTRL);
+#ifdef CONFIG_ARM_ERRATA_764369
+	scu->diag_ctrl = readl_relaxed(scu_base + SCU_DIAG_CTRL);
+#endif
+	scu->cpu_status = readl_relaxed(scu_base + SCU_CPU_STATUS);
+	scu->filter_start = readl_relaxed(scu_base + SCU_FILTER_START);
+	scu->filter_end = readl_relaxed(scu_base + SCU_FILTER_END);
+	scu->sac = readl_relaxed(scu_base + SCU_SAC);
+	scu->snsac = readl_relaxed(scu_base + SCU_SNSAC);
+}
+
+void scu_restore(void __iomem *scu_base, struct scu_context *scu)
+{
+	writel_relaxed(0xffff, scu_base + SCU_INVALIDATE);
+	writel_relaxed(scu->filter_start, scu_base + SCU_FILTER_START);
+	writel_relaxed(scu->filter_end, scu_base + SCU_FILTER_END);
+	writel_relaxed(scu->sac, scu_base + SCU_SAC);
+	writel_relaxed(scu->snsac, scu_base + SCU_SNSAC);
+	writel_relaxed(scu->cpu_status, scu_base + SCU_CPU_STATUS);
+
+#ifdef CONFIG_ARM_ERRATA_764369
+	writel_relaxed(scu->diag_ctrl, scu_base + SCU_DIAG_CTRL);
+#endif
+
+	writel_relaxed(scu->ctrl, scu_base + SCU_CTRL);
+
+	/*
+	 * Ensure that the data accessed by CPU0 before the SCU was
+	 * initialised is visible to the other CPUs.
+	 */
+	flush_cache_all();
 }

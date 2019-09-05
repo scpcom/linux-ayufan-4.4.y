@@ -48,6 +48,35 @@
 #include <linux/leds.h>
 #include <linux/io.h>
 #include <linux/mtd/partitions.h>
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+#include <linux/mtd/exp_lock.h>
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
+#if defined(CONFIG_NAND_COMCERTO_ECC_24_HW_BCH)
+
+#define ECC_BIT_FLIPS_THRESHOLD 18
+
+#elif defined(CONFIG_NAND_COMCERTO_ECC_8_HW_BCH)
+
+#define ECC_BIT_FLIPS_THRESHOLD 6
+
+#else /* Hamming */
+
+#define ECC_BIT_FLIPS_THRESHOLD 1
+
+#endif
+
+#ifdef CONFIG_SMARTNAND
+/** Defined this structure for SmartNAND */
+static struct nand_ecclayout nand_oob_smartnand = {
+	.eccbytes = 0,
+	.eccpos = {},
+	.oobfree = {
+		{.offset = 2,
+		.length = 62}}
+};
+#endif
+
 
 /* Define default oob placement schemes for large and small page devices */
 static struct nand_ecclayout nand_oob_8 = {
@@ -339,6 +368,13 @@ static int nand_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip)
 		chip->select_chip(mtd, chipnr);
 	}
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 	do {
 		if (chip->options & NAND_BUSWIDTH_16) {
 			chip->cmdfunc(mtd, NAND_CMD_READOOB,
@@ -362,6 +398,14 @@ static int nand_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip)
 		page = (int)(ofs >> chip->page_shift) & chip->pagemask;
 		i++;
 	} while (!res && i < 2 && (chip->bbt_options & NAND_BBT_SCAN2NDPAGE));
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	if (getchip) {
 		chip->select_chip(mtd, -1);
@@ -965,6 +1009,13 @@ int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 
 	chip->select_chip(mtd, chipnr);
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 	/* Check, if it is write protected */
 	if (nand_check_wp(mtd)) {
 		pr_debug("%s: device is write protected!\n",
@@ -977,6 +1028,13 @@ int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 
 out:
 	chip->select_chip(mtd, -1);
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 	nand_release_device(mtd);
 
 	return ret;
@@ -1015,6 +1073,14 @@ int nand_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 
 	chip->select_chip(mtd, chipnr);
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	/* Check, if it is write protected */
 	if (nand_check_wp(mtd)) {
 		pr_debug("%s: device is write protected!\n",
@@ -1042,6 +1108,13 @@ int nand_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 
 out:
 	chip->select_chip(mtd, -1);
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 	nand_release_device(mtd);
 
 	return ret;
@@ -1494,6 +1567,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 {
 	int chipnr, page, realpage, col, bytes, aligned, oob_required;
 	struct nand_chip *chip = mtd->priv;
+	struct mtd_ecc_stats stats;
 	int ret = 0;
 	uint32_t readlen = ops->len;
 	uint32_t oobreadlen = ops->ooblen;
@@ -1506,6 +1580,7 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 	int retry_mode = 0;
 	bool ecc_fail = false;
 
+	stats = mtd->ecc_stats;
 	chipnr = (int)(from >> chip->chip_shift);
 	chip->select_chip(mtd, chipnr);
 
@@ -1540,6 +1615,14 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 						 __func__, buf);
 
 read_retry:
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * lock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 			chip->cmdfunc(mtd, NAND_CMD_READ0, 0x00, page);
 
 			/*
@@ -1558,6 +1641,15 @@ read_retry:
 			else
 				ret = chip->ecc.read_page(mtd, chip, bufpoi,
 							  oob_required, page);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * unlock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 			if (ret < 0) {
 				if (use_bufpoi)
 					/* Invalidate page cache */
@@ -1662,7 +1754,11 @@ read_retry:
 	if (ecc_fail)
 		return -EBADMSG;
 
-	return max_bitflips;
+#ifdef CONFIG_SMARTNAND
+	return mtd->ecc_stats.corrected - stats.corrected ? -EUCLEAN : 0;
+#else
+	return ((mtd->ecc_stats.corrected - stats.corrected) >= ECC_BIT_FLIPS_THRESHOLD)  ? -EUCLEAN : 0;
+#endif
 }
 
 /**
@@ -1879,10 +1975,27 @@ static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 	page = realpage & chip->pagemask;
 
 	while (1) {
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		if (ops->mode == MTD_OPS_RAW)
 			ret = chip->ecc.read_oob_raw(mtd, chip, page);
 		else
 			ret = chip->ecc.read_oob(mtd, chip, page);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 		if (ret < 0)
 			break;
@@ -2366,11 +2479,34 @@ static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 	chipnr = (int)(to >> chip->chip_shift);
 	chip->select_chip(mtd, chipnr);
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	/* Check, if it is write protected */
 	if (nand_check_wp(mtd)) {
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 		ret = -EIO;
 		goto err_out;
 	}
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	realpage = (int)(to >> chip->page_shift);
 	page = realpage & chip->pagemask;
@@ -2422,9 +2558,27 @@ static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 			/* We still need to erase leftover OOB data */
 			memset(chip->oob_poi, 0xff, mtd->oobsize);
 		}
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		ret = chip->write_page(mtd, chip, column, bytes, wbuf,
 					oob_required, page, cached,
 					(ops->mode == MTD_OPS_RAW));
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		if (ret)
 			break;
 
@@ -2570,6 +2724,14 @@ static int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
 	/* Shift to get page */
 	page = (int)(to >> chip->page_shift);
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	/*
 	 * Reset the chip. Some chips (like the Toshiba TC5832DC found in one
 	 * of my DiskOnChip 2000 test units) will clear the whole data page too
@@ -2580,9 +2742,24 @@ static int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
 
 	/* Check, if it is write protected */
 	if (nand_check_wp(mtd)) {
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 		chip->select_chip(mtd, -1);
 		return -EROFS;
 	}
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	/* Invalidate the page cache, if we write to the cached page */
 	if (page == chip->pagebuf)
@@ -2590,12 +2767,28 @@ static int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
 
 	nand_fill_oob(mtd, ops->oobbuf, ops->ooblen, ops);
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	if (ops->mode == MTD_OPS_RAW)
 		status = chip->ecc.write_oob_raw(mtd, chip, page & chip->pagemask);
 	else
 		status = chip->ecc.write_oob(mtd, chip, page & chip->pagemask);
 
 	chip->select_chip(mtd, -1);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	if (status)
 		return status;
@@ -2711,13 +2904,37 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 	/* Select the NAND device */
 	chip->select_chip(mtd, chipnr);
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	/* Check, if it is write protected */
 	if (nand_check_wp(mtd)) {
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		pr_debug("%s: device is write protected!\n",
 				__func__);
 		instr->state = MTD_ERASE_FAILED;
 		goto erase_exit;
 	}
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	/* Loop through the pages */
 	len = instr->len;
@@ -2742,6 +2959,14 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 		    (page + pages_per_block))
 			chip->pagebuf = -1;
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		status = chip->erase(mtd, page & chip->pagemask);
 
 		/*
@@ -2751,6 +2976,14 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 		if ((status & NAND_STATUS_FAIL) && (chip->errstat))
 			status = chip->errstat(mtd, chip, FL_ERASING,
 					       status, page);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 		/* See if block erase succeeded */
 		if (status & NAND_STATUS_FAIL) {
@@ -3106,12 +3339,14 @@ static int nand_flash_detect_onfi(struct mtd_info *mtd, struct nand_chip *chip,
 		chip->read_byte(mtd) != 'F' || chip->read_byte(mtd) != 'I')
 		return 0;
 
+	pr_info("ONFI flash detected\n");
 	chip->cmdfunc(mtd, NAND_CMD_PARAM, 0, -1);
 	for (i = 0; i < 3; i++) {
 		for (j = 0; j < sizeof(*p); j++)
 			((uint8_t *)p)[j] = chip->read_byte(mtd);
 		if (onfi_crc16(ONFI_CRC_BASE, (uint8_t *)p, 254) ==
 				le16_to_cpu(p->crc)) {
+			pr_info("ONFI param page %d valid\n", i);
 			break;
 		}
 	}
@@ -3587,6 +3822,10 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 	int busw;
 	int i, maf_idx;
 	u8 id_data[8];
+#ifdef CONFIG_SMARTNAND
+	u8 extid_smartnand, temp;
+	int planeid;
+#endif
 
 	/* Select the device */
 	chip->select_chip(mtd, 0);
@@ -3663,6 +3902,32 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 	} else {
 		nand_decode_id(mtd, chip, type, id_data, &busw);
 	}
+
+#ifdef CONFIG_SMARTNAND
+	/* The 5th id byte contains number of planes */
+	planeid = id_data[4];
+	extid_smartnand = id_data[3];
+	/* Calc pagesize, page size is in multiple of 2K*/
+	mtd->writesize = 2048 << (extid_smartnand & 0x3);
+	extid_smartnand >>= 2;
+	/* oobsize is 32 bytes for SMARTNAND*/
+	mtd->oobsize = 64;
+	extid_smartnand >>= 2;
+	temp = (extid_smartnand >> 1) & 0x5;
+	extid_smartnand = extid_smartnand & 0x03;
+	/* Calc blocksize. Blocksize is multiples of 128KiB */
+	mtd->erasesize = (128 * 1024) << 5;
+	/* 8-bit buswidth for SMARTNAND */
+	busw = 0;
+	/** ECC internally managed by SMARTNAND */
+	chip->ecc.mode = NAND_ECC_NONE;
+	chip->ecc.layout = &nand_oob_smartnand;
+	/** Minimum number of set bits in bad block byte is 8 for SMARTNAND*/
+	chip->badblockbits = 8;
+	/** No Subpage write is supported */
+	chip->options |= NAND_NO_SUBPAGE_WRITE;
+#endif
+
 	/* Get chip options */
 	chip->options |= type->options;
 
@@ -3831,6 +4096,7 @@ static bool nand_ecc_strength_good(struct mtd_info *mtd)
 	corr = (mtd->writesize * ecc->strength) / ecc->size;
 	ds_corr = (mtd->writesize * chip->ecc_strength_ds) / chip->ecc_step_ds;
 
+	pr_warn("corr %d ds_corr %d ecc->strength %d chip->ecc_strength_ds %d\n", corr, ds_corr, ecc->strength, chip->ecc_strength_ds );
 	return corr >= ds_corr && ecc->strength >= chip->ecc_strength_ds;
 }
 
@@ -3886,6 +4152,9 @@ int nand_scan_tail(struct mtd_info *mtd)
 			ecc->layout = &nand_oob_64;
 			break;
 		case 128:
+			ecc->layout = &nand_oob_128;
+			break;
+		case 224:
 			ecc->layout = &nand_oob_128;
 			break;
 		default:
@@ -3958,6 +4227,7 @@ int nand_scan_tail(struct mtd_info *mtd)
 			ecc->write_oob = nand_write_oob_syndrome;
 
 		if (mtd->writesize >= ecc->size) {
+			pr_warn("mtd->writesize %d ecc->size %d ecc->strength %d\n", mtd->writesize, ecc->size, ecc->strength);
 			if (!ecc->strength) {
 				pr_warn("Driver must set ecc.strength when using hardware ECC\n");
 				BUG();

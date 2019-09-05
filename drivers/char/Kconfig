@@ -54,6 +54,38 @@ config TTY_PRINTK
 
 	  If unsure, say N.
 
+config COMCERTO_OTP
+	tristate "Comcerto OTP Memory Support"
+	depends on ARCH_COMCERTO
+	default y
+	help
+	  If you say Y here, driver for accessing on-chip OTP memory in
+	  Comcerto-2000 SoC will be available. Only read access will be provided.
+	  For programming OTP use COMCERTO_OTP_WR_EN flag.
+
+	  If unsure, it is safe to say Y.
+
+config COMCERTO_OTP_USER
+	bool "User space access to Comcerto OTP memory"
+	depends on ARCH_COMCERTO
+	default y
+	help
+	  If you say Y here, user space access to comcerto otp driver will be available.
+	  Only read access will be provided.
+
+	  If unsure, it is safe to say Y.
+
+config COMCERTO_OTP_WR_EN
+	bool "Program Comcerto OTP memory"
+	depends on COMCERTO_OTP
+	default n
+	help
+	  If you say Y here, writing to OTP memory will be enabled.
+	  Be extremely cautious to enable this option as this memory can be
+	  programmed only once.
+
+	  If unsure, say N.
+
 config BFIN_OTP
 	tristate "Blackfin On-Chip OTP Memory Support"
 	depends on BLACKFIN && (BF51x || BF52x || BF54x)
@@ -557,6 +589,14 @@ config UV_MMTIMER
 	help
 	  The uv_mmtimer device allows direct userspace access to the
 	  UV system timer.
+
+config PMUTIMER
+	tristate "PMUTIMER Timer for C2000 PMU"
+    depends on ARCH_COMCERTO
+	default y
+	help
+	  PMUTIMER is a dedicated timer service for C2000 platform which work with sleep and hibernation mode.
+
 
 source "drivers/char/tpm/Kconfig"
 

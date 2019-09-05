@@ -105,3 +105,14 @@ static inline int pm_qos_sysfs_add(struct device *dev) { return 0; }
 static inline void pm_qos_sysfs_remove(struct device *dev) {}
 
 #endif
+
+/* Added for SYSFS support to handle from Device power management from 
+ * user space. Manual PM  configuration.
+ */
+
+#ifdef  CONFIG_PM_SYSFS_MANUAL
+
+extern int dpm_manual_suspend_start(struct device * , pm_message_t );
+extern void dpm_manual_resume_start(struct device * , pm_message_t);
+
+#endif /* CONFIG_PM_SYSFS_MANUAL */

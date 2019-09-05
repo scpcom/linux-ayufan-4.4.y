@@ -15,6 +15,9 @@
 #include <linux/workqueue.h>
 #include <linux/debugfs.h>
 #include <linux/seq_file.h>
+#ifdef CONFIG_ARCH_M86XXX
+#include <mach/comcerto-2000/pm.h>
+#endif
 
 #include "power.h"
 
@@ -364,6 +367,28 @@ static ssize_t state_store(struct kobject *kobj, struct kobj_attribute *attr,
 
 power_attr(state);
 
+#ifdef CONFIG_ARCH_M86XXX
+static ssize_t bitmask_show(struct kobject *kobj, struct kobj_attribute *attr,
+			char *buf)
+{
+	unsigned int value=c2k_pm_bitmask_show();
+	return sprintf(buf,"%02x\n",value);
+
+}
+
+static ssize_t bitmask_store(struct kobject *kobj, struct kobj_attribute *attr,
+			   const char *buf, size_t n)
+{
+	unsigned long value;
+	value=simple_strtoul(buf,NULL,16);
+	/* Store the Bitmask value in the Global Variable */
+	c2k_pm_bitmask_store(value);
+	return n;
+
+}
+power_attr(bitmask);
+#endif
+
 #ifdef CONFIG_PM_SLEEP
 /*
  * The 'wakeup_count' attribute, along with the functions defined in
@@ -584,6 +609,9 @@ power_attr(pm_freeze_timeout);
 
 static struct attribute * g[] = {
 	&state_attr.attr,
+#ifdef CONFIG_ARCH_M86XXX
+	&bitmask_attr.attr,
+#endif
 #ifdef CONFIG_PM_TRACE
 	&pm_trace_attr.attr,
 	&pm_trace_dev_match_attr.attr,

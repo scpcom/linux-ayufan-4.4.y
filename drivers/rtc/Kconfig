@@ -995,6 +995,13 @@ config RTC_DRV_S3C
 	  This driver can also be build as a module. If so, the module
 	  will be called rtc-s3c.
 
+config RTC_DRV_C2K
+	tristate "Mindspeed C2000 SoC RTC"
+	depends on ARCH_M86XXX
+	default y
+	help
+		Comcerto C2000 RTC (Realtime Clock) driver.
+
 config RTC_DRV_EP93XX
 	tristate "Cirrus Logic EP93XX"
 	depends on ARCH_EP93XX

@@ -329,6 +329,18 @@ config ARCH_INTEGRATOR
 	help
 	  Support for ARM's Integrator platform.
 
+config ARCH_COMCERTO
+	bool "Mindspeed Comcerto"
+	select ARCH_SUPPORTS_MSI
+	select NEED_MACH_MEMORY_H
+	select ARCH_REQUIRE_GPIOLIB
+	select MIGHT_HAVE_PCI
+	help
+	  This enables support for Mindspeed's Comcerto development boards.
+	  If you would like to build your kernel to run on one of these boards
+	  then you must say 'Y' here. Otherwise say 'N'    
+
+
 config ARCH_REALVIEW
 	bool "ARM Ltd. RealView family"
 	select ARCH_WANT_OPTIONAL_GPIOLIB
@@ -1037,6 +1049,8 @@ source "arch/arm/mach-w90x900/Kconfig"
 
 source "arch/arm/mach-zynq/Kconfig"
 
+source "arch/arm/mach-comcerto/Kconfig"
+
 # Definitions to make life easier
 config ARCH_ACORN
 	bool
@@ -1393,6 +1407,7 @@ config SMP
 	depends on GENERIC_CLOCKEVENTS
 	depends on HAVE_SMP
 	depends on MMU || ARM_MPU
+	depends on ARCH_COMCERTO
 	help
 	  This enables support for systems with more than one CPU. If you have
 	  a system with only one CPU, say N. If you have a system with more
@@ -1460,6 +1475,11 @@ config HAVE_ARM_ARCH_TIMER
 	help
 	  This option enables support for the ARM architected timer
 
+config SCU_SPECULATIVE_LINE_FILLS
+	bool "SCU speculative line fills"
+	depends on HAVE_ARM_SCU && CACHE_PL310
+	default n
+
 config HAVE_ARM_TWD
 	bool
 	depends on SMP
@@ -1511,10 +1531,12 @@ choice
 	  option alone!
 
 	config VMSPLIT_3G
+		depends on !COMCERTO_HW_KERNEL_PAGETABLE
 		bool "3G/1G user/kernel split"
 	config VMSPLIT_2G
 		bool "2G/2G user/kernel split"
 	config VMSPLIT_1G
+		depends on !COMCERTO_HW_KERNEL_PAGETABLE
 		bool "1G/3G user/kernel split"
 endchoice
 

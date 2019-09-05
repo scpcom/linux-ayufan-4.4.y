@@ -23,6 +23,7 @@
 #include <linux/mm.h>
 #include <linux/module.h>
 #include <linux/slab.h>
+#include <mach/reset.h>
 
 #include "../dmaengine.h"
 #include "internal.h"
@@ -170,6 +171,13 @@ static void dwc_initialize(struct dw_dma_chan *dwc)
 	/* Enable interrupts */
 	channel_set_bit(dw, MASK.XFER, dwc->mask);
 	channel_set_bit(dw, MASK.ERROR, dwc->mask);
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	channel_set_bit(dw, MASK.BLOCK, dwc->mask);
+#endif
 
 	dwc->initialized = true;
 }
@@ -209,7 +217,25 @@ static inline void dwc_chan_disable(struct dw_dma *dw, struct dw_dma_chan *dwc)
 		cpu_relax();
 }
 
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
 /*----------------------------------------------------------------------*/
+static int dma_ssi_xfer_cmplete_chk(struct dw_dma   *dw, u32 ch_no)
+{
+        u32 channel_status = 0xF;
+
+        while(channel_status != 0x0)
+        {
+                channel_status = dma_readl(dw, CH_EN);
+                channel_status = channel_status & (ch_no & 0xFF);
+        }
+
+        return 1;
+}
+#endif
 
 /* Perform single block transfer */
 static inline void dwc_do_single_block(struct dw_dma_chan *dwc,
@@ -229,6 +255,14 @@ static inline void dwc_do_single_block(struct dw_dma_chan *dwc,
 	channel_writel(dwc, CTL_LO, ctllo);
 	channel_writel(dwc, CTL_HI, desc->lli.ctlhi);
 	channel_set_bit(dw, CH_EN, dwc->mask);
+
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	dma_ssi_xfer_cmplete_chk(dw, dwc->mask);
+#endif
 
 	/* Move pointer to next descriptor */
 	dwc->tx_node_active = dwc->tx_node_active->next;
@@ -254,6 +288,9 @@ static void dwc_dostart(struct dw_dma_chan *dwc, struct dw_desc *first)
 		was_soft_llp = test_and_set_bit(DW_DMA_IS_SOFT_LLP,
 						&dwc->flags);
 		if (was_soft_llp) {
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+			printk ("%s:%d: BUG: Attempted to start new LLP transfer\n", __func__, __LINE__);
+#endif
 			dev_err(chan2dev(&dwc->chan),
 				"BUG: Attempted to start new LLP transfer inside ongoing one\n");
 			return;
@@ -332,6 +369,9 @@ static void dwc_complete_all(struct dw_dma *dw, struct dw_dma_chan *dwc)
 
 	spin_lock_irqsave(&dwc->lock, flags);
 	if (dma_readl(dw, CH_EN) & dwc->mask) {
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+		printk ("%s:%d: XFER bit set, but channel not idle!\n", __func__, __LINE__);
+#endif
 		dev_err(chan2dev(&dwc->chan),
 			"BUG: XFER bit set, but channel not idle!\n");
 
@@ -348,8 +388,18 @@ static void dwc_complete_all(struct dw_dma *dw, struct dw_dma_chan *dwc)
 
 	spin_unlock_irqrestore(&dwc->lock, flags);
 
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	list_for_each_entry_safe(desc, _desc, &list, desc_node){
+		dwc_descriptor_complete(dwc, desc, true);
+	}
+#else
 	list_for_each_entry_safe(desc, _desc, &list, desc_node)
 		dwc_descriptor_complete(dwc, desc, true);
+#endif
 }
 
 /* Returns how many bytes were already received from source */
@@ -376,6 +426,16 @@ static void dwc_scan_descriptors(struct dw_dma *dw, struct dw_dma_chan *dwc)
 	if (status_xfer & dwc->mask) {
 		/* Everything we've submitted is done */
 		dma_writel(dw, CLEAR.XFER, dwc->mask);
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+		dma_writel(dw, CLEAR.BLOCK, dwc->mask);
+		dma_writel(dw, CLEAR.SRC_TRAN, dwc->mask);
+		dma_writel(dw, CLEAR.DST_TRAN, dwc->mask);
+		dma_writel(dw, CLEAR.ERROR, dwc->mask);
+#endif
 
 		if (test_bit(DW_DMA_IS_SOFT_LLP, &dwc->flags)) {
 			struct list_head *head, *active = dwc->tx_node_active;
@@ -631,11 +691,28 @@ static void dw_dma_tasklet(unsigned long data)
 	/* Re-enable interrupts */
 	channel_set_bit(dw, MASK.XFER, dw->all_chan_mask);
 	channel_set_bit(dw, MASK.ERROR, dw->all_chan_mask);
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	channel_set_bit(dw, MASK.BLOCK, dw->all_chan_mask);
+#endif
 }
 
 static irqreturn_t dw_dma_interrupt(int irq, void *dev_id)
 {
 	struct dw_dma *dw = dev_id;
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	u32 status;
+
+	dev_vdbg(dw->dma.dev, "%s: status=0x%x\n", __func__,
+			dma_readl(dw, STATUS_INT));
+#else
 	u32 status = dma_readl(dw, STATUS_INT);
 
 	dev_vdbg(dw->dma.dev, "%s: status=0x%x\n", __func__, status);
@@ -643,14 +720,24 @@ static irqreturn_t dw_dma_interrupt(int irq, void *dev_id)
 	/* Check if we have any interrupt from the DMAC */
 	if (!status)
 		return IRQ_NONE;
+#endif
 
 	/*
 	 * Just disable the interrupts. We'll turn them back on in the
 	 * softirq handler.
 	 */
 	channel_clear_bit(dw, MASK.XFER, dw->all_chan_mask);
+#ifndef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
 	channel_clear_bit(dw, MASK.BLOCK, dw->all_chan_mask);
+#endif
 	channel_clear_bit(dw, MASK.ERROR, dw->all_chan_mask);
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	channel_clear_bit(dw, MASK.BLOCK, dw->all_chan_mask);
+#endif
 
 	status = dma_readl(dw, STATUS_INT);
 	if (status) {
@@ -780,7 +867,15 @@ err_desc_get:
 static struct dma_async_tx_descriptor *
 dwc_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
 		unsigned int sg_len, enum dma_transfer_direction direction,
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+		unsigned long flags)
+#else
 		unsigned long flags, void *context)
+#endif
 {
 	struct dw_dma_chan	*dwc = to_dw_dma_chan(chan);
 	struct dw_dma		*dw = to_dw_dma(chan->device);
@@ -807,7 +902,21 @@ dwc_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
 
 	switch (direction) {
 	case DMA_MEM_TO_DEV:
+#if 1
+		reg_width = (sconfig->dst_addr_width ? __fls(sconfig->dst_addr_width): 0);
+#else
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 * The above #if 1 else part can be removed.
+	 */
+		//spsm:reg_width = __fls(sconfig->dst_addr_width);
+		reg_width = sconfig->dst_addr_width; //spsi
+#else
 		reg_width = __ffs(sconfig->dst_addr_width);
+#endif
+#endif
 		reg = sconfig->dst_addr;
 		ctllo = (DWC_DEFAULT_CTLLO(chan)
 				| DWC_CTLL_DST_WIDTH(reg_width)
@@ -826,9 +935,23 @@ dwc_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
 			mem = sg_dma_address(sg);
 			len = sg_dma_len(sg);
 
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+		#if 0 //spsm
+			mem_width = min_t(unsigned int, \
+					  data_width, dwc_fast_fls(mem | len));
+		#endif
+			mem_width = sconfig->src_addr_width; //spsi
+			
+/* I think still we can use the #if 0 part. Because src_addr_width is assigned to zero desingware_spi_dma.c */
+#else
 			mem_width = min_t(unsigned int,
 					  data_width, dwc_fast_ffs(mem | len));
 
+#endif
 slave_sg_todev_fill_desc:
 			desc = dwc_desc_get(dwc);
 			if (!desc) {
@@ -867,7 +990,21 @@ slave_sg_todev_fill_desc:
 		}
 		break;
 	case DMA_DEV_TO_MEM:
+#if 1
+		reg_width = (sconfig->src_addr_width ? __fls(sconfig->src_addr_width): 0);
+#else
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 * The above #if 1 else part can be removed.
+	 */
+		//spsm:reg_width = __fls(sconfig->src_addr_width);
+		reg_width = sconfig->src_addr_width; //spsi
+#else
 		reg_width = __ffs(sconfig->src_addr_width);
+#endif
+#endif
 		reg = sconfig->src_addr;
 		ctllo = (DWC_DEFAULT_CTLLO(chan)
 				| DWC_CTLL_SRC_WIDTH(reg_width)
@@ -886,9 +1023,22 @@ slave_sg_todev_fill_desc:
 			mem = sg_dma_address(sg);
 			len = sg_dma_len(sg);
 
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+		#if 0 //spsm
+			mem_width = min_t(unsigned int, \
+					  data_width, dwc_fast_fls(mem | len));
+		#endif
+			mem_width = sconfig->dst_addr_width; //spsi
+/* I think still we can use the #if 0 part. Because src_addr_width is assigned to zero desingware_spi_dma.c */
+#else
 			mem_width = min_t(unsigned int,
 					  data_width, dwc_fast_ffs(mem | len));
 
+#endif
 slave_sg_fromdev_fill_desc:
 			desc = dwc_desc_get(dwc);
 			if (!desc) {
@@ -975,8 +1125,27 @@ set_runtime_config(struct dma_chan *chan, struct dma_slave_config *sconfig)
 	if (is_request_line_unset(dwc))
 		dwc->request_line = sconfig->slave_id;
 
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	if(dwc->direction == DMA_MEM_TO_DEV){
+		dwc->src_master = 0;
+		dwc->dst_master = 1;
+	}else
+		if(dwc->direction == DMA_DEV_TO_MEM){
+			dwc->src_master = 1;
+			dwc->dst_master = 0;
+		}
+#if 0
 	convert_burst(&dwc->dma_sconfig.src_maxburst);
 	convert_burst(&dwc->dma_sconfig.dst_maxburst);
+#endif
+#else
+	convert_burst(&dwc->dma_sconfig.src_maxburst);
+	convert_burst(&dwc->dma_sconfig.dst_maxburst);
+#endif
 
 	return 0;
 }
@@ -1077,6 +1246,23 @@ dwc_tx_status(struct dma_chan *chan,
 	enum dma_status		ret;
 
 	ret = dma_cookie_status(chan, cookie, txstate);
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	if (ret != DMA_COMPLETE) {
+		dwc_scan_descriptors(to_dw_dma(chan->device), dwc);
+
+		ret = dma_cookie_status(chan, cookie, txstate);
+	}
+
+	if (ret != DMA_COMPLETE)
+		dma_set_residue(txstate, dwc_get_residue(dwc));
+
+	if (dwc->paused)
+		return DMA_PAUSED;
+#else
 	if (ret == DMA_COMPLETE)
 		return ret;
 
@@ -1088,6 +1274,7 @@ dwc_tx_status(struct dma_chan *chan,
 
 	if (dwc->paused && ret == DMA_IN_PROGRESS)
 		return DMA_PAUSED;
+#endif
 
 	return ret;
 }
@@ -1481,6 +1668,13 @@ int dw_dma_probe(struct dw_dma_chip *chip, struct dw_dma_platform_data *pdata)
 	int			err;
 	int			i;
 
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	__raw_writel(__raw_readl(AXI_RESET_1) & ~(0x1), AXI_RESET_1);
+#endif
 	dw = devm_kzalloc(chip->dev, sizeof(*dw), GFP_KERNEL);
 	if (!dw)
 		return -ENOMEM;
@@ -1527,6 +1721,7 @@ int dw_dma_probe(struct dw_dma_chip *chip, struct dw_dma_platform_data *pdata)
 		err = -ENOMEM;
 		goto err_pdata;
 	}
+	c2000_block_reset(COMPONENT_AXI_DMA, 0);
 
 	/* Get hardware configuration parameters */
 	if (autocfg) {
@@ -1559,8 +1754,17 @@ int dw_dma_probe(struct dw_dma_chip *chip, struct dw_dma_platform_data *pdata)
 
 	tasklet_init(&dw->tasklet, dw_dma_tasklet, (unsigned long)dw);
 
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	err = request_irq(chip->irq, dw_dma_interrupt, 0,
+			  "dw_dmac", dw);
+#else
 	err = request_irq(chip->irq, dw_dma_interrupt, IRQF_SHARED,
 			  "dw_dmac", dw);
+#endif
 	if (err)
 		goto err_pdata;
 
@@ -1613,8 +1817,29 @@ int dw_dma_probe(struct dw_dma_chip *chip, struct dw_dma_platform_data *pdata)
 			 */
 			dwc->block_size =
 				(4 << ((max_blk_size >> 4 * i) & 0xf)) - 1;
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+		#if 0 //spsm
+			dwc->nollp = \
+				(dwc_params >> DWC_PARAMS_MBLK_EN & 0x1) == 0;
+		#else
+			dwc->nollp = 1; //spsi
+		#endif
+			if(dwc->nollp)
+				dev_dbg(chip->dev, "%s:%d: \
+				\nLLP(ch:%d) not supported. prio=%d dwc->nollp=%d\n", \
+					__func__, __LINE__, i, dwc->priority, dwc->nollp);
+			else
+				dev_dbg(chip->dev, "%s:%d: \
+				\nMultiblock(ch:%d) Supported.... dwc->nollp=%d\n", \
+					__func__, __LINE__, i, dwc->nollp);
+#else
 			dwc->nollp =
 				(dwc_params >> DWC_PARAMS_MBLK_EN & 0x1) == 0;
+#endif
 		} else {
 			dwc->block_size = pdata->block_size;
 
@@ -1634,6 +1859,13 @@ int dw_dma_probe(struct dw_dma_chip *chip, struct dw_dma_platform_data *pdata)
 	dma_writel(dw, CLEAR.ERROR, dw->all_chan_mask);
 
 	dma_cap_set(DMA_MEMCPY, dw->dma.cap_mask);
+#ifdef LINUX_3_2_DMA_DRIVER_PORTING_CHANGES
+	/*
+	 * The below changes done for 3.2 kernel. 
+	 * It needs to be check it is required here or not
+	 */
+	dma_cap_set(DMA_PRIVATE, dw->dma.cap_mask);//pratap
+#endif
 	dma_cap_set(DMA_SLAVE, dw->dma.cap_mask);
 	if (pdata->is_private)
 		dma_cap_set(DMA_PRIVATE, dw->dma.cap_mask);

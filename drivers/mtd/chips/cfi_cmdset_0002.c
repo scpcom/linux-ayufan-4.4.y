@@ -38,6 +38,9 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/cfi.h>
 #include <linux/mtd/xip.h>
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+#include <linux/mtd/exp_lock.h>
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 #define AMD_BOOTLOC_BUG
 #define FORCE_WORD_WRITE 0
@@ -755,8 +758,32 @@ static int get_chip(struct map_info *map, struct flchip *chip, unsigned long adr
 
 	case FL_STATUS:
 		for (;;) {
-			if (chip_ready(map, adr))
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * lock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
+			if (chip_ready(map, adr)) {
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+				/*
+				 * unlock mutex to prevent simultaneous NAND
+				 * and NOR access to Comcerto2000 EXP bus
+				 */
+				mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 				break;
+			}
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * unlock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 			if (time_after(jiffies, timeo)) {
 				printk(KERN_ERR "Waiting for chip to be ready timed out.\n");
@@ -780,6 +807,14 @@ static int get_chip(struct map_info *map, struct flchip *chip, unsigned long adr
 		    (mode == FL_WRITING && (cfip->EraseSuspend & 0x2))))
 			goto sleep;
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		/* Do not allow suspend iff read/write to EB address */
 		if ((adr & chip->in_progress_block_mask) ==
 		    chip->in_progress_block_addr)
@@ -789,12 +824,46 @@ static int get_chip(struct map_info *map, struct flchip *chip, unsigned long adr
 		/* It's harmless to issue the Erase-Suspend and Erase-Resume
 		 * commands when the erase algorithm isn't in progress. */
 		map_write(map, CMD(0xB0), chip->in_progress_block_addr);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		chip->oldstate = FL_ERASING;
 		chip->state = FL_ERASE_SUSPENDING;
 		chip->erase_suspended = 1;
 		for (;;) {
-			if (chip_ready(map, adr))
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * lock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
+			if (chip_ready(map, adr)) {
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+				/*
+				 * unlock mutex to prevent simultaneous NAND
+				 * and NOR access to Comcerto2000 EXP bus
+				 */
+				mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 				break;
+			}
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * unlock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 			if (time_after(jiffies, timeo)) {
 				/* Should have suspended the erase by now.
@@ -852,10 +921,27 @@ static void put_chip(struct map_info *map, struct flchip *chip, unsigned long ad
 
 	switch(chip->oldstate) {
 	case FL_ERASING:
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		cfi_fixup_m29ew_erase_suspend(map,
 			chip->in_progress_block_addr);
 		map_write(map, cfi->sector_erase_cmd, chip->in_progress_block_addr);
 		cfi_fixup_m29ew_delay_after_resume(cfi);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		chip->oldstate = FL_READY;
 		chip->state = FL_ERASING;
 		break;
@@ -946,7 +1032,24 @@ static void __xipram xip_udelay(struct map_info *map, struct flchip *chip,
 			 * we resume the whole thing at once).  Yes, it
 			 * can happen!
 			 */
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * lock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 			map_write(map, CMD(0xb0), adr);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * unlock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 			usec -= xip_elapsed_since(start);
 			suspended = xip_currtime();
 			do {
@@ -959,7 +1062,23 @@ static void __xipram xip_udelay(struct map_info *map, struct flchip *chip,
 					 */
 					return;
 				}
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+				/*
+				 * lock mutex to prevent simultaneous NAND
+				 * and NOR access to Comcerto2000 EXP bus
+				 */
+				mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 				status = map_read(map, adr);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+				/*
+				 * unlock mutex to prevent simultaneous NAND
+				 * and NOR access to Comcerto2000 EXP bus
+				 */
+				mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 			} while (!map_word_andequal(map, status, OK, OK));
 
 			/* Suspend succeeded */
@@ -968,8 +1087,26 @@ static void __xipram xip_udelay(struct map_info *map, struct flchip *chip,
 				break;
 			chip->state = FL_XIP_WHILE_ERASING;
 			chip->erase_suspended = 1;
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * lock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 			map_write(map, CMD(0xf0), adr);
 			(void) map_read(map, adr);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * unlock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 			xip_iprefetch();
 			local_irq_enable();
 			mutex_unlock(&chip->mutex);
@@ -995,10 +1132,27 @@ static void __xipram xip_udelay(struct map_info *map, struct flchip *chip,
 			/* Disallow XIP again */
 			local_irq_disable();
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * lock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 			/* Correct Erase Suspend Hangups for M29EW */
 			cfi_fixup_m29ew_erase_suspend(map, adr);
 			/* Resume the write or erase operation */
 			map_write(map, cfi->sector_erase_cmd, adr);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * unlock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 			chip->state = oldstate;
 			start = xip_currtime();
 		} else if (usec >= 1000000/HZ) {
@@ -1009,7 +1163,24 @@ static void __xipram xip_udelay(struct map_info *map, struct flchip *chip,
 			 */
 			xip_cpu_idle();
 		}
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		status = map_read(map, adr);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 	} while (!map_word_andequal(map, status, OK, OK)
 		 && xip_elapsed_since(start) < usec);
 }
@@ -1087,12 +1258,28 @@ static inline int do_read_onechip(struct map_info *map, struct flchip *chip, lof
 		return ret;
 	}
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	if (chip->state != FL_POINT && chip->state != FL_READY) {
 		map_write(map, CMD(0xf0), cmd_addr);
 		chip->state = FL_READY;
 	}
 
 	map_copy_from(map, buf, adr, len);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	put_chip(map, chip, cmd_addr);
 
@@ -1165,6 +1352,14 @@ static inline int do_read_secsi_onechip(struct map_info *map, struct flchip *chi
 
 	chip->state = FL_READY;
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	cfi_send_gen_cmd(0xAA, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
 	cfi_send_gen_cmd(0x55, cfi->addr_unlock2, chip->start, map, cfi, cfi->device_type, NULL);
 	cfi_send_gen_cmd(0x88, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
@@ -1175,6 +1370,14 @@ static inline int do_read_secsi_onechip(struct map_info *map, struct flchip *chi
 	cfi_send_gen_cmd(0x55, cfi->addr_unlock2, chip->start, map, cfi, cfi->device_type, NULL);
 	cfi_send_gen_cmd(0x90, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
 	cfi_send_gen_cmd(0x00, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	wake_up(&chip->wq);
 	mutex_unlock(&chip->mutex);
@@ -1251,6 +1454,14 @@ static int __xipram do_write_oneword(struct map_info *map, struct flchip *chip, 
 	pr_debug("MTD %s(): WRITE 0x%.8lx(0x%.8lx)\n",
 	       __func__, adr, datum.x[0] );
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	/*
 	 * Check for a NOP for the case when the datum to write is already
 	 * present - it saves time and works around buggy chips that corrupt
@@ -1267,12 +1478,36 @@ static int __xipram do_write_oneword(struct map_info *map, struct flchip *chip, 
 	XIP_INVAL_CACHED_RANGE(map, adr, map_bankwidth(map));
 	ENABLE_VPP(map);
 	xip_disable(map, chip, adr);
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
  retry:
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	cfi_send_gen_cmd(0xAA, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
 	cfi_send_gen_cmd(0x55, cfi->addr_unlock2, chip->start, map, cfi, cfi->device_type, NULL);
 	cfi_send_gen_cmd(0xA0, cfi->addr_unlock1, chip->start, map, cfi, cfi->device_type, NULL);
 	map_write(map, datum, adr);
 	chip->state = FL_WRITING;
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	INVALIDATE_CACHE_UDELAY(map, chip,
 				adr, map_bankwidth(map),
@@ -1295,6 +1530,14 @@ static int __xipram do_write_oneword(struct map_info *map, struct flchip *chip, 
 			continue;
 		}
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		/*
 		 * We check "time_after" and "!chip_good" before checking
 		 * "chip_good" to avoid the failure due to scheduling.
@@ -1311,6 +1554,14 @@ static int __xipram do_write_oneword(struct map_info *map, struct flchip *chip, 
 		if (chip_good(map, adr, datum))
 			break;
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		/* Latency issues. Drop the lock, wait a while and retry */
 		UDELAY(map, chip, adr, 1);
 	}
@@ -1322,12 +1573,27 @@ static int __xipram do_write_oneword(struct map_info *map, struct flchip *chip, 
 		/* FIXME - should have reset delay before continuing */
 
 		if (++retry_cnt <= MAX_RETRIES) {
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * unlock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 			ret = 0;
 			goto retry;
 		}
 	}
 	xip_enable(map, chip, adr);
+
  op_done:
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 	chip->state = FL_READY;
 	DISABLE_VPP(map);
 	put_chip(map, chip, adr);
@@ -1372,8 +1638,24 @@ static int cfi_amdstd_write_words(struct mtd_info *mtd, loff_t to, size_t len,
 			goto retry;
 		}
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		/* Load 'tmp_buf' with old contents of flash */
 		tmp_buf = map_read(map, bus_ofs+chipstart);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 		mutex_unlock(&cfi->chips[chipnum].mutex);
 
@@ -1443,7 +1725,23 @@ static int cfi_amdstd_write_words(struct mtd_info *mtd, loff_t to, size_t len,
 			goto retry1;
 		}
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		tmp_buf = map_read(map, ofs + chipstart);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 		mutex_unlock(&cfi->chips[chipnum].mutex);
 
@@ -1492,6 +1790,14 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 	pr_debug("MTD %s(): WRITE 0x%.8lx(0x%.8lx)\n",
 	       __func__, adr, datum.x[0] );
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	XIP_INVAL_CACHED_RANGE(map, adr, len);
 	ENABLE_VPP(map);
 	xip_disable(map, chip, cmd_adr);
@@ -1501,6 +1807,10 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 
 	/* Write Buffer Load */
 	map_write(map, CMD(0x25), cmd_adr);
+
+    /* patch from https://dev.openwrt.org/browser/trunk/target/linux/generic/patches-3.2/475-mtd
+	_cfi_cmdset_0002-add-buffer-write-cmd-timeout.patch?rev=31000 */
+	(void) map_read(map, cmd_adr);
 
 	chip->state = FL_WRITING_TO_BUFFER;
 
@@ -1524,6 +1834,14 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 	map_write(map, CMD(0x29), cmd_adr);
 	chip->state = FL_WRITING;
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	INVALIDATE_CACHE_UDELAY(map, chip,
 				adr, map_bankwidth(map),
 				chip->word_write_time);
@@ -1545,6 +1863,14 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 			continue;
 		}
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		/*
 		 * We check "time_after" and "!chip_good" before checking "chip_good" to avoid
 		 * the failure due to scheduling.
@@ -1556,6 +1882,14 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 			xip_enable(map, chip, adr);
 			goto op_done;
 		}
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 		/* Latency issues. Drop the lock, wait a while and retry */
 		UDELAY(map, chip, adr, 1);
@@ -1583,6 +1917,13 @@ static int __xipram do_write_buffer(struct map_info *map, struct flchip *chip,
 
 	ret = -EIO;
  op_done:
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 	chip->state = FL_READY;
 	DISABLE_VPP(map);
 	put_chip(map, chip, adr);
@@ -1925,6 +2266,14 @@ static int __xipram do_erase_chip(struct map_info *map, struct flchip *chip)
 	pr_debug("MTD %s(): ERASE 0x%.8lx\n",
 	       __func__, chip->start );
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	XIP_INVAL_CACHED_RANGE(map, adr, map->size);
 	ENABLE_VPP(map);
 	xip_disable(map, chip, adr);
@@ -1941,6 +2290,14 @@ static int __xipram do_erase_chip(struct map_info *map, struct flchip *chip)
 	chip->erase_suspended = 0;
 	chip->in_progress_block_addr = adr;
 	chip->in_progress_block_mask = ~(map->size - 1);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	INVALIDATE_CACHE_UDELAY(map, chip,
 				adr, map->size,
@@ -1966,6 +2323,14 @@ static int __xipram do_erase_chip(struct map_info *map, struct flchip *chip)
 			chip->erase_suspended = 0;
 		}
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		if (chip_good(map, adr, map_word_ff(map)))
 			break;
 
@@ -1975,6 +2340,14 @@ static int __xipram do_erase_chip(struct map_info *map, struct flchip *chip)
 			ret = -EIO;
 			break;
 		}
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 		/* Latency issues. Drop the lock, wait a while and retry */
 		UDELAY(map, chip, adr, 1000000/HZ);
@@ -1993,6 +2366,13 @@ static int __xipram do_erase_chip(struct map_info *map, struct flchip *chip)
 
 	chip->state = FL_READY;
 	xip_enable(map, chip, adr);
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 	DISABLE_VPP(map);
 	put_chip(map, chip, adr);
 	mutex_unlock(&chip->mutex);
@@ -2021,6 +2401,14 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 	pr_debug("MTD %s(): ERASE 0x%.8lx\n",
 	       __func__, adr );
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	XIP_INVAL_CACHED_RANGE(map, adr, len);
 	ENABLE_VPP(map);
 	xip_disable(map, chip, adr);
@@ -2037,6 +2425,14 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 	chip->erase_suspended = 0;
 	chip->in_progress_block_addr = adr;
 	chip->in_progress_block_mask = ~(len - 1);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	INVALIDATE_CACHE_UDELAY(map, chip,
 				adr, len,
@@ -2062,6 +2458,14 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 			chip->erase_suspended = 0;
 		}
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * lock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 		if (chip_good(map, adr, map_word_ff(map))) {
 			xip_enable(map, chip, adr);
 			break;
@@ -2074,6 +2478,14 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 			ret = -EIO;
 			break;
 		}
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+		/*
+		 * unlock mutex to prevent simultaneous NAND
+		 * and NOR access to Comcerto2000 EXP bus
+		 */
+		mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 		/* Latency issues. Drop the lock, wait a while and retry */
 		UDELAY(map, chip, adr, 1000000/HZ);
@@ -2090,6 +2502,13 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 		}
 	}
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 	chip->state = FL_READY;
 	DISABLE_VPP(map);
 	put_chip(map, chip, adr);
@@ -2153,6 +2572,14 @@ static int do_atmel_lock(struct map_info *map, struct flchip *chip,
 
 	pr_debug("MTD %s(): LOCK 0x%08lx len %d\n", __func__, adr, len);
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	cfi_send_gen_cmd(0xAA, cfi->addr_unlock1, chip->start, map, cfi,
 			 cfi->device_type, NULL);
 	cfi_send_gen_cmd(0x55, cfi->addr_unlock2, chip->start, map, cfi,
@@ -2164,6 +2591,14 @@ static int do_atmel_lock(struct map_info *map, struct flchip *chip,
 	cfi_send_gen_cmd(0x55, cfi->addr_unlock2, chip->start, map, cfi,
 			 cfi->device_type, NULL);
 	map_write(map, CMD(0x40), chip->start + adr);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	chip->state = FL_READY;
 	put_chip(map, chip, adr + chip->start);
@@ -2188,9 +2623,25 @@ static int do_atmel_unlock(struct map_info *map, struct flchip *chip,
 
 	pr_debug("MTD %s(): LOCK 0x%08lx len %d\n", __func__, adr, len);
 
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * lock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 	cfi_send_gen_cmd(0xAA, cfi->addr_unlock1, chip->start, map, cfi,
 			 cfi->device_type, NULL);
 	map_write(map, CMD(0x70), adr);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+	/*
+	 * unlock mutex to prevent simultaneous NAND
+	 * and NOR access to Comcerto2000 EXP bus
+	 */
+	mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 
 	chip->state = FL_READY;
 	put_chip(map, chip, adr + chip->start);
@@ -2544,7 +2995,23 @@ static void cfi_amdstd_resume(struct mtd_info *mtd)
 
 		if (chip->state == FL_PM_SUSPENDED) {
 			chip->state = FL_READY;
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * lock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
+
 			map_write(map, CMD(0xF0), chip->start);
+
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * unlock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 			wake_up(&chip->wq);
 		}
 		else
@@ -2576,7 +3043,21 @@ static int cfi_amdstd_reset(struct mtd_info *mtd)
 
 		ret = get_chip(map, chip, chip->start, FL_SHUTDOWN);
 		if (!ret) {
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * lock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_lock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 			map_write(map, CMD(0xF0), chip->start);
+#ifdef CONFIG_COMCERTO_EXP_BUS_LOCK
+			/*
+			 * unlock mutex to prevent simultaneous NAND
+			 * and NOR access to Comcerto2000 EXP bus
+			 */
+			mutex_unlock(&exp_bus_lock);
+#endif /* CONFIG_COMCERTO_EXP_BUS_LOCK */
 			chip->state = FL_SHUTDOWN;
 			put_chip(map, chip, chip->start);
 		}

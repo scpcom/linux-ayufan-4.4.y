@@ -389,6 +389,16 @@ config IMX2_WDT
 	  To compile this driver as a module, choose M here: the
 	  module will be called imx2_wdt.
 
+config COMCERTO_WATCHDOG
+	tristate "Comcerto Watchdog"
+	depends on ARCH_COMCERTO
+	help
+	  Say Y here if to include support for the watchdog timer in
+	  Comcerto device.
+
+	  This driver can be built as a module by choosing M.
+	  The module will be called comcerto_wdt
+
 config UX500_WATCHDOG
 	tristate "ST-Ericsson Ux500 watchdog"
 	depends on MFD_DB8500_PRCMU

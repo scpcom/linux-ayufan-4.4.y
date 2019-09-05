@@ -876,6 +876,7 @@ SYSCALL_DEFINE1(dup, unsigned int, fildes)
 	}
 	return ret;
 }
+EXPORT_SYMBOL(sys_dup);
 
 int f_dupfd(unsigned int from, struct file *file, unsigned flags)
 {

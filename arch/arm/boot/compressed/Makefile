@@ -40,6 +40,11 @@ endif
 #
 # Architecture dependencies
 #
+
+ifeq ($(CONFIG_ARCH_COMCERTO),y)
+OBJS		+= head-comcerto.o
+endif
+
 ifeq ($(CONFIG_ARCH_ACORN),y)
 OBJS		+= ll_char_wr.o font.o
 endif

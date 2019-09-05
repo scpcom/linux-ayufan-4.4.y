@@ -22,6 +22,7 @@
 
 #include <asm-generic/pgtable-nopud.h>
 #include <asm/memory.h>
+#include <mach/vmalloc.h>
 #include <asm/pgtable-hwdef.h>
 
 
@@ -43,7 +44,9 @@
  */
 #define VMALLOC_OFFSET		(8*1024*1024)
 #define VMALLOC_START		(((unsigned long)high_memory + VMALLOC_OFFSET) & ~(VMALLOC_OFFSET-1))
+#ifndef VMALLOC_END
 #define VMALLOC_END		0xff000000UL
+#endif
 
 #define LIBRARY_TEXT_START	0x0c000000
 
@@ -183,9 +186,10 @@ extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
 
 #define pmd_none(pmd)		(!pmd_val(pmd))
 
+#define PMD_PAGE_ADDR_MASK		(~((1 << 10) - 1))
 static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 {
-	return __va(pmd_val(pmd) & PHYS_MASK & (s32)PAGE_MASK);
+	return __va((pmd_val(pmd) & PHYS_MASK & (s32)PMD_PAGE_ADDR_MASK) - PTE_HWTABLE_OFF);
 }
 
 #define pmd_page(pmd)		pfn_to_page(__phys_to_pfn(pmd_val(pmd) & PHYS_MASK))
@@ -211,7 +215,17 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 #define pte_page(pte)		pfn_to_page(pte_pfn(pte))
 #define mk_pte(page,prot)	pfn_pte(page_to_pfn(page), prot)
 
-#define pte_clear(mm,addr,ptep)	set_pte_ext(ptep, __pte(0), 0)
+#define uncache_pte_ext(ptep) cpu_uncache_pte_ext(ptep)
+#define pte_clear(mm,addr,ptep)	do {__sync_outer_cache(ptep, __pte(0)); set_pte_ext(ptep, __pte(0), 0); } while (0)
+
+#if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+static inline void __sync_outer_cache(pte_t *ptep, pte_t pteval)
+{
+}
+#else
+extern void __sync_outer_cache(pte_t *ptep, pte_t pteval);
+#endif
+
 
 #define pte_isset(pte, val)	((u32)(val) == (val) ? pte_val(pte) & (val) \
 						: !!(pte_val(pte) & (val)))
@@ -242,6 +256,8 @@ static inline void set_pte_at(struct mm_struct *mm, unsigned long addr,
 			      pte_t *ptep, pte_t pteval)
 {
 	unsigned long ext = 0;
+
+	__sync_outer_cache(ptep, pteval);
 
 	if (addr < TASK_SIZE && pte_valid_user(pteval)) {
 		__sync_icache_dcache(pteval);
@@ -294,7 +310,7 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 #define __swp_entry(type,offset) ((swp_entry_t) { ((type) << __SWP_TYPE_SHIFT) | ((offset) << __SWP_OFFSET_SHIFT) })
 
 #define __pte_to_swp_entry(pte)	((swp_entry_t) { pte_val(pte) })
-#define __swp_entry_to_pte(swp)	((pte_t) { (swp).val })
+#define __swp_entry_to_pte(swp)	((pte_t) { { (swp).val } })
 
 /*
  * It is an error for the kernel to have more swap files than we can

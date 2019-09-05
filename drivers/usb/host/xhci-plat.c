@@ -20,6 +20,9 @@
 
 #include "xhci.h"
 #include "xhci-mvebu.h"
+#ifdef CONFIG_ARCH_M86XXX
+#include "xhci-comcerto2000.h"
+#endif
 
 static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
@@ -88,8 +91,13 @@ static const struct hc_driver xhci_plat_xhci_driver = {
 	/* Root hub support */
 	.hub_control =		xhci_hub_control,
 	.hub_status_data =	xhci_hub_status_data,
+#if defined(CONFIG_ARCH_M86XXX) && defined (CONFIG_PM)
+	.bus_suspend =		comcerto_xhci_bus_suspend,
+	.bus_resume =		comcerto_xhci_bus_resume,
+#else
 	.bus_suspend =		xhci_bus_suspend,
 	.bus_resume =		xhci_bus_resume,
+#endif
 };
 
 static int xhci_plat_probe(struct platform_device *pdev)
@@ -104,6 +112,11 @@ static int xhci_plat_probe(struct platform_device *pdev)
 
 	if (usb_disabled())
 		return -ENODEV;
+
+#ifdef CONFIG_ARCH_M86XXX
+	/* Do the Platform specific initializations */
+	comcerto_start_xhci();
+#endif
 
 	driver = &xhci_plat_xhci_driver;
 
@@ -167,6 +180,11 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		if (ret)
 			goto disable_clk;
 	}
+#if 1
+	writel(readl(hcd->regs + 0xc200) & 0x7FFFFFFF, hcd->regs + 0xc200);
+	writel(readl(hcd->regs + 0xc2c0) & 0x7FFFFFFF, hcd->regs + 0xc2c0);
+	writel(0x5Dc11000, hcd->regs + 0xc110);
+#endif
 
 	ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (ret)
@@ -237,6 +255,12 @@ static int xhci_plat_remove(struct platform_device *dev)
 	iounmap(hcd->regs);
 	release_mem_region(hcd->rsrc_start, hcd->rsrc_len);
 	usb_put_hcd(hcd);
+
+#ifdef CONFIG_ARCH_M86XXX
+	/* Do the Platform specific shutdown */
+	comcerto_stop_xhci();
+#endif
+
 	kfree(xhci);
 
 	return 0;

@@ -223,6 +223,25 @@ static ssize_t max_ratio_store(struct device *dev,
 }
 BDI_SHOW(max_ratio, bdi->max_ratio)
 
+#ifdef CONFIG_ARCH_M86XXX
+static ssize_t cpu0_bind_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct backing_dev_info *bdi = dev_get_drvdata(dev);
+	unsigned int flag;
+
+	flag = simple_strtoul(buf, NULL, 10);
+	if (flag)
+		bdi->cpu0_bind = 1;
+	else
+		bdi->cpu0_bind = 0;
+
+	return count;
+}
+BDI_SHOW(cpu0_bind, bdi->cpu0_bind)
+
+#endif /* CONFIG_ARCH_M86XXX */
+
 static ssize_t stable_pages_required_show(struct device *dev,
 					  struct device_attribute *attr,
 					  char *page)
@@ -238,6 +257,9 @@ static struct attribute *bdi_dev_attrs[] = {
 	&dev_attr_read_ahead_kb.attr,
 	&dev_attr_min_ratio.attr,
 	&dev_attr_max_ratio.attr,
+#ifdef CONFIG_ARCH_M86XXX
+	&dev_attr_cpu0_bind.attr,
+#endif
 	&dev_attr_stable_pages_required.attr,
 	NULL,
 };

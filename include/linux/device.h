@@ -800,6 +800,15 @@ static inline struct device *kobj_to_dev(struct kobject *kobj)
 	return container_of(kobj, struct device, kobj);
 }
 
+#ifdef CONFIG_ACPI
+#define ACPI_HANDLE(dev)	((dev)->acpi_node.handle)
+#define ACPI_HANDLE_SET(dev, _handle_)	(dev)->acpi_node.handle = (_handle_)
+#else
+#define ACPI_HANDLE(dev)	(NULL)
+#define ACPI_HANDLE_SET(dev, _handle_)	do { } while (0)
+#endif
+
+
 /* Get the wakeup routines, which depend on struct device */
 #include <linux/pm_wakeup.h>
 

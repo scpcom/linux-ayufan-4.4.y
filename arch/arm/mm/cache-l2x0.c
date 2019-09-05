@@ -98,8 +98,10 @@ static inline void l2c_unlock(void __iomem *base, unsigned num)
 	unsigned i;
 
 	for (i = 0; i < num; i++) {
+#ifndef CONFIG_L2X0_INSTRUCTION_ONLY
 		writel_relaxed(0, base + L2X0_LOCKDOWN_WAY_D_BASE +
 			       i * L2X0_LOCKDOWN_STRIDE);
+#endif
 		writel_relaxed(0, base + L2X0_LOCKDOWN_WAY_I_BASE +
 			       i * L2X0_LOCKDOWN_STRIDE);
 	}
@@ -755,6 +757,7 @@ static void __init __l2c_init(const struct l2c_init_data *data,
 {
 	struct outer_cache_fns fns;
 	unsigned way_size_bits, ways;
+	u32 prefetch = 0;
 	u32 aux, old_aux;
 
 	/*
@@ -840,8 +843,8 @@ static void __init __l2c_init(const struct l2c_init_data *data,
 
 	pr_info("%s cache controller enabled, %d ways, %d kB\n",
 		data->type, ways, l2x0_size >> 10);
-	pr_info("%s: CACHE_ID 0x%08x, AUX_CTRL 0x%08x\n",
-		data->type, cache_id, aux);
+	pr_info("%s: CACHE_ID 0x%08x, AUX_CTRL 0x%08x PREFETCH_CTRL 0x%08x\n",
+		data->type, cache_id, aux, prefetch);
 }
 
 void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)

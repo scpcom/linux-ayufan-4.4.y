@@ -125,6 +125,8 @@ static void __init init_port(struct earlycon_device *device)
 	unsigned int divisor;
 	unsigned char c;
 
+	return;
+
 	serial8250_early_out(port, UART_LCR, 0x3);	/* 8n1 */
 	serial8250_early_out(port, UART_IER, 0);	/* no interrupt */
 	serial8250_early_out(port, UART_FCR, 0);	/* no fifo */

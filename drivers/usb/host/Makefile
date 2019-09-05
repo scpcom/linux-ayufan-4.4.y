@@ -19,6 +19,9 @@ xhci-hcd-$(CONFIG_PCI)	+= xhci-pci.o
 
 ifneq ($(CONFIG_USB_XHCI_PLATFORM), )
 	xhci-hcd-y		+= xhci-plat.o
+ifneq ($(CONFIG_ARCH_M86XXX), )
+obj-$(CONFIG_USB_XHCI_PLATFORM) += xhci-comcerto2000.o
+endif
 ifneq ($(CONFIG_USB_XHCI_MVEBU), )
 	xhci-hcd-y		+= xhci-mvebu.o
 endif

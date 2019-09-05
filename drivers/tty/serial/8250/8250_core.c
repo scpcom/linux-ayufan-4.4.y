@@ -46,6 +46,7 @@
 #include <asm/irq.h>
 
 #include "8250.h"
+#include <mach/comcerto-2000/pm.h>
 
 /*
  * Configuration:
@@ -404,10 +405,53 @@ static unsigned int mem_serial_in(struct uart_port *p, int offset)
 	return readb(p->membase + offset);
 }
 
+#ifdef CONFIG_ARCH_M86XXX
+void serial8250_clear_and_reinit_fifos(struct uart_8250_port *p);
+
+void dw8250_force_idle(struct uart_port *p)
+{
+	struct uart_8250_port *up = container_of(p, struct uart_8250_port, port);
+
+	serial8250_clear_and_reinit_fifos(up);
+	(void)p->serial_in(p, UART_RX);
+}
+#endif
+
+#ifdef CONFIG_ARCH_M86XXX
+static const u8 au_io_out_map[] = {
+        [UART_TX]  = 1,
+        [UART_IER] = 2,
+        [UART_FCR] = 4,
+        [UART_LCR] = 5,
+        [UART_MCR] = 6,
+};
+
+static inline int map_8250_out_reg(struct uart_port *p, int offset)
+{
+        if (p->iotype != UPIO_AU)
+            return offset;
+        return au_io_out_map[offset];
+}
+#endif
+
 static void mem_serial_out(struct uart_port *p, int offset, int value)
 {
-	offset = offset << p->regshift;
-	writeb(value, p->membase + offset);
+	int offset1 = map_8250_out_reg(p, offset) << p->regshift;
+	writeb(value, p->membase + offset1);
+
+#ifdef CONFIG_ARCH_M86XXX
+	/* Make sure LCR write wasn't ignored */
+	if (offset == UART_LCR) {
+		int tries = 1000;
+		while (tries--) {
+			if (value == p->serial_in(p, UART_LCR))
+				return;
+			dw8250_force_idle(p);
+			writeb(value, p->membase + offset1);
+		}
+		dev_err(p->dev, "Couldn't set LCR to %d\n", value);
+	}
+#endif
 }
 
 static void mem32_serial_out(struct uart_port *p, int offset, int value)
@@ -843,6 +887,7 @@ static inline int ns16550a_goto_highspeed(struct uart_8250_port *up)
 		status |= 0x10;  /* 1.625 divisor for baud_base --> 921600 */
 		serial_out(up, 0x04, status);
 	}
+
 	return 1;
 }
 
@@ -2330,12 +2375,18 @@ serial8250_do_set_termios(struct uart_port *port, struct ktermios *termios,
 	 * UART to respond.  IOW, at least 32 bytes of FIFO. Also enable
 	 * AFE if hw flow control is supported
 	 */
+#ifdef CONFIG_ARCH_M86XXX
+	up->mcr &= ~UART_MCR_AFE;
+        if (termios->c_cflag & CRTSCTS)
+               up->mcr |= UART_MCR_AFE;
+#else
 	if ((up->capabilities & UART_CAP_AFE && (port->fifosize >= 32)) ||
 	    (port->flags & UPF_HARD_FLOW)) {
 		up->mcr &= ~UART_MCR_AFE;
 		if (termios->c_cflag & CRTSCTS)
 			up->mcr |= UART_MCR_AFE;
 	}
+#endif
 
 	/*
 	 * Ok, we're now changing the port state.  Do it with
@@ -3128,12 +3179,23 @@ static int serial8250_remove(struct platform_device *dev)
 		if (up->port.dev == &dev->dev)
 			serial8250_unregister_port(i);
 	}
+
 	return 0;
 }
 
+#ifdef CONFIG_PM
 static int serial8250_suspend(struct platform_device *dev, pm_message_t state)
 {
 	int i;
+
+       if ( !(host_utilpe_shared_pmu_bitmask & DUS_UART0UARTS2_IRQ )){
+
+                /* We will return here.
+                 * Not prepared yet for suspend , so that device suspend
+                 * will not occur.
+                */
+		return 0;
+	}
 
 	for (i = 0; i < UART_NR; i++) {
 		struct uart_8250_port *up = &serial8250_ports[i];
@@ -3149,6 +3211,15 @@ static int serial8250_resume(struct platform_device *dev)
 {
 	int i;
 
+       if ( !(host_utilpe_shared_pmu_bitmask & DUS_UART0UARTS2_IRQ )){
+
+                /* We will return here.
+                 * Not prepared yet for suspend , so that device suspend
+                 * will not occur.
+                */
+		return 0;
+	}
+
 	for (i = 0; i < UART_NR; i++) {
 		struct uart_8250_port *up = &serial8250_ports[i];
 
@@ -3158,12 +3229,14 @@ static int serial8250_resume(struct platform_device *dev)
 
 	return 0;
 }
-
+#endif
 static struct platform_driver serial8250_isa_driver = {
 	.probe		= serial8250_probe,
 	.remove		= serial8250_remove,
+#ifdef CONFIG_PM
 	.suspend	= serial8250_suspend,
 	.resume		= serial8250_resume,
+#endif
 	.driver		= {
 		.name	= "serial8250",
 		.owner	= THIS_MODULE,

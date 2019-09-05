@@ -89,4 +89,11 @@ config ARM_EXYNOS5_BUS_DEVFREQ
 	  It reads PPMU counters of memory controllers and adjusts the
 	  operating frequencies and voltages with OPP support.
 
+config COMCERTO_DEVFREQ_SUPPORT
+	bool "Enable Comcerto devfreq"
+	select DEVFREQ_GOV_SIMPLE_ONDEMAND
+	help
+		Adds devfreq support in Comcerto.
+
+
 endif # PM_DEVFREQ

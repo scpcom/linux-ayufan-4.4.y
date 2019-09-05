@@ -9,6 +9,18 @@
 
 #include <asm/cputype.h>
 
+struct scu_context {
+	u32 ctrl;
+	u32 cpu_status;
+#ifdef CONFIG_ARM_ERRATA_764369
+	u32 diag_ctrl;
+#endif
+	u32 filter_start;
+	u32 filter_end;
+	u32 sac;
+	u32 snsac;
+};
+
 static inline bool scu_a9_has_base(void)
 {
 	return read_cpuid_part_number() == ARM_CPU_PART_CORTEX_A9;
@@ -25,7 +37,10 @@ static inline unsigned long scu_a9_get_base(void)
 
 #ifdef CONFIG_HAVE_ARM_SCU
 unsigned int scu_get_core_count(void __iomem *);
+int __scu_power_mode(void __iomem *, int, unsigned int);
 int scu_power_mode(void __iomem *, unsigned int);
+void scu_save(void __iomem *, struct scu_context *);
+void scu_restore(void __iomem *, struct scu_context *);
 #else
 static inline unsigned int scu_get_core_count(void __iomem *scu_base)
 {

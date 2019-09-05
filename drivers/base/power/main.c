@@ -17,6 +17,7 @@
  * subsystem list maintains.
  */
 
+#include <linux/version.h>
 #include <linux/device.h>
 #include <linux/kallsyms.h>
 #include <linux/export.h>
@@ -1682,6 +1683,198 @@ int device_pm_wait_for_dev(struct device *subordinate, struct device *dev)
 	return async_error;
 }
 EXPORT_SYMBOL_GPL(device_pm_wait_for_dev);
+
+/*
+ * Code added to suppoprt  device SUSPEND(L1 and L2 ) and RESUME
+ * (L1 = clock gating L2 = clock gating + reset) .
+ * Depends upon config option CONFIG_PM_SYSFS_MANUAL
+ *
+ */
+
+#ifdef CONFIG_PM_SYSFS_MANUAL
+
+static DEFINE_MUTEX(dpm_lock);
+
+/**
+ *	dpm_manual_resume - resume the device .
+ *      uses device_resume and device_complete to acheive feature.
+ *      part of the code borrowed from dpm_resume and dpm_resume_complete.
+ *	@dev:   Device.
+ * 	@state: State to enter.
+*/
+
+void dpm_manual_resume(struct device *dev,pm_message_t state)
+{
+	int error;
+	struct list_head list;
+	ktime_t starttime = ktime_get();
+
+	might_sleep();
+
+	/* Device resume prepare starts here */
+	mutex_lock(&dpm_list_mtx);
+        pm_transition = state;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,13,0)
+	INIT_COMPLETION(dev->power.completion);
+#else
+	reinit_completion(&dev->power.completion);
+#endif
+	mutex_unlock(&dpm_list_mtx);
+
+	error = device_resume(dev, state, false);
+	if (error) {
+		suspend_stats.failed_resume++;
+		dpm_save_failed_step(SUSPEND_RESUME);
+		dpm_save_failed_dev(dev_name(dev));
+		pm_dev_err(dev, state, "", error);
+	}
+
+	mutex_lock(&dpm_list_mtx);
+	if (!list_empty(&dev->power.entry))
+		list_move_tail(&dev->power.entry, &dpm_prepared_list);
+	mutex_unlock(&dpm_list_mtx);
+	
+	/* DPM complete start */
+	INIT_LIST_HEAD(&list);
+	mutex_lock(&dpm_list_mtx);
+	dev->power.is_prepared = false;
+	list_move(&dev->power.entry, &list);
+	mutex_unlock(&dpm_list_mtx);
+
+	device_complete(dev, state);
+	dev->power.power_state=state;
+	dpm_show_time(starttime, state, NULL);
+}
+
+
+/**
+ *	dpm_manual_resume_start - Start the process for Power one device back to work.
+ *	@dev:   Device.
+ *	@state: State to enter.
+ *      Code inspired from dpm_resume_end().
+ *
+ *	Bring one device back to the on state by first powering it
+ *	on, then restoring state. We only operate on devices that aren't
+ *	already on.
+ */
+
+void dpm_manual_resume_start(struct device * dev,pm_message_t state)
+{
+	mutex_lock(&dpm_lock);
+	if (dev->power.power_state.event == state.event){
+		printk(KERN_ERR "PM: We are already in the resume state \n");
+		goto done;
+        }
+	/* Device resume starts from here */
+	dpm_manual_resume(dev,state);
+done:
+	mutex_unlock(&dpm_lock);
+
+}
+
+/**
+ *	dpm_manual_prepare - prepare the device for power transition.
+ *	Part of the code borrowed from dpm_prapare.
+ *	@dev:   Device.
+ *	@state: State to enter.
+ */
+static int dpm_manual_prepare(struct device * dev , pm_message_t state)
+{
+	/* This part of code is borrowed from dpm_prepare
+	 * make the deice for prepare.
+	*/
+	int error = 0;
+	might_sleep();
+	
+	/* Call the device prepare */
+	error = device_prepare(dev, state);
+
+	mutex_lock(&dpm_list_mtx);
+	if (error){
+		printk(KERN_INFO "PM: Device %s not prepared " "for power transition: code %d\n",
+			dev_name(dev), error);
+		goto done;
+	}
+	dev->power.is_prepared = true;
+	if (!list_empty(&dev->power.entry))
+		list_move_tail(&dev->power.entry, &dpm_prepared_list);
+
+done:
+	mutex_unlock(&dpm_list_mtx);	
+	return error;
+}
+
+/**
+ *	dpm_manual_suspend - Helper routing to call the device_suspend.
+ *	Part of the code borrowed from dpm_supend().
+ *	@dev:   Device.
+ *	@state: State to enter.
+ */
+static int dpm_manual_suspend(struct device * dev, pm_message_t state)
+{
+	ktime_t starttime;
+	int error=0;
+
+	might_sleep();
+
+	mutex_lock(&dpm_list_mtx);
+	pm_transition = state;
+	mutex_unlock(&dpm_list_mtx);
+	
+	error = device_suspend(dev);
+	
+	mutex_lock(&dpm_list_mtx);
+	if (error){
+		pm_dev_err(dev, state, "", error);
+                dpm_save_failed_dev(dev_name(dev));
+	}	
+	if (!list_empty(&dev->power.entry))
+		list_move(&dev->power.entry, &dpm_suspended_list);
+	mutex_unlock(&dpm_list_mtx);
+
+	dev->power.power_state=state;
+	dpm_show_time(starttime, state, NULL);
+	return error;
+}
+
+/**
+ *      dpm_manual_suspend_start - Put one device in Power of L1/L2 state.
+ *      Power off L1 - clock gating , Power off L2 - clock gating + device reset
+ *  	Part of the code borrowed from dpm_suspend_start.
+ *      @dev:   Device.
+ *      @state: State to enter.
+ */
+int dpm_manual_suspend_start(struct device * dev, pm_message_t state)
+{
+	int error=0;
+
+	/* Start the global mutex value*/
+	mutex_lock(&dpm_lock);
+
+	if (dev->power.power_state.event == state.event){
+		if ( state.event == PM_EVENT_SUSPEND )
+			printk(KERN_ERR "PM: We are already in the suspend (power off L1) state \n");
+#if 0
+		else if ( state.event == PM_EVENT_SUSPEND_L2)
+			printk(KERN_ERR "PM: We are already in the suspend (Power off L2) state \n");
+#endif
+		goto done;
+        }
+
+	/* Devce PM prepare starts from here */
+	error=dpm_manual_prepare(dev,state);
+	
+	if (error){
+		suspend_stats.failed_prepare++;
+		dpm_save_failed_step(SUSPEND_PREPARE);
+		goto done;
+	}else
+		error = dpm_manual_suspend(dev,state);	
+done:
+	mutex_unlock(&dpm_lock);
+	return error;
+}
+#endif
 
 /**
  * dpm_for_each_dev - device iterator.

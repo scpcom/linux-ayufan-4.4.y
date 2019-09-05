@@ -36,6 +36,9 @@
 #include <linux/of.h>
 
 #include <asm/irq.h>
+#ifdef CONFIG_ARCH_M86XXX
+#include <mach/comcerto-2000/pm.h>
+#endif
 
 MODULE_DESCRIPTION("PHY library");
 MODULE_AUTHOR("Andy Fleming");
@@ -230,7 +233,7 @@ static int get_phy_c45_ids(struct mii_bus *bus, int addr, u32 *phy_id,
 	for (i = 1;
 	     i < num_ids && c45_ids->devices_in_package == 0;
 	     i++) {
-		reg_addr = MII_ADDR_C45 | i << 16 | 6;
+retry:		reg_addr = MII_ADDR_C45 | i << 16 | 6;
 		phy_reg = mdiobus_read(bus, addr, reg_addr);
 		if (phy_reg < 0)
 			return -EIO;
@@ -242,12 +245,20 @@ static int get_phy_c45_ids(struct mii_bus *bus, int addr, u32 *phy_id,
 			return -EIO;
 		c45_ids->devices_in_package |= (phy_reg & 0xffff);
 
-		/* If mostly Fs, there is no device there,
-		 * let's get out of here.
-		 */
 		if ((c45_ids->devices_in_package & 0x1fffffff) == 0x1fffffff) {
-			*phy_id = 0xffffffff;
-			return 0;
+			if (i) {
+				/*  If mostly Fs, there is no device there,
+				 *  then let's continue to probe more, as some
+				 *  10G PHYs have zero Devices In package,
+				 *  e.g. Cortina CS4315/CS4340 PHY.
+				 */
+				i = 0;
+				goto retry;
+			} else {
+				/* no device there, let's get out of here */
+				*phy_id = 0xffffffff;
+				return 0;
+			}
 		}
 	}
 
@@ -1145,7 +1156,17 @@ static int gen10g_config_init(struct phy_device *phydev)
 int genphy_suspend(struct phy_device *phydev)
 {
 	int value;
-
+#ifdef CONFIG_ARCH_M86XXX
+	/* Check for the Bit_Mask bit for WoL, if it is enabled
+	 * then we are not going suspend the WoL device , as by
+	 * this device , we will wake from System Resume.
+	 */
+	if ( !(host_utilpe_shared_pmu_bitmask & WOL_IRQ )){
+		/* We will just return
+		 */
+		return 0;
+	}
+#endif
 	mutex_lock(&phydev->lock);
 
 	value = phy_read(phydev, MII_BMCR);
@@ -1165,7 +1186,17 @@ static int gen10g_suspend(struct phy_device *phydev)
 int genphy_resume(struct phy_device *phydev)
 {
 	int value;
-
+#ifdef CONFIG_ARCH_M86XXX
+	/* Check for the Bit_Mask bit for WoL, if it is enabled
+	 * then we are not going suspend the WoL device , as by
+	 * this device , we will wake from System Resume.
+	 */
+	if ( !(host_utilpe_shared_pmu_bitmask & WOL_IRQ )){
+		/* We will just return
+		 */
+		return 0;
+	}
+#endif
 	mutex_lock(&phydev->lock);
 
 	value = phy_read(phydev, MII_BMCR);

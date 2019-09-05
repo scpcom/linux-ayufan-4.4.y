@@ -677,6 +677,9 @@ struct spi_message {
 	unsigned		actual_length;
 	int			status;
 
+	/* deliver the address width of spi device to spi controller */
+	u8			addr_width;
+
 	/* for optional use by whatever driver currently owns the
 	 * spi_message ...  between calls to spi_async and then later
 	 * complete(), that's the spi_master controller driver.

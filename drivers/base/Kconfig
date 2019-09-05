@@ -228,6 +228,10 @@ comment "Default contiguous memory area size:"
 config CMA_SIZE_MBYTES
 	int "Size in Mega Bytes"
 	depends on !CMA_SIZE_SEL_PERCENTAGE
+	default 26 if  DSPG_DECT_CSS && !COMCERTO_64K_PAGES
+	default 18 if  DSPG_DECT_CSS &&  COMCERTO_64K_PAGES
+	default 16 if !DSPG_DECT_CSS && !COMCERTO_64K_PAGES
+	default 8  if !DSPG_DECT_CSS &&  COMCERTO_64K_PAGES
 	default 16
 	help
 	  Defines the size (in MiB) of the default memory area for Contiguous
