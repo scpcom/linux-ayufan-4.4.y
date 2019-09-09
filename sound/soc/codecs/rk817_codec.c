@@ -24,6 +24,7 @@
 #include <sound/core.h>
 #include <sound/pcm_params.h>
 #include <sound/soc.h>
+#include <sound/tlv.h>
 #include "rk817_codec.h"
 
 static int dbg_enable;
@@ -55,7 +56,8 @@ module_param_named(dbg_level, dbg_enable, int, 0644);
 
 #ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 #define RK817_DAC_VOLUME \
-	SOC_DOUBLE_R("Playback Volume", RK817_CODEC_DDAC_VOLL, RK817_CODEC_DDAC_VOLR, 0, 0xFF, 1)
+	SOC_DOUBLE_R("Playback Volume", RK817_CODEC_DDAC_VOLL, RK817_CODEC_DDAC_VOLR, 0, 0xff, 1)
+static const DECLARE_TLV_DB_MINMAX(rk817_vol_tlv, -9500, -675);
 #endif
 
 /*
@@ -165,7 +167,8 @@ static const struct reg_default rk817_reg_defaults[] = {
 
 #ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 static const struct snd_kcontrol_new rk817_dac_controls[] = {
-	RK817_DAC_VOLUME,
+	SOC_DOUBLE_R_RANGE_TLV("Playback Volume", RK817_CODEC_DDAC_VOLL,
+		RK817_CODEC_DDAC_VOLR, 0, 0x12, 0xff, 1, rk817_vol_tlv),
 	RK817_ADC_VOLUME
 };
 #endif
