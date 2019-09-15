@@ -72,6 +72,7 @@ extern void device_map_io (void);
 extern void device_irq_init(void);
 extern void device_init(void);
 extern void mac_addr_init(struct comcerto_pfe_platform_data *);
+extern void comcerto_ahci_init(void);
 extern struct sys_timer comcerto_timer;
 
 static void __init board_gpio_init(void)
@@ -690,6 +691,10 @@ static void __init platform_init(void)
 	spi_register_board_info(comcerto_spi_board_info, ARRAY_SIZE(comcerto_spi_board_info));
 #endif
 	mac_addr_init(&comcerto_pfe_pdata);
+
+#if defined(CONFIG_COMCERTO_SATA)
+	comcerto_ahci_init();
+#endif
 
 	platform_add_devices(comcerto_devices, ARRAY_SIZE(comcerto_devices));
 }

@@ -54,7 +54,6 @@
 #include <mach/hardware.h>
 #include <asm/hardware/cache-l2x0.h>
 #include <mach/comcerto-2000.h>
-#include <linux/ahci_platform.h>
 #include <mach/serdes-c2000.h>
 #include <linux/clockchips.h>
 #include <linux/clk.h>
@@ -460,7 +459,7 @@ void comcerto_l2cc_init(void)
 #define SERDES_PHY1     1
 #define SERDES_PHY2     2
 
-static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
+void comcerto_ahci_init(void)
 {
 	struct serdes_regs_s *p_sata_phy_reg_file;
 	int serdes_regs_size;
@@ -468,9 +467,12 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 	int ref_clk_24;
 
 	/* Move SATA controller to DDRC2 port */
-	writel(readl(COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2, COMCERTO_GPIO_FABRIC_CTRL_REG);
+	writel(
+		readl((void __iomem*)COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2,
+		(void __iomem*)COMCERTO_GPIO_FABRIC_CTRL_REG
+	);
 
-	val = readl(COMCERTO_GPIO_SYSTEM_CONFIG);
+	val = readl((void __iomem*)COMCERTO_GPIO_SYSTEM_CONFIG);
 	ref_clk_24 = val & (BIT_5_MSK|BIT_7_MSK);
 
 	if(ref_clk_24)
@@ -812,10 +814,6 @@ static struct platform_device comcerto_dwc_otg_device = {
 #endif
 
 #if defined(CONFIG_COMCERTO_SATA)
-static struct ahci_platform_data comcerto_ahci_pdata = {
-        .init = comcerto_ahci_init,
-};
-
 static struct resource comcerto_ahci_resource[] = {
         [0] = {
                 .start  = COMCERTO_AXI_SATA_BASE,
@@ -832,15 +830,14 @@ static struct resource comcerto_ahci_resource[] = {
 static u64 comcerto_ahci_dmamask = DMA_BIT_MASK(32);
 
 struct platform_device comcerto_device_ahci = {
-        .name           = "ahci",
+        .name           = "ahci_comcerto",
         .id             = -1,
-        .resource       = comcerto_ahci_resource,
-        .num_resources  = ARRAY_SIZE(comcerto_ahci_resource),
         .dev            = {
-                .platform_data          = &comcerto_ahci_pdata,
                 .dma_mask               = &comcerto_ahci_dmamask,
                 .coherent_dma_mask      = DMA_BIT_MASK(32),
         },
+        .num_resources  = ARRAY_SIZE(comcerto_ahci_resource),
+        .resource       = comcerto_ahci_resource,
 };
 #endif
 

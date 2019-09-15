@@ -98,6 +98,15 @@ config SATA_AHCI_PLATFORM
 
 	  If unsure, say N.
 
+config AHCI_COMCERTO
+	tristate "Mindspeed Comcerto AHCI SATA support"
+	depends on ARCH_M86XXX
+	help
+	  This option enables support for the Mindspeed Comcerto
+	  2000 AHCI SATA controller.
+
+	  If unsure, say N.
+
 config AHCI_DA850
 	tristate "DaVinci DA850 AHCI SATA support"
 	depends on ARCH_DAVINCI_DA850

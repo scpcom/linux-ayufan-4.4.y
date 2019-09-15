@@ -215,7 +215,7 @@ config COMCERTO_SATA
 	bool "Comcerto SATA"
 	select ATA
 	select ATA_VERBOSE_ERROR
-	select SATA_AHCI_PLATFORM
+	select AHCI_COMCERTO
 	select BLK_DEV_SD
 	select LBDAF
 
