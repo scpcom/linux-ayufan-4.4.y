@@ -1010,6 +1010,11 @@ static int __init clk_disable_unused(void)
                  * All other unused clocks will be disabled.
                 */
 		if ( strcmp(clk->name, "hfe_core") &&
+#ifdef CONFIG_SEQUOIA
+				// Western Digital: Using ETH_PHY0 for
+				// 25mhx clock for eth0
+				strcmp(clk->name, "ext_phy0") &&
+#endif
 				strcmp(clk->name, "ipsec_eape") &&
 				strcmp(clk->name, "pll3") &&
 				strcmp(clk->name, "arm_peri") )

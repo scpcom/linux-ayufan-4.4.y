@@ -221,6 +221,38 @@ static int bcm50610_a0_workaround(struct phy_device *phydev)
 	return err;
 }
 
+#ifdef CONFIG_SEQUOIA
+// Sequoia: 5/12/2012 ShaunA - added support for BCM54610 PHY
+static int bcm54610_config_init(struct phy_device *phydev)
+{
+	int regb, rega;
+
+	phy_write(phydev, MII_BCM54XX_SHD, 0x2C00);
+	regb = phy_read(phydev, MII_BCM54XX_SHD);
+
+	phy_write(phydev, MII_BCM54XX_SHD, 0xAC8C);
+
+	phy_write(phydev, MII_BCM54XX_SHD, 0x2C00);
+	rega = phy_read(phydev, MII_BCM54XX_SHD);
+
+	printk(KERN_INFO "%s: before 0x%04x, after 0x%04x\n",
+	       __FUNCTION__, (regb & 0xffff), (rega & 0xffff));
+
+	/* the RGMII interface is not half-duplex capable */
+	rega = phy_read(phydev, 0x04);
+	phy_write(phydev, 0x04, rega & ~0x00a0);
+
+	regb = phy_read(phydev, 0x09);
+	phy_write(phydev, 0x09, regb & ~0x0100);
+
+	printk(KERN_INFO "%s: before 0x%04x, 0x%04x; after 0x%04x, 0x%04x\n",
+	       __FUNCTION__, (rega & 0xffff), (regb & 0xffff),
+	       (phy_read(phydev, 0x04) & 0xffff), (phy_read(phydev, 0x09) & 0xffff));
+
+	return 0;
+}
+#endif
+
 static int bcm54xx_phydsp_config(struct phy_device *phydev)
 {
 	int err, err2;
@@ -632,6 +664,36 @@ static int brcm_fet_config_intr(struct phy_device *phydev)
 
 static struct phy_driver broadcom_drivers[] = {
 {
+#ifdef CONFIG_SEQUOIA
+	// Sequoia: 5/12/2012 ShaunA
+	.phy_id		= PHY_ID_BCM54610,
+	.phy_id_mask	= 0xffffffff,
+	.name		= "Broadcom BCM54610",
+	.features	= PHY_GBIT_FEATURES |
+			  SUPPORTED_Pause | SUPPORTED_Asym_Pause,
+	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
+	.config_init	= bcm54610_config_init,
+	.config_aneg	= genphy_config_aneg,
+	.read_status	= genphy_read_status,
+	.ack_interrupt	= bcm54xx_ack_interrupt,
+	.config_intr	= bcm54xx_config_intr,
+	.driver		= { .owner = THIS_MODULE },
+}, {
+	// Sequoia: JO...
+	.phy_id		= PHY_ID_BCM54612,
+	.phy_id_mask	= 0xffffffff,
+	.name		= "Broadcom BCM54612",
+	.features	= PHY_GBIT_FEATURES |
+			  SUPPORTED_Pause | SUPPORTED_Asym_Pause,
+	.flags		= PHY_HAS_MAGICANEG | PHY_HAS_INTERRUPT,
+	.config_init	= bcm54610_config_init,
+	.config_aneg	= genphy_config_aneg,
+	.read_status	= genphy_read_status,
+	.ack_interrupt	= bcm54xx_ack_interrupt,
+	.config_intr	= bcm54xx_config_intr,
+	.driver		= { .owner = THIS_MODULE },
+}, {
+#endif
 	.phy_id		= PHY_ID_BCM5411,
 	.phy_id_mask	= 0xfffffff0,
 	.name		= "Broadcom BCM5411",
