@@ -44,10 +44,6 @@
 		io-channel-names = "joy_x", "joy_y";
 		io-channels = <&saradc 1>, <&saradc 2>;
 
-		/* change the report reference point (ADC MAX - read value) */
-		invert-absx;
-		/* invert-absy; */
-
 		/* adc button max, min (mV) */
 		button-adc-max = <1800>;
 		button-adc-min = <0>;
@@ -118,19 +114,19 @@
                 };
                 sw6 {
                         gpios = <&gpio1 RK_PA5 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY BTN-B";
+                        label = "GPIO BTN-B";
                         linux,code = <BTN_SOUTH>; // 0x130
                         wakeup-source;
                 };
                 sw7 {
                         gpios = <&gpio1 RK_PA6 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY BTN-Y";
+                        label = "GPIO BTN-Y";
                         linux,code = <BTN_WEST>; // 0x134
                         wakeup-source;
                 };
                 sw8 {
                         gpios = <&gpio1 RK_PA7 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY BTN-X";
+                        label = "GPIO BTN-X";
                         linux,code = <BTN_NORTH>; // 0x133
                         wakeup-source;
                 };
@@ -167,19 +163,19 @@
                 sw14 {
                         gpios = <&gpio2 RK_PA5 GPIO_ACTIVE_LOW>;
                         label = "GPIO F6";
-                        linux,code = <BTN_TRIGGER_HAPPY6>; // 0x2c5
+                        linux,code = <BTN_TRIGGER_HAPPY6>; // 0x13c
                         wakeup-source;
                 };
                 sw15 {
                         gpios = <&gpio2 RK_PA6 GPIO_ACTIVE_LOW>;
                         label = "GPIO TOP-LEFT";
-                        linux,code = <BTN_TL>; // 0x136
+                        linux,code = <BTN_TL>; // 0x02
                         wakeup-source;
                 };
                 sw16 {
                         gpios = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>;
                         label = "GPIO TOP-RIGHT";
-                        linux,code = <BTN_TR>; // 0x137
+                        linux,code = <BTN_TR>; // 0x05
                         wakeup-source;
                 };
         };
