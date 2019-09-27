@@ -128,6 +128,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev00.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev01.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev04.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev06.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev07.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev21.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi4-rev22.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-odroidn1-linux.dtb

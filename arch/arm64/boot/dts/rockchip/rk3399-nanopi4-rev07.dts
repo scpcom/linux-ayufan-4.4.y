@@ -1,0 +1,127 @@
+/*
+ * Copyright (c) 2018 FriendlyElec Computer Tech. Co., Ltd.
+ * (http://www.friendlyarm.com)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/dts-v1/;
+#include "rk3399-nanopi4-common.dtsi"
+#include <dt-bindings/sensor-dev.h>
+
+/ {
+	model = "FriendlyElec SOM-RK3399";
+	compatible = "friendlyelec,som-rk3399", "rockchip,rk3399";
+};
+
+&mach {
+	hwrev = <7>;
+	model = "SOM-RK3399";
+};
+
+&i2c3 {
+	status = "okay";
+	i2c-scl-rising-time-ns = <160>;
+	i2c-scl-falling-time-ns = <30>;
+	clock-frequency = <400000>;
+
+	sensor@18 {
+		status = "okay";
+		compatible = "gs_lis3dh";
+		reg = <0x18>;
+		type = <SENSOR_TYPE_ACCEL>;
+		irq-gpio = <&gpio1 22 IRQ_TYPE_LEVEL_LOW>;
+		irq_enable = <0>;
+		poll_delay_ms = <64>;
+		layout = <2>;
+		reprobe_en = <1>;
+	};
+};
+
+&i2s1 {
+	status = "okay";
+	rockchip,i2s-broken-burst-len;
+	rockchip,playback-channels = <2>;
+	rockchip,capture-channels = <2>;
+	#sound-dai-cells = <0>;
+};
+
+&pcie0 {
+	ep-gpios = <&gpio2 4 GPIO_ACTIVE_HIGH>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pcie_gpios>;
+	num-lanes = <4>;
+};
+
+&rt5651_card {
+	simple-audio-card,cpu {
+		sound-dai = <&i2s1>;
+	};
+};
+
+&tc358749x {
+	status = "okay";
+};
+
+&mipi_in_ucam0c {
+	status = "okay";
+};
+
+&dfi {
+	status = "disabled";
+};
+
+&dmc {
+	status = "disabled";
+	system-status-freq = <
+		/*system status         freq(KHz)*/
+		SYS_STATUS_NORMAL       856000
+		SYS_STATUS_REBOOT       416000
+		SYS_STATUS_SUSPEND      416000
+		SYS_STATUS_VIDEO_1080P  856000
+		SYS_STATUS_VIDEO_4K     856000
+		SYS_STATUS_VIDEO_4K_10B 856000
+		SYS_STATUS_PERFORMANCE  856000
+		SYS_STATUS_BOOST        856000
+		SYS_STATUS_DUALVIEW     856000
+		SYS_STATUS_ISP          856000
+	>;
+	vop-bw-dmc-freq = <
+	/* min_bw(MB/s) max_bw(MB/s) freq(KHz) */
+		0       924      416000
+		925     99999    856000
+	>;
+	auto-min-freq = <416000>;
+	auto-freq-en = <1>;
+};
+
+&dmc_opp_table {
+	compatible = "operating-points-v2";
+
+	/delete-node/ opp-200000000;
+	/delete-node/ opp-300000000;
+	/delete-node/ opp-400000000;
+	/delete-node/ opp-528000000;
+	/delete-node/ opp-600000000;
+	/delete-node/ opp-800000000;
+
+	opp-416000000 {
+		opp-hz = /bits/ 64 <416000000>;
+		opp-microvolt = <900000>;
+	};
+	opp-856000000 {
+		opp-hz = /bits/ 64 <856000000>;
+		opp-microvolt = <900000>;
+	};
+};
