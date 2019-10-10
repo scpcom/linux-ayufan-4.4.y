@@ -99,3 +99,4 @@ spi-wk2xxx-objs                        := spi-wk2xxx_64bit
 else
 spi-wk2xxx-objs                        := spi-wk2xxx_32bit
 endif
+obj-$(CONFIG_SPI_FIREFLY)       += spi-firefly-demo.o
