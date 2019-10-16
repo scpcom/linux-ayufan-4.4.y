@@ -88,98 +88,98 @@
 		*/
                 sw1 {
                         gpios = <&gpio1 RK_PB4 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY UP";
-                        linux,code = <KEY_UP>; // 103
+                        label = "GPIO DPAD-UP";
+                        linux,code = <BTN_DPAD_UP>; // 0x220
                         wakeup-source;
                 };
                 sw2 {
                         gpios = <&gpio1 RK_PB5 GPIO_ACTIVE_LOW>;
-                        label = "GPIO Key DOWN";
-                        linux,code = <KEY_DOWN>; // 108
+                        label = "GPIO DPAD-DOWN";
+                        linux,code = <BTN_DPAD_DOWN>; // 0x221
                         wakeup-source;
                 };
                 sw3 {
                         gpios = <&gpio1 RK_PB6 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY LEFT";
-                        linux,code = <KEY_LEFT>; // 105
+                        label = "GPIO DPAD-LEFT";
+                        linux,code = <BTN_DPAD_LEFT>; // 0x222
                         wakeup-source;
                 };
                 sw4 {
                         gpios = <&gpio1 RK_PB7 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY RIGHT";
-                        linux,code = <KEY_RIGHT>; // 106
+                        label = "GPIO DPAD-RIGHT";
+                        linux,code = <BTN_DPAD_RIGHT>; // 0x223
                         wakeup-source;
                 };
                 sw5 {
                         gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_LOW>;
                         label = "GPIO KEY BTN-A";
-                        linux,code = <BTN_A>; // 0x130
+                        linux,code = <BTN_EAST>; // 0x131
                         wakeup-source;
                 };
                 sw6 {
                         gpios = <&gpio1 RK_PA5 GPIO_ACTIVE_LOW>;
                         label = "GPIO KEY BTN-B";
-                        linux,code = <BTN_B>; // 0x131
+                        linux,code = <BTN_SOUTH>; // 0x130
                         wakeup-source;
                 };
                 sw7 {
                         gpios = <&gpio1 RK_PA6 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY BTN-X";
-                        linux,code = <BTN_X>; // 0x133
+                        label = "GPIO KEY BTN-Y";
+                        linux,code = <BTN_WEST>; // 0x134
                         wakeup-source;
                 };
                 sw8 {
                         gpios = <&gpio1 RK_PA7 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY BTN-Y";
-                        linux,code = <BTN_Y>; // 0x134
+                        label = "GPIO KEY BTN-X";
+                        linux,code = <BTN_NORTH>; // 0x133
                         wakeup-source;
                 };
                 sw9 {
                         gpios = <&gpio2 RK_PA0 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY VOL-UP";
-                        linux,code = <KEY_VOLUMEUP>; // 115
+                        label = "GPIO F1";
+                        linux,code = <BTN_TRIGGER_HAPPY1>; // 0x2c0
                         wakeup-source;
                 };
                 sw10 {
                         gpios = <&gpio2 RK_PA1 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY VOL-DOWN";
-                        linux,code = <KEY_VOLUMEDOWN>; // 114
+                        label = "GPIO F2";
+                        linux,code = <BTN_TRIGGER_HAPPY2>; // 0x2c1
                         wakeup-source;
                 };
                 sw11 {
                         gpios = <&gpio2 RK_PA2 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY START";
-                        linux,code = <BTN_START>; // 0x13b
+                        label = "GPIO F3";
+                        linux,code = <BTN_TRIGGER_HAPPY3>; // 0x2c2
                         wakeup-source;
                 };
                 sw12 {
                         gpios = <&gpio2 RK_PA3 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY STOP";
-                        linux,code = <KEY_STOP>; // 128
+                        label = "GPIO F4";
+                        linux,code = <BTN_TRIGGER_HAPPY4>; // 0x2c3
                         wakeup-source;
                 };
                 sw13 {
                         gpios = <&gpio2 RK_PA4 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY MENU";
-                        linux,code = <KEY_MENU>; // 139
+                        label = "GPIO F5";
+                        linux,code = <BTN_TRIGGER_HAPPY5>; // 0x2c4
                         wakeup-source;
                 };
                 sw14 {
                         gpios = <&gpio2 RK_PA5 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY MODE";
-                        linux,code = <BTN_MODE>; // 0x13c
+                        label = "GPIO F6";
+                        linux,code = <BTN_TRIGGER_HAPPY6>; // 0x2c5
                         wakeup-source;
                 };
                 sw15 {
                         gpios = <&gpio2 RK_PA6 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY SHIFT-LEFT";
-                        linux,code = <ABS_Z>; // 0x02
+                        label = "GPIO TOP-LEFT";
+                        linux,code = <BTN_TL>; // 0x136
                         wakeup-source;
                 };
                 sw16 {
                         gpios = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>;
-                        label = "GPIO KEY SHIFT-RIGHT";
-                        linux,code = <ABS_RZ>; // 0x05
+                        label = "GPIO TOP-RIGHT";
+                        linux,code = <BTN_TR>; // 0x137
                         wakeup-source;
                 };
         };
