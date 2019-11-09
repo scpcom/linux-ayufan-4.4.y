@@ -102,6 +102,8 @@ static bool rk818_is_volatile_reg(struct device *dev, unsigned int reg)
 	case RK808_INT_STS_REG2:
 	case RK808_INT_STS_MSK_REG1:
 	case RK808_INT_STS_MSK_REG2:
+	case RK816_INT_STS_REG1:
+	case RK816_INT_STS_MSK_REG1:
 	case RK818_SUP_STS_REG ... RK818_SAVE_DATA19:
 		return true;
 	}
@@ -133,6 +135,14 @@ static const struct regmap_config rk808_regmap_config = {
 	.volatile_reg = rk808_is_volatile_reg,
 };
 
+static const struct regmap_config rk816_regmap_config = {
+	.reg_bits = 8,
+	.val_bits = 8,
+	.max_register = RK816_DATA18_REG,
+	.cache_type = REGCACHE_RBTREE,
+	.volatile_reg = rk818_is_volatile_reg,
+};
+
 static const struct regmap_config rk817_regmap_config = {
 	.reg_bits = 8,
 	.val_bits = 8,
@@ -154,6 +164,11 @@ static const struct rk8xx_i2c_platform_data rk808_data = {
 static const struct rk8xx_i2c_platform_data rk809_data = {
 	.regmap_cfg = &rk817_regmap_config,
 	.variant = RK809_ID,
+};
+
+static const struct rk8xx_i2c_platform_data rk816_data = {
+	.regmap_cfg = &rk816_regmap_config,
+	.variant = RK816_ID,
 };
 
 static const struct rk8xx_i2c_platform_data rk817_data = {
@@ -194,6 +209,7 @@ static const struct of_device_id rk8xx_i2c_of_match[] = {
 	{ .compatible = "rockchip,rk805", .data = &rk805_data },
 	{ .compatible = "rockchip,rk808", .data = &rk808_data },
 	{ .compatible = "rockchip,rk809", .data = &rk809_data },
+	{ .compatible = "rockchip,rk816", .data = &rk816_data },
 	{ .compatible = "rockchip,rk817", .data = &rk817_data },
 	{ .compatible = "rockchip,rk818", .data = &rk818_data },
 	{ },
