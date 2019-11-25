@@ -64,3 +64,4 @@ obj-$(CONFIG_CW1200)	+= cw1200/
 obj-$(CONFIG_RSI_91X)	+= rsi/
 obj-$(CONFIG_WL_ROCKCHIP)	+= rockchip_wlan/
 obj-$(CONFIG_RTL8812AU) += rtl8812au/
+obj-$(CONFIG_RTL8192CU) += rtl8192cu-fixes/
