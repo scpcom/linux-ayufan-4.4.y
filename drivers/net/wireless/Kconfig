@@ -294,6 +294,5 @@ source "drivers/net/wireless/mwifiex/Kconfig"
 source "drivers/net/wireless/cw1200/Kconfig"
 source "drivers/net/wireless/rsi/Kconfig"
 source "drivers/net/wireless/rtl8812au/Kconfig"
-source "drivers/net/wireless/rtl8192cu-fixes/Kconfig"
 
 endif # WLAN
