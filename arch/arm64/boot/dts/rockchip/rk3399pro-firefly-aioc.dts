@@ -45,8 +45,26 @@
 #include "rk3399pro-firefly-pcie.dtsi"
 
 / {
-	model = "RK3399pro-firefly-aiojd4 board";
-	compatible = "rockchip,rk3399pro-firefly-aiojd4", "rockchip,rk3399pro";
+	model = "RK3399pro-firefly-aioc board";
+	compatible = "rockchip,rk3399pro-firefly-aioc", "rockchip,rk3399pro";
+
+	mcp251x_clk: mcp251x-clk {
+        	compatible = "fixed-clock";
+        	#clock-cells = <0>;
+        	clock-frequency = <8000000>;        //MCP2515_CAN模块的晶振为8MHz
+        };
+
+        vcc_hub: vcc-hub-regulator {
+                compatible = "regulator-fixed";
+                enable-active-high;
+                regulator-always-on;
+                regulator-boot-on;
+                gpio = <&gpio2 RK_PA4 GPIO_ACTIVE_HIGH>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&hub_drv>;
+                regulator-name = "vcc_hub";
+        };
+
 };
 
 &hdmi_in_vopl {
@@ -75,3 +93,164 @@
     assigned-clock-parents = <&cru PLL_CPLL>;
 };
 
+
+// mipi csi
+&ov13850 {
+	status = "disabled";
+};
+
+&ov13850_1 {
+	status = "disabled";
+};
+
+
+&vcc_mipi {
+	status = "disabled";
+};
+
+&dvdd_1v2 {
+	status = "disabled";
+};
+
+&rkisp1_0 {
+	status = "disabled";
+};
+
+&mipi_dphy_rx0 {
+	status = "disabled";
+};
+
+&isp0_mmu {
+	status = "disabled";
+};
+
+&rkisp1_1 {
+	status = "disabled";
+};
+
+&mipi_dphy_tx1rx1 {
+	status = "disabled";
+};
+
+&isp1_mmu {
+	status = "disabled";
+};
+
+
+// LED
+&power_led {
+	gpios = <&gpio0 RK_PB1 GPIO_ACTIVE_HIGH>;
+};
+
+&led_power {
+        rockchip,pins = <0 RK_PB1 RK_FUNC_GPIO &pcfg_pull_none>;
+};
+
+
+&pcie0 {
+	/delete-property/ gpio;
+};
+
+&vcc3v3_3g {
+	gpio = <&gpio3 RK_PD6 GPIO_ACTIVE_HIGH>;
+};
+
+&cdn_dp {
+        status = "okay";
+        extcon = <&fusb0>;
+        phys = <&tcphy0_dp>;
+};
+
+&vcc5v0_host {
+	gpio = <&gpio2 RK_PA2 GPIO_ACTIVE_HIGH>;
+};
+
+/* spi to uart */
+&uart4 {
+    status = "disabled";
+};
+
+&spi1 {
+        status = "okay";
+	max-freq = <48000000>;
+	dev-port = <0>;
+	spi_wk2@00{
+        	status = "okay";
+        	compatible = "firefly,spi-wk2xxx";
+        	reg = <0x00>;
+        	spi-max-frequency = <10000000>;
+        	reset-gpio = <&gpio2 RK_PA0 GPIO_ACTIVE_HIGH>;
+        	irq-gpio = <&gpio3 RK_PB2 IRQ_TYPE_EDGE_FALLING>;
+        	cs-gpio = <&gpio1 RK_PB2 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&spi2 {
+        status = "okay";
+	spi_wk2xxx@00{
+		status = "disabled";
+	};
+	mcp2515: can@00 {
+		status = "okay";
+		compatible = "microchip,mcp2515";
+		reg = <0x00>;
+		clocks = <&mcp251x_clk>;
+		interrupt-parent = <&gpio0>;
+		interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
+		spi-max-frequency = <24000000>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&can0_pins>;
+		poll_mode = <0>;
+		enable_dma = <1>;
+	};
+};
+
+&rk809_codec {
+	hp-det = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>;
+	spk-ctl = <&gpio2 RK_PA5 GPIO_ACTIVE_HIGH>;
+	hp-ctl-gpios = <&gpio3 RK_PD7 GPIO_ACTIVE_HIGH>;
+	io-channels = <0>;
+};
+
+&vdd1v5_dvp {
+	regulator-min-microvolt = <3300000>;
+	regulator-max-microvolt = <3300000>;
+};
+
+&i2c4 {
+	status = "okay";
+
+    wdt_pc9202: wdt-pc9202@3c {
+        status = "okay";
+        compatible = "firefly,pc9202";
+        reg = <0x3c>;
+    };
+};
+
+&pinctrl {
+        hub {
+                hub_drv: hub-drv {
+			rockchip,pins =
+				<2 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>;
+                };
+        };
+
+        can0 {
+                can0_pins: can0-pins {
+			rockchip,pins =
+				<0 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
+                };
+        };
+        pcie {
+                pcie_3g_drv: pcie-3g-drv {
+                	rockchip,pins =
+                		<2 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>;
+                };
+        };
+        usb2 {
+                host_vbus_drv: host-vbus-drv {
+                        rockchip,pins =
+                                <2 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
+                };
+        };
+};
