@@ -225,7 +225,7 @@
 };
 
 &dmc {
-	status = "okay";
+	status = "disabled";
 	center-supply = <&vdd_center>;
 };
 
