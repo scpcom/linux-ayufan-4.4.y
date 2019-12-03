@@ -174,16 +174,6 @@
                 regulator-always-on;
         };
 	
-	vcc5v0_typec: vcc5v0_typec {
-                compatible = "regulator-fixed";
-                enable-active-high;
-                gpio = <&gpio4 RK_PC5 GPIO_ACTIVE_HIGH>;
-                pinctrl-names = "default";
-                pinctrl-0 = <&host_typec>;
-                regulator-name = "vcc5v0_typec";
-                regulator-always-on;
-        };
-
 	vcc_sd3v0: vcc-sd3v0-regulator {
                 compatible = "regulator-fixed";
                 enable-active-high;
@@ -591,29 +581,6 @@
 		};
 	};
 
-	bq25700: bq25700@6b {
-		compatible = "ti,bq25703";
-		reg = <0x6b>;
-		extcon = <&fusb0>;
-		interrupt-parent = <&gpio1>;
-		interrupts = <RK_PA1 IRQ_TYPE_LEVEL_LOW>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&charger_ok_int>;
-		ti,charge-current = <1500000>;
-		ti,max-charge-voltage = <8704000>;
-		ti,max-input-voltage = <20000000>;
-		ti,max-input-current = <6000000>;
-		ti,input-current-sdp = <500000>;
-		ti,input-current-dcp = <2000000>;
-		ti,input-current-cdp = <2000000>;
-		ti,input-current-dc = <2000000>;
-		ti,minimum-sys-voltage = <6700000>;
-		ti,otg-voltage = <5000000>;
-		ti,otg-current = <500000>;
-		ti,input-current = <500000>;
-		pd-charge-only = <0>;
-		status = "disabled";
-	};
 };
 
 &i2c1 {
@@ -639,9 +606,9 @@
 		compatible = "fairchild,fusb302";
 		reg = <0x22>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&fusb0_int>;
+		pinctrl-0 = <&fusb0_int &host_typec>;
 		int-n-gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_HIGH>;
-		vbus-5v-gpios = <&gpio0 RK_PA1 GPIO_ACTIVE_LOW>;
+		vbus-5v-gpios = <&gpio4 RK_PC5 GPIO_ACTIVE_LOW>;
 		status = "disabled";
 	};
 
@@ -774,7 +741,7 @@
 	};
 
 	u2phy0_host: host-port {
-		phy-supply = <&vcc5v0_usb>;
+		phy-supply = <&vcc5v0_host>;
 		status = "okay";
 	};
 };
@@ -787,7 +754,7 @@
 	};
 
 	u2phy1_host: host-port {
-		phy-supply = <&vcc5v0_usb>;
+		phy-supply = <&vcc5v0_host>;
 		status = "okay";
 	};
 };
@@ -825,7 +792,6 @@
 
 &usbdrd_dwc3_0 {
 	status = "okay";
-	dr_mode = "host";
 };
 
 &usbdrd_dwc3_1 {

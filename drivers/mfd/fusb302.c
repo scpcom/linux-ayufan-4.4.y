@@ -236,6 +236,42 @@ static int fusb302_set_pos_power_by_charge_ic(struct fusb30x_chip *chip)
 	return 0;
 }
 
+static int fusb302_set_pos_power_by_power_ic(struct fusb30x_chip* chip)
+{
+	struct device_node* pwr = NULL;
+	int max_vol, max_cur;
+	u32 val;
+	int ret;
+
+	max_vol = 0;
+	max_cur = 0;
+
+	dev_err(chip->dev, "0000 max vol cur %d %d \n", max_vol, max_cur);
+
+	pwr = of_parse_phandle(chip->dev->of_node, "power-dev", 0);
+	if (!pwr) {
+		dev_info(chip->dev, "No power dev node \n");
+		return -1;
+	}
+	
+	ret = of_property_read_u32(pwr, "max-input-voltage", &val);
+	if (ret == 0)
+		max_vol = val / 1000;
+
+	ret = of_property_read_u32(pwr, "max-input-current", &val);
+	if (ret == 0)
+		max_cur = val / 1000;
+
+	of_node_put(pwr);
+
+	if (max_vol > 0 && max_cur > 0)
+		fusb_set_pos_power(chip, max_vol, max_cur);
+
+	dev_err(chip->dev, "max vol cur %d %d \n", max_vol, max_cur);
+	
+	return 0;
+}
+
 void fusb_irq_disable(struct fusb30x_chip *chip)
 {
 	unsigned long irqflags = 0;
@@ -334,6 +370,10 @@ static void platform_fusb_notify(struct fusb30x_chip *chip)
 					    property);
 			extcon_sync(chip->extcon, EXTCON_CHG_USB_FAST);
 		}
+		else {
+			extcon_set_state(chip->extcon, EXTCON_CHG_USB_FAST, false);
+			extcon_sync(chip->extcon, EXTCON_CHG_USB_FAST);
+		}
 	}
 }
 
@@ -357,7 +397,7 @@ static void platform_set_vbus_lvl_enable(struct fusb30x_chip *chip, int vbus_5v,
 
 	gpio_vbus_value = gpiod_get_value(chip->gpio_vbus_5v);
 	if (chip->gpio_vbus_5v) {
-		gpiod_set_value(chip->gpio_vbus_5v, vbus_5v);
+		gpiod_set_raw_value(chip->gpio_vbus_5v, vbus_5v);
 		/* Only set state here, don't sync notifier to PMIC */
 		extcon_set_state(chip->extcon, EXTCON_USB_VBUS_EN, vbus_5v);
 	} else {
@@ -367,7 +407,7 @@ static void platform_set_vbus_lvl_enable(struct fusb30x_chip *chip, int vbus_5v,
 	}
 
 	if (chip->gpio_vbus_other)
-		gpiod_set_value(chip->gpio_vbus_other, vbus_other);
+		gpiod_set_raw_value(chip->gpio_vbus_5v, vbus_other);
 
 	if (chip->gpio_discharge && !vbus_5v && gpio_vbus_value) {
 		gpiod_set_value(chip->gpio_discharge, 1);
@@ -920,6 +960,9 @@ static void set_state_unattached(struct fusb30x_chip *chip)
 	msleep(100);
 	if (chip->gpio_discharge)
 		gpiod_set_value(chip->gpio_discharge, 0);
+
+	if (chip->gpio_charge_en)
+		gpiod_set_value(chip->gpio_charge_en, 0);
 
 	regmap_update_bits(chip->regmap, FUSB_REG_MASK,
 			   MASK_M_COMP_CHNG, MASK_M_COMP_CHNG);
@@ -1740,6 +1783,9 @@ static void fusb_state_attached_sink(struct fusb30x_chip *chip, u32 evt)
 		set_state(chip, policy_snk_startup);
 		dev_info(chip->dev, "CC connected in %s as UFP\n",
 			 chip->cc_polarity ? "CC1" : "CC2");
+
+		if (chip->gpio_charge_en)
+			gpiod_set_value(chip->gpio_charge_en, 1);
 		return;
 	} else if (evt & EVENT_TIMER_MUX) {
 		set_state_unattached(chip);
@@ -2538,6 +2584,8 @@ static void fusb_state_snk_evaluate_caps(struct fusb30x_chip *chip, u32 evt)
 		}
 	}
 	fusb302_set_pos_power_by_charge_ic(chip);
+	fusb302_set_pos_power_by_power_ic(chip);
+
 
 	if ((!chip->pos_power) || (chip->pos_power > 7)) {
 		chip->pos_power = 0;
@@ -2902,7 +2950,7 @@ static void fusb_state_snk_send_softreset(struct fusb30x_chip *chip, u32 evt)
 					 chip->timer_state);
 		} else if (tmp == tx_failed) {
 			/* can't reach here */
-			set_state(chip, policy_snk_send_hardrst);
+			//set_state(chip, policy_snk_send_hardrst);
 		}
 
 		if (!(evt & FLAG_EVENT))
@@ -3221,7 +3269,7 @@ static int fusb_initialize_gpio(struct fusb30x_chip *chip)
 		dev_warn(chip->dev,
 			 "Could not get named GPIO for VBus5V!\n");
 	else
-		gpiod_set_value(chip->gpio_vbus_5v, 0);
+		gpiod_set_raw_value(chip->gpio_vbus_5v, 0);
 
 	chip->gpio_vbus_other = devm_gpiod_get_optional(chip->dev,
 							"vbus-other",
@@ -3230,7 +3278,7 @@ static int fusb_initialize_gpio(struct fusb30x_chip *chip)
 		dev_warn(chip->dev,
 			 "Could not get named GPIO for VBusOther!\n");
 	else
-		gpiod_set_value(chip->gpio_vbus_other, 0);
+		gpiod_set_raw_value(chip->gpio_vbus_other, 0);
 
 	chip->gpio_discharge = devm_gpiod_get_optional(chip->dev, "discharge",
 						       GPIOD_OUT_LOW);
@@ -3238,6 +3286,14 @@ static int fusb_initialize_gpio(struct fusb30x_chip *chip)
 		dev_warn(chip->dev,
 			 "Could not get named GPIO for discharge!\n");
 		chip->gpio_discharge = NULL;
+	}
+
+	chip->gpio_charge_en = devm_gpiod_get_optional(chip->dev, "charge-en",
+						       GPIOD_OUT_LOW);
+	if (IS_ERR(chip->gpio_charge_en)) {
+		dev_warn(chip->dev,
+			 "Could not get named GPIO for charge enable!\n");
+		chip->gpio_charge_en = NULL;
 	}
 
 	return 0;
@@ -3287,8 +3343,7 @@ static void fusb302_work_func(struct work_struct *work)
 	struct fusb30x_chip *chip;
 
 	chip = container_of(work, struct fusb30x_chip, work);
-	if (!chip->suspended)
-		state_machine_typec(chip);
+	state_machine_typec(chip);
 }
 
 static int fusb30x_probe(struct i2c_client *client,
@@ -3524,33 +3579,6 @@ static void fusb30x_shutdown(struct i2c_client *client)
 	}
 }
 
-static int fusb30x_pm_suspend(struct device *dev)
-{
-	struct fusb30x_chip *chip = dev_get_drvdata(dev);
-
-	fusb_irq_disable(chip);
-	chip->suspended = true;
-	cancel_work_sync(&chip->work);
-
-	return 0;
-}
-
-static int fusb30x_pm_resume(struct device *dev)
-{
-	struct fusb30x_chip *chip = dev_get_drvdata(dev);
-
-	fusb_irq_enable(chip);
-	chip->suspended = false;
-	queue_work(chip->fusb30x_wq, &chip->work);
-
-	return 0;
-}
-
-static const struct dev_pm_ops fusb30x_pm_ops = {
-	SET_SYSTEM_SLEEP_PM_OPS(fusb30x_pm_suspend,
-				fusb30x_pm_resume)
-};
-
 static const struct of_device_id fusb30x_dt_match[] = {
 	{ .compatible = FUSB30X_I2C_DEVICETREE_NAME },
 	{},
@@ -3567,7 +3595,6 @@ static struct i2c_driver fusb30x_driver = {
 	.driver = {
 		.name = FUSB30X_I2C_DRIVER_NAME,
 		.of_match_table = of_match_ptr(fusb30x_dt_match),
-		.pm = &fusb30x_pm_ops,
 	},
 	.probe = fusb30x_probe,
 	.remove = fusb30x_remove,

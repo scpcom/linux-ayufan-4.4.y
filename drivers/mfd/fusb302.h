@@ -494,6 +494,7 @@ struct fusb30x_chip {
 	struct gpio_desc *gpio_vbus_other;
 	struct gpio_desc *gpio_int;
 	struct gpio_desc *gpio_discharge;
+	struct gpio_desc *gpio_charge_en;
 	int timer_state;
 	int timer_mux;
 	int port_num;
@@ -555,7 +556,6 @@ struct fusb30x_chip {
 	bool try_role_complete;
 	enum role_mode try_role;
 	struct input_dev *input;
-	bool suspended;
 };
 
 #endif /* FUSB302_H */

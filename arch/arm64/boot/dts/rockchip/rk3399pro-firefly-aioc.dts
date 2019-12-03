@@ -48,6 +48,8 @@
 	model = "RK3399pro-firefly-aioc board";
 	compatible = "rockchip,rk3399pro-firefly-aioc", "rockchip,rk3399pro";
 
+
+	/delete-node/ vcc5v0-typec;
 	mcp251x_clk: mcp251x-clk {
         	compatible = "fixed-clock";
         	#clock-cells = <0>;
@@ -68,14 +70,18 @@
 };
 
 &hdmi_in_vopl {
-	status = "disabled";
-};
-
-&hdmi_in_vopb {
 	status = "okay";
 };
 
+&hdmi_in_vopb {
+	status = "disabled";
+};
+
 &dp_in_vopb {
+	status = "okay";
+};
+
+&dp_in_vopl {
 	status = "disabled";
 };
 
@@ -93,6 +99,24 @@
     assigned-clock-parents = <&cru PLL_CPLL>;
 };
 
+// DP
+&i2c8 {
+	status = "okay";
+};
+
+&fusb0 {
+	status = "okay";
+};
+
+&vcc5v0_host {
+       gpio = <&gpio2 RK_PA2 GPIO_ACTIVE_HIGH>;
+};
+
+&cdn_dp {
+        status = "okay";
+        extcon = <&fusb0>;
+        phys = <&tcphy0_dp>;
+};
 
 // mipi csi
 &ov13850 {
@@ -155,15 +179,6 @@
 	gpio = <&gpio3 RK_PD6 GPIO_ACTIVE_HIGH>;
 };
 
-&cdn_dp {
-        status = "okay";
-        extcon = <&fusb0>;
-        phys = <&tcphy0_dp>;
-};
-
-&vcc5v0_host {
-	gpio = <&gpio2 RK_PA2 GPIO_ACTIVE_HIGH>;
-};
 
 /* spi to uart */
 &uart4 {

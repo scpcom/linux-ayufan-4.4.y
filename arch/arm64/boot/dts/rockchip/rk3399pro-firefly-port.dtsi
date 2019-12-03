@@ -262,37 +262,6 @@
         };
 };
 
-&cdn_dp {
-	status = "disabled";
-	extcon = <&fusb0>;
-	phys = <&tcphy0_dp>;
-};
-
-&fusb0 {
-    status = "disabled";
-};
-
-&tcphy0 {
-    /delete-property/ extcon;
-    status = "okay";
-};
-
-&u2phy0 {
-    status = "okay";
-    /delete-property/ extcon;
-
-    u2phy0_otg: otg-port {
-        rockchip,vbus-always-on;
-        vbus-5v-gpios = <&gpio4 RK_PC5 GPIO_ACTIVE_HIGH>;
-        status = "okay";
-    };
-};
-
-&usbdrd3_0 {
-    status = "okay";
-    /delete-property/ extcon;
-};
-
 &pwm3 {
 	status = "okay";
 	interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH 0>;
