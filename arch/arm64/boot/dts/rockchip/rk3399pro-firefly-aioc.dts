@@ -70,19 +70,19 @@
 };
 
 &hdmi_in_vopl {
-	status = "okay";
+	status = "disabled";
 };
 
 &hdmi_in_vopb {
-	status = "disabled";
-};
-
-&dp_in_vopb {
 	status = "okay";
 };
 
-&dp_in_vopl {
+&dp_in_vopb {
 	status = "disabled";
+};
+
+&dp_in_vopl {
+	status = "okay";
 };
 
 &route_hdmi {
