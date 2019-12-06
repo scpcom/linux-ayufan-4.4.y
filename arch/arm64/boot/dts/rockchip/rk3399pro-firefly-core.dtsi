@@ -173,16 +173,6 @@
                 regulator-name = "vcc5v0_host";
                 regulator-always-on;
         };
-	
-	vcc_sd3v0: vcc-sd3v0-regulator {
-                compatible = "regulator-fixed";
-                enable-active-high;
-                gpio = <&gpio2 RK_PA5 GPIO_ACTIVE_HIGH>;
-                pinctrl-names = "default";
-                pinctrl-0 = <&sdcard_pwr>;
-                regulator-name = "vcc_sd3v0";
-                regulator-always-on;
-        };
 
 };
 
@@ -698,8 +688,10 @@
 	cap-sd-highspeed;
 	disable-wp;
 	num-slots = <1>;
+	sd-uhs-sdr12;
+	sd-uhs-sdr25;
+	sd-uhs-sdr50;
 	sd-uhs-sdr104;
-	vmmc-supply = <&vcc_sd3v0>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_cd &sdmmc_bus4>;

@@ -135,12 +135,15 @@
 			compatible = "rockchip,rk809-codec", "rockchip,rk817-codec";
 			clocks = <&cru SCLK_I2S_8CH_OUT>;
 			clock-names = "mclk";
-			pinctrl-names = "default";
+			pinctrl-names = "default","spk_gpio";
 			pinctrl-0 = <&i2s_8ch_mclk>;
 			hp-volume = <20>;
 			spk-volume = <3>;
         		io-channels = <&saradc 4>;
         		hp-det-adc-value = <930>;
+			capture-volume = <0>;
+			spk-ctl = <&gpio0 RK_PB1 GPIO_ACTIVE_HIGH>;
+			pinctrl-1 = <&spk_ctl_gpio>;
 			status = "okay";
 		};
 	};
@@ -342,6 +345,11 @@
                         rockchip,pins = <0 13 RK_FUNC_GPIO &pcfg_pull_down>;
                 };
         };
+         rk809 {                                                                                                                                                                                         
+		 spk_ctl_gpio: spk_ctl_gpio {
+	                 rockchip,pins = <0 RK_PB1 RK_FUNC_GPIO &pcfg_pull_up_20ma>;
+	         };
+	 };
 
 };
 
