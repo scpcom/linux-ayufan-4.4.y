@@ -138,6 +138,7 @@ struct panel_simple {
 
 	struct backlight_device *backlight;
 	struct regulator *supply;
+	struct regulator_bulk_data supplies[2];
 	struct i2c_adapter *ddc;
 
 	struct gpio_desc *enable_gpio;
@@ -497,6 +498,10 @@ static int panel_simple_regulator_enable(struct panel_simple *p)
 {
 	int err;
 
+	err = regulator_bulk_enable(ARRAY_SIZE(p->supplies), p->supplies);
+	if (err < 0)
+		return err;
+
 	if (p->power_invert) {
 		if (regulator_is_enabled(p->supply) > 0)
 			regulator_disable(p->supply);
@@ -522,6 +527,8 @@ static int panel_simple_regulator_disable(struct panel_simple *p)
 	} else {
 		regulator_disable(p->supply);
 	}
+
+	regulator_bulk_disable(ARRAY_SIZE(p->supplies), p->supplies);
 
 	return 0;
 }
@@ -798,6 +805,14 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 	panel->supply = devm_regulator_get(dev, "power");
 	if (IS_ERR(panel->supply))
 		return PTR_ERR(panel->supply);
+
+	panel->supplies[0].supply = "vsp";
+	panel->supplies[1].supply = "vsn";
+
+	err = devm_regulator_bulk_get(dev, ARRAY_SIZE(panel->supplies),
+				      panel->supplies);
+	if (err)
+		return err;
 
 	panel->enable_gpio = devm_gpiod_get_optional(dev, "enable",
 						     GPIOD_ASIS);
