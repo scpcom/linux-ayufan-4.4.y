@@ -4,12 +4,8 @@
 
 if ARCH_ROCKCHIP
 
-config MACH_NANOPI4
-	bool "FriendlyElec NanoPi 4 Series Machine"
-	default n
-
-config MACH_NANOPI_R2
-	bool "FriendlyElec boards based on RK3328"
+config VENDOR_FRIENDLYELEC
+	bool "FriendlyElec board based on RK33XX SoCs"
 	default n
 
 endif
