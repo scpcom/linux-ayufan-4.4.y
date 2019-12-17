@@ -26,10 +26,11 @@
                   - odroidgo2-joypad sysfs list -
 		   * for poll device interval(ms)
 		   /sys/devices/platform/odroidgo2_joypad/poll_interval [rw]
-                   * for button-adc-threshold(mv)
-		   /sys/devices/platform/odroidgo2_joypad/adc_threshold [rw]
-		   * for button-gpio-interval(ms)
-		   /sys/devices/platform/odroidgo2_joypad/gpio_interval [rw]
+                   * for button-adc-fuzz
+		   /sys/devices/platform/odroidgo2_joypad/adc_fuzz [r]
+                   * for button-adc-flat
+		   /sys/devices/platform/odroidgo2_joypad/adc_flat [r]
+
 		   * for report control(1:enable, 0:disable)
 		   /sys/devices/platform/odroidgo2_joypad/enable [rw]
 		   * for adc calibration value setup(1:current adcs value -> cal value)
@@ -44,21 +45,30 @@
 		io-channel-names = "joy_x", "joy_y";
 		io-channels = <&saradc 1>, <&saradc 2>;
 
-		/* adc button max, min (mV) */
-		button-adc-max = <1800>;
-		button-adc-min = <0>;
+		/*
+		    joy-stick voltage range
+		    /sys/devices/platform/ff288000.saradc/iio:device0
+		    adc-x : in_voltage1_raw
+		    adc-y : in_voltage2_raw
+
+		    range calculate.
+		    (adc raw max value - adc raw min value) * 1.7515
+		*/
+		button-adc-x-range = <1100>;
+		button-adc-y-range = <1000>;
 
 		/* adc channel count */
 		button-adc-count = <2>;
 
-		/* report threshold (mV) */
-		button-adc-threshold = <5>;
+		/*
+		  specifies fuzz value that is used to filter noise from
+		  the event stream.
+		*/
+		button-adc-fuzz = <10>;
+		button-adc-flat = <10>;
 
 		/* poll device interval (ms), adc read interval */
-		poll-interval = <5>;
-
-		/* gpio read interval = poll-interval * button-gpio-interval */
-		button-gpio-interval = <1>;
+		poll-interval = <1>;
 
 		/* gpio button auto repeat set value : default disable */
 		/*
@@ -86,97 +96,81 @@
                         gpios = <&gpio1 RK_PB4 GPIO_ACTIVE_LOW>;
                         label = "GPIO DPAD-UP";
                         linux,code = <BTN_DPAD_UP>; // 0x220
-                        wakeup-source;
                 };
                 sw2 {
                         gpios = <&gpio1 RK_PB5 GPIO_ACTIVE_LOW>;
                         label = "GPIO DPAD-DOWN";
                         linux,code = <BTN_DPAD_DOWN>; // 0x221
-                        wakeup-source;
                 };
                 sw3 {
                         gpios = <&gpio1 RK_PB6 GPIO_ACTIVE_LOW>;
                         label = "GPIO DPAD-LEFT";
                         linux,code = <BTN_DPAD_LEFT>; // 0x222
-                        wakeup-source;
                 };
                 sw4 {
                         gpios = <&gpio1 RK_PB7 GPIO_ACTIVE_LOW>;
                         label = "GPIO DPAD-RIGHT";
                         linux,code = <BTN_DPAD_RIGHT>; // 0x223
-                        wakeup-source;
                 };
                 sw5 {
                         gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_LOW>;
                         label = "GPIO KEY BTN-A";
                         linux,code = <BTN_EAST>; // 0x131
-                        wakeup-source;
                 };
                 sw6 {
                         gpios = <&gpio1 RK_PA5 GPIO_ACTIVE_LOW>;
                         label = "GPIO BTN-B";
                         linux,code = <BTN_SOUTH>; // 0x130
-                        wakeup-source;
                 };
                 sw7 {
                         gpios = <&gpio1 RK_PA6 GPIO_ACTIVE_LOW>;
                         label = "GPIO BTN-Y";
                         linux,code = <BTN_WEST>; // 0x134
-                        wakeup-source;
                 };
                 sw8 {
                         gpios = <&gpio1 RK_PA7 GPIO_ACTIVE_LOW>;
                         label = "GPIO BTN-X";
                         linux,code = <BTN_NORTH>; // 0x133
-                        wakeup-source;
                 };
                 sw9 {
                         gpios = <&gpio2 RK_PA0 GPIO_ACTIVE_LOW>;
                         label = "GPIO F1";
                         linux,code = <BTN_TRIGGER_HAPPY1>; // 0x2c0
-                        wakeup-source;
                 };
                 sw10 {
                         gpios = <&gpio2 RK_PA1 GPIO_ACTIVE_LOW>;
                         label = "GPIO F2";
                         linux,code = <BTN_TRIGGER_HAPPY2>; // 0x2c1
-                        wakeup-source;
                 };
                 sw11 {
                         gpios = <&gpio2 RK_PA2 GPIO_ACTIVE_LOW>;
                         label = "GPIO F3";
                         linux,code = <BTN_TRIGGER_HAPPY3>; // 0x2c2
-                        wakeup-source;
                 };
                 sw12 {
                         gpios = <&gpio2 RK_PA3 GPIO_ACTIVE_LOW>;
                         label = "GPIO F4";
                         linux,code = <BTN_TRIGGER_HAPPY4>; // 0x2c3
-                        wakeup-source;
                 };
                 sw13 {
                         gpios = <&gpio2 RK_PA4 GPIO_ACTIVE_LOW>;
                         label = "GPIO F5";
                         linux,code = <BTN_TRIGGER_HAPPY5>; // 0x2c4
-                        wakeup-source;
                 };
                 sw14 {
                         gpios = <&gpio2 RK_PA5 GPIO_ACTIVE_LOW>;
                         label = "GPIO F6";
                         linux,code = <BTN_TRIGGER_HAPPY6>; // 0x13c
-                        wakeup-source;
                 };
                 sw15 {
                         gpios = <&gpio2 RK_PA6 GPIO_ACTIVE_LOW>;
                         label = "GPIO TOP-LEFT";
                         linux,code = <BTN_TL>; // 0x02
-                        wakeup-source;
                 };
                 sw16 {
                         gpios = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>;
                         label = "GPIO TOP-RIGHT";
                         linux,code = <BTN_TR>; // 0x05
-                        wakeup-source;
                 };
         };
 
