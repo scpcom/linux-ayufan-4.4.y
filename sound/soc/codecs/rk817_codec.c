@@ -35,6 +35,11 @@
 static int dbg_enable;
 module_param_named(dbg_level, dbg_enable, int, 0644);
 
+//firefly
+#define FIRST_BOOT                       1
+#define FF_MUTE                          2
+#define UFF_MUTE                         3
+
 #define RK817_ADC_OVER_ADVALUE		950
 #define RK817_ADC_DRIFT_ADVALUE		70		
 #define RK817_ADC_INVALID_ADVALUE	-1
@@ -111,6 +116,9 @@ struct rk817_codec_priv {
 	int hp_det_adc_value;
 	bool hp_insert;
 	struct snd_soc_jack hp_jack;
+
+	int mute; //daijh
+	int firefly_state;//daijh
 };
 
 static const struct reg_default rk817_reg_defaults[] = {
@@ -797,24 +805,9 @@ static int rk817_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
-static int rk817_digital_mute(struct snd_soc_dai *dai, int mute)
+static void rk817_output_ctl(struct rk817_codec_priv *rk817)
 {
-	struct snd_soc_codec *codec = dai->codec;
-	struct rk817_codec_priv *rk817 = snd_soc_codec_get_drvdata(codec);
-
-	DBG("%s %d\n", __func__, mute);
-	if (mute)
-		snd_soc_update_bits(codec, RK817_CODEC_DDAC_MUTE_MIXCTL,
-				    DACMT_ENABLE, DACMT_ENABLE);
-	else
-		snd_soc_update_bits(codec, RK817_CODEC_DDAC_MUTE_MIXCTL,
-				    DACMT_ENABLE, DACMT_DISABLE);
-
-	if (mute) {
-		rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 0);
-		rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 0);
-	} else {
-		switch (rk817->playback_path) {
+	switch (rk817->playback_path) {
 		case SPK_PATH:
 		case RING_SPK:
 			rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 1);
@@ -839,7 +832,29 @@ static int rk817_digital_mute(struct snd_soc_dai *dai, int mute)
 			break;
 		default:
 			break;
-		}
+	}
+	return;
+}
+
+
+static int rk817_digital_mute(struct snd_soc_dai *dai, int mute)
+{
+	struct snd_soc_codec *codec = dai->codec;
+	struct rk817_codec_priv *rk817 = snd_soc_codec_get_drvdata(codec);
+	rk817->mute = mute; //daijh
+	DBG("%s %d\n", __func__, mute);
+	if (mute)
+		snd_soc_update_bits(codec, RK817_CODEC_DDAC_MUTE_MIXCTL,
+				    DACMT_ENABLE, DACMT_ENABLE);
+	else
+		snd_soc_update_bits(codec, RK817_CODEC_DDAC_MUTE_MIXCTL,
+				    DACMT_ENABLE, DACMT_DISABLE);
+
+	if (mute) {
+		rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 0);
+		rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 0);
+	} else {
+		rk817_output_ctl(rk817);
 	}
 
 	return 0;
@@ -1004,29 +1019,40 @@ static void rk817_hp_det_gpio_poll(struct work_struct *work)
         struct rk817_codec_priv *rk817;
 
         rk817 = container_of(work, struct rk817_codec_priv, hp_det_gpio_poll_work.work);
-
-        if( gpio_get_value(rk817->hp_det_gpio))
-        {
-                if(!rk817->hp_insert)
-                {
-                        rk817->hp_insert = true;
-			rk817_enable_hp_control(rk817, true);
-			rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 0);
-			rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 1);
-                        snd_soc_jack_report(&rk817->hp_jack, SND_JACK_HEADPHONE, SND_JACK_HEADPHONE);
-                }
-        } else
-        {
-                if(rk817->hp_insert)
-                {
-			rk817->hp_insert = false;
-			rk817_enable_hp_control(rk817, false);
-			rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 1);
-			rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 0);
-			snd_soc_jack_report(&rk817->hp_jack, SND_JACK_HEADPHONE, SND_JACK_HEADPHONE);
-                }
-        }
-
+	
+	//daijh
+	if(!rk817->mute)
+	{
+        	if( gpio_get_value(rk817->hp_det_gpio))
+        	{
+                	if(!rk817->hp_insert || rk817->firefly_state == FIRST_BOOT)
+                	{
+                        	rk817->hp_insert = true;
+				rk817->firefly_state = UFF_MUTE;
+				rk817_enable_hp_control(rk817, true);
+                        	rk817_output_ctl(rk817);
+				snd_soc_jack_report(&rk817->hp_jack, SND_JACK_HEADPHONE, SND_JACK_HEADPHONE);
+                	}
+        	} else
+        	{
+                	if(rk817->hp_insert || rk817->firefly_state == FIRST_BOOT)
+                	{
+				rk817->hp_insert = false;
+				rk817->firefly_state = UFF_MUTE;
+				rk817_enable_hp_control(rk817, false);
+                        	rk817_output_ctl(rk817);
+				snd_soc_jack_report(&rk817->hp_jack, SND_JACK_HEADPHONE, SND_JACK_HEADPHONE);
+                	}
+        	}
+	} else
+	{		
+	     if(rk817->firefly_state != FF_MUTE || rk817->firefly_state == FIRST_BOOT)
+	     {
+		rk817->firefly_state = FF_MUTE;
+		rk817_codec_ctl_gpio(rk817, CODEC_SET_SPK, 0);
+		rk817_codec_ctl_gpio(rk817, CODEC_SET_HP, 0);
+	     }
+	}
         schedule_delayed_work(&rk817->hp_det_gpio_poll_work, RK817_ADC_SAMPLE_JIFFIES);
 }
 
@@ -1053,6 +1079,7 @@ static int rk817_probe(struct snd_soc_codec *codec)
 				   ARRAY_SIZE(rk817_snd_path_controls));
 
 	rk817->hp_insert = false;
+	rk817->firefly_state = FIRST_BOOT;
         if (rk817->chan) {
                 rk817_jack_init(rk817);
                 INIT_DELAYED_WORK(&rk817->adc_poll_work, rk817_hp_adc_poll);
