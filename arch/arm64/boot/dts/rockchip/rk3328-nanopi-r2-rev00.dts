@@ -51,7 +51,7 @@
 		regulator-name = "vcc_rtl8153";
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
-		startup-delay-us = <2000>;
+		off-on-delay-us = <5000>;
 		enable-active-high;
 	};
 };

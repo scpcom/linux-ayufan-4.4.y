@@ -124,6 +124,9 @@ static int reg_fixed_voltage_probe(struct platform_device *pdev)
 						     &drvdata->desc);
 		if (IS_ERR(config))
 			return PTR_ERR(config);
+
+		of_property_read_u32(pdev->dev.of_node,
+				     "off-on-delay-us", &drvdata->desc.off_on_delay);
 	} else {
 		config = dev_get_platdata(&pdev->dev);
 	}
