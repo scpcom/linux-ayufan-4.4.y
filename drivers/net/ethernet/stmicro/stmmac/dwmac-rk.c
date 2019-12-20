@@ -50,6 +50,7 @@ struct rk_priv_data {
 	int phy_iface;
 	struct regulator *regulator;
 	bool suspended;
+	int wolopts;
 	const struct rk_gmac_ops *ops;
 
 	bool clk_enabled;
@@ -1717,6 +1718,32 @@ void rk_setup_mac_addr(unsigned char *addr)
 }
 #endif /* CONFIG_PLAT_RK3399_ODROIDN1 */
 
+static void rk_get_wol(struct net_device *ndev, struct ethtool_wolinfo *wol)
+{
+	struct stmmac_priv *stpriv = netdev_priv(ndev);
+
+	wol->supported = WAKE_MAGIC;
+	wol->wolopts = stpriv->wolopts;
+}
+
+static int rk_set_wol(struct net_device *ndev, struct ethtool_wolinfo *wol)
+{
+	struct stmmac_priv *stpriv = netdev_priv(ndev);
+	int err;
+
+	err = phy_ethtool_set_wol(stpriv->phydev, wol);
+	if (err < 0) {
+		dev_err(stpriv->device, "phy failed to set_wol, %d\n", err);
+		return err;
+	}
+
+	mutex_lock(&stpriv->lock);
+	stpriv->wolopts = wol->wolopts;
+	mutex_unlock(&stpriv->lock);
+
+	return 0;
+}
+
 void __weak rk_devinfo_get_eth_mac(u8 *mac)
 {
 }
@@ -1827,6 +1854,8 @@ static int rk_gmac_probe(struct platform_device *pdev)
 	plat_dat->has_gmac = true;
 	plat_dat->fix_mac_speed = rk_fix_speed;
 	plat_dat->get_eth_addr = rk_get_eth_addr;
+	plat_dat->set_wol = rk_set_wol;
+	plat_dat->get_wol = rk_get_wol;
 
 	plat_dat->bsp_priv = rk_gmac_setup(pdev, plat_dat, data);
 	if (IS_ERR(plat_dat->bsp_priv))
