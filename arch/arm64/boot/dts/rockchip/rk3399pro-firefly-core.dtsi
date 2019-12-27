@@ -224,6 +224,11 @@
 	cpu-supply = <&vdd_cpu_b>;
 };
 
+&dfi {
+	status = "disabled";
+	center-supply = <&vdd_center>;
+};
+
 &dmc {
 	status = "disabled";
 	center-supply = <&vdd_center>;
