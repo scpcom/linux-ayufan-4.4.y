@@ -45,6 +45,13 @@
 		};
 	};
 	
+	dp_sound: dp-sound {
+		  status = "disabled";
+		  compatible = "rockchip,cdndp-sound";
+		  rockchip,cpu = <&spdif>;
+		  rockchip,codec = <&cdn_dp 1>;
+	};
+
 	adc-keys {
 		compatible = "adc-keys";
 		io-channels = <&saradc 2>;
@@ -174,6 +181,14 @@
                 regulator-always-on;
         };
 
+};
+
+&spdif {
+       status = "disabled";
+       pinctrl-0 = <&spdif_bus_1>;
+       i2c-scl-rising-time-ns = <450>;
+       i2c-scl-falling-time-ns = <15>;
+       #sound-dai-cells = <0>;
 };
 
 &vpu {

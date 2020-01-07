@@ -74,6 +74,18 @@
 
 };
 
+&dp_sound {
+	status = "okay";
+};
+
+&hdmi_sound {
+	status = "okay";
+};
+				
+&spdif {
+       status = "okay";
+};
+
 &hdmi_in_vopl {
 	status = "disabled";
 };
