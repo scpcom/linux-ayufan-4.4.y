@@ -181,3 +181,4 @@ obj-$(CONFIG_RK_NAND)		+= rk_nand/
 obj-$(CONFIG_RK_HEADSET)	+= headset_observe/
 obj-$(CONFIG_ODROIDN1_SYSFS)	+= hardkernel/
 obj-$(CONFIG_RK_FLASH)		+= rkflash/
+obj-$(CONFIG_GATOR)		+= gator/

@@ -210,4 +210,6 @@ source "drivers/headset_observe/Kconfig"
 
 source "drivers/hardkernel/Kconfig"
 
+source "drivers/gator/Kconfig"
+
 endmenu
