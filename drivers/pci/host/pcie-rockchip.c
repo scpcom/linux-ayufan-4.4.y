@@ -268,6 +268,7 @@ struct rockchip_pcie {
 	struct resource *io;
 	bool pcie_really_probed;
 	int in_remove;
+	int other_rw_disabled;
 };
 
 static int bus_scan_delay = -1;
@@ -435,7 +436,7 @@ static int rockchip_pcie_rd_other_conf(struct rockchip_pcie *rockchip,
 		return PCIBIOS_DEVICE_NOT_FOUND;
 	}
 
-	if (!IS_ALIGNED(busdev, size)) {
+	if (!IS_ALIGNED(busdev, size) || rockchip->other_rw_disabled) {
 		*val = 0;
 		return PCIBIOS_BAD_REGISTER_NUMBER;
 	}
@@ -471,7 +472,7 @@ static int rockchip_pcie_wr_other_conf(struct rockchip_pcie *rockchip,
 
 	busdev = PCIE_ECAM_ADDR(bus->number, PCI_SLOT(devfn),
 				PCI_FUNC(devfn), where);
-	if (!IS_ALIGNED(busdev, size))
+	if (!IS_ALIGNED(busdev, size) || rockchip->other_rw_disabled)
 		return PCIBIOS_BAD_REGISTER_NUMBER;
 
 	if (bus->parent->number == rockchip->root_bus_nr)
@@ -1588,12 +1589,16 @@ static ssize_t pcie_reset_ep_store(struct device *dev,
 	if (err)
 		return err;
 
-	if (val == PCIE_USER_UNLINK)
+	if (val == PCIE_USER_UNLINK) {
+		rockchip->other_rw_disabled = 1;
 		rockchip_pcie_suspend_for_user(rockchip->dev);
-	else if (val == PCIE_USER_RELINK)
+	} else if (val == PCIE_USER_RELINK) {
+		rockchip->other_rw_disabled = 0;
 		rockchip_pcie_resume_for_user(rockchip->dev);
-	else
+	} else {
+		dev_err(dev, "unknown cmd %d\n", val);
 		return -EINVAL;
+	}
 
 	return size;
 }
