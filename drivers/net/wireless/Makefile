@@ -68,3 +68,4 @@ obj-$(CONFIG_RTL8192CU) += rtl8192cu/
 obj-$(CONFIG_RTL8822BU) += rtl88x2bu/
 obj-$(CONFIG_RTL8821CU) += rtl8821cu/
 obj-$(CONFIG_RTL8723BU) += ew-7611ulb/
+obj-$(CONFIG_ESP8089) += esp8089/
