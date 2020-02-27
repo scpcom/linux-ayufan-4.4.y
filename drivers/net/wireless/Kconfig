@@ -297,5 +297,6 @@ source "drivers/net/wireless/rtl8812au/Kconfig"
 source "drivers/net/wireless/rtl8192cu/Kconfig"
 source "drivers/net/wireless/rtl88x2bu/Kconfig"
 source "drivers/net/wireless/rtl8821cu/Kconfig"
+source "drivers/net/wireless/ew-7611ulb/Kconfig"
 
 endif # WLAN
