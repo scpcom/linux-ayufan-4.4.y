@@ -1376,6 +1376,16 @@ config TOUCHSCREEN_ZINITIX
 	  To compile this driver as a module, choose M here: the
 	  module will be called zinitix.
 
+config TOUCHSCREEN_DWAV_USB_MT
+	tristate "D-WAV Scientific USB MultiTouch"
+	depends on USB_ARCH_HAS_HCD
+	select USB
+	help
+	  Say Y here if you have a D-WAV Scientific USB(HID) based MultiTouch
+	  controller.
+
+	  module will be called dwav-usb-mt.
+
 source "drivers/input/touchscreen/gslx680new/Kconfig"
 source "drivers/input/touchscreen/gt9xxnew/Kconfig"
 source "drivers/input/touchscreen/focaltech_touch/Kconfig"
