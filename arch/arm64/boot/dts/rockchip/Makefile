@@ -49,3 +49,4 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399pro-rock-pi-n10.dtb
 
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-odroidgo2-linux.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-odroidgo2-linux-v11.dtb
