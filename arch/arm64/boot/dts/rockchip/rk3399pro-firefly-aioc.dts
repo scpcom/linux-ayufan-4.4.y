@@ -10,7 +10,7 @@
  *     modify it under the terms of the GNU General Public License as
  *     published by the Free Software Foundation; either version 2 of the
  *     License, or (at your option) any later version.
- *                                                                                                                                             
+ *
  *     This file is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -47,8 +47,7 @@
 / {
 	model = "RK3399pro-firefly-aioc board";
 	compatible = "rockchip,rk3399pro-firefly-aioc", "rockchip,rk3399pro";
-	
-	
+
 	usbacm_video_control: usbacm-video-control {
 		compatible = "rockchip,usbacm-video-control";
 		status = "disabled";
@@ -74,6 +73,57 @@
 
 };
 
+
+&i2c1 {
+	status = "okay";
+	i2c-scl-rising-time-ns = <300>;
+	i2c-scl-falling-time-ns = <15>;
+
+	/delete-node/ ov13850@36;
+	/delete-node/ ov13850@46;
+
+	//cam0
+	XC6130: XC6130@46{
+		status = "okay";
+		compatible = "firefly,xc7022";
+		reg = <0x23>;
+		reset-gpios = <&gpio2 6 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&xc6130_reset_pin>;
+
+		port {
+			ucam_out0: endpoint {
+				remote-endpoint = <&mipi_in_ucam0>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+	//cam1
+	XC7022: XC7022@36{
+		status = "okay";
+		compatible = "firefly,xc7022";
+		reg = <0x1b>;
+		reset-gpios = <&gpio2 1 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&xc7022_reset_pin>;
+
+		port {
+			ucam_out1: endpoint {
+				remote-endpoint = <&mipi_in_ucam1>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+
+};
+
+
+&cif_isp1 {
+    status = "okay";
+};
+
 &dp_sound {
 	status = "okay";
 };
@@ -81,7 +131,7 @@
 &hdmi_sound {
 	status = "okay";
 };
-				
+
 &spdif {
        status = "okay";
 };
@@ -136,7 +186,7 @@
 };
 
 // mipi csi
-
+/*
 &ov13850 {
 	status = "disabled";
 };
@@ -144,7 +194,7 @@
 &ov13850_1 {
 	status = "disabled";
 };
-
+*/
 
 &vcc_mipi {
 	status = "disabled";
@@ -155,27 +205,27 @@
 };
 
 &rkisp1_0 {
-	status = "disabled";
+	status = "okay";
 };
 
 &mipi_dphy_rx0 {
-	status = "disabled";
+	status = "okay";
 };
 
 &isp0_mmu {
-	status = "disabled";
+	status = "okay";
 };
 
 &rkisp1_1 {
-	status = "disabled";
+	status = "okay";
 };
 
 &mipi_dphy_tx1rx1 {
-	status = "disabled";
+	status = "okay";
 };
 
 &isp1_mmu {
-	status = "disabled";
+	status = "okay";
 };
 
 &i2c4 {
@@ -278,23 +328,33 @@
 };
 
 &pinctrl {
-        hub {
-                hub_drv: hub-drv {
-			rockchip,pins =
-				<2 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>;
-                };
-        };
+	hub {
+			hub_drv: hub-drv {
+		rockchip,pins =
+			<2 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>;
+			};
+	};
 
-        can0 {
-                can0_pins: can0-pins {
-			rockchip,pins =
-				<0 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
-                };
-        };
-        usb2 {
-                host_vbus_drv: host-vbus-drv {
-                        rockchip,pins =
-                                <2 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
-                };
-        };
+	can0 {
+			can0_pins: can0-pins {
+		rockchip,pins =
+			<0 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
+			};
+	};
+	usb2 {
+			host_vbus_drv: host-vbus-drv {
+					rockchip,pins =
+							<2 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
+			};
+	};
+
+	camera-pins{
+		xc7022_reset_pin: xc7022-reset-pin{
+			rockchip,pins = <2 1 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+
+		xc6130_reset_pin: xc6130-reset-pin{
+			rockchip,pins = <2 6 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
 };
