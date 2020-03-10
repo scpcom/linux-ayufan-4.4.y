@@ -228,6 +228,16 @@
 			label = "TOP-RIGHT";
 			linux,code = <BTN_TR>;
 		};
+		sw20 {
+			gpios = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
+			label = "GPIO TOP-RIGHT2";
+			linux,code = <BTN_TR2>;
+		};
+		sw21 {
+			gpios = <&gpio3 RK_PB2 GPIO_ACTIVE_LOW>;
+			label = "GPIO TOP-LEFT2";
+			linux,code = <BTN_TL2>;
+		};
 	};
 
 	leds: gpio-leds {
@@ -1024,7 +1034,9 @@
 					<2 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>,
 					<2 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>,
 					<2 RK_PA6 RK_FUNC_GPIO &pcfg_pull_up>,
-					<2 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>;
+					<2 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>,
+					<3 RK_PB2 RK_FUNC_GPIO &pcfg_pull_up>,
+					<3 RK_PB7 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
