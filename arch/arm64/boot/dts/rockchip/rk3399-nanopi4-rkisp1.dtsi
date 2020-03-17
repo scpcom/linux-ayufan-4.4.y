@@ -98,6 +98,8 @@
 
 &rkisp1_0 {
 	status = "okay";
+	resets = <&cru SRST_H_ISP0>, <&cru SRST_ISP0>;
+	reset-names = "h_isp0", "isp0";
 
 	port {
 		#address-cells = <1>;
@@ -205,6 +207,8 @@
 
 &rkisp1_1 {
 	status = "okay";
+	resets = <&cru SRST_H_ISP1>, <&cru SRST_ISP1>;
+	reset-names = "h_isp1", "isp1";
 
 	port {
 		#address-cells = <1>;
