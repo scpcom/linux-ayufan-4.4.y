@@ -116,8 +116,16 @@
 	/delete-node/ opp-600000000;
 	/delete-node/ opp-800000000;
 
+	opp-328000000 {
+		opp-hz = /bits/ 64 <328000000>;
+		opp-microvolt = <900000>;
+	};
 	opp-416000000 {
 		opp-hz = /bits/ 64 <416000000>;
+		opp-microvolt = <900000>;
+	};
+	opp-666000000 {
+		opp-hz = /bits/ 64 <666000000>;
 		opp-microvolt = <900000>;
 	};
 	opp-856000000 {
