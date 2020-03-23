@@ -155,3 +155,4 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588s-tablet-rk806-single-v10.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588s-tablet-v10.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588s-tablet-v11.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-odroidgo2-linux.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-odroidgo2-linux-v11.dtb
