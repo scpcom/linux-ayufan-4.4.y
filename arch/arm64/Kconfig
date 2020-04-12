@@ -829,10 +829,6 @@ config ARM64_LSE_ATOMICS
 	  not support these instructions and requires the kernel to be
 	  built with binutils >= 2.25.
 
-config KEYS_COMPAT
-	def_bool y
-	depends on COMPAT && KEYS
-
 endmenu
 
 config ARM64_UAO
