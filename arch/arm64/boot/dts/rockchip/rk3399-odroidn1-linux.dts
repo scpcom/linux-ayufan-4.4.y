@@ -58,6 +58,17 @@
 		nvmem-cell-names = "id";
 	};
 
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		drm_logo: drm-logo@00000000 {
+			compatible = "rockchip,drm-logo";
+			reg = <0x0 0x0 0x0 0x0>;
+		};
+	};
+
 	clkin_gmac: external-gmac-clock {
 		compatible = "fixed-clock";
 		clock-frequency = <125000000>;
@@ -401,8 +412,64 @@
 	cpu-supply = <&vdd_cpu_b>;
 };
 
-&display_subsystem {
+&dmc {
 	status = "okay";
+	center-supply = <&vdd_center>;
+	upthreshold = <40>;
+	downdifferential = <20>;
+	system-status-freq = <
+		/*system status         freq(KHz)*/
+		SYS_STATUS_NORMAL       933000
+		SYS_STATUS_REBOOT       400000
+		SYS_STATUS_SUSPEND      400000
+		SYS_STATUS_VIDEO_1080P  933000
+		SYS_STATUS_VIDEO_4K     933000
+		SYS_STATUS_VIDEO_4K_10B 933000
+		SYS_STATUS_PERFORMANCE  933000
+		SYS_STATUS_BOOST        400000
+		SYS_STATUS_DUALVIEW     933000
+		SYS_STATUS_ISP          933000
+	>;
+	vop-bw-dmc-freq = <
+	/* min_bw(MB/s) max_bw(MB/s) freq(KHz) */
+		0       577      200000
+		578     1701     300000
+		1702    99999    400000
+	>;
+	auto-min-freq = <400000>;
+};
+
+&dmc_opp_table {
+	opp-933000000 {
+		opp-hz = /bits/ 64 <933000000>;
+		opp-microvolt = <900000>;
+	};
+};
+
+&display_subsystem {
+	/delete-property/ devfreq;
+	status = "okay";
+
+	ports = <&vopb_out>, <&vopl_out>;
+	logo-memory-region = <&drm_logo>;
+
+	route {
+		route_hdmi: route-hdmi {
+			logo,uboot = "logo.bmp";
+			logo,kernel = "logo_kernel.bmp";
+			logo,mode = "center";
+			charge_logo,mode = "center";
+			connect = <&vopb_out_hdmi>;
+		};
+
+		route_dp: route-dp {
+			logo,uboot = "logo.bmp";
+			logo,kernel = "logo_kernel.bmp";
+			logo,mode = "center";
+			charge_logo,mode = "center";
+			connect = <&vopl_out_dp>;
+		};
+	};
 };
 
 &emmc_phy {
@@ -430,18 +497,36 @@
 	mali-supply = <&vdd_gpu>;
 };
 
+/* HACK: keep MALI version on linux */
+&gpu_power_model {
+	// for DDK r14.
+	voltage = <900>;
+	frequency = <500>;
+	static-power = <300>;
+	dynamic-power = <396>;
+};
+
 &hdmi {
 	#address-cells = <1>;
 	#size-cells = <0>;
 	#sound-dai-cells = <0>;
 	status = "okay";
+	rockchip,phy-table =
+		<74250000 0x8009 0x0004 0x0272>,
+		<165000000 0x802b 0x0004 0x0209>,
+		<297000000 0x8039 0x0005 0x028d>,
+		<594000000 0x8039 0x0000 0x019d>,
+		<000000000 0x0000 0x0000 0x0000>;
 
 	pinctrl-names = "default";
 	pinctrl-0 = <&hdmi_i2c_xfer>, <&hdmi_cec>;
-};
 
-&hdmi_in_vopl {
-       status = "disabled";
+	ports {
+		/* Don't use vopl for hdmi */
+		hdmi_in: port {
+			/delete-node/ endpoint@1;
+		};
+	};
 };
 
 &dp_in_vopl {
@@ -1159,6 +1244,11 @@
 &vopl {
 	rockchip,grf = <&grf>;
 	status = "okay";
+
+	/* Don't use vopl for hdmi */
+	vopl_out: port {
+		/delete-node/ endpoint@2;
+	};
 };
 
 &vopl_mmu {
