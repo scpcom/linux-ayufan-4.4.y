@@ -207,6 +207,67 @@ struct property_set {
 	struct property_entry *properties;
 };
 
+#define PROPERTY_ENTRY_INTEGER_ARRAY(_name_, _type_, _val_)	\
+{								\
+	.name = _name_,						\
+	.length = ARRAY_SIZE(_val_) * sizeof(_type_),		\
+	.is_array = true,					\
+	.is_string = false,					\
+	{ .pointer = { ._type_##_data = _val_ } },		\
+}
+
+#define PROPERTY_ENTRY_U8_ARRAY(_name_, _val_)			\
+	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u8, _val_)
+#define PROPERTY_ENTRY_U16_ARRAY(_name_, _val_)			\
+	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u16, _val_)
+#define PROPERTY_ENTRY_U32_ARRAY(_name_, _val_)			\
+	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u32, _val_)
+#define PROPERTY_ENTRY_U64_ARRAY(_name_, _val_)			\
+	PROPERTY_ENTRY_INTEGER_ARRAY(_name_, u64, _val_)
+
+#define PROPERTY_ENTRY_STRING_ARRAY(_name_, _val_)		\
+{								\
+	.name = _name_,						\
+	.length = ARRAY_SIZE(_val_) * sizeof(const char *),	\
+	.is_array = true,					\
+	.is_string = true,					\
+	{ .pointer = { .str = _val_ } },			\
+}
+
+#define PROPERTY_ENTRY_INTEGER(_name_, _type_, _val_)	\
+{							\
+	.name = _name_,					\
+	.length = sizeof(_type_),			\
+	.is_string = false,				\
+	{ .value = { ._type_##_data = _val_ } },	\
+}
+
+#define PROPERTY_ENTRY_U8(_name_, _val_)		\
+	PROPERTY_ENTRY_INTEGER(_name_, u8, _val_)
+#define PROPERTY_ENTRY_U16(_name_, _val_)		\
+	PROPERTY_ENTRY_INTEGER(_name_, u16, _val_)
+#define PROPERTY_ENTRY_U32(_name_, _val_)		\
+	PROPERTY_ENTRY_INTEGER(_name_, u32, _val_)
+#define PROPERTY_ENTRY_U64(_name_, _val_)		\
+	PROPERTY_ENTRY_INTEGER(_name_, u64, _val_)
+
+#define PROPERTY_ENTRY_STRING(_name_, _val_)		\
+{							\
+	.name = _name_,					\
+	.length = sizeof(_val_),			\
+	.is_string = true,				\
+	{ .value = { .str = _val_ } },			\
+}
+
+#define PROPERTY_ENTRY_BOOL(_name_)		\
+{						\
+	.name = _name_,				\
+}
+
+int device_add_properties(struct device *dev,
+			  struct property_entry *properties);
+void device_remove_properties(struct device *dev);
+
 int device_add_property_set(struct device *dev, const struct property_set *pset);
 void device_remove_property_set(struct device *dev);
 
