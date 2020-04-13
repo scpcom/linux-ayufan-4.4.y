@@ -1367,7 +1367,7 @@
 	assigned-clock-parents = <&cru PLL_CPLL>;
 };
 
-&vopb_mmu {
+&vopl_mmu {
 	status = "okay";
 };
 
