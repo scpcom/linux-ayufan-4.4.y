@@ -258,7 +258,6 @@ struct rockchip_pcie {
 	int wait_ep;
 	struct dma_trx_obj *dma_obj;
 	struct list_head resources;
-	u32	bus_scan_delay;
 };
 
 static int bus_scan_delay = -1;
