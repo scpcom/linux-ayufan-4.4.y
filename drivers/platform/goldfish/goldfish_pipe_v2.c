@@ -811,7 +811,11 @@ static void goldfish_pipe_dma_release_host(struct goldfish_pipe *pipe)
 	pdev_dev = pipe->dev->pdev_dev;
 
 	if (dma->dma_vaddr) {
+#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 		dev_dbg(pdev_dev, "Last ref for dma region @ 0x%llx\n",
+#else
+		dev_dbg(pdev_dev, "Last ref for dma region @ 0x%zx\n",
+#endif
 			dma->phys_begin);
 
 		pipe->command_buffer->dma_maphost_params.dma_paddr =
@@ -821,7 +825,11 @@ static void goldfish_pipe_dma_release_host(struct goldfish_pipe *pipe)
 	}
 
 	dev_dbg(pdev_dev,
+#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 		"after delete of dma @ 0x%llx: alloc total %zu\n",
+#else
+		"after delete of dma @ 0x%zx: alloc total %zu\n",
+#endif
 		dma->phys_begin, pipe->dev->dma_alloc_total);
 }
 
@@ -844,7 +852,11 @@ static void goldfish_pipe_dma_release_guest(struct goldfish_pipe *pipe)
 		pipe->dev->dma_alloc_total -= dma->dma_size;
 
 		dev_dbg(pdev_dev,
+#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 			"after delete of dma @ 0x%llx: alloc total %zu\n",
+#else
+			"after delete of dma @ 0x%zx: alloc total %zu\n",
+#endif
 			dma->phys_begin, pipe->dev->dma_alloc_total);
 	}
 }
@@ -955,7 +967,11 @@ static int goldfish_pipe_dma_alloc_locked(struct goldfish_pipe *pipe)
 	pipe->dev->dma_alloc_total += dma->dma_size;
 
 	dev_dbg(pdev_dev, "%s: got v/p addrs "
+#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 		"%p 0x%llx sz %zu total alloc %zu\n",
+#else
+		"%p 0x%zx sz %zu total alloc %zu\n",
+#endif
 		__func__,
 		dma->dma_vaddr,
 		dma->phys_begin,
@@ -980,7 +996,11 @@ static int goldfish_dma_mmap_locked(
 		return -EINVAL;
 	}
 
+#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 	dev_dbg(pdev_dev, "Mapping dma at 0x%llx\n", dma->phys_begin);
+#else
+	dev_dbg(pdev_dev, "Mapping dma at 0x%zx\n", dma->phys_begin);
+#endif
 
 	/* Alloc phys region if not allocated already. */
 	status = goldfish_pipe_dma_alloc_locked(pipe);
@@ -1000,7 +1020,11 @@ static int goldfish_dma_mmap_locked(
 	}
 
 	vma->vm_ops = &goldfish_dma_vm_ops;
+#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 	dev_dbg(pdev_dev, "goldfish_dma_mmap for host vaddr 0x%llx succeeded\n",
+#else
+	dev_dbg(pdev_dev, "goldfish_dma_mmap for host vaddr 0x%zx succeeded\n",
+#endif
 		dma->phys_begin);
 
 	return 0;
