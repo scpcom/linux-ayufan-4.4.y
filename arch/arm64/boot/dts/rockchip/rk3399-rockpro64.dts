@@ -443,10 +443,19 @@
 		578     1701     300000
 		1702    99999    400000
 	>;
-	auto-min-freq = <800000>;
+	auto-min-freq = <856000>;
 };
 
 &dmc_opp_table {
+	opp-800000000 {
+		opp-hz = /bits/ 64 <800000000>;
+		opp-microvolt = <900000>;
+		status = "disabled";
+	};
+	opp-856000000 {
+		opp-hz = /bits/ 64 <856000000>;
+		opp-microvolt = <900000>;
+	};
 	opp-928000000 {
 		opp-hz = /bits/ 64 <928000000>;
 		opp-microvolt = <925000>;
