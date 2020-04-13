@@ -269,6 +269,7 @@ struct rockchip_pcie {
 	bool pcie_really_probed;
 	int in_remove;
 	int other_rw_disabled;
+	u32	bus_scan_delay;
 };
 
 static int bus_scan_delay = -1;
