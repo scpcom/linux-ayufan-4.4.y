@@ -574,6 +574,10 @@
 	cpu-supply = <&vdd_cpu_b>;
 };
 
+&dfi {
+	status = "okay";
+};
+
 &display_subsystem {
 	/delete-property/ devfreq;
 	status = "okay";
