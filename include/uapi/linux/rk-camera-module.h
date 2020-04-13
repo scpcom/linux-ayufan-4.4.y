@@ -8,6 +8,7 @@
 #define _UAPI_RKMODULE_CAMERA_H
 
 #include <linux/types.h>
+#include <linux/compat.h>
 
 #define RKMODULE_NAME_LEN		32
 #define RKMODULE_LSCDATA_LEN		441
