@@ -43,7 +43,9 @@
 #include <linux/of_device.h>
 #include <linux/of_gpio.h>
 #endif
+#ifdef CONFIG_ARCH_ROCKCHIP
 #include <linux/soc/rockchip/rk_vendor_storage.h>
+#endif
 
 #if 0
 #define DBG(x...)   printk(KERN_INFO "[WLAN_RFKILL]: "x)
@@ -53,8 +55,10 @@
 
 #define LOG(x...)   printk(KERN_INFO "[WLAN_RFKILL]: "x)
 
+#ifdef CONFIG_ARCH_ROCKCHIP
 extern struct mmc_host *primary_sdio_host;
 extern void mmc_pwrseq_power_off(struct mmc_host *host);
+#endif
 
 struct rfkill_wlan_data {
 	struct rksdmmc_gpio_wifi_moudle *pdata;
@@ -309,8 +313,10 @@ int rockchip_wifi_power(int on)
 
     LOG("%s: %d\n", __func__, on);
 
+#ifdef CONFIG_ARCH_ROCKCHIP
 	if (!on && primary_sdio_host)
 		mmc_pwrseq_power_off(primary_sdio_host);
+#endif
 
     if (mrfkill == NULL) {
         LOG("%s: rfkill-wlan driver has not Successful initialized\n", __func__);
@@ -405,7 +411,11 @@ EXPORT_SYMBOL(rockchip_wifi_power);
 extern int mmc_host_rescan(struct mmc_host *host, int val, int irq_type);
 int rockchip_wifi_set_carddetect(int val)
 {
+#ifdef CONFIG_ARCH_ROCKCHIP
 	return mmc_host_rescan(NULL, val, 1);
+#else
+	return -1;
+#endif
 }
 EXPORT_SYMBOL(rockchip_wifi_set_carddetect);
 
@@ -477,6 +487,7 @@ u8 wifi_custom_mac_addr[6] = {0,0,0,0,0,0};
 //#define RANDOM_ADDRESS_SAVE
 static int get_wifi_addr_vendor(unsigned char *addr)
 {
+#ifdef CONFIG_ARCH_ROCKCHIP
 	int ret;
 	int count = 5;
 
@@ -514,6 +525,9 @@ static int get_wifi_addr_vendor(unsigned char *addr)
 		    addr[3], addr[4], addr[5]);
 	}
 	return 0;
+#else
+	return -1;
+#endif
 }
 
 int rockchip_wifi_mac_addr(unsigned char *buf)
