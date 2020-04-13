@@ -2300,9 +2300,11 @@ static void nvme_alloc_ns(struct nvme_dev *dev, unsigned nsid)
 	disk->driverfs_dev = dev->device;
 	disk->flags = GENHD_FL_EXT_DEVT;
 
+#ifdef CONFIG_BLK_DEV_NVME
 	if (strstr(saved_command_line, "storagemedia=nvme"))
 		disk->is_rk_disk = true;
 	else
+#endif
 		disk->is_rk_disk = false;
 
 	sprintf(disk->disk_name, "nvme%dn%d", dev->instance, nsid);
