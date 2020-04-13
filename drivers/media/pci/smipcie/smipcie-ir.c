@@ -183,7 +183,7 @@ int smi_ir_init(struct smi_dev *dev)
 	struct rc_dev *rc_dev;
 	struct smi_rc *ir = &dev->ir;
 
-	rc_dev = rc_allocate_device();
+	rc_dev = rc_allocate_device(RC_DRIVER_IR_RAW);
 	if (!rc_dev)
 		return -ENOMEM;
 
