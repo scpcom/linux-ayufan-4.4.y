@@ -95,7 +95,7 @@ config SND_SOC_ALL_CODECS
 	select SND_SOC_PCM512x_SPI if SPI_MASTER
 	select SND_SOC_RK1000 if I2C
 	select SND_SOC_RK3228
-	select SND_SOC_RK3308
+	select SND_SOC_RK3308 if OF_GPIO
 	select SND_SOC_RK3328
 	select SND_SOC_RK817 if I2C
 	select SND_SOC_RT286 if I2C
@@ -592,6 +592,7 @@ config SND_SOC_RK3228
 config SND_SOC_RK3308
 	select REGMAP_MMIO
 	tristate "Rockchip RK3308 CODEC"
+	depends on OF_GPIO
 
 config SND_SOC_RK3328
 	select REGMAP_MMIO
