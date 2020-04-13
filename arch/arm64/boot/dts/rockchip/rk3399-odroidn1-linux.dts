@@ -664,18 +664,18 @@
 	vdd_cpu_b: syr827@40 {
 		compatible = "silergy,syr827";
 		reg = <0x40>;
-		vin-supply = <&vcc5v0_sys>;
 		regulator-compatible = "fan53555-reg";
+		vsel-gpios = <&gpio1 17 GPIO_ACTIVE_HIGH>;
 		regulator-name = "vdd_cpu_b";
 		regulator-min-microvolt = <712500>;
 		regulator-max-microvolt = <1500000>;
 		regulator-ramp-delay = <40000>;
-		vsel-gpios = <&gpio1 17 GPIO_ACTIVE_HIGH>;
 		fcs,suspend-voltage-selector = <1>;
 		regulator-always-on;
 		regulator-boot-on;
 		regulator-initial-state = <3>;
-			regulator-state-mem {
+		vin-supply = <&vcc5v0_sys>;
+		regulator-state-mem {
 			regulator-off-in-suspend;
 		};
 	};
