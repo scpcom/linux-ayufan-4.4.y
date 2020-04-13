@@ -26,6 +26,7 @@
 #include <linux/io.h>
 #include <linux/jiffies.h>
 #include <linux/list.h>
+#include <linux/iommu.h>
 #include "cif_isp10.h"
 #include <linux/platform_data/rk_isp10_platform.h>
 #include "cif_isp10_regs.h"
