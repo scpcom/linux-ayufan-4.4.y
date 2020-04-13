@@ -347,6 +347,7 @@ int dma_buf_set_release_callback(struct dma_buf *dmabuf,
 
 	return 0;
 }
+EXPORT_SYMBOL_GPL( dma_buf_set_release_callback);
 
 void *dma_buf_get_release_callback_data(struct dma_buf *dmabuf,
 					void (*callback)(void *))
@@ -360,6 +361,7 @@ void *dma_buf_get_release_callback_data(struct dma_buf *dmabuf,
 
 	return NULL;
 }
+EXPORT_SYMBOL_GPL(dma_buf_get_release_callback_data);
 
 /**
  * dma_buf_export - Creates a new dma_buf, and associates an anon file
