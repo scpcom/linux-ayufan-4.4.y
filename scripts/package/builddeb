@@ -144,12 +144,8 @@ fi
 # Not all arches include the boot path in KBUILD_IMAGE
 if [ -e $KBUILD_IMAGE ]; then
 	cp $KBUILD_IMAGE "$tmpdir/$installed_image_path"
-	cp `dirname $KBUILD_IMAGE`/dts/*/*odroid*.dtb `dirname "$tmpdir/$installed_image_path"`/
 else
 	cp arch/$ARCH/boot/$KBUILD_IMAGE "$tmpdir/$installed_image_path"
-	for f in arch/$ARCH/boot/dts/*/*odroid*.dtb; do
-          cp -p $f `dirname "$tmpdir/$installed_image_path"`/`basename $f`-${KERNELRELEASE}
-        done
 fi
 
 if grep -q "^CONFIG_OF=y" $KCONFIG_CONFIG ; then
