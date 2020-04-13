@@ -470,6 +470,7 @@ THUMB(	orr	\reg , \reg , #PSR_T_BIT	)
 	movlo	\addr, #0		@ if (tmp < 0) addr = NULL
 	csdb
 #endif
+	.endm
 
 	.macro	uaccess_disable, tmp, isb=1
 #ifdef CONFIG_CPU_SW_DOMAIN_PAN
