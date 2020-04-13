@@ -233,6 +233,7 @@ config REGULATOR_DB8500_PRCMU
 config REGULATOR_FAN53555
 	tristate "Fairchild FAN53555 Regulator"
 	depends on I2C
+	depends on GPIOLIB || COMPILE_TEST
 	select REGMAP_I2C
 	help
 	  This driver supports Fairchild FAN53555 Digitally Programmable
