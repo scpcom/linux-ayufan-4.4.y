@@ -569,6 +569,7 @@ config LEDS_SEAD3
 config LEDS_IS31FL32XX
 	tristate "LED support for ISSI IS31FL32XX I2C LED controller family"
 	depends on LEDS_CLASS && I2C && OF
+	depends on GPIOLIB || COMPILE_TEST
 	help
 	  Say Y here to include support for ISSI IS31FL32XX and Si-En SN32xx
 	  LED controllers. They are I2C devices with multiple constant-current
