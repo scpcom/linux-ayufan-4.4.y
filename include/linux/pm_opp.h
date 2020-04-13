@@ -218,10 +218,14 @@ static inline int dev_pm_opp_of_get_sharing_cpus(struct device *cpu_dev, cpumask
 	return -ENOSYS;
 }
 
+#if defined(CONFIG_PM_OPP)
+int dev_pm_opp_set_sharing_cpus(struct device *cpu_dev, cpumask_var_t cpumask);
+#else
 static inline int dev_pm_opp_set_sharing_cpus(struct device *cpu_dev, cpumask_var_t cpumask)
 {
 	return -ENOSYS;
 }
+#endif
 #endif
 
 #endif		/* __LINUX_OPP_H__ */
