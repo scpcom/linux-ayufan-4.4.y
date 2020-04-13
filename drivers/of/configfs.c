@@ -23,6 +23,7 @@
 #include <linux/file.h>
 #include <linux/vmalloc.h>
 #include <linux/firmware.h>
+#include <linux/sizes.h>
 
 #include "of_private.h"
 
