@@ -425,9 +425,6 @@ static int rockchip_pcie_wr_other_conf(struct rockchip_pcie *rockchip,
 
 	busdev = PCIE_ECAM_ADDR(bus->number, PCI_SLOT(devfn),
 				PCI_FUNC(devfn), where);
-
-	if (bus->number > 0x1f)
-		return PCIBIOS_DEVICE_NOT_FOUND;
 	if (!IS_ALIGNED(busdev, size))
 		return PCIBIOS_BAD_REGISTER_NUMBER;
 
