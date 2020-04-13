@@ -72,6 +72,7 @@ config DWMAC_MESON
 config DWMAC_ROCKCHIP
 	tristate "Rockchip dwmac support"
 	default ARCH_ROCKCHIP
+	depends on ARCH_ROCKCHIP
 	depends on OF
 	select MFD_SYSCON
 	help
