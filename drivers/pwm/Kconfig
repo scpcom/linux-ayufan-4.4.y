@@ -351,6 +351,7 @@ config PWM_ROCKCHIP
 
 config PWM_ROCKCHIP_I2S
 	tristate "Rockchip I2S PWM support"
+	depends on ARM64
 	depends on ARCH_ROCKCHIP
 	help
 	  Generic PWM framework driver for the I2S controller found on
