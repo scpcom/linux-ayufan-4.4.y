@@ -53,6 +53,8 @@ allowed_warnings = set([
     "sched.h:1211", # include/linux/sched.h:1211:1: warning: type qualifiers ignored on function return type
     "halphyrf_8188e_ce.c:2208", # drivers/net/wireless/rockchip_wlan/rtl8189es/hal/phydm/rtl8188e/halphyrf_8188e_ce.c:2208:1: warning: the frame size of 1056 bytes is larger than 1024 bytes
     "halphyrf_8723b_ce.c:2879", # drivers/net/wireless/rockchip_wlan/rtl8723bu/hal/phydm/rtl8723b/halphyrf_8723b_ce.c:2879:1: warning: the frame size of 1056 bytes is larger than 1024 bytes
+    "mali_kbase_ipa.c:582", # drivers/gpu/arm/midgard/ipa/mali_kbase_ipa.c:582:22: warning: initialization from incompatible pointer type
+    "mali_kbase_ipa.c:583",
  ])
 
 # Capture the name of the object file, can find it.
