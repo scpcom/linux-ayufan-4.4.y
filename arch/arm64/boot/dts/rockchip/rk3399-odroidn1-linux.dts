@@ -729,44 +729,44 @@
 
 		regulators {
 			vdd_center: DCDC_REG1 {
+				regulator-name = "vdd_center";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <750000>;
 				regulator-max-microvolt = <1350000>;
 				regulator-ramp-delay = <6001>;
-				regulator-name = "vdd_center";
 				regulator-state-mem {
 					regulator-off-in-suspend;
 				};
 			};
 
 			vdd_cpu_l: DCDC_REG2 {
+				regulator-name = "vdd_cpu_l";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <750000>;
 				regulator-max-microvolt = <1350000>;
 				regulator-ramp-delay = <6001>;
-				regulator-name = "vdd_cpu_l";
 				regulator-state-mem {
 					regulator-off-in-suspend;
 				};
 			};
 
 			vcc_ddr: DCDC_REG3 {
+				regulator-name = "vcc_ddr";
 				regulator-always-on;
 				regulator-boot-on;
-				regulator-name = "vcc_ddr";
 				regulator-state-mem {
 					regulator-on-in-suspend;
 				};
 			};
 
 			vcc_1v8: DCDC_REG4 {
+				regulator-name = "vcc_1v8";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
-				regulator-name = "vcc_1v8";
 				regulator-state-mem {
 					regulator-on-in-suspend;
 					regulator-suspend-microvolt = <1800000>;
@@ -774,33 +774,33 @@
 			};
 
 			vcc1v8_dvp: LDO_REG1 {
+				regulator-name = "vcc1v8_dvp";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
-				regulator-name = "vcc1v8_dvp";
 				regulator-state-mem {
 					regulator-off-in-suspend;
 				};
 			};
 
 			vcc3v0_tp: LDO_REG2 {
+				regulator-name = "vcc3v0_tp";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <3000000>;
 				regulator-max-microvolt = <3000000>;
-				regulator-name = "vcc3v0_tp";
 				regulator-state-mem {
 					regulator-off-in-suspend;
 				};
 			};
 
 			vcc1v8_pmu: LDO_REG3 {
+				regulator-name = "vcc1v8_pmu";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
-				regulator-name = "vcc1v8_pmu";
 				regulator-state-mem {
 					regulator-on-in-suspend;
 					regulator-suspend-microvolt = <1800000>;
@@ -808,11 +808,11 @@
 			};
 
 			vcc_sd: LDO_REG4 {
+				regulator-name = "vcc_sd";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <3300000>;
-				regulator-name = "vcc_sd";
 				regulator-state-mem {
 					regulator-on-in-suspend;
 					regulator-suspend-microvolt = <3300000>;
@@ -820,22 +820,22 @@
 			};
 
 			vcca3v0_codec: LDO_REG5 {
+				regulator-name = "vcca3v0_codec";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <3000000>;
 				regulator-max-microvolt = <3000000>;
-				regulator-name = "vcca3v0_codec";
 				regulator-state-mem {
 					regulator-off-in-suspend;
 				};
 			};
 
 			vcc_1v5: LDO_REG6 {
+				regulator-name = "vcc_1v5";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <1500000>;
 				regulator-max-microvolt = <1500000>;
-				regulator-name = "vcc_1v5";
 				regulator-state-mem {
 					regulator-on-in-suspend;
 					regulator-suspend-microvolt = <1500000>;
@@ -843,22 +843,22 @@
 			};
 
 			vcca1v8_codec: LDO_REG7 {
+				regulator-name = "vcca1v8_codec";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
-				regulator-name = "vcca1v8_codec";
 				regulator-state-mem {
 					regulator-off-in-suspend;
 				};
 			};
 
 			vcc_3v0: LDO_REG8 {
+				regulator-name = "vcc_3v0";
 				regulator-always-on;
 				regulator-boot-on;
 				regulator-min-microvolt = <3000000>;
 				regulator-max-microvolt = <3000000>;
-				regulator-name = "vcc_3v0";
 				regulator-state-mem {
 					regulator-on-in-suspend;
 					regulator-suspend-microvolt = <3000000>;
@@ -866,18 +866,18 @@
 			};
 
 			vcc3v3_s3: SWITCH_REG1 {
+				regulator-name = "vcc3v3_s3";
 				regulator-always-on;
 				regulator-boot-on;
-				regulator-name = "vcc3v3_s3";
 				regulator-state-mem {
 					regulator-off-in-suspend;
 				};
 			};
 
 			vcc3v3_s0: SWITCH_REG2 {
+				regulator-name = "vcc3v3_s0";
 				regulator-always-on;
 				regulator-boot-on;
-				regulator-name = "vcc3v3_s0";
 				regulator-state-mem {
 					regulator-off-in-suspend;
 				};
