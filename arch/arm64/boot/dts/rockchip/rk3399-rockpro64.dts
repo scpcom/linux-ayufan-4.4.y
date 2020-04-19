@@ -20,6 +20,12 @@
 		stdout-path = "serial2:1500000n8";
 	};
 
+	cpuinfo {
+		compatible = "rockchip,cpuinfo";
+		nvmem-cells = <&cpu_id>;
+		nvmem-cell-names = "id";
+	};
+
 	reserved-memory {
 		#address-cells = <2>;
 		#size-cells = <2>;
