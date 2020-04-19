@@ -22,6 +22,7 @@
 
 #include <linux/ioctl.h>
 #include <linux/types.h>
+#include <linux/compat.h>
 
 struct mtp_file_range {
 	/* file descriptor for file to transfer */
