@@ -790,6 +790,7 @@ config MFD_RK618
 
 config MFD_RK808
 	tristate "Rockchip RK808 Power Management chip"
+	depends on ARCH_ROCKCHIP
 	depends on I2C && OF
 	select MFD_CORE
 	select REGMAP_I2C
