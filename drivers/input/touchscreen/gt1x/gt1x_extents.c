@@ -27,6 +27,7 @@
 #include <linux/device.h>
 #include <linux/miscdevice.h>
 #include <linux/input.h>
+#include <linux/compat.h>
 
 #include <asm/uaccess.h>
 #include <linux/proc_fs.h>	/*proc */
