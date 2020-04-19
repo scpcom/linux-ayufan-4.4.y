@@ -2193,8 +2193,7 @@ static inline void stmmac_rx_refill(struct stmmac_priv *priv)
  */
 static int stmmac_rx(struct stmmac_priv *priv, int limit)
 {
-	unsigned int entry = priv->cur_rx;
-	unsigned int next_entry;
+	unsigned int next_entry = priv->cur_rx;
 	unsigned int count = 0;
 	int coe = priv->hw->rx_csum;
 
