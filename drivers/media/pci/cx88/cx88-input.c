@@ -130,7 +130,7 @@ static void cx88_ir_handle_key(struct cx88_IR *ir)
 
 		data = (data << 4) | ((gpio_key & 0xf0) >> 4);
 
-		rc_keydown(ir->dev, RC_TYPE_UNKNOWN, data, 0);
+		rc_keydown(ir->dev, RC_PROTO_UNKNOWN, data, 0);
 
 	} else if (ir->core->boardnr == CX88_BOARD_PROLINK_PLAYTVPVR ||
 		   ir->core->boardnr == CX88_BOARD_PIXELVIEW_PLAYTV_ULTRA_PRO) {
@@ -144,7 +144,7 @@ static void cx88_ir_handle_key(struct cx88_IR *ir)
 		scancode = RC_SCANCODE_NECX(addr, cmd);
 
 		if (0 == (gpio & ir->mask_keyup))
-			rc_keydown_notimeout(ir->dev, RC_TYPE_NECX, scancode,
+			rc_keydown_notimeout(ir->dev, RC_PROTO_NECX, scancode,
 									0);
 		else
 			rc_keyup(ir->dev);
@@ -152,20 +152,20 @@ static void cx88_ir_handle_key(struct cx88_IR *ir)
 	} else if (ir->mask_keydown) {
 		/* bit set on keydown */
 		if (gpio & ir->mask_keydown)
-			rc_keydown_notimeout(ir->dev, RC_TYPE_UNKNOWN, data, 0);
+			rc_keydown_notimeout(ir->dev, RC_PROTO_UNKNOWN, data, 0);
 		else
 			rc_keyup(ir->dev);
 
 	} else if (ir->mask_keyup) {
 		/* bit cleared on keydown */
 		if (0 == (gpio & ir->mask_keyup))
-			rc_keydown_notimeout(ir->dev, RC_TYPE_UNKNOWN, data, 0);
+			rc_keydown_notimeout(ir->dev, RC_PROTO_UNKNOWN, data, 0);
 		else
 			rc_keyup(ir->dev);
 
 	} else {
 		/* can't distinguish keydown/up :-/ */
-		rc_keydown_notimeout(ir->dev, RC_TYPE_UNKNOWN, data, 0);
+		rc_keydown_notimeout(ir->dev, RC_PROTO_UNKNOWN, data, 0);
 		rc_keyup(ir->dev);
 	}
 }
@@ -265,7 +265,7 @@ int cx88_ir_init(struct cx88_core *core, struct pci_dev *pci)
 	struct cx88_IR *ir;
 	struct rc_dev *dev;
 	char *ir_codes = NULL;
-	u64 rc_type = RC_BIT_OTHER;
+	u64 rc_type = RC_PROTO_BIT_OTHER;
 	int err = -ENOMEM;
 	u32 hardware_mask = 0;	/* For devices with a hardware mask, when
 				 * used with a full-code IR table
@@ -346,7 +346,7 @@ int cx88_ir_init(struct cx88_core *core, struct pci_dev *pci)
 		 * 002-T mini RC, provided with newer PV hardware
 		 */
 		ir_codes = RC_MAP_PIXELVIEW_MK12;
-		rc_type = RC_BIT_NECX;
+		rc_type = RC_PROTO_BIT_NECX;
 		ir->gpio_addr = MO_GP1_IO;
 		ir->mask_keyup = 0x80;
 		ir->polling = 10; /* ms */
@@ -529,7 +529,7 @@ void cx88_ir_irq(struct cx88_core *core)
 	struct cx88_IR *ir = core->ir;
 	u32 samples;
 	unsigned todo, bits;
-	struct ir_raw_event ev;
+	struct ir_raw_event ev = {};
 
 	if (!ir || !ir->sampling)
 		return;
@@ -544,7 +544,6 @@ void cx88_ir_irq(struct cx88_core *core)
 	if (samples == 0xff && ir->dev->idle)
 		return;
 
-	init_ir_raw_event(&ev);
 	for (todo = 32; todo > 0; todo -= bits) {
 		ev.pulse = samples & 0x80000000 ? false : true;
 		bits = min(todo, 32U - fls(ev.pulse ? samples : ~samples));
@@ -555,7 +554,7 @@ void cx88_ir_irq(struct cx88_core *core)
 	ir_raw_event_handle(ir->dev);
 }
 
-static int get_key_pvr2000(struct IR_i2c *ir, enum rc_type *protocol,
+static int get_key_pvr2000(struct IR_i2c *ir, enum rc_proto *protocol,
 			   u32 *scancode, u8 *toggle)
 {
 	int flags, code;
@@ -580,7 +579,7 @@ static int get_key_pvr2000(struct IR_i2c *ir, enum rc_type *protocol,
 	dprintk("IR Key/Flags: (0x%02x/0x%02x)\n",
 		   code & 0xff, flags & 0xff);
 
-	*protocol = RC_TYPE_UNKNOWN;
+	*protocol = RC_PROTO_UNKNOWN;
 	*scancode = code & 0xff;
 	*toggle = 0;
 	return 1;
@@ -610,7 +609,7 @@ void cx88_i2c_init_ir(struct cx88_core *core)
 	case CX88_BOARD_LEADTEK_PVR2000:
 		addr_list = pvr2000_addr_list;
 		core->init_data.name = "cx88 Leadtek PVR 2000 remote";
-		core->init_data.type = RC_BIT_UNKNOWN;
+		core->init_data.type = RC_PROTO_BIT_UNKNOWN;
 		core->init_data.get_key = get_key_pvr2000;
 		core->init_data.ir_codes = RC_MAP_EMPTY;
 		break;
@@ -631,8 +630,8 @@ void cx88_i2c_init_ir(struct cx88_core *core)
 			/* Hauppauge XVR */
 			core->init_data.name = "cx88 Hauppauge XVR remote";
 			core->init_data.ir_codes = RC_MAP_HAUPPAUGE;
-			core->init_data.type = RC_BIT_RC5 | RC_BIT_RC6_MCE |
-							RC_BIT_RC6_6A_32;
+			core->init_data.type = RC_PROTO_BIT_RC5 | RC_PROTO_BIT_RC6_MCE |
+							RC_PROTO_BIT_RC6_6A_32;
 			core->init_data.internal_get_key_func = IR_KBD_GET_KEY_HAUP_XVR;
 
 			info.platform_data = &core->init_data;
