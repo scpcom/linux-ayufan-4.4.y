@@ -683,7 +683,6 @@
 	vdd_gpu: syr828@41 {
 		compatible = "silergy,syr828";
 		reg = <0x41>;
-		vin-supply = <&vcc5v0_sys>;
 		regulator-compatible = "fan53555-reg";
 		regulator-name = "vdd_gpu";
 		regulator-min-microvolt = <712500>;
@@ -693,7 +692,8 @@
 		regulator-always-on;
 		regulator-boot-on;
 		regulator-initial-state = <3>;
-			regulator-state-mem {
+		vin-supply = <&vcc5v0_sys>;
+		regulator-state-mem {
 			regulator-off-in-suspend;
 		};
 	};
