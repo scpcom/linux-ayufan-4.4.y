@@ -366,6 +366,7 @@ config TOUCHSCREEN_GSLX680_PAD
 
 config TOUCHSCREEN_GSLX680_VR
 	tristate "gslX680 touchpad driver for VR"
+	depends on PINCTRL
 	help
 	  gslX680 touchpad driver for VR
 
