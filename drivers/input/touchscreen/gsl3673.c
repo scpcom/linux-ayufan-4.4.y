@@ -15,6 +15,7 @@
 #include <linux/input.h>
 #include <linux/interrupt.h>
 #include <linux/io.h>
+#include <linux/seq_file.h>
 #include <linux/platform_device.h>
 #include <linux/async.h>
 #include <linux/gpio.h>
