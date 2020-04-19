@@ -285,10 +285,11 @@ void rk_pcie_start_dma_3399(struct dma_trx_obj *obj)
 	struct rockchip_pcie *rockchip = dev_get_drvdata(obj->dev);
 	struct dma_table *tbl = obj->cur;
 	int chn = tbl->chn;
+	u64 phys_descs = tbl->phys_descs;
 
-	rockchip_pcie_write(rockchip, (u32)(tbl->phys_descs & 0xffffffff),
+	rockchip_pcie_write(rockchip, (u32)(phys_descs & 0xffffffff),
 			    PCIE_APB_CORE_UDMA_BASE + 0x14 * chn + 0x04);
-	rockchip_pcie_write(rockchip, (u32)(tbl->phys_descs >> 32),
+	rockchip_pcie_write(rockchip, (u32)(phys_descs >> 32),
 			    PCIE_APB_CORE_UDMA_BASE + 0x14 * chn + 0x08);
 	rockchip_pcie_write(rockchip, BIT(0) | (tbl->dir << 1),
 			    PCIE_APB_CORE_UDMA_BASE + 0x14 * chn + 0x00);
