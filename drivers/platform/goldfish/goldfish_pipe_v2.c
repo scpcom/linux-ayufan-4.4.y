@@ -1180,9 +1180,9 @@ static struct miscdevice goldfish_pipe_miscdev = {
 
 static void write_pa_addr(void *addr, void __iomem *portl, void __iomem *porth)
 {
-	const unsigned long paddr = __pa(addr);
+	const u64 paddr = __pa(addr);
 
-	writel(paddr >> 32, porth);
+	writel((u32)(paddr >> 32), porth);
 	writel((u32)paddr, portl);
 }
 
