@@ -175,9 +175,9 @@ int stmmac_mdio_reset(struct mii_bus *bus)
 
 		gpio_free(data->reset_gpio);
 	}
-#endif
 
 phy_reset:
+#endif
 	if (data->phy_reset) {
 		pr_debug("stmmac_mdio_reset: calling phy_reset\n");
 		data->phy_reset(priv->plat->bsp_priv);
