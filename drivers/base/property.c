@@ -804,6 +804,71 @@ static struct property_set *pset_copy_set(const struct property_set *pset)
 }
 
 /**
+ * device_remove_properties - Remove properties from a device object.
+ * @dev: Device whose properties to remove.
+ *
+ * The function removes properties previously associated to the device
+ * secondary firmware node with device_add_properties(). Memory allocated
+ * to the properties will also be released.
+ */
+void device_remove_properties(struct device *dev)
+{
+	struct fwnode_handle *fwnode;
+	struct property_set *pset;
+
+	fwnode = dev_fwnode(dev);
+	if (!fwnode)
+		return;
+	/*
+	 * Pick either primary or secondary node depending which one holds
+	 * the pset. If there is no real firmware node (ACPI/DT) primary
+	 * will hold the pset.
+	 */
+	pset = to_pset_node(fwnode);
+	if (pset) {
+		set_primary_fwnode(dev, NULL);
+	} else {
+		fwnode = fwnode->secondary;
+		if (!IS_ERR(fwnode) && is_pset_node(fwnode)) {
+			set_secondary_fwnode(dev, NULL);
+			pset = to_pset_node(fwnode);
+		}
+	}
+	if (pset)
+		pset_free_set(pset);
+}
+EXPORT_SYMBOL_GPL(device_remove_properties);
+
+/**
+ * device_add_properties - Add a collection of properties to a device object.
+ * @dev: Device to add properties to.
+ * @properties: Collection of properties to add.
+ *
+ * Associate a collection of device properties represented by @properties with
+ * @dev as its secondary firmware node. The function takes a copy of
+ * @properties.
+ */
+int device_add_properties(struct device *dev, struct property_entry *properties)
+{
+	struct property_set *p, pset;
+
+	if (!properties)
+		return -EINVAL;
+
+	pset.properties = properties;
+
+	p = pset_copy_set(&pset);
+	if (IS_ERR(p))
+		return PTR_ERR(p);
+
+	p->fwnode.type = FWNODE_PDATA;
+	p->fwnode.ops = &pset_fwnode_ops;
+	set_secondary_fwnode(dev, &p->fwnode);
+	return 0;
+}
+EXPORT_SYMBOL_GPL(device_add_properties);
+
+/**
  * device_remove_property_set - Remove properties from a device object.
  * @dev: Device whose properties to remove.
  *
