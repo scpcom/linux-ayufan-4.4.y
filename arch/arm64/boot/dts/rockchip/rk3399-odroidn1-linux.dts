@@ -52,6 +52,12 @@
 	model = "Hardkernel ODROID-N1";
 	compatible = "hardkernel,odroidn1-linux", "rockchip,rk3399";
 
+	chosen {
+		// disable USB autosuspend as this solves USB stability issues
+		bootargs = "earlycon=uart8250,mmio32,0xff1a0000 swiotlb=1 no_console_suspend=1 usbcore.autosuspend=-1";
+		stdout-path = "serial2:1500000n8";
+	};
+
 	cpuinfo {
 		compatible = "rockchip,cpuinfo";
 		nvmem-cells = <&cpu_id>;
@@ -67,6 +73,23 @@
 			compatible = "rockchip,drm-logo";
 			reg = <0x0 0x0 0x0 0x0>;
 		};
+	};
+
+	ion {
+		compatible = "rockchip,ion";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cma-heap {
+			reg = <0x00000000 0x02000000>;
+		};
+
+		system-heap {
+		};
+	};
+
+	aliases {
+		ethernet0 = &gmac;
 	};
 
 	clkin_gmac: external-gmac-clock {
