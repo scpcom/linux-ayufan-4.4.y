@@ -241,6 +241,12 @@
 		};
 	};
 
+	rk3399-restart {
+		compatible = "rockchip,rk3399-restart";
+		gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
+		open-source;
+	};
+
 	fan0: pwm-fan {
 		compatible = "pwm-fan";
 		pwms = <&pwm1 0 10000 0>;
