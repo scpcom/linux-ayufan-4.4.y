@@ -2647,7 +2647,7 @@ hal_EfusePgPacketWrite1ByteHeader(
 
 	PHY_SetMacReg(pAdapter, EFUSE_TEST, BIT26, 0); 
 
-		efuse_OneByteRead(pAdapter, efuse_addr, &tmp_header, bPseudoTest);
+	efuse_OneByteRead(pAdapter, efuse_addr, &tmp_header, bPseudoTest);
 
 	PHY_SetMacReg(pAdapter, EFUSE_TEST, BIT26, 1);
 
