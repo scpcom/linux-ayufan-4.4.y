@@ -13,6 +13,7 @@ menuconfig ROCKCHIP_REMOTECTL
 if ROCKCHIP_REMOTECTL
 
 config ROCKCHIP_REMOTECTL_PWM
+	depends on PINCTRL
 	bool "rockchip remoctrl pwm capture"
 	default n
 
