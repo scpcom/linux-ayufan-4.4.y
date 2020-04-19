@@ -73,6 +73,7 @@ struct rk_priv_data {
 	int rx_delay;
 
 	struct regmap *grf;
+	bool hk_mac_rule;
 };
 
 #define HIWORD_UPDATE(val, mask, shift) \
@@ -1477,6 +1478,8 @@ static struct rk_priv_data *rk_gmac_setup(struct platform_device *pdev,
 	dev_info(dev, "integrated PHY? (%s).\n",
 		 bsp_priv->integrated_phy ? "yes" : "no");
 
+	bsp_priv->hk_mac_rule = device_property_read_bool(dev, "hardkernel,mac-rule");
+
 	bsp_priv->pdev = pdev;
 
 	return bsp_priv;
@@ -1736,21 +1739,25 @@ void rk_get_eth_addr(void *priv, unsigned char *addr)
 	if (!is_valid_ether_addr(addr) || is_zero_ether_addr(addr))
 	{
 		/* if this condition comes, run initial set-up with Hardkernel rule */
-		rk_setup_mac_addr(addr);
-		if (is_zero_ether_addr(addr)) {
-			dev_err(dev, "%s: rk_vendor_read eth mac address failed (%d)",
-					__func__, ret);
-			random_ether_addr(addr);
-			dev_err(dev, "%s: generate random eth mac address: %02x:%02x:%02x:%02x:%02x:%02x",
-					__func__, addr[0], addr[1], addr[2],
-					addr[3], addr[4], addr[5]);
-			ret = rk_vendor_write(LAN_MAC_ID, addr, 6);
-			if (ret != 0)
-				dev_err(dev, "%s: rk_vendor_write eth mac address failed (%d)",
+		if (bsp_priv->hk_mac_rule) {
+			rk_setup_mac_addr(addr);
+			if (is_zero_ether_addr(addr)) {
+				dev_err(dev, "%s: rk_vendor_read eth mac address failed (%d)",
 						__func__, ret);
+				random_ether_addr(addr);
+				dev_err(dev, "%s: generate random eth mac address: %02x:%02x:%02x:%02x:%02x:%02x",
+						__func__, addr[0], addr[1], addr[2],
+						addr[3], addr[4], addr[5]);
+				ret = rk_vendor_write(LAN_MAC_ID, addr, 6);
+				if (ret != 0)
+					dev_err(dev, "%s: rk_vendor_write eth mac address failed (%d)",
+							__func__, ret);
+			}
+			goto out;
 		}
-	}
-#else /* CONFIG_PLAT_RK3399_ODROIDN1 */
+	} else
+		goto out;
+#endif /* CONFIG_PLAT_RK3399_ODROIDN1 */
 	rk_devinfo_get_eth_mac(addr);
 	if (is_valid_ether_addr(addr))
 		goto out;
@@ -1770,7 +1777,6 @@ void rk_get_eth_addr(void *priv, unsigned char *addr)
 	}
 
 out:
-#endif /* CONFIG_PLAT_RK3399_ODROIDN1 */
 
 	dev_err(dev, "%s: mac address: %02x:%02x:%02x:%02x:%02x:%02x",
 				__func__, addr[0], addr[1], addr[2],
