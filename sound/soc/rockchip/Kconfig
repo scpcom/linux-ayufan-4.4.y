@@ -81,6 +81,7 @@ config SND_SOC_ROCKCHIP_DA7219
 
 config SND_SOC_ROCKCHIP_HDMI_ANALOG
 	tristate "ASoC support for Rockchip built-in HDMI and CODEC IC"
+	depends on SND_SOC_ROCKCHIP && CLKDEV_LOOKUP
 	select SND_SOC_ROCKCHIP_I2S
 	select SND_SOC_HDMI_CODEC
 	help
