@@ -139,7 +139,7 @@ static int ndesc_get_rx_status(void *data, struct stmmac_extra_stats *x,
 }
 
 static void ndesc_init_rx_desc(struct dma_desc *p, int disable_rx_ic, int mode,
-			       int end, int bfsize)
+			       int end)
 {
 	p->des0 |= RDES0_OWN;
 	p->des1 |= (BUF_SIZE_2KiB - 1) & RDES1_BUFFER1_SIZE_MASK;
@@ -147,7 +147,7 @@ static void ndesc_init_rx_desc(struct dma_desc *p, int disable_rx_ic, int mode,
 	if (mode == STMMAC_CHAIN_MODE)
 		ndesc_rx_set_on_chain(p, end);
 	else
-		ndesc_rx_set_on_ring(p, end, bfsize);
+		ndesc_rx_set_on_ring(p, end);
 
 	if (disable_rx_ic)
 		p->des1 |= RDES1_DISABLE_IC;
