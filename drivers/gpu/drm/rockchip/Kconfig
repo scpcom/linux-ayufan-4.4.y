@@ -2,6 +2,7 @@ config DRM_ROCKCHIP
 	tristate "DRM Support for Rockchip"
 	depends on DRM
 	depends on RESET_CONTROLLER
+	depends on ARCH_ROCKCHIP
 	select DRM_KMS_HELPER
 	select DRM_KMS_FB_HELPER
 	select DRM_PANEL
@@ -117,6 +118,7 @@ config ROCKCHIP_RGB
 config ROCKCHIP_DRM_BACKLIGHT
 	tristate "Rockchip DRM Backlight"
 	depends on DRM_ROCKCHIP
+	depends on PINCTRL
 	help
 	  This selects support for Rockchip backlight manager,
 	  Vop cabc function request using vop self pwm devices, needed a
