@@ -20,7 +20,9 @@
 
 static DEFINE_PER_CPU(int, lock_kicker_irq) = -1;
 static DEFINE_PER_CPU(char *, irq_name);
+#ifdef CONFIG_QUEUED_SPINLOCKS
 static DEFINE_PER_CPU(atomic_t, xen_qlock_wait_nest);
+#endif
 static bool xen_pvspin = true;
 
 #ifdef CONFIG_QUEUED_SPINLOCKS
