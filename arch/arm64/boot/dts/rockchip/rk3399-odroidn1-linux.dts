@@ -289,6 +289,22 @@
 		pwm-supply = <&vcc5v0_sys>;
 	};
 
+	sdio_pwrseq: sdio-pwrseq {
+		compatible = "mmc-pwrseq-simple";
+		clocks = <&rk808 1>;
+		clock-names = "ext_clock";
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_enable_h>;
+
+		/*
+		 * On the module itself this is one of these (depending
+		 * on the actual card populated):
+		 * - SDIO_RESET_L_WL_REG_ON
+		 * - PDN (power down when low)
+		 */
+		reset-gpios = <&gpio0 RK_PB2 GPIO_ACTIVE_LOW>;
+	};
+
 	odroid_sysfs: odroid-sysfs {
 		status = "okay";
 		compatible = "odroid-sysfs";
@@ -715,6 +731,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pcie_clkreqn>;
 	vpcie3v3-supply = <&vcc3v3_pcie>;
+	bus-scan-delay-ms = <1000>;
 	status = "okay";
 };
 
@@ -764,6 +781,13 @@
 		pmic_dvs2: pmic-dvs2 {
 			rockchip,pins =
 				<1 18 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+	};
+
+	sdio-pwrseq {
+		wifi_enable_h: wifi-enable-h {
+			rockchip,pins =
+				<0 RK_PB2 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
@@ -1027,7 +1051,22 @@
 };
 
 &sdio0 { 
-	status = "disabled";
+	clock-frequency = <50000000>;
+	clock-freq-min-max = <200000 50000000>;
+	supports-sdio;
+	bus-width = <4>;
+	disable-wp;
+	cap-sd-highspeed;
+	cap-sdio-irq;
+	keep-power-in-suspend;
+	mmc-pwrseq = <&sdio_pwrseq>;
+	non-removable;
+	num-slots = <1>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&sdio0_bus4 &sdio0_cmd &sdio0_clk>;
+	sd-uhs-sdr104;
+	status = "okay";
+	defer_pcie = <2000>;
 };
 
 &uart0 {
