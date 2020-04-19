@@ -473,6 +473,7 @@ config ADI
 
 config ROCK_GPIOMEM
 	tristate "/dev/gpiomem rootless GPIO access via mmap() on the Rockchip"
+	depends on ARCH_ROCKCHIP
 	default m
 	help
 	  Provides users with root-free access to the GPIO registers
