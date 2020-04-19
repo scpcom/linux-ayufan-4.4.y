@@ -436,7 +436,7 @@
 		578     1701     300000
 		1702    99999    400000
 	>;
-	auto-min-freq = <400000>;
+	auto-min-freq = <800000>;
 };
 
 &dmc_opp_table {
@@ -1253,6 +1253,14 @@
 };
 
 &vopl_mmu {
+	status = "okay";
+};
+
+&vdec_mmu {
+	status = "okay";
+};
+
+&vpu_mmu {
 	status = "okay";
 };
 
