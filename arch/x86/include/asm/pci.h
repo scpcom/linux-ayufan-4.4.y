@@ -8,6 +8,7 @@
 #include <linux/scatterlist.h>
 #include <asm/io.h>
 #include <asm/x86_init.h>
+#include <asm-generic/pci-bridge.h>
 
 #ifdef __KERNEL__
 
