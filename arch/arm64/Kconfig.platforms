@@ -284,6 +284,7 @@ config ARCH_MESON
 	bool "Amlogic Platforms"
 	select COMMON_CLK
 	select MESON_IRQ_GPIO
+	select PWM_MESON
 	help
 	  This enables support for the arm64 based Amlogic SoCs
 	  such as the s905, S905X/D, S912, A113X/D or S905X/D2
