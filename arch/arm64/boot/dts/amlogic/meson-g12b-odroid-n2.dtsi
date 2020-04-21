@@ -12,8 +12,8 @@
 / {
 	aliases {
 		ethernet0 = &ethmac;
-		i2c1 = &i2c2;
-		i2c2 = &i2c3;
+		i2c0 = &i2c2;
+		i2c1 = &i2c3;
 		rtc0 = &rtc;
 		rtc1 = &vrtc;
 		serial0 = &uart_AO;
