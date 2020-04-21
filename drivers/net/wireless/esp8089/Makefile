@@ -17,6 +17,11 @@ endif
 
 KCONFIG := $(KBUILD)/.config
 ifeq (,$(wildcard $(KCONFIG)))
+KBUILD=$(srctree)
+endif
+
+KCONFIG := $(KBUILD)/.config
+ifeq (,$(wildcard $(KCONFIG)))
 $(error No .config found in $(KBUILD), please set KBUILD to configured kernel)
 endif
 
