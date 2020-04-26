@@ -2891,7 +2891,7 @@ static int mmc_blk_probe(struct mmc_card *card)
 			goto out;
 	}
 
-#ifdef CONFIG_ARM64
+#ifdef CONFIG_VIRTDRM
 	if (card->host->restrict_caps & RESTRICT_CARD_TYPE_EMMC)
 		mmc_blk_emmc_add(card, sizeof(struct mmc_blk_data));
 #endif
@@ -2953,7 +2953,7 @@ static int _mmc_blk_suspend(struct mmc_card *card)
 
 static void mmc_blk_shutdown(struct mmc_card *card)
 {
-#ifdef CONFIG_ARM64
+#ifdef CONFIG_VIRTDRM
 	if (card->host->restrict_caps & RESTRICT_CARD_TYPE_EMMC)
 		mmc_blk_emmc_remove(card);
 #endif

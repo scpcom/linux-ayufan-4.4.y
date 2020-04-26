@@ -119,7 +119,9 @@ extern int mmc_packed_init(struct mmc_queue *, struct mmc_card *);
 extern void mmc_packed_clean(struct mmc_queue *);
 
 extern int mmc_access_rpmb(struct mmc_queue *);
+#ifdef CONFIG_VIRTDRM
 void mmc_blk_emmc_remove(struct mmc_card *card);
 void mmc_blk_emmc_add(struct mmc_card *card, size_t data_size);
+#endif
 
 #endif
