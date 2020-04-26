@@ -701,6 +701,7 @@ config SPI_TLE62X0
 config SPI_WK2XXX
 	tristate "wk2xxx Spi Switch Uart"
 	depends on SPI
+	default n
 	help
 	  Say Y to get the third party encryption service.
         
