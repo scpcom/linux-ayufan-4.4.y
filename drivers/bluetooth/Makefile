@@ -2,17 +2,6 @@
 # Makefile for the Linux Bluetooth HCI device drivers.
 #
 
-
-
-
-#obj-y	+=rtk_bt.o
-#obj-y	+=rtk_coex.o
-#obj-y	+=rtk_misc.o
-
-obj-$(CONFIG_RTL8723DU)   += bt_rtl8723du.o
-
-bt_rtl8723du-y += rtk_bt.o rtk_coex.o rtk_misc.o
-
 obj-$(CONFIG_BT_HCIVHCI)	+= hci_vhci.o
 obj-$(CONFIG_BT_HCIUART)	+= hci_uart.o
 obj-$(CONFIG_BT_HCIBCM203X)	+= bcm203x.o
