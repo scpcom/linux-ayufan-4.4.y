@@ -154,7 +154,8 @@ static const struct regmap_config rk817_regmap_config = {
 	.reg_bits = 8,
 	.val_bits = 8,
 	.max_register = RK817_GPIO_INT_CFG,
-	.cache_type = REGCACHE_NONE,
+	.num_reg_defaults_raw = RK817_GPIO_INT_CFG + 1,
+	.cache_type = REGCACHE_RBTREE,
 	.volatile_reg = rk817_is_volatile_reg,
 };
 
@@ -310,6 +311,7 @@ static const struct rk808_reg_data rk816_pre_init_reg[] = {
 };
 
 static const struct rk808_reg_data rk817_pre_init_reg[] = {
+	{RK817_SYS_CFG(3), RK817_SLPPOL_MSK, RK817_SLPPOL_L},
 	{RK817_RTC_CTRL_REG, RTC_STOP, RTC_STOP},
 	/* Codec specific registers */
 	{ RK817_CODEC_DTOP_VUCTL, MASK_ALL, 0x03 },
@@ -938,15 +940,6 @@ static int rk817_pinctrl_init(struct device *dev, struct rk808 *rk808)
 		return 0;
 	}
 
-	ret = regmap_update_bits(rk808->regmap,
-				 RK817_SYS_CFG(3),
-				 RK817_SLPPOL_MSK,
-				 RK817_SLPPOL_L);
-	if (ret) {
-		dev_err(dev, "init: config RK817_SLPPOL_L error!\n");
-		return -1;
-	}
-
 	ret = pinctrl_select_state(rk808->pins->p, rk808->pins->reset);
 
 	if (ret)
@@ -1374,13 +1367,6 @@ static int __maybe_unused rk8xx_suspend(struct device *dev)
 		break;
 	}
 
-	if (rk808->pins && rk808->pins->p && rk808->pins->sleep) {
-		ret = pinctrl_select_state(rk808->pins->p, rk808->pins->sleep);
-		if (ret) {
-			dev_err(dev, "failed to act slp pinctrl state\n");
-			return -1;
-		}
-	}
 	return ret;
 }
 
