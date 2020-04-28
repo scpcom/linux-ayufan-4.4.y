@@ -582,6 +582,14 @@ config AXP20X_POWER
 	  This driver provides support for the power supply features of
 	  AXP20x PMIC.
 
+config USB_EXTCON_CHARGE
+	tristate "USB extcon charge driver"
+	depends on IIO && EXTCON
+	default y if (IIO=y && EXTCON=y)
+	default m if (IIO=y && EXTCON=m) || (IIO=m && EXTCON=y)
+	help
+	  Say Y here to enable support for USB extcon charge.
+
 source "drivers/power/reset/Kconfig"
 
 endif # POWER_SUPPLY
