@@ -340,7 +340,7 @@
 
 &lvds {
 	pinctrl-names = "default";
-	pinctrl-0 = <&lcdc_ctl>;
+	//pinctrl-0 = <&lcdc_ctl>;
 	status = "okay";
 
 	ports {
