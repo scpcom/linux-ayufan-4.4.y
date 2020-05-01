@@ -41,7 +41,9 @@ MODULE_DESCRIPTION("PHY library");
 MODULE_AUTHOR("Andy Fleming");
 MODULE_LICENSE("GPL");
 
+#ifdef CONFIG_REALTEK_PHY
 extern int get_wol_state(void);
+#endif
 
 void phy_device_free(struct phy_device *phydev)
 {
@@ -1231,11 +1233,14 @@ static int gen10g_config_init(struct phy_device *phydev)
 	return 0;
 }
 
+#ifdef CONFIG_REALTEK_PHY
 extern void wol_rtl8211f_config_mac_addr(struct phy_device *phydev);
+#endif
 int genphy_suspend(struct phy_device *phydev)
 {
 	int value;
 
+#ifdef CONFIG_REALTEK_PHY
 	if (get_wol_state()) {
 //             struct net_device * ndev = phydev->attached_dev;
 
@@ -1278,6 +1283,7 @@ int genphy_suspend(struct phy_device *phydev)
 
 		return 0;
 	}
+#endif
 
 	mutex_lock(&phydev->lock);
 
@@ -1299,6 +1305,7 @@ int genphy_resume(struct phy_device *phydev)
 {
 	int value;
 
+#ifdef CONFIG_REALTEK_PHY
 	if (get_wol_state() && phydev->suspended) {
 		mutex_lock(&phydev->lock);
 
@@ -1331,6 +1338,7 @@ int genphy_resume(struct phy_device *phydev)
 
 		return 0;
 	}
+#endif
 
 	mutex_lock(&phydev->lock);
 
