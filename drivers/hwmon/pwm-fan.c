@@ -35,6 +35,7 @@
 enum pwm_fan_mode {
 	PWM_FAN_MODE_MANUAL = 0,
 	PWM_FAN_MODE_AUTO,
+	PWM_FAN_MODE_GOVERNOR,
 };
 
 enum pwm_fan_enable {
@@ -143,6 +144,9 @@ static ssize_t store_pwm_fan_mode(struct device *dev, struct device_attribute *a
 	struct pwm_fan_ctx *ctx = dev_get_drvdata(dev);
 	int mode;
 
+	if (ctx->pwm_fan_mode == PWM_FAN_MODE_GOVERNOR)
+		return -EINVAL;
+
 	if (kstrtoint(buf, 0, &mode))
 		return -EINVAL;
 
@@ -170,6 +174,9 @@ static ssize_t store_pwm_fan_enable(struct device *dev, struct device_attribute 
 {
 	struct pwm_fan_ctx *ctx = dev_get_drvdata(dev);
 	int enable;
+
+	if (ctx->pwm_fan_mode == PWM_FAN_MODE_GOVERNOR)
+		return -EINVAL;
 
 	if (kstrtoint(buf, 0, &enable))
 		return -EINVAL;
@@ -443,20 +450,24 @@ static int pwm_fan_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
+	ctx->pwm_fan_mode = PWM_FAN_MODE_AUTO;
+	ctx->pwm_fan_state = 0;
+	ctx->pwm_fan_enable = PWM_FAN_DISABLE;
+
 	ret = of_property_read_u32(pdev->dev.of_node, "trig_temp_level0", &ctx->trig_temp_level0);
 	if (ret < 0) {
-		dev_err(&pdev->dev, "Property 'trig_temp_level0' cannot be read!\n");
-		return ret;
+		dev_warn(&pdev->dev, "Property 'trig_temp_level0' cannot be read.\n");
+		ctx->pwm_fan_mode = PWM_FAN_MODE_GOVERNOR;
 	}
 	ret = of_property_read_u32(pdev->dev.of_node, "trig_temp_level1", &ctx->trig_temp_level1);
 	if (ret < 0) {
-		dev_err(&pdev->dev, "Property 'trig_temp_level1' cannot be read!\n");
-		return ret;
+		dev_warn(&pdev->dev, "Property 'trig_temp_level1' cannot be read.\n");
+		ctx->pwm_fan_mode = PWM_FAN_MODE_GOVERNOR;
 	}
 	ret = of_property_read_u32(pdev->dev.of_node, "trig_temp_level2", &ctx->trig_temp_level2);
 	if (ret < 0) {
-		dev_err(&pdev->dev, "Property 'trig_temp_level2' cannot be read!\n");
-		return ret;
+		dev_warn(&pdev->dev, "Property 'trig_temp_level2' cannot be read.\n");
+		ctx->pwm_fan_mode = PWM_FAN_MODE_GOVERNOR;
 	}
 
 	ctx->pwm_fan_state = ctx->pwm_fan_max_state;
@@ -474,12 +485,14 @@ static int pwm_fan_probe(struct platform_device *pdev)
 		thermal_cdev_update(cdev);
 	}
 
-	ctx->pwm_fan_mode = PWM_FAN_MODE_AUTO;
-	ctx->pwm_fan_state = 0;
-	ctx->pwm_fan_enable = PWM_FAN_DISABLE;
-	pwm_fan_set(ctx);
+	if (ctx->pwm_fan_mode == PWM_FAN_MODE_GOVERNOR) {
+		ctx->pwm_fan_enable = PWM_FAN_ENABLE;
+		dev_info(&pdev->dev, "Switching to governor mode.");
+	} else {
+		pwm_fan_set(ctx);
 
-	INIT_DELAYED_WORK(&ctx->pwm_fan_work, pwm_fan_work_func);
+		INIT_DELAYED_WORK(&ctx->pwm_fan_work, pwm_fan_work_func);
+	}
 
 	return 0;
 
