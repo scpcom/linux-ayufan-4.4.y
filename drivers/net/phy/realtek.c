@@ -88,9 +88,17 @@ static void rtl8211f_config_speed(struct phy_device *phydev, int mode);
 static u8 mac_addr[] = {0, 0, 0, 0, 0, 0};
 struct phy_device *g_phydev;
 
+#ifdef CONFIG_KHADAS_MCU
 extern int mcu_get_wol_status(void);
+#else
+int wol_enable = 0;
+#endif
 int get_wol_state(void){
+#ifdef CONFIG_KHADAS_MCU
 	return mcu_get_wol_status();
+#else
+	return wol_enable;
+#endif
 }
 
 void enable_wol(int enable, bool is_shutdown)
@@ -141,6 +149,17 @@ static int __init init_mac_addr(char *line)
    return 1;
 }
 __setup("androidboot.mac=",init_mac_addr);
+
+#ifndef CONFIG_KHADAS_MCU
+static int __init init_wol_state(char *str)
+{
+   wol_enable = simple_strtol(str, NULL, 0);
+   printk("%s, wol_enable=%d\n",__func__, wol_enable);
+
+   return 1;
+}
+__setup("wol_enable=", init_wol_state);
+#endif
 
 #ifdef CONFIG_PM
 void rtl8211f_shutdown(void) {
@@ -606,7 +625,7 @@ static int rtl8211f_config_init(struct phy_device *phydev)
 		return -ENOMEM;
 	g_phydev = phydev;
 
-	if (3 == mcu_get_wol_status())
+	if (3 == get_wol_state())
 		enable_wol(3, false);
 
 	return 0;
