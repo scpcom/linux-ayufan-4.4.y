@@ -369,6 +369,7 @@ static int pwm_fan_of_get_cooling_data(struct device *dev,
 	return 0;
 }
 
+#ifdef CONFIG_ROCKCHIP_THERMAL
 extern void rockchip_get_cpu_temperature(int *out_temp);
 static void pwm_fan_work_func(struct work_struct *_work)
 {
@@ -396,6 +397,7 @@ static void pwm_fan_work_func(struct work_struct *_work)
 
 	schedule_delayed_work(&ctx->pwm_fan_work, PWM_FAN_LOOP_SECS);
 }
+#endif
 
 static int pwm_fan_probe(struct platform_device *pdev)
 {
@@ -450,6 +452,7 @@ static int pwm_fan_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
+#ifdef CONFIG_ROCKCHIP_THERMAL
 	ctx->pwm_fan_mode = PWM_FAN_MODE_AUTO;
 	ctx->pwm_fan_state = 0;
 	ctx->pwm_fan_enable = PWM_FAN_DISABLE;
@@ -469,6 +472,11 @@ static int pwm_fan_probe(struct platform_device *pdev)
 		dev_warn(&pdev->dev, "Property 'trig_temp_level2' cannot be read.\n");
 		ctx->pwm_fan_mode = PWM_FAN_MODE_GOVERNOR;
 	}
+#else
+	ctx->pwm_fan_mode = PWM_FAN_MODE_GOVERNOR;
+	ctx->pwm_fan_state = 0;
+	ctx->pwm_fan_enable = PWM_FAN_ENABLE;
+#endif
 
 	ctx->pwm_fan_state = ctx->pwm_fan_max_state;
 	if (IS_ENABLED(CONFIG_THERMAL)) {
@@ -485,6 +493,7 @@ static int pwm_fan_probe(struct platform_device *pdev)
 		thermal_cdev_update(cdev);
 	}
 
+#ifdef CONFIG_ROCKCHIP_THERMAL
 	if (ctx->pwm_fan_mode == PWM_FAN_MODE_GOVERNOR) {
 		ctx->pwm_fan_enable = PWM_FAN_ENABLE;
 		dev_info(&pdev->dev, "Switching to governor mode.");
@@ -493,6 +502,7 @@ static int pwm_fan_probe(struct platform_device *pdev)
 
 		INIT_DELAYED_WORK(&ctx->pwm_fan_work, pwm_fan_work_func);
 	}
+#endif
 
 	return 0;
 
