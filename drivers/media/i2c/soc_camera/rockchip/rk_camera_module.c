@@ -74,12 +74,14 @@
 #define OF_CAMERA_PINCTRL_STATE_SLEEP "rockchip,camera_sleep"
 
 const char *PLTFRM_CAMERA_MODULE_PIN_PD = OF_OV_GPIO_PD;
+EXPORT_SYMBOL(PLTFRM_CAMERA_MODULE_PIN_PD);
 const char *PLTFRM_CAMERA_MODULE_PIN_PWR = OF_OV_GPIO_PWR;
 const char *PLTFRM_CAMERA_MODULE_PIN_PWR_2ND = OF_OV_GPIO_PWR_2ND;
 const char *PLTFRM_CAMERA_MODULE_PIN_PWR_3RD = OF_OV_GPIO_PWR_3RD;
 const char *PLTFRM_CAMERA_MODULE_PIN_FLASH = OF_OV_GPIO_FLASH;
 const char *PLTFRM_CAMERA_MODULE_PIN_TORCH = OF_OV_GPIO_TORCH;
 const char *PLTFRM_CAMERA_MODULE_PIN_RESET = OF_OV_GPIO_RESET;
+EXPORT_SYMBOL(PLTFRM_CAMERA_MODULE_PIN_RESET);
 
 #define I2C_M_WR 0
 #define I2C_MSG_MAX 300
@@ -374,7 +376,7 @@ static struct pltfrm_camera_module_data *pltfrm_camera_module_get_data(
 			}
 			pltfrm_camera_module_pr_info(sd,
 				"camera module has flash driver %s\n",
-				pltfrm_dev_string(pdata->fl_ctrl.flsh_ctrl));
+				pltfrm_camera_module_dev_string(pdata->fl_ctrl.flsh_ctrl));
 		}
 	}
 
@@ -399,7 +401,7 @@ static struct pltfrm_camera_module_data *pltfrm_camera_module_get_data(
 		pdata->info.af_support = 1;
 		pltfrm_camera_module_pr_info(sd,
 			"camera module has auto focus controller %s\n",
-			pltfrm_dev_string(pdata->af_ctrl));
+			pltfrm_camera_module_dev_string(pdata->af_ctrl));
 	}
 
 	pdata->pinctrl = devm_pinctrl_get(&client->dev);
@@ -974,7 +976,7 @@ err:
 
 /* ======================================================================== */
 
-const char *pltfrm_dev_string(
+const char *pltfrm_camera_module_dev_string(
 	struct v4l2_subdev *sd)
 {
 	struct i2c_client *client;
@@ -986,6 +988,7 @@ const char *pltfrm_dev_string(
 		return "";
 	return dev_driver_string(&client->dev);
 }
+EXPORT_SYMBOL(pltfrm_camera_module_dev_string);
 
 int pltfrm_camera_module_read_reg(
 		struct v4l2_subdev *sd,
@@ -1036,6 +1039,7 @@ int pltfrm_camera_module_read_reg(
 
 	return ret;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_read_reg);
 
 int pltfrm_camera_module_read_reg_ex(
 	struct v4l2_subdev *sd,
@@ -1101,6 +1105,7 @@ int pltfrm_camera_module_read_reg_ex(
 		"i2c read from offset 0x%08x failed with error %d\n", reg, ret);
 	return ret;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_read_reg_ex);
 /* ======================================================================== */
 
 int pltfrm_camera_module_write_reg(
@@ -1145,6 +1150,7 @@ int pltfrm_camera_module_write_reg(
 		"i2c write to offset 0x%08x failed with error %d\n", reg, ret);
 	return ret;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_write_reg);
 
 int pltfrm_camera_module_write_reg_ex(
 	struct v4l2_subdev *sd,
@@ -1212,6 +1218,7 @@ int pltfrm_camera_module_write_reg_ex(
 		"i2c write to offset 0x%08x failed with error %d\n", reg, ret);
 	return ret;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_write_reg_ex);
 
 /* ======================================================================== */
 int pltfrm_camera_module_write_reglist(
@@ -1389,6 +1396,7 @@ int pltfrm_camera_module_write_reglist(
 	kfree(data);
 	return 0;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_write_reglist);
 
 static int pltfrm_camera_module_init_pm(
 	struct v4l2_subdev *sd,
@@ -1557,6 +1565,7 @@ int pltfrm_camera_module_set_pin_state(
 		pin);
 	return -EINVAL;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_set_pin_state);
 
 int pltfrm_camera_module_get_pin_state(
 	struct v4l2_subdev *sd,
@@ -1635,6 +1644,7 @@ int pltfrm_camera_module_s_power(
 	}
 	return ret;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_s_power);
 
 struct v4l2_subdev *pltfrm_camera_module_get_af_ctrl(
 	struct v4l2_subdev *sd)
@@ -1645,6 +1655,7 @@ struct v4l2_subdev *pltfrm_camera_module_get_af_ctrl(
 
 	return pdata->af_ctrl;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_get_af_ctrl);
 
 char *pltfrm_camera_module_get_flash_driver_name(
 	struct v4l2_subdev *sd)
@@ -1712,6 +1723,7 @@ err:
 	of_node_put(parent_node);
 	return ret;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_patch_config);
 
 int pltfrm_camera_module_init(
 	struct v4l2_subdev *sd,
@@ -1738,6 +1750,7 @@ int pltfrm_camera_module_init(
 
 	return ret;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_init);
 
 void pltfrm_camera_module_release(
 	struct v4l2_subdev *sd)
@@ -1776,6 +1789,7 @@ void pltfrm_camera_module_release(
 		pdata = NULL;
 	}
 }
+EXPORT_SYMBOL(pltfrm_camera_module_release);
 
 /* ======================================================================== */
 long pltfrm_camera_module_ioctl(struct v4l2_subdev *sd,
@@ -1879,6 +1893,7 @@ long pltfrm_camera_module_ioctl(struct v4l2_subdev *sd,
 
 	return ret;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_ioctl);
 
 int pltfrm_camera_module_get_flip_mirror(
 	struct v4l2_subdev *sd)
@@ -1903,6 +1918,7 @@ int pltfrm_camera_module_get_flip_mirror(
 
 	return mode;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_get_flip_mirror);
 
 int pltfrm_camera_module_pix_fmt2csi2_dt(int src_pix_fmt)
 {
@@ -2031,6 +2047,7 @@ int pltfrm_camera_module_pix_fmt2csi2_dt(int src_pix_fmt)
 	}
 	return ret;
 }
+EXPORT_SYMBOL(pltfrm_camera_module_pix_fmt2csi2_dt);
 
 #endif
 

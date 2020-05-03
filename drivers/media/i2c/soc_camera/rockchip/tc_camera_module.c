@@ -317,6 +317,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(tc_camera_module_s_fmt);
 
 /* ======================================================================== */
 
@@ -340,6 +341,7 @@ int tc_camera_module_g_fmt(struct v4l2_subdev *sd,
 
 	return -1;
 }
+EXPORT_SYMBOL(tc_camera_module_g_fmt);
 
 /* ======================================================================== */
 
@@ -443,6 +445,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(tc_camera_module_s_frame_interval);
 
 int tc_camera_module_g_frame_interval(
 	struct v4l2_subdev *sd,
@@ -464,6 +467,7 @@ int tc_camera_module_g_frame_interval(
 
 	return -EFAULT;
 }
+EXPORT_SYMBOL(tc_camera_module_g_frame_interval);
 
 /* ======================================================================== */
 
@@ -576,6 +580,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(tc_camera_module_s_stream);
 
 /* ======================================================================== */
 
@@ -663,6 +668,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(tc_camera_module_s_power);
 
 /* ======================================================================== */
 
@@ -800,6 +806,7 @@ int tc_camera_module_g_ctrl(struct v4l2_subdev *sd,
 
 	return 0;
 }
+EXPORT_SYMBOL(tc_camera_module_g_ctrl);
 
 static int flash_light_ctrl(
 		struct v4l2_subdev *sd,
@@ -1016,6 +1023,7 @@ int tc_camera_module_s_ext_ctrls(
 
 	return ret;
 }
+EXPORT_SYMBOL(tc_camera_module_s_ext_ctrls);
 
 /* ======================================================================== */
 
@@ -1038,6 +1046,7 @@ int tc_camera_module_s_ctrl(
 
 	return tc_camera_module_s_ext_ctrls(sd, &ext_ctrls);
 }
+EXPORT_SYMBOL(tc_camera_module_s_ctrl);
 
 /* ======================================================================== */
 
@@ -1181,6 +1190,7 @@ long tc_camera_module_ioctl(struct v4l2_subdev *sd,
 	ret = pltfrm_camera_module_ioctl(sd, cmd, arg);
 	return ret;
 }
+EXPORT_SYMBOL(tc_camera_module_ioctl);
 
 /* ======================================================================== */
 
@@ -1204,6 +1214,7 @@ int tc_camera_module_get_flip_mirror(
 
 	return mode;
 }
+EXPORT_SYMBOL(tc_camera_module_get_flip_mirror);
 
 /* ======================================================================== */
 
@@ -1228,6 +1239,7 @@ int tc_camera_module_enum_frameintervals(
 	fie->interval.denominator = cam_mod->custom.configs[fie->index].frm_intrvl.interval.denominator;
 	return 0;
 }
+EXPORT_SYMBOL(tc_camera_module_enum_frameintervals);
 
 /* ======================================================================== */
 static int tc_camera_module_i2c_write(struct v4l2_subdev *sd, u16 reg,
@@ -1327,6 +1339,7 @@ int tc_camera_module_write8_reg(
 {
 	return tc_camera_module_i2c_write(&cam_mod->sd, reg, &val, 1);
 }
+EXPORT_SYMBOL(tc_camera_module_write8_reg);
 
 int tc_camera_module_write16_reg(
 	struct tc_camera_module *cam_mod,
@@ -1335,6 +1348,7 @@ int tc_camera_module_write16_reg(
 {
 	return tc_camera_module_i2c_write(&cam_mod->sd, reg, (u8 *)&val, 2);
 }
+EXPORT_SYMBOL(tc_camera_module_write16_reg);
 
 int tc_camera_module_write32_reg(
 	struct tc_camera_module *cam_mod,
@@ -1343,6 +1357,7 @@ int tc_camera_module_write32_reg(
 {
 	return tc_camera_module_i2c_write(&cam_mod->sd, reg, (u8 *)&val, 4);
 }
+EXPORT_SYMBOL(tc_camera_module_write32_reg);
 
 u8 tc_camera_module_read8_reg(
 	struct tc_camera_module *cam_mod,
@@ -1356,6 +1371,7 @@ u8 tc_camera_module_read8_reg(
 
 	return ret;
 }
+EXPORT_SYMBOL(tc_camera_module_read8_reg);
 
 u16 tc_camera_module_read16_reg(
 	struct tc_camera_module *cam_mod,
@@ -1369,6 +1385,7 @@ u16 tc_camera_module_read16_reg(
 
 	return ret;
 }
+EXPORT_SYMBOL(tc_camera_module_read16_reg);
 
 u32 tc_camera_module_read32_reg(
 	struct tc_camera_module *cam_mod,
@@ -1380,6 +1397,7 @@ u32 tc_camera_module_read32_reg(
 
 	return val;
 }
+EXPORT_SYMBOL(tc_camera_module_read32_reg);
 
 int tc_camera_module_read_reg_table(
 	struct tc_camera_module *cam_mod,
@@ -1514,3 +1532,4 @@ void tc_camera_module_release(struct tc_camera_module *cam_mod)
 	pltfrm_camera_module_release(&cam_mod->sd);
 	v4l2_device_unregister_subdev(&cam_mod->sd);
 }
+EXPORT_SYMBOL(tc_camera_module_release);

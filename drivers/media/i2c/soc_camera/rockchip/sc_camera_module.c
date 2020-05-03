@@ -245,6 +245,7 @@ err:
 	sc_camera_module_release(cam_mod);
 	return ret;
 }
+EXPORT_SYMBOL(sc_camera_module_s_power);
 
 /* ======================================================================== */
 
@@ -303,6 +304,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(sc_camera_module_s_fmt);
 
 /* ======================================================================== */
 
@@ -326,6 +328,7 @@ int sc_camera_module_g_fmt(struct v4l2_subdev *sd,
 
 	return -1;
 }
+EXPORT_SYMBOL(sc_camera_module_g_fmt);
 
 /* ======================================================================== */
 
@@ -421,6 +424,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(sc_camera_module_s_frame_interval);
 
 int sc_camera_module_g_frame_interval(struct v4l2_subdev *sd,
 	struct v4l2_subdev_frame_interval *interval)
@@ -441,6 +445,7 @@ int sc_camera_module_g_frame_interval(struct v4l2_subdev *sd,
 
 	return -EFAULT;
 }
+EXPORT_SYMBOL(sc_camera_module_g_frame_interval);
 
 /* ======================================================================== */
 
@@ -553,6 +558,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(sc_camera_module_s_stream);
 
 /* ======================================================================== */
 
@@ -764,6 +770,7 @@ int sc_camera_module_g_ctrl(struct v4l2_subdev *sd,
 
 	return 0;
 }
+EXPORT_SYMBOL(sc_camera_module_g_ctrl);
 
 static int flash_light_ctrl(struct v4l2_subdev *sd,
 		struct sc_camera_module *cam_mod,
@@ -947,6 +954,7 @@ int sc_camera_module_s_ext_ctrls(struct v4l2_subdev *sd,
 
 	return ret;
 }
+EXPORT_SYMBOL(sc_camera_module_s_ext_ctrls);
 
 /* ======================================================================== */
 
@@ -968,6 +976,7 @@ int sc_camera_module_s_ctrl(struct v4l2_subdev *sd,
 
 	return sc_camera_module_s_ext_ctrls(sd, &ext_ctrls);
 }
+EXPORT_SYMBOL(sc_camera_module_s_ctrl);
 
 /* ======================================================================== */
 
@@ -1126,6 +1135,7 @@ long sc_camera_module_ioctl(struct v4l2_subdev *sd,
 	ret = pltfrm_camera_module_ioctl(sd, cmd, arg);
 	return ret;
 }
+EXPORT_SYMBOL(sc_camera_module_ioctl);
 
 /* ======================================================================== */
 
@@ -1148,6 +1158,7 @@ int sc_camera_module_get_flip_mirror(struct sc_camera_module *cam_mod)
 
 	return mode;
 }
+EXPORT_SYMBOL(sc_camera_module_get_flip_mirror);
 
 /* ======================================================================== */
 
@@ -1173,6 +1184,7 @@ int sc_camera_module_enum_frameintervals(struct v4l2_subdev *sd,
 		cam_mod->custom.configs[fie->index].frm_intrvl.interval.denominator;
 	return 0;
 }
+EXPORT_SYMBOL(sc_camera_module_enum_frameintervals);
 
 /* ======================================================================== */
 
@@ -1191,6 +1203,7 @@ int sc_camera_module_write_reg(struct sc_camera_module *cam_mod,
 {
 	return pltfrm_camera_module_write_reg(&cam_mod->sd, reg, val);
 }
+EXPORT_SYMBOL(sc_camera_module_write_reg);
 
 /* ======================================================================== */
 
@@ -1202,6 +1215,7 @@ int sc_camera_module_read_reg(struct sc_camera_module *cam_mod,
 	return pltfrm_camera_module_read_reg(&cam_mod->sd,
 		data_length, reg, val);
 }
+EXPORT_SYMBOL(sc_camera_module_read_reg);
 
 /* ======================================================================== */
 
@@ -1232,6 +1246,7 @@ int sc_camera_module_read_reg_table(struct sc_camera_module *cam_mod,
 
 	return -EFAULT;
 }
+EXPORT_SYMBOL(sc_camera_module_read_reg_table);
 
 int sc_camera_module_init(struct sc_camera_module *cam_mod,
 	struct sc_camera_module_custom_config *custom)
@@ -1299,3 +1314,4 @@ void sc_camera_module_release(struct sc_camera_module *cam_mod)
 	pltfrm_camera_module_release(&cam_mod->sd);
 	v4l2_device_unregister_subdev(&cam_mod->sd);
 }
+EXPORT_SYMBOL(sc_camera_module_release);

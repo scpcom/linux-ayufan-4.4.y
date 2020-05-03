@@ -315,6 +315,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(adv_camera_module_s_fmt);
 
 /* ======================================================================== */
 
@@ -338,6 +339,7 @@ int adv_camera_module_g_fmt(struct v4l2_subdev *sd,
 
 	return -1;
 }
+EXPORT_SYMBOL(adv_camera_module_g_fmt);
 
 /* ======================================================================== */
 
@@ -438,6 +440,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(adv_camera_module_s_frame_interval);
 
 int adv_camera_module_g_frame_interval(
 	struct v4l2_subdev *sd,
@@ -459,6 +462,7 @@ int adv_camera_module_g_frame_interval(
 
 	return -EFAULT;
 }
+EXPORT_SYMBOL(adv_camera_module_g_frame_interval);
 
 /* ======================================================================== */
 
@@ -571,6 +575,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(adv_camera_module_s_stream);
 
 /* ======================================================================== */
 
@@ -655,6 +660,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(adv_camera_module_s_power);
 
 /* ======================================================================== */
 
@@ -784,6 +790,7 @@ int adv_camera_module_g_ctrl(struct v4l2_subdev *sd,
 
 	return 0;
 }
+EXPORT_SYMBOL(adv_camera_module_g_ctrl);
 
 static int flash_light_ctrl(
 		struct v4l2_subdev *sd,
@@ -989,6 +996,7 @@ int adv_camera_module_s_ext_ctrls(
 
 	return ret;
 }
+EXPORT_SYMBOL(adv_camera_module_s_ext_ctrls);
 
 /* ======================================================================== */
 
@@ -1011,6 +1019,7 @@ int adv_camera_module_s_ctrl(
 
 	return adv_camera_module_s_ext_ctrls(sd, &ext_ctrls);
 }
+EXPORT_SYMBOL(adv_camera_module_s_ctrl);
 
 /* ======================================================================== */
 
@@ -1152,6 +1161,7 @@ long adv_camera_module_ioctl(struct v4l2_subdev *sd,
 	ret = pltfrm_camera_module_ioctl(sd, cmd, arg);
 	return ret;
 }
+EXPORT_SYMBOL(adv_camera_module_ioctl);
 
 /* ======================================================================== */
 
@@ -1202,6 +1212,7 @@ int adv_camera_module_enum_frameintervals(
 
 	return 0;
 }
+EXPORT_SYMBOL(adv_camera_module_enum_frameintervals);
 
 /* ======================================================================== */
 
@@ -1246,6 +1257,7 @@ int adv_camera_module_write_reg(
 		"i2c write to offset 0x%02x failed with error %d\n", reg, ret);
 	return ret;
 }
+EXPORT_SYMBOL(adv_camera_module_write_reg);
 
 /* ======================================================================== */
 
@@ -1290,6 +1302,7 @@ int adv_camera_module_read_reg(
 		"i2c read from offset 0x%02x failed with error %d\n", reg, ret);
 	return ret;
 }
+EXPORT_SYMBOL(adv_camera_module_read_reg);
 
 /* ======================================================================== */
 
@@ -1408,3 +1421,4 @@ void adv_camera_module_release(struct adv_camera_module *cam_mod)
 	pltfrm_camera_module_release(&cam_mod->sd);
 	v4l2_device_unregister_subdev(&cam_mod->sd);
 }
+EXPORT_SYMBOL(adv_camera_module_release);

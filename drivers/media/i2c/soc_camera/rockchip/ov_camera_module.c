@@ -313,6 +313,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(ov_camera_module_s_fmt);
 
 /* ======================================================================== */
 
@@ -336,6 +337,7 @@ int ov_camera_module_g_fmt(struct v4l2_subdev *sd,
 
 	return -1;
 }
+EXPORT_SYMBOL(ov_camera_module_g_fmt);
 
 /* ======================================================================== */
 
@@ -360,6 +362,7 @@ int ov_camera_module_enum_frame_size(
 				      fse->max_width, fse->max_height);
 	return 0;
 }
+EXPORT_SYMBOL(ov_camera_module_enum_frame_size);
 
 /* ======================================================================== */
 
@@ -460,6 +463,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(ov_camera_module_s_frame_interval);
 
 int ov_camera_module_g_frame_interval(
 	struct v4l2_subdev *sd,
@@ -481,6 +485,7 @@ int ov_camera_module_g_frame_interval(
 
 	return -EFAULT;
 }
+EXPORT_SYMBOL(ov_camera_module_g_frame_interval);
 
 /* ======================================================================== */
 
@@ -593,6 +598,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(ov_camera_module_s_stream);
 
 /* ======================================================================== */
 
@@ -677,6 +683,7 @@ err:
 		"failed with error %d\n", ret);
 	return ret;
 }
+EXPORT_SYMBOL(ov_camera_module_s_power);
 
 /* ======================================================================== */
 
@@ -806,6 +813,7 @@ int ov_camera_module_g_ctrl(struct v4l2_subdev *sd,
 
 	return 0;
 }
+EXPORT_SYMBOL(ov_camera_module_g_ctrl);
 
 static int flash_light_ctrl(
 		struct v4l2_subdev *sd,
@@ -1011,6 +1019,7 @@ int ov_camera_module_s_ext_ctrls(
 
 	return ret;
 }
+EXPORT_SYMBOL(ov_camera_module_s_ext_ctrls);
 
 /* ======================================================================== */
 
@@ -1033,6 +1042,7 @@ int ov_camera_module_s_ctrl(
 
 	return ov_camera_module_s_ext_ctrls(sd, &ext_ctrls);
 }
+EXPORT_SYMBOL(ov_camera_module_s_ctrl);
 
 /* ======================================================================== */
 
@@ -1174,6 +1184,7 @@ long ov_camera_module_ioctl(struct v4l2_subdev *sd,
 	ret = pltfrm_camera_module_ioctl(sd, cmd, arg);
 	return ret;
 }
+EXPORT_SYMBOL(ov_camera_module_ioctl);
 
 /* ======================================================================== */
 
@@ -1197,6 +1208,7 @@ int ov_camera_module_get_flip_mirror(
 
 	return mode;
 }
+EXPORT_SYMBOL(ov_camera_module_get_flip_mirror);
 
 /* ======================================================================== */
 
@@ -1223,6 +1235,7 @@ int ov_camera_module_enum_frameintervals(
 		configs[fie->index].frm_intrvl.interval.denominator;
 	return 0;
 }
+EXPORT_SYMBOL(ov_camera_module_enum_frameintervals);
 
 /* ======================================================================== */
 
@@ -1243,6 +1256,7 @@ int ov_camera_module_write_reg(
 {
 	return pltfrm_camera_module_write_reg(&cam_mod->sd, reg, val);
 }
+EXPORT_SYMBOL(ov_camera_module_write_reg);
 
 /* ======================================================================== */
 
@@ -1255,6 +1269,7 @@ int ov_camera_module_read_reg(
 	return pltfrm_camera_module_read_reg(&cam_mod->sd,
 		data_length, reg, val);
 }
+EXPORT_SYMBOL(ov_camera_module_read_reg);
 
 /* ======================================================================== */
 
@@ -1287,6 +1302,7 @@ int ov_camera_module_read_reg_table(
 
 	return -EFAULT;
 }
+EXPORT_SYMBOL(ov_camera_module_read_reg_table);
 
 int ov_camera_module_init(struct ov_camera_module *cam_mod,
 	struct ov_camera_module_custom_config *custom)
@@ -1354,3 +1370,4 @@ void ov_camera_module_release(struct ov_camera_module *cam_mod)
 	pltfrm_camera_module_release(&cam_mod->sd);
 	v4l2_device_unregister_subdev(&cam_mod->sd);
 }
+EXPORT_SYMBOL(ov_camera_module_release);

@@ -145,7 +145,7 @@ long pltfrm_camera_module_ioctl(struct v4l2_subdev *sd,
 	unsigned int cmd,
 	void *arg);
 
-const char *pltfrm_dev_string(struct v4l2_subdev *sd);
+const char *pltfrm_camera_module_dev_string(struct v4l2_subdev *sd);
 
 int pltfrm_camera_module_get_flip_mirror(
 	struct v4l2_subdev *sd);
@@ -154,16 +154,16 @@ int pltfrm_camera_module_pix_fmt2csi2_dt(int src_pix_fmt);
 
 #define pltfrm_camera_module_pr_debug(dev, fmt, arg...) \
 	pr_debug("%s.%s: " fmt, \
-		pltfrm_dev_string(dev), __func__, ## arg)
+		pltfrm_camera_module_dev_string(dev), __func__, ## arg)
 #define pltfrm_camera_module_pr_info(dev, fmt, arg...) \
 	pr_info("%s.%s: " fmt, \
-		pltfrm_dev_string(dev), __func__, ## arg)
+		pltfrm_camera_module_dev_string(dev), __func__, ## arg)
 #define pltfrm_camera_module_pr_warn(dev, fmt, arg...) \
 	pr_warn("%s.%s WARN: " fmt, \
-		pltfrm_dev_string(dev), __func__, ## arg)
+		pltfrm_camera_module_dev_string(dev), __func__, ## arg)
 #define pltfrm_camera_module_pr_err(dev, fmt, arg...) \
 	pr_err("%s.%s(%d) ERR: " fmt, \
-		pltfrm_dev_string(dev), __func__, __LINE__, \
+		pltfrm_camera_module_dev_string(dev), __func__, __LINE__, \
 		## arg)
 
 #endif
