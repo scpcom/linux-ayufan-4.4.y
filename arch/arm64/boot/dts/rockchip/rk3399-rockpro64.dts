@@ -5,6 +5,7 @@
  */
 
 /dts-v1/;
+#include <dt-bindings/soc/rockchip-io-domain.h>
 #include <dt-bindings/pwm/pwm.h>
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/display/drm_mipi_dsi.h>
@@ -1322,6 +1323,18 @@
 
 &pmu_io_domains {
 	status = "okay";
+	/*
+	 * If the uboot use rkdevelop branch, the pmu_io_domain is not set
+	 * during uboot phase, it will cause the io voltage is not suit for
+	 * the hardware,maybe will damage the io of rk3399, so we add
+	 * uboot-set value to make sure the value is same with the kernel,
+	 * ofcause you must make sure firstly the value here is suit for your
+	 * hardware. The available value is defined in
+	 * include/dt-bindings/soc/rockchip-io-domain.h, they are
+	 * also list here for more convenient configuration:
+	 * pmu1830-supply: RK3399_PMU1830_VDD_1V8 or RK3399_PMU1830_VDD_3V0
+	 */
+	uboot-set = <RK3399_PMU1830_VDD_3V0>;
 	pmu1830-supply = <&vcc_3v0>;
 };
 
