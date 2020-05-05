@@ -625,6 +625,7 @@ static int qca_open(struct hci_uart *hu)
 	return 0;
 }
 
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 static void qca_debugfs_init(struct hci_dev *hdev)
 {
 	struct hci_uart *hu = hci_get_drvdata(hdev);
@@ -670,6 +671,7 @@ static void qca_debugfs_init(struct hci_dev *hdev)
 	debugfs_create_u32("tx_idle_delay", mode, ibs_dir,
 			   &qca->tx_idle_delay);
 }
+#endif
 
 /* Flush protocol data */
 static int qca_flush(struct hci_uart *hu)
@@ -1756,6 +1758,7 @@ retry:
 			goto out;
 	}
 
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 	/* Setup patch / NVM configurations */
 	ret = qca_uart_setup(hdev, qca_baudrate, soc_type, ver,
 			firmware_name);
@@ -1793,6 +1796,7 @@ out:
 		retries++;
 		goto retry;
 	}
+#endif
 
 	/* Setup bdaddr */
 	if (soc_type == QCA_ROME)
@@ -1808,7 +1812,11 @@ static const struct hci_uart_proto qca_proto = {
 	.name		= "QCA",
 	.manufacturer	= 29,
 	.init_speed	= 115200,
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
 	.oper_speed	= 3000000,
+#else
+	.oper_speed	= 2000000,
+#endif
 	.open		= qca_open,
 	.close		= qca_close,
 	.flush		= qca_flush,
