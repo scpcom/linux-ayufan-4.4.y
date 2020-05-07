@@ -831,6 +831,7 @@
 	keep-power-in-suspend;
 	/* non-removable; */
 	mmc-pwrseq = <&sdio_pwrseq>;
+	sd-uhs-sdr104;
 	status = "okay";
 };
 
