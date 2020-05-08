@@ -310,15 +310,6 @@
 		vin-supply = <&vccsys>;
 	};
 
-	sdio_pwrseq: sdio-pwrseq {
-		compatible = "mmc-pwrseq-simple";
-		pinctrl-names = "default";
-		pinctrl-0 = <&wifi_enable_h>;
-
-		/* CHIP_EN GPIO3_B6 */
-		reset-gpios = <&gpio3 RK_PB6 GPIO_ACTIVE_LOW>;
-	};
-
 	wireless-wlan {
 		compatible = "wlan-platdata";
 		rockchip,grf = <&grf>;
@@ -971,7 +962,6 @@
 	ignore-pm-notify;
 	keep-power-in-suspend;
 	/* non-removable; */
-	mmc-pwrseq = <&sdio_pwrseq>;
 	status = "okay";
 };
 
@@ -1093,12 +1083,6 @@
 
 		soc_slppin_slp: soc_slppin_slp {
 			rockchip,pins = <0 RK_PA4 1 &pcfg_pull_none>;
-		};
-	};
-
-	sdio-pwrseq {
-		wifi_enable_h: wifi-enable-h {
-			rockchip,pins = <3 RK_PB6 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 };
