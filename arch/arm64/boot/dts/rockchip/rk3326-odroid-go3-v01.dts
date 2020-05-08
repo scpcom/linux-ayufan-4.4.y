@@ -22,10 +22,8 @@
 		stdout-path = "serial2:115200n8";
 	};
 
-	/* TODO */
 	backlight: backlight {
 		compatible = "pwm-backlight";
-		status = "disabled";
 		power-supply = <&vcc_bl>;
 		pwms = <&pwm1 0 25000 0>;
 		brightness-levels = <
