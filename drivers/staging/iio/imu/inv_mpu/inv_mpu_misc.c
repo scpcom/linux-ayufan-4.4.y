@@ -988,6 +988,7 @@ void inv_resume_recover_setting(struct inv_mpu_iio_s *st)
 					ACCL_CONFIG_FSR_SHIFT));
 	}
 }
+EXPORT_SYMBOL(inv_resume_recover_setting);
 
 static int inv_check_compass_self_test(struct inv_mpu_iio_s *st)
 {

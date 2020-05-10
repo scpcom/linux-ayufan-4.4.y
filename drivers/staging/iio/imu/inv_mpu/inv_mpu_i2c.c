@@ -618,7 +618,7 @@ static int inv_mpu_remove(struct i2c_client *client)
 	iio_free_device(indio_dev);
 #endif
 
-	dev_info(&client->adapter->dev, "inv-mpu-iio module removed.\n");
+	dev_info(&client->adapter->dev, "inv-mpu-iio-i2c module removed.\n");
 
 	return 0;
 }
@@ -733,7 +733,7 @@ static struct i2c_driver inv_mpu_driver = {
 	.id_table	=	inv_mpu_id,
 	.driver = {
 		.owner	=	THIS_MODULE,
-		.name	=	"inv-mpu-iio",
+		.name	=	"inv_mpu_iio_i2c",
 		.pm     =       INV_MPU_PMOPS,
 		.of_match_table = of_match_ptr(inv_mpu_of_match),
 	},
@@ -762,7 +762,7 @@ module_exit(inv_mpu_exit);
 MODULE_AUTHOR("Invensense Corporation");
 MODULE_DESCRIPTION("Invensense device driver");
 MODULE_LICENSE("GPL");
-MODULE_ALIAS("inv-mpu-iio");
+MODULE_ALIAS("inv-mpu-iio-i2c");
 
 /**
  *  @}

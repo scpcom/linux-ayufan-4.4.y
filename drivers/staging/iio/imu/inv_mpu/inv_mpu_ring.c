@@ -1058,6 +1058,7 @@ void inv_mpu_unconfigure_ring(struct iio_dev *indio_dev)
 		free_irq(st->irq, st);
 	iio_kfifo_free(indio_dev->buffer);
 };
+EXPORT_SYMBOL(inv_mpu_unconfigure_ring);
 
 static int inv_postenable(struct iio_dev *indio_dev)
 {
@@ -1312,6 +1313,7 @@ error_iio_sw_rb_free:
 	iio_kfifo_free(indio_dev->buffer);
 	return ret;
 }
+EXPORT_SYMBOL(inv_mpu_configure_ring);
 
 /**
  *  @}

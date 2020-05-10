@@ -102,6 +102,7 @@ int inv_mpu_probe_trigger(struct iio_dev *indio_dev)
 
 	return 0;
 }
+EXPORT_SYMBOL(inv_mpu_probe_trigger);
 
 void inv_mpu_remove_trigger(struct iio_dev *indio_dev)
 {
@@ -114,6 +115,7 @@ void inv_mpu_remove_trigger(struct iio_dev *indio_dev)
 	iio_free_trigger(st->trig);
 #endif
 }
+EXPORT_SYMBOL(inv_mpu_remove_trigger);
 /**
  *  @}
  */

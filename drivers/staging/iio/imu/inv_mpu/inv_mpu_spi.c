@@ -551,7 +551,7 @@ static const struct spi_device_id inv_mpu_id[] = {
 	{}
 };
 
-MODULE_DEVICE_TABLE(i2c, inv_mpu_id);
+MODULE_DEVICE_TABLE(spi, inv_mpu_id);
 
 static const struct of_device_id inv_mpu_of_match[] = {
 	{ .compatible = "inv-spi,itg3500", },

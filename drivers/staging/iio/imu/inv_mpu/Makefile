@@ -5,17 +5,23 @@
 
 obj-$(CONFIG_INV_MPU_IIO) += inv-mpu-iio.o
 
-inv-mpu-iio-objs := inv_mpu_spi.o
-inv-mpu-iio-objs += inv_mpu_i2c.o
-inv-mpu-iio-objs += inv_mpu_hid.o
-inv-mpu-iio-objs += inv_mpu_core.o
+inv-mpu-iio-i2c-objs := inv_mpu_i2c.o
+inv-mpu-iio-hid-objs := inv_mpu_hid.o
+inv-mpu-iio-objs := inv_mpu_core.o
 inv-mpu-iio-objs += inv_mpu_ring.o
 inv-mpu-iio-objs += inv_mpu_trigger.o
 inv-mpu-iio-objs += inv_mpu_misc.o
 inv-mpu-iio-objs += inv_mpu3050_iio.o
 inv-mpu-iio-objs += dmpDefaultMPU6050.o
+ifeq ($(CONFIG_SPI_MASTER), y)
+inv-mpu-iio-spi-objs := inv_mpu_spi.o
+obj-$(CONFIG_INV_MPU_IIO) += inv-mpu-iio-spi.o
+endif
+obj-$(CONFIG_INV_MPU_IIO) += inv-mpu-iio-i2c.o
+obj-$(CONFIG_INV_MPU_IIO) += inv-mpu-iio-hid.o
 ifeq ($(CONFIG_INV_TESTING), y)
-inv-mpu-iio-objs += inv_counters.o
+inv-mpu-iio-counters-objs := inv_counters.o
+obj-$(CONFIG_INV_MPU_IIO) += inv-mpu-iio-counters.o
 endif
 ifeq ($(VERSION),4)
 ifeq ($(PATCHLEVEL),4)

@@ -1602,6 +1602,7 @@ void inv_set_iio_info(struct inv_mpu_iio_s *st, struct iio_dev *indio_dev)
 	indio_dev->modes = INDIO_DIRECT_MODE;
 	indio_dev->currentmode = INDIO_DIRECT_MODE;
 }
+EXPORT_SYMBOL(inv_set_iio_info);
 
 /**
  *  inv_setup_compass() - Configure compass.
@@ -1917,6 +1918,7 @@ int inv_check_chip_type(struct inv_mpu_iio_s *st, const char *name)
 
 	return 0;
 }
+EXPORT_SYMBOL(inv_check_chip_type);
 
 /**
  *  inv_create_dmp_sysfs() - create binary sysfs dmp entry.
@@ -1938,6 +1940,12 @@ int inv_create_dmp_sysfs(struct iio_dev *ind)
 
 	return result;
 }
+EXPORT_SYMBOL(inv_create_dmp_sysfs);
+
+MODULE_AUTHOR("Invensense Corporation");
+MODULE_DESCRIPTION("Invensense device driver");
+MODULE_LICENSE("GPL");
+MODULE_ALIAS("inv-mpu-iio");
 
 /**
  *  @}
