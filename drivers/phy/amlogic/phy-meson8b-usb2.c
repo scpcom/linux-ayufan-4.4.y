@@ -113,6 +113,7 @@
 struct phy_meson8b_usb2_priv {
 	void __iomem		*regs;
 	enum usb_dr_mode	dr_mode;
+	enum usb_dr_mode	phy_mode;
 	struct clk		*clk_usb_general;
 	struct clk		*clk_usb;
 	struct reset_control	*reset;
@@ -181,7 +182,7 @@ static int phy_meson8b_usb2_power_on(struct phy *phy)
 	phy_meson8b_usb2_mask_bits(priv, REG_CTRL, REG_CTRL_SOF_TOGGLE_OUT,
 				   REG_CTRL_SOF_TOGGLE_OUT);
 
-	if (priv->dr_mode == USB_DR_MODE_HOST) {
+	if (priv->phy_mode == USB_DR_MODE_HOST) {
 		phy_meson8b_usb2_mask_bits(priv, REG_ADP_BC,
 					   REG_ADP_BC_ACA_ENABLE,
 					   REG_ADP_BC_ACA_ENABLE);
@@ -249,6 +250,11 @@ static int phy_meson8b_usb2_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev,
 			"missing dual role configuration of the controller\n");
 		return -EINVAL;
+	}
+
+	priv->phy_mode = usb_get_dr_mode(&pdev->dev);
+	if (priv->phy_mode == USB_DR_MODE_UNKNOWN) {
+		priv->phy_mode = priv->dr_mode;
 	}
 
 	phy = devm_phy_create(&pdev->dev, NULL, &phy_meson8b_usb2_ops);
