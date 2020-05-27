@@ -299,7 +299,7 @@ define rule_dtc
 endef
 
 $(obj)/%.dt.yaml: $(src)/%.dts $(DTC) $(DT_TMP_SCHEMA) FORCE
-	$(call if_changed_rule,dtc)
+	$(call if_changed_rule,dtc,yaml)
 
 quiet_cmd_dtco = DTCO    $@
 cmd_dtco = mkdir -p $(dir ${dtc-tmp}) ; \
