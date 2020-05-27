@@ -38,6 +38,10 @@ struct drm_fb_helper;
 #include <linux/kgdb.h>
 #include <linux/vgaarb.h>
 
+#if defined(CONFIG_UMP)
+#include <ump/ump_kernel_interface.h>
+#endif
+
 enum mode_set_atomic {
 	LEAVE_ATOMIC_MODE_SET,
 	ENTER_ATOMIC_MODE_SET,
@@ -92,6 +96,8 @@ struct drm_fb_helper_funcs {
 	int (*fb_probe)(struct drm_fb_helper *helper,
 			struct drm_fb_helper_surface_size *sizes);
 };
+
+#define DRM_FB_UMP_COUNT 1 /* only enable one FB UMP layer */
 
 /**
  * struct drm_fb_helper - main structure to emulate fbdev on top of KMS
@@ -186,6 +192,9 @@ struct drm_fb_helper {
 	 * See also: @deferred_setup
 	 */
 	int preferred_bpp;
+#if defined(CONFIG_UMP)
+	ump_dd_handle ump_wrapped_buffer[DRM_FB_UMP_COUNT][2];
+#endif
 };
 
 static inline struct drm_fb_helper *
@@ -500,5 +509,12 @@ drm_fb_helper_remove_conflicting_pci_framebuffers(struct pci_dev *pdev,
 		ret = vga_remove_vgacon(pdev);
 	return ret;
 }
+
+#if defined(CONFIG_UMP)
+extern int (*drm_get_ump_secure_id) (struct fb_info *info,
+        struct drm_fb_helper *g_fbi,     unsigned long arg, int buf);
+#define GET_UMP_SECURE_ID_BUF1 _IOWR('m', 311, unsigned int)
+#define GET_UMP_SECURE_ID_BUF2 _IOWR('m', 312, unsigned int)
+#endif
 
 #endif
