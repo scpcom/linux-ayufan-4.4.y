@@ -808,7 +808,11 @@
 &gpu {
 	status = "okay";
 	mali-supply = <&vdd_gpu>;
+	compatible = "arm,mali-midgard";
+	interrupt-names = "GPU", "JOB", "MMU";
+	clock-names = "clk_mali";
 	#cooling-cells = <2>; /* min followed by max */
+	power-off-delay-ms = <200>;
 
 	gpu_power_model: power_model {
 		compatible = "arm,mali-simple-power-model";
