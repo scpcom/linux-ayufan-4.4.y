@@ -817,16 +817,7 @@
 	compatible = "arm,mali-midgard";
 	interrupt-names = "GPU", "JOB", "MMU";
 	clock-names = "clk_mali";
-	#cooling-cells = <2>; /* min followed by max */
 	power-off-delay-ms = <200>;
-
-	gpu_power_model: power_model {
-		compatible = "arm,mali-simple-power-model";
-		static-coefficient = <411000>;
-		dynamic-coefficient = <733>;
-		ts = <32000 4700 (-80) 2>;
-		thermal-zone = "gpu-thermal";
-	};
 };
 
 &gpu_power_model {
