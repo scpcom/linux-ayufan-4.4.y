@@ -45,6 +45,10 @@
 
 #include <media/cec-notifier.h>
 
+/* try to probe edid two times only, allows to continue without edid in case
+   nothing is connected. */
+int dw_hdmi_wait_for_ddc = 2;
+
 #define DDC_CI_ADDR		0x37
 #define DDC_SEGMENT_ADDR	0x30
 
@@ -3924,6 +3928,11 @@ __dw_hdmi_probe(struct platform_device *pdev,
 		hdmi->ddc = dw_hdmi_i2c_adapter(hdmi);
 		if (IS_ERR(hdmi->ddc))
 			hdmi->ddc = NULL;
+		else if (!drm_probe_ddc(hdmi->ddc) && dw_hdmi_wait_for_ddc) {
+			dw_hdmi_wait_for_ddc--;
+			ret = -EPROBE_DEFER;
+			goto err_iahb;
+		}
 		/*
 		 * Read high and low time from device tree. If not available use
 		 * the default timing scl clock rate is about 99.6KHz.
