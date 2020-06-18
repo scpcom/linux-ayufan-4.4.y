@@ -20,54 +20,52 @@
                 bootargs = "";
 	};
 
-	/* TODO */
-	joypad: odroidgo2-joypad {
-                compatible = "odroidgo2-joypad";
-		status = "disabled";
-
+	joypad: odroidgo3-joypad {
+                compatible = "odroidgo3-joypad";
+		status = "okay";
                 /*
-                  - odroidgo2-joypad sysfs list -
+                  - odroidgo3-joypad sysfs list -
 		   * for poll device interval(ms)
-		   /sys/devices/platform/odroidgo2_joypad/poll_interval [rw]
+		   /sys/devices/platform/odroidgo3_joypad/poll_interval [rw]
+		   ex) echo 20 > poll_interval
                    * for button-adc-fuzz
-		   /sys/devices/platform/odroidgo2_joypad/adc_fuzz [r]
+		   /sys/devices/platform/odroidgo3_joypad/adc_fuzz [r]
                    * for button-adc-flat
-		   /sys/devices/platform/odroidgo2_joypad/adc_flat [r]
+		   /sys/devices/platform/odroidgo3_joypad/adc_flat [r]
 
 		   * for report control(1:enable, 0:disable)
-		   /sys/devices/platform/odroidgo2_joypad/enable [rw]
-		   * for adc calibration value setup(1:current adcs value -> cal value)
-		   /sys/devices/platform/odroidgo2_joypad/adc_cal [rw]
+		   /sys/devices/platform/odroidgo3_joypad/enable [rw]
+		   * for adc calibration value setup(current adcs value -> cal value)
+		   /sys/devices/platform/odroidgo3_joypad/adc_cal [rw]
+		   ex) echo 0 > adc_cal
+		   * for amux data debug
+		   * Joypad driver is disabled when using this sysfs.
+		   /sys/devices/platform/odroidgo3_joypad/amux_debug [rw]
+		   ex) echo 0 > amux_debug --> select amux channel
+		   ex) cat amux_debug --> get adc data of seleted channel
                 */
 
 		/* gpio pincontrol setup */
                 pinctrl-names = "default";
                 pinctrl-0 = <&btn_pins>;
 
-		/* JOY_X, JOY_Y Channel define */
-		io-channel-names = "joy_x", "joy_y";
-		io-channels = <&saradc 1>, <&saradc 2>;
+		/* Analog mux define */
+		io-channel-names = "amux_adc";
+		io-channels = <&saradc 1>;
 
-		/* adc channel count */
-		button-adc-count = <2>;
+		/* adc mux channel count */
+		amux-count = <4>;
+		/* adc mux select(a,b) gpio */
+		amux-a-gpios = <&gpio3 RK_PB3 GPIO_ACTIVE_LOW>;
+		amux-b-gpios = <&gpio3 RK_PB0 GPIO_ACTIVE_LOW>;
+		/* adc mux enable gpio */
+		amux-en-gpios = <&gpio3 RK_PB5 GPIO_ACTIVE_LOW>;
 
 		/* adc calculate scale */
 		button-adc-scale = <2>;
 
 		/* adc deadzone range  */
-		button-adc-deadzone = <20>;
-
-		/*
-		    joy-stick voltage range
-		    /sys/devices/platform/ff288000.saradc/iio:device0
-		    adc-x : in_voltage1_raw
-		    adc-y : in_voltage2_raw
-
-		    range calculate.
-		    (adc raw max value - adc raw min value) * scale * 1.7515
-		*/
-		button-adc-x-range = <1800>;
-		button-adc-y-range = <1800>;
+		button-adc-deadzone = <64>;
 
 		/*
 		  specifies fuzz value that is used to filter noise from
@@ -85,17 +83,20 @@
 		*/
 
 		/*
-		      *** ODROIDGO2-Advance Switch layoout ***
+		      *** ODROIDGO3-Advance Switch layoout ***
 		|------------------------------------------------|
-		| sw15                                      sw16 |
+		| sw15  sw21        sw10   sw9        sw20  sw16 |
 		|------------------------------------------------|
-		|     sw1      |-------------------|      sw8    |
+		|      sw19                            sw22      |
+		|              |-------------------|             |
+		|     sw1      |                   |      sw8    |
 		|  sw3   sw4   |                   |   sw7   sw5 |
 		|     sw2      |    LCD Display    |      sw6    |
 		|              |                   |             |
+		|              |                   |             |
 		|              |-------------------|             |
-		|         sw9 sw10   sw11 sw12   sw13 sw14       |
-		|------------------------------------------------|
+		|  sw11 sw12        | sd-slot |       sw13 sw14  |
+		|-------------------|         |------------------|
 		*/
                 /*
                     joypad driver is poll-device driver.
@@ -143,13 +144,13 @@
                 };
                 sw9 {
                         gpios = <&gpio2 RK_PA0 GPIO_ACTIVE_LOW>;
-                        label = "GPIO F1";
-                        linux,code = <BTN_TRIGGER_HAPPY1>; // 0x2c0
+                        label = "GPIO BTN-VOLUP";
+                        linux,code = <KEY_VOLUMEUP>; // 115, 0x73
                 };
                 sw10 {
                         gpios = <&gpio2 RK_PA1 GPIO_ACTIVE_LOW>;
-                        label = "GPIO F2";
-                        linux,code = <BTN_TRIGGER_HAPPY2>; // 0x2c1
+                        label = "GPIO BTN-VOLDN";
+                        linux,code = <KEY_VOLUMEDOWN>; // 114, 0x72
                 };
                 sw11 {
                         gpios = <&gpio2 RK_PA2 GPIO_ACTIVE_LOW>;
@@ -181,15 +182,25 @@
                         label = "GPIO TOP-RIGHT";
                         linux,code = <BTN_TR>; // 0x05
                 };
+                sw19 {
+                        gpios = <&gpio3 RK_PB1 GPIO_ACTIVE_LOW>;
+                        label = "GPIO F1";
+                        linux,code = <BTN_TRIGGER_HAPPY1>;
+                };
                 sw20 {
                         gpios = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
-                        label = "GPIO TOP-LEFT2";
-                        linux,code = <BTN_TL2>;
+                        label = "GPIO TOP-RIGHT2";
+                        linux,code = <BTN_TR2>;
                 };
                 sw21 {
                         gpios = <&gpio3 RK_PB2 GPIO_ACTIVE_LOW>;
-                        label = "GPIO TOP-RIGHT2";
-                        linux,code = <BTN_TR2>;
+                        label = "GPIO TOP-LEFT2";
+                        linux,code = <BTN_TL2>;
+                };
+                sw22 {
+                        gpios = <&gpio3 RK_PB4 GPIO_ACTIVE_LOW>;
+                        label = "GPIO F2";
+                        linux,code = <BTN_TRIGGER_HAPPY2>;
                 };
         };
 
