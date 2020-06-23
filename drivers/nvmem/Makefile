@@ -6,6 +6,9 @@
 obj-$(CONFIG_NVMEM)		+= nvmem_core.o
 nvmem_core-y			:= core.o
 
+obj-$(CONFIG_GENERIC_EFUSE_CLASS) += nvmem_generic_efuse_class.o
+nvmem_generic_efuse_class-y       := generic-efuse-class.o
+
 # Devices
 obj-$(CONFIG_NVMEM_APPLE_EFUSES)	+= nvmem-apple-efuses.o
 nvmem-apple-efuses-y 			:= apple-efuses.o
