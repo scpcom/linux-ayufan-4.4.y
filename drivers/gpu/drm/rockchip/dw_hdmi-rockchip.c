@@ -153,12 +153,6 @@ static const struct dw_hdmi_mpll_config rockchip_mpll_cfg[] = {
 			{ 0x214c, 0x0003},
 			{ 0x4064, 0x0003}
 		},
-	},  {
-		162000000, {
-			{ 0x0051, 0x0002 },
-			{ 0x214c, 0x0003 },
-			{ 0x4064, 0x0003 },
-		},
 	}, {
 		~0UL, {
 			{ 0x00a0, 0x000a },
