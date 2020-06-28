@@ -179,8 +179,6 @@ static const struct dw_hdmi_curr_ctrl rockchip_cur_ctr[] = {
 	}, {
 		148500000, { 0x0000, 0x0038, 0x0038 },
 	}, {
-		600000000, { 0x0000, 0x0000, 0x0000 },
-	},  {
 		~0UL,      { 0x0000, 0x0000, 0x0000},
 	}
 };
