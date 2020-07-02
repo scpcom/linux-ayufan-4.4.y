@@ -40,6 +40,12 @@ struct iommu_domain;
 #define VOP_OUTPUT_IF_HDMI0	BIT(11)
 #define VOP_OUTPUT_IF_HDMI1	BIT(12)
 
+struct rockchip_drm_sub_dev {
+	struct list_head list;
+	struct drm_connector *connector;
+	struct device_node *of_node;
+};
+
 struct rockchip_sdr2hdr_state {
 	int sdr2hdr_func;
 
@@ -186,6 +192,10 @@ int rockchip_register_crtc_funcs(struct drm_crtc *crtc,
 void rockchip_unregister_crtc_funcs(struct drm_crtc *crtc);
 int rockchip_drm_encoder_set_crtc_endpoint_id(struct rockchip_encoder *rencoder,
 					      struct device_node *np, int port, int reg);
+void rockchip_drm_register_sub_dev(struct rockchip_drm_sub_dev *sub_dev);
+void rockchip_drm_unregister_sub_dev(struct rockchip_drm_sub_dev *sub_dev);
+struct rockchip_drm_sub_dev *rockchip_drm_get_sub_dev(struct device_node *node);
+
 int rockchip_drm_endpoint_is_subdriver(struct device_node *ep);
 uint32_t rockchip_drm_of_find_possible_crtcs(struct drm_device *dev,
 					     struct device_node *port);
