@@ -40,7 +40,8 @@
 #include <linux/of_graph.h>
 #include <video/videomode.h>
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
+    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 	#include <linux/gpio.h>
 	#include <linux/of_gpio.h>
 #endif
@@ -114,14 +115,16 @@ struct panel_simple {
 	const struct panel_desc *desc;
 
 	struct backlight_device *backlight;
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) && \
+   !defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 	struct regulator *backlight_supply;
 #endif
 	struct regulator *supply;
 	struct i2c_adapter *ddc;
 
 	struct gpio_desc *enable_gpio;
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
+    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 	int	reset_gpio;
 	bool	reset_gpio_active;
 #else
@@ -373,6 +376,25 @@ static int panel_simple_dsi_send_cmds(struct panel_simple *panel,
 
 		if (cmd->dchdr.wait)
 			panel_simple_sleep(cmd->dchdr.wait);
+
+/* for command debug */
+#if 0
+		{
+			int cnt, pos;
+			char *cmdp = (char *)cmd->payload, cmdstr[256];
+
+			memset(cmdstr, 0x00, sizeof(cmdstr));
+
+			pos = sprintf(&cmdstr[0], "[cmd : %02X] ", cmdp[0]);
+
+			for(cnt = 1; cnt < cmd->dchdr.dlen; cnt++)
+				pos += sprintf(&cmdstr[pos], "%02X ", cmdp[cnt]);
+
+			pr_err("%s\n", cmdstr);
+			if (cmd->dchdr.wait)
+				pr_err("[delay(ms) : %d]\n", cmd->dchdr.wait);
+		}
+#endif
 	}
 
 	return 0;
@@ -533,7 +555,8 @@ static int panel_simple_regulator_enable(struct drm_panel *panel)
 			return err;
 		}
 	}
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) && \
+   !defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 	err = regulator_enable(p->backlight_supply);
 	if (err < 0)
 		dev_err(panel->dev, "failed to enable supply: %d\n", err);
@@ -559,7 +582,8 @@ static int panel_simple_regulator_disable(struct drm_panel *panel)
 		regulator_disable(p->supply);
 	}
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) && \
+   !defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 	regulator_disable(p->backlight_supply);
 #endif
 	return err;
@@ -627,7 +651,8 @@ static int panel_simple_unprepare(struct drm_panel *panel)
 			dev_err(p->dev, "failed to send off cmds\n");
 	}
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
+    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 	if (p->reset_gpio)
 		gpio_set_value(p->reset_gpio, p->reset_gpio_active);
 #else
@@ -668,7 +693,8 @@ static int panel_simple_prepare(struct drm_panel *panel)
 	if (p->desc && p->desc->delay.prepare)
 		panel_simple_sleep(p->desc->delay.prepare);
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
+    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 	if (p->reset_gpio)
 		gpio_set_value(p->reset_gpio, p->reset_gpio_active);
 #else
@@ -679,7 +705,8 @@ static int panel_simple_prepare(struct drm_panel *panel)
 	if (p->desc && p->desc->delay.reset)
 		panel_simple_sleep(p->desc->delay.reset);
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
+    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 	if (p->reset_gpio)
 		gpio_set_value(p->reset_gpio, !p->reset_gpio_active);
 #else
@@ -894,7 +921,8 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 		return err;
 	}
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) && \
+   !defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 	panel->backlight_supply = devm_regulator_get(dev, "backlight");
 	if (IS_ERR(panel->backlight_supply))
 		return PTR_ERR(panel->backlight_supply);
@@ -906,7 +934,8 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 		return err;
 	}
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
+    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 {
 	enum of_gpio_flags flags;
 	panel->reset_gpio = of_get_named_gpio_flags(dev->of_node,
@@ -1072,7 +1101,8 @@ static void panel_simple_shutdown(struct device *dev)
 	panel_simple_disable(&panel->base);
 
 	if (panel->prepared) {
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
+    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
 		if (panel->reset_gpio)
 			gpio_set_value(panel->reset_gpio,
 				panel->reset_gpio_active);
