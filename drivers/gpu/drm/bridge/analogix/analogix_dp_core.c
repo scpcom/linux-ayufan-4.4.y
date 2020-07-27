@@ -1344,12 +1344,6 @@ static int analogix_dp_set_bridge(struct analogix_dp_device *dp)
 
 	pm_runtime_get_sync(dp->dev);
 
-	ret = clk_prepare_enable(dp->clock);
-	if (ret < 0) {
-		DRM_ERROR("Failed to prepare_enable the clock clk [%d]\n", ret);
-		goto out_dp_clk_pre;
-	}
-
 	if (dp->plat_data->power_on_start)
 		dp->plat_data->power_on_start(dp->plat_data);
 
@@ -1386,8 +1380,6 @@ out_dp_init:
 	phy_power_off(dp->phy);
 	if (dp->plat_data->power_off)
 		dp->plat_data->power_off(dp->plat_data);
-	clk_disable_unprepare(dp->clock);
-out_dp_clk_pre:
 	pm_runtime_put_sync(dp->dev);
 
 	return ret;
@@ -1455,8 +1447,6 @@ static void analogix_dp_bridge_disable(struct drm_bridge *bridge)
 
 	analogix_dp_set_analog_power_down(dp, POWER_ALL, 1);
 	phy_power_off(dp->phy);
-
-	clk_disable_unprepare(dp->clock);
 
 	pm_runtime_put_sync(dp->dev);
 
@@ -1734,13 +1724,13 @@ analogix_dp_probe(struct device *dev, struct analogix_dp_plat_data *plat_data)
 		}
 	}
 
-	dp->clock = devm_clk_get(&pdev->dev, "dp");
-	if (IS_ERR(dp->clock)) {
-		dev_err(&pdev->dev, "failed to get clock\n");
-		return ERR_CAST(dp->clock);
+	ret = devm_clk_bulk_get_all(dev, &dp->clks);
+	if (ret < 0) {
+		dev_err(dev, "failed to get clocks %d\n", ret);
+		return ERR_PTR(ret);
 	}
 
-	clk_prepare_enable(dp->clock);
+	dp->nr_clks = ret;
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 
@@ -1846,32 +1836,21 @@ EXPORT_SYMBOL_GPL(analogix_dp_unbind);
 
 void analogix_dp_remove(struct analogix_dp_device *dp)
 {
-	clk_disable_unprepare(dp->clock);
 }
 EXPORT_SYMBOL_GPL(analogix_dp_remove);
 
-#ifdef CONFIG_PM
-int analogix_dp_suspend(struct analogix_dp_device *dp)
+int analogix_dp_runtime_suspend(struct analogix_dp_device *dp)
 {
-	clk_disable_unprepare(dp->clock);
+	clk_bulk_disable_unprepare(dp->nr_clks, dp->clks);
 	return 0;
 }
-EXPORT_SYMBOL_GPL(analogix_dp_suspend);
+EXPORT_SYMBOL_GPL(analogix_dp_runtime_suspend);
 
-int analogix_dp_resume(struct analogix_dp_device *dp)
+int analogix_dp_runtime_resume(struct analogix_dp_device *dp)
 {
-	int ret;
-
-	ret = clk_prepare_enable(dp->clock);
-	if (ret < 0) {
-		DRM_ERROR("Failed to prepare_enable the clock clk [%d]\n", ret);
-		return ret;
-	}
-
-	return 0;
+	return clk_bulk_prepare_enable(dp->nr_clks, dp->clks);
 }
-EXPORT_SYMBOL_GPL(analogix_dp_resume);
-#endif
+EXPORT_SYMBOL_GPL(analogix_dp_runtime_resume);
 
 int analogix_dp_start_crc(struct drm_connector *connector)
 {
