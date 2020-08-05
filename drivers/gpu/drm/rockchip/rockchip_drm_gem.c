@@ -929,7 +929,7 @@ int rockchip_gem_dumb_map_offset(struct drm_file *file_priv,
 	DRM_DEBUG_KMS("offset = 0x%llx\n", *offset);
 
 out:
-	drm_gem_object_unreference_unlocked(obj);
+	drm_gem_object_put_unlocked(obj);
 
 	return 0;
 }
@@ -978,7 +978,7 @@ int rockchip_gem_get_phys_ioctl(struct drm_device *dev, void *data,
 	args->phy_addr = page_to_phys(rk_obj->pages[0]);
 
 out:
-	drm_gem_object_unreference_unlocked(obj);
+	drm_gem_object_put_unlocked(obj);
 	return ret;
 }
 
