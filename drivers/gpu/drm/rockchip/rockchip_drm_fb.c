@@ -20,7 +20,9 @@
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_gem_framebuffer_helper.h>
 #include <linux/memblock.h>
+#ifdef CONFIG_ARM_ROCKCHIP_DMC_DEVFREQ
 #include <soc/rockchip/rockchip_dmc.h>
+#endif
 
 #include "rockchip_drm_drv.h"
 #include "rockchip_drm_fb.h"
@@ -251,6 +253,7 @@ static int rockchip_drm_bandwidth_atomic_check(struct drm_device *dev,
 						       plane_num);
 	}
 
+#ifdef CONFIG_ARM_ROCKCHIP_DMC_DEVFREQ
 	/*
 	 * Check ddr frequency support here here.
 	 */
@@ -263,6 +266,7 @@ static int rockchip_drm_bandwidth_atomic_check(struct drm_device *dev,
 	if (priv->devfreq)
 		ret = rockchip_dmcfreq_vop_bandwidth_request(priv->devfreq,
 							     *bandwidth);
+#endif
 
 	return ret;
 }
@@ -384,9 +388,11 @@ rockchip_atomic_commit_complete(struct rockchip_atomic_commit *commit)
 {
 	struct drm_atomic_state *state = commit->state;
 	struct drm_device *dev = commit->dev;
+#ifdef CONFIG_ARM_ROCKCHIP_DMC_DEVFREQ
 	struct rockchip_drm_private *prv = dev->dev_private;
 	size_t bandwidth = commit->bandwidth;
 	unsigned int plane_num = commit->plane_num;
+#endif
 
 	/*
 	 * TODO: do fence wait here.
@@ -415,6 +421,7 @@ rockchip_atomic_commit_complete(struct rockchip_atomic_commit *commit)
 
 	drm_atomic_helper_commit_modeset_enables(dev, state);
 
+#ifdef CONFIG_ARM_ROCKCHIP_DMC_DEVFREQ
 	if (prv->dmc_support && !prv->devfreq) {
 		prv->devfreq = devfreq_get_devfreq_by_phandle(dev->dev, 0);
 		if (IS_ERR(prv->devfreq))
@@ -423,6 +430,7 @@ rockchip_atomic_commit_complete(struct rockchip_atomic_commit *commit)
 	if (prv->devfreq)
 		rockchip_dmcfreq_vop_bandwidth_update(prv->devfreq, bandwidth,
 						      plane_num);
+#endif
 
 	drm_atomic_helper_commit_planes(dev, state, true);
 
