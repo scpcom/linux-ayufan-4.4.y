@@ -1942,7 +1942,7 @@ static const struct of_device_id dw_mipi_dsi_dt_ids[] = {
 };
 MODULE_DEVICE_TABLE(of, dw_mipi_dsi_dt_ids);
 
-struct platform_driver dw_mipi_dsi_driver = {
+struct platform_driver dw_mipi_dsi_rockchip_driver = {
 	.probe	= dw_mipi_dsi_probe,
 	.remove = dw_mipi_dsi_remove,
 	.driver = {
