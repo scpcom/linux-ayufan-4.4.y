@@ -839,11 +839,6 @@ static int cdn_dp_parse_dt(struct cdn_dp_device *dp)
 	return 0;
 }
 
-struct dp_sdp {
-	struct dp_sdp_header sdp_header;
-	u8 db[28];
-} __packed;
-
 static int cdn_dp_setup_audio_infoframe(struct cdn_dp_device *dp)
 {
 	struct dp_sdp infoframe_sdp;
