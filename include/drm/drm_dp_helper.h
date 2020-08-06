@@ -1118,6 +1118,19 @@ struct dp_sdp {
 	u8 db[32];
 } __packed;
 
+struct edp_vsc_psr {
+	struct dp_sdp_header sdp_header;
+	u8 DB0; /* Stereo Interface */
+	u8 DB1; /* 0 - PSR State; 1 - Update RFB; 2 - CRC Valid */
+	u8 DB2; /* CRC value bits 7:0 of the R or Cr component */
+	u8 DB3; /* CRC value bits 15:8 of the R or Cr component */
+	u8 DB4; /* CRC value bits 7:0 of the G or Y component */
+	u8 DB5; /* CRC value bits 15:8 of the G or Y component */
+	u8 DB6; /* CRC value bits 7:0 of the B or Cb component */
+	u8 DB7; /* CRC value bits 15:8 of the B or Cb component */
+	u8 DB8_31[24]; /* Reserved */
+} __packed;
+
 #define EDP_VSC_PSR_STATE_ACTIVE	(1<<0)
 #define EDP_VSC_PSR_UPDATE_RFB		(1<<1)
 #define EDP_VSC_PSR_CRC_VALUES_VALID	(1<<2)
