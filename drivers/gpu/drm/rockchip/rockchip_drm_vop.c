@@ -22,7 +22,6 @@
 #ifdef CONFIG_DRM_ANALOGIX_DP
 #include <drm/bridge/analogix_dp.h>
 #endif
-#include <dt-bindings/clock/rk_system_status.h>
 
 #include <linux/debugfs.h>
 #include <linux/fixp-arith.h>
@@ -43,8 +42,13 @@
 #include <linux/reset.h>
 #include <linux/delay.h>
 #include <linux/sort.h>
+#ifdef CONFIG_ARM_ROCKCHIP_DMC_DEVFREQ
 #include <soc/rockchip/rockchip_dmc.h>
+#endif
+#ifdef CONFIG_ROCKCHIP_SYSTEM_MONITOR
+#include <dt-bindings/clock/rk_system_status.h>
 #include <soc/rockchip/rockchip-system-status.h>
+#endif
 #include <uapi/linux/videodev2.h>
 
 #include "../drm_internal.h"
@@ -320,12 +324,16 @@ static DRM_ENUM_NAME_FN(drm_get_bus_format_name, drm_bus_format_enum_list)
 static void vop_lock(struct vop *vop)
 {
 	mutex_lock(&vop->vop_lock);
+#ifdef CONFIG_ARM_ROCKCHIP_DMC_DEVFREQ
 	rockchip_dmcfreq_lock();
+#endif
 }
 
 static void vop_unlock(struct vop *vop)
 {
+#ifdef CONFIG_ARM_ROCKCHIP_DMC_DEVFREQ
 	rockchip_dmcfreq_unlock();
+#endif
 	mutex_unlock(&vop->vop_lock);
 }
 
@@ -1472,8 +1480,10 @@ static void vop_crtc_atomic_disable(struct drm_crtc *crtc,
 				    struct drm_crtc_state *old_state)
 {
 	struct vop *vop = to_vop(crtc);
+#ifdef CONFIG_ROCKCHIP_SYSTEM_MONITOR
 	int sys_status = drm_crtc_index(crtc) ?
 				SYS_STATUS_LCDC1 : SYS_STATUS_LCDC0;
+#endif
 
 	WARN_ON(vop->event);
 
@@ -1521,7 +1531,9 @@ static void vop_crtc_atomic_disable(struct drm_crtc *crtc,
 	clk_disable_unprepare(vop->hclk);
 	vop_unlock(vop);
 
+#ifdef CONFIG_ROCKCHIP_SYSTEM_MONITOR
 	rockchip_clear_system_status(sys_status);
+#endif
 
 	if (crtc->state->event && !crtc->state->active) {
 		spin_lock_irq(&crtc->dev->event_lock);
@@ -2236,8 +2248,10 @@ static int vop_crtc_loader_protect(struct drm_crtc *crtc, bool on)
 {
 	struct rockchip_drm_private *private = crtc->dev->dev_private;
 	struct vop *vop = to_vop(crtc);
+#ifdef CONFIG_ROCKCHIP_SYSTEM_MONITOR
 	int sys_status = drm_crtc_index(crtc) ?
 				SYS_STATUS_LCDC1 : SYS_STATUS_LCDC0;
+#endif
 
 	if (on == vop->loader_protect)
 		return 0;
@@ -2257,7 +2271,9 @@ static int vop_crtc_loader_protect(struct drm_crtc *crtc, bool on)
 			}
 		}
 
+#ifdef CONFIG_ROCKCHIP_SYSTEM_MONITOR
 		rockchip_set_system_status(sys_status);
+#endif
 		vop_initial(crtc);
 		drm_crtc_vblank_on(crtc);
 		vop->loader_protect = true;
@@ -2881,15 +2897,19 @@ static void vop_crtc_atomic_enable(struct drm_crtc *crtc,
 	u16 vsync_len = adjusted_mode->crtc_vsync_end - adjusted_mode->crtc_vsync_start;
 	u16 vact_st = adjusted_mode->crtc_vtotal - adjusted_mode->crtc_vsync_start;
 	u16 vact_end = vact_st + vdisplay;
+#ifdef CONFIG_ROCKCHIP_SYSTEM_MONITOR
 	int sys_status = drm_crtc_index(crtc) ?
 				SYS_STATUS_LCDC1 : SYS_STATUS_LCDC0;
+#endif
 	uint32_t val;
 	int act_end;
 	bool interlaced = !!(adjusted_mode->flags & DRM_MODE_FLAG_INTERLACE);
 	int for_ddr_freq = 0;
 	bool dclk_inv;
 
+#ifdef CONFIG_ROCKCHIP_SYSTEM_MONITOR
 	rockchip_set_system_status(sys_status);
+#endif
 	vop_lock(vop);
 	DRM_DEV_INFO(vop->dev, "Update mode to %dx%d%s%d, type: %d\n",
 		     hdisplay, vdisplay, interlaced ? "i" : "p",
