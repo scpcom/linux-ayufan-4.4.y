@@ -28,6 +28,7 @@
 #include <drm/drm_crtc.h>
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_panel.h>
+#include <drm/drm_probe_helper.h>
 
 #include <drm/bridge/analogix_dp.h>
 
@@ -1377,8 +1378,8 @@ static void analogix_dp_bridge_disable(struct drm_bridge *bridge)
 }
 
 static void analogix_dp_bridge_mode_set(struct drm_bridge *bridge,
-					struct drm_display_mode *orig_mode,
-					struct drm_display_mode *mode)
+					const struct drm_display_mode *orig_mode,
+					const struct drm_display_mode *mode)
 {
 	struct analogix_dp_device *dp = bridge->driver_private;
 	struct drm_display_info *display_info = &dp->connector.display_info;
@@ -1682,8 +1683,7 @@ void analogix_dp_unbind(struct analogix_dp_device *dp)
 	if (dp->plat_data->panel) {
 		if (drm_panel_unprepare(dp->plat_data->panel))
 			DRM_ERROR("failed to turnoff the panel\n");
-		if (drm_panel_detach(dp->plat_data->panel))
-			DRM_ERROR("failed to detach the panel\n");
+		drm_panel_detach(dp->plat_data->panel);
 	}
 
 	drm_dp_aux_unregister(&dp->aux);
