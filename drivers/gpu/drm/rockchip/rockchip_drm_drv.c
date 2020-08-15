@@ -16,10 +16,12 @@
 
 #include <drm/drmP.h>
 #include <drm/drm_atomic.h>
+#include <drm/drm_atomic_uapi.h>
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_fb_helper.h>
 #include <drm/drm_gem_cma_helper.h>
 #include <drm/drm_of.h>
+#include <drm/drm_probe_helper.h>
 #include <linux/devfreq.h>
 #include <linux/dma-buf.h>
 #include <linux/dma-mapping.h>
@@ -30,6 +32,7 @@
 #include <linux/module.h>
 #include <linux/of_address.h>
 #include <linux/of_graph.h>
+#include <linux/of_platform.h>
 #include <linux/clk.h>
 #include <linux/clk-provider.h>
 #include <linux/component.h>
@@ -1683,8 +1686,6 @@ static const struct dma_buf_ops rockchip_drm_gem_prime_dmabuf_ops = {
 	.map_dma_buf = drm_gem_map_dma_buf,
 	.unmap_dma_buf = drm_gem_unmap_dma_buf,
 	.release = drm_gem_dmabuf_release,
-	.map = drm_gem_dmabuf_kmap,
-	.unmap = drm_gem_dmabuf_kunmap,
 	.mmap = drm_gem_dmabuf_mmap,
 	.vmap = drm_gem_dmabuf_vmap,
 	.vunmap = drm_gem_dmabuf_vunmap,
@@ -1804,10 +1805,10 @@ static struct drm_gem_object *rockchip_drm_gem_prime_import(struct drm_device *d
 	return rockchip_drm_gem_prime_import_dev(dev, dma_buf, dev->dev);
 }
 
-static struct dma_buf *rockchip_drm_gem_prime_export(struct drm_device *dev,
-						     struct drm_gem_object *obj,
+static struct dma_buf *rockchip_drm_gem_prime_export(struct drm_gem_object *obj,
 						     int flags)
 {
+	struct drm_device *dev = obj->dev;
 	struct dma_buf_export_info exp_info = {
 		.exp_name = KBUILD_MODNAME, /* white lie for debug */
 		.owner = dev->driver->fops->owner,
@@ -1825,8 +1826,7 @@ static struct dma_buf *rockchip_drm_gem_prime_export(struct drm_device *dev,
 
 static struct drm_driver rockchip_drm_driver = {
 	.driver_features	= DRIVER_MODESET | DRIVER_GEM |
-				  DRIVER_PRIME | DRIVER_ATOMIC |
-				  DRIVER_RENDER,
+				  DRIVER_ATOMIC | DRIVER_RENDER,
 	.postclose		= rockchip_drm_postclose,
 	.lastclose		= rockchip_drm_lastclose,
 	.open			= rockchip_drm_open,
