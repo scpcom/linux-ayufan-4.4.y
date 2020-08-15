@@ -24,6 +24,7 @@
 #include <drm/drm_mipi_dsi.h>
 #include <drm/drm_of.h>
 #include <drm/drm_panel.h>
+#include <drm/drm_probe_helper.h>
 #include <drm/drmP.h>
 #include <video/mipi_display.h>
 #include <asm/unaligned.h>
@@ -598,7 +599,7 @@ static int mipi_dphy_power_on(struct dw_mipi_dsi *dsi)
 	usleep_range(1500, 2000);
 
 	if (dphy->phy) {
-		ret = phy_set_mode(dphy->phy, PHY_MODE_VIDEO_MIPI);
+		ret = phy_set_mode(dphy->phy, PHY_MODE_MIPI_DPHY);
 		if (ret) {
 			DRM_DEV_ERROR(dsi->dev, "failed to set phy mode: %d\n",
 				      ret);
