@@ -18,6 +18,7 @@
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_panel.h>
 #include <drm/drm_of.h>
+#include <drm/drm_probe_helper.h>
 
 #include <linux/component.h>
 #include <linux/mfd/syscon.h>
@@ -209,7 +210,7 @@ static void rockchip_lvds_encoder_enable(struct drm_encoder *encoder)
 	if (lvds->funcs->enable)
 		lvds->funcs->enable(lvds);
 
-	ret = phy_set_mode(lvds->phy, PHY_MODE_VIDEO_LVDS);
+	ret = phy_set_mode(lvds->phy, PHY_MODE_LVDS);
 	if (ret) {
 		DRM_DEV_ERROR(lvds->dev, "failed to set phy mode: %d\n", ret);
 		return;
