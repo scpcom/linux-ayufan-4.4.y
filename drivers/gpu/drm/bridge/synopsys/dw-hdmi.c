@@ -31,6 +31,7 @@
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_edid.h>
 #include <drm/drm_encoder_slave.h>
+#include <drm/drm_probe_helper.h>
 #include <drm/drm_scdc_helper.h>
 #include <drm/bridge/dw_hdmi.h>
 
@@ -1790,14 +1791,16 @@ static void hdmi_config_AVI(struct dw_hdmi *hdmi, struct drm_display_mode *mode)
 	    hdmi->connector.display_info.hdmi.scdc.supported)
 		is_hdmi2 = true;
 	/* Initialise info frame from DRM mode */
-	drm_hdmi_avi_infoframe_from_display_mode(&frame, mode, is_hdmi2);
+	drm_hdmi_avi_infoframe_from_display_mode(&frame,
+						 &hdmi->connector, mode);
 
 	/*
 	 * Ignore monitor selectable quantization, use quantization set
 	 * by the user
 	 */
-	drm_hdmi_avi_infoframe_quant_range(&frame, mode, rgb_quant_range,
-					   true, is_hdmi2);
+	drm_hdmi_avi_infoframe_quant_range(&frame,
+					   &hdmi->connector, mode,
+					   rgb_quant_range);
 	if (hdmi_bus_fmt_is_yuv444(hdmi->hdmi_data.enc_out_bus_format))
 		frame.colorspace = HDMI_COLORSPACE_YUV444;
 	else if (hdmi_bus_fmt_is_yuv422(hdmi->hdmi_data.enc_out_bus_format))
@@ -2991,8 +2994,8 @@ dw_hdmi_bridge_mode_valid(struct drm_bridge *bridge,
 }
 
 static void dw_hdmi_bridge_mode_set(struct drm_bridge *bridge,
-				    struct drm_display_mode *orig_mode,
-				    struct drm_display_mode *mode)
+				    const struct drm_display_mode *orig_mode,
+				    const struct drm_display_mode *mode)
 {
 	struct dw_hdmi *hdmi = bridge->driver_private;
 
