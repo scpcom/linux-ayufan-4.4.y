@@ -399,10 +399,9 @@ struct fb_dmabuf_export {
        __u32 flags;
 };
 
-//#ifdef CONFIG_FB_BACKLIGHT
 /* Settings for the generic backlight code */
 #define FB_BACKLIGHT_LEVELS	128
 #define FB_BACKLIGHT_MAX	0xFF
-//#endif
+
 
 #endif /* _UAPI_LINUX_FB_H */
