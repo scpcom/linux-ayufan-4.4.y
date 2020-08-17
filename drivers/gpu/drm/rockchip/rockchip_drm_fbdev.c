@@ -41,8 +41,7 @@ static struct dma_buf *rockchip_fbdev_get_dma_buf(struct fb_info *info)
 	struct drm_device *dev = helper->dev;
 
 	if (dev->driver->gem_prime_export) {
-		buf = dev->driver->gem_prime_export(dev, private->fbdev_bo,
-						    O_RDWR);
+		buf = dev->driver->gem_prime_export(private->fbdev_bo, O_RDWR);
 		if (buf)
 			drm_gem_object_get(private->fbdev_bo);
 	}
