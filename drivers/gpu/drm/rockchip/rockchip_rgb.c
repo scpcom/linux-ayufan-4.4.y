@@ -22,6 +22,7 @@
 struct rockchip_rgb {
 	struct device *dev;
 	struct drm_device *drm_dev;
+	struct drm_panel *panel;
 	struct drm_bridge *bridge;
 	struct drm_encoder encoder;
 	int output_mode;
@@ -140,6 +141,7 @@ struct rockchip_rgb *rockchip_rgb_init(struct device *dev,
 			return ERR_CAST(bridge);
 	}
 
+	rgb->panel = panel;
 	rgb->bridge = bridge;
 
 	ret = drm_bridge_attach(encoder, rgb->bridge, NULL);
