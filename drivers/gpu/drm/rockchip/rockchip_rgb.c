@@ -53,6 +53,10 @@
 #define RK3288_LVDS_CON_CLKINV(x)	HIWORD_UPDATE(x,  8,  8)
 #define RK3288_LVDS_CON_TTL_EN(x)	HIWORD_UPDATE(x,  6,  6)
 
+#if defined(CONFIG_PHY_ROCKCHIP_INNO_VIDEO_COMBO_PHY) || defined(CONFIG_PHY_ROCKCHIP_INNO_VIDEO_PHY)
+#define HAVE_VIDEO_PHY_TTL
+#endif
+
 struct rockchip_rgb;
 
 struct rockchip_rgb_funcs {
@@ -66,7 +70,9 @@ struct rockchip_rgb {
 	struct drm_bridge *bridge;
 	struct drm_connector connector;
 	struct drm_encoder encoder;
+#ifdef HAVE_VIDEO_PHY_TTL
 	struct phy *phy;
+#endif
 	struct regmap *grf;
 	bool data_sync_bypass;
 	const struct rockchip_rgb_funcs *funcs;
@@ -124,13 +130,16 @@ struct drm_connector_helper_funcs rockchip_rgb_connector_helper_funcs = {
 static void rockchip_rgb_encoder_enable(struct drm_encoder *encoder)
 {
 	struct rockchip_rgb *rgb = encoder_to_rgb(encoder);
+#ifdef HAVE_VIDEO_PHY_TTL
 	int ret;
+#endif
 
 	pinctrl_pm_select_default_state(rgb->dev);
 
 	if (rgb->funcs && rgb->funcs->enable)
 		rgb->funcs->enable(rgb);
 
+#ifdef HAVE_VIDEO_PHY_TTL
 	if (rgb->phy) {
 		ret = phy_set_mode(rgb->phy, PHY_MODE_VIDEO_TTL);
 		if (ret) {
@@ -140,6 +149,7 @@ static void rockchip_rgb_encoder_enable(struct drm_encoder *encoder)
 
 		phy_power_on(rgb->phy);
 	}
+#endif
 
 	if (rgb->panel) {
 		drm_panel_prepare(rgb->panel);
@@ -156,8 +166,10 @@ static void rockchip_rgb_encoder_disable(struct drm_encoder *encoder)
 		drm_panel_unprepare(rgb->panel);
 	}
 
+#ifdef HAVE_VIDEO_PHY_TTL
 	if (rgb->phy)
 		phy_power_off(rgb->phy);
+#endif
 
 	if (rgb->funcs && rgb->funcs->disable)
 		rgb->funcs->disable(rgb);
@@ -361,12 +373,14 @@ static int rockchip_rgb_probe(struct platform_device *pdev)
 		}
 	}
 
+#ifdef HAVE_VIDEO_PHY_TTL
 	rgb->phy = devm_phy_optional_get(dev, "phy");
 	if (IS_ERR(rgb->phy)) {
 		ret = PTR_ERR(rgb->phy);
 		dev_err(dev, "failed to get phy: %d\n", ret);
 		return ret;
 	}
+#endif
 
 	return component_add(dev, &rockchip_rgb_component_ops);
 }
