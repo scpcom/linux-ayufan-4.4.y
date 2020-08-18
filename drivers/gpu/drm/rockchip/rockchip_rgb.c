@@ -455,6 +455,7 @@ static const struct of_device_id rockchip_rgb_dt_ids[] = {
 	{ .compatible = "rockchip,rk1808-rgb", .data = &rk1808_rgb_funcs },
 	{ .compatible = "rockchip,rk3066-rgb", },
 	{ .compatible = "rockchip,rk3128-rgb", },
+	{ .compatible = "rockchip,rk3188-rgb", },
 	{ .compatible = "rockchip,rk3288-rgb", .data = &rk3288_rgb_funcs },
 	{ .compatible = "rockchip,rk3308-rgb", },
 	{ .compatible = "rockchip,rk3368-rgb", },
