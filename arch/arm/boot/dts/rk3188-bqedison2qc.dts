@@ -114,6 +114,26 @@
 		};
 	};
 
+	rgb {
+		compatible = "rockchip,rk3188-rgb";
+		pinctrl-names = "default";
+		pinctrl-0 = <&lcdc1_dclk &lcdc1_den &lcdc1_hsync
+			     &lcdc1_vsync &lcdc1_rgb24>;
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+
+				rgb_in_vop1: endpoint {
+					remote-endpoint = <&vop1_out_rgb>;
+				};
+			};
+		};
+	};
+
 	sdio_pwrseq: sdio-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		clocks = <&hym8563>;
@@ -721,10 +741,13 @@
 };
 
 &vop1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&lcdc1_dclk &lcdc1_den &lcdc1_hsync
-		     &lcdc1_vsync &lcdc1_rgb24>;
 	status = "okay";
+};
+
+&vop1_out {
+	vop1_out_rgb: endpoint {
+		remote-endpoint = <&rgb_in_vop1>;
+	};
 };
 
 &wdt {
