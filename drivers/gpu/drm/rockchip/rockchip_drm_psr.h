@@ -1,6 +1,6 @@
 /*
  * Copyright (C) Fuzhou Rockchip Electronics Co.Ltd
- * Author:Mark Yao <mark.yao@rock-chips.com>
+ * Author: Yakir Yang <ykk@rock-chips.com>
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -12,21 +12,16 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _ROCKCHIP_DRM_FBDEV_H
-#define _ROCKCHIP_DRM_FBDEV_H
+#ifndef __ROCKCHIP_DRM_PSR___
+#define __ROCKCHIP_DRM_PSR___
 
-#ifdef CONFIG_DRM_FBDEV_EMULATION
-int rockchip_drm_fbdev_init(struct drm_device *dev);
-void rockchip_drm_fbdev_fini(struct drm_device *dev);
-#else
-static inline int rockchip_drm_fbdev_init(struct drm_device *dev)
-{
-	return 0;
-}
+void rockchip_drm_psr_flush_all(struct drm_device *dev);
 
-static inline void rockchip_drm_fbdev_fini(struct drm_device *dev)
-{
-}
-#endif
+int rockchip_drm_psr_inhibit_put(struct drm_encoder *encoder);
+int rockchip_drm_psr_inhibit_get(struct drm_encoder *encoder);
 
-#endif /* _ROCKCHIP_DRM_FBDEV_H */
+int rockchip_drm_psr_register(struct drm_encoder *encoder,
+			int (*psr_set)(struct drm_encoder *, bool enable));
+void rockchip_drm_psr_unregister(struct drm_encoder *encoder);
+
+#endif /* __ROCKCHIP_DRM_PSR__ */
