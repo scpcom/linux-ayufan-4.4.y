@@ -2038,6 +2038,9 @@ static void hdmi_config_hdr_infoframe(struct dw_hdmi *hdmi)
 	struct drm_connector_state *conn_state = hdmi->connector.state;
 	int ret;
 
+	if (!hdmi->plat_data->use_drm_infoframe)
+		return;
+
 	/* Dynamic Range and Mastering Infoframe is introduced in v2.11a. */
 	if (hdmi->version < 0x211a) {
 		DRM_ERROR("Not support DRM Infoframe\n");
