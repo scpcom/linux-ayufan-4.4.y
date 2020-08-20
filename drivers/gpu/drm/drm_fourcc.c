@@ -224,6 +224,12 @@ const struct drm_format_info *__drm_format_info(u32 format)
 		{ .format = DRM_FORMAT_NV61,		.depth = 0,  .num_planes = 2, .cpp = { 1, 2, 0 }, .hsub = 2, .vsub = 1, .is_yuv = true },
 		{ .format = DRM_FORMAT_NV24,		.depth = 0,  .num_planes = 2, .cpp = { 1, 2, 0 }, .hsub = 1, .vsub = 1, .is_yuv = true },
 		{ .format = DRM_FORMAT_NV42,		.depth = 0,  .num_planes = 2, .cpp = { 1, 2, 0 }, .hsub = 1, .vsub = 1, .is_yuv = true },
+		{ .format = DRM_FORMAT_NV12_10,		.depth = 0,  .num_planes = 2, .cpp = { 1, 2, 0 }, .hsub = 2, .vsub = 2, .is_yuv = true },
+		{ .format = DRM_FORMAT_NV21_10,		.depth = 0,  .num_planes = 2, .cpp = { 1, 2, 0 }, .hsub = 2, .vsub = 2, .is_yuv = true },
+		{ .format = DRM_FORMAT_NV16_10,		.depth = 0,  .num_planes = 2, .cpp = { 1, 2, 0 }, .hsub = 2, .vsub = 1, .is_yuv = true },
+		{ .format = DRM_FORMAT_NV61_10,		.depth = 0,  .num_planes = 2, .cpp = { 1, 2, 0 }, .hsub = 2, .vsub = 1, .is_yuv = true },
+		{ .format = DRM_FORMAT_NV24_10,		.depth = 0,  .num_planes = 2, .cpp = { 1, 2, 0 }, .hsub = 1, .vsub = 1, .is_yuv = true },
+		{ .format = DRM_FORMAT_NV42_10,		.depth = 0,  .num_planes = 2, .cpp = { 1, 2, 0 }, .hsub = 1, .vsub = 1, .is_yuv = true },
 		{ .format = DRM_FORMAT_YUYV,		.depth = 0,  .num_planes = 1, .cpp = { 2, 0, 0 }, .hsub = 2, .vsub = 1, .is_yuv = true },
 		{ .format = DRM_FORMAT_YVYU,		.depth = 0,  .num_planes = 1, .cpp = { 2, 0, 0 }, .hsub = 2, .vsub = 1, .is_yuv = true },
 		{ .format = DRM_FORMAT_UYVY,		.depth = 0,  .num_planes = 1, .cpp = { 2, 0, 0 }, .hsub = 2, .vsub = 1, .is_yuv = true },
@@ -372,6 +378,70 @@ unsigned int drm_format_info_block_height(const struct drm_format_info *info,
 }
 EXPORT_SYMBOL(drm_format_info_block_height);
 
+int drm_format_info_plane_bpp(const struct drm_format_info *info,
+			      int plane)
+{
+	if (!info || plane < 0 || plane >= info->num_planes)
+		return 0;
+
+	switch (info->format) {
+	case DRM_FORMAT_NV12_10:
+	case DRM_FORMAT_NV21_10:
+	case DRM_FORMAT_NV16_10:
+	case DRM_FORMAT_NV61_10:
+	case DRM_FORMAT_NV24_10:
+	case DRM_FORMAT_NV42_10:
+		return plane ? 20 : 10;
+	default:
+		return info->cpp[plane] << 3;
+	}
+}
+EXPORT_SYMBOL(drm_format_info_plane_bpp);
+
+int drm_format_info_plane_cpp(const struct drm_format_info *info,
+			      int plane)
+{
+	if (!info || plane < 0 || plane >= info->num_planes)
+		return 0;
+
+	return info->cpp[plane];
+}
+EXPORT_SYMBOL(drm_format_info_plane_cpp);
+
+/**
+ * drm_format_plane_bpp - get the bpp for format
+ * @format: pixel format (DRM_FORMAT_*)
+ * @plane: plane index
+ *
+ * Returns:
+ * The bpp for the specified plane.
+ */
+int drm_format_plane_bpp(uint32_t format, int plane)
+{
+	const struct drm_format_info *info;
+
+	info = drm_format_info(format);
+	return drm_format_info_plane_bpp(info, plane);
+}
+EXPORT_SYMBOL(drm_format_plane_bpp);
+
+/**
+ * drm_format_plane_cpp - determine the bytes per pixel value
+ * @format: pixel format (DRM_FORMAT_*)
+ * @plane: plane index
+ *
+ * Returns:
+ * The bytes per pixel value for the specified plane.
+ */
+int drm_format_plane_cpp(uint32_t format, int plane)
+{
+	const struct drm_format_info *info;
+
+	info = drm_format_info(format);
+	return drm_format_info_plane_cpp(info, plane);
+}
+EXPORT_SYMBOL(drm_format_plane_cpp);
+
 /**
  * drm_format_info_min_pitch - computes the minimum required pitch in bytes
  * @info: pixel format info
@@ -388,7 +458,7 @@ uint64_t drm_format_info_min_pitch(const struct drm_format_info *info,
 	if (!info || plane < 0 || plane >= info->num_planes)
 		return 0;
 
-	return DIV_ROUND_UP_ULL((u64)buffer_width * info->char_per_block[plane],
+	return DIV_ROUND_UP_ULL((u64)buffer_width * drm_format_info_plane_bpp(info, plane) / 8,
 			    drm_format_info_block_width(info, plane) *
 			    drm_format_info_block_height(info, plane));
 }
