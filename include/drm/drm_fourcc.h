@@ -313,6 +313,7 @@ int drm_format_info_plane_bpp(const struct drm_format_info *info,
 			      int plane);
 int drm_format_info_plane_cpp(const struct drm_format_info *info,
 			      int plane);
+int drm_format_num_planes(uint32_t format);
 int drm_format_plane_bpp(uint32_t format, int plane);
 int drm_format_plane_cpp(uint32_t format, int plane);
 uint32_t drm_mode_legacy_fb_format(uint32_t bpp, uint32_t depth);
