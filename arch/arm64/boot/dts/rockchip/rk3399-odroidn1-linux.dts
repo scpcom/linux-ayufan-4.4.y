@@ -512,6 +512,42 @@
 	cpu-supply = <&vdd_cpu_b>;
 };
 
+&display_subsystem {
+	status = "okay";
+
+	ports = <&vopb_out>;
+	logo-memory-region = <&drm_logo>;
+
+	route {
+		route_hdmi: route-hdmi {
+			status = "disabled";
+			logo,uboot = "logo.bmp";
+			logo,kernel = "logo_kernel.bmp";
+			logo,mode = "center";
+			charge_logo,mode = "center";
+			connect = <&vopb_out_hdmi>;
+		};
+
+		route_dsi: route-dsi {
+			status = "disabled";
+			logo,uboot = "logo.bmp";
+			logo,kernel = "logo_kernel.bmp";
+			logo,mode = "center";
+			charge_logo,mode = "center";
+			connect = <&vopl_out_mipi>;
+		};
+
+		route_edp: route-edp {
+			status = "disabled";
+			logo,uboot = "logo.bmp";
+			logo,kernel = "logo_kernel.bmp";
+			logo,mode = "center";
+			charge_logo,mode = "center";
+			connect = <&vopl_out_edp>;
+		};
+	};
+};
+
 &dp_in_vopl {
        status = "disabled";
 };
@@ -843,13 +879,6 @@
 	ddc-i2c-bus = <&i2c3>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&hdmi_cec>;
-
-	ports {
-		/* Don't use vopl for hdmi */
-		hdmi_in: port {
-			/delete-node/ endpoint@1;
-		};
-	};
 };
 
 &io_domains {
@@ -1152,11 +1181,8 @@
 &vopl {
 	rockchip,grf = <&grf>;
 	status = "okay";
-
-	/* Don't use vopl for hdmi */
-	vopl_out: port {
-		/delete-node/ endpoint@2;
-	};
+	assigned-clocks = <&cru DCLK_VOP1_DIV>;
+	assigned-clock-parents = <&cru PLL_VPLL>;
 };
 
 &vopl_mmu {
@@ -1166,8 +1192,26 @@
 &vopb {
 	rockchip,grf = <&grf>;
 	status = "okay";
+	assigned-clocks = <&cru DCLK_VOP0_DIV>;
+	assigned-clock-parents = <&cru PLL_CPLL>;
 };
 
 &vopb_mmu {
 	status = "okay";
+};
+
+&cdn_dp {
+	status = "disabled";
+};
+
+&dp_in_vopb {
+	status = "disabled";
+};
+
+&edp_in_vopb {
+	status = "disabled";
+};
+
+&hdmi_in_vopl {
+	status = "disabled";
 };
