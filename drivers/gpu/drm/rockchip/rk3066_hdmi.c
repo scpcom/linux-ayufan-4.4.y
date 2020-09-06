@@ -22,6 +22,7 @@
 struct hdmi_data_info {
 	int vic; /* The CEA Video ID (VIC) of the current drm display mode. */
 	bool sink_is_hdmi;
+	bool sink_has_audio;
 	unsigned int enc_out_format;
 	unsigned int colorimetry;
 };
@@ -468,7 +469,10 @@ static int rk3066_hdmi_connector_get_modes(struct drm_connector *connector)
 {
 	struct rk3066_hdmi *hdmi = to_rk3066_hdmi(connector);
 	struct edid *edid;
-	int ret = 0;
+	const u8 def_modes[6] = {4, 16, 31, 19, 17, 2};
+	struct drm_display_mode *mode;
+	struct drm_display_info *info = &connector->display_info;
+	int i, ret = 0;
 
 	if (!hdmi->ddc)
 		return 0;
@@ -476,9 +480,30 @@ static int rk3066_hdmi_connector_get_modes(struct drm_connector *connector)
 	edid = drm_get_edid(connector, hdmi->ddc);
 	if (edid) {
 		hdmi->hdmi_data.sink_is_hdmi = drm_detect_hdmi_monitor(edid);
+		hdmi->hdmi_data.sink_has_audio = drm_detect_monitor_audio(edid);
 		drm_connector_update_edid_property(connector, edid);
 		ret = drm_add_edid_modes(connector, edid);
 		kfree(edid);
+	} else {
+		hdmi->hdmi_data.sink_is_hdmi = true;
+		hdmi->hdmi_data.sink_has_audio = true;
+		for (i = 0; i < sizeof(def_modes); i++) {
+			mode = drm_display_mode_from_vic_index(connector,
+							       def_modes,
+							       31, i);
+			if (mode) {
+				if (!i)
+					mode->type = DRM_MODE_TYPE_PREFERRED;
+				drm_mode_probed_add(connector, mode);
+				ret++;
+			}
+		}
+
+		info->edid_hdmi_dc_modes = 0;
+		info->hdmi.y420_dc_modes = 0;
+		info->color_formats = 0;
+
+		dev_info(hdmi->dev, "failed to get edid\n");
 	}
 
 	return ret;
