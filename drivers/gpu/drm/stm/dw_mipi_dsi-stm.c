@@ -15,6 +15,7 @@
 
 #include <video/mipi_display.h>
 
+#include <drm/drmP.h>
 #include <drm/bridge/dw_mipi_dsi.h>
 #include <drm/drm_mipi_dsi.h>
 #include <drm/drm_print.h>
