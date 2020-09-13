@@ -2751,7 +2751,7 @@ static int dw_hdmi_connector_get_modes(struct drm_connector *connector)
 
 	edid = drm_get_edid(connector, hdmi->ddc);
 	if (edid) {
-		dev_dbg(hdmi->dev, "got edid: width[%d] x height[%d]\n",
+		dev_info(hdmi->dev, "got edid: width[%d] x height[%d]\n",
 			edid->width_cm, edid->height_cm);
 
 		hdmi->sink_is_hdmi = drm_detect_hdmi_monitor(edid);
@@ -2762,6 +2762,8 @@ static int dw_hdmi_connector_get_modes(struct drm_connector *connector)
 		drm_mode_connector_update_hdr_property(connector, metedata);
 		kfree(edid);
 	} else {
+		dev_info(hdmi->dev, "no edid: fallback to default modes\n");
+
 		hdmi->sink_is_hdmi = true;
 		hdmi->sink_has_audio = true;
 
@@ -3925,12 +3927,19 @@ __dw_hdmi_probe(struct platform_device *pdev,
 			}
 		}
 
+		ret = 0;
 		hdmi->ddc = dw_hdmi_i2c_adapter(hdmi);
-		if (IS_ERR(hdmi->ddc))
+		if (IS_ERR(hdmi->ddc)) {
+			ret = PTR_ERR(hdmi->ddc);
+			dev_warn(dev, "Failed to create DDC I2C adapter: %d\n", ret);
 			hdmi->ddc = NULL;
-		else if (!drm_probe_ddc(hdmi->ddc) && dw_hdmi_wait_for_ddc) {
-			dw_hdmi_wait_for_ddc--;
+		}
+		else if (!drm_probe_ddc(hdmi->ddc)) {
 			ret = -EPROBE_DEFER;
+			dev_warn(dev, "Failed to probe DDC on I2C adapter: %d\n", ret);
+		}
+		if ((ret == -EPROBE_DEFER) && dw_hdmi_wait_for_ddc) {
+			dw_hdmi_wait_for_ddc--;
 			goto err_iahb;
 		}
 		/*
