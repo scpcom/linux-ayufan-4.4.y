@@ -14,7 +14,7 @@
 
 / {
 	model = "Hardkernel ODROID-GO3";
-	compatible = "rockchip,rk3326-odroidgo3-linux-v01", "rockchip,rk3326";
+	compatible = "rockchip,rk3326-odroidgo3-linux", "rockchip,rk3326";
 
 	chosen {
                 bootargs = "";
