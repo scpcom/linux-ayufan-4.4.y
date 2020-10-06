@@ -323,20 +323,6 @@
 		regulator-always-on;
 		vin-supply = <&vccsys>;
 	};
-
-	sdio_pwrseq: sdio-pwrseq {
-		compatible = "mmc-pwrseq-simple";
-		pinctrl-names = "default";
-		pinctrl-0 = <&wifi_enable_h>;
-
-		/* WIFI_REG_ON */
-		reset-gpios = <&gpio0 RK_PA2 GPIO_ACTIVE_LOW>;
-	};
-
-	wireless-wlan {
-		compatible = "wlan-platdata";
-		status = "disabled";
-	};
 };
 
 &bus_apll {
@@ -803,11 +789,8 @@
 
 			/* Rev 1.1 WIFI Power */
 			vcc_wifi: LDO_REG9 {
-				regulator-always-on;
-				regulator-boot-on;
 				regulator-min-microvolt = <3300000>;
 				regulator-max-microvolt = <3300000>;
-
 				regulator-name = "vcc_wifi";
 				regulator-state-mem {
 					regulator-off-in-suspend;
@@ -988,17 +971,7 @@
 };
 
 &sdio {
-	bus-width = <4>;
-	cap-sd-highspeed;
-	cap-sdio-irq;
-	disable-wp;
-	supports-sdio;
-	ignore-pm-notify;
-	keep-power-in-suspend;
-	/* non-removable; */
-	mmc-pwrseq = <&sdio_pwrseq>;
-	sd-uhs-sdr104;
-	status = "okay";
+	status = "disabled";
 };
 
 &tsadc {
@@ -1100,12 +1073,6 @@
 					<3 RK_PB2 RK_FUNC_GPIO &pcfg_pull_up>,
 					<3 RK_PB4 RK_FUNC_GPIO &pcfg_pull_up>,
 					<3 RK_PB7 RK_FUNC_GPIO &pcfg_pull_up>;
-		};
-	};
-
-	sdio-pwrseq {
-		wifi_enable_h: wifi-enable-h {
-			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 };
