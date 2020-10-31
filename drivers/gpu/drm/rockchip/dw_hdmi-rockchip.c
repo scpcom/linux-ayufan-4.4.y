@@ -60,11 +60,13 @@
 /**
  * struct rockchip_hdmi_chip_data - splite the grf setting of kind of chips
  * @lcdsel_grf_reg: grf register offset of lcdc select
+ * @ddc_en_reg: grf register offset of hdmi ddc enable
  * @lcdsel_big: reg value of selecting vop big for HDMI
  * @lcdsel_lit: reg value of selecting vop little for HDMI
  */
 struct rockchip_hdmi_chip_data {
 	int	lcdsel_grf_reg;
+	int	ddc_en_reg;
 	u32	lcdsel_big;
 	u32	lcdsel_lit;
 };
@@ -511,6 +513,7 @@ static const struct dw_hdmi_plat_data rk3399_hdmi_drv_data = {
 
 static struct rockchip_hdmi_chip_data rk3568_chip_data = {
 	.lcdsel_grf_reg = -1,
+	.ddc_en_reg = RK3568_GRF_VO_CON1,
 };
 
 static const struct dw_hdmi_plat_data rk3568_hdmi_drv_data = {
@@ -520,6 +523,7 @@ static const struct dw_hdmi_plat_data rk3568_hdmi_drv_data = {
 	.phy_config = rockchip_phy_config,
 	.phy_data = &rk3568_chip_data,
 	.use_drm_infoframe = true,
+	.ycbcr_420_allowed = true,
 };
 
 static const struct of_device_id dw_hdmi_rockchip_dt_ids[] = {
@@ -613,6 +617,14 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
 	if (ret) {
 		DRM_DEV_ERROR(hdmi->dev, "failed to enable avdd1v8: %d\n", ret);
 		goto err_avdd_1v8;
+	}
+
+	if (hdmi->chip_data->ddc_en_reg == RK3568_GRF_VO_CON1) {
+		regmap_write(hdmi->regmap, RK3568_GRF_VO_CON1,
+			     HIWORD_UPDATE(RK3568_HDMI_SDAIN_MSK |
+					   RK3568_HDMI_SCLIN_MSK,
+					   RK3568_HDMI_SDAIN_MSK |
+					   RK3568_HDMI_SCLIN_MSK));
 	}
 
 	ret = clk_prepare_enable(hdmi->phyref_clk);
