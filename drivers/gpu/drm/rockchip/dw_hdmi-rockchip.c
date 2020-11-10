@@ -74,7 +74,7 @@ struct rockchip_hdmi {
 	struct regmap *regmap;
 	struct rockchip_encoder encoder;
 	const struct rockchip_hdmi_chip_data *chip_data;
-	struct clk *ref_clk;
+	struct clk *phyref_clk;
 	struct clk *grf_clk;
 	struct dw_hdmi *hdmi;
 	struct regulator *avdd_0v9;
@@ -208,15 +208,17 @@ static int rockchip_hdmi_parse_dt(struct rockchip_hdmi *hdmi)
 		return PTR_ERR(hdmi->regmap);
 	}
 
-	hdmi->ref_clk = devm_clk_get_optional(hdmi->dev, "ref");
-	if (!hdmi->ref_clk)
-		hdmi->ref_clk = devm_clk_get_optional(hdmi->dev, "vpll");
+	hdmi->phyref_clk = devm_clk_get(hdmi->dev, "vpll");
+	if (PTR_ERR(hdmi->phyref_clk) == -ENOENT)
+		hdmi->phyref_clk = devm_clk_get(hdmi->dev, "ref");
 
-	if (PTR_ERR(hdmi->ref_clk) == -EPROBE_DEFER) {
+	if (PTR_ERR(hdmi->phyref_clk) == -ENOENT) {
+		hdmi->phyref_clk = NULL;
+	} else if (PTR_ERR(hdmi->phyref_clk) == -EPROBE_DEFER) {
 		return -EPROBE_DEFER;
-	} else if (IS_ERR(hdmi->ref_clk)) {
+	} else if (IS_ERR(hdmi->phyref_clk)) {
 		DRM_DEV_ERROR(hdmi->dev, "failed to get reference clock\n");
-		return PTR_ERR(hdmi->ref_clk);
+		return PTR_ERR(hdmi->phyref_clk);
 	}
 
 	hdmi->grf_clk = devm_clk_get(hdmi->dev, "grf");
@@ -281,7 +283,9 @@ static void dw_hdmi_rockchip_encoder_enable(struct drm_encoder *encoder)
 
 	if (WARN_ON(!crtc || !crtc->state))
 		return;
-	clk_set_rate(hdmi->vpll_clk, crtc->state->adjusted_mode.clock * 1000);
+
+	clk_set_rate(hdmi->phyref_clk,
+		     crtc->state->adjusted_mode.crtc_clock * 1000);
 
 	if (hdmi->chip_data->lcdsel_grf_reg < 0)
 		return;
@@ -601,7 +605,7 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
 		goto err_avdd_1v8;
 	}
 
-	ret = clk_prepare_enable(hdmi->ref_clk);
+	ret = clk_prepare_enable(hdmi->phyref_clk);
 	if (ret) {
 		DRM_DEV_ERROR(hdmi->dev, "Failed to enable HDMI reference clock: %d\n",
 			      ret);
@@ -636,7 +640,7 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
 
 err_bind:
 	drm_encoder_cleanup(encoder);
-	clk_disable_unprepare(hdmi->ref_clk);
+	clk_disable_unprepare(hdmi->phyref_clk);
 err_clk:
 	regulator_disable(hdmi->avdd_1v8);
 err_avdd_1v8:
@@ -651,7 +655,7 @@ static void dw_hdmi_rockchip_unbind(struct device *dev, struct device *master,
 	struct rockchip_hdmi *hdmi = dev_get_drvdata(dev);
 
 	dw_hdmi_unbind(hdmi->hdmi);
-	clk_disable_unprepare(hdmi->ref_clk);
+	clk_disable_unprepare(hdmi->phyref_clk);
 
 	regulator_disable(hdmi->avdd_1v8);
 	regulator_disable(hdmi->avdd_0v9);
