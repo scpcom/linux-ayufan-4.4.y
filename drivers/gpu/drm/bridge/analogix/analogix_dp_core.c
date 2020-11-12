@@ -260,6 +260,8 @@ static int analogix_dp_set_enhanced_mode(struct analogix_dp_device *dp)
 
 	analogix_dp_enable_enhanced_mode(dp, data);
 
+	dp->link_train.enhanced_framing = data;
+
 	return 0;
 }
 
@@ -689,6 +691,7 @@ static int analogix_dp_fast_link_train(struct analogix_dp_device *dp)
 	analogix_dp_set_link_bandwidth(dp, dp->link_train.link_rate);
 	analogix_dp_set_lane_count(dp, dp->link_train.lane_count);
 	analogix_dp_set_lane_link_training(dp);
+	analogix_dp_enable_enhanced_mode(dp, dp->link_train.enhanced_framing);
 
 	/* source Set training pattern 1 */
 	analogix_dp_set_training_pattern(dp, TRAINING_PTN1);
@@ -699,7 +702,6 @@ static int analogix_dp_fast_link_train(struct analogix_dp_device *dp)
 	/* From DP spec, pattern must be on-screen for a minimum 500us */
 	usleep_range(500, 600);
 
-	/* TODO: enhanced_mode?*/
 	analogix_dp_set_training_pattern(dp, DP_NONE);
 
 	/*
