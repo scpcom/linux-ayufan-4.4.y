@@ -1088,7 +1088,7 @@ static int rk817_reboot_notifier_handler(struct notifier_block *nb,
 	struct rk817_reboot_data_t *data;
 	int ret;
 	struct device *dev;
-#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
 	int value, power_en_active0, power_en_active1;
 
 	data = container_of(nb, struct rk817_reboot_data_t, reboot_notifier);
@@ -1114,7 +1114,7 @@ static int rk817_reboot_notifier_handler(struct notifier_block *nb,
 	if (!cmd || !strlen(cmd) || !strcmp(cmd, "normal"))
 		return NOTIFY_OK;
 
-#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
+#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
 	data = container_of(nb, struct rk817_reboot_data_t, reboot_notifier);
 	dev = &data->rk808->i2c->dev;
 #endif

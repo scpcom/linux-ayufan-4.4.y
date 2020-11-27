@@ -40,8 +40,7 @@
 #include <linux/of_graph.h>
 #include <video/videomode.h>
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
-    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 	#include <linux/gpio.h>
 	#include <linux/of_gpio.h>
 #endif
@@ -115,16 +114,14 @@ struct panel_simple {
 	const struct panel_desc *desc;
 
 	struct backlight_device *backlight;
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) && \
-   !defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 	struct regulator *backlight_supply;
 #endif
 	struct regulator *supply;
 	struct i2c_adapter *ddc;
 
 	struct gpio_desc *enable_gpio;
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
-    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 	int	reset_gpio;
 	bool	reset_gpio_active;
 #else
@@ -555,8 +552,7 @@ static int panel_simple_regulator_enable(struct drm_panel *panel)
 			return err;
 		}
 	}
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) && \
-   !defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 	err = regulator_enable(p->backlight_supply);
 	if (err < 0)
 		dev_err(panel->dev, "failed to enable supply: %d\n", err);
@@ -582,8 +578,7 @@ static int panel_simple_regulator_disable(struct drm_panel *panel)
 		regulator_disable(p->supply);
 	}
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) && \
-   !defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 	regulator_disable(p->backlight_supply);
 #endif
 	return err;
@@ -651,8 +646,7 @@ static int panel_simple_unprepare(struct drm_panel *panel)
 			dev_err(p->dev, "failed to send off cmds\n");
 	}
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
-    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 	if (p->reset_gpio)
 		gpio_set_value(p->reset_gpio, p->reset_gpio_active);
 #else
@@ -693,8 +687,7 @@ static int panel_simple_prepare(struct drm_panel *panel)
 	if (p->desc && p->desc->delay.prepare)
 		panel_simple_sleep(p->desc->delay.prepare);
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
-    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 	if (p->reset_gpio)
 		gpio_set_value(p->reset_gpio, p->reset_gpio_active);
 #else
@@ -705,8 +698,7 @@ static int panel_simple_prepare(struct drm_panel *panel)
 	if (p->desc && p->desc->delay.reset)
 		panel_simple_sleep(p->desc->delay.reset);
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
-    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 	if (p->reset_gpio)
 		gpio_set_value(p->reset_gpio, !p->reset_gpio_active);
 #else
@@ -921,11 +913,20 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 		return err;
 	}
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) && \
-   !defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 	panel->backlight_supply = devm_regulator_get(dev, "backlight");
-	if (IS_ERR(panel->backlight_supply))
+	if (IS_ERR(panel->backlight_supply)) {
 		return PTR_ERR(panel->backlight_supply);
+	} else {
+		/*
+		 * Ensure physical regulator is present.
+		 * (e.g. could be dummy regulator.)
+		 */
+		if (regulator_get_voltage(panel->backlight_supply) < 0)
+			dev_err(dev,"using dummy regulator, no backlight_supply\n");
+		else
+			dev_err(dev,"actual backlight_supply exists\n");
+	}
 #endif
 	panel->enable_gpio = devm_gpiod_get_optional(dev, "enable", 0);
 	if (IS_ERR(panel->enable_gpio)) {
@@ -934,8 +935,7 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 		return err;
 	}
 
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
-    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 {
 	enum of_gpio_flags flags;
 	panel->reset_gpio = of_get_named_gpio_flags(dev->of_node,
@@ -1101,8 +1101,7 @@ static void panel_simple_shutdown(struct device *dev)
 	panel_simple_disable(&panel->base);
 
 	if (panel->prepared) {
-#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO2) || \
-    defined(CONFIG_ARCH_ROCKCHIP_ODROIDGO3)
+#if defined(CONFIG_ARCH_ROCKCHIP_ODROIDGOA)
 		if (panel->reset_gpio)
 			gpio_set_value(panel->reset_gpio,
 				panel->reset_gpio_active);
