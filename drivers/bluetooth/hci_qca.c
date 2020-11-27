@@ -625,7 +625,7 @@ static int qca_open(struct hci_uart *hu)
 	return 0;
 }
 
-#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
 static void qca_debugfs_init(struct hci_dev *hdev)
 {
 	struct hci_uart *hu = hci_get_drvdata(hdev);
@@ -1760,7 +1760,7 @@ retry:
 			goto out;
 	}
 
-#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
 	/* Setup patch / NVM configurations */
 	ret = qca_uart_setup(hdev, qca_baudrate, soc_type, ver,
 			firmware_name);
@@ -1814,7 +1814,7 @@ static const struct hci_uart_proto qca_proto = {
 	.name		= "QCA",
 	.manufacturer	= 29,
 	.init_speed	= 115200,
-#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGO2
+#ifndef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
 	.oper_speed	= 3000000,
 #else
 	.oper_speed	= 2000000,
