@@ -917,6 +917,22 @@ enum rk809_reg_id {
 #define RK817_RAMP_RATE_12_5MV_PER_US	(0x2 << RK817_RAMP_RATE_OFFSET)
 #define RK817_RAMP_RATE_25MV_PER_US	(0x3 << RK817_RAMP_RATE_OFFSET)
 
+#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
+/* sys_cfg0 0xf1 */
+#define RK817_VB_LO_ACT_MSK		BIT(3)
+#define RK817_VB_LO_ACT_SHUTDOWN	(0x0 << 3)
+#define RK817_VB_LO_ACT_INTERRUPT	(0x1 << 3)
+#define RK817_VB_LO_SEL_MSK		0x7
+#define RK817_VB_LO_SEL_2V8		0x0
+#define RK817_VB_LO_SEL_2V9		0x1
+#define RK817_VB_LO_SEL_3V0		0x2
+#define RK817_VB_LO_SEL_3V1		0x3
+#define RK817_VB_LO_SEL_3V2		0x4
+#define RK817_VB_LO_SEL_3V3		0x5
+#define RK817_VB_LO_SEL_3V4		0x6
+#define RK817_VB_LO_SEL_3V5		0x7
+#endif
+
 /* sys_cfg1 0xf2 */
 #define RK817_HOTDIE_TEMP_MSK		(0x3 << 4)
 #define RK817_HOTDIE_85			(0x0 << 4)
