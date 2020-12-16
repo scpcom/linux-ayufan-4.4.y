@@ -20,6 +20,23 @@
                 bootargs = "";
 	};
 
+	gpio_keys: odroidgo3-keys {
+			compatible = "gpio-keys";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			autorepeat;
+			button@0 {
+				label = "GPIO BTN-VOLUP";
+				linux,code = <KEY_VOLUMEUP>;
+				gpios = <&gpio2 RK_PA0 GPIO_ACTIVE_LOW>;
+			};
+			button@1 {
+				label = "GPIO BTN-VOLDN";
+				linux,code = <KEY_VOLUMEDOWN>;
+				gpios = <&gpio2 RK_PA1 GPIO_ACTIVE_LOW>;
+			};
+	};
+
 	joypad: odroidgo3-joypad {
                 compatible = "odroidgo3-joypad";
 		status = "okay";
@@ -158,16 +175,6 @@
                         gpios = <&gpio1 RK_PA7 GPIO_ACTIVE_LOW>;
                         label = "GPIO BTN-X";
                         linux,code = <BTN_NORTH>; // 0x133
-                };
-                sw9 {
-                        gpios = <&gpio2 RK_PA0 GPIO_ACTIVE_LOW>;
-                        label = "GPIO BTN-VOLUP";
-                        linux,code = <KEY_VOLUMEUP>; // 115, 0x73
-                };
-                sw10 {
-                        gpios = <&gpio2 RK_PA1 GPIO_ACTIVE_LOW>;
-                        label = "GPIO BTN-VOLDN";
-                        linux,code = <KEY_VOLUMEDOWN>; // 114, 0x72
                 };
                 sw11 {
                         gpios = <&gpio2 RK_PA2 GPIO_ACTIVE_LOW>;
