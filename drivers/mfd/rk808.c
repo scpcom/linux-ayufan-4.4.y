@@ -834,10 +834,6 @@ static const struct rk808_reg_data rk817_pre_init_reg[] = {
 	{RK817_GPIO_INT_CFG, RK817_INT_POL_MSK, RK817_INT_POL_L},
 	{RK817_SYS_CFG(1), RK817_HOTDIE_TEMP_MSK | RK817_TSD_TEMP_MSK,
 					   RK817_HOTDIE_105 | RK817_TSD_140},
-#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
-	{RK817_SYS_CFG(0), RK817_VB_LO_ACT_MSK | RK817_VB_LO_SEL_MSK,
-			   RK817_VB_LO_ACT_INTERRUPT | RK817_VB_LO_SEL_3V3},
-#endif
 };
 
 static int (*pm_shutdown)(struct regmap *regmap);

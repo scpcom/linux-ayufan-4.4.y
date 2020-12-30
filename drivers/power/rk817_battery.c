@@ -38,9 +38,6 @@
 #include <linux/timer.h>
 #include <linux/wakelock.h>
 #include <linux/workqueue.h>
-#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
-#include <linux/reboot.h>
-#endif
 
 static int dbg_enable;
 
@@ -2836,56 +2833,6 @@ static void rk817_battery_work(struct work_struct *work)
 			   msecs_to_jiffies(battery->monitor_ms));
 }
 
-#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
-static irqreturn_t rk817_vb_low_isr(int irq, void *cg)
-{
-	struct rk817_battery_device *battery;
-	int voltage_avg;
-
-	battery = (struct rk817_battery_device *)cg;
-
-	voltage_avg = rk817_bat_get_battery_voltage(battery);
-	pr_info("VB_LOW Interrupt : %d mV\n", voltage_avg);
-
-	if (voltage_avg < 3500) {
-		pr_info("battery voltage is under 3.5V (%dmV), power off!\n",
-				voltage_avg);
-		orderly_poweroff(false);
-	}
-
-	return IRQ_HANDLED;
-}
-
-static int rk817_charge_init_irqs(struct rk817_battery_device *battery)
-{
-	struct rk808 *rk817 = battery->rk817;
-	struct platform_device *pdev = battery->pdev;
-	int ret;
-	int vb_lo_irq;
-
-	/* PMIC_INT_STS0, VB_LO_INT */
-	vb_lo_irq = regmap_irq_get_virq(rk817->irq_data, RK817_IRQ_VB_LO);
-	if (vb_lo_irq < 0) {
-		dev_err(&pdev->dev, "rk817 vb_lo_irq request failed!\n");
-		return vb_lo_irq;
-	}
-
-	/* set low power isr */
-	ret = devm_request_threaded_irq(battery->dev, vb_lo_irq, NULL,
-					rk817_vb_low_isr,
-					IRQF_TRIGGER_RISING | IRQF_ONESHOT,
-					"rk817_vb_low", battery);
-	if (ret) {
-		dev_err(&pdev->dev, "vb low irq request failed!\n");
-		return ret;
-	}
-
-	enable_irq_wake(vb_lo_irq);
-
-	return 0;
-}
-#endif
-
 static irqreturn_t rk809_plug_in_isr(int irq, void *cg)
 {
 	struct rk817_battery_device *battery;
@@ -3050,12 +2997,6 @@ static int rk817_battery_probe(struct platform_device *pdev)
 
 	if (battery->chip_id == RK809_ID)
 		rk809_charge_init_irqs(battery);
-
-#ifdef CONFIG_ARCH_ROCKCHIP_ODROIDGOA
-	if (battery->chip_id == RK817_ID) {
-		rk817_charge_init_irqs(battery);
-	}
-#endif
 
 	wake_lock_init(&battery->wake_lock, WAKE_LOCK_SUSPEND,
 		       "rk817_bat_lock");
