@@ -120,6 +120,7 @@ struct rk_iommu {
 struct rk_iommudata {
 	struct device_link *link; /* runtime PM link from IOMMU to master */
 	struct rk_iommu *iommu;
+	bool defer_attach;
 };
 
 static struct device *dma_dev;
@@ -1176,6 +1177,8 @@ static struct iommu_device *rk_iommu_probe_device(struct device *dev)
 	data->link = device_link_add(dev, iommu->dev,
 				     DL_FLAG_STATELESS | DL_FLAG_PM_RUNTIME);
 
+	data->defer_attach = false;
+
 	return &iommu->iommu;
 }
 
@@ -1195,6 +1198,13 @@ static struct iommu_group *rk_iommu_device_group(struct device *dev)
 	return iommu_group_ref_get(iommu->group);
 }
 
+static bool rk_iommu_is_attach_deferred(struct device *dev)
+{
+	struct rk_iommudata *data = dev_iommu_priv_get(dev);
+
+	return data->defer_attach;
+}
+
 static int rk_iommu_of_xlate(struct device *dev,
 			     struct of_phandle_args *args)
 {
@@ -1209,6 +1219,10 @@ static int rk_iommu_of_xlate(struct device *dev,
 
 	data->iommu = platform_get_drvdata(iommu_dev);
 	data->iommu->domain = &rk_identity_domain;
+
+	if (strstr(dev_name(dev), "vop"))
+		data->defer_attach = true;
+
 	dev_iommu_priv_set(dev, data);
 
 	platform_device_put(iommu_dev);
@@ -1220,6 +1234,7 @@ static const struct iommu_ops rk_iommu_ops = {
 	.domain_alloc = rk_iommu_domain_alloc,
 	.probe_device = rk_iommu_probe_device,
 	.release_device = rk_iommu_release_device,
+	.is_attach_deferred = rk_iommu_is_attach_deferred,
 	.device_group = rk_iommu_device_group,
 #ifdef CONFIG_ARM
 	.set_platform_dma_ops = rk_iommu_set_platform_dma,
