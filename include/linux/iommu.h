@@ -596,6 +596,8 @@ static inline bool iommu_iotlb_gather_queued(struct iommu_iotlb_gather *gather)
 extern struct iommu_group *pci_device_group(struct device *dev);
 /* Generic device grouping function */
 extern struct iommu_group *generic_device_group(struct device *dev);
+extern void rk_iommu_mask_irq(struct device *dev);
+extern void rk_iommu_unmask_irq(struct device *dev);
 /* FSL-MC device grouping function */
 struct iommu_group *fsl_mc_device_group(struct device *dev);
 
@@ -1038,6 +1040,14 @@ static inline void iommu_group_release_dma_owner(struct iommu_group *group)
 static inline bool iommu_group_dma_owner_claimed(struct iommu_group *group)
 {
 	return false;
+}
+
+static inline void rk_iommu_mask_irq(struct device *dev)
+{
+}
+
+static inline void rk_iommu_unmask_irq(struct device *dev)
+{
 }
 #endif /* CONFIG_IOMMU_API */
 
