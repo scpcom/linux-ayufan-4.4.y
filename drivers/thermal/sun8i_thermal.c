@@ -17,6 +17,7 @@
 #include <linux/of.h>
 #include <linux/platform_device.h>
 #include <linux/regmap.h>
+#include <linux/regulator/consumer.h>
 #include <linux/reset.h>
 #include <linux/slab.h>
 #include <linux/thermal.h>
@@ -82,6 +83,7 @@ struct ths_device {
 	struct device				*dev;
 	struct regmap				*regmap;
 	struct reset_control			*reset;
+	struct regulator			*vref_supply;
 	struct clk				*bus_clk;
 	struct clk                              *mod_clk;
 	struct tsensor				sensor[MAX_SENSOR_NUM];
@@ -338,6 +340,10 @@ static int sun8i_ths_resource_init(struct ths_device *tmdev)
 	if (IS_ERR(tmdev->regmap))
 		return PTR_ERR(tmdev->regmap);
 
+	tmdev->vref_supply = devm_regulator_get(dev, "vref");
+	if (IS_ERR(tmdev->vref_supply))
+		return PTR_ERR(tmdev->vref_supply);
+
 	tmdev->reset = devm_reset_control_get_optional(dev, NULL);
 	if (IS_ERR(tmdev->reset))
 		return PTR_ERR(tmdev->reset);
@@ -361,6 +367,10 @@ static int sun8i_ths_resource_init(struct ths_device *tmdev)
 	if (IS_ERR(tmdev->mod_clk))
 		return PTR_ERR(tmdev->mod_clk);
 
+	ret = regulator_enable(tmdev->vref_supply);
+	if (ret)
+		goto disable_vref_supply;
+
 	ret = clk_set_rate(tmdev->mod_clk, 24000000);
 	if (ret)
 		return ret;
@@ -370,6 +380,11 @@ static int sun8i_ths_resource_init(struct ths_device *tmdev)
 		return ret;
 
 	return 0;
+
+disable_vref_supply:
+	regulator_disable(tmdev->vref_supply);
+
+	return ret;
 }
 
 static int sun8i_h3_thermal_init(struct ths_device *tmdev)
@@ -509,6 +524,15 @@ static int sun8i_ths_probe(struct platform_device *pdev)
 					IRQF_ONESHOT, "ths", tmdev);
 	if (ret)
 		return ret;
+
+	return 0;
+}
+
+static int sun8i_ths_remove(struct platform_device *pdev)
+{
+	struct ths_device *tmdev = platform_get_drvdata(pdev);
+
+	regulator_disable(tmdev->vref_supply);
 
 	return 0;
 }
