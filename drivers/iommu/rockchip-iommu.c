@@ -1351,7 +1351,7 @@ void rk_iommu_unmask_irq(struct device *dev)
 }
 EXPORT_SYMBOL(rk_iommu_unmask_irq);
 
-static const struct iommu_ops rk_iommu_ops = {
+static struct iommu_ops rk_iommu_ops = {
 	.domain_alloc = rk_iommu_domain_alloc,
 	.domain_free = rk_iommu_domain_free,
 	.attach_dev = rk_iommu_attach_device,
