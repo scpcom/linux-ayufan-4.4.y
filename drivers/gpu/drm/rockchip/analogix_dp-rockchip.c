@@ -30,6 +30,8 @@
 #include <drm/drm_probe_helper.h>
 #include <drm/drm_simple_kms_helper.h>
 
+#include "../bridge/analogix/analogix_dp_core.h"
+
 #include "rockchip_drm_drv.h"
 #include "rockchip_drm_vop.h"
 
@@ -76,6 +78,7 @@ struct rockchip_dp_device {
 
 	struct analogix_dp_device *adp;
 	struct analogix_dp_plat_data plat_data;
+	struct rockchip_drm_sub_dev sub_dev;
 };
 
 static int rockchip_dp_audio_hw_params(struct device *dev, void *data,
@@ -421,6 +424,12 @@ static int rockchip_dp_bind(struct device *dev, struct device *master,
 		}
 	}
 
+	dp->sub_dev.connector = &dp->adp->connector;
+	if (dp->sub_dev.connector) {
+		dp->sub_dev.of_node = dev->of_node;
+		rockchip_drm_register_sub_dev(&dp->sub_dev);
+	}
+
 	return 0;
 err_cleanup_encoder:
 	dp->encoder.encoder.funcs->destroy(&dp->encoder.encoder);
@@ -432,6 +441,8 @@ static void rockchip_dp_unbind(struct device *dev, struct device *master,
 {
 	struct rockchip_dp_device *dp = dev_get_drvdata(dev);
 
+	if (dp->sub_dev.connector)
+		rockchip_drm_unregister_sub_dev(&dp->sub_dev);
 	if (dp->audio_pdev)
 		platform_device_unregister(dp->audio_pdev);
 	analogix_dp_unbind(dp->adp);
