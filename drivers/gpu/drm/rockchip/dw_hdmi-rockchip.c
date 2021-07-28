@@ -89,6 +89,10 @@ struct rockchip_hdmi {
 	struct regulator *avdd_0v9;
 	struct regulator *avdd_1v8;
 	struct phy *phy;
+
+	u32 max_tmdsclk;
+	bool unsupported_yuv_input;
+	bool unsupported_deep_color;
 };
 
 static struct rockchip_hdmi *to_rockchip_hdmi(struct drm_encoder *encoder)
@@ -600,6 +604,7 @@ static const struct dw_hdmi_plat_data rk3228_hdmi_drv_data = {
 	.phy_ops = &rk3228_hdmi_phy_ops,
 	.phy_name = "inno_dw_hdmi_phy2",
 	.phy_force_vendor = true,
+	.max_tmdsclk = 371250,
 };
 
 static struct rockchip_hdmi_chip_data rk3288_chip_data = {
@@ -615,6 +620,7 @@ static const struct dw_hdmi_plat_data rk3288_hdmi_drv_data = {
 	.phy_config = rockchip_phy_config,
 	.phy_data = &rk3288_chip_data,
 	.tmds_n_table = rockchip_werid_tmds_n_table,
+	.unsupported_yuv_input = true,
 };
 
 static const struct dw_hdmi_phy_ops rk3328_hdmi_phy_ops = {
@@ -639,6 +645,7 @@ static const struct dw_hdmi_plat_data rk3328_hdmi_drv_data = {
 	.phy_name = "inno_dw_hdmi_phy2",
 	.phy_force_vendor = true,
 	.use_drm_infoframe = true,
+	.max_tmdsclk = 371250,
 };
 
 static struct rockchip_hdmi_chip_data rk3368_chip_data = {
@@ -652,6 +659,8 @@ static const struct dw_hdmi_plat_data rk3368_hdmi_drv_data = {
 	.cur_ctr    = rockchip_cur_ctr,
 	.phy_config = rockchip_phy_config,
 	.phy_data = &rk3368_chip_data,
+	.unsupported_deep_color = true,
+	.max_tmdsclk = 340000,
 };
 
 static struct rockchip_hdmi_chip_data rk3399_chip_data = {
@@ -751,6 +760,14 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
 	 */
 	if (encoder->possible_crtcs == 0)
 		return -EPROBE_DEFER;
+
+	if (!plat_data->max_tmdsclk)
+		hdmi->max_tmdsclk = 594000;
+	else
+		hdmi->max_tmdsclk = plat_data->max_tmdsclk;
+
+	hdmi->unsupported_yuv_input = plat_data->unsupported_yuv_input;
+	hdmi->unsupported_deep_color = plat_data->unsupported_deep_color;
 
 	ret = rockchip_hdmi_parse_dt(hdmi);
 	if (ret) {
