@@ -17,6 +17,7 @@
 #include <linux/component.h>
 #include <linux/console.h>
 #include <linux/iommu.h>
+#include <linux/of_reserved_mem.h>
 
 #include <drm/drm_aperture.h>
 #include <drm/drm_debugfs.h>
@@ -653,6 +654,9 @@ static int rockchip_drm_bind(struct device *dev)
 	drm_kms_helper_poll_init(drm_dev);
 
 	rockchip_gem_pool_init(drm_dev);
+	ret = of_reserved_mem_device_init(drm_dev->dev);
+	if (ret)
+		DRM_DEBUG_KMS("No reserved memory region assign to drm\n");
 
 	ret = drm_dev_register(drm_dev, 0);
 	if (ret)
