@@ -1555,7 +1555,6 @@ int xhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 	if (!ep || !ep_ring)
 		goto err_giveback;
 
-	urb_priv = urb->hcpriv;
 	i = urb_priv->td_cnt;
 	if (i < urb_priv->length)
 		xhci_dbg(xhci, "Cancel URB %p, dev %s, ep 0x%x, "
@@ -1565,6 +1564,21 @@ int xhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 				(unsigned long long) xhci_trb_virt_to_dma(
 					urb_priv->td[i]->start_seg,
 					urb_priv->td[i]->first_trb));
+
+	temp = xhci_readl(xhci, &xhci->op_regs->status);
+	if (temp == 0xffffffff || (xhci->xhc_state & XHCI_STATE_HALTED)) {
+		xhci_dbg(xhci, "HW died, freeing TD.\n");
+		for (i = urb_priv->td_cnt;
+		     i < urb_priv->length;
+		     i++) {
+			td = urb_priv->td[i];
+			if (!list_empty(&td->td_list))
+				list_del_init(&td->td_list);
+			if (!list_empty(&td->cancelled_td_list))
+				list_del_init(&td->cancelled_td_list);
+		}
+		goto err_giveback;
+	}
 
 	for (; i < urb_priv->length; i++) {
 		td = urb_priv->td[i];
