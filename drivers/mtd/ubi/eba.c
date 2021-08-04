@@ -524,10 +524,7 @@ retry:
 		goto out_put;
 	}
 
-	vid_hdr->sqnum = cpu_to_be64(ubi_next_sqnum(ubi));
-	err = ubi_io_write_vid_hdr(ubi, new_pnum, vid_hdr);
-	if (err)
-		goto write_error;
+	ubi_assert(vid_hdr->vol_type == UBI_VID_DYNAMIC);
 
 	mutex_lock(&ubi->buf_mutex);
 	memset(ubi->peb_buf + offset, 0xFF, len);
@@ -540,6 +537,18 @@ retry:
 	}
 
 	memcpy(ubi->peb_buf + offset, buf, len);
+
+	data_size = offset + len;
+	crc = crc32(UBI_CRC32_INIT, ubi->peb_buf, data_size);
+	vid_hdr->sqnum = cpu_to_be64(ubi_next_sqnum(ubi));
+	vid_hdr->copy_flag = 1;
+	vid_hdr->data_size = cpu_to_be32(data_size);
+	vid_hdr->data_crc = cpu_to_be32(crc);
+	err = ubi_io_write_vid_hdr(ubi, new_pnum, vid_hdr);
+	if (err) {
+		mutex_unlock(&ubi->buf_mutex);
+		goto write_error;
+	}
 
 	err = ubi_io_write_data(ubi, ubi->peb_buf, new_pnum, 0, data_size);
 	if (err) {
