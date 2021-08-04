@@ -1,0 +1,10 @@
+#
+# MindSpeed pfe support (added by Andy, 2014/07/08)
+#
+
+config OCF_M86XXX_ELP
+	tristate "MindSpeed ocf support"
+	default m
+	---help---
+		MindSpeed ocf kernel module
+		(copied from "MindSpeed_OpenWRT/sdk-comcerto-openwrt-c2k_nas_3.1-rc2/package/mindspeed/pfe_ctrl")
