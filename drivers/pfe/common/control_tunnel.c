@@ -130,6 +130,7 @@ static void M_tnl_build_header(PTnlEntry pTunnelEntry)
 		case TNL_MODE_ETHERIPV6:
 
 			/* add IPv6 header */
+			ip6_hdr.Version_TC_FLHi = 0;
 			SFL_memcpy((U8*)ip6_hdr.DestinationAddress, (U8*)pTunnelEntry->remote, IPV6_ADDRESS_LENGTH);
 			SFL_memcpy((U8*)ip6_hdr.SourceAddress, (U8*)pTunnelEntry->local, IPV6_ADDRESS_LENGTH);
 			ip6_hdr.HopLimit = pTunnelEntry->hlim;
@@ -197,6 +198,7 @@ static void M_tnl_build_header(PTnlEntry pTunnelEntry)
 
                 case TNL_MODE_4O6:
 
+                        ip6_hdr.Version_TC_FLHi = 0;
                         SFL_memcpy((U8*)ip6_hdr.DestinationAddress, (U8*)pTunnelEntry->remote, IPV6_ADDRESS_LENGTH);
                         SFL_memcpy((U8*)ip6_hdr.SourceAddress, (U8*)pTunnelEntry->local, IPV6_ADDRESS_LENGTH);
                         ip6_hdr.HopLimit = pTunnelEntry->hlim;
