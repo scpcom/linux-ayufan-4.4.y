@@ -1834,6 +1834,183 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 	return -EINVAL;
 }
 
+static ssize_t do_splice_from_socket(struct file *file, struct socket *sock,
+				     loff_t __user *ppos, size_t count)
+{		
+	struct address_space *mapping = file->f_mapping;
+	struct inode	*inode = mapping->host;
+	loff_t pos;
+	int count_tmp;
+	int err = 0;
+	int cPagePtr;		
+	int cPagesAllocated = 0;
+#if defined(CONFIG_COMCERTO_64K_PAGES)
+	struct recvfile_ctl_blk rv_cb[MAX_PAGES_PER_RECVFILE + 1];
+	struct kvec iov[MAX_PAGES_PER_RECVFILE + 1];
+#else
+	struct recvfile_ctl_blk *rv_cb;
+	struct kvec *iov;
+#endif
+	struct msghdr msg;
+	long rcvtimeo;
+	int ret;
+
+	if (!mapping || !mapping->a_ops || !mapping->a_ops->write_begin)
+		return -EINVAL;
+
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
+	rv_cb = kmalloc(sizeof(struct recvfile_ctl_blk) *
+					(MAX_PAGES_PER_RECVFILE + 1), GFP_KERNEL);
+	if (!rv_cb)
+		return -ENOMEM;
+
+	iov = kmalloc(sizeof(struct kvec) * (MAX_PAGES_PER_RECVFILE + 1), GFP_KERNEL);
+	if (!iov) {
+		kfree(rv_cb);
+		return -ENOMEM;
+	}
+#endif
+
+	if(copy_from_user(&pos, ppos, sizeof(loff_t))) {
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
+		kfree(rv_cb);
+		kfree(iov);
+#endif
+		return -EFAULT;
+	}
+
+	if(count > MAX_PAGES_PER_RECVFILE * PAGE_SIZE) {
+		printk("%s: count(%u) exceeds maxinum\n", __func__, count);
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
+		kfree(rv_cb);
+		kfree(iov);
+#endif
+		return -EINVAL;
+	}    
+	mutex_lock(&inode->i_mutex);
+
+	/* We can write back this queue in page reclaim */
+	current->backing_dev_info = mapping->backing_dev_info;
+
+	err = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
+	if (err || count == 0)
+		goto done;
+
+	if ((err = file_remove_suid(file)))
+		goto done;
+	file_update_time(file);
+
+	count_tmp = count;
+	do {
+		unsigned long bytes;	/* Bytes to write to page */
+		unsigned long offset;	/* Offset into pagecache page */
+		struct page *pageP;
+		void *fsdata;
+
+		offset = (pos & (PAGE_CACHE_SIZE - 1));
+		bytes = PAGE_CACHE_SIZE - offset;
+		if (bytes > count_tmp)
+			bytes = count_tmp;
+
+		ret = mapping->a_ops->write_begin(file, mapping, pos, bytes,
+											  AOP_FLAG_UNINTERRUPTIBLE,
+											  &pageP, &fsdata);
+
+		if (unlikely(ret)) {
+			err = ret;
+			printk("%s: %d: %s: page_allocate error err = %d\n", __FILE__, __LINE__, __func__, err);
+			for(cPagePtr = 0; cPagePtr < cPagesAllocated; cPagePtr++) {
+				kunmap(rv_cb[cPagePtr].rv_page);
+				ret = mapping->a_ops->write_end(file, mapping,
+								rv_cb[cPagePtr].rv_pos,
+								rv_cb[cPagePtr].rv_count,
+								rv_cb[cPagePtr].rv_count,
+								rv_cb[cPagePtr].rv_page,
+								rv_cb[cPagePtr].rv_fsdata);
+				if (unlikely(ret < 0))
+					printk("%s: write_end fail,ret = %d\n", __func__, ret);
+			}
+			goto done;
+		}
+		rv_cb[cPagesAllocated].rv_page = pageP;
+		rv_cb[cPagesAllocated].rv_pos = pos;
+		rv_cb[cPagesAllocated].rv_count = bytes;
+		rv_cb[cPagesAllocated].rv_fsdata = fsdata;
+		iov[cPagesAllocated].iov_base = kmap(pageP) + offset;
+		iov[cPagesAllocated].iov_len = bytes;
+		cPagesAllocated++;
+		count_tmp -= bytes;
+		pos += bytes;
+	} while (count_tmp);
+
+	/* IOV is ready, receive the date from socket now */
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+	msg.msg_iov = (struct iovec *)&iov[0];
+	msg.msg_iovlen = cPagesAllocated ;
+	msg.msg_control = NULL;
+	msg.msg_controllen = 0;
+	msg.msg_flags = MSG_KERNSPACE;
+	rcvtimeo = sock->sk->sk_rcvtimeo;    
+	sock->sk->sk_rcvtimeo = 4 * HZ;
+
+	ret = kernel_recvmsg(sock, &msg, &iov[0], cPagesAllocated, count,
+			     MSG_WAITALL | MSG_NOCATCHSIG);
+
+	sock->sk->sk_rcvtimeo = rcvtimeo;
+
+	if (unlikely(ret < 0)) {
+		/* kernel_recvmsg error */
+		err = ret;
+		printk("%s: %d: %s: kernel_recvmsg error, estimate %d, real %d\n", __FILE__, __LINE__, __func__, count, err);
+		for(cPagePtr = 0; cPagePtr < cPagesAllocated; cPagePtr++) {
+			kunmap(rv_cb[cPagePtr].rv_page);
+			ret = mapping->a_ops->write_end(file, mapping,
+							rv_cb[cPagePtr].rv_pos,
+							rv_cb[cPagePtr].rv_count,
+							rv_cb[cPagePtr].rv_count,
+							rv_cb[cPagePtr].rv_page,
+							rv_cb[cPagePtr].rv_fsdata);
+			if (unlikely(ret < 0))
+				printk("%s: write_end fail,ret = %d\n", __func__, ret);
+		}
+		goto done;
+	}
+	else {
+		err = 0;
+		if (ret != count) {
+			printk("%s: %d: %s: short kernel_recvmsg, estimate %d, real %d\n", __FILE__, __LINE__, __func__, count, err);
+			pos = pos - count + ret;
+			count = ret;
+		}
+	}
+
+	for(cPagePtr=0;cPagePtr < cPagesAllocated;cPagePtr++) {
+		//flush_dcache_page(pageP);
+		kunmap(rv_cb[cPagePtr].rv_page);
+		ret = mapping->a_ops->write_end(file, mapping,
+						rv_cb[cPagePtr].rv_pos,
+						rv_cb[cPagePtr].rv_count,
+						rv_cb[cPagePtr].rv_count,
+						rv_cb[cPagePtr].rv_page,
+						rv_cb[cPagePtr].rv_fsdata);
+		if (unlikely(ret < 0))
+			printk("%s: write_end fail,ret = %d\n", __func__, ret);
+		//cond_resched();
+	}
+	balance_dirty_pages_ratelimited_nr(mapping, cPagesAllocated);
+	copy_to_user(ppos,&pos,sizeof(loff_t));
+    
+done: 
+#if !defined(CONFIG_COMCERTO_64K_PAGES)
+	kfree(rv_cb);
+	kfree(iov);
+#endif
+	current->backing_dev_info = NULL;    
+	mutex_unlock(&inode->i_mutex);
+	return err ? err : count;
+}
+
 /*
  * Map an iov into an array of pages and offset/length tupples. With the
  * partial_page structure, we can map several non-contiguous ranges into
@@ -2147,31 +2324,43 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 	if (unlikely(!len))
 		return 0;
 
-	if (!(out = fget_light(fd_out, &fput_out)))
-		return -EBADF;
+	error = -EBADF;
 
-	if (!(out->f_mode & FMODE_WRITE))
-		goto out;
+	sock = sockfd_lookup(fd_in, &error);
+	if (sock) {
+		if (!sock->sk) goto done;
+		out = fget_light(fd_out, &fput_out);
 
-	/* Check if fd_in is a socket while out_fd is NOT a pipe. */
-	if (!get_pipe_info(out) &&
-		(sock = sockfd_lookup(fd_in, &error))) {
+		if (out) {
+			if (!(out->f_mode & FMODE_WRITE))
+				goto done;
 #if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
-		if (sock->sk && out->f_op->splice_from_socket)
-			error = out->f_op->splice_from_socket(out, sock,
-								off_out, len);
+			if (out->f_op->splice_from_socket)
+				return out->f_op->splice_from_socket(out, sock, off_out, len);
+			else
 #endif
+				error = do_splice_from_socket(out, sock, off_out, len);
+		}
+done:
+		if (out)
+			fput_light(out, fput_out);
 		fput(sock->file);
-	} else
-	{
-		if (!(in = fget_light(fd_in, &fput_in)))
-			goto out;
-		if ((in->f_mode & FMODE_READ))
-			error = do_splice(in, off_in, out, off_out, len, flags);
+		return error;
+	}
+
+	in = fget_light(fd_in, &fput_in); 
+	if (in) {
+		if ((in->f_mode & FMODE_READ)) {
+			out = fget_light(fd_out, &fput_out);
+			if (out) {
+				if (out->f_mode & FMODE_WRITE)
+					error = do_splice(in, off_in, out, off_out, len, flags);
+				fput_light(out, fput_out);
+			}
+		}
 		fput_light(in, fput_in);
 	}
-out:
-	fput_light(out, fput_out);
+
 	return error;
 }
 
