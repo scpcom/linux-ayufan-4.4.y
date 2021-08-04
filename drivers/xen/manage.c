@@ -93,7 +93,6 @@ static int xen_suspend(void *data)
 
 	if (!si->cancelled) {
 		xen_irq_resume();
-		xen_console_resume();
 		xen_timer_resume();
 	}
 
@@ -109,16 +108,17 @@ static void do_suspend(void)
 
 	shutting_down = SHUTDOWN_SUSPEND;
 
-#ifdef CONFIG_PREEMPT
-	/* If the kernel is preemptible, we need to freeze all the processes
-	   to prevent them from being in the middle of a pagetable update
-	   during suspend. */
 	err = freeze_processes();
 	if (err) {
-		printk(KERN_ERR "xen suspend: freeze failed %d\n", err);
+		pr_err("%s: freeze processes failed %d\n", __func__, err);
 		goto out;
 	}
-#endif
+
+	err = freeze_kernel_threads();
+	if (err) {
+		pr_err("%s: freeze kernel threads failed %d\n", __func__, err);
+		goto out_thaw;
+	}
 
 	err = dpm_suspend_start(PMSG_FREEZE);
 	if (err) {
@@ -149,6 +149,10 @@ static void do_suspend(void)
 
 	err = stop_machine(xen_suspend, &si, cpumask_of(0));
 
+	/* Resume console as early as possible. */
+	if (!si.cancelled)
+		xen_console_resume();
+
 	dpm_resume_noirq(si.cancelled ? PMSG_THAW : PMSG_RESTORE);
 
 	if (err) {
@@ -169,10 +173,8 @@ out_resume:
 	clock_was_set();
 
 out_thaw:
-#ifdef CONFIG_PREEMPT
 	thaw_processes();
 out:
-#endif
 	shutting_down = SHUTDOWN_INVALID;
 }
 #endif	/* CONFIG_HIBERNATE_CALLBACKS */

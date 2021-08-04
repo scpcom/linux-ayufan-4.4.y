@@ -117,7 +117,7 @@ static int _usbctrl_vendorreq_sync_read(struct usb_device *udev, u8 request,
 	reqtype =  REALTEK_USB_VENQT_READ;
 
 	status = usb_control_msg(udev, pipe, request, reqtype, value, index,
-				 pdata, len, 0); /* max. timeout */
+				 pdata, len, 1000);
 
 	if (status < 0)
 		pr_err("reg 0x%x, usbctrl_vendorreq TimeOut! status:0x%x value=0x%x\n",
@@ -500,6 +500,8 @@ static void _rtl_usb_rx_process_noagg(struct ieee80211_hw *hw,
 		} else {
 			dev_kfree_skb_any(skb);
 		}
+	} else {
+		dev_kfree_skb_any(skb);
 	}
 }
 

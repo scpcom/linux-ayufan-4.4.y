@@ -1298,8 +1298,7 @@ handle_newline:
 			tty->canon_data++;
 			spin_unlock_irqrestore(&tty->read_lock, flags);
 			kill_fasync(&tty->fasync, SIGIO, POLL_IN);
-			if (waitqueue_active(&tty->read_wait))
-				wake_up_interruptible(&tty->read_wait);
+			wake_up_interruptible(&tty->read_wait);
 			return;
 		}
 	}
@@ -1422,8 +1421,7 @@ static void n_tty_receive_buf(struct tty_struct *tty, const unsigned char *cp,
 	if ((!tty->icanon && (tty->read_cnt >= tty->minimum_to_wake)) ||
 		L_EXTPROC(tty)) {
 		kill_fasync(&tty->fasync, SIGIO, POLL_IN);
-		if (waitqueue_active(&tty->read_wait))
-			wake_up_interruptible(&tty->read_wait);
+		wake_up_interruptible(&tty->read_wait);
 	}
 
 	/*
@@ -1461,7 +1459,7 @@ static void n_tty_set_termios(struct tty_struct *tty, struct ktermios *old)
 	BUG_ON(!tty);
 
 	if (old)
-		canon_change = (old->c_lflag ^ tty->termios->c_lflag) & ICANON;
+		canon_change = (old->c_lflag ^ tty->termios->c_lflag) & (ICANON | EXTPROC);
 	if (canon_change) {
 		memset(&tty->read_flags, 0, sizeof tty->read_flags);
 		tty->canon_head = tty->read_tail;
@@ -1811,6 +1809,12 @@ do_it_again:
 			}
 			if (tty_hung_up_p(file))
 				break;
+			/*
+			 * Abort readers for ttys which never actually
+			 * get hung up.  See __tty_hangup().
+			 */
+			if (test_bit(TTY_HUPPING, &tty->flags))
+				break;
 			if (!timeout)
 				break;
 			if (file->f_flags & O_NONBLOCK) {
@@ -1997,7 +2001,9 @@ static ssize_t n_tty_write(struct tty_struct *tty, struct file *file,
 				tty->ops->flush_chars(tty);
 		} else {
 			while (nr > 0) {
+				mutex_lock(&tty->output_lock);
 				c = tty->ops->write(tty, b, nr);
+				mutex_unlock(&tty->output_lock);
 				if (c < 0) {
 					retval = c;
 					goto break_out;
@@ -2096,7 +2102,7 @@ static int n_tty_ioctl(struct tty_struct *tty, struct file *file,
 	case TIOCINQ:
 		/* FIXME: Locking */
 		retval = tty->read_cnt;
-		if (L_ICANON(tty))
+		if (L_ICANON(tty) && !L_EXTPROC(tty))
 			retval = inq_canon(tty);
 		return put_user(retval, (unsigned int __user *) arg);
 	default:

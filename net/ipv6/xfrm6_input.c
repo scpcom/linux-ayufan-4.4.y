@@ -38,6 +38,13 @@ int xfrm6_rcv_spi(struct sk_buff *skb, int nexthdr, __be32 spi)
 }
 EXPORT_SYMBOL(xfrm6_rcv_spi);
 
+static int xfrm6_transport_finish2(struct sk_buff *skb)
+{
+	if (xfrm_trans_queue(skb, ip6_rcv_finish))
+		__kfree_skb(skb);
+	return -1;
+}
+
 int xfrm6_transport_finish(struct sk_buff *skb, int async)
 {
 	skb_network_header(skb)[IP6CB(skb)->nhoff] =
@@ -52,7 +59,7 @@ int xfrm6_transport_finish(struct sk_buff *skb, int async)
 	__skb_push(skb, skb->data - skb_network_header(skb));
 
 	NF_HOOK(NFPROTO_IPV6, NF_INET_PRE_ROUTING, skb, skb->dev, NULL,
-		ip6_rcv_finish);
+		xfrm6_transport_finish2);
 	return -1;
 }
 /* If it's a keepalive packet, then just eat it.

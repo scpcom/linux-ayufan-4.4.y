@@ -266,6 +266,13 @@ notrace static void __cpuinit start_secondary(void *unused)
 	check_tsc_sync_target();
 
 	/*
+	 * Enable the espfix hack for this CPU
+	 */
+#ifdef CONFIG_X86_ESPFIX64
+	init_espfix_ap();
+#endif
+
+	/*
 	 * We need to hold call_lock, so there is no inconsistency
 	 * between the time smp_call_function() determines number of
 	 * IPI recipients, and the time when the determination is made
@@ -682,7 +689,8 @@ static int __cpuinit do_boot_cpu(int apicid, int cpu)
 
 	INIT_WORK_ONSTACK(&c_idle.work, do_fork_idle);
 
-	alternatives_smp_switch(1);
+	/* Just in case we booted with a single CPU. */
+	alternatives_enable_smp();
 
 	c_idle.idle = get_idle_for_cpu(cpu);
 
@@ -1102,20 +1110,6 @@ out:
 	preempt_enable();
 }
 
-void arch_disable_nonboot_cpus_begin(void)
-{
-	/*
-	 * Avoid the smp alternatives switch during the disable_nonboot_cpus().
-	 * In the suspend path, we will be back in the SMP mode shortly anyways.
-	 */
-	skip_smp_alternatives = true;
-}
-
-void arch_disable_nonboot_cpus_end(void)
-{
-	skip_smp_alternatives = false;
-}
-
 void arch_enable_nonboot_cpus_begin(void)
 {
 	set_mtrr_aps_delayed_init();
@@ -1245,6 +1239,9 @@ static void remove_siblinginfo(int cpu)
 
 	for_each_cpu(sibling, cpu_sibling_mask(cpu))
 		cpumask_clear_cpu(cpu, cpu_sibling_mask(sibling));
+	for_each_cpu(sibling, cpu_llc_shared_mask(cpu))
+		cpumask_clear_cpu(cpu, cpu_llc_shared_mask(sibling));
+	cpumask_clear(cpu_llc_shared_mask(cpu));
 	cpumask_clear(cpu_sibling_mask(cpu));
 	cpumask_clear(cpu_core_mask(cpu));
 	c->phys_proc_id = 0;
@@ -1278,6 +1275,7 @@ void cpu_disable_common(void)
 int native_cpu_disable(void)
 {
 	int cpu = smp_processor_id();
+	int ret;
 
 	/*
 	 * Perhaps use cpufreq to drop frequency, but that could go
@@ -1289,6 +1287,10 @@ int native_cpu_disable(void)
 	 */
 	if (cpu == 0)
 		return -EBUSY;
+
+	ret = check_irq_vectors_for_cpu_disable();
+	if (ret)
+		return ret;
 
 	clear_local_APIC();
 
@@ -1306,9 +1308,6 @@ void native_cpu_die(unsigned int cpu)
 		if (per_cpu(cpu_state, cpu) == CPU_DEAD) {
 			if (system_state == SYSTEM_RUNNING)
 				pr_info("CPU %u is now offline\n", cpu);
-
-			if (1 == num_online_cpus())
-				alternatives_smp_switch(0);
 			return;
 		}
 		msleep(100);

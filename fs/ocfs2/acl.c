@@ -246,22 +246,6 @@ static int ocfs2_set_acl(handle_t *handle,
 	switch (type) {
 	case ACL_TYPE_ACCESS:
 		name_index = OCFS2_XATTR_INDEX_POSIX_ACL_ACCESS;
-		if (acl) {
-			umode_t mode = inode->i_mode;
-			ret = posix_acl_equiv_mode(acl, &mode);
-			if (ret < 0)
-				return ret;
-			else {
-				if (ret == 0)
-					acl = NULL;
-
-				ret = ocfs2_acl_set_mode(inode, di_bh,
-							 handle, mode);
-				if (ret)
-					return ret;
-
-			}
-		}
 		break;
 	case ACL_TYPE_DEFAULT:
 		name_index = OCFS2_XATTR_INDEX_POSIX_ACL_DEFAULT;
@@ -486,6 +470,17 @@ static int ocfs2_xattr_set_acl(struct dentry *dentry, const char *name,
 	} else
 		acl = NULL;
 
+	if (type == ACL_TYPE_ACCESS && acl) {
+		umode_t mode;
+
+		ret = posix_acl_update_mode(inode, &mode, &acl);
+		if (ret)
+			goto cleanup;
+
+		ret = ocfs2_acl_set_mode(inode, NULL, NULL, mode);
+		if (ret)
+			goto cleanup;
+	}
 	ret = ocfs2_set_acl(NULL, inode, NULL, type, acl, NULL, NULL);
 
 cleanup:

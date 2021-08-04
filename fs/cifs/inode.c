@@ -823,7 +823,7 @@ inode_has_hashed_dentries(struct inode *inode)
 	struct dentry *dentry;
 
 	spin_lock(&inode->i_lock);
-	list_for_each_entry(dentry, &inode->i_dentry, d_alias) {
+	list_for_each_entry(dentry, &inode->i_dentry, d_u.d_alias) {
 		if (!d_unhashed(dentry) || IS_ROOT(dentry)) {
 			spin_unlock(&inode->i_lock);
 			return true;
@@ -1638,6 +1638,12 @@ unlink_target:
 				    target_dentry, toName);
 	}
 
+	/* force revalidate to go get info when needed */
+	CIFS_I(source_dir)->time = CIFS_I(target_dir)->time = 0;
+
+	source_dir->i_ctime = source_dir->i_mtime = target_dir->i_ctime =
+		target_dir->i_mtime = current_fs_time(source_dir->i_sb);
+
 cifs_rename_exit:
 	kfree(info_buf_source);
 	kfree(fromName);
@@ -1867,7 +1873,6 @@ cifs_set_file_size(struct inode *inode, struct iattr *attrs,
 	struct cifs_sb_info *cifs_sb = CIFS_SB(inode->i_sb);
 	struct tcon_link *tlink = NULL;
 	struct cifs_tcon *pTcon = NULL;
-	struct cifs_io_parms io_parms;
 
 	/*
 	 * To avoid spurious oplock breaks from server, in the case of
@@ -1887,18 +1892,6 @@ cifs_set_file_size(struct inode *inode, struct iattr *attrs,
 					npid, false);
 		cifsFileInfo_put(open_file);
 		cFYI(1, "SetFSize for attrs rc = %d", rc);
-		if ((rc == -EINVAL) || (rc == -EOPNOTSUPP)) {
-			unsigned int bytes_written;
-
-			io_parms.netfid = nfid;
-			io_parms.pid = npid;
-			io_parms.tcon = pTcon;
-			io_parms.offset = 0;
-			io_parms.length = attrs->ia_size;
-			rc = CIFSSMBWrite(xid, &io_parms, &bytes_written,
-					  NULL, NULL, 1);
-			cFYI(1, "Wrt seteof rc %d", rc);
-		}
 	} else
 		rc = -EINVAL;
 
@@ -1919,31 +1912,7 @@ cifs_set_file_size(struct inode *inode, struct iattr *attrs,
 				   cifs_sb->mnt_cifs_flags &
 					CIFS_MOUNT_MAP_SPECIAL_CHR);
 		cFYI(1, "SetEOF by path (setattrs) rc = %d", rc);
-		if ((rc == -EINVAL) || (rc == -EOPNOTSUPP)) {
-			__u16 netfid;
-			int oplock = 0;
 
-			rc = SMBLegacyOpen(xid, pTcon, full_path,
-				FILE_OPEN, GENERIC_WRITE,
-				CREATE_NOT_DIR, &netfid, &oplock, NULL,
-				cifs_sb->local_nls,
-				cifs_sb->mnt_cifs_flags &
-					CIFS_MOUNT_MAP_SPECIAL_CHR);
-			if (rc == 0) {
-				unsigned int bytes_written;
-
-				io_parms.netfid = netfid;
-				io_parms.pid = current->tgid;
-				io_parms.tcon = pTcon;
-				io_parms.offset = 0;
-				io_parms.length = attrs->ia_size;
-				rc = CIFSSMBWrite(xid, &io_parms,
-						  &bytes_written,
-						  NULL, NULL,  1);
-				cFYI(1, "wrt seteof rc %d", rc);
-				CIFSSMBClose(xid, pTcon, netfid);
-			}
-		}
 		if (tlink)
 			cifs_put_tlink(tlink);
 	}
@@ -1979,7 +1948,7 @@ cifs_setattr_unix(struct dentry *direntry, struct iattr *attrs)
 	if (cifs_sb->mnt_cifs_flags & CIFS_MOUNT_NO_PERM)
 		attrs->ia_valid |= ATTR_FORCE;
 
-	rc = inode_change_ok(inode, attrs);
+	rc = setattr_prepare(direntry, attrs);
 	if (rc < 0)
 		goto out;
 
@@ -2120,7 +2089,7 @@ cifs_setattr_nounix(struct dentry *direntry, struct iattr *attrs)
 	if (cifs_sb->mnt_cifs_flags & CIFS_MOUNT_NO_PERM)
 		attrs->ia_valid |= ATTR_FORCE;
 
-	rc = inode_change_ok(inode, attrs);
+	rc = setattr_prepare(direntry, attrs);
 	if (rc < 0) {
 		FreeXid(xid);
 		return rc;

@@ -207,24 +207,14 @@ again:
 
 void btrfs_return_ino(struct btrfs_root *root, u64 objectid)
 {
-	struct btrfs_free_space_ctl *ctl = root->free_ino_ctl;
 	struct btrfs_free_space_ctl *pinned = root->free_ino_pinned;
 
 	if (!btrfs_test_opt(root, INODE_MAP_CACHE))
 		return;
-
 again:
 	if (root->cached == BTRFS_CACHE_FINISHED) {
-		__btrfs_add_free_space(ctl, objectid, 1);
+		__btrfs_add_free_space(pinned, objectid, 1);
 	} else {
-		/*
-		 * If we are in the process of caching free ino chunks,
-		 * to avoid adding the same inode number to the free_ino
-		 * tree twice due to cross transaction, we'll leave it
-		 * in the pinned tree until a transaction is committed
-		 * or the caching work is done.
-		 */
-
 		mutex_lock(&root->fs_commit_mutex);
 		spin_lock(&root->cache_lock);
 		if (root->cached == BTRFS_CACHE_FINISHED) {
@@ -236,11 +226,7 @@ again:
 
 		start_caching(root);
 
-		if (objectid <= root->cache_progress ||
-		    objectid > root->highest_objectid)
-			__btrfs_add_free_space(ctl, objectid, 1);
-		else
-			__btrfs_add_free_space(pinned, objectid, 1);
+		__btrfs_add_free_space(pinned, objectid, 1);
 
 		mutex_unlock(&root->fs_commit_mutex);
 	}
@@ -258,6 +244,7 @@ void btrfs_unpin_free_ino(struct btrfs_root *root)
 {
 	struct btrfs_free_space_ctl *ctl = root->free_ino_ctl;
 	struct rb_root *rbroot = &root->free_ino_pinned->free_space_offset;
+	spinlock_t *rbroot_lock = &root->free_ino_pinned->tree_lock;
 	struct btrfs_free_space *info;
 	struct rb_node *n;
 	u64 count;
@@ -266,24 +253,30 @@ void btrfs_unpin_free_ino(struct btrfs_root *root)
 		return;
 
 	while (1) {
+		bool add_to_ctl = true;
+
+		spin_lock(rbroot_lock);
 		n = rb_first(rbroot);
-		if (!n)
+		if (!n) {
+			spin_unlock(rbroot_lock);
 			break;
+		}
 
 		info = rb_entry(n, struct btrfs_free_space, offset_index);
 		BUG_ON(info->bitmap);
 
 		if (info->offset > root->cache_progress)
-			goto free;
+			add_to_ctl = false;
 		else if (info->offset + info->bytes > root->cache_progress)
 			count = root->cache_progress - info->offset + 1;
 		else
 			count = info->bytes;
 
-		__btrfs_add_free_space(ctl, info->offset, count);
-free:
 		rb_erase(&info->offset_index, rbroot);
-		kfree(info);
+		spin_unlock(rbroot_lock);
+		if (add_to_ctl)
+			__btrfs_add_free_space(ctl, info->offset, count);
+		kmem_cache_free(btrfs_free_space_cachep, info);
 	}
 }
 

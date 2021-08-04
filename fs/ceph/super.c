@@ -361,8 +361,10 @@ static int ceph_show_options(struct seq_file *m, struct vfsmount *mnt)
 	if (opt->flags & CEPH_OPT_NOCRC)
 		seq_puts(m, ",nocrc");
 
-	if (opt->name)
-		seq_printf(m, ",name=%s", opt->name);
+	if (opt->name) {
+		seq_puts(m, ",name=");
+		seq_escape(m, opt->name, ", \t\n\\");
+	}
 	if (opt->key)
 		seq_puts(m, ",secret=<hidden>");
 
@@ -405,7 +407,7 @@ static int ceph_show_options(struct seq_file *m, struct vfsmount *mnt)
 	if (fsopt->max_readdir_bytes != CEPH_MAX_READDIR_BYTES_DEFAULT)
 		seq_printf(m, ",readdir_max_bytes=%d", fsopt->max_readdir_bytes);
 	if (strcmp(fsopt->snapdir_name, CEPH_SNAPDIRNAME_DEFAULT))
-		seq_printf(m, ",snapdirname=%s", fsopt->snapdir_name);
+		seq_show_option(m, "snapdirname", fsopt->snapdir_name);
 	return 0;
 }
 
@@ -911,14 +913,20 @@ static int __init init_ceph(void)
 	if (ret)
 		goto out;
 
-	ret = register_filesystem(&ceph_fs_type);
+	ret = ceph_snap_init();
 	if (ret)
 		goto out_icache;
+
+	ret = register_filesystem(&ceph_fs_type);
+	if (ret)
+		goto out_snap;
 
 	pr_info("loaded (mds proto %d)\n", CEPH_MDSC_PROTOCOL);
 
 	return 0;
 
+out_snap:
+	ceph_snap_exit();
 out_icache:
 	destroy_caches();
 out:
@@ -929,6 +937,7 @@ static void __exit exit_ceph(void)
 {
 	dout("exit_ceph\n");
 	unregister_filesystem(&ceph_fs_type);
+	ceph_snap_exit();
 	destroy_caches();
 }
 

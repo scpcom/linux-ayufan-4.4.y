@@ -1608,6 +1608,7 @@ refind_writable:
 			cifsFileInfo_put(inv_file);
 			spin_lock(&cifs_file_list_lock);
 			++refind;
+			inv_file = NULL;
 			goto refind_writable;
 		}
 	}
@@ -2107,7 +2108,7 @@ cifs_iovec_write(struct file *file, const struct iovec *iov,
 {
 	unsigned int written;
 	unsigned long num_pages, npages, i;
-	size_t copied, len, cur_len;
+	size_t bytes, copied, len, cur_len;
 	ssize_t total_written = 0;
 	struct kvec *to_send;
 	struct page **pages;
@@ -2165,16 +2166,44 @@ cifs_iovec_write(struct file *file, const struct iovec *iov,
 	do {
 		size_t save_len = cur_len;
 		for (i = 0; i < npages; i++) {
-			copied = min_t(const size_t, cur_len, PAGE_CACHE_SIZE);
+			bytes = min_t(const size_t, cur_len, PAGE_CACHE_SIZE);
 			copied = iov_iter_copy_from_user(pages[i], &it, 0,
-							 copied);
+							 bytes);
 			cur_len -= copied;
 			iov_iter_advance(&it, copied);
 			to_send[i+1].iov_base = kmap(pages[i]);
 			to_send[i+1].iov_len = copied;
+			/*
+			 * If we didn't copy as much as we expected, then that
+			 * may mean we trod into an unmapped area. Stop copying
+			 * at that point. On the next pass through the big
+			 * loop, we'll likely end up getting a zero-length
+			 * write and bailing out of it.
+			 */
+			if (copied < bytes)
+				break;
 		}
 
 		cur_len = save_len - cur_len;
+
+		/*
+		 * If we have no data to send, then that probably means that
+		 * the copy above failed altogether. That's most likely because
+		 * the address in the iovec was bogus. Set the rc to -EFAULT,
+		 * free anything we allocated and bail out.
+		 */
+		if (!cur_len) {
+			kunmap(pages[0]);
+			if (!total_written)
+				total_written = -EFAULT;
+			break;
+		}
+
+		/*
+		 * i + 1 now represents the number of pages we actually used in
+		 * the copy phase above.
+		 */
+		npages = min(npages, i + 1);
 
 		do {
 			if (open_file->invalidHandle) {
@@ -2501,20 +2530,18 @@ static struct vm_operations_struct cifs_file_vm_ops = {
 
 int cifs_file_strict_mmap(struct file *file, struct vm_area_struct *vma)
 {
-	int rc, xid;
+	int xid, rc = 0;
 	struct inode *inode = file->f_path.dentry->d_inode;
 
 	xid = GetXid();
 
-	if (!CIFS_I(inode)->clientCanCacheRead) {
+	if (!CIFS_I(inode)->clientCanCacheRead)
 		rc = cifs_invalidate_mapping(inode);
-		if (rc)
-			return rc;
-	}
-
-	rc = generic_file_mmap(file, vma);
-	if (rc == 0)
+	if (!rc)
+		rc = generic_file_mmap(file, vma);
+	if (!rc)
 		vma->vm_ops = &cifs_file_vm_ops;
+
 	FreeXid(xid);
 	return rc;
 }
@@ -2524,15 +2551,15 @@ int cifs_file_mmap(struct file *file, struct vm_area_struct *vma)
 	int rc, xid;
 
 	xid = GetXid();
+
 	rc = cifs_revalidate_file(file);
-	if (rc) {
+	if (rc)
 		cFYI(1, "Validation prior to mmap failed, error=%d", rc);
-		FreeXid(xid);
-		return rc;
-	}
-	rc = generic_file_mmap(file, vma);
-	if (rc == 0)
+	if (!rc)
+		rc = generic_file_mmap(file, vma);
+	if (!rc)
 		vma->vm_ops = &cifs_file_vm_ops;
+
 	FreeXid(xid);
 	return rc;
 }

@@ -1602,6 +1602,10 @@ static int device_rx_srv(PSDevice pDevice, unsigned int uIdx) {
 //        DBG_PRT(MSG_LEVEL_DEBUG, KERN_INFO "pDevice->pCurrRD = %x, works = %d\n", pRD, works);
         if (works++>15)
             break;
+
+        if (!pRD->pRDInfo->skb)
+            break;
+
         if (device_receive_frame(pDevice, pRD)) {
             if (!device_alloc_rx_buf(pDevice,pRD)) {
                     DBG_PRT(MSG_LEVEL_ERR, KERN_ERR
@@ -2679,6 +2683,7 @@ static  irqreturn_t  device_intr(int irq,  void *dev_instance) {
     unsigned char byData = 0;
     int             ii= 0;
 //    unsigned char byRSSI;
+    unsigned long flags;
 
 
     MACvReadISR(pDevice->PortOffset, &pDevice->dwIsr);
@@ -2704,7 +2709,8 @@ static  irqreturn_t  device_intr(int irq,  void *dev_instance) {
 
     handled = 1;
     MACvIntDisable(pDevice->PortOffset);
-    spin_lock_irq(&pDevice->lock);
+
+    spin_lock_irqsave(&pDevice->lock, flags);
 
     //Make sure current page is 0
     VNSvInPortB(pDevice->PortOffset + MAC_REG_PAGE1SEL, &byOrgPageSel);
@@ -2952,7 +2958,8 @@ static  irqreturn_t  device_intr(int irq,  void *dev_instance) {
         MACvSelectPage1(pDevice->PortOffset);
     }
 
-    spin_unlock_irq(&pDevice->lock);
+    spin_unlock_irqrestore(&pDevice->lock, flags);
+
     MACvIntEnable(pDevice->PortOffset, IMR_MASK_VALUE);
 
     return IRQ_RETVAL(handled);
@@ -3380,9 +3387,12 @@ static int  device_ioctl(struct net_device *dev, struct ifreq *rq, int cmd) {
 
 	case SIOCGIWAPLIST:
 	    {
-            char buffer[IW_MAX_AP * (sizeof(struct sockaddr) + sizeof(struct iw_quality))];
+		char *buffer = kzalloc(IW_MAX_AP * (sizeof(struct sockaddr) +
+				       sizeof(struct iw_quality)), GFP_KERNEL);
 
-		    if (wrq->u.data.pointer) {
+		if (!buffer) {
+			rc = -ENOMEM;
+		} else if (wrq->u.data.pointer) {
 		        rc = iwctl_giwaplist(dev, NULL, &(wrq->u.data), buffer);
 		        if (rc == 0) {
                     if (copy_to_user(wrq->u.data.pointer,
@@ -3392,6 +3402,7 @@ static int  device_ioctl(struct net_device *dev, struct ifreq *rq, int cmd) {
 				    rc = -EFAULT;
 		        }
             }
+		kfree(buffer);
         }
 		break;
 

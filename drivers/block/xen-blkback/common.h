@@ -56,9 +56,6 @@
 struct blkif_common_request {
 	char dummy;
 };
-struct blkif_common_response {
-	char dummy;
-};
 
 /* i386 protocol version */
 #pragma pack(push, 4)
@@ -82,11 +79,6 @@ struct blkif_x86_32_request {
 		struct blkif_x86_32_request_rw rw;
 		struct blkif_x86_32_request_discard discard;
 	} u;
-};
-struct blkif_x86_32_response {
-	uint64_t        id;              /* copied from request */
-	uint8_t         operation;       /* copied from request */
-	int16_t         status;          /* BLKIF_RSP_???       */
 };
 #pragma pack(pop)
 
@@ -112,18 +104,13 @@ struct blkif_x86_64_request {
 		struct blkif_x86_64_request_discard discard;
 	} u;
 };
-struct blkif_x86_64_response {
-	uint64_t       __attribute__((__aligned__(8))) id;
-	uint8_t         operation;       /* copied from request */
-	int16_t         status;          /* BLKIF_RSP_???       */
-};
 
 DEFINE_RING_TYPES(blkif_common, struct blkif_common_request,
-		  struct blkif_common_response);
+		  struct blkif_response);
 DEFINE_RING_TYPES(blkif_x86_32, struct blkif_x86_32_request,
-		  struct blkif_x86_32_response);
+		  struct blkif_response __packed);
 DEFINE_RING_TYPES(blkif_x86_64, struct blkif_x86_64_request,
-		  struct blkif_x86_64_response);
+		  struct blkif_response);
 
 union blkif_back_rings {
 	struct blkif_back_ring        native;
@@ -238,11 +225,11 @@ static inline void blkif_get_x86_32_req(struct blkif_request *dst,
 					struct blkif_x86_32_request *src)
 {
 	int i, n = BLKIF_MAX_SEGMENTS_PER_REQUEST;
-	dst->operation = src->operation;
+	dst->operation = ACCESS_ONCE(src->operation);
 	dst->nr_segments = src->nr_segments;
 	dst->handle = src->handle;
 	dst->id = src->id;
-	switch (src->operation) {
+	switch (dst->operation) {
 	case BLKIF_OP_READ:
 	case BLKIF_OP_WRITE:
 	case BLKIF_OP_WRITE_BARRIER:
@@ -267,11 +254,11 @@ static inline void blkif_get_x86_64_req(struct blkif_request *dst,
 					struct blkif_x86_64_request *src)
 {
 	int i, n = BLKIF_MAX_SEGMENTS_PER_REQUEST;
-	dst->operation = src->operation;
+	dst->operation = ACCESS_ONCE(src->operation);
 	dst->nr_segments = src->nr_segments;
 	dst->handle = src->handle;
 	dst->id = src->id;
-	switch (src->operation) {
+	switch (dst->operation) {
 	case BLKIF_OP_READ:
 	case BLKIF_OP_WRITE:
 	case BLKIF_OP_WRITE_BARRIER:

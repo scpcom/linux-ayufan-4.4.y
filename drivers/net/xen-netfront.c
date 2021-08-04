@@ -1053,8 +1053,7 @@ err:
 
 static int xennet_change_mtu(struct net_device *dev, int mtu)
 {
-	int max = xennet_can_sg(dev) ?
-		XEN_NETIF_MAX_TX_SIZE - MAX_TCP_HEADER : ETH_DATA_LEN;
+	int max = xennet_can_sg(dev) ? XEN_NETIF_MAX_TX_SIZE : ETH_DATA_LEN;
 
 	if (mtu > max)
 		return -EINVAL;
@@ -1329,8 +1328,6 @@ static struct net_device * __devinit xennet_create_dev(struct xenbus_device *dev
 	SET_ETHTOOL_OPS(netdev, &xennet_ethtool_ops);
 	SET_NETDEV_DEV(netdev, &dev->dev);
 
-	netif_set_gso_max_size(netdev, XEN_NETIF_MAX_TX_SIZE - MAX_TCP_HEADER);
-
 	np->netdev = netdev;
 
 	netif_carrier_off(netdev);
@@ -1406,6 +1403,8 @@ static void xennet_disconnect_backend(struct netfront_info *info)
 	netif_carrier_off(info->netdev);
 	spin_unlock_irq(&info->tx_lock);
 	spin_unlock_bh(&info->rx_lock);
+
+	del_timer_sync(&info->rx_refill_timer);
 
 	if (info->netdev->irq)
 		unbind_from_irqhandler(info->netdev->irq, info->netdev);
@@ -1942,8 +1941,6 @@ static int __devexit xennet_remove(struct xenbus_device *dev)
 	xennet_sysfs_delif(info->netdev);
 
 	unregister_netdev(info->netdev);
-
-	del_timer_sync(&info->rx_refill_timer);
 
 	free_percpu(info->stats);
 

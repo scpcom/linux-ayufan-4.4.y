@@ -152,6 +152,12 @@ static int omninet_attach(struct usb_serial *serial)
 	struct omninet_data *od;
 	struct usb_serial_port *port = serial->port[0];
 
+	/* The second bulk-out endpoint is used for writing. */
+	if (serial->num_bulk_out < 2) {
+		dev_err(&serial->interface->dev, "missing endpoints\n");
+		return -ENODEV;
+	}
+
 	od = kmalloc(sizeof(struct omninet_data), GFP_KERNEL);
 	if (!od) {
 		dev_err(&port->dev, "%s- kmalloc(%Zd) failed.\n",
@@ -165,13 +171,9 @@ static int omninet_attach(struct usb_serial *serial)
 static int omninet_open(struct tty_struct *tty, struct usb_serial_port *port)
 {
 	struct usb_serial	*serial = port->serial;
-	struct usb_serial_port	*wport;
 	int			result = 0;
 
 	dbg("%s - port %d", __func__, port->number);
-
-	wport = serial->port[1];
-	tty_port_tty_set(&wport->port, tty);
 
 	/* Start reading from the device */
 	usb_fill_bulk_urb(port->read_urb, serial->dev,

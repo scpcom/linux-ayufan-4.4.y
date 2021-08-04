@@ -66,7 +66,7 @@ enum environment_cap {
 struct regulatory_request {
 	int wiphy_idx;
 	enum nl80211_reg_initiator initiator;
-	char alpha2[2];
+	char alpha2[3];
 	bool intersect;
 	bool processed;
 	enum environment_cap country_ie_env;
@@ -92,7 +92,7 @@ struct ieee80211_reg_rule {
 
 struct ieee80211_regdomain {
 	u32 n_reg_rules;
-	char alpha2[2];
+	char alpha2[3];
 	struct ieee80211_reg_rule reg_rules[];
 };
 

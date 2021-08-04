@@ -861,6 +861,23 @@ static void bond_mc_swap(struct bonding *bond, struct slave *new_active,
 	}
 }
 
+static struct slave *bond_get_old_active(struct bonding *bond,
+					 struct slave *new_active)
+{
+	struct slave *slave;
+	int i;
+
+	bond_for_each_slave(bond, slave, i) {
+		if (slave == new_active)
+			continue;
+
+		if (!compare_ether_addr(bond->dev->dev_addr, slave->dev->dev_addr))
+			return slave;
+	}
+
+	return NULL;
+}
+
 /*
  * bond_do_fail_over_mac
  *
@@ -897,6 +914,9 @@ static void bond_do_fail_over_mac(struct bonding *bond,
 
 		write_unlock_bh(&bond->curr_slave_lock);
 		read_unlock(&bond->lock);
+
+		if (!old_active)
+			old_active = bond_get_old_active(bond, new_active);
 
 		if (old_active) {
 			memcpy(tmp_mac, new_active->dev->dev_addr, ETH_ALEN);
@@ -1684,8 +1704,11 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 		/* set allmulti level to new slave */
 		if (bond_dev->flags & IFF_ALLMULTI) {
 			res = dev_set_allmulti(slave_dev, 1);
-			if (res)
+			if (res) {
+				if (bond_dev->flags & IFF_PROMISC)
+					dev_set_promiscuity(slave_dev, -1);
 				goto err_close;
+			}
 		}
 
 		netif_addr_lock_bh(bond_dev);
@@ -4914,6 +4937,7 @@ static int __init bonding_init(void)
 out:
 	return res;
 err:
+	bond_destroy_debugfs();
 	rtnl_link_unregister(&bond_link_ops);
 err_link:
 	unregister_pernet_subsys(&bond_net_ops);

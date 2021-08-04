@@ -1503,14 +1503,21 @@ static int print_insn(char *buffer, unsigned char *code, unsigned long addr)
 			}
 			if (separator)
 				ptr += sprintf(ptr, "%c", separator);
+			/*
+			 * Use four '%' characters below because of the
+			 * following two conversions:
+			 *
+			 *  1) sprintf: %%%%r -> %%r
+			 *  2) printk : %%r   -> %r
+			 */
 			if (operand->flags & OPERAND_GPR)
-				ptr += sprintf(ptr, "%%r%i", value);
+				ptr += sprintf(ptr, "%%%%r%i", value);
 			else if (operand->flags & OPERAND_FPR)
-				ptr += sprintf(ptr, "%%f%i", value);
+				ptr += sprintf(ptr, "%%%%f%i", value);
 			else if (operand->flags & OPERAND_AR)
-				ptr += sprintf(ptr, "%%a%i", value);
+				ptr += sprintf(ptr, "%%%%a%i", value);
 			else if (operand->flags & OPERAND_CR)
-				ptr += sprintf(ptr, "%%c%i", value);
+				ptr += sprintf(ptr, "%%%%c%i", value);
 			else if (operand->flags & OPERAND_PCREL)
 				ptr += sprintf(ptr, "%lx", (signed int) value
 								      + addr);
@@ -1535,7 +1542,7 @@ void show_code(struct pt_regs *regs)
 {
 	char *mode = (regs->psw.mask & PSW_MASK_PSTATE) ? "User" : "Krnl";
 	unsigned char code[64];
-	char buffer[64], *ptr;
+	char buffer[128], *ptr;
 	mm_segment_t old_fs;
 	unsigned long addr;
 	int start, end, opsize, hops, i;
@@ -1593,7 +1600,7 @@ void show_code(struct pt_regs *regs)
 		start += opsize;
 		printk(buffer);
 		ptr = buffer;
-		ptr += sprintf(ptr, "\n          ");
+		ptr += sprintf(ptr, "\n\t  ");
 		hops++;
 	}
 	printk("\n");

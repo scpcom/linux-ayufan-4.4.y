@@ -920,7 +920,7 @@ static struct notifier_block trace_probe_module_nb = {
 };
 
 /* Split symbol and offset. */
-static int split_symbol_offset(char *symbol, unsigned long *offset)
+static int split_symbol_offset(char *symbol, long *offset)
 {
 	char *tmp;
 	int ret;
@@ -928,10 +928,9 @@ static int split_symbol_offset(char *symbol, unsigned long *offset)
 	if (!offset)
 		return -EINVAL;
 
-	tmp = strchr(symbol, '+');
+	tmp = strpbrk(symbol, "+-");
 	if (tmp) {
-		/* skip sign because strict_strtol doesn't accept '+' */
-		ret = strict_strtoul(tmp + 1, 0, offset);
+		ret = kstrtol(tmp, 0, offset);
 		if (ret)
 			return ret;
 		*tmp = '\0';
@@ -1165,7 +1164,7 @@ static int create_trace_probe(int argc, char **argv)
 	int is_return = 0, is_delete = 0;
 	char *symbol = NULL, *event = NULL, *group = NULL;
 	char *arg;
-	unsigned long offset = 0;
+	long offset = 0;
 	void *addr = NULL;
 	char buf[MAX_EVENT_NAME_LEN];
 
@@ -1225,24 +1224,21 @@ static int create_trace_probe(int argc, char **argv)
 		pr_info("Probe point is not specified.\n");
 		return -EINVAL;
 	}
-	if (isdigit(argv[1][0])) {
+
+	/* try to parse an address. if that fails, try to read the
+	 * input as a symbol. */
+	if (!strict_strtoul(argv[1], 0, (unsigned long *)&addr)) {
 		if (is_return) {
 			pr_info("Return probe point must be a symbol.\n");
 			return -EINVAL;
-		}
-		/* an address specified */
-		ret = strict_strtoul(&argv[1][0], 0, (unsigned long *)&addr);
-		if (ret) {
-			pr_info("Failed to parse address.\n");
-			return ret;
 		}
 	} else {
 		/* a symbol specified */
 		symbol = argv[1];
 		/* TODO: support .init module functions */
 		ret = split_symbol_offset(symbol, &offset);
-		if (ret) {
-			pr_info("Failed to parse symbol.\n");
+		if (ret || offset < 0 || offset > UINT_MAX) {
+			pr_info("Failed to parse either an address or a symbol.\n");
 			return ret;
 		}
 		if (offset && is_return) {
@@ -2109,6 +2105,11 @@ static __init int kprobe_trace_self_tests_init(void)
 
 end:
 	release_all_trace_probes();
+	/*
+	 * Wait for the optimizer work to finish. Otherwise it might fiddle
+	 * with probes in already freed __init text.
+	 */
+	wait_for_kprobe_optimizer();
 	if (warn)
 		pr_cont("NG: Some tests are failed. Please check them.\n");
 	else

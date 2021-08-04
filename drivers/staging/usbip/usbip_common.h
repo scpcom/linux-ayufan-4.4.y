@@ -276,6 +276,7 @@ struct usbip_device {
 	/* lock for status */
 	spinlock_t lock;
 
+	int sockfd;
 	struct socket *tcp_socket;
 
 	struct task_struct *tcp_rx;
@@ -305,8 +306,7 @@ void setreuse(struct socket *);
 void usbip_dump_urb(struct urb *purb);
 void usbip_dump_header(struct usbip_header *pdu);
 
-int usbip_xmit(int send, struct socket *sock, char *buf, int size,
-	       int msg_flags);
+int usbip_recv(struct socket *sock, void *buf, int size);
 struct socket *sockfd_to_socket(unsigned int sockfd);
 
 void usbip_pack_pdu(struct usbip_header *pdu, struct urb *urb, int cmd,

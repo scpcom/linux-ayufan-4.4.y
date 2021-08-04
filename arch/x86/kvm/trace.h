@@ -244,6 +244,7 @@ TRACE_EVENT(kvm_apic,
 	{ SVM_EXIT_EXCP_BASE + UD_VECTOR,	"UD excp" }, \
 	{ SVM_EXIT_EXCP_BASE + PF_VECTOR,	"PF excp" }, \
 	{ SVM_EXIT_EXCP_BASE + NM_VECTOR,	"NM excp" }, \
+	{ SVM_EXIT_EXCP_BASE + AC_VECTOR,       "AC excp" }, \
 	{ SVM_EXIT_EXCP_BASE + MC_VECTOR,	"MC excp" }, \
 	{ SVM_EXIT_INTR,			"interrupt" }, \
 	{ SVM_EXIT_NMI,				"nmi" }, \
@@ -325,7 +326,7 @@ TRACE_EVENT(kvm_inj_virq,
 #define kvm_trace_sym_exc						\
 	EXS(DE), EXS(DB), EXS(BP), EXS(OF), EXS(BR), EXS(UD), EXS(NM),	\
 	EXS(DF), EXS(TS), EXS(NP), EXS(SS), EXS(GP), EXS(PF),		\
-	EXS(MF), EXS(MC)
+	EXS(MF), EXS(AC), EXS(MC)
 
 /*
  * Tracepoint for kvm interrupt injection:

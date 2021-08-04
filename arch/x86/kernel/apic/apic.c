@@ -1213,7 +1213,7 @@ void __cpuinit setup_local_APIC(void)
 	unsigned int value, queued;
 	int i, j, acked = 0;
 	unsigned long long tsc = 0, ntsc;
-	long long max_loops = cpu_khz;
+	long long max_loops = cpu_khz ? cpu_khz : 1000000;
 
 	if (cpu_has_tsc)
 		rdtscll(tsc);
@@ -1309,11 +1309,13 @@ void __cpuinit setup_local_APIC(void)
 			       acked);
 			break;
 		}
-		if (cpu_has_tsc) {
-			rdtscll(ntsc);
-			max_loops = (cpu_khz << 10) - (ntsc - tsc);
-		} else
-			max_loops--;
+		if (queued) {
+			if (cpu_has_tsc && cpu_khz) {
+				rdtscll(ntsc);
+				max_loops = (cpu_khz << 10) - (ntsc - tsc);
+			} else
+				max_loops--;
+		}
 	} while (queued && max_loops > 0);
 	WARN_ON(max_loops <= 0);
 
@@ -1478,6 +1480,9 @@ void __init enable_IR_x2apic(void)
 	unsigned long flags;
 	int ret, x2apic_enabled = 0;
 	int dmar_table_init_ret;
+
+	if (skip_ioapic_setup)
+		return;
 
 	dmar_table_init_ret = dmar_table_init();
 	if (dmar_table_init_ret && !x2apic_supported())
