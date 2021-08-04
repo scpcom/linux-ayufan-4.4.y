@@ -39,6 +39,8 @@
 #include <linux/cdrom.h>
 #include <linux/sched.h>
 
+#define ZYXEL_STAGGERED_SPIN_UP
+
 /*
  * Define if arch has non-standard setup.  This is a _PCI_ standard
  * not a legacy or ISA standard.
@@ -685,6 +687,10 @@ struct ata_device {
 #endif
 #ifdef CONFIG_SATA_ZPODD
 	void			*zpodd;
+#endif
+#ifdef ZYXEL_STAGGERED_SPIN_UP
+	unsigned long		standby_jiffies;
+	int	standby; 
 #endif
 	struct device		tdev;
 	/* n_sector is CLEAR_BEGIN, read comment above CLEAR_BEGIN */

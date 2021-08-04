@@ -64,6 +64,8 @@
 #include <scsi/scsi_ioctl.h>
 #include <scsi/scsicam.h>
 
+#include <linux/proc_fs.h>
+
 #include "sd.h"
 #include "scsi_priv.h"
 #include "scsi_logging.h"
@@ -121,6 +123,370 @@ static void sd_print_result(struct scsi_disk *, int);
 
 static DEFINE_SPINLOCK(sd_index_lock);
 static DEFINE_IDA(sd_index_ida);
+
+
+//for STG540
+/*for hdd error*/
+struct workqueue_struct *hdd_workqueue = NULL;
+static DECLARE_WORK(HDD_ERR_DETECT, NULL);
+atomic_t sata_device_num;
+#define DISK_NO_ERR	0
+#define DISK_ERR	1
+atomic_t disk1_io_err;
+atomic_t disk2_io_err;
+atomic_t disk3_io_err;
+atomic_t disk4_io_err;
+static struct proc_dir_entry *disk_io_err_proc_root = NULL;
+static struct proc_dir_entry *disk1_io_err_proc = NULL;
+static struct proc_dir_entry *disk2_io_err_proc = NULL;
+static struct proc_dir_entry *disk3_io_err_proc = NULL;
+static struct proc_dir_entry *disk4_io_err_proc = NULL;
+
+enum LED_ID {
+	LED_HDD1 = 0,
+	LED_HDD2,
+	LED_HDD3,
+	LED_HDD4,
+	LED_SYS,
+	LED_COPY,
+	LED_TOTAL,
+};
+
+enum LED_COLOR {
+	LED_RED = 0,
+	LED_GREEN,
+	LED_COLOR_TOTAL,    /* must be last one */
+};
+
+/* RED, GREEN, ORANGE and NO_COLOR shall be same in linux-3.2.54/arch/arm/mach-comcerto/gpio.c*/
+#define RED				1
+#define GREEN			2
+//#define ORANGE		(RED | GREEN)
+//#define NO_COLOR		0
+
+/* turn_on_led and turn_off_led_all are in arch/arm/mach-feroceon-kw/gpio_ctrl.c */
+extern void turn_on_led(unsigned int id, unsigned int color);
+extern void turn_off_led_all(unsigned int id);
+extern void reverse_on_off_led(unsigned int id, unsigned int color);
+
+#ifdef CONFIG_4BAY
+#define MAX_HD_NUM      4
+#else
+#define MAX_HD_NUM      2
+#endif
+
+atomic_t sata_hd_accessing[MAX_HD_NUM];
+atomic_t sata_hd_stop[MAX_HD_NUM];
+atomic_t sata_blinking_times[MAX_HD_NUM];
+atomic_t sata_badblock_idf[MAX_HD_NUM];
+
+#define HDD1_LED_GREEN_REG_OFFSET		48
+#define HDD1_LED_RED_REG_OFFSET			49
+#define HDD2_LED_GREEN_REG_OFFSET		50
+#define HDD2_LED_RED_REG_OFFSET			51
+#define HDD3_LED_GREEN_REG_OFFSET		52
+#define HDD3_LED_RED_REG_OFFSET			53
+#define HDD4_LED_GREEN_REG_OFFSET		54
+#define HDD4_LED_RED_REG_OFFSET			55
+
+struct LED {
+	unsigned int gpio;
+	unsigned int color;
+	unsigned short state;       /* LED_OFF, LED_ON, LED_BLINK_SLOW, ... */
+	
+	unsigned short presence;    /* flag. 0: no such LED color */
+};
+
+struct LED_SET {
+	unsigned int id;            /* LED ID, LED type */
+	char name[32];
+	struct LED led[LED_COLOR_TOTAL];
+	
+	struct timer_list timer;
+	unsigned short timer_state;
+	unsigned short blink_state; /* Binary state, it must be 0 (off) or 1 (on) to present the blinking state */
+	
+	spinlock_t lock;
+	
+	unsigned short presence;    /* flag. 0: no such LED */
+};
+
+struct LED_SET set_led[LED_TOTAL] = {
+	[LED_HDD1] = {
+		.presence = 1,
+		.id = LED_HDD1,
+		.name = "HDD1 LED",
+		.timer = {
+			.data = 0,
+			.function = led_blinking_timer,
+		},
+		.led[LED_RED] = {
+			.presence = 1,
+			.gpio = HDD1_LED_RED_REG_OFFSET,
+			.color = RED,
+		},
+		.led[LED_GREEN] = {
+			.presence = 1,
+			.gpio = HDD1_LED_GREEN_REG_OFFSET,
+			.color = GREEN,
+		},
+	},
+	[LED_HDD2] = {
+		.presence = 1,
+		.id = LED_HDD2,
+		.name = "HDD2 LED",
+		.timer = {
+			.data = 0,
+			.function = led_blinking_timer,
+		},
+		.led[LED_RED] = {
+			.presence = 1,
+			.gpio = HDD2_LED_RED_REG_OFFSET,
+			.color = RED,
+		},
+		.led[LED_GREEN] = {
+			.presence = 1,
+			.gpio = HDD2_LED_GREEN_REG_OFFSET,
+			.color = GREEN,
+		},
+	},
+	[LED_HDD3] = {
+		.presence = 1,
+		.id = LED_HDD3,
+		.name = "HDD3 LED",
+		.timer = {
+			.data = 0,
+			.function = led_blinking_timer,
+		},
+		.led[LED_RED] = {
+			.presence = 1,
+			.gpio = HDD3_LED_RED_REG_OFFSET,
+			.color = RED,
+		},
+		.led[LED_GREEN] = {
+			.presence = 1,
+			.gpio = HDD3_LED_GREEN_REG_OFFSET,
+			.color = GREEN,
+		},
+	},
+	[LED_HDD4] = {
+		.presence = 1,
+		.id = LED_HDD4,
+		.name = "HDD4 LED",
+		.timer = {
+			.data = 0,
+			.function = led_blinking_timer,
+		},
+		.led[LED_RED] = {
+			.presence = 1,
+			.gpio = HDD4_LED_RED_REG_OFFSET,
+			.color = RED,
+		},
+		.led[LED_GREEN] = {
+			.presence = 1,
+			.gpio = HDD4_LED_GREEN_REG_OFFSET,
+			.color = GREEN,
+		},
+	},
+};
+
+
+static void led_blinking_timer(unsigned long in_data)
+{
+	struct LED_SET *set_led = (struct LED_SET*) in_data;
+	int index = set_led->id;
+	
+	int led_num = 0;
+	switch(index)
+	{
+		case 0:
+			led_num = LED_HDD1;
+			break;
+		case 1:
+			led_num = LED_HDD2;
+			break;
+		case 2:
+			led_num = LED_HDD3;
+			break;
+		case 3:
+			led_num = LED_HDD4;
+			break;
+		default:
+			break;
+	}
+	
+	
+	if(atomic_read(&sata_badblock_idf[index]) == 1) {
+		atomic_set(&sata_hd_accessing[index], 0);
+		atomic_set(&sata_hd_stop[index], 1);
+	}
+	
+	if(atomic_read(&sata_hd_accessing[index]) != 0) {
+		atomic_set(&sata_hd_stop[index], 0);
+		reverse_on_off_led(led_num, GREEN);
+		mod_timer(&set_led->timer, jiffies + (HZ)/(4+atomic_read(&sata_hd_accessing[index])));
+		atomic_set(&sata_hd_accessing[index], 0);
+	} else {
+		if (atomic_read(&sata_hd_stop[index]) == 0) {
+			turn_off_led_all(led_num);
+			turn_on_led(led_num, GREEN);
+			atomic_set(&sata_hd_stop[index], 1);
+		}
+		mod_timer(&set_led->timer, jiffies + (HZ >> 3));
+	}
+}
+
+
+/* read file operations */
+static int disk1_io_err_read_proc_func(char *buf, char **start, off_t off, int count, int *eof, void *data)
+{
+	int len;
+	len = sprintf(buf,"%d\n", atomic_read(&disk1_io_err));
+	return len;
+}
+
+static int disk2_io_err_read_proc_func(char *buf, char **start, off_t off, int count, int *eof, void *data)
+{
+	int len;
+	len = sprintf(buf,"%d\n", atomic_read(&disk2_io_err));
+	return len;
+}
+
+static int disk3_io_err_read_proc_func(char *buf, char **start, off_t off, int count, int *eof, void *data)
+{
+	int len;
+	len = sprintf(buf,"%d\n", atomic_read(&disk3_io_err));
+	return len;
+}
+
+static int disk4_io_err_read_proc_func(char *buf, char **start, off_t off, int count, int *eof, void *data)
+{
+	int len;
+	len = sprintf(buf,"%d\n", atomic_read(&disk4_io_err));
+	return len;
+}
+
+/* write file operations */
+static int disk1_io_err_write_proc_func(struct file *file, const char __user *buf, unsigned long count, void *data)
+{
+	char num[10];
+	int err_num;
+	/* no data be written */
+	if (!count) {
+		printk("count is 0\n");
+		return 0;
+	}
+
+	/* Input size is too large to write our buffer(num) */
+	if (count > (sizeof(num) - 1)) {
+		printk("input is too large\n");
+		return -EINVAL;
+	}
+
+	if (copy_from_user(num, buf, count)) {
+		printk("copy from user failed\n");
+		return -EFAULT;
+	}
+
+	err_num = num[0] - '0';
+	if (err_num == 0)
+		atomic_set(&disk1_io_err, DISK_NO_ERR);
+	else
+		atomic_set(&disk1_io_err, DISK_ERR);
+	return count;
+}
+
+static int disk2_io_err_write_proc_func(struct file *file, const char __user *buf, unsigned long count, void *data)
+{
+	char num[10];
+	int err_num;
+	/* no data be written */
+	if (!count) {
+		printk("count is 0\n");
+		return 0;
+	}
+
+	/* Input size is too large to write our buffer(num) */
+	if (count > (sizeof(num) - 1)) {
+		printk("input is too large\n");
+		return -EINVAL;
+	}
+
+	if (copy_from_user(num, buf, count)) {
+		printk("copy from user failed\n");
+		return -EFAULT;
+	}
+
+	err_num = num[0] - '0';
+	if (err_num == 0)
+		atomic_set(&disk2_io_err, DISK_NO_ERR);
+	else
+		atomic_set(&disk2_io_err, DISK_ERR);
+
+	return count;
+
+}
+
+static int disk3_io_err_write_proc_func(struct file *file, const char __user *buf, unsigned long count, void *data)
+{
+	char num[10];
+	int err_num;
+	/* no data be written */
+	if (!count) {
+		printk("count is 0\n");
+		return 0;
+	}
+
+	/* Input size is too large to write our buffer(num) */
+	if (count > (sizeof(num) - 1)) {
+		printk("input is too large\n");
+		return -EINVAL;
+	}
+
+	if (copy_from_user(num, buf, count)) {
+		printk("copy from user failed\n");
+		return -EFAULT;
+	}
+
+	err_num = num[0] - '0';
+	if (err_num == 0)
+		atomic_set(&disk3_io_err, DISK_NO_ERR);
+	else
+		atomic_set(&disk3_io_err, DISK_ERR);
+	return count;
+}
+
+static int disk4_io_err_write_proc_func(struct file *file, const char __user *buf, unsigned long count, void *data)
+{
+	char num[10];
+	int err_num;
+
+	/* no data be written */
+	if (!count) {
+		printk("count is 0\n");
+		return 0;
+	}
+
+	/* Input size is too large to write our buffer(num) */
+	if (count > (sizeof(num) - 1)) {
+		printk("input is too large\n");
+		return -EINVAL;
+	}
+
+	if (copy_from_user(num, buf, count)) {
+		printk("copy from user failed\n");
+		return -EFAULT;
+	}
+
+	err_num = num[0] - '0';
+	if (err_num == 0)
+		atomic_set(&disk4_io_err, DISK_NO_ERR);
+	else
+		atomic_set(&disk4_io_err, DISK_ERR);
+
+	return count;
+}
+
 
 /* This semaphore is used to mediate the 0->1 reference get in the
  * face of object destruction (i.e. we can't allow a get on an
@@ -2964,6 +3330,42 @@ static int sd_probe(struct device *dev)
 	struct gendisk *gd;
 	int index;
 	int error;
+	
+	/* STG540 INIT SATA LED */
+	int hdd_port_num = sdp->host->host_no;
+	switch(hdd_port_num)
+	{
+		case 0:
+			turn_off_led_all(LED_HDD1);
+			turn_on_led(LED_HDD1, GREEN);
+			atomic_set(&sata_badblock_idf[hdd_port_num], 0);
+			atomic_set(&disk1_io_err, DISK_NO_ERR);
+			break;
+
+		case 1:
+			turn_off_led_all(LED_HDD2);
+			turn_on_led(LED_HDD2, GREEN);
+			atomic_set(&sata_badblock_idf[hdd_port_num], 0);
+			atomic_set(&disk2_io_err, DISK_NO_ERR);
+			break;
+#ifdef CONFIG_4BAY
+		case 2:
+			turn_off_led_all(LED_HDD3);
+			turn_on_led(LED_HDD3, GREEN);
+			atomic_set(&sata_badblock_idf[hdd_port_num], 0);
+			atomic_set(&disk3_io_err, DISK_NO_ERR);
+			break;
+
+		case 3:
+			turn_off_led_all(LED_HDD4);
+			turn_on_led(LED_HDD4, GREEN);
+			atomic_set(&sata_badblock_idf[hdd_port_num], 0);
+			atomic_set(&disk4_io_err, DISK_NO_ERR);
+			break;
+#endif		
+		default:
+			break;
+	}
 
 	error = -ENODEV;
 	if (sdp->type != TYPE_DISK && sdp->type != TYPE_MOD && sdp->type != TYPE_RBC)
@@ -3059,6 +3461,43 @@ static int sd_remove(struct device *dev)
 {
 	struct scsi_disk *sdkp;
 	dev_t devt;
+
+	//STG540
+	struct scsi_device *sdp = to_scsi_device(dev);
+	int hdd_port_num = sdp->host->host_no;
+	
+	switch(hdd_port_num)
+	{
+		case 0:
+			turn_off_led_all(LED_HDD1);
+			turn_on_led(LED_HDD1, RED);
+			atomic_set(&sata_badblock_idf[hdd_port_num], 1);
+			atomic_set(&disk1_io_err, DISK_NO_ERR);
+			break;
+
+		case 1:
+			turn_off_led_all(LED_HDD2);
+			turn_on_led(LED_HDD2, RED);
+			atomic_set(&sata_badblock_idf[hdd_port_num], 1);
+			atomic_set(&disk2_io_err, DISK_NO_ERR);
+			break;
+#ifdef CONFIG_4BAY
+		case 2:
+			turn_off_led_all(LED_HDD3);
+			turn_on_led(LED_HDD3, RED);
+			atomic_set(&sata_badblock_idf[hdd_port_num], 1);
+			atomic_set(&disk3_io_err, DISK_NO_ERR);
+			break;
+
+		case 3:
+			turn_off_led_all(LED_HDD4);
+			turn_on_led(LED_HDD4, RED);
+			atomic_set(&sata_badblock_idf[hdd_port_num], 1);
+			atomic_set(&disk4_io_err, DISK_NO_ERR);
+			break;
+#endif
+	}
+
 
 	sdkp = dev_get_drvdata(dev);
 	devt = disk_devt(sdkp->disk);
@@ -3243,6 +3682,69 @@ static int __init init_sd(void)
 	int majors = 0, i, err;
 
 	SCSI_LOG_HLQUEUE(3, printk("init_sd: sd driver entry point\n"));
+	
+	hdd_workqueue = create_singlethread_workqueue("harddrive_hdd");
+	if (!hdd_workqueue) {
+		destroy_workqueue(hdd_workqueue);
+		printk("Error, init disk I/O badblock handler error\n");
+		return -ENOMEM;
+	}
+	
+	/* turn off all hdd led for init */
+	//turn_off_led_all(LED_HDD1);
+	//turn_off_led_all(LED_HDD2);
+	//turn_off_led_all(LED_HDD3);
+	//turn_off_led_all(LED_HDD4);
+
+	/* for STG540 init sata led control */
+	for(i = 0 ; i < MAX_HD_NUM ; i++) {
+		atomic_set(&sata_hd_accessing[i], 0);
+		atomic_set(&sata_hd_stop[i], 1);
+		atomic_set(&sata_blinking_times[i], 0);
+		atomic_set(&sata_badblock_idf[i], 0);
+
+		init_timer(&set_led[i].timer);
+		set_led[i].timer.data = (unsigned long) &set_led[i];
+		mod_timer(&set_led[i].timer, jiffies + (HZ >> 2));
+	}
+
+	/* init sata detect error parameter */
+	atomic_set(&sata_device_num, -1);
+	atomic_set(&disk1_io_err, DISK_NO_ERR);
+	atomic_set(&disk2_io_err, DISK_NO_ERR);
+	atomic_set(&disk3_io_err, DISK_NO_ERR);
+	atomic_set(&disk4_io_err, DISK_NO_ERR);
+	disk_io_err_proc_root = proc_mkdir("disk_err_detect", NULL);
+	if (disk_io_err_proc_root != NULL)
+	{
+		disk1_io_err_proc = create_proc_entry("disk1_err", 0644, disk_io_err_proc_root);
+		if (disk1_io_err_proc != NULL)
+		{
+			disk1_io_err_proc->read_proc = disk1_io_err_read_proc_func;
+			disk1_io_err_proc->write_proc = disk1_io_err_write_proc_func;
+		}
+		
+		disk2_io_err_proc = create_proc_entry("disk2_err", 0644, disk_io_err_proc_root);
+		if (disk2_io_err_proc != NULL)
+		{
+			disk2_io_err_proc->read_proc = disk2_io_err_read_proc_func;
+			disk2_io_err_proc->write_proc = disk2_io_err_write_proc_func;
+		}
+		
+		disk3_io_err_proc = create_proc_entry("disk3_err", 0644, disk_io_err_proc_root);
+		if (disk3_io_err_proc != NULL)
+		{
+			disk3_io_err_proc->read_proc = disk3_io_err_read_proc_func;
+			disk3_io_err_proc->write_proc = disk3_io_err_write_proc_func;
+		}
+		
+		disk4_io_err_proc = create_proc_entry("disk4_err", 0644, disk_io_err_proc_root);
+		if (disk4_io_err_proc != NULL)
+		{
+			disk4_io_err_proc->read_proc = disk4_io_err_read_proc_func;
+			disk4_io_err_proc->write_proc = disk4_io_err_write_proc_func;
+		}
+	}
 
 	for (i = 0; i < SD_MAJORS; i++) {
 		if (register_blkdev(sd_major(i), "sd") != 0)
@@ -3324,6 +3826,8 @@ static void __exit exit_sd(void)
 		blk_unregister_region(sd_major(i), SD_MINORS);
 		unregister_blkdev(sd_major(i), "sd");
 	}
+	
+	destroy_workqueue(hdd_workqueue);
 }
 
 module_init(init_sd);

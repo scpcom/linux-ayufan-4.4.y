@@ -29,12 +29,67 @@
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_host.h>
 
+// for call_usermodehelper
+#include <linux/kmod.h>
+
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
 
 #define SG_MEMPOOL_NR		ARRAY_SIZE(scsi_sg_pools)
 #define SG_MEMPOOL_SIZE		2
+
+//For STG540
+#ifdef CONFIG_4BAY
+#define MAX_HD_NUM      4
+#else
+#define MAX_HD_NUM      2
+#endif
+
+extern struct workqueue_struct *hdd_workqueue;
+static DECLARE_WORK(HDD_ERR_DETECT, NULL);
+/*for hdd error*/
+extern atomic_t sata_device_num;
+#define DISK_NO_ERR	0
+#define DISK_ERR	1
+extern atomic_t disk1_io_err;
+extern atomic_t disk2_io_err;
+extern atomic_t disk3_io_err;
+extern atomic_t disk4_io_err;
+
+
+/* Control the blinking speed for sata */
+#define SATA_BLINKING_RESET 4000
+extern atomic_t sata_blinking_times[MAX_HD_NUM];
+extern atomic_t sata_badblock_idf[MAX_HD_NUM];
+extern atomic_t sata_hd_accessing[MAX_HD_NUM];
+
+enum LED_ID {
+	LED_HDD1 = 0,
+	LED_HDD2,
+	LED_HDD3,
+	LED_HDD4,
+	LED_SYS,
+	LED_COPY,
+	LED_TOTAL,
+};
+
+enum LED_COLOR {
+	LED_RED = 0,
+	LED_GREEN,
+	LED_COLOR_TOTAL,    /* must be last one */
+};
+
+/* RED, GREEN, ORANGE and NO_COLOR shall be same in linux-3.2.54/arch/arm/mach-comcerto/gpio.c*/
+#define RED				1
+#define GREEN			2
+//#define ORANGE		(RED | GREEN)
+//#define NO_COLOR		0
+
+/* turn_on_led and turn_off_led_all are in arch/arm/mach-comcerto/gpio.c */
+extern void turn_on_led(unsigned int id, unsigned int color);
+extern void turn_off_led_all(unsigned int id);
+
 
 struct scsi_host_sg_pool {
 	size_t		size;
@@ -67,6 +122,61 @@ static struct scsi_host_sg_pool scsi_sg_pools[] = {
 #undef SP
 
 struct kmem_cache *scsi_sdb_cache;
+
+
+void hdd_error_handler(struct work_struct *in)
+{
+	int ret;
+	char diskx[10];
+	char cmdPath[] = "/usr/local/disk_error_hander.sh";
+	char* cmdArgv[] = {cmdPath, NULL, NULL};
+	char* cmdEnvp[] = {NULL};
+	int diskid = atomic_read(&sata_device_num);
+	
+	sprintf(diskx, "Disk%d", diskid);
+	cmdArgv[1] = diskx;
+	
+	switch(diskid)
+	{
+		case 1:
+			if ( atomic_read(&disk1_io_err) != DISK_ERR )
+			{
+				//cmdArgv and cmdEnvp must end of NULL to count their size
+				ret = call_usermodehelper(cmdPath, cmdArgv, cmdEnvp, UMH_WAIT_EXEC);
+				atomic_set(&disk1_io_err, DISK_ERR);
+			}
+			break;
+		case 2:
+			if ( atomic_read(&disk2_io_err) != DISK_ERR )
+			{
+				//cmdArgv and cmdEnvp must end of NULL to count their size
+				ret = call_usermodehelper(cmdPath, cmdArgv, cmdEnvp, UMH_WAIT_EXEC);
+				atomic_set(&disk2_io_err, DISK_ERR);
+			}
+			break;
+		case 3:
+			if ( atomic_read(&disk3_io_err) != DISK_ERR )
+			{
+				//cmdArgv and cmdEnvp must end of NULL to count their size
+				ret = call_usermodehelper(cmdPath, cmdArgv, cmdEnvp, UMH_WAIT_EXEC);
+				atomic_set(&disk3_io_err, DISK_ERR);
+			}
+			break;
+		case 4:
+			if ( atomic_read(&disk4_io_err) != DISK_ERR )
+			{
+				//cmdArgv and cmdEnvp must end of NULL to count their size
+				ret = call_usermodehelper(cmdPath, cmdArgv, cmdEnvp, UMH_WAIT_EXEC);
+				atomic_set(&disk4_io_err, DISK_ERR);
+			}
+			break;
+		default:
+			break;
+	}
+
+}
+
+
 
 /*
  * When to reinvoke queueing after a resource shortage. It's 3 msecs to
@@ -688,6 +798,45 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 	      ACTION_DELAYED_RETRY} action;
 	char *description = NULL;
 	unsigned long wait_for = (cmd->allowed + 1) * req->timeout;
+	
+		
+	int SATA_PORT = 0;
+	/* LED Control For STG222 */
+	if (strcmp(dev_name(&cmd->device->sdev_gendev), "0:0:0:0") == 0) {
+		if (atomic_read(&sata_badblock_idf[0]) == 0) {
+			if(atomic_read(&sata_blinking_times[0]) >= SATA_BLINKING_RESET) {
+				atomic_set(&sata_blinking_times[0], 0);
+			}
+			atomic_inc(&sata_blinking_times[0]);
+		}
+		SATA_PORT = 1;
+	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "1:0:0:0") == 0) {
+		if (atomic_read(&sata_badblock_idf[1]) == 0) {
+			if(atomic_read(&sata_blinking_times[1]) >= SATA_BLINKING_RESET) {
+				atomic_set(&sata_blinking_times[1], 0);
+			}
+			atomic_inc(&sata_blinking_times[1]);
+		}
+		SATA_PORT = 2;
+#ifdef CONFIG_4BAY
+	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "2:0:0:0") == 0) {
+		if (atomic_read(&sata_badblock_idf[2]) == 0) {
+			if(atomic_read(&sata_blinking_times[2]) >= SATA_BLINKING_RESET) {
+				atomic_set(&sata_blinking_times[2], 0);
+			}
+			atomic_inc(&sata_blinking_times[2]);
+		}
+		SATA_PORT = 3;
+	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "3:0:0:0") == 0) {
+		if (atomic_read(&sata_badblock_idf[3]) == 0) {
+			if(atomic_read(&sata_blinking_times[3]) >= SATA_BLINKING_RESET) {
+				atomic_set(&sata_blinking_times[3], 0);
+			}
+			atomic_inc(&sata_blinking_times[3]);
+		}
+		SATA_PORT = 4;
+#endif
+	}
 
 	if (result) {
 		sense_valid = scsi_command_normalize_sense(cmd, &sshdr);
@@ -925,6 +1074,39 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 	case ACTION_FAIL:
 		/* Give up and fail the remainder of the request */
 		if (!(req->cmd_flags & REQ_QUIET)) {
+			/* for STG540 SATA error */
+			/* //To match svn #45283, close the led red on when the disk detected badblock, to match disk status display on GUI
+			switch(SATA_PORT) {
+				case 1:
+					atomic_set(&sata_badblock_idf[SATA_PORT-1], 1);
+					turn_off_led_all(LED_HDD1);
+					turn_on_led(LED_HDD1, RED);
+					break;
+				case 2:
+					atomic_set(&sata_badblock_idf[SATA_PORT-1], 1);
+					turn_off_led_all(LED_HDD2);
+					turn_on_led(LED_HDD2, RED);
+					break;
+				case 3:
+					atomic_set(&sata_badblock_idf[SATA_PORT-1], 1);
+					turn_off_led_all(LED_HDD3);
+					turn_on_led(LED_HDD3, RED);
+					break;
+				case 4:
+					atomic_set(&sata_badblock_idf[SATA_PORT-1], 1);
+					turn_off_led_all(LED_HDD4);
+					turn_on_led(LED_HDD4, RED);
+					break;
+				default:
+					break;
+			}
+			*/
+			/* for hdd error hander (send zylog and show fail on gui)*/
+			atomic_set(&sata_device_num, SATA_PORT);
+			PREPARE_WORK(&HDD_ERR_DETECT, hdd_error_handler);
+			queue_work(hdd_workqueue, &HDD_ERR_DETECT);
+		
+		
 			if (description)
 				scmd_printk(KERN_INFO, cmd, "%s\n",
 					    description);
@@ -999,6 +1181,28 @@ int scsi_init_io(struct scsi_cmnd *cmd, gfp_t gfp_mask)
 {
 	struct scsi_device *sdev = cmd->device;
 	struct request *rq = cmd->request;
+	
+	/* LED Control For STG540 */
+	if (strcmp(dev_name(&cmd->device->sdev_gendev), "0:0:0:0") == 0) {
+		if (atomic_read(&sata_badblock_idf[0]) == 0) {
+			atomic_inc(&sata_hd_accessing[0]);
+		}
+	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "1:0:0:0") == 0) {
+		if (atomic_read(&sata_badblock_idf[1]) == 0) {
+			atomic_inc(&sata_hd_accessing[1]);
+		}
+#ifdef CONFIG_4BAY
+	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "2:0:0:0") == 0) {
+		if (atomic_read(&sata_badblock_idf[2]) == 0) {
+			atomic_inc(&sata_hd_accessing[2]);
+		}
+	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "3:0:0:0") == 0) {
+		if (atomic_read(&sata_badblock_idf[3]) == 0) {
+			atomic_inc(&sata_hd_accessing[3]);
+		}
+#endif
+	}
+	
 
 	int error = scsi_init_sgtable(rq, &cmd->sdb, gfp_mask);
 	if (error)

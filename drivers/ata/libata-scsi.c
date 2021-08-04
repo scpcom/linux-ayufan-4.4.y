@@ -56,6 +56,24 @@
 
 #define ATA_SCSI_RBUF_SIZE	4096
 
+#ifdef ZYXEL_STAGGERED_SPIN_UP
+#define NUM_WAKEUP_JIFFIES	16
+#define MAX_DRIVES_WAKING_UP	2
+#define WAKEUP_INTERVAL (10L * HZ)
+#define MIN_WAKEUP_GAP (3L * HZ)
+#define SPINDOWN_DELAY (15L * HZ)
+static unsigned long lastWakeUpJiffies[NUM_WAKEUP_JIFFIES];
+static unsigned long latestWakeUpJiffies;
+static int jiffies_idx_rd = 0, jiffies_idx_wr = 0;
+static DEFINE_SPINLOCK(lastWakeUpLock);
+static int inline num_drives_waking_up(void)
+{
+	return (jiffies_idx_wr < jiffies_idx_rd) ?
+		NUM_WAKEUP_JIFFIES - jiffies_idx_rd + jiffies_idx_wr :
+		jiffies_idx_wr - jiffies_idx_rd;
+}
+#endif
+
 static DEFINE_SPINLOCK(ata_scsi_rbuf_lock);
 static u8 ata_scsi_rbuf[ATA_SCSI_RBUF_SIZE];
 
@@ -1772,6 +1790,40 @@ static void ata_scsi_qc_complete(struct ata_queued_cmd *qc)
 	ata_qc_free(qc);
 }
 
+#ifdef ZYXEL_STAGGERED_SPIN_UP
+static inline int scsi_medium_access_command(struct scsi_cmnd *scmd)
+{
+	switch (scmd->cmnd[0]) {
+	case READ_6:
+	case READ_10:
+	case READ_12:
+	case READ_16:
+	case SYNCHRONIZE_CACHE:
+	case VERIFY:
+	case VERIFY_12:
+	case VERIFY_16:
+	case WRITE_6:
+	case WRITE_10:
+	case WRITE_12:
+	case WRITE_16:
+	case WRITE_SAME:
+	case WRITE_SAME_16:
+	case UNMAP:
+		return 1;
+	case VARIABLE_LENGTH_CMD:
+		switch (scmd->cmnd[9]) {
+		case READ_32:
+		case VERIFY_32:
+		case WRITE_32:
+		case WRITE_SAME_32:
+			return 1;
+		}
+	}
+
+	return 0;
+}
+#endif
+
 /**
  *	ata_scsi_translate - Translate then issue SCSI command to ATA device
  *	@dev: ATA device to which the command is addressed
@@ -1804,6 +1856,9 @@ static int ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd,
 	struct ata_port *ap = dev->link->ap;
 	struct ata_queued_cmd *qc;
 	int rc;
+#ifdef ZYXEL_STAGGERED_SPIN_UP
+	int cmdDefered = 0, spinDown = 0;
+#endif
 
 	VPRINTK("ENTER\n");
 
@@ -1826,6 +1881,40 @@ static int ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd,
 
 	qc->complete_fn = ata_scsi_qc_complete;
 
+#ifdef ZYXEL_STAGGERED_SPIN_UP
+	if (unlikely(cmd->cmnd[0] == START_STOP)) 
+		spinDown = 1;
+	else if (unlikely(dev->standby)) {
+		if (scsi_medium_access_command(cmd)) {
+			spin_lock(&lastWakeUpLock);
+			/* don't wake up drive if it's just spin down */
+			if (time_after_eq(jiffies, dev->standby_jiffies + SPINDOWN_DELAY) && 
+				(time_after_eq(jiffies, latestWakeUpJiffies + MIN_WAKEUP_GAP) ||
+				 time_before(jiffies, latestWakeUpJiffies))) {
+				/* move the wake up jiffies index to the latest */
+				if (num_drives_waking_up() >= MAX_DRIVES_WAKING_UP) 
+					while (num_drives_waking_up() > 0 &&
+						time_after(jiffies, lastWakeUpJiffies[jiffies_idx_rd] + WAKEUP_INTERVAL)) 
+						jiffies_idx_rd = 
+						  (jiffies_idx_rd + 1) % NUM_WAKEUP_JIFFIES;
+				if (num_drives_waking_up() < MAX_DRIVES_WAKING_UP) {
+					printk(KERN_WARNING "\n****** disk(%u:%u:%u:%u %u)(HD%u) awaked by %s (cmd: %x) ******\n", cmd->device->host->host_no, cmd->device->channel, cmd->device->id, cmd->device->lun, cmd->device->type, cmd->device->host->host_no+1, current->comm, cmd->cmnd[0]);
+					latestWakeUpJiffies = lastWakeUpJiffies[jiffies_idx_wr] = jiffies;
+					jiffies_idx_wr = (jiffies_idx_wr + 1) % NUM_WAKEUP_JIFFIES;
+					dev->standby = 0;
+				}
+				else {
+					cmdDefered = 1;
+				}
+			}
+			else {
+				cmdDefered = 1;
+			}
+			spin_unlock(&lastWakeUpLock);
+		}
+	}
+#endif
+
 	if (xlat_func(qc))
 		goto early_finish;
 
@@ -1833,6 +1922,15 @@ static int ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd,
 		if ((rc = ap->ops->qc_defer(qc)))
 			goto defer;
 	}
+	
+#ifdef ZYXEL_STAGGERED_SPIN_UP
+	if (unlikely(cmdDefered)) goto defer;
+	if (unlikely(spinDown)) {
+		dev->standby = 1;
+		dev->standby_jiffies = jiffies;
+		printk(KERN_WARNING "\n****** disk(%u:%u:%u:%u) spin down at %lu ******\n", cmd->device->host->host_no, cmd->device->channel, cmd->device->id, cmd->device->lun, jiffies);
+	}
+#endif
 
 	/* select device, send command to hardware */
 	ata_qc_issue(qc);
