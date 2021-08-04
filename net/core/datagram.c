@@ -210,10 +210,14 @@ int skb_copy_datagram_to_kernel_iovec(const struct sk_buff *skb, int offset,
 	if (!len)
 		return 0;
 
+	/* To fix "mount.cifs unstable" issue */
+	if (len < 4096)	/* Because there are bugs in DMA engine of Mindspeed when handling small packet, we use soft process instead */
+		return skb_copy_datagram_to_kernel_iovec_soft (skb, offset, to, len);
+
 	total_len = len;
 	
 	size = sizeof(struct comcerto_dma_sg);
-	sg = kmalloc(size, GFP_ATOMIC);
+	sg = kzalloc(size, GFP_ATOMIC);
 	if (!sg)
 		return skb_copy_datagram_to_kernel_iovec_soft (skb, offset, to, len);
 
