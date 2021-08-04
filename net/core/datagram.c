@@ -128,6 +128,35 @@ out_noerr:
 	goto out;
 }
 
+static struct sk_buff *skb_set_peeked(struct sk_buff *skb)
+{
+	struct sk_buff *nskb;
+
+	if (skb->peeked)
+		return skb;
+
+	/* We have to unshare an skb before modifying it. */
+	if (!skb_shared(skb))
+		goto done;
+
+	nskb = skb_clone(skb, GFP_ATOMIC);
+	if (!nskb)
+		return ERR_PTR(-ENOMEM);
+
+	skb->prev->next = nskb;
+	skb->next->prev = nskb;
+	nskb->prev = skb->prev;
+	nskb->next = skb->next;
+
+	consume_skb(skb);
+	skb = nskb;
+
+done:
+	skb->peeked = 1;
+
+	return skb;
+}
+
 #if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 /*
  *	skb_copy_datagram_to_kernel_iovec - Copy a datagram to a kernel iovec structure.
