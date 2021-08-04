@@ -1401,6 +1401,7 @@ unsigned long zap_page_range(struct vm_area_struct *vma, unsigned long address,
 	tlb_finish_mmu(&tlb, address, end);
 	return end;
 }
+EXPORT_SYMBOL_GPL(zap_page_range);
 
 /**
  * zap_vma_ptes - remove ptes mapping the vma
@@ -3123,6 +3124,7 @@ static inline int check_stack_guard_page(struct vm_area_struct *vma, unsigned lo
 	}
 	return 0;
 }
+EXPORT_SYMBOL_GPL(vmtruncate_range);
 
 /*
  * We enter with non-exclusive mmap_sem (to exclude vma changes,
