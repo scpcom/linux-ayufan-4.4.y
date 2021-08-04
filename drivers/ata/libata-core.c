@@ -3710,6 +3710,8 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 {
 	u32 scontrol;
 	int rc;
+        int try_count=0;
+        u32 sstatus;
 
 	DPRINTK("ENTER\n");
 
@@ -3733,11 +3735,16 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 		sata_set_spd(link);
 	}
 
+keep_trying:
+
 	/* issue phy wake/reset */
 	if ((rc = sata_scr_read(link, SCR_CONTROL, &scontrol)))
 		goto out;
 
 	scontrol = (scontrol & 0x0f0) | 0x301;
+
+        //Limit the max speed to 3GBps
+        scontrol = (scontrol & ~(0xf0)) | 0x20;
 
 	if ((rc = sata_scr_write_flush(link, SCR_CONTROL, scontrol)))
 		goto out;
@@ -3751,6 +3758,20 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 	rc = sata_link_resume(link, timing, deadline);
 	if (rc)
 		goto out;
+
+        try_count++;
+        sata_scr_read(link, SCR_STATUS, &sstatus);
+
+	/*Few HDDs showed issue with the detection.So the WA is it to restart
+        the communication. The following code check the PHY status and does the 
+	SATA port reset when it sees the PHY is not ready. Doing port reset will 
+	invoke a COMRESET on the interface and start a re-establishment of Phy layer 
+	communications*/
+
+        //Check if PHY not ready
+        if (((sstatus & 0xf) == 0x1) && (try_count < 7))
+                goto keep_trying;
+
 	/* if link is offline nothing more to do */
 	if (ata_phys_link_offline(link))
 		goto out;
@@ -4676,6 +4697,13 @@ void swap_buf_le16(u16 *buf, unsigned int buf_words)
 #endif /* __BIG_ENDIAN */
 }
 
+#include <mach/stats.h>
+
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+struct ahci_port_stats ahci_port_stats[MAX_AHCI_PORTS];
+unsigned int ahci_stats_enable = 0;
+#endif
+
 /**
  *	ata_qc_new - Request an available ATA command, for queueing
  *	@ap: target port
@@ -4754,6 +4782,8 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 	if (likely(ata_tag_valid(tag))) {
 		qc->tag = ATA_TAG_POISON;
 		clear_bit(tag, &ap->qc_allocated);
+
+		ahci_stats_end(ap, qc, tag);
 	}
 }
 

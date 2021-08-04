@@ -3,13 +3,37 @@
 # from userspace.
 #
 
-CC	 = gcc
+#CC	 = gcc
+CC	 = arm-openwrt-linux-gnueabi-gcc
 OPTFLAGS = -O2			# Adjust as desired
 CFLAGS	 = -I.. -I ../../../include -g $(OPTFLAGS)
-LD	 = ld
+LD	 = arm-openwrt-linux-gnueabi-ld
 AWK	 = awk -f
-AR	 = ar
-RANLIB	 = ranlib
+AR	 = arm-openwrt-linux-gnueabi-ar
+RANLIB	 = arm-openwrt-linux-gnueabi-ranlib
+OBJS     = int1.o int2.o int4.o int8.o int16.o int32.o recov.o algos.o tables.o
+
+ifeq ($(ARCH),arm)
+        CFLAGS += -I../../../arch/arm/include -mfpu=neon
+        HAS_NEON = yes
+endif
+ifeq ($(IS_X86),yes)
+        OBJS   += mmx.o sse1.o sse2.o avx2.o recov_ssse3.o recov_avx2.o
+        CFLAGS += $(shell echo "vpbroadcastb %xmm0, %ymm1" |    \
+                    gcc -c -x assembler - >&/dev/null &&        \
+                    rm ./-.o && echo -DCONFIG_AS_AVX2=1)
+else ifeq ($(HAS_NEON),yes)
+        OBJS   += neon.o neon1.o neon2.o neon4.o neon8.o
+        CFLAGS += -DCONFIG_KERNEL_MODE_NEON=1
+else
+        HAS_ALTIVEC := $(shell printf '\#include <altivec.h>\nvector int a;\n' |\
+                         gcc -c -x c - >&/dev/null && \
+                         rm ./-.o && echo yes)
+        ifeq ($(HAS_ALTIVEC),yes)
+                OBJS += altivec1.o altivec2.o altivec4.o altivec8.o
+        endif
+endif
+
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -22,12 +46,12 @@ RANLIB	 = ranlib
 
 all:	raid6.a raid6test
 
-raid6.a: int1.o int2.o int4.o int8.o int16.o int32.o mmx.o sse1.o sse2.o \
-	 altivec1.o altivec2.o altivec4.o altivec8.o recov.o algos.o \
-	 tables.o
-	 rm -f $@
-	 $(AR) cq $@ $^
-	 $(RANLIB) $@
+
+raid6.a: $(OBJS)
+	rm -f $@
+	$(AR) cq $@ $^
+	$(RANLIB) $@
+
 
 raid6test: test.c raid6.a
 	$(CC) $(CFLAGS) -o raid6test $^
@@ -62,11 +86,11 @@ int16.c: int.uc ../unroll.awk
 int32.c: int.uc ../unroll.awk
 	$(AWK) ../unroll.awk -vN=32 < int.uc > $@
 
-tables.c: mktables
-	./mktables > tables.c
+#tables.c: mktables
+#	../mktables > tables.c
 
 clean:
-	rm -f *.o *.a mktables mktables.c *.uc int*.c altivec*.c tables.c raid6test
+	rm -f *.o *.a mktables mktables.c *.uc int*.c altivec*.c neon*.c tables.c raid6test
 
 spotless: clean
 	rm -f *~

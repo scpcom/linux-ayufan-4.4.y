@@ -306,6 +306,8 @@ extern acpi_status acpi_pci_osc_control_set(acpi_handle handle,
 					     u32 *mask, u32 req);
 extern void acpi_early_init(void);
 
+#define ACPI_PTR(_ptr)  (_ptr)
+
 #else	/* !CONFIG_ACPI */
 
 #define acpi_disabled 1
@@ -348,6 +350,8 @@ static inline int acpi_table_parse(char *id,
 {
 	return -1;
 }
+
+#define ACPI_PTR(_ptr)  (NULL)
 #endif	/* !CONFIG_ACPI */
 
 #ifdef CONFIG_ACPI_SLEEP

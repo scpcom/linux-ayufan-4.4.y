@@ -243,7 +243,11 @@ const struct file_operations ext4_file_operations = {
 	.release	= ext4_release_file,
 	.fsync		= ext4_sync_file,
 	.splice_read	= generic_file_splice_read,
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+	.splice_write	= comcerto_file_splice_write,
+#else
 	.splice_write	= generic_file_splice_write,
+#endif
 	.fallocate	= ext4_fallocate,
 };
 

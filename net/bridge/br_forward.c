@@ -43,7 +43,11 @@ int br_dev_queue_push_xmit(struct sk_buff *skb)
 {
 	/* ip_fragment doesn't copy the MAC header */
 	if (nf_bridge_maybe_copy_header(skb) ||
+#if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
+	    (packet_length(skb) > skb->dev->mtu && !skb_is_gso(skb) && (!skb->ipsec_offload))) {
+#else
 	    (packet_length(skb) > skb->dev->mtu && !skb_is_gso(skb))) {
+#endif
 		kfree_skb(skb);
 	} else {
 		skb_push(skb, ETH_HLEN);

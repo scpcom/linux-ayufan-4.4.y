@@ -512,6 +512,36 @@ int udpv6_queue_rcv_skb(struct sock * sk, struct sk_buff *skb)
 	if (!xfrm6_policy_check(sk, XFRM_POLICY_IN, skb))
 		goto drop;
 
+
+	/* NAT-T changes Start */
+	if ( up->encap_type ) {
+		/*
+		 * This is an encapsulation socket, so pass the skb to
+		 * the socket's udp6_encap_rcv() hook.Otherwise, just
+		 * fall through and pass this up the UDP socket.
+		 * up->encap_rcv() returns the following value:
+		 * =0 if skb was successfully passed to the encap
+		 * handler or was discarded by it.
+		 * >0 if skb should be passed on to UDP.
+		 * <0 if skb should be resubmitted as proto -N
+		 */
+
+		/* if we're overly short, let UDP handle it */
+		if (skb->len > sizeof(struct udphdr) &&
+		    up->encap_rcv != NULL) {
+			int ret;
+
+			ret = (*up->encap_rcv)(sk, skb);
+			if (ret <= 0) {
+				UDP_INC_STATS_BH(sock_net(sk),
+						UDP_MIB_INDATAGRAMS,
+						is_udplite);
+				return -ret;
+			}
+			 /* FALLTHROUGH -- it's a UDP Packet */
+		}
+	}
+
 	/*
 	 * UDP-Lite specific tests, ignored on UDP sockets (see net/ipv4/udp.c).
 	 */
@@ -1242,24 +1272,111 @@ void udpv6_destroy_sock(struct sock *sk)
 }
 
 /*
+*	Socket option code for UDP for IPV6
+*/
+int udp6_lib_setsockopt(struct sock *sk, int level, int optname,
+		       char __user *optval, unsigned int optlen,
+		       int (*push_pending_frames)(struct sock *))
+{
+	struct udp_sock *up = udp_sk(sk);
+	int val;
+	int err = 0;
+	int is_udplite = IS_UDPLITE(sk);
+
+	if (optlen < sizeof(int))
+		return -EINVAL;
+
+	if (get_user(val, (int __user *)optval))
+		return -EFAULT;
+
+	switch (optname) {
+		case UDP_CORK:
+			if (val != 0) {
+				up->corkflag = 1;
+			} else {
+				up->corkflag = 0;
+				lock_sock(sk);
+				(*push_pending_frames)(sk);
+				release_sock(sk);
+			}
+			break;
+
+		case UDP_ENCAP:
+			switch (val) {
+				case 0:
+				case UDP_ENCAP_ESPINUDP:
+				case UDP_ENCAP_ESPINUDP_NON_IKE:
+					up->encap_rcv = xfrm6_udp_encap_rcv;
+					/* FALLTHROUGH */
+				case UDP_ENCAP_L2TPINUDP:
+					up->encap_type = val;
+					break;
+				default:
+					err = -ENOPROTOOPT;
+					break;
+			}
+			break;
+
+			/*
+			 * 	UDP-Lite's partial checksum coverage (RFC 3828).
+			 */
+			/* The sender sets actual checksum coverage length via this option.
+			 * The case coverage > packet length is handled by send module. */
+		case UDPLITE_SEND_CSCOV:
+			if (!is_udplite)         /* Disable the option on UDP sockets */
+				return -ENOPROTOOPT;
+			if (val != 0 && val < 8) /* Illegal coverage: use default (8) */
+				val = 8;
+			else if (val > USHRT_MAX)
+				val = USHRT_MAX;
+			up->pcslen = val;
+			up->pcflag |= UDPLITE_SEND_CC;
+			break;
+
+			/* The receiver specifies a minimum checksum coverage value. To make
+			 * sense, this should be set to at least 8 (as done below). If zero is
+			 * used, this again means full checksum coverage.                     */
+		case UDPLITE_RECV_CSCOV:
+			if (!is_udplite)         /* Disable the option on UDP sockets */
+				return -ENOPROTOOPT;
+			if (val != 0 && val < 8) /* Avoid silly minimal values.       */
+				val = 8;
+			else if (val > USHRT_MAX)
+				val = USHRT_MAX;
+			up->pcrlen = val;
+			up->pcflag |= UDPLITE_RECV_CC;
+			break;
+
+		default:
+			err = -ENOPROTOOPT;
+			break;
+	}
+
+	return err;
+}
+
+EXPORT_SYMBOL(udp6_lib_setsockopt);
+
+
+/*
  *	Socket option code for UDP
  */
 int udpv6_setsockopt(struct sock *sk, int level, int optname,
-		     char __user *optval, unsigned int optlen)
+		char __user *optval, unsigned int optlen)
 {
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
-		return udp_lib_setsockopt(sk, level, optname, optval, optlen,
-					  udp_v6_push_pending_frames);
+		return udp6_lib_setsockopt(sk, level, optname, optval, optlen,
+				udp_v6_push_pending_frames);
 	return ipv6_setsockopt(sk, level, optname, optval, optlen);
 }
 
 #ifdef CONFIG_COMPAT
 int compat_udpv6_setsockopt(struct sock *sk, int level, int optname,
-			    char __user *optval, unsigned int optlen)
+		char __user *optval, unsigned int optlen)
 {
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
-		return udp_lib_setsockopt(sk, level, optname, optval, optlen,
-					  udp_v6_push_pending_frames);
+		return udp6_lib_setsockopt(sk, level, optname, optval, optlen,
+				udp_v6_push_pending_frames);
 	return compat_ipv6_setsockopt(sk, level, optname, optval, optlen);
 }
 #endif

@@ -148,7 +148,7 @@ static __always_inline void *kmalloc(size_t size, gfp_t flags)
 		return NULL;
 found:
 #ifdef CONFIG_ZONE_DMA
-		if (flags & GFP_DMA)
+		if (flags & __GFP_DMA)
 			cachep = malloc_sizes[i].cs_dmacachep;
 		else
 #endif

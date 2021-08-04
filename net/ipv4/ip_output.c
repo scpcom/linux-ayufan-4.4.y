@@ -98,6 +98,15 @@ int __ip_local_out(struct sk_buff *skb)
 
 	iph->tot_len = htons(skb->len);
 	ip_send_check(iph);
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD)
+	if(skb->ipsec_offload)
+	{	
+		dst_output(skb);	
+		return 0;
+	}	
+	else
+#endif
 	return nf_hook(NFPROTO_IPV4, NF_INET_LOCAL_OUT, skb, NULL,
 		       skb_dst(skb)->dev, dst_output);
 }
@@ -238,7 +247,13 @@ static int ip_finish_output(struct sk_buff *skb)
 		return dst_output(skb);
 	}
 #endif
+
+#if defined(CONFIG_INET_IPSEC_OFFLOAD)
+	if ((skb->ipsec_offload == 0) &&
+		skb->len > ip_skb_dst_mtu(skb) && !skb_is_gso(skb))
+#else
 	if (skb->len > ip_skb_dst_mtu(skb) && !skb_is_gso(skb))
+#endif
 		return ip_fragment(skb, ip_finish_output2);
 	else
 		return ip_finish_output2(skb);

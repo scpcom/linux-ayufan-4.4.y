@@ -621,7 +621,40 @@ nla_put_failure:
 	return -EMSGSIZE;
 }
 EXPORT_SYMBOL(rtnetlink_put_metrics);
+#ifdef CONFIG_ARCH_COMCERTO
+int rtnetlink_put_metrics_2(struct sk_buff *skb, u32 *metrics, struct dst_entry *dst)
+{
+	struct nlattr *mx;
+	int i, valid = 0;
 
+	mx = nla_nest_start(skb, RTA_METRICS);
+	if (mx == NULL)
+		return -ENOBUFS;
+
+	for (i = 0; i < RTAX_MAX; i++) {
+		if (metrics[i]) {
+			valid++;
+			NLA_PUT_U32(skb, i+1, metrics[i]);
+		}
+		else if ((i + 1) == RTAX_MTU){
+			valid++;
+			NLA_PUT_U32(skb, i+1, dst_mtu(dst));
+		}
+	}
+
+	if (!valid) {
+		nla_nest_cancel(skb, mx);
+		return 0;
+	}
+
+	return nla_nest_end(skb, mx);
+
+nla_put_failure:
+	nla_nest_cancel(skb, mx);
+	return -EMSGSIZE;
+}
+EXPORT_SYMBOL(rtnetlink_put_metrics_2);
+#endif
 int rtnl_put_cacheinfo(struct sk_buff *skb, struct dst_entry *dst, u32 id,
 		       u32 ts, u32 tsage, long expires, u32 error)
 {
@@ -1952,14 +1985,16 @@ static int rtnl_dump_all(struct sk_buff *skb, struct netlink_callback *cb)
 	return skb->len;
 }
 
-void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
+void __rtmsg_ifinfo(int type, struct net_device *dev, unsigned change, gfp_t flags)
 {
 	struct net *net = dev_net(dev);
 	struct sk_buff *skb;
 	int err = -ENOBUFS;
 	size_t if_info_size;
 
-	skb = nlmsg_new((if_info_size = if_nlmsg_size(dev, 0)), GFP_KERNEL);
+
+	skb = nlmsg_new((if_info_size = if_nlmsg_size(dev, 0)), flags);
+
 	if (skb == NULL)
 		goto errout;
 
@@ -1970,12 +2005,24 @@ void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, 0, RTNLGRP_LINK, NULL, GFP_KERNEL);
+	rtnl_notify(skb, net, 0, RTNLGRP_LINK, NULL, flags);
 	return;
 errout:
 	if (err < 0)
 		rtnl_set_sk_err(net, RTNLGRP_LINK, err);
 }
+#if defined(CONFIG_ARCH_COMCERTO)
+EXPORT_SYMBOL(__rtmsg_ifinfo);
+#endif
+
+void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
+{
+	__rtmsg_ifinfo(type, dev, change, GFP_KERNEL);
+}
+#if defined(CONFIG_COMCERTO_FP)
+EXPORT_SYMBOL(rtmsg_ifinfo);
+#endif
+
 
 /* Protected by RTNL sempahore.  */
 static struct rtattr **rta_buf;

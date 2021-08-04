@@ -30,6 +30,16 @@
 #include <linux/statfs.h>
 #include <linux/compat.h>
 #include <linux/slab.h>
+
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#include <linux/socket.h>
+#include <net/sock.h>
+#include <linux/net.h>
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+#include <mach/hardware.h>
+#endif
+#endif
+
 #include "ctree.h"
 #include "disk-io.h"
 #include "transaction.h"
@@ -1718,6 +1728,173 @@ out:
 	return ret;
 }
 
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
+					loff_t __user *ppos, size_t count)
+{
+	struct inode *inode = fdentry(file)->d_inode;
+	struct btrfs_root *root = BTRFS_I(inode)->root;
+	struct page **pages = NULL;
+	struct kvec *iov = NULL;
+	struct msghdr msg;
+	long recvtimeo;
+	ssize_t copied = 0;
+	size_t offset, offset_tmp;
+	int num_pages, dirty_pages;
+	int err = 0;
+	loff_t start_pos;
+	loff_t pos = file->f_pos;
+	int i;
+	unsigned count_tmp = count;
+
+#define ERROR_OUT do {mutex_unlock(&inode->i_mutex); goto out;} while(0)
+
+	if (!count)
+		return 0;
+
+	if (ppos && copy_from_user(&pos, ppos, sizeof pos))
+		return -EFAULT;
+	offset = pos & (PAGE_CACHE_SIZE - 1);
+	num_pages = (offset + count + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+#if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
+	if (num_pages > MDMA_OUTBOUND_BUF_DESC)
+		ERROR_OUT;
+#endif
+	start_pos = round_down(pos, root->sectorsize);
+
+	if (!(pages = kmalloc(num_pages * sizeof(struct page *), GFP_KERNEL)) ||
+		!(iov = kmalloc(num_pages * sizeof(*iov), GFP_KERNEL)))
+		ERROR_OUT;
+
+	vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
+	current->backing_dev_info = inode->i_mapping->backing_dev_info;
+
+	mutex_lock(&inode->i_mutex);
+
+	if ((err = generic_write_checks(file, &pos, &count,
+					S_ISBLK(inode->i_mode))))
+		ERROR_OUT;
+
+	if ((err = file_remove_suid(file)))
+		ERROR_OUT;
+
+	if (root->fs_info->fs_state & BTRFS_SUPER_FLAG_ERROR) {
+                err = -EROFS;
+		ERROR_OUT;
+	}
+
+	if ((err = btrfs_update_time(file)))
+		ERROR_OUT;
+
+	BTRFS_I(inode)->sequence++;
+	if (start_pos > i_size_read(inode) &&
+		(err = btrfs_cont_expand(inode, i_size_read(inode), start_pos)))
+		ERROR_OUT;
+
+	if ((err = btrfs_delalloc_reserve_space(inode,
+					num_pages << PAGE_CACHE_SHIFT)))
+		goto out_free;
+
+	if ((err = prepare_pages(root, file, pages, num_pages,
+					pos, pos >> PAGE_CACHE_SHIFT,
+					count, false))) {
+		btrfs_delalloc_release_space(inode,
+					num_pages << PAGE_CACHE_SHIFT);
+		goto out_free;
+	}
+
+	for (i = 0, offset_tmp = offset; i < num_pages; i++) {
+		unsigned bytes = PAGE_CACHE_SIZE - offset_tmp;
+
+		if (bytes > count_tmp)
+			bytes = count_tmp;
+		iov[i].iov_base = kmap(pages[i]) + offset_tmp;
+		iov[i].iov_len = bytes;
+		offset_tmp = 0;
+		count_tmp -= bytes;
+	}
+
+        /* IOV is ready, receive the date from socket now */
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+	msg.msg_iov = (struct iovec *)&iov[0];
+	msg.msg_iovlen = num_pages;
+	msg.msg_control = NULL;
+	msg.msg_controllen = 0;
+	msg.msg_flags = MSG_KERNSPACE;
+
+	recvtimeo = sock->sk->sk_rcvtimeo;
+	sock->sk->sk_rcvtimeo = 8 * HZ;
+	copied = kernel_recvmsg(sock, &msg, iov, num_pages, count,
+                             MSG_WAITALL | MSG_NOCATCHSIG);
+	sock->sk->sk_rcvtimeo = recvtimeo;
+
+	if (copied < 0) {
+		err = copied;
+		copied = 0;
+	}
+
+	/* FIXME:
+	 * The following results in at least one dirty_page even for copied==0
+	 * unless offset==0, but otherwise the fir page would be corrupted
+	 * for an unknown reason.
+	 */
+	dirty_pages = (copied + offset + PAGE_CACHE_SIZE - 1) >>
+					PAGE_CACHE_SHIFT;
+
+	for (i = 0; i < num_pages; i++)
+		kunmap(pages[i]);
+	if (dirty_pages < num_pages) {
+		if (1||dirty_pages) {
+			spin_lock(&BTRFS_I(inode)->lock);
+			BTRFS_I(inode)->outstanding_extents++;
+			spin_unlock(&BTRFS_I(inode)->lock);
+		}
+		btrfs_delalloc_release_space(inode,
+                                        (num_pages - dirty_pages) <<
+                                        PAGE_CACHE_SHIFT);
+	}
+
+	if (dirty_pages) {
+		if ((err = btrfs_dirty_pages(root, inode, pages,
+					dirty_pages, pos, copied, NULL))) {
+			btrfs_delalloc_release_space(inode,
+					dirty_pages << PAGE_CACHE_SHIFT);
+			btrfs_drop_pages(pages, num_pages);
+			goto out_free;
+                }
+	}
+
+	btrfs_drop_pages(pages, num_pages);
+	cond_resched();
+
+	balance_dirty_pages_ratelimited_nr(inode->i_mapping, dirty_pages);
+	if (dirty_pages < (root->leafsize >> PAGE_CACHE_SHIFT) + 1)
+		btrfs_btree_balance_dirty(root, 1);
+
+	pos += copied;
+
+out_free:
+	mutex_unlock(&inode->i_mutex);
+
+	if (copied > 0) {
+		file->f_pos = pos;
+		if (ppos && copy_to_user(ppos, &pos, sizeof *ppos))
+			err = -EFAULT;
+	}
+
+	BTRFS_I(inode)->last_trans = root->fs_info->generation + 1;
+	if (copied > 0 || err == -EIOCBQUEUED)
+		err = generic_write_sync(file, pos, copied);
+out:
+	kfree(iov);
+	kfree(pages);
+	current->backing_dev_info = NULL;
+
+	return err ? err : copied;
+}
+#endif
+
 static int find_desired_extent(struct inode *inode, loff_t *offset, int origin)
 {
 	struct btrfs_root *root = BTRFS_I(inode)->root;
@@ -1879,6 +2056,9 @@ const struct file_operations btrfs_file_operations = {
 	.write		= do_sync_write,
 	.aio_read       = generic_file_aio_read,
 	.splice_read	= generic_file_splice_read,
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+	.splice_from_socket	= btrfs_splice_from_socket,
+#endif
 	.aio_write	= btrfs_file_aio_write,
 	.mmap		= btrfs_file_mmap,
 	.open		= generic_file_open,

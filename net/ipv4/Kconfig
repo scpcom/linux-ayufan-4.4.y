@@ -182,6 +182,13 @@ config NET_IPIP
 	  be inserted in and removed from the running kernel whenever you
 	  want). Most people won't need this and can say N.
 
+
+config NET_ETHERIP
+	tristate "Ethernet over IP: tunneling"
+	default y
+	help
+	 Ethernet over IPv4 tunneling support.
+
 config NET_IPGRE_DEMUX
 	tristate "IP: GRE demultiplexer"
 	help
@@ -338,6 +345,12 @@ config INET_ESP
 	  Support for IPsec ESP.
 
 	  If unsure, say Y.
+
+config INET_IPSEC_OFFLOAD
+	bool "IPsec Fast Path Processing offload"
+	depends on (INET_ESP || INET_AH) && COMCERTO_FP
+		---help---
+	  Support for IPsec Fast Path offload.
 
 config INET_IPCOMP
 	tristate "IP: IPComp transformation"

@@ -11,7 +11,7 @@
 #include <asm/hardware/gic.h>
 
 #ifndef HAVE_GET_IRQNR_PREAMBLE
-	.macro	get_irqnr_preamble, base, tmp
+	.macro	get_irqnr_preamble, base, pending_intr, tmp
 	ldr	\base, =gic_cpu_base_addr
 	ldr	\base, [\base]
 	.endm
@@ -32,17 +32,70 @@
  * valid range for an IRQ (30-1020 inclusive).
  */
 
-	.macro  get_irqnr_and_base, irqnr, irqstat, base, tmp
+	.macro  get_irqnr_and_base, irqnr, irqstat, base, pending_intr, tmp
+
+#ifdef CONFIG_COMCERTO_MSP
+	ldr     \irqstat, [\base, #GIC_CPU_HIGHPRI]
+	bic     \irqnr, \irqstat, #0x1c00
+	cmp     \irqnr, #33
+	cmpne   \irqnr, #66
+	cmpne   \irqnr, #87
+	cmpne   \irqnr, #51
+	cmpeq   \irqnr, \irqnr
+	bne 1001f
+
+	mov \irqnr, \irqnr /* breakpoint here */
+
+	beq 1002f
+
+1001:
+#endif /* CONFIG_COMCERTO_MSP */
 
 	ldr     \irqstat, [\base, #GIC_CPU_INTACK]
 	/* bits 12-10 = src CPU, 9-0 = int # */
 
-	ldr	\tmp, =1021
 	bic     \irqnr, \irqstat, #0x1c00
+	
+#ifdef CONFIG_COMCERTO_MSP
+	cmp     \irqnr, #33
+	streq	\irqstat, [\base, #GIC_CPU_EOI]
+	ldreq	\tmp, =0x2	//2 on bit1
+	ldreq	\pending_intr, =COMCERTO_DISTR_INT_SET_PENDING_OFFSET_4
+	streq	\tmp, [\pending_intr]
+	beq	1002f
+
+	cmpne   \irqnr, #51
+	streq	\irqstat, [\base, #GIC_CPU_EOI]
+	ldreq	\tmp, =0x80000	//0x80000 on bit 19
+	ldreq	\pending_intr, =COMCERTO_DISTR_INT_SET_PENDING_OFFSET_4
+	streq	\tmp, [\pending_intr]
+	beq	1002f
+
+	cmpne   \irqnr, #66
+	streq	\irqstat, [\base, #GIC_CPU_EOI]
+	ldreq	\tmp, =0x4	//4 on bit 2
+	ldreq	\pending_intr, =COMCERTO_DISTR_INT_SET_PENDING_OFFSET_8
+	streq	\tmp, [\pending_intr]
+	beq	1002f
+
+	cmpne   \irqnr, #87
+	streq	\irqstat, [\base, #GIC_CPU_EOI]
+	ldreq	\tmp, =0x800000	//0x800000 on bit 23
+	ldreq	\pending_intr, =COMCERTO_DISTR_INT_SET_PENDING_OFFSET_8
+	streq	\tmp, [\pending_intr]
+	beq	1002f
+
+#endif /* CONFIG_COMCERTO_MSP */
+	ldr	\tmp, =1021
 	cmp     \irqnr, #15
 	cmpcc	\irqnr, \irqnr
 	cmpne	\irqnr, \tmp
 	cmpcs	\irqnr, \irqnr
+
+#ifdef CONFIG_COMCERTO_MSP
+1002:
+#endif /* CONFIG_COMCERTO_MSP */
+
 	.endm
 
 /* We assume that irqstat (the raw value of the IRQ acknowledge

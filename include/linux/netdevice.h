@@ -1005,6 +1005,11 @@ struct net_device {
 	/* mask of features inheritable by VLAN devices */
 	u32			vlan_features;
 
+#if defined(CONFIG_ARCH_COMCERTO)
+	/* This is pointing to network device that offload WiFi data to PFE */
+	struct net_device 	*wifi_offload_dev;
+#endif
+
 	/* Net device feature bits; if you change something,
 	 * also update netdev_features_strings[] in ethtool.c */
 
@@ -1624,6 +1629,9 @@ extern int		dev_open(struct net_device *dev);
 extern int		dev_close(struct net_device *dev);
 extern void		dev_disable_lro(struct net_device *dev);
 extern int		dev_queue_xmit(struct sk_buff *skb);
+#if defined(CONFIG_ARCH_COMCERTO)
+extern int 		original_dev_queue_xmit(struct sk_buff *skb);
+#endif
 extern int		register_netdevice(struct net_device *dev);
 extern void		unregister_netdevice_queue(struct net_device *dev,
 						   struct list_head *head);
@@ -2052,6 +2060,9 @@ extern void dev_kfree_skb_any(struct sk_buff *skb);
 extern int		netif_rx(struct sk_buff *skb);
 extern int		netif_rx_ni(struct sk_buff *skb);
 extern int		netif_receive_skb(struct sk_buff *skb);
+#if defined(CONFIG_ARCH_COMCERTO)
+extern int              capture_receive_skb(struct sk_buff *skb);
+#endif
 extern gro_result_t	dev_gro_receive(struct napi_struct *napi,
 					struct sk_buff *skb);
 extern gro_result_t	napi_skb_finish(gro_result_t ret, struct sk_buff *skb);

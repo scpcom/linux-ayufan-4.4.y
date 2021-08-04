@@ -141,6 +141,549 @@ static ssize_t fscaps_show(struct kobject *kobj,
 }
 KERNEL_ATTR_RO(fscaps);
 
+#if defined(CONFIG_COMCERTO_MDMA_PROF)
+
+#include <mach/stats.h>
+
+static ssize_t comcerto_mdma_prof_enable_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	int n = 0;
+
+	if (mdma_stats_enable)
+		n += sprintf(buf + n, "MDMA profiling is enabled\n");
+	else
+		n += sprintf(buf + n, "MDMA profiling is disabled\n");
+
+	return (n + 1);
+}
+
+static ssize_t comcerto_mdma_prof_enable_store(struct kobject *kobj,
+				  struct kobj_attribute *attr, const char *buf, size_t count)
+{
+	unsigned int enable;
+
+	if (kstrtouint(buf, 0, &enable))
+		return -EINVAL;
+
+	if (enable > 0)
+		mdma_stats_enable = 1;
+	else
+		mdma_stats_enable = 0;
+
+	return count;
+}
+KERNEL_ATTR_RW(comcerto_mdma_prof_enable);
+
+static ssize_t comcerto_mdma_reqtiming_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct mdma_stats *stats = &mdma_stats;
+	int i;
+	int n = 0;
+
+	n += sprintf(buf + n, "Histogram of mdma request time (us)\n");
+
+	for (i = 0; i < MAX_BINS - 1; i++) {
+		if (stats->reqtime_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%5d-%5d]\n", stats->reqtime_counter[i], i << US_SHIFT, (i + 1) << US_SHIFT);
+			stats->reqtime_counter[i] = 0;
+		}
+	}
+
+	if (stats->reqtime_counter[i]) {
+		n += sprintf(buf + n, "%8u in [%5d-.....]\n", stats->reqtime_counter[i], i << US_SHIFT);
+		stats->reqtime_counter[i] = 0;
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_mdma_reqtiming);
+
+static ssize_t comcerto_mdma_timing_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct mdma_stats *stats = &mdma_stats;
+	int i;
+	int n = 0;
+
+	stats->init = 0;
+
+	n += sprintf(buf + n, "Histogram of inter mdma request time (us)\n");
+
+	for (i = 0; i < MAX_BINS - 1; i++) {
+		if (stats->time_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%5d-%5d]\n", stats->time_counter[i], i << US_SHIFT, (i + 1) << US_SHIFT);
+			stats->time_counter[i] = 0;
+		}
+	}
+
+	if (stats->time_counter[i]) {
+		n += sprintf(buf + n, "%8u in [%5d-.....]\n", stats->time_counter[i], i << US_SHIFT);
+		stats->time_counter[i] = 0;
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_mdma_timing);
+
+static ssize_t comcerto_mdma_data_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct mdma_stats *stats = &mdma_stats;
+	int i;
+	int n = 0;
+
+	n += sprintf(buf + n, "Histogram of mdma data length (KiB)\n");
+
+	for (i = 0; i < MAX_BINS; i++) {
+		if (stats->data_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%4d-%4d]\n", stats->data_counter[i], (i << BYTE_SHIFT) / 1024, ((i + 1) << BYTE_SHIFT) / 1024);
+			stats->data_counter[i] = 0;
+		}
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_mdma_data);
+#endif
+
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+
+#include <mach/stats.h>
+
+static ssize_t comcerto_splice_prof_enable_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	int n = 0;
+
+	if (splice_stats_enable)
+		n += sprintf(buf + n, "Splice profiling is enabled\n");
+	else
+		n += sprintf(buf + n, "Splice profiling is disabled\n");
+
+	return (n + 1);
+}
+
+static ssize_t comcerto_splice_prof_enable_store(struct kobject *kobj,
+				  struct kobj_attribute *attr, const char *buf, size_t count)
+{
+	unsigned int enable;
+
+	if (kstrtouint(buf, 0, &enable))
+		return -EINVAL;
+
+	if (enable > 0)
+		splice_stats_enable = 1;
+	else
+		splice_stats_enable = 0;
+
+	return count;
+}
+KERNEL_ATTR_RW(comcerto_splice_prof_enable);
+
+static ssize_t comcerto_splicew_reqtiming_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct splicew_stats *stats = &splicew_stats;
+	int i;
+	int n = 0;
+
+	n += sprintf(buf + n, "Histogram of splice write time (us)\n");
+
+	for (i = 0; i < MAX_BINS - 1; i++) {
+		if (stats->reqtime_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%5d-%5d]\n", stats->reqtime_counter[i], i << US_SHIFT, (i + 1) << US_SHIFT);
+			stats->reqtime_counter[i] = 0;
+		}
+	}
+
+	if (stats->reqtime_counter[i]) {
+		n += sprintf(buf + n, "%8u in [%5d-.....]\n", stats->reqtime_counter[i], i << US_SHIFT);
+		stats->reqtime_counter[i] = 0;
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_splicew_reqtiming);
+
+static ssize_t comcerto_splicew_timing_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct splicew_stats *stats = &splicew_stats;
+	int i;
+	int n = 0;
+
+	stats->init = 0;
+
+	n += sprintf(buf + n, "Histogram of inter splice write time (us)\n");
+
+	for (i = 0; i < MAX_BINS - 1; i++) {
+		if (stats->time_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%5d-%5d]\n", stats->time_counter[i], i << US_SHIFT, (i + 1) << US_SHIFT);
+			stats->time_counter[i] = 0;
+		}
+	}
+
+	if (stats->time_counter[i]) {
+		n += sprintf(buf + n, "%8u in [%5d-.....]\n", stats->time_counter[i], i << US_SHIFT);
+		stats->time_counter[i] = 0;
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_splicew_timing);
+
+static ssize_t comcerto_splicew_data_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct splicew_stats *stats = &splicew_stats;
+	int i;
+	int n = 0;
+
+	n += sprintf(buf + n, "Histogram of splice write data length (KiB)\n");
+
+	for (i = 0; i < MAX_BINS; i++) {
+		if (stats->data_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%4d-%4d]\n", stats->data_counter[i], (i << BYTE_SHIFT) / 1024, ((i + 1) << BYTE_SHIFT) / 1024);
+			stats->data_counter[i] = 0;
+		}
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_splicew_data);
+
+static ssize_t comcerto_splicew_rate_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct splicew_stats *stats = &splicew_stats;
+	unsigned long total_mb = 0;
+	int i;
+	int n = 0;
+
+	n += sprintf(buf + n, "Histogram of splice write rate (MiB/s)\n");
+
+	for (i = 0; i < MAX_BINS; i++) {
+		if (stats->rate_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%3d-%3d]\n", stats->rate_counter[i], i << RATE_SHIFT, (i + 1) << RATE_SHIFT);
+
+			total_mb += stats->rate_counter[i] >> 10;
+			stats->rate_counter[i] = 0;
+		}
+	}
+
+	if (total_mb) {
+		if (stats->active_us) {
+			n += sprintf(buf + n, "Idle: %lu us, Active: %lu us\n", stats->idle_us, stats->active_us);
+			n += sprintf(buf + n, "Global rate: %lu MiB/s, Adjusted rate: %lu MiB/s for %lu MiB\n", (total_mb * 1000) / (stats->active_us / 1000), (total_mb * 1000) / ((stats->active_us + stats->idle_us) / 1000), total_mb);
+
+			stats->idle_us = 0;
+			stats->active_us = 0;
+		}
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_splicew_rate);
+
+static ssize_t comcerto_splicer_reqtiming_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct splicer_stats *stats = &splicer_stats;
+	int i;
+	int n = 0;
+
+	n += sprintf(buf + n, "Histogram of splice read time (us)\n");
+
+	for (i = 0; i < MAX_BINS - 1; i++) {
+		if (stats->reqtime_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%5d-%5d]\n", stats->reqtime_counter[i], i << US_SHIFT, (i + 1) << US_SHIFT);
+			stats->reqtime_counter[i] = 0;
+		}
+	}
+
+	if (stats->reqtime_counter[i]) {
+		n += sprintf(buf + n, "%8u in [%5d-....]\n", stats->reqtime_counter[i], i << US_SHIFT);
+		stats->reqtime_counter[i] = 0;
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_splicer_reqtiming);
+
+static ssize_t comcerto_splicer_timing_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct splicer_stats *stats = &splicer_stats;
+	int i;
+	int n = 0;
+
+	stats->init = 0;
+
+	n += sprintf(buf + n, "Histogram of inter splice read time (us)\n");
+
+	for (i = 0; i < MAX_BINS - 1; i++) {
+		if (stats->time_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%5d-%5d]\n", stats->time_counter[i], i << US_SHIFT, (i + 1) << US_SHIFT);
+			stats->time_counter[i] = 0;
+		}
+	}
+
+	if (stats->time_counter[i]) {
+		n += sprintf(buf + n, "%8u in [%5d-.....]\n", stats->time_counter[i], i << US_SHIFT);
+		stats->time_counter[i] = 0;
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_splicer_timing);
+
+static ssize_t comcerto_splicer_data_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct splicer_stats *stats = &splicer_stats;
+	int i;
+	int n = 0;
+
+	n += sprintf(buf + n, "Histogram of splice read data length (KiB)\n");
+
+	for (i = 0; i < MAX_BINS; i++) {
+		if (stats->data_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%4d-%4d]\n", stats->data_counter[i], (i << BYTE_SHIFT) / 1024, ((i + 1) << BYTE_SHIFT) / 1024);
+			stats->data_counter[i] = 0;
+		}
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_splicer_data);
+
+static ssize_t comcerto_splicer_rate_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct splicer_stats *stats = &splicer_stats;
+	unsigned long total_mb = 0;
+	int i;
+	int n = 0;
+
+	n += sprintf(buf + n, "Histogram of splice read rate (MiB/s)\n");
+
+	for (i = 0; i < MAX_BINS; i++) {
+		if (stats->rate_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%3d-%3d]\n", stats->rate_counter[i], i << RATE_SHIFT, (i + 1) << RATE_SHIFT);
+
+			total_mb += stats->rate_counter[i] >> 10;
+			stats->rate_counter[i] = 0;
+		}
+	}
+
+	if (total_mb) {
+		if (stats->active_us) {
+			n += sprintf(buf + n, "Idle: %lu us, Active: %lu us\n", stats->idle_us, stats->active_us);
+			n += sprintf(buf + n, "Global rate: %lu MiB/s, Adjusted rate: %lu MiB/s for %lu MiB\n", (total_mb * 1000) / (stats->active_us / 1000), (total_mb * 1000) / ((stats->active_us + stats->idle_us) / 1000), total_mb);
+
+			stats->idle_us = 0;
+			stats->active_us = 0;
+		}
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_splicer_rate);
+
+static ssize_t comcerto_splicer_tcp_rsock_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	struct splicer_stats *stats = &splicer_stats;
+	int i;
+	int n = 0;
+
+	n += sprintf(buf + n, "Histogram of TCP receive queue size when splice read is performed (KiB)\n");
+
+	for (i = 0; i < MAX_BINS - 1; i++) {
+		if (stats->tcp_rsock_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%4d-%4d]\n", stats->tcp_rsock_counter[i], (i << BYTE_SHIFT) / 1024, ((i + 1) << BYTE_SHIFT) / 1024);
+			stats->tcp_rsock_counter[i] = 0;
+		}
+	}
+
+	if (stats->tcp_rsock_counter[i]) {
+		n += sprintf(buf + n, "%8u in [%4d-...]\n", stats->tcp_rsock_counter[i], (i << BYTE_SHIFT) / 1024);
+		stats->tcp_rsock_counter[i] = 0;
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_splicer_tcp_rsock);
+#endif
+
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+
+#include <mach/stats.h>
+
+static ssize_t comcerto_ahci_prof_enable_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	int n = 0;
+
+	if (ahci_stats_enable)
+		n += sprintf(buf + n, "AHCI profiling is enabled\n");
+	else
+		n += sprintf(buf + n, "AHCI profiling is disabled\n");
+
+	return (n + 1);
+}
+
+static ssize_t comcerto_ahci_prof_enable_store(struct kobject *kobj,
+				  struct kobj_attribute *attr, const char *buf, size_t count)
+{
+	unsigned int enable;
+
+	if (kstrtouint(buf, 0, &enable))
+		return -EINVAL;
+
+	if (enable > 0)
+		ahci_stats_enable = 1;
+	else
+		ahci_stats_enable = 0;
+
+	return count;
+}
+KERNEL_ATTR_RW(comcerto_ahci_prof_enable);
+
+static ssize_t comcerto_ahci_timing_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	int i, n = 0, p;
+
+	n += sprintf(buf + n, "Histogram of ahci inter request time (us)\n");
+
+	for (p = 0; p < MAX_AHCI_PORTS; p++) {
+		struct ahci_port_stats *stats = &ahci_port_stats[p];
+
+		n += sprintf(buf + n, "AHCI Port %d\n", p);
+
+		stats->init = 0;
+
+		for (i = 0; i < MAX_BINS - 1; i++) {
+			if (stats->time_counter[i]) {
+				n += sprintf(buf + n, "%8u in [%5d-%5d]\n", stats->time_counter[i], i << US_SHIFT, (i + 1) << US_SHIFT);
+				stats->time_counter[i] = 0;
+			}
+		}
+
+		if (stats->time_counter[i]) {
+			n += sprintf(buf + n, "%8u in [%5d-...]\n", stats->time_counter[i], i << US_SHIFT);
+			stats->time_counter[i] = 0;
+		}
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_ahci_timing);
+
+static ssize_t comcerto_ahci_data_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	int i, n = 0, p;
+
+	n += sprintf(buf + n, "Histogram of ahci requests data length (KiB)\n");
+
+	for (p = 0; p < MAX_AHCI_PORTS; p++) {
+		struct ahci_port_stats *stats = &ahci_port_stats[p];
+
+		n += sprintf(buf + n, "AHCI Port %d\n", p);
+
+		for (i = 0; i < MAX_BINS; i++) {
+			if (stats->data_counter[i]) {
+				n += sprintf(buf + n, "%8u in [%3d-%3d]\n", stats->data_counter[i], (i << BYTE_SHIFT) / 1024, ((i + 1) << BYTE_SHIFT) / 1024);
+				stats->data_counter[i] = 0;
+			}
+		}
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_ahci_data);
+
+static ssize_t comcerto_ahci_qc_rate_show(struct kobject *kobj,
+				  struct kobj_attribute *attr, char *buf)
+{
+	int i, n = 0, p;
+	unsigned long mean_rate, total_mb;
+
+	for (p = 0; p < MAX_AHCI_PORTS; p++) {
+		struct ahci_port_stats *stats = &ahci_port_stats[p];
+
+		n += sprintf(buf + n, "AHCI Port %d\n", p);
+		total_mb = 0;
+		mean_rate = 0;
+
+		n += sprintf(buf + n, "Histogram of bytes transfered (MiB) at rate (MiB/s):\n");
+
+		for (i = 0; i < MAX_BINS; i++) {
+			if (stats->rate_counter[i]) {
+				n += sprintf(buf + n, "%8u in [%3d-%3d]\n", stats->rate_counter[i] >> 10, i << IO_RATE_SHIFT, (i + 1) << IO_RATE_SHIFT);
+				mean_rate += (stats->rate_counter[i] >> 10) * (((2 * i + 1) << IO_RATE_SHIFT) / 2);
+				total_mb += stats->rate_counter[i] >> 10;
+				stats->rate_counter[i] = 0;
+			}
+		}
+
+		n += sprintf(buf + n, "\nHistogram of requests pending (when new request is issued):\n");
+
+		for (i = 0; i < MAX_AHCI_SLOTS; i++) {
+			if (stats->pending_counter[i]) {
+				n += sprintf(buf + n, "%8u in [%2d]\n", stats->pending_counter[i], i);
+				stats->pending_counter[i] = 0;
+			}
+		}
+
+		if (total_mb) {
+			n += sprintf(buf + n, "Mean: %lu MiB/s for %lu MiB\n", mean_rate / total_mb, total_mb);
+			n += sprintf(buf + n, "Max issues in a row : %u \n\n", stats->nb_pending_max);
+
+			if (stats->active_us) {
+				n += sprintf(buf + n, "Idle: %lu us, Active: %lu us\n", stats->idle_us, stats->active_us);
+				n += sprintf(buf + n, "Adjusted mean: %lu MiB/s\n", ((mean_rate / total_mb) * (stats->active_us / ((stats->idle_us + stats->active_us) >> 10))) >> 10);
+
+				stats->idle_us = 0;
+				stats->active_us = 0;
+			}
+		}
+
+		if (stats->write_total) {
+			n += sprintf(buf + n, "Writes: %8lu, Bytes: %8lu MiB\n", stats->write_total, stats->write_kbytes_total >> 10);
+
+			stats->write_total = 0;
+			stats->write_kbytes_total = 0;
+		}
+
+		if (stats->read_total) {
+			n += sprintf(buf + n, "Reads:  %8lu, Bytes: %8lu MiB\n", stats->read_total, stats->read_kbytes_total >> 10);
+
+			stats->read_total = 0;
+			stats->read_kbytes_total = 0;
+		}
+
+		if (stats->other_total) {
+			n += sprintf(buf + n, "Other:  %8lu, Bytes: %8lu MiB\n", stats->other_total, stats->other_kbytes_total >> 10);
+
+			stats->other_total = 0;
+			stats->other_kbytes_total = 0;
+		}
+
+		n += sprintf(buf + n, "\n");
+
+		stats->nb_pending_max = 0;
+	}
+
+	return (n + 1);
+}
+KERNEL_ATTR_RO(comcerto_ahci_qc_rate);
+#endif
+
 /*
  * Make /sys/kernel/notes give the raw contents of our kernel .notes section.
  */
@@ -181,6 +724,30 @@ static struct attribute * kernel_attrs[] = {
 	&kexec_crash_loaded_attr.attr,
 	&kexec_crash_size_attr.attr,
 	&vmcoreinfo_attr.attr,
+#endif
+#if defined(CONFIG_COMCERTO_MDMA_PROF)
+	&comcerto_mdma_prof_enable_attr.attr,
+	&comcerto_mdma_timing_attr.attr,
+	&comcerto_mdma_reqtiming_attr.attr,
+	&comcerto_mdma_data_attr.attr,
+#endif
+#if defined(CONFIG_COMCERTO_SPLICE_PROF)
+	&comcerto_splice_prof_enable_attr.attr,
+	&comcerto_splicew_timing_attr.attr,
+	&comcerto_splicew_reqtiming_attr.attr,
+	&comcerto_splicew_data_attr.attr,
+	&comcerto_splicew_rate_attr.attr,
+	&comcerto_splicer_timing_attr.attr,
+	&comcerto_splicer_reqtiming_attr.attr,
+	&comcerto_splicer_data_attr.attr,
+	&comcerto_splicer_rate_attr.attr,
+	&comcerto_splicer_tcp_rsock_attr.attr,
+#endif
+#if defined(CONFIG_COMCERTO_AHCI_PROF)
+	&comcerto_ahci_prof_enable_attr.attr,
+	&comcerto_ahci_timing_attr.attr,
+	&comcerto_ahci_data_attr.attr,
+	&comcerto_ahci_qc_rate_attr.attr,
 #endif
 	NULL
 };

@@ -1,0 +1,301 @@
+if ARCH_COMCERTO
+
+menu "Comcerto Implementation Options"
+
+config ARCH_SUPPORTS_BIG_ENDIAN
+	bool "Architecture supports Big Endian"
+        default n
+
+choice
+	prompt "Comcerto System Type"
+	default CONFIG_ARCH_M86XXX
+
+config ARCH_M86XXX
+	bool "M86xxx"
+	select CPU_V7
+	select ARM_GIC
+	select ARM_ERRATA_743622
+	select ARM_ERRATA_751472
+	select ARM_ERRATA_754322
+	select ARM_ERRATA_764369 if SMP
+	select MTD_COMCERTO_NOR
+	select COMCERTO_UART1_SUPPORT
+	select COMCERTO_PFE_UART_SUPPORT
+	select COMCERTO_USB2_SUPPORT
+	select COMCERTO_USB3_SUPPORT
+ 	select COMCERTO_USB3_INTERNAL_CLK
+	select COMCERTO_IPSEC_SUPPORT
+	select COMCERTO_I2C_SUPPORT
+	select GENERIC_TIME
+	select GENERIC_CLOCKEVENTS
+	select HAVE_SCHED_CLOCK
+	select COMCERTO_DW_DMA_SUPPORT
+	select CLKDEV_LOOKUP
+	select ARCH_HAS_CPUFREQ
+	select ARCH_HAS_OPP
+	select MIGHT_HAVE_PCI if !RTSM_C2K
+	select PCI_MSI if PCI
+	help
+	  Say Y here if you intend to run this kernel with a Comcerto2000 device.
+
+endchoice
+
+
+
+choice
+	prompt "Comcerto Board type"
+	default RTSM_C2K
+
+config C2K_EVM
+	bool "EVM"
+	depends on ARCH_M86XXX
+	help
+	  Say Y here if you intend to run this kernel with a C2K EVM.
+
+config C2K_MFCN_EVM
+	bool "MFCN EVM"
+	depends on ARCH_M86XXX
+	help
+	  Say Y here if you intend to run this kernel with a C2K MFCN EVM.
+
+config C2K_ASIC
+	bool "ASIC"
+	depends on ARCH_M86XXX
+	select COMCERTO_UART0_SUPPORT
+	help
+	  Say Y here if you intend to run this kernel with a C2K ASIC.
+
+config RTSM_C2K
+	bool "RTSM"
+	depends on ARCH_M86XXX
+	help
+	  Say Y here if you intend to run this kernel with a C2K RTSM.
+	  
+endchoice
+
+
+config MTD_COMCERTO_NOR
+	bool
+	default y
+
+config COMCERTO_TDM_CLOCK
+        bool "Comcerto device TDM clock and frame sync control through sysfs"
+	default y
+	help
+	  Say Y if you intend to use the Comcerto TDM and be able to change
+	  different parameters through sysfs.
+
+config COMCERTO_CSYS_TPI_CLOCK
+        bool "Comcerto device TPI and CSYS clock control "
+	default n
+	help
+	  Say Y if you intend to use the Comcerto TPI (Cortex A9 JTAG interface) and CSYS clock (Cortex A9 CoreSight module).
+
+config COMCERTO_PCIE_OCC_CLOCK
+        bool "Comcerto device PCIE OCC clock control "
+	default n
+	help
+	  Say Y if you intend to use the Comcerto PCIE OCC clock.
+
+config COMCERTO_SATA_OCC_CLOCK
+        bool "Comcerto device SATA OCC clock control "
+	default n
+	help
+	  Say Y if you intend to use the Comcerto SATA OCC clock.
+
+config COMCERTO_SGMII_OCC_CLOCK
+        bool "Comcerto device SGMII OCC clock control "
+	default n
+	help
+	  Say Y if you intend to use the Comcerto SGMII OCC clock.
+
+config COMCERTO_MEMBUF
+	bool "Comcerto memory buffer driver"
+	default n
+	help
+	  Say Y if you intend to use the memory buffer driver. This driver helps
+	  Linux user space applications setup a physical scatter buffer that can be used
+	  directly by the PFE. Currently the PFE hold tone generation feature requires
+	  this driver to be enabled.
+
+config COMCERTO_NUM_PCIES
+	int "Number of PCIe controllers to be enabled (0-2)"
+	range 0 2
+	depends on ARCH_M86XXX 
+	default "2"
+
+config COMCERTO_FP
+	bool "Comcerto Fast Path Support"
+	depends on ARCH_M86XXX
+	default y
+
+config COMCERTO_NAS
+	bool "Comcerto NAS Support"
+	depends on ARCH_M86XXX
+	default n
+	select COMCERTO_SATA
+	select COMCERTO_IMPROVED_SPLICE
+	select COMCERTO_SPLICE_USE_MDMA
+	select COMCERTO_ZONE_DMA_NCNB
+#	select COMCERTO_TCP_DELACK_MIN
+	select COMCERTO_EXT4_WRITEBACK_BUMP
+	help
+	  Say Y here to enable several features and optimizations that improve system performance
+	  when using a NAS configuration.
+
+config COMCERTO_UART0_SUPPORT
+	bool
+	default n
+
+config COMCERTO_UART1_SUPPORT
+	bool
+	default y
+
+config COMCERTO_USB2_SUPPORT
+	bool
+	default n
+
+config COMCERTO_USB3_SUPPORT
+	bool
+	default n
+
+config COMCERTO_IPSEC_SUPPORT
+	bool
+	default n
+
+config COMCERTO_EPAVIS
+	bool "DPI EPAVIS content inspection driver"
+	default n
+
+config COMCERTO_ELP_SUPPORT
+	bool "Elliptic EPN1802 SPAcc/PKA crypto driver"
+	default y
+
+config COMCERTO_I2C_SUPPORT
+        bool
+        default n
+
+config COMCERTO_DW_DMA_SUPPORT
+        bool
+        default n
+
+config COMCERTO_DDR_ECC_SUPPORT
+        bool "Fix for the Comcerto DDR ECC Support problem"
+        default n
+        help
+          There is a limitation with Denali DDRC Controller when ECC is enabled. It expects that the
+          burst writes of greater than or equal to 16 bytes must start and end at a 16-byte boundary.
+          Saying Y for this option will make the dma memory area to be non-writeable, apart from being
+          non-cacheable so that single write should happen instead of burst.
+
+config COMCERTO_MSP
+	bool "Mindspeed Comcerto VoIP"
+	depends on ARCH_M86XXX
+	select FIQ
+	default y
+
+config COMCERTO_SATA
+	bool "Comcerto SATA"
+	select ATA
+	select ATA_VERBOSE_ERROR
+	select SATA_AHCI_PLATFORM
+	select BLK_DEV_SD
+	select LBDAF
+
+config COMCERTO_IMPROVED_SPLICE
+	bool "Comcerto improved splice call"
+	default n
+	help
+	  Say Y if you intend to use the Comcerto improved splice call. When writing data to a file on an
+	  ext4 partition, re-organize the splice code to gather all the memcpy calls in one place, instead
+	  of allocating pages and releasing pipe buffers one by one. This improves performance and makes it
+	  possible to use a DMA engine with scatter-gather in-place of mempcy.
+
+config COMCERTO_SPLICE_USE_MDMA
+	bool "Comcerto splice using MDMA"
+	default n
+	depends on COMCERTO_IMPROVED_SPLICE
+	select COMCERTO_DMA_BASIC
+	help
+	  Say Y if you intend to use the Comcerto MDMA engine to replace memcpy calls inside the improved 
+	  splice call.
+
+config COMCERTO_ZONE_DMA_NCNB
+	bool "Comcerto Zone DMA"
+	select ZONE_DMA
+	default n
+
+config COMCERTO_CUSTOM_SKB_LAYOUT
+	bool "Mindspeed customized skb layout, to reduce NCNB access overhead, when NCNB buffer is used in skb"
+	depends on COMCERTO_ZONE_DMA_NCNB
+	default n
+
+config DSPG_DECT_CSS
+	bool "DSPG DECT CSS"
+	default n
+
+config COMCERTO_USB3_INTERNAL_CLK
+	bool "Comcerto internal clock for USB3"
+	default n
+
+config COMCERTO_AHCI_PROF
+	bool "Comcerto AHCI profiling"
+	bool
+	default n
+
+config COMCERTO_SPLICE_PROF
+	bool "Comcerto splice profiling"
+	depends on COMCERTO_IMPROVED_SPLICE
+	default n
+
+config COMCERTO_MDMA_PROF
+	bool "Comcerto MDMA profiling"
+	depends on COMCERTO_DMA_BASIC
+	default n
+
+config COMCERTO_64K_PAGES
+	bool "Comcerto 64kB pages"
+	default n
+	help
+	  Say Y to enable 64kB pages instead of the default 4kB. Memory usage will be increased, but
+          per-page operations will be reduced, and data transfers will become more efficient.
+
+config COMCERTO_CC_OPTIMIZE_O3
+	bool "Compile the kernel with -O3"
+	default n
+	depends on !CC_OPTIMIZE_FOR_SIZE
+	help
+	  Compile the kernel with -O3 instead of -O2 option. Resulting kernel can be a bit faster, but
+	  it will also be bigger.
+
+config COMCERTO_HW_KERNEL_PAGETABLE
+	bool "Use the 2nd HW page table for kernel memory space"
+	select VMSPLIT_2G
+	default n
+	help
+	  By default, Linux uses only one page table at a time, and switches page tables when switching
+	  between processes. Say Y to enable the 2nd hardware page table, which will be used to map kernel
+	  addresses.
+	  Note that because of the way the ARM MMU determines which page table to use, this option can
+	  only be enabled with a 2G/2G userspace/kernel memory split.
+
+config COMCERTO_UNCACHED_DMA
+	bool "Make pages uncacheable when doing DMA operations"
+	depends on COMCERTO_HW_KERNEL_PAGETABLE
+	default n
+	help
+	  When transferring ownership of a page to a device through the DMA API, make the page uncacheable
+	  for the duration of the transfer. This makes the 2nd cache invalidate (that was needed because
+	  of the possibility of speculative accesses by the A9 cores) unnecessary, which can increase
+	  performance during heavy IO workloads. The page tables will be more complex though, resulting in
+	  more TLB misses when a DMA transfer is going on.
+
+config COMCERTO_TCP_DELACK_MIN
+	bool
+	default n
+
+config COMCERTO_EXT4_WRITEBACK_BUMP
+	bool
+	default n
+endmenu
+endif

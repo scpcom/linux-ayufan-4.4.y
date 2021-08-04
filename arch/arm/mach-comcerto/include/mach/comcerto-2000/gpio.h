@@ -1,0 +1,315 @@
+/*
+ *  arch/arm/mach-comcerto/include/mach/comcerto-2000/gpio.h
+ *
+ *  Copyright (C) 2012 Mindspeed Technologies, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+#ifndef __COMCERTO_GPIO_H__
+#define __COMCERTO_GPIO_H__
+
+/***** GPIO  *****/
+#define COMCERTO_GPIO_OUTPUT_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x00)
+#define COMCERTO_GPIO_OE_REG			APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x04)
+#define COMCERTO_GPIO_INT_CFG_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x08)
+#define COMCERTO_GPIO_INPUT_REG			APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x10)
+#define COMCERTO_GPIO_APB_WS			APB_VADDR(OMCERTO_APB_GPIO_BASE + 0x14)
+#define COMCERTO_GPIO_SYSTEM_CONFIG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x1C)
+#define COMCERTO_GPIO_TDM_MUX			APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x28)
+#define COMCERTO_GPIO_MISC_CTRL			APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x34)
+#define COMCERTO_GPIO_DDR_AXI_CTRL		APB_VADDR(OMCERTO_APB_GPIO_BASE + 0x38)
+#define COMCERTO_GPIO_DDRC_STATUS		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x3C)
+#define COMCERTO_GPIO_BOOTSTRAP_STATUS		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x40)
+#define COMCERTO_GPIO_BOOTSTRAP_OVERRIDE	APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x44)
+
+
+#define COMCERTO_GPIO_DEVICE_ID_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x50)
+#define COMCERTO_GPIO_PIN_SELECT_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x58)
+#define COMCERTO_GPIO_PIN_SELECT_REG1		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x5C)
+#define COMCERTO_GPIO_MISC_PIN_SELECT		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x60)
+
+#define COMCERTO_GPIO_FABRIC_CTRL_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x6C)
+#define COMCERTO_GPIO_A9_AUTH_CTRL_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x70)
+#define COMCERTO_GPIO_A9_ACP_CONF_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x74)
+#define COMCERTO_GPIO_PCIE_CLK_OUT_CTRL_REG	APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x80)
+#define COMCERTO_GPIO_INTR_CLR_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x98)
+#define COMCERTO_GPIO_INTR_SET_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x9C)
+#define COMCERTO_GPIO_INTR_MASK_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0xA0)
+#define COMCERTO_GPIO_CSS_DECT_SYS_CFG0		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0xB0)
+#define COMCERTO_GPIO_CSS_DECT_SYS_CFG1		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0xB4)
+#define COMCERTO_GPIO_CSS_DECT_CTRL		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0xB8)
+#define COMCERTO_GPIO_63_32_PIN_OUTPUT		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0xD0)
+#define COMCERTO_GPIO_63_32_PIN_OUTPUT_EN	APB_VADDR(COMCERTO_APB_GPIO_BASE + 0xD4)
+#define COMCERTO_GPIO_63_32_PIN_INPUT		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0xD8)
+#define COMCERTO_GPIO_63_32_PIN_SELECT		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0xDC)
+
+#define	COMCERTO_GPIO_PAD_CONFIG0		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x100)
+#define	COMCERTO_GPIO_PAD_CONFIG1		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x104)
+#define	COMCERTO_GPIO_PAD_CONFIG2		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x108)
+#define	COMCERTO_GPIO_PAD_CONFIG3		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x10C)
+#define	COMCERTO_GPIO_PAD_CONFIG4		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x110)
+#define	COMCERTO_GPIO_PAD_CONFIG5		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x114)
+#define	COMCERTO_GPIO_PAD_CONFIG6		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x118)
+#define	COMCERTO_GPIO_PAD_CONFIG7		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x11C)
+#define	COMCERTO_GPIO_PAD_CONFIG8		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x120)
+#define	COMCERTO_GPIO_PAD_CONFIG9		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x124)
+#define	COMCERTO_GPIO_PAD_CONFIG10		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x128)
+#define	COMCERTO_GPIO_PAD_CONFIG11		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x12C)
+#define	COMCERTO_GPIO_PAD_CONFIG12		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x130)
+#define	COMCERTO_GPIO_PAD_CONFIG13		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x134)
+#define	COMCERTO_GPIO_PAD_CONFIG14		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x138)
+
+#define COMCERTO_GPIO_PMU_INTR_CLR		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x160)
+#define COMCERTO_GPIO_PMU_INTR_SET		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x164)
+#define COMCERTO_GPIO_PMU_INTR_MASK0		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x168)
+#define COMCERTO_GPIO_PMU_INTR_MASK1		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x16C)
+
+#define COMCERTO_GPIO_MEM_EMA_CONF0		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x1A4)
+#define COMCERTO_GPIO_MEM_EMA_CONF1		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x1A8)
+#define COMCERTO_GPIO_MEM_EMA_CONF2		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x1A8)
+#define COMCERTO_GPIO_MEM_EMA_CONF3		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x1AC)
+#define COMCERTO_GPIO_MEM_EMA_CONF4		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x1B0)
+#define COMCERTO_GPIO_MEM_EMA_CONF5		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x1B4)
+#define COMCERTO_GPIO_MEM_EMA_CONF6		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x1B8)
+
+#define GPIO_0		0x00000003
+#define GPIO_1		0x0000000C
+#define GPIO_2		0x00000030
+#define GPIO_3		0x000000C0
+#define GPIO_4		0x00000300
+#define GPIO_5		0x00000C00
+#define GPIO_6		0x00003000
+#define GPIO_7		0x0000C000
+#define GPIO_8		0x00030000
+#define GPIO_9		0x000C0000
+#define GPIO_10		0x00300000
+#define GPIO_11		0x00C00000
+#define GPIO_12		0x03000000
+#define GPIO_13		0x0C000000
+#define GPIO_14		0x30000000
+#define GPIO_15		0xC0000000
+#define GPIO_16		0x00000003
+#define GPIO_17		0x0000000C
+#define GPIO_18		0x00000030
+#define GPIO_19		0x000000C0
+#define GPIO_20		0x00000300
+#define GPIO_21		0x00000C00
+#define GPIO_22		0x00003000
+#define GPIO_23		0x0000C000
+#define GPIO_24		0x00030000
+#define GPIO_25		0x000C0000
+#define GPIO_26		0x00300000
+#define GPIO_27		0x00C00000
+#define GPIO_28		0x03000000
+#define GPIO_29		0x0C000000
+#define GPIO_30		0x30000000
+#define GPIO_31		0xC0000000
+
+#define GPIO_0_S	0x00000001
+#define GPIO_1_S	0x00000002
+#define GPIO_2_S	0x00000004
+
+/* GPIO Pin Number and Description */
+#define GPIO_PIN_NUM_0		0
+#define GPIO_PIN_NUM_1		1
+#define GPIO_PIN_NUM_2		2
+#define GPIO_PIN_NUM_3		3
+#define GPIO_PIN_NUM_4		4
+#define GPIO_PIN_NUM_5		5
+
+#define GPIO_PIN_DESC_0		"gpio-0"
+#define GPIO_PIN_DESC_1		"gpio-1"
+#define GPIO_PIN_DESC_2		"gpio-2"
+#define GPIO_PIN_DESC_3		"gpio-3"
+#define GPIO_PIN_DESC_4		"gpio-4"
+#define GPIO_PIN_DESC_5		"gpio-5"
+
+#define	GPIO_SET_0	0
+#define	GPIO_SET_1	1
+
+
+/* GPIO Pin Mask */
+#define GPIO_PIN_0		(0x1 << 0)
+#define GPIO_PIN_1		(0x1 << 1)
+#define GPIO_PIN_2		(0x1 << 2)
+#define GPIO_PIN_3		(0x1 << 3)
+#define GPIO_PIN_4		(0x1 << 4)
+#define GPIO_PIN_5		(0x1 << 5)
+#define GPIO_PIN_6		(0x1 << 6)
+#define GPIO_PIN_7		(0x1 << 7)
+#define GPIO_PIN_8		(0x1 << 8)
+#define GPIO_PIN_9		(0x1 << 9)
+#define GPIO_PIN_10		(0x1 << 10)
+#define GPIO_PIN_11		(0x1 << 11)
+#define GPIO_PIN_12		(0x1 << 12)
+#define GPIO_PIN_13		(0x1 << 13)
+#define GPIO_PIN_14		(0x1 << 14)
+#define GPIO_PIN_15		(0x1 << 15)
+#define GPIO_PIN_16		(0x1 << 16)
+#define GPIO_PIN_17		(0x1 << 17)
+#define GPIO_PIN_18		(0x1 << 18)
+#define GPIO_PIN_19		(0x1 << 19)
+#define GPIO_PIN_20		(0x1 << 20)
+#define GPIO_PIN_21		(0x1 << 21)
+#define GPIO_PIN_22		(0x1 << 22)
+#define GPIO_PIN_23		(0x1 << 23)
+#define GPIO_PIN_24		(0x1 << 24)
+#define GPIO_PIN_25		(0x1 << 25)
+#define GPIO_PIN_26		(0x1 << 26)
+#define GPIO_PIN_27		(0x1 << 27)
+#define GPIO_PIN_28		(0x1 << 28)
+#define GPIO_PIN_29		(0x1 << 29)
+#define GPIO_PIN_30		(0x1 << 30)
+#define GPIO_PIN_31		(0x1 << 31)
+
+#define GPIO_PIN_32		(0x1 << (32 - 32))
+#define GPIO_PIN_33		(0x1 << (33 - 32))
+#define GPIO_PIN_34		(0x1 << (34 - 32))
+#define GPIO_PIN_35		(0x1 << (35 - 32))
+#define GPIO_PIN_36		(0x1 << (36 - 32))
+#define GPIO_PIN_37		(0x1 << (37 - 32))
+#define GPIO_PIN_38		(0x1 << (38 - 32))
+#define GPIO_PIN_39		(0x1 << (39 - 32))
+#define GPIO_PIN_40		(0x1 << (40 - 32))
+#define GPIO_PIN_41		(0x1 << (41 - 32))
+#define GPIO_PIN_42		(0x1 << (42 - 32))
+#define GPIO_PIN_43		(0x1 << (43 - 32))
+#define GPIO_PIN_44		(0x1 << (44 - 32))
+#define GPIO_PIN_45		(0x1 << (45 - 32))
+#define GPIO_PIN_46		(0x1 << (46 - 32))
+#define GPIO_PIN_47		(0x1 << (47 - 32))
+#define GPIO_PIN_48		(0x1 << (48 - 32))
+#define GPIO_PIN_49		(0x1 << (49 - 32))
+#define GPIO_PIN_50		(0x1 << (50 - 32))
+#define GPIO_PIN_51		(0x1 << (51 - 32))
+#define GPIO_PIN_52		(0x1 << (52 - 32))
+#define GPIO_PIN_53		(0x1 << (53 - 32))
+#define GPIO_PIN_54		(0x1 << (54 - 32))
+#define GPIO_PIN_55		(0x1 << (55 - 32))
+#define GPIO_PIN_56		(0x1 << (56 - 32))
+#define GPIO_PIN_57		(0x1 << (57 - 32))
+#define GPIO_PIN_58		(0x1 << (58 - 32))
+#define GPIO_PIN_59		(0x1 << (59 - 32))
+#define GPIO_PIN_60		(0x1 << (60 - 32))
+#define GPIO_PIN_61		(0x1 << (61 - 32))
+#define GPIO_PIN_62		(0x1 << (62 - 32))
+#define GPIO_PIN_63		(0x1 << (63 - 32))
+
+/* GPIO Pin Select Pins */
+
+#define GPIO4_PWM0		(0x1 << 8)
+#define GPIO5_PWM1		(0x1 << 10)
+#define GPIO6_PWM2		(0x1 << 12)
+#define GPIO6_SATA0_ACT_LED 	(0x2 << 12)
+#define GPIO7_PWM3		(0x1 << 14)
+#define GPIO7_SATA0_CP_POD  	(0x2 << 14)
+#define GPIO8_UART0_RX		(0x2 << 16)
+#define GPIO9_UART0_TX		(0x2 << 18)
+#define GPIO10_UART0_RTS_N	(0x2 << 20)
+#define GPIO10_DECT0		(0x3 << 20)
+#define GPIO11_UART0_CTS_N	(0x2 << 22)
+#define GPIO11_DECT2		(0x3 << 22)
+#define GPIO12_PWM4		(0x1 << 24)
+#define GPIO12_PFE_UART_RX	(0x2 << 24)
+#define GPIO12_DECT3		(0x3 << 24)
+#define GPIO13_PWM5		(0x1 << 26)
+#define GPIO13_PFE_UART_TX	(0x2 << 26)
+#define GPIO13_DECT4		(0x3 << 26)
+#define GPIO14_SATA1_ACT_LED	(0x1 << 28)
+#define GPIO14_TIM_EVENT0	(0x2 << 28)
+#define GPIO14_DECT5		(0x3 << 28)
+#define GPIO15_SATA1_CP_POD 	(0x1 << 30)
+#define GPIO15_TIM_EVENT1	(0x2 << 30)
+#define GPIO15_RTCOSC		(0x3 << 30)
+#define GPIO16_I2C_SCL		(0x0 << 0)
+#define GPIO17_I2C_SDA		(0x0 << 2)
+#define GPIO18_SPI_SS0_N	(0x0 << 4)
+#define GPIO19_SPI_SS1_N	(0x0 << 6)
+#define GPIO20_SPI2_SS1_N	(0x0 << 8)
+#define GPIO21_SPI_SS2_N	(0x0 << 10)
+#define GPIO22_SPI_SS3_N	(0x0 << 12)
+#define GPIO23_EXP_CS2		(0x0 << 14)
+#define GPIO24_EXP_CS3		(0x0 << 16)
+#define GPIO25_EXP_ALE		(0x0 << 18)
+#define GPIO26_EXP_RDY		(0x0 << 20)
+#define GPIO27_TM_EXT_RESET	(0x0 << 22)
+#define GPIO28_EXP_NAND_CS 	(0x0 << 24)
+#define GPIO29_EXP_NAND_RDY	(0x0 << 26)
+#define GPIO30_SPI_TXD		(0x0 << 28)
+#define GPIO31_SPI_SCLK		(0x0 << 30)
+#define GPIO32_SPI_RXD		(0x0 << 0)
+#define GPIO33_SPI_2_RXD	(0x0 << 1)
+#define GPIO34_SPI_2_SS0_N	(0x0 << 2)
+
+#define BOOT_SERDES1_CNF_SATA0	(1 << 11)
+#define BOOT_SERDES2_CNF_SATA1  (1 << 12)
+
+				/* 0000 0000 0000 0000 0000 0011 0000 0000 */
+#define SPI_2_MUX_GPIO_1	(GPIO_4)
+#define SPI_2_MUX_BUS_1		(GPIO20_SPI2_SS1_N)
+#define SPI_2_MUX_GPIO_1_PIN	(GPIO_PIN_20)
+
+				/* 0000 0000 0000 0000 0000 0000 0000 0110 */
+#define SPI_2_MUX_GPIO_2	(GPIO_1_S | GPIO_2_S)
+#define SPI_2_MUX_BUS_2		(GPIO34_SPI_2_SS0_N | GPIO33_SPI_2_RXD)
+#define SPI_2_MUX_GPIO_2_PIN	(GPIO_PIN_34 | GPIO_PIN_33)
+
+				/* 1111 0000 0000 0000 0011 1100 1111 0000 */
+#define SPI_MUX_GPIO_1		(GPIO_30 | GPIO_31 | GPIO_18 | GPIO_19 | GPIO_21 | GPIO_22)
+#define SPI_MUX_BUS_1		(GPIO31_SPI_SCLK | GPIO30_SPI_TXD | GPIO22_SPI_SS3_N | GPIO21_SPI_SS2_N \
+					| GPIO19_SPI_SS1_N | GPIO18_SPI_SS0_N)
+#define SPI_MUX_GPIO_1_PIN	(GPIO_PIN_30 | GPIO_PIN_31 | GPIO_PIN_18 | GPIO_PIN_19 | GPIO_PIN_21 | GPIO_PIN_22)
+
+				/* 0000 0000 0000 0000 0000 0000 0000 0001 */
+#define SPI_MUX_GPIO_2		(GPIO_0_S)
+#define SPI_MUX_BUS_2		(GPIO32_SPI_RXD)
+#define SPI_MUX_GPIO_2_PIN	(GPIO_PIN_32)
+
+#define UART0_GPIO	(GPIO_8 | GPIO_9 | GPIO_10 | GPIO_11)
+#define UART0_BUS	(GPIO8_UART0_RX | GPIO9_UART0_TX | GPIO10_UART0_RTS_N | GPIO11_UART0_CTS_N)
+#define UART0_GPIO_PIN	(GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11)
+
+#define PFE_UART_GPIO		(GPIO_12 | GPIO_13)
+#define PFE_UART_BUS		(GPIO12_PFE_UART_RX | GPIO13_PFE_UART_TX)
+#define PFE_UART_GPIO_PIN	(GPIO_PIN_12 | GPIO_PIN_13)
+
+#define I2C_GPIO		(GPIO_16 | GPIO_17)
+#define I2C_BUS			(GPIO16_I2C_SCL | GPIO17_I2C_SDA)
+#define I2C_GPIO_PIN		(GPIO_PIN_16 | GPIO_PIN_17)
+
+#define NAND_GPIO		(GPIO_28 | GPIO_29 )
+#define NAND_BUS		(GPIO28_EXP_NAND_CS | GPIO29_EXP_NAND_RDY)
+#define NAND_GPIO_PIN		(GPIO_PIN_28 | GPIO_PIN_29)
+
+#define NOR_GPIO		(GPIO_25 | GPIO_26)
+#define NOR_BUS			(GPIO25_EXP_ALE | GPIO26_EXP_RDY)
+#define NOR_GPIO_PIN		(GPIO_PIN_25 | GPIO_PIN_26)
+
+#define C2K_GPIO_NR_GPIOS	64
+
+#define ARCH_NR_GPIOS		C2K_GPIO_NR_GPIOS
+
+#ifndef __ASSEMBLY__
+/* This is a temporary bit mask for avoiding usage of reserved gpio pins. */
+struct c2k_gpio_pin_stat_info {
+	uint32_t c2k_gpio_pins_0_31;
+	uint32_t c2k_gpio_pins_32_63;
+};
+
+extern struct c2k_gpio_pin_stat_info c2k_gpio_pin_stat;
+#endif
+
+#endif
