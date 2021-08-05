@@ -27,6 +27,7 @@
  */
 
 #include <linux/cgroup.h>
+#include <linux/simple_xattr.h>
 #include <linux/cred.h>
 #include <linux/ctype.h>
 #include <linux/errno.h>
@@ -230,7 +231,8 @@ inline int cgroup_is_removed(const struct cgroup *cgrp)
 
 /* bits in struct cgroupfs_root flags field */
 enum {
-	ROOT_NOPREFIX, /* mounted subsystems have no named prefix */
+	ROOT_NOPREFIX,	/* mounted subsystems have no named prefix */
+	ROOT_XATTR,	/* supports extended attributes */
 };
 
 static int cgroup_is_releasable(const struct cgroup *cgrp)
@@ -854,8 +856,14 @@ static void cgroup_diput(struct dentry *dentry, struct inode *inode)
 		 */
 		BUG_ON(!list_empty(&cgrp->pidlists));
 
+		simple_xattrs_free(&cgrp->xattrs);
+
 		kfree_rcu(cgrp, rcu_head);
-	}
+	} else {
+		struct cftype *cft = dentry->d_fsdata;
+ 
+		simple_xattrs_free(&cft->xattrs);
+ 	}
 	iput(inode);
 }
 
@@ -1056,6 +1064,8 @@ static int cgroup_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_show_option(seq, ss->name, NULL);
 	if (test_bit(ROOT_NOPREFIX, &root->flags))
 		seq_puts(seq, ",noprefix");
+	if (test_bit(ROOT_XATTR, &root->flags))
+		seq_puts(seq, ",xattr");
 	if (strlen(root->release_agent_path))
 		seq_show_option(seq, "release_agent",
 				root->release_agent_path);
@@ -1123,6 +1133,10 @@ static int parse_cgroupfs_options(char *data, struct cgroup_sb_opts *opts)
 		}
 		if (!strcmp(token, "clone_children")) {
 			opts->clone_children = true;
+			continue;
+		}
+		if (!strcmp(token, "xattr")) {
+			set_bit(ROOT_XATTR, &opts->flags);
 			continue;
 		}
 		if (!strncmp(token, "release_agent=", 14)) {
@@ -1328,6 +1342,7 @@ static void init_cgroup_housekeeping(struct cgroup *cgrp)
 	mutex_init(&cgrp->pidlist_mutex);
 	INIT_LIST_HEAD(&cgrp->event_list);
 	spin_lock_init(&cgrp->event_list_lock);
+	simple_xattrs_init(&cgrp->xattrs);
 }
 
 static void init_cgroup_root(struct cgroupfs_root *root)
@@ -1674,6 +1689,8 @@ static void cgroup_kill_sb(struct super_block *sb) {
 	}
 
 	mutex_unlock(&cgroup_mutex);
+
+	simple_xattrs_free(&cgrp->xattrs);
 
 	kill_litter_super(sb);
 	cgroup_drop_root(root);
@@ -2560,6 +2577,64 @@ static int cgroup_rename(struct inode *old_dir, struct dentry *old_dentry,
 	return simple_rename(old_dir, old_dentry, new_dir, new_dentry);
 }
 
+static struct simple_xattrs *__d_xattrs(struct dentry *dentry)
+{
+	if (S_ISDIR(dentry->d_inode->i_mode))
+		return &__d_cgrp(dentry)->xattrs;
+	else
+		return &__d_cft(dentry)->xattrs;
+}
+
+static inline int xattr_enabled(struct dentry *dentry)
+{
+	struct cgroupfs_root *root = dentry->d_sb->s_fs_info;
+	return test_bit(ROOT_XATTR, &root->flags);
+}
+
+static bool is_valid_xattr(const char *name)
+{
+	if (!strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN) ||
+	    !strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN))
+		return true;
+	return false;
+}
+
+static int cgroup_setxattr(struct dentry *dentry, const char *name,
+			   const void *val, size_t size, int flags)
+{
+	if (!xattr_enabled(dentry))
+		return -EOPNOTSUPP;
+	if (!is_valid_xattr(name))
+		return -EINVAL;
+	return simple_xattr_set(__d_xattrs(dentry), name, val, size, flags);
+}
+
+static int cgroup_removexattr(struct dentry *dentry, const char *name)
+{
+	if (!xattr_enabled(dentry))
+		return -EOPNOTSUPP;
+	if (!is_valid_xattr(name))
+		return -EINVAL;
+	return simple_xattr_remove(__d_xattrs(dentry), name);
+}
+
+static ssize_t cgroup_getxattr(struct dentry *dentry, const char *name,
+			       void *buf, size_t size)
+{
+	if (!xattr_enabled(dentry))
+		return -EOPNOTSUPP;
+	if (!is_valid_xattr(name))
+		return -EINVAL;
+	return simple_xattr_get(__d_xattrs(dentry), name, buf, size);
+}
+
+static ssize_t cgroup_listxattr(struct dentry *dentry, char *buf, size_t size)
+{
+	if (!xattr_enabled(dentry))
+		return -EOPNOTSUPP;
+	return simple_xattr_list(__d_xattrs(dentry), buf, size);
+}
+
 static const struct file_operations cgroup_file_operations = {
 	.read = cgroup_file_read,
 	.write = cgroup_file_write,
@@ -2568,11 +2643,22 @@ static const struct file_operations cgroup_file_operations = {
 	.release = cgroup_file_release,
 };
 
+static const struct inode_operations cgroup_file_inode_operations = {
+	.setxattr = cgroup_setxattr,
+	.getxattr = cgroup_getxattr,
+	.listxattr = cgroup_listxattr,
+	.removexattr = cgroup_removexattr,
+};
+
 static const struct inode_operations cgroup_dir_inode_operations = {
 	.lookup = cgroup_lookup,
 	.mkdir = cgroup_mkdir,
 	.rmdir = cgroup_rmdir,
 	.rename = cgroup_rename,
+	.setxattr = cgroup_setxattr,
+	.getxattr = cgroup_getxattr,
+	.listxattr = cgroup_listxattr,
+	.removexattr = cgroup_removexattr,
 };
 
 static struct dentry *cgroup_lookup(struct inode *dir, struct dentry *dentry, struct nameidata *nd)
@@ -2620,6 +2706,7 @@ static int cgroup_create_file(struct dentry *dentry, mode_t mode,
 	} else if (S_ISREG(mode)) {
 		inode->i_size = 0;
 		inode->i_fop = &cgroup_file_operations;
+		inode->i_op = &cgroup_file_inode_operations;
 	}
 	d_instantiate(dentry, inode);
 	dget(dentry);	/* Extra count - pin the dentry in core */
@@ -2687,6 +2774,9 @@ int cgroup_add_file(struct cgroup *cgrp,
 	mode_t mode;
 
 	char name[MAX_CGROUP_TYPE_NAMELEN + MAX_CFTYPE_NAME + 2] = { 0 };
+
+	simple_xattrs_init(&cft->xattrs);
+
 	if (subsys && !test_bit(ROOT_NOPREFIX, &cgrp->root->flags)) {
 		strcpy(name, subsys->name);
 		strcat(name, ".");

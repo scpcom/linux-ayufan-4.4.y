@@ -96,6 +96,18 @@ ssize_t vfs_getxattr_alloc(struct dentry *dentry, const char *name,
 			   char **xattr_value, size_t size, gfp_t flags);
 int vfs_xattr_cmp(struct dentry *dentry, const char *xattr_name,
 		  const char *value, size_t size, gfp_t flags);
+
+struct simple_xattrs {
+	struct list_head head;
+	spinlock_t lock;
+};
+
+struct simple_xattr {
+	struct list_head list;
+	char *name;
+	size_t size;
+	char value[0];
+};
 #endif  /*  __KERNEL__  */
 
 #endif	/* _LINUX_XATTR_H */
