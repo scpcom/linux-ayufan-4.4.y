@@ -1223,7 +1223,8 @@ void turn_off_led_all(unsigned int id)
 		writel(readl(reg) & ~(0x1 << GPIO_BIT_SET_OFFSET(led_set[id].led[i].gpio)), reg);
 	}
 }
-void led_all_red_on()
+
+void led_all_red_on(void)
 {
 	int i = 0;
 
@@ -2197,6 +2198,8 @@ static int set_led_config(unsigned long led_data)
 			turn_off_led_all(led_index);
 			led_blink_start(led_index, color, state);
 	}
+
+	return 0;
 }
 
 void hdd_power_set(struct _hdd_ioctl *hdd_data)
