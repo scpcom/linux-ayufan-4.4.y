@@ -2285,7 +2285,7 @@ static void serial8250_shutdown(struct uart_port *port)
 	spin_lock_irqsave(&up->port.lock, flags);
 	if (up->port.flags & UPF_FOURPORT) {
 		/* reset interrupts on the AST Fourport board */
-		inb((up->port.iobase & 0xfe0) | 0x1f);
+		(void) inb((up->port.iobase & 0xfe0) | 0x1f);
 		up->port.mctrl |= TIOCM_OUT1;
 	} else
 		up->port.mctrl &= ~TIOCM_OUT2;
