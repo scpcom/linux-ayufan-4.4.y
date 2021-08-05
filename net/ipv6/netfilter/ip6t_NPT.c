@@ -90,8 +90,10 @@ static unsigned int
 ip6t_snpt_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {
 	const struct ip6t_npt_tginfo *npt = par->targinfo;
+#ifdef CONFIG_COMCERTO_FP
 	struct nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
+#endif
 
 	if (!ip6t_npt_map_pfx(npt, &ipv6_hdr(skb)->saddr)) {
 		icmpv6_send(skb, ICMPV6_PARAMPROB, ICMPV6_HDR_FIELD,
@@ -113,8 +115,10 @@ static unsigned int
 ip6t_dnpt_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {
 	const struct ip6t_npt_tginfo *npt = par->targinfo;
+#ifdef CONFIG_COMCERTO_FP
 	struct nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
+#endif
 
 	if (!ip6t_npt_map_pfx(npt, &ipv6_hdr(skb)->daddr)) {
 		icmpv6_send(skb, ICMPV6_PARAMPROB, ICMPV6_HDR_FIELD,
