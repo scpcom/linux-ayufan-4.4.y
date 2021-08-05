@@ -25,7 +25,6 @@ u32 usb3_suspended = 0;
 int comcerto_xhci_bus_suspend(struct usb_hcd *hcd)
 {
 	int error_status = 0;
-	int val;
 
 	if (usb3_suspended) {
 		pr_err("comcerto_xhci_bus_suspend: USB 3.0 Already Suspended \n");
@@ -112,7 +111,7 @@ static void comcerto_usb3_phy_init(void)
 	//Configuration for internal clock
 	if(usb3_clk_internal)
 	{
-		printk(KERN_INFO "USB3.0 clock selected: internal\n", __func__);
+		printk(KERN_INFO "%s: USB3.0 clock selected: internal\n", __func__);
 
 		if(HAL_get_ref_clk() == REF_CLK_24MHZ)
 			val = 0x420E82A8;
@@ -122,7 +121,7 @@ static void comcerto_usb3_phy_init(void)
 	else
 	{
 		val = 0x4209927A;
-		printk(KERN_INFO "USB3.0 clock selected: external\n", __func__);
+		printk(KERN_INFO "%s: USB3.0 clock selected: external\n", __func__);
 	}
 
 	writel(val, USB3_PHY_BASE + 0x20);
@@ -134,8 +133,6 @@ static void comcerto_usb3_phy_init(void)
 
 void comcerto_start_xhci(void)
 {
-        u32 val;
-
         printk(KERN_INFO "### %s\n", __func__);
 
 #if defined(CONFIG_C2K_MFCN_EVM)
@@ -181,8 +178,6 @@ void comcerto_start_xhci(void)
 
 void comcerto_stop_xhci(void)
 {
-        u32 val;
-
         printk(KERN_INFO "### %s\n", __func__);
 
 		/* APPLYING THE RESET TO USB3 UTMI */
