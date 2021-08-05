@@ -76,6 +76,7 @@ static inline uint32_t count_zero_bits( uint32_t value) {
 		if ((value & 1) == 0)
 			++num_zeros;
 	}
+	return num_zeros;
 }
 #endif
 
