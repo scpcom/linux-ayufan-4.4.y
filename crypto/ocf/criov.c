@@ -48,7 +48,7 @@ __FBSDID("$FreeBSD: src/sys/opencrypto/criov.c,v 1.5 2006/06/04 22:15:13 pjd Exp
 #include <asm/io.h>
 
 #include <uio.h>
-#include <cryptodev.h>
+#include <linux/cryptodev.h>
 
 /*
  * This macro is only for avoiding code duplication, as we need to skip

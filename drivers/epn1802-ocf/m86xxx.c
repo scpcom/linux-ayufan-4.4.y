@@ -73,10 +73,10 @@
 
 #include <asm/io.h>
 
+#include <linux/cryptodev.h>
 #include "m86xxx_spacc.h"
 #include "m86xxx_spacchw.h"
 #include "m86xxx_var.h"
-#include "cryptodev.h"
 #include "uio.h"
 
 

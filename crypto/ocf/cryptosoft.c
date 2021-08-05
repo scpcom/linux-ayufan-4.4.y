@@ -57,7 +57,7 @@
 #include <crypto/hash.h>
 #endif
 
-#include <cryptodev.h>
+#include <linux/cryptodev.h>
 #include <uio.h>
 
 struct {

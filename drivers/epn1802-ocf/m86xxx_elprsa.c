@@ -142,6 +142,7 @@ void clue_clean_data_memory (U32 mmap)
 
 /*********************** PKA *************************************************/
 
+#if 0
 static void outdiff (char *s, unsigned char *buf1, unsigned char *buf2, int len)
 {
   int x, y;
@@ -160,6 +161,7 @@ static void outdiff (char *s, unsigned char *buf1, unsigned char *buf2, int len)
   }
 
 }
+#endif
 
 int pka_init (U32 mmap)
 {
@@ -280,7 +282,6 @@ int clue_start_engine (int size)
 {
 	int ret = SPACC_CRYPTO_OK;
 	U32 wait_count = CLUE_LOOP_WAIT, reason;
-	unsigned long flags;
 
 	DPRINTF(ELP_DBG, "%s: %d\n", __FUNCTION__, size);
 

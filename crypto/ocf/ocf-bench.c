@@ -42,7 +42,7 @@
 #include <linux/sched.h>
 #include <linux/spinlock.h>
 #include <linux/interrupt.h>
-#include <cryptodev.h>
+#include <linux/cryptodev.h>
 
 #ifdef I_HAVE_AN_XSCALE_WITH_INTEL_SDK
 #define BENCH_IXP_ACCESS_LIB 1

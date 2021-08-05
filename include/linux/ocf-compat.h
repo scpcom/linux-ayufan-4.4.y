@@ -175,8 +175,10 @@ struct ocf_device {
 #define DELAY(x)	((x) > 2000 ? mdelay((x)/1000) : udelay(x))
 #define strtoul simple_strtoul
 
+#ifdef NO_PCI_H
 #define pci_get_vendor(dev)	((dev)->vendor)
 #define pci_get_device(dev)	((dev)->device)
+#endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 #define pci_set_consistent_dma_mask(dev, mask) (0)

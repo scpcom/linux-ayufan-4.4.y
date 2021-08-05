@@ -49,7 +49,7 @@
 
 #include <asm/io.h>
 #include "m86xxx_utils.h"
-#include "ocf-compat.h"
+#include <linux/ocf-compat.h>
 
 
 

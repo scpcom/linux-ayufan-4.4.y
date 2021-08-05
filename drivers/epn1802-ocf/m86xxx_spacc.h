@@ -46,11 +46,11 @@
 #ifndef _ELPSPACC_H_
 #define _ELPSPACC_H_
 
+#include <linux/cryptodev.h>
 #include "m86xxx_types.h"
 
 #include "m86xxx_spacchw.h"
 #include "m86xxx_var.h"
-#include "cryptodev.h"
 
 #define CRYPTO_INVALID_ICV_KEY_SIZE  (S32)-100
 #define CRYPTO_INVALID_PARAMETER_SIZE (S32)-101

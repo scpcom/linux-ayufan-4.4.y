@@ -77,7 +77,7 @@ __FBSDID("$FreeBSD: src/sys/opencrypto/crypto.c,v 1.16 2005/01/07 02:29:16 imp E
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,4)
 #include <linux/kthread.h>
 #endif
-#include <cryptodev.h>
+#include <linux/cryptodev.h>
 
 /*
  * keep track of whether or not we have been initialised, a big
