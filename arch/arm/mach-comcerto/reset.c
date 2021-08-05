@@ -31,7 +31,9 @@
 
 static unsigned int i2cspi_state = 0x3, dus_state = 0xf;
 static spinlock_t reset_lock;
+#if defined(CONFIG_C2K_MFCN_EVM)
 static spinlock_t gpio_lock;
+#endif
 
 void comcerto_rst_cntrl_set(unsigned int dev_rst_cntrl_bit)
 {
