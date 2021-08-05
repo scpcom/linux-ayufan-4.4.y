@@ -97,6 +97,7 @@ MODULE_AUTHOR("Junjiro R. Okajima <aufs-users@lists.sourceforge.net>");
 MODULE_DESCRIPTION(AUFS_NAME
 	" -- Advanced multi layered unification filesystem");
 MODULE_VERSION(AUFS_VERSION);
+MODULE_INFO(staging, "Y");
 
 /* this module parameter has no meaning when SYSFS is disabled */
 int sysaufs_brs = 1;
