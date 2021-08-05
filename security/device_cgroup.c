@@ -7,6 +7,7 @@
 #include <linux/device_cgroup.h>
 #include <linux/cgroup.h>
 #include <linux/ctype.h>
+#include <linux/export.h>
 #include <linux/list.h>
 #include <linux/uaccess.h>
 #include <linux/seq_file.h>
@@ -500,6 +501,7 @@ found:
 
 	return -EPERM;
 }
+EXPORT_SYMBOL_GPL(__devcgroup_inode_permission);
 
 int devcgroup_inode_mknod(int mode, dev_t dev)
 {
