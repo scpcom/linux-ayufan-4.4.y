@@ -22,8 +22,8 @@
 	 ***********************************/
 	#define COMCERTO_OUTPUT_GPIO		(COMCERTO_NAND_CE)
 	#define COMCERTO_IRQ_RISING_EDGE_GPIO	0 // [FIXME]
-	#define COMCERTO_IRQ_FALLING_EDGE_GPIO	(GPIO_2 | GPIO_0) // [FIXME]
-	#define COMCERTO_IRQ_LEVEL_GPIO 	GPIO_2 // [FIXME]
+	#define COMCERTO_IRQ_FALLING_EDGE_GPIO	(C2K_GPIO_2 | C2K_GPIO_0) // [FIXME]
+	#define COMCERTO_IRQ_LEVEL_GPIO 	C2K_GPIO_2 // [FIXME]
 	/*Are pins used either as GPIO or as pins for others IP blocks*/
 	#define COMCERTO_GPIO_PIN_USAGE		(SPI_BUS) // [FIXME]
 
@@ -42,8 +42,8 @@
 	#define COMCERTO_EXP_CS4_SEG_SZ		1
 
 	#define COMCERTO_NAND_FIO_ADDR		EXP_CS4_AXI_BASEADDR
-	#define COMCERTO_NAND_BR		0x20000000 /* BR is on GPIO_29 */
-	#define COMCERTO_NAND_CE		0x10000000 /* CE is on GPIO_28 */
+	#define COMCERTO_NAND_BR		0x20000000 /* BR is on C2K_GPIO_29 */
+	#define COMCERTO_NAND_CE		0x10000000 /* CE is on C2K_GPIO_28 */
 	#define COMCERTO_NAND_IO_SZ		((COMCERTO_EXP_CS4_SEG_SZ << 12) +0x1000)
 
 	/***********************************

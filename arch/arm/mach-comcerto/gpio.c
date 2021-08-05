@@ -507,7 +507,7 @@ struct file *openFile(char *path,int flag,int mode)
 }
 
 
-int readFile(struct file *fp,int *buf,int readlen)
+int readFile(struct file *fp,char *buf,int readlen)
 {
 	if (fp->f_op && fp->f_op->read) {
 		return fp->f_op->read(fp,buf,readlen, &fp->f_pos);
@@ -1976,7 +1976,7 @@ static void buzzer_timer_func(unsigned long in_data)
 	--bz_time;
 }
 
-int set_buzzer(unsigned long bz_data)
+void set_buzzer(unsigned long bz_data)
 {
 	unsigned short time, status;
 	
@@ -2331,7 +2331,7 @@ static ssize_t gpio_write(struct file * file, const char *buf, size_t count, lof
 	return 0;
 }
 
-static int gpio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long gpio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	unsigned long ret = 0;
 	struct _hdd_ioctl hdd_data;

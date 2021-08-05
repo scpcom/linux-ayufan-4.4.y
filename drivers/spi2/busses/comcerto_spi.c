@@ -605,7 +605,7 @@ static int __init comcerto_spi_probe(struct platform_device *pdev)
 	comcerto_spi_hw_init(spi);
 #if 0
 	if (request_irq(spi->irq, comcerto_spi_irq_handler, SA_SHIRQ, COMCERTO_SPI_DRIVER_NAME, spi)) {
-		printk(KERN_INFO "comcerto_spi: error requesting irq %d\n", IRQ_SPI);
+		printk(KERN_INFO "comcerto_spi: error requesting irq %d\n", C2K_IRQ_SPI);
 		goto err2;
 	}
 #endif

@@ -43,9 +43,9 @@ all: version config modules
 modules clean:
 	make CROSS_COMPILE=$(CROSS_COMPILE) V=1 ARCH=$(ARCH) -C $(KERNELDIR) M=`pwd` $@
 
-EXTRA_CFLAGS += -Werror -include $(src)/$(PFE_DIR)/c2000/version.h -I$(src)/$(PFE_DIR)/c2000 -I$(src)/$(PFE_DIR)/common -I$(src) -DENDIAN_LITTLE -DGCC_TOOLCHAIN -DCOMCERTO_2000 -DCOMCERTO_2000_CONTROL
+EXTRA_CFLAGS += -Werror -include $(PWD)/$(src)/$(PFE_DIR)/c2000/version.h -I$(src)/$(PFE_DIR)/c2000 -I$(src)/$(PFE_DIR)/common -I$(src) -DENDIAN_LITTLE -DGCC_TOOLCHAIN -DCOMCERTO_2000 -DCOMCERTO_2000_CONTROL
 
-EXTRA_LDFLAGS += -T$(src)/control_link.lds
+EXTRA_LDFLAGS += -T$(PWD)/$(src)/control_link.lds
 
 obj-m += pfe.o
 

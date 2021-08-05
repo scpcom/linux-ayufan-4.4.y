@@ -650,7 +650,7 @@ static struct plat_serial8250_port comcerto_uart_data[] = {
 	{
 		.mapbase	= COMCERTO_AXI_UART1_BASE,
 		.membase	= (void *)COMCERTO_AXI_UART1_VADDR,
-		.irq		= IRQ_UART1,
+		.irq		= C2K_IRQ_UART1,
 		.handle_irq	= fastuart_handle_irq,
 		.flags		= UPF_BOOT_AUTOCONF | UPF_SKIP_TEST | UPF_IOREMAP,
 		.iotype		= UPIO_MEM,
@@ -663,7 +663,7 @@ static struct plat_serial8250_port comcerto_uart_data[] = {
 	{
 		.mapbase	= COMCERTO_AXI_UART0_BASE,
 		.membase	= (void *)COMCERTO_AXI_UART0_VADDR,
-		.irq		= IRQ_UART0,
+		.irq		= C2K_IRQ_UART0,
 		.handle_irq	= fastuart_handle_irq,
 		.flags		= UPF_BOOT_AUTOCONF | UPF_SKIP_TEST | UPF_IOREMAP,
 		.iotype		= UPIO_MEM,

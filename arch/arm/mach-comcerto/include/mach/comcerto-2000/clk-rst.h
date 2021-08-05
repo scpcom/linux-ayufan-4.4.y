@@ -143,10 +143,10 @@
 #define PLL3_MFR 			APB_VADDR(COMCERTO_APB_CLK_BASE + 0x248)
 #define PLL3_MRR 			APB_VADDR(COMCERTO_APB_CLK_BASE + 0x24C)
 
-#define PLL0				0
-#define PLL1				1
-#define PLL2				2
-#define PLL3				3
+#define C2K_CLK_PLL0				0
+#define C2K_CLK_PLL1				1
+#define C2K_CLK_PLL2				2
+#define C2K_CLK_PLL3				3
 
 /* Device Reset Control Register (DEVICE_RST_CNTRL)*/
 
@@ -179,12 +179,12 @@
 #define CLK_DIV_BYPASS			(1 << 7)
 #define CLK_DIV_RATIO_MASK		0x1f
 
-#define PLL_VSEL			(1 << 6)
-#define PLL_LOCK_EN			(1 << 5)
-#define PLL_BYPASS			(1 << 4)
-#define PLL_RESET			(1 << 0)
+#define C2K_CLK_PLL_VSEL			(1 << 6)
+#define C2K_CLK_PLL_LOCK_EN			(1 << 5)
+#define C2K_CLK_PLL_BYPASS			(1 << 4)
+#define C2K_CLK_PLL_RESET			(1 << 0)
 
-#define PLL_LOCK			(1 << 0)
+#define C2K_CLK_PLL_LOCK			(1 << 0)
 
 #define CLK_PLL_SRC_MASK		0x7
 #define CLK_PLL_SRC_SHIFT		1
@@ -237,9 +237,9 @@
 #define CORE_PWRDWN1        (1 << 7)
 #define MP_PWRDWN       	(1 << 0)
 
-#define SCPRE   			(1 << 4)
-#define SCALL   			(1 << 5)
-#define ISO_EN  			(1 << 6)
+#define C2K_CLK_SCPRE   			(1 << 4)
+#define C2K_CLK_SCALL   			(1 << 5)
+#define C2K_CLK_ISO_EN  			(1 << 6)
 
 #define CPU0_DBG_RST		(1 << 1)
 #define CPU1_DBG_RST		(1 << 2)

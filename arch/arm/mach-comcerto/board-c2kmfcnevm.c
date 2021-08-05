@@ -328,7 +328,7 @@ static struct resource comcerto_fast_spi_resource[] = {
 		.flags  = IORESOURCE_MEM,
 	},
 	{
-		.start  = IRQ_SPI,
+		.start  = C2K_IRQ_SPI,
 		.flags  = IORESOURCE_IRQ,
 	}
 };
@@ -364,7 +364,7 @@ static struct resource comcerto_spi_resource[] = {
 		.flags  = IORESOURCE_MEM,
 	},
 	{
-		.start  = IRQ_SPI_LS,
+		.start  = C2K_IRQ_SPI_LS,
 		.flags  = IORESOURCE_IRQ,
 	}
 };
@@ -393,7 +393,7 @@ static struct resource comcerto_i2c_resources[] = {
 		.flags	= IORESOURCE_MEM,
 	},
 	{
-		.start	= IRQ_I2C,
+		.start	= C2K_IRQ_I2C,
 		.flags	= IORESOURCE_IRQ,
 	},
 };
