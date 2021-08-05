@@ -2024,7 +2024,7 @@ ip6_tnl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		break;
         case SIOCGET4RD:
                 t = netdev_priv(dev);
-                ip4rdp = (struct ip6_tnl_4r *)ifr->ifr_ifru.ifru_data;
+                ip4rdp = (struct ip6_tnl_4rd *)ifr->ifr_ifru.ifru_data;
  
                 read_lock(&t->ip4rd.map_lock);
                 list_for_each_entry (mr, &t->ip4rd.map_list, mr_list){
