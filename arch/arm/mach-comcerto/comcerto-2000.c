@@ -532,7 +532,7 @@ static struct platform_device comcerto_pmu = {
  * OTP Device
  * -------------------------------------------------------------------- */
 #if defined(CONFIG_COMCERTO_OTP)
-static const struct platform_device comcerto_otp_device = {
+static struct platform_device comcerto_otp_device = {
         .name     = "comcerto_otp",
 	.id       = -1,
 };
