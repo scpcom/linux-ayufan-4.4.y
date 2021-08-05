@@ -3428,7 +3428,6 @@ EXPORT_SYMBOL(netif_receive_skb);
 #if defined(CONFIG_ARCH_COMCERTO)
 int capture_receive_skb(struct sk_buff *skb)
 {
-        struct net_device *null_or_orig = NULL;
         struct packet_type *ptype, *pt_prev;
         struct net_device *orig_dev;
         int ret = NET_RX_DROP;
