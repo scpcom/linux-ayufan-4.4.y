@@ -354,9 +354,9 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 	struct pci_dev  *pdev = to_pci_dev(xhci_to_hcd(xhci)->self.controller);
 	int ret;
 
-    /* The xhci platform device has set up IRQs through usb_add_hcd. */
-    if (xhci->quirks & XHCI_PLAT)
-        return 0;
+	/* The xhci platform device has set up IRQs through usb_add_hcd. */
+	if (xhci->quirks & XHCI_PLAT)
+		return 0;
 
 	/*
 	 * Some Fresco Logic host controllers advertise MSI, but fail to
