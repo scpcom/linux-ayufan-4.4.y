@@ -76,7 +76,7 @@ static int eeprom_set_pointer(struct i2c_client *client, u32 addr)
 
 static int eeprom_read_data(struct i2c_client *client, void *buf, int len)
 {
-	int err, i = 0;
+	int err;
 	struct i2c_msg	msg =
 	{
 		.addr = client->addr,
@@ -196,7 +196,7 @@ int eeprom_probe(struct i2c_client *client, const struct i2c_device_id *id)
 
 	client = eeprom_i2c_client;
 
-	err = sysfs_create_file(&client->dev.kobj, &eeprom_attr);
+	err = sysfs_create_file(&client->dev.kobj, (const struct attribute *)&eeprom_attr);
 	if (err) {
 		dev_err(&client->dev, "failed to create sysfs node\n");
 		goto err;
@@ -210,7 +210,7 @@ err:
 
 static int eeprom_remove(struct i2c_client *client)
 {
-	sysfs_remove_bin_file(&client->dev.kobj, &eeprom_attr);
+	sysfs_remove_bin_file(&client->dev.kobj, (const struct bin_attribute *)&eeprom_attr);
 
 	return 0;
 }
