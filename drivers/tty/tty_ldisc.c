@@ -845,7 +845,9 @@ void tty_ldisc_hangup(struct tty_struct *tty)
 	tty_unlock();
 	cancel_work_sync(&tty->buf.work);
 	mutex_unlock(&tty->ldisc_mutex);
+#if 0
 retry:
+#endif
 	tty_lock();
 	mutex_lock(&tty->ldisc_mutex);
 
@@ -855,8 +857,10 @@ retry:
 	   a FIXME */
 	if (tty->ldisc) {	/* Not yet closed */
 		if (atomic_read(&tty->ldisc->users) != 1) {
+#if 0
 			char cur_n[TASK_COMM_LEN], tty_n[64];
 			long timeout = 3 * HZ;
+#endif
 			tty_unlock();
 
 	// comment out following codes to fix issue: STG-540 cannot be powered off without console line connected
