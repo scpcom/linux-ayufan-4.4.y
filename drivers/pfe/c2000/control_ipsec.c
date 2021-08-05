@@ -122,7 +122,7 @@ static int isAramElpSA(void *p) {
   IPSec_hw_context *pipsc = &gIpSecHWCtx;
   if (pipsc->ARAM_sa_base) {
     if ((((U32) p ) >= pipsc->ARAM_sa_base ) &&
-	(((U32) p ) <= pipsc->ARAM_sa_base_end));
+	(((U32) p ) <= pipsc->ARAM_sa_base_end))
       return 1;
   }
   return 0;

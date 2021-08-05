@@ -283,11 +283,14 @@ static void MC4_timeout(void)
 					else if(IS_WIFI_PORT(this_entry->mcdest.listeners[j].output_port))
 						this_entry->mcdest.num_wifi_mc_listeners--;
 #endif
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Warray-bounds"
 					/* remove listener, and move following entries up */
 					for (k = j + 1; k < this_entry->mcdest.num_listeners; k++)
 					{
 						this_entry->mcdest.listeners[k - 1] = this_entry->mcdest.listeners[k];
 					}
+#pragma GCC diagnostic pop
 					this_entry->mcdest.num_listeners--;
 					j -= 1; // need index to remain in place after increment
 				}
@@ -578,6 +581,8 @@ found:
 				else if(IS_WIFI_PORT(this_entry->mcdest.listeners[listener_index].output_port))
 					this_entry->mcdest.num_wifi_mc_listeners--;
 #endif				
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Warray-bounds"
 				/* remove listener, and move following entries up */
 				for (j = listener_index + 1; j < this_entry->mcdest.num_listeners; j++)
 				{
@@ -586,6 +591,7 @@ found:
 					L1_dc_clean(&this_entry->mcdest.listeners[j - 1], ((U8*) &this_entry->mcdest.listeners[j])-1);
 #endif
 				}
+#pragma GCC diagnostic pop
 				this_entry->mcdest.num_listeners--;
 			}
 		/* if listener does not belong to the group, just silently continue processing */
@@ -628,11 +634,14 @@ void MC4_interface_purge(U32 if_index)
 					else if(IS_WIFI_PORT(this_entry->mcdest.listeners[j].output_port))
 						this_entry->mcdest.num_wifi_mc_listeners--;
 #endif
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Warray-bounds"
 					/* remove listener, and move following entries up */
 					for (k = j + 1; k < this_entry->mcdest.num_listeners; k++)
 					{
 						this_entry->mcdest.listeners[k - 1] = this_entry->mcdest.listeners[k];
 					}
+#pragma GCC diagnostic pop
 					this_entry->mcdest.num_listeners--;
 					j -= 1; // need index to remain in place after increment
 				}

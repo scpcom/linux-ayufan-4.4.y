@@ -626,7 +626,7 @@ void tnl_update(int tunnel_index)
 			phw_tnl->route.itf = cpu_to_be32(virt_to_class(pTunnelEntry->pRtEntry->itf));
 			memcpy(phw_tnl->route.dstmac, pTunnelEntry->pRtEntry->dstmac, ETHER_ADDR_LEN);
 			phw_tnl->route.mtu = cpu_to_be16(pTunnelEntry->pRtEntry->mtu);
-			if(pTunnelEntry->mode == TNL_MODE_6O4);
+			if(pTunnelEntry->mode == TNL_MODE_6O4)
 				phw_tnl->route.Daddr_v4 = pTunnelEntry->pRtEntry->Daddr_v4;
 		}
 		else
