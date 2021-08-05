@@ -46,9 +46,10 @@
 #include "iwl-cfg.h"
 
 /* Highest firmware API version supported */
-#define IWL6000_UCODE_API_MAX 6
+#define IWL6000_UCODE_API_MAX 4 /* v5-6 are supported but not released */
+#define IWL6000G2_UCODE_API_MAX 5 /* v6 was released too late */
 #define IWL6050_UCODE_API_MAX 5
-#define IWL6000G2_UCODE_API_MAX 6
+#define IWL6000G2B_UCODE_API_MAX 6
 #define IWL6035_UCODE_API_MAX 6
 
 /* Oldest version we won't warn about */
@@ -424,7 +425,7 @@ struct iwl_cfg iwl6005_2agn_mow2_cfg = {
 
 #define IWL_DEVICE_6030						\
 	.fw_name_pre = IWL6030_FW_PRE,				\
-	.ucode_api_max = IWL6000G2_UCODE_API_MAX,		\
+	.ucode_api_max = IWL6000G2B_UCODE_API_MAX,		\
 	.ucode_api_ok = IWL6000G2B_UCODE_API_OK,		\
 	.ucode_api_min = IWL6000G2_UCODE_API_MIN,		\
 	.eeprom_ver = EEPROM_6030_EEPROM_VERSION,		\
