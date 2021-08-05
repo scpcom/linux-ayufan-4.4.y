@@ -102,4 +102,7 @@
 
 #define PR_MCE_KILL_GET 34
 
+#define PR_SET_CHILD_SUBREAPER 36
+#define PR_GET_CHILD_SUBREAPER 37
+
 #endif /* _LINUX_PRCTL_H */
