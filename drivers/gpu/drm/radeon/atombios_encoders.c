@@ -57,22 +57,6 @@ static inline bool radeon_encoder_is_digital(struct drm_encoder *encoder)
 	}
 }
 
-static struct drm_connector *
-radeon_get_connector_for_encoder_init(struct drm_encoder *encoder)
-{
-	struct drm_device *dev = encoder->dev;
-	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
-	struct drm_connector *connector;
-	struct radeon_connector *radeon_connector;
-
-	list_for_each_entry(connector, &dev->mode_config.connector_list, head) {
-		radeon_connector = to_radeon_connector(connector);
-		if (radeon_encoder->devices & radeon_connector->devices)
-			return connector;
-	}
-	return NULL;
-}
-
 static bool radeon_atom_mode_fixup(struct drm_encoder *encoder,
 				   struct drm_display_mode *mode,
 				   struct drm_display_mode *adjusted_mode)
@@ -89,10 +73,6 @@ static bool radeon_atom_mode_fixup(struct drm_encoder *encoder,
 	if ((mode->flags & DRM_MODE_FLAG_INTERLACE)
 	    && (mode->crtc_vsync_start < (mode->crtc_vdisplay + 2)))
 		adjusted_mode->crtc_vsync_start = adjusted_mode->crtc_vdisplay + 2;
-
-	/* vertical FP must be at least 1 */
-	if (mode->crtc_vsync_start == mode->crtc_vdisplay)
-		adjusted_mode->crtc_vsync_start++;
 
 	/* get the native mode for LVDS */
 	if (radeon_encoder->active_device & (ATOM_DEVICE_LCD_SUPPORT))
@@ -261,7 +241,7 @@ atombios_dvo_setup(struct drm_encoder *encoder, int action)
 			/* R4xx, R5xx */
 			args.ext_tmds.sXTmdsEncoder.ucEnable = action;
 
-			if (radeon_encoder->pixel_clock > 165000)
+			if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 				args.ext_tmds.sXTmdsEncoder.ucMisc |= PANEL_ENCODER_MISC_DUAL;
 
 			args.ext_tmds.sXTmdsEncoder.ucMisc |= ATOM_PANEL_MISC_888RGB;
@@ -273,7 +253,7 @@ atombios_dvo_setup(struct drm_encoder *encoder, int action)
 			/* DFP1, CRT1, TV1 depending on the type of port */
 			args.dvo.sDVOEncoder.ucDeviceType = ATOM_DEVICE_DFP1_INDEX;
 
-			if (radeon_encoder->pixel_clock > 165000)
+			if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 				args.dvo.sDVOEncoder.usDevAttr.sDigAttrib.ucAttribute |= PANEL_ENCODER_MISC_DUAL;
 			break;
 		case 3:
@@ -357,7 +337,7 @@ atombios_digital_setup(struct drm_encoder *encoder, int action)
 			} else {
 				if (dig->linkb)
 					args.v1.ucMisc |= PANEL_ENCODER_MISC_TMDS_LINKB;
-				if (radeon_encoder->pixel_clock > 165000)
+				if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 					args.v1.ucMisc |= PANEL_ENCODER_MISC_DUAL;
 				/*if (pScrn->rgbBits == 8) */
 				args.v1.ucMisc |= ATOM_PANEL_MISC_888RGB;
@@ -396,7 +376,7 @@ atombios_digital_setup(struct drm_encoder *encoder, int action)
 			} else {
 				if (dig->linkb)
 					args.v2.ucMisc |= PANEL_ENCODER_MISC_TMDS_LINKB;
-				if (radeon_encoder->pixel_clock > 165000)
+				if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 					args.v2.ucMisc |= PANEL_ENCODER_MISC_DUAL;
 			}
 			break;
@@ -416,9 +396,9 @@ atombios_digital_setup(struct drm_encoder *encoder, int action)
 int
 atombios_get_encoder_mode(struct drm_encoder *encoder)
 {
-	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
 	struct drm_device *dev = encoder->dev;
 	struct radeon_device *rdev = dev->dev_private;
+	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
 	struct drm_connector *connector;
 	struct radeon_connector *radeon_connector;
 	struct radeon_connector_atom_dig *dig_connector;
@@ -442,13 +422,11 @@ atombios_get_encoder_mode(struct drm_encoder *encoder)
 	switch (connector->connector_type) {
 	case DRM_MODE_CONNECTOR_DVII:
 	case DRM_MODE_CONNECTOR_HDMIB: /* HDMI-B is basically DL-DVI; analog works fine */
-		if (drm_detect_monitor_audio(radeon_connector->edid) && radeon_audio) {
-			/* fix me */
-			if (ASIC_IS_DCE4(rdev))
-				return ATOM_ENCODER_MODE_DVI;
-			else
-				return ATOM_ENCODER_MODE_HDMI;
-		} else if (radeon_connector->use_digital)
+		if (drm_detect_hdmi_monitor(radeon_connector->edid) &&
+		    radeon_audio &&
+		    !ASIC_IS_DCE6(rdev)) /* remove once we support DCE6 */
+			return ATOM_ENCODER_MODE_HDMI;
+		else if (radeon_connector->use_digital)
 			return ATOM_ENCODER_MODE_DVI;
 		else
 			return ATOM_ENCODER_MODE_CRT;
@@ -456,13 +434,11 @@ atombios_get_encoder_mode(struct drm_encoder *encoder)
 	case DRM_MODE_CONNECTOR_DVID:
 	case DRM_MODE_CONNECTOR_HDMIA:
 	default:
-		if (drm_detect_monitor_audio(radeon_connector->edid) && radeon_audio) {
-			/* fix me */
-			if (ASIC_IS_DCE4(rdev))
-				return ATOM_ENCODER_MODE_DVI;
-			else
-				return ATOM_ENCODER_MODE_HDMI;
-		} else
+		if (drm_detect_hdmi_monitor(radeon_connector->edid) &&
+		    radeon_audio &&
+		    !ASIC_IS_DCE6(rdev)) /* remove once we support DCE6 */
+			return ATOM_ENCODER_MODE_HDMI;
+		else
 			return ATOM_ENCODER_MODE_DVI;
 		break;
 	case DRM_MODE_CONNECTOR_LVDS:
@@ -473,13 +449,11 @@ atombios_get_encoder_mode(struct drm_encoder *encoder)
 		if ((dig_connector->dp_sink_type == CONNECTOR_OBJECT_ID_DISPLAYPORT) ||
 		    (dig_connector->dp_sink_type == CONNECTOR_OBJECT_ID_eDP))
 			return ATOM_ENCODER_MODE_DP;
-		else if (drm_detect_monitor_audio(radeon_connector->edid) && radeon_audio) {
-			/* fix me */
-			if (ASIC_IS_DCE4(rdev))
-				return ATOM_ENCODER_MODE_DVI;
-			else
-				return ATOM_ENCODER_MODE_HDMI;
-		} else
+		else if (drm_detect_hdmi_monitor(radeon_connector->edid) &&
+			 radeon_audio &&
+			 !ASIC_IS_DCE6(rdev)) /* remove once we support DCE6 */
+			return ATOM_ENCODER_MODE_HDMI;
+		else
 			return ATOM_ENCODER_MODE_DVI;
 		break;
 	case DRM_MODE_CONNECTOR_eDP:
@@ -514,7 +488,7 @@ atombios_get_encoder_mode(struct drm_encoder *encoder)
  * - 2 DIG encoder blocks.
  * DIG1/2 can drive UNIPHY0/1/2 link A or link B
  *
- * DCE 4.0/5.0
+ * DCE 4.0/5.0/6.0
  * - 3 DIG transmitter blocks UNIPHY0/1/2 (links A and B).
  * Supports up to 6 digital outputs
  * - 6 DIG encoder blocks.
@@ -530,7 +504,11 @@ atombios_get_encoder_mode(struct drm_encoder *encoder)
  * - 3 DIG transmitter blocks UNIPHY0/1/2 (links A and B).
  * Supports up to 6 digital outputs
  * - 2 DIG encoder blocks.
+ * llano
  * DIG1/2 can drive UNIPHY0/1/2 link A or link B
+ * ontario
+ * DIG1 drives UNIPHY0/1/2 link A
+ * DIG2 drives UNIPHY0/1/2 link B
  *
  * Routing
  * crtc -> dig encoder -> UNIPHY/LVTMA (1 or 2 links)
@@ -572,7 +550,7 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 		dp_clock = dig_connector->dp_clock;
 		dp_lane_count = dig_connector->dp_lane_count;
 		hpd_id = radeon_connector->hpd.hpd;
-		bpc = connector->display_info.bpc;
+		/* bpc = connector->display_info.bpc; */
 	}
 
 	/* no dig encoder assigned */
@@ -606,11 +584,13 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 
 			if (ENCODER_MODE_IS_DP(args.v1.ucEncoderMode))
 				args.v1.ucLaneNum = dp_lane_count;
-			else if (radeon_encoder->pixel_clock > 165000)
+			else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 				args.v1.ucLaneNum = 8;
 			else
 				args.v1.ucLaneNum = 4;
 
+			if (ENCODER_MODE_IS_DP(args.v1.ucEncoderMode) && (dp_clock == 270000))
+				args.v1.ucConfig |= ATOM_ENCODER_CONFIG_DPLINKRATE_2_70GHZ;
 			switch (radeon_encoder->encoder_id) {
 			case ENCODER_OBJECT_ID_INTERNAL_UNIPHY:
 				args.v1.ucConfig = ATOM_ENCODER_CONFIG_V2_TRANSMITTER1;
@@ -627,10 +607,6 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 				args.v1.ucConfig |= ATOM_ENCODER_CONFIG_LINKB;
 			else
 				args.v1.ucConfig |= ATOM_ENCODER_CONFIG_LINKA;
-
-			if (ENCODER_MODE_IS_DP(args.v1.ucEncoderMode) && (dp_clock == 270000))
-				args.v1.ucConfig |= ATOM_ENCODER_CONFIG_DPLINKRATE_2_70GHZ;
-
 			break;
 		case 2:
 		case 3:
@@ -643,7 +619,7 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 
 			if (ENCODER_MODE_IS_DP(args.v1.ucEncoderMode))
 				args.v3.ucLaneNum = dp_lane_count;
-			else if (radeon_encoder->pixel_clock > 165000)
+			else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 				args.v3.ucLaneNum = 8;
 			else
 				args.v3.ucLaneNum = 4;
@@ -683,7 +659,7 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 
 			if (ENCODER_MODE_IS_DP(args.v1.ucEncoderMode))
 				args.v4.ucLaneNum = dp_lane_count;
-			else if (radeon_encoder->pixel_clock > 165000)
+			else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 				args.v4.ucLaneNum = 8;
 			else
 				args.v4.ucLaneNum = 4;
@@ -740,6 +716,7 @@ union dig_transmitter_control {
 	DIG_TRANSMITTER_CONTROL_PARAMETERS_V2 v2;
 	DIG_TRANSMITTER_CONTROL_PARAMETERS_V3 v3;
 	DIG_TRANSMITTER_CONTROL_PARAMETERS_V4 v4;
+	DIG_TRANSMITTER_CONTROL_PARAMETERS_V1_5 v5;
 };
 
 void
@@ -760,6 +737,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 	int connector_object_id = 0;
 	int igp_lane_info = 0;
 	int dig_encoder = dig->dig_encoder;
+	int hpd_id = RADEON_HPD_NONE;
 
 	if (action == ATOM_TRANSMITTER_ACTION_INIT) {
 		connector = radeon_get_connector_for_encoder_init(encoder);
@@ -775,6 +753,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 		struct radeon_connector_atom_dig *dig_connector =
 			radeon_connector->con_priv;
 
+		hpd_id = radeon_connector->hpd.hpd;
 		dp_clock = dig_connector->dp_clock;
 		dp_lane_count = dig_connector->dp_lane_count;
 		connector_object_id =
@@ -827,7 +806,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 				if (is_dp)
 					args.v1.usPixelClock =
 						cpu_to_le16(dp_clock / 10);
-				else if (radeon_encoder->pixel_clock > 165000)
+				else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 					args.v1.usPixelClock = cpu_to_le16((radeon_encoder->pixel_clock / 2) / 10);
 				else
 					args.v1.usPixelClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
@@ -842,7 +821,8 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 
 			if ((rdev->flags & RADEON_IS_IGP) &&
 			    (radeon_encoder->encoder_id == ENCODER_OBJECT_ID_INTERNAL_UNIPHY)) {
-				if (is_dp || (radeon_encoder->pixel_clock <= 165000)) {
+				if (is_dp ||
+				    !radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock)) {
 					if (igp_lane_info & 0x1)
 						args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_LANE_0_3;
 					else if (igp_lane_info & 0x2)
@@ -869,7 +849,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 			else if (radeon_encoder->devices & (ATOM_DEVICE_DFP_SUPPORT)) {
 				if (dig->coherent_mode)
 					args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_COHERENT;
-				if (radeon_encoder->pixel_clock > 165000)
+				if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 					args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_8LANE_LINK;
 			}
 			break;
@@ -884,7 +864,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 				if (is_dp)
 					args.v2.usPixelClock =
 						cpu_to_le16(dp_clock / 10);
-				else if (radeon_encoder->pixel_clock > 165000)
+				else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 					args.v2.usPixelClock = cpu_to_le16((radeon_encoder->pixel_clock / 2) / 10);
 				else
 					args.v2.usPixelClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
@@ -912,7 +892,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 			} else if (radeon_encoder->devices & (ATOM_DEVICE_DFP_SUPPORT)) {
 				if (dig->coherent_mode)
 					args.v2.acConfig.fCoherentMode = 1;
-				if (radeon_encoder->pixel_clock > 165000)
+				if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 					args.v2.acConfig.fDualLinkConnector = 1;
 			}
 			break;
@@ -927,7 +907,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 				if (is_dp)
 					args.v3.usPixelClock =
 						cpu_to_le16(dp_clock / 10);
-				else if (radeon_encoder->pixel_clock > 165000)
+				else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 					args.v3.usPixelClock = cpu_to_le16((radeon_encoder->pixel_clock / 2) / 10);
 				else
 					args.v3.usPixelClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
@@ -935,7 +915,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 
 			if (is_dp)
 				args.v3.ucLaneNum = dp_lane_count;
-			else if (radeon_encoder->pixel_clock > 165000)
+			else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 				args.v3.ucLaneNum = 8;
 			else
 				args.v3.ucLaneNum = 4;
@@ -972,7 +952,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 			else if (radeon_encoder->devices & (ATOM_DEVICE_DFP_SUPPORT)) {
 				if (dig->coherent_mode)
 					args.v3.acConfig.fCoherentMode = 1;
-				if (radeon_encoder->pixel_clock > 165000)
+				if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 					args.v3.acConfig.fDualLinkConnector = 1;
 			}
 			break;
@@ -987,7 +967,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 				if (is_dp)
 					args.v4.usPixelClock =
 						cpu_to_le16(dp_clock / 10);
-				else if (radeon_encoder->pixel_clock > 165000)
+				else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 					args.v4.usPixelClock = cpu_to_le16((radeon_encoder->pixel_clock / 2) / 10);
 				else
 					args.v4.usPixelClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
@@ -995,7 +975,7 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 
 			if (is_dp)
 				args.v4.ucLaneNum = dp_lane_count;
-			else if (radeon_encoder->pixel_clock > 165000)
+			else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 				args.v4.ucLaneNum = 8;
 			else
 				args.v4.ucLaneNum = 4;
@@ -1035,9 +1015,63 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 			else if (radeon_encoder->devices & (ATOM_DEVICE_DFP_SUPPORT)) {
 				if (dig->coherent_mode)
 					args.v4.acConfig.fCoherentMode = 1;
-				if (radeon_encoder->pixel_clock > 165000)
+				if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 					args.v4.acConfig.fDualLinkConnector = 1;
 			}
+			break;
+		case 5:
+			args.v5.ucAction = action;
+			if (is_dp)
+				args.v5.usSymClock = cpu_to_le16(dp_clock / 10);
+			else
+				args.v5.usSymClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
+
+			switch (radeon_encoder->encoder_id) {
+			case ENCODER_OBJECT_ID_INTERNAL_UNIPHY:
+				if (dig->linkb)
+					args.v5.ucPhyId = ATOM_PHY_ID_UNIPHYB;
+				else
+					args.v5.ucPhyId = ATOM_PHY_ID_UNIPHYA;
+				break;
+			case ENCODER_OBJECT_ID_INTERNAL_UNIPHY1:
+				if (dig->linkb)
+					args.v5.ucPhyId = ATOM_PHY_ID_UNIPHYD;
+				else
+					args.v5.ucPhyId = ATOM_PHY_ID_UNIPHYC;
+				break;
+			case ENCODER_OBJECT_ID_INTERNAL_UNIPHY2:
+				if (dig->linkb)
+					args.v5.ucPhyId = ATOM_PHY_ID_UNIPHYF;
+				else
+					args.v5.ucPhyId = ATOM_PHY_ID_UNIPHYE;
+				break;
+			}
+			if (is_dp)
+				args.v5.ucLaneNum = dp_lane_count;
+			else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
+				args.v5.ucLaneNum = 8;
+			else
+				args.v5.ucLaneNum = 4;
+			args.v5.ucConnObjId = connector_object_id;
+			args.v5.ucDigMode = atombios_get_encoder_mode(encoder);
+
+			if (is_dp && rdev->clock.dp_extclk)
+				args.v5.asConfig.ucPhyClkSrcId = ENCODER_REFCLK_SRC_EXTCLK;
+			else
+				args.v5.asConfig.ucPhyClkSrcId = pll_id;
+
+			if (is_dp)
+				args.v5.asConfig.ucCoherentMode = 1; /* DP requires coherent */
+			else if (radeon_encoder->devices & (ATOM_DEVICE_DFP_SUPPORT)) {
+				if (dig->coherent_mode)
+					args.v5.asConfig.ucCoherentMode = 1;
+			}
+			if (hpd_id == RADEON_HPD_NONE)
+				args.v5.asConfig.ucHPDSel = 0;
+			else
+				args.v5.asConfig.ucHPDSel = hpd_id + 1;
+			args.v5.ucDigEncoderSel = 1 << dig_encoder;
+			args.v5.ucDPLaneSet = lane_set;
 			break;
 		default:
 			DRM_ERROR("Unknown table version %d, %d\n", frev, crev);
@@ -1134,7 +1168,7 @@ atombios_external_encoder_setup(struct drm_encoder *encoder,
 		dp_lane_count = dig_connector->dp_lane_count;
 		connector_object_id =
 			(radeon_connector->connector_object_id & OBJECT_ID_MASK) >> OBJECT_ID_SHIFT;
-		bpc = connector->display_info.bpc;
+		/* bpc = connector->display_info.bpc; */
 	}
 
 	memset(&args, 0, sizeof(args));
@@ -1158,7 +1192,7 @@ atombios_external_encoder_setup(struct drm_encoder *encoder,
 				if (dp_clock == 270000)
 					args.v1.sDigEncoder.ucConfig |= ATOM_ENCODER_CONFIG_DPLINKRATE_2_70GHZ;
 				args.v1.sDigEncoder.ucLaneNum = dp_lane_count;
-			} else if (radeon_encoder->pixel_clock > 165000)
+			} else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 				args.v1.sDigEncoder.ucLaneNum = 8;
 			else
 				args.v1.sDigEncoder.ucLaneNum = 4;
@@ -1177,7 +1211,7 @@ atombios_external_encoder_setup(struct drm_encoder *encoder,
 				else if (dp_clock == 540000)
 					args.v3.sExtEncoder.ucConfig |= EXTERNAL_ENCODER_CONFIG_V3_DPLINKRATE_5_40GHZ;
 				args.v3.sExtEncoder.ucLaneNum = dp_lane_count;
-			} else if (radeon_encoder->pixel_clock > 165000)
+			} else if (radeon_dig_monitor_is_duallink(encoder, radeon_encoder->pixel_clock))
 				args.v3.sExtEncoder.ucLaneNum = 8;
 			else
 				args.v3.sExtEncoder.ucLaneNum = 4;
@@ -1375,7 +1409,7 @@ radeon_atom_encoder_dpms_dig(struct drm_encoder *encoder, int mode)
 						   ATOM_ENCODER_CMD_SETUP_PANEL_MODE,
 						   dig->panel_mode);
 			if (ext_encoder) {
-				if (ASIC_IS_DCE41(rdev))
+				if (ASIC_IS_DCE41(rdev) || ASIC_IS_DCE61(rdev))
 					atombios_external_encoder_setup(encoder, ext_encoder,
 									EXTERNAL_ENCODER_ACTION_V3_ENCODER_SETUP);
 			}
@@ -1454,7 +1488,7 @@ radeon_atom_encoder_dpms_ext(struct drm_encoder *encoder,
 	switch (mode) {
 	case DRM_MODE_DPMS_ON:
 	default:
-		if (ASIC_IS_DCE41(rdev)) {
+		if (ASIC_IS_DCE41(rdev) || ASIC_IS_DCE61(rdev)) {
 			atombios_external_encoder_setup(encoder, ext_encoder,
 							EXTERNAL_ENCODER_ACTION_V3_ENABLE_OUTPUT);
 			atombios_external_encoder_setup(encoder, ext_encoder,
@@ -1465,7 +1499,7 @@ radeon_atom_encoder_dpms_ext(struct drm_encoder *encoder,
 	case DRM_MODE_DPMS_STANDBY:
 	case DRM_MODE_DPMS_SUSPEND:
 	case DRM_MODE_DPMS_OFF:
-		if (ASIC_IS_DCE41(rdev)) {
+		if (ASIC_IS_DCE41(rdev) || ASIC_IS_DCE61(rdev)) {
 			atombios_external_encoder_setup(encoder, ext_encoder,
 							EXTERNAL_ENCODER_ACTION_V3_ENCODER_BLANKING);
 			atombios_external_encoder_setup(encoder, ext_encoder,
@@ -1747,13 +1781,34 @@ static int radeon_atom_pick_dig_encoder(struct drm_encoder *encoder)
 	struct radeon_crtc *radeon_crtc = to_radeon_crtc(encoder->crtc);
 	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
 	struct drm_encoder *test_encoder;
-	struct radeon_encoder_atom_dig *dig;
+	struct radeon_encoder_atom_dig *dig = radeon_encoder->enc_priv;
 	uint32_t dig_enc_in_use = 0;
 
-	/* DCE4/5 */
-	if (ASIC_IS_DCE4(rdev)) {
-		dig = radeon_encoder->enc_priv;
-		if (ASIC_IS_DCE41(rdev)) {
+	if (ASIC_IS_DCE6(rdev)) {
+		/* DCE6 */
+		switch (radeon_encoder->encoder_id) {
+		case ENCODER_OBJECT_ID_INTERNAL_UNIPHY:
+			if (dig->linkb)
+				return 1;
+			else
+				return 0;
+			break;
+		case ENCODER_OBJECT_ID_INTERNAL_UNIPHY1:
+			if (dig->linkb)
+				return 3;
+			else
+				return 2;
+			break;
+		case ENCODER_OBJECT_ID_INTERNAL_UNIPHY2:
+			if (dig->linkb)
+				return 5;
+			else
+				return 4;
+			break;
+		}
+	} else if (ASIC_IS_DCE4(rdev)) {
+		/* DCE4/5 */
+		if (ASIC_IS_DCE41(rdev) && !ASIC_IS_DCE61(rdev)) {
 			/* ontario follows DCE4 */
 			if (rdev->family == CHIP_PALM) {
 				if (dig->linkb)
@@ -1841,7 +1896,7 @@ radeon_atom_encoder_init(struct radeon_device *rdev)
 			break;
 		}
 
-		if (ext_encoder && ASIC_IS_DCE41(rdev))
+		if (ext_encoder && (ASIC_IS_DCE41(rdev) || ASIC_IS_DCE61(rdev)))
 			atombios_external_encoder_setup(encoder, ext_encoder,
 							EXTERNAL_ENCODER_ACTION_V3_ENCODER_INIT);
 	}

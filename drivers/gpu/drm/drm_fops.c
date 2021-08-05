@@ -133,6 +133,9 @@ int drm_open(struct inode *inode, struct file *filp)
 	if (!(dev = minor->dev))
 		return -ENODEV;
 
+	if (drm_device_is_unplugged(dev))
+		return -ENODEV;
+
 	retcode = drm_open_helper(inode, filp, dev);
 	if (!retcode) {
 		atomic_inc(&dev->counts[_DRM_STAT_OPENS]);
@@ -184,8 +187,11 @@ int drm_stub_open(struct inode *inode, struct file *filp)
 	if (!(dev = minor->dev))
 		goto out;
 
+	if (drm_device_is_unplugged(dev))
+		goto out;
+
 	old_fops = filp->f_op;
-	filp->f_op = fops_get(&dev->driver->fops);
+	filp->f_op = fops_get(dev->driver->fops);
 	if (filp->f_op == NULL) {
 		filp->f_op = old_fops;
 		goto out;
@@ -216,62 +222,6 @@ static int drm_cpu_valid(void)
 	return 0;		/* No cmpxchg before v9 sparc. */
 #endif
 	return 1;
-}
-
-/**
- * drm_new_set_master - Allocate a new master object and become master for the
- * associated master realm.
- *
- * @dev: The associated device.
- * @fpriv: File private identifying the client.
- *
- * This function must be called with dev::struct_mutex held.
- * Returns negative error code on failure. Zero on success.
- */
-int drm_new_set_master(struct drm_device *dev, struct drm_file *fpriv)
-{
-	struct drm_master *old_master;
-	int ret;
-
-	lockdep_assert_held_once(&dev->struct_mutex);
-
-	/* create a new master */
-	fpriv->minor->master = drm_master_create(fpriv->minor);
-	if (!fpriv->minor->master)
-		return -ENOMEM;
-
-	/* take another reference for the copy in the local file priv */
-	old_master = fpriv->master;
-	fpriv->master = drm_master_get(fpriv->minor->master);
-
-	if (dev->driver->master_create) {
-		mutex_unlock(&dev->struct_mutex);
-		ret = dev->driver->master_create(dev, fpriv->master);
-		mutex_lock(&dev->struct_mutex);
-		if (ret)
-			goto out_err;
-	}
-	if (dev->driver->master_set) {
-		ret = dev->driver->master_set(dev, fpriv, true);
-		if (ret)
-			goto out_err;
-	}
-
-	fpriv->is_master = 1;
-	fpriv->allowed_master = 1;
-	fpriv->authenticated = 1;
-	if (old_master)
-		drm_master_put(&old_master);
-
-	return 0;
-
-out_err:
-	/* drop both references and restore old master on failure */
-	drm_master_put(&fpriv->minor->master);
-	drm_master_put(&fpriv->master);
-	fpriv->master = old_master;
-
-	return ret;
 }
 
 /**
@@ -324,6 +274,9 @@ static int drm_open_helper(struct inode *inode, struct file *filp,
 	if (dev->driver->driver_features & DRIVER_GEM)
 		drm_gem_open(dev, priv);
 
+	if (drm_core_check_feature(dev, DRIVER_PRIME))
+		drm_prime_init_file_private(&priv->prime);
+
 	if (dev->driver->open) {
 		ret = dev->driver->open(dev, priv);
 		if (ret < 0)
@@ -335,10 +288,43 @@ static int drm_open_helper(struct inode *inode, struct file *filp,
 	mutex_lock(&dev->struct_mutex);
 	if (!priv->minor->master) {
 		/* create a new master */
-		ret = drm_new_set_master(dev, priv);
-		mutex_unlock(&dev->struct_mutex);
-		if (ret)
+		priv->minor->master = drm_master_create(priv->minor);
+		if (!priv->minor->master) {
+			mutex_unlock(&dev->struct_mutex);
+			ret = -ENOMEM;
 			goto out_free;
+		}
+
+		priv->is_master = 1;
+		/* take another reference for the copy in the local file priv */
+		priv->master = drm_master_get(priv->minor->master);
+
+		priv->authenticated = 1;
+
+		mutex_unlock(&dev->struct_mutex);
+		if (dev->driver->master_create) {
+			ret = dev->driver->master_create(dev, priv->master);
+			if (ret) {
+				mutex_lock(&dev->struct_mutex);
+				/* drop both references if this fails */
+				drm_master_put(&priv->minor->master);
+				drm_master_put(&priv->master);
+				mutex_unlock(&dev->struct_mutex);
+				goto out_free;
+			}
+		}
+		mutex_lock(&dev->struct_mutex);
+		if (dev->driver->master_set) {
+			ret = dev->driver->master_set(dev, priv, true);
+			if (ret) {
+				/* drop both references if this fails */
+				drm_master_put(&priv->minor->master);
+				drm_master_put(&priv->master);
+				mutex_unlock(&dev->struct_mutex);
+				goto out_free;
+			}
+		}
+		mutex_unlock(&dev->struct_mutex);
 	} else {
 		/* get a reference to the master */
 		priv->master = drm_master_get(priv->minor->master);
@@ -524,11 +510,11 @@ int drm_release(struct inode *inode, struct file *filp)
 
 	drm_events_release(file_priv);
 
-	if (dev->driver->driver_features & DRIVER_GEM)
-		drm_gem_release(dev, file_priv);
-
 	if (dev->driver->driver_features & DRIVER_MODESET)
 		drm_fb_release(file_priv);
+
+	if (dev->driver->driver_features & DRIVER_GEM)
+		drm_gem_release(dev, file_priv);
 
 	mutex_lock(&dev->ctxlist_mutex);
 	if (!list_empty(&dev->ctxlist)) {
@@ -591,6 +577,10 @@ int drm_release(struct inode *inode, struct file *filp)
 
 	if (dev->driver->postclose)
 		dev->driver->postclose(dev, file_priv);
+
+	if (drm_core_check_feature(dev, DRIVER_PRIME))
+		drm_prime_destroy_file_private(&file_priv->prime);
+
 	kfree(file_priv);
 
 	/* ========================================================
@@ -605,6 +595,8 @@ int drm_release(struct inode *inode, struct file *filp)
 			retcode = -EBUSY;
 		} else
 			retcode = drm_lastclose(dev);
+		if (drm_device_is_unplugged(dev))
+			drm_put_dev(dev);
 	}
 	mutex_unlock(&drm_global_mutex);
 

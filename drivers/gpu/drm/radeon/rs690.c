@@ -31,7 +31,7 @@
 #include "atom.h"
 #include "rs690d.h"
 
-static int rs690_mc_wait_for_idle(struct radeon_device *rdev)
+int rs690_mc_wait_for_idle(struct radeon_device *rdev)
 {
 	unsigned i;
 	uint32_t tmp;
@@ -160,16 +160,6 @@ void rs690_mc_init(struct radeon_device *rdev)
 	base = RREG32_MC(R_000100_MCCFG_FB_LOCATION);
 	base = G_000100_MC_FB_START(base) << 16;
 	rdev->mc.igp_sideport_enabled = radeon_atombios_sideport_present(rdev);
-	/* Some boards seem to be configured for 128MB of sideport memory,
-	 * but really only have 64MB.  Just skip the sideport and use
-	 * UMA memory.
-	 */
-	if (rdev->mc.igp_sideport_enabled &&
-	    (rdev->mc.real_vram_size == (384 * 1024 * 1024))) {
-		base += 128 * 1024 * 1024;
-		rdev->mc.real_vram_size -= 128 * 1024 * 1024;
-		rdev->mc.mc_vram_size = rdev->mc.real_vram_size;
-	}
 	rs690_pm_info(rdev);
 	radeon_vram_location(rdev, &rdev->mc, base);
 	rdev->mc.gtt_base_align = rdev->mc.gtt_size - 1;
@@ -631,6 +621,12 @@ static int rs690_startup(struct radeon_device *rdev)
 	if (r)
 		return r;
 
+	r = radeon_fence_driver_start_ring(rdev, RADEON_RING_TYPE_GFX_INDEX);
+	if (r) {
+		dev_err(rdev->dev, "failed initializing CP fences (%d).\n", r);
+		return r;
+	}
+
 	/* Enable IRQ */
 	if (!rdev->irq.installed) {
 		r = radeon_irq_kms_init(rdev);
@@ -646,15 +642,21 @@ static int rs690_startup(struct radeon_device *rdev)
 		dev_err(rdev->dev, "failed initializing CP (%d).\n", r);
 		return r;
 	}
-	r = r100_ib_init(rdev);
-	if (r) {
-		dev_err(rdev->dev, "failed initializing IB (%d).\n", r);
-		return r;
-	}
 
 	r = r600_audio_init(rdev);
 	if (r) {
 		dev_err(rdev->dev, "failed initializing audio\n");
+		return r;
+	}
+
+	r = radeon_ib_pool_start(rdev);
+	if (r)
+		return r;
+
+	r = radeon_ib_test(rdev, RADEON_RING_TYPE_GFX_INDEX, &rdev->ring[RADEON_RING_TYPE_GFX_INDEX]);
+	if (r) {
+		dev_err(rdev->dev, "failed testing IB (%d).\n", r);
+		rdev->accel_working = false;
 		return r;
 	}
 
@@ -663,6 +665,8 @@ static int rs690_startup(struct radeon_device *rdev)
 
 int rs690_resume(struct radeon_device *rdev)
 {
+	int r;
+
 	/* Make sur GART are not working */
 	rs400_gart_disable(rdev);
 	/* Resume clock before doing reset */
@@ -679,11 +683,18 @@ int rs690_resume(struct radeon_device *rdev)
 	rv515_clock_startup(rdev);
 	/* Initialize surface registers */
 	radeon_surface_init(rdev);
-	return rs690_startup(rdev);
+
+	rdev->accel_working = true;
+	r = rs690_startup(rdev);
+	if (r) {
+		rdev->accel_working = false;
+	}
+	return r;
 }
 
 int rs690_suspend(struct radeon_device *rdev)
 {
+	radeon_ib_pool_suspend(rdev);
 	r600_audio_fini(rdev);
 	r100_cp_disable(rdev);
 	radeon_wb_disable(rdev);
@@ -762,7 +773,14 @@ int rs690_init(struct radeon_device *rdev)
 	if (r)
 		return r;
 	rs600_set_safe_registers(rdev);
+
+	r = radeon_ib_pool_init(rdev);
 	rdev->accel_working = true;
+	if (r) {
+		dev_err(rdev->dev, "IB initialization failed (%d).\n", r);
+		rdev->accel_working = false;
+	}
+
 	r = rs690_startup(rdev);
 	if (r) {
 		/* Somethings want wront with the accel init stop accel */

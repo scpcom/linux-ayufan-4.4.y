@@ -781,6 +781,12 @@ static int i915_getparam(struct drm_device *dev, void *data,
 	case I915_PARAM_HAS_RELAXED_DELTA:
 		value = 1;
 		break;
+	case I915_PARAM_HAS_GEN7_SOL_RESET:
+		value = 1;
+		break;
+	case I915_PARAM_HAS_LLC:
+		value = HAS_LLC(dev);
+		break;
 	default:
 		DRM_DEBUG_DRIVER("Unknown parameter %d\n",
 				 param->param);
@@ -1177,6 +1183,21 @@ static bool i915_switcheroo_can_switch(struct pci_dev *pdev)
 	return can_switch;
 }
 
+static bool
+intel_enable_ppgtt(struct drm_device *dev)
+{
+	if (i915_enable_ppgtt >= 0)
+		return i915_enable_ppgtt;
+
+#ifdef CONFIG_INTEL_IOMMU
+	/* Disable ppgtt on SNB if VT-d is on. */
+	if (INTEL_INFO(dev)->gen == 6 && intel_iommu_gfx_mapped)
+		return false;
+#endif
+
+	return true;
+}
+
 static int i915_load_gem_init(struct drm_device *dev)
 {
 	struct drm_i915_private *dev_priv = dev->dev_private;
@@ -1190,22 +1211,41 @@ static int i915_load_gem_init(struct drm_device *dev)
 	/* Basic memrange allocator for stolen space */
 	drm_mm_init(&dev_priv->mm.stolen, 0, prealloc_size);
 
-	/* Let GEM Manage all of the aperture.
-	 *
-	 * However, leave one page at the end still bound to the scratch page.
-	 * There are a number of places where the hardware apparently
-	 * prefetches past the end of the object, and we've seen multiple
-	 * hangs with the GPU head pointer stuck in a batchbuffer bound
-	 * at the last page of the aperture.  One page should be enough to
-	 * keep any prefetching inside of the aperture.
-	 */
-	i915_gem_do_init(dev, 0, mappable_size, gtt_size - PAGE_SIZE);
-
 	mutex_lock(&dev->struct_mutex);
-	ret = i915_gem_init_ringbuffer(dev);
+	if (intel_enable_ppgtt(dev) && HAS_ALIASING_PPGTT(dev)) {
+		/* PPGTT pdes are stolen from global gtt ptes, so shrink the
+		 * aperture accordingly when using aliasing ppgtt. */
+		gtt_size -= I915_PPGTT_PD_ENTRIES*PAGE_SIZE;
+		/* For paranoia keep the guard page in between. */
+		gtt_size -= PAGE_SIZE;
+
+		i915_gem_do_init(dev, 0, mappable_size, gtt_size);
+
+		ret = i915_gem_init_aliasing_ppgtt(dev);
+		if (ret) {
+			mutex_unlock(&dev->struct_mutex);
+			return ret;
+		}
+	} else {
+		/* Let GEM Manage all of the aperture.
+		 *
+		 * However, leave one page at the end still bound to the scratch
+		 * page.  There are a number of places where the hardware
+		 * apparently prefetches past the end of the object, and we've
+		 * seen multiple hangs with the GPU head pointer stuck in a
+		 * batchbuffer bound at the last page of the aperture.  One page
+		 * should be enough to keep any prefetching inside of the
+		 * aperture.
+		 */
+		i915_gem_do_init(dev, 0, mappable_size, gtt_size - PAGE_SIZE);
+	}
+
+	ret = i915_gem_init_hw(dev);
 	mutex_unlock(&dev->struct_mutex);
-	if (ret)
+	if (ret) {
+		i915_gem_cleanup_aliasing_ppgtt(dev);
 		return ret;
+	}
 
 	/* Try to set up FBC with a reasonable compressed buffer size */
 	if (I915_HAS_FBC(dev) && i915_powersave) {
@@ -1292,6 +1332,7 @@ cleanup_gem:
 	mutex_lock(&dev->struct_mutex);
 	i915_gem_cleanup_ringbuffer(dev);
 	mutex_unlock(&dev->struct_mutex);
+	i915_gem_cleanup_aliasing_ppgtt(dev);
 cleanup_vga_switcheroo:
 	vga_switcheroo_unregister_client(dev->pdev);
 cleanup_vga_client:
@@ -1660,6 +1701,9 @@ void i915_update_gfx_val(struct drm_i915_private *dev_priv)
 	unsigned long diffms;
 	u32 count;
 
+	if (dev_priv->info->gen != 5)
+		return;
+
 	getrawmonotonic(&now);
 	diff1 = timespec_sub(now, dev_priv->last_time2);
 
@@ -1957,6 +2001,8 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
 
 	i915_kick_out_firmware_fb(dev_priv);
 
+	pci_set_master(dev->pdev);
+
 	/* overlay on gen2 is broken and can't address above 1G */
 	if (IS_GEN2(dev))
 		dma_set_coherent_mask(&dev->pdev->dev, DMA_BIT_MASK(30));
@@ -2059,12 +2105,10 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
 	 * and the registers being closely associated.
 	 *
 	 * According to chipset errata, on the 965GM, MSI interrupts may
-	 * be lost or delayed, and was defeatured. MSI interrupts seem to
-	 * get lost on g4x as well, and interrupt delivery seems to stay
-	 * properly dead afterwards. So we'll just disable them for all
-	 * pre-gen5 chipsets.
+	 * be lost or delayed, but we use them anyways to avoid
+	 * stuck interrupts on some machines.
 	 */
-	if (INTEL_INFO(dev)->gen >= 5)
+	if (!IS_I945G(dev) && !IS_I945GM(dev))
 		pci_enable_msi(dev->pdev);
 
 	spin_lock_init(&dev_priv->gt_lock);
@@ -2103,12 +2147,14 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
 	setup_timer(&dev_priv->hangcheck_timer, i915_hangcheck_elapsed,
 		    (unsigned long) dev);
 
-	spin_lock(&mchdev_lock);
-	i915_mch_dev = dev_priv;
-	dev_priv->mchdev_lock = &mchdev_lock;
-	spin_unlock(&mchdev_lock);
+	if (IS_GEN5(dev)) {
+		spin_lock(&mchdev_lock);
+		i915_mch_dev = dev_priv;
+		dev_priv->mchdev_lock = &mchdev_lock;
+		spin_unlock(&mchdev_lock);
 
-	ips_ping_for_i915_load();
+		ips_ping_for_i915_load();
+	}
 
 	return 0;
 
@@ -2151,7 +2197,7 @@ int i915_driver_unload(struct drm_device *dev)
 		unregister_shrinker(&dev_priv->mm.inactive_shrinker);
 
 	mutex_lock(&dev->struct_mutex);
-	ret = i915_gpu_idle(dev);
+	ret = i915_gpu_idle(dev, true);
 	if (ret)
 		DRM_ERROR("failed to idle hardware: %d\n", ret);
 	mutex_unlock(&dev->struct_mutex);
@@ -2204,6 +2250,7 @@ int i915_driver_unload(struct drm_device *dev)
 		i915_gem_free_all_phys_object(dev);
 		i915_gem_cleanup_ringbuffer(dev);
 		mutex_unlock(&dev->struct_mutex);
+		i915_gem_cleanup_aliasing_ppgtt(dev);
 		if (I915_HAS_FBC(dev) && i915_powersave)
 			i915_cleanup_compression(dev);
 		drm_mm_takedown(&dev_priv->mm.stolen);
@@ -2269,18 +2316,12 @@ void i915_driver_lastclose(struct drm_device * dev)
 
 	i915_gem_lastclose(dev);
 
-	if (dev_priv->agp_heap)
-		i915_mem_takedown(&(dev_priv->agp_heap));
-
 	i915_dma_cleanup(dev);
 }
 
 void i915_driver_preclose(struct drm_device * dev, struct drm_file *file_priv)
 {
-	drm_i915_private_t *dev_priv = dev->dev_private;
 	i915_gem_release(dev, file_priv);
-	if (!drm_core_check_feature(dev, DRIVER_MODESET))
-		i915_mem_release(dev, file_priv, dev_priv->agp_heap);
 }
 
 void i915_driver_postclose(struct drm_device *dev, struct drm_file *file)
@@ -2299,11 +2340,11 @@ struct drm_ioctl_desc i915_ioctls[] = {
 	DRM_IOCTL_DEF_DRV(I915_IRQ_WAIT, i915_irq_wait, DRM_AUTH),
 	DRM_IOCTL_DEF_DRV(I915_GETPARAM, i915_getparam, DRM_AUTH),
 	DRM_IOCTL_DEF_DRV(I915_SETPARAM, i915_setparam, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
-	DRM_IOCTL_DEF_DRV(I915_ALLOC, i915_mem_alloc, DRM_AUTH),
-	DRM_IOCTL_DEF_DRV(I915_FREE, i915_mem_free, DRM_AUTH),
-	DRM_IOCTL_DEF_DRV(I915_INIT_HEAP, i915_mem_init_heap, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
+	DRM_IOCTL_DEF_DRV(I915_ALLOC, drm_noop, DRM_AUTH),
+	DRM_IOCTL_DEF_DRV(I915_FREE, drm_noop, DRM_AUTH),
+	DRM_IOCTL_DEF_DRV(I915_INIT_HEAP, drm_noop, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
 	DRM_IOCTL_DEF_DRV(I915_CMDBUFFER, i915_cmdbuffer, DRM_AUTH),
-	DRM_IOCTL_DEF_DRV(I915_DESTROY_HEAP,  i915_mem_destroy_heap, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
+	DRM_IOCTL_DEF_DRV(I915_DESTROY_HEAP,  drm_noop, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
 	DRM_IOCTL_DEF_DRV(I915_SET_VBLANK_PIPE,  i915_vblank_pipe_set, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
 	DRM_IOCTL_DEF_DRV(I915_GET_VBLANK_PIPE,  i915_vblank_pipe_get, DRM_AUTH),
 	DRM_IOCTL_DEF_DRV(I915_VBLANK_SWAP, i915_vblank_swap, DRM_AUTH),
@@ -2331,6 +2372,8 @@ struct drm_ioctl_desc i915_ioctls[] = {
 	DRM_IOCTL_DEF_DRV(I915_GEM_MADVISE, i915_gem_madvise_ioctl, DRM_UNLOCKED),
 	DRM_IOCTL_DEF_DRV(I915_OVERLAY_PUT_IMAGE, intel_overlay_put_image, DRM_MASTER|DRM_CONTROL_ALLOW|DRM_UNLOCKED),
 	DRM_IOCTL_DEF_DRV(I915_OVERLAY_ATTRS, intel_overlay_attrs, DRM_MASTER|DRM_CONTROL_ALLOW|DRM_UNLOCKED),
+	DRM_IOCTL_DEF_DRV(I915_SET_SPRITE_COLORKEY, intel_sprite_set_colorkey, DRM_MASTER|DRM_CONTROL_ALLOW|DRM_UNLOCKED),
+	DRM_IOCTL_DEF_DRV(I915_GET_SPRITE_COLORKEY, intel_sprite_get_colorkey, DRM_MASTER|DRM_CONTROL_ALLOW|DRM_UNLOCKED),
 };
 
 int i915_max_ioctl = DRM_ARRAY_SIZE(i915_ioctls);

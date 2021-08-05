@@ -558,35 +558,13 @@ static int vmw_cmd_dma(struct vmw_private *dev_priv,
 	} *cmd;
 	int ret;
 	struct vmw_resource *res;
-	SVGA3dCmdSurfaceDMASuffix *suffix;
-	uint32_t bo_size;
 
 	cmd = container_of(header, struct vmw_dma_cmd, header);
-	suffix = (SVGA3dCmdSurfaceDMASuffix *)((unsigned long) &cmd->dma +
-					       header->size - sizeof(*suffix));
-
-	/* Make sure device and verifier stays in sync. */
-	if (unlikely(suffix->suffixSize != sizeof(*suffix))) {
-		DRM_ERROR("Invalid DMA suffix size.\n");
-		return -EINVAL;
-	}
-
 	ret = vmw_translate_guest_ptr(dev_priv, sw_context,
 				      &cmd->dma.guest.ptr,
 				      &vmw_bo);
 	if (unlikely(ret != 0))
 		return ret;
-
-	/* Make sure DMA doesn't cross BO boundaries. */
-	bo_size = vmw_bo->base.num_pages * PAGE_SIZE;
-	if (unlikely(cmd->dma.guest.ptr.offset > bo_size)) {
-		DRM_ERROR("Invalid DMA offset.\n");
-		return -EINVAL;
-	}
-
-	bo_size -= cmd->dma.guest.ptr.offset;
-	if (unlikely(suffix->maximumOffset > bo_size))
-		suffix->maximumOffset = bo_size;
 
 	bo = &vmw_bo->base;
 	ret = vmw_user_surface_lookup_handle(dev_priv, sw_context->tfile,
@@ -1131,10 +1109,11 @@ int vmw_execbuf_process(struct drm_file *file_priv,
 			void *kernel_commands,
 			uint32_t command_size,
 			uint64_t throttle_us,
-			struct drm_vmw_fence_rep __user *user_fence_rep)
+			struct drm_vmw_fence_rep __user *user_fence_rep,
+			struct vmw_fence_obj **out_fence)
 {
 	struct vmw_sw_context *sw_context = &dev_priv->ctx;
-	struct vmw_fence_obj *fence;
+	struct vmw_fence_obj *fence = NULL;
 	uint32_t handle;
 	void *cmd;
 	int ret;
@@ -1230,8 +1209,13 @@ int vmw_execbuf_process(struct drm_file *file_priv,
 	vmw_execbuf_copy_fence_user(dev_priv, vmw_fpriv(file_priv), ret,
 				    user_fence_rep, fence, handle);
 
-	if (likely(fence != NULL))
+	/* Don't unreference when handing fence out */
+	if (unlikely(out_fence != NULL)) {
+		*out_fence = fence;
+		fence = NULL;
+	} else if (likely(fence != NULL)) {
 		vmw_fence_obj_unreference(&fence);
+	}
 
 	mutex_unlock(&dev_priv->cmdbuf_mutex);
 	return 0;
@@ -1384,7 +1368,8 @@ int vmw_execbuf_ioctl(struct drm_device *dev, void *data,
 	ret = vmw_execbuf_process(file_priv, dev_priv,
 				  (void __user *)(unsigned long)arg->commands,
 				  NULL, arg->command_size, arg->throttle_us,
-				  (void __user *)(unsigned long)arg->fence_rep);
+				  (void __user *)(unsigned long)arg->fence_rep,
+				  NULL);
 
 	if (unlikely(ret != 0))
 		goto out_unlock;

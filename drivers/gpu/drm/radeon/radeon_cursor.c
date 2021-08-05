@@ -197,7 +197,12 @@ int radeon_crtc_cursor_set(struct drm_crtc *crtc,
 
 unpin:
 	if (radeon_crtc->cursor_bo) {
-		radeon_gem_object_unpin(radeon_crtc->cursor_bo);
+		robj = gem_to_radeon_bo(radeon_crtc->cursor_bo);
+		ret = radeon_bo_reserve(robj, false);
+		if (likely(ret == 0)) {
+			radeon_bo_unpin(robj);
+			radeon_bo_unreserve(robj);
+		}
 		drm_gem_object_unreference_unlocked(radeon_crtc->cursor_bo);
 	}
 
@@ -233,7 +238,8 @@ int radeon_crtc_cursor_move(struct drm_crtc *crtc,
 		y = 0;
 	}
 
-	if (ASIC_IS_AVIVO(rdev)) {
+	/* fixed on DCE6 and newer */
+	if (ASIC_IS_AVIVO(rdev) && !ASIC_IS_DCE6(rdev)) {
 		int i = 0;
 		struct drm_crtc *crtc_p;
 

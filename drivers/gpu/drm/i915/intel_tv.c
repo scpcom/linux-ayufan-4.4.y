@@ -674,7 +674,7 @@ static const struct tv_mode tv_modes[] = {
 		.filter_table = filter_table,
 	},
 	{
-		.name       = "480p@59.94Hz",
+		.name       = "480p",
 		.clock		= 107520,
 		.refresh	= 59940,
 		.oversample     = TV_OVERSAMPLE_4X,
@@ -682,30 +682,6 @@ static const struct tv_mode tv_modes[] = {
 
 		.hsync_end      = 64,               .hblank_end         = 122,
 		.hblank_start   = 842,              .htotal             = 857,
-
-		.progressive    = true,		    .trilevel_sync = false,
-
-		.vsync_start_f1 = 12,               .vsync_start_f2     = 12,
-		.vsync_len      = 12,
-
-		.veq_ena        = false,
-
-		.vi_end_f1      = 44,               .vi_end_f2          = 44,
-		.nbr_end        = 479,
-
-		.burst_ena      = false,
-
-		.filter_table = filter_table,
-	},
-	{
-		.name       = "480p@60Hz",
-		.clock		= 107520,
-		.refresh	= 60000,
-		.oversample     = TV_OVERSAMPLE_4X,
-		.component_only = 1,
-
-		.hsync_end      = 64,               .hblank_end         = 122,
-		.hblank_start   = 842,              .htotal             = 856,
 
 		.progressive    = true,		    .trilevel_sync = false,
 
@@ -731,7 +707,7 @@ static const struct tv_mode tv_modes[] = {
 		.hsync_end      = 64,               .hblank_end         = 139,
 		.hblank_start   = 859,              .htotal             = 863,
 
-		.progressive    = true,		.trilevel_sync = false,
+		.progressive    = true,		    .trilevel_sync = false,
 
 		.vsync_start_f1 = 10,               .vsync_start_f2     = 10,
 		.vsync_len      = 10,
@@ -754,30 +730,6 @@ static const struct tv_mode tv_modes[] = {
 
 		.hsync_end      = 80,               .hblank_end         = 300,
 		.hblank_start   = 1580,             .htotal             = 1649,
-
-		.progressive	= true,		    .trilevel_sync = true,
-
-		.vsync_start_f1 = 10,               .vsync_start_f2     = 10,
-		.vsync_len      = 10,
-
-		.veq_ena        = false,
-
-		.vi_end_f1      = 29,               .vi_end_f2          = 29,
-		.nbr_end        = 719,
-
-		.burst_ena      = false,
-
-		.filter_table = filter_table,
-	},
-	{
-		.name       = "720p@59.94Hz",
-		.clock		= 148800,
-		.refresh	= 59940,
-		.oversample     = TV_OVERSAMPLE_2X,
-		.component_only = 1,
-
-		.hsync_end      = 80,               .hblank_end         = 300,
-		.hblank_start   = 1580,             .htotal             = 1651,
 
 		.progressive	= true,		    .trilevel_sync = true,
 
@@ -864,32 +816,6 @@ static const struct tv_mode tv_modes[] = {
 
 
 		.vi_end_f1      = 21,               .vi_end_f2          = 22,
-		.nbr_end        = 539,
-
-		.burst_ena      = false,
-
-		.filter_table = filter_table,
-	},
-	{
-		.name       = "1080i@59.94Hz",
-		.clock		= 148800,
-		.refresh	= 29970,
-		.oversample     = TV_OVERSAMPLE_2X,
-		.component_only = 1,
-
-		.hsync_end      = 88,               .hblank_end         = 235,
-		.hblank_start   = 2155,             .htotal             = 2201,
-
-		.progressive	= false,	    .trilevel_sync = true,
-
-		.vsync_start_f1 = 4,            .vsync_start_f2    = 5,
-		.vsync_len      = 10,
-
-		.veq_ena	= true,		    .veq_start_f1	= 4,
-		.veq_start_f2	= 4,		.veq_len	  = 10,
-
-
-		.vi_end_f1	= 21,		.vi_end_f2	  = 22,
 		.nbr_end        = 539,
 
 		.burst_ena      = false,
@@ -1367,7 +1293,7 @@ intel_tv_detect(struct drm_connector *connector, bool force)
 	int type;
 
 	mode = reported_modes[0];
-	drm_mode_set_crtcinfo(&mode, CRTC_INTERLACE_HALVE_V);
+	drm_mode_set_crtcinfo(&mode, 0);
 
 	if (intel_tv->base.base.crtc && intel_tv->base.base.crtc->enabled) {
 		type = intel_tv_detect_type(intel_tv, connector);
@@ -1599,14 +1525,9 @@ static int tv_is_present_in_vbt(struct drm_device *dev)
 		/*
 		 * If the device type is not TV, continue.
 		 */
-		switch (p_child->device_type) {
-		case DEVICE_TYPE_INT_TV:
-		case DEVICE_TYPE_TV:
-		case DEVICE_TYPE_TV_SVIDEO_COMPOSITE:
-			break;
-		default:
+		if (p_child->device_type != DEVICE_TYPE_INT_TV &&
+			p_child->device_type != DEVICE_TYPE_TV)
 			continue;
-		}
 		/* Only when the addin_offset is non-zero, it is regarded
 		 * as present.
 		 */

@@ -49,7 +49,7 @@ struct intel_dp {
 	uint32_t DP;
 	uint8_t  link_configuration[DP_LINK_CONFIGURATION_SIZE];
 	bool has_audio;
-	int force_audio;
+	enum hdmi_force_audio force_audio;
 	uint32_t color_range;
 	int dpms_mode;
 	uint8_t link_bw;
@@ -384,7 +384,7 @@ intel_dp_aux_ch(struct intel_dp *intel_dp,
 		else
 			aux_clock_divider = 225; /* eDP input clock at 450Mhz */
 	} else if (HAS_PCH_SPLIT(dev))
-		aux_clock_divider = 62; /* IRL input clock fixed at 125Mhz */
+		aux_clock_divider = 63; /* IRL input clock fixed at 125Mhz */
 	else
 		aux_clock_divider = intel_hrawclk(dev) / 2;
 
@@ -437,6 +437,10 @@ intel_dp_aux_ch(struct intel_dp *intel_dp,
 			   DP_AUX_CH_CTL_DONE |
 			   DP_AUX_CH_CTL_TIME_OUT_ERROR |
 			   DP_AUX_CH_CTL_RECEIVE_ERROR);
+
+		if (status & (DP_AUX_CH_CTL_TIME_OUT_ERROR |
+			      DP_AUX_CH_CTL_RECEIVE_ERROR))
+			continue;
 		if (status & DP_AUX_CH_CTL_DONE)
 			break;
 	}
@@ -483,7 +487,6 @@ intel_dp_aux_native_write(struct intel_dp *intel_dp,
 	uint8_t	msg[20];
 	int msg_bytes;
 	uint8_t	ack;
-	int retry;
 
 	intel_dp_check_edp(intel_dp);
 	if (send_bytes > 16)
@@ -494,20 +497,18 @@ intel_dp_aux_native_write(struct intel_dp *intel_dp,
 	msg[3] = send_bytes - 1;
 	memcpy(&msg[4], send, send_bytes);
 	msg_bytes = send_bytes + 4;
-	for (retry = 0; retry < 7; retry++) {
+	for (;;) {
 		ret = intel_dp_aux_ch(intel_dp, msg, msg_bytes, &ack, 1);
 		if (ret < 0)
 			return ret;
 		if ((ack & AUX_NATIVE_REPLY_MASK) == AUX_NATIVE_REPLY_ACK)
-			return send_bytes;
+			break;
 		else if ((ack & AUX_NATIVE_REPLY_MASK) == AUX_NATIVE_REPLY_DEFER)
-			usleep_range(400, 500);
+			udelay(100);
 		else
 			return -EIO;
 	}
-
-	DRM_ERROR("too many retries, giving up\n");
-	return -EIO;
+	return send_bytes;
 }
 
 /* Write a single byte to the aux channel in native mode */
@@ -529,7 +530,6 @@ intel_dp_aux_native_read(struct intel_dp *intel_dp,
 	int reply_bytes;
 	uint8_t ack;
 	int ret;
-	int retry;
 
 	intel_dp_check_edp(intel_dp);
 	msg[0] = AUX_NATIVE_READ << 4;
@@ -540,7 +540,7 @@ intel_dp_aux_native_read(struct intel_dp *intel_dp,
 	msg_bytes = 4;
 	reply_bytes = recv_bytes + 1;
 
-	for (retry = 0; retry < 7; retry++) {
+	for (;;) {
 		ret = intel_dp_aux_ch(intel_dp, msg, msg_bytes,
 				      reply, reply_bytes);
 		if (ret == 0)
@@ -553,13 +553,10 @@ intel_dp_aux_native_read(struct intel_dp *intel_dp,
 			return ret - 1;
 		}
 		else if ((ack & AUX_NATIVE_REPLY_MASK) == AUX_NATIVE_REPLY_DEFER)
-			usleep_range(400, 500);
+			udelay(100);
 		else
 			return -EIO;
 	}
-
-	DRM_ERROR("too many retries, giving up\n");
-	return -EIO;
 }
 
 static int
@@ -2155,8 +2152,8 @@ intel_dp_detect(struct drm_connector *connector, bool force)
 	if (status != connector_status_connected)
 		return status;
 
-	if (intel_dp->force_audio) {
-		intel_dp->has_audio = intel_dp->force_audio > 0;
+	if (intel_dp->force_audio != HDMI_AUDIO_AUTO) {
+		intel_dp->has_audio = (intel_dp->force_audio == HDMI_AUDIO_ON);
 	} else {
 		edid = intel_dp_get_edid(connector, &intel_dp->adapter);
 		if (edid) {
@@ -2256,10 +2253,10 @@ intel_dp_set_property(struct drm_connector *connector,
 
 		intel_dp->force_audio = i;
 
-		if (i == 0)
+		if (i == HDMI_AUDIO_AUTO)
 			has_audio = intel_dp_detect_audio(connector);
 		else
-			has_audio = i > 0;
+			has_audio = (i == HDMI_AUDIO_ON);
 
 		if (has_audio == intel_dp->has_audio)
 			return 0;

@@ -225,10 +225,6 @@ int drm_setmaster_ioctl(struct drm_device *dev, void *data,
 	if (!file_priv->minor->master &&
 	    file_priv->minor->master != file_priv->master) {
 		mutex_lock(&dev->struct_mutex);
-		if (!file_priv->allowed_master) {
-			ret = drm_new_set_master(dev, file_priv);
-			goto out_unlock;
-		}
 		file_priv->minor->master = drm_master_get(file_priv->master);
 		file_priv->is_master = 1;
 		if (dev->driver->master_set) {
@@ -238,11 +234,10 @@ int drm_setmaster_ioctl(struct drm_device *dev, void *data,
 				drm_master_put(&file_priv->minor->master);
 			}
 		}
-	out_unlock:
 		mutex_unlock(&dev->struct_mutex);
 	}
 
-	return ret;
+	return 0;
 }
 
 int drm_dropmaster_ioctl(struct drm_device *dev, void *data,
@@ -324,6 +319,7 @@ int drm_fill_in_dev(struct drm_device *dev,
 	drm_lastclose(dev);
 	return retcode;
 }
+EXPORT_SYMBOL(drm_fill_in_dev);
 
 
 /**
@@ -402,6 +398,7 @@ err_idr:
 	*minor = NULL;
 	return ret;
 }
+EXPORT_SYMBOL(drm_get_minor);
 
 /**
  * Put a secondary minor number.
@@ -432,6 +429,12 @@ int drm_put_minor(struct drm_minor **minor_p)
 	kfree(minor);
 	*minor_p = NULL;
 	return 0;
+}
+EXPORT_SYMBOL(drm_put_minor);
+
+static void drm_unplug_minor(struct drm_minor *minor)
+{
+	drm_sysfs_device_remove(minor);
 }
 
 /**
@@ -497,3 +500,21 @@ void drm_put_dev(struct drm_device *dev)
 	kfree(dev);
 }
 EXPORT_SYMBOL(drm_put_dev);
+
+void drm_unplug_dev(struct drm_device *dev)
+{
+	/* for a USB device */
+	if (drm_core_check_feature(dev, DRIVER_MODESET))
+		drm_unplug_minor(dev->control);
+	drm_unplug_minor(dev->primary);
+
+	mutex_lock(&drm_global_mutex);
+
+	drm_device_set_unplugged(dev);
+
+	if (dev->open_count == 0) {
+		drm_put_dev(dev);
+	}
+	mutex_unlock(&drm_global_mutex);
+}
+EXPORT_SYMBOL(drm_unplug_dev);
