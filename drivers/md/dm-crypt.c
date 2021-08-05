@@ -195,13 +195,16 @@ static struct kmem_cache *_crypt_io_pool;
 
 static void clone_init(struct dm_crypt_io *, struct bio *);
 static void kcryptd_queue_crypt(struct dm_crypt_io *io);
+#if !defined(CONFIG_OCF_DM_CRYPT)
 static u8 *iv_of_dmreq(struct crypt_config *cc, struct dm_crypt_request *dmreq);
+#endif
 
 static struct crypt_cpu *this_crypt_config(struct crypt_config *cc)
 {
 	return this_cpu_ptr(cc->cpu);
 }
 
+#if !defined(CONFIG_OCF_DM_CRYPT)
 /*
  * Use this to access cipher attributes that are the same for each CPU.
  */
@@ -209,6 +212,7 @@ static struct crypto_ablkcipher *any_tfm(struct crypt_config *cc)
 {
 	return __this_cpu_ptr(cc->cpu)->tfms[0];
 }
+#endif
 
 /*
  * Different IV generation algorithms:
@@ -696,6 +700,7 @@ static struct dm_crypt_request *dmreq_of_req(struct crypt_config *cc,
 	return (struct dm_crypt_request *)((char *)req + cc->dmreq_start);
 }
 
+#if !defined(CONFIG_OCF_DM_CRYPT)
 static struct ablkcipher_request *req_of_dmreq(struct crypt_config *cc,
 					       struct dm_crypt_request *dmreq)
 {
@@ -708,6 +713,7 @@ static u8 *iv_of_dmreq(struct crypt_config *cc,
 	return (u8 *)ALIGN((unsigned long)(dmreq + 1),
 		crypto_ablkcipher_alignmask(any_tfm(cc)) + 1);
 }
+#endif
 
 static void kcryptd_crypt_read_done(struct dm_crypt_io *io);
 static void crypt_alloc_req(struct crypt_config *cc,
@@ -978,6 +984,7 @@ static int ocf_crypt_convert(struct crypt_config *cc,
 }
 #endif /*CONFIG_OCF_DM_CRYPT*/
 
+#if !defined(CONFIG_OCF_DM_CRYPT)
 static int crypt_convert_block(struct crypt_config *cc,
 			       struct convert_context *ctx,
 			       struct ablkcipher_request *req)
@@ -1035,6 +1042,7 @@ static int crypt_convert_block(struct crypt_config *cc,
 
 static void kcryptd_async_done(struct crypto_async_request *async_req,
 			       int error);
+#endif
 
 static void crypt_alloc_req(struct crypt_config *cc,
 			    struct convert_context *ctx)
@@ -1055,6 +1063,7 @@ static void crypt_alloc_req(struct crypt_config *cc,
 #endif
 }
 
+#if !defined(CONFIG_OCF_DM_CRYPT)
 /*
  * Encrypt / decrypt data from one bio to another one (can be the same one)
  */
@@ -1102,6 +1111,7 @@ static int crypt_convert(struct crypt_config *cc,
 
 	return 0;
 }
+#endif
 
 static void dm_crypt_bio_destructor(struct bio *bio)
 {
@@ -1498,6 +1508,7 @@ static void kcryptd_crypt_read_convert(struct dm_crypt_io *io)
 	crypt_dec_pending(io);
 }
 
+#if !defined(CONFIG_OCF_DM_CRYPT)
 static void kcryptd_async_done(struct crypto_async_request *async_req,
 			       int error)
 {
@@ -1527,6 +1538,7 @@ static void kcryptd_async_done(struct crypto_async_request *async_req,
 	else
 		kcryptd_crypt_write_io_submit(io, 1);
 }
+#endif
 
 static void kcryptd_crypt(struct work_struct *work)
 {
@@ -1573,6 +1585,7 @@ static int crypt_decode_key(u8 *key, char *hex, unsigned int size)
 	return 0;
 }
 
+#if !defined(CONFIG_OCF_DM_CRYPT)
 static void crypt_free_tfms(struct crypt_config *cc, int cpu)
 {
 	struct crypt_cpu *cpu_cc = per_cpu_ptr(cc->cpu, cpu);
@@ -1619,6 +1632,7 @@ static int crypt_setkey_allcpus(struct crypt_config *cc)
 
 	return err;
 }
+#endif
 
 static int crypt_set_key(struct crypt_config *cc, char *key)
 {
