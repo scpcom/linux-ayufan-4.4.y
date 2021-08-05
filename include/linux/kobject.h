@@ -31,6 +31,8 @@
 #define UEVENT_NUM_ENVP			32	/* number of env pointers */
 #define UEVENT_BUFFER_SIZE		2048	/* buffer for the variables */
 
+struct sk_buff;
+
 /* path to the userspace helper executed on an event */
 extern char uevent_helper[];
 
