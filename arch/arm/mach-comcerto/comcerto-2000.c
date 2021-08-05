@@ -807,6 +807,7 @@ struct platform_device comcerto_device_ahci = {
 };
 #endif
 
+#if 0
 /* --------------------------------------------------------------------
  *  XOR Engine
  * -------------------------------------------------------------------- */
@@ -837,6 +838,7 @@ static struct platform_device comcerto_xor_device = {
 	.num_resources  = ARRAY_SIZE(comcerto_xor_resource),
 	.resource = comcerto_xor_resource,
 };
+#endif
 
 /* --------------------------------------------------------------------
  *  Basic C2K MDMA Engine
@@ -931,7 +933,6 @@ static int __init mac_addr_atoi(u8 mac_addr[], char *mac_addr_str)
 	int str_incr_cnt = 0;
 
 	if (*mac_addr_str == ',') {
-		*mac_addr_str++;
 		str_incr_cnt++;
 		return str_incr_cnt;
 	}
