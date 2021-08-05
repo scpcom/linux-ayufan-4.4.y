@@ -90,13 +90,13 @@ config PNFS_FILE_LAYOUT
 
 config PNFS_BLOCK
 	tristate
-	depends on NFS_FS && NFS_V4_1 && BLK_DEV_DM
-	default m
+	depends on NFS_V4_1 && BLK_DEV_DM
+	default NFS_FS
 
 config PNFS_OBJLAYOUT
 	tristate
-	depends on NFS_FS && NFS_V4_1 && SCSI_OSD_ULD
-	default m
+	depends on NFS_V4_1 && SCSI_OSD_ULD
+	default NFS_FS
 
 config ROOT_NFS
 	bool "Root file system on NFS"
