@@ -113,7 +113,7 @@ int m25p80_write_then_read(struct spi_device *spi,
 	int			status;
 	struct spi_message	message;
 	struct spi_transfer	x[2];
-	int len_to_tx = 0, i;
+	int len_to_tx = 0;
 
 	/* Use preallocated DMA-safe buffer.  We can't avoid copying here,
 	 * (as a pure convenience thing), but we can keep heap costs
@@ -583,9 +583,7 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	struct spi_transfer t[2];
 	struct spi_message m;
 	int len_to_tx = 0;
-	int len_tx_total = 0;
 	int len_tx_done = 0;
-	int i;
 	u_char rx_data[8];
 	int cmd_size = m25p_cmdsz(flash);
 	int max_data_len = 8 - m25p_cmdsz(flash);
@@ -763,12 +761,10 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 		size_t *retlen, const u_char *buf)
 {
 	struct m25p *flash = mtd_to_m25p(mtd);
-	u32 page_offset, page_size;
 	struct spi_transfer t[2];
 	struct spi_message m;
 	u_char tx_buf[8];
 	int len_to_tx = 0;
-	int len_tx_total = 0;
 	int len_tx_done = 0;
 	int cmd_size = m25p_cmdsz(flash);
 	int max_data_len = 8 - m25p_cmdsz(flash);
@@ -1173,7 +1169,7 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	struct flash_info		*info;
 	unsigned			i;
 	struct mtd_part_parser_data	ppdata;
-	struct resource *res;
+	struct resource *res = NULL;
 	unsigned long size;
 	int err;
 
@@ -1345,7 +1341,9 @@ static int __devinit m25p_probe(struct spi_device *spi)
 			data ? data->nr_parts : 0);
 
 out_release_mem_region:
-	release_mem_region(res->start, size);
+	if (res) {
+		release_mem_region(res->start, size);
+	}
 out_err:
 	return err;
 }
