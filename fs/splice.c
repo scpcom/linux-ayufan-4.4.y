@@ -2045,7 +2045,8 @@ static ssize_t do_splice_from_socket(struct file *file, struct socket *sock,
 		//cond_resched();
 	}
 	balance_dirty_pages_ratelimited_nr(mapping, cPagesAllocated);
-	copy_to_user(ppos,&pos,sizeof(loff_t));
+	if (copy_to_user(ppos,&pos,sizeof(loff_t)))
+		err = -EFAULT;
     
 done: 
 #if !defined(CONFIG_COMCERTO_64K_PAGES)
