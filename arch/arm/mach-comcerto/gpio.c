@@ -1263,7 +1263,7 @@ void mcu_burning(struct _mcu_burn *mcu_data)
 		int length = 0;
 		long checksum = 0;
 		int sum = 0, x = 0, bit_64_num = 0, opt_64_num = 0, opt_checksum = 0, opt_header = 0, opt_tail = 0;
-		int **Array, **Option;
+		int **Array = NULL, **Option = NULL;
 		int mcu_header = 0;
 		int mcu_check = 0;
 		int verify_format_ok = 0;
@@ -2335,7 +2335,6 @@ static int gpio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	unsigned long ret = 0;
 	struct _hdd_ioctl hdd_data;
-	struct _mcu_ioctl mcu_data;
 	struct _mcu_burn mcu_data2;
 
 
@@ -2364,13 +2363,13 @@ static int gpio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 				return ret;
 			break;
 		case HDD_SET_CTL_IOC_NUM:
-			copy_from_user(&hdd_data, (void __user *) arg, sizeof(struct _hdd_ioctl));
-			hdd_power_set(&hdd_data);
+			if (!copy_from_user(&hdd_data, (void __user *) arg, sizeof(struct _hdd_ioctl)))
+				hdd_power_set(&hdd_data);
 			break;
 		case NAS_IOC_MCU_BURNING:
 			is_mcu_burning = 1;
-			copy_from_user(&mcu_data2, (void __user *) arg, sizeof(struct _mcu_burn));
-			mcu_burning(&mcu_data2);
+			if (!copy_from_user(&mcu_data2, (void __user *) arg, sizeof(struct _mcu_burn)))
+				mcu_burning(&mcu_data2);
 			break;
 
 		default :
