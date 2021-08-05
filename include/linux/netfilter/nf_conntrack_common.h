@@ -93,6 +93,15 @@ enum ip_conntrack_status {
 	IPS_DPI_ALLOWED_BIT = 14,
 	IPS_DPI_ALLOWED = (1 << IPS_DPI_ALLOWED_BIT),
 #endif
+
+	/* Be careful here, modifying these bits can make things messy,
+	 * so don't let users modify them directly.
+	 */
+	IPS_UNCHANGEABLE_MASK = (IPS_NAT_DONE_MASK | IPS_NAT_MASK |
+				 IPS_EXPECTED | IPS_CONFIRMED | IPS_DYING |
+				 IPS_SEQ_ADJUST | IPS_TEMPLATE),
+
+	__IPS_MAX_BIT = 15,
 };
 
 /* Connection tracking event types */
