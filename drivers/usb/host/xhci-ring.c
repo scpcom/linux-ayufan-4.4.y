@@ -2600,9 +2600,8 @@ cleanup:
 		 * Do not update event ring dequeue pointer if we're in a loop
 		 * processing missed tds.
 		 */
-		if (trb_comp_code == COMP_MISSED_INT || !ep->skip) {
+		if (!handling_skipped_tds)
 			inc_deq(xhci, xhci->event_ring);
-		}
 
 		if (ret) {
 			urb = td->urb;
