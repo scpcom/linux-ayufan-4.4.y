@@ -1259,9 +1259,11 @@ err0:
 
 static int comcerto_pcie_device_reset(struct pcie_port *pp)
 {
+#if 0
 	int ii;
 	struct pcie_port *l_pp = pp;
 	struct pci_dev *pci_dev = NULL;
+#endif
 
 	printk(KERN_INFO "ENTER: Bringing PCIe%d device reset\n", pp->port);
 	if (!pp->link_state)
@@ -1319,7 +1321,9 @@ static int comcerto_pcie_device_reset(struct pcie_port *pp)
 static int comcerto_pcie_device_reset_exit(struct pcie_port *pp)
 {
 	unsigned int val;
+#if 0
 	struct pci_dev *pci_dev;
+#endif
 
 	printk(KERN_INFO "ENTER: Bringing PCIe%d device out-of-reset\n", pp->port);
 
@@ -1503,8 +1507,7 @@ static DEVICE_ATTR(device_reset, 0644, comcerto_pcie_show_reset, comcerto_pcie_s
 static ssize_t comcerto_pcie_serdes_pd(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct platform_device *pdev = to_platform_device(dev);
-        struct pcie_port *pp = &pcie_port[pdev->id];
-	int reset = 0, rc;
+	int reset = 0;
 
 	sscanf(buf, "%d", &reset);
 
