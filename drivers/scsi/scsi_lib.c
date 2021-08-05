@@ -46,6 +46,7 @@
 #define MAX_HD_NUM      2
 #endif
 
+extern int drive_bays;
 extern struct workqueue_struct *hdd_workqueue;
 static void hdd_error_handler(struct work_struct *in);
 static DECLARE_WORK(HDD_ERR_DETECT, hdd_error_handler);
@@ -803,7 +804,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 		
 	int SATA_PORT = 0;
 	/* LED Control For STG222 */
-	if (strcmp(dev_name(&cmd->device->sdev_gendev), "0:0:0:0") == 0) {
+	if ((drive_bays > 0) && (strcmp(dev_name(&cmd->device->sdev_gendev), "0:0:0:0") == 0)) {
 		if (atomic_read(&sata_badblock_idf[0]) == 0) {
 			if(atomic_read(&sata_blinking_times[0]) >= SATA_BLINKING_RESET) {
 				atomic_set(&sata_blinking_times[0], 0);
@@ -811,7 +812,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 			atomic_inc(&sata_blinking_times[0]);
 		}
 		SATA_PORT = 1;
-	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "1:0:0:0") == 0) {
+	} else if ((drive_bays > 1) && (strcmp(dev_name(&cmd->device->sdev_gendev), "1:0:0:0") == 0)) {
 		if (atomic_read(&sata_badblock_idf[1]) == 0) {
 			if(atomic_read(&sata_blinking_times[1]) >= SATA_BLINKING_RESET) {
 				atomic_set(&sata_blinking_times[1], 0);
@@ -820,7 +821,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 		}
 		SATA_PORT = 2;
 #ifdef CONFIG_4BAY
-	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "2:0:0:0") == 0) {
+	} else if ((drive_bays > 2) && (strcmp(dev_name(&cmd->device->sdev_gendev), "2:0:0:0") == 0)) {
 		if (atomic_read(&sata_badblock_idf[2]) == 0) {
 			if(atomic_read(&sata_blinking_times[2]) >= SATA_BLINKING_RESET) {
 				atomic_set(&sata_blinking_times[2], 0);
@@ -828,7 +829,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 			atomic_inc(&sata_blinking_times[2]);
 		}
 		SATA_PORT = 3;
-	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "3:0:0:0") == 0) {
+	} else if ((drive_bays > 3) && (strcmp(dev_name(&cmd->device->sdev_gendev), "3:0:0:0") == 0)) {
 		if (atomic_read(&sata_badblock_idf[3]) == 0) {
 			if(atomic_read(&sata_blinking_times[3]) >= SATA_BLINKING_RESET) {
 				atomic_set(&sata_blinking_times[3], 0);
@@ -1183,20 +1184,20 @@ int scsi_init_io(struct scsi_cmnd *cmd, gfp_t gfp_mask)
 	struct request *rq = cmd->request;
 	
 	/* LED Control For STG540 */
-	if (strcmp(dev_name(&cmd->device->sdev_gendev), "0:0:0:0") == 0) {
+	if ((drive_bays > 0) && (strcmp(dev_name(&cmd->device->sdev_gendev), "0:0:0:0") == 0)) {
 		if (atomic_read(&sata_badblock_idf[0]) == 0) {
 			atomic_inc(&sata_hd_accessing[0]);
 		}
-	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "1:0:0:0") == 0) {
+	} else if ((drive_bays > 1) && (strcmp(dev_name(&cmd->device->sdev_gendev), "1:0:0:0") == 0)) {
 		if (atomic_read(&sata_badblock_idf[1]) == 0) {
 			atomic_inc(&sata_hd_accessing[1]);
 		}
 #ifdef CONFIG_4BAY
-	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "2:0:0:0") == 0) {
+	} else if ((drive_bays > 2) && (strcmp(dev_name(&cmd->device->sdev_gendev), "2:0:0:0") == 0)) {
 		if (atomic_read(&sata_badblock_idf[2]) == 0) {
 			atomic_inc(&sata_hd_accessing[2]);
 		}
-	} else if (strcmp(dev_name(&cmd->device->sdev_gendev), "3:0:0:0") == 0) {
+	} else if ((drive_bays > 3) && (strcmp(dev_name(&cmd->device->sdev_gendev), "3:0:0:0") == 0)) {
 		if (atomic_read(&sata_badblock_idf[3]) == 0) {
 			atomic_inc(&sata_hd_accessing[3]);
 		}

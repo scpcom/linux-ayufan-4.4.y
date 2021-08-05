@@ -127,6 +127,13 @@ static DEFINE_IDA(sd_index_ida);
 
 //for STG540
 /*for hdd error*/
+#ifdef CONFIG_4BAY
+int drive_bays = 4;
+#else
+int drive_bays = 2;
+#endif
+static struct proc_dir_entry *drive_bays_proc_root = NULL;
+static struct proc_dir_entry *drive_bays_count_proc = NULL;
 struct workqueue_struct *hdd_workqueue = NULL;
 static DECLARE_WORK(HDD_ERR_DETECT, NULL);
 atomic_t sata_device_num;
@@ -563,6 +570,24 @@ static const struct file_operations disk4_io_err_proc_ops = {
 	write: disk4_io_err_write_proc_func
 };
 
+static int drive_bays_count_read_fun(char *buf, char **start, off_t offset,
+		int count, int *eof, void *data)
+{
+	int len;
+
+	len = sprintf(buf, "%i\n", drive_bays);
+
+	*eof = 1;
+
+	return len;
+}
+
+static int drive_bays_count_write_fun(struct file *file, const char __user *buffer,
+		unsigned long count, void *data)
+{
+	/* do nothing */
+	return 0;
+}
 
 /* This semaphore is used to mediate the 0->1 reference get in the
  * face of object destruction (i.e. we can't allow a get on an
@@ -3412,31 +3437,43 @@ static int sd_probe(struct device *dev)
 	switch(hdd_port_num)
 	{
 		case 0:
-			turn_off_led_all(LED_HDD1);
-			turn_on_led(LED_HDD1, GREEN);
-			atomic_set(&sata_badblock_idf[hdd_port_num], 0);
-			atomic_set(&disk1_io_err, DISK_NO_ERR);
+			if (drive_bays > 0)
+			{
+				turn_off_led_all(LED_HDD1);
+				turn_on_led(LED_HDD1, GREEN);
+				atomic_set(&sata_badblock_idf[hdd_port_num], 0);
+				atomic_set(&disk1_io_err, DISK_NO_ERR);
+			}
 			break;
 
 		case 1:
-			turn_off_led_all(LED_HDD2);
-			turn_on_led(LED_HDD2, GREEN);
-			atomic_set(&sata_badblock_idf[hdd_port_num], 0);
-			atomic_set(&disk2_io_err, DISK_NO_ERR);
+			if (drive_bays > 1)
+			{
+				turn_off_led_all(LED_HDD2);
+				turn_on_led(LED_HDD2, GREEN);
+				atomic_set(&sata_badblock_idf[hdd_port_num], 0);
+				atomic_set(&disk2_io_err, DISK_NO_ERR);
+			}
 			break;
 #ifdef CONFIG_4BAY
 		case 2:
-			turn_off_led_all(LED_HDD3);
-			turn_on_led(LED_HDD3, GREEN);
-			atomic_set(&sata_badblock_idf[hdd_port_num], 0);
-			atomic_set(&disk3_io_err, DISK_NO_ERR);
+			if (drive_bays > 2)
+			{
+				turn_off_led_all(LED_HDD3);
+				turn_on_led(LED_HDD3, GREEN);
+				atomic_set(&sata_badblock_idf[hdd_port_num], 0);
+				atomic_set(&disk3_io_err, DISK_NO_ERR);
+			}
 			break;
 
 		case 3:
-			turn_off_led_all(LED_HDD4);
-			turn_on_led(LED_HDD4, GREEN);
-			atomic_set(&sata_badblock_idf[hdd_port_num], 0);
-			atomic_set(&disk4_io_err, DISK_NO_ERR);
+			if (drive_bays > 3)
+			{
+				turn_off_led_all(LED_HDD4);
+				turn_on_led(LED_HDD4, GREEN);
+				atomic_set(&sata_badblock_idf[hdd_port_num], 0);
+				atomic_set(&disk4_io_err, DISK_NO_ERR);
+			}
 			break;
 #endif		
 		default:
@@ -3545,31 +3582,43 @@ static int sd_remove(struct device *dev)
 	switch(hdd_port_num)
 	{
 		case 0:
-			turn_off_led_all(LED_HDD1);
-			turn_on_led(LED_HDD1, RED);
-			atomic_set(&sata_badblock_idf[hdd_port_num], 1);
-			atomic_set(&disk1_io_err, DISK_NO_ERR);
+			if (drive_bays > 0)
+			{
+				turn_off_led_all(LED_HDD1);
+				turn_on_led(LED_HDD1, RED);
+				atomic_set(&sata_badblock_idf[hdd_port_num], 1);
+				atomic_set(&disk1_io_err, DISK_NO_ERR);
+			}
 			break;
 
 		case 1:
-			turn_off_led_all(LED_HDD2);
-			turn_on_led(LED_HDD2, RED);
-			atomic_set(&sata_badblock_idf[hdd_port_num], 1);
-			atomic_set(&disk2_io_err, DISK_NO_ERR);
+			if (drive_bays > 1)
+			{
+				turn_off_led_all(LED_HDD2);
+				turn_on_led(LED_HDD2, RED);
+				atomic_set(&sata_badblock_idf[hdd_port_num], 1);
+				atomic_set(&disk2_io_err, DISK_NO_ERR);
+			}
 			break;
 #ifdef CONFIG_4BAY
 		case 2:
-			turn_off_led_all(LED_HDD3);
-			turn_on_led(LED_HDD3, RED);
-			atomic_set(&sata_badblock_idf[hdd_port_num], 1);
-			atomic_set(&disk3_io_err, DISK_NO_ERR);
+			if (drive_bays > 2)
+			{
+				turn_off_led_all(LED_HDD3);
+				turn_on_led(LED_HDD3, RED);
+				atomic_set(&sata_badblock_idf[hdd_port_num], 1);
+				atomic_set(&disk3_io_err, DISK_NO_ERR);
+			}
 			break;
 
 		case 3:
-			turn_off_led_all(LED_HDD4);
-			turn_on_led(LED_HDD4, RED);
-			atomic_set(&sata_badblock_idf[hdd_port_num], 1);
-			atomic_set(&disk4_io_err, DISK_NO_ERR);
+			if (drive_bays > 3)
+			{
+				turn_off_led_all(LED_HDD4);
+				turn_on_led(LED_HDD4, RED);
+				atomic_set(&sata_badblock_idf[hdd_port_num], 1);
+				atomic_set(&disk4_io_err, DISK_NO_ERR);
+			}
 			break;
 #endif
 	}
@@ -3799,6 +3848,17 @@ static int __init init_sd(void)
 		disk4_io_err_proc = proc_create_data("disk4_err", 0644, disk_io_err_proc_root, &disk4_io_err_proc_ops, NULL);
 	}
 
+	drive_bays_proc_root = proc_mkdir("drive_bays", NULL);
+	if (drive_bays_proc_root != NULL)
+	{
+		drive_bays_count_proc = create_proc_entry("count", 0644, drive_bays_proc_root);
+		if(drive_bays_count_proc != NULL)
+		{
+			drive_bays_count_proc->read_proc = drive_bays_count_read_fun;
+			drive_bays_count_proc->write_proc = drive_bays_count_write_fun;
+		}
+	}
+
 	for (i = 0; i < SD_MAJORS; i++) {
 		if (register_blkdev(sd_major(i), "sd") != 0)
 			continue;
@@ -3900,4 +3960,20 @@ static void sd_print_result(struct scsi_disk *sdkp, int result)
 	sd_printk(KERN_INFO, sdkp, " ");
 	scsi_show_result(result);
 }
+
+static int __init drive_bays_setup(char *str)
+{
+	if (get_option(&str, &drive_bays) != 1)
+		return 1;
+
+	if (drive_bays < 1)
+		drive_bays = 2;
+	if (drive_bays > MAX_HD_NUM)
+		drive_bays = MAX_HD_NUM;
+
+	pr_debug("drive_bays: %u\n", drive_bays);
+
+	return 1;
+}
+__setup("drive_bays=", drive_bays_setup);
 
