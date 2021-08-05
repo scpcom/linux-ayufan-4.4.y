@@ -23,6 +23,7 @@
 #define SCSI_NETLINK_H
 
 #include <linux/netlink.h>
+#include <linux/types.h>
 
 
 /*
