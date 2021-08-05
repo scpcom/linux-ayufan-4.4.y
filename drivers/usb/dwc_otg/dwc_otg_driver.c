@@ -684,7 +684,7 @@ static irqreturn_t dwc_otg_common_irq(int irq, void *dev)
  *
  * @param _dev
  */
-static void dwc_otg_driver_remove(
+static int dwc_otg_driver_remove(
 #ifdef LM_INTERFACE
 					 struct lm_device *_dev
 #elif defined(PCI_INTERFACE)
@@ -707,14 +707,14 @@ static void dwc_otg_driver_remove(
 	if (!otg_dev) {
 		/* Memory allocation for the dwc_otg_device failed. */
 		DWC_DEBUGPL(DBG_ANY, "%s: otg_dev NULL!\n", __func__);
-		return;
+		return -ENOMEM;
 	}
 #ifndef DWC_DEVICE_ONLY
 	if (otg_dev->hcd) {
 		hcd_remove(_dev);
 	} else {
 		DWC_DEBUGPL(DBG_ANY, "%s: otg_dev->hcd NULL!\n", __func__);
-		return;
+		return -EINVAL;
 	}
 #endif
 
@@ -723,7 +723,7 @@ static void dwc_otg_driver_remove(
 		pcd_remove(_dev);
 	} else {
 		DWC_DEBUGPL(DBG_ANY, "%s: otg_dev->pcd NULL!\n", __func__);
-		return;
+		return -EINVAL;
 	}
 #endif
 	/*
@@ -733,14 +733,14 @@ static void dwc_otg_driver_remove(
 		free_irq(otg_dev->irq, otg_dev);
 	} else {
 		DWC_DEBUGPL(DBG_ANY, "%s: There is no installed irq!\n", __func__);
-		return;
+		return -EINVAL;
 	}
 
 	if (otg_dev->core_if) {
 		dwc_otg_cil_remove(otg_dev->core_if);
 	} else {
 		DWC_DEBUGPL(DBG_ANY, "%s: otg_dev->core_if NULL!\n", __func__);
-		return;
+		return -EINVAL;
 	}
 
 	/*
@@ -771,6 +771,8 @@ static void dwc_otg_driver_remove(
 #else
 	platform_set_drvdata(_dev, 0);
 #endif
+
+	return 0;
 }
 
 /**
