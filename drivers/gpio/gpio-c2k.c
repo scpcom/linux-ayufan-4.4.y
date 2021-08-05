@@ -133,7 +133,7 @@ static struct c2k_gpio_chip c2k_gpio_chip = {
 	},
 };
 
-void __init c2k_init_gpio(void)
+int __init c2k_init_gpio(void)
 {
 	int ret;
 
@@ -141,6 +141,8 @@ void __init c2k_init_gpio(void)
 
 	if (ret)
 		printk(KERN_WARNING "C2K GPIO registration failed: %d\n", ret);
+
+	return ret;
 }
 pure_initcall(c2k_init_gpio);
 
