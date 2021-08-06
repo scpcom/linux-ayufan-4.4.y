@@ -1204,6 +1204,7 @@ static int scsi_init_sgtable(struct request *req, struct scsi_data_buffer *sdb,
  */
 int scsi_init_io(struct scsi_cmnd *cmd, gfp_t gfp_mask)
 {
+	int error;
 	struct request *rq = cmd->request;
 	
 	/* LED Control For STG540 */
@@ -1228,7 +1229,7 @@ int scsi_init_io(struct scsi_cmnd *cmd, gfp_t gfp_mask)
 	}
 	
 
-	int error = scsi_init_sgtable(rq, &cmd->sdb, gfp_mask);
+	error = scsi_init_sgtable(rq, &cmd->sdb, gfp_mask);
 	if (error)
 		goto err_exit;
 
