@@ -20,7 +20,7 @@
 
 
 #if defined(CONFIG_ARCH_M86XXX)
-#define VMALLOC_END       (0xF0000000)
+#define VMALLOC_END       (0xF0000000UL)
 #else
 #error "Unsupported CPU"
 #endif
