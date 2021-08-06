@@ -534,6 +534,7 @@ int do_mcu_program_entry(unsigned int r_mode, unsigned int m_mode, unsigned int 
 	int i, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio;
 	int check_ack[8] = {1,1,r_mode,mode_sel[m_mode][0],mode_sel[m_mode][1],mode_sel[m_mode][2],mode_sel[m_mode][3],s_mode};
 	int read_ack[8];
+	int check_fail_flag;
 
 	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
 	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
@@ -604,7 +605,7 @@ int do_mcu_program_entry(unsigned int r_mode, unsigned int m_mode, unsigned int 
 	set_gpio_output(mcu_resb_gpio, 0x1);
 	
 	// check read ack
-	int check_fail_flag = 0;
+	check_fail_flag = 0;
 	for (i=0; i<8; i++) {
 		if (r_mode == 1) {
 			// Mode3~Mode0 don't care
@@ -743,7 +744,7 @@ int mcu_program_check(int bit_64_num, long mcu_header, int checksum)
 		if ((check_value + checksum) % 256 == 0) {
 			printk(KERN_ALERT "[mcu_program_check] Verify Program ROM CheckSum is OK...\n");
 		} else {
-			printk(KERN_ERR "[mcu_program_check] Writing Program ROM unsuccessfully(check_value:%ld, checksum:%ld, mcu_header:%ld)...\n", check_value, checksum, mcu_header);
+			printk(KERN_ERR "[mcu_program_check] Writing Program ROM unsuccessfully(check_value:%ld, checksum:%d, mcu_header:%ld)...\n", check_value, checksum, mcu_header);
 			return_num = -1;
 		}	
 	}	
@@ -822,10 +823,12 @@ int mcu_data_check(int bit_8_num, long mcu_header, int checksum)
 	int i = 0, j = 0, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio, entry_flag;
 	int return_num = 0;
 	long check_value = 0;
-	check_value += mcu_header;
 
 	int mcu_addr[bit_8_num][9];
 	int sum;
+
+	check_value += mcu_header;
+
 	for (i=0; i<bit_8_num; i++) {
 		sum = i;
 		do {
@@ -915,7 +918,7 @@ int mcu_data_check(int bit_8_num, long mcu_header, int checksum)
 		if ((check_value + checksum) % 256 == 0) {
 			printk(KERN_ALERT "[mcu_data_check] Verify Data ROM CheckSum is OK...\n");
 		} else {
-			printk(KERN_ERR "[mcu_data_check] Writing Data ROM unsuccessfully(check_value:%ld, checksum:%ld, mcu_header:%ld)...\n", check_value, checksum, mcu_header);
+			printk(KERN_ERR "[mcu_data_check] Writing Data ROM unsuccessfully(check_value:%ld, checksum:%d, mcu_header:%ld)...\n", check_value, checksum, mcu_header);
 			return_num = -1;
 		}
 	}
@@ -957,6 +960,7 @@ void mcu_write_data(int **Array, int bit_8_num)
 
 	if (entry_flag == 0) {
 		for (i=0; i<bit_8_num; i++) {
+			int num;
 			// send start bit
 			set_gpio_output(mcu_sclk_gpio, 0x1);
 			set_gpio_output(mcu_sdata_gpio, 0x1);
@@ -1018,7 +1022,7 @@ void mcu_write_data(int **Array, int bit_8_num)
 			udelay(3);
 			set_gpio_output(mcu_sclk_gpio, 0x0);
 			set_gpio_input(mcu_sdata_gpio);
-			int num = 0;
+			num = 0;
 			do {
 				num++;
 				udelay(1000);
@@ -1052,10 +1056,11 @@ int mcu_option_check(int bit_64_num, int mcu_header, int checksum, int mcu_tail)
 	int i, j, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio, entry_flag;
 	int return_num = 0;
 	long check_value = 0;
-	check_value += mcu_header;
-	check_value += mcu_tail;
 
 	int Array_CHK[bit_64_num];
+
+	check_value += mcu_header;
+	check_value += mcu_tail;
 
 	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
 	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
@@ -1098,7 +1103,7 @@ int mcu_option_check(int bit_64_num, int mcu_header, int checksum, int mcu_tail)
 		if ((check_value + checksum) % 256 == 0) {
 			printk(KERN_ALERT "[mcu_option_check] Verify Option ROM CheckSum is OK...\n");
 		} else {
-			printk(KERN_ERR "[mcu_option_check] Writing Option ROM unsuccessfully(check_value:%ld, checksum:%ld, mcu_header:%ld, mcu_tail:%ld)...\n", check_value, checksum, mcu_header, mcu_tail);
+			printk(KERN_ERR "[mcu_option_check] Writing Option ROM unsuccessfully(check_value:%ld, checksum:%d, mcu_header:%d, mcu_tail:%d)...\n", check_value, checksum, mcu_header, mcu_tail);
 			
 			for (i=0; i<bit_64_num; i++) {
 				printk("%d\n",Array_CHK[i]);
@@ -1255,7 +1260,6 @@ void mcu_burning(struct _mcu_burn *mcu_data)
 	
 	if (fp!=NULL) 
 	{ 
-		memset(buf,0,sizeof(buf));
 		int c, num=0, record_num=0, i;
 		int record_flag = 0;
 		int allocate_flag = 0;
@@ -1267,6 +1271,8 @@ void mcu_burning(struct _mcu_burn *mcu_data)
 		int mcu_header = 0;
 		int mcu_check = 0;
 		int verify_format_ok = 0;
+
+		memset(buf,0,sizeof(buf));
 
 		while ((ret = readFile(fp,buf,1))>0) {
 			c = buf[0];
@@ -1328,7 +1334,7 @@ void mcu_burning(struct _mcu_burn *mcu_data)
 					if (mcu_check == -1 || record_type == 2) break;
 				} else {
 					mcu_check = -1;
-					printk(KERN_ERR "[ERR] checksum error(%d)!!!\n", checksum);
+					printk(KERN_ERR "[ERR] checksum error(%ld)!!!\n", checksum);
 					break;
 				}
 			}
@@ -1341,9 +1347,9 @@ void mcu_burning(struct _mcu_burn *mcu_data)
 				if (num == 7) mcu_header = checksum;
 				if (num > 7) {
 					if (!allocate_flag) {
-						allocate_flag = 1;
 						int *pData;
 						int m, n;
+						allocate_flag = 1;
 						if (record_type < 2) {
 							m = length / 8 + 1;
 							n = 64;
@@ -1457,6 +1463,7 @@ void mcu_program(struct _mcu_ioctl *mcu_data)
 	int i, mcu_sclk_gpio, mcu_resb_gpio, mcu_sdata_gpio, mcu_bi_gpio;
 	int check_ack[8] = {1,1,r_mode,mode_sel[m_mode][0],mode_sel[m_mode][1],mode_sel[m_mode][2],mode_sel[m_mode][3],s_mode};
 	int read_ack[8];
+	int check_fail_flag;
 											
 	mcu_sclk_gpio = MCU_SCLK_REG_OFFSET;
 	mcu_resb_gpio = MCU_RESB_REG_OFFSET;
@@ -1526,7 +1533,7 @@ void mcu_program(struct _mcu_ioctl *mcu_data)
 	set_gpio_output(mcu_resb_gpio, 0x1);
 
 	// check read ack
-	int check_fail_flag = 0;
+	check_fail_flag = 0;
 	for (i=0; i<8; i++) {
 		if (read_ack[i] != check_ack[i]) {
 			check_fail_flag = 1;
@@ -1783,10 +1790,11 @@ void Reset_To_Defu_func(struct work_struct *in)
 
 void zyxel_power_off(void)
 {
+	unsigned long reg;
+
 	printk(KERN_ERR"GPIO[15] is pull high for power off\n");
 	
 	/* Output Enable High as Output */
-	unsigned long reg;
 	reg = GPIO_DATA_OUT_ENABLE(POWER_OFF_REG_OFFSET);
 	writel(readl(reg) | (0x1 << GPIO_BIT_SET_OFFSET(POWER_OFF_REG_OFFSET)), reg);
 
