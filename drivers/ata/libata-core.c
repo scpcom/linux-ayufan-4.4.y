@@ -2280,7 +2280,7 @@ int ata_dev_configure(struct ata_device *dev)
 
 		if (ata_id_has_lba(id)) {
 			const char *lba_desc;
-			char ncq_desc[24];
+			char ncq_desc[32];
 
 			lba_desc = "LBA";
 			dev->flags |= ATA_DFLAG_LBA;
