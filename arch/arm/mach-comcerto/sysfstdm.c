@@ -384,7 +384,7 @@ static ssize_t tdm_data_read(struct device *dev,
 	else if (strcmp("clock_hz", attr->attr.name) == 0)
 		return sprintf(buf, "%lu\n", clock_frequency_get());
 	else if (strcmp("tdm_mux", attr->attr.name) == 0)
-                return sprintf(buf, "%lu\n", (readl(COMCERTO_GPIO_MISC_PIN_SELECT) >> 4) & 0x3);
+                return sprintf(buf, "%u\n", (readl(COMCERTO_GPIO_MISC_PIN_SELECT) >> 4) & 0x3);
 	else
 	{
 		printk(KERN_ERR "%s: Unknown file attribute\n", __func__);
