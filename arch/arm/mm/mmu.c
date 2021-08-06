@@ -1058,13 +1058,13 @@ static void __init map_lowmem(void)
 			printk("Comcerto: zone_dma mapping size=%lx type=%lx\n", (unsigned long) map.length, (unsigned long) map.type);
 
 			if (!arm_dma_zone.start)
-				arm_dma_zone.start = __phys_to_virt(start);
+				arm_dma_zone.start = (void *)__phys_to_virt(start);
 
 			create_mapping(&map);
 			start += length_ncnb_now;
 			length_ncnb -= length_ncnb_now;
 
-			arm_dma_zone.end = __phys_to_virt(start);
+			arm_dma_zone.end = (void *)__phys_to_virt(start);
 
 			if (start == end)
 				continue;
