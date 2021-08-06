@@ -1224,7 +1224,7 @@ static int __devinit m25p_probe(struct spi_device *spi)
 		goto out_release_mem_region;
 	}
 
-	flash->command = COMCERTO_FASTSPI_IRAM_VADDR;
+	flash->command = (u8 *)COMCERTO_FASTSPI_IRAM_VADDR;
 	flash->value = flash->command + DMA_ALIGN;
 	flash->data = flash->command + 2*DMA_ALIGN;
 
