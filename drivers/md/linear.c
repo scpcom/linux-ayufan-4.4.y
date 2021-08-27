@@ -1,23 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
-   linear.c : Multiple Devices driver for Linux
-	      Copyright (C) 1994-96 Marc ZYNGIER
-	      <zyngier@ufr-info-p7.ibp.fr> or
-	      <maz@gloups.fdn.fr>
-
-   Linear mode management functions.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-   
-   You should have received a copy of the GNU General Public License
-   (for example /usr/src/linux/COPYING); if not, write to the Free
-   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
-*/
  
 #include <linux/blkdev.h>
 #include <linux/raid/md_u.h>
@@ -27,9 +10,6 @@
 #include "md.h"
 #include "linear.h"
 
-/*
- * find which device holds a particular offset 
- */
 static inline struct dev_info *which_dev(struct mddev *mddev, sector_t sector)
 {
 	int lo, mid, hi;
@@ -38,10 +18,6 @@ static inline struct dev_info *which_dev(struct mddev *mddev, sector_t sector)
 	lo = 0;
 	hi = mddev->raid_disks - 1;
 	conf = rcu_dereference(mddev->private);
-
-	/*
-	 * Binary Search
-	 */
 
 	while (hi > lo) {
 
@@ -55,14 +31,6 @@ static inline struct dev_info *which_dev(struct mddev *mddev, sector_t sector)
 	return conf->disks + lo;
 }
 
-/**
- *	linear_mergeable_bvec -- tell bio layer if two requests can be merged
- *	@q: request queue
- *	@bvm: properties of new bio
- *	@biovec: the request that could be merged to it.
- *
- *	Return amount of bytes we can take at this offset
- */
 static int linear_mergeable_bvec(struct request_queue *q,
 				 struct bvec_merge_data *bvm,
 				 struct bio_vec *biovec)
@@ -84,8 +52,7 @@ static int linear_mergeable_bvec(struct request_queue *q,
 
 	if (maxsectors <= (PAGE_SIZE >> 9 ) && bio_sectors == 0)
 		return biovec->bv_len;
-	/* The bytes available at this offset could be really big,
-	 * so we cap at 2^31 to avoid overflow */
+	 
 	if (maxsectors > (1 << (31-9)))
 		return 1<<31;
 	return maxsectors << 9;
@@ -182,10 +149,7 @@ static struct linear_conf *linear_conf(struct mddev *mddev, int raid_disks)
 
 		disk_stack_limits(mddev->gendisk, rdev->bdev,
 				  rdev->data_offset << 9);
-		/* as we don't honour merge_bvec_fn, we must never risk
-		 * violating it, so limit max_segments to 1 lying within
-		 * a single page.
-		 */
+		 
 		if (rdev->bdev->bd_disk->queue->merge_bvec_fn) {
 			blk_queue_max_segments(mddev->queue, 1);
 			blk_queue_segment_boundary(mddev->queue,
@@ -200,10 +164,7 @@ static struct linear_conf *linear_conf(struct mddev *mddev, int raid_disks)
 	}
 	if (cnt != raid_disks) {
 #ifdef MY_ABC_HERE
-		/* 
-		 * for Linear status consistense to other raid type
-		 * Let it can assemble.
-		 */
+		 
 		mddev->degraded = mddev->raid_disks - cnt;		
 #ifdef MY_ABC_HERE
 		mddev->nodev_and_crashed = 1;
@@ -223,9 +184,6 @@ static struct linear_conf *linear_conf(struct mddev *mddev, int raid_disks)
 	else
 		queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, mddev->queue);
 
-	/*
-	 * Here we calculate the device offsets.
-	 */
 	conf->disks[0].end_sector = conf->disks[0].rdev->sectors;
 
 	for (i = 1; i < raid_disks; i++)
@@ -264,14 +222,7 @@ static int linear_run (struct mddev *mddev)
 
 static int linear_add(struct mddev *mddev, struct md_rdev *rdev)
 {
-	/* Adding a drive to a linear array allows the array to grow.
-	 * It is permitted if the new drive has a matching superblock
-	 * already on it, with raid_disk equal to raid_disks.
-	 * It is achieved by creating a new linear_private_data structure
-	 * and swapping it in in-place of the current one.
-	 * The current one is never freed until the array is stopped.
-	 * This avoids races.
-	 */
+	 
 	struct linear_conf *newconf, *oldconf;
 
 	if (rdev->saved_raid_disk != mddev->raid_disks)
@@ -299,15 +250,8 @@ static int linear_stop (struct mddev *mddev)
 {
 	struct linear_conf *conf = mddev->private;
 
-	/*
-	 * We do not require rcu protection here since
-	 * we hold reconfig_mutex for both linear_add and
-	 * linear_stop, so they cannot race.
-	 * We should make sure any old 'conf's are properly
-	 * freed though.
-	 */
 	rcu_barrier();
-	blk_sync_queue(mddev->queue); /* the unplug fn references 'conf'*/
+	blk_sync_queue(mddev->queue);  
 	kfree(conf);
 	mddev->private = NULL;
 
@@ -315,17 +259,7 @@ static int linear_stop (struct mddev *mddev)
 }
 
 #ifdef MY_ABC_HERE
-/**
- * This is end_io callback function.
- * We can use this for bad sector report and device error
- * handing. Prevent umount panic from file system
- *
- * @author \$Author: khchen $
- * @version \$Revision: 1.1
- *
- * @param bio    Should not be NULL. Passing from block layer
- * @param error  error number
- */
+ 
 static void
 SynoLinearEndRequest(struct bio *bio, int error)
 {
@@ -350,7 +284,7 @@ SynoLinearEndRequest(struct bio *bio, int error)
 #ifdef MY_ABC_HERE
 #ifdef MY_ABC_HERE
 			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
-				SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
+			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
 			}
 #else
 			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
@@ -365,7 +299,7 @@ SynoLinearEndRequest(struct bio *bio, int error)
 
 	atomic_dec(&rdev->nr_pending);
 	bio_put(data_bio);
-	/* Let mount could successful and bad sector could keep accessing, no matter it success or not */
+	 
 	bio_endio(bio, 0);
 }
 #endif
@@ -384,10 +318,7 @@ static void linear_make_request(struct mddev *mddev, struct bio *bio)
 	}
 
 #ifdef MY_ABC_HERE
-	/**
-	* if there has any device offline, we don't make any request to
-	* our linear md array
-	*/
+	 
 #ifdef MY_ABC_HERE
 	if (mddev->nodev_and_crashed) {
 #else
@@ -420,9 +351,7 @@ static void linear_make_request(struct mddev *mddev, struct bio *bio)
 	}
 	if (unlikely(bio->bi_sector + (bio->bi_size >> 9) >
 		     tmp_dev->end_sector)) {
-		/* This bio crosses a device boundary, so we have to
-		 * split it.
-		 */
+		 
 		struct bio_pair *bp;
 		sector_t end_sector = tmp_dev->end_sector;
 
@@ -458,7 +387,7 @@ static void linear_make_request(struct mddev *mddev, struct bio *bio)
 
 	if (unlikely((bio->bi_rw & REQ_DISCARD) &&
 		     !blk_queue_discard(bdev_get_queue(bio->bi_bdev)))) {
-		/* Just ignore it */
+		 
 		bio_endio(bio, 0);
 		return;
 	}
@@ -502,14 +431,14 @@ syno_linear_status(struct seq_file *seq, struct mddev *mddev)
 	rcu_read_unlock();
 	seq_printf (seq, "]");
 }
-#else /* MY_ABC_HERE */
+#else  
 static void linear_status (struct seq_file *seq, struct mddev *mddev)
 {
 
 	seq_printf(seq, " %dk rounding", mddev->chunk_sectors / 2);
 }
 
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 int
@@ -526,15 +455,11 @@ SynoLinearRemoveDisk(struct mddev *mddev, int number)
 	}
 
 	if (atomic_read(&rdev->nr_pending)) {
-		/* lost the race, try later */
+		 
 		err = -EBUSY;
 		goto END;
 	}
 
-	/**
-	 * Linear don't has their own thread, we just remove it's sysfs
-	 * when there has no other pending request
-	 */
 	sprintf(nm,"rd%d", rdev->raid_disk);
 	sysfs_remove_link(&mddev->kobj, nm);
 	rdev->raid_disk = -1;
@@ -543,18 +468,6 @@ END:
 	return err;
 }
 
-/**
- * This is our implement for raid handler.
- * It mainly for handling device hotplug.
- * We let it look like other raid type.
- * Set it faulty could let SDK know it's status
- *
- * @author \$Author: khchen $
- * @version \$Revision: 1.1
- *
- * @param mddev  Should not be NULL. passing from md.c
- * @param rdev   Should not be NULL. passing from md.c
- */
 static void
 SynoLinearError(struct mddev *mddev, struct md_rdev *rdev)
 {
@@ -585,21 +498,6 @@ END:
 	return;
 }
 
-/**
- * This is our implement for raid handler.
- * It mainly for mdadm set device faulty. We let it look like
- * other raid type. Let it become read only (scemd would remount
- * if it find DiskError)
- *
- * You should not sync super block in the same thread, otherwise
- * would panic.
- *
- * @author \$Author: khchen $
- * @version \$Revision: 1.1  *
- *
- * @param mddev  Should not be NULL. passing from md.c
- * @param rdev   Should not be NULL. passing from md.c
- */
 static void
 SynoLinearErrorInternal(struct mddev *mddev, struct md_rdev *rdev)
 {
@@ -623,7 +521,7 @@ END:
 #endif
 	return;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static struct md_personality linear_personality =
 {
@@ -661,6 +559,6 @@ module_init(linear_init);
 module_exit(linear_exit);
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Linear device concatenation personality for MD");
-MODULE_ALIAS("md-personality-1"); /* LINEAR - deprecated*/
+MODULE_ALIAS("md-personality-1");  
 MODULE_ALIAS("md-linear");
 MODULE_ALIAS("md-level--1");

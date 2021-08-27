@@ -1,15 +1,8 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/kernel/smp_tlb.c
- *
- *  Copyright (C) 2002 ARM Limited, All Rights Reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
+
 #include <linux/preempt.h>
 #include <linux/smp.h>
 
@@ -31,11 +24,6 @@ static void on_each_cpu_mask(void (*func)(void *), void *info, int wait,
 	preempt_enable();
 }
 
-/**********************************************************************/
-
-/*
- * TLB operations
- */
 struct tlb_args {
 	struct vm_area_struct *ta_vma;
 	unsigned long ta_start;
@@ -150,12 +138,10 @@ static inline void ipi_flush_cache_user_range(void *arg)
 	struct tlb_args *ta = (struct tlb_args *)arg;
 	printk("function %s  line %d\n", __func__,__LINE__);
 	local_flush_cache_user_range((struct vm_area_struct *)ta->ta_vma, ta->ta_start, ta->ta_end);
-#else /* To verify that JAVA is working */
+#else  
 	__cpuc_flush_kern_all();
 #endif
 }
-
-//#if defined(CONFIG_SMP) && defined(CONFIG_CPU_V6)
 
 void flush_cache_user_range(struct vm_area_struct *vma,
 			    unsigned long start, unsigned long end)

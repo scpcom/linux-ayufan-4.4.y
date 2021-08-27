@@ -1,31 +1,4 @@
-/*
- *  Annapurna Labs PCI host bridge device tree driver
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
-/*
- * - This driver for both internal PCIe bus and for external PCIe ports
- *   (in Root-Complex mode).
- * - The driver requires PCI_DOMAINS as each port registered as a pci domain
- * - for the external PCIe ports, the following applies:
- *	- Configuration access to bus 0 device 0 are routed to the configuration
- *	  space header register that found in the host bridge.
- *	- The driver assumes the controller link is initialized by the
- *	  bootloader.
- */
+ 
 #include <linux/kernel.h>
 #include <linux/version.h>
 #include <linux/export.h>
@@ -49,7 +22,6 @@ enum al_pci_type {
 	AL_PCI_TYPE_EXTERNAL = 1,
 };
 
-/* PCI bridge private data */
 struct al_pcie_pd {
 	struct device *dev;
 	enum al_pci_type type;
@@ -65,9 +37,9 @@ struct al_pcie_pd {
 
 	void __iomem *local_bridge_config_space;
 	unsigned int index;
-	/* lock configuration access as we change the target_bus */
+	 
 	spinlock_t conf_lock;
-	/*HAL structure*/
+	 
 	struct al_pcie_port	pcie_port;
 	struct al_pcie_link_status status;
 	u8	target_bus;
@@ -115,7 +87,6 @@ static bool al_pcie_port_check_link(struct al_pcie_pd *pcie)
 	return true;
 }
 
-/* prepare controller for issueing IO transactions*/
 static int al_pcie_io_prepare(struct al_pcie_pd *pcie)
 {
 	struct al_pcie_port *pcie_port = &pcie->pcie_port;
@@ -128,14 +99,14 @@ static int al_pcie_io_prepare(struct al_pcie_pd *pcie)
 			.index = 0,
 			.base_addr = (uint64_t)pcie->io.start,
 			.limit = (uint64_t)pcie->io.start + resource_size(&pcie->io) - 1,
-			.target_addr = (uint64_t)pcie->realio.start, /* the address that matches will be translated to this address + offset */
+			.target_addr = (uint64_t)pcie->realio.start,  
 			.invert_matching = AL_FALSE,
-			.tlp_type = AL_PCIE_TLP_TYPE_IO, /* pcie tlp type*/
-			.attr = 0, /* pcie frame header attr field*/
-			/* outbound specific params */
-			.msg_code = 0, /* pcie message code */
+			.tlp_type = AL_PCIE_TLP_TYPE_IO,  
+			.attr = 0,  
+			 
+			.msg_code = 0,  
 			.cfg_shift_mode = AL_FALSE,
-			/* inbound specific params*/
+			 
 		};
 
 		dev_dbg(pcie->dev, "%s: base %llx, limit %llx, target %llx\n",
@@ -148,7 +119,7 @@ static int al_pcie_io_prepare(struct al_pcie_pd *pcie)
 }
 
 #if defined(AL_PCIE_RMN_1010) && defined(CONFIG_SYNO_ALPINE_V2_5_3)
-/* prepare controller for issuing mem transactions */
+ 
 static int al_pcie_mem_prepare(struct al_pcie_pd *pcie)
 {
 	struct al_pcie_port *pcie_port = &pcie->pcie_port;
@@ -157,11 +128,6 @@ static int al_pcie_mem_prepare(struct al_pcie_pd *pcie)
 	} else {
 		struct al_pcie_atu_region mem_atu_region;
 
-		/*
-		 * This region is meant to insure all accesses to this section
-		 * will be always with type memory (accessing from DMA may
-		 * change the type to IO).
-		 */
 		mem_atu_region.enable = AL_TRUE;
 		mem_atu_region.direction = al_pcie_atu_dir_outbound;
 		mem_atu_region.index = 1;
@@ -169,12 +135,12 @@ static int al_pcie_mem_prepare(struct al_pcie_pd *pcie)
 		mem_atu_region.limit = pcie->mem.end;
 		mem_atu_region.target_addr = pcie->mem.start;
 		mem_atu_region.invert_matching = AL_FALSE;
-		mem_atu_region.tlp_type = AL_PCIE_TLP_TYPE_MEM; /* pcie tlp type*/
-		mem_atu_region.attr = 0; /* pcie frame header attr field*/
-		mem_atu_region.msg_code = 0; /* pcie message code */
+		mem_atu_region.tlp_type = AL_PCIE_TLP_TYPE_MEM;  
+		mem_atu_region.attr = 0;  
+		mem_atu_region.msg_code = 0;  
 		mem_atu_region.cfg_shift_mode = AL_FALSE;
-		mem_atu_region.bar_number = 0; /* not used */
-		mem_atu_region.match_mode = 0; /* address match mode */
+		mem_atu_region.bar_number = 0;  
+		mem_atu_region.match_mode = 0;  
 		mem_atu_region.enable_attr_match_mode = AL_FALSE;
 		mem_atu_region.enable_msg_match_mode = AL_FALSE;
 
@@ -189,7 +155,6 @@ static int al_pcie_mem_prepare(struct al_pcie_pd *pcie)
 }
 #endif
 
-/* prepare controller for issueing CFG transactions*/
 static int al_pcie_cfg_prepare(struct al_pcie_pd *pcie)
 {
 	struct al_pcie_port *pcie_port = &pcie->pcie_port;
@@ -199,22 +164,16 @@ static int al_pcie_cfg_prepare(struct al_pcie_pd *pcie)
 
 	spin_lock_init(&pcie->conf_lock);
 	pcie->target_bus = 1;
-	/*
-	 * force the controller to set the pci bus in the TLP to
-	 * pcie->target_bus no matter what is the bus portion of the ECAM addess
-	 * is.
-	 */
+	 
 	al_pcie_target_bus_set(pcie_port, pcie->target_bus, 0xFF);
 
-	/* the bus connected to the controller always enumberated as bus 1*/
 	al_pcie_secondary_bus_set(pcie_port, 1);
-	/* set subordinary to max value */
+	 
 	al_pcie_subordinary_bus_set(pcie_port, 0xff);
 
 	return 0;
 }
 
-/* Get ECAM address according to bus, device, function, and offset */
 static void __iomem *al_pcie_cfg_addr(struct al_pcie_pd *pcie,
 				      struct pci_bus *bus,
 				      unsigned int devfn, int offset)
@@ -224,7 +183,6 @@ static void __iomem *al_pcie_cfg_addr(struct al_pcie_pd *pcie,
 	int slot = PCI_SLOT(devfn);
 	void __iomem *ret_val;
 
-	/* Trap out illegal values */
 	if (busnr > 255)
 		BUG();
 	if (devfn > 255)
@@ -236,7 +194,6 @@ static void __iomem *al_pcie_cfg_addr(struct al_pcie_pd *pcie,
 	if (pcie->type == AL_PCI_TYPE_INTERNAL)
 		return ret_val;
 
-	/* If there is no link, just show the PCI bridge. */
 	if ((pcie->status.link_up == AL_FALSE) && (busnr > 0 || slot > 0))
 		return NULL;
 
@@ -258,7 +215,6 @@ static void __iomem *al_pcie_cfg_addr(struct al_pcie_pd *pcie,
 	return ret_val;
 }
 
-/* PCI config space read */
 static int al_read_config(struct pci_bus *bus, unsigned int devfn, int where,
 				 int size, u32 *val)
 {
@@ -301,7 +257,6 @@ static int al_read_config(struct pci_bus *bus, unsigned int devfn, int where,
 	return rc;
 }
 
-/* PCI config space write */
 static int al_write_config(struct pci_bus *bus, unsigned int devfn, int where,
 				  int size, u32 val)
 {
@@ -341,13 +296,11 @@ static int al_write_config(struct pci_bus *bus, unsigned int devfn, int where,
 	return rc;
 }
 
-/* PCI bridge config space read/write operations */
 static struct pci_ops al_pcie_ops = {
 	.read	= al_read_config,
 	.write	= al_write_config,
 };
 
-/* PCI config space read */
 static int al_internal_read_config(struct pci_bus *bus, unsigned int devfn,
 				   int where, int size, u32 *val)
 {
@@ -377,7 +330,6 @@ static int al_internal_read_config(struct pci_bus *bus, unsigned int devfn,
 	return PCIBIOS_SUCCESSFUL;
 }
 
-/* PCI config space write */
 static int al_internal_write_config(struct pci_bus *bus, unsigned int devfn,
 				    int where, int size, u32 val)
 {
@@ -402,7 +354,6 @@ static int al_internal_write_config(struct pci_bus *bus, unsigned int devfn,
 	return PCIBIOS_SUCCESSFUL;
 }
 
-/* PCI bridge config space read/write operations */
 static struct pci_ops al_internal_pcie_ops = {
 	.read	= al_internal_read_config,
 	.write	= al_internal_write_config,
@@ -425,11 +376,7 @@ static int al_pcie_setup(int nr, struct pci_sys_data *sys)
 	pci_add_resource_offset(&sys->resource, &pcie->mem, sys->mem_offset);
 	pci_add_resource(&sys->resource, &pcie->busn);
 #else
-	/*
-	 * bus->resource[0] is the IO resource for this bus
-	 * bus->resource[1] is the mem resource for this bus
-	 * bus->resource[2] is the prefetch mem resource for this bus
-	 */
+	 
 	sys->resource[1] = &pcie->mem;
 	sys->resource[2] = NULL;
 #endif
@@ -445,7 +392,7 @@ static int al_pcie_parse_dt(struct al_pcie_pd *pcie)
 	static int index;
 
 	if (pcie->type == AL_PCI_TYPE_EXTERNAL) {
-		/* Get registers resources */
+		 
 		err = of_address_to_resource(np, 0, &pcie->regs);
 		if (err < 0) {
 			dev_dbg(pcie->dev, "of_address_to_resource(): %d\n",
@@ -457,12 +404,10 @@ static int al_pcie_parse_dt(struct al_pcie_pd *pcie)
 							   &pcie->regs);
 		if (!pcie->regs_base)
 			return -EADDRNOTAVAIL;
-		/* set the base address of the configuration space of the local
-		 * bridge
-		 */
+		 
 		pcie->local_bridge_config_space = pcie->regs_base + 0x2000;
 	}
-	/* Get the ECAM, I/O and memory ranges from DT */
+	 
 	for_each_of_pci_range(&iter, np) {
 		unsigned long restype = iter.flags & IORESOURCE_TYPE_BITS;
 		if (restype == 0) {
@@ -485,7 +430,6 @@ static int al_pcie_parse_dt(struct al_pcie_pd *pcie)
 		}
 	}
 
-	/* map ecam space */
 	dev_dbg(pcie->dev, " ecam %pr\n",  &pcie->ecam);
 	pcie->ecam_base = devm_request_and_ioremap(pcie->dev, &pcie->ecam);
 	if (!pcie->ecam_base)
@@ -504,7 +448,6 @@ static int al_pcie_parse_dt(struct al_pcie_pd *pcie)
 	return 0;
 }
 
-/* map the specified device/slot/pin to an IRQ */
 static int al_pcie_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	struct of_irq oirq;
@@ -549,11 +492,6 @@ static struct pci_bus *al_pcie_scan_bus(int nr, struct pci_sys_data *sys)
 	}
 #endif
 }
-
-/*
- * Fixup function to make sure Max Paylod Size and MaxReadReq
- * are set based on host bridge Max capabilities.
- */
 
 extern int pcie_bus_configure_set(struct pci_dev *dev, void *data);
 static void al_pci_fixup(struct pci_dev *dev)
@@ -653,10 +591,6 @@ static int al_pcie_probe(struct platform_device *pdev)
 			__func__, pcie->index, al_pcie_write_addr_start[pcie->index],
 			al_pcie_write_addr_end[pcie->index]);
 
-		/*
-		 * set an axi IO bar to make the accesses to this addresses
-		 * with size of 4 bytes. (access from DMA will be 16 Bytes minimum)
-		 */
 		al_pcie_axi_io_config(
 				&pcie->pcie_port,
 				al_pcie_read_addr_start[pcie->index],
@@ -664,7 +598,6 @@ static int al_pcie_probe(struct platform_device *pdev)
 	}
 #endif
 
-	/* Configure IOCC for external PCIE */
 	if (pcie->type != AL_PCI_TYPE_INTERNAL) {
 		if (arch_is_coherent()) {
 			printk("Configuring PCIE for IOCC\n");

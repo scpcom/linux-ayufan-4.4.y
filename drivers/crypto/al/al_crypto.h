@@ -1,26 +1,4 @@
-/*
- * drivers/crypto/al_crypto.h
- *
- * Annapurna Labs Crypto driver - header file
- *
- * Copyright (C) 2012 Annapurna Labs Ltd.
- *
- * Chained scatter/gather lists handling based on caam driver.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+ 
 #ifndef __AL_CRYPTO_H__
 #define __AL_CRYPTO_H__
 
@@ -48,31 +26,23 @@
 #define AL_CRYPTO_TX_CDESC_SIZE			8
 #define AL_CRYPTO_RX_CDESC_SIZE			8
 #else
-/* Currently in VP it is always 16 bytes */
+ 
 #define AL_CRYPTO_TX_CDESC_SIZE			16
 #define AL_CRYPTO_RX_CDESC_SIZE			16
 #endif
 
 #define AL_CRYPTO_DMA_MAX_CHANNELS		4
 
-/* 4 interrupts for the 4 queues and 1 for group D */
 #define AL_CRYPTO_MSIX_INTERRUPTS		AL_CRYPTO_DMA_MAX_CHANNELS + 1
 
 #define AL_CRYPTO_SW_RING_MIN_ORDER		4
 #define AL_CRYPTO_SW_RING_MAX_ORDER		16
 
-/*
- * tx: 31(supported by HW) - 1(metadata) - 1(sa_in) -
- *			1(enc_iv_in|auth_iv_in) - 1(auth_sign_in) = 27
- * rx: 31(supported by HW) - 1(sa_out) - 1(enc_iv_out|auth_iv_out) -
- *			1(next_enc_iv_out) - 1(auth_sign_out) = 27
- */
 #define AL_CRYPTO_OP_MAX_BUFS			27
 #define AL_CRYPTO_HASH_HMAC_IPAD		0x36
 #define AL_CRYPTO_HASH_HMAC_OPAD		0x5c
 
-#define AL_CRYPTO_MAX_IV_LENGTH	16 /* max of AES_BLOCK_SIZE,
-							DES3_EDE_BLOCK_SIZE */
+#define AL_CRYPTO_MAX_IV_LENGTH	16  
 
 #ifdef CONFIG_CRYPTO_DEV_AL_CRYPTO_STATS
 #define AL_CRYPTO_STATS_INC(var, incval)	(var) += (incval)
@@ -110,8 +80,6 @@ enum al_crypto_req_type {
 	AL_CRYPTO_REQ_CRC,
 };
 
-/* software descriptor structure
- */
 struct al_crypto_sw_desc {
 	union {
 		struct al_crypto_transaction	hal_xaction;
@@ -136,9 +104,6 @@ struct al_crypto_sw_desc {
 	bool	dst_chained;
 };
 
-/**
- * cache entry in lru list
- */
 struct al_crypto_cache_lru_entry {
 	struct list_head		list;
 	struct al_crypto_cache_state	*ctx;
@@ -146,12 +111,7 @@ struct al_crypto_cache_lru_entry {
 };
 
 #ifdef CONFIG_CRYPTO_DEV_AL_CRYPTO_STATS
-/**
- * struct al_crypto_chan_stats_gen - Crypto DMA channel statistics - general
- * @ablkcipher_tfms - active ablkcipher tfms
- * @ablkcipher_tfms - active aead tfms
- * @ablkcipher_tfms - active ahash tfms
- */
+ 
 struct al_crypto_chan_stats_gen {
 	uint64_t ablkcipher_tfms;
 	uint64_t aead_tfms;
@@ -159,35 +119,6 @@ struct al_crypto_chan_stats_gen {
 	uint64_t crc_tfms;
 };
 
-/**
- * struct al_crypto_chan_stats_prep - Crypto DMA channel statistics -
- * 								preparation
- * @ablkcipher_encrypt_reqs - ablkcipher encrypt requests
- * @ablkcipher_encrypt_bytes - ablkcipher encrypted bytes
- * @ablkcipher_decrypt_reqs - ablkcipher decrypt requests
- * @ablkcipher_decrypt_bytes - ablkcipher decrypted bytes
- * @aead_encrypt_hash_reqs - aead combined encrypt+hash requests
- * @aead_encrypt_bytes - aead encrypted bytes
- * @aead_hash_bytes - aead hashed bytes
- * @aead_decrypt_validate_reqs - aead combined decrypt+validate requests
- * @aead_decrypt_bytes - aead decrypted bytes
- * @aead_validate_bytes - aead validate bytes
- * @ahash_reqs - ahash requests
- * @ahash_bytes - ahash hashed bytes
- * @cache_misses - SA cache misses
- * @ablkcipher_reqs_le512 - ablkcipher requests up to 512 bytes
- * @ablkcipher_reqs_512_2048 - ablkcipher requests between 512 and 2048 bytes
- * @ablkcipher_reqs_2048_4096 - ablkcipher requests between 2048 and 4096 bytes
- * @ablkcipher_reqs_gt4096 - ablkcipher requests greater than 4096 bytes
- * @aead_reqs_le512 - aead requests up to 512 bytes
- * @aead_reqs_512_2048 - aead requests between 512 and 2048 bytes
- * @aead_reqs_2048_4096 - aead requests between 2048 and 4096 bytes
- * @aead_reqs_gt4096 - aead requests greater than 4096 bytes
- * @ahash_reqs_le512 - ahash requests up to 512 bytes
- * @ahash_reqs_512_2048 - ahash requests between 512 and 2048 bytes
- * @ahash_reqs_2048_4096 - ahash requests between 2048 and 4096 bytes
- * @ahash_reqs_gt4096 - ahash requests greater than 4096 bytes
- */
 struct al_crypto_chan_stats_prep {
 	uint64_t ablkcipher_encrypt_reqs;
 	uint64_t ablkcipher_encrypt_bytes;
@@ -222,19 +153,12 @@ struct al_crypto_chan_stats_prep {
 	uint64_t crc_reqs_gt4096;
 };
 
-/**
- * struct al_crypto_chan_stats_comp - Crypto DMA channel statistics -
- * 								completion
- * @redundant_int_cnt - redundant interrupts (interrupts without completions)
- */
 struct al_crypto_chan_stats_comp {
 	uint64_t redundant_int_cnt;
 	uint64_t max_active_descs;
 };
 #endif
 
-/* internal representation of a DMA channel
- */
 struct al_crypto_chan {
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
 	struct al_ssm_dma	*hal_crypto;
@@ -249,49 +173,39 @@ struct al_crypto_chan {
 #endif
 	cpumask_t      affinity_hint_mask;
 
-	/* Tx UDMA hw ring */
-	int tx_descs_num;	/* number of descriptors in Tx queue */
-	void *tx_dma_desc_virt; /* Tx descriptors ring */
+	int tx_descs_num;	 
+	void *tx_dma_desc_virt;  
 	dma_addr_t tx_dma_desc;
 
-	/* Rx UDMA hw ring */
-	int rx_descs_num;	/* number of descriptors in Rx queue */
-	void *rx_dma_desc_virt; /* Rx descriptors ring */
+	int rx_descs_num;	 
+	void *rx_dma_desc_virt;  
 	dma_addr_t rx_dma_desc;
-	void *rx_dma_cdesc_virt; /* Rx completion descriptors ring */
+	void *rx_dma_cdesc_virt;  
 	dma_addr_t rx_dma_cdesc;
 
-	/* SW descriptors ring */
 	u16 alloc_order;
 	struct al_crypto_sw_desc **sw_ring;
 #ifdef CONFIG_CRYPTO_DEV_AL_CRYPTO_STATS
 	struct al_crypto_chan_stats_gen stats_gen;
-	spinlock_t stats_gen_lock; /* locked during access of general stats */
+	spinlock_t stats_gen_lock;  
 #endif
 
-	/* Frequently accessed prep */
-	spinlock_t prep_lock ____cacheline_aligned;	/* locked during
-						xaction preparation and
-						cache management changes */
+	spinlock_t prep_lock ____cacheline_aligned;	 
 	u16 head;
-	int sw_desc_num_locked; /* num of sw descriptors locked during xaction
-						preparation */
-	u32 tx_desc_produced;	/* num of hw descriptors generated by HAL */
-	struct crypto_queue sw_queue; /* sw queue for backlog */
+	int sw_desc_num_locked;  
+	u32 tx_desc_produced;	 
+	struct crypto_queue sw_queue;  
 #ifdef CONFIG_CRYPTO_DEV_AL_CRYPTO_STATS
 	struct al_crypto_chan_stats_prep stats_prep;
 #endif
 
-	/* LRU cache management */
 	int cache_entries_num;
 	struct list_head cache_lru_list;
 	int cache_lru_count;
 	struct al_crypto_cache_lru_entry cache_lru_entries[
 					MAX_CACHE_ENTRIES_PER_CHANNEL];
 
-	/* Frequently accessed cleanup */
-	spinlock_t cleanup_lock ____cacheline_aligned_in_smp; /* locked during
-								cleanup */
+	spinlock_t cleanup_lock ____cacheline_aligned_in_smp;  
 	u16 tail;
 #ifdef CONFIG_CRYPTO_DEV_AL_CRYPTO_STATS
 	struct al_crypto_chan_stats_comp stats_comp;
@@ -304,14 +218,10 @@ struct al_crypto_chan {
 
 #define to_dev(al_crypto_chan) (&(al_crypto_chan)->device->pdev->dev)
 
-/* internal structure for AL Crypto IRQ
- */
 struct al_crypto_irq {
 	char name[AL_CRYPTO_IRQNAME_SIZE];
 };
 
-/* internal structure for AL Crypto device
- */
 struct al_crypto_device {
 	struct pci_dev		*pdev;
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
@@ -339,14 +249,12 @@ struct al_crypto_device {
 	int			int_moderation;
 	int			num_irq_used;
 
-	struct kmem_cache	*cache;	   /* descriptors cache */
-	atomic_t		tfm_count; /* used to allocate the dma
-						channel for current tfm */
-	atomic_t		crc_tfm_count; /* used to allocate the dma
-						channel for current crc tfm */
-	struct list_head alg_list;  /* list of registered crypto algorithms */
-	struct list_head hash_list; /* list of registered hash algorithms */
-	struct list_head crc_list; /* list of registered crc/csum algorithms */
+	struct kmem_cache	*cache;	    
+	atomic_t		tfm_count;  
+	atomic_t		crc_tfm_count;  
+	struct list_head alg_list;   
+	struct list_head hash_list;  
+	struct list_head crc_list;  
 };
 
 struct al_crypto_cache_state {
@@ -354,26 +262,22 @@ struct al_crypto_cache_state {
 	int			idx;
 };
 
-/* context structure
- */
 struct al_crypto_ctx {
 	struct al_crypto_chan	*chan;
 	struct al_crypto_cache_state	cache_state;
 	struct al_crypto_sa	sa;
 	struct al_crypto_hw_sa	*hw_sa;
 	dma_addr_t		hw_sa_dma_addr;
-	struct crypto_shash	*sw_hash;	/* for HMAC key hashing */
+	struct crypto_shash	*sw_hash;	 
 	u8 			*iv;
 	dma_addr_t		iv_dma_addr;
 };
 
-/* DMA ring management inline functions */
 static inline u16 al_crypto_ring_size(struct al_crypto_chan *chan)
 {
 	return 1 << chan->alloc_order;
 }
 
-/* count of transactions in flight with the engine */
 static inline u16 al_crypto_ring_active(struct al_crypto_chan *chan)
 {
 	return CIRC_CNT(chan->head, chan->tail, al_crypto_ring_size(chan));
@@ -412,11 +316,6 @@ static inline void hexdump(unsigned char *buf, unsigned int len)
 static inline void hexdump(unsigned char *buf, unsigned int len) {}
 #endif
 
-/* Scatter/gather list management functions */
-
-/* Count number of elements in scatterlist and check if there's a scatterlist
- * chain
- */
 static inline int sg_count(struct scatterlist *sg_list, int nbytes,
 			bool *chained)
 {
@@ -434,7 +333,6 @@ static inline int sg_count(struct scatterlist *sg_list, int nbytes,
 	return sg_nents;
 }
 
-/* Copy from len bytes of sg to dest, starting from beginning */
 static inline void sg_copy(u8 *dest, struct scatterlist *sg, unsigned int len)
 {
 	struct scatterlist *current_sg = sg;
@@ -461,7 +359,6 @@ static inline void sg_copy(u8 *dest, struct scatterlist *sg, unsigned int len)
 	}
 }
 
-/* Copy sg data, from to_skip to end, to dest */
 static inline void sg_copy_part(u8 *dest, struct scatterlist *sg,
 				      int to_skip, unsigned int end)
 {
@@ -518,7 +415,7 @@ static inline void sg_map_to_xaction_buffers(
 			}
 			sg = sg_next;
 		}
-		/* last sg */
+		 
 		bufs[*buf_idx].len += remain;
 		(*buf_idx)++;
 	}
@@ -533,7 +430,6 @@ int dma_unmap_sg_chained(struct device *dev, struct scatterlist *sg,
 				unsigned int nents, enum dma_data_direction dir,
 				bool chained);
 
-/* SA cache management using LRU */
 void al_crypto_cache_update_lru(struct al_crypto_chan *chan,
 		struct al_crypto_cache_state *ctx);
 
@@ -544,7 +440,6 @@ u32 al_crypto_cache_replace_lru(struct al_crypto_chan *chan,
 void al_crypto_cache_remove_lru(struct al_crypto_chan *chan,
 		struct al_crypto_cache_state *ctx);
 
-/* Core APIs */
 int al_crypto_core_init(
 	struct al_crypto_device	*device,
 	void __iomem		*iobase_udma,
@@ -564,7 +459,6 @@ void al_crypto_set_int_moderation(
 int al_crypto_get_int_moderation(
 	struct al_crypto_device *device);
 
-/* ablkcipher related functions */
 void al_crypto_cleanup_single_ablkcipher(
 	struct al_crypto_chan		*chan,
 	struct al_crypto_sw_desc	*desc,
@@ -572,19 +466,16 @@ void al_crypto_cleanup_single_ablkcipher(
 
 int ablkcipher_process_queue(struct al_crypto_chan *chan);
 
-/* aead related functions */
 void al_crypto_cleanup_single_aead(
 	struct al_crypto_chan		*chan,
 	struct al_crypto_sw_desc	*desc,
 	u32				comp_status);
 
-/* ahash related functions */
 void al_crypto_cleanup_single_ahash(
 	struct al_crypto_chan		*chan,
 	struct al_crypto_sw_desc	*desc,
 	u32				comp_status);
 
-/* crc related functions */
 void al_crypto_cleanup_single_crc(
 	struct al_crypto_chan		*chan,
 	struct al_crypto_sw_desc	*desc,
@@ -596,26 +487,22 @@ int hmac_setkey(struct al_crypto_ctx *ctx,
 	unsigned int			sw_hash_interm_offset,
 	unsigned int			sw_hash_interm_size);
 
-/* sysfs */
 void al_crypto_free_channel(struct al_crypto_chan *chan);
 
 int al_crypto_sysfs_init(struct al_crypto_device *device);
 
 void al_crypto_sysfs_terminate(struct al_crypto_device *device);
 
-/* al_crypto_alg APIs */
 int al_crypto_alg_init(struct al_crypto_device *device);
 
 void al_crypto_alg_terminate(struct al_crypto_device *device);
 
-/* al_crypto_hash APIs */
 int al_crypto_hash_init(struct al_crypto_device *device);
 
 void al_crypto_hash_terminate(struct al_crypto_device *device);
 
-/* al_crypto_crc APIs */
 int al_crypto_crc_init(struct al_crypto_device *device);
 
 void al_crypto_crc_terminate(struct al_crypto_device *device);
 
-#endif	/* __AL_CRYPTO_H__ */
+#endif	 

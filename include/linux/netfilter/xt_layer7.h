@@ -16,4 +16,4 @@ struct xt_layer7_info {
 #endif
 };
 
-#endif /* _XT_LAYER7_H */
+#endif  

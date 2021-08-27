@@ -1,25 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * sysctl.c: General linux system control interface
- *
- * Begun 24 March 1995, Stephen Tweedie
- * Added /proc support, Dec 1995
- * Added bdflush entry and intvec min/max checking, 2/23/96, Tom Dyas.
- * Added hooks for /proc/sys/net (minor, minor patch), 96/4/1, Mike Shaver.
- * Added kernel/java-{interpreter,appletviewer}, 96/5/10, Mike Shaver.
- * Dynamic registration fixes, Stephen Tweedie.
- * Added kswapd-interval, ctrl-alt-del, printk stuff, 1/8/97, Chris Horn.
- * Made sysctl support optional via CONFIG_SYSCTL, 1/10/97, Chris
- *  Horn.
- * Added proc_doulongvec_ms_jiffies_minmax, 09/08/99, Carlos H. Bauer.
- * Added proc_doulongvec_minmax, 09/08/99, Carlos H. Bauer.
- * Changed linked lists to use list.h instead of lists.h, 02/24/00, Bill
- *  Wendling.
- * The list_for_each() macro wasn't appropriate for the sysctl loop.
- *  Removed it and replaced it with older style, 03/23/00, Bill Wendling
- */
  
 #include <linux/module.h>
 #include <linux/mm.h>
@@ -87,7 +68,6 @@
 #include <linux/nmi.h>
 #endif
 
-
 #if defined(CONFIG_SYSCTL)
 
 #ifdef MY_ABC_HERE
@@ -122,7 +102,7 @@ EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #ifdef MY_ABC_HERE
 DECLARE_RWSEM(s_reshape_mount_key);
 EXPORT_SYMBOL(s_reshape_mount_key);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 long g_internal_hd_num = -1;
@@ -133,8 +113,7 @@ EXPORT_SYMBOL(g_internal_hd_num);
 #ifdef MY_ABC_HERE
 long unsigned int guiWakeupDisksNum = 1;
 EXPORT_SYMBOL(guiWakeupDisksNum);
-/* The default spinup time interval is 7000ms. if want modify the interval, you
- * can modify this value. ex. assign 14 to it means 500ms (7000/14) */
+ 
 int giDenoOfTimeInterval = 1;
 EXPORT_SYMBOL(giDenoOfTimeInterval);
 #endif
@@ -176,7 +155,7 @@ int gSynoHasDynModule = 1;
 int gSynoHasDynModule = 0;
 #endif
 EXPORT_SYMBOL(gSynoHasDynModule);
-#endif /*MY_ABC_HERE*/
+#endif  
 
 #ifdef MY_DEF_HERE
 long gSynoFlashMemorySize = 0;
@@ -308,17 +287,16 @@ EXPORT_SYMBOL(guSynoScsiCmdSN);
 int giSynoEncPwrCtl = 0;
 extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 		        void __user *buffer, size_t *lenp, loff_t *ppos);
-#endif /* SYNO_SAS_ENCOLURE_PWR_CTL */
+#endif  
 
 #ifdef MY_ABC_HERE
 int (*syno_test_list)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_test_list);
-#endif /* MY_ABC_HERE */
+#endif  
 
 int gSynoSystemShutdown = 0;
 EXPORT_SYMBOL(gSynoSystemShutdown);
 
-/* External variables not in a header file. */
 extern int sysctl_overcommit_memory;
 extern int sysctl_overcommit_ratio;
 extern int max_threads;
@@ -341,7 +319,6 @@ extern int sysctl_nr_trim_pages;
 extern int blk_iopoll_enabled;
 #endif
 
-/* Constants used for minimum and  maximum */
 #ifdef CONFIG_LOCKUP_DETECTOR
 static int sixty = 60;
 static int neg_one = -1;
@@ -361,10 +338,8 @@ static int iMacEntrySize = 16;
 static int ten_thousand = 10000;
 #endif
 
-/* this is needed for the proc_doulongvec_minmax of vm_dirty_bytes */
 static unsigned long dirty_bytes_min = 2 * PAGE_SIZE;
 
-/* this is needed for the proc_dointvec_minmax for [fs_]overflow UID and GID */
 static int maxolduid = 65535;
 static int minolduid;
 static int min_percpu_pagelist_fract = 8;
@@ -406,7 +381,7 @@ static int proc_dointvec_minmax_sysadmin(struct ctl_table *table, int write,
 #endif
 
 #ifdef CONFIG_MAGIC_SYSRQ
-/* Note: sysrq code uses it's own private copy */
+ 
 static int __sysrq_enabled = SYSRQ_DEFAULT_ENABLE;
 
 static int sysrq_sysctl_handler(ctl_table *table, int write,
@@ -455,8 +430,6 @@ extern struct ctl_table epoll_table[];
 int sysctl_legacy_va_layout;
 #endif
 
-/* The default sysctl tables: */
-
 static struct ctl_table root_table[] = {
 	{
 		.procname	= "kernel",
@@ -487,10 +460,10 @@ static struct ctl_table root_table[] = {
 };
 
 #ifdef CONFIG_SCHED_DEBUG
-static int min_sched_granularity_ns = 100000;		/* 100 usecs */
-static int max_sched_granularity_ns = NSEC_PER_SEC;	/* 1 second */
-static int min_wakeup_granularity_ns;			/* 0 usecs */
-static int max_wakeup_granularity_ns = NSEC_PER_SEC;	/* 1 second */
+static int min_sched_granularity_ns = 100000;		 
+static int max_sched_granularity_ns = NSEC_PER_SEC;	 
+static int min_wakeup_granularity_ns;			 
+static int max_wakeup_granularity_ns = NSEC_PER_SEC;	 
 static int min_sched_tunable_scaling = SCHED_TUNABLESCALING_NONE;
 static int max_sched_tunable_scaling = SCHED_TUNABLESCALING_END-1;
 #endif
@@ -792,7 +765,7 @@ static struct ctl_table kern_table[] = {
 		.data		= &modules_disabled,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
-		/* only handle a transition from default "0" to "1" */
+		 
 		.proc_handler	= proc_dointvec_minmax,
 		.extra1		= &one,
 		.extra2		= &one,
@@ -1184,12 +1157,7 @@ static struct ctl_table kern_table[] = {
 	},
 #endif
 #ifdef CONFIG_PERF_EVENTS
-	/*
-	 * User-space scripts rely on the existence of this file
-	 * as a feature check for perf_events being enabled.
-	 *
-	 * So it's an ABI, do not remove!
-	 */
+	 
 	{
 		.procname	= "perf_event_paranoid",
 		.data		= &sysctl_perf_event_paranoid,
@@ -1230,10 +1198,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= proc_dointvec,
 	},
 #endif
-/*
- * NOTE: do not add new entries to this table unless you have read
- * Documentation/sysctl/ctl_unnumbered.txt
- */
+ 
 #ifdef MY_ABC_HERE
 	{
 		.procname       = "syno_debug_flag",
@@ -1529,7 +1494,7 @@ static struct ctl_table kern_table[] = {
 		.mode           = 0644,
 		.proc_handler   = &SynoProcEncPwrCtl,
 	},
-#endif /* SYNO_SAS_ENCOLURE_PWR_CTL */
+#endif  
 	{ }
 };
 
@@ -1634,7 +1599,7 @@ static struct ctl_table vm_table[] = {
 		.procname	= "nr_pdflush_threads",
 		.data		= &nr_pdflush_threads,
 		.maxlen		= sizeof nr_pdflush_threads,
-		.mode		= 0444 /* read-only*/,
+		.mode		= 0444  ,
 		.proc_handler	= proc_dointvec,
 	},
 	{
@@ -1725,7 +1690,7 @@ static struct ctl_table vm_table[] = {
 		.extra2		= &max_extfrag_threshold,
 	},
 
-#endif /* CONFIG_COMPACTION */
+#endif  
 	{
 		.procname	= "min_free_kbytes",
 		.data		= &min_free_kbytes,
@@ -2013,7 +1978,7 @@ static struct ctl_table fs_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_doulongvec_minmax,
 	},
-#endif /* CONFIG_AIO */
+#endif  
 #ifdef CONFIG_INOTIFY_USER
 	{
 		.procname	= "inotify",
@@ -2087,7 +2052,6 @@ static struct ctl_table dev_table[] = {
 
 static DEFINE_SPINLOCK(sysctl_lock);
 
-/* called under sysctl_lock */
 static int use_table(struct ctl_table_header *p)
 {
 	if (unlikely(p->unregistering))
@@ -2096,7 +2060,6 @@ static int use_table(struct ctl_table_header *p)
 	return 1;
 }
 
-/* called under sysctl_lock */
 static void unuse_table(struct ctl_table_header *p)
 {
 	if (!--p->used)
@@ -2104,13 +2067,9 @@ static void unuse_table(struct ctl_table_header *p)
 			complete(p->unregistering);
 }
 
-/* called under sysctl_lock, will reacquire if has to wait */
 static void start_unregistering(struct ctl_table_header *p)
 {
-	/*
-	 * if p->used is 0, nobody will ever touch that entry again;
-	 * we'll eliminate all paths to it before dropping sysctl_lock
-	 */
+	 
 	if (unlikely(p->used)) {
 		struct completion wait;
 		init_completion(&wait);
@@ -2119,13 +2078,10 @@ static void start_unregistering(struct ctl_table_header *p)
 		wait_for_completion(&wait);
 		spin_lock(&sysctl_lock);
 	} else {
-		/* anything non-NULL; we'll never dereference it */
+		 
 		p->unregistering = ERR_PTR(-EINVAL);
 	}
-	/*
-	 * do not remove from the list until nobody holds it; walking the
-	 * list in do_sysctl() relies on that.
-	 */
+	 
 	list_del_init(&p->ctl_entry);
 }
 
@@ -2236,11 +2192,6 @@ void register_sysctl_root(struct ctl_table_root *root)
 	spin_unlock(&sysctl_lock);
 }
 
-/*
- * sysctl_perm does NOT grant the superuser all rights automatically, because
- * some sysctl variables are readonly even to root.
- */
-
 static int test_perm(int mode, int op)
 {
 	if (!current_euid())
@@ -2290,15 +2241,12 @@ static struct ctl_table *is_branch_in(struct ctl_table *branch,
 	struct ctl_table *p;
 	const char *s = branch->procname;
 
-	/* branch should have named subdirectory as its first element */
 	if (!s || !branch->child)
 		return NULL;
 
-	/* ... and nothing else */
 	if (branch[1].procname)
 		return NULL;
 
-	/* table should contain subdirectory with the same name */
 	for (p = table; p->procname; p++) {
 		if (!p->child)
 			continue;
@@ -2308,7 +2256,6 @@ static struct ctl_table *is_branch_in(struct ctl_table *branch,
 	return NULL;
 }
 
-/* see if attaching q to p would be an improvement */
 static void try_attach(struct ctl_table_header *p, struct ctl_table_header *q)
 {
 	struct ctl_table *to = p->ctl_table, *by = q->ctl_table;
@@ -2332,59 +2279,6 @@ static void try_attach(struct ctl_table_header *p, struct ctl_table_header *q)
 	}
 }
 
-/**
- * __register_sysctl_paths - register a sysctl hierarchy
- * @root: List of sysctl headers to register on
- * @namespaces: Data to compute which lists of sysctl entries are visible
- * @path: The path to the directory the sysctl table is in.
- * @table: the top-level table structure
- *
- * Register a sysctl table hierarchy. @table should be a filled in ctl_table
- * array. A completely 0 filled entry terminates the table.
- *
- * The members of the &struct ctl_table structure are used as follows:
- *
- * procname - the name of the sysctl file under /proc/sys. Set to %NULL to not
- *            enter a sysctl file
- *
- * data - a pointer to data for use by proc_handler
- *
- * maxlen - the maximum size in bytes of the data
- *
- * mode - the file permissions for the /proc/sys file, and for sysctl(2)
- *
- * child - a pointer to the child sysctl table if this entry is a directory, or
- *         %NULL.
- *
- * proc_handler - the text handler routine (described below)
- *
- * de - for internal use by the sysctl routines
- *
- * extra1, extra2 - extra pointers usable by the proc handler routines
- *
- * Leaf nodes in the sysctl tree will be represented by a single file
- * under /proc; non-leaf nodes will be represented by directories.
- *
- * sysctl(2) can automatically manage read and write requests through
- * the sysctl table.  The data and maxlen fields of the ctl_table
- * struct enable minimal validation of the values being written to be
- * performed, and the mode field allows minimal authentication.
- *
- * There must be a proc_handler routine for any terminal nodes
- * mirrored under /proc/sys (non-terminals are handled by a built-in
- * directory handler).  Several default handlers are available to
- * cover common cases -
- *
- * proc_dostring(), proc_dointvec(), proc_dointvec_jiffies(),
- * proc_dointvec_userhz_jiffies(), proc_dointvec_minmax(), 
- * proc_doulongvec_ms_jiffies_minmax(), proc_doulongvec_minmax()
- *
- * It is the handler's job to read the input buffer from user memory
- * and process it. The handler should return 0 on success.
- *
- * This routine returns %NULL on a failure to register, and a pointer
- * to the table header on success.
- */
 struct ctl_table_header *__register_sysctl_paths(
 	struct ctl_table_root *root,
 	struct nsproxy *namespaces,
@@ -2395,18 +2289,9 @@ struct ctl_table_header *__register_sysctl_paths(
 	unsigned int n, npath;
 	struct ctl_table_set *set;
 
-	/* Count the path components */
 	for (npath = 0; path[npath].procname; ++npath)
 		;
 
-	/*
-	 * For each path component, allocate a 2-element ctl_table array.
-	 * The first array element will be filled with the sysctl entry
-	 * for this, the second will be the sentinel (procname == 0).
-	 *
-	 * We allocate everything in one go so that we don't have to
-	 * worry about freeing additional memory in unregister_sysctl_table.
-	 */
 	header = kzalloc(sizeof(struct ctl_table_header) +
 			 (2 * npath * sizeof(struct ctl_table)), GFP_KERNEL);
 	if (!header)
@@ -2414,10 +2299,9 @@ struct ctl_table_header *__register_sysctl_paths(
 
 	new = (struct ctl_table *) (header + 1);
 
-	/* Now connect the dots */
 	prevp = &header->ctl_table;
 	for (n = 0; n < npath; ++n, ++path) {
-		/* Copy the procname */
+		 
 		new->procname = path->procname;
 		new->mode     = 0555;
 
@@ -2461,16 +2345,6 @@ struct ctl_table_header *__register_sysctl_paths(
 	return header;
 }
 
-/**
- * register_sysctl_table_path - register a sysctl table hierarchy
- * @path: The path to the directory the sysctl table is in.
- * @table: the top-level table structure
- *
- * Register a sysctl table hierarchy. @table should be a filled in ctl_table
- * array. A completely 0 filled entry terminates the table.
- *
- * See __register_sysctl_paths for more details.
- */
 struct ctl_table_header *register_sysctl_paths(const struct ctl_path *path,
 						struct ctl_table *table)
 {
@@ -2478,15 +2352,6 @@ struct ctl_table_header *register_sysctl_paths(const struct ctl_path *path,
 					path, table);
 }
 
-/**
- * register_sysctl_table - register a sysctl table hierarchy
- * @table: the top-level table structure
- *
- * Register a sysctl table hierarchy. @table should be a filled in ctl_table
- * array. A completely 0 filled entry terminates the table.
- *
- * See register_sysctl_paths for more details.
- */
 struct ctl_table_header *register_sysctl_table(struct ctl_table *table)
 {
 	static const struct ctl_path null_path[] = { {} };
@@ -2494,13 +2359,6 @@ struct ctl_table_header *register_sysctl_table(struct ctl_table *table)
 	return register_sysctl_paths(null_path, table);
 }
 
-/**
- * unregister_sysctl_table - unregister a sysctl table hierarchy
- * @header: the header returned from register_sysctl_table
- *
- * Unregisters the sysctl table and all children. proc entries may not
- * actually be removed until they are no longer used by anyone.
- */
 void unregister_sysctl_table(struct ctl_table_header * header)
 {
 	might_sleep();
@@ -2543,7 +2401,7 @@ void setup_sysctl_set(struct ctl_table_set *p,
 	p->is_seen = is_seen;
 }
 
-#else /* !CONFIG_SYSCTL */
+#else  
 struct ctl_table_header *register_sysctl_table(struct ctl_table * table)
 {
 	return NULL;
@@ -2569,11 +2427,7 @@ void sysctl_head_put(struct ctl_table_header *head)
 {
 }
 
-#endif /* CONFIG_SYSCTL */
-
-/*
- * /proc/sys support
- */
+#endif  
 
 #ifdef CONFIG_PROC_SYSCTL
 
@@ -2635,23 +2489,6 @@ static int _proc_do_string(void* data, int maxlen, int write,
 	return 0;
 }
 
-/**
- * proc_dostring - read a string sysctl
- * @table: the sysctl table
- * @write: %TRUE if this is a write to the sysctl file
- * @buffer: the user buffer
- * @lenp: the size of the user buffer
- * @ppos: file position
- *
- * Reads/writes a string from/to the user buffer. If the kernel
- * buffer provided is not large enough to hold the string, the
- * string is truncated. The copied string is %NULL-terminated.
- * If the string is being read by the user process, it is copied
- * and a newline '\n' is added. It is truncated if the buffer is
- * not large enough.
- *
- * Returns 0 on success.
- */
 int proc_dostring(struct ctl_table *table, int write,
 		  void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -2679,22 +2516,7 @@ static void proc_skip_char(char **buf, size_t *size, const char v)
 }
 
 #define TMPBUFLEN 22
-/**
- * proc_get_long - reads an ASCII formatted integer from a user buffer
- *
- * @buf: a kernel buffer
- * @size: size of the kernel buffer
- * @val: this is where the number will be stored
- * @neg: set to %TRUE if number is negative
- * @perm_tr: a vector which contains the allowed trailers
- * @perm_tr_len: size of the perm_tr vector
- * @tr: pointer to store the trailer character
- *
- * In case of success %0 is returned and @buf and @size are updated with
- * the amount of bytes read. If @tr is non-NULL and a trailing
- * character exists (size is non-zero after returning from this
- * function), @tr is updated with the trailing character.
- */
+ 
 static int proc_get_long(char **buf, size_t *size,
 			  unsigned long *val, bool *neg,
 			  const char *perm_tr, unsigned perm_tr_len, char *tr)
@@ -2725,9 +2547,6 @@ static int proc_get_long(char **buf, size_t *size,
 
 	len = p - tmp;
 
-	/* We don't know if the next char is whitespace thus we may accept
-	 * invalid integers (e.g. 1234...a) or two integers instead of one
-	 * (e.g. 123...1). So lets not allow such large numbers. */
 	if (len == TMPBUFLEN - 1)
 		return -EINVAL;
 
@@ -2743,17 +2562,6 @@ static int proc_get_long(char **buf, size_t *size,
 	return 0;
 }
 
-/**
- * proc_put_long - converts an integer to a decimal ASCII formatted string
- *
- * @buf: the user buffer
- * @size: the size of the user buffer
- * @val: the integer to be converted
- * @neg: sign of the number, %TRUE for negative
- *
- * In case of success %0 is returned and @buf and @size are updated with
- * the amount of bytes written.
- */
 static int proc_put_long(void __user **buf, size_t *size, unsigned long val,
 			  bool neg)
 {
@@ -2901,19 +2709,6 @@ static int do_proc_dointvec(struct ctl_table *table, int write,
 			buffer, lenp, ppos, conv, data);
 }
 
-/**
- * proc_dointvec - read a vector of integers
- * @table: the sysctl table
- * @write: %TRUE if this is a write to the sysctl file
- * @buffer: the user buffer
- * @lenp: the size of the user buffer
- * @ppos: file position
- *
- * Reads/writes up to table->maxlen/sizeof(unsigned int) integer
- * values from/to the user buffer, treated as an ASCII string. 
- *
- * Returns 0 on success.
- */
 int proc_dointvec(struct ctl_table *table, int write,
 		     void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -2921,10 +2716,6 @@ int proc_dointvec(struct ctl_table *table, int write,
 		    	    NULL,NULL);
 }
 
-/*
- * Taint values can only be increased
- * This means we can safely use a temporary.
- */
 static int proc_taint(struct ctl_table *table, int write,
 			       void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -2942,10 +2733,7 @@ static int proc_taint(struct ctl_table *table, int write,
 		return err;
 
 	if (write) {
-		/*
-		 * Poor man's atomic or. Not worth adding a primitive
-		 * to everyone's atomic.h for this
-		 */
+		 
 		int i;
 		for (i = 0; i < BITS_PER_LONG && tmptaint >> i; i++) {
 			if ((tmptaint >> i) & 1)
@@ -2996,22 +2784,6 @@ static int do_proc_dointvec_minmax_conv(bool *negp, unsigned long *lvalp,
 	return 0;
 }
 
-/**
- * proc_dointvec_minmax - read a vector of integers with min/max values
- * @table: the sysctl table
- * @write: %TRUE if this is a write to the sysctl file
- * @buffer: the user buffer
- * @lenp: the size of the user buffer
- * @ppos: file position
- *
- * Reads/writes up to table->maxlen/sizeof(unsigned int) integer
- * values from/to the user buffer, treated as an ASCII string.
- *
- * This routine will ensure the values are within the range specified by
- * table->extra1 (min) and table->extra2 (max).
- *
- * Returns 0 on success.
- */
 int proc_dointvec_minmax(struct ctl_table *table, int write,
 		  void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -3113,45 +2885,12 @@ static int do_proc_doulongvec_minmax(struct ctl_table *table, int write,
 			buffer, lenp, ppos, convmul, convdiv);
 }
 
-/**
- * proc_doulongvec_minmax - read a vector of long integers with min/max values
- * @table: the sysctl table
- * @write: %TRUE if this is a write to the sysctl file
- * @buffer: the user buffer
- * @lenp: the size of the user buffer
- * @ppos: file position
- *
- * Reads/writes up to table->maxlen/sizeof(unsigned long) unsigned long
- * values from/to the user buffer, treated as an ASCII string.
- *
- * This routine will ensure the values are within the range specified by
- * table->extra1 (min) and table->extra2 (max).
- *
- * Returns 0 on success.
- */
 int proc_doulongvec_minmax(struct ctl_table *table, int write,
 			   void __user *buffer, size_t *lenp, loff_t *ppos)
 {
     return do_proc_doulongvec_minmax(table, write, buffer, lenp, ppos, 1l, 1l);
 }
 
-/**
- * proc_doulongvec_ms_jiffies_minmax - read a vector of millisecond values with min/max values
- * @table: the sysctl table
- * @write: %TRUE if this is a write to the sysctl file
- * @buffer: the user buffer
- * @lenp: the size of the user buffer
- * @ppos: file position
- *
- * Reads/writes up to table->maxlen/sizeof(unsigned long) unsigned long
- * values from/to the user buffer, treated as an ASCII string. The values
- * are treated as milliseconds, and converted to jiffies when they are stored.
- *
- * This routine will ensure the values are within the range specified by
- * table->extra1 (min) and table->extra2 (max).
- *
- * Returns 0 on success.
- */
 int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
 				      void __user *buffer,
 				      size_t *lenp, loff_t *ppos)
@@ -3227,21 +2966,6 @@ static int do_proc_dointvec_ms_jiffies_conv(bool *negp, unsigned long *lvalp,
 	return 0;
 }
 
-/**
- * proc_dointvec_jiffies - read a vector of integers as seconds
- * @table: the sysctl table
- * @write: %TRUE if this is a write to the sysctl file
- * @buffer: the user buffer
- * @lenp: the size of the user buffer
- * @ppos: file position
- *
- * Reads/writes up to table->maxlen/sizeof(unsigned int) integer
- * values from/to the user buffer, treated as an ASCII string. 
- * The values read are assumed to be in seconds, and are converted into
- * jiffies.
- *
- * Returns 0 on success.
- */
 int proc_dointvec_jiffies(struct ctl_table *table, int write,
 			  void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -3249,21 +2973,6 @@ int proc_dointvec_jiffies(struct ctl_table *table, int write,
 		    	    do_proc_dointvec_jiffies_conv,NULL);
 }
 
-/**
- * proc_dointvec_userhz_jiffies - read a vector of integers as 1/USER_HZ seconds
- * @table: the sysctl table
- * @write: %TRUE if this is a write to the sysctl file
- * @buffer: the user buffer
- * @lenp: the size of the user buffer
- * @ppos: pointer to the file position
- *
- * Reads/writes up to table->maxlen/sizeof(unsigned int) integer
- * values from/to the user buffer, treated as an ASCII string. 
- * The values read are assumed to be in 1/USER_HZ seconds, and 
- * are converted into jiffies.
- *
- * Returns 0 on success.
- */
 int proc_dointvec_userhz_jiffies(struct ctl_table *table, int write,
 				 void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -3271,22 +2980,6 @@ int proc_dointvec_userhz_jiffies(struct ctl_table *table, int write,
 		    	    do_proc_dointvec_userhz_jiffies_conv,NULL);
 }
 
-/**
- * proc_dointvec_ms_jiffies - read a vector of integers as 1 milliseconds
- * @table: the sysctl table
- * @write: %TRUE if this is a write to the sysctl file
- * @buffer: the user buffer
- * @lenp: the size of the user buffer
- * @ppos: file position
- * @ppos: the current position in the file
- *
- * Reads/writes up to table->maxlen/sizeof(unsigned int) integer
- * values from/to the user buffer, treated as an ASCII string. 
- * The values read are assumed to be in 1/1000 seconds, and 
- * are converted into jiffies.
- *
- * Returns 0 on success.
- */
 int proc_dointvec_ms_jiffies(struct ctl_table *table, int write,
 			     void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -3316,23 +3009,6 @@ static int proc_do_cad_pid(struct ctl_table *table, int write,
 	return 0;
 }
 
-/**
- * proc_do_large_bitmap - read/write from/to a large bitmap
- * @table: the sysctl table
- * @write: %TRUE if this is a write to the sysctl file
- * @buffer: the user buffer
- * @lenp: the size of the user buffer
- * @ppos: file position
- *
- * The bitmap is stored at table->data and the bitmap length (in bits)
- * in table->maxlen.
- *
- * We use a range comma separated format (e.g. 1,3-4,10-10) so that
- * large bitmaps may be represented in a compact manner. Writing into
- * the file will clear the bitmap then update it with the given input.
- *
- * Returns 0 on success.
- */
 int proc_do_large_bitmap(struct ctl_table *table, int write,
 			 void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -3468,19 +3144,7 @@ int proc_do_large_bitmap(struct ctl_table *table, int write,
 }
 
 #if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_DUAL_HEAD)
-/**
- * Notice: In order to call this handler, the input array of strings
- * must be in continuous memory allocation
- * such as str[arrayindex][string]
- *
- * Each string must be null terminated
- *
- * The extra1 parameter should pass the array size
- *
- * The extra2 parameter should pass the size of an array entry
- *
- * The output of this function will be one string per line
- */
+ 
 int SynoProcDoStringVec(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -3505,7 +3169,7 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 	}
 
 	if (write) {
-		// do nothing
+		 
 #ifdef CONFIG_SYNO_DUAL_HEAD
 		for (iArrayIndex = 0; iArrayIndex < *pArraySize; iArrayIndex++) {
 			if (0 == c) {
@@ -3533,7 +3197,7 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 		}
 #endif
 	} else {
-		// move to desired array index iArrayIndex and offset pStr
+		 
 		iLenSum = 0;
 		for (iArrayIndex = 0; iArrayIndex < *pArraySize; iArrayIndex++) {
 			iLen = strlen(pStr);
@@ -3550,7 +3214,6 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 			}
 		}
 
-		// print macs
 		for (; iArrayIndex < *pArraySize; iArrayIndex++) {
 			iLen = strlen(pStr);
 			if (0 == iLen) {
@@ -3573,9 +3236,9 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 
 	return 0;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
-#else /* CONFIG_PROC_SYSCTL */
+#else  
 
 int proc_dostring(struct ctl_table *table, int write,
 		  void __user *buffer, size_t *lenp, loff_t *ppos)
@@ -3634,12 +3297,8 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 }
 #endif
 
-#endif /* CONFIG_PROC_SYSCTL */
+#endif  
 
-/*
- * No sense putting this after each symbol definition, twice,
- * exception granted :-)
- */
 EXPORT_SYMBOL(proc_dointvec);
 EXPORT_SYMBOL(proc_dointvec_jiffies);
 EXPORT_SYMBOL(proc_dointvec_minmax);

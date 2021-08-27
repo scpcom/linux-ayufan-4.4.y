@@ -1,45 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * INET		An implementation of the TCP/IP protocol suite for the LINUX
- *		operating system.  INET is implemented using the  BSD Socket
- *		interface as the means of communication with the user level.
- *
- *		Ethernet-type device handling.
- *
- * Version:	@(#)eth.c	1.0.7	05/25/93
- *
- * Authors:	Ross Biro
- *		Fred N. van Kempen, <waltje@uWalt.NL.Mugnet.ORG>
- *		Mark Evans, <evansmp@uhura.aston.ac.uk>
- *		Florian  La Roche, <rzsfl@rz.uni-sb.de>
- *		Alan Cox, <gw4pts@gw4pts.ampr.org>
- *
- * Fixes:
- *		Mr Linux	: Arp problems
- *		Alan Cox	: Generic queue tidyup (very tiny here)
- *		Alan Cox	: eth_header ntohs should be htons
- *		Alan Cox	: eth_rebuild_header missing an htons and
- *				  minor other things.
- *		Tegge		: Arp bug fixes.
- *		Florian		: Removed many unnecessary functions, code cleanup
- *				  and changes for new arp and skbuff.
- *		Alan Cox	: Redid header building to reflect new format.
- *		Alan Cox	: ARP only when compiled with CONFIG_INET
- *		Greg Page	: 802.2 and SNAP stuff.
- *		Alan Cox	: MAC layer pointers/new format.
- *		Paul Gortmaker	: eth_copy_and_sum shouldn't csum padding.
- *		Alan Cox	: Protect against forwarding explosions with
- *				  older network drivers and IFF_ALLMULTI.
- *	Christer Weinigel	: Better rebuild header message.
- *             Andrew Morton    : 26Feb01: kill ether_setup() - use netdev_boot_setup().
- *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
- */
+ 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -66,19 +28,6 @@
 
 __setup("ether=", netdev_boot_setup);
 
-/**
- * eth_header - create the Ethernet header
- * @skb:	buffer to alter
- * @dev:	source device
- * @type:	Ethernet type field
- * @daddr: destination address (NULL leave destination address)
- * @saddr: source address (NULL use device source address)
- * @len:   packet length (<= skb->len)
- *
- *
- * Set the protocol type. For a packet of type ETH_P_802_3/2 we put the length
- * in here instead.
- */
 int eth_header(struct sk_buff *skb, struct net_device *dev,
 	       unsigned short type,
 	       const void *daddr, const void *saddr, unsigned len)
@@ -90,10 +39,6 @@ int eth_header(struct sk_buff *skb, struct net_device *dev,
 	else
 		eth->h_proto = htons(len);
 
-	/*
-	 *      Set the source hardware address.
-	 */
-
 	if (!saddr)
 		saddr = dev->dev_addr;
 	memcpy(eth->h_source, saddr, ETH_ALEN);
@@ -102,10 +47,6 @@ int eth_header(struct sk_buff *skb, struct net_device *dev,
 		memcpy(eth->h_dest, daddr, ETH_ALEN);
 		return ETH_HLEN;
 	}
-
-	/*
-	 *      Anyway, the loopback-device should never use this function...
-	 */
 
 	if (dev->flags & (IFF_LOOPBACK | IFF_NOARP)) {
 		memset(eth->h_dest, 0, ETH_ALEN);
@@ -116,16 +57,6 @@ int eth_header(struct sk_buff *skb, struct net_device *dev,
 }
 EXPORT_SYMBOL(eth_header);
 
-/**
- * eth_rebuild_header- rebuild the Ethernet MAC header.
- * @skb: socket buffer to update
- *
- * This is called after an ARP or IPV6 ndisc it's resolution on this
- * sk_buff. We now let protocol (ARP) fill in the other fields.
- *
- * This routine CANNOT use cached dst->neigh!
- * Really, it is used only when dst->neigh is wrong.
- */
 int eth_rebuild_header(struct sk_buff *skb)
 {
 	struct ethhdr *eth = (struct ethhdr *)skb->data;
@@ -149,15 +80,6 @@ int eth_rebuild_header(struct sk_buff *skb)
 }
 EXPORT_SYMBOL(eth_rebuild_header);
 
-/**
- * eth_type_trans - determine the packet's protocol ID.
- * @skb: received socket data
- * @dev: receiving network device
- *
- * The rule here is that we
- * assume 802.3 if the type field is short enough to be a length.
- * This is normal practice and works for any 'now in use' protocol.
- */
 __be16 eth_type_trans(struct sk_buff *skb, struct net_device *dev)
 {
 	struct ethhdr *eth;
@@ -174,25 +96,11 @@ __be16 eth_type_trans(struct sk_buff *skb, struct net_device *dev)
 			skb->pkt_type = PACKET_MULTICAST;
 	}
 
-	/*
-	 *      This ALLMULTI check should be redundant by 1.4
-	 *      so don't forget to remove it.
-	 *
-	 *      Seems, you forgot to remove it. All silly devices
-	 *      seems to set IFF_PROMISC.
-	 */
-
-	else if (1 /*dev->flags&IFF_PROMISC */ ) {
+	else if (1   ) {
 		if (unlikely(compare_ether_addr_64bits(eth->h_dest, dev->dev_addr)))
 			skb->pkt_type = PACKET_OTHERHOST;
 	}
 
-	/*
-	 * Some variants of DSA tagging don't have an ethertype field
-	 * at all, so we check here whether one of those tagging
-	 * variants has been configured on the receiving interface,
-	 * and if so, set skb->protocol without looking at the packet.
-	 */
 	if (netdev_uses_dsa_tags(dev))
 		return htons(ETH_P_DSA);
 	if (netdev_uses_trailer_tags(dev))
@@ -201,27 +109,13 @@ __be16 eth_type_trans(struct sk_buff *skb, struct net_device *dev)
 	if (ntohs(eth->h_proto) >= 1536)
 		return eth->h_proto;
 
-	/*
-	 *      This is a magic hack to spot IPX packets. Older Novell breaks
-	 *      the protocol design and runs IPX over 802.3 without an 802.2 LLC
-	 *      layer. We look for FFFF which isn't a used 802.2 SSAP/DSAP. This
-	 *      won't work for fault tolerant netware but does for the rest.
-	 */
 	if (skb->len >= 2 && *(unsigned short *)(skb->data) == 0xFFFF)
 		return htons(ETH_P_802_3);
 
-	/*
-	 *      Real 802.2 LLC
-	 */
 	return htons(ETH_P_802_2);
 }
 EXPORT_SYMBOL(eth_type_trans);
 
-/**
- * eth_header_parse - extract hardware address from packet
- * @skb: packet to extract header from
- * @haddr: destination buffer
- */
 int eth_header_parse(const struct sk_buff *skb, unsigned char *haddr)
 {
 	const struct ethhdr *eth = eth_hdr(skb);
@@ -230,13 +124,6 @@ int eth_header_parse(const struct sk_buff *skb, unsigned char *haddr)
 }
 EXPORT_SYMBOL(eth_header_parse);
 
-/**
- * eth_header_cache - fill cache entry from neighbour
- * @neigh: source neighbour
- * @hh: destination cache entry
- * @type: Ethernet type field
- * Create an Ethernet header template from the neighbour.
- */
 int eth_header_cache(const struct neighbour *neigh, struct hh_cache *hh, __be16 type)
 {
 	struct ethhdr *eth;
@@ -256,14 +143,6 @@ int eth_header_cache(const struct neighbour *neigh, struct hh_cache *hh, __be16 
 }
 EXPORT_SYMBOL(eth_header_cache);
 
-/**
- * eth_header_cache_update - update cache entry
- * @hh: destination cache entry
- * @dev: network device
- * @haddr: new hardware address
- *
- * Called by Address Resolution module to notify changes in address.
- */
 void eth_header_cache_update(struct hh_cache *hh,
 			     const struct net_device *dev,
 			     const unsigned char *haddr)
@@ -273,15 +152,6 @@ void eth_header_cache_update(struct hh_cache *hh,
 }
 EXPORT_SYMBOL(eth_header_cache_update);
 
-/**
- * eth_mac_addr - set new Ethernet hardware address
- * @dev: network device
- * @p: socket address
- * Change hardware address of device.
- *
- * This doesn't change hardware matching, so needs to be overridden
- * for most real devices.
- */
 int eth_mac_addr(struct net_device *dev, void *p)
 {
 	struct sockaddr *addr = p;
@@ -297,14 +167,6 @@ int eth_mac_addr(struct net_device *dev, void *p)
 }
 EXPORT_SYMBOL(eth_mac_addr);
 
-/**
- * eth_change_mtu - set new MTU size
- * @dev: network device
- * @new_mtu: new Maximum Transfer Unit
- *
- * Allow changing MTU size. Needs to be overridden for devices
- * supporting jumbo frames.
- */
 int eth_change_mtu(struct net_device *dev, int new_mtu)
 {
 	if (new_mtu < 68 || new_mtu > ETH_DATA_LEN)
@@ -331,11 +193,6 @@ const struct header_ops eth_header_ops ____cacheline_aligned = {
 	.cache_update	= eth_header_cache_update,
 };
 
-/**
- * ether_setup - setup Ethernet network device
- * @dev: network device
- * Fill in the fields of the device structure with Ethernet-generic values.
- */
 void ether_setup(struct net_device *dev)
 {
 	dev->header_ops		= &eth_header_ops;
@@ -343,7 +200,7 @@ void ether_setup(struct net_device *dev)
 	dev->hard_header_len 	= ETH_HLEN;
 	dev->mtu		= ETH_DATA_LEN;
 	dev->addr_len		= ETH_ALEN;
-	dev->tx_queue_len	= 1000;	/* Ethernet wants good queues */
+	dev->tx_queue_len	= 1000;	 
 	dev->flags		= IFF_BROADCAST|IFF_MULTICAST;
 	dev->priv_flags		|= IFF_TX_SKB_SHARING;
 
@@ -351,21 +208,6 @@ void ether_setup(struct net_device *dev)
 
 }
 EXPORT_SYMBOL(ether_setup);
-
-/**
- * alloc_etherdev_mqs - Allocates and sets up an Ethernet device
- * @sizeof_priv: Size of additional driver-private structure to be allocated
- *	for this Ethernet device
- * @txqs: The number of TX queues this device has.
- * @rxqs: The number of RX queues this device has.
- *
- * Fill in the fields of the device structure with Ethernet-generic
- * values. Basically does everything except registering the device.
- *
- * Constructs a new net device, complete with a private data area of
- * size (sizeof_priv).  A 32-byte (not bit) alignment is enforced for
- * this private data area.
- */
 
 struct net_device *alloc_etherdev_mqs(int sizeof_priv, unsigned int txqs,
 				      unsigned int rxqs)

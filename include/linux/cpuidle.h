@@ -1,15 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * cpuidle.h - a generic framework for CPU idle power management
- *
- * (C) 2007 Venkatesh Pallipadi <venkatesh.pallipadi@intel.com>
- *          Shaohua Li <shaohua.li@intel.com>
- *          Adam Belay <abelay@novell.com>
- *
- * This code is licenced under the GPL.
- */
  
 #ifndef _LINUX_CPUIDLE_H
 #define _LINUX_CPUIDLE_H
@@ -28,9 +19,7 @@ struct module;
 struct cpuidle_device;
 struct cpuidle_driver;
 
-/****************************
- * CPUIDLE DEVICE INTERFACE *
- ****************************/
+
 
 struct cpuidle_state_usage {
 	void		*driver_data;
@@ -39,7 +28,7 @@ struct cpuidle_state_usage {
 	unsigned long long	disable;
 #endif
 	unsigned long long	usage;
-	unsigned long long	time; /* in US */
+	unsigned long long	time;  
 };
 
 struct cpuidle_state {
@@ -47,38 +36,28 @@ struct cpuidle_state {
 	char		desc[CPUIDLE_DESC_LEN];
 
 	unsigned int	flags;
-	unsigned int	exit_latency; /* in US */
+	unsigned int	exit_latency;  
 #ifdef CONFIG_SYNO_ALPINE
-	int		power_usage; /* in mW */
+	int		power_usage;  
 #else
-	unsigned int	power_usage; /* in mW */
+	unsigned int	power_usage;  
 #endif
-	unsigned int	target_residency; /* in US */
+	unsigned int	target_residency;  
 
 	int (*enter)	(struct cpuidle_device *dev,
 			struct cpuidle_driver *drv,
 			int index);
 };
 
-/* Idle State Flags */
-#define CPUIDLE_FLAG_TIME_VALID	(0x01) /* is residency time measurable? */
+#define CPUIDLE_FLAG_TIME_VALID	(0x01)  
 
 #define CPUIDLE_DRIVER_FLAGS_MASK (0xFFFF0000)
 
-/**
- * cpuidle_get_statedata - retrieves private driver state data
- * @st_usage: the state usage statistics
- */
 static inline void *cpuidle_get_statedata(struct cpuidle_state_usage *st_usage)
 {
 	return st_usage->driver_data;
 }
 
-/**
- * cpuidle_set_statedata - stores private driver state data
- * @st_usage: the state usage statistics
- * @data: the private data
- */
 static inline void
 cpuidle_set_statedata(struct cpuidle_state_usage *st_usage, void *data)
 {
@@ -110,20 +89,10 @@ struct cpuidle_device {
 
 DECLARE_PER_CPU(struct cpuidle_device *, cpuidle_devices);
 
-/**
- * cpuidle_get_last_residency - retrieves the last state's residency time
- * @dev: the target CPU
- *
- * NOTE: this value is invalid if CPUIDLE_FLAG_TIME_VALID isn't set
- */
 static inline int cpuidle_get_last_residency(struct cpuidle_device *dev)
 {
 	return dev->last_residency;
 }
-
-/****************************
- * CPUIDLE DRIVER INTERFACE *
- ****************************/
 
 struct cpuidle_driver {
 	char			name[CPUIDLE_NAME_LEN];
@@ -170,10 +139,6 @@ static inline void cpuidle_disable_device(struct cpuidle_device *dev) { }
 
 #endif
 
-/******************************
- * CPUIDLE GOVERNOR INTERFACE *
- ******************************/
-
 struct cpuidle_governor {
 	char			name[CPUIDLE_NAME_LEN];
 	struct list_head 	governor_list;
@@ -210,4 +175,4 @@ static inline void cpuidle_unregister_governor(struct cpuidle_governor *gov) { }
 #define CPUIDLE_DRIVER_STATE_START	0
 #endif
 
-#endif /* _LINUX_CPUIDLE_H */
+#endif  

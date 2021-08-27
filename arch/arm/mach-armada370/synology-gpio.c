@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Synology Armada NAS Board GPIO Setup
- *
- * Maintained by:  KueiHuan Chen <khchen@synology.com>
- *
- * Copyright 2009-2012 Synology, Inc.  All rights reserved.
- * Copyright 2009-2012 KueiHuan.Chen
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; see the file COPYING.  If not, write to
- * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- */
+ 
 #if defined(CONFIG_SYNO_ARMADA_ARCH)
 
 #include <linux/gpio.h>
@@ -37,7 +15,6 @@
 
 #define GPIO_UNDEF				0xFF
 
-/* copied from synobios.h */
 #define DISK_LED_OFF			0
 #define DISK_LED_GREEN_SOLID	1
 #define DISK_LED_ORANGE_SOLID	2
@@ -170,17 +147,13 @@ MV_STATUS SYNOMppCtrlRegWrite(MV_U32 mppPin, MV_U32 mppVal)
 	MV_U32 origVal;
 	MV_U32 mppGroup;
 
-	/* there are 66 mpp pins only */
 	if(66 < mppPin)
 		return -EINVAL;
 
-	/* get the group the pin belongs to, for addressing */
-	/* 32 bits per register, 4 bits per pin, 8 pins in a group */
 	mppGroup = mppPin / 8;
 	mppVal &= 0x0F;
 	origVal = MV_REG_READ(mvCtrlMppRegGet(mppGroup));
 
-	/* get the corresponding bits */
 	origVal &= ~(0xF << ((mppPin % 8)*4));
 	origVal |= (mppVal << ((mppPin % 8)*4));
 
@@ -203,11 +176,11 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 	int mode_sata_present;
 	int mode_gpio;
 	int fail_led;
-	int active = 0; //note: led is low active
+	int active = 0;  
 
 #ifdef MY_ABC_HERE
 	if (syno_is_hw_version(HW_RS214v10)) {
-		// RS214 led is high active
+		 
 		active = 1;
 	}
 #endif
@@ -218,13 +191,12 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 		WARN_ON(GPIO_UNDEF == generic_gpio.soc_sata_led.hdd2_fail_led);
 
         if (SYNO_RS214_ID == mvBoardIdGet()) {
-                /* RS214 disk LED is HIGH active, so we need invert the active indication */
+                 
                 MV_REG_WRITE(MV_SATA_REGS_OFFSET + 0x2c, 0xc);
         } else {
                 MV_REG_WRITE(MV_SATA_REGS_OFFSET + 0x2c, 0x4);
         }
 
-	/* assign pin info according to hdd */
 	switch (index) {
 		case 1:
 			mpp_pin = 60;
@@ -243,19 +215,17 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 			goto END;
 	}
 
-	/* Since faulty led and present led are combined,
-	   we need to disable present led when light on faulty's */
 	if ( DISK_LED_ORANGE_SOLID == status ||
 		 DISK_LED_ORANGE_BLINK == status )
 	{
-		SYNOMppCtrlRegWrite(mpp_pin, mode_gpio);  // change MPP to GPIO mode
+		SYNOMppCtrlRegWrite(mpp_pin, mode_gpio);   
 		gpio_set_value(mpp_pin, !active);
 		gpio_set_value(fail_led, active);
 	}
 	else if ( DISK_LED_GREEN_SOLID == status ||
 			  DISK_LED_GREEN_BLINK == status )
 	{
-		SYNOMppCtrlRegWrite(mpp_pin, mode_sata_present);  // change MPP to sata present mode
+		SYNOMppCtrlRegWrite(mpp_pin, mode_sata_present);   
 		gpio_set_value(fail_led, !active);
 	}
 	else if (DISK_LED_OFF == status)
@@ -304,7 +274,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 	case 5:
 		if (generic_gpio.ext_sata_led.hdd5_led_0 == GPIO_UNDEF ||
 			generic_gpio.ext_sata_led.hdd5_led_1 == GPIO_UNDEF) {
-			//some 4 bay model don't contain such gpio.
+			 
 			ret = 0;
 			goto END;
 		}
@@ -312,7 +282,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 		pin2 = generic_gpio.ext_sata_led.hdd5_led_1;
 		break;
 	case 6:
-		//for esata
+		 
 		ret = 0;
 		goto END;
 	default:
@@ -584,8 +554,6 @@ MV_U8 SYNOArmadaIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 		break;
 	}
 
-	/* lookup table for max disk
-	   if not found, compare default */
 	ret = (disk_id <= def_max_disk)? 1 : 0;
 	if (table) {
 		int i;
@@ -602,11 +570,6 @@ MV_U8 SYNOArmadaIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 	return ret;
 }
 
-/* SYNO_CHECK_HDD_PRESENT
- * Check HDD present for evansport
- * input : index - disk index, 1-based.
- * output: 0 - HDD not present,  1 - HDD present.
- */
 int SYNO_CHECK_HDD_PRESENT(int index)
 {
 	return 1;
@@ -635,33 +598,6 @@ EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
 EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
 EXPORT_SYMBOL(SYNO_ENABLE_USB_POWER);
 
-/*
- Pin 		Mode	Signal select and definition	Input/output	Pull-up/pull-down
- MPP[0:1]	0x1	UART0
- MPP[2:3]	0x1	TWSI
- MPP[4]		0x1	CPU Power control		Out
- MPP[5:16]	0x0	Reserved
- MPP[17:18]	0x1	Ethernet SMI
- MPP[19:30]	0x0	Reserved
- MPP[31]		0x0	HDD 0 fail LED			Out
- MPP[32]		0x0	HDD 1 fail LED			Out
- MPP[33:36]	0x2	SPI
- MPP[37]		0x0	HDD 0 Power			Out
- MPP[38]		0x0	Fan Sense			In
- MPP[39:40]	0x0	Reserved
- MPP[41:42]	0x1	UART1
- MPP[43:47]	0x0	Reserved
- MPP[48]		0x4	HDD 1 Present			Out
- MPP[49:54]	0x0	Reserved
- MPP[55:58]	0x0	Model ID			In
- MPP[59]		0x0	Reserved
- MPP[60]		0x3	HDD 0 Present			Out
- MPP[61]		0x0	Reserved
- MPP[62]		0x0	HDD 1 Power			Out
- MPP[63]		0x0	FAN Control Max			Out
- MPP[64]		0x0	FAN Control Middle		Out
- MPP[65]		0x0	FAN Control Min			Out
-*/
 static void 
 Armada_370_213j_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 {
@@ -727,13 +663,12 @@ Armada_370_213j_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 extern void (*syno_power_off_indicator)(void);
 static void us3_power_off(void)
 {
-	/* since US3 has no microP to power off,
-	 * we need an indicator for system halt */
+	 
 	printk("Set US3 shutdown indicator\n");
-	/* set power green off */
+	 
 	gpio_set_value(42, 1);
 	SYNO_ARMADA_GPIO_BLINK(42, 0);
-	/* set power orange on */
+	 
 	gpio_set_value(43, 0);
 	SYNO_ARMADA_GPIO_BLINK(43, 0);
 }
@@ -799,7 +734,6 @@ Armada_370_us3_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 
 	*global_gpio = gpio_us3;
 
-	/* customize power off indicator */
 	syno_power_off_indicator = us3_power_off;
 }
 
@@ -1214,4 +1148,4 @@ void synology_gpio_init(void)
 		break;
 	}
 }
-#endif /* CONFIG_SYNO_ARMADA */
+#endif  

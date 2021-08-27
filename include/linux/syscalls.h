@@ -1,15 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * syscalls.h - Linux syscall interfaces (non-arch-specific)
- *
- * Copyright (c) 2004 Randy Dunlap
- * Copyright (c) 2004 Open Source Development Labs
- *
- * This file is released under the GPLv2.
- * See the file COPYING for more details.
- */
  
 #ifndef _LINUX_SYSCALLS_H
 #define _LINUX_SYSCALLS_H
@@ -162,7 +153,7 @@ extern struct trace_event_functions exit_syscall_print_funcs;
 	static struct syscall_metadata __used			\
 	  __syscall_meta_##sname = {				\
 		.name 		= "sys"#sname,			\
-		.syscall_nr	= -1,	/* Filled in at boot */	\
+		.syscall_nr	= -1,	 	\
 		.nb_args 	= nb,				\
 		.types		= types_##sname,		\
 		.args		= args_##sname,			\
@@ -180,7 +171,7 @@ extern struct trace_event_functions exit_syscall_print_funcs;
 	static struct syscall_metadata __used			\
 	  __syscall_meta__##sname = {				\
 		.name 		= "sys_"#sname,			\
-		.syscall_nr	= -1,	/* Filled in at boot */	\
+		.syscall_nr	= -1,	 	\
 		.nb_args 	= 0,				\
 		.enter_event	= &event_enter__##sname,	\
 		.exit_event	= &event_exit__##sname,		\
@@ -245,13 +236,13 @@ extern struct trace_event_functions exit_syscall_print_funcs;
 	SYSCALL_ALIAS(sys##name, SyS##name);				\
 	static inline long SYSC##name(__SC_DECL##x(__VA_ARGS__))
 
-#else /* CONFIG_HAVE_SYSCALL_WRAPPERS */
+#else  
 
 #define SYSCALL_DEFINE(name) asmlinkage long sys_##name
 #define __SYSCALL_DEFINEx(x, name, ...)					\
 	asmlinkage long sys##name(__SC_DECL##x(__VA_ARGS__))
 
-#endif /* CONFIG_HAVE_SYSCALL_WRAPPERS */
+#endif  
 
 asmlinkage long sys_time(time_t __user *tloc);
 asmlinkage long sys_stime(time_t __user *tptr);
@@ -843,7 +834,7 @@ asmlinkage long sys_SYNONotifyAddWatch(int synotify_fd, const char  __user *path
 asmlinkage long sys_SYNONotifyRemoveWatch(int synotify_fd, const char  __user *pathname, u64 mask);
 asmlinkage long sys_SYNONotifyAddWatch32(int synotify_fd, const char  __user *pathname, u32 mask);
 asmlinkage long sys_SYNONotifyRemoveWatch32(int synotify_fd, const char  __user *pathname, u32 mask);
-#endif /* CONFIG_SYNO_NOTIFY */
+#endif  
 #ifdef MY_ABC_HERE
 asmlinkage long sys_SYNOArchiveOverwrite(unsigned int fd, unsigned int flags);
 #endif

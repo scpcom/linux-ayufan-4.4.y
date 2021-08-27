@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+ 
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/export.h>
@@ -29,9 +15,6 @@
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "mvOs.h"
 
-/*************************************************************************************************************
- * Environment
- *************************************************************************************************************/
 extern u32 mvTclk;
 extern u32 mvSysclk;
 
@@ -72,17 +55,11 @@ EXPORT_SYMBOL(mvSpiParamsSet);
 #include "gpp/mvGpp.h"
 EXPORT_SYMBOL(mvGppValueSet);
 
-/*************************************************************************************************************
- * TDM
- *************************************************************************************************************/
 #if defined(MV_INCLUDE_TDM)
 EXPORT_SYMBOL(mvCtrlTdmUnitIrqGet);
 EXPORT_SYMBOL(mvCtrlTdmUnitTypeGet);
 #endif
 
-/*************************************************************************************************************
- * Audio
- *************************************************************************************************************/
 #ifdef CONFIG_MV_INCLUDE_AUDIO
 #include "audio/mvAudio.h"
 #include "mvSysAudioApi.h"
@@ -96,9 +73,6 @@ EXPORT_SYMBOL(mvAudioRecordControlSet);
 EXPORT_SYMBOL(mvSysAudioInit);
 #endif
 
-/*************************************************************************************************************
- * USB
- *************************************************************************************************************/
 #ifdef CONFIG_MV_INCLUDE_USB
 extern u32 mvIsUsbHost;
 
@@ -110,11 +84,8 @@ EXPORT_SYMBOL(mvUsbGetCapRegAddr);
 EXPORT_SYMBOL(mvUsbGppInit);
 EXPORT_SYMBOL(mvUsbBackVoltageUpdate);
 #endif
-#endif /* CONFIG_MV_INCLUDE_USB */
+#endif  
 
-/*************************************************************************************************************
- * CESA
- *************************************************************************************************************/
 #ifdef CONFIG_MV_INCLUDE_CESA
 #include "mvSysCesaApi.h"
 #include "cesa/mvCesa.h"
@@ -151,9 +122,6 @@ EXPORT_SYMBOL(mvCesaFinish);
 
 #endif
 
-/*************************************************************************************************************
- * Flashes
- *************************************************************************************************************/
 #if defined (CONFIG_MV_INCLUDE_SPI)
 #include <sflash/mvSFlash.h>
 #include <sflash/mvSFlashSpec.h>
@@ -172,17 +140,13 @@ EXPORT_SYMBOL(mvSFlashPowerSaveExit);
 EXPORT_SYMBOL(mvSFlashModelGet);
 #endif
 
-/*************************************************************************************************************
- * SATA
- *************************************************************************************************************/
+
 #ifdef CONFIG_MV_INCLUDE_INTEG_SATA
 #include <sata/CoreDriver/mvSata.h>
 EXPORT_SYMBOL(mvSataWinInit);
 #endif
 
-/*************************************************************************************************************
- * DMA/XOR
- *************************************************************************************************************/
+
 #if (defined (CONFIG_MV_XOR_MEMCOPY) || defined (CONFIG_MV_IDMA_MEMCOPY)) && !defined(CONFIG_SYNO_ARMADA_ARCH)
 EXPORT_SYMBOL(asm_memcpy);
 #endif
@@ -191,9 +155,6 @@ EXPORT_SYMBOL(asm_memcpy);
 EXPORT_SYMBOL(mv_l2_inv_range);
 #endif
 
-/*************************************************************************************************************
- * Marvell TRACE
- *************************************************************************************************************/
 #ifdef CONFIG_MV_DBG_TRACE
 #include "dbg-trace.h"
 EXPORT_SYMBOL(TRC_INIT);

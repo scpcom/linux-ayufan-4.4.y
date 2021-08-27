@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/kernel/smp_scu.c
- *
- *  Copyright (C) 2002 ARM Ltd.
- *  All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #include <linux/init.h>
 #include <linux/io.h>
 
@@ -25,9 +16,7 @@
 #define SCU_FPGA_REVISION	0x10
 
 #ifdef CONFIG_SMP
-/*
- * Get the number of CPU cores from the SCU configuration
- */
+ 
 unsigned int __init scu_get_core_count(void __iomem *scu_base)
 {
 #if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
@@ -40,15 +29,13 @@ unsigned int __init scu_get_core_count(void __iomem *scu_base)
 #endif
 
 #if defined(CONFIG_SMP) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) 
-/*
- * Enable the SCU
- */
+ 
 void scu_enable(void __iomem *scu_base)
 {
 	u32 scu_ctrl;
 
 #ifdef CONFIG_ARM_ERRATA_764369
-	/* Cortex-A9 only */
+	 
 	if ((read_cpuid(CPUID_ID) & 0xff0ffff0) == 0x410fc090) {
 #if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		scu_ctrl = readl_relaxed(scu_base + 0x30);
@@ -69,7 +56,7 @@ void scu_enable(void __iomem *scu_base)
 #else
 	scu_ctrl = __raw_readl(scu_base + SCU_CTRL);
 #endif
-	/* already enabled? */
+	 
 	if (scu_ctrl & 1)
 		return;
 
@@ -85,22 +72,10 @@ void scu_enable(void __iomem *scu_base)
 	__raw_writel(scu_ctrl, scu_base + SCU_CTRL);
 #endif
 
-	/*
-	 * Ensure that the data accessed by CPU0 before the SCU was
-	 * initialised is visible to the other CPUs.
-	 */
 	flush_cache_all();
 }
 #endif
 
-/*
- * Set the executing CPUs power mode as defined.  This will be in
- * preparation for it executing a WFI instruction.
- *
- * This function must be called with preemption disabled, and as it
- * has the side effect of disabling coherency, caches must have been
- * flushed.  Interrupts must also have been disabled.
- */
 int scu_power_mode(void __iomem *scu_base, unsigned int mode)
 {
 	unsigned int val;

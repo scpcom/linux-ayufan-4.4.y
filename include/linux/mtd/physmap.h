@@ -1,19 +1,8 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * For boards with physically mapped flash and using
- * drivers/mtd/maps/physmap.c mapping driver.
- *
- * Copyright (C) 2003 MontaVista Software Inc.
- * Author: Jun Sun, jsun@mvista.com or jsun@junsun.net
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- *
- */
+ 
+
 
 #ifndef __LINUX_MTD_PHYSMAP__
 #define __LINUX_MTD_PHYSMAP__
@@ -38,4 +27,4 @@ struct physmap_flash_data {
 	struct mtd_partition	*parts;
 };
 
-#endif /* __LINUX_MTD_PHYSMAP__ */
+#endif  

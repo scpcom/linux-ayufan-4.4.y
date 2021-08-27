@@ -1,48 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) 2013 Annapurna Labs Ltd.
-
-This file may be licensed under the terms of the Annapurna Labs Commercial
-License Agreement.
-
-Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
-found at http://www.gnu.org/licenses/gpl-2.0.html
-
-Alternatively, redistribution and use in source and binary forms, with or
-without modification, are permitted provided that the following conditions are
-met:
-
-    *     Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
-
-    *     Redistributions in binary form must reproduce the above copyright
-	  notice, this list of conditions and the following disclaimer in
-	  the documentation and/or other materials provided with the
-	  distribution.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-
-/**
- *  @{
- * @file   al_hal_eth_main.c
- *
- * @brief  XG Ethernet unit HAL driver for main functions (initialization, data path)
- *
- */
  
 #include "al_hal_eth.h"
 #include "al_hal_udma_iofic.h"
@@ -51,7 +9,6 @@ met:
 #include "al_hal_eth_mac_regs.h"
 #include "al_hal_unit_adapter_regs.h"
 
-/* Number of clocks to stop the Tx MAC interface after getting out of EEE mode */
 #define AL_ETH_EEE_STOP_CNT		100000
 
 #define AL_ETH_TX_PKT_UDMA_FLAGS	(AL_ETH_TX_FLAGS_NO_SNOOP | \
@@ -77,7 +34,6 @@ met:
 #define AL_ETH_TX_VLAN_MOD_VID_SEL_SHIFT	28
 #define AL_ETH_TX_VLAN_MOD_PBIT_SEL_SHIFT	30
 
-/* tx Meta Descriptor defines */
 #define AL_ETH_TX_META_STORE			(1 << 21)
 #define AL_ETH_TX_META_L3_LEN_MASK		0xff
 #define AL_ETH_TX_META_L3_OFF_MASK		0xff
@@ -91,17 +47,15 @@ met:
 #define AL_ETH_TX_META_OUTER_L3_OFF_LOW_MASK	0x07
 #define AL_ETH_TX_META_OUTER_L3_OFF_LOW_SHIFT	29
 
-/* tx Meta Descriptor defines - MacSec */
-#define AL_ETH_TX_MACSEC_SIGN_SHIFT			  0		/* Sign TX pkt */
-#define AL_ETH_TX_MACSEC_ENCRYPT_SHIFT			  1		/* Encrypt TX pkt */
-#define AL_ETH_TX_MACSEC_AN_LSB_SHIFT			  2		/* Association Number */
+#define AL_ETH_TX_MACSEC_SIGN_SHIFT			  0		 
+#define AL_ETH_TX_MACSEC_ENCRYPT_SHIFT			  1		 
+#define AL_ETH_TX_MACSEC_AN_LSB_SHIFT			  2		 
 #define AL_ETH_TX_MACSEC_AN_MSB_SHIFT			  3
-#define AL_ETH_TX_MACSEC_SC_LSB_SHIFT			  4		/* Secured Channel */
+#define AL_ETH_TX_MACSEC_SC_LSB_SHIFT			  4		 
 #define AL_ETH_TX_MACSEC_SC_MSB_SHIFT			  9
-#define AL_ETH_TX_MACSEC_SECURED_PYLD_LEN_LSB_SHIFT	 10		/* Secure Payload Length (0x3FFF for non-SL packets) */
+#define AL_ETH_TX_MACSEC_SECURED_PYLD_LEN_LSB_SHIFT	 10		 
 #define AL_ETH_TX_MACSEC_SECURED_PYLD_LEN_MSB_SHIFT	 23
 
-/* Rx Descriptor defines */
 #define AL_ETH_RX_L3_PROTO_IDX_MASK	0x1F
 #define AL_ETH_RX_SRC_VLAN_CNT_MASK	3
 #define AL_ETH_RX_SRC_VLAN_CNT_SHIFT	5
@@ -116,7 +70,6 @@ met:
 #define ETH_MAC_GEN_LED_CFG_BLINK_TIMER_VAL 5
 #define ETH_MAC_GEN_LED_CFG_ACT_TIMER_VAL 7
 
-/* Ethernet Rx completion descriptor */
 typedef struct {
 	uint32_t ctrl_meta;
 	uint32_t len;
@@ -130,8 +83,8 @@ struct al_eth_epe_p_reg_entry {
 	uint32_t ctrl;
 };
 
-#define AL_ETH_MDIO_DELAY_PERIOD	1 /* micro seconds to wait when polling mdio status */
-#define AL_ETH_MDIO_DELAY_COUNT		150 /* number of times to poll */
+#define AL_ETH_MDIO_DELAY_PERIOD	1  
+#define AL_ETH_MDIO_DELAY_COUNT		150  
 
 #define AL_ETH_EPE_ENTRIES_NUM 26
 static struct al_eth_epe_p_reg_entry al_eth_epe_p_regs[AL_ETH_EPE_ENTRIES_NUM] = {
@@ -198,14 +151,6 @@ static struct al_eth_epe_control_entry al_eth_epe_control_table[AL_ETH_EPE_ENTRI
 
 #define AL_ETH_IS_1G_MAC(mac_mode) (((mac_mode) == AL_ETH_MAC_MODE_RGMII) || ((mac_mode) == AL_ETH_MAC_MODE_SGMII))
 
-/**
- * change and wait udma state
- *
- * @param dma the udma to change its state
- * @param new_state
- *
- * @return 0 on success. otherwise on failure.
- */
 static int al_udma_state_set_wait(struct al_udma *dma, enum al_udma_state new_state)
 {
 	enum al_udma_state state;
@@ -261,7 +206,6 @@ static void al_eth_epe_init(struct al_hal_eth_adapter *adapter)
 		al_reg_write32(&adapter->ec_regs_base->msp_c[idx].p_comp_mask, al_eth_epe_p_regs[idx].mask);
 		al_reg_write32(&adapter->ec_regs_base->msp_c[idx].p_comp_ctrl, al_eth_epe_p_regs[idx].ctrl);
 
-		/*control table  0*/
 		al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_addr, idx);
 		al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_6,
 						al_eth_epe_control_table[idx].data[5]);
@@ -276,7 +220,6 @@ static void al_eth_epe_init(struct al_hal_eth_adapter *adapter)
 		al_reg_write32(&adapter->ec_regs_base->epe[0].act_table_data_1,
 						al_eth_epe_control_table[idx].data[0]);
 
-		/*control table 1*/
 		al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_addr, idx);
 		al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_6,
 						al_eth_epe_control_table[idx].data[5]);
@@ -291,7 +234,6 @@ static void al_eth_epe_init(struct al_hal_eth_adapter *adapter)
 		al_reg_write32(&adapter->ec_regs_base->epe[1].act_table_data_1,
 						al_eth_epe_control_table[idx].data[0]);
 
-		/* macsec parser */
 		al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_addr, idx);
 		al_reg_write32(&adapter->ec_regs_base->msp.p_act_table_data_6,
 						al_eth_epe_control_table[idx].data[5]);
@@ -316,20 +258,13 @@ static void al_eth_epe_init(struct al_hal_eth_adapter *adapter)
 	al_reg_write32(&adapter->ec_regs_base->msp.p_res_def, 0x08000080);
 	al_reg_write32(&adapter->ec_regs_base->msp.p_res_in, 0x7);
 
-	/* header length as function of 4 bits value, for GRE, when C bit is set, the header len should be increase by 4*/
 	al_reg_write32(&adapter->ec_regs_base->epe_h[8].hdr_len, (4 << 16) | 4);
 
-	/* select the inner information when writing the rx descriptor (l3 protocol index etc) */
 	al_reg_write32(&adapter->ec_regs_base->rfw.meta, 0x3f);
 
 	al_reg_write32(&adapter->ec_regs_base->rfw.checksum, EC_RFW_CHECKSUM_HDR_SEL);
 }
 
-/*****************************API Functions  **********************************/
-/*adapter management */
-/**
- * initialize the ethernet adapter's DMA
- */
 int al_eth_adapter_init(struct al_hal_eth_adapter *adapter, struct al_eth_adapter_params *params)
 {
 	struct al_udma_params udma_params;
@@ -356,7 +291,6 @@ int al_eth_adapter_init(struct al_hal_eth_adapter *adapter, struct al_eth_adapte
 	adapter->ec_ints_base = ((void __iomem *)adapter->ec_regs_base) + 0x1c00;
 	adapter->mac_ints_base = ((void __iomem *)adapter->mac_regs_base) + 0x800;
 
-	/* initialize Tx udma */
 	udma_params.udma_reg = (union udma_regs __iomem *)&adapter->unit_regs->m2s;
 	udma_params.type = UDMA_TX;
 	udma_params.num_of_queues = AL_ETH_UDMA_TX_QUEUES;
@@ -374,7 +308,7 @@ int al_eth_adapter_init(struct al_hal_eth_adapter *adapter, struct al_eth_adapte
 			 udma_params.name, rc);
 		return rc;
 	}
-	/* initialize Rx udma */
+	 
 	udma_params.udma_reg = (union udma_regs __iomem *)&adapter->unit_regs->s2m;
 	udma_params.type = UDMA_RX;
 	udma_params.num_of_queues = AL_ETH_UDMA_RX_QUEUES;
@@ -396,17 +330,14 @@ int al_eth_adapter_init(struct al_hal_eth_adapter *adapter, struct al_eth_adapte
 	al_dbg("eth [%s]: controller's UDMA successfully initialized\n",
 		 params->name);
 
-	/* set max packet size to 1M (for TSO) */
 	conf.encode_64k_as_zero = AL_TRUE;
 	conf.max_pkt_size = 0xfffff;
 	al_udma_m2s_packet_size_cfg_set(&adapter->tx_udma, &conf);
 
-	/* set max descriptors to max data buffers number and one for meta desc */
 	al_udma_m2s_max_descs_set(&adapter->tx_udma, AL_ETH_PKT_MAX_BUFS + 1);
 
-	/* if pointer to ec regs provided, then init the tx meta cache of this udma*/
 	if (adapter->ec_regs_base != NULL) {
-		// INIT TX CACHE TABLE:
+		 
 		for (i = 0; i < 4; i++) {
 			al_reg_write32(&adapter->ec_regs_base->tso.cache_table_addr, i + (adapter->udma_id * 4));
 			al_reg_write32(&adapter->ec_regs_base->tso.cache_table_data_1, 0x00000000);
@@ -415,26 +346,23 @@ int al_eth_adapter_init(struct al_hal_eth_adapter *adapter, struct al_eth_adapte
 			al_reg_write32(&adapter->ec_regs_base->tso.cache_table_data_4, 0x00000000);
 		}
 	}
-	// only udma 0 allowed to init ec
+	 
 	if (adapter->udma_id != 0) {
 		return 0;
 	}
-	/* enable Ethernet controller: */
-	/* enable internal machines*/
+	 
 	al_reg_write32(&adapter->ec_regs_base->gen.en, 0xffffffff);
 	al_reg_write32(&adapter->ec_regs_base->gen.fifo_en, 0xffffffff);
 
 	if (adapter->rev_id > AL_ETH_REV_ID_0) {
-		/* enable A0 descriptor structure */
+		 
 		al_reg_write32_masked(&adapter->ec_regs_base->gen.en_ext,
 				      EC_GEN_EN_EXT_CACHE_WORD_SPLIT,
 				      EC_GEN_EN_EXT_CACHE_WORD_SPLIT);
 
-		/* use mss value in the descriptor */
 		al_reg_write32(&adapter->ec_regs_base->tso.cfg_add_0,
 						EC_TSO_CFG_ADD_0_MSS_SEL);
 
-		/* enable tunnel TSO */
 		al_reg_write32(&adapter->ec_regs_base->tso.cfg_tunnel,
 						(EC_TSO_CFG_TUNNEL_EN_TUNNEL_TSO |
 						 EC_TSO_CFG_TUNNEL_EN_UDP_CHKSUM |
@@ -445,49 +373,37 @@ int al_eth_adapter_init(struct al_hal_eth_adapter *adapter, struct al_eth_adapte
 						 EC_TSO_CFG_TUNNEL_EN_IPV4_TLEN));
 	}
 
-	/* swap input byts from MAC RX */
 	al_reg_write32(&adapter->ec_regs_base->mac.gen, 0x00000001);
-	/* swap output bytes to MAC TX*/
+	 
 	al_reg_write32(&adapter->ec_regs_base->tmi.tx_cfg, EC_TMI_TX_CFG_EN_FWD_TO_RX|EC_TMI_TX_CFG_SWAP_BYTES);
 
-	/* TODO: check if we need this line*/
 	al_reg_write32(&adapter->ec_regs_base->tfw_udma[0].fwd_dec, 0x000003fb);
 
-	/* RFW configuration: default 0 */
 	al_reg_write32(&adapter->ec_regs_base->rfw_default[0].opt_1, 0x00000001);
 
-	/* VLAN table address*/
 	al_reg_write32(&adapter->ec_regs_base->rfw.vid_table_addr, 0x00000000);
-	/* VLAN table data*/
+	 
 	al_reg_write32(&adapter->ec_regs_base->rfw.vid_table_data, 0x00000000);
-	/* HASH config (select toeplitz and bits 7:0 of the thash result) */
+	 
 	al_reg_write32(&adapter->ec_regs_base->rfw.thash_cfg_1, 0x00000000);
 
 	al_eth_epe_init(adapter);
 
-	/* disable TSO padding and use mac padding instead */
 	reg = al_reg_read32(&adapter->ec_regs_base->tso.in_cfg);
-	reg &= ~0x7F00; /*clear bits 14:8 */
+	reg &= ~0x7F00;  
 	al_reg_write32(&adapter->ec_regs_base->tso.in_cfg, reg);
 
 	return 0;
 }
 
-/*****************************API Functions  **********************************/
-/*adapter management */
-/**
- * enable the ec and mac interrupts
- */
 int al_eth_ec_mac_ints_config(struct al_hal_eth_adapter *adapter)
 {
 
 	al_dbg("eth [%s]: enable ethernet and mac interrupts\n", adapter->name);
 
-	// only udma 0 allowed to init ec
 	if (adapter->udma_id != 0)
 		return -EPERM;
 
-	/* enable mac ints */
 	al_iofic_config(adapter->ec_ints_base, AL_INT_GROUP_A,
 		INT_CONTROL_GRP_SET_ON_POSEDGE | INT_CONTROL_GRP_CLEAR_ON_READ);
 	al_iofic_config(adapter->ec_ints_base, AL_INT_GROUP_B,
@@ -497,10 +413,8 @@ int al_eth_ec_mac_ints_config(struct al_hal_eth_adapter *adapter)
 	al_iofic_config(adapter->ec_ints_base, AL_INT_GROUP_D,
 		INT_CONTROL_GRP_SET_ON_POSEDGE | INT_CONTROL_GRP_CLEAR_ON_READ);
 
-	/* unmask MAC int */
 	al_iofic_unmask(adapter->ec_ints_base, AL_INT_GROUP_A, 1);
 
-	/* enable ec interrupts */
 	al_iofic_config(adapter->mac_ints_base, AL_INT_GROUP_A,
 		INT_CONTROL_GRP_SET_ON_POSEDGE | INT_CONTROL_GRP_CLEAR_ON_READ);
 	al_iofic_config(adapter->mac_ints_base, AL_INT_GROUP_B,
@@ -510,31 +424,20 @@ int al_eth_ec_mac_ints_config(struct al_hal_eth_adapter *adapter)
 	al_iofic_config(adapter->mac_ints_base, AL_INT_GROUP_D,
 		INT_CONTROL_GRP_SET_ON_POSEDGE | INT_CONTROL_GRP_CLEAR_ON_READ);
 
-	/* eee active */
 	al_iofic_unmask(adapter->mac_ints_base, AL_INT_GROUP_A, AL_BIT(12));
 
 	al_iofic_unmask(adapter->unit_regs, AL_INT_GROUP_D, AL_BIT(11));
 	return 0;
 }
 
-/**
- * ec and mac interrupt service routine
- * read and print asserted interrupts
- *
- * @param adapter pointer to the private structure
- *
- * @return 0 on success. otherwise on failure.
- */
 int al_eth_ec_mac_isr(struct al_hal_eth_adapter *adapter)
 {
 	uint32_t cause;
 	al_dbg("[%s]: ethernet interrupts handler\n", adapter->name);
 
-	// only udma 0 allowed to init ec
 	if (adapter->udma_id != 0)
 		return -EPERM;
 
-	/* read ec cause */
 	cause = al_iofic_read_cause(adapter->ec_ints_base, AL_INT_GROUP_A);
 	al_dbg("[%s]: ethernet group A cause 0x%08x\n", adapter->name, cause);
 	if (cause & 1)
@@ -561,16 +464,12 @@ int al_eth_ec_mac_isr(struct al_hal_eth_adapter *adapter)
 	return 0;
 }
 
-/**
- * stop the DMA of the ethernet adapter
- */
 int al_eth_adapter_stop(struct al_hal_eth_adapter *adapter)
 {
 	int rc;
 
 	al_dbg("eth [%s]: stop controller's UDMA\n", adapter->name);
 
-	/* disable Tx dma*/
 	rc = al_udma_state_set_wait(&adapter->tx_udma, UDMA_DISABLE);
 	if (rc != 0) {
 		al_warn("[%s] warn: failed to change state, error %d\n",
@@ -580,7 +479,7 @@ int al_eth_adapter_stop(struct al_hal_eth_adapter *adapter)
 
 	al_dbg("eth [%s]: controller's TX UDMA stopped\n",
 		 adapter->name);
-	/* disable Rx dma*/
+	 
 	rc = al_udma_state_set_wait(&adapter->rx_udma, UDMA_DISABLE);
 	if (rc != 0) {
 		al_warn("[%s] warn: failed to change state, error %d\n",
@@ -600,10 +499,6 @@ int al_eth_adapter_reset(struct al_hal_eth_adapter *adapter)
 	return -EPERM;
 }
 
-/* Q management */
-/**
- * Configure and enable a queue ring
- */
 int al_eth_queue_config(struct al_hal_eth_adapter *adapter, enum al_udma_type type, uint32_t qid,
 			     struct al_udma_q_params *q_params)
 {
@@ -640,19 +535,14 @@ int al_eth_queue_disable(struct al_hal_eth_adapter *adapter __attribute__((__unu
 	return -EPERM;
 }
 
-/* MAC layer */
 int al_eth_rx_pkt_limit_config(struct al_hal_eth_adapter *adapter, uint32_t min_rx_len, uint32_t max_rx_len)
 {
 	al_assert(max_rx_len <= AL_ETH_MAX_FRAME_LEN);
 
-	/* EC minimum packet length [bytes] in RX */
 	al_reg_write32(&adapter->ec_regs_base->mac.min_pkt, min_rx_len);
-	/* EC maximum packet length [bytes] in RX, reduce 8 bytes to make  */
+	 
 	al_reg_write32(&adapter->ec_regs_base->mac.max_pkt, max_rx_len);
 
-	/* configure the MAC's max rx length, add 8 bytes so the packet get
-	 * discarded by in EC rather by MAC
-	 */
 	if (AL_ETH_IS_1G_MAC(adapter->mac_mode)) {
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.frm_len, max_rx_len + 8);
 	} else {
@@ -661,7 +551,6 @@ int al_eth_rx_pkt_limit_config(struct al_hal_eth_adapter *adapter, uint32_t min_
 	return 0;
 }
 
-/* configure the mac media type. */
 int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode mode)
 {
 	char * mode_str;
@@ -671,42 +560,28 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 		mode_str = "RGMII";
 		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x40003210);
 
-		/* 1G MAC control register */
-		/* bit[0]  - TX_ENA - zeroed by default. Should be asserted by al_eth_mac_start
-		 * bit[1]  - RX_ENA - zeroed by default. Should be asserted by al_eth_mac_start
-		 * bit[3]  - ETH_SPEED - zeroed to enable 10/100 Mbps Ethernet
-		 * bit[4]  - PROMIS_EN - asserted to enable MAC promiscuous mode
-		 * bit[23] - CNTL_FRM-ENA - asserted to enable control frames
-		 * bit[24] - NO_LGTH_CHECK - asserted to disable length checks, which is done in the controller
-		 */
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.cmd_cfg, 0x01800010);
 
-		/* RX_SECTION_EMPTY,  */
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.rx_section_empty, 0x00000000);
-		/* RX_SECTION_FULL,  */
-		al_reg_write32(&adapter->mac_regs_base->mac_1g.rx_section_full, 0x0000000c); /* must be larger than almost empty */
-		/* RX_ALMOST_EMPTY,  */
+		 
+		al_reg_write32(&adapter->mac_regs_base->mac_1g.rx_section_full, 0x0000000c);  
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.rx_almost_empty, 0x00000008);
-		/* RX_ALMOST_FULL,  */
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.rx_almost_full, 0x00000008);
 
-		/* TX_SECTION_EMPTY,  */
-		al_reg_write32(&adapter->mac_regs_base->mac_1g.tx_section_empty, 0x00000008); /* 8 ? */
-		/* TX_SECTION_FULL, 0 - store and forward, */
+		al_reg_write32(&adapter->mac_regs_base->mac_1g.tx_section_empty, 0x00000008);  
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.tx_section_full, 0x0000000c);
-		/* TX_ALMOST_EMPTY,  */
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.tx_almost_empty, 0x00000008);
-		/* TX_ALMOST_FULL,  */
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.tx_almost_full, 0x00000008);
 
-		/* XAUI MAC control register */
 		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000000);
 
-		/* 1G MACSET 1G */
-		/* taking sel_1000/sel_10 inputs from rgmii PHY, and not from register.
-		 * disabling magic_packets detection in mac */
 		al_reg_write32(&adapter->mac_regs_base->gen.mac_1g_cfg, 0x00000002);
-		/* RGMII set 1G */
+		 
 		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x00063910);
 		al_reg_write32(&adapter->mac_regs_base->gen.rgmii_sel, 0xF);
 		break;
@@ -714,47 +589,32 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 		mode_str = "SGMII";
 		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x40053210);
 
-		/* 1G MAC control register */
-		/* bit[0]  - TX_ENA - zeroed by default. Should be asserted by al_eth_mac_start
-		 * bit[1]  - RX_ENA - zeroed by default. Should be asserted by al_eth_mac_start
-		 * bit[3]  - ETH_SPEED - zeroed to enable 10/100 Mbps Ethernet
-		 * bit[4]  - PROMIS_EN - asserted to enable MAC promiscuous mode
-		 * bit[23] - CNTL_FRM-ENA - asserted to enable control frames
-		 * bit[24] - NO_LGTH_CHECK - asserted to disable length checks, which is done in the controller
-		 */
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.cmd_cfg, 0x01800010);
 
-		/* RX_SECTION_EMPTY,  */
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.rx_section_empty, 0x00000000);
-		/* RX_SECTION_FULL,  */
-		al_reg_write32(&adapter->mac_regs_base->mac_1g.rx_section_full, 0x0000000c); /* must be larger than almost empty */
-		/* RX_ALMOST_EMPTY,  */
+		 
+		al_reg_write32(&adapter->mac_regs_base->mac_1g.rx_section_full, 0x0000000c);  
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.rx_almost_empty, 0x00000008);
-		/* RX_ALMOST_FULL,  */
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.rx_almost_full, 0x00000008);
 
-		/* TX_SECTION_EMPTY,  */
-		al_reg_write32(&adapter->mac_regs_base->mac_1g.tx_section_empty, 0x00000008); /* 8 ? */
-		/* TX_SECTION_FULL, 0 - store and forward, */
+		al_reg_write32(&adapter->mac_regs_base->mac_1g.tx_section_empty, 0x00000008);  
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.tx_section_full, 0x0000000c);
-		/* TX_ALMOST_EMPTY,  */
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.tx_almost_empty, 0x00000008);
-		/* TX_ALMOST_FULL,  */
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.tx_almost_full, 0x00000008);
 
-		/* XAUI MAC control register */
 		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x000000c0);
 
-		/* 1G MACSET 1G */
-		/* taking sel_1000/sel_10 inputs from rgmii_converter, and not from register.
-		 * disabling magic_packets detection in mac */
 		al_reg_write32(&adapter->mac_regs_base->gen.mac_1g_cfg, 0x00000002);
-		/* SerDes configuration */
+		 
 		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x00063910);
 		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x000004f0);
 		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x00000401);
 
-		// FAST AN -- Testing only
 #ifdef AL_HAL_ETH_FAST_AN
 		al_reg_write32(&adapter->mac_regs_base->sgmii.reg_addr, 0x00000012);
 		al_reg_write32(&adapter->mac_regs_base->sgmii.reg_data, 0x00000040);
@@ -762,7 +622,6 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 		al_reg_write32(&adapter->mac_regs_base->sgmii.reg_data, 0x00000000);
 #endif
 
-		/* Setting PCS i/f mode to SGMII (instead of default 1000Base-X) */
 		al_reg_write32(&adapter->mac_regs_base->sgmii.reg_addr, 0x00000014);
 		al_reg_write32(&adapter->mac_regs_base->sgmii.reg_data, 0x0000000b);
 
@@ -773,31 +632,31 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 
 	case AL_ETH_MAC_MODE_XAUI:
 		mode_str = "XAUI";
-		/* MAC register file */
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022830);
-		/* XAUI MAC control register */
+		 
 		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000003);
 
 		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_32_64, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_out, 0x00000401); */
+ 
 		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_64_32, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_in, 0x00000401); */
+ 
 		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x06883910);
 		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x10003210);
 		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x0000040f);
 		break;
 	case AL_ETH_MAC_MODE_RXAUI:
 		mode_str = "RXAUI";
-		/* MAC register file */
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022830);
-		/* XAUI MAC control register */
+		 
 		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x0000000b);
-		/* RXAUI MAC control register */
+		 
 		al_reg_write32(&adapter->mac_regs_base->gen.rxaui_cfg, 0x00000005);
 		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_32_64, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_out, 0x00000401); */
+ 
 		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_64_32, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_in, 0x00000401); */
+ 
 		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x002c3910);
 		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x0003210);
 		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x00000403);
@@ -806,17 +665,16 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 	case AL_ETH_MAC_MODE_10GbE_Serial:
 		mode_str = "KR";
 
-		/* MAC register file */
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022830);
-		/* XAUI MAC control register */
+		 
 		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000005);
-		/* RXAUI MAC control register */
+		 
 		al_reg_write32(&adapter->mac_regs_base->gen.rxaui_cfg, 0x00000007);
 		al_reg_write32(&adapter->mac_regs_base->gen.sd_cfg, 0x000001F1);
 		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_32_64, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_out, 0x00000401); */
+ 
 		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_64_32, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_in, 0x00000401); */
+ 
 		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x00073910);
 		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x10003210);
 		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x000004f0);
@@ -829,26 +687,23 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 	case AL_ETH_MAC_MODE_10G_SGMII:
 		mode_str = "10G_SGMII";
 
-		/* MAC register file */
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x01022830);
 
-		/* XAUI MAC control register */
 		al_reg_write32(&adapter->mac_regs_base->gen.cfg, 0x00000001);
 
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.if_mode, 0x0000002b);
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.control, 0x00009140);
-		// FAST AN -- Testing only
+		 
 #ifdef AL_HAL_ETH_FAST_AN
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.link_timer_lo, 0x00000040);
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.link_timer_hi, 0x00000000);
 #endif
 
-		/* RXAUI MAC control register */
 		al_reg_write32(&adapter->mac_regs_base->gen.rxaui_cfg, 0x00000007);
 		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_32_64, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_out, 0x00000401); */
+ 
 		al_reg_write32(&adapter->mac_regs_base->gen.xgmii_dfifo_64_32, 0x00000401);
-/*		al_reg_write32(&adapter->mac_regs_base->gen.mac_res_1_in, 0x00000401); */
+ 
 		al_reg_write32_masked(&adapter->mac_regs_base->gen.mux_sel, ~ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, 0x00063910);
 		al_reg_write32(&adapter->mac_regs_base->gen.clk_cfg, 0x40003210);
 		al_reg_write32(&adapter->mac_regs_base->gen.sd_fifo_ctrl, 0x00000401);
@@ -868,25 +723,23 @@ int al_eth_mac_config(struct al_hal_eth_adapter *adapter, enum al_eth_mac_mode m
 	return 0;
 }
 
-/* start the mac */
 int al_eth_mac_start(struct al_hal_eth_adapter *adapter)
 {
 	if (AL_ETH_IS_1G_MAC(adapter->mac_mode))
-		/* 1G MAC control register */
+		 
 		al_reg_write32_masked(&adapter->mac_regs_base->mac_1g.cmd_cfg, 0x3, 0x3);
-	else	/* MAC register file */
+	else	 
 		al_reg_write32_masked(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x3, 0x3);
 
 	return 0;
 }
 
-/* stop the mac */
 int al_eth_mac_stop(struct al_hal_eth_adapter *adapter)
 {
 	if (AL_ETH_IS_1G_MAC(adapter->mac_mode))
-		/* 1G MAC control register */
+		 
 		al_reg_write32(&adapter->mac_regs_base->mac_1g.cmd_cfg, 0x0);
-	else	/* MAC register file */
+	else	 
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, 0x0);
 
 	return 0;
@@ -928,7 +781,6 @@ int al_eth_capabilities_get(struct al_hal_eth_adapter *adapter, struct al_eth_ca
 	return 0;
 }
 
-/* update link speed and duplex mode */
 #ifdef CONFIG_SYNO_ALPINE_A0
 int al_eth_mac_link_config(struct al_hal_eth_adapter *adapter,
 			   al_bool force_1000_base_x,
@@ -952,10 +804,7 @@ int al_eth_mac_link_config(struct al_hal_eth_adapter *adapter, uint32_t speed, a
 	}
 #ifdef CONFIG_SYNO_ALPINE_A0
 	if ((adapter != AL_ETH_MAC_MODE_RGMII) && (an_enable)) {
-		/*
-		 * an_enable is not relevant to RGMII mode.
-		 * in AN mode speed and duplex aren't relevant.
-		 */
+		 
 		al_info("eth [%s]: set auto negotiation to enable\n", adapter->name);
 	} else {
 #endif
@@ -981,10 +830,7 @@ int al_eth_mac_link_config(struct al_hal_eth_adapter *adapter, uint32_t speed, a
 		al_reg_write32(&adapter->mac_regs_base->sgmii.reg_addr,
 			       ETH_MAC_SGMII_REG_ADDR_CTRL_REG);
 		sgmii_ctrl = al_reg_read32(&adapter->mac_regs_base->sgmii.reg_data);
-		/*
-		 * in case bit 0 is off in sgmii_if_mode register all the other
-		 * bits are ignored.
-		 */
+		 
 		if (force_1000_base_x == AL_FALSE)
 			sgmii_if_mode = ETH_MAC_SGMII_REG_DATA_IF_MODE_SGMII_EN;
 
@@ -1027,7 +873,7 @@ int al_eth_mac_link_config(struct al_hal_eth_adapter *adapter, uint32_t speed, a
 		al_reg_write32(&adapter->mac_regs_base->sgmii.reg_data,
 			       sgmii_ctrl);
 	}
-#else //CONFIG_SYNO_ALPINE_A0
+#else  
 	if (full_duplex == AL_TRUE)
 		AL_REG_MASK_CLEAR(mac_ctrl, AL_ETH_1G_MAC_CTRL_HD_EN);
 	else
@@ -1042,7 +888,7 @@ int al_eth_mac_link_config(struct al_hal_eth_adapter *adapter, uint32_t speed, a
 		else
 			AL_REG_MASK_CLEAR(mac_ctrl, AL_ETH_1G_MAC_CTRL_10M_SPD);
 	}
-#endif //CONFIG_SYNO_ALPINE_A0
+#endif  
 
 	al_reg_write32(&adapter->mac_regs_base->mac_1g.cmd_cfg, mac_ctrl);
 	return 0;
@@ -1068,7 +914,6 @@ int al_eth_mac_loopback_config(struct al_hal_eth_adapter *adapter, int enable)
 	return 0;
 }
 
-/* MDIO */
 int al_eth_mdio_config(
 	struct al_hal_eth_adapter	*adapter,
 	enum al_eth_mdio_type		mdio_type,
@@ -1115,7 +960,6 @@ int al_eth_mdio_config(
 				break;
 		}
 
-		/* set clock div to get 'mdio_clk_freq_khz' */
 		switch (ref_clk_freq) {
 		default:
 			al_err("eth [%s]: %s: invalid reference clock frequency"
@@ -1175,12 +1019,7 @@ int al_eth_mdio_10g_mac_wait_busy(struct al_hal_eth_adapter *adapter)
 
 	do {
 		mdio_cfg_status = al_reg_read32(&adapter->mac_regs_base->mac_10g.mdio_cfg_status);
-/*
-		if (mdio_cfg_status & AL_BIT(1)){ //error
-			al_err(" %s mdio read failed on error. phy_addr 0x%x reg 0x%x\n",
-				udma_params.name, phy_addr, reg);
-			return -EIO;
-		}*/
+ 
 		if (mdio_cfg_status & AL_BIT(0)){
 			if (count > 0)
 				al_dbg("eth [%s] mdio: still busy!\n", adapter->name);
@@ -1200,7 +1039,6 @@ int al_eth_mdio_10g_mac_type22(struct al_hal_eth_adapter *adapter, int read, uin
 	uint32_t mdio_cfg_status;
 	uint16_t mdio_cmd;
 
-	//wait if the HW is busy
 	rc = al_eth_mdio_10g_mac_wait_busy(adapter);
 	if (rc) {
 		al_err(" eth [%s] mdio %s failed. HW is busy\n", adapter->name, op);
@@ -1211,7 +1049,7 @@ int al_eth_mdio_10g_mac_type22(struct al_hal_eth_adapter *adapter, int read, uin
 	mdio_cmd |= (0x1F & phy_addr) << 5;
 
 	if (read)
-		mdio_cmd |= AL_BIT(15); //READ command
+		mdio_cmd |= AL_BIT(15);  
 
 	al_reg_write16(&adapter->mac_regs_base->mac_10g.mdio_cmd,
 			mdio_cmd);
@@ -1219,7 +1057,6 @@ int al_eth_mdio_10g_mac_type22(struct al_hal_eth_adapter *adapter, int read, uin
 		al_reg_write16(&adapter->mac_regs_base->mac_10g.mdio_data,
 				*val);
 
-	//wait for the busy to clear
 	rc = al_eth_mdio_10g_mac_wait_busy(adapter);
 	if (rc != 0) {
 		al_err(" %s mdio %s failed on timeout\n", adapter->name, op);
@@ -1228,7 +1065,7 @@ int al_eth_mdio_10g_mac_type22(struct al_hal_eth_adapter *adapter, int read, uin
 
 	mdio_cfg_status = al_reg_read32(&adapter->mac_regs_base->mac_10g.mdio_cfg_status);
 
-	if (mdio_cfg_status & AL_BIT(1)){ //error
+	if (mdio_cfg_status & AL_BIT(1)){  
 		al_err(" %s mdio %s failed on error. phy_addr 0x%x reg 0x%x\n",
 			adapter->name, op, phy_addr, reg);
 			return -EIO;
@@ -1246,30 +1083,27 @@ int al_eth_mdio_10g_mac_type45(struct al_hal_eth_adapter *adapter, int read, uin
 	uint32_t mdio_cfg_status;
 	uint16_t mdio_cmd;
 
-	//wait if the HW is busy
 	rc = al_eth_mdio_10g_mac_wait_busy(adapter);
 	if (rc) {
 		al_err(" %s mdio %s failed. HW is busy\n", adapter->name, op);
 		return rc;
 	}
-	// set command register
+	 
 	mdio_cmd = (uint16_t)(0x1F & device);
 	mdio_cmd |= (0x1F & port_addr) << 5;
 	al_reg_write16(&adapter->mac_regs_base->mac_10g.mdio_cmd,
 			mdio_cmd);
 
-	// send address frame
 	al_reg_write16(&adapter->mac_regs_base->mac_10g.mdio_regaddr, reg);
-	//wait for the busy to clear
+	 
 	rc = al_eth_mdio_10g_mac_wait_busy(adapter);
 	if (rc) {
 		al_err(" %s mdio %s (address frame) failed on timeout\n", adapter->name, op);
 		return rc;
 	}
 
-	// if read, write again to the command register with READ bit set
 	if (read) {
-		mdio_cmd |= AL_BIT(15); //READ command
+		mdio_cmd |= AL_BIT(15);  
 		al_reg_write16(
 			(uint16_t *)&adapter->mac_regs_base->mac_10g.mdio_cmd,
 			mdio_cmd);
@@ -1278,7 +1112,7 @@ int al_eth_mdio_10g_mac_type45(struct al_hal_eth_adapter *adapter, int read, uin
 			(uint16_t *)&adapter->mac_regs_base->mac_10g.mdio_data,
 			*val);
 	}
-	//wait for the busy to clear
+	 
 	rc = al_eth_mdio_10g_mac_wait_busy(adapter);
 	if (rc) {
 		al_err(" %s mdio %s failed on timeout\n", adapter->name, op);
@@ -1287,7 +1121,7 @@ int al_eth_mdio_10g_mac_type45(struct al_hal_eth_adapter *adapter, int read, uin
 
 	mdio_cfg_status = al_reg_read32(&adapter->mac_regs_base->mac_10g.mdio_cfg_status);
 
-	if (mdio_cfg_status & AL_BIT(1)){ //error
+	if (mdio_cfg_status & AL_BIT(1)){  
 		al_err(" %s mdio %s failed on error. port 0x%x, device 0x%x reg 0x%x\n",
 			adapter->name, op, port_addr, device, reg);
 			return -EIO;
@@ -1298,30 +1132,17 @@ int al_eth_mdio_10g_mac_type45(struct al_hal_eth_adapter *adapter, int read, uin
 	return 0;
 }
 
-/**
- * acquire mdio interface ownership
- * when mdio interface shared between multiple eth controllers, this function waits until the ownership granted for this controller.
- * this function does nothing when the mdio interface is used only by this controller.
- *
- * @param adapter
- * @return 0 on success, -ETIMEDOUT  on timeout.
- */
 static int al_eth_mdio_lock(struct al_hal_eth_adapter *adapter)
 {
 	int	count = 0;
 	uint32_t mdio_ctrl_1;
 
 	if (adapter->shared_mdio_if == AL_FALSE)
-		return 0; /* nothing to do when interface is not shared */
+		return 0;  
 
 	do {
 		mdio_ctrl_1 = al_reg_read32(&adapter->mac_regs_base->gen.mdio_ctrl_1);
-/*
-		if (mdio_cfg_status & AL_BIT(1)){ //error
-			al_err(" %s mdio read failed on error. phy_addr 0x%x reg 0x%x\n",
-				udma_params.name, phy_addr, reg);
-			return -EIO;
-		}*/
+ 
 		if (mdio_ctrl_1 & AL_BIT(0)){
 			if (count > 0)
 				al_dbg("eth %s mdio interface still busy!\n", adapter->name);
@@ -1340,33 +1161,13 @@ static int al_eth_mdio_lock(struct al_hal_eth_adapter *adapter)
 	return -ETIMEDOUT;
 }
 
-/**
- * free mdio interface ownership
- * when mdio interface shared between multiple eth controllers, this function releases the ownership granted for this controller.
- * this function does nothing when the mdio interface is used only by this controller.
- *
- * @param adapter
- * @return 0.
- */
 static int al_eth_mdio_free(struct al_hal_eth_adapter *adapter)
 {
 	if (adapter->shared_mdio_if == AL_FALSE)
-		return 0; /* nothing to do when interface is not shared */
+		return 0;  
 
 	al_reg_write32(&adapter->mac_regs_base->gen.mdio_ctrl_1, 0);
 
-	/*
-	 * Addressing RMN: 2917
-	 *
-	 * RMN description:
-	 * The HW spin-lock is stateless and doesn't maintain any scheduling
-	 * policy.
-	 *
-	 * Software flow:
-	 * After getting the lock wait 2 times the delay period in order to give
-	 * the other port chance to take the lock and prevent starvation.
-	 * This is not scalable to more than two ports.
-	 */
 	al_udelay(2 * AL_ETH_MDIO_DELAY_PERIOD);
 
 	return 0;
@@ -1377,7 +1178,6 @@ int al_eth_mdio_read(struct al_hal_eth_adapter *adapter, uint32_t phy_addr, uint
 	int rc;
 	rc = al_eth_mdio_lock(adapter);
 
-	/*"interface ownership taken"*/
 	if (rc)
 		return rc;
 
@@ -1399,7 +1199,7 @@ int al_eth_mdio_write(struct al_hal_eth_adapter *adapter, uint32_t phy_addr, uin
 	int rc;
 	al_dbg("eth mdio write: phy_addr %x, device %x, reg %x, val %x\n", phy_addr, device, reg, val);
 	rc = al_eth_mdio_lock(adapter);
-	/* interface ownership taken */
+	 
 	if (rc)
 		return rc;
 
@@ -1502,10 +1302,7 @@ al_dump_tx_pkt(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 	al_dbg("[%s %d]: total len: 0x%08x\n", tx_dma_q->udma->name, tx_dma_q->qid, total_len);
 
 }
-/* TX */
-/**
- * add packet to transmission queue
- */
+ 
 int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 {
 	union al_udma_desc *tx_desc;
@@ -1539,7 +1336,7 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 		flags &= ~(AL_M2S_DESC_FIRST | AL_ETH_TX_FLAGS_INT);
 
 		tx_desc = al_udma_desc_get(tx_dma_q);
-		/* get ring id, and clear FIRST and Int flags */
+		 
 		ring_id = al_udma_ring_id_get(tx_dma_q) <<
 			AL_M2S_DESC_RING_ID_SHIFT;
 
@@ -1585,10 +1382,6 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 				meta_word_2 |= ((pkt->meta->mss_val & 0x03ff)
 						<< AL_ETH_TX_META_MSS_LSB_VAL_SHIFT);
 
-				/*
-				 * move from bytes to multiplication of 2 as the HW
-				 * expect to get it
-				 */
 				l3_offset = (pkt->meta->outer_l3_offset >> 1);
 
 				meta_word_0 |=
@@ -1601,10 +1394,6 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 					   AL_ETH_TX_META_OUTER_L3_OFF_LOW_MASK)
 					   << AL_ETH_TX_META_OUTER_L3_OFF_LOW_SHIFT);
 
-				/*
-				 * shift right 2 bits to work in multiplication of 4
-				 * as the HW expect to get it
-				 */
 				meta_word_3 |=
 					(((pkt->meta->outer_l3_len >> 2) &
 					   AL_ETH_TX_META_OUTER_L3_LEN_MASK)
@@ -1613,8 +1402,8 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 		}
 
 		if (pkt->meta->words_valid & 8) {
-		/* MacSec packets */
-		if (pkt->flags & AL_ETH_TX_FLAGS_L2_MACSEC_PKT) { /* pkt is macsec protected */
+		 
+		if (pkt->flags & AL_ETH_TX_FLAGS_L2_MACSEC_PKT) {  
 				meta_word_3 |= pkt->macsec_sign			<< AL_ETH_TX_MACSEC_SIGN_SHIFT;
 				meta_word_3 |= pkt->macsec_encrypt		<< AL_ETH_TX_MACSEC_ENCRYPT_SHIFT;
 				meta_word_3 |= pkt->macsec_association_number	<< AL_ETH_TX_MACSEC_AN_LSB_SHIFT;
@@ -1632,11 +1421,9 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 
 	meta_ctrl = pkt->flags & AL_ETH_TX_PKT_META_FLAGS;
 
-	/* L4_PARTIAL_CSUM without L4_CSUM is invalid option  */
 	al_assert((pkt->flags & (AL_ETH_TX_FLAGS_L4_CSUM|AL_ETH_TX_FLAGS_L4_PARTIAL_CSUM)) !=
 		  AL_ETH_TX_FLAGS_L4_PARTIAL_CSUM);
 
-	/* TSO packets can't have Timestamp enabled */
 	al_assert((pkt->flags & (AL_ETH_TX_FLAGS_TSO|AL_ETH_TX_FLAGS_TS)) !=
 		  (AL_ETH_TX_FLAGS_TSO|AL_ETH_TX_FLAGS_TS));
 
@@ -1659,7 +1446,7 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 	for(buf_idx = 0; buf_idx < pkt->num_of_bufs; buf_idx++ ) {
 		uint32_t flags_len = flags;
 				tx_desc = al_udma_desc_get(tx_dma_q);
-		/* get ring id, and clear FIRST and Int flags */
+		 
 		ring_id = al_udma_ring_id_get(tx_dma_q) <<
 			AL_M2S_DESC_RING_ID_SHIFT;
 
@@ -1668,7 +1455,6 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 		if (buf_idx == (pkt->num_of_bufs - 1))
 			flags_len |= AL_M2S_DESC_LAST;
 
-		/* clear First and Int flags */
 		flags &= AL_ETH_TX_FLAGS_NO_SNOOP;
 		flags |= AL_M2S_DESC_CONCAT;
 
@@ -1689,17 +1475,14 @@ int al_eth_tx_pkt_prepare(struct al_udma_q *tx_dma_q, struct al_eth_pkt *pkt)
 
 void al_eth_tx_dma_action(struct al_udma_q *tx_dma_q, uint32_t tx_descs)
 {
-	/* add tx descriptors */
+	 
 	al_udma_desc_action_add(tx_dma_q, tx_descs);
 }
 
-/**
- * get number of completed tx descriptors, upper layer should derive from
- */
 int al_eth_comp_tx_get(struct al_udma_q *tx_dma_q)
 {
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
-//do nothing
+ 
 #else
 	union al_udma_cdesc *cdesc;
 #endif
@@ -1719,24 +1502,17 @@ int al_eth_comp_tx_get(struct al_udma_q *tx_dma_q)
 	return rc;
 }
 
-/**
- * configure the TSO MSS val
- */
 int al_eth_tso_mss_config(struct al_hal_eth_adapter *adapter, uint8_t idx, uint32_t mss_val)
 {
 
-	al_assert(idx <= 8); /*valid MSS index*/
-	al_assert(mss_val <= AL_ETH_TSO_MSS_MAX_VAL); /*valid MSS val*/
-	al_assert(mss_val >= AL_ETH_TSO_MSS_MIN_VAL); /*valid MSS val*/
+	al_assert(idx <= 8);  
+	al_assert(mss_val <= AL_ETH_TSO_MSS_MAX_VAL);  
+	al_assert(mss_val >= AL_ETH_TSO_MSS_MIN_VAL);  
 
 	al_reg_write32(&adapter->ec_regs_base->tso_sel[idx].mss, mss_val);
 	return 0;
 }
 
-/* RX */
-/**
- * config the rx descriptor fields
- */
 void al_eth_rx_desc_config(
 			struct al_hal_eth_adapter *adapter,
 			enum al_eth_rx_desc_lro_context_val_res lro_sel,
@@ -1756,9 +1532,6 @@ void al_eth_rx_desc_config(
 	al_reg_write32(&adapter->ec_regs_base->rfw.cfg_a_0, reg_val);
 }
 
-/**
- * add buffer to receive queue
- */
 int al_eth_rx_buffer_add(struct al_udma_q *rx_dma_q,
 			      struct al_buf *buf, uint32_t flags,
 			      struct al_buf *header_buf)
@@ -1783,8 +1556,8 @@ int al_eth_rx_buffer_add(struct al_udma_q *rx_dma_q,
 	flags_len |= buf->len & AL_M2S_DESC_LEN_MASK;
 
 	if (flags & AL_ETH_RX_FLAGS_DUAL_BUF) {
-		al_assert(header_buf != NULL); /*header valid in dual buf */
-		al_assert(AL_ADDR_HIGH(buf->addr) == AL_ADDR_HIGH(header_buf->addr)); /* high bits of addresses must be the same */
+		al_assert(header_buf != NULL);  
+		al_assert(AL_ADDR_HIGH(buf->addr) == AL_ADDR_HIGH(header_buf->addr));  
 
 		flags_len |= (header_buf->len << AL_M2S_DESC_LEN_SHIFT) &
 			AL_M2S_DESC_LEN_MASK;
@@ -1796,21 +1569,14 @@ int al_eth_rx_buffer_add(struct al_udma_q *rx_dma_q,
 	return 0;
 }
 
-/**
- * notify the hw engine about rx descriptors that were added to the receive queue
- */
 void al_eth_rx_buffer_action(struct al_udma_q *rx_dma_q, uint32_t descs_num)
 {
 	al_dbg("[%s]: update the rx engine tail pointer: queue %d. descs %d\n",
 		 rx_dma_q->udma->name, rx_dma_q->qid, descs_num);
 
-	/* add rx descriptor */
 	al_udma_desc_action_add(rx_dma_q, descs_num);
 }
 
-/**
- * get packet from RX completion ring
- */
 uint32_t al_eth_pkt_rx(struct al_udma_q *rx_dma_q, struct al_eth_pkt *pkt)
 {
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
@@ -1834,7 +1600,6 @@ uint32_t al_eth_pkt_rx(struct al_udma_q *rx_dma_q, struct al_eth_pkt *pkt)
 	for (i = 0; i < rc; i++) {
 		uint32_t len;
 
-		/* get next descriptor */
 		rx_desc = (al_eth_rx_cdesc *)al_cdesc_next(rx_dma_q, cdesc, i);
 
 		len = swap32_from_le(rx_desc->len);
@@ -1845,7 +1610,7 @@ uint32_t al_eth_pkt_rx(struct al_udma_q *rx_dma_q, struct al_eth_pkt *pkt)
 #endif
 		pkt->bufs[i].len = len & AL_M2S_DESC_LEN_MASK;
 	}
-	/* get flags from last desc */
+	 
 	pkt->flags = swap32_from_le(rx_desc->ctrl_meta);
 #ifdef AL_ETH_RX_DESC_RAW_GET
 	pkt->rx_desc_raw[0] = pkt->flags;
@@ -1853,13 +1618,12 @@ uint32_t al_eth_pkt_rx(struct al_udma_q *rx_dma_q, struct al_eth_pkt *pkt)
 	pkt->rx_desc_raw[2] = swap32_from_le(rx_desc->word2);
 	pkt->rx_desc_raw[3] = swap32_from_le(rx_desc->word3);
 #endif
-	/* update L3/L4 proto index */
+	 
 	pkt->l3_proto_idx = pkt->flags & AL_ETH_RX_L3_PROTO_IDX_MASK;
 	pkt->l4_proto_idx = (pkt->flags >> AL_ETH_RX_L4_PROTO_IDX_SHIFT) & AL_ETH_RX_L4_PROTO_IDX_MASK;
 	pkt->rxhash = (swap32_from_le(rx_desc->len) & AL_ETH_RX_HASH_MASK) >>
 		AL_ETH_RX_HASH_SHIFT;
 
-	/* update MacSec related info */
 	pkt->macsec_rx_flags = (swap32_from_le(rx_desc->word3) & AL_ETH_MACSEC_RX_FLAGS_MASK) >>
 						AL_ETH_MACSEC_RX_FLAGS_LSB_SHIFT;
 	if (pkt->macsec_rx_flags & AL_ETH_MACSEC_RX_FLAGS_IS_MACSEC) {
@@ -1880,7 +1644,7 @@ uint32_t al_eth_pkt_rx(struct al_udma_q *rx_dma_q, struct al_eth_pkt *pkt)
 int al_eth_thash_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint32_t entry)
 {
 
-	al_assert(idx < AL_ETH_RX_THASH_TABLE_SIZE); /*valid THASH index*/
+	al_assert(idx < AL_ETH_RX_THASH_TABLE_SIZE);  
 
 	al_reg_write32(&adapter->ec_regs_base->rfw.thash_table_addr, idx);
 	al_reg_write32(&adapter->ec_regs_base->rfw.thash_table_data, entry);
@@ -1890,7 +1654,7 @@ int al_eth_thash_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uin
 int al_eth_fsm_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint32_t entry)
 {
 
-	al_assert(idx < AL_ETH_RX_FSM_TABLE_SIZE); /*valid FSM index*/
+	al_assert(idx < AL_ETH_RX_FSM_TABLE_SIZE);  
 
 	al_reg_write32(&adapter->ec_regs_base->rfw.fsm_table_addr, idx);
 	al_reg_write32(&adapter->ec_regs_base->rfw.fsm_table_data, entry);
@@ -1964,7 +1728,7 @@ int al_eth_ctrl_table_def_set(struct al_hal_eth_adapter *adapter,
 int al_eth_ctrl_table_raw_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint32_t entry)
 {
 
-	al_assert(idx < AL_ETH_RX_CTRL_TABLE_SIZE); /* valid CTRL index */
+	al_assert(idx < AL_ETH_RX_CTRL_TABLE_SIZE);  
 
 	al_reg_write32(&adapter->ec_regs_base->rfw.ctrl_table_addr, idx);
 	al_reg_write32(&adapter->ec_regs_base->rfw.ctrl_table_data, entry);
@@ -1981,7 +1745,7 @@ int al_eth_ctrl_table_def_raw_set(struct al_hal_eth_adapter *adapter, uint32_t v
 int al_eth_hash_key_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint32_t val)
 {
 
-	al_assert(idx < AL_ETH_RX_HASH_KEY_NUM); /*valid CTRL index*/
+	al_assert(idx < AL_ETH_RX_HASH_KEY_NUM);  
 
 	al_reg_write32(&adapter->ec_regs_base->rfw_hash[idx].key, val);
 
@@ -2014,7 +1778,7 @@ int al_eth_fwd_mac_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
 {
 	uint32_t val;
 
-	al_assert(idx < AL_ETH_FWD_MAC_NUM); /*valid FWD MAC index */
+	al_assert(idx < AL_ETH_FWD_MAC_NUM);  
 
 	val = (entry->addr[2] << 24) | (entry->addr[3] << 16) |
 	      (entry->addr[4] << 8) | entry->addr[5];
@@ -2034,7 +1798,7 @@ int al_eth_fwd_mac_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
 
 int al_eth_fwd_mac_addr_raw_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint32_t addr_lo, uint32_t addr_hi, uint32_t mask_lo, uint32_t mask_hi)
 {
-	al_assert(idx < AL_ETH_FWD_MAC_NUM); /*valid FWD MAC index */
+	al_assert(idx < AL_ETH_FWD_MAC_NUM);  
 
 	al_reg_write32(&adapter->ec_regs_base->fwd_mac[idx].data_l, addr_lo);
 	al_reg_write32(&adapter->ec_regs_base->fwd_mac[idx].data_h, addr_hi);
@@ -2046,7 +1810,7 @@ int al_eth_fwd_mac_addr_raw_set(struct al_hal_eth_adapter *adapter, uint32_t idx
 
 int al_eth_fwd_mac_ctrl_raw_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint32_t ctrl)
 {
-	al_assert(idx < AL_ETH_FWD_MAC_NUM); /*valid FWD MAC index */
+	al_assert(idx < AL_ETH_FWD_MAC_NUM);  
 
 	al_reg_write32(&adapter->ec_regs_base->fwd_mac[idx].ctrl, ctrl);
 
@@ -2058,7 +1822,7 @@ int al_eth_mac_addr_store(void * __iomem ec_base, uint32_t idx, uint8_t *addr)
 	struct al_ec_regs __iomem *ec_regs_base = (struct al_ec_regs __iomem*)ec_base;
 	uint32_t val;
 
-	al_assert(idx < AL_ETH_FWD_MAC_NUM); /*valid FWD MAC index */
+	al_assert(idx < AL_ETH_FWD_MAC_NUM);  
 
 	val = (addr[2] << 24) | (addr[3] << 16) | (addr[4] << 8) | addr[5];
 	al_reg_write32(&ec_regs_base->fwd_mac[idx].data_l, val);
@@ -2085,7 +1849,7 @@ int al_eth_mac_addr_read(void * __iomem ec_base, uint32_t idx, uint8_t *addr)
 int al_eth_fwd_mhash_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint8_t udma_mask, uint8_t qid)
 {
 	uint32_t val = 0;
-	al_assert(idx < AL_ETH_FWD_MAC_HASH_NUM); /* valid MHASH index */
+	al_assert(idx < AL_ETH_FWD_MAC_HASH_NUM);  
 
 	AL_REG_FIELD_SET(val,  AL_FIELD_MASK(3,0), 0, udma_mask);
 	AL_REG_FIELD_SET(val,  AL_FIELD_MASK(5,4), 4, qid);
@@ -2125,7 +1889,7 @@ int al_eth_fwd_vid_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
 			     struct al_eth_fwd_vid_table_entry *entry)
 {
 	uint32_t val;
-	al_assert(idx < AL_ETH_FWD_VID_TABLE_NUM); /* valid VID index */
+	al_assert(idx < AL_ETH_FWD_VID_TABLE_NUM);  
 
 	val = al_eth_fwd_vid_entry_to_val(entry);
 	al_reg_write32(&adapter->ec_regs_base->rfw.vid_table_addr, idx);
@@ -2136,8 +1900,8 @@ int al_eth_fwd_vid_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
 int al_eth_fwd_pbits_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint8_t prio)
 {
 
-	al_assert(idx < AL_ETH_FWD_PBITS_TABLE_NUM); /* valid PBIT index */
-	al_assert(prio < AL_ETH_FWD_PRIO_TABLE_NUM); /* valid PRIO index */
+	al_assert(idx < AL_ETH_FWD_PBITS_TABLE_NUM);  
+	al_assert(prio < AL_ETH_FWD_PRIO_TABLE_NUM);  
 	al_reg_write32(&adapter->ec_regs_base->rfw.pbits_table_addr, idx);
 	al_reg_write32(&adapter->ec_regs_base->rfw.pbits_table_data, prio);
 	return 0;
@@ -2145,7 +1909,7 @@ int al_eth_fwd_pbits_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx,
 
 int al_eth_fwd_priority_table_set(struct al_hal_eth_adapter *adapter, uint8_t prio, uint8_t qid)
 {
-	al_assert(prio < AL_ETH_FWD_PRIO_TABLE_NUM); /* valid PRIO index */
+	al_assert(prio < AL_ETH_FWD_PRIO_TABLE_NUM);  
 
 	al_reg_write32(&adapter->ec_regs_base->rfw_priority[prio].queue, qid);
 	return 0;
@@ -2154,7 +1918,7 @@ int al_eth_fwd_priority_table_set(struct al_hal_eth_adapter *adapter, uint8_t pr
 int al_eth_fwd_dscp_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint8_t prio)
 {
 
-	al_assert(idx < AL_ETH_FWD_DSCP_TABLE_NUM); /* valid DSCP index */
+	al_assert(idx < AL_ETH_FWD_DSCP_TABLE_NUM);  
 
 	al_reg_write32(&adapter->ec_regs_base->rfw.dscp_table_addr, idx);
 	al_reg_write32(&adapter->ec_regs_base->rfw.dscp_table_data, prio);
@@ -2164,14 +1928,13 @@ int al_eth_fwd_dscp_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, 
 int al_eth_fwd_tc_table_set(struct al_hal_eth_adapter *adapter, uint32_t idx, uint8_t prio)
 {
 
-	al_assert(idx < AL_ETH_FWD_DSCP_TABLE_NUM); /* valid TC index */
+	al_assert(idx < AL_ETH_FWD_DSCP_TABLE_NUM);  
 
 	al_reg_write32(&adapter->ec_regs_base->rfw.tc_table_addr, idx);
 	al_reg_write32(&adapter->ec_regs_base->rfw.tc_table_data, prio);
 	return 0;
 }
 
-/** Configure default UDMA register */
 int al_eth_fwd_default_udma_config(struct al_hal_eth_adapter *adapter, uint32_t idx,
 				   uint8_t udma_mask)
 {
@@ -2181,7 +1944,6 @@ int al_eth_fwd_default_udma_config(struct al_hal_eth_adapter *adapter, uint32_t 
 	return 0;
 }
 
-/** Configure default queue register */
 int al_eth_fwd_default_queue_config(struct al_hal_eth_adapter *adapter, uint32_t idx,
 				   uint8_t qid)
 {
@@ -2191,7 +1953,6 @@ int al_eth_fwd_default_queue_config(struct al_hal_eth_adapter *adapter, uint32_t
 	return 0;
 }
 
-/** Configure default priority register */
 int al_eth_fwd_default_priority_config(struct al_hal_eth_adapter *adapter, uint32_t idx,
 				   uint8_t prio)
 {
@@ -2240,12 +2001,11 @@ int al_eth_switching_config_set(struct al_hal_eth_adapter *adapter, uint8_t udma
 	AL_ETH_RFW_FILTER_PROT_INDEX | \
 	((rev_id > AL_ETH_REV_ID_0) ? (AL_ETH_RFW_FILTER_WOL) : 0))
 
-/* Configure the receive filters */
 int al_eth_filter_config(struct al_hal_eth_adapter *adapter, struct al_eth_filter_params *params)
 {
 	uint32_t reg;
 
-	al_assert(params); /* valid params pointer */
+	al_assert(params);  
 
 	if (params->filters & ~(AL_ETH_RFW_FILTER_SUPPORTED(adapter->rev_id))) {
 		al_err("[%s]: unsupported filter options (0x%08x)\n", adapter->name, params->filters);
@@ -2277,13 +2037,12 @@ int al_eth_filter_config(struct al_hal_eth_adapter *adapter, struct al_eth_filte
 	return 0;
 }
 
-/* Configure the receive override filters */
 int al_eth_filter_override_config(struct al_hal_eth_adapter *adapter,
 				  struct al_eth_filter_override_params *params)
 {
 	uint32_t reg;
 
-	al_assert(params); /* valid params pointer */
+	al_assert(params);  
 
 	if (params->filters & ~(AL_ETH_RFW_FILTER_SUPPORTED(adapter->rev_id))) {
 		al_err("[%s]: unsupported override filter options (0x%08x)\n", adapter->name, params->filters);
@@ -2316,49 +2075,46 @@ int al_eth_flow_control_config(struct al_hal_eth_adapter *adapter, struct al_eth
 {
 	uint32_t reg;
 	int i;
-	al_assert(params); /* valid params pointer */
+	al_assert(params);  
 
 	switch(params->type){
 	case AL_ETH_FLOW_CONTROL_TYPE_LINK_PAUSE:
 		al_dbg("[%s]: config flow control to link pause mode.\n", adapter->name);
 		if (params->obay_enable == AL_TRUE)
-			/* Tx path FIFO, unmask pause_on from MAC when PAUSE packet received */
+			 
 			al_reg_write32(&adapter->ec_regs_base->efc.ec_pause, 1);
 		else
 			al_reg_write32(&adapter->ec_regs_base->efc.ec_pause, 0);
 
-		/* Rx path */
 		if (params->gen_enable == AL_TRUE)
-			/* enable generating xoff from ec fifo almost full indication in hysteresis mode */
+			 
 			al_reg_write32(&adapter->ec_regs_base->efc.ec_xoff, 1 << EC_EFC_EC_XOFF_MASK_2_SHIFT);
 		else
 			al_reg_write32(&adapter->ec_regs_base->efc.ec_xoff, 0);
 
 		if (AL_ETH_IS_1G_MAC(adapter->mac_mode))
-			/* in 1G mode, enable generating xon from ec fifo in hysteresis mode*/
+			 
 			al_reg_write32(&adapter->ec_regs_base->efc.xon, EC_EFC_XON_MASK_2 | EC_EFC_XON_MASK_1);
 
-		/* set hysteresis mode thresholds */
 		al_reg_write32(&adapter->ec_regs_base->efc.rx_fifo_hyst, params->rx_fifo_th_low | (params->rx_fifo_th_high << EC_EFC_RX_FIFO_HYST_TH_HIGH_SHIFT));
 
 		for (i = 0; i < 4; i++) {
 			if (params->obay_enable == AL_TRUE)
-				/* Tx path UDMA, unmask pause_on for all queues */
+				 
 				al_reg_write32(&adapter->ec_regs_base->fc_udma[i].q_pause_0,
 						params->prio_q_map[i][0]);
 			else
 				al_reg_write32(&adapter->ec_regs_base->fc_udma[i].q_pause_0, 0);
 
 			if (params->gen_enable == AL_TRUE)
-				/* Rx path UDMA, enable generating xoff from UDMA queue almost full indication */
+				 
 				al_reg_write32(&adapter->ec_regs_base->fc_udma[i].q_xoff_0, params->prio_q_map[i][0]);
 			else
 				al_reg_write32(&adapter->ec_regs_base->fc_udma[i].q_xoff_0, 0);
 		}
 
-		/* config the mac */
 		if (AL_ETH_IS_1G_MAC(adapter->mac_mode)) {
-			/* set quanta value */
+			 
 			al_reg_write32(
 				&adapter->mac_regs_base->mac_1g.pause_quant,
 				params->quanta);
@@ -2367,11 +2123,11 @@ int al_eth_flow_control_config(struct al_hal_eth_adapter *adapter, struct al_eth
 				params->quanta_th);
 
 		} else {
-			/* set quanta value */
+			 
 			al_reg_write32(
 				&adapter->mac_regs_base->mac_10g.cl01_pause_quanta,
 				params->quanta);
-			/* set quanta threshold value */
+			 
 			al_reg_write32(
 				&adapter->mac_regs_base->mac_10g.cl01_quanta_thresh,
 				params->quanta_th);
@@ -2379,13 +2135,13 @@ int al_eth_flow_control_config(struct al_hal_eth_adapter *adapter, struct al_eth
 	break;
 	case AL_ETH_FLOW_CONTROL_TYPE_PFC:
 		al_dbg("[%s]: config flow control to PFC mode.\n", adapter->name);
-		al_assert(!AL_ETH_IS_1G_MAC(adapter->mac_mode)); /* pfc not available for RGMII mode */;
+		al_assert(!AL_ETH_IS_1G_MAC(adapter->mac_mode));  ;
 
 		for (i = 0; i < 4; i++) {
 			int prio;
 			for (prio = 0; prio < 8; prio++) {
 				if (params->obay_enable == AL_TRUE)
-					/* Tx path UDMA, unmask pause_on for all queues */
+					 
 					al_reg_write32(&adapter->ec_regs_base->fc_udma[i].q_pause_0 + prio,
 							params->prio_q_map[i][0]);
 				else
@@ -2401,18 +2157,13 @@ int al_eth_flow_control_config(struct al_hal_eth_adapter *adapter, struct al_eth
 			}
 		}
 
-		/* Rx path */
-		/* enable generating xoff from ec fifo almost full indication in hysteresis mode */
 		if (params->gen_enable == AL_TRUE)
 			al_reg_write32(&adapter->ec_regs_base->efc.ec_xoff, 0xFF << EC_EFC_EC_XOFF_MASK_2_SHIFT);
 		else
 			al_reg_write32(&adapter->ec_regs_base->efc.ec_xoff, 0);
 
-		/* set hysteresis mode thresholds */
 		al_reg_write32(&adapter->ec_regs_base->efc.rx_fifo_hyst, params->rx_fifo_th_low | (params->rx_fifo_th_high << EC_EFC_RX_FIFO_HYST_TH_HIGH_SHIFT));
 
-		/* config the mac */
-		/* set quanta value (same value for all prios) */
 		reg = params->quanta | (params->quanta << 16);
 		al_reg_write32(
 			&adapter->mac_regs_base->mac_10g.cl01_pause_quanta, reg);
@@ -2422,7 +2173,7 @@ int al_eth_flow_control_config(struct al_hal_eth_adapter *adapter, struct al_eth
 			&adapter->mac_regs_base->mac_10g.cl45_pause_quanta, reg);
 		al_reg_write32(
 			&adapter->mac_regs_base->mac_10g.cl67_pause_quanta, reg);
-		/* set quanta threshold value (same value for all prios) */
+		 
 		reg = params->quanta_th | (params->quanta_th << 16);
 		al_reg_write32(
 			&adapter->mac_regs_base->mac_10g.cl01_quanta_thresh, reg);
@@ -2433,7 +2184,6 @@ int al_eth_flow_control_config(struct al_hal_eth_adapter *adapter, struct al_eth
 		al_reg_write32(
 			&adapter->mac_regs_base->mac_10g.cl67_quanta_thresh, reg);
 
-		/* enable PFC in the MAC */
 		reg = al_reg_read32(&adapter->mac_regs_base->mac_10g.cmd_cfg);
 		reg |= 1 << 19;
 		al_reg_write32(&adapter->mac_regs_base->mac_10g.cmd_cfg, reg);
@@ -2494,63 +2244,41 @@ int al_eth_eee_config(struct al_hal_eth_adapter *adapter, struct al_eth_eee_para
 	return 0;
 }
 
-/* Timestamp */
-/* prepare the adapter for doing Timestamps for Rx packets. */
 int al_eth_ts_init(struct al_hal_eth_adapter *adapter)
 {
 	uint32_t reg;
 
-	/*TODO:
-	 * return error when:
-	 * - working in 1G mode and MACSEC enabled
-	 * - RX completion descriptor is not 8 words
-	 */
 	reg = al_reg_read32(&adapter->ec_regs_base->gen.en_ext);
 	if (AL_ETH_IS_1G_MAC(adapter->mac_mode))
 		reg &= ~EC_GEN_EN_EXT_PTH_1_10_SEL;
 	else
 		reg |= EC_GEN_EN_EXT_PTH_1_10_SEL;
-	/*
-	 * clear completion bypass so tx completions will be indicated
-	 * only when the packet timestamped
-	 */
+	 
 	reg &= ~EC_GEN_EN_EXT_PTH_COMPLETION_BYPASS;
 	al_reg_write32(&adapter->ec_regs_base->gen.en_ext, reg);
 
-	/*TODO: add the following when we have updated regs file:
-	 * reg_rfw_out_cfg_timestamp_sample_out
-                0 (default) – use the timestamp from the SOP info (10G MAC)
-                1 – use the timestamp from the EOP (1G MAC) (noly when MACSEC is disabled)
-	 */
 	return 0;
 }
 
-/* read Timestamp sample value of previously transmitted packet. */
 int al_eth_tx_ts_val_get(struct al_hal_eth_adapter *adapter, uint8_t ts_index,
 			 uint32_t *timestamp)
 {
 	al_assert(ts_index < AL_ETH_PTH_TX_SAMPLES_NUM);
 
-	/* in 1G mode, only indexes 1-7 are allowed*/
 	if (AL_ETH_IS_1G_MAC(adapter->mac_mode)) {
 		al_assert(ts_index <= 7);
 		al_assert(ts_index >= 1);
 	}
 
-	/*TODO: check if sample is valid */
 	*timestamp = al_reg_read32(&adapter->ec_regs_base->pth_db[ts_index].ts);
 	return 0;
 }
 
-/* Read the systime value */
 int al_eth_pth_systime_read(struct al_hal_eth_adapter *adapter,
 			    struct al_eth_pth_time *systime)
 {
 	uint32_t reg;
 
-	/* first we must read the subseconds MSB so the seconds register will be
-	 * shadowed
-	 */
 	reg = al_reg_read32(&adapter->ec_regs_base->pth.system_time_subseconds_msb);
 	systime->femto = (uint64_t)reg << 18;
 	reg = al_reg_read32(&adapter->ec_regs_base->pth.system_time_seconds);
@@ -2559,15 +2287,11 @@ int al_eth_pth_systime_read(struct al_hal_eth_adapter *adapter,
 	return 0;
 }
 
-/* Set the clock period to a given value. */
 int al_eth_pth_clk_period_write(struct al_hal_eth_adapter *adapter,
 				uint64_t clk_period)
 {
 	uint32_t reg;
-	/* first write the LSB so it will be shadowed */
-	/* bits 31:14 of the clock period lsb register contains bits 17:0 of the
-	 * period.
-	 */
+	 
 	reg = (clk_period & AL_BIT_MASK(18)) << EC_PTH_CLOCK_PERIOD_LSB_VAL_SHIFT;
 	al_reg_write32(&adapter->ec_regs_base->pth.clock_period_lsb, reg);
 	reg = clk_period >> 18;
@@ -2576,7 +2300,6 @@ int al_eth_pth_clk_period_write(struct al_hal_eth_adapter *adapter,
 	return 0;
 }
 
-/* Configure the systime internal update */
 int al_eth_pth_int_update_config(struct al_hal_eth_adapter *adapter,
 				 struct al_eth_pth_int_update_params *params)
 {
@@ -2598,7 +2321,7 @@ int al_eth_pth_int_update_config(struct al_hal_eth_adapter *adapter,
 	al_reg_write32(&adapter->ec_regs_base->pth.int_update_ctrl, reg);
 	return 0;
 }
-/* set internal update time */
+ 
 int al_eth_pth_int_update_time_set(struct al_hal_eth_adapter *adapter,
 				   struct al_eth_pth_time *time)
 {
@@ -2617,7 +2340,6 @@ int al_eth_pth_int_update_time_set(struct al_hal_eth_adapter *adapter,
 	return 0;
 }
 
-/* Configure the systime external update */
 int al_eth_pth_ext_update_config(struct al_hal_eth_adapter *adapter,
 				 struct al_eth_pth_ext_update_params * params)
 {
@@ -2635,7 +2357,6 @@ int al_eth_pth_ext_update_config(struct al_hal_eth_adapter *adapter,
 	return 0;
 }
 
-/* set external update time */
 int al_eth_pth_ext_update_time_set(struct al_hal_eth_adapter *adapter,
 				   struct al_eth_pth_time *time)
 {
@@ -2654,13 +2375,11 @@ int al_eth_pth_ext_update_time_set(struct al_hal_eth_adapter *adapter,
 	return 0;
 };
 
-/* set the read compensation delay */
 int al_eth_pth_read_compensation_set(struct al_hal_eth_adapter *adapter,
 				     uint64_t subseconds)
 {
 	uint32_t reg;
 
-	/* first write to lsb to ensure atomicity */
 	reg = (subseconds & AL_BIT_MASK(18)) << EC_PTH_READ_COMPENSATION_SUBSECONDS_LSB_VAL_SHIFT;
 	al_reg_write32(&adapter->ec_regs_base->pth.read_compensation_subseconds_lsb, reg);
 
@@ -2669,13 +2388,11 @@ int al_eth_pth_read_compensation_set(struct al_hal_eth_adapter *adapter,
 	return 0;
 }
 
-/* set the internal write compensation delay */
 int al_eth_pth_int_write_compensation_set(struct al_hal_eth_adapter *adapter,
 					  uint64_t subseconds)
 {
 	uint32_t reg;
 
-	/* first write to lsb to ensure atomicity */
 	reg = (subseconds & AL_BIT_MASK(18)) << EC_PTH_INT_WRITE_COMPENSATION_SUBSECONDS_LSB_VAL_SHIFT;
 	al_reg_write32(&adapter->ec_regs_base->pth.int_write_compensation_subseconds_lsb, reg);
 
@@ -2684,13 +2401,11 @@ int al_eth_pth_int_write_compensation_set(struct al_hal_eth_adapter *adapter,
 	return 0;
 }
 
-/* set the external write compensation delay */
 int al_eth_pth_ext_write_compensation_set(struct al_hal_eth_adapter *adapter,
 					  uint64_t subseconds)
 {
 	uint32_t reg;
 
-	/* first write to lsb to ensure atomicity */
 	reg = (subseconds & AL_BIT_MASK(18)) << EC_PTH_EXT_WRITE_COMPENSATION_SUBSECONDS_LSB_VAL_SHIFT;
 	al_reg_write32(&adapter->ec_regs_base->pth.ext_write_compensation_subseconds_lsb, reg);
 
@@ -2699,13 +2414,11 @@ int al_eth_pth_ext_write_compensation_set(struct al_hal_eth_adapter *adapter,
 	return 0;
 }
 
-/* set the sync compensation delay */
 int al_eth_pth_sync_compensation_set(struct al_hal_eth_adapter *adapter,
 				     uint64_t subseconds)
 {
 	uint32_t reg;
 
-	/* first write to lsb to ensure atomicity */
 	reg = (subseconds & AL_BIT_MASK(18)) << EC_PTH_SYNC_COMPENSATION_SUBSECONDS_LSB_VAL_SHIFT;
 	al_reg_write32(&adapter->ec_regs_base->pth.sync_compensation_subseconds_lsb, reg);
 
@@ -2714,7 +2427,6 @@ int al_eth_pth_sync_compensation_set(struct al_hal_eth_adapter *adapter,
 	return 0;
 }
 
-/* Configure an output pulse */
 int al_eth_pth_pulse_out_config(struct al_hal_eth_adapter *adapter,
 				struct al_eth_pth_pulse_out_params *params)
 {
@@ -2744,7 +2456,6 @@ int al_eth_pth_pulse_out_config(struct al_hal_eth_adapter *adapter,
 	}
 	al_reg_write32(&adapter->ec_regs_base->pth_egress[params->index].trigger_ctrl, reg);
 
-	/* set trigger time */
 	al_reg_write32(&adapter->ec_regs_base->pth_egress[params->index].trigger_seconds,
 		       params->start_time.seconds);
 	reg = params->start_time.femto & AL_BIT_MASK(18);
@@ -2755,7 +2466,6 @@ int al_eth_pth_pulse_out_config(struct al_hal_eth_adapter *adapter,
 	al_reg_write32(&adapter->ec_regs_base->pth_egress[params->index].trigger_subseconds_msb,
 		       reg);
 
-	/* set pulse width */
 	reg = params->pulse_width & AL_BIT_MASK(18);
 	reg = reg << EC_PTH_EGRESS_PULSE_WIDTH_SUBSECONDS_LSB_VAL_SHIFT;
 	al_reg_write32(&adapter->ec_regs_base->pth_egress[params->index].pulse_width_subseconds_lsb, reg);
@@ -2766,7 +2476,6 @@ int al_eth_pth_pulse_out_config(struct al_hal_eth_adapter *adapter,
 	return 0;
 }
 
-/** get link status */
 int al_eth_link_status_get(struct al_hal_eth_adapter *adapter,
 			   struct al_eth_link_status *status)
 {
@@ -2784,10 +2493,7 @@ int al_eth_link_status_get(struct al_hal_eth_adapter *adapter,
 	} else if (adapter->mac_mode == AL_ETH_MAC_MODE_SGMII) {
 		al_reg_write32(&adapter->mac_regs_base->sgmii.reg_addr, 1);
 #ifdef CONFIG_SYNO_ALPINE_A0
-		/*
-		 * This register is latched low so need to read twice to get
-		 * the current link status
-		 */
+		 
 		reg = al_reg_read32(&adapter->mac_regs_base->sgmii.reg_data);
 #endif
 		reg = al_reg_read32(&adapter->mac_regs_base->sgmii.reg_data);
@@ -2798,7 +2504,7 @@ int al_eth_link_status_get(struct al_hal_eth_adapter *adapter,
 			status->link_up = AL_TRUE;
 
 	} else {
-		/* not implemented yet */
+		 
 		return -EPERM;
 	}
 
@@ -2806,7 +2512,7 @@ int al_eth_link_status_get(struct al_hal_eth_adapter *adapter,
 }
 
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
-/** set LED mode and value */
+ 
 int al_eth_led_set(struct al_hal_eth_adapter *adapter, al_bool link_is_up)
  {
  	uint32_t reg = 0;
@@ -2831,7 +2537,7 @@ int al_eth_led_set(struct al_hal_eth_adapter *adapter, al_bool link_is_up)
 	return 0;
 } 
 #else
-/** config LED mode and value */
+ 
 int al_eth_led_config(struct al_hal_eth_adapter *adapter, al_bool link_is_up)
 {
 	uint32_t reg = 0;
@@ -2857,7 +2563,6 @@ int al_eth_led_config(struct al_hal_eth_adapter *adapter, al_bool link_is_up)
 }
 #endif
 
-/* get statistics */
 int al_eth_mac_stats_get(struct al_hal_eth_adapter *adapter, struct al_eth_mac_stats *stats)
 {
 	al_assert(stats);
@@ -2905,14 +2610,13 @@ int al_eth_mac_stats_get(struct al_hal_eth_adapter *adapter, struct al_eth_mac_s
 
 		stats->aFramesReceivedOK = al_reg_read32(mac_10g_regs_base + 0x88);
 		stats->aFramesTransmittedOK = al_reg_read32(mac_10g_regs_base + 0x80);
-		/* aOctetsReceivedOK = ifInOctets - 18 * aFramesReceivedOK - 4 * VLANReceivedOK */
+		 
 		octets = al_reg_read32(mac_10g_regs_base + 0xD8);
 		octets |= (uint64_t)(al_reg_read32(mac_10g_regs_base + 0xDC)) << 32;
 		octets -= 18 * stats->aFramesReceivedOK;
 		octets -= 4 * al_reg_read32(mac_10g_regs_base + 0xC8);
 		stats->aOctetsReceivedOK = octets;
 
-		/* aOctetsTransmittedOK = ifOutOctets - 18 * aFramesTransmittedOK - 4 * VLANTransmittedOK */
 		octets = al_reg_read32(mac_10g_regs_base + 0xD0);
 		octets |= (uint64_t)(al_reg_read32(mac_10g_regs_base + 0xD4)) << 32;
 		octets -= 18 * stats->aFramesTransmittedOK;
@@ -2931,11 +2635,8 @@ int al_eth_mac_stats_get(struct al_hal_eth_adapter *adapter, struct al_eth_mac_s
 	stats->eee_in = al_reg_read32(&adapter->mac_regs_base->stat.eee_in);
 	stats->eee_out = al_reg_read32(&adapter->mac_regs_base->stat.eee_out);
 
-//	stats->etherStatsPkts = 1;
 	return 0;
 }
-
-/* Traffic control */
 
 int al_eth_flr_rmn(int (* pci_read_config_u32)(void *handle, int where, uint32_t *val),
 		   int (* pci_write_config_u32)(void *handle, int where, uint32_t val),
@@ -2951,20 +2652,18 @@ int al_eth_flr_rmn(int (* pci_read_config_u32)(void *handle, int where, uint32_t
 
 	(*pci_read_config_u32)(handle, AL_ADAPTER_GENERIC_CONTROL_0, &reg);
 
-	/* reset 1G mac */
 	AL_REG_MASK_SET(reg, AL_ADAPTER_GENERIC_CONTROL_0_ETH_RESET_1GMAC);
 	(*pci_write_config_u32)(handle, AL_ADAPTER_GENERIC_CONTROL_0, reg);
 	al_udelay(1000);
-	/* don't reset 1G mac */
+	 
 	AL_REG_MASK_CLEAR(reg, AL_ADAPTER_GENERIC_CONTROL_0_ETH_RESET_1GMAC);
-	/* prevent 1G mac reset on FLR */
+	 
 	AL_REG_MASK_CLEAR(reg, AL_ADAPTER_GENERIC_CONTROL_0_ETH_RESET_1GMAC_ON_FLR);
-	/* prevent adapter reset */
+	 
 	(*pci_write_config_u32)(handle, AL_ADAPTER_GENERIC_CONTROL_0, reg);
 
 	mux_sel = al_reg_read32(&mac_regs_base->gen.mux_sel);
 
-	/* save pci register that get reset due to flr*/
 	(*pci_read_config_u32)(handle, AL_PCI_COMMAND, &cfg_reg_store[i++]);
 	(*pci_read_config_u32)(handle, 0xC, &cfg_reg_store[i++]);
 	(*pci_read_config_u32)(handle, 0x10, &cfg_reg_store[i++]);
@@ -2972,10 +2671,9 @@ int al_eth_flr_rmn(int (* pci_read_config_u32)(void *handle, int where, uint32_t
 	(*pci_read_config_u32)(handle, 0x20, &cfg_reg_store[i++]);
 	(*pci_read_config_u32)(handle, 0x110, &cfg_reg_store[i++]);
 
-	/* do flr */
 	(*pci_write_config_u32)(handle, AL_PCI_EXP_CAP_BASE + AL_PCI_EXP_DEVCTL, AL_PCI_EXP_DEVCTL_BCR_FLR);
 	al_udelay(1000);
-	/* restore command */
+	 
 	i = 0;
 	(*pci_write_config_u32)(handle, AL_PCI_COMMAND, cfg_reg_store[i++]);
 	(*pci_write_config_u32)(handle, 0xC, cfg_reg_store[i++]);
@@ -2986,23 +2684,19 @@ int al_eth_flr_rmn(int (* pci_read_config_u32)(void *handle, int where, uint32_t
 
 	al_reg_write32_masked(&mac_regs_base->gen.mux_sel, ETH_MAC_GEN_MUX_SEL_KR_IN_MASK, mux_sel);
 
-	/* set SGMII clock to 125MHz */
 	al_reg_write32(mac_base + 0xB08, 0x03320501);
 
-	/* reset 1G mac */
 	AL_REG_MASK_SET(reg, AL_ADAPTER_GENERIC_CONTROL_0_ETH_RESET_1GMAC);
 	(*pci_write_config_u32)(handle, AL_ADAPTER_GENERIC_CONTROL_0, reg);
 
 	al_udelay(1000);
 
-	/* clear 1G mac reset */
 	AL_REG_MASK_CLEAR(reg, AL_ADAPTER_GENERIC_CONTROL_0_ETH_RESET_1GMAC);
 	(*pci_write_config_u32)(handle, AL_ADAPTER_GENERIC_CONTROL_0, reg);
 
-	/* reset SGMII mac clock to default */
 	al_reg_write32(mac_base + 0xB08, 0x00320501);
 	al_udelay(1000);
-	/* reset async fifo */
+	 
 	reg = al_reg_read32(mac_base + 0x95c);
 	AL_REG_MASK_SET(reg, 0xF0);
 	al_reg_write32(mac_base + 0x95c, reg);
@@ -3014,7 +2708,7 @@ int al_eth_flr_rmn(int (* pci_read_config_u32)(void *handle, int where, uint32_t
 }
 
 #ifdef CONFIG_SYNO_ALPINE_A0
-/* board params register 1 */
+
 #endif
 #define AL_HAL_ETH_MEDIA_TYPE_MASK	(AL_FIELD_MASK(3, 0))
 #define AL_HAL_ETH_MEDIA_TYPE_SHIFT	0
@@ -3039,7 +2733,7 @@ int al_eth_flr_rmn(int (* pci_read_config_u32)(void *handle, int where, uint32_t
 #define AL_HAL_ETH_REF_CLK_FREQ_MASK	(AL_FIELD_MASK(31, 29))
 #define AL_HAL_ETH_REF_CLK_FREQ_SHIFT	29
 #ifdef CONFIG_SYNO_ALPINE_A0
-/* board params register 2 */
+ 
 #define AL_HAL_ETH_DONT_OVERRIDE_SERDES_SHIFT	0
 #define AL_HAL_ETH_1000_BASE_X_SHIFT		1
 #define AL_HAL_ETH_1G_AN_DISABLE_SHIFT		2
@@ -3064,7 +2758,7 @@ int al_eth_board_params_set(void * __iomem mac_base, struct al_eth_board_params 
 	uint32_t	reg = 0;
 
 #ifdef CONFIG_SYNO_ALPINE_A0
-	/* ************* Setting Board params register 1 **************** */
+	
 #endif
 	AL_REG_FIELD_SET(reg, AL_HAL_ETH_MEDIA_TYPE_MASK,
 			 AL_HAL_ETH_MEDIA_TYPE_SHIFT, params->media_type);
@@ -3100,7 +2794,7 @@ int al_eth_board_params_set(void * __iomem mac_base, struct al_eth_board_params 
 
 	al_reg_write32(mac_base + 0x4, reg);
 #ifdef CONFIG_SYNO_ALPINE_A0
-	/* ************* Setting Board params register 2 **************** */
+	 
 	reg = 0;
 	AL_REG_BIT_VAL_SET(reg, AL_HAL_ETH_DONT_OVERRIDE_SERDES_SHIFT,
 			   params->dont_override_serdes == AL_TRUE);
@@ -3141,11 +2835,10 @@ int al_eth_board_params_set(void * __iomem mac_base, struct al_eth_board_params 
 int al_eth_board_params_get(void * __iomem mac_base, struct al_eth_board_params *params){
 	uint32_t	reg = al_reg_read32(mac_base + 0x4);
 #ifdef CONFIG_SYNO_ALPINE_A0
-	/* check if the register was initialized, 0 is not a valid value */
+	 
 	if (reg == 0)
 		return -ENOENT;
 
-	/* ************* Getting Board params register 1 **************** */
 #endif
 	params->media_type = AL_REG_FIELD_GET(reg, AL_HAL_ETH_MEDIA_TYPE_MASK,
 					      AL_HAL_ETH_MEDIA_TYPE_SHIFT);
@@ -3206,7 +2899,7 @@ int al_eth_board_params_get(void * __iomem mac_base, struct al_eth_board_params 
 						AL_HAL_ETH_REF_CLK_FREQ_MASK,
 						AL_HAL_ETH_REF_CLK_FREQ_SHIFT);
 #ifdef CONFIG_SYNO_ALPINE_A0
-	/* ************* Getting Board params register 2 **************** */
+	 
 	reg = al_reg_read32(mac_base + 0x404);
 	if (AL_REG_BIT_GET(reg, AL_HAL_ETH_DONT_OVERRIDE_SERDES_SHIFT))
 		params->dont_override_serdes = AL_TRUE;
@@ -3269,7 +2962,6 @@ int al_eth_board_params_get(void * __iomem mac_base, struct al_eth_board_params 
 	return 0;
 }
 
-/* Wake-On-Lan (WoL) */
 static inline void al_eth_byte_arr_to_reg(
 		uint32_t *reg, uint8_t *arr, unsigned int num_bytes)
 {
@@ -3334,7 +3026,6 @@ int al_eth_wol_enable(
 		al_reg_write32(&adapter->ec_regs_base->wol.ethertype, reg);
 	}
 
-	/* make sure we dont forwarding packets without interrupt */
 	al_assert((wol->forward_mask | wol->int_mask) == wol->int_mask);
 
 	reg = ((uint32_t)wol->forward_mask << 16);
@@ -3351,5 +3042,3 @@ int al_eth_wol_disable(
 
 	return 0;
 }
-
-/** @} end of Ethernet group */

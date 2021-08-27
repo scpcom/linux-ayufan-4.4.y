@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2000-2014 Synology Inc. All rights reserved.
+ 
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -21,7 +21,7 @@ typedef struct _tag_SYNO_LED_TRIGGER_TIMER {
 static SYNO_LED_TRIGGER_TIMER syno_led_trigger_timer[16];
 static struct led_trigger syno_led_ledtrig[16];
 
-int *gpGreenLedMap, *gpOrangeLedMap = NULL; //mapping disk index to disk led; must be initialized before used
+int *gpGreenLedMap, *gpOrangeLedMap = NULL;  
 EXPORT_SYMBOL(gpGreenLedMap);
 EXPORT_SYMBOL(gpOrangeLedMap);
 
@@ -93,7 +93,6 @@ static int __init syno_ledtrig_init(void)
 	int err = 0;
 	SYNO_LED_TRIGGER_TIMER *pTriggerTimer = NULL;
 
-	/*set trigger names*/
 	syno_led_ledtrig[0].name = "syno_led0_ledtrig";
 	syno_led_ledtrig[1].name = "syno_led1_ledtrig";
 	syno_led_ledtrig[2].name = "syno_led2_ledtrig";
@@ -111,7 +110,6 @@ static int __init syno_ledtrig_init(void)
 	syno_led_ledtrig[14].name = "syno_led14_ledtrig";
 	syno_led_ledtrig[15].name = "syno_led15_ledtrig";
 
-	/*register all triggers used in DSM*/
 	for(iTriggerNum = 0 ; iTriggerNum < 16 ; iTriggerNum++){
 		err = led_trigger_register(&syno_led_ledtrig[iTriggerNum]);
 		if (0 != err ){
@@ -130,11 +128,11 @@ module_init(syno_ledtrig_init);
 static void __exit syno_ledtrig_exit(void)
 {
 	int iTriggerNum = 0;
-	/*unregister triggers*/
+	 
 	for(iTriggerNum = 0 ; iTriggerNum < 16 ; iTriggerNum++){
 		led_trigger_unregister_simple(&syno_led_ledtrig[iTriggerNum]);
 	}
 }
 module_exit(syno_ledtrig_exit);
 
-#endif // CONFIG_SYNO_LEDS_TRIGGER
+#endif  

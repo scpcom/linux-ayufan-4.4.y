@@ -1,31 +1,8 @@
-/*
- * Annapurna Labs DMA Linux driver - XOR validation preparation
- * Copyright(c) 2011 Annapurna Labs.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU General Public License,
- * version 2, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * The full GNU General Public License is included in this distribution in
- * the file called "COPYING".
- *
- */
  
 #include "al_dma.h"
 
 #define MAX_SIZE	AL_DMA_MAX_SIZE_XOR_VAL
 
-/******************************************************************************
- *****************************************************************************/
 struct dma_async_tx_descriptor *al_dma_prep_xor_val_lock(
 	struct dma_chan *c,
 	dma_addr_t *src,
@@ -112,7 +89,7 @@ struct dma_async_tx_descriptor *al_dma_prep_xor_val_lock(
 
 		desc->txd.flags = flags;
 		desc->len = cur_len;
-		/* prepare hal transaction */
+		 
 		xaction = &desc->hal_xaction;
 		memset(xaction, 0, sizeof(struct al_raid_transaction));
 		xaction->op = AL_RAID_OP_P_VAL;
@@ -136,7 +113,6 @@ struct dma_async_tx_descriptor *al_dma_prep_xor_val_lock(
 			__func__,
 			(unsigned int)flags);
 
-		/* use bufs[0] and block[i] for source buffers/blocks */
 		for (i = 0; i < src_cnt; i++) {
 			desc->bufs[i].addr = src[i] + src_off;
 			desc->bufs[i].len = cur_len;
@@ -157,7 +133,6 @@ struct dma_async_tx_descriptor *al_dma_prep_xor_val_lock(
 			__func__,
 			xaction->flags);
 
-		/* send raid transaction to engine */
 		rc = al_raid_dma_prepare(chan->hal_raid, chan->idx,
 					&desc->hal_xaction);
 		if (unlikely(rc)) {

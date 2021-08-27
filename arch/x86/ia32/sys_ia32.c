@@ -1,27 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * sys_ia32.c: Conversion between 32bit and 64bit native syscalls. Based on
- *             sys_sparc32
- *
- * Copyright (C) 2000		VA Linux Co
- * Copyright (C) 2000		Don Dugger <n0ano@valinux.com>
- * Copyright (C) 1999		Arun Sharma <arun.sharma@intel.com>
- * Copyright (C) 1997,1998	Jakub Jelinek (jj@sunsite.mff.cuni.cz)
- * Copyright (C) 1997		David S. Miller (davem@caip.rutgers.edu)
- * Copyright (C) 2000		Hewlett-Packard Co.
- * Copyright (C) 2000		David Mosberger-Tang <davidm@hpl.hp.com>
- * Copyright (C) 2000,2001,2002	Andi Kleen, SuSE Labs (x86-64 port)
- *
- * These routines maintain argument size conversion between 32bit and 64bit
- * environment. In 2.5 most of this should be moved to a generic directory.
- *
- * This file assumes that there is a hole at the end of user address space.
- *
- * Some of the functions are LE specific currently. These are
- * hopefully all marked.  This should be fixed.
- */
  
 #include <linux/kernel.h>
 #include <linux/sched.h>
@@ -65,10 +44,6 @@ asmlinkage long sys32_ftruncate64(unsigned int fd, unsigned long offset_low,
        return sys_ftruncate(fd, ((loff_t) offset_high << 32) | offset_low);
 }
 
-/*
- * Another set for IA32/LFS -- x86_64 struct stat is different due to
- * support for 64bit inode numbers.
- */
 static int cp_stat64(struct stat64 __user *ubuf, struct kstat *stat)
 {
 	typeof(ubuf->st_uid) uid = 0;
@@ -143,12 +118,12 @@ asmlinkage long sys32_SYNOCaselessLStat64(char __user * filename, struct stat64 
 
 #include <linux/namei.h>
 
-// For 32 bit application 
+
 struct SYNOSTAT64_EXTRA {
-	struct compat_timespec creatTime;  //Create Time
-	unsigned int bkpVer;  		//Backup Version
-	unsigned int archBit; 		//Archive Bit
-	unsigned int lastComponent; //For caseless stat, it means parent directory is found.
+	struct compat_timespec creatTime;  
+	unsigned int bkpVer;  		
+	unsigned int archBit; 		
+	unsigned int lastComponent; 
 };
 
 struct SYNOSTAT64 {
@@ -173,7 +148,7 @@ static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct S
 			goto Out;
 		}
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 	if (flags & SYNOST_BKPVER) {
@@ -181,7 +156,7 @@ static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct S
 			goto Out;
 		}
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 	if (flags & SYNOST_CREATIME) {
@@ -192,7 +167,7 @@ static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct S
 			goto Out;
 		}
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 
 	error = 0;
 Out:
@@ -260,7 +235,7 @@ asmlinkage long sys32_SYNOLStat64(char __user * filename, unsigned int flags, st
 	return do_SYNOStat64(filename, 1, flags, pSt);
 }
 
-#endif /* MY_ABC_HERE */
+#endif  
 
 asmlinkage long sys32_stat64(const char __user *filename,
 			     struct stat64 __user *statbuf)
@@ -304,12 +279,6 @@ asmlinkage long sys32_fstatat(unsigned int dfd, const char __user *filename,
 	return cp_stat64(statbuf, &stat);
 }
 
-/*
- * Linux/i386 didn't use to be able to handle more than
- * 4 system call parameters, so these system calls used a memory
- * block for parameter passing..
- */
-
 struct mmap_arg_struct32 {
 	unsigned int addr;
 	unsigned int len;
@@ -347,7 +316,6 @@ asmlinkage long sys32_rt_sigaction(int sig, struct sigaction32 __user *act,
 	int ret;
 	compat_sigset_t set32;
 
-	/* XXX: Don't preclude handling different sized sigset_t's.  */
 	if (sigsetsize != sizeof(compat_sigset_t))
 		return -EINVAL;
 
@@ -364,10 +332,6 @@ asmlinkage long sys32_rt_sigaction(int sig, struct sigaction32 __user *act,
 		new_ka.sa.sa_handler = compat_ptr(handler);
 		new_ka.sa.sa_restorer = compat_ptr(restorer);
 
-		/*
-		 * FIXME: here we rely on _COMPAT_NSIG_WORS to be >=
-		 * than _NSIG_WORDS << 1
-		 */
 		switch (_NSIG_WORDS) {
 		case 4: new_ka.sa.sa_mask.sig[3] = set32.sig[6]
 				| (((long)set32.sig[7]) << 32);
@@ -383,10 +347,7 @@ asmlinkage long sys32_rt_sigaction(int sig, struct sigaction32 __user *act,
 	ret = do_sigaction(sig, act ? &new_ka : NULL, oact ? &old_ka : NULL);
 
 	if (!ret && oact) {
-		/*
-		 * FIXME: here we rely on _COMPAT_NSIG_WORS to be >=
-		 * than _NSIG_WORDS << 1
-		 */
+		 
 		switch (_NSIG_WORDS) {
 		case 4:
 			set32.sig[7] = (old_ka.sa.sa_mask.sig[3] >> 32);
@@ -505,8 +466,6 @@ asmlinkage long sys32_waitpid(compat_pid_t pid, unsigned int *stat_addr,
 	return compat_sys_wait4(pid, stat_addr, options, NULL);
 }
 
-/* 32-bit timeval and related flotsam.  */
-
 asmlinkage long sys32_sysfs(int option, u32 arg1, u32 arg2)
 {
 	return sys_sysfs(option, arg1, arg2);
@@ -566,7 +525,6 @@ asmlinkage long sys32_rt_sigqueueinfo(int pid, int sig,
 	return ret;
 }
 
-/* warning: next two assume little endian */
 asmlinkage long sys32_pread(unsigned int fd, char __user *ubuf, u32 count,
 			    u32 poslo, u32 poshi)
 {
@@ -640,10 +598,6 @@ asmlinkage long sys32_clone(unsigned int clone_flags, unsigned int newsp,
 	return do_fork(clone_flags, newsp, regs, 0, parent_tid, child_tid);
 }
 
-/*
- * Some system calls that need sign extended arguments. This could be
- * done by a generic wrapper.
- */
 long sys32_lseek(unsigned int fd, int offset, unsigned int whence)
 {
 	return sys_lseek(fd, offset, whence);

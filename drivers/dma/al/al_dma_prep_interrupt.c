@@ -1,29 +1,6 @@
-/*
- * Annapurna Labs DMA Linux driver - Interrupt preparation
- * Copyright(c) 2011 Annapurna Labs.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU General Public License,
- * version 2, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * The full GNU General Public License is included in this distribution in
- * the file called "COPYING".
- *
- */
  
 #include "al_dma.h"
 
-/******************************************************************************
- *****************************************************************************/
 struct dma_async_tx_descriptor *al_dma_prep_interrupt_lock(
 	struct dma_chan *c,
 	unsigned long flags)
@@ -63,7 +40,6 @@ struct dma_async_tx_descriptor *al_dma_prep_interrupt_lock(
 
 	desc->txd.flags = flags;
 
-	/* prepare hal transaction */
 	xaction = &desc->hal_xaction;
 	memset(xaction, 0, sizeof(struct al_raid_transaction));
 	xaction->op = AL_RAID_OP_NOP;
@@ -98,7 +74,6 @@ struct dma_async_tx_descriptor *al_dma_prep_interrupt_lock(
 		__func__,
 		xaction->flags);
 
-	/* send raid transaction to engine */
 	rc = al_raid_dma_prepare(chan->hal_raid, chan->idx,
 				&desc->hal_xaction);
 	if (unlikely(rc)) {
@@ -114,7 +89,7 @@ struct dma_async_tx_descriptor *al_dma_prep_interrupt_lock(
 		chan,
 		chan->stats_prep.int_num,
 		1,
-		chan->stats_prep.int_num, /* dummy */
+		chan->stats_prep.int_num,  
 		0);
 
 	al_dma_tx_submit_sw_cond_unlock(chan, txd);

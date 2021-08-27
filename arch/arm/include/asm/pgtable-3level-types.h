@@ -1,25 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/include/asm/pgtable-3level-types.h
- *
- * Copyright (C) 2011 ARM Ltd.
- * Author: Catalin Marinas <catalin.marinas@arm.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- */
+ 
 #ifndef _ASM_PGTABLE_3LEVEL_TYPES_H
 #define _ASM_PGTABLE_3LEVEL_TYPES_H
 
@@ -33,14 +15,12 @@ typedef u64 pgdval_t;
 
 #ifdef STRICT_MM_TYPECHECKS
 
-/*
- * These are used to make use of C type-checking..
- */
+
 #ifdef CONFIG_SYNO_ALPINE
 typedef struct { pteval_t pte;
 #if HW_PAGES_PER_PAGE > 1
 	pteval_t unused[HW_PAGES_PER_PAGE-1];
-#endif /* HW_PAGES_PER_PAGE > 1 */
+#endif  
 } pte_t;
 #else
 typedef struct { pteval_t pte; } pte_t;
@@ -63,13 +43,13 @@ typedef struct { pteval_t pgprot; } pgprot_t;
 #define __pgd(x)	((pgd_t) { (x) } )
 #define __pgprot(x)     ((pgprot_t) { (x) } )
 
-#else	/* !STRICT_MM_TYPECHECKS */
+#else	 
 
 #ifdef CONFIG_SYNO_ALPINE
 typedef struct { pteval_t pte;
 #if HW_PAGES_PER_PAGE > 1
 	pteval_t unused[HW_PAGES_PER_PAGE-1];
-#endif /* HW_PAGES_PER_PAGE > 1 */
+#endif  
 } pte_t;
 #else
 typedef pteval_t pte_t;
@@ -96,6 +76,6 @@ typedef pteval_t pgprot_t;
 #define __pgd(x)	(x)
 #define __pgprot(x)	(x)
 
-#endif	/* STRICT_MM_TYPECHECKS */
+#endif	 
 
-#endif	/* _ASM_PGTABLE_3LEVEL_TYPES_H */
+#endif	 

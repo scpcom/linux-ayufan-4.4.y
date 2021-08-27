@@ -1,19 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/hfsplus/ioctl.c
- *
- * Copyright (C) 2003
- * Ethan Benson <erbenson@alaska.net>
- * partially derived from linux/fs/ext2/ioctl.c
- * Copyright (C) 1993, 1994, 1995
- * Remy Card (card@masi.ibp.fr)
- * Laboratoire MASI - Institut Blaise Pascal
- * Universite Pierre et Marie Curie (Paris VI)
- *
- * hfsplus ioctls
- */
  
 #include <linux/capability.h>
 #include <linux/fs.h>
@@ -22,10 +9,6 @@
 #include <asm/uaccess.h>
 #include "hfsplus_fs.h"
 
-/*
- * "Blessing" an HFS+ filesystem writes metadata to the superblock informing
- * the platform firmware which file to boot from
- */
 static int hfsplus_ioctl_bless(struct file *file, int __user *user_flags)
 {
 	struct dentry *dentry = file->f_path.dentry;
@@ -40,18 +23,11 @@ static int hfsplus_ioctl_bless(struct file *file, int __user *user_flags)
 
 	mutex_lock(&sbi->vh_mutex);
 
-	/* Directory containing the bootable system */
 	vh->finder_info[0] = bvh->finder_info[0] =
 		cpu_to_be32(parent_ino(dentry));
 
-	/*
-	 * Bootloader. Just using the inode here breaks in the case of
-	 * hard links - the firmware wants the ID of the hard link file,
-	 * but the inode points at the indirect inode
-	 */
 	vh->finder_info[1] = bvh->finder_info[1] = cpu_to_be32(cnid);
 
-	/* Per spec, the OS X system folder - same as finder_info[0] here */
 	vh->finder_info[5] = bvh->finder_info[5] =
 		cpu_to_be32(parent_ino(dentry));
 
@@ -114,7 +90,6 @@ static int hfsplus_ioctl_setflags(struct file *file, int __user *user_flags)
 		}
 	}
 
-	/* don't silently ignore unsupported ext2 flags */
 	if (flags & ~(FS_IMMUTABLE_FL|FS_APPEND_FL|FS_NODUMP_FL)) {
 		err = -EOPNOTSUPP;
 		goto out_unlock_inode;

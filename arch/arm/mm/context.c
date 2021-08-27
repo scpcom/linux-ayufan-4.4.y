@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/mm/context.c
- *
- *  Copyright (C) 2002-2003 Deep Blue Solutions Ltd, all rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #include <linux/init.h>
 #include <linux/sched.h>
 #include <linux/mm.h>
@@ -33,16 +25,10 @@ static void cpu_set_reserved_ttbr0(void)
 	unsigned long ttbh = 0;
 
 #ifdef CONFIG_SYNO_ALPINE
-	/*
-	 * Set TTBR0 to swapper_pg_dir which contains only global entries. The
-	 * ASID is set to 0.
-	 */
+	 
 	asm volatile(
 #else
-	/*
-	 * Set TTBR0 to swapper_pg_dir. Note that swapper_pg_dir only contains
-	 * global entries so the ASID value is not relevant.
-	 */
+	 
 	asm(
 #endif
 	"	mcrr	p15, 0, %0, %1, c2		@ set TTBR0\n"
@@ -57,7 +43,7 @@ static void cpu_set_reserved_ttbr0(void)
 {
 	u32 ttb;
 
-	/* Copy TTBR1 into TTBR0 */
+	
 	asm volatile(
 	"	mrc	p15, 0, %0, c2, c0, 1		@ read TTBR1\n"
 	"	mcr	p15, 0, %0, c2, c0, 0		@ set TTBR0\n"
@@ -69,16 +55,6 @@ static void cpu_set_reserved_ttbr0(void)
 #endif
 #endif
 
-/*
- * We fork()ed a process, and we need a new context for the child
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
- * to run in.
-#else
- * to run in.  We reserve version 0 for initial tasks so we will
- * always allocate an ASID. The ASID 0 is reserved for the TTBR
- * register changing sequence.
-#endif
- */
 void __init_new_context(struct task_struct *tsk, struct mm_struct *mm)
 {
 	mm->context.id = 0;
@@ -90,11 +66,11 @@ static void flush_context(void)
 #if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 	cpu_set_reserved_ttbr0();
 #else
-	/* set the reserved ASID before flushing the TLB */
+	 
 	asm("mcr	p15, 0, %0, c13, c0, 1\n" : : "r" (0));
 #endif
 #ifdef CONFIG_SYNO_ALPINE
-//do nothing
+ 
 #else
 	isb();
 #endif
@@ -111,43 +87,24 @@ static void set_mm_context(struct mm_struct *mm, unsigned int asid)
 {
 	unsigned long flags;
 
-	/*
-	 * Locking needed for multi-threaded applications where the
-	 * same mm->context.id could be set from different CPUs during
-	 * the broadcast. This function is also called via IPI so the
-	 * mm->context.id_lock has to be IRQ-safe.
-	 */
 	raw_spin_lock_irqsave(&mm->context.id_lock, flags);
 	if (likely((mm->context.id ^ cpu_last_asid) >> ASID_BITS)) {
-		/*
-		 * Old version of ASID found. Set the new one and
-		 * reset mm_cpumask(mm).
-		 */
+		 
 		mm->context.id = asid;
 		cpumask_clear(mm_cpumask(mm));
 	}
 	raw_spin_unlock_irqrestore(&mm->context.id_lock, flags);
 
-	/*
-	 * Set the mm_cpumask(mm) bit for the current CPU.
-	 */
 	cpumask_set_cpu(smp_processor_id(), mm_cpumask(mm));
 }
 
-/*
- * Reset the ASID on the current CPU. This function call is broadcast
- * from the CPU handling the ASID rollover and holding cpu_asid_lock.
- */
 static void reset_context(void *info)
 {
 	unsigned int asid;
 	unsigned int cpu = smp_processor_id();
 	struct mm_struct *mm = per_cpu(current_mm, cpu);
 
-	/*
-	 * Check if a current_mm was set on this CPU as it might still
-	 * be in the early booting stages and using the reserved ASID.
-	 */
+	
 	if (!mm)
 		return;
 
@@ -161,7 +118,7 @@ static void reset_context(void *info)
 	flush_context();
 	set_mm_context(mm, asid);
 
-	/* set the new ASID */
+	
 #if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 	cpu_switch_mm(mm->pgd, mm);
 #else
@@ -186,29 +143,19 @@ void __new_context(struct mm_struct *mm)
 
 	raw_spin_lock(&cpu_asid_lock);
 #ifdef CONFIG_SMP
-	/*
-	 * Check the ASID again, in case the change was broadcast from
-	 * another CPU before we acquired the lock.
-	 */
+	 
 	if (unlikely(((mm->context.id ^ cpu_last_asid) >> ASID_BITS) == 0)) {
 		cpumask_set_cpu(smp_processor_id(), mm_cpumask(mm));
 		raw_spin_unlock(&cpu_asid_lock);
 		return;
 	}
 #endif
-	/*
-	 * At this point, it is guaranteed that the current mm (with
-	 * an old ASID) isn't active on any other CPU since the ASIDs
-	 * are changed simultaneously via IPI.
-	 */
+	 
 	asid = ++cpu_last_asid;
 	if (asid == 0)
 		asid = cpu_last_asid = ASID_FIRST_VERSION;
 
-	/*
-	 * If we've used up all our ASIDs, we need
-	 * to start a new version and flush the TLB.
-	 */
+	
 	if (unlikely((asid & ~ASID_MASK) == 0)) {
 #if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		asid = cpu_last_asid + smp_processor_id();

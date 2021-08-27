@@ -1,19 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * AppArmor security module
- *
- * This file contains AppArmor network mediation
- *
- * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009-2010 Canonical Ltd.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, version 2 of the
- * License.
- */
  
 #include "include/apparmor.h"
 #include "include/audit.h"
@@ -44,7 +31,6 @@ static const char *sock_type_names[] = {
 	"packet",
 };
 
-/* audit callback for net specific fields */
 static void audit_cb(struct audit_buffer *ab, void *va)
 {
 	struct common_audit_data *sa = va;
@@ -66,18 +52,6 @@ static void audit_cb(struct audit_buffer *ab, void *va)
 	audit_log_format(ab, " protocol=%d", sa->aad.net.protocol);
 }
 
-/**
- * audit_net - audit network access
- * @profile: profile being enforced  (NOT NULL)
- * @op: operation being checked
- * @family: network family
- * @type:   network type
- * @protocol: network protocol
- * @sk: socket auditing is being applied to
- * @error: error code for failure else 0
- *
- * Returns: %0 or sa->error else other errorcode on failure
- */
 static int audit_net(struct aa_profile *profile, int op, u16 family, int type,
 		     int protocol, struct sock *sk, int error)
 {
@@ -88,7 +62,6 @@ static int audit_net(struct aa_profile *profile, int op, u16 family, int type,
 	} else {
 		COMMON_AUDIT_DATA_INIT(&sa, NONE);
 	}
-	/* todo fill in socket addr info */
 	 
 	sa.aad.op = op,
 	sa.u.net.family = family;
@@ -120,16 +93,6 @@ static int audit_net(struct aa_profile *profile, int op, u16 family, int type,
 	return aa_audit(audit_type, profile, GFP_KERNEL, &sa, audit_cb);
 }
 
-/**
- * aa_net_perm - very course network access check
- * @op: operation being checked
- * @profile: profile being enforced  (NOT NULL)
- * @family: network family
- * @type:   network type
- * @protocol: network protocol
- *
- * Returns: %0 else error if permission denied
- */
 int aa_net_perm(int op, struct aa_profile *profile, u16 family, int type,
 		int protocol, struct sock *sk)
 {
@@ -142,7 +105,6 @@ int aa_net_perm(int op, struct aa_profile *profile, u16 family, int type,
 	if ((type < 0) || (type >= SOCK_MAX))
 		return -EINVAL;
 
-	/* unix domain and netlink sockets are handled by ipc */
 	if (family == AF_UNIX || family == AF_NETLINK)
 		return 0;
 
@@ -153,21 +115,11 @@ int aa_net_perm(int op, struct aa_profile *profile, u16 family, int type,
 	return audit_net(profile, op, family, type, protocol, sk, error);
 }
 
-/**
- * aa_revalidate_sk - Revalidate access to a sock
- * @op: operation being checked
- * @sk: sock being revalidated  (NOT NULL)
- *
- * Returns: %0 else error if permission denied
- */
 int aa_revalidate_sk(int op, struct sock *sk)
 {
 	struct aa_profile *profile;
 	int error = 0;
 
-	/* aa_revalidate_sk should not be called from interrupt context
-	 * don't mediate these calls as they are not task related
-	 */
 	if (in_interrupt())
 		return 0;
 

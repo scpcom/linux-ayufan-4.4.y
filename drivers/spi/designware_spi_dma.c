@@ -1,22 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (c) 2012, Mindspeed Technologies.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU General Public License,
- * version 2, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- */
  
 #include <linux/dma-mapping.h>
 #include <linux/dmaengine.h>
@@ -57,7 +41,6 @@ static int spi_dma_init(struct designware_spi *dws)
         dma_cap_zero(mask);
         dma_cap_set(DMA_SLAVE, mask);
 
-        /* 1. Init rx channel */
         dws->rxchan = dma_request_channel(mask, NULL, dws);
         if (!dws->rxchan){
 		printk("%s:%d: dma_request_channel failed.\n", \
@@ -80,7 +63,6 @@ static int spi_dma_init(struct designware_spi *dws)
         rxs->src_master = (DMA_CTL_SMS & DMA_CTL_SMS_MASK);
         rxs->dst_master = (DMA_CTL_DMS & DMA_CTL_DMS_MASK);
 
-        /* 2. Init tx channel */
         dws->txchan = dma_request_channel(mask, NULL, dws);
         if (!dws->txchan){
 		printk("%s:%d: dma_request_channel failed.\n", \
@@ -123,9 +105,6 @@ static void spi_dma_exit(struct designware_spi *dws)
         dma_release_channel(dws->rxchan);
 }
 
-/*
- * Completion callback for rx/tx channel.
- */
 static void dw_spi_dma_done(void *arg)
 {
         struct designware_spi *dwspi = arg;
@@ -205,7 +184,7 @@ static int spi_dma_transfer(struct designware_spi *dws, int cs_change)
 	int ret=0;
 
 #define BUSY            (1<<0)
-	/* 1. setup DMA related registers */
+	 
 	if (cs_change) {
 
 		while(readb(dws->regs + DWSPI_SR) & BUSY){
@@ -241,7 +220,7 @@ static int spi_dma_transfer(struct designware_spi *dws, int cs_change)
 
 #endif
 		txchan = dws->txchan;
-		/* 2. Prepare the TX dma transfer */
+		 
 		txconf.direction = DMA_MEM_TO_DEV;
 		txconf.dst_addr = dws->dma_addr;
 		txconf.src_addr = dws->tx_dma;
@@ -265,7 +244,7 @@ static int spi_dma_transfer(struct designware_spi *dws, int cs_change)
 				&dws->tx_sgl,
 				1,
 				DMA_MEM_TO_DEV,
-//				DMA_PREP_INTERRUPT | DMA_COMPL_SRC_UNMAP_SINGLE);
+ 
 				DMA_PREP_INTERRUPT | DMA_COMPL_SKIP_DEST_UNMAP);
 		if(!txdesc){
 			printk ("%s: txdesc: Error in device_prep_slave_sg\n", __func__);
@@ -288,7 +267,7 @@ static int spi_dma_transfer(struct designware_spi *dws, int cs_change)
 #endif
 
 		rxchan = dws->rxchan;
-		/* 3. Prepare the RX dma transfer */
+		 
 		rxconf.direction = DMA_DEV_TO_MEM;
 		rxconf.src_addr = dws->dma_addr;
 		rxconf.dst_addr = dws->rx_dma;
@@ -316,7 +295,7 @@ static int spi_dma_transfer(struct designware_spi *dws, int cs_change)
 				&dws->rx_sgl,
 				1,
 				DMA_DEV_TO_MEM,
-				//DMA_PREP_INTERRUPT | DMA_COMPL_DEST_UNMAP_SINGLE);
+				 
 				DMA_PREP_INTERRUPT | DMA_COMPL_SKIP_DEST_UNMAP);
 		if(!rxdesc){
 			printk ("%s: rxdesc: Error in device_prep_slave_sg\n", __func__);

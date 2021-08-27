@@ -1,11 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * include/linux/random.h
- *
- * Include file for the random number generator.
- */
  
 #ifndef _LINUX_RANDOM_H
 #define _LINUX_RANDOM_H
@@ -14,52 +9,46 @@
 #include <linux/ioctl.h>
 #include <linux/irqnr.h>
 
-/* ioctl()'s for the random number generator */
 
-/* Get the entropy count. */
+
+
 #define RNDGETENTCNT	_IOR( 'R', 0x00, int )
 
-/* Add to (or subtract from) the entropy count.  (Superuser only.) */
+
 #define RNDADDTOENTCNT	_IOW( 'R', 0x01, int )
 
-/* Get the contents of the entropy pool.  (Superuser only.) */
+
 #define RNDGETPOOL	_IOR( 'R', 0x02, int [2] )
 
-/* 
- * Write bytes into the entropy pool and add to the entropy count.
- * (Superuser only.)
- */
+
 #define RNDADDENTROPY	_IOW( 'R', 0x03, int [2] )
 
-/* Clear entropy count to 0.  (Superuser only.) */
+
 #define RNDZAPENTCNT	_IO( 'R', 0x04 )
 
-/* Clear the entropy pool and associated counters.  (Superuser only.) */
+
 #define RNDCLEARPOOL	_IO( 'R', 0x06 )
 
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_FIPS_RNG)
 
-/* Size of seed value - equal to AES blocksize */
+
 #define AES_BLOCK_SIZE_BYTES	16
 #define SEED_SIZE_BYTES			AES_BLOCK_SIZE_BYTES
-/* Size of AES key */
+ 
 #define KEY_SIZE_BYTES		16
 
-/* ioctl() structure used by FIPS 140-2 Tests */
 struct rand_fips_test {
-	unsigned char key[KEY_SIZE_BYTES];			/* Input */
-	unsigned char datetime[SEED_SIZE_BYTES];	/* Input */
-	unsigned char seed[SEED_SIZE_BYTES];		/* Input */
-	unsigned char result[SEED_SIZE_BYTES];		/* Output */
+	unsigned char key[KEY_SIZE_BYTES];			 
+	unsigned char datetime[SEED_SIZE_BYTES];	 
+	unsigned char seed[SEED_SIZE_BYTES];		 
+	unsigned char result[SEED_SIZE_BYTES];		 
 };
 
-/* FIPS 140-2 RNG Variable Seed Test. (Superuser only.) */
 #define RNDFIPSVST	_IOWR('R', 0x10, struct rand_fips_test)
 
-/* FIPS 140-2 RNG Monte Carlo Test. (Superuser only.) */
 #define RNDFIPSMCT	_IOWR('R', 0x11, struct rand_fips_test)
 
-#endif /* #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_FIPS_RNG) */
+#endif  
 
 struct rand_pool_info {
 	int	entropy_count;
@@ -70,8 +59,6 @@ struct rand_pool_info {
 struct rnd_state {
 	__u32 s1, s2, s3;
 };
-
-/* Exported functions */
 
 #ifdef __KERNEL__
 
@@ -109,29 +96,17 @@ u32 prandom_u32(void);
 void prandom_bytes(void *buf, int nbytes);
 void prandom_seed(u32 seed);
 
-/*
- * These macros are preserved for backward compatibility and should be
- * removed as soon as a transition is finished.
- */
 #define random32() prandom_u32()
 #define srandom32(seed) prandom_seed(seed)
 
 u32 prandom_u32_state(struct rnd_state *);
 void prandom_bytes_state(struct rnd_state *state, void *buf, int nbytes);
 
-/*
- * Handle minimum values for seeds
- */
 static inline u32 __seed(u32 x, u32 m)
 {
 	return (x < m) ? x + m : x;
 }
 
-/**
- * prandom_seed_state - set seed for prandom_u32_state().
- * @state: pointer to state structure to receive the seed.
- * @seed: arbitrary 64-bit value to use as a seed.
- */
 static inline void prandom_seed_state(struct rnd_state *state, u64 seed)
 {
 	u32 i = (seed >> 32) ^ (seed << 10) ^ seed;
@@ -154,6 +129,6 @@ static inline int arch_get_random_int(unsigned int *v)
 }
 #endif
 
-#endif /* __KERNEL___ */
+#endif  
 
-#endif /* _LINUX_RANDOM_H */
+#endif  

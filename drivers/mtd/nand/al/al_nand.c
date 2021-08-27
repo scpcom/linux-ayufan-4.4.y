@@ -1,28 +1,3 @@
-/*
- * Annapurna Labs Nand driver.
- *
- * Copyright (C) 2013 Annapurna Labs Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * TODO:
- * - add sysfs statistics
- * - use dma for reading writing
- * - get config parameters from device tree instead of config registers
- * - use correct ECC size and not entire OOB
- */
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -73,7 +48,6 @@ struct nand_data {
 	uint32_t cw_size;
 	struct al_nand_ecc_config ecc_config;
 
-	/*** interrupts ***/
 	struct completion complete;
 	spinlock_t irq_lock;
 	uint32_t irq_status;
@@ -84,14 +58,6 @@ struct nand_data {
 #endif
 };
 
-/*
- * Addressing RMN: 2903
- *
- * RMN description:
- * NAND timing parameters that are used in the non-manual mode are wrong and
- * reduce performance.
- * Replacing with the manual parameters to increase speed
- */
 #define AL_NAND_NSEC_PER_CLK_CYCLES 2.666
 #define NAND_CLK_CYCLES(nsec) ((nsec) / (AL_NAND_NSEC_PER_CLK_CYCLES))
 
@@ -291,9 +257,6 @@ int nand_dev_ready(struct mtd_info *mtd)
 	return is_ready;
 }
 
-/*
- * read len bytes from the nand device.
- */
 void nand_read_buff(struct mtd_info *mtd, uint8_t *buf, int len)
 {
 	uint32_t cw_size;
@@ -332,11 +295,6 @@ void nand_read_buff(struct mtd_info *mtd, uint8_t *buf, int len)
 	}
 }
 
-/*
- * read byte from the device.
- * read byte is not supported by the controller so this function reads
- * 4 bytes as a cache and use it in the next calls.
- */
 uint8_t nand_read_byte_from_fifo(struct mtd_info *mtd)
 {
 	uint8_t ret_val;
@@ -363,15 +321,12 @@ uint8_t nand_read_byte_from_fifo(struct mtd_info *mtd)
 
 u16 nand_read_word(struct mtd_info *mtd)
 {
-	/* shouldn't be called */
+	 
 	BUG();
 
 	return 0;
 }
-/*
- * writing buffer to the nand device.
- * this func will wait for the write to be complete
- */
+ 
 void nand_write_buff(struct mtd_info *mtd, const uint8_t *buf, int len)
 {
 	uint32_t cw_size = ((struct nand_chip *)mtd->priv)->ecc.size;
@@ -409,10 +364,6 @@ void nand_write_buff(struct mtd_info *mtd, const uint8_t *buf, int len)
 		len -= cw_size;
 	}
 
-	/* enable wp and disable tx will be executed after commands
-	 * NAND_CMD_PAGEPROG and AL_NAND_COMMAND_TYPE_WAIT_FOR_READY will be
-	 * sent to make sure all data were written.
-	 */
 }
 
 int nand_init_size(struct mtd_info *mtd, struct nand_chip *this, u8 *id_data)
@@ -422,9 +373,6 @@ int nand_init_size(struct mtd_info *mtd, struct nand_chip *this, u8 *id_data)
 	return -1;
 }
 
-/******************************************************************************/
-/**************************** ecc functions ***********************************/
-/******************************************************************************/
 #ifdef AL_NAND_ECC_SUPPORT
 #ifdef CONFIG_SYNO_ALPINE_A0
 static inline int is_empty_oob(uint8_t *oob, int len)
@@ -463,10 +411,7 @@ static inline int is_empty_block(uint8_t *buf, int len)
 	return 1;
 }
 #endif
-/*
- * read page with HW ecc support (corrected and uncorrected stat will be
- * updated).
- */
+ 
 int ecc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 			uint8_t *buf, int page)
 {
@@ -481,7 +426,6 @@ int ecc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 
 	dev_dbg(&nand->pdev->dev, "ecc_read_page: read page %d\n", page);
 
-	/* Clear TX/RX ECC state machine */
 	al_nand_tx_set_enable(&nand->nand_obj, 1);
 	al_nand_tx_set_enable(&nand->nand_obj, 0);
 
@@ -490,7 +434,6 @@ int ecc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 
 	al_nand_ecc_set_enabled(&nand->nand_obj, 1);
 
-	/* First need to read the OOB to the controller to calc the ecc */
 	chip->cmdfunc(mtd, NAND_CMD_READOOB,
 			chip->ecc.layout->eccpos[0], page);
 
@@ -498,10 +441,8 @@ int ecc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 				AL_NAND_COMMAND_TYPE_SPARE_READ_COUNT,
 				bytes);
 
-	/* move to the start of the page to read the data */
 	chip->cmdfunc(mtd, NAND_CMD_RNDOUT, 0x00, -1);
 
-	/* read the buffer (after ecc correction) */
 	chip->read_buf(mtd, buf, mtd->writesize);
 
 #ifdef CONFIG_SYNO_ALPINE_A0
@@ -510,14 +451,10 @@ int ecc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 
 	al_nand_ecc_set_enabled(&nand->nand_obj, 0);
 
-	/* update statistics*/
 	if (0 != uncorr_err_count) {
 		bool uncorr_err = true;
 		if (nand->ecc_config.algorithm == AL_NAND_ECC_ALGORITHM_BCH) {
-			/* the ECC in BCH algorithm will find an uncorrected
-			 * errors while trying to read an empty page.
-			 * to avoid error messages and failures in the upper
-			 * layer, don't update the statistics in this case */
+			 
 			chip->read_buf(mtd, nand->oob, mtd->oobsize);
 
 			if (is_empty_oob(nand->oob, mtd->oobsize))
@@ -533,12 +470,9 @@ int ecc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 
 	if (0 != corr_err_count) {
 #else
-	/* update statistics*/
+	 
 	if (0 != al_nand_uncorr_err_get(&nand->nand_obj)) {
-		/* the ECC in BCH algorithm will find an uncorrected errors
-		 * while trying to read an empty page.
-		 * to avoid error messeges and failures in the upper layer,
-		 * don't update the statistics in this case */
+		 
 		if ((nand->ecc_config.algorithm != AL_NAND_ECC_ALGORITHM_BCH)
 			|| (!is_empty_block(buf, mtd->writesize))) {
 			mtd->ecc_stats.failed++;
@@ -562,7 +496,7 @@ int ecc_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 					mtd->ecc_stats.corrected);
 
 #ifdef CONFIG_SYNO_ALPINE_A0
-// Do nothing
+ 
 #else
 	al_nand_ecc_set_enabled(&nand->nand_obj, 0);
 #endif
@@ -575,10 +509,7 @@ int ecc_read_subpage(struct mtd_info *mtd, struct nand_chip *chip,
 	pr_err("ERROR: read subpage not supported!\n");
 	return -1;
 }
-/*
- * program page with HW ecc support.
- * this function is called after the commands and adderess for this page sent.
- */
+ 
 void ecc_write_page(struct mtd_info *mtd, struct nand_chip *chip,
 			const uint8_t *buf)
 {
@@ -620,9 +551,6 @@ void ecc_write_page(struct mtd_info *mtd, struct nand_chip *chip,
 }
 #endif
 
-/******************************************************************************/
-/****************************** interrupts ************************************/
-/******************************************************************************/
 static irqreturn_t al_nand_isr(int irq, void *dev_id);
 
 static void nand_interrupt_init(struct nand_data *nand)
@@ -639,10 +567,7 @@ static void nand_interrupt_init(struct nand_data *nand)
 	if (ret)
 		pr_info("failed to request irq. rc %d\n", ret);
 }
-/*
- * ISR for nand interrupts - save the interrupt status, disable this interrupts
- * and nodify the waiting proccess.
- */
+ 
 static irqreturn_t al_nand_isr(int irq, void *dev_id)
 {
 	struct nand_data *nand = dev_id;
@@ -657,10 +582,6 @@ static irqreturn_t al_nand_isr(int irq, void *dev_id)
 
 }
 
-/*
- * Waiting for interrupt with status in irq_mask to occur.
- * return 0 when reach timeout of 1 sec.
- */
 static uint32_t wait_for_irq(struct nand_data *nand, uint32_t irq_mask)
 {
 	unsigned long comp_res = 0;
@@ -670,7 +591,7 @@ static uint32_t wait_for_irq(struct nand_data *nand, uint32_t irq_mask)
 	comp_res = wait_for_completion_timeout(&nand->complete, timeout);
 
 	if (comp_res == 0) {
-		/* timeout */
+		 
 		pr_err("timeout occurred, mask = 0x%x\n", irq_mask);
 
 		return -EINVAL;
@@ -679,9 +600,6 @@ static uint32_t wait_for_irq(struct nand_data *nand, uint32_t irq_mask)
 
 }
 
-/******************************************************************************/
-/**************************** configuration ***********************************/
-/******************************************************************************/
 static enum al_nand_ecc_bch_num_corr_bits bch_num_bits_convert(
 							unsigned int bits)
 {
@@ -792,13 +710,9 @@ static void nand_onfi_config_set(
 	enum al_nand_device_page_size onfi_page_size;
 	int i;
 
-	/* find the max timing mode supported by the device and below
-	 * AL_NAND_MAX_ONFI_TIMING_MODE */
 	for (i = AL_NAND_MAX_ONFI_TIMING_MODE ; i >= 0 ; i--) {
 		if (BIT(i) & nand->onfi_params.async_timing_mode) {
-			/*
-			 * Addressing RMN: 2903
-			 */
+			 
 			device_properties->timingMode =
 					AL_NAND_DEVICE_TIMING_MODE_MANUAL;
 
@@ -959,7 +873,6 @@ static int al_nand_probe(struct platform_device *pdev)
 		goto err;
 	}
 
-	/* must be set before scan_ident cause it uses read_buff */
 	nand->ecc.size = 512 << nand_dat->ecc_config.messageSize;
 	nand_dat->cw_size = 512 << nand_dat->ecc_config.messageSize;
 
@@ -997,9 +910,6 @@ static int al_nand_probe(struct platform_device *pdev)
 		goto err;
 	}
 
-	/* parse the device tree looking for partitions declaration.
-	 * if no partition declaration will be found, 1 partition will be
-	 * created for the all device */
 	ppdata.of_node = pdev->dev.of_node;
 	mtd_device_parse_register(mtd, NULL, &ppdata, NULL, 0);
 

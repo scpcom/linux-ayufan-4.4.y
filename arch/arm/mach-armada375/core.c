@@ -1,21 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
  
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -94,9 +79,8 @@ extern void __init set_core_count(unsigned int cpu_count);
 extern unsigned int group_cpu_mask;
 #else
 static unsigned int group_cpu_mask = 1;
-#endif /* CONFIG_SMP */
+#endif  
 
-/* for debug putstr */
 static char arr[256];
 
 #ifdef CONFIG_MV_INCLUDE_GIG_ETH
@@ -104,9 +88,6 @@ MV_U8 mvMacAddr[MV_UBOOT_ETH_PORTS][6];
 MV_U16 mvMtu[MV_UBOOT_ETH_PORTS] = { 0 };
 #endif
 
-/*
- * Helpers to get DDR bank info
- */
 #define DDR_BASE_CS_OFF(n)      (0x0180 + ((n) << 3))
 #define DDR_SIZE_CS_OFF(n)      (0x0184 + ((n) << 3))
 #define TARGET_DDR              0
@@ -120,15 +101,10 @@ const struct mbus_dram_target_info *mv_mbus_dram_info(void)
 }
 EXPORT_SYMBOL(mv_mbus_dram_info);
 
-/*******************************************************************************
- * Early Printk Support
- */
 #ifdef MV_INCLUDE_EARLY_PRINTK
 #define MV_UART0_LSR    (*(unsigned char *)(INTER_REGS_VIRT_BASE + 0x12000 + 0x14))
 #define MV_UART0_THR    (*(unsigned char *)(INTER_REGS_VIRT_BASE + 0x12000 + 0x0))
-/*
- * This does not append a newline
- */
+ 
 static void putstr(const char *s)
 {
 	while (*s) {
@@ -155,11 +131,8 @@ void mv_early_printk(char *fmt, ...)
 	va_end(args);
 	putstr(arr);
 }
-#endif /* MV_INCLUDE_EARLY_PRINTK */
+#endif  
 
-/*******************************************************************************
- * UBoot Tagging Parameters
- */
 #ifdef CONFIG_BE8_ON_LE
 #define read_tag(a)    le32_to_cpu(a)
 #define read_mtu(a)    le16_to_cpu(a)
@@ -178,10 +151,7 @@ static int __init parse_tag_mv_uboot(const struct tag *tag)
 
 	pr_info("Using UBoot passing parameters structure\n");
 	boardId = read_tag(tag->u.mv_uboot.uboot_version);
-	/* uboot_version:
-	 * - Board Id is Passed in the lower byte
-	 * - Used to set board ID & structure pointer - must be set before any mvBoardIdGet usage
-	 */
+	 
 	mvBoardSet(boardId & 0xff);
 
 #ifdef CONFIG_MV_INCLUDE_USB
@@ -199,23 +169,17 @@ static int __init parse_tag_mv_uboot(const struct tag *tag)
 
 __tagtable(ATAG_MV_UBOOT, parse_tag_mv_uboot);
 
-/*******************************************************************************
- * Command Line Parameters
- */
 #ifdef CONFIG_SMP
 static int __init mv_rsrc_setup(char *s)
 {
 	char *rsrc = strchr(s, ' ');
 
-	/* Verify NULL termination */
 	if (rsrc)
 		(*rsrc) = '\0';
 
-	/* Parse string to table */
 	if (mvUnitMapSetup(s, strstr) == MV_FALSE)
 		pr_err("Invalid resource string %s\n", s);
 
-	/* Change to rsrc limited mode */
 	mvUnitMapSetRsrcLimited(MV_TRUE);
 
 	return 1;
@@ -244,9 +208,6 @@ static void __init a375_init_cpu_mbus(void)
 	coherency_status = COHERENCY_STATUS_SHARED_NO_L2_ALLOC;
 #endif
 
-	/*
-	 * Setup MBUS dram target info.
-	 */
 	a375_mbus_dram_info.mbus_dram_target_id = TARGET_DDR;
 	addr = (void __iomem *)BRIDGE_VIRT_BASE;
 
@@ -254,13 +215,10 @@ static void __init a375_init_cpu_mbus(void)
 		u32 base = readl(addr + DDR_BASE_CS_OFF(i));
 		u32 size = readl(addr + DDR_SIZE_CS_OFF(i));
 
-		/*
-		 * Chip select enabled?
-		 */
 		if (size & 1) {
 			struct mbus_dram_window *w;
 			if (base & 0xf)
-				/* BaseExtension is used (> 4GB). */
+				 
 				continue;
 			w = &a375_mbus_dram_info.cs[cs++];
 			w->cs_index = i;
@@ -294,14 +252,11 @@ unsigned char *mv_sram_usage_get(int *sram_size_ptr)
 }
 #endif
 
-/*******************************************************************************
- * I2C (TWSI)
- */
 #ifdef CONFIG_I2C_MV64XXX
 static struct mv64xxx_i2c_pdata a375_i2c_pdata = {
-	.freq_m = 8, /* assumes 166 MHz TCLK */
+	.freq_m = 8,  
 	.freq_n = 3,
-	.timeout = 1000, /* Default timeout of 1 second */
+	.timeout = 1000,  
 };
 
 static struct resource a375_i2c_0_resources[] = {
@@ -367,9 +322,6 @@ static void __init a375_i2c_init(void)
 #endif
 }
 
-/**********
- * UART-0 *
- **********/
 static struct plat_serial8250_port uart0_data[] = {
 	{
 		.mapbase	= (INTER_REGS_PHYS_BASE | MV_UART_REGS_OFFSET(0)),
@@ -407,9 +359,6 @@ static struct platform_device uart0 = {
 	.num_resources		= ARRAY_SIZE(uart0_resources),
 };
 
-/**********
- * UART-1 *
- **********/
 static struct plat_serial8250_port uart1_data[] = {
 	{
 		.mapbase	= (INTER_REGS_PHYS_BASE | MV_UART_REGS_OFFSET(1)),
@@ -472,9 +421,6 @@ void __init serial_initialize(int port)
 	}
 }
 
-/*******************************************************************************
- * SDIO
- */
 #if defined(CONFIG_MV_INCLUDE_SDIO)
 static struct resource mvsdio_resources[] = {
 	[0] = {
@@ -538,10 +484,6 @@ void __init a375_sdio_init(void)
 #endif
 }
 
-/*******************************************************************************
- * USB
- */
-
 void __init a375_usb_init(void)
 {
 #ifdef CONFIG_MV_INCLUDE_USB
@@ -549,9 +491,6 @@ void __init a375_usb_init(void)
 #endif
 }
 
-/*******************************************************************************
- * GBE
- */
 #ifdef CONFIG_MV_ETHERNET
 #if defined(CONFIG_MV_ETH_PP2) || defined(CONFIG_MV_ETH_PP2_MODULE)
 static void mv_pp2_giga_pdev_register(struct platform_device *pdev)
@@ -708,7 +647,7 @@ static struct platform_device mv_pp2_ge3_plat = {
 };
 #else
 #error "Ethernet Mode is not defined"
-#endif /* Ethernet mode: PPv2 */
+#endif  
 
 static void __init eth_init(void)
 {
@@ -725,7 +664,7 @@ static void __init eth_init(void)
 #endif
 }
 
-#endif /* CONFIG_MV_ETHERNET */
+#endif  
 
 static void a375_init_eth(void)
 {
@@ -735,9 +674,6 @@ static void a375_init_eth(void)
 #endif
 }
 
-/*******************************************************************************
- * GPIO
- */
 static struct platform_device mv_gpio = {
 	.name = "mv_gpio",
 	.id = 0,
@@ -749,9 +685,6 @@ static void __init a375_gpio_init(void)
 	platform_device_register(&mv_gpio);
 }
 
-/*******************************************************************************
- * RTC
- */
 static struct resource rtc_resource[] = {
 	{
 	 .start = INTER_REGS_PHYS_BASE + MV_RTC_REGS_OFFSET,
@@ -768,9 +701,6 @@ static void __init a375_rtc_init(void)
 	platform_device_register_simple("rtc-mv", -1, rtc_resource, 2);
 }
 
-/*******************************************************************************
- * SATA
- */
 #if defined(CONFIG_SATA_MV) || defined(CONFIG_SATA_MV_MODULE)
 #define SATA_PHYS_BASE (INTER_REGS_PHYS_BASE | 0xA0000)
 
@@ -815,18 +745,12 @@ static void __init a375_sata_init(struct mv_sata_platform_data *sata_data)
 #endif
 }
 
-/*******************************************************************************
- * SoC hwmon Thermal Sensor
- */
 static void __init a375_hwmon_init(void)
 {
 	if (mvUnitMapIsMine(HWMON) == MV_TRUE)
 		platform_device_register_simple("a375-temp", 0, NULL, 0);
 }
 
-/*******************************************************************************
- * NAND controller
- */
 #ifdef CONFIG_MTD_NAND_NFC
 static struct resource a375_nfc_resources[] = {
 	{
@@ -876,7 +800,6 @@ static void __init a375_nand_nfc_init(void)
 	if (mvUnitMapIsMine(NAND) != MV_TRUE)
 		return;
 
-	/* Check for ganaged mode */
 	if (nfcConfig) {
 		if (strncmp(nfcConfig, "ganged", 6) == 0) {
 			a375_nfc_data.nfc_width = 16;
@@ -884,7 +807,6 @@ static void __init a375_nand_nfc_init(void)
 			nfcConfig += 7;
 		}
 
-		/* Check for ECC type directive */
 		if (strcmp(nfcConfig, "8bitecc") == 0)
 			a375_nfc_data.ecc_type = MV_NFC_ECC_BCH_1K;
 		else if (strcmp(nfcConfig, "12bitecc") == 0)
@@ -899,9 +821,6 @@ static void __init a375_nand_nfc_init(void)
 #endif
 }
 
-/*******************************************************************************
- * XOR
- */
 #ifdef CONFIG_MV_INCLUDE_XOR
 static struct mv_xor_platform_shared_data a375_xor_shared_data = {
 	.dram = &a375_mbus_dram_info,
@@ -909,9 +828,6 @@ static struct mv_xor_platform_shared_data a375_xor_shared_data = {
 
 static u64 a375_xor_dmamask = DMA_BIT_MASK(32);
 
-/*
- * XOR0
- */
 static struct resource a375_xor0_shared_resources[] = {
 	{
 	 .name = "xor 0 low",
@@ -995,10 +911,6 @@ static void __init a375_xor0_init(void)
 
 	platform_device_register(&a375_xor0_shared);
 
-	/*
-	 * two engines can't do memset simultaneously, this limitation
-	 * satisfied by removing memset support from one of the engines.
-	 */
 	dma_cap_set(DMA_MEMCPY, a375_xor00_data.cap_mask);
 	dma_cap_set(DMA_XOR, a375_xor00_data.cap_mask);
 	platform_device_register(&a375_xor00_channel);
@@ -1009,9 +921,6 @@ static void __init a375_xor0_init(void)
 	platform_device_register(&a375_xor01_channel);
 }
 
-/*
- * XOR1
- */
 static struct resource a375_xor1_shared_resources[] = {
 	{
 	 .name = "xor 1 low",
@@ -1095,10 +1004,6 @@ static void __init a375_xor1_init(void)
 
 	platform_device_register(&a375_xor1_shared);
 
-	/*
-	 * two engines can't do memset simultaneously, this limitation
-	 * satisfied by removing memset support from one of the engines.
-	 */
 	dma_cap_set(DMA_XOR, a375_xor10_data.cap_mask);
 	platform_device_register(&a375_xor10_channel);
 
@@ -1116,21 +1021,14 @@ static void __init a375_xor_init(void)
 #endif
 }
 
-/*******************************************************************************
- * SPI
- */
 static void a375_spi_init(void)
 {
 #ifdef CONFIG_MV_INCLUDE_SPI
-	/* SPI */
+	 
 	if (mvUnitMapIsMine(SPI) == MV_TRUE)
 		mvSysSpiInit(0, _16M);
 #endif
 }
-
-/*******************************************************************************
- * Helper Routines
- */
 
 static void print_board_info(void)
 {
@@ -1167,10 +1065,6 @@ extern void printascii(const char *);
 
 extern MV_TARGET_ATTRIB mvTargetDefaultsArray[];
 
-/*******************************************************************************
- * SMP Init boot window
- * Note: This function is called before PUnit IO windows are configured.
- */
 #if defined(CONFIG_SMP)
 void __init a375_smp_secondary_boot_win_set(void)
 {
@@ -1191,9 +1085,7 @@ void __init a375_smp_secondary_boot_win_set(void)
 	mbus_win.enable			= MV_TRUE;
 
 	if (mvAhbToMbusWinNumByTargetGet(target, &win_num) != MV_OK) {
-		/* If not found, replace window #10.
-		** Worst case this will override another window which will be
-		** later fixed by mvCpuIfInit(). */
+		 
 		win_num = 10;
 	}
 
@@ -1212,18 +1104,8 @@ void __init a375_smp_secondary_boot_win_set(void)
 }
 #endif
 
-/*******************************************************************************
- * IOCC sync implementation
- */
 #ifdef CONFIG_AURORA_IO_CACHE_COHERENCY
 
-/*
- * All combinations of IOCC/SMP/UP should be supported:
- *     UP  + HWCC (Hardware Cache Coherency)
- *     UP  + SWCC (Software Cache Coherency)
- *     SMP + HWCC
- *     SMP + SWCC
- */
 static void __init a375_init_iocc(void)
 {
 
@@ -1233,7 +1115,7 @@ static void __init a375_init_iocc(void)
 #endif
 
 }
-#endif /* CONFIG_AURORA_IO_CACHE_COHERENCY */
+#endif  
 
 static void __init a375_init_l2x0_cache(void)
 {
@@ -1311,7 +1193,7 @@ extern void synology_gpio_init(void);
 static void synology_power_off(void)
 {
 #ifdef MY_ABC_HERE
-	/* platform driver will not shutdown when poweroff */
+	 
 	syno_mv_net_shutdown();
 #endif
 	writel(SET8N1, UART1_REG(LCR));
@@ -1323,13 +1205,11 @@ static void synology_restart(char mode, const char *cmd)
 	writel(SET8N1, UART1_REG(LCR));
 	writel(SOFTWARE_REBOOT, UART1_REG(TX));
 
-	/* delay for uart1 send the request to uP */
 	mdelay(10);
-        /* Calls original reset function for models those do not use uP
-        * I.e. USB Station. */
+         
         arm_machine_restart(mode, cmd);
 }
-#endif /* CONFIG_SYNO_ARMADA_ARCH_V2 */
+#endif  
 
 static void __init a375_board_init(void)
 {
@@ -1340,7 +1220,6 @@ static void __init a375_board_init(void)
 	a375_init_cpu_mbus();
 	a375_init_l2x0_cache();
 
-	/* Init the CPU windows setting and the access protection windows. */
 	if (mvCpuIfInit(mv_sys_map())) {
 		pr_err("%s: Error: cpu memory windows init failed.\n",
 		       __func__);

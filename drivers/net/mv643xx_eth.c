@@ -1,42 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Driver for Marvell Discovery (MV643XX) and Marvell Orion ethernet ports
- * Copyright (C) 2002 Matthew Dharm <mdharm@momenco.com>
- *
- * Based on the 64360 driver from:
- * Copyright (C) 2002 Rabeeh Khoury <rabeeh@galileo.co.il>
- *		      Rabeeh Khoury <rabeeh@marvell.com>
- *
- * Copyright (C) 2003 PMC-Sierra, Inc.,
- *	written by Manish Lachwani
- *
- * Copyright (C) 2003 Ralf Baechle <ralf@linux-mips.org>
- *
- * Copyright (C) 2004-2006 MontaVista Software, Inc.
- *			   Dale Farnsworth <dale@farnsworth.org>
- *
- * Copyright (C) 2004 Steven J. Hill <sjhill1@rockwellcollins.com>
- *				     <sjhill@realitydiluted.com>
- *
- * Copyright (C) 2007-2008 Marvell Semiconductor
- *			   Lennert Buytenhek <buytenh@marvell.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -69,9 +33,6 @@
 static char mv643xx_eth_driver_name[] = "mv643xx_eth";
 static char mv643xx_eth_driver_version[] = "1.4";
 
-/*
- * Registers shared between all ports.
- */
 #define PHY_ADDR			0x0000
 #define SMI_REG				0x0004
 #define  SMI_BUSY			0x10000000
@@ -87,10 +48,6 @@ static char mv643xx_eth_driver_version[] = "1.4";
 #define WINDOW_BAR_ENABLE		0x0290
 #define WINDOW_PROTECT(w)		(0x0294 + ((w) << 4))
 
-/*
- * Main per-port registers.  These live at offset 0x0400 for
- * port #0, 0x0800 for port #1, and 0x0c00 for port #2.
- */
 #define PORT_CONFIG			0x0000
 #define  UNICAST_PROMISCUOUS_MODE	0x00000001
 #define PORT_CONFIG_EXT			0x0004
@@ -153,17 +110,11 @@ static char mv643xx_eth_driver_version[] = "1.4";
 #define TXQ_BW_CONF(q)			(0x0304 + ((q) << 4))
 #define TXQ_BW_WRR_CONF(q)		(0x0308 + ((q) << 4))
 
-/*
- * Misc per-port registers.
- */
 #define MIB_COUNTERS(p)			(0x1000 + ((p) << 7))
 #define SPECIAL_MCAST_TABLE(p)		(0x1400 + ((p) << 10))
 #define OTHER_MCAST_TABLE(p)		(0x1500 + ((p) << 10))
 #define UNICAST_TABLE(p)		(0x1600 + ((p) << 10))
 
-/*
- * SDMA configuration register default value.
- */
 #if defined(__BIG_ENDIAN)
 #define PORT_SDMA_CONFIG_DEFAULT_VALUE		\
 		(RX_BURST_SIZE_4_64BIT	|	\
@@ -178,59 +129,50 @@ static char mv643xx_eth_driver_version[] = "1.4";
 #error One of __BIG_ENDIAN or __LITTLE_ENDIAN must be defined
 #endif
 
-/*
- * Misc definitions.
- */
 #define DEFAULT_RX_QUEUE_SIZE	128
 #define DEFAULT_TX_QUEUE_SIZE	256
 #define SKB_DMA_REALIGN		((PAGE_SIZE - NET_SKB_PAD) % SMP_CACHE_BYTES)
 
-/*
- * RX/TX descriptors.
- */
 #if defined(__BIG_ENDIAN)
 struct rx_desc {
-	u16 byte_cnt;		/* Descriptor buffer byte count		*/
-	u16 buf_size;		/* Buffer size				*/
-	u32 cmd_sts;		/* Descriptor command status		*/
-	u32 next_desc_ptr;	/* Next descriptor pointer		*/
-	u32 buf_ptr;		/* Descriptor buffer pointer		*/
+	u16 byte_cnt;		 
+	u16 buf_size;		 
+	u32 cmd_sts;		 
+	u32 next_desc_ptr;	 
+	u32 buf_ptr;		 
 };
 
 struct tx_desc {
-	u16 byte_cnt;		/* buffer byte count			*/
-	u16 l4i_chk;		/* CPU provided TCP checksum		*/
-	u32 cmd_sts;		/* Command/status field			*/
-	u32 next_desc_ptr;	/* Pointer to next descriptor		*/
-	u32 buf_ptr;		/* pointer to buffer for this descriptor*/
+	u16 byte_cnt;		 
+	u16 l4i_chk;		 
+	u32 cmd_sts;		 
+	u32 next_desc_ptr;	 
+	u32 buf_ptr;		 
 };
 #elif defined(__LITTLE_ENDIAN)
 struct rx_desc {
-	u32 cmd_sts;		/* Descriptor command status		*/
-	u16 buf_size;		/* Buffer size				*/
-	u16 byte_cnt;		/* Descriptor buffer byte count		*/
-	u32 buf_ptr;		/* Descriptor buffer pointer		*/
-	u32 next_desc_ptr;	/* Next descriptor pointer		*/
+	u32 cmd_sts;		 
+	u16 buf_size;		 
+	u16 byte_cnt;		 
+	u32 buf_ptr;		 
+	u32 next_desc_ptr;	 
 };
 
 struct tx_desc {
-	u32 cmd_sts;		/* Command/status field			*/
-	u16 l4i_chk;		/* CPU provided TCP checksum		*/
-	u16 byte_cnt;		/* buffer byte count			*/
-	u32 buf_ptr;		/* pointer to buffer for this descriptor*/
-	u32 next_desc_ptr;	/* Pointer to next descriptor		*/
+	u32 cmd_sts;		 
+	u16 l4i_chk;		 
+	u16 byte_cnt;		 
+	u32 buf_ptr;		 
+	u32 next_desc_ptr;	 
 };
 #else
 #error One of __BIG_ENDIAN or __LITTLE_ENDIAN must be defined
 #endif
 
-/* RX & TX descriptor command */
 #define BUFFER_OWNED_BY_DMA		0x80000000
 
-/* RX & TX descriptor status */
 #define ERROR_SUMMARY			0x00000001
 
-/* RX descriptor status */
 #define LAYER_4_CHECKSUM_OK		0x40000000
 #define RX_ENABLE_INTERRUPT		0x20000000
 #define RX_FIRST_DESC			0x08000000
@@ -242,7 +184,6 @@ struct tx_desc {
 #define RX_PKT_LAYER4_TYPE_TCP_IPV4	0x00000000
 #define RX_PKT_IS_VLAN_TAGGED		0x00080000
 
-/* TX descriptor command */
 #define TX_ENABLE_INTERRUPT		0x00800000
 #define GEN_CRC				0x00400000
 #define TX_FIRST_DESC			0x00200000
@@ -256,40 +197,19 @@ struct tx_desc {
 
 #define TX_IHL_SHIFT			11
 
-/* global *******************************************************************/
 struct mv643xx_eth_shared_private {
-	/*
-	 * Ethernet controller base address.
-	 */
+	 
 	void __iomem *base;
 
-	/*
-	 * Points at the right SMI instance to use.
-	 */
 	struct mv643xx_eth_shared_private *smi;
 
-	/*
-	 * Provides access to local SMI interface.
-	 */
 	struct mii_bus *smi_bus;
 
-	/*
-	 * If we have access to the error interrupt pin (which is
-	 * somewhat misnamed as it not only reflects internal errors
-	 * but also reflects SMI completion), use that to wait for
-	 * SMI access completion instead of polling the SMI busy bit.
-	 */
 	int err_interrupt;
 	wait_queue_head_t smi_busy_wait;
 
-	/*
-	 * Per-port MBUS window access register value.
-	 */
 	u32 win_protect;
 
-	/*
-	 * Hardware-specific parameters.
-	 */
 	unsigned int t_clk;
 	int extended_rx_coal_limit;
 	int tx_bw_control;
@@ -308,7 +228,6 @@ static int g_netif_count = 0;
 extern long g_internal_netif_num;
 #endif
 
-/* per-port *****************************************************************/
 struct mib_counters {
 	u64 good_octets_received;
 	u32 bad_octets_received;
@@ -415,9 +334,6 @@ struct mv643xx_eth_private {
 	int skb_size;
 	struct sk_buff_head rx_recycle;
 
-	/*
-	 * RX state.
-	 */
 	int rx_ring_size;
 	unsigned long rx_desc_sram_addr;
 	int rx_desc_sram_size;
@@ -425,9 +341,6 @@ struct mv643xx_eth_private {
 	struct timer_list rx_oom;
 	struct rx_queue rxq[8];
 
-	/*
-	 * TX state.
-	 */
 	int tx_ring_size;
 	unsigned long tx_desc_sram_addr;
 	int tx_desc_sram_size;
@@ -436,7 +349,7 @@ struct mv643xx_eth_private {
 };
 
 #ifdef SYNO_6281_MTU_WA
-/* Tailgate and Kirwood have only 2K TX FIFO, so disable NETIF_F_IP_CSUM when mtu bigger than 1600 */
+ 
 static void mv_set_features(struct net_device *dev)
 {
     dev->features = NETIF_F_SG;
@@ -449,7 +362,7 @@ static void mv_set_features(struct net_device *dev)
 }
 
 #endif
-/* port register accessors **************************************************/
+ 
 static inline u32 rdl(struct mv643xx_eth_private *mp, int offset)
 {
 	return readl(mp->shared->base + offset);
@@ -470,7 +383,6 @@ static inline void wrlp(struct mv643xx_eth_private *mp, int offset, u32 data)
 	writel(data, mp->base + offset);
 }
 
-/* rxq/txq helper functions *************************************************/
 static struct mv643xx_eth_private *rxq_to_mp(struct rx_queue *rxq)
 {
 	return container_of(rxq, struct mv643xx_eth_private, rxq[rxq->index]);
@@ -536,17 +448,12 @@ static void txq_maybe_wake(struct tx_queue *txq)
 	}
 }
 
-/* rx napi ******************************************************************/
 static int
 mv643xx_get_skb_header(struct sk_buff *skb, void **iphdr, void **tcph,
 		       u64 *hdr_flags, void *priv)
 {
 	unsigned long cmd_sts = (unsigned long)priv;
 
-	/*
-	 * Make sure that this packet is Ethernet II, is not VLAN
-	 * tagged, is IPv4, has a valid IP header, and is TCP.
-	 */
 	if ((cmd_sts & (RX_IP_HDR_OK | RX_PKT_IS_IPV4 |
 		       RX_PKT_IS_ETHERNETV2 | RX_PKT_LAYER4_TYPE_MASK |
 		       RX_PKT_IS_VLAN_TAGGED)) !=
@@ -601,30 +508,13 @@ static int rxq_process(struct rx_queue *rxq, int budget)
 
 		byte_cnt = rx_desc->byte_cnt;
 
-		/*
-		 * Update statistics.
-		 *
-		 * Note that the descriptor byte count includes 2 dummy
-		 * bytes automatically inserted by the hardware at the
-		 * start of the packet (which we don't count), and a 4
-		 * byte CRC at the end of the packet (which we do count).
-		 */
 		stats->rx_packets++;
 		stats->rx_bytes += byte_cnt - 2;
 
-		/*
-		 * In case we received a packet without first / last bits
-		 * on, or the error summary bit is set, the packet needs
-		 * to be dropped.
-		 */
 		if ((cmd_sts & (RX_FIRST_DESC | RX_LAST_DESC | ERROR_SUMMARY))
 			!= (RX_FIRST_DESC | RX_LAST_DESC))
 			goto err;
 
-		/*
-		 * The -4 is for the CRC in the trailer of the
-		 * received packet
-		 */
 		skb_put(skb, byte_cnt - 2 - 4);
 
 		if (cmd_sts & LAYER_4_CHECKSUM_OK)
@@ -708,11 +598,6 @@ static int rxq_refill(struct rx_queue *rxq, int budget)
 		rx_desc->cmd_sts = BUFFER_OWNED_BY_DMA | RX_ENABLE_INTERRUPT;
 		wmb();
 
-		/*
-		 * The hardware automatically prepends 2 bytes of
-		 * dummy data to each received packet, so that the
-		 * IP header ends up 16-byte aligned.
-		 */
 		skb_reserve(skb, 2);
 	}
 
@@ -723,7 +608,6 @@ oom:
 	return refilled;
 }
 
-/* tx ***********************************************************************/
 static inline unsigned int has_tiny_unaligned_frags(struct sk_buff *skb)
 {
 	int frag;
@@ -754,10 +638,6 @@ static void txq_submit_frag_skb(struct tx_queue *txq, struct sk_buff *skb)
 			txq->tx_curr_desc = 0;
 		desc = &txq->tx_desc_area[tx_index];
 
-		/*
-		 * The last fragment will generate an interrupt
-		 * which will free the skb on TX completion.
-		 */
 		if (frag == nr_frags - 1) {
 			desc->cmd_sts = BUFFER_OWNED_BY_DMA |
 					ZERO_PADDING | TX_LAST_DESC |
@@ -832,7 +712,7 @@ static int txq_submit_skb(struct tx_queue *txq, struct sk_buff *skb)
 		}
 	} else {
 no_csum:
-		/* Errata BTS #50, IHL must be 5 if no HW checksum */
+		 
 		cmd_sts |= 5 << TX_IHL_SHIFT;
 	}
 
@@ -856,14 +736,11 @@ no_csum:
 
 	__skb_queue_tail(&txq->tx_skb, skb);
 
-	/* ensure all other descriptors are written before first cmd_sts */
 	wmb();
 	desc->cmd_sts = cmd_sts;
 
-	/* clear TX_END status */
 	mp->work_tx_end &= ~(1 << txq->index);
 
-	/* ensure all descriptors are written before poking hardware */
 	wmb();
 	txq_enable(txq);
 
@@ -911,7 +788,6 @@ static netdev_tx_t mv643xx_eth_xmit(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 }
 
-/* tx napi ******************************************************************/
 static void txq_kick(struct tx_queue *txq)
 {
 	struct mv643xx_eth_private *mp = txq_to_mp(txq);
@@ -1004,11 +880,6 @@ static int txq_reclaim(struct tx_queue *txq, int budget, int force)
 	return reclaimed;
 }
 
-/* tx rate control **********************************************************/
-/*
- * Set total maximum TX rate (shared by all TX queues for this port)
- * to 'rate' bits per second, with a maximum burst of 'burst' bytes.
- */
 static void tx_set_rate(struct mv643xx_eth_private *mp, int rate, int burst)
 {
 	int token_rate;
@@ -1065,9 +936,6 @@ static void txq_set_fixed_prio_mode(struct tx_queue *txq)
 	int off;
 	u32 val;
 
-	/*
-	 * Turn on fixed priority mode.
-	 */
 	off = 0;
 	switch (mp->shared->tx_bw_control) {
 	case TX_BW_CONTROL_OLD_LAYOUT:
@@ -1085,7 +953,6 @@ static void txq_set_fixed_prio_mode(struct tx_queue *txq)
 	}
 }
 
-/* mii management interface *************************************************/
 static irqreturn_t mv643xx_eth_err_irq(int irq, void *dev_id)
 {
 	struct mv643xx_eth_shared_private *msp = dev_id;
@@ -1176,7 +1043,6 @@ static int smi_bus_write(struct mii_bus *bus, int addr, int reg, u16 val)
 	return 0;
 }
 
-/* statistics ***************************************************************/
 static struct net_device_stats *mv643xx_eth_get_stats(struct net_device *dev)
 {
 	struct mv643xx_eth_private *mp = netdev_priv(dev);
@@ -1281,18 +1147,6 @@ static void mib_counters_timer_wrapper(unsigned long _mp)
 	mib_counters_update(mp);
 }
 
-/* interrupt coalescing *****************************************************/
-/*
- * Hardware coalescing parameters are set in units of 64 t_clk
- * cycles.  I.e.:
- *
- *	coal_delay_in_usec = 64000000 * register_value / t_clk_rate
- *
- *	register_value = coal_delay_in_usec * t_clk_rate / 64000000
- *
- * In the ->set*() methods, we round the computed register value
- * to the nearest integer.
- */
 static unsigned int get_rx_coal(struct mv643xx_eth_private *mp)
 {
 	u32 val = rdlp(mp, SDMA_CONFIG);
@@ -1359,7 +1213,6 @@ static void set_tx_coal(struct mv643xx_eth_private *mp, unsigned int usec)
 	wrlp(mp, TX_FIFO_URGENT_THRESHOLD, temp << 4);
 }
 
-/* ethtool ******************************************************************/
 struct mv643xx_eth_stats {
 	char stat_string[ETH_GSTRING_LEN];
 	int sizeof_stat;
@@ -1433,9 +1286,6 @@ mv643xx_eth_get_settings_phy(struct mv643xx_eth_private *mp,
 	if (err == 0)
 		err = phy_ethtool_gset(mp->phy, cmd);
 
-	/*
-	 * The MAC does not support 1000baseT_Half.
-	 */
 	cmd->supported &= ~SUPPORTED_1000baseT_Half;
 	cmd->advertising &= ~ADVERTISED_1000baseT_Half;
 
@@ -1496,9 +1346,6 @@ mv643xx_eth_set_settings(struct net_device *dev, struct ethtool_cmd *cmd)
 	if (mp->phy == NULL)
 		return -EINVAL;
 
-	/*
-	 * The MAC does not support 1000baseT_Half.
-	 */
 	cmd->advertising &= ~ADVERTISED_1000baseT_Half;
 
 	return phy_ethtool_sset(mp->phy, cmd);
@@ -1660,7 +1507,6 @@ static const struct ethtool_ops mv643xx_eth_ethtool_ops = {
 	.get_sset_count		= mv643xx_eth_get_sset_count,
 };
 
-/* address handling *********************************************************/
 static void uc_addr_get(struct mv643xx_eth_private *mp, unsigned char *addr)
 {
 	unsigned int mac_h = rdlp(mp, MAC_ADDR_HIGH);
@@ -1834,7 +1680,6 @@ static int mv643xx_eth_set_mac_address(struct net_device *dev, void *addr)
 	return 0;
 }
 
-/* rx/tx queue initialisation ***********************************************/
 static int rxq_init(struct mv643xx_eth_private *mp, int index)
 {
 	struct rx_queue *rxq = mp->rxq + index;
@@ -2017,7 +1862,6 @@ static void txq_deinit(struct tx_queue *txq)
 				  txq->tx_desc_area, txq->tx_desc_dma);
 }
 
-/* netdev ops and related ***************************************************/
 static int mv643xx_eth_collect_events(struct mv643xx_eth_private *mp)
 {
 	u32 int_cause;
@@ -2211,9 +2055,6 @@ static void port_start(struct mv643xx_eth_private *mp)
 	u32 pscr;
 	int i;
 
-	/*
-	 * Perform PHY reset, if there is a PHY.
-	 */
 	if (mp->phy != NULL) {
 		struct ethtool_cmd cmd;
 
@@ -2222,9 +2063,6 @@ static void port_start(struct mv643xx_eth_private *mp)
 		mv643xx_eth_set_settings(mp->dev, &cmd);
 	}
 
-	/*
-	 * Configure basic link parameters.
-	 */
 	pscr = rdlp(mp, PORT_SERIAL_CONTROL);
 
 	pscr |= SERIAL_PORT_ENABLE;
@@ -2235,9 +2073,6 @@ static void port_start(struct mv643xx_eth_private *mp)
 		pscr |= FORCE_LINK_PASS;
 	wrlp(mp, PORT_SERIAL_CONTROL, pscr);
 
-	/*
-	 * Configure TX path and queues.
-	 */
 	tx_set_rate(mp, 1000000000, 16777216);
 	for (i = 0; i < mp->txq_count; i++) {
 		struct tx_queue *txq = mp->txq + i;
@@ -2247,26 +2082,12 @@ static void port_start(struct mv643xx_eth_private *mp)
 		txq_set_fixed_prio_mode(txq);
 	}
 
-	/*
-	 * Receive all unmatched unicast, TCP, UDP, BPDU and broadcast
-	 * frames to RX queue #0, and include the pseudo-header when
-	 * calculating receive checksums.
-	 */
 	mv643xx_eth_set_features(mp->dev, mp->dev->features);
 
-	/*
-	 * Treat BPDUs as normal multicasts, and disable partition mode.
-	 */
 	wrlp(mp, PORT_CONFIG_EXT, 0x00000000);
 
-	/*
-	 * Add configured unicast addresses to address filter table.
-	 */
 	mv643xx_eth_program_unicast_filter(mp->dev);
 
-	/*
-	 * Enable the receive queues.
-	 */
 	for (i = 0; i < mp->rxq_count; i++) {
 		struct rx_queue *rxq = mp->rxq + i;
 		u32 addr;
@@ -2283,27 +2104,10 @@ static void mv643xx_eth_recalc_skb_size(struct mv643xx_eth_private *mp)
 {
 	int skb_size;
 
-	/*
-	 * Reserve 2+14 bytes for an ethernet header (the hardware
-	 * automatically prepends 2 bytes of dummy data to each
-	 * received packet), 16 bytes for up to four VLAN tags, and
-	 * 4 bytes for the trailing FCS -- 36 bytes total.
-	 */
 	skb_size = mp->dev->mtu + 36;
 
-	/*
-	 * Make sure that the skb size is a multiple of 8 bytes, as
-	 * the lower three bits of the receive descriptor's buffer
-	 * size field are ignored by the hardware.
-	 */
 	mp->skb_size = (skb_size + 7) & ~7;
 
-	/*
-	 * If NET_SKB_PAD is smaller than a cache line,
-	 * netdev_alloc_skb() will cause skb->data to be misaligned
-	 * to a cache line boundary.  If this is the case, include
-	 * some extra space to allow re-aligning the data area.
-	 */
 	mp->skb_size += SKB_DMA_REALIGN;
 }
 
@@ -2393,7 +2197,6 @@ static void port_reset(struct mv643xx_eth_private *mp)
 		udelay(10);
 	}
 
-	/* Reset the Enable bit in the Configuration Register */
 	data = rdlp(mp, PORT_SERIAL_CONTROL);
 	data &= ~(SERIAL_PORT_ENABLE		|
 		  DO_NOT_FORCE_LINK_FAIL	|
@@ -2461,12 +2264,6 @@ static int mv643xx_eth_change_mtu(struct net_device *dev, int new_mtu)
 	mv_set_features(dev);
 #endif
 
-	/*
-	 * Stop and then re-open the interface. This will allocate RX
-	 * skbs of the new MTU.
-	 * There is a possible danger that the open will not succeed,
-	 * due to memory being full.
-	 */
 	mv643xx_eth_stop(dev);
 	if (mv643xx_eth_open(dev)) {
 		netdev_err(dev,
@@ -2474,7 +2271,7 @@ static int mv643xx_eth_change_mtu(struct net_device *dev, int new_mtu)
 	}
 
 #ifdef SYNO_6281_MTU_WA
-	/* phy reset is slower let it is easy to loop in scemd. So we sleep 3 sec. */
+	 
 	msleep(3000);
 #endif
 
@@ -2517,7 +2314,6 @@ static void mv643xx_eth_netpoll(struct net_device *dev)
 }
 #endif
 
-/* platform glue ************************************************************/
 static void
 mv643xx_eth_conf_mbus_windows(struct mv643xx_eth_shared_private *msp,
 			      struct mbus_dram_target_info *dram)
@@ -2555,22 +2351,13 @@ mv643xx_eth_conf_mbus_windows(struct mv643xx_eth_shared_private *msp,
 
 static void infer_hw_params(struct mv643xx_eth_shared_private *msp)
 {
-	/*
-	 * Check whether we have a 14-bit coal limit field in bits
-	 * [21:8], or a 16-bit coal limit in bits [25,21:7] of the
-	 * SDMA config register.
-	 */
+	 
 	writel(0x02000000, msp->base + 0x0400 + SDMA_CONFIG);
 	if (readl(msp->base + 0x0400 + SDMA_CONFIG) & 0x02000000)
 		msp->extended_rx_coal_limit = 1;
 	else
 		msp->extended_rx_coal_limit = 0;
 
-	/*
-	 * Check whether the MAC supports TX rate control, and if
-	 * yes, whether its associated registers are in the old or
-	 * the new place.
-	 */
 	writel(1, msp->base + 0x0400 + TX_BW_MTU_MOVED);
 	if (readl(msp->base + 0x0400 + TX_BW_MTU_MOVED) & 1) {
 		msp->tx_bw_control = TX_BW_CONTROL_NEW_LAYOUT;
@@ -2618,9 +2405,6 @@ static int mv643xx_eth_shared_probe(struct platform_device *pdev)
 	if (msp->base == NULL)
 		goto out_free;
 
-	/*
-	 * Set up and register SMI bus.
-	 */
 	if (pd == NULL || pd->shared_smi == NULL) {
 		msp->smi_bus = mdiobus_alloc();
 		if (msp->smi_bus == NULL)
@@ -2643,9 +2427,6 @@ static int mv643xx_eth_shared_probe(struct platform_device *pdev)
 	msp->err_interrupt = NO_IRQ;
 	init_waitqueue_head(&msp->smi_busy_wait);
 
-	/*
-	 * Check whether the error interrupt is hooked up.
-	 */
 	res = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
 	if (res != NULL) {
 		int err;
@@ -2658,15 +2439,9 @@ static int mv643xx_eth_shared_probe(struct platform_device *pdev)
 		}
 	}
 
-	/*
-	 * (Re-)program MBUS remapping windows if we are asked to.
-	 */
 	if (pd != NULL && pd->dram != NULL)
 		mv643xx_eth_conf_mbus_windows(msp, pd->dram);
 
-	/*
-	 * Detect hardware parameters.
-	 */
 	msp->t_clk = (pd != NULL && pd->t_clk != 0) ? pd->t_clk : 133000000;
 	msp->tx_csum_limit = (pd != NULL && pd->tx_csum_limit) ?
 					pd->tx_csum_limit : 9 * 1024;
@@ -2993,7 +2768,6 @@ static void mv643xx_eth_shutdown(struct platform_device *pdev)
 {
 	struct mv643xx_eth_private *mp = platform_get_drvdata(pdev);
 
-	/* Mask all interrupts on ethernet port */
 	wrlp(mp, INT_MASK, 0);
 	rdlp(mp, INT_MASK);
 

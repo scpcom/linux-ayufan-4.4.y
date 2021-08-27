@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* IPv4 specific functions of netfilter core */
+ 
 #include <linux/kernel.h>
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
@@ -14,7 +14,6 @@
 #include <net/ip.h>
 #include <net/netfilter/nf_queue.h>
 
-/* route_me_harder function, used by iptable_nat, iptable_mangle + ip_queue */
 int ip_route_me_harder(struct sk_buff *skb, unsigned addr_type)
 {
 	struct net *net = dev_net(skb_dst(skb)->dev);
@@ -32,9 +31,6 @@ int ip_route_me_harder(struct sk_buff *skb, unsigned addr_type)
 	else
 		saddr = 0;
 
-	/* some non-standard hacks like ipt_REJECT.c:send_reset() can cause
-	 * packets with foreign saddr to appear on the NF_INET_LOCAL_OUT hook.
-	 */
 	fl4.daddr = iph->daddr;
 	fl4.saddr = saddr;
 	fl4.flowi4_tos = RT_TOS(iph->tos);
@@ -45,7 +41,6 @@ int ip_route_me_harder(struct sk_buff *skb, unsigned addr_type)
 	if (IS_ERR(rt))
 		return -1;
 
-	/* Drop old route. */
 	skb_dst_drop(skb);
 	skb_dst_set(skb, &rt->dst);
 
@@ -64,7 +59,6 @@ int ip_route_me_harder(struct sk_buff *skb, unsigned addr_type)
 	}
 #endif
 
-	/* Change in oif may mean change in hh_len. */
 	hh_len = skb_dst(skb)->dev->hard_header_len;
 	if (skb_headroom(skb) < hh_len &&
 	    pskb_expand_head(skb, HH_DATA_ALIGN(hh_len - skb_headroom(skb)),
@@ -86,7 +80,7 @@ int ip_xfrm_me_harder(struct sk_buff *skb)
 		return 0;
 
 #if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
-	/* Mindspeed added WA: required to support 4o6 ipsec offload */
+	 
 	if(skb->ipsec_offload)
 	{
 		if (IP6CB(skb)->flags & IP6SKB_XFRM_TRANSFORMED)
@@ -109,7 +103,6 @@ int ip_xfrm_me_harder(struct sk_buff *skb)
 	skb_dst_drop(skb);
 	skb_dst_set(skb, dst);
 
-	/* Change in oif may mean change in hh_len. */
 	hh_len = skb_dst(skb)->dev->hard_header_len;
 	if (skb_headroom(skb) < hh_len &&
 	    pskb_expand_head(skb, hh_len - skb_headroom(skb), 0, GFP_ATOMIC))
@@ -121,11 +114,6 @@ EXPORT_SYMBOL(ip_xfrm_me_harder);
 
 void (*ip_nat_decode_session)(struct sk_buff *, struct flowi *);
 EXPORT_SYMBOL(ip_nat_decode_session);
-
-/*
- * Extra routing may needed on local out, as the QUEUE target never
- * returns control to the table.
- */
 
 struct ip_rt_info {
 	__be32 daddr;
@@ -183,7 +171,7 @@ __sum16 nf_ip_checksum(struct sk_buff *skb, unsigned int hook,
 			skb->ip_summed = CHECKSUM_UNNECESSARY;
 			break;
 		}
-		/* fall through */
+		 
 	case CHECKSUM_NONE:
 		if (protocol == 0)
 			skb->csum = 0;
@@ -208,7 +196,7 @@ static __sum16 nf_ip_checksum_partial(struct sk_buff *skb, unsigned int hook,
 	case CHECKSUM_COMPLETE:
 		if (len == skb->len - dataoff)
 			return nf_ip_checksum(skb, hook, dataoff, protocol);
-		/* fall through */
+		 
 	case CHECKSUM_NONE:
 		skb->csum = csum_tcpudp_nofold(iph->saddr, iph->daddr, protocol,
 					       skb->len - dataoff, 0);
@@ -259,4 +247,4 @@ struct ctl_path nf_net_ipv4_netfilter_sysctl_path[] = {
 	{ }
 };
 EXPORT_SYMBOL_GPL(nf_net_ipv4_netfilter_sysctl_path);
-#endif /* CONFIG_SYSCTL */
+#endif  

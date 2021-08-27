@@ -4,7 +4,7 @@
 #ifndef _ASM_X86_PTRACE_H
 #define _ASM_X86_PTRACE_H
 
-#include <linux/compiler.h>	/* For __user */
+#include <linux/compiler.h>	 
 #include <asm/ptrace-abi.h>
 #include <asm/processor-flags.h>
 
@@ -16,8 +16,6 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __i386__
-/* this struct defines the way the registers are stored on the
-   stack during a system call. */
  
 #ifndef __KERNEL__
 
@@ -41,7 +39,7 @@ struct pt_regs {
 	int  xss;
 };
 
-#else /* __KERNEL__ */
+#else  
 
 struct pt_regs {
 	unsigned long bx;
@@ -63,9 +61,9 @@ struct pt_regs {
 	unsigned long ss;
 };
 
-#endif /* __KERNEL__ */
+#endif  
 
-#else /* __i386__ */
+#else  
 
 #ifndef __KERNEL__
 
@@ -76,7 +74,7 @@ struct pt_regs {
 	unsigned long r12;
 	unsigned long rbp;
 	unsigned long rbx;
-/* arguments: non interrupts/non tracing syscalls only save up to here*/
+ 
 	unsigned long r11;
 	unsigned long r10;
 	unsigned long r9;
@@ -87,17 +85,16 @@ struct pt_regs {
 	unsigned long rsi;
 	unsigned long rdi;
 	unsigned long orig_rax;
-/* end of arguments */
-/* cpu exception frame or undefined */
+ 
 	unsigned long rip;
 	unsigned long cs;
 	unsigned long eflags;
 	unsigned long rsp;
 	unsigned long ss;
-/* top of stack page */
+ 
 };
 
-#else /* __KERNEL__ */
+#else  
 
 struct pt_regs {
 	unsigned long r15;
@@ -106,7 +103,7 @@ struct pt_regs {
 	unsigned long r12;
 	unsigned long bp;
 	unsigned long bx;
-/* arguments: non interrupts/non tracing syscalls only save up to here*/
+ 
 	unsigned long r11;
 	unsigned long r10;
 	unsigned long r9;
@@ -117,18 +114,17 @@ struct pt_regs {
 	unsigned long si;
 	unsigned long di;
 	unsigned long orig_ax;
-/* end of arguments */
-/* cpu exception frame or undefined */
+ 
 	unsigned long ip;
 	unsigned long cs;
 	unsigned long flags;
 	unsigned long sp;
 	unsigned long ss;
-/* top of stack page */
+ 
 };
 
-#endif /* __KERNEL__ */
-#endif /* !__i386__ */
+#endif  
+#endif  
 
 #ifdef __KERNEL__
 
@@ -157,13 +153,6 @@ static inline unsigned long regs_return_value(struct pt_regs *regs)
 	return regs->ax;
 }
 
-/*
- * user_mode_vm(regs) determines whether a register set came from user mode.
- * This is true if V8086 mode was enabled OR if the register set was from
- * protected mode with RPL-3 CS value.  This tricky test checks that with
- * one comparison.  Many places in the kernel can bypass this full check
- * if they have already ruled out V8086 mode, so user_mode(regs) can be used.
- */
 static inline int user_mode(struct pt_regs *regs)
 {
 #ifdef CONFIG_X86_32
@@ -188,7 +177,7 @@ static inline int v8086_mode(struct pt_regs *regs)
 #ifdef CONFIG_X86_32
 	return (regs->flags & X86_VM_MASK);
 #else
-	return 0;	/* No V86 mode support in long mode */
+	return 0;	 
 #endif
 }
 
@@ -196,13 +185,10 @@ static inline int v8086_mode(struct pt_regs *regs)
 static inline bool user_64bit_mode(struct pt_regs *regs)
 {
 #ifndef CONFIG_PARAVIRT
-	/*
-	 * On non-paravirt systems, this is the only long mode CPL 3
-	 * selector.  We do not allow long mode selectors in the LDT.
-	 */
+	 
 	return regs->cs == __USER_CS;
 #else
-	/* Headers are too twisted for this to go in paravirt.h. */
+	 
 	return regs->cs == __USER_CS || regs->cs == pv_info.extra_user_64bit_cs;
 #endif
 }
@@ -223,20 +209,10 @@ static inline unsigned long kernel_stack_pointer(struct pt_regs *regs)
 
 #include <asm-generic/ptrace.h>
 
-/* Query offset/name of register from its name/offset */
 extern int regs_query_register_offset(const char *name);
 extern const char *regs_query_register_name(unsigned int offset);
 #define MAX_REG_OFFSET (offsetof(struct pt_regs, ss))
 
-/**
- * regs_get_register() - get register value from its offset
- * @regs:	pt_regs from which register value is gotten.
- * @offset:	offset number of the register.
- *
- * regs_get_register returns the value of a register. The @offset is the
- * offset of the register in struct pt_regs address which specified by @regs.
- * If @offset is bigger than MAX_REG_OFFSET, this returns 0.
- */
 static inline unsigned long regs_get_register(struct pt_regs *regs,
 					      unsigned int offset)
 {
@@ -245,14 +221,6 @@ static inline unsigned long regs_get_register(struct pt_regs *regs,
 	return *(unsigned long *)((unsigned long)regs + offset);
 }
 
-/**
- * regs_within_kernel_stack() - check the address in the stack
- * @regs:	pt_regs which contains kernel stack pointer.
- * @addr:	address which is checked.
- *
- * regs_within_kernel_stack() checks @addr is within the kernel stack page(s).
- * If @addr is within the kernel stack, it returns true. If not, returns false.
- */
 static inline int regs_within_kernel_stack(struct pt_regs *regs,
 					   unsigned long addr)
 {
@@ -260,15 +228,6 @@ static inline int regs_within_kernel_stack(struct pt_regs *regs,
 		(kernel_stack_pointer(regs) & ~(THREAD_SIZE - 1)));
 }
 
-/**
- * regs_get_kernel_stack_nth() - get Nth entry of the stack
- * @regs:	pt_regs which contains kernel stack pointer.
- * @n:		stack entry number.
- *
- * regs_get_kernel_stack_nth() returns @n th entry of the kernel stack which
- * is specified by @regs. If the @n th entry is NOT in the kernel stack,
- * this returns 0.
- */
 static inline unsigned long regs_get_kernel_stack_nth(struct pt_regs *regs,
 						      unsigned int n)
 {
@@ -290,22 +249,13 @@ static inline unsigned long regs_get_kernel_stack_nth(struct pt_regs *regs,
 #define ARCH_HAS_USER_SINGLE_STEP_INFO
 
 #ifdef MY_ABC_HERE
-/*
- * When hitting ptrace_stop(), we cannot return using SYSRET because
- * that does not restore the full CPU state, only a minimal set.  The
- * ptracer can change arbitrary register values, which is usually okay
- * because the usual ptrace stops run off the signal delivery path which
- * forces IRET; however, ptrace_event() stops happen in arbitrary places
- * in the kernel and don't force IRET path.
- *
- * So force IRET path after a ptrace stop.
- */
+ 
 #define arch_ptrace_stop_needed(code, info)				\
 ({									\
 	set_thread_flag(TIF_NOTIFY_RESUME);				\
 	false;								\
 })
-#endif /* MY_ABC_HERE */
+#endif  
 
 struct user_desc;
 extern int do_get_thread_area(struct task_struct *p, int idx,
@@ -313,8 +263,8 @@ extern int do_get_thread_area(struct task_struct *p, int idx,
 extern int do_set_thread_area(struct task_struct *p, int idx,
 			      struct user_desc __user *info, int can_allocate);
 
-#endif /* __KERNEL__ */
+#endif  
 
-#endif /* !__ASSEMBLY__ */
+#endif  
 
-#endif /* _ASM_X86_PTRACE_H */
+#endif  

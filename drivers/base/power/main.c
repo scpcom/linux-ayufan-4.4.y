@@ -1,24 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * drivers/base/power/main.c - Where the driver meets power management.
- *
- * Copyright (c) 2003 Patrick Mochel
- * Copyright (c) 2003 Open Source Development Lab
- *
- * This file is released under the GPLv2
- *
- *
- * The driver model core calls device_pm_add() when a device is registered.
- * This will initialize the embedded device_pm_info object in the device
- * and add it to the list of power-controlled devices. sysfs entries for
- * controlling device power management will also be added.
- *
- * A separate list is used for keeping track of power info, because the power
- * domain dependencies may differ from the ancestral dependencies that the
- * subsystem list maintains.
- */
  
 #include <linux/device.h>
 #include <linux/kallsyms.h>
@@ -39,15 +21,6 @@
 int suspend_device(struct device *dev, pm_message_t state);
 int resume_device(struct device *dev, pm_message_t state);
 #endif
-/*
- * The entries in the dpm_list list are in a depth first order, simply
- * because children are guaranteed to be discovered after parents, and
- * are inserted at the back of the list on discovery.
- *
- * Since device_pm_add() may be called with a device lock held,
- * we must never try to acquire a device lock while holding
- * dpm_list_mutex.
- */
  
 LIST_HEAD(dpm_list);
 LIST_HEAD(dpm_prepared_list);
@@ -64,10 +37,6 @@ int async_error;
 static int async_error;
 #endif
 
-/**
- * device_pm_init - Initialize the PM-related part of a device object.
- * @dev: Device object being initialized.
- */
 void device_pm_init(struct device *dev)
 {
 	dev->power.is_prepared = false;
@@ -81,26 +50,16 @@ void device_pm_init(struct device *dev)
 	dev->power.power_state = PMSG_INVALID;
 }
 
-/**
- * device_pm_lock - Lock the list of active devices used by the PM core.
- */
 void device_pm_lock(void)
 {
 	mutex_lock(&dpm_list_mtx);
 }
 
-/**
- * device_pm_unlock - Unlock the list of active devices used by the PM core.
- */
 void device_pm_unlock(void)
 {
 	mutex_unlock(&dpm_list_mtx);
 }
 
-/**
- * device_pm_add - Add a device to the PM core's list of active devices.
- * @dev: Device to add to the list.
- */
 void device_pm_add(struct device *dev)
 {
 	pr_debug("PM: Adding info for %s:%s\n",
@@ -114,10 +73,6 @@ void device_pm_add(struct device *dev)
 	mutex_unlock(&dpm_list_mtx);
 }
 
-/**
- * device_pm_remove - Remove a device from the PM core's list of active devices.
- * @dev: Device to be removed from the list.
- */
 void device_pm_remove(struct device *dev)
 {
 	pr_debug("PM: Removing info for %s:%s\n",
@@ -131,38 +86,24 @@ void device_pm_remove(struct device *dev)
 	pm_runtime_remove(dev);
 }
 
-/**
- * device_pm_move_before - Move device in the PM core's list of active devices.
- * @deva: Device to move in dpm_list.
- * @devb: Device @deva should come before.
- */
 void device_pm_move_before(struct device *deva, struct device *devb)
 {
 	pr_debug("PM: Moving %s:%s before %s:%s\n",
 		 deva->bus ? deva->bus->name : "No Bus", dev_name(deva),
 		 devb->bus ? devb->bus->name : "No Bus", dev_name(devb));
-	/* Delete deva from dpm_list and reinsert before devb. */
+	 
 	list_move_tail(&deva->power.entry, &devb->power.entry);
 }
 
-/**
- * device_pm_move_after - Move device in the PM core's list of active devices.
- * @deva: Device to move in dpm_list.
- * @devb: Device @deva should come after.
- */
 void device_pm_move_after(struct device *deva, struct device *devb)
 {
 	pr_debug("PM: Moving %s:%s after %s:%s\n",
 		 deva->bus ? deva->bus->name : "No Bus", dev_name(deva),
 		 devb->bus ? devb->bus->name : "No Bus", dev_name(devb));
-	/* Delete deva from dpm_list and reinsert after devb. */
+	 
 	list_move(&deva->power.entry, &devb->power.entry);
 }
 
-/**
- * device_pm_move_last - Move device to end of the PM core's list of devices.
- * @dev: Device to move in dpm_list.
- */
 void device_pm_move_last(struct device *dev)
 {
 	pr_debug("PM: Moving %s:%s to end of list\n",
@@ -196,11 +137,6 @@ static void initcall_debug_report(struct device *dev, ktime_t calltime,
 	}
 }
 
-/**
- * dpm_wait - Wait for a PM operation to complete.
- * @dev: Device to wait for.
- * @async: If unset, wait only if the device's power.async_suspend flag is set.
- */
 static void dpm_wait(struct device *dev, bool async)
 {
 	if (!dev)
@@ -221,12 +157,6 @@ static void dpm_wait_for_children(struct device *dev, bool async)
        device_for_each_child(dev, &async, dpm_wait_fn);
 }
 
-/**
- * pm_op - Execute the PM operation appropriate for given PM event.
- * @dev: Device to handle.
- * @ops: PM operations to choose from.
- * @state: PM transition of the system being carried out.
- */
 static int pm_op(struct device *dev,
 		 const struct dev_pm_ops *ops,
 		 pm_message_t state)
@@ -250,7 +180,7 @@ static int pm_op(struct device *dev,
 			suspend_report_result(ops->resume, error);
 		}
 		break;
-#endif /* CONFIG_SUSPEND */
+#endif  
 #ifdef CONFIG_HIBERNATE_CALLBACKS
 	case PM_EVENT_FREEZE:
 	case PM_EVENT_QUIESCE:
@@ -278,7 +208,7 @@ static int pm_op(struct device *dev,
 			suspend_report_result(ops->restore, error);
 		}
 		break;
-#endif /* CONFIG_HIBERNATE_CALLBACKS */
+#endif  
 	default:
 		error = -EINVAL;
 	}
@@ -288,15 +218,6 @@ static int pm_op(struct device *dev,
 	return error;
 }
 
-/**
- * pm_noirq_op - Execute the PM operation appropriate for given PM event.
- * @dev: Device to handle.
- * @ops: PM operations to choose from.
- * @state: PM transition of the system being carried out.
- *
- * The driver of @dev will not receive interrupts while this function is being
- * executed.
- */
 static int pm_noirq_op(struct device *dev,
 			const struct dev_pm_ops *ops,
 			pm_message_t state)
@@ -325,7 +246,7 @@ static int pm_noirq_op(struct device *dev,
 			suspend_report_result(ops->resume_noirq, error);
 		}
 		break;
-#endif /* CONFIG_SUSPEND */
+#endif  
 #ifdef CONFIG_HIBERNATE_CALLBACKS
 	case PM_EVENT_FREEZE:
 	case PM_EVENT_QUIESCE:
@@ -353,7 +274,7 @@ static int pm_noirq_op(struct device *dev,
 			suspend_report_result(ops->restore_noirq, error);
 		}
 		break;
-#endif /* CONFIG_HIBERNATE_CALLBACKS */
+#endif  
 	default:
 		error = -EINVAL;
 	}
@@ -424,16 +345,6 @@ static void dpm_show_time(ktime_t starttime, pm_message_t state, char *info)
 		usecs / USEC_PER_MSEC, usecs % USEC_PER_MSEC);
 }
 
-/*------------------------- Resume routines -------------------------*/
-
-/**
- * device_resume_noirq - Execute an "early resume" callback for given device.
- * @dev: Device to handle.
- * @state: PM transition of the system being carried out.
- *
- * The driver of @dev will not receive interrupts while this function is being
- * executed.
- */
 static int device_resume_noirq(struct device *dev, pm_message_t state)
 {
 	int error = 0;
@@ -459,13 +370,6 @@ static int device_resume_noirq(struct device *dev, pm_message_t state)
 	return error;
 }
 
-/**
- * dpm_resume_noirq - Execute "early resume" callbacks for non-sysdev devices.
- * @state: PM transition of the system being carried out.
- *
- * Call the "noirq" resume handlers for all devices marked as DPM_OFF_IRQ and
- * enable device drivers to receive interrupts.
- */
 void dpm_resume_noirq(pm_message_t state)
 {
 	ktime_t starttime = ktime_get();
@@ -496,11 +400,6 @@ void dpm_resume_noirq(pm_message_t state)
 }
 EXPORT_SYMBOL_GPL(dpm_resume_noirq);
 
-/**
- * legacy_resume - Execute a legacy (bus or class) resume callback for device.
- * @dev: Device to resume.
- * @cb: Resume callback to execute.
- */
 static int legacy_resume(struct device *dev, int (*cb)(struct device *dev))
 {
 	int error;
@@ -516,12 +415,6 @@ static int legacy_resume(struct device *dev, int (*cb)(struct device *dev))
 	return error;
 }
 
-/**
- * device_resume - Execute "resume" callbacks for given device.
- * @dev: Device to handle.
- * @state: PM transition of the system being carried out.
- * @async: If true, the device is being resumed asynchronously.
- */
 static int device_resume(struct device *dev, pm_message_t state, bool async)
 {
 	int error = 0;
@@ -533,10 +426,6 @@ static int device_resume(struct device *dev, pm_message_t state, bool async)
 	dpm_wait(dev->parent, async);
 	device_lock(dev);
 
-	/*
-	 * This is a fib.  But we'll allow new children to be added below
-	 * a resumed device, even if the device hasn't been completed yet.
-	 */
 	dev->power.is_prepared = false;
 
 	if (!dev->power.is_suspended)
@@ -617,13 +506,6 @@ static bool is_async(struct device *dev)
 		&& !pm_trace_is_enabled();
 }
 
-/**
- * dpm_resume - Execute "resume" callbacks for non-sysdev devices.
- * @state: PM transition of the system being carried out.
- *
- * Execute the appropriate "resume" callback for all devices whose status
- * indicates that they are suspended.
- */
 void dpm_resume(pm_message_t state)
 {
 	struct device *dev;
@@ -670,11 +552,6 @@ void dpm_resume(pm_message_t state)
 	dpm_show_time(starttime, state, NULL);
 }
 
-/**
- * device_complete - Complete a PM transition for given device.
- * @dev: Device to handle.
- * @state: PM transition of the system being carried out.
- */
 static void device_complete(struct device *dev, pm_message_t state)
 {
 	device_lock(dev);
@@ -700,13 +577,6 @@ static void device_complete(struct device *dev, pm_message_t state)
 	device_unlock(dev);
 }
 
-/**
- * dpm_complete - Complete a PM transition for all non-sysdev devices.
- * @state: PM transition of the system being carried out.
- *
- * Execute the ->complete() callbacks for all devices whose PM status is not
- * DPM_ON (this allows new devices to be registered).
- */
 void dpm_complete(pm_message_t state)
 {
 	struct list_head list;
@@ -732,13 +602,6 @@ void dpm_complete(pm_message_t state)
 	mutex_unlock(&dpm_list_mtx);
 }
 
-/**
- * dpm_resume_end - Execute "resume" callbacks and complete system transition.
- * @state: PM transition of the system being carried out.
- *
- * Execute "resume" callbacks for all devices and complete the PM transition of
- * the system.
- */
 void dpm_resume_end(pm_message_t state)
 {
 	dpm_resume(state);
@@ -746,15 +609,6 @@ void dpm_resume_end(pm_message_t state)
 }
 EXPORT_SYMBOL_GPL(dpm_resume_end);
 
-/*------------------------- Suspend routines -------------------------*/
-
-/**
- * resume_event - Return a "resume" message for given "suspend" sleep state.
- * @sleep_state: PM message representing a sleep state.
- *
- * Return a PM message representing the resume event corresponding to given
- * sleep state.
- */
 static pm_message_t resume_event(pm_message_t sleep_state)
 {
 	switch (sleep_state.event) {
@@ -769,14 +623,6 @@ static pm_message_t resume_event(pm_message_t sleep_state)
 	return PMSG_ON;
 }
 
-/**
- * device_suspend_noirq - Execute a "late suspend" callback for given device.
- * @dev: Device to handle.
- * @state: PM transition of the system being carried out.
- *
- * The driver of @dev will not receive interrupts while this function is being
- * executed.
- */
 static int device_suspend_noirq(struct device *dev, pm_message_t state)
 {
 	int error;
@@ -806,13 +652,6 @@ static int device_suspend_noirq(struct device *dev, pm_message_t state)
 	return 0;
 }
 
-/**
- * dpm_suspend_noirq - Execute "late suspend" callbacks for non-sysdev devices.
- * @state: PM transition of the system being carried out.
- *
- * Prevent device drivers from receiving interrupts and call the "noirq" suspend
- * handlers for all non-sysdev devices.
- */
 int dpm_suspend_noirq(pm_message_t state)
 {
 	ktime_t starttime = ktime_get();
@@ -850,12 +689,6 @@ int dpm_suspend_noirq(pm_message_t state)
 }
 EXPORT_SYMBOL_GPL(dpm_suspend_noirq);
 
-/**
- * legacy_suspend - Execute a legacy (bus or class) suspend callback for device.
- * @dev: Device to suspend.
- * @state: PM transition of the system being carried out.
- * @cb: Suspend callback to execute.
- */
 static int legacy_suspend(struct device *dev, pm_message_t state,
 			  int (*cb)(struct device *dev, pm_message_t state))
 {
@@ -872,12 +705,6 @@ static int legacy_suspend(struct device *dev, pm_message_t state,
 	return error;
 }
 
-/**
- * device_suspend - Execute "suspend" callbacks for given device.
- * @dev: Device to handle.
- * @state: PM transition of the system being carried out.
- * @async: If true, the device is being suspended asynchronously.
- */
 static int __device_suspend(struct device *dev, pm_message_t state, bool async)
 {
 	int error = 0;
@@ -989,10 +816,7 @@ int suspend_device(struct device *dev, pm_message_t state)
        return  __device_suspend(dev, state, false);
 }	
 #endif
-/**
- * dpm_suspend - Execute "suspend" callbacks for all non-sysdev devices.
- * @state: PM transition of the system being carried out.
- */
+ 
 int dpm_suspend(pm_message_t state)
 {
 	ktime_t starttime = ktime_get();
@@ -1036,14 +860,6 @@ int dpm_suspend(pm_message_t state)
 	return error;
 }
 
-/**
- * device_prepare - Prepare a device for system power transition.
- * @dev: Device to handle.
- * @state: PM transition of the system being carried out.
- *
- * Execute the ->prepare() callback(s) for given device.  No new children of the
- * device may be registered after this function has returned.
- */
 static int device_prepare(struct device *dev, pm_message_t state)
 {
 	int error = 0;
@@ -1086,12 +902,6 @@ static int device_prepare(struct device *dev, pm_message_t state)
 	return error;
 }
 
-/**
- * dpm_prepare - Prepare all non-sysdev devices for a system PM transition.
- * @state: PM transition of the system being carried out.
- *
- * Execute the ->prepare() callback(s) for all devices.
- */
 int dpm_prepare(pm_message_t state)
 {
 	int error = 0;
@@ -1129,13 +939,6 @@ int dpm_prepare(pm_message_t state)
 	return error;
 }
 
-/**
- * dpm_suspend_start - Prepare devices for PM transition and suspend them.
- * @state: PM transition of the system being carried out.
- *
- * Prepare all non-sysdev devices for system PM transition and execute "suspend"
- * callbacks for them.
- */
 int dpm_suspend_start(pm_message_t state)
 {
 	int error;
@@ -1157,11 +960,6 @@ void __suspend_report_result(const char *function, void *fn, int ret)
 }
 EXPORT_SYMBOL_GPL(__suspend_report_result);
 
-/**
- * device_pm_wait_for_dev - Wait for suspend/resume of a device to complete.
- * @dev: Device to wait for.
- * @subordinate: Device that needs to wait for @dev.
- */
 int device_pm_wait_for_dev(struct device *subordinate, struct device *dev)
 {
 	dpm_wait(dev, subordinate->power.async_suspend);
@@ -1170,24 +968,11 @@ int device_pm_wait_for_dev(struct device *subordinate, struct device *dev)
 EXPORT_SYMBOL_GPL(device_pm_wait_for_dev);
 
 #if defined(CONFIG_SYNO_COMCERTO)
-/*
- * Code added to suppoprt  device SUSPEND(L1 and L2 ) and RESUME
- * (L1 = clock gating L2 = clock gating + reset) .
- * Depends upon config option CONFIG_PM_SYSFS_MANUAL
- *
- */
+
  
 #ifdef CONFIG_PM_SYSFS_MANUAL
 
 static DEFINE_MUTEX(dpm_lock);
-
-/**
- *	dpm_manual_resume - resume the device .
- *      uses device_resume and device_complete to acheive feature.
- *      part of the code borrowed from dpm_resume and dpm_resume_complete.
- *	@dev:   Device.
- * 	@state: State to enter.
-*/
 
 void dpm_manual_resume(struct device *dev,pm_message_t state)
 {
@@ -1197,7 +982,6 @@ void dpm_manual_resume(struct device *dev,pm_message_t state)
 
 	might_sleep();
 
-	/* Device resume prepare starts here */
 	mutex_lock(&dpm_list_mtx);
         pm_transition = state;
 	INIT_COMPLETION(dev->power.completion);
@@ -1216,7 +1000,6 @@ void dpm_manual_resume(struct device *dev,pm_message_t state)
 		list_move_tail(&dev->power.entry, &dpm_prepared_list);
 	mutex_unlock(&dpm_list_mtx);
 	
-	/* DPM complete start */
 	INIT_LIST_HEAD(&list);
 	mutex_lock(&dpm_list_mtx);
 	dev->power.is_prepared = false;
@@ -1228,17 +1011,6 @@ void dpm_manual_resume(struct device *dev,pm_message_t state)
 	dpm_show_time(starttime, state, NULL);
 }
 
-/**
- *	dpm_manual_resume_start - Start the process for Power one device back to work.
- *	@dev:   Device.
- *	@state: State to enter.
- *      Code inspired from dpm_resume_end().
- *
- *	Bring one device back to the on state by first powering it
- *	on, then restoring state. We only operate on devices that aren't
- *	already on.
- */
-
 void dpm_manual_resume_start(struct device * dev,pm_message_t state)
 {
 	mutex_lock(&dpm_lock);
@@ -1246,28 +1018,19 @@ void dpm_manual_resume_start(struct device * dev,pm_message_t state)
 		printk(KERN_ERR "PM: We are already in the resume state \n");
 		goto done;
         }
-	/* Device resume starts from here */
+	 
 	dpm_manual_resume(dev,state);
 done:
 	mutex_unlock(&dpm_lock);
 
 }
 
-/**
- *	dpm_manual_prepare - prepare the device for power transition.
- *	Part of the code borrowed from dpm_prapare.
- *	@dev:   Device.
- *	@state: State to enter.
- */
 static int dpm_manual_prepare(struct device * dev , pm_message_t state)
 {
-	/* This part of code is borrowed from dpm_prepare
-	 * make the deice for prepare.
-	*/
+	 
 	int error = 0;
 	might_sleep();
 	
-	/* Call the device prepare */
 	error = device_prepare(dev, state);
 
 	mutex_lock(&dpm_list_mtx);
@@ -1285,12 +1048,6 @@ done:
 	return error;
 }
 
-/**
- *	dpm_manual_suspend - Helper routing to call the device_suspend.
- *	Part of the code borrowed from dpm_supend().
- *	@dev:   Device.
- *	@state: State to enter.
- */
 static int dpm_manual_suspend(struct device * dev, pm_message_t state)
 {
 	ktime_t starttime;
@@ -1318,18 +1075,10 @@ static int dpm_manual_suspend(struct device * dev, pm_message_t state)
 	return error;
 }
 
-/**
- *      dpm_manual_suspend_start - Put one device in Power of L1/L2 state.
- *      Power off L1 - clock gating , Power off L2 - clock gating + device reset
- *  	Part of the code borrowed from dpm_suspend_start.
- *      @dev:   Device.
- *      @state: State to enter.
- */
 int dpm_manual_suspend_start(struct device * dev, pm_message_t state)
 {
 	int error=0;
 
-	/* Start the global mutex value*/
 	mutex_lock(&dpm_lock);
 
 	if (dev->power.power_state.event == state.event){
@@ -1342,7 +1091,6 @@ int dpm_manual_suspend_start(struct device * dev, pm_message_t state)
 		goto done;
         }
 
-	/* Devce PM prepare starts from here */
 	error=dpm_manual_prepare(dev,state);
 	
 	if (error){

@@ -1,94 +1,18 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
  
-This software file (the "File") is owned and distributed by Marvell 
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File in accordance with the terms and conditions of the General 
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is 
-available along with the File in the license.txt file or by writing to the Free 
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or 
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt. 
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY 
-DISCLAIMED.  The GPL License provides additional details about this warranty 
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File under the following licensing terms. 
-Redistribution and use in source and binary forms, with or without modification, 
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	    this list of conditions and the following disclaimer. 
-
-    *   Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution. 
-
-    *   Neither the name of Marvell nor the names of its contributors may be 
-        used to endorse or promote products derived from this software without 
-        specific prior written permission. 
-    
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR 
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-/*******************************************************************************
-* mvSata.h - Header File for mvSata.c.
-*
-* DESCRIPTION:
-*       None.
-*
-* DEPENDENCIES:
-*       mvOs.h
-*       ATA/ATAPI-6 standard
-*
-*******************************************************************************/
 #ifndef __INCmvSatah
 #define __INCmvSatah
 #ifdef __cplusplus
-extern "C" /*{*/
-#endif /* __cplusplus */
+extern "C"  
+#endif  
 
-/* Includes */
 #include "mvOsS.h"
 #include "mvRegs.h"
 
-/* Definitions */
 #define MV_CORE_DRIVER_LOG_ID                   0
 
-/* MV88SX50XX specific defines */
 #define MV_SATA_VENDOR_ID                       0x11AB
 #define MV_SATA_DEVICE_ID_5080                  0x5080
 #define MV_SATA_DEVICE_ID_5081                  0x5081
@@ -98,18 +22,18 @@ extern "C" /*{*/
 #define MV_SATA_DEVICE_ID_6081                  0x6081
 #define MV_SATA_DEVICE_ID_6042                  0x6042
 #define MV_SATA_DEVICE_ID_7042                  0x7042
-#define MV_SATA_DEVICE_ID_5182                  0x5182 /*88F5182 integrated sata*/
-#define MV_SATA_DEVICE_ID_5082                  0x5082 /*88F5082 integrated sata*/
-#define MV_SATA_DEVICE_ID_6082                  0x6082 /* Same device ID for 6082L */
-#define MV_SATA_DEVICE_ID_6490                  0x6490 /*64660 integrated sata*/
+#define MV_SATA_DEVICE_ID_5182                  0x5182  
+#define MV_SATA_DEVICE_ID_5082                  0x5082  
+#define MV_SATA_DEVICE_ID_6082                  0x6082  
+#define MV_SATA_DEVICE_ID_6490                  0x6490  
 
-#define MV_SATA_DEVICE_ID_78XX0                 0x7800 /*78x00 Z0/Y0 integrated sata*/
-#define MV_SATA_DEVICE_ID_78100                 0x7810 /*78100 integrated sata*/
-#define MV_SATA_DEVICE_ID_78200                 0x7820 /*78200 integrated sata*/
+#define MV_SATA_DEVICE_ID_78XX0                 0x7800  
+#define MV_SATA_DEVICE_ID_78100                 0x7810  
+#define MV_SATA_DEVICE_ID_78200                 0x7820  
 
-#define MV_SATA_DEVICE_ID_6281                 0x6281 /*88f6281 integrated sata*/
-#define MV_SATA_DEVICE_ID_6192                 0x6192 /*88f6192 integrated sata*/
-#define MV_SATA_DEVICE_ID_6190                 0x6190 /*88f6190 integrated sata*/
+#define MV_SATA_DEVICE_ID_6281                 0x6281  
+#define MV_SATA_DEVICE_ID_6192                 0x6192  
+#define MV_SATA_DEVICE_ID_6190                 0x6190  
 
 #define MV_SATA_CHANNELS_NUM                    8
 #define MV_SATA_UNITS_NUM                       2
@@ -126,10 +50,9 @@ extern "C" /*{*/
 #define MV_SATA_PM_MAX_PORTS                    15
 #define MV_SATA_PM_CONTROL_PORT                 15
 
-#define MV_EDMA_QUEUE_LENGTH                    32  /* Up to 32 outstanding  */
+#define MV_EDMA_QUEUE_LENGTH                    32   
 #define MV_EDMA_GEN2E_QUEUE_LENGTH              128
 
-/* commands per SATA channel*/
 #ifndef MV_SATA_OVERRIDE_SW_QUEUE_SIZE
     #define MV_SATA_SW_QUEUE_SIZE                   (MV_EDMA_QUEUE_LENGTH -1)
 #else
@@ -165,26 +88,25 @@ extern "C" /*{*/
 #define MV_EDMA_QUEUE_MASK                      0x1F
 #define MV_EDMA_REQUEST_ENTRY_SIZE              32
 #define MV_EDMA_RESPONSE_ENTRY_SIZE             8
-#define MV_EDMA_REQUEST_QUEUE_SIZE              1024 /* 32*32 = 1KBytes */
-#define MV_EDMA_RESPONSE_QUEUE_SIZE             256  /* 32*8 = 256 Bytes */
+#define MV_EDMA_REQUEST_QUEUE_SIZE              1024  
+#define MV_EDMA_RESPONSE_QUEUE_SIZE             256   
 
 #define MV_EDMA_GEN2E_QUEUE_MASK                      0x7F
-#define MV_EDMA_GEN2E_REQUEST_QUEUE_SIZE              4096 /* 128*32 = 4KBytes */
-#define MV_EDMA_GEN2E_RESPONSE_QUEUE_SIZE             1024  /* 128*8 = 1KBytes */
+#define MV_EDMA_GEN2E_REQUEST_QUEUE_SIZE              4096  
+#define MV_EDMA_GEN2E_RESPONSE_QUEUE_SIZE             1024   
 
-#define MV_EDMA_PRD_ENTRY_SIZE                  16      /* 16Bytes*/
+#define MV_EDMA_PRD_ENTRY_SIZE                  16       
 #define MV_EDMA_PRD_NO_SNOOP_FLAG               MV_BIT0
 #define MV_EDMA_PRD_EOT_FLAG                    MV_BIT15
 
-#define MV_ATA_IDENTIFY_DEV_DATA_LENGTH         256 /* number of words(2 byte)*/
+#define MV_ATA_IDENTIFY_DEV_DATA_LENGTH         256  
 #define MV_ATA_MODEL_NUMBER_LEN                 40
 #define ATA_SECTOR_SIZE                         512
 #define ATA_SECTOR_SIZE_IN_WORDS                256
 
-#define MV_SATA_COMM_INIT_DELAY                 1000 /*1000 us*/
-#define MV_SATA_COMM_INIT_WAIT_DELAY            20000 /*20 ms*/
+#define MV_SATA_COMM_INIT_DELAY                 1000  
+#define MV_SATA_COMM_INIT_WAIT_DELAY            20000  
 
-/*Channel to Channel*/
 #ifdef MV_SATA_C2C_COMM
     #define MV_SATA_REGISTER_HOST_2_DEVICE_FIS         0x00000034
     #define MV_SATA_DMA_ACTIVATE_FIS                   0x00000039
@@ -197,7 +119,6 @@ extern "C" /*{*/
     #define MV_IOG_INVALID_COMMAND_ID   MV_IOG_QUEUE_SIZE
 #endif
 
-/* Typedefs    */
 typedef enum mvUdmaType
 {
     MV_UDMA_TYPE_READ, MV_UDMA_TYPE_WRITE
@@ -423,9 +344,9 @@ typedef struct mvPacketCommandParams
     MV_U32      buffer_len;
     MV_U32      transfered_data;
     MV_U8       cdb_len;
-    MV_U16_PTR  cdb_buffer; /*SCSI command desciptor block*/
-    MV_U8       flags;/* bit 0:1-> DMA write*/
-                      /* bit 1:1-> single Data Region*/
+    MV_U16_PTR  cdb_buffer;  
+    MV_U8       flags; 
+                       
     MV_U32      prdLowAddr;
     MV_U32      prdHighAddr;
     mvSataCommandCompletionCallBack_t callBack;
@@ -434,24 +355,15 @@ typedef struct mvPacketCommandParams
 
 #ifdef MY_ABC_HERE
 
-/* 
- * Use in SynoCommandExt : flags
- */
 #define SYNO_PM_REQ_SUCCESS 0x0
 #define SYNO_PM_REQ_FAIL 0x1
 
-/*
- * Use in MV_QUEUED_COMMAND_ENTRY : syno_flags_ext
- */
 #define SYNO_PM_CMD_TIMEOUT 0x0
 
-/* please refer MV_STORAGE_DEVICE_REGISTERS we copy the content of it just because 
- * we don't wanna break the dependency (mvStorageDev.h and mvSata.h)
- */
 typedef struct _tag_SynoTaskFile {
     MV_U8    errorRegister;
-    MV_U16   featuresRegister;/*input only*/
-    MV_U8    commandRegister;/*input only*/
+    MV_U16   featuresRegister; 
+    MV_U8    commandRegister; 
     MV_U16   sectorCountRegister;
     MV_U16   lbaLowRegister;
     MV_U16   lbaMidRegister;
@@ -484,11 +396,10 @@ typedef struct mvQueueCommandInfo
 #endif
 } MV_QUEUE_COMMAND_INFO;
 
-/* The following structure is for the Core Driver internal usage */
 typedef struct mvQueuedCommandEntry
 {
     MV_BOOLEAN   isFreeEntry;
-    /*MV_U8        commandTag;*/
+     
     MV_U8        hostTag;
     MV_U8        deviceTag;
     MV_BOOLEAN   isCommandInEdma:1;
@@ -515,14 +426,13 @@ typedef enum mvErrorHandlingState
 typedef struct
 {
     MV_ERROR_HANDLING_STATE state;
-    MV_U16                      PortsWithErrors;/*which ports reported errors*/
+    MV_U16                      PortsWithErrors; 
     MV_U8                       CurrPort;
     MV_QUEUED_COMMAND_ENTRY     *pReadLogExtEntry;
     MV_U16_PTR                  ReadLogExtBuffer;
     MV_BOOLEAN                  useVendorUniqGen2WA;
 }MV_ERROR_HANDLING_INFO;
 
-/*for internal usage*/
 #define MV_SATA_TAGS_PER_POOL                   32
 #ifdef MV_SATA_SUPPORT_GEN2E_128_QUEUE_LEN
     #define MV_SATA_GEN2E_TAG_POOLS_NUM         (MV_SATA_PM_MAX_PORTS + 1)
@@ -547,15 +457,14 @@ struct _mvChannelTags
 
 typedef enum mvHostInterfase
 {
-    MV_HOST_IF_INTEGRATED,   /*as in 5182*/
+    MV_HOST_IF_INTEGRATED,    
     MV_HOST_IF_PEX,
-    MV_HOST_IF_PCI /*PCI/PCI-X*/
+    MV_HOST_IF_PCI  
 }MV_HOST_IF;
 
-/* The following structures are part of the Core Driver API */
 typedef struct mvSataChannel
 {
-    /* Fields set by Intermediate Application Layer */
+     
     MV_U8                       channelNumber;
     struct mvDmaRequestQueueEntry  *requestQueue;
     struct mvDmaResponseQueueEntry *responseQueue;
@@ -563,10 +472,9 @@ typedef struct mvSataChannel
     MV_U32                      requestQueuePciLowAddress;
     MV_U32                      responseQueuePciHiAddress;
     MV_U32                      responseQueuePciLowAddress;
-    /* DRQ Data Block size in sectors, Core Driver sets a default value of 1 */
-    /* sector in mvSataConfigureChannel*/
+     
     MV_U8                       DRQDataBlockSize;
-    /* Fields set by CORE driver */
+     
     struct mvSataAdapter        *mvSataAdapter;
     MV_OS_SEMAPHORE             semaphore;
     MV_U32                      eDmaRegsOffset;
@@ -590,13 +498,13 @@ typedef struct mvSataChannel
     MV_U8                       rspOutPtr;
     MV_U8       		EDMAQueuePtrMask;
     MV_U32	                EDMARequestInpMask;
-    /* Port Multiplier fiels*/
+     
     MV_BOOLEAN                  PMSupported;
     MV_SATA_DEVICE_TYPE         deviceType;
     MV_BOOLEAN  		FBSEnabled;
     MV_BOOLEAN                  use128Entries;
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-    /* while restart channel, device type would forget by mvSata */
+     
     MV_SATA_DEVICE_TYPE         oldDeviceType;
 #endif
 #ifdef MY_ABC_HERE
@@ -606,17 +514,16 @@ typedef struct mvSataChannel
 #endif
 #ifdef MV_SATA_C2C_COMM
 
-    /* Channel 2 Channel*/
     MV_BOOLEAN                  C2CmodeEnabled;
     MV_SATA_C2C_MODE            C2CMode;
     C2CCallBack_t               C2CCallback;
 #endif
     MV_U8                       recoveredErrorsCounter;
-    /* NCQ error handling*/
+     
     MV_ERROR_HANDLING_INFO  ErrorHandlingInfo;
 #ifdef MY_ABC_HERE
 	unsigned long chkpower_flags;
-	/* bit definitions */
+	 
 	#define CHKPOWER_CHECKING 0
 	#define CHKPOWER_WAKING 1
 	#define CHKPOWER_BLOCKING 2
@@ -625,46 +532,37 @@ typedef struct mvSataChannel
 	MV_QUEUE_COMMAND_INFO		OrigCmd;
 	struct timer_list	rstimer;
 	struct list_head	pendinglh;
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
-	unsigned long  ssd_list;  /* ssd mask, start from bit 0 to bit 32 indicate the disk */
+	unsigned long  ssd_list;   
 #endif
 } MV_SATA_CHANNEL;
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 typedef struct _tag_SYNO_EH {
-    /* state the current action and reason.
-     * There is no pm port flags
-     */
+     
     MV_U32 flags;
 
-    /* channel index */
     MV_U8 channel;
 
-    /* current retry count for the channel */
     MV_U8 retry_count;
 
-    /* the sata adapter reference pointer */
     struct mvSataAdapter *pSataAdapter;
 
-    /* the ialExt reference pointer */
     MV_VOID_PTR pIalExt;
 
-    /* the scsi adapter reference pointer */
     MV_VOID_PTR pataScsiAdapterExt;
 
-    /* delay work */
     struct delayed_work work;
 }SYNO_EH;
 
 enum {
-    /* reason */
+     
     EH_DISCONNECT_TRIGGER = (1 << 0),
     EH_UNRECOVER_TRIGGER  = (1 << 1),
     EH_CONNECT_TRIGGER    = (1 << 2),
 
-    /* action */
     EH_PROCESSING            = (1 << 5),
     EH_SCSI_DONE_NEEDED      = (1 << 6),
     EH_CONNECT_AGAIN         = (1 << 7),
@@ -672,13 +570,11 @@ enum {
     EH_HW_COM_ERROR          = (1 << 8),
 #endif
 
-    /* original device */
     EH_LINK_DISK             = (1 << 20),
     EH_LINK_PMP              = (1 << 21),
 
 #ifdef MY_ABC_HERE
-    /* FIXME: please integrade detect fix after merge EH to CVS. */
-    /* probe status */
+     
     SYNO_PROBE_RETRY = (1 << 0),
     SYNO_PROBE_LIMIT_TO_15 = (1 << 1),
 #endif
@@ -687,7 +583,7 @@ enum {
 
 typedef struct mvSataAdapter
 {
-    /* Fields set by Intermediate Application Layer */
+     
     MV_U32            adapterId;
     MV_VOID_PTR       IALData;
     MV_U8             pciConfigRevisionId;
@@ -703,14 +599,13 @@ typedef struct mvSataAdapter
     MV_U32            pciSerrMask;
     MV_U32            pciInterruptMask;
 
-    /* Fields set by CORE driver */
     MV_SATA_GEN       sataAdapterGeneration;
-    MV_BOOLEAN        staggaredSpinup[MV_SATA_CHANNELS_NUM]; /* For 60x1 only */
-    MV_BOOLEAN        limitInterfaceSpeed[MV_SATA_CHANNELS_NUM]; /* For 60x1 only */
-    MV_SATA_IF_SPEED  ifSpeed[MV_SATA_CHANNELS_NUM];  /* For 60x1 only */
+    MV_BOOLEAN        staggaredSpinup[MV_SATA_CHANNELS_NUM];  
+    MV_BOOLEAN        limitInterfaceSpeed[MV_SATA_CHANNELS_NUM];  
+    MV_SATA_IF_SPEED  ifSpeed[MV_SATA_CHANNELS_NUM];   
     MV_SATA_IF_POWER_STATE ifPowerState[MV_SATA_CHANNELS_NUM];
-    MV_U8             numberOfChannels;/* 4 channels for 504x, 8 for 508x*/
-    MV_U8             numberOfUnits;/* 1 for 504x, 2 for 508x*/
+    MV_U8             numberOfChannels; 
+    MV_U8             numberOfUnits; 
     MV_U8             portsPerUnit;
     MV_OS_SEMAPHORE   semaphore;
     MV_U32            mainMask;
@@ -742,7 +637,6 @@ typedef struct mvSataAdapter
 #endif
 } MV_SATA_ADAPTER;
 
-/* this structure used by the IAL defines the PRD entries used by the EDMA HW */
 typedef struct mvSataEdmaPRDEntry
 {
     volatile MV_U32 lowBaseAddr;
@@ -752,9 +646,6 @@ typedef struct mvSataEdmaPRDEntry
     volatile MV_U32 reserved;
 }MV_SATA_EDMA_PRD_ENTRY;
 
-/* API Functions */
-
-/* CORE driver Adapter Management */
 MV_BOOLEAN mvSataInitAdapter(MV_SATA_ADAPTER *pAdapter);
 
 MV_BOOLEAN mvSataShutdownAdapter(MV_SATA_ADAPTER *pAdapter);
@@ -764,7 +655,6 @@ MV_U32  mvSataReadReg(MV_SATA_ADAPTER *pAdapter, MV_U32 regOffset);
 MV_VOID mvSataWriteReg(MV_SATA_ADAPTER *pAdapter, MV_U32 regOffset,
                        MV_U32 regValue);
 
-/* CORE driver SATA Channel Management */
 MV_BOOLEAN mvSataConfigureChannel(MV_SATA_ADAPTER *pAdapter,
                                   MV_U8 channelIndex);
 
@@ -817,7 +707,7 @@ MV_BOOLEAN mvSataChannelPhyPowerOn(MV_SATA_ADAPTER *pAdapter,
 
 MV_BOOLEAN mvSataChannelFarLoopbackDiagnostic(MV_SATA_ADAPTER *pAdapter,
                                               MV_U8 channelIndex);
-/* Queue ATA command */
+ 
 MV_QUEUE_COMMAND_RESULT mvSataQueueCommand(MV_SATA_ADAPTER *pAdapter,
                                            MV_U8 channelIndex,
                                            MV_QUEUE_COMMAND_INFO *pCommandParams);
@@ -828,7 +718,6 @@ MV_VOID SynoSataPMGPIOQueueCommandTimeout(MV_SATA_ADAPTER *pAdapter,
                                           MV_QUEUE_COMMAND_INFO *pCommandInfo);
 #endif
 
-/* Interrupt Service Routine */
 MV_BOOLEAN mvSataInterruptServiceRoutine(MV_SATA_ADAPTER *pAdapter);
 
 MV_BOOLEAN mvSataMaskAdapterInterrupt(MV_SATA_ADAPTER *pAdapter);
@@ -840,10 +729,6 @@ MV_BOOLEAN mvSataCheckPendingInterrupt(MV_SATA_ADAPTER *pAdapter);
 MV_BOOLEAN mvSataSetInterruptsScheme(MV_SATA_ADAPTER *pAdapter,
                                      MV_SATA_INTERRUPT_SCHEME interruptScheme);
 
-/*
- * Staggered spin-ip support and SATA interface speed control
- * (relevant for 60x1 adapters)
- */
 MV_BOOLEAN mvSataEnableStaggeredSpinUpAll (MV_SATA_ADAPTER *pAdapter);
 
 MV_BOOLEAN mvSataEnableStaggeredSpinUp (MV_SATA_ADAPTER *pAdapter,
@@ -869,12 +754,10 @@ MV_BOOLEAN mvSataGetInterfacePowerState (MV_SATA_ADAPTER *pAdapter,
                                          MV_U8 channelIndex,
                                          MV_SATA_IF_POWER_STATE *ifPowerState);
 
-/* Command Completion and Event Notification (user implemented) */
 MV_BOOLEAN mvSataEventNotify(MV_SATA_ADAPTER *, MV_EVENT_TYPE ,
                              MV_U32, MV_U32);
 #ifdef MV_SATA_C2C_COMM
 
-/* Channel 2 Channel communication */
 MV_BOOLEAN mvSataC2CInit (MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
                           MV_SATA_C2C_MODE mvSataC2CMode,
                           C2CCallBack_t mvSataC2CCallBack);
@@ -910,7 +793,7 @@ MV_BOOLEAN mvSata60X1B2CheckDevError(MV_SATA_ADAPTER *pAdapter,
                                        MV_U8 channelIndex);
 #ifdef __cplusplus
 
-/*}*/
-#endif /* __cplusplus */
 
-#endif /* __INCmvSatah */
+#endif 
+
+#endif  

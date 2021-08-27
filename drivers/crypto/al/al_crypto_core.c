@@ -1,30 +1,3 @@
-/*
- * drivers/crypto/al_crypto_core.c
- *
- * Annapurna Labs Crypto driver - core
- *
- * Copyright (C) 2012 Annapurna Labs Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
-/*
-#ifndef DEBUG
-#define DEBUG
-#endif
-*/
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -115,8 +88,7 @@ static void al_crypto_unmask_interrupts(struct al_crypto_device *device,
 		bool single_interrupt);
 
 static void al_crypto_group_d_errors_handler(struct al_crypto_device *device);
-/******************************************************************************
- *****************************************************************************/
+ 
 int al_crypto_core_init(
 		struct al_crypto_device	*device,
 		void __iomem		*iobase_udma,
@@ -153,8 +125,7 @@ int al_crypto_core_init(
 	}
 
 	device->udma_regs_base = iobase_udma;
-	/* The crypto regs exists only for the PF.
-	 * The VF uses the same configs/ error reporting as the PF */
+	 
 	device->crypto_regs_base = iobase_app ? iobase_app +
 			AL_CRYPTO_APP_REGS_BASE_OFFSET : NULL;
 
@@ -198,7 +169,6 @@ int al_crypto_core_init(
 		goto err_no_chan;
 	}
 
-	/* enumerate and initialize channels (queues) */
 	al_crypto_init_channels(device, max_channels);
 
 	err = al_crypto_alloc_channels(device);
@@ -208,7 +178,6 @@ int al_crypto_core_init(
 		goto err_no_irq;
 	}
 
-	/* enable Crypto DMA engine */
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
 	rc = al_ssm_dma_state_set(&device->hal_crypto, UDMA_NORMAL);
 #else
@@ -236,8 +205,6 @@ done:
 	return err;
 }
 
-/******************************************************************************
- *****************************************************************************/
 int al_crypto_core_terminate(
 		struct al_crypto_device	*device)
 {
@@ -262,8 +229,6 @@ int al_crypto_core_terminate(
 	return status;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int al_crypto_init_channels(
 		struct al_crypto_device *device,
 		int max_channels)
@@ -282,8 +247,6 @@ static int al_crypto_init_channels(
 	return i;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_crypto_init_channel(struct al_crypto_device *device,
 			 struct al_crypto_chan *chan, int idx)
 {
@@ -315,14 +278,12 @@ static void al_crypto_init_channel(struct al_crypto_device *device,
 	crypto_init_queue(&chan->sw_queue, 1);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_crypto_unmask_interrupts(struct al_crypto_device *device,
 		bool single_interrupt)
 {
-	/* enable group D summary */
+	 
 	u32 group_a_mask = AL_INT_GROUP_A_GROUP_D_SUM;
-	u32 group_b_mask = (1 << device->num_channels) - 1; /* bit per Rx q*/
+	u32 group_b_mask = (1 << device->num_channels) - 1;  
 	u32 group_d_mask = AL_INT_GROUP_D_ALL;
 
 	struct unit_regs __iomem *regs_base =
@@ -336,8 +297,6 @@ static void al_crypto_unmask_interrupts(struct al_crypto_device *device,
 	al_udma_iofic_unmask(regs_base, AL_INT_GROUP_D, group_d_mask);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_crypto_config_crypto_app_interrupts
 	(struct al_crypto_device *device)
 {
@@ -360,14 +319,11 @@ static void al_crypto_config_crypto_app_interrupts
 		INT_CONTROL_GRP_CLEAR_ON_READ |
 		INT_CONTROL_GRP_MASK_MSI_X);
 
-	/* Clear the interrupt reg */
 	al_iofic_read_cause(
 		device->crypto_regs_base + AL_CRYPTO_APP_IOFIC_OFFSET,
 		AL_INT_GROUP_A);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int al_crypto_iofic_config(struct al_crypto_device *device,
 		bool single_msix)
 {
@@ -401,8 +357,6 @@ static int al_crypto_iofic_config(struct al_crypto_device *device,
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int al_crypto_setup_interrupts(struct al_crypto_device *device)
 {
 	struct al_crypto_chan *chan;
@@ -417,8 +371,6 @@ static int al_crypto_setup_interrupts(struct al_crypto_device *device)
 	if (al_crypto_get_use_single_msix())
 		goto msix_single_vector;
 
-	/* The number of MSI-X vectors should equal the number of channels + 1
-	 * for group D */
 	msixcnt = device->num_channels + 1;
 
 	for (i = 0; i < device->num_channels; i++)
@@ -574,16 +526,11 @@ err_free_devm:
 	}
 
 err_no_irq:
-	/* Disable all interrupt generation */
 	 
 	dev_err(dev, "no usable interrupts\n");
 	return err;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Free tx and rx descriptor rings for all channels
- */
 static void al_crypto_free_channels(struct al_crypto_device *device)
 {
 	int i;
@@ -597,10 +544,6 @@ static void al_crypto_free_channels(struct al_crypto_device *device)
 		irq_set_affinity_hint(device->msix_entries[i].vector, NULL);
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Allocate/initialize tx and rx descriptor rings for all channels
- */
 static int al_crypto_alloc_channels(struct al_crypto_device *device)
 {
 	int i, j;
@@ -626,18 +569,12 @@ static int al_crypto_alloc_channels(struct al_crypto_device *device)
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static inline bool al_crypto_is_crypt_auth_chan(struct al_crypto_chan *chan)
 {
 	struct al_crypto_device *device = chan->device;
 	return (chan->idx < device->num_channels - device->crc_channels);
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Allocate/initialize tx and rx descriptor rings for one channel
- */
 static int al_crypto_alloc_chan_resources(struct al_crypto_chan *chan)
 {
 	struct al_crypto_device *device = chan->device;
@@ -656,7 +593,6 @@ static int al_crypto_alloc_chan_resources(struct al_crypto_chan *chan)
 	dev_dbg(dev, "al_crypto_alloc_chan_resources: channel %d\n",
 		chan->idx);
 
-	/* have we already been set up? */
 	if (chan->sw_ring)
 		return 1 << chan->alloc_order;
 
@@ -667,7 +603,6 @@ static int al_crypto_alloc_chan_resources(struct al_crypto_chan *chan)
 	chan->tx_descs_num = 1 << tx_descs_order;
 	chan->rx_descs_num = 1 << rx_descs_order;
 
-	/* allocate coherent memory for Tx submission descriptors */
 	chan->tx_dma_desc_virt = dma_alloc_coherent(dev,
 						    chan->tx_descs_num *
 						    sizeof(union al_udma_desc),
@@ -681,7 +616,6 @@ static int al_crypto_alloc_chan_resources(struct al_crypto_chan *chan)
 	dev_dbg(dev, "allocted tx descriptor ring: virt 0x%p phys 0x%llx\n",
 		chan->tx_dma_desc_virt, (u64)chan->tx_dma_desc);
 
-	/* allocate coherent memory for Rx submission descriptors */
 	chan->rx_dma_desc_virt = dma_alloc_coherent(dev,
 						    chan->rx_descs_num *
 						    sizeof(union al_udma_desc),
@@ -697,7 +631,6 @@ static int al_crypto_alloc_chan_resources(struct al_crypto_chan *chan)
 	dev_dbg(dev, "allocted rx descriptor ring: virt 0x%p phys 0x%llx\n",
 		chan->rx_dma_desc_virt, (u64)chan->rx_dma_desc);
 
-	/* allocate coherent memory for Rx completion descriptors */
 	chan->rx_dma_cdesc_virt = dma_alloc_coherent(dev,
 						     chan->rx_descs_num *
 						     AL_CRYPTO_RX_CDESC_SIZE,
@@ -711,7 +644,6 @@ static int al_crypto_alloc_chan_resources(struct al_crypto_chan *chan)
 		return -ENOMEM;
 	}
 
-	/* clear the Rx completion descriptors to avoid false positive */
 	memset(
 		chan->rx_dma_cdesc_virt,
 		0,
@@ -746,9 +678,9 @@ static int al_crypto_alloc_chan_resources(struct al_crypto_chan *chan)
 	tx_params.size = chan->tx_descs_num;
 	tx_params.desc_base = chan->tx_dma_desc_virt;
 	tx_params.desc_phy_base = chan->tx_dma_desc;
-	tx_params.cdesc_base = NULL; /* don't use Tx completion ring */
+	tx_params.cdesc_base = NULL;  
 	tx_params.cdesc_phy_base = 0;
-	tx_params.cdesc_size = AL_CRYPTO_TX_CDESC_SIZE; /* size is needed */
+	tx_params.cdesc_size = AL_CRYPTO_TX_CDESC_SIZE;  
 
 	rx_params.size = chan->rx_descs_num;
 	rx_params.desc_base = chan->rx_dma_desc_virt;
@@ -757,7 +689,6 @@ static int al_crypto_alloc_chan_resources(struct al_crypto_chan *chan)
 	rx_params.cdesc_phy_base = chan->rx_dma_cdesc;
 	rx_params.cdesc_size = AL_CRYPTO_RX_CDESC_SIZE;
 
-	/* alloc sw descriptors */
 	if (ring_alloc_order < AL_CRYPTO_SW_RING_MIN_ORDER) {
 		dev_err(
 			dev,
@@ -839,14 +770,9 @@ static int al_crypto_alloc_chan_resources(struct al_crypto_chan *chan)
 	spin_unlock_bh(&chan->prep_lock);
 	spin_unlock_bh(&chan->cleanup_lock);
 
-	/* should we return less ?*/
 	return  1 << chan->alloc_order;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Free tx and rx descriptor rings for one channel
- */
 static void al_crypto_free_chan_resources(struct al_crypto_chan *chan)
 {
 	struct device *dev = to_dev(chan);
@@ -890,10 +816,6 @@ static void al_crypto_free_chan_resources(struct al_crypto_chan *chan)
 	return;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Alloc sw descriptors ring
- */
 static struct al_crypto_sw_desc **al_crypto_alloc_sw_ring(
 		struct al_crypto_chan	*chan,
 		int	order,
@@ -903,7 +825,6 @@ static struct al_crypto_sw_desc **al_crypto_alloc_sw_ring(
 	int descs = 1 << order;
 	int i;
 
-	/* allocate the array to hold the software ring */
 	ring = kcalloc(descs, sizeof(*ring), flags);
 	if (!ring)
 		return NULL;
@@ -913,16 +834,12 @@ static struct al_crypto_sw_desc **al_crypto_alloc_sw_ring(
 			al_crypto_free_sw_ring(ring, chan , i);
 			return NULL;
 		}
-		/* set_desc_id(ring[i], i); */
+		 
 	}
 
 	return ring;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Free sw descriptors ring
-*/
 static void al_crypto_free_sw_ring(
 		struct al_crypto_sw_desc **ring,
 		struct al_crypto_chan	*chan,
@@ -936,10 +853,6 @@ static void al_crypto_free_sw_ring(
 	kfree(ring);
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Alloc sw descriptor
- */
 static struct al_crypto_sw_desc *al_crypto_alloc_ring_ent(
 	struct al_crypto_chan	*chan,
 	gfp_t			flags)
@@ -953,10 +866,6 @@ static struct al_crypto_sw_desc *al_crypto_alloc_ring_ent(
 	return desc;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Free sw descriptor
- */
 static void al_crypto_free_ring_ent(
 	struct al_crypto_sw_desc	*desc,
 	struct al_crypto_chan		*chan)
@@ -964,10 +873,6 @@ static void al_crypto_free_ring_ent(
 	kmem_cache_free(chan->device->cache, desc);
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Get sw desc
- */
 int al_crypto_get_sw_desc(struct al_crypto_chan *chan, int num)
 {
 	if (likely(al_crypto_ring_space(chan) >= num)) {
@@ -979,10 +884,6 @@ int al_crypto_get_sw_desc(struct al_crypto_chan *chan, int num)
 	return -ENOMEM;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Handler used for vector-per-channel interrupt mode
- */
 static irqreturn_t al_crypto_do_interrupt_msix(int irq, void *data)
 {
 	struct al_crypto_chan *chan = data;
@@ -994,10 +895,6 @@ static irqreturn_t al_crypto_do_interrupt_msix(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Handler for interrupt group d
- */
 static irqreturn_t al_crypto_do_interrupt_group_d(int irq, void *data)
 {
 	struct al_crypto_device *device = data;
@@ -1009,10 +906,6 @@ static irqreturn_t al_crypto_do_interrupt_group_d(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Handler used for vector-per-group interrupt mode
- */
 static irqreturn_t al_crypto_do_interrupt_msix_rx(int irq, void *data)
 {
 	struct al_crypto_device *device = data;
@@ -1024,10 +917,6 @@ static irqreturn_t al_crypto_do_interrupt_msix_rx(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Handler used for legacy interrupt mode
- */
 static irqreturn_t al_crypto_do_interrupt_legacy(int irq, void *data)
 {
 	struct al_crypto_device *device = data;
@@ -1045,8 +934,6 @@ static irqreturn_t al_crypto_do_interrupt_legacy(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-/******************************************************************************
- *****************************************************************************/
 int al_crypto_cleanup_fn(struct al_crypto_chan *chan, int from_tasklet)
 {
 	struct al_crypto_sw_desc *desc;
@@ -1071,7 +958,6 @@ int al_crypto_cleanup_fn(struct al_crypto_chan *chan, int from_tasklet)
 		rc = al_crypto_dma_completion(chan->hal_crypto, chan->idx,
 					    &comp_status);
 
-		/* if no completed transaction found -> exit */
 		if (rc == 0) {
 			dev_dbg(to_dev(chan), "%s: No completion\n",
 			__func__);
@@ -1085,8 +971,6 @@ int al_crypto_cleanup_fn(struct al_crypto_chan *chan, int from_tasklet)
 			__func__,
 			comp_status);
 
-		/* This will instruct the CPU to make sure the index is up to
-		   date before reading the new item */
 		smp_read_barrier_depends();
 
 		desc = al_crypto_get_ring_ent(chan, idx + i);
@@ -1112,28 +996,21 @@ int al_crypto_cleanup_fn(struct al_crypto_chan *chan, int from_tasklet)
 		}
 	}
 
-	/* This will make sure the CPU has finished reading the item
-	   before it writes the new tail pointer, which will erase the item */
-	smp_mb(); /* finish all descriptor reads before incrementing tail */
+	smp_mb();  
 
 	chan->tail = idx + i;
 
-	/* Keep track of redundant interrupts - interrupts that doesn't
-	   yield completions */
 	if (unlikely(from_tasklet && (!i)))
 		AL_CRYPTO_STATS_INC(chan->stats_comp.redundant_int_cnt, 1);
 
 	spin_unlock_bh(&chan->cleanup_lock);
 
-	/* Currently only ablkcipher reqs can be backlogged */
 	if (i && chan->sw_queue.qlen)
 		ablkcipher_process_queue(chan);
 
 	return i;
 };
 
-/******************************************************************************
- *****************************************************************************/
 static void al_crypto_group_d_errors_handler(struct al_crypto_device *device)
 {
 	u32 read_cause_group_d, read_cause_crypto_reg_a;
@@ -1168,8 +1045,6 @@ static void al_crypto_group_d_errors_handler(struct al_crypto_device *device)
 	}
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_crypto_cleanup_tasklet(unsigned long data)
 {
 	struct al_crypto_chan *chan = (struct al_crypto_chan *)data;
@@ -1188,8 +1063,6 @@ static void al_crypto_cleanup_tasklet(unsigned long data)
 		1 << chan->idx);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static inline void al_crypto_cleanup_q_group_fn(
 		struct al_crypto_device *device,
 		int group)
@@ -1214,8 +1087,6 @@ static inline void al_crypto_cleanup_q_group_fn(
 	}
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_crypto_cleanup_tasklet_msix_rx(unsigned long data)
 {
 	struct al_crypto_device *device = (struct al_crypto_device *)data;
@@ -1236,8 +1107,6 @@ static void al_crypto_cleanup_tasklet_msix_rx(unsigned long data)
 		AL_INT_GROUP_A_GROUP_B_SUM);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_crypto_cleanup_tasklet_legacy(unsigned long data)
 {
 	struct al_crypto_device *device = (struct al_crypto_device *)data;
@@ -1258,10 +1127,6 @@ static void al_crypto_cleanup_tasklet_legacy(unsigned long data)
 		AL_INT_GROUP_A_GROUP_B_SUM);
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Dma map of scatterlist, with chaining support
- */
 int dma_map_sg_chained(struct device *dev, struct scatterlist *sg,
 			unsigned int nents, enum dma_data_direction dir,
 			bool chained)
@@ -1278,10 +1143,6 @@ int dma_map_sg_chained(struct device *dev, struct scatterlist *sg,
 	return nents;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Dma unmap of scatterlist, with chaining support
- */
 int dma_unmap_sg_chained(struct device *dev, struct scatterlist *sg,
 				unsigned int nents, enum dma_data_direction dir,
 				bool chained)
@@ -1298,10 +1159,6 @@ int dma_unmap_sg_chained(struct device *dev, struct scatterlist *sg,
 	return nents;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Update the LRU list according to the currently accessed entry
- */
 void al_crypto_cache_update_lru(struct al_crypto_chan *chan,
 		struct al_crypto_cache_state *ctx)
 {
@@ -1309,7 +1166,6 @@ void al_crypto_cache_update_lru(struct al_crypto_chan *chan,
 	struct al_crypto_cache_lru_entry *lru_entry = NULL;
 	uint32_t list_idx = 0;
 
-	/* skip update if cache not yet populated */
 	if (unlikely(chan->cache_lru_count <= 1))
 		return;
 
@@ -1322,19 +1178,12 @@ void al_crypto_cache_update_lru(struct al_crypto_chan *chan,
 		list_idx++;
 	}
 
-	/* The entry has to be in the list */
 	BUG_ON(lru_entry->ctx != ctx);
 
-	/* move to tail only if needed */
 	if (list_idx != (chan->cache_lru_count - 1))
 		list_move_tail(ptr, &chan->cache_lru_list);
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Translate cache entry index in ring[0..3] to global index: [0..15] in sa
- * sa cache, [0..7] in crc iv cache
- */
 static inline uint32_t
 al_crypto_ring_cache_idx(struct al_crypto_chan *chan, int cache_idx)
 {
@@ -1348,10 +1197,6 @@ al_crypto_ring_cache_idx(struct al_crypto_chan *chan, int cache_idx)
 	return (chan_idx * chan->cache_entries_num) + cache_idx;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Replace least recently used cache entry with current entry
- */
 uint32_t al_crypto_cache_replace_lru(struct al_crypto_chan *chan,
 		struct al_crypto_cache_state *ctx,
 		struct al_crypto_cache_state **old_ctx)
@@ -1359,7 +1204,7 @@ uint32_t al_crypto_cache_replace_lru(struct al_crypto_chan *chan,
 	struct al_crypto_cache_lru_entry *lru_entry = NULL;
 
 	if (chan->cache_lru_count < chan->cache_entries_num) {
-		/* find a free entry */
+		 
 		int i;
 		for (i = 0; i < chan->cache_entries_num; i++) {
 			lru_entry = &chan->cache_lru_entries[i];
@@ -1386,14 +1231,14 @@ uint32_t al_crypto_cache_replace_lru(struct al_crypto_chan *chan,
 		lru_entry = list_first_entry(&chan->cache_lru_list,
 					struct al_crypto_cache_lru_entry,
 					list);
-		/* Invalidate old ctx */
+		 
 		lru_entry->ctx->cached = false;
-		/* Return old ctx if needed */
+		 
 		if (old_ctx)
 			*old_ctx = lru_entry->ctx;
-		/* Connect new ctx */
+		 
 		lru_entry->ctx = ctx;
-		/* Move current entry to end of LRU list */
+		 
 		list_rotate_left(&chan->cache_lru_list);
 	}
 
@@ -1402,10 +1247,6 @@ uint32_t al_crypto_cache_replace_lru(struct al_crypto_chan *chan,
 	return lru_entry->cache_idx;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Remove the entry from LRU list
- */
 void al_crypto_cache_remove_lru(struct al_crypto_chan *chan,
 		struct al_crypto_cache_state *ctx)
 {
@@ -1413,7 +1254,6 @@ void al_crypto_cache_remove_lru(struct al_crypto_chan *chan,
 	struct al_crypto_cache_lru_entry *lru_entry = NULL;
 	uint32_t list_idx = 0;
 
-	/* lru list is empty */
 	if (chan->cache_lru_count == 0)
 		return;
 
@@ -1426,7 +1266,6 @@ void al_crypto_cache_remove_lru(struct al_crypto_chan *chan,
 		list_idx++;
 	}
 
-	/* The entry has to be in the list */
 	BUG_ON(lru_entry->ctx != ctx);
 
 	list_del(ptr);
@@ -1435,10 +1274,6 @@ void al_crypto_cache_remove_lru(struct al_crypto_chan *chan,
 	ctx->cached = false;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Move ring tail to process prepared descriptors
- */
 void al_crypto_tx_submit(struct al_crypto_chan *chan)
 {
 	dev_dbg(
@@ -1447,15 +1282,7 @@ void al_crypto_tx_submit(struct al_crypto_chan *chan)
 		__func__,
 		chan);
 
-	/* according to Documentation/circular-buffers.txt we should have */
-	/* smp_wmb before intcrementing the head, however, the */
-	/* al_crypto_dma_action contains writel() which implies dmb on ARM */
-	/* so this smp_wmb() can be omitted on ARM platforms */
-	/*smp_wmb();*/ /* commit the item before incrementing the head */
 	chan->head += chan->sw_desc_num_locked;
-	/* in our case the consumer (interrupt handler) will be waken up by */
-	/* the hw, so we send the transaction to the hw after incrementing */
-	/* the head */
 	 
 	al_crypto_dma_action(
 		chan->hal_crypto,
@@ -1463,10 +1290,6 @@ void al_crypto_tx_submit(struct al_crypto_chan *chan)
 		chan->tx_desc_produced);
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Set interrupt moderation interval, each tick ~= 1.5usecs
- */
 void al_crypto_set_int_moderation(struct al_crypto_device *device, int interval)
 {
 	int i;
@@ -1482,10 +1305,6 @@ void al_crypto_set_int_moderation(struct al_crypto_device *device, int interval)
 	device->int_moderation = interval;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Get interrupt moderation interval
- */
 int al_crypto_get_int_moderation(struct al_crypto_device *device)
 {
 	return device->int_moderation;

@@ -1,69 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
  
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File under the following licensing terms.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	    this list of conditions and the following disclaimer.
-
-    *   Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in the
-	documentation and/or other materials provided with the distribution.
-
-    *   Neither the name of Marvell nor the names of its contributors may be
-	used to endorse or promote products derived from this software without
-	specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
 #include "mvCommon.h"
 #include "mvBoardEnvLib.h"
 #include "mvBoardEnvSpec.h"
@@ -72,12 +10,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define ARRSZ(x)	(sizeof(x)/sizeof(x[0]))
 
-/**********************/
-/* ARMADA-XP DB BOARD */
-/**********************/
 #define DB_88F78XX0_BOARD_NAND_READ_PARAMS	0x000C0282
 #define DB_88F78XX0_BOARD_NAND_WRITE_PARAMS	0x00010305
-/*NAND care support for small page chips*/
+ 
 #define DB_88F78XX0_BOARD_NAND_CONTROL		0x01c00543
 
 #define DB_88F78XX0_BOARD_NOR_READ_PARAMS	0x403E07CF
@@ -88,7 +23,7 @@ MV_U8 mvDbDisableModuleDetection = 0;
 MV_U8	db88f6781InfoBoardDebugLedIf[] = {26, 27, 48};
 
 MV_BOARD_TWSI_INFO	db88f78XX0InfoBoardTwsiDev[] = {
-	/* {{MV_BOARD_DEV_CLASS	devClass, MV_U8	twsiDevAddr, MV_U8 twsiDevAddrType}} */
+	 
 	{BOARD_DEV_TWSI_SATR, 0x4C, ADDR7_BIT},
 	{BOARD_DEV_TWSI_SATR, 0x4D, ADDR7_BIT},
 	{BOARD_DEV_TWSI_SATR, 0x4E, ADDR7_BIT},
@@ -96,11 +31,11 @@ MV_BOARD_TWSI_INFO	db88f78XX0InfoBoardTwsiDev[] = {
 };
 
 MV_BOARD_MAC_INFO db88f78XX0InfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x0,0x0, 0x0,},
 	{BOARD_MAC_SPEED_AUTO, 0x1,0x0, 0x1,},
-	{BOARD_MAC_SPEED_AUTO, 0x19,0x800 , 0x18},  /* Port 1 */
-	{BOARD_MAC_SPEED_AUTO, 0x1B,0x1800, 0x18}  /* Port 3 */
+	{BOARD_MAC_SPEED_AUTO, 0x19,0x800 , 0x18},   
+	{BOARD_MAC_SPEED_AUTO, 0x1B,0x1800, 0x18}   
 };
 
 MV_BOARD_MODULE_TYPE_INFO db88f78XX0InfoBoardModTypeInfo[] = {
@@ -111,18 +46,18 @@ MV_BOARD_MODULE_TYPE_INFO db88f78XX0InfoBoardModTypeInfo[] = {
 };
 
 MV_BOARD_GPP_INFO db88f78XX0InfoBoardGppInfo[] = {
-	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
-	{BOARD_GPP_USB_VBUS,    24}, /* from MPP map */
+	 
+	{BOARD_GPP_USB_VBUS,    24},  
 	{BOARD_GPP_RESET,       47},
 };
 
 MV_DEV_CS_INFO db88f78XX0InfoBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth, busWidth }*/
+	 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}, /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8},  
 #endif
 #if defined(MV_INCLUDE_NOR)
-	{DEV_BOOCS, N_A, BOARD_DEV_NOR_FLASH, 16, 16} /* NOR DEV */
+	{DEV_BOOCS, N_A, BOARD_DEV_NOR_FLASH, 16, 16}  
 #endif
 };
 
@@ -138,7 +73,7 @@ MV_BOARD_MPP_INFO db88f78XX0InfoBoardMppConfigValue[] = {
 	DB_88F78XX0_MPP56_63,
 	DB_88F78XX0_MPP64_67,
 	} },
-	{ { /* MV_BOARD_TDM_32CH */
+	{ {  
 		DB_88F78XX0_MPP0_7,
 		DB_88F78XX0_MPP8_15,
 		DB_88F78XX0_MPP16_23,
@@ -149,7 +84,7 @@ MV_BOARD_MPP_INFO db88f78XX0InfoBoardMppConfigValue[] = {
 		DB_88F78XX0_MPP56_63,
 		DB_88F78XX0_MPP64_67,
 	} },
-	{ { /* MV_BOARD_LCD_DVI */
+	{ {  
 		(DB_88F78XX0_MPP0_7   & 0x00000000) | 0x44444444,
 		(DB_88F78XX0_MPP8_15  & 0x00000000) | 0x44444444,
 		(DB_88F78XX0_MPP16_23 & 0x00000000) | 0x44444444,
@@ -160,7 +95,7 @@ MV_BOARD_MPP_INFO db88f78XX0InfoBoardMppConfigValue[] = {
 		DB_88F78XX0_MPP56_63,
 		DB_88F78XX0_MPP64_67,
 	} },
-	{ { /* MV_BOARD_MII_GMII */
+	{ {  
 		(DB_88F78XX0_MPP0_7 & 0x00000000) | 0x11111111,
 		(DB_88F78XX0_MPP8_15 & 0x00000000) | 0x11111111,
 		(DB_88F78XX0_MPP16_23 & 0x000000FF) | 0x11111100,
@@ -171,7 +106,7 @@ MV_BOARD_MPP_INFO db88f78XX0InfoBoardMppConfigValue[] = {
 		DB_88F78XX0_MPP56_63,
 		DB_88F78XX0_MPP64_67,
 	} },
-	{ { /* MV_BOARD_OTHER */
+	{ {  
 		DB_88F78XX0_MPP0_7,
 		DB_88F78XX0_MPP8_15,
 		DB_88F78XX0_MPP16_23,
@@ -209,7 +144,6 @@ MV_BOARD_INFO db88f78XX0Info = {
 	.pLedGppPin			= db88f6781InfoBoardDebugLedIf,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
 	.gppOutEnValLow			= DB_88F78XX0_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= DB_88F78XX0_GPP_OUT_ENA_MID,
 	.gppOutEnValHigh		= DB_88F78XX0_GPP_OUT_ENA_HIGH,
@@ -220,39 +154,26 @@ MV_BOARD_INFO db88f78XX0Info = {
 	.gppPolarityValMid		= DB_88F78XX0_GPP_POL_MID,
 	.gppPolarityValHigh		= DB_88F78XX0_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	** can be connected to board.
-	** When modules are scanned, then we select the index of the relevant
-	** slic's information array.
-	** For RD and Customers boards we only need to initialize a single
-	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo		= {2, 6, 1},
 	.pBoardTdmInt2CsInfo		= {db88f78XX0Tdm880,
 					   db88f78XX0Tdm792,
 					   db88f78XX0Tdm3215},
 	.boardTdmInfoIndex		= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= DB_88F78XX0_BOARD_NAND_READ_PARAMS,
 	.nandFlashWriteParams		= DB_88F78XX0_BOARD_NAND_WRITE_PARAMS,
 	.nandFlashControl		= DB_88F78XX0_BOARD_NAND_CONTROL,
-	/* NOR init params */
+	 
 	.norFlashReadParams		= DB_88F78XX0_BOARD_NOR_READ_PARAMS,
 	.norFlashWriteParams		= DB_88F78XX0_BOARD_NOR_WRITE_PARAMS
 };
 
-/***************************/
-/* ARMADA-XP DB REV2 BOARD */
-/***************************/
 #define DB_88F78XX0_REV2_BOARD_NAND_READ_PARAMS	0x000C0282
 #define DB_88F78XX0_REV2_BOARD_NAND_WRITE_PARAMS	0x00010305
-/*NAND care support for small page chips*/
+ 
 #define DB_88F78XX0_REV2_BOARD_NAND_CONTROL		0x01c00543
 
 #define DB_88F78XX0_REV2_BOARD_NOR_READ_PARAMS	0x403E07CF
@@ -263,7 +184,7 @@ MV_U8 mvDbDisableModuleDetection_rev2 = 0;
 MV_U8	db88f6781InfoBoardDebugLedIf_rev2[] = {26, 27, 48};
 
 MV_BOARD_TWSI_INFO	db88f78XX0rev2InfoBoardTwsiDev[] = {
-	/* {{MV_BOARD_DEV_CLASS	devClass, MV_U8	twsiDevAddr, MV_U8 twsiDevAddrType}} */
+	 
 	{BOARD_DEV_TWSI_SATR, 0x4C, ADDR7_BIT},
 	{BOARD_DEV_TWSI_SATR, 0x4D, ADDR7_BIT},
 	{BOARD_DEV_TWSI_SATR, 0x4E, ADDR7_BIT},
@@ -271,11 +192,11 @@ MV_BOARD_TWSI_INFO	db88f78XX0rev2InfoBoardTwsiDev[] = {
 };
 
 MV_BOARD_MAC_INFO db88f78XX0rev2InfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x0,0x0 	  , 0x0 },
 	{BOARD_MAC_SPEED_AUTO, 0x1,0x0	  , 0x1 },
-	{BOARD_MAC_SPEED_AUTO, 0x19,0x800 , 0x18},  /* Port 1 */
-	{BOARD_MAC_SPEED_AUTO, 0x1B,0x1800, 0x18}  /* Port 3 */
+	{BOARD_MAC_SPEED_AUTO, 0x19,0x800 , 0x18},   
+	{BOARD_MAC_SPEED_AUTO, 0x1B,0x1800, 0x18}   
 };
 
 MV_BOARD_MODULE_TYPE_INFO db88f78XX0rev2InfoBoardModTypeInfo[] = {
@@ -286,18 +207,18 @@ MV_BOARD_MODULE_TYPE_INFO db88f78XX0rev2InfoBoardModTypeInfo[] = {
 };
 
 MV_BOARD_GPP_INFO db88f78XX0rev2InfoBoardGppInfo[] = {
-	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
-	{BOARD_GPP_USB_VBUS,    24} /* from MPP map */
-	/*{BOARD_GPP_RESET,       47},*/
+	 
+	{BOARD_GPP_USB_VBUS,    24}  
+	 
 };
 
 MV_DEV_CS_INFO db88f78XX0rev2InfoBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth, busWidth }*/
+	 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}, /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8},  
 #endif
 #if defined(MV_INCLUDE_NOR)
-	{DEV_BOOCS, N_A, BOARD_DEV_NOR_FLASH, 16, 16} /* NOR DEV */
+	{DEV_BOOCS, N_A, BOARD_DEV_NOR_FLASH, 16, 16}  
 #endif
 };
 
@@ -313,7 +234,7 @@ MV_BOARD_MPP_INFO db88f78XX0rev2InfoBoardMppConfigValue[] = {
 	DB_88F78XX0_REV2_MPP56_63,
 	DB_88F78XX0_REV2_MPP64_67,
 	} },
-	{ { /* MV_BOARD_TDM_32CH */
+	{ {  
 		DB_88F78XX0_REV2_MPP0_7,
 		DB_88F78XX0_REV2_MPP8_15,
 		DB_88F78XX0_REV2_MPP16_23,
@@ -324,7 +245,7 @@ MV_BOARD_MPP_INFO db88f78XX0rev2InfoBoardMppConfigValue[] = {
 		DB_88F78XX0_REV2_MPP56_63,
 		DB_88F78XX0_REV2_MPP64_67,
 	} },
-	{ { /* MV_BOARD_LCD_DVI */
+	{ {  
 		(DB_88F78XX0_REV2_MPP0_7   & 0x00000000) | 0x44444444,
 		(DB_88F78XX0_REV2_MPP8_15  & 0x00000000) | 0x44444444,
 		(DB_88F78XX0_REV2_MPP16_23 & 0x00000000) | 0x44444444,
@@ -335,7 +256,7 @@ MV_BOARD_MPP_INFO db88f78XX0rev2InfoBoardMppConfigValue[] = {
 		DB_88F78XX0_REV2_MPP56_63,
 		DB_88F78XX0_REV2_MPP64_67,
 	} },
-	{ { /* MV_BOARD_MII_GMII */
+	{ {  
 		(DB_88F78XX0_REV2_MPP0_7 & 0x00000000) | 0x11111111,
 		(DB_88F78XX0_REV2_MPP8_15 & 0x00000000) | 0x11111111,
 		(DB_88F78XX0_REV2_MPP16_23 & 0x000000FF) | 0x11111100,
@@ -346,7 +267,7 @@ MV_BOARD_MPP_INFO db88f78XX0rev2InfoBoardMppConfigValue[] = {
 		DB_88F78XX0_REV2_MPP56_63,
 		DB_88F78XX0_REV2_MPP64_67,
 	} },
-	{ { /* MV_BOARD_OTHER */
+	{ {  
 		DB_88F78XX0_REV2_MPP0_7,
 		DB_88F78XX0_REV2_MPP8_15,
 		DB_88F78XX0_REV2_MPP16_23,
@@ -384,7 +305,6 @@ MV_BOARD_INFO db88f78XX0rev2Info = {
 	.pLedGppPin			= db88f6781InfoBoardDebugLedIf,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
 	.gppOutEnValLow			= DB_88F78XX0_REV2_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= DB_88F78XX0_REV2_GPP_OUT_ENA_MID,
 	.gppOutEnValHigh		= DB_88F78XX0_REV2_GPP_OUT_ENA_HIGH,
@@ -395,47 +315,33 @@ MV_BOARD_INFO db88f78XX0rev2Info = {
 	.gppPolarityValMid		= DB_88F78XX0_REV2_GPP_POL_MID,
 	.gppPolarityValHigh		= DB_88F78XX0_REV2_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	** can be connected to board.
-	** When modules are scanned, then we select the index of the relevant
-	** slic's information array.
-	** For RD and Customers boards we only need to initialize a single
-	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo		= {2, 6, 1},
 	.pBoardTdmInt2CsInfo		= {db88f78XX0rev2Tdm880,
 					   db88f78XX0rev2Tdm792,
 					   db88f78XX0rev2Tdm3215},
 	.boardTdmInfoIndex		= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= DB_88F78XX0_REV2_BOARD_NAND_READ_PARAMS,
 	.nandFlashWriteParams		= DB_88F78XX0_REV2_BOARD_NAND_WRITE_PARAMS,
 	.nandFlashControl		= DB_88F78XX0_REV2_BOARD_NAND_CONTROL,
-	/* NOR init params */
+	 
 	.norFlashReadParams		= DB_88F78XX0_REV2_BOARD_NOR_READ_PARAMS,
 	.norFlashWriteParams		= DB_88F78XX0_REV2_BOARD_NOR_WRITE_PARAMS
 };
 
-/***************************/
-/* ARMADA-XP RD NAS  BOARD */
-/***************************/
 #define RD_78460_NAS_BOARD_NAND_READ_PARAMS	0x000C0282
 #define RD_78460_NAS_BOARD_NAND_WRITE_PARAMS	0x00010305
-/*NAND care support for small page chips*/
+ 
 #define RD_78460_NAS_BOARD_NAND_CONTROL		0x01c00543
 
 #define RD_78460_NAS_BOARD_NOR_READ_PARAMS	0x403E07CF
 #define RD_78460_NAS_BOARD_NOR_WRITE_PARAMS	0x000F0F0F
 
 MV_BOARD_MAC_INFO rd78460nasInfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-        /* speed will toggle to force link 1000 when SW module detected */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x10,0x0, 0x10},
 	{BOARD_MAC_SPEED_AUTO, 0x11,0x0, 0x10},
 	{BOARD_MAC_SPEED_AUTO, 0x12,0x0, 0x10},
@@ -450,14 +356,14 @@ MV_BOARD_MODULE_TYPE_INFO rd78460nasInfoBoardModTypeInfo[] = {
 };
 
 MV_BOARD_GPP_INFO rd78460nasInfoBoardGppInfo[] = {
-	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
+	 
 	{BOARD_GPP_RESET, 21}
 };
 
 MV_DEV_CS_INFO rd78460nasInfoBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth, busWidth }*/
+	 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8} /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}  
 #endif
 };
 
@@ -496,7 +402,6 @@ MV_BOARD_INFO rd78460nasInfo = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
 	.gppOutEnValLow			= RD_78460_NAS_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= RD_78460_NAS_GPP_OUT_ENA_MID,
 	.gppOutEnValHigh		= RD_78460_NAS_GPP_OUT_ENA_HIGH,
@@ -507,41 +412,28 @@ MV_BOARD_INFO rd78460nasInfo = {
 	.gppPolarityValMid		= RD_78460_NAS_GPP_POL_MID,
 	.gppPolarityValHigh		= RD_78460_NAS_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	** can be connected to board.
-	** When modules are scanned, then we select the index of the relevant
-	** slic's information array.
-	** For RD and Customers boards we only need to initialize a single
-	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo			= {},
 	.pBoardTdmInt2CsInfo			= {},
 	.boardTdmInfoIndex			= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= RD_78460_NAS_BOARD_NAND_READ_PARAMS,
 	.nandFlashWriteParams		= RD_78460_NAS_BOARD_NAND_WRITE_PARAMS,
 	.nandFlashControl		= RD_78460_NAS_BOARD_NAND_CONTROL,
-	/* NOR init params */
+	 
 	.norFlashReadParams		= RD_78460_NAS_BOARD_NOR_READ_PARAMS,
 	.norFlashWriteParams		= RD_78460_NAS_BOARD_NOR_WRITE_PARAMS
 };
 
-/*****************************/
-/* ARMADA-XP RD SERVER BOARD */
-/*****************************/
 #define RD_78460_BOARD_NAND_READ_PARAMS		0x000C0282
 #define RD_78460_BOARD_NAND_WRITE_PARAMS	0x00010305
-/*NAND care support for small page chips*/
+ 
 #define RD_78460_BOARD_NAND_CONTROL			0x01c00543
 
 MV_BOARD_MAC_INFO rd78460InfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_1000M, 0x1, 0x0, 0x1},
 	{BOARD_MAC_SPEED_1000M, 0x2, 0x0, 0x2},
 	{BOARD_MAC_SPEED_AUTO,  0x0, 0x0, 0x0},
@@ -556,9 +448,9 @@ MV_BOARD_MODULE_TYPE_INFO rd78460InfoBoardModTypeInfo[] = {
 };
 
 MV_DEV_CS_INFO rd78460InfoBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth}*/
+	 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8} /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8}  
 #endif
 };
 
@@ -597,7 +489,6 @@ MV_BOARD_INFO rd78460Info = {
  .pLedGppPin				= NULL,
  .ledsPolarity				= 0,
 
- /* GPP values */
  .gppOutEnValLow			= RD_78460_GPP_OUT_ENA_LOW,
  .gppOutEnValMid			= RD_78460_GPP_OUT_ENA_MID,
  .gppOutEnValHigh			= RD_78460_GPP_OUT_ENA_HIGH,
@@ -608,38 +499,25 @@ MV_BOARD_INFO rd78460Info = {
  .gppPolarityValMid			= RD_78460_GPP_POL_MID,
  .gppPolarityValHigh			= RD_78460_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
- /* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
- ** can be connected to board.
- ** When modules are scanned, then we select the index of the relevant
- ** slic's information array.
- ** For RD and Customers boards we only need to initialize a single
- ** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
  .numBoardTdmInfo			= {},
  .pBoardTdmInt2CsInfo			= {},
  .boardTdmInfoIndex			= -1,
 
- /* NAND init params */
  .nandFlashReadParams			= RD_78460_BOARD_NAND_READ_PARAMS,
  .nandFlashWriteParams			= RD_78460_BOARD_NAND_WRITE_PARAMS,
  .nandFlashControl			= RD_78460_BOARD_NAND_CONTROL
 };
 
-/*****************************/
-/* ARMADA-XP RD SERVER REV2 BOARD */
-/*****************************/
 #define RD_78460_SERVER_REV2_BOARD_NAND_READ_PARAMS		0x000C0282
 #define RD_78460_SERVER_REV2_BOARD_NAND_WRITE_PARAMS		0x00010305
-/*NAND care support for small page chips*/
+ 
 #define RD_78460_SERVER_REV2_BOARD_NAND_CONTROL			0x01c00543
 
 MV_BOARD_MAC_INFO rd78460ServerRev2InfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_1000M, 0x1,0x0, 0x1},
 	{BOARD_MAC_SPEED_1000M, 0x2,0x0, 0x1},
 	{BOARD_MAC_SPEED_AUTO,  0x0,0x0, 0x1},
@@ -654,9 +532,9 @@ MV_BOARD_MODULE_TYPE_INFO rd78460ServerRev2InfoBoardModTypeInfo[] = {
 };
 
 MV_DEV_CS_INFO rd78460ServerRev2InfoBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth}*/
+	 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8} /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8}  
 #endif
 };
 
@@ -695,7 +573,6 @@ MV_BOARD_INFO rd78460ServerRev2Info = {
  .pLedGppPin				= NULL,
  .ledsPolarity				= 0,
 
- /* GPP values */
  .gppOutEnValLow			= RD_78460_SERVER_REV2_GPP_OUT_ENA_LOW,
  .gppOutEnValMid			= RD_78460_SERVER_REV2_GPP_OUT_ENA_MID,
  .gppOutEnValHigh			= RD_78460_SERVER_REV2_GPP_OUT_ENA_HIGH,
@@ -706,39 +583,27 @@ MV_BOARD_INFO rd78460ServerRev2Info = {
  .gppPolarityValMid			= RD_78460_SERVER_REV2_GPP_POL_MID,
  .gppPolarityValHigh			= RD_78460_SERVER_REV2_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
- /* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
- ** can be connected to board.
- ** When modules are scanned, then we select the index of the relevant
- ** slic's information array.
- ** For RD and Customers boards we only need to initialize a single
- ** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
  .numBoardTdmInfo			= {},
  .pBoardTdmInt2CsInfo			= {},
  .boardTdmInfoIndex			= -1,
 
- /* NAND init params */
  .nandFlashReadParams			= RD_78460_SERVER_REV2_BOARD_NAND_READ_PARAMS,
  .nandFlashWriteParams			= RD_78460_SERVER_REV2_BOARD_NAND_WRITE_PARAMS,
  .nandFlashControl			= RD_78460_SERVER_REV2_BOARD_NAND_CONTROL
 };
-/***************************/
-/* ARMADA-XP DB PCAC BOARD */
-/***************************/
+ 
 #define DB_78X60_PCAC_BOARD_NAND_READ_PARAMS		0x000C0282
 #define DB_78X60_PCAC_BOARD_NAND_WRITE_PARAMS		0x00010305
-/*NAND care support for small page chips*/
+ 
 #define DB_78X60_PCAC_BOARD_NAND_CONTROL			0x01c00543
 
 MV_U8	db78X60pcacInfoBoardDebugLedIf[] = {53, 54, 55, 56};
 
 MV_BOARD_TWSI_INFO	db78X60pcacInfoBoardTwsiDev[] = {
-	/* {{MV_BOARD_DEV_CLASS	devClass, MV_U8	twsiDevAddr, MV_U8 twsiDevAddrType}} */
+	 
 	{BOARD_DEV_TWSI_SATR, 0x4C, ADDR7_BIT},
 	{BOARD_DEV_TWSI_SATR, 0x4D, ADDR7_BIT},
 	{BOARD_DEV_TWSI_SATR, 0x4E, ADDR7_BIT},
@@ -746,11 +611,11 @@ MV_BOARD_TWSI_INFO	db78X60pcacInfoBoardTwsiDev[] = {
 };
 
 MV_BOARD_MAC_INFO db78X60pcacInfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
 	{BOARD_MAC_SPEED_AUTO, 0x3,0x0,0x0},
 	{BOARD_MAC_SPEED_AUTO, 0x2,0x0,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x0,0x0,0x0}		/* Dummy */
+	{BOARD_MAC_SPEED_AUTO, 0x0,0x0,0x0}		 
 };
 
 MV_BOARD_MODULE_TYPE_INFO db78X60pcacInfoBoardModTypeInfo[] = {
@@ -761,14 +626,14 @@ MV_BOARD_MODULE_TYPE_INFO db78X60pcacInfoBoardModTypeInfo[] = {
 };
 
 MV_BOARD_GPP_INFO db78X60pcacInfoBoardGppInfo[] = {
-	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
-	{BOARD_GPP_USB_VBUS,    23} /* from MPP map */
+	 
+	{BOARD_GPP_USB_VBUS,    23}  
 };
 
 MV_DEV_CS_INFO db78X60pcacInfoBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth}*/
+	 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8} /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8}  
 #endif
 };
 
@@ -811,7 +676,6 @@ MV_BOARD_INFO db78X60pcacInfo = {
 	.pLedGppPin			= db78X60pcacInfoBoardDebugLedIf,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
 	.gppOutEnValLow			= DB_78X60_PCAC_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= DB_78X60_PCAC_GPP_OUT_ENA_MID,
 	.gppOutEnValHigh		= DB_78X60_PCAC_GPP_OUT_ENA_HIGH,
@@ -822,46 +686,33 @@ MV_BOARD_INFO db78X60pcacInfo = {
 	.gppPolarityValMid		= DB_78X60_PCAC_GPP_POL_MID,
 	.gppPolarityValHigh		= DB_78X60_PCAC_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	 ** can be connected to board.
-	 ** When modules are scanned, then we select the index of the relevant
-	 ** slic's information array.
-	 ** For RD and Customers boards we only need to initialize a single
-	 ** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo		= {2, 6, 1},
 	.pBoardTdmInt2CsInfo		= {db78X60pcacTdm880,
 					   db78X60pcacTdm792,
 					   db78X60pcacTdm3215},
 	.boardTdmInfoIndex		= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= DB_78X60_PCAC_BOARD_NAND_READ_PARAMS,
 	.nandFlashWriteParams		= DB_78X60_PCAC_BOARD_NAND_WRITE_PARAMS,
 	.nandFlashControl		= DB_78X60_PCAC_BOARD_NAND_CONTROL
 };
 
-/********************************/
-/* ARMADA-XP DB PCAC REV2 BOARD */
-/********************************/
 #define DB_78X60_PCAC_REV2_BOARD_NAND_READ_PARAMS		0x000C0282
 #define DB_78X60_PCAC_REV2_BOARD_NAND_WRITE_PARAMS		0x00010305
-/*NAND care support for small page chips*/
+ 
 #define DB_78X60_PCAC_REV2_BOARD_NAND_CONTROL			0x01c00543
 
 MV_U8	db78X60pcacrev2InfoBoardDebugLedIf[] = {53, 54, 55, 56};
 
 MV_BOARD_MAC_INFO db78X60pcacrev2InfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
 	{BOARD_MAC_SPEED_AUTO, 0x3,0x0,0x0},
 	{BOARD_MAC_SPEED_AUTO, 0x2,0x0,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x0,0x0,0x0}		/* Dummy */
+	{BOARD_MAC_SPEED_AUTO, 0x0,0x0,0x0}		 
 };
 
 MV_BOARD_MODULE_TYPE_INFO db78X60pcacrev2InfoBoardModTypeInfo[] = {
@@ -872,14 +723,14 @@ MV_BOARD_MODULE_TYPE_INFO db78X60pcacrev2InfoBoardModTypeInfo[] = {
 };
 
 MV_BOARD_GPP_INFO db78X60pcacrev2InfoBoardGppInfo[] = {
-	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
-	{BOARD_GPP_USB_VBUS,    23} /* from MPP map */
+	 
+	{BOARD_GPP_USB_VBUS,    23}  
 };
 
 MV_DEV_CS_INFO db78X60pcacrev2InfoBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth}*/
+	 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8} /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8}  
 #endif
 };
 
@@ -918,7 +769,6 @@ MV_BOARD_INFO db78X60pcacrev2Info = {
 	.pLedGppPin			= db78X60pcacrev2InfoBoardDebugLedIf,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
 	.gppOutEnValLow			= DB_78X60_PCAC_REV2_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= DB_78X60_PCAC_REV2_GPP_OUT_ENA_MID,
 	.gppOutEnValHigh		= DB_78X60_PCAC_REV2_GPP_OUT_ENA_HIGH,
@@ -929,38 +779,25 @@ MV_BOARD_INFO db78X60pcacrev2Info = {
 	.gppPolarityValMid		= DB_78X60_PCAC_REV2_GPP_POL_MID,
 	.gppPolarityValHigh		= DB_78X60_PCAC_REV2_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	 ** can be connected to board.
-	 ** When modules are scanned, then we select the index of the relevant
-	 ** slic's information array.
-	 ** For RD and Customers boards we only need to initialize a single
-	 ** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo			= {},
 	.pBoardTdmInt2CsInfo			= {},
 	.boardTdmInfoIndex			= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= DB_78X60_PCAC_REV2_BOARD_NAND_READ_PARAMS,
 	.nandFlashWriteParams		= DB_78X60_PCAC_REV2_BOARD_NAND_WRITE_PARAMS,
 	.nandFlashControl		= DB_78X60_PCAC_REV2_BOARD_NAND_CONTROL
 };
 
-/************************/
-/* ARMADA-XP FPGA BOARD */
-/************************/
 #define FPGA_88F78XX0_BOARD_NAND_READ_PARAMS	0x000C0282
 #define FPGA_88F78XX0_BOARD_NAND_WRITE_PARAMS	0x00010305
-/*NAND care support for small page chips*/
+ 
 #define FPGA_88F78XX0_BOARD_NAND_CONTROL	0x01c00543
 
 MV_BOARD_TWSI_INFO	fpga88f78XX0InfoBoardTwsiDev[] = {
-	/* {{MV_BOARD_DEV_CLASS	devClass, MV_U8	twsiDevAddr, MV_U8 twsiDevAddrType}} */
+	 
 	{BOARD_DEV_TWSI_SATR, 0x4C, ADDR7_BIT},
 	{BOARD_DEV_TWSI_SATR, 0x4D, ADDR7_BIT},
 	{BOARD_DEV_TWSI_SATR, 0x4E, ADDR7_BIT},
@@ -968,7 +805,7 @@ MV_BOARD_TWSI_INFO	fpga88f78XX0InfoBoardTwsiDev[] = {
 };
 
 MV_BOARD_MAC_INFO fpga88f78XX0InfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
 	{BOARD_MAC_SPEED_AUTO, 0x2,0x0,0x0},
 	{BOARD_MAC_SPEED_AUTO, 0x3,0x0,0x0},
@@ -983,14 +820,14 @@ MV_BOARD_MODULE_TYPE_INFO fpga88f78XX0InfoBoardModTypeInfo[] = {
 };
 
 MV_BOARD_GPP_INFO fpga88f78XX0InfoBoardGppInfo[] = {
-	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
-	{BOARD_GPP_USB_VBUS,    24} /* from MPP map */
+	 
+	{BOARD_GPP_USB_VBUS,    24}  
 };
 
 MV_DEV_CS_INFO fpga88f78XX0InfoBoardDeCsInfo[] = {
-		/*{deviceCS, params, devType, devWidth}*/
+		 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8} /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8}  
 #endif
 };
 
@@ -1033,7 +870,6 @@ MV_BOARD_INFO fpga88f78XX0Info = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
 	.gppOutEnValLow			= FPGA_88F78XX0_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= FPGA_88F78XX0_GPP_OUT_ENA_MID,
 	.gppOutEnValHigh		= FPGA_88F78XX0_GPP_OUT_ENA_HIGH,
@@ -1044,18 +880,9 @@ MV_BOARD_INFO fpga88f78XX0Info = {
 	.gppPolarityValMid		= FPGA_88F78XX0_GPP_POL_MID,
 	.gppPolarityValHigh		= FPGA_88F78XX0_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	** can be connected to board.
-	** When modules are scanned, then we select the index of the relevant
-	** slic's information array.
-	** For RD and Customers boards we only need to initialize a single
-	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo		= { 2, 6, 1 },
 	.pBoardTdmInt2CsInfo		= { fpga88f78XX0Tdm880,
 					    fpga88f78XX0Tdm792,
@@ -1063,28 +890,24 @@ MV_BOARD_INFO fpga88f78XX0Info = {
 					  },
 	.boardTdmInfoIndex		= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= FPGA_88F78XX0_BOARD_NAND_READ_PARAMS,
 	.nandFlashWriteParams		= FPGA_88F78XX0_BOARD_NAND_WRITE_PARAMS,
 	.nandFlashControl		= FPGA_88F78XX0_BOARD_NAND_CONTROL
 };
 
-/***************************/
-/* ARMADA-XP AMC BOARD     */
-/***************************/
 #define DB_78X60_AMC_BOARD_NAND_READ_PARAMS		0x000C0282
 #define DB_78X60_AMC_BOARD_NAND_WRITE_PARAMS		0x00010305
-/*NAND care support for small page chips*/
+ 
 #define DB_78X60_AMC_BOARD_NAND_CONTROL			0x01c00543
 
-MV_U8	db78X60amcInfoBoardDebugLedIf[] = {53, 54, 55, 56}; /* 7 segment MPPs*/
+MV_U8	db78X60amcInfoBoardDebugLedIf[] = {53, 54, 55, 56};  
 
 MV_BOARD_TWSI_INFO	db78X60amcInfoBoardTwsiDev[] = {
-	/* No TWSI devices on board*/
+	 
 };
 
 MV_BOARD_MAC_INFO db78X60amcInfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
 	{BOARD_MAC_SPEED_AUTO, 0xF,0x0,0x0},
 	{BOARD_MAC_SPEED_AUTO, 0xE,0x0,0x0},
@@ -1092,18 +915,18 @@ MV_BOARD_MAC_INFO db78X60amcInfoBoardMacInfo[] = {
 };
 
 MV_BOARD_MODULE_TYPE_INFO db78X60amcInfoBoardModTypeInfo[] = {
-	/* No Modules */
+	 
 };
 
 MV_BOARD_GPP_INFO db78X60amcInfoBoardGppInfo[] = {
-	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
-	{BOARD_GPP_USB_VBUS,    46} /* from MPP map */
+	 
+	{BOARD_GPP_USB_VBUS,    46}  
 };
 
 MV_DEV_CS_INFO db78X60amcInfoBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth}*/
+	 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}, /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8},  
 #endif
 };
 
@@ -1146,7 +969,6 @@ MV_BOARD_INFO db78X60amcInfo = {
 	.pLedGppPin			= db78X60amcInfoBoardDebugLedIf,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
 	.gppOutEnValLow			= DB_78X60_AMC_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= DB_78X60_AMC_GPP_OUT_ENA_MID,
 	.gppOutEnValHigh		= DB_78X60_AMC_GPP_OUT_ENA_HIGH,
@@ -1157,33 +979,18 @@ MV_BOARD_INFO db78X60amcInfo = {
 	.gppPolarityValMid		= DB_78X60_AMC_GPP_POL_MID,
 	.gppPolarityValHigh		= DB_78X60_AMC_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	 ** can be connected to board.
-	 ** When modules are scanned, then we select the index of the relevant
-	 ** slic's information array.
-	 ** For RD and Customers boards we only need to initialize a single
-	 ** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo		= {},
 	.pBoardTdmInt2CsInfo		= {},
 	.boardTdmInfoIndex		= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= DB_78X60_AMC_BOARD_NAND_READ_PARAMS,
 	.nandFlashWriteParams		= DB_78X60_AMC_BOARD_NAND_WRITE_PARAMS,
 	.nandFlashControl		= DB_78X60_AMC_BOARD_NAND_CONTROL
 };
 
-/*********************************************************************************/
-
-/***************************/
-/* ARMADA-XP RD GP  BOARD */
-/***************************/
 #define RD_78460_GP_BOARD_NAND_READ_PARAMS		0x000C0282
 #define RD_78460_GP_BOARD_NAND_WRITE_PARAMS		0x00010305
 
@@ -1193,15 +1000,14 @@ MV_BOARD_INFO db78X60amcInfo = {
 #define RD_78460_GP_BOARD_NOR_WRITE_PARAMS		0x000F0F0F
 
 MV_BOARD_TWSI_INFO   rd78460gpInfoBoardTwsiDev[] = {
-	/* {{MV_BOARD_DEV_CLASS	devClass, MV_U8	twsiDevAddr, MV_U8 twsiDevAddrType}} */
+	 
 	{BOARD_DEV_TWSI_SATR, 0x4C, ADDR7_BIT},
 	{BOARD_DEV_TWSI_SATR, 0x4D, ADDR7_BIT},
 	{BOARD_DEV_TWSI_SATR, 0x4E, ADDR7_BIT}
 };
 
 MV_BOARD_MAC_INFO rd78460gpInfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-        /* speed will toggle to force link 1000 when SW module detected */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x10,0x0000, 0x10},
 	{BOARD_MAC_SPEED_AUTO, 0x11,0x0800, 0x10},
 	{BOARD_MAC_SPEED_AUTO, 0x12,0x1000, 0x10},
@@ -1216,17 +1022,17 @@ MV_BOARD_MODULE_TYPE_INFO rd78460gpInfoBoardModTypeInfo[] = {
 };
 
 MV_BOARD_GPP_INFO rd78460gpInfoBoardGppInfo[] = {
-	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
+	 
 	{BOARD_GPP_RESET, 21}
 };
 
 MV_DEV_CS_INFO rd78460gpInfoBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth, busWidth }*/
+	 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}, /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8},  
 #endif
 #if defined(MV_INCLUDE_NOR)
-	{DEV_BOOCS, N_A, BOARD_DEV_NOR_FLASH, 16, 16} /* NOR DEV */
+	{DEV_BOOCS, N_A, BOARD_DEV_NOR_FLASH, 16, 16}  
 #endif
 };
 
@@ -1265,7 +1071,6 @@ MV_BOARD_INFO rd78460gpInfo = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
 	.gppOutEnValLow			= RD_78460_GP_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= RD_78460_GP_GPP_OUT_ENA_MID,
 	.gppOutEnValHigh		= RD_78460_GP_GPP_OUT_ENA_HIGH,
@@ -1276,44 +1081,31 @@ MV_BOARD_INFO rd78460gpInfo = {
 	.gppPolarityValMid		= RD_78460_GP_GPP_POL_MID,
 	.gppPolarityValHigh		= RD_78460_GP_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	** can be connected to board.
-	** When modules are scanned, then we select the index of the relevant
-	** slic's information array.
-	** For RD and Customers boards we only need to initialize a single
-	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo			= {},
 	.pBoardTdmInt2CsInfo			= {},
 	.boardTdmInfoIndex			= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= RD_78460_GP_BOARD_NAND_READ_PARAMS,
 	.nandFlashWriteParams		= RD_78460_GP_BOARD_NAND_WRITE_PARAMS,
 	.nandFlashControl		= RD_78460_GP_BOARD_NAND_CONTROL,
-	/* NOR init params */
+	 
 	.norFlashReadParams		= RD_78460_GP_BOARD_NOR_READ_PARAMS,
 	.norFlashWriteParams		= RD_78460_GP_BOARD_NOR_WRITE_PARAMS
 };
 
-/***************************/
-/* ARMADA-XP CUSTOMER BOARD */
-/***************************/
 #define RD_78460_CUSTOMER_BOARD_NAND_READ_PARAMS	0x000C0282
 #define RD_78460_CUSTOMER_BOARD_NAND_WRITE_PARAMS	0x00010305
-/*NAND care support for small page chips*/
+ 
 #define RD_78460_CUSTOMER_BOARD_NAND_CONTROL		0x01c00543
 
 #define RD_78460_CUSTOMER_BOARD_NOR_READ_PARAMS	0x403E07CF
 #define RD_78460_CUSTOMER_BOARD_NOR_WRITE_PARAMS	0x000F0F0F
 
 MV_BOARD_MAC_INFO rd78460customerInfoBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x10,0x0000, 0x10},
 	{BOARD_MAC_SPEED_AUTO, 0x11,0x0800, 0x10},
 	{BOARD_MAC_SPEED_AUTO, 0x12,0x1000, 0x10},
@@ -1326,17 +1118,16 @@ MV_BOARD_MODULE_TYPE_INFO rd78460customerInfoBoardModTypeInfo[] = {
 		.boardOtherMod		= MV_BOARD_NONE
 	}
 };
-/*********************************************************************************/
  
 MV_BOARD_GPP_INFO rd78460customerInfoBoardGppInfo[] = {
-	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
+	 
 	{BOARD_GPP_RESET, 21}
 };
 
 MV_DEV_CS_INFO rd78460customerInfoBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth, busWidth }*/
+	 
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8} /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}  
 #endif
 };
 
@@ -1375,7 +1166,6 @@ MV_BOARD_INFO rd78460customerInfo = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
 	.gppOutEnValLow			= RD_78460_CUSTOMER_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= RD_78460_CUSTOMER_GPP_OUT_ENA_MID,
 	.gppOutEnValHigh		= RD_78460_CUSTOMER_GPP_OUT_ENA_HIGH,
@@ -1386,45 +1176,31 @@ MV_BOARD_INFO rd78460customerInfo = {
 	.gppPolarityValMid		= RD_78460_CUSTOMER_GPP_POL_MID,
 	.gppPolarityValHigh		= RD_78460_CUSTOMER_GPP_POL_HIGH,
 
-	/* External Switch Configuration */
 	.pSwitchInfo = NULL,
 	.switchInfoNum = 0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	** can be connected to board.
-	** When modules are scanned, then we select the index of the relevant
-	** slic's information array.
-	** For RD and Customers boards we only need to initialize a single
-	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo			= {},
 	.pBoardTdmInt2CsInfo			= {},
 	.boardTdmInfoIndex			= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= RD_78460_CUSTOMER_BOARD_NAND_READ_PARAMS,
 	.nandFlashWriteParams		= RD_78460_CUSTOMER_BOARD_NAND_WRITE_PARAMS,
 	.nandFlashControl		= RD_78460_CUSTOMER_BOARD_NAND_CONTROL,
-	/* NOR init params */
+	 
 	.norFlashReadParams		= RD_78460_CUSTOMER_BOARD_NOR_READ_PARAMS,
 	.norFlashWriteParams		= RD_78460_CUSTOMER_BOARD_NOR_WRITE_PARAMS
 };
-/*********************************************************************************/
+ 
 
 #ifdef CONFIG_SYNO_ARMADA_ARCH
-/*************************************************************************************
- *
- * Synology customized board
- *
-**/
 
-/***************************/
-/* ARMADA-XP B0 4Bay       */
-/***************************/
+
+
+
+
  
 MV_BOARD_MAC_INFO Syno78230AxpBoardMacInfo[] = {
-	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
 	{BOARD_MAC_SPEED_AUTO, 0x0,0x0,0x0},
 };
@@ -1437,14 +1213,14 @@ MV_BOARD_MODULE_TYPE_INFO Syno78230AxpBoardModTypeInfo[] = {
 };
 
 MV_BOARD_GPP_INFO Syno78230AxpBoardGppInfo[] = {
-	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
-	{BOARD_GPP_USB_VBUS,    24} /* from MPP map */
-	/*{BOARD_GPP_RESET,       47},*/
+	 
+	{BOARD_GPP_USB_VBUS,    24}  
+	 
 };
 
 MV_DEV_CS_INFO Syno78230AxpBoardDeCsInfo[] = {
-	/*{deviceCS, params, devType, devWidth, busWidth }*/
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}, /* SPI DEV */
+	 
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8},  
 };
 
 #define SYNOAXP_4BAY_MPP0_7			0x11111111
@@ -1492,7 +1268,6 @@ MV_BOARD_INFO Syno78230AxpInfo = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
 	.gppOutEnValLow			= (~(BIT25 | BIT30)),
 	.gppOutEnValMid			= (~(BIT10 | BIT12 | BIT13 | BIT14 | BIT15)),
 	.gppOutEnValHigh		= (~(0x0)),
@@ -1503,40 +1278,27 @@ MV_BOARD_INFO Syno78230AxpInfo = {
 	.gppPolarityValMid		= 0x0,
 	.gppPolarityValHigh		= 0x0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	** can be connected to board.
-	** When modules are scanned, then we select the index of the relevant
-	** slic's information array.
-	** For RD and Customers boards we only need to initialize a single
-	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo		= {},
 	.pBoardTdmInt2CsInfo		= {},
 	.boardTdmInfoIndex		= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= 0,
 	.nandFlashWriteParams		= 0,
 	.nandFlashControl		= 0,
-	/* NOR init params */
+	 
 	.norFlashReadParams		= 0,
 	.norFlashWriteParams		= 0
 };
 
-/***************************/
-/* ARMADA-XP B0 2Bay       */
-/***************************/
-	 
 MV_BOARD_MAC_INFO Syno78230AxpBoardMacInfo_2bay[] = {
-	/* {{MV_BOARD_MAC_SPEED boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	 
 	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
 };
 
 #define SYNOAXP_2BAY_MPP0_7			0x00000000
 #define SYNOAXP_2BAY_MPP8_15		0x00000000
 #define SYNOAXP_2BAY_MPP16_23		0x00000000
-#define SYNOAXP_2BAY_MPP24_31		0x00000000  // disable MPP[24,25] sata present, enable in synobios
+#define SYNOAXP_2BAY_MPP24_31		0x00000000   
 #define SYNOAXP_2BAY_MPP32_39		0x11110000
 #define SYNOAXP_2BAY_MPP40_47		0x00004000
 #define SYNOAXP_2BAY_MPP48_55		0x00000000
@@ -1578,12 +1340,10 @@ MV_BOARD_INFO Syno78230AxpInfo_2bay = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* PMU Power */
 	.pmuPwrUpPolarity		= 0,
 	.pmuPwrUpDelay			= 80000,
 
-	/* GPP values */
-	.gppOutEnValLow			= (~(BIT24 | BIT25)),  /* low active */
+	.gppOutEnValLow			= (~(BIT24 | BIT25)),   
 	.gppOutEnValMid			= (~(BIT12 | BIT13 | BIT14)),
 	.gppOutEnValHigh		= (~(0x0)),
 	.gppOutValLow			= 0x0,
@@ -1593,30 +1353,17 @@ MV_BOARD_INFO Syno78230AxpInfo_2bay = {
 	.gppPolarityValMid		= 0x0,
 	.gppPolarityValHigh		= 0x0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	** can be connected to board.
-	** When modules are scanned, then we select the index of the relevant
-	** slic's information array.
-	** For RD and Customers boards we only need to initialize a single
-	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo		= {},
 	.pBoardTdmInt2CsInfo		= {},
 	.boardTdmInfoIndex		= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= 0,
 	.nandFlashWriteParams		= 0,
 	.nandFlashControl		= 0,
-	/* NOR init params */
+	 
 	.norFlashReadParams		= 0,
 	.norFlashWriteParams		= 0
 };
-
-/***************************/
-/* ARMADA-XP B0 4Bay rack  */
-/***************************/
 
 #define SYNOAXP_4_RACK_MPP0_7		0x11111111
 #define SYNOAXP_4_RACK_MPP8_15		0x22221111
@@ -1663,8 +1410,7 @@ MV_BOARD_INFO Syno78230AxpInfo_4bay_rack = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* GPP values */
-	.gppOutEnValLow			= (~(0x0)),  /* low active */
+	.gppOutEnValLow			= (~(0x0)),   
 	.gppOutEnValMid			= (~(BIT8 | BIT13 | BIT15)),
 	.gppOutEnValHigh		= (~(0x0)),
 	.gppOutValLow			= 0x0,
@@ -1674,23 +1420,14 @@ MV_BOARD_INFO Syno78230AxpInfo_4bay_rack = {
 	.gppPolarityValMid		= 0x0,
 	.gppPolarityValHigh		= 0x0,
 
-	/* TDM configuration */
-	/* We hold a different configuration array for each possible slic that
-	** can be connected to board.
-	** When modules are scanned, then we select the index of the relevant
-	** slic's information array.
-	** For RD and Customers boards we only need to initialize a single
-	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
-	*/
 	.numBoardTdmInfo		= {},
 	.pBoardTdmInt2CsInfo		= {},
 	.boardTdmInfoIndex		= -1,
 
-	/* NAND init params */
 	.nandFlashReadParams		= 0,
 	.nandFlashWriteParams		= 0,
 	.nandFlashControl		= 0,
-	/* NOR init params */
+	 
 	.norFlashReadParams		= 0,
 	.norFlashWriteParams		= 0
 };

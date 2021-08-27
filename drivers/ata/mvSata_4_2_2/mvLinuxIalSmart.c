@@ -1,42 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
  
-This software file (the "File") is owned and distributed by Marvell 
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File in accordance with the terms and conditions of the General 
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is 
-available along with the File in the license.txt file or by writing to the Free 
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or 
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt. 
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY 
-DISCLAIMED.  The GPL License provides additional details about this warranty 
-disclaimer.
-*******************************************************************************/
-/*******************************************************************************
-* file_name - mvLinuxIALSmart.c
-*
-* DESCRIPTION: C file for S.M.A.R.T. features - smartmontools app
-*
-* DEPENDENCIES:
-*   None.
-*
-*
-*******************************************************************************/
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/types.h>
@@ -106,7 +71,7 @@ void swap_buf_le16(u16 *buf, unsigned int buf_words)
 
      for (i = 0; i < buf_words; i++)
 	  buf[i] = le16_to_cpu(buf[i]);
-#endif /* __BIG_ENDIAN */
+#endif  
 }
 
 MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSataAdapter,
@@ -139,14 +104,14 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
         return MV_SCSI_COMMAND_STATUS_COMPLETED;
     }
 
-    if (pScb->dataBufferLength <= 6 || /*six byte opcode*/
+    if (pScb->dataBufferLength <= 6 ||  
         (buff[SMART_BUF_COMMAND_OFFSET] != WIN_IDENTIFY &&
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_IDLE &&
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_IDLE_IMMEDIATE &&
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_STANDBY_IMMEDIATE &&
 #ifdef MY_ABC_HERE
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_CHECK_POWER &&
-#endif /* MY_ABC_HERE */
+#endif  
          buff[SMART_BUF_COMMAND_OFFSET] != WIN_SMART))
     {
         mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG_ERROR, "invalid SMART command received");
@@ -192,7 +157,7 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
 		buff[SMART_BUF_FEATURES_OFFSET] = 0;
 		buff[SMART_BUF_SECTORCOUNT_OFFSET] = 0;
 	}
-#endif /* MY_ABC_HERE */
+#endif  
     else  if (buff[SMART_BUF_COMMAND_OFFSET] == MV_ATA_COMMAND_IDLE)
     {
          mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "SMART command: IDLE command received, sector count = %d.\n",
@@ -285,7 +250,7 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
         (MV_U16_PTR)&buff[6];
         qCommandInfo.commandParams.NoneUdmaCommand.count =
         (MV_U32)(ATA_SECTOR_SIZE/2);
-        /*in words*/
+         
     }
     qCommandInfo.commandParams.NoneUdmaCommand.features =
     (MV_U16)buff[SMART_BUF_FEATURES_OFFSET];
@@ -324,7 +289,6 @@ static void SmartFillReturnBuffer(IN MV_U8* buff,
                                   IN MV_STORAGE_DEVICE_REGISTERS *registerStruct)
 {
 
-    /*For PIO non-data return registers' values*/
 #ifdef MY_ABC_HERE
 	if ((buff[SMART_BUF_COMMAND_OFFSET] == MV_ATA_COMMAND_CHECK_POWER) ||
 		(buff[SMART_BUF_COMMAND_OFFSET] == WIN_SMART &&
@@ -454,8 +418,7 @@ SmartCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
                  pScb->ScsiCdb[1], pScb->ScsiCdb[2], pScb->ScsiCdb[3],
                  pScb->ScsiCdb[4], pScb->ScsiCdb[5], pScb->ScsiCdb[6],
                  pScb->ScsiCdb[7], pScb->ScsiCdb[8], pScb->ScsiCdb[9]);
-        /* here the  eDMA will be stopped, so we have to flush  */
-        /* the pending commands                                 */
+         
         handleNoneUdmaError(pScb, registerStruct);
         break;
     default:

@@ -1,44 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  pNFS Objects layout implementation over open-osd initiator library
- *
- *  Copyright (C) 2009 Panasas Inc. [year of first publication]
- *  All rights reserved.
- *
- *  Benny Halevy <bhalevy@panasas.com>
- *  Boaz Harrosh <bharrosh@panasas.com>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License version 2
- *  See the file COPYING included with this distribution for more details.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *
- *  1. Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *  3. Neither the name of the Panasas company nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
- *  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- *  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
  
 #include <linux/module.h>
 #include <scsi/osd_ore.h>
@@ -122,16 +84,14 @@ OBJIO_LSEG(struct pnfs_layout_segment *lseg)
 }
 
 struct objio_state {
-	/* Generic layer */
+	 
 	struct objlayout_io_res oir;
 
 	bool sync;
-	/*FIXME: Support for extra_bytes at ore_get_rw_state() */
+	 
 	struct ore_io_state *ios;
 };
 
-/* Send and wait for a get_device_info of devices in the layout,
-   then look them up with the osd_initiator library */
 static int objio_devices_lookup(struct pnfs_layout_hdr *pnfslay,
 	struct objio_segment *objio_seg, unsigned c, struct nfs4_deviceid *d_id,
 	gfp_t gfp_flags)
@@ -144,7 +104,7 @@ static int objio_devices_lookup(struct pnfs_layout_hdr *pnfslay,
 
 	ode = _dev_list_find(NFS_SERVER(pnfslay->plh_inode), d_id);
 	if (ode) {
-		objio_seg->oc.ods[c] = &ode->od; /* must use container_of */
+		objio_seg->oc.ods[c] = &ode->od;  
 		return 0;
 	}
 
@@ -183,7 +143,7 @@ static int objio_devices_lookup(struct pnfs_layout_hdr *pnfslay,
 
 	ode = _dev_list_add(NFS_SERVER(pnfslay->plh_inode), d_id, od,
 			    gfp_flags);
-	objio_seg->oc.ods[c] = &ode->od; /* must use container_of */
+	objio_seg->oc.ods[c] = &ode->od;  
 	dprintk("Adding new dev_id(%llx:%llx)\n",
 		_DEVID_LO(d_id), _DEVID_HI(d_id));
 out:
@@ -196,7 +156,7 @@ static void copy_single_comp(struct ore_components *oc, unsigned c,
 {
 	struct ore_comp *ocomp = &oc->comps[c];
 
-	WARN_ON(src_comp->oc_cap_key.cred_len > 0); /* libosd is NO_SEC only */
+	WARN_ON(src_comp->oc_cap_key.cred_len > 0);  
 	WARN_ON(src_comp->oc_cap.cred_len > sizeof(ocomp->cred));
 
 	ocomp->obj.partition = src_comp->oc_object_id.oid_partition_id;
@@ -273,7 +233,7 @@ int objio_alloc_lseg(struct pnfs_layout_segment **outp,
 			goto err;
 		++cur_comp;
 	}
-	/* pnfs_osd_xdr_decode_layout_comp returns false on error */
+	 
 	if (unlikely(err))
 		goto err;
 
@@ -375,7 +335,7 @@ enum pnfs_osd_errno osd_pri_2_pnfs_err(enum osd_err_priority oep)
 		return PNFS_OSD_ERR_NO_SPACE;
 	default:
 		WARN_ON(1);
-		/* fallthrough */
+		 
 	case OSD_ERR_PRI_EIO:
 		return PNFS_OSD_ERR_EIO;
 	}
@@ -388,9 +348,7 @@ static void __on_dev_error(struct ore_io_state *ios,
 	struct objio_state *objios = ios->private;
 	struct pnfs_osd_objid pooid;
 	struct objio_dev_ent *ode = container_of(od, typeof(*ode), od);
-	/* FIXME: what to do with more-then-one-group layouts. We need to
-	 * translate from ore_io_state index to oc->comps index
-	 */
+	 
 	unsigned comp = dev_index;
 
 	pooid.oid_device_id = ode->id_node.deviceid;
@@ -402,16 +360,11 @@ static void __on_dev_error(struct ore_io_state *ios,
 				dev_offset, dev_len, !ios->reading);
 }
 
-/*
- * read
- */
 static void _read_done(struct ore_io_state *ios, void *private)
 {
 	struct objio_state *objios = private;
 	ssize_t status;
 	int ret = ore_check_io(ios, &__on_dev_error);
-
-	/* FIXME: _io_free(ios) can we dealocate the libosd resources; */
 
 	if (likely(!ret))
 		status = ios->length;
@@ -442,20 +395,14 @@ int objio_read_pagelist(struct nfs_read_data *rdata)
 	return ret;
 }
 
-/*
- * write
- */
 static void _write_done(struct ore_io_state *ios, void *private)
 {
 	struct objio_state *objios = private;
 	ssize_t status;
 	int ret = ore_check_io(ios, &__on_dev_error);
 
-	/* FIXME: _io_free(ios) can we dealocate the libosd resources; */
-		 
 	if (likely(!ret)) {
-		/* FIXME: should be based on the OSD's persistence model
-		 * See OSD2r05 Section 4.13 Data persistence model */
+		 
 		objios->oir.committed = NFS_FILE_SYNC;
 		status = ios->length;
 	} else {

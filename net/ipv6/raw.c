@@ -1,25 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *	RAW sockets for IPv6
- *	Linux INET6 implementation
- *
- *	Authors:
- *	Pedro Roque		<roque@di.fc.ul.pt>
- *
- *	Adapted from linux/net/ipv4/raw.c
- *
- *	Fixes:
- *	Hideaki YOSHIFUJI	:	sin6_scope_id support
- *	YOSHIFUJI,H.@USAGI	:	raw checksum (RFC2292(bis) compliance)
- *	Kazunori MIYAZAWA @USAGI:	change process style to use ip6_append_data
- *
- *	This program is free software; you can redistribute it and/or
- *      modify it under the terms of the GNU General Public License
- *      as published by the Free Software Foundation; either version
- *      2 of the License, or (at your option) any later version.
- */
  
 #include <linux/errno.h>
 #include <linux/types.h>
@@ -106,10 +87,6 @@ found:
 	return sk;
 }
 
-/*
- *	0 - deliver
- *	1 - block
- */
 static int icmpv6_filter(const struct sock *sk, const struct sk_buff *skb)
 {
 	struct icmp6hdr *_hdr;
@@ -148,13 +125,6 @@ EXPORT_SYMBOL(rawv6_mh_filter_unregister);
 
 #endif
 
-/*
- *	demultiplex raw sockets.
- *	(should consider queueing the skb in the sock receive_queue
- *	without calling rawv6.c)
- *
- *	Caller owns SKB so we must make clones.
- */
 static int ipv6_raw_deliver(struct sk_buff *skb, int nexthdr)
 {
 	const struct in6_addr *saddr;
@@ -190,12 +160,7 @@ static int ipv6_raw_deliver(struct sk_buff *skb, int nexthdr)
 #if defined(CONFIG_IPV6_MIP6) || defined(CONFIG_IPV6_MIP6_MODULE)
 		case IPPROTO_MH:
 		{
-			/* XXX: To validate MH only once for each packet,
-			 * this is placed here. It should be after checking
-			 * xfrm policy, however it doesn't. The checking xfrm
-			 * policy is placed in rawv6_rcv() because it is
-			 * required for each socket.
-			 */
+			 
 			mh_filter_t *filter;
 
 			filter = rcu_dereference(mh_filter);
@@ -213,7 +178,6 @@ static int ipv6_raw_deliver(struct sk_buff *skb, int nexthdr)
 		if (filtered == 0) {
 			struct sk_buff *clone = skb_clone(skb, GFP_ATOMIC);
 
-			/* Not releasing hash table! */
 			if (clone) {
 				nf_reset(clone);
 				rawv6_rcv(sk, clone);
@@ -238,7 +202,6 @@ int raw6_local_deliver(struct sk_buff *skb, int nexthdr)
 	return raw_sk != NULL;
 }
 
-/* This cleans up af_inet6 a bit. -DaveM */
 static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 {
 	struct inet_sock *inet = inet_sk(sk);
@@ -252,7 +215,6 @@ static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 		return -EINVAL;
 	addr_type = ipv6_addr_type(&addr->sin6_addr);
 
-	/* Raw sockets are IPv6 only */
 	if (addr_type == IPV6_ADDR_MAPPED)
 		return -EADDRNOTAVAIL;
 
@@ -263,16 +225,14 @@ static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 		goto out;
 
 	rcu_read_lock();
-	/* Check if the address belongs to the host. */
+	 
 	if (addr_type != IPV6_ADDR_ANY) {
 		struct net_device *dev = NULL;
 
 		if (addr_type & IPV6_ADDR_LINKLOCAL) {
 			if (addr_len >= sizeof(struct sockaddr_in6) &&
 			    addr->sin6_scope_id) {
-				/* Override any existing binding, if another
-				 * one is supplied by user.
-				 */
+				 
 				sk->sk_bound_dev_if = addr->sin6_scope_id;
 			}
 
@@ -292,7 +252,7 @@ static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 				}
 			}
 #else
-			/* Binding to link-local address requires an interface */
+			 
 			if (!sk->sk_bound_dev_if)
 				goto out_unlock;
 #endif
@@ -304,9 +264,6 @@ static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 				goto out_unlock;
 		}
 
-		/* ipv4 addr of the socket is invalid.  Only the
-		 * unspecified and mapped address have a v4 equivalent.
-		 */
 		v4addr = LOOPBACK4_IPV6;
 		if (!(addr_type & IPV6_ADDR_MULTICAST))	{
 			err = -EADDRNOTAVAIL;
@@ -338,11 +295,6 @@ static void rawv6_err(struct sock *sk, struct sk_buff *skb,
 	int err;
 	int harderr;
 
-	/* Report error on raw socket, if:
-	   1. User requested recverr.
-	   2. Socket is connected (otherwise the error indication
-	      is useless without recverr and error is hard.
-	 */
 	if (!np->recverr && sk->sk_state != TCP_ESTABLISHED)
 		return;
 
@@ -376,7 +328,7 @@ void raw6_icmp_error(struct sk_buff *skb, int nexthdr,
 	read_lock(&raw_v6_hashinfo.lock);
 	sk = sk_head(&raw_v6_hashinfo.ht[hash]);
 	if (sk != NULL) {
-		/* Note: ipv6_hdr(skb) != skb->data */
+		 
 		const struct ipv6hdr *ip6h = (const struct ipv6hdr *)skb->data;
 		saddr = &ip6h->saddr;
 		daddr = &ip6h->daddr;
@@ -401,7 +353,6 @@ static inline int rawv6_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		return NET_RX_DROP;
 	}
 
-	/* Charge it to the socket. */
 	if (ip_queue_rcv_skb(sk, skb) < 0) {
 		kfree_skb(skb);
 		return NET_RX_DROP;
@@ -410,13 +361,6 @@ static inline int rawv6_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	return 0;
 }
 
-/*
- *	This is next to useless...
- *	if we demultiplex in network layer we don't need the extra call
- *	just to queue the skb...
- *	maybe we could have the network decide upon a hint if it
- *	should call raw_rcv for demultiplexing
- */
 int rawv6_rcv(struct sock *sk, struct sk_buff *skb)
 {
 	struct inet_sock *inet = inet_sk(sk);
@@ -456,11 +400,6 @@ int rawv6_rcv(struct sock *sk, struct sk_buff *skb)
 	rawv6_rcv_skb(sk, skb);
 	return 0;
 }
-
-/*
- *	This should be easy, if there is something there
- *	we return it, otherwise we block.
- */
 
 static int rawv6_recvmsg(struct kiocb *iocb, struct sock *sk,
 		  struct msghdr *msg, size_t len,
@@ -505,7 +444,6 @@ static int rawv6_recvmsg(struct kiocb *iocb, struct sock *sk,
 	if (err)
 		goto out_free;
 
-	/* Copy the address. */
 	if (sin6) {
 		sin6->sin6_family = AF_INET6;
 		sin6->sin6_port = 0;
@@ -534,9 +472,6 @@ out:
 csum_copy_err:
 	skb_kill_datagram(sk, skb, flags);
 
-	/* Error for blocking case is chosen to masquerade
-	   as some normal condition.
-	 */
 	err = (flags&MSG_DONTWAIT) ? -EAGAIN : -EHOSTUNREACH;
 	goto out;
 }
@@ -566,11 +501,8 @@ static int rawv6_push_pending_frames(struct sock *sk, struct flowi6 *fl6,
 		goto out;
 	}
 
-	/* should be check HW csum miyazawa */
 	if (skb_queue_len(&sk->sk_write_queue) == 1) {
-		/*
-		 * Only one fragment on the socket.
-		 */
+		 
 		tmp_csum = skb->csum;
 	} else {
 		struct sk_buff *csum_skb = NULL;
@@ -598,7 +530,6 @@ static int rawv6_push_pending_frames(struct sock *sk, struct flowi6 *fl6,
 	if (skb_copy_bits(skb, offset, &csum, 2))
 		BUG();
 
-	/* in case cksum was not initialized */
 	if (unlikely(csum))
 		tmp_csum = csum_sub(tmp_csum, csum_unfold(csum));
 
@@ -696,13 +627,13 @@ static int rawv6_probe_proto_opt(struct flowi6 *fl6, struct msghdr *msg)
 
 		switch (fl6->flowi6_proto) {
 		case IPPROTO_ICMPV6:
-			/* check if one-byte field is readable or not. */
+			 
 			if (iov->iov_base && iov->iov_len < 1)
 				break;
 
 			if (!type) {
 				type = iov->iov_base;
-				/* check if code field is readable or not. */
+				 
 				if (iov->iov_len > 1)
 					code = type + 1;
 			} else if (!code)
@@ -718,7 +649,7 @@ static int rawv6_probe_proto_opt(struct flowi6 *fl6, struct msghdr *msg)
 		case IPPROTO_MH:
 			if (iov->iov_base && iov->iov_len < 1)
 				break;
-			/* check if type field is readable or not. */
+			 
 			if (iov->iov_len > 2 - len) {
 				u8 __user *p = iov->iov_base;
 				if (get_user(fl6->fl6_mh_type, &p[2 - len]))
@@ -758,19 +689,12 @@ static int rawv6_sendmsg(struct kiocb *iocb, struct sock *sk,
 	u16 proto;
 	int err;
 
-	/* Rough check on arithmetic overflow,
-	   better check is made in ip6_append_data().
-	 */
 	if (len > INT_MAX)
 		return -EMSGSIZE;
 
-	/* Mirror BSD error message compatibility */
 	if (msg->msg_flags & MSG_OOB)
 		return -EOPNOTSUPP;
 
-	/*
-	 *	Get and verify the address.
-	 */
 	memset(&fl6, 0, sizeof(fl6));
 
 	fl6.flowi6_mark = sk->sk_mark;
@@ -782,7 +706,6 @@ static int rawv6_sendmsg(struct kiocb *iocb, struct sock *sk,
 		if (sin6->sin6_family && sin6->sin6_family != AF_INET6)
 			return -EAFNOSUPPORT;
 
-		/* port is the proto value [0..255] carried in nexthdr */
 		proto = ntohs(sin6->sin6_port);
 
 		if (!proto)
@@ -804,10 +727,6 @@ static int rawv6_sendmsg(struct kiocb *iocb, struct sock *sk,
 			}
 		}
 
-		/*
-		 * Otherwise it will be difficult to maintain
-		 * sk->sk_dst_cache.
-		 */
 		if (sk->sk_state == TCP_ESTABLISHED &&
 		    ipv6_addr_equal(daddr, &np->daddr))
 			daddr = &np->daddr;
@@ -861,7 +780,7 @@ static int rawv6_sendmsg(struct kiocb *iocb, struct sock *sk,
 	if (!ipv6_addr_any(daddr))
 		ipv6_addr_copy(&fl6.daddr, daddr);
 	else
-		fl6.daddr.s6_addr[15] = 0x1; /* :: means loopback (BSD'ism) */
+		fl6.daddr.s6_addr[15] = 0x1;  
 	if (ipv6_addr_any(&fl6.saddr) && !ipv6_addr_any(&np->saddr))
 		ipv6_addr_copy(&fl6.saddr, &np->saddr);
 
@@ -977,19 +896,10 @@ static int do_rawv6_setsockopt(struct sock *sk, int level, int optname,
 	case IPV6_CHECKSUM:
 		if (inet_sk(sk)->inet_num == IPPROTO_ICMPV6 &&
 		    level == IPPROTO_IPV6) {
-			/*
-			 * RFC3542 tells that IPV6_CHECKSUM socket
-			 * option in the IPPROTO_IPV6 level is not
-			 * allowed on ICMPv6 sockets.
-			 * If you want to set it, use IPPROTO_RAW
-			 * level IPV6_CHECKSUM socket option
-			 * (Linux extension).
-			 */
+			 
 			return -EINVAL;
 		}
 
-		/* You may get strange result with a positive odd offset;
-		   RFC2292bis agrees with me. */
 		if (val > 0 && (val&1))
 			return -EINVAL;
 		if (val < 0) {
@@ -1060,11 +970,7 @@ static int do_rawv6_getsockopt(struct sock *sk, int level, int optname,
 
 	switch (optname) {
 	case IPV6_CHECKSUM:
-		/*
-		 * We allow getsockopt() for IPPROTO_IPV6-level
-		 * IPV6_CHECKSUM socket option on ICMPv6 sockets
-		 * since RFC3542 is silent about it.
-		 */
+		 
 		if (rp->checksum == 0)
 			val = -1;
 		else
@@ -1324,26 +1230,25 @@ void raw6_proc_exit(void)
 {
 	unregister_pernet_subsys(&raw6_net_ops);
 }
-#endif	/* CONFIG_PROC_FS */
+#endif	 
 
-/* Same as inet6_dgram_ops, sans udp_poll.  */
 static const struct proto_ops inet6_sockraw_ops = {
 	.family		   = PF_INET6,
 	.owner		   = THIS_MODULE,
 	.release	   = inet6_release,
 	.bind		   = inet6_bind,
-	.connect	   = inet_dgram_connect,	/* ok		*/
-	.socketpair	   = sock_no_socketpair,	/* a do nothing	*/
-	.accept		   = sock_no_accept,		/* a do nothing	*/
+	.connect	   = inet_dgram_connect,	 
+	.socketpair	   = sock_no_socketpair,	 
+	.accept		   = sock_no_accept,		 
 	.getname	   = inet6_getname,
-	.poll		   = datagram_poll,		/* ok		*/
-	.ioctl		   = inet6_ioctl,		/* must change  */
-	.listen		   = sock_no_listen,		/* ok		*/
-	.shutdown	   = inet_shutdown,		/* ok		*/
-	.setsockopt	   = sock_common_setsockopt,	/* ok		*/
-	.getsockopt	   = sock_common_getsockopt,	/* ok		*/
-	.sendmsg	   = inet_sendmsg,		/* ok		*/
-	.recvmsg	   = sock_common_recvmsg,	/* ok		*/
+	.poll		   = datagram_poll,		 
+	.ioctl		   = inet6_ioctl,		 
+	.listen		   = sock_no_listen,		 
+	.shutdown	   = inet_shutdown,		 
+	.setsockopt	   = sock_common_setsockopt,	 
+	.getsockopt	   = sock_common_getsockopt,	 
+	.sendmsg	   = inet_sendmsg,		 
+	.recvmsg	   = sock_common_recvmsg,	 
 	.mmap		   = sock_no_mmap,
 	.sendpage	   = sock_no_sendpage,
 #ifdef CONFIG_COMPAT
@@ -1354,7 +1259,7 @@ static const struct proto_ops inet6_sockraw_ops = {
 
 static struct inet_protosw rawv6_protosw = {
 	.type		= SOCK_RAW,
-	.protocol	= IPPROTO_IP,	/* wild card */
+	.protocol	= IPPROTO_IP,	 
 	.prot		= &rawv6_prot,
 	.ops		= &inet6_sockraw_ops,
 	.no_check	= UDP_CSUM_DEFAULT,

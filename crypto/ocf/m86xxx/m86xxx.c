@@ -1,45 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* ---------------------------------------------------------------------------
- *
- * An OCF-Linux module that uses Mindspeed Comcerto 2000  HW security Engine to do the crypto.
- * Based on crypto/ocf/hifn and crypto/ocf/safe OCF drivers
- *
- * Copyright (c) 2012 Mindspeed Technologies, Inc.
- *
- * This code written by Mindspeed Technologies
- * some code copied from files with the following:
- * Copyright (C) 2004 David McCullough <davidm@snapgear.com>
- *  Kim A. B. Phillips <kim.phillips@freescale.com>
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * ---------------------------------------------------------------------------
- *
- * NOTES:
- *
- */
+ 
 #include <generated/autoconf.h>
 #include <linux/types.h>
 #include <linux/time.h>
@@ -102,7 +64,7 @@ static	int elp_freesession(device_t, u_int64_t);
 static int elp_kprocess(device_t dev, struct cryptkop *krp, int hint);
 
 static device_method_t elp_methods = {
-	/* crypto device methods */
+	 
 	DEVMETHOD(cryptodev_newsession,	elp_newsession),
 	DEVMETHOD(cryptodev_freesession,elp_freesession),
 	DEVMETHOD(cryptodev_process,	elp_process),
@@ -113,7 +75,6 @@ static device_method_t elp_methods = {
 #endif
 };
 
-/* HW module structures */
 struct elp_spacc_device _spacc_dev;
 
 static elp_trng _trngm;
@@ -122,7 +83,7 @@ elp_pka _pka;
 static S32 alloc_handle (S32 ctx, S32 ctx_skip);
 static S32 free_handle (S32 handle);
 static int _module_initialized;
-//spinlock_t elp_context_spinlock =SPIN_LOCK_UNLOCKED;
+ 
 DEFINE_SPINLOCK(elp_context_spinlock);
 DEFINE_SPINLOCK(elp_ddt_lock);
 
@@ -130,18 +91,16 @@ struct tasklet_struct 	irq_spacc_tasklet;
 struct tasklet_struct 	irq_pka_tasklet;
 spinlock_t	reg_lock;
 
-static LIST_HEAD(pka_pkq); /* current PKA wait list */
+static LIST_HEAD(pka_pkq);  
 static spinlock_t pka_pkq_lock;
 
 elp_id tid;
 elphw_if tif;
 
-/* IPSEC spacc AXI Clock */
 static struct clk *spacc_clk;
 
-/* Module arguments */
 int elp_debug = 0x1;
-//int elp_debug = 0x1 | 0x2 | 0x4 | 0x8;
+ 
 module_param(elp_debug, int, 0644);
 MODULE_PARM_DESC(debug, "Enable debug");
 
@@ -150,20 +109,11 @@ module_param(little_endian, int, 0644);
 MODULE_PARM_DESC(little_endian, "Switch clp into BIG Endian Mode");
 
 static int irq_mode = 1;
-module_param(irq_mode, int, 0644); // insmod elp1800 irq_mode=1
+module_param(irq_mode, int, 0644);  
 MODULE_PARM_DESC(irq_mode, "Enable IRQ mode");
 
-//Enable ELP_TRNG_SELF_TEST to check TRNG module is working
-//#define ELP_TRNG_SELF_TEST 1
-
-//Enable ELP_PKA_SELF_TEST to check PKA module
-//#define ELP_PKA_SELF_TEST 1
- 
 #ifdef ELP_PKA_SELF_TEST
-//#define PKA_ECC_TEST_POINT_ADD
-//#define PKA_ECC_TEST_POINT_DBL
-//#define PKA_ECC_TEST_POINT_PVER
-//#define PKA_ECC_TEST_POINT_MUL
+ 
 #define PKA_TEST_MOD_EXP
 #define PKA_TEST_MOD_MULT
 #define PKA_TEST_MOD_DIV
@@ -172,8 +122,8 @@ MODULE_PARM_DESC(irq_mode, "Enable IRQ mode");
 #define PKA_TEST_MOD_INV
 #endif
 
-// Enable ELP_TRNG_IRQ_MODE to switch TRNG module from polling to IRQ mode 
-//#define ELP_TRNG_IRQ_MODE 1
+
+
 
 extern char *pka_errmsgs[];
 
@@ -181,16 +131,6 @@ extern char *pka_errmsgs[];
 static DEFINE_SPINLOCK(syno_ocf_lock);
 #endif
 
-/************************* OCF Higher level API ****************************************/
-
-/*
- * Generate a new software session.
- */
-/*
- * Allocate a new 'session' and return an encoded session id.  'sidp'
- * contains our registration id, and should contain an encoded session
- * id on successful allocation.
- */
 static int elp_newsession(device_t arg, u_int32_t *sidp, struct cryptoini *cri)
 {
 	struct cryptoini *c, *encini = NULL, *macini = NULL;
@@ -242,7 +182,7 @@ static int elp_newsession(device_t arg, u_int32_t *sidp, struct cryptoini *cri)
 		goto err;
 	}
 
-	if (encini) {			/* validate key length */
+	if (encini) {			 
 		switch (encini->cri_alg) {
 			case CRYPTO_DES_CBC:
 				if (encini->cri_klen != 64)
@@ -352,7 +292,7 @@ static int elp_newsession(device_t arg, u_int32_t *sidp, struct cryptoini *cri)
 		ses->ses_mode |=  ELP_SESMODE_CRYPTO_CIPHER  | ELP_SESMODE_CBC;
 		if (encini->cri_flags & CRYPTO_ENCRYPT)
 			ses->ses_mode |= ELP_SESMODE_ENCRYPT;
-		/* get an IV */
+		 
 		if(_trngm.active == 1) {
 			if(trng_get_rand((U8*)ses->ses_iv, ses->ses_iv_size) == SPACC_CRYPTO_FAILED) {
 				DPRINTF(ELP_ERR, "%d\n",__LINE__);
@@ -416,9 +356,7 @@ err:
 	return ret;
 }
 
-/*
- * Deallocate a session.
- */
+
 static int elp_freesession(device_t dev, u_int64_t tid)
 {
 	struct elp_softc *sc = device_get_softc(dev);
@@ -441,11 +379,7 @@ static int elp_freesession(device_t dev, u_int64_t tid)
 	if (session < sc->sc_nsessions) {
 		ses = &sc->sc_sessions[session];
 
-		/*
-		   if((ret = spacc_close (sc->sc_sessions[session].ses_spacc_handle)) < 0) {
-		   DPRINTF ("warning: %s\n", spacc_error_msg (ret));
-		   }
-		 */
+		
 		bzero(&sc->sc_sessions[session], sizeof(sc->sc_sessions[session]));
 		ret = 0;
 		sc->stats.close_sessions++;
@@ -466,15 +400,15 @@ static int elp_process(device_t dev, struct cryptop *crp, int hint)
 	elp_spacc_handle_ctx *ctx = NULL;
 	int err = EINVAL;
 	int handle = 0;
-	//int i;
+	 
 	struct iovec *iov = NULL;
 	struct uio *uio = NULL;
-	//unsigned char mackey[24] = {0};
+	 
 	S32 ctxid = -1;
 	S32 ctxid_skip = -1;
 	bool same_buff = 0;
 
-	spin_lock_bh(&elp_ddt_lock); /*This lock is to protect the sessions on SMP, if this lock is not used then data corruption is observed*/
+	spin_lock_bh(&elp_ddt_lock);  
 	sc = device_get_softc(dev);
 	if (crp == NULL || crp->crp_callback == NULL || sc == NULL ||
 			(ELP_SESSION(crp->crp_sid) >= sc->sc_nsessions)) {
@@ -488,7 +422,6 @@ static int elp_process(device_t dev, struct cryptop *crp, int hint)
 	ses = &sc->sc_sessions[ELP_SESSION(crp->crp_sid)];
 	DPRINTF(ELP_DBG, "session %d\n", (int)crp->crp_sid);
 
-	//non packet session (Raw crypto mode)
 	if (crp->crp_desc == NULL || crp->crp_buf == NULL) {
 		DPRINTF(ELP_ERR, "Invalid request \n");
 		crp->crp_etype = err;
@@ -561,9 +494,7 @@ static int elp_process(device_t dev, struct cryptop *crp, int hint)
 			enccrd = crd1;
 			maccrd = crd2;
 		} else {
-			/*
-			 * We cannot order the spacc  as requested
-			 */
+			 
 			DPRINTF(ELP_ERR, " Crypt algo %x %x flags %x not supported\n", crd1->crd_alg, crd2->crd_alg, crd1->crd_flags);
 			crp->crp_etype = err;
 			crypto_done(crp);
@@ -616,8 +547,6 @@ static int elp_process(device_t dev, struct cryptop *crp, int hint)
 		}
 	}
 	ses->ses_first_packet = 0;
-	//ses->ses_spacc_handle = handle;
-	/* sc->crp = crp;*/
 	 
 	ctx = context_lookup (handle);
 
@@ -670,7 +599,7 @@ static int elp_process(device_t dev, struct cryptop *crp, int hint)
 		}
 		else {
 			DPRINTF (ELP_DBG, "key is not explicitly provided\n");
-#if 0 /*TODO */
+#if 0  
 			read_random(mackey, (maccrd->crd_klen >> 3));
 			if ((err = spacc_set_context (handle, SPACC_HASH_OPERATION, mackey, (maccrd->crd_klen >> 3), 0, 0)) != SPACC_CRYPTO_OK) {
 				DPRINTF ("spacc_set_context %s\n", spacc_error_msg (err));
@@ -684,7 +613,7 @@ static int elp_process(device_t dev, struct cryptop *crp, int hint)
 		{
 			DPRINTF(ELP_DBG, "iov_len %d crd_klen%d\n", iov->iov_len,(maccrd->crd_klen>>3));
 			if (crp->crp_flags & CRYPTO_F_IOV) {
- 				iov->iov_len -= (maccrd->crd_klen>>3); /* Upper layer giving padded len for output also */
+ 				iov->iov_len -= (maccrd->crd_klen>>3);  
 			}
 		}
 	}
@@ -737,9 +666,7 @@ static int elp_process(device_t dev, struct cryptop *crp, int hint)
 
 		if (crp->crp_buf) {
 			DPRINTF(ELP_DBG, "%s: INPUT BUFFER (len %d)\n", __FUNCTION__, (unsigned int)crp->crp_ilen);
-			/*for(i = 0; i < crp->crp_ilen; i++)
-				printk("%2x ", *((U8*)crp->crp_buf + i));
-			printk("\n");*/
+			 
 		} else {
 			DPRINTF (ELP_ERR, "%s():%d EINVAL\n",__FUNCTION__,__LINE__);
 			err = EINVAL; goto out;
@@ -917,7 +844,6 @@ static void pka_self_test()
 		modexp_ry[i] = htonl(modexp_ry[i]);
 	}
 
-	// modexp self test
 	printk("\nTesting modexp....");
 	if (clue_bn_modexp ((U8*)&modexp_a[0], (U8*)&modexp_b[0], (U8*)&modexp_m[0], result1, (modexp_size / 8), 1) != SPACC_CRYPTO_OK)
 	{
@@ -1110,7 +1036,6 @@ static int elp_kprocess(device_t dev, struct cryptkop *krp, int hint)
 		goto err;
 	}
 
-	/* For now only modular exponentiation is supported */
 	if (krp->krp_op != CRK_MOD_EXP) {
 		krp->krp_status = EOPNOTSUPP;
 		DPRINTF(ELP_ERR, "%s: krp_op %d NOT SUPPORTED\n", __FUNCTION__, krp->krp_op);
@@ -1130,7 +1055,7 @@ static int elp_kprocess(device_t dev, struct cryptkop *krp, int hint)
 	INIT_LIST_HEAD(&q->pkq_list);
 
 	q->pkq_obuf = (U32 *)krp->krp_param[KRP_PARAM_RES].crp_p;
-	q->pkq_result_len = krp->krp_param[KRP_PARAM_RES].crp_nbits / 8;  //use length in bytes unit
+	q->pkq_result_len = krp->krp_param[KRP_PARAM_RES].crp_nbits / 8;   
 
 	if (pka_copy_kparam(&krp->krp_param[KRP_PARAM_BASE], q->pkq_M, q->pkq_result_len)) {
 		krp->krp_status = ERANGE; goto err;
@@ -1172,7 +1097,7 @@ err:
 
 void elp_register_ocf(struct elp_softc *sc)
 {
-	/* register algorithms with the framework */
+	 
 	DPRINTF(ELP_ERR, DRV_NAME);
 
 #if !defined(CONFIG_SYNO_COMCERTO)
@@ -1200,13 +1125,11 @@ void elp_register_ocf(struct elp_softc *sc)
 	printk("md5 ");
 	crypto_register(sc->sc_cid, CRYPTO_MD5, 0, 0);
 
-	/* HMAC support only with IPsec for now */
 	crypto_register(sc->sc_cid, CRYPTO_MD5_HMAC, 0, 0);
 
 	printk("sha1 ");
 	crypto_register(sc->sc_cid, CRYPTO_SHA1, 0, 0);
 
-	/* HMAC support only with IPsec for now */
 	crypto_register(sc->sc_cid, CRYPTO_SHA1_HMAC, 0, 0);
 
 	printk("sha256 ");
@@ -1216,16 +1139,12 @@ void elp_register_ocf(struct elp_softc *sc)
 	crypto_register(sc->sc_cid, CRYPTO_NULL_CBC, 0, 0);
 	crypto_register(sc->sc_cid, CRYPTO_NULL_HMAC, 0, 0);
 
-	/* XXX other supported algorithms */
 }
 
-/********************* SPACC-PDU interrupt management ****************/
 static irqreturn_t spacc_intr(int irq, void *dev_id)
 {
 	unsigned long flags;
 	int cnt;
-
-	//DPRINTF(ELP_DBG, "%s()\n", __FUNCTION__);
 
 	spin_lock_irqsave(&reg_lock, flags);
 
@@ -1242,10 +1161,7 @@ static irqreturn_t spacc_intr(int irq, void *dev_id)
 
 		trng_disable_int();
 
-		/* Ack interrupt */
 		ELP_WRITE_UINT( _trngm.irq_stat, ELP_READ_UINT(_trngm.irq_stat) | TRNG_IRQ_DONE);
-
-		/* process TRNG IRQ (call tasklet...)*/
 
 		trng_enable_int();
 	}
@@ -1301,7 +1217,7 @@ static void elp_pka_tasklet(unsigned long arg)
 
 static void elp_spacc_tasklet(unsigned long arg)
 {
-	struct cryptop *crp = NULL;/*(struct cryptop *)sc->crp;*/
+	struct cryptop *crp = NULL; 
 	S32 ret = SPACC_CRYPTO_INPROGRESS;
   	elp_spacc_handle_ctx *ctx = NULL;
   	U32 status, cmdstat;
@@ -1323,11 +1239,7 @@ static void elp_spacc_tasklet(unsigned long arg)
 		status  = ELP_READ_UINT(_spacc_dev.reg.fifo_stat);
 		cmdstat = ELP_READ_UINT(_spacc_dev.reg.status);
 
-/*
-		DPRINTF(ELP_DBG, "elp_spacc_tasklet: after pop fifo => fifo_stat:%lX status %lX fifo_stat_count:%lu return code:%lX\n",
-			status, cmdstat, SPACC_GET_FIFO_STAT_CNT (status),
-			SPACC_GET_STATUS_RET_CODE (cmdstat));
-*/
+
 
 		jobid = cmdstat & 0xFF;
 		if (_spacc_dev.job_pool[jobid][0] == 0xFFFFFFFF) {
@@ -1354,7 +1266,6 @@ static void elp_spacc_tasklet(unsigned long arg)
 
 		crp = ctx->crp;
 
-		/* check SPacc return code */
 		switch (SPACC_GET_STATUS_RET_CODE (cmdstat)) {
 		case SPACC_ICVFAIL:
 			DPRINTF(ELP_ERR, "%s: handle %x: SPACC_ICVFAIL\n", __FUNCTION__, x);
@@ -1381,13 +1292,11 @@ static void elp_spacc_tasklet(unsigned long arg)
 		case SPACC_OK:
 			ctx->job_done = 1;
 
-			/* move the last job to this slot to free up a spot */
 			if (y != (ctx->job_idx - 1)) {
 				ctx->job_id[y] = ctx->job_id[ctx->job_idx-1];
 				y = ctx->job_idx-1;
 			}
 
-			/* mark job as done */
 			ctx->job_id[y] = 0xFFFFFFFF;
 			--(ctx->job_idx);
 
@@ -1414,7 +1323,7 @@ static void elp_spacc_tasklet(unsigned long arg)
 				if(iov->iov_len < hash_out_len)
 				{
 					U8 *dest, *src;
-					//Input len is smaller than output len
+					 
 					dest = (U8*)iov->iov_base + iov->iov_len + hash_out_len;
 					src = (U8*)iov->iov_base + hash_out_len;
 					while((U8*)src >= (U8*)iov->iov_base) {
@@ -1429,7 +1338,6 @@ static void elp_spacc_tasklet(unsigned long arg)
 			}
 		}
 
-		/*Acknowledge each interrupt here only as we are emptying fifo_stat*/
 		spacc_ack_int();
 
 		crypto_done(crp);
@@ -1450,8 +1358,6 @@ int spacc_probe(void)
 {
 	int err = 0;
 
-	/* DPRINTF (ELP_DBG, "spacc_probe: irq_mode=%d irq=%d  little_endian=%d\n",
-		irq_mode, dev->irq,  little_endian); */
 	if (spacc_init (CRYPTO_MODULE_SPACC | CRYPTO_MODULE_TRNG | CRYPTO_MODULE_PKA, ((U32)tif.preg) + SPACC_MEMORY_BASE_OFFSET) != SPACC_CRYPTO_OK)
 	{
 		DPRINTF (ELP_ERR, "spacc_probe: spacc_init failed\n");
@@ -1471,7 +1377,7 @@ void spacc_remove (void)
 		trng_disable_int();
 #endif
 		spacc_disable_int();
-		//pka_disable_int();
+		 
 		spacc_pdu_disable_int();
 		ELP_WRITE_UINT(_spacc_dev.reg.irq_stat, ELP_READ_UINT(_spacc_dev.reg.irq_stat)|SPACC_IRQ_STAT_STAT);
 	}
@@ -1483,10 +1389,6 @@ void spacc_remove (void)
 	spacc_fini ();
 
 }
-
-/************************************************************************/
-
-/* Elliptic SPacc APIs **************************************************/
 
 int spacc_fifo_stat (void)
 {
@@ -1500,7 +1402,7 @@ void spacc_disable_int (void)
 
 void spacc_enable_int (void)
 {
-	// Enable only FIFO status interrupts
+	 
 	ELP_WRITE_UINT(_spacc_dev.reg.irq_enable, ELP_READ_UINT(_spacc_dev.reg.irq_enable) | SPACC_IRQ_EN_STAT_EN);
 	ELP_WRITE_UINT(_spacc_dev.reg.irq_ctrl, SPACC_IRQ_CTRL_SET_STAT_CNT (1));
 }
@@ -1519,9 +1421,6 @@ void spacc_pdu_disable_int (void)
 	ELP_WRITE_UINT(_spacc_dev.reg.irq_enable,0);
 }
 
-// Initialize crypto context for all implemented
-// hardware crypto modules.
-// mmap:  start of the crypto hardware physical memory
 S32 spacc_init (U32 opmodules, U32 regmap)
 {
 	int x, y;
@@ -1529,7 +1428,6 @@ S32 spacc_init (U32 opmodules, U32 regmap)
 
 	DPRINTF(ELP_DBG, "%s\n", __FUNCTION__);
 
-	// Initialize all global structures
 	_module_initialized = 0;
 
 	MEMSET((unsigned char *)&_spacc_dev.reg,   0, sizeof (elp_spacc_regmap));
@@ -1605,12 +1503,12 @@ S32 spacc_init (U32 opmodules, U32 regmap)
 	DPRINTF(ELP_DBG, "   PROJECT: %x\n", SPACC_ID_PROJECT(id));
 
 #if 0
-	// Test to read from FIFO_STAT register to make sure we have the correct regmap
+	 
 	if ((ELPSEC_READ_UINT(_spacc_dev.reg.fifo_stat) & SPACC_FIFO_STAT_STAT_EMPTY) != SPACC_FIFO_STAT_STAT_EMPTY) {
 		DPRINTF(ELP_DBG, "FIFO_STAT: %X : %X\n",(U32)_spacc_dev.reg.fifo_stat, ELPSEC_READ_UINT(_spacc_dev.reg.fifo_stat));
 		goto ERR;
 	}
-	// Quick sanity check for ptr registers (mask unused bits)
+	 
 	ELP_WRITE_UINT(_spacc_dev.reg.dst_ptr, 0x1234567F);
 	ELP_WRITE_UINT(_spacc_dev.reg.src_ptr, 0xDEADBEEF);
 	if (( (ELPSEC_READ_UINT(_spacc_dev.reg.dst_ptr) & SPACC_DST_PTR_PTR) != (0x1234567F & SPACC_DST_PTR_PTR) ) ||
@@ -1642,7 +1540,6 @@ S32 spacc_init (U32 opmodules, U32 regmap)
 
 		DPRINTF (ELP_DBG, "spacc_init: MEM_ALLOC_MAP ddt[%d]@ %p %d entries\n",x, _spacc_dev.ctx[x].ddt_map, MAX_DDT_ENTRIES);
 
-		// allocate physical mem for the ops
 		_spacc_dev.ctx[x].sddt = MEM_ALLOC_MAP (NULL, DDT_ENTRY_SIZE, &_spacc_dev.ctx[x].sddt_map);
 		if (_spacc_dev.ctx[x].sddt == NULL) {
 			goto ERR;
@@ -1677,8 +1574,6 @@ void spacc_fini (void)
 	}
 }
 
-// Return a context structure for a handle
-// or null if invalid
 elp_spacc_handle_ctx *context_lookup (S32 handle)
 {
 	elp_spacc_handle_ctx *ctx = NULL;
@@ -1698,7 +1593,6 @@ elp_spacc_handle_ctx *context_lookup (S32 handle)
 	return ctx;
 }
 
-// Releases a crypto context back into appropriate module's pool
 S32 spacc_close (S32 handle, struct elp_softc *sc)
 {
 	S32 ret = SPACC_CRYPTO_OK;
@@ -1714,46 +1608,6 @@ S32 spacc_close (S32 handle, struct elp_softc *sc)
 
 	return ret;
 }
-
-// Allocates a handle for spacc module context and initialize it with
-// an appropriate type. Here we receive encryption and hashing algos
-// as defined by the OCF layer. So we need to remap theses definitions
-// to match the elliptic ones.
-/*
-#define CRYPTO_DES_CBC			1
-#define CRYPTO_3DES_CBC			2
-#define CRYPTO_BLF_CBC			3
-#define CRYPTO_CAST_CBC			4
-#define CRYPTO_SKIPJACK_CBC		5
-#define CRYPTO_MD5_HMAC			6
-#define CRYPTO_SHA1_HMAC		7
-#define CRYPTO_RIPEMD160_HMAC		8
-#define CRYPTO_MD5_KPDK			9
-#define CRYPTO_SHA1_KPDK		10
-#define CRYPTO_RIJNDAEL128_CBC		11 
-#define CRYPTO_AES_CBC			11 
-#define CRYPTO_ARC4			12
-#define CRYPTO_MD5			13
-#define CRYPTO_SHA1			14
-#define CRYPTO_NULL_HMAC		15
-#define CRYPTO_NULL_CBC			16
-#define CRYPTO_DEFLATE_COMP		17 
-#define CRYPTO_SHA2_256_HMAC		18
-#define CRYPTO_SHA2_384_HMAC		19
-#define CRYPTO_SHA2_512_HMAC		20
-#define CRYPTO_CAMELLIA_CBC		21
-#define CRYPTO_SHA2_256			22
-#define CRYPTO_SHA2_384			23
-#define CRYPTO_SHA2_512			24
-#define CRYPTO_RIPEMD160		25
-*/
-
-/*
- Allocates a handle for spacc module context and initialize it with an
- appropriate type. the ctxid_skip param is used to skip a "rezerved" ctx id,
- i.e. when using spacc with a Effective Master Key(EMK), the EMK context must
- not be used. ctxid_skip == -1 indicates no ctx id should be skipped.
- */
 
 S32 spacc_open (S32 enc, S32 hash,  S32 ctxid, S32 ctxid_skip, UINT rc4len, UINT first_packet)
 {
@@ -1776,8 +1630,6 @@ S32 spacc_open (S32 enc, S32 hash,  S32 ctxid, S32 ctxid_skip, UINT rc4len, UINT
 		ctx->icv_len = 0;
 	}
 
-	// Expand the key on the first use of the context
-	// Should be reset after the first call
 	if(enc == CRYPTO_ARC4) {
 		if(first_packet)
 			ctrl |= CTRL_SET_KEY_EXP;
@@ -1933,8 +1785,6 @@ err_out:
 	return ret;
 }
 
-// return a software handle back to the pool
-// if failed return -1 else tha same handle value
 S32 free_handle (S32 handle)
 {
 	S32 ret = -1;
@@ -1950,7 +1800,6 @@ S32 free_handle (S32 handle)
 	return ret;
 }
 
-// allocate a software context handle
 S32 alloc_handle (S32 ctx, S32 ctx_skip)
 {
 	U8 i;
@@ -1982,17 +1831,14 @@ S32 alloc_handle (S32 ctx, S32 ctx_skip)
 	return ret;
 }
 
-// Universal function to initialize a crypto module with an appropreate context
-// data which is actually depends on module functionality
 S32 spacc_set_context (S32 handle, S32 op, U8 * key, S32 ksz, U8 * iv, S32 ivsz)
 {
 	S32 ret = SPACC_CRYPTO_OK;
 	elp_spacc_handle_ctx *ctx = NULL;
-	//int i;
 	 
 	ctx = context_lookup (handle);
 
-	if(!ksz) //Will it happen this?
+	if(!ksz)  
 		DPRINTF(ELP_DBG, "%s: HASH KEY not provided\n", __FUNCTION__);
 
 	if (ctx == NULL) {
@@ -2034,9 +1880,9 @@ S32 spacc_set_context (S32 handle, S32 op, U8 * key, S32 ksz, U8 * iv, S32 ivsz)
 					break;
 				case CRYPTO_MODE_AES_XTS:
 					if (key) {
-						MEMCPY32(ctx->ciph_key, key, ksz >> 3); // divide by 4 bytes per word then in half
+						MEMCPY32(ctx->ciph_key, key, ksz >> 3);  
 						MEMCPY32(&ctx->ciph_key[8+4], key + (ksz>>1), ksz >> 3);
-						ksz = ksz >> 1; // divide by two since that's what we program the hardware with
+						ksz = ksz >> 1;  
 					}
 					if (iv) {
 						MEMCPY32(&ctx->ciph_key[8], iv, 4);
@@ -2047,13 +1893,13 @@ S32 spacc_set_context (S32 handle, S32 op, U8 * key, S32 ksz, U8 * iv, S32 ivsz)
 				case CRYPTO_MODE_MULTI2_CBC:
 				case CRYPTO_MODE_MULTI2_OFB:
 				case CRYPTO_MODE_MULTI2_CFB:
-					// Number of rounds at the end of the IV
+					 
 					if (key)
 						MEMCPY32 (ctx->ciph_key, key, ksz >> 2);
 					if (iv)
 						MEMCPY32 (&ctx->ciph_key[10], iv, ivsz >> 2);
 					if (ivsz == 0) {
-						ctx->ciph_key[0x30/4] = 0x80000000; // default to 128 rounds
+						ctx->ciph_key[0x30/4] = 0x80000000;  
 					}
 					break;
 
@@ -2081,10 +1927,8 @@ S32 spacc_set_context (S32 handle, S32 op, U8 * key, S32 ksz, U8 * iv, S32 ivsz)
 					break;
 			}
 
-			// Set context might be called only to set iv separately
-			// so only when having a key set the key size
 			if (key) {
-				//ctx->ctrl    |= CTRL_SET_KEY_EXP;
+				 
 				ctx->ckey_sz  = SPACC_SET_CIPHER_KEY_SZ (ksz, handle);
 			}
 			break;
@@ -2112,7 +1956,7 @@ S32 spacc_set_context (S32 handle, S32 op, U8 * key, S32 ksz, U8 * iv, S32 ivsz)
 				default:
 					if(ksz) {
 						ctx->hkey_sz = SPACC_SET_HASH_KEY_SZ (ksz, handle);
-						MEMCPY32 (ctx->hash_key, key, (ksz+3) >> 2); //allow for odd sized keys
+						MEMCPY32 (ctx->hash_key, key, (ksz+3) >> 2);  
 					}
 					break;
 			}
@@ -2142,17 +1986,17 @@ S32 spacc_set_operation (S32 handle, S32 op, U32 prot, U32 icvpos, U32 icvoff, U
 		}
 
 		switch (prot) {
-			case IM_ICV_HASH:          /* HASH of plaintext */
+			case IM_ICV_HASH:           
 				ctx->ctrl |= CTRL_SET_ICV_PT;
 				break;
-			case IM_ICV_HASH_ENCRYPT:  /* HASH the plaintext and encrypt the lot */
+			case IM_ICV_HASH_ENCRYPT:   
 				ctx->ctrl |= CTRL_SET_ICV_PT;
 				ctx->ctrl |= CTRL_SET_ICV_ENC;
 				ctx->ctrl |= CTRL_SET_ICV_APPEND;
 				break;
-			case IM_ICV_ENCRYPT_HASH:  /* HASH the ciphertext */
-				ctx->ctrl &= ~(CTRL_SET_ICV_PT); // ICV_PT=0
-				ctx->ctrl &= ~(CTRL_SET_ICV_ENC); // ICV_ENC=0
+			case IM_ICV_ENCRYPT_HASH:   
+				ctx->ctrl &= ~(CTRL_SET_ICV_PT);  
+				ctx->ctrl &= ~(CTRL_SET_ICV_ENC);  
 				break;
 			case IM_ICV_IGNORE:
 				break;
@@ -2186,7 +2030,6 @@ S32 spacc_add_ddt (S32 handle, U8 * data, U32 len, struct elp_softc *sc)
 	elp_spacc_handle_ctx *ctx = NULL;
 	struct platform_device *pdev = sc->sc_dev;
 
-	// NOP so let's just skip it
 	if (data == NULL || len == 0) return SPACC_CRYPTO_OK;
 
 	ctx = context_lookup (handle);
@@ -2196,7 +2039,6 @@ S32 spacc_add_ddt (S32 handle, U8 * data, U32 len, struct elp_softc *sc)
 	} else {
 		U32 newlen;
 
-		/* split things larger than the max particle size */
 		if (len > SPACC_MAX_PARTICLE_SIZE) {
 			newlen = len - SPACC_MAX_PARTICLE_SIZE;
 			len    = SPACC_MAX_PARTICLE_SIZE;
@@ -2220,7 +2062,6 @@ S32 spacc_add_ddt (S32 handle, U8 * data, U32 len, struct elp_softc *sc)
 		ctx->ddt_len += len;
 	 	ctx->ddt_idx++;
 
-		/* if there are remaining bytes, recurse and add it as a new DDT entry */
 		if (newlen != 0) {
 			return spacc_add_ddt(handle, data + SPACC_MAX_PARTICLE_SIZE, newlen, sc);
 		}
@@ -2245,9 +2086,6 @@ S32 spacc_release_ddt (S32 handle, struct elp_softc *sc)
 			(int) handle, i, (int) ctx->ddt_desc[i].map,
 			(int) ctx->ddt_desc[i].len);
 		} else {
-/*			DPRINTF(ELP_DBG,"spacc_release_ddt:%d: ddt_idx=%d @ %lX %lu bytes\n",
-			handle, i, (U32)ctx->ddt_desc[i].map, ctx->ddt_desc[i].len);
-*/
  
 			MEM_UNMAP (&pdev->dev, ctx->ddt_desc[i].map, ctx->ddt_desc[i].len);
 
@@ -2270,7 +2108,6 @@ S32 spacc_add_dst_ddt (S32 handle, U8 * data, U32 len, struct elp_softc *sc, boo
 	elp_spacc_handle_ctx *ctx = NULL;
 	struct platform_device *pdev = sc->sc_dev;
 
-	// NOP so let's just skip it
 	if (data == NULL || len == 0) return SPACC_CRYPTO_OK;
 
 	ctx = context_lookup (handle);
@@ -2279,7 +2116,6 @@ S32 spacc_add_dst_ddt (S32 handle, U8 * data, U32 len, struct elp_softc *sc, boo
 	} else {
 		U32 newlen;
 
-		/* split things larger than the max particle size */
 		if (len > SPACC_MAX_PARTICLE_SIZE) {
 			newlen = len - SPACC_MAX_PARTICLE_SIZE;
 			len    = SPACC_MAX_PARTICLE_SIZE;
@@ -2287,9 +2123,9 @@ S32 spacc_add_dst_ddt (S32 handle, U8 * data, U32 len, struct elp_softc *sc, boo
 			newlen = 0;
 		}
 
-		if(same_buff) { //Input and output buffers have same address so avoid DMA_MAP 
+		if(same_buff) {  
 			ctx->sddt_desc[ctx->sddt_idx].map = ctx->ddt_desc[ctx->ddt_idx - 1].map;
-			ctx->ddt_descr_status[ctx->sddt_idx] = 1; //Mark the status to check in release_dst_ddt to avoid DMA_UNMAP
+			ctx->ddt_descr_status[ctx->sddt_idx] = 1;  
 		}
 		else {
 			if ((ctx->sddt_desc[ctx->sddt_idx].map = MEM_MAP (&pdev->dev, data, len)) == NULL) {
@@ -2309,7 +2145,6 @@ S32 spacc_add_dst_ddt (S32 handle, U8 * data, U32 len, struct elp_softc *sc, boo
 		ctx->sddt_len += len;
 		ctx->sddt_idx++;
 
-		/* if there are remaining bytes, recurse and add it as a new DDT entry */
 		if (newlen != 0) {
 			return spacc_add_dst_ddt(handle, data + SPACC_MAX_PARTICLE_SIZE, newlen, sc, same_buff);
 		}
@@ -2331,14 +2166,9 @@ S32 spacc_release_dst_ddt (S32 handle, struct elp_softc *sc)
 
 	for (i = 0; i < ctx->sddt_idx; i++) {
 		if ((ctx->sddt_desc[i].map == NULL) || (ctx->sddt_desc[i].len == 0)) {
-/*			DPRINTF(ELP_DBG,"spacc_release_dst_ddt:%d: Invalid entry %d map=%X len=%d\n",
-			(int) handle, i, (int) ctx->sddt_desc[i].map,
-			(int) ctx->sddt_desc[i].len);
-*/
+ 
 		} else {
-/*			DPRINTF(ELP_DBG,"spacc_release_dst_ddt:%d: ddt_idx=%d @ %lX %lu bytes\n",
-			handle, i,(U32) ctx->sddt_desc[i].map, ctx->sddt_desc[i].len);
-*/
+ 
 			if(ctx->ddt_descr_status[i] != 1)
 				MEM_UNMAP (&pdev->dev, ctx->sddt_desc[i].map, ctx->sddt_desc[i].len);
 
@@ -2360,7 +2190,7 @@ S32 spacc_packet_enqueue_ddt (S32 handle, U32 proc_sz, U32 aad_offset, U32 pre_a
 {
 	S32 ret = SPACC_CRYPTO_OK, proc_len;
 	unsigned long flags;
-	//U32 status;
+	 
 	elp_spacc_handle_ctx *ctx = NULL;
 
 	ctx = context_lookup (handle);
@@ -2378,9 +2208,6 @@ S32 spacc_packet_enqueue_ddt (S32 handle, U32 proc_sz, U32 aad_offset, U32 pre_a
 			return SPACC_CRYPTO_FAILED;
 		}
 
-		/* compute the length we must process, in decrypt mode with an ICV (hash, hmac or CCM modes)
-		 * we must subtract the icv length from the buffer size
-		 */
 		if (proc_sz == 0) {
 			if ((ctx->op == OP_DECRYPT) &&
 				((ctx->hash_mode > 0) || (ctx->enc_mode == CRYPTO_MODE_AES_CCM || ctx->enc_mode == CRYPTO_MODE_AES_GCM)) &&
@@ -2428,7 +2255,6 @@ S32 spacc_packet_enqueue_ddt (S32 handle, U32 proc_sz, U32 aad_offset, U32 pre_a
 
 		ELP_WRITE_UINT(_spacc_dev.reg.sw_tag,  (ctx->job_id[ctx->job_idx]  << SPACC_SW_ID_ID_O) | (prio << SPACC_SW_ID_PRIO));
 
-		//start processing...
 		ELP_WRITE_UINT(_spacc_dev.reg.ctrl, ctx->ctrl);
 
 		++(ctx->job_idx);
@@ -2447,10 +2273,6 @@ printk("src_ptr: %X\n",*spacc_dev.reg.src_ptr);
 printk("dst_ptr: %X\n",*spacc_dev.reg.dst_ptr);
 #endif
 
-		/*status = ELP_READ_UINT(_spacc_dev.reg.fifo_stat);
-		DPRINTF (ELP_DBG, "spacc_packet_enqueue_ddt:Fifo Status:%X Commands:%u\n", status, SPACC_GET_FIFO_STAT_CNT (status));*/
-
-		// Clear an expansion key after the first call
 		if (ctx->first_use == 1) {
 			ctx->first_use = 0;
 			ctx->ctrl &= ~CTRL_SET_KEY_EXP;
@@ -2459,7 +2281,6 @@ printk("dst_ptr: %X\n",*spacc_dev.reg.dst_ptr);
 	return ret;
 }
 
-// Returns a user friendly error message for a correspponding error code
 U8 *spacc_error_msg (S32 err)
 {
 	U8 *msg = NULL;
@@ -2530,10 +2351,6 @@ U8 *spacc_error_msg (S32 err)
 	return msg;
 }
 
-/************************ TRNG ***********************************/
-// init trng context
-//input: spacc pdu base address 
-//output: engine status
 int trng_init (U32 mmap)
 {
 #ifdef ELP_TRNG_SELF_TEST
@@ -2546,7 +2363,6 @@ int trng_init (U32 mmap)
 	
 	memset ((U8 *) & _trngm, 0, sizeof (_trngm));
 
-	// Initialize TRNG crypto module contexts
 	_trngm.active = 1;
 	_trngm.status = (U32 *) (mmap + TRNG_CTRL);
 	_trngm.ctrl = (U32 *) (mmap + TRNG_CTRL);
@@ -2555,12 +2371,10 @@ int trng_init (U32 mmap)
 	_trngm.seed = (U32 *) (mmap + TRNG_DATA);
 	_trngm.irq_stat = (U32 *) (mmap + TRNG_IRQ_STAT);
 	
-	//for now using polling mode to get trng output
 #ifdef ELP_TRNG_IRQ_MODE
 	trng_enable_int();
 #endif
 
-	//default setting is RAND mode
 	ELP_WRITE_UINT(_trngm.ctrl,  TRNG_RAND_RESEED);
 
 	trng_dump_registers();
@@ -2603,16 +2417,10 @@ int trng_read_random(void *arg, u_int32_t *buf, int maxwords)
 {
 	int rc=SPACC_CRYPTO_OK;
 
-	//DPRINTF(ELP_DBG, "%s (%p, %d)\n", __FUNCTION__, buf, maxwords);
-	
 	rc = trng_get_rand ((U8*)buf, maxwords);
 	
 	return(rc);
 }
-/* get a stream of random bytes */
-/* input: *randbuf and it size, the size should be > 0,
-         s/w supports byte access even if h/w word (4 bytes) access */
-/* output: data into randbuf and returns engine status */
  
 int trng_get_rand (U8 * randbuf, int size)
 {
@@ -2621,8 +2429,6 @@ int trng_get_rand (U8 * randbuf, int size)
 	int i;
 	int n;
 	
-	//DPRINTF(ELP_DBG, "%s\n", __FUNCTION__);
-
 	if (_trngm.active == 0) {
 		DPRINTF (ELP_ERR, "%s SPACC_CRYPTO_FAILED\n", __FUNCTION__);
 		ret = SPACC_CRYPTO_FAILED;
@@ -2632,7 +2438,6 @@ int trng_get_rand (U8 * randbuf, int size)
 	} else {
 		for (; size;) {
 		
-			/* This tests for a reseeding operation or a new value generation */
 			if (ELP_READ_UINT (_trngm.ctrl) > 0) {
 				if ((ret = trng_wait_done ()) != SPACC_CRYPTO_OK) {
 					DPRINTF (ELP_DBG, "%s: %d SPACC_CRYPTO_FAILED\n", __FUNCTION__,__LINE__);
@@ -2641,7 +2446,6 @@ int trng_get_rand (U8 * randbuf, int size)
 				}
 			}
 
-			/* read out in maximum TRNG_DATA_SIZE_BYTES byte chunks */
 			i = size > TRNG_DATA_SIZE_BYTES ? TRNG_DATA_SIZE_BYTES : size;
 
 			for (n = 0; n < TRNG_DATA_SIZE_WORDS; n++) {
@@ -2652,31 +2456,24 @@ int trng_get_rand (U8 * randbuf, int size)
 			randbuf += i;
 			size -= i;
 
-			/* request next data */
 			ELP_WRITE_UINT(_trngm.ctrl, ELP_READ_UINT( _trngm.ctrl)| TRNG_GET_NEW);
 			if (trng_wait_done () != SPACC_CRYPTO_OK) {
 				DPRINTF (ELP_DBG, "%s: %d SPACC_CRYPTO_FAILED\n", __FUNCTION__,__LINE__);
 				ret = SPACC_CRYPTO_FAILED;
 				break;
 			}
-			//dumpword ((U32*)randbuf, i, "TRNG output:");
+			 
 		}
 	}
-	//DPRINTF (ELP_DBG, "%s done\n", __FUNCTION__);
+	 
 	return ret;
 }
 
-//internal use only, used after set mode and go 
-//input: void
-//output: engine status
 int trng_wait_done (void)
 {
 	int ret = SPACC_CRYPTO_OK;
 	S32 wait_count = LOOP_WAIT;
 
-//	DPRINTF (ELP_DBG, "%s\n", __FUNCTION__);
-	
-	// check high level status
 	while ((wait_count > 0) && ((ELP_READ_UINT(_trngm.status) & TRNG_BUSY) == TRNG_BUSY)) {
 		wait_count--;
 	}
@@ -2687,7 +2484,7 @@ int trng_wait_done (void)
 	}
 	
 #ifdef  ELP_TRNG_IRQ_MODE
-	/* Ack Done bit */
+	 
 	if ((ELP_READ_UINT(_trngm.status) & TRNG_BUSY) != TRNG_BUSY) {
 		ELP_WRITE_UINT(_trngm.irq_stat, ELP_READ_UINT( _trngm.irq_stat)| TRNG_IRQ_DONE);
 	}
@@ -2756,12 +2553,6 @@ int pka_kstart(struct elp_softc *sc)
 
 	DPRINTF(ELP_DBG, "%s\n", __FUNCTION__);
 
-	//inputs:	q->pkq_M (base)
-	//		q->pkq_e (exponent applied to base)
-	//		q->pkq_N (modulus)
-	//		q->pkq_obuf (output buffer)
-	//		q->pkq_result_len (expected length of modexp result)
-
 	if (q != NULL) {
 		dumpword (q->pkq_M, q->pkq_M_len, "q->pkq_M");
 		dumpword (q->pkq_e, q->pkq_e_len, "q->pkq_e");
@@ -2788,7 +2579,7 @@ int pka_copy_kparam(struct crparam *p, U32 *buf, U32 alen)
 	dst = (unsigned char *) &buf[alen/4];
 	dst--;
 
-        while (bits > 0) { /*TODO this logic can be improved */
+        while (bits > 0) {  
                 *dst-- = *src++;
                 bits -= 8;
         }
@@ -2945,10 +2736,6 @@ void elp_sysfs_exit(struct elp_softc *sc)
 	device_remove_file(&sc->sc_dev->dev, &dev_attr_elp_stats);
 }
 
-/********************************************************************/
-
-/* Set up the crypto device structure, private data,
- * and anything else we need before we start */
 static int comcerto_elp_probe(struct platform_device *pdev)
 {
 	struct elp_softc *sc;
@@ -2958,23 +2745,20 @@ static int comcerto_elp_probe(struct platform_device *pdev)
 
 	DPRINTF(ELP_DBG, "%s\n", __FUNCTION__);
 
-	/*Take spacc out of reset*/
 	c2000_block_reset(COMPONENT_AXI_IPSEC_SPACC,0);
 
-	/* Get the spacc clock */
 	spacc_clk = clk_get(NULL ,"ipsec_spacc");
 
 	if (IS_ERR(spacc_clk)) {
 		pr_err("%s: Unable to obtain ipsec_spacc clock: %ld\n",__func__,PTR_ERR(spacc_clk));
-		/* Elliptic driver cannot proceed from here */
+		 
 		return PTR_ERR(spacc_clk);
 	}
 
-	/* Enable the IPSEC SPAcc clk  */
 	err = clk_enable(spacc_clk);
 	if (err){
 		pr_err("%s: IPSEC SPACC clock enable failed:\n",__func__);
-		/* Elliptic driver cannot proceed from here */
+		 
 		return err;
 	}
 
@@ -2998,7 +2782,6 @@ static int comcerto_elp_probe(struct platform_device *pdev)
 	tif.preg  = 0;
 	tif.preg2  = 0;
 
-	/* get a pointer to the register memory */
 	r = platform_get_resource_byname(pdev, IORESOURCE_MEM, "elp");
 
 	sc->sc_base_addr = (ocf_iomem_t) ioremap(r->start, (r->end - r->start));
@@ -3014,7 +2797,7 @@ static int comcerto_elp_probe(struct platform_device *pdev)
 	spin_lock_init(&pka_pkq_lock);
 
 	DPRINTF(ELP_DBG, "%s(): irq_mode %d\n", __FUNCTION__, irq_mode);
-	/* get the irq line */
+	 
 	sc->sc_irq = platform_get_irq(pdev, 0);
 	if ((err = request_irq (sc->sc_irq, spacc_intr, IRQF_SHARED, "spacc", pdev))) {
 		DPRINTF (ELP_ERR, "%s: failed request_irq irq %i [%d] \n", __FUNCTION__, sc->sc_irq, err);
@@ -3022,13 +2805,12 @@ static int comcerto_elp_probe(struct platform_device *pdev)
 		goto out;
 	} else {
 		DPRINTF (ELP_DBG, "%s:request_irq:  assigned irq %i\n", __FUNCTION__, sc->sc_irq);
-		spacc_pdu_enable_int(); //global IRQ enable for SPacc-PDU Core
-		spacc_enable_int (); //IRQ enabled for SPacc-Raw Crypto module
-		//pka_enable_int(); //IRQ enabled for PKA module
+		spacc_pdu_enable_int();  
+		spacc_enable_int ();  
+		 
 	}
 
 	tasklet_init(&irq_spacc_tasklet, elp_spacc_tasklet, (unsigned long)sc);
-	//tasklet_init(&irq_pka_tasklet, elp_pka_tasklet, (unsigned long)sc);
 	 
 	sc->sc_cid = crypto_get_driverid(softc_get_device(sc), CRYPTOCAP_F_HARDWARE);
 	if (sc->sc_cid < 0) {
@@ -3060,7 +2842,6 @@ static int comcerto_elp_remove(struct platform_device *pdev)
 	elp_sysfs_exit(sc);
 
 	tasklet_disable(&irq_spacc_tasklet);
-	//tasklet_disable(&irq_pka_tasklet);
 	 
 	if (sc->sc_cid >= 0) {
 		crypto_unregister_all(sc->sc_cid);
@@ -3084,10 +2865,9 @@ static int comcerto_elp_remove(struct platform_device *pdev)
 	if(sc != NULL)
 		kfree(sc);
 
-	/*Disable the IPSEC SPAcc clock here*/
 	clk_disable(spacc_clk);
 	clk_put(spacc_clk);
-	/*put IPSEC spacc into reset */
+	 
 	c2000_block_reset(COMPONENT_AXI_IPSEC_SPACC,1);
 
 	return 0;
@@ -3098,19 +2878,13 @@ static int comcerto_elp_suspend(struct platform_device *pdev, pm_message_t state
 {
 	struct elp_softc *sc = platform_get_drvdata(pdev); 
 
-	/* SPACC HW is going to be clock gated. Let Linux kernel OCF framework 
-	 * knew about it and unregister the algos. If any user space application
-	 * wants to do crypto operation it will be done in software crypto.
-	 * For ex: openssl speed test.
-	 * Thanks to Linux kernel , for providing API.
-	*/
 	if (sc->sc_cid >= 0) {
 		crypto_unregister_all(sc->sc_cid);
 #ifdef CONFIG_OCF_RANDOMHARVEST_MODULE
 		crypto_runregister_all(sc->sc_cid);
 #endif
 	}
-	/*Clock disable for SPACC (AXI clock domain)*/
+	 
 	clk_disable(spacc_clk);
         return 0;
 }
@@ -3119,16 +2893,12 @@ static int comcerto_elp_resume(struct platform_device *pdev)
 {
 	struct elp_softc *sc = platform_get_drvdata(pdev); 
 	int ret=0;
-	/*Clock enable for SPACC(AXI clock domain)*/
+	 
 	ret = clk_enable(spacc_clk);
 	if (ret){
 		pr_err("%s: IPSEC SPACC clock enable failed:\n",__func__);
 		return ret;
 	}
-
-	/* SPACC HW is back(clock on), So lets register it with 
-	 * Kernel OCF framework again, for the HW acceleration .
-	 */
 
 	sc->sc_cid = crypto_get_driverid(softc_get_device(sc), CRYPTOCAP_F_HARDWARE);
 	if (sc->sc_cid < 0) {
@@ -3142,7 +2912,6 @@ static int comcerto_elp_resume(struct platform_device *pdev)
 }
 #endif
 
-/* Structure for a platform device driver */
 static struct platform_driver comcerto_elp_driver = {
 	.probe = comcerto_elp_probe,
 	.remove = comcerto_elp_remove,

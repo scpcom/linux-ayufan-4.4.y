@@ -1,19 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * adt7475 - Thermal sensor driver for the ADT7475 chip and derivatives
- * Copyright (C) 2007-2008, Advanced Micro Devices, Inc.
- * Copyright (C) 2008 Jordan Crouse <jordan@cosmicpenguin.net>
- * Copyright (C) 2008 Hans de Goede <hdegoede@redhat.com>
- * Copyright (C) 2009 Jean Delvare <khali@linux-fr.org>
- *
- * Derived from the lm83 driver by Jean Delvare
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -24,8 +11,6 @@
 #include <linux/hwmon-vid.h>
 #include <linux/err.h>
 
-/* Indexes for the sysfs hooks */
-
 #define INPUT		0
 #define MIN		1
 #define MAX		2
@@ -35,18 +20,13 @@
 #define THERM		5
 #define HYSTERSIS	6
 
-/* These are unique identifiers for the sysfs functions - unlike the
-   numbers above, these are not also indexes into an array
-*/
-
 #define ALARM		9
 #define FAULT		10
 
-/* 7475 Common Registers */
-#define REG_DEVREV2		0x12    /* ADT7490 only */
+#define REG_DEVREV2		0x12     
 
-#define REG_VTT			0x1E    /* ADT7490 only */
-#define REG_EXTEND3		0x1F    /* ADT7490 only */
+#define REG_VTT			0x1E     
+#define REG_EXTEND3		0x1F     
 
 #define REG_VOLTAGE_BASE	0x20
 #define REG_TEMP_BASE		0x25
@@ -61,7 +41,7 @@
 #define REG_STATUS1		0x41
 #define REG_STATUS2		0x42
 
-#define REG_VID			0x43	/* ADT7476 only */
+#define REG_VID			0x43	 
 
 #define REG_VOLTAGE_MIN_BASE	0x44
 #define REG_VOLTAGE_MAX_BASE	0x45
@@ -86,16 +66,16 @@
 #define REG_TEMP_OFFSET_BASE	0x70
 
 #ifdef CONFIG_SYNO_ADT7490_FEATURES
-#define REG_CONFIG1				0x40	/* ADT7490 only */
-#define REG_PECI0				0x33	/* ADT7490 only */
-#define REG_PECI1_BASE			0x1A	/* ADT7490 only */
-#define REG_PECI_CONFIG			0x88	/* ADT7490 only */
-#define REG_PECI_MIN			0x3B	/* ADT7490 only */
-#define REG_PECI_RANGE			0x3C	/* ADT7490 only */
-#define REG_PECI_OFFSET_BASE	0x94	/* ADT7490 only */
-#define REG_PECI_LOW_LIMIT		0x34	/* ADT7490 only */
-#define REG_PECI_HIGH_LIMIT		0x35	/* ADT7490 only */
-#define REG_ACOUSTIC			0x62	/* ADT7490 only */
+#define REG_CONFIG1				0x40	 
+#define REG_PECI0				0x33	 
+#define REG_PECI1_BASE			0x1A	 
+#define REG_PECI_CONFIG			0x88	 
+#define REG_PECI_MIN			0x3B	 
+#define REG_PECI_RANGE			0x3C	 
+#define REG_PECI_OFFSET_BASE	0x94	 
+#define REG_PECI_LOW_LIMIT		0x34	 
+#define REG_PECI_HIGH_LIMIT		0x35	 
+#define REG_ACOUSTIC			0x62	 
 #endif
 
 #define REG_CONFIG2		0x73
@@ -107,12 +87,12 @@
 #define REG_CONFIG5		0x7C
 #define REG_CONFIG4		0x7D
 
-#define REG_STATUS4		0x81	/* ADT7490 only */
+#define REG_STATUS4		0x81	 
 
-#define REG_VTT_MIN		0x84	/* ADT7490 only */
-#define REG_VTT_MAX		0x86	/* ADT7490 only */
+#define REG_VTT_MIN		0x84	 
+#define REG_VTT_MAX		0x86	 
 
-#define VID_VIDSEL		0x80	/* ADT7476 only */
+#define VID_VIDSEL		0x80	 
 
 #define CONFIG2_ATTN		0x20
 
@@ -126,24 +106,20 @@
 
 #define CONFIG5_TWOSCOMP	0x01
 #define CONFIG5_TEMPOFFSET	0x02
-#define CONFIG5_VIDGPIO		0x10	/* ADT7476 only */
+#define CONFIG5_VIDGPIO		0x10	 
 
-/* ADT7475 Settings */
 
-#define ADT7475_VOLTAGE_COUNT	5	/* Not counting Vtt */
+
+#define ADT7475_VOLTAGE_COUNT	5	 
 #define ADT7475_TEMP_COUNT	3
 #define ADT7475_TACH_COUNT	4
 #define ADT7475_PWM_COUNT	3
 #ifdef CONFIG_SYNO_ADT7490_FEATURES
-#define ADT7490_PECI_COUNT	4	/*ADT7490 only*/
+#define ADT7490_PECI_COUNT	4	 
 #define SYNO_IS_ADT7490(client) !strcmp(client->name, "adt7490")
 #endif
 
-/* Macro to read the registers */
-
 #define adt7475_read(reg) i2c_smbus_read_byte_data(client, (reg))
-
-/* Macros to easily index the registers */
 
 #define TACH_REG(idx) (REG_TACH_BASE + ((idx) * 2))
 #define TACH_MIN_REG(idx) (REG_TACH_MIN_BASE + ((idx) * 2))
@@ -158,7 +134,7 @@
 #define VOLTAGE_MAX_REG(idx) (REG_VOLTAGE_MAX_BASE + ((idx) * 2))
 
 #ifdef CONFIG_SYNO_ADT7490_FEATURES
-#define PECI_REG(idx) (idx == 0 ? REG_PECI0:REG_PECI1_BASE + (idx-1))	/* ADT7490 only */
+#define PECI_REG(idx) (idx == 0 ? REG_PECI0:REG_PECI1_BASE + (idx-1))	 
 #define PECI_OFFSET_REG(idx) (REG_PECI_OFFSET_BASE + (idx))
 #endif
 #define TEMP_REG(idx) (REG_TEMP_BASE + (idx))
@@ -193,7 +169,7 @@ struct adt7475_data {
 	u8 config4;
 	u8 config5;
 	u8 has_voltage;
-	u8 bypass_attn;		/* Bypass voltage attenuator */
+	u8 bypass_attn;		 
 	u8 has_pwm2:1;
 	u8 has_fan4:1;
 	u8 has_vid:1;
@@ -210,7 +186,7 @@ struct adt7475_data {
 	u8 vrm;
 #ifdef CONFIG_SYNO_ADT7490_FEATURES
 	u8 pwmsynoctl[4];
-	u16 peci[7][4];	/* ADT7490 only */
+	u16 peci[7][4];	 
 	u8 peci_range[4];
 #endif
 };
@@ -219,8 +195,6 @@ static struct i2c_driver adt7475_driver;
 static struct adt7475_data *adt7475_update_device(struct device *dev);
 static void adt7475_read_hystersis(struct i2c_client *client);
 static void adt7475_read_pwm(struct i2c_client *client, int index);
-
-/* Given a temp value, convert it to register value */
 
 static inline u16 temp2reg(struct adt7475_data *data, long val)
 {
@@ -239,8 +213,6 @@ static inline u16 temp2reg(struct adt7475_data *data, long val)
 
 	return ret << 2;
 }
-
-/* Given a register value, convert it to a real temp value */
 
 static inline int reg2temp(struct adt7475_data *data, u16 reg)
 {
@@ -269,14 +241,13 @@ static inline u16 rpm2tach(unsigned long rpm)
 	return SENSORS_LIMIT((90000 * 60) / rpm, 1, 0xFFFF);
 }
 
-/* Scaling factors for voltage inputs, taken from the ADT7490 datasheet */
 static const int adt7473_in_scaling[ADT7475_VOLTAGE_COUNT + 1][2] = {
-	{ 45, 94 },	/* +2.5V */
-	{ 175, 525 },	/* Vccp */
-	{ 68, 71 },	/* Vcc */
-	{ 93, 47 },	/* +5V */
-	{ 120, 20 },	/* +12V */
-	{ 45, 45 },	/* Vtt */
+	{ 45, 94 },	 
+	{ 175, 525 },	 
+	{ 68, 71 },	 
+	{ 93, 47 },	 
+	{ 120, 20 },	 
+	{ 45, 45 },	 
 };
 
 static inline int reg2volt(int channel, u16 reg, u8 bypass_attn)
@@ -316,8 +287,6 @@ static void adt7475_write_word(struct i2c_client *client, int reg, u16 val)
 	i2c_smbus_write_byte_data(client, reg, val & 0xFF);
 }
 
-/* Find the nearest value in a table - used for pwm frequency and
-   auto temp range */
 static int find_nearest(long val, const int *array, int size)
 {
 	int i;
@@ -413,16 +382,14 @@ static ssize_t show_temp(struct device *dev, struct device_attribute *attr,
 			out = (out >> 4) & 0xF;
 		else
 			out = (out & 0xF);
-		/* Show the value as an absolute number tied to
-		 * THERM */
+		 
 		out = reg2temp(data, data->temp[THERM][sattr->index]) -
 			out * 1000;
 		mutex_unlock(&data->lock);
 		break;
 
 	case OFFSET:
-		/* Offset is always 2's complement, regardless of the
-		 * setting in CONFIG5 */
+		 
 		mutex_lock(&data->lock);
 		out = (s8)data->temp[sattr->nr][sattr->index];
 		if (data->config5 & CONFIG5_TEMPOFFSET)
@@ -437,12 +404,12 @@ static ssize_t show_temp(struct device *dev, struct device_attribute *attr,
 		break;
 
 	case FAULT:
-		/* Note - only for remote1 and remote2 */
+		 
 		out = !!(data->alarms & (sattr->index ? 0x8000 : 0x4000));
 		break;
 
 	default:
-		/* All other temp values are in the configured format */
+		 
 		out = reg2temp(data, data->temp[sattr->nr][sattr->index]);
 	}
 
@@ -465,7 +432,6 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *attr,
 
 	mutex_lock(&data->lock);
 
-	/* We need the config register in all cases for temp <-> reg conv. */
 	data->config5 = adt7475_read(REG_CONFIG5);
 
 	switch (sattr->nr) {
@@ -480,10 +446,7 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *attr,
 		break;
 
 	case HYSTERSIS:
-		/* The value will be given as an absolute value, turn it
-		   into an offset based on THERM */
 		 
-		/* Read fresh THERM and HYSTERSIS values from the chip */
 		data->temp[THERM][sattr->index] =
 			adt7475_read(TEMP_THERM_REG(sattr->index)) << 2;
 		adt7475_read_hystersis(client);
@@ -516,8 +479,6 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *attr,
 	default:
 		data->temp[sattr->nr][sattr->index] = temp2reg(data, val);
 
-		/* We maintain an extra 2 digits of precision for simplicity
-		 * - shift those back off before writing the value */
 		out = (u8) (data->temp[sattr->nr][sattr->index] >> 2);
 	}
 
@@ -552,8 +513,6 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-/* Table of autorange values - the user will write the value in millidegrees,
-   and we'll convert it */
 static const int autorange_table[] = {
 	2000, 2500, 3330, 4000, 5000, 6670, 8000,
 	10000, 13330, 16000, 20000, 26670, 32000, 40000,
@@ -589,21 +548,17 @@ static ssize_t set_point2(struct device *dev, struct device_attribute *attr,
 
 	mutex_lock(&data->lock);
 
-	/* Get a fresh copy of the needed registers */
 	data->config5 = adt7475_read(REG_CONFIG5);
 	data->temp[AUTOMIN][sattr->index] =
 		adt7475_read(TEMP_TMIN_REG(sattr->index)) << 2;
 	data->range[sattr->index] =
 		adt7475_read(TEMP_TRANGE_REG(sattr->index));
 
-	/* The user will write an absolute value, so subtract the start point
-	   to figure the range */
 	temp = reg2temp(data, data->temp[AUTOMIN][sattr->index]);
 	val = SENSORS_LIMIT(val, temp + autorange_table[0],
 		temp + autorange_table[ARRAY_SIZE(autorange_table) - 1]);
 	val -= temp;
 
-	/* Find the nearest table entry to what the user wrote */
 	val = find_nearest(val, autorange_table, ARRAY_SIZE(autorange_table));
 
 	data->range[sattr->index] &= ~0xF0;
@@ -698,12 +653,10 @@ static ssize_t set_pwm(struct device *dev, struct device_attribute *attr,
 
 	switch (sattr->nr) {
 	case INPUT:
-		/* Get a fresh value for CONTROL */
+		 
 		data->pwm[CONTROL][sattr->index] =
 			adt7475_read(PWM_CONFIG_REG(sattr->index));
 
-		/* If we are not in manual mode, then we shouldn't allow
-		 * the user to set the pwm speed */
 		if (((data->pwm[CONTROL][sattr->index] >> 5) & 7) != 7) {
 			mutex_unlock(&data->lock);
 			return count;
@@ -730,8 +683,6 @@ static ssize_t set_pwm(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-/* Called by set_pwmctrl and set_pwmchan */
-
 static int hw_set_pwm(struct i2c_client *client, int index,
 		      unsigned int pwmctl, unsigned int pwmchan)
 {
@@ -740,31 +691,31 @@ static int hw_set_pwm(struct i2c_client *client, int index,
 
 	switch (pwmctl) {
 	case 0:
-		val = 0x03;	/* Run at full speed */
+		val = 0x03;	 
 		break;
 	case 1:
-		val = 0x07;	/* Manual mode */
+		val = 0x07;	 
 		break;
 	case 2:
 		switch (pwmchan) {
 		case 1:
-			/* Remote1 controls PWM */
+			 
 			val = 0x00;
 			break;
 		case 2:
-			/* local controls PWM */
+			 
 			val = 0x01;
 			break;
 		case 4:
-			/* remote2 controls PWM */
+			 
 			val = 0x02;
 			break;
 		case 6:
-			/* local/remote2 control PWM */
+			 
 			val = 0x05;
 			break;
 		case 7:
-			/* All three control PWM */
+			 
 			val = 0x06;
 			break;
 		default:
@@ -800,7 +751,7 @@ static ssize_t set_pwmchan(struct device *dev, struct device_attribute *attr,
 		return -EINVAL;
 
 	mutex_lock(&data->lock);
-	/* Read Modify Write PWM values */
+	 
 	adt7475_read_pwm(client, sattr->index);
 	r = hw_set_pwm(client, sattr->index, data->pwmctl[sattr->index], val);
 	if (r)
@@ -823,7 +774,7 @@ static ssize_t set_pwmctrl(struct device *dev, struct device_attribute *attr,
 		return -EINVAL;
 
 	mutex_lock(&data->lock);
-	/* Read Modify Write PWM values */
+	 
 	adt7475_read_pwm(client, sattr->index);
 	r = hw_set_pwm(client, sattr->index, val, data->pwmchan[sattr->index]);
 	if (r)
@@ -833,7 +784,6 @@ static ssize_t set_pwmctrl(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-/* List of frequencies for the PWM */
 static const int pwmfreq_table[] = {
 	11, 14, 22, 29, 35, 44, 58, 88
 };
@@ -910,7 +860,7 @@ static ssize_t set_pwm_at_crit(struct device *dev,
 
 #ifdef CONFIG_SYNO_ADT7490_FEATURES
 
-/* set peci */
+
 static ssize_t set_peci(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
@@ -930,7 +880,7 @@ static ssize_t set_peci(struct device *dev, struct device_attribute *attr,
 		return -EINVAL;
 
 	mutex_lock(&data->lock);
-	/* We need the config register in all cases for temp <-> reg conv. */
+	 
 	data->config5 = adt7475_read(REG_CONFIG5);
 
 	switch (sattr->nr) {
@@ -940,10 +890,7 @@ static ssize_t set_peci(struct device *dev, struct device_attribute *attr,
 			break;
 
 		case HYSTERSIS:
-			/* The value will be given as an absolute value, turn it
-			   into an offset based on THERM */
-			/* Read fresh THERM and HYSTERSIS values from the chip */
-			/* in ADT7490 register 0x3D is for PECI Tcontrol*/
+			 
 			data->peci[THERM][sattr->index] = adt7475_read(REG_DEVID) << 2;
 			adt7475_read_hystersis(client);
 			temp = reg2temp(data, data->peci[THERM][sattr->index]);
@@ -958,8 +905,7 @@ static ssize_t set_peci(struct device *dev, struct device_attribute *attr,
 
 		default:
 			data->peci[sattr->nr][sattr->index] = temp2reg(data, val);
-			/* We maintain an extra 2 digits of precision for simplicity
-			 * - shift those back off before writing the value */
+			 
 			out = (u8) (data->peci[sattr->nr][sattr->index] >> 2);
 	}
 
@@ -989,13 +935,11 @@ static ssize_t set_peci(struct device *dev, struct device_attribute *attr,
 	mutex_unlock(&data->lock);
 	return count;
 }
-/*
- * Show temperature from PECI interface
- */
+ 
 static ssize_t show_peci(struct device *dev, struct device_attribute *attr,
 			 char *buf)
 {
-	// this function is adt7490 only
+	 
 	struct adt7475_data *data = adt7475_update_device(dev);
 	struct i2c_client *client = to_i2c_client(dev);
 	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
@@ -1021,7 +965,7 @@ static ssize_t show_peci(struct device *dev, struct device_attribute *attr,
 			break;
 
 		default:
-			/* show peci temperature */
+			 
 			mutex_lock(&data->lock);
 			out = reg2temp(data, data->peci[sattr->nr][sattr->index]);
 			mutex_unlock(&data->lock);
@@ -1034,7 +978,7 @@ static ssize_t show_peci(struct device *dev, struct device_attribute *attr,
 static ssize_t show_adt_full_duty_cycle(struct device *dev, struct device_attribute *attr,
 						char *buf)
 {
-	// this function is adt7490 only
+	 
 	struct i2c_client *client = to_i2c_client(dev);
 	u8 config1;
 
@@ -1049,7 +993,7 @@ static ssize_t show_adt_full_duty_cycle(struct device *dev, struct device_attrib
 static ssize_t set_adt_full_duty_cycle(struct device *dev, struct device_attribute *attr,
 						const char *buf, size_t count)
 {
-	// this function is adt7490 only
+	 
 	struct i2c_client *client = to_i2c_client(dev);
 	u8 config1;
 	long val;
@@ -1076,7 +1020,7 @@ static ssize_t set_adt_full_duty_cycle(struct device *dev, struct device_attribu
 static ssize_t show_peci_error(struct device *dev, struct device_attribute *attr,
 						char *buf)
 {
-	// this function is adt7490 only
+	 
 	struct i2c_client *client = to_i2c_client(dev);
 	u8 config;
 
@@ -1090,7 +1034,7 @@ static ssize_t show_peci_error(struct device *dev, struct device_attribute *attr
 static ssize_t show_enh_acou_reg(struct device *dev, struct device_attribute *attr,
 						char *buf)
 {
-	// this function is adt7490 only
+	 
 	struct i2c_client *client = to_i2c_client(dev);
 	u8 config;
 
@@ -1104,7 +1048,7 @@ static ssize_t show_enh_acou_reg(struct device *dev, struct device_attribute *at
 static ssize_t set_enh_acou_reg(struct device *dev, struct device_attribute *attr,
 						const char *buf, size_t count)
 {
-	// this function is adt7490 only
+	 
 	struct i2c_client *client = to_i2c_client(dev);
 	u8 config;
 	long val;
@@ -1127,7 +1071,7 @@ static ssize_t set_enh_acou_reg(struct device *dev, struct device_attribute *att
 static ssize_t show_adtenable(struct device *dev, struct device_attribute *attr,
 						char *buf)
 {
-	// this function is adt7490 only
+	 
 	struct i2c_client *client = to_i2c_client(dev);
 	u8 config1;
 
@@ -1141,7 +1085,7 @@ static ssize_t show_adtenable(struct device *dev, struct device_attribute *attr,
 static ssize_t set_adtenable(struct device *dev, struct device_attribute *attr,
 						const char *buf, size_t count)
 {
-	// this function is adt7490 only
+	 
 	struct i2c_client *client = to_i2c_client(dev);
 	u8 config1;
 	long val;
@@ -1163,9 +1107,6 @@ static ssize_t set_adtenable(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-/*
- * Show high frequency configure of pwm
- */
 static ssize_t show_pwmHighFreq(struct device *dev, struct device_attribute *attr,
 						char *buf)
 {
@@ -1185,9 +1126,6 @@ static ssize_t show_pwmHighFreq(struct device *dev, struct device_attribute *att
 	return sprintf(buf, "%d\n", out);
 }
 
-/*
- * Set pwm output as high frequency
- */
 static ssize_t set_pwmHighFreq(struct device *dev, struct device_attribute *attr,
 						const char *buf, size_t count)
 {
@@ -1256,19 +1194,15 @@ static ssize_t set_peci_point2(struct device *dev, struct device_attribute *attr
 
 	mutex_lock(&data->lock);
 
-	/* Get a fresh copy of the needed registers */
 	data->config5 = adt7475_read(REG_CONFIG5);
 	data->peci[AUTOMIN][sattr->index] = adt7475_read(REG_PECI_MIN) << 2;
 	data->peci_range[sattr->index] = adt7475_read(REG_PECI_RANGE);
 
-	/* The user will write an absolute value, so subtract the start point
-	   to figure the range */
 	temp = reg2temp(data, data->peci[AUTOMIN][sattr->index]);
 	val = SENSORS_LIMIT(val, temp + autorange_table[0],
 		temp + autorange_table[ARRAY_SIZE(autorange_table) - 1]);
 	val -= temp;
 
-	/* Find the nearest table entry to what the user wrote */
 	val = find_nearest(val, autorange_table, ARRAY_SIZE(autorange_table));
 
 	data->peci_range[sattr->index] &= ~0xF0;
@@ -1292,20 +1226,13 @@ static ssize_t show_pwm_syno_control(struct device *dev, struct device_attribute
 		return -EINVAL;
 	}
 	mutex_lock(&data->lock);
-	/* Read Modify Write PWM values */
+	 
 	adt7475_read_pwm(client, sattr->index);
 	mutex_unlock(&data->lock);
 
 	return sprintf(buf, "%d\n", data->pwmsynoctl[sattr->index]);
 }
 
-/*
- * This function is set the pwm control sensor,
- * In ADT7490 spec, it could choose many way to control the pwm
- * we implement all the valid control mapping in this fucntion
- *
- * We don't use pwm_enable and pwm_auto_channel to set pwm control source
- */
 static ssize_t set_pwm_syno_control(struct device *dev, struct device_attribute *attr,
 			   const char *buf, size_t count)
 {
@@ -1325,65 +1252,65 @@ static ssize_t set_pwm_syno_control(struct device *dev, struct device_attribute 
 		return -EINVAL;
 
 	mutex_lock(&data->lock);
-	/* Read Modify Write PWM values */
+	 
 	data->pwm[CONTROL][index] = adt7475_read(PWM_CONFIG_REG(index));
 
 	switch (inputVal) {
 		case 1:
 			valt = 0;
-			val = 0x03;	/* Run at maximun duty cycle (set by pwmMax) */
+			val = 0x03;	 
 			break;
 		case 2:
 			valt = 0;
-			val = 0x07;	/* Manual mode*/
+			val = 0x07;	 
 			break;
 		case 3:
 			valt = 1;
-			val = 0x07;	/* Source from all peci and all sensor */
+			val = 0x07;	 
 			break;
 		case 4:
 			valt = 1;
-			val = 0x05;	/* Source from all peci */
+			val = 0x05;	 
 			break;
 		case 5:
 			valt = 1;
-			val = 0x00;	/* Source from peci0 */
+			val = 0x00;	 
 			break;
 		case 6:
 			valt = 1;
-			val = 0x01;	/* Source from peci1 */
+			val = 0x01;	 
 			break;
 		case 7:
 			valt = 1;
-			val = 0x02;	/* Source from peci2 */
+			val = 0x02;	 
 			break;
 		case 8:
 			valt = 1;
-			val = 0x03;	/* Source from peci3 */
+			val = 0x03;	 
 			break;
 		case 9:
 			valt = 0;
-			val = 0x06;	/* Source from all sensors */
+			val = 0x06;	 
 			break;
 		case 10:
 			valt = 0;
-			val = 0x05;	/* Source from local and remote2 */
+			val = 0x05;	 
 			break;
 		case 11:
 			valt = 0;
-			val = 0x00;	/* Source from remote1 */
+			val = 0x00;	 
 			break;
 		case 12:
 			valt = 0;
-			val = 0x01;	/* Source from local */
+			val = 0x01;	 
 			break;
 		case 13:
 			valt = 0;
-			val = 0x02;	/* Source from remote2 */
+			val = 0x02;	 
 			break;
 		default:
 			valt = 0;
-			val = 0x03;	/* Run at maximun duty cycle (set by pwmMax) */
+			val = 0x03;	 
 			break;
 	}
 
@@ -1648,7 +1575,6 @@ static SENSOR_DEVICE_ATTR_2(enhanced_acoustic_register, S_IWUSR | S_IRUGO, show_
 				set_enh_acou_reg, INPUT, 0);
 #endif
 
-/* Non-standard name, might need revisiting */
 static DEVICE_ATTR(pwm_use_point2_pwm_at_crit, S_IWUSR | S_IRUGO,
 		   show_pwm_at_crit, set_pwm_at_crit);
 
@@ -1842,7 +1768,7 @@ static int adt7475_detect(struct i2c_client *client,
 
 	vendid = adt7475_read(REG_VENDID);
 	devid2 = adt7475_read(REG_DEVID2);
-	if (vendid != 0x41 ||		/* Analog Devices */
+	if (vendid != 0x41 ||		 
 	    (devid2 & 0xf8) != 0x68)
 		return -ENODEV;
 
@@ -1911,29 +1837,28 @@ static int adt7475_probe(struct i2c_client *client,
 	mutex_init(&data->lock);
 	i2c_set_clientdata(client, data);
 
-	/* Initialize device-specific values */
 	switch (id->driver_data) {
 	case adt7476:
-		data->has_voltage = 0x0e;	/* in1 to in3 */
+		data->has_voltage = 0x0e;	 
 		revision = adt7475_read(REG_DEVID2) & 0x07;
 		break;
 	case adt7490:
-		data->has_voltage = 0x3e;	/* in1 to in5 */
+		data->has_voltage = 0x3e;	 
 		revision = adt7475_read(REG_DEVID2) & 0x03;
 		if (revision == 0x03)
 			revision += adt7475_read(REG_DEVREV2);
 		break;
 	default:
-		data->has_voltage = 0x06;	/* in1, in2 */
+		data->has_voltage = 0x06;	 
 		revision = adt7475_read(REG_DEVID2) & 0x07;
 	}
 
 #ifdef CONFIG_SYNO_ADT7490_FEATURES
 	if (SYNO_IS_ADT7490(client)) {
 		config1 = adt7475_read(REG_CONFIG1);
-		// which means adt7490 is not been told to start
+		 
 		if (!(config1 & 0x1)) {
-			// which means adt7490 is ready to go...
+			 
 			if (config1 & 0x4) {
 				config1 |= 0x11;
 				i2c_smbus_write_byte_data(client, REG_CONFIG1, config1);
@@ -1947,21 +1872,18 @@ static int adt7475_probe(struct i2c_client *client,
 #endif
 
 	config3 = adt7475_read(REG_CONFIG3);
-	/* Pin PWM2 may alternatively be used for ALERT output */
+	 
 	if (!(config3 & CONFIG3_SMBALERT))
 		data->has_pwm2 = 1;
-	/* Meaning of this bit is inverted for the ADT7473-1 */
+	 
 	if (id->driver_data == adt7473 && revision >= 1)
 		data->has_pwm2 = !data->has_pwm2;
 
 	data->config4 = adt7475_read(REG_CONFIG4);
-	/* Pin TACH4 may alternatively be used for THERM */
+	 
 	if ((data->config4 & CONFIG4_PINFUNC) == 0x0)
 		data->has_fan4 = 1;
 
-	/* THERM configuration is more complex on the ADT7476 and ADT7490,
-	   because 2 different pins (TACH4 and +2.5 Vin) can be used for
-	   this function */
 	if (id->driver_data == adt7490) {
 		if ((data->config4 & CONFIG4_PINFUNC) == 0x1 &&
 		    !(config3 & CONFIG3_THERM))
@@ -1970,20 +1892,17 @@ static int adt7475_probe(struct i2c_client *client,
 	if (id->driver_data == adt7476 || id->driver_data == adt7490) {
 		if (!(config3 & CONFIG3_THERM) ||
 		    (data->config4 & CONFIG4_PINFUNC) == 0x1)
-			data->has_voltage |= (1 << 0);		/* in0 */
+			data->has_voltage |= (1 << 0);		 
 	}
 
-	/* On the ADT7476, the +12V input pin may instead be used as VID5,
-	   and VID pins may alternatively be used as GPIO */
 	if (id->driver_data == adt7476) {
 		u8 vid = adt7475_read(REG_VID);
 		if (!(vid & VID_VIDSEL))
-			data->has_voltage |= (1 << 4);		/* in4 */
+			data->has_voltage |= (1 << 4);		 
 
 		data->has_vid = !(adt7475_read(REG_CONFIG5) & CONFIG5_VIDGPIO);
 	}
 
-	/* Voltage attenuators can be bypassed, globally or individually */
 	config2 = adt7475_read(REG_CONFIG2);
 	if (config2 & CONFIG2_ATTN) {
 		data->bypass_attn = (0x3 << 3) | 0x3;
@@ -1993,8 +1912,6 @@ static int adt7475_probe(struct i2c_client *client,
 	}
 	data->bypass_attn &= data->has_voltage;
 
-	/* Call adt7475_read_pwm for all pwm's as this will reprogram any
-	   pwm's which are disabled to manual mode with 0% duty cycle */
 	for (i = 0; i < ADT7475_PWM_COUNT; i++)
 		adt7475_read_pwm(client, i);
 
@@ -2002,7 +1919,6 @@ static int adt7475_probe(struct i2c_client *client,
 	if (ret)
 		goto efree;
 
-	/* Features that can be disabled individually */
 	if (data->has_fan4) {
 		ret = sysfs_create_group(&client->dev.kobj, &fan4_attr_group);
 		if (ret)
@@ -2179,8 +2095,7 @@ static void adt7475_read_pwm(struct i2c_client *client, int index)
 
 	data->pwm[CONTROL][index] = adt7475_read(PWM_CONFIG_REG(index));
 
-	/* Figure out the internal value for pwmctrl and pwmchan
-	   based on the current settings */
+	
 	v = (data->pwm[CONTROL][index] >> 5) & 7;
 #ifdef CONFIG_SYNO_ADT7490_FEATURES
 	data->pwmsynoctl[index] = adt7490_pwmctl_read(data->pwm[CONTROL][index]);
@@ -2190,10 +2105,7 @@ static void adt7475_read_pwm(struct i2c_client *client, int index)
 	else if (v == 7)
 		data->pwmctl[index] = 1;
 	else if (v == 4) {
-		/* The fan is disabled - we don't want to
-		   support that, so change to manual mode and
-		   set the duty cycle to 0 instead
-		*/
+		 
 		data->pwm[INPUT][index] = 0;
 		data->pwm[CONTROL][index] &= ~0xE0;
 		data->pwm[CONTROL][index] |= (7 << 5);
@@ -2237,7 +2149,6 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 
 	mutex_lock(&data->lock);
 
-	/* Measurement values update every 2 seconds */
 	if (time_after(jiffies, data->measure_updated + HZ * 2) ||
 	    !data->valid) {
 		data->alarms = adt7475_read(REG_STATUS2) << 8;
@@ -2267,7 +2178,7 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 #ifdef CONFIG_SYNO_ADT7490_FEATURES
 		if (SYNO_IS_ADT7490(client)) {
 			for (i = 0; i < ADT7490_PECI_COUNT; i++) {
-				/* Adjust values so they match the input precision */
+				 
 				data->peci[MIN][i] = adt7475_read(REG_PECI_LOW_LIMIT) << 2;
 				data->peci[MAX][i] = adt7475_read(REG_PECI_HIGH_LIMIT) << 2;
 				data->peci[AUTOMIN][i] = adt7475_read(REG_PECI_MIN) << 2;
@@ -2286,7 +2197,6 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 				adt7475_read_word(client, TACH_REG(i));
 		}
 
-		/* Updated by hw when in auto mode */
 		for (i = 0; i < ADT7475_PWM_COUNT; i++) {
 			if (i == 1 && !data->has_pwm2)
 				continue;
@@ -2299,7 +2209,6 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 		data->measure_updated = jiffies;
 	}
 
-	/* Limits and settings, should never change update every 60 seconds */
 	if (time_after(jiffies, data->limits_updated + HZ * 60) ||
 	    !data->valid) {
 		data->config4 = adt7475_read(REG_CONFIG4);
@@ -2308,7 +2217,7 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 		for (i = 0; i < ADT7475_VOLTAGE_COUNT; i++) {
 			if (!(data->has_voltage & (1 << i)))
 				continue;
-			/* Adjust values so they match the input precision */
+			 
 			data->voltage[MIN][i] =
 				adt7475_read(VOLTAGE_MIN_REG(i)) << 2;
 			data->voltage[MAX][i] =
@@ -2321,7 +2230,7 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 		}
 
 		for (i = 0; i < ADT7475_TEMP_COUNT; i++) {
-			/* Adjust values so they match the input precision */
+			 
 			data->temp[MIN][i] =
 				adt7475_read(TEMP_MIN_REG(i)) << 2;
 			data->temp[MAX][i] =
@@ -2347,7 +2256,7 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 				continue;
 			data->pwm[MAX][i] = adt7475_read(PWM_MAX_REG(i));
 			data->pwm[MIN][i] = adt7475_read(PWM_MIN_REG(i));
-			/* Set the channel and control information */
+			 
 			adt7475_read_pwm(client, i);
 		}
 

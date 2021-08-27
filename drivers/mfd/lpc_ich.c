@@ -1,58 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  lpc_ich.c - LPC interface for Intel ICH
- *
- *  LPC bridge function of the Intel ICH contains many other
- *  functional units, such as Interrupt controllers, Timers,
- *  Power Management, System Management, GPIO, RTC, and LPC
- *  Configuration Registers.
- *
- *  This driver is derived from lpc_sch.
-
- *  Copyright (c) 2011 Extreme Engineering Solution, Inc.
- *  Author: Aaron Sierra <asierra@xes-inc.com>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License 2 as published
- *  by the Free Software Foundation.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  This driver supports the following I/O Controller hubs:
- *	(See the intel documentation on http://developer.intel.com.)
- *	document number 290655-003, 290677-014: 82801AA (ICH), 82801AB (ICHO)
- *	document number 290687-002, 298242-027: 82801BA (ICH2)
- *	document number 290733-003, 290739-013: 82801CA (ICH3-S)
- *	document number 290716-001, 290718-007: 82801CAM (ICH3-M)
- *	document number 290744-001, 290745-025: 82801DB (ICH4)
- *	document number 252337-001, 252663-008: 82801DBM (ICH4-M)
- *	document number 273599-001, 273645-002: 82801E (C-ICH)
- *	document number 252516-001, 252517-028: 82801EB (ICH5), 82801ER (ICH5R)
- *	document number 300641-004, 300884-013: 6300ESB
- *	document number 301473-002, 301474-026: 82801F (ICH6)
- *	document number 313082-001, 313075-006: 631xESB, 632xESB
- *	document number 307013-003, 307014-024: 82801G (ICH7)
- *	document number 322896-001, 322897-001: NM10
- *	document number 313056-003, 313057-017: 82801H (ICH8)
- *	document number 316972-004, 316973-012: 82801I (ICH9)
- *	document number 319973-002, 319974-002: 82801J (ICH10)
- *	document number 322169-001, 322170-003: 5 Series, 3400 Series (PCH)
- *	document number 320066-003, 320257-008: EP80597 (IICH)
- *	document number 324645-001, 324646-001: Cougar Point (CPT)
- *	document number TBD : Patsburg (PBG)
- *	document number TBD : DH89xxCC
- *	document number TBD : Panther Point
- *	document number TBD : Lynx Point
- */
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -81,11 +29,11 @@ static int lpc_ich_acpi_save = -1;
 static int lpc_ich_gpio_save = -1;
 
 static struct resource gpio_ich_res[] = {
-	/* GPIO */
+	 
 	{
 		.flags = IORESOURCE_IO,
 	},
-	/* ACPI - GPE0 */
+	 
 	{
 		.flags = IORESOURCE_IO,
 	},
@@ -104,68 +52,67 @@ static struct mfd_cell lpc_ich_cells[] = {
 	},
 };
 
-/* chipset related info */
 enum lpc_chipsets {
-	LPC_ICH = 0,	/* ICH */
-	LPC_ICH0,	/* ICH0 */
-	LPC_ICH2,	/* ICH2 */
-	LPC_ICH2M,	/* ICH2-M */
-	LPC_ICH3,	/* ICH3-S */
-	LPC_ICH3M,	/* ICH3-M */
-	LPC_ICH4,	/* ICH4 */
-	LPC_ICH4M,	/* ICH4-M */
-	LPC_CICH,	/* C-ICH */
-	LPC_ICH5,	/* ICH5 & ICH5R */
-	LPC_6300ESB,	/* 6300ESB */
-	LPC_ICH6,	/* ICH6 & ICH6R */
-	LPC_ICH6M,	/* ICH6-M */
-	LPC_ICH6W,	/* ICH6W & ICH6RW */
-	LPC_631XESB,	/* 631xESB/632xESB */
-	LPC_ICH7,	/* ICH7 & ICH7R */
-	LPC_ICH7DH,	/* ICH7DH */
-	LPC_ICH7M,	/* ICH7-M & ICH7-U */
-	LPC_ICH7MDH,	/* ICH7-M DH */
-	LPC_NM10,	/* NM10 */
-	LPC_ICH8,	/* ICH8 & ICH8R */
-	LPC_ICH8DH,	/* ICH8DH */
-	LPC_ICH8DO,	/* ICH8DO */
-	LPC_ICH8M,	/* ICH8M */
-	LPC_ICH8ME,	/* ICH8M-E */
-	LPC_ICH9,	/* ICH9 */
-	LPC_ICH9R,	/* ICH9R */
-	LPC_ICH9DH,	/* ICH9DH */
-	LPC_ICH9DO,	/* ICH9DO */
-	LPC_ICH9M,	/* ICH9M */
-	LPC_ICH9ME,	/* ICH9M-E */
-	LPC_ICH10,	/* ICH10 */
-	LPC_ICH10R,	/* ICH10R */
-	LPC_ICH10D,	/* ICH10D */
-	LPC_ICH10DO,	/* ICH10DO */
-	LPC_PCH,	/* PCH Desktop Full Featured */
-	LPC_PCHM,	/* PCH Mobile Full Featured */
-	LPC_P55,	/* P55 */
-	LPC_PM55,	/* PM55 */
-	LPC_H55,	/* H55 */
-	LPC_QM57,	/* QM57 */
-	LPC_H57,	/* H57 */
-	LPC_HM55,	/* HM55 */
-	LPC_Q57,	/* Q57 */
-	LPC_HM57,	/* HM57 */
-	LPC_PCHMSFF,	/* PCH Mobile SFF Full Featured */
-	LPC_QS57,	/* QS57 */
-	LPC_3400,	/* 3400 */
-	LPC_3420,	/* 3420 */
-	LPC_3450,	/* 3450 */
-	LPC_EP80579,	/* EP80579 */
-	LPC_CPT,	/* Cougar Point */
-	LPC_CPTD,	/* Cougar Point Desktop */
-	LPC_CPTM,	/* Cougar Point Mobile */
-	LPC_PBG,	/* Patsburg */
-	LPC_DH89XXCC,	/* DH89xxCC */
-	LPC_PPT,	/* Panther Point */
-	LPC_LPT,	/* Lynx Point */
+	LPC_ICH = 0,	 
+	LPC_ICH0,	 
+	LPC_ICH2,	 
+	LPC_ICH2M,	 
+	LPC_ICH3,	 
+	LPC_ICH3M,	 
+	LPC_ICH4,	 
+	LPC_ICH4M,	 
+	LPC_CICH,	 
+	LPC_ICH5,	 
+	LPC_6300ESB,	 
+	LPC_ICH6,	 
+	LPC_ICH6M,	 
+	LPC_ICH6W,	 
+	LPC_631XESB,	 
+	LPC_ICH7,	 
+	LPC_ICH7DH,	 
+	LPC_ICH7M,	 
+	LPC_ICH7MDH,	 
+	LPC_NM10,	 
+	LPC_ICH8,	 
+	LPC_ICH8DH,	 
+	LPC_ICH8DO,	 
+	LPC_ICH8M,	 
+	LPC_ICH8ME,	 
+	LPC_ICH9,	 
+	LPC_ICH9R,	 
+	LPC_ICH9DH,	 
+	LPC_ICH9DO,	 
+	LPC_ICH9M,	 
+	LPC_ICH9ME,	 
+	LPC_ICH10,	 
+	LPC_ICH10R,	 
+	LPC_ICH10D,	 
+	LPC_ICH10DO,	 
+	LPC_PCH,	 
+	LPC_PCHM,	 
+	LPC_P55,	 
+	LPC_PM55,	 
+	LPC_H55,	 
+	LPC_QM57,	 
+	LPC_H57,	 
+	LPC_HM55,	 
+	LPC_Q57,	 
+	LPC_HM57,	 
+	LPC_PCHMSFF,	 
+	LPC_QS57,	 
+	LPC_3400,	 
+	LPC_3420,	 
+	LPC_3450,	 
+	LPC_EP80579,	 
+	LPC_CPT,	 
+	LPC_CPTD,	 
+	LPC_CPTM,	 
+	LPC_PBG,	 
+	LPC_DH89XXCC,	 
+	LPC_PPT,	 
+	LPC_LPT,	 
 #ifdef CONFIG_SYNO_AVOTON
-	LPC_AVN,	/* Avoton SoC */
+	LPC_AVN,	 
 #endif
 };
 
@@ -392,12 +339,6 @@ struct lpc_ich_info lpc_chipset_info[] __devinitdata = {
 #endif
 };
 
-/*
- * This data only exists for exporting the supported PCI ids
- * via MODULE_DEVICE_TABLE.  We do not actually register a
- * pci_driver, because the I/O Controller Hub has also other
- * functions that probably will be registered by other drivers.
- */
 static DEFINE_PCI_DEVICE_TABLE(lpc_ich_ids) = {
 	{ PCI_VDEVICE(INTEL, 0x2410), LPC_ICH},
 	{ PCI_VDEVICE(INTEL, 0x2420), LPC_ICH0},
@@ -569,7 +510,7 @@ static DEFINE_PCI_DEVICE_TABLE(lpc_ich_ids) = {
 	{ PCI_VDEVICE(INTEL, 0x1f3a), LPC_AVN},
 	{ PCI_VDEVICE(INTEL, 0x1f3b), LPC_AVN},
 #endif
-	{ 0, },			/* End of list */
+	{ 0, },			 
 };
 MODULE_DEVICE_TABLE(pci, lpc_ich_ids);
 
@@ -612,12 +553,7 @@ static void __devinit lpc_ich_finalize_cell(struct mfd_cell *cell,
 }
 
 #ifdef SYNO_LPC_ICH_GPIO_CTRL
-/*
- * Now only Avoton use this way to control gpio
- * the others x64 platform syno_pch_lpc_gpio_pin is in
- * driver/pci/quirks.c
- * One day other x64 platforms can use this path
- */
+ 
 static u32 gpiobase = 0;
 static u32 *writable_pin = NULL;
 static u32 SynoGpioCount = 0;
@@ -632,21 +568,18 @@ static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36,
 static u32 avoton_writable_pin[] = {10, 15, 16, 17, 49, 50, 53, 54};
 
 #if defined(CONFIG_SYNO_AVOTON)
-/* for avoton gpio we define that
- * CORE WELL gpio (GPIOS_X) start from 0 to 31
- * SUS WELL gpio (GPIO_SUSX) start from 32 to 63
- */
+ 
 static u32 coreWellGpio = 0;
 static u32 susWellGpio = 0;
-static u32 avoton_corewell_gpioin_pin = 0x18041831; //pin 15 16 and 17 used as output pin for DS415+, so we don't read these pin from CPU
+static u32 avoton_corewell_gpioin_pin = 0x18041831;  
 static u32 avoton_suswell_gpioin_pin = 0xC181114;
 #endif
 
 #if defined(CONFIG_SYNO_AVOTON)
-// avoton gpio pin 0~63
+ 
 #define GPIO_MAX_PIN 63
 #else
-// other x64 platform gpio pin 0~95
+ 
 #define GPIO_MAX_PIN 95
 #endif
 
@@ -675,7 +608,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
 	spin_lock_irqsave(&lock, flags);
 
 	if (1 == isWrite) {
-		// SynoGpioCount should follow the assigned array size of writable_pin
+		 
 		while (i < SynoGpioCount) {
             if (pin == writable_pin[i]) {
                 break;
@@ -715,15 +648,12 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
         addr_lvl = gpiobase + 0x48;
         mppPin %= 32;
 	}
-/*
- * If Avoton GPIO pin set ouput, we can't read the value from register
- * so we need to store the gpio values in kernel instead of register
- */
+ 
 #if defined(CONFIG_SYNO_AVOTON)
 	if (0 == isWrite) {
-        //out put value
+         
 		if ((1 << mppPin) & gpioin_pin) {
-			// Input pin is GPI, read from GPI register directly
+			 
 			val_lvl = inl(addr_lvl);
 			*pValue = (val_lvl & (1 << mppPin)) >> mppPin;
 		} else {
@@ -742,30 +672,27 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
 	}
 #else
     if (0 == isWrite) {
-        //change use select to GPIO
+         
         val_use_select = inl(addr_use_select);
         tmpVal = 1 << mppPin;
         val_use_select |= tmpVal;
         outl(val_use_select, addr_use_select);
 
-        //out put value
         val_lvl = inl(addr_lvl);
 
         *pValue = (val_lvl & (1 << mppPin)) >> mppPin;
     } else {
-        //change use select to GPIO
+         
         val_use_select = inl(addr_use_select);
         tmpVal = 1 << mppPin;
         val_use_select |= tmpVal;
         outl(val_use_select, addr_use_select);
 
-        //change I/O select to output
         val_io_select = inl(addr_io_select);
         tmpVal = ~(1 << mppPin);
         val_io_select &= tmpVal;
         outl(val_io_select, addr_io_select);
 
-        //out put value
         val_lvl = inl(addr_lvl);
         if (1 == *pValue) {
             tmpVal = 1 << mppPin;
@@ -818,7 +745,6 @@ static int __devinit lpc_ich_init_gpio(struct pci_dev *dev,
 	bool acpi_conflict = false;
 	struct resource *res;
 
-	/* Setup power management base register */
 	pci_read_config_dword(dev, ACPIBASE, &base_addr_cfg);
 	base_addr = base_addr_cfg & 0x0000ff80;
 	if (!base_addr) {
@@ -832,11 +758,7 @@ static int __devinit lpc_ich_init_gpio(struct pci_dev *dev,
 	res->end = base_addr + ACPIBASE_GPE_END;
 	ret = acpi_check_resource_conflict(res);
 	if (ret) {
-		/*
-		 * This isn't fatal for the GPIO, but we have to make sure that
-		 * the platform_device subsystem doesn't see this resource
-		 * or it will register an invalid region.
-		 */
+		 
 		lpc_ich_cells[LPC_GPIO].num_resources--;
 		acpi_conflict = true;
 	} else {
@@ -844,7 +766,7 @@ static int __devinit lpc_ich_init_gpio(struct pci_dev *dev,
 	}
 
 gpe0_done:
-	/* Setup GPIO base register */
+	 
 	pci_read_config_dword(dev, GPIOBASE, &base_addr_cfg);
 	base_addr = base_addr_cfg & 0x0000ff80;
 	if (!base_addr) {
@@ -856,20 +778,15 @@ gpe0_done:
 	gpiobase = base_addr;
 	syno_gpio_init(dev);
 #ifdef CONFIG_SYNO_AVOTON
-	/* For Avoton models
-	 * gpio_sus18 and gpio_sus22 is output pin and the default valuse is 1
-	 * gpio sus21 is for ds415+ phy reset
-	 * So we need set the default value to 1
-	 */
+	 
 	if (syno_is_hw_version(HW_DS415p)) {
 		susWellGpio = 0x640000;
 	} else {
 		susWellGpio = 0x440000;
 	}
-#endif /* CONFIG_SYNO_AVOTON */
+#endif  
 #endif
 
-	/* Older devices provide fewer GPIO and have a smaller resource size. */
 	res = &gpio_ich_res[ICH_RES_GPIO];
 	res->start = base_addr;
 	switch (lpc_chipset_info[id->driver_data].gpio_version) {
@@ -884,7 +801,7 @@ gpe0_done:
 
 	ret = acpi_check_resource_conflict(res);
 	if (ret) {
-		/* this isn't necessarily fatal for the GPIO */
+		 
 		acpi_conflict = true;
 		goto gpio_done;
 	}
@@ -911,10 +828,6 @@ static int __devinit lpc_ich_probe(struct pci_dev *dev,
 	if (!ret)
 		cell_added = true;
 
-	/*
-	 * We only care if at least one or none of the cells registered
-	 * successfully.
-	 */
 	if (!cell_added) {
 		lpc_ich_restore_config_space(dev);
 		return -ENODEV;

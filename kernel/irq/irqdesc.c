@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 1992, 1998-2006 Linus Torvalds, Ingo Molnar
- * Copyright (C) 2005-2006, Thomas Gleixner, Russell King
- *
- * This file contains the interrupt descriptor management code
- *
- * Detailed information is available in Documentation/DocBook/genericirq
- *
- */
+ 
 #include <linux/irq.h>
 #include <linux/slab.h>
 #include <linux/export.h>
@@ -20,9 +12,6 @@
 
 #include "internals.h"
 
-/*
- * lockdep: we want to handle all irq_desc locks as a single lock-class:
- */
 static struct lock_class_key irq_desc_lock_class;
 
 #if defined(CONFIG_SMP)
@@ -146,7 +135,7 @@ static struct irq_desc *alloc_desc(int irq, int node, struct module *owner)
 	desc = kzalloc_node(sizeof(*desc), gfp, node);
 	if (!desc)
 		return NULL;
-	/* allocate based on nr_cpu_ids */
+	 
 	desc->kstat_irqs = alloc_percpu(unsigned int);
 	if (!desc->kstat_irqs)
 		goto err_desc;
@@ -224,7 +213,6 @@ int __init early_irq_init(void)
 
 	init_irq_default_affinity();
 
-	/* Let arch update nr_irqs and return the nr of preallocated irqs */
 	initcnt = arch_probe_nr_irqs();
 	printk(KERN_INFO "NR_IRQS:%d nr_irqs:%d %d\n", NR_IRQS, nr_irqs, initcnt);
 
@@ -245,7 +233,7 @@ int __init early_irq_init(void)
 	return arch_early_irq_init();
 }
 
-#else /* !CONFIG_SPARSE_IRQ */
+#else  
 
 struct irq_desc irq_desc[NR_IRQS] __cacheline_aligned_in_smp = {
 	[0 ... NR_IRQS-1] = {
@@ -315,13 +303,8 @@ static int irq_expand_nr_irqs(unsigned int nr)
 	return -ENOMEM;
 }
 
-#endif /* !CONFIG_SPARSE_IRQ */
+#endif  
 
-/**
- * generic_handle_irq - Invoke the handler for a particular irq
- * @irq:	The irq number to handle
- *
- */
 int generic_handle_irq(unsigned int irq)
 {
 	struct irq_desc *desc = irq_to_desc(irq);
@@ -333,13 +316,6 @@ int generic_handle_irq(unsigned int irq)
 }
 EXPORT_SYMBOL_GPL(generic_handle_irq);
 
-/* Dynamic interrupt handling */
-
-/**
- * irq_free_descs - free irq descriptors
- * @from:	Start of descriptor range
- * @cnt:	Number of consecutive irqs to free
- */
 void irq_free_descs(unsigned int from, unsigned int cnt)
 {
 	int i;
@@ -356,16 +332,6 @@ void irq_free_descs(unsigned int from, unsigned int cnt)
 }
 EXPORT_SYMBOL_GPL(irq_free_descs);
 
-/**
- * irq_alloc_descs - allocate and initialize a range of irq descriptors
- * @irq:	Allocate for specific irq number if irq >= 0
- * @from:	Start the search from this irq number
- * @cnt:	Number of consecutive irqs to allocate.
- * @node:	Preferred node on which the irq descriptor should be allocated
- * @owner:	Owning module (can be NULL)
- *
- * Returns the first irq number or error code
- */
 int __ref
 __irq_alloc_descs(int irq, unsigned int from, unsigned int cnt, int node,
 		  struct module *owner)
@@ -405,13 +371,6 @@ err:
 }
 EXPORT_SYMBOL_GPL(__irq_alloc_descs);
 
-/**
- * irq_reserve_irqs - mark irqs allocated
- * @from:	mark from irq number
- * @cnt:	number of irqs to mark
- *
- * Returns 0 on success or an appropriate error code
- */
 int irq_reserve_irqs(unsigned int from, unsigned int cnt)
 {
 	unsigned int start;
@@ -430,12 +389,6 @@ int irq_reserve_irqs(unsigned int from, unsigned int cnt)
 	return ret;
 }
 
-/**
- * irq_get_next_irq - get next allocated irq number
- * @offset:	where to start the search
- *
- * Returns next irq number after offset or nr_irqs if none is found.
- */
 unsigned int irq_get_next_irq(unsigned int offset)
 {
 	return find_next_bit(allocated_irqs, nr_irqs, offset);
@@ -491,10 +444,6 @@ int irq_set_percpu_devid(unsigned int irq)
 	return 0;
 }
 
-/**
- * dynamic_irq_cleanup - cleanup a dynamically allocated irq
- * @irq:	irq number to initialize
- */
 void dynamic_irq_cleanup(unsigned int irq)
 {
 	struct irq_desc *desc = irq_to_desc(irq);

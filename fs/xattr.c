@@ -1,12 +1,4 @@
-/*
-  File: fs/xattr.c
  
-  Extended attribute handling.
-
-  Copyright (C) 2001 by Andreas Gruenbacher <a.gruenbacher@computer.org>
-  Copyright (C) 2001 SGI - Silicon Graphics, Inc <linux-xfs@oss.sgi.com>
-  Copyright (c) 2004 Red Hat, Inc., James Morris <jmorris@redhat.com>
- */
 #include <linux/fs.h>
 #include <linux/slab.h>
 #include <linux/file.h>
@@ -25,33 +17,21 @@
 #include "synoacl_int.h"
 #include <linux/syno_acl_xattr_ds.h>
 #endif
-/*
- * Check permissions for extended attribute access.  This is a bit complicated
- * because different namespaces have very different rules.
- */
+ 
 #ifdef CONFIG_FS_SYNO_ACL
 static int
 xattr_permission(struct dentry *dentry, const char *name, int mask)
 #else
 static int
 xattr_permission(struct inode *inode, const char *name, int mask)
-#endif /* CONFIG_FS_SYNO_ACL */
+#endif  
 {
 #ifdef CONFIG_FS_SYNO_ACL
 	struct inode *inode = dentry->d_inode;
-	/**
-	 * For synoacl getxattr setxattr
-	 * getxattr: mask should be MAY_READ
-	 * setxattr: mask should be MAY_WRITE
-	 * removexattr: mask should be MAY_WRITE
-	 * Need to use synoacl_check_xattr_perm to check permission
-	 */
+	 
 	if (!strcmp(name, SYNO_ACL_XATTR_ACCESS)) {
 		if (inode->i_op->syno_bypass_is_synoacl) {
-			/*
-			 * GlusterFS returns false for [IS|HAS]_SYNOACL, but ACL
-			 * attribute could be checked and got from GlusterFS xlator.
-			 */
+			 
 			return inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
 		} else if (MAY_WRITE == mask || MAY_WRITE_PERMISSION == mask) {
 			return synoacl_check_xattr_perm(name, dentry, MAY_WRITE_PERMISSION);
@@ -62,18 +42,10 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 		}
 	}
 
-	/**
-	 * getxattr for inherit ACL;
-	 * The mask should be MAY_READ
-	 * Need to check the MAY_READ_PERMISSION
-	 */
 	if (MAY_READ == mask) {
 		if (!strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
 			if (inode->i_op->syno_bypass_is_synoacl) {
-				/*
-				 * GlusterFS returns false for [IS|HAS]_SYNOACL, but ACL
-				 * attribute could be checked and got from GlusterFS xlator.
-				 */
+				 
 				return inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
 			} else if (!IS_SYNOACL(dentry)) {
 				return -EOPNOTSUPP;
@@ -82,19 +54,13 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 		}
 		if (!strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY)) {
 			if (inode->i_op->syno_bypass_is_synoacl) {
-				/*
-				 * GlusterFS returns false for [IS|HAS]_SYNOACL, but ACL
-				 * attribute could be checked and got from GlusterFS xlator.
-				 */
+				 
 				return inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
 			}
 			return synoacl_op_perm(dentry, MAY_READ_PERMISSION);
 		}
 	}
 
-	/**
-	 * MAC EA need add read/write attribute permission
-	 */
 	if (IS_SYNOACL(dentry) &&
 	    (!strncmp(name, SYNO_XATTR_EA_PREFIX, SYNO_XATTR_EA_PREFIX_LEN) ||
 	     !strncmp(name, SYNO_XATTR_NETATALK_PREFIX, SYNO_XATTR_NETATALK_PREFIX_LEN))) {
@@ -106,38 +72,23 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 		}
 		return synoacl_op_perm(dentry, mask);
 	}
-#endif /* CONFIG_FS_SYNO_ACL */
-	/*
-	 * We can never set or remove an extended attribute on a read-only
-	 * filesystem  or on an immutable / append-only inode.
-	 */
+#endif  
+	 
 	if (mask & MAY_WRITE) {
 		if (IS_IMMUTABLE(inode) || IS_APPEND(inode))
 			return -EPERM;
 	}
 
-	/*
-	 * No restriction for security.* and system.* from the VFS.  Decision
-	 * on these is left to the underlying filesystem / security module.
-	 */
 	if (!strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN) ||
 	    !strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
 		return 0;
 
-	/*
-	 * The trusted.* namespace can only be accessed by privileged users.
-	 */
 	if (!strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN)) {
 		if (!capable(CAP_SYS_ADMIN))
 			return (mask & MAY_WRITE) ? -EPERM : -ENODATA;
 		return 0;
 	}
 
-	/*
-	 * In the user.* namespace, only regular files and directories can have
-	 * extended attributes. For sticky directories, only the owner and
-	 * privileged users can write attributes.
-	 */
 	if (!strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN)) {
 		if (!S_ISREG(inode->i_mode) && !S_ISDIR(inode->i_mode))
 			return (mask & MAY_WRITE) ? -EPERM : -ENODATA;
@@ -148,30 +99,13 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_SYNOACL(dentry)) {
-		//ACL file but not the syno key.
-		//still need to check mask permission with ACL
+		 
 		return synoacl_op_perm(dentry, mask);
 	} else
-#endif /* CONFIG_FS_SYNO_ACL */
+#endif  
 	return inode_permission(inode, mask);
 }
 
-/**
- *  __vfs_setxattr_noperm - perform setxattr operation without performing
- *  permission checks.
- *
- *  @dentry - object to perform setxattr on
- *  @name - xattr name to set
- *  @value - value to set @name to
- *  @size - size of @value
- *  @flags - flags to pass into filesystem operations
- *
- *  returns the result of the internal setxattr or setsecurity operations.
- *
- *  This function requires the caller to lock the inode's i_mutex before it
- *  is executed. It also assumes that the caller will make the appropriate
- *  permission checks.
- */
 int __vfs_setxattr_noperm(struct dentry *dentry, const char *name,
 		const void *value, size_t size, int flags)
 {
@@ -211,7 +145,7 @@ vfs_setxattr(struct dentry *dentry, const char *name, const void *value,
 	error = xattr_permission(dentry, name, MAY_WRITE);
 #else
 	error = xattr_permission(inode, name, MAY_WRITE);
-#endif /* CONFIG_FS_SYNO_ACL */
+#endif  
 	if (error)
 		return error;
 
@@ -246,7 +180,7 @@ out:
 	return error;
 }
 EXPORT_SYMBOL(vfs_setxattr_nolock);
-#endif /* CONFIG_FS_SYNO_ACL */
+#endif  
 
 ssize_t
 xattr_getsecurity(struct inode *inode, const char *name, void *value,
@@ -275,14 +209,6 @@ out_noalloc:
 }
 EXPORT_SYMBOL_GPL(xattr_getsecurity);
 
-/*
- * vfs_getxattr_alloc - allocate memory, if necessary, before calling getxattr
- *
- * Allocate memory, if not already allocated, or re-allocate correct size,
- * before retrieving the extended attribute.
- *
- * Returns the result of alloc, if failed, or the getxattr operation.
- */
 ssize_t
 vfs_getxattr_alloc(struct dentry *dentry, const char *name, char **xattr_value,
 		   size_t xattr_size, gfp_t flags)
@@ -295,7 +221,7 @@ vfs_getxattr_alloc(struct dentry *dentry, const char *name, char **xattr_value,
 	error = xattr_permission(dentry, name, MAY_READ);
 #else
 	error = xattr_permission(inode, name, MAY_READ);
-#endif /* CONFIG_FS_SYNO_ACL */
+#endif  
 	if (error)
 		return error;
 
@@ -318,7 +244,6 @@ vfs_getxattr_alloc(struct dentry *dentry, const char *name, char **xattr_value,
 	return error;
 }
 
-/* Compare an extended attribute value with the given value */
 int vfs_xattr_cmp(struct dentry *dentry, const char *xattr_name,
 		  const char *value, size_t size, gfp_t flags)
 {
@@ -347,7 +272,7 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 	error = xattr_permission(dentry, name, MAY_READ);
 #else
 	error = xattr_permission(inode, name, MAY_READ);
-#endif /* CONFIG_FS_SYNO_ACL */
+#endif  
 	if (error)
 		return error;
 
@@ -359,19 +284,16 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 		if (!strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
 			return synoacl_op_xattr_get(dentry, SYNO_ACL_INHERITED, value, size);
 		} else if (!strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY)) {
-			//We should return possible inherited ACL even file is in linux mode.
+			 
 			return synoacl_op_xattr_get(dentry, SYNO_ACL_PSEUDO_INHERIT_ONLY, value, size);
 		}
 	}
-#endif /* CONFIG_FS_SYNO_ACL */
+#endif  
 	if (!strncmp(name, XATTR_SECURITY_PREFIX,
 				XATTR_SECURITY_PREFIX_LEN)) {
 		const char *suffix = name + XATTR_SECURITY_PREFIX_LEN;
 		int ret = xattr_getsecurity(inode, suffix, value, size);
-		/*
-		 * Only overwrite the return value if a security module
-		 * is actually active.
-		 */
+		 
 		if (ret == -EOPNOTSUPP)
 			goto nolsm;
 		return ret;
@@ -421,7 +343,7 @@ vfs_removexattr(struct dentry *dentry, const char *name)
 	error = xattr_permission(dentry, name, MAY_WRITE);
 #else
 	error = xattr_permission(inode, name, MAY_WRITE);
-#endif /* CONFIG_FS_SYNO_ACL */
+#endif  
 	if (error)
 		return error;
 
@@ -441,9 +363,6 @@ vfs_removexattr(struct dentry *dentry, const char *name)
 }
 EXPORT_SYMBOL_GPL(vfs_removexattr);
 
-/*
- * Extended attribute SET operations
- */
 static long
 setxattr(struct dentry *d, const char __user *name, const void __user *value,
 	 size_t size, int flags)
@@ -533,9 +452,6 @@ SYSCALL_DEFINE5(fsetxattr, int, fd, const char __user *, name,
 	return error;
 }
 
-/*
- * Extended attribute GET operations
- */
 static ssize_t
 getxattr(struct dentry *d, const char __user *name, void __user *value,
 	 size_t size)
@@ -563,8 +479,7 @@ getxattr(struct dentry *d, const char __user *name, void __user *value,
 		if (size && copy_to_user(value, kvalue, error))
 			error = -EFAULT;
 	} else if (error == -ERANGE && size >= XATTR_SIZE_MAX) {
-		/* The file system tried to returned a value bigger
-		   than XATTR_SIZE_MAX bytes. Not possible. */
+		 
 		error = -E2BIG;
 	}
 	kfree(kvalue);
@@ -614,9 +529,6 @@ SYSCALL_DEFINE4(fgetxattr, int, fd, const char __user *, name,
 	return error;
 }
 
-/*
- * Extended attribute LIST operations
- */
 static ssize_t
 listxattr(struct dentry *d, char __user *list, size_t size)
 {
@@ -636,8 +548,7 @@ listxattr(struct dentry *d, char __user *list, size_t size)
 		if (size && copy_to_user(list, klist, error))
 			error = -EFAULT;
 	} else if (error == -ERANGE && size >= XATTR_LIST_MAX) {
-		/* The file system tried to returned a list bigger
-		   than XATTR_LIST_MAX bytes. Not possible. */
+		 
 		error = -E2BIG;
 	}
 	kfree(klist);
@@ -686,9 +597,6 @@ SYSCALL_DEFINE3(flistxattr, int, fd, char __user *, list, size_t, size)
 	return error;
 }
 
-/*
- * Extended attribute REMOVE operations
- */
 static long
 removexattr(struct dentry *d, const char __user *name)
 {
@@ -770,23 +678,11 @@ strcmp_prefix(const char *a, const char *a_prefix)
 	return *a_prefix ? NULL : a;
 }
 
-/*
- * In order to implement different sets of xattr operations for each xattr
- * prefix with the generic xattr API, a filesystem should create a
- * null-terminated array of struct xattr_handler (one for each prefix) and
- * hang a pointer to it off of the s_xattr field of the superblock.
- *
- * The generic_fooxattr() functions will use this list to dispatch xattr
- * operations to the correct xattr_handler.
- */
 #define for_each_xattr_handler(handlers, handler)		\
 		for ((handler) = *(handlers)++;			\
 			(handler) != NULL;			\
 			(handler) = *(handlers)++)
 
-/*
- * Find the xattr_handler with the matching prefix.
- */
 static const struct xattr_handler *
 xattr_resolve_name(const struct xattr_handler **handlers, const char **name)
 {
@@ -805,9 +701,6 @@ xattr_resolve_name(const struct xattr_handler **handlers, const char **name)
 	return handler;
 }
 
-/*
- * Find the handler for the prefix and dispatch its get() operation.
- */
 ssize_t
 generic_getxattr(struct dentry *dentry, const char *name, void *buffer, size_t size)
 {
@@ -819,10 +712,6 @@ generic_getxattr(struct dentry *dentry, const char *name, void *buffer, size_t s
 	return handler->get(dentry, name, buffer, size, handler->flags);
 }
 
-/*
- * Combine the results of the list() operation from every xattr_handler in the
- * list.
- */
 ssize_t
 generic_listxattr(struct dentry *dentry, char *buffer, size_t buffer_size)
 {
@@ -850,16 +739,13 @@ generic_listxattr(struct dentry *dentry, char *buffer, size_t buffer_size)
 	return size;
 }
 
-/*
- * Find the handler for the prefix and dispatch its set() operation.
- */
 int
 generic_setxattr(struct dentry *dentry, const char *name, const void *value, size_t size, int flags)
 {
 	const struct xattr_handler *handler;
 
 	if (size == 0)
-		value = "";  /* empty EA, do not remove */
+		value = "";   
 
 	handler = xattr_resolve_name(dentry->d_sb->s_xattr, &name);
 	if (!handler)
@@ -867,10 +753,6 @@ generic_setxattr(struct dentry *dentry, const char *name, const void *value, siz
 	return handler->set(dentry, name, value, size, flags, handler->flags);
 }
 
-/*
- * Find the handler for the prefix and dispatch its set() operation to remove
- * any associated extended attribute.
- */
 int
 generic_removexattr(struct dentry *dentry, const char *name)
 {

@@ -1,32 +1,9 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright(c) 2004 - 2006 Intel Corporation. All rights reserved.
- * Portions based on net/core/datagram.c and copyrighted by their authors.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59
- * Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- * The full GNU General Public License is included in this distribution in the
- * file called COPYING.
- */
+ 
 
-/*
- * This code allows the net stack to make use of a DMA engine for
- * skb to iovec copies.
- */
+
 
 #include <linux/dmaengine.h>
 #include <linux/socket.h>
@@ -35,7 +12,7 @@
 #include <net/netdma.h>
 
 #ifdef CONFIG_SYNO_ALPINE
-#define NET_DMA_DEFAULT_COPYBREAK  8192 /* don't enable NET_DMA by default */
+#define NET_DMA_DEFAULT_COPYBREAK  8192  
 #else
 #define NET_DMA_DEFAULT_COPYBREAK 4096
 #endif
@@ -43,16 +20,7 @@
 int sysctl_tcp_dma_copybreak = NET_DMA_DEFAULT_COPYBREAK;
 EXPORT_SYMBOL(sysctl_tcp_dma_copybreak);
 
-/**
- *	dma_skb_copy_datagram_iovec - Copy a datagram to an iovec.
- *	@skb - buffer to copy
- *	@offset - offset in the buffer to start copying from
- *	@iovec - io vector to copy to
- *	@len - amount of data to copy from buffer to iovec
- *	@pinned_list - locked iovec buffer data
- *
- *	Note: the iovec is modified during the copy.
- */
+
 int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 			struct sk_buff *skb, int offset, struct iovec *to,
 			size_t len, struct dma_pinned_list *pinned_list)
@@ -60,7 +28,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 	int start = skb_headlen(skb);
 	int i, copy = start - offset;
 #ifdef CONFIG_SYNO_ALPINE
-//do nothing
+ 
 #else
 	struct sk_buff *frag_iter;
 #endif
@@ -95,7 +63,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 	src_sg_len = 0;
 #endif
 
-	/* Copy header. */
+	
 	if (copy > 0) {
 		if (copy > len)
 			copy = len;
@@ -123,7 +91,6 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 #endif
 	}
 
-	/* Copy paged appendix. Hmm... why does this look so complicated? */
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
 		int end;
 		const skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
@@ -216,7 +183,7 @@ retry:
 #endif
 
 #ifdef CONFIG_SYNO_ALPINE
-//do nothing
+ 
 #else
 end:
 #endif
@@ -226,7 +193,7 @@ end:
 	}
 
 #ifdef CONFIG_SYNO_ALPINE
-//do nothing
+ 
 #else
 fault:
 #endif

@@ -3,7 +3,7 @@
 #endif
 #ifdef CONFIG_MMU
 
-/* the upper-most page table pointer */
+
 extern pmd_t *top_pmd;
 
 #if (defined(CONFIG_SYNO_ARMADA_ARCH__V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)) ||\

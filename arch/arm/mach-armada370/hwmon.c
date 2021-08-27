@@ -1,25 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * hwmon-axp.c - temperature monitoring driver for Dove SoC
- *
- * Inspired from other hwmon drivers
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301 USA.
- */
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -32,11 +13,9 @@
 #include <linux/platform_device.h>
 #include <linux/cpu.h>
 #include <asm/io.h>
-//#include <linux/delay.h>
-#include <linux/slab.h>
-//#include "pmu/mvPmuRegs.h"
  
-/* Termal Sensor Registers */
+#include <linux/slab.h>
+ 
 #define TSEN_STATUS_REG				0x18300
 #define	TSEN_STATUS_TEMP_OUT_OFFSET		19
 #define	TSEN_STATUS_TEMP_OUT_MASK		(0x1FF << TSEN_STATUS_TEMP_OUT_OFFSET)
@@ -46,21 +25,20 @@
 #define	TSEN_CONF_REF_CAL_MASK			(0x1FF << 11)
 #define	TSEN_CONF_SOFT_RESET_MASK		(0x1 << 1)
 
-#define ARMADAXP_OVERHEAT_TEMP	105		/* milidegree Celsius */
+#define ARMADAXP_OVERHEAT_TEMP	105		 
 #define ARMADAXP_OVERHEAT_DELAY	0x700
-#define ARMADAXP_OVERCOOL_TEMP	10		/* milidegree Celsius */
+#define ARMADAXP_OVERCOOL_TEMP	10		 
 #define	ARMADAXP_OVERCOOL_DELAY	0x700
 #define ARMADAXP_OVERHEAT_MIN	0
 #define ARMADAXP_OVERHEAT_MAX	110
 #define ARMADAXP_OVERCOOL_MIN	0
 #define ARMADAXP_OVERCOOL_MAX	110
 
-/* Junction Temperature */
 #define ARMADAXP_TSEN_TEMP2RAW(x) ((3153000 - (13825 * x)) / 10000)
 #define ARMADAXP_TSEN_RAW2TEMP(x) ((3153000 - (10000 * x)) / 13825)
 #if 0
-/* Dove */
-((2281638 - (10 * x)) / 7298)    /* in millCelsius */
+ 
+((2281638 - (10 * x)) / 7298)     
  ((2281638 - (7298 * x)) / 10)
 #endif
 
@@ -82,14 +60,12 @@ static void axptemp_set_thresholds(unsigned int max, unsigned int min)
 #if 0
 	u32 temp, reg;
 
-	/* Set the overheat threashold & delay */
 	temp = ARMADAXP_TSEN_TEMP2RAW(max);
 	reg = readl(INTER_REGS_BASE | PMU_THERMAL_MNGR_REG);
 	reg &= ~PMU_TM_OVRHEAT_THRSH_MASK;
 	reg |= (temp << PMU_TM_OVRHEAT_THRSH_OFFS);
 	writel(reg, (INTER_REGS_BASE | PMU_THERMAL_MNGR_REG));
 
-	/* Set the overcool threshole & delay */
 	temp = ARMADAXP_TSEN_TEMP2RAW(min);
 	reg = readl(INTER_REGS_BASE | PMU_THERMAL_MNGR_REG);
 	reg &= ~PMU_TM_COOL_THRSH_MASK;
@@ -102,7 +78,6 @@ static int axptemp_init_sensor(void)
 {
 	u32 reg;
 
-	/* init the TSEN sensor once */
 	reg = readl(INTER_REGS_BASE | TSEN_CONF_REG);
 	reg |= TSEN_CONF_OTF_CALIB_MASK;
 	writel(reg, (INTER_REGS_BASE | TSEN_CONF_REG));
@@ -116,19 +91,14 @@ static int axptemp_init_sensor(void)
 	reg |= TSEN_CONF_SOFT_RESET_MASK;
 	writel(reg, (INTER_REGS_BASE | TSEN_CONF_REG));
 
-	//udelay(1000);
-
 	reg = readl(INTER_REGS_BASE | TSEN_CONF_REG);
 	reg &= ~(TSEN_CONF_SOFT_RESET_MASK);
 	writel(reg, (INTER_REGS_BASE | TSEN_CONF_REG));
 
-	//udelay(10000);
-	 
 #if 0
-	/* Set thresholds */
+	 
 	axptemp_set_thresholds(temp_max, temp_min);
 
-	/* Set delays */
 	writel(ARMADAXP_OVERHEAT_DELAY, (INTER_REGS_BASE | PMU_TM_OVRHEAT_DLY_REG));
 	writel(ARMADAXP_OVERCOOL_DELAY, (INTER_REGS_BASE | PMU_TM_COOLING_DLY_REG));
 #endif
@@ -146,17 +116,13 @@ int axptemp_read_temp(void)
 
 	reg = readl(INTER_REGS_BASE | TSEN_STATUS_REG);
 	reg = (reg & TSEN_STATUS_TEMP_OUT_MASK) >> TSEN_STATUS_TEMP_OUT_OFFSET;
-//	value = ((3153000 - (10000 * reg)) / 13825);
+ 
 
 	return ARMADAXP_TSEN_RAW2TEMP(reg);
 }
 #ifdef CONFIG_SYNO_ARMADA_ARCH
 EXPORT_SYMBOL(axptemp_read_temp);
 #endif
-
-/*
- * Sysfs stuff
- */
 
 static ssize_t show_name(struct device *dev, struct device_attribute
 			  *devattr, char *buf) {
@@ -251,7 +217,6 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *devattr,
 	return count;
 }
 
-/* TODO - Add read/write support in order to support setting max/min */
 static SENSOR_DEVICE_ATTR(temp1_type, S_IRUGO, show_info, NULL,
 			  SHOW_TYPE);
 static SENSOR_DEVICE_ATTR(temp1_label, S_IRUGO, show_info, NULL,

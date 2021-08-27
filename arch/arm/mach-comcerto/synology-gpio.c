@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Synology Armada NAS Board GPIO Setup
- *
- * Maintained by:  KueiHuan Chen <khchen@synology.com>
- *
- * Copyright 2009-2013 Synology, Inc.  All rights reserved.
- * Copyright 2009-2013 Chocoyeh
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; see the file COPYING.  If not, write to
- * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- */
+ 
 #if defined(CONFIG_SYNO_COMCERTO)
 
 #include <linux/platform_device.h>
@@ -35,7 +13,6 @@
 
 #define GPIO_UNDEF				0xFF
 
-/* copied from synobios.h */
 #define DISK_LED_OFF			0
 #define DISK_LED_GREEN_SOLID	1
 #define DISK_LED_ORANGE_SOLID	2
@@ -198,7 +175,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 	case 5:
 		if (generic_gpio.ext_sata_led.hdd5_led_0 == GPIO_UNDEF ||
 			generic_gpio.ext_sata_led.hdd5_led_1 == GPIO_UNDEF) {
-			//some 4 bay model don't contain such gpio.
+			 
 			ret = 0;
 			goto END;
 		}
@@ -206,7 +183,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 		pin2 = generic_gpio.ext_sata_led.hdd5_led_1;
 		break;
 	case 6:
-		//for esata
+		 
 		ret = 0;
 		goto END;
 	default:
@@ -361,7 +338,7 @@ unsigned char SYNOComcerto2kIsBoardNeedPowerUpHDD(u32 disk_id) {
 
 int SYNO_CHECK_HDD_PRESENT(int index)
 {
-    int iPrzVal = 1; /*defult is present*/
+    int iPrzVal = 1;  
 
     switch (index) {
         case 1:
@@ -400,7 +377,6 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 
 	WARN_ON(GPIO_UNDEF == generic_gpio.soc_sata_led.hdd1_fail_led);
 
-	/* assign pin info according to hdd */
 	switch (index) {
 		case 1:
 			act_led = generic_gpio.soc_sata_led.hdd1_act_led;
@@ -415,8 +391,6 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 			goto END;
 	}
 
-	/* Since faulty led and present led are combined,
-	   we need to disable present led when light on faulty's */
 	if ( DISK_LED_ORANGE_SOLID == status ||
 		 DISK_LED_ORANGE_BLINK == status )
 	{
@@ -445,15 +419,10 @@ END:
 	return ret;
 }
 
-/* SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER
- * Query support HDD dynamic Power .
- * output: 0 - support, 1 - not support.
- */
 int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 {
 	int iRet = 0;
 
-	/* if exist at least one hdd has enable pin and present detect pin ret=1*/
 	if ((GPIO_UNDEF != generic_gpio.hdd_pm.hdd1_pm && GPIO_UNDEF != generic_gpio.hdd_detect.hdd1_present_detect) ||
 			(GPIO_UNDEF != generic_gpio.hdd_pm.hdd2_pm && GPIO_UNDEF != generic_gpio.hdd_detect.hdd2_present_detect) ||
 			(GPIO_UNDEF != generic_gpio.hdd_pm.hdd3_pm && GPIO_UNDEF != generic_gpio.hdd_detect.hdd3_present_detect) ||
@@ -499,29 +468,6 @@ EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
 EXPORT_SYMBOL(SYNO_SOC_HDD_LED_SET);
 EXPORT_SYMBOL(SYNO_GPIO_SET_FALLING_EDGE);
 EXPORT_SYMBOL(SYNO_GPIO_SET_RISING_EDGE);
-
-/*
-DS414J/415J GPIO config table
-
-Pin     In/Out    Function
-00      Out       High = LED Enable , Low = LED Disable
-02      Out       High = HDD power enable , Low = HDD power disable
-03      Out       High = HDD power enable , Low = HDD power disable
-04      Out       High = HDD power enable , Low = HDD power disable
-05      Out       High = HDD power enable , Low = HDD power disable
-10      Out       Active high
-11      Out       Active high
-12      Out       Active high
-35       In       Pulse => Fan Status is good , Low => Fan Fail
-36       In       High = No HDD present , Low = HDD present
-37       In       High = No HDD present , Low = HDD present
-38       In       High = No HDD present , Low = HDD present
-39       In       High = No HDD present , Low = HDD present
-40       In       Model ID [2]
-41       In       Model ID [1]
-42       In       Model ID [0] , DS414j = 0x0
-43       In       Pulse => Fan Status is good , Low => Fan Fail
-*/
 
 static void
 COMCERTO2K_4bay_GPIO_init(SYNO_GPIO *global_gpio)
@@ -723,7 +669,7 @@ void synology_gpio_init(void)
 	} else if(0 == strncmp(gszSynoHWVersion, HW_DS415jv10, strlen(HW_DS415jv10))) {
 		COMCERTO2K_4bay_GPIO_init(&generic_gpio);
 		generic_gpio.ext_sata_led.hdd_led_mask = 0;
-		/* 415j fan is re-order */
+		 
 		generic_gpio.fan.fan_fail = 35;
 		generic_gpio.fan.fan_fail_2 = 43;
 		printk("Synology %s GPIO Init\n", HW_DS415jv10);
@@ -735,4 +681,4 @@ void synology_gpio_init(void)
 		printk("Not supported hw version!\n");
 	}
 }
-#endif /* CONFIG_SYNO_COMCERTO2K_ARCH */
+#endif  

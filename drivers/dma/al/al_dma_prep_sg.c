@@ -1,28 +1,6 @@
-/*
- * Annapurna Labs DMA Linux driver - SG Memory copy preparation
- * Copyright(c) 2013 Annapurna Labs.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU General Public License,
- * version 2, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * The full GNU General Public License is included in this distribution in
- * the file called "COPYING".
- *
- */
+ 
 #include "al_dma.h"
 
-/******************************************************************************
- *****************************************************************************/
 struct dma_async_tx_descriptor *al_dma_prep_sg_lock(
 	struct dma_chan *c,
 	struct scatterlist *dst_sg, unsigned int dst_nents,
@@ -81,7 +59,7 @@ struct dma_async_tx_descriptor *al_dma_prep_sg_lock(
 			txd = &desc->txd;
 
 		desc->txd.flags = flags;
-		/* prepare hal transaction */
+		 
 		xaction = &desc->hal_xaction;
 #ifdef CONFIG_SYNO_ALPINE_A0
 		xaction->op = AL_RAID_OP_MEM_CPY;
@@ -101,7 +79,6 @@ struct dma_async_tx_descriptor *al_dma_prep_sg_lock(
 			xaction->flags |= AL_RAID_BARRIER;
 #endif
 
-		/* use bufs[0] and block[0] for source buffers/blocks */
 		for_each_sg(src_sg, sg, src_nents, i) {
 			desc->bufs[i].addr = sg_dma_address(sg);
 			desc->bufs[i].len = sg_dma_len(sg);
@@ -126,7 +103,6 @@ struct dma_async_tx_descriptor *al_dma_prep_sg_lock(
 		xaction->num_of_srcs = 1;
 		xaction->total_src_bufs = src_nents;
 
-		/* use next bufs and block for destination buffers/blocks */
 		for_each_sg(dst_sg, sg, dst_nents, i) {
 			desc->bufs[src_nents + i].addr = sg_dma_address(sg);
 			desc->bufs[src_nents + i].len = sg_dma_len(sg);
@@ -166,7 +142,6 @@ struct dma_async_tx_descriptor *al_dma_prep_sg_lock(
 				__func__, total_src_len, total_dst_len);
 		}
 
-		/* send raid transaction to engine */
 		rc = al_raid_dma_prepare(chan->hal_raid, chan->idx,
 					&desc->hal_xaction);
 		if (unlikely(rc)) {

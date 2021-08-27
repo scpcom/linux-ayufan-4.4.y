@@ -1,45 +1,18 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * fs/inotify_user.c - inotify support for userspace
- *
- * Authors:
- *	John McCutchan	<ttb@tentacle.dhs.org>
- *	Robert Love	<rml@novell.com>
- *
- * Copyright (C) 2005 John McCutchan
- * Copyright 2006 Hewlett-Packard Development Company, L.P.
- *
- * Copyright (C) 2009 Eric Paris <Red Hat Inc>
- * inotify was largely rewriten to make use of the fsnotify infrastructure
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- */
  
-#include <linux/dcache.h> /* d_unlinked */
-#include <linux/fs.h> /* struct inode */
+#include <linux/dcache.h>  
+#include <linux/fs.h>  
 #include <linux/fsnotify_backend.h>
 #include <linux/inotify.h>
-#include <linux/path.h> /* struct path */
-#include <linux/slab.h> /* kmem_* */
+#include <linux/path.h>  
+#include <linux/slab.h>  
 #include <linux/types.h>
 #include <linux/sched.h>
 
 #include "inotify.h"
 
-/*
- * Check if 2 events contain the same information.  We do not compare private data
- * but at this moment that isn't a problem for any know fsnotify listeners.
- */
 static bool event_compare(struct fsnotify_event *old, struct fsnotify_event *new)
 {
 	if ((old->mask == new->mask) &&
@@ -48,9 +21,7 @@ static bool event_compare(struct fsnotify_event *old, struct fsnotify_event *new
 	    (old->name_len == new->name_len)) {
 		switch (old->data_type) {
 		case (FSNOTIFY_EVENT_INODE):
-			/* remember, after old was put on the wait_q we aren't
-			 * allowed to look at the inode any more, only thing
-			 * left to check was if the file_name is the same */
+			 
 			if (!old->name_len ||
 			    !strcmp(old->file_name, new->file_name))
 				return true;
@@ -77,7 +48,6 @@ static struct fsnotify_event *inotify_merge(struct list_head *list,
 	struct fsnotify_event_holder *last_holder;
 	struct fsnotify_event *last_event;
 
-	/* and the list better be locked by something too */
 	spin_lock(&event->lock);
 
 	last_holder = list_entry(list->prev, struct fsnotify_event_holder, event_list);
@@ -164,13 +134,6 @@ static bool inotify_should_send_event(struct fsnotify_group *group, struct inode
 	return true;
 }
 
-/*
- * This is NEVER supposed to be called.  Inotify marks should either have been
- * removed from the idr when the watch was removed or in the
- * fsnotify_destroy_mark_by_group() call when the inotify instance was being
- * torn down.  This is only called if the idr is about to be freed but there
- * are still marks in it.
- */
 static int idr_callback(int id, void *p, void *data)
 {
 	struct fsnotify_mark *fsn_mark;
@@ -187,12 +150,6 @@ static int idr_callback(int id, void *p, void *data)
 	WARN(1, "inotify closing but id=%d for fsn_mark=%p in group=%p still in "
 		"idr.  Probably leaking memory\n", id, p, data);
 
-	/*
-	 * I'm taking the liberty of assuming that the mark in question is a
-	 * valid address and I'm dereferencing it.  This might help to figure
-	 * out why we got here and the panic is no worse than the original
-	 * BUG() that was here.
-	 */
 	if (fsn_mark)
 		printk(KERN_WARNING "fsn_mark->group=%p inode=%p wd=%d\n",
 			fsn_mark->group, fsn_mark->i.inode, i_mark->wd);
@@ -201,7 +158,7 @@ static int idr_callback(int id, void *p, void *data)
 
 static void inotify_free_group_priv(struct fsnotify_group *group)
 {
-	/* ideally the idr is empty and we won't hit the BUG in the callback */
+	 
 	idr_for_each(&group->inotify_data.idr, idr_callback, group);
 	idr_remove_all(&group->inotify_data.idr);
 	idr_destroy(&group->inotify_data.idr);

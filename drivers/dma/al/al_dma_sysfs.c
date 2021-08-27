@@ -1,24 +1,3 @@
-/*
- * Annapurna Labs DMA Linux driver - sysfs support
- * Copyright(c) 2011 Annapurna Labs.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU General Public License,
- * version 2, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * The full GNU General Public License is included in this distribution in
- * the file called "COPYING".
- *
- */
  
 #include <linux/stat.h>
 #include <linux/sysdev.h>
@@ -110,7 +89,6 @@ struct sysdev_ext_attribute dev_attr_stats_comp[] = {
 	DEVICE_STATS_COMP_ATTR(mismatching_cpu),
 };
 
-/* Device attrs - udma debug */
 static struct sysdev_ext_attribute dev_attr_udma_debug[] = {
 	UDMA_DUMP_PREP_ATTR(m2s_regs, UDMA_DUMP_M2S_REGS),
 	UDMA_DUMP_PREP_ATTR(m2s_q_struct, UDMA_DUMP_M2S_Q_STRUCT),
@@ -123,8 +101,6 @@ static struct sysdev_ext_attribute dev_attr_udma_debug[] = {
 static DEVICE_ATTR(stats_rst,	S_IRUGO | S_IWUSR, rd_stats_rst, wr_stats_rst);
 #endif
 
-/******************************************************************************
- *****************************************************************************/
 int al_dma_sysfs_init(
 	struct device *dev)
 {
@@ -191,8 +167,6 @@ done:
 	return status;
 }
 
-/******************************************************************************
- *****************************************************************************/
 void al_dma_sysfs_terminate(
 	struct device *dev)
 {
@@ -214,8 +188,7 @@ void al_dma_sysfs_terminate(
 }
 
 #ifdef CONFIG_AL_DMA_STATS
-/******************************************************************************
- *****************************************************************************/
+ 
 static ssize_t rd_stats_prep(
 	struct device *dev,
 	struct sysdev_attribute *attr,
@@ -252,8 +225,6 @@ static ssize_t rd_stats_prep(
 	return size;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static ssize_t rd_stats_comp(
 	struct device *dev,
 	struct sysdev_attribute *attr,
@@ -290,8 +261,6 @@ static ssize_t rd_stats_comp(
 	return size;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static ssize_t rd_stats_rst(
 	struct device *dev,
 	struct sysdev_attribute *attr,
@@ -302,8 +271,6 @@ static ssize_t rd_stats_rst(
 		"Write anything to clear all statistics\n");
 }
 
-/******************************************************************************
- *****************************************************************************/
 static ssize_t wr_stats_rst(
 	struct device *dev,
 	struct sysdev_attribute *attr,
@@ -335,8 +302,6 @@ static ssize_t wr_stats_rst(
 	return i;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static ssize_t rd_udma_dump(
 	struct device *dev,
 	struct sysdev_attribute *attr,
@@ -375,8 +340,6 @@ static ssize_t rd_udma_dump(
 	return rc;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static ssize_t wr_udma_dump(
 	struct device *dev,
 	struct sysdev_attribute *attr,

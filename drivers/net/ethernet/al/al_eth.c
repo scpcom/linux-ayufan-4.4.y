@@ -1,14 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* al_eth.c: AnnapurnaLabs Unified 1GbE and 10GbE ethernet driver.
- *
- * Copyright (c) 2012 AnnapurnaLabs
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation.
- */
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -75,16 +67,14 @@ MODULE_DESCRIPTION("AnnapurnaLabs unified 1GbE and 10GbE Ethernet driver");
 MODULE_LICENSE("GPL");
 MODULE_VERSION(DRV_MODULE_VERSION);
 
-/* Time in jiffies before concluding the transmitter is hung. */
 #define TX_TIMEOUT  (5*HZ)
 
-/* Time in mSec to keep trying to read / write from MDIO in case of error */
 #define MDIO_TIMEOUT_MSEC	100
 
 #ifdef CONFIG_SYNO_ALPINE_A0
-//Do nothing
+ 
 #else
-/* num of link training failures till serdes reset */
+ 
 #define AL_ETH_KR_LT_FAILURES_TO_RESET	(10)
 #endif
 static int disable_msi;
@@ -97,7 +87,6 @@ static int debug = -1;
 module_param(debug, int, 0);
 MODULE_PARM_DESC(debug, "Debug level (0=none,...,16=all)");
 
-/* indexed by board_t */
 static struct {
 	char *name;
 } board_info[] = {
@@ -124,7 +113,6 @@ struct al_udma *al_eth_udma_get(struct al_eth_adapter *adapter, int tx)
 	return &adapter->hal_adapter.rx_udma;
 }
 
-/* MDIO */
 static int
 al_mdio_read(struct mii_bus *bp, int mii_id, int reg)
 {
@@ -201,33 +189,22 @@ static int al_eth_flow_ctrl_config(struct al_eth_adapter *adapter);
 static uint8_t al_eth_flow_ctrl_mutual_cap_get(struct al_eth_adapter *adapter);
 
 #ifdef CONFIG_SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
-/* We want to change backplane RJ45 link speed LED behavior:
- * 1000M: green
- *  100M: orange
- *   10M: disabled
- */
+ 
 static void syno_update_rtl8211dn_led(struct phy_device *phydev, int speed)
 {
-	/* To change LED behavior, switch to extension Page44 first:
-	 * Write Register 31 Data=0x0007
-	 * Write Register 30 Data=0x002c
-	 */
+	 
 	phy_write(phydev, 0x1f, 0x07);
 	phy_write(phydev, 0x1e, 0x2c);
 
-	/* Write Register 28 to change link speed LED */
 	switch (speed) {
 	case SPEED_1000:
 	case SPEED_100:
 	case SPEED_10:
-		/* Green LED on only when 1000Mbps. Orange LED on only when 100Mbps */
+		 
 		phy_write(phydev, 0x1c, 0x0742);
 		break;
 	}
 
-	/* After LED setting, switch to the PHY's Page0:
-	 * Write Register 31 Data=0x0000
-	 */
 	phy_write(phydev, 0x1f, 0x00);
 }
 #endif
@@ -273,7 +250,7 @@ static void al_eth_adjust_link(struct net_device *dev)
 
 		if (new_state) {
 			int rc;
-			/* change the MAC link configuration */
+			 
 			rc = al_eth_mac_link_config(&adapter->hal_adapter,
 #ifdef CONFIG_SYNO_ALPINE_A0
 					false,
@@ -316,7 +293,6 @@ static int al_eth_phy_init(struct al_eth_adapter *adapter)
 	adapter->link_config.active_duplex = DUPLEX_UNKNOWN;
 	adapter->link_config.active_speed = SPEED_UNKNOWN;
 
-	/* Attach the MAC to the PHY. */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
 	phydev = phy_connect(adapter->netdev, dev_name(&phydev->dev), al_eth_adjust_link,
 			     PHY_INTERFACE_MODE_RGMII);
@@ -333,7 +309,6 @@ static int al_eth_phy_init(struct al_eth_adapter *adapter)
 			phydev->addr, dev_name(&phydev->dev),
 			phydev->drv ? phydev->drv->name : "unknown");
 
-	/* Mask with MAC supported features. */
 	phydev->supported &= (PHY_GBIT_FEATURES |
 				SUPPORTED_Pause |
 				SUPPORTED_Asym_Pause);
@@ -344,17 +319,12 @@ static int al_eth_phy_init(struct al_eth_adapter *adapter)
 			phydev->addr, phydev->supported, phydev->advertising);
 
 	adapter->phydev = phydev;
-	/* Bring the PHY up */
+	 
 	phy_start(adapter->phydev);
 
 	return 0;
 }
 
-/**
- * al_eth_mdiobus_setup - initialize mdiobus and register to kernel
- *
- *
- **/
 static int al_eth_mdiobus_setup(struct al_eth_adapter *adapter)
 {
 	struct phy_device *phydev;
@@ -402,11 +372,6 @@ static int al_eth_mdiobus_setup(struct al_eth_adapter *adapter)
 	return 0;
 }
 
-/**
- * al_eth_mdiobus_teardown - mdiobus unregister
- *
- *
- **/
 static void al_eth_mdiobus_teardown(struct al_eth_adapter *adapter)
 {
 	if (!adapter->mdio_bus)
@@ -452,28 +417,28 @@ al_init_rx_cpu_rmap(struct al_eth_adapter *adapter);
 
 int al_eth_fpga_read_pci_config(void *handle, int where, uint32_t *val)
 {
-	/* handle is the base address of the adapter */
+	 
 	*val = readl(handle + where);
 	return 0;
 }
 
 int al_eth_fpga_write_pci_config(void *handle, int where, uint32_t val)
 {
-	/* handle is the base address of the adapter */
+	 
 	writel(val, handle + where);
 	return 0;
 }
 
 int al_eth_read_pci_config(void *handle, int where, uint32_t *val)
 {
-	/* handle is a pointer to the pci_dev */
+	 
 	pci_read_config_dword((struct pci_dev *)handle, where, val);
 	return 0;
 }
 
 int al_eth_write_pci_config(void *handle, int where, uint32_t val)
 {
-	/* handle is a pointer to the pci_dev */
+	 
 	pci_write_config_dword((struct pci_dev *)handle, where, val);
 	return 0;
 }
@@ -485,7 +450,6 @@ al_eth_function_reset(struct al_eth_adapter *adapter)
 	void __iomem *adapter_base;
 	int rc;
 
-	/* save board params so we restore it after reset */
 	al_eth_board_params_get(adapter->mac_base, &params);
 	al_eth_mac_addr_read(adapter->ec_base, 0, adapter->mac_addr);
 	if (adapter->board_type == ALPINE_NIC) {
@@ -494,14 +458,14 @@ al_eth_function_reset(struct al_eth_adapter *adapter)
 		rc = al_eth_flr_rmn(&al_eth_fpga_read_pci_config,
 				&al_eth_fpga_write_pci_config,
 				adapter_base, adapter->mac_base);
-//		writel(0x80, adapter_base + 0x93); /* enable MSI-X in the adapter */
+ 
 	} else {
 		rc = al_eth_flr_rmn(&al_eth_read_pci_config,
 				&al_eth_write_pci_config,
 				adapter->pdev, adapter->mac_base);
 
 	}
-	/* restore params */
+	 
 	al_eth_board_params_set(adapter->mac_base, &params);
 	al_eth_mac_addr_store(adapter->ec_base, 0, adapter->mac_addr);
 	return rc;
@@ -529,7 +493,7 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 	adapter->auto_speed = false;
 
 	rc = al_eth_board_params_get(adapter->mac_base, &params);
-	if (rc) { /* if params are not initialized, use the following default */
+	if (rc) {  
 		adapter->ref_clk_freq = AL_ETH_REF_FREQ_375_MHZ;
 		adapter->mdio_freq = AL_ETH_DEFAULT_MDIO_FREQ_KHZ;
 
@@ -617,7 +581,7 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 		switch (params.media_type) {
 		case AL_ETH_BOARD_MEDIA_TYPE_RGMII:
 			if (params.sfp_plus_module_exist == AL_TRUE)
-				/* Backward compatibility */
+				 
 				adapter->mac_mode = AL_ETH_MAC_MODE_SGMII;
 			else
 				adapter->mac_mode = AL_ETH_MAC_MODE_RGMII;
@@ -682,10 +646,6 @@ al_eth_flow_ctrl_mutual_cap_get(struct al_eth_adapter *adapter)
 	if (phydev->asym_pause)
 		peer_flow_ctrl ^= (AL_ETH_FLOW_CTRL_RX_PAUSE);
 
-	/*
-	 * in autoneg mode, supported flow ctrl is also
-	 * the current advertising
-	 */
 	if ((peer_flow_ctrl & AL_ETH_FLOW_CTRL_TX_PAUSE) ==
 	    (link_config->flow_ctrl_supported & AL_ETH_FLOW_CTRL_TX_PAUSE))
 		new_flow_ctrl |= AL_ETH_FLOW_CTRL_TX_PAUSE;
@@ -724,8 +684,7 @@ al_eth_flow_ctrl_config(struct al_eth_adapter *adapter)
 static void
 al_eth_flow_ctrl_enable(struct al_eth_adapter *adapter)
 {
-	/* change the active configuration to the default / force by ethtool
-	 * and call to configure */
+	 
 	adapter->link_config.flow_ctrl_active =
 				adapter->link_config.flow_ctrl_supported;
 
@@ -747,10 +706,10 @@ static int al_eth_hw_init_adapter(struct al_eth_adapter *adapter)
 	params->dev_id = adapter->dev_id;
 	params->rev_id = adapter->rev_id;
 	params->udma_id = 0;
-	params->enable_rx_parser = 1; /* enable rx epe parser*/
-	params->udma_regs_base = adapter->udma_base; /* UDMA register base address */
-	params->ec_regs_base = adapter->ec_base; /* Ethernet controller registers base address */
-	params->mac_regs_base = adapter->mac_base; /* Ethernet MAC registers base address */
+	params->enable_rx_parser = 1;  
+	params->udma_regs_base = adapter->udma_base;  
+	params->ec_regs_base = adapter->ec_base;  
+	params->mac_regs_base = adapter->mac_base;  
 	params->name = adapter->name;
 
 	rc = al_eth_adapter_init(&adapter->hal_adapter, params);
@@ -791,7 +750,7 @@ al_eth_hw_init(struct al_eth_adapter *adapter)
 #endif
 
 	rc = al_eth_mdio_config(&adapter->hal_adapter,
-		AL_ETH_MDIO_TYPE_CLAUSE_22 , AL_TRUE/*shared_mdio_if*/,
+		AL_ETH_MDIO_TYPE_CLAUSE_22 , AL_TRUE ,
 		adapter->ref_clk_freq, adapter->mdio_freq);
 	if (rc) {
 		dev_err(&adapter->pdev->dev, "%s failed at mdio config!\n", __func__);
@@ -810,19 +769,13 @@ al_eth_hw_stop(struct al_eth_adapter *adapter)
 {
 	al_eth_mac_stop(&adapter->hal_adapter);
 
-	/* wait till pending rx packets written and UDMA becomes idle,
-	 * the MAC has ~10KB fifo, 10us should be enought time for the
-	 * UDMA to write to the memory
-	 */
 	udelay(10);
 
-	/* disable hw queues */
 	al_eth_udma_queues_disable_all(adapter);
 	al_eth_adapter_stop(&adapter->hal_adapter);
 
 	adapter->flags |= AL_ETH_FLAG_RESET_REQUESTED;
 
-	/* disable flow ctrl to avoid pause packets*/
 	al_eth_flow_ctrl_disable(adapter);
 
 	return 0;
@@ -847,7 +800,7 @@ al_eth_udma_queue_enable(struct al_eth_adapter *adapter, enum al_udma_type type,
 			   qid);
 		return rc;
 	}
-#if 0 /* queue enable not implemented yet */
+#if 0  
 	rc = al_eth_queue_enable(&adapter->hal_adapter, type, qid);
 
 	if (rc < 0)
@@ -874,7 +827,7 @@ al_eth_udma_queue_disable(struct al_eth_adapter *adapter, enum al_udma_type type
 			 int	qid)
 {
 	int rc = 0;
-#if 0 /* queue_disable not implemented yet */
+#if 0  
 	char *name = (type == UDMA_TX) ? "Tx" : "Rx";
 	rc = al_eth_queue_disable(&adapter->hal_adapter, type, qid);
 
@@ -929,13 +882,6 @@ al_eth_init_rings(struct al_eth_adapter *adapter)
 	}
 }
 
-/**
- * al_eth_setup_tx_resources - allocate Tx resources (Descriptors)
- * @adapter: network interface device structure
- * @qid: queue index
- *
- * Return 0 on success, negative on failure
- **/
 static int
 al_eth_setup_tx_resources(struct al_eth_adapter *adapter, int qid)
 {
@@ -950,7 +896,6 @@ al_eth_setup_tx_resources(struct al_eth_adapter *adapter, int qid)
 	if (!tx_ring->tx_buffer_info)
 		return -ENOMEM;
 
-	/* TODO: consider ALIGN to page size */
 	tx_ring->descs_size = tx_ring->hw_count * sizeof(union al_udma_desc);
 	q_params->size = tx_ring->hw_count;
 
@@ -962,20 +907,13 @@ al_eth_setup_tx_resources(struct al_eth_adapter *adapter, int qid)
 	if (!q_params->desc_base)
 		return -ENOMEM;
 
-	q_params->cdesc_base = NULL; /* completion queue not used for tx */
+	q_params->cdesc_base = NULL;  
 	q_params->cdesc_size = 8;
 	tx_ring->next_to_use = 0;
 	tx_ring->next_to_clean = 0;
 	return 0;
 }
 
-/**
- * al_eth_free_tx_resources - Free Tx Resources per Queue
- * @adapter: network interface device structure
- * @qid: queue index
- *
- * Free all transmit software resources
- **/
 static void
 al_eth_free_tx_resources(struct al_eth_adapter *adapter, int qid)
 {
@@ -987,7 +925,6 @@ al_eth_free_tx_resources(struct al_eth_adapter *adapter, int qid)
 	kfree(tx_ring->tx_buffer_info);
 	tx_ring->tx_buffer_info = NULL;
 
-	/* if not set, then don't free */
 	if (!q_params->desc_base)
 		return;
 
@@ -998,12 +935,6 @@ al_eth_free_tx_resources(struct al_eth_adapter *adapter, int qid)
 	q_params->desc_base = NULL;
 }
 
-/**
- * al_eth_setup_all_tx_resources - allocate all queues Tx resources
- * @adapter: private structure
- *
- * Return 0 on success, negative on failure
- **/
 static int
 al_eth_setup_all_tx_resources(struct al_eth_adapter *adapter)
 {
@@ -1020,18 +951,12 @@ al_eth_setup_all_tx_resources(struct al_eth_adapter *adapter)
 
 	return 0;
 err_setup_tx:
-	/* rewind the index freeing the rings as we go */
+	 
 	while (i--)
 		al_eth_free_tx_resources(adapter, i);
 	return rc;
 }
 
-/**
- * al_eth_free_all_tx_resources - Free Tx Resources for All Queues
- * @adapter: board private structure
- *
- * Free all transmit software resources
- **/
 static void
 al_eth_free_all_tx_resources(struct al_eth_adapter *adapter)
 {
@@ -1042,13 +967,6 @@ al_eth_free_all_tx_resources(struct al_eth_adapter *adapter)
 			al_eth_free_tx_resources(adapter, i);
 }
 
-/**
- * al_eth_setup_rx_resources - allocate Rx resources (Descriptors)
- * @adapter: network interface device structure
- * @qid: queue index
- *
- * Returns 0 on success, negative on failure
- **/
 static int
 al_eth_setup_rx_resources(struct al_eth_adapter *adapter, unsigned int qid)
 {
@@ -1063,7 +981,6 @@ al_eth_setup_rx_resources(struct al_eth_adapter *adapter, unsigned int qid)
 	if (!rx_ring->rx_buffer_info)
 		return -ENOMEM;
 
-	/* TODO: consider Round up to nearest 4K */
 	rx_ring->descs_size = rx_ring->hw_count * sizeof(union al_udma_desc);
 	q_params->size = rx_ring->hw_count;
 
@@ -1082,7 +999,6 @@ al_eth_setup_rx_resources(struct al_eth_adapter *adapter, unsigned int qid)
 	if (!q_params->cdesc_base)
 		return -ENOMEM;
 
-	/* Zero out the descriptor ring */
 	memset(q_params->cdesc_base, 0, rx_ring->cdescs_size);
 
 	rx_ring->next_to_clean = 0;
@@ -1091,13 +1007,6 @@ al_eth_setup_rx_resources(struct al_eth_adapter *adapter, unsigned int qid)
 	return 0;
 }
 
-/**
- * al_eth_free_rx_resources - Free Rx Resources
- * @adapter: network interface device structure
- * @qid: queue index
- *
- * Free all receive software resources
- **/
 static void
 al_eth_free_rx_resources(struct al_eth_adapter *adapter, unsigned int qid)
 {
@@ -1107,7 +1016,6 @@ al_eth_free_rx_resources(struct al_eth_adapter *adapter, unsigned int qid)
 	kfree(rx_ring->rx_buffer_info);
 	rx_ring->rx_buffer_info = NULL;
 
-	/* if not set, then don't free */
 	if (!q_params->desc_base)
 		return;
 
@@ -1117,7 +1025,6 @@ al_eth_free_rx_resources(struct al_eth_adapter *adapter, unsigned int qid)
 
 	q_params->desc_base = NULL;
 
-	/* if not set, then don't free */
 	if (!q_params->cdesc_base)
 		return;
 
@@ -1128,12 +1035,6 @@ al_eth_free_rx_resources(struct al_eth_adapter *adapter, unsigned int qid)
 	q_params->cdesc_phy_base = 0;
 }
 
-/**
- * al_eth_setup_all_rx_resources - allocate all queues Rx resources
- * @adapter: board private structure
- *
- * Return 0 on success, negative on failure
- **/
 static int al_eth_setup_all_rx_resources(struct al_eth_adapter *adapter)
 {
 	int i, rc = 0;
@@ -1149,18 +1050,12 @@ static int al_eth_setup_all_rx_resources(struct al_eth_adapter *adapter)
 	return 0;
 
 err_setup_rx:
-	/* rewind the index freeing the rings as we go */
+	 
 	while (i--)
 		al_eth_free_rx_resources(adapter, i);
 	return rc;
 }
 
-/**
- * al_eth_free_all_rx_resources - Free Rx Resources for All Queues
- * @adapter: board private structure
- *
- * Free all receive software resources
- **/
 static void al_eth_free_all_rx_resources(struct al_eth_adapter *adapter)
 {
 	int i;
@@ -1179,7 +1074,6 @@ al_eth_alloc_rx_page(struct al_eth_adapter *adapter,
 	struct page *page;
 	dma_addr_t dma;
 
-	/* if previous allocated page is not used */
 	if (rx_info->page != NULL)
 		return 0;
 
@@ -1233,7 +1127,6 @@ al_eth_alloc_rx_frag(struct al_eth_adapter *adapter,
 	dma_addr_t dma;
 	u8 *data;
 
-	/* if previous allocated frag is not used */
 	if (rx_info->data != NULL)
 		return 0;
 
@@ -1359,11 +1252,6 @@ al_eth_free_rx_bufs(struct al_eth_adapter *adapter, unsigned int qid)
 	}
 }
 
-/**
- * al_eth_refill_all_rx_bufs - allocate all queues Rx buffers
- * @adapter: board private structure
- *
- **/
 static void
 al_eth_refill_all_rx_bufs(struct al_eth_adapter *adapter)
 {
@@ -1382,11 +1270,6 @@ al_eth_free_all_rx_bufs(struct al_eth_adapter *adapter)
 		al_eth_free_rx_bufs(adapter, i);
 }
 
-/**
- * al_eth_free_tx_bufs - Free Tx Buffers per Queue
- * @adapter: network interface device structure
- * @qid: queue index
- **/
 static void
 al_eth_free_tx_bufs(struct al_eth_adapter *adapter, unsigned int qid)
 {
@@ -1416,7 +1299,6 @@ al_eth_free_tx_bufs(struct al_eth_adapter *adapter, unsigned int qid)
 				 dma_unmap_addr(al_buf, addr),
 				 dma_unmap_len(al_buf, len), DMA_TO_DEVICE);
 
-		/* unmap remaining mapped pages */
 		nr_frags = tx_info->hal_pkt.num_of_bufs - 1;
 		for (j = 0; j < nr_frags; j++) {
 			al_buf++;
@@ -1442,13 +1324,6 @@ al_eth_free_all_tx_bufs(struct al_eth_adapter *adapter)
 		al_eth_free_tx_bufs(adapter, i);
 }
 
-/**
- * al_eth_tx_poll - NAPI Tx polling callback
- * @napi: structure for representing this polling device
- * @budget: how many packets driver is allowed to clean
- *
- * This function is used for legacy and MSI, NAPI mode
- **/
 static int
 al_eth_tx_poll(struct napi_struct *napi, int budget)
 {
@@ -1475,13 +1350,12 @@ al_eth_tx_poll(struct napi_struct *napi, int budget)
 		int i, nr_frags;
 
 		tx_info = &tx_ring->tx_buffer_info[next_to_clean];
-		/* stop if not all descriptors of the packet are completed */
+		 
 		if (tx_info->tx_descs > total_done)
 			break;
 
 		skb = tx_info->skb;
 
-		/* prefetch skb_end_pointer() to speedup skb_shinfo(skb) */
 		prefetch(&skb->end);
 
 		tx_info->skb = NULL;
@@ -1489,7 +1363,6 @@ al_eth_tx_poll(struct napi_struct *napi, int budget)
 		dma_unmap_single(tx_ring->dev, dma_unmap_addr(al_buf, addr),
 				 dma_unmap_len(al_buf, len), DMA_TO_DEVICE);
 
-		/* unmap remaining mapped pages */
 		nr_frags = tx_info->hal_pkt.num_of_bufs - 1;
 		for (i = 0; i < nr_frags; i++) {
 			al_buf++;
@@ -1515,9 +1388,6 @@ al_eth_tx_poll(struct napi_struct *napi, int budget)
 	dev_dbg(&adapter->pdev->dev, "tx_poll: q %d done next to clean %x\n",
 		qid, next_to_clean);
 
-	/* need to make the rings circular update visible to
-	 * al_eth_start_xmit() before checking for netif_queue_stopped().
-	 */
 	smp_mb();
 
 	if (unlikely(netif_tx_queue_stopped(txq) &&
@@ -1529,7 +1399,6 @@ al_eth_tx_poll(struct napi_struct *napi, int budget)
 		__netif_tx_unlock(txq);
 	}
 
-	/* all work done, exit the polling mode */
 	napi_complete(napi);
 	al_reg_write32_relaxed(tx_ring->unmask_reg_offset, tx_ring->unmask_val);
 	return 0;
@@ -1554,14 +1423,14 @@ static	struct sk_buff *al_eth_rx_skb(struct al_eth_adapter *adapter,
 		rx_info, rx_info->page);
 
 	page = rx_info->page;
-	/* save virt address of first buffer */
+	 
 	va = page_address(rx_info->page) + rx_info->page_offset;
 	prefetch(va + AL_ETH_RX_OFFSET);
 
 	if (len <= adapter->small_copy_len) {
 		skb = netdev_alloc_skb_ip_align(adapter->netdev, adapter->small_copy_len);
 		if (unlikely(!skb)) {
-			/*rx_ring->rx_stats.alloc_rx_buff_failed++;*/
+			 
 			netdev_dbg(adapter->netdev, "Failed allocating skb\n");
 			return NULL;
 		}
@@ -1570,7 +1439,7 @@ static	struct sk_buff *al_eth_rx_skb(struct al_eth_adapter *adapter,
 						skb->len, skb->data_len);
 
 		netdev_dbg(adapter->netdev, "rx small packet. len %d\n", len);
-		/* sync this buffer for CPU use */
+		 
 		dma_sync_single_for_cpu(rx_ring->dev, rx_info->dma, len,
 					DMA_FROM_DEVICE);
 		skb_copy_to_linear_data(skb, va, len);
@@ -1607,14 +1476,11 @@ static	struct sk_buff *al_eth_rx_skb(struct al_eth_adapter *adapter,
 		len = hal_pkt->bufs[++buf].len;
 	} while (1);
 
-	/* Copy headers into the skb linear buffer */
 	skb_copy_to_linear_data(skb, va, AL_ETH_HEADER_COPY_SIZE);
 	skb->tail += AL_ETH_HEADER_COPY_SIZE;
 
-	/* Skip headers in first fragment */
 	skb_shinfo(skb)->frags[0].page_offset += AL_ETH_HEADER_COPY_SIZE;
 
-	/* Adjust size of first fragment */
 	skb_frag_size_sub(&skb_shinfo(skb)->frags[0], AL_ETH_HEADER_COPY_SIZE);
 	skb->data_len -= AL_ETH_HEADER_COPY_SIZE;
 	return skb;
@@ -1711,38 +1577,29 @@ static	struct sk_buff *al_eth_rx_skb(struct al_eth_adapter *adapter,
 
 #endif
 
-/**
- * al_eth_rx_checksum - indicate in skb if hw indicated a good cksum
- * @adapter: structure containing adapter specific data
- * @hal_pkt: HAL structure for the packet
- * @skb: skb currently being received and modified
- **/
 static inline void al_eth_rx_checksum(struct al_eth_adapter *adapter,
 				      struct al_eth_pkt *hal_pkt,
 				      struct sk_buff *skb)
 {
 	skb_checksum_none_assert(skb);
 
-	/* Rx csum disabled */
 	if (unlikely(!(adapter->netdev->features & NETIF_F_RXCSUM))) {
 		netdev_dbg(adapter->netdev, "hw checksum offloading disabled\n");
 		return;
 	}
 
-	/* if IP and error */
 	if (unlikely((hal_pkt->l3_proto_idx == AL_ETH_PROTO_ID_IPv4) &&
 		(hal_pkt->flags & AL_ETH_RX_FLAGS_L3_CSUM_ERR))) {
-		/* ipv4 checksum error */
+		 
 		netdev_dbg(adapter->netdev, "rx ipv4 header checksum error\n");
 		return;
 	}
 
-	/* if TCP/UDP */
 	if (likely((hal_pkt->l4_proto_idx == AL_ETH_PROTO_ID_TCP) ||
 	   (hal_pkt->l4_proto_idx == AL_ETH_PROTO_ID_UDP))) {
-		/* TODO: check if we need the test above for TCP/UDP */
+		 
 		if (unlikely(hal_pkt->flags & AL_ETH_RX_FLAGS_L4_CSUM_ERR)) {
-			/* TCP/UDP checksum error */
+			 
 			netdev_dbg(adapter->netdev, "rx L4 checksum error\n");
 			return;
 		} else {
@@ -1752,13 +1609,6 @@ static inline void al_eth_rx_checksum(struct al_eth_adapter *adapter,
 	}
 }
 
-/**
- * al_eth_rx_poll - NAPI Rx polling callback
- * @napi: structure for representing this polling device
- * @budget: how many packets driver is allowed to clean
- *
- * This function is used for legacy and MSI, NAPI mode
- **/
 static int
 al_eth_rx_poll(struct napi_struct *napi, int budget)
 {
@@ -1788,18 +1638,15 @@ al_eth_rx_poll(struct napi_struct *napi, int budget)
 					qid, hal_pkt->flags, hal_pkt->l3_proto_idx,
 					hal_pkt->l4_proto_idx);
 
-		/* ignore if detected dma or eth controller errors */
 		if (hal_pkt->flags & (AL_ETH_RX_ERROR | AL_UDMA_CDESC_ERROR)) {
 			netdev_dbg(adapter->netdev, "receive packet with error. flags = 0x%x\n", hal_pkt->flags);
 			next_to_clean = AL_ETH_RX_RING_IDX_ADD(rx_ring, next_to_clean, descs);
 			goto next;
 		}
 
-		/* allocate skb and fill it */
 		skb = al_eth_rx_skb(adapter, rx_ring, hal_pkt, descs,
 				&next_to_clean);
 
-		/* exit if we failed to retrieve a buffer */
 		if (unlikely(!skb)) {
 			next_to_clean = AL_ETH_RX_RING_IDX_ADD(rx_ring,
 					next_to_clean, descs);
@@ -1845,11 +1692,6 @@ next:
 	return work_done;
 }
 
-/**
- * al_eth_intr_intx_all - Legacy Interrupt Handler for all interrupts
- * @irq: interrupt number
- * @data: pointer to a network interface device structure
- **/
 static irqreturn_t al_eth_intr_intx_all(int irq, void *data)
 {
 	struct al_eth_adapter *adapter = data;
@@ -1881,7 +1723,7 @@ static irqreturn_t al_eth_intr_intx_all(int irq, void *data)
 		int qid;
 		for (qid = 0; qid < adapter->num_rx_queues; qid++) {
 			if (cause_b & (1 << qid)) {
-				/* mask */
+				 
 				al_udma_iofic_mask(
 				(struct unit_regs __iomem *)adapter->udma_base,
 				AL_INT_GROUP_B, 1 << qid);
@@ -1895,7 +1737,7 @@ static irqreturn_t al_eth_intr_intx_all(int irq, void *data)
 		int qid;
 		for (qid = 0; qid < adapter->num_tx_queues; qid++) {
 			if (cause_c & (1 << qid)) {
-				/* mask */
+				 
 				al_udma_iofic_mask(
 				(struct unit_regs __iomem *)adapter->udma_base,
 				AL_INT_GROUP_C, 1 << qid);
@@ -1908,32 +1750,17 @@ static irqreturn_t al_eth_intr_intx_all(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-/**
- * al_eth_intr_msix_all - MSIX Interrupt Handler for all interrupts
- * @irq: interrupt number
- * @data: pointer to a network interface device structure
- **/
 static irqreturn_t al_eth_intr_msix_all(int irq, void *data)
 {
 	return IRQ_HANDLED;
 }
 
-/**
- * al_eth_intr_msix_mgmt - MSIX Interrupt Handler for Management interrupts
- * @irq: interrupt number
- * @data: pointer to a network interface device structure
- **/
 static irqreturn_t al_eth_intr_msix_mgmt(int irq, void *data)
 {
 	pr_info("got mgmt interrupt\n");
 	return IRQ_HANDLED;
 }
 
-/**
- * al_eth_intr_msix_tx - MSIX Interrupt Handler for Tx
- * @irq: interrupt number
- * @data: pointer to a network interface private napi device structure
- **/
 static irqreturn_t al_eth_intr_msix_tx(int irq, void *data)
 {
 	struct al_eth_napi *al_napi = data;
@@ -1944,11 +1771,6 @@ static irqreturn_t al_eth_intr_msix_tx(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-/**
- * al_eth_intr_msix_rx - MSIX Interrupt Handler for Rx
- * @irq: interrupt number
- * @data: pointer to a network interface private napi device structure
- **/
 static irqreturn_t al_eth_intr_msix_rx(int irq, void *data)
 {
 	struct al_eth_napi *al_napi = data;
@@ -1978,18 +1800,16 @@ al_eth_enable_msix(struct al_eth_adapter *adapter)
 		return;
 	}
 
-	/* management vector (GROUP_A) @2*/
 	adapter->msix_entries[AL_ETH_MGMT_IRQ_IDX].entry = 2;
 	adapter->msix_entries[AL_ETH_MGMT_IRQ_IDX].vector = 0;
 
-	/* rx queues start @3 */
 	for (i = 0; i < adapter->num_rx_queues; i++) {
 		int	irq_idx = AL_ETH_RXQ_IRQ_IDX(adapter, i);
 
 		adapter->msix_entries[irq_idx].entry = 3 + i;
 		adapter->msix_entries[irq_idx].vector = 0;
 	}
-	/* tx queues start @7 */
+	 
 	for (i = 0; i < adapter->num_tx_queues; i++) {
 		int	irq_idx = AL_ETH_TXQ_IRQ_IDX(adapter, i);
 
@@ -2003,7 +1823,7 @@ al_eth_enable_msix(struct al_eth_adapter *adapter)
 		if (rc <= 0)
 			break;
 		if (rc > 0)
-			msix_vecs = 1; /* if we can't allocate all, then try only 1; */
+			msix_vecs = 1;  
 	}
 
 	if (rc != 0) {
@@ -2038,7 +1858,6 @@ al_eth_setup_int_mode(struct al_eth_adapter *adapter, int dis_msi)
 
 	adapter->irq_vecs = max(1, adapter->msix_vecs);
 
-	/* single INTX mode */
 	if (adapter->msix_vecs == 0) {
 		snprintf(adapter->irq_tbl[AL_ETH_MGMT_IRQ_IDX].name, AL_ETH_IRQNAME_SIZE,
 			 "al-eth-intx-all@pci:%s", pci_name(adapter->pdev));
@@ -2052,7 +1871,6 @@ al_eth_setup_int_mode(struct al_eth_adapter *adapter, int dis_msi)
 		return 0;
 	}
 
-	/* single MSI-X mode */
 	if (adapter->msix_vecs == 1) {
 		snprintf(adapter->irq_tbl[AL_ETH_MGMT_IRQ_IDX].name, AL_ETH_IRQNAME_SIZE,
 			 "al-eth-msix-all@pci:%s", pci_name(adapter->pdev));
@@ -2065,7 +1883,7 @@ al_eth_setup_int_mode(struct al_eth_adapter *adapter, int dis_msi)
 
 		return 0;
 	}
-	/* MSI-X per queue*/
+	 
 	snprintf(adapter->irq_tbl[AL_ETH_MGMT_IRQ_IDX].name, AL_ETH_IRQNAME_SIZE,
 		"al-eth-msix-mgmt@pci:%s", pci_name(adapter->pdev));
 	adapter->irq_tbl[AL_ETH_MGMT_IRQ_IDX].handler = al_eth_intr_msix_mgmt;
@@ -2122,7 +1940,6 @@ al_eth_configure_int_mode(struct al_eth_adapter *adapter)
 	uint32_t	s2m_errors_disable = 0x1E0;
 	uint32_t	s2m_aborts_disable = 0x1E0;
 
-	/* single INTX mode */
 	if (adapter->msix_vecs == 0)
 		int_mode = AL_IOFIC_MODE_LEGACY;
 	else if (adapter->msix_vecs > 1)
@@ -2151,15 +1968,15 @@ al_eth_configure_int_mode(struct al_eth_adapter *adapter)
 			int_mode == AL_IOFIC_MODE_LEGACY ? "INTx" :
 			int_mode == AL_IOFIC_MODE_MSIX_PER_Q ? "MSI-X per Queue" :
 			"Unknown");
-	/* set interrupt moderation resolution to 15us */
+	 
 	al_iofic_moder_res_config(&((struct unit_regs *)(adapter->udma_base))->gen.interrupt_regs.main_iofic, AL_INT_GROUP_B, 15);
 	al_iofic_moder_res_config(&((struct unit_regs *)(adapter->udma_base))->gen.interrupt_regs.main_iofic, AL_INT_GROUP_C, 15);
-	/* by default interrupt coalescing is disabled */
+	 
 	adapter->tx_usecs = 0;
 	adapter->rx_usecs = 0;
 
 #ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
-	// directly adjust interrupt coalescing values
+	 
 	struct ethtool_coalesce coalesce;
 	coalesce.use_adaptive_tx_coalesce = 0;
 	coalesce.tx_coalesce_usecs = 208;
@@ -2175,11 +1992,6 @@ typedef struct INTERFACE_CPU_MAPPING_ {
 	int cpu;
 } INTERFACE_CPU_MAPPING;
 
-/* Suppose that all 4 CPUs are online on DS2015xs, we want to:
-   Bind the first  10G interface (0000:00:00.0) interrupt to 1st CPU, and
-   bind the second 10G interface (0000:00:02.0) interrupt to 2nd CPU, and
-   bind the first   1G interface (0000:00:01.0) interrupt to 3rd CPU, and
-   bind the second  1G interface (0000:00:03.0) interrupt to 4th CPU. */
 static INTERFACE_CPU_MAPPING ds2015xs_interface_cpu_mapping[] = {
 	{.interface = "0000:00:00.0", .cpu = 0},
 	{.interface = "0000:00:02.0", .cpu = 1},
@@ -2187,10 +1999,6 @@ static INTERFACE_CPU_MAPPING ds2015xs_interface_cpu_mapping[] = {
 	{.interface = "0000:00:03.0", .cpu = 3},
 };
 
-/*
- * For all other Alpine models except DS2015xs:
- * Bind Nth interface to Nth CPU
- */
 static INTERFACE_CPU_MAPPING interface_cpu_mapping[] = {
 	{.interface = "0000:00:00.0", .cpu = 0},
 	{.interface = "0000:00:01.0", .cpu = 1},
@@ -2302,7 +2110,6 @@ al_eth_disable_int_sync(struct al_eth_adapter *adapter)
 	if (!netif_running(adapter->netdev))
 		return;
 
-	/* mask hw interrupts */
 	al_eth_interrupts_mask(adapter);
 
 	for (i = 0; i < adapter->irq_vecs; i++)
@@ -2311,9 +2118,9 @@ al_eth_disable_int_sync(struct al_eth_adapter *adapter)
 
 static void al_eth_interrupts_unmask(struct al_eth_adapter *adapter)
 {
-	u32 group_a_mask = AL_INT_GROUP_A_GROUP_D_SUM; /* enable group D summery */
-	u32 group_b_mask = (1 << adapter->num_rx_queues) - 1;/* bit per Rx q*/
-	u32 group_c_mask = (1 << adapter->num_tx_queues) - 1;/* bit per Tx q*/
+	u32 group_a_mask = AL_INT_GROUP_A_GROUP_D_SUM;  
+	u32 group_b_mask = (1 << adapter->num_rx_queues) - 1; 
+	u32 group_c_mask = (1 << adapter->num_tx_queues) - 1; 
 	u32 group_d_mask = 3 << 8;
 	struct unit_regs __iomem *regs_base = (struct unit_regs __iomem *)adapter->udma_base;
 
@@ -2332,7 +2139,6 @@ static void al_eth_interrupts_mask(struct al_eth_adapter *adapter)
 {
 	struct unit_regs __iomem *regs_base = (struct unit_regs __iomem *)adapter->udma_base;
 
-	/* mask all interrupts */
 	al_udma_iofic_mask(regs_base, AL_INT_GROUP_A, 0x7);
 	al_udma_iofic_mask(regs_base, AL_INT_GROUP_B, 0xF);
 	al_udma_iofic_mask(regs_base, AL_INT_GROUP_C, 0xF);
@@ -2417,7 +2223,6 @@ al_eth_napi_enable_all(struct al_eth_adapter *adapter)
 		napi_enable(&adapter->al_napi[i].napi);
 }
 
-/* the following defines should be moved to hal */
 #define AL_ETH_FSM_ENTRY_OUTER(idx)	   (idx & 7)
 #define AL_ETH_FSM_ENTRY_IPV4_TCP	   0
 #define AL_ETH_FSM_ENTRY_IPV4_UDP	   1
@@ -2426,7 +2231,6 @@ al_eth_napi_enable_all(struct al_eth_adapter *adapter)
 #define AL_ETH_FSM_ENTRY_IPV6_NO_UDP_TCP   4
 #define AL_ETH_FSM_ENTRY_IPV4_NO_UDP_TCP   5
 
-/* FSM DATA format */
 #define AL_ETH_FSM_DATA_OUTER_2_TUPLE	0
 #define AL_ETH_FSM_DATA_OUTER_4_TUPLE	1
 #define AL_ETH_FSM_DATA_INNER_2_TUPLE	2
@@ -2437,7 +2241,6 @@ al_eth_napi_enable_all(struct al_eth_adapter *adapter)
 #define AL_ETH_FSM_DATA_DEFAULT_Q	0
 #define AL_ETH_FSM_DATA_DEFAULT_UDMA	0
 
-/* init FSM, no tunneling supported yet, if packet is tcp/udp over ipv4/ipv6, use 4 tuple hash */
 static void
 al_eth_fsm_table_init(struct al_eth_adapter *adapter)
 {
@@ -2475,7 +2278,7 @@ al_eth_set_thash_table_entry(struct al_eth_adapter *adapter, uint8_t idx, uint8_
 {
 	uint32_t entry;
 
-	BUG_ON(udma != 0); /* currenty only UDMA 0 supported */
+	BUG_ON(udma != 0);  
 	BUG_ON(queue >= AL_ETH_NUM_QUEUES);
 
 	entry = (udma << AL_ETH_THASH_UDMA_SHIFT) & AL_ETH_THASH_UDMA_MASK;
@@ -2483,7 +2286,6 @@ al_eth_set_thash_table_entry(struct al_eth_adapter *adapter, uint8_t idx, uint8_
 	al_eth_thash_table_set(&adapter->hal_adapter, idx, entry);
 }
 
-/* the following defines should be moved to hal */
 #define AL_ETH_CTRL_TABLE_PRIO_SEL_SHIFT	0
 #define AL_ETH_CTRL_TABLE_PRIO_SEL_MASK		(0xF << AL_ETH_CTRL_TABLE_PRIO_SEL_SHIFT)
 #define AL_ETH_CTRL_TABLE_PRIO_SEL_0		(12 << AL_ETH_CTRL_TABLE_PRIO_SEL_SHIFT)
@@ -2494,12 +2296,12 @@ al_eth_set_thash_table_entry(struct al_eth_adapter *adapter, uint8_t idx, uint8_
 
 #define AL_ETH_CTRL_TABLE_Q_PRIO_SEL_SHIFT	8
 #define AL_ETH_CTRL_TABLE_Q_PRIO_SEL_MASK	(0x3 << AL_ETH_CTRL_TABLE_Q_PRIO_SEL_SHIFT)
-/* selected queue is hash output table */
+ 
 #define AL_ETH_CTRL_TABLE_Q_PRIO_SEL_Q		(3 << AL_ETH_CTRL_TABLE_Q_PRIO_SEL_SHIFT)
 
 #define AL_ETH_CTRL_TABLE_UDMA_SEL_SHIFT	10
 #define AL_ETH_CTRL_TABLE_UDMA_SEL_MASK	(0xF << AL_ETH_CTRL_TABLE_UDMA_SEL_SHIFT)
-/* select UDMA from rfw_default opt1 register */
+ 
 #define AL_ETH_CTRL_TABLE_UDMA_SEL_DEF_1	(7 << AL_ETH_CTRL_TABLE_UDMA_SEL_SHIFT)
 #define AL_ETH_CTRL_TABLE_UDMA_SEL_0	(15 << AL_ETH_CTRL_TABLE_UDMA_SEL_SHIFT)
 
@@ -2617,10 +2419,6 @@ static void al_eth_mac_table_entry_clear(
 	al_eth_fwd_mac_table_set(&adapter->hal_adapter, idx, &entry);
 }
 
-/* configure the RX forwarding (UDMA/QUEUE.. selection)
- * currently we don't use the full control table, we use only the default configuration
- */
-
 static void
 al_eth_config_rx_fwd(struct al_eth_adapter *adapter)
 {
@@ -2635,16 +2433,11 @@ al_eth_config_rx_fwd(struct al_eth_adapter *adapter)
 
 	al_eth_ctrl_table_def_set(&adapter->hal_adapter, AL_FALSE, &entry);
 
-	/*
-	 * By default set the mac table to forward all unicast packets to our
-	 * MAC address and all broadcast. all the rest will be dropped.
-	 */
 	al_eth_mac_table_unicast_add(adapter, AL_ETH_MAC_TABLE_UNICAST_IDX_BASE,
 				     adapter->mac_addr, 1);
 	al_eth_mac_table_broadcast_add(adapter, AL_ETH_MAC_TABLE_BROADCAST_IDX, 1);
 	al_eth_mac_table_promiscuous_set(adapter, false);
 
-	/* set toeplitz hash keys */
 	get_random_bytes(adapter->toeplitz_hash_key,
 			 sizeof(adapter->toeplitz_hash_key));
 
@@ -2669,27 +2462,23 @@ static void al_eth_up_complete(struct al_eth_adapter *adapter)
 {
 	al_eth_configure_int_mode(adapter);
 
-	/*config rx fwd*/
 	al_eth_config_rx_fwd(adapter);
 
 	al_eth_init_napi(adapter);
 	al_eth_napi_enable_all(adapter);
 
 	al_eth_change_mtu(adapter->netdev, adapter->netdev->mtu);
-	/* enable hw queues */
+	 
 	al_eth_udma_queues_enable_all(adapter);
 
 	al_eth_refill_all_rx_bufs(adapter);
 
 	al_eth_interrupts_unmask(adapter);
 
-	/* enable transmits */
 	netif_tx_start_all_queues(adapter->netdev);
 
-	/* enable flow control */
 	al_eth_flow_ctrl_enable(adapter);
 
-	/* enable the mac tx and rx paths */
 	al_eth_mac_start(&adapter->hal_adapter);
 }
 
@@ -2714,12 +2503,10 @@ static int al_eth_up(struct al_eth_adapter *adapter)
 		goto err_setup_int;
 	}
 
-	/* allocate transmit descriptors */
 	rc = al_eth_setup_all_tx_resources(adapter);
 	if (rc)
 		goto err_setup_tx;
 
-	/* allocate receive descriptors */
 	rc = al_eth_setup_all_rx_resources(adapter);
 	if (rc)
 		goto err_setup_rx;
@@ -2731,7 +2518,7 @@ static int al_eth_up(struct al_eth_adapter *adapter)
 	al_eth_up_complete(adapter);
 
 #ifdef CONFIG_SYNO_ALPINE_A0
-//Do nothing
+ 
 #else
 	adapter->last_link_status.link_up = false;
 	adapter->lt_completed = false;
@@ -2774,7 +2561,7 @@ al_eth_flow_steer(struct net_device *netdev, const struct sk_buff *skb,
 	}
 
 	if (skb->protocol == htons(ETH_P_IPV6)) {
-		/* ipv6 with extension not supported yet */
+		 
 		if ((ipv6_hdr(skb)->nexthdr != IPPROTO_TCP) && (ipv6_hdr(skb)->nexthdr != IPPROTO_UDP))
 			return -EPROTONOSUPPORT;
 	}
@@ -2807,14 +2594,9 @@ al_eth_flow_steer(struct net_device *netdev, const struct sk_buff *skb,
 #endif
 
 #ifdef CONFIG_SYNO_ALPINE_A0
-//Do nothing
+ 
 #else
-/*
- * Configure tx and rx serdes parameters to basic values
- *	For DA - these parameters used for fall-back in case link training
- *		 failed or not supported by the link partner
- *	For optic SFP - used as static configuration.
- */
+ 
 void al_eth_serdes_da_tx_basic_config(struct al_serdes_obj	*serdes_obj,
 				      enum al_serdes_group	grp,
 				      enum al_serdes_lane	lane)
@@ -2840,7 +2622,7 @@ void al_eth_serdes_da_rx_basic_config(struct al_serdes_obj	*serdes_obj,
 
 	basic_rx.override		= AL_TRUE;
 #ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
-	// empirical values, tested by using DS2015xs and Foxconn DA cable
+	 
 	basic_rx.dcgain			= 0x7;
 	basic_rx.dfe_3db_freq		= 0x7;
 	basic_rx.dfe_gain		= 0x0;
@@ -2912,10 +2694,6 @@ static void al_eth_serdes_init(struct al_eth_adapter *adapter)
 
 	adapter->serdes_init = false;
 
-	/*
-	 * always call with group A to get the base address of
-	 * all groups.
-	 */
 	serdes_base = alpine_serdes_resource_get(AL_SRDS_GRP_A);
 
 	if (!serdes_base) {
@@ -2946,13 +2724,11 @@ static void al_eth_kr_link_status(struct al_eth_adapter *adapter)
 
 	al_eth_link_status_get(&adapter->hal_adapter, &status);
 
-	/* link status lost */
 	if ((adapter->last_link_status.link_up == true) &&
 	    (status.link_up == false)) {
 		netdev_dbg(adapter->netdev, "%s link status lost\n", __func__);
 		netif_carrier_off(adapter->netdev);
 
-		/* if link status lost lt is needed again */
 		adapter->lt_completed = false;
 	}
 
@@ -2965,7 +2741,7 @@ static void al_eth_kr_link_status(struct al_eth_adapter *adapter)
 						adapter->serdes_lane);
 
 		if (signal_detected == false)
-			/* if no signal detected there is nothing to do */
+			 
 			return;
 
 		netdev_dbg(adapter->netdev, "%s start an and lt\n", __func__);
@@ -2978,7 +2754,7 @@ static void al_eth_kr_link_status(struct al_eth_adapter *adapter)
 		get_random_bytes(&an_adv.transmitted_nonce, 1);
 		an_adv.transmitted_nonce &= 0x1f;
 		an_adv.technology = AL_ETH_AN_TECH_10GBASE_KR;
-		/* TODO: Add fec support */
+		 
 		an_adv.fec_capability = 0;
 
 		ret = al_eth_an_lt_execute(&adapter->hal_adapter,
@@ -3012,9 +2788,7 @@ static void al_eth_kr_link_status(struct al_eth_adapter *adapter)
 							       AL_FALSE);
 				adapter->lt_failures = 0;
 			}
-			/* In case auto-negotiation or link training failed -
-			 * configure basic values to be able to work with
-			 * partners that doesn't implement link training */
+			 
 			al_eth_serdes_da_rx_basic_config(&adapter->serdes_obj,
 							 adapter->serdes_grp,
 							 adapter->serdes_lane);
@@ -3022,8 +2796,6 @@ static void al_eth_kr_link_status(struct al_eth_adapter *adapter)
 							 adapter->serdes_grp,
 							 adapter->serdes_lane);
 
-			/* After setting basic values check for link. if no
-			 * remote or local fault detected, indicate link up */
 			al_eth_link_status_get(&adapter->hal_adapter, &status);
 
 			if (adapter->last_link_status.link_up == true) {
@@ -3038,7 +2810,7 @@ static void al_eth_kr_link_status(struct al_eth_adapter *adapter)
 #endif
 
 #ifdef CONFIG_SYNO_ALPINE_A0
-/************************ Link management ************************/
+ 
 #define SFP_I2C_ADDR			0x50
 
 static int al_eth_i2c_byte_read(void *context,
@@ -3051,7 +2823,7 @@ static int al_eth_i2c_byte_read(void *context,
 #endif
 				uint8_t *val)
 #else
-/************************ SFP detection ************************/
+ 
 #define SFP_I2C_ADDR			0x50
 #define SFP_I2C_HEADER_10G_IDX		3
 #define SFP_I2C_HEADER_10G_DA_IDX	8
@@ -3211,10 +2983,6 @@ static void al_eth_serdes_init(struct al_eth_adapter *adapter)
 
 	adapter->serdes_init = false;
 
-	/*
-	 * always call with group A to get the base address of
-	 * all groups.
-	 */
 	serdes_base = alpine_serdes_resource_get(AL_SRDS_GRP_A);
 
 	if (!serdes_base) {
@@ -3228,7 +2996,7 @@ static void al_eth_serdes_init(struct al_eth_adapter *adapter)
 	adapter->serdes_init = true;
 #endif
 }
-#else // CONFIG_SYNO_ALPINE_A0
+#else  
 static int al_eth_sfp_detect(
 	struct al_eth_adapter		*adapter,
 	enum al_eth_sfp_detect_evt	*evt)
@@ -3286,12 +3054,11 @@ static int al_eth_sfp_detect(
 	stat->sfp_1g = sfp_1g;
 	stat->sfp_cable_tech = sfp_cable_tech;
 
-	/* determine device type */
 	if (sfp_10g != 0) {
 		if (sfp_cable_tech & (SFP_10G_DA_ACTIVE | SFP_10G_DA_PASSIVE)) {
 			netdev_info(adapter->netdev,
 				   "%s: DA cable detected\n", __func__);
-			/* in case of DA need to perform link training */
+			 
 			stat->lt_en = true;
 			stat->an_en = true;
 		} else {
@@ -3341,7 +3108,7 @@ static void al_eth_sfp_detection_apply(
 	adapter->mac_mode = adapter->sfp_detect_status.mac_mode;
 	adapter->mac_mode_set = true;
 }
-#endif // CONFIG_SYNO_ALPINE_A0
+#endif  
 
 static void al_eth_down(struct al_eth_adapter *adapter)
 {
@@ -3378,7 +3145,6 @@ static void al_eth_link_status_task(struct work_struct *work)
 	if (rc)
 		goto reschedule;
 
-	/* The link is still up. continue */
 	if (fault == false)
 		goto reschedule;
 
@@ -3429,7 +3195,7 @@ static void al_eth_link_status_task(struct work_struct *work)
 	}
 
 	adapter->last_link = link_up;
-#else //CONFIG_SYNO_ALPINE_A0
+#else  
 	enum al_eth_sfp_detect_evt sfp_detect_evt;
 
 	if (adapter->sfp_detection_needed) {
@@ -3486,10 +3252,10 @@ static void al_eth_link_status_task(struct work_struct *work)
 
 		adapter->last_link_status = status;
 	}
-#endif // CONFIG_SYNO_ALPINE_A0
+#endif  
 
 reschedule:
-	/* setting link status delay to 0 (through sysfs) will stop the task */
+	 
 	if (adapter->link_poll_interval != 0) {
 		unsigned long delay;
 
@@ -3564,22 +3330,10 @@ static void al_eth_lm_config(struct al_eth_adapter *adapter)
 }
 #endif
 
-/**
- * al_eth_open - Called when a network interface is made active
- * @netdev: network interface device structure
- *
- * Returns 0 on success, negative value on failure
- *
- * The open entry point is called when a network interface is made
- * active by the system (IFF_UP).  At this point all resources needed
- * for transmit and receive operations are allocated, the interrupt
- * handler is registered with the OS, the watchdog timer is started,
- * and the stack is notified that the interface is ready.
- **/
 static int al_eth_open(struct net_device *netdev)
 {
 #ifdef CONFIG_SYNO_ALPINE_A0
-//Do nothing
+ 
 #else
 	enum al_eth_sfp_detect_evt sfp_detect_evt;
 #endif
@@ -3593,7 +3347,6 @@ static int al_eth_open(struct net_device *netdev)
 	netdev_dbg(adapter->netdev, "%s\n", __func__);
 	netif_carrier_off(netdev);
 
-	/* Notify the stack of the actual queue counts. */
 	rc = netif_set_real_num_tx_queues(netdev, adapter->num_tx_queues);
 	if (rc)
 		return rc;
@@ -3603,7 +3356,7 @@ static int al_eth_open(struct net_device *netdev)
 		return rc;
 
 #ifdef CONFIG_SYNO_ALPINE_A0
-//Do nothing
+ 
 #else
 	rc = al_eth_sysfs_init(&adapter->pdev->dev);
 	if (rc)
@@ -3643,7 +3396,7 @@ static int al_eth_open(struct net_device *netdev)
 			goto err_mdiobus_setup;
 		}
 	}
-#else //CONFIG_SYNO_ALPINE_A0
+#else  
 	if (adapter->sfp_detection_needed) {
 		adapter->sfp_detect_status.valid = false;
 		rc = al_eth_sfp_detect(adapter, &sfp_detect_evt);
@@ -3668,7 +3421,7 @@ static int al_eth_open(struct net_device *netdev)
 			goto err_mdiobus_setup;
 		}
 	}
-#endif //CONFIG_SYNO_ALPINE_A0
+#endif  
 
 	if (adapter->mdio_bus) {
 		rc = al_eth_phy_init(adapter);
@@ -3694,17 +3447,6 @@ err_mdiobus_setup:
 	return rc;
 }
 
-/**
- * al_eth_close - Disables a network interface
- * @netdev: network interface device structure
- *
- * Returns 0, this is not allowed to fail
- *
- * The close entry point is called when an interface is de-activated
- * by the OS.  The hardware is still under the drivers control, but
- * needs to be disabled.  A global MAC reset is issued to stop the
- * hardware, and all transmit and receive resources are freed.
- */
 static int al_eth_close(struct net_device *netdev)
 {
 	struct al_eth_adapter *adapter = netdev_priv(netdev);
@@ -3714,7 +3456,7 @@ static int al_eth_close(struct net_device *netdev)
 	cancel_delayed_work_sync(&adapter->link_status_task);
 
 #ifdef CONFIG_SYNO_ALPINE_A0
-//Do nothing
+ 
 #else
 	al_eth_sysfs_terminate(&adapter->pdev->dev);
 #endif
@@ -3727,8 +3469,6 @@ static int al_eth_close(struct net_device *netdev)
 
 	if (adapter->up)
 		al_eth_down(adapter);
-
-	/*al_eth_release_hw_control(adapter);*/
 
 	return 0;
 }
@@ -3775,7 +3515,6 @@ al_eth_set_settings(struct net_device *netdev, struct ethtool_cmd *ecmd)
 	if (phydev)
 		return phy_ethtool_sset(phydev, ecmd);
 
-	/* in case no phy exist set only mac parameters */
 	adapter->link_config.active_speed = ecmd->speed;
 	adapter->link_config.active_duplex = ecmd->duplex;
 	adapter->link_config.autoneg = ecmd->autoneg;
@@ -3889,17 +3628,17 @@ static struct rtnl_link_stats64 *al_eth_get_stats64(struct net_device *netdev,
 
 	al_eth_mac_stats_get(&adapter->hal_adapter, mac_stats);
 
-	stats->rx_packets = mac_stats->aFramesReceivedOK; /* including pause frames */
-	stats->tx_packets = mac_stats->aFramesTransmittedOK; /* including pause frames */
+	stats->rx_packets = mac_stats->aFramesReceivedOK;  
+	stats->tx_packets = mac_stats->aFramesTransmittedOK;  
 	stats->rx_bytes = mac_stats->aOctetsReceivedOK;
 	stats->tx_bytes = mac_stats->aOctetsTransmittedOK;
 	stats->rx_dropped = 0;
 	stats->multicast = mac_stats->ifInMulticastPkts;
 	stats->collisions = 0;
 
-	stats->rx_length_errors = (mac_stats->etherStatsUndersizePkts + /* good but short */
-				   mac_stats->etherStatsFragments + /* short and bad*/
-				   mac_stats->etherStatsJabbers + /* with crc errors */
+	stats->rx_length_errors = (mac_stats->etherStatsUndersizePkts +  
+				   mac_stats->etherStatsFragments +  
+				   mac_stats->etherStatsJabbers +  
 				   mac_stats->etherStatsOversizePkts);
 	stats->rx_crc_errors = mac_stats->aFrameCheckSequenceErrors;
 	stats->rx_frame_errors = mac_stats->aAlignmentErrors;
@@ -3960,7 +3699,6 @@ al_eth_set_pauseparam(struct net_device *netdev,
 	struct al_eth_link_config *link_config = &adapter->link_config;
 	uint32_t newadv;
 
-	/* auto negotiation and receive pause are currently not supported */
 	if (pause->autoneg == AUTONEG_ENABLE)
 		return -EINVAL;
 
@@ -4011,15 +3749,12 @@ static int
 al_eth_get_rxnfc(struct net_device *netdev, struct ethtool_rxnfc *info,
 		 u32 *rules __always_unused)
 {
-	/*struct al_eth_adapter *adapter = netdev_priv(netdev);*/
 	 
 	switch (info->cmd) {
 	case ETHTOOL_GRXRINGS:
 		info->data = AL_ETH_NUM_QUEUES;
 		return 0;
-/*	case ETHTOOL_GRXFH:
-		return bnx2x_get_rss_flags(bp, info);
-*/
+ 
 	default:
 		netdev_err(netdev, "Command parameters not supported\n");
 		return -EOPNOTSUPP;
@@ -4150,24 +3885,22 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 			szMacTmp[idx] = (priv->netdev->dev_addr[idx*2] & 0xff) | (priv->netdev->dev_addr[idx*2 + 1] & 0xff) << 8;
 		}
 
-		/* Tell phy about MAC address */
 		phy_write(priv->phydev, 31, 0x7);
 		phy_write(priv->phydev, 30, 0x6E);
 		phy_write(priv->phydev, 21, szMacTmp[0]);
 		phy_write(priv->phydev, 22, szMacTmp[1]);
 		phy_write(priv->phydev, 23, szMacTmp[2]);
 
-		/* Limit packet size */
 		phy_write(priv->phydev, 30, 0x6D);
 		phy_write(priv->phydev, 22, 0x1FFF);
 
-		/* enable Magic packet */
+		
 		phy_write(priv->phydev, 30, 0x6D);
 		phy_write(priv->phydev, 21, 0x1000);
-		phy_write(priv->phydev, 31, 0x0000); //set PHY to page 0
+		phy_write(priv->phydev, 31, 0x0000);  
 #ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
 		if (syno_is_hw_version(HW_DS1515)) {
-			phy_write(priv->phydev, 31, 0x0003); //set PHY to read-only page 3
+			phy_write(priv->phydev, 31, 0x0003);  
 		}
 #endif
 	}
@@ -4180,7 +3913,7 @@ void syno_alpine_wol_set(void)
 	syno_alpine_wol_set_wrapper(PCI_DEVICE_ID_AL_ETH);
 
 	if (syno_is_hw_version(HW_DS2015xs)) {
-		// do nothing
+		 
 	} else {
 		syno_alpine_wol_set_wrapper(PCI_DEVICE_ID_AL_ETH_ADVANCED);
 	}
@@ -4212,8 +3945,7 @@ static const struct ethtool_ops al_eth_ethtool_ops = {
 	.get_settings		= al_eth_get_settings,
 	.set_settings		= al_eth_set_settings,
 	.get_drvinfo		= al_eth_get_drvinfo,
-/*	.get_regs_len		= al_eth_get_regs_len,*/
-/*	.get_regs		= al_eth_get_regs,*/
+ 
 #ifdef SYNO_ALPINE_SUPPORT_WOL
 	.get_wol		= al_eth_get_wol,
 	.set_wol		= al_eth_set_wol,
@@ -4226,22 +3958,18 @@ static const struct ethtool_ops al_eth_ethtool_ops = {
 	.get_coalesce		= al_eth_get_coalesce,
 	.set_coalesce		= al_eth_set_coalesce,
 	.get_ringparam		= al_eth_get_ringparam,
-/*	.set_ringparam		= al_set_ringparam,*/
+ 
 	.get_pauseparam		= al_eth_get_pauseparam,
 	.set_pauseparam		= al_eth_set_pauseparam,
-/*	.self_test		= al_eth_self_test,*/
-/*	.get_strings		= al_eth_get_strings,*/
-/*	.set_phys_id		= al_eth_set_phys_id,*/
-/*	.get_ethtool_stats	= al_eth_get_ethtool_stats,*/
+ 
 	.get_rxnfc		= al_eth_get_rxnfc,
-/*	.get_sset_count		= al_eth_get_sset_count,*/
+ 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
 	.get_rxfh_indir_size    = al_eth_get_rxfh_indir_size,
 	.get_rxfh_indir		= al_eth_get_rxfh_indir,
 	.set_rxfh_indir		= al_eth_set_rxfh_indir,
 #endif
 	.get_channels		= al_eth_get_channels,
-/*	.set_channels		= al_eth_set_channels,*/
  
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
 	.get_eee		= al_eth_get_eee,
@@ -4274,7 +4002,7 @@ al_eth_tx_csum(struct al_eth_ring *tx_ring, struct al_eth_tx_buffer *tx_info,
 			break;
 		case __constant_htons(ETH_P_IPV6):
 			hal_pkt->l3_proto_idx = AL_ETH_PROTO_ID_IPv6;
-			/* TODO: add support for csum offloading for ipv6 with options */
+			 
 			if (ipv6_hdr(skb)->nexthdr == IPPROTO_TCP)
 				hal_pkt->l4_proto_idx = AL_ETH_PROTO_ID_TCP;
 			else
@@ -4287,17 +4015,14 @@ al_eth_tx_csum(struct al_eth_ring *tx_ring, struct al_eth_tx_buffer *tx_info,
 		meta->words_valid = 4;
 		meta->l3_header_len = skb_network_header_len(skb);
 		meta->l3_header_offset = skb_network_offset(skb);
-		meta->l4_header_len = tcp_hdr(skb)->doff; /* this param needed only
-		for TSO */
-		meta->mss_idx_sel = 0; /* TODO: check how to select MSS */
+		meta->l4_header_len = tcp_hdr(skb)->doff;  
+		meta->mss_idx_sel = 0;  
 		meta->mss_val = skb_shinfo(skb)->gso_size;
 		hal_pkt->meta = meta;
 	} else
 		hal_pkt->meta = NULL;
 }
 
-/* Called with netif_tx_lock.
- */
 static netdev_tx_t
 al_eth_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {
@@ -4313,7 +4038,7 @@ al_eth_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	struct netdev_queue *txq;
 
 	netdev_dbg(adapter->netdev, "%s skb %p\n", __func__, skb);
-	/*  Determine which tx ring we will be placed on */
+	 
 	qid = skb_get_queue_mapping(skb);
 	tx_ring = &adapter->tx_ring[qid];
 	txq = netdev_get_tx_queue(dev, qid);
@@ -4331,7 +4056,6 @@ al_eth_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	tx_info->skb = skb;
 	hal_pkt = &tx_info->hal_pkt;
 
-	/* set flags and meta data */
 	hal_pkt->flags = AL_ETH_TX_FLAGS_INT;
 	al_eth_tx_csum(tx_ring, tx_info, hal_pkt, skb);
 
@@ -4369,16 +4093,12 @@ al_eth_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	netdev_tx_sent_queue(txq, skb->len);
 #endif
 
-	/*smp_wmb();*/ /* commit the item before incrementing the head */
 	tx_ring->next_to_use = AL_ETH_TX_RING_IDX_NEXT(tx_ring, next_to_use);
 
-	/* prepare the packet's descriptors to dma engine */
 	tx_info->tx_descs = al_eth_tx_pkt_prepare(tx_ring->dma_q, hal_pkt);
-	/* trigger the dma engine */
+	 
 	al_eth_tx_dma_action(tx_ring->dma_q, tx_info->tx_descs);
 
-	/* stop the queue when no more space available, the packet can have up
-	 * to MAX_SKB_FRAGS + 1 buffers and a meta descriptor */
 	if (unlikely(al_udma_available_get(tx_ring->dma_q) <
 				(MAX_SKB_FRAGS + 2))) {
 		dev_dbg(&adapter->pdev->dev, "%s stop queue %d\n", __func__, qid);
@@ -4387,16 +4107,14 @@ al_eth_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 
 dma_error:
-	/* save value of frag that failed */
+	 
 	last_frag = i;
 
-	/* start back at beginning and unmap skb */
 	tx_info->skb = NULL;
 	al_buf = hal_pkt->bufs;
 	dma_unmap_single(tx_ring->dev, dma_unmap_addr(al_buf, addr),
 			 dma_unmap_len(al_buf, len), DMA_TO_DEVICE);
 
-	/* unmap remaining mapped pages */
 	for (i = 0; i < last_frag; i++) {
 		al_buf++;
 		dma_unmap_page(tx_ring->dev, dma_unmap_addr(al_buf, addr),
@@ -4407,7 +4125,6 @@ dma_error:
 	return NETDEV_TX_OK;
 }
 
-/* Return subqueue id on this core (one per core). */
 static u16 al_eth_select_queue(struct net_device *dev, struct sk_buff *skb)
 {
 	return smp_processor_id();
@@ -4433,15 +4150,6 @@ static int al_eth_set_mac_addr(struct net_device *dev, void *p)
 	return err;
 }
 
-/**
- *  Unicast, Multicast and Promiscuous mode set
- *  @netdev: network interface device structure
- *
- *  The set_rx_mode entry point is called whenever the unicast or multicast
- *  address lists or the network interface flags are updated.  This routine is
- *  responsible for configuring the hardware for proper unicast, multicast,
- *  promiscuous mode, and all-multi behavior.
- **/
 static void al_eth_set_rx_mode(struct net_device *netdev)
 {
 	struct al_eth_adapter *adapter = netdev_priv(netdev);
@@ -4467,20 +4175,17 @@ static void al_eth_set_rx_mode(struct net_device *netdev)
 
 			if (netdev_uc_count(netdev) >
 				AL_ETH_MAC_TABLE_UNICAST_MAX_COUNT) {
-				/* In this case there are more addresses then
-				 * entries in the mac table - set promiscuous */
+				 
 				al_eth_mac_table_promiscuous_set(adapter, true);
 				return;
 			}
 
-			/* clear the last configuration */
 			while (i < (AL_ETH_MAC_TABLE_UNICAST_IDX_BASE + 1 +
 				    AL_ETH_MAC_TABLE_UNICAST_MAX_COUNT)) {
 				al_eth_mac_table_entry_clear(adapter, i);
 				i++;
 			}
 
-			/* set new addresses */
 			i = AL_ETH_MAC_TABLE_UNICAST_IDX_BASE + 1;
 			netdev_for_each_uc_addr(ha, netdev) {
 				al_eth_mac_table_unicast_add(adapter, i,
@@ -4522,21 +4227,10 @@ static inline void al_eth_random_addr(struct net_device *dev)
 	dev->addr_assign_type = NET_ADDR_RANDOM;
 
 	get_random_bytes(addr, ETH_ALEN);
-	addr[0] &= 0xfe;        /* clear multicast bit */
-	addr[0] |= 0x02;        /* set local assignment bit (IEEE802) */
+	addr[0] &= 0xfe;         
+	addr[0] |= 0x02;         
 }
 
-/**
- * al_eth_probe - Device Initialization Routine
- * @pdev: PCI device information struct
- * @ent: entry in al_eth_pci_tbl
- *
- * Returns 0 on success, negative on failure
- *
- * al_eth_probe initializes an adapter identified by a pci_dev structure.
- * The OS initialization, configuring of the adapter private structure,
- * and a hardware reset occur.
- **/
 static int
 al_eth_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
@@ -4597,7 +4291,6 @@ al_eth_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	pci_set_master(pdev);
 	pci_save_state(pdev);
 
-	/* dev zeroed in init_etherdev */
 	netdev = alloc_etherdev_mq(sizeof(struct al_eth_adapter), AL_ETH_NUM_QUEUES);
 	if (!netdev) {
 		dev_err(&pdev->dev, "alloc_etherdev_mq failed\n");
@@ -4620,21 +4313,13 @@ al_eth_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	if (adapter->board_type == ALPINE_NIC) {
 		u16 adapter_pci_cmd;
 
-		/*
-		 * pci adapter configuration space: 0-4K
-		 * BAR0-ETH_CTL: 20K-36K (start offset 0x5000)
-		 * BAR1-MAC_CTL: 36K-40K (start offset 0x9000)
-		 * BAR2-UDMA: 128K-256K
-		 */
-
-		/* enable master/slave in the adapter conf */
 		adapter_pci_cmd = readw(iomap[0] + PCI_COMMAND);
 		adapter_pci_cmd |= PCI_COMMAND_MEMORY | PCI_COMMAND_MASTER;
 		adapter_pci_cmd &= ~PCI_COMMAND_INTX_DISABLE;
 
 		writew(adapter_pci_cmd, iomap[0] + PCI_COMMAND);
-		/* enable forwarding interrupts from eth through pci end point*/
-		writel(0x1FFFF, iomap[0] + 0x201210); /* FPGA */
+		 
+		writel(0x1FFFF, iomap[0] + 0x201210);  
 
 		pr_info("enable msix in the adapter: %x\n", readl(iomap[0] + 0x90));
 		adapter->udma_base = iomap[0] + 128 * 0x400;
@@ -4647,7 +4332,6 @@ al_eth_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 	adapter->id_number = adapters_found;
 
-	/* set default ring sizes */
 	adapter->tx_ring_count = AL_ETH_DEFAULT_TX_SW_DESCS;
 	adapter->tx_descs_count = AL_ETH_DEFAULT_TX_HW_DESCS;
 	adapter->rx_ring_count = AL_ETH_DEFAULT_RX_DESCS;
@@ -4725,13 +4409,6 @@ err_hw_init:
 	return rc;
 }
 
-/**
- * al_eth_remove - Device Removal Routine
- * @pdev: PCI device information struct
- *
- * al_eth_remove is called by the PCI subsystem to alert the driver
- * that it should release a PCI device.
- **/
 static void
 al_eth_remove(struct pci_dev *pdev)
 {

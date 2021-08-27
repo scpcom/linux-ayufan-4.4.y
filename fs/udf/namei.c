@@ -1,26 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * namei.c
- *
- * PURPOSE
- *      Inode name handling routines for the OSTA-UDF(tm) filesystem.
- *
- * COPYRIGHT
- *      This file is distributed under the terms of the GNU General Public
- *      License (GPL). Copies of the GPL can be obtained from:
- *              ftp://prep.ai.mit.edu/pub/gnu/GPL
- *      Each contributing author retains all rights to their own work.
- *
- *  (C) 1998-2004 Ben Fennema
- *  (C) 1999-2000 Stelias Computing Inc
- *
- * HISTORY
- *
- *  12/12/98 blf  Created. Split out the lookup code from dir.c
- *  04/19/99 blf  link, mknod, symlink support
- */
  
 #include "udfdecl.h"
 
@@ -214,7 +194,7 @@ static struct fileIdentDesc *udf_find_entry(struct inode *dir,
 		if (fibh->sbh == fibh->ebh) {
 			nameptr = fi->fileIdent + liu;
 		} else {
-			int poffset;	/* Unpaded ending offset */
+			int poffset;	 
 
 			poffset = fibh->soffset + sizeof(struct fileIdentDesc) +
 					liu + lfi;
@@ -283,7 +263,7 @@ static struct dentry *udf_lookup(struct inode *dir, struct dentry *dentry,
 		return ERR_PTR(-ENAMETOOLONG);
 
 #ifdef UDF_RECOVERY
-	/* temporary shorthand for specifying files by inode number */
+	 
 	if (!strncmp(dentry->d_name.name, ".B=", 3)) {
 		struct kernel_lb_addr lb = {
 			.logicalBlockNum = 0,
@@ -296,7 +276,7 @@ static struct dentry *udf_lookup(struct inode *dir, struct dentry *dentry,
 			return ERR_PTR(-EACCES);
 		}
 	} else
-#endif /* UDF_RECOVERY */
+#endif  
 
 	if (udf_find_entry(dir, &dentry->d_name, &fibh, &cfi)) {
 		struct kernel_lb_addr loc;
@@ -440,11 +420,10 @@ add:
 			goto out_err;
 		epos.block = dinfo->i_location;
 		epos.offset = udf_file_entry_alloc_offset(dir);
-		/* Load extent udf_expand_dir_adinicb() has created */
+		 
 		udf_current_aext(dir, &epos, &eloc, &elen, 1);
 	}
 
-	/* Entry fits into current block? */
 	if (sb->s_blocksize - fibh->eoffset >= nfidlen) {
 		fibh->soffset = fibh->eoffset;
 		fibh->eoffset += nfidlen;
@@ -468,7 +447,7 @@ add:
 				(fibh->sbh->b_data + fibh->soffset);
 		}
 	} else {
-		/* Round up last extent in the file */
+		 
 		elen = (elen + sb->s_blocksize - 1) & ~(sb->s_blocksize - 1);
 		if (dinfo->i_alloc_type == ICBTAG_FLAG_AD_SHORT)
 			epos.offset -= sizeof(struct short_ad);
@@ -491,14 +470,14 @@ add:
 				f_pos >> dir->i_sb->s_blocksize_bits, 1, err);
 		if (!fibh->ebh)
 			goto out_err;
-		/* Extents could have been merged, invalidate our position */
+		 
 		brelse(epos.bh);
 		epos.bh = NULL;
 		epos.block = dinfo->i_location;
 		epos.offset = udf_file_entry_alloc_offset(dir);
 
 		if (!fibh->soffset) {
-			/* Find the freshly allocated block */
+			 
 			while (udf_next_aext(dir, &epos, &eloc, &elen, 1) ==
 				(EXT_RECORDED_ALLOCATED >> 30))
 				;
@@ -529,7 +508,7 @@ add:
 		if (dinfo->i_alloc_type == ICBTAG_FLAG_AD_IN_ICB)
 			dinfo->i_lenAlloc += nfidlen;
 		else {
-			/* Find the last extent and truncate it to proper size */
+			 
 			while (udf_next_aext(dir, &epos, &eloc, &elen, 1) ==
 				(EXT_RECORDED_ALLOCATED >> 30))
 				;
@@ -1081,9 +1060,6 @@ static int udf_link(struct dentry *old_dentry, struct inode *dir,
 	return 0;
 }
 
-/* Anybody can rename anything with this: the permission checks are left to the
- * higher-level routines.
- */
 static int udf_rename(struct inode *old_dir, struct dentry *old_dentry,
 		      struct inode *new_dir, struct dentry *new_dentry)
 {
@@ -1158,22 +1134,14 @@ static int udf_rename(struct inode *old_dir, struct dentry *old_dentry,
 			goto end_rename;
 	}
 
-	/*
-	 * Like most other Unix systems, set the ctime for inodes on a
-	 * rename.
-	 */
 	old_inode->i_ctime = current_fs_time(old_inode->i_sb);
 	mark_inode_dirty(old_inode);
 
-	/*
-	 * ok, that's it
-	 */
 	ncfi.fileVersionNum = ocfi.fileVersionNum;
 	ncfi.fileCharacteristics = ocfi.fileCharacteristics;
 	memcpy(&(ncfi.icb), &(ocfi.icb), sizeof(struct long_ad));
 	udf_write_fi(new_dir, &ncfi, nfi, &nfibh, NULL, NULL);
 
-	/* The old fid may have moved - find it again */
 	ofi = udf_find_entry(old_dir, &old_dentry->d_name, &ofibh, &ocfi);
 	udf_delete_entry(old_dir, ofi, &ofibh, &ocfi);
 

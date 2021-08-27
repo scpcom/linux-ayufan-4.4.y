@@ -1,19 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/mm/cache-aurora-l2.c - AURORA shared L2 cache controller support
- *
- * Copyright (C) 2008 Marvell Semiconductor
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- *
- * References:
- * - Unified Shared Layer 2 Cache for Armada CP SoC devices,
- *   Document ID MV-S104858-00, Rev. A, October 23 2007.
- */
  
 #include <linux/init.h>
 #include <linux/delay.h>
@@ -27,9 +14,6 @@
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "ctrlEnv/mvSemaphore.h"
 
-/*
- * L2 registers offsets
- */
 #define L2_CONTROL		0x100
 #define L2_AUX_CONTROL		0x104
 #define L2_SYNC			0x700
@@ -219,12 +203,12 @@ static int proc_auroraL2_counter_write(struct file *file, const char __user *buf
     if (strcmp(param[0], "reset") == 0)
     {
 	for (i = 0; i < L2_MAX_COUNTERS; i++){
-		/* Stop counters */
+		 
 		cfg = readl(auroraL2_base + L2_CNTR_CONFIG_REG(i));
 		cfg &= ~(0x3F << 2)
         	writel(cfg, auroraL2_base + L2_CNTR_CONFIG_REG(i)); 
 	}
-        writel(0x101, auroraL2_base + L2_CNTR_CTRL_REG); /* reset counter values */
+        writel(0x101, auroraL2_base + L2_CNTR_CTRL_REG);  
 
         memset((unsigned char *)last_counter, 0, sizeof(last_counter));         
         
@@ -245,8 +229,8 @@ out:
     
 	return count;
 }
-#endif /* CONFIG_CACHE_TAUROS3_EVENT_MONITOR_ENABLE */
-#endif /* CONFIG_PROC_FS */
+#endif  
+#endif  
 
 #define CACHE_LINE_SIZE		32
 #define MAX_RANGE_SIZE		1024
@@ -257,24 +241,10 @@ static int l2_wt_override = 0;
       (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_AURORA_L2_OUTER))
 static DEFINE_SPINLOCK(smp_l2cache_lock);
 #endif
-/*
- * Low-level cache maintenance operations.
- *
- *
- * Cache range operations are initiated by writing the start and
- * end addresses to successive cp15 registers, and process every
- * cache line whose first byte address lies in the inclusive range
- * [start:end-1] (the end address is inclusive).
- *
- * The cache range operations stall the CPU pipeline until completion.
- *
- * The range operations require two successive cp15 writes, in
- * between which we don't want to be preempted.
- */
  
 static inline void cache_sync(void)
 {    
-    writel(0, auroraL2_base+L2_SYNC);  /* flush L2 write buffer (barrier) */ 
+    writel(0, auroraL2_base+L2_SYNC);    
 }
 
 #ifdef CONFIG_AURORA_L2_OUTER
@@ -313,11 +283,6 @@ static inline void l2_clean_pa_range(unsigned long start, unsigned long end)
 {
 	unsigned long flags;
 
-	/*
-	 * Make sure 'start' and 'end' reference the same page, as
-	 * L2 is PIPT and range operations only do a TLB lookup on
-	 * the start address.
-	 */
 	BUG_ON((start ^ end) & ~(PAGE_SIZE - 1));
 #ifdef RANGE_OP
 	spin_lock_irqsave(&smp_l2cache_lock, flags);
@@ -339,11 +304,6 @@ static inline void l2_flush_pa_range(unsigned long start, unsigned long end)
 {
 	unsigned long flags;
 
-	/*
-	 * Make sure 'start' and 'end' reference the same page, as
-	 * L2 is PIPT and range operations only do a TLB lookup on
-	 * the start address.
-	 */
 	BUG_ON((start ^ end) & ~(PAGE_SIZE - 1));
 #ifdef RANGE_OP
 	spin_lock_irqsave(&smp_l2cache_lock, flags);
@@ -365,11 +325,6 @@ static inline void l2_inv_pa_range(unsigned long start, unsigned long end)
 {
 	unsigned long flags;
 
-	/*
-	 * Make sure 'start' and 'end' reference the same page, as
-	 * L2 is PIPT and range operations only do a TLB lookup on
-	 * the start address.
-	 */
 	BUG_ON((start ^ end) & ~(PAGE_SIZE - 1));
 #ifdef RANGE_OP
 	spin_lock_irqsave(&smp_l2cache_lock, flags);
@@ -388,14 +343,6 @@ static inline void l2_inv_pa_range(unsigned long start, unsigned long end)
 	cache_sync();
 }
 
-/*
- * Linux primitives.
- *
- * Note that the end addresses passed to Linux primitives are
- * noninclusive, while the hardware cache range operations use
- * inclusive start and end addresses.
- */
-
 static inline unsigned long calc_range_end(unsigned long start, unsigned long end)
 {
 	unsigned long range_end;
@@ -403,22 +350,11 @@ static inline unsigned long calc_range_end(unsigned long start, unsigned long en
 	BUG_ON(start & (CACHE_LINE_SIZE - 1));
 	BUG_ON(end & (CACHE_LINE_SIZE - 1));
 
-	/*
-	 * Try to process all cache lines between 'start' and 'end'.
-	 */
 	range_end = end;
 
-	/*
-	 * Limit the number of cache lines processed at once,
-	 * since cache range operations stall the CPU pipeline
-	 * until completion.
-	 */
 	if (range_end > start + MAX_RANGE_SIZE)
 		range_end = start + MAX_RANGE_SIZE;
 
-	/*
-	 * Cache range operations can't straddle a page boundary.
-	 */
 	if (range_end > (start | (PAGE_SIZE - 1)) + 1)
 		range_end = (start | (PAGE_SIZE - 1)) + 1;
 
@@ -429,25 +365,17 @@ static void aurora_l2_inv_range(unsigned long start, unsigned long end)
 {
     	if (!auroraL2_enable)
         	return;        
-	/*
-	 * Clean and invalidate partial first cache line.
-	 */
+	 
 	if (start & (CACHE_LINE_SIZE - 1)) {
 		l2_clean_inv_pa(start & ~(CACHE_LINE_SIZE - 1));
 		start = (start | (CACHE_LINE_SIZE - 1)) + 1;
 	}
 
-	/*
-	 * Clean and invalidate partial last cache line.
-	 */
 	if (start < end && end & (CACHE_LINE_SIZE - 1)) {
 		l2_clean_inv_pa(end & ~(CACHE_LINE_SIZE - 1));
 		end &= ~(CACHE_LINE_SIZE - 1);
 	}
 
-	/*
-	 * Invalidate all full cache lines between 'start' and 'end'.
-	 */
 	while (start < end) {
 		unsigned long range_end = calc_range_end(start, end);
 		l2_inv_pa_range(start, range_end - CACHE_LINE_SIZE);
@@ -461,10 +389,7 @@ void aurora_l2_clean_range(unsigned long start, unsigned long end)
 {
     	if (!auroraL2_enable)
         	return;        
-	/*
-	 * If L2 is forced to WT, the L2 will always be clean and we
-	 * don't need to do anything here.
-	 */
+	 
 	if (!l2_wt_override) {
 		start &= ~(CACHE_LINE_SIZE - 1);
 		end = (end + CACHE_LINE_SIZE - 1) & ~(CACHE_LINE_SIZE - 1);
@@ -494,12 +419,8 @@ void aurora_l2_flush_range(unsigned long start, unsigned long end)
 
 	dsb();
 }
-#endif /* #ifdef CONFIG_AURORA_L2_OUTER */
+#endif  
 
-/*
- * Routines to disable and re-enable the D-cache and I-cache at run
- * time.  
- */
 static u32 __init invalidate_and_disable_cache(void)
 {
 	int dummy;
@@ -534,14 +455,14 @@ static void __init enable_l2(void)
 {
 	u32 u, mask;
 #if 0
-	/* Enable SMP (SMPnAMP) in Aux Control Reg */
+	 
 	__asm__ __volatile__("mrc p15, 0, %0, c1, c0, 1" : "=r" (u));
-	u |= 0x40; /* Set SMPnAMP bit */
+	u |= 0x40;  
 	__asm__ __volatile__("mcr p15, 0, %0, c1, c0, 1\n" : : "r" (u));
 #endif
-	/* Enable Broadcasring (FW) in Extra Features Reg */	
+	 	
 	__asm__ __volatile__("mrc p15, 1, %0, c15, c2, 0" : "=r" (u));
-	u |= 0x100; /* Set the FW bit */
+	u |= 0x100;  
 	__asm__ __volatile__("mcr p15, 1, %0, c15, c2, 0\n" : : "r" (u));
 
 	u = readl(auroraL2_base+L2_CONTROL);
@@ -554,7 +475,6 @@ static void __init enable_l2(void)
 	}
 }
 
-/* lock_mask is a bit map. '1' means way is locked. '0' means way is unlocked */
 void __init aurora_l2_lockdown(u32 cpuId, u32 lock_mask)
 {
 	lock_mask &= 0xFF;
@@ -565,7 +485,7 @@ void __init aurora_l2_lockdown(u32 cpuId, u32 lock_mask)
 }
 
 #if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
-static u32 l2_ways = 0xffffffff; /* all ways init to L2$ ways */
+static u32 l2_ways = 0xffffffff;  
 #endif
 
 void auroraL2_inv_all(void)
@@ -573,7 +493,7 @@ void auroraL2_inv_all(void)
 #if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	writel(l2_ways, auroraL2_base+L2_INVAL_WAY_REG);
 #else
-	u32 u   = 0xffff; // all ways
+	u32 u   = 0xffff;  
 	writel(u, auroraL2_base+L2_INVAL_WAY_REG);
 #endif
 }
@@ -582,7 +502,7 @@ void auroraL2_flush_all(void)
 {
 #if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #else
-	u32 u   = 0xffff; // all ways
+	u32 u   = 0xffff;  
 #endif
 
     	if (!auroraL2_enable)
@@ -597,7 +517,7 @@ void auroraL2_flush_all(void)
 }
 
 #if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
-/* get the L2$ ways - to enable invalidate of only the L2$ ways */
+ 
 static int __init early_l2_ways(char *arg)
 {
 	l2_ways = memparse(arg, NULL);
@@ -616,7 +536,6 @@ static struct regs_entry aurora_l2_regs[] = {
 	{L2_CONTROL, 0}
 };
 
-/* L2 Power management function */
 int aurora_l2_pm_enter(void)
 {
 	int i;
@@ -657,7 +576,6 @@ int __init aurora_l2_init(void __iomem *base)
 	if (!res)
 		return -ENOMEM;
 
-    	/* Create information proc file */
 	res_file = create_proc_entry("info", S_IWUSR | S_IRUGO, res);
 	if (!res)
 		return -ENOMEM;
@@ -666,14 +584,14 @@ int __init aurora_l2_init(void __iomem *base)
 	res_file->write_proc = NULL;
 
 #ifdef CONFIG_CACHE_AURORAL2_EVENT_MONITOR_ENABLE
-	/* Create counter proc file */
+	 
 	res_file = create_proc_entry("counter", S_IWUSR | S_IRUGO, res);
 	if (!res)
 		return -ENOMEM;
 
 	res_file->read_proc = proc_auroraL2_counter_read;
 	res_file->write_proc = proc_auroraL2_counter_write;
-#endif /* CONFIG_CACHE_AURORAL2_EVENT_MONITOR_ENABLE */
+#endif  
 #endif
 
 #ifdef CONFIG_AURORA_L2_OUTER
@@ -689,9 +607,7 @@ int __init aurora_l2_init(void __iomem *base)
 #endif
 	{
 
-		/* 1. Write to AuroraL2 Auxiliary Control Register, 0x104
-		*    Setting up Associativity, Way Size, ECC and Latencies
-		*/
+		
 		aux = readl(auroraL2_base + L2_AUX_CTRL_REG);
 		aux &= ~L2ACR_REPLACEMENT_MASK;
 		aux |= l2rep;
@@ -707,7 +623,7 @@ int __init aurora_l2_init(void __iomem *base)
 		aux |= L2ACR_FORCE_WRITE_BACK_POLICY;
 #elif defined(CONFIG_AURORA_L2_WBWT_FORCE_WT)
 		aux |= L2ACR_FORCE_WRITE_THRO_POLICY;
-#else /* CONFIG_AURORA_L2_WBWT_PAGE_ATTRIBUTE */
+#else  
 		aux |= L2ACR_FORCE_WRITE_POLICY_DIS;
 #endif
 
@@ -716,32 +632,23 @@ int __init aurora_l2_init(void __iomem *base)
 		aux |= L2ACR_FORCE_WA_NONE;
 #elif defined(CONFIG_AURORA_L2_WA_FORCE_ALLOCATE)  || defined(CONFIG_CACHE_AURORA_L2_ERRATA_ECC_PARTIALS)
 		aux |= L2ACR_FORCE_WA_ALL;
-#else /* CONFIG_AURORA_L2_WA_PAGE_ATTRIBUTE */
+#else  
 		aux |= L2ACR_FORCE_WA_REQ_ATTRIB;
 #endif
 
 #if defined(CONFIG_AURORA_L2_ECC)
-		/* Enable L2 ECC. 1bit can be corrected, 2bit will cause an excpetion */
+		 
 		aux |= L2ACR_ECC_ENABLE;
 #endif
-#endif // CONFIG_SYNO_ARMADA_ARCH_V2
+#endif  
 		writel(aux, auroraL2_base + L2_AUX_CTRL_REG);
 
 		l2_wt_override = ((aux & (0x3)) == 0x2 ? 1:0);
-		/* 3. Secure write to AuroraL2 Invalidate by Way, 0x77c
-		*/
+
 		auroraL2_inv_all();
 
-		/* 4. Write to the Lockdown D and Lockdown I Register 9 if required
-		*/
-
-		/* 5. Write to interrupt clear register, 0x220, to clear any residual
-		*    raw interrupt set.
-		*/
 		writel(0x1FF, auroraL2_base + L2_INT_CAUSE_REG);
 
-		/* 6. Enable L2 cache
-		*/
 		enable_l2();
 	}
 

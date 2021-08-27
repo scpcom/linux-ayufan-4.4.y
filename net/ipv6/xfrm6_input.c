@@ -1,16 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * xfrm6_input.c: based on net/ipv4/xfrm4_input.c
- *
- * Authors:
- *	Mitsuru KANDA @USAGI
- * 	Kazunori MIYAZAWA @USAGI
- * 	Kunihiro Ishiguro <kunihiro@ipinfusion.com>
- *	YOSHIFUJI Hideaki @USAGI
- *		IPv6 support
- */
  
 #include <linux/module.h>
 #include <linux/string.h>
@@ -61,13 +51,7 @@ int xfrm6_transport_finish(struct sk_buff *skb, int async)
 	return -1;
 }
 #if defined(CONFIG_SYNO_COMCERTO)
-/* If it's a keepalive packet, then just eat it.
- * If it's an encapsulated packet, then pass it to the
- * IPsec xfrm input.
- * Returns 0 if skb passed to xfrm or was dropped.
- * Returns >0 if skb should be passed to UDP.
- * Returns <0 if skb should be resubmitted (-ret is protocol)
- */
+ 
 int xfrm6_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
 {
 
@@ -83,17 +67,13 @@ int xfrm6_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
 	__be32 *udpdata32;
 	__u16 encap_type = up->encap_type;
 
-	/* if this is not encapsulated socket, then just return now */
 	if (!encap_type)
 		return 1;
 
-	/* If this is a paged skb, make sure we pull up
-	 * whatever data we need to look at. */
 	len = skb->len - sizeof(struct udphdr);
 	if (!pskb_may_pull(skb, sizeof(struct udphdr) + min(len, 8)))
 		return 1;
 
-	/* Now we can get the pointers */
 	uh = udp_hdr(skb);
 	udpdata = (__u8 *)uh + sizeof(struct udphdr);
 	udpdata32 = (__be32 *)udpdata;
@@ -101,56 +81,44 @@ int xfrm6_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
 	switch (encap_type) {
 	default:
 	case UDP_ENCAP_ESPINUDP:
-		/* Check if this is a keepalive packet.  If so, eat it. */
+		 
 		if (len == 1 && udpdata[0] == 0xff) {
 			goto drop;
 		} else if (len > sizeof(struct ip_esp_hdr) && udpdata32[0] != 0) {
-			/* ESP Packet without Non-ESP header */
+			 
 			len = sizeof(struct udphdr);
 		} else
-			/* Must be an IKE packet.. pass it through */
+			 
 			return 1;
 		break;
 	case UDP_ENCAP_ESPINUDP_NON_IKE:
-		/* Check if this is a keepalive packet.  If so, eat it. */
+		 
 		if (len == 1 && udpdata[0] == 0xff) {
 			goto drop;
 		} else if (len > 2 * sizeof(u32) + sizeof(struct ip_esp_hdr) &&
 			   udpdata32[0] == 0 && udpdata32[1] == 0) {
 
-			/* ESP Packet with Non-IKE marker */
 			len = sizeof(struct udphdr) + 2 * (sizeof(u32) * 4);
 		} else
-			/* Must be an IKE packet.. pass it through */
+			 
 			return 1;
 		break;
 	}
 
-	/* At this point we are sure that this is an ESPinUDP packet,
-	 * so we need to remove 'len' bytes from the packet (the UDP
-	 * header and optional ESP marker bytes) and then modify the
-	 * protocol to ESP, and then call into the transform receiver.
-	 */
 	if (skb_cloned(skb) && pskb_expand_head(skb, 0, 0, GFP_ATOMIC)){
 		goto drop;
 	}
 
-	/* Now we can update and verify the packet length... */
 	iph = ipv6_hdr(skb);
 	iphlen = ntohs(iph->payload_len);
 	if (skb->len < iphlen) {
-		/* packet is too small!?! */
+		 
 		goto drop;
 	}
 
-	/* pull the data buffer up to the ESP header and set the
-	 * transport header to point to ESP.  Keep UDP on the stack
-	 * for later.
-	 */
 	__skb_pull(skb, len);
 	skb_reset_transport_header(skb);
 
-	/* process ESP */
 	return xfrm6_rcv_encap(skb, IPPROTO_ESP, 0, encap_type);
 
 drop:
@@ -175,7 +143,6 @@ int xfrm6_input_addr(struct sk_buff *skb, xfrm_address_t *daddr,
 	struct xfrm_state *x = NULL;
 	int i = 0;
 
-	/* Allocate new secpath or COW existing one. */
 	if (!skb->sp || atomic_read(&skb->sp->refcnt) != 1) {
 		struct sec_path *sp;
 
@@ -203,12 +170,12 @@ int xfrm6_input_addr(struct sk_buff *skb, xfrm_address_t *daddr,
 			src = saddr;
 			break;
 		case 1:
-			/* lookup state with wild-card source address */
+			 
 			dst = daddr;
 			src = (xfrm_address_t *)&in6addr_any;
 			break;
 		default:
-			/* lookup state with wild-card addresses */
+			 
 			dst = (xfrm_address_t *)&in6addr_any;
 			src = (xfrm_address_t *)&in6addr_any;
 			break;
@@ -225,7 +192,7 @@ int xfrm6_input_addr(struct sk_buff *skb, xfrm_address_t *daddr,
 		    !xfrm_state_check_expire(x)) {
 			spin_unlock(&x->lock);
 			if (x->type->input(x, skb) > 0) {
-				/* found a valid state */
+				 
 				break;
 			}
 		} else

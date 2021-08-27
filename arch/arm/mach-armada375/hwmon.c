@@ -1,21 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301 USA.
- */
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -32,7 +17,6 @@
 #include <linux/interrupt.h>
 #include <linux/delay.h>
 
-/* Termal Sensor Registers */
 #define TSEN_STATUS_REG				0xE8078
 #define	TSEN_STATUS_TEMP_OUT_MASK		0x1FF
 #define	TSEN_STATUS_TEMP_VALID_MASK		0x400
@@ -45,7 +29,7 @@
 #define TSEN_CONT_MSB_DISABLE_RST_OFFSET	8
 #define TSEN_CONT_MSB_DISABLE_RST_MASK		(0x1 << TSEN_CONT_MSB_DISABLE_RST_OFFSET)
 
-#define A375_OVERHEAT_TEMP	105		/* milidegree Celsius */
+#define A375_OVERHEAT_TEMP	105		 
 #define A375_OVERHEAT_DELAY	0x700
 #define A375_OVERHEAT_MIN	0
 #define A375_OVERHEAT_MAX	110000
@@ -67,7 +51,6 @@
 #define	PMU_TM_OVRHEAT_DLY_REG  0x184cc
 #define	PMU_TM_COOLING_DLY_REG	0x184c8
 
-/* Junction Temperature */
 #define A375_TSEN_TEMP2RAW(x) ((3239600 - (13616 * x)) / 10000)
 #define A375_TSEN_RAW2TEMP(x) ((3239600 - (10000 * x)) / 13616)
 
@@ -83,7 +66,7 @@ typedef enum {
 	SHOW_LABEL } SHOW;
 
 #ifdef MY_DEF_HERE
-#define IRQ_AURORA_PMU           107 // armada375 is not define this value, it is reference from armadaxp
+#define IRQ_AURORA_PMU           107  
 #endif
 
 static void a375_temp_set_thresholds(unsigned int max)
@@ -94,7 +77,6 @@ static void a375_temp_set_thresholds(unsigned int max)
 	reg &= ~PMU_TM_DISABLE_MASK;
 	writel(reg, (INTER_REGS_VIRT_BASE | PMU_THERMAL_MNGR_REG));
 
-	/* Set the overheat threashold & delay */
 	temp = A375_TSEN_TEMP2RAW(max);
 	reg = readl(INTER_REGS_VIRT_BASE | PMU_THERMAL_MNGR_REG);
 	reg &= ~PMU_TM_OVRHEAT_THRSH_MASK;
@@ -106,23 +88,19 @@ static int a375_temp_init_sensor(void)
 {
 	u32 reg;
 
-	/* Set Temp sensor 0 to read */
 	reg = readl(INTER_REGS_VIRT_BASE | TSEN_CONT_MSB_REG);
 	reg &= ~TSEN_CONT_MSB_UNIT_CTRL_MASK;
 	reg |= (0x0 << TSEN_CONT_MSB_UNIT_CTRL_OFFSET);
 
-	/* Disable readout invert */
 	reg &= ~TSEN_CONT_MSB_READOUT_INVERT_MASK;
 	reg |= (0x0 << TSEN_CONT_MSB_READOUT_INVERT_OFFSET);
 
-	/* Disable reset */
 	reg &= ~TSEN_CONT_MSB_DISABLE_RST_MASK;
 	reg |= (0x0 << TSEN_CONT_MSB_DISABLE_RST_OFFSET);
 	writel(reg, (INTER_REGS_VIRT_BASE | TSEN_CONT_MSB_REG));
 
 	udelay(20);
 
-	/* Enable reset */
 	reg &= ~TSEN_CONT_MSB_DISABLE_RST_MASK;
 	reg |= (0x1 << TSEN_CONT_MSB_DISABLE_RST_OFFSET);
 	writel(reg, (INTER_REGS_VIRT_BASE | TSEN_CONT_MSB_REG));
@@ -135,7 +113,6 @@ static int a375_temp_read_temp(void)
 	int reg;
 	int timeOut = 0;
 
-	/* Wait for temperature reading to be valid */
 	do {
 		reg = readl(INTER_REGS_VIRT_BASE | TSEN_STATUS_REG);
 		udelay(20);
@@ -145,7 +122,7 @@ static int a375_temp_read_temp(void)
 
 	} while (!(reg & TSEN_STATUS_TEMP_VALID_MASK));
 
-	/* calculate the temperature */
+	
 	reg = reg & TSEN_STATUS_TEMP_OUT_MASK;
 	
 	return A375_TSEN_RAW2TEMP(reg);
@@ -155,7 +132,7 @@ static int a375_temp_read_temp(void)
 extern unsigned int mvCtrlGetJuncTemp(void);
 int axptemp_read_temp(void)
 {
-	#if 0 // this funciton is not ready, temp = 228, so force to return 40
+	#if 0  
 	int val = a375_temp_read_temp();
 	printk("CPU Temp: %d\n", val);
 	return val;
@@ -165,10 +142,6 @@ int axptemp_read_temp(void)
 }
 EXPORT_SYMBOL(axptemp_read_temp);
 #endif
-
-/*
- * Sysfs stuff
- */
 
 static ssize_t show_name(struct device *dev, struct device_attribute
 			  *devattr, char *buf) {
@@ -239,7 +212,6 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *devattr,
 	} else
 		printk(KERN_ERR "a375-temp: Invalid sensor attribute!");
 
-	/* Clear & unmask overheat interrupts */
 	writel(0, (INTER_REGS_VIRT_BASE | PMU_INT_CAUSE_REG));
 	writel(PMU_INT_OVRHEAT_MASK, (INTER_REGS_VIRT_BASE | PMU_INT_MASK_REG));
 
@@ -252,7 +224,7 @@ static irqreturn_t a375_temp_irq_handler(int irq, void *data)
 	u32 val, mask;
 	mask = readl(INTER_REGS_VIRT_BASE | PMU_INT_MASK_REG);
 	val = (readl(INTER_REGS_VIRT_BASE | PMU_INT_CAUSE_REG) & mask);
-	/* Mask overheat interrupt */
+	 
 	writel((mask & ~val), (INTER_REGS_VIRT_BASE | PMU_INT_MASK_REG));
 
 	printk(KERN_WARNING "WARNING: %s threshold was triggered\n",
@@ -261,13 +233,11 @@ static irqreturn_t a375_temp_irq_handler(int irq, void *data)
 	if (val & PMU_INT_OVRHEAT_MASK)
 		val &= ~PMU_INT_OVRHEAT_MASK;
 
-	/* Clear cooling/overheat interrupt */
 	writel(val, (INTER_REGS_VIRT_BASE | PMU_INT_CAUSE_REG));
 
 	return IRQ_HANDLED;
 }
 
-/* TODO - Add read/write support in order to support setting max */
 static SENSOR_DEVICE_ATTR(temp1_type, S_IRUGO, show_info, NULL,
 			  SHOW_TYPE);
 static SENSOR_DEVICE_ATTR(temp1_label, S_IRUGO, show_info, NULL,

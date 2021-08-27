@@ -1,27 +1,3 @@
-/*
- * drivers/crypto/al_crypto_hash.c
- *
- * Annapurna Labs Crypto driver - hash algorithms
- *
- * Copyright (C) 2012 Annapurna Labs Ltd.
- *
- * Algorithm registration code and chained scatter/gather lists
- * handling based on caam driver.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
  
 #include "linux/export.h"
 #include "linux/crypto.h"
@@ -44,12 +20,6 @@
 #define AL_CRYPTO_HASH_MAX_BLOCK_SIZE	SHA512_BLOCK_SIZE
 #define AL_CRYPTO_HASH_MAX_DIGEST_SIZE	SHA512_DIGEST_SIZE
 
-/*
-#ifndef DEBUG
-#define DEBUG
-#endif
-*/
-
 static int ahash_init(struct ahash_request *req);
 
 static int ahash_update(struct ahash_request *req);
@@ -67,23 +37,15 @@ static int ahash_import(struct ahash_request *req, const void *in);
 static int ahash_setkey(struct crypto_ahash *ahash,
 			const u8 *key, unsigned int keylen);
 
-/* ahash request ctx */
 struct al_crypto_hash_req_ctx {
-	/* Note 1:
-	 *	buf_0 and buf_1 are used for keeping the data that
-	 *  was not hashed during current update for the next update
-	 * Note 2:
-	 *  buf_0, buf_1 and interm are DMAed so they shouldn't
-	 *  share the same cache line
-	 * with other fields
-	 *	*/
+	 
 	uint8_t buf_0[AL_CRYPTO_HASH_MAX_BLOCK_SIZE] ____cacheline_aligned;
 	uint8_t buf_1[AL_CRYPTO_HASH_MAX_BLOCK_SIZE] ____cacheline_aligned;
-	/* intermediate state */
+	 
 	uint8_t interm[AL_CRYPTO_HASH_MAX_DIGEST_SIZE] ____cacheline_aligned;
 	int buflen_0 ____cacheline_aligned;
 	int buflen_1;
-	uint8_t current_buf;	/* select active buffer for current update */
+	uint8_t current_buf;	 
 	dma_addr_t buf_dma_addr;
 	int buf_dma_len;
 	dma_addr_t interm_dma_addr;
@@ -289,8 +251,6 @@ struct al_crypto_hash {
 	unsigned int sw_hash_interm_size;
 };
 
-/******************************************************************************
- *****************************************************************************/
 static u8 zero_message_hash_md5[MD5_DIGEST_SIZE] = {
 	0xd4, 0x1d, 0x8c, 0xd9, 0x8f ,0x00 ,0xb2, 0x04,
 	0xe9, 0x80, 0x09, 0x98, 0xec, 0xf8, 0x42, 0x7e
@@ -329,15 +289,11 @@ static u8 zero_message_hash_sha512[SHA512_DIGEST_SIZE] = {
 	0xa5, 0x38, 0x32, 0x7a, 0xf9, 0x27, 0xda, 0x3e,
 };
 
-/******************************************************************************
- *****************************************************************************/
 static inline int to_signature_size(int digest_size)
 {
 	return (digest_size / 4) - 1;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int al_crypto_hash_cra_init(struct crypto_tfm *tfm)
 {
 	struct crypto_ahash *ahash = __crypto_ahash_cast(tfm);
@@ -356,11 +312,8 @@ static int al_crypto_hash_cra_init(struct crypto_tfm *tfm)
 
 	memset(&ctx->sa, 0, sizeof(struct al_crypto_sa));
 
-	/* Allocate SW hash for hmac long key hashing and key XOR ipad/opad
-	 * intermediate calculations
-	 */
 	if (strlen(al_crypto_hash->sw_hash_name)) {
-		/* TODO: is CRYPTO_ALG_NEED_FALLBACK needed here? */
+		 
 		sw_hash = crypto_alloc_shash(al_crypto_hash->sw_hash_name, 0,
 				CRYPTO_ALG_NEED_FALLBACK);
 		if (IS_ERR(sw_hash)) {
@@ -399,8 +352,6 @@ static int al_crypto_hash_cra_init(struct crypto_tfm *tfm)
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_crypto_hash_cra_exit(struct crypto_tfm *tfm)
 {
 	struct crypto_alg *base = tfm->__crt_alg;
@@ -413,7 +364,6 @@ static void al_crypto_hash_cra_exit(struct crypto_tfm *tfm)
 	struct al_crypto_ctx *ctx = crypto_tfm_ctx(tfm);
 	struct al_crypto_device *device = al_crypto_hash->device;
 
-	/* LRU list access has to be protected */
 	spin_lock_bh(&ctx->chan->prep_lock);
 	if (ctx->cache_state.cached)
 		al_crypto_cache_remove_lru(ctx->chan, &ctx->cache_state);
@@ -435,10 +385,6 @@ static void al_crypto_hash_cra_exit(struct crypto_tfm *tfm)
 	return;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* DMA unmap buffers for ahash request
- */
 static inline void al_crypto_dma_unmap_ahash(
 		struct al_crypto_chan		*chan,
 		struct al_crypto_sw_desc	*desc,
@@ -471,8 +417,6 @@ static inline void al_crypto_dma_unmap_ahash(
 	}
 }
 
-/******************************************************************************
- *****************************************************************************/
 static inline void zero_message_result_copy(struct ahash_request *req)
 {
 	struct crypto_ahash *ahash = crypto_ahash_reqtfm(req);
@@ -503,11 +447,7 @@ static inline void zero_message_result_copy(struct ahash_request *req)
 
 	memcpy(req->result, zero_message, digestsize);
 }
-/******************************************************************************
- *****************************************************************************/
-/* Cleanup single ahash request - invoked from cleanup tasklet (interrupt
- * handler)
- */
+ 
 void al_crypto_cleanup_single_ahash(
 		struct al_crypto_chan		*chan,
 		struct al_crypto_sw_desc	*desc,
@@ -523,8 +463,6 @@ void al_crypto_cleanup_single_ahash(
 	req->base.complete(&req->base, 0);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int ahash_init(struct ahash_request *req)
 {
 	struct crypto_ahash *ahash = crypto_ahash_reqtfm(req);
@@ -548,8 +486,6 @@ static int ahash_init(struct ahash_request *req)
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static inline void ahash_req_prepare_xaction_buffers(struct ahash_request *req,
 		struct al_crypto_sw_desc *desc,
 		int to_hash,
@@ -574,8 +510,6 @@ static inline void ahash_req_prepare_xaction_buffers(struct ahash_request *req,
 				src_idx);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static inline void ahash_update_stats(struct al_crypto_transaction *xaction,
 		struct al_crypto_chan *chan)
 {
@@ -593,8 +527,6 @@ static inline void ahash_update_stats(struct al_crypto_transaction *xaction,
 		AL_CRYPTO_STATS_INC(chan->stats_prep.ahash_reqs_gt4096, 1);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static inline void ahash_req_prepare_xaction(struct ahash_request *req,
 		struct al_crypto_sw_desc *desc,
 		int to_hash,
@@ -613,17 +545,15 @@ static inline void ahash_req_prepare_xaction(struct ahash_request *req,
 	unsigned int ivsize;
 	int src_idx;
 
-	/* In SHA384 the ivsize is 64 bytes and not 48 bytes. */
 	ivsize = (digestsize == SHA384_DIGEST_SIZE) ?
 			SHA512_DIGEST_SIZE : digestsize;
 
-	/* prepare hal transaction */
 	xaction = &desc->hal_xaction;
 	memset(xaction, 0, sizeof(struct al_crypto_transaction));
 	xaction->auth_sign_in.len = 0;
 	xaction->auth_fl_valid = AL_TRUE;
 	xaction->auth_in_off = 0;
-	/* if first, there's no input intermediate */
+	 
 	if (unlikely(req_ctx->first)) {
 		req_ctx->first = false;
 		xaction->auth_first = AL_TRUE;
@@ -645,7 +575,6 @@ static inline void ahash_req_prepare_xaction(struct ahash_request *req,
 		xaction->auth_iv_out.addr = (al_phys_addr_t)(uintptr_t)NULL;
 		xaction->auth_bcnt = req_ctx->hashed_len;
 
-		/* count the first hmac key^ipad block */
 		if (ctx->sa.auth_hmac_en)
 			xaction->auth_bcnt +=
 				crypto_tfm_alg_blocksize(
@@ -706,13 +635,6 @@ static inline void ahash_req_prepare_xaction(struct ahash_request *req,
 	ahash_update_stats(xaction, chan);
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Main hash processing function that handles update/final/finup and digest
- *
- * Implementation is based on the assumption that the caller waits for
- * completion of every operation before issuing the next operation
- */
 static int ahash_process_req(struct ahash_request *req, unsigned int nbytes)
 {
 	struct crypto_ahash *ahash = crypto_ahash_reqtfm(req);
@@ -741,13 +663,12 @@ static int ahash_process_req(struct ahash_request *req, unsigned int nbytes)
 			in_len, *buflen);
 
 	if (!req_ctx->last) {
-		/* if aligned, do not hash last block */
+		 
 		*next_buflen =
 		    (in_len & (crypto_tfm_alg_blocksize(&ahash->base) - 1)) ?
 				: crypto_tfm_alg_blocksize(&ahash->base);
 		to_hash = in_len - *next_buflen;
 
-		/* Ignore not last empty update requests */
 		if (unlikely(in_len == 0))
 			return rc;
 	} else {
@@ -825,7 +746,6 @@ static int ahash_process_req(struct ahash_request *req, unsigned int nbytes)
 			req_ctx->current_buf = !req_ctx->current_buf;
 		}
 
-		/* send crypto transaction to engine */
 		rc = al_crypto_dma_prepare(chan->hal_crypto, chan->idx,
 					&desc->hal_xaction);
 		if (unlikely(rc != 0)) {
@@ -855,8 +775,6 @@ static int ahash_process_req(struct ahash_request *req, unsigned int nbytes)
 	return rc;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int ahash_update(struct ahash_request *req)
 {
 	struct al_crypto_hash_req_ctx *req_ctx = ahash_request_ctx(req);
@@ -866,8 +784,6 @@ static int ahash_update(struct ahash_request *req)
 	return ahash_process_req(req, req->nbytes);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int ahash_final(struct ahash_request *req)
 {
 	struct al_crypto_hash_req_ctx *req_ctx = ahash_request_ctx(req);
@@ -877,8 +793,6 @@ static int ahash_final(struct ahash_request *req)
 	return ahash_process_req(req, 0);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int ahash_finup(struct ahash_request *req)
 {
 	struct al_crypto_hash_req_ctx *req_ctx = ahash_request_ctx(req);
@@ -888,8 +802,6 @@ static int ahash_finup(struct ahash_request *req)
 	return ahash_process_req(req, req->nbytes);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int ahash_digest(struct ahash_request *req)
 {
 	struct al_crypto_hash_req_ctx *req_ctx = ahash_request_ctx(req);
@@ -901,8 +813,6 @@ static int ahash_digest(struct ahash_request *req)
 	return ahash_process_req(req, req->nbytes);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int ahash_export(struct ahash_request *req, void *out)
 {
 	struct crypto_ahash *ahash = crypto_ahash_reqtfm(req);
@@ -915,8 +825,6 @@ static int ahash_export(struct ahash_request *req, void *out)
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int ahash_import(struct ahash_request *req, const void *in)
 {
 	struct crypto_ahash *ahash = crypto_ahash_reqtfm(req);
@@ -929,11 +837,6 @@ static int ahash_import(struct ahash_request *req, const void *in)
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Generate intermediate hash of hmac^opad and hmac^ipad using sw hash engine
- * and place the results in ctx->sa.
- */
 int hmac_setkey(struct al_crypto_ctx *ctx, const u8 *key,
 		unsigned int keylen, unsigned int sw_hash_interm_offset,
 		unsigned int sw_hash_interm_size)
@@ -941,7 +844,6 @@ int hmac_setkey(struct al_crypto_ctx *ctx, const u8 *key,
 	unsigned int blocksize, digestsize, descsize;
 	int rc;
 
-	/* Based on code from the hmac module */
 	blocksize = crypto_shash_blocksize(ctx->sw_hash);
 	digestsize = crypto_shash_digestsize(ctx->sw_hash);
 	descsize = crypto_shash_descsize(ctx->sw_hash);
@@ -959,7 +861,6 @@ int hmac_setkey(struct al_crypto_ctx *ctx, const u8 *key,
 		desc.shash.flags = crypto_shash_get_flags(ctx->sw_hash) &
 		    CRYPTO_TFM_REQ_MAY_SLEEP;
 
-		/* hash the key if longer than blocksize */
 		if (keylen > blocksize) {
 			int err;
 
@@ -974,13 +875,11 @@ int hmac_setkey(struct al_crypto_ctx *ctx, const u8 *key,
 		memset(ipad + keylen, 0, blocksize - keylen);
 		memcpy(opad, ipad, blocksize);
 
-		/* Generate XORs with ipad and opad */
 		for (i = 0; i < blocksize; i++) {
 			ipad[i] ^= AL_CRYPTO_HASH_HMAC_IPAD;
 			opad[i] ^= AL_CRYPTO_HASH_HMAC_OPAD;
 		}
 
-		/* Generate intermediate results using SW hash */
 		rc = crypto_shash_init(&desc.shash) ? :
 		    crypto_shash_update(&desc.shash, ipad, blocksize) ? :
 		    crypto_shash_export(&desc.shash, ipad) ? :
@@ -992,7 +891,6 @@ int hmac_setkey(struct al_crypto_ctx *ctx, const u8 *key,
 			unsigned int offset = sw_hash_interm_offset;
 			unsigned int size = sw_hash_interm_size;
 
-			/* Copy intermediate results to SA */
 			memcpy(ctx->sa.hmac_iv_in, ipad + offset, size);
 			memcpy(ctx->sa.hmac_iv_out, opad + offset, size);
 
@@ -1007,8 +905,6 @@ int hmac_setkey(struct al_crypto_ctx *ctx, const u8 *key,
 	return rc;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int ahash_setkey(struct crypto_ahash *ahash, const u8 *key,
 		unsigned int keylen)
 {
@@ -1032,7 +928,6 @@ static int ahash_setkey(struct crypto_ahash *ahash, const u8 *key,
 	if (rc == 0) {
 		al_crypto_hw_sa_init(&ctx->sa, ctx->hw_sa);
 
-		/* mark the sa as not cached, will update in next xaction */
 		spin_lock_bh(&ctx->chan->prep_lock);
 		if (ctx->cache_state.cached)
 			al_crypto_cache_remove_lru(ctx->chan,
@@ -1043,8 +938,6 @@ static int ahash_setkey(struct crypto_ahash *ahash, const u8 *key,
 	return rc;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static struct al_crypto_hash *al_crypto_hash_alloc(
 		struct al_crypto_device *device,
 		struct al_crypto_hash_template *template,
@@ -1101,8 +994,6 @@ static struct al_crypto_hash *al_crypto_hash_alloc(
 	return t_alg;
 }
 
-/******************************************************************************
- *****************************************************************************/
 int al_crypto_hash_init(struct al_crypto_device *device)
 {
 	int i;
@@ -1110,14 +1001,9 @@ int al_crypto_hash_init(struct al_crypto_device *device)
 
 	INIT_LIST_HEAD(&device->hash_list);
 
-	/* tfm count is initialized in alg, move to core?? */
-	/* atomic_set(&device->tfm_count, -1); */
-
-	/* register crypto algorithms the device supports */
 	for (i = 0; i < ARRAY_SIZE(driver_hash); i++) {
 		struct al_crypto_hash *t_alg;
 
-		/* register hmac version */
 		t_alg = al_crypto_hash_alloc(device,
 				&driver_hash[i], true);
 		if (IS_ERR(t_alg)) {
@@ -1137,7 +1023,6 @@ int al_crypto_hash_init(struct al_crypto_device *device)
 		} else
 			list_add_tail(&t_alg->entry, &device->hash_list);
 
-		/* register unkeyed version */
 		t_alg = al_crypto_hash_alloc(device, &driver_hash[i], false);
 		if (IS_ERR(t_alg)) {
 			err = PTR_ERR(t_alg);
@@ -1164,8 +1049,6 @@ int al_crypto_hash_init(struct al_crypto_device *device)
 	return err;
 }
 
-/******************************************************************************
- *****************************************************************************/
 void al_crypto_hash_terminate(struct al_crypto_device *device)
 {
 	struct al_crypto_hash *t_alg, *n;

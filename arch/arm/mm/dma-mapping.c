@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/mm/dma-mapping.c
- *
- *  Copyright (C) 2000-2004 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- *  DMA uncached mapping support.
- */
+ 
 #include <linux/module.h>
 #include <linux/mm.h>
 #include <linux/gfp.h>
@@ -69,7 +59,7 @@ static int __init init_shadow_page_table(void)
 	do {
 		pmd = pmd_off_k((unsigned long) start);
 		if (!pmd_none(*pmd)) {
-			if (pmd_bad(*pmd) && ((pmd_val(*pmd) & ~SECTION_MASK) == mt->prot_sect)) {  // Only do it for MT_MEMORY areas
+			if (pmd_bad(*pmd) && ((pmd_val(*pmd) & ~SECTION_MASK) == mt->prot_sect)) {   
 				shadow_pmd = (pmd_t *)shadow_pg_dir + (pmd - pmd_off_k(0));
 				addr = (unsigned long)start & PMD_MASK;
 				end = addr + PMD_SIZE;
@@ -85,7 +75,7 @@ static int __init init_shadow_page_table(void)
 				} while (ptep++, addr += PAGE_SIZE, addr != end);
 				__pmd_populate(shadow_pmd, __pa(shadow_pte), mt->prot_l1);
 			} else {
-				// Mark the shadow in use, so we never replace the already existing 2nd-level
+				 
 				shadow_pmd_count[pgd_index(start)]++;
 			}
 		}
@@ -96,7 +86,7 @@ static int __init init_shadow_page_table(void)
 err2:
 	__free_pages((struct page *)shadow_pmd_count, get_order(sizeof(u16) * PTRS_PER_PGD));
 	shadow_pmd_count = NULL;
-	//TODO: free already allocated shadow_pte tables
+	 
 err1:
 	__free_pages((struct page *)shadow_pg_dir, get_order(16384));
 	return -ENOMEM;
@@ -111,10 +101,6 @@ static u64 get_coherent_dma_mask(struct device *dev)
 	if (dev) {
 		mask = dev->coherent_dma_mask;
 
-		/*
-		 * Sanity check the DMA mask - it must be non-zero, and
-		 * must be able to be satisfied by a DMA allocation.
-		 */
 		if (mask == 0) {
 			dev_warn(dev, "coherent DMA mask is unset\n");
 			return 0;
@@ -131,10 +117,6 @@ static u64 get_coherent_dma_mask(struct device *dev)
 	return mask;
 }
 
-/*
- * Allocate a DMA buffer for 'dev' of size 'size' using the
- * specified gfp mask.  Note that 'size' must be page aligned.
- */
 static struct page *__dma_alloc_buffer(struct device *dev, size_t size, gfp_t gfp)
 {
 	unsigned long order = get_order(size);
@@ -161,17 +143,10 @@ static struct page *__dma_alloc_buffer(struct device *dev, size_t size, gfp_t gf
 	if (!page)
 		return NULL;
 
-	/*
-	 * Now split the huge page and free the excess pages
-	 */
 	split_page(page, order);
 	for (p = page + (size >> PAGE_SHIFT), e = page + (1 << order); p < e; p++)
 		__free_page(p);
 
-	/*
-	 * Ensure that the allocated pages are zeroed, and that any data
-	 * lurking in the kernel direct-mapped region is invalidated.
-	 */
 	ptr = page_address(page);
 	memset(ptr, 0, size);
 	dmac_flush_range(ptr, ptr + size);
@@ -180,9 +155,6 @@ static struct page *__dma_alloc_buffer(struct device *dev, size_t size, gfp_t gf
 	return page;
 }
 
-/*
- * Free a DMA buffer.  'size' must be page aligned.
- */
 static void __dma_free_buffer(struct page *page, size_t size)
 {
 	struct page *e = page + (size >> PAGE_SHIFT);
@@ -198,9 +170,6 @@ static void __dma_free_buffer(struct page *page, size_t size)
 #define CONSISTENT_OFFSET(x)	(((unsigned long)(x) - consistent_base) >> PAGE_SHIFT)
 #define CONSISTENT_PTE_INDEX(x) (((unsigned long)(x) - consistent_base) >> PMD_SHIFT)
 
-/*
- * These are the page tables (2MB each) covering uncached, DMA consistent allocations
- */
 static pte_t **consistent_pte;
 
 #define DEFAULT_CONSISTENT_DMA_SIZE SZ_2M
@@ -211,10 +180,9 @@ void __init init_consistent_dma_size(unsigned long size)
 {
 	unsigned long base = CONSISTENT_END - ALIGN(size, SZ_2M);
 
-	BUG_ON(consistent_pte); /* Check we're called before DMA region init */
+	BUG_ON(consistent_pte);  
 	BUG_ON(base < VMALLOC_END);
 
-	/* Grow region to accommodate specified size  */
 	if (base < consistent_base)
 		consistent_base = base;
 }
@@ -231,9 +199,6 @@ static struct arm_vmregion_head consistent_head = {
 #error ARM Coherent DMA allocator does not (yet) support huge TLB
 #endif
 
-/*
- * Initialise the consistent memory allocation.
- */
 static int __init consistent_init(void)
 {
 	int ret = 0;
@@ -310,20 +275,11 @@ __dma_alloc_remap(struct page *page, size_t size, gfp_t gfp, pgprot_t prot)
 		return NULL;
 	}
 
-	/*
-	 * Align the virtual region allocation - maximum alignment is
-	 * a section size, minimum is a page size.  This helps reduce
-	 * fragmentation of the DMA space, and also prevents allocations
-	 * smaller than a section from crossing a section boundary.
-	 */
 	bit = fls(size - 1);
 	if (bit > SECTION_SHIFT)
 		bit = SECTION_SHIFT;
 	align = 1 << bit;
 
-	/*
-	 * Allocate a virtual address in the consistent mapping region.
-	 */
 	c = arm_vmregion_alloc(&consistent_head, align, size,
 			    gfp & ~(__GFP_DMA | __GFP_HIGHMEM));
 	if (c) {
@@ -402,12 +358,12 @@ static void __dma_free_remap(void *cpu_addr, size_t size)
 	arm_vmregion_free(&consistent_head, c);
 }
 
-#else	/* !CONFIG_MMU */
+#else	 
 
 #define __dma_alloc_remap(page, size, gfp, prot)	page_address(page)
 #define __dma_free_remap(addr, size)			do { } while (0)
 
-#endif	/* CONFIG_MMU */
+#endif	 
 
 static void *
 __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
@@ -416,13 +372,6 @@ __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
 	struct page *page;
 	void *addr;
 
-	/*
-	 * Following is a work-around (a.k.a. hack) to prevent pages
-	 * with __GFP_COMP being passed to split_page() which cannot
-	 * handle them.  The real problem is that this flag probably
-	 * should be 0 on ARM as it is not supported on this
-	 * platform; see CONFIG_HUGETLBFS.
-	 */
 	gfp &= ~(__GFP_COMP);
 
 	*handle = ~0;
@@ -445,10 +394,6 @@ __dma_alloc(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp,
 	return addr;
 }
 
-/*
- * Allocate DMA-coherent memory space and return both the kernel remapped
- * virtual and bus address for that space.
- */
 void *
 dma_alloc_coherent(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp)
 {
@@ -462,10 +407,6 @@ dma_alloc_coherent(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gf
 }
 EXPORT_SYMBOL(dma_alloc_coherent);
 
-/*
- * Allocate a writecombining region, in much the same way as
- * dma_alloc_coherent above.
- */
 void *
 dma_alloc_writecombine(struct device *dev, size_t size, dma_addr_t *handle, gfp_t gfp)
 {
@@ -498,7 +439,7 @@ static int dma_mmap(struct device *dev, struct vm_area_struct *vma,
 					      vma->vm_page_prot);
 		}
 	}
-#endif	/* CONFIG_MMU */
+#endif	 
 
 	return ret;
 }
@@ -519,10 +460,6 @@ int dma_mmap_writecombine(struct device *dev, struct vm_area_struct *vma,
 }
 EXPORT_SYMBOL(dma_mmap_writecombine);
 
-/*
- * free a page as defined by the above mapping.
- * Must not be called with IRQs disabled.
- */
 void dma_free_coherent(struct device *dev, size_t size, void *cpu_addr, dma_addr_t handle)
 {
 	WARN_ON(irqs_disabled());
@@ -575,8 +512,6 @@ static inline void __dmac_map_area(const void *kaddr, size_t size,
 	if (!shadow_pmd_count)
 		goto op;
 
-	// For now, be safe and only uncache full pages so we don't have to handle
-	// the case of pages being DMA-mapped multiple times
 	if ((dir == DMA_FROM_DEVICE) && ((((unsigned long) kaddr|size) & ~PAGE_MASK) == 0)) {
 		mt = get_mem_type(MT_MEMORY_NONCACHED);
 		kaddr_page = kaddr;
@@ -584,11 +519,10 @@ static inline void __dmac_map_area(const void *kaddr, size_t size,
 		shadow_pmd = (pmd_t *)shadow_pg_dir + (pmd - pmd_off_k(0));
 		nr_pages = __phys_to_pfn(size);
 
-		if (nr_pages == 1) { // Optimize for the common case
+		if (nr_pages == 1) {  
 			shadow_pmd_inc(kaddr_page, 1);
-			if (pmd_bad(*pmd)) { //No 2nd-level page table, retrieve it from the shadows
-				// Small race condition here, but at worst we'll end up copying the shadow_pmd to the actual pmd twice.
-				// For now, map the whole PMD. TODO: try and map only 1 section (1MB).
+			if (pmd_bad(*pmd)) {  
+				 
 				copy_pmd_fast(pmd, shadow_pmd);
 			}
 
@@ -607,9 +541,8 @@ static inline void __dmac_map_area(const void *kaddr, size_t size,
 
 			shadow_pmd_inc(kaddr_page, nr_pages_pmd);
 
-			if (pmd_bad(*pmd)) { //No 2nd-level page table, retrieve it from the shadows
-				// Small race condition here, but at worst we'll end up copying the shadow_pmd to the actual pmd twice.
-				// For now, map the whole PMD. TODO: try and map only 1 section (1MB).
+			if (pmd_bad(*pmd)) {  
+				 
 				copy_pmd_fast(pmd, shadow_pmd);
 			}
 
@@ -662,8 +595,8 @@ static inline void __dmac_unmap_area(const void *kaddr, size_t size,
 
 		nr_pages = __phys_to_pfn(size);
 
-		if (nr_pages == 1) { // Optimize for the common case
-			if (pmd_bad(*pmd)) // No 2nd-level page table, so page was never made non-cacheable.
+		if (nr_pages == 1) {  
+			if (pmd_bad(*pmd))  
 				goto op;
 			pte = pte_offset_kernel(pmd, (int) kaddr_page);
 			set_pte_ext(pte, *pte, 0);
@@ -694,7 +627,7 @@ static inline void __dmac_unmap_area(const void *kaddr, size_t size,
 		nr_pages_pmd = __phys_to_pfn(PMD_SIZE - ((unsigned long) kaddr_page & ~PMD_MASK));
 
 		while (nr_pages) {
-			if (pmd_bad(*pmd)) // No 2nd-level page table, so page was never made non-cacheable.
+			if (pmd_bad(*pmd))  
 				goto op;
 			nr_pages_pmd = min(nr_pages, nr_pages_pmd);
 			nr_pages -= nr_pages_pmd;
@@ -752,12 +685,7 @@ static inline void __dmac_unmap_area(const void *kaddr, size_t size,
 }
 #endif
 
-/*
- * Make an area consistent for devices.
- * Note: Drivers should NOT use this function directly, as it will break
- * platforms with CONFIG_DMABOUNCE.
- * Use the driver DMA support - see dma-mapping.h (dma_sync_*)
- */
+
 void ___dma_single_cpu_to_dev(const void *kaddr, size_t size,
 	enum dma_data_direction dir)
 {
@@ -794,7 +722,7 @@ void ___dma_single_cpu_to_dev(const void *kaddr, size_t size,
 	} else {
 		outer_clean_range(paddr, paddr + size);
 	}
-	/* FIXME: non-speculating: flush on bidirectional mappings? */
+	 
 #endif
 }
 EXPORT_SYMBOL(___dma_single_cpu_to_dev);
@@ -814,12 +742,12 @@ void ___dma_single_dev_to_cpu(const void *kaddr, size_t size,
 #endif
 
 #if !defined(CONFIG_SYNO_COMCERTO)
-	/* FIXME: non-speculating: not required */
+	
 #endif
 
 #if defined(CONFIG_SYNO_COMCERTO)
 #if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
-	/* don't bother invalidating if DMA to device */
+	 
 	if (dir != DMA_TO_DEVICE) {
 #if !defined(CONFIG_CPU_DMA_PARTIAL_INVALIDATES)
 		outer_inv_range(paddr, paddr + size);
@@ -834,7 +762,7 @@ void ___dma_single_dev_to_cpu(const void *kaddr, size_t size,
 
 	__dmac_unmap_area(kaddr, size, dir);
 #else
-	/* don't bother invalidating if DMA to device */
+	 
 	if (dir != DMA_TO_DEVICE) {
 		unsigned long paddr = __pa(kaddr);
 		outer_inv_range(paddr, paddr + size);
@@ -856,12 +784,6 @@ static void dma_cache_maint_page(struct page *page, unsigned long offset,
 	pfn = page_to_pfn(page) + offset / PAGE_SIZE;
 	offset %= PAGE_SIZE;
 
-	/*
-	 * A single sg entry may refer to multiple physically contiguous
-	 * pages.  But we still need to process highmem pages individually.
-	 * If highmem is not configured then the bulk of this loop gets
-	 * optimized out.
-	 */
 	do {
 		size_t len = left;
 		void *vaddr;
@@ -877,7 +799,7 @@ static void dma_cache_maint_page(struct page *page, unsigned long offset,
 				op(vaddr, len, dir);
 				kunmap_high(page);
 			} else if (cache_is_vipt()) {
-				/* unmapped pages might still be cached */
+				 
 				vaddr = kmap_atomic(page);
 				op(vaddr + offset, len, dir);
 				kunmap_atomic(vaddr);
@@ -928,7 +850,7 @@ void ___dma_page_cpu_to_dev(struct page *page, unsigned long off,
 		outer_clean_range(paddr, paddr + size);
 	}
 #endif
-	/* FIXME: non-speculating: flush on bidirectional mappings? */
+	 
 }
 EXPORT_SYMBOL(___dma_page_cpu_to_dev);
 
@@ -943,12 +865,12 @@ void ___dma_page_dev_to_cpu(struct page *page, unsigned long off,
 #endif
 
 #if !defined(CONFIG_SYNO_COMCERTO)
-	/* FIXME: non-speculating: not required */
+	
 #endif
 
 #if defined(CONFIG_SYNO_COMCERTO)
 #if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
-	/* don't bother invalidating if DMA to device */
+	 
 	if (dir != DMA_TO_DEVICE) {
 #if !defined(CONFIG_CPU_DMA_PARTIAL_INVALIDATES)
 		outer_inv_range(paddr, paddr + size);
@@ -962,7 +884,7 @@ void ___dma_page_dev_to_cpu(struct page *page, unsigned long off,
 #endif
 	dma_cache_maint_page(page, off, size, dir, __dmac_unmap_area);
 #else
-	/* don't bother invalidating if DMA to device */
+	 
 	if (dir != DMA_TO_DEVICE)
 		outer_inv_range(paddr, paddr + size);
 
@@ -970,30 +892,11 @@ void ___dma_page_dev_to_cpu(struct page *page, unsigned long off,
 
 #endif
 
-	/*
-	 * Mark the D-cache clean for this page to avoid extra flushing.
-	 */
 	if (dir != DMA_TO_DEVICE && off == 0 && size >= PAGE_SIZE)
 		set_bit(PG_dcache_clean, &page->flags);
 }
 EXPORT_SYMBOL(___dma_page_dev_to_cpu);
 
-/**
- * dma_map_sg - map a set of SG buffers for streaming mode DMA
- * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
- * @sg: list of buffers
- * @nents: number of buffers to map
- * @dir: DMA transfer direction
- *
- * Map a set of buffers described by scatterlist in streaming mode for DMA.
- * This is the scatter-gather version of the dma_map_single interface.
- * Here the scatter gather list elements are each tagged with the
- * appropriate dma address and length.  They are obtained via
- * sg_dma_{address,length}.
- *
- * Device ownership issues as mentioned for dma_map_single are the same
- * here.
- */
 int dma_map_sg(struct device *dev, struct scatterlist *sg, int nents,
 		enum dma_data_direction dir)
 {
@@ -1018,16 +921,6 @@ int dma_map_sg(struct device *dev, struct scatterlist *sg, int nents,
 }
 EXPORT_SYMBOL(dma_map_sg);
 
-/**
- * dma_unmap_sg - unmap a set of SG buffers mapped by dma_map_sg
- * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
- * @sg: list of buffers
- * @nents: number of buffers to unmap (same as was passed to dma_map_sg)
- * @dir: DMA transfer direction (same as was passed to dma_map_sg)
- *
- * Unmap a set of streaming mode DMA translations.  Again, CPU access
- * rules concerning calls here are the same as for dma_unmap_single().
- */
 void dma_unmap_sg(struct device *dev, struct scatterlist *sg, int nents,
 		enum dma_data_direction dir)
 {
@@ -1041,13 +934,6 @@ void dma_unmap_sg(struct device *dev, struct scatterlist *sg, int nents,
 }
 EXPORT_SYMBOL(dma_unmap_sg);
 
-/**
- * dma_sync_sg_for_cpu
- * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
- * @sg: list of buffers
- * @nents: number of buffers to map (returned from dma_map_sg)
- * @dir: DMA transfer direction (same as was passed to dma_map_sg)
- */
 void dma_sync_sg_for_cpu(struct device *dev, struct scatterlist *sg,
 			int nents, enum dma_data_direction dir)
 {
@@ -1067,13 +953,6 @@ void dma_sync_sg_for_cpu(struct device *dev, struct scatterlist *sg,
 }
 EXPORT_SYMBOL(dma_sync_sg_for_cpu);
 
-/**
- * dma_sync_sg_for_device
- * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
- * @sg: list of buffers
- * @nents: number of buffers to map (returned from dma_map_sg)
- * @dir: DMA transfer direction (same as was passed to dma_map_sg)
- */
 void dma_sync_sg_for_device(struct device *dev, struct scatterlist *sg,
 			int nents, enum dma_data_direction dir)
 {
@@ -1093,12 +972,6 @@ void dma_sync_sg_for_device(struct device *dev, struct scatterlist *sg,
 }
 EXPORT_SYMBOL(dma_sync_sg_for_device);
 
-/*
- * Return whether the given device DMA address mask can be supported
- * properly.  For example, if your device can only drive the low 24-bits
- * during bus mastering, then you would pass 0x00ffffff as the mask
- * to this function.
- */
 int dma_supported(struct device *dev, u64 mask)
 {
 	if (mask < (u64)arm_dma_limit)

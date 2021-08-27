@@ -1,44 +1,10 @@
-/*******************************************************************************
-Copyright (C) 2013 Annapurna Labs Ltd.
-
-This file may be licensed under the terms of the Annapurna Labs Commercial
-License Agreement.
-
-Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
-found at http://www.gnu.org/licenses/gpl-2.0.html
-
-Alternatively, redistribution and use in source and binary forms, with or
-without modification, are permitted provided that the following conditions are
-met:
-
-    *     Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
-
-    *     Redistributions in binary form must reproduce the above copyright
-	  notice, this list of conditions and the following disclaimer in
-	  the documentation and/or other materials provided with the
-	  distribution.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
  
 #include "al_hal_thermal_sensor.h"
 #include "al_hal_thermal_sensor_regs.h"
 
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
-#define OFFSET		1154	/* 115.4 x 10 - for better accuracy */
-#define MULTIPLIER	3523	/* 352.3 x 10 - for better accuracy */
+#define OFFSET		1154	 
+#define MULTIPLIER	3523	 
 
 #define READOUT_TO_CELCIUS(readout)		\
 	((((((int)(readout)) * MULTIPLIER) / 4096) - OFFSET) / 10)
@@ -53,8 +19,6 @@ met:
 	(((((int)(readout)) * 244) / 4096) - 56)
 #endif
 
-/******************************************************************************
- ******************************************************************************/
 int al_thermal_sensor_handle_init(
 	struct al_thermal_sensor_handle	*thermal_sensor_handle,
 	void __iomem		*thermal_sensor_reg_base)
@@ -69,8 +33,7 @@ int al_thermal_sensor_handle_init(
 }
 
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
-/******************************************************************************
- ******************************************************************************/
+ 
 void al_thermal_sensor_trim_set(
 	struct al_thermal_sensor_handle *thermal_sensor_handle,
 	unsigned int			trim)
@@ -87,8 +50,6 @@ void al_thermal_sensor_trim_set(
 		trim << THERMAL_SENSE_UNIT_STATIC_CONFIG_TRIM_SHIFT);
 }
 
-/******************************************************************************
- ******************************************************************************/
 void al_thermal_sensor_threshold_config(
 	struct al_thermal_sensor_handle *thermal_sensor_handle,
 	int				low_temp_threshold,
@@ -119,8 +80,6 @@ void al_thermal_sensor_threshold_config(
 }
 #endif
 
-/******************************************************************************
- ******************************************************************************/
 void al_thermal_sensor_enable_set(
 	struct al_thermal_sensor_handle	*thermal_sensor_handle,
 	int				enable)
@@ -143,8 +102,6 @@ void al_thermal_sensor_enable_set(
 		THERMAL_SENSE_UNIT_STATIC_CONFIG_POWER_DOWN);
 }
 
-/******************************************************************************
- ******************************************************************************/
 int al_thermal_sensor_is_ready(
 	struct al_thermal_sensor_handle	*thermal_sensor_handle)
 {
@@ -165,8 +122,6 @@ int al_thermal_sensor_is_ready(
 	return is_valid;
 }
 
-/******************************************************************************
- ******************************************************************************/
 void al_thermal_sensor_trigger_once(
 	struct al_thermal_sensor_handle	*thermal_sensor_handle)
 {
@@ -180,8 +135,6 @@ void al_thermal_sensor_trigger_once(
 		THERMAL_SENSE_UNIT_DYNAMIC_CONFIG_RUN_ONCE);
 }
 
-/******************************************************************************
- ******************************************************************************/
 void al_thermal_sensor_trigger_continuous(
 	struct al_thermal_sensor_handle	*thermal_sensor_handle)
 {
@@ -195,8 +148,6 @@ void al_thermal_sensor_trigger_continuous(
 		THERMAL_SENSE_UNIT_DYNAMIC_CONFIG_KEEP_RUNNING);
 }
 
-/******************************************************************************
- ******************************************************************************/
 int al_thermal_sensor_readout_is_valid(
 	struct al_thermal_sensor_handle	*thermal_sensor_handle)
 {
@@ -223,8 +174,6 @@ int al_thermal_sensor_readout_is_valid(
 	return is_valid;
 }
 
-/******************************************************************************
- ******************************************************************************/
 int al_thermal_sensor_readout_get(
 	struct al_thermal_sensor_handle	*thermal_sensor_handle)
 {

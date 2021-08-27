@@ -1,15 +1,3 @@
-/*
- * MPC85xx setup and early boot code plus other random bits.
- *
- * Maintained by Kumar Gala (see MAINTAINERS for contact information)
- *
- * Copyright 2005 Freescale Semiconductor Inc.
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
  
 #include <linux/stddef.h>
 #include <linux/kernel.h>
@@ -50,8 +38,6 @@
 #include <sysdev/fsl_soc.h>
 #include <sysdev/fsl_pci.h>
 
-/* CADMUS info */
-/* xxx - galak, move into device tree */
 #define CADMUS_BASE (0xf8004000)
 #define CADMUS_SIZE (256)
 #define CM_VER	(0)
@@ -69,7 +55,7 @@ static volatile u8 *cadmus;
 static int mpc85xx_exclude_device(struct pci_controller *hose,
 				  u_char bus, u_char devfn)
 {
-	/* We explicitly do not go past the Tundra 320 Bridge */
+	 
 	if ((bus == 1) && (PCI_SLOT(devfn) == ARCADIA_2ND_BRIDGE_IDSEL))
 		return PCIBIOS_DEVICE_NOT_FOUND;
 	if ((bus == 0) && (PCI_SLOT(devfn) == ARCADIA_2ND_BRIDGE_IDSEL))
@@ -86,26 +72,14 @@ static void mpc85xx_cds_restart(char *cmd)
 	if ((dev = pci_get_device(PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C686,
 					NULL))) {
 
-		/* Use the VIA Super Southbridge to force a PCI reset */
 		pci_read_config_byte(dev, 0x47, &tmp);
 		pci_write_config_byte(dev, 0x47, tmp | 1);
 
-		/* Flush the outbound PCI write queues */
 		pci_read_config_byte(dev, 0x47, &tmp);
-
-		/*
-		 *  At this point, the harware reset should have triggered.
-		 *  However, if it doesn't work for some mysterious reason,
-		 *  just fall through to the default reset below.
-		 */
 
 		pci_dev_put(dev);
 	}
 
-	/*
-	 *  If we can't find the VIA chip (maybe the P2P bridge is disabled)
-	 *  or the VIA chip reset didn't work, just use the default reset.
-	 */
 	fsl_rstcr_restart(NULL);
 }
 
@@ -114,12 +88,7 @@ static void __init mpc85xx_cds_pci_irq_fixup(struct pci_dev *dev)
 	u_char c;
 
 #ifdef CONFIG_SYNO_MPC854X
-	/*
-	 * set PBFR(PCI Bus Function Register)[10] = 1, to
-	 * disable the combining of crossing cacheline
-	 * boundary requests into one burst transaction.
-	 * fix ERRATA PCI 5
-	 */
+	 
 	if (MPC8548_ERRATA(2, 1)) {
 		unsigned short temp;
 		if (dev->vendor == PCI_VENDOR_ID_MOTOROLA ||
@@ -136,29 +105,17 @@ static void __init mpc85xx_cds_pci_irq_fixup(struct pci_dev *dev)
 	if (dev->vendor == PCI_VENDOR_ID_VIA) {
 		switch (dev->device) {
 		case PCI_DEVICE_ID_VIA_82C586_1:
-			/*
-			 * U-Boot does not set the enable bits
-			 * for the IDE device. Force them on here.
-			 */
+			 
 			pci_read_config_byte(dev, 0x40, &c);
-			c |= 0x03; /* IDE: Chip Enable Bits */
+			c |= 0x03;  
 			pci_write_config_byte(dev, 0x40, c);
 
-			/*
-			 * Since only primary interface works, force the
-			 * IDE function to standard primary IDE interrupt
-			 * w/ 8259 offset
-			 */
 			dev->irq = 14;
 			pci_write_config_byte(dev, PCI_INTERRUPT_LINE, dev->irq);
 			break;
-		/*
-		 * Force legacy USB interrupt routing
-		 */
+		 
 		case PCI_DEVICE_ID_VIA_82C586_2:
-		/* There are two USB controllers.
-		 * Identify them by functon number
-		 */
+		 
 			if (PCI_FUNC(dev->devfn) == 3)
 				dev->irq = 11;
 			else
@@ -172,8 +129,7 @@ static void __init mpc85xx_cds_pci_irq_fixup(struct pci_dev *dev)
 
 static void __devinit skip_fake_bridge(struct pci_dev *dev)
 {
-	/* Make it an error to skip the fake bridge
-	 * in pci_setup_device() in probe.c */
+	 
 	dev->hdr_type = 0x7f;
 }
 DECLARE_PCI_FIXUP_EARLY(0x1957, 0x3fff, skip_fake_bridge);
@@ -187,10 +143,9 @@ static void mpc85xx_8259_cascade_handler(unsigned int irq,
 	unsigned int cascade_irq = i8259_irq();
 
 	if (cascade_irq != NO_IRQ)
-		/* handle an interrupt from the 8259 */
+		 
 		generic_handle_irq(cascade_irq);
 
-	/* check for any interrupts from the shared IRQ line */
 	handle_fasteoi_irq(irq, desc);
 }
 
@@ -204,8 +159,8 @@ static struct irqaction mpc85xxcds_8259_irqaction = {
 	.flags = IRQF_SHARED,
 	.name = "8259 cascade",
 };
-#endif /* PPC_I8259 */
-#endif /* CONFIG_PCI */
+#endif  
+#endif  
 
 static void __init mpc85xx_cds_pic_init(void)
 {
@@ -231,7 +186,6 @@ static void __init mpc85xx_cds_pic_init(void)
 			0, 256, " OpenPIC  ");
 	BUG_ON(mpic == NULL);
 
-	/* Return the mpic node */
 	of_node_put(np);
 
 	mpic_init(mpic);
@@ -245,7 +199,6 @@ static int mpc85xx_cds_8259_attach(void)
 	struct device_node *cascade_node = NULL;
 	int cascade_irq;
 
-	/* Initialize the i8259 controller */
 	for_each_node_by_type(np, "interrupt-controller")
 		if (of_device_is_compatible(np, "chrp,iic")) {
 			cascade_node = np;
@@ -266,29 +219,19 @@ static int mpc85xx_cds_8259_attach(void)
 	i8259_init(cascade_node, 0);
 	of_node_put(cascade_node);
 
-	/*
-	 *  Hook the interrupt to make sure desc->action is never NULL.
-	 *  This is required to ensure that the interrupt does not get
-	 *  disabled when the last user of the shared IRQ line frees their
-	 *  interrupt.
-	 */
 	if ((ret = setup_irq(cascade_irq, &mpc85xxcds_8259_irqaction))) {
 		printk(KERN_ERR "Failed to setup cascade interrupt\n");
 		return ret;
 	}
 
-	/* Success. Connect our low-level cascade handler. */
 	irq_set_handler(cascade_irq, mpc85xx_8259_cascade_handler);
 
 	return 0;
 }
 machine_device_initcall(mpc85xx_cds, mpc85xx_cds_8259_attach);
 
-#endif /* CONFIG_PPC_I8259 */
+#endif  
 
-/*
- * Setup the architecture
- */
 static void __init mpc85xx_cds_setup_arch(void)
 {
 #ifdef CONFIG_PCI
@@ -313,12 +256,6 @@ static void __init mpc85xx_cds_setup_arch(void)
 		uint __iomem *tmp_eebpcr;
 		tmp_eebpcr = ioremap(get_immrbase() + 0x1010, 0x4);
 
-		/*
-		 * CPU2 errata workaround: A core hang possible while executing
-		 * a msync instruction and a snoopable transaction from an I/O
-		 * master tagged to make quick forward progress is present.
-		 * Fixed in silicon rev 2.1.
-		 */             
 		setbits32(tmp_eebpcr, 1 << 16);
 		iounmap(tmp_eebpcr);
 
@@ -348,23 +285,21 @@ static void __init mpc85xx_cds_setup_arch(void)
 	ppc_md.pci_exclude_device = mpc85xx_exclude_device;
 
 #ifdef CONFIG_SYNO_MPC854X
-	/* fix PCI/PCI-X erroneous error detection. ERRATA PCI 6 */
+	 
 	if (MPC8548_ERRATA(2, 0)) {
 		struct ccsr_pci __iomem *tmp;
 
-		/* deal PCI1 */
 		tmp = ioremap(get_immrbase() + 0x8000, 0x1000);
-		/* Set ERR_CAP_DR[27] and ERR_CAP_DR[28] to disable OWMSV, ORMSV error capture */
+		 
 		setbits32(&tmp->pex_err_dr, 3 << 3);
-		/* clear ERR_EN[27] and ERR_EN[28] to disable OWMSV, ORMSV error reporting */
+		 
 		clrbits32(&tmp->pex_err_en, 3 << 3); 
 		iounmap(tmp);
 
-		/* deal PCI2 */
 		tmp = ioremap(get_immrbase() + 0x9000, 0x1000);
-		/* Set ERR_CAP_DR[27] and ERR_CAP_DR[28] to disable OWMSV, ORMSV error capture */
+		 
 		setbits32(&tmp->pex_err_dr, 3 << 3);
-		/* clear ERR_EN[27] and ERR_EN[28] to disable OWMSV, ORMSV error reporting */
+		 
 		clrbits32(&tmp->pex_err_en, 3 << 3); 
 		iounmap(tmp);
 	}
@@ -384,14 +319,10 @@ static void mpc85xx_cds_show_cpuinfo(struct seq_file *m)
 	seq_printf(m, "PVR\t\t: 0x%x\n", pvid);
 	seq_printf(m, "SVR\t\t: 0x%x\n", svid);
 
-	/* Display cpu Pll setting */
 	phid1 = mfspr(SPRN_HID1);
 	seq_printf(m, "PLL setting\t: 0x%x\n", ((phid1 >> 24) & 0x3f));
 }
 
-/*
- * Called very early, device-tree isn't unflattened
- */
 static int __init mpc85xx_cds_probe(void)
 {
         unsigned long root = of_get_flat_dt_root();

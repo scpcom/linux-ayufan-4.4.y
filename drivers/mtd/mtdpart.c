@@ -1,28 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Simple MTD partitioning layer
- *
- * Copyright © 2000 Nicolas Pitre <nico@fluxnic.net>
- * Copyright © 2002 Thomas Gleixner <gleixner@linutronix.de>
- * Copyright © 2000-2010 David Woodhouse <dwmw2@infradead.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- */
  
 #include <linux/module.h>
 #include <linux/types.h>
@@ -52,20 +30,18 @@ extern char gszSerialNum[];
 extern char gszCustomSerialNum[];
 #define SYNO_SN_TAG "SN="
 #define SYNO_CHKSUM_TAG "CHK="
-#define SYNO_SN_12_SIG SYNO_SN_TAG  // signature for 12 serial number
+#define SYNO_SN_12_SIG SYNO_SN_TAG   
 #endif
 
 #include "mtdcore.h"
 
 #if defined(CONFIG_SYNO_COMCERTO)
-#define MTD_ERASE_PARTIAL	0x8000 /* partition only covers parts of an erase block */
+#define MTD_ERASE_PARTIAL	0x8000  
 #endif
 
-/* Our partition linked list */
 static LIST_HEAD(mtd_partitions);
 static DEFINE_MUTEX(mtd_partitions_mutex);
 
-/* Our partition node structure */
 struct mtd_part {
 	struct mtd_info mtd;
 	struct mtd_info *master;
@@ -73,19 +49,11 @@ struct mtd_part {
 	struct list_head list;
 };
 
-/*
- * Given a pointer to the MTD object in the mtd_part structure, we can retrieve
- * the pointer to that structure with this macro.
- */
+
 #define PART(x)  ((struct mtd_part *)(x))
 #if defined(CONFIG_SYNO_COMCERTO)
 #define IS_PART(mtd) (mtd->read == part_read)
 #endif
-
-/*
- * MTD methods which simply translate the effective address and pass through
- * to the _real_ device.
- */
 
 static int part_read(struct mtd_info *mtd, loff_t from, size_t len,
 		size_t *retlen, u_char *buf)
@@ -153,10 +121,6 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 	if (ops->datbuf && from + ops->len > mtd->size)
 		return -EINVAL;
 
-	/*
-	 * If OOB is also requested, make sure that we do not read past the end
-	 * of this partition.
-	 */
 	if (ops->oobbuf) {
 		size_t len, pages;
 
@@ -455,11 +419,6 @@ static inline void free_partition(struct mtd_part *p)
 	kfree(p);
 }
 
-/*
- * This function unregisters and destroy all slave MTD objects which are
- * attached to the given master MTD object.
- */
-
 int del_mtd_partitions(struct mtd_info *master)
 {
 	struct mtd_part *slave, *next;
@@ -488,7 +447,6 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	struct mtd_part *slave;
 	char *name;
 
-	/* allocate the partition structure */
 	slave = kzalloc(sizeof(*slave), GFP_KERNEL);
 	name = kstrdup(part->name, GFP_KERNEL);
 	if (!name || !slave) {
@@ -499,7 +457,6 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 		return ERR_PTR(-ENOMEM);
 	}
 
-	/* set up the MTD object for this partition */
 	slave->mtd.type = master->type;
 	slave->mtd.flags = master->flags & ~part->mask_flags;
 	slave->mtd.size = part->size;
@@ -513,9 +470,6 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	slave->mtd.owner = master->owner;
 	slave->mtd.backing_dev_info = master->backing_dev_info;
 
-	/* NOTE:  we don't arrange MTDs as a tree; it'd be error-prone
-	 * to have the same data be in two different partitions.
-	 */
 	slave->mtd.dev.parent = master->dev.parent;
 
 	slave->mtd.read = part_read;
@@ -574,7 +528,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	if (slave->offset == MTDPART_OFS_NXTBLK) {
 		slave->offset = cur_offset;
 		if (mtd_mod_by_eb(cur_offset, master) != 0) {
-			/* Round up to next erasesize */
+			 
 			slave->offset = (mtd_div_by_eb(cur_offset, master) + 1) * master->erasesize;
 			printk(KERN_NOTICE "Moving partition %d: "
 			       "0x%012llx -> 0x%012llx\n", partno,
@@ -590,7 +544,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 			printk(KERN_ERR "mtd partition \"%s\" doesn't have enough space: %#llx < %#llx, disabled\n",
 				part->name, master->size - slave->offset,
 				slave->mtd.size);
-			/* register to preserve ordering */
+			 
 			goto out_register;
 		}
 	}
@@ -600,9 +554,8 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	printk(KERN_NOTICE "0x%012llx-0x%012llx : \"%s\"\n", (unsigned long long)slave->offset,
 		(unsigned long long)(slave->offset + slave->mtd.size), slave->mtd.name);
 
-	/* let's do some sanity checks */
 	if (slave->offset >= master->size) {
-		/* let's register it anyway to preserve ordering */
+		 
 		slave->offset = 0;
 		slave->mtd.size = 0;
 		printk(KERN_ERR"mtd: partition \"%s\" is out of reach -- disabled\n",
@@ -615,20 +568,17 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 			part->name, master->name, (unsigned long long)slave->mtd.size);
 	}
 	if (master->numeraseregions > 1) {
-		/* Deal with variable erase size stuff */
+		 
 		int i, max = master->numeraseregions;
 		u64 end = slave->offset + slave->mtd.size;
 		struct mtd_erase_region_info *regions = master->eraseregions;
 
-		/* Find the first erase regions which is part of this
-		 * partition. */
 		for (i = 0; i < max && regions[i].offset <= slave->offset; i++)
 			;
-		/* The loop searched for the region _behind_ the first one */
+		 
 		if (i > 0)
 			i--;
 
-		/* Pick biggest erasesize */
 		for (; i < max && regions[i].offset < end; i++) {
 			if (slave->mtd.erasesize < regions[i].erasesize) {
 				slave->mtd.erasesize = regions[i].erasesize;
@@ -636,13 +586,13 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 		}
 		BUG_ON(slave->mtd.erasesize == 0);
 	} else {
-		/* Single erase size */
+		 
 		slave->mtd.erasesize = master->erasesize;
 	}
 
 	if ((slave->mtd.flags & MTD_WRITEABLE) &&
 	    mtd_mod_by_eb(slave->offset, &slave->mtd)) {
-		/* Doesn't start on a boundary of major erase size */
+		 
 #if defined(CONFIG_SYNO_COMCERTO)
 		slave->mtd.flags |= MTD_ERASE_PARTIAL;
 		if (((u32) slave->mtd.size) > master->erasesize)
@@ -650,8 +600,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 		else
 			slave->mtd.erasesize = slave->mtd.size;
 #else
-		/* FIXME: Let it be writable if it is on a boundary of
-		 * _minor_ erase size though */
+		 
 		slave->mtd.flags &= ~MTD_WRITEABLE;
 		printk(KERN_WARNING"mtd: partition \"%s\" doesn't start on an erase block boundary -- force read-only\n",
 			part->name);
@@ -705,11 +654,6 @@ out_register:
 			u_char ucSum;
 			unsigned char rgbLanMac[SYNO_MAC_MAX_V2][6];
 
-			/**
-			 * FIXME: current vender structure on arm platform only support
-			 * max 4 lans instead of SYNO_MAC_MAX_V2.
-			 * If more lans needed, check DSM #52055
-			 */
 			part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
 #ifdef MY_ABC_HERE
 			x = 0;
@@ -755,9 +699,8 @@ out_register:
 			memset(gszSerialNum, 0, 32);
 			memcpy(szSerialBuffer, &(rgbszBuf[32]), 32);
 
-			// this is new defined SN
 			if (0 == strncmp(szSerialBuffer, SYNO_SN_12_SIG,strlen(SYNO_SN_12_SIG))) {
-				//paring serial number with format 'SN=1350KKN99999'
+				 
 				ptr = strstr(szSerialBuffer, SYNO_SN_TAG);
 				if (NULL == ptr) {
 					printk("no serial tag found, serial buffer='%s'\n", szSerialBuffer);
@@ -771,7 +714,6 @@ out_register:
 				}
 				szSerial[i] = '\0';
 
-				//paring serial number with format 'CHK=125'
 				ptr = strstr(szSerialBuffer, SYNO_CHKSUM_TAG);
 				if (NULL == ptr) {
 					printk("no checksum tag found, serial buffer='%s'\n", szSerialBuffer);
@@ -785,12 +727,10 @@ out_register:
 				}
 				szCheckSum[i] = '\0';
 
-				//calculate checksum
 				for (i = 0 ; i < strlen(szSerial); i++) {
 					uichksum += szSerial[i];
 				}
 
-				//------ check checksum ------
 				if (0 != strict_strtoul(szCheckSum, 10, &uiTemp)) {
 					printk("string conversion error: '%s'\n", szCheckSum);
 					goto SKIP_SERIAL;
@@ -800,11 +740,11 @@ out_register:
 				}
 			} else {
 				unsigned char ucChkSum = 0;
-				//calculate checksum
+				 
 				for (i = 0 ; i < 10; i++) {
 					ucChkSum += szSerialBuffer[i];
 				}
-				//------ check checksum ------
+				 
 				if (ucChkSum != szSerialBuffer[10]) {
 					printk("serial number checksum error, serial='%s', checksum='%d' not '%d'", szSerialBuffer, ucChkSum, szSerialBuffer[10]);
 					goto SKIP_SERIAL;
@@ -816,7 +756,6 @@ out_register:
 SKIP_SERIAL:
 			printk("serial number='%s'", gszSerialNum);
 
-			//read custom serial number out, it is in the vender partion shift 64 bytes.
 			x = 64;
 			for (Sum=0,ucSum=0,i=0; i<31; i++) {
 				Sum+=rgbszBuf[i+x];
@@ -846,7 +785,6 @@ int mtd_add_partition(struct mtd_info *master, char *name,
 	uint64_t start, end;
 	int ret = 0;
 
-	/* the direct offset is expected */
 	if (offset == MTDPART_OFS_APPEND ||
 	    offset == MTDPART_OFS_NXTBLK)
 		return -EINVAL;
@@ -1018,27 +956,26 @@ static int refresh_rootfs_split(struct mtd_info *mtd)
 	struct mtd_partition tpart;
 	struct mtd_part *part;
 	char *name;
-	//int index = 0;
+	 
 	int offset, size;
 	int ret;
 
 	part = PART(mtd);
 
-	/* check for the new squashfs offset first */
 	ret = split_squashfs(part->master, part->offset, &offset);
 	if (ret)
 		return ret;
 
 	if ((offset > 0) && !mtd->split) {
 		printk(KERN_INFO "%s: creating new split partition for \"%s\"\n", __func__, mtd->name);
-		/* if we don't have a rootfs split partition, create a new one */
+		 
 		tpart.name = (char *) mtd->name;
 		tpart.size = mtd->size;
 		tpart.offset = part->offset;
 
 		return split_rootfs_data(part->master, &part->mtd, &tpart);
 	} else if ((offset > 0) && mtd->split) {
-		/* update the offsets of the existing partition */
+		 
 		size = mtd->size + part->offset - offset;
 
 		part = PART(mtd->split);
@@ -1053,7 +990,6 @@ static int refresh_rootfs_split(struct mtd_info *mtd)
 	} else if ((offset <= 0) && mtd->split) {
 		printk(KERN_INFO "%s: removing partition \"%s\"\n", __func__, mtd->split->name);
 
-		/* mark existing partition as removed */
 		part = PART(mtd->split);
 		name = kmalloc(sizeof(ROOTFS_SPLIT_NAME) + 1, GFP_KERNEL);
 		strcpy(name, ROOTFS_REMOVED_NAME);
@@ -1064,16 +1000,7 @@ static int refresh_rootfs_split(struct mtd_info *mtd)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_COMCERTO && CONFIG_MTD_ROOTFS_SPLIT */
-
-/*
- * This function, given a master MTD object and a partition table, creates
- * and registers slave MTD objects which are bound to the master according to
- * the partition definitions.
- *
- * We don't register the master, or expect the caller to have done so,
- * for reasons of data integrity.
- */
+#endif  
 
 int add_mtd_partitions(struct mtd_info *master,
 		       const struct mtd_partition *parts,
@@ -1110,8 +1037,7 @@ int add_mtd_partitions(struct mtd_info *master,
 #endif
 #ifdef CONFIG_MTD_ROOTFS_SPLIT
 			ret = split_rootfs_data(master, &slave->mtd, &parts[i]);
-			/* if (ret == 0)
-			 * 	j++; */
+			 
 #endif
 		}
 #endif
@@ -1190,10 +1116,7 @@ int deregister_mtd_parser(struct mtd_part_parser *p)
 }
 EXPORT_SYMBOL_GPL(deregister_mtd_parser);
 
-/*
- * Do not forget to update 'parse_mtd_partitions()' kerneldoc comment if you
- * are changing this array!
- */
+
 static const char *default_mtd_part_types[] = {
 #ifdef CONFIG_SYNO_ALPINE
 	"RedBoot",
@@ -1203,26 +1126,6 @@ static const char *default_mtd_part_types[] = {
 	NULL
 };
 
-/**
- * parse_mtd_partitions - parse MTD partitions
- * @master: the master partition (describes whole MTD device)
- * @types: names of partition parsers to try or %NULL
- * @pparts: array of partitions found is returned here
- * @data: MTD partition parser-specific data
- *
- * This function tries to find partition on MTD device @master. It uses MTD
- * partition parsers, specified in @types. However, if @types is %NULL, then
- * the default list of parsers is used. The default list contains only the
- * "cmdlinepart" and "ofpart" parsers ATM.
- * Note: If there are more then one parser in @types, the kernel only takes the
- * partitions parsed out by the first parser.
- *
- * This function may return:
- * o a negative error code in case of failure
- * o zero if no partitions were found
- * o a positive number of found partitions, in which case on exit @pparts will
- *   point to an array containing this number of &struct mtd_info objects.
- */
 int parse_mtd_partitions(struct mtd_info *master, const char **types,
 			 struct mtd_partition **pparts,
 			 struct mtd_part_parser_data *data)
@@ -1267,7 +1170,6 @@ int mtd_is_partition(const struct mtd_info *mtd)
 }
 EXPORT_SYMBOL_GPL(mtd_is_partition);
 
-/* Returns the size of the entire flash chip */
 uint64_t mtd_get_device_size(const struct mtd_info *mtd)
 {
 	if (!mtd_is_partition(mtd))
@@ -1293,4 +1195,4 @@ int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned l
 
 	return 0;
 }
-#endif /* MY_ABC_HERE */
+#endif  

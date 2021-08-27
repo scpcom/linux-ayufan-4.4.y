@@ -1,24 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/include/asm/pgtable-2level-types.h
- *
- * Copyright (C) 1995-2003 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- */
+ 
 #ifndef _ASM_PGTABLE_2LEVEL_TYPES_H
 #define _ASM_PGTABLE_2LEVEL_TYPES_H
 
@@ -34,9 +17,7 @@ typedef u32 pmdval_t;
 #endif
 
 #ifdef STRICT_MM_TYPECHECKS
-/*
- * These are used to make use of C type-checking..
- */
+ 
 #if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
 typedef struct { pteval_t pte; } pte_t;
 typedef struct { pmdval_t pmd; } pmd_t;
@@ -70,9 +51,7 @@ typedef struct { pteval_t pgprot; } pgprot_t;
 #endif
 
 #else
-/*
- * .. while these make it easier on the compiler
- */
+ 
 typedef pteval_t pte_t;
 typedef pmdval_t pmd_t;
 typedef pmdval_t pgd_t[2];
@@ -87,6 +66,6 @@ typedef pteval_t pgprot_t;
 #define __pmd(x)        (x)
 #define __pgprot(x)     (x)
 
-#endif /* STRICT_MM_TYPECHECKS */
+#endif  
 
-#endif	/* _ASM_PGTABLE_2LEVEL_TYPES_H */
+#endif	 

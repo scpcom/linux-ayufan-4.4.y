@@ -1,42 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  GPL LICENSE SUMMARY
- *
- *  Copyright(c) 2005 - 2012 Intel Corporation. All rights reserved.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of version 2 of the GNU General Public License as
- *  published by the Free Software Foundation.
- *
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *  The full GNU General Public License is included in this distribution
- *  in the file called LICENSE.GPL.
- *
- *  Contact Information:
- *    Intel Corporation
- *    2200 Mission College Blvd.
- *    Santa Clara, CA  97052
- *
- */
-
-/*
- * The following code is for Intel Media SOC Gen3 base support.
-*/
-
-/*
- * This file contains PCI access simulation code for Intel Media SOC Gen3.
-*/ 
  
-
 #include <linux/kernel.h>
 #include <linux/pci.h>
 #include <linux/init.h>
@@ -203,14 +168,10 @@ static sim_dev_reg_t av_dev_reg_fixups3[] = {
 	{ 27, 0, 0x14, { 0, SIZE_TO_MASK(256) } }
 };
 
-/* 
- * This table is for Gen 5 fixing
- */
 static sim_dev_reg_t av_dev_reg_fixups5[] = {
 	{  2, 0, 0x10, { 0, SIZE_TO_MASK(16*MB) } },
 	{  2, 0, 0x14, { 0, SIZE_TO_MASK(256) } },
 
-        /* Multi-Function Decoder */
 	{  3, 0, 0x10, { 0, SIZE_TO_MASK(16*KB) } },
 	{  3, 0, 0x14, { 0, SIZE_TO_MASK(4*KB) } },
 	{  3, 0, 0x18, { 0, SIZE_TO_MASK(4*KB) } },
@@ -232,34 +193,32 @@ static sim_dev_reg_t av_dev_reg_fixups5[] = {
 	{ 10, 0, 0x10, { 0, SIZE_TO_MASK(256) } },
 	{ 10, 0, 0x14, { 0, SIZE_TO_MASK(256*MB) } },
 
-        /* UART */
 	{ 11, 0, 0x10, { 0, SIZE_TO_MASK(256) } },
 	{ 11, 0, 0x14, { 0, SIZE_TO_MASK(256) } },
 	{ 11, 0, 0x18, { 0, SIZE_TO_MASK(256) } },
-        /* GPIO */
+         
 	{ 11, 1, 0x10, { 0, SIZE_TO_MASK(256) } },
-	/* I2C */
+	 
 	{ 11, 2, 0x10, { 0, SIZE_TO_MASK(256) } },
 	{ 11, 2, 0x14, { 0, SIZE_TO_MASK(256) } },
 	{ 11, 2, 0x18, { 0, SIZE_TO_MASK(256) } },
 	{ 11, 2, 0x1C, { 0, SIZE_TO_MASK(256) } },
-        /* Smart Card */
+         
 	{ 11, 3, 0x10, { 0, SIZE_TO_MASK(256) } },
 	{ 11, 3, 0x14, { 0, SIZE_TO_MASK(256) } },
-        /* SPI Master */
+         
 	{ 11, 4, 0x10, { 0, SIZE_TO_MASK(256) } },
-	/* MSPOD */
+	 
 	{ 11, 5, 0x10, { 0, SIZE_TO_MASK(64*KB) } },
-	/* PWM */
+	 
 	{ 11, 6, 0x10, { 0, SIZE_TO_MASK(256) } },
-	/* DFV */
+	 
 	{ 11, 7, 0x10, { 0, SIZE_TO_MASK(64*KB) } },
 
 	{ 12, 0, 0x10, { 0, SIZE_TO_MASK(128*KB) } },
 	{ 12, 0, 0x14, { 0, SIZE_TO_MASK(256) } },
 	{ 12, 1, 0x10, { 0, SIZE_TO_MASK(1024) } },
 
-	/* USB */
 	{ 13, 0, 0x10, { 0, SIZE_TO_MASK(32*KB) } },
 	{ 13, 1, 0x10, { 0, SIZE_TO_MASK(32*KB) } },
 	{ 13, 2, 0x10, { 0, SIZE_TO_MASK(32*KB) } },
@@ -276,13 +235,11 @@ static sim_dev_reg_t av_dev_reg_fixups5[] = {
 
 	{ 20, 0, 0x10, { 0, SIZE_TO_MASK(1*MB) } },
 
-	/* SPI Slave */
 	{ 21, 0, 0x10, { 0, SIZE_TO_MASK(256) } },
 
 	{ 22, 0, 0x10, { 0, SIZE_TO_MASK(256*KB) } },
 	{ 22, 0, 0x14, { 0, SIZE_TO_MASK(64*KB) } },
 
-	/* SPI Flash */
 	{ 23, 0, 0x10, { 0, SIZE_TO_MASK(256) } },
 	{ 23, 0, 0x14, { 0, SIZE_TO_MASK(64*MB) } },
 	{ 23, 0, 0x18, { 0, SIZE_TO_MASK(256) } },
@@ -310,9 +267,7 @@ static void init_sim_regs(void) {
 	for (i = 0; i < num_av_dev_reg_fixups; i++) {
 		if (av_dev_reg_fixups[i].dev == 14) {
 			if (av_dev_reg_fixups[i].reg == 0x24) {
-                                /* SATA AHCI base address has an offset 0x400 from the SATA base
-                                 * physical address.
-                                 */ 
+                                  
 				av_dev_reg_fixups[i].sim_reg.value = sata_cfg_phys_addr + 0x400;            
 			}
 		} else {
@@ -330,9 +285,7 @@ static void init_sim_regs3(void) {
 	for (i = 0; i < num_av_dev_reg_fixups3; i++) {
 		if (av_dev_reg_fixups3[i].dev == 14) {
 			if (av_dev_reg_fixups3[i].reg == 0x24) {
-                                /* SATA AHCI base address has an offset 0x400 from the SATA base
-                                 * physical address.
-                                 */ 
+                                  
 				av_dev_reg_fixups3[i].sim_reg.value = sata_cfg_phys_addr + 0x400;            
 			}
 		} else {
@@ -360,7 +313,7 @@ sim_reg_t *get_sim_reg(unsigned int bus, unsigned int devfn, int reg, int len) {
 
 	dev = PCI_SLOT(devfn);
 	func = PCI_FUNC(devfn);
-	/* A/V bridge devices are on bus 1. */
+	 
 	if (bus == 1) {
 		for (i = 0; i < num_av_dev_reg_fixups; i++) {
 			if ((reg & ~3) == av_dev_reg_fixups[i].reg
@@ -382,7 +335,7 @@ sim_reg_t *get_sim_reg3(unsigned int bus, unsigned int devfn, int reg, int len) 
 
 	dev = PCI_SLOT(devfn);
 	func = PCI_FUNC(devfn);
-	/* A/V bridge devices are on bus 1. */
+	 
 	if (bus == 1) {
 		for (i = 0; i < num_av_dev_reg_fixups3; i++) {
 			if ((reg & ~3) == av_dev_reg_fixups3[i].reg
@@ -404,7 +357,7 @@ sim_reg_t *get_sim_reg5(unsigned int bus, unsigned int devfn, int reg, int len) 
 
 	dev = PCI_SLOT(devfn);
 	func = PCI_FUNC(devfn);
-	/* A/V bridge devices are on bus 1. */
+	 
 	if (bus == 1) {
 		for (i = 0; i < num_av_dev_reg_fixups5; i++) {
 			if ((reg & ~3) == av_dev_reg_fixups5[i].reg
@@ -452,22 +405,20 @@ static int gen3_conf_read(unsigned int seg, unsigned int bus,
 		*value = sim_reg->value;
 		raw_spin_unlock_irqrestore(&pci_config_lock, flags);
 
-                /* EHCI registers has 0x100 offset. */
 		if (bus == 1 && dev == 13 && reg == 0x10 && func < 2) {
 			if (*value != sim_reg->mask) {
 				*value |= 0x100;
 			}
 		}
 		extract_bytes(value, reg, len);
-	/* Emulate TDI USB controllers. */
+	 
 	} else if (bus == 1 && dev == 13 && (func == 0 || func == 1) && ((reg & ~3) == PCI_VENDOR_ID)) {
 		*value = 0x0101192E;
 		extract_bytes(value, reg, len);
-        /* b0:d1:f0 is A/V bridge. */
+         
 	} else if (bus == 0 && dev == 1 && func == 0) {
 		switch (reg) {
 
-                        /* Make BARs appear to not request any memory. */
 			case PCI_BASE_ADDRESS_0:
 			case PCI_BASE_ADDRESS_0 + 1:
 			case PCI_BASE_ADDRESS_0 + 2:
@@ -475,9 +426,6 @@ static int gen3_conf_read(unsigned int seg, unsigned int bus,
 				*value = 0;
 				break;
 
-                        /* Since subordinate bus number register is hardwired
-                         * to zero and read only, so do the simulation.
-                         */
 			case PCI_PRIMARY_BUS:
 				if (len == 4) {
 					*value = 0x00010100;
@@ -492,7 +440,7 @@ static int gen3_conf_read(unsigned int seg, unsigned int bus,
 
 			case PCI_MEMORY_BASE:
 			case PCI_MEMORY_LIMIT:
-                                /* Get the A/V bridge base address. */				
+                                 				
 				pci_direct_conf1.read(0, 0, PCI_DEVFN(1, 0), PCI_BASE_ADDRESS_0, 4, 
 					&av_bridge_base);
 
@@ -511,16 +459,14 @@ static int gen3_conf_read(unsigned int seg, unsigned int bus,
 					*value = (av_bridge_limit << 16) | av_bridge_base;
 				}
 				break;
-                        /* Make prefetchable memory limit smaller than prefetchable
-                         * memory base, so not claim prefetchable memory space.
-                         */
+                         
 			case PCI_PREF_MEMORY_BASE:
 				*value = 0xFFF0;
 				break;
 			case PCI_PREF_MEMORY_LIMIT:
 				*value = 0x0;
 				break;
-                        /* Make IO limit smaller than IO base, so not claim IO space. */
+                         
 			case PCI_IO_BASE:
 				*value = 0xF0;
 				break;
@@ -565,7 +511,7 @@ static int gen3_conf_write(unsigned int seg, unsigned int bus,
 		raw_spin_unlock_irqrestore(&pci_config_lock, flags);
 		retval = 0;
 	} else if (bus == 0 && dev == 1 && func == 0 && ((reg & ~3) == PCI_BASE_ADDRESS_0)) {      
-                /* Discard writes to A/V bridge BAR. */
+                 
 		retval = 0;
 	} else {
 		retval = pci_direct_conf1.write(seg, bus, devfn, reg, len, value);
@@ -613,18 +559,16 @@ static int ce_soc_conf_read(unsigned int seg, unsigned int bus,
 		*value = sim_reg->value;
 		raw_spin_unlock_irqrestore(&pci_config_lock, flags);
 
-                /* EHCI registers has 0x100 offset. */
 		if (bus == 1 && dev == 13 && reg == 0x10 && func < usb_number) {
 			if (*value != sim_reg->mask) {
 				*value |= 0x100;
 			}
 		}
 		extract_bytes(value, reg, len);
-        /* b0:d1:f0 is A/V bridge. */
+         
 	} else if (bus == 0 && dev == 1 && func == 0) {
 		switch (reg) {
 
-                        /* Make BARs appear to not request any memory. */
 			case PCI_BASE_ADDRESS_0:
 			case PCI_BASE_ADDRESS_0 + 1:
 			case PCI_BASE_ADDRESS_0 + 2:
@@ -632,9 +576,6 @@ static int ce_soc_conf_read(unsigned int seg, unsigned int bus,
 				*value = 0;
 				break;
 
-                        /* Since subordinate bus number register is hardwired
-                         * to zero and read only, so do the simulation.
-                         */
 			case PCI_PRIMARY_BUS:
 				if (len == 4) {
 					*value = 0x00010100;
@@ -649,7 +590,7 @@ static int ce_soc_conf_read(unsigned int seg, unsigned int bus,
 
 			case PCI_MEMORY_BASE:
 			case PCI_MEMORY_LIMIT:
-                                /* Get the A/V bridge base address. */				
+                                 				
 				pci_direct_conf1.read(0, 0, PCI_DEVFN(1, 0), PCI_BASE_ADDRESS_0, 4, 
 					&av_bridge_base);
 
@@ -668,16 +609,14 @@ static int ce_soc_conf_read(unsigned int seg, unsigned int bus,
 					*value = (av_bridge_limit << 16) | av_bridge_base;
 				}
 				break;
-                        /* Make prefetchable memory limit smaller than prefetchable
-                         * memory base, so not claim prefetchable memory space.
-                         */
+                         
 			case PCI_PREF_MEMORY_BASE:
 				*value = 0xFFF0;
 				break;
 			case PCI_PREF_MEMORY_LIMIT:
 				*value = 0x0;
 				break;
-                        /* Make IO limit smaller than IO base, so not claim IO space. */
+                         
 			case PCI_IO_BASE:
 				*value = 0xF0;
 				break;
@@ -731,7 +670,7 @@ static int ce_soc_conf_write(unsigned int seg, unsigned int bus,
 		raw_spin_unlock_irqrestore(&pci_config_lock, flags);
 		retval = 0;
 	} else if (bus == 0 && dev == 1 && func == 0 && ((reg & ~3) == PCI_BASE_ADDRESS_0)) {      
-                /* Discard writes to A/V bridge BAR. */
+                 
 		retval = 0;
 	} else {
 		retval = pci_direct_conf1.write(seg, bus, devfn, reg, len, value);
@@ -744,7 +683,7 @@ struct pci_raw_ops gen3_pci_conf = {
 	.read =	gen3_conf_read,
 	.write = gen3_conf_write,
 };
-/*We use same structure here for CE4200 and CE5300 platform*/
+ 
 struct pci_raw_ops ce_soc_pci_conf = {
 	.read =	ce_soc_conf_read,
 	.write = ce_soc_conf_write,
@@ -794,7 +733,7 @@ static int __init gen3_pci_init(void)
 			raw_pci_ops = &gen3_pci_conf;
 			break;
 		case CE4200_SOC_DEVICE_ID:
-	        /* check if the chicken bit enabled*/
+	         
 			pci_direct_conf1.write(0, 0, 0, 0xd0, 4, 0xd00040f0);
 			pci_direct_conf1.read(0, 0, 0, 0xd4, 4, &pcimode);
 			printk("pcimode=0x%x\n", pcimode);
@@ -806,7 +745,7 @@ static int __init gen3_pci_init(void)
 			}
 			break;
 		case CE5300_SOC_DEVICE_ID:
-			/* check if the chicken bit enabled*/
+			 
 			pci_direct_conf1.write(0, 0, 0, 0xd0, 4, 0x060040f0);
 			pci_direct_conf1.read(0, 0, 0, 0xd4, 4, &pcimode);
 			printk("pcimode=0x%x\n", pcimode);

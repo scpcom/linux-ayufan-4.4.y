@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* ip_conntrack proc compat - based on ip_conntrack_standalone.c
- *
- * (C) 1999-2001 Paul `Rusty' Russell
- * (C) 2002-2006 Netfilter Core Team <coreteam@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #include <linux/types.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
@@ -130,7 +122,6 @@ static int ct_seq_show(struct seq_file *s, void *v)
 	if (unlikely(!atomic_inc_not_zero(&ct->ct_general.use)))
 		return 0;
 
-	/* we only want to print DIR_ORIGINAL */
 	if (NF_CT_DIRECTION(hash))
 		goto release;
 	if (nf_ct_l3num(ct) != AF_INET)
@@ -193,7 +184,7 @@ static int ct_seq_show(struct seq_file *s, void *v)
 		if (seq_printf(s, "[NFP (reply)] "))
 			goto release;
 	}
-#endif /* CONFIG_MV_ETH_NFP_HOOKS */
+#endif  
 #endif
 
 	if (seq_printf(s, "use=%u\n", atomic_read(&ct->ct_general.use)))
@@ -225,7 +216,6 @@ static const struct file_operations ct_file_ops = {
 	.release = seq_release_net,
 };
 
-/* expects */
 struct ct_expect_iter_state {
 	struct seq_net_private p;
 	unsigned int bucket;

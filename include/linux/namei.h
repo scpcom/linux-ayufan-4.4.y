@@ -22,7 +22,7 @@ struct nameidata {
 	struct path	path;
 	struct qstr	last;
 	struct path	root;
-	struct inode	*inode; /* path.dentry.d_inode */
+	struct inode	*inode;  
 	unsigned int	flags;
 	unsigned	seq;
 	int		last_type;
@@ -34,26 +34,13 @@ struct nameidata {
 	unsigned int real_filename_len;
 #endif
 
-	/* Intent data */
 	union {
 		struct open_intent open;
 	} intent;
 };
 
-/*
- * Type of the last component on LOOKUP_PARENT
- */
 enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 
-/*
- * The bitmask for a lookup event:
- *  - follow links at the end
- *  - require a directory
- *  - ending slashes ok even for nonexistent files
- *  - internal "there are more path components" flag
- *  - dentry cache is untrusted; force a real lookup
- *  - suppress terminal automount
- */
 #define LOOKUP_FOLLOW		0x0001
 #define LOOKUP_DIRECTORY	0x0002
 #define LOOKUP_AUTOMOUNT	0x0004
@@ -62,9 +49,6 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 #define LOOKUP_REVAL		0x0020
 #define LOOKUP_RCU		0x0040
 
-/*
- * Intent data
- */
 #define LOOKUP_OPEN		0x0100
 #define LOOKUP_CREATE		0x0200
 #define LOOKUP_EXCL		0x0400
@@ -74,7 +58,7 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 #define LOOKUP_ROOT		0x2000
 #define LOOKUP_EMPTY		0x4000
 #ifdef MY_ABC_HERE
-/* this namei has done to the last component */
+ 
 #define LOOKUP_TO_LASTCOMPONENT 0x8000
 #define LOOKUP_MOUNTED			0x10000
 #define LOOKUP_CASELESS_COMPARE 0x20000
@@ -106,7 +90,7 @@ extern struct file *lookup_instantiate_filp(struct nameidata *nd, struct dentry 
 extern struct dentry *lookup_hash(struct nameidata *nd);
 extern int __lookup_one_len(const char *name, struct qstr *this,
 			    struct dentry *base, int len);
-#endif /* SYNO_AUFS */
+#endif  
 extern struct dentry *lookup_one_len(const char *, struct dentry *, int);
 
 extern int follow_down_one(struct path *);
@@ -135,4 +119,4 @@ static inline void nd_terminate_link(void *name, size_t len, size_t maxlen)
 	((char *) name)[min(len, maxlen)] = '\0';
 }
 
-#endif /* _LINUX_NAMEI_H */
+#endif  

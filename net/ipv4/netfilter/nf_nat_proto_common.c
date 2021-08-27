@@ -1,14 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* (C) 1999-2001 Paul `Rusty' Russell
- * (C) 2002-2006 Netfilter Core Team <coreteam@netfilter.org>
- * (C) 2008 Patrick McHardy <kaber@trash.net>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
  
 #include <linux/types.h>
 #include <linux/random.h>
@@ -54,14 +46,13 @@ void nf_nat_proto_unique_tuple(struct nf_conntrack_tuple *tuple,
 	else
 		portptr = &tuple->dst.u.all;
 
-	/* If no range specified... */
 	if (!(range->flags & IP_NAT_RANGE_PROTO_SPECIFIED)) {
-		/* If it's dst rewrite, can't change port */
+		 
 		if (maniptype == IP_NAT_MANIP_DST)
 			return;
 
 		if (ntohs(*portptr) < 1024) {
-			/* Loose convention: >> 512 is credential passing */
+			 
 			if (ntohs(*portptr) < 512) {
 				min = 1;
 				range_size = 511 - min + 1;
@@ -87,7 +78,7 @@ void nf_nat_proto_unique_tuple(struct nf_conntrack_tuple *tuple,
 		off = *rover;
 
 #if defined(CONFIG_SYNO_COMCERTO)
-       /* 4rd specific range NAPT - start */
+        
        if ((range->flags & IP_NAT_RANGE_4RD_NAPT) && (maniptype == IP_NAT_MANIP_SRC)){
                __be16 fix_port;
                __be16 port_min, port_max;
@@ -132,7 +123,7 @@ void nf_nat_proto_unique_tuple(struct nf_conntrack_tuple *tuple,
                offsetlen = MAXBITLEN - psidlen - mbitlen;
 
                if((psidlen == 0) || (mbitlen == 0)){
-                       /* ERROR */
+                        
                        printk(KERN_INFO "4rd parameter INVALID");
                }
 
@@ -188,10 +179,9 @@ void nf_nat_proto_unique_tuple(struct nf_conntrack_tuple *tuple,
                        if ((++i != range_total_size) && nf_nat_used_tuple(tuple, ct))
                                continue;
 
-                       //printk(KERN_INFO "fix_port = %d ",fix_port);
                        return ;
                }
-       } /* 4rd specific range NAPT - end */
+       }  
        else{
 #endif
 

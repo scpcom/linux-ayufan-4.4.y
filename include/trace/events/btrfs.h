@@ -1010,7 +1010,6 @@ DECLARE_EVENT_CLASS(btrfs__work,
 		  __entry->ordered_func, __entry->ordered_free)
 );
 
-/* For situiations that the work is freed */
 DECLARE_EVENT_CLASS(btrfs__work__done,
 
 	TP_PROTO(struct btrfs_work *work),
@@ -1118,7 +1117,6 @@ DEFINE_EVENT(btrfs__workqueue_done, btrfs_workqueue_destroy,
 	TP_ARGS(wq)
 );
 
-#endif /* _TRACE_BTRFS_H */
+#endif  
 
-/* This part must be outside protection */
 #include <trace/define_trace.h>

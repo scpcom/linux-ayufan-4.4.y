@@ -43,7 +43,7 @@ static void idmap_add_pmd(pud_t *pud, unsigned long addr, unsigned long end,
 		flush_pmd_entry(pmd);
 	} while (pmd++, addr = next, addr != end);
 }
-#else	/* !CONFIG_ARM_LPAE */
+#else	 
 static void idmap_add_pmd(pud_t *pud, unsigned long addr, unsigned long end,
 	unsigned long prot)
 {
@@ -55,7 +55,7 @@ static void idmap_add_pmd(pud_t *pud, unsigned long addr, unsigned long end,
 	pmd[1] = __pmd(addr);
 	flush_pmd_entry(pmd);
 }
-#endif	/* CONFIG_ARM_LPAE */
+#endif	 
 
 static void idmap_add_pud(pgd_t *pgd, unsigned long addr, unsigned long end,
 	unsigned long prot)
@@ -126,18 +126,9 @@ void identity_mapping_del(pgd_t *pgd, unsigned long addr, unsigned long end)
 }
 #endif
 
-/*
- * In order to soft-boot, we need to insert a 1:1 mapping in place of
- * the user-mode pages.  This will then ensure that we have predictable
- * results when turning the mmu off
- */
 void setup_mm_for_reboot(char mode)
 {
-	/*
-	 * We need to access to user-mode page tables here. For kernel threads
-	 * we don't have any user-mode mappings so we use the context that we
-	 * "borrowed".
-	 */
+	 
 	identity_mapping_add(current->active_mm->pgd, 0, TASK_SIZE);
 	local_flush_tlb_all();
 }

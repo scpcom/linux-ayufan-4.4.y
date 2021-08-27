@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+ 
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/ctype.h>
@@ -77,30 +63,24 @@
 
 #include <plat/mv_xor.h>
 
-/* I2C */
 #include <linux/i2c.h>
 #include <linux/mv643xx_i2c.h>
 #include "ctrlEnv/mvCtrlEnvSpec.h"
 #include "ctrlEnv/mvCtrlEnvRegs.h"
 
-/* SPI */
 #include "mvSysSpiApi.h"
 
-/* Eth Phy */
 #include "mvSysEthPhyApi.h"
 #include "eth-phy/mvEthPhy.h"
 
-/* LCD */
 #include <video/dovefb.h>
 #include <video/dovefbreg.h>
 #include <mach/dove_bl.h>
 
-/* NAND */
 #ifdef CONFIG_MTD_NAND_NFC
 #include "mv_mtd/nand_nfc.h"
 #endif
 
-/* USB */
 #ifdef CONFIG_MV_INCLUDE_USB
 #include "usb/mvUsb.h"
 #endif
@@ -125,7 +105,6 @@ extern void axp_init_irq(void);
 extern void __init set_core_count(unsigned int cpu_count);
 extern unsigned int group_cpu_mask;
 
-/* for debug putstr */
 static char arr[256];
 MV_U32 mvTclk = 166666667;
 MV_U32 mvSysclk = 200000000;
@@ -135,9 +114,6 @@ MV_U8 mvMacAddr[CONFIG_MV_ETH_PORTS_NUM][6];
 MV_U16 mvMtu[CONFIG_MV_ETH_PORTS_NUM] = {0};
 #endif
 
-/*
- * Helpers to get DDR bank info
- */
 #define DDR_BASE_CS_OFF(n)	(0x0180 + ((n) << 3))
 #define DDR_SIZE_CS_OFF(n)	(0x0184 + ((n) << 3))
 #define TARGET_DDR		0
@@ -145,18 +121,14 @@ MV_U16 mvMtu[CONFIG_MV_ETH_PORTS_NUM] = {0};
 
 struct mbus_dram_target_info armadaxp_mbus_dram_info;
 
-/* XOR0 is disabled in Z1 Silicone */
 #ifdef CONFIG_ARMADA_XP_REV_Z1
- /* XOR0 is disabled in Z1 Silicone */
+  
 #undef XOR0_ENABLE
 #else
- /* XOR0 is disabled in A0 Silicone */
+  
 #define XOR0_ENABLE
 #endif
 
-/*********************************************************************************/
-/**************                 Early Printk Support                **************/
-/*********************************************************************************/
 #ifdef MV_INCLUDE_EARLY_PRINTK
 #define MV_UART0_LSR 	(*(volatile unsigned char *)(INTER_REGS_BASE + 0x12000 + 0x14))
 #define MV_UART0_THR	(*(volatile unsigned char *)(INTER_REGS_BASE + 0x12000 + 0x0 ))
@@ -165,14 +137,11 @@ struct mbus_dram_target_info armadaxp_mbus_dram_info;
 #define MV_SERIAL_BASE 	((unsigned char *)(INTER_REGS_BASE + 0x12000 + 0x0 ))
 #define DEV_REG		(*(volatile unsigned int *)(INTER_REGS_BASE + 0x40000))
 #define CLK_REG         (*(volatile unsigned int *)(INTER_REGS_BASE + 0x2011c))
-/*
- * This does not append a newline
- */
+ 
 static void putstr(const char *s)
 {
 	unsigned int model;
 
-	/* Get dev ID, make sure pex clk is on */
 	if((CLK_REG & 0x4) == 0)
 	{
 		CLK_REG = CLK_REG | 0x4;
@@ -204,9 +173,6 @@ void mv_early_printk(char *fmt,...)
 }
 #endif
 
-/*********************************************************************************/
-/**************               UBoot Tagging Parameters              **************/
-/*********************************************************************************/
 #ifdef CONFIG_BE8_ON_LE
 #define read_tag(a)    le32_to_cpu(a)
 #define read_mtu(a)    le16_to_cpu(a)
@@ -244,23 +210,20 @@ static int __init parse_tag_mv_uboot(const struct tag *tag)
 #endif
 
 #ifdef CONFIG_MV_NAND
-               /* get NAND ECC type(1-bit or 4-bit) */
+                
 	if ((mvUbootVer >> 8) >= 0x3040c)
 		mv_nand_ecc = read_tag(tag->u.mv_uboot.nand_ecc);
 	else
-		mv_nand_ecc = 1; /* fallback to 1-bit ECC */
+		mv_nand_ecc = 1;  
 #endif
 	return 0;
 }
 
 __tagtable(ATAG_MV_UBOOT, parse_tag_mv_uboot);
 
-/*********************************************************************************/
-/**************                Command Line Parameters              **************/
-/*********************************************************************************/
 #ifdef CONFIG_MV_INCLUDE_USB
 #include "mvSysUsbApi.h"
-/* Required to get the configuration string from the Kernel Command Line */
+ 
 static char *usb0Mode = "host";
 static char *usb1Mode = "host";
 static char *usb2Mode = "device";
@@ -302,7 +265,7 @@ __setup("noL2", noL2_setup);
 #endif
 
 #ifndef CONFIG_SHEEVA_ERRATA_ARM_CPU_4948
-unsigned int l0_disable_flag = 0;		/* L0 Enabled by Default */
+unsigned int l0_disable_flag = 0;		 
 static int __init l0_disable_setup(char *__unused)
 {
      l0_disable_flag = 1;
@@ -313,7 +276,7 @@ __setup("l0_disable", l0_disable_setup);
 #endif
 
 #ifndef CONFIG_SHEEVA_ERRATA_ARM_CPU_5315
-unsigned int sp_enable_flag = 0;		/* SP Disabled by Default */
+unsigned int sp_enable_flag = 0;		 
 static int __init spec_prefesth_setup(char *__unused)
 {
      sp_enable_flag = 1;
@@ -352,7 +315,6 @@ static int __init mv_cpu_count_setup(char *s)
 	int fail;
 	unsigned long cpu_count;
 
-	/* Translate string to integer. If fails return to default*/
 	while (isspace(*s))
 		s++;
 
@@ -370,19 +332,17 @@ static int __init mv_rsrc_setup(char *s)
 {
 	char* rsrc = strchr(s, ' ');
 
-	/*Verify NULL termination */
 	if (rsrc) (*rsrc) = '\0';
-	/* Parse string to table */
+	 
 	if (MV_FALSE == mvUnitMapSetup(s, strstr))
 		printk(KERN_ERR "Invalid resource string %s\n", s);
 
-	// Change to rsrc limited mode
 	mvUnitMapSetRsrcLimited(MV_TRUE);
 
 	return 1;
 }
 __setup("mv_rsrc=", mv_rsrc_setup);
-#endif /* CONFIG_SMP */
+#endif  
 
 #ifdef CONFIG_MV_AMP_ENABLE
 unsigned int sh_mem_base = 0, sh_mem_size = 0;
@@ -399,7 +359,6 @@ static int __init mv_shared_mem_setup(char *s)
 		return 1;
 	}
 
-	/*Split the string to base and size strings*/
 	*delim = '\0';
 
 	fail  = strict_strtoul(base_str, 16, &sh_mem_base);
@@ -411,7 +370,7 @@ static int __init mv_shared_mem_setup(char *s)
 	return 1;
 }
 __setup("mv_sh_mem=", mv_shared_mem_setup);
-#endif /* CONFIG_MV_AMP_ENABLE */
+#endif  
 
 #ifdef CONFIG_MV_IPC_DRIVER
 int ipc_target_cpu;
@@ -423,7 +382,6 @@ static int __init mv_ipc_setup(char *s)
 	while (isspace(*s))
 		s++;
 
-	/* Translate string to integer. If fails return to default*/
 	fail = strict_strtoul(s, 10, &ipc_target_cpu);
 	if(fail) {
 		printk(KERN_WARNING "IPC: Received bad target cpu id %s\n", s);
@@ -445,9 +403,6 @@ void __init armadaxp_setup_cpu_mbus(void)
 	coherency_status = COHERENCY_STATUS_SHARED_NO_L2_ALLOC;
 #endif
 
-	/*
-	 * Setup MBUS dram target info.
-	 */
 	armadaxp_mbus_dram_info.mbus_dram_target_id = TARGET_DDR;
 	mvCtrlAddrWinMapBuild(addrWinMap, MAX_TARGETS + 1);
 	for (i = 0, cs = 0; i < MAX_TARGETS; i++) {
@@ -459,7 +414,7 @@ void __init armadaxp_setup_cpu_mbus(void)
 			continue;
 
 		if (addrWinMap[i].addrWin.baseHigh)
-			/* > 4GB not mapped by IO's */
+			 
 				continue;
 
 			w = &armadaxp_mbus_dram_info.cs[cs++];
@@ -472,16 +427,10 @@ void __init armadaxp_setup_cpu_mbus(void)
 	armadaxp_mbus_dram_info.num_cs = cs;
 }
 
-/*********************************************************************************/
-/**************               I/O Devices Platform Info             **************/
-/*********************************************************************************/
-/*************
- * I2C(TWSI) *
- *************/
 static struct mv64xxx_i2c_pdata axp_i2c_pdata = {
-       .freq_m         = 8, /* assumes 166 MHz TCLK */
+       .freq_m         = 8,  
        .freq_n         = 3,
-       .timeout        = 1000, /* Default timeout of 1 second */
+       .timeout        = 1000,  
 };
 
 static struct resource axp_i2c_0_resources[] = {
@@ -552,9 +501,6 @@ void __init armadaxp_i2c1_init(void)
 }
 #endif
 
-/**********
- * UART-0 *
- **********/
 static struct plat_serial8250_port aurora_uart0_data[] = {
 	{
 		.mapbase	= (INTER_REGS_PHYS_BASE | MV_UART_REGS_OFFSET(0)),
@@ -592,9 +538,6 @@ static struct platform_device aurora_uart0 = {
 	.num_resources		= ARRAY_SIZE(aurora_uart0_resources),
 };
 
-/**********
- * UART-1 *
- **********/
 static struct plat_serial8250_port aurora_uart1_data[] = {
 	{
 		.mapbase	= (INTER_REGS_PHYS_BASE | MV_UART_REGS_OFFSET(1)),
@@ -660,9 +603,6 @@ void __init serial_initialize(int port)
 	}
 }
 
-/********
- * SDIO *
- ********/
 #if defined(CONFIG_MV_INCLUDE_SDIO)
 static struct resource mvsdio_resources[] = {
 	[0] = {
@@ -721,11 +661,8 @@ void __init armadaxp_sdio_init(void)
 		platform_device_register(&mv_sdio_plat);
        }
 }
-#endif /* #if defined(CONFIG_MV_INCLUDE_SDIO) */
+#endif  
 
-/*******
- * GBE *
- *******/
 #ifdef CONFIG_MV_ETHERNET
 #if defined(CONFIG_MV_ETH_LEGACY)
 static struct platform_device mv88fx_eth = {
@@ -741,7 +678,7 @@ static struct platform_device mv88fx_neta = {
 };
 #else
 #error "Ethernet Mode is not defined (should be Legacy or NETA)"
-#endif /* Ethernet mode: legacy or NETA */
+#endif  
 
 static void __init eth_init(void)
 {
@@ -785,14 +722,11 @@ static void __init eth_init(void)
         platform_device_register(&mv88fx_eth);
 #elif defined(CONFIG_MV_ETH_NETA)
         platform_device_register(&mv88fx_neta);
-#endif /* Ethernet mode: legacy or NETA */
+#endif  
 }
 
-#endif /* CONFIG_MV_ETHERNET */
+#endif  
 
-/************
- * GPIO
- ***********/
 static struct platform_device mv_gpio = {
 	.name	= "mv_gpio",
 	.id		= 0,
@@ -803,10 +737,6 @@ static void __init mv_gpio_init(void)
 {
 	platform_device_register(&mv_gpio);
 }
-
-/***********
- * IPC NET *
- ***********/
 
 #ifdef CONFIG_MV_IPC_NET
 static struct platform_device mv_ipc_net = {
@@ -819,9 +749,6 @@ static struct platform_device mv_ipc_net = {
 };
 #endif
 
-/*******
- * RTC *
- *******/
 static struct resource axp_rtc_resource[] = {
 	{
 		.start	= INTER_REGS_PHYS_BASE + MV_RTC_REGS_OFFSET,
@@ -840,9 +767,6 @@ static void __init rtc_init(void)
 				axp_rtc_resource, 2);
 }
 
-/********
- * SATA *
- ********/
 #ifdef CONFIG_SATA_MV
 #define SATA_PHYS_BASE (INTER_REGS_PHYS_BASE | 0xA0000)
 #define IRQ_DSMP_SATA IRQ_AURORA_SATA0
@@ -885,37 +809,29 @@ void __init armadaxp_sata_init(struct mv_sata_platform_data *sata_data)
 	platform_device_register(&armadaxp_sata);
 }
 #endif
-/*****************************************************************************
- * SoC hwmon Thermal Sensor
- ****************************************************************************/
+ 
 void __init armadaxp_hwmon_init(void)
 {
 	if (mvUnitMapIsMine(HWMON) == MV_TRUE)
 	platform_device_register_simple("axp-temp", 0, NULL, 0);
 }
 
-/*************
- * 7-Segment *
- *************/
 static struct timer_list axp_db_timer;
 static void axp_db_7seg_event(unsigned long data)
 {
 	static int count = 0;
 
-	/* Update the 7 segment */
 	mvBoardDebugLed(count);
 
-	/* Incremnt count and arm the timer*/
 	count = (count + 1) & 7;
 	mod_timer(&axp_db_timer, jiffies + 1 * HZ);
 }
 
 static int __init axp_db_7seg_init(void)
 {
-	/* Create the 7segment timer */
+	 
 	setup_timer(&axp_db_timer, axp_db_7seg_event, 0);
 
-	/* Arm it expire in 1 second */
 	mod_timer(&axp_db_timer, jiffies + 1 * HZ);
 
 	return 0;
@@ -923,16 +839,7 @@ static int __init axp_db_7seg_init(void)
 __initcall(axp_db_7seg_init);
 
 #ifdef CONFIG_FB_DOVE
-/*****************************************************************************
- * LCD
- ****************************************************************************/
-
-/*
- * LCD HW output Red[0] to LDD[0] when set bit [19:16] of reg 0x190
- * to 0x0. Which means HW outputs BGR format default. All platforms
- * uses this controller should enable .panel_rbswap. Unless layout
- * design connects Blue[0] to LDD[0] instead.
- */
+ 
 static struct dovefb_mach_info kw_lcd0_dmi = {
 	.id_gfx			= "GFX Layer 0",
 	.id_ovly		= "Video Layer 0",
@@ -983,46 +890,41 @@ static struct dovefb_mach_info kw_lcd0_vid_dmi = {
 	.enable_lcd0		= 0,
 };
 
-/*****************************************************************************
- * BACKLIGHT
- ****************************************************************************/
 static struct dovebl_platform_data dsmp_backlight_data = {
 	.default_intensity = 0xa,
 	.gpio_pm_control = 1,
 
-	.lcd_start = LCD_PHYS_BASE,	/* lcd power control reg base. */
-	.lcd_end = LCD_PHYS_BASE+0x1C8,	/* end of reg map. */
-	.lcd_offset = LCD_SPU_DUMB_CTRL,/* register offset */
-	.lcd_mapped = 0,		/* va = 0, pa = 1 */
-	.lcd_mask = 0x0,		/* mask, bit[21] */
-	.lcd_on = 0x0,			/* value to enable lcd power */
-	.lcd_off = 0x0,			/* value to disable lcd power */
+	.lcd_start = LCD_PHYS_BASE,	 
+	.lcd_end = LCD_PHYS_BASE+0x1C8,	 
+	.lcd_offset = LCD_SPU_DUMB_CTRL, 
+	.lcd_mapped = 0,		 
+	.lcd_mask = 0x0,		 
+	.lcd_on = 0x0,			 
+	.lcd_off = 0x0,			 
 
-	.blpwr_start = LCD_PHYS_BASE, /* bl pwr ctrl reg base. */
-	.blpwr_end = LCD_PHYS_BASE+0x1C8,/* end of reg map. */
-	.blpwr_offset = LCD_SPU_DUMB_CTRL,/* register offset */
-	.blpwr_mapped = 0,		/* pa = 0, va = 1 */
-	.blpwr_mask = 0x0,		/* mask */
-	.blpwr_on = 0x0,		/* value to enable bl power */
-	.blpwr_off = 0x0,		/* value to disable bl power */
+	.blpwr_start = LCD_PHYS_BASE,  
+	.blpwr_end = LCD_PHYS_BASE+0x1C8, 
+	.blpwr_offset = LCD_SPU_DUMB_CTRL, 
+	.blpwr_mapped = 0,		 
+	.blpwr_mask = 0x0,		 
+	.blpwr_on = 0x0,		 
+	.blpwr_off = 0x0,		 
 
-	.btn_start = LCD_PHYS_BASE, /* brightness control reg base. */
-	.btn_end = LCD_PHYS_BASE+0x1C8,	/* end of reg map. */
-	.btn_offset = LCD_CFG_GRA_PITCH,	/* register offset */
-	.btn_mapped = 0,		/* pa = 0, va = 1 */
-	.btn_mask = 0xF0000000,	/* mask */
-	.btn_level = 15,	/* how many level can be configured. */
-	.btn_min = 0x1,	/* min value */
-	.btn_max = 0xF,	/* max value */
-	.btn_inc = 0x1,	/* increment */
+	.btn_start = LCD_PHYS_BASE,  
+	.btn_end = LCD_PHYS_BASE+0x1C8,	 
+	.btn_offset = LCD_CFG_GRA_PITCH,	 
+	.btn_mapped = 0,		 
+	.btn_mask = 0xF0000000,	 
+	.btn_level = 15,	 
+	.btn_min = 0x1,	 
+	.btn_max = 0xF,	 
+	.btn_inc = 0x1,	 
 };
 
-#endif /* CONFIG_FB_DOVE */
+#endif  
 
 #ifdef CONFIG_MTD_NAND_NFC
-/*****************************************************************************
- * NAND controller
- ****************************************************************************/
+ 
 static struct resource axp_nfc_resources[] = {
 	{
 		.start  = INTER_REGS_BASE + MV_NFC_REGS_OFFSET,
@@ -1074,7 +976,6 @@ static void __init axp_db_nfc_init(void)
 	if (mvUnitMapIsMine(NAND) != MV_TRUE)
 		return;
 
-	/* Check for ganaged mode */
 	if (nfcConfig) {
 		if (strncmp(nfcConfig, "ganged", 6) == 0) {
 			axp_nfc_data.nfc_width = 16;
@@ -1082,7 +983,6 @@ static void __init axp_db_nfc_init(void)
 			nfcConfig += 7;
 		}
 
-		/* Check for ECC type directive */
 		if (strcmp(nfcConfig, "8bitecc") == 0) {
 			axp_nfc_data.ecc_type = MV_NFC_ECC_BCH_1K;
 		} else if (strcmp(nfcConfig, "12bitecc") == 0) {
@@ -1097,9 +997,7 @@ static void __init axp_db_nfc_init(void)
 	platform_device_register(&axp_nfc);
 }
 #endif
-/*********************************************************************************/
-/**************                      Helper Routines                **************/
-/*********************************************************************************/
+ 
 #ifdef CONFIG_MV_INCLUDE_CESA
 unsigned char*  mv_sram_usage_get(int* sram_size_ptr)
 {
@@ -1145,14 +1043,13 @@ static void io_coherency_init(void)
 {
 	MV_U32 reg;
 
-	/* set CIB read snoop command to ReadUnique */
 	reg = MV_REG_READ(MV_CIB_CTRL_CFG_REG);
 	reg &= ~(7 << 16);
 	reg |= (7 << 16);
 	MV_REG_WRITE(MV_CIB_CTRL_CFG_REG, reg);
 
 #ifndef CONFIG_SMP
-        /* enable CPUs in SMP group on Fabric coherency */
+         
 	reg = MV_REG_READ(MV_COHERENCY_FABRIC_CTRL_REG);
 	reg &= ~(0x3<<24);
 	reg |= 1<<24;
@@ -1197,18 +1094,12 @@ static void check_cpu_mode(void)
 }
 #endif
 
-/*****************************************************************************
- * XOR
- ****************************************************************************/
 static struct mv_xor_platform_shared_data armadaxp_xor_shared_data = {
 	.dram		= &armadaxp_mbus_dram_info,
 };
 
 static u64 armadaxp_xor_dmamask = DMA_BIT_MASK(32);
 
-/*****************************************************************************
- * XOR0
- ****************************************************************************/
 #ifdef XOR0_ENABLE
 static struct resource armadaxp_xor0_shared_resources[] = {
 	{
@@ -1293,10 +1184,6 @@ static void __init armadaxp_xor0_init(void)
 
 	platform_device_register(&armadaxp_xor0_shared);
 
-	/*
-	 * two engines can't do memset simultaneously, this limitation
-	 * satisfied by removing memset support from one of the engines.
-	 */
 	dma_cap_set(DMA_MEMCPY, armadaxp_xor00_data.cap_mask);
 	dma_cap_set(DMA_XOR, armadaxp_xor00_data.cap_mask);
 	platform_device_register(&armadaxp_xor00_channel);
@@ -1308,9 +1195,6 @@ static void __init armadaxp_xor0_init(void)
 }
 #endif
 
-/*****************************************************************************
- * XOR1
- ****************************************************************************/
 static struct resource armadaxp_xor1_shared_resources[] = {
 	{
 		.name	= "xor 1 low",
@@ -1394,17 +1278,12 @@ static void __init armadaxp_xor1_init(void)
 
 	platform_device_register(&armadaxp_xor1_shared);
 
-	/*
-	 * two engines can't do memset simultaneously, this limitation
-	 * satisfied by removing memset support from one of the engines.
-	 */
-	//dma_cap_set(DMA_MEMCPY, armadaxp_xor10_data.cap_mask);
 	dma_cap_set(DMA_XOR, armadaxp_xor10_data.cap_mask);
 	platform_device_register(&armadaxp_xor10_channel);
 
 	dma_cap_set(DMA_MEMCPY, armadaxp_xor11_data.cap_mask);
 	dma_cap_set(DMA_MEMSET, armadaxp_xor11_data.cap_mask);
-	//dma_cap_set(DMA_XOR, armadaxp_xor11_data.cap_mask);
+	 
 	platform_device_register(&armadaxp_xor11_channel);
 }
 
@@ -1471,7 +1350,7 @@ static int mvAmpInitCpuIf()
 	}
 	else
 	{
-		// Wait until master initializes address decode windows
+		 
 		while(mvReadAmpReg(ADR_WIN_EN_REG) == 0){
 			udelay(1);
 		}
@@ -1479,7 +1358,6 @@ static int mvAmpInitCpuIf()
 		if(mvCpuIfVerify(mv_sys_map()) != MV_OK)
 			return 1;
 
-		/*verify window decode */
 		printk("Verified Address decode windows\n");
 	}
 
@@ -1487,9 +1365,6 @@ static int mvAmpInitCpuIf()
 }
 #endif
 
-/*****************************************************************************
- * DB BOARD: Restore from suspend to RAM
- * ****************************************************************************/
 void axp_db_restore(void)
 {
 	int maxPorts, port;
@@ -1497,16 +1372,13 @@ void axp_db_restore(void)
 	static MV_UNIT_WIN_INFO addrWinMap[MAX_TARGETS + 1];
 #endif
 
-	/* init the Board environment */
 	mvBoardEnvInit();
 
-	/* init the controller environment */
 	if (mvCtrlEnvInit()) {
 		pr_warn("Controller env initialization failed.\n");
 		return;
 	}
 
-	/* Init the CPU windows setting and the access protection windows. */
 	if (mvCpuIfInit(mv_sys_map())) {
 		pr_warn("Cpu Interface initialization failed.\n");
 		return;
@@ -1527,7 +1399,7 @@ void axp_db_restore(void)
 	for (port = 0; port < maxPorts; port++)
 		mvEthPhyInit(port, MV_FALSE);
 
-	/* TODO - timer should be restored by kernel hook */
+	
 	axp_timer_resume();
 }
 
@@ -1544,7 +1416,7 @@ extern void synology_gpio_init(void);
 static void synology_power_off(void)
 {
 #ifdef MY_ABC_HERE
-	/* platform driver will not shutdown when poweroff */
+	 
 	syno_mv_net_shutdown();
 #endif
 	writel(SET8N1, UART1_REG(LCR));
@@ -1556,29 +1428,24 @@ static void synology_restart(char mode, const char *cmd)
 	writel(SET8N1, UART1_REG(LCR));
 	writel(SOFTWARE_REBOOT, UART1_REG(TX));
 
-        /* Calls original reset function for models those do not use uP
-        * I.e. USB Station. */
         arm_machine_restart(mode, cmd);
 }
-#endif /* CONFIG_SYNO_ARMADA_ARCH */
+#endif  
 
-/*****************************************************************************
- * DB BOARD: Main Initialization
- ****************************************************************************/
 static void __init axp_db_init(void)
 {
 #ifdef CONFIG_MV_AMP_ENABLE
-	/* Init Resource sharing */
+	 
 	if(mvUnitMapIsRsrcLimited() == MV_FALSE)
 		mvUnitMapSetAllMine();
 #endif
 
-	/* Call Aurora/cpu special configurations */
+	
 	cpu_fabric_common_init();
 
-	/* Select appropriate Board ID for Machine */
+	
 #ifndef CONFIG_SYNO_ARMADA_ARCH
-	/* bypass manually assign board ID, using from uboot */
+	 
 #if defined(CONFIG_ARMADA_XP_REV_A0) || defined(CONFIG_ARMADA_XP_REV_B0)
 	gBoardId = DB_88F78XX0_BP_REV2_ID;
 #else
@@ -1586,10 +1453,8 @@ static void __init axp_db_init(void)
 #endif
 #endif
 
-	/* init the Board environment */
 	mvBoardEnvInit();
 
-	/* init the controller environment */
 	if( mvCtrlEnvInit() ) {
 		printk( "Controller env initialization failed.\n" );
 		return;
@@ -1597,7 +1462,6 @@ static void __init axp_db_init(void)
 
 	armadaxp_setup_cpu_mbus();
 
-	/* Init the CPU windows setting and the access protection windows. */
 #ifdef CONFIG_MV_AMP_ENABLE
 	if(mvAmpInitCpuIf()){
 #else
@@ -1607,7 +1471,6 @@ static void __init axp_db_init(void)
 		return;
 	}
 
-	/* Init Tclk & SysClk */
 	mvTclk = mvBoardTclkGet();
 	mvSysclk = mvBoardSysClkGet();
 
@@ -1622,58 +1485,48 @@ static void __init axp_db_init(void)
 	serial_initialize(1);
 #endif
 
-	/* At this point, the CPU windows are configured according to default definitions in mvSysHwConfig.h */
-	/* and cpuAddrWinMap table in mvCpuIf.c. Now it's time to change defaults for each platform.         */
-	/*mvCpuIfAddDecShow();*/
-
 	print_board_info();
 
-	/* GPIO */
 	mv_gpio_init();
 
-	/* RTC */
 		rtc_init();
 
 #ifdef CONFIG_MV_INCLUDE_SPI
-	/* SPI */
+	 
 	if(mvUnitMapIsMine(SPI) == MV_TRUE)
 		mvSysSpiInit(0, _16M);
 #endif
 
-	/* ETH-PHY */
 	mvSysEthPhyInit();
 
-	/* Sata */
 #ifdef CONFIG_SATA_MV
 		armadaxp_sata_init(&dbdsmp_sata_data);
 #endif
 #ifdef CONFIG_MTD_NAND_NFC
-	/* NAND */
+	 
 		axp_db_nfc_init();
 #endif
-	/* HWMON */
+	 
 		armadaxp_hwmon_init();
 
-	/* XOR */
 #ifdef XOR0_ENABLE
 		armadaxp_xor0_init();
 #endif
 		armadaxp_xor1_init();
 
-	/* I2C */
 	armadaxp_i2c0_init();
 
 #ifdef CONFIG_FB_DOVE
 	if ((lcd0_enable == 1) && (lcd_panel == 0))
 		armadaxp_i2c1_init();
 #endif
-	/* SDIO */
+	 
 #if defined(CONFIG_MV_INCLUDE_SDIO)
 	armadaxp_sdio_init();
 #endif
 
 #ifdef CONFIG_MV_ETHERNET
-	/* Ethernet */
+	 
 	eth_init();
 #endif
 
@@ -1688,7 +1541,7 @@ static void __init axp_db_init(void)
 			kw_lcd0_dmi.lvds_info.enabled = 1;
 			kw_lcd0_dmi.fixed_full_div = 1;
 			kw_lcd0_dmi.full_div_val = 7;
-	//		kw_lcd0_dmi.lcd_ref_clk = 27000000;
+	 
 			printk(KERN_INFO "LCD Panel enabled.\n");
 		}
 		clcd_platform_init(&kw_lcd0_dmi, &kw_lcd0_vid_dmi, &dsmp_backlight_data);
@@ -1704,10 +1557,7 @@ static void __init axp_db_init(void)
 }
 
 #ifdef CONFIG_FB_DOVE
-/*
- * This fixup function is used to reserve memory for the LCD engine
- * as these drivers require large chunks of consecutive memory.
- */
+ 
 void __init axp_tag_fixup_mem32(struct tag *t, char **cmdline, struct meminfo *mi)
 
 {
@@ -1728,7 +1578,6 @@ void __init axp_tag_fixup_mem32(struct tag *t, char **cmdline, struct meminfo *m
 		return;
 	}
 
-	/* Resereve memory from last tag for LCD usage.	*/
 	last_tag->u.mem.size -= total_size;
 	memory_start = last_tag->u.mem.start + last_tag->u.mem.size + 1;
 
@@ -1738,7 +1587,7 @@ void __init axp_tag_fixup_mem32(struct tag *t, char **cmdline, struct meminfo *m
 	kw_lcd0_dmi.fb_mem_size[1] = total_size / 2;
 
 }
-#endif /* CONFIG_FB_DOVE */
+#endif  
 
 #ifdef CONFIG_SUSPEND
 #define TRAINING_SPACE	(10*1024)
@@ -1751,12 +1600,6 @@ void __init reserve_training_mem(void)
 	phys_addr_t size = (phys_addr_t)(TRAINING_SPACE);
 	struct map_desc  early_mem_table;
 
-	/*
-	 * When the reserve hook is called the MMU enabled but the page
-	 * table entries for the machine are still not set so its impossible
-	 * to access internal registers. To resolve that, we create a
-	 * temporary mapping for the register space only.
-	 */
 	early_mem_table.virtual = INTER_REGS_BASE;
 	early_mem_table.pfn     = __phys_to_pfn(INTER_REGS_PHYS_BASE);
 	early_mem_table.length  = SZ_1M;
@@ -1764,7 +1607,6 @@ void __init reserve_training_mem(void)
 
 	iotable_init(&early_mem_table , 1);
 
-	/* Create a map of address decode windows */
 	mvCtrlAddrWinMapBuild(addr_win_map, MAX_TARGETS + 1);
 	for (i = 0; i < MAX_TARGETS; i++) {
 		if (!MV_TARGET_IS_DRAM(i))
@@ -1789,42 +1631,35 @@ void __init reserve_training_mem(void)
 #endif
 
 MACHINE_START(ARMADA_XP_DB, "Marvell Armada XP Development Board")
-	/* MAINTAINER("MARVELL") */
+	 
 	.atag_offset	= BOOT_PARAMS_OFFSET,
 	.map_io		= axp_map_io,
 	.init_irq	= axp_init_irq,
 	.timer		= &axp_timer,
 	.init_machine	= axp_db_init,
 #ifdef CONFIG_FB_DOVE
-	/* reserve memory for LCD */
+	 
 	.fixup		= axp_tag_fixup_mem32,
-#endif /* CONFIG_FB_DOVE */
+#endif  
 #ifdef CONFIG_SUSPEND
 	.reserve	= reserve_training_mem,
-#endif /* CONFIG_SUSPEND */
+#endif  
 MACHINE_END
 
-/*****************************************************************************
- * GP BOARD
- ****************************************************************************/
 static void __init axp_gp_init(void)
 {
 #ifdef CONFIG_MV_AMP_ENABLE
-	/* Init Resource sharing */
+	 
 	if (mvUnitMapIsRsrcLimited() == MV_FALSE)
 		mvUnitMapSetAllMine();
 #endif
 
-	/* Call Aurora/cpu special configurations */
 	cpu_fabric_common_init();
 
-	/* Select appropriate Board ID for Machine */
 	gBoardId = DB_784MP_GP_ID;
 
-	/* init the Board environment */
 	mvBoardEnvInit();
 
-	/* init the controller environment */
 	if( mvCtrlEnvInit() ) {
 		printk( "Controller env initialization failed.\n" );
 		return;
@@ -1832,7 +1667,6 @@ static void __init axp_gp_init(void)
 
 	armadaxp_setup_cpu_mbus();
 
-	/* Init the CPU windows setting and the access protection windows. */
 #ifdef CONFIG_MV_AMP_ENABLE
 	if (mvAmpInitCpuIf()) {
 #else
@@ -1842,7 +1676,6 @@ static void __init axp_gp_init(void)
 		return;
 	}
 
-	/* Init Tclk & SysClk */
 	mvTclk = mvBoardTclkGet();
 	mvSysclk = mvBoardSysClkGet();
 
@@ -1854,44 +1687,35 @@ static void __init axp_gp_init(void)
 	serial_initialize(CONFIG_MV_UART_PORT);
 #endif
 
-	/* At this point, the CPU windows are configured according to default definitions in mvSysHwConfig.h */
-	/* and cpuAddrWinMap table in mvCpuIf.c. Now it's time to change defaults for each platform.         */
-	/*mvCpuIfAddDecShow();*/
-
 	print_board_info();
 
 	mv_gpio_init();
 
-	/* RTC */
 	rtc_init();
 
 #ifdef CONFIG_MV_INCLUDE_SPI
-	/* SPI */
+	 
 	if (mvUnitMapIsMine(SPI) == MV_TRUE)
 	mvSysSpiInit(0, _16M);
 #endif
 
-	/* ETH-PHY */
 	mvSysEthPhyInit();
 
-	/* Sata */
 #ifdef CONFIG_SATA_MV
 	armadaxp_sata_init(&dbdsmp_sata_data);
 #endif
 #ifdef CONFIG_MTD_NAND_NFC
-	/* NAND */
+	 
 	axp_db_nfc_init();
 #endif
-	/* HWMON */
+	 
 	armadaxp_hwmon_init();
 
-	/* XOR */
 #ifdef XOR0_ENABLE
 	armadaxp_xor0_init();
 #endif
 	armadaxp_xor1_init();
 
-	/* I2C */
 	armadaxp_i2c0_init();
 
 #ifdef CONFIG_FB_DOVE
@@ -1904,7 +1728,7 @@ static void __init axp_gp_init(void)
 #endif
 
 #ifdef CONFIG_MV_ETHERNET
-	/* Ethernet */
+	 
 	eth_init();
 #endif
 
@@ -1918,7 +1742,7 @@ static void __init axp_gp_init(void)
 		kw_lcd0_dmi.lvds_info.enabled = 1;
 		kw_lcd0_dmi.fixed_full_div = 1;
 		kw_lcd0_dmi.full_div_val = 7;
-//		kw_lcd0_dmi.lcd_ref_clk = 27000000;
+ 
 		printk(KERN_INFO "LCD Panel enabled.\n");
 	}
 	clcd_platform_init(&kw_lcd0_dmi, &kw_lcd0_vid_dmi, &dsmp_backlight_data);
@@ -1928,42 +1752,35 @@ static void __init axp_gp_init(void)
 }
 
 MACHINE_START(ARMADA_XP_GP, "Marvell Armada XP GP Board")
-	/* MAINTAINER("MARVELL") */
+	 
 	.atag_offset	= 0x00000100,
 	.map_io		= axp_map_io,
 	.init_irq	= axp_init_irq,
 	.timer		= &axp_timer,
 	.init_machine	= axp_gp_init,
 #ifdef CONFIG_FB_DOVE
-	/* reserve memory for LCD */
+	 
 	.fixup		= axp_tag_fixup_mem32,
-#endif /* CONFIG_FB_DOVE */
+#endif  
 #ifdef CONFIG_SUSPEND
 	.reserve	= reserve_training_mem,
-#endif /* CONFIG_SUSPEND */
+#endif  
 MACHINE_END
 
-/*****************************************************************************
- * AMC BOARD
- ****************************************************************************/
 static void __init axp_amc_init(void)
 {
 #ifdef CONFIG_MV_AMP_ENABLE
-	/* Init Resource sharing */
+	 
 	if (mvUnitMapIsRsrcLimited() == MV_FALSE)
 		mvUnitMapSetAllMine();
 #endif
 
-	/* Call Aurora/cpu special configurations */
 	cpu_fabric_common_init();
 
-	/* Select appropriate Board ID for Machine */
 	gBoardId = DB_78X60_AMC_ID;
 
-	/* init the Board environment */
 	mvBoardEnvInit();
 
-	/* init the controller environment */
 	if (mvCtrlEnvInit()) {
 		printk(KERN_ERR "Controller env initialization failed.\n");
 		return;
@@ -1971,7 +1788,6 @@ static void __init axp_amc_init(void)
 
 	armadaxp_setup_cpu_mbus();
 
-	/* Init the CPU windows setting and the access protection windows. */
 #ifdef CONFIG_MV_AMP_ENABLE
 	if (mvAmpInitCpuIf()) {
 #else
@@ -1981,7 +1797,6 @@ static void __init axp_amc_init(void)
 		return;
 	}
 
-	/* Init Tclk & SysClk */
 	mvTclk = mvBoardTclkGet();
 	mvSysclk = mvBoardSysClkGet();
 
@@ -1993,60 +1808,48 @@ static void __init axp_amc_init(void)
 	serial_initialize(CONFIG_MV_UART_PORT);
 #endif
 
-	/* At this point, the CPU windows are configured according to default
-	   definitions in mvSysHwConfig.h and cpuAddrWinMap table in mvCpuIf.c.
-	   Now it's time to change defaults for each platform.         */
-
-	/* mvCpuIfAddDecShow();*/
-
 	print_board_info();
 
-	/* GPIO */
 	mv_gpio_init();
 
-	/* RTC */
 	rtc_init();
 
 #ifdef CONFIG_MV_INCLUDE_SPI
-	/* SPI */
+	 
 	if (mvUnitMapIsMine(SPI) == MV_TRUE)
 		mvSysSpiInit(0, _16M);
 #endif
 
-	/* ETH-PHY */
 	mvSysEthPhyInit();
 
-	/* Sata */
 #ifdef CONFIG_SATA_MV
 	armadaxp_sata_init(&dbdsmp_sata_data);
 #endif
 #ifdef CONFIG_MTD_NAND_NFC
-	/* NAND */
+	 
 	axp_db_nfc_init();
 #endif
-	/* HWMON */
+	 
 	armadaxp_hwmon_init();
 
-	/* XOR */
 #ifdef XOR0_ENABLE
 	armadaxp_xor0_init();
 #endif
 	armadaxp_xor1_init();
 
-	/* I2C */
 	armadaxp_i2c0_init();
 
 #ifdef CONFIG_FB_DOVE
 	if ((lcd0_enable == 1) && (lcd_panel == 0))
 		armadaxp_i2c1_init();
 #endif
-	/* SDIO */
+	 
 #if defined(CONFIG_MV_INCLUDE_SDIO)
 	armadaxp_sdio_init();
 #endif
 
 #ifdef CONFIG_MV_ETHERNET
-	/* Ethernet */
+	 
 	eth_init();
 #endif
 
@@ -2061,7 +1864,7 @@ static void __init axp_amc_init(void)
 			kw_lcd0_dmi.lvds_info.enabled = 1;
 			kw_lcd0_dmi.fixed_full_div = 1;
 			kw_lcd0_dmi.full_div_val = 7;
-			/* kw_lcd0_dmi.lcd_ref_clk = 27000000; */
+			 
 			printk(KERN_INFO "LCD Panel enabled.\n");
 		}
 		clcd_platform_init(&kw_lcd0_dmi, &kw_lcd0_vid_dmi,
@@ -2073,36 +1876,30 @@ static void __init axp_amc_init(void)
 }
 
 MACHINE_START(ARMADA_XP_AMC, "Marvell Armada XP AMC Board")
-	/* MAINTAINER("MARVELL") */
+	 
 	.atag_offset	= 0x00000100,
 	.map_io		= axp_map_io,
 	.init_irq	= axp_init_irq,
 	.timer		= &axp_timer,
 	.init_machine	= axp_amc_init,
 #ifdef CONFIG_FB_DOVE
-	/* reserve memory for LCD */
+	 
 	.fixup		= axp_tag_fixup_mem32,
-#endif /* CONFIG_FB_DOVE */
+#endif  
 #ifdef CONFIG_SUSPEND
 	.reserve	= reserve_training_mem,
-#endif /* CONFIG_SUSPEND */
+#endif  
 MACHINE_END
 
-/*****************************************************************************
- * RD NAS BOARD
- ****************************************************************************/
 static void __init axp_rd_nas_init(void)
 {
-	/* Call Aurora/cpu special configurations */
+	 
 	cpu_fabric_common_init();
 
-	/* Select appropriate Board ID for Machine */
 	gBoardId = RD_78460_NAS_ID;
 
-	/* init the Board environment */
 	mvBoardEnvInit();
 
-	/* init the controller environment */
 	if( mvCtrlEnvInit() ) {
 		printk( "Controller env initialization failed.\n" );
 		return;
@@ -2110,13 +1907,11 @@ static void __init axp_rd_nas_init(void)
 
 	armadaxp_setup_cpu_mbus();
 
-	/* Init the CPU windows setting and the access protection windows. */
 	if( mvCpuIfInit(mv_sys_map())) {
 		printk( "Cpu Interface initialization failed.\n" );
 		return;
 	}
 
-	/* Init Tclk & SysClk */
 	mvTclk = mvBoardTclkGet();
 	mvSysclk = mvBoardSysClkGet();
 
@@ -2124,43 +1919,34 @@ static void __init axp_rd_nas_init(void)
 
 	serial_initialize(0);
 
-	/* At this point, the CPU windows are configured according to default definitions in mvSysHwConfig.h */
-	/* and cpuAddrWinMap table in mvCpuIf.c. Now it's time to change defaults for each platform.         */
-	/*mvCpuIfAddDecShow();*/
-
 	print_board_info();
 
 	mv_gpio_init();
 
-	/* RTC */
 	rtc_init();
 
 #ifdef CONFIG_MV_INCLUDE_SPI
-	/* SPI */
+	 
 	mvSysSpiInit(0, _16M);
 #endif
 
-	/* ETH-PHY */
 	mvSysEthPhyInit();
 
-	/* Sata */
 #ifdef CONFIG_SATA_MV
 	armadaxp_sata_init(&dbdsmp_sata_data);
 #endif
 #ifdef CONFIG_MTD_NAND_NFC
-	/* NAND */
+	 
 	axp_db_nfc_init();
 #endif
-	/* HWMON */
+	 
 	armadaxp_hwmon_init();
 
-	/* XOR */
 #ifdef XOR0_ENABLE
 	armadaxp_xor0_init();
 #endif
 	armadaxp_xor1_init();
 
-	/* I2C */
 	armadaxp_i2c0_init();
 
 #ifdef CONFIG_FB_DOVE
@@ -2189,7 +1975,7 @@ static void __init axp_rd_nas_init(void)
 #endif
 
 #ifdef CONFIG_MV_ETHERNET
-	/* Ethernet */
+	 
 	eth_init();
 #endif
 
@@ -2199,7 +1985,7 @@ static void __init axp_rd_nas_init(void)
 		kw_lcd0_dmi.lvds_info.enabled = 1;
 		kw_lcd0_dmi.fixed_full_div = 1;
 		kw_lcd0_dmi.full_div_val = 7;
-//		kw_lcd0_dmi.lcd_ref_clk = 27000000;
+ 
 		printk(KERN_INFO "LCD Panel enabled.\n");
 	}
 	clcd_platform_init(&kw_lcd0_dmi, &kw_lcd0_vid_dmi, &dsmp_backlight_data);
@@ -2209,37 +1995,31 @@ static void __init axp_rd_nas_init(void)
 }
 
 MACHINE_START(ARMADA_XP_RD_NAS, "Marvell Armada XP RD NAS Board")
-	/* MAINTAINER("MARVELL") */
+	 
 	.atag_offset	= 0x00000100,
 	.map_io		= axp_map_io,
 	.init_irq	= axp_init_irq,
 	.timer		= &axp_timer,
 	.init_machine	= axp_rd_nas_init,
 #ifdef CONFIG_FB_DOVE
-	/* reserve memory for LCD */
+	 
 	.fixup		= axp_tag_fixup_mem32,
-#endif /* CONFIG_FB_DOVE */
+#endif  
 MACHINE_END
 
-/*****************************************************************************
-* RDSRV BOARD: Main Initialization
- ****************************************************************************/
 static void __init axp_rdsrv_init(void)
 {
-	/* Call Aurora/cpu special configurations */
+	 
 	cpu_fabric_common_init();
 
-	/* Select appropriate Board ID for Machine */
 #if defined(CONFIG_ARMADA_XP_REV_A0) || defined(CONFIG_ARMADA_XP_REV_B0)
 	gBoardId = RD_78460_SERVER_ID;
 #else
 	gBoardId = RD_78460_SERVER_ID;
 #endif
 
-	/* init the Board environment */
 	mvBoardEnvInit();
 
-	/* init the controller environment */
 	if( mvCtrlEnvInit() ) {
 		printk( "Controller env initialization failed.\n" );
 		return;
@@ -2247,13 +2027,11 @@ static void __init axp_rdsrv_init(void)
 
 	armadaxp_setup_cpu_mbus();
 
-	/* Init the CPU windows setting and the access protection windows. */
 	if( mvCpuIfInit(mv_sys_map())) {
 		printk( "Cpu Interface initialization failed.\n" );
 		return;
 	}
 
-	/* Init Tclk & SysClk */
 	mvTclk = mvBoardTclkGet();
 	mvSysclk = mvBoardSysClkGet();
 
@@ -2261,32 +2039,22 @@ static void __init axp_rdsrv_init(void)
 
 	serial_initialize(0);
 
-	/* At this point, the CPU windows are configured according to default definitions in mvSysHwConfig.h */
-	/* and cpuAddrWinMap table in mvCpuIf.c. Now it's time to change defaults for each platform.         */
-	/*mvCpuIfAddDecShow();*/
-
 	print_board_info();
 
 	mv_gpio_init();
 
-	/* RTC */
 	rtc_init();
 
-	/* SPI */
 	mvSysSpiInit(0, _16M);
 
-	/* ETH-PHY */
 	mvSysEthPhyInit();
 
-	/* Sata */
 #ifdef CONFIG_SATA_MV
 	armadaxp_sata_init(&dbdsmp_sata_data);
 #endif
 
-	/* HWMON */
 	armadaxp_hwmon_init();
 
-	/* I2C */
 	armadaxp_i2c0_init();
 
 #if defined(CONFIG_MV_INCLUDE_SDIO)
@@ -2310,7 +2078,7 @@ static void __init axp_rdsrv_init(void)
 #endif
 
 #ifdef CONFIG_MV_ETHERNET
-	/* Ethernet */
+	 
 	eth_init();
 #endif
 
@@ -2318,7 +2086,7 @@ static void __init axp_rdsrv_init(void)
 }
 
 MACHINE_START(ARMADA_XP_RDSRV, "Marvell Armada XP Server Board")
-		/* MAINTAINER("MARVELL") */
+		 
 	.atag_offset	= BOOT_PARAMS_OFFSET,
 	 .map_io	= axp_map_io,
   	.init_irq	= axp_init_irq,
@@ -2326,45 +2094,30 @@ MACHINE_START(ARMADA_XP_RDSRV, "Marvell Armada XP Server Board")
   	.init_machine	= axp_rdsrv_init,
   MACHINE_END
 
-/*****************************************************************************
- * FPGA BOARD: Main Initialization
- ****************************************************************************/
 extern MV_TARGET_ATTRIB mvTargetDefaultsArray[];
 static void __init axp_fpga_init(void)
 {
-	/* Call Aurora/cpu special configurations */
+	 
 	cpu_fabric_common_init();
 
-	/* Select appropriate Board ID for Machine */
 	gBoardId = FPGA_88F78XX0_ID;
 
-        /* init the Board environment */
        	mvBoardEnvInit();
 
-        /* init the controller environment */
         if( mvCtrlEnvInit() ) {
             printk( "Controller env initialization failed.\n" );
             return;
         }
 	
-	/* Replace PCI-0 Attribute for FPGA 0xE => 0xD */
 	mvTargetDefaultsArray[PEX0_MEM].attrib = 0xD8;
-
-	/* Init the CPU windows setting and the access protection windows. */
-	/*if( mvCpuIfInit(mv_sys_map())) {
-		printk( "Cpu Interface initialization failed.\n" );
-		return;
-	}*/
 
 	armadaxp_setup_cpu_mbus();
 
-	/* Init the CPU windows setting and the access protection windows. */
 	if( mvCpuIfInit(mv_sys_map())) {
 		printk( "Cpu Interface initialization failed.\n" );
 		return;
 	}
 
-    	/* Init Tclk & SysClk */
     	mvTclk = mvBoardTclkGet();
    	mvSysclk = mvBoardSysClkGet();
 
@@ -2372,15 +2125,10 @@ static void __init axp_fpga_init(void)
 
 	serial_initialize(0);
 
-	/* At this point, the CPU windows are configured according to default definitions in mvSysHwConfig.h */
-	/* and cpuAddrWinMap table in mvCpuIf.c. Now it's time to change defaults for each platform.         */
-	/*mvCpuIfAddDecShow();*/
-
 	print_board_info();
 
 	mv_gpio_init();
 
-	/* RTC */
 	rtc_init();
 
 	return;

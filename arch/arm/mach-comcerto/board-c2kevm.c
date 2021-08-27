@@ -1,25 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/mach-comcerto/board-c2kevm.c
- *
- *  Copyright (C) 2012 Mindspeed Technologies, Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
  
 #include <linux/sched.h>
 #include <linux/device.h>
@@ -90,19 +71,19 @@ static void __init board_gpio_init(void)
 {
 #ifdef CONFIG_COMCERTO_PFE_UART_SUPPORT
 	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~PFE_UART_GPIO) | PFE_UART_BUS, COMCERTO_GPIO_PIN_SELECT_REG);
-	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= PFE_UART_GPIO_PIN; /* GPIOs 12 & 13 are used for PFE_UART */
+	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= PFE_UART_GPIO_PIN;  
 #endif
 
 #if defined(CONFIG_SPI_MSPD_LOW_SPEED) || defined(CONFIG_SPI2_MSPD_LOW_SPEED)
-	/* enable SPI pins */
+	 
 	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~(SPI_MUX_GPIO_1)) | (SPI_MUX_BUS_1), COMCERTO_GPIO_PIN_SELECT_REG1);
 	writel((readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~(SPI_MUX_GPIO_2)) | (SPI_MUX_BUS_2), COMCERTO_GPIO_63_32_PIN_SELECT);
-	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= SPI_MUX_GPIO_1_PIN; /* GPIOs 18,19, 21,22, 30,31 are used for SPI*/
-	c2k_gpio_pin_stat.c2k_gpio_pins_32_63 |= SPI_MUX_GPIO_2_PIN; /* GPIO 32 is used for SPI*/
+	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= SPI_MUX_GPIO_1_PIN;  
+	c2k_gpio_pin_stat.c2k_gpio_pins_32_63 |= SPI_MUX_GPIO_2_PIN;  
 #endif
 
 #if defined(CONFIG_SPI_MSPD_HIGH_SPEED)
-	/* enable SPI pins */
+	 
 	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG1) & ~(SPI_2_MUX_GPIO_1)) | (SPI_2_MUX_BUS_1), COMCERTO_GPIO_PIN_SELECT_REG1);
 	writel((readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~(SPI_2_MUX_GPIO_2)) | (SPI_2_MUX_BUS_2), COMCERTO_GPIO_63_32_PIN_SELECT);
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= SPI_2_MUX_GPIO_1_PIN;
@@ -125,9 +106,6 @@ static void __init board_gpio_init(void)
 #endif
 }
 
-/* --------------------------------------------------------------------
- *  NOR device
- * -------------------------------------------------------------------- */
 #if defined(CONFIG_MTD_COMCERTO_NOR)
 
 static struct resource comcerto_nor_resources[] = {
@@ -176,9 +154,6 @@ static struct platform_device rtc_dev = {
        .resource = rtc_res,
 };
 
-/* --------------------------------------------------------------------
- *  DMAC controller
- * -------------------------------------------------------------------- */
 #if defined(CONFIG_COMCERTO_DW_DMA_SUPPORT)
 static struct resource dw_dmac_resource[] = {
 	{
@@ -212,9 +187,6 @@ static struct platform_device dw_dmac_device = {
 };
 #endif
 
-/* --------------------------------------------------------------------
- *  NAND device
- * -------------------------------------------------------------------- */
 #if defined(CONFIG_MTD_NAND_COMCERTO) || defined(CONFIG_MTD_NAND_COMCERTO_MODULE)
 static struct resource comcerto_nand_resources[] = {
 	{
@@ -235,18 +207,8 @@ static struct platform_device comcerto_nand = {
 };
 #endif
 
-/* --------------------------------------------------------------------
- *  SPI bus controller
- * -------------------------------------------------------------------- */
 #if defined(CONFIG_SPI_MSPD_LOW_SPEED) || defined(CONFIG_SPI_MSPD_HIGH_SPEED)
 
-/*This structure is same as struct flash_platform_data defined in include/linux/spi/flash.h, 
-  but since that structure is conflicting with struct flash_platform_data defined in 
-  arch/arm/include/asm/mach/flash.h for nor flash, and is already used in this file for nor
-  flash, so defining a new structure for spi flash which matches struct flash_platform_data
-  of include/linux/spi/flash.h
-  FIXME: Need to resolve this structure conflict
-*/
 struct spi_flash_platform_data {
        char            *name;
        struct mtd_partition *parts;
@@ -254,7 +216,7 @@ struct spi_flash_platform_data {
        char            *type;
        u32             num_resources;
        struct resource * resource;
-       /* we'll likely add more ... use JEDEC IDs, etc */
+        
 };
 
 #define	CLK_NAME	10
@@ -273,8 +235,8 @@ struct spi_platform_data {
 };
 
 struct spi_controller_data {
-        u8 poll_mode;   /* 0 for contoller polling mode */
-        u8 type;        /* SPI/SSP/Micrwire */
+        u8 poll_mode;    
+        u8 type;         
         u8 enable_dma;
         void (*cs_control)(u32 command);
 };
@@ -298,7 +260,7 @@ struct spi_controller_pdata hs_spi_pdata = {
 	.use_dma = 1,
 	.num_chipselects = 2,
 	.bus_num = 1,
-/*	.max_freq = 60 * 1000 * 1000, */
+ 
 	.max_freq = 5 * 1000 * 1000,
 	.clk_name = "DUS",
 	.type="m25p80",
@@ -414,7 +376,7 @@ static struct spi_board_info synology_spi_info[] = {
 
 static struct spi_board_info comcerto_spi_board_info[] = {
 	{
-		/* FIXME: for chipselect-0 */
+		 
 		.modalias = "m25p80",
 		.chip_select = 0,
 		.max_speed_hz = 30*1000*1000,
@@ -425,14 +387,14 @@ static struct spi_board_info comcerto_spi_board_info[] = {
                 .controller_data = &spi_ctrl_data,
 	},
 	{
-		/* FIXME: for chipselect-1 */
+		 
 		.modalias = "proslic",
 		.max_speed_hz = 4*1000*1000,
 		.chip_select = 1,
 		.mode = SPI_MODE_3,
 		.bus_num = 0,
 		.irq = -1,
-	/*  .mode = SPI_MODE_3, */
+	 
 		.platform_data = &spi_pdata,
                 .controller_data = &spi_ctrl_data,
 	},
@@ -447,7 +409,7 @@ static struct spi_board_info comcerto_spi_board_info[] = {
                 .controller_data = &spi_ctrl_data,
 	},
 
-#if 0 //MSIF
+#if 0  
 
 	{
 		.modalias = "proslic",
@@ -537,9 +499,6 @@ static struct platform_device comcerto_spi = {
 };
 #endif
 
-/* --------------------------------------------------------------------
- *  I2C bus controller
- * -------------------------------------------------------------------- */
 #if defined(CONFIG_COMCERTO_I2C_SUPPORT)
 static struct resource comcerto_i2c_resources[] = {
 	{
@@ -561,9 +520,6 @@ static struct platform_device comcerto_i2c = {
 };
 #endif
 
-/* --------------------------------------------------------------------
-*  Watchdog
-* -------------------------------------------------------------------- */
 #ifdef CONFIG_MPCORE_WATCHDOG
 static struct resource comcerto_a9wd_resources[] = {
 	{
@@ -604,9 +560,7 @@ static struct platform_device comcerto_wdt = {
 #endif
 
 #if defined(CONFIG_COMCERTO_ELP_SUPPORT)
-/* --------------------------------------------------------------------
- *  IPsec
- * -------------------------------------------------------------------- */
+ 
 static struct resource comcerto_elp_resources[] = {
 	{
 		.name   = "elp",
@@ -637,21 +591,15 @@ static struct platform_device  comcerto_elp_device = {
 #endif
 
 static struct comcerto_tdm_data comcerto_tdm_pdata = {
-	.fsoutput = 1, /* Generic Pad Control and Version ID Register[2] */
-	.fspolarity = 0, /* 28 FSYNC_FALL(RISE)_EDGE */
-	.fshwidth = 1, /* High_Phase_Width[10:0] */
-	.fslwidth = 0xFF, /* Low_Phase_Width[10:0] */
-	.clockhz = 2048000, /* INC_VALUE[29:0] According to the desired TDM clock output \
-			       frequency, this field should be configured */
-	.clockout = 1, /* 0 -> set bit 21, clear bit 20 in COMCERTO_GPIO_IOCTRL_REG
-			  (software control, clock input)
-			  1 -> set bit 21 and 20 in COMCERTO_GPIO_IOCTRL_REG
-			  (software control, clock output)
-			  2 -> clear bit 21 in COMCERTO_GPIO_IOCTRL_REG (hardware control) */
-	.tdmmux = 0x1, /* TDM interface Muxing:0x0 - TDM block, 0x1 - ZDS block,
-		0x2 - GPIO[63:60] signals and 0x3 - MSIF block is selected */
+	.fsoutput = 1,  
+	.fspolarity = 0,  
+	.fshwidth = 1,  
+	.fslwidth = 0xFF,  
+	.clockhz = 2048000,  
+	.clockout = 1,  
+	.tdmmux = 0x1,  
 #if 0
-	/* FIX ME - Need correct values for TDM_DR, TDM_DX, TDM_FS and TDM_CK */
+	 
 	.tdmck = 0x3F,
 	.tdmfs = 0x3F,
 	.tdmdx = 0x3F,
@@ -783,12 +731,7 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.mac_addr = (u8[])GEM2_MAC,
 	},
 
-	/**
-	 * There is a single mdio bus coming out of C2K.  And that's the one
-	 * connected to GEM0. All PHY's, switchs will be connected to the same
-	 * bus using different addresses. Typically .bus_id is always 0, only
-	 * .phy_id will change in the different comcerto_eth_pdata[] structures above.
-	 */
+	
 	.comcerto_mdio_pdata[0] = {
 		.enabled = 1,
 #if defined(CONFIG_SYNO_C2K_NET)
@@ -837,12 +780,6 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata_ds215air = {
 		.mac_addr = (u8[])GEM2_MAC,
 	},
 
-	/**
-	 * There is a single mdio bus coming out of C2K.  And that's the one
-	 * connected to GEM0. All PHY's, switchs will be connected to the same
-	 * bus using different addresses. Typically .bus_id is always 0, only
-	 * .phy_id will change in the different comcerto_eth_pdata[] structures above.
-	 */
 	.comcerto_mdio_pdata[0] = {
 		.enabled = 1,
 		.phy_mask = 0xFFFFFFEF,
@@ -913,24 +850,15 @@ static struct platform_device *comcerto_devices[] __initdata = {
 #endif
 };
 
-/************************************************************************
- *  Expansion bus
- *
- ************************************************************************/
-/* This variable is used by comcerto-2000.c to initialize the expansion bus */
 int comcerto_exp_values[5][7]= {
-	/* ENABLE, BASE, SEG_SZ, CFG, TMG1, TMG2, TMG3 */
-	{1, (EXP_BUS_REG_BASE_CS0 >> 12), ((EXP_BUS_REG_BASE_CS0 + EXP_CS0_SEG_SIZE - 1) >> 12), EXP_MEM_BUS_SIZE_16, 0x03034007, 0x04040502, 0x00000002},		/*TODO Values to check*/
-	{0, (EXP_BUS_REG_BASE_CS1 >> 12), ((EXP_BUS_REG_BASE_CS1 + EXP_CS1_SEG_SIZE - 1) >> 12), EXP_RDY_EN|EXP_MEM_BUS_SIZE_32, 0x1A1A401F, 0x06060A04, 0x00000002},	/*TODO Values to check*/
-	{0, (EXP_BUS_REG_BASE_CS2 >> 12), ((EXP_BUS_REG_BASE_CS2 + EXP_CS2_SEG_SIZE - 1) >> 12), EXP_STRB_MODE|EXP_ALE_MODE|EXP_MEM_BUS_SIZE_8, 0x1A10201A, 0x03080403, 0x0000002},	/*TODO Values to check*/
-	{0, (EXP_BUS_REG_BASE_CS3 >> 12), ((EXP_BUS_REG_BASE_CS3 + EXP_CS3_SEG_SIZE - 1) >> 12), EXP_STRB_MODE|EXP_ALE_MODE|EXP_MEM_BUS_SIZE_8, 0x1A10201A, 0x03080403, 0x0000002},	/*BT8370*/
-	{1, (EXP_BUS_REG_BASE_CS4 >> 12), ((EXP_BUS_REG_BASE_CS4 + EXP_CS4_SEG_SIZE - 1) >> 12), EXP_NAND_MODE|EXP_MEM_BUS_SIZE_8, 0x00000001, 0x01010001, 0x00000002},	/* NAND: TODO Values to check */
+	 
+	{1, (EXP_BUS_REG_BASE_CS0 >> 12), ((EXP_BUS_REG_BASE_CS0 + EXP_CS0_SEG_SIZE - 1) >> 12), EXP_MEM_BUS_SIZE_16, 0x03034007, 0x04040502, 0x00000002},		 
+	{0, (EXP_BUS_REG_BASE_CS1 >> 12), ((EXP_BUS_REG_BASE_CS1 + EXP_CS1_SEG_SIZE - 1) >> 12), EXP_RDY_EN|EXP_MEM_BUS_SIZE_32, 0x1A1A401F, 0x06060A04, 0x00000002},	 
+	{0, (EXP_BUS_REG_BASE_CS2 >> 12), ((EXP_BUS_REG_BASE_CS2 + EXP_CS2_SEG_SIZE - 1) >> 12), EXP_STRB_MODE|EXP_ALE_MODE|EXP_MEM_BUS_SIZE_8, 0x1A10201A, 0x03080403, 0x0000002},	 
+	{0, (EXP_BUS_REG_BASE_CS3 >> 12), ((EXP_BUS_REG_BASE_CS3 + EXP_CS3_SEG_SIZE - 1) >> 12), EXP_STRB_MODE|EXP_ALE_MODE|EXP_MEM_BUS_SIZE_8, 0x1A10201A, 0x03080403, 0x0000002},	 
+	{1, (EXP_BUS_REG_BASE_CS4 >> 12), ((EXP_BUS_REG_BASE_CS4 + EXP_CS4_SEG_SIZE - 1) >> 12), EXP_NAND_MODE|EXP_MEM_BUS_SIZE_8, 0x00000001, 0x01010001, 0x00000002},	 
 };
 
-/************************************************************************
- *  Machine definition
- *
- ************************************************************************/
 static void __init platform_map_io(void)
 {
 	device_map_io();
@@ -970,7 +898,7 @@ static void synology_restart(char mode, const char *cmd)
 	writel(SET8N1, UART0_REG(LCR));
 	writel(SOFTWARE_REBOOT, UART0_REG(TX));
 }
-#endif //CONFIG_SYNO_C2K_REBOOT_POWEROFF_BY_MICROP
+#endif  
 
 static void __init platform_init(void)
 {
@@ -1019,7 +947,7 @@ static void __init platform_init(void)
 }
 
 MACHINE_START(COMCERTO, "Comcerto 2000 EVM")
-	/* Mindspeed Technologies Inc. */
+	 
 	.atag_offset    = COMCERTO_AXI_DDR_BASE + 0x100,
 	.reserve	= platform_reserve,
 	.map_io		= platform_map_io,

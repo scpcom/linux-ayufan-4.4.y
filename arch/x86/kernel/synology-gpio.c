@@ -1,36 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Synology Evansport NAS Board GPIO Setup
- *
- * Maintained by: KueiHuan Chen <khchen@synology.com>
- *                Yikai Peng <ykpeng@synology.com>
- *
- * Copyright 2009-2013 Synology, Inc.  All rights reserved.
- * Copyright 2009-2013 KueiHuan.Chen
- * Copyright 2009-2013 Yikai Peng
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; see the file COPYING.  If not, write to
- * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- */
-
-/*
- * This part is user for evansport platform
- * and x64 and cedarview platforms gpio control in setup.c
- */
+ 
 #if defined(CONFIG_ARCH_GEN3)
 
 #include <linux/gpio.h>
@@ -40,7 +11,6 @@
 
 #define GPIO_UNDEF				0xFF
 
-/* copied from synobios.h */
 #define DISK_LED_OFF		0
 #define DISK_LED_GREEN_SOLID	1
 #define DISK_LED_ORANGE_SOLID	2
@@ -197,7 +167,6 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 			break;
 	}
 
-	//note: hd led is active low
 	if ( DISK_LED_OFF == status ) {
 		fail_led = 1;
 		act_led = 1;
@@ -261,7 +230,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 	case 5:
 		if (generic_gpio.ext_sata_led.hdd5_led_0 == GPIO_UNDEF ||
 			generic_gpio.ext_sata_led.hdd5_led_1 == GPIO_UNDEF) {
-			//some 4 bay model don't contain such gpio.
+			 
 			ret = 0;
 			goto END;
 		}
@@ -269,7 +238,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 		pin2 = generic_gpio.ext_sata_led.hdd5_led_1;
 		break;
 	case 6:
-		//for esata
+		 
 		ret = 0;
 		goto END;
 	default:
@@ -427,14 +396,9 @@ END:
 	return ret;
 }
 
-/* SYNO_CHECK_HDD_PRESENT
- * Check HDD present for evansport
- * input : index - disk index, 1-based.
- * output: 0 - HDD not present, 1 - HDD present.
- */
 int SYNO_CHECK_HDD_PRESENT(int index)
 {
-	int iPrzVal = 1; /*defult is persent*/
+	int iPrzVal = 1;  
 
 	switch (index) {
 		case 1:
@@ -456,15 +420,10 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 	return iPrzVal;
 }
 
-/* SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER
- * Query support HDD dynamic Power for evansport.
- * output: 0 - support, 1 - not support.
- */
 int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 {
 	int iRet = 0;
 
-	/* if exist at least one hdd has enable pin and present detect pin ret=1*/
 	if ((GPIO_UNDEF != generic_gpio.hdd_pm.hdd1_pm && GPIO_UNDEF != generic_gpio.hdd_detect.hdd1_present_detect) ||
 			(GPIO_UNDEF != generic_gpio.hdd_pm.hdd2_pm && GPIO_UNDEF != generic_gpio.hdd_detect.hdd2_present_detect)||
 			(GPIO_UNDEF != generic_gpio.hdd_pm.hdd3_pm && GPIO_UNDEF != generic_gpio.hdd_detect.hdd3_present_detect)||
@@ -488,20 +447,6 @@ EXPORT_SYMBOL(SYNO_CTRL_HDD_ACT_NOTIFY);
 EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
 
-/*
- Pin 		Mode	Signal select and definition	Input/output	Pull-up/pull-down
- MPP[09]		0x0	HDD 0 Power			Out
- MPP[10]		0x0	HDD 1 Power			Out
- MPP[11]		0x0	HDD 0 fail LED			Out
- MPP[12]		0x0	HDD 1 fail LED			Out
- MPP[13]		0x0	HDD 0 Act			Out
- MPP[15]		0x0	HDD 1 Act			Out
- MPP[16]		0x0	Fan Sense			In
- MPP[17]		0x0	HDD 0 Present			In
- MPP[18]		0x0	HDD 1 Present			In
- MPP[19]		0x0	Inter Lock			In
- MPP[34]		0x0	Led Enable			Out
-*/
 static void
 EVANSPORT_214p_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 {
@@ -804,4 +749,4 @@ void synology_gpio_init(void)
 #endif
 }
 EXPORT_SYMBOL(synology_gpio_init);
-#endif /* CONFIG_ARCH_GEN3 */
+#endif  

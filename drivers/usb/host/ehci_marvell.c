@@ -1,25 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (c) 2000-2002 by Dima Epshtein
- * 
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
-/* #define DRIVER_AUTHOR "Dima Epshtein" */
  
 #ifdef CONFIG_USB_DEBUG
     #define DEBUG
@@ -33,7 +14,6 @@
 
 #include "ehci.h"
 
-/* Special bits in Port status regsiter */
 #define PORT_SPEED_OFFS		26
 #define PORT_SPEED_MASK		0x3
 #define PORT_SPEED_FULL		0
@@ -43,20 +23,7 @@
 static int ehci_marvell_setup(struct usb_hcd *hcd);
 
 #if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
-/* In a370 and axp USB UTMI PHY there is an errata which causes
- * error in detection of high speed devices. For certain devices
- * with low pull up values the USB MAC doesnt detect the end of the
- * device chirp K signal and therefore remains stuck in reset
- * state.
- * The workaround solves this issue by modifying the UTMI PHY
- * squelch threshold once a high speed port reset error is detected.
- * Modifying the squelch level enables the MAC to detect the end of
- * device chirp K signal and to come out of reset. Once the MAC
- * comes out of reset a consecutive reset attempt is made by the USB stack.
- * This reset attempt succeeds due to the updated squelch level.
 
- * Since the optimal squelch level is device dependant the WA
- * toggles between 2 verfied squelch levels 0xA and 0xE.*/
  
 #define MAX_EHCI_PORTS		3
 #define PHY_RX_CTRL_REG_OFFSET(x) (0x708 + (0x40 * (x)))
@@ -117,16 +84,11 @@ int ehci_marvell_hs_detect_wa(struct ehci_hcd *ehci, int busnum)
 	}
 #endif
 
-	/* Apply the WA only once in a reset cycle */
 	if (hs_wa_applied[busnum]++)
 		return 1;
 
 	ehci_marvell_toggle_squelch(ehci, busnum);
 
-	/*
-	 * After the squelch value is replaced we need to
-	 * wait upto 3ms for the MAC to leave reset state.
-	 */
 	portsc_reg = &ehci->regs->port_status[0];
 	timeout = 30;
 	while (timeout--) {
@@ -136,15 +98,9 @@ int ehci_marvell_hs_detect_wa(struct ehci_hcd *ehci, int busnum)
 			break;
 	}
 
-	/* Return error If the MAC doesn't come out of reset */
 	if (val & PORT_RESET)
 		return 1;
 
-	/*
-	 * Clear Connect Status Change, Port Enable, and Port Enable Change.
-	 * This returns the port status to pre-reset state and allows for
-	 * succesfull consecutive reset.
-	 */
 	val = ehci_readl(ehci, portsc_reg);
 	val = val  & (~PORT_PE);
 	val = (val  & (~PORT_RWC_BITS)) | PORT_CSC | PORT_PEC;
@@ -152,16 +108,15 @@ int ehci_marvell_hs_detect_wa(struct ehci_hcd *ehci, int busnum)
 
 	return 0;
 }
-#endif /* (CONFIG_SYNO_ARMADA_ARCH || CONFIG_SYNO_ARMADA_ARCH_V2) && CONFIG_USB_MARVELL_ERRATA_FE_9049667 */
+#endif  
 
 void 	ehci_marvell_port_status_changed(struct ehci_hcd *ehci)
 {
-	/* GL USB-19:USB Configuration for LS Eye Pattern Test - DD and KW */
+	 
 #if defined(CONFIG_ARCH_FEROCEON_KW2) || defined(CONFIG_ARCH_FEROCEON_KW) || defined(CONFIG_ARCH_FEROCEON_MV78XX0)
 	u32 __iomem 	*reg_ptr;
 	u32 		port_status, phy_val;
 
-	/* Change PHY Tx Control Register: offset 0x420 = 0x140 + 0x2e0 */
     	reg_ptr = (u32 __iomem *)(((u8 __iomem *)ehci->regs) + 0x2e0);
     	phy_val = ehci_readl(ehci, reg_ptr);
 
@@ -169,18 +124,17 @@ void 	ehci_marvell_port_status_changed(struct ehci_hcd *ehci)
 	if( (port_status & PORT_CONNECT) && 
             (((port_status >> PORT_SPEED_OFFS) & PORT_SPEED_MASK) == PORT_SPEED_LOW) )
 	{
-		/* If Low speed device is connected - disable autocalibration */
-		/* bits[27-30] = 0, bit[26] = 1 */
+		 
 		phy_val &= ~(0xF << 27);
 		phy_val |= (1 << 26);	
 	}
 	else
 	{
-		/* Nothing connected or FS/HS devices connected - enable autocalibration */
+		 
 		phy_val &= ~(1 << 26);
 	}
 	ehci_writel(ehci, phy_val, reg_ptr);
-#endif /* CONFIG_ARCH_FEROCEON_KW2 || CONFIG_ARCH_FEROCEON_KW || CONFIG_ARCH_FEROCEON_MV78XX0 */
+#endif  
 }
 
 static const struct hc_driver ehci_marvell_hc_driver = {
@@ -188,15 +142,9 @@ static const struct hc_driver ehci_marvell_hc_driver = {
         .product_desc = "Marvell Orion EHCI",
         .hcd_priv_size = sizeof(struct ehci_hcd),
 
-        /*
-         * generic hardware linkage
-         */
         .irq = ehci_irq,
         .flags = HCD_USB2,
 
-        /*
-         * basic lifecycle operations
-         */
         .reset = ehci_marvell_setup,
         .start = ehci_run,
 #ifdef CONFIG_PM
@@ -206,21 +154,12 @@ static const struct hc_driver ehci_marvell_hc_driver = {
         .stop = ehci_stop,
         .shutdown = ehci_shutdown,
 
-        /*
-         * managing i/o requests and associated device resources
-         */
         .urb_enqueue = ehci_urb_enqueue,
         .urb_dequeue = ehci_urb_dequeue,
         .endpoint_disable = ehci_endpoint_disable,
 
-        /*
-         * scheduling support
-         */
         .get_frame_number = ehci_get_frame,
 
-        /*
-         * root hub support
-         */
         .hub_status_data = ehci_hub_status_data,
         .hub_control = ehci_hub_control,
         .bus_suspend = ehci_bus_suspend,
@@ -232,25 +171,16 @@ static int ehci_marvell_setup(struct usb_hcd *hcd)
         struct ehci_hcd *ehci = hcd_to_ehci(hcd);
         int retval;
 
-        /*
-         * registers start at offset
-         */
         ehci->caps = hcd->regs;
         ehci->regs = hcd->regs +
                 HC_LENGTH(ehci,ehci_readl(ehci, &ehci->caps->hc_capbase));
 
-        /*
-         * cache this readonly data; minimize chip reads
-         */
         ehci->hcs_params = ehci_readl(ehci, &ehci->caps->hcs_params);
 
         retval = ehci_halt(ehci);
         if (retval)
                 return retval;
 
-        /*
-         * data structure init
-         */
         retval = ehci_init(hcd);
         if (retval)
                 return retval;

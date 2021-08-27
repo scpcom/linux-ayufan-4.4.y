@@ -1,44 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/nfs/blocklayout/blocklayout.c
- *
- *  Module for the NFSv4.1 pNFS block layout driver.
- *
- *  Copyright (c) 2006 The Regents of the University of Michigan.
- *  All rights reserved.
- *
- *  Andy Adamson <andros@citi.umich.edu>
- *  Fred Isaman <iisaman@umich.edu>
- *
- * permission is granted to use, copy, create derivative works and
- * redistribute this software and such derivative works for any purpose,
- * so long as the name of the university of michigan is not used in
- * any advertising or publicity pertaining to the use or distribution
- * of this software without specific, written prior authorization.  if
- * the above copyright notice or any other identification of the
- * university of michigan is included in any copy of any portion of
- * this software, then the disclaimer below must also be included.
- *
- * this software is provided as is, without representation from the
- * university of michigan as to its fitness for any purpose, and without
- * warranty by the university of michigan of any kind, either express
- * or implied, including without limitation the implied warranties of
- * merchantability and fitness for a particular purpose.  the regents
- * of the university of michigan shall not be liable for any damages,
- * including special, indirect, incidental, or consequential damages,
- * with respect to any claim arising out or in connection with the use
- * of the software, even if it has been or is hereafter advised of the
- * possibility of such damages.
- */
  
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/mount.h>
 #include <linux/namei.h>
-#include <linux/bio.h>		/* struct bio */
-#include <linux/buffer_head.h>	/* various write calls */
+#include <linux/bio.h>		 
+#include <linux/buffer_head.h>	 
 #include <linux/prefetch.h>
 
 #include "../pnfs.h"
@@ -68,9 +37,6 @@ static void print_page(struct page *page)
 	dprintk("\n");
 }
 
-/* Given the be associated with isect, determine if page data needs to be
- * initialized.
- */
 static int is_hole(struct pnfs_block_extent *be, sector_t isect)
 {
 	if (be->be_state == PNFS_BLOCK_NONE_DATA)
@@ -81,18 +47,12 @@ static int is_hole(struct pnfs_block_extent *be, sector_t isect)
 		return !bl_is_sector_init(be->be_inval, isect);
 }
 
-/* Given the be associated with isect, determine if page data can be
- * written to disk.
- */
 static int is_writable(struct pnfs_block_extent *be, sector_t isect)
 {
 	return (be->be_state == PNFS_BLOCK_READWRITE_DATA ||
 		be->be_state == PNFS_BLOCK_INVALID_DATA);
 }
 
-/* The data we are handed might be spread across several bios.  We need
- * to track when the last one is finished.
- */
 struct parallel_io {
 	struct kref refcnt;
 	struct rpc_call_ops call_ops;
@@ -200,7 +160,6 @@ static struct bio *bl_add_page_to_bio(struct bio *bio, int npg, int rw,
 				  end_io, par, 0, PAGE_CACHE_SIZE);
 }
 
-/* This is basically copied from mpage_end_io_read */
 static void bl_end_io_read(struct bio *bio, int err)
 {
 	struct parallel_io *par = bio->bi_private;
@@ -244,9 +203,6 @@ bl_end_par_io_read(void *data)
 	schedule_work(&rdata->task.u.tk_work);
 }
 
-/* We don't want normal .rpc_call_done callback used, so we replace it
- * with this stub.
- */
 static void bl_rpc_do_nothing(struct rpc_task *task, void *calldata)
 {
 	return;
@@ -274,17 +230,16 @@ bl_read_pagelist(struct nfs_read_data *rdata)
 	par->call_ops = *rdata->mds_ops;
 	par->call_ops.rpc_call_done = bl_rpc_do_nothing;
 	par->pnfs_callback = bl_end_par_io_read;
-	/* At this point, we can no longer jump to use_mds */
 	 
 	isect = (sector_t) (f_offset >> SECTOR_SHIFT);
-	/* Code assumes extents are page-aligned */
+	 
 	for (i = pg_index; i < rdata->npages; i++) {
 		if (!extent_length) {
-			/* We've used up the previous extent */
+			 
 			bl_put_extent(be);
 			bl_put_extent(cow_read);
 			bio = bl_submit_bio(READ, bio);
-			/* Get the next one */
+			 
 			be = bl_find_get_extent(BLK_LSEG2EXT(rdata->lseg),
 					     isect, &cow_read);
 			if (!be) {
@@ -302,7 +257,7 @@ bl_read_pagelist(struct nfs_read_data *rdata)
 		hole = is_hole(be, isect);
 		if (hole && !cow_read) {
 			bio = bl_submit_bio(READ, bio);
-			/* Fill hole w/ zeroes w/o accessing device */
+			 
 			dprintk("%s Zeroing page for hole\n", __func__);
 			zero_user_segment(pages[i], 0, PAGE_CACHE_SIZE);
 			print_page(pages[i]);
@@ -356,10 +311,10 @@ static void mark_extents_written(struct pnfs_block_layout *bl,
 	while (isect < end) {
 		sector_t len;
 		be = bl_find_get_extent(bl, isect, NULL);
-		BUG_ON(!be); /* FIXME */
+		BUG_ON(!be);  
 		len = min(end, be->be_f_offset + be->be_length) - isect;
 		if (be->be_state == PNFS_BLOCK_INVALID_DATA)
-			bl_mark_for_commit(be, isect, len); /* What if fails? */
+			bl_mark_for_commit(be, isect, len);  
 		isect += len;
 		bl_put_extent(be);
 	}
@@ -377,7 +332,7 @@ static void bl_end_io_write_zero(struct bio *bio, int err)
 
 		if (--bvec >= bio->bi_io_vec)
 			prefetchw(&bvec->bv_page->flags);
-		/* This is the zeroing page we added */
+		 
 		end_page_writeback(page);
 		page_cache_release(page);
 	} while (bvec >= bio->bi_io_vec);
@@ -390,7 +345,6 @@ static void bl_end_io_write_zero(struct bio *bio, int err)
 	put_parallel(par);
 }
 
-/* This is basically copied from mpage_end_io_read */
 static void bl_end_io_write(struct bio *bio, int err)
 {
 	struct parallel_io *par = bio->bi_private;
@@ -406,9 +360,6 @@ static void bl_end_io_write(struct bio *bio, int err)
 	put_parallel(par);
 }
 
-/* Function scheduled for call during bl_end_par_io_write,
- * it marks sectors as written and extends the commitlist.
- */
 static void bl_write_cleanup(struct work_struct *work)
 {
 	struct rpc_task *task;
@@ -417,14 +368,13 @@ static void bl_write_cleanup(struct work_struct *work)
 	task = container_of(work, struct rpc_task, u.tk_work);
 	wdata = container_of(task, struct nfs_write_data, task);
 	if (!wdata->pnfs_error) {
-		/* Marks for LAYOUTCOMMIT */
+		 
 		mark_extents_written(BLK_LSEG2EXT(wdata->lseg),
 				     wdata->args.offset, wdata->args.count);
 	}
 	pnfs_ld_write_done(wdata);
 }
 
-/* Called when last of bios associated with a bl_write_pagelist call finishes */
 static void bl_end_par_io_write(void *data)
 {
 	struct nfs_write_data *wdata = data;
@@ -435,18 +385,11 @@ static void bl_end_par_io_write(void *data)
 	schedule_work(&wdata->task.u.tk_work);
 }
 
-/* FIXME STUB - mark intersection of layout and page as bad, so is not
- * used again.
- */
 static void mark_bad_read(void)
 {
 	return;
 }
 
-/*
- * map_block:  map a requested I/0 block (isect) into an offset in the LVM
- * block_device
- */
 static void
 map_block(struct buffer_head *bh, sector_t isect, struct pnfs_block_extent *be)
 {
@@ -469,7 +412,6 @@ bl_read_single_end_io(struct bio *bio, int error)
 	struct bio_vec *bvec = bio->bi_io_vec + bio->bi_vcnt - 1;
 	struct page *page = bvec->bv_page;
 
-	/* Only one page in bvec */
 	unlock_page(page);
 }
 
@@ -563,9 +505,6 @@ bl_read_partial_page_sync(struct page *page, struct pnfs_block_extent *be,
 	return ret;
 }
 
-/* Given an unmapped page, zero it or read in page for COW, page is locked
- * by caller.
- */
 static int
 init_page_for_write(struct page *page, struct pnfs_block_extent *cow_read)
 {
@@ -599,9 +538,7 @@ cleanup:
 	if (bh)
 		free_buffer_head(bh);
 	if (ret) {
-		/* Need to mark layout with bad read...should now
-		 * just use nfs4 for reads and writes.
-		 */
+		 
 		mark_bad_read();
 	}
 	return ret;
@@ -626,17 +563,13 @@ bl_write_pagelist(struct nfs_write_data *wdata, int sync)
 	    NFS_SERVER(wdata->inode)->pnfs_blksize >> PAGE_CACHE_SHIFT;
 
 	dprintk("%s enter, %Zu@%lld\n", __func__, count, offset);
-	/* At this point, wdata->pages is a (sequential) list of nfs_pages.
-	 * We want to write each, and if there is an error set pnfs_error
-	 * to have it redone using nfs.
-	 */
+	 
 	par = alloc_parallel(wdata);
 	if (!par)
 		return PNFS_NOT_ATTEMPTED;
 	par->call_ops = *wdata->mds_ops;
 	par->call_ops.rpc_call_done = bl_rpc_do_nothing;
 	par->pnfs_callback = bl_end_par_io_write;
-	/* At this point, have to be more careful with error handling */
 	 
 	isect = (sector_t) ((offset & (long)PAGE_CACHE_MASK) >> SECTOR_SHIFT);
 	be = bl_find_get_extent(BLK_LSEG2EXT(wdata->lseg), isect, &cow_read);
@@ -646,7 +579,6 @@ bl_write_pagelist(struct nfs_write_data *wdata, int sync)
 		goto out;
 	}
 
-	/* First page inside INVALID extent */
 	if (be->be_state == PNFS_BLOCK_INVALID_DATA) {
 		temp = offset >> PAGE_CACHE_SHIFT;
 		npg_zero = do_div(temp, npg_per_block);
@@ -662,7 +594,7 @@ fill_invalid_ext:
 					(unsigned long long)isect);
 				goto next_page;
 			}
-			/* page ref released in bl_end_io_write_zero */
+			 
 			index = isect >> PAGE_CACHE_SECTOR_SHIFT;
 #ifdef CONFIG_SYNO_ALPINE
 			dprintk("%s zero %dth page: index %llu isect %llu\n",
@@ -682,11 +614,6 @@ fill_invalid_ext:
 				goto out;
 			}
 
-			/* PageDirty: Other will write this out
-			 * PageWriteback: Other is writing this out
-			 * PageUptodate: It was read before
-			 * sector_initialized: already written out
-			 */
 			if (PageDirty(page) || PageWriteback(page)) {
 				print_page(page);
 				unlock_page(page);
@@ -694,7 +621,7 @@ fill_invalid_ext:
 				goto next_page;
 			}
 			if (!PageUptodate(page)) {
-				/* New page, readin or zero it */
+				 
 				init_page_for_write(page, cow_read);
 			}
 			set_page_writeback(page);
@@ -719,7 +646,7 @@ fill_invalid_ext:
 				bio = NULL;
 				goto out;
 			}
-			/* FIXME: This should be done in bi_end_io */
+			 
 			mark_extents_written(BLK_LSEG2EXT(wdata->lseg),
 					     page->index << PAGE_CACHE_SHIFT,
 					     PAGE_CACHE_SIZE);
@@ -732,15 +659,14 @@ next_page:
 	}
 	bio = bl_submit_bio(WRITE, bio);
 
-	/* Middle pages */
 	pg_index = wdata->args.pgbase >> PAGE_CACHE_SHIFT;
 	for (i = pg_index; i < wdata->npages; i++) {
 		if (!extent_length) {
-			/* We've used up the previous extent */
+			 
 			bl_put_extent(be);
 			bl_put_extent(cow_read);
 			bio = bl_submit_bio(WRITE, bio);
-			/* Get the next one */
+			 
 			be = bl_find_get_extent(BLK_LSEG2EXT(wdata->lseg),
 					     isect, &cow_read);
 			if (!be || !is_writable(be, isect)) {
@@ -780,14 +706,11 @@ next_page:
 				goto out;
 			}
 
-			/* Expand to full page write */
 			pg_offset = 0;
 			pg_len = PAGE_CACHE_SIZE;
 		} else if  ((pg_offset & (SECTOR_SIZE - 1)) ||
 			    (pg_len & (SECTOR_SIZE - 1))){
-			/* ahh, nasty case. We have to do sync full sector
-			 * read-modify-write cycles.
-			 */
+			 
 			unsigned int saved_offset = pg_offset;
 			ret = bl_read_partial_page_sync(pages[i], be, pg_offset,
 							pg_len, false);
@@ -812,7 +735,6 @@ next_page:
 		extent_length -= PAGE_CACHE_SECTORS;
 	}
 
-	/* Last page inside INVALID extent */
 	if (be->be_state == PNFS_BLOCK_INVALID_DATA) {
 		bio = bl_submit_bio(WRITE, bio);
 		temp = last_isect >> PAGE_CACHE_SECTOR_SHIFT;
@@ -833,7 +755,6 @@ out:
 	return PNFS_ATTEMPTED;
 }
 
-/* FIXME - range ignored */
 static void
 release_extents(struct pnfs_block_layout *bl, struct pnfs_layout_range *range)
 {
@@ -901,9 +822,6 @@ static void bl_free_lseg(struct pnfs_layout_segment *lseg)
 	kfree(lseg);
 }
 
-/* We pretty much ignore lseg, and store all data layout wide, so we
- * can correctly merge.
- */
 static struct pnfs_layout_segment *bl_alloc_lseg(struct pnfs_layout_hdr *lo,
 						 struct nfs4_layoutget_res *lgr,
 						 gfp_t gfp_flags)
@@ -917,9 +835,7 @@ static struct pnfs_layout_segment *bl_alloc_lseg(struct pnfs_layout_hdr *lo,
 		return ERR_PTR(-ENOMEM);
 	status = nfs4_blk_process_layoutget(lo, lgr, gfp_flags);
 	if (status) {
-		/* We don't want to call the full-blown bl_free_lseg,
-		 * since on error extents were not touched.
-		 */
+		 
 		kfree(lseg);
 		return ERR_PTR(status);
 	}
@@ -948,7 +864,6 @@ static void free_blk_mountid(struct block_mount_id *mid)
 	if (mid) {
 		struct pnfs_block_dev *dev, *tmp;
 
-		/* No need to take bm_lock as we are last user freeing bm_devlist */
 		list_for_each_entry_safe(dev, tmp, &mid->bm_devlist, bm_node) {
 			list_del(&dev->bm_node);
 			bl_free_block_dev(dev);
@@ -957,9 +872,6 @@ static void free_blk_mountid(struct block_mount_id *mid)
 	}
 }
 
-/* This is mostly copied from the filelayout's get_device_info function.
- * It seems much of this should be at the generic pnfs level.
- */
 static struct pnfs_block_dev *
 nfs4_blk_get_deviceinfo(struct nfs_server *server, const struct nfs_fh *fh,
 			struct nfs4_deviceid *d_id)
@@ -971,10 +883,6 @@ nfs4_blk_get_deviceinfo(struct nfs_server *server, const struct nfs_fh *fh,
 	struct page **pages = NULL;
 	int i, rc;
 
-	/*
-	 * Use the session max response size as the basis for setting
-	 * GETDEVICEINFO's maxcount
-	 */
 	max_resp_sz = server->nfs_client->cl_session->fc_attrs.max_resp_sz;
 	max_pages = nfs_page_array_len(0, max_resp_sz);
 	dprintk("%s max_resp_sz %u max_pages %d\n",
@@ -1043,7 +951,7 @@ bl_set_layoutdriver(struct nfs_server *server, const struct nfs_fh *fh)
 		status = -ENOMEM;
 		goto out_error;
 	}
-	/* Initialize nfs4 block layout mount id */
+	 
 	spin_lock_init(&b_mt_id->bm_lock);
 	INIT_LIST_HEAD(&b_mt_id->bm_devlist);
 

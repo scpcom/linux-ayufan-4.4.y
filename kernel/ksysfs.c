@@ -1,15 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * kernel/ksysfs.c - sysfs attributes in /sys/kernel, which
- * 		     are not related to any other subsystem
- *
- * Copyright (C) 2004 Kay Sievers <kay.sievers@vrfy.org>
- * 
- * This file is release under the GPLv2
- *
- */
  
 #include <linux/kobject.h>
 #include <linux/string.h>
@@ -30,7 +21,7 @@ static struct kobj_attribute _name##_attr = \
 	__ATTR(_name, 0644, _name##_show, _name##_store)
 
 #if defined(CONFIG_HOTPLUG)
-/* current uevent sequence number */
+ 
 static ssize_t uevent_seqnum_show(struct kobject *kobj,
 				  struct kobj_attribute *attr, char *buf)
 {
@@ -38,7 +29,6 @@ static ssize_t uevent_seqnum_show(struct kobject *kobj,
 }
 KERNEL_ATTR_RO(uevent_seqnum);
 
-/* uevent helper program, used during early boot */
 static ssize_t uevent_helper_show(struct kobject *kobj,
 				  struct kobj_attribute *attr, char *buf)
 {
@@ -73,11 +63,7 @@ static ssize_t profiling_store(struct kobject *kobj,
 
 	if (prof_on)
 		return -EEXIST;
-	/*
-	 * This eventually calls into get_option() which
-	 * has a ton of callers and is not const.  It is
-	 * easiest to cast it away here.
-	 */
+	 
 	profile_setup((char *)buf);
 	ret = profile_init();
 	if (ret)
@@ -134,9 +120,8 @@ static ssize_t vmcoreinfo_show(struct kobject *kobj,
 }
 KERNEL_ATTR_RO(vmcoreinfo);
 
-#endif /* CONFIG_KEXEC */
+#endif  
 
-/* whether file capabilities are enabled */
 static ssize_t fscaps_show(struct kobject *kobj,
 				  struct kobj_attribute *attr, char *buf)
 {
@@ -146,8 +131,8 @@ KERNEL_ATTR_RO(fscaps);
 
 #if defined(CONFIG_SYNO_COMCERTO)
 #if defined(CONFIG_COMCERTO_MDMA_PROF)
-extern unsigned int mdma_time_counter[256]; // 16 -> 4000 us
-extern unsigned int mdma_reqtime_counter[256]; // 16 -> 4000 us
+extern unsigned int mdma_time_counter[256];  
+extern unsigned int mdma_reqtime_counter[256];  
 extern unsigned int mdma_data_counter[256];
 extern unsigned int init_mdma_prof;
 extern unsigned int enable_mdma_prof;
@@ -256,8 +241,8 @@ KERNEL_ATTR_RO(comcerto_mdma_data);
 #endif
 
 #if defined(CONFIG_COMCERTO_SPLICE_PROF)
-extern unsigned int splicew_time_counter[256]; // 4 ms -> 1S
-extern unsigned int splicew_reqtime_counter[256]; // 4 ms -> 1S
+extern unsigned int splicew_time_counter[256];  
+extern unsigned int splicew_reqtime_counter[256];  
 extern unsigned int splicew_data_counter[256]; 
 extern unsigned int init_splicew_prof; 
 extern unsigned int enable_splice_prof;
@@ -359,8 +344,8 @@ static ssize_t comcerto_splicew_data_show(struct kobject *kobj,
 }
 KERNEL_ATTR_RO(comcerto_splicew_data);
 
-extern unsigned int splicer_time_counter[256]; // 4 ms -> 1S
-extern unsigned int splicer_reqtime_counter[256]; // 4 ms -> 1S
+extern unsigned int splicer_time_counter[256];  
+extern unsigned int splicer_reqtime_counter[256];  
 extern unsigned int splicer_data_counter[256]; 
 extern unsigned int splicer_tcp_rsock_counter[64];
 extern unsigned int init_splicer_prof; 
@@ -619,11 +604,8 @@ static ssize_t comcerto_ahci_qc_no_free_slot_show(struct kobject *kobj,
 }
 KERNEL_ATTR_RO(comcerto_ahci_qc_no_free_slot);
 #endif
-#endif /* CONFIG_SYNO_COMCERTO */
+#endif  
 
-/*
- * Make /sys/kernel/notes give the raw contents of our kernel .notes section.
- */
 extern const void __start_notes __attribute__((weak));
 extern const void __stop_notes __attribute__((weak));
 #define	notes_size (&__stop_notes - &__start_notes)

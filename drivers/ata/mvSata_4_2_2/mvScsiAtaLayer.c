@@ -1,45 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
  
-This software file (the "File") is owned and distributed by Marvell 
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File in accordance with the terms and conditions of the General 
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is 
-available along with the File in the license.txt file or by writing to the Free 
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or 
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt. 
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY 
-DISCLAIMED.  The GPL License provides additional details about this warranty 
-disclaimer.
-*******************************************************************************/
-/*******************************************************************************
-* mvScsiAtaLayer.c
-*
-* DESCRIPTION:
-*       C implementation for SCSI to ATA translation layer.
-*
-* DEPENDENCIES:
-*   mvIALCommon.h
-*   mvScsiAtaLayer.h
-*
-*******************************************************************************/
-
-/* includes */
 #include "mvScsiAtaLayer.h"
 #include "mvIALCommon.h"
 
@@ -47,23 +9,20 @@ disclaimer.
     #define SAL_SPRINTF     sprintf
 #endif
 
-/* ATA defines */
-/* Bits for HD_ERROR */
-#define NM_ERR          0x02    /* media present */
-#define ABRT_ERR        0x04    /* Command aborted */
-#define MCR_ERR         0x08    /* media change request */
-#define IDNF_ERR        0x10    /* ID field not found */
-#define MC_ERR          0x20    /* media changed */
-#define UNC_ERR         0x40    /* Uncorrect data */
-#define WP_ERR          0x40    /* write protect */
-#define ICRC_ERR        0x80    /* new meaning:  CRC error during transfer */
+#define NM_ERR          0x02     
+#define ABRT_ERR        0x04     
+#define MCR_ERR         0x08     
+#define IDNF_ERR        0x10     
+#define MC_ERR          0x20     
+#define UNC_ERR         0x40     
+#define WP_ERR          0x40     
+#define ICRC_ERR        0x80     
 
 #ifdef MV_LOGGER
 static MV_VOID reportScbCompletion(MV_SATA_ADAPTER*    pSataAdapter,
                                    MV_SATA_SCSI_CMD_BLOCK *pScb);
 #endif
 
-/* Locals */
 static MV_VOID mvAta2HostString(IN   MV_U16 *source,
                                 OUT  MV_U16 *target,
                                 IN   MV_U32 wordsCount);
@@ -140,7 +99,7 @@ static MV_VOID handleUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
                                MV_U32 responseFlags,
                                MV_STORAGE_DEVICE_REGISTERS *registerStruct);
 
-/*static*/ MV_VOID  checkQueueCommandResult(MV_SATA_SCSI_CMD_BLOCK *pScb,
+  MV_VOID  checkQueueCommandResult(MV_SATA_SCSI_CMD_BLOCK *pScb,
                                             MV_QUEUE_COMMAND_RESULT result);
 
 static MV_VOID  mvScsiAtaSendSplittedVerifyCommand(IN MV_SATA_SCSI_CMD_BLOCK  *pScb);
@@ -172,7 +131,7 @@ MV_VOID setSenseData(IN MV_SATA_SCSI_CMD_BLOCK *pScb, IN MV_U8 SenseKey,
         return;
     }
     memset(&SenseData, 0, sizeof(MV_SCSI_SENSE_DATA));
-//    SenseData.Valid = 0;
+ 
     SenseData.ResponseCode = MV_SCSI_RESPONSE_CODE;
     SenseData.SenseKey = SenseKey;
     SenseData.AdditionalSenseCode = AdditionalSenseCode;
@@ -191,14 +150,14 @@ MV_VOID _fillSenseInformation(IN MV_SATA_SCSI_CMD_BLOCK *pScb, MV_SCSI_SENSE_DAT
 {
         if (pScb->isExtended == MV_TRUE)
         {
-		/* LBA 48 error handling */
+		 
 		SenseData->InformationDesc.information[2] = (MV_U8)((registerStruct->lbaHighRegister >> 8) & 0xff);
 		SenseData->InformationDesc.information[3] = (MV_U8)((registerStruct->lbaMidRegister >> 8) & 0xff);
 		SenseData->InformationDesc.information[4] = (MV_U8)((registerStruct->lbaLowRegister >> 8) & 0xff);
         }
         else
         {
-            /* LBA 28 error handling */
+             
             SenseData->InformationDesc.information[4] =  (MV_U8)((registerStruct->deviceRegister) & 0x0f);
         }
         SenseData->InformationDesc.information[5] = (MV_U8)(registerStruct->lbaHighRegister & 0xff);
@@ -229,24 +188,6 @@ static MV_BOOLEAN checkLBAOutOfRange(IN MV_SATA_ADAPTER*    pSataAdapter,
     }
     return MV_FALSE;
 }
-/*******************************************************************************
-* mvScsiAtaGetInquiryData - Get the SCSI-3 standard inquiry(12h) data
-*
-* DESCRIPTION: This function fills the data buffer with Scsi standard inquiry
-*       data according to the ATA Identify data
-*
-* INPUT:
-*   pSataAdapter    - pointer to the SATA adapter data structure.
-*   pScb->bus    - the index of the specific SATA channel.
-*   pScb            - pointer to the Scsi command block.
-*
-* RETURN:
-*   MV_TRUE on success, MV_FALSE on failure.
-*
-* COMMENTS:
-*   No sanity check is done for the parameters.
-*
-*******************************************************************************/
  
 static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetInquiryData(IN  MV_SATA_ADAPTER*    pSataAdapter,
                                                             IN  MV_SATA_SCSI_CMD_BLOCK  *pScb)
@@ -320,15 +261,15 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetInquiryData(IN  MV_SATA_ADAPTER*
     {
         MV_U8   Vendor[9],Product[17], temp[24];
         buff[0] = MV_SCSI_DIRECT_ACCESS_DEVICE;
-        buff[1] = 0;    /* Not Removable disk */
-        buff[2] = 5;    /*claim conformance to SCSI-3*/
-        buff[3] = 2;    /* set RESPONSE DATA FORMAT to 2*/
-        buff[4] = 41 - 4; /* n - 4, n start from 0 */
+        buff[1] = 0;     
+        buff[2] = 5;     
+        buff[3] = 2;     
+        buff[4] = 41 - 4;  
 #if 0
-        buff[6] = 0x80;     /* basic queuing*/
+        buff[6] = 0x80;      
         buff[7] = 0;
 #else
-        buff[6] = 0x0;     /* tagged queuing*/
+        buff[6] = 0x0;      
         buff[7] = 2;
 #endif
         memcpy(temp, pDriveData->identifyInfo.model, 24);
@@ -348,7 +289,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetInquiryData(IN  MV_SATA_ADAPTER*
                     ((temp[0] == 'H') && (temp[1] == 'T')) ||
                     ((temp[0] == 'H') && (temp[1] == 'D')) ||
                     ((temp[0] == 'D') && (temp[1] == 'K')))
-                { /*Hitachi*/
+                {  
                     Vendor[0] = 'H';
                     Vendor[1] = 'i';
                     Vendor[2] = 't';
@@ -361,7 +302,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetInquiryData(IN  MV_SATA_ADAPTER*
                 }
                 else if ((temp[0] == 'S') && (temp[1] == 'T'))
                 {
-                    /*Seagate*/
+                     
                     Vendor[0] = 'S';
                     Vendor[1] = 'e';
                     Vendor[2] = 'a';
@@ -374,7 +315,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetInquiryData(IN  MV_SATA_ADAPTER*
                 }
                 else
                 {
-                    /*Unkown*/
+                     
                     Vendor[0] = 'A';
                     Vendor[1] = 'T';
                     Vendor[2] = 'A';
@@ -414,8 +355,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetInquiryData(IN  MV_SATA_ADAPTER*
             mvAta2HostString((MV_U16 *)(&buff[32]), (MV_U16 *)(&buff[32]), 2);
         }
         memcpy(&buff[36], "MVSATA", 6);
-
-        /*buff[32] = '3';*/
 
         inquiryLen = 42;
     }
@@ -554,13 +493,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendDataCommand(IN  MV_SATA_ADAPTER
     LBA = ((MV_U64)pUdmaParams->highLBAAddress << 32) | (MV_U64)pUdmaParams->lowLBAAddress;
     pScb->isExtended = pUdmaParams->isEXT = pDriveData->identifyInfo.LBA48Supported;
 
-    /* If READ10 / WRITE10 with 0 sectors (no data transfer), then complete */
-    /* the command with OK.                                                 */
-    /* If READ6 / WRITE6 with 0 sectors, seemse the Windows have problem with */
-    /* this and doesn't allocate and buffers for this ; so complete this    */
-    /* command with ILLEGAL REQUEST sense and INVLAID CDB in addition sense */
-    /* code.                                                                */
-
     if (sectors == 0)
     {
         if ((cmd[0] == SCSI_OPCODE_READ10) || (cmd[0] == SCSI_OPCODE_WRITE10) || 
@@ -585,7 +517,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendDataCommand(IN  MV_SATA_ADAPTER
         }
         else
         {
-            /* READ6 / WRITE6 with sector count 0, which means 256 sectors */
+             
             sectors = 256;
         }
     }
@@ -595,11 +527,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendDataCommand(IN  MV_SATA_ADAPTER
     {
         return MV_SCSI_COMMAND_STATUS_COMPLETED;
     }
-
-    /* If trying to send more than 256 sectors or DataTransferLength field is
-     * not equal to number of sectors request in CDB then return invalid
-     * request.
-     */
 
     if (((sectors > 256) && (pUdmaParams->isEXT == MV_FALSE)) ||
         ((sectors * ATA_SECTOR_SIZE) != pScb->dataBufferLength))
@@ -644,8 +571,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendDataCommand(IN  MV_SATA_ADAPTER
         return MV_SCSI_COMMAND_STATUS_COMPLETED;
     }
 
-    /*update statistics*/
-
     pAdapterExt->totalAccumulatedOutstanding[pScb->bus] +=
     mvSataNumOfDmaCommands(pSataAdapter,pScb->bus);
     pDriveData->stats.totalIOs++;
@@ -654,25 +579,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendDataCommand(IN  MV_SATA_ADAPTER
     return MV_SCSI_COMMAND_STATUS_QUEUED;
 }
 
-/*******************************************************************************
-* mvScsiAtaGetReadCapacityData - Get the SCSI-3 Read Capacity (10h/16h) data
-*
-* DESCRIPTION: This function fills the data buffer with Scsi Read Capacity 10 or
-*       Read Capacity 16 data according to the disk size as it is reported in
-*       the ATA Identify data.
-*
-* INPUT:
-*   pSataAdapter    - pointer to the SATA adapter data structure.
-*   pScb->bus    - the index of the specific SATA channel.
-*
-* OUTPUT:
-* RETURN:
-*   MV_TRUE on success, MV_FALSE on failure.
-*
-* COMMENTS:
-*   No sanity check is done for the parameters.
-*
-*******************************************************************************/
 static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetReadCapacityData(IN MV_SATA_ADAPTER*    pSataAdapter,
                                                                  IN    MV_SATA_SCSI_CMD_BLOCK  *pScb)
 {
@@ -711,10 +617,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetReadCapacityData(IN MV_SATA_ADAP
     mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "MVSATA: last Addressable sector = 0x%x "
              " (sec size=%d bytes)\n", lastAddressableLBA, ATA_SECTOR_SIZE);
 
-    /* The disk size as indicated by the ATA spec is the total addressable
-     * secotrs on the drive ; while the SCSI translation of the command
-     * should be the last addressable sector.
-     */
     buff = pScb->pDataBuffer;
     memset(buff, 0, pScb->dataBufferLength);
     buff[0] = (MV_U8)(lastAddressableLBA >> 24);
@@ -723,7 +625,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetReadCapacityData(IN MV_SATA_ADAP
     buff[3] = (MV_U8)(lastAddressableLBA & 0xff);
     buff[4] = 0;
     buff[5] = 0;
-    buff[6] = (MV_U8)((ATA_SECTOR_SIZE >> 8) & 0xff);           /* 512 byte sectors */
+    buff[6] = (MV_U8)((ATA_SECTOR_SIZE >> 8) & 0xff);            
     buff[7] = (MV_U8)(ATA_SECTOR_SIZE & 0xff);
     pScb->dataTransfered = 8;
     pScb->ScsiCommandCompletion = MV_SCSI_COMPLETION_SUCCESS;
@@ -736,25 +638,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetReadCapacityData(IN MV_SATA_ADAP
     return MV_SCSI_COMMAND_STATUS_COMPLETED;
 }
 
-/*******************************************************************************
-* mvScsiAtaGetReadCapacity16Data - Get the SCSI-3 Read Capacity (16h) data
-*
-* DESCRIPTION: This function fills the data buffer with Scsi Read Capacity 16
-* data according to the disk size as it is reported in
-*       the ATA Identify data.
-*
-* INPUT:
-*   pSataAdapter    - pointer to the SATA adapter data structure.
-*   pScb->bus    - the index of the specific SATA channel.
-*
-* OUTPUT:
-* RETURN:
-*   MV_TRUE on success, MV_FALSE on failure.
-*
-* COMMENTS:
-*   No sanity check is done for the parameters.
-*
-*******************************************************************************/
 static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetReadCapacity16Data(IN MV_SATA_ADAPTER*    pSataAdapter,
                                                                  IN    MV_SATA_SCSI_CMD_BLOCK  *pScb)
 {
@@ -788,10 +671,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetReadCapacity16Data(IN MV_SATA_AD
     mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "MVSATA: last Addressable sector = 0x%x "
              " (sec size=%d bytes)\n", lastAddressableLBA, ATA_SECTOR_SIZE);
 
-    /* The disk size as indicated by the ATA spec is the total addressable
-     * secotrs on the drive ; while the SCSI translation of the command
-     * should be the last addressable sector.
-     */
     buff = pScb->pDataBuffer;
     memset(buff, 0, pScb->dataBufferLength);
     buff[0] = (MV_U8)((lastAddressableLBA >> 56) & 0xff);
@@ -804,7 +683,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetReadCapacity16Data(IN MV_SATA_AD
     buff[7] = (MV_U8)(lastAddressableLBA & 0xff);
     buff[8] = 0;
     buff[9] = 0;
-    buff[10] = (MV_U8)((ATA_SECTOR_SIZE >> 8) & 0xff);           /* 512 byte sectors */
+    buff[10] = (MV_U8)((ATA_SECTOR_SIZE >> 8) & 0xff);            
     buff[11] = (MV_U8)(ATA_SECTOR_SIZE & 0xff);
     pScb->dataTransfered = 8;
     pScb->ScsiCommandCompletion = MV_SCSI_COMPLETION_SUCCESS;
@@ -817,23 +696,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetReadCapacity16Data(IN MV_SATA_AD
     return MV_SCSI_COMMAND_STATUS_COMPLETED;
 }
 
-/*******************************************************************************
-* mvScsiAtaReportLuns - handle the SCSI-3 Report LUNS
-*
-* DESCRIPTION: Report 1 LUN
-*
-* INPUT:
-*   pSataAdapter    - pointer to the SATA adapter data structure.
-*   pScb->bus    - the index of the specific SATA channel.
-*
-* OUTPUT:
-* RETURN:
-*   MV_TRUE on success, MV_FALSE on failure.
-*
-* COMMENTS:
-*   No sanity check is done for the parameters.
-*
-*******************************************************************************/
 static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaReportLuns(IN MV_SATA_ADAPTER*    pSataAdapter,
 							IN    MV_SATA_SCSI_CMD_BLOCK  *pScb)
 {
@@ -841,7 +703,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaReportLuns(IN MV_SATA_ADAPTER*    p
 
     buff = pScb->pDataBuffer;
     memset(buff, 0, pScb->dataBufferLength);
-    buff[3] = 8; /* 1 lun*/
+    buff[3] = 8;  
     pScb->dataTransfered = 16;
     pScb->ScsiCommandCompletion = MV_SCSI_COMPLETION_SUCCESS;
     pScb->ScsiStatus = MV_SCSI_STATUS_GOOD;
@@ -930,10 +792,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendVerifyCommand(IN MV_SATA_ADAPTE
         }
         else
         {
-            /* If VERIFY6 to 48bit device, then 256 sectors is OK ; otherwise
-            the CORE driver must get sector count of 0 in order to understand that
-            256 sectors must be transferred
-            */
              
             if (pDriveData->identifyInfo.LBA48Supported == MV_TRUE)
             {
@@ -963,7 +821,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendVerifyCommand(IN MV_SATA_ADAPTE
 
     pScb->commandType = MV_QUEUED_COMMAND_TYPE_NONE_UDMA;
     pScb->LowLbaAddress = (MV_U32)(LbaAddress & 0xFFFFFFFF);
-//    pScb->highLbaAddress = (MV_U32)(LbaAddress >> 32);
  
     if (pDriveData->identifyInfo.LBA48Supported == MV_TRUE)
     {
@@ -1010,7 +867,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendVerifyCommand(IN MV_SATA_ADAPTE
             pScb->completionCallBack(pSataAdapter, pScb);
             return MV_SCSI_COMMAND_STATUS_COMPLETED;
         }
-        /* update stats*/
+         
         pAdapterExt->totalAccumulatedOutstanding[pScb->bus] +=
         mvSataNumOfDmaCommands(pSataAdapter,pScb->bus);
         pDriveData->stats.totalIOs++;
@@ -1019,7 +876,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendVerifyCommand(IN MV_SATA_ADAPTE
     }
     else
     {
-        /* The following only in case command is VERIFY 6 with 0 sector count */
+         
         if (sectors == 0)
         {
             commands = 1;
@@ -1126,11 +983,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaWriteLong(IN MV_SATA_ADAPTER    *pSa
         return MV_SCSI_COMMAND_STATUS_COMPLETED;
     }
 
-    /*if (checkLBAOutOfRange(pSataAdapter, pScb, MV_BIT28 - 2,
-                        LBA, 1) == MV_TRUE)
-    {
-        return MV_SCSI_COMMAND_STATUS_COMPLETED;
-    }*/
     if (LBA & (MV_BIT31|MV_BIT30|MV_BIT29|MV_BIT28))
     {
 
@@ -1176,14 +1028,14 @@ static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaWriteLong(IN MV_SATA_ADAPTER    *pSa
     if (result != MV_QUEUE_COMMAND_RESULT_OK)
     {
         checkQueueCommandResult(pScb, result);
-        /* shoudl complete the Scsi request here*/
+         
 #ifdef MV_LOGGER
         reportScbCompletion(pSataAdapter, pScb);
 #endif
         pScb->completionCallBack(pSataAdapter, pScb);
         return MV_SCSI_COMMAND_STATUS_COMPLETED;
     }
-    /* update stats*/
+     
     pAdapterExt->totalAccumulatedOutstanding[pScb->bus] += mvSataNumOfDmaCommands(pSataAdapter,pScb->bus);
     pDriveData->stats.totalIOs++;
 
@@ -1231,11 +1083,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaReadLong(IN MV_SATA_ADAPTER    *pSat
         return MV_SCSI_COMMAND_STATUS_COMPLETED;
     }
 
-    /*if (checkLBAOutOfRange(pSataAdapter, pScb, MV_BIT28 - 2,
-                        LBA, 1) == MV_TRUE)
-    {
-        return MV_SCSI_COMMAND_STATUS_COMPLETED;
-    }*/
     if (LBA & (MV_BIT31|MV_BIT30|MV_BIT29|MV_BIT28))
     {
 
@@ -1281,14 +1128,14 @@ static MV_SCSI_COMMAND_STATUS_TYPE mvScsiAtaReadLong(IN MV_SATA_ADAPTER    *pSat
     if (result != MV_QUEUE_COMMAND_RESULT_OK)
     {
         checkQueueCommandResult(pScb, result);
-        /* shoudl complete the Scsi request here*/
+         
 #ifdef MV_LOGGER
         reportScbCompletion(pSataAdapter, pScb);
 #endif
         pScb->completionCallBack(pSataAdapter, pScb);
         return MV_SCSI_COMMAND_STATUS_COMPLETED;
     }
-    /* update stats*/
+     
     pAdapterExt->totalAccumulatedOutstanding[pScb->bus] += mvSataNumOfDmaCommands(pSataAdapter,pScb->bus);
     pDriveData->stats.totalIOs++;
 
@@ -1310,7 +1157,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSyncCacheCommand(IN MV_SATA_ADA
     MV_SATA_SCSI_DRIVE_DATA *pDriveData = &pScb->pSalAdapterExtension->ataDriveData[pScb->bus][pScb->target];
     MV_SAL_ADAPTER_EXTENSION *pAdapterExt = pScb->pSalAdapterExtension;
 
-    /* Check if IMMED bit is set, if so then return ILLEGAL REQUEST */
     if (pScb->ScsiCdb[1] & MV_BIT1)
     {
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Synchronise cache completed with error:"
@@ -1405,45 +1251,20 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSyncCacheCommand(IN MV_SATA_ADA
     if (result != MV_QUEUE_COMMAND_RESULT_OK)
     {
         checkQueueCommandResult(pScb, result);
-        /* shoudl complete the Scsi request here*/
+         
 #ifdef MV_LOGGER
         reportScbCompletion(pSataAdapter, pScb);
 #endif
         pScb->completionCallBack(pSataAdapter, pScb);
         return MV_SCSI_COMMAND_STATUS_COMPLETED;
     }
-    /* update stats*/
+     
     pAdapterExt->totalAccumulatedOutstanding[pScb->bus] += mvSataNumOfDmaCommands(pSataAdapter,pScb->bus);
     pDriveData->stats.totalIOs++;
 
     return MV_SCSI_COMMAND_STATUS_QUEUED;
 }
 
-/*******************************************************************************
-* mvScsiAtaGetRequestSenseData - Get the SCSI-3 Request Sense(03h) data
-*
-* DESCRIPTION: This function fills the sense buffer with a sense key of NO SENSE
-*       and an additional sense code of NO ADDITIONAL SENSE INFORMATION.
-*
-* INPUT:
-*   pSataAdapter    - pointer to the SATA adapter data structure.
-*   pScb->bus    - the index of the specific SATA channel.
-*   Cdb             - specifies the SCSI-3 command descriptor block.
-*
-* OUTPUT:
-*   pScsiStatus     - pointer to the Scsi status to be returned.
-*   pSenseBuffer    - pointer to the Scsi sense buffer.
-*   senseBufferLength   - the size in bytes of the sense buffer.
-*   pDataTransfered - the size in bytes of the data transfered into the data
-*                     buffer(alwasy zero for this command).
-*
-* RETURN:
-*   MV_TRUE on success, MV_FALSE on failure.
-*
-* COMMENTS:
-*   No sanity check is done for the parameters.
-*
-*******************************************************************************/
 static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetRequestSenseData(IN MV_SATA_ADAPTER*    pSataAdapter,
                                                                  IN MV_SATA_SCSI_CMD_BLOCK  *pScb)
 {
@@ -1453,7 +1274,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetRequestSenseData(IN MV_SATA_ADAP
     memset(pScb->pDataBuffer, 0, pScb->dataBufferLength);
 
     memset(&SenseData, 0, sizeof(MV_SCSI_SENSE_DATA));
-//    SenseData.Valid = 0;
+ 
     SenseData.ResponseCode = MV_SCSI_RESPONSE_CODE;
     SenseData.SenseKey = SCSI_SENSE_NO_SENSE;
     SenseData.AdditionalSenseCode = SCSI_ADSENSE_NO_SENSE;
@@ -1496,14 +1317,13 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetRequestSenseData(IN MV_SATA_ADAP
     {
         pScb->dataTransfered = sizeof(MV_SCSI_SENSE_DATA);
         memcpy(pScb->pDataBuffer, &SenseData, pScb->dataTransfered);
-        /*pScb->ScsiStatus = MV_SCSI_STATUS_GOOD;*/
-        /*pScb->ScsiCommandCompletion = MV_SCSI_COMPLETION_SUCCESS;*/
+         
     }
     else
     {
         pScb->dataTransfered = pScb->dataBufferLength;
         memcpy(pScb->pDataBuffer, &SenseData, pScb->dataTransfered);
-        pScb->ScsiStatus = MV_SCSI_STATUS_GOOD;/*TBD*/
+        pScb->ScsiStatus = MV_SCSI_STATUS_GOOD; 
         pScb->ScsiCommandCompletion = MV_SCSI_COMPLETION_SUCCESS;
     }
 #ifdef MV_LOGGER
@@ -1513,25 +1333,6 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetRequestSenseData(IN MV_SATA_ADAP
     return MV_SCSI_COMMAND_STATUS_COMPLETED;
 }
 
-/*******************************************************************************
-* mvScsiAtaGetModeSenseData - Get the SCSI-3 Mode Sense data
-*
-* DESCRIPTION: This function issues ATA Identify command, in the command
-*       completion, the Mode Sense data will be filled according to the returned
-*       Identify Data.
-*
-* INPUT:
-*   pSataAdapter    - pointer to the SATA adapter data structure.
-*   pScb->bus    - the index of the specific SATA channel.
-*   Cdb             - specifies the SCSI-3 command descriptor block.
-*
-* RETURN:
-*   MV_TRUE on success, MV_FALSE on failure.
-*
-* COMMENTS:
-*   No sanity check is done for the parameters.
-*
-*******************************************************************************/
 static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetModeSenseData(IN MV_SATA_ADAPTER    *pSataAdapter,
                                                               IN  MV_SATA_SCSI_CMD_BLOCK  *pScb)
 {
@@ -1549,7 +1350,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetModeSenseData(IN MV_SATA_ADAPTER
     pCommandInfo->type = MV_QUEUED_COMMAND_TYPE_NONE_UDMA;
     pCommandInfo->PMPort = pScb->target;
     pCommandInfo->commandParams.NoneUdmaCommand.bufPtr = pDriveData->identifyBuffer;
-    pCommandInfo->commandParams.NoneUdmaCommand.count = 256;         /* 512 bytes */
+    pCommandInfo->commandParams.NoneUdmaCommand.count = 256;          
     pCommandInfo->commandParams.NoneUdmaCommand.callBack = SALCommandCompletionCB;
 #ifdef MY_ABC_HERE
     pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
@@ -1566,7 +1367,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaGetModeSenseData(IN MV_SATA_ADAPTER
     if (result != MV_QUEUE_COMMAND_RESULT_OK)
     {
         checkQueueCommandResult(pScb, result);
-        /* shoudl complete the Scsi request here*/
+         
 #ifdef MV_LOGGER
         reportScbCompletion(pSataAdapter, pScb);
 #endif
@@ -1598,32 +1399,24 @@ static MV_BOOLEAN  mvScsiAtaGetModeSenseDataPhase2(IN MV_SATA_ADAPTER    *pSataA
     {
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Sense: save control not supported\n.",
                  pSataAdapter->adapterId, pScb->bus);
-        AdditionalSenseCode = 0x39; /*SAVING PARAMETERS NOT SUPPORTED */
+        AdditionalSenseCode = 0x39;  
         commandFailed = MV_TRUE;
     }
     if (commandFailed != MV_TRUE)
     {
         memset(modeSenseResult, 0, MV_MAX_MODE_SENSE_RESULT_LENGTH);
-        /*1. Mode parameter header*/
-        /* Mode data length will be set later */
-        /* Medium Type 0: Default medium type */
-        /* Device-specific parameter 0:  write enabled, target */
-        /*      supports the DPO and FUA bits only in NCQ mode*/
+         
         if (pSataAdapter->sataChannel[pScb->bus]->queuedDMA == MV_EDMA_MODE_NATIVE_QUEUING)
         {
             modeSenseResult[2] = MV_BIT4;
         }
 
-        /* Block descriptor length 0: no block descriptors*/
-
-        /*2. Block descriptor(s): Empty list*/
-        /*3. Page(s)*/
         offset = 4;
 
         switch (pageCode)
         {
         case 0x3f:
-        case 0x8: /*Caching page */
+        case 0x8:  
             pageLength = mvModeSenseCachingPage(pScb,
                                                 modeSenseResult + offset,
                                                 pageControl);
@@ -1646,8 +1439,6 @@ static MV_BOOLEAN  mvScsiAtaGetModeSenseDataPhase2(IN MV_SATA_ADAPTER    *pSataA
             commandFailed = MV_TRUE;
         }
 
-        /* set the DATA LENGTH of the Mode parameter list not including the number*/
-        /* of bytes of the DATA LENGTH itself ( 1 byte for Mode Selet(6)) */
         modeSenseResult[0] = (MV_U8)(offset - 1);
 
         if (pScb->dataBufferLength < offset)
@@ -1690,7 +1481,7 @@ static MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaModeSelect(IN MV_SATA_ADAPTER    *p
     result = modeSelect(pSataAdapter, pScb, &commandStatus);
     if (result != 0x0)
     {
-        if (result == 0x1)/*PARAMETER LIST LENGTH ERROR*/
+        if (result == 0x1) 
         {
             setSenseData(pScb, SCSI_SENSE_ILLEGAL_REQUEST, 0x1a, 0);
 
@@ -1752,13 +1543,13 @@ modeSelect(IN MV_SATA_ADAPTER    *pSataAdapter,
     {
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "%d %d: Mode Select Error: PF not supported\n.",
                  pSataAdapter->adapterId, pScb->bus);
-        return 0x2; /* Invalid field in CDB */
+        return 0x2;  
     }
     if (SP == 1)
     {
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "%d %d: Mode Select Error: SP not supported\n.",
                  pSataAdapter->adapterId, pScb->bus);
-        return 0x2; /* PARAMETER LIST LENGTH ERROR */
+        return 0x2;  
     }
     if (length == 0)
     {
@@ -1774,13 +1565,13 @@ modeSelect(IN MV_SATA_ADAPTER    *pSataAdapter,
     }
     if (length < 4)
     {
-        return 0x1; /* PARAMETER LIST LENGTH ERROR */
+        return 0x1;  
     }
     if (list[0] || (list[1] != MV_SCSI_DIRECT_ACCESS_DEVICE) || list[2])
     {
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Select Error: invalid field in parameter "
                  "list\n", pSataAdapter->adapterId, pScb->bus);
-        return 0x3; /* Invalid field in parameter list */
+        return 0x3;  
     }
     if (list[3])
     {
@@ -1789,11 +1580,11 @@ modeSelect(IN MV_SATA_ADAPTER    *pSataAdapter,
             mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Select Error: wrong size for mode parameter"
                      " block descriptor, BLOCK DESCRIPTOR LENGTH %d\n.",
                      pSataAdapter->adapterId, pScb->bus, list[3]);
-            return 0x3; /* Invalid field in parameter list */
+            return 0x3;  
         }
         if (length < 12)
         {
-            return 0x1; /* PARAMETER LIST LENGTH ERROR */
+            return 0x1;  
         }
         if (list[4] || list[5] || list[6] || list[7] || list[8] || list[9] ||
             (list[10] != 0x2) || list[11])
@@ -1801,10 +1592,10 @@ modeSelect(IN MV_SATA_ADAPTER    *pSataAdapter,
             mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Select Error: invalid field in parameter "
                      "block descriptor list\n", pSataAdapter->adapterId,
                      pScb->bus);
-            return 0x3; /* Invalid field in parameter list */
+            return 0x3;  
         }
     }
-    offset = 4 + list[3];/* skip the mode parameter block descriptor */
+    offset = 4 + list[3]; 
 
     mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Select: PF 0x%x SP 0x%x parameter length %x "
              "length %d(0x%x)\n offset %d", pSataAdapter->adapterId, pScb->bus,
@@ -1835,7 +1626,7 @@ modeSelect(IN MV_SATA_ADAPTER    *pSataAdapter,
                 mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Select Error: bad length in caching mode "
                          "page %d\n.",
                          pSataAdapter->adapterId, pScb->bus, list[offset + 1]);
-                return 0x3; /* Invalid field in parameter list */
+                return 0x3;  
             }
             cachePageOffset = offset;
             offset += list[offset + 1] + 2;
@@ -1875,7 +1666,7 @@ modeSelect(IN MV_SATA_ADAPTER    *pSataAdapter,
                      "list, mode page %d not supported, offset %d\n",
                      pSataAdapter->adapterId, pScb->bus, list[offset],
                      offset);
-            return 0x3; /* Invalid field in parameter list */
+            return 0x3;  
         }
     }
 
@@ -1883,7 +1674,7 @@ modeSelect(IN MV_SATA_ADAPTER    *pSataAdapter,
     {
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Select Error: bad length %d\n.",
                  pSataAdapter->adapterId, pScb->bus, length);
-        return 0x1; /* PARAMETER LIST LENGTH ERROR */
+        return 0x1;  
     }
 
     if (cachePageOffset)
@@ -1935,12 +1726,12 @@ mvParseModeCachingPage(MV_SATA_ADAPTER *pSataAdapter,
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Select Error: invalid field in caching mode"
                  " page, index %d\n", pSataAdapter->adapterId, pScb->bus,
                  index);
-        return 0x3; /* Invalid field in parameter list */
+        return 0x3;  
     }
 
     pScb->splitCount = 2;
     pScb->sequenceNumber = 1;
-    if (buffer[12] & MV_BIT5) /* Disable Look Ahead*/
+    if (buffer[12] & MV_BIT5)  
     {
         if (pDriveData->identifyInfo.readAheadSupported == MV_FALSE)
         {
@@ -1955,12 +1746,12 @@ mvParseModeCachingPage(MV_SATA_ADAPTER *pSataAdapter,
             mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Select Error: invalid field in caching mode"
                      " page, enable read ahead (feature not supported)\n",
                      pSataAdapter->adapterId, pScb->bus);
-            return 0x3; /* Invalid field in parameter list */
+            return 0x3;  
         }
         pScb->LowLbaAddress = 1;
     }
 
-    if (buffer[2] & MV_BIT2) /* enable write cache*/
+    if (buffer[2] & MV_BIT2)  
     {
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " Parse Caching Page: enable Write Cache\n");
         if (pDriveData->identifyInfo.writeCacheSupported == MV_FALSE)
@@ -1968,7 +1759,7 @@ mvParseModeCachingPage(MV_SATA_ADAPTER *pSataAdapter,
             mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d: Mode Select Error: invalid field in caching mode"
                      " page, enable write cache (feature not supported)\n",
                      pSataAdapter->adapterId, pScb->bus);
-            return 0x3; /* Invalid field in parameter list */
+            return 0x3;  
         }
         pCommandInfo->commandParams.NoneUdmaCommand.features = MV_ATA_SET_FEATURES_ENABLE_WCACHE;
     }
@@ -2048,10 +1839,10 @@ mvModeSenseCachingPage(MV_SATA_SCSI_CMD_BLOCK  *pScb,
 {
     MV_SATA_SCSI_DRIVE_DATA *pDriveData = &pScb->pSalAdapterExtension->ataDriveData[pScb->bus][pScb->target];
 
-    buffer[0] = 0x8; /* caching page*/
-    buffer[1] = 0x12; /* length = 2 + 0x12*/
+    buffer[0] = 0x8;  
+    buffer[1] = 0x12;  
     buffer[2] = 0;
-    if (pageControl == 2) /*default values*/
+    if (pageControl == 2)  
     {
         if (pDriveData->identifyInfo.writeCacheSupported == MV_TRUE)
         {
@@ -2059,7 +1850,7 @@ mvModeSenseCachingPage(MV_SATA_SCSI_CMD_BLOCK  *pScb,
             mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " Cache Page: writeCacheEnabledByDefault\n");
         }
     }
-    else if (pageControl == 0)  /* current values*/
+    else if (pageControl == 0)   
     {
         if ((pDriveData->identifyInfo.writeCacheSupported == MV_TRUE) &&
             (pDriveData->identifyBuffer[85] & MV_BIT5))
@@ -2068,7 +1859,7 @@ mvModeSenseCachingPage(MV_SATA_SCSI_CMD_BLOCK  *pScb,
             mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " Cache Page: writeCacheEnabled\n");
         }
     }
-    else if (pageControl == 1)  /* changeable values*/
+    else if (pageControl == 1)   
     {
         if (pDriveData->identifyInfo.writeCacheSupported == MV_TRUE)
         {
@@ -2085,14 +1876,14 @@ mvModeSenseCachingPage(MV_SATA_SCSI_CMD_BLOCK  *pScb,
         buffer[9] = 0x10;
         buffer[11] = 0x10;
     }
-    if (pageControl == 2) /*default values*/
+    if (pageControl == 2)  
     {
         if (pDriveData->identifyInfo.readAheadSupported == MV_FALSE)
         {
             buffer[12] = MV_BIT5;
         }
     }
-    else if (pageControl == 0)  /* current values*/
+    else if (pageControl == 0)   
     {
         if ((pDriveData->identifyInfo.readAheadSupported == MV_TRUE) &&
             (pDriveData->identifyBuffer[85] & MV_BIT6))
@@ -2104,7 +1895,7 @@ mvModeSenseCachingPage(MV_SATA_SCSI_CMD_BLOCK  *pScb,
             buffer[12] = MV_BIT5;
         }
     }
-    else if (pageControl == 1)  /* changeable values*/
+    else if (pageControl == 1)   
     {
         if (pDriveData->identifyInfo.readAheadSupported == MV_TRUE)
         {
@@ -2135,11 +1926,11 @@ mvModeSenseControlPage(MV_SATA_ADAPTER *pSataAdapter,
                        MV_SATA_SCSI_CMD_BLOCK  *pScb,
                        MV_U8 *buffer, MV_U8 pageControl)
 {
-    buffer[0] = 0xA;    /* control page */
-    buffer[1] = 0xA;    /* length 2 + 0xa*/
+    buffer[0] = 0xA;     
+    buffer[1] = 0xA;     
     if (pageControl != 1)
     {
-        buffer[3] = MV_BIT4/*Unrestricted reordering allowed*/;
+        buffer[3] = MV_BIT4 ;
     }
 
     {
@@ -2175,7 +1966,7 @@ SALCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
     switch (comp_type)
     {
     case MV_COMPLETION_TYPE_NORMAL:
-        /* finish */
+         
 #ifdef  MV_SUPPORT_ATAPI
         if(pScb->commandType == MV_QUEUED_COMMAND_TYPE_PACKET)
         {
@@ -2195,14 +1986,14 @@ SALCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
             break;
         }
 #endif
-        /* If splited VERIFY command, then SRB completion will be on the last fragment */
+         
         if ((((pScb->ScsiCdb[0] == SCSI_OPCODE_VERIFY6) ||
               (pScb->ScsiCdb[0] == SCSI_OPCODE_VERIFY10) ||
               (pScb->ScsiCdb[0] == SCSI_OPCODE_VERIFY16) ||
               (pScb->ScsiCdb[0] == SCSI_OPCODE_MODE_SELECT6)))
             &&  (pScb->splitCount > pScb->sequenceNumber))
         {
-            /* add the command to the list for post interrupt service*/
+             
             pScb->pNext = pScb->pSalAdapterExtension->pHead;
             pScb->pSalAdapterExtension->pHead = pScb;
             return MV_TRUE;
@@ -2243,8 +2034,6 @@ SALCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
                  pScb->ScsiCdb[1], pScb->ScsiCdb[2], pScb->ScsiCdb[3],
                  pScb->ScsiCdb[4], pScb->ScsiCdb[5], pScb->ScsiCdb[6],
                  pScb->ScsiCdb[7], pScb->ScsiCdb[8], pScb->ScsiCdb[9]);
-        /* here the  eDMA will be stopped, so we have to flush  */
-        /* the pending commands                                 */
          
         if (pScb->commandType == MV_QUEUED_COMMAND_TYPE_UDMA)
         {
@@ -2309,17 +2098,7 @@ SynoBadSectorRemapCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
     kfree(commandId);
     return MV_TRUE;
 }
-/**
- * Insert 30h or 34h to a UNC LBA
- * 
- * @param pScb   [IN] Should not be NULL
- * @param registerStruct
- *               [IN] Should not be NULL
- * @param blRead [IN] Indicate the command is read
- * 
- * @return TRUE: success
- *         FALSE: fail to remap
- */
+
 static MV_BOOLEAN
 SynoInsertBadSectorRemap(MV_SATA_SCSI_CMD_BLOCK *pScb,
                          MV_STORAGE_DEVICE_REGISTERS *registerStruct,
@@ -2355,7 +2134,7 @@ SynoInsertBadSectorRemap(MV_SATA_SCSI_CMD_BLOCK *pScb,
 
     syno_eh_printk(pScb->pSalAdapterExtension->pSataAdapter, pScb->bus, "%s unc at LBA %llu", blRead ? "read" : "write", lba);
 
-    /* Skip read fail except build raid in complete mode */
+    
     if (blRead &&
         !blSectorNeedAutoRemap(pScb->IALData, lba)) {
         goto END;
@@ -2383,7 +2162,7 @@ SynoInsertBadSectorRemap(MV_SATA_SCSI_CMD_BLOCK *pScb,
     commandInfo.commandParams.NoneUdmaCommand.device |= (blLBA48) ? 0 : (registerStruct->deviceRegister & 0x0f);
     commandInfo.commandParams.NoneUdmaCommand.features = 0;
     commandInfo.commandParams.NoneUdmaCommand.isEXT = blLBA48;
-    /* Put it with malloc buffer, so we can free it in the call back */
+    
     commandInfo.commandParams.NoneUdmaCommand.commandId = pBuf;
 #ifdef MY_ABC_HERE
     commandInfo.commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
@@ -2425,19 +2204,11 @@ handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
 
     pScb->dataBufferLength = 0;
 
-    /*if (pSrb->SenseInfoBufferLength < 13)
-    {
-        mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG_ERROR, "IAL ERROR: invalid Sense Info buffer len (%d)\n",
-                 Srb->SenseInfoBufferLength);
-        Srb->SrbStatus = SRB_STATUS_ERROR;
-        return;
-    }*/
     memset(pScb->pSenseBuffer, 0, pScb->senseBufferLength);
-    /*pScb->ScsiCommandCompletion = ;*/
+     
     pScb->ScsiStatus =  MV_SCSI_STATUS_CHECK_CONDITION;
 
     SenseData.ResponseCode = MV_SCSI_RESPONSE_CODE;
-//    SenseData.Valid = 0;
  
     SenseData.AdditionalSenseLength = 12;
     SenseData.InformationDesc.type = 0;
@@ -2453,7 +2224,6 @@ handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
     mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "%20s : %04x\n","Device", registerStruct->deviceRegister);
     mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "%20s : %04x\n","Status", registerStruct->statusRegister);
 
-    /* If the command is synchronize cache */
     if ((pScb->ScsiCdb[0] == SCSI_OPCODE_SYNCHRONIZE_CACHE10) || 
 	(pScb->ScsiCdb[0] == SCSI_OPCODE_SYNCHRONIZE_CACHE16))
     {
@@ -2476,7 +2246,7 @@ handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
         else if (errorReg & UNC_ERR)
         {
 #ifdef MY_ABC_HERE
-            /* SCSI_OPCODE_VERIFY* is a kind of read */
+            
             SynoInsertBadSectorRemap(pScb, registerStruct, MV_TRUE);
 #endif
 #if 0
@@ -2484,9 +2254,7 @@ handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
 #endif
             SenseData.SenseKey = SCSI_SENSE_MEDIUM_ERROR;
 #if 0
-            /* Since high 8 bit address are taken immediatly from LowLbaAddress and
-            not from the completion info ; the following code is relevant for both
-            48bit and 28bit LBA addressing*/
+             
             SenseData.Information[0] = (MV_U8)((LowLbaAddress & 0xff000000) >> 24);
             SenseData.Information[1] = (MV_U8)(registerStruct->lbaHighRegister & 0xff);
             SenseData.Information[2] = (MV_U8)(registerStruct->lbaMidRegister & 0xff);
@@ -2502,10 +2270,7 @@ handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
                      SenseData.InformationDesc.information[7]
 		     );
         }
-        /*else if (errorReg & IDNF_ERR)
-        {
-            SenseData.SenseKey = SCSI_SENSE_VOL_OVERFLOW;
-        }*/
+         
         else if ((errorReg & ABRT_ERR) || (errorReg & IDNF_ERR))
         {
             SenseData.SenseKey = SCSI_SENSE_ABORTED_COMMAND;
@@ -2519,7 +2284,7 @@ handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
     }
     else if (pScb->ScsiCdb[0] == SCSI_OPCODE_MODE_SELECT6)
     {
-        /* MODE SELECT is only when enabling / disabling write cache */
+         
         if (errorReg & ABRT_ERR)
         {
             SenseData.SenseKey = SCSI_SENSE_ABORTED_COMMAND;
@@ -2547,10 +2312,10 @@ handleUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
              "READ" : "WRITE");
     if (responseFlags & (MV_BIT3))
     {
-        /* prevent the error_handler from re-send any commands */
+         
         pScb->ScsiCommandCompletion = MV_SCSI_COMPLETION_DISCONNECT;
     }
-    else if (responseFlags & MV_BIT2)           /* ATA error*/
+    else if (responseFlags & MV_BIT2)            
     {
         MV_SCSI_SENSE_DATA SenseData;
 
@@ -2558,7 +2323,7 @@ handleUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
         pScb->ScsiStatus =  MV_SCSI_STATUS_CHECK_CONDITION;
         pScb->dataTransfered = 0;
         pScb->senseDataLength = 13;
-//        SenseData.Valid = 1;
+ 
         SenseData.ResponseCode = MV_SCSI_RESPONSE_CODE;
         SenseData.AdditionalSenseLength = 12;
 	SenseData.InformationDesc.type = 0;
@@ -2575,7 +2340,7 @@ handleUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, "%20s : %04x\n","Status", registerStruct->statusRegister);
 
         if ((registerStruct->errorRegister & ICRC_ERR)||
-            (registerStruct->errorRegister == 0xC))/*error code injected by 88i8030*/
+            (registerStruct->errorRegister == 0xC)) 
         {
             SenseData.SenseKey = SCSI_SENSE_ABORTED_COMMAND;
             SenseData.AdditionalSenseCode = SCSI_ADSENSE_NO_SENSE;
@@ -2625,7 +2390,7 @@ handleUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
         else if ((registerStruct->errorRegister & IDNF_ERR) &&
                  (!(registerStruct->errorRegister & ABRT_ERR)))
         {
-            /* In case IDNF is set and ABRT reset OR IDNF reset and ABRT is set */
+             
             SenseData.SenseKey = SCSI_SENSE_ILLEGAL_REQUEST;
             SenseData.AdditionalSenseCode = SCSI_ADSENSE_ILLEGAL_BLOCK;
         }
@@ -2667,24 +2432,7 @@ handleUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
     }
 }
 
-/*******************************************************************************
-* checkQueueCommandResult -
-*
-* DESCRIPTION:  set the scsi request completion status and the Scsi Status
-*       according to the result returned form the mvSataQueueCommand function
-*
-* INPUT:
-*
-* OUTPUT:
-*
-* RETURN:
-*
-* COMMENTS:
-*
-*
-*******************************************************************************/
-
-/*static*/ MV_VOID  checkQueueCommandResult(MV_SATA_SCSI_CMD_BLOCK *pScb,
+  MV_VOID  checkQueueCommandResult(MV_SATA_SCSI_CMD_BLOCK *pScb,
                                             MV_QUEUE_COMMAND_RESULT  result)
 {
     switch (result)
@@ -2814,10 +2562,10 @@ static MV_VOID  mvScsiAtaSendSplittedVerifyCommand(IN MV_SATA_SCSI_CMD_BLOCK  *p
     MV_QUEUE_COMMAND_INFO   *pCommandInfo = &commandInfo;
 #endif
     MV_QUEUE_COMMAND_RESULT result;
-    MV_U8                  sectors = 0;/*256 sectors*/
+    MV_U8                  sectors = 0; 
 
     pScb->sequenceNumber++;
-    if (pScb->sequenceNumber == 1)/*for the first command*/
+    if (pScb->sequenceNumber == 1) 
     {
         if (pScb->ScsiCdb[0] == SCSI_OPCODE_VERIFY6)
         {
@@ -2889,7 +2637,6 @@ static MV_VOID  mvScsiAtaSendSplittedVerifyCommand(IN MV_SATA_SCSI_CMD_BLOCK  *p
         return;
     }
 
-    /* update stats*/
     pScb->pSalAdapterExtension->totalAccumulatedOutstanding[pScb->bus] +=
     mvSataNumOfDmaCommands(pScb->pSalAdapterExtension->pSataAdapter,pScb->bus);
     pScb->pSalAdapterExtension->ataDriveData[pScb->bus][pScb->target].stats.totalIOs++;
@@ -2907,7 +2654,7 @@ static MV_VOID  mvScsiAtaSendReadLookAhead(IN MV_SATA_ADAPTER *pSataAdapter,
 #endif
     MV_QUEUE_COMMAND_RESULT result;
 
-    if (pScb->LowLbaAddress == 0) /* Disable Look Ahead*/
+    if (pScb->LowLbaAddress == 0)  
     {
         mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " Parse Caching Page: Disable Read Look Ahead\n");
         pCommandInfo->commandParams.NoneUdmaCommand.features = MV_ATA_SET_FEATURES_DISABLE_RLA;
@@ -2969,8 +2716,7 @@ MV_VOID     mvSataScsiInitAdapterExt(MV_SAL_ADAPTER_EXTENSION *pAdapterExt,
         for (PMPort = 0; PMPort < MV_SATA_PM_MAX_PORTS; PMPort++)
         {
             pAdapterExt->ataDriveData[channelIndex][PMPort].driveReady = MV_FALSE;
-            /* one identify data buffer used for all the drives connected to */
-            /* the same channel*/
+             
             pAdapterExt->ataDriveData[channelIndex][PMPort].identifyBuffer =
             pAdapterExt->identifyBuffer[channelIndex];
         }
@@ -3122,7 +2868,7 @@ MV_SCSI_COMMAND_STATUS_TYPE mvSataExecuteScsiCommand(MV_SATA_SCSI_CMD_BLOCK  *pS
     case SCSI_OPCODE_WRITE_LONG10:
     case SCSI_OPCODE_READ_LONG10:
 #endif
-        if (cmd[1] & MV_BIT0) /* if related address*/
+        if (cmd[1] & MV_BIT0)  
         {
             invalidCDB = MV_TRUE;
             mvLogMsg(MV_SAL_LOG_ID, MV_DEBUG, " %d %d %d: Scsi command received with "
@@ -3131,7 +2877,7 @@ MV_SCSI_COMMAND_STATUS_TYPE mvSataExecuteScsiCommand(MV_SATA_SCSI_CMD_BLOCK  *pS
 
         }
     }
-    if (cmd[pScb->ScsiCdbLength - 1] != 0) /*if CONTROL is set*/
+    if (cmd[pScb->ScsiCdbLength - 1] != 0)  
     {
         MV_BOOLEAN commandSupported = MV_TRUE;
 
@@ -3147,7 +2893,7 @@ MV_SCSI_COMMAND_STATUS_TYPE mvSataExecuteScsiCommand(MV_SATA_SCSI_CMD_BLOCK  *pS
         case SCSI_OPCODE_TEST_UNIT_READY:
         case SCSI_OPCODE_MODE_SELECT6:
         case SCSI_OPCODE_MODE_SENSE6:
-        case SCSI_OPCODE_READ_CAPACITY10:     /* read capctiy CDB*/
+        case SCSI_OPCODE_READ_CAPACITY10:      
         case SCSI_OPCODE_REQUEST_SENSE6:
         case SCSI_OPCODE_VERIFY6:
         case SCSI_OPCODE_VERIFY10:
@@ -3244,10 +2990,10 @@ MV_SCSI_COMMAND_STATUS_TYPE mvSataExecuteScsiCommand(MV_SATA_SCSI_CMD_BLOCK  *pS
         return mvScsiAtaModeSelect(pSataAdapter, pScb);
     case SCSI_OPCODE_MODE_SENSE6:
         return mvScsiAtaGetModeSenseData(pSataAdapter,pScb);
-        /* Used to detect write protected status.*/
-    case SCSI_OPCODE_READ_CAPACITY10:     /* read capctiy CDB*/
+         
+    case SCSI_OPCODE_READ_CAPACITY10:      
         return mvScsiAtaGetReadCapacityData(pSataAdapter, pScb);
-    case SCSI_OPCODE_READ_CAPACITY16:     /* read capctiy CDB*/
+    case SCSI_OPCODE_READ_CAPACITY16:      
         return mvScsiAtaGetReadCapacity16Data(pSataAdapter, pScb);
     case SCSI_OPCODE_REQUEST_SENSE6:
         return mvScsiAtaGetRequestSenseData(pSataAdapter, pScb);
@@ -3360,13 +3106,11 @@ MV_VOID     mvSataScsiSetDriveReady(MV_SAL_ADAPTER_EXTENSION *pAdapterExt,
     }
 }
 
-/* notify the translation layer with Reset and Power on reset*/
 MV_VOID mvSataScsiNotifyUA(MV_SAL_ADAPTER_EXTENSION *pAdapterExt,
                            MV_U8    channelIndex, MV_U8 PMPort)
 {
     pAdapterExt->ataDriveData[channelIndex][PMPort].UAConditionPending = MV_TRUE;
-    /* bit 0 - reset*/
-    /* bit 1 - parameters changed*/
+     
     pAdapterExt->ataDriveData[channelIndex][PMPort].UAEvents = MV_BIT1 | MV_BIT0;
     pAdapterExt->ataDriveData[channelIndex][PMPort].UAEvents &=
     pAdapterExt->UAMask;

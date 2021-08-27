@@ -1,24 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2003-2008 Takahiro Hirofuchi
- *
- * This is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
- * USA.
- */
  
 #ifndef __USBIP_COMMON_H
 #define __USBIP_COMMON_H
@@ -106,28 +88,6 @@ extern struct device_attribute dev_attr_usbip_debug;
 #define usbip_dbg_stub_tx(fmt, args...) \
 	usbip_dbg_with_flag(usbip_debug_stub_tx, fmt , ##args)
 
-/*
- * USB/IP request headers
- *
- * Each request is transferred across the network to its counterpart, which
- * facilitates the normal USB communication. The values contained in the headers
- * are basically the same as in a URB. Currently, four request types are
- * defined:
- *
- *  - USBIP_CMD_SUBMIT: a USB request block, corresponds to usb_submit_urb()
- *    (client to server)
- *
- *  - USBIP_RET_SUBMIT: the result of USBIP_CMD_SUBMIT
- *    (server to client)
- *
- *  - USBIP_CMD_UNLINK: an unlink request of a pending USBIP_CMD_SUBMIT,
- *    corresponds to usb_unlink_urb()
- *    (client to server)
- *
- *  - USBIP_RET_UNLINK: the result of USBIP_CMD_UNLINK
- *    (server to client)
- *
- */
 #define USBIP_CMD_SUBMIT	0x0001
 #define USBIP_CMD_UNLINK	0x0002
 #define USBIP_RET_SUBMIT	0x0003
@@ -139,16 +99,6 @@ extern struct device_attribute dev_attr_usbip_debug;
 #define USBIP_DIR_OUT	0x00
 #define USBIP_DIR_IN	0x01
 
-/**
- * struct usbip_header_basic - data pertinent to every request
- * @command: the usbip request type
- * @seqnum: sequential number that identifies requests; incremented per
- *	    connection
- * @devid: specifies a remote USB device uniquely instead of busnum and devnum;
- *	   in the stub driver, this value is ((busnum << 16) | devnum)
- * @direction: direction of the transfer
- * @ep: endpoint number
- */
 struct usbip_header_basic {
 	__u32 command;
 	__u32 seqnum;
@@ -157,20 +107,10 @@ struct usbip_header_basic {
 	__u32 ep;
 } __packed;
 
-/**
- * struct usbip_header_cmd_submit - USBIP_CMD_SUBMIT packet header
- * @transfer_flags: URB flags
- * @transfer_buffer_length: the data size for (in) or (out) transfer
- * @start_frame: initial frame for isochronous or interrupt transfers
- * @number_of_packets: number of isochronous packets
- * @interval: maximum time for the request on the server-side host controller
- * @setup: setup data for a control request
- */
 struct usbip_header_cmd_submit {
 	__u32 transfer_flags;
 	__s32 transfer_buffer_length;
 
-	/* it is difficult for usbip to sync frames (reserved only?) */
 	__s32 start_frame;
 	__s32 number_of_packets;
 	__s32 interval;
@@ -178,14 +118,6 @@ struct usbip_header_cmd_submit {
 	unsigned char setup[8];
 } __packed;
 
-/**
- * struct usbip_header_ret_submit - USBIP_RET_SUBMIT packet header
- * @status: return status of a non-iso request
- * @actual_length: number of bytes transferred
- * @start_frame: initial frame for isochronous or interrupt transfers
- * @number_of_packets: number of isochronous packets
- * @error_count: number of errors for isochronous transfers
- */
 struct usbip_header_ret_submit {
 	__s32 status;
 	__s32 actual_length;
@@ -194,27 +126,14 @@ struct usbip_header_ret_submit {
 	__s32 error_count;
 } __packed;
 
-/**
- * struct usbip_header_cmd_unlink - USBIP_CMD_UNLINK packet header
- * @seqnum: the URB seqnum to unlink
- */
 struct usbip_header_cmd_unlink {
 	__u32 seqnum;
 } __packed;
 
-/**
- * struct usbip_header_ret_unlink - USBIP_RET_UNLINK packet header
- * @status: return status of the request
- */
 struct usbip_header_ret_unlink {
 	__s32 status;
 } __packed;
 
-/**
- * struct usbip_header - common header for all usbip packets
- * @base: the basic header
- * @u: packet type dependent header
- */
 struct usbip_header {
 	struct usbip_header_basic base;
 
@@ -226,12 +145,9 @@ struct usbip_header {
 	} u;
 } __packed;
 
-/*
- * This is the same as usb_iso_packet_descriptor but packed for pdu.
- */
 struct usbip_iso_packet_descriptor {
 	__u32 offset;
-	__u32 length;			/* expected length */
+	__u32 length;			 
 	__u32 actual_length;
 	__u32 status;
 } __packed;
@@ -242,22 +158,20 @@ enum usbip_side {
 };
 
 enum usbip_status {
-	/* sdev is available. */
+	 
 	SDEV_ST_AVAILABLE = 0x01,
-	/* sdev is now used. */
+	 
 	SDEV_ST_USED,
-	/* sdev is unusable because of a fatal error. */
+	 
 	SDEV_ST_ERROR,
 
-	/* vdev does not connect a remote device. */
 	VDEV_ST_NULL,
-	/* vdev is used, but the USB address is not assigned yet */
+	 
 	VDEV_ST_NOTASSIGNED,
 	VDEV_ST_USED,
 	VDEV_ST_ERROR
 };
 
-/* event handler */
 #define USBIP_EH_SHUTDOWN	(1 << 0)
 #define USBIP_EH_BYE		(1 << 1)
 #define USBIP_EH_RESET		(1 << 2)
@@ -274,12 +188,10 @@ enum usbip_status {
 #define	VDEV_EVENT_ERROR_TCP	(USBIP_EH_SHUTDOWN | USBIP_EH_RESET)
 #define	VDEV_EVENT_ERROR_MALLOC	(USBIP_EH_SHUTDOWN | USBIP_EH_UNUSABLE)
 
-/* a common structure for stub_device and vhci_device */
 struct usbip_device {
 	enum usbip_side side;
 	enum usbip_status status;
 
-	/* lock for status */
 	spinlock_t lock;
 
 	struct socket *tcp_socket;
@@ -307,7 +219,6 @@ int setkeepalive(struct socket *socket);
 void setreuse(struct socket *);
 #endif
 
-/* usbip_common.c */
 void usbip_dump_urb(struct urb *purb);
 void usbip_dump_header(struct usbip_header *pdu);
 
@@ -320,12 +231,11 @@ void usbip_pack_pdu(struct usbip_header *pdu, struct urb *urb, int cmd,
 void usbip_header_correct_endian(struct usbip_header *pdu, int send);
 
 void *usbip_alloc_iso_desc_pdu(struct urb *urb, ssize_t *bufflen);
-/* some members of urb must be substituted before. */
+ 
 int usbip_recv_iso(struct usbip_device *ud, struct urb *urb);
 void usbip_pad_iso(struct usbip_device *ud, struct urb *urb);
 int usbip_recv_xbuff(struct usbip_device *ud, struct urb *urb);
 
-/* usbip_event.c */
 int usbip_start_eh(struct usbip_device *ud);
 void usbip_stop_eh(struct usbip_device *ud);
 void usbip_event_add(struct usbip_device *ud, unsigned long event);
@@ -348,4 +258,4 @@ static inline int interface_to_infnum(struct usb_interface *interface)
 	return interface->cur_altsetting->desc.bInterfaceNumber;
 }
 
-#endif /* __USBIP_COMMON_H */
+#endif  

@@ -1,13 +1,8 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * sysfs.c - sysfs support
- *
- * (C) 2006-2007 Shaohua Li <shaohua.li@intel.com>
- *
- * This code is licenced under the GPL.
- */
+ 
+
 
 #include <linux/kernel.h>
 #include <linux/cpuidle.h>
@@ -142,9 +137,6 @@ static struct attribute_group cpuclass_attr_group = {
 	.name = "cpuidle",
 };
 
-/**
- * cpuidle_add_class_sysfs - add CPU global sysfs attributes
- */
 int cpuidle_add_class_sysfs(struct sysdev_class *cls)
 {
 	if (sysfs_switch)
@@ -153,9 +145,6 @@ int cpuidle_add_class_sysfs(struct sysdev_class *cls)
 	return sysfs_create_group(&cls->kset.kobj, &cpuclass_attr_group);
 }
 
-/**
- * cpuidle_remove_class_sysfs - remove CPU global sysfs attributes
- */
 void cpuidle_remove_class_sysfs(struct sysdev_class *cls)
 {
 	sysfs_remove_group(&cls->kset.kobj, &cpuclass_attr_group);
@@ -377,17 +366,12 @@ static inline void cpuidle_free_state_kobj(struct cpuidle_device *device, int i)
 	device->kobjs[i] = NULL;
 }
 
-/**
- * cpuidle_add_driver_sysfs - adds driver-specific sysfs attributes
- * @device: the target device
- */
 int cpuidle_add_state_sysfs(struct cpuidle_device *device)
 {
 	int i, ret = -ENOMEM;
 	struct cpuidle_state_kobj *kobj;
 	struct cpuidle_driver *drv = cpuidle_get_driver();
 
-	/* state statistics */
 	for (i = 0; i < device->state_count; i++) {
 		kobj = kzalloc(sizeof(struct cpuidle_state_kobj), GFP_KERNEL);
 		if (!kobj)
@@ -414,10 +398,6 @@ error_state:
 	return ret;
 }
 
-/**
- * cpuidle_remove_driver_sysfs - removes driver-specific sysfs attributes
- * @device: the target device
- */
 void cpuidle_remove_state_sysfs(struct cpuidle_device *device)
 {
 	int i;
@@ -426,10 +406,6 @@ void cpuidle_remove_state_sysfs(struct cpuidle_device *device)
 		cpuidle_free_state_kobj(device, i);
 }
 
-/**
- * cpuidle_add_sysfs - creates a sysfs instance for the target device
- * @sysdev: the target device
- */
 int cpuidle_add_sysfs(struct sys_device *sysdev)
 {
 	int cpu = sysdev->id;
@@ -444,10 +420,6 @@ int cpuidle_add_sysfs(struct sys_device *sysdev)
 	return error;
 }
 
-/**
- * cpuidle_remove_sysfs - deletes a sysfs instance on the target device
- * @sysdev: the target device
- */
 void cpuidle_remove_sysfs(struct sys_device *sysdev)
 {
 	int cpu = sysdev->id;

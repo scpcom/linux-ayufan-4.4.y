@@ -1,13 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* (C) 1999-2001 Paul `Rusty' Russell
- * (C) 2002-2004 Netfilter Core Team <coreteam@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
  
 #include <linux/types.h>
 #include <linux/netfilter.h>
@@ -171,7 +164,6 @@ ct_show_delta_time(struct seq_file *s, const struct nf_conn *ct)
 }
 #endif
 
-/* return 0 on success, 1 in case of error */
 static int ct_seq_show(struct seq_file *s, void *v)
 {
 	struct nf_conntrack_tuple_hash *hash = v;
@@ -184,7 +176,6 @@ static int ct_seq_show(struct seq_file *s, void *v)
 	if (unlikely(!atomic_inc_not_zero(&ct->ct_general.use)))
 		return 0;
 
-	/* we only want to print DIR_ORIGINAL */
 	if (NF_CT_DIRECTION(hash))
 		goto release;
 
@@ -266,7 +257,7 @@ static int ct_seq_show(struct seq_file *s, void *v)
 		if (seq_printf(s, "[NFP (reply)] "))
 			goto release;
 	}
-#endif /* CONFIG_MV_ETH_NFP_HOOKS */
+#endif  
 #endif
 
 #if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE))
@@ -432,12 +423,10 @@ static int nf_conntrack_standalone_init_proc(struct net *net)
 static void nf_conntrack_standalone_fini_proc(struct net *net)
 {
 }
-#endif /* CONFIG_PROC_FS */
-
-/* Sysctl support */
+#endif  
  
 #ifdef CONFIG_SYSCTL
-/* Log invalid packets of a given protocol */
+ 
 static int log_invalid_proto_min = 0;
 static int log_invalid_proto_max = 255;
 
@@ -566,7 +555,7 @@ static int nf_conntrack_standalone_init_sysctl(struct net *net)
 static void nf_conntrack_standalone_fini_sysctl(struct net *net)
 {
 }
-#endif /* CONFIG_SYSCTL */
+#endif  
 
 static int nf_conntrack_net_init(struct net *net)
 {
@@ -618,8 +607,6 @@ static void __exit nf_conntrack_standalone_fini(void)
 module_init(nf_conntrack_standalone_init);
 module_exit(nf_conntrack_standalone_fini);
 
-/* Some modules need us, but don't depend directly on any symbol.
-   They should call this. */
 void need_conntrack(void)
 {
 }

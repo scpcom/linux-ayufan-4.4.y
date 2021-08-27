@@ -1,11 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/fcntl.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- */
  
 #include <linux/syscalls.h>
 #include <linux/init.h>
@@ -36,88 +31,87 @@
 #define ACL_MASK_NONE 0
 
 struct syno_archive_map {
-	unsigned int sAr;	//syno archive
+	unsigned int sAr;	 
 	int isSetCmd;
 };
 
 static struct syno_archive_map rgSynoAr[] = {
-	{S2_IARCHIVE, 0},               /* F_CLEAR_ARCHIVE */
-	{S2_SMB_ARCHIVE, 1},            /* F_SETSMB_ARCHIVE */
-	{S2_SMB_HIDDEN, 1},             /* F_SETSMB_HIDDEN */
-	{S2_SMB_SYSTEM, 1},             /* F_SETSMB_SYSTEM */
-	{S2_SMB_ARCHIVE, 0},            /* F_CLRSMB_ARCHIVE */
-	{S2_SMB_HIDDEN, 0},             /* F_CLRSMB_HIDDEN */
-	{S2_SMB_SYSTEM, 0},             /* F_CLRSMB_SYSTEM */
-	{S3_IARCHIVE, 0},               /* F_CLEAR_S3_ARCHIVE */
+	{S2_IARCHIVE, 0},                
+	{S2_SMB_ARCHIVE, 1},             
+	{S2_SMB_HIDDEN, 1},              
+	{S2_SMB_SYSTEM, 1},              
+	{S2_SMB_ARCHIVE, 0},             
+	{S2_SMB_HIDDEN, 0},              
+	{S2_SMB_SYSTEM, 0},              
+	{S3_IARCHIVE, 0},                
 #ifdef CONFIG_FS_SYNO_ACL
-	{S2_SMB_READONLY, 0},           /* F_CLRSMB_READONLY */
-	{S2_SMB_READONLY, 1},           /* F_SETSMB_READONLY */
-	{S2_SYNO_ACL_INHERIT, 0},       /* F_CLRACL_INHERIT */
-	{S2_SYNO_ACL_INHERIT, 1},       /* F_SETSMB_INHERIT */
-	{S2_SYNO_ACL_EXIST, 0},         /* F_CLRACL_HAS_ACL */
-	{S2_SYNO_ACL_EXIST, 1},         /* F_SETACL_HAS_ACL */
-	{S2_SYNO_ACL_SUPPORT, 0},       /* F_CLRACL_SUPPORT */
-	{S2_SYNO_ACL_SUPPORT, 1},       /* F_SETACL_SUPPORT */
-	{S2_SYNO_ACL_IS_OWNER_GROUP, 0},/* F_CLRACL_OWNER_IS_GROUP */
-	{S2_SYNO_ACL_IS_OWNER_GROUP, 1},/* F_SETACL_OWNER_IS_GROUP */
+	{S2_SMB_READONLY, 0},            
+	{S2_SMB_READONLY, 1},            
+	{S2_SYNO_ACL_INHERIT, 0},        
+	{S2_SYNO_ACL_INHERIT, 1},        
+	{S2_SYNO_ACL_EXIST, 0},          
+	{S2_SYNO_ACL_EXIST, 1},          
+	{S2_SYNO_ACL_SUPPORT, 0},        
+	{S2_SYNO_ACL_SUPPORT, 1},        
+	{S2_SYNO_ACL_IS_OWNER_GROUP, 0}, 
+	{S2_SYNO_ACL_IS_OWNER_GROUP, 1}, 
 #endif
 };
 
 #ifdef CONFIG_FS_SYNO_ACL
 const int rgSynoArAclTag[] = {
-	PROTECT_BY_ACL,                 /* F_CLEAR_ARCHIVE */
-	PROTECT_BY_ACL,                 /* F_SETSMB_ARCHIVE */
-	PROTECT_BY_ACL,                 /* F_SETSMB_HIDDEN */
-	PROTECT_BY_ACL,                 /* F_SETSMB_SYSTEM */
-	PROTECT_BY_ACL,                 /* F_CLRSMB_ARCHIVE */
-	PROTECT_BY_ACL,                 /* F_CLRSMB_HIDDEN */
-	PROTECT_BY_ACL,                 /* F_CLRSMB_SYSTEM */
-	PROTECT_BY_ACL,                 /* F_CLEAR_S3_ARCHIVE */
-	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, /* F_CLRSMB_READONLY */
-	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, /* F_SETSMB_READONLY */
-	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, /* F_CLRACL_INHERIT */
-	PROTECT_BY_ACL | NEED_FS_ACL_SUPPORT,                          /* F_SETACL_INHERIT */
-	NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,                  /* F_CLRACL_HAS_ACL */
-	NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,                  /* F_SETACL_HAS_ACL */
-	NEED_FS_ACL_SUPPORT,                                           /* F_CLRACL_SUPPORT */
-	NEED_FS_ACL_SUPPORT,                                           /* F_SETACL_SUPPORT */
-	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, /* F_CLRACL_OWNER_IS_GROUP */
-	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT, /* F_SETACL_OWNER_IS_GROUP */
+	PROTECT_BY_ACL,                  
+	PROTECT_BY_ACL,                  
+	PROTECT_BY_ACL,                  
+	PROTECT_BY_ACL,                  
+	PROTECT_BY_ACL,                  
+	PROTECT_BY_ACL,                  
+	PROTECT_BY_ACL,                  
+	PROTECT_BY_ACL,                  
+	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,  
+	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,  
+	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,  
+	PROTECT_BY_ACL | NEED_FS_ACL_SUPPORT,                           
+	NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,                   
+	NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,                   
+	NEED_FS_ACL_SUPPORT,                                            
+	NEED_FS_ACL_SUPPORT,                                            
+	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,  
+	PROTECT_BY_ACL | NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT,  
 };
 
 const int rgSynoArAclMask[] = {
-	MAY_WRITE_ATTR,       /* F_CLEAR_ARCHIVE */
-	MAY_WRITE_ATTR,       /* F_SETSMB_ARCHIVE */
-	MAY_WRITE_ATTR,       /* F_SETSMB_HIDDEN */
-	MAY_WRITE_ATTR,       /* F_SETSMB_SYSTEM */
-	MAY_WRITE_ATTR,       /* F_CLRSMB_ARCHIVE */
-	MAY_WRITE_ATTR,       /* F_CLRSMB_HIDDEN */
-	MAY_WRITE_ATTR,       /* F_CLRSMB_SYSTEM */
-	MAY_WRITE_ATTR,       /* F_CLEAR_S3_ARCHIVE */
-	MAY_WRITE_ATTR,       /* F_CLRSMB_READONLY */
-	MAY_WRITE_ATTR,       /* F_SETSMB_READONLY */
-	MAY_WRITE_PERMISSION, /* F_CLRACL_INHERIT */
-	MAY_WRITE_PERMISSION, /* F_SETACL_INHERIT */
-	ACL_MASK_NONE,        /* F_CLRACL_HAS_ACL */
-	ACL_MASK_NONE,        /* F_SETACL_HAS_ACL */
-	ACL_MASK_NONE,        /* F_CLRACL_SUPPORT */
-	ACL_MASK_NONE,        /* F_SETACL_SUPPORT */
-	MAY_GET_OWNER_SHIP,   /* F_CLRACL_OWNER_IS_GROUP */
-	MAY_GET_OWNER_SHIP,   /* F_SETACL_OWNER_IS_GROUP */
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_ATTR,        
+	MAY_WRITE_PERMISSION,  
+	MAY_WRITE_PERMISSION,  
+	ACL_MASK_NONE,         
+	ACL_MASK_NONE,         
+	ACL_MASK_NONE,         
+	ACL_MASK_NONE,         
+	MAY_GET_OWNER_SHIP,    
+	MAY_GET_OWNER_SHIP,    
 };
 
 struct syno_archive_permission_mapping {
-	unsigned int sAr;	//syno archive
+	unsigned int sAr;	 
 	int permission;
 };
 static struct syno_archive_permission_mapping rgSynoArPermission[] = {
-	/* General archive */
+	 
 	{S2_IARCHIVE, MAY_WRITE_ATTR},
 	{S2_SMB_ARCHIVE, MAY_WRITE_ATTR},
 	{S2_SMB_HIDDEN, MAY_WRITE_ATTR},
 	{S2_SMB_SYSTEM, MAY_WRITE_ATTR},
 
-	/* ACL archive */
 	{S2_SMB_READONLY, MAY_WRITE_ATTR},
 	{S2_SYNO_ACL_IS_OWNER_GROUP, MAY_GET_OWNER_SHIP},
 	{S2_SYNO_ACL_INHERIT, MAY_WRITE_PERMISSION},
@@ -125,7 +119,7 @@ static struct syno_archive_permission_mapping rgSynoArPermission[] = {
 	{S2_SYNO_ACL_SUPPORT, MAY_WRITE_PERMISSION},
 	{0, -1}
 };
-#endif //CONFIG_FS_SYNO_ACL
+#endif  
 
 #ifdef MY_ABC_HERE
 long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
@@ -175,7 +169,7 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 			err = -EOPNOTSUPP;
 			goto unlock;
 		}
-		// S2_SYNO_ACL_SUPPORT should be set if you want to set ACL archive bit.
+		 
 		if (!(S2_SYNO_ACL_SUPPORT & flags)) {
 			err = -EINVAL;
 			goto unlock;
@@ -223,14 +217,14 @@ long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd)
 	if (0 > (err = synoacl_op_arbit_chg_ok(dentry, cmd, rgSynoArAclTag[i], rgSynoArAclMask[i]))){
 		goto unlock;
 	}
-#endif //CONFIG_FS_SYNO_ACL
+#endif  
 	if (rgSynoAr[i].isSetCmd) {
 		archive_bit |= rgSynoAr[i].sAr;
 #ifdef CONFIG_FS_SYNO_ACL
 		if (S2_SYNO_ACL_INHERIT == rgSynoAr[i].sAr) {
 			archive_bit |= S2_SYNO_ACL_SUPPORT;
 		}
-#endif //CONFIG_FS_SYNO_ACL
+#endif  
 	} else {
 		archive_bit &= ~rgSynoAr[i].sAr;
 	}
@@ -241,7 +235,7 @@ unlock:
 	return err;
 }
 EXPORT_SYMBOL(__SYNOArchiveSet);
-#endif /* MY_ABC_HERE */
+#endif  
 
 void set_close_on_exec(unsigned int fd, int flag)
 {
@@ -291,20 +285,7 @@ SYSCALL_DEFINE3(dup3, unsigned int, oldfd, unsigned int, newfd, int, flags)
 			goto Ebadf;
 		goto out_unlock;
 	}
-	/*
-	 * We need to detect attempts to do dup2() over allocated but still
-	 * not finished descriptor.  NB: OpenBSD avoids that at the price of
-	 * extra work in their equivalent of fget() - they insert struct
-	 * file immediately after grabbing descriptor, mark it larval if
-	 * more work (e.g. actual opening) is needed and make sure that
-	 * fget() treats larval files as absent.  Potentially interesting,
-	 * but while extra work in fget() is trivial, locking implications
-	 * and amount of surgery on open()-related paths in VFS are not.
-	 * FreeBSD fails with -EBADF in the same situation, NetBSD "solution"
-	 * deadlocks in rather amusing ways, AFAICS.  All of that is out of
-	 * scope of POSIX or SUS, since neither considers shared descriptor
-	 * tables and this condition does not arise without those.
-	 */
+	 
 	err = -EBUSY;
 	fdt = files_fdtable(files);
 	tofree = fdt->fd[newfd];
@@ -333,7 +314,7 @@ out_unlock:
 
 SYSCALL_DEFINE2(dup2, unsigned int, oldfd, unsigned int, newfd)
 {
-	if (unlikely(newfd == oldfd)) { /* corner case */
+	if (unlikely(newfd == oldfd)) {  
 		struct files_struct *files = current->files;
 		int retval = oldfd;
 
@@ -368,19 +349,13 @@ static int setfl(int fd, struct file * filp, unsigned long arg)
 	struct inode * inode = filp->f_path.dentry->d_inode;
 	int error = 0;
 
-	/*
-	 * O_APPEND cannot be cleared if the file is marked as append-only
-	 * and the file is open for write.
-	 */
 	if (((arg ^ filp->f_flags) & O_APPEND) && IS_APPEND(inode))
 		return -EPERM;
 
-	/* O_NOATIME can only be set by the owner or superuser */
 	if ((arg & O_NOATIME) && !(filp->f_flags & O_NOATIME))
 		if (!inode_owner_or_capable(inode))
 			return -EPERM;
 
-	/* required for strict SunOS emulation */
 	if (O_NONBLOCK != O_NDELAY)
 	       if (arg & O_NDELAY)
 		   arg |= O_NONBLOCK;
@@ -396,9 +371,6 @@ static int setfl(int fd, struct file * filp, unsigned long arg)
 	if (error)
 		return error;
 
-	/*
-	 * ->fasync() is responsible for setting the FASYNC bit.
-	 */
 	if (((arg ^ filp->f_flags) & FASYNC) && filp->f_op &&
 			filp->f_op->fasync) {
 		error = filp->f_op->fasync(fd, filp, (arg & FASYNC) != 0);
@@ -598,13 +570,7 @@ static long do_fcntl(int fd, unsigned int cmd, unsigned long arg,
 		err = fcntl_setlk(fd, filp, cmd, (struct flock __user *) arg);
 		break;
 	case F_GETOWN:
-		/*
-		 * XXX If f_owner is a process group, the
-		 * negative return value will get converted
-		 * into an error.  Oops.  If we keep the
-		 * current syscall conventions, the only way
-		 * to fix this will be in libc.
-		 */
+		 
 		err = f_getown(filp);
 		force_successful_syscall_return();
 		break;
@@ -621,7 +587,7 @@ static long do_fcntl(int fd, unsigned int cmd, unsigned long arg,
 		err = filp->f_owner.signum;
 		break;
 	case F_SETSIG:
-		/* arg == 0 restores default behaviour. */
+		 
 		if (!valid_signal(arg)) {
 			break;
 		}
@@ -743,15 +709,13 @@ out:
 }
 #endif
 
-/* Table to convert sigio signal codes into poll band bitmaps */
-
 static const long band_table[NSIGPOLL] = {
-	POLLIN | POLLRDNORM,			/* POLL_IN */
-	POLLOUT | POLLWRNORM | POLLWRBAND,	/* POLL_OUT */
-	POLLIN | POLLRDNORM | POLLMSG,		/* POLL_MSG */
-	POLLERR,				/* POLL_ERR */
-	POLLPRI | POLLRDBAND,			/* POLL_PRI */
-	POLLHUP | POLLERR			/* POLL_HUP */
+	POLLIN | POLLRDNORM,			 
+	POLLOUT | POLLWRNORM | POLLWRBAND,	 
+	POLLIN | POLLRDNORM | POLLMSG,		 
+	POLLERR,				 
+	POLLPRI | POLLRDBAND,			 
+	POLLHUP | POLLERR			 
 };
 
 static inline int sigio_perm(struct task_struct *p,
@@ -774,10 +738,7 @@ static void send_sigio_to_task(struct task_struct *p,
 			       struct fown_struct *fown,
 			       int fd, int reason, int group)
 {
-	/*
-	 * F_SETSIG can change ->signum lockless in parallel, make
-	 * sure we read it once and use the same value throughout.
-	 */
+	 
 	int signum = ACCESS_ONCE(fown->signum);
 
 	if (!sigio_perm(p, fown, signum))
@@ -786,18 +747,11 @@ static void send_sigio_to_task(struct task_struct *p,
 	switch (signum) {
 		siginfo_t si;
 		default:
-			/* Queue a rt signal with the appropriate fd as its
-			   value.  We use SI_SIGIO as the source, not 
-			   SI_KERNEL, since kernel signals always get 
-			   delivered even if we can't queue.  Failure to
-			   queue in this case _should_ be reported; we fall
-			   back to SIGIO in that case. --sct */
+			 
 			si.si_signo = signum;
 			si.si_errno = 0;
 		        si.si_code  = reason;
-			/* Make sure we are called with one of the POLL_*
-			   reasons, otherwise we could leak kernel stack into
-			   userspace.  */
+			 
 			BUG_ON((reason & __SI_MASK) != __SI_POLL);
 			if (reason - POLL_IN >= NSIGPOLL)
 				si.si_band  = ~0L;
@@ -806,7 +760,7 @@ static void send_sigio_to_task(struct task_struct *p,
 			si.si_fd    = fd;
 			if (!do_send_sig_info(signum, &si, p, group))
 				break;
-		/* fall-through: fall back on the old plain SIGIO signal */
+		 
 		case 0:
 			do_send_sig_info(SIGIO, SEND_SIG_PRIV, p, group);
 	}
@@ -888,15 +842,6 @@ static void fasync_free_rcu(struct rcu_head *head)
 			container_of(head, struct fasync_struct, fa_rcu));
 }
 
-/*
- * Remove a fasync entry. If successfully removed, return
- * positive and clear the FASYNC flag. If no entry exists,
- * do nothing and return 0.
- *
- * NOTE! It is very important that the FASYNC flag always
- * match the state "is the filp on a fasync list".
- *
- */
 int fasync_remove_entry(struct file *filp, struct fasync_struct **fapp)
 {
 	struct fasync_struct *fa, **fp;
@@ -928,23 +873,11 @@ struct fasync_struct *fasync_alloc(void)
 	return kmem_cache_alloc(fasync_cache, GFP_KERNEL);
 }
 
-/*
- * NOTE! This can be used only for unused fasync entries:
- * entries that actually got inserted on the fasync list
- * need to be released by rcu - see fasync_remove_entry.
- */
 void fasync_free(struct fasync_struct *new)
 {
 	kmem_cache_free(fasync_cache, new);
 }
 
-/*
- * Insert a new entry into the fasync list.  Return the pointer to the
- * old one if we didn't use the new one.
- *
- * NOTE! It is very important that the FASYNC flag always
- * match the state "is the filp on a fasync list".
- */
 struct fasync_struct *fasync_insert_entry(int fd, struct file *filp, struct fasync_struct **fapp, struct fasync_struct *new)
 {
         struct fasync_struct *fa, **fp;
@@ -975,10 +908,6 @@ out:
 	return fa;
 }
 
-/*
- * Add a fasync entry. Return negative on error, positive if
- * added, and zero if did nothing but change an existing one.
- */
 static int fasync_add_entry(int fd, struct file *filp, struct fasync_struct **fapp)
 {
 	struct fasync_struct *new;
@@ -987,13 +916,6 @@ static int fasync_add_entry(int fd, struct file *filp, struct fasync_struct **fa
 	if (!new)
 		return -ENOMEM;
 
-	/*
-	 * fasync_insert_entry() returns the old (update) entry if
-	 * it existed.
-	 *
-	 * So free the (unused) new entry and return 0 to let the
-	 * caller know that we didn't add any new fasync entries.
-	 */
 	if (fasync_insert_entry(fd, filp, fapp, new)) {
 		fasync_free(new);
 		return 0;
@@ -1002,12 +924,6 @@ static int fasync_add_entry(int fd, struct file *filp, struct fasync_struct **fa
 	return 1;
 }
 
-/*
- * fasync_helper() is used by almost all character device drivers
- * to set up the fasync queue, and for regular files by the file
- * lease code. It returns negative on error, 0 if it did no changes
- * and positive if it added/deleted the entry.
- */
 int fasync_helper(int fd, struct file * filp, int on, struct fasync_struct **fapp)
 {
 	if (!on)
@@ -1017,9 +933,6 @@ int fasync_helper(int fd, struct file * filp, int on, struct fasync_struct **fap
 
 EXPORT_SYMBOL(fasync_helper);
 
-/*
- * rcu_read_lock() is held
- */
 static void kill_fasync_rcu(struct fasync_struct *fa, int sig, int band)
 {
 	while (fa) {
@@ -1034,9 +947,7 @@ static void kill_fasync_rcu(struct fasync_struct *fa, int sig, int band)
 		spin_lock_irqsave(&fa->fa_lock, flags);
 		if (fa->fa_file) {
 			fown = &fa->fa_file->f_owner;
-			/* Don't send SIGURG to processes which have not set a
-			   queued signum: SIGURG has its own default signalling
-			   mechanism. */
+			 
 			if (!(sig == SIGURG && fown->signum == 0))
 				send_sigio(fown, fa->fa_fd, band);
 		}
@@ -1047,9 +958,7 @@ static void kill_fasync_rcu(struct fasync_struct *fa, int sig, int band)
 
 void kill_fasync(struct fasync_struct **fp, int sig, int band)
 {
-	/* First a quick test without locking: usually
-	 * the list is empty.
-	 */
+	 
 	if (*fp) {
 		rcu_read_lock();
 		kill_fasync_rcu(rcu_dereference(*fp), sig, band);
@@ -1060,15 +969,11 @@ EXPORT_SYMBOL(kill_fasync);
 
 static int __init fcntl_init(void)
 {
-	/*
-	 * Please add new bits here to ensure allocation uniqueness.
-	 * Exceptions: O_NONBLOCK is a two bit define on parisc; O_NDELAY
-	 * is defined as O_NONBLOCK on some platforms and not on others.
-	 */
-	BUILD_BUG_ON(19 - 1 /* for O_RDONLY being 0 */ != HWEIGHT32(
+	 
+	BUILD_BUG_ON(19 - 1   != HWEIGHT32(
 		O_RDONLY	| O_WRONLY	| O_RDWR	|
 		O_CREAT		| O_EXCL	| O_NOCTTY	|
-		O_TRUNC		| O_APPEND	| /* O_NONBLOCK	| */
+		O_TRUNC		| O_APPEND	|  
 		__O_SYNC	| O_DSYNC	| FASYNC	|
 		O_DIRECT	| O_LARGEFILE	| O_DIRECTORY	|
 		O_NOFOLLOW	| O_NOATIME	| O_CLOEXEC	|

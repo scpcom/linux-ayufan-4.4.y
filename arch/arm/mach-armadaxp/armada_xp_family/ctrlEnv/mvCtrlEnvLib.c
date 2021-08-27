@@ -1,71 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
  
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File under the following licensing terms.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	    this list of conditions and the following disclaimer.
-
-    *   Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in the
-	documentation and/or other materials provided with the distribution.
-
-    *   Neither the name of Marvell nor the names of its contributors may be
-	used to endorse or promote products derived from this software without
-	specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-
-/* includes */
 #include "mvCommon.h"
 #include "mvCtrlEnvLib.h"
 #include "boardEnv/mvBoardEnvLib.h"
@@ -83,7 +19,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "eth/mvEth.h"
 #else
 #include "neta/gbe/mvNeta.h"
-#endif /* MV_ETH_LEGACY or MV_ETH_NETA */
+#endif  
 #endif
 
 #if defined(MV_INCLUDE_XOR)
@@ -103,7 +39,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ddr2_3/mvDramIfRegs.h"
 
-/* defines  */
 #undef MV_DEBUG
 #ifdef MV_DEBUG
 #define DB(x)	x
@@ -112,19 +47,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 MV_U32 dummyFlavour = 0;
 MV_BIOS_MODE bios_modes[BIOS_MODES_NUM] = {
-/*DBConf ConfID Code L2Size CPUFreq CpuFreqMode FabricFreq  Altfabricfreq     FabricFreqMode CPU1/2/3Enable cpuEndianess dramBusWidth BootSRC BootWidth */
-/*	                       0x4d/[1:0]  0x4d/[4:2]  0x4e[0]      0x4e/[4:1]  	0x4f[0]   0x4f/[2:1]      0x4f/[3]   	  */
+ 
 {"78230",0x13, 0x7823, 0x1,  0x3,      0x0,	 0x1a, 		0x5,		0x1,	     0x1,	    0x0,	0x1, 	     0x3,	0x1},
 {"78260",0x14, 0x7826, 0x1,  0x3,      0x0,	 0x1a,		0x5,		0x1,	     0x1,	    0x0,	0x0, 	     0x3,	0x1},
 {"78460",0x15, 0x7846, 0x3,  0x3,      0x0,	 0x1a, 		0x5,		0x1,	     0x3,	    0x0,	0x0, 	     0x3,	0x1},
 {"78480",0x16, 0x7846, 0x3,  0x3,      0x0,	 0x1a, 		0x5,		0x1,	     0x3,	    0x0,	0x0, 	     0x3,	0x1}
 
-/*	{"6710" ,0x11, 0x6710,	0x0,	   0x3,		0x0,	      0x5, 		0x0,		0x0,		0x1,		0x0},     */
 };
 
 MV_BIOS_MODE bios_modes_b0[BIOS_MODES_NUM] = {
-/*DBConf ConfID Code L2Size CPUFreq CpuFreqMode FabricFreq  Altfabricfreq  FabricFreqMode CPUEna  cpuEndianess dramBusWidth BootSRC BootWidth */
-/*	                       0x4d/[1:0]  0x4d/[4:2]  0x4e[0]      0x4e/[4:1]  	0x4f[0]   0x4f/[2:1]      0x4f/[3]   	  */
+ 
 {"78230",0x13, 0x7823, 0x1,  0x3,      0x0,	 		0x5, 		0x5,			0x1,	     0x1,	    0x0,		0x1, 	   0x3,		0x1},
 {"78260",0x14, 0x7826, 0x1,  0x3,      0x0,	 		0x5,		0x5,			0x1,	     0x1,	    0x0,		0x0, 	   0x3,		0x1},
 {"78460",0x15, 0x7846, 0x3,  0x3,      0x0,	 		0x5, 		0x5,			0x1,	     0x3,	    0x1,		0x0, 	   0x3,		0x1},
@@ -162,7 +94,7 @@ MV_BOOL mvCtrlIsValidSatR(MV_VOID)
 	tmpSocCores = (MV_REG_READ(MPP_SAMPLE_AT_RESET(1)) & SAR1_CPU_CORE_MASK) >> SAR1_CPU_CORE_OFFSET;
 	cpuFreqMode = (MV_REG_READ(MPP_SAMPLE_AT_RESET(1)) & SAR1_CPU_MODE_MASK) >> SAR1_CPU_MODE_OFFSET;
 	fabricFreqMode = (MV_REG_READ(MPP_SAMPLE_AT_RESET(1)) & SAR1_FABRIC_MODE_MASK) >> SAR1_FABRIC_MODE_OFFSET;
-	/* Bug fix in HW, bit0 & bit1 are swapped */
+	 
 	cpuEna |= (tmpSocCores & 0x2) >> 1;
 	cpuEna |= (tmpSocCores & 0x1) << 1;
 	if (mvCtrlRevGet() == 2)
@@ -170,7 +102,6 @@ MV_BOOL mvCtrlIsValidSatR(MV_VOID)
 	else
 		pBbiosModes = bios_modes;
 
-	/* Find out what is programmed in SAR and change device ID accordingly */
 	for (i = 0; i < BIOS_MODES_NUM; i++) {
 		if (pBbiosModes->confId == confId) {
 			DB(mvOsPrintf("confId = 0x%x\n", confId));
@@ -195,94 +126,50 @@ MV_BOOL mvCtrlIsValidSatR(MV_VOID)
 	}
 	return MV_FALSE;
 }
-/*******************************************************************************
-* mvCtrlEnvInit - Initialize Marvell controller environment.
-*
-* DESCRIPTION:
-*       This function get environment information and initialize controller
-*       internal/external environment. For example
-*       1) MPP settings according to board MPP macros.
-*		NOTE: It is the user responsibility to shut down all DMA channels
-*		in device and disable controller sub units interrupts during
-*		boot process.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
+ 
 MV_STATUS mvCtrlEnvInit(MV_VOID)
 {
 	MV_U32 mppGroup;
 	MV_U32 mppVal;
 	MV_U32 i, gppMask;
 
-	/* Disable MBus Error Propagation */
 	MV_REG_BIT_RESET(SOC_COHERENCY_FABRIC_CTRL_REG, BIT8);
 
-	/* Use Background sync barrier (polling) for I/O cache coherency */
 	MV_REG_BIT_SET(SOC_CIB_CTRL_CFG_REG, BIT8);
 
-	/* MPP Init - scan which modeule is connected */
 	mvBoardMppModulesScan();
 
-	/* Read MPP config values from board level and write MPP options to HW */
 	for (mppGroup = 0; mppGroup < MV_MPP_MAX_GROUP; mppGroup++) {
-		mppVal = mvBoardMppGet(mppGroup);	/* get pre-defined values */
+		mppVal = mvBoardMppGet(mppGroup);	 
 		MV_REG_WRITE(mvCtrlMppRegGet(mppGroup), mppVal);
 	}
 
-	/* disable all GPIO interrupts */
 	for (i = 0; i < MV_GPP_MAX_GROUP; i++) {
 		MV_REG_WRITE(GPP_INT_MASK_REG(i), 0x0);
 		MV_REG_WRITE(GPP_INT_LVL_REG(i), 0x0);
 	}
 
-	/* clear all int */
 	for (i = 0; i < MV_GPP_MAX_GROUP; i++)
 		MV_REG_WRITE(GPP_INT_CAUSE_REG(i), 0x0);
 
-	/* Set gpp interrupts as needed */
 	for (i = 0; i < MV_GPP_MAX_GROUP; i++) {
 		gppMask = mvBoardGpioIntMaskGet(i);
 		mvGppTypeSet(i, gppMask , (MV_GPP_IN & gppMask));
 		mvGppPolaritySet(i, gppMask , (MV_GPP_IN_INVERT & gppMask));
 	}
 
-	/* Scan for other modules (SERDES/LVDS/...) */
 	mvBoardOtherModulesScan();
 
-	/* Update interfaces configuration based on above scan */
 	if (MV_OK != mvCtrlSerdesPhyConfig())
 		mvOsPrintf("mvCtrlEnvInit: Can't init some or all SERDES lanes\n");
 
-	MV_REG_BIT_SET(PUP_EN_REG,0x17); /* Enable GBE0, GBE1, LCD and NFC PUP */
+	MV_REG_BIT_SET(PUP_EN_REG,0x17);  
 
 	mvOsDelay(100);
 
 	return MV_OK;
 }
 
-/*******************************************************************************
-* mvCtrlMppRegGet - return reg address of mpp group
-*
-* DESCRIPTION:
-*
-* INPUT:
-*       mppGroup - MPP group.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       MV_U32 - Register address.
-*
-*******************************************************************************/
 MV_U32 mvCtrlMppRegGet(MV_U32 mppGroup)
 {
 	MV_U32 ret;
@@ -296,23 +183,7 @@ MV_U32 mvCtrlMppRegGet(MV_U32 mppGroup)
 }
 
 #if defined(MV_INCLUDE_PEX)
-/*******************************************************************************
-* mvCtrlPexMaxIfGet - Get Marvell controller number of PEX interfaces.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of PEX interfaces.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of PEX interfaces. If controller
-*		ID is undefined the function returns '0'.
-*
-*******************************************************************************/
+ 
 MV_U32 mvCtrlPexMaxIfGet(MV_VOID)
 {
 	switch (mvCtrlModelGet()) {
@@ -333,23 +204,6 @@ MV_U32 mvCtrlPexMaxIfGet(MV_VOID)
 }
 #endif
 
-/*******************************************************************************
-* mvCtrlPexMaxUnitGet - Get Marvell controller number of PEX units.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of PEX units.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of PEX units. If controller
-*		ID is undefined the function returns '0'.
-*
-*******************************************************************************/
 MV_U32 mvCtrlPexMaxUnitGet(MV_VOID)
 {
 	switch (mvCtrlModelGet()) {
@@ -372,23 +226,7 @@ MV_U32 mvCtrlPexMaxUnitGet(MV_VOID)
 }
 
 #if defined(MV_INCLUDE_PCI)
-/*******************************************************************************
-* mvCtrlPexMaxIfGet - Get Marvell controller number of PEX interfaces.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of PEX interfaces.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of PEX interfaces. If controller
-*		ID is undefined the function returns '0'.
-*
-*******************************************************************************/
+ 
 MV_U32 mvCtrlPciMaxIfGet(MV_VOID)
 {
 	switch (mvCtrlModelGet()) {
@@ -401,22 +239,6 @@ MV_U32 mvCtrlPciMaxIfGet(MV_VOID)
 }
 #endif
 
-/*******************************************************************************
-* mvCtrlEthMaxPortGet - Get Marvell controller number of etherent ports.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of etherent port.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of etherent port.
-*
-*******************************************************************************/
 MV_U32 mvCtrlEthMaxPortGet(MV_VOID)
 {
 	MV_U32 devId;
@@ -439,29 +261,12 @@ MV_U32 mvCtrlEthMaxPortGet(MV_VOID)
 	}
 }
 
-/*******************************************************************************
-* mvCtrlEthMaxCPUsGet - Get Marvell controller number of CPUs.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of CPUs.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of CPUs.
-*
-*******************************************************************************/
 MV_U8 mvCtrlEthMaxCPUsGet(MV_VOID)
 {
 	MV_U32 devId;
 
 	devId = mvCtrlModelGet();
 
-	/* FIXME - assuming MV_78460_DEV_ID */
 	devId = MV_78460_DEV_ID;
 
 	switch (devId) {
@@ -478,22 +283,7 @@ MV_U8 mvCtrlEthMaxCPUsGet(MV_VOID)
 }
 
 #if defined(MV_INCLUDE_SATA)
-/*******************************************************************************
-* mvCtrlSataMaxPortGet - Get Marvell controller number of Sata ports.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of Sata ports.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of Sata ports.
-*
-*******************************************************************************/
+ 
 MV_U32 mvCtrlSataMaxPortGet(MV_VOID)
 {
 	MV_U32 devId;
@@ -511,22 +301,7 @@ MV_U32 mvCtrlSataMaxPortGet(MV_VOID)
 #endif
 
 #if defined(MV_INCLUDE_IDMA)
-/*******************************************************************************
-* mvCtrlIdmaMaxChanGet - Get Marvell controller number of IDMA channels.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of IDMA channels.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of IDMA channels.
-*
-*******************************************************************************/
+ 
 MV_U32 mvCtrlIdmaMaxChanGet(MV_VOID)
 {
 	MV_U32 devId;
@@ -542,22 +317,6 @@ MV_U32 mvCtrlIdmaMaxChanGet(MV_VOID)
 	return res;
 }
 
-/*******************************************************************************
-* mvCtrlIdmaMaxUnitGet - Get Marvell controller number of IDMA units.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of IDMA units.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of IDMA units.
-*
-*******************************************************************************/
 MV_U32 mvCtrlIdmaMaxUnitGet(MV_VOID)
 {
 	MV_U32 devId;
@@ -572,25 +331,10 @@ MV_U32 mvCtrlIdmaMaxUnitGet(MV_VOID)
 	}
 	return res;
 }
-#endif /* MV_INCLUDE_IDMA */
+#endif  
 
 #if defined(MV_INCLUDE_XOR)
-/*******************************************************************************
-* mvCtrlXorMaxChanGet - Get Marvell controller number of XOR channels.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of XOR channels.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of XOR channels.
-*
-*******************************************************************************/
+ 
 MV_U32 mvCtrlXorMaxChanGet(MV_VOID)
 {
 	MV_U32 devId;
@@ -606,22 +350,6 @@ MV_U32 mvCtrlXorMaxChanGet(MV_VOID)
 	return res;
 }
 
-/*******************************************************************************
-* mvCtrlXorMaxUnitGet - Get Marvell controller number of XOR units.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of XOR units.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of XOR units.
-*
-*******************************************************************************/
 MV_U32 mvCtrlXorMaxUnitGet(MV_VOID)
 {
 	MV_U32 devId;
@@ -640,21 +368,7 @@ MV_U32 mvCtrlXorMaxUnitGet(MV_VOID)
 #endif
 
 #if defined(MV_INCLUDE_USB)
-/*******************************************************************************
-* mvCtrlUsbHostMaxGet - Get number of Marvell Usb  controllers
-*
-* DESCRIPTION:
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       returns number of Marvell USB  controllers.
-*
-*******************************************************************************/
+ 
 MV_U32 mvCtrlUsbMaxGet(void)
 {
 	MV_U32 devId;
@@ -677,21 +391,7 @@ MV_U32 mvCtrlUsbMaxGet(void)
 #endif
 
 #if defined(MV_INCLUDE_LEGACY_NAND)
-/*******************************************************************************
-* mvCtrlNandSupport - Return if this controller has integrated NAND flash support
-*
-* DESCRIPTION:
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       MV_TRUE if NAND is supported and MV_FALSE otherwise
-*
-*******************************************************************************/
+ 
 MV_U32 mvCtrlNandSupport(MV_VOID)
 {
 	return ARMADA_XP_NAND;
@@ -699,21 +399,7 @@ MV_U32 mvCtrlNandSupport(MV_VOID)
 #endif
 
 #if defined(MV_INCLUDE_SDIO)
-/*******************************************************************************
-* mvCtrlSdioSupport - Return if this controller has integrated SDIO flash support
-*
-* DESCRIPTION:
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       MV_TRUE if SDIO is supported and MV_FALSE otherwise
-*
-*******************************************************************************/
+ 
 MV_U32 mvCtrlSdioSupport(MV_VOID)
 {
 	return ARMADA_XP_SDIO;
@@ -721,107 +407,30 @@ MV_U32 mvCtrlSdioSupport(MV_VOID)
 #endif
 
 #if defined(MV_INCLUDE_TDM)
-/*******************************************************************************
-* mvCtrlTdmSupport - Return if this controller has integrated TDM flash support
-*
-* DESCRIPTION:
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       MV_TRUE if TDM is supported and MV_FALSE otherwise
-*
-*******************************************************************************/
+ 
 MV_U32 mvCtrlTdmSupport(MV_VOID)
 {
 	return ARMADA_XP_TDM;
 }
 
-/*******************************************************************************
-* mvCtrlTdmMaxGet - Return the maximum number of TDM ports.
-*
-* DESCRIPTION:
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       The number of TDM ports in device.
-*
-*******************************************************************************/
 MV_U32 mvCtrlTdmMaxGet(MV_VOID)
 {
 	return ARMADA_XP_MAX_TDM_PORTS;
 }
 
-/*******************************************************************************
-* mvCtrlTdmTypeGet
-*
-* DESCRIPTION:
-*	Return the TDM unit type being compiled in.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*	The TDM unit type.
-*
-*******************************************************************************/
 MV_UNIT_ID mvCtrlTdmUnitTypeGet(MV_VOID)
 {
 	return TDM_UNIT_32CH;
 }
 
-/*******************************************************************************
-* mvCtrlTdmUnitIrqGet
-*
-* DESCRIPTION:
-*	Return the TDM unit IRQ number depending on the TDM unit compilation
-*	options.
-*
-* INPUT:
-*	None.
-*
-* OUTPUT:
-*	None.
-*
-* RETURN:
-*	None.
-******************************************************************************/
 MV_U32 mvCtrlTdmUnitIrqGet(MV_VOID)
 {
 	return MV_TDM_IRQ_NUM;
 }
 
-#endif /* if defined(MV_INCLUDE_TDM) */
+#endif  
 
-/*******************************************************************************
-* mvCtrlModelGet - Get Marvell controller device model (Id)
-*
-* DESCRIPTION:
-*       This function returns 16bit describing the device model (ID) as defined
-*       in PCI Device and Vendor ID configuration register offset 0x0.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       16bit desscribing Marvell controller ID
-*
-*******************************************************************************/
+
 MV_U16 mvCtrlModelGet(MV_VOID)
 {
 #if defined(CONFIG_SYNO_ARMADA_ARCH)
@@ -831,7 +440,6 @@ MV_U16 mvCtrlModelGet(MV_VOID)
 	MV_U16 model = 0;
 	MV_U32 reg, reg2;
 
-	/* if PEX0 clocks are disabled - enabled it to read */
 	reg = MV_REG_READ(POWER_MNG_CTRL_REG);
 	if ((reg & PMC_PEXSTOPCLOCK_MASK(0)) == PMC_PEXSTOPCLOCK_STOP(0)) {
 		reg2 = ((reg & ~PMC_PEXSTOPCLOCK_MASK(0)) | PMC_PEXSTOPCLOCK_EN(0));
@@ -840,7 +448,6 @@ MV_U16 mvCtrlModelGet(MV_VOID)
 
 	devId = MV_REG_READ(PEX_CFG_DIRECT_ACCESS(0, PEX_DEVICE_AND_VENDOR_ID));
 
-	/* Reset the original value of the PEX0 clock */
 	if ((reg & PMC_PEXSTOPCLOCK_MASK(0)) == PMC_PEXSTOPCLOCK_STOP(0))
 		MV_REG_WRITE(POWER_MNG_CTRL_REG, reg);
 
@@ -849,28 +456,11 @@ MV_U16 mvCtrlModelGet(MV_VOID)
 	return model;
 }
 
-/*******************************************************************************
-* mvCtrlRevGet - Get Marvell controller device revision number
-*
-* DESCRIPTION:
-*       This function returns 8bit describing the device revision as defined
-*       in PCI Express Class Code and Revision ID Register.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       8bit desscribing Marvell controller revision number
-*
-*******************************************************************************/
 MV_U8 mvCtrlRevGet(MV_VOID)
 {
 	MV_U8 revNum;
 #if defined(MV_INCLUDE_CLK_PWR_CNTRL)
-	/* Check pex power state */
+	 
 	MV_U32 pexPower;
 	pexPower = mvCtrlPwrClckGet(PEX_UNIT_ID, 0);
 	if (pexPower == MV_FALSE)
@@ -878,29 +468,13 @@ MV_U8 mvCtrlRevGet(MV_VOID)
 #endif
 	revNum = (MV_U8) MV_REG_READ(PEX_CFG_DIRECT_ACCESS(0, PCI_CLASS_CODE_AND_REVISION_ID));
 #if defined(MV_INCLUDE_CLK_PWR_CNTRL)
-	/* Return to power off state */
+	 
 	if (pexPower == MV_FALSE)
 		mvCtrlPwrClckSet(PEX_UNIT_ID, 0, MV_FALSE);
 #endif
 	return ((revNum & PCCRIR_REVID_MASK) >> PCCRIR_REVID_OFFS);
 }
 
-/*******************************************************************************
-* mvCtrlNameGet - Get Marvell controller name
-*
-* DESCRIPTION:
-*       This function returns a string describing the device model and revision.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       pNameBuff - Buffer to contain device name string. Minimum size 30 chars.
-*
-* RETURN:
-*
-*       MV_ERROR if informantion can not be read.
-*******************************************************************************/
 MV_STATUS mvCtrlNameGet(char *pNameBuff)
 {
 	if (mvCtrlModelGet() == 0x7800)
@@ -910,46 +484,11 @@ MV_STATUS mvCtrlNameGet(char *pNameBuff)
 	return MV_OK;
 }
 
-/*******************************************************************************
-* mvCtrlModelRevGet - Get Controller Model (Device ID) and Revision
-*
-* DESCRIPTION:
-*       This function returns 32bit value describing both Device ID and Revision
-*       as defined in PCI Express Device and Vendor ID Register and device revision
-*	    as defined in PCI Express Class Code and Revision ID Register.
-
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       32bit describing both controller device ID and revision number
-*
-*******************************************************************************/
 MV_U32 mvCtrlModelRevGet(MV_VOID)
 {
 	return ((mvCtrlModelGet() << 16) | mvCtrlRevGet());
 }
 
-/*******************************************************************************
-* mvCtrlModelRevNameGet - Get Marvell controller name
-*
-* DESCRIPTION:
-*       This function returns a string describing the device model and revision.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       pNameBuff - Buffer to contain device name string. Minimum size 30 chars.
-*
-* RETURN:
-*
-*       MV_ERROR if informantion can not be read.
-*******************************************************************************/
 MV_STATUS mvCtrlModelRevNameGet(char *pNameBuff)
 {
 	switch (mvCtrlModelRevGet()) {
@@ -1014,22 +553,7 @@ MV_STATUS mvCtrlModelRevNameGet(char *pNameBuff)
 }
 
 MV_U32 gDevId = -1;
-/*******************************************************************************
-* mvCtrlDevFamilyIdGet - Get Device ID
-*
-* DESCRIPTION:
-*       This function returns Device ID.
-*
-* INPUT:
-*       ctrlModel.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       32bit board Device ID number, '-1' if Device ID is undefined.
-*
-*******************************************************************************/
+ 
 MV_U32 mvCtrlDevFamilyIdGet(MV_U16 ctrlModel)
 {
 	if (gDevId == -1)
@@ -1054,21 +578,6 @@ MV_U32 mvCtrlDevFamilyIdGet(MV_U16 ctrlModel)
 
 static const char *cntrlName[] = TARGETS_NAME_ARRAY;
 
-/*******************************************************************************
-* mvCtrlTargetNameGet - Get Marvell controller target name
-*
-* DESCRIPTION:
-*       This function convert the trget enumeration to string.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Target name (const MV_8 *)
-*******************************************************************************/
 const MV_8 *mvCtrlTargetNameGet(MV_TARGET target)
 {
 	if (target >= MAX_TARGETS)
@@ -1077,22 +586,6 @@ const MV_8 *mvCtrlTargetNameGet(MV_TARGET target)
 	return cntrlName[target];
 }
 
-/*******************************************************************************
-* mvCtrlPexAddrDecShow - Print the PEX address decode map (BARs and windows).
-*
-* DESCRIPTION:
-*		This function print the PEX address decode map (BARs and windows).
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
 static MV_VOID mvCtrlPexAddrDecShow(MV_VOID)
 {
 	MV_PEX_BAR pexBar;
@@ -1170,25 +663,6 @@ static MV_VOID mvCtrlPexAddrDecShow(MV_VOID)
 	}
 }
 
-/*******************************************************************************
-* mvUnitAddrDecShow - Print the Unit's address decode map.
-*
-* DESCRIPTION:
-*       This is a generic function for printing the different unit's address
-*	decode map.
-*
-* INPUT:
-*       unit	- The unit to print the address decode for.
-*	name	- The unit's name.
-*	winGetFuncPtr - A pointer to the HAL's window get function.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
 static void mvUnitAddrDecShow(MV_U8 numUnits, MV_UNIT_ID unitId, const char *name, MV_WIN_GET_FUNC_PTR winGetFuncPtr)
 {
 	MV_UNIT_WIN_INFO win;
@@ -1226,22 +700,6 @@ static void mvUnitAddrDecShow(MV_U8 numUnits, MV_UNIT_ID unitId, const char *nam
 	return;
 }
 
-/*******************************************************************************
-* mvCtrlAddrDecShow - Print the Controller units address decode map.
-*
-* DESCRIPTION:
-*		This function the Controller units address decode map.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
 MV_VOID mvCtrlAddrDecShow(MV_VOID)
 {
 	mvCpuIfAddDecShow();
@@ -1258,8 +716,8 @@ MV_VOID mvCtrlAddrDecShow(MV_VOID)
 	mvUnitAddrDecShow(mvCtrlEthMaxPortGet(), ETH_GIG_UNIT_ID, "ETH", mvEthWinRead);
 #else
 	mvUnitAddrDecShow(mvCtrlEthMaxPortGet(), ETH_GIG_UNIT_ID, "ETH", mvNetaWinRead);
-#endif /* MV_ETH_LEGACY */
-#endif /* MV_INCLUDE_GIG_ETH */
+#endif  
+#endif  
 
 #if defined(MV_INCLUDE_XOR)
 	mvUnitAddrDecShow(mvCtrlXorMaxChanGet(), XOR_UNIT_ID, "XOR", mvXorTargetWinRead);
@@ -1269,154 +727,81 @@ MV_VOID mvCtrlAddrDecShow(MV_VOID)
 #endif
 }
 
-/*******************************************************************************
-* ctrlSizeToReg - Extract size value for register assignment.
-*
-* DESCRIPTION:
-*       Address decode size parameter must be programed from LSB to MSB as
-*       sequence of 1's followed by sequence of 0's. The number of 1's
-*       specifies the size of the window in 64 KB granularity (e.g. a
-*       value of 0x00ff specifies 256x64k = 16 MB).
-*       This function extract the size value from the size parameter according
-*       to given aligment paramter. For example for size 0x1000000 (16MB) and
-*       aligment 0x10000 (64KB) the function will return 0x00FF.
-*
-* INPUT:
-*       size - Size.
-*       alignment - Size alignment. Note that alignment must be power of 2!
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       32bit describing size register value correspond to size parameter.
-*       If value is '-1' size parameter or aligment are invalid.
-*******************************************************************************/
 MV_U32 ctrlSizeToReg(MV_U32 size, MV_U32 alignment)
 {
 	MV_U32 retVal;
 
-	/* Check size parameter alignment               */
 	if ((0 == size) || (MV_IS_NOT_ALIGN(size, alignment))) {
 		DB(mvOsPrintf("ctrlSizeToReg: ERR. Size is zero or not aligned.\n"));
 		return -1;
 	}
 
-	/* Take out the "alignment" portion out of the size parameter */
-	alignment--;		/* Now the alignmet is a sequance of '1' (e.g. 0xffff)          */
-	/* and size is 0x1000000 (16MB) for example     */
-	while (alignment & 1) {	/* Check that alignmet LSB is set       */
-		size = (size >> 1);	/* If LSB is set, move 'size' one bit to right      */
+	alignment--;		 
+	 
+	while (alignment & 1) {	 
+		size = (size >> 1);	 
 		alignment = (alignment >> 1);
 	}
 
-	/* If after the alignment first '0' was met we still have '1' in                */
-	/* it then aligment is invalid (not power of 2)                                 */
 	if (alignment) {
 		DB(mvOsPrintf("ctrlSizeToReg: ERR. Alignment parameter 0x%x invalid.\n", (MV_U32) alignment));
 		return -1;
 	}
 
-	/* Now the size is shifted right according to aligment: 0x0100                  */
-	size--;			/* Now the size is a sequance of '1': 0x00ff                    */
+	size--;			 
 	retVal = size;
 
-	/* Check that LSB to MSB is sequence of 1's followed by sequence of 0's         */
-	while (size & 1)	/* Check that LSB is set    */
-		size = (size >> 1);	/* If LSB is set, move one bit to the right         */
+	while (size & 1)	 
+		size = (size >> 1);	 
 
-	if (size) {		/* Sequance of 1's is over. Check that we have no other 1's         */
+	if (size) {		 
 		DB(mvOsPrintf("ctrlSizeToReg: ERR. Size parameter 0x%x invalid.\n", size));
 		return -1;
 	}
 	return retVal;
 }
 
-/*******************************************************************************
-* ctrlRegToSize - Extract size value from register value.
-*
-* DESCRIPTION:
-*       This function extract a size value from the register size parameter
-*       according to given aligment paramter. For example for register size
-*       value 0xff and aligment 0x10000 the function will return 0x01000000.
-*
-* INPUT:
-*       regSize   - Size as in register format.	See ctrlSizeToReg.
-*       alignment - Size alignment.	Note that alignment must be power of 2!
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       32bit describing size.
-*       If value is '-1' size parameter or aligment are invalid.
-*******************************************************************************/
 MV_U32 ctrlRegToSize(MV_U32 regSize, MV_U32 alignment)
 {
 	MV_U32 temp;
 
-	/* Check that LSB to MSB is sequence of 1's followed by sequence of 0's         */
-	temp = regSize;		/* Now the size is a sequance of '1': 0x00ff            */
+	temp = regSize;		 
 
-	while (temp & 1)	/* Check that LSB is set                                    */
-		temp = (temp >> 1);	/* If LSB is set, move one bit to the right         */
+	while (temp & 1)	 
+		temp = (temp >> 1);	 
 
-	if (temp) {		/* Sequance of 1's is over. Check that we have no other 1's         */
+	if (temp) {		 
 		DB(mvOsPrintf("ctrlRegToSize: ERR. Size parameter 0x%x invalid.\n", regSize));
 		return -1;
 	}
 
-	/* Check that aligment is a power of two                                        */
-	temp = alignment - 1;	/* Now the alignmet is a sequance of '1' (0xffff)          */
+	temp = alignment - 1;	 
 
-	while (temp & 1)	/* Check that alignmet LSB is set                           */
-		temp = (temp >> 1);	/* If LSB is set, move 'size' one bit to right      */
+	while (temp & 1)	 
+		temp = (temp >> 1);	 
 
-	/* If after the 'temp' first '0' was met we still have '1' in 'temp'            */
-	/* then 'temp' is invalid (not power of 2)                                      */
 	if (temp) {
 		DB(mvOsPrintf("ctrlSizeToReg: ERR. Alignment parameter 0x%x invalid.\n", alignment));
 		return -1;
 	}
 
-	regSize++;		/* Now the size is 0x0100                                       */
+	regSize++;		 
 
-	/* Add in the "alignment" portion to the register size parameter                */
-	alignment--;		/* Now the alignmet is a sequance of '1' (e.g. 0xffff)          */
+	alignment--;		 
 
-	while (alignment & 1) {	/* Check that alignmet LSB is set                       */
-		regSize = (regSize << 1);	/* LSB is set, move 'size' one bit left     */
+	while (alignment & 1) {	 
+		regSize = (regSize << 1);	 
 		alignment = (alignment >> 1);
 	}
 
 	return regSize;
 }
 
-/*******************************************************************************
-* ctrlSizeRegRoundUp - Round up given size
-*
-* DESCRIPTION:
-*       This function round up a given size to a size that fits the
-*       restrictions of size format given an aligment parameter.
-*		to given aligment paramter. For example for size parameter 0xa1000 and
-*		aligment 0x1000 the function will return 0xFF000.
-*
-* INPUT:
-*       size - Size.
-*		alignment - Size alignment.	Note that alignment must be power of 2!
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       32bit describing size value correspond to size in register.
-*******************************************************************************/
 MV_U32 ctrlSizeRegRoundUp(MV_U32 size, MV_U32 alignment)
 {
 	MV_U32 msbBit = 0;
 	MV_U32 retSize;
 
-	/* Check if size parameter is already comply with restriction   */
 	if (!(-1 == ctrlSizeToReg(size, alignment)))
 		return size;
 
@@ -1433,22 +818,6 @@ MV_U32 ctrlSizeRegRoundUp(MV_U32 size, MV_U32 alignment)
 		return retSize;
 }
 
-/*******************************************************************************
-* mvCtrlIsBootFromNOR
-*
-* DESCRIPTION:
-*       Check if device is configured to boot from NOR flash according to the
-*	SAR registers.
-*
-* INPUT:
-*	None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       MV_TRUE if device boot from SPI.
-*******************************************************************************/
 MV_BOOL mvCtrlIsBootFromNOR(MV_VOID)
 {
 	MV_U32 satr;
@@ -1461,22 +830,6 @@ MV_BOOL mvCtrlIsBootFromNOR(MV_VOID)
 		return MV_FALSE;
 }
 
-/*******************************************************************************
-* mvCtrlIsBootFromSPI
-*
-* DESCRIPTION:
-*       Check if device is configured to boot from SPI flash according to the
-*	SAR registers.
-*
-* INPUT:
-*	None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       MV_TRUE if device boot from SPI.
-*******************************************************************************/
 MV_BOOL mvCtrlIsBootFromSPI(MV_VOID)
 {
 	MV_U32 satr;
@@ -1489,22 +842,6 @@ MV_BOOL mvCtrlIsBootFromSPI(MV_VOID)
 		return MV_FALSE;
 }
 
-/*******************************************************************************
-* mvCtrlIsBootFromNAND
-*
-* DESCRIPTION:
-*       Check if device is confiogured to boot from NAND flash according to the SAR
-*	registers.
-*
-* INPUT:
-*	None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       MV_TRUE if device boot from NAND.
-*******************************************************************************/
 MV_BOOL mvCtrlIsBootFromNAND(MV_VOID)
 {
 	MV_U32 satr;
@@ -1518,20 +855,10 @@ MV_BOOL mvCtrlIsBootFromNAND(MV_VOID)
 }
 
 #if defined(MV_INCLUDE_CLK_PWR_CNTRL)
-/*******************************************************************************
-* mvCtrlPwrClckSet - Set Power State for specific Unit
-*
-* DESCRIPTION:
-*
-* INPUT:
-*
-* OUTPUT:
-*
-* RETURN:
-*******************************************************************************/
+ 
 MV_VOID mvCtrlPwrClckSet(MV_UNIT_ID unitId, MV_U32 index, MV_BOOL enable)
 {
-	/* Clock gating is not supported on FPGA */
+	 
 	if (mvCtrlModelGet() == MV_FPGA_DEV_ID)
 		return;
 
@@ -1601,23 +928,11 @@ MV_VOID mvCtrlPwrClckSet(MV_UNIT_ID unitId, MV_U32 index, MV_BOOL enable)
 	}
 }
 
-/*******************************************************************************
-* mvCtrlPwrClckGet - Get Power State of specific Unit
-*
-* DESCRIPTION:
-*
-* INPUT:
-*
-* OUTPUT:
-*
-* RETURN:
-******************************************************************************/
 MV_BOOL mvCtrlPwrClckGet(MV_UNIT_ID unitId, MV_U32 index)
 {
 	MV_U32 reg = MV_REG_READ(POWER_MNG_CTRL_REG);
 	MV_BOOL state = MV_TRUE;
 
-	/* Clock gating is not supported on FPGA */
 	if (mvCtrlModelGet() == MV_FPGA_DEV_ID)
 		return MV_TRUE;
 
@@ -1686,17 +1001,6 @@ MV_BOOL mvCtrlPwrClckGet(MV_UNIT_ID unitId, MV_U32 index)
 	return state;
 }
 
-/*******************************************************************************
-* mvCtrlPwrMemSet - Set Power State for memory on specific Unit
-*
-* DESCRIPTION:
-*
-* INPUT:
-*
-* OUTPUT:
-*
-* RETURN:
-*******************************************************************************/
 MV_VOID mvCtrlPwrMemSet(MV_UNIT_ID unitId, MV_U32 index, MV_BOOL enable)
 {
 	switch (unitId) {
@@ -1777,17 +1081,6 @@ MV_VOID mvCtrlPwrMemSet(MV_UNIT_ID unitId, MV_U32 index, MV_BOOL enable)
 	}
 }
 
-/*******************************************************************************
-* mvCtrlPwrMemGet - Get Power State of memory on specific Unit
-*
-* DESCRIPTION:
-*
-* INPUT:
-*
-* OUTPUT:
-*
-* RETURN:
-******************************************************************************/
 MV_BOOL mvCtrlPwrMemGet(MV_UNIT_ID unitId, MV_U32 index)
 {
 	MV_U32 reg;
@@ -1883,25 +1176,8 @@ MV_BOOL mvCtrlPwrClckGet(MV_UNIT_ID unitId, MV_U32 index)
 {
 	return MV_TRUE;
 }
-#endif /* #if defined(MV_INCLUDE_CLK_PWR_CNTRL) */
+#endif  
 
-/*******************************************************************************
-* mvCtrlSerdesMaxLinesGet - Get Marvell controller number of SERDES lines.
-*
-* DESCRIPTION:
-*       This function returns Marvell controller number of SERDES lines.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Marvell controller number of PEX units. If controller
-*		ID is undefined the function returns '0'.
-*
-*******************************************************************************/
 MV_U32 mvCtrlSerdesMaxLinesGet(MV_VOID)
 {
 	switch (mvCtrlModelGet()) {
@@ -1946,22 +1222,6 @@ MV_BOOL mvCtrlDDRECC(MV_VOID)
 
 static const MV_U8 serdesCfg[][8] = SERDES_CFG;
 
-/*******************************************************************************
-* mvCtrlSerdesPhyConfig
-*
-* DESCRIPTION:
-*	Configure Serdes MUX and init PHYs connected to SERDES lines.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       Status
-*
-*******************************************************************************/
 MV_STATUS mvCtrlSerdesPhyConfig(MV_VOID)
 {
 	MV_U32		socCtrlReg, RegX4, serdesLine0_7;
@@ -1974,11 +1234,9 @@ MV_STATUS mvCtrlSerdesPhyConfig(MV_VOID)
 	MV_U8		maxSerdesLines = mvCtrlSerdesMaxLinesGet();
 	MV_BOARD_PEX_INFO 	*boardPexInfo = mvBoardPexInfoGet();
 
-/* this is a mapping of the final power management clock gating control register value @ 0x18220.*/
 	MV_U32	powermngmntctrlregmap = 0x0;
 	MV_U32	tmpcounter = 0;
 
-	/* Check if no SERDESs available - FPGA */
 	if (maxSerdesLines == 0)
 		return MV_OK;
 
@@ -1990,9 +1248,8 @@ MV_STATUS mvCtrlSerdesPhyConfig(MV_VOID)
 	boardPexInfo->pexUnitCfg[2].pexCfg = ((RegX4 & 0x0F00) == 0x0F00) ? PEX_BUS_MODE_X4: PEX_BUS_MODE_X1;
 	boardPexInfo->pexUnitCfg[3].pexCfg = ((RegX4 & 0x0F000) == 0x0F000) ? PEX_BUS_MODE_X4: PEX_BUS_MODE_X1;
 
-	/* Prepare PHY parameters for each step according to  MUX selection */
 	for (pexIf = 0; pexIf < pexIfNum; pexIf++) {
-		/* for each serdes lane*/
+		 
 		pexUnit    = (pexIf<9)? (pexIf >> 2) : 3;
 		if ((socCtrlReg & (1<< pexUnit)) == 0){
 			boardPexInfo->pexUnitCfg[pexUnit].pexCfg = PEX_BUS_DISABLED;
@@ -2041,15 +1298,14 @@ MV_STATUS mvCtrlSerdesPhyConfig(MV_VOID)
 	}
 
 #if defined(MV_INCLUDE_CLK_PWR_CNTRL)
-	powermngmntctrlregmap = powermngmntctrlregmap | BIT4; /* Enabling port GE0 always since we need SMI 0 to access other PHYs*/
-	/*check if GE1 is not enabled via MPPs and not Serdes - if yes you have to enable the clock*/
+	powermngmntctrlregmap = powermngmntctrlregmap | BIT4;  
+	 
 		if (MV_TRUE ==  mvBoardIsGbEPortConnected(1))
 			powermngmntctrlregmap = powermngmntctrlregmap | PMC_GESTOPCLOCK_MASK(1);
 
-	/* Hard core enable DDR, USB, SDIO, LCD, XOR, IDMA, CESA cause we don't support this at this momemt*/
 	powermngmntctrlregmap = powermngmntctrlregmap | (BIT0  | BIT13 | (0x1FF<<16) | BIT24 | BIT25 | BIT28 | BIT31);
 	DB(mvOsPrintf("%s:Shutting down unused interfaces:\n", __func__));
-	/*now report everything to the screen*/
+	 
 	if (!(powermngmntctrlregmap & PMC_SATASTOPCLOCK_MASK(0))) {
 		DB(mvOsPrintf("%s:       SATA0\n", __func__));
 		mvCtrlPwrClckSet(SATA_UNIT_ID, 0, MV_FALSE);
@@ -2060,7 +1316,7 @@ MV_STATUS mvCtrlSerdesPhyConfig(MV_VOID)
 	}
 	for (tmpcounter = 0; tmpcounter < 4; tmpcounter++) {
 		if (!(powermngmntctrlregmap & (1 << (4 - tmpcounter)))) {
-			/*mvOsOutput("       GBE%d\n", tmpcounter );*/
+			 
 			DB(mvOsPrintf("%s:       GBE%d\n", __func__, tmpcounter));
 			mvCtrlPwrClckSet(ETH_GIG_UNIT_ID, tmpcounter, MV_FALSE);
 		}
@@ -2080,16 +1336,15 @@ MV_STATUS mvCtrlSerdesPhyConfig(MV_VOID)
 		mvCtrlPwrClckSet(PEX_UNIT_ID, 9, MV_FALSE);
 	}
 
-/*this code is valid for all devices after Z1*/
 	if(!(powermngmntctrlregmap & BIT25)) {
 		DB(mvOsPrintf("%s:       TDM\n", __func__));
 		mvCtrlPwrClckSet(TDM_32CH_UNIT_ID, 0, MV_FALSE);
 	}
-	/*apply clock gatting*/
+	 
 	MV_REG_WRITE(POWER_MNG_CTRL_REG, MV_REG_READ(POWER_MNG_CTRL_REG) & powermngmntctrlregmap);
-	/*the Sata driver doesn't support clock gating at this point so we enable the logic to the block*/
+	 
 	MV_REG_WRITE(POWER_MNG_CTRL_REG, MV_REG_READ(POWER_MNG_CTRL_REG) | (BIT15 | BIT30));
-#endif /* defined(MV_INCLUDE_CLK_PWR_CNTRL) */
+#endif  
 
 	return status;
 err_cfg:

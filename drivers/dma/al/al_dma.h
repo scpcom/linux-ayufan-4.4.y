@@ -1,24 +1,4 @@
-/*
- * Annapurna Labs DMA Linux driver
- * Copyright(c) 2011 Annapurna Labs.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59
- * Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- * The full GNU General Public License is included in this distribution in the
- * file called COPYING.
- */
+ 
 #ifndef AL_DMA_H
 #define AL_DMA_H
 
@@ -41,20 +21,20 @@
 
 #define AL_DMA_IRQNAME_SIZE		40
 
-#define AL_DMA_MAX_SIZE_SHIFT_MEMCPY	16	/* 64KB */
-#define AL_DMA_MAX_SIZE_SHIFT_MEMSET	16	/* 64KB */
-#define AL_DMA_MAX_SIZE_SHIFT_XOR	14	/* 16KB */
-#define AL_DMA_MAX_SIZE_SHIFT_XOR_VAL	14	/* 16KB */
-#define AL_DMA_MAX_SIZE_SHIFT_PQ	13	/* 8KB */
-#define AL_DMA_MAX_SIZE_SHIFT_PQ_VAL	13	/* 8KB */
+#define AL_DMA_MAX_SIZE_SHIFT_MEMCPY	16	 
+#define AL_DMA_MAX_SIZE_SHIFT_MEMSET	16	 
+#define AL_DMA_MAX_SIZE_SHIFT_XOR	14	 
+#define AL_DMA_MAX_SIZE_SHIFT_XOR_VAL	14	 
+#define AL_DMA_MAX_SIZE_SHIFT_PQ	13	 
+#define AL_DMA_MAX_SIZE_SHIFT_PQ_VAL	13	 
 
-#define AL_DMA_ALIGN_SHIFT		0	/* No alignment requirements */
+#define AL_DMA_ALIGN_SHIFT		0	 
 
 #ifndef CONFIG_ALPINE_VP_WA
 #define AL_DMA_RAID_TX_CDESC_SIZE	8
 #define AL_DMA_RAID_RX_CDESC_SIZE	8
 #else
-/* Currently in VP it is always 16 bytes */
+ 
 #define AL_DMA_RAID_TX_CDESC_SIZE	16
 #define AL_DMA_RAID_RX_CDESC_SIZE	16
 #endif
@@ -79,15 +59,7 @@
 #define AL_DMA_SW_RING_MIN_ORDER	4
 #define AL_DMA_SW_RING_MAX_ORDER	16
 
-/**
- * Issue pending transaction upon sumbit:
- * 0 - no, issue when issue_pending is called
- * 1 - yes, and do nothing when issue_pending is called
- */
 #define AL_DMA_ISSUE_PNDNG_UPON_SUBMIT	1
-
-/*#define AL_DMA_MEMCPY_VALIDATION*/
-/*#define AL_DMA_XOR_VALIDATION*/
 
 #ifdef CONFIG_AL_DMA_STATS
 #define AL_DMA_STATS_INC(var, incval)	{ (var) += (incval); }
@@ -124,9 +96,6 @@ struct al_dma_unmap_info_ent {
 	enum al_unmap_type type;
 };
 
-/**
- * struct al_dma_sw_desc - software descriptor
- */
 struct al_dma_sw_desc {
 	struct al_raid_transaction hal_xaction;
 	struct al_block blocks[AL_DMA_OP_MAX_BLOCKS];
@@ -168,24 +137,7 @@ struct al_dma_sw_desc {
 #define to_dev(al_dma_chan) (&(al_dma_chan)->device->pdev->dev)
 
 #ifdef CONFIG_AL_DMA_STATS
-/**
- * struct al_dma_chan_stats_prep - DMA channel statistics - preparation
- * @int_num - Total number of interrupt requests
- * @memcpy_num - Total number of memcpy operations
- * @memcpy_size - Total size of memcpy operations
- * @memset_num - Total number of memset operations
- * @memset_size - Total size of memset operations
- * @xor_num - Total number of xor operations
- * @xor_size - Total size of xor operations
- * @pq_num - Total number of pq operations
- * @pq_size - Total size of pq operations
- * @pq_val_num - Total number of pq validation operations
- * @pq_val_size - Total size of pq validation operations
- * @xor_val_num - Total number of xor validation operations
- * @xor_val_size - Total size of xor validation operations
- * @matching_cpu - Number of preparations with matching queue and cpu
- * @mismatching_cpu - Number of preparations with mismatching queue and cpu
- */
+ 
 struct al_dma_chan_stats_prep {
 	uint64_t int_num;
 	uint64_t memcpy_num;
@@ -206,13 +158,6 @@ struct al_dma_chan_stats_prep {
 	uint64_t mismatching_cpu;
 };
 
-/**
- * struct al_dma_chan_stats_prep - DMA channel statistics - completion
- * @redundant_int_cnt - Total number of redundant interrupts (interrupts for
- *                      which there was no completions
- * @matching_cpu - Number of completions with matching queue and cpu
- * @mismatching_cpu - Number of completions with mismatching queue and cpu
- */
 struct al_dma_chan_stats_comp {
 	uint64_t redundant_int_cnt;
 	uint64_t matching_cpu;
@@ -220,15 +165,10 @@ struct al_dma_chan_stats_comp {
 };
 #endif
 
-/* internal structure for AL Crypto IRQ
- */
 struct al_dma_irq {
 	char name[AL_DMA_IRQNAME_SIZE];
 };
 
-/**
- * struct al_dma_device - internal representation of a DMA device
- */
 struct al_dma_device {
 	struct pci_dev			*pdev;
 	u16				dev_id;
@@ -257,11 +197,8 @@ struct al_dma_device {
 	struct kmem_cache		*cache;
 };
 
-/**
- * struct al_dma_chan - internal representation of a DMA channel
- */
 struct al_dma_chan {
-	/* Misc */
+	 
 	struct dma_chan common		____cacheline_aligned;
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
 	struct al_ssm_dma *hal_raid;
@@ -272,28 +209,22 @@ struct al_dma_chan {
 	struct al_dma_device *device;
 	cpumask_t affinity_mask;
 
-	/* SW descriptors ring */
 	struct al_dma_sw_desc **sw_ring;
 
-	/* Tx UDMA hw ring */
-	int tx_descs_num; /* number of descriptors in Tx queue */
-	void *tx_dma_desc_virt; /* Tx descriptors ring */
+	int tx_descs_num;  
+	void *tx_dma_desc_virt;  
 	dma_addr_t tx_dma_desc;
 
-	/* Rx UDMA hw ring */
-	int rx_descs_num; /* number of descriptors in Rx queue */
-	void *rx_dma_desc_virt; /* Rx descriptors ring */
+	int rx_descs_num;  
+	void *rx_dma_desc_virt;  
 	dma_addr_t rx_dma_desc;
-	void *rx_dma_cdesc_virt; /* Rx completion descriptors ring */
+	void *rx_dma_cdesc_virt;  
 	dma_addr_t rx_dma_cdesc;
 
-	/* sysfs */
 	struct kobject kobj;
 
-	/* Channel allocation */
 	u16 alloc_order;
 
-	/* Preparation */
 	spinlock_t prep_lock		____cacheline_aligned;
 	u16 head;
 	int sw_desc_num_locked;
@@ -302,7 +233,6 @@ struct al_dma_chan {
 	struct al_dma_chan_stats_prep stats_prep;
 #endif
 
-	/* Completion */
 	spinlock_t cleanup_lock		____cacheline_aligned_in_smp;
 	struct tasklet_struct cleanup_task;
 	dma_cookie_t completed_cookie;
@@ -317,7 +247,6 @@ static inline u16 al_dma_ring_size(struct al_dma_chan *chan)
 	return 1 << chan->alloc_order;
 }
 
-/* count of transactions in flight with the engine */
 static inline u16 al_dma_ring_active(struct al_dma_chan *chan)
 {
 	return CIRC_CNT(chan->head, chan->tail, al_dma_ring_size(chan));
@@ -343,8 +272,6 @@ static inline struct al_dma_chan *to_al_dma_chan(struct dma_chan *c)
 {
 	return container_of(c, struct al_dma_chan, common);
 }
-
-/* wrapper around hardware descriptor format + additional software fields */
 
 #ifdef DEBUG
 #define set_desc_id(desc, i) ((desc)->id = (i))
@@ -409,10 +336,6 @@ int al_dma_cleanup_fn(
 int udma_fast_memcpy(int len, al_phys_addr_t src, al_phys_addr_t dst);
 #endif
 
-/**
- * Submit pending SW descriptors (enlarge the head) and unlock the prep-lock
- * in the case 'issue-pending' is responsible for submitting the HW descriptors
- */
 void al_dma_tx_submit_sw_cond_unlock(
 	struct al_dma_chan		*chan,
 	struct dma_async_tx_descriptor	*tx);
@@ -423,4 +346,4 @@ extern const struct sysfs_ops al_dma_sysfs_ops;
 extern struct al_dma_sysfs_entry al_dma_version_attr;
 extern struct al_dma_sysfs_entry al_dma_cap_attr;
 
-#endif /* AL_DMA_H */
+#endif  

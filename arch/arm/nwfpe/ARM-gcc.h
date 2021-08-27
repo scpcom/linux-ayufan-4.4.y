@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
 -------------------------------------------------------------------------------
 The macro `BITS64' can be defined to indicate that 64-bit integer types are

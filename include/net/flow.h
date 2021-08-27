@@ -1,11 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *
- *	Generic internet FLOW.
- *
- */
  
 #ifndef _NET_FLOW_H
 #define _NET_FLOW_H
@@ -94,7 +89,6 @@ static inline void flowi4_init_output(struct flowi4 *fl4, int oif,
 	fl4->fl4_sport = sport;
 }
 
-/* Reset some input parameters after previous lookup */
 static inline void flowi4_update_output(struct flowi4 *fl4, int oif, __u8 tos,
 					__be32 daddr, __be32 saddr)
 {

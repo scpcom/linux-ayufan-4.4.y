@@ -1,23 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
-  Kernel module to match application layer (OSI layer 7) data in connections.
-
-  http://l7-filter.sf.net
-
-  (C) 2003-2009 Matthew Strait and Ethan Sommer.
-
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
-  as published by the Free Software Foundation; either version
-  2 of the License, or (at your option) any later version.
-  http://www.gnu.org/licenses/gpl.txt
-
-  Based on ipt_string.c (C) 2000 Emmanuel Roger <winfield@freegates.be>,
-  xt_helper.c (C) 2002 Harald Welte and cls_layer7.c (C) 2003 Matthew Strait,
-  Ethan Sommer, Justin Levandoski.
-*/
  
 #include <linux/spinlock.h>
 #include <linux/version.h>
@@ -45,7 +28,7 @@ MODULE_DESCRIPTION("iptables application layer match module");
 MODULE_ALIAS("ipt_layer7");
 MODULE_VERSION("2.21");
 
-static int maxdatalen = 2048; // this is the default
+static int maxdatalen = 2048;  
 module_param(maxdatalen, int, 0444);
 MODULE_PARM_DESC(maxdatalen, "maximum bytes of data looked at by l7-filter");
 #ifdef CONFIG_NETFILTER_XT_MATCH_LAYER7_DEBUG
@@ -54,8 +37,6 @@ MODULE_PARM_DESC(maxdatalen, "maximum bytes of data looked at by l7-filter");
 	#define DPRINTK(format,args...)
 #endif
 
-/* Number of packets whose data we look at.
-This can be modified through /proc/net/layer7_numpackets */
 static int num_packets = 10;
 
 static struct pattern_cache {
@@ -83,8 +64,7 @@ static int total_acct_packets(struct nf_conn *ct)
 }
 
 #ifdef CONFIG_IP_NF_MATCH_LAYER7_DEBUG
-/* Converts an unfriendly string into a friendly one by
-replacing unprintables with periods and all whitespace with " ". */
+ 
 static char * friendly_print(unsigned char * s)
 {
 	char * f = kmalloc(strlen(s) + 1, GFP_ATOMIC);
@@ -143,10 +123,8 @@ static char * hex_print(unsigned char * s)
 
 	return g;
 }
-#endif // DEBUG
+#endif  
 
-/* Use instead of regcomp.  As we expect to be seeing the same regexps over and
-over again, it make sense to cache the results. */
 static regexp * compile_and_cache(const char * regex_string,
                                   const char * protocol)
 {
@@ -159,13 +137,10 @@ static regexp * compile_and_cache(const char * regex_string,
 		if (!strcmp(node->regex_string, regex_string))
 		return node->pattern;
 
-		last_pattern_cache = node;/* points at the last non-NULL node */
+		last_pattern_cache = node; 
 		node = node->next;
 	}
 
-	/* If we reach the end of the list, then we have not yet cached
-	   the pattern for this regex. Let's do that now.
-	   Be paranoid about running out of memory to avoid list corruption. */
 	tmp = kmalloc(sizeof(struct pattern_cache), GFP_ATOMIC);
 
 	if(!tmp) {
@@ -189,15 +164,13 @@ static regexp * compile_and_cache(const char * regex_string,
 		return NULL;
 	}
 
-	/* Ok.  The new node is all ready now. */
 	node = tmp;
 
-	if(first_pattern_cache == NULL) /* list is empty */
-		first_pattern_cache = node; /* make node the beginning */
+	if(first_pattern_cache == NULL)  
+		first_pattern_cache = node;  
 	else
-		last_pattern_cache->next = node; /* attach node to the end */
+		last_pattern_cache->next = node;  
 
-	/* copy the string and compile the regex */
 	len = strlen(regex_string);
 	DPRINTK("About to compile this: \"%s\"\n", regex_string);
 	node->pattern = regcomp((char *)regex_string, &len);
@@ -206,7 +179,7 @@ static regexp * compile_and_cache(const char * regex_string,
 			printk(KERN_ERR "layer7: Error compiling regexp "
 					"\"%s\" (%s)\n",
 					regex_string, protocol);
-		/* pattern is now cached as NULL, so we won't try again. */
+		 
 	}
 
 	strcpy(node->regex_string, regex_string);
@@ -215,7 +188,7 @@ static regexp * compile_and_cache(const char * regex_string,
 
 static int can_handle(const struct sk_buff *skb)
 {
-	if(!ip_hdr(skb)) /* not IP */
+	if(!ip_hdr(skb))  
 		return 0;
 	if(ip_hdr(skb)->protocol != IPPROTO_TCP &&
 	   ip_hdr(skb)->protocol != IPPROTO_UDP &&
@@ -224,41 +197,35 @@ static int can_handle(const struct sk_buff *skb)
 	return 1;
 }
 
-/* Returns offset the into the skb->data that the application data starts */
 static int app_data_offset(const struct sk_buff *skb)
 {
-	/* In case we are ported somewhere (ebtables?) where ip_hdr(skb)
-	isn't set, this can be gotten from 4*(skb->data[0] & 0x0f) as well. */
+	 
 	int ip_hl = 4*ip_hdr(skb)->ihl;
 
 	if( ip_hdr(skb)->protocol == IPPROTO_TCP ) {
-		/* 12 == offset into TCP header for the header length field.
-		Can't get this with skb->h.th->doff because the tcphdr
-		struct doesn't get set when routing (this is confirmed to be
-		true in Netfilter as well as QoS.) */
+		 
 		int tcp_hl = 4*(skb->data[ip_hl + 12] >> 4);
 
 		return ip_hl + tcp_hl;
 	} else if( ip_hdr(skb)->protocol == IPPROTO_UDP  ) {
-		return ip_hl + 8; /* UDP header is always 8 bytes */
+		return ip_hl + 8;  
 	} else if( ip_hdr(skb)->protocol == IPPROTO_ICMP ) {
-		return ip_hl + 8; /* ICMP header is 8 bytes */
+		return ip_hl + 8;  
 	} else {
 		if (net_ratelimit())
 			printk(KERN_ERR "layer7: tried to handle unknown "
 					"protocol!\n");
-		return ip_hl + 8; /* something reasonable */
+		return ip_hl + 8;  
 	}
 }
 
-/* handles whether there's a match when we aren't appending data anymore */
 static int match_no_append(struct nf_conn * conntrack,
                            struct nf_conn * master_conntrack,
                            enum ip_conntrack_info ctinfo,
                            enum ip_conntrack_info master_ctinfo,
                            const struct xt_layer7_info * info)
 {
-	/* If we're in here, throw the app data away */
+	 
 	if(master_conntrack->layer7.app_data != NULL) {
 
 	#ifdef CONFIG_IP_NF_MATCH_LAYER7_DEBUG
@@ -277,11 +244,11 @@ static int match_no_append(struct nf_conn * conntrack,
 	#endif
 
 		kfree(master_conntrack->layer7.app_data);
-		master_conntrack->layer7.app_data = NULL; /* don't free again */
+		master_conntrack->layer7.app_data = NULL;  
 	}
 
 	if(master_conntrack->layer7.app_proto){
-		/* Here child connections set their .app_proto (for /proc) */
+		 
 		if(!conntrack->layer7.app_proto) {
 			conntrack->layer7.app_proto =
 			  kmalloc(strlen(master_conntrack->layer7.app_proto)+1,
@@ -301,8 +268,7 @@ static int match_no_append(struct nf_conn * conntrack,
 				info->protocol));
 	}
 	else {
-		/* If not classified, set to "unknown" to distinguish from
-		connections that are still being tested. */
+		 
 		master_conntrack->layer7.app_proto =
 			kmalloc(strlen("unknown")+1, GFP_ATOMIC);
 		if(!master_conntrack->layer7.app_proto){
@@ -316,18 +282,16 @@ static int match_no_append(struct nf_conn * conntrack,
 	}
 }
 
-/* add the new app data to the conntrack.  Return number of bytes added. */
+
 #if defined(CONFIG_SYNO_COMCERTO)
 static int add_datastr(char *target, int offset, char *app_data, int len)
 {
 	int length = 0, i;
 	if (!target) return 0;
 
-	/* Strip nulls. Make everything lower case (our regex lib doesn't
-	do case insensitivity).  Add it to the end of the current data. */
  	for(i = 0; i < maxdatalen-offset-1 && i < len; i++) {
 		if(app_data[i] != '\0') {
-			/* the kernel version of tolower mungs 'upper ascii' */
+			 
 			target[length+offset] =
 				isascii(app_data[i])? 
 					tolower(app_data[i]) : app_data[i];
@@ -339,7 +303,6 @@ static int add_datastr(char *target, int offset, char *app_data, int len)
 	return length;
 }
 
-/* add the new app data to the conntrack.  Return number of bytes added. */
 static int add_data(struct nf_conn * master_conntrack,
                     char * app_data, int appdatalen)
 {
@@ -357,18 +320,12 @@ static int add_data(struct nf_conn * master_conntrack,
 	int length = 0, i;
 	int oldlength = master_conntrack->layer7.app_data_len;
 
-	/* This is a fix for a race condition by Deti Fliegl. However, I'm not
-	   clear on whether the race condition exists or whether this really
-	   fixes it.  I might just be being dense... Anyway, if it's not really
-	   a fix, all it does is waste a very small amount of time. */
 	if(!master_conntrack->layer7.app_data) return 0;
 
-	/* Strip nulls. Make everything lower case (our regex lib doesn't
-	do case insensitivity).  Add it to the end of the current data. */
 	for(i = 0; i < maxdatalen-oldlength-1 &&
 		   i < appdatalen; i++) {
 		if(app_data[i] != '\0') {
-			/* the kernel version of tolower mungs 'upper ascii' */
+			 
 			master_conntrack->layer7.app_data[length+oldlength] =
 				isascii(app_data[i])?
 					tolower(app_data[i]) : app_data[i];
@@ -383,7 +340,6 @@ static int add_data(struct nf_conn * master_conntrack,
 }
 #endif
 
-/* taken from drivers/video/modedb.c */
 static int my_atoi(const char *s)
 {
 	int val = 0;
@@ -399,7 +355,6 @@ static int my_atoi(const char *s)
 	}
 }
 
-/* write out num_packets to userland. */
 static int layer7_read_proc(char* page, char ** start, off_t off, int count,
                             int* eof, void * data)
 {
@@ -416,7 +371,6 @@ static int layer7_read_proc(char* page, char ** start, off_t off, int count,
 	return 3;
 }
 
-/* Read in num_packets from userland */
 static int layer7_write_proc(struct file* file, const char* buffer,
                              unsigned long count, void *data)
 {
@@ -436,8 +390,6 @@ static int layer7_write_proc(struct file* file, const char* buffer,
 	num_packets = my_atoi(foo);
 	kfree (foo);
 
-	/* This has an arbitrary limit to make the math easier. I'm lazy.
-	But anyway, 99 is a LOT! If you want more, you're doing it wrong! */
 	if(num_packets > 99) {
 		printk(KERN_WARNING "layer7: num_packets can't be > 99.\n");
 		num_packets = 99;
@@ -465,7 +417,7 @@ match(const struct sk_buff *skbin,
       bool *hotdrop)
 #endif
 {
-	/* sidestep const without getting a compiler warning... */
+	 
 	struct sk_buff * skb = (struct sk_buff *)skbin;
 
 	const struct xt_layer7_info * info =
@@ -484,7 +436,6 @@ match(const struct sk_buff *skbin,
 	unsigned int pattern_result, appdatalen;
 	regexp * comppattern;
 
-	/* Be paranoid/incompetent - lock the entire match function. */
 	spin_lock_bh(&l7_lock);
 
 	if(!can_handle(skb)){
@@ -493,9 +444,6 @@ match(const struct sk_buff *skbin,
 		return info->invert;
 	}
 
-	/* Treat parent & all its children together as one connection, except
-	for the purpose of setting conntrack->layer7.app_proto in the actual
-	connection. This makes /proc/net/ip_conntrack more satisfying. */
 	if(!(conntrack = nf_ct_get(skb, &ctinfo)) ||
 	   !(master_conntrack=nf_ct_get(skb,&master_ctinfo))){
 		DPRINTK("layer7: couldn't get conntrack.\n");
@@ -503,11 +451,11 @@ match(const struct sk_buff *skbin,
 		return info->invert;
 	}
 
-	/* Try to get a master conntrack (and its master etc) for FTP, etc. */
+	
 	while (master_ct(master_conntrack) != NULL)
 		master_conntrack = master_ct(master_conntrack);
 
-	/* if we've classified it or seen too many packets */
+	
 #if defined(CONFIG_SYNO_COMCERTO)
 	if(!info->pkt && (total_acct_packets(master_conntrack) > num_packets ||
 	   master_conntrack->layer7.app_proto)) {
@@ -519,12 +467,7 @@ match(const struct sk_buff *skbin,
 		pattern_result = match_no_append(conntrack, master_conntrack,
 						 ctinfo, master_ctinfo, info);
 
-		/* skb->cb[0] == seen. Don't do things twice if there are
-		multiple l7 rules. I'm not sure that using cb for this purpose
-		is correct, even though it says "put your private variables
-		there". But it doesn't look like it is being used for anything
-		else in the skbs that make it here. */
-		skb->cb[0] = 1; /* marking it seen here's probably irrelevant */
+		skb->cb[0] = 1;  
 
 		spin_unlock_bh(&l7_lock);
 		return (pattern_result ^ info->invert);
@@ -540,11 +483,10 @@ match(const struct sk_buff *skbin,
 		}
 	}
 
-	/* now that the skb is linearized, it's safe to set these. */
 	app_data = skb->data + app_data_offset(skb);
 	appdatalen = skb_tail_pointer(skb) - app_data;
 
-	/* the return value gets checked later, when we're ready to use it */
+	
 	comppattern = compile_and_cache(info->pattern, info->protocol);
 
 #if defined(CONFIG_SYNO_COMCERTO)
@@ -568,7 +510,6 @@ match(const struct sk_buff *skbin,
 	}
 #endif
 
-	/* On the first packet of a connection, allocate space for app data */
 	if(total_acct_packets(master_conntrack) == 1 && !skb->cb[0] &&
 	   !master_conntrack->layer7.app_data){
 		master_conntrack->layer7.app_data =
@@ -584,37 +525,32 @@ match(const struct sk_buff *skbin,
 		master_conntrack->layer7.app_data[0] = '\0';
 	}
 
-	/* Can be here, but unallocated, if numpackets is increased near
-	the beginning of a connection */
 	if(master_conntrack->layer7.app_data == NULL){
 		spin_unlock_bh(&l7_lock);
-		return info->invert; /* unmatched */
+		return info->invert;  
 	}
 
 	if(!skb->cb[0]){
 		int newbytes;
 		newbytes = add_data(master_conntrack, app_data, appdatalen);
 
-		if(newbytes == 0) { /* didn't add any data */
+		if(newbytes == 0) {  
 			skb->cb[0] = 1;
-			/* Didn't match before, not going to match now */
+			 
 			spin_unlock_bh(&l7_lock);
 			return info->invert;
 		}
 	}
 
-	/* If looking for "unknown", then never match.  "Unknown" means that
-	we've given up; we're still trying with these packets. */
 	if(!strcmp(info->protocol, "unknown")) {
 		pattern_result = 0;
-	/* If looking for "unset", then always match. "Unset" means that we
-	haven't yet classified the connection. */
+	 
 	} else if(!strcmp(info->protocol, "unset")) {
 		pattern_result = 2;
 		DPRINTK("layer7: matched unset: not yet classified "
 			"(%d/%d packets)\n",
                         total_acct_packets(master_conntrack), num_packets);
-	/* If the regexp failed to compile, don't bother running it */
+	 
 	} else if(comppattern &&
 		  regexec(comppattern, master_conntrack->layer7.app_data)){
 		DPRINTK("layer7: matched %s\n", info->protocol);
@@ -632,18 +568,18 @@ match(const struct sk_buff *skbin,
 			return (pattern_result ^ info->invert);
 		}
 		strcpy(master_conntrack->layer7.app_proto, info->protocol);
-	} else if(pattern_result > 1) { /* cleanup from "unset" */
+	} else if(pattern_result > 1) {  
 		pattern_result = 1;
 	}
 
-	/* mark the packet seen */
+	
 	skb->cb[0] = 1;
 
 	spin_unlock_bh(&l7_lock);
 	return (pattern_result ^ info->invert);
 }
 
-// load nf_conntrack_ipv4
+
 #if defined(CONFIG_SYNO_COMCERTO)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 35)
 static int
@@ -714,7 +650,6 @@ static void layer7_cleanup_proc(void)
 	remove_proc_entry("layer7_numpackets", init_net.proc_net);
 }
 
-/* register the proc file */
 static void layer7_init_proc(void)
 {
 	struct proc_dir_entry* entry;
@@ -733,8 +668,7 @@ static int __init xt_layer7_init(void)
 			"using 1\n");
 		maxdatalen = 1;
 	}
-	/* This is not a hard limit.  It's just here to prevent people from
-	bringing their slow machines to a grinding halt. */
+	 
 	else if(maxdatalen > 65536) {
 		printk(KERN_WARNING "layer7: maxdatalen can't be > 65536, "
 			"using 65536\n");

@@ -1,18 +1,3 @@
-/*
- * Annapurna Labs thermal driver.
- *
- * Copyright (C) 2013 Annapurna Labs
- *
- * This software is licensed under the terms of the GNU General Public
- * License version 2, as published by the Free Software Foundation, and
- * may be copied, distributed, and modified under those terms.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- */
  
 #include <linux/err.h>
 #include <linux/of.h>
@@ -95,7 +80,7 @@ int syno_alpine_get_cpu_temperature(int *temperature)
 		return -1;
 	if (g_thermal_get_temp_ret != 0)
 		return -1;
-	// check ulong -> int overflow
+	 
 	*temperature = (int)g_cpu_temperature;
 	if (*temperature < 0)
 		return -1;
@@ -112,7 +97,6 @@ static int al_thermal_suspend(struct device *dev)
 	struct thermal_zone_device *al_thermal = platform_get_drvdata(pdev);
 	struct al_thermal_dev *al_dev = al_thermal->devdata;
 
-	/* Disable Annapurna Labs Thermal Sensor */
 	al_thermal_sensor_enable_set(&al_dev->handle, 0);
 
 	pr_info("%s: Suspended.\n", __func__);
@@ -127,7 +111,6 @@ static int al_thermal_resume(struct device *dev)
 	struct al_thermal_dev *al_dev = al_thermal->devdata;
 	int err = 0;
 
-	/* Enable Annapurna Labs Thermal Sensor */
 	err = thermal_enable(&al_dev->handle);
 	if (err) {
 		pr_err("%s: thermal_enable failed!\n", __func__);

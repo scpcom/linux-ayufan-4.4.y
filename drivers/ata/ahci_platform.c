@@ -1,19 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * AHCI SATA platform driver
- *
- * Copyright 2004-2005  Red Hat, Inc.
- *   Jeff Garzik <jgarzik@pobox.com>
- * Copyright 2010  MontaVista Software, LLC.
- *   Anton Vorontsov <avorontsov@ru.mvista.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- */
  
 #include <linux/kernel.h>
 #include <linux/gfp.h>
@@ -35,18 +22,18 @@
 #endif
 
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
-/* SATA Clocks */
-static struct clk *sata_oob_clk; /* Core clock */
-static struct clk *sata_pmu_clk; /* PMU alive clock */
-static struct clk *sata_clk;	/* Sata AXI ref clock */
+ 
+static struct clk *sata_oob_clk;  
+static struct clk *sata_pmu_clk;  
+static struct clk *sata_clk;	 
 #if defined(CONFIG_COMCERTO_SATA_OCC_CLOCK)
-static struct clk *sata_occ_clk; /* sata OCC clock */
+static struct clk *sata_occ_clk;  
 #endif
 #endif 
 
 enum ahci_type {
-	AHCI,		/* standard platform ahci */
-	IMX53_AHCI,	/* ahci on i.mx53 */
+	AHCI,		 
+	IMX53_AHCI,	 
 };
 
 static struct platform_device_id ahci_devtype[] = {
@@ -57,13 +44,13 @@ static struct platform_device_id ahci_devtype[] = {
 		.name = "imx53-ahci",
 		.driver_data = IMX53_AHCI,
 	}, {
-		/* sentinel */
+		 
 	}
 };
 MODULE_DEVICE_TABLE(platform, ahci_devtype);
 
 static const struct ata_port_info ahci_port_info[] = {
-	/* by features */
+	 
 	[AHCI] = {
 		.flags		= AHCI_FLAG_COMMON,
 		.pio_mask	= ATA_PIO4,
@@ -89,14 +76,9 @@ static int ahci_platform_suspend(struct platform_device *pdev, pm_message_t stat
 	int ret=0;
 
 #ifdef CONFIG_ARCH_M86XXX
-	 /* Check for the Bit_Mask bit for SATA, if it is enabled
-	  * then we are not going suspend the SATA device , as by
-	  * this device , we will wake from System Resume.
-	 */
+	  
 	if ( !(host_utilpe_shared_pmu_bitmask & SATA_IRQ )){
 
-                /* We will Just return
-                */
 		return ret;
 	}
 #endif
@@ -105,15 +87,13 @@ static int ahci_platform_suspend(struct platform_device *pdev, pm_message_t stat
 		ret = ata_host_suspend(host, state);
 
 #ifdef CONFIG_ARCH_M86XXX
-	if (!ret) /* sucessfully done the host suspend */
+	if (!ret)  
 	{
-		/* No do the clock disable PMU,OOB,AXI here */
+		 
 		clk_disable(sata_clk);
 		clk_disable(sata_oob_clk);
 		clk_disable(sata_pmu_clk);
 
-		/* PM Performance Enhancement : SRDS1 PD SATA1/SRDS2 PD SATA2 - P2 state, */
-		/* Resets the entire PHY module and CMU power down */
 		if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES1_CNF_SATA0)
 			writel((readl((COMCERTO_DWC1_CFG_BASE+0x44)) | 0xCC), (COMCERTO_DWC1_CFG_BASE+0x44));
 		else if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES2_CNF_SATA1)
@@ -130,26 +110,17 @@ static int ahci_platform_resume(struct platform_device *pdev)
         struct ata_host *host = platform_get_drvdata(pdev);
 
 #ifdef CONFIG_ARCH_M86XXX
-	/* PM Performance Enhancement : SRDS1 PD SATA1/SRDS2 PD SATA2 - P2 state, */
-	/* Enable PHY module and CMU power UP */
+	 
 	if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES1_CNF_SATA0)
  		writel((readl((COMCERTO_DWC1_CFG_BASE+0x44)) & ~0xCC), (COMCERTO_DWC1_CFG_BASE+0x44));
 	else if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES2_CNF_SATA1)
 		writel((readl((COMCERTO_DWC1_CFG_BASE+0x54)) & ~0xCC), (COMCERTO_DWC1_CFG_BASE+0x54));
 
-	/* Check for the Bit_Mask bit for SATA, if it is enabled
-	 * then we are not going suspend the SATA device , as by
-	 * this device , we will wake from System Resume.
-	*/
-
 	if ( !(host_utilpe_shared_pmu_bitmask & SATA_IRQ )){
 
-                /* We will Just return
-                */
 		return 0;
 	}
 
-	/* Do the  clock enable here  PMU,OOB,AXI */
 	clk_enable(sata_clk);
 	clk_enable(sata_oob_clk);
 	clk_enable(sata_pmu_clk);
@@ -180,35 +151,34 @@ static int __init ahci_probe(struct platform_device *pdev)
 	int i;
 	int rc;
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
-	/* Get the Reference and Enable  the SATA clocks here */
+	
 	 
 	sata_clk = clk_get(NULL,"sata");
-	/* Error Handling , if no SATA(AXI) clock reference: return error */
+	 
 	if (IS_ERR(sata_clk)) {
 		pr_err("%s: Unable to obtain SATA(AXI) clock: %ld\n",__func__,PTR_ERR(sata_clk));
 		return PTR_ERR(sata_clk);
  	}
 
-	/*Enable the SATA(AXI) clock here */
         rc = clk_enable(sata_clk);
 	if (rc){
 		pr_err("%s: SATA(AXI) clock enable failed \n",__func__);
                 return rc;
 	}
 	sata_oob_clk = clk_get(NULL,"sata_oob");
-	/* Error Handling , if no SATA_OOB clock reference: return error */
+	 
 	if (IS_ERR(sata_oob_clk)) {
 		pr_err("%s: Unable to obtain SATA_OOB clock: %ld\n",__func__,PTR_ERR(sata_oob_clk));
 		return PTR_ERR(sata_oob_clk);
  	}
 
 	sata_pmu_clk = clk_get(NULL,"sata_pmu");
-	/* Error Handling , if no SATA_PMU clock reference: return error */
+	 
 	if (IS_ERR(sata_pmu_clk)) {
 		pr_err("%s: Unable to obtain SATA_PMU clock: %ld\n",__func__,PTR_ERR(sata_pmu_clk));
 		return PTR_ERR(sata_pmu_clk);
 	}
-	/*Enable the SATA(PMU and OOB) clocks here */
+	 
         rc = clk_enable(sata_oob_clk);
 	if (rc){
 		pr_err("%s: SATA_OOB clock enable failed \n",__func__);
@@ -222,19 +192,19 @@ static int __init ahci_probe(struct platform_device *pdev)
 	}
 #if defined(CONFIG_COMCERTO_SATA_OCC_CLOCK)
 	sata_occ_clk = clk_get(NULL,"sata_occ");
-	/* Error Handling , if no sata occ clock reference: return error */
+	 
 	if (IS_ERR(sata_occ_clk)) {
 		pr_err("%s: Unable to obtain sata occ clock: %ld\n",__func__,PTR_ERR(sata_occ_clk));
 		return PTR_ERR(sata_occ_clk);
  	}
-	/*Enable the sata_occ clocks here */
+	 
         rc = clk_enable(sata_occ_clk);
 	if (rc){
 		pr_err("%s: sata occ clock enable failed \n",__func__);
 		return rc;
 	}
 #endif
-	/* Set the SATA PMU clock to 30 MHZ and OOB clock to 125MHZ */
+	 
 	clk_set_rate(sata_oob_clk,125000000);
 	clk_set_rate(sata_pmu_clk,30000000);
 	
@@ -269,12 +239,6 @@ static int __init ahci_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 
-	/*
-	 * Some platforms might need to prepare for mmio region access,
-	 * which could be done in the following init call. So, the mmio
-	 * region shouldn't be accessed before init (if provided) has
-	 * returned successfully.
-	 */
 	if (pdata && pdata->init) {
 		rc = pdata->init(dev, hpriv->mmio);
 		if (rc)
@@ -285,7 +249,6 @@ static int __init ahci_probe(struct platform_device *pdev)
 		pdata ? pdata->force_port_map : 0,
 		pdata ? pdata->mask_port_map  : 0);
 
-	/* prepare host */
 	if (hpriv->cap & HOST_CAP_NCQ)
 		pi.flags |= ATA_FLAG_NCQ;
 
@@ -294,11 +257,6 @@ static int __init ahci_probe(struct platform_device *pdev)
 
 	ahci_set_em_messages(hpriv, &pi);
 
-	/* CAP.NP sometimes indicate the index of the last enabled
-	 * port, at other times, that of the last possible port, so
-	 * determining the maximum port number requires looking at
-	 * both CAP.NP and port_map.
-	 */
 	n_ports = max(ahci_nr_ports(hpriv->cap), fls(hpriv->port_map));
 
 	host = ata_host_alloc_pinfo(dev, ppi, n_ports);
@@ -323,17 +281,15 @@ static int __init ahci_probe(struct platform_device *pdev)
 		ata_port_desc(ap, "mmio %pR", mem);
 		ata_port_desc(ap, "port 0x%x", 0x100 + ap->port_no * 0x80);
 
-		/* set enclosure management message type */
+		
 		if (ap->flags & ATA_FLAG_EM)
 			ap->em_message_type = hpriv->em_msg_type;
 
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
-		/* Optimized PFE/SATA DDR interaction,
-		limit read burst size of SATA controller */
+		 
 		writel(0x41, ahci_port_base(ap) + 0x70);
 #endif
 
-		/* disabled/not-implemented port */
 		if (!(hpriv->port_map & (1 << i)))
 			ap->ops = &ata_dummy_port_ops;
 	}
@@ -368,7 +324,7 @@ static int __devexit ahci_remove(struct platform_device *pdev)
 	if (pdata && pdata->exit)
 		pdata->exit(dev);
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
-	/* Disbale the SATA clocks Here */
+	 
 	clk_disable(sata_clk);
 	clk_put(sata_clk);
 	clk_disable(sata_oob_clk);
@@ -379,11 +335,7 @@ static int __devexit ahci_remove(struct platform_device *pdev)
 	clk_disable(sata_occ_clk);
 	clk_put(sata_occ_clk);
 #endif
-	/*Putting  SATA in reset state 
-	 * Sata axi clock domain in reset state
-	 * Serdes 1/2 in reset state, this depends upon PCIE1 and SGMII 
-         * sata 0/1 serdes controller in reset state
-	*/
+	 
 	c2000_block_reset(COMPONENT_AXI_SATA,1);
 
 	c2000_block_reset(COMPONENT_SERDES1,1);

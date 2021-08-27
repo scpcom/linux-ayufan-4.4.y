@@ -1,13 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/fs/hfsplus/xattr.c
- *
- * Vyacheslav Dubeyko <slava@dubeyko.com>
- *
- * Logic of processing extended attributes
- */
  
 #include "hfsplus_fs.h"
 #include "xattr.h"
@@ -21,10 +14,9 @@
 #endif
 
 #ifdef MY_ABC_HERE
-/* Zero out the date added field for the specified cnode */
+ 
 static void hfsplus_zero_dateadded(u16 entry_type, u8 *finderinfo) {
 
-	/* Advance finfo by 16 bytes to the 2nd half of the finderinfo */
     finderinfo = finderinfo + 16;
 
 	if (entry_type == HFSPLUS_FOLDER) {
@@ -82,23 +74,16 @@ static int can_set_xattr(struct inode *inode, const char *name,
 				const void *value, size_t value_len)
 {
 	if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
-		return -EOPNOTSUPP; /* TODO: implement ACL support */
+		return -EOPNOTSUPP;  
 
 	if (!strncmp(name, XATTR_MAC_OSX_PREFIX, XATTR_MAC_OSX_PREFIX_LEN)) {
-		/*
-		 * This makes sure that we aren't trying to set an
-		 * attribute in a different namespace by prefixing it
-		 * with "osx."
-		 */
+		 
 		if (is_known_namespace(name + XATTR_MAC_OSX_PREFIX_LEN))
 			return -EOPNOTSUPP;
 
 		return 0;
 	}
 
-	/*
-	 * Don't allow setting an attribute in an unknown namespace.
-	 */
 	if (strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN) &&
 	    strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN) &&
 	    strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN))
@@ -155,7 +140,7 @@ int __hfsplus_setxattr(struct inode *inode, const char *name,
 			err = -EOPNOTSUPP;
 			goto end_setxattr;
 		}
-#ifdef MY_ABC_HERE // SOLVE GFP call trace
+#ifdef MY_ABC_HERE  
 		cat_entry_type = hfs_bnode_read_u16(cat_fd.bnode, cat_fd.entryoffset);
 		if (cat_entry_type == HFSPLUS_FOLDER) {
 			hfs_bnode_read(cat_fd.bnode, &entry, cat_fd.entryoffset, sizeof(struct hfsplus_cat_folder));
@@ -369,12 +354,9 @@ ssize_t hfsplus_getxattr(struct dentry *dentry, const char *name,
 
 	if (strncmp(name, XATTR_MAC_OSX_PREFIX,
 				XATTR_MAC_OSX_PREFIX_LEN) == 0) {
-		/* skip "osx." prefix */
+		 
 		name += XATTR_MAC_OSX_PREFIX_LEN;
-		/*
-		 * Don't allow retrieving properly prefixed attributes
-		 * by prepending them with "osx."
-		 */
+		 
 		if (is_known_namespace(name))
 			return -EOPNOTSUPP;
 	}
@@ -895,10 +877,7 @@ static int hfsplus_osx_setxattr(struct dentry *dentry, const char *name,
 static size_t hfsplus_osx_listxattr(struct dentry *dentry, char *list,
 		size_t list_size, const char *name, size_t name_len, int type)
 {
-	/*
-	 * This method is not used.
-	 * It is used hfsplus_listxattr() instead of generic_listxattr().
-	 */
+	 
 	return -EOPNOTSUPP;
 }
 

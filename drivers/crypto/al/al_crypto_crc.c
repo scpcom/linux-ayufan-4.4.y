@@ -1,27 +1,3 @@
-/*
- * drivers/crypto/al_crypto_crc.c
- *
- * Annapurna Labs Crypto driver - crc/checksum algorithms
- *
- * Copyright (C) 2013 Annapurna Labs Ltd.
- *
- * Algorithm registration code and chained scatter/gather lists
- * handling based on caam driver.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
  
 #include "linux/export.h"
 #include "linux/crypto.h"
@@ -59,9 +35,7 @@ static int crc_setkey(struct crypto_ahash *ahash,
 			const u8 *key, unsigned int keylen);
 
 struct al_crc_req_ctx {
-	/* Make sure the following field isn't share the same cache line
-	 * with other fields.
-	 * This field is DMAed */
+	 
 	uint32_t result ____cacheline_aligned;
 	bool last ____cacheline_aligned;
 	struct al_crypto_cache_state	cache_state;
@@ -127,8 +101,6 @@ struct al_crc {
 	struct ahash_alg ahash_alg;
 };
 
-/******************************************************************************
- *****************************************************************************/
 static int al_crc_cra_init(struct crypto_tfm *tfm)
 {
 	struct crypto_alg *base = tfm->__crt_alg;
@@ -160,8 +132,6 @@ static int al_crc_cra_init(struct crypto_tfm *tfm)
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_crc_cra_exit(struct crypto_tfm *tfm)
 {
 	struct al_crc_ctx *ctx = crypto_tfm_ctx(tfm);
@@ -173,10 +143,6 @@ static void al_crc_cra_exit(struct crypto_tfm *tfm)
 	return;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* DMA unmap buffers for crc request
- */
 static inline void al_crypto_dma_unmap_crc(
 		struct al_crypto_chan		*chan,
 		struct al_crypto_sw_desc	*desc)
@@ -205,11 +171,6 @@ static inline void al_crypto_dma_unmap_crc(
 	}
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Cleanup single crc request - invoked from cleanup tasklet (interrupt
- * handler)
- */
 void al_crypto_cleanup_single_crc(
 		struct al_crypto_chan		*chan,
 		struct al_crypto_sw_desc	*desc,
@@ -223,7 +184,6 @@ void al_crypto_cleanup_single_crc(
 
 	al_crypto_dma_unmap_crc(chan, desc);
 
-	/* LRU list access has to be protected */
 	if (req_ctx->last) {
 		spin_lock(&ctx->chan->prep_lock);
 		if (req_ctx->cache_state.cached)
@@ -234,8 +194,6 @@ void al_crypto_cleanup_single_crc(
 	req->base.complete(&req->base, 0);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int crc_init(struct ahash_request *req)
 {
 	struct crypto_ahash *ahash = crypto_ahash_reqtfm(req);
@@ -257,8 +215,6 @@ static int crc_init(struct ahash_request *req)
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static inline void crc_req_prepare_xaction_buffers(struct ahash_request *req,
 		struct al_crypto_sw_desc *desc,
 		int nbytes,
@@ -275,8 +231,6 @@ static inline void crc_req_prepare_xaction_buffers(struct ahash_request *req,
 				src_idx);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static inline void crc_update_stats(int nbytes,
 		struct al_crypto_chan *chan)
 {
@@ -293,8 +247,6 @@ static inline void crc_update_stats(int nbytes,
 		AL_CRYPTO_STATS_INC(chan->stats_prep.crc_reqs_gt4096, 1);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static inline void crc_req_prepare_xaction(struct ahash_request *req,
 		int nbytes,
 		struct al_crypto_sw_desc *desc,
@@ -308,7 +260,6 @@ static inline void crc_req_prepare_xaction(struct ahash_request *req,
 	unsigned int digestsize = crypto_ahash_digestsize(ahash);
 	int src_idx;
 
-	/* prepare hal transaction */
 	xaction = &desc->hal_crc_xaction;
 	memset(xaction, 0, sizeof(struct al_crc_transaction));
 	xaction->crcsum_type = ctx->crcsum_type;
@@ -316,14 +267,11 @@ static inline void crc_req_prepare_xaction(struct ahash_request *req,
 	xaction->in_xor = ~0;
 	xaction->res_xor = ~0;
 
-	/* if the entry is not cached, take stored iv */
 	if (!(req_ctx->cache_state.cached)) {
 		xaction->crc_iv_in.addr = req_ctx->crc_dma_addr;
 		xaction->crc_iv_in.len = digestsize;
 	}
 
-	/* both store in cache and output intermediate result */
-	/* cached result will be used unless it will be replaced */
 	xaction->crc_out.addr = req_ctx->crc_dma_addr;
 	xaction->crc_out.len = digestsize;
 
@@ -364,13 +312,6 @@ static inline void crc_req_prepare_xaction(struct ahash_request *req,
 	crc_update_stats(nbytes, chan);
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* Main CRC processing function that handles update/final/finup and digest
- *
- * Implementation is based on the assumption that the caller waits for
- * completion of every operation before issuing the next operation
- */
 static int crc_process_req(struct ahash_request *req, unsigned int nbytes)
 {
 	struct crypto_ahash *ahash = crypto_ahash_reqtfm(req);
@@ -429,7 +370,6 @@ static int crc_process_req(struct ahash_request *req, unsigned int nbytes)
 
 		crc_req_prepare_xaction(req, nbytes, desc, src_nents);
 
-		/* send crypto transaction to engine */
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
 		rc = al_crc_csum_prepare(chan->hal_crypto, chan->idx,
 					&desc->hal_crc_xaction);
@@ -468,8 +408,6 @@ static int crc_process_req(struct ahash_request *req, unsigned int nbytes)
 	return rc;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int crc_update(struct ahash_request *req)
 {
 	struct al_crc_req_ctx *req_ctx = ahash_request_ctx(req);
@@ -479,8 +417,6 @@ static int crc_update(struct ahash_request *req)
 	return crc_process_req(req, req->nbytes);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int crc_final(struct ahash_request *req)
 {
 	struct al_crc_req_ctx *req_ctx = ahash_request_ctx(req);
@@ -490,8 +426,6 @@ static int crc_final(struct ahash_request *req)
 	return crc_process_req(req, 0);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int crc_finup(struct ahash_request *req)
 {
 	struct al_crc_req_ctx *req_ctx = ahash_request_ctx(req);
@@ -501,8 +435,6 @@ static int crc_finup(struct ahash_request *req)
 	return crc_process_req(req, req->nbytes);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int crc_digest(struct ahash_request *req)
 {
 	struct al_crc_req_ctx *req_ctx = ahash_request_ctx(req);
@@ -514,8 +446,6 @@ static int crc_digest(struct ahash_request *req)
 	return crc_process_req(req, req->nbytes);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int crc_export(struct ahash_request *req, void *out)
 {
 	struct crypto_ahash *ahash = crypto_ahash_reqtfm(req);
@@ -528,8 +458,6 @@ static int crc_export(struct ahash_request *req, void *out)
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int crc_import(struct ahash_request *req, const void *in)
 {
 	struct crypto_ahash *ahash = crypto_ahash_reqtfm(req);
@@ -542,8 +470,6 @@ static int crc_import(struct ahash_request *req, const void *in)
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int crc_setkey(struct crypto_ahash *ahash, const u8 *key,
 		unsigned int keylen)
 {
@@ -559,8 +485,6 @@ static int crc_setkey(struct crypto_ahash *ahash, const u8 *key,
 	return 0;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static struct al_crc *al_crc_alloc(
 		struct al_crypto_device *device,
 		struct al_crc_template *template)
@@ -599,8 +523,6 @@ static struct al_crc *al_crc_alloc(
 	return t_alg;
 }
 
-/******************************************************************************
- *****************************************************************************/
 int al_crypto_crc_init(struct al_crypto_device *device)
 {
 	int i;
@@ -613,7 +535,6 @@ int al_crypto_crc_init(struct al_crypto_device *device)
 
 	atomic_set(&device->crc_tfm_count, -1);
 
-	/* register crypto algorithms the device supports */
 	for (i = 0; i < ARRAY_SIZE(driver_crc); i++) {
 		struct al_crc *t_alg;
 
@@ -643,8 +564,6 @@ int al_crypto_crc_init(struct al_crypto_device *device)
 	return err;
 }
 
-/******************************************************************************
- *****************************************************************************/
 void al_crypto_crc_terminate(struct al_crypto_device *device)
 {
 	struct al_crc *t_alg, *n;

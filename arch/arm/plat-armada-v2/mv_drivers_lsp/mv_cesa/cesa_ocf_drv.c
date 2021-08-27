@@ -1,32 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-*******************************************************************************/
  
 #include <linux/interrupt.h>
 #include <linux/module.h>
@@ -44,7 +18,7 @@ disclaimer.
 #include "mvCommon.h"
 #include "mvOs.h"
 #include "ctrlEnv/mvCtrlEnvLib.h"
-#include "cesa_if.h" /* moved here before cryptodev.h due to include dependencies */
+#include "cesa_if.h"  
 #include "mvSysCesaApi.h"
 #include "ctrlEnv/mvUnitMap.h"
 #include <cryptodev.h>
@@ -72,20 +46,17 @@ static int debug = 0;
 #define dprintk(a...)
 #endif
 
-/* interrupt handling */
 #undef CESA_OCF_TASKLET
 
 extern int cesaReqResources[MV_CESA_CHANNELS];
-/* support for spliting action into 2 actions */
+ 
 #define CESA_OCF_SPLIT
 
-/* general defines */
 #define CESA_OCF_MAX_SES 	128
 #define CESA_Q_SIZE		256
 #define CESA_RESULT_Q_SIZE	(CESA_Q_SIZE * MV_CESA_CHANNELS * 2)
 #define CESA_OCF_POOL_SIZE	(CESA_Q_SIZE * MV_CESA_CHANNELS * 2)
 
-/* data structures */
 struct cesa_ocf_data {
         int                                      cipher_alg;
         int                                      auth_alg;
@@ -95,7 +66,7 @@ struct cesa_ocf_data {
 	int 					 digestlen;
 	short					 sid_encrypt;
 	short					 sid_decrypt;
-	/* fragment workaround sessions */
+	 
 	short					 frag_wa_encrypt;
 	short					 frag_wa_decrypt;
 	short					 frag_wa_auth;
@@ -112,7 +83,7 @@ struct cesa_ocf_process {
 	int 					need_cb;
 };
 
-/* global variables */
+
 static int32_t			cesa_ocf_id 		= -1;
 static struct cesa_ocf_data 	**cesa_ocf_sessions = NULL;
 #ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
@@ -126,7 +97,6 @@ static unsigned int next_result;
 static unsigned int result_done;
 static unsigned char chan_id[MV_CESA_CHANNELS];
 
-/* static APIs */
 static int 		cesa_ocf_process	(device_t, struct cryptop *, int);
 static int 		cesa_ocf_newsession	(device_t, u_int32_t *, struct cryptoini *);
 static int 		cesa_ocf_freesession	(device_t, u_int64_t);
@@ -144,15 +114,12 @@ static struct cesa_ocf_process *cesa_ocf_pool = NULL;
 static struct cesa_ocf_process *cesa_ocf_stack[CESA_OCF_POOL_SIZE];
 static unsigned int cesa_ocf_stack_idx;
 
-/*
- * dummy device structure
- */
 static struct {
 	softc_device_decl	sc_dev;
 } mv_cesa_dev;
 
 static device_method_t mv_cesa_methods = {
-	/* crypto device methods */
+	 
 	DEVMETHOD(cryptodev_newsession,	cesa_ocf_newsession),
 	DEVMETHOD(cryptodev_freesession,cesa_ocf_freesession),
 	DEVMETHOD(cryptodev_process,	cesa_ocf_process),
@@ -202,38 +169,34 @@ skb_copy_bits_back(struct sk_buff *skb, int offset, caddr_t cp, int len)
 }
 
 #ifdef RT_DEBUG
-/* 
- * check that the crp action match the current session
- */
+ 
 static int 
 ocf_check_action(struct cryptop *crp, struct cesa_ocf_data *cesa_ocf_cur_ses) {
 	int count = 0;
 	int encrypt = 0, decrypt = 0, auth = 0;
 	struct cryptodesc *crd;
 
-        /* Go through crypto descriptors, processing as we go */
         for (crd = crp->crp_desc; crd; crd = crd->crd_next, count++) {
 		if(count > 2) {
 			printk("%s,%d: session mode is not supported.\n", __FILE__, __LINE__);
 			return 1;
 		}
 		
-		/* Encryption /Decryption */
 		if(crd->crd_alg == cesa_ocf_cur_ses->cipher_alg) {
-			/* check that the action is compatible with session */
+			 
 			if(encrypt || decrypt) {
 				printk("%s,%d: session mode is not supported.\n", __FILE__, __LINE__);
 				return 1;
 			}
 
-			if(crd->crd_flags & CRD_F_ENCRYPT) { /* encrypt */
+			if(crd->crd_flags & CRD_F_ENCRYPT) {  
 				if( (count == 2) && (cesa_ocf_cur_ses->encrypt_tn_auth) ) {
 					printk("%s,%d: sequence isn't supported by this session.\n", __FILE__, __LINE__);
 					return 1;
 				}
 				encrypt++;
 			}
-			else { 					/* decrypt */
+			else { 					 
 				if( (count == 2) && !(cesa_ocf_cur_ses->auth_tn_decrypt) ) {
 					printk("%s,%d: sequence isn't supported by this session.\n", __FILE__, __LINE__);
 					return 1;
@@ -242,9 +205,9 @@ ocf_check_action(struct cryptop *crp, struct cesa_ocf_data *cesa_ocf_cur_ses) {
 			}
 
 		}
-		/* Authentication */
+		 
 		else if(crd->crd_alg == cesa_ocf_cur_ses->auth_alg) {
-			/* check that the action is compatible with session */
+			 
 			if(auth) {
 				printk("%s,%d: session mode is not supported.\n", __FILE__, __LINE__);
 				return 1;
@@ -295,9 +258,6 @@ static inline void cesa_ocf_free(struct cesa_ocf_process *ocf_process_p)
 	spin_unlock_irqrestore(&cesa_lock, flags);
 }
 
-/*
- * Process a request.
- */
 static int 
 cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 {
@@ -322,15 +282,13 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 	for(chan = 0; chan < MV_CESA_CHANNELS; chan++)
 		free_resrc += cesaReqResources[chan];
 
-		/* In case request should be split, at least 2 slots
-			should be available in CESA fifo */
 		if (free_resrc < 2) {
                 	dprintk("%s,%d: ERESTART\n", __FILE__, __LINE__);
 			return -ERESTART;
 		}
 
 #ifdef RT_DEBUG
-        /* Sanity check */
+         
         if (crp == NULL) {
                 printk("%s,%d: EINVAL\n", __FILE__, __LINE__);
 		return -EINVAL;
@@ -361,38 +319,28 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 	}
 #endif
 
-	/* Allocate new cesa process from local pool */	
 	cesa_ocf_cmd = cesa_ocf_alloc();
 	if (cesa_ocf_cmd == NULL) {
             	printk("%s,%d: ENOBUFS \n", __FILE__, __LINE__);
             	goto p_error;
       	}
 
-	/* init cesa_process */
 	cesa_ocf_cmd->crp = crp;
-	/* always call callback */
+	 
 	cesa_ocf_cmd->need_cb = 1;
 
-	/* init cesa_cmd for usage of the HALs */
 	cesa_cmd = &cesa_ocf_cmd->cesa_cmd;
 	cesa_cmd->pReqPrv = (void *)cesa_ocf_cmd;
-	cesa_cmd->sessionId = cesa_ocf_cur_ses->sid_encrypt; /* defualt use encrypt */
+	cesa_cmd->sessionId = cesa_ocf_cur_ses->sid_encrypt;  
 
-	/* prepare src buffer 	*/
-	/* we send the entire buffer to the HAL, even if only part of it should be encrypt/auth.  */
-	/* if not using seesions for both encrypt and auth, then it will be wiser to to copy only */
-	/* from skip to crd_len. 								  */
 	p_buf_info = cesa_ocf_cmd->cesa_bufs;	
 	p_mbuf_info = &cesa_ocf_cmd->cesa_mbuf;
 
-	p_buf_info += 2; /* save 2 first buffers for IV and digest - 
-			    we won't append them to the end since, they 
-			    might be places in an unaligned addresses. */
+	p_buf_info += 2;  
 	
 	p_mbuf_info->pFrags = p_buf_info;
 	temp_len = 0;
 
-	/* handle SKB */
 	if (crp->crp_flags & CRYPTO_F_SKBUF) {
 		
 		dprintk("%s,%d: handle SKB.\n", __FILE__, __LINE__);
@@ -405,12 +353,11 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 
 		p_mbuf_info->mbufSize = skb->len;
 		temp_len = skb->len;
-        	/* first skb fragment */
+        	 
         	p_buf_info->bufSize = skb_headlen(skb);
         	p_buf_info->bufVirtPtr = skb->data;
 		p_buf_info++;
 
-        	/* now handle all other skb fragments */
         	for ( i = 0; i < skb_shinfo(skb)->nr_frags; i++ ) {
             		skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
             		p_buf_info->bufSize = frag->size;
@@ -419,7 +366,7 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
         	}
         	p_mbuf_info->numFrags = skb_shinfo(skb)->nr_frags + 1;
 	}
-	/* handle UIO */
+	 
 	else if(crp->crp_flags & CRYPTO_F_IOV) {
 	
 		dprintk("%s,%d: handle UIO.\n", __FILE__, __LINE__);
@@ -442,7 +389,7 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 		}
 
 	}
-	/* handle CONTIG */
+	 
 	else {
 		dprintk("%s,%d: handle CONTIG.\n", __FILE__, __LINE__); 
 		p_mbuf_info->numFrags = 1;
@@ -453,7 +400,6 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 		p_buf_info++;
 	}
 	
-	/* Support up to 64K why? cause! */
 	if(crp->crp_ilen > 64*1024) {
 		printk("%s,%d: buf too big %x \n", __FILE__, __LINE__, crp->crp_ilen);
 		goto p_error;
@@ -466,14 +412,11 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 	cesa_cmd->pSrc = p_mbuf_info;
 	cesa_cmd->pDst = p_mbuf_info;
 	
-	/* restore p_buf_info to point to first available buf */
 	p_buf_info = cesa_ocf_cmd->cesa_bufs;	
 	p_buf_info += 1; 
 
-        /* Go through crypto descriptors, processing as we go */
         for (crd = crp->crp_desc; crd; crd = crd->crd_next) {
 		
-		/* Encryption /Decryption */
 		if(crd->crd_alg == cesa_ocf_cur_ses->cipher_alg) {
 
 			dprintk("%s,%d: cipher", __FILE__, __LINE__);
@@ -481,19 +424,15 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 			cesa_cmd->cryptoOffset = crd->crd_skip;
     	              	cesa_cmd->cryptoLength = crd->crd_len;
 
-			if(crd->crd_flags & CRD_F_ENCRYPT) { /* encrypt */
+			if(crd->crd_flags & CRD_F_ENCRYPT) {  
 				dprintk(" encrypt \n");
 				encrypt++;
 
-				/* handle IV */
-				if (crd->crd_flags & CRD_F_IV_EXPLICIT) {  /* IV from USER */
+				if (crd->crd_flags & CRD_F_IV_EXPLICIT) {   
 					dprintk("%s,%d: IV from USER (offset %x) \n", __FILE__, __LINE__, crd->crd_inject);
 					cesa_cmd->ivFromUser = 1;
 					ivp = crd->crd_iv;
 
-                                	/*
-                                 	 * do we have to copy the IV back to the buffer ?
-                                 	 */
                                 	if ((crd->crd_flags & CRD_F_IV_PRESENT) == 0) {
 						dprintk("%s,%d: copy the IV back to the buffer\n", __FILE__, __LINE__);
 						cesa_cmd->ivOffset = crd->crd_inject;
@@ -514,7 +453,6 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 						p_buf_info->bufSize = cesa_ocf_cur_ses->ivlen; 
 						p_buf_info--;
 
-						/* offsets */
 						cesa_cmd->ivOffset = 0;
 						cesa_cmd->cryptoOffset += cesa_ocf_cur_ses->ivlen;
 						if(auth) {
@@ -523,34 +461,28 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 						}	
 					}
                                 }
-				else {					/* random IV */
+				else {					 
 					dprintk("%s,%d: random IV \n", __FILE__, __LINE__);
 					cesa_cmd->ivFromUser = 0;
 
-                                	/*
-                                 	 * do we have to copy the IV back to the buffer ?
-                                 	 */
-					/* in this mode the HAL will always copy the IV */
-					/* given by the session to the ivOffset  	*/
 					if ((crd->crd_flags & CRD_F_IV_PRESENT) == 0) {
 						cesa_cmd->ivOffset = crd->crd_inject;
 					} 
 					else {
-						/* if IV isn't copy, then how will the user know which IV did we use??? */
+						 
 						printk("%s,%d: EINVAL\n", __FILE__, __LINE__);
 						goto p_error; 
 					}
 				}
 			}
-			else { 					/* decrypt */
+			else { 					 
 				dprintk(" decrypt \n");
 				decrypt++;
 				cesa_cmd->sessionId = cesa_ocf_cur_ses->sid_decrypt;
 
-				/* handle IV */
 				if (crd->crd_flags & CRD_F_IV_EXPLICIT) {
 					dprintk("%s,%d: IV from USER \n", __FILE__, __LINE__);
-					/* append the IV buf to the mbuf */
+					 
 					cesa_cmd->ivFromUser = 1;	
 					p_mbuf_info->numFrags++;
 					p_mbuf_info->mbufSize += cesa_ocf_cur_ses->ivlen; 
@@ -560,7 +492,6 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 					p_buf_info->bufSize = cesa_ocf_cur_ses->ivlen; 
 					p_buf_info--;
 
-					/* offsets */
 					cesa_cmd->ivOffset = 0;
 					cesa_cmd->cryptoOffset += cesa_ocf_cur_ses->ivlen;
 					if(auth) {
@@ -576,14 +507,13 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 			}
 
 		}
-		/* Authentication */
+		 
 		else if(crd->crd_alg == cesa_ocf_cur_ses->auth_alg) {
 			dprintk("%s,%d:  Authentication \n", __FILE__, __LINE__);
 			auth++;
 			cesa_cmd->macOffset = crd->crd_skip;
 			cesa_cmd->macLength = crd->crd_len;
 
-			/* digest + mac */
 			cesa_cmd->digestOffset = crd->crd_inject;
 		} 
 		else {
@@ -604,19 +534,16 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 
 	cesa_cmd->split = MV_CESA_SPLIT_NONE;
 	
-	/* send action to HAL */
 	spin_lock_irqsave(&cesa_lock, flags);
 	status = mvCesaIfAction(cesa_cmd);
 	spin_unlock_irqrestore(&cesa_lock, flags);
 
-	/* action not allowed */
 	if(status == MV_NOT_ALLOWED) {
 #ifdef CESA_OCF_SPLIT
-		/* if both encrypt and auth try to split */
+		 
 		if(auth && (encrypt || decrypt)) {
 			MV_CESA_COMMAND	*cesa_cmd_wa;
 
-			/* Allocate new cesa process from local pool and initialize it */	
 			cesa_ocf_cmd_wa = cesa_ocf_alloc();
 	
         		if (cesa_ocf_cmd_wa == NULL) {
@@ -630,7 +557,6 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 			cesa_cmd_wa->split = MV_CESA_SPLIT_FIRST;
 			cesa_cmd->split = MV_CESA_SPLIT_SECOND;
 
-			/* break requests to two operation, first operation completion won't call callback */
 			if((decrypt) && (cesa_ocf_cur_ses->auth_tn_decrypt)) {
 				cesa_cmd_wa->sessionId = cesa_ocf_cur_ses->frag_wa_auth;
 				cesa_cmd->sessionId = cesa_ocf_cur_ses->frag_wa_decrypt;
@@ -652,7 +578,6 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
             			goto p_error;
 			}
 
-			/* send the 2 actions to the HAL */
 			spin_lock_irqsave(&cesa_lock, flags);
 			status = mvCesaIfAction(cesa_cmd_wa);
 			spin_unlock_irqrestore(&cesa_lock, flags);
@@ -666,7 +591,7 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 			spin_unlock_irqrestore(&cesa_lock, flags);
 
 		}
-		/* action not allowed and can't split */
+		 
 		else 
 #endif
 		{
@@ -674,7 +599,6 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 		}
 	}
 
-	/* Hal Q is full, send again. This should never happen */
 	if(status == MV_NO_RESOURCE) {
 		dprintk("%s,%d: cesa no more resources \n", __FILE__, __LINE__);
 		if(cesa_ocf_cmd)
@@ -700,9 +624,6 @@ p_error:
 	return -EINVAL;
 }
 
-/*
- * cesa callback. 
- */
 static inline void
 cesa_callback(unsigned long dummy)
 {
@@ -739,9 +660,6 @@ cesa_callback(unsigned long dummy)
 	return;
 }
 
-/*
- * cesa Interrupt Service Routine.
- */
 static irqreturn_t
 cesa_interrupt_handler(int irq, void *arg)
 {
@@ -757,17 +675,15 @@ cesa_interrupt_handler(int irq, void *arg)
 #else
 	mask = MV_CESA_CAUSE_ACC_DMA_MASK;
 #endif
-  	/* Read cause register */
+  	 
 	cause = MV_REG_READ(MV_CESA_ISR_CAUSE_REG(chan));
 
 	if (likely(cause & mask)) {
 
 		spin_lock(&cesa_lock);
 
-		/* Clear pending irq */
     		MV_REG_WRITE(MV_CESA_ISR_CAUSE_REG(chan), 0);
 
-		/* Get completed results */
 		while (atomic_read(&result_count) < CESA_RESULT_Q_SIZE) {
 
 			status = mvCesaIfReadyGet(chan, &result);
@@ -782,7 +698,7 @@ cesa_interrupt_handler(int irq, void *arg)
 		spin_unlock(&cesa_lock);
 
 		if (atomic_read(&result_count) >= CESA_RESULT_Q_SIZE) {
-			/* In case reaching this point -result_Q should be tuned   */
+			 
 				printk("%s: Error: Q request is full(chan=%d)\n", __func__, chan);
 				return IRQ_HANDLED;
 		}
@@ -798,11 +714,8 @@ cesa_interrupt_handler(int irq, void *arg)
 	return IRQ_HANDLED;
 }
 
-/*
- * Open a session.
- */
 static int 
-/*cesa_ocf_newsession(void *arg, u_int32_t *sid, struct cryptoini *cri)*/
+ 
 cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 {
 	u32 status = 0, i = 0;
@@ -832,7 +745,7 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 		struct cesa_ocf_data **cesa_ocf_new_sessions;
 
 		if (cesa_ocf_sessions == NULL) {
-			i = 1; /* We leave cesa_ocf_sessions[0] empty */
+			i = 1;  
 			cesa_ocf_sesnum = CESA_OCF_MAX_SES;
 		}
 		else
@@ -840,7 +753,7 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 
 		cesa_ocf_new_sessions = kmalloc(cesa_ocf_sesnum * sizeof(struct cesa_ocf_data *), SLAB_ATOMIC);
 		if (cesa_ocf_new_sessions == NULL) {
-			/* Reset session number */
+			 
 			if (cesa_ocf_sesnum == CESA_OCF_MAX_SES)
 				cesa_ocf_sesnum = 0;
 			else
@@ -850,7 +763,6 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 		}
 		memset(cesa_ocf_new_sessions, 0, cesa_ocf_sesnum * sizeof(struct cesa_ocf_data *));
 
-		/* Copy existing sessions */
 		if (cesa_ocf_sessions) {
 			memcpy(cesa_ocf_new_sessions, cesa_ocf_sessions,
 			    (cesa_ocf_sesnum / 2) * sizeof(struct cesa_ocf_data *));
@@ -865,10 +777,7 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	if (cesa_ocf_sessions[i] == NULL) {
 #ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
 		spin_unlock_irqrestore(&syno_cesa_lock, flags);
-		/* !! small lock LEAKAGE after !!
-		 * should NOT call cesa_ocf_freesession since
-		 * it does nothing in current implementation
-		 */
+		 
 #endif
 		cesa_ocf_freesession(NULL, i);
 		dprintk("%s,%d: EINVAL\n", __FILE__, __LINE__);
@@ -889,7 +798,6 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	cesa_ocf_cur_ses->frag_wa_decrypt = -1;
 	cesa_ocf_cur_ses->frag_wa_auth = -1;
 
-	/* init the session */	
 	memset(cesa_ses, 0, sizeof(MV_CESA_OPEN_SESSION));
 	count = 1;
         while (cri) {	
@@ -984,10 +892,9 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
                 goto error;
 	}
 
-	/* create new sessions in HAL */
 	if(encrypt) {
 		cesa_ses->operation = MV_CESA_CRYPTO_ONLY;
-		/* encrypt session */
+		 
 		if(auth == 1) {
 			cesa_ses->operation = MV_CESA_MAC_THEN_CRYPTO;
 		}
@@ -1006,7 +913,7 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
         		printk("%s,%d: Can't open new session - status = 0x%x\n", __FILE__, __LINE__, status);
         		goto error;
     		}	
-		/* decrypt session */
+		 
 		if( cesa_ses->operation == MV_CESA_MAC_THEN_CRYPTO ) {
 			cesa_ses->operation = MV_CESA_CRYPTO_THEN_MAC;
 		}
@@ -1022,11 +929,10 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
         		goto error;
     		}
 
-		/* preapre one action sessions for case we will need to split an action */
 #ifdef CESA_OCF_SPLIT
 		if(( cesa_ses->operation == MV_CESA_MAC_THEN_CRYPTO ) || 
 			( cesa_ses->operation == MV_CESA_CRYPTO_THEN_MAC )) {
-			/* open one session for encode and one for decode */
+			 
 			cesa_ses->operation = MV_CESA_CRYPTO_ONLY;
 			cesa_ses->direction = MV_CESA_DIR_ENCODE;
 			spin_lock_irqsave(&cesa_lock, flags);
@@ -1045,7 +951,7 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
         			printk("%s,%d: Can't open new session - status = 0x%x\n", __FILE__, __LINE__, status);
         			goto error;
     			}
-			/* open one session for auth */	
+			 	
 			cesa_ses->operation = MV_CESA_MAC_ONLY;
 			cesa_ses->direction = MV_CESA_DIR_ENCODE;
 			spin_lock_irqsave(&cesa_lock, flags);
@@ -1058,7 +964,7 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 		}
 #endif
 	}
-	else { /* only auth */
+	else {  
 		cesa_ses->operation = MV_CESA_MAC_ONLY;
 		cesa_ses->direction = MV_CESA_DIR_ENCODE;
 		spin_lock_irqsave(&cesa_lock, flags);
@@ -1077,9 +983,6 @@ error:
 
 }
 
-/*
- * Free a session.
- */
 static int
 cesa_ocf_freesession(device_t dev, u_int64_t tid)
 {
@@ -1094,11 +997,9 @@ cesa_ocf_freesession(device_t dev, u_int64_t tid)
 		return EINVAL;
 	}
 
-        /* Silently accept and return */
         if (sid == 0)
                 return(0);
 
-	/* release session from HAL */
 	cesa_ocf_cur_ses = cesa_ocf_sessions[sid];
      	if (cesa_ocf_cur_ses->sid_encrypt != -1) {
 		spin_lock_irqsave(&cesa_lock, flags);
@@ -1142,9 +1043,6 @@ cesa_ocf_freesession(device_t dev, u_int64_t tid)
 extern int crypto_init(void);
 #endif
 
-/*
- * our driver startup and shutdown routines
- */
 static int
 cesa_ocf_init(void)
 {
@@ -1166,11 +1064,9 @@ cesa_ocf_init(void)
 	crypto_init();
 #endif
 
-	/* Init globals */
 	next_result = 0;
 	result_done = 0;
 
-	/* The pool size here is twice bigger than requests queue size due to possible reordering */
 	cesa_ocf_pool = (struct cesa_ocf_process*)kmalloc((sizeof(struct cesa_ocf_process) * 
 					CESA_OCF_POOL_SIZE), GFP_KERNEL);
 	if (cesa_ocf_pool == NULL) {
@@ -1204,13 +1100,11 @@ cesa_ocf_init(void)
 
 	for(chan = 0; chan < MV_CESA_CHANNELS; chan++) {
 
-		/* clear and unmask Int */
 		MV_REG_WRITE( MV_CESA_ISR_CAUSE_REG(chan), 0);
 		MV_REG_WRITE( MV_CESA_ISR_MASK_REG(chan), mask);
 
 		chan_id[chan] = chan;
 
-		/* register interrupt */
 		if( request_irq( CESA_IRQ(chan), cesa_interrupt_handler,
 				(IRQF_DISABLED) , irq_str[chan], &chan_id[chan]) < 0) {
             		printk("%s,%d: cannot assign irq %x\n", __FILE__, __LINE__, CESA_IRQ(chan));
@@ -1250,7 +1144,6 @@ cesa_ocf_exit(void)
 	for(chan = 0; chan < MV_CESA_CHANNELS; chan++) {
 		free_irq(CESA_IRQ(chan), NULL);
 	
-		/* mask and clear Int */
 		MV_REG_WRITE( MV_CESA_ISR_MASK_REG(chan), 0);
 		MV_REG_WRITE( MV_CESA_ISR_CAUSE_REG(chan), 0);
     	

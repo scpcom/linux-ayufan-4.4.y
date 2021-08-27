@@ -1,15 +1,8 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  arch/arm/include/asm/pgtable.h
- *
- *  Copyright (C) 1995-2002 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
+
 #ifndef _ASMARM_PGTABLE_H
 #define _ASMARM_PGTABLE_H
 
@@ -44,18 +37,6 @@
 #include <asm/pgtable-2level.h>
 #endif
 
-/*
- * Just any arbitrary offset to the start of the vmalloc VM area: the
- * current 8MB value just means that there will be a 8MB "hole" after the
- * physical memory until the kernel virtual memory starts.  That means that
- * any out-of-bounds memory accesses will hopefully be caught.
- * The vmalloc() routines leaves a hole of 4kB between each vmalloced
- * area for the same reason. ;)
- *
- * Note that platforms may override VMALLOC_START, but they must provide
- * VMALLOC_END.  VMALLOC_END defines the (exclusive) limit of this space,
- * which may not overlap IO space.
- */
 #ifndef VMALLOC_START
 #define VMALLOC_OFFSET		(8*1024*1024)
 #define VMALLOC_START		(((unsigned long)high_memory + VMALLOC_OFFSET) & ~(VMALLOC_OFFSET-1))
@@ -72,28 +53,12 @@ extern void __pgd_error(const char *file, int line, pgd_t);
 #define pmd_ERROR(pmd)		__pmd_error(__FILE__, __LINE__, pmd)
 #define pgd_ERROR(pgd)		__pgd_error(__FILE__, __LINE__, pgd)
 
-/*
- * This is the lowest virtual address we can permit any user space
- * mapping to be mapped at.  This is particularly important for
- * non-high vector CPUs.
- */
 #define FIRST_USER_ADDRESS	PAGE_SIZE
 
-/*
- * Use TASK_SIZE as the ceiling argument for free_pgtables() and
- * free_pgd_range() to avoid freeing the modules pmd when LPAE is enabled (pmd
- * page shared between user and kernel).
- */
 #if defined(CONFIG_ARM_LPAE) && defined(CONFIG_SYNO_ALPINE_FIX_USB_HANG)
 #define USER_PGTABLES_CEILING	TASK_SIZE
 #endif
 
-/*
- * The pgprot_* and protection_map entries will be fixed up in runtime
- * to include the cachable and bufferable bits based on memory policy,
- * as well as any architecture dependent bits like global/ASID and SMP
- * shared mapping bits.
- */
 #define _L_PTE_DEFAULT	L_PTE_PRESENT | L_PTE_YOUNG
 
 extern pgprot_t		pgprot_user;
@@ -143,16 +108,8 @@ extern pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
 	__pgprot_modify(prot, L_PTE_MT_MASK, L_PTE_MT_UNCACHED | L_PTE_XN)
 #endif
 
-#endif /* __ASSEMBLY__ */
+#endif  
 
-/*
- * The table below defines the page protection levels that we insert into our
- * Linux page table version.  These get translated into the best that the
- * architecture can perform.  Note that on most ARM hardware:
- *  1) We cannot do execute protection
- *  2) If we could do execute protection, then read is implied
- *  3) write implies read permissions
- */
 #define __P000  __PAGE_NONE
 #define __P001  __PAGE_READONLY
 #define __P010  __PAGE_COPY
@@ -172,21 +129,17 @@ extern pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
 #define __S111  __PAGE_SHARED_EXEC
 
 #ifndef __ASSEMBLY__
-/*
- * ZERO_PAGE is a global shared page that is always zero: used
- * for zero-mapped memory areas etc..
- */
+ 
 extern struct page *empty_zero_page;
 #define ZERO_PAGE(vaddr)	(empty_zero_page)
 
 extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
 
-/* to find an entry in a page-table-directory */
 #define pgd_index(addr)		((addr) >> PGDIR_SHIFT)
 
 #define pgd_offset(mm, addr)	((mm)->pgd + pgd_index(addr))
 
-/* to find an entry in a kernel page-table-directory */
+
 #define pgd_offset_k(addr)	pgd_offset(&init_mm, addr)
 
 #if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
@@ -213,28 +166,19 @@ static inline pmd_t *pud_page_vaddr(pud_t pud)
 	return __va(pud_val(pud) & PHYS_MASK & (s32)PAGE_MASK);
 }
 
-#else	/* !CONFIG_ARM_LPAE */
+#else	 
 
-/*
- * The "pud_xxx()" functions here are trivial when the pmd is folded into
- * the pud: the pud entry is never bad, always exists, and can't be set or
- * cleared.
- */
 #define pud_none(pud)		(0)
 #define pud_bad(pud)		(0)
 #define pud_present(pud)	(1)
 #define pud_clear(pudp)		do { } while (0)
 #define set_pud(pud,pudp)	do { } while (0)
 
-#endif	/* CONFIG_ARM_LPAE */
+#endif	 
 #elif defined(CONFIG_SYNO_ALPINE)
-		/* Do nothing */
+		 
 #else
-/*
- * The "pgd_xxx()" functions here are trivial for a folded two-level
- * setup: the pgd is never bad, and a pmd always exists (as it's folded
- * into the pgd entry)
- */
+ 
 #define pgd_none(pgd)		(0)
 #define pgd_bad(pgd)		(0)
 #define pgd_present(pgd)	(1)
@@ -244,7 +188,7 @@ static inline pmd_t *pud_page_vaddr(pud_t pud)
 
 #endif
 
-/* Find an entry in the second-level page table.. */
+
 #if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_ARM_LPAE
 #define pmd_index(addr)		(((addr) >> PMD_SHIFT) & (PTRS_PER_PMD - 1))
@@ -259,7 +203,7 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 }
 #endif
 #elif defined(CONFIG_SYNO_ALPINE)
-	/* Do nothing */
+	 
 #else
 #define pmd_offset(dir, addr)	((pmd_t *)(dir))
 #endif
@@ -284,8 +228,8 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 	} while (0)
 
 #elif defined(CONFIG_SYNO_ALPINE)
-	/* Do nothing */
-#else	/* !CONFIG_ARM_LPAE */
+	 
+#else	 
 
 #define pmd_bad(pmd)		(pmd_val(pmd) & 2)
 
@@ -322,7 +266,7 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 	} while (0)
 
 #endif
-#endif	/* CONFIG_ARM_LPAE */
+#endif	 
  
 #if defined(CONFIG_SYNO_COMCERTO)
 #define PMD_PAGE_ADDR_MASK		(~((1 << 10) - 1))
@@ -342,7 +286,7 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 
 #if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined (CONFIG_SYNO_ALPINE)
 #else
-/* we don't need complex calculations here as the pmd is folded into the pgd */
+ 
 #define pmd_addr_end(addr,end)	(end)
 
 #endif
@@ -392,7 +336,7 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte_val(pte),ext)
 #define uncache_pte_ext(ptep) cpu_uncache_pte_ext(ptep)
 #elif defined(CONFIG_SYNO_ALPINE)
-	/*Do nothing */
+	 
 #else
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte,ext)
 #endif
@@ -450,17 +394,6 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 	return pte;
 }
 
-/*
- * Encode and decode a swap entry.  Swap entries are stored in the Linux
- * page tables as follows:
- *
- *   3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
- *   1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
- *   <--------------- offset ----------------------> < type -> 0 0 0
- *
- * This gives us up to 31 swap files and 64GB per swap file.  Note that
- * the offset field is always non-zero.
- */
 #define __SWP_TYPE_SHIFT	3
 #define __SWP_TYPE_BITS		5
 #define __SWP_TYPE_MASK		((1 << __SWP_TYPE_BITS) - 1)
@@ -477,42 +410,20 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 #define __swp_entry_to_pte(swp)	((pte_t) { (swp).val })
 #endif
 
-/*
- * It is an error for the kernel to have more swap files than we can
- * encode in the PTEs.  This ensures that we know when MAX_SWAPFILES
- * is increased beyond what we presently support.
- */
 #define MAX_SWAPFILES_CHECK() BUILD_BUG_ON(MAX_SWAPFILES_SHIFT > __SWP_TYPE_BITS)
 
-/*
- * Encode and decode a file entry.  File entries are stored in the Linux
- * page tables as follows:
- *
- *   3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
- *   1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
- *   <----------------------- offset ------------------------> 1 0 0
- */
 #define pte_file(pte)		(pte_val(pte) & L_PTE_FILE)
 #define pte_to_pgoff(x)		(pte_val(x) >> 3)
 #define pgoff_to_pte(x)		__pte(((x) << 3) | L_PTE_FILE)
 
 #define PTE_FILE_MAX_BITS	29
 
-/* Needs to be defined here and not in linux/mm.h, as it is arch dependent */
-/* FIXME: this is not correct */
 #define kern_addr_valid(addr)	(1)
 
 #include <asm-generic/pgtable.h>
 
-/*
- * We provide our own arch_get_unmapped_area to cope with VIPT caches.
- */
 #define HAVE_ARCH_UNMAPPED_AREA
 
-/*
- * remap a physical page `pfn' of size `size' with page protection `prot'
- * into virtual address `from'
- */
 #define io_remap_pfn_range(vma,from,pfn,size,prot) \
 		remap_pfn_range(vma, from, pfn, size, prot)
 
@@ -521,8 +432,8 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 void identity_mapping_add(pgd_t *, unsigned long, unsigned long);
 void identity_mapping_del(pgd_t *, unsigned long, unsigned long);
 
-#endif /* !__ASSEMBLY__ */
+#endif  
 
-#endif /* CONFIG_MMU */
+#endif  
 
-#endif /* _ASMARM_PGTABLE_H */
+#endif  

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* The head-file for the Shark
  * by Alexander Schulz
  *

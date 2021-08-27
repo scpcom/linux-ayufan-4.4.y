@@ -1,15 +1,3 @@
-/*
- * drivers/net/phy/at803x.c
- *
- * Driver for Atheros 803x PHY
- *
- * Author: Matus Ujhelyi <ujhelyi.m@gmail.com>
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
  
 #include <linux/phy.h>
 #include <linux/module.h>
@@ -120,7 +108,6 @@ static int at803x_config_init(struct phy_device *phydev)
 	}
 #endif
 
-	/* enable WOL */
 	at803x_set_wol_mac_addr(phydev);
 	status = phy_write(phydev, AT803X_INTR_ENABLE, AT803X_WOL_ENABLE);
 	status = phy_read(phydev, AT803X_INTR_STATUS);
@@ -130,7 +117,7 @@ static int at803x_config_init(struct phy_device *phydev)
 
 static struct phy_driver at803x_driver[] = {
 {
-	/* ATHEROS 8035 */
+	 
 	.phy_id		= 0x004dd072,
 	.name		= "Atheros 8035 ethernet",
 	.phy_id_mask	= 0xffffffef,
@@ -143,7 +130,7 @@ static struct phy_driver at803x_driver[] = {
 		.owner = THIS_MODULE,
 	},
 }, {
-	/* ATHEROS 8030 */
+	 
 	.phy_id		= 0x004dd076,
 	.name		= "Atheros 8030 ethernet",
 	.phy_id_mask	= 0xffffffef,
@@ -156,7 +143,7 @@ static struct phy_driver at803x_driver[] = {
 		.owner = THIS_MODULE,
 	},
 }, {
-	/* ATHEROS 8031 */
+	 
 	.phy_id		= 0x004dd074,
 	.name		= "Atheros 8031 ethernet",
 	.phy_id_mask	= 0xffffffef,

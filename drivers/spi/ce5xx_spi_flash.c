@@ -1,26 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * SPI flash controller driver for Intel media processor CE5300 series
- *
- * GPL LICENSE SUMMARY
- * Copyright (c) 2011-2012, Intel Corporation and its suppliers.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU General Public License,
- * version 2, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *
- */
  
 #include <linux/init.h>
 #include <linux/pci.h>
@@ -47,11 +27,6 @@
 #ifdef MY_DEF_HERE
 #include "synoflashmap.h"
 #endif
-/* 
- * CS_HOLD is incorrect for legacy mode, causes possible spurrious CS assertion.
- * If CS_TAR field is set, CS will go low and will not be released until we do 
- * another write to one of the legacy registers with data bit 26 = 0
-*/
  
 #define MB 			(1024*1024)
 #define SIZE_4_MB	(4*MB)
@@ -61,11 +36,6 @@
 #define SIZE_64_MB	(64*MB)
 
 #define BITS_OF_BYTES(bytenum)	(BITS_PER_BYTE*(bytenum))
-/*
- * Device read contains two methods: CSR or Memory Window
- * CSR: Configuration Space Registers
- * CS0 is always the boot device
- */
  
 static const struct pci_device_id ce5xx_sflash_pci_tbl[] __devinitdata = {
   { PCI_DEVICE( INTEL_VENDOR_ID, CE5XX_SPI_FLASH_CONTROLLER_ID), .driver_data = 1 },
@@ -84,7 +54,6 @@ struct spi_board_info CE5xx_sflash_devices[] = {
   },
 };
 
-//#define SPI_CE_DEBUG 1
 #ifdef  SPI_CE_DEBUG
 #define spi_dbg(fmt, args...) do \
                              { \
@@ -99,51 +68,29 @@ struct spi_board_info CE5xx_sflash_devices[] = {
 
 MODULE_DEVICE_TABLE(pci, ce5xx_sflash_pci_tbl);
 
-/*
- *  Serial Flash controller using memory window for read, not by CSR read
- * When using memory window read, the Address Split Register should be 
- * correctly configured.
- * The match algorithm is :  
- * Mask is M; value is CS, address is A
- * match= !((A xor CS) and (not M))
- *
- * Different device size in two chip selects require different Address Spilit 
- * Value. 
- */
 static struct ce5xx_address_split addr_split_tbl[] = {
 
-		/* single 4MB */
 		{SIZE_4_MB,	0,		0x8,	0x0,	0x0,	0x0},
 		{0,		SIZE_4_MB,	0x0,	0x0,	0x8,	0x0},		
 
-		/* single 8MB*/	
 		{SIZE_8_MB,	0,		0x8,	0x0,	0x0,	0x0},
 		{0,		SIZE_8_MB,	0x0,	0x0,	0x8,	0x0},		
 
-		/* single 16MB*/ 
 		{SIZE_16_MB,	0,		0x8,	0x0,	0x0,	0x0},
 		{0, 	SIZE_16_MB,	0x0,	0x0,	0x8,	0x0},
 
-		/* single 32MB*/ 		
 		{SIZE_32_MB,	0,	0x8,	0x1,	0xA,	0x1},
 		{0,	SIZE_32_MB,	0x8,	0x1,	0xA,	0x1},
 
-		/* single 64MB*/
 		{SIZE_64_MB,	0,		0x8,	0x0,	0x0,	0x0},
 		{0, 	SIZE_64_MB,	0x0,	0x0,	0x8,	0x0},		
 		
-		/* Double 8MB */		
 		{SIZE_8_MB,	SIZE_8_MB,	0x8,	0x0,	0x9,	0x0},
 		
-		/* Double 16MB */		
 		{SIZE_16_MB,	SIZE_16_MB,	0x8,	0x0,	0x9,	0x0},
 		
-		/* Double 32MB */	
 		{SIZE_32_MB,	SIZE_32_MB,	0x8,	0x1,	0xA,	0x1},
 		
-		/* Double 64MB */		
-		/* [WARNING] Two 64MB devices can not be totally mapped, using CSR windows */		
-		/* {SIZE_64_MB,	SIZE_64_MB,	0x8,	0x3,	0x8,	0x3},			*/
 		{},
 };
 
@@ -174,7 +121,7 @@ static struct ce5xx_address_split * match_address_split(struct flash_cs_info *cn
 	}
 	return 0;
 }
-/* Config address split register at init */
+ 
 static int address_split_cfg(struct ce5xx_sflash *dev)
 {
 	struct ce5xx_address_split *split = dev->addr_split_methd;
@@ -195,9 +142,6 @@ static int address_split_cfg(struct ce5xx_sflash *dev)
 	return 0;
 }
 
-/*
- * Chip select signal goes high
- */
 static void ce5xx_sflash_turn_off_chip_sel(struct ce5xx_sflash *dev) 
 {	
 
@@ -205,7 +149,7 @@ static void ce5xx_sflash_turn_off_chip_sel(struct ce5xx_sflash *dev)
 	if (dev->mode & SPI_MODE_QUAD_IO){
 		__raw_writel(0, reg + HIGH_EFFICY_TRS_PAR_REG);
 	}
-	else{ /* Default Legacy mode */
+	else{  
 		__raw_writel(0, reg + DATA_COMMAND_REG);
 	}
 
@@ -232,16 +176,6 @@ static void ce5xx_sflash_cs_enable(struct ce5xx_sflash *dev, int cs0_on, int cs1
 		__raw_writel(writeData, reg + MODE_CONTL_REG);
 }
 
-/*
- * __sflash_write_data_unit: program data to SPI flash, data size should be no more than 4 bytes
- * In quad mode, write size should no more than 4 bytes
- * In legacy mode, write size should no more than 3 bytes
- * @buf, location of the data
- * @len, write size, size could be 1, 2, 3, 4 bytes
- * return 0 if success, else the remaining bytes
- *
- * Data in the source buffer is in little endian format, it should be transformed to big endian format.
- */
 static uint32_t ce5xx_sflash_unit_write(struct ce5xx_sflash* dev, const char * buf, size_t len)
 {
 	uint32_t writeData = 0;	
@@ -250,30 +184,25 @@ static uint32_t ce5xx_sflash_unit_write(struct ce5xx_sflash* dev, const char * b
 	volatile uint8_t *src = (uint8_t *)&tmpData;
 	uint32_t finished = 0;
 	
-	//spi_dbg(" [%s] transmiting 0x%x bytes data to buf 0x%x\n", __FUNCTION__, len, buf);
 	memcpy((void *)src,buf,len);
 	if (dev->mode & SPI_MODE_QUAD_IO){
-		/* Sanity checks */
+		 
 		if ((!len) || (len > HETPR_NBYTES_WR_MAX))
 			return 0;
 		
-		/* quad mode write parameter */
-		/* [FIX ME: do we need to add dummy cycle here? ] */
 		writeData = (uint32_t)((0x1<<HETPR_CS_HOLD)|(len<<HETPR_NBYTES_WR));
 		__raw_writel(writeData, reg + HIGH_EFFICY_TRS_PAR_REG);
 		printk("len %x, high efficiency write Data %x\n", len, writeData);
 
-		/* quad mode write data */
 		writeData = __cpu_to_be32p((uint32_t *)src);
 		__raw_writel(writeData, reg + HIGH_EFFICY_CMD_DATA_REG);
 		printk("original data %x, len %x, write Data %x\n",*(uint32_t *)src, len, writeData);
 		finished = len;
 	}
-	else{ /* Legacy SPI mode */
-		/* Sanity checks */
+	else{  
+		 
 		if ((!len) || ( len > DCR_NBYTES_MAX ))
 			return 0;
-		/* transformed to big endian format */
 		 
 		writeData = __cpu_to_be32p((uint32_t *)src)>>BITS_PER_BYTE;
 
@@ -281,23 +210,12 @@ static uint32_t ce5xx_sflash_unit_write(struct ce5xx_sflash* dev, const char * b
 
 		__raw_writel(writeData, reg + DATA_COMMAND_REG);
 		finished = len;
-		/* Dummy read */
-		//dummyData = __raw_readl(reg + DATA_COMMAND_REG);		
+		 
 	}
 
 	return finished;
 	}
-/*
- * sflash_unit_read_csr: read data from SPI flash by CSR window
- * In quad mode, read length should no more than 0xFFFF bytes
- * In legacy mode, read length should no more than 3 bytes
- * @buf, location of the data
- * @len, read length
- *
- * Data read from command/data register is big endian format. It will be 
- * transformed to little endian format.
- * 
- */
+ 
 static uint32_t sflash_unit_read_csr(struct ce5xx_sflash *dev, const u_char *buf, size_t len) 
 {
 	uint32_t readData = 0;
@@ -313,7 +231,6 @@ static uint32_t sflash_unit_read_csr(struct ce5xx_sflash *dev, const u_char *buf
 	if (dev->mode & SPI_MODE_QUAD_IO){
 		spi_dbg_func;
 
-		/* Sanity checks */
 		if ((!len) || ( len > HETPR_NBYTES_RD_MAX))
 			return 0;
 
@@ -342,27 +259,19 @@ static uint32_t sflash_unit_read_csr(struct ce5xx_sflash *dev, const u_char *buf
 	}
 	else {
 
-		/* Sanity checks */
 		if ((!len)||( len > DCR_NBYTES_MAX))
 			return 0;
 		__raw_writel((0x1<<DCR_CS_HOLD)|(len<<DCR_NBYTES),reg + DATA_COMMAND_REG);
 
-		/* Alligned to a integar in big endian format */
 	    readData = __raw_readl(reg + DATA_COMMAND_REG)<<BITS_OF_BYTES(4-len);
 		readData = __be32_to_cpu(readData);
 		finished+=len;
 	}
 	memcpy((void *)buf,(void *)dst,len);
-	//spi_dbg(" [%s], buf 0x%x, len 0x%x\n", __FUNCTION__, buf, len);
 	 
 	return finished;
 }
 
-/*
- * ce5xx_sflash_transmiter: program data to SPI flash
- * @buf, location of the data
- * @len, write size
- */
 static uint32_t ce5xx_sflash_transmiter(struct ce5xx_sflash	 *dev, void *buf, size_t len)
 {
 	uint32_t remain = len;
@@ -371,7 +280,6 @@ static uint32_t ce5xx_sflash_transmiter(struct ce5xx_sflash	 *dev, void *buf, si
 	int limit = 0;
 	int count =0;
 
-	/* Sanity checks */
 	if ((!len) || (!src))
 		return 0;
 		
@@ -387,12 +295,10 @@ static uint32_t ce5xx_sflash_transmiter(struct ce5xx_sflash	 *dev, void *buf, si
 		finished += count;
 		remain -=count;
 	}
-//	printk(" [%s] transmiting 0x%x bytes data to buf 0x%x\n", __FUNCTION__, len, buf);
+ 
 	return finished;	   
 }
-/*
- * ce5xx_sflash_read: read data from flash device
- */
+ 
 static uint32_t ce5xx_sflash_csr_receiver(struct ce5xx_sflash *dev, void *buf, size_t len) 
 {
 	uint32_t remain = len;
@@ -402,7 +308,6 @@ static uint32_t ce5xx_sflash_csr_receiver(struct ce5xx_sflash *dev, void *buf, s
 	int limit = 0;
 	int count =0;
 	
-	/* Sanity checks */
 	if (!len)
 		return 0;
 		
@@ -411,8 +316,6 @@ static uint32_t ce5xx_sflash_csr_receiver(struct ce5xx_sflash *dev, void *buf, s
 	else
 		limit = DCR_NBYTES_MAX;
 
-	//spi_dbg(" [%s] reading 0x%x bytes data to buf 0x%x\n", __FUNCTION__, len, buf);
-	
 	while (remain)
 	{
 		count = (remain>limit?limit:remain);	
@@ -422,14 +325,11 @@ static uint32_t ce5xx_sflash_csr_receiver(struct ce5xx_sflash *dev, void *buf, s
 	}
 	return finished;	   
 }
-/*
- * ce5xx_sflash_read: read data from memory window
- */
+ 
 static uint32_t ce5xx_sflash_dma_receiver(struct ce5xx_sflash *dev, void *to, uint32_t offset, size_t len) 
 {	
 	void __iomem *from;
 
-	/* Sanity checks */
 	if ((!len) || (!to))
 		return 0;
 	
@@ -440,14 +340,11 @@ static uint32_t ce5xx_sflash_dma_receiver(struct ce5xx_sflash *dev, void *to, ui
 	return len;	
 }
 
-/* Switch to a target CS_num and disable the other CS 
- * This is only used for CSR access
- */
 static void ce5xx_sflash_cs_switch(struct ce5xx_sflash *dev, int cs_num)
 {
 	ce5xx_sflash_cs_enable(dev,(cs_num == 0),(cs_num == 1));
 }
-/* This is responsible for entire one operation */
+ 
 static void ce5xx_sflash_work_one(struct ce5xx_sflash *dev, struct spi_message *m)
 {
 	struct spi_device *spi = m->spi;
@@ -461,25 +358,14 @@ static void ce5xx_sflash_work_one(struct ce5xx_sflash *dev, struct spi_message *
 		uint32_t len = t->len;
 		uint32_t	actual_len = 0;
 
-		//spi_dbg(" [%s] m 0x%x, t 0x%x ,buf 0x%x, dma 0x%x, len 0x%x\n",__FUNCTION__,m,t,(u32)t->rx_buf, (u32)t->rx_dma, t->len);
-
-		/*
-		 * A transfer could be one of three types, csr_read, data_read, write
-		 * chip select number is decided by spi->chip_select
-		 */
-		/* Memory mapped method access  
-		 * rx_dma is used to indicate memory window read access 
-		 */
-			 
 		if (t->rx_buf && m->is_dma_mapped) {
-			/* CSR access method */
+			 
 			ce5xx_sflash_cs_enable(dev,dev->cntl_data->cs0_size,dev->cntl_data->cs1_size);
 
 			actual_len = dev->dma_receiver(dev,rxbuf,t->rx_dma,len);
 		}
 		else {
 			
-		/* CSR access method */
 			ce5xx_sflash_cs_switch(dev, spi->chip_select);
 
 			if (t->tx_buf)
@@ -527,7 +413,6 @@ static int ce5xx_sflash_transfer(struct spi_device *spi, struct spi_message *m)
 
 	m->actual_length = 0;
 
-	/* check each transfer's parameters */
 	list_for_each_entry (t, &m->transfers, transfer_list) {
 		if (!t->len)
 			return -EINVAL;
@@ -546,49 +431,35 @@ static int ce5xx_sflash_transfer(struct spi_device *spi, struct spi_message *m)
 
 	return 0;
 }
-/* 
- * Initia configuration of controller
- * Set to legacy mode 
- * Default value is 0x44450031, SLE clock divider = 1, 33.3MHZ
- */
+ 
 static int __devinit ce5xx_sflash_set_up_default_mode(struct ce5xx_sflash *dev)
 {
 	uint32_t	mode_cntl = 0;
 
 	void __iomem *reg = dev->regs_base;
 	mode_cntl = __raw_readl(reg + MODE_CONTL_REG);
-	/* CLK RATIO */
+	 
 	mode_cntl = (mode_cntl>>3<<3)|(0x1<<MODE_CONTL_CLK_RATIOR_SHIFT);
-	/* Boot Mode */
+	 
 #if	CE5XX_BOOT_MODE_ENABLE
 	mode_cntl |= MODE_CONTL_BOOT_MODE_ENABLE;
 #else
 	mode_cntl &= MODE_CONTL_BOOT_MODE_DISABLE;
 #endif
-	/* SS1_UNIT_EN */
-	/* 
-	 * In Golden Spring, SPI IO unit will be disabled by BIOS. Thus SPI
-	 * controller initialization need be bypassed
-	*/
+	 
 	if (!(MODE_CONTL_SPI_UNIT_EN & mode_cntl)) 
 		return -ENODEV;
 
-	/* SS1_EN Enable CS1*/
 	mode_cntl |= MODE_CONTL_SS1_EN;
 
-	/* CMD WIDTH */
 	mode_cntl |= MODE_CONTL_CMD_WIDTH_EQUAL_TO_DATA;
 
-	/* Set SPI_WIDTH */
 	mode_cntl |= MODE_CONTL_SPI_WIDTH_1_BIT;
 
-	/* NR_ADDR_BYTES  */
 	mode_cntl |= MODE_CONTL_N_ADDR_3_BYTES;			
 
-	/* Chip select */
 	mode_cntl |= MODE_CONTL_CS0_WP|MODE_CONTL_CS0_MODE_ENABLE|MODE_CONTL_CS1_MODE_ENABLE|MODE_CONTL_CS1_WP;	
 
-	/* CS_TAR */
 	mode_cntl |= 0x4<<MODE_CONTL_CS_TAR_SHIFT;
 	
 	__raw_writel(mode_cntl, reg + MODE_CONTL_REG);
@@ -597,9 +468,6 @@ static int __devinit ce5xx_sflash_set_up_default_mode(struct ce5xx_sflash *dev)
 	return 0;
 }	
 
-/* 
- * Set controller to be the mode defined by serial flash devices
- */
 static int ce5xx_sflash_setup(struct spi_device *spi)
 {
 	uint32_t	mode_cntl = 0;
@@ -618,16 +486,15 @@ static int ce5xx_sflash_setup(struct spi_device *spi)
 		return -ESHUTDOWN;
 	}
 	spin_unlock_irqrestore(&dev->lock, flags);
-	/*If no controller data from device layer, then set the controller works in default mode */
+	 
 	if (!dev->cntl_data)
 		return ce5xx_sflash_set_up_default_mode(dev);
-	/* Setup up Address Split Register */
+	 
 	if (address_split_cfg(dev))
 		return -ENODEV;
 	
 	mode_cntl	=	__raw_readl(reg + MODE_CONTL_REG);
 
-	/* Setup up Mode Contrl Register */
 	mode_cntl &= MODE_CONTL_N_ADDR_BYTES_MASK;
 	switch (spi->bits_per_word>>3)
 	{
@@ -642,14 +509,13 @@ static int ce5xx_sflash_setup(struct spi_device *spi)
 			dev_err(&spi->dev, "Error: not supported yet addr_width %d\n",spi->bits_per_word>>3);
 			return -ENODEV;
 	}
-	/* Using 4 BIT WIDTH in QUAD IO mode */
+	 
 	mode_cntl &= MODE_CONTL_SPI_WIDTH_BIT_MASK;
 	if (dev->mode & SPI_MODE_QUAD_IO)
 		mode_cntl |= MODE_CONTL_SPI_WIDTH_4_BIT;
 	else
 		mode_cntl |= MODE_CONTL_SPI_WIDTH_1_BIT;
 
-	/* Enable CS1 if there's device connected*/
 	mode_cntl &= (MODE_CONTL_CS0_MODE_DISABLE_MASK & MODE_CONTL_CS1_MODE_DISABLE_MASK);
 	if (dev->cntl_data->cs0_size)
 		mode_cntl |= MODE_CONTL_CS0_MODE_ENABLE;
@@ -667,7 +533,6 @@ static struct notifier_block ce5xx_sflash_reboot_notifier = {
            .notifier_call   = ce5xx_sflash_reboot
 };
 
-/*Probe and Init controller */
 static int __devinit ce5xx_sflash_probe (struct pci_dev *pdev,
                                 const struct pci_device_id *id)
 {
@@ -681,12 +546,10 @@ static int __devinit ce5xx_sflash_probe (struct pci_dev *pdev,
 	else
 		spi_dbg("found device 0x%08x, rev id 0x%08x\n", pdev->device, pdev->revision);
 
-	/* Determine BAR values */
 	ret = pci_enable_device(pdev);
 	if (ret)
 		 return ret;
 
-	/* SPI master register */
 	master = spi_alloc_master(&pdev->dev, sizeof(*c));
 	if (!master) {
 		ret = -ENOMEM;
@@ -715,7 +578,6 @@ static int __devinit ce5xx_sflash_probe (struct pci_dev *pdev,
 	dev_info(&pdev->dev, "csr iobase 0x%x, iosize 0x%x , mapped to 0x%x\n",(uint32_t)pci_resource_start(pdev,0),(uint32_t)pci_resource_len(pdev,0),(uint32_t)c->regs_base);
 	dev_info(&pdev->dev, "mem iobase 0x%x, iosize 0x%x , mapped to 0x%x\n",(uint32_t)pci_resource_start(pdev,1),(uint32_t)pci_resource_len(pdev,1),(uint32_t)c->mem_base);
 
-	/* Lock/queue initliazation */
 	INIT_WORK(&c->work, ce5xx_sflash_work);
 	spin_lock_init(&c->lock);
 	INIT_LIST_HEAD(&c->queue);
@@ -728,12 +590,11 @@ static int __devinit ce5xx_sflash_probe (struct pci_dev *pdev,
 	master->bus_num 	= id->driver_data;
 	master->setup 		= ce5xx_sflash_setup;
 	master->transfer 	= ce5xx_sflash_transfer;
-	master->num_chipselect = 2; /* Two chip selects */
+	master->num_chipselect = 2;  
 	master->mode_bits	= SPI_MODE_0|SPI_MODE_QUAD_IO;
 
 	pci_set_drvdata(pdev, c);
 
-	/* Set controller working in legacy SPI mode */
 	c->transmiter	= ce5xx_sflash_transmiter;
 	c->csr_receiver	= ce5xx_sflash_csr_receiver;
 	c->dma_receiver	= ce5xx_sflash_dma_receiver;
@@ -803,7 +664,6 @@ static void __devexit ce5xx_sflash_remove(struct pci_dev *pdev)
 	unsigned long flags;
 	int ret = 0;
 
-	/*set SUSPEND flag*/
 	spin_lock_irqsave(&c->lock, flags);
 	c->status |= SPI_FLASH_SUSPEND;
 	spin_unlock_irqrestore(&c->lock, flags);
@@ -840,7 +700,6 @@ static void __devexit ce5xx_sflash_remove(struct pci_dev *pdev)
 	flash_write32(c->hetp & (0xF0000000), c->regs_base + HIGH_EFFICY_TRS_PAR_REG);
 	flash_write32(c->heop, c->regs_base + HIGH_EFFICY_OPCODE_REG);
 
-	/*clear SUSPEND flag*/
 	spin_lock_irqsave(&c->lock, flags);
 	c->status &= ~SPI_FLASH_SUSPEND;
 	spin_unlock_irqrestore(&c->lock, flags);

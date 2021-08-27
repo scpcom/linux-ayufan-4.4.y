@@ -1,25 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/mach-comcerto/comcerto-2000.c
- *
- *  Copyright (C) 2011 Mindspeed Technologies, Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
  
 #include <linux/sched.h>
 #include <linux/mm.h>
@@ -84,11 +65,6 @@ struct c2k_gpio_pin_stat_info c2k_gpio_pin_stat =
 void __iomem *l2cache_base;
 #endif
 
-/***********************************************************
- *   Virtual address Mapping                               *
- *                                                         *
- ***********************************************************/
-
 static struct map_desc comcerto_io_desc[] __initdata =
 {
 #ifdef CONFIG_COMCERTO_MSP
@@ -116,7 +92,7 @@ static struct map_desc comcerto_io_desc[] __initdata =
                .length     = COMCERTO_AXI_PFE_SIZE,
                .type       = MT_DEVICE
        },
-#endif  /* CONFIG_COMCERTO_MSP */
+#endif   
 #if defined(CONFIG_PCI)
         {
                 .virtual    = COMCERTO_AXI_PCIe0_VADDR_BASE,
@@ -187,7 +163,6 @@ void __init device_map_io(void)
 
 	iotable_init(comcerto_io_desc, ARRAY_SIZE(comcerto_io_desc));
 
-	/* Increase consistent DMA zone size */
 	init_consistent_dma_size(size);
 }
 
@@ -196,9 +171,7 @@ void __init device_irq_init(void)
 	gic_init(0, SGI_IRQ(1), (void *)COMCERTO_GIC_DIST_VADDR, (void *)COMCERTO_GIC_CPU_VADDR);
 }
 
-/************************************************************************
- *  GPIO
- ************************************************************************/
+
 #if defined(CONFIG_SYNO_COMCERTO)
 extern void synology_gpio_init(void);
 #endif
@@ -212,45 +185,31 @@ static __init void gpio_init(void)
 
 #if defined(CONFIG_COMCERTO_UART0_SUPPORT)
 	writel((readl(COMCERTO_GPIO_PIN_SELECT_REG) & ~UART0_GPIO) | UART0_BUS, COMCERTO_GPIO_PIN_SELECT_REG);
-	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= UART0_GPIO_PIN; /* GPIOs 8 to 11 are used for UART0 */
+	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= UART0_GPIO_PIN;  
 #endif
 
 #if defined(CONFIG_SYNO_COMCERTO)
 	synology_gpio_init();
 #else
-	/*
-	 * Configure each GPIO to be Output or Input
-	 * When Input, Configure to be Input, IRQ
-	 * When Input IRQ, Configure to be IRQ Rising Edge or IRQ falling Edge
-	 */
 	 
-	/*[FIXME]: GPIO Output, others are input*/
 	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG) | COMCERTO_OUTPUT_GPIO, COMCERTO_GPIO_OE_REG);
 
-	/*[FIXME]: GPIO IRQ Configuration */
 	__raw_writel(COMCERTO_IRQ_RISING_EDGE_GPIO, COMCERTO_GPIO_INT_CFG_REG);
 
 #if !defined(CONFIG_C2K_MFCN_EVM)
-	/* [FIXME]: Need to have proper defines for enabling the GPIO irq */
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG)     | (0x1 << 5), COMCERTO_GPIO_OE_REG);		// enable GPIO5 (SLIC_RESET_n) as output
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);     // clear reset
+	 
+	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG)     | (0x1 << 5), COMCERTO_GPIO_OE_REG);		 
+	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);      
 	udelay(15);
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);	// put in reset
+	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);	 
 	udelay(15);
-	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG); 	// clear reset after some time
+	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG); 	 
 #endif
-	__raw_writel(0x4, COMCERTO_GPIO_INT_CFG_REG); /* si3227 is falling edge interrupt(gpio1) */
+	__raw_writel(0x4, COMCERTO_GPIO_INT_CFG_REG);  
 
-	/* [FIXME]: Are pins GPIO or pins used by another block*/
-	//__raw_writel(COMCERTO_GPIO_PIN_USAGE, COMCERTO_GPIO_IOCTRL_REG);
 #endif
 }
 
-/************************************************************************
- *  Expansion Bus
- ************************************************************************/
-
-/*This variable is provided by the board file*/
 extern int comcerto_exp_values[5][7];
 
 static __init void exp_bus_init(void)
@@ -260,58 +219,45 @@ static __init void exp_bus_init(void)
 	unsigned int axi_clk, clk_div;
 	struct clk *clk_axi;
 
-	/*First, Reset the Expansion block*/
 	__raw_writel(0x1, COMCERTO_EXP_SW_RST_R);
 
 	while (readl(COMCERTO_EXP_SW_RST_R) & 0x1) ;
 
-	/* Clock divider configuration, get the AXI clock first
-	 * AXI clock will be used for refernce count , as exp bus
-         * also have a dependancy with AXI.
-	*/
         clk_axi = clk_get(NULL,"axi");
 
 	if (IS_ERR(clk_axi)) {
 		pr_err("comcerto_Device_init: Unable to obtain axi clock: %ld\n",PTR_ERR(clk_axi));
 	}
 
-	/*Enable the AXI clock */
 	if (clk_enable(clk_axi)){
 		pr_err("%s: Unable to enable axi clock:\n",__func__);
 	}
 
-        /* Get the AXI clock rate in HZ */
         axi_clk = clk_get_rate(clk_axi);
-	/* Round divider up */
+	 
 	clk_div = (axi_clk + COMCERTO_EXPCLK - 1) / COMCERTO_EXPCLK;
 
 	__raw_writel(clk_div, COMCERTO_EXP_CLOCK_DIV_R);
 
 	cs_enable = 0;
 	for (cs = 0; cs < 5; cs++) {
-		/*configure only enabled CS */
+		 
 		{
 			if (comcerto_exp_values[cs][0] == 1)
 				cs_enable |= EXP_CSx_EN(cs);
 
-			/*mode configuration*/
 			__raw_writel(comcerto_exp_values[cs][3], COMCERTO_EXP_CSx_CFG_R(cs));
 
-			/*Chip select Base configuration (start of address space)*/
 			__raw_writel(comcerto_exp_values[cs][1], COMCERTO_EXP_CSx_BASE_R(cs));
 
-			/*Chip select Segment size configuration (end of address space)*/
 			__raw_writel(comcerto_exp_values[cs][2], COMCERTO_EXP_CSx_SEG_R(cs));
 
-			/*Chip select timing configuration*/
-			/* [FIXME] : Using default timing values */
 			__raw_writel(comcerto_exp_values[cs][4], COMCERTO_EXP_CSx_TMG1_R(cs));
 			__raw_writel(comcerto_exp_values[cs][5], COMCERTO_EXP_CSx_TMG2_R(cs));
 			__raw_writel(comcerto_exp_values[cs][6], COMCERTO_EXP_CSx_TMG3_R(cs));
 		}
 	}
 
-	/*Chip Select activation*/
 	__raw_writel(EXP_CLK_EN | cs_enable, COMCERTO_EXP_CS_EN_R);
 }
 
@@ -377,10 +323,8 @@ void comcerto_l2cc_init(void)
 	l2cache_base = (void *)COMCERTO_L310_VADDR;
 	BUG_ON(!l2cache_base);
 
-	/* Set Latency of L2CC to minimum (i.e. 1 cycle) */
 	l2x0_latency(1, 1, 1, 1, 1, 1);
 
-	/* Set L2 address filtering, use L2CC M1 port for DDR accesses */
 	writel(0x80000000, l2cache_base + L2X0_ADDR_FILTER_END);
 	writel(0x00000000 | L2X0_ADDR_FILTER_EN, l2cache_base + L2X0_ADDR_FILTER_START);
 
@@ -389,13 +333,9 @@ void comcerto_l2cc_init(void)
 	aux_val = associativity | waysize;
 	aux_mask = (COMCERTO_L2CC_ASSOCIATIVITY_MASK | COMCERTO_L2CC_WAYSIZE_MASK);
 
-	/* Shareable attribute override enable */
-	/* This prevents the cache from changing "normal memory/non-cacheable" accesses to
-	"normal memory/cacheable/writethrough no read/write allocate"*/
 	aux_val |= (1 << 22);
 	aux_mask |= (1 << 22);
 
-	/* Write allocate override, no write allocate */
 	aux_val |= (1 << 23);
 	aux_mask |= (3 << 23);
 
@@ -429,7 +369,6 @@ void comcerto_l2cc_init(void)
 	aux_mask |= (1 << 12);
 #endif
 
-	/* L2 8-way associativity with 32KB way size */
 	l2x0_init(l2cache_base, aux_val, aux_mask);
 
 #ifdef CONFIG_L2X0_INSTRUCTION_ONLY
@@ -457,7 +396,6 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
         u32 val;
 	int ref_clk_24;
 
-	/* Move SATA controller to DDRC2 port */
 	writel(readl(COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2, COMCERTO_GPIO_FABRIC_CTRL_REG);
 
 	val = readl(COMCERTO_GPIO_SYSTEM_CONFIG);
@@ -476,9 +414,8 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 		printk(KERN_INFO "SATA Serdes: 48Mhz ref clk\n");
 	}
 
-	//Take SATA AXI domain out of reset
 	c2000_block_reset(COMPONENT_AXI_SATA,0);
-	//Bring SATA PMU and OOB out of reset
+	 
 	c2000_block_reset(COMPONENT_SATA_PMU,0);
 	c2000_block_reset(COMPONENT_SATA_OOB,0);
 
@@ -486,12 +423,11 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
         {
                 if (val & BOOT_SERDES1_CNF_SATA0)
                 {
-			//Bring Serdes1 out of reset
+			 
 			c2000_block_reset(COMPONENT_SERDES1,0);
-			//Bring SATA0 out of reset
+			 
 			c2000_block_reset(COMPONENT_SERDES_SATA0,0);
 
-                        /* Serdes Initialization. */
                         if( serdes_phy_init(SERDES_PHY1,  p_sata_phy_reg_file,
                                                 serdes_regs_size / sizeof(serdes_regs_t),
                                                 SD_DEV_TYPE_SATA) )
@@ -504,12 +440,11 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 
                 if (!(val & BOOT_SERDES2_CNF_SATA1))
                 {
-			//Bring Serdes2 out of reset
+			 
 			c2000_block_reset(COMPONENT_SERDES2,0);
-			//Bring SATA1 out of reset
+			 
 			c2000_block_reset(COMPONENT_SERDES_SATA1,0);
 
-                        /* Serdes Initialization. */
                         if( serdes_phy_init(SERDES_PHY2,  p_sata_phy_reg_file,
                                                 serdes_regs_size / sizeof(serdes_regs_t),
                                                 SD_DEV_TYPE_SATA) )
@@ -534,7 +469,7 @@ static int fastuart_handle_irq(struct uart_port *p)
 	if (serial8250_handle_irq(p, iir)) {
 		return 1;
 	} else if ((iir & UART_IIR_BUSY) == UART_IIR_BUSY) {
-		/* Clear the USR */
+		 
 		dummy = p->serial_in(p, UART_DWC_USR);
 		return 1;
 	}
@@ -563,9 +498,6 @@ static struct platform_device comcerto_pmu = {
 	.resource = comcerto_pmu_resources,
 };
 
-/* --------------------------------------------------------------------
- *  Serial interface
- * -------------------------------------------------------------------- */
 #if defined(CONFIG_COMCERTO_UART0_SUPPORT) || defined(CONFIG_COMCERTO_UART1_SUPPORT)
 static struct plat_serial8250_port comcerto_uart_data[] = {
 #ifdef CONFIG_COMCERTO_UART1_SUPPORT
@@ -641,11 +573,7 @@ static struct platform_device comcerto_ved = {
 	.num_resources = ARRAY_SIZE(comcerto_ved_resources),
 	.resource = comcerto_ved_resources,
 };
-#endif  /* CONFIG_COMCERTO_MSP */
-
-/* --------------------------------------------------------------------
- *  USB 3.0 Host
- * -------------------------------------------------------------------- */
+#endif   
 
 #if defined(CONFIG_COMCERTO_USB3_SUPPORT)
 static struct resource comcerto_usb3_resource[] = {
@@ -675,13 +603,9 @@ struct platform_device comcerto_device_usb3 = {
 };
 #endif
 
-/* --------------------------------------------------------------------
- *  USB 2.0 Host 
- * -------------------------------------------------------------------- */
-
 #if defined(CONFIG_COMCERTO_USB2_SUPPORT)
 
-static u64 comcerto_dwc_otg_dmamask = 0xFFFFFFFF /*DMA_BIT_MASK(32)*/;
+static u64 comcerto_dwc_otg_dmamask = 0xFFFFFFFF  ;
 
 static struct resource comcerto_dwc_otg_resources[] = {
 	{
@@ -740,10 +664,6 @@ struct platform_device comcerto_device_ahci = {
 };
 #endif
 
-/* --------------------------------------------------------------------
- *  XOR Engine
- * -------------------------------------------------------------------- */
-
 static struct resource comcerto_xor_resource[] = {
 		{
 				.name  = "xor base address",
@@ -770,10 +690,6 @@ static struct platform_device comcerto_xor_device = {
 	.num_resources  = ARRAY_SIZE(comcerto_xor_resource),
 	.resource = comcerto_xor_resource,
 };
-
-/* --------------------------------------------------------------------
- *  Basic C2K MDMA Engine
- * -------------------------------------------------------------------- */
 
 static struct resource comcerto_dma_resource[] = {
 		{
@@ -898,7 +814,7 @@ static void __init mac_addr_setup(char *str)
 {
 	int str_incr_cnt = 0;
 
-	if (*str++ != '=' || !*str)  /* No mac addr specified */
+	if (*str++ != '=' || !*str)   
 		return;
 
 	str_incr_cnt = mac_addr_atoi(c2k_mac_addr[0], str);
@@ -920,7 +836,7 @@ void __init mac_addr_init(struct comcerto_pfe_platform_data * comcerto_pfe_data_
 #if defined(CONFIG_SYNO_C2K_NET)
 	int num = NUM_GEMAC_SUPPORT;
 
-	// DS215air gem_port_id same as c2kevm
+	
 	if(0 == strncmp(gszSynoHWVersion, HW_DS414jv10, strlen(HW_DS414jv10)) || 0 == strncmp(gszSynoHWVersion, HW_DS415jv10, strlen(HW_DS415jv10))) {
 		num = 1;
 	}
@@ -929,7 +845,7 @@ void __init mac_addr_init(struct comcerto_pfe_platform_data * comcerto_pfe_data_
 #else
 	for (gem_port_id = 0; gem_port_id < NUM_GEMAC_SUPPORT; gem_port_id++) {
 #endif
-		if (is_mac_zero(c2k_mac_addr[gem_port_id]))  /* If mac is non-zero */
+		if (is_mac_zero(c2k_mac_addr[gem_port_id]))   
 			comcerto_pfe_data_ptr->comcerto_eth_pdata[gem_port_id].mac_addr = c2k_mac_addr[gem_port_id];
 	}
 
@@ -941,7 +857,7 @@ static struct platform_device *comcerto_common_devices[] __initdata = {
 #endif
 #ifdef CONFIG_COMCERTO_MSP
 	&comcerto_ved,
-#endif  /* CONFIG_COMCERTO_MSP */
+#endif   
 	&comcerto_pmu,
 
 #if defined(CONFIG_COMCERTO_USB3_SUPPORT)
@@ -955,7 +871,7 @@ static struct platform_device *comcerto_common_devices[] __initdata = {
 #if defined(CONFIG_COMCERTO_SATA)
 	&comcerto_device_ahci,
 #endif
-//	&comcerto_xor_device,
+ 
 	&comcerto_dma_device,
 #if defined(CONFIG_COMCERTO_EPAVIS)
 	&comcerto_device_epavis_cie,
@@ -968,76 +884,63 @@ static struct platform_device *comcerto_common_devices[] __initdata = {
 
 void __init device_init(void)
 {
-	/* Default value for the bit mask */
+	 
 	unsigned int default_host_utilpe_shared_bitmask = ~(USB2p0_IRQ|WOL_IRQ);
 	struct clk *axi_clk,*ddr_clk,*arm_clk,*l2cc_clk;
 	HAL_clk_div_backup_relocate_table ();
 	system_rev = (readl(COMCERTO_GPIO_DEVICE_ID_REG) >> 24) & 0xf;
 
-	/* Initialize the reset driver here */
 	reset_init();
 	
-	/* Enable the AXI,DDR,A9 susbsystem clock
-	 * this is just for s/w use count house keeping.
-	 * These clocks will never be disabled from bootloader while
-	 * booting. In fact we are keeping this because for these clocks , 
-	 * we dont have any driver to do a clk_enable. so doing  it here.
-	*/
-
-	/* Get the AXI clk structure */
 	axi_clk = clk_get(NULL,"axi");
 	if (IS_ERR(axi_clk)) {
 		pr_err("%s: Unable to obtain AXI clock: %ld\n",__func__,PTR_ERR(axi_clk));
-		/* System cannot proceed from here */
+		 
 		BUG();
 	}
-	/* Enable the AXI clk  */
+	 
 	if (clk_enable(axi_clk)){
 		pr_err("%s: Unable to enable AXI clock:\n",__func__);
-		/* System cannot proceed from here */
+		 
 		BUG();
 	}
 	
-	/* Get the DDR clock structure */
 	ddr_clk = clk_get(NULL,"ddr");
 	if (IS_ERR(ddr_clk)) {
 		pr_err("%s: Unable to obtain DDR clock: %ld\n",__func__,PTR_ERR(ddr_clk));
-		/* System cannot proceed from here */
+		 
 		BUG();
 	}
-	/* Enable the DDR clk  */
+	 
  	if (clk_enable(ddr_clk)){
 		pr_err("%s: Unable to enable DDR clock:\n",__func__);
-		/* System cannot proceed from here */
+		 
 		BUG();
 	}
 	
-	/* Get the CPU(A9) clock */
 	arm_clk = clk_get(NULL,"arm");
 	if (IS_ERR(arm_clk)) {
 		pr_err("%s: Unable to obtain A9(arm) clock: %ld\n",__func__,PTR_ERR(arm_clk));
-		/* System cannot proceed from here */
+		 
 		BUG();
 	}
-	/* Enable the ARM clk  */
+	 
 	if (clk_enable(arm_clk)){
 		pr_err("%s: Unable to enable A9(arm) clock:\n",__func__);
-		/* System cannot proceed from here */
+		 
 		BUG();
 	}
 	
-	/* Get the L2CC clock */
 	l2cc_clk = clk_get(NULL,"l2cc");
 	if (IS_ERR(l2cc_clk)) {
 		pr_err("%s: Unable to obtain L2CC clock: %ld\n",__func__,PTR_ERR(l2cc_clk));
-		/* L2CC initilization cannot proceed from here */
+		 
 		BUG();
 	}
 
-	/* Enable the L2CC clk  */
 	if (clk_enable(l2cc_clk)){
 		pr_err("%s: Unable to enable L2CC clock:\n",__func__);
-		/* L2CC initilization cannot proceed from here */
+		 
 		BUG();
 	}
 	
@@ -1050,10 +953,10 @@ void __init device_init(void)
 	gpio_init();
 
 #ifdef CONFIG_COMCERTO_TDM_CLOCK
-	// [FIXME] Take TDM out of reset
-	//writel(readl(COMCERTO_BLOCK_RESET_REG) | TDM_RST, COMCERTO_BLOCK_RESET_REG);
+	
+	
 #endif
-	/* Default bit mask is applied here , which will be passed to Util-Pe*/
+	
 	c2k_pm_bitmask_store(default_host_utilpe_shared_bitmask);
 
 	platform_add_devices(comcerto_common_devices, ARRAY_SIZE(comcerto_common_devices));
@@ -1061,8 +964,7 @@ void __init device_init(void)
 
 void __init platform_reserve(void)
 {
-	/* Allocate DDR block used by PFE/MSP, the base address is fixed so that util-pe code can
-	be linked at a fixed address */
+	 
 	if (memblock_reserve(COMCERTO_DDR_SHARED_BASE, COMCERTO_DDR_SHARED_SIZE) < 0)
 		BUG();
 

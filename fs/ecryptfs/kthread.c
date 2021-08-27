@@ -1,27 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/**
- * eCryptfs: Linux filesystem encryption layer
- *
- * Copyright (C) 2008 International Business Machines Corp.
- *   Author(s): Michael A. Halcrow <mahalcro@us.ibm.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
- */
  
 #include <linux/kthread.h>
 #include <linux/freezer.h>
@@ -42,15 +21,6 @@ static struct ecryptfs_kthread_ctl {
 
 static struct task_struct *ecryptfs_kthread;
 
-/**
- * ecryptfs_threadfn
- * @ignored: ignored
- *
- * The eCryptfs kernel thread that has the responsibility of getting
- * the lower file with RW permissions.
- *
- * Returns zero on success; non-zero otherwise
- */
 static int ecryptfs_threadfn(void *ignored)
 {
 	set_freezable();
@@ -124,16 +94,6 @@ void ecryptfs_destroy_kthread(void)
 	wake_up(&ecryptfs_kthread_ctl.wait);
 }
 
-/**
- * ecryptfs_privileged_open
- * @lower_file: Result of dentry_open by root on lower dentry
- * @lower_dentry: Lower dentry for file to open
- * @lower_mnt: Lower vfsmount for file to open
- *
- * This function gets a r/w file opened againt the lower dentry.
- *
- * Returns zero on success; non-zero otherwise
- */
 int ecryptfs_privileged_open(struct file **lower_file,
 			     struct dentry *lower_dentry,
 			     struct vfsmount *lower_mnt,
@@ -143,9 +103,6 @@ int ecryptfs_privileged_open(struct file **lower_file,
 	int flags = O_LARGEFILE;
 	int rc = 0;
 
-	/* Corresponding dput() and mntput() are done when the
-	 * lower file is fput() when all eCryptfs files for the inode are
-	 * released. */
 	dget(lower_dentry);
 	mntget(lower_mnt);
 	flags |= IS_RDONLY(lower_dentry->d_inode) ? O_RDONLY : O_RDWR;

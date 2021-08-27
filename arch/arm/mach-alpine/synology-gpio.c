@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Synology ALPINE NAS Board GPIO Setup
- *
- * Maintained by:  KueiHuan Chen <khchen@synology.com>
- *
- * Copyright 2009-2015 Synology, Inc.  All rights reserved.
- * Copyright 2009-2015 Chocoyeh
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; see the file COPYING.  If not, write to
- * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- */
+ 
 #if defined(CONFIG_SYNO_ALPINE)
 
 #include <linux/platform_device.h>
@@ -49,7 +27,6 @@
 
 #define GPIO_UNDEF				0xFF
 
-/* copied from synobios.h */
 #define DISK_LED_OFF			0
 #define DISK_LED_GREEN_SOLID	1
 #define DISK_LED_ORANGE_SOLID	2
@@ -232,7 +209,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 		pin2 = generic_gpio.ext_sata_led.hdd5_led_1;
 		break;
 	case 6:
-		//for esata
+		 
 		ret = 0;
 		goto END;
 	default:
@@ -397,11 +374,11 @@ unsigned char SYNOALPINEIsBoardNeedPowerUpHDD(u32 disk_id) {
 	int def_max_disk = 0;
 
 	if (0 == strncmp(gszSynoHWVersion, HW_DS2015xs, strlen(HW_DS2015xs))) {
-	    //For DS2015xs, it has buildin power and it does not need to power up disks specially.
+	     
 	    return 0;
 	}
 	if (0 == strncmp(gszSynoHWVersion, HW_DS1515, strlen(HW_DS1515))) {
-	    //For DS1515, it has buildin power and it does not need to power up disks specially.
+	     
 		return 0;
 	}
 
@@ -413,8 +390,6 @@ unsigned char SYNOALPINEIsBoardNeedPowerUpHDD(u32 disk_id) {
 		def_max_disk = 4;
 	}
 
-	/* lookup table for max disk
-	   if not found, compare default */
 	ret = (disk_id <= def_max_disk)? 1 : 0;
 	for (i = 0; i < ARRAY_LEN(alpine_family); i++) {
 		if (syno_is_hw_version(alpine_family[i].hw_version)) {
@@ -430,7 +405,7 @@ unsigned char SYNOALPINEIsBoardNeedPowerUpHDD(u32 disk_id) {
 
 int SYNO_CHECK_HDD_PRESENT(int index)
 {
-    int iPrzVal = 1; /*defult is present*/
+    int iPrzVal = 1;  
 
     switch (index) {
         case 1:
@@ -489,7 +464,6 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 
 	WARN_ON(GPIO_UNDEF == generic_gpio.soc_sata_led.hdd1_fail_led);
 
-	/* assign pin info according to hdd */
 	switch (index) {
 		case 1:
 			fail_led = generic_gpio.soc_sata_led.hdd1_fail_led;
@@ -528,8 +502,6 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 			goto END;
 	}
 
-	/* Since faulty led and present led are combined,
-	   we need to disable present led when light on faulty's */
 	if (DISK_LED_ORANGE_SOLID == status || DISK_LED_ORANGE_BLINK == status) {
 		gpio_set_value(fail_led, 1);
 		gpio_set_value(present_led, 0);
@@ -549,15 +521,10 @@ END:
 	return ret;
 }
 
-/* SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER
- * Query support HDD dynamic Power .
- * output: 0 - support, 1 - not support.
- */
 int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 {
 	int iRet = 0;
 
-	/* if exist at least one hdd has enable pin and present detect pin ret=1*/
 	if ((GPIO_UNDEF != generic_gpio.hdd_pm.hdd1_pm && GPIO_UNDEF != generic_gpio.hdd_detect.hdd1_present_detect) ||
 		(GPIO_UNDEF != generic_gpio.hdd_pm.hdd2_pm && GPIO_UNDEF != generic_gpio.hdd_detect.hdd2_present_detect) ||
 		(GPIO_UNDEF != generic_gpio.hdd_pm.hdd3_pm && GPIO_UNDEF != generic_gpio.hdd_detect.hdd3_present_detect) ||
@@ -635,43 +602,6 @@ EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
 EXPORT_SYMBOL(SYNO_SOC_HDD_LED_SET);
 
-/*
-DS2015xs GPIO config table
-(High=1)
-
-Pin     In/Out    Function
- 0       In       FAN 1
- 1       In       FAN 2
- 5      Out       High = Disk LED off
-18      Out       High = Enable ESATA 1 power
-19      Out       High = Enable ESATA 2 power
-10      Out       High = HDD 1 activity
-11      Out       High = HDD 2 activity
-22      Out       High = HDD 3 activity
-23      Out       High = HDD 4 activity
-24      Out       High = HDD 5 activity
-25      Out       High = HDD 6 activity
-26      Out       High = HDD 7 activity
-27      Out       High = HDD 8 activity
-30      Out       High = HDD 1 present
-31      Out       High = HDD 2 present
-32      Out       High = HDD 3 present
-33      Out       High = HDD 4 present
-34      Out       High = HDD 5 present
-35      Out       High = HDD 6 present
-36      Out       High = HDD 7 present
-37      Out       High = HDD 8 present
-38      Out       High = HDD 1 fault
-39      Out       High = HDD 2 fault
-40      Out       High = HDD 3 fault
-41      Out       High = HDD 4 fault
-42      Out       High = HDD 5 fault
- 2      Out       High = HDD 6 fault
- 3      Out       High = HDD 7 fault
- 4      Out       High = HDD 8 fault
-43      Out       VTT off
-*/
-
 static void
 ALPINE_ds2015xs_GPIO_init(SYNO_GPIO *global_gpio)
 {
@@ -718,9 +648,9 @@ ALPINE_ds2015xs_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd8_act_led = 27,
 		},
 		.model		  = {
-			.model_id_0 = 42,  // FIXME
-			.model_id_1 = 41,  // FIXME
-			.model_id_2 = 40,  // FIXME
+			.model_id_0 = 42,   
+			.model_id_1 = 41,   
+			.model_id_2 = 40,   
 			.model_id_3 = GPIO_UNDEF,
 		},
 		.fan		  = {
@@ -756,33 +686,6 @@ ALPINE_ds2015xs_GPIO_init(SYNO_GPIO *global_gpio)
 
 	*global_gpio = gpio_ds2015xs;
 }
-
-/*
-DS1515 GPIO config table
-(High=1)
-
-Pin     In/Out    Function
- 0       In       FAN 1
- 1       In       FAN 2
- 5      Out       High = Disk LED off
-18      Out       High = GPIO fan fail
-10      Out       High = HDD 1 activity
-11      Out       High = HDD 2 activity
-22      Out       High = HDD 3 activity
-23      Out       High = HDD 4 activity
-24      Out       High = HDD 5 activity
-29      Out       High = HDD 1 present
-31      Out       High = HDD 2 present
-32      Out       High = HDD 3 present
-33      Out       High = HDD 4 present
-34      Out       High = HDD 5 present
-38      Out       High = HDD 1 fault
-39      Out       High = HDD 2 fault
-40      Out       High = HDD 3 fault
-41      Out       High = HDD 4 fault
-42      Out       High = HDD 5 fault
-43      Out       VTT off
-*/
 
 static void
 ALPINE_ds1515_GPIO_init(SYNO_GPIO *global_gpio)
@@ -830,9 +733,9 @@ ALPINE_ds1515_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd8_act_led = GPIO_UNDEF,
 		},
 		.model		  = {
-			.model_id_0 = 42,  // FIXME
-			.model_id_1 = 41,  // FIXME
-			.model_id_2 = 40,  // FIXME
+			.model_id_0 = 42,   
+			.model_id_1 = 41,   
+			.model_id_2 = 40,   
 			.model_id_3 = GPIO_UNDEF,
 		},
 		.fan		  = {
@@ -868,28 +771,6 @@ ALPINE_ds1515_GPIO_init(SYNO_GPIO *global_gpio)
 
 	*global_gpio = gpio_ds1515;
 }
-
-/*
-DS715/DS215+ GPIO config table
-(High=1)
-
-Pin     In/Out    Function
- 0       In       FAN 1
- 2       In       HDD_PRZ_1 (Low = HDD insert; High = plug out)
- 3       In       HDD_PRZ_2 (Low = HDD insert; High = plug out)
- 5      Out       High = SATA LED off
-34      Out       High = LAN LED on
-19      Out       High = Enable ESATA 1 power
-22      Out       High = Enable HDD 1 power (for deep sleep)
-23      Out       High = Enable HDD 2 power (for deep sleep)
-10      Out       High = HDD 1 activity LED
-11      Out       High = HDD 2 activity LED
-29      Out       High = HDD 1 present LED
-31      Out       High = HDD 2 present LED
-38      Out       High = HDD 1 faulty LED
-39      Out       High = HDD 2 faulty LED
-43      Out       VTT off
-*/
 
 static void
 ALPINE_2bay_GPIO_init(SYNO_GPIO *global_gpio)
@@ -937,9 +818,9 @@ ALPINE_2bay_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd8_act_led = GPIO_UNDEF,
 		},
 		.model		  = {
-			.model_id_0 = 42,  // FIXME
-			.model_id_1 = 41,  // FIXME
-			.model_id_2 = 40,  // FIXME
+			.model_id_0 = 42,   
+			.model_id_1 = 41,   
+			.model_id_2 = 40,   
 			.model_id_3 = GPIO_UNDEF,
 		},
 		.fan		  = {
@@ -975,38 +856,6 @@ ALPINE_2bay_GPIO_init(SYNO_GPIO *global_gpio)
 
 	*global_gpio = gpio_2bay;
 }
-
-/*
-DS416 GPIO config table
-(High=1)
-
-Pin     In/Out    Function
- 0       In       FAN 1
- 1       In       FAN 2
- 2       In       HDD_PRZ_1 (Low = HDD insert; High = plug out)
- 3       In       HDD_PRZ_2 (Low = HDD insert; High = plug out)
-35       In       HDD_PRZ_3 (Low = HDD insert; High = plug out)
-36       In       HDD_PRZ_4 (Low = HDD insert; High = plug out)
- 5      Out       High = Disk LED off
-19      Out       High = Enable ESATA 1 power
-10      Out       High = HDD 1 activity
-11      Out       High = HDD 2 activity
-22      Out       High = HDD 3 activity
-23      Out       High = HDD 4 activity
-24      Out       High = Enable HDD 1 power (for deep sleep)
-25      Out       High = Enable HDD 2 power (for deep sleep)
-26      Out       High = Enable HDD 3 power (for deep sleep)
-27      Out       High = Enable HDD 4 power (for deep sleep)
-29      Out       High = HDD 1 present
-31      Out       High = HDD 2 present
-32      Out       High = HDD 3 present
-33      Out       High = HDD 4 present
-38      Out       High = HDD 1 fault
-39      Out       High = HDD 2 fault
-40      Out       High = HDD 3 fault
-41      Out       High = HDD 4 fault
-43      Out       VTT off
-*/
 
 static void
 ALPINE_ds416_GPIO_init(SYNO_GPIO *global_gpio)
@@ -1054,9 +903,9 @@ ALPINE_ds416_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd8_act_led = GPIO_UNDEF,
 		},
 		.model		  = {
-			.model_id_0 = 42,  // FIXME
-			.model_id_1 = 41,  // FIXME
-			.model_id_2 = 40,  // FIXME
+			.model_id_0 = 42,   
+			.model_id_1 = 41,   
+			.model_id_2 = 40,   
 			.model_id_3 = GPIO_UNDEF,
 		},
 		.fan		  = {
@@ -1199,4 +1048,4 @@ void synology_gpio_init(void)
 		printk("Not supported hw version!\n");
 	}
 }
-#endif /* CONFIG_SYNO_ALPINE_ARCH */
+#endif  

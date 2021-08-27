@@ -4,17 +4,7 @@
 #ifndef _ASM_FIXMAP_H
 #define _ASM_FIXMAP_H
 
-/*
- * Nothing too fancy for now.
- *
- * On ARM we already have well known fixed virtual addresses imposed by
- * the architecture such as the vector page which is located at 0xffff0000,
- * therefore a second level page table is already allocated covering
- * 0xfff00000 upwards.
- *
- * The cache flushing code in proc-xscale.S uses the virtual area between
- * 0xfffe0000 and 0xfffeffff.
- */
+
 
 #if (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM)) || \
      (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)) 

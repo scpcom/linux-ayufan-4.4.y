@@ -1,58 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* ==========================================================================
- * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd_queue.c $
- * $Revision: #44 $
- * $Date: 2011/10/26 $
- * $Change: 1873028 $
- *
- * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
- * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
- * otherwise expressly agreed to in writing between Synopsys and you.
- * 
- * The Software IS NOT an item of Licensed Software or Licensed Product under
- * any End User Software License Agreement or Agreement for Licensed Product
- * with Synopsys or any supplement thereto. You are permitted to use and
- * redistribute this Software in source and binary forms, with or without
- * modification, provided that redistributions of source code must retain this
- * notice. You may not view, use, disclose, copy or distribute this file or
- * any information contained herein except pursuant to this license grant from
- * Synopsys. If you do not agree with this notice, including the disclaimer
- * below, then you are not authorized to use the Software.
- * 
- * THIS SOFTWARE IS BEING DISTRIBUTED BY SYNOPSYS SOLELY ON AN "AS IS" BASIS
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE HEREBY DISCLAIMED. IN NO EVENT SHALL SYNOPSYS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
- * DAMAGE.
- * ========================================================================== */
-#ifndef DWC_DEVICE_ONLY
 
-/**
- * @file
- *
- * This file contains the functions to manage Queue Heads and Queue
- * Transfer Descriptors.
- */
+#ifndef DWC_DEVICE_ONLY
 
 #include "dwc_otg_hcd.h"
 #include "dwc_otg_regs.h"
 
-/** 
- * Free each QTD in the QH's QTD-list then free the QH.  QH should already be
- * removed from a list.  QTD list should already be empty if called from URB
- * Dequeue.
- *
- * @param hcd HCD instance.
- * @param qh The QH to free.
- */
+
 void dwc_otg_hcd_qh_free(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 	dwc_otg_qtd_t *qtd, *qtd_tmp;
@@ -60,7 +15,7 @@ void dwc_otg_hcd_qh_free(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 	dwc_irqflags_t flags;
 #endif
 
-	/* Free each QTD in the QTD list */
+	
 #if !defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
 	DWC_SPINLOCK(hcd->lock);
 #endif
@@ -109,11 +64,10 @@ void dwc_otg_hcd_qh_free(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 }
 
 #define BitStuffTime(bytecount)  ((8 * 7* bytecount) / 6)
-#define HS_HOST_DELAY		5	/* nanoseconds */
-#define FS_LS_HOST_DELAY	1000	/* nanoseconds */
-#define HUB_LS_SETUP		333	/* nanoseconds */
+#define HS_HOST_DELAY		5	 
+#define FS_LS_HOST_DELAY	1000	 
+#define HUB_LS_SETUP		333	 
 #define NS_TO_US(ns)		((ns + 500) / 1000)
-				/* convert & round nanoseconds to microseconds */
 				 
 static uint32_t calc_bus_time(int speed, int is_in, int is_isoc, int bytecount)
 {
@@ -173,14 +127,6 @@ static uint32_t calc_bus_time(int speed, int is_in, int is_isoc, int bytecount)
 	return NS_TO_US(retval);
 }
 
-/** 
- * Initializes a QH structure.
- *
- * @param hcd The HCD state structure for the DWC OTG controller.
- * @param qh  The QH to init.
- * @param urb Holds the information about the device/endpoint that we need
- * 	      to initialize the QH. 
- */
 #define SCHEDULE_SLOP 10
 void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 {
@@ -190,7 +136,6 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 
 	dwc_memset(qh, 0, sizeof(dwc_otg_qh_t));
 
-	/* Initialize QH */
 	qh->ep_type = dwc_otg_hcd_get_pipe_type(&urb->pipe_info);
 	qh->ep_is_in = dwc_otg_hcd_is_pipe_in(&urb->pipe_info) ? 1 : 0;
 
@@ -200,8 +145,6 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 	DWC_LIST_INIT(&qh->qh_list_entry);
 	qh->channel = NULL;
 
-	/* FS/LS Enpoint on HS Hub 
-	 * NOT virtual root hub */
 	dev_speed = hcd->fops->speed(hcd, urb->priv);
 
 	hcd->fops->hub_info(hcd, urb->priv, &hub_addr, &hub_port);
@@ -218,10 +161,9 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 	}
 
 	if (qh->ep_type == UE_INTERRUPT || qh->ep_type == UE_ISOCHRONOUS) {
-		/* Compute scheduling parameters once and save them. */
+		 
 		hprt0_data_t hprt;
 
-		/** @todo Account for split transfers in the bus time. */
 		int bytecount =
 		    dwc_hb_mult(qh->maxp) * dwc_max_packet(qh->maxp);
 
@@ -229,7 +171,7 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 		    calc_bus_time((qh->do_split ? USB_SPEED_HIGH : dev_speed),
 				  qh->ep_is_in, (qh->ep_type == UE_ISOCHRONOUS),
 				  bytecount);
-		/* Start in a slightly future (micro)frame. */
+		 
 #if defined(CONFIG_SYNO_C2K_NOISE_WITH_REMOTE_DAC)
 		hcd->frame_number = dwc_otg_hcd_get_frame_number(hcd);
 #endif
@@ -238,7 +180,7 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 		qh->interval = urb->interval;
 
 #if 0
-		/* Increase interrupt polling rate for debugging. */
+		 
 		if (qh->ep_type == UE_INTERRUPT) {
 			qh->interval = 8;
 		}
@@ -316,22 +258,11 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 
 }
 
-/**
- * This function allocates and initializes a QH.
- *
- * @param hcd The HCD state structure for the DWC OTG controller.
- * @param urb Holds the information about the device/endpoint that we need
- * 	      to initialize the QH.
- * @param atomic_alloc Flag to do atomic allocation if needed
- *
- * @return Returns pointer to the newly allocated QH, or NULL on error. */
 dwc_otg_qh_t *dwc_otg_hcd_qh_create(dwc_otg_hcd_t * hcd,
 				    dwc_otg_hcd_urb_t * urb, int atomic_alloc)
 {
 	dwc_otg_qh_t *qh;
 
-	/* Allocate memory */
-	/** @todo add memflags argument */
 	qh = dwc_otg_hcd_qh_alloc(atomic_alloc);
 	if (qh == NULL) {
 		DWC_ERROR("qh allocation failed");
@@ -349,18 +280,9 @@ dwc_otg_qh_t *dwc_otg_hcd_qh_create(dwc_otg_hcd_t * hcd,
 	return qh;
 }
 
-/**
- * Checks that a channel is available for a periodic transfer.
- *
- * @return 0 if successful, negative error code otherise.
- */
 static int periodic_channel_available(dwc_otg_hcd_t * hcd)
 {
-	/*
-	 * Currently assuming that there is a dedicated host channnel for each
-	 * periodic transaction plus at least one host channel for
-	 * non-periodic transactions.
-	 */
+	 
 	int status;
 	int num_channels;
 
@@ -370,23 +292,13 @@ static int periodic_channel_available(dwc_otg_hcd_t * hcd)
 		status = 0;
 	} else {
 		DWC_INFO("%s: Total channels: %d, Periodic: %d, Non-periodic: %d\n",
-			__func__, num_channels, hcd->periodic_channels, hcd->non_periodic_channels);	//NOTICE
+			__func__, num_channels, hcd->periodic_channels, hcd->non_periodic_channels);	 
 		status = -DWC_E_NO_SPACE;
 	}
 
 	return status;
 }
 
-/**
- * Checks that there is sufficient bandwidth for the specified QH in the
- * periodic schedule. For simplicity, this calculation assumes that all the
- * transfers in the periodic schedule may occur in the same (micro)frame.
- *
- * @param hcd The HCD state structure for the DWC OTG controller.
- * @param qh QH containing periodic bandwidth required.
- *
- * @return 0 if successful, negative error code otherwise.
- */
 static int check_periodic_bandwidth(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 	int status;
@@ -395,38 +307,21 @@ static int check_periodic_bandwidth(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 	status = 0;
 
 	if ((qh->dev_speed == DWC_OTG_EP_SPEED_HIGH) || qh->do_split) {
-		/*
-		 * High speed mode.
-		 * Max periodic usecs is 80% x 125 usec = 100 usec.
-		 */
 		 
 		max_claimed_usecs = 100 - qh->usecs;
 	} else {
-		/*
-		 * Full speed mode.
-		 * Max periodic usecs is 90% x 1000 usec = 900 usec.
-		 */
+		 
 		max_claimed_usecs = 900 - qh->usecs;
 	}
 
 	if (hcd->periodic_usecs > max_claimed_usecs) {
-		DWC_INFO("%s: already claimed usecs %d, required usecs %d\n", __func__, hcd->periodic_usecs, qh->usecs);	//NOTICE
+		DWC_INFO("%s: already claimed usecs %d, required usecs %d\n", __func__, hcd->periodic_usecs, qh->usecs);	 
 		status = -DWC_E_NO_SPACE;
 	}
 
 	return status;
 }
 
-/**
- * Checks that the max transfer size allowed in a host channel is large enough
- * to handle the maximum data transfer in a single (micro)frame for a periodic
- * transfer.
- *
- * @param hcd The HCD state structure for the DWC OTG controller.
- * @param qh QH for a periodic endpoint.
- *
- * @return 0 if successful, negative error code otherwise.
- */
 static int check_max_xfer_size(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 	int status;
@@ -440,82 +335,63 @@ static int check_max_xfer_size(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 
 	if (max_xfer_size > max_channel_xfer_size) {
 		DWC_INFO("%s: Periodic xfer length %d > " "max xfer length for channel %d\n",
-				__func__, max_xfer_size, max_channel_xfer_size);	//NOTICE
+				__func__, max_xfer_size, max_channel_xfer_size);	 
 		status = -DWC_E_NO_SPACE;
 	}
 
 	return status;
 }
 
-/**
- * Schedules an interrupt or isochronous transfer in the periodic schedule.
- *
- * @param hcd The HCD state structure for the DWC OTG controller.
- * @param qh QH for the periodic transfer. The QH should already contain the
- * scheduling information.
- *
- * @return 0 if successful, negative error code otherwise.
- */
 static int schedule_periodic(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 	int status = 0;
 
 	status = periodic_channel_available(hcd);
 	if (status) {
-		DWC_INFO("%s: No host channel available for periodic " "transfer.\n", __func__);	//NOTICE
+		DWC_INFO("%s: No host channel available for periodic " "transfer.\n", __func__);	 
 		return status;
 	}
 
 	status = check_periodic_bandwidth(hcd, qh);
 	if (status) {
-		DWC_INFO("%s: Insufficient periodic bandwidth for " "periodic transfer.\n", __func__);	//NOTICE
+		DWC_INFO("%s: Insufficient periodic bandwidth for " "periodic transfer.\n", __func__);	 
 		return status;
 	}
 
 	status = check_max_xfer_size(hcd, qh);
 	if (status) {
-		DWC_INFO("%s: Channel max transfer size too small " "for periodic transfer.\n", __func__);	//NOTICE
+		DWC_INFO("%s: Channel max transfer size too small " "for periodic transfer.\n", __func__);	 
 		return status;
 	}
 
 	if (hcd->core_if->dma_desc_enable) {
-		/* Don't rely on SOF and start in ready schedule */
+		 
 		DWC_LIST_INSERT_TAIL(&hcd->periodic_sched_ready, &qh->qh_list_entry);
 	}
 	else {
-	/* Always start in the inactive schedule. */
+	 
 	DWC_LIST_INSERT_TAIL(&hcd->periodic_sched_inactive, &qh->qh_list_entry);
 	}
 
-	/* Reserve the periodic channel. */
 	hcd->periodic_channels++;
 
-	/* Update claimed usecs per (micro)frame. */
 	hcd->periodic_usecs += qh->usecs;
 
 	return status;
 }
 
-/**
- * This function adds a QH to either the non periodic or periodic schedule if
- * it is not already in the schedule. If the QH is already in the schedule, no
- * action is taken.
- *
- * @return 0 if successful, negative error code otherwise.
- */
 int dwc_otg_hcd_qh_add(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 	int status = 0;
 	gintmsk_data_t intr_mask = {.d32 = 0 };
 
 	if (!DWC_LIST_EMPTY(&qh->qh_list_entry)) {
-		/* QH already in a schedule. */
+		 
 		return status;
 	}
 
-	/* Add the new QH to the appropriate schedule */
 	if (dwc_qh_is_non_per(qh)) {
-		/* Always start in the inactive schedule. */
+		 
 		DWC_LIST_INSERT_TAIL(&hcd->non_periodic_sched_inactive,
 				     &qh->qh_list_entry);
 	} else {
@@ -531,35 +407,21 @@ int dwc_otg_hcd_qh_add(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 	return status;
 }
 
-/**
- * Removes an interrupt or isochronous transfer from the periodic schedule.
- *
- * @param hcd The HCD state structure for the DWC OTG controller.
- * @param qh QH for the periodic transfer.
- */
 static void deschedule_periodic(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 	DWC_LIST_REMOVE_INIT(&qh->qh_list_entry);
 
-	/* Release the periodic channel reservation. */
 	hcd->periodic_channels--;
 
-	/* Update claimed usecs per (micro)frame. */
 	hcd->periodic_usecs -= qh->usecs;
 }
 
-/** 
- * Removes a QH from either the non-periodic or periodic schedule.  Memory is
- * not freed.
- *
- * @param hcd The HCD state structure.
- * @param qh QH to remove from schedule. */
 void dwc_otg_hcd_qh_remove(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 	gintmsk_data_t intr_mask = {.d32 = 0 };
 
 	if (DWC_LIST_EMPTY(&qh->qh_list_entry)) {
-		/* QH is not in a schedule. */
+		 
 		return;
 	}
 
@@ -580,33 +442,20 @@ void dwc_otg_hcd_qh_remove(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 	}
 }
 
-/**
- * Deactivates a QH. For non-periodic QHs, removes the QH from the active
- * non-periodic schedule. The QH is added to the inactive non-periodic
- * schedule if any QTDs are still attached to the QH.
- *
- * For periodic QHs, the QH is removed from the periodic queued schedule. If
- * there are any QTDs still attached to the QH, the QH is added to either the
- * periodic inactive schedule or the periodic ready schedule and its next
- * scheduled frame is calculated. The QH is placed in the ready schedule if
- * the scheduled frame has been reached already. Otherwise it's placed in the
- * inactive schedule. If there are no QTDs attached to the QH, the QH is
- * completely removed from the periodic schedule.
- */
 void dwc_otg_hcd_qh_deactivate(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh,
 			       int sched_next_periodic_split)
 {	
 	if (dwc_qh_is_non_per(qh)) {
 		dwc_otg_hcd_qh_remove(hcd, qh);
 		if (!DWC_CIRCLEQ_EMPTY(&qh->qtd_list)) {
-			/* Add back to inactive non-periodic schedule. */
+			 
 			dwc_otg_hcd_qh_add(hcd, qh);
 		}
 	} else {
 		uint16_t frame_number = dwc_otg_hcd_get_frame_number(hcd);
 
 		if (qh->do_split) {
-			/* Schedule the next continuing periodic split transfer */
+			 
 			if (sched_next_periodic_split) {
 
 				qh->sched_frame = frame_number;
@@ -614,13 +463,7 @@ void dwc_otg_hcd_qh_deactivate(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh,
 						     dwc_frame_num_inc
 						     (qh->start_split_frame,
 						      1))) {
-					/*
-					 * Allow one frame to elapse after start
-					 * split microframe before scheduling
-					 * complete split, but DONT if we are
-					 * doing the next start split in the
-					 * same frame for an ISOC out.
-					 */
+					 
 					if ((qh->ep_type != UE_ISOCHRONOUS) ||
 					    (qh->ep_is_in != 0)) {
 						qh->sched_frame =
@@ -654,10 +497,7 @@ void dwc_otg_hcd_qh_deactivate(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh,
 		if (DWC_CIRCLEQ_EMPTY(&qh->qtd_list)) {
 			dwc_otg_hcd_qh_remove(hcd, qh);
 		} else {
-			/*
-			 * Remove from periodic_sched_queued and move to
-			 * appropriate queue.
-			 */
+			 
 			if (qh->sched_frame == frame_number) {
 				DWC_LIST_MOVE_HEAD(&hcd->periodic_sched_ready,
 						   &qh->qh_list_entry);
@@ -670,14 +510,6 @@ void dwc_otg_hcd_qh_deactivate(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh,
 	}
 }
 
-/** 
- * This function allocates and initializes a QTD. 
- *
- * @param urb The URB to create a QTD from.  Each URB-QTD pair will end up
- * 	      pointing to each other so each pair should have a unique correlation.
- * @param atomic_alloc Flag to do atomic alloc if needed
- *
- * @return Returns pointer to the newly allocated QTD, or NULL on error. */
 dwc_otg_qtd_t *dwc_otg_hcd_qtd_create(dwc_otg_hcd_urb_t * urb, int atomic_alloc)
 {
 	dwc_otg_qtd_t *qtd;
@@ -691,49 +523,25 @@ dwc_otg_qtd_t *dwc_otg_hcd_qtd_create(dwc_otg_hcd_urb_t * urb, int atomic_alloc)
 	return qtd;
 }
 
-/** 
- * Initializes a QTD structure.
- *
- * @param qtd The QTD to initialize.
- * @param urb The URB to use for initialization.  */
 void dwc_otg_hcd_qtd_init(dwc_otg_qtd_t * qtd, dwc_otg_hcd_urb_t * urb)
 {
 	dwc_memset(qtd, 0, sizeof(dwc_otg_qtd_t));
 	qtd->urb = urb;
 	if (dwc_otg_hcd_get_pipe_type(&urb->pipe_info) == UE_CONTROL) {
-		/*
-		 * The only time the QTD data toggle is used is on the data
-		 * phase of control transfers. This phase always starts with
-		 * DATA1.
-		 */
+		 
 		qtd->data_toggle = DWC_OTG_HC_PID_DATA1;
 		qtd->control_phase = DWC_OTG_CONTROL_SETUP;
 	}
 
-	/* start split */
 	qtd->complete_split = 0;
 	qtd->isoc_split_pos = DWC_HCSPLIT_XACTPOS_ALL;
 	qtd->isoc_split_offset = 0;
 	qtd->in_process = 0;
 
-	/* Store the qtd ptr in the urb to reference what QTD. */
 	urb->qtd = qtd;
 	return;
 }
 
-/**
- * This function adds a QTD to the QTD-list of a QH.  It will find the correct
- * QH to place the QTD into.  If it does not find a QH, then it will create a
- * new QH. If the QH to which the QTD is added is not currently scheduled, it
- * is placed into the proper schedule based on its EP type.
- *
- * @param[in] qtd The QTD to add
- * @param[in] hcd The DWC HCD structure
- * @param[out] qh out parameter to return queue head
- * @param atomic_alloc Flag to do atomic alloc if needed
- *
- * @return 0 if successful, negative error code otherwise.
- */
 int dwc_otg_hcd_qtd_add(dwc_otg_qtd_t * qtd,
 			dwc_otg_hcd_t * hcd, dwc_otg_qh_t ** qh, int atomic_alloc)
 {
@@ -742,10 +550,6 @@ int dwc_otg_hcd_qtd_add(dwc_otg_qtd_t * qtd,
 
 	dwc_otg_hcd_urb_t *urb = qtd->urb;
 
-	/*
-	 * Get the QH which holds the QTD-list to insert to. Create QH if it
-	 * doesn't exist.
-	 */
 	if (*qh == NULL) {
 		*qh = dwc_otg_hcd_qh_create(hcd, urb, atomic_alloc);
 		if (*qh == NULL) {
@@ -766,4 +570,4 @@ done:
 	return retval;
 }
 
-#endif /* DWC_DEVICE_ONLY */
+#endif  

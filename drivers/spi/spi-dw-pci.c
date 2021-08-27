@@ -1,24 +1,8 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * PCI interface driver for DW SPI Core
- *
- * Copyright (c) 2009, Intel Corporation.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU General Public License,
- * version 2, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- */
+ 
+
 
 #include <linux/interrupt.h>
 #include <linux/pci.h>
@@ -66,7 +50,6 @@ static int __devinit spi_pci_probe(struct pci_dev *pdev,
 	dwpci->pdev = pdev;
 	dws = &dwpci->dws;
 
-	/* Get basic io resource and map it */
 	dws->paddr = pci_resource_start(pdev, pci_bar);
 	dws->iolen = pci_resource_len(pdev, pci_bar);
 
@@ -102,10 +85,6 @@ static int __devinit spi_pci_probe(struct pci_dev *pdev,
 #endif
 	dws->irq = pdev->irq;
 
-	/*
-	 * Specific handling for Intel MID paltforms, like dma setup,
-	 * clock rate, FIFO depth.
-	 */
 	if (pdev->device == 0x0800) {
 		ret = dw_spi_mid_init(dws);
 		if (ret)
@@ -116,7 +95,6 @@ static int __devinit spi_pci_probe(struct pci_dev *pdev,
 	if (ret)
 		goto err_unmap;
 
-	/* PCI hook and SPI hook use the same drv data */
 	pci_set_drvdata(pdev, dwpci);
 	return 0;
 
@@ -176,7 +154,7 @@ static int spi_resume(struct pci_dev *pdev)
 #endif
 
 static const struct pci_device_id pci_ids[] __devinitdata = {
-	/* Intel MID platform SPI controller 0 */
+	 
 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, 0x0800) },
 	{},
 };
@@ -184,7 +162,7 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
 #ifdef CONFIG_SYNO_ALPINE
 static struct of_device_id dw_spi_pci_of_match[] = {
 		{ .compatible = "snps,dw-spi-pci", },
-		{ /* sentinel */}
+		{  }
 };
 MODULE_DEVICE_TABLE(of, dw_spi_pci_of_match);
 #endif

@@ -7,46 +7,40 @@
 #include <linux/list.h>
 #include <linux/types.h>
 
-/*
- *	These allocations are managed by device@lanana.org. If you use an
- *	entry that is not in assigned your entry may well be moved and
- *	reassigned, or set dynamic if a fixed value is not justified.
- */
-
 #define PSMOUSE_MINOR		1
 #define MS_BUSMOUSE_MINOR	2
 #define ATIXL_BUSMOUSE_MINOR	3
-/*#define AMIGAMOUSE_MINOR	4	FIXME OBSOLETE */
+ 
 #define ATARIMOUSE_MINOR	5
 #define SUN_MOUSE_MINOR		6
 #define APOLLO_MOUSE_MINOR	7
 #define PC110PAD_MINOR		9
-/*#define ADB_MOUSE_MINOR	10	FIXME OBSOLETE */
+ 
 #if defined(CONFIG_SYNO_USE_OCF_LINUX) || defined(CONFIG_SYNO_ALPINE)
-#define CRYPTODEV_MINOR		70	/* /dev/crypto */
+#define CRYPTODEV_MINOR		70	 
 #endif
 #if defined(CONFIG_SYNO_ARMADA_V2)
-#define CRYPTODEV_MINOR		70	/* OCF async crypto */
+#define CRYPTODEV_MINOR		70	 
 #endif
 #if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
-#define CESADEV_MINOR		71	/* marvell CESA     */
-#define BTNSDEV_MINOR  		72	/* Marvell btns */
-#define SLICDEV_MINOR		73	/* Marvell SLIC control device */
-#define TDMDEV_MINOR		74	/* Marvell TDM test device */
+#define CESADEV_MINOR		71	 
+#define BTNSDEV_MINOR  		72	 
+#define SLICDEV_MINOR		73	 
+#define TDMDEV_MINOR		74	 
 #endif
-#define WATCHDOG_MINOR		130	/* Watchdog timer     */
-#define TEMP_MINOR		131	/* Temperature Sensor */
+#define WATCHDOG_MINOR		130	 
+#define TEMP_MINOR		131	 
 #define RTC_MINOR		135
-#define EFI_RTC_MINOR		136	/* EFI Time services */
+#define EFI_RTC_MINOR		136	 
 #define SUN_OPENPROM_MINOR	139
-#define DMAPI_MINOR		140	/* DMAPI */
+#define DMAPI_MINOR		140	 
 #define NVRAM_MINOR		144
 #define SGI_MMTIMER		153
 #define STORE_QUEUE_MINOR	155
 #define I2O_MINOR		166
 #define MICROCODE_MINOR		184
 #define TUN_MINOR		200
-#define MWAVE_MINOR		219	/* ACP/Mwave Modem */
+#define MWAVE_MINOR		219	 
 #define MPT_MINOR		220
 #define MPT2SAS_MINOR		221
 #define UINPUT_MINOR		223

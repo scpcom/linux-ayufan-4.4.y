@@ -1,69 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-   Copyright (C) Marvell International Ltd. and its affiliates
-
-   This software file (the "File") is owned and distributed by Marvell
-   International Ltd. and/or its affiliates ("Marvell") under the following
-   alternative licensing terms.  Once you have made an election to distribute the
-   File under one of the following license alternatives, please (i) delete this
-   introductory statement regarding license alternatives, (ii) delete the two
-   license alternatives that you have not elected to use and (iii) preserve the
-   Marvell copyright notice above.
-
-********************************************************************************
-   Marvell Commercial License Option
-
-   If you received this File from Marvell and you have entered into a commercial
-   license agreement (a "Commercial License") with Marvell, the File is licensed
-   to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-   Marvell GPL License Option
-
-   If you received this File from Marvell, you may opt to use, redistribute and/or
-   modify this File in accordance with the terms and conditions of the General
-   Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-   available along with the File in the license.txt file or by writing to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-   on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-   THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-   DISCLAIMED.  The GPL License provides additional details about this warranty
-   disclaimer.
-********************************************************************************
-   Marvell BSD License Option
-
-   If you received this File from Marvell, you may opt to use, redistribute and/or
-   modify this File under the following licensing terms.
-   Redistribution and use in source and binary forms, with or without modification,
-   are permitted provided that the following conditions are met:
-
-*   Redistributions of source code must retain the above copyright notice,
-            this list of conditions and the following disclaimer.
-
-*   Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
-
-*   Neither the name of Marvell nor the names of its contributors may be
-        used to endorse or promote products derived from this software without
-        specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
  
 #ifndef __INCmvCtrlEnvLibh
 #define __INCmvCtrlEnvLibh
@@ -77,19 +14,19 @@
 #include "ctrlEnv/mvCtrlEnvAddrDec.h"
 
 typedef enum _mvSatRTypeID {
-	// "Bios" Device
+	 
 	MV_SATR_CPU_DDR_L2_FREQ,
 	MV_SATR_CORE_CLK_SELECT,
 	MV_SATR_CPU1_ENABLE,
 	MV_SATR_SSCG_DISABLE,
 	MV_SATR_DDR_BUS_WIDTH,
-	// Jumpers  - change by removing Jumper. S@R will be changed by this option
+	 
 	MV_SATR_I2C0_SERIAL_ROM,
 	MV_SATR_EXTERNAL_CPU_RESET,
 	MV_SATR_EXTERNAL_CORE_RESET,
-	// DIP Switch - change by removing Switch. S@R will be changed by this option:
+	 
 	MV_SATR_BOOT_DEVICE,
-	// DPR's -modified by moving resistor with solderer. S@R will be changed by this
+	 
 	MV_SATR_CPU_PLL_XTAL_BYPASS,
 	MV_SATR_CPU0_ENDIANESS,
 	MV_SATR_CPU0_NMFI,
@@ -152,41 +89,28 @@ typedef enum _mvIoExpanderTypeID {
 	MV_IO_EXPANDER_USB_SUPER_SPEED,
 } MV_IO_EXPANDER_TYPE_ID;
 
-/* typedefs */
 typedef MV_STATUS (*MV_WIN_GET_FUNC_PTR)(MV_U32, MV_U32, MV_UNIT_WIN_INFO*);
 
-/* This enumerator describes the possible SMI control options */
 typedef enum _mvSMIctrl {
 	CPU_SMI_CTRL,
 	SWITCH_SMI_CTRL,
 	NO_SMI_CTRL,
 } MV_SMI_CTRL;
 
-/* This enumerator describes the possible HW cache coherency policies the
- * controllers supports.
- */
 typedef enum _mvCachePolicy {
-	NO_COHERENCY,   /* No HW cache coherency support                        */
-	WT_COHERENCY,   /* HW cache coherency supported in Write Through policy */
-	WB_COHERENCY    /* HW cache coherency supported in Write Back policy    */
+	NO_COHERENCY,    
+	WT_COHERENCY,    
+	WB_COHERENCY     
 } MV_CACHE_POLICY;
 
-/* The swapping is referred to a 64-bit words (as this is the controller
- * internal data path width). This enumerator describes the possible
- * data swap types. Below is an example of the data 0x0011223344556677
- */
 typedef enum _mvSwapType {
-	MV_BYTE_SWAP,           /* Byte Swap                77 66 55 44 33 22 11 00 */
-	MV_NO_SWAP,             /* No swapping              00 11 22 33 44 55 66 77 */
-	MV_BYTE_WORD_SWAP,      /* Both byte and word swap  33 22 11 00 77 66 55 44 */
-	MV_WORD_SWAP,           /* Word swap                44 55 66 77 00 11 22 33 */
-	SWAP_TYPE_MAX           /* Delimiter for this enumerator                    */
+	MV_BYTE_SWAP,            
+	MV_NO_SWAP,              
+	MV_BYTE_WORD_SWAP,       
+	MV_WORD_SWAP,            
+	SWAP_TYPE_MAX            
 } MV_SWAP_TYPE;
 
-/*
- * Define the different Ethernet complex sources for the RGMIIA/B and
- * the FE/GE phy interfaces.
- */
 typedef enum {
 	MV_ETHCOMP_SW_P0_2_GE_PHY_P0		=	BIT0,
 	MV_ETHCOMP_SW_P1_2_GE_PHY_P1		=	BIT1,
@@ -212,7 +136,7 @@ typedef enum {
 } MV_ETH_COMPLEX_TOPOLOGY;
 
 typedef enum {
-	EPM_DEFAULT = 0x0,      /* RGMII */
+	EPM_DEFAULT = 0x0,       
 	EPM_MAC0_MII = 0x01,
 	EPM_MAC1_MII = 0x10,
 	EPM_SW_PORT_5_MII = 0x100,
@@ -238,24 +162,17 @@ typedef enum {
 	PEX_BUS_MODE_X8         = 3
 } MV_PEX_UNIT_CFG;
 
-/* Configuration per SERDES line.
-   Each nibble is MV_SERDES_LINE_TYPE */
 typedef struct _boardSerdesConf {
-	MV_U32 enableSerdesConfiguration;       /*This will determine if mvCtrlSerdesPhyConfig will configure the serdes*/
-	MV_U32 serdesLine0_7;                   /* Lines 0 to 7 SERDES MUX one nibble per line */
-	MV_U32 serdesLine8_15;                  /* Lines 8 to 15 SERDES MUX one nibble per line */
+	MV_U32 enableSerdesConfiguration;        
+	MV_U32 serdesLine0_7;                    
+	MV_U32 serdesLine8_15;                   
 	MV_PEX_UNIT_CFG pex0Mod;
 	MV_PEX_UNIT_CFG pex1Mod;
 	MV_PEX_UNIT_CFG pex2Mod;
 	MV_PEX_UNIT_CFG pex3Mod;
-	MV_U32 busSpeed;        /* Bus speed - one bit per SERDES line:
-	                           Low speed (0)		High speed (1)
-	                           PEX	2.5 G (10 bit)		5 G (20 bit)
-	                           SATA	1.5 G			3 G
-	                           SGMII        1.25 Gbps		3.125 Gbps	*/
+	MV_U32 busSpeed;         
 } MV_SERDES_CFG;
 
-/* Termal Sensor Registers */
 #define TSEN_CTRL_MSB_REG				0xE8080
 
 #define TSEN_CTRL_UNIT_CTRL_OFFSET			27
@@ -271,10 +188,8 @@ typedef struct _boardSerdesConf {
 #define TSEN_STATUS_TEMP_OUT_OFFSET				0
 #define TSEN_STATUS_TEMP_OUT_MASK				(0x1FF << TSEN_STATUS_TEMP_OUT_OFFSET)
 
-/* BIOS Modes related defines */
 #define SAR_CPU_FAB_GET(cpu, fab)       (((cpu & 0x7) << 21) | ((fab & 0xF) << 24))
 
-/* mcspLib.h API list */
 MV_STATUS mvCtrlSatRWrite(MV_SATR_TYPE_ID satrWriteField, MV_SATR_TYPE_ID satrReadField, MV_U8 val);
 MV_U32 mvCtrlSatRRead(MV_SATR_TYPE_ID satrField);
 MV_STATUS mvCtrlCpuDdrL2FreqGet(MV_FREQ_MODE *freqMode);
@@ -384,4 +299,4 @@ MV_BOOL mvCtrlDDRECC(MV_VOID);
 { MV_SATR_WRITE_DDR_BUS_WIDTH,	 0x00000001,	0,	0, {1} },\
 };
 
-#endif /* __INCmvCtrlEnvLibh */
+#endif  

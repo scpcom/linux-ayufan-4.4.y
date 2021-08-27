@@ -8,32 +8,27 @@
 #include <linux/netdevice.h>
 #include <linux/ip6_tunnel.h>
 
-/* capable of sending packets */
 #define IP6_TNL_F_CAP_XMIT 0x10000
-/* capable of receiving packets */
+
 #define IP6_TNL_F_CAP_RCV 0x20000
 
-/* IPv6 tunnel */
-
 struct ip6_tnl {
-	struct ip6_tnl __rcu *next;	/* next tunnel in list */
-	struct net_device *dev;	/* virtual device associated with tunnel */
-	struct ip6_tnl_parm parms;	/* tunnel configuration parameters */
-	struct flowi fl;	/* flowi template for xmit */
-	struct dst_entry *dst_cache;    /* cached dst */
+	struct ip6_tnl __rcu *next;	 
+	struct net_device *dev;	 
+	struct ip6_tnl_parm parms;	 
+	struct flowi fl;	 
+	struct dst_entry *dst_cache;     
 	u32 dst_cookie;
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_INET6_IPSEC_OFFLOAD)
 	u32 genid;
-       struct ip6_tnl_4rd_parm ip4rd; /* 4rd parameters for the tunnel */ 
+       struct ip6_tnl_4rd_parm ip4rd;   
 #endif
 };
 
-/* Tunnel encapsulation limit destination sub-option */
-
 struct ipv6_tlv_tnl_enc_lim {
-	__u8 type;		/* type-code for option         */
-	__u8 length;		/* option length                */
-	__u8 encap_limit;	/* tunnel encapsulation limit   */
+	__u8 type;		 
+	__u8 length;		 
+	__u8 encap_limit;	 
 } __packed;
 
 #endif

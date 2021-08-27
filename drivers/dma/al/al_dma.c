@@ -1,24 +1,3 @@
-/*
- * Annapurna Labs DMA Linux driver
- * Copyright(c) 2011 Annapurna Labs.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU General Public License,
- * version 2, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * The full GNU General Public License is included in this distribution in
- * the file called "COPYING".
- *
- */
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -35,7 +14,7 @@ MODULE_AUTHOR("Annapurna Labs");
 #define DRV_NAME "al_dma"
 
 enum {
-	/* BAR's are enumerated in terms of pci_resource_start() terms */
+	 
 	AL_DMA_UDMA_BAR		= 0,
 	AL_DMA_APP_BAR		= 4,
 };
@@ -71,8 +50,6 @@ static struct pci_driver al_dma_pci_driver = {
 #endif
 };
 
-/******************************************************************************
- *****************************************************************************/
 static int al_dma_pci_probe(
 	struct pci_dev			*pdev,
 	const struct pci_device_id	*id)
@@ -198,8 +175,6 @@ done:
 	return status;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_dma_pci_remove(struct pci_dev *pdev)
 {
 	struct al_dma_device *device = pci_get_drvdata(pdev);
@@ -226,14 +201,12 @@ static void al_dma_pci_remove(struct pci_dev *pdev)
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
 static void al_dma_pci_shutdown(struct pci_dev *pdev)
 {
-	/* Don't call for physfn as its removal is not fully implement yet */
+	 
 	if (!pdev->is_physfn)
 		al_dma_pci_remove(pdev);
 }
 #endif
 
-/******************************************************************************
- *****************************************************************************/
 static int __init al_dma_init_module(void)
 {
 	int err;
@@ -249,8 +222,6 @@ static int __init al_dma_init_module(void)
 }
 module_init(al_dma_init_module);
 
-/******************************************************************************
- *****************************************************************************/
 static void __exit al_dma_exit_module(void)
 {
 	pci_unregister_driver(&al_dma_pci_driver);

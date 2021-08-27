@@ -1,49 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*-----------------------------------------------------------------------
-//
-// Proprietary Information of Elliptic Semiconductor
-// Copyright (C) 2002-2005, all rights reserved
-// Elliptic Semiconductor, Inc.
-//
-// As part of our confidentiality  agreement, Elliptic Semiconductor and
-// the Company, as  a  Receiving Party, of  this  information  agrees to
-// keep strictly  confidential  all Proprietary Information  so received
-// from Elliptic Semiconductor. Such Proprietary Information can be used
-// solely for  the  purpose  of evaluating  and/or conducting a proposed
-// business  relationship  or  transaction  between  the  parties.  Each
-// Party  agrees  that  any  and  all  Proprietary  Information  is  and
-// shall remain confidential and the property of Elliptic Semiconductor.
-// The  Company  may  not  use  any of  the  Proprietary  Information of
-// Elliptic Semiconductor for any purpose other  than  the  above-stated
-// purpose  without the prior written consent of Elliptic Semiconductor.
-//
-//-----------------------------------------------------------------------
-//
-// Project:
-//
-//   ELP - TOE
-//
-// Description:
-//
-//   
-// This file maps defines a system abstraction layer for some generic 
-// functions and data structures
-//    
-//
-//-----------------------------------------------------------------------
-//
-// Language:         C
-//
-//
-// Filename:         $Source: /home/repository/cvsrep/common_sdk/include/elputils.h,v $
-// Current Revision: $Revision: 1.8 $
-// Last Updated:     $Date: 2009-05-14 19:03:24 $
-// Current Tag:      $Name: EPN1802_MINDSPEED_27SEP2010 $
-//
-//
-//-----------------------------------------------------------------------*/
  
 #ifndef _ELPUTILS_H_
 #define _ELPUTILS_H_
@@ -100,7 +57,7 @@ int    wcopy(U32 *src, U32 *dst, U32 size);
 int    wcopyton(U32 *src, U32 *dst, U32 size);
 int    wcmp(U32 *src, U32 *dst, U32 size);
 int    bytecmp(U8 *src, U8 *dst, U32 size);
-//U8  *elpcommon_error_msg(S32 err);
+ 
 int elp_processor_endian(void);
 
 #if defined (ELPSEC_LINUX)
@@ -113,11 +70,9 @@ void dumpstruct(FILE *out, char *mem, int size, char *sname,char *msg);
 #define MEMSET(d,v,z)		memset8((U8 *)(d),(v),(z))
 #define BTOW(i)			((((i)?(i):-3)-1)/4+1)
 
-//#ifdef ELPSEC_LINUX_KERNEL_2_6
+#include <linux/kernel.h>        
+#include <linux/wait.h>           
             
-#include <linux/kernel.h>       /* printk() */
-#include <linux/wait.h>          /* wait queue */
-/* #include <asm/io.h> */          /* memcpy_fromio */
 #define MEMCPY32W(d,s,z)                 do { memcpy_toio((void *)(d),(void *)(s),(int)(z<<2)); wmb(); } while(0)
 #define MEMCPY32R(d,s,z)                 do { memcpy_fromio((void *)(d),(void *)(s),(int)(z<<2)); rmb(); } while(0)
 
@@ -132,13 +87,6 @@ void dumpstruct(FILE *out, char *mem, int size, char *sname,char *msg);
 
 #define ELPSEC_WRITE_UINT(val,addr)    do { iowrite32((u32)(val),(void *)(addr)); wmb(); } while(0)
 #define ELPSEC_READ_UINT(addr)       ioread32((void *)(addr))
-
-//#else
-
-//#define ELPSEC_WRITE_UINT(val,addr)    (*(U32 *)(addr)=(U32)(val))
-//#define ELPSEC_READ_UINT(addr)       *(U32 *)(addr)
-
-//#endif
 
 #define SIZE_QUANT   64
 void   minit(void *buffer, long len);

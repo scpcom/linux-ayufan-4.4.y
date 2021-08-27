@@ -1,64 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/** -*- linux-c -*- ***********************************************************
- * Linux PPP over Ethernet (PPPoX/PPPoE) Sockets
- *
- * PPPoX --- Generic PPP encapsulation socket family
- * PPPoE --- PPP over Ethernet (RFC 2516)
- *
- *
- * Version:	0.7.0
- *
- * 070228 :	Fix to allow multiple sessions with same remote MAC and same
- *		session id by including the local device ifindex in the
- *		tuple identifying a session. This also ensures packets can't
- *		be injected into a session from interfaces other than the one
- *		specified by userspace. Florian Zumbiehl <florz@florz.de>
- *		(Oh, BTW, this one is YYMMDD, in case you were wondering ...)
- * 220102 :	Fix module use count on failure in pppoe_create, pppox_sk -acme
- * 030700 :	Fixed connect logic to allow for disconnect.
- * 270700 :	Fixed potential SMP problems; we must protect against
- *		simultaneous invocation of ppp_input
- *		and ppp_unregister_channel.
- * 040800 :	Respect reference count mechanisms on net-devices.
- * 200800 :	fix kfree(skb) in pppoe_rcv (acme)
- *		Module reference count is decremented in the right spot now,
- *		guards against sock_put not actually freeing the sk
- *		in pppoe_release.
- * 051000 :	Initialization cleanup.
- * 111100 :	Fix recvmsg.
- * 050101 :	Fix PADT procesing.
- * 140501 :	Use pppoe_rcv_core to handle all backlog. (Alexey)
- * 170701 :	Do not lock_sock with rwlock held. (DaveM)
- *		Ignore discovery frames if user has socket
- *		locked. (DaveM)
- *		Ignore return value of dev_queue_xmit in __pppoe_xmit
- *		or else we may kfree an SKB twice. (DaveM)
- * 190701 :	When doing copies of skb's in __pppoe_xmit, always delete
- *		the original skb that was passed in on success, never on
- *		failure.  Delete the copy of the skb on failure to avoid
- *		a memory leak.
- * 081001 :	Misc. cleanup (licence string, non-blocking, prevent
- *		reference of device on close).
- * 121301 :	New ppp channels interface; cannot unregister a channel
- *		from interrupts.  Thus, we mark the socket as a ZOMBIE
- *		and do the unregistration later.
- * 081002 :	seq_file support for proc stuff -acme
- * 111602 :	Merge all 2.4 fixes into 2.5/2.6 tree.  Label 2.5/2.6
- *		as version 0.7.  Spacing cleanup.
- * Author:	Michal Ostrowski <mostrows@speakeasy.net>
- * Contributors:
- * 		Arnaldo Carvalho de Melo <acme@conectiva.com.br>
- *		David S. Miller (davem@redhat.com)
- *
- * License:
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
- *
- */
  
 #include <linux/string.h>
 #include <linux/module.h>
@@ -104,29 +46,13 @@ static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb);
 static const struct proto_ops pppoe_ops;
 static const struct ppp_channel_ops pppoe_chan_ops;
 
-/* per-net private data for this module */
 static int pppoe_net_id __read_mostly;
 struct pppoe_net {
-	/*
-	 * we could use _single_ hash table for all
-	 * nets by injecting net id into the hash but
-	 * it would increase hash chains and add
-	 * a few additional math comparations messy
-	 * as well, moreover in case of SMP less locking
-	 * controversy here
-	 */
+	 
 	struct pppox_sock *hash_table[PPPOE_HASH_SIZE];
 	rwlock_t hash_lock;
 };
 
-/*
- * PPPoE could be in the following stages:
- * 1) Discovery stage (to obtain remote MAC and Session ID)
- * 2) Session stage (MAC and SID are known)
- *
- * Ethernet frames have a special tag for this but
- * we use simpler approach based on session id
- */
 static inline bool stage_session(__be16 sid)
 {
 	return sid != 0;
@@ -168,11 +94,6 @@ static int hash_item(__be16 sid, unsigned char *addr)
 	return hash & PPPOE_HASH_MASK;
 }
 
-/**********************************************************************
- *
- *  Set/get/delete/rehash items  (internal versions)
- *
- **********************************************************************/
 static struct pppox_sock *__get_item(struct pppoe_net *pn, __be16 sid,
 				unsigned char *addr, int ifindex)
 {
@@ -234,11 +155,6 @@ static struct pppox_sock *__delete_item(struct pppoe_net *pn, __be16 sid,
 	return ret;
 }
 
-/**********************************************************************
- *
- *  Set/get/delete/rehash items
- *
- **********************************************************************/
 static inline struct pppox_sock *get_item(struct pppoe_net *pn, __be16 sid,
 					unsigned char *addr, int ifindex)
 {
@@ -286,13 +202,6 @@ static inline struct pppox_sock *delete_item(struct pppoe_net *pn, __be16 sid,
 	return ret;
 }
 
-/***************************************************************************
- *
- *  Handler for device events.
- *  Certain device events require that sockets be unconnected.
- *
- **************************************************************************/
-
 static void pppoe_flush_dev(struct net_device *dev)
 {
 	struct pppoe_net *pn;
@@ -314,14 +223,6 @@ static void pppoe_flush_dev(struct net_device *dev)
 
 			sk = sk_pppox(po);
 
-			/* We always grab the socket lock, followed by the
-			 * hash_lock, in that order.  Since we should hold the
-			 * sock lock while doing any unbinding, we need to
-			 * release the lock we're holding.  Hold a reference to
-			 * the sock so it doesn't disappear as we're jumping
-			 * between locks.
-			 */
-
 			sock_hold(sk);
 			write_unlock_bh(&pn->hash_lock);
 			lock_sock(sk);
@@ -338,11 +239,6 @@ static void pppoe_flush_dev(struct net_device *dev)
 			release_sock(sk);
 			sock_put(sk);
 
-			/* Restart the process from the start of the current
-			 * hash chain. We dropped locks so the world may have
-			 * change from underneath us.
-			 */
-
 			BUG_ON(pppoe_pernet(dev_net(dev)) == NULL);
 			write_lock_bh(&pn->hash_lock);
 			po = pn->hash_table[i];
@@ -356,7 +252,7 @@ static int pppoe_device_event(struct notifier_block *this,
 {
 	struct net_device *dev = (struct net_device *)ptr;
 
-	/* Only look at sockets that are using this specific device. */
+	
 	switch (event) {
 #if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
@@ -390,18 +286,15 @@ static int pppoe_device_event(struct notifier_block *this,
 		write_unlock_bh(&pn->hash_lock);
 	}
 	break;
-#endif /* CONFIG_MV_ETH_NFP_HOOKS */
+#endif  
 #endif
 
 	case NETDEV_CHANGEADDR:
 	case NETDEV_CHANGEMTU:
-		/* A change in mtu or address is a bad thing, requiring
-		 * LCP re-negotiation.
-		 */
 		 
 	case NETDEV_GOING_DOWN:
 	case NETDEV_DOWN:
-		/* Find every socket on this device and kill it. */
+		 
 		pppoe_flush_dev(dev);
 		break;
 
@@ -416,20 +309,10 @@ static struct notifier_block pppoe_notifier = {
 	.notifier_call = pppoe_device_event,
 };
 
-/************************************************************************
- *
- * Do the real work of receiving a PPPoE Session frame.
- *
- ***********************************************************************/
 static int pppoe_rcv_core(struct sock *sk, struct sk_buff *skb)
 {
 	struct pppox_sock *po = pppox_sk(sk);
 	struct pppox_sock *relay_po;
-
-	/* Backlog receive. Semantics of backlog rcv preclude any code from
-	 * executing in lock_sock()/release_sock() bounds; meaning sk->sk_state
-	 * can't change.
-	 */
 
 	if (sk->sk_state & PPPOX_BOUND) {
 		ppp_input(&po->chan, skb);
@@ -459,11 +342,6 @@ abort_kfree:
 	return NET_RX_DROP;
 }
 
-/************************************************************************
- *
- * Receive wrapper called in BH context.
- *
- ***********************************************************************/
 static int pppoe_rcv(struct sk_buff *skb, struct net_device *dev,
 		     struct packet_type *pt, struct net_device *orig_dev)
 {
@@ -491,9 +369,6 @@ static int pppoe_rcv(struct sk_buff *skb, struct net_device *dev,
 
 	pn = pppoe_pernet(dev_net(dev));
 
-	/* Note that get_item does a sock_hold(), so sk_pppox(po)
-	 * is known to be safe.
-	 */
 	po = get_item(pn, ph->sid, eth_hdr(skb)->h_source, dev->ifindex);
 	if (!po)
 		goto drop;
@@ -506,12 +381,6 @@ out:
 	return NET_RX_DROP;
 }
 
-/************************************************************************
- *
- * Receive a PPPoE Discovery frame.
- * This is solely for detection of PADT frames
- *
- ***********************************************************************/
 static int pppoe_disc_rcv(struct sk_buff *skb, struct net_device *dev,
 			  struct packet_type *pt, struct net_device *orig_dev)
 
@@ -538,15 +407,8 @@ static int pppoe_disc_rcv(struct sk_buff *skb, struct net_device *dev,
 
 		bh_lock_sock(sk);
 
-		/* If the user has locked the socket, just ignore
-		 * the packet.  With the way two rcv protocols hook into
-		 * one socket family type, we cannot (easily) distinguish
-		 * what kind of SKB it is during backlog rcv.
-		 */
 		if (sock_owned_by_user(sk) == 0) {
-			/* We're no longer connect at the PPPOE layer,
-			 * and must wait for ppp channel to disconnect us.
-			 */
+			 
 			sk->sk_state = PPPOX_ZOMBIE;
 		}
 
@@ -557,7 +419,7 @@ static int pppoe_disc_rcv(struct sk_buff *skb, struct net_device *dev,
 abort:
 	kfree_skb(skb);
 out:
-	return NET_RX_SUCCESS; /* Lies... :-) */
+	return NET_RX_SUCCESS;  
 }
 
 static struct packet_type pppoes_ptype __read_mostly = {
@@ -576,11 +438,6 @@ static struct proto pppoe_sk_proto __read_mostly = {
 	.obj_size = sizeof(struct pppox_sock),
 };
 
-/***********************************************************************
- *
- * Initialize a new struct sock.
- *
- **********************************************************************/
 static int pppoe_create(struct net *net, struct socket *sock)
 {
 	struct sock *sk;
@@ -643,16 +500,11 @@ static int pppoe_release(struct socket *sock)
 
 	pppox_unbind_sock(sk);
 
-	/* Signal the death of the socket. */
 	sk->sk_state = PPPOX_DEAD;
 
 	net = sock_net(sk);
 	pn = pppoe_pernet(net);
 
-	/*
-	 * protect "po" from concurrent updates
-	 * on pppoe_flush_dev
-	 */
 	delete_item(pn, po->pppoe_pa.sid, po->pppoe_pa.remote,
 		    po->pppoe_ifindex);
 
@@ -683,13 +535,11 @@ static int pppoe_connect(struct socket *sock, struct sockaddr *uservaddr,
 	if (sp->sa_protocol != PX_PROTO_OE)
 		goto end;
 
-	/* Check for already bound sockets */
 	error = -EBUSY;
 	if ((sk->sk_state & PPPOX_CONNECTED) &&
 	     stage_session(sp->sa_addr.pppoe.sid))
 		goto end;
 
-	/* Check for already disconnected sockets, on attempts to disconnect */
 	error = -EALREADY;
 	if ((sk->sk_state & PPPOX_DEAD) &&
 	     !stage_session(sp->sa_addr.pppoe.sid))
@@ -697,7 +547,6 @@ static int pppoe_connect(struct socket *sock, struct sockaddr *uservaddr,
 
 	error = 0;
 
-	/* Delete the old binding */
 	if (stage_session(po->pppoe_pa.sid)) {
 		pppox_unbind_sock(sk);
 		pn = pppoe_pernet(sock_net(sk));
@@ -713,7 +562,6 @@ static int pppoe_connect(struct socket *sock, struct sockaddr *uservaddr,
 		sk->sk_state = PPPOX_NONE;
 	}
 
-	/* Re-bind in session stage only */
 	if (stage_session(sp->sa_addr.pppoe.sid)) {
 		error = -ENODEV;
 		net = sock_net(sk);
@@ -845,8 +693,6 @@ static int pppoe_ioctl(struct socket *sock, unsigned int cmd,
 		if (!(sk->sk_state & PPPOX_CONNECTED))
 			break;
 
-		/* PPPoE address from the user specifies an outbound
-		   PPPoE address which frames are forwarded to */
 		err = -EFAULT;
 		if (copy_from_user(&po->pppoe_relay,
 				   (void __user *)arg,
@@ -858,8 +704,6 @@ static int pppoe_ioctl(struct socket *sock, unsigned int cmd,
 		    po->pppoe_relay.sa_protocol != PX_PROTO_OE)
 			break;
 
-		/* Check that the socket referenced by the address
-		   actually exists. */
 		relay_po = get_item_by_addr(sock_net(sk), &po->pppoe_relay);
 		if (!relay_po)
 			break;
@@ -927,7 +771,7 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 		goto end;
 	}
 
-	/* Reserve space for headers. */
+	
 #if defined(CONFIG_SYNO_COMCERTO)
 	skb_reserve(skb, dev->hard_header_len + NET_SKB_PAD);
 #else
@@ -964,11 +808,6 @@ end:
 	return error;
 }
 
-/************************************************************************
- *
- * xmit function for internal use.
- *
- ***********************************************************************/
 static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb)
 {
 	struct pppox_sock *po = pppox_sk(sk);
@@ -976,23 +815,12 @@ static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb)
 	struct pppoe_hdr *ph;
 	int data_len = skb->len;
 
-	/* The higher-level PPP code (ppp_unregister_channel()) ensures the PPP
-	 * xmit operations conclude prior to an unregistration call.  Thus
-	 * sk->sk_state cannot change, so we don't need to do lock_sock().
-	 * But, we also can't do a lock_sock since that introduces a potential
-	 * deadlock as we'd reverse the lock ordering used when calling
-	 * ppp_unregister_channel().
-	 */
-
 	if (sock_flag(sk, SOCK_DEAD) || !(sk->sk_state & PPPOX_CONNECTED))
 		goto abort;
 
 	if (!dev)
 		goto abort;
 
-	/* Copy the data if there is no space for the header or if it's
-	 * read-only.
-	 */
 	if (skb_cow_head(skb, sizeof(*ph) + dev->hard_header_len))
 		goto abort;
 
@@ -1028,12 +856,6 @@ abort:
 	return 1;
 }
 
-/************************************************************************
- *
- * xmit function called by generic PPP driver
- * sends PPP frame over PPPoE socket
- *
- ***********************************************************************/
 static int pppoe_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 {
 	struct sock *sk = (struct sock *)chan->private;
@@ -1193,7 +1015,7 @@ static const struct file_operations pppoe_seq_fops = {
 	.release	= seq_release_net,
 };
 
-#endif /* CONFIG_PROC_FS */
+#endif  
 
 static const struct proto_ops pppoe_ops = {
 	.family		= AF_PPPOX,
@@ -1255,7 +1077,7 @@ void nfp_ppp_sync(void)
 }
 EXPORT_SYMBOL(nfp_ppp_sync);
 
-#endif /* CONFIG_MV_ETH_NFP_HOOKS */
+#endif  
 #endif
 
 static __net_init int pppoe_init_net(struct net *net)

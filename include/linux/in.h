@@ -1,63 +1,45 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * INET		An implementation of the TCP/IP protocol suite for the LINUX
- *		operating system.  INET is implemented using the  BSD Socket
- *		interface as the means of communication with the user level.
- *
- *		Definitions of the Internet Protocol.
- *
- * Version:	@(#)in.h	1.0.1	04/21/93
- *
- * Authors:	Original taken from the GNU Project <netinet/in.h> file.
- *		Fred N. van Kempen, <waltje@uWalt.NL.Mugnet.ORG>
- *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
- */
+ 
 #ifndef _LINUX_IN_H
 #define _LINUX_IN_H
 
 #include <linux/types.h>
 #include <linux/socket.h>
 
-/* Standard well-defined IP protocols.  */
 enum {
-  IPPROTO_IP = 0,		/* Dummy protocol for TCP		*/
-  IPPROTO_ICMP = 1,		/* Internet Control Message Protocol	*/
-  IPPROTO_IGMP = 2,		/* Internet Group Management Protocol	*/
-  IPPROTO_IPIP = 4,		/* IPIP tunnels (older KA9Q tunnels use 94) */
-  IPPROTO_TCP = 6,		/* Transmission Control Protocol	*/
-  IPPROTO_EGP = 8,		/* Exterior Gateway Protocol		*/
-  IPPROTO_PUP = 12,		/* PUP protocol				*/
-  IPPROTO_UDP = 17,		/* User Datagram Protocol		*/
-  IPPROTO_IDP = 22,		/* XNS IDP protocol			*/
-  IPPROTO_DCCP = 33,		/* Datagram Congestion Control Protocol */
-  IPPROTO_RSVP = 46,		/* RSVP protocol			*/
-  IPPROTO_GRE = 47,		/* Cisco GRE tunnels (rfc 1701,1702)	*/
+  IPPROTO_IP = 0,		 
+  IPPROTO_ICMP = 1,		 
+  IPPROTO_IGMP = 2,		 
+  IPPROTO_IPIP = 4,		 
+  IPPROTO_TCP = 6,		 
+  IPPROTO_EGP = 8,		 
+  IPPROTO_PUP = 12,		 
+  IPPROTO_UDP = 17,		 
+  IPPROTO_IDP = 22,		 
+  IPPROTO_DCCP = 33,		 
+  IPPROTO_RSVP = 46,		 
+  IPPROTO_GRE = 47,		 
 
-  IPPROTO_IPV6	 = 41,		/* IPv6-in-IPv4 tunnelling		*/
+  IPPROTO_IPV6	 = 41,		 
 
-  IPPROTO_ESP = 50,            /* Encapsulation Security Payload protocol */
-  IPPROTO_AH = 51,             /* Authentication Header protocol       */
-  IPPROTO_BEETPH = 94,	       /* IP option pseudo header for BEET */
+  IPPROTO_ESP = 50,             
+  IPPROTO_AH = 51,              
+  IPPROTO_BEETPH = 94,	        
 #if defined(CONFIG_SYNO_COMCERTO)
-  IPPROTO_ETHERIP = 97,        /* IP option for EtherIP tunnel (rfc 3378) */
+  IPPROTO_ETHERIP = 97,         
 #endif
-  IPPROTO_PIM    = 103,		/* Protocol Independent Multicast	*/
+  IPPROTO_PIM    = 103,		 
 
-  IPPROTO_COMP   = 108,                /* Compression Header protocol */
-  IPPROTO_SCTP   = 132,		/* Stream Control Transport Protocol	*/
-  IPPROTO_UDPLITE = 136,	/* UDP-Lite (RFC 3828)			*/
+  IPPROTO_COMP   = 108,                 
+  IPPROTO_SCTP   = 132,		 
+  IPPROTO_UDPLITE = 136,	 
 
-  IPPROTO_RAW	 = 255,		/* Raw IP packets			*/
+  IPPROTO_RAW	 = 255,		 
   IPPROTO_MAX
 };
 
-/* Internet address. */
 struct in_addr {
 	__be32	s_addr;
 };
@@ -82,21 +64,18 @@ struct in_addr {
 #define IP_PASSSEC	18
 #define IP_TRANSPARENT	19
 
-/* BSD compatibility */
 #define IP_RECVRETOPTS	IP_RETOPTS
 
-/* TProxy original addresses */
 #define IP_ORIGDSTADDR       20
 #define IP_RECVORIGDSTADDR   IP_ORIGDSTADDR
 
 #define IP_MINTTL       21
 #define IP_NODEFRAG     22
 
-/* IP_MTU_DISCOVER values */
-#define IP_PMTUDISC_DONT		0	/* Never send DF frames */
-#define IP_PMTUDISC_WANT		1	/* Use per route hints	*/
-#define IP_PMTUDISC_DO			2	/* Always DF		*/
-#define IP_PMTUDISC_PROBE		3       /* Ignore dst pmtu      */
+#define IP_PMTUDISC_DONT		0	 
+#define IP_PMTUDISC_WANT		1	 
+#define IP_PMTUDISC_DO			2	 
+#define IP_PMTUDISC_PROBE		3        
 
 #define IP_MULTICAST_IF			32
 #define IP_MULTICAST_TTL 		33
@@ -120,21 +99,18 @@ struct in_addr {
 #define MCAST_EXCLUDE	0
 #define MCAST_INCLUDE	1
 
-/* These need to appear somewhere around here */
 #define IP_DEFAULT_MULTICAST_TTL        1
 #define IP_DEFAULT_MULTICAST_LOOP       1
 
-/* Request struct for multicast socket ops */
-
 struct ip_mreq  {
-	struct in_addr imr_multiaddr;	/* IP multicast address of group */
-	struct in_addr imr_interface;	/* local IP address of interface */
+	struct in_addr imr_multiaddr;	 
+	struct in_addr imr_interface;	 
 };
 
 struct ip_mreqn {
-	struct in_addr	imr_multiaddr;		/* IP multicast address of group */
-	struct in_addr	imr_address;		/* local IP address of interface */
-	int		imr_ifindex;		/* Interface index */
+	struct in_addr	imr_multiaddr;		 
+	struct in_addr	imr_address;		 
+	int		imr_ifindex;		 
 };
 
 struct ip_mreq_source {
@@ -156,22 +132,22 @@ struct ip_msfilter {
 	+ (numsrc) * sizeof(__u32))
 
 struct group_req {
-	__u32				 gr_interface;	/* interface index */
-	struct __kernel_sockaddr_storage gr_group;	/* group address */
+	__u32				 gr_interface;	 
+	struct __kernel_sockaddr_storage gr_group;	 
 };
 
 struct group_source_req {
-	__u32				 gsr_interface;	/* interface index */
-	struct __kernel_sockaddr_storage gsr_group;	/* group address */
-	struct __kernel_sockaddr_storage gsr_source;	/* source address */
+	__u32				 gsr_interface;	 
+	struct __kernel_sockaddr_storage gsr_group;	 
+	struct __kernel_sockaddr_storage gsr_source;	 
 };
 
 struct group_filter {
-	__u32				 gf_interface;	/* interface index */
-	struct __kernel_sockaddr_storage gf_group;	/* multicast address */
-	__u32				 gf_fmode;	/* filter mode */
-	__u32				 gf_numsrc;	/* number of sources */
-	struct __kernel_sockaddr_storage gf_slist[1];	/* interface index */
+	__u32				 gf_interface;	 
+	struct __kernel_sockaddr_storage gf_group;	 
+	__u32				 gf_fmode;	 
+	__u32				 gf_numsrc;	 
+	struct __kernel_sockaddr_storage gf_slist[1];	 
 };
 
 #define GROUP_FILTER_SIZE(numsrc) \
@@ -184,24 +160,17 @@ struct in_pktinfo {
 	struct in_addr	ipi_addr;
 };
 
-/* Structure describing an Internet (IP) socket address. */
-#define __SOCK_SIZE__	16		/* sizeof(struct sockaddr)	*/
+#define __SOCK_SIZE__	16		 
 struct sockaddr_in {
-  __kernel_sa_family_t	sin_family;	/* Address family		*/
-  __be16		sin_port;	/* Port number			*/
-  struct in_addr	sin_addr;	/* Internet address		*/
+  __kernel_sa_family_t	sin_family;	 
+  __be16		sin_port;	 
+  struct in_addr	sin_addr;	 
 
-  /* Pad to size of `struct sockaddr'. */
   unsigned char		__pad[__SOCK_SIZE__ - sizeof(short int) -
 			sizeof(unsigned short int) - sizeof(struct in_addr)];
 };
-#define sin_zero	__pad		/* for BSD UNIX comp. -FvK	*/
+#define sin_zero	__pad		 
 
-/*
- * Definitions of the bits in an Internet address integer.
- * On subnets, host and network parts are found according
- * to the subnet mask, not these masks.
- */
 #define	IN_CLASSA(a)		((((long int) (a)) & 0x80000000) == 0)
 #define	IN_CLASSA_NET		0xff000000
 #define	IN_CLASSA_NSHIFT	24
@@ -226,29 +195,22 @@ struct sockaddr_in {
 #define	IN_EXPERIMENTAL(a)	((((long int) (a)) & 0xf0000000) == 0xf0000000)
 #define	IN_BADCLASS(a)		IN_EXPERIMENTAL((a))
 
-/* Address to accept any incoming messages. */
 #define	INADDR_ANY		((unsigned long int) 0x00000000)
 
-/* Address to send to all hosts. */
 #define	INADDR_BROADCAST	((unsigned long int) 0xffffffff)
 
-/* Address indicating an error return. */
 #define	INADDR_NONE		((unsigned long int) 0xffffffff)
 
-/* Network number for local host loopback. */
 #define	IN_LOOPBACKNET		127
 
-/* Address to loopback in software to local host.  */
-#define	INADDR_LOOPBACK		0x7f000001	/* 127.0.0.1   */
+#define	INADDR_LOOPBACK		0x7f000001	 
 #define	IN_LOOPBACK(a)		((((long int) (a)) & 0xff000000) == 0x7f000000)
 
-/* Defines for Multicast INADDR */
-#define INADDR_UNSPEC_GROUP   	0xe0000000U	/* 224.0.0.0   */
-#define INADDR_ALLHOSTS_GROUP 	0xe0000001U	/* 224.0.0.1   */
-#define INADDR_ALLRTRS_GROUP    0xe0000002U	/* 224.0.0.2 */
-#define INADDR_MAX_LOCAL_GROUP  0xe00000ffU	/* 224.0.0.255 */
+#define INADDR_UNSPEC_GROUP   	0xe0000000U	 
+#define INADDR_ALLHOSTS_GROUP 	0xe0000001U	 
+#define INADDR_ALLRTRS_GROUP    0xe0000002U	 
+#define INADDR_MAX_LOCAL_GROUP  0xe00000ffU	 
 
-/* <asm/byteorder.h> contains the htonl type stuff.. */
 #include <asm/byteorder.h> 
 
 #ifdef __KERNEL__
@@ -261,11 +223,11 @@ static inline int proto_ports_offset(int proto)
 	case IPPROTO_TCP:
 	case IPPROTO_UDP:
 	case IPPROTO_DCCP:
-	case IPPROTO_ESP:	/* SPI */
+	case IPPROTO_ESP:	 
 	case IPPROTO_SCTP:
 	case IPPROTO_UDPLITE:
 		return 0;
-	case IPPROTO_AH:	/* SPI */
+	case IPPROTO_AH:	 
 		return 4;
 	default:
 		return -EINVAL;
@@ -289,7 +251,7 @@ static inline bool ipv4_is_local_multicast(__be32 addr)
 
 static inline bool ipv4_is_lbcast(__be32 addr)
 {
-	/* limited broadcast */
+	 
 	return addr == htonl(INADDR_BROADCAST);
 }
 
@@ -297,8 +259,6 @@ static inline bool ipv4_is_zeronet(__be32 addr)
 {
 	return (addr & htonl(0xff000000)) == htonl(0x00000000);
 }
-
-/* Special-Use IPv4 Addresses (RFC3330) */
 
 static inline bool ipv4_is_private_10(__be32 addr)
 {
@@ -336,4 +296,4 @@ static inline bool ipv4_is_test_198(__be32 addr)
 }
 #endif
 
-#endif	/* _LINUX_IN_H */
+#endif	 

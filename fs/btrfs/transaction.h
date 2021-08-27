@@ -1,23 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007 Oracle.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
  
 #ifndef __BTRFS_TRANSACTION__
 #define __BTRFS_TRANSACTION__
@@ -37,20 +20,12 @@ enum btrfs_trans_state {
 
 struct btrfs_transaction {
 	u64 transid;
-	/*
-	 * total external writers(USERSPACE/START/ATTACH) in this
-	 * transaction, it must be zero before the transaction is
-	 * being committed
-	 */
+	 
 	atomic_t num_extwriters;
-	/*
-	 * total writers in this transaction, it must be zero before the
-	 * transaction can end
-	 */
+	 
 	atomic_t num_writers;
 	atomic_t use_count;
 
-	/* Be protected by fs_info->trans_lock when we want to change it. */
 	enum btrfs_trans_state state;
 	struct list_head list;
 	struct extent_io_tree dirty_pages;
@@ -103,11 +78,7 @@ struct btrfs_trans_handle {
 	bool reloc_reserved;
 	bool sync;
 	unsigned int type;
-	/*
-	 * this root is only needed to validate that the root passed to
-	 * start_transaction is the same as the one passed to end_transaction.
-	 * Subvolume quota depends on this
-	 */
+	 
 	struct btrfs_root *root;
 	struct seq_list delayed_ref_elem;
 	struct list_head qgroup_ref_list;
@@ -120,10 +91,10 @@ struct btrfs_pending_snapshot {
 	struct btrfs_root *root;
 	struct btrfs_root *snap;
 	struct btrfs_qgroup_inherit *inherit;
-	/* block reservation for the operation */
+	 
 	struct btrfs_block_rsv block_rsv;
 	u64 qgroup_reserved;
-	/* extra metadata reseration for relocation */
+	 
 	int error;
 	bool readonly;
 	struct list_head list;

@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  arch/arm/include/asm/pgalloc.h
- *
- *  Copyright (C) 2000-2001 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #ifndef _ASMARM_PGALLOC_H
 #define _ASMARM_PGALLOC_H
 
@@ -46,11 +38,9 @@ static inline void pud_populate(struct mm_struct *mm, pud_t *pud, pmd_t *pmd)
 	set_pud(pud, __pud(__pa(pmd) | PMD_TYPE_TABLE));
 }
 
-#else	/* !CONFIG_ARM_LPAE */
+#else	 
 
-/*
- * Since we have only two-level page tables, these are trivial
- */
+
 #define pmd_alloc_one(mm,addr)		({ BUG(); ((pmd_t *)2); })
 #define pmd_free(mm, pmd)		do { } while (0)
 #if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
@@ -59,7 +49,7 @@ static inline void pud_populate(struct mm_struct *mm, pud_t *pud, pmd_t *pmd)
 #define pgd_populate(mm,pmd,pte)	BUG()
 #endif
 
-#endif	/* CONFIG_ARM_LPAE */
+#endif	 
 
 extern pgd_t *pgd_alloc(struct mm_struct *mm);
 extern void pgd_free(struct mm_struct *mm, pgd_t *pgd);
@@ -71,22 +61,6 @@ static inline void clean_pte_table(pte_t *pte)
 	clean_dcache_area(pte + PTE_HWTABLE_PTRS, PTE_HWTABLE_SIZE);
 }
 
-/*
- * Allocate one PTE table.
- *
- * This actually allocates two hardware PTE tables, but we wrap this up
- * into one table thus:
- *
- *  +------------+
- *  | Linux pt 0 |
- *  +------------+
- *  | Linux pt 1 |
- *  +------------+
- *  |  h/w pt 0  |
- *  +------------+
- *  |  h/w pt 1  |
- *  +------------+
- */
 static inline pte_t *
 pte_alloc_one_kernel(struct mm_struct *mm, unsigned long addr)
 {
@@ -118,9 +92,6 @@ pte_alloc_one(struct mm_struct *mm, unsigned long addr)
 	return pte;
 }
 
-/*
- * Free one PTE table.
- */
 static inline void pte_free_kernel(struct mm_struct *mm, pte_t *pte)
 {
 	if (pte)
@@ -147,25 +118,17 @@ static inline void __pmd_populate(pmd_t *pmdp, phys_addr_t pte,
 	int i, off = 0;
 	for (i = 0; i < LINKED_PMDS; i++) {
 		pmdp[i] = __pmd(pmdval + off);
-		off += 1024; // Each PMD points to a 1kB 2nd-level table
+		off += 1024;  
 	}
 
 #endif
 	flush_pmd_entry(pmdp);
 }
 
-/*
- * Populate the pmdp entry with a pointer to the pte.  This pmd is part
- * of the mm address space.
- *
- * Ensure that we always set both PMD entries.
- */
 static inline void
 pmd_populate_kernel(struct mm_struct *mm, pmd_t *pmdp, pte_t *ptep)
 {
-	/*
-	 * The pmd must be loaded with the physical address of the PTE table
-	 */
+	 
 	__pmd_populate(pmdp, __pa(ptep), _PAGE_KERNEL_TABLE);
 }
 
@@ -176,6 +139,6 @@ pmd_populate(struct mm_struct *mm, pmd_t *pmdp, pgtable_t ptep)
 }
 #define pmd_pgtable(pmd) pmd_page(pmd)
 
-#endif /* CONFIG_MMU */
+#endif  
 
 #endif

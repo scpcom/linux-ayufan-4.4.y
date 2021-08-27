@@ -1,23 +1,8 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Device Tree support for Alpine platforms.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+ 
+
 
 #include <linux/of.h>
 #include <linux/of_address.h>
@@ -56,7 +41,7 @@
 	#define LOAD_MAX	0xFFFFFFFF
 #define WDTVALUE		0x004
 #define WDTCONTROL		0x008
-	/* control register masks */
+	 
 	#define	INT_ENABLE	(1 << 0)
 	#define	RESET_ENABLE	(1 << 1)
 #define WDTLOCK			0xC00
@@ -124,7 +109,7 @@ static struct clk sb_clk = {
 };
 
 static struct clk_lookup lookup[] = {
-	{	/* AMBA bus clock */
+	{	 
 		.con_id		= "apb_pclk",
 		.clk		= &sb_clk,
 	},
@@ -162,7 +147,6 @@ static void __init clk_get_freq_dt(unsigned long *refclk, unsigned long *sbclk,
 {
 	struct device_node *np;
 
-	/* retrieve the freqency of fixed clocks from device tree */
 	for_each_compatible_node(np, NULL, "fixed-clock") {
 		u32 rate;
 		if (of_property_read_u32(np, "clock-frequency", &rate))
@@ -217,7 +201,6 @@ static void __init al_timer_init(void)
 	sp804_clocksource_init(timer_base + 0x20, "al-timer1");
 	sp804_clockevents_init(timer_base, irq, "al-timer0");
 
-	/* Find the first watchdog and make sure it is not disabled */
 	np = of_find_compatible_node(
 			NULL, NULL, "arm,sp805");
 
@@ -229,7 +212,6 @@ static void __init al_timer_init(void)
 	}
 }
 
-/* Early initializations */
 void __init al_init_early(void)
 {
 	clkdev_add_table(lookup, ARRAY_SIZE(lookup));
@@ -242,7 +224,7 @@ static void al_power_off(void)
 
 static void __init al_map_io(void)
 {
-	/* Needed for early printk to work */
+	 
 	struct map_desc uart_map_desc[1];
 
 	uart_map_desc[0].virtual = (unsigned long)AL_UART_BASE(0);
@@ -252,7 +234,6 @@ static void __init al_map_io(void)
 
 	iotable_init(uart_map_desc, ARRAY_SIZE(uart_map_desc));
 
-	/* The 6MB size is plucked from the air */
 	init_consistent_dma_size(8 * SZ_1M);
 }
 
@@ -268,7 +249,6 @@ static void __init al_serdes_resource_init(void)
 {
 	struct device_node *np;
 
-	/* Find the serdes node and make sure it is not disabled */
 	np = of_find_compatible_node(NULL, NULL, "annapurna-labs,al-serdes");
 
 	if (np && of_device_is_available(np)) {
@@ -405,18 +385,11 @@ static void __init al_init(void)
 	pm_power_off = al_power_off;
 #endif
 
-	/*
-	 * Power Management Services Initialization
-	 * When running in SMP this should be done earlier
-	 */
 #ifndef CONFIG_SMP
 	alpine_cpu_pm_init();
 #endif
 
-	/* fabric uses a notifier for device registration,
-	 * Hence it must be initialized before registering
-	 * any devices
-	 **/
+	
 	al_fabric_init();
 
 	al_serdes_resource_init();

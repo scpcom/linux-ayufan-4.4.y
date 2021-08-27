@@ -1,20 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Virtio SCSI HBA driver
- *
- * Copyright IBM Corp. 2010
- * Copyright Red Hat, Inc. 2011
- *
- * Authors:
- *  Stefan Hajnoczi   <stefanha@linux.vnet.ibm.com>
- *  Paolo Bonzini   <pbonzini@redhat.com>
- *
- * This work is licensed under the terms of the GNU GPL, version 2 or later.
- * See the COPYING file in the top-level directory.
- *
- */
  
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -30,7 +16,6 @@
 #define VIRTIO_SCSI_MEMPOOL_SZ 64
 #define VIRTIO_SCSI_EVENT_LEN 8
 
-/* Command queue element */
 struct virtio_scsi_cmd {
 	struct scsi_cmnd *sc;
 	struct completion *comp;
@@ -54,22 +39,19 @@ struct virtio_scsi_event_node {
 };
 
 struct virtio_scsi_vq {
-	/* Protects vq */
+	 
 	spinlock_t vq_lock;
 
 	struct virtqueue *vq;
 };
 
-/* Per-target queue state */
 struct virtio_scsi_target_state {
-	/* Protects sg.  Lock hierarchy is tgt_lock -> vq_lock.  */
+	 
 	spinlock_t tgt_lock;
 
-	/* For sglist construction when adding commands to the virtqueue.  */
 	struct scatterlist sg[];
 };
 
-/* Driver instance state */
 struct virtio_scsi {
 	struct virtio_device *vdev;
 
@@ -77,7 +59,6 @@ struct virtio_scsi {
 	struct virtio_scsi_vq event_vq;
 	struct virtio_scsi_vq req_vq;
 
-	/* Get some buffers ready for event vq */
 	struct virtio_scsi_event_node event_list[VIRTIO_SCSI_EVENT_LEN];
 
 	struct virtio_scsi_target_state *tgt[];
@@ -105,11 +86,6 @@ static void virtscsi_compute_resid(struct scsi_cmnd *sc, u32 resid)
 	scsi_out(sc)->resid = resid - scsi_in(sc)->resid;
 }
 
-/**
- * virtscsi_complete_cmd - finish a scsi_cmd and invoke scsi_done
- *
- * Called with vq_lock held.
- */
 static void virtscsi_complete_cmd(void *buf)
 {
 	struct virtio_scsi_cmd *cmd = buf;
@@ -153,7 +129,7 @@ static void virtscsi_complete_cmd(void *buf)
 	default:
 		scmd_printk(KERN_WARNING, sc, "Unknown response %d",
 			    resp->response);
-		/* fall through */
+		 
 	case VIRTIO_SCSI_S_FAILURE:
 		set_host_byte(sc, DID_ERROR);
 		break;
@@ -299,8 +275,6 @@ static void virtscsi_handle_param_change(struct virtio_scsi *vscsi,
 		return;
 	}
 
-	/* Handle "Parameters changed", "Mode parameters changed", and
-	   "Capacity data has changed".  */
 	if (asc == 0x2a && (ascq == 0x00 || ascq == 0x01 || ascq == 0x09))
 		scsi_rescan_device(&sdev->sdev_gendev);
 
@@ -367,17 +341,6 @@ static void virtscsi_map_sgl(struct scatterlist *sg, unsigned int *p_idx,
 	*p_idx = idx;
 }
 
-/**
- * virtscsi_map_cmd - map a scsi_cmd to a virtqueue scatterlist
- * @vscsi	: virtio_scsi state
- * @cmd		: command structure
- * @out_num	: number of read-only elements
- * @in_num	: number of write-only elements
- * @req_size	: size of the request buffer
- * @resp_size	: size of the response buffer
- *
- * Called with tgt_lock held.
- */
 static void virtscsi_map_cmd(struct virtio_scsi_target_state *tgt,
 			     struct virtio_scsi_cmd *cmd,
 			     unsigned *out_num, unsigned *in_num,
@@ -387,19 +350,15 @@ static void virtscsi_map_cmd(struct virtio_scsi_target_state *tgt,
 	struct scatterlist *sg = tgt->sg;
 	unsigned int idx = 0;
 
-	/* Request header.  */
 	sg_set_buf(&sg[idx++], &cmd->req, req_size);
 
-	/* Data-out buffer.  */
 	if (sc && sc->sc_data_direction != DMA_FROM_DEVICE)
 		virtscsi_map_sgl(sg, &idx, scsi_out(sc));
 
 	*out_num = idx;
 
-	/* Response header.  */
 	sg_set_buf(&sg[idx++], &cmd->resp, resp_size);
 
-	/* Data-in buffer */
 	if (sc && sc->sc_data_direction != DMA_TO_DEVICE)
 		virtscsi_map_sgl(sg, &idx, scsi_in(sc));
 
@@ -441,7 +400,6 @@ static int virtscsi_queuecommand(struct Scsi_Host *sh, struct scsi_cmnd *sc)
 	struct Scsi_Host *shost = virtio_scsi_host(vscsi->vdev);
 	BUG_ON(scsi_sg_count(sc) > shost->sg_tablesize);
 
-	/* TODO: check feature bit and fail if unsupported?  */
 	BUG_ON(sc->sc_data_direction == DMA_BIDIRECTIONAL);
 
 	dev_dbg(&sc->device->sdev_gendev,
@@ -595,7 +553,6 @@ static struct virtio_scsi_target_state *virtscsi_alloc_tgt(
 	struct virtio_scsi_target_state *tgt;
 	gfp_t gfp_mask = GFP_KERNEL;
 
-	/* We need extra sg elements at head and tail.  */
 	tgt = kmalloc(sizeof(*tgt) + sizeof(tgt->sg[0]) * (sg_elems + 2),
 		      gfp_mask);
 
@@ -620,7 +577,6 @@ static void virtscsi_remove_vqs(struct virtio_device *vdev)
 	struct virtio_scsi *vscsi = shost_priv(sh);
 	u32 i, num_targets;
 
-	/* Stop all the virtqueues. */
 	vdev->config->reset(vdev);
 
 	num_targets = sh->max_id;
@@ -650,7 +606,6 @@ static int virtscsi_init(struct virtio_device *vdev,
 		"request"
 	};
 
-	/* Discover virtqueues and write information to configuration.  */
 	err = vdev->config->find_vqs(vdev, 3, vqs, callbacks, names);
 	if (err)
 		return err;
@@ -665,7 +620,6 @@ static int virtscsi_init(struct virtio_device *vdev,
 	if (virtio_has_feature(vdev, VIRTIO_SCSI_F_HOTPLUG))
 		virtscsi_kick_event_all(vscsi);
 
-	/* We need to know how many segments before we allocate.  */
 	sg_elems = virtscsi_config_get(vdev, seg_max) ?: 1;
 
 	for (i = 0; i < num_targets; i++) {
@@ -691,7 +645,6 @@ static int __devinit virtscsi_probe(struct virtio_device *vdev)
 	u32 sg_elems, num_targets;
 	u32 cmd_per_lun;
 
-	/* Allocate memory and link the structs together.  */
 	num_targets = virtscsi_config_get(vdev, max_target) + 1;
 	shost = scsi_host_alloc(&virtscsi_host_template,
 		sizeof(*vscsi)
@@ -714,9 +667,6 @@ static int __devinit virtscsi_probe(struct virtio_device *vdev)
 	shost->cmd_per_lun = min_t(u32, cmd_per_lun, shost->can_queue);
 	shost->max_sectors = virtscsi_config_get(vdev, max_sectors) ?: 0xFFFF;
 
-	/* LUNs > 256 are reported with format 1, so they go in the range
-	 * 16640-32767.
-	 */
 	shost->max_lun = virtscsi_config_get(vdev, max_lun) + 1 + 0x4000;
 	shost->max_id = num_targets;
 	shost->max_channel = 0;
@@ -724,10 +674,7 @@ static int __devinit virtscsi_probe(struct virtio_device *vdev)
 	err = scsi_add_host(shost, &vdev->dev);
 	if (err)
 		goto scsi_add_host_failed;
-	/*
-	 * scsi_scan_host() happens in virtscsi_scan() via virtio_driver->scan()
-	 * after VIRTIO_CONFIG_S_DRIVER_OK has been set..
-	 */
+	 
 	return 0;
 
 scsi_add_host_failed:

@@ -92,49 +92,47 @@ struct kstat {
 #ifdef MY_ABC_HERE
 #ifdef __KERNEL__
 
-// Be careful!! If you want to change following structure, 
-// you should modify libsynocore/lib/file/file.h, too.
+
+
 
 struct SYNOSTAT_EXTRA {
-	struct timespec creatTime;  //Create Time
-	unsigned int bkpVer;  		//Backup Version
-	unsigned int archBit; 		//Archive Bit
+	struct timespec creatTime;  
+	unsigned int bkpVer;  		
+	unsigned int archBit; 		
 };
 struct SYNOSTAT {
 	struct stat st;
 	struct SYNOSTAT_EXTRA ext;
 };
 
-/*
- * flags: decide which information to get.
- */
-#define SYNOST_STAT			0x00000001	/* stat */	
-#define SYNOST_ARBIT		0x00000002	/* Archive Bit */
-#define SYNOST_BKPVER		0x00000004	/* Backup Version */
-#define SYNOST_CREATIME		0x00000008	/* Create Time */
+
+#define SYNOST_STAT			0x00000001	 	
+#define SYNOST_ARBIT		0x00000002	
+#define SYNOST_BKPVER		0x00000004	
+#define SYNOST_CREATIME		0x00000008	
 
 #define SYNOST_ALL			SYNOST_STAT|SYNOST_ARBIT|SYNOST_BKPVER|SYNOST_CREATIME
-#define SYNOST_IS_CASELESS	0x10000000	/* Is Caseless */
+#define SYNOST_IS_CASELESS	0x10000000	 
 
-#endif /* __KERNEL__ */
-#endif /* MY_ABC_HERE */
+#endif  
+#endif  
 
 #ifdef MY_ABC_HERE
-#define S2_IARCHIVE    (1<<0)	// synology backup archive bit
-#define S2_SMB_ARCHIVE (1<<1)	// samba backup archive bit (some other windows ap)
-#define S2_SMB_HIDDEN  (1<<2)	// hidden attribute in samba
-#define S2_SMB_SYSTEM  (1<<3)	// system attribute in samba
-#define S3_IARCHIVE    (1<<4)	// synology S3 backup archive bit (amazon ap)
+#define S2_IARCHIVE    (1<<0)	 
+#define S2_SMB_ARCHIVE (1<<1)	 
+#define S2_SMB_HIDDEN  (1<<2)	 
+#define S2_SMB_SYSTEM  (1<<3)	 
+#define S3_IARCHIVE    (1<<4)	 
 #if defined(MY_ABC_HERE) || defined(CONFIG_FS_SYNO_ACL)
-#define S2_SMB_READONLY    					(1<<5)	// Read-Only attribute of samba
-#define S2_SYNO_ACL_INHERIT				    (1<<6)	// inherited from parent
-#define S2_SYNO_ACL_IS_OWNER_GROUP			(1<<7)	// owner tag of SYNO ACL
-#define S2_SYNO_ACL_EXIST					(1<<8)	// is there SYNO ACL
-#define S2_SYNO_ACL_SUPPORT  				(1<<9)	// is support ACL
+#define S2_SMB_READONLY    					(1<<5)	 
+#define S2_SYNO_ACL_INHERIT				    (1<<6)	 
+#define S2_SYNO_ACL_IS_OWNER_GROUP			(1<<7)	 
+#define S2_SYNO_ACL_EXIST					(1<<8)	 
+#define S2_SYNO_ACL_SUPPORT  				(1<<9)	 
 #define ALL_SYNO_ACL_ARCHIVE	(S2_SMB_READONLY|S2_SYNO_ACL_INHERIT|S2_SYNO_ACL_IS_OWNER_GROUP|S2_SYNO_ACL_EXIST|S2_SYNO_ACL_SUPPORT)
 #endif
-#define ALL_IARCHIVE (S2_IARCHIVE|S3_IARCHIVE)	// All synology archive bit.
-#define ALL_SYNO_ARCHIVE (S2_IARCHIVE|S2_SMB_ARCHIVE|S3_IARCHIVE)	// All backup archive bit, if there is new one, it should be added here.
+#define ALL_IARCHIVE (S2_IARCHIVE|S3_IARCHIVE)	 
+#define ALL_SYNO_ARCHIVE (S2_IARCHIVE|S2_SMB_ARCHIVE|S3_IARCHIVE)	 
 #if defined(MY_ABC_HERE) || defined(CONFIG_FS_SYNO_ACL)
 #define ALL_ARCHIVE_BIT (S2_IARCHIVE|S2_SMB_ARCHIVE|S2_SMB_HIDDEN|S2_SMB_SYSTEM|S3_IARCHIVE|ALL_SYNO_ACL_ARCHIVE)
 #else

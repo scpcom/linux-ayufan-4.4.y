@@ -1,44 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
  
-This software file (the "File") is owned and distributed by Marvell 
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File in accordance with the terms and conditions of the General 
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is 
-available along with the File in the license.txt file or by writing to the Free 
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or 
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt. 
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY 
-DISCLAIMED.  The GPL License provides additional details about this warranty 
-disclaimer.
-*******************************************************************************/
-/*******************************************************************************
-* mvIALCommon.c
-*
-* DESCRIPTION:
-*       C implementation for IAL's common functions.
-*
-* DEPENDENCIES:
-*   mvIALCommon.h
-*
-*******************************************************************************/
-
-/* includes */
 #include "mvOs.h"
 #include "mvScsiAtaLayer.h"
 #include "mvIALCommon.h"
@@ -46,15 +9,12 @@ disclaimer.
 #include "mvStorageDev.h"
 
 #ifdef MY_ABC_HERE
-//#define DEBUGMSG(x...) printk(x)
+ 
 #define DEBUGMSG(x...)
 #endif
 
-/* defines */
 #undef DISABLE_PM_SCC
-/* typedefs */
  
-/*Static functions*/
 static MV_BOOLEAN mvGetDisksModes(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                   MV_SAL_ADAPTER_EXTENSION *pScsiAdapterExt,
                                   MV_U8 channelIndex,
@@ -84,7 +44,7 @@ static void mvSetChannelState(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 
 static MV_BOOLEAN clearSErrorPorts(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex, 
 				   MV_U8     PMnumberOfPorts);
-/*PM related*/
+ 
 static MV_BOOLEAN mvPMCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
                                           MV_U8 channelIndex,
                                           MV_COMPLETION_TYPE comp_type,
@@ -113,8 +73,6 @@ static MV_BOOLEAN mvPMEnableAsyncNotify(
 static void mvCheckPMForError(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                               MV_U8 channelIndex);
 #endif
-
-/*End PM related*/
 
 static MV_BOOLEAN mvStartChannelInit(MV_SATA_ADAPTER *pSataAdapter,
                                      MV_U8 channelIndex,
@@ -146,8 +104,6 @@ static void mvDecrementChannelTimer(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 static MV_BOOLEAN mvIsChannelTimerExpired(
                                          MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                          MV_U8 channelIndex);
-
-/*Channel state machine*/
 
 static MV_BOOLEAN mvChannelNotConnectedStateHandler(
                                                    MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
@@ -229,28 +185,6 @@ static void SynoClearEHInfo(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                 MV_CHANNEL_STATE state);
 #endif
 
-/*Public functions*/
-
-/*******************************************************************************
-* mvAdapterStartInitialization - start adapter initialization
-*
-* DESCRIPTION:
-*  Starts adapter initialization after driver load.
-*  State - machine related data structure is initialized for adapter
-*  and its channels. Begin staggered spin-up.
-*  Adapter state is changed to ADAPTER_READY.
-* INPUT:
-*    pAdapter    - pointer to the adapter data structure.
-*    scsiAdapterExt  - SCSI to ATA layer adapter extension data structure
-* OUTPUT:
-*    None.
-*
-* RETURN:
-*    MV_TRUE on success
-*    MV_FALSE on error
-*
-*******************************************************************************/
-
 MV_BOOLEAN mvAdapterStartInitialization(MV_SATA_ADAPTER *pSataAdapter,
                                         MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                         MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt)
@@ -288,28 +222,6 @@ extern int syno_mv_scsi_host_no_get(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channel
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
 
-/*******************************************************************************
-* mvRestartChannel - restart specific channel
-*
-* DESCRIPTION:
-*  The function is used in channel hot-plug to restart the channel
-*  initialization sequence. The channel stated is changed to
-*  CHANNEL_CONNECTED and any pending command in software queue are flushed
-* INPUT:
-*    pAdapter    - pointer to the adapter data structure.
-*    channelIndex  - channel number
-*    scsiAdapterExt  - SCSI to ATA layer adapter extension data structure
-*    bBusReset       - MV_TRUE if the faunction is called because of bus reset,
-*                       MV_FALSE otherwise
-* OUTPUT:
-*    None.
-*
-* RETURN:
-*    MV_TRUE on success
-*    MV_FALSE on error
-*
-*******************************************************************************/
-
 void mvRestartChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                       MV_U8 channelIndex,
                       MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt,
@@ -345,36 +257,16 @@ void mvRestartChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     {
         if (bBusChangeNotify == MV_TRUE)
         {
-            /*Notify about bus change*/
+             
             IALBusChangeNotify(pSataAdapter, channelIndex);
         }
     }
     else
     {
-        /*Notify about bus change*/
+         
         IALBusChangeNotify(pSataAdapter, channelIndex);
     }
 }
-
-/*******************************************************************************
-* mvPMHotPlugDetected - restart specific channel
-*
-* DESCRIPTION:
-*  The function is used in PM hot-plug to wait for empty EDMA command queue
-*  and then restart the channel initialization sequence.
-*  The channel stated is changed to CHANNEL_PM_HOT_PLUG if there are any
-*  pending command in EDMA queue
-* INPUT:
-*    pAdapter    - pointer to the adapter data structure.
-*    channelIndex  - channel number
-
-* OUTPUT:
-*    None.
-*
-* RETURN:
-*    None
-*
-*******************************************************************************/
 
 void mvPMHotPlugDetected(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                          MV_U8 channelIndex,
@@ -393,22 +285,6 @@ void mvPMHotPlugDetected(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     mvRestartChannel(ialExt, channelIndex, scsiAdapterExt, MV_FALSE);
 }
 
-/*******************************************************************************
-* mvStopChannel - stop channel
-*
-* DESCRIPTION:
-*  The function is used when the channel is unplugged.
-*  The channel stated is changed to CHANNEL_NOT_CONNECTED
-*  until further connection.
-* INPUT:
-*    pAdapter    - pointer to the adapter data structure.
-*    channelIndex  - channel number
-* OUTPUT:
-*    None.
-*
-* RETURN:
-*    None
-*******************************************************************************/
 void mvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                    MV_U8 channelIndex,
                    MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt)
@@ -446,7 +322,7 @@ void mvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
         IALReleaseChannel(pSataAdapter, channelIndex);
     }
     pSataAdapter->sataChannel[channelIndex] = NULL;
-    /*Notify about bus change*/
+     
     IALBusChangeNotify(pSataAdapter, channelIndex);
     if (drivesSnapshot != 0)
     {
@@ -463,19 +339,7 @@ void mvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 }
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-/**
- * This function is 
- * almost the same as mvStopChannel.
- * 
- * The only difference is setting scsi
- * device to offline stat.
- * 
- * This can help us determind the reason of bad sector
- * 
- * @param ialExt
- * @param channelIndex
- * @param scsiAdapterExt
- */
+ 
 void SynomvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                    MV_U8 channelIndex,
                    MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt)
@@ -509,7 +373,7 @@ void SynomvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
         IALReleaseChannel(pSataAdapter, channelIndex);
     }
     pSataAdapter->sataChannel[channelIndex] = NULL;
-    /*Notify about bus change*/
+     
     IALBusChangeNotify(pSataAdapter, channelIndex);    
     if (drivesSnapshot != 0)
     {
@@ -526,28 +390,6 @@ void SynomvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 }
 #endif
 
-/*******************************************************************************
-* mvExecuteScsiCommand - execute SCSI command
-*
-* DESCRIPTION:
-*  IAL common layer wrapper of mvSataExecuteScsiCommand function.
-*  If either the adapter state is either other than ADAPTER_READY
-*  or the channel is connected but channel state is not CHANNEL_READY,
-*  the current SCSI command is queued in channel's SCSI commands
-*  software queue until channel initialization sequence completed.
-*  If channel is found in CHANNEL ready state the SCSI command is passed to
-*  SCSI ATA translation layer.
-* INPUT:
-*    pScb    - SCSI command block structure.
-*
-* OUTPUT:
-*    None.
-*
-* RETURN:
-*    Return MV_SCSI_COMMAND_STATUS_COMPLETED if the command has been added
-*    to channel software queue. Otherwise return the result of
-*    mvSataExecuteScsiCommand function call
-*******************************************************************************/
 MV_SCSI_COMMAND_STATUS_TYPE mvExecuteScsiCommand(MV_SATA_SCSI_CMD_BLOCK *pScb,
                                                  MV_BOOLEAN canQueue)
 {
@@ -586,22 +428,6 @@ MV_SCSI_COMMAND_STATUS_TYPE mvExecuteScsiCommand(MV_SATA_SCSI_CMD_BLOCK *pScb,
     }
 }
 
-/*******************************************************************************
-* mvIALTimerCallback - IAL timer callback
-*
-* DESCRIPTION:
-*  The adapter/channel state machine is timer-driven.
-*  After being loaded, the IAL must call this callback every 0.5 seconds
-* INPUT:
-*    pSataAdapter    - pointer to the adapter data structure.
-*    scsiAdapterExt  - SCSI to ATA layer adapter extension data structure
-* OUTPUT:
-*    None.
-*
-* RETURN:
-*
-*******************************************************************************/
-
 MV_BOOLEAN mvIALTimerCallback(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                               MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt)
 {
@@ -609,23 +435,6 @@ MV_BOOLEAN mvIALTimerCallback(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     return mvAdapterStateMachine(ialExt,
                                  scsiAdapterExt);
 }
-
-/*******************************************************************************
-* mvCommandCompletionErrorHandler - IAL common command completion error handler
-*
-* DESCRIPTION:
-*  Called by whether SAL completion of SMART completion function. Check whether
-*  command is failed because of PM hot plug
-*
-* INPUT:
-*    pSataAdapter    - pointer to the adapter data structure.
-*    channelIndex    - channelNumber
-* OUTPUT:
-*    None.
-*
-* RETURN:
-*
-*******************************************************************************/
 
 void mvCommandCompletionErrorHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                      MV_U8 channelIndex)
@@ -651,8 +460,6 @@ void mvCommandCompletionErrorHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     ialExt->IALChannelExt[channelIndex].completionError = MV_TRUE;
 }
 
-/*Static functions*/
-
 static void printAtaDeviceRegisters(
                                    MV_STORAGE_DEVICE_REGISTERS *mvStorageDevRegisters)
 {
@@ -677,13 +484,13 @@ static void printAtaDeviceRegisters(
 static void mvDrivesInfoSaveAll(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                 MV_U8 channelIndex)
 {
-    /*Save disk drives information for channel*/
+     
     ialExt->IALChannelExt[channelIndex].drivesInfo.drivesSnapshotSaved =
     ialExt->IALChannelExt[channelIndex].drivesInfo.drivesSnapshotCurrent;
     memcpy(ialExt->IALChannelExt[channelIndex].drivesInfo.driveSerialSaved,
            ialExt->IALChannelExt[channelIndex].drivesInfo.driveSerialCurrent,
            sizeof(ialExt->IALChannelExt[channelIndex].drivesInfo.driveSerialCurrent));
-    /*Reset current disk drives information*/
+     
     ialExt->IALChannelExt[channelIndex].drivesInfo.drivesSnapshotCurrent = 0;
     memset(ialExt->IALChannelExt[channelIndex].drivesInfo.driveSerialCurrent,
            0,
@@ -694,7 +501,7 @@ static void mvDrivesInfoSaveAll(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 static void mvDrivesInfoFlushAll(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                  MV_U8 channelIndex)
 {
-    /*Flush drives info*/
+     
     memset(&ialExt->IALChannelExt[channelIndex].drivesInfo, 0,
            sizeof(ialExt->IALChannelExt[channelIndex].drivesInfo));
 }
@@ -708,12 +515,12 @@ static void mvDrivesInfoFlushSingleDrive(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt
         return;
     }
 #endif
-    /*Clear bit in disk drive drive snapshot*/
+     
     ialExt->IALChannelExt[channelIndex].drivesInfo.drivesSnapshotCurrent &=
     ~(1 << PMPort);
     ialExt->IALChannelExt[channelIndex].drivesInfo.drivesSnapshotSaved &=
     ~(1 << PMPort);
-    /*Clear disk drive serial number string*/
+     
     ialExt->
     IALChannelExt[channelIndex].drivesInfo.driveSerialSaved[PMPort].serial[0] = 0;
     ialExt->
@@ -728,10 +535,10 @@ static void mvDrivesInfoSaveSingleDrive(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 {
     if (MV_TRUE == isDriveAdded)
     {
-        /*Set bit in disk drive snapshot for current disk drive*/
+         
         ialExt->IALChannelExt[channelIndex].drivesInfo.drivesSnapshotCurrent |=
         1 << PMPort;
-        /*Save serial number for current disk drive*/
+         
         memcpy(ialExt->IALChannelExt[channelIndex].drivesInfo.driveSerialCurrent[PMPort].serial,
                &identifyBuffer[IDEN_SERIAL_NUM_OFFSET], IDEN_SERIAL_NUM_SIZE);
     }
@@ -792,20 +599,20 @@ static void mvDrivesInfoGetChannelRescanParams(MV_IAL_COMMON_ADAPTER_EXTENSION *
                            &ialExt->IALChannelExt[channelIndex].drivesInfo.driveSerialSaved[PMPort].serial,
                            IDEN_SERIAL_NUM_SIZE))
                 {
-                    /*Disk drive connected to port is replaced*/
+                     
                     *drivesToAdd |= (1 << PMPort);
                     *drivesToRemove |= (1 << PMPort);
                 }
             }
             else
             {
-                /*New drive connected to port*/
+                 
                 *drivesToAdd |= (1 << PMPort);
             }
         }
         else
         {
-            /*Drive removed from Port*/
+             
             if (ialExt->IALChannelExt[channelIndex].drivesInfo.drivesSnapshotSaved
                 & (1 << PMPort))
             {
@@ -818,7 +625,6 @@ static void mvDrivesInfoGetChannelRescanParams(MV_IAL_COMMON_ADAPTER_EXTENSION *
     }
 }
 
-/*SCSI command queue functions*/
 static void mvAddToSCSICommandQueue(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                     MV_U8 channelIndex,
                                     MV_SATA_SCSI_CMD_BLOCK *pScb)
@@ -902,7 +708,7 @@ MV_BOOLEAN mvRemoveFromSCSICommandQueue(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 static void mvFlushSCSICommandQueue(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                     MV_U8 channelIndex)
 {
-    /*Abort all pending commands in SW queue*/
+     
     MV_SATA_SCSI_CMD_BLOCK *cmdBlock = (MV_SATA_SCSI_CMD_BLOCK *)
                                        ialExt->IALChannelExt[channelIndex].IALChannelPendingCmdQueue;
 
@@ -923,7 +729,6 @@ static void mvFlushSCSICommandQueue(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
              ialExt->pSataAdapter->adapterId, channelIndex);
 }
 
-/*Port Multilier related functions*/
 static MV_BOOLEAN mvPMCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
                                           MV_U8 channelIndex,
                                           MV_COMPLETION_TYPE comp_type,
@@ -1144,20 +949,6 @@ END:
     return ret;
 }
 
-/**
- * This is compatible call back function to mvSata error handling, we don't do anything .
- * Just let orginal command timeout
- * 
- * @param pSataAdapter
- * @param channelIndex
- * @param comp_type
- * @param commandId
- * @param responseFlags
- * @param timeStamp
- * @param registerStruct
- * 
- * @return 
- */
 static MV_BOOLEAN SynoMVPMCommandAbnormalCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
                                           MV_U8 channelIndex,
                                           MV_COMPLETION_TYPE comp_type,
@@ -1312,7 +1103,7 @@ static MV_BOOLEAN mvPMEnableCommStatusChangeBits(MV_IAL_COMMON_ADAPTER_EXTENSION
     mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "[%d %d]: Set PM "
              "GSCR[33] register to 0x%X\n",
              pSataAdapter->adapterId, channelIndex, regVal);
-    /*Set N bit reflection in PM GSCR*/
+     
     if (mvPMDevWriteReg(pSataAdapter, channelIndex,
                         MV_SATA_PM_CONTROL_PORT,
                         MV_SATA_GSCR_ERROR_ENABLE_REG_NUM,
@@ -1331,7 +1122,7 @@ static MV_BOOLEAN mvPMEnableAsyncNotify(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 {
     MV_U32 regVal1, regVal2;
     MV_SATA_ADAPTER *pSataAdapter = ialExt->pSataAdapter;
-    /*Features register*/
+     
     if (mvPMDevReadReg(pSataAdapter, channelIndex, MV_SATA_PM_CONTROL_PORT,
                        MV_SATA_GSCR_FEATURES_REG_NUM,
                        &regVal1, NULL) == MV_FALSE)
@@ -1344,7 +1135,6 @@ static MV_BOOLEAN mvPMEnableAsyncNotify(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "[%d %d]: Port Multiplier features supported: 0x%X\n",
              pSataAdapter->adapterId, channelIndex, regVal1);
 
-    /*PM asynchronous notification supported*/
     if (mvPMDevReadReg(pSataAdapter, channelIndex, MV_SATA_PM_CONTROL_PORT,
                        MV_SATA_GSCR_FEATURES_ENABLE_REG_NUM,
                        &regVal2 ,NULL) == MV_FALSE)
@@ -1403,7 +1193,6 @@ static MV_BOOLEAN mvPMDisableAsyncNotify(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt
     MV_U32 regVal2;
     MV_SATA_ADAPTER *pSataAdapter = ialExt->pSataAdapter;
 
-    /*PM asynchronous notification supported*/
     if (mvPMDevReadReg(pSataAdapter, channelIndex, MV_SATA_PM_CONTROL_PORT,
                        MV_SATA_GSCR_FEATURES_ENABLE_REG_NUM,
                        &regVal2 ,NULL) == MV_FALSE)
@@ -1446,7 +1235,6 @@ static inline void syno_prepare_custom_info(MV_IAL_COMMON_ADAPTER_EXTENSION *pIA
     u8 old_venderID = pIALExt->pSataAdapter->sataChannel[channelIndex]->PMvendorId;
     u8 old_deviceID = pIALExt->pSataAdapter->sataChannel[channelIndex]->PMdeviceId;
 
-    /* must set it first. Because some function need these two val */
     pIALExt->pSataAdapter->sataChannel[channelIndex]->PMvendorId = PMInfo->vendorId;
     pIALExt->pSataAdapter->sataChannel[channelIndex]->PMdeviceId = PMInfo->deviceId;
 
@@ -1476,7 +1264,6 @@ syno_mvSata_pm_power_ctl(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt,
     MV_U16 venderID = pIALExt->pSataAdapter->sataChannel[channelIndex]->PMvendorId;
     MV_U16 deviceID = pIALExt->pSataAdapter->sataChannel[channelIndex]->PMdeviceId;
 
-    /* Ensure we don't open power while user turn off expansion box manually */
     if (blHotplug) {
         return;
     }
@@ -1494,9 +1281,9 @@ syno_mvSata_pm_power_ctl(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt,
 		syno_mvSata_pmp_write_gpio(pIALExt, channelIndex, &pm_pkg);
 
         if (blPowerOn) {
-            mdelay(5); /* don't do it too fast. Otherwise CPLD might not response */
+            mdelay(5);  
         } else {
-            mdelay(7000); /* hardware spec */
+            mdelay(7000);  
         }
 
 		syno_pm_poweron_pkg_init(venderID, deviceID, &pm_pkg, MV_TRUE);
@@ -1647,7 +1434,6 @@ MV_BOOLEAN mvPMDisableSSC(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex)
         return MV_FALSE;
     }
 
-    /*Host SSC disable*/
     regVal &= ~MV_BIT2;
     if (mvPMDevWriteReg(pSataAdapter,channelIndex, MV_SATA_PM_CONTROL_PORT,
                         MV_SATA_GSCR_FEATURES_ENABLE_REG_NUM,
@@ -1657,7 +1443,6 @@ MV_BOOLEAN mvPMDisableSSC(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex)
         return MV_FALSE;
     }
 
-    /* disable ssc for port 0*/
     if (mvPMDevWriteReg(pSataAdapter, channelIndex, MV_SATA_PM_CONTROL_PORT,
                         0x8C,
                         0,
@@ -1672,7 +1457,7 @@ MV_BOOLEAN mvPMDisableSSC(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex)
     {
         return MV_FALSE;
     }
-    /* disable ssc for port 1*/
+     
     if (mvPMDevWriteReg(pSataAdapter, channelIndex, MV_SATA_PM_CONTROL_PORT,
                         0x8C,
                         1,
@@ -1687,7 +1472,7 @@ MV_BOOLEAN mvPMDisableSSC(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex)
     {
         return MV_FALSE;
     }
-    /* disable ssc for port 2*/
+     
     if (mvPMDevWriteReg(pSataAdapter, channelIndex, MV_SATA_PM_CONTROL_PORT,
                         0x8C,
                         2,
@@ -1703,7 +1488,6 @@ MV_BOOLEAN mvPMDisableSSC(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex)
         return MV_FALSE;
     }
 
-    /* disable ssc for port 3*/
     if (mvPMDevWriteReg(pSataAdapter, channelIndex, MV_SATA_PM_CONTROL_PORT,
                         0x8C,
                         3,
@@ -1719,7 +1503,6 @@ MV_BOOLEAN mvPMDisableSSC(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex)
         return MV_FALSE;
     }
 
-    /* disable ssc for port 15*/
     if (mvPMDevWriteReg(pSataAdapter, channelIndex, MV_SATA_PM_CONTROL_PORT,
                         0x8C,
                         MV_SATA_PM_CONTROL_PORT,
@@ -1841,8 +1624,6 @@ static MV_BOOLEAN mvConfigChannelQueuingMode(MV_IAL_COMMON_ADAPTER_EXTENSION* ia
     return MV_TRUE;
 }
 
-/*Channel related functions*/
-
 static void mvSetChannelState(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                               MV_U8 channelIndex,
                               MV_CHANNEL_STATE state)
@@ -1872,7 +1653,7 @@ static void mvSetChannelState(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
             ialExt->channelState[channelIndex] = state;
             mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG,"[%d %d] flush pending queue\n",
                      ialExt->pSataAdapter->adapterId, channelIndex);
-            /*Abort all pending commands in SW queue*/
+             
             mvFlushSCSICommandQueue(ialExt, channelIndex);
             if (MV_TRUE == ialExt->IALChannelExt[channelIndex].bHotPlug)
             {
@@ -1923,7 +1704,7 @@ static MV_BOOLEAN mvStartChannelInit(MV_SATA_ADAPTER *pSataAdapter,
     mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG,"[%d %d]: start channel\n",
              pSataAdapter->adapterId,
              channelIndex);
-    /*Just check SStatus in case of SATA I adapter*/
+     
     if (pSataAdapter->sataAdapterGeneration == MV_SATA_GEN_I)
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG,"[%d %d]: starting SATA I channel.\n",
@@ -2131,7 +1912,7 @@ static MV_BOOLEAN mvConfigChannelDMA(
                  pSataAdapter->adapterId, channelIndex);
         return MV_FALSE;
     }
-    /* Enable EDMA */
+     
     if (mvSataEnableChannelDma(pSataAdapter, channelIndex) == MV_FALSE)
     {
         mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_ERROR,"[%d] Failed to enable DMA, channel=%d\n",
@@ -2175,12 +1956,6 @@ static MV_BOOLEAN mvIsChannelTimerExpired(
         return MV_FALSE;
     }
 }
-
-/*******************************************************************************
-*State Machine related functions:
-*  Return MV_TRUE to proceed to the next channel
-*  Return MV_FALSE to proceed to the next state on current channel
-*******************************************************************************/
 
 static MV_BOOLEAN mvChannelNotConnectedStateHandler(
                                                    MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
@@ -2232,7 +2007,7 @@ static MV_BOOLEAN mvChannelConnectedStateHandler(
      {
 	  if (isChannelReady == MV_FALSE)
 	  {
-	       /*SRST channel, Set polling timer*/
+	        
             mvSetChannelTimer(ialExt, channelIndex,
                               MV_IAL_SRST_TIMEOUT);
             mvSetChannelState(ialExt,
@@ -2311,7 +2086,7 @@ blSynoReprobeProcessStop(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 END:
     return res;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 MV_BOOLEAN mvChannelInSrstStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                        MV_U8 channelIndex,
                                        MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt)
@@ -2332,7 +2107,7 @@ MV_BOOLEAN mvChannelInSrstStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                 &bFatalError);
     if (res == MV_TRUE)
     {
-        /*Finishing channel initialization*/
+         
         if (isChannelReady == MV_TRUE)
         {
 	     mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_INFO,"[%d %d]: Sata device ready\n",
@@ -2353,7 +2128,7 @@ MV_BOOLEAN mvChannelInSrstStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
             }
         }
         else
-        {/*If channel not ready and function call succeed -> PM is found*/
+        { 
             if (mvConfigurePMDevice(ialExt, channelIndex) == MV_FALSE)
             {
                 mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_ERROR,"[%d %d]: Failed to "
@@ -2385,12 +2160,9 @@ MV_BOOLEAN mvChannelInSrstStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     else
     {
 #ifdef MY_ABC_HERE
-        /* 
-         * FIXME: Please use a new eh to handle reprobe. 
-         * No matter what happend, retry probe until it really cannot be probed.
-         */
+         
         if (MV_TRUE == bFatalError) {
-            /* Retry it with all possible method */
+             
             return blSynoReprobeProcessStop(ialExt, scsiAdapterExt, pSataAdapter,channelIndex);
         } else {
             if (MV_TRUE == mvIsChannelTimerExpired(ialExt, channelIndex)) {
@@ -2510,8 +2282,7 @@ static MV_BOOLEAN mvPMPortProbeLink(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     
     mvPMDevEnableStaggeredSpinUpPort(pSataAdapter, channelIndex, PMPort, 
 				     force_speed_gen1);
-    /* clear N bit (16) and X bit (26)in serror */
-    /* some driver expect the host to respond with R_RDY immediatly */
+     
     if (mvPMDevWriteReg(pSataAdapter, channelIndex, PMPort,
 			MV_SATA_PSCR_SERROR_REG_NUM, 
 			MV_BIT26 | MV_BIT18 |MV_BIT16, NULL) ==
@@ -2524,7 +2295,6 @@ static MV_BOOLEAN mvPMPortProbeLink(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     mvMicroSecondsDelay(pSataAdapter, 50000);
     *H2DReceived = mvSataIfD2HReceived(pSataAdapter, channelIndex, PMPort);
     
-    /* clear again*/
     mvPMDevWriteReg(pSataAdapter, channelIndex, PMPort,
 		    MV_SATA_PSCR_SERROR_REG_NUM,
 		    MV_BIT26| MV_BIT18 |MV_BIT16, NULL);
@@ -2541,7 +2311,6 @@ static MV_BOOLEAN mvPMPortProbeLink(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 	     pSataAdapter->adapterId,
 	     channelIndex, PMPort, *SStatus);
     
-    /* clear X bit in serror */
     if (mvPMDevWriteReg(pSataAdapter, channelIndex, PMPort,
 			MV_SATA_PSCR_SERROR_REG_NUM,
 			MV_BIT26 | MV_BIT18 | MV_BIT16, NULL) ==
@@ -2614,8 +2383,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 	      }
 	      if((SStatus & 0xf) == 1) {
 		   if(retry_count++ < 5) {
-			/* probe link again 
-			 */
+			 
 			mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_ERROR,
 				 "[%d %d %d]: retry link (%d)\n",
 				 pSataAdapter->adapterId, channelIndex, PMPort,
@@ -2626,7 +2394,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 			continue;
 		   }
 	      } 
-	      /* next PORT*/
+	       
 	      PMPort++;
 	      if(PMPort == channelExt->PMnumberOfPorts)
 	      {
@@ -2657,17 +2425,16 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 	 }
 	 channelExt->port_state = MV_PORT_ISSUE_SRST;
 	 channelExt->devInSRST = PMPort;
-	 return MV_FALSE; /* re-call this function without delay*/
+	 return MV_FALSE;  
     }else if(channelExt->port_state == MV_PORT_ISSUE_SRST){
 	 MV_U32 SError;
-	 /* check if disk is connected*/
+	  
 	 mvPMDevReadReg(pSataAdapter, channelIndex, PMPort, 
 			MV_SATA_PSCR_SERROR_REG_NUM, &SError, NULL);
 	 mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "[%d %d %d]:SError "
 		  " 0x%08x\n",
 		  pSataAdapter->adapterId, channelIndex, PMPort, SError);
 
-	 /*check N bit*/
 	 if(SError & MV_BIT16)
 	 {
 	      mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_INFO, "[%d %d %d]: "
@@ -2690,7 +2457,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 	      mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_ERROR, "[%d %d %d]: "
 		       "failed to Soft Reset PM device port.\n",
 		       pSataAdapter->adapterId, channelIndex, PMPort);
-	      /* this port not functional, next port*/
+	       
 	      channelExt->port_state = MV_PORT_NOT_INITIALIZED;
 	      channelExt->devInSRST++;
 	 }
@@ -2717,7 +2484,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 		   printAtaDeviceRegisters(mvStorageDevRegisters);
 		   return MV_TRUE;
 	      }
-	      /* SRST timeout*/
+	       
 	      mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_ERROR,"[%d %d %d]: Soft Reset PM port time out\n",
 		       pSataAdapter->adapterId, channelIndex, PMPort);
 	      
@@ -2739,31 +2506,28 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 	      }
 	      
 	 }
-	 /* SRST completed*/
+	  
 	 channelExt->port_state = MV_PORT_INIT_DEVICE;
 	 return MV_TRUE;
     }else if(channelExt->port_state == MV_PORT_INIT_DEVICE){
 	 MV_U32 SError;
-	 /* check if disk is connected*/
+	  
 	 mvPMDevReadReg(pSataAdapter, channelIndex, PMPort, 
 			MV_SATA_PSCR_SERROR_REG_NUM, &SError, NULL);
 	 mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG, "[%d %d %d]:SError "
 		  " 0x%08x\n",
 		  pSataAdapter->adapterId, channelIndex, PMPort, SError);
 
-	 /*check N bit*/
 #ifdef MY_ABC_HERE
      if (SError & MV_BIT16) {
-         /* Some disk, 9410-HD-001, is always on this bit even mvSataChannelHardReset and mvRestartChannel is used.
-          * So we just clear the spurious N bit.
-          */
+          
          printk("[%d %d %d]: N of SError is on while init. clear and reset\n",
                         pSataAdapter->adapterId, channelIndex, PMPort);
 
          if(mvPMPortProbeLink(ialExt, channelIndex, PMPort, MV_FALSE,
 				   &SStatus, &H2DReceived) == MV_TRUE) {
              if ((SStatus & 0xf) == 3) {
-                 /* Device presence detected and Phy communication established */
+                  
                  if (mvStorageDevATASoftResetDevice(pSataAdapter, channelIndex,
                                                     MV_SATA_PM_CONTROL_PORT, NULL)== MV_TRUE){
 #ifdef MY_ABC_HERE
@@ -2781,14 +2545,14 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
                             pSataAdapter->adapterId, channelIndex, PMPort);
                  }
              } else if ((SStatus & 0xf) == 1) {
-                 /* Device presence detected, but PHY communication not established */
+                  
                  printk("[%d %d %d]: Device presence detected, but PHY communication not established, reset whole channel\n",
                         pSataAdapter->adapterId, channelIndex, PMPort);
                  mvSataChannelHardReset(pSataAdapter, channelIndex);
                  mvRestartChannel(ialExt, channelIndex, scsiAdapterExt, MV_FALSE);
                  return MV_FALSE;
              } else {
-                 /* skip */
+                  
                  printk("[%d %d %d]: give up this port\n",
                         pSataAdapter->adapterId, channelIndex, PMPort);
              }
@@ -2806,7 +2570,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
          classifyAndInitDevice(scsiAdapterExt, ialExt, channelIndex, PMPort);
 #endif
 	 }	 
-#else /* MY_ABC_HERE */
+#else  
      if(SError & MV_BIT16)
 	 {
 	      mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_INFO, "[%d %d %d]: "
@@ -2816,8 +2580,8 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 	      classifyAndInitDevice(scsiAdapterExt, ialExt,
 				    channelIndex, PMPort);
 	 }
-#endif /* MY_ABC_HERE */
-	 /* next port*/
+#endif  
+	  
 	 if(++channelExt->devInSRST == channelExt->PMnumberOfPorts)
 	 {
 	      channelExt->port_state = MV_PORT_DONE;
@@ -2902,7 +2666,7 @@ static MV_BOOLEAN mvChannelReadyStateHandler(
         (mvStorageDevGetDeviceType (pSataAdapter, channelIndex) == MV_SATA_DEVICE_TYPE_PM) &&
         (ialExt->IALChannelExt[channelIndex].pmAsyncNotifyEnabled == MV_FALSE))
     {
-        /*poll pm GSCR error register one time of 4 steps (2 seconds)*/
+         
         if (ialExt->IALChannelExt[channelIndex].pmRegPollCounter++ & 0x3) 
         {
             return MV_TRUE;
@@ -3038,7 +2802,6 @@ static MV_BOOLEAN mvAdapterStateMachine(
     mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG,"[%d] ADAPTER_READY\n",
              pSataAdapter->adapterId);
 
-    /*Start channel initialization for connected channels*/
     for (channelIndex = 0;
         channelIndex < pSataAdapter->numberOfChannels;
         channelIndex++)
@@ -3285,22 +3048,13 @@ syno_mvSata_is_synology_pm(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt, MV_U8 chann
         goto END;
     }
 
-    /* After enable preemptive kernel, below code would be dangerous because lack of spin lock */
-         
     if (MV_SATA_DEVICE_TYPE_PM != pIALExt->pSataAdapter->sataChannel[channelIndex]->deviceType) {
-        /* 
-         * add this condition for those incoming command during the channel reset.
-         * We would deny command if and only if gpio command coming during reset.
-         * This is done by defer_gpio_cmd
-         */
+         
         if (MV_SATA_DEVICE_TYPE_PM != pIALExt->pSataAdapter->sataChannel[channelIndex]->oldDeviceType) {
             goto END;
         }        
     }
 
-    /*
-     * skip those models which we do not support
-     */
     if (!is_ebox_support()) {
         goto END;
     }
@@ -3313,25 +3067,10 @@ syno_mvSata_is_synology_pm(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt, MV_U8 chann
 END:
     return ret;
 }
-#endif // MY_ABC_HERE
+#endif  
 
 #ifdef MY_ABC_HERE
-/**
- * Because we support shock protection.
- * So we need revalidate whether the device
- * type is the same.
- * 
- * @param ialExt     [IN] Should not be NULL
- * @param scsiAdapterExtstruct
- *                   [IN] Should not be NULL
- * @param pSataAdapter
- *                   [IN] Should not be NULL
- * @param channel    [IN] channel index
- * @param deviceType [IN] new device type
- * 
- * @return TRUE: The device serial is the same 
- *         FALSE: The device serial is difference
- */
+ 
 static MV_BOOLEAN
 blSynoEHTypeRevalidate(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                  MV_SAL_ADAPTER_EXTENSION *scsiAdapterExtstruct,
@@ -3351,7 +3090,7 @@ blSynoEHTypeRevalidate(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     }
     
     if (!(pSataAdapter->eh[channel].flags & EH_PROCESSING)) {
-        /* No need revalidate because it is not EH */
+         
         goto END;
     }
 
@@ -3367,18 +3106,15 @@ blSynoEHTypeRevalidate(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                    pSataAdapter->sataChannel[channel]->deviceType,
                    pSataAdapter->sataChannel[channel]->oldDeviceType);
 
-    /* Save EH flags before stop channel */
     old_eh_flags = pSataAdapter->eh[channel].flags;
     if (MV_SATA_DEVICE_TYPE_PM != deviceType &&
         MV_SATA_IF_SPEED_1_5_GBPS == mvSataGetInterfaceSpeed(pSataAdapter, channel)) {
-        /* FIXME: please identify whether the device need 1.5Gbps after integrade EH with SATA_DETECT */
+         
         blSpeedAdjust = 1;
     }
 
-    /* Stop channel will clear flags and retry count */
     SynomvStopChannel(ialExt, channel, scsiAdapterExtstruct);    
 
-    /* Since we are in the EH, just let it EH again with retry count=0. And it will restart kernel*/
     pSataAdapter->eh[channel].flags = old_eh_flags;
     if (blSpeedAdjust) {
         syno_eh_printk(pSataAdapter, channel, "Set interface speed to 1.5");
@@ -3391,23 +3127,6 @@ END:
     return ret;
 }
 
-/**
- * Because we support shock protection.
- * So we need revalidate whether the device is the same.
- * 
- * @param ialExt  [IN] Should not be NULL
- * @param scsiAdapterExtstruct
- *                [IN] Should not be NULL
- * @param pSataAdapter
- *                [IN] Should not be NULL
- * @param channel [IN] channel number
- * @param PMPort  [IN] PM port number
- * @param identifyBuffer
- *                [IN] Should not be NULL. Identify buffer
- * 
- * @return TRUE: The device is the same
- *         FALSE: The device type is difference
- */
 static MV_BOOLEAN
 blSynoEHDiskRevalidate(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                        MV_SAL_ADAPTER_EXTENSION *scsiAdapterExtstruct,
@@ -3436,7 +3155,7 @@ blSynoEHDiskRevalidate(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     if (!memcmp(serial_base,
                &ialExt->IALChannelExt[channel].drivesInfo.driveSerialSaved[PMPort].serial,
                IDEN_SERIAL_NUM_SIZE)) {
-        /* for port multiplier probe disk */
+         
         goto END;
     }
 
@@ -3447,9 +3166,7 @@ blSynoEHDiskRevalidate(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     }
 
     syno_eh_printk(pSataAdapter, channel, "Drive is different. PMPort %d", PMPort);
-    /* we don't use mvDrivesInfoFlushAll because the disk may exist in PM, 
-     * we don't use mvDrivesInfoFlushSingleDrive because we don't need it actually(This only affect PM device)
-     */
+     
     memset(&ialExt->IALChannelExt[channel].drivesInfo.driveSerialSaved[PMPort].serial,
            0,
            sizeof(MV_DRIVE_SERIAL_NUMBER));
@@ -3476,11 +3193,6 @@ END:
     return ret;
 }
 
-/**
- * Channel EH main process. It must schedule reprobe
- * 
- * @param work   [IN] Should not be NULL.
- */
 void 
 SynoChannelErrorHandle(struct work_struct *work)
 {
@@ -3546,15 +3258,6 @@ SynoChannelErrorHandle(struct work_struct *work)
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 
-/**
- * Clear EH information when channel 
- * status is stable (Not connect or ready)
- * 
- * @param ialExt [IN] Should not be NULL
- * @param channelIndex
- *               [IN] channel index
- * @param state  [IN] Current channel status
- */
 static void 
 SynoClearEHInfo(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                 MV_U8 channelIndex,
@@ -3571,7 +3274,7 @@ SynoClearEHInfo(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
         clear_bit(SYNO_PROBE_RETRY, &ialExt->pSataAdapter->flags[channelIndex]);
         clear_bit(SYNO_PROBE_LIMIT_TO_15, &ialExt->pSataAdapter->flags[channelIndex]);
     }
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_ABC_HERE
     if (CHANNEL_NOT_CONNECTED == state || CHANNEL_READY == state) {
         MV_U8 blflush = MV_FALSE;
@@ -3586,6 +3289,6 @@ SynoClearEHInfo(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
             channel_do_scsi_done(ialExt->pSataAdapter->IALData, ialExt->pSataAdapter, channelIndex);
         }
     }
-#endif /* MY_ABC_HERE */
+#endif  
 }
-#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
+#endif  

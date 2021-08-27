@@ -1,40 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Driver for /dev/crypto device (aka CryptoDev)
- *
- * Copyright (c) 2004 Michal Ludvig <mludvig@logix.net.nz>, SuSE Labs
- * Copyright (c) 2009,2010,2011 Nikos Mavrogiannopoulos <nmav@gnutls.org>
- * Copyright (c) 2010 Phil Sutter
- *
- * This file is part of linux cryptodev.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
-/*
- * Device /dev/crypto provides an interface for
- * accessing kernel CryptoAPI algorithms (ciphers,
- * hashes) from userspace programs.
- *
- * /dev/crypto interface was originally introduced in
- * OpenBSD and this module attempts to keep the API.
- *
- */
  
 #include <crypto/hash.h>
 #include <linux/crypto.h>
@@ -60,20 +26,13 @@ MODULE_AUTHOR("Nikos Mavrogiannopoulos <nmav@gnutls.org>");
 MODULE_DESCRIPTION("CryptoDev driver");
 MODULE_LICENSE("GPL");
 
-/* ====== Compile-time config ====== */
-
-/* Default (pre-allocated) and maximum size of the job queue.
- * These are free, pending and done items all together. */
 #define DEF_COP_RINGSIZE 16
 #define MAX_COP_RINGSIZE 64
-
-/* ====== Module parameters ====== */
 
 int cryptodev_verbosity;
 module_param(cryptodev_verbosity, int, 0644);
 MODULE_PARM_DESC(cryptodev_verbosity, "0: normal, 1: verbose, 2: debug");
 
-/* ====== CryptoAPI ====== */
 struct todo_list_item {
 	struct list_head __hook;
 	struct kernel_crypt_op kcop;
@@ -101,10 +60,8 @@ struct crypt_priv {
 		(sg)->dma_address = 0;				\
 	} while (0)
 
-/* cryptodev's own workqueue, keeps crypto tasks from disturbing the force */
 static struct workqueue_struct *cryptodev_wq;
 
-/* Prepare session for future use. */
 static int
 crypto_create_session(struct fcrypt *fcr, struct session_op *sop)
 {
@@ -114,7 +71,6 @@ crypto_create_session(struct fcrypt *fcr, struct session_op *sop)
 	const char *hash_name = NULL;
 	int hmac_mode = 1, stream = 0, aead = 0;
 
-	/* Does the request make sense? */
 	if (unlikely(!sop->cipher && !sop->mac)) {
 		dprintk(1, KERN_DEBUG, "Both 'cipher' and 'mac' unset.\n");
 		return -EINVAL;
@@ -185,7 +141,6 @@ crypto_create_session(struct fcrypt *fcr, struct session_op *sop)
 		hash_name = "hmac(sha512)";
 		break;
 
-	/* non-hmac cases */
 	case CRYPTO_MD5:
 		hash_name = "md5";
 		hmac_mode = 0;
@@ -219,12 +174,10 @@ crypto_create_session(struct fcrypt *fcr, struct session_op *sop)
 		return -EINVAL;
 	}
 
-	/* Create a session and put it to the list. */
 	ses_new = kzalloc(sizeof(*ses_new), GFP_KERNEL);
 	if (!ses_new)
 		return -ENOMEM;
 
-	/* Set-up crypto transform. */
 	if (alg_name) {
 		uint8_t keyp[CRYPTO_CIPHER_MAX_KEY_LEN];
 
@@ -294,18 +247,16 @@ crypto_create_session(struct fcrypt *fcr, struct session_op *sop)
 		goto error_hash;
 	}
 
-	/* put the new session to the list */
 	get_random_bytes(&ses_new->sid, sizeof(ses_new->sid));
 	mutex_init(&ses_new->sem);
 
 	mutex_lock(&fcr->sem);
 restart:
 	list_for_each_entry(ses_ptr, &fcr->list, entry) {
-		/* Check for duplicate SID */
+		 
 		if (unlikely(ses_new->sid == ses_ptr->sid)) {
 			get_random_bytes(&ses_new->sid, sizeof(ses_new->sid));
-			/* Unless we have a broken RNG this
-			   shouldn't loop forever... ;-) */
+			 
 			goto restart;
 		}
 	}
@@ -313,7 +264,6 @@ restart:
 	list_add(&ses_new->entry, &fcr->list);
 	mutex_unlock(&fcr->sem);
 
-	/* Fill in some values for the user. */
 	sop->ses = ses_new->sid;
 
 	return 0;
@@ -329,7 +279,6 @@ error_cipher:
 
 }
 
-/* Everything that needs to be done when remowing a session. */
 static inline void
 crypto_destroy_session(struct csession *ses_ptr)
 {
@@ -349,7 +298,6 @@ crypto_destroy_session(struct csession *ses_ptr)
 	kfree(ses_ptr);
 }
 
-/* Look up a session by ID and remove. */
 static int
 crypto_finish_session(struct fcrypt *fcr, uint32_t sid)
 {
@@ -377,7 +325,6 @@ crypto_finish_session(struct fcrypt *fcr, uint32_t sid)
 	return ret;
 }
 
-/* Remove all sessions when closing the file */
 static int
 crypto_finish_all_sessions(struct fcrypt *fcr)
 {
@@ -396,7 +343,6 @@ crypto_finish_all_sessions(struct fcrypt *fcr)
 	return 0;
 }
 
-/* Look up session by session ID. The returned session is locked. */
 struct csession *
 crypto_get_session_by_sid(struct fcrypt *fcr, uint32_t sid)
 {
@@ -424,12 +370,10 @@ static void cryptask_routine(struct work_struct *work)
 	struct todo_list_item *item;
 	LIST_HEAD(tmp);
 
-	/* fetch all pending jobs into the temporary list */
 	mutex_lock(&pcr->todo.lock);
 	list_cut_position(&tmp, &pcr->todo.list, pcr->todo.list.prev);
 	mutex_unlock(&pcr->todo.lock);
 
-	/* handle each job locklessly */
 	list_for_each_entry(item, &tmp, __hook) {
 		item->result = crypto_run(&pcr->fcrypt, &item->kcop);
 		if (unlikely(item->result))
@@ -437,16 +381,12 @@ static void cryptask_routine(struct work_struct *work)
 					item->result);
 	}
 
-	/* push all handled jobs to the done list at once */
 	mutex_lock(&pcr->done.lock);
 	list_splice_tail(&tmp, &pcr->done.list);
 	mutex_unlock(&pcr->done.lock);
 
-	/* wake for POLLIN */
 	wake_up_interruptible(&pcr->user_waiter);
 }
-
-/* ====== /dev/crypto ====== */
 
 static int
 cryptodev_open(struct inode *inode, struct file *filp)
@@ -546,13 +486,7 @@ clonefd(struct file *filp)
 }
 
 #ifdef ENABLE_ASYNC
-/* enqueue a job for asynchronous completion
- *
- * returns:
- * -EBUSY when there are no free queue slots left
- *        (and the number of slots has reached it MAX_COP_RINGSIZE)
- * -EFAULT when there was a memory allocation error
- * 0 on success */
+ 
 static int crypto_async_run(struct crypt_priv *pcr, struct kernel_crypt_op *kcop)
 {
 	struct todo_list_item *item = NULL;
@@ -591,11 +525,6 @@ static int crypto_async_run(struct crypt_priv *pcr, struct kernel_crypt_op *kcop
 	return 0;
 }
 
-/* get the first completed job from the "done" queue
- *
- * returns:
- * -EBUSY if no completed jobs are ready (yet)
- * the return value of crypto_run() otherwise */
 static int crypto_async_fetch(struct crypt_priv *pcr,
 		struct kernel_crypt_op *kcop)
 {
@@ -618,28 +547,25 @@ static int crypto_async_fetch(struct crypt_priv *pcr,
 	list_add_tail(&item->__hook, &pcr->free.list);
 	mutex_unlock(&pcr->free.lock);
 
-	/* wake for POLLOUT */
 	wake_up_interruptible(&pcr->user_waiter);
 
 	return retval;
 }
 #endif
 
-/* this function has to be called from process context */
 static int fill_kcop_from_cop(struct kernel_crypt_op *kcop, struct fcrypt *fcr)
 {
 	struct crypt_op *cop = &kcop->cop;
 	struct csession *ses_ptr;
 	int rc;
 
-	/* this also enters ses_ptr->sem */
 	ses_ptr = crypto_get_session_by_sid(fcr, cop->ses);
 	if (unlikely(!ses_ptr)) {
 		dprintk(1, KERN_ERR, "invalid session ID=0x%08X\n", cop->ses);
 		return -EINVAL;
 	}
 	kcop->ivlen = cop->iv ? ses_ptr->cdata.ivsize : 0;
-	kcop->digestsize = 0; /* will be updated during operation */
+	kcop->digestsize = 0;  
 
 	crypto_put_session(ses_ptr);
 
@@ -659,7 +585,6 @@ static int fill_kcop_from_cop(struct kernel_crypt_op *kcop, struct fcrypt *fcr)
 	return 0;
 }
 
-/* this function has to be called from process context */
 static int fill_cop_from_kcop(struct kernel_crypt_op *kcop, struct fcrypt *fcr)
 {
 	int ret;
@@ -719,7 +644,7 @@ static unsigned int is_known_accelerated(struct crypto_tfm *tfm)
 const char* name = crypto_tfm_alg_driver_name(tfm);
 
 	if (name == NULL)
-	  return 1; /* assume accelerated */
+	  return 1;  
 
 	if (strstr(name, "-talitos"))
 	  return 1;
@@ -752,7 +677,6 @@ static int get_session_info(struct fcrypt *fcr, struct session_info_op *siop)
 	struct csession *ses_ptr;
 	struct crypto_tfm *tfm;
 
-	/* this also enters ses_ptr->sem */
 	ses_ptr = crypto_get_session_by_sid(fcr, siop->ses);
 	if (unlikely(!ses_ptr)) {
 		dprintk(1, KERN_ERR, "invalid session ID=0x%08X\n", siop->ses);
@@ -894,7 +818,6 @@ cryptodev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg_)
 	}
 }
 
-/* compatibility code for 32bit userlands */
 #ifdef CONFIG_COMPAT
 
 static inline void
@@ -1052,7 +975,7 @@ cryptodev_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg_)
 	}
 }
 
-#endif /* CONFIG_COMPAT */
+#endif  
 
 static unsigned int cryptodev_poll(struct file *file, poll_table *wait)
 {
@@ -1076,7 +999,7 @@ static const struct file_operations cryptodev_fops = {
 	.unlocked_ioctl = cryptodev_ioctl,
 #ifdef CONFIG_COMPAT
 	.compat_ioctl = cryptodev_compat_ioctl,
-#endif /* CONFIG_COMPAT */
+#endif  
 	.poll = cryptodev_poll,
 };
 
@@ -1107,7 +1030,6 @@ cryptodev_deregister(void)
 	misc_deregister(&cryptodev);
 }
 
-/* ====== Module init/exit ====== */
 static int __init init_cryptodev(void)
 {
 	int rc;

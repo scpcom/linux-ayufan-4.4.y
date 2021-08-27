@@ -1,26 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * 	EtherIP tunnel over IPv6 link
- *	IPv6 tunneling device
- *	Linux INET6 implementation
- *
- *	Authors:
- *	Ville Nuorvala		<vnuorval@tcs.hut.fi>
- *	Yasuyuki Kozakai	<kozakai@linux-ipv6.org>
- *
- *      Based on:
- *      linux/net/ipv6/ip6_tunnel.c, linux/net/ipv6/sit.c and linux/net/ipv4/ipip.c
- *
- *      RFC 3378
- *
- *	This program is free software; you can redistribute it and/or
- *      modify it under the terms of the GNU General Public License
- *      as published by the Free Software Foundation; either version
- *      2 of the License, or (at your option) any later version.
- *
- */
  
 #include <linux/module.h>
 #include <linux/capability.h>
@@ -89,17 +69,14 @@ static void ethipip6_tnl_dev_setup(struct net_device *dev);
 
 static int ethipip6_tnl_net_id __read_mostly;
 struct ip6_tnl_net {
-	/* the IPv6 tunnel fallback device */
+	 
 	struct net_device *fb_tnl_dev;
-	/* lists for storing tunnels in use */
+	 
 	struct ip6_tnl *tnls_r_l[HASH_SIZE];
 	struct ip6_tnl *tnls_wc[1];
 	struct ip6_tnl **tnls[2];
 };
 
-/*
- * Locking : hash tables are protected by RCU and a spinlock
- */
 static DEFINE_SPINLOCK(ethipip6_tnl_lock);
 
 static inline struct dst_entry *ip6_tnl_dst_check(struct ip6_tnl *t)
@@ -130,17 +107,6 @@ static inline void ip6_tnl_dst_store(struct ip6_tnl *t, struct dst_entry *dst)
 	t->dst_cache = dst;
 }
 
-/**
- * ethipip6_tnl_lookup - fetch tunnel matching the end-point addresses
- *   @remote: the address of the tunnel exit-point
- *   @local: the address of the tunnel entry-point
- *
- * Return:
- *   tunnel matching given end-points if found,
- *   else fallback tunnel if its device is up,
- *   else %NULL
- **/
-
 #define for_each_ethip6_tunnel_rcu(start) \
 	for (t = rcu_dereference(start); t; t = rcu_dereference(t->next))
 
@@ -165,17 +131,6 @@ ethipip6_tnl_lookup(struct net *net, struct in6_addr *remote, struct in6_addr *l
 	return NULL;
 }
 
-/**
- * ethipip6_tnl_bucket - get head of list matching given tunnel parameters
- *   @p: parameters containing tunnel end-points
- *
- * Description:
- *   ethipip6_tnl_bucket() returns the head of the list matching the
- *   &struct in6_addr entries laddr and raddr in @p.
- *
- * Return: head of IPv6 tunnel list
- **/
-
 static struct ip6_tnl **
 ethipip6_tnl_bucket(struct ip6_tnl_net *ip6n, struct ip6_tnl_parm *p)
 {
@@ -191,11 +146,6 @@ ethipip6_tnl_bucket(struct ip6_tnl_net *ip6n, struct ip6_tnl_parm *p)
 	return &ip6n->tnls[prio][h];
 }
 
-/**
- * ethipip6_tnl_link - add tunnel to hash table
- *   @t: tunnel to be added
- **/
-
 static void
 ethipip6_tnl_link(struct ip6_tnl_net *ip6n, struct ip6_tnl *t)
 {
@@ -206,11 +156,6 @@ ethipip6_tnl_link(struct ip6_tnl_net *ip6n, struct ip6_tnl *t)
 	rcu_assign_pointer(*tp, t);
 	spin_unlock_bh(&ethipip6_tnl_lock);
 }
-
-/**
- * ethipip6_tnl_unlink - remove tunnel from hash table
- *   @t: tunnel to be removed
- **/
 
 static void
 ethipip6_tnl_unlink(struct ip6_tnl_net *ip6n, struct ip6_tnl *t)
@@ -226,18 +171,6 @@ ethipip6_tnl_unlink(struct ip6_tnl_net *ip6n, struct ip6_tnl *t)
 		}
 	}
 }
-
-/**
- * ip6_tnl_create() - create a new tunnel
- *   @p: tunnel parameters
- *   @pt: pointer to new tunnel
- *
- * Description:
- *   Create tunnel matching given parameters.
- *
- * Return:
- *   created tunnel or NULL
- **/
 
 static struct ip6_tnl *ip6_tnl_create(struct net *net, struct ip6_tnl_parm *p)
 {
@@ -279,20 +212,6 @@ failed:
 	return NULL;
 }
 
-/**
- * ethipip6_tnl_locate - find or create tunnel matching given parameters
- *   @p: tunnel parameters
- *   @create: != 0 if allowed to create new tunnel if no match found
- *
- * Description:
- *   ethipip6_tnl_locate() first tries to locate an existing tunnel
- *   based on @parms. If this is unsuccessful, but @create is set a new
- *   tunnel device is created and registered for use.
- *
- * Return:
- *   matching tunnel or NULL
- **/
-
 static struct ip6_tnl *ethipip6_tnl_locate(struct net *net,
 		struct ip6_tnl_parm *p, int create)
 {
@@ -311,14 +230,6 @@ static struct ip6_tnl *ethipip6_tnl_locate(struct net *net,
 	return ip6_tnl_create(net, p);
 }
 
-/**
- * ethipip6_tnl_dev_uninit - tunnel device uninitializer
- *   @dev: the device to be destroyed
- *
- * Description:
- *   ethipip6_tnl_dev_uninit() removes tunnel from its list
- **/
-
 static void
 ethipip6_tnl_dev_uninit(struct net_device *dev)
 {
@@ -336,15 +247,6 @@ ethipip6_tnl_dev_uninit(struct net_device *dev)
 	ip6_tnl_dst_reset(t);
 	dev_put(dev);
 }
-
-/**
- * parse_tvl_tnl_enc_lim - handle encapsulation limit option
- *   @skb: received socket buffer
- *
- * Return:
- *   0 if none was found,
- *   else index to encapsulation limit
- **/
 
 static __u16
 parse_tlv_tnl_enc_lim(struct sk_buff *skb, __u8 * raw)
@@ -376,16 +278,15 @@ parse_tlv_tnl_enc_lim(struct sk_buff *skb, __u8 * raw)
 			while (1) {
 				struct ipv6_tlv_tnl_enc_lim *tel;
 
-				/* No more room for encapsulation limit */
 				if (i + sizeof (*tel) > off + optlen)
 					break;
 
 				tel = (struct ipv6_tlv_tnl_enc_lim *) &raw[i];
-				/* return index of option if found and valid */
+				 
 				if (tel->type == IPV6_TLV_TNL_ENCAP_LIMIT &&
 				    tel->length == 1)
 					return i;
-				/* else jump to next option */
+				 
 				if (tel->type)
 					i += tel->length + 2;
 				else
@@ -397,14 +298,6 @@ parse_tlv_tnl_enc_lim(struct sk_buff *skb, __u8 * raw)
 	}
 	return 0;
 }
-
-/**
- * ethipip6_tnl_err - tunnel error handler
- *
- * Description:
- *   ethipip6_tnl_err() should handle errors in the tunnel according
- *   to the specifications in RFC 2473.
- **/
 
 static int
 ethipip6_tnl_err(struct sk_buff *skb, __u8 ipproto, struct inet6_skb_parm *opt,
@@ -418,10 +311,6 @@ ethipip6_tnl_err(struct sk_buff *skb, __u8 ipproto, struct inet6_skb_parm *opt,
 	__u32 rel_info = 0;
 	__u16 len;
 	int err = -ENOENT;
-
-	/* If the packet doesn't contain the original IPv6 header we are
-	   in trouble since we might need the source address for further
-	   processing of the error. */
 
 	rcu_read_lock();
 	if ((t = ethipip6_tnl_lookup(dev_net(skb->dev), &ipv6h->daddr,
@@ -552,7 +441,6 @@ ip4ethipip6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 	skb_reset_network_header(skb2);
 	eiph = ip_hdr(skb2);
 
-	/* Try to guess incoming interface */
 	memset(&fl, 0, sizeof(fl));
 	fl.u.ip4.daddr = eiph->saddr;
 	fl.flowi_tos = RT_TOS(eiph->tos);
@@ -563,7 +451,6 @@ ip4ethipip6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 
 	skb2->dev = rt->dst.dev;
 
-	/* route "incoming" packet */
 	if (rt->rt_flags & RTCF_LOCAL) {
 		ip_rt_put(rt);
 		fl.u.ip4.daddr = eiph->daddr;
@@ -585,7 +472,6 @@ ip4ethipip6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 			goto out;
 	}
 
-	/* change mtu on this route */
 	if (rel_type == ICMP_DEST_UNREACH && rel_code == ICMP_FRAG_NEEDED) {
 		if (rel_info > dst_mtu(skb_dst(skb2)))
 			goto out;
@@ -626,7 +512,6 @@ ip6ethipip6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 		skb_pull(skb2, offset);
 		skb_reset_network_header(skb2);
 
-		/* Try to guess incoming interface */
 		rt = rt6_lookup(dev_net(skb->dev), &ipv6_hdr(skb2)->saddr,
 				NULL, 0, 0);
 
@@ -668,7 +553,6 @@ static void ip6ethipip6_dscp_ecn_decapsulate(struct ip6_tnl *t,
 		IP6_ECN_set_ce(ipv6_hdr(skb));
 }
 
-/* called with rcu_read_lock() */
 static inline int ip6_tnl_rcv_ctl(struct ip6_tnl *t)
 {
 	struct ip6_tnl_parm *p = &t->parms;
@@ -690,14 +574,6 @@ static inline int ip6_tnl_rcv_ctl(struct ip6_tnl *t)
 	return ret;
 }
 
-/**
- * ethipip6_tnl_rcv - decapsulate IPv6 packet and retransmit it locally
- *   @skb: received socket buffer
- *   @protocol: ethernet protocol ID
- *   @dscp_ecn_decapsulate: the function to decapsulate DSCP code and ECN
- *
- * Return: 0
- **/
 static int ethipip6_tnl_rcv(struct sk_buff *skb, __u16 protocol,
 		       __u8 ipproto,
 		       void (*dscp_ecn_decapsulate)(struct ip6_tnl *t,
@@ -725,7 +601,6 @@ static int ethipip6_tnl_rcv(struct sk_buff *skb, __u16 protocol,
 			goto discard;
 		}
 
-		/* Check the xfrm policy for decrypted packets */
 		if (skb->sp && !xfrm6_policy_check(NULL, XFRM_POLICY_IN, skb)) {
 			rcu_read_unlock();
 			goto discard;
@@ -793,20 +668,6 @@ static void init_tel_txopt(struct ipv6_tel_txoption *opt, __u8 encap_limit)
 	opt->ops.opt_nflen = 8;
 }
 
-/**
- * ethipip6_tnl_addr_conflict - compare packet addresses to tunnel's own
- *   @t: the outgoing tunnel device
- *   @hdr: IPv6 header from the incoming packet
- *
- * Description:
- *   Avoid trivial tunneling loop by checking that tunnel exit-point
- *   doesn't match source of incoming packet.
- *
- * Return:
- *   1 if conflict,
- *   0 else
- **/
-
 static inline int
 ethipip6_tnl_addr_conflict(struct ip6_tnl *t, struct ipv6hdr *hdr)
 {
@@ -842,24 +703,6 @@ static inline int ethipip6_tnl_xmit_ctl(struct ip6_tnl *t)
 	}
 	return ret;
 }
-/**
- * ethipip6_tnl_xmit2 - encapsulate packet and send
- *   @skb: the outgoing socket buffer
- *   @dev: the outgoing tunnel device
- *   @dsfield: dscp code for outer header
- *   @fl: flow of tunneled packet
- *   @encap_limit: encapsulation limit
- *   @pmtu: Path MTU is stored if packet is too big
- *
- * Description:
- *   Build new header and do some sanity checks on the packet before sending
- *   it.
- *
- * Return:
- *   0 on success
- *   -1 fail
- *   %-EMSGSIZE message too big. return mtu in this case.
- **/
  
 static int ethipip6_tnl_xmit2(struct sk_buff *skb,
 			 struct net_device *dev,
@@ -910,11 +753,6 @@ static int ethipip6_tnl_xmit2(struct sk_buff *skb,
 #endif
         }
 
-	/* donot allow wifi specific pkts to be bridged,
-         * is there any better why to identify this condition!!! 
-         * if (skb->len < 42) some thing like this... 
-         * For regular ethernet pkts, iphdr is always aligned to 4bytes,
-         * so one way is to check the address alignment */
 	if (!((unsigned int)skb->data & 0x3)) {
 		stats->rx_length_errors++;
 	 	goto tx_err_dst_release;
@@ -940,9 +778,6 @@ static int ethipip6_tnl_xmit2(struct sk_buff *skb,
 	if (skb_dst(skb))
 		skb_dst(skb)->ops->update_pmtu(skb_dst(skb), mtu);
 
-	/*
-	 * Okay, now see if we can stuff it in the buffer as-is.
-	 */
 	max_headroom += LL_RESERVED_SPACE(tdev);
 
 	if (skb_headroom(skb) < max_headroom || skb_shared(skb) ||
@@ -977,8 +812,8 @@ static int ethipip6_tnl_xmit2(struct sk_buff *skb,
 	skb_reset_network_header(skb);
 	ipv6h = ipv6_hdr(skb);
 	*(__be32*)ipv6h = fl->u.ip6.flowlabel | htonl(0x60000000);
-	//dsfield = INET_ECN_encapsulate(0, dsfield);
-	//ipv6_change_dsfield(ipv6h, ~INET_ECN_MASK, dsfield);
+	 
+	
 	ipv6h->hop_limit = t->parms.hop_limit;
 	ipv6h->nexthdr = proto;
 	ipv6_addr_copy(&ipv6h->saddr, &fl->u.ip6.saddr);
@@ -1020,7 +855,7 @@ __ethipip6_tnl_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	err = ethipip6_tnl_xmit2(skb, dev, 0, &fl, -1, &mtu);
 	if (err != 0) {
-		/* XXX: send ICMP error even if DF is not set. */
+		 
 		if (err == -EMSGSIZE) {
 			icmp_send(skb, ICMP_DEST_UNREACH, ICMP_FRAG_NEEDED, htonl(mtu));
 		}
@@ -1048,7 +883,7 @@ ip4ethipip6_tnl_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	err = ethipip6_tnl_xmit2(skb, dev, dsfield, &fl, encap_limit, &mtu);
 	if (err != 0) {
-		/* XXX: send ICMP error even if DF is not set. */
+		 
 		if (err == -EMSGSIZE)
 			icmp_send(skb, ICMP_DEST_UNREACH, ICMP_FRAG_NEEDED, 
 				htonl(mtu));
@@ -1064,7 +899,7 @@ ip6ethipip6_tnl_xmit(struct sk_buff *skb, struct net_device *dev)
 	struct ip6_tnl *t = netdev_priv(dev);
 	struct ipv6hdr *ipv6h = ipv6_hdr(skb);
 	int encap_limit = -1;
-	//__u16 offset;
+	 
 	struct flowi fl;
 	__u8 dsfield;
 	__u32 mtu = 0;
@@ -1146,17 +981,15 @@ static void ethipip6_tnl_link_config(struct ip6_tnl *t)
 #endif
 
 	memcpy(dev->dev_addr, &p->laddr, dev->addr_len);
-	/* Make sure that dev_addr is nither mcast nor all zeros */
+	 
 	dev->dev_addr[0] &= 0xfe;
 	dev->dev_addr[0] |= 0x2;
 
 	memcpy(dev->broadcast, &p->raddr, sizeof(struct in6_addr));
 
-	/* Set up flowi template */
 	ipv6_addr_copy(&fl->u.ip6.saddr, &p->laddr);
 	ipv6_addr_copy(&fl->u.ip6.daddr, &p->raddr);
 	fl->flowi_oif = p->link;
-	//fl->u.ip6.flowlabel = 0; 
 	 
 	if (!(p->flags&IP6_TNL_F_USE_ORIG_TCLASS))
 		fl->u.ip6.flowlabel |= IPV6_TCLASS_MASK & p->flowinfo;
@@ -1173,8 +1006,7 @@ static void ethipip6_tnl_link_config(struct ip6_tnl *t)
 	dev->iflink = p->link;
 
 #if defined(CONFIG_SYNO_COMCERTO)
-	/* Initialize the default mtu  of tunnel with it's parent interface
-	mtu */
+	 
 	rcu_read_lock();
 	if (p->link)
 	{
@@ -1200,7 +1032,7 @@ static void ethipip6_tnl_link_config(struct ip6_tnl *t)
 			dev->hard_header_len = rt->rt6i_dev->hard_header_len +
 				sizeof (struct ipv6hdr);
 
-			dev->mtu = rt->rt6i_dev->mtu; //To make bridge happy
+			dev->mtu = rt->rt6i_dev->mtu;  
 
 			if (dev->mtu < IPV6_MIN_MTU)
 				dev->mtu = IPV6_MIN_MTU;
@@ -1208,15 +1040,6 @@ static void ethipip6_tnl_link_config(struct ip6_tnl *t)
 		dst_release(&rt->dst);
 	}
 }
-
-/**
- * ethipip6_tnl_change - update the tunnel parameters
- *   @t: tunnel to be changed
- *   @p: tunnel configuration parameters
- *
- * Description:
- *   ethipip6_tnl_change() updates the tunnel parameters
- **/
 
 static int
 ethipip6_tnl_change(struct ip6_tnl *t, struct ip6_tnl_parm *p)
@@ -1233,34 +1056,6 @@ ethipip6_tnl_change(struct ip6_tnl *t, struct ip6_tnl_parm *p)
 	ethipip6_tnl_link_config(t);
 	return 0;
 }
-
-/**
- * ehtipip6_tnl_ioctl - configure ipv6 tunnels from userspace
- *   @dev: virtual device associated with tunnel
- *   @ifr: parameters passed from userspace
- *   @cmd: command to be performed
- *
- * Description:
- *   ethipip6_tnl_ioctl() is used for managing IPv6 tunnels
- *   from userspace.
- *
- *   The possible commands are the following:
- *     %SIOCGETTUNNEL: get tunnel parameters for device
- *     %SIOCADDTUNNEL: add tunnel matching given tunnel parameters
- *     %SIOCCHGTUNNEL: change tunnel parameters to those given
- *     %SIOCDELTUNNEL: delete tunnel
- *
- *   The fallback device "ethipip6tnl0", created during module
- *   initialization, can be used for creating other tunnel devices.
- *
- * Return:
- *   0 on success,
- *   %-EFAULT if unable to copy data to or from userspace,
- *   %-EPERM if current process hasn't %CAP_NET_ADMIN set
- *   %-EINVAL if passed tunnel parameters are invalid,
- *   %-EEXIST if changing a tunnel's parameters would cause a conflict
- *   %-ENODEV if attempting to change or delete a nonexisting device
- **/
 
 static int
 ethipip6_tnl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
@@ -1347,16 +1142,6 @@ ethipip6_tnl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	return err;
 }
 
-/**
- * ethipip6_tnl_change_mtu - change mtu manually for tunnel device
- *   @dev: virtual device associated with tunnel
- *   @new_mtu: the new mtu
- *
- * Return:
- *   0 on success,
- *   %-EINVAL if mtu too small
- **/
-
 static int
 ethipip6_tnl_change_mtu(struct net_device *dev, int new_mtu)
 {
@@ -1387,14 +1172,6 @@ static const struct net_device_ops ip6_tnl_netdev_ops = {
 	.ndo_stop = ethipip6_stop, 
 };
 
-/**
- * ethipip6_tnl_dev_setup - setup virtual tunnel device
- *   @dev: virtual device associated with tunnel
- *
- * Description:
- *   Initialize function pointers and device parameters
- **/
-
 static void ethipip6_tnl_dev_setup(struct net_device *dev)
 {
 	struct ip6_tnl *t = netdev_priv(dev);
@@ -1411,14 +1188,9 @@ static void ethipip6_tnl_dev_setup(struct net_device *dev)
 		dev->flags |= IFF_POINTOPOINT;
 	dev->iflink = 0; 
 
-	dev->addr_len = ETH_ALEN; //To make bridge happy while adding etherip iface to bridge
+	dev->addr_len = ETH_ALEN;  
 	dev->features |= NETIF_F_NETNS_LOCAL;
 }
-
-/**
- * ethipip6_tnl_dev_init_gen - general initializer for all tunnel devices
- *   @dev: virtual device associated with tunnel
- **/
 
 static inline void
 ethipip6_tnl_dev_init_gen(struct net_device *dev)
@@ -1428,11 +1200,6 @@ ethipip6_tnl_dev_init_gen(struct net_device *dev)
 	strcpy(t->parms.name, dev->name);
 }
 
-/**
- * ethipip6_tnl_dev_init - initializer for all non fallback tunnel devices
- *   @dev: virtual device associated with tunnel
- **/
-
 static int ethipip6_tnl_dev_init(struct net_device *dev)
 {
 	struct ip6_tnl *t = netdev_priv(dev);
@@ -1441,13 +1208,6 @@ static int ethipip6_tnl_dev_init(struct net_device *dev)
 
 	return 0;
 }
-
-/**
- * ethipip6_fb_tnl_dev_init - initializer for fallback tunnel device
- *   @dev: fallback device
- *
- * Return: 0
- **/
 
 static void ethipip6_fb_tnl_dev_init(struct net_device *dev)
 {
@@ -1543,12 +1303,6 @@ static const struct inet6_protocol ethipip6_protocol = {
 	.flags		= 	IPPROTO_ETHERIP,
 };
 
-/**
- * ethipip6_tunnel_init - register protocol and reserve needed resources
- *
- * Return: 0 on success
- **/
-
 static int __init ethipip6_tunnel_init(void)
 {
 	int  err;
@@ -1581,10 +1335,6 @@ unreg_ip4ip6:
 out:
 	return err;
 }
-
-/**
- * ethipip6_tunnel_cleanup - free resources and unregister protocol
- **/
 
 static void __exit ethipip6_tunnel_cleanup(void)
 {

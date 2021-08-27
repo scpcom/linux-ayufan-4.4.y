@@ -6,7 +6,6 @@
 
 #include <linux/rbtree.h>
 
-/* bits for the extent state */
 #define EXTENT_DIRTY 1
 #define EXTENT_WRITEBACK (1 << 1)
 #define EXTENT_UPTODATE (1 << 2)
@@ -26,21 +25,16 @@
 #define EXTENT_IOBITS (EXTENT_LOCKED | EXTENT_WRITEBACK)
 #define EXTENT_CTLBITS (EXTENT_DO_ACCOUNTING | EXTENT_FIRST_DELALLOC)
 
-/*
- * flags for bio submission. The high bits indicate the compression
- * type for this bio
- */
 #define EXTENT_BIO_COMPRESSED 1
 #define EXTENT_BIO_TREE_LOG 2
 #define EXTENT_BIO_PARENT_LOCKED 4
 #define EXTENT_BIO_FLAG_SHIFT 16
 
-/* these are bit numbers for test/set bit */
 #define EXTENT_BUFFER_UPTODATE 0
 #define EXTENT_BUFFER_BLOCKING 1
 #define EXTENT_BUFFER_DIRTY 2
 #define EXTENT_BUFFER_CORRUPT 3
-#define EXTENT_BUFFER_READAHEAD 4	/* this got triggered by readahead */
+#define EXTENT_BUFFER_READAHEAD 4	 
 #define EXTENT_BUFFER_TREE_REF 5
 #define EXTENT_BUFFER_STALE 6
 #define EXTENT_BUFFER_WRITEBACK 7
@@ -51,17 +45,12 @@
 #define EXTENT_BUFFER_CLONE 63
 #endif
 
-/* these are flags for extent_clear_unlock_delalloc */
 #define PAGE_UNLOCK		(1 << 0)
 #define PAGE_CLEAR_DIRTY	(1 << 1)
 #define PAGE_SET_WRITEBACK	(1 << 2)
 #define PAGE_END_WRITEBACK	(1 << 3)
 #define PAGE_SET_PRIVATE2	(1 << 4)
 
-/*
- * page->private values.  Every page that is controlled by the extent
- * map has page->private set to one.
- */
 #define EXTENT_PAGE_PRIVATE 1
 #define EXTENT_PAGE_PRIVATE_FIRST_PAGE 3
 
@@ -110,16 +99,14 @@ struct extent_io_tree {
 
 struct extent_state {
 	u64 start;
-	u64 end; /* inclusive */
+	u64 end;  
 	struct rb_node rb_node;
 
-	/* ADD NEW ELEMENTS AFTER THIS */
 	struct extent_io_tree *tree;
 	wait_queue_head_t wq;
 	atomic_t refs;
 	unsigned long state;
 
-	/* for use by the FS */
 	u64 private;
 
 #ifdef CONFIG_BTRFS_DEBUG
@@ -143,7 +130,6 @@ struct extent_buffer {
 	struct rcu_head rcu_head;
 	pid_t lock_owner;
 
-	/* count of read lock holders on the extent buffer */
 	atomic_t write_locks;
 	atomic_t read_locks;
 	atomic_t blocking_writers;
@@ -152,17 +138,10 @@ struct extent_buffer {
 	atomic_t spinning_writers;
 	int lock_nested;
 
-	/* protects write locks */
 	rwlock_t lock;
 
-	/* readers use lock_wq while they wait for the write
-	 * lock holders to unlock
-	 */
 	wait_queue_head_t write_lock_wq;
 
-	/* writers use read_lock_wq while they wait for readers
-	 * to unlock
-	 */
 	wait_queue_head_t read_lock_wq;
 	wait_queue_head_t lock_wq;
 	struct page *pages[INLINE_EXTENT_BUFFER_PAGES];

@@ -3,48 +3,12 @@
 #endif
 #ifndef _BSD_COMPAT_H_
 #define _BSD_COMPAT_H_ 1
-/****************************************************************************/
-/*
- * Provide compat routines for older linux kernels and BSD kernels
- *
- * Written by David McCullough <david_mccullough@mcafee.com>
- * Copyright (C) 2010 David McCullough <david_mccullough@mcafee.com>
- *
- * LICENSE TERMS
- *
- * The free distribution and use of this software in both source and binary
- * form is allowed (with or without changes) provided that:
- *
- *   1. distributions of this source code include the above copyright
- *      notice, this list of conditions and the following disclaimer;
- *
- *   2. distributions in binary form include the above copyright
- *      notice, this list of conditions and the following disclaimer
- *      in the documentation and/or other associated materials;
- *
- *   3. the copyright holder's name is not used to endorse products
- *      built using this software without specific written permission.
- *
- * ALTERNATIVELY, provided that this notice is retained in full, this file
- * may be distributed under the terms of the GNU General Public License (GPL),
- * in which case the provisions of the GPL apply INSTEAD OF those given above.
- *
- * DISCLAIMER
- *
- * This software is provided 'as is' with no explicit or implied warranties
- * in respect of its properties, including, but not limited to, correctness
- * and/or fitness for purpose.
- */
-/****************************************************************************/
+ 
 #ifdef __KERNEL__
 #include <linux/version.h>
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38) && !defined(AUTOCONF_INCLUDED)
 #include <linux/config.h>
 #endif
-
-/*
- * fake some BSD driver interface stuff specifically for OCF use
- */
 
 typedef struct ocf_device *device_t;
 
@@ -57,8 +21,8 @@ typedef struct {
 #define DEVMETHOD(id, func)	id: func
 
 struct ocf_device {
-	char name[32];		/* the driver name */
-	char nameunit[32];	/* the driver name + HW instance */
+	char name[32];		 
+	char nameunit[32];	 
 	int  unit;
 	device_method_t	methods;
 	void *softc;
@@ -94,16 +58,9 @@ struct ocf_device {
 
 #define	softc_get_device(_sc)	(&(_sc)->_device)
 
-/*
- * iomem support for 2.4 and 2.6 kernels
- */
 #include <linux/version.h>
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 #define ocf_iomem_t	unsigned long
-
-/*
- * implement simple workqueue like support for older kernels
- */
 
 #include <linux/tqueue.h>
 
@@ -138,7 +95,7 @@ struct ocf_device {
 #endif
 
 #ifdef MODULE_PARM
-#undef module_param	/* just in case */
+#undef module_param	 
 #define	module_param(a,b,c)		MODULE_PARM(a,"i")
 #endif
 
@@ -205,8 +162,6 @@ struct ocf_device {
 #define htobe16(x)	cpu_to_be16(x)
 #endif
 
-/* older kernels don't have these */
-
 #include <asm/irq.h>
 #if !defined(IRQ_NONE) && !defined(IRQ_RETVAL)
 #define IRQ_NONE
@@ -237,9 +192,7 @@ typedef irqreturn_t (*irq_handler_t)(int irq, void *arg, struct pt_regs *regs);
 #endif
 #endif
 
-/*
- * common debug for all
- */
+
 #ifdef CONFIG_SYNO_ARMADA_V2
 #undef dprintk
 #endif
@@ -251,12 +204,10 @@ typedef irqreturn_t (*irq_handler_t)(int irq, void *arg, struct pt_regs *regs);
 #endif
 
 #ifndef SLAB_ATOMIC
-/* Changed in 2.6.20, must use GFP_ATOMIC now */
+ 
 #define	SLAB_ATOMIC	GFP_ATOMIC
 #endif
 
-/*
- * need some additional support for older kernels */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,2)
 #define pci_register_driver_compat(driver, rc) \
 	do { \
@@ -321,12 +272,11 @@ struct ocf_thread {
 	void				*arg;
 };
 
-/* thread startup helper func */
 static inline int ocf_run_thread(void *arg)
 {
 	struct ocf_thread *t = (struct ocf_thread *) arg;
 	if (!t)
-		return -1; /* very bad */
+		return -1;  
 	t->task = current;
 	daemonize();
 	spin_lock_irq(&current->sigmask_lock);
@@ -351,7 +301,7 @@ static inline int ocf_run_thread(void *arg)
 		(t.task); \
 	})
 
-#define kthread_bind(t,cpu)	/**/
+#define kthread_bind(t,cpu)	 
 
 #define kthread_should_stop()	(strcmp(current->comm, "stopping") == 0)
 
@@ -372,7 +322,6 @@ static inline int ocf_run_thread(void *arg)
 #define	skb_frag_page(x)	((x)->page)
 #endif
 
-#endif /* __KERNEL__ */
+#endif  
 
-/****************************************************************************/
-#endif /* _BSD_COMPAT_H_ */
+#endif  

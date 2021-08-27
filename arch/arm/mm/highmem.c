@@ -1,17 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/mm/highmem.c -- ARM highmem support
- *
- * Author:	Nicolas Pitre
- * Created:	september 8, 2008
- * Copyright:	Marvell Semiconductors Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
  
 #include <linux/module.h>
 #include <linux/highmem.h>
@@ -51,10 +40,7 @@ void *__kmap_atomic(struct page *page)
 		return page_address(page);
 
 #ifdef CONFIG_DEBUG_HIGHMEM
-	/*
-	 * There is no cache coherency issue when non VIVT, so force the
-	 * dedicated kmap usage for better debugging purposes in that case.
-	 */
+	 
 	if (!cache_is_vivt())
 		kmap = NULL;
 	else
@@ -68,10 +54,7 @@ void *__kmap_atomic(struct page *page)
 	idx = type + KM_TYPE_NR * smp_processor_id();
 	vaddr = __fix_to_virt(FIX_KMAP_BEGIN + idx);
 #ifdef CONFIG_DEBUG_HIGHMEM
-	/*
-	 * With debugging enabled, kunmap_atomic forces that entry to 0.
-	 * Make sure it was indeed properly unmapped.
-	 */
+	 
 #ifdef CONFIG_SYNO_ALPINE
 	BUG_ON(!pte_none(get_fix_pte(vaddr)));
 #else
@@ -82,11 +65,7 @@ void *__kmap_atomic(struct page *page)
 	set_fix_pte(vaddr, mk_pte(page, kmap_prot));
 #else
 	set_pte_ext(TOP_PTE(vaddr), mk_pte(page, kmap_prot), 0);
-	/*
-	 * When debugging is off, kunmap_atomic leaves the previous mapping
-	 * in place, so this TLB flush ensures the TLB is updated with the
-	 * new mapping.
-	 */
+	 
 	local_flush_tlb_kernel_page(vaddr);
 #endif
 
@@ -114,11 +93,11 @@ void __kunmap_atomic(void *kvaddr)
 		local_flush_tlb_kernel_page(vaddr);
 #endif
 #else
-		(void) idx;  /* to kill a warning */
+		(void) idx;   
 #endif
 		kmap_atomic_idx_pop();
 	} else if (vaddr >= PKMAP_ADDR(0) && vaddr < PKMAP_ADDR(LAST_PKMAP)) {
-		/* this address was obtained through kmap_high_get() */
+		 
 		kunmap_high(pte_page(pkmap_page_table[PKMAP_NR(vaddr)]));
 	}
 	pagefault_enable();

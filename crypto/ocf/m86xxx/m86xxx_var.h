@@ -1,54 +1,11 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*-----------------------------------------------------------------------
-//
-// Proprietary Information of Elliptic Semiconductor
-// Copyright (C) 2002, all rights reserved
-// Elliptic Semiconductor, Inc.
-//
-// As part of our confidentiality  agreement, Elliptic Semiconductor and
-// the Company, as  a  Receiving Party, of  this  information  agrees to
-// keep strictly  confidential  all Proprietary Information  so received
-// from Elliptic Semiconductor. Such Proprietary Information can be used
-// solely for  the  purpose  of evaluating  and/or conducting a proposed
-// business  relationship  or  transaction  between  the  parties.  Each
-// Party  agrees  that  any  and  all  Proprietary  Information  is  and
-// shall remain confidential and the property of Elliptic Semiconductor.
-// The  Company  may  not  use  any of  the  Proprietary  Information of
-// Elliptic Semiconductor for any purpose other  than  the  above-stated
-// purpose  without the prior written consent of Elliptic Semiconductor.
-//
-//-----------------------------------------------------------------------
-//
-// Project:
-//
-//   ELP - TOE
-//
-// Description:
-//
-//   
-// This file maps defines a system abstraction layer for some generic 
-// functions and data structures
-// 	
-//
-//-----------------------------------------------------------------------
-//
-// Language:         C
-//
-//
-// Filename:         $Source: 
-// Current Revision: $Revision: 1. $
-// Last Updated:     $Date: 2012/06/22 014:30:56 $
-// Current Tag:      $Name:  $
-//
-//
-//-----------------------------------------------------------------------*/
  
 #ifndef _ELPVAR_H_
 #define _ELPVAR_H_
 
-#include <linux/types.h>	/* size_t */
+#include <linux/types.h>	 
 
 #include <asm/io.h>
 #include "m86xxx_utils.h"
@@ -60,17 +17,10 @@
 
 #define DRV_NAME "Comcerto 2000 ELP Crypto Offload Engine " 
 
-/* Maximum queue length */
-/*
-#ifndef M821_MAX_NQUEUE
-#define M821_MAX_NQUEUE	60
-#endif
-*/
-
-#define	ELP_MAX_PART		8	/* Maximum scatter/gather depth */
+#define	ELP_MAX_PART		8	 
 #define ELP_MAX_ARAM_SA		8
 #define ELP_PE_RING_SIZE	64
-#define ELP_MAX_ESPAH_OVERHEAD	8+16+18+12 // ESP + IV + max pad + 2 + 12
+#define ELP_MAX_ESPAH_OVERHEAD	8+16+18+12  
 
 #define	ELP_SESSION(sid)	( (sid) & 0x0fffffff)
 #define	ELP_SID(id, sesn)	(((id+1) << 28) | ((sesn) & 0x0fffffff))
@@ -90,21 +40,20 @@
 struct elp_session {
 	u_int32_t	ses_used;
 	u_int32_t	ses_new;
-	u_int32_t	ses_cipher_klen;	/* key length in bits */
-	u_int32_t	ses_cipher_key[8];	/* DES/3DES/AES key */
+	u_int32_t	ses_cipher_klen;	 
+	u_int32_t	ses_cipher_key[8];	 
 	u_int32_t	ses_iv_size;
 	u_int32_t	ses_iv[4];
 	u_int32_t	ses_hmac_klen;
 	u_int32_t	ses_hmac_key[8];
 	u_int32_t	ses_hmac_res[8];
 
-	// raw crypto parameters
-	u_int32_t	ses_mode;		// CBC ECB CTR CIPHER HMAC
+	u_int32_t	ses_mode;		 
 	u_int32_t	ses_auth_alg;
 	u_int32_t	ses_cipher_alg;
 	u_int32_t	ses_packet_alg;
 	u_int32_t	ses_alg_flags;
-	// Packet engine session parameters
+	 
 	u_int32_t	ses_direction;
 	dma_addr_t 	ses_sa_dma;
 	void*		ses_sa_vma;
@@ -114,21 +63,13 @@ struct elp_session {
 	u_int32_t 	ses_first_packet;
 };
 
-/*
- * Cryptographic operand state.  One of these exists for each
- * source and destination operand passed in from the crypto
- * subsystem.  When possible source and destination operands
- * refer to the same memory.  More often they are distinct.
- * We track the virtual address of each operand as well as
- * where each is mapped for DMA.
- */
 struct elp_operand {
 	union {
 		struct sk_buff *skb;
 		struct uio *io;
 	} u;
 	void		*map;
-	int		 mapsize;	/* total number of bytes in segs */
+	int		 mapsize;	 
 	struct {
 		dma_addr_t	ds_addr;
 		int		ds_len;
@@ -137,9 +78,6 @@ struct elp_operand {
 	int			nsegs;
 };
 
-/*
- * Scatter/Gather data descriptor table.
- */
 struct elp_ddtdesc {
 	volatile u_int32_t	frag_addr;		
 	volatile u_int32_t	frag_size;		
@@ -148,20 +86,20 @@ struct elp_ddtdesc {
 struct elp_desc {
 	u_int32_t			d_src_ddt_addr;
 	u_int32_t			d_dst_ddt_addr;
-	u_int32_t			d_src_ddt_size;		 /* number of fragments (2 if flat) */
-	u_int32_t			d_dst_ddt_size;		 /* number of fragments (2 if flat) */
+	u_int32_t			d_src_ddt_size;		  
+	u_int32_t			d_dst_ddt_size;		  
 	u_int32_t			d_sa_addr;
 	u_int32_t			d_status;
 };
 
 struct elp_ringentry {	
-	struct elp_desc		re_desc;		/* command descriptor */
-	struct cryptop		*re_crp;		/* crypto operation */
+	struct elp_desc		re_desc;		 
+	struct cryptop		*re_crp;		 
 
-	struct elp_operand	re_src;		/* source operand */
-	struct elp_operand	re_dst;		/* destination operand */
+	struct elp_operand	re_src;		 
+	struct elp_operand	re_dst;		 
 
-	struct elp_session	*re_ses;	/* crypto session  */
+	struct elp_session	*re_ses;	 
 	int			re_flags;	
 };
 
@@ -181,37 +119,37 @@ struct elp_ringentry {
 
 struct elp_packet_engine{
 
-	spinlock_t		 pe_ringmtx;		/* Packet Engine ring lock */
+	spinlock_t		 pe_ringmtx;		 
 	int			 pe_flags;
-	struct elp_ringentry	*pe_ring;		/* PE ring */
-	struct elp_ringentry	*pe_ringtop;		/* PE ring top */
-	struct elp_ringentry	*pe_front;		/* next free entry */
-	struct elp_ringentry	*pe_back;		/* next pending entry */
+	struct elp_ringentry	*pe_ring;		 
+	struct elp_ringentry	*pe_ringtop;		 
+	struct elp_ringentry	*pe_front;		 
+	struct elp_ringentry	*pe_back;		 
 
-	dma_addr_t		 pe_src_ddt_dma;	/* DDT area (ARAM) */
+	dma_addr_t		 pe_src_ddt_dma;	 
 	void			*pe_src_ddt_vma;
 	int			 pe_src_ddtavail;	
-	struct elp_ddtdesc	*pe_src_ddtring;		/* source DDT ring */
+	struct elp_ddtdesc	*pe_src_ddtring;		 
 	struct elp_ddtdesc	*pe_src_ddtringtop;
 	struct elp_ddtdesc	*pe_src_ddtfree;
 	struct elp_ddtdesc	*pe_src_ddtbusy;
 
-	dma_addr_t		 pe_dst_ddt_dma;	/* DDT area (ARAM) */
+	dma_addr_t		 pe_dst_ddt_dma;	 
 	void			*pe_dst_ddt_vma;	
 	int			 pe_dst_ddtavail;
-	struct elp_ddtdesc	*pe_dst_ddtring;	/* Inbound destination DDT ring */
+	struct elp_ddtdesc	*pe_dst_ddtring;	 
 	struct elp_ddtdesc	*pe_dst_ddtringtop;
 	struct elp_ddtdesc	*pe_dst_ddtfree;
 	struct elp_ddtdesc	*pe_dst_ddtbusy;
 
-	int			 pe_needwakeup;	/* notify crypto layer */
-	int			 pe_nqchip;		/* # passed to chip */
+	int			 pe_needwakeup;	 
+	int			 pe_nqchip;		 
 
 };
 
 struct elp_aram_sa {
 	int		sa_used;
-	dma_addr_t	sa_aram_dma;		/* SADB address in internal SRAM (ARAM)*/
+	dma_addr_t	sa_aram_dma;		 
 	void		*sa_aram_vma;
 };	
 
@@ -244,19 +182,19 @@ struct elp_softc {
 	u32			sc_aram_base;
 	u32			sc_irq;
 	u32			sc_irq2;
-	u32			sc_cid;			/* crypto tag */
+	u32			sc_cid;			 
 
 	struct elp_packet_engine sc_pe[2];
-	struct elp_aram_sa	 sc_aram_sa[ELP_MAX_ARAM_SA];	/* SA located in ARAM */
-	struct dma_pool		*sc_sa_ddr_dma;		/* additional SA in external DDR */
-	int			sc_flags;		/* device specific flags */
-	int			sc_nsessions;	/* # of sessions */
-	struct elp_session	*sc_sessions;	/* sessions (can be Packet Engine or raw crypto module)*/
-	struct cryptop		*crp;		/* raw crypto request descriptor from OCF */
-	struct cryptkop 	*krp;		/* key genration request descriptor from OCF */
-	struct list_head	sc_pkq;		/* queue of PKA requests */
-	struct pka_pkq		*sc_pkq_cur;	/* PKA request in use */
-	int			sc_needwakeup;	/* notify crypto layer */
+	struct elp_aram_sa	 sc_aram_sa[ELP_MAX_ARAM_SA];	 
+	struct dma_pool		*sc_sa_ddr_dma;		 
+	int			sc_flags;		 
+	int			sc_nsessions;	 
+	struct elp_session	*sc_sessions;	 
+	struct cryptop		*crp;		 
+	struct cryptkop 	*krp;		 
+	struct list_head	sc_pkq;		 
+	struct pka_pkq		*sc_pkq_cur;	 
+	int			sc_needwakeup;	 
 
 	struct tasklet_struct	irq_in_tasklet;
 	struct tasklet_struct 	irq_out_tasklet;

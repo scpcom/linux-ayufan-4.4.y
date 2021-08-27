@@ -1,25 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/fs/ext3/file.c
- *
- * Copyright (C) 1992, 1993, 1994, 1995
- * Remy Card (card@masi.ibp.fr)
- * Laboratoire MASI - Institut Blaise Pascal
- * Universite Pierre et Marie Curie (Paris VI)
- *
- *  from
- *
- *  linux/fs/minix/file.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- *
- *  ext3 fs regular file handling primitives
- *
- *  64-bit file support on 64-bit platforms by Jakub Jelinek
- *	(jj@sunsite.ms.mff.cuni.cz)
- */
  
 #include <linux/time.h>
 #include <linux/fs.h>
@@ -30,18 +11,13 @@
 #include "xattr.h"
 #include "acl.h"
 
-/*
- * Called when an inode is released. Note that this is different
- * from ext3_file_open: open gets called at every open, but release
- * gets called only when /all/ the files are closed.
- */
 static int ext3_release_file (struct inode * inode, struct file * filp)
 {
 	if (ext3_test_inode_state(inode, EXT3_STATE_FLUSH_ON_CLOSE)) {
 		filemap_flush(inode->i_mapping);
 		ext3_clear_inode_state(inode, EXT3_STATE_FLUSH_ON_CLOSE);
 	}
-	/* if we are the last writer on the inode, drop the block reservation */
+	 
 	if ((filp->f_mode & FMODE_WRITE) &&
 			(atomic_read(&inode->i_writecount) == 1))
 	{

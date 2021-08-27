@@ -1,38 +1,31 @@
 #include <linux/file.h>
-#include <linux/fs.h> /* struct inode */
+#include <linux/fs.h>  
 #include <linux/fsnotify_backend.h>
 #include <linux/idr.h>
-#include <linux/init.h> /* module_init */
+#include <linux/init.h>  
 #include <linux/synotify.h>
-#include <linux/kernel.h> /* roundup() */
-#include <linux/namei.h> /* LOOKUP_FOLLOW */
-#include <linux/sched.h> /* struct user */
-#include <linux/slab.h> /* struct kmem_cache */
+#include <linux/kernel.h>  
+#include <linux/namei.h>  
+#include <linux/sched.h>  
+#include <linux/slab.h>  
 #include <linux/syscalls.h>
 #include <linux/types.h>
 #include <linux/anon_inodes.h>
 #include <linux/uaccess.h>
 #include <linux/poll.h>
 #include <linux/wait.h>
-#include <linux/mount.h> /* struct vfsmount */
+#include <linux/mount.h>  
 
 #include <asm/ioctls.h>
 
-#define SYNOTIFY_DEFAULT_MAX_EVENTS	16384 /* per group */
-#define SYNOTIFY_DEFAULT_MAX_WATCHERS	8192 /* per group */
-#define SYNOTIFY_DEFAULT_MAX_INSTANCES	128 /* per user */
+#define SYNOTIFY_DEFAULT_MAX_EVENTS	16384  
+#define SYNOTIFY_DEFAULT_MAX_WATCHERS	8192  
+#define SYNOTIFY_DEFAULT_MAX_INSTANCES	128  
 
 extern const struct fsnotify_ops synotify_fsnotify_ops;
 
 static struct kmem_cache *synotify_mark_cache __read_mostly;
 
-/*
- * Get an fsnotify notification event if one exists and is small
- * enough to fit in "count". Return an error pointer if the count
- * is not large enough.
- *
- * Called with the group->notification_mutex held.
- */
 static struct fsnotify_event *get_one_event(struct fsnotify_group *group,
 					    size_t count)
 {
@@ -54,8 +47,6 @@ static struct fsnotify_event *get_one_event(struct fsnotify_group *group,
 	if (event_size > count)
 		return ERR_PTR(-EINVAL);
 
-	/* held the notification_mutex the whole time, so this is the
-	 * same event we peeked above */
 	return fsnotify_remove_notify_event(group);
 }
 
@@ -75,10 +66,6 @@ static ssize_t copy_event_to_user(struct fsnotify_group *group,
 
 	pr_debug("%s: group=%p event=%p\n", __func__, group, event);
 
-	/*
-	 * round up event->name_len so it is a multiple of event_size
-	 * plus an extra byte for the terminating '\0'.
-	 */
 	if (event->full_name_len)
 		name_len = roundup(event->full_name_len + 1, event_size);
 
@@ -86,25 +73,18 @@ static ssize_t copy_event_to_user(struct fsnotify_group *group,
 	synotify_event.mask = synotify_mask_to_arg(event->mask);
 	synotify_event.cookie = event->sync_cookie;
 
-	/* send the main event */
 	if (copy_to_user(buf, &synotify_event, event_size))
 		return -EFAULT;
 
 	buf += event_size;
 
-	/*
-	 * fsnotify only stores the pathname, so here we have to send the pathname
-	 * and then pad that pathname out to a multiple of sizeof(inotify_event)
-	 * with zeros.  I get my zeros from the nul_inotify_event.
-	 */
 	if (name_len) {
 		unsigned int len_to_zero = name_len - event->full_name_len;
-		/* copy the path name */
+		 
 		if (copy_to_user(buf, event->full_name, event->full_name_len))
 			return -EFAULT;
 		buf += event->full_name_len;
 
-		/* fill userspace with 0's */
 		if (clear_user(buf, len_to_zero))
 			return -EFAULT;
 		buf += len_to_zero;
@@ -114,7 +94,6 @@ static ssize_t copy_event_to_user(struct fsnotify_group *group,
 	return event_size;
 }
 
-/* synotifiy userspace file descriptor functions */
 static unsigned int synotify_poll(struct file *file, poll_table *wait)
 {
 	struct fsnotify_group *group = file->private_data;
@@ -190,7 +169,6 @@ static int synotify_release(struct inode *ignored, struct file *file)
 
 	fsnotify_clear_marks_by_group(group);
 
-	/* matches the fanotify_init->fsnotify_alloc_group */
 	fsnotify_put_group(group);
 
 	return 0;
@@ -254,7 +232,7 @@ static int synotify_find_path(const char __user *filename,
 	error = user_path_at(AT_FDCWD, filename, flags, path);
 	if (error)
 		return error;
-	/* you can only watch an inode if you have read permissions on it */
+	 
 	error = inode_permission(path->dentry->d_inode, MAY_READ);
 	if (error)
 		path_put(path);
@@ -294,9 +272,8 @@ static int synotify_remove_vfsmount_mark(struct fsnotify_group *group,
 
 	removed = synotify_mark_remove_from_mask(fsn_mark, mask);
 
-	/* synotify_mark_remove_from_mask invokes fsnotify_get_mark, so we put here */
 	fsnotify_put_mark(fsn_mark);
-	// FIXME: it will remove entire mount mask
+	 
 	if (removed & mnt->mnt_fsnotify_mask)
 		fsnotify_recalc_vfsmount_mask(mnt);
 
@@ -318,7 +295,6 @@ static __u32 synotify_mark_add_to_mask(struct fsnotify_mark *fsn_mark,
 
 	spin_unlock(&fsn_mark->lock);
 
-	/* return new add event */
 	return setmask & ~oldmask;
 }
 
@@ -344,10 +320,8 @@ static int synotify_add_vfsmount_mark(struct fsnotify_group *group,
 			goto err;
 	}
 
-	/* update mark flags/ignored_flags */
 	added = synotify_mark_add_to_mask(fsn_mark, mask);
 
-	/* Check if we have any new event we need to take care */
 	if (added & ~mnt->mnt_fsnotify_mask)
 		fsnotify_recalc_vfsmount_mask(mnt);
 err:
@@ -355,7 +329,6 @@ err:
 	return ret;
 }
 
-/* synotify syscalls */
 SYSCALL_DEFINE1(SYNONotifyInit, unsigned int, flags)
 {
 	struct fsnotify_group *group;
@@ -384,7 +357,6 @@ SYSCALL_DEFINE1(SYNONotifyInit, unsigned int, flags)
 		return -EMFILE;
 	}
 
-	/* fsnotify_alloc_group takes a ref.  Dropped in synotify_release */
 	group = fsnotify_alloc_group(&synotify_fsnotify_ops);
 	if (IS_ERR(group)) {
 		free_uid(user);
@@ -424,7 +396,6 @@ SYSCALL_DEFINE3(SYNONotifyRemoveWatch, int, synotify_fd, const char __user *, pa
 
 	pr_debug("%s: synotify_fd=%d pathname=%p mask=%llx\n",__FUNCTION__, synotify_fd, pathname, mask);
 
-	/* we only use the lower 32 bits as of right now. */
 	if (mask & ((__u64)0xffffffff << 32))
 		return ret;
 
@@ -432,7 +403,6 @@ SYSCALL_DEFINE3(SYNONotifyRemoveWatch, int, synotify_fd, const char __user *, pa
 	if (unlikely(!filp))
 		return -EBADF;
 
-	/* verify that this is indeed an fanotify instance */
 	if (unlikely(filp->f_op != &synotify_fops))
 		goto fput_and_out;
 
@@ -473,7 +443,6 @@ SYSCALL_DEFINE3(SYNONotifyAddWatch, int, synotify_fd, const char __user *, pathn
 	pr_debug("%s: synotify_fd=%d pathname=%p mask=%llx\n",
 		 __func__, synotify_fd, pathname, mask);
 
-	/* we only use the lower 32 bits as of right now. */
 	if (mask & ((__u64)0xffffffff << 32))
 		return ret;
 
@@ -481,7 +450,6 @@ SYSCALL_DEFINE3(SYNONotifyAddWatch, int, synotify_fd, const char __user *, pathn
 	if (unlikely(!filp))
 		return -EBADF;
 
-	/* verify that this is indeed an syno notify instance */
 	if (unlikely(filp->f_op != &synotify_fops))
 		goto fput_and_out;
 
@@ -494,7 +462,6 @@ SYSCALL_DEFINE3(SYNONotifyAddWatch, int, synotify_fd, const char __user *, pathn
 
 	group = filp->private_data;
 
-	/* In current design, synotify monitors mount point event only */
 	mnt = path.mnt;
 
 	ret = synotify_add_vfsmount_mark(group, mnt, mask);

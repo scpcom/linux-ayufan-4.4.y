@@ -1,51 +1,14 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
  
-This software file (the "File") is owned and distributed by Marvell 
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or 
-modify this File in accordance with the terms and conditions of the General 
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is 
-available along with the File in the license.txt file or by writing to the Free 
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or 
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt. 
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY 
-DISCLAIMED.  The GPL License provides additional details about this warranty 
-disclaimer.
-*******************************************************************************/
-/*******************************************************************************
-* mvIALCommon.h
-*
-* DESCRIPTION:
-*       H implementation for IAL's common functions.
-*
-* DEPENDENCIES:
-*   mvSata.h
-*   mvStorageDev.h
-*
-*******************************************************************************/
 #ifndef __INCmvIALCommonh
 #define __INCmvIALCommonh
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif  
 
-/* includes */
 #include "mvSata.h"
 #include "mvStorageDev.h"
 
@@ -53,14 +16,14 @@ extern "C" {
 #include <linux/synosata.h>
 #endif
 
-/* defines  */
 
-/*Timer period in milliseconds*/
+
+
 #define MV_IAL_ASYNC_TIMER_PERIOD       500
 #define MV_IAL_SRST_TIMEOUT             31000
 #define MV_IAL_WAIT_FOR_RDY_TIMEOUT     10000
-/* typedefs */
  
+
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #define syno_eh_printk(pMvSataAdapter, channel, fmt, args...) \
         printk("mvSata[%d %d]: "fmt".\n", pMvSataAdapter->adapterId, channel, ##args)
@@ -102,11 +65,11 @@ typedef struct mvDrivesInfo
 typedef enum mvPortState
 {
     MV_PORT_NOT_INITIALIZED,
-    MV_PORT_WAIT_FOR_RDY, /* wait for the disk's signature*/
+    MV_PORT_WAIT_FOR_RDY,  
     MV_PORT_ISSUE_SRST,
     MV_PORT_IN_SRST,
     MV_PORT_INIT_DEVICE,
-    MV_PORT_DONE, /* PM ports scan is complete successfully*/
+    MV_PORT_DONE,  
     MV_PORT_FAILED
 } MV_PORT_STATE;
 
@@ -141,7 +104,6 @@ typedef struct mvIALCommonAdapterExtension
     MV_IAL_COMMON_CHANNEL_EXTENSION IALChannelExt[MV_SATA_CHANNELS_NUM];
 } MV_IAL_COMMON_ADAPTER_EXTENSION;
 
-/*Public functions*/
 MV_BOOLEAN mvAdapterStartInitialization(MV_SATA_ADAPTER* pSataAdapter,
                                         MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                         MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt);
@@ -204,8 +166,6 @@ MV_BOOLEAN mvRemoveFromSCSICommandQueue(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                         MV_U8 channelIndex,
                                         MV_SATA_SCSI_CMD_BLOCK *pScb);
 
-/*The following functions which must be implemented in IAL*/
-
 MV_BOOLEAN IALConfigQueuingMode(MV_SATA_ADAPTER *pSataAdapter,
                                 MV_U8 channelIndex,
                                 MV_EDMA_MODE mode,
@@ -232,6 +192,6 @@ MV_BOOLEAN IALBusChangeNotifyEx(MV_SATA_ADAPTER *pSataAdapter,
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif  
 
-#endif /* __INCmvIALCommonh */
+#endif  

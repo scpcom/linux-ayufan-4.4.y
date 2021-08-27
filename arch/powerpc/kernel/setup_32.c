@@ -1,9 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Common prep/pmac/chrp boot and setup code.
- */
  
 #include <linux/module.h>
 #include <linux/string.h>
@@ -114,37 +111,18 @@ unsigned long vgacon_remap_base;
 EXPORT_SYMBOL(vgacon_remap_base);
 #endif
 
-/*
- * These are used in binfmt_elf.c to put aux entries on the stack
- * for each elf executable being started.
- */
 int dcache_bsize;
 int icache_bsize;
 int ucache_bsize;
 
-/*
- * We're called here very early in the boot.  We determine the machine
- * type and call the appropriate low-level setup functions.
- *  -- Cort <cort@fsmlabs.com>
- *
- * Note that the kernel may be running at an address which is different
- * from the address that it was linked at, so we must use RELOC/PTRRELOC
- * to access static data (including strings).  -- paulus
- */
 notrace unsigned long __init early_init(unsigned long dt_ptr)
 {
 	unsigned long offset = reloc_offset();
 	struct cpu_spec *spec;
 
-	/* First zero the BSS -- use memset_io, some platforms don't have
-	 * caches on yet */
 	memset_io((void __iomem *)PTRRELOC(&__bss_start), 0,
 			__bss_stop - __bss_start);
 
-	/*
-	 * Identify the CPU type and fix up code sections
-	 * that depend on which cpu we have.
-	 */
 	spec = identify_cpu(offset, mfspr(SPRN_PVR));
 
 	do_feature_fixups(spec->cpu_features,
@@ -164,20 +142,12 @@ notrace unsigned long __init early_init(unsigned long dt_ptr)
 	return KERNELBASE + offset;
 }
 
-/*
- * Find out what kind of machine we're on and save any data we need
- * from the early boot process (devtree is copied on pmac by prom_init()).
- * This is called very early on the boot process, after a minimal
- * MMU environment has been set up but before MMU_init is called.
- */
 notrace void __init machine_init(u64 dt_ptr)
 {
 	lockdep_init();
 
-	/* Enable early debugging if any specified (see udbg.h) */
 	udbg_early_init();
 
-	/* Do some early initialization based on the flat device tree */
 	early_init_devtree(__va(dt_ptr));
 
 	early_init_mmu();
@@ -202,7 +172,7 @@ notrace void __init machine_init(u64 dt_ptr)
 }
 
 #ifdef CONFIG_BOOKE_WDT
-/* Checks wdt=x and wdt_period=xx command-line option */
+ 
 notrace int __init early_parse_wdt(char *p)
 {
 	if (p && strncmp(p, "0", 1) != 0)
@@ -220,16 +190,15 @@ int __init early_parse_wdt_period (char *p)
 	return 0;
 }
 early_param("wdt_period", early_parse_wdt_period);
-#endif	/* CONFIG_BOOKE_WDT */
+#endif	 
 
-/* Checks "l2cr=xxxx" command-line option */
 int __init ppc_setup_l2cr(char *str)
 {
 	if (cpu_has_feature(CPU_FTR_L2CR)) {
 		unsigned long val = simple_strtoul(str, NULL, 0);
 		printk(KERN_INFO "l2cr set to %lx\n", val);
-		_set_L2CR(0);		/* force invalidate by disable cache */
-		_set_L2CR(val);		/* and enable it */
+		_set_L2CR(0);		 
+		_set_L2CR(val);		 
 	}
 	return 1;
 }
@@ -418,13 +387,12 @@ static int __init early_disk_seq_reserve(char *p)
 __setup("DiskSeqReverse=", early_disk_seq_reserve);
 #endif
 
-/* Checks "l3cr=xxxx" command-line option */
 int __init ppc_setup_l3cr(char *str)
 {
 	if (cpu_has_feature(CPU_FTR_L3CR)) {
 		unsigned long val = simple_strtoul(str, NULL, 0);
 		printk(KERN_INFO "l3cr set to %lx\n", val);
-		_set_L3CR(val);		/* and enable it */
+		_set_L3CR(val);		 
 	}
 	return 1;
 }
@@ -456,7 +424,6 @@ __setup("syno_disable_usb3=", early_factory_usb3_disable);
 
 #ifdef CONFIG_GENERIC_NVRAM
 
-/* Generic nvram hooks used by drivers/char/gen_nvram.c */
 unsigned char nvram_read_byte(int addr)
 {
 	if (ppc_md.nvram_read_val)
@@ -487,15 +454,14 @@ void nvram_sync(void)
 }
 EXPORT_SYMBOL(nvram_sync);
 
-#endif /* CONFIG_NVRAM */
+#endif  
 
 int __init ppc_init(void)
 {
-	/* clear the progress line */
+	 
 	if (ppc_md.progress)
 		ppc_md.progress("             ", 0xffff);
 
-	/* call platform init */
 	if (ppc_md.init != NULL) {
 		ppc_md.init();
 	}
@@ -508,8 +474,6 @@ static void __init irqstack_early_init(void)
 {
 	unsigned int i;
 
-	/* interrupt stacks must be in lowmem, we get that for free on ppc32
-	 * as the memblock is limited to lowmem by default */
 	for_each_possible_cpu(i) {
 		softirq_ctx[i] = (struct thread_info *)
 			__va(memblock_alloc(THREAD_SIZE, THREAD_SIZE));
@@ -523,8 +487,6 @@ static void __init exc_lvl_early_init(void)
 {
 	unsigned int i, hw_cpu;
 
-	/* interrupt stacks must be in lowmem, we get that for free on ppc32
-	 * as the memblock is limited to lowmem by MEMBLOCK_REAL_LIMIT */
 	for_each_possible_cpu(i) {
 		hw_cpu = get_hard_smp_processor_id(i);
 		critirq_ctx[hw_cpu] = (struct thread_info *)
@@ -541,12 +503,10 @@ static void __init exc_lvl_early_init(void)
 #define exc_lvl_early_init()
 #endif
 
-/* Warning, IO base is not yet inited */
 void __init setup_arch(char **cmdline_p)
 {
 	*cmdline_p = cmd_line;
 
-	/* so udelay does something sensible, assume <= 1000 bogomips */
 	loops_per_jiffy = 500000000 / HZ;
 
 	unflatten_device_tree();
@@ -565,23 +525,16 @@ void __init setup_arch(char **cmdline_p)
 
 	smp_setup_cpu_maps();
 
-	/* Register early console */
 	register_early_udbg_console();
 
 	xmon_setup();
 
-	/*
-	 * Set cache line size based on type of cpu as a default.
-	 * Systems with OF can look in the properties on the cpu node(s)
-	 * for a possibly more accurate value.
-	 */
 	dcache_bsize = cur_cpu_spec->dcache_bsize;
 	icache_bsize = cur_cpu_spec->icache_bsize;
 	ucache_bsize = 0;
 	if (cpu_has_feature(CPU_FTR_UNIFIED_ID_CACHE))
 		ucache_bsize = icache_bsize = dcache_bsize;
 
-	/* reboot on panic */
 	panic_timeout = 180;
 
 	if (ppc_md.panic)
@@ -596,7 +549,6 @@ void __init setup_arch(char **cmdline_p)
 
 	irqstack_early_init();
 
-	/* set up the bootmem stuff with available memory */
 	do_init_bootmem();
 	if ( ppc_md.progress ) ppc_md.progress("setup_arch: bootmem", 0x3eab);
 
@@ -610,7 +562,6 @@ void __init setup_arch(char **cmdline_p)
 
 	paging_init();
 
-	/* Initialize the MMU context management stuff */
 	mmu_context_init();
 
 }

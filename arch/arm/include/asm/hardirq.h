@@ -20,7 +20,7 @@ typedef struct {
 #endif
 } ____cacheline_aligned irq_cpustat_t;
 
-#include <linux/irq_cpustat.h>	/* Standard mappings for irq_cpustat_t above */
+#include <linux/irq_cpustat.h>	 
 
 #define __inc_irq_stat(cpu, member)	__IRQ_STAT(cpu, member)++
 #define __get_irq_stat(cpu, member)	__IRQ_STAT(cpu, member)
@@ -41,15 +41,10 @@ u64 smp_irq_stat_cpu(unsigned int cpu);
 #define HARDIRQ_BITS	8
 #endif
 
-/*
- * The hardirq mask has to be large enough to have space
- * for potentially all IRQ sources in the system nesting
- * on a single CPU:
- */
 #if (1 << HARDIRQ_BITS) < NR_IRQS
 # error HARDIRQ_BITS is too low!
 #endif
 
 #define __ARCH_IRQ_EXIT_IRQS_DISABLED	1
 
-#endif /* __ASM_HARDIRQ_H */
+#endif  

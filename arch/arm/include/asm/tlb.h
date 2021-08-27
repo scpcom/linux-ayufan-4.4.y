@@ -1,22 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  arch/arm/include/asm/tlb.h
- *
- *  Copyright (C) 2002 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- *  Experimentation shows that on a StrongARM, it appears to be faster
- *  to use the "invalidate whole tlb" rather than "invalidate single
- *  tlb" for this.
- *
- *  This appears true for both the process fork+exit case, as well as
- *  the munmap-large-area case.
- */
+ 
 #ifndef __ASMARM_TLB_H
 #define __ASMARM_TLB_H
 
@@ -30,18 +15,12 @@
 
 #include <asm-generic/tlb.h>
 
-#else /* !CONFIG_MMU */
+#else  
 
 #include <linux/swap.h>
 #include <asm/pgalloc.h>
 #include <asm/tlbflush.h>
 
-/*
- * We need to delay page freeing for SMP as other CPUs can access pages
- * which have been removed but not yet had their TLB entries invalidated.
- * Also, as ARMv7 speculative prefetch can drag new entries into the TLB,
- * we need to apply this same delaying tactic to ensure correct operation.
- */
 #if defined(CONFIG_SMP) || defined(CONFIG_CPU_32v7)
 #define tlb_fast_mode(tlb)	0
 #else
@@ -50,10 +29,6 @@
 
 #define MMU_GATHER_BUNDLE	8
 
-/*
- * TLB handling.  This allows us to remove pages from the page
- * tables, and efficiently handle the TLB issues.
- */
 struct mmu_gather {
 	struct mm_struct	*mm;
 	unsigned int		fullmm;
@@ -68,19 +43,6 @@ struct mmu_gather {
 
 DECLARE_PER_CPU(struct mmu_gather, mmu_gathers);
 
-/*
- * This is unnecessarily complex.  There's three ways the TLB shootdown
- * code is used:
- *  1. Unmapping a range of vmas.  See zap_page_range(), unmap_region().
- *     tlb->fullmm = 0, and tlb_start_vma/tlb_end_vma will be called.
- *     tlb->vma will be non-NULL.
- *  2. Unmapping all vmas.  See exit_mmap().
- *     tlb->fullmm = 1, and tlb_start_vma/tlb_end_vma will be called.
- *     tlb->vma will be non-NULL.  Additionally, page tables will be freed.
- *  3. Unmapping argument pages.  See shift_arg_pages().
- *     tlb->fullmm = 0, but tlb_start_vma/tlb_end_vma will not be called.
- *     tlb->vma will be NULL.
- */
 static inline void tlb_flush(struct mmu_gather *tlb)
 {
 	if (tlb->fullmm || !tlb->vma)
@@ -140,27 +102,18 @@ tlb_finish_mmu(struct mmu_gather *tlb, unsigned long start, unsigned long end)
 {
 	tlb_flush_mmu(tlb);
 
-	/* keep the page table cache within bounds */
 	check_pgt_cache();
 
 	if (tlb->pages != tlb->local)
 		free_pages((unsigned long)tlb->pages, 0);
 }
 
-/*
- * Memorize the range for the TLB flush.
- */
 static inline void
 tlb_remove_tlb_entry(struct mmu_gather *tlb, pte_t *ptep, unsigned long addr)
 {
 	tlb_add_flush(tlb, addr);
 }
 
-/*
- * In the case of tlb vma handling, we can optimise these away in the
- * case where we're doing a full MM flush.  When we're doing a munmap,
- * the vmas are adjusted to only cover the region to be torn down.
- */
 static inline void
 tlb_start_vma(struct mmu_gather *tlb, struct vm_area_struct *vma)
 {
@@ -183,7 +136,7 @@ static inline int __tlb_remove_page(struct mmu_gather *tlb, struct page *page)
 {
 	if (tlb_fast_mode(tlb)) {
 		free_page_and_swap_cache(page);
-		return 1; /* avoid calling tlb_flush_mmu */
+		return 1;  
 	}
 
 	tlb->pages[tlb->nr++] = page;
@@ -205,10 +158,7 @@ static inline void __pte_free_tlb(struct mmu_gather *tlb, pgtable_t pte,
 #if defined(CONFIG_ARM_LPAE) && defined(CONFIG_SYNO_ALPINE_FIX_USB_HANG)
 	tlb_add_flush(tlb, addr);
 #else
-	/*
-	 * With the classic ARM MMU, a pte page has two corresponding pmd
-	 * entries, each covering 1MB.
-	 */
+	 
 	addr &= PMD_MASK;
 	tlb_add_flush(tlb, addr + SZ_1M - PAGE_SIZE);
 	tlb_add_flush(tlb, addr + SZ_1M);
@@ -240,5 +190,5 @@ static inline void __pmd_free_tlb(struct mmu_gather *tlb, pmd_t *pmdp,
 
 #define tlb_migrate_finish(mm)		do { } while (0)
 
-#endif /* CONFIG_MMU */
+#endif  
 #endif

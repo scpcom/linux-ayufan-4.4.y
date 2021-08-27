@@ -19,8 +19,6 @@ static void __init error(char *x)
 		message = x;
 }
 
-/* link hash */
-
 #define N_ALIGN(len) ((((len) + 1) & ~3) + 2)
 
 static __initdata struct hash {
@@ -120,8 +118,6 @@ static void __init dir_utime(void)
 
 static __initdata time_t mtime;
 
-/* cpio header parsing */
-
 static __initdata unsigned long ino, major, minor, nlink;
 static __initdata mode_t mode;
 static __initdata unsigned long body_len, name_len;
@@ -152,8 +148,6 @@ static void __init parse_header(char *s)
 	rdev = new_encode_dev(MKDEV(parsed[9], parsed[10]));
 	name_len = parsed[11];
 }
-
-/* FSM */
 
 static __initdata enum state {
 	Start,
@@ -410,7 +404,7 @@ static int __init flush_buffer(void *bufv, unsigned len)
 	return origLen;
 }
 
-static unsigned my_inptr;   /* index of next byte to be processed in inbuf */
+static unsigned my_inptr;    
 
 #include <linux/decompress/generic.h>
 
@@ -462,8 +456,7 @@ static char * __init unpack_to_rootfs(char *buf, unsigned len)
 			}
 #ifdef MY_ABC_HERE
 		} else {
-			/* It's workaround. For backward supporting inaccurate size of rd
-			 * in boot arguments, eg.: initrd=0x2000040,4M */
+			 
 			break;
 		}
 #else
@@ -509,15 +502,9 @@ static void __init free_initrd(void)
 		goto skip;
 
 #ifdef CONFIG_KEXEC
-	/*
-	 * If the initrd region is overlapped with crashkernel reserved region,
-	 * free only memory that is not part of crashkernel region.
-	 */
+	 
 	if (initrd_start < crashk_end && initrd_end > crashk_start) {
-		/*
-		 * Initialize initrd memory region since the kexec boot does
-		 * not do.
-		 */
+		 
 		memset((void *)initrd_start, 0, initrd_end - initrd_start);
 		if (initrd_start < crashk_start)
 			free_initrd_mem(initrd_start, crashk_start);
@@ -584,7 +571,7 @@ static int __init populate_rootfs(void)
 {
 	char *err = unpack_to_rootfs(__initramfs_start, __initramfs_size);
 	if (err)
-		panic(err);	/* Failed to decompress INTERNAL initramfs */
+		panic(err);	 
 	if (initrd_start) {
 #ifdef CONFIG_BLK_DEV_RAM
 		int fd;

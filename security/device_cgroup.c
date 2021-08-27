@@ -1,8 +1,3 @@
-/*
- * device_cgroup.c - device cgroup subsystem
- *
- * Copyright 2007 IBM Corp
- */
  
 #include <linux/device_cgroup.h>
 #include <linux/cgroup.h>
@@ -21,15 +16,9 @@
 
 #define DEV_BLOCK 1
 #define DEV_CHAR  2
-#define DEV_ALL   4  /* this represents all devices */
+#define DEV_ALL   4   
 
 static DEFINE_MUTEX(devcgroup_mutex);
-
-/*
- * whitelist locking rules:
- * hold devcgroup_mutex for update/read.
- * hold rcu_read_lock() for read.
- */
 
 struct dev_whitelist_item {
 	u32 major, minor;
@@ -70,9 +59,6 @@ static int devcgroup_can_attach(struct cgroup_subsys *ss,
 	return 0;
 }
 
-/*
- * called under devcgroup_mutex
- */
 static int dev_whitelist_copy(struct list_head *dest, struct list_head *orig)
 {
 	struct dev_whitelist_item *wh, *tmp, *new;
@@ -94,10 +80,6 @@ free_and_exit:
 	return -ENOMEM;
 }
 
-/* Stupid prototype - don't bother combining existing entries */
-/*
- * called under devcgroup_mutex
- */
 static int dev_whitelist_add(struct dev_cgroup *dev_cgroup,
 			struct dev_whitelist_item *wh)
 {
@@ -125,9 +107,6 @@ static int dev_whitelist_add(struct dev_cgroup *dev_cgroup,
 	return 0;
 }
 
-/*
- * called under devcgroup_mutex
- */
 static void dev_whitelist_rm(struct dev_cgroup *dev_cgroup,
 			struct dev_whitelist_item *wh)
 {
@@ -152,9 +131,6 @@ remove:
 	}
 }
 
-/*
- * called from kernel/cgroup.c with cgroup_lock() held.
- */
 static struct cgroup_subsys_state *devcgroup_create(struct cgroup_subsys *ss,
 						struct cgroup *cgroup)
 {
@@ -266,13 +242,6 @@ static int devcgroup_seq_read(struct cgroup *cgroup, struct cftype *cft,
 	return 0;
 }
 
-/*
- * may_access_whitelist:
- * does the access granted to dev_cgroup c contain the access
- * requested in whitelist item refwh.
- * return 1 if yes, 0 if no.
- * call with devcgroup_mutex held
- */
 static int may_access_whitelist(struct dev_cgroup *c,
 				       struct dev_whitelist_item *refwh)
 {
@@ -296,11 +265,6 @@ static int may_access_whitelist(struct dev_cgroup *c,
 	return 0;
 }
 
-/*
- * parent_has_perm:
- * when adding a new allow rule to a device whitelist, the rule
- * must be allowed in the parent device
- */
 static int parent_has_perm(struct dev_cgroup *childcg,
 				  struct dev_whitelist_item *wh)
 {
@@ -313,19 +277,6 @@ static int parent_has_perm(struct dev_cgroup *childcg,
 	return may_access_whitelist(parent, wh);
 }
 
-/*
- * Modify the whitelist using allow/deny rules.
- * CAP_SYS_ADMIN is needed for this.  It's at least separate from CAP_MKNOD
- * so we can give a container CAP_MKNOD to let it create devices but not
- * modify the whitelist.
- * It seems likely we'll want to add a CAP_CONTAINER capability to allow
- * us to also grant CAP_SYS_ADMIN to containers without giving away the
- * device whitelist controls, but for now we'll stick with CAP_SYS_ADMIN
- *
- * Taking rules away is always allowed (given CAP_SYS_ADMIN).  Granting
- * new access is only allowed if you're in the top-level cgroup, or your
- * parent cgroup has the access you're asking for.
- */
 static int devcgroup_update_access(struct dev_cgroup *devcgroup,
 				   int filetype, const char *buffer)
 {
@@ -373,7 +324,6 @@ static int devcgroup_update_access(struct dev_cgroup *devcgroup,
 		return -EINVAL;
 	b++;
 
-	/* read minor */
 	if (*b == '*') {
 		wh.minor = ~0;
 		b++;
@@ -502,7 +452,7 @@ found:
 }
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(devcgroup_inode_permission);
-#endif /* SYNO_AUFS */
+#endif  
 
 int devcgroup_inode_mknod(int mode, dev_t dev)
 {

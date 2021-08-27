@@ -1,24 +1,3 @@
-/*
- * Annapurna Labs DMA Linux driver core
- * Copyright(c) 2011 Annapurna Labs.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU General Public License,
- * version 2, as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * The full GNU General Public License is included in this distribution in
- * the file called "COPYING".
- *
- */
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -130,8 +109,6 @@ static void al_dma_free_ring_ent(
 
 static void al_dma_cleanup_tasklet(unsigned long data);
 
-/******************************************************************************
- *****************************************************************************/
 int al_dma_core_init(
 	struct al_dma_device	*device,
 	void __iomem		*iobase_udma,
@@ -221,7 +198,6 @@ int al_dma_core_init(
 	al_raid_init(device->app_regs_base);
 #endif
 
-	/* set max packet size to 512k (XOR with 32 sources) */
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
 	rc = al_ssm_dma_handle_get(
 		&device->hal_raid,
@@ -247,10 +223,8 @@ int al_dma_core_init(
 		return rc;
 	}
 
-	/* enumerate and initialize channels (queues) */
 	al_dma_init_channels(device, max_channels);
 
-	/* enable RAID DMA engine */
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
 	rc = al_ssm_dma_state_set(&device->hal_raid, UDMA_NORMAL);
 #else
@@ -322,7 +296,7 @@ int al_dma_core_init(
 #endif
 
 #ifdef CONFIG_DMATEST
-	/* Reserve for DMA test */
+	 
 	dma_cap_set(DMA_PRIVATE, dma->cap_mask);
 #endif
 
@@ -342,10 +316,9 @@ int al_dma_core_init(
 }
 
 #ifdef CONFIG_SYNO_ALPINE_V2_5_3
-/******************************************************************************
- ***************************** Fast DMA **************************************/
+ 
 #define FAST_DMA_NUM_OF_QUEUES		4
-#define FAST_DMA_MEMCPY_TIMEOUT		1000 /* in uSec */
+#define FAST_DMA_MEMCPY_TIMEOUT		1000  
 #define FAST_DMA_DESCS_COUNT		8
 #define FAST_DMA_TX_CDESCS_COUNT	8
 #define FAST_DMA_RX_CDESCS_COUNT	8
@@ -370,9 +343,6 @@ bool		al_pcie_address_valid[AL_SB_PCIE_NUM] = {0};
 
 bool		fast_dma_init = false;
 
-/******************************************************************************
- *****************************************************************************/
-/* Prepare queue for fast mode */
 static void ssm_udma_fast_init(struct al_ssm_dma *ssm_dma)
 {
 	struct al_memcpy_transaction xaction;
@@ -388,7 +358,6 @@ static void ssm_udma_fast_init(struct al_ssm_dma *ssm_dma)
 		memset(&xaction, 0, sizeof(struct al_memcpy_transaction));
 		al_udma_fast_memcpy_q_prepare(tx_udma_q, rx_udma_q, &xaction);
 
-		/* Allocate temp memory */
 		temp = dma_alloc_coherent(NULL,
 							    sizeof(uint32_t),
 							    &temp_phys_addr,
@@ -411,7 +380,6 @@ static void ssm_udma_fast_terminate(void)
 		temp = per_cpu(temp_percpu, cpu);
 		temp_phys_addr = per_cpu(temp_phys_addr_percpu, cpu);
 
-		/* if not set, don't free */
 		if (!temp)
 			continue;
 
@@ -423,8 +391,6 @@ static void ssm_udma_fast_terminate(void)
 	}
 }
 
-/******************************************************************************
- *****************************************************************************/
 int al_dma_fast_init(
 	struct al_dma_device	*device,
 	void __iomem		*iobase_udma)
@@ -487,8 +453,6 @@ int al_dma_fast_init(
 		return rc;
 	}
 
-	/* set max packet size to 128 (XOR with 32 sources) */
-	/* TODO reduce max pkt size to 32 */
 	pkt_len_conf.encode_64k_as_zero = AL_FALSE;
 	pkt_len_conf.max_pkt_size = SZ_128;
 	rc = al_udma_m2s_packet_size_cfg_set(tx_udma, &pkt_len_conf);
@@ -498,41 +462,34 @@ int al_dma_fast_init(
 		return rc;
 	}
 
-	/* enable RAID DMA engine */
 	rc = al_ssm_dma_state_set(&device->hal_raid, UDMA_NORMAL);
 
 	dma->dev = &device->pdev->dev;
 
-	/* Init dma queue using the params below */
 	for (i = 0; i < FAST_DMA_NUM_OF_QUEUES; i++) {
-		/* Allocate dma queue memory */
-		/* allocate coherent memory for Tx submission descriptors */
+		 
 		tx_dma_desc_virt[i] = dma_alloc_coherent(
 			dma->dev,
 			FAST_DMA_DESCS_COUNT * sizeof(union al_udma_desc),
 			&tx_dma_desc_phys[i],
 			GFP_KERNEL);
 
-		/* allocate coherent memory for Rx submission descriptors */
 		rx_dma_desc_virt[i] = dma_alloc_coherent(
 			dma->dev,
 			FAST_DMA_DESCS_COUNT * sizeof(union al_udma_desc),
 			&rx_dma_desc_phys[i],
 			GFP_KERNEL);
 
-		/* Allocate memory for Rx completion descriptors */
-		/* allocate coherent memory for Rx submission descriptors */
 		rx_dma_cdesc_virt[i] = dma_alloc_coherent(
 			dma->dev,
 			FAST_DMA_RX_CDESCS_COUNT * sizeof(union al_udma_cdesc),
 			&rx_dma_cdesc_phys[i],
 			GFP_KERNEL);
 
-		/* Fill in dma queue params */
 		tx_params.size = FAST_DMA_DESCS_COUNT;
 		tx_params.desc_base = tx_dma_desc_virt[i];
 		tx_params.desc_phy_base = tx_dma_desc_phys[i];
-		tx_params.cdesc_base = NULL; /* don't use Tx completion ring */
+		tx_params.cdesc_base = NULL;  
 		tx_params.cdesc_phy_base = 0;
 		tx_params.cdesc_size = FAST_DMA_TX_CDESCS_COUNT;
 
@@ -592,9 +549,7 @@ int al_dma_fast_terminate(struct al_dma_device	*device)
 
 	return 0;
 }
-/******************************************************************************
- *****************************************************************************/
-/* Fast memcopy submission */
+ 
 int udma_fast_memcpy(int len, al_phys_addr_t src, al_phys_addr_t dst)
 {
 	struct al_udma_q *tx_udma_q, *rx_udma_q;
@@ -604,7 +559,6 @@ int udma_fast_memcpy(int len, al_phys_addr_t src, al_phys_addr_t dst)
 	int completed = 0;
 	int timeout = FAST_DMA_MEMCPY_TIMEOUT;
 	uint32_t flags;
-	/* prepare rx desc */
 	 
 	rx_udma_q = __get_cpu_var(rx_udma_q_percpu);
 	tx_udma_q = __get_cpu_var(tx_udma_q_percpu);
@@ -618,10 +572,8 @@ int udma_fast_memcpy(int len, al_phys_addr_t src, al_phys_addr_t dst)
 	al_udma_fast_desc_len_set(rx_desc, len);
 	al_udma_fast_desc_buf_set(rx_desc, dst, 0);
 
-	/* submit rx desc */
 	al_udma_desc_action_add(rx_udma_q, 1);
 
-	/* prepare tx desc */
 	tx_desc = al_udma_desc_get(tx_udma_q);
 
 	flags = al_udma_ring_id_get(tx_udma_q) <<
@@ -631,10 +583,8 @@ int udma_fast_memcpy(int len, al_phys_addr_t src, al_phys_addr_t dst)
 	al_udma_fast_desc_len_set(tx_desc, len);
 	al_udma_fast_desc_buf_set(tx_desc, src, 0);
 
-	/* submit tx desc */
 	al_udma_desc_action_add(tx_udma_q, 1);
 
-	/* wait for completion using polling */
 	while(1) {
 		completed = al_udma_fast_completion(rx_udma_q, 1, 0);
 		if ((completed > 0) || (timeout == 0))
@@ -660,29 +610,13 @@ static inline al_phys_addr_t virt_to_physical_address(const volatile void __iome
 	al_phys_addr_t phys_addr;
 	uint32_t phys_addr_h, phys_addr_l;
 
-	/*
-	 * write a virt. address to ATS1CPR:
-	 * perform H/W stage1 address translation (meaning, to IPA)
-	 * translate as current security state, privileged read accesses
-	 * read PAR: (physical address register)
-	 * lower 12-bit have some flags, the rest holds upper bits
-	 * of the physical address
-	 */
 	asm volatile( "mcr p15, 0, %0, c7, c8, 0" :: "r"(address));
-
-	/*
-	 * according to ARM ABI, in Little Endian systems r0 will contain the
-	 * low 32 bits, while in Big Endian systems r0 will contain the high 32
-	 * bits
-	 * TODO: assumes LE need to change to BE mode
-	 */
 
 #ifdef CONFIG_CPU_BIG_ENDIAN
 #error "virt_to_physical_address assumes LE!"
 #endif
 	asm volatile("mrrc p15, 0, %0, %1, c7" : "=r"(phys_addr_l), "=r"(phys_addr_h));
 
-	/* Take the lower 12-bit from the virtual address. */
 	phys_addr = phys_addr_l & ~(((uint32_t)1<<12) - 1UL);
 	phys_addr |= (uintptr_t)address & AL_BIT_MASK(12);
 
@@ -730,7 +664,6 @@ static inline uint32_t _al_dma_read_reg(const volatile void __iomem *address, in
 	uint8_t val_8;
 	int i;
 
-	/* Use DMA read only if the fast DMA was initialized and HW CC */
 	if (likely((hwcc) && (fast_dma_init))) {
 		local_irq_save(flags);
 
@@ -810,7 +743,6 @@ void al_dma_write_reg32(volatile void __iomem *address, u32 val)
 	al_phys_addr_t phys_addr;
 	int i;
 
-	/* Use DMA write only if the fast DMA was initialized and HW CC */
 	if (likely((hwcc) && (fast_dma_init))) {
 		local_irq_save(flags);
 
@@ -844,8 +776,6 @@ pcie_mem_write:
 EXPORT_SYMBOL(al_dma_write_reg32);
 #endif
 
-/******************************************************************************
- *****************************************************************************/
 int al_dma_core_terminate(
 	struct al_dma_device	*device)
 {
@@ -870,8 +800,6 @@ int al_dma_core_terminate(
 	return status;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int al_dma_init_channels(struct al_dma_device *device, int max_channels)
 {
 	int i;
@@ -900,8 +828,6 @@ static int al_dma_init_channels(struct al_dma_device *device, int max_channels)
 	return i;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_dma_init_channel(struct al_dma_device *device,
 			 struct al_dma_chan *chan, int idx)
 {
@@ -932,8 +858,6 @@ static void al_dma_init_channel(struct al_dma_device *device,
 	tasklet_init(&chan->cleanup_task, al_dma_cleanup_tasklet, data);
 }
 
-/******************************************************************************
- *****************************************************************************/
 static int al_dma_setup_interrupts(struct al_dma_device *device)
 {
 	struct al_dma_chan *chan;
@@ -943,7 +867,6 @@ static int al_dma_setup_interrupts(struct al_dma_device *device)
 	int i, j, msixcnt;
 	int err = -EINVAL;
 
-	/* The number of MSI-X vectors should equal the number of channels */
 	msixcnt = device->common.chancnt;
 
 	for (i = 0; i < msixcnt; i++)
@@ -989,11 +912,9 @@ static int al_dma_setup_interrupts(struct al_dma_device *device)
 				devm_free_irq(dev, msix->vector, chan);
 			}
 
-			/* goto msix_single_vector; */
 			return -EIO;
 		}
 
-		/* setup interrupt affinity */
 		if (cpu_online(chan->idx))
 			cpumask_set_cpu(chan->idx, &chan->affinity_mask);
 		else
@@ -1073,16 +994,11 @@ done:
 	return 0;
 
 err_no_irq:
-	/* Disable all interrupt generation */
 	 
 	dev_err(dev, "no usable interrupts\n");
 	return err;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* al_dma_alloc_chan_resources - allocate/initialize tx and rx descriptor rings
- */
 static int al_dma_alloc_chan_resources(struct dma_chan *c)
 {
 	struct al_dma_chan *chan = to_al_dma_chan(c);
@@ -1095,14 +1011,12 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 	dev_dbg(dev, "al_dma_alloc_chan_resources: channel %d\n",
 		chan->idx);
 
-	/* have we already been set up? */
 	if (chan->sw_ring)
 		return 1 << chan->alloc_order;
 
 	chan->tx_descs_num = 1 << tx_descs_order;
 	chan->rx_descs_num = 1 << rx_descs_order;
 
-	/* allocate coherent memory for Tx submission descriptors */
 	chan->tx_dma_desc_virt = dma_alloc_coherent(dev,
 						    chan->tx_descs_num *
 						    sizeof(union al_udma_desc),
@@ -1117,7 +1031,6 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 	dev_dbg(dev, "allocted tx descriptor ring: virt 0x%p phys 0x%llx\n",
 		chan->tx_dma_desc_virt, (u64)chan->tx_dma_desc);
 
-	/* allocate coherent memory for Rx submission descriptors */
 	chan->rx_dma_desc_virt = dma_alloc_coherent(dev,
 						    chan->rx_descs_num *
 						    sizeof(union al_udma_desc),
@@ -1134,7 +1047,6 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 	dev_dbg(dev, "allocted rx descriptor ring: virt 0x%p phys 0x%llx\n",
 		chan->rx_dma_desc_virt, (u64)chan->rx_dma_desc);
 
-	/* allocate coherent memory for Rx completion descriptors */
 	chan->rx_dma_cdesc_virt = dma_alloc_coherent(dev,
 						     chan->rx_descs_num *
 						     AL_DMA_RAID_RX_CDESC_SIZE,
@@ -1149,7 +1061,6 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 		return -ENOMEM;
 	}
 
-	/* clear the Rx completion descriptors to avoid false positive */
 	memset(
 		chan->rx_dma_cdesc_virt,
 		0,
@@ -1163,9 +1074,9 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 	tx_params.size = chan->tx_descs_num;
 	tx_params.desc_base = chan->tx_dma_desc_virt;
 	tx_params.desc_phy_base = chan->tx_dma_desc;
-	tx_params.cdesc_base = NULL; /* don't use Tx completion ring */
+	tx_params.cdesc_base = NULL;  
 	tx_params.cdesc_phy_base = 0;
-	tx_params.cdesc_size = AL_DMA_RAID_TX_CDESC_SIZE; /* size is needed */
+	tx_params.cdesc_size = AL_DMA_RAID_TX_CDESC_SIZE;  
 
 	rx_params.size = chan->rx_descs_num;
 	rx_params.desc_base = chan->rx_dma_desc_virt;
@@ -1174,7 +1085,6 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 	rx_params.cdesc_phy_base = chan->rx_dma_cdesc;
 	rx_params.cdesc_size = AL_DMA_RAID_RX_CDESC_SIZE;
 
-	/* alloc sw descriptors */
 	if (ring_alloc_order < AL_DMA_SW_RING_MIN_ORDER) {
 		dev_err(
 			dev,
@@ -1233,15 +1143,9 @@ static int al_dma_alloc_chan_resources(struct dma_chan *c)
 		return rc;
 	}
 
-	/* should we return less ?*/
 	return  1 << chan->alloc_order;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/* al_dma_free_chan_resources - free tx and rx descriptor rings
- * @chan: channel to be free
- */
 static void al_dma_free_chan_resources(struct dma_chan *c)
 {
 	struct al_dma_chan *chan = to_al_dma_chan(c);
@@ -1284,8 +1188,6 @@ static void al_dma_free_chan_resources(struct dma_chan *c)
 	return;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static struct al_dma_sw_desc **al_dma_alloc_sw_ring(
 	struct al_dma_chan	*chan,
 	int			order,
@@ -1295,7 +1197,6 @@ static struct al_dma_sw_desc **al_dma_alloc_sw_ring(
 	int descs = 1 << order;
 	int i;
 
-	/* allocate the array to hold the software ring */
 	ring = kcalloc(descs, sizeof(*ring), flags);
 	if (!ring)
 		return NULL;
@@ -1313,8 +1214,6 @@ static struct al_dma_sw_desc **al_dma_alloc_sw_ring(
 	return ring;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static struct al_dma_sw_desc *al_dma_alloc_ring_ent(
 	struct al_dma_chan	*chan,
 	gfp_t			flags)
@@ -1330,8 +1229,6 @@ static struct al_dma_sw_desc *al_dma_alloc_ring_ent(
 	return desc;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_dma_free_ring_ent(
 	struct al_dma_sw_desc	*desc,
 	struct al_dma_chan	*chan)
@@ -1339,25 +1236,14 @@ static void al_dma_free_ring_ent(
 	kmem_cache_free(chan->device->cache, desc);
 }
 
-/******************************************************************************
- *****************************************************************************/
-/**
- * al_dma_get_sw_desc_lock - get sw desc and grab ring producer lock
- * @chan: dma channel to operate on
- * @num: the number of required sw descriptos
- */
 int al_dma_get_sw_desc_lock(struct al_dma_chan *chan, int num)
 {
 	spin_lock_bh(&chan->prep_lock);
 
-	/* never allow the last descriptor to be consumed, we need at
-	 * least one free at all times to allow for on-the-fly ring
-	 * resizing.
-	 */
 	if (likely(al_dma_ring_space(chan) >= num)) {
 		dev_dbg(to_dev(chan), "%s: (%x:%x)\n",
 			__func__, chan->head, chan->tail);
-		return 0;  /* with chan->prep_lock held */
+		return 0;   
 	}
 
 	spin_unlock_bh(&chan->prep_lock);
@@ -1365,29 +1251,13 @@ int al_dma_get_sw_desc_lock(struct al_dma_chan *chan, int num)
 	return -ENOMEM;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/**
- * al_dma_do_interrupt - handler used for single vector interrupt mode
- * @irq: interrupt id
- * @data: interrupt data
- */
 static irqreturn_t al_dma_do_interrupt(int irq, void *data)
 {
 	pr_debug("%s(%d, %p)\n", __func__, irq, data);
 
-	/* TODO: handle interrupt registers */
-
 	return IRQ_HANDLED;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/**
- * al_dma_do_interrupt_msix - handler used for vector-per-channel interrupt mode
- * @irq: interrupt id
- * @data: interrupt data
- */
 static irqreturn_t al_dma_do_interrupt_msix(int irq, void *data)
 {
 	struct al_dma_chan *chan = data;
@@ -1399,14 +1269,6 @@ static irqreturn_t al_dma_do_interrupt_msix(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-/******************************************************************************
- *****************************************************************************/
-/**
- * al_dma_tx_status - poll the status of an DMA transaction
- * @c: channel handle
- * @cookie: transaction identifier
- * @txstate: if set, updated with the transaction state
- */
 static enum dma_status al_dma_tx_status(
 	struct dma_chan *c,
 	dma_cookie_t cookie,
@@ -1445,8 +1307,6 @@ static enum dma_status al_dma_tx_status(
 	return dma_status;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static inline int al_dma_issue_pending_raw(struct al_dma_chan *chan)
 {
 	int err = 0;
@@ -1487,8 +1347,6 @@ static inline dma_cookie_t al_dma_cookie_assign(struct dma_async_tx_descriptor *
 	return cookie;
 }
 
-/******************************************************************************
- *****************************************************************************/
 void al_dma_tx_submit_sw_cond_unlock(
 	struct al_dma_chan		*chan,
 	struct dma_async_tx_descriptor	*tx)
@@ -1505,19 +1363,8 @@ void al_dma_tx_submit_sw_cond_unlock(
 			__func__,
 			cookie);
 
-		/**
-		 * according to Documentation/circular-buffers.txt we should
-		 * have smp_wmb before intcrementing the head, however, the
-		 * al_raid_dma_action contains writel() which implies dmb on
-		 * ARM so this smp_wmb() can be omitted on ARM platforms
-		 */
-		/*smp_wmb();*/ /* commit the item before updating the head */
 		chan->head += chan->sw_desc_num_locked;
-		/**
-		 * in our case the consumer (interrupt handler) will be waken up
-		 * by the hw, so we send the transaction to the hw after
-		 * incrementing the head
-		 **/
+		 
 	}
 
 #if !AL_DMA_ISSUE_PNDNG_UPON_SUBMIT
@@ -1525,8 +1372,6 @@ void al_dma_tx_submit_sw_cond_unlock(
 #endif
 }
 
-/******************************************************************************
- *****************************************************************************/
 static dma_cookie_t al_dma_tx_submit_unlock(struct dma_async_tx_descriptor *tx)
 {
 #if AL_DMA_ISSUE_PNDNG_UPON_SUBMIT
@@ -1556,8 +1401,6 @@ static dma_cookie_t al_dma_tx_submit_unlock(struct dma_async_tx_descriptor *tx)
 	return tx->cookie;
 }
 
-/******************************************************************************
- *****************************************************************************/
 static void al_dma_issue_pending(struct dma_chan *c)
 {
 #if !AL_DMA_ISSUE_PNDNG_UPON_SUBMIT

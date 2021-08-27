@@ -1,16 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright 2012 Texas Instruments
- *
- * Author: Milo(Woogyom) Kim <milo.kim@ti.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- */
  
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -21,13 +11,12 @@
 #include <linux/leds-lp3943.h>
 #ifdef CONFIG_SYNO_LP3943_FEATURES
 #include <linux/spinlock.h>
-#endif // CONFIG_SYNO_LP3943_FEATURES
+#endif  
 
 #define MAX_NUM_LEDS		16
 #define MAX_BRIGHTNESS		255
 #define LED_OFF			0
 
-/* Registers */
 #define LP3943_INPUT1		0x00
 #define LP3943_PSC0		0x02
 #define LP3943_PWM0		0x03
@@ -38,7 +27,6 @@
 #define LP3943_LS2		0x08
 #define LP3943_LS3		0x09
 
-/* Mask, shift */
 #define LP3943_SEL0_M		0x03
 #define LP3943_SEL1_M		0x0C
 #define LP3943_SEL2_M		0x30
@@ -272,7 +260,7 @@ struct i2c_board_info __initdata LedI2CBoardInfo[] = {
 		.platform_data = &syno_lp3943_pdata,
 	},
 };
-#endif // CONFIG_SYNO_LP3943_FEATURES
+#endif  
 
 static int lp3943_read_byte(struct lp3943 *lp, u8 reg, u8 *data)
 {
@@ -299,7 +287,7 @@ static int lp3943_update_bits(struct lp3943 *lp, u8 reg, u8 mask, u8 data)
 	u8 tmp;
 
 #ifdef CONFIG_SYNO_LP3943_FEATURES
-/*LS registers are modified in this function only, so this is the only part that we have to protect as a critical section*/
+ 
 	mutex_lock(&ModeLock);
 	ret = lp3943_read_byte(lp, reg, &tmp);
 	if (ret) {
@@ -323,7 +311,7 @@ END:
 	tmp |= data & mask;
 
 	return lp3943_write_byte(lp, reg, tmp);
-#endif // CONFIG_SYNO_LP3943_FEATURES
+#endif  
 }
 
 static int lp3943_update_selector(struct lp3943 *lp, enum lp3943_led_mode mode,
@@ -404,7 +392,7 @@ static int lp3943_update_brightness(struct lp3943_led *led)
 	for (i = 0 ; i < node->num_channels ; i++) {
 		channel = node->channel + i;
 #ifdef CONFIG_SYNO_LP3943_FEATURES
-		/*The brightness associated on/of state are inverted to match the hardware design.*/
+		 
 		switch (led->brightness){
 		case 0:
 			mode = LP3943_LED_ON;
@@ -418,17 +406,17 @@ static int lp3943_update_brightness(struct lp3943_led *led)
 		}
 #else
 		mode = led->brightness == 0 ? LP3943_LED_OFF : node->mode;
-#endif // CONFIG_SYNO_LP3943_FEATURES
+#endif  
 		ret = lp3943_update_selector(lp, mode, *channel);
 		if (ret)
 			return ret;
 #ifdef CONFIG_SYNO_LP3943_FEATURES
 		if (mode == LP3943_LED_OFF || mode == LP3943_LED_ON)
 			continue;
-#else // CONFIG_SYNO_LP3943_FEATURES
+#else  
 		if (mode == LP3943_LED_OFF)
 			continue;
-#endif // CONFIG_SYNO_LP3943_FEATURES
+#endif  
 
 		ret = lp3943_update_scale(lp, mode, node->prescale);
 		if (ret)
@@ -485,7 +473,7 @@ static int lp3943_leds_register(struct lp3943 *lp,
 
 #ifdef CONFIG_SYNO_LP3943_FEATURES
 		INIT_WORK(&lp->led[i].brtwork, lp3943_brightness_work);
-#endif // CONFIG_SYNO_LP3943_FEATURES
+#endif  
 		lp->led[i].id = i;
 		lp->led[i].node = node;
 		lp->led[i].cdev.name = node->name;
@@ -493,7 +481,7 @@ static int lp3943_leds_register(struct lp3943 *lp,
 		lp->led[i].cdev.brightness_set = lp3943_brightness_set;
 #ifdef CONFIG_SYNO_LP3943_FEATURES
 		lp->led[i].cdev.default_trigger = node->default_trigger;
-#endif // CONFIG_SYNO_LP3943_FEATURES
+#endif  
 
 		ret = led_classdev_register(lp->dev, &lp->led[i].cdev);
 		if (ret) {
@@ -502,10 +490,10 @@ static int lp3943_leds_register(struct lp3943 *lp,
 			goto err_dev;
 		}
 #ifdef CONFIG_SYNO_LP3943_FEATURES
-/* do nothing */
+ 
 #else
 		INIT_WORK(&lp->led[i].brtwork, lp3943_brightness_work);
-#endif // CONFIG_SYNO_LP3943_FEATURES
+#endif  
 	}
 
 	return 0;
@@ -614,7 +602,7 @@ static int __init lp3943_init(void)
 #ifdef CONFIG_SYNO_LP3943_FEATURES
 	int iErr = -1;
 	struct i2c_adapter *pAdapter = NULL;
-	/* instantiate the devices explicitly */
+	 
 	pAdapter = i2c_get_adapter(0);
 	if (pAdapter == NULL) {
 		printk(KERN_ERR "led-lp3943 initial error: failed to get i2c adapter\n");
@@ -623,7 +611,6 @@ static int __init lp3943_init(void)
 
 	i2c_put_adapter(pAdapter);
 
-    /*regist board info*/
 	gpClient = i2c_new_device(pAdapter, &LedI2CBoardInfo[0]);
 	if (gpClient == NULL) {
 		printk(KERN_ERR "led-lp3943 initial error: failed to initial device\n");
@@ -636,7 +623,7 @@ END:
 	return iErr;
 #else
 	return i2c_add_driver(&lp3943_driver);
-#endif // CONFIG_SYNO_LP3943_FEATURES
+#endif  
 }
 module_init(lp3943_init);
 
@@ -644,7 +631,7 @@ static void __exit lp3943_exit(void)
 {
 #ifdef CONFIG_SYNO_LP3943_FEATURES
 	i2c_unregister_device(gpClient);
-#endif // CONFIG_SYNO_LP3943_FEATURES
+#endif  
 	i2c_del_driver(&lp3943_driver);
 }
 module_exit(lp3943_exit);

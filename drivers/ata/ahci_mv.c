@@ -1,27 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * ahci_mv.c - Marvell AHCI SATA platform support
- *
- * Copyright 2013: Marvell Corporation, all rights reserved.
- *
- * based on the AHCI SATA platform driver by Jeff Garzik and Anton Vorontsov
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
  
 #include <linux/kernel.h>
 #include <linux/gfp.h>
@@ -126,15 +105,11 @@ static int ahci_mv_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 
-	/*
-	 * (Re-)program MBUS remapping windows if we are asked to.
-	 */
 	if (pdata->dram != NULL)
 		ahci_mv_windows_config(hpriv, pdata->dram);
 
 	ahci_save_initial_config(dev, hpriv, 0, 0);
 
-	/* prepare host */
 	if (hpriv->cap & HOST_CAP_NCQ)
 		pi.flags |= ATA_FLAG_NCQ;
 
@@ -143,11 +118,6 @@ static int ahci_mv_probe(struct platform_device *pdev)
 
 	ahci_set_em_messages(hpriv, &pi);
 
-	/* CAP.NP sometimes indicate the index of the last enabled
-	 * port, at other times, that of the last possible port, so
-	 * determining the maximum port number requires looking at
-	 * both CAP.NP and port_map.
-	 */
 	n_ports = max(ahci_nr_ports(hpriv->cap), fls(hpriv->port_map));
 
 	host = ata_host_alloc_pinfo(dev, ppi, n_ports);
@@ -172,18 +142,16 @@ static int ahci_mv_probe(struct platform_device *pdev)
 		ata_port_desc(ap, "mmio %pR", mem);
 		ata_port_desc(ap, "port 0x%x", 0x100 + ap->port_no * 0x80);
 
-		/* set enclosure management message type */
 		if (ap->flags & ATA_FLAG_EM)
 			ap->em_message_type = hpriv->em_msg_type;
 
-		/* disabled/not-implemented port */
+		
 		if (!(hpriv->port_map & (1 << i)))
 			ap->ops = &ata_dummy_port_ops;
 	}
 
 #ifdef CONFIG_SYNO_ARMADA_V2
-	/* Enabling regret bit to enables the SATA unit to regret
-	a request that didn't receive an acknowlegde and avoid a deadlock */
+	
 	 
 	writel(0x4, hpriv->mmio + VENDOR_SPECIFIC_0_ADDR);
 	writel(0x80, hpriv->mmio + VENDOR_SPECIFIC_0_DATA);
@@ -220,15 +188,10 @@ static int ahci_mv_suspend(struct device *dev)
 		return -EIO;
 	}
 
-	/*
-	 * AHCI spec rev1.1 section 8.3.3:
-	 * Software must disable interrupts prior to requesting a
-	 * transition of the HBA to D3 state.
-	 */
 	ctl = readl(mmio + HOST_CTL);
 	ctl &= ~HOST_IRQ_EN;
 	writel(ctl, mmio + HOST_CTL);
-	readl(mmio + HOST_CTL); /* flush */
+	readl(mmio + HOST_CTL);  
 
 	rc = ata_host_suspend(host, PMSG_SUSPEND);
 	if (rc)
@@ -242,9 +205,6 @@ static int ahci_mv_resume(struct device *dev)
 	struct ata_host *host = dev_get_drvdata(dev);
 	int rc;
 
-	/*
-	 * (Re-)program MBUS remapping windows if we are asked to.
-	 */
 	if (pdata->dram != NULL)
 		ahci_mv_windows_config(hpriv, pdata->dram);
 

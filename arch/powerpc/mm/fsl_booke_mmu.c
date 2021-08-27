@@ -1,29 +1,3 @@
-/*
- * Modifications by Kumar Gala (galak@kernel.crashing.org) to support
- * E500 Book E processors.
- *
- * Copyright 2004,2010 Freescale Semiconductor, Inc.
- *
- * This file contains the routines for initializing the MMU
- * on the 4xx series of chips.
- *  -- paulus
- *
- *  Derived from arch/ppc/mm/init.c:
- *    Copyright (C) 1995-1996 Gary Thomas (gdt@linuxppc.org)
- *
- *  Modifications by Paul Mackerras (PowerMac) (paulus@cs.anu.edu.au)
- *  and Cort Dougan (PReP) (cort@cs.nmt.edu)
- *    Copyright (C) 1996 Paul Mackerras
- *
- *  Derived from "arch/i386/mm/init.c"
- *    Copyright (C) 1991, 1992, 1993, 1994  Linus Torvalds
- *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License
- *  as published by the Free Software Foundation; either version
- *  2 of the License, or (at your option) any later version.
- *
- */
  
 #include <linux/signal.h>
 #include <linux/sched.h>
@@ -73,9 +47,6 @@ unsigned long tlbcam_sz(int idx)
 	return tlbcam_addrs[idx].limit - tlbcam_addrs[idx].start + 1;
 }
 
-/*
- * Return PA for this VA if it is mapped by a CAM, or 0
- */
 phys_addr_t v_mapped_by_tlbcam(unsigned long va)
 {
 	int b;
@@ -85,9 +56,6 @@ phys_addr_t v_mapped_by_tlbcam(unsigned long va)
 	return 0;
 }
 
-/*
- * Return VA for a given PA or 0 if not mapped
- */
 unsigned long p_mapped_by_tlbcam(phys_addr_t pa)
 {
 	int b;
@@ -99,13 +67,6 @@ unsigned long p_mapped_by_tlbcam(phys_addr_t pa)
 	return 0;
 }
 
-/*
- * Set up a variable-size TLB entry (tlbcam). The parameters are not checked;
- * in particular size must be a power of 4 between 4k and the max supported by
- * an implementation; max may further be limited by what can be represented in
- * an unsigned long (for example, 32-bit implementations cannot support a 4GB
- * size).
- */
 static void settlbcam(int index, unsigned long virt, phys_addr_t phys,
 		unsigned long size, unsigned long flags, unsigned int pid)
 {
@@ -133,7 +94,6 @@ static void settlbcam(int index, unsigned long virt, phys_addr_t phys,
 	if (mmu_has_feature(MMU_FTR_BIG_PHYS))
 		TLBCAM[index].MAS7 = (u64)phys >> 32;
 
-	/* Below is unlikely -- only for large user pages or similar */
 	if (pte_user(flags)) {
 	   TLBCAM[index].MAS3 |= MAS3_UX | MAS3_UR;
 	   TLBCAM[index].MAS3 |= ((flags & _PAGE_RW) ? MAS3_UW : 0);
@@ -153,7 +113,6 @@ unsigned long calc_cam_sz(unsigned long ram, unsigned long virt,
 	unsigned int align = __ffs(virt | phys) & ~1U;
 	unsigned long max_cam = (mfspr(SPRN_TLB1CFG) >> 16) & 0xf;
 
-	/* Convert (4^max) kB to (2^max) bytes */
 	max_cam = max_cam * 2 + 10;
 
 	if (camsize > align)
@@ -171,7 +130,6 @@ unsigned long map_mem_in_cams(unsigned long ram, int max_cam_idx)
 	phys_addr_t phys = memstart_addr;
 	unsigned long amount_mapped = 0;
 
-	/* Calculate CAM values */
 	for (i = 0; ram && i < max_cam_idx; i++) {
 		unsigned long cam_sz;
 
@@ -199,9 +157,6 @@ unsigned long __init mmu_mapin_ram(unsigned long top)
 	return tlbcam_addrs[tlbcam_index - 1].limit - PAGE_OFFSET + 1;
 }
 
-/*
- * MMU_init_hw does the chip-specific initialization of the MMU hardware.
- */
 void __init MMU_init_hw(void)
 {
 	flush_instruction_cache();
@@ -212,7 +167,6 @@ void __init adjust_total_lowmem(void)
 	unsigned long ram;
 	int i;
 
-	/* adjust lowmem size to __max_low_memory */
 	ram = min((phys_addr_t)__max_low_memory, (phys_addr_t)total_lowmem);
 
 	__max_low_memory = map_mem_in_cams(ram, CONFIG_LOWMEM_CAM_NUM);
@@ -231,7 +185,6 @@ void setup_initial_memory_limit(phys_addr_t first_memblock_base,
 {
 	phys_addr_t limit = first_memblock_base + first_memblock_size;
 
-	/* 64M mapped initially according to head_fsl_booke.S */
 	memblock_set_current_limit(min_t(u64, limit, 0x04000000));
 }
 #endif
@@ -248,9 +201,9 @@ void __init cam_mapin_extra_chip_select(void)
 
     immr_base = get_immrbase();
     if ( immr_base != -1 ) {
-        //configuration base
+         
         settlbcam(15, immr_base, immr_base, 1024*1024, _PAGE_IO, 0);
-        //CS1: CPLD
+         
         settlbcam(14, SYNO_CPLD_BASE, SYNO_CPLD_BASE, SYNO_CPLD_SIZE, _PAGE_IO, 0);
     } else {
         printk("HW Settings Error: Failed to get immr_base\n");

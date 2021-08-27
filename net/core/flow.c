@@ -1,11 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* flow.c: Generic flow cache.
- *
- * Copyright (C) 2003 Alexey N. Kuznetsov (kuznet@ms2.inr.ac.ru)
- * Copyright (C) 2003 David S. Miller (davem@redhat.com)
- */
  
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -140,7 +135,7 @@ static void flow_cache_gc_task(struct work_struct *work)
 #if defined(CONFIG_SYNO_COMCERTO) 
 	list_for_each_entry_safe(fce, n, &gc_list, u.gc_list) {
 #if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
-		/*call nl_key_flow_remove*/
+		 
 		if (fce->flags & FLOW_CACHE_FLAG_IPSEC_OFFLOAD)
 			ipsec_nlkey_flow_remove(&fce->key, fce->family, fce->dir);
 #endif
@@ -222,9 +217,6 @@ static u32 flow_hash_code(struct flow_cache *fc,
 		& (flow_cache_hash_size(fc) - 1);
 }
 
-/* I hear what you're saying, use memcmp.  But memcmp cannot make
- * important assumptions that we can here, such as alignment.
- */
 static int flow_key_compare(const struct flowi *key1, const struct flowi *key2,
 			    size_t keysize)
 {
@@ -276,8 +268,6 @@ flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
 	if (!keysize)
 		goto nocache;
 
-	/* Packet really early in init?  Making flow_cache_init a
-	 * pre-smp initcall would solve this.  --RR */
 	if (!fcp->hash_table)
 		goto nocache;
 
@@ -402,7 +392,6 @@ void flow_cache_flush(void)
 	struct flow_flush_info info;
 	static DEFINE_MUTEX(flow_flush_sem);
 
-	/* Don't want cpus going down or up during this. */
 	get_online_cpus();
 	mutex_lock(&flow_flush_sem);
 	info.cache = &flow_cache_global;
@@ -473,12 +462,11 @@ void flow_cache_remove(const struct flowi *key,
 	struct flow_remove_info info;
 	static DEFINE_MUTEX(flow_rem_sem);
 
-	/* Don't want cpus going down or up during this. */
 	get_online_cpus();
 	mutex_lock(&flow_rem_sem);
 	info.cache = &flow_cache_global;
 	info.key = (struct flowi*)key;
-	//memcpy(&info.key, key, sizeof(struct flowi));
+	 
 	info.family = family;
 	info.dir = dir;
         atomic_set(&info.cpuleft, num_online_cpus());

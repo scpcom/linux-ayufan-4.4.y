@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/kernel/irq.c
- *
- *  Copyright (C) 1992 Linus Torvalds
- *  Modifications for ARM processor Copyright (C) 1995-2000 Russell King.
- *
- *  Support for Dynamic Tick Timer Copyright (C) 2004-2005 Nokia Corporation.
- *  Dynamic Tick Timer written by Tony Lindgren <tony@atomide.com> and
- *  Tuukka Tikkanen <tuukka.tikkanen@elektrobit.com>.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- *  This file contains the code used by various IRQ handling routines:
- *  asking for different IRQ's should be done through these routines
- *  instead of just grabbing them. Thus setups with different IRQ numbers
- *  shouldn't result in any weird surprises, and installing new handlers
- *  should be easier.
- *
- *  IRQ's are in fact implemented a bit like signal handlers for the kernel.
- *  Naturally it's not a 1:1 relation, but there are similarities.
- */
+ 
 #include <linux/kernel_stat.h>
 #include <linux/signal.h>
 #include <linux/ioport.h>
@@ -44,9 +22,6 @@
 #include <asm/mach/irq.h>
 #include <asm/mach/time.h>
 
-/*
- * No architecture-specific irq_finish function defined in arm/arch/irqs.h.
- */
 #ifndef irq_finish
 #define irq_finish(irq) do { } while (0)
 #endif
@@ -68,22 +43,12 @@ int arch_show_interrupts(struct seq_file *p, int prec)
 	return 0;
 }
 
-/*
- * handle_IRQ handles all hardware IRQ's.  Decoded IRQs should
- * not come via this function.  Instead, they should provide their
- * own 'handler'.  Used by platform code implementing C-based 1st
- * level decoding.
- */
 void handle_IRQ(unsigned int irq, struct pt_regs *regs)
 {
 	struct pt_regs *old_regs = set_irq_regs(regs);
 
 	irq_enter();
 
-	/*
-	 * Some hardware gives randomly wrong interrupts.  Rather
-	 * than crashing, do something sensible.
-	 */
 	if (unlikely(irq >= nr_irqs)) {
 		if (printk_ratelimit())
 			printk(KERN_WARNING "Bad IRQ%u\n", irq);
@@ -92,16 +57,12 @@ void handle_IRQ(unsigned int irq, struct pt_regs *regs)
 		generic_handle_irq(irq);
 	}
 
-	/* AT91 specific workaround */
 	irq_finish(irq);
 
 	irq_exit();
 	set_irq_regs(old_regs);
 }
 
-/*
- * asm_do_IRQ is the interface to be used from assembly code.
- */
 asmlinkage void __exception_irq_entry
 asm_do_IRQ(unsigned int irq, struct pt_regs *regs)
 {
@@ -123,7 +84,7 @@ void set_irq_flags(unsigned int irq, unsigned int iflags)
 		clr |= IRQ_NOPROBE;
 	if (!(iflags & IRQF_NOAUTOEN))
 		clr |= IRQ_NOAUTOEN;
-	/* Order is clear bits in "clr" then set bits in "set" */
+	 
 	irq_modify_status(irq, clr, set & ~clr);
 }
 
@@ -149,10 +110,6 @@ static bool migrate_one_irq(struct irq_desc *desc)
 	struct irq_chip *c;
 	bool ret = false;
 
-	/*
-	 * If this is a per-CPU interrupt, or the affinity does not
-	 * include this CPU, then we have nothing to do.
-	 */
 	if (irqd_is_per_cpu(d) || !cpumask_test_cpu(smp_processor_id(), affinity))
 		return false;
 
@@ -170,14 +127,6 @@ static bool migrate_one_irq(struct irq_desc *desc)
 	return ret;
 }
 
-/*
- * The current CPU has been marked offline.  Migrate IRQs off this CPU.
- * If the affinity settings do not allow other CPUs, force them onto any
- * available CPU.
- *
- * Note: we must iterate over all IRQs, whether they have an attached
- * action structure or not, as we need to get chained interrupts too.
- */
 void migrate_irqs(void)
 {
 	unsigned int i;
@@ -203,4 +152,4 @@ void migrate_irqs(void)
 
 	local_irq_restore(flags);
 }
-#endif /* CONFIG_HOTPLUG_CPU */
+#endif  

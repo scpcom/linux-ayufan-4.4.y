@@ -1,8 +1,4 @@
-/*
- * linux/fs/synoacl_api.c
- *
- * Copyright (c) 2000-2010 Synology Inc.
- */
+ 
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <asm/atomic.h>
@@ -67,7 +63,6 @@ Err:
 }
 EXPORT_SYMBOL(UseACLModule);
 
-/* --------------- Register Function ---------------- */
 int synoacl_vfs_register(struct synoacl_vfs_operations *pvfs, struct synoacl_syscall_operations *psys)
 {
 	if (!pvfs || !psys) {
@@ -88,13 +83,12 @@ void synoacl_vfs_unregister(void)
 }
 EXPORT_SYMBOL(synoacl_vfs_unregister);
 
-/* --------------- VFS API ---------------- */
 int synoacl_mod_archive_change_ok(struct dentry *d, unsigned int cmd, int tag, int mask)
 {
 	if (IS_VFS_ACL_READY(archive_change_ok)) {
 		return DO_VFS(archive_change_ok, d, cmd, tag, mask);
 	}
-	return 0; //is settable
+	return 0;  
 }
 EXPORT_SYMBOL(synoacl_mod_archive_change_ok);
 
@@ -177,7 +171,7 @@ int synoacl_mod_init_acl(struct dentry *dentry, struct inode *inode)
 	return -EOPNOTSUPP;
 }
 EXPORT_SYMBOL(synoacl_mod_init_acl);
-/* --------------- System Call API ---------------- */
+ 
 asmlinkage long sys_SYNOACLIsSupport(const char *name, int fd, int tag)
 {
 	int is_path_get = 0;

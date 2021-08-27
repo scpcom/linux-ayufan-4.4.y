@@ -1,11 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/fs/btrfs/xattr_syno.c
- *
- * Copyright (C) 2001-2014 Synology Inc.
- */
  
 #include <linux/fs.h>
 #include <linux/slab.h>
@@ -30,7 +25,7 @@ static int btrfs_xattr_syno_set(struct dentry *dentry, const char *name,
 			const __le32 *archive_bit_le32 = value;
 			dentry->d_inode->i_mode2 = le32_to_cpu(*archive_bit_le32);
 		}
-#endif /* MY_ABC_HERE */
+#endif  
 	}
 out:
 	kfree(complete_name);

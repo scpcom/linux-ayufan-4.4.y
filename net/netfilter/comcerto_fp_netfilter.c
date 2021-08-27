@@ -1,25 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/drivers/net/comcerto/fp_netfilter.c
- *
- *  Copyright (C) 2010 Mindspeed Technologies, Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
  
 #include <linux/module.h>
 #include <linux/version.h>
@@ -50,10 +31,6 @@ static unsigned int fp_netfilter_pre_routing(int family, unsigned int hooknum, s
 
 	dir = CTINFO2DIR(ctinfo);
 
-//	if (printk_ratelimit())
-//		printk(KERN_INFO "ct: %lx, dir: %x, mark: %x, ifindex: %d iif: %d\n", (unsigned long)ct, dir, skb->mark, skb->dev->ifindex, skb->skb_iif);
-
-	/* We could also check for changes and notify userspace (or print message) */
 	if (dir == IP_CT_DIR_ORIGINAL) {
 		fp_info = &ct->fp_info[IP_CT_DIR_ORIGINAL];
 	} else {

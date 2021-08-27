@@ -1,30 +1,10 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  arch/arm/mach-comcerto/include/mach/comcerto-2000/gpio.h
- *
- *  Copyright (C) 2012 Mindspeed Technologies, Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
  
 #ifndef __COMCERTO_GPIO_H__
 #define __COMCERTO_GPIO_H__
 
-/***** GPIO  *****/
 #define COMCERTO_GPIO_OUTPUT_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x00)
 #define COMCERTO_GPIO_OE_REG			APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x04)
 #define COMCERTO_GPIO_INT_CFG_REG		APB_VADDR(COMCERTO_APB_GPIO_BASE + 0x08)
@@ -124,7 +104,6 @@
 #define GPIO_1_S	0x00000002
 #define GPIO_2_S	0x00000004
 
-/* GPIO Pin Number and Description */
 #define GPIO_PIN_NUM_0		0
 #define GPIO_PIN_NUM_1		1
 #define GPIO_PIN_NUM_2		2
@@ -142,7 +121,6 @@
 #define	GPIO_SET_0	0
 #define	GPIO_SET_1	1
 
-/* GPIO Pin Mask */
 #define GPIO_PIN_0		(0x1 << 0)
 #define GPIO_PIN_1		(0x1 << 1)
 #define GPIO_PIN_2		(0x1 << 2)
@@ -209,8 +187,6 @@
 #define GPIO_PIN_62		(0x1 << (62 - 32))
 #define GPIO_PIN_63		(0x1 << (63 - 32))
 
-/* GPIO Pin Select Pins */
-
 #define GPIO4_PWM0		(0x1 << 8)
 #define GPIO5_PWM1		(0x1 << 10)
 #define GPIO6_PWM2		(0x1 << 12)
@@ -258,23 +234,20 @@
 #define BOOT_SERDES1_CNF_SATA0	(1 << 11)
 #define BOOT_SERDES2_CNF_SATA1  (1 << 12)
 
-				/* 0000 0000 0000 0000 0000 0011 0000 0000 */
 #define SPI_2_MUX_GPIO_1	(GPIO_4)
 #define SPI_2_MUX_BUS_1		(GPIO20_SPI2_SS1_N)
 #define SPI_2_MUX_GPIO_1_PIN	(GPIO_PIN_20)
 
-				/* 0000 0000 0000 0000 0000 0000 0000 0110 */
 #define SPI_2_MUX_GPIO_2	(GPIO_1_S | GPIO_2_S)
 #define SPI_2_MUX_BUS_2		(GPIO34_SPI_2_SS0_N | GPIO33_SPI_2_RXD)
 #define SPI_2_MUX_GPIO_2_PIN	(GPIO_PIN_34 | GPIO_PIN_33)
 
-				/* 1111 0000 0000 0000 0011 1100 1111 0000 */
 #define SPI_MUX_GPIO_1		(GPIO_30 | GPIO_31 | GPIO_18 | GPIO_19 | GPIO_21 | GPIO_22)
 #define SPI_MUX_BUS_1		(GPIO31_SPI_SCLK | GPIO30_SPI_TXD | GPIO22_SPI_SS3_N | GPIO21_SPI_SS2_N \
 					| GPIO19_SPI_SS1_N | GPIO18_SPI_SS0_N)
 #define SPI_MUX_GPIO_1_PIN	(GPIO_PIN_30 | GPIO_PIN_31 | GPIO_PIN_18 | GPIO_PIN_19 | GPIO_PIN_21 | GPIO_PIN_22)
 
-				/* 0000 0000 0000 0000 0000 0000 0000 0001 */
+				
 #define SPI_MUX_GPIO_2		(GPIO_0_S)
 #define SPI_MUX_BUS_2		(GPIO32_SPI_RXD)
 #define SPI_MUX_GPIO_2_PIN	(GPIO_PIN_32)
@@ -310,7 +283,7 @@
 #define ARCH_NR_GPIOS		C2K_GPIO_NR_GPIOS
 
 #ifndef __ASSEMBLY__
-/* This is a temporary bit mask for avoiding usage of reserved gpio pins. */
+ 
 struct c2k_gpio_pin_stat_info {
 	uint32_t c2k_gpio_pins_0_31;
 	uint32_t c2k_gpio_pins_32_63;

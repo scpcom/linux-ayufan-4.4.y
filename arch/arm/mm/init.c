@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/mm/init.c
- *
- *  Copyright (C) 1995-2005 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/swap.h>
@@ -92,13 +84,8 @@ void __init early_init_dt_setup_initrd_arch(unsigned long start, unsigned long e
 	phys_initrd_start = start;
 	phys_initrd_size = end - start;
 }
-#endif /* CONFIG_OF_FLATTREE */
+#endif  
 
-/*
- * This keeps memory configuration data used by a couple memory
- * initialization functions, as well as show_mem() for the skipping
- * of holes in the memory map.  It is populated by arm_add_memory().
- */
 struct meminfo meminfo;
 
 void show_mem(unsigned int filter)
@@ -180,23 +167,14 @@ static void __init arm_bootmem_init(unsigned long start_pfn,
 	phys_addr_t bitmap;
 	pg_data_t *pgdat;
 
-	/*
-	 * Allocate the bootmem bitmap page.  This must be in a region
-	 * of memory which has already been mapped.
-	 */
 	boot_pages = bootmem_bootmap_pages(end_pfn - start_pfn);
 	bitmap = memblock_alloc_base(boot_pages << PAGE_SHIFT, L1_CACHE_BYTES,
 				__pfn_to_phys(end_pfn));
 
-	/*
-	 * Initialise the bootmem allocator, handing the
-	 * memory banks over to bootmem.
-	 */
 	node_set_online(0);
 	pgdat = NODE_DATA(0);
 	init_bootmem_node(pgdat, __phys_to_pfn(bitmap), start_pfn, end_pfn);
 
-	/* Free the lowmem regions from memblock into bootmem. */
 	for_each_memblock(memory, reg) {
 		unsigned long start = memblock_region_memory_base_pfn(reg);
 		unsigned long end = memblock_region_memory_end_pfn(reg);
@@ -209,7 +187,6 @@ static void __init arm_bootmem_init(unsigned long start_pfn,
 		free_bootmem(__pfn_to_phys(start), (end - start) << PAGE_SHIFT);
 	}
 
-	/* Reserve the lowmem memblock reserved regions in bootmem. */
 	for_each_memblock(reserved, reg) {
 		unsigned long start = memblock_region_reserved_base_pfn(reg);
 		unsigned long end = memblock_region_reserved_end_pfn(reg);
@@ -229,12 +206,7 @@ static void __init arm_bootmem_init(unsigned long start_pfn,
 unsigned long arm_dma_zone_size __read_mostly;
 EXPORT_SYMBOL(arm_dma_zone_size);
 
-/*
- * The DMA mask corresponding to the maximum bus address allocatable
- * using GFP_DMA.  The default here places no restriction on DMA
- * allocations.  This must be the smallest DMA mask in the system,
- * so a successful GFP_DMA allocation will always satisfy this.
- */
+
 #ifdef CONFIG_SYNO_ALPINE
 phys_addr_t arm_dma_limit;
 #else
@@ -260,25 +232,13 @@ static void __init arm_bootmem_free(unsigned long min, unsigned long max_low,
 	unsigned long zone_size[MAX_NR_ZONES], zhole_size[MAX_NR_ZONES];
 	struct memblock_region *reg;
 
-	/*
-	 * initialise the zones.
-	 */
 	memset(zone_size, 0, sizeof(zone_size));
 
-	/*
-	 * The memory size has already been determined.  If we need
-	 * to do anything fancy with the allocation of this memory
-	 * to the zones, now is the time to do it.
-	 */
 	zone_size[0] = max_low - min;
 #ifdef CONFIG_HIGHMEM
 	zone_size[ZONE_HIGHMEM] = max_high - max_low;
 #endif
 
-	/*
-	 * Calculate the size of the holes.
-	 *  holes = node_size - sum(bank_sizes)
-	 */
 	memcpy(zhole_size, zone_size, sizeof(zhole_size));
 	for_each_memblock(memory, reg) {
 		unsigned long start = memblock_region_memory_base_pfn(reg);
@@ -297,10 +257,7 @@ static void __init arm_bootmem_free(unsigned long min, unsigned long max_low,
 	}
 
 #ifdef CONFIG_ZONE_DMA
-	/*
-	 * Adjust the sizes according to any special requirements for
-	 * this machine type.
-	 */
+	 
 	if (arm_dma_zone_size) {
 		arm_adjust_dma_zone(zone_size, zhole_size,
 			arm_dma_zone_size >> PAGE_SHIFT);
@@ -364,7 +321,6 @@ void __init arm_memblock_init(struct meminfo *mi, struct machine_desc *mdesc)
 	for (i = 0; i < mi->nr_banks; i++)
 		memblock_add(mi->bank[i].start, mi->bank[i].size);
 
-	/* Register the kernel text, kernel data and initrd with memblock. */
 #ifdef CONFIG_XIP_KERNEL
 	memblock_reserve(__pa(_sdata), _end - _sdata);
 #else
@@ -386,7 +342,6 @@ void __init arm_memblock_init(struct meminfo *mi, struct machine_desc *mdesc)
 	if (phys_initrd_size) {
 		memblock_reserve(phys_initrd_start, phys_initrd_size);
 
-		/* Now convert initrd to virtual addresses */
 		initrd_start = __phys_to_virt(phys_initrd_start);
 		initrd_end = initrd_start + phys_initrd_size;
 	}
@@ -395,7 +350,6 @@ void __init arm_memblock_init(struct meminfo *mi, struct machine_desc *mdesc)
 	arm_mm_memblock_reserve();
 	arm_dt_memblock_reserve();
 
-	/* reserve any platform specific memblock areas */
 	if (mdesc->reserve)
 		mdesc->reserve();
 
@@ -413,34 +367,15 @@ void __init bootmem_init(void)
 
 	arm_bootmem_init(min, max_low);
 
-	/*
-	 * Sparsemem tries to allocate bootmem in memory_present(),
-	 * so must be done after the fixed reservations
-	 */
 	arm_memory_present();
 
-	/*
-	 * sparse_init() needs the bootmem allocator up and running.
-	 */
 	sparse_init();
 
-	/*
-	 * Now free the memory - free_area_init_node needs
-	 * the sparse mem_map arrays initialized by sparse_init()
-	 * for memmap_init_zone(), otherwise all PFNs are invalid.
-	 */
 	arm_bootmem_free(min, max_low, max_high);
 
 	high_memory = __va(((phys_addr_t)max_low << PAGE_SHIFT) - 1) + 1;
 
-	/*
-	 * This doesn't seem to be used by the Linux memory manager any
-	 * more, but is used by ll_rw_block.  If we can get rid of it, we
-	 * also get rid of some of the stuff above as well.
-	 *
-	 * Note: max_low_pfn and max_pfn reflect the number of _pages_ in
-	 * the system, not the maximum PFN.
-	 */
+	
 	max_low_pfn = max_low - PHYS_PFN_OFFSET;
 	max_pfn = max_high - PHYS_PFN_OFFSET;
 }
@@ -473,10 +408,6 @@ static inline int free_area(unsigned long pfn, unsigned long end, char *s)
 	return pages;
 }
 
-/*
- * Poison init memory with an undefined instruction (ARM) or a branch to an
- * undefined instruction (Thumb).
- */
 static inline void poison_init_mem(void *s, size_t count)
 {
 	u32 *p = (u32 *)s;
@@ -490,71 +421,38 @@ free_memmap(unsigned long start_pfn, unsigned long end_pfn)
 	struct page *start_pg, *end_pg;
 	unsigned long pg, pgend;
 
-	/*
-	 * Convert start_pfn/end_pfn to a struct page pointer.
-	 */
 	start_pg = pfn_to_page(start_pfn - 1) + 1;
 	end_pg = pfn_to_page(end_pfn - 1) + 1;
 
-	/*
-	 * Convert to physical addresses, and
-	 * round start upwards and end downwards.
-	 */
 	pg = (unsigned long)PAGE_ALIGN(__pa(start_pg));
 	pgend = (unsigned long)__pa(end_pg) & PAGE_MASK;
 
-	/*
-	 * If there are free pages between these,
-	 * free the section of the memmap array.
-	 */
 	if (pg < pgend)
 		free_bootmem(pg, pgend - pg);
 }
 
-/*
- * The mem_map array can get very big.  Free the unused area of the memory map.
- */
 static void __init free_unused_memmap(struct meminfo *mi)
 {
 	unsigned long bank_start, prev_bank_end = 0;
 	unsigned int i;
 
-	/*
-	 * This relies on each bank being in address order.
-	 * The banks are sorted previously in bootmem_init().
-	 */
 	for_each_bank(i, mi) {
 		struct membank *bank = &mi->bank[i];
 
 		bank_start = bank_pfn_start(bank);
 
 #ifdef CONFIG_SPARSEMEM
-		/*
-		 * Take care not to free memmap entries that don't exist
-		 * due to SPARSEMEM sections which aren't present.
-		 */
+		 
 		bank_start = min(bank_start,
 				 ALIGN(prev_bank_end, PAGES_PER_SECTION));
 #else
-		/*
-		 * Align down here since the VM subsystem insists that the
-		 * memmap entries are valid from the bank start aligned to
-		 * MAX_ORDER_NR_PAGES.
-		 */
+		 
 		bank_start = round_down(bank_start, MAX_ORDER_NR_PAGES);
 #endif
-		/*
-		 * If we had a previous bank, and there is a space
-		 * between the current bank and the previous, free it.
-		 */
+		 
 		if (prev_bank_end && prev_bank_end < bank_start)
 			free_memmap(prev_bank_end, bank_start);
 
-		/*
-		 * Align up here since the VM subsystem insists that the
-		 * memmap entries are valid from the bank end aligned to
-		 * MAX_ORDER_NR_PAGES.
-		 */
 		prev_bank_end = ALIGN(bank_pfn_end(bank), MAX_ORDER_NR_PAGES);
 	}
 
@@ -571,20 +469,16 @@ static void __init free_highpages(void)
 	unsigned long max_low = max_low_pfn + PHYS_PFN_OFFSET;
 	struct memblock_region *mem, *res;
 
-	/* set highmem page free */
 	for_each_memblock(memory, mem) {
 		unsigned long start = memblock_region_memory_base_pfn(mem);
 		unsigned long end = memblock_region_memory_end_pfn(mem);
 
-		/* Ignore complete lowmem entries */
 		if (end <= max_low)
 			continue;
 
-		/* Truncate partial highmem entries */
 		if (start < max_low)
 			start = max_low;
 
-		/* Find and exclude any reserved regions */
 		for_each_memblock(reserved, res) {
 			unsigned long res_start, res_end;
 
@@ -607,7 +501,6 @@ static void __init free_highpages(void)
 				break;
 		}
 
-		/* And now free anything which remains */
 		if (start < end)
 			totalhigh_pages += free_area(start, end, NULL);
 	}
@@ -615,31 +508,25 @@ static void __init free_highpages(void)
 #endif
 }
 
-/*
- * mem_init() marks the free areas in the mem_map and tells us how much
- * memory is free.  This is done after various parts of the system have
- * claimed their memory after the kernel image.
- */
 void __init mem_init(void)
 {
 	unsigned long reserved_pages, free_pages;
 	struct memblock_region *reg;
 	int i;
 #ifdef CONFIG_HAVE_TCM
-	/* These pointers are filled in on TCM detection */
+	 
 	extern u32 dtcm_end;
 	extern u32 itcm_end;
 #endif
 
 	max_mapnr   = pfn_to_page(max_pfn + PHYS_PFN_OFFSET) - mem_map;
 
-	/* this will put all unused low memory onto the freelists */
 	free_unused_memmap(&meminfo);
 
 	totalram_pages += free_all_bootmem();
 
 #ifdef CONFIG_SA1111
-	/* now that our DMA memory is actually so designated, we can free it */
+	 
 	totalram_pages += free_area(PHYS_PFN_OFFSET,
 				    __phys_to_pfn(__pa(swapper_pg_dir)), NULL);
 #endif
@@ -668,10 +555,6 @@ void __init mem_init(void)
 		} while (page < end);
 	}
 
-	/*
-	 * Since our memory may not be contiguous, calculate the
-	 * real number of pages we have in this system
-	 */
 	printk(KERN_INFO "Memory:");
 	num_physpages = 0;
 	for_each_memblock(memory, reg) {
@@ -734,10 +617,6 @@ void __init mem_init(void)
 #undef MLM
 #undef MLK_ROUNDUP
 
-	/*
-	 * Check boundaries twice: Some fundamental inconsistencies can
-	 * be detected at build time already.
-	 */
 #ifdef CONFIG_MMU
 	BUILD_BUG_ON(TASK_SIZE				> MODULES_VADDR);
 	BUG_ON(TASK_SIZE 				> MODULES_VADDR);
@@ -750,11 +629,7 @@ void __init mem_init(void)
 
 	if (PAGE_SIZE >= 16384 && num_physpages <= 128) {
 		extern int sysctl_overcommit_memory;
-		/*
-		 * On a machine this small we won't get
-		 * anywhere without overcommit, so turn
-		 * it on by default.
-		 */
+		 
 		sysctl_overcommit_memory = OVERCOMMIT_ALWAYS;
 	}
 }

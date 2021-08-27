@@ -1,30 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
-   Unix SMB/Netbios implementation.
-   Version 1.9.
-   SMB parameters and setup
-   Copyright (C) Andrew Tridgell 1992-2000
-   Copyright (C) Luke Kenneth Casson Leighton 1996-2000
-   Modified by Jeremy Allison 1995.
-   Copyright (C) Andrew Bartlett <abartlet@samba.org> 2002-2003
-   Modified by Steve French (sfrench@us.ibm.com) 2002-2003
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
  
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -45,7 +21,6 @@
 #define true 1
 #endif
 
-/* following came from the other byteorder.h to avoid include conflicts */
 #define CVAL(buf,pos) (((unsigned char *)(buf))[pos])
 #define SSVALX(buf,pos,val) (CVAL(buf,pos)=(val)&0xFF,CVAL(buf,pos+1)=(val)>>8)
 #define SSVAL(buf,pos,val) SSVALX((buf),(pos),((__u16)(val)))
@@ -130,7 +105,6 @@ E_P24(unsigned char *p21, const unsigned char *c8, unsigned char *p24)
 	return rc;
 }
 
-/* produce a md4 message digest from data of length n bytes */
 int
 mdfour(unsigned char *md4_hash, unsigned char *link_str, int link_len)
 {
@@ -176,11 +150,6 @@ mdfour_err:
 	return rc;
 }
 
-/*
-   This implements the X/Open SMB password encryption
-   It takes a password, a 8 byte "crypt key" and puts 24 bytes of
-   encrypted password into p24 */
-/* Note that password must be uppercased and null terminated */
 int
 SMBencrypt(unsigned char *passwd, const unsigned char *c8, unsigned char *p24)
 {
@@ -202,10 +171,6 @@ SMBencrypt(unsigned char *passwd, const unsigned char *c8, unsigned char *p24)
 	return rc;
 }
 
-/*
- * Creates the MD4 Hash of the users password in NT UNICODE.
- */
-
 int
 E_md4hash(const unsigned char *passwd, unsigned char *p16,
 	const struct nls_table *codepage)
@@ -214,8 +179,7 @@ E_md4hash(const unsigned char *passwd, unsigned char *p16,
 	int len;
 	__le16 wpwd[129];
 
-	/* Password cannot be longer than 128 characters */
-	if (passwd) /* Password must be converted to NT unicode */
+	if (passwd)  
 #ifdef MY_ABC_HERE
 		len = cifs_strtoUCS_NoSpecialChar(wpwd, passwd, 128, codepage);
 #else
@@ -223,7 +187,7 @@ E_md4hash(const unsigned char *passwd, unsigned char *p16,
 #endif
 	else {
 		len = 0;
-		*wpwd = 0; /* Ensure string is null terminated */
+		*wpwd = 0;  
 	}
 
 	rc = mdfour(p16, (unsigned char *) wpwd, len * sizeof(__le16));
@@ -232,7 +196,6 @@ E_md4hash(const unsigned char *passwd, unsigned char *p16,
 	return rc;
 }
 
-/* Does the NT MD4 hash then des encryption. */
 int
 SMBNTencrypt(unsigned char *passwd, unsigned char *c8, unsigned char *p24,
 		const struct nls_table *codepage)

@@ -1,23 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007 Oracle.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
  
 #ifndef __BTRFS_VOLUMES_
 #define __BTRFS_VOLUMES_
@@ -41,9 +24,8 @@ struct btrfs_device {
 	struct btrfs_fs_devices *fs_devices;
 	struct btrfs_root *dev_root;
 
-	/* regular prio bios */
 	struct btrfs_pending_bios pending_bios;
-	/* WRITE_SYNC bios */
+	 
 	struct btrfs_pending_bios pending_sync_bios;
 
 	u64 generation;
@@ -55,52 +37,41 @@ struct btrfs_device {
 	int is_tgtdev_for_dev_replace;
 
 	spinlock_t io_lock;
-	/* the mode sent to blkdev_get */
+	 
 	fmode_t mode;
 
 	struct block_device *bdev;
 
 	struct rcu_string *name;
 
-	/* the internal btrfs device id */
 	u64 devid;
 
-	/* size of the device */
 	u64 total_bytes;
 
-	/* size of the disk */
 	u64 disk_total_bytes;
 
-	/* bytes used */
 	u64 bytes_used;
 
-	/* optimal io alignment for this device */
 	u32 io_align;
 
-	/* optimal io width for this device */
 	u32 io_width;
-	/* type and info about this device */
+	 
 	u64 type;
 
-	/* minimal io size for this device */
 	u32 sector_size;
 
-	/* physical drive uuid (or lvm uuid) */
 	u8 uuid[BTRFS_UUID_SIZE];
 
-	/* for sending down flush barriers */
 	int nobarriers;
 	struct bio *flush_bio;
 	struct completion flush_wait;
 
-	/* per-device scrub information */
 	struct scrub_ctx *scrub_device;
 
 	struct btrfs_work work;
 	struct rcu_head rcu;
 	struct work_struct rcu_work;
 
-	/* readahead state */
 	spinlock_t reada_lock;
 	atomic_t reada_in_flight;
 	u64 reada_next;
@@ -108,17 +79,14 @@ struct btrfs_device {
 	struct radix_tree_root reada_zones;
 	struct radix_tree_root reada_extents;
 
-	/* disk I/O failure stats. For detailed description refer to
-	 * enum btrfs_dev_stat_values in ioctl.h */
 	int dev_stats_valid;
-	int dev_stats_dirty; /* counters need to be written to disk */
+	int dev_stats_dirty;  
 	atomic_t dev_stat_values[BTRFS_DEV_STAT_VALUES_MAX];
 };
 
 struct btrfs_fs_devices {
-	u8 fsid[BTRFS_FSID_SIZE]; /* FS specific uuid */
+	u8 fsid[BTRFS_FSID_SIZE];  
 
-	/* the device with this id has the most recent copy of the super */
 	u64 latest_devid;
 	u64 latest_trans;
 	u64 num_devices;
@@ -130,16 +98,9 @@ struct btrfs_fs_devices {
 	u64 total_devices;
 	struct block_device *latest_bdev;
 
-	/* all of the devices in the FS, protected by a mutex
-	 * so we can safely walk it to write out the supers without
-	 * worrying about add/remove by the multi-device code.
-	 * Scrubbing super can kick off supers writing by holding
-	 * this mutex lock.
-	 */
 	struct mutex device_list_mutex;
 	struct list_head devices;
 
-	/* devices not currently being allocated */
 	struct list_head alloc_list;
 	struct list_head list;
 
@@ -148,23 +109,11 @@ struct btrfs_fs_devices {
 
 	int opened;
 
-	/* set when we find or add a device that doesn't have the
-	 * nonrot flag set
-	 */
 	int rotating;
 };
 
 #define BTRFS_BIO_INLINE_CSUM_SIZE	64
 
-/*
- * we need the mirror number and stripe index to be passed around
- * the call chain while we are processing end_io (especially errors).
- * Really, what we need is a btrfs_bio structure that has this info
- * and is properly sized with its stripe array, but we're not there
- * quite yet.  We have our own btrfs bioset, and all of the bios
- * we allocate are actually btrfs_io_bios.  We'll cram as much of
- * struct btrfs_bio as we can into this over time.
- */
 typedef void (btrfs_io_bio_end_io_t) (struct btrfs_io_bio *bio, int err);
 struct btrfs_io_bio {
 	unsigned long mirror_num;
@@ -184,7 +133,7 @@ static inline struct btrfs_io_bio *btrfs_io_bio(struct bio *bio)
 struct btrfs_bio_stripe {
 	struct btrfs_device *dev;
 	u64 physical;
-	u64 length; /* only used for discard mappings */
+	u64 length;  
 };
 
 struct btrfs_bio;
@@ -214,12 +163,12 @@ struct btrfs_device_info {
 };
 
 struct btrfs_raid_attr {
-	int sub_stripes;	/* sub_stripes info for map */
-	int dev_stripes;	/* stripes per dev */
-	int devs_max;		/* max devs to use */
-	int devs_min;		/* min devs needed */
-	int devs_increment;	/* ndevs has to be a multiple of this */
-	int ncopies;		/* how many copies to data has */
+	int sub_stripes;	 
+	int dev_stripes;	 
+	int devs_max;		 
+	int devs_min;		 
+	int devs_increment;	 
+	int ncopies;		 
 };
 
 struct map_lookup {
@@ -236,9 +185,6 @@ struct map_lookup {
 #define map_lookup_size(n) (sizeof(struct map_lookup) + \
 			    (sizeof(struct btrfs_bio_stripe) * (n)))
 
-/*
- * Restriper's general type filter
- */
 #define BTRFS_BALANCE_DATA		(1ULL << 0)
 #define BTRFS_BALANCE_SYSTEM		(1ULL << 1)
 #define BTRFS_BALANCE_METADATA		(1ULL << 2)
@@ -250,20 +196,12 @@ struct map_lookup {
 #define BTRFS_BALANCE_FORCE		(1ULL << 3)
 #define BTRFS_BALANCE_RESUME		(1ULL << 4)
 
-/*
- * Balance filters
- */
 #define BTRFS_BALANCE_ARGS_PROFILES	(1ULL << 0)
 #define BTRFS_BALANCE_ARGS_USAGE	(1ULL << 1)
 #define BTRFS_BALANCE_ARGS_DEVID	(1ULL << 2)
 #define BTRFS_BALANCE_ARGS_DRANGE	(1ULL << 3)
 #define BTRFS_BALANCE_ARGS_VRANGE	(1ULL << 4)
 
-/*
- * Profile changing flags.  When SOFT is set we won't relocate chunk if
- * it already has the target profile (even though it may be
- * half-filled).
- */
 #define BTRFS_BALANCE_ARGS_CONVERT	(1ULL << 8)
 #define BTRFS_BALANCE_ARGS_SOFT		(1ULL << 9)
 

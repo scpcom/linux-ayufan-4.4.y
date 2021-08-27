@@ -1,44 +1,9 @@
-/*******************************************************************************
-Copyright (C) 2013 Annapurna Labs Ltd.
-
-This file may be licensed under the terms of the Annapurna Labs Commercial
-License Agreement.
-
-Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 or V3 as published by the Free Software Foundation and can be
-found at http://www.gnu.org/licenses/gpl-2.0.html
-
-Alternatively, redistribution and use in source and binary forms, with or
-without modification, are permitted provided that the following conditions are
-met:
-
-    *     Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
-
-    *     Redistributions in binary form must reproduce the above copyright
-	  notice, this list of conditions and the following disclaimer in
-	  the documentation and/or other materials provided with the
-	  distribution.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
  
 #include "al_hal_pcie.h"
 #include "al_hal_pbs_regs.h"
 #include "al_hal_pcie_regs.h"
 #include "al_hal_unit_adapter_regs.h"
 
-/* --->>> Parameters definitions <<<--- */
 #define AL_PCIE_REV_ID_0			0
 #define AL_PCIE_REV_ID_1			1
 
@@ -53,7 +18,7 @@ met:
 
 #define AL_PCIE_SECBUS_DEFAULT			0x1
 #define AL_PCIE_SUBBUS_DEFAULT			0x1
-#define AL_PCIE_LINKUP_WAIT_INTERVAL		50	/* measured in usec */
+#define AL_PCIE_LINKUP_WAIT_INTERVAL		50	 
 #define AL_PCIE_LINKUP_WAIT_INTERVALS_PER_SEC	20
 
 #define AL_PCIE_LINKUP_RETRIES			8
@@ -62,11 +27,8 @@ met:
 #define AL_PCIE_MIN_MEMORY_BAR_SIZE		(1 << 12)
 #define AL_PCIE_MIN_IO_BAR_SIZE			(1 << 8)
 
-/* --->>> MACROS <<<--- */
 #define AL_PCIE_PARSE_LANES(v)		(((1 << v) - 1) << \
 		PCIE_AXI_MISC_PCIE_GLOBAL_CONF_NOF_ACT_LANES_SHIFT)
-
-/* --->>> static functions <<<--- */
 
 static void
 al_pcie_port_enable_wr_to_rd_only(struct al_pcie_port *pcie_port)
@@ -79,7 +41,6 @@ al_pcie_port_enable_wr_to_rd_only(struct al_pcie_port *pcie_port)
 	pcie_port->write_to_read_only_enabled = AL_TRUE;
 }
 
-/** helper function to access dbi_cs2 registers */
 void al_reg_write32_dbi_cs2(uint32_t * offset, uint32_t val)
 {
 	al_reg_write32(offset + (0x1000 >> 2),val);
@@ -89,7 +50,6 @@ int al_pcie_port_max_lanes_set(struct al_pcie_port *pcie_port, uint8_t lanes)
 {
 	struct al_pcie_regs *regs = pcie_port->regs;
 
-	/* convert to bitmask format (4 ->'b1111, 2 ->'b11, 1 -> 'b1) */
 	uint32_t active_lanes_val = AL_PCIE_PARSE_LANES(lanes);
 
 	al_reg_write32_masked(&regs->axi.pcie_global.conf,
@@ -120,7 +80,7 @@ static unsigned int al_pcie_speed_gen_code(enum al_pcie_link_speed speed)
 		return 2;
 	if (speed == AL_PCIE_LINK_SPEED_GEN3)
 		return 3;
-	/* must not be reached */
+	 
 	return 0;
 }
 
@@ -144,7 +104,6 @@ al_pcie_port_link_config(struct al_pcie_port *pcie_port,
 				       0xF, max_speed_val);
 	}
 
-	/* TODO: add support for reversal mode */
 	if (link_params->enable_reversal) {
 		al_err("PCIe %d: enabling reversal mode not implemented\n",
 			pcie_port->port_id);
@@ -192,7 +151,6 @@ al_pcie_port_snoop_config(struct al_pcie_port *pcie_port, al_bool enable_axi_sno
 {
 	struct al_pcie_regs *regs = pcie_port->regs;
 
-	/* Set snoop mode */
 	al_info("PCIE_%d: snoop mode %s\n",
 			pcie_port->port_id, enable_axi_snoop ? "enable" : "disable");
 
@@ -329,14 +287,6 @@ al_pcie_port_gen3_params_config(struct al_pcie_port *pcie_port,
 	al_reg_write32(&regs->axi.conf.zero_lane2, reg);
 	al_reg_write32(&regs->axi.conf.zero_lane3, reg);
 
-	/*
-	 * Gen3 EQ Control Register:
-	 * - Preset Request Vector - request 3-5
-	 * - Behavior After 24 ms Timeout (when optimal settings are not
-	 *   found): Recovery.Equalization.RcvrLock
-	 * - Phase2_3 2 ms Timeout Disable
-	 * - Feedback Mode - Figure Of Merit
-	 */
 	reg = 0x00001831;
 	al_reg_write32(&regs->core_space.port_regs.gen3_eq_ctrl, reg);
 
@@ -363,13 +313,11 @@ al_pcie_port_ep_params_config(struct al_pcie_port *pcie_port,
 
 	al_pcie_port_enable_wr_to_rd_only(pcie_port);
 
-	/* Disable D1 and D3hot capabilities */
 	if (ep_params->cap_d1_d3hot_dis)
 		al_reg_write32_masked(
 			&regs->core_space.pcie_pm_cap_base,
 			AL_FIELD_MASK(26, 25) | AL_FIELD_MASK(31, 28), 0);
 
-	/* Disable FLR capability */
 	if (ep_params->cap_flr_dis)
 		al_reg_write32_masked(
 			&regs->core_space.pcie_dev_cap_base,
@@ -378,7 +326,7 @@ al_pcie_port_ep_params_config(struct al_pcie_port *pcie_port,
 	if (!ep_params->bar_params_valid)
 		return 0;
 
-	for (bar_idx = 0; bar_idx < 6;){ /* bar_idx will be incremented depending on bar type */
+	for (bar_idx = 0; bar_idx < 6;){  
 		struct al_pcie_ep_bar_params *params = ep_params->bar_params + bar_idx;
 		uint32_t mask = 0;
 		uint32_t ctrl = 0;
@@ -389,21 +337,19 @@ al_pcie_port_ep_params_config(struct al_pcie_port *pcie_port,
 
 			if (params->memory_64_bit) {
 				struct al_pcie_ep_bar_params *next_params = params + 1;
-				/* 64 bars start at even index (BAR0, BAR 2 or BAR 4) */
+				 
 				if (bar_idx & 1)
 					return -EINVAL;
 
-				/* next BAR must be disabled */
 				if (next_params->enable)
 					return -EINVAL;
 
-				/* 64 bar must be memory bar */
 				if (params->memory_space)
 					return -EINVAL;
 			} else {
 				if (size > AL_PCIE_MAX_32_MEMORY_BAR_SIZE)
 					return -EINVAL;
-				/* 32 bit space can't be prefetchable */
+				 
 				if (params->memory_is_prefetchable)
 					return -EINVAL;
 			}
@@ -415,7 +361,7 @@ al_pcie_port_ep_params_config(struct al_pcie_port *pcie_port,
 					return -EINVAL;
 				}
 			} else {
-				/* IO can't be prefetchable */
+				 
 				if (params->memory_is_prefetchable)
 					return -EINVAL;
 
@@ -426,7 +372,6 @@ al_pcie_port_ep_params_config(struct al_pcie_port *pcie_port,
 				}
 			}
 
-			/* size must be power of 2 */
 			if (size & (size - 1)) {
 				al_err("PCIe %d: BAR %d:size (0x%llx) must be "
 					"power of 2\n",
@@ -434,7 +379,7 @@ al_pcie_port_ep_params_config(struct al_pcie_port *pcie_port,
 				return -EINVAL;
 			}
 
-			mask = 1; /* enable bit*/
+			mask = 1;  
 			mask |= (params->size - 1) & 0xFFFFFFFF;
 
 			al_reg_write32_dbi_cs2(bar_addr , mask);
@@ -465,24 +410,8 @@ al_pcie_port_ep_params_config(struct al_pcie_port *pcie_port,
 		return -ENOSYS;
 	}
 
-	/* Open CPU generated msi and legacy interrupts in pcie wrapper logic */
 	al_reg_write32(&regs->app.soc_int.mask_inta_leg_0, (1 << 21));
 
-	/**
-	 * Addressing RMN: 1547
-	 *
-	 * RMN description:
-	 * 1. Whenever writing to 0x2xx offset, the write also happens to
-	 * 0x3xx address, meaning two registers are written instead of one.
-	 * 2. Read and write from 0x3xx work ok.
-	 *
-	 * Software flow:
-	 * Backup the value of the app.int_grp_a.mask_a register, because
-	 * app.int_grp_a.mask_clear_a gets overwritten during the write to
-	 * app.soc.mask_msi_leg_0 register.
-	 * Restore the original value after the write to app.soc.mask_msi_leg_0
-	 * register.
-	 */
 	if (pcie_port->rev_id == AL_PCIE_REV_ID_0) {
 		uint32_t backup;
 
@@ -576,9 +505,6 @@ al_pcie_port_ep_iov_setup(
 		 PCIE_W_CFG_EMUL_CTRL_FIX_CLIENT1_FMT_EN : 0));
 }
 
-/******************** link operations ***************************************/
-
-/** return AL_TRUE if link is up, AL_FALSE otherwise */
 static al_bool al_pcie_check_link(struct al_pcie_port *pcie_port,
 				uint8_t *ltssm_ret)
 {
@@ -604,8 +530,6 @@ static al_bool al_pcie_check_link(struct al_pcie_port *pcie_port,
 	return AL_FALSE;
 }
 
-/******************************* API functions ********************************/
-/** Enable PCIe port (deassert reset) */
 int al_pcie_port_enable(
 	struct al_pcie_port	*pcie_port,
 	void __iomem		*pbs_reg_base)
@@ -614,17 +538,11 @@ int al_pcie_port_enable(
 	struct al_pcie_regs *regs = pcie_port->regs;
 	unsigned int port_id = pcie_port->port_id;
 
-	/*
-	 * Disable ATS capability
-	 * - must be done before core reset deasserted
-	 * - rev_id 0 - no effect, but no harm
-	 */
 	al_reg_write32_masked(
 		&regs->axi.ordering.pos_cntl,
 		PCIE_AXI_CORE_SETUP_ATS_CAP_DIS,
 		PCIE_AXI_CORE_SETUP_ATS_CAP_DIS);
 
-	/* Deassert core reset */
 	al_reg_write32_masked(
 		&pbs_regs->unit.pcie_conf_1,
 		1 << (port_id + PBS_UNIT_PCIE_CONF_1_PCIE_EXIST_SHIFT),
@@ -633,7 +551,6 @@ int al_pcie_port_enable(
 	return 0;
 }
 
-/** Disable PCIe port (assert reset) */
 void al_pcie_port_disable(
 	struct al_pcie_port	*pcie_port,
 	void __iomem		*pbs_reg_base)
@@ -641,14 +558,12 @@ void al_pcie_port_disable(
 	struct al_pbs_regs *pbs_regs = (struct al_pbs_regs *)pbs_reg_base;
 	unsigned int port_id = pcie_port->port_id;
 
-	/* Assert core reset */
 	al_reg_write32_masked(
 		&pbs_regs->unit.pcie_conf_1,
 		1 << (port_id + PBS_UNIT_PCIE_CONF_1_PCIE_EXIST_SHIFT),
 		0);
 }
 
-/** Initializes a PCIe handle structure. */
 int al_pcie_handle_init(struct al_pcie_port 	*pcie_port,
 			 void __iomem		*pcie_reg_base,
 			 unsigned int		port_id)
@@ -664,7 +579,6 @@ int al_pcie_handle_init(struct al_pcie_port 	*pcie_port,
 	return 0;
 }
 
-/** configure function mode (root complex or endpoint) */
 int
 al_pcie_port_func_mode_config(struct al_pcie_port *pcie_port,
 			      enum al_pcie_function_mode mode)
@@ -700,7 +614,6 @@ al_pcie_port_func_mode_config(struct al_pcie_port *pcie_port,
 	return 0;
 }
 
-/* Inbound header credits and outstanding outbound reads configuration */
 void al_pcie_port_ib_hcrd_os_ob_reads_config(
 	struct al_pcie_port *pcie_port,
 	struct al_pcie_ib_hcrd_os_ob_reads_config *ib_hcrd_os_ob_reads_config)
@@ -749,21 +662,17 @@ void al_pcie_port_ib_hcrd_os_ob_reads_config(
 		ib_hcrd_os_ob_reads_config->nof_outstanding_ob_reads <<
 		PCIE_AXI_CORE_SETUP_NOF_READS_ONSLAVE_INTRF_PCIE_CORE_SHIFT);
 
-	/* Store 'nof_p_hdr' and 'nof_np_hdr' to be set in the core later */
 	pcie_port->nof_np_hdr =	ib_hcrd_os_ob_reads_config->nof_np_hdr;
 	pcie_port->nof_p_hdr =	ib_hcrd_os_ob_reads_config->nof_p_hdr;
 	pcie_port->ib_hcrd_config_required = AL_TRUE;
 }
 
-/*TODO: move those defines */
-/** return current function mode (root complex or endpoint) */
 enum al_pcie_function_mode
 al_pcie_function_type_get(struct al_pcie_port *pcie_port)
 {
 	return al_pcie_function_mode_get(pcie_port);
 }
 
-/** configure pcie port (link params, etc..) */
 int al_pcie_port_config(struct al_pcie_port *pcie_port,
 			struct al_pcie_config_params *params)
 {
@@ -775,7 +684,6 @@ int al_pcie_port_config(struct al_pcie_port *pcie_port,
 
 	al_dbg("PCIe %d: port config\n", pcie_port->port_id);
 
-	/* Read revision ID */
 	pcie_port->rev_id = al_reg_read32(
 		(uint32_t __iomem *)(&regs->core_space.config_header[0] +
 		(PCI_CLASS_REVISION >> 2))) & 0xff;
@@ -795,7 +703,6 @@ int al_pcie_port_config(struct al_pcie_port *pcie_port,
 	pcie_port->axi_int_grp_a_base =
 		(uint32_t __iomem *)&regs->axi.int_grp_a;
 
-	/* if max lanes not specifies, read it from register */
 	if (pcie_port->max_lanes == 0) {
 		uint32_t global_conf = al_reg_read32(&regs->axi.pcie_global.conf);
 		pcie_port->max_lanes = AL_REG_FIELD_GET(global_conf,
@@ -861,12 +768,11 @@ int al_pcie_port_config(struct al_pcie_port *pcie_port,
 				1 << PCIE_PORT_AXI_SLAVE_ERR_RESP_ALL_MAPPING_SHIFT,
 				1 << PCIE_PORT_AXI_SLAVE_ERR_RESP_ALL_MAPPING_SHIFT);
 
-	/* enable memory and I/O access from port when in RC mode*/
 	if (params->function_mode == AL_PCIE_FUNCTION_MODE_RC) {
 		al_reg_write16_masked((uint16_t __iomem *)(&regs->core_space.config_header[0] + (0x4 >> 2)),
-					0x7, /* Mem, MSE, IO */
+					0x7,  
 					0x7);
-		/* change the class code to match pci bridge */
+		 
 		al_reg_write32_masked((uint32_t __iomem *)(&regs->core_space.config_header[0] + (PCI_CLASS_REVISION >> 2)),
 					0xFFFFFF00,
 					0x06040000);
@@ -877,7 +783,6 @@ done:
 	return status;
 }
 
-/* Enable/disable deferring incoming configuration requests */
 void al_pcie_app_req_retry_set(
 	struct al_pcie_port	*pcie_port,
 	al_bool			en)
@@ -891,7 +796,6 @@ void al_pcie_app_req_retry_set(
 		PCIE_W_GLOBAL_CTRL_PM_CONTROL_APP_REQ_RETRY_EN : 0);
 }
 
-/* start pcie link */
 int al_pcie_link_start(struct al_pcie_port *pcie_port)
 {
 	struct al_pcie_regs *regs = (struct al_pcie_regs *)pcie_port->regs;
@@ -906,7 +810,6 @@ int al_pcie_link_start(struct al_pcie_port *pcie_port)
 	return 0;
 }
 
-/* stop pcie link */
 int al_pcie_link_stop(struct al_pcie_port *pcie_port)
 {
 	struct al_pcie_regs *regs = (struct al_pcie_regs *)pcie_port->regs;
@@ -921,7 +824,6 @@ int al_pcie_link_stop(struct al_pcie_port *pcie_port)
 	return 0;
 }
 
-/* wait for link up indication */
 int al_pcie_link_up_wait(struct al_pcie_port *pcie_port, uint32_t timeout_ms)
 {
 	int wait_count = timeout_ms * AL_PCIE_LINKUP_WAIT_INTERVALS_PER_SEC;
@@ -942,7 +844,6 @@ int al_pcie_link_up_wait(struct al_pcie_port *pcie_port, uint32_t timeout_ms)
 	return -ETIME;
 }
 
-/** get link status */
 int al_pcie_link_status(struct al_pcie_port *pcie_port,
 			struct al_pcie_link_status *status)
 {
@@ -983,7 +884,6 @@ int al_pcie_link_status(struct al_pcie_port *pcie_port,
 	return 0;
 }
 
-/** trigger hot reset */
 int al_pcie_link_hot_reset(struct al_pcie_port *pcie_port)
 {
 	al_err("PCIe %d: link hot reset not implemented\n",
@@ -992,7 +892,6 @@ int al_pcie_link_hot_reset(struct al_pcie_port *pcie_port)
 	return -ENOSYS;
 }
 
-/* TODO: check if this function needed */
 int al_pcie_link_change_speed(struct al_pcie_port *pcie_port,
 			      enum al_pcie_link_speed new_speed __attribute__((__unused__)))
 {
@@ -1002,7 +901,6 @@ int al_pcie_link_change_speed(struct al_pcie_port *pcie_port,
 	return -ENOSYS;
 }
 
-/* TODO: check if this function needed */
 int al_pcie_link_change_width(struct al_pcie_port *pcie_port,
 			      uint8_t width __attribute__((__unused__)))
 {
@@ -1012,7 +910,6 @@ int al_pcie_link_change_width(struct al_pcie_port *pcie_port,
 	return -ENOSYS;
 }
 
-/** set target_bus and mask_target_bus */
 int al_pcie_target_bus_set(struct al_pcie_port *pcie_port,
 			   uint8_t target_bus,
 			   uint8_t mask_target_bus)
@@ -1031,7 +928,6 @@ int al_pcie_target_bus_set(struct al_pcie_port *pcie_port,
 	return 0;
 }
 
-/** get target_bus and mask_target_bus */
 int al_pcie_target_bus_get(struct al_pcie_port *pcie_port,
 			   uint8_t *target_bus,
 			   uint8_t *mask_target_bus)
@@ -1053,7 +949,6 @@ int al_pcie_target_bus_get(struct al_pcie_port *pcie_port,
 	return 0;
 }
 
-/** Set secondary bus number */
 int al_pcie_secondary_bus_set(struct al_pcie_port *pcie_port, uint8_t secbus)
 {
 	struct al_pcie_regs *regs = pcie_port->regs;
@@ -1068,7 +963,6 @@ int al_pcie_secondary_bus_set(struct al_pcie_port *pcie_port, uint8_t secbus)
 	return 0;
 }
 
-/** Set sub-ordinary bus number */
 int al_pcie_subordinary_bus_set(struct al_pcie_port *pcie_port, uint8_t subbus)
 {
 	struct al_pcie_regs *regs = pcie_port->regs;
@@ -1083,7 +977,6 @@ int al_pcie_subordinary_bus_set(struct al_pcie_port *pcie_port, uint8_t subbus)
 	return 0;
 }
 
-/** get base address of pci configuration space header */
 int al_pcie_config_space_get(struct al_pcie_port *pcie_port,
 			     uint8_t __iomem **addr)
 {
@@ -1093,7 +986,6 @@ int al_pcie_config_space_get(struct al_pcie_port *pcie_port,
 	return 0;
 }
 
-/* Read data from the local configuration space */
 uint32_t al_pcie_cfg_emul_local_cfg_space_read(
 	struct al_pcie_port	*pcie_port,
 	unsigned int	reg_offset)
@@ -1106,7 +998,6 @@ uint32_t al_pcie_cfg_emul_local_cfg_space_read(
 	return data;
 }
 
-/* Write data to the local configuration space */
 void al_pcie_cfg_emul_local_cfg_space_write(
 	struct al_pcie_port	*pcie_port,
 	unsigned int		reg_offset,
@@ -1146,14 +1037,12 @@ void al_pcie_axi_io_config(struct al_pcie_port	*pcie_port,
 }
 #endif
 
-/** program internal ATU region entry */
 int al_pcie_atu_region_set(struct al_pcie_port *pcie_port, struct al_pcie_atu_region *atu_region)
 {
 	struct al_pcie_regs *regs = pcie_port->regs;
 	uint32_t reg = 0;
 	uint32_t limit_reg_val;
 
-	/*TODO : add sanity check */
 	AL_REG_FIELD_SET(reg, 0xF, 0, atu_region->index);
 	AL_REG_BIT_VAL_SET(reg, 31, atu_region->direction);
 	al_reg_write32(&regs->core_space.port_regs.iatu.index, reg);
@@ -1210,7 +1099,6 @@ int al_pcie_atu_region_set(struct al_pcie_port *pcie_port, struct al_pcie_atu_re
 	AL_REG_FIELD_SET(reg, 0x3 << 9, 9, atu_region->attr);
 	al_reg_write32(&regs->core_space.port_regs.iatu.cr1, reg);
 
-	/* Enable/disable the region. */
 	reg = 0;
 	AL_REG_FIELD_SET(reg, 0xFF, 0, atu_region->msg_code);
 	AL_REG_FIELD_SET(reg, 0x700, 8, atu_region->bar_number);
@@ -1227,14 +1115,13 @@ int al_pcie_atu_region_set(struct al_pcie_port *pcie_port, struct al_pcie_atu_re
 	return 0;
 }
 
-/** generate INTx Assert/DeAssert Message */
 int al_pcie_legacy_int_gen(struct al_pcie_port *pcie_port, al_bool assert,
 			   enum al_pcie_legacy_int_type type)
 {
 	struct al_pcie_regs *regs = pcie_port->regs;
 	uint32_t reg;
 
-	al_assert(type == AL_PCIE_LEGACY_INTA); /* only INTA supported */
+	al_assert(type == AL_PCIE_LEGACY_INTA);  
 	reg = al_reg_read32(&regs->app.global_ctrl.events_gen);
 	AL_REG_BIT_VAL_SET(reg, 3, !!assert);
 	al_reg_write32(&regs->app.global_ctrl.events_gen, reg);
@@ -1242,13 +1129,11 @@ int al_pcie_legacy_int_gen(struct al_pcie_port *pcie_port, al_bool assert,
 	return 0;
 }
 
-/** generate MSI interrupt */
 int al_pcie_msi_int_gen(struct al_pcie_port *pcie_port, uint8_t vector)
 {
 	struct al_pcie_regs *regs = pcie_port->regs;
 	uint32_t reg;
 
-	/* set msi vector and clear MSI request */
 	reg = al_reg_read32(&regs->app.global_ctrl.events_gen);
 	AL_REG_BIT_CLEAR(reg, 4);
 	AL_REG_FIELD_SET(reg,
@@ -1256,16 +1141,13 @@ int al_pcie_msi_int_gen(struct al_pcie_port *pcie_port, uint8_t vector)
 			PCIE_W_GLOBAL_CTRL_EVENTS_GEN_MSI_VECTOR_SHIFT,
 			vector);
 	al_reg_write32(&regs->app.global_ctrl.events_gen, reg);
-	/* set MSI request */
+	 
 	AL_REG_BIT_SET(reg, 4);
 	al_reg_write32(&regs->app.global_ctrl.events_gen, reg);
 
 	return 0;
 }
 
-/********************** Loopback mode (RC and Endpoint modes) ************/
-
-/** enter local pipe loopback mode */
 int al_pcie_local_pipe_loopback_enter(struct al_pcie_port *pcie_port)
 {
 	struct al_pcie_regs *regs = pcie_port->regs;
@@ -1283,12 +1165,6 @@ int al_pcie_local_pipe_loopback_enter(struct al_pcie_port *pcie_port)
 	return 0;
 }
 
-/**
- * @brief   exit local pipe loopback mode
- *
- * @param   pcie_port pcie port handle
- * @return  0 if no error found
- */
 int al_pcie_local_pipe_loopback_exit(struct al_pcie_port *pcie_port)
 {
 	struct al_pcie_regs *regs = pcie_port->regs;
@@ -1305,7 +1181,6 @@ int al_pcie_local_pipe_loopback_exit(struct al_pcie_port *pcie_port)
 	return 0;
 }
 
-/** enter remote loopback mode */
 int al_pcie_remote_loopback_enter(struct al_pcie_port *pcie_port)
 {
 	struct al_pcie_regs *regs = pcie_port->regs;
@@ -1319,12 +1194,6 @@ int al_pcie_remote_loopback_enter(struct al_pcie_port *pcie_port)
 	return 0;
 }
 
-/**
- * @brief   exit remote loopback mode
- *
- * @param   pcie_port pcie port handle
- * @return  0 if no error found
- */
 int al_pcie_remote_loopback_exit(struct al_pcie_port *pcie_port)
 {
 	struct al_pcie_regs *regs = pcie_port->regs;

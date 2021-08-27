@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Synopsys DesignWare 8250 driver.
- *
- * Copyright 2011 Picochip, Jamie Iles.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * The Synopsys DesignWare 8250 has an extra feature whereby it detects if the
- * LCR is written whilst busy.  If it is, then a busy detect interrupt is
- * raised, the LCR needs to be rewritten and the uart status register read.
- */
+ 
 #include <linux/device.h>
 #include <linux/init.h>
 #include <linux/io.h>
@@ -69,7 +56,6 @@ static unsigned int dw8250_serial_in32(struct uart_port *p, int offset)
 	return readl(p->membase + offset);
 }
 
-/* Offset for the DesignWare's UART Status Register. */
 #define UART_USR	0x1f
 
 static int dw8250_handle_irq(struct uart_port *p)
@@ -80,7 +66,7 @@ static int dw8250_handle_irq(struct uart_port *p)
 	if (serial8250_handle_irq(p, iir)) {
 		return 1;
 	} else if ((iir & UART_IIR_BUSY) == UART_IIR_BUSY) {
-		/* Clear the USR and write the LCR again. */
+		 
 		(void)p->serial_in(p, UART_USR);
 		p->serial_out(p, UART_LCR, d->last_lcr);
 
@@ -177,7 +163,7 @@ static int __devexit dw8250_remove(struct platform_device *pdev)
 
 static const struct of_device_id dw8250_match[] = {
 	{ .compatible = "snps,dw-apb-uart" },
-	{ /* Sentinel */ }
+	{   }
 };
 MODULE_DEVICE_TABLE(of, dw8250_match);
 

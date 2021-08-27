@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2000-2008 Synology Inc. All rights reserved.
+ 
 #ifdef MY_ABC_HERE
 #include <linux/bio.h>
 #include <linux/synobios.h>
@@ -85,5 +85,5 @@ EXPORT_SYMBOL(SynoAutoRemapReport);
 EXPORT_SYMBOL(funcSYNOLvLgSectorCount);
 EXPORT_SYMBOL(funcSYNOSendAutoRemapRaidEvent);
 EXPORT_SYMBOL(funcSYNOSendAutoRemapLVEvent);
+#endif
 #endif  
-#endif /* MY_ABC_HERE */

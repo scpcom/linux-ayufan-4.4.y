@@ -1,25 +1,6 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *	IPv6 tunneling device
- *	Linux INET6 implementation
- *
- *	Authors:
- *	Ville Nuorvala		<vnuorval@tcs.hut.fi>
- *	Yasuyuki Kozakai	<kozakai@linux-ipv6.org>
- *
- *      Based on:
- *      linux/net/ipv6/sit.c and linux/net/ipv4/ipip.c
- *
- *      RFC 2473
- *
- *	This program is free software; you can redistribute it and/or
- *      modify it under the terms of the GNU General Public License
- *      as published by the Free Software Foundation; either version
- *      2 of the License, or (at your option) any later version.
- *
- */
  
 #include <linux/module.h>
 #include <linux/capability.h>
@@ -90,15 +71,14 @@ static void ip6_tnl_dev_setup(struct net_device *dev);
 
 static int ip6_tnl_net_id __read_mostly;
 struct ip6_tnl_net {
-	/* the IPv6 tunnel fallback device */
+	 
 	struct net_device *fb_tnl_dev;
-	/* lists for storing tunnels in use */
+	 
 	struct ip6_tnl __rcu *tnls_r_l[HASH_SIZE];
 	struct ip6_tnl __rcu *tnls_wc[1];
 	struct ip6_tnl __rcu **tnls[2];
 };
 
-/* often modified stats are per cpu, other are shared (netdev->stats) */
 struct pcpu_tstats {
 	unsigned long	rx_packets;
 	unsigned long	rx_bytes;
@@ -126,9 +106,7 @@ static struct net_device_stats *ip6_get_stats(struct net_device *dev)
 	return &dev->stats;
 }
 
-/*
- * Locking : hash tables are protected by RCU and RTNL
- */
+
 
 #if defined(CONFIG_SYNO_COMCERTO)
 static struct kmem_cache *mr_kmem __read_mostly;
@@ -159,7 +137,7 @@ static int ip6_4rd_fill_node( struct sk_buff *skb, struct ip6_tnl_4rd_map_rule *
 	}
 	else
 	{
-		//	memcpy(mr_msg,mr, sizeof(*mr_msg));
+		 
 		memset(mr_msg,0,sizeof(*mr_msg));
 		mr_msg->prefix = mr->prefix;
 		mr_msg->prefixlen = mr->prefixlen ;
@@ -243,7 +221,7 @@ void ip6_4rd_notify(int event, struct ip6_tnl_4rd_map_rule *mr ,struct net_devic
 
 	err = ip6_4rd_fill_node(skb, mr,0,0,event,  0, reset, dev->ifindex);
 	if (err < 0) {
-		/* -EMSGSIZE implies BUG in rt6_nlmsg_size() */
+		 
 		WARN_ON(err == -EMSGSIZE);
 		kfree_skb(skb);
 		goto errout;
@@ -309,7 +287,7 @@ ip6_tnl_4rd_mr_create(struct ip6_tnl_4rd *ip4rd, struct ip6_tnl_4rd_parm *parm, 
        list_add_tail(&mr->mr_list, &parm->map_list);
 
 out:
-	ip6_4rd_notify(RTM_NEW4RD,mr, dev,0); /* modified by MSPD */
+	ip6_4rd_notify(RTM_NEW4RD,mr, dev,0);  
 	write_unlock_bh(&parm->map_lock);
 	return err;
 }
@@ -461,18 +439,11 @@ ip6_tnl_4rd_modify_daddr(struct in6_addr *daddr6, __be32 daddr4, __be16 dport4,
        for (i = 0; i < 4; ++i)
                daddr6->s6_addr32[i] = htonl(daddr[i]);
 
-       /* DBG */
        printk(KERN_DEBUG "ip6_tnl_4rd_modify_daddr: %08x %08x %08x %08x  PSID:%04x\n",
                daddr[0], daddr[1], daddr[2], daddr[3], port_set_id);
 
        return 0;
 }
-
-/**
- * ip6_tnl_4rd_rcv_helper - 
- *   @skb: received socket buffer
- *   @t: tunnel device
- **/
 
 static int
 ip6_tnl_4rd_rcv_helper(struct sk_buff *skb, struct ip6_tnl *t)
@@ -620,20 +591,12 @@ ip6_tnl_4rd_xmit_helper(struct sk_buff *skb, struct flowi6 *fl6,
        iph->check = 0;
        iph->check = ip_fast_csum((unsigned char *)iph, iph->ihl);
 
-       /* XXX: */
        skb->local_df = 1;
 
 out:
 	return err;
 }
 
-/**
- * ip6_tnl_4rd_update_parms - update 4rd parameters
- *   @t: tunnel to be updated
- *
- * Description:
- *   ip6_tnl_4rd_update_parms() updates 4rd parameters
- **/
 static void
 ip6_tnl_4rd_update_parms(struct ip6_tnl *t)
 {
@@ -653,7 +616,6 @@ ip6_tnl_4rd_update_parms(struct ip6_tnl *t)
 		d |= ntohl(t->parms.laddr.s6_addr32[pbw0+1]) >> (32 - pbi1);
 	t->ip4rd.port_set_id = d;
 
-	/* local v4 address */
 	t->ip4rd.laddr4 = t->ip4rd.prefix;
 	pbw0 = t->ip4rd.relay_prefixlen >> 5;
 	pbi0 = t->ip4rd.relay_prefixlen & 0x1f;
@@ -700,16 +662,7 @@ static inline void ip6_tnl_dst_store(struct ip6_tnl *t, struct dst_entry *dst)
 	t->dst_cache = dst;
 }
 
-/**
- * ip6_tnl_lookup - fetch tunnel matching the end-point addresses
- *   @remote: the address of the tunnel exit-point
- *   @local: the address of the tunnel entry-point
- *
- * Return:
- *   tunnel matching given end-points if found,
- *   else fallback tunnel if its device is up,
- *   else %NULL
- **/
+
 
 #if !defined(CONFIG_SYNO_COMCERTO)
 #define for_each_ip6_tunnel_rcu(start) \
@@ -720,7 +673,7 @@ static struct ip6_tnl *
 ip6_tnl_lookup(struct net *net, const struct in6_addr *remote, const struct in6_addr *local)
 {
 #if defined(CONFIG_SYNO_COMCERTO)
-//	unsigned int h0 = HASH(remote); /* 4rd support, remote could be any, so hashing to be done only based on local address */
+ 
 #else
 	unsigned int h0 = HASH(remote);
 #endif
@@ -740,8 +693,7 @@ ip6_tnl_lookup(struct net *net, const struct in6_addr *remote, const struct in6_
 #if defined(CONFIG_SYNO_COMCERTO)
                 if (t->ip4rd.prefix &&
                    ipv6_addr_equal(local, &t->parms.laddr) &&
-                /* ipv6_prefix_equal(remote, &t->ip4rd.relay_prefix,
-                       t->ip4rd.relay_prefixlen) && 4RD D  */
+                 
                    (t->dev->flags & IFF_UP))
                        return t;
 #endif
@@ -753,16 +705,7 @@ ip6_tnl_lookup(struct net *net, const struct in6_addr *remote, const struct in6_
 	return NULL;
 }
 
-/**
- * ip6_tnl_bucket - get head of list matching given tunnel parameters
- *   @p: parameters containing tunnel end-points
- *
- * Description:
- *   ip6_tnl_bucket() returns the head of the list matching the
- *   &struct in6_addr entries laddr and raddr in @p.
- *
- * Return: head of IPv6 tunnel list
- **/
+
 
 static struct ip6_tnl __rcu **
 ip6_tnl_bucket(struct ip6_tnl_net *ip6n, const struct ip6_tnl_parm *p)
@@ -775,7 +718,7 @@ ip6_tnl_bucket(struct ip6_tnl_net *ip6n, const struct ip6_tnl_parm *p)
 	int prio = 0;
 
 #if defined(CONFIG_SYNO_COMCERTO)
-	if (!ipv6_addr_any(local)) {      /* 4rd support, since remote address could be any address, refrain from checking based on remote */ 
+	if (!ipv6_addr_any(local)) {        
 #else
 	if (!ipv6_addr_any(remote) || !ipv6_addr_any(local)) {
 #endif
@@ -789,11 +732,6 @@ ip6_tnl_bucket(struct ip6_tnl_net *ip6n, const struct ip6_tnl_parm *p)
 	return &ip6n->tnls[prio][h];
 }
 
-/**
- * ip6_tnl_link - add tunnel to hash table
- *   @t: tunnel to be added
- **/
-
 static void
 ip6_tnl_link(struct ip6_tnl_net *ip6n, struct ip6_tnl *t)
 {
@@ -802,11 +740,6 @@ ip6_tnl_link(struct ip6_tnl_net *ip6n, struct ip6_tnl *t)
 	rcu_assign_pointer(t->next , rtnl_dereference(*tp));
 	rcu_assign_pointer(*tp, t);
 }
-
-/**
- * ip6_tnl_unlink - remove tunnel from hash table
- *   @t: tunnel to be removed
- **/
 
 static void
 ip6_tnl_unlink(struct ip6_tnl_net *ip6n, struct ip6_tnl *t)
@@ -829,18 +762,6 @@ static void ip6_dev_free(struct net_device *dev)
 	free_percpu(dev->tstats);
 	free_netdev(dev);
 }
-
-/**
- * ip6_tnl_create() - create a new tunnel
- *   @p: tunnel parameters
- *   @pt: pointer to new tunnel
- *
- * Description:
- *   Create tunnel matching given parameters.
- *
- * Return:
- *   created tunnel or NULL
- **/
 
 static struct ip6_tnl *ip6_tnl_create(struct net *net, struct ip6_tnl_parm *p)
 {
@@ -887,20 +808,6 @@ failed:
 	return NULL;
 }
 
-/**
- * ip6_tnl_locate - find or create tunnel matching given parameters
- *   @p: tunnel parameters
- *   @create: != 0 if allowed to create new tunnel if no match found
- *
- * Description:
- *   ip6_tnl_locate() first tries to locate an existing tunnel
- *   based on @parms. If this is unsuccessful, but @create is set a new
- *   tunnel device is created and registered for use.
- *
- * Return:
- *   matching tunnel or NULL
- **/
-
 static struct ip6_tnl *ip6_tnl_locate(struct net *net,
 		struct ip6_tnl_parm *p, int create)
 {
@@ -922,14 +829,6 @@ static struct ip6_tnl *ip6_tnl_locate(struct net *net,
 	return ip6_tnl_create(net, p);
 }
 
-/**
- * ip6_tnl_dev_uninit - tunnel device uninitializer
- *   @dev: the device to be destroyed
- *
- * Description:
- *   ip6_tnl_dev_uninit() removes tunnel from its list
- **/
-
 static void
 ip6_tnl_dev_uninit(struct net_device *dev)
 {
@@ -944,15 +843,6 @@ ip6_tnl_dev_uninit(struct net_device *dev)
 	ip6_tnl_dst_reset(t);
 	dev_put(dev);
 }
-
-/**
- * parse_tvl_tnl_enc_lim - handle encapsulation limit option
- *   @skb: received socket buffer
- *
- * Return:
- *   0 if none was found,
- *   else index to encapsulation limit
- **/
 
 static __u16
 parse_tlv_tnl_enc_lim(struct sk_buff *skb, __u8 * raw)
@@ -984,16 +874,15 @@ parse_tlv_tnl_enc_lim(struct sk_buff *skb, __u8 * raw)
 			while (1) {
 				struct ipv6_tlv_tnl_enc_lim *tel;
 
-				/* No more room for encapsulation limit */
 				if (i + sizeof (*tel) > off + optlen)
 					break;
 
 				tel = (struct ipv6_tlv_tnl_enc_lim *) &raw[i];
-				/* return index of option if found and valid */
+				 
 				if (tel->type == IPV6_TLV_TNL_ENCAP_LIMIT &&
 				    tel->length == 1)
 					return i;
-				/* else jump to next option */
+				 
 				if (tel->type)
 					i += tel->length + 2;
 				else
@@ -1005,14 +894,6 @@ parse_tlv_tnl_enc_lim(struct sk_buff *skb, __u8 * raw)
 	}
 	return 0;
 }
-
-/**
- * ip6_tnl_err - tunnel error handler
- *
- * Description:
- *   ip6_tnl_err() should handle errors in the tunnel according
- *   to the specifications in RFC 2473.
- **/
 
 static int
 ip6_tnl_err(struct sk_buff *skb, __u8 ipproto, struct inet6_skb_parm *opt,
@@ -1026,10 +907,6 @@ ip6_tnl_err(struct sk_buff *skb, __u8 ipproto, struct inet6_skb_parm *opt,
 	__u32 rel_info = 0;
 	__u16 len;
 	int err = -ENOENT;
-
-	/* If the packet doesn't contain the original IPv6 header we are
-	   in trouble since we might need the source address for further
-	   processing of the error. */
 
 	rcu_read_lock();
 	if ((t = ip6_tnl_lookup(dev_net(skb->dev), &ipv6h->daddr,
@@ -1160,7 +1037,6 @@ ip4ip6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 	skb_reset_network_header(skb2);
 	eiph = ip_hdr(skb2);
 
-	/* Try to guess incoming interface */
 	rt = ip_route_output_ports(dev_net(skb->dev), &fl4, NULL,
 				   eiph->saddr, 0,
 				   0, 0,
@@ -1170,7 +1046,6 @@ ip4ip6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 
 	skb2->dev = rt->dst.dev;
 
-	/* route "incoming" packet */
 	if (rt->rt_flags & RTCF_LOCAL) {
 		ip_rt_put(rt);
 		rt = NULL;
@@ -1194,7 +1069,6 @@ ip4ip6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 			goto out;
 	}
 
-	/* change mtu on this route */
 	if (rel_type == ICMP_DEST_UNREACH && rel_code == ICMP_FRAG_NEEDED) {
 		if (rel_info > dst_mtu(skb_dst(skb2)))
 			goto out;
@@ -1235,7 +1109,6 @@ ip6ip6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 		skb_pull(skb2, offset);
 		skb_reset_network_header(skb2);
 
-		/* Try to guess incoming interface */
 		rt = rt6_lookup(dev_net(skb->dev), &ipv6_hdr(skb2)->saddr,
 				NULL, 0, 0);
 
@@ -1277,7 +1150,6 @@ static void ip6ip6_dscp_ecn_decapsulate(const struct ip6_tnl *t,
 		IP6_ECN_set_ce(ipv6_hdr(skb));
 }
 
-/* called with rcu_read_lock() */
 static inline int ip6_tnl_rcv_ctl(struct ip6_tnl *t)
 {
 	struct ip6_tnl_parm *p = &t->parms;
@@ -1298,15 +1170,6 @@ static inline int ip6_tnl_rcv_ctl(struct ip6_tnl *t)
 	}
 	return ret;
 }
-
-/**
- * ip6_tnl_rcv - decapsulate IPv6 packet and retransmit it locally
- *   @skb: received socket buffer
- *   @protocol: ethernet protocol ID
- *   @dscp_ecn_decapsulate: the function to decapsulate DSCP code and ECN
- *
- * Return: 0
- **/
 
 static int ip6_tnl_rcv(struct sk_buff *skb, __u16 protocol,
 		       __u8 ipproto,
@@ -1403,20 +1266,6 @@ static void init_tel_txopt(struct ipv6_tel_txoption *opt, __u8 encap_limit)
 	opt->ops.opt_nflen = 8;
 }
 
-/**
- * ip6_tnl_addr_conflict - compare packet addresses to tunnel's own
- *   @t: the outgoing tunnel device
- *   @hdr: IPv6 header from the incoming packet
- *
- * Description:
- *   Avoid trivial tunneling loop by checking that tunnel exit-point
- *   doesn't match source of incoming packet.
- *
- * Return:
- *   1 if conflict,
- *   0 else
- **/
-
 static inline int
 ip6_tnl_addr_conflict(const struct ip6_tnl *t, const struct ipv6hdr *hdr)
 {
@@ -1452,24 +1301,6 @@ static inline int ip6_tnl_xmit_ctl(struct ip6_tnl *t)
 	}
 	return ret;
 }
-/**
- * ip6_tnl_xmit2 - encapsulate packet and send
- *   @skb: the outgoing socket buffer
- *   @dev: the outgoing tunnel device
- *   @dsfield: dscp code for outer header
- *   @fl: flow of tunneled packet
- *   @encap_limit: encapsulation limit
- *   @pmtu: Path MTU is stored if packet is too big
- *
- * Description:
- *   Build new header and do some sanity checks on the packet before sending
- *   it.
- *
- * Return:
- *   0 on success
- *   -1 fail
- *   %-EMSGSIZE message too big. return mtu in this case.
- **/
  
 static int ip6_tnl_xmit2(struct sk_buff *skb,
 			 struct net_device *dev,
@@ -1530,7 +1361,7 @@ static int ip6_tnl_xmit2(struct sk_buff *skb,
 	if (skb_dst(skb))
 		skb_dst(skb)->ops->update_pmtu(skb_dst(skb), mtu);
 #if defined(CONFIG_SYNO_COMCERTO)
-        if (!t->ip4rd.prefix) {   /* 4rd support requires Post Fragmentation, so skb->len could be greater than MTU */ 
+        if (!t->ip4rd.prefix) {     
 #endif
 	if (skb->len > mtu) {
 		*pmtu = mtu;
@@ -1550,9 +1381,6 @@ static int ip6_tnl_xmit2(struct sk_buff *skb,
 	}
 #endif
 
-	/*
-	 * Okay, now see if we can stuff it in the buffer as-is.
-	 */
 	max_headroom += LL_RESERVED_SPACE(tdev);
 
 	if (skb_headroom(skb) < max_headroom || skb_shared(skb) ||
@@ -1655,7 +1483,7 @@ ip4ip6_tnl_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	err = ip6_tnl_xmit2(skb, dev, dsfield, &fl6, encap_limit, &mtu);
 	if (err != 0) {
-		/* XXX: send ICMP error even if DF is not set. */
+		 
 		if (err == -EMSGSIZE)
 			icmp_send(skb, ICMP_DEST_UNREACH, ICMP_FRAG_NEEDED,
 				  htonl(mtu));
@@ -1784,7 +1612,6 @@ static void ip6_tnl_link_config(struct ip6_tnl *t)
 	memcpy(dev->dev_addr, &p->laddr, sizeof(struct in6_addr));
 	memcpy(dev->broadcast, &p->raddr, sizeof(struct in6_addr));
 
-	/* Set up flowi template */
 	ipv6_addr_copy(&fl6->saddr, &p->laddr);
 	ipv6_addr_copy(&fl6->daddr, &p->raddr);
 	fl6->flowi6_oif = p->link;
@@ -1830,15 +1657,6 @@ static void ip6_tnl_link_config(struct ip6_tnl *t)
 	}
 }
 
-/**
- * ip6_tnl_change - update the tunnel parameters
- *   @t: tunnel to be changed
- *   @p: tunnel configuration parameters
- *
- * Description:
- *   ip6_tnl_change() updates the tunnel parameters
- **/
-
 static int
 ip6_tnl_change(struct ip6_tnl *t, struct ip6_tnl_parm *p)
 {
@@ -1857,34 +1675,6 @@ ip6_tnl_change(struct ip6_tnl *t, struct ip6_tnl_parm *p)
 	ip6_tnl_link_config(t);
 	return 0;
 }
-
-/**
- * ip6_tnl_ioctl - configure ipv6 tunnels from userspace
- *   @dev: virtual device associated with tunnel
- *   @ifr: parameters passed from userspace
- *   @cmd: command to be performed
- *
- * Description:
- *   ip6_tnl_ioctl() is used for managing IPv6 tunnels
- *   from userspace.
- *
- *   The possible commands are the following:
- *     %SIOCGETTUNNEL: get tunnel parameters for device
- *     %SIOCADDTUNNEL: add tunnel matching given tunnel parameters
- *     %SIOCCHGTUNNEL: change tunnel parameters to those given
- *     %SIOCDELTUNNEL: delete tunnel
- *
- *   The fallback device "ip6tnl0", created during module
- *   initialization, can be used for creating other tunnel devices.
- *
- * Return:
- *   0 on success,
- *   %-EFAULT if unable to copy data to or from userspace,
- *   %-EPERM if current process hasn't %CAP_NET_ADMIN set
- *   %-EINVAL if passed tunnel parameters are invalid,
- *   %-EEXIST if changing a tunnel's parameters would cause a conflict
- *   %-ENODEV if attempting to change or delete a nonexisting device
- **/
 
 static int
 ip6_tnl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
@@ -2009,7 +1799,7 @@ ip6_tnl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			if (!ipv6_addr_equal(&relay_suffix, &ip4rd.relay_suffix))
 				goto done;
 
-			err = ip6_tnl_4rd_mr_create(&ip4rd, &t->ip4rd, t->dev); /* modified by MSPD */
+			err = ip6_tnl_4rd_mr_create(&ip4rd, &t->ip4rd, t->dev);  
 
 			if ( ip4rd.entry_num == 0 ){
 
@@ -2025,7 +1815,7 @@ ip6_tnl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 				ip6_tnl_dst_reset(t);
 				ip6_tnl_link_config(t);
 			}
-			/* DBG */
+			 
 			ip6_tnl_4rd_mr_show(&t->ip4rd);
 		}else if(cmd == SIOCDEL4RD){
 			if ( ip4rd.entry_num == 0 ){
@@ -2043,9 +1833,9 @@ ip6_tnl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 				ip6_tnl_dst_reset(t);
 				ip6_tnl_link_config(t);
 			}else{
-				err = ip6_tnl_4rd_mr_delete( ip4rd.entry_num , &t->ip4rd, t->dev);  /* modified by MSPD */
+				err = ip6_tnl_4rd_mr_delete( ip4rd.entry_num , &t->ip4rd, t->dev);   
 			}
-			/* DBG */
+			 
 			ip6_tnl_4rd_mr_show(&t->ip4rd);
 		}else{
 			printk(KERN_ERR "=== ioctl_cmd 0x%x \n",cmd );
@@ -2086,16 +1876,6 @@ done:
 	return err;
 }
 
-/**
- * ip6_tnl_change_mtu - change mtu manually for tunnel device
- *   @dev: virtual device associated with tunnel
- *   @new_mtu: the new mtu
- *
- * Return:
- *   0 on success,
- *   %-EINVAL if mtu too small
- **/
-
 static int
 ip6_tnl_change_mtu(struct net_device *dev, int new_mtu)
 {
@@ -2113,14 +1893,6 @@ static const struct net_device_ops ip6_tnl_netdev_ops = {
 	.ndo_change_mtu = ip6_tnl_change_mtu,
 	.ndo_get_stats	= ip6_get_stats,
 };
-
-/**
- * ip6_tnl_dev_setup - setup virtual tunnel device
- *   @dev: virtual device associated with tunnel
- *
- * Description:
- *   Initialize function pointers and device parameters
- **/
 
 static void ip6_tnl_dev_setup(struct net_device *dev)
 {
@@ -2141,11 +1913,6 @@ static void ip6_tnl_dev_setup(struct net_device *dev)
 	dev->priv_flags &= ~IFF_XMIT_DST_RELEASE;
 }
 
-/**
- * ip6_tnl_dev_init_gen - general initializer for all tunnel devices
- *   @dev: virtual device associated with tunnel
- **/
-
 static inline int
 ip6_tnl_dev_init_gen(struct net_device *dev)
 {
@@ -2158,11 +1925,6 @@ ip6_tnl_dev_init_gen(struct net_device *dev)
 	return 0;
 }
 
-/**
- * ip6_tnl_dev_init - initializer for all non fallback tunnel devices
- *   @dev: virtual device associated with tunnel
- **/
-
 static int ip6_tnl_dev_init(struct net_device *dev)
 {
 	struct ip6_tnl *t = netdev_priv(dev);
@@ -2173,13 +1935,6 @@ static int ip6_tnl_dev_init(struct net_device *dev)
 	ip6_tnl_link_config(t);
 	return 0;
 }
-
-/**
- * ip6_fb_tnl_dev_init - initializer for fallback tunnel device
- *   @dev: fallback device
- *
- * Return: 0
- **/
 
 static int __net_init ip6_fb_tnl_dev_init(struct net_device *dev)
 {
@@ -2280,11 +2035,7 @@ static struct pernet_operations ip6_tnl_net_ops = {
 	.size = sizeof(struct ip6_tnl_net),
 };
 
-/**
- * ip6_tunnel_init - register protocol and reserve needed resources
- *
- * Return: 0 on success
- **/
+
 
 static int __init ip6_tunnel_init(void)
 {
@@ -2342,10 +2093,6 @@ out_kmem:
 out_pernet:
 	return err;
 }
-
-/**
- * ip6_tunnel_cleanup - free resources and unregister protocol
- **/
 
 static void __exit ip6_tunnel_cleanup(void)
 {

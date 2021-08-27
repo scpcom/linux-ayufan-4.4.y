@@ -1,13 +1,10 @@
-/* kernel header */
+ 
 #include <linux/synolib.h>
 #include <linux/list.h>
 #include <linux/atomic.h>
 #include <linux/slab.h>
 #include <linux/sched.h>
 
-/* user-defined header */
-
-/* static definition */
 #define SYNO_PLUGIN_ERR(msg, arg...)    printk(KERN_ERR "SYNO_PLUGIN_ERR: %s() " msg, __FUNCTION__, ##arg)
 
 typedef struct syno_plugin_s {
@@ -17,11 +14,9 @@ typedef struct syno_plugin_s {
 	struct list_head    list;
 } syno_plugin_t;
 
-/* static variables */
 static LIST_HEAD(sg_syno_plugin_list);
 static DEFINE_SPINLOCK(sg_syno_plugin_lock);
 
-/* ------- function implementation ------- */
 static inline void syno_plugin_lock(void)
 {
 	spin_lock(&sg_syno_plugin_lock);
@@ -74,7 +69,6 @@ int syno_plugin_register(int plugin_magic, void *instance)
 		goto EXIT;
 	}
 
-	/* check if the plug-in has already registered */
 	syno_plugin_lock();
 
 	if (!list_empty(&sg_syno_plugin_list)) {
@@ -125,7 +119,6 @@ int syno_plugin_unregister(int plugin_magic)
 		goto EXIT;
 	}
 
-	/* wait until no one use the plugin */
 	if (0 < plugin->access_cnt) {
 		ret = -EBUSY;
 		goto EXIT;
