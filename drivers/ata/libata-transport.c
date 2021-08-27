@@ -326,7 +326,7 @@ static DEVICE_ATTR(field, S_IRUGO, show_ata_link_##field, NULL)
 
 ata_link_linkspeed_attr(hw_sata_spd_limit);
 ata_link_linkspeed_attr(sata_spd_limit);
-#ifdef SYNO_FIX_SATA_SPD_ATTR
+#ifdef MY_ABC_HERE
 static ssize_t
 show_ata_link_sata_spd(struct device *dev,
 			struct device_attribute *attr, char *buf)

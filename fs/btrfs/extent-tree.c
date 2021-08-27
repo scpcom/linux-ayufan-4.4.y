@@ -2965,7 +2965,7 @@ out:
 static int __btrfs_mod_ref(struct btrfs_trans_handle *trans,
 			   struct btrfs_root *root,
 			   struct extent_buffer *buf,
-#ifdef SYNO_BTRFS_FIX_INVALID_OWNER
+#ifdef MY_ABC_HERE
 			   int full_backref, int inc, int for_cow, u64 explicit_rootid)
 #else
 			   int full_backref, int inc, int for_cow)
@@ -2984,7 +2984,7 @@ static int __btrfs_mod_ref(struct btrfs_trans_handle *trans,
 	int (*process_func)(struct btrfs_trans_handle *, struct btrfs_root *,
 			    u64, u64, u64, u64, u64, u64, int);
 
-#ifdef SYNO_BTRFS_FIX_INVALID_OWNER
+#ifdef MY_ABC_HERE
 	if (explicit_rootid) {
 		ref_root = explicit_rootid;
 	} else
@@ -3045,7 +3045,7 @@ fail:
 int btrfs_inc_ref(struct btrfs_trans_handle *trans, struct btrfs_root *root,
 		  struct extent_buffer *buf, int full_backref, int for_cow)
 {
-#ifdef SYNO_BTRFS_FIX_INVALID_OWNER
+#ifdef MY_ABC_HERE
 	return __btrfs_mod_ref(trans, root, buf, full_backref, 1, for_cow, 0);
 #else
 	return __btrfs_mod_ref(trans, root, buf, full_backref, 1, for_cow);
@@ -3056,14 +3056,14 @@ int btrfs_dec_ref(struct btrfs_trans_handle *trans, struct btrfs_root *root,
 		  struct extent_buffer *buf, int full_backref, int for_cow)
 {
 
-#ifdef SYNO_BTRFS_FIX_INVALID_OWNER
+#ifdef MY_ABC_HERE
 	return __btrfs_mod_ref(trans, root, buf, full_backref, 0, for_cow, 0);
 #else
 	return __btrfs_mod_ref(trans, root, buf, full_backref, 0, for_cow);
 #endif
 }
 
-#ifdef SYNO_BTRFS_FIX_INVALID_OWNER
+#ifdef MY_ABC_HERE
 int btrfs_dec_ref_explicit(struct btrfs_trans_handle *trans, struct btrfs_root *root,
 		  struct extent_buffer *buf, int full_backref, int for_cow, u64 rootid)
 {
@@ -3966,7 +3966,7 @@ static int can_overcommit(struct btrfs_root *root,
 	u64 avail;
 	u64 used;
 
-#ifdef SYNO_BTRFS_METADATA_OVERCOMMIT_POLICY
+#ifdef MY_ABC_HERE
 	used = space_info->bytes_used + space_info->bytes_reserved +
 		space_info->bytes_readonly;
 #else
@@ -3986,7 +3986,7 @@ static int can_overcommit(struct btrfs_root *root,
 	if (used + space_size >= space_info->total_bytes)
 		return 0;
 
-#ifdef SYNO_BTRFS_METADATA_OVERCOMMIT_POLICY
+#ifdef MY_ABC_HERE
 	used += space_info->bytes_may_use + space_info->bytes_pinned;
 #else
 	used += space_info->bytes_may_use;
@@ -7532,7 +7532,7 @@ static noinline int walk_up_proc(struct btrfs_trans_handle *trans,
 	if (wc->refs[level] == 1) {
 		if (level == 0) {
 			if (wc->flags[level] & BTRFS_BLOCK_FLAG_FULL_BACKREF)
-#ifdef SYNO_BTRFS_FIX_INVALID_OWNER
+#ifdef MY_ABC_HERE
 				ret = btrfs_dec_ref_explicit(trans, root, eb, 1,
 						    wc->for_reloc, root->root_key.objectid);
 #else
@@ -7667,7 +7667,7 @@ int btrfs_drop_snapshot(struct btrfs_root *root,
 	int ret;
 	int level;
 	bool root_dropped = false;
-#ifdef SYNO_BTRFS_REMOVE_UNUSED_QGROUP
+#ifdef MY_ABC_HERE
 	struct btrfs_fs_info *fs_info = root->fs_info;
 	u64 qgroupid = root->root_key.objectid;
 #endif
@@ -7817,7 +7817,7 @@ int btrfs_drop_snapshot(struct btrfs_root *root,
 	if (err)
 		goto out_end_trans;
 
-#ifdef SYNO_BTRFS_REMOVE_UNUSED_QGROUP
+#ifdef MY_ABC_HERE
 	if (fs_info->quota_enabled) {
 		ret = btrfs_remove_qgroup(trans, fs_info, qgroupid);
 		if (0 != ret) {

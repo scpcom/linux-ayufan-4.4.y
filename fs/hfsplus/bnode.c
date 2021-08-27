@@ -42,7 +42,7 @@ void hfs_bnode_read(struct hfs_bnode *node, void *buf, int off, int len)
 	}
 }
 
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 u32 hfs_bnode_read_u32(struct hfs_bnode *node, int off)
 {
 	__be32 data;
@@ -601,7 +601,7 @@ struct hfs_bnode *hfs_bnode_create(struct hfs_btree *tree, u32 num)
 	node = hfs_bnode_findhash(tree, num);
 	spin_unlock(&tree->hash_lock);
 	if (node) {
-#ifdef SYNO_HFSPLUS_ERROR_HANDLE_ENHANCE
+#ifdef MY_ABC_HERE
 		tree->sb->s_flags |= MS_RDONLY;
 		return ERR_PTR(-EIO);
 #else
@@ -654,7 +654,7 @@ void hfs_bnode_put(struct hfs_bnode *node)
 		hfs_dbg(BNODE_REFS, "put_node(%d:%d): %d\n",
 			node->tree->cnid, node->this,
 			atomic_read(&node->refcnt));
-#ifdef SYNO_HFSPLUS_ERROR_HANDLE_ENHANCE
+#ifdef MY_ABC_HERE
 		if (!atomic_read(&node->refcnt)) {
 			printk("hfsplus:node refcnt wrong (%d).\n", atomic_read(&node->refcnt));
 			tree->sb->s_flags |= MS_RDONLY;

@@ -37,7 +37,7 @@
 #include <linux/uio.h>
 #include <linux/bio.h>
 #include <linux/workqueue.h>
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #include <linux/xattr.h>
 #endif
 #include <linux/kernel.h>
@@ -829,7 +829,7 @@ static int ext4_write_begin(struct file *file, struct address_space *mapping,
 	unsigned from, to;
 
 	trace_ext4_write_begin(inode, pos, len, flags);
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 	// Add for mark_inode_dirty.
 	if (flags & AOP_FLAG_RECVFILE) {
 		needed_blocks = ext4_writepage_trans_blocks(inode) + MAX_PAGES_PER_RECVFILE;
@@ -888,7 +888,7 @@ retry:
 		 * Add inode to orphan list in case we crash before
 		 * truncate finishes
 		 */
-#ifndef SYNO_REDUCE_ADD_INODE_ORPHAN_TWICE
+#ifndef MY_ABC_HERE
 		if (pos + len > inode->i_size && ext4_can_truncate(inode))
 			ext4_orphan_add(handle, inode);
 #endif
@@ -896,7 +896,7 @@ retry:
 		ext4_journal_stop(handle);
 		if (pos + len > inode->i_size) {
 			ext4_truncate_failed_write(inode);
-#ifndef SYNO_REDUCE_ADD_INODE_ORPHAN_TWICE
+#ifndef MY_ABC_HERE
 			/*
 			 * If truncate failed early the inode might
 			 * still be on the orphan list; we need to
@@ -911,7 +911,7 @@ retry:
 
 	if (ret == -ENOSPC && ext4_should_retry_alloc(inode->i_sb, &retries))
 		goto retry;
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
 		if (pos + len > inode->i_size) {
 			// Don't need i_size_write because we hold i_mutex.
@@ -1592,7 +1592,7 @@ static void mpage_da_map_and_submit(struct mpage_da_data *mpd)
 				 "with error %d", mpd->inode->i_ino,
 				 (unsigned long long) next,
 				 mpd->b_size >> mpd->inode->i_blkbits, err);
-#ifdef SYNO_EXT4_DA_PREVENT_RESERVED_BLOCK_UNDERFLOW
+#ifdef MY_ABC_HERE
 			if (err != -ENOSPC)
 #endif
 			ext4_msg(sb, KERN_CRIT,
@@ -2486,7 +2486,7 @@ retry:
 	 * to journalling the i_disksize update if writes to the end
 	 * of file which has an already mapped buffer.
 	 */
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 	if (flags & AOP_FLAG_RECVFILE) {
 		handle = ext4_journal_start(inode, MAX_PAGES_PER_RECVFILE);
 	} else {
@@ -2527,7 +2527,7 @@ retry:
 
 	if (ret == -ENOSPC && ext4_should_retry_alloc(inode->i_sb, &retries))
 		goto retry;
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
 		if (pos + len > inode->i_size) {
 			// Don't need i_size_write because we hold i_mutex.
@@ -3179,7 +3179,7 @@ static const struct address_space_operations ext4_da_aops = {
 	.error_remove_page	= generic_error_remove_page,
 };
 
-#ifdef SYNO_FS_EXT4_SKIP_JOURNAL_SYMLINK
+#ifdef MY_ABC_HERE
 void ext4_set_writeback_aops(struct inode *inode)
 {
 	inode->i_mapping->a_ops = &ext4_writeback_aops;
@@ -3852,7 +3852,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
 #endif
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	inode->i_mode2 = le16_to_cpu(raw_inode->ext4_mode2);
 #endif
 
@@ -4034,7 +4034,7 @@ static int ext4_do_update_inode(handle_t *handle,
 #else
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	raw_inode->ext4_mode2 = cpu_to_le16(inode->i_mode2); /* we'll lost upper 16 bits flags */
 #endif
 
@@ -4375,23 +4375,23 @@ int ext4_getattr(struct vfsmount *mnt, struct dentry *dentry,
 	return 0;
 }
 
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 int syno_ext4_getattr(struct dentry *d, struct kstat *stat, int flags)
 {
 	struct inode *inode = d->d_inode;
 	int err = 0;
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_CREATIME) {
 		stat->SynoCreateTime = inode->i_CreateTime;
 	}
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARBIT) {
 		stat->SynoMode = inode->i_mode2;
 	}
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_BKPVER) {
 		err = syno_ext4_get_archive_ver(d, &stat->syno_archive_version);
 	}
@@ -4400,7 +4400,7 @@ int syno_ext4_getattr(struct dentry *d, struct kstat *stat, int flags)
 }
 #endif
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 int syno_ext4_set_archive_ver(struct dentry *dentry, u32 version)
 {
 	struct inode *inode = dentry->d_inode;

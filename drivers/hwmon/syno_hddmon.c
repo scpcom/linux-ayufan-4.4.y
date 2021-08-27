@@ -67,11 +67,11 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 
 	memset(pData, 0, sizeof(SynoHddMonData_t));
 
-#ifdef SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 	pData->blHddHotPlugSupport = g_hdd_hotplug;
 #endif
 
-#ifdef SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 	pData->iMaxHddNum = g_internal_hd_num;
 #else
 	pData->iMaxHddNum = SYNO_MAX_HDD_PRZ;

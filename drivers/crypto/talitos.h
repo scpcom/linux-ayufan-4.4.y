@@ -161,7 +161,7 @@
 /* primary execution unit mode (MODE0) and derivatives */
 #define	DESC_HDR_MODE0_ENCRYPT		cpu_to_be32(0x00100000)
 #define	DESC_HDR_MODE0_AESU_CBC		cpu_to_be32(0x00200000)
-#ifdef SYNO_TALITOS_PATCH
+#ifdef MY_ABC_HERE
 #define	DESC_HDR_MODE0_AESU_XOR		cpu_to_be32(0x0c600000)
 #endif
 #define	DESC_HDR_MODE0_DEU_CBC		cpu_to_be32(0x00400000)
@@ -218,7 +218,7 @@
 #define DESC_HDR_TYPE_IPSEC_ESP			cpu_to_be32(1 << 3)
 #define DESC_HDR_TYPE_COMMON_NONSNOOP_NO_AFEU	cpu_to_be32(2 << 3)
 #define DESC_HDR_TYPE_HMAC_SNOOP_NO_AFEU	cpu_to_be32(4 << 3)
-#ifdef SYNO_TALITOS_PATCH
+#ifdef MY_ABC_HERE
 #define DESC_HDR_TYPE_RAID_XOR			cpu_to_be32(21 << 3)
 #endif
 

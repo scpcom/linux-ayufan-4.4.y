@@ -2464,7 +2464,7 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		 * TD list.
 		 */
 		if (list_empty(&ep_ring->td_list)) {
-#ifdef SYNO_USB3_SURPRESS_WARN
+#ifdef MY_ABC_HERE
 			xhci_dbg(xhci, "WARN Event TRB for slot %d ep %d "
 #else
 			xhci_warn(xhci, "WARN Event TRB for slot %d ep %d "

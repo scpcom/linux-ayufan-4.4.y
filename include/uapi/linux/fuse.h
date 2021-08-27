@@ -103,7 +103,7 @@
 /** Minor version number of this interface */
 #define FUSE_KERNEL_MINOR_VERSION 22
 
-#if defined(SYNO_GLUSTERFS_PREFETCH_ACL) || defined(SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #define SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION 10
 #endif
 
@@ -654,7 +654,7 @@ struct fuse_dirent {
 	char name[];
 };
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 struct syno_fuse_acl_data {
 	__u32 len;
 	char value[];
@@ -663,7 +663,7 @@ struct syno_fuse_acl_data {
 #define SYNO_FUSE_ACL_VALUE_OFFSET offsetof(struct syno_fuse_acl_data, value)
 
 #define SYNO_FUSE_ACL_CACHE_SIZE 8192
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 
 #define FUSE_NAME_OFFSET offsetof(struct fuse_dirent, name)
 #define FUSE_DIRENT_ALIGN(x) (((x) + sizeof(__u64) - 1) & ~(sizeof(__u64) - 1))

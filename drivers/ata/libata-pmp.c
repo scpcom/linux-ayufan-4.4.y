@@ -13,7 +13,7 @@
 #include <linux/kernel.h>
 #include <linux/export.h>
 #include <linux/libata.h>
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 #include <linux/sched.h>
 #endif
 #include <linux/slab.h>
@@ -57,7 +57,7 @@ static unsigned int sata_pmp_read(struct ata_link *link, int reg, u32 *r_val)
 	tf.command = ATA_CMD_PMP_READ;
 	tf.protocol = ATA_PROT_NODATA;
 	tf.flags |= ATA_TFLAG_ISADDR | ATA_TFLAG_DEVICE | ATA_TFLAG_LBA48;
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	tf.feature = reg & 0xff;
 	tf.hob_feature = (reg >> 8) & 0xff;
 #else
@@ -98,7 +98,7 @@ static unsigned int sata_pmp_write(struct ata_link *link, int reg, u32 val)
 	tf.command = ATA_CMD_PMP_WRITE;
 	tf.protocol = ATA_PROT_NODATA;
 	tf.flags |= ATA_TFLAG_ISADDR | ATA_TFLAG_DEVICE | ATA_TFLAG_LBA48;
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	tf.feature = reg & 0xff;
 	tf.hob_feature = (reg >> 8) & 0xff;
 #else
@@ -114,7 +114,7 @@ static unsigned int sata_pmp_write(struct ata_link *link, int reg, u32 val)
 				 SATA_PMP_RW_TIMEOUT);
 }
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 /**
  * Some PM chips need to config GPIO related 
  * registers before starting using them.
@@ -772,7 +772,7 @@ syno_pmp_ports_num(struct ata_port *ap)
 		}
 		/* add other quirk of port multiplier here */
 		 
-#ifdef SYNO_MV_9235_PORTING
+#ifdef MY_ABC_HERE
 		/* Block sata 6Gbps host + sata 3Gbps expansion unit case*/
 		if (syno_pm_is_synology_3xxx(ap) && (ap->link.uiStsFlags & SYNO_STATUS_IS_MV9235)) {
 			ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
@@ -966,7 +966,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		if (blPowerOn) {
 			DBGMESG("port %d delay 3000ms wait for HW ready\n", ap->print_id);
 			SleepForLatency();
-#ifdef SYNO_SATA_PM_SEAGATE_PROBE_TIME_FIX
+#ifdef MY_ABC_HERE
 			ata_port_printk(ap, KERN_INFO, "PMP Power control set ATA_EH_SYNO_PWON\n");
 			ap->link.eh_context.i.action |= ATA_EH_SYNO_PWON;
 #endif
@@ -1021,7 +1021,7 @@ END:
 	spin_unlock_irqrestore(ap->lock, flags);
 	return iRet;
 }
-#endif /* SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
 /**
  *	sata_pmp_qc_defer_cmd_switch - qc_defer for command switching PMP
@@ -1195,7 +1195,7 @@ static int sata_pmp_configure(struct ata_device *dev, int print_info)
 	const char *reason;
 	int nr_ports, rc;
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	nr_ports = syno_pmp_ports_num(ap);
 #else
 	nr_ports = sata_pmp_gscr_ports(gscr);
@@ -1226,7 +1226,7 @@ static int sata_pmp_configure(struct ata_device *dev, int print_info)
 	 * R_OK that was intended for the host. Symptom will be all
 	 * 5 drives under test will timeout, get reset, and recover.
 	 */
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/*our DX513 and DX213 use 3826 chip */
 	if (vendor == 0x1095 && (devid == 0x3726 || devid == 0x3826)) {
 #else
@@ -1320,11 +1320,11 @@ static void sata_pmp_quirks(struct ata_port *ap)
 	u16 vendor = sata_pmp_gscr_vendor(gscr);
 	u16 devid = sata_pmp_gscr_devid(gscr);
 	struct ata_link *link;
-#ifdef SYNO_PM_DISABLE_LINK_LIMIT
+#ifdef MY_ABC_HERE
 	u32 scontrol;
 #endif
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/*our DX513 and DX213 use 3826 chip */
 	if (vendor == 0x1095 && (devid == 0x3726 || devid == 0x3826)) {
 #else
@@ -1344,7 +1344,7 @@ static void sata_pmp_quirks(struct ata_port *ap)
 				link->flags |= ATA_LFLAG_NO_SRST |
 					       ATA_LFLAG_ASSUME_SEMB;
 
-#ifdef SYNO_PM_DISABLE_LINK_LIMIT
+#ifdef MY_ABC_HERE
 			sata_pmp_scr_read(link, SATA_PMP_PSCR_CONTROL, &scontrol);
 
 			// Has speed limit before negotiate link speed, clear it.
@@ -1451,7 +1451,7 @@ int sata_pmp_attach(struct ata_device *dev)
 	unsigned long flags;
 	struct ata_link *tlink;
 	int rc;
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	u32 target = 0, target_limit = 0;
 #endif
 
@@ -1479,14 +1479,14 @@ int sata_pmp_attach(struct ata_device *dev)
 	if (rc)
 		goto fail;
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/* Get information for all PM we supported */
 	syno_pm_gpio_config(ap);
 	syno_prepare_custom_info(ap);
 	if (syno_pm_is_synology_9705(ap)){
 		syno_pm_9705_max_tx_amp(ap);
 	}
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 	/*For DS1812+ with older version of DX510, the link should be limited to 1.5G*/
 	if (syno_is_hw_version(HW_DS1812p)) {
 		/* The old version should be b000 */
@@ -1543,14 +1543,14 @@ int sata_pmp_attach(struct ata_device *dev)
 	rc = sata_pmp_configure(dev, 1);
 	if (rc)
 		goto fail;
-#ifdef SYNO_SATA_PM_LINK_RETRY
+#ifdef MY_DEF_HERE
 	/* DS2415 doesn't use the sil3132, so we don't do the retry */
 	if (!syno_is_hw_version(HW_DS2415p)) {
 		ap->isFirstAttach = 1;
 	}
 #endif
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	rc = sata_pmp_init_links(ap, syno_pmp_ports_num(ap));
 #else
 	rc = sata_pmp_init_links(ap, sata_pmp_gscr_ports(dev->gscr));
@@ -1563,7 +1563,7 @@ int sata_pmp_attach(struct ata_device *dev)
 	/* attach it */
 	spin_lock_irqsave(ap->lock, flags);
 	WARN_ON(ap->nr_pmp_links);
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	ap->nr_pmp_links = syno_pmp_ports_num(ap);
 #else
 	ap->nr_pmp_links = sata_pmp_gscr_ports(dev->gscr);
@@ -1580,7 +1580,7 @@ int sata_pmp_attach(struct ata_device *dev)
 
 	ata_acpi_associate_sata_port(ap);
 
-#ifdef SYNO_LIBATA_PMP_UEVENT
+#ifdef MY_ABC_HERE
 	ap->pflags |= ATA_PFLAG_PMP_CONNECT;
 #endif
 
@@ -1613,14 +1613,14 @@ static void sata_pmp_detach(struct ata_device *dev)
 	WARN_ON(!ata_is_host_link(link) || dev->devno ||
 		link->pmp != SATA_PMP_CTRL_PORT);
 
-#ifdef SYNO_SATA_PM_CLEANUP_CLASS
+#ifdef MY_ABC_HERE
 	ata_for_each_link(tlink, ap, EDGE) {
 		unsigned int *classes = tlink->eh_context.classes;
 		struct ata_device *tdev = tlink->device;
 		classes[tdev->devno] = ATA_DEV_UNKNOWN;
 	}
 #endif
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	ap->PMSynoUnique = 0;
 #endif
 
@@ -1636,7 +1636,7 @@ static void sata_pmp_detach(struct ata_device *dev)
 	spin_unlock_irqrestore(ap->lock, flags);
 
 	ata_acpi_associate_sata_port(ap);
-#ifdef SYNO_LIBATA_PMP_UEVENT
+#ifdef MY_ABC_HERE
 	ap->pflags |= ATA_PFLAG_PMP_DISCONNECT;
 #endif
 }
@@ -1660,7 +1660,7 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 	const u32 *old_gscr = dev->gscr;
 	u16 old_vendor, new_vendor, old_devid, new_devid;
 	int old_nr_ports, new_nr_ports;
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	struct ata_port *ap = dev->link->ap;
 	u32 old_syno_unique = ap->PMSynoUnique;
 #endif
@@ -1669,7 +1669,7 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 	new_vendor = sata_pmp_gscr_vendor(new_gscr);
 	old_devid = sata_pmp_gscr_devid(old_gscr);
 	new_devid = sata_pmp_gscr_devid(new_gscr);
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	new_nr_ports = old_nr_ports = syno_pmp_ports_num(ap);
 #else
 	old_nr_ports = sata_pmp_gscr_ports(old_gscr);
@@ -1697,7 +1697,7 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 		return 0;
 	}
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/* power on and re-custom */
 	syno_pm_gpio_config(ap);
 	syno_prepare_custom_info(ap);

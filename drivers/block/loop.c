@@ -973,7 +973,7 @@ loop_init_xfer(struct loop_device *lo, struct loop_func_table *xfer,
 	return err;
 }
 
-#ifdef SYNO_FIX_LOOP_DEVICE_CALL_TRACE
+#ifdef MY_ABC_HERE
 static int loop_clr_fd(struct loop_device *lo, struct block_device *bdev)
 #else
 static int loop_clr_fd(struct loop_device *lo)
@@ -981,7 +981,7 @@ static int loop_clr_fd(struct loop_device *lo)
 {
 	struct file *filp = lo->lo_backing_file;
 	gfp_t gfp = lo->old_gfp_mask;
-#ifdef SYNO_FIX_LOOP_DEVICE_CALL_TRACE
+#ifdef MY_ABC_HERE
 #else
 	struct block_device *bdev = lo->lo_device;
 #endif
@@ -1302,7 +1302,7 @@ static int lo_ioctl(struct block_device *bdev, fmode_t mode,
 		break;
 	case LOOP_CLR_FD:
 		/* loop_clr_fd would have unlocked lo_ctl_mutex on success */
-#ifdef SYNO_FIX_LOOP_DEVICE_CALL_TRACE
+#ifdef MY_ABC_HERE
 		err = loop_clr_fd(lo, bdev);
 #else
 		err = loop_clr_fd(lo);
@@ -1532,7 +1532,7 @@ static int lo_release(struct gendisk *disk, fmode_t mode)
 		 * In autoclear mode, stop the loop thread
 		 * and remove configuration after last close.
 		 */
-#ifdef SYNO_FIX_LOOP_DEVICE_CALL_TRACE
+#ifdef MY_ABC_HERE
 		err = loop_clr_fd(lo, lo->lo_device);
 #else
 		err = loop_clr_fd(lo);

@@ -196,7 +196,7 @@
 #error "Samba archive bit redefine."
 #endif
 
-#if defined(SYNO_FS_SYNO_ACL) || defined(CONFIG_FS_SYNO_ACL)
+#if defined(MY_ABC_HERE) || defined(CONFIG_FS_SYNO_ACL)
 #if defined (F_CLRSMB_READONLY) || defined (F_SETSMB_READONLY) || \
 	defined (F_CLRACL_INHERIT)  || defined (F_SETACL_INHERIT)  || \
 	defined (F_CLRACL_OWNER_IS_GROUP) || defined (F_SETACL_OWNER_IS_GROUP)  || \
@@ -215,7 +215,7 @@
 #define F_CLRSMB_SYSTEM             (SYNO_FCNTL_BASE + 6)
 #define F_CLEAR_S3_ARCHIVE          (SYNO_FCNTL_BASE + 7)
 
-#ifdef SYNO_FS_SYNO_ACL
+#ifdef MY_ABC_HERE
 #define F_CLRSMB_READONLY           (SYNO_FCNTL_BASE + 8)
 #define F_SETSMB_READONLY           (SYNO_FCNTL_BASE + 9)
 #define F_CLRACL_INHERIT            (SYNO_FCNTL_BASE + 10)
@@ -252,7 +252,7 @@
 #define SYNO_LIMIT_CPU_CORES
 #endif
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 #define MAX_CHANNEL_RETRY       2
 #define CHANNEL_RETRY_INTERVAL  (3*HZ)
 

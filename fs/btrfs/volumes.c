@@ -5321,7 +5321,7 @@ int btrfs_rmap_block(struct btrfs_mapping_tree *map_tree,
 static void btrfs_end_bio(struct bio *bio, int err)
 {
 	struct btrfs_bio *bbio = bio->bi_private;
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	struct btrfs_device *dev = bbio->stripes[0].dev;
 #endif
@@ -5332,7 +5332,7 @@ static void btrfs_end_bio(struct bio *bio, int err)
 		if (err == -EIO || err == -EREMOTEIO) {
 			unsigned int stripe_index =
 				btrfs_io_bio(bio)->stripe_index;
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 			struct btrfs_device *dev;
 #endif
 
@@ -5356,7 +5356,7 @@ static void btrfs_end_bio(struct bio *bio, int err)
 	if (bio == bbio->orig_bio)
 		is_orig_bio = 1;
 
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	btrfs_bio_counter_dec(bbio->fs_info);
 #endif
@@ -5503,7 +5503,7 @@ static void submit_stripe_bio(struct btrfs_root *root, struct btrfs_bio *bbio,
 #endif
 	bio->bi_bdev = dev->bdev;
 
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	btrfs_bio_counter_inc_noblocked(root->fs_info);
 #endif
@@ -5576,13 +5576,13 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 	length = bio->bi_size;
 	map_length = length;
 
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	btrfs_bio_counter_inc_blocked(root->fs_info);
 #endif
 	ret = __btrfs_map_block(root->fs_info, rw, logical, &map_length, &bbio,
 			      mirror_num, &raid_map);
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 	if (ret) /* -ENOMEM */
 		return ret;
 #else
@@ -5596,7 +5596,7 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 	bbio->orig_bio = first_bio;
 	bbio->private = first_bio->bi_private;
 	bbio->end_io = first_bio->bi_end_io;
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	bbio->fs_info = root->fs_info;
 #endif
@@ -5605,7 +5605,7 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 	if (raid_map) {
 		/* In this case, map_length has been set to the length of
 		   a single stripe; not the whole write */
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 		if (rw & WRITE) {
 			return raid56_parity_write(root, bio, bbio,
 						   raid_map, map_length);
@@ -5671,7 +5671,7 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 				  async_submit);
 		dev_nr++;
 	}
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	btrfs_bio_counter_dec(root->fs_info);
 #endif

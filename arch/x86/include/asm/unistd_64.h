@@ -694,30 +694,30 @@ __SYSCALL(__NR_process_vm_readv, sys_process_vm_readv)
 #define __NR_process_vm_writev			311
 __SYSCALL(__NR_process_vm_writev, sys_process_vm_writev)
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 #define __NR_SYNOUtime                          402
 #define SYNOUtime(arg1, arg2)                   syscall(__NR_SYNOUtime, arg1, arg2)
 __SYSCALL(__NR_SYNOUtime, sys_SYNOUtime)
 #endif
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #define __NR_SYNOArchiveBit                     403
 #define SYNOArchiveBit(arg1, arg2)              syscall(__NR_SYNOArchiveBit, arg1, arg2)
 __SYSCALL(__NR_SYNOArchiveBit, sys_SYNOArchiveBit)
 #endif
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 #define __NR_recvfile                           404
 #define recvfile(arg1,arg2,arg3,arg4,arg5)      syscall(__NR_recvfile, arg1, arg2, arg3, arg4, arg5)
 __SYSCALL(__NR_recvfile, sys_recvfile)
 #endif
 
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 #define __NR_SYNOMTDAlloc                       405
 #define SYNOMTDAlloc(arg1)                      syscall(__NR_SYNOMTDAlloc, arg1)
 #endif
 
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 #define __NR_SYNOCaselessStat                   406
 #define __NR_SYNOCaselessLStat                  407
 
@@ -725,9 +725,9 @@ __SYSCALL(__NR_recvfile, sys_recvfile)
 #define SYNOCaselessLStat(arg1, arg2)           syscall(__NR_SYNOCaselessLStat, arg1, arg2)
 __SYSCALL(__NR_SYNOCaselessStat, sys_SYNOCaselessStat)
 __SYSCALL(__NR_SYNOCaselessLStat, sys_SYNOCaselessLStat)
-#endif /* SYNO_UNICODE_STAT */
+#endif /* MY_ABC_HERE */
 
-#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
+#ifdef MY_ABC_HERE
 #define __NR_SYNOEcryptName                     410
 #define SYNOEcryptName(arg1, arg2)              syscall(__NR_SYNOEcryptName, arg1, arg2)
 __SYSCALL(__NR_SYNOEcryptName, sys_SYNOEcryptName)
@@ -736,7 +736,7 @@ __SYSCALL(__NR_SYNOEcryptName, sys_SYNOEcryptName)
 __SYSCALL(__NR_SYNODecryptName, sys_SYNODecryptName)
 #endif
 
-#ifdef SYNO_FS_SYNO_ACL
+#ifdef MY_ABC_HERE
 #define __NR_SYNOACLCheckPerm                   412
 #define SYNOACLSysCheckPerm(arg1, arg2)         syscall(__NR_SYNOACLCheckPerm, arg1, arg2)
 __SYSCALL(__NR_SYNOACLCheckPerm, sys_SYNOACLCheckPerm)
@@ -748,7 +748,7 @@ __SYSCALL(__NR_SYNOACLIsSupport, sys_SYNOACLIsSupport)
 __SYSCALL(__NR_SYNOACLGetPerm, sys_SYNOACLGetPerm)
 #endif
 
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 #define __NR_SYNOStat                           419
 #define __NR_SYNOFStat                          420
 #define __NR_SYNOLStat                          421
@@ -759,7 +759,7 @@ __SYSCALL(__NR_SYNOACLGetPerm, sys_SYNOACLGetPerm)
 __SYSCALL(__NR_SYNOStat, sys_SYNOStat)
 __SYSCALL(__NR_SYNOFStat, sys_SYNOFStat)
 __SYSCALL(__NR_SYNOLStat, sys_SYNOLStat)
-#endif /* SYNO_STAT */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_SYNO_NOTIFY
 #define __NR_SYNONotifyInit                     422
@@ -779,13 +779,13 @@ __SYSCALL(__NR_SYNONotifyAddWatch32, sys_SYNONotifyAddWatch32)
 __SYSCALL(__NR_SYNONotifyRemoveWatch32, sys_SYNONotifyRemoveWatch32)
 #endif /* CONFIG_SYNO_NOTIFY */
 
-#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
+#ifdef MY_ABC_HERE
 #define __NR_SYNOArchiveOverwrite               427
 #define SYNOArchiveOverwrite(arg1, arg2)        syscall(__NR_SYNOArchiveOverwrite, arg1, arg2)
 __SYSCALL(__NR_SYNOArchiveOverwrite, sys_SYNOArchiveOverwrite)
 #endif
 
-#ifdef SYNO_SYSTEM_CALL
+#ifdef MY_ABC_HERE
 #define __syscall_return(type, res) \
 do { \
 	if ((unsigned long)(res) >= (unsigned long)(-127)) { \

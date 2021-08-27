@@ -19,7 +19,7 @@
 
 static struct sysdev_class_attribute *cpu_sysdev_class_attrs[];
 
-#if defined(SYNO_LIMIT_CPU_CORES) && defined(SYNO_HW_VERSION)
+#if defined(SYNO_LIMIT_CPU_CORES) && defined(MY_ABC_HERE)
 #include <linux/synobios.h>
 #endif
 

@@ -353,7 +353,7 @@ static inline unsigned long btrfs_chunk_item_size(int num_stripes)
 #define BTRFS_FS_STATE_ERROR		0
 #define BTRFS_FS_STATE_REMOUNTING	1
 #define BTRFS_FS_STATE_TRANS_ABORTED	2
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 #define BTRFS_FS_STATE_DEV_REPLACING	3
 #endif
@@ -1367,7 +1367,7 @@ struct btrfs_fs_info {
 	/* logical->physical extent mapping */
 	struct btrfs_mapping_tree mapping_tree;
 
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	atomic_t nr_extent_maps;
 #endif
 	/*
@@ -1703,7 +1703,7 @@ struct btrfs_fs_info {
 
 	atomic_t mutually_exclusive_operation_running;
 
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	struct percpu_counter bio_counter;
 	wait_queue_head_t replace_wait;
@@ -1767,7 +1767,7 @@ struct btrfs_root {
 	atomic_t log_commit[2];
 	atomic_t log_batch;
 	int log_transid;
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	/* No matter the commit succeeds or not*/
 	int log_transid_committed;
@@ -3874,7 +3874,7 @@ void btrfs_get_block_group_info(struct list_head *groups_list,
 				struct btrfs_ioctl_space_info *space);
 void update_ioctl_balance_args(struct btrfs_fs_info *fs_info, int lock,
 			       struct btrfs_ioctl_balance_args *bargs);
-#ifdef SYNO_BTRFS_COMPAT_IOCTL
+#ifdef MY_ABC_HERE
 #ifdef CONFIG_COMPAT
 long btrfs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 #endif
@@ -4103,7 +4103,7 @@ int btrfs_scrub_cancel_dev(struct btrfs_fs_info *info,
 int btrfs_scrub_progress(struct btrfs_root *root, u64 devid,
 			 struct btrfs_scrub_progress *progress);
 
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 /* dev-replace.c */
 void btrfs_bio_counter_inc_blocked(struct btrfs_fs_info *fs_info);

@@ -98,10 +98,10 @@ struct bio {
 #define BIO_FS_INTEGRITY 9	/* fs owns integrity data, not block layer */
 #define BIO_QUIET	10	/* Make BIO Quiet */
 #define BIO_MAPPED_INTEGRITY 11/* integrity metadata has been remapped */
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 #define BIO_AUTO_REMAP 12	/* record if auto-remap occurred */
 #endif
-#ifdef SYNO_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 /*
  * Currently, our RAID1 device won't return error on make_reuest() when RAID1 is crashed
  * So we add this flag to told md layer that is should eturn error for flashcache * devices

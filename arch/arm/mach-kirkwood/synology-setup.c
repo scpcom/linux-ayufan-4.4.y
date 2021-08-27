@@ -346,7 +346,7 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	int ret = -1;
 	int fail_led;
 
-#ifdef SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 	extern long g_internal_hd_num;
 
 	if ( 1 >= g_internal_hd_num ) {

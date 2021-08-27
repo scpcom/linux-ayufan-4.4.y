@@ -693,7 +693,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 
 out_register:
 
-#if defined(SYNO_MAC_ADDRESS) 
+#if defined(MY_ABC_HERE) 
 	if ((memcmp(part->name, "vender", 7)==0) ||
 		(memcmp(part->name, "vendor", 7)==0)) {
 			int gVenderMacNumber = 0;
@@ -711,7 +711,7 @@ out_register:
 			 * If more lans needed, check DSM #52055
 			 */
 			part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 			x = 0;
 			gVenderMacNumber = 0;
 			for (n = 0; n < SYNO_MAC_MAX_V2; n++) {
@@ -742,7 +742,7 @@ out_register:
 			}
 #endif
 
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 			char szSerialBuffer[32];
 			char *ptr;
 			char szSerial[32];
@@ -1277,7 +1277,7 @@ uint64_t mtd_get_device_size(const struct mtd_info *mtd)
 }
 EXPORT_SYMBOL_GPL(mtd_get_device_size);
 
-#ifdef SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length)
 {
 	struct mtd_part *part = PART(mtd);
@@ -1293,4 +1293,4 @@ int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned l
 
 	return 0;
 }
-#endif /* SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */

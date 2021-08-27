@@ -2270,7 +2270,7 @@ rebalance:
 	}
 
 nopage:
-#ifndef SYNO_HIDE_LOWMEM_WARNING
+#ifndef MY_ABC_HERE
 	warn_alloc_failed(gfp_mask, order, NULL);
 #endif
 	return page;

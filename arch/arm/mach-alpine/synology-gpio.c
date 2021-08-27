@@ -60,7 +60,7 @@
 #define SYNO_LED_ON			1
 #define SYNO_LED_BLINKING	2
 
-#ifdef  SYNO_HW_VERSION
+#ifdef  MY_ABC_HERE
 extern char gszSynoHWVersion[];
 #endif
 

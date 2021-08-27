@@ -110,7 +110,7 @@ static const struct xattr_handler *ext4_xattr_handler_map[] = {
 #ifdef CONFIG_EXT4_FS_SECURITY
 	[EXT4_XATTR_INDEX_SECURITY]	     = &ext4_xattr_security_handler,
 #endif
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 	[EXT4_XATTR_INDEX_SYNO]  = &ext4_xattr_syno_handler
 #endif
 };
@@ -125,7 +125,7 @@ const struct xattr_handler *ext4_xattr_handlers[] = {
 #ifdef CONFIG_EXT4_FS_SECURITY
 	&ext4_xattr_security_handler,
 #endif
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 	&ext4_xattr_syno_handler,
 #endif
 	NULL
@@ -1616,7 +1616,7 @@ ext4_exit_xattr(void)
 	ext4_xattr_cache = NULL;
 }
 
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 
 static size_t
 ext4_xattr_syno_list(struct dentry *dentry, char *list, size_t list_size,

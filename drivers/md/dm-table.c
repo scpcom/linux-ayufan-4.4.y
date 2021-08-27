@@ -516,7 +516,7 @@ int dm_get_device(struct dm_target *ti, const char *path, fmode_t mode,
 }
 EXPORT_SYMBOL(dm_get_device);
 
-#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 int dm_handle_4kn_target_support(struct dm_target *ti, struct dm_dev *dev,
 			 sector_t start, sector_t len, void *data)
 {
@@ -863,7 +863,7 @@ int dm_table_add_target(struct dm_table *t, const char *type,
 		DMWARN("%s: %s: ignoring discards_supported because num_discard_requests is zero.",
 		       dm_device_name(t->md), type);
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 	if (tgt->type->lvinfoset){
 		tgt->type->lvinfoset(tgt);
 	}
@@ -1278,7 +1278,7 @@ int dm_calculate_queue_limits(struct dm_table *table,
 
 		ti = dm_table_get_target(table, i++);
 
-#ifdef SYNO_DM_FORCE_IO_HINTS
+#ifdef MY_ABC_HERE
 		if (!ti->type->iterate_devices && ti->force_io_hints) {
 			if (ti->type->io_hints) {
 				ti->type->io_hints(ti, &ti_limits);
@@ -1309,7 +1309,7 @@ int dm_calculate_queue_limits(struct dm_table *table,
 
 combine_limits:
 
-#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 		if (ti->type->handle_4kn_target_support) {
 			ti->type->handle_4kn_target_support(ti, dm_handle_4kn_target_support,
 						  &ti_limits);

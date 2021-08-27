@@ -159,7 +159,7 @@ struct us_data {
 #ifdef CONFIG_PM
 	pm_hook			suspend_resume_hook;
 #endif
-#ifdef SYNO_DISK_HIBERNATION
+#ifdef MY_ABC_HERE
        u8 is_ata_disk;
 #endif
 

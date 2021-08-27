@@ -143,7 +143,7 @@
 
 #include "net-sysfs.h"
 
-#if defined(SYNO_SWITCH_NET_DEVICE_NAME) && defined(SYNO_HW_VERSION)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 #include <linux/synobios.h>
 extern char gszSynoHWVersion[16];
 #include <linux/pci.h>
@@ -151,7 +151,7 @@ extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
-#ifdef SYNO_E1000E_LED_SWITCH
+#ifdef MY_ABC_HERE
 void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
 EXPORT_SYMBOL(funcSynoNicLedCtrl);
 #endif
@@ -168,7 +168,7 @@ EXPORT_SYMBOL(funcSynoNicLedCtrl);
 /* This should be increased if a protocol with a bigger head is added. */
 #define GRO_MAX_HEAD (MAX_HEADER + 128)
 
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 static unsigned int str_to_hex( char ch )
 {
 	if( (ch >= '0') && (ch <= '9') )
@@ -5739,7 +5739,7 @@ int register_netdevice(struct net_device *dev)
 {
 	int ret;
 	struct net *net = dev_net(dev);
-#if defined(SYNO_SWITCH_NET_DEVICE_NAME) && defined(SYNO_HW_VERSION)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	// we assume internal lans are comming up before extension lans
     static int netdevCnt = 0;
 #endif
@@ -5760,7 +5760,7 @@ int register_netdevice(struct net_device *dev)
 	ret = dev_get_valid_name(dev, dev->name);
 	if (ret < 0)
 		goto out;
-#if defined(SYNO_SWITCH_NET_DEVICE_NAME) && defined(SYNO_HW_VERSION)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	if (gSwitchDev > 0 && netdevCnt < gSwitchDev && !strncmp("eth", dev->name, 3)) {
 		snprintf(dev->name, sizeof(dev->name), "eth%c", gDevPCIName[netdevCnt++][0]);
 	}
@@ -6098,7 +6098,7 @@ struct rtnl_link_stats64 *dev_get_stats(struct net_device *dev,
 		netdev_stats_to_stats64(storage, &dev->stats);
 	}
 
-#ifndef SYNO_SKIP_RXDROP_BY_CORE
+#ifndef MY_ABC_HERE
 	storage->rx_dropped += atomic_long_read(&dev->rx_dropped);
 #endif
 	return storage;

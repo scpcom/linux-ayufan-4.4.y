@@ -110,7 +110,7 @@ static LIST_HEAD(hub_event_list);	/* List of hubs needing servicing */
 /* Wakes up khubd */
 static DECLARE_WAIT_QUEUE_HEAD(khubd_wait);
 
-#ifdef SYNO_USB_SHUTDOWN_FIX
+#ifdef MY_ABC_HERE
 struct task_struct *khubd_task = NULL;
 #else
 static struct task_struct *khubd_task;
@@ -2321,12 +2321,12 @@ static unsigned hub_is_wusb(struct usb_hub *hub)
 #define HUB_SHORT_RESET_TIME	10
 #define HUB_BH_RESET_TIME	50
 #define HUB_LONG_RESET_TIME	200
-#ifdef SYNO_HUB_RESET_TIMEOUT
+#ifdef MY_ABC_HERE
 #define HUB_RESET_TIMEOUT	3000
 #else
 #define HUB_RESET_TIMEOUT   800
 #endif
-#ifdef SYNO_USB3_RESET_WAIT
+#ifdef MY_ABC_HERE
 // wait device reset, some devices are slow, then set address will fail
 // ex. WD passport, Fujitsu, HP.
 #define HUB_XHCI_ROOT_RESET_TIME	1000
@@ -2354,7 +2354,7 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 	u16 portstatus;
 	u16 portchange;
 
-#ifdef SYNO_USB3_RESET_WAIT
+#ifdef MY_ABC_HERE
 	// this sleep is waiting for status change to clear (reset/bh_reset/link_state),
 	// but sometimes it will take longer time to change the status,
 	// so prolong the waiting time.
@@ -3187,7 +3187,7 @@ EXPORT_SYMBOL_GPL(usb_ep0_reinit);
 #define usb_sndaddr0pipe()	(PIPE_CONTROL << 30)
 #define usb_rcvaddr0pipe()	((PIPE_CONTROL << 30) | USB_DIR_IN)
 
-#ifdef SYNO_USB_EXTRA_TIMEOUT_FOR_SET_ADDR
+#ifdef MY_ABC_HERE
 static int hub_set_address(struct usb_device *udev, int devnum, unsigned int extra_timeout_base)
 #else
 static int hub_set_address(struct usb_device *udev, int devnum)
@@ -3211,7 +3211,7 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	else
 		retval = usb_control_msg(udev, usb_sndaddr0pipe(),
 				USB_REQ_SET_ADDRESS, 0, devnum, 0,
-#ifdef SYNO_USB_EXTRA_TIMEOUT_FOR_SET_ADDR
+#ifdef MY_ABC_HERE
 				NULL, 0, USB_CTRL_SET_TIMEOUT * (extra_timeout_base + 1));
 #else
 				NULL, 0, USB_CTRL_SET_TIMEOUT);
@@ -3272,7 +3272,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	 * (from USB 2.0 spec, section 7.1.7.5)
 	 */
 	if (!hdev->parent) {
-#ifdef SYNO_USB3_RESET_WAIT
+#ifdef MY_ABC_HERE
 		if (IS_XHCI(hub))
 			delay = HUB_XHCI_ROOT_RESET_TIME;
 		else
@@ -3463,7 +3463,7 @@ port_init_retry:
  		 */
 		if (udev->wusb == 0) {
 			for (j = 0; j < SET_ADDRESS_TRIES; ++j) {
-#ifdef SYNO_USB_EXTRA_TIMEOUT_FOR_SET_ADDR
+#ifdef MY_ABC_HERE
 				retval = hub_set_address(udev, devnum, j);
 #else
 				retval = hub_set_address(udev, devnum);
@@ -4268,7 +4268,7 @@ int usb_hub_init(void)
 	if (!IS_ERR(khubd_task))
 		return 0;
 
-#ifdef SYNO_USB_SHUTDOWN_FIX
+#ifdef MY_ABC_HERE
 	khubd_task = NULL;
 #endif
 	/* Fall through if kernel_thread failed */
@@ -4280,7 +4280,7 @@ int usb_hub_init(void)
 
 void usb_hub_cleanup(void)
 {
-#ifdef SYNO_USB_SHUTDOWN_FIX
+#ifdef MY_ABC_HERE
 	if (khubd_task != NULL) {
 		kthread_stop(khubd_task);
 		khubd_task = NULL;

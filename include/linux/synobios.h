@@ -182,11 +182,11 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_SHUTDOWN_LOG			0x2200
 #define SYNO_EVENT_EBOX_REFRESH      0x2300
 
-#ifdef SYNO_ECC_NOTIFICATION
+#ifdef MY_DEF_HERE
 #define SYNO_EVENT_ECC_NOTIFICATION		0x2400
 #endif
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 #define SYNO_EVENT_RAID_REMAP_RECORD 0x2500
 #define SYNO_EVENT_LV_REMAP_RECORD 0x2600
 #endif
@@ -194,7 +194,7 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_DISK_PWR_RESET 0x2700
 #define SYNO_EVENT_DISK_PORT_DISABLED 0x2800
 
-#ifdef SYNO_EXT4_ERROR_FS_REPORT
+#ifdef MY_ABC_HERE
 #define SYNO_EVENT_ERROR_FS 0x2900
 #endif
 
@@ -202,7 +202,7 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_SATA_ERROR_REPORT 0x2a00
 #endif
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 #define SYNO_EVENT_WAKE_FROM_DEEP_SLEEP 0x2b00
 #endif
 
@@ -242,9 +242,9 @@ typedef struct _SynoMsgPkt {
 
 #define SYNO_EVENT_WIFIWPS              0x6000
 
-#ifdef SYNO_WIFI_WORKAROUND
+#ifdef MY_DEF_HERE
 #define SYNO_EVENT_WIFI_NOTIFICATION    0x6001
-#endif /* SYNO_WIFI_WORKAROUND */
+#endif /* MY_DEF_HERE */
 
 #define DRIVER_CLASS_FXP                0x00
 #define DRIVER_CLASS_EM                 0x10
@@ -1603,9 +1603,8 @@ struct synobios_ops {
 /**************************/
 #define IXP425
 
-
 PRODUCT_MODEL synobios_getmodel(void);
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 static inline int syno_is_hw_version(const char *hw_version)
 {
 	if (NULL == hw_version) {

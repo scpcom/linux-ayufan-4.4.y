@@ -35,7 +35,7 @@
 #define XATTR_USER_PREFIX "user."
 #define XATTR_USER_PREFIX_LEN (sizeof (XATTR_USER_PREFIX) - 1)
 
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_PREFIX "syno."
 #define XATTR_SYNO_PREFIX_LEN (sizeof (XATTR_SYNO_PREFIX) - 1)
 #endif
@@ -47,14 +47,14 @@
 #define XATTR_SELINUX_SUFFIX "selinux"
 #define XATTR_NAME_SELINUX XATTR_SECURITY_PREFIX XATTR_SELINUX_SUFFIX
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_ARCHIVE_VERSION "archive_version"
 #define XATTR_SYNO_ARCHIVE_VERSION_VOLUME "archive_version_volume"
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_CREATE_TIME "create_time"
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_ARCHIVE_BIT "archive_bit"
 #define XATTR_SYNO_ARCHIVE_BIT_NOPERM "archive_bit_noperm" //for glusterfs
 #endif
@@ -98,7 +98,7 @@ struct xattr_handler {
 		   size_t size, int flags, int handler_flags);
 };
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 struct syno_xattr_archive_version {
 	__le16	v_magic;
 	__le16	v_struct_version;
@@ -124,7 +124,7 @@ ssize_t generic_listxattr(struct dentry *dentry, char *buffer, size_t buffer_siz
 int generic_setxattr(struct dentry *dentry, const char *name, const void *value, size_t size, int flags);
 int generic_removexattr(struct dentry *dentry, const char *name);
 
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 int syno_generic_setxattr(struct inode *inode, const char *name, const void *value, size_t size, int flags);
 #endif
 ssize_t vfs_getxattr_alloc(struct dentry *dentry, const char *name,

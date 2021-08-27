@@ -1241,7 +1241,7 @@ static void ndisc_router_discovery(struct sk_buff *skb)
 
 		rt = rt6_add_dflt_router(&ipv6_hdr(skb)->saddr, skb->dev, pref);
 		if (rt == NULL) {
-#ifdef SYNO_REMOVE_RA_ERROR_LOG
+#ifdef MY_ABC_HERE
 			goto skip_defrtr;
 #else
 			ND_PRINTK0(KERN_ERR

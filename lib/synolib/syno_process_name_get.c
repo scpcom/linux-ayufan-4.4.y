@@ -14,7 +14,7 @@
 #include <linux/security.h>
 #include <asm/page.h>
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 
 #define MAX_BUF_SIZE 64
 #define MSG_SIZE 256

@@ -352,7 +352,7 @@ int fat_ent_read(struct inode *inode, struct fat_entry *fatent, int entry)
 	if (entry < FAT_START_ENT || sbi->max_cluster <= entry) {
 		fatent_brelse(fatent);
 		fat_fs_error(sb, "invalid access to FAT (entry 0x%08x)", entry);
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 		return -ECORRUPT;
 #else
 		return -EIO;
@@ -569,7 +569,7 @@ int fat_free_clusters(struct inode *inode, int cluster)
 		} else if (cluster == FAT_ENT_FREE) {
 			fat_fs_error(sb, "%s: deleting FAT entry beyond EOF",
 				     __func__);
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 			err = -ECORRUPT;
 #else
 			err = -EIO;

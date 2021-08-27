@@ -2396,7 +2396,7 @@ u32 syno_superio_gpio_pin(int pin, int *pValue, int isWrite)
 EXPORT_SYMBOL(syno_superio_gpio_pin);
 #endif
 
-#ifdef SYNO_SUPPORT_EUP
+#ifdef MY_ABC_HERE
 int syno_superio_regist_read(u8 ldn, u8 reg, u8 *value)
 {
 	int iRet = -1;

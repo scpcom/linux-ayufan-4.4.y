@@ -934,7 +934,7 @@ int conf_write_autoconf(void)
 	const char *name;
 	FILE *out, *tristate, *out_h;
 	int i;
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 	FILE *syno_h;
 #endif
 
@@ -962,7 +962,7 @@ int conf_write_autoconf(void)
 		return 1;
 	}
 
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 	syno_h = fopen(".tmpsynoconfig.h", "w");
 	if (!syno_h) {
 		fclose(out);
@@ -978,7 +978,7 @@ int conf_write_autoconf(void)
 
 	conf_write_heading(out_h, &header_printer_cb, NULL);
 
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 	conf_write_heading(syno_h, &header_printer_cb, NULL);
 	fprintf(syno_h, "#ifndef __SYNO_AUTOCONF_H__\n"
 			"#define __SYNO_AUTOCONF_H__\n");
@@ -999,7 +999,7 @@ int conf_write_autoconf(void)
 		conf_write_symbol(tristate, sym, &tristate_printer_cb, (void *)1);
 
 		conf_write_symbol(out_h, sym, &header_printer_cb, NULL);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 		if (strncmp(sym->name, "SYNO", 4) == 0 ||
 		    strcmp(sym->name, "FS_SYNO_ACL") == 0) {
 			conf_write_symbol(syno_h, sym, &header_printer_cb, NULL);
@@ -1009,7 +1009,7 @@ int conf_write_autoconf(void)
 	fclose(out);
 	fclose(tristate);
 	fclose(out_h);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 	fprintf(syno_h, "#endif /* __SYNO_AUTOCONF_H__ */");
 	fclose(syno_h);
 	if (rename(".tmpsynoconfig.h", "include/linux/syno_autoconf.h"))

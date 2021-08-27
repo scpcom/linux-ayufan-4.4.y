@@ -24,7 +24,7 @@
 #include "rcu-string.h"
 #include "backref.h"
 
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 #include <linux/ratelimit.h>
 #endif
 
@@ -2603,7 +2603,7 @@ readpage_ok:
 	bio_put(bio);
 }
 
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 static void btrfs_bio_destructor(struct bio *bio)
 {
 	bio_free(bio, btrfs_bioset);
@@ -2631,7 +2631,7 @@ btrfs_bio_alloc(struct block_device *bdev, u64 first_sector, int nr_vecs,
 	}
 
 	if (bio) {
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 		bio->bi_destructor = btrfs_bio_destructor;
 #endif
 		bio->bi_size = 0;
@@ -2647,7 +2647,7 @@ btrfs_bio_alloc(struct block_device *bdev, u64 first_sector, int nr_vecs,
 
 struct bio *btrfs_bio_clone(struct bio *bio, gfp_t gfp_mask)
 {
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 	struct bio *b;
 
 	b = bio_alloc_bioset(gfp_mask, bio->bi_max_vecs, btrfs_bioset);
@@ -2680,7 +2680,7 @@ struct bio *btrfs_io_bio_alloc(gfp_t gfp_mask, unsigned int nr_iovecs)
 
 	bio = bio_alloc_bioset(gfp_mask, nr_iovecs, btrfs_bioset);
 	if (bio) {
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 		bio->bi_destructor = btrfs_bio_destructor;
 #endif
 		btrfs_bio = btrfs_io_bio(bio);
@@ -4402,7 +4402,7 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 	unsigned long num_pages;
 	struct page *page;
 	int mapped = !test_bit(EXTENT_BUFFER_DUMMY, &eb->bflags);
-#ifdef SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
+#ifdef MY_ABC_HERE
 	int cloned = test_bit(EXTENT_BUFFER_CLONE, &eb->bflags);
 #endif
 
@@ -4433,7 +4433,7 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 	do {
 		index--;
 		page = extent_buffer_page(eb, index);
-#ifdef SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
+#ifdef MY_ABC_HERE
 		if (page && (cloned || mapped)) {
 			if (!cloned) // cloned extent buffer has no mapping to lock
 #else
@@ -4461,7 +4461,7 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 				/* One for the page private */
 				page_cache_release(page);
 			}
-#ifdef SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
+#ifdef MY_ABC_HERE
 			if (!cloned) // cloned extent buffer has no mapping to unlock
 #endif
 			spin_unlock(&page->mapping->private_lock);
@@ -4549,7 +4549,7 @@ struct extent_buffer *btrfs_clone_extent_buffer(struct extent_buffer *src)
 	copy_extent_buffer(new, src, 0, 0, src->len);
 	set_bit(EXTENT_BUFFER_UPTODATE, &new->bflags);
 	set_bit(EXTENT_BUFFER_DUMMY, &new->bflags);
-#ifdef SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
+#ifdef MY_ABC_HERE
 	set_bit(EXTENT_BUFFER_CLONE, &new->bflags);
 #endif
 

@@ -207,7 +207,7 @@ static int proc_print_scsidevice(struct device *dev, void *data)
 	}
 
 	seq_printf(s, " Model: ");
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 	for (i = 0; i < SYNO_DISK_MODEL_NUM; i++) {
 #else
 	for (i = 0; i < 16; i++) {

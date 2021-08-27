@@ -63,7 +63,7 @@
 #define DRV_NAME	"ahci"
 #define DRV_VERSION	"3.0"
 
-#ifdef SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 extern long g_ahci_switch;
 #endif
 
@@ -89,12 +89,12 @@ enum board_ids {
 	board_ahci_sb700,	/* for SB700 and SB800 */
 	board_ahci_vt8251,
 
-#ifdef SYNO_SATA_AHCI_FBS_QCDEFER
+#ifdef MY_ABC_HERE
 	board_ahci_yes_fbs_with_qcdefer,
-#endif /* SYNO_SATA_AHCI_FBS_QCDEFER */
-#ifdef SYNO_SATA_AHCI_FBS_NONCQ
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 	board_ahci_yes_fbs_no_ncq,
-#endif /* SYNO_SATA_AHCI_FBS_NONCQ */
+#endif /* MY_ABC_HERE */
 
 	/* aliases */
 	board_ahci_mcp_linux	= board_ahci_mcp65,
@@ -117,7 +117,7 @@ static struct scsi_host_template ahci_sht = {
 	AHCI_SHT("ahci"),
 };
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static int
 sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
 {
@@ -185,7 +185,7 @@ static const struct ata_port_info ahci_port_info[] = {
 		.flags		= AHCI_FLAG_COMMON,
 		.pio_mask	= ATA_PIO4,
 		.udma_mask	= ATA_UDMA6,
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 		.port_ops	= &ahci_pmp_ops,
 #else
 		.port_ops	= &ahci_ops,
@@ -287,7 +287,7 @@ static const struct ata_port_info ahci_port_info[] = {
 		.port_ops	= &ahci_ops,
 #endif /* CONFIG_SYNO_ALPINE */
 	},
-#endif /* SYNO_SATA_AHCI_FBS_NONCQ */
+#endif /* MY_ABC_HERE */
 };
 
 static const struct pci_device_id ahci_pci_tbl[] = {
@@ -546,7 +546,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ }	/* terminate list */
 };
 
-#ifdef SYNO_MV_9235_GPIO_CTRL
+#ifdef MY_ABC_HERE
 
 /*
  * 9235 gpio mmio address, to control 9235 GPIO, please read register manual section 1.6
@@ -1388,7 +1388,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	VPRINTK("ENTER\n");
 
-#ifdef SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 	if(0 == g_ahci_switch) {
 		printk("AHCI is disabled.\n");
 		return 0;
@@ -1525,13 +1525,13 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 * determining the maximum port number requires looking at
 	 * both CAP.NP and port_map.
 	 */
-#ifdef SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 	if(gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
 		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
 	}else{
 #endif
 	n_ports = max(ahci_nr_ports(hpriv->cap), fls(hpriv->port_map));
-#ifdef SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 	}
 #endif
 
@@ -1540,7 +1540,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		return -ENOMEM;
 	host->private_data = hpriv;
 
-#ifdef SYNO_MV_9235_PORTING
+#ifdef MY_ABC_HERE
 	if (pdev->vendor == 0x1b4b && pdev->device == 0x9235) {
 		hpriv->flags |= AHCI_HFLAG_YES_MV9235_FIX;
 

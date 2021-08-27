@@ -166,7 +166,7 @@ struct dentry_operations {
 	int (*d_compare)(const struct dentry *, const struct inode *,
 			const struct dentry *, const struct inode *,
 			unsigned int, const char *, const struct qstr *);
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 	int (*d_compare_case)(const struct dentry *, const struct inode *,
 			const struct dentry *, const struct inode *,
 			unsigned int, const char *, const struct qstr *, int caseless);
@@ -213,11 +213,11 @@ struct dentry_operations {
 #define DCACHE_GENOCIDE		0x0200
 #define DCACHE_SHRINK_LIST	0x0400
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 #define DCACHE_OP_COMPARE_CASE	0x10000000
 #endif
 
-#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
+#ifdef MY_ABC_HERE
 #define DCACHE_ECRYPTFS_DECRYPT 0x20000000
 #endif
 
@@ -324,7 +324,7 @@ extern struct dentry *d_ancestor(struct dentry *, struct dentry *);
 /* appendix may either be NULL or be used for transname suffixes */
 extern struct dentry *d_lookup(struct dentry *, struct qstr *);
 extern struct dentry *d_hash_and_lookup(struct dentry *, struct qstr *);
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 extern struct dentry *d_lookup_case(struct dentry *, struct qstr *, int caseless);
 extern struct dentry *__d_lookup(struct dentry *, struct qstr *, int caseless);
 extern struct dentry *__d_lookup_rcu(struct dentry *parent, struct qstr *name,

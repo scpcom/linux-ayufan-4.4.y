@@ -296,7 +296,7 @@ SYSCALL_DEFINE(fallocate)(int fd, int mode, loff_t offset, loff_t len)
 
 	return error;
 }
-#ifdef SYNO_FS_EXPORT_SYMBOL_FALLOCATE
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(do_fallocate);
 #endif
 
@@ -577,7 +577,7 @@ static int chown_common(struct path *path, uid_t user, gid_t group)
 	return error;
 }
 
-#ifdef	SYNO_ARCHIVE_BIT
+#ifdef	MY_ABC_HERE
 extern long __SYNOArchiveSet(struct dentry *, unsigned int cmd);
 
 asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
@@ -1074,7 +1074,7 @@ long do_sys_open(int dfd, const char __user *filename, int flags, int mode)
 	return fd;
 }
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_level;
 #endif
@@ -1085,7 +1085,7 @@ SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, int, mode)
 	if (force_o_largefile())
 		flags |= O_LARGEFILE;
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if(syno_hibernation_log_level > 0) {
 		syno_do_hibernation_filename_log(filename);
 	}

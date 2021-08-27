@@ -4026,7 +4026,7 @@ static void e1000e_update_stats(struct e1000_adapter *adapter)
 					      adapter->stats.roc;
 	netdev->stats.rx_crc_errors = adapter->stats.crcerrs;
 	netdev->stats.rx_frame_errors = adapter->stats.algnerrc;
-#ifdef SYNO_E1000E_RX_MISSED_FIX
+#ifdef MY_ABC_HERE
 	/*
 	 * The "/1000" operation is used to beautify the RX missed
 	 * errors in the "ifconfig" command.
@@ -5921,7 +5921,7 @@ static int __devinit e1000_probe(struct pci_dev *pdev,
 	netdev->netdev_ops		= &e1000e_netdev_ops;
 	e1000e_set_ethtool_ops(netdev);
 	netdev->watchdog_timeo		= 5 * HZ;
-#ifdef SYNO_E1000E_RX_MISSED_FIX
+#ifdef MY_ABC_HERE
 	netif_napi_add(netdev, &adapter->napi, e1000_clean, 256);
 #else
 	netif_napi_add(netdev, &adapter->napi, e1000_clean, 64);
@@ -6087,7 +6087,7 @@ static int __devinit e1000_probe(struct pci_dev *pdev,
 	adapter->wol = adapter->eeprom_wol;
 	device_set_wakeup_enable(&adapter->pdev->dev, adapter->wol);
 
-#if defined(SYNO_E1000E_WOL) && !defined(CONFIG_PM)
+#if defined(MY_ABC_HERE) && !defined(CONFIG_PM)
 	device_init_wakeup(&adapter->pdev->dev, adapter->wol);
 #endif
 

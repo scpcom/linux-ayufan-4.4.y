@@ -42,7 +42,7 @@
 #include <linux/init.h>
 #include <asm/pci_x86.h>
 
-#ifdef SYNO_EVANSPORT_EXPORT_SYMBOL
+#ifdef MY_DEF_HERE
 #include <linux/export.h>
 #endif
 

@@ -1436,7 +1436,7 @@ cifs_parse_mount_options(const char *mountdata, const char *devname,
 			vol->no_linux_ext = 1;
 		} else if ((strnicmp(data, "nocase", 6) == 0) ||
 			   (strnicmp(data, "ignorecase", 10)  == 0)) {
-#ifdef SYNO_CASELESS_CIFS_MOUNT
+#ifdef MY_ABC_HERE
 			SynoPosixSemanticsEnabled = 0;
 #endif
 			vol->nocase = 1;

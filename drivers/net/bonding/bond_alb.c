@@ -1683,7 +1683,7 @@ void bond_alb_clear_vlan(struct bonding *bond, unsigned short vlan_id)
 	}
 }
 
-#ifdef SYNO_NET_BOND
+#ifdef MY_ABC_HERE
 void bond_alb_info_show(struct seq_file *seq)
 {
 	struct bonding *bond = seq->private;

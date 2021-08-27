@@ -86,7 +86,7 @@ find_prop_handler(const char *name,
 		  const struct hlist_head *handlers)
 {
 	struct prop_handler *h;
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 	struct hlist_node *pos;
 #endif
 
@@ -98,7 +98,7 @@ find_prop_handler(const char *name,
 			return NULL;
 	}
 
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 	hlist_for_each_entry(h, pos, handlers, node)
 #else
 	hlist_for_each_entry(h, handlers, node)

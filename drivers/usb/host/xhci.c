@@ -4022,7 +4022,7 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	int ret;
 	union xhci_trb *cmd_trb;
 
-#ifdef SYNO_USB3_RESET_WAIT
+#ifdef MY_ABC_HERE
 	msleep(1000); // wait device ready
 #endif
 

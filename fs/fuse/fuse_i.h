@@ -47,7 +47,7 @@
     doing the mount will be allowed to access the filesystem */
 #define FUSE_ALLOW_OTHER         (1 << 1)
 
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 #define SYNOMETA_XATTR_MNT_OPT "synometa_xattr"
 #endif
 
@@ -73,7 +73,7 @@ struct fuse_forget_link {
 };
 
 #define SYNO_FUSE_PROFILE 0
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 typedef struct {
 	void *value;
 	ssize_t size;
@@ -89,8 +89,7 @@ typedef struct {
 
 #define SYNO_ACL_CACHE_TABLE_LEN 2
 
-#endif // SYNO_GLUSTER_FS
-
+#endif // MY_ABC_HERE
 
 /** FUSE inode */
 struct fuse_inode {
@@ -139,7 +138,7 @@ struct fuse_inode {
 	/** Miscellaneous bits describing inode state */
 	unsigned long state;
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	syno_xattr_cache_node synoacl_cache_table[SYNO_ACL_CACHE_TABLE_LEN];
 #endif
 };
@@ -681,7 +680,7 @@ void fuse_force_forget(struct file *file, u64 nodeid);
 void fuse_read_fill(struct fuse_req *req, struct file *file,
 		    loff_t pos, size_t count, int opcode);
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 /*
  * args[0]: syno.archive_bit_noperm
  * args[1]: system.syno_acl_noperm_self

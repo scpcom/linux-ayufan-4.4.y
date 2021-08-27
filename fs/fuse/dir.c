@@ -17,11 +17,11 @@
 #include <linux/namei.h>
 #include <linux/slab.h>
 
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 #include <linux/xattr.h>
 #endif
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 #include "../synoacl_int.h"
 #endif
 static bool fuse_use_readdirplus(struct inode *dir, struct file *filp)
@@ -153,7 +153,7 @@ static void fuse_lookup_init(struct fuse_conn *fc, struct fuse_req *req,
 			     u64 nodeid, struct qstr *name,
 			     struct fuse_entry_out *outarg)
 {
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	int out_numargs = 1;
 
 	if (1 == syno_is_fuse_version_compatible(fc) && 0 == strcmp(SZ_FS_GLUSTER, fc->sb->s_subtype)) {
@@ -166,7 +166,7 @@ static void fuse_lookup_init(struct fuse_conn *fc, struct fuse_req *req,
 	req->in.numargs = 1;
 	req->in.args[0].size = name->len + 1;
 	req->in.args[0].value = name->name;
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	req->out.numargs = out_numargs;
 #else
 	req->out.numargs = 1;
@@ -193,7 +193,7 @@ u64 fuse_get_attr_version(struct fuse_conn *fc)
 	return curr_version;
 }
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 static int syno_fuse_get_acl_cache_index(const char *name)
 {
 	int index = -1;
@@ -300,10 +300,9 @@ static ssize_t syno_fuse_get_acl_cache(const char *name, void **value, struct fu
 END:
 	return ret;
 }
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 
-
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 static int syno_init_acl_cache(void **pCache)
 {
 	int ret = -1;
@@ -337,7 +336,7 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 	struct fuse_conn *fc;
 	struct fuse_inode *fi;
 	int ret;
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	void *pCache_syno_acl_noperm_self = NULL;
 	void *pCache_archive_bit_noperm = NULL;
 	int bIsGlusterFS = 0;
@@ -375,7 +374,7 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 			goto out;
 		}
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 		blIsCompatible = syno_is_fuse_version_compatible(fc);
 		if (IS_GLUSTER_FS(inode) && 0 != blIsCompatible) {
 			bIsGlusterFS = 1;
@@ -391,14 +390,14 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 		parent = dget_parent(entry);
 		fuse_lookup_init(fc, req, get_node_id(parent->d_inode),
 				 &entry->d_name, &outarg);
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	if (1 == bIsGlusterFS) {
 		req->out.args[1].size = SYNO_FUSE_ACL_CACHE_SIZE;
 		req->out.args[1].value = pCache_syno_acl_noperm_self;
 		req->out.args[2].size = SYNO_FUSE_ACL_CACHE_SIZE;
 		req->out.args[2].value = pCache_archive_bit_noperm;
 	}
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 		fuse_request_send(fc, req);
 		dput(parent);
 		err = req->out.h.error;
@@ -424,7 +423,7 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 				       entry_attr_timeout(&outarg),
 				       attr_version);
 		fuse_change_entry_timeout(entry, &outarg);
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 		if (1 == bIsGlusterFS) {
 			struct fuse_inode *pFuse_inode = NULL;
 			struct syno_fuse_acl_data *pAcl = (struct syno_fuse_acl_data *)pCache_syno_acl_noperm_self;
@@ -438,7 +437,7 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 #endif
 	} else if (inode) {
 		fi = get_fuse_inode(inode);
-#ifdef SYNO_FUSE_BACK_PORTING
+#ifdef MY_ABC_HERE
 		if (nd && (nd->flags & LOOKUP_RCU)) {
 #else
 		if (flags & LOOKUP_RCU) {
@@ -453,7 +452,7 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 	}
 	ret = 1;
 out:
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	if (NULL != pCache_syno_acl_noperm_self) {
 		kfree(pCache_syno_acl_noperm_self);
 		pCache_syno_acl_noperm_self = NULL;
@@ -493,7 +492,7 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 	struct fuse_forget_link *forget;
 	u64 attr_version;
 	int err;
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	void *pCache_syno_acl_noperm_self = NULL;
 	void *pCache_archive_bit_noperm = NULL;
 	int bIsGlusterFS = 0;
@@ -530,7 +529,7 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 	attr_version = fuse_get_attr_version(fc);
 
 	fuse_lookup_init(fc, req, nodeid, name, outarg);
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	if (1 == bIsGlusterFS) {
 		req->out.args[1].size = SYNO_FUSE_ACL_CACHE_SIZE;
 		req->out.args[1].value = pCache_syno_acl_noperm_self;
@@ -542,7 +541,7 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 	DUMP_ARGS("before send: [1]", req->out.args[1]);
 	DUMP_ARGS("before send: [2]", req->out.args[2]);
 #endif // SYNO_FUSE_DEBUG
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 	fuse_request_send(fc, req);
 	err = req->out.h.error;
 	fuse_put_request(fc, req);
@@ -564,15 +563,15 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 		fuse_queue_forget(fc, forget, outarg->nodeid, 1);
 		goto out;
 	}
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 #ifdef SYNO_FUSE_DEBUG
 	DUMP_ARGS("after send: [1]", req->out.args[1]);
 	DUMP_ARGS("after send: [2]", req->out.args[2]);
 #endif // SYNO_FUSE_DEBUG
-#endif // SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#endif // MY_ABC_HERE
 	err = 0;
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	if (1 == bIsGlusterFS) {
 		struct fuse_inode *pFuse_inode = NULL;
 		struct syno_fuse_acl_data *pAcl = (struct syno_fuse_acl_data *)pCache_syno_acl_noperm_self;
@@ -589,7 +588,7 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
  out_put_forget:
 	kfree(forget);
  out:
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	if (NULL != pCache_syno_acl_noperm_self) {
 		kfree(pCache_syno_acl_noperm_self);
 		pCache_syno_acl_noperm_self = NULL;
@@ -785,7 +784,7 @@ static int create_new_entry(struct fuse_conn *fc, struct fuse_req *req,
 	struct inode *inode;
 	int err;
 	struct fuse_forget_link *forget;
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	void *pCache_syno_acl_noperm_self = NULL;
 	void *pCache_archive_bit_noperm = NULL;
 	int bIsGlusterFS = 0;
@@ -812,7 +811,7 @@ static int create_new_entry(struct fuse_conn *fc, struct fuse_req *req,
 
 	memset(&outarg, 0, sizeof(outarg));
 	req->in.h.nodeid = get_node_id(dir);
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	req->out.numargs = numargs;
 #else
 	req->out.numargs = 1;
@@ -823,14 +822,14 @@ static int create_new_entry(struct fuse_conn *fc, struct fuse_req *req,
 		req->out.args[0].size = sizeof(outarg);
 	req->out.args[0].value = &outarg;
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	if (1 == bIsGlusterFS) {
 		req->out.args[1].size = SYNO_FUSE_ACL_CACHE_SIZE;
 		req->out.args[1].value = pCache_syno_acl_noperm_self;
 		req->out.args[2].size = SYNO_FUSE_ACL_CACHE_SIZE;
 		req->out.args[2].value = pCache_archive_bit_noperm;
 	}
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 
 	fuse_request_send(fc, req);
 	err = req->out.h.error;
@@ -872,7 +871,7 @@ static int create_new_entry(struct fuse_conn *fc, struct fuse_req *req,
 	fuse_change_entry_timeout(entry, &outarg);
 	fuse_invalidate_attr(dir);
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	if (1 == bIsGlusterFS) {
 		struct fuse_inode *pFuse_inode = NULL;
 		struct syno_fuse_acl_data *pAcl = (struct syno_fuse_acl_data *)pCache_syno_acl_noperm_self;
@@ -899,7 +898,7 @@ END:
 	return 0;
 
  out_put_forget_req:
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef MY_ABC_HERE
 	if (NULL != pCache_syno_acl_noperm_self) {
 		kfree(pCache_syno_acl_noperm_self);
 		pCache_syno_acl_noperm_self = NULL;
@@ -1491,7 +1490,7 @@ static int parse_dirfile(char *buf, size_t nbytes, struct file *file,
 	return 0;
 }
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 static int syno_fuse_direntplus_link_acl(struct inode *inode, const struct syno_fuse_acl_data *pAcl, const struct syno_fuse_acl_data *pArchiveBit)
 {
 	struct fuse_inode *pFuse_inode = NULL;
@@ -1546,11 +1545,11 @@ static int syno_is_valid_acl_entry(struct fuse_direntplus *direntplus)
 END:
 	return ret;
 }
-#endif // SYNO_GLUSTERFS_PREFETCH_ACL
+#endif // MY_ABC_HERE
 
 static int fuse_direntplus_link(struct file *file,
 				struct fuse_direntplus *direntplus,
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 				u64 attr_version, struct syno_fuse_acl_data *pAcl, struct syno_fuse_acl_data *pArchiveBit)
 #else
 				u64 attr_version)
@@ -1560,7 +1559,7 @@ static int fuse_direntplus_link(struct file *file,
 	struct fuse_entry_out *o = &direntplus->entry_out;
 	struct fuse_dirent *dirent = &direntplus->dirent;
 	struct dentry *parent = file->f_path.dentry;
-#ifdef SYNO_FUSE_BACK_PORTING
+#ifdef MY_ABC_HERE
 	struct qstr name = { .len = dirent->namelen, .name = dirent->name};
 #else
 	struct qstr name = QSTR_INIT(dirent->name, dirent->namelen);
@@ -1571,7 +1570,7 @@ static int fuse_direntplus_link(struct file *file,
 	struct fuse_conn *fc;
 	struct inode *inode;
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 	int blIsCompatible = 0;
 #endif
 	if (!o->nodeid) {
@@ -1664,7 +1663,7 @@ found:
 
 	err = 0;
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 	blIsCompatible = syno_is_fuse_version_compatible(fc);
 	if (0 != blIsCompatible && 0 != syno_fuse_direntplus_link_acl(inode, pAcl, pArchiveBit)) {
 		printk("cannot update ACL cache name: [%s]\n", name.name);
@@ -1676,7 +1675,7 @@ out:
 }
 
 static int parse_dirplusfile(char *buf, size_t nbytes, struct file *file,
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 			     void *dstbuf, filldir_t filldir, u64 attr_version,
 				 void *pCache_syno_acl_noperm_self, void *pCache_archive_bit_noperm)
 #else
@@ -1688,7 +1687,7 @@ static int parse_dirplusfile(char *buf, size_t nbytes, struct file *file,
 	size_t reclen;
 	int over = 0;
 	int ret;
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 	struct syno_fuse_acl_data *pAcl = NULL;
 	struct syno_fuse_acl_data *pArchiveBit = NULL;
 	off_t acl_offset = 0;
@@ -1726,7 +1725,7 @@ static int parse_dirplusfile(char *buf, size_t nbytes, struct file *file,
 		buf += reclen;
 		nbytes -= reclen;
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 		ret = fuse_direntplus_link(file, direntplus, attr_version, pAcl, pArchiveBit);
 		if (NULL != pAcl &&
 			NULL != pArchiveBit &&
@@ -1755,7 +1754,7 @@ static int fuse_readdir(struct file *file, void *dstbuf, filldir_t filldir)
 	struct fuse_conn *fc = get_fuse_conn(inode);
 	struct fuse_req *req;
 	u64 attr_version = 0;
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 	void *pCache_syno_acl_noperm_self = NULL;
 	void *pCache_archive_bit_noperm = NULL;
 	int bIsGlusterFS = 0;
@@ -1767,7 +1766,7 @@ static int fuse_readdir(struct file *file, void *dstbuf, filldir_t filldir)
 	if (is_bad_inode(inode))
 		return -EIO;
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 	if (IS_GLUSTER_FS(inode) && 0 != blIsCompatible) {
 		bIsGlusterFS = 1;
 	}
@@ -1786,7 +1785,7 @@ static int fuse_readdir(struct file *file, void *dstbuf, filldir_t filldir)
 	plus = fuse_use_readdirplus(inode, file);
 	req->out.argpages = 1;
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 	if (1 == bIsGlusterFS &&
 		(0 != syno_init_acl_cache(&pCache_syno_acl_noperm_self) || 0 != syno_init_acl_cache(&pCache_archive_bit_noperm))) {
 		err = -ENOMEM;
@@ -1799,7 +1798,7 @@ static int fuse_readdir(struct file *file, void *dstbuf, filldir_t filldir)
 	req->page_descs[0].length = PAGE_SIZE;
 	if (plus) {
 		attr_version = fuse_get_attr_version(fc);
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 		if (1 == bIsGlusterFS) {
 			req->out.args[0].size = SYNO_FUSE_ACL_CACHE_SIZE;
 			req->out.args[0].value = pCache_syno_acl_noperm_self;
@@ -1820,7 +1819,7 @@ static int fuse_readdir(struct file *file, void *dstbuf, filldir_t filldir)
 			       FUSE_READDIR);
 	}
 	fuse_request_send(fc, req);
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 	if (1 == bIsGlusterFS) {
 		nbytes = req->out.args[2].size;
 	} else {
@@ -1835,7 +1834,7 @@ static int fuse_readdir(struct file *file, void *dstbuf, filldir_t filldir)
 		if (plus) {
 			err = parse_dirplusfile(page_address(page), nbytes,
 						file, dstbuf, filldir,
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 						attr_version,
 						pCache_syno_acl_noperm_self, pCache_archive_bit_noperm);
 #else
@@ -1847,7 +1846,7 @@ static int fuse_readdir(struct file *file, void *dstbuf, filldir_t filldir)
 		}
 	}
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 out:
 	if (NULL != pCache_syno_acl_noperm_self) {
 		kfree(pCache_syno_acl_noperm_self);
@@ -2200,11 +2199,11 @@ static int fuse_setxattr(struct dentry *entry, const char *name,
 	if (fc->no_setxattr)
 		return -EOPNOTSUPP;
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	if (IS_GLUSTER_FS(inode)) {
 		SYNOACL_XATTR_CHGNAME(name)
 	}
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 	req = fuse_get_req_nopages(fc);
 	if (IS_ERR(req))
 		return PTR_ERR(req);
@@ -2231,11 +2230,11 @@ static int fuse_setxattr(struct dentry *entry, const char *name,
 	if (!err)
 		fuse_invalidate_attr(inode);
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	if (!err) {
 		syno_fuse_update_acl_cache(name, value, size, get_fuse_inode(inode));
 	}
-#endif //SYNO_GLUSTER_FS
+#endif //MY_ABC_HERE
 	return err;
 }
 
@@ -2248,10 +2247,10 @@ static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 	struct fuse_getxattr_in inarg;
 	struct fuse_getxattr_out outarg;
 	ssize_t ret;
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	int blUpdateCache = 0;
 	struct fuse_inode *pFuse_inode = NULL;
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 
 #if SYNO_FUSE_PROFILE
 	u64 start_time = 0;
@@ -2263,7 +2262,7 @@ static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 	if (fc->no_getxattr)
 		return -EOPNOTSUPP;
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	if (IS_GLUSTER_FS(inode)) {
 		SYNOACL_XATTR_CHGNAME(name)
 	}
@@ -2296,7 +2295,7 @@ static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 			goto END;
 		}
 	}
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 	req = fuse_get_req_nopages(fc);
 	if (IS_ERR(req))
 		return PTR_ERR(req);
@@ -2348,13 +2347,13 @@ static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 	}
 	fuse_put_request(fc, req);
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	if (blUpdateCache) {
 		syno_fuse_update_acl_cache(name, value, ret, pFuse_inode);
 	}
 	//printk("%s(%d) not cached !!!!!!! filename: [%s] name: [%s] inode: [%lu] size: [%zu]\n", __func__, __LINE__, entry->d_name.name, name, inode->i_ino, size);
 END:
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 
 	return ret;
 }
@@ -2419,7 +2418,7 @@ static int fuse_removexattr(struct dentry *entry, const char *name)
 	if (fc->no_removexattr)
 		return -EOPNOTSUPP;
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	if (IS_GLUSTER_FS(inode))
 		SYNOACL_XATTR_CHGNAME(name)
 #endif
@@ -2442,13 +2441,13 @@ static int fuse_removexattr(struct dentry *entry, const char *name)
 	if (!err)
 		fuse_invalidate_attr(inode);
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	// FIXME: update cache
 #endif
 	return err;
 }
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 static int fuse_syno_arbit_get(struct dentry *dentry, unsigned int *pArbit)
 {
 	unsigned int arVal = 0;
@@ -2459,7 +2458,7 @@ static int fuse_syno_arbit_get(struct dentry *dentry, unsigned int *pArbit)
 		return -EINVAL;
 
 	inode = dentry->d_inode;
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 	if (!IS_SYNO_META_XATTR(inode))
 		return -EOPNOTSUPP;
 #endif
@@ -2481,7 +2480,7 @@ static int fuse_syno_arbit_set(struct dentry *dentry, unsigned int arbit)
 	if (!inode->i_op->setxattr)
 		return -EOPNOTSUPP;
 
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 	if (!IS_SYNO_META_XATTR(inode))
 		return -EOPNOTSUPP;
 #endif
@@ -2494,9 +2493,9 @@ static int fuse_syno_arbit_set(struct dentry *dentry, unsigned int arbit)
 Err:
 	return err;
 }
-#endif //SYNO_ARCHIVE_BIT
+#endif //MY_ABC_HERE
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 static int fuse_create_time_set(struct dentry *dentry, struct timespec *t)
 {
 	long err = -EINVAL;
@@ -2505,7 +2504,7 @@ static int fuse_create_time_set(struct dentry *dentry, struct timespec *t)
 	if (!inode->i_op->setxattr)
 		return -EOPNOTSUPP;
 
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 	if (!IS_SYNO_META_XATTR(inode))
 		return -EOPNOTSUPP;
 #endif
@@ -2535,20 +2534,20 @@ static int fuse_create_time_get(struct dentry *dentry, struct timespec *t)
 Err:
 	return err;
 }
-#endif //SYNO_CREATE_TIME
+#endif //MY_ABC_HERE 
 
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int flags)
 {
 	int err = 0;
 	struct inode * inode = dentry->d_inode;
 
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 	if (!IS_SYNO_META_XATTR(inode))
 		return -EOPNOTSUPP;
 #endif
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_CREATIME) {
 		err = fuse_create_time_get(dentry, &stat->SynoCreateTime);
 		if (0 > err) {
@@ -2557,7 +2556,7 @@ static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int flag
 	}
 	}
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARBIT) {
 		err = fuse_syno_arbit_get(dentry, &stat->SynoMode);
 		if (0 > err) {
@@ -2567,7 +2566,7 @@ static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int flag
 #endif
 	return 0;
 }
-#endif //SYNO_STAT
+#endif //MY_ABC_HERE
 
 static const struct inode_operations fuse_dir_inode_operations = {
 	.lookup		= fuse_lookup,
@@ -2586,14 +2585,14 @@ static const struct inode_operations fuse_dir_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= fuse_syno_getattr,
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	.syno_get_archive_bit = fuse_syno_arbit_get,
 	.syno_set_archive_bit = fuse_syno_arbit_set,
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	.syno_set_crtime = fuse_create_time_set,
 #endif
 };
@@ -2617,14 +2616,14 @@ static const struct inode_operations fuse_common_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= fuse_syno_getattr,
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	.syno_get_archive_bit = fuse_syno_arbit_get,
 	.syno_set_archive_bit = fuse_syno_arbit_set,
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	.syno_set_crtime = fuse_create_time_set,
 #endif
 };
@@ -2639,14 +2638,14 @@ static const struct inode_operations fuse_symlink_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= fuse_syno_getattr,
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	.syno_get_archive_bit = fuse_syno_arbit_get,
 	.syno_set_archive_bit = fuse_syno_arbit_set,
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	.syno_set_crtime = fuse_create_time_set,
 #endif
 };

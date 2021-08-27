@@ -476,7 +476,7 @@ int msdos_partition(struct parsed_partitions *state)
 				put_dev_sector(sect);
 				return 1;
 			} else {
-#ifndef SYNO_FAT_SKIP_BOOT_INDICATOR_CHK
+#ifndef MY_ABC_HERE
 				put_dev_sector(sect);
 				return 0;
 #else

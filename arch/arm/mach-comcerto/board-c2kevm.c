@@ -39,7 +39,7 @@
 
 #include <linux/synobios.h>
 
-#ifdef  SYNO_HW_VERSION
+#ifdef  MY_ABC_HERE
 extern char gszSynoHWVersion[];
 #endif
 #include <asm/sizes.h>

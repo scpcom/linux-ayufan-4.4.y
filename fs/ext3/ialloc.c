@@ -179,7 +179,7 @@ error_return:
 	ext3_std_error(sb, fatal);
 }
 
-#ifdef SYNO_RESERVE_OLDALLOC
+#ifdef MY_ABC_HERE
 /*
  * There are two policies for allocating an inode.  If the new inode is
  * a directory, then a forward search is made for a block group with both
@@ -213,7 +213,7 @@ static int find_group_dir(struct super_block *sb, struct inode *parent)
 			best_desc = desc;
 		}
 	}
-#ifdef SYNO_FORCE_GET_AVAILABLE_GROUP
+#ifdef MY_ABC_HERE
 	if (-1 != best_group) {
 		goto FOUND_GROUP;
 	}
@@ -458,7 +458,7 @@ struct inode *ext3_new_inode(handle_t *handle, struct inode * dir,
 
 	sbi = EXT3_SB(sb);
 	es = sbi->s_es;
-#ifdef SYNO_RESERVE_OLDALLOC
+#ifdef MY_ABC_HERE
 	if (S_ISDIR(mode)) {
 		if (test_opt (sb, OLDALLOC))
 			group = find_group_dir(sb, dir);
@@ -569,10 +569,10 @@ got:
 	/* This is the optimal IO size (for stat), not the fs block size */
 	inode->i_blocks = 0;
 	inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME_SEC;
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	inode->i_CreateTime = CURRENT_TIME_SEC;
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	inode->i_mode2 = ALL_SYNO_ARCHIVE;   /* set archive bit on creation */
 #endif
 

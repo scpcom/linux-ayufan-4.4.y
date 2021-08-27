@@ -90,7 +90,7 @@
 
 #if defined(CONFIG_SYSCTL)
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 int SynoDebugFlag = 0;
 EXPORT_SYMBOL(SynoDebugFlag);
 
@@ -104,28 +104,28 @@ int giSynoAtaDebug=0;
 EXPORT_SYMBOL(giSynoAtaDebug);
 #endif
 
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 char gszSynoHWVersion[16];
 EXPORT_SYMBOL(gszSynoHWVersion);
 #endif
 
-#ifdef SYNO_HW_REVISION
+#ifdef MY_ABC_HERE
 char gszSynoHWRevision[4] = {'\0'};
 EXPORT_SYMBOL(gszSynoHWRevision);
 #endif
 
-#ifdef  SYNO_RAID_STATUS
+#ifdef  MY_ABC_HERE
 int gSynoRaidSyncFlag = 0;
 EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif
 
-#ifdef SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 long g_internal_hd_num = -1;
 long syno_boot_hd_count = 0;
 EXPORT_SYMBOL(g_internal_hd_num);
 #endif
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 long unsigned int guiWakeupDisksNum = 1;
 EXPORT_SYMBOL(guiWakeupDisksNum);
 /* The default spinup time interval is 7000ms. if want modify the interval, you
@@ -134,7 +134,7 @@ int giDenoOfTimeInterval = 1;
 EXPORT_SYMBOL(giDenoOfTimeInterval);
 #endif
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 long g_internal_netif_num = -1;
 EXPORT_SYMBOL(g_internal_netif_num);
 #endif
@@ -350,7 +350,7 @@ static int __maybe_unused two = 2;
 static int __maybe_unused three = 3;
 static unsigned long one_ul = 1;
 static int one_hundred = 100;
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 static int iSynoMacMaxV2 = SYNO_MAC_MAX_V2;
 static int iMacEntrySize = 16;
 #endif
@@ -1231,7 +1231,7 @@ static struct ctl_table kern_table[] = {
  * NOTE: do not add new entries to this table unless you have read
  * Documentation/sysctl/ctl_unnumbered.txt
  */
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	{
 		.procname       = "syno_debug_flag",
 		.data           = &SynoDebugFlag,
@@ -1261,7 +1261,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_hw_version",
 		.data			= gszSynoHWVersion,
@@ -1270,7 +1270,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dostring,
 	},
 #endif
-#ifdef SYNO_HW_REVISION
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_hw_revision",
 		.data			= gszSynoHWRevision,
@@ -1279,7 +1279,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dostring,
 	},
 #endif
-#ifdef SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_internal_hd_num",
 		.data			= &g_internal_hd_num,
@@ -1288,7 +1288,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_disks_group",
 		.data			= &guiWakeupDisksNum,
@@ -1304,7 +1304,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_internal_netif_num",
 		.data			= &g_internal_netif_num,
@@ -1333,7 +1333,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_RAID_STATUS
+#ifdef MY_ABC_HERE
 	{
 		.procname       = "syno_raid_sync_flag",
 		.data           = &gSynoRaidSyncFlag,
@@ -1342,7 +1342,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_mac_address1",
 		.data			= &grgbLanMac[0],
@@ -1388,7 +1388,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_serial",
 		.data			= &gszSerialNum,
@@ -1404,7 +1404,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dostring,
 	},
 #endif
-#ifdef SYNO_INSTALL_FLAG
+#ifdef MY_ABC_HERE
 	{
 		.procname       = "syno_install_flag",
 		.data           = &gSynoInstallFlag,
@@ -1413,7 +1413,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_USB_FLASH_BOOT
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_dyn_module",
 		.data			= &gSynoHasDynModule,
@@ -1466,7 +1466,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_NO_EHCI
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_no_ehci",
 		.data			= &gSynoNoEhci,
@@ -1475,7 +1475,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_VIRTUAL_HW_MSG
+#ifdef MY_ABC_HERE
 	{
 		.procname       = "syno_virtual_hw_msg",
 		.data           = &g_syno_virtual_hw_msg,
@@ -1484,7 +1484,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_DETECT_ERROR_BOOT
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_detect_error_boot",
 		.data			= gszErrorBoot,
@@ -1493,7 +1493,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dostring,
 	},
 #endif
-#ifdef SYNO_SPECIFY_SYSTEM_RAID
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_root_uuid",
 		.data			= gszRaidRootUuid,
@@ -1509,7 +1509,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dostring,
 	},
 #endif
-#ifdef SYNO_DISK_EH_FLAG
+#ifdef MY_ABC_HERE
 	{
 		.procname       = "syno_disk_eh_flag",
 		.data           = &giSynoDsikEhFlag,
@@ -3570,7 +3570,7 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 
 	return 0;
 }
-#endif /* SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 
 #else /* CONFIG_PROC_SYSCTL */
 

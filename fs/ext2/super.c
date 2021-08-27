@@ -604,7 +604,7 @@ static int ext2_setup_super (struct super_block * sb,
 	}
 	if (read_only)
 		return res;
-#ifndef SYNO_REMOVE_CHECKTIME_WARNING
+#ifndef MY_ABC_HERE
 	if (!(sbi->s_mount_state & EXT2_VALID_FS))
 		ext2_msg(sb, KERN_WARNING,
 			"warning: mounting unchecked fs, "

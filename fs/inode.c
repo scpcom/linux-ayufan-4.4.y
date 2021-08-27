@@ -73,7 +73,7 @@ static struct hlist_head *inode_hashtable __read_mostly;
 static __cacheline_aligned_in_smp DEFINE_SPINLOCK(inode_hash_lock);
 
 __cacheline_aligned_in_smp DEFINE_SPINLOCK(inode_sb_list_lock);
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(inode_sb_list_lock);
 #endif
 
@@ -176,13 +176,13 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	inode->i_rdev = 0;
 	inode->dirtied_when = 0;
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	inode->i_archive_version = 0;
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	inode->i_mode2 = 0;   /* set archive bit on creation */
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	inode->i_CreateTime.tv_sec = 0;
 	inode->i_CreateTime.tv_nsec = 0;
 #endif
@@ -193,7 +193,7 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 
 	mutex_init(&inode->i_mutex);
 	lockdep_set_class(&inode->i_mutex, &sb->s_type->i_mutex_key);
-#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	mutex_init(&inode->i_syno_mutex);
 	lockdep_set_class(&inode->i_syno_mutex, &sb->s_type->i_syno_mutex_key);
 #endif
@@ -438,7 +438,7 @@ void __iget(struct inode *inode)
 {
 	atomic_inc(&inode->i_count);
 }
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(__iget);
 #endif
 
@@ -1007,7 +1007,7 @@ void unlock_new_inode(struct inode *inode)
 {
 	lockdep_annotate_inode_mutex_key(inode);
 	spin_lock(&inode->i_lock);
-#ifdef SYNO_FS_SKIP_RDONLY_NEW_INODE_WARNING
+#ifdef MY_ABC_HERE
 	if (!(inode->i_state & I_NEW)) {
 		printk(KERN_ERR "EXT4: inode->i_state is not I_NEW. File system should be remount read-only.\n");
 	}

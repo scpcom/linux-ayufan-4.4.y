@@ -146,11 +146,11 @@ static const struct mv_pp2_tool_stats mv_pp2_tool_tx_queue_strings_stats[] = {
 #define MV_ETH_TOOL_STATS_LEN		\
 	(MV_ETH_TOOL_GLOBAL_STATS_LEN + MV_ETH_TOOL_CPU_STATS_LEN + MV_ETH_TOOL_QUEUE_STATS_LEN)
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 extern spinlock_t          mii_lock;
 #endif
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 
 MV_U32 syno_wol_support(struct eth_port *pp)
 {
@@ -1259,7 +1259,7 @@ const struct ethtool_ops mv_pp2_eth_tool_ops = {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)
 	.get_ts_info				= ethtool_op_get_ts_info,
 #endif
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	.get_wol	= syno_get_wol,
 	.set_wol	= syno_set_wol,
 #endif

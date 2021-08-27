@@ -97,12 +97,12 @@ static int cp_stat64(struct stat64 __user *ubuf, struct kstat *stat)
 	return 0;
 }
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_level;
 #endif
 
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 
 #include <linux/namei.h>
 
@@ -139,7 +139,7 @@ asmlinkage long sys32_SYNOCaselessLStat64(char __user * filename, struct stat64 
 }
 #endif
 
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 
 #include <linux/namei.h>
 
@@ -167,23 +167,23 @@ static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct S
 		}
 	}
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARBIT) {
 		if (__put_user(pKst->SynoMode, &pSt->ext.archBit)){
 			goto Out;
 		}
 	}
-#endif /* SYNO_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_BKPVER) {
 		if (__put_user(pKst->syno_archive_version, &pSt->ext.bkpVer)){
 			goto Out;
 		}
 	}
-#endif /* SYNO_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_CREATIME) {
 		if (__put_user(pKst->SynoCreateTime.tv_sec, &pSt->ext.creatTime.tv_sec)){
 			goto Out;
@@ -192,7 +192,7 @@ static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct S
 			goto Out;
 		}
 	}
-#endif /* SYNO_CREATE_TIME */
+#endif /* MY_ABC_HERE */
 
 	error = 0;
 Out:
@@ -206,7 +206,7 @@ static long do_SYNOStat64(char __user * filename, int nofollowLink, unsigned int
 	struct kstat kst;
 
 	if (flags & SYNOST_IS_CASELESS) {
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 		error = __SYNOCaselessStat(filename, nofollowLink, &kst, &lastComponent, flags);
 		if (-ENOENT == error) {
 			if (__put_user(lastComponent, &pSt->ext.lastComponent)){
@@ -220,7 +220,7 @@ static long do_SYNOStat64(char __user * filename, int nofollowLink, unsigned int
 		if (nofollowLink) {
 			error = syno_vfs_stat(filename, &kst, 0, flags);
 		} else {
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 			if(syno_hibernation_log_level > 0) {
 				syno_do_hibernation_filename_log(filename);
 			}
@@ -260,7 +260,7 @@ asmlinkage long sys32_SYNOLStat64(char __user * filename, unsigned int flags, st
 	return do_SYNOStat64(filename, 1, flags, pSt);
 }
 
-#endif /* SYNO_STAT */
+#endif /* MY_ABC_HERE */
 
 asmlinkage long sys32_stat64(const char __user *filename,
 			     struct stat64 __user *statbuf)

@@ -110,18 +110,18 @@ static struct extent_map *create_pinned_em(struct inode *inode, u64 start,
 
 static int btrfs_dirty_inode(struct inode *inode);
 
-#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 static int syno_btrfs_init_attr(struct btrfs_trans_handle *trans, struct inode *inode)
 {
 	int err = -EINVAL;
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	struct btrfs_timespec crtime;
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	__le32 archive_bit;
 #endif
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	inode->i_CreateTime = inode->i_mtime;
 	crtime.sec = cpu_to_le64(inode->i_CreateTime.tv_sec);
 	crtime.nsec = cpu_to_le32(inode->i_CreateTime.tv_nsec);
@@ -130,7 +130,7 @@ static int syno_btrfs_init_attr(struct btrfs_trans_handle *trans, struct inode *
 		goto out;
 #endif
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	inode->i_mode2 = ALL_SYNO_ARCHIVE;
 	archive_bit = cpu_to_le32(inode->i_mode2);
 	err = __btrfs_setxattr(trans, inode, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT, &archive_bit, sizeof(archive_bit), XATTR_CREATE);
@@ -140,7 +140,7 @@ out:
 }
 #endif
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 static int syno_btrfs_set_crtime(struct dentry *dentry, struct timespec *time)
 {
 	int err = -EINVAL;
@@ -165,7 +165,7 @@ out:
 }
 #endif
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 static int syno_btrfs_set_archive_bit(struct dentry *dentry, u32 archive_bit)
 {
 	int err = -EINVAL;
@@ -182,7 +182,7 @@ out:
 }
 #endif
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 static int syno_btrfs_set_archive_ver(struct dentry *dentry, u32 version)
 {
 	struct inode *inode = dentry->d_inode;
@@ -3325,7 +3325,7 @@ int btrfs_orphan_cleanup(struct btrfs_root *root)
 		 * kill the orphan item.
 		 */
 		if (ret == -ESTALE) {
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 			trans = btrfs_start_transaction_nocheckquota(root, 1);
 #else
 			trans = btrfs_start_transaction(root, 1);
@@ -3361,7 +3361,7 @@ int btrfs_orphan_cleanup(struct btrfs_root *root)
 			nr_truncate++;
 
 			/* 1 for the orphan item deletion. */
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 			trans = btrfs_start_transaction_nocheckquota(root, 1);
 #else
 			trans = btrfs_start_transaction(root, 1);
@@ -3940,7 +3940,7 @@ static struct btrfs_trans_handle *__unlink_start_trans(struct inode *dir)
 	 * 1 for the inode ref
 	 * 1 for the inode
 	 */
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 	trans = btrfs_start_transaction_nocheckquota(root, 5);
 #else
 	trans = btrfs_start_transaction(root, 5);
@@ -4505,7 +4505,7 @@ static int maybe_insert_hole(struct btrfs_root *root, struct inode *inode,
 	 * 1 - for the one we're adding
 	 * 1 - for updating the inode.
 	 */
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 	trans = btrfs_start_transaction_nocheckquota(root, 3);
 #else
 	trans = btrfs_start_transaction(root, 3);
@@ -4665,7 +4665,7 @@ static int btrfs_setsize(struct inode *inode, struct iattr *attr)
 		if (ret)
 			return ret;
 
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 		trans = btrfs_start_transaction_nocheckquota(root, 1);
 #else
 		trans = btrfs_start_transaction(root, 1);
@@ -4693,7 +4693,7 @@ static int btrfs_setsize(struct inode *inode, struct iattr *attr)
 		 * 1 for the orphan item we're going to add
 		 * 1 for the orphan item deletion.
 		 */
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 		trans = btrfs_start_transaction_nocheckquota(root, 2);
 #else
 		trans = btrfs_start_transaction(root, 2);
@@ -5248,7 +5248,7 @@ struct inode *btrfs_iget(struct super_block *s, struct btrfs_key *location,
 	if (inode->i_state & I_NEW) {
 		btrfs_read_locked_inode(inode);
 		if (!is_bad_inode(inode)) {
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 			int retval;
 			__le32 archive_bit;
 
@@ -5257,7 +5257,7 @@ struct inode *btrfs_iget(struct super_block *s, struct btrfs_key *location,
 			unlock_new_inode(inode);
 			if (new)
 				*new = 1;
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 			retval = __btrfs_getxattr(inode, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT, &archive_bit, sizeof(archive_bit));
 			if (0 < retval) {
 				inode->i_mode2 = le32_to_cpu(archive_bit);
@@ -5398,7 +5398,7 @@ static struct dentry *btrfs_lookup(struct inode *dir, struct dentry *dentry,
 			return ERR_CAST(inode);
 	}
 
-#ifdef SYNO_BTRFS_REVERT_DCACHE_DISCONNECTED_FOR_NFS
+#ifdef MY_ABC_HERE
 	ret = d_splice_alias(inode, dentry);
 #else
 	ret = d_materialise_unique(dentry, inode);
@@ -5672,7 +5672,7 @@ static int btrfs_dirty_inode(struct inode *inode)
 	if (ret && ret == -ENOSPC) {
 		/* whoops, lets try again with the full transaction */
 		btrfs_end_transaction(trans, root);
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 		trans = btrfs_start_transaction_nocheckquota(root, 1);
 #else
 		trans = btrfs_start_transaction(root, 1);
@@ -6068,7 +6068,7 @@ static int btrfs_mknod(struct inode *dir, struct dentry *dentry,
 		goto out_unlock;
 	}
 
-#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	err = syno_btrfs_init_attr(trans, inode);
 	if (err) {
 		drop_inode = 1;
@@ -6140,7 +6140,7 @@ static int btrfs_create(struct inode *dir, struct dentry *dentry,
 	if (err)
 		goto out_unlock;
 
-#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	err = syno_btrfs_init_attr(trans, inode);
 	if (err) {
 		goto out_unlock;
@@ -6284,7 +6284,7 @@ static int btrfs_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 	if (err)
 		goto out_fail;
 
-#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	err = syno_btrfs_init_attr(trans, inode);
 	if (err) {
 		goto out_fail;
@@ -8152,7 +8152,7 @@ static int btrfs_truncate(struct inode *inode)
 	 * 1 for the truncate slack space
 	 * 1 for updating the inode.
 	 */
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 	trans = btrfs_start_transaction_nocheckquota(root, 2);
 #else
 	trans = btrfs_start_transaction(root, 2);
@@ -8196,7 +8196,7 @@ static int btrfs_truncate(struct inode *inode)
 		btrfs_end_transaction(trans, root);
 		btrfs_btree_balance_dirty(root);
 
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 		trans = btrfs_start_transaction_nocheckquota(root, 2);
 #else
 		trans = btrfs_start_transaction(root, 2);
@@ -8257,7 +8257,7 @@ int btrfs_create_subvol_root(struct btrfs_trans_handle *trans,
 				&index);
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
-#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	err = syno_btrfs_init_attr(trans, inode);
 	if (err)
 		goto out;
@@ -8276,7 +8276,7 @@ int btrfs_create_subvol_root(struct btrfs_trans_handle *trans,
 
 	err = btrfs_update_inode(trans, new_root, inode);
 
-#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 out:
 #endif
 	iput(inode);
@@ -8320,7 +8320,7 @@ struct inode *btrfs_alloc_inode(struct super_block *sb)
 
 	inode = &ei->vfs_inode;
 	extent_map_tree_init(&ei->extent_tree);
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	ei->extent_tree.inode = ei;
 #endif
 	extent_io_tree_init(&ei->io_tree, &inode->i_data);
@@ -8502,13 +8502,13 @@ static int btrfs_getattr(struct vfsmount *mnt,
 	return 0;
 }
 
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 int syno_btrfs_getattr(struct dentry *d, struct kstat *stat, int flags)
 {
 	int err = 0;
 	struct inode *inode = d->d_inode;
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_CREATIME) {
 		struct btrfs_timespec crtime;
 
@@ -8526,12 +8526,12 @@ int syno_btrfs_getattr(struct dentry *d, struct kstat *stat, int flags)
 		err = 0;
 	}
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARBIT) {
 		stat->SynoMode = inode->i_mode2;
 	}
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_BKPVER) {
 		err = syno_btrfs_get_archive_ver(d, &stat->syno_archive_version);
 	}
@@ -8606,7 +8606,7 @@ static int btrfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	 * inodes.  So 5 * 2 is 10, plus 1 for the new link, so 11 total items
 	 * should cover the worst case number of items we'll modify.
 	 */
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 	trans = btrfs_start_transaction_nocheckquota(root, 11);
 #else
 	trans = btrfs_start_transaction(root, 11);
@@ -8977,7 +8977,7 @@ static int btrfs_symlink(struct inode *dir, struct dentry *dentry,
 		goto out_unlock;
 	}
 
-#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	err = syno_btrfs_init_attr(trans, inode);
 	if (err) {
 		drop_inode = 1;
@@ -9213,16 +9213,16 @@ static int btrfs_permission(struct inode *inode, int mask)
 }
 
 static const struct inode_operations btrfs_dir_inode_operations = {
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= syno_btrfs_getattr,
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	.syno_set_crtime = syno_btrfs_set_crtime,
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	.syno_set_archive_bit = syno_btrfs_set_archive_bit,
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_archive_ver = syno_btrfs_set_archive_ver,
 	.syno_get_archive_ver = syno_btrfs_get_archive_ver,
 #endif
@@ -9246,16 +9246,16 @@ static const struct inode_operations btrfs_dir_inode_operations = {
 	.update_time	= btrfs_update_time,
 };
 static const struct inode_operations btrfs_dir_ro_inode_operations = {
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= syno_btrfs_getattr,
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	.syno_set_crtime = syno_btrfs_set_crtime,
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	.syno_set_archive_bit = syno_btrfs_set_archive_bit,
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_archive_ver = syno_btrfs_set_archive_ver,
 	.syno_get_archive_ver = syno_btrfs_get_archive_ver,
 #endif
@@ -9271,7 +9271,7 @@ static const struct file_operations btrfs_dir_file_operations = {
 	.readdir	= btrfs_real_readdir,
 	.unlocked_ioctl	= btrfs_ioctl,
 #ifdef CONFIG_COMPAT
-#ifdef SYNO_BTRFS_COMPAT_IOCTL
+#ifdef MY_ABC_HERE
 	.compat_ioctl	= btrfs_compat_ioctl,
 #else
 	.compat_ioctl	= btrfs_ioctl,
@@ -9326,16 +9326,16 @@ static const struct address_space_operations btrfs_symlink_aops = {
 };
 
 static const struct inode_operations btrfs_file_inode_operations = {
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= syno_btrfs_getattr,
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	.syno_set_crtime = syno_btrfs_set_crtime,
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	.syno_set_archive_bit = syno_btrfs_set_archive_bit,
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_archive_ver = syno_btrfs_set_archive_ver,
 	.syno_get_archive_ver = syno_btrfs_get_archive_ver,
 #endif
@@ -9351,16 +9351,16 @@ static const struct inode_operations btrfs_file_inode_operations = {
 	.update_time	= btrfs_update_time,
 };
 static const struct inode_operations btrfs_special_inode_operations = {
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= syno_btrfs_getattr,
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	.syno_set_crtime = syno_btrfs_set_crtime,
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	.syno_set_archive_bit = syno_btrfs_set_archive_bit,
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_archive_ver = syno_btrfs_set_archive_ver,
 	.syno_get_archive_ver = syno_btrfs_get_archive_ver,
 #endif
@@ -9375,16 +9375,16 @@ static const struct inode_operations btrfs_special_inode_operations = {
 	.update_time	= btrfs_update_time,
 };
 static const struct inode_operations btrfs_symlink_inode_operations = {
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= syno_btrfs_getattr,
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	.syno_set_crtime = syno_btrfs_set_crtime,
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	.syno_set_archive_bit = syno_btrfs_set_archive_bit,
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_archive_ver = syno_btrfs_set_archive_ver,
 	.syno_get_archive_ver = syno_btrfs_get_archive_ver,
 #endif

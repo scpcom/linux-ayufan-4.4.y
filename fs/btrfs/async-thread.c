@@ -38,7 +38,7 @@
 
 struct __btrfs_workqueue {
 	struct workqueue_struct *normal_wq;
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 	char *wq_name;
 #endif
 	/* List head pointing to ordered work list */
@@ -70,7 +70,7 @@ static inline struct __btrfs_workqueue
 	if (unlikely(!ret))
 		return NULL;
 
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 	ret->wq_name = kzalloc(64, GFP_NOFS);
 	if (unlikely(!ret->wq_name)) {
 		kfree(ret);
@@ -90,7 +90,7 @@ static inline struct __btrfs_workqueue
 		ret->thresh = thresh;
 	}
 
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 	if (flags & WQ_HIGHPRI)
 		snprintf(ret->wq_name, 64, "%s-%s-high", "btrfs", name);
 	else
@@ -333,7 +333,7 @@ void btrfs_queue_work(struct btrfs_workqueue *wq,
 static inline void
 __btrfs_destroy_workqueue(struct __btrfs_workqueue *wq)
 {
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 	if (wq->wq_name) {
 		kfree(wq->wq_name);
 	}

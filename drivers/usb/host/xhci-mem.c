@@ -1471,7 +1471,7 @@ int xhci_endpoint_init(struct xhci_hcd *xhci,
 		/* dig out max burst from ep companion desc */
 		max_packet = ep->ss_ep_comp.bMaxBurst;
 		ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(max_packet));
-#ifdef SYNO_USB3_SMALL_MAX_BURST
+#ifdef MY_ABC_HERE
 		if (cpu_to_le16(0x1759) == udev->descriptor.idVendor &&
 			cpu_to_le16(0x5002) == udev->descriptor.idProduct &&
 			cpu_to_le16(0x2580) == udev->descriptor.bcdDevice &&
@@ -1479,7 +1479,7 @@ int xhci_endpoint_init(struct xhci_hcd *xhci,
 			ep_ctx->ep_info2 &= cpu_to_le32(~MAX_BURST_MASK);
 			ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(1));
 		}
-#endif //SYNO_USB3_SMALL_MAX_BURST
+#endif //MY_ABC_HERE
 		break;
 	case USB_SPEED_HIGH:
 		/* bits 11:12 specify the number of additional transaction

@@ -165,7 +165,7 @@ static int start_log_trans(struct btrfs_trans_handle *trans,
 		if (ctx) {
 			index = root->log_transid % 2;
 			list_add_tail(&ctx->list, &root->log_ctxs[index]);
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 			ctx->log_transid = root->log_transid;
 #endif
@@ -194,7 +194,7 @@ static int start_log_trans(struct btrfs_trans_handle *trans,
 	if (ctx) {
 		index = root->log_transid % 2;
 		list_add_tail(&ctx->list, &root->log_ctxs[index]);
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 		ctx->log_transid = root->log_transid;
 #endif
@@ -2402,7 +2402,7 @@ static void wait_log_commit(struct btrfs_trans_handle *trans,
 				&wait, TASK_UNINTERRUPTIBLE);
 		mutex_unlock(&root->log_mutex);
 
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 		if (root->log_transid < transid + 2 &&
 #else
 		if (root->log_transid_committed < transid &&
@@ -2412,7 +2412,7 @@ static void wait_log_commit(struct btrfs_trans_handle *trans,
 
 		finish_wait(&root->log_commit_wait[index], &wait);
 		mutex_lock(&root->log_mutex);
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	} while (root->log_transid < transid + 2 &&
 #else
 	} while (root->log_transid_committed < transid &&
@@ -2493,7 +2493,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	struct blk_plug plug;
 
 	mutex_lock(&root->log_mutex);
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	log_transid = root->log_transid;
 	index1 = root->log_transid % 2;
 #else
@@ -2506,7 +2506,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	index1 = log_transid % 2;
 #endif
 	if (atomic_read(&root->log_commit[index1])) {
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 		wait_log_commit(trans, root, root->log_transid);
 #else
 		wait_log_commit(trans, root, log_transid);
@@ -2514,7 +2514,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 		mutex_unlock(&root->log_mutex);
 		return ctx->log_ret;
 	}
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	ASSERT(log_transid == root->log_transid);
 #endif
@@ -2522,7 +2522,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 
 	/* wait for previous tree log sync to complete */
 	if (atomic_read(&root->log_commit[(index1 + 1) % 2]))
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 		wait_log_commit(trans, root, root->log_transid - 1);
 #else
 		wait_log_commit(trans, root, log_transid - 1);
@@ -2582,7 +2582,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	 */
 	mutex_unlock(&root->log_mutex);
 
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	btrfs_init_log_ctx(&root_log_ctx);
 #endif
@@ -2591,7 +2591,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	atomic_inc(&log_root_tree->log_batch);
 	atomic_inc(&log_root_tree->log_writers);
 
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	index2 = log_root_tree->log_transid % 2;
 	list_add_tail(&root_log_ctx.list, &log_root_tree->log_ctxs[index2]);
@@ -2610,7 +2610,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	}
 
 	if (ret) {
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 		if (!list_empty(&root_log_ctx.list))
 			list_del_init(&root_log_ctx.list);
@@ -2631,14 +2631,14 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 		goto out;
 	}
 
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	index2 = log_root_tree->log_transid % 2;
 
 	btrfs_init_log_ctx(&root_log_ctx);
 	list_add_tail(&root_log_ctx.list, &log_root_tree->log_ctxs[index2]);
 #else
 	if (log_root_tree->log_transid_committed >= root_log_ctx.log_transid) {
-#ifdef SYNO_BTRFS_ADD_MISSING_FINISH_PLUG_FOR_TREE_LOG
+#ifdef MY_ABC_HERE
 		blk_finish_plug(&plug);
 #endif
 		mutex_unlock(&log_root_tree->log_mutex);
@@ -2652,7 +2652,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 		blk_finish_plug(&plug);
 		btrfs_wait_marked_extents(log, &log->dirty_log_pages, mark);
 		wait_log_commit(trans, log_root_tree,
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 				log_root_tree->log_transid);
 #else
 				root_log_ctx.log_transid);
@@ -2662,7 +2662,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 		ret = root_log_ctx.log_ret;
 		goto out;
 	}
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	ASSERT(root_log_ctx.log_transid == log_root_tree->log_transid);
 #endif
@@ -2670,7 +2670,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 
 	if (atomic_read(&log_root_tree->log_commit[(index2 + 1) % 2])) {
 		wait_log_commit(trans, log_root_tree,
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 				log_root_tree->log_transid - 1);
 #else
 				root_log_ctx.log_transid - 1);
@@ -2746,7 +2746,7 @@ out_wake_log_root:
 	 */
 	btrfs_remove_all_log_ctxs(log_root_tree, index2, ret);
 
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	/*
 	 * It is dangerous if log_commit is changed before we set
 	 * ->log_ret of log ctx. Because the readers may not get
@@ -2758,7 +2758,7 @@ out_wake_log_root:
 	log_root_tree->log_transid_committed++;
 #endif
 	atomic_set(&log_root_tree->log_commit[index2], 0);
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	smp_mb();
 #else
 	mutex_unlock(&log_root_tree->log_mutex);
@@ -2770,7 +2770,7 @@ out:
 	/* See above. */
 	btrfs_remove_all_log_ctxs(root, index1, ret);
 
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	/* See above. */
 	smp_wmb();
 #else
@@ -2778,7 +2778,7 @@ out:
 	root->log_transid_committed++;
 #endif
 	atomic_set(&root->log_commit[index1], 0);
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	smp_mb();
 #else
 	mutex_unlock(&root->log_mutex);

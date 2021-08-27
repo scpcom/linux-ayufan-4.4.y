@@ -83,7 +83,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mvStorageDev.h"
 #include "mvRegs.h"
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 #include <linux/synosata.h>
 #include <linux/synobios.h>
 extern int syno_mv_scsi_host_no_get(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex);
@@ -95,7 +95,7 @@ static unsigned long int g_jiffies_lastwake;
 	#else
 	#define DBGMESG(x, ...)
 	#endif /* SYNO_SPINUP_DELAY_DEBUG */
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
 /* Defines */
 #define MV_SATA_PORT_PER_UNIT                   4
@@ -286,7 +286,7 @@ static void handleDeviceInterrupt(MV_SATA_ADAPTER *pAdapter, MV_U8 sataUnit,
 
 static void handleEdmaError(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex);
 
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
 MV_VOID handleDisconnect(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex);
 #else
 static MV_VOID handleDisconnect(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex);
@@ -354,11 +354,11 @@ static void _channelHardReset(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex);
 
 static void _establishSataComm(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex);
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 static void SYNOEstablishSataCommAll(MV_SATA_ADAPTER *pAdapter);
 #else
 static void _establishSataCommAll(MV_SATA_ADAPTER *pAdapter);
-#endif //SYNO_SPINUP_DELAY
+#endif //MY_ABC_HERE
 
 void _setActivePMPort(MV_SATA_CHANNEL *pSataChannel, MV_U8 PMPort);
 
@@ -1727,7 +1727,7 @@ static void handleEdmaError(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
         return;
     }
 }
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
 MV_VOID handleDisconnect(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
 #else
 static MV_VOID handleDisconnect(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
@@ -1818,7 +1818,7 @@ static MV_VOID handleDisconnect(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
 static MV_VOID handleConnect(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
 {
 
-#ifdef SYNO_SATA_MVSATA_PHY_PARM_FIX
+#ifdef MY_ABC_HERE
     /* 
      * If we not add this, disk probe would not normally after we fix the phy mode 4.  
      * This is safe because the code,below this define, did almost the same thing
@@ -1948,7 +1948,7 @@ static MV_BOOLEAN handleUnrecoverableError(MV_SATA_ADAPTER *pAdapter,
                      "UnrecoverableHW error detected.\n", pAdapter->adapterId, channelIndex);
         }
 #endif
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
         if (pSataChannel) {
             MV_U32 mask = 0;
             if (MV_SATA_DEVICE_ID_7042 == pAdapter->pciConfigDeviceId) {
@@ -2889,7 +2889,7 @@ static MV_BOOLEAN transferPacketData(MV_SATA_CHANNEL *pSataChannel,
 }
 #endif
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 void ResubmitMvCommand(unsigned long data)
 {
 	MV_QUEUE_COMMAND_RESULT r;
@@ -2903,7 +2903,7 @@ void ResubmitMvCommand(unsigned long data)
 	}
 	/* cleanup */
 }
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
 static void completePIOCommand(MV_SATA_CHANNEL *pSataChannel,
                                MV_QUEUED_COMMAND_ENTRY *pCommandEntry,
@@ -2963,7 +2963,7 @@ static void completePIOCommand(MV_SATA_CHANNEL *pSataChannel,
         removeCommand(pSataChannel,pCommandEntry);
     }
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     if (pParams->SynoExtCallBack && 
         pCommandEntry->pCommandInfo->pSynoCmdExt &&
         !test_and_clear_bit(SYNO_PM_CMD_TIMEOUT, &(pCommandEntry->syno_flags_ext)))
@@ -2987,7 +2987,7 @@ static void completePIOCommand(MV_SATA_CHANNEL *pSataChannel,
         }
         else
         {
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 
 			if (test_and_clear_bit(CHKPOWER_CHECKING, &(pSataChannel->chkpower_flags))) {
 				/* this completion is for CHECK_POWER. 
@@ -3044,11 +3044,11 @@ static void completePIOCommand(MV_SATA_CHANNEL *pSataChannel,
 					ResubmitMvCommand((unsigned long)pSataChannel);
 				}
 			} else {
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
             _insertQCommandsIntoEdma(pSataChannel);
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 			}
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
         }
     }
 }
@@ -3599,7 +3599,7 @@ static void _fixPhyParams(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
                 phyMode4Value &= ~0x5DE3FFFC;
                 phyMode4Value |= MV_BIT2;
 
-#ifdef SYNO_SATA_MVSATA_PHY_PARM_FIX
+#ifdef MY_ABC_HERE
                 phyMode4Value |= MV_BIT18;
                 phyMode4Value |= MV_BIT19;
                 phyMode4Value |= MV_BIT20;
@@ -3670,7 +3670,7 @@ static void _fixPhyParams(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
                                      MV_SATA_II_PHY_MODE_4_REG_OFFSET);
          regVal &= ~0x1;
          regVal |= MV_BIT16; /* must write 1 to this bit */
-#ifdef SYNO_SATA_MVSATA_PHY_PARM_FIX
+#ifdef MY_ABC_HERE
         regVal |= MV_BIT18;
         regVal |= MV_BIT19;
         regVal |= MV_BIT20;
@@ -3850,7 +3850,7 @@ static void _establishSataComm(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex)
     }
 }
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 #if 0
 static void printAtaDeviceRegisters(MV_STORAGE_DEVICE_REGISTERS *mvStorageDevRegisters)
 {
@@ -4036,16 +4036,16 @@ static void SYNOEstablishSataCommAll(MV_SATA_ADAPTER *pAdapter){
                 }
             }
 #endif
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
 			_channelHardReset(pAdapter, channelIndex);
 #endif
 			SYNOHWReset(pAdapter, channelIndex);
 
-#ifdef SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 			SleepForHD(channelIndex+1);
 #endif
 		}
-#ifdef SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 		/*
 		* this is for that larger disk. sometimes we need more time.
         */
@@ -4054,7 +4054,7 @@ static void SYNOEstablishSataCommAll(MV_SATA_ADAPTER *pAdapter){
 	}
 }
 
-#else //SYNO_SPINUP_DELAY
+#else //MY_ABC_HERE
 
 static void _establishSataCommAll(MV_SATA_ADAPTER *pAdapter)
 {
@@ -4090,11 +4090,7 @@ static void _establishSataCommAll(MV_SATA_ADAPTER *pAdapter)
         }
     }
 }
-#endif //SYNO_SPINUP_DELAY
-
-
-
-
+#endif //MY_ABC_HERE
 
 void _setActivePMPort(MV_SATA_CHANNEL *pSataChannel, MV_U8 PMPort)
 {
@@ -4478,7 +4474,7 @@ static void addCommand(MV_SATA_CHANNEL *pSataChannel,
  
     pCommandEntry->pCommandInfo = pCommandInfo;
 #endif
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     /* caller's syno command ext no matter MV_SATA_STORE_COMMANDS_INFO_ON_IAL_STACK */
     pCommandEntry->pCommandInfo->pSynoCmdExt = pCommandInfo->pSynoCmdExt;
 
@@ -4547,7 +4543,7 @@ static void removeCommand(MV_SATA_CHANNEL *pSataChannel,
     pSataChannel->outstandingCommands--;
     pSataChannel->portQueuedCommands[pCommandEntry->pCommandInfo->PMPort]--;
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	if (test_and_clear_bit(CHKPOWER_WAKING, 
 				&(pSataChannel->chkpower_flags))) {
 		/* This completion is for the command that wakes up
@@ -4556,7 +4552,7 @@ static void removeCommand(MV_SATA_CHANNEL *pSataChannel,
 				pSataChannel->channelNumber);		
 		list_del(&pSataChannel->pendinglh);
 	}
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
 }
 
@@ -5533,7 +5529,7 @@ static MV_VOID insertReadLogExtCmnd(MV_SATA_CHANNEL *pSataChannel)
 
     pReadLogExtPIOParams->bufPtr = pSataChannel->ErrorHandlingInfo.ReadLogExtBuffer;
     pReadLogExtPIOParams->callBack = ReadLogExtCompletionCB;
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     pReadLogExtPIOParams->SynoExtCallBack = NULL;
 #endif
     pReadLogExtPIOParams->command = MV_ATA_COMMAND_READ_LOG_EXT;
@@ -6088,7 +6084,7 @@ MV_BOOLEAN mvSataInitAdapter (MV_SATA_ADAPTER *pAdapter)
         pAdapter->sataAdapterGeneration = MV_SATA_GEN_IIE;
         switch (pAdapter->pciConfigRevisionId)
         {
-#ifdef SYNO_MV_MODIFY
+#ifdef MY_ABC_HERE
         case 0x1: // This case is for the chip 7042 revision 1.
 #endif
         case 0x2:/*B0*/
@@ -6246,7 +6242,7 @@ MV_BOOLEAN mvSataInitAdapter (MV_SATA_ADAPTER *pAdapter)
         pAdapter->ifSpeed[channelIndex] = MV_SATA_IF_SPEED_NO_LIMIT;
         pAdapter->ifPowerState[channelIndex] = MV_SATA_IF_POWER_PHY_READY;
         pAdapter->limitInterfaceSpeed[channelIndex] = MV_FALSE;
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
         /* FIXME: please use new EH define after integrade detect fix to new eh*/
         pAdapter->flags[channelIndex] = 0;
 #endif
@@ -6364,7 +6360,7 @@ MV_BOOLEAN mvSataInitAdapter (MV_SATA_ADAPTER *pAdapter)
 
     }
 
-#ifdef	SYNO_MV_SATA_LED
+#ifdef	MY_ABC_HERE
 	/* In order to make LED static when disk present and blinking when
 	 * disk active, we have to set the offset 0x104F0 bit 0-1 to 0x00 and
 	 * bit 2-3 to 1.
@@ -8063,7 +8059,7 @@ MV_BOOLEAN mvSataChannelFarLoopbackDiagnostic(MV_SATA_ADAPTER *pAdapter,
     return result;
 }
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 /**
  * Completion callback function for CHECKPOWER command.
  * Actually it does nothing. Merely a place holder
@@ -8111,7 +8107,7 @@ static MV_QUEUE_COMMAND_INFO * insertCheckPowerCmd(MV_SATA_CHANNEL *pSataChannel
 	/* make a CHECKPOWER command struct */
 	pPIOParams->bufPtr = NULL;
 	pPIOParams->callBack = CheckPowerCompletionCB;
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
         pPIOParams->SynoExtCallBack = NULL;
 #endif
 	pPIOParams->command = MV_ATA_COMMAND_CHECK_POWER;
@@ -8130,9 +8126,9 @@ static MV_QUEUE_COMMAND_INFO * insertCheckPowerCmd(MV_SATA_CHANNEL *pSataChannel
 
 	return pCommandInfo;
 }
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 MV_VOID SynoSataPMGPIOQueueCommandTimeout(MV_SATA_ADAPTER *pAdapter,
                                           MV_U8 channelIndex,
                                           MV_QUEUE_COMMAND_INFO *pCommandInfo)
@@ -8218,7 +8214,7 @@ MV_QUEUE_COMMAND_RESULT mvSataQueueCommand(MV_SATA_ADAPTER *pAdapter,
         return MV_QUEUE_COMMAND_RESULT_BAD_PARAMS;
     }
 #endif
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 #ifdef SYNO_SPINUP_DELAY_DEBUG
 	/* print current command for debugging */
 	if (pCommandInfo->type==MV_QUEUED_COMMAND_TYPE_UDMA) {
@@ -8243,7 +8239,7 @@ MV_QUEUE_COMMAND_RESULT mvSataQueueCommand(MV_SATA_ADAPTER *pAdapter,
         goto SKIP;
     }
 
-#ifdef SYNO_SATA_SSD_DETECT
+#ifdef MY_ABC_HERE
     if (test_bit(pCommandInfo->PMPort, &pSataChannel->ssd_list)) {
         goto SKIP;
     }
@@ -8283,7 +8279,7 @@ MV_QUEUE_COMMAND_RESULT mvSataQueueCommand(MV_SATA_ADAPTER *pAdapter,
 		pSataChannel->tLastCmd = jiffies;
 	}
 SKIP:
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
     eDmaRegsOffset = pSataChannel->eDmaRegsOffset;
     if (pSataChannel->queueCommandsEnabled == MV_FALSE)
     {
@@ -8734,11 +8730,11 @@ MV_BOOLEAN mvSataEnableStaggeredSpinUpAll (MV_SATA_ADAPTER *pAdapter)
     {
 
         mvOsSemTake(&pAdapter->semaphore);
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 		SYNOEstablishSataCommAll(pAdapter);
 #else
         _establishSataCommAll(pAdapter);
-#endif //SYNO_SPINUP_DELAY
+#endif //MY_ABC_HERE
 
         for (channelIndex = 0 ; channelIndex < pAdapter->numberOfChannels ;
             channelIndex ++)

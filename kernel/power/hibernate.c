@@ -736,7 +736,7 @@ int hibernate(void)
  * attempts to recover gracefully and make the kernel return to the normal mode
  * of operation.
  */
-#ifdef  SYNO_HIBERNATE_TO_DISK
+#ifdef  MY_DEF_HERE
 int software_resume(void)
 #else
 static int software_resume(void)
@@ -871,7 +871,7 @@ close_finish:
 	goto Finish;
 }
 
-#ifndef SYNO_HIBERNATE_TO_DISK
+#ifndef MY_DEF_HERE
 late_initcall(software_resume);
 
 #endif

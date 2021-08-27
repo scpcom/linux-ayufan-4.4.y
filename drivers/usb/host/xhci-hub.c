@@ -968,7 +968,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 
 			temp = xhci_readl(xhci, port_array[wIndex]);
 			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
-#ifdef SYNO_USB3_WD_FIX
+#ifdef MY_ABC_HERE
 			if (pdev->vendor == PCI_VENDOR_ID_NEC ||
 				pdev->vendor == PCI_VENDOR_ID_ETRON) {
 				xhci_dbg(xhci, "set port reset map, actual port %d status  = 0x%x\n", wIndex, temp_map);

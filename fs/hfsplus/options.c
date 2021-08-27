@@ -52,7 +52,7 @@ void hfsplus_fill_defaults(struct hfsplus_sb_info *opts)
 {
 	if (!opts)
 		return;
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	opts->creator = 0;
 	opts->type = 0;
 #else
@@ -142,7 +142,7 @@ int hfsplus_parse_options(char *input, struct hfsplus_sb_info *sbi)
 				pr_err("uid requires an argument\n");
 				return 0;
 			}
-#ifdef SYNO_HFSPLUS_PORTING_3_9
+#ifdef MY_ABC_HERE
 			sbi->uid = (uid_t)tmp;
 #else
 			sbi->uid = make_kuid(current_user_ns(), (uid_t)tmp);
@@ -157,7 +157,7 @@ int hfsplus_parse_options(char *input, struct hfsplus_sb_info *sbi)
 				pr_err("gid requires an argument\n");
 				return 0;
 			}
-#ifdef SYNO_HFSPLUS_PORTING_3_9
+#ifdef MY_ABC_HERE
 			sbi->gid = (gid_t)tmp;
 #else
 			sbi->gid = make_kgid(current_user_ns(), (gid_t)tmp);
@@ -229,13 +229,13 @@ done:
 	return 1;
 }
 
-#ifdef SYNO_HFSPLUS_PORTING_3_9
+#ifdef MY_ABC_HERE
 int hfsplus_show_options(struct seq_file *seq, struct vfsmount *mnt)
 #else
 int hfsplus_show_options(struct seq_file *seq, struct dentry *root)
 #endif
 {
-#ifdef SYNO_HFSPLUS_PORTING_3_9
+#ifdef MY_ABC_HERE
 	struct hfsplus_sb_info *sbi = HFSPLUS_SB(mnt->mnt_sb);
 #else
 	struct hfsplus_sb_info *sbi = HFSPLUS_SB(root->d_sb);
@@ -246,7 +246,7 @@ int hfsplus_show_options(struct seq_file *seq, struct dentry *root)
 	if (sbi->type != HFSPLUS_DEF_CR_TYPE)
 		seq_printf(seq, ",type=%.4s", (char *)&sbi->type);
 	seq_printf(seq, ",umask=%o,uid=%u,gid=%u", sbi->umask,
-#ifdef SYNO_HFSPLUS_PORTING_3_9
+#ifdef MY_ABC_HERE
 		sbi->uid, sbi->gid);
 #else
 			from_kuid_munged(&init_user_ns, sbi->uid),
@@ -262,7 +262,7 @@ int hfsplus_show_options(struct seq_file *seq, struct dentry *root)
 		seq_printf(seq, ",nodecompose");
 	if (test_bit(HFSPLUS_SB_NOBARRIER, &sbi->flags))
 		seq_printf(seq, ",nobarrier");
-#ifdef SYNO_HFSPLUS_SHOW_CASELESS_INFO
+#ifdef MY_ABC_HERE
 	if (test_bit(HFSPLUS_SB_CASEFOLD, &sbi->flags))
 		seq_printf(seq, ",caseless");
 #endif

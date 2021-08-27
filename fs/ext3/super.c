@@ -75,7 +75,7 @@ static int ext3_statfs (struct dentry * dentry, struct kstatfs * buf);
 static int ext3_unfreeze(struct super_block *sb);
 static int ext3_freeze(struct super_block *sb);
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 extern struct dentry_operations ext3_dentry_operations;
 
 spinlock_t Ext3Namei_buf_lock;  /* lock for UTF8Ext3NameiStrBuf[] in fs/ext3/namei.c */
@@ -621,7 +621,7 @@ static char *data_mode_string(unsigned long mode)
 	return "unknown";
 }
 
-#if defined(SYNO_DEBUG_FLAG) && defined(SYNO_HIDE_OLDALLOC)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 extern int SynoDebugFlag;
 #endif
 /*
@@ -670,8 +670,8 @@ static int ext3_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",nouid32");
 	if (test_opt(sb, DEBUG))
 		seq_puts(seq, ",debug");
-#ifdef SYNO_HIDE_OLDALLOC
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
 	if(SynoDebugFlag) {
 		if (test_opt(sb, OLDALLOC)) {
 			seq_puts(seq, ",oldalloc");
@@ -783,7 +783,7 @@ static int bdev_try_to_free_page(struct super_block *sb, struct page *page,
 	return try_to_free_buffers(page);
 }
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 static int syno_ext3_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
 {
 	struct ext3_super_block *es = EXT3_SB(sb)->s_es;
@@ -858,7 +858,7 @@ static const struct quotactl_ops ext3_qctl_operations = {
 #endif
 
 static const struct super_operations ext3_sops = {
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_sb_archive_ver = syno_ext3_set_sb_archive_ver,
 	.syno_get_sb_archive_ver = syno_ext3_get_sb_archive_ver,
 #endif
@@ -1116,7 +1116,7 @@ static int parse_options (char *options, struct super_block *sb,
 			set_opt (sbi->s_mount_opt, DEBUG);
 			break;
 		case Opt_oldalloc:
-#ifdef SYNO_RESERVE_OLDALLOC
+#ifdef MY_ABC_HERE
 			set_opt (sbi->s_mount_opt, OLDALLOC);
 #else
 			ext3_msg(sb, KERN_WARNING,
@@ -1124,7 +1124,7 @@ static int parse_options (char *options, struct super_block *sb,
 #endif
 			break;
 		case Opt_orlov:
-#ifdef SYNO_RESERVE_OLDALLOC
+#ifdef MY_ABC_HERE
 			clear_opt (sbi->s_mount_opt, OLDALLOC);
 #else
 			ext3_msg(sb, KERN_WARNING,
@@ -1406,7 +1406,7 @@ static int ext3_setup_super(struct super_block *sb, struct ext3_super_block *es,
 	}
 	if (read_only)
 		return res;
-#ifndef SYNO_REMOVE_CHECKTIME_WARNING
+#ifndef MY_ABC_HERE
 	if (!(sbi->s_mount_state & EXT3_VALID_FS))
 		ext3_msg(sb, KERN_WARNING,
 			"warning: mounting unchecked fs, "
@@ -2123,7 +2123,7 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		ext3_msg(sb, KERN_ERR, "error: corrupt root inode, run e2fsck");
 		goto failed_mount3;
 	}
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	sb->s_d_op = &ext3_dentry_operations;
 #endif
 	sb->s_root = d_alloc_root(root);
@@ -2134,11 +2134,11 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		goto failed_mount3;
 	}
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	// root is mounted, attach our dentry operations
 	sb->s_root->d_op = &ext3_dentry_operations;
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
 #endif
 	ext3_setup_super (sb, es, sb->s_flags & MS_RDONLY);
@@ -2153,7 +2153,7 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_JOURNAL_DATA ? "journal":
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_ORDERED_DATA ? "ordered":
 		"writeback");
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	if (!Ext3Namei_lock_init) {
 		spin_lock_init(&Ext3Namei_buf_lock);
 		Ext3Namei_lock_init=1;

@@ -94,7 +94,7 @@ typedef int (*iterate_devices_callout_fn) (struct dm_target *ti,
 typedef int (*dm_iterate_devices_fn) (struct dm_target *ti,
 				      iterate_devices_callout_fn fn,
 				      void *data);
-#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 typedef int (*dm_handle_4kn_target_support_fn) (struct dm_target *ti,
 				      iterate_devices_callout_fn fn,
 				      void *data);
@@ -110,7 +110,7 @@ typedef void (*dm_io_hints_fn) (struct dm_target *ti,
  */
 typedef int (*dm_busy_fn) (struct dm_target *ti);
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 typedef void (*dm_lvinfoset_fn) (struct dm_target *ti);
 typedef sector_t (*dm_lg_sector_get_fn) (sector_t sector, struct dm_target *ti);
 #endif
@@ -163,11 +163,11 @@ struct target_type {
 	dm_merge_fn merge;
 	dm_busy_fn busy;
 	dm_iterate_devices_fn iterate_devices;
-#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 	dm_handle_4kn_target_support_fn handle_4kn_target_support;
 #endif
 	dm_io_hints_fn io_hints;
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 	dm_lvinfoset_fn lvinfoset;
 	dm_lg_sector_get_fn lg_sector_get;
 #endif
@@ -250,7 +250,7 @@ struct dm_target {
 	 */
 	unsigned discard_zeroes_data_unsupported:1;
 
-#ifdef SYNO_DM_FORCE_IO_HINTS
+#ifdef MY_ABC_HERE
 	unsigned force_io_hints:1;
 #endif
 };
@@ -336,7 +336,7 @@ void *dm_get_mdptr(struct mapped_device *md);
  */
 int dm_suspend(struct mapped_device *md, unsigned suspend_flags);
 int dm_resume(struct mapped_device *md);
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 int dm_active_get(struct mapped_device *md);
 int dm_active_set(struct mapped_device *md, int value);
 #endif

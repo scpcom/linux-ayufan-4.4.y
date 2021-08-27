@@ -143,7 +143,7 @@ struct btrfs_trans_handle *btrfs_start_transaction(struct btrfs_root *root,
 						   int num_items);
 struct btrfs_trans_handle *btrfs_start_transaction_lflush(
 					struct btrfs_root *root, int num_items);
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 struct btrfs_trans_handle *btrfs_start_transaction_nocheckquota(struct btrfs_root *root,
 						   int num_items);
 #endif

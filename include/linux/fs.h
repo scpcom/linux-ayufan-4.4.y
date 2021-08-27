@@ -16,9 +16,9 @@
 #endif
 #include <linux/types.h>
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 #include <linux/net.h>
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 /*
  * It's silly to have NR_OPEN bigger than NR_FILE, but you can change
@@ -245,7 +245,7 @@ struct inodes_stat_t {
 #ifdef CONFIG_FS_SYNO_ACL  
 #define MS_SYNOACL	(1<<25)	/* Synology ACL */
 #endif
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 #define MS_CORRUPT	(1<<26)	/* filesystem corrupt */
 #endif
 #define MS_NOSEC	(1<<28)
@@ -253,7 +253,7 @@ struct inodes_stat_t {
 #define MS_ACTIVE	(1<<30)
 #define MS_NOUSER	(1<<31)
 
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 #define SYNO_MS_META_XATTR	(1<<0) /* storing arbit/crtime ...extra syno metadata into xattr */
 
 #define __IS_SYNO_FLG(inode,flg) ((inode)->i_sb->s_syno_opt & (flg))
@@ -286,7 +286,7 @@ struct inodes_stat_t {
 #define S_AUTOMOUNT	2048	/* Automount/referral quasi-directory */
 #define S_NOSEC		4096	/* no suid or xattr security attributes */
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #define S_ARCHIVE_VERSION_CACHED 0x80000000
 #endif
 
@@ -326,7 +326,7 @@ struct inodes_stat_t {
 #define IS_IMA(inode)		((inode)->i_flags & S_IMA)
 #define IS_AUTOMOUNT(inode)	((inode)->i_flags & S_AUTOMOUNT)
 #define IS_NOSEC(inode)		((inode)->i_flags & S_NOSEC)
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #define IS_ARCHIVE_VERSION_CACHED(inode) ((inode)->i_flags & S_ARCHIVE_VERSION_CACHED)
 #endif
 
@@ -377,12 +377,12 @@ struct inodes_stat_t {
 #define FIFREEZE	_IOWR('X', 119, int)	/* Freeze */
 #define FITHAW		_IOWR('X', 120, int)	/* Thaw */
 #define FITRIM		_IOWR('X', 121, struct fstrim_range)	/* Trim */
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #define FIGETVERSION	_IOWR('x', 122, unsigned int)	/* get syno archive version */
 #define FISETVERSION	_IOWR('x', 123, unsigned int)	/* set syno archive version */
 #define FIINCVERSION	_IO('x', 124)	/* increase syno archive version by 1 */
 #define FISETFILEVERSION	_IOWR('x', 125, unsigned int)	/* set file syno archive version */
-#ifdef SYNO_FIX_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #define FIGETBADVERSION	_IOWR('x', 126, unsigned int)	/* fix bad archive version */
 #define FICLEARBADVERSION	_IO('x', 127)	/* fix bad archive version */
 #define FISETBADVERSION	_IOWR('x', 128, unsigned int)	/* fix bad archive version */
@@ -435,7 +435,7 @@ struct inodes_stat_t {
 #define SYNC_FILE_RANGE_WRITE		2
 #define SYNC_FILE_RANGE_WAIT_AFTER	4
 
-#if defined(CONFIG_SYNO_ARMADA_V2) && !defined(SYNO_RECVFILE)
+#if defined(CONFIG_SYNO_ARMADA_V2) && !defined(MY_ABC_HERE)
 #define MAX_PAGES_PER_RECVFILE		64
 #endif
 
@@ -587,7 +587,7 @@ enum positive_aop_returns {
 #define AOP_FLAG_NOFS			0x0004 /* used by filesystem to direct
 						* helper code (eg buffer layer)
 						* to clear GFP_FS from alloc */
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 #define AOP_FLAG_RECVFILE		0x0008
 #endif
 
@@ -887,16 +887,16 @@ struct inode {
 	atomic_t		i_count;
 	unsigned int		i_blkbits;
 	u64			i_version;
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	struct timespec		i_CreateTime;
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	__u32			i_mode2;
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	__u32			i_archive_version;
 #endif
-#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	struct mutex		i_syno_mutex;	/* i_CreateTime, i_mode2 */
 #endif
 	atomic_t		i_dio_count;
@@ -1596,12 +1596,12 @@ struct super_block {
 	 * Saved mount options for lazy filesystems using
 	 * generic_show_options()
 	 */
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	/* We've not sure s_frozen is capable of out intention, thus we
 	 * create another to flag frozen stat. Awful... */
 	struct mutex s_archive_mutex;  /* protect frozen state, also version */
 	u32		s_archive_version;
-#ifdef SYNO_FIX_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	u32		s_archive_version1;
 #endif
 #endif
@@ -1617,12 +1617,12 @@ struct super_block {
 
 	/* Number of inodes with nlink == 0 but still referenced */
 	atomic_long_t s_remove_count;
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 	u64 	s_syno_opt;
 #endif
 };
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 #define SZ_FS_GLUSTER	"glusterfs"
 #define IS_GLUSTER_FS(inode) (inode->i_sb->s_subtype && !strcmp(SZ_FS_GLUSTER, inode->i_sb->s_subtype))
 #define IS_GLUSTER_FS_SB(sb) (sb->s_subtype && !strcmp(SZ_FS_GLUSTER, sb->s_subtype))
@@ -1910,14 +1910,14 @@ struct inode_operations {
 	int (*syno_acl_init)(struct dentry *, struct inode *);
 	void (*syno_acl_to_mode)(struct dentry *, struct kstat *);
 #endif /* CONFIG_FS_SYNO_ACL */
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	int (*syno_get_archive_bit)(struct dentry *, unsigned int *);
 	int (*syno_set_archive_bit)(struct dentry *, unsigned int);
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	int (*syno_set_crtime)(struct dentry *, struct timespec *);
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	int (*syno_get_archive_ver)(struct dentry *, u32 *);
 	int (*syno_set_archive_ver)(struct dentry *, u32);
 #endif
@@ -1949,10 +1949,10 @@ extern ssize_t vfs_writev(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
 
 struct super_operations {
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	int (*syno_get_sb_archive_ver)(struct super_block *sb, u32 *version);
 	int (*syno_set_sb_archive_ver)(struct super_block *sb, u32 version);
-#ifdef SYNO_FIX_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	int (*syno_get_sb_archive_ver1)(struct super_block *sb, u32 *version);
 	int (*syno_set_sb_archive_ver1)(struct super_block *sb, u32 version);
 #endif
@@ -2131,7 +2131,7 @@ struct file_system_type {
 
 	struct lock_class_key i_lock_key;
 	struct lock_class_key i_mutex_key;
-#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	struct lock_class_key i_syno_mutex_key;
 #endif
 	struct lock_class_key i_mutex_dir_key;
@@ -2524,7 +2524,7 @@ static inline bool execute_ok(struct inode *inode)
 	return (inode->i_mode & S_IXUGO) || S_ISDIR(inode->i_mode);
 }
 
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 static inline struct inode *file_inode(struct file *f)
 {
 	return f->f_path.dentry->d_inode;
@@ -2672,7 +2672,7 @@ extern int generic_file_mmap(struct file *, struct vm_area_struct *);
 extern int generic_file_readonly_mmap(struct file *, struct vm_area_struct *);
 extern int file_read_actor(read_descriptor_t * desc, struct page *page, unsigned long offset, unsigned long size);
 int generic_write_checks(struct file *file, loff_t *pos, size_t *count, int isblk);
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 /**
 * Description for page buffer in recvfile:
 * The max size of per receive file request is "128KB". If PAGE_SIZE is changed from 4K to 64K,
@@ -3000,7 +3000,7 @@ static inline void inode_has_no_xattr(struct inode *inode)
 		inode->i_flags |= S_NOSEC;
 }
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 #define UTF16_UPCASE_TABLE_SIZE 	0x10000		/* 64k chars */
 #define UNICODE_UTF16_BUFSIZE		4096		/* should be safe enough for namei */
 #define UNICODE_UTF8_BUFSIZE		8192
@@ -3008,7 +3008,7 @@ int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int 
 int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable);
 #endif /*MY_ABC_HERE */
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *time)
 {
 	int error = 0;
@@ -3033,7 +3033,7 @@ static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *tim
 }
 #endif
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 static inline int syno_op_get_archive_bit(struct dentry *dentry, unsigned int *pArbit)
 {
 	int err = 0;
@@ -3088,7 +3088,7 @@ static inline int syno_op_set_archive_bit(struct dentry *dentry, unsigned int ar
 
 #endif //MY_ABC_HERE
 
-#if defined(CONFIG_FS_SYNO_ACL) && defined(SYNO_ARCHIVE_BIT)
+#if defined(CONFIG_FS_SYNO_ACL) && defined(MY_ABC_HERE)
 #define IS_SYNOACL_SUPERUSER() (0 == current_fsuid())
 
 static inline int is_syno_arbit_enable(struct inode *inode, struct dentry * dentry, unsigned int arbit)
@@ -3127,7 +3127,7 @@ static inline int is_syno_arbit_enable(struct inode *inode, struct dentry * dent
 #define is_synoacl_owner_or_capable(dentry) (is_synoacl_owner(dentry) || capable(CAP_FOWNER))
 #endif /* CONFIG_FS_SYNO_ACL */
 
-#ifdef SYNO_EXT4_ERROR_FS_REPORT
+#ifdef MY_ABC_HERE
 #define SYNO_EXT4_MOUNT_PATH_LEN 128
 #endif
 

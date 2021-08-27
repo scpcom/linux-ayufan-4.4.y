@@ -38,7 +38,7 @@ disclaimer.
 #include <linux/inetdevice.h>
 #include <linux/mv_neta.h>
 #include <linux/prefetch.h>
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 #include <linux/mii.h>
 #endif
 #include <linux/mbus.h>
@@ -100,7 +100,7 @@ MV_CPU_CNTRS_EVENT	*event5 = NULL;
 static struct  platform_device *neta_sysfs;
 unsigned int ext_switch_port_mask = 0;
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 extern MV_U32 syno_wol_support(struct eth_port *pp);
 #endif
 
@@ -108,7 +108,7 @@ void handle_group_affinity(int port);
 void set_rxq_affinity(struct eth_port *pp, MV_U32 rxqAffinity, int group);
 static inline int mv_eth_tx_policy(struct eth_port *pp, struct sk_buff *skb);
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 extern int mv_eth_tool_read_phy_reg(int phy_addr, u16 page, u16 reg, u16 *val);
 DEFINE_SPINLOCK(mii_lock);
 #endif
@@ -4331,7 +4331,7 @@ struct net_device *mv_eth_netdev_init(struct platform_device *pdev)
 #endif /* CONFIG_MV_ETH_GRO_DEF */
 
 			printk(KERN_ERR "    o %s, ifindex = %d, GbE port = %d", dev->name, dev->ifindex, pp->port);
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 			printk("\n    o %s, phy chipid = %x, Support WOL = %d\n", dev->name, pp->phy_chip, syno_wol_support(pp));
 #endif
 			printk(KERN_CONT "\n");
@@ -5725,7 +5725,7 @@ static int mv_eth_priv_init(struct eth_port *pp, int port)
 	int cpu, i;
 	struct cpu_ctrl	*cpuCtrl;
 	u8	*ext_buf;
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	MV_U16		phy_id_0, phy_id_1;
 #endif
 
@@ -5838,7 +5838,7 @@ static int mv_eth_priv_init(struct eth_port *pp, int port)
 		printk(KERN_ERR "ethPort #%d: Can't allocate %d bytes for tx_done_dist\n",
 		       pp->port, sizeof(u32) * (pp->txp_num * CONFIG_MV_ETH_TXQ * CONFIG_MV_ETH_TXQ_DESC + 1));
 #endif /* CONFIG_MV_ETH_STAT_DIST */
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	pp->phy_id = mvBoardPhyAddrGet(port);
 	pp->wol = 0;
 	if (mv_eth_tool_read_phy_reg(pp->phy_id, 0, MII_PHYSID1, &phy_id_0) ||
@@ -6751,13 +6751,13 @@ static struct platform_driver mv_eth_driver = {
 	},
 };
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 void syno_mv_net_shutdown()
 {
 	int i = 0, j = 0;
 	MV_U16 macTmp[3];
 	MV_U16 phyTmp;
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 	extern long g_egiga;
 	if ( 0 == g_egiga ) {
 		return;
@@ -6811,7 +6811,7 @@ module_platform_driver(mv_eth_driver);
 #else
 static int __init mv_eth_init_module(void)
 {
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	spin_lock_init( &mii_lock );
 #endif
 	return platform_driver_register(&mv_eth_driver);

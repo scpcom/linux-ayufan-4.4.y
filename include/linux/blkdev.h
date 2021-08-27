@@ -857,7 +857,7 @@ extern void blk_queue_max_segments(struct request_queue *, unsigned short);
 extern void blk_queue_max_segment_size(struct request_queue *, unsigned int);
 extern void blk_queue_max_discard_sectors(struct request_queue *q,
 		unsigned int max_discard_sectors);
-#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 extern void syno_limits_logical_block_size(struct queue_limits *limits, unsigned short size);
 #endif
 extern void blk_queue_logical_block_size(struct request_queue *, unsigned short);
@@ -939,7 +939,7 @@ extern struct blk_plug_cb *blk_check_plugged(blk_plug_cb_fn unplug,
 extern void blk_start_plug(struct blk_plug *);
 extern void blk_finish_plug(struct blk_plug *);
 extern void blk_flush_plug_list(struct blk_plug *, bool);
-#ifdef  SYNO_FLASHCACHE_SUPPORT
+#ifdef  MY_ABC_HERE
 extern void syno_flashcache_return_error(struct bio *bio);
 #endif
 

@@ -1202,7 +1202,7 @@ static void ext4_update_super(struct super_block *sb,
 
 	/* Update the reserved block counts only once the new group is
 	 * active. */
-#ifndef SYNO_EXT4_SKIP_ADD_RESERVED_BLOCKS
+#ifndef MY_ABC_HERE
 	ext4_r_blocks_count_set(es, ext4_r_blocks_count(es) +
 				reserved_blocks);
 #endif

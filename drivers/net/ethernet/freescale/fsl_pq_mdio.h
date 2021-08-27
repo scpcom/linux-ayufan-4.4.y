@@ -22,15 +22,15 @@
 #define MIIMIND_BUSY            0x00000001
 #define MIIMIND_NOTVALID        0x00000004
 
-#ifdef SYNO_TSEC_RGMII
+#ifdef MY_ABC_HERE
 #define MIIMCFG_INIT_VALUE_RGMII	0x00000006
-#endif /* SYNO_TSEC_RGMII */
+#endif /* MY_ABC_HERE */
 
-#ifdef  SYNO_MIIMCFG_VALUE
+#ifdef  MY_ABC_HERE
 #define MIIMCFG_INIT_VALUE     0x00000003
-#else /* SYNO_MIIMCFG_VALUE */
+#else /* MY_ABC_HERE */
 #define MIIMCFG_INIT_VALUE	0x00000007
-#endif /* SYNO_MIIMCFG_VALUE */
+#endif /* MY_ABC_HERE */
 
 #define MIIMCFG_RESET           0x80000000
 

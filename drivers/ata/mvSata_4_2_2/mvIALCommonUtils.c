@@ -41,7 +41,7 @@ disclaimer.
 /* includes */
 #include "mvOs.h"
 #include "mvIALCommonUtils.h"
-#ifdef SYNO_SATA_SSD_DETECT
+#ifdef MY_ABC_HERE
 #include <linux/synosata.h>
 #endif
 
@@ -1153,7 +1153,7 @@ MV_BOOLEAN mvInitSataDisk(MV_SATA_ADAPTER   *pSataAdapter, MV_U8 channelIndex,
         return MV_FALSE;
     }
 
-#ifdef SYNO_SATA_SSD_DETECT
+#ifdef MY_ABC_HERE
     clear_bit(PMPort, &pSataAdapter->sataChannel[channelIndex]->ssd_list);
     if (ata_id_is_ssd(identifyBuffer)) {
         set_bit(PMPort, &pSataAdapter->sataChannel[channelIndex]->ssd_list);
@@ -1260,7 +1260,7 @@ MV_BOOLEAN  mvGetPMDeviceInfo(MV_SATA_ADAPTER   *pSataAdapter,
     }
     pPMDeviceInfo->numberOfPorts = (MV_U8)(regVal & 0xf);
 
-#ifdef SYNO_SATA_MV_PM_WORK
+#ifdef MY_ABC_HERE
     /* The following Sil quirk taken from linux*/
      
     /* Early revisions of sil4726 report one extra port but later

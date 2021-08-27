@@ -218,7 +218,7 @@ static struct super_block *alloc_super(struct file_system_type *type)
 		s->s_maxbytes = MAX_NON_LFS;
 		s->s_op = &default_op;
 		s->s_time_gran = 1000000000;
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 		mutex_init(&s->s_archive_mutex);
 		s->s_archive_version = 0;
 #endif

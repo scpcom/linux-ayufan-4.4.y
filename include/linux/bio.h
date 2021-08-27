@@ -141,7 +141,7 @@ static inline int bio_has_allocated_vec(struct bio *bio)
  * drivers should not use the __ version unless they _really_ want to
  * run through the entire bio and not just pending pieces
  */
-#ifdef SYNO_SG_IO_MEMORY_CORRUPTION
+#ifdef MY_ABC_HERE
 #define bio_for_each_segment_all(bvl, bio, i)				\
 	for (i = 0;							\
 	     bvl = bio_iovec_idx((bio), (i)), i < (bio)->bi_vcnt;	\

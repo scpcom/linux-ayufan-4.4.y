@@ -303,7 +303,7 @@ struct mv643xx_eth_shared_private {
 static int mv643xx_eth_open(struct net_device *dev);
 static int mv643xx_eth_stop(struct net_device *dev);
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 static int g_netif_count = 0;
 extern long g_internal_netif_num;
 #endif
@@ -2591,7 +2591,7 @@ static int mv643xx_eth_shared_probe(struct platform_device *pdev)
 	struct resource *res;
 	int ret;
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 	g_netif_count++;
 	if ( g_internal_netif_num >= 0 &&
 		 g_netif_count > g_internal_netif_num )

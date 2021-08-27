@@ -120,7 +120,7 @@ int usbip_event_happened(struct usbip_device *ud)
 	int happened = 0;
 
 	spin_lock(&ud->lock);
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	if (0 != ud->event && USBIP_EH_RESET != ud->event) {
         happened = 1;
     }

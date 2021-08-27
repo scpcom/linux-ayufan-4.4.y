@@ -667,7 +667,7 @@ static int atif_ioctl(int cmd, void __user *arg)
 	struct sockaddr_at *sa;
 	struct net_device *dev;
 	struct atalk_iface *atif;
-#ifndef SYNO_ATALK_ROUTERLESS
+#ifndef MY_ABC_HERE
 	int ct;
 	int limit;
 #endif
@@ -763,7 +763,7 @@ static int atif_ioctl(int cmd, void __user *arg)
 			rtdef.rt_flags |= RTF_HOST;
 
 		/* Routerless initial state */
-#ifdef SYNO_ATALK_ROUTERLESS
+#ifdef MY_ABC_HERE
 		sa->sat_addr.s_net = atif->address.s_net;
 		atrtr_create(&rtdef, dev);
 		atrtr_set_default(dev);

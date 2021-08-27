@@ -95,7 +95,7 @@ SmartCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
                          MV_U32 timeStamp,
                          MV_STORAGE_DEVICE_REGISTERS *registerStruct);
 
-#ifdef SYNO_MV_MODIFY
+#ifdef MY_ABC_HERE
 void swap_buf_le16_bsp422(u16 *buf, unsigned int buf_words)
 #else
 void swap_buf_le16(u16 *buf, unsigned int buf_words)
@@ -144,9 +144,9 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_IDLE &&
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_IDLE_IMMEDIATE &&
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_STANDBY_IMMEDIATE &&
-#ifdef SYNO_MV_CHECK_HDD_POWER
+#ifdef MY_ABC_HERE
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_CHECK_POWER &&
-#endif /* SYNO_MV_CHECK_HDD_POWER */
+#endif /* MY_ABC_HERE */
          buff[SMART_BUF_COMMAND_OFFSET] != WIN_SMART))
     {
         mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG_ERROR, "invalid SMART command received");
@@ -179,7 +179,7 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
         buff[SMART_BUF_LBAHIGH_OFFSET] = 0;
         buff[SMART_BUF_FEATURES_OFFSET] = 0;
     }
-#ifdef SYNO_MV_CHECK_HDD_POWER
+#ifdef MY_ABC_HERE
 	else  if (buff[SMART_BUF_COMMAND_OFFSET] == MV_ATA_COMMAND_CHECK_POWER)
 	{
 		 mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "SMART command: CHECK_POWER command received\n");
@@ -192,7 +192,7 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
 		buff[SMART_BUF_FEATURES_OFFSET] = 0;
 		buff[SMART_BUF_SECTORCOUNT_OFFSET] = 0;
 	}
-#endif /* SYNO_MV_CHECK_HDD_POWER */
+#endif /* MY_ABC_HERE */
     else  if (buff[SMART_BUF_COMMAND_OFFSET] == MV_ATA_COMMAND_IDLE)
     {
          mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "SMART command: IDLE command received, sector count = %d.\n",
@@ -300,7 +300,7 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
     qCommandInfo.commandParams.NoneUdmaCommand.device = (MV_U8)(MV_BIT6);
     qCommandInfo.commandParams.NoneUdmaCommand.command =
     buff[SMART_BUF_COMMAND_OFFSET];
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     qCommandInfo.commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
     qCommandInfo.commandParams.NoneUdmaCommand.callBack =
@@ -325,7 +325,7 @@ static void SmartFillReturnBuffer(IN MV_U8* buff,
 {
 
     /*For PIO non-data return registers' values*/
-#ifdef SYNO_MV_CHECK_HDD_POWER
+#ifdef MY_ABC_HERE
 	if ((buff[SMART_BUF_COMMAND_OFFSET] == MV_ATA_COMMAND_CHECK_POWER) ||
 		(buff[SMART_BUF_COMMAND_OFFSET] == WIN_SMART &&
 		buff[SMART_BUF_FEATURES_OFFSET] != SMART_READ_VALUES &&
@@ -357,7 +357,7 @@ static void SmartFillReturnBuffer(IN MV_U8* buff,
     }
     else
     {
-#ifdef SYNO_MV_MODIFY
+#ifdef MY_ABC_HERE
 	 swap_buf_le16_bsp422((u16 *) (buff + 6), ATA_SECTOR_SIZE/2);
 #else
          swap_buf_le16((u16 *) (buff + 6), ATA_SECTOR_SIZE/2);
@@ -409,7 +409,7 @@ SmartCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
 	    {
 		    struct scatterlist *sg;
 		    MV_U8*		pBuffer;
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
 		    sg = (struct scatterlist *)SCpnt->sdb.table.sgl;
 #else
 		    sg = (struct scatterlist *)SCpnt->request_buffer;
@@ -417,7 +417,7 @@ SmartCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
 		    
 		    mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "SMART PIO command needs kmap for Data-in buffer\n");
 		    
-#ifdef SYNO_MV_MODIFY
+#ifdef MY_ABC_HERE
 		    pBuffer = kmap_atomic(sg_page(sg), KM_IRQ0) + sg->offset;
 #else
 		    pBuffer = kmap_atomic(sg->page, KM_IRQ0) + sg->offset;

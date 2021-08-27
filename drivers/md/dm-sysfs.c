@@ -67,7 +67,7 @@ static ssize_t dm_attr_suspended_show(struct mapped_device *md, char *buf)
 	return strlen(buf);
 }
 
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 static ssize_t dm_attr_store(struct kobject *kobj, struct attribute *attr, const char *buf, size_t len)
 {
 	struct dm_sysfs_attr *dm_attr = NULL;
@@ -114,7 +114,7 @@ static struct attribute *dm_attrs[] = {
 	&dm_attr_name.attr,
 	&dm_attr_uuid.attr,
 	&dm_attr_suspended.attr,
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	&dm_attr_active.attr,
 #endif
 	NULL,
@@ -122,7 +122,7 @@ static struct attribute *dm_attrs[] = {
 
 static const struct sysfs_ops dm_sysfs_ops = {
 	.show	= dm_attr_show,
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	.store	= dm_attr_store,
 #endif
 };

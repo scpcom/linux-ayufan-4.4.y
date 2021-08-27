@@ -25,7 +25,7 @@ static void hfsplus_destroy_inode(struct inode *inode);
 #include "hfsplus_fs.h"
 #include "xattr.h"
 
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 int syno_hfsplus_mutex_init = 0;
 struct mutex syno_hfsplus_global_mutex;
 #endif
@@ -61,7 +61,7 @@ static int hfsplus_system_read_inode(struct inode *inode)
 	return 0;
 }
 
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 // 3802 byte for 8K node_size
 static inline size_t hfsplus_get_maxinline_attrsize(struct hfs_btree *btree)
 {
@@ -186,7 +186,7 @@ static void hfsplus_evict_inode(struct inode *inode)
 {
 	hfs_dbg(INODE, "hfsplus_evict_inode: %lu\n", inode->i_ino);
 	truncate_inode_pages(&inode->i_data, 0);
-#ifdef SYNO_HFSPLUS_PORTING_3_9
+#ifdef MY_ABC_HERE
 	end_writeback(inode);
 #else
 	clear_inode(inode);
@@ -286,7 +286,7 @@ void hfsplus_mark_mdb_dirty(struct super_block *sb)
 {
 	struct hfsplus_sb_info *sbi = HFSPLUS_SB(sb);
 	unsigned long delay;
-#ifdef SYNO_HFSPLUS_PORTING_3_9
+#ifdef MY_ABC_HERE
 	/*
 	 * The interval between pdate'-style writebacks
 	 * in mm/page-writeback.c
@@ -411,7 +411,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	struct nls_table *nls = NULL;
 	u64 last_fs_block, last_fs_page;
 	int err;
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	size_t max_attr_size = 0;
 	size_t cached_size = 0;
 #endif
@@ -421,7 +421,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	if (!sbi)
 		goto out;
 
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	if (0 == syno_hfsplus_mutex_init) {
 		syno_hfsplus_mutex_init = 1;
 		mutex_init(&syno_hfsplus_global_mutex);
@@ -528,7 +528,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		}
 	}
 	sb->s_xattr = hfsplus_xattr_handlers;
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	if (sbi->attr_tree) {
 		max_attr_size = hfsplus_get_maxinline_attrsize(sbi->attr_tree);
 		cached_size = offsetof(struct hfsplus_attr_inline_data, raw_bytes) + max_attr_size;
@@ -558,7 +558,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		goto out_put_alloc_file;
 	}
 
-#ifndef SYNO_HFSPLUS_PORTING_3_9
+#ifndef MY_ABC_HERE
 	sb->s_d_op = &hfsplus_dentry_operations;
 	sb->s_root = d_make_root(root);
 	if (!sb->s_root) {
@@ -634,7 +634,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		}
 	}
 
-#ifdef SYNO_HFSPLUS_PORTING_3_9
+#ifdef MY_ABC_HERE
 	sb->s_d_op = &hfsplus_dentry_operations;
 	sb->s_root = d_alloc_root(root);
 	if (!sb->s_root) {
@@ -650,7 +650,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 out_put_hidden_dir:
 	iput(sbi->hidden_dir);
 out_put_root:
-#ifdef SYNO_HFSPLUS_PORTING_3_9
+#ifdef MY_ABC_HERE
 	iput(root);
 #else
 	dput(sb->s_root);
@@ -716,7 +716,7 @@ static struct file_system_type hfsplus_fs_type = {
 	.kill_sb	= kill_block_super,
 	.fs_flags	= FS_REQUIRES_DEV,
 };
-#ifndef SYNO_HFSPLUS_PORTING_3_9
+#ifndef MY_ABC_HERE
 MODULE_ALIAS_FS("hfsplus");
 #endif
 

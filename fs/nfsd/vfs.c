@@ -76,7 +76,7 @@ struct raparm_hbucket {
 #define RAPARM_HASH_MASK	(RAPARM_HASH_SIZE-1)
 static struct raparm_hbucket	raparm_hash[RAPARM_HASH_SIZE];
 
-#ifdef SYNO_NFSD_UNIX_PRI
+#ifdef MY_ABC_HERE
 extern u32 bl_unix_pri_enable;
 #endif
 
@@ -334,7 +334,7 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 	dentry = fhp->fh_dentry;
 	inode = dentry->d_inode;
 
-#ifdef SYNO_NFSD_UNIX_PRI
+#ifdef MY_ABC_HERE
 	// Ignore chmod when !bl_unix_pri_enable & the share is ACL share
 	if (!bl_unix_pri_enable && IS_SYNOACL(dentry)) {
 		iap->ia_valid &= ~ATTR_MODE;

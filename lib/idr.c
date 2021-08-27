@@ -358,13 +358,13 @@ int idr_get_new(struct idr *idp, void *ptr, int *id)
 }
 EXPORT_SYMBOL(idr_get_new);
 
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 int syno_ida_get_new(struct ida *idp, int starting_id, int *id)
 {
 	return ida_get_new_above(idp, starting_id, id);
 }
 EXPORT_SYMBOL(syno_ida_get_new);
-#endif /* SYNO_FIXED_DISK_NAME */
+#endif /* MY_ABC_HERE */
 
 static void idr_remove_warning(int id)
 {

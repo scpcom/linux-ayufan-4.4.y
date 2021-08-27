@@ -593,7 +593,7 @@ static int soundcore_open(struct inode *inode, struct file *file)
 	if (preclaim_oss && !new_fops) {
 		spin_unlock(&sound_loader_lock);
 
-#ifndef SYNO_IGNORE_REQUEST_ALSA_MODULE
+#ifndef MY_ABC_HERE
 		/*
 		 *  Please, don't change this order or code.
 		 *  For ALSA slot means soundcard and OSS emulation code

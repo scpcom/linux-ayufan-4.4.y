@@ -211,7 +211,7 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 				add_uevent_var(env, "DEVMODE=%#o", mode & 0777);
 		}
 	}
-#ifdef SYNO_LIBATA_PMP_UEVENT
+#ifdef MY_ABC_HERE
 	/* host with dev->devt 0, if we want to get hotplug of CABLE_CONNECT/CABLE_DISCONNECT
 	 * we must add DEVNAME in env to pass it to hotplug.
 	 **/
@@ -226,8 +226,8 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 	if (dev->driver)
 		add_uevent_var(env, "DRIVER=%s", dev->driver->name);
 
-#if defined(SYNO_USB_COPY) || defined(SYNO_SD_COPY)
-#if defined(CONFIG_SYSFS_DEPRECATED) || defined(SYNO_DEPRECATED_UEVENT_ENV)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYSFS_DEPRECATED) || defined(MY_ABC_HERE)
 	if (dev->class) {
 		struct device *parent = dev->parent;
 
@@ -257,7 +257,7 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 							 dev->driver->name);
 	}
 #endif //#ifdef CONFIG_SYSFS_DEPRECATED
-#endif //#if defined(SYNO_USB_COPY) || defined(SYNO_SD_COPY)
+#endif //#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 
 	/* have the bus specific function add its stuff */
 	if (dev->bus && dev->bus->uevent) {

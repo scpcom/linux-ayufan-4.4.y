@@ -14,7 +14,7 @@
 /*
  * Time out in seconds for disks and Magneto-opticals (which are slower).
  */
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 #define SD_TIMEOUT		(60 * HZ)
 #else
 #define SD_TIMEOUT		(30 * HZ)
@@ -53,7 +53,7 @@ enum {
 	SD_LBP_DISABLE,		/* Discard disabled due to failed cmd */
 };
 
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 // FIXME: we need share kernel devices type with user space,
 // so this enum must sync with libsynosdk/lib/fs/fs.h DISK_PORT_TYPE
 typedef enum __syno_disk_type {
@@ -79,7 +79,7 @@ struct scsi_disk {
 	u32		unmap_granularity;
 	u32		unmap_alignment;
 	u32		index;
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	SYNO_DISK_TYPE	synodisktype;
 #endif
 #ifdef SYNO_SAS_DISK_NAME

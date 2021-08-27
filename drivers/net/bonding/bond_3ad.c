@@ -2465,7 +2465,7 @@ void bond_3ad_lacpdu_recv(struct sk_buff *skb, struct bonding *bond,
 	if (!pskb_may_pull(skb, sizeof(struct lacpdu)))
 		return;
 
-#ifdef SYNO_NET_BOND_FIX_NONLINEAR_SKB
+#ifdef MY_ABC_HERE
 	if (!pskb_may_pull(skb, sizeof(struct lacpdu)))
 		return;
 

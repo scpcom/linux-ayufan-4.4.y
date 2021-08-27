@@ -148,7 +148,7 @@ static void bond_info_show_master(struct seq_file *seq)
 			seq_printf(seq, "\tPartner Mac Address: %pM\n",
 				   ad_info.partner_system);
 		}
-#ifdef SYNO_NET_BOND
+#ifdef MY_ABC_HERE
 	} else if (bond->params.mode == BOND_MODE_ALB) {
 		bond_alb_info_show(seq);
 #endif
@@ -161,7 +161,7 @@ static void bond_info_show_slave(struct seq_file *seq,
 	struct bonding *bond = seq->private;
 
 	seq_printf(seq, "\nSlave Interface: %s\n", slave->dev->name);
-#ifdef SYNO_NET_BOND
+#ifdef MY_ABC_HERE
 	seq_printf(seq, "Speed: %d\n", slave->speed);
 	seq_printf(seq, "Duplex: %s\n",
 		   (slave->duplex == DUPLEX_FULL) ? "full" : "half");

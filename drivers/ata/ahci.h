@@ -227,7 +227,7 @@ enum {
 #ifdef SYNO_LIBATA_JMB_BEHAVIOR
 	AHCI_HFLAG_REPROBE		= (1 << 15),
 #endif
-#ifdef SYNO_MV_9235_PORTING
+#ifdef MY_ABC_HERE
 	AHCI_HFLAG_YES_MV9235_FIX   = (1 << 31),
 #endif
 
@@ -369,7 +369,7 @@ int ahci_reset_em(struct ata_host *host);
 irqreturn_t ahci_interrupt(int irq, void *dev_instance);
 void ahci_print_info(struct ata_host *host, const char *scc_s);
 
-#ifdef SYNO_MV_9235_GPIO_CTRL
+#ifdef MY_ABC_HERE
 static inline void __iomem *ahci_host_base(struct ata_host *host)
 {
 	struct ahci_host_priv *hpriv = host->private_data;

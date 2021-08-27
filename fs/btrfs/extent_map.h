@@ -41,14 +41,14 @@ struct extent_map {
 	struct list_head list;
 };
 
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 struct btrfs_inode;
 #endif
 struct extent_map_tree {
 	struct rb_root map;
 	struct list_head modified_extents;
 	rwlock_t lock;
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	atomic_t nr_extent_maps;
 	struct btrfs_inode *inode;
 #endif

@@ -1674,7 +1674,7 @@ static void ixgbe_set_itr(struct ixgbe_q_vector *q_vector)
 	}
 
 	if (new_itr != q_vector->itr) {
-#ifdef SYNO_IXGBE_INTR_THROTTLE
+#ifdef MY_ABC_HERE
 		new_itr = ((q_vector->itr * 9) + new_itr) / 10;
 #else
 		/* do an exponential smoothing */
@@ -3782,7 +3782,7 @@ void ixgbe_reinit_locked(struct ixgbe_adapter *adapter)
 	/* put off any impending NetWatchDogTimeout */
 	adapter->netdev->trans_start = jiffies;
 
-#ifdef SYNO_IXBGE_SERVICE_TASK_MUTEX
+#ifdef MY_ABC_HERE
 	// if service task is updating info, wait to get lock
 	while (test_and_set_bit(__IXGBE_SERVICE_TASK_MUTEX, &adapter->state)) {
 		usleep_range(1000, 2000);
@@ -3801,7 +3801,7 @@ void ixgbe_reinit_locked(struct ixgbe_adapter *adapter)
 		msleep(2000);
 	ixgbe_up(adapter);
 	clear_bit(__IXGBE_RESETTING, &adapter->state);
-#ifdef SYNO_IXBGE_SERVICE_TASK_MUTEX
+#ifdef MY_ABC_HERE
 	clear_bit(__IXGBE_SERVICE_TASK_MUTEX, &adapter->state);
 #endif
 }
@@ -6268,7 +6268,7 @@ static void ixgbe_service_task(struct work_struct *work)
 						     service_task);
 
 	ixgbe_reset_subtask(adapter);
-#ifdef SYNO_IXBGE_SERVICE_TASK_MUTEX
+#ifdef MY_ABC_HERE
 	// if device is resetting, don't update information
 	if (test_bit(__IXGBE_RESETTING, &adapter->state) ||
 		test_bit(__IXGBE_DOWN, &adapter->state)) {
@@ -6289,7 +6289,7 @@ static void ixgbe_service_task(struct work_struct *work)
 	ixgbe_fdir_reinit_subtask(adapter);
 	ixgbe_check_hang_subtask(adapter);
 
-#ifdef SYNO_IXBGE_SERVICE_TASK_MUTEX
+#ifdef MY_ABC_HERE
 	clear_bit(__IXGBE_SERVICE_TASK_MUTEX, &adapter->state);
 #endif
 	ixgbe_service_event_complete(adapter);

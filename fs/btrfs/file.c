@@ -724,7 +724,7 @@ int __btrfs_drop_extents(struct btrfs_trans_handle *trans,
 	u64 disk_bytenr = 0;
 	u64 num_bytes = 0;
 	u64 extent_offset = 0;
-#ifdef SYNO_BTRFS_DROP_EXTENT_END_FIX
+#ifdef MY_ABC_HERE
 	u64 extent_end = 0, candidate_extent_end = 0;
 #else
 	u64 extent_end = 0;
@@ -790,14 +790,14 @@ next_slot:
 			disk_bytenr = btrfs_file_extent_disk_bytenr(leaf, fi);
 			num_bytes = btrfs_file_extent_disk_num_bytes(leaf, fi);
 			extent_offset = btrfs_file_extent_offset(leaf, fi);
-#ifdef SYNO_BTRFS_DROP_EXTENT_END_FIX
+#ifdef MY_ABC_HERE
 			candidate_extent_end = key.offset +
 #else
 			extent_end = key.offset +
 #endif
 				btrfs_file_extent_num_bytes(leaf, fi);
 		} else if (extent_type == BTRFS_FILE_EXTENT_INLINE) {
-#ifdef SYNO_BTRFS_DROP_EXTENT_END_FIX
+#ifdef MY_ABC_HERE
 			candidate_extent_end = key.offset +
 #else
 			extent_end = key.offset +
@@ -806,14 +806,14 @@ next_slot:
 						     path->slots[0], fi);
 		} else {
 			WARN_ON(1);
-#ifdef SYNO_BTRFS_DROP_EXTENT_END_FIX
+#ifdef MY_ABC_HERE
 			candidate_extent_end = search_start;
 #else
 			extent_end = search_start;
 #endif
 		}
 
-#ifdef SYNO_BTRFS_DROP_EXTENT_END_FIX
+#ifdef MY_ABC_HERE
 		if (candidate_extent_end <= search_start) {
 #else
 		if (extent_end <= search_start) {
@@ -821,7 +821,7 @@ next_slot:
 			path->slots[0]++;
 			goto next_slot;
 		}
-#ifdef SYNO_BTRFS_DROP_EXTENT_END_FIX
+#ifdef MY_ABC_HERE
 		extent_end = candidate_extent_end;
 #endif
 
@@ -1515,7 +1515,7 @@ static noinline ssize_t __btrfs_buffered_write(struct file *file,
 
 	first_index = pos >> PAGE_CACHE_SHIFT;
 
-#ifdef SYNO_BTRFS_SHRINK_ORDERED_EXTENT
+#ifdef MY_ABC_HERE
 	// FIXME: It's prevent OOM. The value should be tunable in sysfs.
 	if (root->nr_ordered_extents > 100000)
 		btrfs_wait_ordered_roots(root->fs_info, 10000);
@@ -2322,7 +2322,7 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 	 * 1 - adding the hole extent if no_holes isn't set
 	 */
 	rsv_count = no_holes ? 2 : 3;
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 	trans = btrfs_start_transaction_nocheckquota(root, rsv_count);
 #else
 	trans = btrfs_start_transaction(root, rsv_count);
@@ -2365,7 +2365,7 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 
 		btrfs_end_transaction(trans, root);
 		btrfs_btree_balance_dirty(root);
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 		trans = btrfs_start_transaction_nocheckquota(root, rsv_count);
 #else
 		trans = btrfs_start_transaction(root, rsv_count);
@@ -2898,7 +2898,7 @@ const struct file_operations btrfs_file_operations = {
 	.fallocate	= btrfs_fallocate,
 	.unlocked_ioctl	= btrfs_ioctl,
 #ifdef CONFIG_COMPAT
-#ifdef SYNO_BTRFS_COMPAT_IOCTL
+#ifdef MY_ABC_HERE
 	.compat_ioctl	= btrfs_compat_ioctl,
 #else
 	.compat_ioctl	= btrfs_ioctl,

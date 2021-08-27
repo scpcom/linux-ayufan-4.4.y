@@ -186,7 +186,7 @@ static int tcp_v6_connect(struct sock *sk, struct sockaddr *uaddr,
 			sk->sk_bound_dev_if = usin->sin6_scope_id;
 		}
 
-#ifdef SYNO_IPV6_LINKLOCAL
+#ifdef MY_ABC_HERE
 		if (!sk->sk_bound_dev_if) {
 			unsigned flags;
 			struct net_device *dev = NULL;

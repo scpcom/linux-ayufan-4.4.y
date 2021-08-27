@@ -498,7 +498,7 @@ void fuse_read_fill(struct fuse_req *req, struct file *file, loff_t pos,
 	req->out.args[0].size = count;
 }
 
-#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+#ifdef MY_ABC_HERE
 /*
  * args[0]: syno.archive_bit_noperm
  * args[1]: system.syno_acl_noperm_self
@@ -933,7 +933,7 @@ static size_t fuse_send_write(struct fuse_req *req, struct fuse_io_priv *io,
 	return req->misc.write.out.size;
 }
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 static int fuse_write_begin(struct file *file, struct address_space *mapping,
                        loff_t pos, unsigned len, unsigned flags,
                        struct page **pagep, void **fsdata)
@@ -945,7 +945,7 @@ static int fuse_write_begin(struct file *file, struct address_space *mapping,
                return -ENOMEM;
        return 0;
 }
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 void fuse_write_update_size(struct inode *inode, loff_t pos)
 {
@@ -959,7 +959,7 @@ void fuse_write_update_size(struct inode *inode, loff_t pos)
 	spin_unlock(&fc->lock);
 }
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 static int fuse_buffered_write(struct file *file, struct inode *inode,
                               loff_t pos, unsigned count, struct page *page)
 {
@@ -1016,7 +1016,7 @@ static int fuse_write_end(struct file *file, struct address_space *mapping,
        page_cache_release(page);
        return res;
 }
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 static size_t fuse_send_write_pages(struct fuse_req *req, struct file *file,
 				    struct inode *inode, loff_t pos,
@@ -2566,7 +2566,7 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 				loff_t length)
 {
 	struct fuse_file *ff = file->private_data;
-#ifdef SYNO_FUSE_BACK_PORTING
+#ifdef MY_ABC_HERE
 	struct inode *inode = file->f_path.dentry->d_inode;
 #else
 	struct inode *inode = file->f_inode;
@@ -2686,10 +2686,10 @@ static const struct address_space_operations fuse_file_aops  = {
 	.readpage	= fuse_readpage,
 	.writepage	= fuse_writepage,
 	.launder_page	= fuse_launder_page,
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 	.write_begin    = fuse_write_begin,
 	.write_end      = fuse_write_end,
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 	.readpages	= fuse_readpages,
 	.set_page_dirty	= __set_page_dirty_nobuffers,
 	.bmap		= fuse_bmap,

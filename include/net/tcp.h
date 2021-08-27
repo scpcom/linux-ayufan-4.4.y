@@ -21,7 +21,7 @@
 #ifndef _TCP_H
 #define _TCP_H
 
-#ifdef SYNO_REMOVE_TCP_DEBUG
+#ifdef MY_ABC_HERE
 #undef TCP_DEBUG
 #endif
 

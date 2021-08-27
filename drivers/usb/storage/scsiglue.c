@@ -74,7 +74,7 @@ extern struct usb_hub *hdev_to_hub(struct usb_device *hdev);
 extern int syno_get_hub_eh(struct usb_hub *hub);
 #endif
 
-#ifdef SYNO_USB_FLASH_BOOT
+#ifdef MY_ABC_HERE
 extern int gSynoHasDynModule;
 #endif
 /***********************************************************************
@@ -556,7 +556,7 @@ static ssize_t store_max_sectors(struct device *dev, struct device_attribute *at
 static DEVICE_ATTR(max_sectors, S_IRUGO | S_IWUSR, show_max_sectors,
 		store_max_sectors);
 
-#ifdef SYNO_HAS_SDCARDREADER
+#ifdef MY_ABC_HERE
 extern int blIsCardReader(struct usb_device *usbdev);
 static ssize_t show_syno_cardreader(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -575,7 +575,7 @@ static DEVICE_ATTR(syno_cardreader, S_IRUGO | S_IWUSR, show_syno_cardreader, NUL
 
 static struct device_attribute *sysfs_device_attr_list[] = {
 		&dev_attr_max_sectors,
-#ifdef SYNO_HAS_SDCARDREADER
+#ifdef MY_ABC_HERE
 		&dev_attr_syno_cardreader,
 #endif
 		NULL,
@@ -631,7 +631,7 @@ struct scsi_host_template usb_stor_host_template = {
 	/* sysfs device attributes */
 	.sdev_attrs =			sysfs_device_attr_list,
 
-#if defined(SYNO_DISK_HIBERNATION) || defined(SYNO_FIXED_DISK_NAME)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	.syno_port_type         = SYNO_PORT_TYPE_USB,
 #endif
 

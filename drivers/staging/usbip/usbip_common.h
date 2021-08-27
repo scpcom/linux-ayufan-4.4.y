@@ -132,7 +132,7 @@ extern struct device_attribute dev_attr_usbip_debug;
 #define USBIP_CMD_UNLINK	0x0002
 #define USBIP_RET_SUBMIT	0x0003
 #define USBIP_RET_UNLINK	0x0004
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 #define USBIP_RESET_DEV     0xFFFF
 #endif
 

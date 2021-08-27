@@ -130,7 +130,7 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 
 	} else {
 		dev_info(dev, "stub down\n");
-#ifndef SYNO_USB_USBIP
+#ifndef MY_ABC_HERE
 		/* force shutdown socket and reset device */
 		spin_lock(&sdev->ud.lock);
 		if (sdev->ud.status != SDEV_ST_USED) {
@@ -547,7 +547,7 @@ int stub_post_reset(struct usb_interface *interface)
 }
 
 struct usb_driver stub_driver = {
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	.name		= "usbip",
 #else
 	.name		= "usbip-host",

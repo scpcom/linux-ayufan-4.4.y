@@ -2581,7 +2581,7 @@ int alg_test(const char *driver, const char *alg, u32 type, u32 mask)
 	int j;
 	int rc;
 
-#ifdef SYNO_CRYPT_NO_SELFTEST
+#ifdef MY_ABC_HERE
 	goto notest;
 #endif
 

@@ -57,9 +57,9 @@
 #include <linux/notifier.h>
 #include <linux/cpu.h>
 #include <linux/mutex.h>
-#if defined(SYNO_DISK_HIBERNATION)
+#if defined(MY_ABC_HERE)
 #include <linux/ata.h>
-#endif /* SYNO_DISK_HIBERNATION */
+#endif /* MY_ABC_HERE */
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
@@ -93,7 +93,7 @@ static void scsi_done(struct scsi_cmnd *cmd);
 /* Do not call reset on error if we just did a reset within 15 sec. */
 #define MIN_RESET_PERIOD (15*HZ)
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_level;
 #endif
@@ -659,7 +659,7 @@ void scsi_cmd_get_serial(struct Scsi_Host *host, struct scsi_cmnd *cmd)
 }
 EXPORT_SYMBOL(scsi_cmd_get_serial);
 
-#if defined(SYNO_DISK_HIBERNATION)
+#if defined(MY_ABC_HERE)
 /**
  * print disk command, for hibernation debug
  */
@@ -694,8 +694,7 @@ void syno_disk_hiternation_cmd_printk(struct scsi_device *sdp, struct scsi_cmnd 
 		}
 	}
 }
-#endif /* SYNO_DISK_HIBERNATION */
-
+#endif /* MY_ABC_HERE */
 
 /**
  * scsi_dispatch_command - Dispatch a command to the low-level driver.
@@ -801,7 +800,7 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 		    cmd->cmnd[3], cmd->cmnd[4], cmd->cmnd[5]);
 	}
 #endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
-#if defined(SYNO_DISK_HIBERNATION)
+#if defined(MY_ABC_HERE)
 	// this is for SATA disk only, in SATA disk, we don't know which command to wake up disk
 	// so we need spindown to help us to remember whichever disk is sleeping
 	// So if disk is sleeping, then we assume any command will wake up this disk, and update the idle time
@@ -809,7 +808,7 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 	/*the following command which for eunit chip shouldn't wake up hdd, so ignore it */
 		!(ATA_16 == cmd->cmnd[0] && (ATA_CMD_PMP_WRITE == cmd->cmnd[14] ||ATA_CMD_PMP_READ == cmd->cmnd[14])) &&
 		TEST_UNIT_READY != cmd->cmnd[0]) {
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 		if(syno_hibernation_log_level > 0) {
 			syno_disk_hiternation_cmd_printk(cmd->device, cmd);
 		}
@@ -849,7 +848,7 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 	} else if(START_STOP == cmd->cmnd[0]) {
 		if (0x01 == cmd->cmnd[4]) {
 			// start disks
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 			if(syno_hibernation_log_level > 0) {
 				syno_disk_hiternation_cmd_printk(cmd->device, cmd);
 			}
@@ -860,14 +859,14 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 			TEST_UNIT_READY != cmd->cmnd[0] &&
 			SYNCHRONIZE_CACHE != cmd->cmnd[0]) {
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 			if(syno_hibernation_log_level > 1) { // only works in log level 2, 3
 				syno_disk_hiternation_cmd_printk(cmd->device, cmd);
 			}
-#endif // SYNO_DEBUG_FLAG
+#endif // MY_ABC_HERE
 		cmd->device->idle = jiffies;
 	}
-#endif /* SYNO_DISK_HIBERNATION  */
+#endif /* MY_ABC_HERE  */
 
 	if (unlikely(host->shost_state == SHOST_DEL)) {
 		cmd->result = (DID_NO_CONNECT << 16);

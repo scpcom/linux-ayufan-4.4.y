@@ -97,7 +97,7 @@ void mv_ial_lib_add_done_queue (struct IALAdapter *pAdapter,
 
 struct scsi_cmnd * mv_ial_lib_get_first_cmnd (struct IALAdapter *pAdapter,
                                        MV_U8 channel);
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 struct scsi_cmnd * syno_ial_lib_clear_cmnd (struct IALAdapter *pAdapter, MV_U8 channel);
 #endif
 

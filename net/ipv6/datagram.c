@@ -143,7 +143,7 @@ ipv4_connected:
 		}
 		/* Connect to link-local address requires an interface */
 		if (!sk->sk_bound_dev_if) {
-#ifdef SYNO_IPV6_LINKLOCAL
+#ifdef MY_ABC_HERE
 			unsigned flags;
 			struct net_device *dev = NULL;
 			for_each_netdev(sock_net(sk), dev) {

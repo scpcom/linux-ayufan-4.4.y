@@ -9,7 +9,7 @@
 extern const char linux_banner[];
 extern const char linux_proc_banner[];
 
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 static inline int printk_get_level(const char *buffer)
 {
 	if (buffer[0] == '\001' && buffer[1]) {

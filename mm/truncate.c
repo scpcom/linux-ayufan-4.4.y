@@ -582,7 +582,7 @@ void truncate_setsize(struct inode *inode, loff_t newsize)
 }
 EXPORT_SYMBOL(truncate_setsize);
 
-#ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+#ifdef MY_ABC_HERE
 void ecryptfs_truncate_setsize(struct inode *inode, loff_t newsize)
 {
 	loff_t oldsize;

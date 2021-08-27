@@ -40,7 +40,7 @@ disclaimer.
 #include <linux/inetdevice.h>
 #include <linux/interrupt.h>
 #include <linux/mv_pp2.h>
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 #include <linux/mii.h>
 #endif
 #include <asm/setup.h>
@@ -101,7 +101,7 @@ void mv_pp2_iocc_l1_l2_cache_inv(unsigned char *v_start, int size)
 static struct mv_mux_eth_ops mux_eth_ops;
 
 static struct  platform_device *pp2_sysfs;
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 extern MV_U32 syno_wol_support(struct eth_port *pp);
 #endif
 
@@ -110,7 +110,7 @@ platform_device used in mv_pp2_all_ports_probe only for debug
 */
 
 struct platform_device *plats[MV_ETH_MAX_PORTS];
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 extern int mv_eth_tool_read_phy_reg(int phy_addr, u16 page, u16 reg, u16 *val);
 DEFINE_SPINLOCK(mii_lock);
 #endif
@@ -4401,7 +4401,7 @@ static int mv_pp2_netdev_connect(struct eth_port *pp)
 			return -ENODEV;
 		} else {
 			pr_info("\to %s, ifindex = %d, GbE port = %d", dev->name, dev->ifindex, pp->port);
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 			pr_info("\n    o %s, phy chipid = %x, Support WOL = %d\n", dev->name, pp->phy_chip, syno_wol_support(pp));
 #endif
 		}
@@ -5241,7 +5241,7 @@ static int mv_pp2_priv_init(struct eth_port *pp, int port)
 	int cpu, i;
 	struct cpu_ctrl	*cpuCtrl;
 	u8	*ext_buf;
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	MV_U16		phy_id_0, phy_id_1;
 #endif
 
@@ -5349,7 +5349,7 @@ static int mv_pp2_priv_init(struct eth_port *pp, int port)
 		pr_err("\to ethPort #%d: Can't allocate %d bytes for tx_done_dist\n",
 		       pp->port, sizeof(u32) * (pp->txp_num * CONFIG_MV_PP2_TXQ * CONFIG_MV_PP2_TXQ_DESC + 1));
 #endif /* CONFIG_MV_PP2_STAT_DIST */
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	pp->phy_id =  pp->plat_data->phy_addr;
 	pp->wol = 0;
 	if (mv_eth_tool_read_phy_reg(pp->phy_id, 0, MII_PHYSID1, &phy_id_0) ||
@@ -6306,7 +6306,7 @@ module_platform_driver(mv_pp2_eth_driver);
 #else
 static int __init mv_pp2_init_module(void)
 {
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	spin_lock_init( &mii_lock );
 #endif
 	return platform_driver_register(&mv_pp2_eth_driver);
@@ -6320,13 +6320,13 @@ static void __exit mv_pp2_cleanup_module(void)
 module_exit(mv_pp2_cleanup_module);
 #endif /* CONFIG_OF */
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 void syno_mv_net_shutdown()
 {
 	int i = 0, j = 0;
 	MV_U16 macTmp[3];
 	MV_U16 phyTmp;
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 	extern long g_egiga;
 	if ( 0 == g_egiga ) {
 		return;

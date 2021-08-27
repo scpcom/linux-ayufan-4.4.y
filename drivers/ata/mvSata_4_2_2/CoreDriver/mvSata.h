@@ -326,7 +326,7 @@ typedef MV_BOOLEAN (* mvSataCommandCompletionCallBack_t)(struct mvSataAdapter *,
                                                          MV_U32,
                                                          struct mvStorageDevRegisters *);
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 struct _tag_SynoCommandExt;
 typedef MV_BOOLEAN (* SynoMVSataCommandCompletionCallBack_t)(struct mvSataAdapter *,
                                                          MV_U8,
@@ -410,7 +410,7 @@ typedef struct mvNoneUdmaCommandParams
     MV_U8       device;
     MV_U8       command;
     mvSataCommandCompletionCallBack_t callBack;
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     SynoMVSataCommandCompletionCallBack_t SynoExtCallBack;
 #endif
     MV_VOID_PTR  commandId;
@@ -432,7 +432,7 @@ typedef struct mvPacketCommandParams
     MV_VOID_PTR  commandId;
 } MV_PACKET_COMMAND_PARAMS;
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 
 /* 
  * Use in SynoCommandExt : flags
@@ -478,7 +478,7 @@ typedef struct mvQueueCommandInfo
         MV_PACKET_COMMAND_PARAMS     packetCommand;
     } commandParams;
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     SynoCommandExt *pSynoCmdExt;
     MV_VOID_PTR pQueueCmdEntry;
 #endif
@@ -499,7 +499,7 @@ typedef struct mvQueuedCommandEntry
 #ifndef MV_SATA_STORE_COMMANDS_INFO_ON_IAL_STACK
     MV_QUEUE_COMMAND_INFO   commandInfo;
 #endif
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     unsigned long syno_flags_ext;
 #endif
 } MV_QUEUED_COMMAND_ENTRY;
@@ -595,11 +595,11 @@ typedef struct mvSataChannel
     MV_SATA_DEVICE_TYPE         deviceType;
     MV_BOOLEAN  		FBSEnabled;
     MV_BOOLEAN                  use128Entries;
-#if defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(SYNO_SATA_MV_EH)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
     /* while restart channel, device type would forget by mvSata */
     MV_SATA_DEVICE_TYPE         oldDeviceType;
 #endif
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     MV_U16                      PMvendorId;
     MV_U16                      PMdeviceId;
     MV_U8                       PMSynoUnique;
@@ -614,7 +614,7 @@ typedef struct mvSataChannel
     MV_U8                       recoveredErrorsCounter;
     /* NCQ error handling*/
     MV_ERROR_HANDLING_INFO  ErrorHandlingInfo;
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	unsigned long chkpower_flags;
 	/* bit definitions */
 	#define CHKPOWER_CHECKING 0
@@ -625,14 +625,14 @@ typedef struct mvSataChannel
 	MV_QUEUE_COMMAND_INFO		OrigCmd;
 	struct timer_list	rstimer;
 	struct list_head	pendinglh;
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
-#ifdef SYNO_SATA_SSD_DETECT
+#ifdef MY_ABC_HERE
 	unsigned long  ssd_list;  /* ssd mask, start from bit 0 to bit 32 indicate the disk */
 #endif
 } MV_SATA_CHANNEL;
 
-#if defined(SYNO_SATA_MV_EH) || defined(SYNO_SATA_DETECT_FIX)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 typedef struct _tag_SYNO_EH {
     /* state the current action and reason.
      * There is no pm port flags
@@ -668,7 +668,7 @@ enum {
     EH_PROCESSING            = (1 << 5),
     EH_SCSI_DONE_NEEDED      = (1 << 6),
     EH_CONNECT_AGAIN         = (1 << 7),
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
     EH_HW_COM_ERROR          = (1 << 8),
 #endif
 
@@ -676,7 +676,7 @@ enum {
     EH_LINK_DISK             = (1 << 20),
     EH_LINK_PMP              = (1 << 21),
 
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
     /* FIXME: please integrade detect fix after merge EH to CVS. */
     /* probe status */
     SYNO_PROBE_RETRY = (1 << 0),
@@ -734,10 +734,10 @@ typedef struct mvSataAdapter
     MV_U8             iogFreeIdsNum;
     MV_OS_SEMAPHORE   iogSemaphore;
 #endif
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     SYNO_EH           eh[MV_SATA_CHANNELS_NUM];
 #endif
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
     MV_ULONG          flags[MV_SATA_CHANNELS_NUM];
 #endif
 } MV_SATA_ADAPTER;
@@ -822,7 +822,7 @@ MV_QUEUE_COMMAND_RESULT mvSataQueueCommand(MV_SATA_ADAPTER *pAdapter,
                                            MV_U8 channelIndex,
                                            MV_QUEUE_COMMAND_INFO *pCommandParams);
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 MV_VOID SynoSataPMGPIOQueueCommandTimeout(MV_SATA_ADAPTER *pAdapter,
                                           MV_U8 channelIndex,
                                           MV_QUEUE_COMMAND_INFO *pCommandInfo);

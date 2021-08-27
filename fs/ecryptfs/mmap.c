@@ -67,7 +67,7 @@ static int ecryptfs_writepage(struct page *page, struct writeback_control *wbc)
 
 	rc = ecryptfs_encrypt_page(page);
 	if (rc) {
-#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -EIO != rc && -ENOSPC != rc)
 #endif
 #ifdef CONFIG_SYNO_ALPINE
@@ -421,7 +421,7 @@ static int ecryptfs_write_inode_size_to_header(struct inode *ecryptfs_inode)
 	rc = ecryptfs_write_lower(ecryptfs_inode, file_size_virt, 0,
 				  sizeof(u64));
 	kfree(file_size_virt);
-#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 	if (-EDQUOT == rc || -EIO == rc || -ENOSPC == rc)
 		return rc;  // skip error msg
 #endif
@@ -545,7 +545,7 @@ static int ecryptfs_write_end(struct file *file,
 	}
 	rc = ecryptfs_encrypt_page(page);
 	if (rc) {
-#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -EIO != rc && -ENOSPC != rc)
 #endif
 #ifdef CONFIG_SYNO_ALPINE
@@ -565,13 +565,13 @@ static int ecryptfs_write_end(struct file *file,
 	}
 	rc = ecryptfs_write_inode_size_to_metadata(ecryptfs_inode);
 	if (rc)
-#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 	{
 		if (-EDQUOT != rc && -ENOSPC != rc)
 #endif
 		printk(KERN_ERR "Error writing inode size to metadata; "
 		       "rc = [%d]\n", rc);
-#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 	}
 #endif
 	else

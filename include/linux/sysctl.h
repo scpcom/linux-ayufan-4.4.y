@@ -982,7 +982,7 @@ extern int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int,
 				      void __user *, size_t *, loff_t *);
 extern int proc_do_large_bitmap(struct ctl_table *, int,
 				void __user *, size_t *, loff_t *);
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 extern int SynoProcDoStringVec(struct ctl_table *, int,
 				void __user *, size_t *, loff_t *);
 #endif

@@ -1258,7 +1258,7 @@ static void __setup_root(u32 nodesize, u32 leafsize, u32 sectorsize,
 	atomic_set(&root->refs, 1);
 	atomic_set(&root->will_be_snapshoted, 0);
 	root->log_transid = 0;
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	root->log_transid_committed = -1;
 #endif
@@ -1475,7 +1475,7 @@ int btrfs_add_log_tree(struct btrfs_trans_handle *trans,
 	WARN_ON(root->log_root);
 	root->log_root = log_root;
 	root->log_transid = 0;
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	root->log_transid_committed = -1;
 #endif
@@ -2208,7 +2208,7 @@ int open_ctree(struct super_block *sb,
 		goto fail_dirty_metadata_bytes;
 	}
 
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	ret = percpu_counter_init(&fs_info->bio_counter, 0);
 	if (ret) {
@@ -2220,7 +2220,7 @@ int open_ctree(struct super_block *sb,
 	fs_info->btree_inode = new_inode(sb);
 	if (!fs_info->btree_inode) {
 		err = -ENOMEM;
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 		goto fail_delalloc_bytes;
 #else
 		goto fail_bio_counter;
@@ -2257,7 +2257,7 @@ int open_ctree(struct super_block *sb,
 	INIT_LIST_HEAD(&fs_info->tree_mod_seq_list);
 	INIT_LIST_HEAD(&fs_info->unused_bgs);
 	btrfs_mapping_init(&fs_info->mapping_tree);
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	atomic_set(&fs_info->nr_extent_maps, 0);
 #endif
 	btrfs_init_block_rsv(&fs_info->global_block_rsv,
@@ -2305,7 +2305,7 @@ int open_ctree(struct super_block *sb,
 	atomic_set(&fs_info->scrub_pause_req, 0);
 	atomic_set(&fs_info->scrubs_paused, 0);
 	atomic_set(&fs_info->scrub_cancel_req, 0);
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	init_waitqueue_head(&fs_info->replace_wait);
 #endif
@@ -3028,7 +3028,7 @@ fail_iput:
 	btrfs_mapping_tree_free(&fs_info->mapping_tree);
 
 	iput(fs_info->btree_inode);
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 fail_bio_counter:
 	percpu_counter_destroy(&fs_info->bio_counter);
@@ -3693,7 +3693,7 @@ int close_ctree(struct btrfs_root *root)
 
 	percpu_counter_destroy(&fs_info->dirty_metadata_bytes);
 	percpu_counter_destroy(&fs_info->delalloc_bytes);
-#ifdef SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	percpu_counter_destroy(&fs_info->bio_counter);
 #endif
@@ -3783,7 +3783,7 @@ static void __btrfs_btree_balance_dirty(struct btrfs_root *root,
 	if (flush_delayed)
 		btrfs_balance_delayed_items(root);
 
-#ifdef SYNO_BTRFS_PREVENT_FLUSH_STUCK_IN_BALANCE_DIRTY_PAGES
+#ifdef MY_ABC_HERE
 	/*
 	 * flush-btrfs-X will be stuck in balance_dirty_pages() forever.
 	 * the flush-X thread is forked by bdi_forker_thread().

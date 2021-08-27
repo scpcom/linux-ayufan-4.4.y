@@ -23,7 +23,7 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int SynoDebugFlag;
 extern int syno_hibernation_log_level;
@@ -471,7 +471,7 @@ SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
 	ssize_t ret = -EBADF;
 	int fput_needed;
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if(syno_hibernation_log_level > 0) {
 		syno_do_hibernation_fd_log(fd);
 	}
@@ -495,7 +495,7 @@ SYSCALL_DEFINE3(write, unsigned int, fd, const char __user *, buf,
 	ssize_t ret = -EBADF;
 	int fput_needed;
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if(syno_hibernation_log_level > 0) {
 		syno_do_hibernation_fd_log(fd);
 	}
@@ -512,7 +512,7 @@ SYSCALL_DEFINE3(write, unsigned int, fd, const char __user *, buf,
 	return ret;
 }
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 
 asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, size_t *rwbytes)
 {
@@ -625,7 +625,7 @@ out:
 
 	return ret;
 }
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 SYSCALL_DEFINE(pread64)(unsigned int fd, char __user *buf,
 			size_t count, loff_t pos)

@@ -40,7 +40,7 @@
 #include "ext4.h"
 #include "ext4_jbd2.h"
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 #include <linux/namei.h>
 #endif
 
@@ -56,7 +56,7 @@
 #define NAMEI_RA_SIZE	     (NAMEI_RA_CHUNKS * NAMEI_RA_BLOCKS)
 #define NAMEI_RA_INDEX(c,b)  (((c) * NAMEI_RA_BLOCKS) + (b))
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 //	there is the same variable in ext3, it will be used another place.  This is only for ext4.
 static unsigned char UTF8Ext4NameiStrBuf[UNICODE_UTF8_BUFSIZE];
 extern spinlock_t Ext4Namei_buf_lock;  /* init at ext4_fill_super() */
@@ -229,7 +229,7 @@ static int ext4_htree_next_block(struct inode *dir, __u32 hash,
 				 struct dx_frame *frame,
 				 struct dx_frame *frames,
 				 __u32 *start_hash);
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 static struct buffer_head * ext4_dx_find_entry(struct inode *dir,
 		 const struct qstr *d_name,
 		 struct ext4_dir_entry_2 **res_dir,
@@ -836,7 +836,7 @@ static void dx_insert_block(struct dx_frame *frame, u32 hash, ext4_lblk_t block)
 
 static void ext4_update_dx_flag(struct inode *inode)
 {
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	if (EXT4_SB(inode->i_sb)->s_es->s_syno_hash_magic != cpu_to_le32(SYNO_HASH_MAGIC))
 #else
 	if (!EXT4_HAS_COMPAT_FEATURE(inode->i_sb,
@@ -851,7 +851,7 @@ static void ext4_update_dx_flag(struct inode *inode)
  * `len <= EXT4_NAME_LEN' is guaranteed by caller.
  * `de != NULL' is guaranteed by caller.
  */
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 static inline int ext4_match (int len, const char * const name,
 			      struct ext4_dir_entry_2 * de, unsigned int caseless)
 {
@@ -882,7 +882,7 @@ static inline int ext4_match (int len, const char * const name,
 /*
  * Returns 0 if not found, -1 on failure, and 1 on success
  */
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 static inline int search_dirblock(struct buffer_head *bh,
 				  struct inode *dir,
 				  const struct qstr *d_name,
@@ -901,7 +901,7 @@ static inline int search_dirblock(struct buffer_head *bh,
 	int de_len;
 	const char *name = d_name->name;
 	int namelen = d_name->len;
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 	char *new_dname = NULL;
 	const char *ext_dname = NULL;
 #endif
@@ -913,7 +913,7 @@ static inline int search_dirblock(struct buffer_head *bh,
 		/* do minimal checking `by hand' */
 		 
 		if ((char *) de + namelen <= dlimit &&
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 			ext4_match (namelen, name, de, caseless)) {
 #else
 		    ext4_match (namelen, name, de)) {
@@ -922,7 +922,7 @@ static inline int search_dirblock(struct buffer_head *bh,
 			if (ext4_check_dir_entry(dir, NULL, de, bh, offset))
 				return -1;
 			*res_dir = de;
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 			/* If we do caseless lookup after dentry queue of parent be cleared,
 			* file name may async between dentry queue and disk.
 			* So we should make sure it is the real name before dentry be added to queue.
@@ -976,7 +976,7 @@ static inline int search_dirblock(struct buffer_head *bh,
  * The returned buffer_head has ->b_count elevated.  The caller is expected
  * to brelse() it when appropriate.
  */
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 static struct buffer_head * ext4_find_entry (struct inode *dir,
 					const struct qstr *d_name,
 					struct ext4_dir_entry_2 ** res_dir, int caseless)
@@ -1016,7 +1016,7 @@ static struct buffer_head * ext4_find_entry (struct inode *dir,
 		goto restart;
 	}
 	if (is_dx(dir)) {
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 		bh = ext4_dx_find_entry(dir, d_name, res_dir, &err, caseless);
 #else
 		bh = ext4_dx_find_entry(dir, d_name, res_dir, &err);
@@ -1073,7 +1073,7 @@ restart:
 			brelse(bh);
 			goto next;
 		}
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 		i = search_dirblock(bh, dir, d_name,
 			    block << EXT4_BLOCK_SIZE_BITS(sb), res_dir, caseless);
 #else
@@ -1112,7 +1112,7 @@ cleanup_and_exit:
 	return ret;
 }
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 static struct buffer_head * ext4_dx_find_entry(struct inode *dir, const struct qstr *d_name,
 		       struct ext4_dir_entry_2 **res_dir, int *err, unsigned int caseless)
 #else
@@ -1134,7 +1134,7 @@ static struct buffer_head * ext4_dx_find_entry(struct inode *dir, const struct q
 		if (!(bh = ext4_bread(NULL, dir, block, 0, err)))
 			goto errout;
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 		retval = search_dirblock(bh, dir, d_name,
 					 block << EXT4_BLOCK_SIZE_BITS(sb),
 					 res_dir, caseless);
@@ -1178,7 +1178,7 @@ static struct dentry *ext4_lookup(struct inode *dir, struct dentry *dentry, stru
 	struct ext4_dir_entry_2 *de;
 	struct buffer_head *bh;
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	int caseless = 0;
 
 	if (nd && (nd->flags & LOOKUP_CASELESS_COMPARE)) {
@@ -1188,7 +1188,7 @@ static struct dentry *ext4_lookup(struct inode *dir, struct dentry *dentry, stru
 	if (dentry->d_name.len > EXT4_NAME_LEN)
 		return ERR_PTR(-ENAMETOOLONG);
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	bh = ext4_find_entry(dir, &dentry->d_name, &de, caseless);
 #else
 	bh = ext4_find_entry(dir, &dentry->d_name, &de);
@@ -1215,7 +1215,7 @@ static struct dentry *ext4_lookup(struct inode *dir, struct dentry *dentry, stru
 			return ERR_PTR(-EIO);
 		}
 	}
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	if (!dentry->d_op) {
 		d_set_d_op(dentry, dentry->d_sb->s_d_op);
 	}
@@ -1233,7 +1233,7 @@ struct dentry *ext4_get_parent(struct dentry *child)
 	struct ext4_dir_entry_2 * de;
 	struct buffer_head *bh;
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	bh = ext4_find_entry(child->d_inode, &dotdot, &de, 1);
 #else
 	bh = ext4_find_entry(child->d_inode, &dotdot, &de);
@@ -1447,7 +1447,7 @@ static int add_dirent_to_buf(handle_t *handle, struct dentry *dentry,
 		while ((char *) de <= top) {
 			if (ext4_check_dir_entry(dir, NULL, de, bh, offset))
 				return -EIO;
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 			if (ext4_match(namelen, name, de, 0))
 #else
 			if (ext4_match(namelen, name, de))
@@ -1660,7 +1660,7 @@ static int ext4_add_entry(handle_t *handle, struct dentry *dentry,
 		}
 
 		if (blocks == 1 && !dx_fallback &&
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 			(EXT4_SB(sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) &&
 			!EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX))
 #else
@@ -2320,7 +2320,7 @@ static int ext4_rmdir(struct inode *dir, struct dentry *dentry)
 		return PTR_ERR(handle);
 
 	retval = -ENOENT;
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	bh = ext4_find_entry(dir, &dentry->d_name, &de, 0);
 #else
 	bh = ext4_find_entry(dir, &dentry->d_name, &de);
@@ -2389,7 +2389,7 @@ static int ext4_unlink(struct inode *dir, struct dentry *dentry)
 		ext4_handle_sync(handle);
 
 	retval = -ENOENT;
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	bh = ext4_find_entry(dir, &dentry->d_name, &de, 0);
 #else
 	bh = ext4_find_entry(dir, &dentry->d_name, &de);
@@ -2495,11 +2495,11 @@ retry:
 		ext4_journal_stop(handle);
 		if (err)
 			goto err_drop_inode;
-#ifdef SYNO_FS_EXT4_SKIP_JOURNAL_SYMLINK
+#ifdef MY_ABC_HERE
 		ext4_set_writeback_aops(inode);
 #endif
 		err = __page_symlink(inode, symname, l, 1);
-#ifdef SYNO_FS_EXT4_SKIP_JOURNAL_SYMLINK
+#ifdef MY_ABC_HERE
 		ext4_set_aops(inode);
 #endif
 		if (err)
@@ -2615,7 +2615,7 @@ static int ext4_rename(struct inode *old_dir, struct dentry *old_dentry,
 	if (IS_DIRSYNC(old_dir) || IS_DIRSYNC(new_dir))
 		ext4_handle_sync(handle);
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	old_bh = ext4_find_entry(old_dir, &old_dentry->d_name, &old_de, 0);
 #else
 	old_bh = ext4_find_entry(old_dir, &old_dentry->d_name, &old_de);
@@ -2632,7 +2632,7 @@ static int ext4_rename(struct inode *old_dir, struct dentry *old_dentry,
 		goto end_rename;
 
 	new_inode = new_dentry->d_inode;
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	new_bh = ext4_find_entry(new_dir, &new_dentry->d_name, &new_de, 0);
 #else
 	new_bh = ext4_find_entry(new_dir, &new_dentry->d_name, &new_de);
@@ -2714,7 +2714,7 @@ static int ext4_rename(struct inode *old_dir, struct dentry *old_dentry,
 		struct buffer_head *old_bh2;
 		struct ext4_dir_entry_2 *old_de2;
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 		old_bh2 = ext4_find_entry(old_dir, &old_dentry->d_name, &old_de2, 0);
 #else
 		old_bh2 = ext4_find_entry(old_dir, &old_dentry->d_name, &old_de2);
@@ -2782,10 +2782,10 @@ end_rename:
  * directories can handle most operations...
  */
 const struct inode_operations ext4_dir_inode_operations = {
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= syno_ext4_getattr,
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_get_archive_ver = syno_ext4_get_archive_ver,
 	.syno_set_archive_ver = syno_ext4_set_archive_ver,
 #endif
@@ -2810,10 +2810,10 @@ const struct inode_operations ext4_dir_inode_operations = {
 };
 
 const struct inode_operations ext4_special_inode_operations = {
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= syno_ext4_getattr,
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_get_archive_ver = syno_ext4_get_archive_ver,
 	.syno_set_archive_ver = syno_ext4_set_archive_ver,
 #endif

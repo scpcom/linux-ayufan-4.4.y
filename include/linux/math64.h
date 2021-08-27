@@ -48,7 +48,7 @@ static inline s64 div64_s64(s64 dividend, s64 divisor)
 	return dividend / divisor;
 }
 
-#ifdef SYNO_EMULATE_U64_DIVISOR
+#ifdef MY_ABC_HERE
 static inline u64 mod_u64_rem64(u64 dividend, u64 divisor)
 {
         return dividend % divisor;
@@ -79,7 +79,7 @@ extern u64 div64_u64(u64 dividend, u64 divisor);
 extern s64 div64_s64(s64 dividend, s64 divisor);
 #endif
 
-#ifdef SYNO_EMULATE_U64_DIVISOR
+#ifdef MY_ABC_HERE
 #if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2) || defined(CONFIG_SYNO_COMCERTO) || (defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)) || defined(CONFIG_SYNO_ALPINE)
 static inline u64 mod_u64_rem64(u64 dividend, u64 divisor)
 {

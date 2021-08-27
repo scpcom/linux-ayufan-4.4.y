@@ -37,7 +37,7 @@ void __fat_fs_error(struct super_block *sb, int report, const char *fmt, ...)
 		va_end(args);
 	}
 
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 	sb->s_flags |= MS_CORRUPT;
 #endif
 	if (opts->errors == FAT_ERRORS_PANIC)

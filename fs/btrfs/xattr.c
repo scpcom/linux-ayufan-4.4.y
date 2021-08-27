@@ -237,7 +237,7 @@ int __btrfs_setxattr(struct btrfs_trans_handle *trans,
 	if (trans)
 		return do_setxattr(trans, inode, name, value, size, flags);
 
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 	trans = btrfs_start_transaction_nocheckquota(root, 2);
 #else
 	trans = btrfs_start_transaction(root, 2);
@@ -384,7 +384,7 @@ static bool btrfs_is_valid_xattr(const char *name)
 			XATTR_SECURITY_PREFIX_LEN) ||
 	       !strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN) ||
 	       !strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN) ||
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 	       !strncmp(name, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN) ||
 #endif
 	       !strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN) ||

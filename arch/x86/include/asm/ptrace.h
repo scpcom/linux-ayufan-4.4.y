@@ -289,7 +289,7 @@ static inline unsigned long regs_get_kernel_stack_nth(struct pt_regs *regs,
 
 #define ARCH_HAS_USER_SINGLE_STEP_INFO
 
-#ifdef SYNO_CVE_2014_4699
+#ifdef MY_ABC_HERE
 /*
  * When hitting ptrace_stop(), we cannot return using SYSRET because
  * that does not restore the full CPU state, only a minimal set.  The
@@ -305,7 +305,7 @@ static inline unsigned long regs_get_kernel_stack_nth(struct pt_regs *regs,
 	set_thread_flag(TIF_NOTIFY_RESUME);				\
 	false;								\
 })
-#endif /* SYNO_CVE_2014_4699 */
+#endif /* MY_ABC_HERE */
 
 struct user_desc;
 extern int do_get_thread_area(struct task_struct *p, int idx,

@@ -27,7 +27,7 @@
 #include <linux/wait.h>
 #include <linux/workqueue.h>
 
-#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 #include <linux/raid/libmd-report.h>
 #endif
 
@@ -40,7 +40,7 @@
  */
 #define MD_MAX_BADBLOCKS	(PAGE_SIZE/8)
 
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 typedef struct _tag_SYNO_WAKEUP_DEVICE_WORK{
     struct work_struct work;
     struct mddev *mddev;
@@ -66,7 +66,7 @@ struct md_rdev {
 	struct block_device *bdev;	/* block device handle */
 
 	struct page	*sb_page, *bb_page;
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	struct page	*wakeup_page;
 #endif
 	int		sb_loaded;
@@ -117,9 +117,9 @@ struct md_rdev {
 					 * accurately as possible is good, but
 					 * not absolutely critical.
 					 */
-#ifdef SYNO_RAID_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 #define DiskError	12		/* device is know to have a fault in degraded state */
-#endif /* SYNO_RAID_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 	wait_queue_head_t blocked_wait;
 
 	int desc_nr;			/* descriptor index in the superblock */
@@ -173,7 +173,7 @@ struct md_rdev {
 	} badblocks;
 };
 
-#ifdef SYNO_RAID_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 typedef struct _tag_SYNO_UPDATE_SB_WORK{
     struct work_struct work;
     struct mddev *mddev;
@@ -339,7 +339,7 @@ struct mddev {
 	 * takes a copy of this number and does not attempt recovery again
 	 * until this number changes.
 	 */
-#ifdef SYNO_FIX_RAID5_RESHAPE_HANG
+#ifdef MY_ABC_HERE
 	/* Resolve the raid 5 hang problem during expansion with disk error
 	 * or hotplug out.
 	 *
@@ -423,18 +423,18 @@ struct mddev {
 
 	atomic_t 			max_corr_read_errors; /* max read retries */
 	struct list_head		all_mddevs;
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	unsigned char			blActive;  /* to record whether this md is in active or not */
 	spinlock_t				ActLock;   /* lock for Active attr. */
 	unsigned long			ulLastReq; /* the last time received request */
 #endif
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#ifdef MY_ABC_HERE
     unsigned char           nodev_and_crashed;     // 1 ==> nodev && crashed. deny make_request
 #endif
-#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
+#ifdef MY_ABC_HERE
 	unsigned char			auto_remap;     // 1 ==> set all rdevs to remap mode.
 #endif
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 	unsigned char                   force_auto_remap; // user open auto remap manually
 	void                            *syno_private;    // store lv struct for auto remap report
 	char                            lv_name[16];
@@ -480,14 +480,14 @@ struct md_personality
 	/* error_handler must set ->faulty and clear ->in_sync
 	 * if appropriate, and should abort recovery if needed 
 	 */
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 	/**
 	 *  for our special purpose, like raid1, there is not exist a
 	 *  easy way for distinguish between hotplug or read/write error
 	 *  on last one disk which is in sync
 	 */
 	void (*syno_error_handler)(struct mddev *mddev, struct md_rdev *rdev);
-#endif /* SYNO_RAID_DEVICE_NOTIFY */
+#endif /* MY_ABC_HERE */
 	void (*error_handler)(struct mddev *mddev, struct md_rdev *rdev);
 	int (*hot_add_disk) (struct mddev *mddev, struct md_rdev *rdev);
 	int (*hot_remove_disk) (struct mddev *mddev, int number);
@@ -513,7 +513,7 @@ struct md_personality
 	 * This needs to be installed and then ->run used to activate the
 	 * array.
 	 */
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 	unsigned char (*ismaxdegrade) (struct mddev *mddev);
 #endif
 	void *(*takeover) (struct mddev *mddev);
@@ -616,11 +616,11 @@ static inline void safe_put_page(struct page *p)
 	if (p) put_page(p);
 }
 
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#ifdef MY_ABC_HERE
 extern void syno_md_error (struct mddev *mddev, struct md_rdev *rdev);
 extern int IsDeviceDisappear(struct block_device *bdev);
 #endif
-#ifdef SYNO_RAID_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 extern void SynoUpdateSBTask(struct work_struct *work);
 #endif
 extern int register_md_personality(struct md_personality *p);
@@ -655,10 +655,10 @@ extern void md_integrity_add_rdev(struct md_rdev *rdev, struct mddev *mddev);
 extern int strict_strtoul_scaled(const char *cp, unsigned long *res, int scale);
 extern void restore_bitmap_write_access(struct file *file);
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 void SynoAutoRemapReport(struct mddev *mddev, sector_t sector, struct block_device *bdev);
 #endif
-#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
+#ifdef MY_ABC_HERE
 void RaidRemapModeSet(struct block_device *, unsigned char);
 
 static inline void
@@ -676,7 +676,7 @@ RaidMemberAutoRemapSet(struct mddev *mddev)
 }
 #endif
 
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 void SYNORaidRdevUnplug(struct mddev *mddev, struct md_rdev *rdev);
 #endif
 extern void mddev_init(struct mddev *mddev);

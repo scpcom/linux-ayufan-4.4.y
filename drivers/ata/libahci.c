@@ -218,7 +218,7 @@ void sata_syno_ahci_diskled_set(int iHostNum, int iPresent, int iFault)
 		goto RELEASESRC;
 	}
 
-#ifdef SYNO_ATA_AHCI_LED_SWITCH
+#ifdef MY_ABC_HERE
 	iPresent &= giSynoHddLedEnabled;
 	iFault &= giSynoHddLedEnabled;
 #endif
@@ -277,15 +277,15 @@ struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_ahci_port_cmd,
 	&dev_attr_em_buffer,
 	&dev_attr_em_message_supported,
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
 #endif
-#ifdef SYNO_TRANS_HOST_TO_DISK
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
 #endif
-#ifdef SYNO_SATA_DISK_LED_CONTROL
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_sata_disk_led_ctrl,
 #endif
 	NULL
@@ -1636,11 +1636,11 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
 	/* issue the second D2H Register FIS */
 	tf.ctl &= ~ATA_SRST;
-#ifdef SYNO_MV_9235_SRST_FIX
+#ifdef MY_ABC_HERE
 	if (!(hpriv->flags & AHCI_HFLAG_YES_MV9235_FIX)) {
 #endif
 	ahci_exec_polled_cmd(ap, pmp, &tf, 0, 0, 0);
-#ifdef SYNO_MV_9235_SRST_FIX
+#ifdef MY_ABC_HERE
 	} else {
 		/* 9235 may fail at 2nd D2H, so we use the same check as 1st D2H */
 		msecs = 0;
@@ -1914,7 +1914,7 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 		u32 fbs = readl(port_mmio + PORT_FBS);
 		int pmp = fbs >> PORT_FBS_DWE_OFFSET;
 
-#ifdef SYNO_AHCI_PM_DEADLOCK_FIX
+#ifdef MY_ABC_HERE
 		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links)) {
 #else
 		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links) &&
@@ -1996,10 +1996,10 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	}
 
 	if (irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) {
-#ifdef SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
-#ifdef SYNO_ATA_FAST_PROBE
+#ifdef MY_ABC_HERE
 		if (irq_stat & PORT_IRQ_CONNECT) {
 			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 		}

@@ -46,10 +46,10 @@
 
 #include <asm/mman.h>
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 #include <linux/tcp.h>
 #include <net/tcp.h>
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 /*
  * Shared mappings implemented 30.11.1994. It's not fully working yet,
@@ -2305,7 +2305,7 @@ int pagecache_write_end(struct file *file, struct address_space *mapping,
 }
 EXPORT_SYMBOL(pagecache_write_end);
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 int
 do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 			size_t count, size_t * rbytes, size_t * wbytes)

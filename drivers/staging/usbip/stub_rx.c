@@ -588,7 +588,7 @@ static void stub_rx_pdu(struct usbip_device *ud)
 	case USBIP_CMD_UNLINK:
 		stub_recv_cmd_unlink(sdev, &pdu);
 		break;
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
     case USBIP_RESET_DEV:
         printk("reset device\n");
 #endif

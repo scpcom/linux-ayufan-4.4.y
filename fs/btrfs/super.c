@@ -847,7 +847,7 @@ static struct dentry *get_default_root(struct super_block *sb,
 	struct btrfs_path *path;
 	struct btrfs_key location;
 	struct inode *inode;
-#ifndef SYNO_BTRFS_REVERT_DCACHE_DISCONNECTED_FOR_NFS
+#ifndef MY_ABC_HERE
 	struct dentry *dentry;
 #endif
 	u64 dir_id;
@@ -920,7 +920,7 @@ setup_root:
 		return dget(sb->s_root);
 	}
 
-#ifdef SYNO_BTRFS_REVERT_DCACHE_DISCONNECTED_FOR_NFS
+#ifdef MY_ABC_HERE
 	return d_obtain_alias(inode);
 #else
 	dentry = d_obtain_alias(inode);
@@ -933,7 +933,7 @@ setup_root:
 #endif
 }
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 static void syno_load_sb_archive_ver(struct super_block *sb, struct inode *inode)
 {
 	struct syno_xattr_archive_version value;
@@ -992,7 +992,7 @@ static int btrfs_fill_super(struct super_block *sb,
 	}
 
 	sb->s_root = root_dentry;
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	syno_load_sb_archive_ver(sb, inode);
 #endif
 
@@ -1815,13 +1815,13 @@ static int btrfs_unfreeze(struct super_block *sb)
 	return 0;
 }
 
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 static int btrfs_show_devname(struct seq_file *m, struct vfsmount *vfs)
 #else
 static int btrfs_show_devname(struct seq_file *m, struct dentry *root)
 #endif
 {
-#ifdef SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 	struct btrfs_fs_info *fs_info = btrfs_sb(vfs->mnt_sb);
 #else
 	struct btrfs_fs_info *fs_info = btrfs_sb(root->d_sb);
@@ -1856,7 +1856,7 @@ static int btrfs_show_devname(struct seq_file *m, struct dentry *root)
 	return 0;
 }
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 static int syno_btrfs_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
 {
 	struct dentry *dentry = sb->s_root;
@@ -1884,7 +1884,7 @@ static int syno_btrfs_get_sb_archive_ver(struct super_block *sb, u32 *version)
 }
 #endif
 
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 static int btrfs_nr_cached_objects(struct super_block *sb)
 {
 	return (int)atomic_read(&btrfs_sb(sb)->nr_extent_maps);
@@ -1972,11 +1972,11 @@ static void btrfs_free_cached_objects(struct super_block *sb, int nr_to_drop)
 #endif
 
 static const struct super_operations btrfs_super_ops = {
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_sb_archive_ver = syno_btrfs_set_sb_archive_ver,
 	.syno_get_sb_archive_ver = syno_btrfs_get_sb_archive_ver,
 #endif
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	.nr_cached_objects = btrfs_nr_cached_objects,
 	.free_cached_objects = btrfs_free_cached_objects,
 #endif

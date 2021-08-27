@@ -140,7 +140,7 @@ void usb_major_cleanup(void)
 	unregister_chrdev(USB_MAJOR, "usb");
 }
 
-#ifdef SYNO_STATIC_HIDDEV_MINOR
+#ifdef MY_ABC_HERE
 /**
  * Copy from usb/core/file.c usb_register_dev()
  * We need an offset when RF remote controller found.

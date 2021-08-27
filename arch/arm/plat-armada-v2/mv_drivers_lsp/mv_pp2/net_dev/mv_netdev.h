@@ -345,7 +345,7 @@ struct cpu_ctrl {
 	unsigned long		flags;
 };
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 #define MV_PHY_ID_151X 0x01410DD0
 #endif
 struct eth_port {
@@ -409,7 +409,7 @@ struct eth_port {
 	struct cpu_ctrl		*cpu_config[CONFIG_NR_CPUS];
 	MV_U32			sgmii_serdes;
 	int			pm_mode;
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	MV_U32 phy_chip;
 	MV_U32 phy_id;
 #endif

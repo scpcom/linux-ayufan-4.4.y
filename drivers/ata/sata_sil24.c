@@ -330,7 +330,7 @@ static const struct sil24_cerr_info {
 				    "FIS received while sending service FIS" },
 };
 
-#ifdef SYNO_SIL3132_ACTIVITY
+#ifdef MY_ABC_HERE
 struct sil3132_em_priv {
 	struct timer_list timer;
 	unsigned long saved_activity;
@@ -347,7 +347,7 @@ struct sil24_port_priv {
 	union sil24_cmd_block *cmd_block;	/* 32 cmd blocks */
 	dma_addr_t cmd_block_dma;		/* DMA base addr for them */
 	int do_port_rst;
-#ifdef SYNO_SIL3132_ACTIVITY
+#ifdef MY_ABC_HERE
 	struct sil3132_em_priv em_st;
 #endif
 };
@@ -463,15 +463,15 @@ static struct pci_driver sil24_pci_driver = {
 #endif
 };
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static struct device_attribute *sil24_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef SYNO_TRANS_HOST_TO_DISK
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
 #endif
-#ifdef SYNO_SATA_DISK_LED_CONTROL
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_sata_disk_led_ctrl,
 #endif
 	NULL
@@ -483,7 +483,7 @@ static struct scsi_host_template sil24_sht = {
 	.can_queue		= SIL24_MAX_CMDS,
 	.sg_tablesize		= SIL24_MAX_SGE,
 	.dma_boundary		= ATA_DMA_BOUNDARY,
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	.shost_attrs 		= sil24_shost_attrs,
 #endif
 };
@@ -763,7 +763,7 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 	struct ata_taskfile tf;
 	const char *reason;
 	int rc;
-#ifdef SYNO_SATA_SIL3132_HD_DETECT
+#ifdef MY_ABC_HERE
 	int retry_count = 0;
 #endif
 
@@ -779,7 +779,7 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 	if (time_after(deadline, jiffies))
 		timeout_msec = jiffies_to_msecs(deadline - jiffies);
 
-#ifdef SYNO_SATA_SIL3132_HD_DETECT
+#ifdef MY_ABC_HERE
 retry:
 #endif
 	ata_tf_init(link->device, &tf);	/* doesn't really matter */
@@ -790,7 +790,7 @@ retry:
 		reason = "timeout";
 		goto err;
 	} else if (rc) {
-#ifdef SYNO_SATA_SIL3132_HD_DETECT
+#ifdef MY_ABC_HERE
 		/* retry once. And we don't retry port multiplier itself */
 		if (retry_count < 1 && 0xf != link->pmp) {
 			sata_std_hardreset(link, class, deadline+HZ);
@@ -830,7 +830,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 	int tout_msec, rc;
 	u32 tmp;
 
-#ifdef SYNO_SIL3132_INTEL_SSD_WORKAROUND
+#ifdef MY_ABC_HERE
 	link->uiStsFlags |= SYNO_STATUS_IS_SIL3132;
 #endif
 
@@ -856,7 +856,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 		did_port_rst = 1;
 	}
 
-#ifdef SYNO_SATA_SIL3132_HITACHI_WORKAROUND
+#ifdef MY_ABC_HERE
 	sil24_scr_read(link, SCR_STATUS, &tmp);
 	if (0x1 == tmp) {
 		/* No IPM, speed negotiate and phy is not well communicated.  */
@@ -971,7 +971,7 @@ static int sil24_qc_defer(struct ata_queued_cmd *qc)
 				return ATA_DEFER_PORT;
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 		} else
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 		{
 			if (!ap->nr_active_links) {
 				/* Since we are here now, just preempt */
@@ -1045,7 +1045,7 @@ static void sil24_qc_prep(struct ata_queued_cmd *qc)
 		sil24_fill_sg(qc, sge);
 }
 
-#ifdef SYNO_SIL3132_ACTIVITY
+#ifdef MY_ABC_HERE
 static void sil3132_sw_activity(struct ata_port *ap)
 {
 	struct sil24_port_priv *pp = ap->private_data;
@@ -1081,7 +1081,7 @@ static unsigned int sil24_qc_issue(struct ata_queued_cmd *qc)
 	wmb();
 	writel((u32)paddr, activate);
 	writel((u64)paddr >> 32, activate + 4);
-#ifdef SYNO_SIL3132_ACTIVITY
+#ifdef MY_ABC_HERE
 	sil3132_sw_activity(ap);
 #endif
 
@@ -1134,7 +1134,7 @@ static int sil24_pmp_hardreset(struct ata_link *link, unsigned int *class,
 		return rc;
 	}
 
-#ifdef SYNO_SIL3132_PM_WORKAROUND
+#ifdef MY_ABC_HERE
 	link->uiStsFlags |= SYNO_STATUS_IS_SIL3132PM;
 #endif
 	return sata_std_hardreset(link, class, deadline);
@@ -1190,10 +1190,10 @@ static void sil24_error_intr(struct ata_port *ap)
 	}
 
 	if (irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) {
-#ifdef SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
-#ifdef SYNO_ATA_FAST_PROBE
+#ifdef MY_ABC_HERE
 		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 #endif
 		ata_ehi_hotplugged(ehi);
@@ -1391,7 +1391,7 @@ static void sil24_post_internal_cmd(struct ata_queued_cmd *qc)
 		ata_eh_freeze_port(ap);
 }
 
-#ifdef SYNO_SIL3132_ACTIVITY
+#ifdef MY_ABC_HERE
 static void sil3132_sw_activity_blink(unsigned long arg)
 {
 	struct ata_port *ap = (struct ata_port *)arg;
@@ -1549,7 +1549,7 @@ static void sil24_init_controller(struct ata_host *host)
 
 		/* configure port */
 		sil24_config_port(ap);
-#ifdef SYNO_SATA_SIL3132_ABRT_WORKAROUND
+#ifdef MY_ABC_HERE
 		mdelay(1000);
 #endif
 	}

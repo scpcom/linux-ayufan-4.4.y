@@ -1050,7 +1050,7 @@ error_inode:
 		fat_fs_error(new_dir->i_sb,
 			     "%s: Filesystem corrupted (i_pos %lld)",
 			     __func__, sinfo.i_pos);
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 		err = -ECORRUPT;
 #endif
 	}

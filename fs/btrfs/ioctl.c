@@ -1504,7 +1504,7 @@ static noinline int btrfs_ioctl_resize(struct file *file,
 	char *devstr = NULL;
 	int ret = 0;
 	int mod = 0;
-#ifdef SYNO_BTRFS_RESIZE_QUERY
+#ifdef MY_ABC_HERE
 	int dry_run = 0;
 #endif
 
@@ -1570,7 +1570,7 @@ static noinline int btrfs_ioctl_resize(struct file *file,
 		} else if (sizestr[0] == '+') {
 			mod = 1;
 			sizestr++;
-#ifdef SYNO_BTRFS_RESIZE_QUERY
+#ifdef MY_ABC_HERE
 			if (sizestr[0] == '?') {
 				dry_run = 1;
 				sizestr++;
@@ -1613,7 +1613,7 @@ static noinline int btrfs_ioctl_resize(struct file *file,
 		ret = -EFBIG;
 		goto out_free;
 	}
-#ifdef SYNO_BTRFS_RESIZE_QUERY
+#ifdef MY_ABC_HERE
 	if (dry_run) {
 		goto out_free;
 	}
@@ -1890,7 +1890,7 @@ static noinline int btrfs_ioctl_subvol_setflags(struct file *file,
 					root_flags & ~BTRFS_ROOT_SUBVOL_HIDE);
 #endif /* MY_ABC_HERE */
 
-#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+#ifdef MY_ABC_HERE
 	trans = btrfs_start_transaction_nocheckquota(root, 1);
 #else
 	trans = btrfs_start_transaction(root, 1);
@@ -2293,7 +2293,7 @@ static noinline int btrfs_ioctl_snap_destroy(struct file *file,
 	int namelen;
 	int ret;
 	int err = 0;
-#ifdef SYNO_BTRFS_GRAB_ROOT_ON_DESTROY_SNAP
+#ifdef MY_ABC_HERE
 	int blGrabRoot = 0;
 #endif
 
@@ -2329,7 +2329,7 @@ static noinline int btrfs_ioctl_snap_destroy(struct file *file,
 
 	inode = dentry->d_inode;
 	dest = BTRFS_I(inode)->root;
-#ifdef SYNO_BTRFS_GRAB_ROOT_ON_DESTROY_SNAP
+#ifdef MY_ABC_HERE
 	if (NULL == btrfs_grab_fs_root(dest)) {
 		err = -ENOENT;
 		goto out_dput;
@@ -2488,7 +2488,7 @@ out_unlock_dir:
 out_drop_write:
 	mnt_drop_write_file(file);
 out:
-#ifdef SYNO_BTRFS_GRAB_ROOT_ON_DESTROY_SNAP
+#ifdef MY_ABC_HERE
 	if (blGrabRoot) {
 		btrfs_put_fs_root(dest);
 	}
@@ -3326,7 +3326,7 @@ static noinline long btrfs_ioctl_clone(struct file *file, unsigned long srcfd,
 	u64 len = olen;
 	u64 bs = root->fs_info->sb->s_blocksize;
 	int same_inode = 0;
-#ifdef SYNO_BTRFS_CLONE_CHECK_QUOTA 
+#ifdef MY_ABC_HERE
 	u64 reserve_size = 0;
 #endif
 
@@ -3420,7 +3420,7 @@ static noinline long btrfs_ioctl_clone(struct file *file, unsigned long srcfd,
 		if (ret)
 			goto fail_qgroup;
 	}
-#endif /* SYNO_BTRFS_CLONE_CHECK_QUOTA */
+#endif /* MY_ABC_HERE */
 
 	/* determine range to clone */
 	ret = -EINVAL;
@@ -3463,11 +3463,11 @@ static noinline long btrfs_ioctl_clone(struct file *file, unsigned long srcfd,
 
 	unlock_extent(&BTRFS_I(src)->io_tree, off, off + len - 1);
 out_unlock:
-#ifdef SYNO_BTRFS_CLONE_CHECK_QUOTA
+#ifdef MY_ABC_HERE
 	if (root->fs_info->quota_enabled)
 		btrfs_qgroup_free(root, reserve_size);
 fail_qgroup:
-#endif /* SYNO_BTRFS_CLONE_CHECK_QUOTA */
+#endif /* MY_ABC_HERE */
 	if (!same_inode) {
 		if (inode < src) {
 			mutex_unlock(&src->i_mutex);

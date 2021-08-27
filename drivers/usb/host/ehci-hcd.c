@@ -1362,7 +1362,7 @@ MODULE_LICENSE ("GPL");
 #error "missing bus glue for ehci-hcd"
 #endif
 
-#ifdef SYNO_NO_EHCI
+#ifdef MY_ABC_HERE
 /* kernel command line should use syno_no_ehci=1 to skip ehci controller insert*/
 extern int gSynoNoEhci;
 #endif
@@ -1374,7 +1374,7 @@ static int __init ehci_hcd_init(void)
 	if (usb_disabled())
 		return -ENODEV;
 
-#ifdef SYNO_NO_EHCI
+#ifdef MY_ABC_HERE
 	if (gSynoNoEhci) {
 		return -ENODEV;
 	}

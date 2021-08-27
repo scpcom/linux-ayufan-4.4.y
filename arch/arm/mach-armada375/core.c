@@ -1306,7 +1306,7 @@ void __a375_iounmap(void __iomem *addr)
 EXPORT_SYMBOL(__a375_iounmap);
 
 #ifdef CONFIG_SYNO_ARMADA_ARCH_V2
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 extern void syno_mv_net_shutdown();
 #endif
 #define UART1_REG(x)		(PORT1_BASE + ((UART_##x) << 2))
@@ -1317,7 +1317,7 @@ extern void synology_gpio_init(void);
 
 static void synology_power_off(void)
 {
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	/* platform driver will not shutdown when poweroff */
 	syno_mv_net_shutdown();
 #endif

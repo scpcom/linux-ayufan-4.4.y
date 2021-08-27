@@ -445,7 +445,7 @@ ENTRY(cpu_v7_do_resume)
 	ldmia	r0, {r6 - r10}
 #endif
 	mcr	p15, 0, r6, c3, c0, 0	@ Domain ID
-#ifdef CONFIG_SYNO_ALPINE)
+#ifdef CONFIG_SYNO_ALPINE
 #if !defined(CONFIG_ARM_LPAE)
 	ALT_SMP(orr	r1, r1, #TTB_FLAGS_SMP)
 	ALT_UP(orr	r1, r1, #TTB_FLAGS_UP)

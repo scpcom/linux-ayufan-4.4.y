@@ -243,7 +243,7 @@ struct net_device *e1000_get_hw_dev(struct e1000_hw *hw)
 	return adapter->netdev;
 }
 
-#ifdef SYNO_E1000_LED_SWITCH
+#ifdef MY_ABC_HERE
 void e1000_syno_led_switch(int iEnable)
 {
 #ifdef CONFIG_ARCH_GEN3
@@ -4952,19 +4952,19 @@ static int __e1000_shutdown(struct pci_dev *pdev, bool *enable_wake)
 
 			/* Enable WoL for selected modes */
 			e1000_write_phy_reg(hw, 31, 0x0007);
-#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
+#ifdef MY_DEF_HERE
 			udelay(10);
 #endif
 			e1000_write_phy_reg(hw, 30, 0x006d);
-#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
+#ifdef MY_DEF_HERE
 			udelay(10);
 #endif
 			e1000_write_phy_reg(hw, 22, 0x9fff);
-#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
+#ifdef MY_DEF_HERE
 			udelay(10);
 #endif
 			e1000_write_phy_reg(hw, 21, (u16) phy_wol);
-#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
+#ifdef MY_DEF_HERE
 			udelay(10);
 #endif
 

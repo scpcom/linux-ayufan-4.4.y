@@ -61,13 +61,13 @@ disclaimer.
 #include "pnc/mvPnc.h"
 #endif /* CONFIG_MV_ETH_PNC */
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 extern spinlock_t          mii_lock;
 #endif
 
 #define MV_ETH_TOOL_AN_TIMEOUT	5000
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 
 MV_U32 syno_wol_support(struct eth_port *pp)
 {
@@ -1002,7 +1002,7 @@ const struct ethtool_ops mv_eth_tool_ops = {
 	.set_rxfh_indir				= mv_eth_tool_set_rxfh_indir,
 	.get_rxnfc                  = mv_eth_tool_get_rxnfc,
 	.set_rx_ntuple				= mv_eth_tool_set_rx_ntuple,
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	.get_wol	= syno_get_wol,
 	.set_wol	= syno_set_wol,
 #endif

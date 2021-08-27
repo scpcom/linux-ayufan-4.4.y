@@ -280,9 +280,9 @@
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 #include <linux/pci.h>
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 int sysctl_tcp_fin_timeout __read_mostly = TCP_FIN_TIMEOUT;
 
@@ -1475,7 +1475,7 @@ int q_has_frag_list(struct sock *sk){
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(SYNO_RECVFILE)
+#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(MY_ABC_HERE)
 int is_enough_skb_data_for_dma(struct sk_buff *skb, int offset, int len)
 {
 	int start = skb_headlen(skb);
@@ -1628,7 +1628,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	do {
 		u32 offset;
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
         if(flags &  MSG_NOCATCHSIGNAL) {
 			/* Original when we have recvfile(), we remove the following
 			 * sygnal_pending(). But it would cause system hang when smbd
@@ -1652,7 +1652,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 			}
         }
         else
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_SYNO_ARMADA_V2
 		if (flags & MSG_NOCATCHSIG) {
 			if (signal_pending(current)) {
@@ -1722,7 +1722,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 				break;
 
 			if (sk->sk_err) {
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 				if ( (msg->msg_flags & MSG_KERNSPACE) &&
 					ECONNRESET == sk->sk_err )
 					printk("connection reset by peer.\n");
@@ -1891,7 +1891,7 @@ do_prequeue:
 				tp->ucopy.dma_chan = dma_find_channel(DMA_MEMCPY);
 #endif
 
-#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(SYNO_RECVFILE)
+#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(MY_ABC_HERE)
 			/**
 			* For alpine, if there is no enough skb data to satify this request,
 			* we need to use CPU to copy data instead of DMA. The reason is SYNOLOGY RECVFILE
@@ -1925,7 +1925,7 @@ do_prequeue:
 
 				if ((offset + used) == skb->len)
 					copied_early = 1;
-#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(SYNO_RECVFILE)
+#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(MY_ABC_HERE)
 			// This is to match left brace of previous section.
 			} else
 #else
@@ -1933,11 +1933,11 @@ do_prequeue:
 #endif
 #endif
 			{
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 				if(msg->msg_flags & MSG_KERNSPACE)
 					err = skb_copy_datagram_iovec1(skb, offset, msg->msg_iov, used);
 				else
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_SYNO_ARMADA_V2
 				if (msg->msg_flags & MSG_KERNSPACE)
 					err = skb_copy_datagram_to_kernel_iovec(skb,

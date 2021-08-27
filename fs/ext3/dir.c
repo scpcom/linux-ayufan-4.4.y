@@ -83,7 +83,7 @@ int ext3_check_dir_entry (const char * function, struct inode * dir,
 		error_msg = "inode out of bounds";
 
 	if (unlikely(error_msg != NULL))
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit())
 #endif
 		ext3_error (dir->i_sb, function,
@@ -111,7 +111,7 @@ static int ext3_readdir(struct file * filp,
 
 	sb = inode->i_sb;
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 	if ((EXT3_SB(inode->i_sb)->s_es->s_syno_hash_magic != cpu_to_le32(SYNO_HASH_MAGIC)) &&
 		EXT3_HAS_COMPAT_FEATURE(inode->i_sb, EXT3_FEATURE_COMPAT_DIR_INDEX) &&
 #else

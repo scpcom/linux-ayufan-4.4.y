@@ -1011,7 +1011,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			 */
 			qc = ata_qc_from_tag(ap, qc->tag);
 			if (qc) {
-#if defined(SYNO_SPINUP_DELAY)
+#if defined(MY_ABC_HERE)
 				if (IS_SYNO_SPINUP_CMD(qc)) {
 					ata_sff_irq_on(ap);
 					/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
@@ -1028,7 +1028,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 #endif
 					ata_sff_irq_on(ap);
 					ata_qc_complete(qc);
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 				} else {
 					if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag)) {
 						DBGMESG("disk %d:its our insert cmd,don't freeze. cmd 0x%x tag %d feature 0x%x\n",
@@ -1046,7 +1046,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 
 			spin_unlock_irqrestore(ap->lock, flags);
 		} else {
-#if defined(SYNO_SPINUP_DELAY)
+#if defined(MY_ABC_HERE)
 			if (IS_SYNO_SPINUP_CMD(qc)) {
 				/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
 				if (qc->err_mask || 
@@ -1061,7 +1061,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			if (likely(!(qc->err_mask & AC_ERR_HSM)))
 #endif
 				ata_qc_complete(qc);
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 			else {
 				if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag)) {
 					DBGMESG("disk %d:its our insert cmd,don't freeze. cmd 0x%x tag %d feature 0x%x\n",
@@ -1102,13 +1102,13 @@ int ata_sff_hsm_move(struct ata_port *ap, struct ata_queued_cmd *qc,
 {
 	struct ata_link *link = qc->dev->link;
 	struct ata_eh_info *ehi = &link->eh_info;
-#if defined(SYNO_SPINUP_DELAY) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	struct ata_taskfile *tf = &qc->tf;
 #endif
 	unsigned long flags = 0;
 	int poll_next;
 
-#if defined(SYNO_SPINUP_DELAY) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	/* if our ATA_CMD_FPDMA_READ command timeout,
 	 * it will be flushed (ATA_QCFLAG_ACTIVE = 0).
 	 * But it still in workqueue, so we should be ignore it when called by ata_pio_task

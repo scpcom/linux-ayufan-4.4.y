@@ -216,7 +216,7 @@ int ecryptfs_write(struct inode *ecryptfs_inode, char *data, loff_t offset,
 			rc2 = ecryptfs_write_inode_size_to_metadata(
 								ecryptfs_inode);
 			if (rc2) {
-#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 				if (-EDQUOT != rc && -ENOSPC != rc)
 #endif
 

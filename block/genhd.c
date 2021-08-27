@@ -25,7 +25,7 @@
 
 #include "blk.h"
 
-#ifdef SYNO_SYSFS_BLOCK_DEV_LINK
+#ifdef MY_ABC_HERE
 static inline char *make_class_name(const char *name, struct kobject *kobj)
 {
 	char *class_name;
@@ -538,7 +538,7 @@ void register_disk(struct gendisk *disk)
 	struct disk_part_iter piter;
 	struct hd_struct *part;
 	int err;
-#ifdef SYNO_SYSFS_BLOCK_DEV_LINK
+#ifdef MY_ABC_HERE
 	int error;
 #endif
 
@@ -551,7 +551,7 @@ void register_disk(struct gendisk *disk)
 
 	if (device_add(ddev))
 		return;
-#ifdef SYNO_SYSFS_BLOCK_DEV_LINK
+#ifdef MY_ABC_HERE
 	if (ddev->parent) {
 		char *class_name;
 		class_name = make_class_name(ddev->class->name,
@@ -567,7 +567,7 @@ void register_disk(struct gendisk *disk)
 		err = sysfs_create_link(block_depr, &ddev->kobj,
 					kobject_name(&ddev->kobj));
 		if (err) {
-#ifdef SYNO_SYSFS_BLOCK_DEV_LINK
+#ifdef MY_ABC_HERE
 			if (ddev->parent && !error) {
 				char *class_name;
 				class_name = make_class_name(ddev->class->name,
@@ -681,7 +681,7 @@ void del_gendisk(struct gendisk *disk)
 {
 	struct disk_part_iter piter;
 	struct hd_struct *part;
-#ifdef SYNO_SYSFS_BLOCK_DEV_LINK
+#ifdef MY_ABC_HERE
 	struct device *ddev = disk_to_dev(disk);
 #endif
 
@@ -713,7 +713,7 @@ void del_gendisk(struct gendisk *disk)
 	disk->driverfs_dev = NULL;
 	if (!sysfs_deprecated)
 		sysfs_remove_link(block_depr, dev_name(disk_to_dev(disk)));
-#ifdef SYNO_SYSFS_BLOCK_DEV_LINK
+#ifdef MY_ABC_HERE
 	if (ddev && ddev->parent) {
 		char *class_name;
 		class_name = make_class_name(ddev->class->name,

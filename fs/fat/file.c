@@ -267,7 +267,7 @@ static int fat_free(struct inode *inode, int skip)
 			fat_fs_error(sb,
 				     "%s: invalid cluster chain (i_pos %lld)",
 				     __func__, MSDOS_I(inode)->i_pos);
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 			ret = -ECORRUPT;
 #else
 			ret = -EIO;

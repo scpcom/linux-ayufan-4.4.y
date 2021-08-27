@@ -53,7 +53,7 @@ MODULE_PARM_DESC(max_user_congthresh,
  "Global limit for the maximum congestion threshold an "
  "unprivileged user can set");
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 
 #define DEFAULT_XATTR_EXPIRED_TIME 10000
 unsigned long syno_fuse_xattr_expired_time;
@@ -101,7 +101,7 @@ MODULE_PARM_DESC(syno_fuse_xattr_profile_time,
  "PROFILE time"
  " (unit: microsecond)");
 #endif // SYNO_FUSE_PROFILE
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 
 #define FUSE_SUPER_MAGIC 0x65735546
 
@@ -132,7 +132,7 @@ struct fuse_forget_link *fuse_alloc_forget(void)
 	return kzalloc(sizeof(struct fuse_forget_link), GFP_KERNEL);
 }
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 static void syno_fuse_reset_acl_cache_table(struct fuse_inode *fi)
 {
 	int i = 0;
@@ -171,7 +171,7 @@ static struct inode *fuse_alloc_inode(struct super_block *sb)
 	fi->orig_ino = 0;
 	fi->state = 0;
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	syno_fuse_reset_acl_cache_table(fi);
 #endif
 
@@ -200,7 +200,7 @@ static void fuse_destroy_inode(struct inode *inode)
 	BUG_ON(!list_empty(&fi->write_files));
 	BUG_ON(!list_empty(&fi->queued_writes));
 	kfree(fi->forget);
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	syno_fuse_reset_acl_cache_table(fi);
 #endif
 	call_rcu(&inode->i_rcu, fuse_i_callback);
@@ -534,7 +534,7 @@ enum {
 #ifdef CONFIG_FS_SYNO_ACL
 	OPT_SYNOACL,
 #endif
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 	OPT_SYNOMETA_XATTR,
 #endif
 	OPT_ERR
@@ -552,13 +552,13 @@ static const match_table_t tokens = {
 #ifdef CONFIG_FS_SYNO_ACL
 	{OPT_SYNOACL, 			SYNO_ACL_MNT_OPT},
 #endif
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 	{OPT_SYNOMETA_XATTR, 		SYNOMETA_XATTR_MNT_OPT},
 #endif
 	{OPT_ERR,			NULL}
 };
 
-#if defined(CONFIG_FS_SYNO_ACL) || defined(SYNO_FS_OPTIONS)
+#if defined(CONFIG_FS_SYNO_ACL) || defined(MY_ABC_HERE)
 static int parse_fuse_opt(char *opt, struct super_block *sb, struct fuse_mount_data *d, int is_bdev)
 #else
 static int parse_fuse_opt(char *opt, struct fuse_mount_data *d, int is_bdev)
@@ -633,11 +633,11 @@ static int parse_fuse_opt(char *opt, struct fuse_mount_data *d, int is_bdev)
 			sb->s_flags |= MS_SYNOACL;
 			break;
 #endif
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 		case OPT_SYNOMETA_XATTR:
 			sb->s_syno_opt |= SYNO_MS_META_XATTR;
 			break;
-#endif //SYNO_FS_OPTIONS
+#endif //MY_ABC_HERE
 		default:
 			return 0;
 		}
@@ -669,7 +669,7 @@ static int fuse_show_options(struct seq_file *m, struct vfsmount *mnt)
 	if (mnt->mnt_sb->s_flags & MS_SYNOACL)
 		seq_puts(m, ","SYNO_ACL_MNT_OPT);
 #endif
-#ifdef SYNO_FS_OPTIONS
+#ifdef MY_ABC_HERE
 	if (mnt->mnt_sb->s_syno_opt & SYNO_MS_META_XATTR)
 		seq_puts(m, ","SYNOMETA_XATTR_MNT_OPT);
 #endif
@@ -928,7 +928,7 @@ static int set_global_limit(const char *val, struct kernel_param *kp)
 	return 0;
 }
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 static void sanitize_expired_time(unsigned long *expired_time)
 {
 	syno_fuse_xattr_expired_time_seconds = *expired_time;
@@ -949,7 +949,7 @@ static int set_expired_time(const char *val, struct kernel_param *kp)
 
 	return 0;
 }
-#endif // SYNO_GLUSTER_FS
+#endif // MY_ABC_HERE
 
 static void process_init_limits(struct fuse_conn *fc, struct fuse_init_out *arg)
 {
@@ -1130,7 +1130,7 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 
 	sb->s_flags &= ~MS_NOSEC;
 
-#if defined(CONFIG_FS_SYNO_ACL) || defined(SYNO_FS_OPTIONS)
+#if defined(CONFIG_FS_SYNO_ACL) || defined(MY_ABC_HERE)
 	if (!parse_fuse_opt((char *) data, sb, &d, is_bdev))
 #else
 	if (!parse_fuse_opt((char *) data, &d, is_bdev))
@@ -1466,7 +1466,7 @@ static int __init fuse_init(void)
 	sanitize_global_limit(&max_user_bgreq);
 	sanitize_global_limit(&max_user_congthresh);
 
-#ifdef SYNO_GLUSTER_FS
+#ifdef MY_ABC_HERE
 	syno_fuse_xattr_expired_time = DEFAULT_XATTR_EXPIRED_TIME;
 	sanitize_expired_time(&syno_fuse_xattr_expired_time);
 #endif

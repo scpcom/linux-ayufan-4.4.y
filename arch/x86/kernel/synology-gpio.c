@@ -178,7 +178,7 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	int fail_led;
 	int act_led;
 
-#ifdef SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 	extern long g_internal_hd_num;
 
 	if ( 1 >= g_internal_hd_num ) {
@@ -371,7 +371,7 @@ int SYNO_CTRL_FAN_STATUS_GET(int index, int *pValue)
 u8 SYNOEvansportIsBoardNeedPowerUpHDD(u32 disk_id) {
 	u8 ret = 0;
 
-#ifdef  SYNO_HW_VERSION
+#ifdef  MY_ABC_HERE
 	if (syno_is_hw_version(HW_DS214play)) {
 		if (2 >= disk_id ) {
 			ret = 1;
@@ -785,7 +785,7 @@ EVANSPORT_default_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 
 void synology_gpio_init(void)
 {
-#ifdef  SYNO_HW_VERSION
+#ifdef  MY_ABC_HERE
 	if (syno_is_hw_version(HW_DS214play)) {
 		EVANSPORT_214p_GPIO_init(&generic_gpio);
 		printk("Synology Evansport 2 bay GPIO Init\n");
@@ -799,7 +799,7 @@ void synology_gpio_init(void)
 #endif
 		EVANSPORT_default_GPIO_init(&generic_gpio);
 		printk("%s: Failed to get model id or model not supported\n", __func__);
-#ifdef  SYNO_HW_VERSION
+#ifdef  MY_ABC_HERE
 	}
 #endif
 }

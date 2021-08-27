@@ -7,7 +7,7 @@
 #include <linux/hardirq.h>
 #include "ctree.h"
 #include "extent_map.h"
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 #include "btrfs_inode.h"
 #endif
 
@@ -38,7 +38,7 @@ void extent_map_exit(void)
  */
 void extent_map_tree_init(struct extent_map_tree *tree)
 {
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	atomic_set(&tree->nr_extent_maps, 0);
 	tree->inode = 0;
 #endif
@@ -254,7 +254,7 @@ static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 			RB_CLEAR_NODE(&merge->rb_node);
 			free_extent_map(merge);
 
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 			// decreace nr_extent_maps when extent_map dettached from extent_tree
 			WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
 			atomic_dec(&tree->nr_extent_maps);
@@ -278,7 +278,7 @@ static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 		em->generation = max(em->generation, merge->generation);
 		free_extent_map(merge);
 
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 		// decreace nr_extent_maps when extent_map dettached from extent_tree
 		WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
 		atomic_dec(&tree->nr_extent_maps);
@@ -382,7 +382,7 @@ int add_extent_mapping(struct extent_map_tree *tree,
 	if (ret)
 		goto out;
 
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	atomic_inc(&tree->nr_extent_maps);
 	if (tree->inode) {
 		atomic_inc(&tree->inode->root->fs_info->nr_extent_maps);
@@ -474,7 +474,7 @@ int remove_extent_mapping(struct extent_map_tree *tree, struct extent_map *em)
 		list_del_init(&em->list);
 	RB_CLEAR_NODE(&em->rb_node);
 
-#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	// decreace nr_extent_maps when extent_map dettached from extent_tree
 	WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
 	atomic_dec(&tree->nr_extent_maps);

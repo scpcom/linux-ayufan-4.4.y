@@ -367,7 +367,7 @@ static void scsi_device_dev_release_usercontext(struct work_struct *work)
 	scsi_target_reap(scsi_target(sdev));
 
 	kfree(sdev->inquiry);
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 	kfree(sdev->model);
 #endif
 	kfree(sdev);
@@ -449,7 +449,7 @@ void scsi_sysfs_unregister(void)
  * sdev_show_function: macro to create an attr function that can be used to
  * show a non-bit field.
  */
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 #define sdev_show_function(field, format_string)				\
 static ssize_t								\
 sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
@@ -542,7 +542,7 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 		return -EINVAL;
 }
 #endif
-#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
+#ifdef MY_ABC_HERE
 extern void
 ScsiRemapModeSet(struct scsi_device *sdev, unsigned char blAutoRemap);
 static ssize_t
@@ -567,7 +567,7 @@ sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const c
 static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
 #endif
  
-#ifdef SYNO_DISK_HIBERNATION
+#ifdef MY_ABC_HERE
 /* FIXME: We don't know why SAS disks led blinking when open it, so we add a sysfs interface to prevent it  
  * The following code is copied from "case SD_IOCTL_IDLE: " ind "sd.c" */
 static ssize_t
@@ -633,7 +633,7 @@ sdev_rd_attr (queue_depth, "%d\n");
 sdev_rd_attr (type, "%d\n");
 sdev_rd_attr (scsi_level, "%d\n");
 sdev_rd_attr (vendor, "%.8s\n");
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 sdev_rd_attr (model, "%."SYNO_DISK_MODEL_LEN"s\n");
 #else
 sdev_rd_attr (model, "%.16s\n");
@@ -833,10 +833,10 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_iodone_cnt.attr,
 	&dev_attr_ioerr_cnt.attr,
 	&dev_attr_modalias.attr,
-#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
+#ifdef MY_ABC_HERE
 	&dev_attr_auto_remap.attr,
 #endif
-#ifdef SYNO_DISK_HIBERNATION
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_idle_time.attr,
 	&dev_attr_syno_spindown.attr,
 #endif
@@ -1126,10 +1126,10 @@ void __scsi_remove_device(struct scsi_device *sdev)
 	put_device(dev);
 }
 
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 int (*funcSYNORaidDiskUnplug)(char *szDiskName) = NULL;
 EXPORT_SYMBOL(funcSYNORaidDiskUnplug);
-#endif /* SYNO_RAID_DEVICE_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 /**
  * scsi_remove_device - unregister a device from the scsi bus
@@ -1145,7 +1145,7 @@ void scsi_remove_device(struct scsi_device *sdev)
 #ifdef SYNO_SAS_SPINUP_DELAY
 	SynoSpinupRemove(sdev);
 #endif /* SYNO_SAS_SPINUP_DELAY */
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 	if (funcSYNORaidDiskUnplug) {
 		funcSYNORaidDiskUnplug(sdev->syno_disk_name);
 	}

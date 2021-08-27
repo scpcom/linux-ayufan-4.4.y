@@ -1990,13 +1990,13 @@ static ssize_t n_tty_write(struct tty_struct *tty, struct file *file,
 				tty->ops->flush_chars(tty);
 		} else {
 			while (nr > 0) {
-#if defined(SYNO_CVE_2014_0196) && !defined(CONFIG_ARMADA_370)
+#if defined(MY_ABC_HERE) && !defined(CONFIG_ARMADA_370)
 				mutex_lock(&tty->output_lock);
-#endif /* SYNO_CVE_2014_0196 */
+#endif /* MY_ABC_HERE */
 				c = tty->ops->write(tty, b, nr);
-#if defined(SYNO_CVE_2014_0196) && !defined(CONFIG_ARMADA_370)
+#if defined(MY_ABC_HERE) && !defined(CONFIG_ARMADA_370)
 				mutex_unlock(&tty->output_lock);
-#endif /* SYNO_CVE_2014_0196 */
+#endif /* MY_ABC_HERE */
 				if (c < 0) {
 					retval = c;
 					goto break_out;

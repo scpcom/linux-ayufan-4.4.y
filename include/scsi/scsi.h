@@ -589,7 +589,7 @@ extern int gBadSectorTest;
 #define SynoGetInternalDiskSeq(szBdevName) (szBdevName[2] - 'a')
 #endif
 
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 #define SYNO_DISK_MODEL_LEN "24"
 #define SYNO_DISK_MODEL_NUM 24
 #endif

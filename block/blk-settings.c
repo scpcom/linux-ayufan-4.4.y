@@ -353,7 +353,7 @@ void blk_queue_max_segment_size(struct request_queue *q, unsigned int max_size)
 }
 EXPORT_SYMBOL(blk_queue_max_segment_size);
 
-#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 /*
  * Export this function for device mapper layer
  * to set logical block size via limits
@@ -383,7 +383,7 @@ EXPORT_SYMBOL(syno_limits_logical_block_size);
  **/
 void blk_queue_logical_block_size(struct request_queue *q, unsigned short size)
 {
-#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 	syno_limits_logical_block_size(&q->limits, size);
 #else
 	q->limits.logical_block_size = size;

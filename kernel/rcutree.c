@@ -213,7 +213,7 @@ module_param(blimit, long, 0);
 module_param(qhimark, long, 0);
 module_param(qlowmark, long, 0);
 
-#ifdef SYNO_DISABLE_RCU_CPU_STALL_DETECTOR
+#ifdef MY_ABC_HERE
 int rcu_cpu_stall_suppress __read_mostly = 1;
 #else
 int rcu_cpu_stall_suppress __read_mostly;
@@ -539,7 +539,7 @@ static int rcu_implicit_dynticks_qs(struct rcu_data *rdp)
 
 #endif /* #else #ifdef CONFIG_NO_HZ */
 
-#ifndef SYNO_DISABLE_RCU_CPU_STALL_DETECTOR
+#ifndef MY_ABC_HERE
 int rcu_cpu_stall_suppress __read_mostly;
 #endif
 

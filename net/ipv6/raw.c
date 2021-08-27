@@ -276,7 +276,7 @@ static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 				sk->sk_bound_dev_if = addr->sin6_scope_id;
 			}
 
-#ifdef SYNO_IPV6_LINKLOCAL
+#ifdef MY_ABC_HERE
 			if (!sk->sk_bound_dev_if) {
 				unsigned flags;
 				for_each_netdev(sock_net(sk), dev) {

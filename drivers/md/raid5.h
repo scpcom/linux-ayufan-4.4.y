@@ -209,7 +209,7 @@ struct stripe_head {
 	short			ddf_layout;/* use DDF ordering to calculate Q */
 	unsigned long		state;		/* state flags */
 	atomic_t		count;	      /* nr of active thread/requests */
-#ifdef SYNO_KERNEL_3_RAID5_REVERT_STRIPE_LOCK_REMOVAL
+#ifdef MY_ABC_HERE
 	spinlock_t		lock;
 #endif
 	int			bm_seq;	/* sequence number for bitmap flushes */
@@ -296,7 +296,7 @@ struct stripe_head_state {
  * Stripe state
  */
 enum {
-#ifndef SYNO_KERNEL_3_RAID5_REVERT_STRIPE_LOCK_REMOVAL
+#ifndef MY_ABC_HERE
 	STRIPE_ACTIVE,
 #endif
 	STRIPE_HANDLE,
@@ -318,7 +318,7 @@ enum {
 	STRIPE_DISCARD,
 };
 
-#ifdef SYNO_RAID_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 #define STRIPE_NORETRY		17
 #endif
 
@@ -517,7 +517,7 @@ extern int md_raid5_congested(struct mddev *mddev, int bits);
 extern void md_raid5_kick_device(struct r5conf *conf);
 extern int raid5_set_cache_size(struct mddev *mddev, int size);
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 #define sector_mod(a,b) sector_div(a,b)
 #endif
 

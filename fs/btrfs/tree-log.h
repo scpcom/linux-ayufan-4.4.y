@@ -27,7 +27,7 @@
 
 struct btrfs_log_ctx {
 	int log_ret;
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	int log_transid;
 #endif
@@ -37,7 +37,7 @@ struct btrfs_log_ctx {
 static inline void btrfs_init_log_ctx(struct btrfs_log_ctx *ctx)
 {
 	ctx->log_ret = 0;
-#ifdef SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	ctx->log_transid = 0;
 #endif

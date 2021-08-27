@@ -45,7 +45,7 @@ static DEFINE_PER_CPU(unsigned long, hrtimer_interrupts);
 static DEFINE_PER_CPU(unsigned long, hrtimer_interrupts_saved);
 static DEFINE_PER_CPU(struct perf_event *, watchdog_ev);
 #endif
-#ifdef SYNO_SOFTLOCKUP_COUNTER
+#ifdef MY_ABC_HERE
 static DEFINE_PER_CPU(unsigned long, softlockup_counter);
 #endif
 
@@ -106,7 +106,7 @@ __setup("nosoftlockup", nosoftlockup_setup);
  */
 static int get_softlockup_thresh(void)
 {
-#ifdef SYNO_EXTEND_SOFTLOCK_THRESH
+#ifdef MY_ABC_HERE
 	return watchdog_thresh * 4;
 #else
 	return watchdog_thresh * 2;
@@ -306,7 +306,7 @@ static enum hrtimer_restart watchdog_timer_fn(struct hrtimer *hrtimer)
 		if (__this_cpu_read(soft_watchdog_warn) == true)
 			return HRTIMER_RESTART;
 
-#ifdef SYNO_SOFTLOCKUP_COUNTER
+#ifdef MY_ABC_HERE
 		if (__this_cpu_read(softlockup_counter) >= SYNO_SOFTLOCKUP_COUNTER_MAX) {
 			__this_cpu_write(soft_watchdog_warn, false);
 			return HRTIMER_RESTART;
@@ -469,7 +469,7 @@ static int watchdog_enable(int cpu)
 		kthread_bind(p, cpu);
 		per_cpu(watchdog_touch_ts, cpu) = 0;
 		per_cpu(softlockup_watchdog, cpu) = p;
-#ifdef SYNO_SOFTLOCKUP_COUNTER
+#ifdef MY_ABC_HERE
 		per_cpu(softlockup_counter, cpu) = 0;
 #endif
 		wake_up_process(p);
