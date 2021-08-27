@@ -828,26 +828,6 @@ static void xhci_free_tt_info(struct xhci_hcd *xhci,
 			break;
 		}
 	}
-	/* Cautionary measure in case the hub was disconnected before we
-	 * stored the TT information.
-	 */
-	if (tt_info->slot_id != slot_id)
-		return;
-
-	tt_next = tt->next;
-	tt_info = list_entry(tt, struct xhci_tt_bw_info,
-			tt_list);
-		/* Multi-TT hubs will have more than one entry */
-	do {
-		list_del(tt);
-			kfree(tt_info);
-		tt = tt_next;
-		if (list_empty(tt_list_head))
-			break;
-		tt_next = tt->next;
-		tt_info = list_entry(tt, struct xhci_tt_bw_info,
-				tt_list);
-	} while (tt_info->slot_id == slot_id);
 }
 
 int xhci_alloc_tt_info(struct xhci_hcd *xhci,

@@ -139,6 +139,14 @@
  *      int random_input_wait(void);
  *
 #endif
+ * add_device_randomness() is for adding data to the random pool that
+ * is likely to differ between two devices (or possibly even per boot).
+ * This would be things like MAC addresses or serial numbers, or the
+ * read-out of the RTC. This does *not* add any actual entropy to the
+ * pool, but it initializes the pool to different values for devices
+ * that might otherwise be identical and have very little entropy
+ * available to them (particularly common in the embedded world).
+ *
  * add_input_randomness() uses the input layer interrupt timing, as well as
  * the event type information from the hardware.
  *
@@ -489,7 +497,7 @@ static __u32 const twist_table[8] = {
  * it's cheap to do so and helps slightly in the expected case where
  * the entropy is concentrated in the low-order bits.
  */
-static void mix_pool_bytes_extract(struct entropy_store *r, const void *in,
+static void __mix_pool_bytes(struct entropy_store *r, const void *in,
 			     int nbytes, __u8 out[64])
 {
 	unsigned long i, j, tap1, tap2, tap3, tap4, tap5;
@@ -843,7 +851,7 @@ void add_disk_randomness(struct gendisk *disk)
  */
 void random_input_words(__u32 *buf, size_t wordcount, int ent_count)
 {
-	mix_pool_bytes(&input_pool, buf, wordcount*4);
+	mix_pool_bytes(&input_pool, buf, wordcount*4, NULL);
 
 	credit_entropy_bits(&input_pool, ent_count);
 
@@ -1147,10 +1155,10 @@ void get_random_bytes_arch(void *buf, int nbytes)
 		nbytes -= chunk;
 	}
 
+	if (nbytes)
 		extract_entropy(&nonblocking_pool, p, nbytes, 0, 0);
 }
 EXPORT_SYMBOL(get_random_bytes_arch);
-
 
 /*
  * init_std_data - initialize pool with system data

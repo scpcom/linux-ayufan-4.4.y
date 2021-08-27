@@ -1928,6 +1928,12 @@ __alloc_pages_direct_compact(gfp_t gfp_mask, unsigned int order,
 		 * but not enough to satisfy watermarks.
 		 */
 		count_vm_event(COMPACTFAIL);
+
+		/*
+		 * As async compaction considers a subset of pageblocks, only
+		 * defer if the failure was a sync compaction failure.
+		 */
+		if (sync_migration)
 			defer_compaction(preferred_zone);
 
 		cond_resched();
@@ -2559,9 +2565,10 @@ bool skip_free_areas_node(unsigned int flags, int nid)
 	if (!(flags & SHOW_MEM_FILTER_NODES))
 		goto out;
 
-	get_mems_allowed();
+	do {
+		cpuset_mems_cookie = get_mems_allowed();
 		ret = !node_isset(nid, cpuset_current_mems_allowed);
-	put_mems_allowed();
+	} while (!put_mems_allowed(cpuset_mems_cookie));
 out:
 	return ret;
 }
@@ -3437,26 +3444,34 @@ static void setup_zone_migrate_reserve(struct zone *zone)
 		if (page_to_nid(page) != zone_to_nid(zone))
 			continue;
 
-		/* Blocks with reserved pages will never free, skip them. */
+		block_migratetype = get_pageblock_migratetype(page);
+
+		/* Only test what is necessary when the reserves are not met */
+		if (reserve > 0) {
+			/*
+			 * Blocks with reserved pages will never free, skip
+			 * them.
+			 */
 			block_end_pfn = min(pfn + pageblock_nr_pages, end_pfn);
 			if (pageblock_is_reserved(pfn, block_end_pfn))
 				continue;
 
-		block_migratetype = get_pageblock_migratetype(page);
-
 			/* If this block is reserved, account for it */
-		if (reserve > 0 && block_migratetype == MIGRATE_RESERVE) {
+			if (block_migratetype == MIGRATE_RESERVE) {
 				reserve--;
 				continue;
 			}
 
 			/* Suitable for reserving if this block is movable */
-		if (reserve > 0 && block_migratetype == MIGRATE_MOVABLE) {
-			set_pageblock_migratetype(page, MIGRATE_RESERVE);
-			move_freepages_block(zone, page, MIGRATE_RESERVE);
+			if (block_migratetype == MIGRATE_MOVABLE) {
+				set_pageblock_migratetype(page,
+							MIGRATE_RESERVE);
+				move_freepages_block(zone, page,
+							MIGRATE_RESERVE);
 				reserve--;
 				continue;
 			}
+		}
 
 		/*
 		 * If the reserve is met and this is a previous reserved block,

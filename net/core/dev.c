@@ -4188,7 +4188,6 @@ static inline struct net_device *dev_from_same_bucket(struct seq_file *seq, loff
 		if (++count == offset)
 			return dev;
 	}
-	}
 
 	return NULL;
 }
