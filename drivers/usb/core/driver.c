@@ -34,15 +34,15 @@
 
 #include "usb.h"
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HAS_SDCARDREADER
 #include <linux/synobios.h>
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_COPY
 extern int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HAS_SDCARDREADER
 extern int (*funcSYNOGetHwCapability)(CAPABILITY *);
 extern int blIsCardReader(struct usb_device *usbdev);
 
@@ -807,14 +807,14 @@ static int usb_uevent(struct device *dev, struct kobj_uevent_env *env)
 			   usb_dev->descriptor.bDeviceProtocol))
 		return -ENOMEM;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_COPY
 	if (blIsUSBDeviceAtFrontPort(usb_dev)) {
 		if (add_uevent_var(env, "FRONTPORT=1"))
 			return -ENOMEM;
 	}
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HAS_SDCARDREADER
 	if(has_cardreader()) {
 		if (blIsCardReader(usb_dev)) {
 			if (add_uevent_var(env, "CARDREADER=1"))

@@ -25,7 +25,7 @@
 #include "synoacl_int.h"
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 #include <linux/synolib.h>
 extern int SynoDebugFlag;
 extern int syno_hibernation_log_sec;
@@ -137,7 +137,7 @@ int vfs_lstat(const char __user *name, struct kstat *stat)
 }
 EXPORT_SYMBOL(vfs_lstat);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 
 int __always_inline syno_vfs_getattr(struct path *path, struct kstat *stat, int stat_flags)
 {
@@ -158,13 +158,13 @@ int __always_inline syno_vfs_getattr(struct path *path, struct kstat *stat, int 
 			is_support = 0;
 
 		if (!is_support) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 			stat->SynoCreateTime = inode->i_CreateTime;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 			stat->SynoMode = inode->i_mode2;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 			stat->syno_archive_version = inode->i_archive_version;
 #endif
 		}
@@ -351,7 +351,7 @@ SYSCALL_DEFINE2(newstat, const char __user *, filename,
 	return cp_new_stat(&stat, statbuf);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
 SYSCALL_DEFINE2(SYNOArchiveOverwrite, unsigned int, fd, unsigned int, flags)
 {
 	int ret = -EBADF;
@@ -376,7 +376,7 @@ fput_out:
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
 #include "../fs/ecryptfs/ecryptfs_kernel.h"
 int (*fecryptfs_decode_and_decrypt_filename)(char **plaintext_name,
                                         size_t *plaintext_name_size,
@@ -580,7 +580,7 @@ SYSCALL_DEFINE3(readlink, const char __user *, path, char __user *, buf,
 	return sys_readlinkat(AT_FDCWD, path, buf, bufsiz);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 /* This stat is used by caseless protocol.
  * The filename will be convert to real filename and return to user space.
  * In caller, the length of filename must equal or be larger than SYNO_SMB_PSTRING_LEN.
@@ -621,7 +621,7 @@ int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct kstat *s
 #endif
 		}
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 	if (error && SynoDebugFlag) {
 		printk("%s(%d) convert name:[%s], error:[%d]\n",__FUNCTION__,__LINE__,filename, error);
 	}
@@ -762,7 +762,7 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, const char __user *, filename,
 }
 
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 struct SYNOSTAT64 {
 	struct stat64 st;
 	struct SYNOSTAT_EXTRA ext;
@@ -841,7 +841,7 @@ static int do_SYNOStat(char __user * filename, int nofollowLink, int flags, stru
 	struct kstat kst;
 
 	if (flags & SYNOST_IS_CASELESS) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 		error = __SYNOCaselessStat(filename, nofollowLink, &kst, &lastComponent, flags);
 		if (-ENOENT == error) {
 			if (pSt) {

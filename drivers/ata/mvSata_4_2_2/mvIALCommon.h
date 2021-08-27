@@ -62,11 +62,11 @@ extern "C" {
 /* typedefs */
  
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_SATA_MV_EH) || defined(SYNO_SATA_INFO) || defined(SYNO_SATA_BAD_SECTOR_AUTO_REMAP)
 #define syno_eh_printk(pMvSataAdapter, channel, fmt, args...) \
         printk("mvSata[%d %d]: "fmt".\n", pMvSataAdapter->adapterId, channel, ##args)
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_EH
 extern struct workqueue_struct *mvSata_aux_wq;
 #endif
 
@@ -156,7 +156,7 @@ void mvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                    MV_U8 channelIndex,
                    MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt);
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_BLOCK_REQUEST_ERROR_NODEV) || defined(SYNO_SATA_MV_EH) || defined(SYNO_SATA_DETECT_FIX)
 void SynomvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                    MV_U8 channelIndex,
                    MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt);
@@ -182,7 +182,7 @@ void syno_mvSata_pm_power_ctl(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt,
                               MV_U8 blHotplug);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_EH
 void SynoChannelErrorHandle(struct work_struct *work);
 extern void channel_do_scsi_done(MV_VOID_PTR pAdapter, struct mvSataAdapter *pSataAdapter, MV_U8 channel);
 extern void SynoInitChannelEH(MV_VOID_PTR *pAdapter, MV_SATA_ADAPTER *pMvSataAdapter);
@@ -219,7 +219,7 @@ MV_BOOLEAN IALInitChannel(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex);
 void IALReleaseChannel(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex);
 MV_BOOLEAN IALBusChangeNotify(MV_SATA_ADAPTER *pSataAdapter,
                               MV_U8 channelIndex);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_PMP_UEVENT
 MV_BOOLEAN IALBusChangeNotifyEx(MV_SATA_ADAPTER *pSataAdapter, 
                                 MV_U8 channelIndex, 
                                 MV_U16 targetsToRemove,

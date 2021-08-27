@@ -338,7 +338,7 @@ static bool btrfs_is_valid_xattr(const char *name)
 			XATTR_SECURITY_PREFIX_LEN) ||
 	       !strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN) ||
 	       !strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN) ||
-#ifdef MY_ABC_HERE
+#ifdef SYNO_XATTR
 	       !strncmp(name, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN) ||
 #endif
 	       !strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN);

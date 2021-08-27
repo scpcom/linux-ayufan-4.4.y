@@ -83,7 +83,7 @@ void hfsplus_cat_set_perms(struct inode *inode, struct hfsplus_perm *perms)
 
 	perms->userflags = HFSPLUS_I(inode)->userflags;
 	perms->mode = cpu_to_be16(inode->i_mode);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_PORTING_3_9
 	perms->owner = cpu_to_be32(inode->i_uid);
 	perms->group = cpu_to_be32(inode->i_gid);
 #else

@@ -534,7 +534,7 @@ enum {
 #ifdef CONFIG_FS_SYNO_ACL
 	OPT_SYNOACL,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_OPTIONS
 	OPT_SYNOMETA_XATTR,
 #endif
 	OPT_ERR
@@ -552,13 +552,13 @@ static const match_table_t tokens = {
 #ifdef CONFIG_FS_SYNO_ACL
 	{OPT_SYNOACL, 			SYNO_ACL_MNT_OPT},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_OPTIONS
 	{OPT_SYNOMETA_XATTR, 		SYNOMETA_XATTR_MNT_OPT},
 #endif
 	{OPT_ERR,			NULL}
 };
 
-#if defined(CONFIG_FS_SYNO_ACL) || defined(MY_ABC_HERE)
+#if defined(CONFIG_FS_SYNO_ACL) || defined(SYNO_FS_OPTIONS)
 static int parse_fuse_opt(char *opt, struct super_block *sb, struct fuse_mount_data *d, int is_bdev)
 #else
 static int parse_fuse_opt(char *opt, struct fuse_mount_data *d, int is_bdev)
@@ -633,7 +633,7 @@ static int parse_fuse_opt(char *opt, struct fuse_mount_data *d, int is_bdev)
 			sb->s_flags |= MS_SYNOACL;
 			break;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_OPTIONS
 		case OPT_SYNOMETA_XATTR:
 			sb->s_syno_opt |= SYNO_MS_META_XATTR;
 			break;
@@ -669,7 +669,7 @@ static int fuse_show_options(struct seq_file *m, struct vfsmount *mnt)
 	if (mnt->mnt_sb->s_flags & MS_SYNOACL)
 		seq_puts(m, ","SYNO_ACL_MNT_OPT);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_OPTIONS
 	if (mnt->mnt_sb->s_syno_opt & SYNO_MS_META_XATTR)
 		seq_puts(m, ","SYNOMETA_XATTR_MNT_OPT);
 #endif
@@ -1127,7 +1127,7 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 
 	sb->s_flags &= ~MS_NOSEC;
 
-#if defined(CONFIG_FS_SYNO_ACL) || defined(MY_ABC_HERE)
+#if defined(CONFIG_FS_SYNO_ACL) || defined(SYNO_FS_OPTIONS)
 	if (!parse_fuse_opt((char *) data, sb, &d, is_bdev))
 #else
 	if (!parse_fuse_opt((char *) data, &d, is_bdev))

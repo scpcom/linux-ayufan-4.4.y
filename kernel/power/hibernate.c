@@ -871,7 +871,7 @@ close_finish:
 	goto Finish;
 }
 
-#ifndef MY_DEF_HERE
+#ifndef SYNO_HIBERNATE_TO_DISK
 late_initcall(software_resume);
 
 #endif

@@ -120,7 +120,7 @@ struct r1bio {
 	int			read_disk;
 
 	struct list_head	retry_list;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
 	unsigned int read_failed;
 	int orig_disk_idx;
 #endif

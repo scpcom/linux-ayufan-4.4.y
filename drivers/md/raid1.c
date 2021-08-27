@@ -58,7 +58,7 @@ static int max_queued_requests = 1024;
 static void allow_barrier(struct r1conf *conf);
 static void lower_barrier(struct r1conf *conf);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 static unsigned char IsDiskErrorSet(struct mddev *mddev)
 {
 	int i;
@@ -78,7 +78,7 @@ END:
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 static inline unsigned char SynoIsRaidReachMaxDegrade(struct mddev *mddev)
 {
 	struct r1conf *conf = mddev->private;
@@ -336,7 +336,7 @@ static void raid1_end_read_request(struct bio *bio, int error)
 	 */
 	update_head_pos(mirror, r1_bio);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
 		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
 		SynoAutoRemapReport(conf->mddev, r1_bio->sector, conf->mirrors[mirror].rdev->bdev);
@@ -344,7 +344,7 @@ static void raid1_end_read_request(struct bio *bio, int error)
 #endif
 
 	if (uptodate)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
 	{
 		if (r1_bio->read_failed) {
 			if (mirror == r1_bio->orig_disk_idx) {
@@ -369,7 +369,7 @@ static void raid1_end_read_request(struct bio *bio, int error)
 		if (r1_bio->mddev->degraded == conf->raid_disks ||
 		    (r1_bio->mddev->degraded == conf->raid_disks-1 &&
 		     !test_bit(Faulty, &conf->mirrors[mirror].rdev->flags)))
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 			/**
 			 * We don't change here, because the condition has been matched
 			 * for us.
@@ -378,9 +378,9 @@ static void raid1_end_read_request(struct bio *bio, int error)
 			uptodate = 1;
 		spin_unlock_irqrestore(&conf->device_lock, flags);
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_RAID_SECTOR_STATUS_REPORT) && defined(SYNO_BLOCK_REQUEST_ERROR_NODEV)
 		if (!IsDeviceDisappear(conf->mirrors[mirror].rdev->bdev)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
 			SynoReportBadSector(bio->bi_sector, READ,
 								conf->mddev->md_minor, conf->mirrors[mirror].rdev->bdev, __FUNCTION__);
@@ -470,7 +470,7 @@ static void raid1_end_write_request(struct bio *bio, int error)
 	 * 'one mirror IO has finished' event handler:
 	 */
 	if (!uptodate) {
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_RAID_SECTOR_STATUS_REPORT) && defined(SYNO_BLOCK_REQUEST_ERROR_NODEV)
 		if (!IsDeviceDisappear(conf->mirrors[mirror].rdev->bdev)) {
 			SynoReportBadSector(bio->bi_sector, WRITE, conf->mddev->md_minor,
 					conf->mirrors[mirror].rdev->bdev, __FUNCTION__);
@@ -1002,7 +1002,7 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 	r1_bio->state = 0;
 	r1_bio->mddev = mddev;
 	r1_bio->sector = bio->bi_sector;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
 	r1_bio->read_failed = 0;
 	r1_bio->orig_disk_idx = -1;
 #endif
@@ -1300,7 +1300,7 @@ static void status(struct seq_file *seq, struct mddev *mddev)
 	rcu_read_lock();
 	for (i = 0; i < conf->raid_disks; i++) {
 		struct md_rdev *rdev = rcu_dereference(conf->mirrors[i].rdev);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 		seq_printf(seq, "%s",
 				   rdev && test_bit(In_sync, &rdev->flags) ?
 				   (test_bit(DiskError, &rdev->flags) ?  "E" : "U") : "_");
@@ -1313,7 +1313,7 @@ static void status(struct seq_file *seq, struct mddev *mddev)
 	seq_printf(seq, "]");
 }
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_RAID_DEVICE_NOTIFY) || defined(SYNO_RAID_STATUS_DISKERROR)
 void syno_error_common(struct mddev *mddev, struct md_rdev *rdev)
 {
 	char b[BDEVNAME_SIZE];
@@ -1323,15 +1323,15 @@ void syno_error_common(struct mddev *mddev, struct md_rdev *rdev)
 		unsigned long flags;
 		spin_lock_irqsave(&conf->device_lock, flags);
 		mddev->degraded++;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 		if (mddev->degraded >= conf->raid_disks) {
 			if (0 == mddev->nodev_and_crashed) {
 				mddev->nodev_and_crashed = 1;
 			}
 		}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 		clear_bit(DiskError, &rdev->flags);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RAID_STATUS_DISKERROR */
 #endif
 		set_bit(Faulty, &rdev->flags);
 		spin_unlock_irqrestore(&conf->device_lock, flags);
@@ -1410,7 +1410,7 @@ void syno_error_for_internal(struct mddev *mddev, struct md_rdev *rdev)
 
 	if (test_bit(In_sync, &rdev->flags)
 	    && (conf->raid_disks - mddev->degraded) == 1){
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 			/**
 			 * set it to DiskError, scemd would remount read only as soon as
 			 * possible. File system would also remount read only when it
@@ -1420,7 +1420,7 @@ void syno_error_for_internal(struct mddev *mddev, struct md_rdev *rdev)
 				set_bit(DiskError, &rdev->flags);
 				set_bit(MD_CHANGE_DEVS, &mddev->flags);
 			}
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RAID_STATUS_DISKERROR */
 			/*
 			 * find out the disk in sync now, set it to faulty let it fail to building parity
 			 */
@@ -1449,7 +1449,7 @@ void syno_error_for_internal(struct mddev *mddev, struct md_rdev *rdev)
 	syno_error_common(mddev, rdev);
 }
 
-#else /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
+#else /* defined(SYNO_RAID_DEVICE_NOTIFY) || defined(SYNO_RAID_STATUS_DISKERROR) */
 
 static void error(struct mddev *mddev, struct md_rdev *rdev)
 {
@@ -1462,7 +1462,7 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	 * next level up know.
 	 * else mark the drive as failed
 	 */
-#ifndef MY_ABC_HERE
+#ifndef SYNO_RAID_DEVICE_NOTIFY
 	/**
 	 * Default raid1 not permit there has no device on it. So we
 	 * must jump it, and let latet request done directly
@@ -1499,7 +1499,7 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	       mdname(mddev), bdevname(rdev->bdev, b),
 	       mdname(mddev), conf->raid_disks - mddev->degraded);
 }
-#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
+#endif /* defined(SYNO_RAID_DEVICE_NOTIFY) || defined(SYNO_RAID_STATUS_DISKERROR) */
 
 static void print_conf(struct r1conf *conf)
 {
@@ -1542,7 +1542,7 @@ static int raid1_spare_active(struct mddev *mddev)
 	int count = 0;
 	unsigned long flags;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 	if (IsDiskErrorSet(mddev)) {
 		return 0;
 	}
@@ -1579,7 +1579,7 @@ static int raid1_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 	int first = 0;
 	int last = mddev->raid_disks - 1;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 	if (IsDiskErrorSet(mddev)) {
 		return -EINVAL;
 	}
@@ -1669,7 +1669,7 @@ abort:
 static void end_sync_read(struct bio *bio, int error)
 {
 	struct r1bio *r1_bio = bio->bi_private;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 	struct r1conf *conf = r1_bio->mddev->private;
 	int mirror = r1_bio->read_disk;
 	unsigned char uptodate = test_bit(BIO_UPTODATE, &bio->bi_flags);
@@ -1682,8 +1682,8 @@ static void end_sync_read(struct bio *bio, int error)
 	 * or re-read if the read failed.
 	 * We don't do much here, just schedule handling by raid1d
 	 */
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#ifdef SYNO_AUTO_REMAP_REPORT
 	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
 		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
 		SynoAutoRemapReport(conf->mddev, r1_bio->sector, conf->mirrors[mirror].rdev->bdev);
@@ -1695,7 +1695,7 @@ static void end_sync_read(struct bio *bio, int error)
 		if (IsDeviceDisappear(conf->mirrors[mirror].rdev->bdev)) {
 			syno_md_error(r1_bio->mddev, conf->mirrors[mirror].rdev);
 		}else{
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
 			/*
 			 * No need prepare for end_sync_read retry, because it not going here
 			 * Please refer sync_request_write
@@ -1737,7 +1737,7 @@ static void end_sync_write(struct bio *bio, int error)
 			s += sync_blocks;
 			sectors_to_go -= sync_blocks;
 		} while (sectors_to_go > 0);
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_RAID_SECTOR_STATUS_REPORT) && defined(SYNO_BLOCK_REQUEST_ERROR_NODEV)
 		if (!IsDeviceDisappear(conf->mirrors[mirror].rdev->bdev)) {
 			SynoReportBadSector(bio->bi_sector, WRITE,
 								conf->mddev->md_minor, conf->mirrors[mirror].rdev->bdev, __FUNCTION__);
@@ -2238,7 +2238,7 @@ static void handle_sync_write_finished(struct r1conf *conf, struct r1bio *r1_bio
 		}
 		if (!test_bit(BIO_UPTODATE, &bio->bi_flags) &&
 		    test_bit(R1BIO_WriteError, &r1_bio->state)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 			if (IsDeviceDisappear(rdev->bdev)) {
 				syno_md_error(conf->mddev, rdev);
 			} else
@@ -2266,7 +2266,7 @@ static void handle_write_finished(struct r1conf *conf, struct r1bio *r1_bio)
 			 * narrow down and record precise write
 			 * errors.
 			 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 			if (IsDeviceDisappear(conf->mirrors[m].rdev->bdev)) {
 				syno_md_error(conf->mddev, conf->mirrors[m].rdev);
 				set_bit(R1BIO_Degraded, &r1_bio->state);
@@ -2304,7 +2304,7 @@ static void handle_read_error(struct r1conf *conf, struct r1bio *r1_bio)
 	 * This is all done synchronously while the array is
 	 * frozen
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 	if (!conf->mirrors[r1_bio->read_disk].rdev || IsDeviceDisappear(conf->mirrors[r1_bio->read_disk].rdev->bdev)) {
 		syno_md_error(mddev, conf->mirrors[r1_bio->read_disk].rdev);
 	} else
@@ -2318,14 +2318,14 @@ static void handle_read_error(struct r1conf *conf, struct r1bio *r1_bio)
 		md_error(mddev, conf->mirrors[r1_bio->read_disk].rdev);
 
 	bio = r1_bio->bios[r1_bio->read_disk];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_DEVICE_RELEASE_NO_NAME
 #else
 	bdevname(bio->bi_bdev, b);
 #endif
 read_more:
 	disk = read_balance(conf, r1_bio, &max_sectors);
 	if (disk == -1) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 		if (mddev->nodev_and_crashed) {
 			/* Oringinal raid1 didn't think about this */
 			printk(KERN_ALERT "md/raid1: no bdev: unrecoverable I/O"
@@ -2333,7 +2333,7 @@ read_more:
 					(unsigned long long)r1_bio->sector);
 		}else
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_DEVICE_RELEASE_NO_NAME
 		printk(KERN_ALERT "md/raid1:%s: unrecoverable I/O"
 		       " read error for block %llu\n",
 		       mdname(mddev), (unsigned long long)r1_bio->sector);
@@ -2495,7 +2495,7 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr, int *skipp
 		if (init_resync(conf))
 			return 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 	/**
 	 * when last one disk has bad sector or r/w error.
 	 * We just freeze any sync request. Because it is crashed now.
@@ -2517,7 +2517,7 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr, int *skipp
 #endif
 
 	max_sector = mddev->dev_sectors;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 	if (sector_nr >= max_sector || *skipped == 1) {
 #else
 	if (sector_nr >= max_sector) {
@@ -3020,7 +3020,7 @@ static int raid1_resize(struct mddev *mddev, sector_t sectors)
 	 * worth it.
 	 */
 	 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 	if (IsDiskErrorSet(mddev)) {
 		return -EINVAL;
 	}
@@ -3072,7 +3072,7 @@ static int raid1_reshape(struct mddev *mddev)
 		return -EINVAL;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 	if (IsDiskErrorSet(mddev)) {
 		return -EINVAL;
 	}
@@ -3215,7 +3215,7 @@ static struct md_personality raid1_personality =
 	.check_reshape	= raid1_reshape,
 	.quiesce	= raid1_quiesce,
 	.takeover	= raid1_takeover,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
 #endif
 };

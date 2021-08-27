@@ -362,27 +362,27 @@
 #define __NR_process_vm_readv	347
 #define __NR_process_vm_writev	348
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 #define __NR_SYNOUtime                          402
 #define SYNOUtime(arg1, arg2)                   syscall(__NR_SYNOUtime, arg1, arg2)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 #define __NR_SYNOArchiveBit                     403
 #define SYNOArchiveBit(arg1, arg2)              syscall(__NR_SYNOArchiveBit, arg1, arg2)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 #define __NR_recvfile                           404
 #define recvfile(arg1,arg2,arg3,arg4,arg5)      syscall(__NR_recvfile, arg1, arg2, arg3, arg4, arg5)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 #define __NR_SYNOMTDAlloc                       405
 #define SYNOMTDAlloc(arg1)                      syscall(__NR_SYNOMTDAlloc, arg1)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 #define __NR_SYNOCaselessStat64                 406
 #define __NR_SYNOCaselessLStat64                407
 #define __NR_SYNOCaselessStat                   408
@@ -554,7 +554,7 @@ __syscall_return(type,__res); \
 #endif
 
 #ifdef __KERNEL__
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SYSTEM_CALL
 #define NR_syscalls 420
 #else
 #define NR_syscalls 349

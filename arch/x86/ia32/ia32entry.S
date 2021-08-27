@@ -855,7 +855,7 @@ ia32_sys_call_table:
 	.quad sys_setns
 	.quad compat_sys_process_vm_readv
 	.quad compat_sys_process_vm_writev
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SYSTEM_CALL
 	.quad sys_ni_syscall
 	.quad sys_ni_syscall /* 350 */
 	.quad sys_ni_syscall

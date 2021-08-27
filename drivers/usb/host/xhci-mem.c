@@ -1471,7 +1471,7 @@ int xhci_endpoint_init(struct xhci_hcd *xhci,
 		/* dig out max burst from ep companion desc */
 		max_packet = ep->ss_ep_comp.bMaxBurst;
 		ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(max_packet));
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SMALL_MAX_BURST
 		if (cpu_to_le16(0x1759) == udev->descriptor.idVendor &&
 			cpu_to_le16(0x5002) == udev->descriptor.idProduct &&
 			cpu_to_le16(0x2580) == udev->descriptor.bcdDevice &&

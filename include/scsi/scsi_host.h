@@ -45,13 +45,13 @@ struct blk_queue_tags;
 #define DISABLE_CLUSTERING 0
 #define ENABLE_CLUSTERING 1
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_DISK_HIBERNATION) || defined(SYNO_FIXED_DISK_NAME)
 enum {
    	SYNO_PORT_TYPE_SATA = 1,
 	SYNO_PORT_TYPE_USB = 2,
 	SYNO_PORT_TYPE_SAS = 3,
 };
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_DISK_HIBERNATION */
 
 enum {
 	SCSI_QDEPTH_DEFAULT,	/* default requested change, e.g. from sysfs */
@@ -514,7 +514,7 @@ struct scsi_host_template {
 	 */
 	struct list_head legacy_hosts;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	/*
 	 * This is an optional routine that allow low level driver can deside
 	 * target start index in scsi layer.
@@ -533,7 +533,7 @@ struct scsi_host_template {
 	 */
 	int  (* syno_host_power_ctl)(struct Scsi_Host *host, u8 blPowerOn);
 #endif
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_DISK_HIBERNATION) || defined(SYNO_FIXED_DISK_NAME)
 	int  syno_port_type;
 #endif
 

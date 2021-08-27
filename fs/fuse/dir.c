@@ -258,7 +258,7 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 		fuse_change_entry_timeout(entry, &outarg);
 	} else if (inode) {
 		fi = get_fuse_inode(inode);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FUSE_BACK_PORTING
 		if (nd && (nd->flags & LOOKUP_RCU)) {
 #else
 		if (flags & LOOKUP_RCU) {
@@ -1183,7 +1183,7 @@ static int fuse_direntplus_link(struct file *file,
 	struct fuse_entry_out *o = &direntplus->entry_out;
 	struct fuse_dirent *dirent = &direntplus->dirent;
 	struct dentry *parent = file->f_path.dentry;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FUSE_BACK_PORTING
 	struct qstr name = { .len = dirent->namelen, .name = dirent->name};
 #else
 	struct qstr name = QSTR_INIT(dirent->name, dirent->namelen);
@@ -2089,7 +2089,7 @@ static int fuse_syno_arbit_get(struct dentry *dentry, unsigned int *pArbit)
 		return -EINVAL;
 
 	inode = dentry->d_inode;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_OPTIONS
 	if (!IS_SYNO_META_XATTR(inode))
 		return -EOPNOTSUPP;
 #endif
@@ -2111,7 +2111,7 @@ static int fuse_syno_arbit_set(struct dentry *dentry, unsigned int arbit)
 	if (!inode->i_op->setxattr)
 		return -EOPNOTSUPP;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_OPTIONS
 	if (!IS_SYNO_META_XATTR(inode))
 		return -EOPNOTSUPP;
 #endif
@@ -2127,7 +2127,7 @@ Err:
 }
 #endif //MY_ABC_HERE
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 static int fuse_create_time_set(struct dentry *dentry, struct timespec *t)
 {
 	long err = -EINVAL;
@@ -2136,7 +2136,7 @@ static int fuse_create_time_set(struct dentry *dentry, struct timespec *t)
 	if (!inode->i_op->setxattr)
 		return -EOPNOTSUPP;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_OPTIONS
 	if (!IS_SYNO_META_XATTR(inode))
 		return -EOPNOTSUPP;
 #endif
@@ -2168,18 +2168,18 @@ Err:
 }
 #endif //MY_ABC_HERE 
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int flags)
 {
 	int err = 0;
 	struct inode * inode = dentry->d_inode;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_OPTIONS
 	if (!IS_SYNO_META_XATTR(inode))
 		return -EOPNOTSUPP;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	if (flags & SYNOST_CREATIME) {
 		err = fuse_create_time_get(dentry, &stat->SynoCreateTime);
 		if (0 > err) {
@@ -2188,7 +2188,7 @@ static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int flag
 	}
 	}
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	if (flags & SYNOST_ARBIT) {
 		err = fuse_syno_arbit_get(dentry, &stat->SynoMode);
 		if (0 > err) {
@@ -2217,14 +2217,14 @@ static const struct inode_operations fuse_dir_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 	.syno_getattr	= fuse_syno_getattr,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_get_archive_bit = fuse_syno_arbit_get,
 	.syno_set_archive_bit = fuse_syno_arbit_set,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	.syno_set_crtime = fuse_create_time_set,
 #endif
 };
@@ -2248,14 +2248,14 @@ static const struct inode_operations fuse_common_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 	.syno_getattr	= fuse_syno_getattr,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_get_archive_bit = fuse_syno_arbit_get,
 	.syno_set_archive_bit = fuse_syno_arbit_set,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	.syno_set_crtime = fuse_create_time_set,
 #endif
 };
@@ -2270,14 +2270,14 @@ static const struct inode_operations fuse_symlink_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 	.syno_getattr	= fuse_syno_getattr,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_get_archive_bit = fuse_syno_arbit_get,
 	.syno_set_archive_bit = fuse_syno_arbit_set,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	.syno_set_crtime = fuse_create_time_set,
 #endif
 };

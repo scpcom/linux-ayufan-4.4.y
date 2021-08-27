@@ -103,7 +103,7 @@ static int ioctl_internal_command(struct scsi_device *sdev, char *cmd,
 
 	if ((driver_byte(result) & DRIVER_SENSE) &&
 	    (scsi_sense_valid(&sshdr))) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DISK_HIBERNATION
 		if (cmd[0] == START_STOP) {
 			if (sdev->nospindown == 0) {
 				sdev->nospindown = 1;
@@ -111,7 +111,7 @@ static int ioctl_internal_command(struct scsi_device *sdev, char *cmd,
 					   sdev->host->host_no, sdev->id, sdev->lun);
 			}
 		}
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_DISK_HIBERNATION */
 		switch (sshdr.sense_key) {
 		case ILLEGAL_REQUEST:
 			if (cmd[0] == ALLOW_MEDIUM_REMOVAL)

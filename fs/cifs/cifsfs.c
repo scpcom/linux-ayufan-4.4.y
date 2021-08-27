@@ -58,7 +58,7 @@ int cifsERROR = 1;
 int traceSMB = 0;
 bool enable_oplocks = true;
 unsigned int linuxExtEnabled = 1;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CASELESS_CIFS_MOUNT
 unsigned int SynoPosixSemanticsEnabled = 1;
 #endif
 unsigned int lookupCacheEnabled = 1;

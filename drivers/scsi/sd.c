@@ -142,7 +142,7 @@ static void sd_print_result(struct scsi_disk *, int);
 
 static DEFINE_SPINLOCK(sd_index_lock);
 static DEFINE_IDA(sd_index_ida);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 #include <linux/libata.h>
 #include <linux/usb.h>
 #include "../usb/storage/usb.h"
@@ -1471,7 +1471,7 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 			*pCanSleep = sdp->nospindown ? 0 : 1;
 			return 0;
 		}
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_DISK_HIBERNATION */
 		default:
 			error = scsi_cmd_blk_ioctl(bdev, mode, cmd, p);
 			if (error != -ENOTTY)
@@ -2601,7 +2601,7 @@ static void sd_read_app_tag_own(struct scsi_disk *sdkp, unsigned char *buffer)
 	return;
 }
 
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_INCREASE_DISK_MODEL_NAME_LENGTH)
 /**
  * syno_get_ata_identity - Get ATA IDENTITY via ATA PASS-THRU command
  * @sdev: the disk you want to get ata identity
@@ -2832,10 +2832,10 @@ static int sd_revalidate_disk(struct gendisk *disk)
 	return 0;
 }
 
-#ifdef	MY_ABC_HERE
+#ifdef	SYNO_FIXED_DISK_NAME
 extern int syno_ida_get_new(struct ida *idp, int starting_id, int *id);
 #endif
-#ifdef	MY_ABC_HERE
+#ifdef	SYNO_DISK_HIBERNATION
 int (*SynoUSBDeviceIsSATA)(void *) = NULL;
 EXPORT_SYMBOL(SynoUSBDeviceIsSATA);
 #endif
@@ -2997,8 +2997,8 @@ static void sd_probe_async(void *data, async_cookie_t cookie)
 	put_device(&sdkp->dev);
 }
 
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
+#ifdef SYNO_USB_FLASH_BOOT
 static bool syno_find_synoboot(void)
 {
 	bool find = false;
@@ -3103,7 +3103,7 @@ static int sd_probe(struct device *dev)
 	struct gendisk *gd;
 	int index;
 	int error;
-#ifdef	MY_ABC_HERE
+#ifdef	SYNO_FIXED_DISK_NAME
 	struct ata_port *ap;
 	int start_index;
 	int iRetry = 0;
@@ -3129,7 +3129,7 @@ static int sd_probe(struct device *dev)
 	if (!gd)
 		goto out_free;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	sdkp->synodisktype = syno_disk_type_get(dev);
 #endif
 
@@ -3140,7 +3140,7 @@ static int sd_probe(struct device *dev)
 #ifdef SYNO_SAS_DISK_NAME
 		if (1 == g_is_sas_model) {
 			switch(sdkp->synodisktype) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ISCSI_DEVICE
 				case SYNO_DISK_ISCSI:
 					if (!ida_pre_get(&iscsi_index_ida, GFP_KERNEL))
 						goto out_put;
@@ -3160,17 +3160,17 @@ static int sd_probe(struct device *dev)
 		}
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DISK_HIBERNATION
 		sdp->idle = jiffies;
 		sdp->nospindown = 0;
 		sdp->spindown = 0;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_DISK_HIBERNATION */
 
 		spin_lock(&sd_index_lock);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 		switch(sdkp->synodisktype) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ISCSI_DEVICE
 			case SYNO_DISK_ISCSI:
 #ifdef SYNO_SAS_DISK_NAME
 				if (1 == g_is_sas_model) {
@@ -3182,7 +3182,7 @@ static int sd_probe(struct device *dev)
 					want_idx = SYNO_ISCSI_DEVICE_INDEX;
 				break;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 			case SYNO_DISK_SYNOBOOT:
 				want_idx = SYNO_USB_FLASH_DEVICE_INDEX;
 				break;
@@ -3242,7 +3242,7 @@ static int sd_probe(struct device *dev)
 
 #else /* MY_ABC_HERE */
 		error = ida_get_new(&sd_index_ida, &index);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_FIXED_DISK_NAME */
 		spin_unlock(&sd_index_lock);
 	} while (error == -EAGAIN);
 
@@ -3251,10 +3251,10 @@ static int sd_probe(struct device *dev)
 		goto out_put;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	gd->systemDisk = 0;
 	switch(sdkp->synodisktype) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ISCSI_DEVICE
 		case SYNO_DISK_ISCSI:
 #ifdef SYNO_SAS_DISK_NAME
 			if (1 == g_is_sas_model) {
@@ -3268,7 +3268,7 @@ static int sd_probe(struct device *dev)
 			printk("got iSCSI disk[%d]\n", start_index);
 			break;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 		case SYNO_DISK_SYNOBOOT:
 			// we assume synoboot will be plugged only once
 			sprintf(gd->disk_name, SYNO_USB_FLASH_DEVICE_NAME);
@@ -3374,7 +3374,7 @@ static int sd_probe(struct device *dev)
 #ifdef SYNO_SAS_DISK_NAME
 	if (1 == g_is_sas_model) {
 		switch(sdkp->synodisktype) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ISCSI_DEVICE
 			case SYNO_DISK_ISCSI:
 				ida_remove(&iscsi_index_ida, synoidx);
 				break;
@@ -3451,7 +3451,7 @@ static void scsi_disk_release(struct device *dev)
 #ifdef SYNO_SAS_DISK_NAME
 	if (1 == g_is_sas_model) {
 		switch(sdkp->synodisktype) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ISCSI_DEVICE
 			case SYNO_DISK_ISCSI:
 				ida_remove(&iscsi_index_ida, sdkp->synoindex);
 				break;
@@ -3669,7 +3669,7 @@ static void sd_print_result(struct scsi_disk *sdkp, int result)
 	scsi_show_result(result);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SCSI_DEVICE_INDEX
 int SynoSCSIGetDeviceIndex(struct block_device *bdev)
 {
 	struct gendisk *disk = NULL;
@@ -3685,9 +3685,9 @@ int SynoSCSIGetDeviceIndex(struct block_device *bdev)
 	return container_of(disk->private_data, struct scsi_disk, driver)->index;
 }
 EXPORT_SYMBOL(SynoSCSIGetDeviceIndex);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SCSI_DEVICE_INDEX */
  
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_SATA_BAD_SECTOR_AUTO_REMAP) || defined(SYNO_BLOCK_REQUEST_ERROR_NODEV)
 /**
  * Please modify this when SCSI_DISK* is bigger than 15 when
  * porting kernel
@@ -3713,9 +3713,9 @@ blIsScsiDevice(int major)
 
 	return ret;
 }
-#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
+#endif /* defined(SYNO_SATA_BAD_SECTOR_AUTO_REMAP) || defined(SYNO_BLOCK_REQUEST_ERROR_NODEV) */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 int
 IsDeviceDisappear(struct block_device *bdev)
 {
@@ -3762,9 +3762,9 @@ END:
 }
 
 EXPORT_SYMBOL(IsDeviceDisappear);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_BLOCK_REQUEST_ERROR_NODEV */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
 /**
  * Set the partition to specify remap mode
  *
@@ -3973,4 +3973,4 @@ EXPORT_SYMBOL(blSectorNeedAutoRemap);
 EXPORT_SYMBOL(RaidRemapModeSet);
 EXPORT_SYMBOL(ScsiRemapModeSet);
 EXPORT_SYMBOL(PartitionRemapModeSet);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SATA_BAD_SECTOR_AUTO_REMAP */

@@ -110,13 +110,13 @@ static void buffer_io_error(struct buffer_head *bh)
 {
 	char b[BDEVNAME_SIZE];
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IO_ERROR_LIMIT_MSG
 	    if (printk_ratelimit()) {
 #endif
 	printk(KERN_ERR "Buffer I/O error on device %s, logical block %Lu\n",
 			bdevname(bh->b_bdev, b),
 			(unsigned long long)bh->b_blocknr);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IO_ERROR_LIMIT_MSG
 		}
 #endif
 }
@@ -1172,7 +1172,7 @@ __getblk_slow(struct block_device *bdev, sector_t block, int size)
  */
 void mark_buffer_dirty(struct buffer_head *bh)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SKIP_BH_WARNON
 	static int SynoWarnings = 0;
 	if (!buffer_uptodate(bh) && !SynoWarnings) {
 		SynoWarnings = 1;

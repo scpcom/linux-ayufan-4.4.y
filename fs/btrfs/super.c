@@ -1759,13 +1759,13 @@ static int btrfs_unfreeze(struct super_block *sb)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BTRFS_PORTING
 static int btrfs_show_devname(struct seq_file *m, struct vfsmount *vfs)
 #else
 static int btrfs_show_devname(struct seq_file *m, struct dentry *root)
 #endif
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BTRFS_PORTING
 	struct btrfs_fs_info *fs_info = btrfs_sb(vfs->mnt_sb);
 #else
 	struct btrfs_fs_info *fs_info = btrfs_sb(root->d_sb);
@@ -1800,7 +1800,7 @@ static int btrfs_show_devname(struct seq_file *m, struct dentry *root)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 static int syno_btrfs_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
 {
 	struct btrfs_fs_info *fs_info = sb->s_fs_info;

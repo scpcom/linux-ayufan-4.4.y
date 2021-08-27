@@ -659,7 +659,7 @@ struct xhci_ep_ctx {
 /* bit 6 reserved */
 /* bit 7 is Host Initiate Disable - for disabling stream selection */
 #define MAX_BURST(p)	(((p)&0xff) << 8)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SMALL_MAX_BURST
 #define MAX_BURST_MASK (0xff << 8)
 #endif //MY_ABC_HERE
 #define CTX_TO_MAX_BURST(p)	(((p) >> 8) & 0xff)

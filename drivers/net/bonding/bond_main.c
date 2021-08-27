@@ -515,7 +515,7 @@ static void bond_del_vlans_from_slave(struct bonding *bond,
 
 /*------------------------------- Link status -------------------------------*/
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BONDING_INIT_STATUS
 static void default_operstate(struct net_device *dev)
 {
 	if (!netif_carrier_ok(dev)) {
@@ -1613,7 +1613,7 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	/* If this is the first slave, then we need to set the master's hardware
 	 * address to be the same as the slave's. */
 	if (is_zero_ether_addr(bond->dev->dev_addr))
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 		{
 			unsigned char szMac[MAX_ADDR_LEN];
 			memset(szMac, 0, sizeof(szMac));
@@ -1665,7 +1665,7 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	 * that need it, and for restoring it upon release, and then
 	 * set it to the master's address
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 	{
 		unsigned char szMac[MAX_ADDR_LEN];
 		memset(szMac, 0, sizeof(szMac));
@@ -1881,7 +1881,7 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	write_unlock_bh(&bond->curr_slave_lock);
 
 	bond_set_carrier(bond);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BONDING_INIT_STATUS
 	default_operstate(bond->dev);
 #endif
 
@@ -4330,7 +4330,7 @@ static void bond_ethtool_get_drvinfo(struct net_device *bond_dev,
 	snprintf(drvinfo->fw_version, 32, "%d", BOND_ABI_VERSION);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_BOND
 static int bond_ethtool_get_settings(struct net_device *bond_dev,
 				    struct ethtool_cmd *cmd)
 {
@@ -4377,7 +4377,7 @@ out:
 #endif
 
 static const struct ethtool_ops bond_ethtool_ops = {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_BOND
 	.get_settings		= bond_ethtool_get_settings,
 #endif
 	.get_drvinfo		= bond_ethtool_get_drvinfo,

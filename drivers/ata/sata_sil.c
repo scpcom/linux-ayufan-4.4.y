@@ -129,7 +129,7 @@ static void sil_bmdma_start(struct ata_queued_cmd *qc);
 static void sil_bmdma_stop(struct ata_queued_cmd *qc);
 static void sil_freeze(struct ata_port *ap);
 static void sil_thaw(struct ata_port *ap);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_HOTPLUG_FIX
 static bool syno_ata_sff_qc_fill_rtf(struct ata_queued_cmd *qc);
 static void syno_ata_sff_drain_fifo(struct ata_queued_cmd *qc);
 #endif
@@ -196,7 +196,7 @@ static struct ata_port_operations sil_ops = {
 	.qc_prep		= sil_qc_prep,
 	.freeze			= sil_freeze,
 	.thaw			= sil_thaw,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_HOTPLUG_FIX
 	.qc_fill_rtf		= syno_ata_sff_qc_fill_rtf,
 	.sff_drain_fifo		= syno_ata_sff_drain_fifo,
 #endif
@@ -460,10 +460,10 @@ static void sil_host_intr(struct ata_port *ap, u32 bmdma2)
 		 */
 		if (serror & SERR_PHYRDY_CHG) {
 			ap->link.eh_info.serror |= serror;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_INFO
 			syno_ata_info_print(ap);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ATA_FAST_PROBE
 			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 #endif
 			goto freeze;
@@ -609,7 +609,7 @@ static void sil_thaw(struct ata_port *ap)
 	writel(tmp, mmio_base + SIL_SYSCFG);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_HOTPLUG_FIX
 /**
  *	syno_ata_sff_qc_fill_rtf - fill result TF using ->sff_tf_read
  *	3512 has a hw issue that when the device is not in the port,
@@ -775,7 +775,7 @@ static void sil_init_controller(struct ata_host *host)
 			       mmio_base + sil_port[2].bmdma);
 	}
 
-#ifdef	MY_ABC_HERE
+#ifdef	SYNO_SATA_RAISE_TX_VOLT
 	/* raise tx output swing voltage to maximum for DS2.0 bug 2308. */
 	/* accroding final datasheet in
 	*	http://www.siliconimage.com/docs/SiI-DS-0102-D.pdf
@@ -891,7 +891,7 @@ static int sil_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	sil_init_controller(host);
 
 	pci_set_master(pdev);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 	host->flags |= ATA_HOST_LLD_SPINUP_DELAY;
 #endif
 	return ata_host_activate(host, pdev->irq, sil_interrupt, IRQF_SHARED,

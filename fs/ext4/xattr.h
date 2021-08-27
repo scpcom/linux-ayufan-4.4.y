@@ -24,7 +24,7 @@
 #define EXT4_XATTR_INDEX_TRUSTED		4
 #define	EXT4_XATTR_INDEX_LUSTRE			5
 #define EXT4_XATTR_INDEX_SECURITY	        6
-#ifdef MY_ABC_HERE
+#ifdef SYNO_XATTR
 #define EXT4_XATTR_INDEX_SYNO	8
 #endif
 
@@ -71,7 +71,7 @@ struct ext4_xattr_entry {
 
 # ifdef CONFIG_EXT4_FS_XATTR
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_XATTR
 extern struct xattr_handler ext4_xattr_syno_handler;
 #endif
 extern const struct xattr_handler ext4_xattr_user_handler;

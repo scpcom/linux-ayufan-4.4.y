@@ -956,7 +956,7 @@ static inline void unmap_shared_mapping_range(struct address_space *mapping,
 
 extern void truncate_pagecache(struct inode *inode, loff_t old, loff_t new);
 extern void truncate_setsize(struct inode *inode, loff_t newsize);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
 extern void ecryptfs_truncate_setsize(struct inode *inode, loff_t newsize);
 #endif
 extern int vmtruncate(struct inode *inode, loff_t offset);
@@ -1456,7 +1456,7 @@ void task_dirty_inc(struct task_struct *tsk);
 #endif
 #else /* MY_ABC_HERE */
 #define VM_MAX_READAHEAD	128	/* kbytes */
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_INCREASE_READAHEAD */
 #define VM_MIN_READAHEAD	16	/* kbytes (includes current page) */
 
 int force_page_cache_readahead(struct address_space *mapping, struct file *filp,

@@ -479,7 +479,7 @@ static char *usb_dump_string(char *start, char *end,
 
 #endif /* PROC_EXTRA */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_COPY
 int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 {
 	char buf[256];
@@ -546,7 +546,7 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HAS_SDCARDREADER
 int blIsCardReader(struct usb_device *usbdev)
 {
 	char buf[256];
@@ -637,13 +637,13 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 	default:
 		speed = "??";
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_COPY
 	if(blIsUSBDeviceAtFrontPort(usbdev))
 		data_end = pages_start + sprintf(pages_start, format_topo,
 			   bus->busnum, level, parent_devnum,
 			   USBCOPY_PORT_LOCATION, count, usbdev->devnum,
 			   speed, usbdev->maxchild);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SD_COPY
 	else if(blIsCardReader(usbdev))
 		data_end = pages_start + sprintf(pages_start, format_topo,
 			   bus->busnum, level, parent_devnum,
@@ -722,11 +722,11 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 
 		if (childdev) {
 			usb_lock_device(childdev);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_COPY
 			if(blIsUSBDeviceAtFrontPort(usbdev))
 				ret = usb_device_dump(buffer, nbytes, skip_bytes, file_offset, childdev,
 									  bus, level + 1, USBCOPY_PORT_LOCATION, ++cnt);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SD_COPY
 			else if(blIsCardReader(usbdev))
 				ret = usb_device_dump(buffer, nbytes, skip_bytes, file_offset, childdev,
 									  bus, level + 1, SDCOPY_PORT_LOCATION, ++cnt);

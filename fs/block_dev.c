@@ -1041,14 +1041,14 @@ int revalidate_disk(struct gendisk *disk)
 	if (!bdev)
 		return ret;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLKDEV_MUTEX_LOCK
 	mutex_lock(&bdev->bd_inode->i_mutex);
 #else
 	mutex_lock(&bdev->bd_mutex);
 #endif
 	check_disk_size_change(disk, bdev);
 	bdev->bd_invalidated = 0;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLKDEV_MUTEX_LOCK
 	mutex_unlock(&bdev->bd_inode->i_mutex);
 #else
 	mutex_unlock(&bdev->bd_mutex);

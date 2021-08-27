@@ -2477,7 +2477,7 @@ int vt_kmsg_redirect(int new)
 		return kmsg_con;
 }
 
-#ifndef MY_DEF_HERE
+#ifndef SYNO_X86_TTY_CONSOLE_OUTPUT
 /*
  *	Console on virtual terminal
  *
@@ -2577,7 +2577,7 @@ quit:
 }
 #endif
 
-#ifndef MY_DEF_HERE
+#ifndef SYNO_X86_TTY_CONSOLE_OUTPUT
 static struct tty_driver *vt_console_device(struct console *c, int *index)
 {
 	*index = c->index ? c->index-1 : fg_console;
@@ -2945,7 +2945,7 @@ static int __init con_init(void)
 
 	console_unlock();
 
-#ifndef MY_DEF_HERE
+#ifndef SYNO_X86_TTY_CONSOLE_OUTPUT
 #ifdef CONFIG_VT_CONSOLE
 	register_console(&vt_console_driver);
 #endif

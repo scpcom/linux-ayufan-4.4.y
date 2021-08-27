@@ -32,7 +32,7 @@
 #define XATTR_USER_PREFIX "user."
 #define XATTR_USER_PREFIX_LEN (sizeof (XATTR_USER_PREFIX) - 1)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_XATTR
 #define XATTR_SYNO_PREFIX "syno."
 #define XATTR_SYNO_PREFIX_LEN (sizeof (XATTR_SYNO_PREFIX) - 1)
 #endif
@@ -94,7 +94,7 @@ struct xattr_handler {
 		   size_t size, int flags, int handler_flags);
 };
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 struct syno_xattr_archive_version {
 	__le16	v_magic;
 	__le16	v_struct_version;
@@ -120,7 +120,7 @@ ssize_t generic_listxattr(struct dentry *dentry, char *buffer, size_t buffer_siz
 int generic_setxattr(struct dentry *dentry, const char *name, const void *value, size_t size, int flags);
 int generic_removexattr(struct dentry *dentry, const char *name);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_XATTR
 int syno_generic_setxattr(struct inode *inode, const char *name, const void *value, size_t size, int flags);
 #endif
 ssize_t vfs_getxattr_alloc(struct dentry *dentry, const char *name,

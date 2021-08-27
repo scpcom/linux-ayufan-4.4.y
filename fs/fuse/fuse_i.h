@@ -47,7 +47,7 @@
     doing the mount will be allowed to access the filesystem */
 #define FUSE_ALLOW_OTHER         (1 << 1)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_OPTIONS
 #define SYNOMETA_XATTR_MNT_OPT "synometa_xattr"
 #endif
 

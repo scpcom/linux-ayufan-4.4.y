@@ -2256,7 +2256,7 @@ static void __exit sm_it87_exit(void)
 	platform_driver_unregister(&it87_driver);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_PINEVIEW_SYSTEMP
 int syno_sys_temperature(int *Temperature)
 {
     unsigned short address;
@@ -2288,7 +2288,7 @@ int syno_sys_temperature(int *Temperature)
 EXPORT_SYMBOL(syno_sys_temperature);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_PINEVIEW_SUPERIO_RW
 struct writable_pin {
     u32         pin;
     u32         en_reg;
@@ -2396,7 +2396,7 @@ u32 syno_superio_gpio_pin(int pin, int *pValue, int isWrite)
 EXPORT_SYMBOL(syno_superio_gpio_pin);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SUPPORT_EUP
 int syno_superio_regist_read(u8 ldn, u8 reg, u8 *value)
 {
 	int iRet = -1;

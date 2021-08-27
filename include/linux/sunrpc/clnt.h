@@ -241,7 +241,7 @@ static inline bool __rpc_copy_addr6(struct sockaddr *dst,
 
 	dsin6->sin6_family = ssin6->sin6_family;
 	ipv6_addr_copy(&dsin6->sin6_addr, &ssin6->sin6_addr);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_IPV6_COPY_SCOPEID
 	dsin6->sin6_scope_id = ssin6->sin6_scope_id;
 #endif
 	return true;

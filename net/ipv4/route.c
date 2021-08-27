@@ -3580,12 +3580,12 @@ int __init ip_rt_init(void)
 	if (ip_rt_proc_init())
 		printk(KERN_ERR "Unable to create route proc files\n");
 #ifdef CONFIG_XFRM
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_IPV4_ROUTE_WORKAROUND
 	mdelay(500);
 #endif
 	xfrm_init();
 	xfrm4_init(ip_rt_max_size);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_IPV4_ROUTE_WORKAROUND
 	mdelay(500);
 #endif
 #endif

@@ -906,7 +906,7 @@ static size_t fuse_send_write(struct fuse_req *req, struct fuse_io_priv *io,
 	return req->misc.write.out.size;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 static int fuse_write_begin(struct file *file, struct address_space *mapping,
                        loff_t pos, unsigned len, unsigned flags,
                        struct page **pagep, void **fsdata)
@@ -918,7 +918,7 @@ static int fuse_write_begin(struct file *file, struct address_space *mapping,
                return -ENOMEM;
        return 0;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 
 void fuse_write_update_size(struct inode *inode, loff_t pos)
 {
@@ -932,7 +932,7 @@ void fuse_write_update_size(struct inode *inode, loff_t pos)
 	spin_unlock(&fc->lock);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 static int fuse_buffered_write(struct file *file, struct inode *inode,
                               loff_t pos, unsigned count, struct page *page)
 {
@@ -988,7 +988,7 @@ static int fuse_write_end(struct file *file, struct address_space *mapping,
        page_cache_release(page);
        return res;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 
 static size_t fuse_send_write_pages(struct fuse_req *req, struct file *file,
 				    struct inode *inode, loff_t pos,
@@ -2538,7 +2538,7 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 				loff_t length)
 {
 	struct fuse_file *ff = file->private_data;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FUSE_BACK_PORTING
 	struct inode *inode = file->f_path.dentry->d_inode;
 #else
 	struct inode *inode = file->f_inode;
@@ -2658,10 +2658,10 @@ static const struct address_space_operations fuse_file_aops  = {
 	.readpage	= fuse_readpage,
 	.writepage	= fuse_writepage,
 	.launder_page	= fuse_launder_page,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	.write_begin    = fuse_write_begin,
 	.write_end      = fuse_write_end,
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 	.readpages	= fuse_readpages,
 	.set_page_dirty	= __set_page_dirty_nobuffers,
 	.bmap		= fuse_bmap,

@@ -31,7 +31,7 @@
 
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_INFO
 #include <linux/sched.h>
 #endif
 #include <linux/module.h>
@@ -212,7 +212,7 @@ static int parse_redboot_partitions(struct mtd_info *master,
 		/* I'm sure the JFFS2 code has done me permanent damage.
 		 * I now think the following is _normal_
 		 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_PARTS_KEEP_ORDER
 		if (i == 0) {
 			fl = new_fl;
 			tmp_fl = fl;
@@ -221,13 +221,13 @@ static int parse_redboot_partitions(struct mtd_info *master,
 			tmp_fl = new_fl;
 		}
 		new_fl->next = NULL;
-#else /* !MY_ABC_HERE */
+#else /* !SYNO_MTD_PARTS_KEEP_ORDER */
 		prev = &fl;
 		while(*prev && (*prev)->img->flash_base < new_fl->img->flash_base)
 			prev = &(*prev)->next;
 		new_fl->next = *prev;
 		*prev = new_fl;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MTD_PARTS_KEEP_ORDER */
 
 		nrparts++;
 	}
@@ -327,7 +327,7 @@ static void __exit redboot_parser_exit(void)
 	deregister_mtd_parser(&redboot_parser);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_INFO
 static void mtd_erase_callback_in_redboot (struct erase_info *instr)
 {
 	wake_up((wait_queue_head_t *)instr->priv);
@@ -433,7 +433,7 @@ out:
 	kfree(buf);
 	return ret;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MTD_INFO */
 
 module_init(redboot_parser_init);
 module_exit(redboot_parser_exit);

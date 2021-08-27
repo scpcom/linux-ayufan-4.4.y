@@ -188,7 +188,7 @@ struct ecryptfs_filename {
 	char dentry_name[ECRYPTFS_ENCRYPTED_DENTRY_NAME_LEN + 1];
 };
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
 struct ecryptfs_request {
 	struct ablkcipher_request *req;
 	struct completion complete;
@@ -333,7 +333,7 @@ struct ecryptfs_mount_crypt_stat {
 #define ECRYPTFS_GLOBAL_ENCFN_USE_MOUNT_FNEK   0x00000020
 #define ECRYPTFS_GLOBAL_ENCFN_USE_FEK          0x00000040
 #define ECRYPTFS_GLOBAL_MOUNT_AUTH_TOK_ONLY    0x00000080
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_REPORT_ERROR
 #define ECRYPTFS_SYNO_ERROR_REPORT             0x10000000
 #endif
 	u32 flags;

@@ -1257,7 +1257,7 @@ static int ext3_write_begin(struct file *file, struct address_space *mapping,
 	struct page *page;
 	pgoff_t index;
 	unsigned from, to;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	// Add for mark_inode_dirty.
 	int needed_blocks;
 
@@ -1267,7 +1267,7 @@ static int ext3_write_begin(struct file *file, struct address_space *mapping,
 		needed_blocks = ext3_writepage_trans_blocks(inode) + 1;
 	}
 #endif
-#ifndef MY_ABC_HERE
+#ifndef SYNO_REDUCE_ADD_INODE_ORPHAN_TWICE
 	/* Reserve one block more for addition to orphan list in case
 	 * we allocate blocks but write fails for some reason */
 	int needed_blocks = ext3_writepage_trans_blocks(inode) + 1;
@@ -1312,7 +1312,7 @@ write_begin_failed:
 		 * finishes. Do this only if ext3_can_truncate() agrees so
 		 * that orphan processing code is happy.
 		 */
-#ifndef MY_ABC_HERE
+#ifndef SYNO_REDUCE_ADD_INODE_ORPHAN_TWICE
 		if (pos + len > inode->i_size && ext3_can_truncate(inode))
 			ext3_orphan_add(handle, inode);
 #endif
@@ -1324,7 +1324,7 @@ write_begin_failed:
 	}
 	if (ret == -ENOSPC && ext3_should_retry_alloc(inode->i_sb, &retries))
 		goto retry;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
 		if (pos + len > inode->i_size) {
 			// Don't need i_size_write because we hold i_mutex.
@@ -2949,11 +2949,11 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	inode->i_ctime.tv_sec = (signed)le32_to_cpu(raw_inode->i_ctime);
 	inode->i_mtime.tv_sec = (signed)le32_to_cpu(raw_inode->i_mtime);
 	inode->i_atime.tv_nsec = inode->i_ctime.tv_nsec = inode->i_mtime.tv_nsec = 0;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->ext3_CreateTime);
 	inode->i_CreateTime.tv_nsec = 0;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = le32_to_cpu(raw_inode->ext3_mode2);
 #endif
 
@@ -3160,10 +3160,10 @@ again:
 	raw_inode->i_frag = ei->i_frag_no;
 	raw_inode->i_fsize = ei->i_frag_size;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	raw_inode->ext3_CreateTime = cpu_to_le32(inode->i_CreateTime.tv_sec);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	raw_inode->ext3_mode2 = cpu_to_le32(inode->i_mode2);
 #endif
 	raw_inode->i_file_acl = cpu_to_le32(ei->i_file_acl);
@@ -3402,23 +3402,23 @@ err_out:
 	return error;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 int syno_ext3_getattr(struct dentry *d, struct kstat *stat, int flags)
 {
 	struct inode *inode = d->d_inode;
 	int err = 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	if (flags & SYNOST_CREATIME) {
 		stat->SynoCreateTime = inode->i_CreateTime;
 	}
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	if (flags & SYNOST_ARBIT) {
 		stat->SynoMode = inode->i_mode2;
 	}
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	if (flags & SYNOST_BKPVER) {
 		err = syno_ext3_get_archive_ver(d, &stat->syno_archive_version);
 	}
@@ -3427,7 +3427,7 @@ int syno_ext3_getattr(struct dentry *d, struct kstat *stat, int flags)
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 int syno_ext3_set_archive_ver(struct dentry *dentry, u32 version)
 {
 	struct inode *inode = dentry->d_inode;

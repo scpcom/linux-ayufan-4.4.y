@@ -50,12 +50,12 @@
 #define EM_MSG_LED_VALUE_ACTIVITY     0x00070000
 #define EM_MSG_LED_VALUE_OFF          0xfff80000
 #define EM_MSG_LED_VALUE_ON           0x00010000
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ATA_AHCI_LED_MSG
 #define EM_MSG_LOCATE_LED_MASK        0x00380000
 #define EM_MSG_FAULT_LED_MASK         0x01c00000
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ATA_AHCI_LED_MSG
 enum{
 	ATA_FLAG_SW_LOCATE      = (1 << 24), /* driver supports sw locate led */
 	ATA_FLAG_SW_FAULT       = (1 << 25), /* driver supports sw fault led */
@@ -279,7 +279,7 @@ struct ahci_em_priv {
 	unsigned long saved_activity;
 	unsigned long activity;
 	unsigned long led_state;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ATA_AHCI_LED_MSG
 	unsigned long saved_locate;
 	unsigned long locate;
 	unsigned long saved_fault;
@@ -337,7 +337,7 @@ extern struct device_attribute *ahci_sdev_attrs[];
 extern struct ata_port_operations ahci_ops;
 extern struct ata_port_operations ahci_pmp_retry_srst_ops;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ATA_AHCI_LED_MSG
 extern struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 					    const struct scsi_device *scsidev);
 #endif
@@ -366,7 +366,7 @@ int ahci_reset_em(struct ata_host *host);
 irqreturn_t ahci_interrupt(int irq, void *dev_instance);
 void ahci_print_info(struct ata_host *host, const char *scc_s);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_9235_GPIO_CTRL
 static inline void __iomem *ahci_host_base(struct ata_host *host)
 {
 	struct ahci_host_priv *hpriv = host->private_data;

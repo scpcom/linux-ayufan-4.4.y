@@ -391,7 +391,7 @@
 /* 375 */	CALL(sys_setns)
 		CALL(sys_process_vm_readv)
 		CALL(sys_process_vm_writev)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SYSTEM_CALL
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 /* 380 */	CALL(sys_ni_syscall)

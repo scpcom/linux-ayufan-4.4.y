@@ -188,7 +188,7 @@ asmlinkage int SynoPrintk(u8 direct_print, const char *fmt, ...)
 		va_end(args);
 		goto END;
 	}else{
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_DEBUG_FLAG
 		if(syno_temperature_debug) {
 			va_start(args, fmt);
 			r = vprintk(fmt, args);

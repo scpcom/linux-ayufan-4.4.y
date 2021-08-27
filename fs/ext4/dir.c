@@ -93,7 +93,7 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 		return 0;
 
 	if (filp) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 		if (printk_ratelimit())
 #endif
 		ext4_error_file(filp, function, line, bh ? bh->b_blocknr : 0,
@@ -103,7 +103,7 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 				offset, le32_to_cpu(de->inode),
 				rlen, de->name_len);
 	} else {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 		if (printk_ratelimit())
 #endif
 		ext4_error_inode(dir, function, line, bh ? bh->b_blocknr : 0,
@@ -132,7 +132,7 @@ static int ext4_readdir(struct file *filp,
 
 	sb = inode->i_sb;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	if ((EXT4_SB(inode->i_sb)->s_es->s_syno_hash_magic != cpu_to_le32(SYNO_HASH_MAGIC)) &&
 		EXT4_HAS_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_COMPAT_DIR_INDEX) &&
 #else

@@ -333,7 +333,7 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 
 				/* Binding to link-local address requires an interface */
 				if (!sk->sk_bound_dev_if) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IPV6_LINKLOCAL
 					unsigned flags;
 					for_each_netdev(net, dev) {
 						flags = dev_get_flags(dev);

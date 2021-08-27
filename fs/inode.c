@@ -168,13 +168,13 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	inode->i_rdev = 0;
 	inode->dirtied_when = 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	inode->i_archive_version = 0;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = 0;   /* set archive bit on creation */
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	inode->i_CreateTime.tv_sec = 0;
 	inode->i_CreateTime.tv_nsec = 0;
 #endif
@@ -185,7 +185,7 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 
 	mutex_init(&inode->i_mutex);
 	lockdep_set_class(&inode->i_mutex, &sb->s_type->i_mutex_key);
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
 	mutex_init(&inode->i_syno_mutex);
 	lockdep_set_class(&inode->i_syno_mutex, &sb->s_type->i_syno_mutex_key);
 #endif
@@ -989,7 +989,7 @@ void unlock_new_inode(struct inode *inode)
 {
 	lockdep_annotate_inode_mutex_key(inode);
 	spin_lock(&inode->i_lock);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_SKIP_RDONLY_NEW_INODE_WARNING
 	if (!(inode->i_state & I_NEW)) {
 		printk(KERN_ERR "EXT4: inode->i_state is not I_NEW. File system should be remount read-only.\n");
 	}

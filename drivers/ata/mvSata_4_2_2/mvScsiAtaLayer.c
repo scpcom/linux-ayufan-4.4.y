@@ -2276,7 +2276,7 @@ SALCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
     return MV_TRUE;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
 #include <scsi/scsi_cmnd.h>
 extern unsigned char
 blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd, sector_t lba);
@@ -2475,7 +2475,7 @@ handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
         }
         else if (errorReg & UNC_ERR)
         {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
             /* SCSI_OPCODE_VERIFY* is a kind of read */
             SynoInsertBadSectorRemap(pScb, registerStruct, MV_TRUE);
 #endif
@@ -2589,7 +2589,7 @@ handleUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
         else if ((registerStruct->errorRegister & UNC_ERR) ||
 		 (registerStruct->errorRegister == 1))
         {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
             SynoInsertBadSectorRemap(pScb, registerStruct, (MV_UDMA_TYPE_READ == pScb->udmaType));
 #endif
 #if 0

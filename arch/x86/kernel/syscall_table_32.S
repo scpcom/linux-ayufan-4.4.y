@@ -353,7 +353,7 @@ ENTRY(sys_call_table)
 	.long sys_setns
 	.long sys_process_vm_readv
 	.long sys_process_vm_writev
-#ifdef MY_ABC_HERE 
+#ifdef SYNO_SYSTEM_CALL 
     .long sys_ni_syscall
     .long sys_ni_syscall        /* 350 */
     .long sys_ni_syscall

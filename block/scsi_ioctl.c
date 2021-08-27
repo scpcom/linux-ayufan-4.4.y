@@ -37,7 +37,7 @@
 #include <scsi/scsi_cmnd.h>
 
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SCSI_VERIFY_ADD_WHITE_LIST
 #include <linux/raid/md_u.h>
 #endif
 
@@ -678,7 +678,7 @@ int scsi_cmd_ioctl(struct request_queue *q, struct gendisk *bd_disk, fmode_t mod
 		 * old junk scsi send command ioctl
 		 */
 		case SCSI_IOCTL_SEND_COMMAND:
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DISK_HIBERNATION
 			printk(KERN_WARNING "program %s is using a deprecated SCSI ioctl, please convert it to SG_IO\n", current->comm);
 #endif
 			err = -EINVAL;
@@ -722,7 +722,7 @@ int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
 	case SG_EMULATED_HOST:
 		return 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SCSI_VERIFY_ADD_WHITE_LIST
 	case BLKFLSBUF:
 	case BLKROSET:
 		return 0;
@@ -738,7 +738,7 @@ int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
 	}
 	if (capable(CAP_SYS_RAWIO))
 		return 0;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SCSI_VERIFY_ADD_WHITE_LIST
 	/* When create/delete raid, mdadm sends RAID_VERSION ioctl to partition.
 	 *
 	 * If system have no raids, and then create SHR/basic raid,

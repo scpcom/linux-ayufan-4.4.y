@@ -79,17 +79,17 @@
 
 #define BPRINTK(fmt, args...) if (ap->flags & ATA_FLAG_DEBUGMSG) printk(KERN_ERR "%s: " fmt, __func__, ## args)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 extern int giSynoAtaDebug;
 #define DBGMESG(x...)	\
 	if (0 < giSynoAtaDebug) printk(x)
 #endif
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(SYNO_ATA_AHCI_LED_SWITCH)
 extern int giSynoHddLedEnabled;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 #define WAKEINTERVAL (7UL*HZ)
 /* WD suggest 30s */
 #define ISSUEREADTIMEOUT (30UL*HZ)
@@ -177,7 +177,7 @@ enum {
 	ATA_DFLAG_DUBIOUS_XFER	= (1 << 16), /* data transfer not verified */
 	ATA_DFLAG_NO_UNLOAD	= (1 << 17), /* device doesn't support unload */
 	ATA_DFLAG_UNLOCK_HPA	= (1 << 18), /* unlock HPA */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_WCACHE_DISABLE
 	ATA_DFLAG_NO_WCACHE	= (1 << 23), /* device doesn't support write cache */
 #endif
 	ATA_DFLAG_INIT_MASK	= (1 << 24) - 1,
@@ -287,7 +287,7 @@ enum {
 	ATA_HOST_SIMPLEX	= (1 << 0),	/* Host is simplex, one DMA channel per host only */
 	ATA_HOST_STARTED	= (1 << 1),	/* Host started */
 	ATA_HOST_PARALLEL_SCAN	= (1 << 2),	/* Ports on this host can be scanned in parallel */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 	ATA_HOST_LLD_SPINUP_DELAY	= (1 << 3),	/* host spinup delay in LLD */
 #endif
 
@@ -373,11 +373,11 @@ enum {
 	ATA_EH_HARDRESET	= (1 << 2), /* meaningful only in ->prereset */
 	ATA_EH_RESET		= ATA_EH_SOFTRESET | ATA_EH_HARDRESET,
 	ATA_EH_ENABLE_LINK	= (1 << 3),
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_SEAGATE_PROBE_TIME_FIX
 	ATA_EH_SYNO_PWON	= (1 << 4),
 #endif
 	ATA_EH_PARK		= (1 << 5), /* unload heads and stop I/O */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_WCACHE_DISABLE
 	ATA_EH_WCACHE_DISABLE = (1 << 6), /* unload heads and stop I/O */
 #endif
 
@@ -451,7 +451,7 @@ enum {
 	ATA_HORKAGE_NOSETXFER	= (1 << 14),	/* skip SETXFER, SATA only */
 	ATA_HORKAGE_BROKEN_FPDMA_AA	= (1 << 15),	/* skip AA */
 	ATA_HORKAGE_DUMP_ID	= (1 << 16),	/* dump IDENTIFY data */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_WCACHE_DISABLE
 	ATA_HORKAGE_NOWCACHE	= (1 << 17),	/* skip Wcache */
 #endif
 
@@ -623,7 +623,7 @@ struct ata_host {
 #ifdef CONFIG_ATA_ACPI
 	acpi_handle		acpi_handle;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	unsigned int            host_no;
 #endif
 	struct ata_port		*simplex_claimed;	/* channel owning the DMA */
@@ -685,7 +685,7 @@ struct ata_ering {
 	struct ata_ering_entry	ring[ATA_ERING_SIZE];
 };
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 typedef unsigned int (*ata_xlat_func_t)(struct ata_queued_cmd *qc);
 #endif
 
@@ -701,7 +701,7 @@ struct ata_device {
 	union acpi_object	*gtf_cache;
 	unsigned int		gtf_filter;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 	/* be careful the ATA_DEVICE_CLEAR_OFFSET when porting this */
 	unsigned long ulLastCmd;
 	unsigned long ulSpinupState;
@@ -721,7 +721,7 @@ struct ata_device {
 	u8			pio_mode;
 	u8			dma_mode;
 	u8			xfer_mode;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SSD_DETECT
 	u8 is_ssd;
 #endif
 	unsigned int		xfer_shift;	/* ATA_SHIFT_xxx */
@@ -881,7 +881,7 @@ struct ata_port {
 
 	struct mutex		scsi_scan_mutex;
 	struct delayed_work	hotplug_task;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_PMP_HOTPLUG_TASK
 	struct delayed_work	syno_pmp_task;
 #endif //MY_ABC_HERE
 	struct work_struct	scsi_rescan_task;
@@ -1207,7 +1207,7 @@ extern int ata_cable_sata(struct ata_port *ap);
 extern int ata_cable_ignore(struct ata_port *ap);
 extern int ata_cable_unknown(struct ata_port *ap);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_WCACHE_DISABLE
 unsigned int ata_dev_set_feature(struct ata_device *dev,
 					u8 enable, u8 feature);
 #endif
@@ -1222,7 +1222,7 @@ extern void ata_timing_merge(const struct ata_timing *,
 			     unsigned int);
 extern u8 ata_timing_cycle2mode(unsigned int xfer_shift, int cycle);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_INFO
 extern void syno_ata_info_print(struct ata_port *ap);
 #endif
 
@@ -1355,7 +1355,7 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 #define IS_SYNO_PMP_CMD(tf) (IS_SYNO_PMP_READ_CMD(tf) || IS_SYNO_PMP_WRITE_CMD(tf))
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 #define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
 			(ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
 			 ATA_CMD_READ_EXT == qc->tf.command || ATA_CMD_PIO_READ == qc->tf.command || ATA_CMD_PIO_READ_EXT == qc->tf.command || \

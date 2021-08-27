@@ -560,7 +560,7 @@ static struct scsi_host_template virtscsi_host_template = {
 	.can_queue = 1024,
 	.dma_boundary = UINT_MAX,
 	.use_clustering = ENABLE_CLUSTERING,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	.syno_port_type		= SYNO_PORT_TYPE_SAS,
 #endif
 };

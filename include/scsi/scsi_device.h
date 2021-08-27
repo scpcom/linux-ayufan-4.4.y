@@ -94,10 +94,10 @@ struct scsi_device {
 	unsigned long last_queue_ramp_up;	/* last queue ramp up time */
 
 	unsigned int id, lun, channel;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	char syno_disk_name[BDEVNAME_SIZE];		/* name of major driver */
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
 	unsigned char auto_remap;
 #endif
 
@@ -174,11 +174,11 @@ struct scsi_device {
 	atomic_t iodone_cnt;
 	atomic_t ioerr_cnt;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DISK_HIBERNATION
 	unsigned long   idle;   /* scsi idle time in jiffers */
 	unsigned char	spindown;
 	unsigned char   nospindown;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_DISK_HIBERNATION */
 
 	struct device		sdev_gendev,
 				sdev_dev;
@@ -313,7 +313,7 @@ void SynoSpinupEnd(struct scsi_device *sdev);
 int SynoSpinupRemove(struct scsi_device *sdev);
 #endif /* MY_ABC_HERE */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
 #define SYNO_DISK_MODEL_LEN "24"
 #endif
 

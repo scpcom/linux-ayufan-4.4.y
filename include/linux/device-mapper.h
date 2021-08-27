@@ -105,7 +105,7 @@ typedef void (*dm_io_hints_fn) (struct dm_target *ti,
  */
 typedef int (*dm_busy_fn) (struct dm_target *ti);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 typedef void (*dm_lvinfoset_fn) (struct dm_target *ti);
 typedef sector_t (*dm_lg_sector_get_fn) (sector_t sector, struct dm_target *ti);
 #endif
@@ -242,7 +242,7 @@ struct dm_target {
 	 */
 	unsigned discard_zeroes_data_unsupported:1;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DM_FORCE_IO_HINTS
 	unsigned force_io_hints:1;
 #endif
 };
@@ -328,7 +328,7 @@ void *dm_get_mdptr(struct mapped_device *md);
  */
 int dm_suspend(struct mapped_device *md, unsigned suspend_flags);
 int dm_resume(struct mapped_device *md);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FAST_VOLUME_WAKEUP
 int dm_active_get(struct mapped_device *md);
 int dm_active_set(struct mapped_device *md, int value);
 #endif

@@ -345,7 +345,7 @@ struct cpu_ctrl {
 
 };
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 #define MV_PHY_ID_151X 0x01410DD0
 #endif
 
@@ -396,7 +396,7 @@ struct eth_port {
 	struct cpu_ctrl	*cpu_config[CONFIG_NR_CPUS];
 	MV_U32  sgmii_serdes;
 	int	wol_mode;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 	MV_U32 phy_chip;
 	MV_U32 phy_id;
 	MV_U32  wol;

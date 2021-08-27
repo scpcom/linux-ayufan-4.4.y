@@ -379,7 +379,7 @@ fault:
 }
 EXPORT_SYMBOL(skb_copy_datagram_iovec);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 /**
  *	skb_copy_datagram_iovec - Copy a datagram to an iovec.
  *	@skb: buffer to copy

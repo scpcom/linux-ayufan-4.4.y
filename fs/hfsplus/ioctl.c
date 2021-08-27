@@ -61,7 +61,7 @@ static int hfsplus_ioctl_bless(struct file *file, int __user *user_flags)
 
 static int hfsplus_ioctl_getflags(struct file *file, int __user *user_flags)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_PORTING_3_9
 	struct inode *inode = file->f_path.dentry->d_inode;
 #else
 	struct inode *inode = file_inode(file);
@@ -81,7 +81,7 @@ static int hfsplus_ioctl_getflags(struct file *file, int __user *user_flags)
 
 static int hfsplus_ioctl_setflags(struct file *file, int __user *user_flags)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_PORTING_3_9
 	struct inode *inode = file->f_path.dentry->d_inode;
 #else
 	struct inode *inode = file_inode(file);

@@ -101,7 +101,7 @@ int memcpy_toiovec(struct iovec *iov, unsigned char *kdata, int len)
 }
 EXPORT_SYMBOL(memcpy_toiovec);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 /* this was removed in 2.6. Re-add it because we beed it in recvfile. */
 /*
  *	In kernel copy to iovec. Returns -EFAULT on error.
@@ -125,7 +125,7 @@ void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len)
 		iov++;
 	}
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 /*
  *	Copy kernel to iovec. Returns -EFAULT on error.
  */

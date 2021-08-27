@@ -24,7 +24,7 @@
 #include "locking.h"
 #include "rcu-string.h"
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BTRFS_PORTING
 #include <linux/ratelimit.h>
 #endif
 
@@ -2540,7 +2540,7 @@ readpage_ok:
 	bio_put(bio);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BTRFS_PORTING
 static void btrfs_bio_destructor(struct bio *bio)
 {
 	bio_free(bio, btrfs_bioset);
@@ -2568,7 +2568,7 @@ btrfs_bio_alloc(struct block_device *bdev, u64 first_sector, int nr_vecs,
 	}
 
 	if (bio) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BTRFS_PORTING
 		bio->bi_destructor = btrfs_bio_destructor;
 #endif
 		bio->bi_size = 0;
@@ -2584,7 +2584,7 @@ btrfs_bio_alloc(struct block_device *bdev, u64 first_sector, int nr_vecs,
 
 struct bio *btrfs_bio_clone(struct bio *bio, gfp_t gfp_mask)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BTRFS_PORTING
 	struct bio *b;
 
 	b = bio_alloc_bioset(gfp_mask, bio->bi_max_vecs, btrfs_bioset);
@@ -2617,7 +2617,7 @@ struct bio *btrfs_io_bio_alloc(gfp_t gfp_mask, unsigned int nr_iovecs)
 
 	bio = bio_alloc_bioset(gfp_mask, nr_iovecs, btrfs_bioset);
 	if (bio) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BTRFS_PORTING
 		bio->bi_destructor = btrfs_bio_destructor;
 #endif
 		btrfs_bio = btrfs_io_bio(bio);

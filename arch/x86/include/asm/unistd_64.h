@@ -756,7 +756,7 @@ __SYSCALL(__NR_SYNOEcryptName, sys_SYNOEcryptName)
 __SYSCALL(__NR_SYNODecryptName, sys_SYNODecryptName)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_SYNO_ACL
 #define __NR_SYNOACLCheckPerm                   412
 #define SYNOACLSysCheckPerm(arg1, arg2)         syscall(__NR_SYNOACLCheckPerm, arg1, arg2)
 __SYSCALL(__NR_SYNOACLCheckPerm, sys_SYNOACLCheckPerm)

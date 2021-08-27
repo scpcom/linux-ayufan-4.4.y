@@ -58,7 +58,7 @@
 #include <asm/ioctls.h>
 #include "internal.h"
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 #include <linux/synolib.h>
 extern int syno_hibernation_log_sec;
 #endif
@@ -1814,7 +1814,7 @@ asmlinkage long compat_sys_timerfd_gettime(int ufd,
 
 #endif /* CONFIG_TIMERFD */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 
 asmlinkage ssize_t compat_sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, compat_size_t __user *rwbytes32)
 {
@@ -1845,9 +1845,9 @@ asmlinkage ssize_t compat_sys_recvfile(int fd, int s, loff_t *offset, size_t nby
 
 	return ret;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 /**
  * sys_SYNOUtime() is used to update create time.
  *

@@ -100,7 +100,7 @@ module_param(irq_coalescing_usecs, int, S_IRUGO);
 MODULE_PARM_DESC(irq_coalescing_usecs,
 		 "IRQ coalescing time threshold in usecs");
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 extern void sata_print_link_status(struct ata_link *link);
 #endif
 
@@ -144,7 +144,7 @@ enum {
 	FLASH_CTL		= 0x1046c,
 	GPIO_PORT_CTL		= 0x104f0,
 	RESET_CFG		= 0x180d8,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_GPIO_RW
 	GPIO_CTL_DATA		= 0x1809c,
 #endif
 
@@ -695,7 +695,7 @@ static struct scsi_host_template mv5_sht = {
 	ATA_BASE_SHT(DRV_NAME),
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	.syno_index_get         = syno_libata_index_get,
 #endif
 };
@@ -2759,10 +2759,10 @@ static void mv_err_intr(struct ata_port *ap)
 		ata_ehi_push_desc(ehi, "parity error");
 	}
 	if (edma_err_cause & (EDMA_ERR_DEV_DCON | EDMA_ERR_DEV_CON)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_INFO
 		syno_ata_info_print(ap);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ATA_FAST_PROBE
 		if (edma_err_cause & EDMA_ERR_DEV_CON) {
 			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 		}
@@ -3403,13 +3403,13 @@ static void mv6_read_preamp(struct mv_host_priv *hpriv, int idx,
 
 static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 {
-#ifdef	MY_ABC_HERE
+#ifdef	SYNO_SATA_LED_SPECIAL
 	if(0 != g_sata_led_special) {
 		writel(0x00000050, mmio + GPIO_PORT_CTL);
 		writel(0x00000000, mmio + GPIO_CTL_DATA);
 	}else{
 #endif
-#ifdef	MY_ABC_HERE
+#ifdef	SYNO_OSS_SATA_LED
 		/* In order to make LED static when disk present and blinking when
 		 * disk active, we have to set the offset 0x104F0 bit 0-1 to 0x00 and
 		 * bit 2-3 to 1.
@@ -3461,7 +3461,7 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	 * Achieves better receiver noise performance than the h/w default:
 	 */
 	m3 = readl(port_mmio + PHY_MODE3);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ENLARGE_RX_NOISE_TRRESHOLD
 	m3 = (m3 & 0x03) | (0x5555601 << 5);
 	m3 |= 0x0c;
 #else
@@ -3642,7 +3642,7 @@ static bool soc_is_65n(struct mv_host_priv *hpriv)
 	return false;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_SHUTDOWN_PHY
 extern struct scsi_device *look_up_scsi_dev_from_ap(struct ata_port *ap);
 /**
  * Please refer arch/arm/plat-feroceon/mv_hal/sata/CoreDriver/mvSataSoc.c
@@ -3663,7 +3663,7 @@ static void syno_mv_phy_ctl(void __iomem *port_mmio, u8 blShutdown)
 	writelfl(ifcfg, port_mmio + SATA_IFCFG);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_GPIO_RW
 int syno_sata_mv_gpio_read(const unsigned short hostnum)
 {
 	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
@@ -3827,12 +3827,12 @@ static void mv_pmp_select(struct ata_port *ap, int pmp)
 static int mv_pmp_hardreset(struct ata_link *link, unsigned int *class,
 				unsigned long deadline)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 	int iRet = 0;
 #endif
 
 	mv_pmp_select(link->ap, sata_srst_pmp(link));
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 	iRet = sata_std_hardreset(link, class, deadline);
 	if (0 < giSynoAtaDebug) {
 		DBGMESG("-- Syno Debug Show pmp link status --\n");
@@ -4273,7 +4273,7 @@ static void mv_conf_mbus_windows(struct mv_host_priv *hpriv,
 	}
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
 extern int mvSataWinInit(void);
 #endif
 /**
@@ -4342,7 +4342,7 @@ static int mv_platform_probe(struct platform_device *pdev)
 	 */
 	if (mv_platform_data->dram != NULL)
 		mv_conf_mbus_windows(hpriv, mv_platform_data->dram);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
 	else
 		mvSataWinInit();
 #endif
@@ -4594,13 +4594,13 @@ static int mv_pci_init_one(struct pci_dev *pdev,
 	ata_print_version_once(&pdev->dev, DRV_VERSION);
 
 	/* allocate host */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PORT_MAP
 	if(gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
 		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
 	}else{
 #endif
 	n_ports = mv_get_hc_count(ppi[0]->flags) * MV_PORTS_PER_HC;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PORT_MAP
 	}
 #endif
 
@@ -4688,7 +4688,7 @@ static int __devexit mv_platform_remove(struct platform_device *pdev);
 static int __init mv_init(void)
 {
 	int rc = -ENODEV;
-#if defined(MY_DEF_HERE)
+#if defined(SYNO_ESATA_7042)
 	extern long g_esata_7042;
 
 	/* 211p use 7042 as external sata device. So we need to reverse the register order. */

@@ -595,7 +595,7 @@ typedef struct mvSataChannel
     MV_SATA_DEVICE_TYPE         deviceType;
     MV_BOOLEAN  		FBSEnabled;
     MV_BOOLEAN                  use128Entries;
-#if defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(MY_ABC_HERE)
+#if defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(SYNO_SATA_MV_EH)
     /* while restart channel, device type would forget by mvSata */
     MV_SATA_DEVICE_TYPE         oldDeviceType;
 #endif
@@ -614,7 +614,7 @@ typedef struct mvSataChannel
     MV_U8                       recoveredErrorsCounter;
     /* NCQ error handling*/
     MV_ERROR_HANDLING_INFO  ErrorHandlingInfo;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 	unsigned long chkpower_flags;
 	/* bit definitions */
 	#define CHKPOWER_CHECKING 0
@@ -625,14 +625,14 @@ typedef struct mvSataChannel
 	MV_QUEUE_COMMAND_INFO		OrigCmd;
 	struct timer_list	rstimer;
 	struct list_head	pendinglh;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SPINUP_DELAY */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SSD_DETECT
 	unsigned long  ssd_list;  /* ssd mask, start from bit 0 to bit 32 indicate the disk */
 #endif
 } MV_SATA_CHANNEL;
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_SATA_MV_EH) || defined(SYNO_SATA_DETECT_FIX)
 typedef struct _tag_SYNO_EH {
     /* state the current action and reason.
      * There is no pm port flags
@@ -668,7 +668,7 @@ enum {
     EH_PROCESSING            = (1 << 5),
     EH_SCSI_DONE_NEEDED      = (1 << 6),
     EH_CONNECT_AGAIN         = (1 << 7),
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DETECT_FIX
     EH_HW_COM_ERROR          = (1 << 8),
 #endif
 
@@ -676,7 +676,7 @@ enum {
     EH_LINK_DISK             = (1 << 20),
     EH_LINK_PMP              = (1 << 21),
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DETECT_FIX
     /* FIXME: please integrade detect fix after merge EH to CVS. */
     /* probe status */
     SYNO_PROBE_RETRY = (1 << 0),
@@ -734,10 +734,10 @@ typedef struct mvSataAdapter
     MV_U8             iogFreeIdsNum;
     MV_OS_SEMAPHORE   iogSemaphore;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_EH
     SYNO_EH           eh[MV_SATA_CHANNELS_NUM];
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DETECT_FIX
     MV_ULONG          flags[MV_SATA_CHANNELS_NUM];
 #endif
 } MV_SATA_ADAPTER;

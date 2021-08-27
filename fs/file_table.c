@@ -357,7 +357,7 @@ struct file *fget_light(unsigned int fd, int *fput_needed)
 
 	return file;
 }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BTRFS_PORTING
 EXPORT_SYMBOL(fget_light);
 #endif
 

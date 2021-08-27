@@ -48,10 +48,10 @@ enum {
 	NFSD_Gracetime,
 	NFSD_RecoveryDir,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UDP_PACKET
 	NFSD_UDP_Size,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UNIX_PRI
 	NFSD_UNIX_PRI,
 #endif
 };
@@ -72,10 +72,10 @@ static ssize_t write_leasetime(struct file *file, char *buf, size_t size);
 static ssize_t write_gracetime(struct file *file, char *buf, size_t size);
 static ssize_t write_recoverydir(struct file *file, char *buf, size_t size);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UDP_PACKET
 static ssize_t write_udp_size(struct file *file, char *buf, size_t size);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UNIX_PRI
 static ssize_t write_unix_enable(struct file *file, char *buf, size_t size);
 #endif
 
@@ -93,10 +93,10 @@ static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 	[NFSD_Gracetime] = write_gracetime,
 	[NFSD_RecoveryDir] = write_recoverydir,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UDP_PACKET
 	[NFSD_UDP_Size] = write_udp_size,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UNIX_PRI
 	[NFSD_UNIX_PRI] = write_unix_enable,
 #endif
 };
@@ -509,7 +509,7 @@ out_free:
 	return rv;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UDP_PACKET
 u32 nfs_udp_f_rtpref;
 u32 nfs_udp_f_wtpref;
 
@@ -548,7 +548,7 @@ End:
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UNIX_PRI
 u32 bl_unix_pri_enable;
 
 static ssize_t write_unix_enable(struct file *file, char *buf, size_t size)
@@ -1179,10 +1179,10 @@ static int nfsd_fill_super(struct super_block * sb, void * data, int silent)
 		[NFSD_Gracetime] = {"nfsv4gracetime", &transaction_ops, S_IWUSR|S_IRUSR},
 		[NFSD_RecoveryDir] = {"nfsv4recoverydir", &transaction_ops, S_IWUSR|S_IRUSR},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UDP_PACKET
 		[NFSD_UDP_Size] = {"udppacketsize", &transaction_ops, S_IWUSR|S_IRUGO},
-#endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
+#endif /* SYNO_NFSD_UDP_PACKET */
+#ifdef SYNO_NFSD_UNIX_PRI
 		[NFSD_UNIX_PRI] = {"unix_privilege_enable", &transaction_ops, S_IWUSR|S_IRUGO},
 #endif
 		/* last one */ {""}
@@ -1228,12 +1228,12 @@ static int __init init_nfsd(void)
 	int retval;
 	printk(KERN_INFO "Installing knfsd (copyright (C) 1996 okir@monad.swb.de).\n");
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UDP_PACKET
 	/*initial default udp packet size*/
 	nfs_udp_f_rtpref = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
 	nfs_udp_f_wtpref = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
-#endif /*MY_ABC_HERE*/
-#ifdef MY_ABC_HERE
+#endif /*SYNO_NFSD_UDP_PACKET*/
+#ifdef SYNO_NFSD_UNIX_PRI
 	bl_unix_pri_enable = 1;
 #endif
 

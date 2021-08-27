@@ -296,7 +296,7 @@ SYSCALL_DEFINE(fallocate)(int fd, int mode, loff_t offset, loff_t len)
 
 	return error;
 }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_EXPORT_SYMBOL_FALLOCATE
 EXPORT_SYMBOL(do_fallocate);
 #endif
 
@@ -577,7 +577,7 @@ static int chown_common(struct path *path, uid_t user, gid_t group)
 	return error;
 }
 
-#ifdef	MY_ABC_HERE
+#ifdef	SYNO_ARCHIVE_BIT
 extern long __SYNOArchiveSet(struct dentry *, unsigned int cmd);
 
 asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
@@ -1074,7 +1074,7 @@ long do_sys_open(int dfd, const char __user *filename, int flags, int mode)
 	return fd;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 #include <linux/synolib.h>
 extern int syno_hibernation_log_sec;
 #endif

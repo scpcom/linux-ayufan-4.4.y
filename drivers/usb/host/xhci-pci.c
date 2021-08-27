@@ -34,7 +34,7 @@
 #define PCI_DEVICE_ID_FRESCO_LOGIC_PDK	0x1000
 #define PCI_DEVICE_ID_FRESCO_LOGIC_FL1400	0x1400
 
-#ifndef MY_ABC_HERE // move to pci_id.h
+#ifndef SYNO_USB3_PCI_ID_DEFINE // move to pci_id.h
 #define PCI_VENDOR_ID_ETRON		0x1b6f
 #define PCI_DEVICE_ID_ASROCK_P67	0x7023
 #else
@@ -112,7 +112,7 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		xhci->quirks |= XHCI_AVOID_BEI;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_PCI_ID_DEFINE
 	xhci_vendor = pdev->vendor;
 #endif
 

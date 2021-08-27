@@ -319,7 +319,7 @@ void usb_hcd_pci_remove(struct pci_dev *dev)
 }
 EXPORT_SYMBOL_GPL(usb_hcd_pci_remove);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_SHUTDOWN_FIX
 #include <linux/kthread.h>
 extern struct task_struct *khubd_task;
 #endif
@@ -336,14 +336,14 @@ void usb_hcd_pci_shutdown(struct pci_dev *dev)
 	if (!hcd)
 		return;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_SHUTDOWN_FIX
 	if (khubd_task != NULL) {
 		kthread_stop(khubd_task);
 		khubd_task = NULL;
 	}
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_SHUTDOWN_FIX
 	if (hcd->irq >= 0) {
 		//disable_irq(hcd->irq);
 		free_irq(hcd->irq, hcd);

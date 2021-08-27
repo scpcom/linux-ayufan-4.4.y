@@ -756,7 +756,7 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 	struct ata_taskfile tf;
 	const char *reason;
 	int rc;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SIL3132_HD_DETECT
 	int retry_count = 0;
 #endif
 
@@ -772,7 +772,7 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 	if (time_after(deadline, jiffies))
 		timeout_msec = jiffies_to_msecs(deadline - jiffies);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SIL3132_HD_DETECT
 retry:
 #endif
 	ata_tf_init(link->device, &tf);	/* doesn't really matter */
@@ -783,7 +783,7 @@ retry:
 		reason = "timeout";
 		goto err;
 	} else if (rc) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SIL3132_HD_DETECT
 		/* retry once. And we don't retry port multiplier itself */
 		if (retry_count < 1 && 0xf != link->pmp) {
 			sata_std_hardreset(link, class, deadline+HZ);
@@ -823,7 +823,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 	int tout_msec, rc;
 	u32 tmp;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SIL3132_INTEL_SSD_WORKAROUND
 	link->uiStsFlags |= SYNO_STATUS_IS_SIL3132;
 #endif
 
@@ -849,7 +849,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 		did_port_rst = 1;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SIL3132_HITACHI_WORKAROUND
 	sil24_scr_read(link, SCR_STATUS, &tmp);
 	if (0x1 == tmp) {
 		/* No IPM, speed negotiate and phy is not well communicated.  */
@@ -1101,7 +1101,7 @@ static int sil24_pmp_hardreset(struct ata_link *link, unsigned int *class,
 		return rc;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SIL3132_PM_WORKAROUND
 	link->uiStsFlags |= SYNO_STATUS_IS_SIL3132PM;
 #endif
 	return sata_std_hardreset(link, class, deadline);
@@ -1157,10 +1157,10 @@ static void sil24_error_intr(struct ata_port *ap)
 	}
 
 	if (irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_INFO
 		syno_ata_info_print(ap);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ATA_FAST_PROBE
 		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 #endif
 		ata_ehi_hotplugged(ehi);
@@ -1428,7 +1428,7 @@ static void sil24_init_controller(struct ata_host *host)
 
 		/* configure port */
 		sil24_config_port(ap);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SIL3132_ABRT_WORKAROUND
 		mdelay(1000);
 #endif
 	}

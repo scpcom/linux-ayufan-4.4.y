@@ -40,7 +40,7 @@
 #include <linux/io.h>
 #include <linux/spinlock.h>
 #include <linux/rtnetlink.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TALITOS_PATCH
 #include <linux/dmaengine.h>
 #include <linux/raid/xor.h>
 #endif
@@ -159,7 +159,7 @@ struct talitos_private {
 	/* hwrng device */
 	struct hwrng rng;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TALITOS_PATCH
 	/* XOR Device */
 	struct dma_device dma_dev_common;
 #endif
@@ -291,7 +291,7 @@ static int init_device(struct device *dev)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TALITOS_CHANNEL_FIX
 static void talitos_release_xor(struct device *dev, struct talitos_desc *hwdesc,
 				void *context, int error);
 #endif
@@ -318,7 +318,7 @@ static int talitos_submit(struct device *dev, int ch, struct talitos_desc *desc,
 	unsigned long flags;
 	int head;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TALITOS_CHANNEL_FIX
 	// XOR engine always use channel 0 to prevent bug when combind with other engine
 	if (callback == talitos_release_xor) {
 		ch = 0;
@@ -718,7 +718,7 @@ static void talitos_unregister_rng(struct device *dev)
 	hwrng_unregister(&priv->rng);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TALITOS_PATCH
 /*
  * async_tx interface for XOR-capable SECs
  *
@@ -2758,7 +2758,7 @@ static int talitos_remove(struct platform_device *ofdev)
 	tasklet_kill(&priv->done_task);
 
 	iounmap(priv->reg);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TALITOS_PATCH
 	if (priv->dma_dev_common.chancnt)
 		talitos_unregister_async_xor(dev);
 #endif
@@ -2969,7 +2969,7 @@ static int talitos_probe(struct platform_device *ofdev)
 			dev_info(dev, "hwrng\n");
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TALITOS_PATCH
 	/*
 	 * register with async_tx xor, if capable
 	 * SEC 2.x support up to 3 RAID sources,

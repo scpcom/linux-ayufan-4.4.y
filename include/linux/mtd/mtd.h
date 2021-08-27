@@ -377,12 +377,12 @@ static inline int mtd_is_bitflip_or_eccerr(int err) {
 	return mtd_is_bitflip(err) || mtd_is_eccerr(err);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_INFO
 /* written in synopart.c */
 int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length);
 
 /* written in redboot.c */
 int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdFisInfo);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MTD_INFO */
 
 #endif /* __MTD_MTD_H__ */

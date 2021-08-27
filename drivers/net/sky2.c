@@ -1574,7 +1574,7 @@ static void sky2_hw_up(struct sky2_port *sky2)
 	u32 ramsize;
 	int cap;
 	struct net_device *otherdev = hw->dev[sky2->port^1];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SKY2_BLINK_BEHAVIOR
 	u32 gphy_ctrl = 0;
 #endif
 
@@ -1594,7 +1594,7 @@ static void sky2_hw_up(struct sky2_port *sky2)
 	}
 
 	sky2_mac_init(hw, port);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SKY2_BLINK_BEHAVIOR
         gphy_ctrl = sky2_read32(hw, SK_REG(port, GPHY_CTRL));
 
 	//change linking behavior
@@ -2539,7 +2539,7 @@ static void sky2_rx_checksum(struct sky2_port *sky2, u32 status)
 	 */
 	if (likely((u16)(status >> 16) == (u16)status)) {
 		struct sk_buff *skb = sky2->rx_ring[sky2->rx_next].skb;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SKY2_CSUM_FIX
 		skb->ip_summed = CHECKSUM_UNNECESSARY;
 #else
 		skb->ip_summed = CHECKSUM_COMPLETE;

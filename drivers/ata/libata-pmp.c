@@ -755,7 +755,7 @@ syno_pmp_ports_num(struct ata_port *ap)
 		}
 		/* add other quirk of port multiplier here */
 		 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_9235_PORTING
 		/* Block sata 6Gbps host + sata 3Gbps expansion unit case*/
 		if (syno_pm_is_synology_3xxx(ap) && (ap->link.uiStsFlags & SYNO_STATUS_IS_MV9235)) {
 			ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
@@ -945,7 +945,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		if (blPowerOn) {
 			DBGMESG("port %d delay 3000ms wait for HW ready\n", ap->print_id);
 			SleepForLatency();
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_SEAGATE_PROBE_TIME_FIX
 			ata_port_printk(ap, KERN_INFO, "PMP Power control set ATA_EH_SYNO_PWON\n");
 			ap->link.eh_context.i.action |= ATA_EH_SYNO_PWON;
 #endif
@@ -1538,7 +1538,7 @@ int sata_pmp_attach(struct ata_device *dev)
 
 	ata_acpi_associate_sata_port(ap);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIBATA_PMP_UEVENT
 	ap->pflags |= ATA_PFLAG_PMP_CONNECT;
 #endif
 
@@ -1594,7 +1594,7 @@ static void sata_pmp_detach(struct ata_device *dev)
 	spin_unlock_irqrestore(ap->lock, flags);
 
 	ata_acpi_associate_sata_port(ap);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIBATA_PMP_UEVENT
 	ap->pflags |= ATA_PFLAG_PMP_DISCONNECT;
 #endif
 }

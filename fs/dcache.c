@@ -1302,7 +1302,7 @@ void d_set_d_op(struct dentry *dentry, const struct dentry_operations *op)
 		dentry->d_flags |= DCACHE_OP_HASH;
 	if (op->d_compare)
 		dentry->d_flags |= DCACHE_OP_COMPARE;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 	if (op->d_compare_case)
 		dentry->d_flags |= DCACHE_OP_COMPARE_CASE;
 #endif
@@ -1701,7 +1701,7 @@ EXPORT_SYMBOL(d_add_ci);
  * child is looked up. Thus, an interlocking stepping of sequence lock checks
  * is formed, giving integrity down the path walk.
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 struct dentry *__d_lookup_rcu(struct dentry *parent, struct qstr *name,
 				unsigned *seq, struct inode **inode, int caseless)
 #else
@@ -1715,7 +1715,7 @@ struct dentry *__d_lookup_rcu(struct dentry *parent, struct qstr *name,
 	struct hlist_bl_head *b = d_hash(parent, hash);
 	struct hlist_bl_node *node;
 	struct dentry *dentry;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 	struct dentry *found = NULL;
 #endif
 
@@ -1765,7 +1765,7 @@ seqretry:
 		 */
 		if (read_seqcount_retry(&dentry->d_seq, *seq))
 			goto seqretry;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 		if (likely(parent->d_flags & DCACHE_OP_COMPARE_CASE)) {
 			if (parent->d_op->d_compare_case(parent, *inode, dentry, i, tlen, tname, name, caseless))
 				continue;
@@ -1805,7 +1805,7 @@ seqretry:
 		*inode = i;
 		return dentry;
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 	return found;
 #else
 	return NULL;
@@ -1830,7 +1830,7 @@ struct dentry *d_lookup(struct dentry *parent, struct qstr *name)
 
         do {
                 seq = read_seqbegin(&rename_lock);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
                 dentry = __d_lookup(parent, name, 0);
 #else
                 dentry = __d_lookup(parent, name);
@@ -1842,7 +1842,7 @@ struct dentry *d_lookup(struct dentry *parent, struct qstr *name)
 }
 EXPORT_SYMBOL(d_lookup);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 /**
  * d_lookup - search for a dentry
  * @parent: parent dentry
@@ -1883,7 +1883,7 @@ EXPORT_SYMBOL(d_lookup_case);
  *
  * __d_lookup callers must be commented.
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 struct dentry *__d_lookup(struct dentry *parent, struct qstr *name, int caseless)
 #else
 struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
@@ -1896,7 +1896,7 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 	struct hlist_bl_node *node;
 	struct dentry *found = NULL;
 	struct dentry *dentry;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 	int lockFound = 0;
 #endif
 
@@ -1941,7 +1941,7 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 		 */
 		tlen = dentry->d_name.len;
 		tname = dentry->d_name.name;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 		if (parent->d_flags & DCACHE_OP_COMPARE_CASE) {
 			if (parent->d_op->d_compare_case(parent, parent->d_inode,
 						dentry, dentry->d_inode,
@@ -1979,7 +1979,7 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 			if (dentry_cmp(tname, tlen, str, len))
 				goto next;
 		}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 		// make sure "found" is unlocked
 		if (lockFound) {
 			found->d_count--;
@@ -1995,7 +1995,7 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 next:
 		spin_unlock(&dentry->d_lock);
  	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 	// make sure "found" is unlocked
 	if (lockFound) {
 		spin_unlock(&found->d_lock);

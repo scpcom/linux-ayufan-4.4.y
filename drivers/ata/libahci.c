@@ -130,7 +130,7 @@ static DEVICE_ATTR(ahci_host_cap2, S_IRUGO, ahci_show_host_cap2, NULL);
 static DEVICE_ATTR(ahci_host_version, S_IRUGO, ahci_show_host_version, NULL);
 static DEVICE_ATTR(ahci_port_cmd, S_IRUGO, ahci_show_port_cmd, NULL);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ATA_AHCI_LED_MSG
 static ssize_t
 ata_ahci_locate_show(struct device *dev, struct device_attribute *attr,
 		char *buf)
@@ -207,7 +207,7 @@ void sata_syno_ahci_diskled_set(int iHostNum, int iPresent, int iFault)
 		goto RELEASESRC;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ATA_AHCI_LED_SWITCH
 	iPresent &= giSynoHddLedEnabled;
 	iFault &= giSynoHddLedEnabled;
 #endif
@@ -284,13 +284,13 @@ EXPORT_SYMBOL_GPL(ahci_shost_attrs);
 struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_activity,
 	&dev_attr_unload_heads,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_WCACHE_DISABLE
 	&dev_attr_syno_wcache,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DISK_SERIAL
 	&dev_attr_syno_disk_serial,
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ATA_AHCI_LED_MSG
 	&dev_attr_sw_locate,
 	&dev_attr_sw_fault,
 #endif
@@ -1031,7 +1031,7 @@ static void ahci_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(SYNO_ATA_AHCI_LED_SWITCH)
 	if (!giSynoHddLedEnabled) {
 		return;
 	}
@@ -1044,7 +1044,7 @@ static void ahci_sw_activity(struct ata_link *link)
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(10));
 }
 
-#ifdef MY_DEF_HERE 
+#ifdef SYNO_ATA_AHCI_LED_MSG 
 static void ahci_sw_locate_set(struct ata_link *link, u8 blEnable)
 {
 	struct ata_port *ap = link->ap;
@@ -1804,7 +1804,7 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 		u32 fbs = readl(port_mmio + PORT_FBS);
 		int pmp = fbs >> PORT_FBS_DWE_OFFSET;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AHCI_PM_DEADLOCK_FIX
 		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links)) {
 #else
 		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links) &&
@@ -1886,10 +1886,10 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	}
 
 	if (irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_INFO
 		syno_ata_info_print(ap);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ATA_FAST_PROBE
 		if (irq_stat & PORT_IRQ_CONNECT) {
 			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 		}
@@ -2536,7 +2536,7 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 		pi->flags |= ATA_FLAG_EM;
 		if (!(em_ctl & EM_CTL_ALHD))
 			pi->flags |= ATA_FLAG_SW_ACTIVITY;
-#ifdef MY_DEF_HERE 
+#ifdef SYNO_ATA_AHCI_LED_MSG 
 		if (em_ctl & EM_CTL_LED) {
 			pi->flags |= ATA_FLAG_SW_LOCATE;
 			pi->flags |= ATA_FLAG_SW_FAULT;

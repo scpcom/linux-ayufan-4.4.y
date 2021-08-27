@@ -483,7 +483,7 @@ static void reset_page(struct page *page)
 	set_page_private(page, 0);
 	page->mapping = NULL;
 	page->freelist = NULL;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ZRAM
 	reset_page_mapcount(page);
 #else
 	page_mapcount_reset(page);

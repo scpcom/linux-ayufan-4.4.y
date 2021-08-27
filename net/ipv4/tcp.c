@@ -280,9 +280,9 @@
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 #include <linux/pci.h>
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 
 int sysctl_tcp_fin_timeout __read_mostly = TCP_FIN_TIMEOUT;
 
@@ -1538,7 +1538,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	do {
 		u32 offset;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
         if(flags &  MSG_NOCATCHSIGNAL) {
 			/* Original when we have recvfile(), we remove the following
 			 * sygnal_pending(). But it would cause system hang when smbd
@@ -1614,7 +1614,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 				break;
 
 			if (sk->sk_err) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 				if ( (msg->msg_flags & MSG_KERNSPACE) &&
 					ECONNRESET == sk->sk_err )
 					printk("connection reset by peer.\n");

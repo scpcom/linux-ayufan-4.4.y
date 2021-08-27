@@ -713,7 +713,7 @@ static void native_machine_power_off(void)
  * Intel Media SOC Gen3 uses this specific way to power off.
 */
 	machine_shutdown();
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_POWEROFF
 	outb(SYNO_EVANSPORT_SET8N1, SYNO_EVANSPORT_TTYS1_PORT + SYNO_EVANSPORT_LCR);
 	outb(SYNO_EVANSPORT_SHUTDOWN_CMD, SYNO_EVANSPORT_TTYS1_PORT + SYNO_EVANSPORT_TXR);
 #endif

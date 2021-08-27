@@ -36,7 +36,7 @@ static int raid0_congested(void *data, int bits)
 	int raid_disks = conf->strip_zone[0].nb_dev;
 	int i, ret = 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_DEVICE_NOTIFY
 	/* when raid0 lose one of disks, it is not normally,
 	 * So we just do a fake report that it is fine,
 	 * Nor will encounter NULL pointer access in devlist[i]->bdev.
@@ -222,7 +222,7 @@ static int create_strip_zones(struct mddev *mddev, struct r0conf **private_conf)
 	if (cnt != mddev->raid_disks) {
 		printk(KERN_ERR "md/raid0:%s: too few disks (%d of %d) - "
 		       "aborting!\n", mdname(mddev), cnt, mddev->raid_disks);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS
 		/* for raid0 status consistense to other raid type */
 		mddev->degraded = mddev->raid_disks - cnt;
 		zone->nb_dev = mddev->raid_disks;
@@ -370,7 +370,7 @@ static int raid0_run(struct mddev *mddev)
 	struct r0conf *conf;
 	int ret;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_DEVICE_NOTIFY
 	mddev->degraded = 0;
 #endif
 
@@ -387,9 +387,9 @@ static int raid0_run(struct mddev *mddev)
 	/* if private is not null, we are here after takeover */
 	if (mddev->private == NULL) {
 		ret = create_strip_zones(mddev, &conf);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS
 		if (ret < 0) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 			mddev->nodev_and_crashed = 1;
 #endif
 			/* The size must greater than zero,
@@ -446,7 +446,7 @@ static int raid0_stop(struct mddev *mddev)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 /**
  * This is end_io callback function.
  * We can use this for bad sector report and device error
@@ -478,8 +478,8 @@ static void Raid0EndRequest(struct bio *bio, int error)
 			syno_md_error(mddev, rdev);
 		}else{
 			/* Let raid0 could keep read.(md_error would let it become read-only) */
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
+#ifdef SYNO_AUTO_REMAP_REPORT
 			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
 			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
 			}
@@ -496,7 +496,7 @@ static void Raid0EndRequest(struct bio *bio, int error)
 	/* Let mount could successful and bad sector could keep accessing */
 	bio_endio(bio, 0);
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_BLOCK_REQUEST_ERROR_NODEV */
 
 /* Find the zone which holds a particular offset
  * Update *sectorp to be an offset in that zone
@@ -575,7 +575,7 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 	unsigned int chunk_sects;
 	sector_t sector_offset;
 	struct strip_zone *zone;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 	struct bio *data_bio;
 #endif
 	struct md_rdev *tmp_dev;
@@ -585,17 +585,17 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		return;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_DEVICE_NOTIFY
 	/**
 	* if there has any device offline, we don't make any request to
 	* our raid0 md array
 	*/
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 	if (mddev->nodev_and_crashed) {
 #else
 	if (mddev->degraded) {
 #endif
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_FLASHCACHE_SUPPORT
 		syno_flashcache_return_error(bio);
 #else
 		bio_endio(bio, 0);
@@ -641,7 +641,7 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		return;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 	data_bio = bio_clone(bio, GFP_NOIO);
 
 	if (data_bio) {
@@ -668,7 +668,7 @@ bad_map:
 	return;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS
 static void
 syno_raid0_status(struct seq_file *seq, struct mddev *mddev)
 {
@@ -681,7 +681,7 @@ syno_raid0_status(struct seq_file *seq, struct mddev *mddev)
 	for (k = 0; k < conf->strip_zone[0].nb_dev; k++) {
 		rdev = conf->devlist[k];
 		if(rdev) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 			seq_printf (seq, "%s", 
 						test_bit(In_sync, &rdev->flags) ? 
 						(test_bit(DiskError, &rdev->flags) ? "E" : "U") : "_");
@@ -694,15 +694,15 @@ syno_raid0_status(struct seq_file *seq, struct mddev *mddev)
 	}
 	seq_printf (seq, "]");
 }
-#else /* MY_ABC_HERE */
+#else /* SYNO_RAID_STATUS */
 static void raid0_status(struct seq_file *seq, struct mddev *mddev)
 {
 	seq_printf(seq, " %dk chunks", mddev->chunk_sectors / 2);
 	return;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RAID_STATUS */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_DEVICE_NOTIFY
 int SynoRaid0RemoveDisk(struct mddev *mddev, int number)
 {
 	int err = 0;
@@ -751,11 +751,11 @@ static void SynoRaid0Error(struct mddev *mddev, struct md_rdev *rdev)
 		if (mddev->degraded < mddev->raid_disks) {
 			SYNO_UPDATE_SB_WORK *update_sb = NULL;
 			mddev->degraded++;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 			mddev->nodev_and_crashed = 1;
 #endif
 			set_bit(Faulty, &rdev->flags);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 			clear_bit(DiskError, &rdev->flags);
 #endif
 			set_bit(MD_CHANGE_DEVS, &mddev->flags);
@@ -790,7 +790,7 @@ END:
  */
 static void SynoRaid0ErrorInternal(struct mddev *mddev, struct md_rdev *rdev)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 	if (!test_bit(DiskError, &rdev->flags)) {
 		SYNO_UPDATE_SB_WORK *update_sb = NULL;
 
@@ -810,7 +810,7 @@ END:
 #endif
 	return;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RAID_DEVICE_NOTIFY */
 
 static void *raid0_takeover_raid45(struct mddev *mddev)
 {
@@ -956,13 +956,13 @@ static struct md_personality raid0_personality=
 	.make_request	= raid0_make_request,
 	.run		= raid0_run,
 	.stop		= raid0_stop,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS
 	.status		= syno_raid0_status,
 #else
 	.status		= raid0_status,
 #endif
 	.size		= raid0_size,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_DEVICE_NOTIFY
 	.hot_remove_disk = SynoRaid0RemoveDisk,
 	.error_handler = SynoRaid0ErrorInternal,
 	.syno_error_handler	 = SynoRaid0Error,

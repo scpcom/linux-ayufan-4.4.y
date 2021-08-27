@@ -143,9 +143,9 @@ extern "C" {
 #define MV_ATA_COMMAND_FLUSH_CACHE              0xe7
 #define MV_ATA_COMMAND_FLUSH_CACHE_EXT          0xea
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_CHECK_HDD_POWER
 #define MV_ATA_COMMAND_CHECK_POWER              0xe5
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MV_CHECK_HDD_POWER */
 
 #define MV_ATA_COMMAND_PM_READ_REG              0xe4
 #define MV_ATA_COMMAND_PM_WRITE_REG             0xe8
@@ -226,7 +226,7 @@ extern "C" {
 
 /* Defines for parsing the IDENTIFY command results*/
 #define IDEN_SERIAL_NUM_OFFSET                  10
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_EH
 /* mvSata use MV_U8 to declare the storage space to save serial.
    And also use memcpy or memcmp to compare.
    This is a dummy bug because they nerver meet this if they don't have software delayed EH.

@@ -57,9 +57,9 @@
 #include <linux/notifier.h>
 #include <linux/cpu.h>
 #include <linux/mutex.h>
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_DISK_HIBERNATION)
 #include <linux/ata.h>
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_DISK_HIBERNATION */
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
@@ -652,7 +652,7 @@ void scsi_cmd_get_serial(struct Scsi_Host *host, struct scsi_cmnd *cmd)
 }
 EXPORT_SYMBOL(scsi_cmd_get_serial);
 
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_DISK_HIBERNATION)
 /**
  * print disk command, for hibernation debug
  */
@@ -692,7 +692,7 @@ void syno_disk_hiternation_cmd_printk(struct scsi_device *sdp, struct scsi_cmnd 
 		}
 	}
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_DISK_HIBERNATION */
 
 
 /**
@@ -799,7 +799,7 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 		    cmd->cmnd[3], cmd->cmnd[4], cmd->cmnd[5]);
 	}
 #endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_DISK_HIBERNATION)
 	// this is for SATA disk only, in SATA disk, we don't know which command to wake up disk
 	// so we need spindown to help us to remember whichever disk is sleeping
 	// So if disk is sleeping, then we assume any command will wake up this disk, and update the idle time

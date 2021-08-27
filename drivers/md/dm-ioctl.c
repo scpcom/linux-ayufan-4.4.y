@@ -1014,7 +1014,7 @@ static int do_resume(struct dm_ioctl *param)
 	return r;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FAST_VOLUME_WAKEUP
 static int dev_active(struct dm_ioctl *param, size_t param_size)
 {
 	if (param->flags & DM_SUSPEND_FLAG)

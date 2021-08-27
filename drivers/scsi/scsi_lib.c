@@ -1347,12 +1347,12 @@ int scsi_prep_state_check(struct scsi_device *sdev, struct request *req)
 			 * commands.  The device must be brought online
 			 * before trying any recovery commands.
 			 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IO_ERROR_LIMIT_MSG
 			if (printk_ratelimit()) {
 #endif
 			sdev_printk(KERN_ERR, sdev,
 				    "rejecting I/O to offline device\n");
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IO_ERROR_LIMIT_MSG
 			}
 #endif
 			ret = BLKPREP_KILL;
@@ -1690,12 +1690,12 @@ static void scsi_request_fn(struct request_queue *q)
 			break;
 
 		if (unlikely(!scsi_device_online(sdev))) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IO_ERROR_LIMIT_MSG
 			if (printk_ratelimit()) {
 #endif
 			sdev_printk(KERN_ERR, sdev,
 				    "rejecting I/O to offline device\n");
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IO_ERROR_LIMIT_MSG
 			}
 #endif
 			scsi_kill_request(req, q);

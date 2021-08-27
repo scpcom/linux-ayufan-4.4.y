@@ -66,10 +66,10 @@ struct kstat {
 	u64		ino;
 	dev_t		dev;
 	umode_t		mode;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	__u32		SynoMode;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	__u32		syno_archive_version;
 #endif
 	unsigned int	nlink;
@@ -80,7 +80,7 @@ struct kstat {
 	struct timespec  atime;
 	struct timespec	mtime;
 	struct timespec	ctime;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	struct timespec SynoCreateTime;
 #endif
 	unsigned long	blksize;
@@ -89,7 +89,7 @@ struct kstat {
 
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 #ifdef __KERNEL__
 
 // Be careful!! If you want to change following structure, 
@@ -118,15 +118,15 @@ struct SYNOSTAT {
 #define SYNOST_IS_CASELESS	0x10000000	/* Is Caseless */
 
 #endif /* __KERNEL__ */
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_STAT */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 #define S2_IARCHIVE    (1<<0)	// synology backup archive bit
 #define S2_SMB_ARCHIVE (1<<1)	// samba backup archive bit (some other windows ap)
 #define S2_SMB_HIDDEN  (1<<2)	// hidden attribute in samba
 #define S2_SMB_SYSTEM  (1<<3)	// system attribute in samba
 #define S3_IARCHIVE    (1<<4)	// synology S3 backup archive bit (amazon ap)
-#if defined(MY_ABC_HERE) || defined(CONFIG_FS_SYNO_ACL)
+#if defined(SYNO_FS_SYNO_ACL) || defined(CONFIG_FS_SYNO_ACL)
 #define S2_SMB_READONLY    					(1<<5)	// Read-Only attribute of samba
 #define S2_SYNO_ACL_INHERIT				    (1<<6)	// inherited from parent
 #define S2_SYNO_ACL_IS_OWNER_GROUP			(1<<7)	// owner tag of SYNO ACL
@@ -136,7 +136,7 @@ struct SYNOSTAT {
 #endif
 #define ALL_IARCHIVE (S2_IARCHIVE|S3_IARCHIVE)	// All synology archive bit.
 #define ALL_SYNO_ARCHIVE (S2_IARCHIVE|S2_SMB_ARCHIVE|S3_IARCHIVE)	// All backup archive bit, if there is new one, it should be added here.
-#if defined(MY_ABC_HERE) || defined(CONFIG_FS_SYNO_ACL)
+#if defined(SYNO_FS_SYNO_ACL) || defined(CONFIG_FS_SYNO_ACL)
 #define ALL_ARCHIVE_BIT (S2_IARCHIVE|S2_SMB_ARCHIVE|S2_SMB_HIDDEN|S2_SMB_SYSTEM|S3_IARCHIVE|ALL_SYNO_ACL_ARCHIVE)
 #else
 #define ALL_ARCHIVE_BIT (S2_IARCHIVE|S2_SMB_ARCHIVE|S2_SMB_HIDDEN|S2_SMB_SYSTEM|S3_IARCHIVE)

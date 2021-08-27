@@ -296,7 +296,7 @@ error_return:
 	ext4_std_error(sb, fatal);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RESERVE_OLDALLOC
 /*
  * There are two policies for allocating an inode.  If the new inode is
  * a directory, then a forward search is made for a block group with both
@@ -333,7 +333,7 @@ static int find_group_dir(struct super_block *sb, struct inode *parent,
 			ret = 0;
 		}
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_GET_AVAILABLE_GROUP
 	if (0 == ret) {
 		goto FOUND_GROUP;
 	}
@@ -858,7 +858,7 @@ struct inode *ext4_new_inode(handle_t *handle, struct inode *dir, umode_t mode,
 	int ret2, err = 0;
 	struct inode *ret;
 	ext4_group_t i;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RESERVE_OLDALLOC
 	static int once = 1;
 #endif
 	ext4_group_t flex_group;
@@ -886,7 +886,7 @@ struct inode *ext4_new_inode(handle_t *handle, struct inode *dir, umode_t mode,
 		goto got_group;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RESERVE_OLDALLOC
 	if (sbi->s_log_groups_per_flex && test_opt(sb, OLDALLOC)) {
 		ret2 = find_group_flex(sb, dir, &group);
 		if (ret2 == -1) {
@@ -994,7 +994,7 @@ repeat_in_this_group:
 		 * group descriptor metadata has not yet been updated.
 		 * So we just go onto the next blockgroup.
 		 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_DIRENT_INODE_NUMBER_OVERFLOW
 		if (++group == ngroups || ((u64)(~0U) < (u64)group*EXT4_INODES_PER_GROUP(sb))) {
 			group = 0;
 		}
@@ -1069,10 +1069,10 @@ got:
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ei->i_crtime =
 						       ext4_current_time(inode);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	inode->i_CreateTime = ei->i_crtime;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = ALL_SYNO_ARCHIVE;   /* set archive bit on creation */
 #endif
 

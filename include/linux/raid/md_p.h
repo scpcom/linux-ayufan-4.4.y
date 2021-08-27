@@ -85,7 +85,7 @@
 				   * read requests will only be sent here in
 				   * dire need
 				   */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 #define MD_DISK_ERROR		6 /* disk error in degraded mode */
 #endif
 

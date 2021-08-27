@@ -7505,7 +7505,7 @@ static struct scsi_host_template scsih_driver_template = {
 	.use_clustering			= ENABLE_CLUSTERING,
 	.shost_attrs			= mpt2sas_host_attrs,
 	.sdev_attrs			= mpt2sas_dev_attrs,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	.syno_port_type		= SYNO_PORT_TYPE_SAS,
 #endif
 };

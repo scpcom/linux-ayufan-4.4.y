@@ -209,7 +209,7 @@ struct stripe_head {
 	short			ddf_layout;/* use DDF ordering to calculate Q */
 	unsigned long		state;		/* state flags */
 	atomic_t		count;	      /* nr of active thread/requests */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_3_RAID5_REVERT_STRIPE_LOCK_REMOVAL
 	spinlock_t		lock;
 #endif
 	int			bm_seq;	/* sequence number for bitmap flushes */
@@ -296,7 +296,7 @@ struct stripe_head_state {
  * Stripe state
  */
 enum {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_KERNEL_3_RAID5_REVERT_STRIPE_LOCK_REMOVAL
 	STRIPE_ACTIVE,
 #endif
 	STRIPE_HANDLE,
@@ -317,7 +317,7 @@ enum {
 	STRIPE_OPS_REQ_PENDING,
 };
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 #define STRIPE_NORETRY		17
 #endif
 

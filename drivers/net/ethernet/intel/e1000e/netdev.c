@@ -143,7 +143,7 @@ static const struct e1000_reg_info e1000_reg_info_tbl[] = {
 	{}
 };
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_E1000E_LED_SWITCH
 void e1000e_syno_led_switch(int iEnable)
 {
 	struct net_device *dev = NULL;
@@ -170,7 +170,7 @@ void e1000e_syno_led_switch(int iEnable)
 	}
 }
 EXPORT_SYMBOL(e1000e_syno_led_switch);
-#endif /*MY_ABC_HERE*/
+#endif /*SYNO_E1000E_LED_SWITCH*/
 
 /*
  * e1000_regdump - register printout routine

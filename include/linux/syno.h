@@ -150,7 +150,7 @@
 #define SYNO_SMB_PSTRING_LEN 1024
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_EH
 #define MAX_CHANNEL_RETRY       2
 #define CHANNEL_RETRY_INTERVAL  (3*HZ)
 #endif

@@ -108,7 +108,7 @@ cifs_mapchar(char *target, const __u16 src_char, const struct nls_table *cp,
 	case UNI_LESSTHAN:
 		*target = '<';
 		break;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CIFS_SPECIAL_CHAR_CONVER
 	case UNI_DQUOT:
 		*target = '"';
 		break;
@@ -203,7 +203,7 @@ cifs_from_ucs2(char *to, const __le16 *from, int tolen, int fromlen,
 	return outlen;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CIFS_NO_SPECIAL_CHAR_LOGON
 int
 cifs_strtoUCS_NoSpecialChar(__le16 *to, const char *from, int len,
 	      const struct nls_table *codepage)
@@ -244,7 +244,7 @@ cifs_strtoUCS(__le16 *to, const char *from, int len,
 	wchar_t wchar_to; /* needed to quiet sparse */
 
 	for (i = 0; len && *from; i++, from += charlen, len -= charlen) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CIFS_SPECIAL_CHAR_CONVER
 		if (0x0d == *from) {    //'\r'
 			to[i] = cpu_to_le16(0xf00d);
 			charlen = 1;
@@ -276,7 +276,7 @@ cifs_strtoUCS(__le16 *to, const char *from, int len,
 #endif
 		charlen = codepage->char2uni(from, len, &wchar_to);
 		if (charlen < 1) {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_CIFS_SPECIAL_CHAR_CONVER
 			cERROR(1, "strtoUCS: char2uni of 0x%x returned %d",
 				*from, charlen);
 #endif
@@ -285,7 +285,7 @@ cifs_strtoUCS(__le16 *to, const char *from, int len,
 			charlen = 1;
 		}
 		put_unaligned_le16(wchar_to, &to[i]);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CIFS_SPECIAL_CHAR_CONVER
 		}
 #endif
 	}
@@ -376,7 +376,7 @@ cifsConvertToUCS(__le16 *target, const char *source, int srclen,
 		case '|':
 			dst_char = cpu_to_le16(UNI_PIPE);
 			break;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CIFS_SPECIAL_CHAR_CONVER
 		case '"':
 			dst_char = cpu_to_le16(UNI_DQUOT);
 			break;

@@ -4020,7 +4020,7 @@ void copy_user_huge_page(struct page *dst, struct page *src,
 }
 #endif /* CONFIG_TRANSPARENT_HUGEPAGE || CONFIG_HUGETLBFS */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 extern struct mm_struct *syno_get_task_mm(struct task_struct *task);
 int syno_access_process_vm(struct task_struct *tsk, unsigned long addr, void *buf, int len, int write)
 {
@@ -4084,4 +4084,4 @@ int syno_access_process_vm(struct task_struct *tsk, unsigned long addr, void *bu
 
 	return buf - old_buf;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_DEBUG_FLAG */

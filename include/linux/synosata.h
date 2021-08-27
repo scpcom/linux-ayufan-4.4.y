@@ -23,7 +23,7 @@
 *  0 : do not spinup delay
 * >0 : The number that we would delay
 */
-#if defined(MY_ABC_HERE) && defined(__KERNEL__)
+#if defined(SYNO_INTERNAL_HD_NUM) && defined(__KERNEL__)
 extern long g_internal_hd_num;
 extern long syno_boot_hd_count;
 
@@ -552,7 +552,7 @@ END:
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SSD_DETECT
 
 /* 
  *back porting from linux 2.6.28. add SYNO prefix in order to not mixed with libata
@@ -635,9 +635,9 @@ syno_ata_id_is_ssd(const unsigned short *id)
 END:
 	return res;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SATA_SSD_DETECT */
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_LIBATA_PMP_UEVENT) || defined(SYNO_MV_PMP_UEVENT)
 #define SZK_PMP_UEVENT "SYNO_PMP_EVENT"
 #define SZV_PMP_CONNECT "CABLE_CONNECT"
 #define SZV_PMP_DISCONNECT "CABLE_DISCONNECT"

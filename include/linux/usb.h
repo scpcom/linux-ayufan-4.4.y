@@ -1000,7 +1000,7 @@ extern void usb_deregister_device_driver(struct usb_device_driver *);
 
 extern int usb_register_dev(struct usb_interface *intf,
 			    struct usb_class_driver *class_driver);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STATIC_HIDDEV_MINOR
 extern int usb_register_dev1(struct usb_interface *intf,
 				struct usb_class_driver *class_driver, int minor_offset);
 #endif

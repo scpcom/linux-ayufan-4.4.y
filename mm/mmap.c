@@ -87,7 +87,7 @@ pgprot_t vm_get_page_prot(unsigned long vm_flags)
 }
 EXPORT_SYMBOL(vm_get_page_prot);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MM_OVERCOMMIT_ALWAYS
 int sysctl_overcommit_memory __read_mostly = OVERCOMMIT_ALWAYS;
 #else
 int sysctl_overcommit_memory __read_mostly = OVERCOMMIT_GUESS;  /* heuristic overcommit */

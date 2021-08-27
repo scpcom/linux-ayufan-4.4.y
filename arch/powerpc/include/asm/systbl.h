@@ -359,7 +359,7 @@ SYSCALL(sendmmsg)
 SYSCALL(setns)				/* 350 */
 COMPAT_SYS(process_vm_readv)
 COMPAT_SYS(process_vm_writev)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SYSTEM_CALL
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)			/* 355 */

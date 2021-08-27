@@ -1543,7 +1543,7 @@ extern void synology_gpio_init(void);
 
 static void synology_power_off(void)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 	/* platform driver will not shutdown when poweroff */
 	syno_mv_net_shutdown();
 #endif

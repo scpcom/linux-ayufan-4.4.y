@@ -205,7 +205,7 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 	int fail_led;
 	int active = 0; //note: led is low active
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HW_VERSION
 	if (syno_is_hw_version(HW_RS214v10)) {
 		// RS214 led is high active
 		active = 1;

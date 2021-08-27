@@ -781,7 +781,7 @@ do {									       \
 
 #endif /* defined(__KERNEL__) || defined(__linux__) */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 #define ext4_mode2			i_pad1
 #endif
 
@@ -927,7 +927,7 @@ struct ext4_inode_info {
 /*
  * Mount flags
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RESERVE_OLDALLOC
 #define EXT4_MOUNT_OLDALLOC		0x00002  /* Don't use the new Orlov allocator */
 #endif
 #define EXT4_MOUNT_GRPID		0x00004	/* Create files with directory's group */
@@ -1113,14 +1113,14 @@ struct ext4_super_block {
 	__u8	s_last_error_func[32];	/* function where the error happened */
 #define EXT4_S_ERR_END offsetof(struct ext4_super_block, s_mount_opts)
 	__u8	s_mount_opts[64];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_ARCHIVE_VERSION
 	__le32	s_archive_version1;	/* FIXME : SHOULD BE REMOVED AFTER DSM 5.0*/
 #else
 	__le32	s_usr_quota_inum;	/* inode for tracking user quota */
 #endif
 	__le32	s_grp_quota_inum;	/* inode for tracking group quota */
 	__le32	s_overhead_clusters;	/* overhead blocks/clusters in fs */
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_KERNEL_UNICODE) || defined(SYNO_ARCHIVE_VERSION)
 	__le32  s_reserved[106];        /* Padding to the end of the block */
 	__le32  s_archive_version;      /* Last archived version */
 	__le32  s_archive_version_obsoleted;
@@ -1261,11 +1261,11 @@ struct ext4_sb_info {
 
 	unsigned int s_log_groups_per_flex;
 	struct flex_groups *s_flex_groups;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 	int s_new_error_fs_event_flag;
 	char *s_mount_path;
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	int s_swap_create_time;
 #endif
 
@@ -1611,7 +1611,7 @@ static inline __le16 ext4_rec_len_to_disk(unsigned len, unsigned blocksize)
  * Hash Tree Directory indexing
  * (c) Daniel Phillips, 2001
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 #define SYNO_HASH_MAGIC	0x01856E96      // 25521814
 #define is_dx(dir) ((EXT4_SB(dir->i_sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) && \
 					!(EXT4_HAS_COMPAT_FEATURE(dir->i_sb, \
@@ -1701,7 +1701,7 @@ void ext4_get_group_no_and_offset(struct super_block *sb, ext4_fsblk_t blocknr,
 /*
  * Timeout and state flag for lazy initialization inode thread.
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_LAZYINIT_DEFAULT_MULTIPLY
 #define EXT4_DEF_LI_WAIT_MULT			2
 #else
 #define EXT4_DEF_LI_WAIT_MULT			10
@@ -1934,10 +1934,10 @@ extern int ext4_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf);
 extern qsize_t *ext4_get_reserved_space(struct inode *inode);
 extern void ext4_da_update_reserve_space(struct inode *inode,
 					int used, int quota_claim);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 extern int syno_ext4_getattr(struct dentry *d, struct kstat *stat, int flags);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 extern int syno_ext4_get_archive_ver(struct dentry *d, u32 *);
 extern int syno_ext4_set_archive_ver(struct dentry *d, u32);
 #endif

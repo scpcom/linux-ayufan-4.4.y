@@ -54,7 +54,7 @@
 #define UNI_LESSTHAN    (__u16) ('<' + 0xF000)
 #define UNI_PIPE        (__u16) ('|' + 0xF000)
 #define UNI_SLASH       (__u16) ('\\' + 0xF000)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CIFS_SPECIAL_CHAR_CONVER
 #define UNI_DQUOT       (__u16) ('"' + 0xF000)
 #define UNI_DIVSLASH       (__u16) ('/' + 0xF000)
 #define UNI_CRGRET       (__u16) ('\r' + 0xF000)
@@ -87,7 +87,7 @@ int cifs_from_ucs2(char *to, const __le16 *from, int tolen, int fromlen,
 int cifs_ucs2_bytes(const __le16 *from, int maxbytes,
 		    const struct nls_table *codepage);
 int cifs_strtoUCS(__le16 *, const char *, int, const struct nls_table *);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CIFS_NO_SPECIAL_CHAR_LOGON
 int cifs_strtoUCS_NoSpecialChar(__le16 *, const char *, int, const struct nls_table *);
 #endif
 char *cifs_strndup_from_ucs(const char *src, const int maxlen,

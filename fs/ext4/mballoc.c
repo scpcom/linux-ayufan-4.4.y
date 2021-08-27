@@ -2023,11 +2023,11 @@ ext4_mb_regular_allocator(struct ext4_allocation_context *ac)
 	 */
 repeat:
 	for (; cr < 4 && ac->ac_status == AC_STATUS_CONTINUE; cr++) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MBALLOC_RANDOM
 #define SYNO_MBALLOC_RANDOM_THRES 1024
 		ext4_group_t random_interval;
 		random_interval = ngroups / (SYNO_MBALLOC_RANDOM_THRES/2);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MBALLOC_RANDOM */
 		ac->ac_criteria = cr;
 		/*
 		 * searching for the right group start
@@ -2036,7 +2036,7 @@ repeat:
 		group = ac->ac_g_ex.fe_group;
 
 		for (i = 0; i < ngroups; group++, i++) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MBALLOC_RANDOM
 			if (0 == cr) { // only do it on cr==0 for safety
 				if (i >= SYNO_MBALLOC_RANDOM_THRES && 
 						ngroups > 2 * SYNO_MBALLOC_RANDOM_THRES) {
@@ -2057,7 +2057,7 @@ repeat:
 #else /* !MY_ABC_HERE */
 			if (group == ngroups)
 				group = 0;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MBALLOC_RANDOM */
 
 			/* This now checks without needing the buddy page */
 			if (!ext4_mb_good_group(ac, group, cr))
@@ -4843,7 +4843,7 @@ int ext4_group_add_blocks(handle_t *handle, struct super_block *sb,
 	    in_range(block, ext4_inode_table(sb, desc), sbi->s_itb_per_group) ||
 	    in_range(block + count - 1, ext4_inode_table(sb, desc),
 		     sbi->s_itb_per_group)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 		if (printk_ratelimit())
 #endif
 		ext4_error(sb, "Adding blocks in system zones - "

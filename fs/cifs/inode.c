@@ -164,7 +164,7 @@ cifs_fattr_to_inode(struct inode *inode, struct cifs_fattr *fattr)
 	cifs_nlink_fattr_to_inode(inode, fattr);
 	inode->i_uid = fattr->cf_uid;
 	inode->i_gid = fattr->cf_gid;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	inode->i_CreateTime = cifs_NTtimeToUnix(cpu_to_le64(fattr->cf_createtime));
 #endif
 

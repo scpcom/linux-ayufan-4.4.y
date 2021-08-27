@@ -1441,7 +1441,7 @@ static void handle_bad_sector(struct bio *bio)
 {
 	char b[BDEVNAME_SIZE];
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG
 	if (printk_ratelimit()) {
 #endif
 	printk(KERN_INFO "attempt to access beyond end of device\n");
@@ -1451,7 +1451,7 @@ static void handle_bad_sector(struct bio *bio)
 			(unsigned long long)bio->bi_sector + bio_sectors(bio),
 			(long long)(i_size_read(bio->bi_bdev->bd_inode) >> 9));
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG
 	}
 #endif
 	set_bit(BIO_EOF, &bio->bi_flags);
@@ -2127,13 +2127,13 @@ bool blk_update_request(struct request *req, int error, unsigned int nr_bytes)
 			error_type = "I/O";
 			break;
 		}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IO_ERROR_LIMIT_MSG
 		if (printk_ratelimit()) {
 #endif
 		printk(KERN_ERR "end_request: %s error, dev %s, sector %llu\n",
 		       error_type, req->rq_disk ? req->rq_disk->disk_name : "?",
 		       (unsigned long long)blk_rq_pos(req));
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IO_ERROR_LIMIT_MSG
 		}
 #endif
 	}
@@ -2893,7 +2893,7 @@ void blk_finish_plug(struct blk_plug *plug)
 }
 EXPORT_SYMBOL(blk_finish_plug);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FLASHCACHE_SUPPORT
 void syno_flashcache_return_error(struct bio *bio)
 {
 	/* defined in blk_types.h */

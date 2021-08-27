@@ -239,7 +239,7 @@ struct net_device *e1000_get_hw_dev(struct e1000_hw *hw)
 	return adapter->netdev;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_E1000_LED_SWITCH
 void e1000_syno_led_switch(int iEnable)
 {
 #ifdef CONFIG_ARCH_GEN3
@@ -280,7 +280,7 @@ void e1000_syno_led_switch(int iEnable)
 #endif
 }
 EXPORT_SYMBOL(e1000_syno_led_switch);
-#endif /*MY_ABC_HERE*/
+#endif /*SYNO_E1000E_LED_SWITCH*/
 
 /**
  * e1000_init_module - Driver Registration Routine
@@ -4885,19 +4885,19 @@ static int __e1000_shutdown(struct pci_dev *pdev, bool *enable_wake)
 
 			/* Enable WoL for selected modes */
 			e1000_write_phy_reg(hw, 31, 0x0007);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
 			udelay(10);
 #endif
 			e1000_write_phy_reg(hw, 30, 0x006d);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
 			udelay(10);
 #endif
 			e1000_write_phy_reg(hw, 22, 0x9fff);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
 			udelay(10);
 #endif
 			e1000_write_phy_reg(hw, 21, (u16) phy_wol);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
 			udelay(10);
 #endif
 

@@ -48,7 +48,7 @@
 #include <linux/gfp.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ATA_AHCI_LED_MSG
 #include <scsi/scsi.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
@@ -63,7 +63,7 @@
 #define DRV_NAME	"ahci"
 #define DRV_VERSION	"3.0"
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AHCI_SWITCH
 extern long g_ahci_switch;
 #endif
 
@@ -505,7 +505,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ }	/* terminate list */
 };
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_9235_GPIO_CTRL
 
 /*
  * 9235 gpio mmio address, to control 9235 GPIO, please read register manual section 1.6
@@ -1296,7 +1296,7 @@ static inline void ahci_gtf_filter_workaround(struct ata_host *host)
 {}
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LIBATA_JMB_BEHAVIOR
 extern void ata_port_wait_eh(struct ata_port *ap);
 extern void ata_scsi_scan_host(struct ata_port *ap, int sync);
 #endif
@@ -1314,7 +1314,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	VPRINTK("ENTER\n");
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AHCI_SWITCH
 	if(0 == g_ahci_switch) {
 		printk("AHCI is disabled.\n");
 		return 0;
@@ -1451,13 +1451,13 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 * determining the maximum port number requires looking at
 	 * both CAP.NP and port_map.
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PORT_MAP
 	if(gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
 		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
 	}else{
 #endif
 	n_ports = max(ahci_nr_ports(hpriv->cap), fls(hpriv->port_map));
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PORT_MAP
 	}
 #endif
 
@@ -1466,7 +1466,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		return -ENOMEM;
 	host->private_data = hpriv;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_9235_PORTING
 	if (pdev->vendor == 0x1b4b && pdev->device == 0x9235) {
 		for (i = 0; i < host->n_ports; i++) {
 			struct ata_port *ap = host->ports[i];

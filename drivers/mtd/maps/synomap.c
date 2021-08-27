@@ -305,7 +305,7 @@ static int __init init_synomtd(void)
 			 */
 			pMtdPartition = &synomtd_partitions;
 			n = ARRAY_SIZE(synomtd_partitions);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FLASH_MEMORY_SIZE
 			if (8 == gSynoFlashMemorySize) {
 				pMtdPartition = &synomtd_partitions_8M;
 				n = ARRAY_SIZE(synomtd_partitions_8M);

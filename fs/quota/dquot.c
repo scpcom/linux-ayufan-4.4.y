@@ -620,7 +620,7 @@ int dquot_quota_sync(struct super_block *sb, int type, int wait)
 			if (!test_bit(DQ_ACTIVE_B, &dquot->dq_flags)) {
 				clear_dquot_dirty(dquot);
 				continue;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_QUOTA_ROBUSTNESS
 			/* To avoid busy loop here, when filesystem is readonly, just remove it. */
 			} else if (sb->s_flags & MS_RDONLY) {
 				printk("%s (%d) Read only filesystem. Just skip quota sync.\n", __FILE__, __LINE__);
@@ -774,7 +774,7 @@ we_slept:
 	clear_dquot_dirty(dquot);
 	if (test_bit(DQ_ACTIVE_B, &dquot->dq_flags)) {
 		spin_unlock(&dq_list_lock);
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_QUOTA_ROBUSTNESS
 		ret = dquot->dq_sb->dq_op->release_dquot(dquot);
 		if (ret == -EROFS) {
 			printk("%s (%d) Read only filesystem. Skip retry...\n", __FILE__, __LINE__);

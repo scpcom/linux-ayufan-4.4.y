@@ -112,7 +112,7 @@
 #define ERFKILL		132	/* Operation not possible due to RF-kill */
 
 #define EHWPOISON	133	/* Memory page has hardware error */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FAT_ERR_HANDLE
 #define	ECORRUPT	140	/* corrupt file */
 #endif
 
