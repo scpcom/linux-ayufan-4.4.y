@@ -55,40 +55,32 @@
 #include <linux/raid/md_p.h>
 #include <linux/raid/md_u.h>
 #include <linux/slab.h>
-#ifdef SYNO_MD_DISK_SORT
+#ifdef MY_ABC_HERE
 #include <linux/list_sort.h>
 #endif
 #include "md.h"
 #include "bitmap.h"
 
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 void SynoMDWakeUpDevices(void *md);
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 extern int SynoDebugFlag;
 #endif
 #endif
 
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
 EXPORT_SYMBOL(SYNORaidRdevUnplug);
 int SYNORaidDiskUnplug(char *szArgDiskName);
 void SYNORaidUnplugTask(struct work_struct *);
-#endif  /* SYNO_RAID_DEVICE_NOTIFY */
+#endif  /* MY_ABC_HERE */
 
-#ifdef SYNO_MD_AUTODETECT_LOCK
+#ifdef MY_ABC_HERE
 DEFINE_SPINLOCK(MdListLock);
-#endif
-
-#ifdef __LITTLE_ENDIAN
-#define SYNO_RAID_USE_BE_SB
 #endif
 
 #ifndef MODULE
 static void autostart_arrays(int part);
-#endif
-
-#if defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
-#include <linux/syno_affinity.h>
 #endif
 
 /* pers_list is a list of registered personalities protected
@@ -4649,44 +4641,6 @@ static struct md_sysfs_entry md_active =
 __ATTR(active, S_IRUGO|S_IWUSR, md_active_show, md_active_store);
 #endif
 
-#ifdef SYNO_RAID5_PARITY_CHECK
-static ssize_t
-disable_force_rcw_show(struct mddev *mddev, char *page)
-{
-	return sprintf(page, "%d\n", mddev->disable_force_rcw);
-}
-
-static ssize_t
-disable_force_rcw_store(struct mddev *mddev, const char *page, size_t len)
-{
-	if (!mddev->pers){
-		len = -EINVAL;
-		goto END;
-	}
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
-	if (mddev->nodev_and_crashed) {
-		/* No responce for faulty raid */
-		goto END;
-	}
-#endif
-
-	if (cmd_match(page, "1")) {
-		mddev->disable_force_rcw = 1;
-	} else if (cmd_match(page, "0")) {
-		mddev->disable_force_rcw = 0;
-	} else {
-		printk("md: %s: disable_force_rcw, error input\n", mdname(mddev));
-		goto END;
-	}
-
-END:
-	return len;
-}
-
-static struct md_sysfs_entry md_disable_force_rcw =
-__ATTR(disable_force_rcw, S_IRUGO|S_IWUSR, disable_force_rcw_show, disable_force_rcw_store);
-#endif
-
 static ssize_t
 array_size_show(struct mddev *mddev, char *page)
 {
@@ -4749,9 +4703,6 @@ static struct attribute *md_default_attrs[] = {
 #endif
 #ifdef SYNO_FAST_VOLUME_WAKEUP
 	&md_active.attr,
-#endif
-#ifdef SYNO_RAID5_PARITY_CHECK
-	&md_disable_force_rcw.attr,
 #endif
 	NULL,
 };
@@ -5292,9 +5243,9 @@ int md_run(struct mddev *mddev)
 	} else {
 		set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 	}
-#else /* SYNO_RAID_STATUS */
+#else /* MY_ABC_HERE */
 	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
-#endif	/* SYNO_RAID_STATUS */
+#endif	/* MY_ABC_HERE */
 	
 	if (mddev->flags)
 		md_update_sb(mddev, 0);
@@ -6904,9 +6855,6 @@ static const struct block_device_operations md_fops =
 static int md_thread(void * arg)
 {
 	struct md_thread *thread = arg;
-#if defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
-	SYNOSetTaskAffinity(current, 0);
-#endif
 
 	/*
 	 * md_thread is a 'system-thread', it's priority should be very
@@ -7549,7 +7497,9 @@ void md_do_sync(struct md_thread *thread)
 	 
 #ifdef SYNO_RAID_STATUS
 	// # Test for DSM #56012. Workaround
-	//set_user_nice(current, 10);
+#ifdef CONFIG_SYNO_HIGH_AVAILABILITY
+	set_user_nice(current, 10);
+#endif
 #endif
 
 	/* just incase thread restarts... */

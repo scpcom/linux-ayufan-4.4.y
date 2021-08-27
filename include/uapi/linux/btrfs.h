@@ -44,6 +44,9 @@ struct btrfs_ioctl_vol_args {
 #define BTRFS_SUBVOL_CREATE_ASYNC	(1ULL << 0)
 #define BTRFS_SUBVOL_RDONLY		(1ULL << 1)
 #define BTRFS_SUBVOL_QGROUP_INHERIT	(1ULL << 2)
+#ifdef MY_ABC_HERE
+#define BTRFS_SUBVOL_HIDE (1ULL << 32)
+#endif
 #define BTRFS_FSID_SIZE 16
 #define BTRFS_UUID_SIZE 16
 
@@ -438,6 +441,25 @@ struct btrfs_ioctl_qgroup_create_args {
 	__u64 qgroupid;
 };
 
+#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+struct btrfs_ioctl_qgroup_query_args {
+	/* state */
+	__u64 rfer;
+	__u64 rfer_cmpr;
+	__u64 excl;
+	__u64 excl_cmpr;
+
+	/* limit */
+	__u64 max_rfer;
+	__u64 max_excl;
+	__u64 rsv_rfer;
+	__u64 rsv_excl;
+
+	/* reservation tracking */
+	__u64 reserved;
+};
+#endif
+
 struct btrfs_ioctl_timespec {
 	__u64 sec;
 	__u32 nsec;
@@ -450,9 +472,29 @@ struct btrfs_ioctl_received_subvol_args {
 	struct btrfs_ioctl_timespec stime; /* in */
 	struct btrfs_ioctl_timespec rtime; /* out */
 	__u64	flags;			/* in */
+#ifdef MY_ABC_HERE
+	struct btrfs_ioctl_timespec otime; /* in */
+	__u64	reserved[14];		/* in */
+#else
 	__u64	reserved[16];		/* in */
+#endif /* MY_ABC_HERE */
 };
 
+#ifdef MY_ABC_HERE
+struct btrfs_ioctl_subvol_info_args {
+	/* this root's id */
+	__u64 root_id;
+	/* flags of the root */
+	__u64 flags;
+	/* generation when the root is created or last updated */
+	__u64 gen;
+	/* creation generation of this root in sec*/
+	__u64 ogen;
+	__u8 uuid[BTRFS_UUID_SIZE];
+	__u8 puuid[BTRFS_UUID_SIZE];
+	__u8 ruuid[BTRFS_UUID_SIZE];
+};
+#endif /* MY_ABC_HERE */
 /*
  * Caller doesn't want file data in the send stream, even if the
  * search of clone sources doesn't find an extent. UPDATE_EXTENT
@@ -627,5 +669,14 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 				   struct btrfs_ioctl_feature_flags[2])
 #define BTRFS_IOC_GET_SUPPORTED_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
 				   struct btrfs_ioctl_feature_flags[3])
+#ifdef MY_ABC_HERE
+#define BTRFS_IOC_SUBVOL_GETINFO _IOR(BTRFS_IOCTL_MAGIC, 249, \
+				   struct btrfs_ioctl_subvol_info_args)
+#endif /* MY_ABC_HERE */
+
+#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+#define BTRFS_IOC_QGROUP_QUERY _IOR(BTRFS_IOCTL_MAGIC, 253, \
+                                    struct btrfs_ioctl_qgroup_query_args)
+#endif
 
 #endif /* _UAPI_LINUX_BTRFS_H */

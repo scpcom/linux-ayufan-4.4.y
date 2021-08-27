@@ -87,12 +87,6 @@ struct btrfs_inode {
 	 */
 	struct list_head delalloc_inodes;
 
-	/*
-	 * list for tracking inodes that must be sent to disk before a
-	 * rename or truncate commit
-	 */
-	struct list_head ordered_operations;
-
 	/* node for the red-black tree that links inodes in subvolume root */
 	struct rb_node rb_node;
 
@@ -142,8 +136,11 @@ struct btrfs_inode {
 	 */
 	u64 index_cnt;
 
+#ifdef MY_ABC_HERE
+#else
 	/* Cache the directory index number to speed the dir/file remove */
 	u64 dir_index;
+#endif /* MY_ABC_HERE */
 
 	/* the fsync log has some corner cases that mean we have to check
 	 * directories to see if any unlinks have been done before

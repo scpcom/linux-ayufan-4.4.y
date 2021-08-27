@@ -285,7 +285,7 @@ MV_BOOLEAN mvAdapterStartInitialization(MV_SATA_ADAPTER *pSataAdapter,
     return mvAdapterStateMachine(ialExt, scsiAdapterExt);
 }
 
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 extern int syno_mv_scsi_host_no_get(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex);
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
@@ -329,7 +329,7 @@ void mvRestartChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
             == MV_SATA_DEVICE_TYPE_PM)
         {
             bBusChangeNotify = MV_TRUE;
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 			if(funcSYNOSendEboxRefreshEvent) {
 				funcSYNOSendEboxRefreshEvent(syno_mv_scsi_host_no_get(pSataAdapter, channelIndex));
 			}
@@ -2809,7 +2809,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
          classifyAndInitDevice(scsiAdapterExt, ialExt, channelIndex, PMPort);
 #endif
 	 }	 
-#else /* SYNO_SATA_MV422_PM_FIX */
+#else /* MY_ABC_HERE */
      if(SError & MV_BIT16)
 	 {
 	      mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_INFO, "[%d %d %d]: "

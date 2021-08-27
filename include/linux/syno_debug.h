@@ -9,6 +9,5 @@
 /**
  * IN : sd.c, scsi.h, scsi_lib.c
  */
-#define SYNO_BADSECTOR_TEST
 
 #endif /* __SYNODEBUG_H_ */

@@ -645,6 +645,14 @@ Pin     In/Out    Function
  5      Out       High = Disk LED off
 18      Out       High = Enable ESATA 1 power
 19      Out       High = Enable ESATA 2 power
+10      Out       High = HDD 1 activity
+11      Out       High = HDD 2 activity
+22      Out       High = HDD 3 activity
+23      Out       High = HDD 4 activity
+24      Out       High = HDD 5 activity
+25      Out       High = HDD 6 activity
+26      Out       High = HDD 7 activity
+27      Out       High = HDD 8 activity
 30      Out       High = HDD 1 present
 31      Out       High = HDD 2 present
 32      Out       High = HDD 3 present
@@ -757,9 +765,12 @@ Pin     In/Out    Function
  0       In       FAN 1
  1       In       FAN 2
  5      Out       High = Disk LED off
- 4      Out       High = Enable ESATA 1 power
-19      Out       High = Enable ESATA 2 power
 18      Out       High = GPIO fan fail
+10      Out       High = HDD 1 activity
+11      Out       High = HDD 2 activity
+22      Out       High = HDD 3 activity
+23      Out       High = HDD 4 activity
+24      Out       High = HDD 5 activity
 29      Out       High = HDD 1 present
 31      Out       High = HDD 2 present
 32      Out       High = HDD 3 present
@@ -858,6 +869,113 @@ ALPINE_ds1515_GPIO_init(SYNO_GPIO *global_gpio)
 	*global_gpio = gpio_ds1515;
 }
 
+/*
+DS715+/DS215+ GPIO config table
+(High=1)
+
+Pin     In/Out    Function
+ 0       In       FAN 1
+ 2       In       HDD_PRZ_1 (Low = HDD insert; High = plug out)
+ 3       In       HDD_PRZ_1 (Low = HDD insert; High = plug out)
+ 5      Out       High = SATA LED off
+34      Out       High = LAN LED on
+19      Out       High = Enable ESATA 1 power
+22      Out       High = Enable HDD 1 power (for deep sleep)
+23      Out       High = Enable HDD 1 power (for deep sleep)
+10      Out       High = HDD 1 activity LED
+11      Out       High = HDD 2 activity LED
+29      Out       High = HDD 1 present LED
+31      Out       High = HDD 2 present LED
+38      Out       High = HDD 1 faulty LED
+39      Out       High = HDD 2 faulty LED
+43      Out       VTT off
+*/
+
+static void
+ALPINE_2bay_GPIO_init(SYNO_GPIO *global_gpio)
+{
+	SYNO_GPIO gpio_2bay = {
+		.hdd_detect = {
+			.hdd1_present_detect = 29,
+			.hdd2_present_detect = 31,
+			.hdd3_present_detect = GPIO_UNDEF,
+			.hdd4_present_detect = GPIO_UNDEF,
+			.hdd5_present_detect = GPIO_UNDEF,
+			.hdd6_present_detect = GPIO_UNDEF,
+			.hdd7_present_detect = GPIO_UNDEF,
+			.hdd8_present_detect = GPIO_UNDEF,
+		},
+		.ext_sata_led = {
+			.hdd1_led_0 = GPIO_UNDEF,
+			.hdd1_led_1 = GPIO_UNDEF,
+			.hdd2_led_0 = GPIO_UNDEF,
+			.hdd2_led_1 = GPIO_UNDEF,
+			.hdd3_led_0 = GPIO_UNDEF,
+			.hdd3_led_1 = GPIO_UNDEF,
+			.hdd4_led_0 = GPIO_UNDEF,
+			.hdd4_led_1 = GPIO_UNDEF,
+			.hdd5_led_0 = GPIO_UNDEF,
+			.hdd5_led_1 = GPIO_UNDEF,
+			.hdd_led_mask = GPIO_UNDEF,
+		},
+		.soc_sata_led = {
+			.hdd1_fail_led = 38,
+			.hdd2_fail_led = 39,
+			.hdd3_fail_led = GPIO_UNDEF,
+			.hdd4_fail_led = GPIO_UNDEF,
+			.hdd5_fail_led = GPIO_UNDEF,
+			.hdd6_fail_led = GPIO_UNDEF,
+			.hdd7_fail_led = GPIO_UNDEF,
+			.hdd8_fail_led = GPIO_UNDEF,
+			.hdd1_act_led = 10,
+			.hdd2_act_led = 11,
+			.hdd3_act_led = GPIO_UNDEF,
+			.hdd4_act_led = GPIO_UNDEF,
+			.hdd5_act_led = GPIO_UNDEF,
+			.hdd6_act_led = GPIO_UNDEF,
+			.hdd7_act_led = GPIO_UNDEF,
+			.hdd8_act_led = GPIO_UNDEF,
+		},
+		.model		  = {
+			.model_id_0 = 42,  // FIXME
+			.model_id_1 = 41,  // FIXME
+			.model_id_2 = 40,  // FIXME
+			.model_id_3 = GPIO_UNDEF,
+		},
+		.fan		  = {
+			.fan_1 = GPIO_UNDEF,
+			.fan_2 = GPIO_UNDEF,
+			.fan_fail = 0,
+			.fan_fail_2 = GPIO_UNDEF,
+		},
+		.hdd_pm		  = {
+			.hdd1_pm = 22,
+			.hdd2_pm = 23,
+			.hdd3_pm = GPIO_UNDEF,
+			.hdd4_pm = GPIO_UNDEF,
+			.hdd5_pm = GPIO_UNDEF,
+			.hdd6_pm = GPIO_UNDEF,
+			.hdd7_pm = GPIO_UNDEF,
+			.hdd8_pm = GPIO_UNDEF,
+		},
+		.rack		  = {
+			.buzzer_mute_req = GPIO_UNDEF,
+			.buzzer_mute_ack = GPIO_UNDEF,
+			.rps1_on = GPIO_UNDEF,
+			.rps2_on = GPIO_UNDEF,
+		},
+		.multi_bay	  = {
+			.inter_lock = GPIO_UNDEF,
+		},
+		.status		  = {
+			.power_led = GPIO_UNDEF,
+			.alarm_led = GPIO_UNDEF,
+		},
+	};
+
+	*global_gpio = gpio_2bay;
+}
+
 static void
 ALPINE_default_GPIO_init(SYNO_GPIO *global_gpio)
 {
@@ -950,6 +1068,12 @@ void synology_gpio_init(void)
 	} else if (0 == strncmp(gszSynoHWVersion, HW_DS1515, strlen(HW_DS1515))) {
 		ALPINE_ds1515_GPIO_init(&generic_gpio);
 		printk("Synology %s GPIO Init\n", HW_DS1515);
+	} else if (0 == strncmp(gszSynoHWVersion, HW_DS715p, strlen(HW_DS715p))) {
+		ALPINE_2bay_GPIO_init(&generic_gpio);
+		printk("Synology %s GPIO Init\n", HW_DS715p);
+	} else if (0 == strncmp(gszSynoHWVersion, HW_DS215p, strlen(HW_DS215p))) {
+		ALPINE_2bay_GPIO_init(&generic_gpio);
+		printk("Synology %s GPIO Init\n", HW_DS215p);
 	} else {
 		ALPINE_default_GPIO_init(&generic_gpio);
 		printk("Not supported hw version!\n");

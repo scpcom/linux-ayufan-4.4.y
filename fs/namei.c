@@ -38,6 +38,9 @@
 #include <linux/posix_acl.h>
 #include <asm/uaccess.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/magic.h>
+#endif
 #ifdef CONFIG_FS_SYNO_ACL
 #include "synoacl_int.h"
 #endif
@@ -3737,7 +3740,11 @@ static int vfs_rename_dir(struct inode *old_dir, struct dentry *old_dentry,
 	 * If we are going to change the parent - check write permissions,
 	 * we'll need to flip '..'.
 	 */
+#ifdef MY_ABC_HERE
+	if (new_dir != old_dir && !(old_dentry->d_sb->s_magic == BTRFS_SUPER_MAGIC && old_dentry->d_inode->i_ino == 256)) {
+#else
 	if (new_dir != old_dir) {
+#endif
 #ifdef CONFIG_FS_SYNO_ACL
 		if (!IS_SYNOACL(old_dentry)) {
 			error = inode_permission(old_dentry->d_inode, MAY_WRITE);
@@ -4132,10 +4139,10 @@ EXPORT_SYMBOL(get_write_access); /* binfmt_aout */
 EXPORT_SYMBOL(getname);
 EXPORT_SYMBOL(lock_rename);
 EXPORT_SYMBOL(lookup_one_len);
-#if defined(CONFIG_AUFS_FS ) || defined(SYNO_EXPORT_SYMBOL_FOR_LIO)
+#if defined(CONFIG_AUFS_FS ) || defined(MY_ABC_HERE)
 EXPORT_SYMBOL(lookup_hash);
 #endif
-#ifdef SYNO_EXPORT_SYMBOL_FOR_LIO
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(kern_path_parent);
 #endif
 EXPORT_SYMBOL(page_follow_link_light);

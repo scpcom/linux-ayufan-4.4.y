@@ -200,6 +200,38 @@ static int al_eth_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
 static int al_eth_flow_ctrl_config(struct al_eth_adapter *adapter);
 static uint8_t al_eth_flow_ctrl_mutual_cap_get(struct al_eth_adapter *adapter);
 
+#ifdef CONFIG_SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
+/* We want to change backplane RJ45 link speed LED behavior:
+ * 1000M: green
+ *  100M: orange
+ *   10M: disabled
+ */
+static void syno_update_rtl8211dn_led(struct phy_device *phydev, int speed)
+{
+	/* To change LED behavior, switch to extension Page44 first:
+	 * Write Register 31 Data=0x0007
+	 * Write Register 30 Data=0x002c
+	 */
+	phy_write(phydev, 0x1f, 0x07);
+	phy_write(phydev, 0x1e, 0x2c);
+
+	/* Write Register 28 to change link speed LED */
+	switch (speed) {
+	case SPEED_1000:
+	case SPEED_100:
+	case SPEED_10:
+		/* Green LED on only when 1000Mbps. Orange LED on only when 100Mbps */
+		phy_write(phydev, 0x1c, 0x0042);
+		break;
+	}
+
+	/* After LED setting, switch to the PHY's Page0:
+	 * Write Register 31 Data=0x0000
+	 */
+	phy_write(phydev, 0x1f, 0x00);
+}
+#endif
+
 static void al_eth_adjust_link(struct net_device *dev)
 {
 	struct al_eth_adapter *adapter = netdev_priv(dev);
@@ -219,6 +251,10 @@ static void al_eth_adjust_link(struct net_device *dev)
 			case SPEED_1000:
 			case SPEED_100:
 			case SPEED_10:
+#ifdef CONFIG_SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
+				if (!syno_is_hw_version(HW_DS2015xs))
+					syno_update_rtl8211dn_led(phydev, phydev->speed);
+#endif
 				break;
 			default:
 				if (netif_msg_link(adapter))
@@ -2123,19 +2159,45 @@ al_eth_configure_int_mode(struct al_eth_adapter *adapter)
 	adapter->rx_usecs = 0;
 
 #ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
-	if (syno_is_hw_version(HW_DS2015xs)) {
-		// adjust interrupt coalescing values for 10Gbps interfaces
-		if (AL_ETH_MAC_MODE_10GbE_Serial == adapter->mac_mode) {
+	// directly adjust interrupt coalescing values
 	struct ethtool_coalesce coalesce;
 	coalesce.use_adaptive_tx_coalesce = 0;
 	coalesce.tx_coalesce_usecs = 208;
 	coalesce.rx_coalesce_usecs = 112;
 	al_eth_set_coalesce(adapter->netdev, &coalesce);
-		}
-	}
 #endif
 	return 0;
 }
+
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+typedef struct INTERFACE_CPU_MAPPING_ {
+	char *interface;
+	int cpu;
+} INTERFACE_CPU_MAPPING;
+
+/* Suppose that all 4 CPUs are online on DS2015xs, we want to:
+   Bind the first  10G interface (0000:00:00.0) interrupt to 1st CPU, and
+   bind the second 10G interface (0000:00:02.0) interrupt to 2nd CPU, and
+   bind the first   1G interface (0000:00:01.0) interrupt to 3rd CPU, and
+   bind the second  1G interface (0000:00:03.0) interrupt to 4th CPU. */
+static INTERFACE_CPU_MAPPING ds2015xs_interface_cpu_mapping[] = {
+	{.interface = "0000:00:00.0", .cpu = 0},
+	{.interface = "0000:00:02.0", .cpu = 1},
+	{.interface = "0000:00:01.0", .cpu = 2},
+	{.interface = "0000:00:03.0", .cpu = 3},
+};
+
+/*
+ * For all other Alpine models except DS2015xs:
+ * Bind Nth interface to Nth CPU
+ */
+static INTERFACE_CPU_MAPPING interface_cpu_mapping[] = {
+	{.interface = "0000:00:00.0", .cpu = 0},
+	{.interface = "0000:00:01.0", .cpu = 1},
+	{.interface = "0000:00:02.0", .cpu = 2},
+	{.interface = "0000:00:03.0", .cpu = 3},
+};
+#endif
 
 static int
 al_eth_request_irq(struct al_eth_adapter *adapter)
@@ -2147,11 +2209,17 @@ al_eth_request_irq(struct al_eth_adapter *adapter)
 	unsigned int cpu = first_cpu(*cpu_online_mask);
 
 	if (syno_is_hw_version(HW_DS2015xs)) {
-		// bind the first  10G interface (0000:00:00.0) interrupt to first  CPU, and
-		// bind the second 10G interface (0000:00:02.0) interrupt to second CPU.
-		if (AL_ETH_MAC_MODE_10GbE_Serial == adapter->mac_mode) {
-			if (0 == strcmp(dev_name(adapter->netdev->dev.parent), "0000:00:02.0")) {
-				cpu = next_cpu(cpu, *cpu_online_mask);
+		for (i = 0; i < ARRAY_SIZE(ds2015xs_interface_cpu_mapping); i++) {
+			if (0 == strcmp(dev_name(adapter->netdev->dev.parent), ds2015xs_interface_cpu_mapping[i].interface)) {
+				cpu = ds2015xs_interface_cpu_mapping[i].cpu;
+				break;
+			}
+		}
+	} else {
+		for (i = 0; i < ARRAY_SIZE(interface_cpu_mapping); i++) {
+			if (0 == strcmp(dev_name(adapter->netdev->dev.parent), interface_cpu_mapping[i].interface)) {
+				cpu = interface_cpu_mapping[i].cpu;
+				break;
 			}
 		}
 	}
@@ -2179,14 +2247,10 @@ al_eth_request_irq(struct al_eth_adapter *adapter)
 		irq_set_affinity_hint(irq->vector, &irq->affinity_hint_mask);
 
 #ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
-		if (syno_is_hw_version(HW_DS2015xs)) {
-			if (AL_ETH_MAC_MODE_10GbE_Serial == adapter->mac_mode) {
 		cpumask_clear(&irq->affinity_hint_mask);
 		cpumask_set_cpu(cpu, &irq->affinity_hint_mask);
 		irq_set_affinity_hint(irq->vector, &irq->affinity_hint_mask);
 		irq_set_affinity(irq->vector, &irq->affinity_hint_mask);
-			}
-		}
 #endif
 	}
 	return rc;
@@ -2975,8 +3039,6 @@ static void al_eth_kr_link_status(struct al_eth_adapter *adapter)
 
 #ifdef CONFIG_SYNO_ALPINE_A0
 /************************ Link management ************************/
-#ifdef CONFIG_ARCH_ALPINE
-#endif
 #define SFP_I2C_ADDR			0x50
 
 static int al_eth_i2c_byte_read(void *context,
@@ -4053,7 +4115,7 @@ static int al_eth_set_eee(struct net_device *netdev,
 }
 #endif
 
-#ifdef SYNO_ALPINE_SUPPORT_WOL
+#ifdef MY_DEF_HERE
 #define MAC_ADDR_LEN      (6)
 
 void syno_alpine_wol_set_wrapper(unsigned int device)
@@ -4103,21 +4165,24 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 		phy_write(priv->phydev, 30, 0x6D);
 		phy_write(priv->phydev, 21, 0x1000);
 		phy_write(priv->phydev, 31, 0x0000); //set PHY to page 0
+#ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
+		if (syno_is_hw_version(HW_DS1515)) {
+			phy_write(priv->phydev, 31, 0x0003); //set PHY to read-only page 3
+		}
+#endif
 	}
 
 	return;
 }
 
-void syno_alpine_wol_set()
+void syno_alpine_wol_set(void)
 {
 	syno_alpine_wol_set_wrapper(PCI_DEVICE_ID_AL_ETH);
 
 	if (syno_is_hw_version(HW_DS2015xs)) {
 		// do nothing
-	} else if (syno_is_hw_version(HW_DS1515)) {
-		syno_alpine_wol_set_wrapper(PCI_DEVICE_ID_AL_ETH_ADVANCED);
 	} else {
-		// do nothing
+		syno_alpine_wol_set_wrapper(PCI_DEVICE_ID_AL_ETH_ADVANCED);
 	}
 }
 
@@ -4149,7 +4214,7 @@ static const struct ethtool_ops al_eth_ethtool_ops = {
 	.get_drvinfo		= al_eth_get_drvinfo,
 /*	.get_regs_len		= al_eth_get_regs_len,*/
 /*	.get_regs		= al_eth_get_regs,*/
-#ifdef SYNO_ALPINE_SUPPORT_WOL
+#ifdef MY_DEF_HERE
 	.get_wol		= al_eth_get_wol,
 	.set_wol		= al_eth_set_wol,
 #endif

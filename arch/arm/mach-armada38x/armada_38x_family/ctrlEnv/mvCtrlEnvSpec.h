@@ -163,7 +163,9 @@ extern "C" {
 #define MV_XOR_MAX_CHAN                         4       /* total channels for all units together*/
 #define MV_XOR_MAX_CHAN_PER_UNIT                2       /* channels for units */
 
-#define MV_SATA_MAX_CHAN                        2
+#define MV_SATA_MAX_UNIT                        2
+#define MV_SATA_MAX_CHAN                        4	/* total channels (ports) for all units together */
+#define MV_SATA_MAX_CHAN_PER_UNIT               2       /* channels (ports) per unit */
 
 #define MV_MPP_MAX_GROUP                        9
 
@@ -390,7 +392,7 @@ typedef enum _mvTarget {
 	{ 0xDA, DEV_TARGET_ID	},		/* SPI1_CS3              */ \
 	{ MAIN_BOOT_ATTR, DEV_TARGET_ID },	/* Main Boot device      */ \
 	{ SEC_BOOT_ATTR, DEV_TARGET_ID  },	/* Secondary Boot device */ \
-	{ 0x01, CRYPT_TARGET_ID	},		/* CRYPT_ENG0            */ \
+	{ 0x09, CRYPT_TARGET_ID	},		/* CRYPT_ENG0            */ \
 	{ 0x05, CRYPT_TARGET_ID	},		/* CRYPT_ENG1            */ \
 	{0x00, PNC_BM_TARGET_ID },		/* PNC_BM		 */ \
 }

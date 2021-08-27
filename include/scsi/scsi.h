@@ -572,7 +572,8 @@ static inline __u32 scsi_to_u32(__u8 *ptr)
 {
 	return (ptr[0]<<24) + (ptr[1]<<16) + (ptr[2]<<8) + ptr[3];
 }
-#ifdef SYNO_BADSECTOR_TEST
+#ifdef MY_ABC_HERE
+#include <linux/syno.h>
 #define SCSI_IOCTL_SET_BADSECTORS    0x5400
 
 typedef struct _tag_SdBadSectors {

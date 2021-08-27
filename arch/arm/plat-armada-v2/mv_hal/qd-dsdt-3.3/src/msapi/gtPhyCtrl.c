@@ -1345,10 +1345,6 @@ GT_STATUS gprtGetPortPowerDown
     GT_U8        hwPort;         /* the physical port number     */
     GT_U16       u16Data;
 
-#ifdef GT_USE_MAD
-
-#endif
-
     DBG_INFO(("gprtGetPortPowerDown Called.\n"));
 
     if(state == NULL)

@@ -16,6 +16,7 @@
 
 #ifdef CONFIG_FS_SYNO_ACL
 #include "../synoacl_int.h"
+#include <linux/magic.h>
 #endif
 
 #define NFSDDBG_FACILITY		NFSDDBG_FH
@@ -38,11 +39,11 @@ static int nfsd_acceptable(void *expv, struct dentry *dentry)
 	// We can't accept this kind of dentry.
 	// linux-2.6.32 d_obtain_alias default dentry = ""
 	// linux-3.x d_obtain_alias default dentry = "/"
-	if (dentry && (dentry->d_flags & DCACHE_DISCONNECTED) &&
+	if (exp->ex_flags & NFSEXP_NOSUBTREECHECK && dentry && (dentry->d_flags & DCACHE_DISCONNECTED) &&
 		(('/' == dentry->d_iname[0] && '\0' == dentry->d_iname[1]) ||
 		('\0' == dentry->d_iname[0]))) {
 		return 0;
-	} else 
+	}
 #endif /* CONFIG_FS_SYNO_ACL */
 	if (exp->ex_flags & NFSEXP_NOSUBTREECHECK)
 		return 1;
@@ -424,17 +425,18 @@ static void _fh_update(struct svc_fh *fhp, struct svc_export *exp,
 		struct fid *fid = (struct fid *)
 			(fhp->fh_handle.fh_auth + fhp->fh_handle.fh_size/4 - 1);
 		int maxsize = (fhp->fh_maxsize - fhp->fh_handle.fh_size)/4;
+		int subtreecheck = !(exp->ex_flags & NFSEXP_NOSUBTREECHECK);
 #ifdef CONFIG_FS_SYNO_ACL
+		// ESXi nfs client cannot handle FILEID_BTRFS_WITH_PARENT properly,
+		// such that we can't enable subtreecheck to solve WINACL inheritance problem
+		if (dentry->d_sb->s_magic != BTRFS_SUPER_MAGIC) {
 			//in order to let fh have parent ino for ACL inherit
 			//We need force encode fh to add parent ino into fid
-		fhp->fh_handle.fh_fileid_type =
-			exportfs_encode_fh(dentry, fid, &maxsize, 1);
-#else
-		int subtreecheck = !(exp->ex_flags & NFSEXP_NOSUBTREECHECK);
-
+			subtreecheck = 1;
+		}
+#endif /* CONFIG_FS_SYNO_ACL */
 		fhp->fh_handle.fh_fileid_type =
 			exportfs_encode_fh(dentry, fid, &maxsize, subtreecheck);
-#endif /* CONFIG_FS_SYNO_ACL */
 		fhp->fh_handle.fh_size += maxsize * 4;
 	} else {
 		fhp->fh_handle.fh_fileid_type = FILEID_ROOT;

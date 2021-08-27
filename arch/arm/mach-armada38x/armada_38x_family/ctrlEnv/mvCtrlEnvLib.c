@@ -143,6 +143,9 @@ MV_UNIT_ID mvCtrlSocUnitNums[MAX_UNITS_ID][MV_68xx_INDEX_MAX] = {
 #define ON_BOARD_RGMII(x)	(1 << x)
 #define SERDES_SGMII(x)		(4 << x)
 
+/* Only the first unit, only the second unit or both can be active on the specific board */
+static MV_BOOL sataUnitActive[MV_SATA_MAX_UNIT] = {MV_FALSE, MV_FALSE};
+
 /* ethComPhy will be initialize by mvCtrlEnvInit and  updated by mvCtrlSerdesConfigDetect in case SGMII is set */
 static MV_U32	ethComPhy;
 /*******************************************************************************
@@ -284,7 +287,7 @@ MV_U32 mvCtrlSocUnitInfoNumSet(MV_UNIT_ID unit, MV_U32 maxValue)
 *******************************************************************************/
 MV_VOID mvCtrlSerdesConfigDetect(MV_VOID)
 {
-	MV_U32 ifNo, commPhyConfigReg, comPhyCfg, serdesNum, serdesCongigField, maxSerdesLane;
+	MV_U32 ifNo, commPhyConfigReg, comPhyCfg, serdesNum, serdesConfigField, maxSerdesLane;
 	MV_U32 sataIfCount = 0;
 	MV_U32 usbIfCount = 0;
 	MV_U32 usbHIfCount = 0;
@@ -299,10 +302,10 @@ MV_VOID mvCtrlSerdesConfigDetect(MV_VOID)
 	commPhyConfigReg = MV_REG_READ(COMM_PHY_SELECTOR_REG);
 	DB(printf("mvCtrlSerdesConfig: commPhyConfigReg=0x%x\n", commPhyConfigReg));
 	for (serdesNum = 0; serdesNum < maxSerdesLane; serdesNum++) {
-		serdesCongigField = (commPhyConfigReg & COMPHY_SELECT_MASK(serdesNum)) >> COMPHY_SELECT_OFFS(serdesNum);
-		comPhyCfg = serdesCfg[serdesNum][serdesCongigField];
-		DB(printf("serdesCongigField=0x%x, comPhyCfg=0x%02x SERDES %d detect as ",	\
-			  serdesCongigField, comPhyCfg, serdesNum));
+		serdesConfigField = (commPhyConfigReg & COMPHY_SELECT_MASK(serdesNum)) >> COMPHY_SELECT_OFFS(serdesNum);
+		comPhyCfg = serdesCfg[serdesNum][serdesConfigField];
+		DB(printf("serdesConfigField=0x%x, comPhyCfg=0x%02x SERDES %d detect as ",	\
+			  serdesConfigField, comPhyCfg, serdesNum));
 		ifNo = comPhyCfg & 0x0f;
 		switch (comPhyCfg & 0xF0) {
 		case SERDES_UNIT_PEX:
@@ -317,6 +320,15 @@ MV_VOID mvCtrlSerdesConfigDetect(MV_VOID)
 		case SERDES_UNIT_SATA:
 			DB(printf("SATA, if=%d\n", ifNo));
 			sataIfCount++;
+			/* SerDes 0,1,2 - Unit 0. SerDes 3,5 - Unit 1.
+			   SerDes 4 can be Unit 0 if serdesConfigField is set to 0x2, or Unit 1 if set to 0x6 */
+			if (serdesNum > 2)
+				if ((serdesNum == 4) && (serdesConfigField == 0x2))
+					sataUnitActive[0] = MV_TRUE;
+				else
+					sataUnitActive[1] = MV_TRUE;
+			else
+				sataUnitActive[0] = MV_TRUE;
 			break;
 		case SERDES_UNIT_GBE:
 			if (ON_BOARD_RGMII(ifNo)) /* detected SGMII will replace the same Ob-Board compatible port */
@@ -687,6 +699,49 @@ MV_U32 mvCtrlSataMaxPortGet(MV_VOID)
 	return mvCtrlSocUnitInfoNumGet(SATA_UNIT_ID);
 }
 
+/*******************************************************************************
+* mvCtrlSataMaxUnitGet
+*
+* DESCRIPTION:
+*       This function returns max number of SATA units for A38x/A39x chip.
+*
+* INPUT:
+*       None.
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:
+*       Marvell controller number of SATA units.
+*
+*******************************************************************************/
+MV_U32 mvCtrlSataMaxUnitGet(MV_VOID)
+{
+	return MV_SATA_MAX_UNIT;
+}
+
+/*******************************************************************************
+* mvCtrlIsActiveSataUnit
+*
+* DESCRIPTION:
+*       This function checks state of SATA units.
+*
+* INPUT:
+*       None.
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:
+*       MV_TRUE if SATA unit exists and active - MV_FALSE in any other case.
+*
+*******************************************************************************/
+MV_BOOL mvCtrlIsActiveSataUnit(MV_U32 unitNumber)
+{
+	if (unitNumber >= mvCtrlSataMaxUnitGet())
+		return MV_FALSE;
+	return sataUnitActive[unitNumber];
+}
 #endif
 
 #if defined(MV_INCLUDE_XOR)
@@ -1525,9 +1580,9 @@ MV_VOID mvCtrlPwrClckSet(MV_UNIT_ID unitId, MV_U32 index, MV_BOOL enable)
 #if defined(MV_INCLUDE_INTEG_SATA)
 	case SATA_UNIT_ID:
 		if (enable == MV_FALSE)
-			MV_REG_BIT_RESET(POWER_MNG_CTRL_REG, PMC_SATA_STOP_CLK_MASK);
+			MV_REG_BIT_RESET(POWER_MNG_CTRL_REG, PMC_SATA_STOP_CLK_MASK(index));
 		else
-			MV_REG_BIT_SET(POWER_MNG_CTRL_REG, PMC_SATA_STOP_CLK_MASK);
+			MV_REG_BIT_SET(POWER_MNG_CTRL_REG, PMC_SATA_STOP_CLK_MASK(index));
 
 		break;
 #endif
@@ -1591,7 +1646,7 @@ MV_BOOL mvCtrlPwrClckGet(MV_UNIT_ID unitId, MV_U32 index)
 #endif
 #if defined(MV_INCLUDE_SATA)
 	case SATA_UNIT_ID:
-		if ((reg & PMC_SATA_STOP_CLK_MASK) == PMC_SATA_STOP_CLK_STOP)
+		if ((reg & PMC_SATA_STOP_CLK_MASK(index)) == PMC_SATA_STOP_CLK_STOP(index))
 			state = MV_FALSE;
 		else
 			state = MV_TRUE;

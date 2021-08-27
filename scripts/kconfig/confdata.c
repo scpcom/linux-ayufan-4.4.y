@@ -18,7 +18,6 @@
 #include <unistd.h>
 
 #include "lkc.h"
-#define SYNO_EXPORT_CONFIG
 
 static void conf_warning(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)));

@@ -1699,6 +1699,7 @@ again:
 		 * shortening the size of the delalloc range we're searching
 		 */
 		free_extent_state(cached_state);
+		cached_state = NULL;
 		if (!loops) {
 			max_bytes = PAGE_CACHE_SIZE;
 			loops = 1;
@@ -3595,6 +3596,7 @@ static int write_one_eb(struct extent_buffer *eb,
 		if (ret) {
 			set_bit(EXTENT_BUFFER_IOERR, &eb->bflags);
 			SetPageError(p);
+			end_page_writeback(p);
 			if (atomic_sub_and_test(num_pages - i, &eb->io_pages))
 				end_extent_buffer_writeback(eb);
 			ret = -EIO;
@@ -3608,6 +3610,7 @@ static int write_one_eb(struct extent_buffer *eb,
 	if (unlikely(ret)) {
 		for (; i < num_pages; i++) {
 			struct page *p = extent_buffer_page(eb, i);
+			clear_page_dirty_for_io(p);
 			unlock_page(p);
 		}
 	}
@@ -4403,7 +4406,24 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 	int cloned = test_bit(EXTENT_BUFFER_CLONE, &eb->bflags);
 #endif
 
+#ifdef MY_ABC_HERE
+	if (test_bit(EXTENT_BUFFER_DIRTY, &eb->bflags)) {
+		printk("start_idx:%lu io_pages:%u flags:%x, eb_ref:%u, write_locks:%u, read_locks:%u\n",
+		      start_idx, atomic_read(&eb->io_pages),
+		      eb->bflags, atomic_read(&eb->refs),
+		      atomic_read(&eb->write_locks),
+		      atomic_read(&eb->read_locks));
+		printk("blocking_writers:%u, blocking_readers:%u\n spinning_readers:%u, spinning_writers:%u\n",
+		      atomic_read(&eb->blocking_writers),
+		      atomic_read(&eb->blocking_readers),
+		      atomic_read(&eb->spinning_readers),
+		      atomic_read(&eb->spinning_writers));
+		clear_extent_buffer_dirty(eb);
+	}
+	BUG_ON(atomic_read(&eb->io_pages) || test_bit(EXTENT_BUFFER_WRITEBACK, &eb->bflags));
+#else
 	BUG_ON(extent_buffer_under_io(eb));
+#endif
 
 	num_pages = num_extent_pages(eb->start, eb->len);
 	index = start_idx + num_pages;

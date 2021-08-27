@@ -68,7 +68,7 @@
 
 #ifdef CONFIG_SYNO_ALPINE
 #include <linux/serial_reg.h>
-#ifdef SYNO_ALPINE_SUPPORT_WOL
+#ifdef MY_DEF_HERE
 #include <linux/netdevice.h>
 #include <linux/ethtool.h>
 #endif
@@ -79,13 +79,13 @@
 
 extern void synology_gpio_init(void);
 
-#ifdef SYNO_ALPINE_SUPPORT_WOL
+#ifdef MY_DEF_HERE
 extern void syno_alpine_wol_set();
 #endif
 
 static void synology_power_off(void)
 {
-#ifdef SYNO_ALPINE_SUPPORT_WOL
+#ifdef MY_DEF_HERE
 	syno_alpine_wol_set();
 #endif
 	printk(KERN_EMERG "Synology shutdown\n");

@@ -348,7 +348,7 @@ int SYNO_CTRL_BUZZER_CLEARED_GET(int *pValue)
 unsigned char SYNOComcerto2kIsBoardNeedPowerUpHDD(u32 disk_id) {
 	u8 ret = 0;
 
-	if(0 == strncmp(gszSynoHWVersion, HW_DS414jv10, strlen(HW_DS414jv10))) {
+	if(0 == strncmp(gszSynoHWVersion, HW_DS414jv10, strlen(HW_DS414jv10)) || 0 == strncmp(gszSynoHWVersion, HW_DS415jv10, strlen(HW_DS415jv10))) {
 	    if ( 4 >= disk_id )
 			ret = 1;
 	} else if(0 == strncmp(gszSynoHWVersion, HW_DS215airv10, strlen(HW_DS215airv10))){
@@ -501,7 +501,7 @@ EXPORT_SYMBOL(SYNO_GPIO_SET_FALLING_EDGE);
 EXPORT_SYMBOL(SYNO_GPIO_SET_RISING_EDGE);
 
 /*
-DS414J GPIO config table
+DS414J/415J GPIO config table
 
 Pin     In/Out    Function
 00      Out       High = LED Enable , Low = LED Disable
@@ -524,9 +524,9 @@ Pin     In/Out    Function
 */
 
 static void
-COMCERTO2K_414j_GPIO_init(SYNO_GPIO *global_gpio)
+COMCERTO2K_4bay_GPIO_init(SYNO_GPIO *global_gpio)
 {
-	SYNO_GPIO gpio_ds414j = {
+	SYNO_GPIO gpio_ds4bay = {
 		.hdd_detect = {
 			.hdd1_present_detect = 39,
 			.hdd2_present_detect = 38,
@@ -587,7 +587,7 @@ COMCERTO2K_414j_GPIO_init(SYNO_GPIO *global_gpio)
 		},
 	};
 
-	*global_gpio = gpio_ds414j;
+	*global_gpio = gpio_ds4bay;
 }
 
 static void
@@ -718,8 +718,15 @@ COMCERTO2K_default_GPIO_init(SYNO_GPIO *global_gpio)
 void synology_gpio_init(void)
 {
 	if(0 == strncmp(gszSynoHWVersion, HW_DS414jv10, strlen(HW_DS414jv10))) {
-		COMCERTO2K_414j_GPIO_init(&generic_gpio);
+		COMCERTO2K_4bay_GPIO_init(&generic_gpio);
 		printk("Synology %s GPIO Init\n", HW_DS414jv10);
+	} else if(0 == strncmp(gszSynoHWVersion, HW_DS415jv10, strlen(HW_DS415jv10))) {
+		COMCERTO2K_4bay_GPIO_init(&generic_gpio);
+		generic_gpio.ext_sata_led.hdd_led_mask = 0;
+		/* 415j fan is re-order */
+		generic_gpio.fan.fan_fail = 35;
+		generic_gpio.fan.fan_fail_2 = 43;
+		printk("Synology %s GPIO Init\n", HW_DS415jv10);
 	} else if(0 == strncmp(gszSynoHWVersion, HW_DS215airv10, strlen(HW_DS215airv10))) {
 		COMCERTO2K_215air_GPIO_init(&generic_gpio);
 		printk("Synology %s GPIO Init\n", HW_DS215airv10);

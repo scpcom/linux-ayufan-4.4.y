@@ -363,8 +363,6 @@ static int __devinit sk98lin_init_device(struct pci_dev *pdev,
 	DEV_NET			*pNet = NULL;
 	struct SK_NET_DEVICE *dev = NULL;
 	int			retval;
-#ifdef CONFIG_PROC_FS
-#endif
 	int			pci_using_dac;
 
 	retval = pci_enable_device(pdev);

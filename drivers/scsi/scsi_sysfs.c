@@ -860,6 +860,9 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 	int depth, retval;
 	struct scsi_device *sdev = to_scsi_device(dev);
 	struct scsi_host_template *sht = sdev->host->hostt;
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
+	unsigned long flags;
+#endif /* CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK */
 
 	if (!sht->change_queue_depth)
 		return -EINVAL;
@@ -869,12 +872,24 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 	if (depth < 1)
 		return -EINVAL;
 
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
+	//spin_lock_irqsave to prevent scsi_softirq_done() will call scsi_handle_queue_ramp_up() to increase queue_depth
+	spin_lock_irqsave(sdev->host->host_lock, flags);
+#endif /* CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK */
+
 	retval = sht->change_queue_depth(sdev, depth,
 					 SCSI_QDEPTH_DEFAULT);
-	if (retval < 0)
+	if (retval < 0) {
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
+		spin_unlock_irqrestore(sdev->host->host_lock, flags);
+#endif /* CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK */
 		return retval;
+	}
 
 	sdev->max_queue_depth = sdev->queue_depth;
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
+	spin_unlock_irqrestore(sdev->host->host_lock, flags);
+#endif /* CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK */
 
 	return count;
 }
@@ -1134,7 +1149,7 @@ void scsi_remove_device(struct scsi_device *sdev)
 	if (funcSYNORaidDiskUnplug) {
 		funcSYNORaidDiskUnplug(sdev->syno_disk_name);
 	}
-#endif  /* SYNO_RAID_DEVICE_NOTIFY */
+#endif  /* MY_ABC_HERE */
 }
 EXPORT_SYMBOL(scsi_remove_device);
 

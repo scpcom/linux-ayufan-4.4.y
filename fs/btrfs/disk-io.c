@@ -62,8 +62,6 @@ static void end_workqueue_fn(struct btrfs_work *work);
 static void free_fs_root(struct btrfs_root *root);
 static int btrfs_check_super_valid(struct btrfs_fs_info *fs_info,
 				    int read_only);
-static void btrfs_destroy_ordered_operations(struct btrfs_transaction *t,
-					     struct btrfs_root *root);
 static void btrfs_destroy_ordered_extents(struct btrfs_root *root);
 static int btrfs_destroy_delayed_refs(struct btrfs_transaction *trans,
 				      struct btrfs_root *root);
@@ -1157,6 +1155,9 @@ void clean_tree_block(struct btrfs_trans_handle *trans, struct btrfs_root *root,
 	    fs_info->running_transaction->transid) {
 		btrfs_assert_tree_locked(buf);
 
+#ifdef MY_ABC_HERE
+		spin_lock(&buf->refs_lock);
+#endif
 		if (test_and_clear_bit(EXTENT_BUFFER_DIRTY, &buf->bflags)) {
 			__percpu_counter_add(&fs_info->dirty_metadata_bytes,
 					     -buf->len,
@@ -1165,6 +1166,9 @@ void clean_tree_block(struct btrfs_trans_handle *trans, struct btrfs_root *root,
 			btrfs_set_lock_blocking(buf);
 			clear_extent_buffer_dirty(buf);
 		}
+#ifdef MY_ABC_HERE
+		spin_unlock(&buf->refs_lock);
+#endif
 	}
 }
 
@@ -1377,6 +1381,7 @@ struct btrfs_root *btrfs_create_tree(struct btrfs_trans_handle *trans,
 fail:
 	if (leaf) {
 		btrfs_tree_unlock(leaf);
+		free_extent_buffer(root->commit_root);
 		free_extent_buffer(leaf);
 	}
 	kfree(root);
@@ -1773,6 +1778,7 @@ static int cleaner_kthread(void *arg)
 		}
 
 		btrfs_run_delayed_iputs(root);
+		btrfs_delete_unused_bgs(root->fs_info);
 		again = btrfs_clean_one_deleted_snapshot(root);
 		mutex_unlock(&root->fs_info->cleaner_mutex);
 
@@ -2239,6 +2245,7 @@ int open_ctree(struct super_block *sb,
 	spin_lock_init(&fs_info->tree_mod_seq_lock);
 	spin_lock_init(&fs_info->super_lock);
 	spin_lock_init(&fs_info->buffer_lock);
+	spin_lock_init(&fs_info->unused_bgs_lock);
 	rwlock_init(&fs_info->tree_mod_log_lock);
 	mutex_init(&fs_info->reloc_mutex);
 	mutex_init(&fs_info->delalloc_root_mutex);
@@ -2248,6 +2255,7 @@ int open_ctree(struct super_block *sb,
 	INIT_LIST_HEAD(&fs_info->dirty_cowonly_roots);
 	INIT_LIST_HEAD(&fs_info->space_info);
 	INIT_LIST_HEAD(&fs_info->tree_mod_seq_list);
+	INIT_LIST_HEAD(&fs_info->unused_bgs);
 	btrfs_mapping_init(&fs_info->mapping_tree);
 #ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
 	atomic_set(&fs_info->nr_extent_maps, 0);
@@ -2390,6 +2398,8 @@ int open_ctree(struct super_block *sb,
 	init_waitqueue_head(&fs_info->transaction_wait);
 	init_waitqueue_head(&fs_info->transaction_blocked_wait);
 	init_waitqueue_head(&fs_info->async_submit_wait);
+
+	INIT_LIST_HEAD(&fs_info->pinned_chunks);
 
 	ret = btrfs_alloc_stripe_hash_table(fs_info);
 	if (ret) {
@@ -2980,6 +2990,8 @@ retry_root_backup:
 	} else {
 		fs_info->update_uuid_tree_gen = 1;
 	}
+
+	fs_info->open = 1;
 
 	return 0;
 
@@ -3659,8 +3671,14 @@ int close_ctree(struct btrfs_root *root)
 
 	btrfs_free_block_groups(fs_info);
 
+	/*
+	 * we must make sure there is not any read request to
+	 * submit after we stopping all workers.
+	 */
+	invalidate_inode_pages2(fs_info->btree_inode->i_mapping);
 	btrfs_stop_all_workers(fs_info);
 
+	fs_info->open = 0;
 	free_root_pointers(fs_info, 1);
 
 	iput(fs_info->btree_inode);
@@ -3687,6 +3705,16 @@ int close_ctree(struct btrfs_root *root)
 	btrfs_free_block_rsv(root, root->orphan_block_rsv);
 	root->orphan_block_rsv = NULL;
 
+	lock_chunks(root);
+	while (!list_empty(&fs_info->pinned_chunks)) {
+		struct extent_map *em;
+
+		em = list_first_entry(&fs_info->pinned_chunks,
+				      struct extent_map, list);
+		list_del_init(&em->list);
+		free_extent_map(em);
+	}
+	unlock_chunks(root);
 	return 0;
 }
 
@@ -3811,34 +3839,6 @@ static void btrfs_error_commit_super(struct btrfs_root *root)
 
 	/* cleanup FS via transaction */
 	btrfs_cleanup_transaction(root);
-}
-
-static void btrfs_destroy_ordered_operations(struct btrfs_transaction *t,
-					     struct btrfs_root *root)
-{
-	struct btrfs_inode *btrfs_inode;
-	struct list_head splice;
-
-	INIT_LIST_HEAD(&splice);
-
-	mutex_lock(&root->fs_info->ordered_operations_mutex);
-	spin_lock(&root->fs_info->ordered_root_lock);
-
-	list_splice_init(&t->ordered_operations, &splice);
-	while (!list_empty(&splice)) {
-		btrfs_inode = list_entry(splice.next, struct btrfs_inode,
-					 ordered_operations);
-
-		list_del_init(&btrfs_inode->ordered_operations);
-		spin_unlock(&root->fs_info->ordered_root_lock);
-
-		btrfs_invalidate_inodes(btrfs_inode->root);
-
-		spin_lock(&root->fs_info->ordered_root_lock);
-	}
-
-	spin_unlock(&root->fs_info->ordered_root_lock);
-	mutex_unlock(&root->fs_info->ordered_operations_mutex);
 }
 
 static void btrfs_destroy_ordered_extents(struct btrfs_root *root)
@@ -4077,8 +4077,6 @@ again:
 void btrfs_cleanup_one_transaction(struct btrfs_transaction *cur_trans,
 				   struct btrfs_root *root)
 {
-	btrfs_destroy_ordered_operations(cur_trans, root);
-
 	btrfs_destroy_delayed_refs(cur_trans, root);
 
 	cur_trans->state = TRANS_STATE_COMMIT_START;

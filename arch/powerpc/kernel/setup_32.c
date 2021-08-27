@@ -86,11 +86,11 @@ extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
 #endif
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
@@ -430,7 +430,7 @@ int __init ppc_setup_l3cr(char *str)
 }
 __setup("l3cr=", ppc_setup_l3cr);
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 static int __init early_factory_usb_fast_reset(char *p)
 {
 	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
@@ -442,7 +442,7 @@ static int __init early_factory_usb_fast_reset(char *p)
 __setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
 #endif
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 static int __init early_factory_usb3_disable(char *p)
 {
 	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);

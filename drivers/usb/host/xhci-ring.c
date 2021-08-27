@@ -1649,6 +1649,15 @@ static void handle_port_status(struct xhci_hcd *xhci,
 			port_id);
 
 	temp = xhci_readl(xhci, port_array[faked_port_index]);
+
+#if defined(CONFIG_ARCH_ARMADA375)
+	if (temp & PORT_CEC) {
+		xhci_dbg(xhci, "port failed to configure its link partner.\n");
+		xhci_test_and_clear_bit(xhci, port_array,
+				faked_port_index, PORT_CEC);
+	}
+#endif /* CONFIG_ARCH_ARMADA375 */
+
 	if (hcd->state == HC_STATE_SUSPENDED) {
 		xhci_dbg(xhci, "resume root hub\n");
 		usb_hcd_resume_root_hub(hcd);

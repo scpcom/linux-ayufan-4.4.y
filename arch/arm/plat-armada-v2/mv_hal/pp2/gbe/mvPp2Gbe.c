@@ -195,6 +195,9 @@ MV_STATUS mvPp2HalInit(MV_PP2_HAL_DATA *halData)
 	if (mvPp2HalData.iocc)
 		mvPp2WrReg(MV_PP2_TX_SNOOP_REG, 0x1);
 
+	/* Set TX FIFO Threshold to maximum */
+	MV_REG_WRITE(MV_PP2_TX_FIFO_THRESH_REG, MV_PP2_TX_CSUM_MAX_SIZE);
+
 	return MV_OK;
 }
 
@@ -1803,6 +1806,11 @@ MV_STATUS mvPp2TxpDisable(int port, int txp)
 		mvPp2WrReg(MV_PP2_TXP_SCHED_Q_CMD_REG, (regData << MV_PP2_TXP_SCHED_DISQ_OFFSET));
 
 	/* Wait for all Tx activity to terminate. */
+	/* for PON, do not wait for TXQ, since for Functional Erratum FE-8309479, PON TXQ could only be flushed
+	    for Ethernet port, not PON port, so TXQ will never be stopped */
+	if (MV_PP2_IS_PON_PORT(port))
+		return MV_OK;
+
 	mDelay = 0;
 	do {
 		if (mDelay >= TX_DISABLE_TIMEOUT_MSEC) {

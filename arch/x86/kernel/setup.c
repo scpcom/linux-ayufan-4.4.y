@@ -181,11 +181,11 @@ extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
 #endif
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
@@ -193,11 +193,15 @@ extern int gSynoFactoryUSB3Disable;
 extern int gSynoDualHead;
 #endif
 
-#ifdef SYNO_DETECT_ERROR_BOOT
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+extern int gSynoSASWriteConflictPanic;
+#endif
+
+#ifdef MY_ABC_HERE
 extern char gszErrorBoot[16];
 #endif
 
-#ifdef SYNO_SPECIFY_SYSTEM_RAID
+#ifdef MY_ABC_HERE
 extern char gszRaidRootUuid[48];
 extern char gszRaidSwapUuid[48];
 #endif
@@ -874,7 +878,7 @@ static int __init early_custom_sn(char *p)
 __setup("custom_sn=", early_custom_sn);
 #endif
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 static int __init early_factory_usb_fast_reset(char *p)
 {
 	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
@@ -886,7 +890,7 @@ static int __init early_factory_usb_fast_reset(char *p)
 __setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
 #endif
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 static int __init early_factory_usb3_disable(char *p)
 {
 	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);
@@ -902,12 +906,27 @@ __setup("syno_disable_usb3=", early_factory_usb3_disable);
 static int __init early_dual_head(char *p)
 {
 	gSynoDualHead = simple_strtol(p, NULL, 10);
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+	gSynoSASWriteConflictPanic = gSynoDualHead;
+#endif
 
 	printk("Synology Dual Head: %d\n", gSynoDualHead);
 
 	return 1;
 }
 __setup("dual_head=", early_dual_head);
+#endif
+
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+static int __init early_sas_reservation_write_conflict(char *p)
+{
+	gSynoSASWriteConflictPanic = simple_strtol(p, NULL, 10);
+
+	printk("Let kernel panic if sas reservation write conflict: %d\n", gSynoSASWriteConflictPanic);
+
+	return 1;
+}
+__setup("sas_reservation_write_conflict=", early_sas_reservation_write_conflict);
 #endif
 
 #ifdef SYNO_DETECT_ERROR_BOOT

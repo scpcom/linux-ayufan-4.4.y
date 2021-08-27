@@ -27,7 +27,7 @@
 
 #define TIMEOUT_MS	1000
 
-#ifdef SYNO_ALPINE_ARCH
+#ifdef MY_DEF_HERE
 unsigned long g_cpu_temperature = 0;
 int g_thermal_get_temp_ret = -ETIME;
 #endif
@@ -72,14 +72,14 @@ static inline int thermal_get_temp(struct thermal_zone_device *thermal,
 	if (timeout == TIMEOUT_MS) {
 		pr_err("%s: al_thermal_sensor_readout_is_valid timed out!\n",
 				__func__);
-#ifdef SYNO_ALPINE_ARCH
+#ifdef MY_DEF_HERE
 		g_thermal_get_temp_ret = -ETIME;
 #endif
 		return -ETIME;
 	}
 
 	*temp = al_thermal_sensor_readout_get(&al_dev->handle);
-#ifdef SYNO_ALPINE_ARCH
+#ifdef MY_DEF_HERE
 	g_cpu_temperature = *temp;
 	g_thermal_get_temp_ret = 0;
 #endif
@@ -91,7 +91,7 @@ static struct thermal_zone_device_ops ops = {
 	.get_temp = thermal_get_temp,
 };
 
-#ifdef SYNO_ALPINE_ARCH
+#ifdef MY_DEF_HERE
 int syno_alpine_get_cpu_temperature(int *temperature)
 {
 	if (temperature == NULL)

@@ -202,6 +202,8 @@ bool mv_switch_tag_get(int db, MV_TAG_TYPE tag_mode, MV_SWITCH_PRESET_TYPE prese
 {
 	unsigned int p, port_mask = db_port_mask[db];
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FALSE, "switch dev qd_dev has not been init!\n");
+
 	if (db_port_mask[db] == 0)
 		return MV_FALSE;
 
@@ -252,6 +254,8 @@ static int mv_switch_group_state_set(int db, int en)
 {
 	unsigned int p, port_mask = db_port_mask[db];
 
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
+
 	/* enable/disable all ports in group */
 	for (p = 0; p < qd_dev->numOfPorts; p++) {
 		if (!MV_BIT_CHECK(port_mask, p))
@@ -276,6 +280,8 @@ static int mv_switch_group_state_set(int db, int en)
 int mv_switch_group_restart_autoneg(int db)
 {
 	unsigned int p, port_mask = db_port_mask[db];
+
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
 
 	/* enable/disable all ports in group */
 	for (p = 0; p < qd_dev->numOfPorts; p++) {
@@ -338,6 +344,8 @@ int mv_switch_mac_addr_set(int db, unsigned char *mac_addr, unsigned char op)
 	GT_ATU_ENTRY mac_entry;
 	unsigned int ports_mask;
 
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
+
 	memset(&mac_entry, 0, sizeof(GT_ATU_ENTRY));
 
 	mac_entry.trunkMember = GT_FALSE;
@@ -378,6 +386,8 @@ int mv_switch_port_based_vlan_set(unsigned int ports_mask, int set_cpu_port)
 	unsigned char cnt;
 	GT_LPORT port_list[MAX_SWITCH_PORTS];
 
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
+
 	for (p = 0; p < qd_dev->numOfPorts; p++) {
 		if (MV_BIT_CHECK(ports_mask, p) && (set_cpu_port || (p != qd_cpu_port))) {
 			SWITCH_DBG(SWITCH_DBG_LOAD | SWITCH_DBG_MCAST | SWITCH_DBG_VLAN,
@@ -403,6 +413,8 @@ int mv_switch_vlan_in_vtu_set(unsigned short vlan_id, unsigned short db_num, uns
 {
 	GT_VTU_ENTRY vtu_entry;
 	unsigned int p;
+
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
 
 	memset(&vtu_entry, 0, sizeof(GT_VTU_ENTRY));
 	vtu_entry.sid = 1;
@@ -438,6 +450,8 @@ int mv_switch_vlan_in_vtu_set(unsigned short vlan_id, unsigned short db_num, uns
 
 int mv_switch_atu_db_flush(int db_num)
 {
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
+
 	if (gfdbFlushInDB(qd_dev, GT_FLUSH_ALL, db_num) != GT_OK) {
 		printk(KERN_ERR "gfdbFlushInDB failed\n");
 		return -1;
@@ -450,6 +464,8 @@ int mv_switch_promisc_set(int db, u8 promisc_on)
 	int i;
 	unsigned int ports_mask = db_port_mask[db];
 	int vlan_grp_id = MV_SWITCH_GROUP_VLAN_ID(db);
+
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
 
 	if (promisc_on)
 		ports_mask |= (1 << qd_cpu_port);
@@ -476,6 +492,8 @@ int mv_switch_promisc_set(int db, u8 promisc_on)
 int mv_switch_vlan_set(u16 vlan_grp_id, u16 port_map)
 {
 	int p;
+
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
 
 	/* set port's default private vlan id and database number (DB per group): */
 	for (p = 0; p < qd_dev->numOfPorts; p++) {
@@ -522,6 +540,8 @@ void mv_switch_link_update_event(MV_U32 port_mask, int force_link_check)
 {
 	int p, db;
 	unsigned short phy_cause = 0;
+
+	MV_IF_NULL_STR(qd_dev, "switch dev qd_dev has not been init!\n");
 
 	for (p = 0; p < qd_dev->numOfPorts; p++) {
 		if (MV_BIT_CHECK(port_mask, p)) {
@@ -614,6 +634,8 @@ void mv_switch_tasklet(unsigned long data)
 	GT_DEV_INT_STATUS devIntStatus;
 	MV_U32 port_mask = 0;
 
+	MV_IF_NULL_STR(qd_dev, "switch dev qd_dev has not been init!\n");
+
 	/* TODO: verify that switch interrupt occured */
 
 	if (geventGetDevIntStatus(qd_dev, &devIntStatus) != GT_OK)
@@ -633,6 +655,8 @@ int mv_switch_jumbo_mode_set(int max_size)
 {
 	int i;
 	GT_JUMBO_MODE jumbo_mode;
+
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
 
 	/* Set jumbo frames mode */
 	if (max_size <= 1522)
@@ -954,6 +978,8 @@ int mv_switch_preset_init(MV_TAG_TYPE tag_mode, MV_SWITCH_PRESET_TYPE preset, in
 	unsigned char cnt;
 	GT_LPORT port_list[MAX_SWITCH_PORTS];
 
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
+
 	printk(KERN_INFO "Switch driver init:\n");
 	switch (preset) {
 	case MV_PRESET_TRANSPARENT:
@@ -1201,6 +1227,8 @@ int mv_switch_tos_get(unsigned char tos)
 	unsigned char queue;
 	int rc;
 
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
+
 	rc = gcosGetDscp2Tc(qd_dev, tos >> 2, &queue);
 	if (rc)
 		return -1;
@@ -1210,12 +1238,16 @@ int mv_switch_tos_get(unsigned char tos)
 
 int mv_switch_tos_set(unsigned char tos, int rxq)
 {
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
+
 	return gcosSetDscp2Tc(qd_dev, tos >> 2, (unsigned char)rxq);
 }
 
 int mv_switch_get_free_buffers_num(void)
 {
 	MV_U16 regVal;
+
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
 
 	if (gsysGetFreeQSize(qd_dev, &regVal) != GT_OK) {
 		printk(KERN_ERR "gsysGetFreeQSize - FAILED\n");
@@ -1332,6 +1364,10 @@ static char *mv_str_speed_state(int port)
 	GT_PORT_SPEED_MODE speed;
 	char *speed_str;
 
+	if (qd_dev == NULL) {
+		pr_err("Switch is not initialized\n");
+		return "ERR";
+	}
 	if (gprtGetSpeedMode(qd_dev, port, &speed) != GT_OK) {
 		printk(KERN_ERR "gprtGetSpeedMode failed (port %d)\n", port);
 		speed_str = "ERR";
@@ -1350,6 +1386,10 @@ static char *mv_str_duplex_state(int port)
 {
 	GT_BOOL duplex;
 
+	if (qd_dev == NULL) {
+		pr_err("Switch is not initialized\n");
+		return "ERR";
+	}
 	if (gprtGetDuplex(qd_dev, port, &duplex) != GT_OK) {
 		printk(KERN_ERR "gprtGetDuplex failed (port %d)\n", port);
 		return "ERR";
@@ -1361,6 +1401,10 @@ static char *mv_str_link_state(int port)
 {
 	GT_BOOL link;
 
+	if (qd_dev == NULL) {
+		pr_err("Switch is not initialized\n");
+		return "ERR";
+	}
 	if (gprtGetLinkState(qd_dev, port, &link) != GT_OK) {
 		printk(KERN_ERR "gprtGetLinkState failed (port %d)\n", port);
 		return "ERR";
@@ -1372,6 +1416,10 @@ static char *mv_str_pause_state(int port)
 {
 	GT_BOOL force, pause;
 
+	if (qd_dev == NULL) {
+		pr_err("Switch is not initialized\n");
+		return "ERR";
+	}
 	if (gpcsGetForcedFC(qd_dev, port, &force) != GT_OK) {
 		printk(KERN_ERR "gpcsGetForcedFC failed (port %d)\n", port);
 		return "ERR";
@@ -1568,6 +1616,8 @@ int mv_switch_all_multicasts_del(int db_num)
 	memcpy(atu_entry.macAddr.arEther, &mc_mac, 6);
 	atu_entry.DBNum = db_num;
 
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
+
 	while ((status = gfdbGetAtuEntryNext(qd_dev, &atu_entry)) == GT_OK) {
 
 		/* Delete only Mcast addresses */
@@ -1600,6 +1650,7 @@ int mv_switch_port_add(int switch_port, u16 grp_id)
 	int p;
 	u16 port_map, vlan_grp_id;
 
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
 	if (!MV_BIT_CHECK(switch_ports_mask, switch_port)) {
 		printk(KERN_ERR "%s: switch port %d is not connected to PHY/CPU\n", __func__, switch_port);
 		return -1;
@@ -1663,6 +1714,7 @@ int mv_switch_port_del(int switch_port)
 	int p;
 	u16 port_map, vlan_grp_id, grp_id;
 
+	MV_IF_NULL_RET_STR(qd_dev, -1, "switch dev qd_dev has not been init!\n");
 	if (!MV_BIT_CHECK(switch_ports_mask, switch_port)) {
 		printk(KERN_ERR "%s: switch port %d is not connected to PHY/CPU\n", __func__, switch_port);
 		return -1;
@@ -1744,6 +1796,8 @@ int mv_switch_port_discard_tag_set(unsigned int lport, GT_BOOL mode)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtSetDiscardTagged(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call gprtSetDiscardTagged()\n");
 
@@ -1771,6 +1825,8 @@ int mv_switch_port_discard_tag_set(unsigned int lport, GT_BOOL mode)
 int mv_switch_port_discard_tag_get(unsigned int lport, GT_BOOL *mode)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gprtGetDiscardTagged(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetDiscardTagged()\n");
@@ -1801,6 +1857,8 @@ int mv_switch_port_discard_untag_set(unsigned int lport, GT_BOOL mode)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtSetDiscardUntagged(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call gprtSetDiscardUntagged()\n");
 
@@ -1829,6 +1887,8 @@ int mv_switch_port_discard_untag_get(unsigned int lport, GT_BOOL *mode)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtGetDiscardUntagged(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetDiscardUntagged()\n");
 
@@ -1856,6 +1916,8 @@ int mv_switch_port_def_vid_set(unsigned int lport, unsigned short vid)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gvlnSetPortVid(qd_dev, lport, vid);
 	SW_IF_ERROR_STR(rc, "failed to call gvlnSetPortVid()\n");
 
@@ -1881,6 +1943,8 @@ int mv_switch_port_def_vid_set(unsigned int lport, unsigned short vid)
 int mv_switch_port_def_vid_get(unsigned int lport, unsigned short *vid)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gvlnGetPortVid(qd_dev, lport, vid);
 	SW_IF_ERROR_STR(rc, "failed to call gvlnGetPortVid()\n");
@@ -1909,6 +1973,8 @@ int mv_switch_port_def_pri_set(unsigned int lport, unsigned char pri)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gcosSetPortDefaultTc(qd_dev, lport, pri);
 	SW_IF_ERROR_STR(rc, "failed to call gcosSetPortDefaultTc()\n");
 
@@ -1934,6 +2000,8 @@ int mv_switch_port_def_pri_set(unsigned int lport, unsigned char pri)
 int mv_switch_port_def_pri_get(unsigned int lport, unsigned char *pri)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gcosGetPortDefaultTc(qd_dev, lport, pri);
 	SW_IF_ERROR_STR(rc, "failed to call gcosGetPortDefaultTc()\n");
@@ -2022,6 +2090,8 @@ int mv_switch_vid_add(unsigned int lport, unsigned short vid, unsigned char egr_
 	unsigned int port;
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	memset(&vtu_entry, 0, sizeof(GT_VTU_ENTRY));
 
 	/* Find existed VTU entry in SW cache */
@@ -2096,6 +2166,8 @@ int mv_switch_port_vid_add(unsigned int lport, unsigned short vid, unsigned char
 	unsigned int  port_bm;
 	unsigned int port_idx;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	/* Verify whether the port is already a member of this VID */
 	port_bm = (unsigned int)(1 << lport);
 	if (!(sw_vlan_tbl[vid].port_bm & port_bm) || (sw_vlan_tbl[vid].egr_mode[lport] != egr_mode)) {
@@ -2151,6 +2223,8 @@ int mv_switch_port_vid_del(unsigned int lport, unsigned short vid)
 	unsigned int port_idx;
 	unsigned int is_vlan_member = 0;
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	/* Do nothing if the port does not in this VLAN */
 	port_bm = (unsigned int)(1 << lport);
@@ -2227,6 +2301,8 @@ int mv_switch_vid_get(unsigned int vid, GT_VTU_ENTRY *vtu_entry, unsigned int *f
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	memset(vtu_entry, 0, sizeof(GT_VTU_ENTRY));
 	vtu_entry->vid = vid;
 	rc = gvtuFindVidEntry(qd_dev, vtu_entry, found);
@@ -2265,6 +2341,8 @@ int mv_switch_port_vid_egress_mode_set(unsigned int lport, unsigned short vid, u
 	GT_STATUS    rc = GT_OK;
 	GT_VTU_ENTRY vtu_entry;
 	GT_BOOL      found = GT_FALSE;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	/* If the port is the member of vlan, set */
 	if (sw_vlan_tbl[vid].port_bm & (1 << lport)) {
@@ -2319,6 +2397,8 @@ int mv_switch_unknown_unicast_flood_set(unsigned char lport, GT_BOOL enable)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtSetForwardUnknown(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gprtSetForwardUnknown()\n");
 
@@ -2344,6 +2424,8 @@ int mv_switch_unknown_unicast_flood_set(unsigned char lport, GT_BOOL enable)
 int mv_switch_unknown_unicast_flood_get(unsigned char lport, GT_BOOL *enable)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gprtGetForwardUnknown(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetForwardUnknown()\n");
@@ -2372,6 +2454,8 @@ int mv_switch_unknown_multicast_flood_set(unsigned char lport, GT_BOOL enable)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtSetDefaultForward(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gprtSetDefaultForward()\n");
 
@@ -2397,6 +2481,8 @@ int mv_switch_unknown_multicast_flood_set(unsigned char lport, GT_BOOL enable)
 int mv_switch_unknown_multicast_flood_get(unsigned char lport, GT_BOOL *enable)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gprtGetDefaultForward(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetDefaultForward()\n");
@@ -2425,6 +2511,8 @@ int mv_switch_broadcast_flood_set(GT_BOOL enable)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gsysSetFloodBC(qd_dev, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gsysSetFloodBC()\n");
 
@@ -2450,6 +2538,8 @@ int mv_switch_broadcast_flood_set(GT_BOOL enable)
 int mv_switch_broadcast_flood_get(GT_BOOL *enable)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gsysGetFloodBC(qd_dev, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gsysGetFloodBC()\n");
@@ -2480,6 +2570,8 @@ int mv_switch_port_count3_get(unsigned int lport, GT_STATS_COUNTER_SET3 *count)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gstatsGetPortAllCounters3(qd_dev, lport, count);
 	SW_IF_ERROR_STR(rc, "failed to call gstatsGetPortAllCounters3()\n");
 
@@ -2509,6 +2601,8 @@ int mv_switch_port_drop_count_get(unsigned int lport, GT_PORT_STAT2 *count)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtGetPortCtr2(qd_dev, lport, count);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetPortCtr2()\n");
 
@@ -2535,6 +2629,8 @@ int mv_switch_port_count_clear(unsigned int lport)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gstatsFlushPort(qd_dev, lport);
 	SW_IF_ERROR_STR(rc, "failed to call gstatsFlushPort()\n");
 
@@ -2560,6 +2656,8 @@ int mv_switch_port_count_clear(unsigned int lport)
 int mv_switch_count_clear(void)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gstatsFlushAll(qd_dev);
 	SW_IF_ERROR_STR(rc, "failed to call gstatsFlushAll()\n");
@@ -2595,6 +2693,8 @@ int mv_switch_ingr_limit_mode_set(unsigned int lport, GT_RATE_LIMIT_MODE mode)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = grcSetLimitMode(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call grcSetLimitMode()\n");
 
@@ -2627,6 +2727,8 @@ int mv_switch_ingr_limit_mode_set(unsigned int lport, GT_RATE_LIMIT_MODE mode)
 int mv_switch_ingr_limit_mode_get(unsigned int lport, GT_RATE_LIMIT_MODE *mode)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = grcGetLimitMode(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call grcSetLimitMode()\n");
@@ -2667,6 +2769,8 @@ int mv_switch_ingr_police_rate_get(unsigned int		lport,
 	irl_unit =  0;
 	memset(&pirl_2_Data, 0, sizeof(GT_PIRL2_DATA));
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gpirl2ReadResource(qd_dev, lport, irl_unit, &pirl_2_Data);
 	SW_IF_ERROR_STR(rc, "failed to call gpirl2ReadResource()\n");
 
@@ -2703,6 +2807,8 @@ int mv_switch_egr_rate_limit_set(unsigned int lport, GT_PIRL_ELIMIT_MODE mode, u
 {
 	GT_ERATE_TYPE	fRate;
 	GT_STATUS	rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	fRate.fRate  = rate;
 	fRate.kbRate = rate;
@@ -2742,6 +2848,8 @@ int mv_switch_egr_rate_limit_get(unsigned int lport, GT_PIRL_ELIMIT_MODE *mode, 
 {
 	GT_ERATE_TYPE	fRate;
 	GT_STATUS		rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = grcGetELimitMode(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call grcGetELimitMode()\n");
@@ -2789,6 +2897,8 @@ int mv_switch_ingr_broadcast_rate_get(unsigned int		lport,
 	GT_U32		irl_unit;
 	GT_STATUS	rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	/* IRL Unit 0 - bucket to be used (0 ~ 4) */
 	irl_unit =  MV_SWITCH_PIRL_RESOURCE_BROADCAST;
 	memset(&pirl_2_Data, 0, sizeof(GT_PIRL2_DATA));
@@ -2831,6 +2941,8 @@ int mv_switch_ingr_multicast_rate_get(unsigned int		lport,
 	GT_U32		irl_unit;
 	GT_STATUS	rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	/* IRL Unit 0 - bucket to be used (0 ~ 4) */
 	irl_unit =  MV_SWITCH_PIRL_RESOURCE_MULTICAST;
 	memset(&pirl_2_Data, 0, sizeof(GT_PIRL2_DATA));
@@ -2866,6 +2978,8 @@ int mv_switch_ingr_multicast_rate_get(unsigned int		lport,
 int mv_switch_port_mirror_set(unsigned int sport, enum sw_mirror_mode_t mode, GT_BOOL enable, unsigned int dport)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	if (mode == MV_SWITCH_MIRROR_INGRESS) {
 		if (enable == GT_TRUE) {
@@ -2951,6 +3065,8 @@ int mv_switch_port_mirror_get(unsigned int sport, enum sw_mirror_mode_t mode, GT
 	GT_LPORT port;
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	if (mode == MV_SWITCH_MIRROR_INGRESS) {
 		/* Get ingress monitor source status */
 		rc = gprtGetIngressMonitorSource(qd_dev, (GT_LPORT)sport, enable);
@@ -2999,6 +3115,8 @@ int mv_switch_age_time_set(unsigned int time)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gfdbSetAgingTimeout(qd_dev, time);
 	SW_IF_ERROR_STR(rc, "failed to call gfdbSetAgingTimeout()\n");
 
@@ -3024,6 +3142,8 @@ int mv_switch_age_time_set(unsigned int time)
 int mv_switch_age_time_get(unsigned int *time)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gfdbGetAgingTimeout(qd_dev, (GT_U32 *)time);
 	SW_IF_ERROR_STR(rc, "failed to call gfdbGetAgingTimeout()\n");
@@ -3055,6 +3175,8 @@ int mv_switch_mac_learn_disable_set(unsigned int lport, GT_BOOL enable)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtSetLearnDisable(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gprtSetLearnDisable()\n");
 
@@ -3082,6 +3204,8 @@ int mv_switch_mac_learn_disable_set(unsigned int lport, GT_BOOL enable)
 int mv_switch_mac_learn_disable_get(unsigned int lport, GT_BOOL *enable)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gprtGetLearnDisable(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetLearnDisable()\n");
@@ -3122,6 +3246,8 @@ int mv_switch_ingr_police_rate_set(unsigned int	lport,
 	GT_PIRL2_DATA	pirl_2_Data;
 	GT_BOOL		pause_state;
 	GT_STATUS	rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	memset(&pirl_2_Data, 0, sizeof(pirl_2_Data));
 
@@ -3192,6 +3318,8 @@ int mv_switch_ingr_broadcast_rate_set(unsigned int		lport,
 	GT_BOOL		pause_state;
 	GT_STATUS	rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	memset(&pirl_2_Data, 0, sizeof(pirl_2_Data));
 
 	irlRes = MV_SWITCH_PIRL_RESOURCE_BROADCAST;
@@ -3261,6 +3389,8 @@ int mv_switch_ingr_multicast_rate_set(unsigned int		lport,
 	GT_BOOL		pause_state;
 	GT_STATUS	rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	memset(&pirl_2_Data, 0, sizeof(pirl_2_Data));
 
 	irlRes = MV_SWITCH_PIRL_RESOURCE_MULTICAST;
@@ -3327,6 +3457,8 @@ int mv_switch_queue_weight_set(unsigned int lport, unsigned char queue, unsigned
 	GT_QoS_WEIGHT l_weight;
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	/* get weight information at first */
 	rc = gsysGetQoSWeight(qd_dev, &l_weight);
 	SW_IF_ERROR_STR(rc, "failed to call gsysGetQoSWeight()\n");
@@ -3384,6 +3516,8 @@ int mv_switch_queue_weight_get(unsigned int lport, unsigned char queue, unsigned
 	unsigned int offset;
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	/* Get QoS queue information */
 	rc = gsysGetQoSWeight(qd_dev, &l_weight);
 	SW_IF_ERROR_STR(rc, "failed to call gsysSetQoSWeight()\n");
@@ -3419,6 +3553,8 @@ int mv_switch_learn2all_enable_set(GT_BOOL enable)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gsysSetLearn2All(qd_dev, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gsysSetLearn2All(%d)\n", enable);
 
@@ -3446,6 +3582,8 @@ int mv_switch_learn2all_enable_set(GT_BOOL enable)
 int mv_switch_learn2all_enable_get(GT_BOOL *enabled)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gsysGetLearn2All(qd_dev, enabled);
 	SW_IF_ERROR_STR(rc, "failed to call gsysSetLearn2All()\n");
@@ -3480,6 +3618,8 @@ int mv_switch_learn2all_enable_get(GT_BOOL *enabled)
 int mv_switch_mac_limit_set(unsigned int lport, unsigned int mac_num)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	/* define the desired limit for the ports */
 	rc = gfdbSetPortAtuLearnLimit(qd_dev, lport, mac_num);
@@ -3523,6 +3663,8 @@ int mv_switch_mac_limit_get(unsigned int lport, unsigned int *mac_num)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gfdbGetPortAtuLearnLimit(qd_dev, lport, (GT_U32 *)mac_num);
 	SW_IF_ERROR_STR(rc, "failed to call gfdbGetPortAtuLearnLimit()\n");
 
@@ -3554,6 +3696,8 @@ int mv_switch_mac_addr_add(unsigned int port_bm, unsigned char mac_addr[6], unsi
 	unsigned int l_port_bm = 0;
 	GT_STATUS    rc = GT_OK;
 	enum sw_mac_addr_type_t type = MV_SWITCH_UNICAST_MAC_ADDR;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	memset(&mac_entry, 0, sizeof(GT_ATU_ENTRY));
 
@@ -3615,6 +3759,8 @@ int mv_switch_mac_addr_del(unsigned int lport, unsigned char mac_addr[6])
 	GT_BOOL      mc_addr = GT_FALSE;
 	GT_STATUS    rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	/* try to find VTU entry */
 	memset(&mac_entry, 0, sizeof(GT_ATU_ENTRY));
 	memcpy(mac_entry.macAddr.arEther, mac_addr, GT_ETHERNET_HEADER_SIZE);
@@ -3667,6 +3813,8 @@ int mv_switch_port_qos_mode_set(unsigned int lport, GT_PORT_SCHED_MODE mode)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtSetPortSched(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call gprtSetPortSched()\n");
 
@@ -3692,6 +3840,8 @@ int mv_switch_port_qos_mode_set(unsigned int lport, GT_PORT_SCHED_MODE mode)
 int mv_switch_port_qos_mode_get(unsigned int lport, GT_PORT_SCHED_MODE *mode)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gprtGetPortSched(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetPortSched()\n");
@@ -3720,6 +3870,8 @@ int mv_switch_mtu_set(unsigned int mtu)
 	unsigned int idx;
 	GT_JUMBO_MODE jumbo_mode;
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	/* Set jumbo frames mode */
 	if (mtu < 1522) {
@@ -3768,6 +3920,8 @@ int mv_switch_mtu_get(unsigned int *mtu)
 	GT_JUMBO_MODE jumbo_mode;
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	/* Get switch MTU */
 	rc = gsysGetJumboMode(qd_dev, MV_SWITCH_CPU_PORT_NUM, &jumbo_mode);
 	SW_IF_ERROR_STR(rc, "failed to call gsysGetJumboMode()\n");
@@ -3804,6 +3958,8 @@ int mv_switch_link_state_get(unsigned int lport, GT_BOOL *state)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtGetLinkState(qd_dev, lport, state);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetLinkState()\n");
 
@@ -3830,6 +3986,8 @@ int mv_switch_link_state_get(unsigned int lport, GT_BOOL *state)
 int mv_switch_duplex_state_get(unsigned int lport, GT_BOOL *state)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gprtGetDuplex(qd_dev, lport, state);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetDuplex()\n");
@@ -3858,6 +4016,8 @@ int mv_switch_duplex_state_get(unsigned int lport, GT_BOOL *state)
 int mv_switch_speed_state_get(unsigned int lport, GT_PORT_SPEED_MODE *speed)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gprtGetSpeedMode(qd_dev, lport, speed);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetSpeedMode()\n");
@@ -3974,6 +4134,8 @@ int mv_switch_port_vlan_filter_set(unsigned int lport, unsigned char filter)
 	GT_DOT1Q_MODE mode;
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	/* Move port to secure mode and removed from all VLANs */
 	if (filter) {
 		/* The port is already in the secure mode - do noting */
@@ -4023,6 +4185,8 @@ int mv_switch_port_vlan_filter_get(unsigned int lport, unsigned char *filter)
 	GT_DOT1Q_MODE mode;
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gvlnGetPortVlanDot1qMode(qd_dev, lport, &mode);
 	SW_IF_ERROR_STR(rc, "failed to call gvlnGetPortVlanDot1qMode()\n");
 
@@ -4054,6 +4218,8 @@ int mv_switch_port_vlan_mode_set(unsigned int lport, GT_DOT1Q_MODE mode)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gvlnSetPortVlanDot1qMode(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call gvlnSetPortVlanDot1qMode()\n");
 
@@ -4079,6 +4245,8 @@ int mv_switch_port_vlan_mode_set(unsigned int lport, GT_DOT1Q_MODE mode)
 int mv_switch_port_vlan_mode_get(unsigned int lport, GT_DOT1Q_MODE *mode)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gvlnGetPortVlanDot1qMode(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call gvlnGetPortVlanDot1qMode()\n");
@@ -4111,6 +4279,8 @@ int mv_switch_port_mac_filter_mode_set(unsigned int	lport,
 {
 	int rc = MV_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	/* set filter mode */
 	rc = gprtSetSAFiltering(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "fail to set filter port(%d) mode(%d)\n", lport, mode);
@@ -4140,6 +4310,8 @@ int mv_switch_port_mac_filter_mode_get(unsigned int	lport,
 				    GT_SA_FILTERING	*mode)
 {
 	int rc = MV_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	/* set filter mode */
 	rc = gprtGetSAFiltering(qd_dev, lport, mode);
@@ -4246,6 +4418,8 @@ int mv_switch_port_vlan_set(unsigned int lport, GT_LPORT mem_port[], unsigned in
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gvlnSetPortVlanPorts(qd_dev, (GT_LPORT)lport, mem_port, (unsigned char)mem_num);
 	SW_IF_ERROR_STR(rc, "failed to call gvlnSetPortVlanPorts()\n");
 
@@ -4273,6 +4447,8 @@ int mv_switch_port_vlan_get(unsigned int lport, GT_LPORT mem_port[], unsigned in
 {
 	GT_U8 num;
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gvlnGetPortVlanPorts(qd_dev, lport, mem_port, &num);
 	SW_IF_ERROR_STR(rc, "failed to call gvlnGetPortVlanPorts()\n");
@@ -4302,6 +4478,8 @@ int mv_switch_mh_mode_set(unsigned char lport, GT_BOOL enable)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtSetHeaderMode(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gprtSetHeaderMode()\n");
 
@@ -4327,6 +4505,8 @@ int mv_switch_mh_mode_set(unsigned char lport, GT_BOOL enable)
 int mv_switch_mh_mode_get(unsigned char lport, GT_BOOL *enable)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gprtGetHeaderMode(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetHeaderMode()\n");
@@ -4355,6 +4535,8 @@ int mv_switch_frame_mode_set(unsigned char lport, GT_FRAME_MODE mode)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtSetFrameMode(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call gprtSetFrameMode()\n");
 
@@ -4380,6 +4562,8 @@ int mv_switch_frame_mode_set(unsigned char lport, GT_FRAME_MODE mode)
 int mv_switch_frame_mode_get(unsigned char lport, GT_FRAME_MODE *mode)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gprtGetFrameMode(qd_dev, lport, mode);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetFrameMode()\n");
@@ -4408,6 +4592,8 @@ int mv_switch_etype_set(unsigned char lport, unsigned short etype)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gprtSetPortEType(qd_dev, lport, etype);
 	SW_IF_ERROR_STR(rc, "failed to call gprtSetPortEType()\n");
 
@@ -4434,6 +4620,8 @@ int mv_switch_etype_get(unsigned char lport, unsigned short *etype)
 {
 	GT_ETYPE l_etype;
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gprtGetPortEType(qd_dev, lport, &l_etype);
 	SW_IF_ERROR_STR(rc, "failed to call gprtGetPortEType()\n");
@@ -4463,6 +4651,8 @@ int mv_switch_port_preamble_set(unsigned char lport, unsigned short preamble)
 {
 	unsigned short data;
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = mv_switch_mii_write(qd_dev, 3, 26, preamble);
 	SW_IF_ERROR_STR(rc, "failed to call mv_switch_set_port_reg()\n");
@@ -4496,6 +4686,8 @@ int mv_switch_port_preamble_get(unsigned char lport, unsigned short *preamble)
 {
 	unsigned int data;
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	data = 0xc002 | (lport << 8);
 	rc = mv_switch_mii_write(qd_dev, 2, 26, data);
@@ -4531,6 +4723,8 @@ int mv_switch_atu_next_entry_get(GT_ATU_ENTRY *atu_entry)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gfdbGetAtuEntryNext(qd_dev, atu_entry);
 
 	if (rc == GT_OK)
@@ -4559,6 +4753,8 @@ int mv_switch_vtu_flush(void)
 {
 	unsigned int lport;
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gvtuFlush(qd_dev);
 	SW_IF_ERROR_STR(rc, "failed to call gvtuFlush()\n");
@@ -4592,6 +4788,8 @@ int mv_switch_atu_flush(GT_FLUSH_CMD flush_cmd, unsigned short db_num)
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gfdbFlushInDB(qd_dev, flush_cmd, db_num);
 	SW_IF_ERROR_STR(rc, "failed to call gfdbFlushInDB()\n");
 	return MV_OK;
@@ -4618,6 +4816,8 @@ int mv_switch_atu_flush(GT_FLUSH_CMD flush_cmd, unsigned short db_num)
 int mv_switch_port_force_link_set(unsigned int lport, GT_BOOL enable, GT_BOOL value)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gpcsSetForcedLink(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gpcsSetForcedLink()\n");
@@ -4648,6 +4848,8 @@ int mv_switch_port_force_link_set(unsigned int lport, GT_BOOL enable, GT_BOOL va
 int mv_switch_port_force_link_get(unsigned int lport, GT_BOOL *enable, GT_BOOL *value)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gpcsGetForcedLink(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gpcsGetForcedLink()\n");
@@ -4680,6 +4882,8 @@ int mv_switch_port_force_fc_set(unsigned int lport, GT_BOOL enable, GT_BOOL valu
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gpcsSetForcedFC(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gpcsSetForcedFC()\n");
 
@@ -4709,6 +4913,8 @@ int mv_switch_port_force_fc_set(unsigned int lport, GT_BOOL enable, GT_BOOL valu
 int mv_switch_port_force_fc_get(unsigned int lport, GT_BOOL *enable, GT_BOOL *value)
 {
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gpcsGetForcedFC(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gpcsGetForcedFC()\n");
@@ -4742,6 +4948,8 @@ int mv_switch_port_force_speed_set(unsigned int lport, GT_BOOL enable, unsigned 
 	GT_PORT_FORCED_SPEED_MODE l_mode;
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	if (GT_FALSE == enable)
 		l_mode = PORT_DO_NOT_FORCE_SPEED;
 	else
@@ -4774,6 +4982,8 @@ int mv_switch_port_force_speed_get(unsigned int lport, GT_BOOL *enable, unsigned
 {
 	GT_PORT_FORCED_SPEED_MODE l_mode;
 	GT_STATUS rc = GT_OK;
+
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
 
 	rc = gpcsGetForceSpeed(qd_dev, lport, &l_mode);
 	SW_IF_ERROR_STR(rc, "failed to call gpcsGetForceSpeed()\n");
@@ -4810,6 +5020,8 @@ int mv_switch_port_force_duplex_set(unsigned int lport, GT_BOOL enable, GT_BOOL 
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gpcsSetForcedDpx(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gpcsSetForcedDpx()\n");
 
@@ -4840,6 +5052,8 @@ int mv_switch_port_force_duplex_get(unsigned int lport, GT_BOOL *enable, GT_BOOL
 {
 	GT_STATUS rc = GT_OK;
 
+	MV_IF_NULL_RET_STR(qd_dev, MV_FAIL, "switch dev qd_dev has not been init!\n");
+
 	rc = gpcsGetForcedDpx(qd_dev, lport, enable);
 	SW_IF_ERROR_STR(rc, "failed to call gpcsGetForcedDpx()\n");
 
@@ -4867,6 +5081,8 @@ int mv_switch_port_force_duplex_get(unsigned int lport, GT_BOOL *enable, GT_BOOL
 *******************************************************************************/
 unsigned int mv_switch_port_num_get(void)
 {
+	MV_IF_NULL_RET_STR(qd_dev, 0, "switch dev qd_dev has not been init!\n");
+
 	return qd_dev->numOfPorts;
 }
 

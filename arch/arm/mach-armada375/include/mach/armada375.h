@@ -59,7 +59,7 @@
 #define DEVICE_CS3_PHYS_BASE		0xF4300000
 #define DEVICE_CS3_SIZE			_1M
 
-#define CRYPT_ENG_PHYS_BASE(chan)	((chan == 0) ? 0xC8010000 : 0xF4480000)
+#define CRYPT_ENG_PHYS_BASE(chan)	((chan == 0) ? 0xF4400000 : 0xF4480000)
 #define CRYPT_ENG_SIZE			_64K
 
 #define XOR0_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0x60800)

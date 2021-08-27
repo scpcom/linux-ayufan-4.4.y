@@ -10,7 +10,7 @@
 #include <linux/spinlock.h>
 #include <linux/jiffies.h>
 #include <linux/module.h>
-
+#include <linux/fs.h>
 
 #ifdef  SYNO_DEBUG_FLAG
 extern int syno_temperature_debug;
@@ -56,13 +56,15 @@ struct workqueue_struct *SynoCreateWorkqueue(const char *name);
 void SynoDestroyWorkqueue(struct workqueue_struct *wq);
 #endif /* CONFIG_SYNO_CROND */
 
-#ifdef SYNO_DEBUG_FLAG
-void syno_do_hibernation_log(const char __user *filename);
+#ifdef MY_ABC_HERE
 void syno_do_hibernation_fd_log(const int fd);
-void syno_do_hibernation_log_print(const char *DeviceName);
+void syno_do_hibernation_filename_log(const char __user *filename);
+void syno_do_hibernation_inode_log(struct inode *inode);
+void syno_do_hibernation_bio_log(const char *DeviceName);
+void syno_do_hibernation_scsi_log(const char *DeviceName);
 #endif
 
-#ifdef SYNO_SCSI_DEVICE_INDEX
+#ifdef MY_ABC_HERE
 #include <linux/fs.h>
 int SynoSCSIGetDeviceIndex(struct block_device *bdev);
 #endif

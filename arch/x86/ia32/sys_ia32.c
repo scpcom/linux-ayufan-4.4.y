@@ -222,7 +222,7 @@ static long do_SYNOStat64(char __user * filename, int nofollowLink, unsigned int
 		} else {
 #ifdef SYNO_DEBUG_FLAG
 			if(syno_hibernation_log_level > 0) {
-				syno_do_hibernation_log(filename);
+				syno_do_hibernation_filename_log(filename);
 			}
 #endif
 			error = syno_vfs_stat(filename, &kst, LOOKUP_FOLLOW, flags);

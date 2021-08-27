@@ -50,9 +50,6 @@ extern int gSynoHasDynModule;
 extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
 #endif
 
-int (*funcSYNOSendErrorFsBtrfsEvent)(const u8*) = NULL;
-EXPORT_SYMBOL(funcSYNOSendErrorFsBtrfsEvent);
-
 static int event;
 static DEFINE_IDA(mnt_id_ida);
 static DEFINE_IDA(mnt_group_ida);
@@ -2870,6 +2867,9 @@ void kern_unmount(struct vfsmount *mnt)
 	}
 }
 EXPORT_SYMBOL(kern_unmount);
+
+int (*funcSYNOSendErrorFsBtrfsEvent)(const u8*) = NULL;
+EXPORT_SYMBOL(funcSYNOSendErrorFsBtrfsEvent);
 
 bool our_mnt(struct vfsmount *mnt)
 {

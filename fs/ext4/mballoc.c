@@ -2054,7 +2054,7 @@ repeat:
 			if (group >= ngroups) {
 				group -= ngroups;
 			}
-#else /* !SYNO_MBALLOC_RANDOM */
+#else /* !MY_ABC_HERE */
 			if (group == ngroups)
 				group = 0;
 #endif /* SYNO_MBALLOC_RANDOM */
@@ -3171,6 +3171,7 @@ static void ext4_discard_allocated_blocks(struct ext4_allocation_context *ac)
 		mb_free_blocks(ac->ac_inode, &e4b, ac->ac_f_ex.fe_start,
 			       ac->ac_f_ex.fe_len);
 		ext4_unlock_group(ac->ac_sb, ac->ac_f_ex.fe_group);
+		ext4_mb_unload_buddy(&e4b);
 		return;
 	}
 	if (pa->pa_type == MB_INODE_PA)

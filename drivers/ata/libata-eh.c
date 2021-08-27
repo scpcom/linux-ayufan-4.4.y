@@ -98,7 +98,7 @@ enum {
 	ATA_EH_PROBE_TRIALS		= 2,
 };
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 extern unsigned int guiWakeupDisksNum;
 #endif
 
@@ -842,11 +842,11 @@ void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 #ifdef SYNO_LIBATA_JMB_BEHAVIOR
 	else if (ap->pflags & ATA_PFLAG_SCSI_HOTPLUG) {
 		if (!(ap->pflags & ATA_PFLAG_SYNC_SCSI_DEVICE)) {
-#ifdef SYNO_LIBATA_WAIT_HOTPULG_COMPLETE
+#ifdef MY_ABC_HERE
 			INIT_COMPLETION(ap->synoHotplugWait);
 #endif
 			schedule_delayed_work(&ap->hotplug_task, 0);
-#ifdef SYNO_LIBATA_WAIT_HOTPULG_COMPLETE
+#ifdef MY_ABC_HERE
 			wait_for_completion(&(ap->synoHotplugWait));
 #endif
 		} else {
@@ -870,7 +870,7 @@ void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 #else
 		ap->pflags &= ~ATA_PFLAG_PMP_DISCONNECT;
 		ap->pflags &= ~ATA_PFLAG_PMP_CONNECT;
-#endif //SYNO_PMP_HOTPLUG_TASK
+#endif //MY_ABC_HERE
 	}
 #endif
 #ifdef SYNO_ATA_FAST_PROBE
@@ -3896,7 +3896,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 	struct ata_device *dev;
 	int rc, nr_fails;
 	unsigned long flags, deadline;
-#ifdef SYNO_SATA_PM_LINK_RETRY
+#ifdef MY_DEF_HERE
 	bool blResetDone = 0;
 	int iResetTimes = 0;
 #endif
@@ -3989,8 +3989,13 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 #ifdef SYNO_SATA_PM_LINK_RETRY
 		/* Avoton + PM3826 would drop ata linkspeed to 1.5Gbps
 		 * so we add 3 retry to reset ata link
+		 * Alpine + 88SE9170 + PM3826 also has this problem too
 		 */
 		iResetTimes = EUNIT_DROP_SPEED_RETRY;
+#ifdef CONFIG_SYNO_ALPINE
+		// don't care whether is first plug or not, just force retry if drop speed
+		ap->isFirstAttach = 1;
+#endif
 		while (ap->isFirstAttach && 0 < iResetTimes) {
 			u32 sstatus, scontrol;
 			if (sata_scr_read(link, SCR_STATUS, &sstatus)) {

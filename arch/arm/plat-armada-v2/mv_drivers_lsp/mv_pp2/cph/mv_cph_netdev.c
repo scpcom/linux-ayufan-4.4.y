@@ -355,8 +355,8 @@ int cph_udp_port_tx(int port, struct net_device *dev, struct sk_buff *skb,
 }
 #endif
 
-
 #ifdef CONFIG_MV_CPH_FLOW_MAP_HANDLE
+
 /******************************************************************************
 * cph_data_flow_rx()
 * _____________________________________________________________________________
@@ -420,6 +420,7 @@ static int cph_data_flow_rx(int port, struct net_device *dev, struct sk_buff *sk
 
 	return 0;
 }
+#endif
 
 /******************************************************************************
 * cph_data_flow_tx()
@@ -527,7 +528,6 @@ int cph_data_flow_tx(int port, struct net_device *dev, struct sk_buff *skb,
 	}
 	return 1;
 }
-#endif
 
 /******************************************************************************
 * cph_app_packet_rx()
@@ -847,8 +847,7 @@ int cph_netdev_init(void)
 
 	/* Register special transmit check function */
 #ifdef CONFIG_MV_PP2_TX_SPECIAL
-	for (idx = 0; idx < gs_mv_eth_port_num; idx++)
-		mv_pp2_tx_special_check_func(idx, cph_tx_func);
+	mv_pp2_tx_special_check_func(MV_PON_LOGIC_PORT_GET(), cph_tx_func);
 #endif /* CONFIG_MV_PP2_TX_SPECIAL */
 
 	/* enable all T-CONT by default, whill remove it once callback implmented*/

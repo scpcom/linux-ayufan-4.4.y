@@ -265,7 +265,7 @@ void __btrfs_abort_transaction(struct btrfs_trans_handle *trans,
 	trans->aborted = errno;
 	/* Nothing used. The other threads that have joined this
 	 * transaction may be able to continue. */
-	if (!trans->blocks_used) {
+	if (!trans->blocks_used && list_empty(&trans->new_bgs)) {
 		const char *errstr;
 
 		errstr = btrfs_decode_error(errno);
@@ -1935,6 +1935,12 @@ static void btrfs_free_cached_objects(struct super_block *sb, int nr_to_drop)
 
 	spin_lock(&inode_sb_list_lock);
 	list_for_each_entry(inode, &fs_info->sb->s_inodes, i_sb_list) {
+		spin_lock(&inode->i_sb->s_inode_lru_lock);
+		if (!list_empty(&inode->i_lru)) {
+			spin_unlock(&inode->i_sb->s_inode_lru_lock);
+			continue;
+		}
+		spin_unlock(&inode->i_sb->s_inode_lru_lock);
 		spin_lock(&inode->i_lock);
 		if (inode->i_state & (I_FREEING|I_WILL_FREE|I_NEW)) {
 			spin_unlock(&inode->i_lock);

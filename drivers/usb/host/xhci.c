@@ -41,7 +41,7 @@ static int link_quirk;
 module_param(link_quirk, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(link_quirk, "Don't clear the chain bit on a link TRB");
 
-#if defined(SYNO_USB3_SPECIAL_RESET) || defined(SYNO_USB3_LIGHTWEIGHT_SPECIAL_RESET)
+#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE)
 extern enum XHCI_SPECIAL_RESET_MODE xhci_special_reset; // from hub.c
 extern unsigned short xhci_vendor;
 // SKIP_SPECIAL_RESET_xxx: check SPECIAL_RESET_RETRY in hub.c for reference
@@ -922,12 +922,11 @@ static void xhci_event_ring_work(unsigned long arg)
 }
 #endif
 
-
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
 #endif
@@ -946,21 +945,21 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 
 	xhci_dbg(xhci, "Finished xhci_run for USB3 roothub\n");
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
 #endif
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
 	}
 #endif
 
-#if defined(SYNO_USB3_ERR_MONITOR) || defined(SYNO_USB3_LIGHTWEIGHT_SPECIAL_RESET)
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE)
+#ifdef MY_ABC_HERE
 	if(1 == gSynoFactoryUSB3Disable || PCI_VENDOR_ID_ETRON == xhci_vendor) {
 		xhci_special_reset = XHCI_SPECIAL_RESET_DISABLE;
 	} else {
@@ -973,8 +972,8 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 #if defined(SYNO_USB3_ERR_MONITOR)
 	xhci_task = kthread_run(xhci_thread, NULL, "xhci_thread");
 #endif
-#endif //SYNO_FACTORY_USB3_DISABLE
-#endif //SYNO_USB3_ERR_MONITOR || SYNO_USB3_LIGHTWEIGHT_SPECIAL_RESET
+#endif //MY_ABC_HERE
+#endif //SYNO_USB3_ERR_MONITOR || MY_ABC_HERE
 
 	return 0;
 }
@@ -1164,7 +1163,7 @@ void xhci_stop(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;

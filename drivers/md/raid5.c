@@ -2963,16 +2963,6 @@ handle_failed_sync(struct r5conf *conf, struct stripe_head *sh,
 	}
 }
 
-#ifdef SYNO_RAID5_PARITY_CHECK
-static inline int is_force_rcw(struct r5conf *conf, struct stripe_head_state *s)
-{
-	if (0 == conf->mddev->disable_force_rcw) {
-		return (s->failed && s->to_write);
-	}
-	return (conf->level == 6 && s->failed && s->to_write);
-}
-#endif
-
 /* fetch_block - checks the given member device to see if its data needs
  * to be read or computed to satisfy a request.
  *
@@ -2985,9 +2975,6 @@ static int fetch_block(struct stripe_head *sh, struct stripe_head_state *s,
 	struct r5dev *dev = &sh->dev[disk_idx];
 	struct r5dev *fdev[2] = { &sh->dev[s->failed_num[0]],
 				  &sh->dev[s->failed_num[1]] };
-#ifdef SYNO_RAID5_PARITY_CHECK
-	struct r5conf *conf = sh->raid_conf;
-#endif
 
 	/* is the data in this block needed, and can we get it? */
 	if (!test_bit(R5_LOCKED, &dev->flags) &&
@@ -2999,11 +2986,7 @@ static int fetch_block(struct stripe_head *sh, struct stripe_head_state *s,
 	     (s->failed >= 2 && fdev[1]->toread) ||
 	     (sh->raid_conf->level <= 5 && s->failed && fdev[0]->towrite &&
 	      !test_bit(R5_OVERWRITE, &fdev[0]->flags)) ||
-#ifdef SYNO_RAID5_PARITY_CHECK
-	     (is_force_rcw(conf, s)))) {
-#else
 	     (sh->raid_conf->level == 6 && s->failed && s->to_write))) {
-#endif
 		/* we would like to get this block, possibly by computing it,
 		 * otherwise read it if the backing disk is insync
 		 */
@@ -3172,15 +3155,7 @@ static void handle_stripe_dirtying(struct r5conf *conf,
 				   int disks)
 {
 	int rmw = 0, rcw = 0, i;
-#ifdef SYNO_RAID5_PARITY_CHECK
-	if (conf->max_degraded == 2 ||
-#ifdef SYNO_ENABLE_RMW_WHEN_SYNC
-	   (conf->mddev->recovery_cp < MaxSector && sh->sector >= conf->mddev->recovery_cp) ||
-#endif
-	   (0 == conf->mddev->disable_force_rcw && conf->max_degraded == 1)) {
-#else
 	if (conf->max_degraded == 2) {
-#endif
 		/* RAID6 requires 'rcw' in current implementation
 		 * Calculate the real rcw later - for now fake it
 		 * look like rcw is cheaper
@@ -4078,11 +4053,7 @@ static void handle_stripe(struct stripe_head *sh)
 	 * or to load a block that is being partially written.
 	 */
 	if (s.to_read || s.non_overwrite
-#ifdef SYNO_RAID5_PARITY_CHECK
-	    || (is_force_rcw(conf, &s))
-#else
 	    || (conf->level == 6 && s.to_write && s.failed)
-#endif
 	    || (s.syncing && (s.uptodate + s.compute < disks)) || s.expanding)
 		handle_stripe_fill(sh, &s, disks);
 
@@ -4402,6 +4373,9 @@ static void raid5_align_endio(struct bio *bi, int error)
 	struct mddev *mddev;
 	struct r5conf *conf;
 	int uptodate = test_bit(BIO_UPTODATE, &bi->bi_flags);
+#ifdef MY_ABC_HERE
+	int auto_remap = test_and_clear_bit(BIO_AUTO_REMAP, &bi->bi_flags);
+#endif
 	struct md_rdev *rdev;
 
 	bio_put(bi);
@@ -4413,9 +4387,8 @@ static void raid5_align_endio(struct bio *bi, int error)
 
 	rdev_dec_pending(rdev, conf->mddev);
 
-#ifdef SYNO_AUTO_REMAP_REPORT
-	if (bio_flagged(bi, BIO_AUTO_REMAP)) {
-		clear_bit(BIO_AUTO_REMAP, &bi->bi_flags);
+#ifdef MY_ABC_HERE
+	if (auto_remap) {
 		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
 		SynoAutoRemapReport(conf->mddev, raid_bi->bi_sector, rdev->bdev);
 	}
@@ -4630,11 +4603,13 @@ static void make_discard_request(struct mddev *mddev, struct bio *bi)
 			goto again;
 		}
 		clear_bit(R5_Overlap, &sh->dev[sh->pd_idx].flags);
+		spin_lock_irq(&sh->lock);
 		for (d = 0; d < conf->raid_disks; d++) {
 			if (d == sh->pd_idx || d == sh->qd_idx)
 				continue;
 			if (sh->dev[d].towrite || sh->dev[d].toread) {
 				set_bit(R5_Overlap, &sh->dev[d].flags);
+				spin_unlock_irq(&sh->lock);
 				release_stripe(sh);
 				schedule();
 				goto again;
@@ -4649,6 +4624,7 @@ static void make_discard_request(struct mddev *mddev, struct bio *bi)
 			set_bit(R5_OVERWRITE, &sh->dev[d].flags);
 			raid5_inc_bi_active_stripes(bi);
 		}
+		spin_unlock_irq(&sh->lock);
 		if (conf->mddev->bitmap) {
 			for (d = 0;
 			     d < conf->raid_disks - conf->max_degraded;
@@ -4665,6 +4641,7 @@ static void make_discard_request(struct mddev *mddev, struct bio *bi)
 		clear_bit(STRIPE_DELAYED, &sh->state);
 		if (!test_and_set_bit(STRIPE_PREREAD_ACTIVE, &sh->state))
 			atomic_inc(&conf->preread_active_stripes);
+		release_stripe(sh);
 	}
 
 	remaining = raid5_dec_bi_active_stripes(bi);

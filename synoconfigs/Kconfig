@@ -154,6 +154,23 @@ config SYNO_C2K_HS_SPI_DMA_READ_ERROR
 	  Say Y to enable this bug fixing
 	  Bug DSM #69068. The old retry mechanism will be reverted.
 
+config SYNO_C2K_NOISE_WITH_REMOTE_DAC
+	bool "There is noise when playing music after reading hid device of synology remote"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to enable this bug fixing
+	  Bug DSM #57290. There is problem with handling interrupt packet of dwc otg driver.
+	  In dwc_otg_hcd_queue.c , changing calculations of start_split microframe number for INTR IN (split) endpoint.
+
+config SYNO_C2K_SPLICE_SB_FREEZING
+	bool "Add Comcerto2k's sb freezing of splice"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to enable this bug fixing
+	  Bug DSM #71113. WarnOn is triggered when frequently suspend volume1 and resume volume1,
+	  and transfer couple files via samba at the same time
+	  Add sb freeze mechanism at the start and end of splice write
+
 config SYNO_EFI
 	bool "Enable EFI runtime service"
 	depends on SYNO_BROMOLOW
@@ -250,6 +267,24 @@ config SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 	help
 	  Some settings such as binding interrupt affinity may boost samba performance. This option enables them.
 
+config SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
+	bool "Adjust Alpine backplane RJ45 LED behavior"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  Adjust LED behavior so that it matches HW spec.
+
+config SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
+	bool "Workaround for PHY status error and cannot be woke on lan"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  When DS1515 power off, the power noise writes random value to phy,
+	  making its status invalid, and breaks the WOL function.
+	  To reduce the chance this issue occurs, we switch the PHY page to a
+	  read-only page before power off, so that the noise must switch to
+	  writable page first to make some trouble.
+
 config SYNO_SUPPORT_EMMC_ERASE
 	bool "Enable erase capability for Marvell sdio host"
 	depends on ARCH_ARMADA370
@@ -258,6 +293,12 @@ config SYNO_SUPPORT_EMMC_ERASE
 	  This config will enable erase capability for Marvell sdio host.
 	  Then we could send erase command to eMMC
 
+config SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
+	bool "Enable irq lock while changing queue_depth"
+	depends on SCSI_MPT2SAS
+	default y
+	help
+	  This config ensure the queue_depth and max_queue_depth are consistent with user setting
 config SYNO_ALPINE_FIX_DMA_RECVFILE
 	bool "Fix issue of checksum error when using NETDMA"
 	depends on SYNO_ALPINE
@@ -267,8 +308,6 @@ config SYNO_ALPINE_FIX_DMA_RECVFILE
 	  will be incorrect. In alpine, if NETDMA is enabled, sometimes tcp_recvmsg will return partial data and cause recvfile
 	  behaves incorrectly. When the DMA resource can not satify request, turn to use CPU to copy data from socket buffer.
 
-endmenu
-
 config SYNO_DUAL_HEAD
 	bool "Synology Dual Head Host"
 	depends on SYNO_BROMOLOW
@@ -276,3 +315,19 @@ config SYNO_DUAL_HEAD
 	help
 	  Dual head host use STAT DOM as the synoboot device. In this model SATA
 	  controller & SAS expander exist simultaneously.
+
+config SYNO_HIGH_AVAILABILITY
+	bool "Synology High Availability"
+	depends on SYNO_BROMOLOW || SYNO_CEDARVIEW || SYNO_ALPINE || SYNO_AVOTON || SYNO_GRANTLEY
+	default y
+	help
+	  Check if support SHA
+
+config SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+	bool "Let kernel panic if sas reservation write conflict"
+	depends on SYNO_BROMOLOW
+	default n
+	help
+	  Check if sas reservation write conflict. If yes, kernel panic and then reboot.
+
+endmenu

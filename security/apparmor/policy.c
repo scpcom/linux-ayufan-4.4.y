@@ -1081,7 +1081,12 @@ audit:
 	if (!old_profile && !rename_profile)
 		op = OP_PROF_LOAD;
 
+#ifdef SYNO_APPARMOR_PATCH
+	if (error)
+		error = audit_policy(op, GFP_ATOMIC, name, info, error);
+#else
 	error = audit_policy(op, GFP_ATOMIC, name, info, error);
+#endif
 
 	if (!error) {
 		if (rename_profile)
@@ -1176,7 +1181,9 @@ ssize_t aa_remove_profiles(char *fqname, size_t size)
 	}
 
 	/* don't fail removal if audit fails */
+#ifndef SYNO_APPARMOR_PATCH
 	(void) audit_policy(OP_PROF_RM, GFP_KERNEL, name, info, error);
+#endif
 	aa_put_namespace(ns);
 	aa_put_profile(profile);
 	return size;

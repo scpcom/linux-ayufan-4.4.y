@@ -850,6 +850,9 @@ int genphy_read_status(struct phy_device *phydev)
 }
 EXPORT_SYMBOL(genphy_read_status);
 
+#if defined(CONFIG_SYNO_COMCERTO)
+struct phy_device *gSynoPhydev = NULL;
+#endif
 static int genphy_config_init(struct phy_device *phydev)
 {
 	int val;
@@ -893,9 +896,48 @@ static int genphy_config_init(struct phy_device *phydev)
 
 	phydev->supported = features;
 	phydev->advertising = features;
+#if defined(CONFIG_SYNO_COMCERTO)
+	gSynoPhydev = phydev;
+#endif
 
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_COMCERTO)
+void syno_genphy_ledcontrol(const int iEnable)
+{
+	static u16 normalACT = 0;
+	static u16 normalLINK = 0;
+	u16 nowACT = 0;
+	u16 nowLINK = 0;
+
+	if (NULL == gSynoPhydev) {
+		goto END;
+	}
+	phy_write(gSynoPhydev, 31, 0x7);
+	phy_write(gSynoPhydev, 30, 0x2c);
+	nowACT = phy_read(gSynoPhydev, 26);
+	nowLINK = phy_read(gSynoPhydev, 28);
+
+	if (iEnable) {
+		nowACT = normalACT;
+		nowLINK = normalLINK;
+
+	} else {
+		normalACT = nowACT;
+		normalLINK = nowLINK;
+		nowACT &= ~(0x70);
+		nowLINK &= ~ (0x777);
+	}
+	phy_write(gSynoPhydev, 26, nowACT);
+	phy_write(gSynoPhydev, 28, nowLINK);
+	phy_write(gSynoPhydev, 31, 0x0);
+END:
+	return;
+}
+EXPORT_SYMBOL(syno_genphy_ledcontrol);
+#endif
+
 int genphy_suspend(struct phy_device *phydev)
 {
 	int value;

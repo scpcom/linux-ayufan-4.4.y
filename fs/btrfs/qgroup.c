@@ -1099,6 +1099,42 @@ out:
 	return ret;
 }
 
+#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+/*
+ * struct btrfs_ioctl_qgroup_query_args should be initialized to zero
+ */
+void btrfs_qgroup_query(struct btrfs_fs_info *fs_info, u64 qgroupid,
+                        struct btrfs_ioctl_qgroup_query_args *qqa)
+{
+	struct btrfs_qgroup *qgroup;
+
+	mutex_lock(&fs_info->qgroup_ioctl_lock);
+	if (!fs_info->quota_enabled)
+		goto unlock;
+
+	qgroup = find_qgroup_rb(fs_info, qgroupid);
+	if (!qgroup)
+		goto unlock;
+
+	qqa->rfer = qgroup->rfer;
+	qqa->rfer_cmpr = qgroup->rfer_cmpr;
+	qqa->excl = qgroup->excl;
+	qqa->excl_cmpr = qgroup->excl_cmpr;
+
+	if (qgroup->lim_flags & BTRFS_QGROUP_LIMIT_MAX_RFER)
+		qqa->max_rfer = qgroup->max_rfer;
+	if (qgroup->lim_flags & BTRFS_QGROUP_LIMIT_MAX_EXCL)
+		qqa->max_excl = qgroup->max_excl;
+	if (qgroup->lim_flags & BTRFS_QGROUP_LIMIT_RSV_RFER)
+		qqa->rsv_rfer = qgroup->rsv_rfer;
+	if (qgroup->lim_flags & BTRFS_QGROUP_LIMIT_RSV_EXCL)
+		qqa->rsv_excl = qgroup->rsv_excl;
+	qqa->reserved = qgroup->reserved;
+unlock:
+	mutex_unlock(&fs_info->qgroup_ioctl_lock);
+}
+#endif
+
 int btrfs_remove_qgroup(struct btrfs_trans_handle *trans,
 			struct btrfs_fs_info *fs_info, u64 qgroupid)
 {

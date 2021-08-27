@@ -255,7 +255,7 @@ SYSCALL_DEFINE2(stat, const char __user *, filename,
 
 #ifdef SYNO_DEBUG_FLAG
 	if(syno_hibernation_log_level > 0) {
-		syno_do_hibernation_log(filename);
+		syno_do_hibernation_filename_log(filename);
 	}
 #endif
 
@@ -350,7 +350,7 @@ SYSCALL_DEFINE2(newstat, const char __user *, filename,
 	int error;
 
 	if(syno_hibernation_log_level > 0) {
-		syno_do_hibernation_log(filename);
+		syno_do_hibernation_filename_log(filename);
 	}
 	error = vfs_stat(filename, &stat);
 #else
@@ -616,13 +616,13 @@ int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct kstat *s
 		return -ENOMEM;
 	}
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if(!nofollowLink && syno_hibernation_log_level > 0) {
-		syno_do_hibernation_log(filename);
+		syno_do_hibernation_filename_log(filename);
 	}
 #endif
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if (SynoDebugFlag) {
 		printk("%s(%d) orig name:[%s] len:[%u]\n", __FUNCTION__, __LINE__, filename, (unsigned int)strlen(filename));
 	}
@@ -705,9 +705,10 @@ SYSCALL_DEFINE2(stat64, const char __user *, filename,
 
 #ifdef SYNO_DEBUG_FLAG
 	if(syno_hibernation_log_level > 0) {
-		syno_do_hibernation_log(filename);
+		syno_do_hibernation_filename_log(filename);
 	}
 #endif
+
 	int error = vfs_stat(filename, &stat);
 	if (!error)
 		error = cp_new_stat64(&stat, statbuf);
@@ -820,7 +821,7 @@ static int do_SYNOStat64(char __user * filename, int nofollowLink, int flags, st
 		} else {
 #ifdef SYNO_DEBUG_FLAG
 			if(syno_hibernation_log_level > 0) {
-				syno_do_hibernation_log(filename);
+				syno_do_hibernation_filename_log(filename);
 			}
 #endif
 			error = syno_vfs_stat(filename, &kst, LOOKUP_FOLLOW, flags);
@@ -954,16 +955,16 @@ static int do_SYNOStat(char __user * filename, int nofollowLink, int flags, stru
 		}
 #else
 		error = -EOPNOTSUPP;
-#endif /* SYNO_UNICODE_STAT */
+#endif /* MY_ABC_HERE */
 	} else {
 		if (nofollowLink) {
 			error = syno_vfs_stat(filename, &kst, 0, flags);
 		} else {
 #ifdef SYNO_DEBUG_FLAG
 			if(syno_hibernation_log_level > 0) {
-				syno_do_hibernation_log(filename);
+				syno_do_hibernation_filename_log(filename);
 			}
-#endif /* SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 			error = syno_vfs_stat(filename, &kst, LOOKUP_FOLLOW, flags);
 		}
 	}

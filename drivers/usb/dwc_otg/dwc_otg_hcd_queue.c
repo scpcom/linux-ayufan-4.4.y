@@ -230,6 +230,9 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 				  qh->ep_is_in, (qh->ep_type == UE_ISOCHRONOUS),
 				  bytecount);
 		/* Start in a slightly future (micro)frame. */
+#if defined(CONFIG_SYNO_C2K_NOISE_WITH_REMOTE_DAC)
+		hcd->frame_number = dwc_otg_hcd_get_frame_number(hcd);
+#endif
 		qh->sched_frame = dwc_frame_num_inc(hcd->frame_number,
 						    SCHEDULE_SLOP);
 		qh->interval = urb->interval;
@@ -246,6 +249,11 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 		     (dev_speed == USB_SPEED_FULL))) {
 			qh->interval *= 8;
 			qh->sched_frame |= 0x7;
+#if defined(CONFIG_SYNO_C2K_NOISE_WITH_REMOTE_DAC)
+			if ((qh->ep_type == UE_INTERRUPT) && qh->ep_is_in && qh->do_split) {
+				qh->sched_frame = dwc_frame_num_inc(qh->sched_frame, 2);
+			}
+#endif
 			qh->start_split_frame = qh->sched_frame;
 		}
 
@@ -628,6 +636,11 @@ void dwc_otg_hcd_qh_deactivate(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh,
 					qh->sched_frame = frame_number;
 				}
 				qh->sched_frame |= 0x7;
+#if defined(CONFIG_SYNO_C2K_NOISE_WITH_REMOTE_DAC)
+				if ((qh->ep_type == UE_INTERRUPT) && qh->ep_is_in && qh->do_split) {
+					qh->sched_frame = dwc_frame_num_inc(qh->sched_frame, 2);
+				}
+#endif
 				qh->start_split_frame = qh->sched_frame;
 			}
 		} else {

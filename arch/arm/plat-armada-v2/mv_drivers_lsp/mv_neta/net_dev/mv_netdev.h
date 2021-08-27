@@ -425,8 +425,8 @@ struct eth_port {
 	MV_U32              rx_indir_table[256];
 	struct cpu_ctrl	    *cpu_config[CONFIG_NR_CPUS];
 	MV_U32              sgmii_serdes;
-	int	                wol_mode;
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+	int	                pm_mode;
+#ifdef MY_ABC_HERE
 	MV_U32 phy_chip;
 	MV_U32 phy_id;
 	MV_U32  wol;

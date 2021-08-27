@@ -214,10 +214,12 @@ vfs_setxattr_nolock(struct dentry *dentry, const char *name, const void *value,
 		size_t size, int flags)
 {
 	int error;
-	if (error = xattr_permission(dentry, name, MAY_WRITE)) {
+	error = xattr_permission(dentry, name, MAY_WRITE);
+	if (error) {
 		goto out;
 	}
-	if (error = security_inode_setxattr(dentry, name, value, size, flags)) {
+	error = security_inode_setxattr(dentry, name, value, size, flags);
+	if (error) {
 		goto out;
 	}
 	error = __vfs_setxattr_noperm(dentry, name, value, size, flags);

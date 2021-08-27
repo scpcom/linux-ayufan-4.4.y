@@ -264,10 +264,23 @@ extern "C" {
 
 /************************************/
 /*  SPANSION S25FL128P Device Specific  */
+/*  SPANSION S25FL032P Device Specific (cisco)*/
 /************************************/
 
 /* Manufacturer IDs and Device IDs for SFLASHs supported by the driver */
 #define	MV_SPANSION_MANF_ID			0x01
+
+#define	MV_S25FL032_DEVICE_ID			0x0215
+
+#define	MV_S25FL032_MAX_SPI_FREQ		33000000    /* 33MHz */
+#define	MV_S25FL032_MAX_FAST_SPI_FREQ		104000000    /* 104MHz */
+#define	MV_S25FL032_FAST_READ_DUMMY_BYTES	1
+#define	MV_S25FL032_ADDR_CYC_CNT		3
+
+/* Sector Sizes and population per device model*/
+#define	MV_S25FL032_SECTOR_SIZE			0x10000 /* 64K */
+#define	MV_S25FL032_SECTOR_NUMBER		64
+
 #define     MV_S25FL128_DEVICE_ID              		0x2018
 #define     MV_S25FL128_MAX_SPI_FREQ           		33000000    /* 33MHz */
 #define     MV_S25FL128_MAX_FAST_SPI_FREQ        	104000000    /* 104MHz */

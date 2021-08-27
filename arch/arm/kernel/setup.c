@@ -62,62 +62,62 @@
 #include "atags.h"
 #include "tcm.h"
 
-#ifdef  SYNO_HW_VERSION
+#ifdef  MY_ABC_HERE
 extern char gszSynoHWVersion[];
 #endif
 
-#ifdef  SYNO_HW_REVISION
+#ifdef  MY_ABC_HERE
 extern char gszSynoHWRevision[];
 #endif
 
-#ifdef SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 extern long g_internal_hd_num;
 #endif
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 extern long g_internal_netif_num;
 long g_egiga = 1;
 #endif
 
-#ifdef SYNO_SATA_LED_SPECIAL
+#ifdef MY_ABC_HERE
 extern long g_sata_led_special;
 #endif
 
-#ifdef SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 extern long g_hdd_hotplug;
 #endif
 
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[SYNO_MAC_MAX_V2][16];
 extern int giVenderFormatVersion;
 #endif
 
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef SYNO_ESATA_7042
+#ifdef MY_DEF_HERE
 extern long g_esata_7042;
 #endif
 #ifndef MEM_SIZE
 #define MEM_SIZE	(16*1024*1024)
 #endif
 
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[16];
 #endif
 
-#ifdef SYNO_SATA_DISK_SEQ_REVERSE
+#ifdef MY_ABC_HERE
 extern char giDiskSeqReverse[8];
 #endif
 
-#ifdef SYNO_SWITCH_NET_DEVICE_NAME
+#ifdef MY_DEF_HERE
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
-#ifdef SYNO_USB_FLASH_BOOT
+#ifdef MY_ABC_HERE
 extern int gSynoHasDynModule;
 #endif
 
@@ -125,11 +125,11 @@ extern int gSynoHasDynModule;
 extern long gSynoFlashMemorySize;
 #endif
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
 #endif
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
@@ -469,7 +469,7 @@ END:
 __setup("flash_size=", early_flash_memory_size);
 #endif
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 static int __init early_factory_usb_fast_reset(char *p)
 {
 	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
@@ -481,7 +481,7 @@ static int __init early_factory_usb_fast_reset(char *p)
 __setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
 #endif
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 static int __init early_factory_usb3_disable(char *p)
 {
 	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);

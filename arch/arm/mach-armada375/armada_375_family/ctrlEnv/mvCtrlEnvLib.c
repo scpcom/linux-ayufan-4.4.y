@@ -1886,6 +1886,10 @@ MV_U32 mvCtrlGetJuncTemp(MV_VOID)
 #endif
 {
 	MV_32 reg = 0;
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+	/* return value will be 55 */
+	static MV_32 reg_last = 249;
+#endif
 
 	/* Initialize TSEN CTRL MSB REG */
 	reg = MV_REG_READ(TSEN_CTRL_MSB_REG);
@@ -1909,6 +1913,13 @@ MV_U32 mvCtrlGetJuncTemp(MV_VOID)
 	/* Read temperature sensor status */
 	reg = MV_REG_READ(TSEN_STATUS_REG);
 	reg = (reg & TSEN_STATUS_TEMP_OUT_MASK) >> TSEN_STATUS_TEMP_OUT_OFFSET;
+
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+	if (0 == reg)
+		reg = reg_last;
+	else
+		reg_last = reg;
+#endif
 
 	/* formula values taken from SPIC */
 	return (3239600 - (10000 * reg)) / 13616;

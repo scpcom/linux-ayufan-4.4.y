@@ -3074,6 +3074,182 @@ static void __devinit disable_igfx_irq(struct pci_dev *dev)
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x0102, disable_igfx_irq);
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x010a, disable_igfx_irq);
 
+#ifdef MY_ABC_HERE
+/*
+ * Marvell provide PCI Programming steps for 88SE9235 without SPI flash
+ * to slove some compatibility issue.
+ *
+ * The reference document is put in SynoStorage
+ *     HW_Docs\datasheets_Roadmaps\SATA\marvell\SATA6g_88SE923x\software\
+ *     Marvell_SE92159235_NonSPI__flash_Support_App_Note_r1.0.doc
+ */
+static void __devinit mv9235_non_spi_programming(struct pci_dev *dev)
+{
+	void __iomem *bar5;
+
+	bar5 = ioremap(pci_resource_start(dev, 5), pci_resource_len(dev, 5));
+	if (!bar5) {
+		dev_warn(&dev->dev, "Can't map mv9235 registers\n");
+		return;
+	}
+
+	dev_info(&dev->dev, "Apply mv9235 specific programming steps\n");
+
+	// sata port0-interrupt boundary of command
+	writel(0x00000104, bar5+0x178);
+	ndelay(80);
+	// Disable the interrupt blocking; port interrupt coalescing count
+	writel(0x00500B03, bar5+0x17C);
+	ndelay(80);
+	// sata port1-interrupt boundary of command
+	writel(0x00000104, bar5+0x1F8);
+	ndelay(80);
+	// Disable the interrupt blocking; port interrupt coalescing count
+	writel(0x00500B03, bar5+0x1FC);
+	ndelay(80);
+	// sata port2-interrupt boundary of command
+	writel(0x00000104, bar5+0x278);
+	ndelay(80);
+	// Disable the interrupt blocking; port interrupt coalescing count
+	writel(0x00500B03, bar5+0x27C);
+	ndelay(80);
+	// sata port3-interrupt boundary of command
+	writel(0x00000104, bar5+0x2F8);
+	ndelay(80);
+	// Disable the interrupt blocking; port interrupt coalescing count
+	writel(0x00500B03, bar5+0x2FC);
+	ndelay(80);
+	// 6G drives issue/HW CC
+	writel(0x0000001C, bar5+0xA0);
+	ndelay(80);
+	writel(0x00935038, bar5+0xA4);
+	ndelay(80);
+	// SSC parameter calculate in PLL CTL2
+	writel(0x0000000C, bar5+0xA0);
+	ndelay(80);
+	writel(0xA5A58757, bar5+0xA4);
+	ndelay(80);
+	// SSC parameter calculate in PLL CTL1
+	writel(0x00000008, bar5+0xA0);
+	ndelay(80);
+	writel(0x0001388F, bar5+0xA4);
+	ndelay(80);
+}
+DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9235, mv9235_non_spi_programming);
+DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9215, mv9235_non_spi_programming);
+#endif
+
+#ifdef MY_ABC_HERE
+/*
+ * Marvell provide PCI Programming steps for 88SE9170 without SPI flash
+ * to slove some compatibility issue.
+ */
+static void __devinit mv9170_non_spi_programming(struct pci_dev *dev)
+{
+	void __iomem *bar5;
+
+	bar5 = ioremap(pci_resource_start(dev, 5), pci_resource_len(dev, 5));
+	if (!bar5) {
+		dev_warn(&dev->dev, "Can't map mv9170 registers\n");
+		return;
+	}
+
+	dev_info(&dev->dev, "Apply mv9170 specific programming steps\n");
+
+	//port0-GEN1
+	writel(0x0000008D, bar5+0x178);
+	ndelay(80);
+	writel(0x0000C962, bar5+0x17C);
+	ndelay(80);
+	//port1-GEN1
+	writel(0x0000008D, bar5+0x1F8);
+	ndelay(80);
+	writel(0x0000C962, bar5+0x1FC);
+	ndelay(80);
+	//port0-GEN3
+	writel(0x00000091, bar5+0x178);
+	ndelay(80);
+	writel(0x00000E75, bar5+0x17C);
+	ndelay(80);
+	//port1-GEN3
+	writel(0x00000091, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000E75, bar5+0x1FC);
+	ndelay(80);
+	//port0-password
+	writel(0x000000A2, bar5+0x178);
+	ndelay(80);
+	writel(0x00000046, bar5+0x17C);
+	ndelay(80);
+	//port1-password
+	writel(0x000000A2, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000046, bar5+0x1FC);
+	ndelay(80);
+	//port0-ffe-isel
+	writel(0x000000ED, bar5+0x178);
+	ndelay(80);
+	writel(0x00002400, bar5+0x17C);
+	ndelay(80);
+	//port1-ffe-isel
+	writel(0x000000ED, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00002400, bar5+0x1FC);
+	ndelay(80);
+	//port0-sampler-scale
+	writel(0x000000DB, bar5+0x178);
+	ndelay(80);
+	writel(0x00000000, bar5+0x17C);
+	ndelay(80);
+	//port1-sampler-scale
+	writel(0x000000DB, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000000, bar5+0x1FC);
+	ndelay(80);
+	//port0-vset
+	writel(0x000000A9, bar5+0x178);
+	ndelay(80);
+	writel(0x00005556, bar5+0x17C);
+	ndelay(80);
+	//port1-vset
+	writel(0x000000A9, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00005556, bar5+0x1FC);
+	ndelay(80);
+	//port0-cal-sampler-start
+	writel(0x000000D6, bar5+0x178);
+	ndelay(80);
+	writel(0x00000000, bar5+0x17C);
+	ndelay(80);
+	//port1-cal-sampler-start
+	writel(0x000000D6, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000000, bar5+0x1FC);
+	ndelay(80);
+	//port0-cal-sampler-start
+	writel(0x000000D6, bar5+0x178);
+	ndelay(80);
+	writel(0x00000200, bar5+0x17C);
+	ndelay(80);
+	//port1-cal-sampler-start
+	writel(0x000000D6, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000200, bar5+0x1FC);
+	ndelay(80);
+	//set the amplitude to 3.5%
+	writel(0x00000008, bar5+0xA0);
+	ndelay(80);
+	writel(0x11888EAE, bar5+0xA4);
+	ndelay(80);
+	//enable SSC
+	writel(0x00000004, bar5+0xA0);
+	ndelay(80);
+	writel(0x00009C4F, bar5+0xA4);
+	ndelay(80);
+}
+DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9170, mv9170_non_spi_programming);
+#endif /* MY_ABC_HERE */
+
 static void pci_do_fixups(struct pci_dev *dev, struct pci_fixup *f,
 			  struct pci_fixup *end)
 {

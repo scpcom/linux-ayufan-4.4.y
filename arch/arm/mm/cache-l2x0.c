@@ -305,7 +305,7 @@ static void l2x0_unlock(__u32 cache_id)
 		lockregs = 1;
 
 	for (i = 0; i < lockregs; i++) {
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if !(defined(CONFIG_ARMADA_375) || defined(CONFIG_SYNO_COMCERTO)) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 		writel_relaxed(0x0, l2x0_base + L2X0_LOCKDOWN_WAY_D_BASE +
 			       i * L2X0_LOCKDOWN_STRIDE);
 #endif

@@ -1631,11 +1631,26 @@ static void mpage_da_map_and_submit(struct mpage_da_data *mpd)
 	 * Update on-disk size along with block allocation.
 	 */
 	disksize = ((loff_t) next + blks) << mpd->inode->i_blkbits;
+#ifdef MY_ABC_HERE
+	if (disksize > EXT4_I(mpd->inode)->i_disksize) {
+		loff_t i_size;
+		struct inode *inode = mpd->inode;
+
+		down_write(&EXT4_I(inode)->i_data_sem);
+		i_size = i_size_read(inode);
+		if (disksize > i_size)
+			disksize = i_size;
+		if (disksize > EXT4_I(inode)->i_disksize)
+			EXT4_I(inode)->i_disksize = disksize;
+		err = ext4_mark_inode_dirty(handle, inode);
+		up_write(&EXT4_I(inode)->i_data_sem);
+#else /* MY_ABC_HERE */
 	if (disksize > i_size_read(mpd->inode))
 		disksize = i_size_read(mpd->inode);
 	if (disksize > EXT4_I(mpd->inode)->i_disksize) {
 		ext4_update_i_disksize(mpd->inode, disksize);
 		err = ext4_mark_inode_dirty(handle, mpd->inode);
+#endif /* MY_ABC_HERE */
 		if (err)
 			ext4_error(mpd->inode->i_sb,
 				   "Failed to mark inode %lu dirty",
@@ -3823,7 +3838,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	EXT4_INODE_GET_XTIME(i_mtime, inode, raw_inode);
 	EXT4_INODE_GET_XTIME(i_atime, inode, raw_inode);
 	EXT4_EINODE_GET_XTIME(i_crtime, ei, raw_inode);
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 #ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	if (EXT4_SB(sb)->s_swap_create_time) {
 		inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
@@ -4003,7 +4018,7 @@ static int ext4_do_update_inode(handle_t *handle,
 	EXT4_INODE_SET_XTIME(i_ctime, inode, raw_inode);
 	EXT4_INODE_SET_XTIME(i_mtime, inode, raw_inode);
 	EXT4_INODE_SET_XTIME(i_atime, inode, raw_inode);
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 #ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	if (EXT4_SB(inode->i_sb)->s_swap_create_time) {
 		raw_inode->i_crtime = cpu_to_le32(inode->i_CreateTime.tv_sec);
@@ -4196,6 +4211,10 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 	int error, rc = 0;
 	int orphan = 0;
 	const unsigned int ia_valid = attr->ia_valid;
+#ifdef MY_ABC_HERE
+	bool already_update_size = false;
+	loff_t oldsize = 0;
+#endif
 
 	error = inode_change_ok(inode, attr);
 	if (error)
@@ -4256,8 +4275,23 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 			error = ext4_orphan_add(handle, inode);
 			orphan = 1;
 		}
+#ifdef MY_ABC_HERE
+		down_write(&EXT4_I(inode)->i_data_sem);
+#endif
 		EXT4_I(inode)->i_disksize = attr->ia_size;
 		rc = ext4_mark_inode_dirty(handle, inode);
+#ifdef MY_ABC_HERE
+		/*
+		 * We have to update i_size under i_data_sem together
+		 * with i_disksize to avoid races with writeback.
+		 */
+		if (!error) {
+			oldsize = inode->i_size;
+			i_size_write(inode, attr->ia_size);
+			already_update_size = true;
+		}
+		up_write(&EXT4_I(inode)->i_data_sem);
+#endif /* MY_ABC_HERE */
 		if (!error)
 			error = rc;
 		ext4_journal_stop(handle);
@@ -4281,6 +4315,12 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 	}
 
 	if (attr->ia_valid & ATTR_SIZE) {
+#ifdef MY_ABC_HERE
+		if (already_update_size) {
+			truncate_pagecache(inode, oldsize, attr->ia_size);
+			ext4_truncate(inode);
+		} else
+#endif /* MY_ABC_HERE */
 		if (attr->ia_size != i_size_read(inode)) {
 			truncate_setsize(inode, attr->ia_size);
 			ext4_truncate(inode);

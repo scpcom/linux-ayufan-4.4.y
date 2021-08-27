@@ -1309,7 +1309,7 @@ compat_sys_open(const char __user *filename, int flags, int mode)
 {
 #ifdef SYNO_DEBUG_FLAG
         if(syno_hibernation_log_level > 0) {
-                syno_do_hibernation_log(filename);
+                syno_do_hibernation_filename_log(filename);
         }
 #endif
 	return do_sys_open(AT_FDCWD, filename, flags, mode);

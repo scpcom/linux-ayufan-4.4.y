@@ -256,7 +256,7 @@ u32 xhci_port_state_to_neutral(u32 state)
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 #include <linux/pci.h>
 
 extern int gSynoFactoryUSB3Disable;
@@ -360,7 +360,7 @@ void xhci_ring_device(struct xhci_hcd *xhci, int slot_id)
 	return;
 }
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
@@ -466,7 +466,7 @@ static int xhci_get_ports(struct usb_hcd *hcd, __le32 __iomem ***port_array)
 	return max_ports;
 }
 
-#if defined(SYNO_USB3_ERR_MONITOR) || defined(SYNO_FACTORY_USB3_DISABLE)
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE)
 /*
  * get the mapping port array.
  * if hcd is usb3, return usb2's port_array, and vice versa.
@@ -601,12 +601,12 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	int max_ports;
 	unsigned long flags;
 	u32 temp, status;
-#if defined(SYNO_USB3_ERR_MONITOR) || defined(SYNO_FACTORY_USB3_DISABLE) || defined(SYNO_USB3_WD_FIX)
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	u32 temp_map;
 #endif
 	int retval = 0;
 	__le32 __iomem **port_array;
-#if defined(SYNO_USB3_ERR_MONITOR) || defined(SYNO_FACTORY_USB3_DISABLE)
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE)
 	__le32 __iomem **port_array_map;
 	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
 #endif
@@ -622,7 +622,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 #endif
 
 	max_ports = xhci_get_ports(hcd, &port_array);
-#if defined(SYNO_USB3_ERR_MONITOR) || defined(SYNO_FACTORY_USB3_DISABLE)
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE)
 	if (pdev->vendor == PCI_VENDOR_ID_NEC ||
 		pdev->vendor == PCI_VENDOR_ID_ETRON) {
 		xhci_get_ports_map(hcd, &port_array_map); // max_ports should be the same, only for NEC fixes
@@ -801,7 +801,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			goto error;
 		wIndex--;
 		temp = xhci_readl(xhci, port_array[wIndex]);
-#if defined(SYNO_USB3_ERR_MONITOR) || defined(SYNO_FACTORY_USB3_DISABLE)
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE)
 		if (pdev->vendor == PCI_VENDOR_ID_NEC ||
 			pdev->vendor == PCI_VENDOR_ID_ETRON) {
 			temp_map = xhci_readl(xhci, port_array_map[wIndex]);
@@ -926,7 +926,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 			xhci_dbg(xhci, "set port power. hcd->speed:%d.\n",hcd->speed);
 			if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3)
 				xhci_writel(xhci, temp & ~PORT_POWER,

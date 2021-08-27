@@ -66,7 +66,7 @@
 #include <linux/synobios.h>
 #endif
 
-#ifdef  SYNO_HW_VERSION
+#ifdef  MY_ABC_HERE
 extern char gszSynoHWVersion[];
 #endif
 
@@ -921,7 +921,7 @@ void __init mac_addr_init(struct comcerto_pfe_platform_data * comcerto_pfe_data_
 	int num = NUM_GEMAC_SUPPORT;
 
 	// DS215air gem_port_id same as c2kevm
-	if(0 == strncmp(gszSynoHWVersion, HW_DS414jv10, strlen(HW_DS414jv10))) {
+	if(0 == strncmp(gszSynoHWVersion, HW_DS414jv10, strlen(HW_DS414jv10)) || 0 == strncmp(gszSynoHWVersion, HW_DS415jv10, strlen(HW_DS415jv10))) {
 		num = 1;
 	}
 

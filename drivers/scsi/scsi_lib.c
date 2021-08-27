@@ -45,6 +45,10 @@ extern int ss_stats[128];
 #define SG_MEMPOOL_NR		ARRAY_SIZE(scsi_sg_pools)
 #define SG_MEMPOOL_SIZE		2
 
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+extern int gSynoSASWriteConflictPanic;
+#endif
+
 struct scsi_host_sg_pool {
 	size_t		size;
 	char		*name;
@@ -811,6 +815,31 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 		if (sense_valid)
 			sense_deferred = scsi_sense_is_deferred(&sshdr);
 	}
+
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+	// only dual head model for now
+	if (1 == gSynoSASWriteConflictPanic) {
+		if (unlikely(RESERVATION_CONFLICT == status_byte(cmd->result) && COMMAND_COMPLETE == msg_byte(cmd->result) &&
+			(WRITE_6 == cmd->cmnd[0] ||
+			 WRITE_10 == cmd->cmnd[0] ||
+			 WRITE_12 == cmd->cmnd[0] ||
+			 WRITE_16 == cmd->cmnd[0] ||
+			 WRITE_32 == cmd->cmnd[0] ||
+			 WRITE_SAME == cmd->cmnd[0] ||
+			 WRITE_SAME_16 == cmd->cmnd[0] ||
+			 WRITE_SAME_32 == cmd->cmnd[0] ||
+			 WRITE_VERIFY == cmd->cmnd[0] ||
+			 WRITE_VERIFY_12 == cmd->cmnd[0] ||
+			 WRITE_LONG == cmd->cmnd[0] ||
+			 WRITE_LONG_2 == cmd->cmnd[0]))) {
+			scmd_printk(KERN_INFO, cmd, "Unhandled error code\n");
+			scsi_print_result(cmd);
+			scsi_print_sense("", cmd);
+			scsi_print_command(cmd);
+			panic("Reservation conflict!, try to reboot\n");
+		}
+	}
+#endif
 
 #ifdef SYNO_SAS_SPINUP_DELAY
 #ifdef SYNO_SAS_SPINUP_DELAY_DEBUG

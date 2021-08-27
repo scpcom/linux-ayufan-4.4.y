@@ -82,6 +82,14 @@ struct clone_root {
 #define SEND_CTX_MAX_NAME_CACHE_SIZE 128
 #define SEND_CTX_NAME_CACHE_CLEAN_SIZE (SEND_CTX_MAX_NAME_CACHE_SIZE * 2)
 
+#ifdef MY_ABC_HERE
+enum syno_archive{
+	syno_archive_set = 0x1,
+	syno_archive_set_owner_group = 0x1 << 1,
+	syno_archive_set_acl = 0x1 << 2,
+};
+#endif /* MY_ABC_HERE */
+
 struct send_ctx {
 	struct file *send_filp;
 	loff_t send_off;
@@ -115,6 +123,9 @@ struct send_ctx {
 	u64 cur_inode_mode;
 	u64 cur_inode_rdev;
 	u64 cur_inode_last_extent;
+#ifdef MY_ABC_HERE
+	u32 cur_inode_archive;
+#endif /* MY_ABC_HERE */
 
 	u64 send_progress;
 
@@ -587,6 +598,13 @@ static int tlv_put_btrfs_timespec(struct send_ctx *sctx, u16 attr,
 	return tlv_put(sctx, attr, &bts, sizeof(bts));
 }
 
+#ifdef MY_ABC_HERE
+static int tlv_put_btrfs_subvol_timespec(struct send_ctx *sctx, u16 attr,
+				struct btrfs_timespec *ts)
+{
+	return tlv_put(sctx, attr, ts, sizeof(struct btrfs_timespec));
+}
+#endif /* MY_ABC_HERE */
 
 #define TLV_PUT(sctx, attrtype, attrlen, data) \
 	do { \
@@ -631,6 +649,14 @@ static int tlv_put_btrfs_timespec(struct send_ctx *sctx, u16 attr,
 		if (ret < 0) \
 			goto tlv_put_failure; \
 	} while (0)
+#ifdef MY_ABC_HERE
+#define TLV_PUT_BTRFS_SUBVOL_TIMESPEC(sctx, attrtype, ts) \
+	do { \
+		ret = tlv_put_btrfs_subvol_timespec(sctx, attrtype, ts); \
+		if (ret < 0) \
+			goto tlv_put_failure; \
+	} while (0)
+#endif /* MY_ABC_HERE */
 
 static int send_header(struct send_ctx *sctx)
 {
@@ -2281,13 +2307,26 @@ static int send_subvol_begin(struct send_ctx *sctx)
 	}
 
 	TLV_PUT_STRING(sctx, BTRFS_SEND_A_PATH, name, namelen);
+#ifdef MY_ABC_HERE
+	TLV_PUT_UUID(sctx, BTRFS_SEND_A_UUID,
+			sctx->send_root->root_item.received_uuid);
+#else
 	TLV_PUT_UUID(sctx, BTRFS_SEND_A_UUID,
 			sctx->send_root->root_item.uuid);
+#endif /* MY_ABC_HERE */
 	TLV_PUT_U64(sctx, BTRFS_SEND_A_CTRANSID,
 		    le64_to_cpu(sctx->send_root->root_item.ctransid));
+#ifdef MY_ABC_HERE
+	TLV_PUT_BTRFS_SUBVOL_TIMESPEC(sctx, BTRFS_SEND_A_OTIME, &sctx->send_root->root_item.otime);
+#endif /* MY_ABC_HERE */
 	if (parent_root) {
+#ifdef MY_ABC_HERE
+		TLV_PUT_UUID(sctx, BTRFS_SEND_A_CLONE_UUID,
+				sctx->parent_root->root_item.received_uuid);
+#else
 		TLV_PUT_UUID(sctx, BTRFS_SEND_A_CLONE_UUID,
 				sctx->parent_root->root_item.uuid);
+#endif /* MY_ABC_HERE */
 		TLV_PUT_U64(sctx, BTRFS_SEND_A_CLONE_CTRANSID,
 			    le64_to_cpu(sctx->parent_root->root_item.ctransid));
 	}
@@ -3973,6 +4012,18 @@ static int __process_new_xattr(int num, struct btrfs_key *di_key,
 	struct fs_path *p;
 	posix_acl_xattr_header dummy_acl;
 
+#ifdef MY_ABC_HERE
+	/*
+	 * chmod and chown will clear archive bit acl-related bits and acl entries, so
+	 * we handle these at inode-finishing step to avoid losing syno archive bit and 
+	 * acl entries.
+	 */
+	if (!strncmp(name, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT, name_len)) {
+		sctx->cur_inode_archive = syno_archive_set;
+		return 0;
+	}
+#endif /* MY_ABC_HERE */
+
 	p = fs_path_alloc();
 	if (!p)
 		return -ENOMEM;
@@ -4933,6 +4984,62 @@ out:
 	return ret;
 }
 
+#ifdef MY_ABC_HERE
+/*
+ *Handle syno archive bit and syno acl here
+ */
+static int syno_attribute_handler(struct send_ctx *sctx)
+{
+	int ret = 0;
+	__le32 archive_bit_le32 = 0;
+	struct fs_path *p = NULL;
+	struct btrfs_root *root = sctx->send_root;
+	struct btrfs_fs_info *fs_info = root->fs_info;
+	struct inode *inode = NULL;
+	struct btrfs_key key;
+
+	if (sctx->cur_inode_archive) {
+		key.objectid = sctx->cur_ino;
+		key.type = BTRFS_INODE_ITEM_KEY;
+		key.offset = 0;
+
+		inode = btrfs_iget(fs_info->sb, &key, root, NULL);
+		if (IS_ERR(inode)) {
+			ret = PTR_ERR(inode);
+			goto out;
+		}
+		if (sctx->cur_inode_archive) {
+			archive_bit_le32 = cpu_to_le32(inode->i_mode2);
+		}
+
+		iput(inode);
+		if (ret < 0) {
+			goto out;
+		}
+	}
+	if (sctx->cur_inode_archive) {
+		p = fs_path_alloc();
+		if (!p) {
+			ret = -ENOMEM;
+			goto out;
+		}
+		ret = get_cur_path(sctx, sctx->cur_ino, sctx->cur_inode_gen, p);
+		if (ret < 0)
+			goto out;
+		if (sctx->cur_inode_archive) {
+			ret = send_set_xattr(sctx, p, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT,
+				strlen(XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT),
+				(const char *)&archive_bit_le32, sizeof(archive_bit_le32));
+			if (ret < 0)
+				goto out;
+		}
+	}
+out:
+	fs_path_free(p);
+	return ret;
+}
+#endif /* MY_ABC_HERE */
+
 static int finish_inode_if_needed(struct send_ctx *sctx, int at_end)
 {
 	int ret = 0;
@@ -5029,6 +5136,11 @@ static int finish_inode_if_needed(struct send_ctx *sctx, int at_end)
 			goto out;
 	}
 
+#ifdef MY_ABC_HERE
+	ret = syno_attribute_handler(sctx);
+	if (ret < 0)
+		goto out;
+#endif /* MY_ABC_HERE */
 	/*
 	 * If other directory inodes depended on our current directory
 	 * inode's move/rename, now do their move/rename operations.
@@ -5067,6 +5179,9 @@ static int changed_inode(struct send_ctx *sctx,
 	sctx->cur_ino = key->objectid;
 	sctx->cur_inode_new_gen = 0;
 	sctx->cur_inode_last_extent = (u64)-1;
+#ifdef MY_ABC_HERE
+	sctx->cur_inode_archive = 0;
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * Set send_progress to current inode. This will tell all get_cur_xxx

@@ -1502,6 +1502,10 @@ comcerto_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 	int diff_time_ms;
 #endif
 
+#if defined(CONFIG_SYNO_C2K_SPLICE_SB_FREEZING)
+	sb_start_write(inode->i_sb);
+#endif
+
 	pipe_lock(pipe);
 
 #if defined(CONFIG_COMCERTO_SPLICE_PROF)
@@ -1580,6 +1584,10 @@ comcerto_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 
 		last_splicew = now;
 	}
+#endif
+
+#if defined(CONFIG_SYNO_C2K_SPLICE_SB_FREEZING)
+	sb_end_write(inode->i_sb);
 #endif
 	return ret;
 }

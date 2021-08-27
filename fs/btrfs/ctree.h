@@ -614,6 +614,7 @@ struct btrfs_path {
 	unsigned int leave_spinning:1;
 	unsigned int search_commit_root:1;
 	unsigned int need_commit_sem:1;
+	unsigned int skip_release_on_error:1;
 };
 
 /*
@@ -758,6 +759,9 @@ struct btrfs_dir_item {
 } __attribute__ ((__packed__));
 
 #define BTRFS_ROOT_SUBVOL_RDONLY	(1ULL << 0)
+#ifdef MY_ABC_HERE
+#define BTRFS_ROOT_SUBVOL_HIDE		(1ULL << 32)
+#endif
 
 struct btrfs_root_item {
 	struct btrfs_inode_item inode;
@@ -1203,6 +1207,9 @@ struct btrfs_free_cluster {
 	/* first extent starting offset */
 	u64 window_start;
 
+#ifdef MY_ABC_HERE
+	u64 reserve_bytes;
+#endif
 	struct btrfs_block_group_cache *block_group;
 	/*
 	 * when a cluster is allocated from a block group, we put the
@@ -1257,6 +1264,8 @@ struct btrfs_block_group_cache {
 	unsigned int ro:1;
 	unsigned int dirty:1;
 	unsigned int iref:1;
+	unsigned int has_caching_ctl:1;
+	unsigned int removed:1;
 
 	int disk_cache_state;
 
@@ -1284,8 +1293,10 @@ struct btrfs_block_group_cache {
 	 */
 	struct list_head cluster_list;
 
-	/* For delayed block group creation */
-	struct list_head new_bg_list;
+	/* For delayed block group creation or deletion of empty block groups */
+	struct list_head bg_list;
+
+	atomic_t trimming;
 };
 
 /* delayed seq elem */
@@ -1552,6 +1563,7 @@ struct btrfs_fs_info {
 	int do_barriers;
 	int closing;
 	int log_root_recovering;
+	int open;
 
 	u64 total_pinned;
 
@@ -1699,6 +1711,15 @@ struct btrfs_fs_info {
 
 	struct semaphore uuid_tree_rescan_sem;
 	unsigned int update_uuid_tree_gen:1;
+
+	spinlock_t unused_bgs_lock;
+	struct list_head unused_bgs;
+
+	/*
+	 * Chunks that can't be freed yet (under a trim/discard operation)
+	 * and will be latter freed. Protected by fs_info->chunk_mutex.
+	 */
+	struct list_head pinned_chunks;
 };
 
 struct btrfs_subvolume_writers {
@@ -2799,6 +2820,13 @@ static inline bool btrfs_root_readonly(struct btrfs_root *root)
 	return (root->root_item.flags & cpu_to_le64(BTRFS_ROOT_SUBVOL_RDONLY)) != 0;
 }
 
+#ifdef MY_ABC_HERE
+static inline bool btrfs_root_hide(struct btrfs_root *root)
+{
+	return (root->root_item.flags & cpu_to_le64(BTRFS_ROOT_SUBVOL_HIDE)) != 0;
+}
+#endif
+
 /* struct btrfs_root_backup */
 BTRFS_SETGET_STACK_FUNCS(backup_tree_root, struct btrfs_root_backup,
 		   tree_root, 64);
@@ -3325,7 +3353,9 @@ int btrfs_make_block_group(struct btrfs_trans_handle *trans,
 			   u64 type, u64 chunk_objectid, u64 chunk_offset,
 			   u64 size);
 int btrfs_remove_block_group(struct btrfs_trans_handle *trans,
-			     struct btrfs_root *root, u64 group_start);
+			     struct btrfs_root *root, u64 group_start,
+			     struct extent_map *em);
+void btrfs_delete_unused_bgs(struct btrfs_fs_info *fs_info);
 void btrfs_create_pending_block_groups(struct btrfs_trans_handle *trans,
 				       struct btrfs_root *root);
 u64 btrfs_get_alloc_profile(struct btrfs_root *root, int data);
@@ -3660,6 +3690,10 @@ struct btrfs_dir_item *btrfs_lookup_xattr(struct btrfs_trans_handle *trans,
 int verify_dir_item(struct btrfs_root *root,
 		    struct extent_buffer *leaf,
 		    struct btrfs_dir_item *dir_item);
+struct btrfs_dir_item *btrfs_match_dir_item_name(struct btrfs_root *root,
+						 struct btrfs_path *path,
+						 const char *name,
+						 int name_len);
 
 /* orphan.c */
 int btrfs_insert_orphan_item(struct btrfs_trans_handle *trans,
@@ -4137,6 +4171,10 @@ int btrfs_qgroup_inherit(struct btrfs_trans_handle *trans,
 int btrfs_qgroup_reserve(struct btrfs_root *root, u64 num_bytes);
 void btrfs_qgroup_free(struct btrfs_root *root, u64 num_bytes);
 
+#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+void btrfs_qgroup_query(struct btrfs_fs_info *fs_info, u64 qgroupid,
+                        struct btrfs_ioctl_qgroup_query_args *qqa);
+#endif
 void assert_qgroups_uptodate(struct btrfs_trans_handle *trans);
 
 static inline int is_fstree(u64 rootid)

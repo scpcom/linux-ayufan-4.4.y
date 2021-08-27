@@ -907,6 +907,10 @@ static int fuse_ref_page(struct fuse_copy_state *cs, struct page *page,
 	return 0;
 }
 
+/*
+ * Copy a page in the request to/from the userspace buffer.  Must be
+ * done atomically
+ */
 static int fuse_copy_page(struct fuse_copy_state *cs, struct page **pagep,
 			  unsigned offset, unsigned count, int zeroing)
 {

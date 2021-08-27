@@ -26,6 +26,9 @@
 
 extern const struct xattr_handler btrfs_xattr_acl_access_handler;
 extern const struct xattr_handler btrfs_xattr_acl_default_handler;
+#ifdef MY_ABC_HERE
+extern const struct xattr_handler btrfs_xattr_syno_handler;
+#endif /* MY_ABC_HERE */
 extern const struct xattr_handler *btrfs_xattr_handlers[];
 
 extern ssize_t __btrfs_getxattr(struct inode *inode, const char *name,

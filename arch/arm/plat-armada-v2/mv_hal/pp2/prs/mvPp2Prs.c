@@ -1135,6 +1135,9 @@ static int mvPp2PrsDsaTagEtherTypeSet(int port, int add, int tagged, int extend)
 			/* Clear all AI bits for next iteration */
 			mvPp2PrsSwSramAiUpdate(&pe, 0, SRAM_AI_MASK);
 
+			/* mark vlan single RI */
+			mvPp2PrsSwSramRiUpdate(&pe, RI_VLAN_SINGLE, RI_VLAN_MASK);
+
 			mvPp2PrsSwSramNextLuSet(&pe, PRS_LU_VLAN);
 		} else {
 			/* Set result info bits - No valns ! */
@@ -1205,6 +1208,9 @@ static int mvPp2PrsDsaTagSet(int port, int add, int tagged, int extend)
 
 			/* Clear all AI bits for next iteration */
 			mvPp2PrsSwSramAiUpdate(&pe, 0, SRAM_AI_MASK);
+
+			/* mark vlan single RI */
+			mvPp2PrsSwSramRiUpdate(&pe, RI_VLAN_SINGLE, RI_VLAN_MASK);
 
 			mvPp2PrsSwSramNextLuSet(&pe, PRS_LU_VLAN);
 		} else {
@@ -1433,6 +1439,14 @@ static MV_PP2_PRS_ENTRY *mvPrsVlanFind(unsigned short tpid, int ai)
 	return NULL;
 }
 
+int mvPrsVlanExist(unsigned short tpid, int ai)
+{
+	if (NULL == mvPrsVlanFind(tpid, ai))
+		return 0;
+	else
+		return 1;
+}
+
 static MV_PP2_PRS_ENTRY *mvPrsDoubleVlanFind(unsigned short tpid1, unsigned short tpid2)
 {
 	MV_PP2_PRS_ENTRY *pe;
@@ -1475,6 +1489,14 @@ static MV_PP2_PRS_ENTRY *mvPrsDoubleVlanFind(unsigned short tpid1, unsigned shor
 	}
 	mvPp2PrsSwFree(pe);
 	return NULL;
+}
+
+int mvPrsDoubleVlanExist(unsigned short tpid1, unsigned short tpid2)
+{
+	if (NULL == mvPrsDoubleVlanFind(tpid1, tpid2))
+		return 0;
+	else
+		return 1;
 }
 
 /* return last double vlan entry */
@@ -2370,8 +2392,8 @@ static int mvPp2PrsIpv6Pppoe(void)
 	/* there is no support in extension yet */
 	mvPp2PrsSwSramRiUpdate(pe, RI_L3_IP6, RI_L3_PROTO_MASK);
 
-	/* Skip eth_type + 4 bytes of IPV6 header */
-	mvPp2PrsSwSramShiftSet(pe, MV_ETH_TYPE_LEN + 4, SRAM_OP_SEL_SHIFT_ADD);
+	/* Skip DIP of IPV6 header */
+	mvPp2PrsSwSramShiftSet(pe, MV_ETH_TYPE_LEN + 8 + MV_MAX_L3_ADDR_SIZE, SRAM_OP_SEL_SHIFT_ADD);
 
 	/* set L3 offset */
 	mvPp2PrsSwSramOffsetSet(pe, SRAM_OFFSET_TYPE_L3, MV_ETH_TYPE_LEN, SRAM_OP_SEL_OFFSET_ADD);
@@ -2905,12 +2927,16 @@ static int mvPp2PrsIp6Proto(unsigned short proto, unsigned int ri, unsigned int 
 
 			/* Set AI bit */
 			mvPp2PrsSwTcamAiUpdate(pe, (1 << IPV6_NO_EXT_AI_BIT), (1 << IPV6_NO_EXT_AI_BIT));
+			/* update UDF2 */
+			mvPp2PrsSwSramOffsetSet(pe, SRAM_OFFSET_TYPE_IPV6_PROTO, 0, SRAM_OP_SEL_SHIFT_ADD);
 		} else { /* Case 2: xx is not first NH of IPv6 */
 			/* Skip to NH */
 			mvPp2PrsSwSramShiftSet(pe, 0, SRAM_OP_SEL_SHIFT_IP6_ADD);
 
 			/* Set AI bit */
 			mvPp2PrsSwTcamAiUpdate(pe, (1 << IPV6_EXT_AI_BIT), (1 << IPV6_EXT_AI_BIT));
+			/* update UDF2 */
+			mvPp2PrsSwSramOffsetSet(pe, SRAM_OFFSET_TYPE_IPV6_PROTO, 0, SRAM_OP_SEL_SHIFT_IP6_ADD);
 		}
 
 		/* Next LU */

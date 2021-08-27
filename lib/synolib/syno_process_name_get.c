@@ -10,99 +10,162 @@
 #include <linux/statfs.h>
 #include <linux/magic.h>
 #include <linux/namei.h>
+#include <linux/hardirq.h>
+#include <linux/security.h>
 #include <asm/page.h>
 
 #ifdef SYNO_DEBUG_FLAG
 
 #define MAX_BUF_SIZE 64
 #define MSG_SIZE 256
-#define MSG_QUEUE_SIZE 8
+#define MSG_QUEUE_SIZE 32
 
 extern int syno_hibernation_log_level;
-unsigned long gScsiLogTimeout;
-unsigned int gcMsgCount;
 static struct kfifo gMsgQueue;
 static spinlock_t gMsgQueueLock;
+static struct timer_list gDumpTimer;
 
 extern struct mm_struct *syno_get_task_mm(struct task_struct *task);
 extern int syno_access_process_vm(struct task_struct *tsk, unsigned long addr, void *buf, int len, int write);
 static int SynoCommGet(struct task_struct *task, char *ptr, int length);
 static int SynoUserMMNameGet(struct task_struct *task, char *ptr, int length);
 static void SynoProcessNameGet(struct task_struct *task, unsigned char kp, char *buf, int buf_size);
-static void SynoFileNameGet(struct task_struct *pTask, int fd, char *szBuf, size_t cbBuf);
-static void SynoHibernationLogForm(const char __user *szFileName);
-static void SynoHibernationLogDump(void);
-static int SynoMsgChek(const char* szMsg);
-static int SynoFsTypeChek(struct kstatfs *statfs);
+static void SynoFileInfoGet(struct task_struct *pTask, int const fd, char *szFileBuf, char *szDevBuf, int *piIno);
+static void SynoHibernationLogForm(const int iIno ,const char __user *szFileName, const char *szDevName, struct kfifo *pMsgQueue);
+static void SynoHibernationLogDump(unsigned long data);
+static int SynoMsgCheck(const char *szMsg);
+static int SynoFsTypeCheck(struct kstatfs *Statfs);
 
 /**
- * Prints out the hibernation debug message.
+ * Trigger FS layer hibernation message generating. Also set the timer for printing all messages.
  * This function is called whenever a scsi command is issued and the log level fits.
- * It will dump all filesystem level hibernation debug log queued and generate a message with
- * information provided from scsi layer.
+ * It will generate a message with information provided from scsi layer
+ * and dump all hibernation debug log queued in 2 secs.
  *
- * @param DeviceName	[IN]the device name that scsi command is issued on
+ * @param szDevName	[IN]name of the device on which the scsi command is issued
  */
-void syno_do_hibernation_log_print(const char *DeviceName)
+void syno_do_hibernation_scsi_log(const char *szDevName)
 {
-	struct task_struct *Parent;
+	char szFileName[MAX_BUF_SIZE] = "SCSI CMD\0";
 
-	/* dump all FS layer messages in the queue before printing out scsi layer message */
-	SynoHibernationLogDump();
+	if (NULL == szDevName) {
+		return;
+	}
 
-    /* these logs are not helpful, printing them is meaningless in most cases. Only shown in higher log level */
-	if (syno_hibernation_log_level < 3){
-		if(strstr(current->comm, "swapper") != NULL ||
-			strstr(current->comm, "kworker") != NULL ||
-			strstr(current->comm, "_raid") != NULL){
-		goto END;
+	SynoHibernationLogForm(-1, szFileName, szDevName, &gMsgQueue);
+	/* if there is no pending timer waiting to dump the message queue, set up timer for 2 secs */
+	if (!timer_pending(&gDumpTimer)) {
+		mod_timer(&gDumpTimer, jiffies + 2*HZ);
 	}
+
+	return;
+			}
+EXPORT_SYMBOL(syno_do_hibernation_scsi_log);
+
+/**
+ * Trigger block layer hibernation message generating.
+ * This function is called whenever a Block IO is issued.
+ * Leave a block IO log message in the queue.
+ *
+ * @param szDevName	[IN]the device name that bio is issued on
+ */
+void syno_do_hibernation_bio_log(const char *szDevName)
+{
+	char szFileName[MAX_BUF_SIZE] = "Block I/O\0";
+
+    if (NULL == szDevName) {
+		return;
 	}
-    /* print out the filtered scsi layer log message*/
-    Parent = current->parent;
-	printk("[%s]: scsi cmd issued - pid:%d, comm:%s, ppid:%d(%s)\n",
-			DeviceName,current->pid, current->comm, Parent->pid, Parent->comm);
-END:
-	/* set up timeout and counter, following messages will be printed out instead of storing in the queue. */
-	gScsiLogTimeout = jiffies + 2*HZ;
-	gcMsgCount = MSG_QUEUE_SIZE;
+
+	SynoHibernationLogForm(-1, szFileName, szDevName, &gMsgQueue);
+
 	return;
 }
-EXPORT_SYMBOL(syno_do_hibernation_log_print);
+EXPORT_SYMBOL(syno_do_hibernation_bio_log);
 
 /**
- * Trigger FS layer hibernation message generation
+ * Trigger inode hibernation message generating.
+ * This function is called when ever an inode is dirtied.
+ * Check the file system type and generate hibernation
+ * debug message with provided inode.
+ *
+ * @param inode	[IN]the dirtied inode
+ */
+void syno_do_hibernation_inode_log(struct inode *inode)
+{
+	int iIno = inode->i_ino & INT_MAX;
+	struct dentry *pDentry = d_find_alias(inode);
+	const char *szFileName = NULL;
+	const char *szDevName = NULL;
+	struct kstatfs Statfs;
+	int iErr = -1;
+
+    if (NULL == pDentry) {
+		return;
+    }
+
+	spin_lock(&pDentry->d_lock);
+
+	/* Get file name and device name */
+	szFileName = (const char *) pDentry->d_name.name;
+	szDevName = inode->i_sb->s_id;
+	/* Get stat of file system */
+	if (NULL != pDentry->d_sb->s_op->statfs && 0 == security_sb_statfs(pDentry)) {
+		iErr = pDentry->d_sb->s_op->statfs(pDentry, &Statfs);
+	}
+
+	spin_unlock(&pDentry->d_lock);
+	dput(pDentry);
+	/* checking for filesystem type */
+	if (0 != iErr || 0 == SynoFsTypeCheck(&Statfs)) {
+		goto END;
+	}
+
+	SynoHibernationLogForm(iIno, szFileName, szDevName, &gMsgQueue);
+
+END:
+	return;
+}
+EXPORT_SYMBOL(syno_do_hibernation_inode_log);
+
+/**
+ * Trigger FS layer hibernation message generating.
  * Check the file system type and generate file system layer
  * hibernation debug message with provided file name.
  *
  * @param szFileName	[IN] The file name that is operated in FS system call
  */
-void syno_do_hibernation_log(const char __user *szFileName)
+void syno_do_hibernation_filename_log(const char __user *szFileName)
 {
-	struct kstatfs statfs;
-	struct path filepath;
+	struct kstatfs Statfs;
+	struct path FilePath;
+	int iIno = 0;
 
-	/* Get filepath  */
-	if(0 != user_lpath(szFileName, &filepath)){
+    if (NULL == szFileName) {
 		goto END;
 	}
 
+	/* Get filepath  */
+	if (0 != user_lpath(szFileName, &FilePath)) {
+		goto END;
+	}
 	/* Get stat of file system */
-	if(0 != vfs_statfs(&filepath, &statfs)){
+	if (0 != vfs_statfs(&FilePath, &Statfs)) {
 		goto END;
 	}
 
 	/* checking for filesystem type */
-	if(0 == SynoFsTypeChek(&statfs)){
+	if (0 == SynoFsTypeCheck(&Statfs)) {
 		goto END;
 	}
-
-	SynoHibernationLogForm(szFileName);
+	/* collect the information for forming the Log */
+	iIno = FilePath.dentry->d_inode->i_ino & INT_MAX;
+	SynoHibernationLogForm(iIno, szFileName, NULL, &gMsgQueue);
 
 END:
 	return;
 }
-EXPORT_SYMBOL(syno_do_hibernation_log);
+EXPORT_SYMBOL(syno_do_hibernation_filename_log);
 
 /**
  * Trigger FS layer hibernation message generation.
@@ -113,107 +176,157 @@ EXPORT_SYMBOL(syno_do_hibernation_log);
  */
 void syno_do_hibernation_fd_log(const int fd)
 {
-	char szFileName[MAX_BUF_SIZE];
-	struct kstatfs statfs;
+	char szDevName[BDEVNAME_SIZE] = {'\0'};
+	char szFileName[MAX_BUF_SIZE] = {'\0'};
+	int iIno = 0;
+	struct kstatfs Statfs;
 
 	/* Get stat of file system */
-	if(0 != fd_statfs(fd, &statfs)){
+	if (0 != fd_statfs(fd, &Statfs)) {
 		goto END;
 	}
 
 	/* checking for filesystem type */
-	if(0 == SynoFsTypeChek(&statfs)){
+	if (0 == SynoFsTypeCheck(&Statfs)) {
 		goto END;
 	}
 
-	SynoFileNameGet(current, fd, szFileName, sizeof(szFileName));
-	SynoHibernationLogForm(szFileName);
+	/* collect the information for forming the Log */
+	SynoFileInfoGet(current, fd, szFileName, szDevName, &iIno);
+	SynoHibernationLogForm(iIno, szFileName, szDevName, &gMsgQueue);
 
 END:
 	return;
 }
 EXPORT_SYMBOL(syno_do_hibernation_fd_log);
 
-/* The FS layer hibernation logs are formed and queued here */
-static void SynoHibernationLogForm(const char __user *szFileName)
+/**
+ * The hibernation logs are formed and queued in this funciton with the provied imformation.
+ * Simple filtering and dedupe are also done here befroe messages are queued.
+ *
+ * @param iIno	[IN]
+ *				0: no inode number
+ *				-1: no need for inode number (block device)
+ *				others: the inode number of the file
+ * @param szFileName	[IN]filename of the file
+ * @param szDevName		[IN]block device which the file locates on
+ * @param pMsgQueue		[IN]the queue to put messages into
+ *
+ */
+static void SynoHibernationLogForm(const int iIno ,const char __user *szFileName, const char *szDevName, struct kfifo *pMsgQueue)
 {
-	char p_cups[MAX_BUF_SIZE], p_ckps[MAX_BUF_SIZE], szParent[MAX_BUF_SIZE], szMsg[MSG_SIZE];
-    int error = -1;
+	char p_cups[MAX_BUF_SIZE] = {'\0'};
+	char p_kups[MAX_BUF_SIZE] = {'\0'};
+	char szParent[MAX_BUF_SIZE] = {'\0'};
+	char szCurrent[MSG_SIZE] = {'\0'};
+	char szMsg[MSG_SIZE] = {'\0'};
+	struct task_struct *Parent = current->parent;
+	int iErr = -1;
 
-	if(true == kfifo_initialized(&gMsgQueue)){
-		error = kfifo_alloc(&gMsgQueue, MSG_QUEUE_SIZE*MSG_SIZE, GFP_KERNEL);
+	if (NULL == pMsgQueue) {
+		goto END;
+	}
+	/* initialize the message queue and queue lock for the first time
+	 * it is ok to re-initial the queue so this is not a strict critical section
+	 */
+	if (!kfifo_initialized(pMsgQueue)) {
 		spin_lock_init(&gMsgQueueLock);
-		}
+		iErr = kfifo_alloc(pMsgQueue, MSG_QUEUE_SIZE*MSG_SIZE, GFP_KERNEL);
+		setup_timer(&gDumpTimer, SynoHibernationLogDump, 0);
 
-    if(NULL==szFileName){
-		szFileName = "UNKNOWN";
+		if (0 != iErr) {
+			printk(KERN_DEBUG"[Hibernation Debug]: Queue init Failed.");
+
+			goto END;
+		}
 	}
 
 	/* A simple black list of filenames that should not be considered as the cause of hibernation issue */
-    if(strstr(szFileName, "pipe:[") == szFileName ||
+    if (NULL == szFileName) {
+		szFileName = "Missing\0";
+    }else if (strstr(szFileName, "pipe:[") == szFileName ||
 			  strstr(szFileName, "socket:[") == szFileName ||
 			  strstr(szFileName, "/etc/ld.so.cache") != NULL || //a cache list of dynamic libraries.
-	   strstr(szFileName, "eventfd") != NULL){ //an eventfd does not descript a real file on disk.
-		error = 0;
+			  strstr(szFileName, "eventfd") != NULL) { //an eventfd does not descrip a real file on disk.
+		iErr = 0;
 		goto END;
 	}
 
-    /* get the process name */
+    /* get the parent process name */
+    SynoProcessNameGet(Parent, 1, szParent, MAX_BUF_SIZE);
+	/* get the current process name */
+    SynoProcessNameGet(current, 1, p_kups, MAX_BUF_SIZE);
+    /* the full command arguments of the current task makes the message unnecessarily long, save it for the higher log level */
+    if (3 > syno_hibernation_log_level || 0 > iIno) {
+		snprintf(szCurrent, sizeof(szCurrent), "comm:(%s)", p_kups);
+    }else {
 		SynoProcessNameGet(current, 0, p_cups, MAX_BUF_SIZE);
-	SynoProcessNameGet(current, 1, p_ckps, MAX_BUF_SIZE);
-	SynoProcessNameGet(current->parent, 1, szParent, MAX_BUF_SIZE);
+		snprintf(szCurrent, sizeof(szCurrent), "comm:(%s), u:(%s)", p_kups, p_cups);
+    }
 
-	/* form the message here*/
-	memset(szMsg, 0 ,sizeof(szMsg));
-	snprintf(szMsg, sizeof(szMsg), "[%s] accessed - pid %d [u:(%s), comm:(%s)], parent [%s]\n",
-			 szFileName, current->pid, p_cups, p_ckps, szParent);
-
-	/* These logs are only shown in higher log level*/
-	if (syno_hibernation_log_level < 3){
-		if(strstr(szMsg, "syslog-ng") != NULL || //it is obvious that syslog-ng is accessing disk while writing any other logs.
-			strstr(szFileName, "/usr/syno/lib") == szFileName || //loading share libraries are not likely to affect disk hibernation.
-			strstr(szFileName, "/lib") == szFileName){
-				error = 0;
+	/* These logs are only shown in higher log level */
+	if (3 > syno_hibernation_log_level) {
+		if (strstr(szFileName, "/usr/syno/lib") == szFileName || //loading share libraries are not likely to affect disk hibernation.
+			strstr(szFileName, "/lib") == szFileName ||
+			strstr(szCurrent, "syslog-ng") != NULL ||
+			strstr(szCurrent, "swapper") != NULL || // the following message are not useful in most cases
+			strstr(szCurrent, "kworker") != NULL ||
+			strstr(szCurrent, "ksoftirqd") != NULL ||
+			strstr(szCurrent, "jbd2") != NULL ||
+			strstr(szCurrent, "_raid") != NULL) {
+				iErr = 0;
 				goto END;
+		}
 	}
+
+	/* start to form the message */
+	memset(szMsg, 0 ,sizeof(szMsg));
+	snprintf(szMsg, sizeof(szMsg), "[%s]", szFileName);
+
+	if (0 < iIno) {
+		snprintf(szMsg, sizeof(szMsg), "%s (%hu)", szMsg, iIno);
 	}
+
+	if (NULL != szDevName && strcmp(szDevName, "")) {
+		snprintf(szMsg, sizeof(szMsg), "%s on [%s]", szMsg, szDevName);
+	}
+
+	snprintf(szMsg, sizeof(szMsg), "%s - pid %d [%s], ppid %d [%s] \n",
+			szMsg, current->pid, szCurrent, Parent->pid, szParent);
 
 	/* checking for the latest log message*/
-	if(0 == SynoMsgChek(szMsg)){
-		error = 0;
+	if (0 == SynoMsgCheck(szMsg)) {
+		iErr = 0;
 		goto END;
 	}
 
-	/* a fs layer log message will be printed out immediately if there was an scsi command issued in the past 2 sec,
-	  otherwise the message will be queued in the kernel queue */
-	if((0 < gcMsgCount) && (time_before(jiffies, gScsiLogTimeout))){
-		printk("%s",szMsg);
-		gcMsgCount--;
-	}else if( 0 > kfifo_in_spinlocked(&gMsgQueue, szMsg, MSG_SIZE, &gMsgQueueLock)){
+	/* queue the log message */
+	if (0 == kfifo_in_spinlocked(&gMsgQueue, szMsg, MSG_SIZE, &gMsgQueueLock)) {
         goto END;
 	}
 
-	error = 0;
+	iErr = 0;
 END:
-    if (0 > error){
-		printk(KERN_INFO"[Hibernation debug error]: Fail on hibernation log\n");
+    if (0 > iErr) {
+		printk(KERN_DEBUG"[Hibernation debug error]: Fail on hibernation log forming\n");
     }
-
 	return;
 }
 
 /* Output the FS layer hibernation debug messages queued.
- * Print out all log messages in the kernel queue one after another
- * until the queue is empty.
- * Reset the whole kernel queue if there is something wrong about it.
+ * Print out all log messages in the kernel queue one after another.
+ * Reset the whole kernel queue if there is something wrong.
  */
-static void SynoHibernationLogDump(void)
+static void SynoHibernationLogDump(unsigned long data)
 {
 	char szMsg[MSG_SIZE];
+	int iErr = -1;
+
 	while (!kfifo_is_empty(&gMsgQueue)) {
 		memset(szMsg, 0 ,sizeof(szMsg));
-		if(0 > kfifo_out_spinlocked(&gMsgQueue, szMsg, MSG_SIZE, &gMsgQueueLock)){
-			printk(KERN_INFO"Fail to get message. Queue reseted. \n");
+		iErr = kfifo_out_spinlocked(&gMsgQueue, szMsg, MSG_SIZE, &gMsgQueueLock);
+		if (0 == iErr) {
+			printk(KERN_DEBUG"Fail to get message. Queue reseted. \n");
 			kfifo_reset(&gMsgQueue);
 			break;
 		}
@@ -223,39 +336,43 @@ static void SynoHibernationLogDump(void)
 
 /*FIX ME:A simple and crude mechanism that only checks for the last message.
 Need to be further designed to guarantee the quality of log printed.*/
-static int SynoMsgChek(const char* szMsg)
+static int SynoMsgCheck(const char *szMsg)
 {
 	static char szUsedMsg[MSG_SIZE] ={'\0'};
-	static long uiLastCheck = 0;
+	static unsigned long ulLastCheck = 0;
 
 	int ret = -1;
 
 	ret = strcmp(szUsedMsg, szMsg);
 
+	/* The messages does not actually age,
+	 * we simply flush all messages if the last message is at least 2s older than the latest one.
+	 * With this 2 sec limit and a total queue size 32,
+	 * we make sure that no log will stay in queue for more than about 1 min .
+	 */
 	if (0 != ret) {
-		if(time_before(jiffies, uiLastCheck + 2*HZ))
-		{
+		if (time_after(jiffies, ulLastCheck + 2*HZ)) {
 			kfifo_reset(&gMsgQueue);
 		}
-		uiLastCheck = jiffies;
-		strcpy(szUsedMsg, szMsg);
+		ulLastCheck = jiffies;
+		strlcpy(szUsedMsg, szMsg, MSG_SIZE);
 	}
 
 	return ret;
 }
 
 /* checks if a file is on proc, sysfs, ramfs, tmpfs, securityfs ,or nfs */
-static int SynoFsTypeChek(struct kstatfs *statfs)
+static int SynoFsTypeCheck(struct kstatfs *Statfs)
 {
 	int iFsType;
 	int ret = -1;
 
-	if(NULL == statfs){
+	if (NULL == Statfs) {
 		ret = 0;
 		goto END;
 	}
 
-	iFsType = statfs->f_type;
+	iFsType = Statfs->f_type;
 
 	/* check filesystem type magic */
 	if (SYSFS_MAGIC == iFsType ||
@@ -274,19 +391,23 @@ END:
 	return ret;
 }
 
-static void SynoFileNameGet(struct task_struct *pTask, int fd, char *szBuf, size_t cbBuf)
+/* Get file information with the provided fd and task*/
+static void SynoFileInfoGet(struct task_struct *pTask, int const fd, char *szFileBuf, char *szDevBuf, int *piIno)
 {
-	int error=-1;
+	int iErr=-1;
 	char *pageTmp;
 	struct files_struct *pFileStr;
 	struct file *pFile;
 	struct path FilePath;
+	struct dentry *pDentry;
+	struct inode *pInode;
 
-	if((NULL == pTask) || (NULL == szBuf) || (0 >= cbBuf)){
+	if ((NULL == pTask) || (NULL == szFileBuf) || (NULL == szDevBuf)) {
 		goto END;
 	}
 
-	memset(szBuf, 0 ,cbBuf);
+	memset(szFileBuf, 0, MAX_BUF_SIZE);
+	memset(szDevBuf, 0, BDEVNAME_SIZE);
 
 	pFileStr = pTask->files;
 	spin_lock(&pFileStr->file_lock);
@@ -295,33 +416,36 @@ static void SynoFileNameGet(struct task_struct *pTask, int fd, char *szBuf, size
 
 	if (!pFile) {
 		spin_unlock(&pFileStr->file_lock);
-		snprintf(szBuf, sizeof(szBuf), "UNKOWN");
-		error = 0;
+		snprintf(szFileBuf, sizeof(szFileBuf), "UNKOWN");
+		snprintf(szDevBuf, sizeof(szDevBuf), "UNKOWN");
+		iErr = 0;
 		goto END;
 	}
-
 	FilePath = pFile->f_path;
 	path_get(&pFile->f_path);
 	spin_unlock(&pFileStr->file_lock);
-
 	pageTmp = (char *)__get_free_page(GFP_TEMPORARY);
 
 	if (!pageTmp) {
 		path_put(&FilePath);
-		printk(KERN_INFO"[Hibernation debug error]: Get page failed.\n");
+		printk(KERN_DEBUG"[Hibernation debug error]: Get page failed.\n");
 		goto END;
 	}
 
-	strlcpy(szBuf, d_path(&FilePath, pageTmp, PAGE_SIZE), cbBuf);
-
+	strlcpy(szFileBuf, d_path(&FilePath, pageTmp, PAGE_SIZE), MAX_BUF_SIZE);
+	pDentry = FilePath.dentry;
+	szDevBuf = (char *) pDentry->d_name.name;
+	pInode = pDentry->d_inode;
+	*piIno = pInode->i_ino & INT_MAX;
 	path_put(&FilePath);
 	free_page((unsigned long)pageTmp);
 
-    error = 0;
+    iErr = 0;
 
 END:
-	if(0 != error){
-		szBuf[0] = '\0';
+	if (0 != iErr) {
+		szFileBuf[0] = '\0';
+		szDevBuf[0] = '\0';
 	}
 	return;
 }
@@ -412,7 +536,7 @@ static int SynoUserMMNameGet(struct task_struct *task, char *ptr, int length)
 
 	res_len = syno_access_process_vm(task, mm->arg_start, buffer, len, 0);
 	if(res_len <= 0) {
-		printk(KERN_INFO"access_process_vm_syno  fail\n");
+		printk(KERN_DEBUG"access_process_vm_syno  fail\n");
 		goto END;
 	}
 
@@ -437,5 +561,4 @@ END:
 	}
 	return res;
 }
-
-#endif //SYNO_DEBUG_FLAG
+#endif //MY_ABC_HERE

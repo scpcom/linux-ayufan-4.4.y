@@ -144,41 +144,41 @@ long g_is_sas_model = 0;
 EXPORT_SYMBOL(g_is_sas_model);
 #endif
 
-#ifdef SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 long g_ahci_switch = 1;
 EXPORT_SYMBOL(g_ahci_switch);
 #endif
 
-#ifdef SYNO_SATA_LED_SPECIAL
+#ifdef MY_ABC_HERE
 long g_sata_led_special = 0;
 EXPORT_SYMBOL(g_sata_led_special);
 #endif
 
-#ifdef SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 long g_hdd_hotplug = 0;
 EXPORT_SYMBOL(g_hdd_hotplug);
 #endif
 
-#ifdef SYNO_INSTALL_FLAG
+#ifdef MY_ABC_HERE
 int gSynoInstallFlag = 0;
 EXPORT_SYMBOL(gSynoInstallFlag);
 #endif
 
-#ifdef SYNO_USB_FLASH_BOOT
+#ifdef MY_ABC_HERE
 #if defined(CONFIG_SYNO_X64) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
 int gSynoHasDynModule = 1;
 #else
 int gSynoHasDynModule = 0;
 #endif
 EXPORT_SYMBOL(gSynoHasDynModule);
-#endif /*SYNO_USB_FLASH_BOOT*/
+#endif /*MY_ABC_HERE*/
 
 #ifdef SYNO_FLASH_MEMORY_SIZE
 long gSynoFlashMemorySize = 0;
 EXPORT_SYMBOL(gSynoFlashMemorySize);
 #endif
 
-#ifdef SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 char gszSataPortMap[8] = {0};
 EXPORT_SYMBOL(gszSataPortMap);
 
@@ -186,53 +186,53 @@ unsigned int gSynoSataHostCnt = 0;
 EXPORT_SYMBOL(gSynoSataHostCnt);
 #endif
 
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 char gszDiskIdxMap[16] = {0};
 EXPORT_SYMBOL(gszDiskIdxMap);
 #endif
 
-#ifdef SYNO_SATA_DISK_SEQ_REVERSE
+#ifdef MY_ABC_HERE
 char giDiskSeqReverse[8] = {0};
 EXPORT_SYMBOL(giDiskSeqReverse);
 #endif
 
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 unsigned char grgbLanMac[SYNO_MAC_MAX_V2][16];
 EXPORT_SYMBOL(grgbLanMac);
 int giVenderFormatVersion = 1;
 EXPORT_SYMBOL(giVenderFormatVersion);
 #endif
 
-#ifdef SYNO_SWITCH_NET_DEVICE_NAME
+#ifdef MY_DEF_HERE
 unsigned int gSwitchDev = 0;
 char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 EXPORT_SYMBOL(gSwitchDev);
 EXPORT_SYMBOL(gDevPCIName);
 #endif
 
-#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(SYNO_ATA_AHCI_LED_SWITCH)
+#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
 #endif
 
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 char gszSerialNum[32];
 EXPORT_SYMBOL(gszSerialNum);
 char gszCustomSerialNum[32];
 EXPORT_SYMBOL(gszCustomSerialNum);
 #endif
 
-#ifdef SYNO_ESATA_7042
+#ifdef MY_DEF_HERE
 long g_esata_7042 = -1;
 EXPORT_SYMBOL(g_esata_7042);
 #endif
 
-#if (defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(SYNO_HAS_SDCARDREADER))
+#if (defined(MY_ABC_HERE) || defined(MY_ABC_HERE))
 #include <linux/synosata.h>
 int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
 EXPORT_SYMBOL(funcSYNOGetHwCapability);
 
-#ifdef SYNO_EUNIT_POWERCTL_PIN
+#ifdef MY_ABC_HERE
 EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
 EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 #endif
@@ -246,12 +246,12 @@ char gSynoCPUInfoClock[16];
 EXPORT_SYMBOL(gSynoCPUInfoClock);
 #endif
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 int gSynoFactoryUSBFastReset = 0;
 EXPORT_SYMBOL(gSynoFactoryUSBFastReset);
 #endif
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 int gSynoFactoryUSB3Disable = 0;
 EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
 #endif
@@ -265,39 +265,55 @@ static int iSynoMacIFCount = 9;
 static int iSynoDualheadIPValueLen = 32;
 #endif
 
-#ifdef SYNO_NO_EHCI
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+int gSynoSASWriteConflictPanic = 0;
+EXPORT_SYMBOL(gSynoSASWriteConflictPanic);
+#endif
+
+#ifdef MY_ABC_HERE
 int gSynoNoEhci = 0;
 EXPORT_SYMBOL(gSynoNoEhci);
 #endif
 
-#ifdef SYNO_VIRTUAL_HW_MSG
+#ifdef MY_ABC_HERE
 int g_syno_virtual_hw_msg = 0;
 EXPORT_SYMBOL(g_syno_virtual_hw_msg);
 #endif
 
-#ifdef SYNO_DETECT_ERROR_BOOT
+#ifdef MY_ABC_HERE
 char gszErrorBoot[16];
 EXPORT_SYMBOL(gszErrorBoot);
 #endif
 
-#ifdef SYNO_SPECIFY_SYSTEM_RAID
+#ifdef MY_ABC_HERE
 char gszRaidRootUuid[48];
 EXPORT_SYMBOL(gszRaidRootUuid);
 char gszRaidSwapUuid[48];
 EXPORT_SYMBOL(gszRaidSwapUuid);
 #endif
 
-#ifdef SYNO_DISK_EH_FLAG
+#ifdef MY_ABC_HERE
 int giSynoDsikEhFlag = 0;
 EXPORT_SYMBOL(giSynoDsikEhFlag);
 unsigned long guSynoScsiCmdSN = 0;
 EXPORT_SYMBOL(guSynoScsiCmdSN);
 #endif
 
-#ifdef SYNO_TTY_EXPORT
+#ifdef SYNO_SAS_ENCOLURE_PWR_CTL
+int giSynoEncPwrCtl = 0;
+extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
+		        void __user *buffer, size_t *lenp, loff_t *ppos);
+#endif /* SYNO_SAS_ENCOLURE_PWR_CTL */
+
+#ifdef MY_ABC_HERE
 int (*syno_test_list)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_test_list);
-#endif /* SYNO_TTY_EXPORT */
+#endif /* MY_ABC_HERE */
+
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+int gSynoSystemShutdown = 0;
+EXPORT_SYMBOL(gSynoSystemShutdown);
+#endif /* SYNO_ATA_SHUTDOWN_FIX */
 
 /* External variables not in a header file. */
 extern int sysctl_overcommit_memory;
@@ -1432,7 +1448,7 @@ static struct ctl_table kern_table[] = {
         },
 #endif
 
-#ifdef SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_usb_fast_reset",
 		.data			= &gSynoFactoryUSBFastReset,
@@ -1441,7 +1457,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 	{
 		.procname		= "syno_disable_usb3",
 		.data			= &gSynoFactoryUSB3Disable,
@@ -1502,6 +1518,15 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = &proc_dointvec,
 	},
 #endif
+#ifdef SYNO_SAS_ENCOLURE_PWR_CTL
+	{
+		.procname       = "syno_enc_pwr_ctl",
+		.data           = &giSynoEncPwrCtl,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &SynoProcEncPwrCtl,
+	},
+#endif /* SYNO_SAS_ENCOLURE_PWR_CTL */
 	{ }
 };
 
@@ -3439,7 +3464,7 @@ int proc_do_large_bitmap(struct ctl_table *table, int write,
 	}
 }
 
-#if defined(SYNO_MAC_ADDRESS) || defined(CONFIG_SYNO_DUAL_HEAD)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_DUAL_HEAD)
 /**
  * Notice: In order to call this handler, the input array of strings
  * must be in continuous memory allocation
@@ -3598,7 +3623,7 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
     return -ENOSYS;
 }
 
-#if defined(SYNO_MAC_ADDRESS) || defined(CONFIG_SYNO_DUAL_HEAD)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_DUAL_HEAD)
 int SynoProcDoStringVec(struct ctl_table *table, int write,
 			void __user *buffer, size_t *lenp, loff_t *ppos)
 {

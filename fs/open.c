@@ -604,7 +604,7 @@ out_release:
 	path_put(&path);
 	return error;
 }
-#endif //SYNO_ARCHIVE_BIT
+#endif //MY_ABC_HERE
 
 SYSCALL_DEFINE3(chown, const char __user *, filename, uid_t, user, gid_t, group)
 {
@@ -1087,7 +1087,7 @@ SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, int, mode)
 
 #ifdef SYNO_DEBUG_FLAG
 	if(syno_hibernation_log_level > 0) {
-		syno_do_hibernation_log(filename);
+		syno_do_hibernation_filename_log(filename);
 	}
 #endif
 

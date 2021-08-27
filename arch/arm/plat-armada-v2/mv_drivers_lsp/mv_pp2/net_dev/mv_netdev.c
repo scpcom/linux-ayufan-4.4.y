@@ -160,6 +160,8 @@ static int mv_pp2_initialized;
 
 static struct tasklet_struct link_tasklet;
 
+static int wol_ports_bmp;
+
 /*
  * Local functions
  */
@@ -176,11 +178,6 @@ static int  mv_pp2_hal_init(struct eth_port *pp);
 struct net_device *mv_pp2_netdev_init(int mtu, u8 *mac, struct platform_device *pdev);
 static int mv_pp2_netdev_connect(struct eth_port *pp);
 static void mv_pp2_netdev_init_features(struct net_device *dev);
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 4, 25)
-static u32 mv_pp2_netdev_fix_features(struct net_device *dev, u32 features);
-#else
-static netdev_features_t mv_pp2_netdev_fix_features(struct net_device *dev, netdev_features_t features);
-#endif
 static struct sk_buff *mv_pp2_skb_alloc(struct eth_port *pp, struct bm_pool *pool,
 					phys_addr_t *phys_addr, gfp_t gfp_mask);
 static MV_STATUS mv_pp2_pool_create(int pool, int capacity);
@@ -630,7 +627,7 @@ int mv_pp2_ctrl_pool_size_set(int pool, int total_size)
 	pkts_num = ppool->buf_num;
 	mv_pp2_pool_free(pool, pkts_num);
 	ppool->pkt_size = pkt_size;
-	mv_pp2_pool_add(pp, pool, pkts_num);
+	mv_pp2_pool_add(NULL, pool, pkts_num);
 	mvBmPoolBufSizeSet(pool, buf_size);
 	MV_ETH_UNLOCK(&ppool->lock, flags);
 
@@ -975,6 +972,32 @@ int mv_pp2_ctrl_rxq_size_set(int port, int rxq, int value)
 	return 0;
 }
 
+static int mv_pp2_txq_size_validate(struct tx_queue *txq_ctrl, int txq_size)
+{
+	int txq_min_size, txq_max_size = MV_PP2_TXQ_DESC_SIZE_MASK;
+
+#ifdef CONFIG_MV_ETH_PP2_1
+	txq_min_size = 3 * (nr_cpu_ids * txq_ctrl->rsvd_chunk);
+#else
+	/* At least 16 descriptors per CPU */
+	txq_min_size = txq_ctrl->hwf_size + 16 * nr_cpu_ids;
+#endif /* CONFIG_MV_ETH_PP2_1 */
+
+	if ((txq_size < txq_min_size) || (txq_size > txq_max_size)) {
+		pr_err("Invalid TXQ size %d. Valid range: %d .. %d\n",
+			txq_size, txq_min_size, txq_max_size);
+		return -EINVAL;
+	}
+	/* txq_size must be aligned to 16 bytes */
+	if (txq_size % (1 << MV_PP2_TXQ_DESC_SIZE_OFFSET)) {
+		pr_warn("txq_size %d is not aligned %d, rounded to %d\n",
+			txq_size, 1 << MV_PP2_TXQ_DESC_SIZE_OFFSET,
+			txq_size & MV_PP2_TXQ_DESC_SIZE_MASK);
+		txq_size = txq_size & MV_PP2_TXQ_DESC_SIZE_MASK;
+	}
+	return txq_size;
+}
+
 static void mv_pp2_txq_size_set(struct tx_queue *txq_ctrl, int txq_size)
 {
 	int cpu;
@@ -983,7 +1006,6 @@ static void mv_pp2_txq_size_set(struct tx_queue *txq_ctrl, int txq_size)
 	txq_ctrl->txq_size = txq_size;
 
 #ifdef CONFIG_MV_ETH_PP2_1
-	txq_ctrl->rsvd_chunk = MV_ETH_CPU_DESC_CHUNK;
 	txq_ctrl->hwf_size = txq_ctrl->txq_size - (nr_cpu_ids * txq_ctrl->rsvd_chunk);
 	txq_ctrl->swf_size = txq_ctrl->txq_size - 2 * (nr_cpu_ids * txq_ctrl->rsvd_chunk);
 
@@ -1021,7 +1043,7 @@ int mv_pp2_ctrl_txq_chunk_set(int port, int txp, int txq, int chunk_size)
 		return -EINVAL;
 	}
 	/* chunk_size must be less than swf_size */
-	if (chunk_size > txq_ctrl->swf_size) {
+	if (chunk_size > (txq_ctrl->swf_size)) {
 		pr_err("Chunk size %d must be less or equal than swf size %d\n",
 			chunk_size, txq_ctrl->swf_size);
 		return -EINVAL;
@@ -1095,11 +1117,6 @@ int mv_pp2_ctrl_txq_size_set(int port, int txp, int txq, int txq_size)
 	if (mvPp2MaxCheck(txq, CONFIG_MV_PP2_TXQ, "txq"))
 		return -EINVAL;
 
-	if ((txq_size <= 0) || (txq_size > 0x3FFF) || (txq_size % 16)) {
-		pr_err("Invalid TXQ size %d\n", txq_size);
-		return -EINVAL;
-	}
-
 	pp = mv_pp2_port_by_id(port);
 	if (pp == NULL) {
 		pr_err("Port %d does not exist\n", port);
@@ -1112,11 +1129,13 @@ int mv_pp2_ctrl_txq_size_set(int port, int txp, int txq, int txq_size)
 	}
 
 	txq_ctrl = &pp->txq_ctrl[txp * CONFIG_MV_PP2_TXQ + txq];
-
 	if (!txq_ctrl) {
 		pr_err("TXQ is not exist\n");
 		return -EINVAL;
 	}
+	txq_size = mv_pp2_txq_size_validate(txq_ctrl, txq_size);
+	if (txq_size < 0)
+		return -EINVAL;
 
 	if ((txq_ctrl->q) && (txq_ctrl->txq_size != txq_size)) {
 		/* Clean and Reset of txq is required when TXQ ring size is changed */
@@ -1133,15 +1152,14 @@ int mv_pp2_ctrl_txq_size_set(int port, int txp, int txq, int txq_size)
 	return 0;
 }
 
-
 /* Set TXQ for CPU originated packets */
 int mv_pp2_ctrl_txq_cpu_def(int port, int txp, int txq, int cpu)
 {
 	struct eth_port *pp = mv_pp2_port_by_id(port);
 
-	if ((cpu >= CONFIG_NR_CPUS) || (cpu < 0)) {
+	if ((cpu >= nr_cpu_ids) || (cpu < 0)) {
 		printk(KERN_ERR "cpu #%d is out of range: from 0 to %d\n",
-			cpu, CONFIG_NR_CPUS - 1);
+			cpu, nr_cpu_ids - 1);
 		return -EINVAL;
 	}
 
@@ -1316,21 +1334,6 @@ static inline u16 mv_pp2_select_txq(struct net_device *dev, struct sk_buff *skb)
 	struct eth_port *pp = MV_ETH_PRIV(dev);
 	return mv_pp2_tx_policy(pp, skb);
 }
-
-static const struct net_device_ops mv_pp2_netdev_ops = {
-	.ndo_open = mv_pp2_eth_open,
-	.ndo_stop = mv_pp2_eth_stop,
-	.ndo_start_xmit = mv_pp2_tx,
-	.ndo_set_rx_mode = mv_pp2_rx_set_rx_mode,
-	.ndo_set_mac_address = mv_pp2_eth_set_mac_addr,
-	.ndo_change_mtu = mv_pp2_eth_change_mtu,
-	.ndo_tx_timeout = mv_pp2_tx_timeout,
-	.ndo_select_queue = mv_pp2_select_txq,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 39)
-	.ndo_fix_features = mv_pp2_netdev_fix_features,
-#endif
-};
-
 
 void mv_pp2_eth_link_status_print(int port)
 {
@@ -2085,6 +2088,11 @@ static int mv_pp2_tx(struct sk_buff *skb, struct net_device *dev)
 			} else {
 				/* Check validity of tx_spec txp/txq must be CPU owned */
 				tx_spec_ptr = &tx_spec;
+
+				/* in routine cph_flow_mod_frwd,  if this packet should be discard,
+					txq will be assigned to value MV_ETH_TXQ_INVALID */
+				if (tx_spec_ptr->txq == MV_ETH_TXQ_INVALID)
+					goto out;
 			}
 		}
 	}
@@ -2257,7 +2265,7 @@ out:
 #endif /* CONFIG_MV_PP2_STAT_DIST */
 		}
 		/* If after calling mv_pp2_txq_done, txq_ctrl->txq_count equals frags, we need to set the timer */
-		if ((txq_cpu_ptr->txq_count == frags) && (frags > 0))
+		if ((txq_cpu_ptr->txq_count > 0)  && (txq_cpu_ptr->txq_count <= frags) && (frags > 0))
 			mv_pp2_add_tx_done_timer(pp->cpu_config[smp_processor_id()]);
 	}
 #endif /* CONFIG_MV_PP2_TXDONE_ISR */
@@ -2296,21 +2304,16 @@ static inline int mv_pp2_tso_validate(struct sk_buff *skb, struct net_device *de
 	return 0;
 }
 
-static inline int mv_pp2_tso_build_hdr_desc(struct pp2_tx_desc *tx_desc, struct eth_port *priv, struct sk_buff *skb,
-					     struct txq_cpu_ctrl *txq_ctrl, u16 *mh, int hdr_len, int size,
-					     MV_U32 tcp_seq, MV_U16 ip_id, int left_len)
+static inline int mv_pp2_tso_build_hdr_desc(struct pp2_tx_desc *tx_desc, MV_U8 *data, struct eth_port *priv,
+					struct sk_buff *skb, struct txq_cpu_ctrl *txq_ctrl, u16 *mh,
+					int hdr_len, int size, MV_U32 tcp_seq, MV_U16 ip_id, int left_len)
 {
 	struct iphdr *iph;
 	struct tcphdr *tcph;
-	MV_U8 *data, *mac;
+	MV_U8 *mac;
 	MV_U32 bufPhysAddr;
 	int mac_hdr_len = skb_network_offset(skb);
 
-	data = mv_pp2_extra_pool_get(priv);
-	if (!data) {
-		pr_err("Can't allocate extra buffer for TSO\n");
-		return 0;
-	}
 	mv_pp2_shadow_push(txq_ctrl, ((MV_ULONG)data | MV_ETH_SHADOW_EXT));
 
 	/* Reserve 2 bytes for IP header alignment */
@@ -2398,7 +2401,7 @@ static int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev, struct mv_
 {
 	int ptxq, frag = 0;
 	int total_len, hdr_len, size, frag_size, data_left;
-	int total_desc_num, seg_desc_num, total_bytes = 0;
+	int total_desc_num, total_bytes = 0, max_desc_num = 0;
 	char *frag_ptr;
 	struct pp2_tx_desc *tx_desc;
 	struct txq_cpu_ctrl *txq_cpu_ptr = NULL;
@@ -2407,13 +2410,32 @@ static int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev, struct mv_
 	skb_frag_t *skb_frag_ptr;
 	const struct tcphdr *th = tcp_hdr(skb);
 	struct eth_port *priv = MV_ETH_PRIV(dev);
+	int i;
 
 	STAT_DBG(priv->stats.tx_tso++);
 
 	if (mv_pp2_tso_validate(skb, dev))
 		return 0;
 
+	/* Calculate expected number of TX descriptors */
+	max_desc_num = skb_shinfo(skb)->gso_segs * 2 + skb_shinfo(skb)->nr_frags;
+
+	if (mv_pp2_aggr_desc_num_check(aggr_txq_ctrl, max_desc_num)) {
+		STAT_DBG(priv->stats.tx_tso_no_resource++);
+		return 0;
+	}
+
 	txq_cpu_ptr = &txq_ctrl->txq_cpu[smp_processor_id()];
+
+	/* Check if there are enough descriptors in physical TXQ */
+#ifdef CONFIG_MV_ETH_PP2_1
+	if (mv_pp2_reserved_desc_num_proc(priv, tx_spec->txp, tx_spec->txq, max_desc_num)) {
+#else
+	if (mv_pp2_phys_desc_num_check(txq_cpu_ptr, max_desc_num)) {
+#endif
+		STAT_DBG(priv->stats.tx_tso_no_resource++);
+		return 0;
+	}
 
 	total_len = skb->len;
 	hdr_len = (skb_transport_offset(skb) + tcp_hdrlen(skb));
@@ -2452,68 +2474,55 @@ static int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev, struct mv_
 
 	/* Each iteration - create new TCP segment */
 	while (total_len > 0) {
+		MV_U8 *data;
+
 		data_left = MV_MIN(skb_shinfo(skb)->gso_size, total_len);
 
-		/* Calculate maximum number of descriptors needed for the current TCP segment			  *
-		 * At worst case we'll transmit all remaining frags including skb->data (one descriptor per frag) *
-		 * We also need one descriptor for packet header						  */
-		seg_desc_num = skb_shinfo(skb)->nr_frags - frag + 2;
-
-		if (mv_pp2_aggr_desc_num_check(aggr_txq_ctrl, seg_desc_num)) {
-			STAT_DBG(priv->stats.tx_tso_no_resource++);
-			return 0;
+		/* Sanity check */
+		if (total_desc_num >= max_desc_num) {
+			pr_err("%s: Used TX descriptors number %d is larger than allocated %d\n",
+				__func__, total_desc_num, max_desc_num);
+			goto outNoTxDesc;
 		}
 
-		/* Check if there are enough descriptors in physical TXQ */
-#ifdef CONFIG_MV_ETH_PP2_1
-		if (mv_pp2_reserved_desc_num_proc(priv, tx_spec->txp, tx_spec->txq, seg_desc_num)) {
-#else
-		if (mv_pp2_phys_desc_num_check(txq_cpu_ptr, seg_desc_num)) {
-#endif
-			STAT_DBG(priv->stats.tx_tso_no_resource++);
-			return 0;
+		data = mv_pp2_extra_pool_get(priv);
+		if (!data) {
+			pr_err("Can't allocate extra buffer for TSO\n");
+			goto outNoTxDesc;
 		}
-
-		seg_desc_num = 0;
 
 		tx_desc = mvPp2AggrTxqNextDescGet(aggr_txq_ctrl->q);
+		total_desc_num++;
+
 		tx_desc->physTxq = ptxq;
 
-		seg_desc_num++;
-		total_desc_num++;
 		total_len -= data_left;
-
-		aggr_txq_ctrl->txq_count++;
-		txq_cpu_ptr->txq_count++;
 
 		if (tx_spec->flags & MV_ETH_TX_F_MH)
 			mh = &tx_spec->tx_mh;
 
 		/* prepare packet headers: MAC + IP + TCP */
-		size = mv_pp2_tso_build_hdr_desc(tx_desc, priv, skb, txq_cpu_ptr, mh,
+		size = mv_pp2_tso_build_hdr_desc(tx_desc, data, priv, skb, txq_cpu_ptr, mh,
 					hdr_len, data_left, tcp_seq, ip_id, total_len);
-		if (size == 0) {
-			aggr_txq_ctrl->txq_count--;
-			txq_cpu_ptr->txq_count--;
-			mv_pp2_shadow_dec_put(txq_cpu_ptr);
-			mvPp2AggrTxqPrevDescGet(aggr_txq_ctrl->q);
 
-			STAT_DBG(priv->stats.tx_tso_no_resource++);
-			return 0;
-		}
 		total_bytes += size;
 
 		/* Update packet's IP ID */
 		ip_id++;
 
 		while (data_left > 0) {
+
+			/* Sanity check */
+			if (total_desc_num >= max_desc_num) {
+				pr_err("%s: Used TX descriptors number %d is larger than allocated %d\n",
+					__func__, total_desc_num, max_desc_num);
+				goto outNoTxDesc;
+			}
+
 			tx_desc = mvPp2AggrTxqNextDescGet(aggr_txq_ctrl->q);
 			tx_desc->physTxq = ptxq;
 
-			seg_desc_num++;
 			total_desc_num++;
-			aggr_txq_ctrl->txq_count++;
-			txq_cpu_ptr->txq_count++;
 
 			size = mv_pp2_tso_build_data_desc(priv, tx_desc, skb, txq_cpu_ptr,
 							  frag_ptr, frag_size, data_left, total_len);
@@ -2540,23 +2549,43 @@ static int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev, struct mv_
 				frag++;
 			}
 		}
+	}
+
+	/* TCP segment is ready - transmit it */
+	wmb();
+	mvPp2AggrTxqPendDescAdd(total_desc_num);
 
 #ifdef CONFIG_MV_ETH_PP2_1
 	/* PPv2.1 - MAS 3.16, decrease number of reserved descriptors */
-		txq_cpu_ptr->reserved_num -= seg_desc_num;
+	txq_cpu_ptr->reserved_num -= total_desc_num;
 #endif
 
-		/* TCP segment is ready - transmit it */
-		wmb();
-		mvPp2AggrTxqPendDescAdd(seg_desc_num);
-
-		STAT_DBG(aggr_txq_ctrl->stats.txq_tx += seg_desc_num);
-		STAT_DBG(txq_cpu_ptr->stats.txq_tx += seg_desc_num);
-	}
+	aggr_txq_ctrl->txq_count += total_desc_num;
+	txq_cpu_ptr->txq_count += total_desc_num;
 
 	STAT_DBG(priv->stats.tx_tso_bytes += total_bytes);
+	STAT_DBG(aggr_txq_ctrl->stats.txq_tx += total_desc_num);
+	STAT_DBG(txq_cpu_ptr->stats.txq_tx += total_desc_num);
 
 	return total_desc_num;
+
+outNoTxDesc:
+	/* No enough memory for packet header - rollback */
+	pr_err("%s: No TX descriptors - rollback %d, txq_count=%d, nr_frags=%d, skb=%p, len=%d, gso_segs=%d\n",
+			__func__, total_desc_num, aggr_txq_ctrl->txq_count, skb_shinfo(skb)->nr_frags,
+			skb, skb->len, skb_shinfo(skb)->gso_segs);
+	STAT_DBG(priv->stats.tx_tso_no_resource++);
+
+	for (i = 0; i < total_desc_num; i++) {
+		u32 shadow;
+
+		mv_pp2_shadow_dec_put(txq_cpu_ptr);
+		shadow = txq_cpu_ptr->shadow_txq[txq_cpu_ptr->shadow_txq_put_i];
+		mv_pp2_txq_buf_free(priv, shadow);
+		mvPp2AggrTxqPrevDescGet(aggr_txq_ctrl->q);
+	}
+
+	return 0;
 }
 
 #endif /* CONFIG_MV_PP2_TSO */
@@ -3038,6 +3067,7 @@ irqreturn_t mv_pp2_isr(int irq, void *dev_id)
 	int cpu = smp_processor_id();
 	struct napi_group_ctrl *napi_group = pp->cpu_config[cpu]->napi_group;
 	struct napi_struct *napi = napi_group->napi;
+	u32 imr;
 
 #ifdef CONFIG_MV_PP2_DEBUG_CODE
 	if (pp->dbg_flags & MV_ETH_F_DBG_ISR) {
@@ -3064,6 +3094,13 @@ irqreturn_t mv_pp2_isr(int irq, void *dev_id)
 			__func__, irq, pp->port, cpu, napi_group->cpu_mask);
 #endif /* CONFIG_MV_PP2_DEBUG_CODE */
 	}
+
+	/*
+	 * Ensure mask register write is completed by issuing a read.
+	 * dsb() instruction cannot be used on registers since they are in
+	 * MBUS domain
+	 */
+	imr = mvPp2RdReg(MV_PP2_ISR_ENABLE_REG(pp->port));
 
 	return IRQ_HANDLED;
 }
@@ -3546,7 +3583,7 @@ static int mv_pp2_load_network_interfaces(struct platform_device *pdev)
 	if (pp->flags & MV_ETH_F_CONNECT_LINUX) {
 		if (mv_pp2_port_napi_group_create(pp->port, 0))
 			return -EIO;
-		if (mv_pp2_napi_set_cpu_affinity(pp->port, 0, (1 << CONFIG_NR_CPUS) - 1) ||
+		if (mv_pp2_napi_set_cpu_affinity(pp->port, 0, (1 << nr_cpu_ids) - 1) ||
 				mv_pp2_eth_napi_set_rxq_affinity(pp->port, 0, (1 << MV_PP2_MAX_RXQ) - 1))
 			return -EIO;
 	}
@@ -3776,6 +3813,13 @@ int	mv_pp2_pm_mode_set(int port, int mode)
 
 	pp->pm_mode = mode;
 
+	/* Set wol_ports_bmp, because WoL HW is shared by all ports,
+	   so for WoL mode (mode == 0), only one port is set in bit map */
+	if (mode)
+		wol_ports_bmp &= ~(1 << port);
+	else
+		wol_ports_bmp = (1 << port);
+
 	return MV_OK;
 }
 
@@ -3871,7 +3915,7 @@ static int	mv_pp2_shared_probe(struct mv_pp2_pdata *plat_data)
 	memset(mv_pp2_ports, 0, size);
 
 	/* Allocate aggregated TXQs control */
-	size = CONFIG_NR_CPUS * sizeof(struct aggr_tx_queue);
+	size = nr_cpu_ids * sizeof(struct aggr_tx_queue);
 	aggr_txqs = mvOsMalloc(size);
 	if (!aggr_txqs)
 		goto oom;
@@ -4231,6 +4275,44 @@ static void mv_pp2_tx_timeout(struct net_device *dev)
 	printk(KERN_INFO "%s: tx timeout\n", dev->name);
 }
 
+static u32 mv_pp2_netdev_fix_features_internal(struct net_device *dev, u32 features)
+{
+	if (MV_MAX_PKT_SIZE(dev->mtu) > MV_PP2_TX_CSUM_MAX_SIZE) {
+		if (features & (NETIF_F_IP_CSUM | NETIF_F_TSO)) {
+			features &= ~(NETIF_F_IP_CSUM | NETIF_F_TSO);
+			pr_info("%s: NETIF_F_IP_CSUM and NETIF_F_TSO aren't supported when packet size > %d bytes\n",
+				dev->name, MV_PP2_TX_CSUM_MAX_SIZE);
+		}
+	}
+	return features;
+}
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 4, 25)
+static u32 mv_pp2_netdev_fix_features(struct net_device *dev, u32 features)
+{
+	return mv_pp2_netdev_fix_features_internal(dev, features);
+}
+#else
+static netdev_features_t mv_pp2_netdev_fix_features(struct net_device *dev, netdev_features_t features)
+{
+	return (netdev_features_t)mv_pp2_netdev_fix_features_internal(dev, (u32)features);
+}
+#endif /* LINUX_VERSION_CODE < 3.4.25 */
+
+static const struct net_device_ops mv_pp2_netdev_ops = {
+	.ndo_open = mv_pp2_eth_open,
+	.ndo_stop = mv_pp2_eth_stop,
+	.ndo_start_xmit = mv_pp2_tx,
+	.ndo_set_rx_mode = mv_pp2_rx_set_rx_mode,
+	.ndo_set_mac_address = mv_pp2_eth_set_mac_addr,
+	.ndo_change_mtu = mv_pp2_eth_change_mtu,
+	.ndo_tx_timeout = mv_pp2_tx_timeout,
+	.ndo_select_queue = mv_pp2_select_txq,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 39)
+	.ndo_fix_features = mv_pp2_netdev_fix_features,
+#endif
+};
+
 /***************************************************************
  * mv_eth_netdev_init -- Allocate and initialize net_device    *
  *                   structure                                 *
@@ -4342,11 +4424,9 @@ bool mv_pp2_eth_netdev_find(unsigned int dev_idx)
 }
 EXPORT_SYMBOL(mv_pp2_eth_netdev_find);
 
-
 int mv_pp2_hal_init(struct eth_port *pp)
 {
-	int rxq, txp, txq, size, cpu;
-	struct tx_queue *txq_ctrl;
+	int rxq, txp, txq, size;
 	struct rx_queue *rxq_ctrl;
 
 	/* Init port */
@@ -4366,13 +4446,25 @@ int mv_pp2_hal_init(struct eth_port *pp)
 	/* Create TX descriptor rings */
 	for (txp = 0; txp < pp->txp_num; txp++) {
 		for (txq = 0; txq < CONFIG_MV_PP2_TXQ; txq++) {
+			struct tx_queue *txq_ctrl;
+			int txq_size;
+
 			txq_ctrl = &pp->txq_ctrl[txp * CONFIG_MV_PP2_TXQ + txq];
 
 			txq_ctrl->txp = txp;
 			txq_ctrl->txq = txq;
 			txq_ctrl->txq_done_pkts_coal = mv_ctrl_pp2_txdone;
 
-			mv_pp2_txq_size_set(txq_ctrl, CONFIG_MV_PP2_TXQ_DESC);
+#ifdef CONFIG_MV_ETH_PP2_1
+			txq_ctrl->rsvd_chunk = CONFIG_MV_PP2_TXQ_CPU_CHUNK;
+#else
+			txq_ctrl->hwf_size = CONFIG_MV_PP2_TXQ_HWF_DESC;
+#endif
+			txq_size = mv_pp2_txq_size_validate(txq_ctrl, CONFIG_MV_PP2_TXQ_DESC);
+			if (txq_size < 0)
+				return -ENODEV;
+
+			mv_pp2_txq_size_set(txq_ctrl, txq_size);
 		}
 	}
 
@@ -4473,7 +4565,7 @@ void mv_pp2_config_show(void)
 	pr_info("  o Driver DEBUG statistics enabled\n");
 #endif
 
-#ifdef ETH_DEBUG
+#ifdef CONFIG_MV_ETH_DEBUG_CODE
 	pr_info("  o Driver debug messages enabled\n");
 #endif
 
@@ -4503,32 +4595,6 @@ void mv_pp2_netdev_init_features(struct net_device *dev)
 #endif
 #endif
 }
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 4, 25)
-static u32 mv_pp2_netdev_fix_features(struct net_device *dev, u32 features)
-{
-	if (dev->mtu > MV_PP2_TX_CSUM_MAX_SIZE)
-		if (features & (NETIF_F_IP_CSUM | NETIF_F_TSO)) {
-			features &= ~(NETIF_F_IP_CSUM | NETIF_F_TSO);
-			printk(KERN_ERR "%s: NETIF_F_IP_CSUM and NETIF_F_TSO not supported for mtu larger %d bytes\n",
-				dev->name, MV_PP2_TX_CSUM_MAX_SIZE);
-		}
-
-	return features;
-}
-#else
-static netdev_features_t mv_pp2_netdev_fix_features(struct net_device *dev, netdev_features_t features)
-{
-	if (dev->mtu > MV_PP2_TX_CSUM_MAX_SIZE)
-		if (features & (NETIF_F_IP_CSUM | NETIF_F_TSO)) {
-			features &= ~(NETIF_F_IP_CSUM | NETIF_F_TSO);
-			printk(KERN_ERR "%s: NETIF_F_IP_CSUM and NETIF_F_TSO not supported for mtu larger %d bytes\n",
-				dev->name, MV_PP2_TX_CSUM_MAX_SIZE);
-		}
-
-	return features;
-}
-#endif
 
 static int mv_pp2_rxq_fill(struct eth_port *pp, int rxq, int num)
 {
@@ -4892,19 +4958,13 @@ error:
 int mv_pp2_eth_check_mtu_valid(struct net_device *dev, int mtu)
 {
 	if (mtu < 68) {
-		printk(KERN_INFO "MTU must be at least 68, change mtu failed\n");
+		pr_info("MTU must be at least 68, change mtu failed\n");
 		return -EINVAL;
 	}
 	if (mtu > 9676 /* 9700 - 20 and rounding to 8 */) {
-		printk(KERN_ERR "%s: Illegal MTU value %d, ", dev->name, mtu);
+		pr_info("%s: Illegal MTU value %d, ", dev->name, mtu);
 		mtu = 9676;
-		printk(KERN_CONT " rounding MTU to: %d \n", mtu);
-	}
-
-	if (MV_IS_NOT_ALIGN(RX_PKT_SIZE(mtu), 8)) {
-		printk(KERN_ERR "%s: Illegal MTU value %d, ", dev->name, mtu);
-		mtu = MV_ALIGN_UP(RX_PKT_SIZE(mtu), 8);
-		printk(KERN_CONT " rounding MTU to: %d \n", mtu);
+		pr_info(" rounding MTU to: %d\n", mtu);
 	}
 	return mtu;
 }
@@ -5186,7 +5246,7 @@ static int mv_pp2_priv_init(struct eth_port *pp, int port)
 #endif
 
 	/* Default field per cpu initialization */
-	for (i = 0; i < CONFIG_NR_CPUS; i++) {
+	for (i = 0; i < nr_cpu_ids; i++) {
 		pp->cpu_config[i] = kmalloc(sizeof(struct cpu_ctrl), GFP_KERNEL);
 		memset(pp->cpu_config[i], 0, sizeof(struct cpu_ctrl));
 	}
@@ -5326,13 +5386,12 @@ static void mv_pp2_priv_cleanup(struct eth_port *pp)
 	mvOsFree(pp->rxq_ctrl);
 	pp->rxq_ctrl = NULL;
 
-
 	mvOsFree(pp->txq_ctrl);
 	pp->txq_ctrl = NULL;
 
 	mvPp2PortDestroy(pp->port);
 
-	for (i = 0; i < CONFIG_NR_CPUS; i++)
+	for (i = 0; i < nr_cpu_ids; i++)
 		kfree(pp->cpu_config[i]);
 
 	/* delete pool of external buffers for TSO, fragmentation, etc */
@@ -5454,17 +5513,16 @@ void mv_pp2_ext_pool_print(struct eth_port *pp)
  ***********************************************************************************/
 void mv_pp2_eth_netdev_print(struct net_device *dev)
 {
-	printk(KERN_ERR "%s net_device status:\n\n", dev->name);
-	printk(KERN_ERR "ifIdx=%d, mtu=%u, pkt_size=%d, buf_size=%d, MAC=" MV_MACQUAD_FMT "\n",
-		dev->ifindex, dev->mtu, RX_PKT_SIZE(dev->mtu),
-		(int)RX_BUF_SIZE(RX_PKT_SIZE(dev->mtu)), MV_MACQUAD(dev->dev_addr));
+	pr_info("%s net_device status:\n\n", dev->name);
+	pr_info("ifIdx=%d, mtu=%u, MAC=" MV_MACQUAD_FMT "\n",
+		dev->ifindex, dev->mtu,	MV_MACQUAD(dev->dev_addr));
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 39)
-	printk(KERN_ERR "features=0x%x, hw_features=0x%x, wanted_features=0x%x, vlan_features=0x%x\n",
+	pr_info("features=0x%x, hw_features=0x%x, wanted_features=0x%x, vlan_features=0x%x\n",
 			(unsigned int)(dev->features), (unsigned int)(dev->hw_features),
 			(unsigned int)(dev->wanted_features), (unsigned int)(dev->vlan_features));
 #else
-	printk(KERN_ERR "features=0x%x, vlan_features=0x%x\n",
+	pr_info("features=0x%x, vlan_features=0x%x\n",
 		 (unsigned int)(dev->features), (unsigned int)(dev->vlan_features));
 #endif
 
@@ -5567,7 +5625,7 @@ void mv_pp2_eth_port_status_print(unsigned int port)
 		pr_info("txq_swf_desc(num) [%2d.q]   = ", txp);
 		for (q = 0; q < CONFIG_MV_PP2_TXQ; q++) {
 			txq_ctrl = &pp->txq_ctrl[txp * CONFIG_MV_PP2_TXQ + q];
-			pr_cont("%4d ", txq_ctrl->txq_cpu[0].txq_size);
+			pr_cont("%4d ", txq_ctrl->swf_size);
 		}
 		pr_info("txq_rsvd_chunk(num) [%2d.q] = ", txp);
 		for (q = 0; q < CONFIG_MV_PP2_TXQ; q++) {
@@ -6136,7 +6194,8 @@ int mv_pp2_suspend_common(int port)
 	}
 
 	/* PM mode: WoL Mode*/
-	if (pp->pm_mode == 0) {
+	if (pp->pm_mode == 0 &&
+	    wol_ports_bmp & (1 << port)) {
 		/* Insert port to WoL mode */
 		if (mvPp2WolSleep(port)) {
 			pr_err("%s: port #%d suspend failed.\n", __func__, port);

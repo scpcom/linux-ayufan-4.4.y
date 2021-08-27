@@ -361,6 +361,9 @@ static int hfs_brec_update_parent(struct hfs_find_data *fd)
 	int newkeylen, diff;
 	int rec, rec_off, end_rec_off;
 	int start_off, end_off;
+#ifdef MY_ABC_HERE
+	int res = 0;
+#endif /* MY_ABC_HERE */
 
 	tree = fd->tree;
 	node = fd->bnode;
@@ -372,7 +375,17 @@ again:
 	parent = hfs_bnode_find(tree, node->parent);
 	if (IS_ERR(parent))
 		return PTR_ERR(parent);
+#ifdef MY_ABC_HERE
+	res = __hfs_brec_find(parent, fd, hfs_find_rec_by_key);
+	if (-ENOENT == res) {
+		rec = 0;
+		goto skip2;
+	} else if (-EINVAL == res) {
+		return res;
+	}
+#else
 	__hfs_brec_find(parent, fd, hfs_find_rec_by_key);
+#endif /* MY_ABC_HERE */
 	hfs_bnode_dump(parent);
 	rec = fd->record;
 
@@ -422,6 +435,9 @@ skip:
 	hfs_bnode_copy(parent, fd->keyoffset, node, 14, newkeylen);
 	hfs_bnode_dump(parent);
 
+#ifdef MY_ABC_HERE
+skip2:
+#endif /* MY_ABC_HERE */
 	hfs_bnode_put(node);
 	node = parent;
 

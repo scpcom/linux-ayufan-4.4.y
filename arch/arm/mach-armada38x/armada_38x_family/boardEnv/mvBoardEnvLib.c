@@ -98,10 +98,10 @@ MV_SATR_BOOT_TABLE satrBootSrcTable[] = MV_SATR_BOOT_SRC_TABLE_VAL;
 
 /* Locals */
 static MV_DEV_CS_INFO *boardGetDevEntry(MV_32 devNum, MV_BOARD_DEV_CLASS devClass);
-static MV_BOARD_INFO *board;
+/* Global variables should be removed from BSS (set to a non-zero value)
+   for avoiding memory corruption during early access upon code relocation */
+static MV_BOARD_INFO *board = (MV_BOARD_INFO *)-1;
 static MV_VOID mvBoardModuleAutoDetect(MV_VOID);
-
-
 
 /*******************************************************************************
 * mvBoardIdIndexGet
@@ -2728,4 +2728,52 @@ MV_U32 mvBoardUartPortGet()
 		return whoAmI();
 
 	return (whoAmI() == 0 ? 1 : 0); /* CPU0 uses UART1 on DB-AP */
+}
+
+/*******************************************************************************
+* mvBoardNandECCModeGet
+*
+* DESCRIPTION:
+*	Obtain NAND ECC mode
+*
+* INPUT:
+*	None.
+*
+* OUTPUT:
+*	None.
+*
+* RETURN:
+*	MV_NFC_ECC_MODE type
+*
+*******************************************************************************/
+MV_NFC_ECC_MODE mvBoardNandECCModeGet()
+{
+#if defined(MV_NAND_4BIT_MODE)
+	return MV_NFC_ECC_BCH_2K;
+#elif defined(MV_NAND_8BIT_MODE)
+	return MV_NFC_ECC_BCH_1K;
+#elif defined(MV_NAND_12BIT_MODE)
+	return MV_NFC_ECC_BCH_704B;
+#elif defined(MV_NAND_16BIT_MODE)
+	return MV_NFC_ECC_BCH_512B;
+#else
+	MV_U32 satrBootDeviceValue = mvCtrlbootSrcGet();
+
+	if (satrBootSrcTable[satrBootDeviceValue].bootSrc == MSAR_0_BOOT_NAND_NEW) {
+		switch (satrBootSrcTable[satrBootDeviceValue].attr3) {
+		case MSAR_0_NAND_ECC_4BIT:
+			return MV_NFC_ECC_BCH_2K;
+		case MSAR_0_NAND_ECC_8BIT:
+			return MV_NFC_ECC_BCH_1K;
+		case MSAR_0_NAND_ECC_12BIT:
+			return MV_NFC_ECC_BCH_704B;
+		case MSAR_0_NAND_ECC_16BIT:
+			return MV_NFC_ECC_BCH_512B;
+		default:
+			break;
+		}
+	}
+
+	return MV_NFC_ECC_DISABLE;
+#endif
 }

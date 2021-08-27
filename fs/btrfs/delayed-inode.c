@@ -1018,6 +1018,8 @@ static void btrfs_release_delayed_inode(struct btrfs_delayed_node *delayed_node)
 	}
 }
 
+#ifdef MY_ABC_HERE
+#else
 static void btrfs_release_delayed_iref(struct btrfs_delayed_node *delayed_node)
 {
 	struct btrfs_delayed_root *delayed_root;
@@ -1029,6 +1031,7 @@ static void btrfs_release_delayed_iref(struct btrfs_delayed_node *delayed_node)
 	delayed_root = delayed_node->root->fs_info->delayed_root;
 	finish_one_item(delayed_root);
 }
+#endif
 
 static int __btrfs_update_delayed_inode(struct btrfs_trans_handle *trans,
 					struct btrfs_root *root,
@@ -1038,19 +1041,26 @@ static int __btrfs_update_delayed_inode(struct btrfs_trans_handle *trans,
 	struct btrfs_key key;
 	struct btrfs_inode_item *inode_item;
 	struct extent_buffer *leaf;
+#ifdef MY_ABC_HERE
+#else
 	int mod;
+#endif
 	int ret;
 
 	key.objectid = node->inode_id;
 	btrfs_set_key_type(&key, BTRFS_INODE_ITEM_KEY);
 	key.offset = 0;
 
+#ifdef MY_ABC_HERE
+	ret = btrfs_lookup_inode(trans, root, path, &key, 1);
+#else
 	if (test_bit(BTRFS_DELAYED_NODE_DEL_IREF, &node->flags))
 		mod = -1;
 	else
 		mod = 1;
 
 	ret = btrfs_lookup_inode(trans, root, path, &key, mod);
+#endif
 	if (ret > 0) {
 		btrfs_release_path(path);
 		return -ENOENT;
@@ -1058,13 +1068,23 @@ static int __btrfs_update_delayed_inode(struct btrfs_trans_handle *trans,
 		return ret;
 	}
 
+#ifdef MY_ABC_HERE
+	btrfs_unlock_up_safe(path, 1);
+#endif
 	leaf = path->nodes[0];
 	inode_item = btrfs_item_ptr(leaf, path->slots[0],
 				    struct btrfs_inode_item);
 	write_extent_buffer(leaf, &node->inode_item, (unsigned long)inode_item,
 			    sizeof(struct btrfs_inode_item));
 	btrfs_mark_buffer_dirty(leaf);
+#ifdef MY_ABC_HERE
+	btrfs_release_path(path);
 
+	btrfs_delayed_inode_release_metadata(root, node);
+	btrfs_release_delayed_inode(node);
+
+	return 0;
+#else
 	if (!test_bit(BTRFS_DELAYED_NODE_DEL_IREF, &node->flags))
 		goto no_iref;
 
@@ -1110,6 +1130,7 @@ search:
 	leaf = path->nodes[0];
 	path->slots[0]--;
 	goto again;
+#endif
 }
 
 static inline int btrfs_update_delayed_inode(struct btrfs_trans_handle *trans,
@@ -1852,6 +1873,8 @@ release_node:
 	return ret;
 }
 
+#ifdef MY_ABC_HERE
+#else
 int btrfs_delayed_delete_inode_ref(struct inode *inode)
 {
 	struct btrfs_delayed_node *delayed_node;
@@ -1886,6 +1909,7 @@ release_node:
 	btrfs_release_delayed_node(delayed_node);
 	return 0;
 }
+#endif
 
 static void __btrfs_kill_delayed_node(struct btrfs_delayed_node *delayed_node)
 {
@@ -1909,8 +1933,11 @@ static void __btrfs_kill_delayed_node(struct btrfs_delayed_node *delayed_node)
 		btrfs_release_delayed_item(prev_item);
 	}
 
+#ifdef MY_ABC_HERE
+#else
 	if (test_bit(BTRFS_DELAYED_NODE_DEL_IREF, &delayed_node->flags))
 		btrfs_release_delayed_iref(delayed_node);
+#endif
 
 	if (test_bit(BTRFS_DELAYED_NODE_INODE_DIRTY, &delayed_node->flags)) {
 		btrfs_delayed_inode_release_metadata(root, delayed_node);

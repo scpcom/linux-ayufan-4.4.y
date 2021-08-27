@@ -174,7 +174,6 @@ create_usb_usbmodem_table() { #$1: driver list
 	# thus the grep will cause duplicate lines
 	uniq ${USB_USBMODEM_MAP} > ${USB_USBMODEM_MAP}.tmp
 	mv ${USB_USBMODEM_MAP}.tmp ${USB_USBMODEM_MAP}
-	rm ${USB_USBMODEM_MAP}.tmp
 }
 
 case $1 in

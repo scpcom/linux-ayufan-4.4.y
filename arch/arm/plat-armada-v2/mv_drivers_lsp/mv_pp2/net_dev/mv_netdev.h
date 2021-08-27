@@ -32,6 +32,7 @@ disclaimer.
 #include <linux/version.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
+#include <linux/if_vlan.h>
 #include <linux/skbuff.h>
 #include <linux/mv_pp2.h>
 #include <net/ip.h>
@@ -84,8 +85,11 @@ extern unsigned int mv_pp2_pnc_ctrl_en;
  ****************************************************************************/
 #define MV_ETH_SKB_SHINFO_SIZE		SKB_DATA_ALIGN(sizeof(struct skb_shared_info))
 
+/* MTU + EtherType + Double VLAN + MAC_SA + MAC_DA + Marvell header */
+#define MV_MAX_PKT_SIZE(mtu)		((mtu) + MV_ETH_MH_SIZE + 2 * VLAN_HLEN + ETH_HLEN)
+
 #define RX_PKT_SIZE(mtu) \
-		MV_ALIGN_UP((mtu) + 2 + 4 + ETH_HLEN + 4, CPU_D_CACHE_LINE_SIZE)
+		MV_ALIGN_UP(MV_MAX_PKT_SIZE(mtu) + ETH_FCS_LEN, CPU_D_CACHE_LINE_SIZE)
 
 #define RX_BUF_SIZE(pkt_size)		((pkt_size) + NET_SKB_PAD)
 #define RX_TOTAL_SIZE(buf_size)		((buf_size) + MV_ETH_SKB_SHINFO_SIZE)
@@ -257,13 +261,9 @@ struct port_stats {
 
 #define MV_ETH_F_TX_DONE_TIMER		(1 << MV_ETH_F_TX_DONE_TIMER_BIT)	/* 0x01 */
 
-
 #define MV_ETH_TXQ_INVALID	0xFF
 
 #define TOS_TO_DSCP(tos)	((tos >> 2) & 0x3F)
-
-/* Used in PPv2.1 */
-#define MV_ETH_CPU_DESC_CHUNK	64
 
 /* Masks used for tx_spec->flags */
 #define MV_ETH_TX_F_NO_PAD	0x0001
@@ -667,14 +667,13 @@ static inline int mv_pp2_reserved_desc_num_proc(struct eth_port *pp, int txp, in
 	struct txq_cpu_ctrl *txq_cpu_p;
 	struct txq_cpu_ctrl *txq_cpu_ptr =  &txq_ctrl->txq_cpu[smp_processor_id()];
 
-
 	if (txq_cpu_ptr->reserved_num < num) {
 		int req, new_reserved, cpu, txq_count = 0;
 
 		/* new chunk is necessary */
 			 
 		for_each_possible_cpu(cpu) {
-			/* compute tolat txq used descriptors */
+			/* compute total txq used descriptors */
 			txq_cpu_p = &txq_ctrl->txq_cpu[cpu];
 			txq_count += txq_cpu_p->txq_count;
 			txq_count += txq_cpu_p->reserved_num;
@@ -1036,10 +1035,10 @@ struct pp2_rx_desc *mv_pp2_rx_prefetch(struct eth_port *pp,
 
 void		*mv_pp2_bm_pool_create(int pool, int capacity, MV_ULONG *physAddr);
 
-#if defined(CONFIG_MV_PP2_HWF) && !defined(CONFIG_MV_ETH_BM_CPU)
+#if defined(CONFIG_MV_PP2_HWF)
 MV_STATUS mv_pp2_hwf_bm_create(int port, int mtuPktSize);
 void      mv_hwf_bm_dump(void);
-#endif /* CONFIG_MV_PP2_HWF && !CONFIG_MV_ETH_BM_CPU */
+#endif /* CONFIG_MV_PP2_HWF */
 
 #ifdef CONFIG_MV_PP2_SWF_HWF_CORRUPTION_WA
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 34)

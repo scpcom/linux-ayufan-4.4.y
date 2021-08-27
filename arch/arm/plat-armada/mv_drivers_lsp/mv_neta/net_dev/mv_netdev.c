@@ -41,6 +41,7 @@ disclaimer.
 #ifdef SYNO_NET_MV_WOL_WITH_UP
 #include <linux/mii.h>
 #endif
+#include <linux/synobios.h>
 #include <net/ip.h>
 #include <net/ipv6.h>
 #include <linux/module.h>
@@ -6214,6 +6215,20 @@ void syno_mv_net_shutdown()
 				mvEthPhyRegWrite(pp->phy_id, 0x10, 0x4000);
 				mvEthPhyRegWrite(pp->phy_id, 0x16, 0x0);
 			}
+		}
+	}
+	/* RS815 LAN LED Work around */
+	if(syno_is_hw_version(HW_RS815)) {
+		for (i = 0 ; i <mv_eth_ports_num ; ++i) {
+			struct eth_port *pp = mv_eth_port_by_id(i);
+			if (!pp) {
+				continue;
+			}
+			mvEthPhyRegWrite(pp->phy_id, 0x16, 0x3);
+			mvEthPhyRegRead(pp->phy_id, 0x10, &phyTmp);
+			phyTmp = (phyTmp & 0xFFF0) | 0x8;
+			mvEthPhyRegWrite(pp->phy_id, 0x10, phyTmp);
+			mvEthPhyRegWrite(pp->phy_id, 0x16, 0x0);
 		}
 	}
 }

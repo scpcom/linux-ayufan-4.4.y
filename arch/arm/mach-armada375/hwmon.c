@@ -82,8 +82,7 @@ typedef enum {
 	SHOW_TYPE,
 	SHOW_LABEL } SHOW;
 
-#define	SYNO_A375_TEMP
-#ifdef SYNO_A375_TEMP
+#ifdef MY_DEF_HERE
 #define IRQ_AURORA_PMU           107 // armada375 is not define this value, it is reference from armadaxp
 #endif
 

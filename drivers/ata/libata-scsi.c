@@ -75,7 +75,11 @@ static unsigned long gulLastWake = 0;
 DEFINE_SPINLOCK(SYNOLastWakeLock);
 #endif
 
-#ifdef SYNO_EUNIT_POWERCTL_PIN
+#ifdef MY_DEF_HERE
+DEFINE_SPINLOCK(SYNOEUnitLock);
+#endif /* MY_DEF_HERE */
+
+#ifdef MY_ABC_HERE
 extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
 #endif
 
@@ -84,7 +88,7 @@ extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
 static DEFINE_SPINLOCK(ata_scsi_rbuf_lock);
 static u8 ata_scsi_rbuf[ATA_SCSI_RBUF_SIZE];
 
-#ifndef SYNO_SPINUP_DELAY
+#ifndef MY_ABC_HERE
 typedef unsigned int (*ata_xlat_func_t)(struct ata_queued_cmd *qc);
 #endif
 
@@ -531,16 +535,22 @@ static ssize_t
 syno_gpio_read_no_sdev(struct ata_port *ap, char *buf)
 {
 	SYNO_GPIO_TASK task;
+	struct workqueue_struct *pTaskWorkqueue = NULL;
 	ssize_t len = 0;
 
+	pTaskWorkqueue = create_singlethread_workqueue("SYNO_GPIO_READ_TASK_QUEUE");
+	if (NULL == pTaskWorkqueue) {
+		len = -ENOMEM;
+		goto END;
+	}
 	syno_gpio_task_init(&task, READ, ap);
-	schedule_delayed_work(&(task.work), 0);
+	queue_delayed_work(pTaskWorkqueue, &(task.work), 0);
 WAIT:
 	wait_for_completion(&task.wait);
 
 	if (task.blRetry) {
 		syno_gpio_task_reinit(&task, READ, ap);
-		schedule_delayed_work(&(task.work), HZ/10);
+		queue_delayed_work(pTaskWorkqueue, &(task.work), HZ/10);
 		goto WAIT;
 	}
 
@@ -549,6 +559,11 @@ WAIT:
 		sprintf(buf, "%s=\"\"%s", EBOX_GPIO_KEY, "\n");
 	} else {
 		len = sprintf(buf, "%s=\"0x%x\"%s", EBOX_GPIO_KEY, task.pm_pkg.var, "\n");
+	}
+
+END:
+	if (NULL != pTaskWorkqueue) {
+		destroy_workqueue(pTaskWorkqueue);
 	}
 	return len;
 }
@@ -586,20 +601,32 @@ static u8
 syno_gpio_write_no_sdev(struct ata_port *ap, u32 input)
 {
 	SYNO_GPIO_TASK task;
+	struct workqueue_struct *pTaskWorkqueue = NULL;
+
+	pTaskWorkqueue = create_singlethread_workqueue("SYNO_GPIO_WRITE_TASK_QUEUE");
+	if (NULL == pTaskWorkqueue) {
+		task.blIsErr = 1;
+		goto END;
+	}
 
 	syno_gpio_task_init(&task, WRITE, ap);
 	task.pm_pkg.var = input;
-	schedule_delayed_work(&(task.work), 0);
+	queue_delayed_work(pTaskWorkqueue, &(task.work), 0);
+
 WAIT:
 	wait_for_completion(&task.wait);
 
 	if (task.blRetry) {
 		syno_gpio_task_reinit(&task, WRITE, ap);
 		task.pm_pkg.var = input;
-		schedule_delayed_work(&(task.work), HZ/10);
+		queue_delayed_work(pTaskWorkqueue, &(task.work), HZ/10);
 		goto WAIT;
 	}
 
+END:
+	if (NULL != pTaskWorkqueue) {
+		destroy_workqueue(pTaskWorkqueue);
+	}
 	return !task.blIsErr ? 0 : 1;
 }
 
@@ -628,6 +655,9 @@ struct ata_port *SynoEunitFindMaster(struct ata_port *ap)
 	struct ata_port *pAp_master = NULL;
 	int i = 0;
 	int unique = 0;
+#ifdef MY_DEF_HERE
+	unsigned long flags;
+#endif /* MY_DEF_HERE */
 	if (!syno_is_synology_pm(ap)) {
 		goto END;
 	}
@@ -640,9 +670,18 @@ struct ata_port *SynoEunitFindMaster(struct ata_port *ap)
 
 	unique = SYNO_UNIQUE(ap->PMSynoUnique);
 	for (i = 1; i < ata_print_id; i++) {
+#ifdef MY_DEF_HERE
+		spin_lock_irqsave(&SYNOEUnitLock, flags);
+		pMaster_host = scsi_host_lookup(i - 1);
+		spin_unlock_irqrestore(&SYNOEUnitLock, flags);
+		if (NULL == pMaster_host) {
+			continue;
+		}
+#else
 		if (NULL == (pMaster_host = scsi_host_lookup(i - 1))) {
 			continue;
 		}
+#endif /* MY_DEF_HERE */
 
 		if (NULL == (pAp_master = ata_shost_to_port(pMaster_host))) {
 			goto CONTINUE_FOR;
@@ -692,11 +731,8 @@ syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn)
 	struct ata_port *ap = ata_shost_to_port(host);
 	int iRet = -1;
 
-
 	DBGMESG("disk %d do pm control blPowerOn %d\n", ap->print_id, blPowerOn);
 	if (!ap->nr_pmp_links) {
-	}
-	else {
 		if (!syno_is_synology_pm(ap)) {
 			goto END;
 		}
@@ -4670,10 +4706,10 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 	}
 
 	if (xlat_func)
-/* As you see if SYNO_INTERNAL_HD_NUM is not ported, this is not work */
-#if defined(SYNO_SPINUP_DELAY)
+/* As you see if MY_ABC_HERE is not ported, this is not work */
+#if defined(MY_ABC_HERE)
 	{
-#ifdef SYNO_ATA_FAST_PROBE
+#ifdef MY_ABC_HERE
 		if (dev->link->ap->nr_pmp_links && dev->link->ap->pflags & ATA_PFLAG_SYNO_BOOT_PROBE) {
 			/* I don't know why some EUnit master may not clear ATA_PFLAG_SYNO_BOOT_PROBE,
 			 * so we must clear it again by schedule_eh*/
@@ -4707,8 +4743,9 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 	else
 		ata_scsi_simulate(dev, scmd);
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
-        /* This is a work around for the problem that PMP GPIO command stucked in the low level driver and cause in system hang.
+#ifdef MY_ABC_HERE
+		/* This was the original work around for the problem that PMP GPIO command stucked in the low level driver and cause in system hang.
+		 * Though the issue has been fixed, we leave it here to make sure the system will not hang when running into a similar situation.
 		 * When multiple commands are deferred in a row longer than normal ATA command timeout(10 sec),
 		 * and the command occupying the lower level queue is an PMP R/W command, we force it to abort.
 		 * Also, we assumed that there won't be more than 64 commands(twice of the default ATA queue depth)
@@ -5186,7 +5223,7 @@ void ata_syno_pmp_hotplug(struct work_struct *work)
 	envp[1] = NULL;
 	kobject_uevent_env(&ap->scsi_host->shost_dev.kobj, KOBJ_CHANGE, envp);
 }
-#endif //SYNO_PMP_HOTPLUG_TASK
+#endif //MY_ABC_HERE
 
 /**
  *	ata_scsi_hotplug - SCSI part of hotplug

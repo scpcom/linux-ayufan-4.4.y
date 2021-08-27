@@ -321,7 +321,7 @@ void set_cpu_affinity(struct eth_port *pp, MV_U32 cpuAffinity, int group)
 		return;
 
 	/* First, read affinity of the target group, in case it contains CPUs */
-	for (cpu = 0; cpu < CONFIG_NR_CPUS; cpu++) {
+	for (cpu = 0; cpu < nr_cpu_ids; cpu++) {
 		cpuCtrl = pp->cpu_config[cpu];
 		if (!(MV_BIT_CHECK(pp->cpu_mask, cpu)))
 			continue;
@@ -330,7 +330,7 @@ void set_cpu_affinity(struct eth_port *pp, MV_U32 cpuAffinity, int group)
 			break;
 		}
 	}
-	for (cpu = 0; cpu < CONFIG_NR_CPUS; cpu++) {
+	for (cpu = 0; cpu < nr_cpu_ids; cpu++) {
 		if (cpuAffinity & 1) {
 			cpuCtrl = pp->cpu_config[cpu];
 			cpuCtrl->napi = pp->napiGroup[group];
@@ -348,7 +348,7 @@ int group_has_cpus(struct eth_port *pp, int group)
 	int cpu;
 	struct cpu_ctrl	*cpuCtrl;
 
-	for (cpu = 0; cpu < CONFIG_NR_CPUS; cpu++) {
+	for (cpu = 0; cpu < nr_cpu_ids; cpu++) {
 		if (!(MV_BIT_CHECK(pp->cpu_mask, cpu)))
 			continue;
 
@@ -382,7 +382,7 @@ void set_rxq_affinity(struct eth_port *pp, MV_U32 rxqAffinity, int group)
 		return;
 	}
 
-	for (cpu = 0; cpu < CONFIG_NR_CPUS; cpu++) {
+	for (cpu = 0; cpu < nr_cpu_ids; cpu++) {
 		if (!(MV_BIT_CHECK(pp->cpu_mask, cpu)))
 			continue;
 		tmpRxqAffinity = rxqAffinity;
@@ -902,9 +902,9 @@ int mv_eth_ctrl_txq_cpu_def(int port, int txp, int txq, int cpu)
 	struct cpu_ctrl	*cpuCtrl;
 	struct eth_port *pp = mv_eth_port_by_id(port);
 
-	if ((cpu >= CONFIG_NR_CPUS) || (cpu < 0)) {
+	if ((cpu >= nr_cpu_ids) || (cpu < 0)) {
 		printk(KERN_ERR "cpu #%d is out of range: from 0 to %d\n",
-			cpu, CONFIG_NR_CPUS - 1);
+			cpu, nr_cpu_ids - 1);
 		return -EINVAL;
 	}
 
@@ -951,9 +951,9 @@ int	mv_eth_cpu_txq_mask_set(int port, int cpu, int txqMask)
 		return -EINVAL;
 	}
 
-	if ((cpu >= CONFIG_NR_CPUS) || (cpu < 0)) {
+	if ((cpu >= nr_cpu_ids) || (cpu < 0)) {
 		printk(KERN_ERR "cpu #%d is out of range: from 0 to %d\n",
-			cpu, CONFIG_NR_CPUS - 1);
+			cpu, nr_cpu_ids - 1);
 		return -EINVAL;
 	}
 	if (pp == NULL) {
@@ -2871,6 +2871,7 @@ irqreturn_t mv_eth_isr(int irq, void *dev_id)
 	struct eth_port *pp = (struct eth_port *)dev_id;
 	int cpu = smp_processor_id();
 	struct napi_struct *napi = pp->cpu_config[cpu]->napi;
+	u32 regVal;
 
 #ifdef CONFIG_MV_NETA_DEBUG_CODE
 	if (pp->flags & MV_ETH_F_DBG_ISR) {
@@ -2898,6 +2899,17 @@ irqreturn_t mv_eth_isr(int irq, void *dev_id)
 			__func__, irq, pp->port, cpu);
 #endif /* CONFIG_MV_NETA_DEBUG_CODE */
 	}
+
+	/*
+	* Ensure mask register write is completed by issuing a read.
+	* dsb() instruction cannot be used on registers since they are in
+	* MBUS domain
+	* Need for Aramada38x. Dosn't need for AXP and A370
+	*/
+	if ((pp->plat_data->ctrl_model == MV_6810_DEV_ID) ||
+	    (pp->plat_data->ctrl_model == MV_6820_DEV_ID))
+		regVal = MV_REG_READ(NETA_INTR_NEW_MASK_REG(pp->port));
+
 	return IRQ_HANDLED;
 }
 
@@ -3372,6 +3384,7 @@ static int mv_eth_load_network_interfaces(struct platform_device *pdev)
 int mv_eth_resume_network_interfaces(struct eth_port *pp)
 {
 	int cpu;
+	int err = 0;
 
 	if (!MV_PON_PORT(pp->port)) {
 		int phyAddr;
@@ -3391,10 +3404,34 @@ int mv_eth_resume_network_interfaces(struct eth_port *pp)
 		mv_eth_port_promisc_set(pp->port);
 	}
 
-	for (cpu = 0; cpu < CONFIG_NR_CPUS; cpu++) {
+	for (cpu = 0; cpu < nr_cpu_ids; cpu++) {
 		/* set queue mask per cpu */
 		mvNetaRxqCpuMaskSet(pp->port, pp->cpu_config[cpu]->cpuRxqMask, cpu);
 		mvNetaTxqCpuMaskSet(pp->port, pp->cpu_config[cpu]->cpuTxqMask, cpu);
+	}
+
+	/* set port's speed, duplex, fc */
+	if (!MV_PON_PORT(pp->port)) {
+		/* force link, speed and duplex if necessary (e.g. Switch is connected) based on board information */
+		switch (pp->plat_data->speed) {
+		case SPEED_10:
+			err = mv_eth_port_link_speed_fc(pp->port, MV_ETH_SPEED_10, 1);
+			break;
+		case SPEED_100:
+			err = mv_eth_port_link_speed_fc(pp->port, MV_ETH_SPEED_100, 1);
+			break;
+		case SPEED_1000:
+			err = mv_eth_port_link_speed_fc(pp->port, MV_ETH_SPEED_1000, 1);
+			break;
+		case 0:
+			err = mv_eth_port_link_speed_fc(pp->port, MV_ETH_SPEED_AN, 0);
+			break;
+		default:
+			/* do nothing */
+			break;
+		}
+		if (err)
+			return err;
 	}
 
 	return MV_OK;
@@ -3855,10 +3892,14 @@ int	mv_eth_wol_mode_set(int port, int mode)
 		printk(KERN_ERR "Port %d must resumed before\n", port);
 		return -EINVAL;
 	}
-	pp->wol_mode = mode;
+	pp->pm_mode = mode;
 
 	if (mode)
+#ifdef CONFIG_MV_ETH_PNC_WOL
 		wol_ports_bmp |= (1 << port);
+#else
+		;
+#endif
 	else
 		wol_ports_bmp &= ~(1 << port);
 
@@ -4077,13 +4118,18 @@ static struct mv_neta_pdata *mv_plat_data_get(struct platform_device *pdev)
 		return NULL;
 	}
 
+	/* FDT does not support the '-1' convention of the inband fake phy address */
+	/* In case of FDT, use '999' phy address to represent inband mode */
+	if (plat_data->phy_addr == 999)
+		plat_data->phy_addr = -1;
+
 	/* Get port MTU */
 	if (of_property_read_u32(np, "eth,port-mtu", &plat_data->mtu)) {
 		pr_err("could not get MTU\n");
 		return NULL;
 	}
 	/* Get TX checksum offload limit */
-	if (of_property_read_u32(np, "tx_csum_limit", &plat_data->tx_csum_limit))
+	if (of_property_read_u32(np, "tx-csum-limit", &plat_data->tx_csum_limit))
 		plat_data->tx_csum_limit = MV_ETH_TX_CSUM_MAX_SIZE;
 
 	/* Get port PHY mode */
@@ -4254,7 +4300,7 @@ struct net_device *mv_eth_netdev_init(struct platform_device *pdev)
 		memset(pp->napiGroup[i], 0, sizeof(struct napi_struct));
 	}
 
-	for (cpu = 0; cpu < CONFIG_NR_CPUS; cpu++) {
+	for (cpu = 0; cpu < nr_cpu_ids; cpu++) {
 		cpuCtrl = pp->cpu_config[cpu];
 		cpuCtrl->napiCpuGroup = 0;
 		cpuCtrl->napi         = NULL;
@@ -4645,7 +4691,7 @@ void mv_eth_napi_group_show(int port)
 	}
 	for (group = 0; group < CONFIG_MV_ETH_NAPI_GROUPS; group++) {
 		printk(KERN_INFO "group=%d:\n", group);
-		for (cpu = 0; cpu < CONFIG_NR_CPUS; cpu++) {
+		for (cpu = 0; cpu < nr_cpu_ids; cpu++) {
 			cpuCtrl = pp->cpu_config[cpu];
 			if (!(MV_BIT_CHECK(pp->cpu_mask, cpu)))
 				continue;
@@ -5626,9 +5672,9 @@ int mv_eth_txq_tos_map_set(int port, int txq, int cpu, unsigned int tos)
 	if ((pp == NULL) || (pp->txq_ctrl == NULL))
 		return -ENODEV;
 
-	if ((cpu >= CONFIG_NR_CPUS) || (cpu < 0)) {
+	if ((cpu >= nr_cpu_ids) || (cpu < 0)) {
 		printk(KERN_ERR "cpu #%d is out of range: from 0 to %d\n",
-			cpu, CONFIG_NR_CPUS - 1);
+			cpu, nr_cpu_ids - 1);
 		return -EINVAL;
 	}
 
@@ -5686,7 +5732,7 @@ static int mv_eth_priv_init(struct eth_port *pp, int port)
 	memset(pp, 0, sizeof(struct eth_port));
 
 	/* Default field per cpu initialization */
-	for (i = 0; i < CONFIG_NR_CPUS; i++) {
+	for (i = 0; i < nr_cpu_ids; i++) {
 		pp->cpu_config[i] = kmalloc(sizeof(struct cpu_ctrl), GFP_KERNEL);
 		memset(pp->cpu_config[i], 0, sizeof(struct cpu_ctrl));
 	}
@@ -5694,7 +5740,7 @@ static int mv_eth_priv_init(struct eth_port *pp, int port)
 	pp->port = port;
 	pp->txp_num = 1;
 	pp->txp = 0;
-	pp->wol_mode = 0;
+	pp->pm_mode = 0;
 	for_each_possible_cpu(cpu) {
 		cpuCtrl = pp->cpu_config[cpu];
 		cpuCtrl->txq = CONFIG_MV_ETH_TXQ_DEF;
@@ -5955,7 +6001,7 @@ void mv_eth_port_status_print(unsigned int port)
 	else
 		printk(KERN_CONT "Disabled\n");
 #endif /* CONFIG_MV_ETH_NFP */
-	if (pp->wol_mode == 1)
+	if (pp->pm_mode == 1)
 		printk(KERN_CONT "pm - wol\n");
 	else
 		printk(KERN_CONT "pm - suspend\n");
@@ -6546,7 +6592,7 @@ MV_BOOL mv_pon_link_status(void)
 
 /* Support for platform driver */
 
-#ifdef CONFIG_CPU_IDLE
+#ifdef CONFIG_PM
 
 int mv_eth_suspend(struct platform_device *pdev, pm_message_t state)
 {
@@ -6559,7 +6605,7 @@ int mv_eth_suspend(struct platform_device *pdev, pm_message_t state)
 	if (!pp)
 		return 0;
 
-	if (pp->wol_mode == 0) {
+	if (pp->pm_mode == 0) {
 		if (mv_eth_port_suspend(port)) {
 			printk(KERN_ERR "%s: port #%d suspend failed.\n", __func__, port);
 			return MV_ERROR;
@@ -6605,7 +6651,7 @@ int mv_eth_resume(struct platform_device *pdev)
 	if (!pp)
 		return 0;
 
-	if (pp->wol_mode == 0) {
+	if (pp->pm_mode == 0) {
 		/* Set Port Power State to 1 */
 #ifdef CONFIG_ARCH_MVEBU
 		{
@@ -6632,8 +6678,7 @@ int mv_eth_resume(struct platform_device *pdev)
 	return MV_OK;
 }
 
-
-#endif	/*CONFIG_CPU_IDLE*/
+#endif	/*CONFIG_PM*/
 
 static int mv_eth_shared_remove(void)
 {
@@ -6694,10 +6739,10 @@ static struct platform_driver mv_eth_driver = {
 	.probe = mv_eth_probe,
 	.remove = mv_eth_remove,
 	.shutdown = mv_eth_shutdown,
-#ifdef CONFIG_CPU_IDLE
+#ifdef CONFIG_PM
 	.suspend = mv_eth_suspend,
 	.resume = mv_eth_resume,
-#endif /* CONFIG_CPU_IDLE */
+#endif /* CONFIG_PM */
 	.driver = {
 		.name = MV_NETA_PORT_NAME,
 #ifdef CONFIG_OF

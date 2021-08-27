@@ -61,7 +61,7 @@
 #include <linux/leds.h>
 #endif /* CONFIG_SYNO_LEDS_TRIGGER */
 
-#if defined(CONFIG_ARCH_GEN3) || defined(SYNO_ALPINE_SW_SATA_LED)
+#if defined(CONFIG_ARCH_GEN3) || defined(MY_DEF_HERE)
 extern int SYNO_CTRL_HDD_ACT_NOTIFY(int index);
 #endif
 
@@ -295,10 +295,10 @@ EXPORT_SYMBOL_GPL(ahci_shost_attrs);
 struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_activity,
 	&dev_attr_unload_heads,
-#ifdef SYNO_SATA_WCACHE_DISABLE
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_wcache,
 #endif
-#ifdef SYNO_SATA_DISK_SERIAL
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_disk_serial,
 #endif
 #ifdef SYNO_ATA_AHCI_LED_MSG
@@ -931,7 +931,7 @@ END:
 	return ret;
 }
 #endif
-#if defined(SYNO_ALPINE_SW_SATA_LED)
+#if defined(MY_DEF_HERE)
 int syno_is_alpine_internal_ahci(struct ata_port *ap)
 {
 	struct pci_dev *pdev = NULL;
@@ -1010,7 +1010,7 @@ static void ahci_start_port(struct ata_port *ap)
 	if (syno_is_avoton_ahci(ap)) {
 		ap->flags |= ATA_FLAG_SW_ACTIVITY;
 	}
-#elif defined(SYNO_ALPINE_SW_SATA_LED)
+#elif defined(MY_DEF_HERE)
 	if (syno_is_alpine_internal_ahci(ap)) {
 		ap->flags |= ATA_FLAG_SW_ACTIVITY;
 	}
@@ -1096,7 +1096,7 @@ static void ahci_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
-#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(SYNO_ATA_AHCI_LED_SWITCH)
+#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
 	if (!giSynoHddLedEnabled) {
 		return;
 	}
@@ -1188,7 +1188,7 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	 * toggle state of LED and reset timer.  If not,
 	 * turn LED to desired idle state.
 	 */
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(SYNO_ALPINE_SW_SATA_LED)
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(MY_DEF_HERE)
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
@@ -1246,12 +1246,12 @@ static void ahci_init_sw_activity(struct ata_link *link)
 
 	/* init activity stats, setup timer */
 	emp->saved_activity = emp->activity = 0;
-#if defined(CONFIG_SYNO_ALPINE) && !defined(SYNO_ALPINE_SW_SATA_LED)
+#if defined(CONFIG_SYNO_ALPINE) && !defined(MY_DEF_HERE)
 	emp->blink_policy = BLINK_ON;
 #endif
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
 
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(SYNO_ALPINE_SW_SATA_LED)
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(MY_DEF_HERE)
 #else
 	/* check our blink policy and set flag for link if it's enabled */
 	if (emp->blink_policy)

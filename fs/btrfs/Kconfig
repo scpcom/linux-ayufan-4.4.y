@@ -27,6 +27,14 @@ config BTRFS_FS
 
 	  If unsure, say N.
 
+config SYNO_BTRFS_QGROUP_QUERY
+	bool
+	depends on BTRFS_FS
+	default y
+	help
+	  <FS Snapshot> #163
+	  Add an ioctl command to query qgroup usage.
+
 config BTRFS_FS_POSIX_ACL
 	bool "Btrfs POSIX Access Control Lists"
 	depends on BTRFS_FS

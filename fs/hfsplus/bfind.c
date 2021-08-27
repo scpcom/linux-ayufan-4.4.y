@@ -199,7 +199,11 @@ int hfs_brec_find(struct hfs_find_data *fd, search_strategy_t do_key_compare)
 		res = __hfs_brec_find(bnode, fd, do_key_compare);
 		if (!height)
 			break;
+#ifdef MY_ABC_HERE
+		if (fd->record < 0 || res == -EINVAL)
+#else
 		if (fd->record < 0)
+#endif /* MY_ABC_HERE */
 			goto release;
 
 		parent = nidx;

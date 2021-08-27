@@ -220,7 +220,6 @@ loop:
 	spin_lock_init(&cur_trans->delayed_refs.lock);
 
 	INIT_LIST_HEAD(&cur_trans->pending_snapshots);
-	INIT_LIST_HEAD(&cur_trans->ordered_operations);
 	INIT_LIST_HEAD(&cur_trans->pending_chunks);
 	INIT_LIST_HEAD(&cur_trans->switch_commits);
 	list_add_tail(&cur_trans->list, &fs_info->trans_list);
@@ -230,6 +229,9 @@ loop:
 	cur_trans->transid = fs_info->generation;
 	fs_info->running_transaction = cur_trans;
 	cur_trans->aborted = 0;
+#ifdef MY_ABC_HERE
+	cur_trans->clear_full = false;
+#endif
 	spin_unlock(&fs_info->trans_lock);
 
 	return 0;
@@ -498,6 +500,7 @@ again:
 	smp_mb();
 	if (cur_trans->state >= TRANS_STATE_BLOCKED &&
 	    may_wait_transaction(root, type)) {
+		current->journal_info = h;
 		btrfs_commit_transaction(h, root);
 		goto again;
 	}
@@ -1284,6 +1287,11 @@ static noinline int create_pending_snapshot(struct btrfs_trans_handle *trans,
 	memcpy(new_root_item->uuid, new_uuid.b, BTRFS_UUID_SIZE);
 	memcpy(new_root_item->parent_uuid, root->root_item.uuid,
 			BTRFS_UUID_SIZE);
+#ifdef MY_ABC_HERE
+	if (root_flags & BTRFS_ROOT_SUBVOL_RDONLY) {
+		memcpy(new_root_item->received_uuid, new_uuid.b, BTRFS_UUID_SIZE);
+	}
+#endif /* MY_ABC_HERE */
 	if (!(root_flags & BTRFS_ROOT_SUBVOL_RDONLY)) {
 		memset(new_root_item->received_uuid, 0,
 		       sizeof(new_root_item->received_uuid));
@@ -1632,38 +1640,6 @@ static void cleanup_transaction(struct btrfs_trans_handle *trans,
 	kmem_cache_free(btrfs_trans_handle_cachep, trans);
 }
 
-static int btrfs_flush_all_pending_stuffs(struct btrfs_trans_handle *trans,
-					  struct btrfs_root *root)
-{
-	int ret;
-
-	ret = btrfs_run_delayed_items(trans, root);
-	/*
-	 * running the delayed items may have added new refs. account
-	 * them now so that they hinder processing of more delayed refs
-	 * as little as possible.
-	 */
-	if (ret) {
-		btrfs_delayed_refs_qgroup_accounting(trans, root->fs_info);
-		return ret;
-	}
-
-	ret = btrfs_delayed_refs_qgroup_accounting(trans, root->fs_info);
-	if (ret)
-		return ret;
-
-	/*
-	 * rename don't use btrfs_join_transaction, so, once we
-	 * set the transaction to blocked above, we aren't going
-	 * to get any new ordered operations.  We can safely run
-	 * it here and no for sure that nothing new will be added
-	 * to the list
-	 */
-	ret = btrfs_run_ordered_operations(trans, root, 1);
-
-	return ret;
-}
-
 static inline int btrfs_start_delalloc_flush(struct btrfs_fs_info *fs_info)
 {
 	if (btrfs_test_opt(fs_info->tree_root, FLUSHONCOMMIT))
@@ -1683,13 +1659,6 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 	struct btrfs_transaction *cur_trans = trans->transaction;
 	struct btrfs_transaction *prev_trans = NULL;
 	int ret;
-
-	ret = btrfs_run_ordered_operations(trans, root, 0);
-	if (ret) {
-		btrfs_abort_transaction(trans, root, ret);
-		btrfs_end_transaction(trans, root);
-		return ret;
-	}
 
 	/* Stop the commit early if ->aborted is set */
 	if (unlikely(ACCESS_ONCE(cur_trans->aborted))) {
@@ -1771,7 +1740,7 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 	if (ret)
 		goto cleanup_transaction;
 
-	ret = btrfs_flush_all_pending_stuffs(trans, root);
+	ret = btrfs_run_delayed_items(trans, root);
 	if (ret)
 		goto cleanup_transaction;
 
@@ -1779,7 +1748,7 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 		   extwriter_counter_read(cur_trans) == 0);
 
 	/* some pending stuffs might be added after the previous flush. */
-	ret = btrfs_flush_all_pending_stuffs(trans, root);
+	ret = btrfs_run_delayed_items(trans, root);
 	if (ret)
 		goto cleanup_transaction;
 
@@ -1950,6 +1919,10 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 		goto scrub_continue;
 	}
 
+#ifdef MY_ABC_HERE
+	if (cur_trans->clear_full)
+		btrfs_clear_space_info_full(root->fs_info);
+#endif
 	/*
 	 * the super is written, we can safely allow the tree-loggers
 	 * to go about their business

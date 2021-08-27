@@ -378,19 +378,19 @@ void kernel_restart(char *cmd)
 }
 EXPORT_SYMBOL_GPL(kernel_restart);
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO 
-extern void scsi_host_poweroff_all(void);
-#endif
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+extern int gSynoSystemShutdown;
+#endif /* CONFIG_SYNO_ATA_SHUTDOWN_FIX */
 static void kernel_shutdown_prepare(enum system_states state)
 {
 	blocking_notifier_call_chain(&reboot_notifier_list,
 		(state == SYSTEM_HALT)?SYS_HALT:SYS_POWER_OFF, NULL);
 	system_state = state;
 	usermodehelper_disable();
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+	gSynoSystemShutdown = 1;
+#endif /* SYNO_ATA_SHUTDOWN_FIX */
 	device_shutdown();
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
-	scsi_host_poweroff_all();
-#endif
 }
 /**
  *	kernel_halt - halt the system
@@ -432,7 +432,7 @@ void kernel_power_off(void)
 }
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
-#ifdef SYNO_X86_MICROP_CTRL
+#ifdef MY_DEF_HERE
 #if defined(CONFIG_SYNO_CEDARVIEW) || defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON)
 #define UART_PORT1_IOBASE   0x2F8
 #else

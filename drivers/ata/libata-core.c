@@ -142,6 +142,12 @@ extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
 #endif
 
+#if defined(CONFIG_SYNO_ALPINE)
+extern unsigned char SYNOALPINEIsBoardNeedPowerUpHDD(u32);
+extern int SYNO_CTRL_HDD_POWERON(int index, int value);
+extern int SYNO_CHECK_HDD_PRESENT(int index);
+#endif
+
 #if defined(CONFIG_ARCH_GEN3)
 extern unsigned char SYNOEvansportIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
@@ -153,6 +159,9 @@ extern unsigned char SYNOComcerto2kIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
 #endif
+
+int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODeepSleepEvent);
 
 /* param_buf is thrown away after initialization, disallow read */
 module_param_string(force, ata_force_param_buf, sizeof(ata_force_param_buf), 0);
@@ -4009,10 +4018,6 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 {
 	u32 scontrol;
 	int rc;
-#if defined(CONFIG_SYNO_COMCERTO)
-	int try_count=0;
-	u32 sstatus;
-#endif
 
 	DPRINTK("ENTER\n");
 
@@ -4036,20 +4041,11 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 		sata_set_spd(link);
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO)
-keep_trying:
-#endif
-
 	/* issue phy wake/reset */
 	if ((rc = sata_scr_read(link, SCR_CONTROL, &scontrol)))
 		goto out;
 
 	scontrol = (scontrol & 0x0f0) | 0x301;
-
-#if defined(CONFIG_SYNO_COMCERTO)
-	//Limit the max speed to 3GBps
-	scontrol = (scontrol & ~(0xf0)) | 0x20;
-#endif
 
 	if ((rc = sata_scr_write_flush(link, SCR_CONTROL, scontrol)))
 		goto out;
@@ -4063,23 +4059,6 @@ keep_trying:
 	rc = sata_link_resume(link, timing, deadline);
 	if (rc)
 		goto out;
-
-#if defined(CONFIG_SYNO_COMCERTO)
-	try_count++;
-	sata_scr_read(link, SCR_STATUS, &sstatus);
-
-	//Check if PHY not ready
-	if (((sstatus & 0xf) == 0x1) && (try_count < 7))
-	{
-		printk("!!!!!!!!!!! PHY Not Ready : SStatus 0x%x !!!!!!!!!!!\n",sstatus);
-		goto keep_trying;
-	}
-	else
-	{
-		if((sstatus & 0xf) == 0x3)
-		printk("!!!!!!!!!!! PHY Ready : SStatus 0x%x !!!!!!!!!!!\n",sstatus);
-	}
-#endif
 
 	/* if link is offline nothing more to do */
 	if (ata_phys_link_offline(link))
@@ -5930,7 +5909,7 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 	INIT_DELAYED_WORK(&ap->hotplug_task, ata_scsi_hotplug);
 #ifdef SYNO_PMP_HOTPLUG_TASK
 	INIT_DELAYED_WORK(&ap->syno_pmp_task, ata_syno_pmp_hotplug);
-#endif //SYNO_PMP_HOTPLUG_TASK
+#endif //MY_ABC_HERE
 	INIT_WORK(&ap->scsi_rescan_task, ata_scsi_dev_rescan);
 	INIT_LIST_HEAD(&ap->eh_done_q);
 	init_waitqueue_head(&ap->eh_wait_q);
@@ -6390,6 +6369,17 @@ static void DelayForHWCtl(struct ata_port *pAp)
 
 #if defined(CONFIG_ARCH_COMCERTO)
 	if(SYNOComcerto2kIsBoardNeedPowerUpHDD(pAp->print_id)) {
+		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
+		if (0 == SYNO_CHECK_HDD_PRESENT(pAp->print_id)) {
+			goto END;
+		}
+		SleepForLatency();
+		iIsDoLatency = 1;
+	}
+#endif
+
+#if defined(CONFIG_SYNO_ALPINE)
+	if (SYNOALPINEIsBoardNeedPowerUpHDD(pAp->print_id)) {
 		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		if (0 == SYNO_CHECK_HDD_PRESENT(pAp->print_id)) {
 			goto END;
@@ -7413,12 +7403,10 @@ int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendDiskPortDisEvent);
 int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSataErrorReport);
-int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
-EXPORT_SYMBOL(funcSYNODeepSleepEvent);
 int (*funcSYNODiskRetryReport)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNODiskRetryReport);
 
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 int (*funcSYNOSendEboxRefreshEvent)(int portIndex) = NULL;
 EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
 #endif
@@ -7427,3 +7415,5 @@ EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
 EXPORT_SYMBOL_GPL(ata_dev_set_feature);
 #endif
 
+int (*funcSYNODiskPowerShortBreakReport)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODiskPowerShortBreakReport);

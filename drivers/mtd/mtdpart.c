@@ -37,17 +37,17 @@
 #include <linux/magic.h>
 #endif
 #include <linux/err.h>
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 #include <linux/rtnetlink.h>
 #include <linux/netdevice.h>
 #include <linux/if_arp.h>
 #endif
 
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[SYNO_MAC_MAX_V2][16];
 #endif
 
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 extern char gszSerialNum[];
 extern char gszCustomSerialNum[];
 #define SYNO_SN_TAG "SN="
@@ -703,7 +703,7 @@ out_register:
 			int i, n, x;
 			unsigned int Sum;
 			u_char ucSum;
-			char rgbLanMac[SYNO_MAC_MAX_V2][6];
+			unsigned char rgbLanMac[SYNO_MAC_MAX_V2][6];
 
 			/**
 			 * FIXME: current vender structure on arm platform only support
@@ -727,7 +727,7 @@ out_register:
 							n, ucSum, rgbszBuf[x], Sum);
 					grgbLanMac[n][0] = '\0';
 				} else {
-					snprintf(grgbLanMac[n], sizeof(grgbLanMac),
+					snprintf(grgbLanMac[n], sizeof(grgbLanMac[n]),
 							"%02x%02x%02x%02x%02x%02x",
 					rgbLanMac[n][0],
 					rgbLanMac[n][1],

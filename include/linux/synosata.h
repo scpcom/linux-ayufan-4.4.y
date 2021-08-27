@@ -538,7 +538,7 @@ syno_pm_hddled_status_pkg_init(unsigned short vendor, unsigned short devid, SYNO
 	/* add other port multiplier here */
 }
 
-#ifdef SYNO_EUNIT_POWERCTL_PIN
+#ifdef MY_ABC_HERE
 extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
 #endif
 extern char gszSynoHWVersion[16];
@@ -547,7 +547,7 @@ is_ebox_support(void)
 {
 	unsigned char ret = 0;
 
-#ifdef SYNO_EUNIT_POWERCTL_PIN
+#ifdef MY_ABC_HERE
 	if (funcSynoEunitPowerctlType) {
 		if (EUNIT_NOT_SUPPORT == funcSynoEunitPowerctlType()) {
 			goto END;
@@ -561,7 +561,7 @@ is_ebox_support(void)
 	 */
 	 
 	ret = 1;
-#ifdef SYNO_EUNIT_POWERCTL_PIN
+#ifdef MY_ABC_HERE
 END:
 #endif
 	return ret;

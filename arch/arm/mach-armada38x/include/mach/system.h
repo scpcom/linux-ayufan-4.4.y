@@ -15,7 +15,7 @@
 #define LSP_PG_SZ_VER  ""
 #endif
 
-#define LSP_VERSION "linux-3.2.58-2014_T2.0p1" LSP_PG_SZ_VER
+#define LSP_VERSION "linux-3.2.58-2014_T2.0p2" LSP_PG_SZ_VER
 
 static inline void arch_idle(void)
 {

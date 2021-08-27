@@ -124,6 +124,16 @@ ace_syno_from_xattr(struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntry)
 		pAce->e_tag = SYNO_ACL_OWNER;
 		pAce->e_id = SYNO_ACL_UNDEFINED_ID;
 
+	} else if (SYNO_ACL_XATTR_TAG_ID_AUTHENTICATEDUSER & tag) {
+
+		pAce->e_tag = SYNO_ACL_AUTHENTICATEDUSER;
+		pAce->e_id = SYNO_ACL_UNDEFINED_ID;
+
+	} else if (SYNO_ACL_XATTR_TAG_ID_SYSTEM & tag) {
+
+		pAce->e_tag = SYNO_ACL_SYSTEM;
+		pAce->e_id = SYNO_ACL_UNDEFINED_ID;
+
 	} else {
 		return -1;
 	}
@@ -168,6 +178,12 @@ ace_syno_to_xattr(const struct syno_acl_entry *pAce, syno_acl_xattr_entry *pEntr
 		break;
 	case SYNO_ACL_OWNER:
 		tag |= SYNO_ACL_XATTR_TAG_ID_OWNER;
+		break;
+	case SYNO_ACL_AUTHENTICATEDUSER:
+		tag |= SYNO_ACL_XATTR_TAG_ID_AUTHENTICATEDUSER;
+		break;
+	case SYNO_ACL_SYSTEM:
+		tag |= SYNO_ACL_XATTR_TAG_ID_SYSTEM;
 		break;
 	default:
 		ret = -EINVAL;

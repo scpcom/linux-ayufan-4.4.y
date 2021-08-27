@@ -79,17 +79,17 @@
 
 #define BPRINTK(fmt, args...) if (ap->flags & ATA_FLAG_DEBUGMSG) printk(KERN_ERR "%s: " fmt, __func__, ## args)
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 extern int giSynoAtaDebug;
 #define DBGMESG(x...)	\
 	if (0 < giSynoAtaDebug) printk(x)
 #endif
 
-#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(SYNO_ATA_AHCI_LED_SWITCH)
+#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
 extern int giSynoHddLedEnabled;
 #endif
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 #define WAKEINTERVAL (7UL*HZ)
 /* WD suggest 30s */
 #define ISSUEREADTIMEOUT (30UL*HZ)
@@ -255,14 +255,14 @@ enum {
 #ifdef SYNO_LIBATA_JMB_BEHAVIOR
 	ATA_PFLAG_SYNC_SCSI_DEVICE = (1 << 22),
 #endif
-#ifdef SYNO_LIBATA_PMP_UEVENT
+#ifdef MY_ABC_HERE
 	ATA_PFLAG_PMP_DISCONNECT = (1 << 23),
 	ATA_PFLAG_PMP_CONNECT = (1 << 24),
 #endif
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	ATA_PFLAG_PMP_PMCTL			= (1 << 25),
 #endif
-#ifdef SYNO_ATA_FAST_PROBE
+#ifdef MY_ABC_HERE
 	ATA_PFLAG_SYNO_BOOT_PROBE = (1 << 31),
 	/* TODO: PFLAG are exhausted, shouldn't add any more.
 	 * If OSS add any more PFLAG, we should refine SYNO PFLAG.
@@ -883,7 +883,7 @@ struct ata_port {
 	struct delayed_work	hotplug_task;
 #ifdef SYNO_PMP_HOTPLUG_TASK
 	struct delayed_work	syno_pmp_task;
-#endif //SYNO_PMP_HOTPLUG_TASK
+#endif //MY_ABC_HERE
 	struct work_struct	scsi_rescan_task;
 
 	unsigned int		hsm_task_state;
@@ -1431,8 +1431,6 @@ extern long g_sata_led_special;
 #define SYNO_DISK_HIBERNATION_MACRO
 #endif
 
-#define SYNO_SATA_IRQ_OFF_MACRO
-
 #define ATA_BASE_SHT(drv_name)					\
 	.module			= THIS_MODULE,			\
 	.name			= drv_name,			\
@@ -1450,7 +1448,6 @@ extern long g_sata_led_special;
 	SYNO_SATA_POWER_CTL_MACRO \
 	SYNO_FIXED_DISK_NAME_MACRO \
 	SYNO_DISK_HIBERNATION_MACRO \
-	SYNO_SATA_IRQ_OFF_MACRO \
 	.unlock_native_capacity	= ata_scsi_unlock_native_capacity, \
 	.sdev_attrs		= ata_common_sdev_attrs
 

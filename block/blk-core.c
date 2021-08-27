@@ -38,6 +38,11 @@
 
 #include "blk.h"
 
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+extern int syno_hibernation_log_level;
+#endif /* MY_ABC_HERE */
+
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_bio_remap);
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_rq_remap);
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_bio_complete);
@@ -1706,6 +1711,14 @@ void submit_bio(int rw, struct bio *bio)
 				bdevname(bio->bi_bdev, b),
 				count);
 		}
+
+#ifdef MY_ABC_HERE
+		if(syno_hibernation_log_level > 0) {
+			char b[BDEVNAME_SIZE];
+			syno_do_hibernation_bio_log(bdevname(bio->bi_bdev, b));
+		}
+#endif /* MY_ABC_HERE */
+
 	}
 
 	generic_make_request(bio);

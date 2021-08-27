@@ -390,26 +390,16 @@ static const struct pci_device_id sil24_pci_tbl[] = {
 	{ } /* terminate list */
 };
 
-#if defined(SYNO_ATA_SHUTDOWN_FIX) && defined(CONFIG_SYNO_X64)
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+#ifdef CONFIG_SYNO_X64
 extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
 extern int grgPwrCtlPin[];
-#endif
-
-#ifdef SYNO_ATA_SHUTDOWN_FIX
-static int syno_shutdown_eunit(struct ata_port *ap)
+static int syno_pulldown_eunit_gpio(struct ata_port *ap)
 {
 	int iRet = -1;
 	int iValue = 0;
 	int iPin = -1;
-	struct Scsi_Host *shost;
 
-	/* we will poweroff EUnit if it support ZERO_WATT deepsleep whether poweroff or reboot */
-	shost = ap->scsi_host;
-	if (shost->hostt->syno_host_poweroff_task) {
-		shost->hostt->syno_host_poweroff_task(shost);
-	}
-
-#ifdef CONFIG_SYNO_X64
 	/* Due to EUnit is edge trigger, we have to pull the GPIO PIN to low before EUnit poweroff */
 	if (!(iPin = grgPwrCtlPin[ap->print_id])) { /* get pwrctl GPIO pin */
 		goto END;
@@ -419,55 +409,45 @@ static int syno_shutdown_eunit(struct ata_port *ap)
 		goto END;
 	}
 	mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
-#endif
 
 	iRet = 0;
 END:
 	return iRet;
 }
+#endif /* CONFIG_SYNO_X64 */
+
+extern int gSynoSystemShutdown;
 
 void sil24_pci_shutdown(struct pci_dev *pdev){
 	int i;
-	int iPin = -1;
-	bool blIsNeedFreeIRQ = true;
 	struct ata_host *host = dev_get_drvdata(&pdev->dev);
+	struct Scsi_Host *shost;
 
 	if(NULL == host){
 		goto END;
 	}
 
+	// gSynoSystemShutdown = 1 means the host is going to poweroff
+	if (1 == gSynoSystemShutdown) {
 		for (i = 0; i < host->n_ports; i++) {
-		if (PWR_PMP_ZERO_WATT_TYPE != syno_get_deep_sleep_pwr_type(host->ports[i])) {
+			shost = host->ports[i]->scsi_host;
+			if (shost->hostt->syno_host_poweroff_task) {
+				shost->hostt->syno_host_poweroff_task(shost);
+			}
 #ifdef CONFIG_SYNO_X64
-			/* get pwrctl GPIO pin */
-			if (0 != (iPin = grgPwrCtlPin[host->ports[i]->print_id])) {
-				if (0 != syno_shutdown_eunit(host->ports[i])) {
-					continue;
-				}
-			} else {
-				blIsNeedFreeIRQ = false;
-			}
-#else
-			/* If the EUnit of this port doesn't support ZERO_WATT deepsleep, we shouldn't free IRQ,
-			 * we will poweroff it in  __syno_host_power_ctl_work, but only when DS do poweroff not reboot
-			 * NOTE: If this port doesn't plug any EUnit, it will also set blIsNeedFreeIRQ to false */
-			blIsNeedFreeIRQ = false;
-#endif
-		} else {
-			if (0 != syno_shutdown_eunit(host->ports[i])) {
-				continue;
-			}
+			syno_pulldown_eunit_gpio(host->ports[i]);
+#endif /* CONFIG_SYNO_X64 */
 		}
 	}
 
-	if (true == blIsNeedFreeIRQ && pdev->irq >= 0) {
+	if (pdev->irq >= 0) {
 		free_irq(pdev->irq, host);
 		pdev->irq = -1;
 	}
 END:
 	return;
 }
-#endif
+#endif /* SYNO_ATA_SHUTDOWN_FIX */
 
 static struct pci_driver sil24_pci_driver = {
 	.name			= DRV_NAME,

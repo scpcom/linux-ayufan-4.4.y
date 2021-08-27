@@ -1868,14 +1868,14 @@ struct file_operations {
 	int (*setlease)(struct file *, long, struct file_lock **);
 	long (*fallocate)(struct file *file, int mode, loff_t offset,
 			  loff_t len);
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 	ssize_t (*syno_recvfile)(struct file *file, struct socket *sock,
 	                                              loff_t *ppos, size_t count, size_t * rbytes, size_t * wbytes);
 #endif
 };
 
 struct inode_operations {
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 	int (*syno_getattr)(struct dentry *, struct kstat *, int flags);
 #endif
 	struct dentry * (*lookup) (struct inode *,struct dentry *, struct nameidata *);
@@ -2756,6 +2756,9 @@ enum {
 
 	/* filesystem does not support filling holes */
 	DIO_SKIP_HOLES	= 0x02,
+#ifdef MY_ABC_HERE
+	DIO_NO_ASYNC	= 0x04,
+#endif
 };
 
 void dio_end_io(struct bio *bio, int error);
@@ -3003,7 +3006,7 @@ static inline void inode_has_no_xattr(struct inode *inode)
 #define UNICODE_UTF8_BUFSIZE		8192
 int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int clenUtf8Str1, int clenUtf8Str2, u_int16_t *upcasetable);
 int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable);
-#endif /*SYNO_KERNEL_UNICODE */
+#endif /*MY_ABC_HERE */
 
 #ifdef SYNO_CREATE_TIME
 static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *time)
@@ -3083,7 +3086,7 @@ static inline int syno_op_set_archive_bit(struct dentry *dentry, unsigned int ar
 	return err;
 }
 
-#endif //SYNO_ARCHIVE_BIT
+#endif //MY_ABC_HERE
 
 #if defined(CONFIG_FS_SYNO_ACL) && defined(SYNO_ARCHIVE_BIT)
 #define IS_SYNOACL_SUPERUSER() (0 == current_fsuid())

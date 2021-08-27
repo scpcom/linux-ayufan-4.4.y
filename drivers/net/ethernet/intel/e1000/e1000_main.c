@@ -35,6 +35,10 @@
 #include <linux/prefetch.h>
 #include <linux/bitops.h>
 #include <linux/if_vlan.h>
+#ifdef MY_ABC_HERE
+#include <linux/proc_fs.h>
+#define SYNO_E1000_PHY_RESET_FILE "driver/e1000_phy_reset"
+#endif /* MY_ABC_HERE */
 
 /* Intel Media SOC GbE MDIO physical base address */
 static unsigned long ce4100_gbe_mdio_base_phy;
@@ -280,7 +284,63 @@ void e1000_syno_led_switch(int iEnable)
 #endif
 }
 EXPORT_SYMBOL(e1000_syno_led_switch);
-#endif /*SYNO_E1000E_LED_SWITCH*/
+#endif /*MY_ABC_HERE*/
+
+#ifdef MY_ABC_HERE
+static struct proc_dir_entry *syno_e1000_phy_reset_proc_entry = NULL;
+
+static int syno_e1000_phy_reset_proc_show(struct seq_file *seq, void *v)
+{
+	// leave a dummy entry because proc_create need it
+	seq_puts(seq, "0\n");
+	return 0;
+}
+
+static int syno_e1000_phy_reset_proc_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, syno_e1000_phy_reset_proc_show, inode->i_private);
+}
+
+static ssize_t syno_e1000_phy_reset_proc_write(struct file *file, const char __user *buffer,
+		size_t count, loff_t *pos)
+{
+	struct net_device *dev = NULL;
+	struct e1000_adapter *adapter = NULL;
+	struct e1000_hw *hw = NULL;
+
+	dev = first_net_device(&init_net);
+	adapter = netdev_priv(dev);
+	hw = &adapter->hw;
+	/* The structure retured by first_net_device()
+	* does not contain the value of mac_type, this
+	* makes wrong opertaion to r/w phy regs.
+	* So we assign the value for Evansport's nic  here.
+	*/
+	hw->mac_type = e1000_ce4100;
+
+	e1000_phy_reset(hw);
+
+	return count;
+}
+
+static const struct file_operations syno_e1000_phy_reset_fops = {
+	.open  = syno_e1000_phy_reset_proc_open,
+	.read  = seq_read,
+	.write  = syno_e1000_phy_reset_proc_write,
+	.llseek  = seq_lseek,
+	.release = single_release,
+};
+
+static void syno_phy_reset_proc_add(void)
+{
+	syno_e1000_phy_reset_proc_entry = proc_create(SYNO_E1000_PHY_RESET_FILE, 0600, NULL, &syno_e1000_phy_reset_fops);
+}
+
+static void syno_phy_reset_proc_remove(void)
+{
+	remove_proc_entry(SYNO_E1000_PHY_RESET_FILE, NULL);
+}
+#endif /* MY_ABC_HERE */
 
 /**
  * e1000_init_module - Driver Registration Routine
@@ -304,6 +364,10 @@ static int __init e1000_init_module(void)
 			pr_info("copybreak enabled for "
 				   "packets <= %u bytes\n", copybreak);
 	}
+#ifdef MY_ABC_HERE
+	syno_phy_reset_proc_add();
+#endif /* MY_ABC_HERE */
+
 	return ret;
 }
 
@@ -318,6 +382,9 @@ module_init(e1000_init_module);
 
 static void __exit e1000_exit_module(void)
 {
+#ifdef MY_ABC_HERE
+	syno_phy_reset_proc_remove();
+#endif /* MY_ABC_HERE */
 	pci_unregister_driver(&e1000_driver);
 }
 

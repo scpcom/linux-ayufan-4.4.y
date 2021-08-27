@@ -36,11 +36,9 @@ void armada_msi_irq_handler(unsigned int irq, struct irq_desc *desc)
 	generic_handle_irq(IRQ_AURORA_MSI_START + j - NR_PRIVATE_MSI_IRQS);
 }
 
-void __init armada_msi_init(void)
+void armada_msi_init_unmask(void)
 {
 	unsigned long temp;
-
-	irq_set_chained_handler(IRQ_AURORA_IN_DRBL_HIGH, armada_msi_irq_handler);
 
 	/* Unmask private doorbells 16-31 */
 	temp = MV_REG_READ(AXP_IN_DRBEL_MSK) | (0xFFFF0000);
@@ -52,6 +50,13 @@ void __init armada_msi_init(void)
 	temp |= 0xf;
 	MV_REG_WRITE(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_IN_DRBL_HIGH), temp);
 #endif
+}
+
+void __init armada_msi_init(void)
+{
+	irq_set_chained_handler(IRQ_AURORA_IN_DRBL_HIGH, armada_msi_irq_handler);
+
+	armada_msi_init_unmask();
 }
 
 /*

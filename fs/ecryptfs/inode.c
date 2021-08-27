@@ -568,6 +568,13 @@ static int ecryptfs_symlink(struct inode *dir, struct dentry *dentry,
 						  strlen(symname));
 	if (rc)
 		goto out_lock;
+#ifdef MY_ABC_HERE
+	if (encoded_symlen > PATH_MAX - 1) {
+		kfree(encoded_symname);
+		rc = -ENAMETOOLONG;
+		goto out_lock;
+	}
+#endif
 	rc = vfs_symlink(lower_dir_dentry->d_inode, lower_dentry,
 			 encoded_symname);
 	kfree(encoded_symname);
@@ -1042,7 +1049,7 @@ static int ecryptfs_syno_set_archive_bit(struct dentry *dentry, unsigned int arb
 	}
 	return error;
 }
-#endif //SYNO_ARCHIVE_BIT
+#endif //MY_ABC_HERE
 
 #ifdef SYNO_ARCHIVE_VERSION
 static int ecryptfs_syno_set_archive_ver(struct dentry *dentry, u32 version)
@@ -1154,7 +1161,7 @@ ecryptfs_syno_getattr(struct dentry *dentry, struct kstat *st, int flags)
 	}
 	return -EOPNOTSUPP;
 }
-#endif //SYNO_STAT
+#endif //MY_ABC_HERE
 
 static int
 ecryptfs_permission(struct inode *inode, int mask)

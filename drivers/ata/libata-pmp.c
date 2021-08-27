@@ -20,7 +20,7 @@
 #include "libata.h"
 #include "libata-transport.h"
 
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
 
@@ -863,42 +863,6 @@ CONTINUE_FOR:
 	}
 }
 
-int syno_libata_pmp_deepsleep_indicator_set(struct ata_port *ap, const int blCLR)
-{
-#define CLEAR_DEEPSLEEP_BIT(BITMAP)	(BITMAP & (~0x80))
-	SYNO_PM_PKG pm_pkg;
-	int iRet = -1;
-	unsigned int uiVar = 0;
-
-	if (!ap) {
-		goto END;
-	}
-
-	syno_pm_hddled_status_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
-				sata_pmp_gscr_devid(ap->link.device->gscr), &pm_pkg);
-
-	iRet = syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg);
-	if(0 != iRet) {
-		goto END;
-	}
-	uiVar = CLEAR_DEEPSLEEP_BIT(pm_pkg.var);
-
-	if (syno_pm_deepsleep_indicator_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
-				sata_pmp_gscr_devid(ap->link.device->gscr), &pm_pkg, blCLR)) {
-		pm_pkg.var |= uiVar;
-		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
-			printk("ata%d pm deepsleep indicator write 0 fail\n", ap->print_id);
-			ata_port_printk(ap, KERN_INFO, "Set PMP deepsleep indicator %d failed\n", blCLR);
-			goto END;
-		}
-
-	}
-
-	iRet = 0;
-END:
-	return iRet;
-}
-
 int
 syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 {
@@ -966,9 +930,13 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 
 	for (iRetry = 0; blPowerOn ^ syno_pm_is_poweron(ap)
 					 && iRetry < SYNO_PMP_PWR_TRIES; ++iRetry) {
+
+		if (blPowerOn) {
+		} else {
 			if (syno_sata_pmp_check_powerbtn(ap)) {
 				printk("check Eunit port %d power button fail\n", ap->print_id);
 			}
+		}
 
 		syno_pm_poweron_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
@@ -992,7 +960,6 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 1);
 		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
-			printk("ata%d pm poweron write 1 fail\n", ap->print_id);
 			goto END;
 		}
 
@@ -1764,7 +1731,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	struct ata_port *ap = link->ap;
 	u32 *gscr = (void *)ap->sector_buf;
 	int rc;
-#if defined(SYNO_SATA_EBOX_REFRESH)
+#if defined(MY_ABC_HERE) 
 	struct ata_port *master_ap = NULL;
 #endif
 
@@ -1802,7 +1769,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 
 	ata_eh_done(link, NULL, ATA_EH_REVALIDATE);
 
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 	if(funcSYNOSendEboxRefreshEvent) {
 		master_ap = SynoEunitFindMaster(ap);
 		if (NULL != master_ap) {

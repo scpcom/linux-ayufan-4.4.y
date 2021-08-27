@@ -32,9 +32,10 @@
 #include <linux/tracepoint.h>
 #include "internal.h"
 
-#if defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
-#include <linux/syno_affinity.h>
-#endif
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+extern int syno_hibernation_log_level;
+#endif /* MY_ABC_HERE */
 
 /*
  * Passed into wb_writeback(), essentially a subset of writeback_control
@@ -933,9 +934,6 @@ int bdi_writeback_thread(void *data)
 	struct bdi_writeback *wb = data;
 	struct backing_dev_info *bdi = wb->bdi;
 	long pages_written;
-#if defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
-	SYNOSetTaskAffinity(current, 0);
-#endif
 
 	current->flags |= PF_SWAPWRITE;
 	set_freezable();
@@ -1084,6 +1082,12 @@ void __mark_inode_dirty(struct inode *inode, int flags)
 
 	if (unlikely(block_dump))
 		block_dump___mark_inode_dirty(inode);
+
+#ifdef MY_ABC_HERE
+	if(syno_hibernation_log_level > 0) {
+		syno_do_hibernation_inode_log(inode);
+	}
+#endif /* MY_ABC_HERE */
 
 	spin_lock(&inode->i_lock);
 	if ((inode->i_state & flags) != flags) {

@@ -80,11 +80,13 @@
  * module options
  */
 
+
+
 #ifdef SYNO_SATA_88SX7042_MSI
 static int msi = 1;
-#else /* SYNO_SATA_88SX7042_MSI */
+#else /* MY_ABC_HERE */
 static int msi;
-#endif /* SYNO_SATA_88SX7042_MSI */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_PCI
 module_param(msi, int, S_IRUGO);
 MODULE_PARM_DESC(msi, "Enable use of PCI MSI (0=off, 1=on)");
@@ -604,6 +606,9 @@ static int mv_qc_defer(struct ata_queued_cmd *qc);
 static void mv_qc_prep(struct ata_queued_cmd *qc);
 static void mv_qc_prep_iie(struct ata_queued_cmd *qc);
 static unsigned int mv_qc_issue(struct ata_queued_cmd *qc);
+#ifdef MY_ABC_HERE
+static bool syno_mv_qc_fill_rtf(struct ata_queued_cmd *qc);
+#endif // MY_ABC_HERE
 static int mv_hardreset(struct ata_link *link, unsigned int *class,
 			unsigned long deadline);
 static void mv_eh_freeze(struct ata_port *ap);
@@ -744,7 +749,9 @@ static struct ata_port_operations mv6_ops = {
 	.qc_defer		= mv_qc_defer,
 	.qc_prep		= mv_qc_prep,
 	.qc_issue		= mv_qc_issue,
-
+#ifdef MY_ABC_HERE
+	.qc_fill_rtf	= syno_mv_qc_fill_rtf,
+#endif // MY_ABC_HERE
 	.dev_config             = mv6_dev_config,
 
 	.freeze			= mv_eh_freeze,
@@ -2470,7 +2477,36 @@ static unsigned int mv_qc_issue(struct ata_queued_cmd *qc)
 	}
 	return ata_bmdma_qc_issue(qc);
 }
+#ifdef MY_ABC_HERE
+static bool syno_mv_qc_fill_rtf(struct ata_queued_cmd *qc)
+{
+	bool bRet = false;
+	struct ata_taskfile *rtf = &qc->result_tf;
+	struct ata_taskfile *tf = &qc->tf;
 
+	bRet = ata_sff_qc_fill_rtf(qc);
+
+    /* MV7042 would return the LBA even if the NCQ command failed because of UNC error,
+	 * and the scsi layer would take that as a partially success (which is not, of course.)
+	 * Since the LBA register value is not defined in the error return of a ATA_CMD_FPDMA_READ in ATA 8 standard,
+	 * we fill the LBA and device in result taskfile with the preceding setup.
+	 * Reference to "American National Standard T13/1699-D Table 136." for more information.
+     */
+	if (ATA_ERR & rtf->command &&
+		ATA_UNC & rtf->feature &&
+		ATA_TFLAG_LBA48 & tf->flags &&
+		ATA_CMD_FPDMA_READ == tf->command) {
+		rtf->lbal		= tf->lbal;
+		rtf->lbam		= tf->lbam;
+		rtf->lbah		= tf->lbah;
+		rtf->device		= tf->device;
+		rtf->hob_lbal	= tf->hob_lbal;
+		rtf->hob_lbam	= tf->hob_lbam;
+		rtf->hob_lbah	= tf->hob_lbah;
+	}
+	return bRet;
+}
+#endif // MY_ABC_HERE
 static struct ata_queued_cmd *mv_get_active_qc(struct ata_port *ap)
 {
 	struct mv_port_priv *pp = ap->private_data;
@@ -3430,7 +3466,7 @@ static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 #else
 	writel(0x00000060, mmio + GPIO_PORT_CTL);
 #endif
-#ifdef  SYNO_SATA_LED_SPECIAL
+#ifdef  MY_ABC_HERE
 	}
 #endif
 }
@@ -4448,6 +4484,63 @@ static int mv_platform_resume(struct platform_device *pdev)
 #endif
 
 #ifdef SYNO_ATA_SHUTDOWN_FIX
+#ifdef CONFIG_SYNO_X64
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+extern int grgPwrCtlPin[];
+static int syno_pulldown_eunit_gpio(struct ata_port *ap)
+{
+	int iRet = -1;
+	int iValue = 0;
+	int iPin = -1;
+
+	/* Due to EUnit is edge trigger, we have to pull the GPIO PIN to low before EUnit poweroff */
+	if (!(iPin = grgPwrCtlPin[ap->print_id])) { /* get pwrctl GPIO pin */
+		goto END;
+	}
+	iValue = 0;
+	if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
+		goto END;
+	}
+	mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
+
+	iRet = 0;
+END:
+	return iRet;
+}
+#endif /* CONFIG_SYNO_X64 */
+
+extern int gSynoSystemShutdown;
+
+void mv_platform_shutdown(struct platform_device *pdev) {
+	int i = 0;
+	struct ata_host *host = platform_get_drvdata(pdev);
+	struct Scsi_Host *shost = NULL;
+	int irq = -1;
+
+	if (NULL == host) {
+		goto END;
+	}
+	// gSynoSystemShutdown = 1 means the host is going to poweroff
+	if (1 == gSynoSystemShutdown) {
+		for (i = 0; i < host->n_ports; i++) {
+			shost = host->ports[i]->scsi_host;
+			if (shost->hostt->syno_host_poweroff_task) {
+				shost->hostt->syno_host_poweroff_task(shost);
+			}
+#ifdef CONFIG_SYNO_X64
+			syno_pulldown_eunit_gpio(host->ports[i]);
+#endif /* CONFIG_SYNO_X64 */
+		}
+	}
+
+	irq = platform_get_irq(pdev, 0);
+	if (0 < irq) {
+		free_irq(irq, host);
+	}
+END:
+	return;
+}
+
 void mv_pci_shutdown(struct pci_dev *pdev){
 	int i;
 	struct ata_host *host = dev_get_drvdata(&pdev->dev);
@@ -4456,12 +4549,17 @@ void mv_pci_shutdown(struct pci_dev *pdev){
 	if(NULL == host){
 		goto END;
 	}
-
+	// gSynoSystemShutdown = 1 means the host is going to poweroff
+	if (1 == gSynoSystemShutdown) {
 		for (i = 0; i < host->n_ports; i++) {
 			shost = host->ports[i]->scsi_host;
 			if (shost->hostt->syno_host_poweroff_task) {
 				shost->hostt->syno_host_poweroff_task(shost);
 			}
+#ifdef CONFIG_SYNO_X64
+			syno_pulldown_eunit_gpio(host->ports[i]);
+#endif /* CONFIG_SYNO_X64 */
+		}
 	}
 
 	if (pdev->irq >= 0) {
@@ -4482,8 +4580,10 @@ static struct platform_driver mv_platform_driver = {
 				   .name = DRV_NAME,
 				   .owner = THIS_MODULE,
 				  },
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+	.shutdown		= mv_platform_shutdown,
+#endif
 };
-
 
 #ifdef CONFIG_PCI
 static int mv_pci_init_one(struct pci_dev *pdev,

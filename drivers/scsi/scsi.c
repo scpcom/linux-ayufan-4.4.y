@@ -669,7 +669,7 @@ void syno_disk_hiternation_cmd_printk(struct scsi_device *sdp, struct scsi_cmnd 
 	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type ||
 		SYNO_PORT_TYPE_SAS  == sdp->host->hostt->syno_port_type) {
 		/*our SMART read command (SCpnt[0]:ATA_16, SCpnt[14]: 0xb0), it's "disk" is null, so we must check it.*/
-		syno_do_hibernation_log_print(sdp->syno_disk_name);
+		syno_do_hibernation_scsi_log(sdp->syno_disk_name);
 	} else if (SYNO_PORT_TYPE_USB == sdp->host->hostt->syno_port_type) {
 		char szBuf[128];
 		struct mm_struct *mm;

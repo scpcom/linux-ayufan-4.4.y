@@ -235,7 +235,7 @@ static void __flush_dcache_aliases(struct address_space *mapping, struct page *p
 	flush_dcache_mmap_unlock(mapping);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if (defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_ARMADA_375)) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 
 void __sync_outer_cache(pte_t *ptep, pte_t pteval)
 {
@@ -325,7 +325,7 @@ void flush_dcache_page(struct page *page)
 		else if (mapping)
 			__flush_icache_all();
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if (defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_ARMADA_375)) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 		sync_outer_cache(page);
 #endif
 		set_bit(PG_dcache_clean, &page->flags);

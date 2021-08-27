@@ -75,6 +75,9 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 	size_t	dst_len = len;
 	size_t	dst_offset = offset;
 	int ret;
+#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
+	int retry_limit = 10;
+#endif
 
 	pr_debug("%s %d copy %d len %d nr_iovecs %d skb frags %d\n",
 			__func__, __LINE__, copy, len, pinned_list->nr_iovecs,
@@ -167,11 +170,24 @@ fill_dst_sg:
 		dst_sg_len = dma_memcpy_fill_sg_from_iovec(chan, to, pinned_list, dst_sg, dst_offset, dst_len);
 		BUG_ON(dst_sg_len <= 0);
 
+#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
+retry:
+#endif
 		cookie = dma_async_memcpy_sg_to_sg(chan,
 						dst_sgt->sgl,
 						dst_sg_len,
 						src_sgt->sgl,
 						src_sg_len);
+#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
+		if (cookie == -ENOMEM) {
+			if (--retry_limit > 0) {
+				udelay(50);
+				goto retry;
+			} else {
+				printk(KERN_ERR "Cannot retrieve DMA buffer!\n");
+			}
+		}
+#endif
 	}
 #else
 	skb_walk_frags(skb, frag_iter) {
