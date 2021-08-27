@@ -125,7 +125,7 @@ static inline int verify_replay(struct xfrm_usersa_info *p,
 	struct nlattr *rt = attrs[XFRMA_REPLAY_ESN_VAL];
 
 	if ((p->flags & XFRM_STATE_ESN) && !rt)
-			return -EINVAL;
+		return -EINVAL;
 
 	if (!rt)
 		return 0;
@@ -2971,3 +2971,4 @@ module_init(xfrm_user_init);
 module_exit(xfrm_user_exit);
 MODULE_LICENSE("GPL");
 MODULE_ALIAS_NET_PF_PROTO(PF_NETLINK, NETLINK_XFRM);
+

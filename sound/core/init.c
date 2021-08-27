@@ -456,7 +456,7 @@ int snd_card_free_when_closed(struct snd_card *card)
 	if (list_empty(&card->files_list))
 		free_now = 1;
 	else
-	card->free_on_last_close = 1;
+		card->free_on_last_close = 1;
 	spin_unlock(&card->files_lock);
 
 	if (free_now)

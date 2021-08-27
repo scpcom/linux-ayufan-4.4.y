@@ -110,9 +110,9 @@ static inline void freezer_count(void)
 	}
 }
 
-	/*
+/*
  * Check if the task should be counted as freezable by the freezer
-	 */
+ */
 static inline int freezer_should_skip(struct task_struct *p)
 {
 	return !!(p->flags & PF_FREEZER_SKIP);
@@ -163,6 +163,7 @@ static inline void set_freezable_with_signal(void)
 	} while (try_to_freeze());					\
 	__retval;							\
 })
+
 
 #define wait_event_freezable_timeout(wq, condition, timeout)		\
 ({									\

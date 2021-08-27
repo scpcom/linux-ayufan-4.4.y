@@ -681,7 +681,7 @@ int ubifs_find_free_leb_for_idx(struct ubifs_info *c)
 	if (!lprops) {
 		lprops = ubifs_fast_find_freeable(c);
 		if (!lprops) {
-				ubifs_assert(c->freeable_cnt == 0);
+			ubifs_assert(c->freeable_cnt == 0);
 			if (c->lst.empty_lebs - c->lst.taken_empty_lebs > 0) {
 				lprops = scan_for_leb_for_idx(c);
 				if (IS_ERR(lprops)) {

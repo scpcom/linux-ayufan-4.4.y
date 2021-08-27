@@ -72,9 +72,11 @@
 #define OUTPUT_URBS 7
 #define INPUT_URBS 7
 
+
 MODULE_AUTHOR("Clemens Ladisch <clemens@ladisch.de>");
 MODULE_DESCRIPTION("USB Audio/MIDI helper module");
 MODULE_LICENSE("Dual BSD/GPL");
+
 
 struct usb_ms_header_descriptor {
 	__u8  bLength;
@@ -1010,6 +1012,7 @@ static struct usb_protocol_ops snd_usbmidi_emagic_ops = {
 	.finish_out_endpoint = snd_usbmidi_emagic_finish_out,
 };
 
+
 static void update_roland_altsetting(struct snd_usb_midi* umidi)
 {
 	struct usb_interface *intf;
@@ -1037,19 +1040,19 @@ static void substream_open(struct snd_rawmidi_substream *substream, int open)
 	mutex_lock(&umidi->mutex);
 	if (open) {
 		if (umidi->opened++ == 0 && umidi->roland_load_ctl) {
-				ctl = umidi->roland_load_ctl;
-				ctl->vd[0].access |= SNDRV_CTL_ELEM_ACCESS_INACTIVE;
-				snd_ctl_notify(umidi->card,
+			ctl = umidi->roland_load_ctl;
+			ctl->vd[0].access |= SNDRV_CTL_ELEM_ACCESS_INACTIVE;
+			snd_ctl_notify(umidi->card,
 				       SNDRV_CTL_EVENT_MASK_INFO, &ctl->id);
-				update_roland_altsetting(umidi);
-			}
+			update_roland_altsetting(umidi);
+		}
 	} else {
 		if (--umidi->opened == 0 && umidi->roland_load_ctl) {
-				ctl = umidi->roland_load_ctl;
-				ctl->vd[0].access &= ~SNDRV_CTL_ELEM_ACCESS_INACTIVE;
-				snd_ctl_notify(umidi->card,
+			ctl = umidi->roland_load_ctl;
+			ctl->vd[0].access &= ~SNDRV_CTL_ELEM_ACCESS_INACTIVE;
+			snd_ctl_notify(umidi->card,
 				       SNDRV_CTL_EVENT_MASK_INFO, &ctl->id);
-			}
+		}
 	}
 	mutex_unlock(&umidi->mutex);
 }

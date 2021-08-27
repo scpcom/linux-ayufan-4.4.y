@@ -1502,6 +1502,7 @@ static void ftrace_bug(int failed, unsigned long ip)
 	}
 }
 
+
 /* Return 1 if the address range is reserved for ftrace */
 int ftrace_text_reserved(void *start, void *end)
 {
@@ -1515,6 +1516,7 @@ int ftrace_text_reserved(void *start, void *end)
 	} while_for_each_ftrace_rec();
 	return 0;
 }
+
 
 static int
 __ftrace_replace_code(struct dyn_ftrace *rec, int update)
@@ -2592,6 +2594,7 @@ static void __disable_ftrace_function_probe(void)
 	ftrace_probe_registered = 0;
 }
 
+
 static void ftrace_free_entry_rcu(struct rcu_head *rhp)
 {
 	struct ftrace_func_probe *entry =
@@ -2601,6 +2604,7 @@ static void ftrace_free_entry_rcu(struct rcu_head *rhp)
 		entry->ops->free(&entry->data);
 	kfree(entry);
 }
+
 
 int
 register_ftrace_function_probe(char *glob, struct ftrace_probe_ops *ops,
@@ -3451,7 +3455,7 @@ static void ftrace_init_module(struct module *mod,
 }
 
 static int ftrace_module_notify(struct notifier_block *self,
-				      unsigned long val, void *data)
+				unsigned long val, void *data)
 {
 	struct module *mod = data;
 
@@ -3470,7 +3474,7 @@ static int ftrace_module_notify(struct notifier_block *self,
 }
 #else
 static int ftrace_module_notify(struct notifier_block *self,
-				     unsigned long val, void *data)
+				unsigned long val, void *data)
 {
 	return 0;
 }
@@ -3890,6 +3894,7 @@ int register_ftrace_function(struct ftrace_ops *ops)
 	ret = __register_ftrace_function(ops);
 	if (!ret)
 		ret = ftrace_startup(ops, 0);
+
 
  out_unlock:
 	mutex_unlock(&ftrace_lock);

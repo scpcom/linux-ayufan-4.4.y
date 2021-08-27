@@ -142,7 +142,7 @@ out:
 static void ecryptfs_vma_close(struct vm_area_struct *vma)
 {
 	filemap_write_and_wait(vma->vm_file->f_mapping);
-	}
+}
 
 static const struct vm_operations_struct ecryptfs_file_vm_ops = {
 	.close		= ecryptfs_vma_close,
@@ -154,7 +154,7 @@ static int ecryptfs_file_mmap(struct file *file, struct vm_area_struct *vma)
 	int rc;
 
 	rc = generic_file_mmap(file, vma);
-		if (!rc)
+	if (!rc)
 		vma->vm_ops = &ecryptfs_file_vm_ops;
 
 	return rc;
@@ -253,7 +253,7 @@ static int ecryptfs_open(struct inode *inode, struct file *file)
 				       "Plaintext passthrough mode is not "
 				       "enabled; returning -EIO\n");
 				mutex_unlock(&crypt_stat->cs_mutex);
-		goto out_put;
+				goto out_put;
 			}
 			rc = 0;
 			crypt_stat->flags &= ~(ECRYPTFS_I_SIZE_INITIALIZED

@@ -517,6 +517,7 @@ static int __devinit virtblk_probe(struct virtio_device *vdev)
 	if (!err && opt_io_size)
 		blk_queue_io_opt(q, blk_size * opt_io_size);
 
+
 	add_disk(vblk->disk);
 	err = device_create_file(disk_to_dev(vblk->disk), &dev_attr_serial);
 	if (err)
@@ -563,7 +564,7 @@ static void __devexit virtblk_remove(struct virtio_device *vdev)
 	mempool_destroy(vblk->pool);
 	vdev->config->del_vqs(vdev);
 	kfree(vblk);
-		ida_simple_remove(&vd_index_ida, index);
+	ida_simple_remove(&vd_index_ida, index);
 }
 
 static const struct virtio_device_id id_table[] = {
