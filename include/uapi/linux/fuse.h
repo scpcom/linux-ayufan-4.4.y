@@ -701,4 +701,6 @@ struct fuse_notify_retrieve_in {
 	__u64	dummy4;
 };
 
+#define SYNO_FUSE_ACL_CACHE_SIZE 2048
+
 #endif /* _UAPI_LINUX_FUSE_H */

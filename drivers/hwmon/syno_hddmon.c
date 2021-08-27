@@ -124,9 +124,8 @@ static int syno_hddmon_unplug_monitor(void *args)
 				continue;
 			}
 
-
 			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
-			pData->blHddEnStat[iIdx] = iPrzPinVal;
+			pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 		}
 
 		uiTimeout = SYNO_HDDMON_POLL_SEC * HZ;
@@ -158,14 +157,15 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 
 		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
 
-		if(pData->blHddEnStat[iIdx] != iPrzPinVal) {
+		if(pData->blHddEnStat[iIdx-1] != iPrzPinVal) {
+
 			if(iPrzPinVal) {
 				//while starting a port, monitoring other ports for the disks unplugged
 				pUnplugMonitor = kthread_run(syno_hddmon_unplug_monitor, pData, SYNO_HDDMON_UPLG_STR);
 			}
 
 			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
-			pData->blHddEnStat[iIdx] = iPrzPinVal;
+			pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 
 			if(iPrzPinVal) {
 				uiTimeout = SYNO_HDDMON_EN_WAIT_SEC * HZ;
@@ -204,11 +204,11 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 		 */
 		if(!iPrzPinVal) {
 			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
-			pData->blHddEnStat[iIdx] = iPrzPinVal;
+			pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 		}
 
 		/*sync the states*/
-		pData->blHddEnStat[iIdx] = iPrzPinVal;
+		pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 
 	}
 
@@ -278,6 +278,8 @@ END:
 static void __exit syno_hddman_exit(void)
 {
 	if(pHddPrzPolling) {
+        printk("###\n");
+        WARN_ON(1);
 		kthread_stop(pHddPrzPolling);
 	}
 }

@@ -73,12 +73,6 @@
 static const struct super_operations btrfs_super_ops;
 static struct file_system_type btrfs_fs_type;
 
-#ifdef MY_ABC_HERE
-spinlock_t SYNOBtrfsGlobalLock;  /* lock for SYNOBtrfsGlobalBuf[]  */
-unsigned char SYNOBtrfsGlobalBuf[UNICODE_UTF8_BUFSIZE];
-static int SYNOBtrfsGlobalLockInit = 0;
-#endif
-
 static const char *btrfs_decode_error(int errno)
 {
 	char *errstr = "unknown";
@@ -945,12 +939,6 @@ static int btrfs_fill_super(struct super_block *sb,
 
 	save_mount_options(sb, data);
 	cleancache_init_fs(sb);
-#ifdef MY_ABC_HERE
-	if (!SYNOBtrfsGlobalLockInit) {
-		spin_lock_init(&SYNOBtrfsGlobalLock);
-		SYNOBtrfsGlobalLockInit=1;
-	}
-#endif
 	sb->s_flags |= MS_ACTIVE;
 	return 0;
 

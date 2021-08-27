@@ -433,7 +433,7 @@ void kernel_power_off(void)
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
 #ifdef MY_DEF_HERE
-#if defined(CONFIG_SYNO_CEDARVIEW) || defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_CEDARVIEW) || defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON)
 #define UART_PORT1_IOBASE   0x2F8
 #else
 #define UART_PORT1_IOBASE   0x3F8

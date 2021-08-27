@@ -393,10 +393,26 @@ void sil24_pci_shutdown(struct pci_dev *pdev){
 		for (i = 0; i < host->n_ports; i++) {
 
 		if (PWR_PMP_ZERO_WATT_TYPE != syno_get_deep_sleep_pwr_type(host->ports[i])) {
+#ifdef CONFIG_SYNO_X64
+			/* get pwrctl GPIO pin */
+			if (!(iPin = grgPwrCtlPin[host->ports[i]->print_id])) {
+				/* If the EUnit of this port doesn't support ZERO_WATT deepsleep, we shouldn't free IRQ,
+				 * we will poweroff it in  __syno_host_power_ctl_work, but only when DS do poweroff not reboot
+				 * NOTE: If this port doesn't plug any EUnit, it will also set blIsNeedFreeIRQ to false */
+				blIsNeedFreeIRQ = false;
+			} else {
+				iValue = 0;
+				if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
+					continue;
+				}
+				mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
+			}
+#else
 			/* If the EUnit of this port doesn't support ZERO_WATT deepsleep, we shouldn't free IRQ,
 			 * we will poweroff it in  __syno_host_power_ctl_work, but only when DS do poweroff not reboot
 			 * NOTE: If this port doesn't plug any EUnit, it will also set blIsNeedFreeIRQ to false */
 			blIsNeedFreeIRQ = false;
+#endif
 		} else {
 			/* we will poweroff EUnit if it support ZERO_WATT deepsleep whether poweroff or reboot */
 			shost = host->ports[i]->scsi_host;

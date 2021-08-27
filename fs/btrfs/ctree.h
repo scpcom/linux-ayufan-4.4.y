@@ -597,10 +597,6 @@ struct btrfs_path {
 	unsigned int skip_locking:1;
 	unsigned int leave_spinning:1;
 	unsigned int search_commit_root:1;
-#ifdef MY_ABC_HERE
-	unsigned int caseless_key:1;
-	unsigned int caseless_name:1;
-#endif
 };
 
 /*
@@ -1851,9 +1847,6 @@ struct btrfs_ioctl_defrag_range_args {
 #define BTRFS_DIR_LOG_ITEM_KEY  60
 #define BTRFS_DIR_LOG_INDEX_KEY 72
 #define BTRFS_DIR_ITEM_KEY	84
-#ifdef MY_ABC_HERE
-#define BTRFS_DIR_ITEM_CASELESS_KEY 91
-#endif
 #define BTRFS_DIR_INDEX_KEY	96
 /*
  * extent data is for file data
@@ -3669,11 +3662,7 @@ static inline void btrfs_force_ra(struct address_space *mapping,
 	page_cache_sync_readahead(mapping, ra, file, offset, req_size);
 }
 
-#ifdef MY_ABC_HERE
-struct inode *btrfs_lookup_dentry(struct inode *dir, struct dentry *dentry, int caseless);
-#else
 struct inode *btrfs_lookup_dentry(struct inode *dir, struct dentry *dentry);
-#endif
 int btrfs_set_inode_index(struct inode *dir, u64 *index);
 int btrfs_unlink_inode(struct btrfs_trans_handle *trans,
 		       struct btrfs_root *root,

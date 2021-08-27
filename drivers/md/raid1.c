@@ -921,19 +921,6 @@ do_sync_io:
 	pr_debug("%dB behind alloc failed, doing sync I/O\n", bio->bi_size);
 }
 
-#ifdef MY_ABC_HERE
-static void syno_flashcache_return_error(struct bio *bio)
-{
-	/* defined in blk_types.h */
-	if (bio_flagged(bio, BIO_MD_RETURN_ERROR)) {
-		printk(KERN_DEBUG "Get flashcache read error, return error code\n");
-		bio_endio(bio, 1);
-	} else {
-		bio_endio(bio, 0);
-	}
-}
-#endif
-
 static void make_request(struct mddev *mddev, struct bio * bio)
 {
 	struct r1conf *conf = mddev->private;

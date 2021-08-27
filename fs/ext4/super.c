@@ -54,10 +54,6 @@
 #include "acl.h"
 #include "mballoc.h"
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-#include <linux/syno_acl.h>
-#endif
-
 #define CREATE_TRACE_POINTS
 #include <trace/events/ext4.h>
 
@@ -1153,10 +1149,7 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",nouser_xattr");
 #endif
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (test_opt(sb, SYNO_ACL))
-		seq_puts(seq, ","SYNO_ACL_MNT_OPT);
-#elif defined(CONFIG_EXT4_FS_POSIX_ACL)
+#ifdef CONFIG_EXT4_FS_POSIX_ACL
 	if (test_opt(sb, POSIX_ACL) && !(def_mount_opts & EXT4_DEFM_ACL))
 		seq_puts(seq, ",acl");
 	if (!test_opt(sb, POSIX_ACL) && (def_mount_opts & EXT4_DEFM_ACL))
@@ -1512,9 +1505,6 @@ enum {
 	Opt_inode_readahead_blks, Opt_journal_ioprio,
 	Opt_dioread_nolock, Opt_dioread_lock,
 	Opt_discard, Opt_nodiscard, Opt_init_itable, Opt_noinit_itable,
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	Opt_synoacl, Opt_nosynoacl,
-#endif
 };
 
 static const match_table_t tokens = {
@@ -1538,10 +1528,6 @@ static const match_table_t tokens = {
 	{Opt_nouser_xattr, "nouser_xattr"},
 	{Opt_acl, "acl"},
 	{Opt_noacl, "noacl"},
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	{Opt_synoacl, SYNO_ACL_MNT_OPT},
-	{Opt_nosynoacl, SYNO_ACL_NOT_MNT_OPT},
-#endif
 	{Opt_noload, "noload"},
 	{Opt_noload, "norecovery"},
 	{Opt_nobh, "nobh"},
@@ -1800,14 +1786,7 @@ static int parse_options(char *options, struct super_block *sb,
 			ext4_msg(sb, KERN_ERR, "(no)user_xattr options not supported");
 			break;
 #endif
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-		case Opt_synoacl:
-			set_opt(sb, SYNO_ACL);
-			break;
-		case Opt_nosynoacl:
-			clear_opt(sb, SYNO_ACL);
-			break;
-#elif  defined(CONFIG_EXT4_FS_POSIX_ACL)
+#ifdef CONFIG_EXT4_FS_POSIX_ACL
 		case Opt_acl:
 			set_opt(sb, POSIX_ACL);
 			break;
@@ -3664,21 +3643,8 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		if (test_opt(sb, DELALLOC))
 			clear_opt(sb, DELALLOC);
 	}
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (test_opt(sb, SYNO_ACL)) {
-		int st = SYNOACLModuleStatusGet("synoacl_vfs");
-		if (MODULE_STATE_LIVE != st) {
-			ext4_msg(sb, KERN_ERR, "synoacl module has not been loaded. Unable to mount with synoacl, vfs_mod status=%d", st);
-			clear_opt(sb, SYNO_ACL);
-		} else {
-			sb->s_flags |= MS_SYNOACL;
-			SYNOACLModuleGet("synoacl_vfs");
-		}
-	}
-#else
 	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
 		(test_opt(sb, POSIX_ACL) ? MS_POSIXACL : 0);
-#endif
 
 	if (le32_to_cpu(es->s_rev_level) == EXT4_GOOD_OLD_REV &&
 	    (EXT4_HAS_COMPAT_FEATURE(sb, ~0U) ||
@@ -4871,24 +4837,8 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 	if (sbi->s_mount_flags & EXT4_MF_FS_ABORTED)
 		ext4_abort(sb, "Abort forced by user");
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if ((sb->s_flags & MS_SYNOACL) && !test_opt(sb, SYNO_ACL)) {
-		sb->s_flags = sb->s_flags & ~MS_SYNOACL;
-		SYNOACLModulePut("synoacl_vfs");
-	} else if((!(sb->s_flags & MS_SYNOACL)) && test_opt(sb, SYNO_ACL)) {
-		int st = SYNOACLModuleStatusGet("synoacl_vfs");
-		if (MODULE_STATE_LIVE != st) {
-			ext4_msg(sb, KERN_ERR, "synoacl module has not been loaded. Unable to remount with synoacl, vfs_mod status=%d", st);
-			clear_opt(sb, SYNO_ACL);
-		} else {
-			sb->s_flags |= MS_SYNOACL;
-			SYNOACLModuleGet("synoacl_vfs");
-		}
-	}
-#else
 	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
 		(test_opt(sb, POSIX_ACL) ? MS_POSIXACL : 0);
-#endif
 
 	es = sbi->s_es;
 
@@ -5358,17 +5308,6 @@ static struct dentry *ext4_mount(struct file_system_type *fs_type, int flags,
 	return mount_bdev(fs_type, flags, dev_name, data, ext4_fill_super);
 }
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-static void ext4_kill_sb(struct super_block *sb)
-{
-	kill_block_super(sb);
-
-	if (MS_SYNOACL & sb->s_flags) {
-		SYNOACLModulePut("synoacl_vfs");
-	}
-}
-#endif
-
 #ifdef MY_ABC_HERE
 void ext4_fill_mount_path(struct super_block *sb, char *szPath)
 {
@@ -5452,11 +5391,7 @@ static struct file_system_type ext4_fs_type = {
 	.owner		= THIS_MODULE,
 	.name		= "ext4",
 	.mount          = ext4_mount,
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	.kill_sb	= ext4_kill_sb,
-#else
 	.kill_sb	= kill_block_super,
-#endif
 	.fs_flags	= FS_REQUIRES_DEV,
 };
 

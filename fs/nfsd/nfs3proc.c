@@ -23,6 +23,9 @@
 	extern u32 nfs_udp_f_rtpref;
 	extern u32 nfs_udp_f_wtpref;
 #endif /*MY_ABC_HERE*/
+#ifdef MY_ABC_HERE
+extern u32 bl_unix_pri_enable;
+#endif
 
 static int	nfs3_ftypes[] = {
 	0,			/* NF3NON */

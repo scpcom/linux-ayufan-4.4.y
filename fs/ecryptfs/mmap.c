@@ -76,8 +76,8 @@ static int ecryptfs_writepage(struct page *page, struct writeback_control *wbc)
 		goto out;
 	}
 	SetPageUptodate(page);
-	unlock_page(page);
 out:
+	unlock_page(page);
 	return rc;
 }
 

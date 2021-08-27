@@ -1098,6 +1098,7 @@ static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable)
 	led_message |= (emp->fault << 22);
 	spin_unlock_irqrestore(ap->lock, flags);
 	ahci_transmit_led_message(ap, led_message, 4);
+	mdelay(10);
 END:
 	return;
 }

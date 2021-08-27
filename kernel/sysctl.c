@@ -221,7 +221,7 @@ char gszCustomSerialNum[32];
 EXPORT_SYMBOL(gszCustomSerialNum);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 long g_esata_7042 = -1;
 EXPORT_SYMBOL(g_esata_7042);
 #endif

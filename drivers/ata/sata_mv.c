@@ -4688,7 +4688,7 @@ static int __devexit mv_platform_remove(struct platform_device *pdev);
 static int __init mv_init(void)
 {
 	int rc = -ENODEV;
-#if defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE)
 	extern long g_esata_7042;
 
 	/* 211p use 7042 as external sata device. So we need to reverse the register order. */

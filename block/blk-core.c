@@ -2893,6 +2893,20 @@ void blk_finish_plug(struct blk_plug *plug)
 }
 EXPORT_SYMBOL(blk_finish_plug);
 
+#ifdef MY_ABC_HERE
+void syno_flashcache_return_error(struct bio *bio)
+{
+	/* defined in blk_types.h */
+	if (bio_flagged(bio, BIO_MD_RETURN_ERROR)) {
+		printk(KERN_DEBUG "Get flashcache read error, return error code\n");
+		bio_endio(bio, 1);
+	} else {
+		bio_endio(bio, 0);
+	}
+}
+#endif
+EXPORT_SYMBOL(syno_flashcache_return_error);
+
 int __init blk_dev_init(void)
 {
 	BUILD_BUG_ON(__REQ_NR_BITS > 8 *

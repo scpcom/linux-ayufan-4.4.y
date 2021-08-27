@@ -768,9 +768,7 @@ static void handle_stopped_endpoint(struct xhci_hcd *xhci,
 	struct xhci_td *last_unlinked_td;
 
 	struct xhci_dequeue_state deq_state;
-#ifndef MY_ABC_HERE
-printk("%s\n", __func__);
-#endif
+
 	slot_id = TRB_TO_SLOT_ID(le32_to_cpu(trb->generic.field[3]));
 	virt_dev = xhci->devs[slot_id];
 	if (!virt_dev) {
@@ -1196,9 +1194,6 @@ static void handle_reset_ep_completion(struct xhci_hcd *xhci,
 static void xhci_complete_cmd_in_cmd_wait_list(struct xhci_hcd *xhci,
 		struct xhci_command *command, u32 status)
 {
-#ifndef MY_ABC_HERE
-printk("%s\n", __func__);
-#endif
 	command->status = status;
 	list_del(&command->cmd_list);
 	if (command->completion)
@@ -1217,9 +1212,6 @@ static int handle_cmd_in_cmd_wait_list(struct xhci_hcd *xhci,
 {
 	struct xhci_command *command;
 
-#ifndef MY_ABC_HERE
-printk("%s\n", __func__);
-#endif
 	if (list_empty(&virt_dev->cmd_list))
 		return 0;
 
@@ -1702,9 +1694,6 @@ static void handle_port_status(struct xhci_hcd *xhci,
 			port_id);
 
 	temp = xhci_readl(xhci, port_array[faked_port_index]);
-#ifndef MY_ABC_HERE
-printk("%s - port %p status %08x\n", __func__, port_array[faked_port_index], temp);
-#endif
 	if (hcd->state == HC_STATE_SUSPENDED) {
 		xhci_dbg(xhci, "resume root hub\n");
 		usb_hcd_resume_root_hub(hcd);
@@ -2552,7 +2541,7 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		 * TD list.
 		 */
 		if (list_empty(&ep_ring->td_list)) {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			xhci_dbg(xhci, "WARN Event TRB for slot %d ep %d "
 #else
 			xhci_warn(xhci, "WARN Event TRB for slot %d ep %d "
@@ -2743,15 +2732,6 @@ static int xhci_handle_event(struct xhci_hcd *xhci)
 		xhci->error_bitmask |= 1 << 2;
 		return 0;
 	}
-
-#ifndef MY_ABC_HERE
-if (((le32_to_cpu(event->generic.field[3]) & TRB_TYPE_BITMASK) == TRB_TYPE(TRB_COMPLETION)) ||
-	((GET_COMP_CODE(le32_to_cpu(event->generic.field[2])) != COMP_SUCCESS) &&
-	(GET_COMP_CODE(le32_to_cpu(event->generic.field[2])) != COMP_SHORT_TX))) {
-	printk("%s\n", __func__);
-	etxhci_print_trbs(xhci, xhci->event_ring->deq_seg, xhci->event_ring->dequeue, 1);
-}
-#endif
 
 	/*
 	 * Barrier between reading the TRB_CYCLE (valid) flag above and any
@@ -4013,16 +3993,9 @@ int etxhci_queue_isoc_tx_prepare(struct xhci_hcd *xhci, gfp_t mem_flags,
 static int queue_command(struct xhci_hcd *xhci, u32 field1, u32 field2,
 		u32 field3, u32 field4, bool command_must_succeed)
 {
-#ifndef MY_ABC_HERE
-union xhci_trb *dbg_trb;
-struct xhci_segment *dbg_seg;
-#endif
 	int reserved_trbs = xhci->cmd_ring_reserved_trbs;
 	int ret;
 
-#ifndef MY_ABC_HERE
-printk("%s\n", __func__);
-#endif
 	if (!command_must_succeed)
 		reserved_trbs++;
 
@@ -4035,17 +4008,8 @@ printk("%s\n", __func__);
 					"unfailable commands failed.\n");
 		return ret;
 	}
-
-#ifndef MY_ABC_HERE
-dbg_trb = xhci->cmd_ring->enqueue;
-dbg_seg = xhci->cmd_ring->enq_seg;
-#endif
-
 	queue_trb(xhci, xhci->cmd_ring, false, field1, field2, field3,
 			field4 | xhci->cmd_ring->cycle_state);
-#ifndef MY_ABC_HERE
-etxhci_print_trbs(xhci, dbg_seg, dbg_trb, 1);
-#endif
 	return 0;
 }
 

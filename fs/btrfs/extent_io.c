@@ -4973,45 +4973,6 @@ int map_private_extent_buffer(struct extent_buffer *eb, unsigned long start,
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
-/* We don't want to check in while loop, so copy from memcmp_extent_buffer(). */
-int memcmp_caseless_extent_buffer(struct extent_buffer *eb, const void *ptrv,
-			  unsigned long start,
-			  unsigned long len)
-{
-	size_t cur;
-	size_t offset;
-	struct page *page;
-	char *kaddr;
-	char *ptr = (char *)ptrv;
-	size_t start_offset = eb->start & ((u64)PAGE_CACHE_SIZE - 1);
-	unsigned long i = (start_offset + start) >> PAGE_CACHE_SHIFT;
-	int ret = 0;
-
-	WARN_ON(start > eb->len);
-	WARN_ON(start + len > eb->start + eb->len);
-
-	offset = (start_offset + start) & ((unsigned long)PAGE_CACHE_SIZE - 1);
-
-	while (len > 0) {
-		page = extent_buffer_page(eb, i);
-
-		cur = min(len, (PAGE_CACHE_SIZE - offset));
-
-		kaddr = page_address(page);
-		ret = SYNOUnicodeUTF8Strcmp(ptr, kaddr + offset, cur, cur, 0);
-		if (ret)
-			break;
-
-		ptr += cur;
-		len -= cur;
-		offset = 0;
-		i++;
-	}
-	return ret;
-}
-#endif
-
 int memcmp_extent_buffer(struct extent_buffer *eb, const void *ptrv,
 			  unsigned long start,
 			  unsigned long len)

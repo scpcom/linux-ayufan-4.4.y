@@ -270,20 +270,20 @@ struct mtd_partition syno_c2k_16m_spi[] = {
         .offset     = 0x00070000,
     }, {
         .name       = "rd.gz",
-        .size       = 0x00A00000,
+        .size       = 0x00A60000,
         .offset     = 0x00570000,
     }, {
         .name       = "vendor",
         .size       = 0x00010000,
-        .offset     = 0x00F70000,
+        .offset     = 0x00FD0000,
     }, {
         .name       = "RedBoot Config",
         .size       = 0x00010000,
-        .offset     = 0x00F80000,
+        .offset     = 0x00FE0000,
     }, {
         .name       = "FIS directory",
         .size       = 0x00010000,
-        .offset     = 0x00F90000,
+        .offset     = 0x00FF0000,
     },
 };
 

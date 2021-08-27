@@ -99,6 +99,13 @@ extern const struct raid6_calls raid6_altivec2;
 extern const struct raid6_calls raid6_altivec4;
 extern const struct raid6_calls raid6_altivec8;
 
+#ifdef CONFIG_KERNEL_MODE_NEON
+extern const struct raid6_calls raid6_neonx1;
+extern const struct raid6_calls raid6_neonx2;
+extern const struct raid6_calls raid6_neonx4;
+extern const struct raid6_calls raid6_neonx8;
+#endif
+
 /* Algorithm list */
 extern const struct raid6_calls * const raid6_algos[];
 int raid6_select_algo(void);

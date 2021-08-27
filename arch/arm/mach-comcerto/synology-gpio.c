@@ -570,8 +570,8 @@ COMCERTO2K_214air_GPIO_init(SYNO_GPIO *global_gpio)
 {
 	SYNO_GPIO gpio_ds214air = {
 		.hdd_detect = {
-			.hdd1_present_detect = 50,
-			.hdd2_present_detect = 49,
+			.hdd1_present_detect = GPIO_UNDEF,
+			.hdd2_present_detect = GPIO_UNDEF,
 			.hdd3_present_detect = GPIO_UNDEF,
 			.hdd4_present_detect = GPIO_UNDEF,
 		},
@@ -589,7 +589,7 @@ COMCERTO2K_214air_GPIO_init(SYNO_GPIO *global_gpio)
 		},
 		.soc_sata_led = {
 			.hdd2_fail_led = 52,
-			.hdd1_fail_led = 53,
+			.hdd1_fail_led = 51,
 			.hdd2_act_led = 3,
 			.hdd1_act_led = 2,
 		},
@@ -608,7 +608,7 @@ COMCERTO2K_214air_GPIO_init(SYNO_GPIO *global_gpio)
 			.fan_fail_3 = GPIO_UNDEF,
 		},
 		.hdd_pm		  = {
-			.hdd1_pm = 5,
+			.hdd1_pm = 7,
 			.hdd2_pm = 4,
 			.hdd3_pm = GPIO_UNDEF,
 			.hdd4_pm = GPIO_UNDEF,

@@ -2887,13 +2887,14 @@ ppp_connect_channel(struct channel *pch, int unit)
 #endif
 	write_unlock_bh(&pch->upl);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(CONFIG_COMCERTO_FP)
 	if ((ppp->dev) && (!ppp->closing)) {
 		rtnl_lock();
 		rtmsg_ifinfo(RTM_NEWLINK, ppp->dev, 0);
 		rtnl_unlock();
 	}
-
+#endif
 	ret = 0;
 #endif
  out:

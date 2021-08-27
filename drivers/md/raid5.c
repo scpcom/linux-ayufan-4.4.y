@@ -4378,8 +4378,12 @@ static void make_request(struct mddev *mddev, struct bio * bi)
 #else
 	if (mddev->degraded > conf->max_degraded) {
 #endif
+#ifdef  MY_ABC_HERE
+		syno_flashcache_return_error(bi);
+#else
 		/* if there has more than max_degraded disks lose, we would not permit keeping acceess on it*/
 		bio_endio(bi, 0);
+#endif
 		return;
 	}
 #endif /* MY_ABC_HERE */

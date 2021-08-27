@@ -960,9 +960,6 @@ struct ext4_inode_info {
 #define EXT4_MOUNT_BLOCK_VALIDITY	0x20000000 /* Block validity checking */
 #define EXT4_MOUNT_DISCARD		0x40000000 /* Issue DISCARD requests */
 #define EXT4_MOUNT_INIT_INODE_TABLE	0x80000000 /* Initialize uninitialized itables */
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-#define EXT4_MOUNT_SYNO_ACL		0x00200 /* Synology Access Control Lists */
-#endif
 
 #define EXT4_MOUNT2_EXPLICIT_DELALLOC	0x00000001 /* User explicitly
 						      specified delalloc */
@@ -1971,10 +1968,6 @@ extern int ext4_htree_fill_tree(struct file *dir_file, __u32 start_hash,
 /* resize.c */
 extern int ext4_group_add(struct super_block *sb,
 				struct ext4_new_group_data *input);
-#ifdef MY_DEF_HERE
-extern int ext4_group_add_no_flex(struct super_block *sb,
-				struct ext4_new_group_data *input);
-#endif
 extern int ext4_group_extend(struct super_block *sb,
 				struct ext4_super_block *es,
 				ext4_fsblk_t n_blocks_count);

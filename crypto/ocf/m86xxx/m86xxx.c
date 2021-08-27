@@ -1240,8 +1240,10 @@ void elp_register_ocf(struct elp_softc *sc)
 	printk("aes ");
 	crypto_register(sc->sc_cid, CRYPTO_AES_CBC, 0, 0);
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	printk("rc4 ");
 	crypto_register(sc->sc_cid, CRYPTO_ARC4, 0, 0);
+#endif
 
 	printk("md5 ");
 	crypto_register(sc->sc_cid, CRYPTO_MD5, 0, 0);

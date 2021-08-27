@@ -86,6 +86,8 @@ typedef struct _Synohw_custom {
 } SYNOHW_CUSTOM;
 */
 
+extern struct proc_dir_entry *proc_synobios_root;
+
 typedef struct _SynoMsgPkt {
 	long	usNum;
 	long	usLen;
@@ -170,7 +172,7 @@ typedef struct _SynoMsgPkt {
 
 #define SYNO_EVENT_IOERR_HD0            0x1700
 
-#define SYNO_EVENT_USB_ERROR            0x1800
+#define SYNO_EVENT_DETECT_CARD_CHANGE   0x1800
 
 #define SYNO_EVENT_RAID                 0x1900
 
@@ -199,6 +201,10 @@ typedef struct _SynoMsgPkt {
 
 #ifdef MY_ABC_HERE
 #define SYNO_EVENT_WAKE_FROM_DEEP_SLEEP 0x2b00
+#endif
+
+#ifdef SYNO_SATA_ERROR_REPORT
+#define SYNO_EVENT_DISK_RETRY_REPORT 0x2c00
 #endif
 
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
@@ -700,6 +706,7 @@ typedef enum {
 	CPU_88F6702,
 	CPU_88F6707,
 	CPU_MV78230,
+	CPU_8241,
 	CPU_8533e,
 	CPU_P1022,
 	CPU_C2000,
@@ -864,6 +871,7 @@ typedef struct {
 #define HW_RS814p      "RS814+"        //"RS814+"
 #define HW_RS814rpp    "RS814rp+"      //"RS814rp+"
 #define HW_DS214play      "DS214play"
+#define HW_DS414play      "DS414play"   //"DS414play"
 #define HW_DS414slim   "DS414slim"    //DS414slim
 #define HW_UNKNOWN     "DSUnknown"
 
@@ -995,6 +1003,7 @@ typedef enum {
 	MODEL_DS214play,
 	MODEL_DS2414p,
 	MODEL_DS414slim,
+	MODEL_DS414play,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 

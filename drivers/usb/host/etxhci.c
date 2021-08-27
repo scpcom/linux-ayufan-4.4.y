@@ -496,11 +496,11 @@ static void xhci_event_ring_work(unsigned long arg)
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern int gSynoFactoryUSBFastReset;
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
 #endif
@@ -516,13 +516,13 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 
 	xhci_dbg(xhci, "Finished xhci_run for USB3 roothub\n");
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
@@ -677,7 +677,7 @@ void etxhci_stop(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
@@ -1664,9 +1664,6 @@ void etxhci_stop_endpoint(struct usb_hcd *hcd, struct usb_device *udev,
 	unsigned long flags;
 	int ret, timeleft;
 
-#ifndef MY_ABC_HERE
-printk("%s\n", __func__);
-#endif
 	ret = xhci_check_args(hcd, udev, ep, 1, true, __func__);
 	if (ret < 0)
 		return;
@@ -2011,12 +2008,9 @@ int etxhci_check_bandwidth(struct usb_hcd *hcd, struct usb_device *udev)
 	xhci = hcd_to_xhci(hcd);
 	if (xhci->xhc_state & XHCI_STATE_DYING)
 		return -ENODEV;
-
-#ifndef MY_ABC_HERE
 	ret = xhci_downgrade_to_usb2(hcd, udev);
 	if (!ret)
 		return -ENODEV;
-#endif
 
 	xhci_dbg(xhci, "%s called for udev %p\n", __func__, udev);
 	virt_dev = xhci->devs[udev->slot_id];
@@ -2930,6 +2924,9 @@ static void etxhci_pre_free_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	unsigned long flags;
 	u32 temp;
 
+	if (!(udev->parent && !udev->parent->parent))
+		return;
+
 	spin_lock_irqsave(&xhci->lock, flags);
 
 	port_array = xhci->usb2_ports;
@@ -2974,10 +2971,7 @@ void etxhci_free_dev(struct usb_hcd *hcd, struct usb_device *udev)
 
 	virt_dev = xhci->devs[udev->slot_id];
 
-#ifndef MY_ABC_HERE
 	etxhci_pre_free_dev(hcd, udev);
-#endif
-
 	/* Stop any wayward timer functions (which may grab the lock) */
 	for (i = 0; i < 31; ++i) {
 		virt_dev->eps[i].ep_state &= ~EP_HALT_PENDING;

@@ -1708,6 +1708,112 @@ static int fuse_getattr(struct vfsmount *mnt, struct dentry *entry,
 	return fuse_update_attributes(inode, stat, NULL, NULL);
 }
 
+#ifdef SYNO_GLUSTER_FS
+static int syno_fuse_get_acl_cache_index(const char *name)
+{
+	int index = -1;
+	if (IS_SYNO_ACL_XATTR_ACCESS_NOPERM(name)) {
+		index = 0;
+	} else if (IS_SYNO_ARCHIVE_BIT_NOPERM(name)) {
+		index = 1;
+	}
+
+	return index;
+}
+
+extern unsigned long syno_fuse_xattr_expired_time_seconds;
+extern unsigned long syno_fuse_xattr_expired_time_milliseconds;
+
+#define CONVERT_MILLI_TO_NANO(milli) (((u64)milli) * 1000000llu)
+
+static int syno_fuse_update_acl_cache(const char *name, const void *value, ssize_t size, struct fuse_inode *pFuse_inode)
+{
+	int ret = -1;
+	int index = -1;
+	struct fuse_conn *fc = NULL;
+
+	if (!name || !size || !pFuse_inode) {
+		goto END;
+	}
+
+	fc = get_fuse_conn(&pFuse_inode->inode);
+	if (NULL == fc) {
+		goto END;
+	}
+
+	if (0 > (index = syno_fuse_get_acl_cache_index(name))) {
+		goto END;
+	}
+
+	spin_lock(&fc->lock);
+	pFuse_inode->synoacl_cache_table[index].expired_time = time_to_jiffies(syno_fuse_xattr_expired_time_seconds, CONVERT_MILLI_TO_NANO(syno_fuse_xattr_expired_time_milliseconds));
+#ifdef SYNO_FUSE_DEBUG
+	printk("name: [%s] expired_time_jiffied: [%llu] second: [%lu] millisecond: [%lu]\n",
+			name,
+			pFuse_inode->synoacl_cache_table[index].expired_time,
+			syno_fuse_xattr_expired_time_seconds,
+			CONVERT_MILLI_TO_NANO(syno_fuse_xattr_expired_time_milliseconds));
+#endif
+	pFuse_inode->synoacl_cache_table[index].size = size;
+	if (!value || 0 > size) {
+		// this request only query attribute size
+		ret = 0;
+		goto UNLOCK;
+	}
+	if (pFuse_inode->synoacl_cache_table[index].value) {
+		kfree(pFuse_inode->synoacl_cache_table[index].value);
+		pFuse_inode->synoacl_cache_table[index].value = NULL;
+	}
+	if (NULL == (pFuse_inode->synoacl_cache_table[index].value = kmalloc(size, GFP_KERNEL))) {
+		ret = -ENOMEM;
+		goto UNLOCK;
+	}
+	memcpy(pFuse_inode->synoacl_cache_table[index].value, value, size);
+
+	ret = 0;
+UNLOCK:
+	spin_unlock(&fc->lock);
+END:
+	return ret;
+}
+
+static ssize_t syno_fuse_get_acl_cache(const char *name, void **value, struct fuse_inode *pFuse_inode, size_t size)
+{
+	ssize_t ret = 0;
+	int index = -1;
+
+	if (!name || !value || !pFuse_inode) {
+		goto END;
+	}
+	if (0 > (index = syno_fuse_get_acl_cache_index(name))) {
+		goto END;
+	}
+
+	if (pFuse_inode->synoacl_cache_table[index].expired_time < get_jiffies_64()) {
+		goto END;
+	}
+	if (!IS_FUSE_SYNOACL_SIZE_CACHED(pFuse_inode, index)) {
+		goto END;
+	}
+	ret = pFuse_inode->synoacl_cache_table[index].size;
+	if (!(*value) || 0 > ret) {
+		goto END;
+	}
+	if (IS_FUSE_SYNOACL_ATTR_CACHED(pFuse_inode, index)) {
+		if (ret != size) {
+			ret = 0;
+			goto END;
+		}
+		memcpy(*value, pFuse_inode->synoacl_cache_table[index].value, ret);
+		goto END;
+	} else {
+		ret = 0;
+	}
+END:
+	return ret;
+}
+#endif // SYNO_GLUSTER_FS
+
 static int fuse_setxattr(struct dentry *entry, const char *name,
 			 const void *value, size_t size, int flags)
 {
@@ -1721,9 +1827,10 @@ static int fuse_setxattr(struct dentry *entry, const char *name,
 		return -EOPNOTSUPP;
 
 #ifdef SYNO_GLUSTER_FS
-	if (IS_GLUSTER_FS(inode))
+	if (IS_GLUSTER_FS(inode)) {
 		SYNOACL_XATTR_CHGNAME(name)
-#endif
+	}
+#endif // SYNO_GLUSTER_FS
 	req = fuse_get_req_nopages(fc);
 	if (IS_ERR(req))
 		return PTR_ERR(req);
@@ -1749,9 +1856,19 @@ static int fuse_setxattr(struct dentry *entry, const char *name,
 	}
 	if (!err)
 		fuse_invalidate_attr(inode);
+
+#ifdef SYNO_GLUSTER_FS
+	if (!err) {
+		syno_fuse_update_acl_cache(name, value, size, get_fuse_inode(inode));
+	}
+#endif //SYNO_GLUSTER_FS
 	return err;
 }
 
+#if SYNO_FUSE_PROFILE
+extern unsigned long syno_fuse_xattr_profile_time;
+extern unsigned long syno_fuse_xattr_profile_schedule_count;
+#endif
 static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 			     void *value, size_t size)
 {
@@ -1761,14 +1878,55 @@ static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 	struct fuse_getxattr_in inarg;
 	struct fuse_getxattr_out outarg;
 	ssize_t ret;
+#ifdef SYNO_GLUSTER_FS
+	int blUpdateCache = 0;
+	struct fuse_inode *pFuse_inode = NULL;
+#endif // SYNO_GLUSTER_FS
+
+#if SYNO_FUSE_PROFILE
+	u64 start_time = 0;
+	u64 end_time = 0;
+
+	start_time = get_jiffies_64();
+#endif
 
 	if (fc->no_getxattr)
 		return -EOPNOTSUPP;
 
 #ifdef SYNO_GLUSTER_FS
-	if (IS_GLUSTER_FS(inode))
+	if (IS_GLUSTER_FS(inode)) {
 		SYNOACL_XATTR_CHGNAME(name)
+	}
+
+#if SYNO_FUSE_PROFILE
+	if (IS_SYNO_ACL_XATTR_ACCESS_NOPERM(name)) {
+		//syno_fuse_xattr_profile_schedule_count++;
+	}
+	if (IS_SYNO_ARCHIVE_BIT_NOPERM(name)) {
+		syno_fuse_xattr_profile_schedule_count++;
+	}
 #endif
+	if (IS_SYNO_ACL_XATTR_ACCESS_NOPERM(name) ||
+		IS_SYNO_ARCHIVE_BIT_NOPERM(name)) {
+		if (NULL == (pFuse_inode = get_fuse_inode(inode))) {
+			ret = -ENOSYS;
+			goto END;
+		}
+
+		ret = syno_fuse_get_acl_cache(name, &value, pFuse_inode, size);
+		if (0 == ret) {
+			blUpdateCache = 1;
+#ifdef SYNO_FUSE_DEBUG
+			printk("%s(%d) NOT cache file: [%s] name: [%s] size: [%lu] ret: [%ld]\n", __func__, __LINE__, entry->d_name.name, name, size, ret);
+#endif
+		} else {
+#ifdef SYNO_FUSE_DEBUG
+			printk("%s(%d) HIT cache file: [%s] name: [%s] size: [%lu] ret: [%ld]\n", __func__, __LINE__, entry->d_name.name, name, size, ret);
+#endif
+			goto END;
+		}
+	}
+#endif // SYNO_GLUSTER_FS
 	req = fuse_get_req_nopages(fc);
 	if (IS_ERR(req))
 		return PTR_ERR(req);
@@ -1792,7 +1950,23 @@ static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 		req->out.args[0].size = sizeof(outarg);
 		req->out.args[0].value = &outarg;
 	}
+#if SYNO_FUSE_PROFILE
+	start_time = get_jiffies_64();
+#endif // PROFILE START
 	fuse_request_send(fc, req);
+#if SYNO_FUSE_PROFILE
+	end_time = get_jiffies_64();
+	{
+		struct timespec time_val = {0, 0};
+		jiffies_to_timespec(end_time - start_time, &time_val);
+		printk("getxattr time time cost ");
+		if (blUpdateCache) {
+			printk(" not cached ");
+		}
+		printk("filename: [%s] name: [%s] sec: [%llu] nsec: [%llu] usec: [%llu]\n", entry->d_name.name, name, time_val.tv_sec, time_val.tv_nsec, jiffies_to_usecs(end_time - start_time));
+		syno_fuse_xattr_profile_time = syno_fuse_xattr_profile_time + jiffies_to_usecs(end_time - start_time);
+	}
+#endif // PROFILE END
 	ret = req->out.h.error;
 	if (!ret)
 		ret = size ? req->out.args[0].size : outarg.size;
@@ -1803,6 +1977,15 @@ static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 		}
 	}
 	fuse_put_request(fc, req);
+
+#ifdef SYNO_GLUSTER_FS
+	if (blUpdateCache) {
+		syno_fuse_update_acl_cache(name, value, ret, pFuse_inode);
+	}
+	//printk("%s(%d) not cached !!!!!!! filename: [%s] name: [%s] inode: [%lu] size: [%zu]\n", __func__, __LINE__, entry->d_name.name, name, inode->i_ino, size);
+END:
+#endif // SYNO_GLUSTER_FS
+
 	return ret;
 }
 
@@ -1888,6 +2071,10 @@ static int fuse_removexattr(struct dentry *entry, const char *name)
 	}
 	if (!err)
 		fuse_invalidate_attr(inode);
+
+#ifdef SYNO_GLUSTER_FS
+	// FIXME: update cache
+#endif
 	return err;
 }
 

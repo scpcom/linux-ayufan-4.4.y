@@ -144,7 +144,6 @@
 
 #else
 #undef 1
-#undef 1
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -169,7 +168,7 @@
 #define SYNO_SATA_DEVICE_PREFIX	   "sd"
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)    
-#if 1
+#if 0
 #define SYNO_INTERNAL_MICROSD_NAME "4-4"
 #endif
 

@@ -51,6 +51,9 @@ enum {
 #ifdef MY_ABC_HERE
 	NFSD_UDP_Size,
 #endif
+#ifdef MY_ABC_HERE
+	NFSD_UNIX_PRI,
+#endif
 };
 
 /*
@@ -72,6 +75,9 @@ static ssize_t write_recoverydir(struct file *file, char *buf, size_t size);
 #ifdef MY_ABC_HERE
 static ssize_t write_udp_size(struct file *file, char *buf, size_t size);
 #endif
+#ifdef MY_ABC_HERE
+static ssize_t write_unix_enable(struct file *file, char *buf, size_t size);
+#endif
 
 static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 	[NFSD_Fh] = write_filehandle,
@@ -89,6 +95,9 @@ static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 #endif
 #ifdef MY_ABC_HERE
 	[NFSD_UDP_Size] = write_udp_size,
+#endif
+#ifdef MY_ABC_HERE
+	[NFSD_UNIX_PRI] = write_unix_enable,
 #endif
 };
 
@@ -535,6 +544,42 @@ End:
 		return err;
 	} else {
 		return scnprintf(buf, SIMPLE_TRANSACTION_LIMIT, "rsize=%d,wsize=%d\n", nfs_udp_f_rtpref, nfs_udp_f_wtpref);
+	}
+}
+#endif
+
+#ifdef MY_ABC_HERE
+u32 bl_unix_pri_enable;
+
+static ssize_t write_unix_enable(struct file *file, char *buf, size_t size)
+{
+	int err = 0;
+	u32 bl_tmp_unix_pri_enable;
+
+	if (0 == size) {
+		goto End;
+	}
+
+	// use sscanf to get if unix privilege enable
+	if (1 != sscanf(buf, "%u", &bl_tmp_unix_pri_enable)) {
+		err = -EINVAL;
+		printk("NFSD error wrong format of unix_pri_enable in /proc");
+		goto End;
+	}
+
+	// check if value valid
+	if (0 != bl_tmp_unix_pri_enable && 1 != bl_tmp_unix_pri_enable) {
+		err = -EINVAL;
+		printk("NFSD error wrong value of unix_pri_enable in /proc %u", bl_unix_pri_enable);
+		goto End;
+	}
+
+	bl_unix_pri_enable = bl_tmp_unix_pri_enable;
+End:
+	if (err) {
+		return err;
+	} else {
+		return scnprintf(buf, SIMPLE_TRANSACTION_LIMIT, "%u\n", bl_unix_pri_enable);
 	}
 }
 #endif
@@ -1137,6 +1182,9 @@ static int nfsd_fill_super(struct super_block * sb, void * data, int silent)
 #ifdef MY_ABC_HERE
 		[NFSD_UDP_Size] = {"udppacketsize", &transaction_ops, S_IWUSR|S_IRUGO},
 #endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
+		[NFSD_UNIX_PRI] = {"unix_privilege_enable", &transaction_ops, S_IWUSR|S_IRUGO},
+#endif
 		/* last one */ {""}
 	};
 	return simple_fill_super(sb, 0x6e667364, nfsd_files);
@@ -1185,6 +1233,9 @@ static int __init init_nfsd(void)
 	nfs_udp_f_rtpref = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
 	nfs_udp_f_wtpref = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
 #endif /*MY_ABC_HERE*/
+#ifdef MY_ABC_HERE
+	bl_unix_pri_enable = 1;
+#endif
 
 	retval = nfs4_state_init(); /* nfs4 locking state */
 	if (retval)

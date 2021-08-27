@@ -286,7 +286,6 @@ int ecryptfs_initialize_file(struct dentry *ecryptfs_dentry,
 		if (-EDQUOT != rc && -EIO != rc && -ENOSPC != rc)
 #endif
 		printk(KERN_ERR "Error writing headers; rc = [%d]\n", rc);
-		goto out;
 	}
 	ecryptfs_put_lower_file(ecryptfs_inode);
 out:

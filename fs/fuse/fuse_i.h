@@ -51,6 +51,8 @@
 #define SYNOMETA_XATTR_MNT_OPT "synometa_xattr"
 #endif
 
+//#define SYNO_FUSE_DEBUG 0
+
 /** Number of page pointers embedded in fuse_req */
 #define FUSE_REQ_INLINE_PAGES 1
 
@@ -69,6 +71,26 @@ struct fuse_forget_link {
 	struct fuse_forget_one forget_one;
 	struct fuse_forget_link *next;
 };
+
+#define SYNO_FUSE_PROFILE 0
+#ifdef SYNO_GLUSTER_FS
+typedef struct {
+	void *value;
+	ssize_t size;
+	u64 expired_time;
+} syno_xattr_cache_node;
+
+#define IS_FUSE_SYNOACL_CACHED(pFuse_inode, index) ((0 != pFuse_inode->synoacl_cache_table[index].size))
+#define IS_FUSE_SYNOACL_SIZE_CACHED(pFuse_inode, index) ((0 != pFuse_inode->synoacl_cache_table[index].size))
+#define IS_FUSE_SYNOACL_ATTR_CACHED(pFuse_inode, index) (pFuse_inode->synoacl_cache_table[index].value)
+#define IS_SYNO_ACL_XATTR_ACCESS_NOPERM(name) (!strcmp(name, SYNO_ACL_XATTR_ACCESS_NOPERM))
+#define IS_SYNO_ACL_XATTR_ACCESS(name) (!strcmp(name, SYNO_ACL_XATTR_ACCESS))
+#define IS_SYNO_ARCHIVE_BIT_NOPERM(name) (!strcmp(name, XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_BIT_NOPERM))
+
+#define SYNO_ACL_CACHE_TABLE_LEN 2
+
+#endif // SYNO_GLUSTER_FS
+
 
 /** FUSE inode */
 struct fuse_inode {
@@ -116,6 +138,10 @@ struct fuse_inode {
 
 	/** Miscellaneous bits describing inode state */
 	unsigned long state;
+
+#ifdef SYNO_GLUSTER_FS
+	syno_xattr_cache_node synoacl_cache_table[SYNO_ACL_CACHE_TABLE_LEN];
+#endif
 };
 
 /** FUSE inode state bits */

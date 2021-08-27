@@ -53,6 +53,56 @@ MODULE_PARM_DESC(max_user_congthresh,
  "Global limit for the maximum congestion threshold an "
  "unprivileged user can set");
 
+#ifdef SYNO_GLUSTER_FS
+
+#define DEFAULT_XATTR_EXPIRED_TIME 10000
+unsigned long syno_fuse_xattr_expired_time;
+unsigned long syno_fuse_xattr_expired_time_seconds;
+unsigned long syno_fuse_xattr_expired_time_milliseconds;
+static int set_expired_time(const char *val, struct kernel_param *kp);
+module_param_call(syno_fuse_xattr_expired_time, set_expired_time, param_get_ulong, &syno_fuse_xattr_expired_time, 0644);
+__MODULE_PARM_TYPE(syno_fuse_xattr_expired_time, "ulong");
+MODULE_PARM_DESC(syno_fuse_xattr_expired_time,
+ "Global limit for the extended attribute cache expired time"
+ " (unit: millisecond)");
+
+#if SYNO_FUSE_PROFILE
+unsigned long syno_fuse_xattr_profile_schedule_count;
+static int set_profile_schedule_count(const char *val, struct kernel_param *kp)
+{
+	int rv;
+
+	rv = param_set_ulong(val, kp);
+	if (rv)
+		return rv;
+
+	return 0;
+}
+module_param_call(syno_fuse_xattr_profile_schedule_count, set_profile_schedule_count, param_get_ulong, &syno_fuse_xattr_profile_schedule_count, 0644);
+__MODULE_PARM_TYPE(syno_fuse_xattr_profile_schedule_count, "ulong");
+MODULE_PARM_DESC(syno_fuse_xattr_profile_schedule_count,
+ "PROFILE schedule count"
+ " (unit: number)");
+
+unsigned long syno_fuse_xattr_profile_time;
+static int set_profile_time(const char *val, struct kernel_param *kp)
+{
+	int rv;
+
+	rv = param_set_ulong(val, kp);
+	if (rv)
+		return rv;
+
+	return 0;
+}
+module_param_call(syno_fuse_xattr_profile_time, set_profile_time, param_get_ulong, &syno_fuse_xattr_profile_time, 0644);
+__MODULE_PARM_TYPE(syno_fuse_xattr_profile_time, "ulong");
+MODULE_PARM_DESC(syno_fuse_xattr_profile_time,
+ "PROFILE time"
+ " (unit: microsecond)");
+#endif // SYNO_FUSE_PROFILE
+#endif // SYNO_GLUSTER_FS
+
 #define FUSE_SUPER_MAGIC 0x65735546
 
 #define FUSE_DEFAULT_BLKSIZE 512
@@ -82,6 +132,27 @@ struct fuse_forget_link *fuse_alloc_forget(void)
 	return kzalloc(sizeof(struct fuse_forget_link), GFP_KERNEL);
 }
 
+#ifdef SYNO_GLUSTER_FS
+static void syno_fuse_reset_acl_cache_table(struct fuse_inode *fi)
+{
+	int i = 0;
+	if (!fi) {
+		goto END;
+	}
+
+	for (i = 0;i < SYNO_ACL_CACHE_TABLE_LEN; ++i) {
+		if (!fi->synoacl_cache_table[i].value) {
+			kfree(fi->synoacl_cache_table[i].value);
+		}
+		fi->synoacl_cache_table[i].value = NULL;
+		fi->synoacl_cache_table[i].size = 0;
+		fi->synoacl_cache_table[i].expired_time = 0;
+	}
+END:
+	return;
+}
+#endif
+
 static struct inode *fuse_alloc_inode(struct super_block *sb)
 {
 	struct inode *inode;
@@ -99,6 +170,11 @@ static struct inode *fuse_alloc_inode(struct super_block *sb)
 	fi->writectr = 0;
 	fi->orig_ino = 0;
 	fi->state = 0;
+
+#ifdef SYNO_GLUSTER_FS
+	syno_fuse_reset_acl_cache_table(fi);
+#endif
+
 	INIT_LIST_HEAD(&fi->write_files);
 	INIT_LIST_HEAD(&fi->queued_writes);
 	INIT_LIST_HEAD(&fi->writepages);
@@ -124,6 +200,9 @@ static void fuse_destroy_inode(struct inode *inode)
 	BUG_ON(!list_empty(&fi->write_files));
 	BUG_ON(!list_empty(&fi->queued_writes));
 	kfree(fi->forget);
+#ifdef SYNO_GLUSTER_FS
+	syno_fuse_reset_acl_cache_table(fi);
+#endif
 	call_rcu(&inode->i_rcu, fuse_i_callback);
 }
 
@@ -849,6 +928,29 @@ static int set_global_limit(const char *val, struct kernel_param *kp)
 	return 0;
 }
 
+#ifdef SYNO_GLUSTER_FS
+static void sanitize_expired_time(unsigned long *expired_time)
+{
+	syno_fuse_xattr_expired_time_seconds = *expired_time;
+#define THOUSANDTH_TO_ONE 1000
+	syno_fuse_xattr_expired_time_milliseconds = do_div(syno_fuse_xattr_expired_time_seconds, THOUSANDTH_TO_ONE);
+	//printk("seconds: [%lu] milliseconds: [%lu]\n", syno_fuse_xattr_expired_time_seconds, syno_fuse_xattr_expired_time_milliseconds);
+}
+
+static int set_expired_time(const char *val, struct kernel_param *kp)
+{
+	int rv;
+
+	rv = param_set_ulong(val, kp);
+	if (rv)
+		return rv;
+
+	sanitize_expired_time((unsigned long *)kp->arg);
+
+	return 0;
+}
+#endif // SYNO_GLUSTER_FS
+
 static void process_init_limits(struct fuse_conn *fc, struct fuse_init_out *arg)
 {
 	int cap_sys_admin = capable(CAP_SYS_ADMIN);
@@ -1356,6 +1458,11 @@ static int __init fuse_init(void)
 
 	sanitize_global_limit(&max_user_bgreq);
 	sanitize_global_limit(&max_user_congthresh);
+
+#ifdef SYNO_GLUSTER_FS
+	syno_fuse_xattr_expired_time = DEFAULT_XATTR_EXPIRED_TIME;
+	sanitize_expired_time(&syno_fuse_xattr_expired_time);
+#endif
 
 	return 0;
 

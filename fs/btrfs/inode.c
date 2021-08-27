@@ -65,9 +65,6 @@
 #ifdef CONFIG_BTRFS_FS_SYNO_ACL
 #include "syno_acl.h"
 #endif
-#ifdef MY_ABC_HERE
-#include <linux/namei.h>
-#endif
 
 struct btrfs_iget_args {
 	u64 ino;
@@ -3672,47 +3669,6 @@ noinline int btrfs_update_inode_fallback(struct btrfs_trans_handle *trans,
 	return ret;
 }
 
-#ifdef MY_ABC_HERE
-static int btrfs_unlink_dir_item_caseless(struct btrfs_trans_handle *trans,
-					struct btrfs_root *root,
-					struct inode *dir, struct inode *inode,
-					const char *name, int name_len)
-{
-	struct btrfs_path *path;
-	int ret = 0;
-	struct extent_buffer *leaf;
-	struct btrfs_dir_item *di;
-	struct btrfs_key key;
-	u64 dir_ino = btrfs_ino(dir);
-
-	path = btrfs_alloc_path();
-	if (!path) {
-		return -ENOMEM;
-	}
-	path->caseless_key = 1;
-	path->leave_spinning = 1;
-
-	di = btrfs_lookup_dir_item(trans, root, path, dir_ino,
-				    name, name_len, -1);
-	if (IS_ERR(di)) {
-		ret = PTR_ERR(di);
-		goto err;
-	}
-	if (!di) {
-		goto err;
-	}
-	leaf = path->nodes[0];
-	btrfs_dir_item_key_to_cpu(leaf, di, &key);
-	ret = btrfs_delete_one_dir_name(trans, root, path, di);
-	if (ret)
-		goto err;
-err:
-	btrfs_free_path(path);
-	return ret;
-
-}
-#endif
-
 /*
  * unlink helper that gets used here in inode.c and in the tree logging
  * recovery code.  It remove a link in a directory with a given name, and
@@ -3755,12 +3711,6 @@ static int __btrfs_unlink_inode(struct btrfs_trans_handle *trans,
 	if (ret)
 		goto err;
 	btrfs_release_path(path);
-
-#ifdef MY_ABC_HERE
-	ret = btrfs_unlink_dir_item_caseless(trans, root, dir, inode, name, name_len);
-	if (ret)
-		goto err;
-#endif
 
 	ret = btrfs_del_inode_ref(trans, root, name, name_len, ino,
 				  dir_ino, &index);
@@ -4770,13 +4720,8 @@ no_delete:
  * this returns the key found in the dir entry in the location pointer.
  * If no dir entries were found, location->objectid is 0.
  */
-#ifdef MY_ABC_HERE
-static int btrfs_inode_by_name(struct inode *dir, struct dentry *dentry,
-			       struct btrfs_key *location, int caseless)
-#else
 static int btrfs_inode_by_name(struct inode *dir, struct dentry *dentry,
 			       struct btrfs_key *location)
-#endif
 {
 	const char *name = dentry->d_name.name;
 	int namelen = dentry->d_name.len;
@@ -4789,12 +4734,6 @@ static int btrfs_inode_by_name(struct inode *dir, struct dentry *dentry,
 	if (!path)
 		return -ENOMEM;
 
-#ifdef MY_ABC_HERE
-	if (caseless) {
-		path->caseless_key = 1;
-		path->caseless_name = 1;
-	}
-#endif
 	di = btrfs_lookup_dir_item(NULL, root, path, btrfs_ino(dir), name,
 				    namelen, 0);
 	if (IS_ERR(di))
@@ -4803,32 +4742,6 @@ static int btrfs_inode_by_name(struct inode *dir, struct dentry *dentry,
 	if (IS_ERR_OR_NULL(di))
 		goto out_err;
 
-#ifdef MY_ABC_HERE
-	if (caseless) {
-		struct extent_buffer *leaf = path->nodes[0];
-		int real_name_len = btrfs_dir_name_len(leaf, di);
-		if (real_name_len > (DNAME_INLINE_LEN - 1) && real_name_len > dentry->d_name.len) {
-			char *old_name = NULL;
-			char *new_name = kmalloc(real_name_len + 1, GFP_KERNEL);
-			if (!new_name) {
-				goto out_err;
-			}
-			if (dentry->d_name.len > (DNAME_INLINE_LEN -1)) {
-				old_name = (char *)dentry->d_name.name;
-			}
-			read_extent_buffer(leaf, (void *) new_name, (unsigned long)(di + 1), real_name_len);
-			new_name[real_name_len] = 0;
-			dentry->d_name.name = new_name;
-			dentry->d_name.len = real_name_len;
-			if (old_name)
-				kfree(old_name);
-		} else {
-			read_extent_buffer(leaf, (void *) dentry->d_name.name, (unsigned long)(di + 1), real_name_len);
-			((char *)dentry->d_name.name)[real_name_len] = 0;
-			dentry->d_name.len = real_name_len;
-		}
-	}
-#endif
 	btrfs_dir_item_key_to_cpu(path->nodes[0], di, location);
 out:
 	btrfs_free_path(path);
@@ -5126,11 +5039,7 @@ static struct inode *new_simple_dir(struct super_block *s,
 	return inode;
 }
 
-#ifdef MY_ABC_HERE
-struct inode *btrfs_lookup_dentry(struct inode *dir, struct dentry *dentry, int caseless)
-#else
 struct inode *btrfs_lookup_dentry(struct inode *dir, struct dentry *dentry)
-#endif
 {
 	struct inode *inode;
 	struct btrfs_root *root = BTRFS_I(dir)->root;
@@ -5149,11 +5058,7 @@ struct inode *btrfs_lookup_dentry(struct inode *dir, struct dentry *dentry)
 		/* This thing is hashed, drop it for now */
 		d_drop(dentry);
 	} else {
-#ifdef MY_ABC_HERE
-		ret = btrfs_inode_by_name(dir, dentry, &location, caseless);
-#else
 		ret = btrfs_inode_by_name(dir, dentry, &location);
-#endif
 	}
 
 	if (ret < 0)
@@ -5226,11 +5131,7 @@ static struct dentry *btrfs_lookup(struct inode *dir, struct dentry *dentry,
 {
 	struct dentry *ret;
 
-#ifdef MY_ABC_HERE
-	ret = d_splice_alias(btrfs_lookup_dentry(dir, dentry, (nd && nd->flags & LOOKUP_CASELESS_COMPARE)?1:0), dentry);
-#else
 	ret = d_splice_alias(btrfs_lookup_dentry(dir, dentry), dentry);
-#endif
 	if (unlikely(d_need_lookup(dentry))) {
 		spin_lock(&dentry->d_lock);
 		dentry->d_flags &= ~DCACHE_NEED_LOOKUP;
@@ -5852,21 +5753,12 @@ static int btrfs_mknod(struct inode *dir, struct dentry *dentry,
 	if (!new_valid_dev(rdev))
 		return -EINVAL;
 
-#ifdef MY_ABC_HERE
-	/*
-	 * 2 for inode item and ref
-	 * 3 for dir items
-	 * 1 for xattr if selinux is on
-	 */
-	trans = btrfs_start_transaction(root, 6);
-#else
 	/*
 	 * 2 for inode item and ref
 	 * 2 for dir items
 	 * 1 for xattr if selinux is on
 	 */
 	trans = btrfs_start_transaction(root, 5);
-#endif
 	if (IS_ERR(trans))
 		return PTR_ERR(trans);
 
@@ -5933,21 +5825,12 @@ static int btrfs_create(struct inode *dir, struct dentry *dentry,
 	u64 objectid;
 	u64 index = 0;
 
-#ifdef MY_ABC_HERE
-	/*
-	 * 2 for inode item and ref
-	 * 3 for dir items
-	 * 1 for xattr if selinux is on
-	 */
-	trans = btrfs_start_transaction(root, 6);
-#else
 	/*
 	 * 2 for inode item and ref
 	 * 2 for dir items
 	 * 1 for xattr if selinux is on
 	 */
 	trans = btrfs_start_transaction(root, 5);
-#endif
 	if (IS_ERR(trans))
 		return PTR_ERR(trans);
 
@@ -6078,21 +5961,12 @@ static int btrfs_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 	u64 objectid = 0;
 	u64 index = 0;
 
-#ifdef MY_ABC_HERE
-	/*
-	 * 2 items for inode and ref
-	 * 3 items for dir items
-	 * 1 for xattr if selinux is on
-	 */
-	trans = btrfs_start_transaction(root, 6);
-#else
 	/*
 	 * 2 items for inode and ref
 	 * 2 items for dir items
 	 * 1 for xattr if selinux is on
 	 */
 	trans = btrfs_start_transaction(root, 5);
-#endif
 	if (IS_ERR(trans))
 		return PTR_ERR(trans);
 
@@ -8715,21 +8589,12 @@ static int btrfs_symlink(struct inode *dir, struct dentry *dentry,
 	if (name_len > BTRFS_MAX_INLINE_DATA_SIZE(root))
 		return -ENAMETOOLONG;
 
-#ifdef MY_ABC_HERE
-	/*
-	 * 2 items for inode item and ref
-	 * 3 items for dir items
-	 * 1 item for xattr if selinux is on
-	 */
-	trans = btrfs_start_transaction(root, 6);
-#else
 	/*
 	 * 2 items for inode item and ref
 	 * 2 items for dir items
 	 * 1 item for xattr if selinux is on
 	 */
 	trans = btrfs_start_transaction(root, 5);
-#endif
 	if (IS_ERR(trans))
 		return PTR_ERR(trans);
 
@@ -9182,39 +9047,7 @@ static const struct inode_operations btrfs_symlink_inode_operations = {
 	.update_time	= btrfs_update_time,
 };
 
-#ifdef MY_ABC_HERE
-extern unsigned char SYNOBtrfsGlobalBuf[UNICODE_UTF8_BUFSIZE];
-extern spinlock_t SYNOBtrfsGlobalLock;  /* init at btrfs_fill_super() */
-
-/* Hash a string to an integer in a caseless way */
-static int btrfs_dentry_hash(const struct dentry *dentry, const struct inode *inode, struct qstr *this)
-{
-	unsigned int upperlen;
-
-	spin_lock(&SYNOBtrfsGlobalLock);
-	upperlen = SYNOUnicodeUTF8toUpper(SYNOBtrfsGlobalBuf, this->name, UNICODE_UTF8_BUFSIZE - 1 , this->len, NULL);
-	this->hash = btrfs_name_hash(SYNOBtrfsGlobalBuf, upperlen);
-	spin_unlock(&SYNOBtrfsGlobalLock);
-	return 0;
-}
-
-/* return 1 on failure and 0 on success */
-static int btrfs_dentry_compare(const struct dentry *parent, const struct inode *pinode,
-							   const struct dentry *dentry, const struct inode *inode,
-							   unsigned int len, const char *str, const struct qstr *name, int caseless)
-{
-	if (caseless) {
-		return SYNOUnicodeUTF8Strcmp(str, name->name, len, name->len, NULL);
-	} else {
-		return dentry_cmp(str, len, name->name, name->len);
-	}
-}
-#endif
 const struct dentry_operations btrfs_dentry_operations = {
 	.d_delete	= btrfs_dentry_delete,
 	.d_release	= btrfs_dentry_release,
-#ifdef MY_ABC_HERE
-	.d_hash		= btrfs_dentry_hash,
-	.d_compare_case	= btrfs_dentry_compare,
-#endif
 };

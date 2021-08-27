@@ -235,7 +235,7 @@ const struct super_operations ecryptfs_sops = {
 #endif
 	.alloc_inode = ecryptfs_alloc_inode,
 	.destroy_inode = ecryptfs_destroy_inode,
-	.drop_inode = generic_delete_inode,
+	.drop_inode = generic_drop_inode,
 	.statfs = ecryptfs_statfs,
 	.remount_fs = NULL,
 	.evict_inode = ecryptfs_evict_inode,

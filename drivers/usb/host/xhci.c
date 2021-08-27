@@ -41,6 +41,12 @@ static int link_quirk;
 module_param(link_quirk, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(link_quirk, "Don't clear the chain bit on a link TRB");
 
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+extern enum XHCI_SPECIAL_RESET_MODE xhci_special_reset; // from hub.c
+extern unsigned short xhci_vendor;
+// SKIP_SPECIAL_RESET_xxx: check SPECIAL_RESET_RETRY in hub.c for reference
+#endif
+
 #ifdef MY_DEF_HERE
 #include <linux/kthread.h>
 #include <linux/pci.h>
@@ -52,16 +58,9 @@ static struct usb_hcd *xhci_task_hcd3 = NULL; // usb3's hcd
 //check every 5s, take action if 2 successive error(10s).
 #define BOUNCE_TIME 10 // seconds
 
-#ifdef MY_DEF_HERE
-extern enum XHCI_SPECIAL_RESET_MODE xhci_special_reset; // from hub.c
-extern unsigned short xhci_vendor;
-
-// SKIP_SPECIAL_RESET_xxx: check SPECIAL_RESET_RETRY in hub.c for reference
-
 // sleep first 60s, do not disturbe the hub init
 // hub_port_init retry 20 times, each spends 1s wait, and 2 ports
 #define SKIP_SPECIAL_RESET_BEFORE 60 // seconds
-#endif
 
 enum STATUS_MONITOR {
 	STATUS_MON_TEST = 0x1,
@@ -944,18 +943,22 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 	}
 #endif
 
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 #ifdef MY_ABC_HERE
 	if(1 == gSynoFactoryUSB3Disable || PCI_VENDOR_ID_ETRON == xhci_vendor) {
 		xhci_special_reset = XHCI_SPECIAL_RESET_DISABLE;
 	} else {
 		xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
+#if defined(MY_DEF_HERE)
 		xhci_task = kthread_run(xhci_thread, NULL, "xhci_thread");
+#endif
 	}
 #else
+#if defined(MY_DEF_HERE)
 	xhci_task = kthread_run(xhci_thread, NULL, "xhci_thread");
 #endif
-#endif
+#endif //MY_ABC_HERE
+#endif //MY_DEF_HERE || MY_ABC_HERE
 
 	return 0;
 }

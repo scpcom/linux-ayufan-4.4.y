@@ -553,11 +553,7 @@ fail:
 		ret = err;
 
 	if (!ret)
-#ifdef MY_ABC_HERE
-		d_instantiate(dentry, btrfs_lookup_dentry(dir, dentry, 0));
-#else
 		d_instantiate(dentry, btrfs_lookup_dentry(dir, dentry));
-#endif
 out:
 	btrfs_subvolume_release_metadata(root, &block_rsv, qgroup_reserved);
 	return ret;
@@ -641,11 +637,7 @@ static int create_snapshot(struct btrfs_root *root, struct inode *dir,
 	if (ret)
 		goto fail;
 
-#ifdef MY_ABC_HERE
-	inode = btrfs_lookup_dentry(dentry->d_parent->d_inode, dentry, 0);
-#else
 	inode = btrfs_lookup_dentry(dentry->d_parent->d_inode, dentry);
-#endif
 	if (IS_ERR(inode)) {
 		ret = PTR_ERR(inode);
 		goto fail;

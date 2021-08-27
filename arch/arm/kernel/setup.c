@@ -97,7 +97,7 @@ extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern long g_esata_7042;
 #endif
 #ifndef MEM_SIZE
@@ -356,7 +356,7 @@ static int __init early_custom_sn(char *p)
 __setup("custom_sn=", early_custom_sn);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static int __init early_esata_7042(char *p)
 {
 	g_esata_7042 = simple_strtol(p, NULL, 10);

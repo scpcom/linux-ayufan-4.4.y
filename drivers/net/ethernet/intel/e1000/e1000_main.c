@@ -246,7 +246,8 @@ void e1000_syno_led_switch(int iEnable)
 	struct net_device *dev = NULL;
 	struct e1000_adapter *adapter = NULL;
 	struct e1000_hw *hw = NULL;
-	u16 uiActLedCtrl = 0, uiLinkLedCtrl = 0;
+	static u16 uiActLedCtrl = 0, uiLinkLedCtrl = 0;
+	u16 uiActLedCtrlReg = 0, uiLinkLedCtrlReg = 0;
 
 	dev = first_net_device(&init_net);
 	adapter = netdev_priv(dev);
@@ -260,19 +261,21 @@ void e1000_syno_led_switch(int iEnable)
 
 	e1000_write_phy_reg(hw, 31, 0x0007);
 	e1000_write_phy_reg(hw, 30, 0x002C);
-	e1000_read_phy_reg(hw, 26, &uiActLedCtrl);
-	e1000_read_phy_reg(hw, 28, &uiLinkLedCtrl);
+    e1000_read_phy_reg(hw, 26, &uiActLedCtrlReg);
+	e1000_read_phy_reg(hw, 28, &uiLinkLedCtrlReg);
 
 	if (iEnable) {
-		uiActLedCtrl |= 0x0040;
-		uiLinkLedCtrl |= 0x0700;
+		uiActLedCtrlReg |= uiActLedCtrl; //Restore the active bits of LED0, LED1, LED2
+        uiLinkLedCtrlReg |= uiLinkLedCtrl; //Restore the link speed bits of LED0, LED1, LED2
 	} else {
-		uiActLedCtrl &= 0xFFBF;
-		uiLinkLedCtrl &= 0xF8FF;
+		uiActLedCtrl = uiActLedCtrlReg & 0x0070; //Backup the active bits of LED0, LED1, LED2
+		uiLinkLedCtrl = uiLinkLedCtrlReg & 0x0777; //Backup the link speed bits of LED0, LED1, LED2
+		uiActLedCtrlReg &= ~(0x0070); //Disable LED0, LED1, LED2
+        uiLinkLedCtrlReg &= ~(0x0777); //Disable LED0, LED1, LED2
 	}
 
-	e1000_write_phy_reg(hw, 26, uiActLedCtrl);
-	e1000_write_phy_reg(hw, 28, uiLinkLedCtrl);
+    e1000_write_phy_reg(hw, 26, uiActLedCtrlReg );
+    e1000_write_phy_reg(hw, 28, uiLinkLedCtrlReg );
 	e1000_write_phy_reg(hw, 31, 0x0000);
 #endif
 }

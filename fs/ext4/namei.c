@@ -47,10 +47,6 @@
 #include "xattr.h"
 #include "acl.h"
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-#include "syno_acl.h"
-#endif
-
 #include <trace/events/ext4.h>
 /*
  * define how far ahead to read directories while searching them.
@@ -2803,12 +2799,7 @@ const struct inode_operations ext4_dir_inode_operations = {
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
 #endif
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	.syno_acl_get   = ext4_get_syno_acl,
-	.syno_acl_set	= ext4_set_syno_acl,
-#else
 	.get_acl	= ext4_get_acl,
-#endif
 	.fiemap         = ext4_fiemap,
 };
 
@@ -2827,7 +2818,5 @@ const struct inode_operations ext4_special_inode_operations = {
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
 #endif
-#ifndef CONFIG_EXT4_FS_SYNO_ACL
 	.get_acl	= ext4_get_acl,
-#endif
 };

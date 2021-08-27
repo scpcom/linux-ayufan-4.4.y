@@ -305,11 +305,6 @@ static inline void extent_buffer_get(struct extent_buffer *eb)
 int memcmp_extent_buffer(struct extent_buffer *eb, const void *ptrv,
 			  unsigned long start,
 			  unsigned long len);
-#ifdef MY_ABC_HERE
-int memcmp_caseless_extent_buffer(struct extent_buffer *eb, const void *ptrv,
-			  unsigned long start,
-			  unsigned long len);
-#endif
 void read_extent_buffer(struct extent_buffer *eb, void *dst,
 			unsigned long start,
 			unsigned long len);

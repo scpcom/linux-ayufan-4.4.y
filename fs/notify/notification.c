@@ -291,11 +291,13 @@ alloc_holder:
 	/* we fetch full name after it is decided to inqueue. */
 	if (event->data_type == FSNOTIFY_EVENT_SYNO || event->data_type == FSNOTIFY_EVENT_PATH)
 	{
+		if (event->full_name == NULL) {
 			if (0 > SYNOFetchFullName(event, GFP_KERNEL))
 			{
 				return ERR_PTR(-ENOMEM);
 			}
 		}
+	}
 #endif
 	fsnotify_get_event(event);
 	list_add_tail(&holder->event_list, list);

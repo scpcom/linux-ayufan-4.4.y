@@ -1479,12 +1479,6 @@ void etxhci_dbg_ep_rings(struct xhci_hcd *xhci,
 		struct xhci_virt_ep *ep);
 void etxhci_dbg_stream_info(struct xhci_hcd *xhci,
 		unsigned int ep_index, struct xhci_stream_info *stream_info);
-void etxhci_print_trbs(struct xhci_hcd *xhci,
-    struct xhci_segment *seg,
-    union xhci_trb *trb,
-    int num_trbs);
-void etxhci_print_segment(struct xhci_hcd *xhci, struct xhci_segment *seg);
-void etxhci_print_ring(struct xhci_hcd *xhci, struct xhci_ring *ring);
 
 /* xHCI memory management */
 void etxhci_mem_cleanup(struct xhci_hcd *xhci);

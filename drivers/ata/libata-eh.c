@@ -719,6 +719,21 @@ void ata_scsi_cmd_error_handler(struct Scsi_Host *host, struct ata_port *ap,
 }
 EXPORT_SYMBOL(ata_scsi_cmd_error_handler);
 
+#ifdef MY_DEF_HERE
+int SYNO_is_ich_port(struct ata_port *ap)
+{
+	struct pci_dev *pdev = NULL;
+	int iRet = 0;
+
+	pdev = to_pci_dev(ap->host->dev);
+	if (pdev && (pdev->vendor == 0x8086 && pdev->device == 0x8c02)) {
+		iRet = 1;
+	}
+
+	return iRet;
+}
+#endif
+
 /**
  * ata_scsi_port_error_handler - recover the port after the commands
  * @host:	SCSI host containing the port
@@ -3762,8 +3777,14 @@ static int ata_eh_schedule_probe(struct ata_device *dev)
 	ata_ering_record(&dev->ering, 0, AC_ERR_OTHER);
 	ata_ering_map(&dev->ering, ata_count_probe_trials_cb, &trials);
 
+#ifdef MY_DEF_HERE
+	if (!link->ap->uiSflags & ATA_SYNO_FLAG_FORCE_RETRY) {
+#endif
 	if (trials > ATA_EH_PROBE_TRIALS)
 		sata_down_spd_limit(link, 1);
+#ifdef MY_DEF_HERE
+	}
+#endif
 
 	return 1;
 }
@@ -3771,12 +3792,41 @@ static int ata_eh_schedule_probe(struct ata_device *dev)
 static int ata_eh_handle_dev_fail(struct ata_device *dev, int err)
 {
 	struct ata_eh_context *ehc = &dev->link->eh_context;
+#ifdef MY_DEF_HERE
+	struct pci_dev *pdev = NULL;
+#endif
 
 	/* -EAGAIN from EH routine indicates retry without prejudice.
 	 * The requester is responsible for ensuring forward progress.
 	 */
 	if (err != -EAGAIN)
+#ifdef MY_DEF_HERE
+	{
+		/* To solve some disk drop speed after last chance reset in ICH sata port,
+		 * We clean the speed limit and do one more reset to apply this modification
+		 */
+		if (1 == ehc->tries[dev->devno] && -EIO == err) {
+			if (dev->link->ap && dev->link->ap->host) {
+				pdev = to_pci_dev(dev->link->ap->host->dev);
+			}
+			if (pdev && (pdev->vendor == 0x8086 && pdev->device == 0x8c02)) {
+				u32 scontrol = 0;
+				dev->link->sata_spd_limit = 0;
+				sata_scr_read(dev->link, SCR_CONTROL, &scontrol);
+				scontrol = (scontrol & ~0x0f0);
+				sata_scr_write(dev->link, SCR_CONTROL, scontrol);
+				ehc->i.action |= ATA_EH_RESET;
+				ehc->tries[dev->devno]--;
+				return 0;
+			}
+		}
+		if (ehc->tries[dev->devno]) {
+#endif
 		ehc->tries[dev->devno]--;
+#ifdef MY_DEF_HERE
+		}
+	}
+#endif
 
 	switch (err) {
 	case -ENODEV:
