@@ -69,8 +69,8 @@
 #define MPT2SAS_DRIVER_NAME		"mpt2sas"
 #define MPT2SAS_AUTHOR	"LSI Corporation <DL-MPTFusionLinux@lsi.com>"
 #define MPT2SAS_DESCRIPTION	"LSI MPT Fusion SAS 2.0 Device Driver"
-#define MPT2SAS_DRIVER_VERSION		"11.100.00.00"
-#define MPT2SAS_MAJOR_VERSION		11
+#define MPT2SAS_DRIVER_VERSION		"13.100.00.00"
+#define MPT2SAS_MAJOR_VERSION		13
 #define MPT2SAS_MINOR_VERSION		100
 #define MPT2SAS_BUILD_VERSION		00
 #define MPT2SAS_RELEASE_VERSION		00
@@ -154,6 +154,14 @@
 /*
  * Intel HBA branding
  */
+#define MPT2SAS_INTEL_RMS25JB080_BRANDING    \
+				"Intel(R) Integrated RAID Module RMS25JB080"
+#define MPT2SAS_INTEL_RMS25JB040_BRANDING    \
+				"Intel(R) Integrated RAID Module RMS25JB040"
+#define MPT2SAS_INTEL_RMS25KB080_BRANDING    \
+				"Intel(R) Integrated RAID Module RMS25KB080"
+#define MPT2SAS_INTEL_RMS25KB040_BRANDING    \
+				"Intel(R) Integrated RAID Module RMS25KB040"
 #define MPT2SAS_INTEL_RMS2LL080_BRANDING	\
 				"Intel Integrated RAID Module RMS2LL080"
 #define MPT2SAS_INTEL_RMS2LL040_BRANDING	\
@@ -165,6 +173,10 @@
 /*
  * Intel HBA SSDIDs
  */
+#define MPT2SAS_INTEL_RMS25JB080_SSDID         0x3516
+#define MPT2SAS_INTEL_RMS25JB040_SSDID         0x3517
+#define MPT2SAS_INTEL_RMS25KB080_SSDID         0x3518
+#define MPT2SAS_INTEL_RMS25KB040_SSDID         0x3519
 #define MPT2SAS_INTEL_RMS2LL080_SSDID          0x350E
 #define MPT2SAS_INTEL_RMS2LL040_SSDID          0x350F
 #define MPT2SAS_INTEL_RS25GB008_SSDID          0x3000
@@ -368,6 +380,7 @@ struct _sas_device {
  * @percent_complete: resync percent complete
  * @direct_io_enabled: Whether direct io to PDs are allowed or not
  * @stripe_exponent: X where 2powX is the stripe sz in blocks
+ * @block_exponent: X where 2powX is the block sz in bytes
  * @max_lba: Maximum number of LBA in the volume
  * @stripe_sz: Stripe Size of the volume
  * @device_info: Device info of the volume member disk
@@ -389,6 +402,7 @@ struct _raid_device {
 	u8	percent_complete;
 	u8	direct_io_enabled;
 	u8	stripe_exponent;
+	u8	block_exponent;
 	u64	max_lba;
 	u32	stripe_sz;
 	u32	device_info;
@@ -700,6 +714,7 @@ typedef void (*MPT2SAS_FLUSH_RUNNING_CMDS)(struct MPT2SAS_ADAPTER *ioc);
  * @io_missing_delay: time for IO completed by fw when PDR enabled
  * @device_missing_delay: time for device missing by fw when PDR enabled
  * @sas_id : used for setting volume target IDs
+ * @blocking_handles: bitmask used to identify which devices need blocking
  * @pd_handles : bitmask for PD handles
  * @pd_handles_sz : size of pd_handle bitmask
  * @config_page_sz: config page size
@@ -869,7 +884,7 @@ struct MPT2SAS_ADAPTER {
 	u8		io_missing_delay;
 	u16		device_missing_delay;
 	int		sas_id;
-
+	void		*blocking_handles;
 	void		*pd_handles;
 	u16		pd_handles_sz;
 
@@ -1037,7 +1052,8 @@ int mpt2sas_scsih_issue_tm(struct MPT2SAS_ADAPTER *ioc, u16 handle,
 void mpt2sas_scsih_set_tm_flag(struct MPT2SAS_ADAPTER *ioc, u16 handle);
 void mpt2sas_scsih_clear_tm_flag(struct MPT2SAS_ADAPTER *ioc, u16 handle);
 void mpt2sas_expander_remove(struct MPT2SAS_ADAPTER *ioc, u64 sas_address);
-void mpt2sas_device_remove(struct MPT2SAS_ADAPTER *ioc, u64 sas_address);
+void mpt2sas_device_remove_by_sas_address(struct MPT2SAS_ADAPTER *ioc,
+		u64 sas_address);
 struct _sas_node *mpt2sas_scsih_expander_find_by_handle(struct MPT2SAS_ADAPTER *ioc,
     u16 handle);
 struct _sas_node *mpt2sas_scsih_expander_find_by_sas_address(struct MPT2SAS_ADAPTER
@@ -1135,6 +1151,7 @@ extern struct scsi_transport_template *mpt2sas_transport_template;
 extern int scsi_internal_device_block(struct scsi_device *sdev);
 extern u8 mpt2sas_stm_zero_smid_handler(struct MPT2SAS_ADAPTER *ioc,
     u8 msix_index, u32 reply);
-extern int scsi_internal_device_unblock(struct scsi_device *sdev);
+extern int scsi_internal_device_unblock(struct scsi_device *sdev,
+					enum scsi_device_state new_state);
 
 #endif /* MPT2SAS_BASE_H_INCLUDED */

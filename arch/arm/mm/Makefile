@@ -2,21 +2,20 @@
 # Makefile for the linux arm-specific parts of the memory manager.
 #
 
-ifeq ($(CONFIG_ARCH_FEROCEON_ORION),y)
-	include $(srctree)/arch/arm/mach-feroceon-orion/config/mvRules.mk
-endif
-ifeq ($(CONFIG_ARCH_FEROCEON_KW),y)
-	include $(srctree)/arch/arm/mach-feroceon-kw/config/mvRules.mk
-endif
-ifeq ($(CONFIG_ARCH_FEROCEON_MV78XX0),y)
-	include $(srctree)/arch/arm/mach-feroceon-mv78xx0/config/mvRules.mk
+ifneq ($(MACHINE),)
+include $(srctree)/$(MACHINE)/config/mvRules.mk
 endif
 
 obj-y				:= dma-mapping.o extable.o fault.o init.o \
 				   iomap.o
 
+ifeq ($(CONFIG_SYNO_ARMADA_ARCH), y)
+obj-$(CONFIG_MMU)		+= fault-armv.o flush.o idmap.o ioremap-armada.o \
+				   mmap.o pgd.o mmu.o vmregion.o
+else
 obj-$(CONFIG_MMU)		+= fault-armv.o flush.o idmap.o ioremap.o \
 				   mmap.o pgd.o mmu.o vmregion.o
+endif
 
 ifneq ($(CONFIG_MMU),y)
 obj-y				+= nommu.o
@@ -47,8 +46,15 @@ obj-$(CONFIG_CPU_CACHE_V3)	+= cache-v3.o
 obj-$(CONFIG_CPU_CACHE_V4)	+= cache-v4.o
 obj-$(CONFIG_CPU_CACHE_V4WT)	+= cache-v4wt.o
 obj-$(CONFIG_CPU_CACHE_V4WB)	+= cache-v4wb.o
+ifeq ($(CONFIG_SYNO_ARMADA_ARCH), y)
+obj-$(CONFIG_CPU_CACHE_V6)	+= cache-v6-armada.o
+obj-$(CONFIG_CPU_CACHE_V7)	+= cache-v7-armada.o
+AFLAGS_cache-v6-armada.o	:=-Wa,-march=armv6
+AFLAGS_cache-v7-armada.o	:=-Wa,-march=armv7-a
+else
 obj-$(CONFIG_CPU_CACHE_V6)	+= cache-v6.o
 obj-$(CONFIG_CPU_CACHE_V7)	+= cache-v7.o
+endif
 obj-$(CONFIG_CPU_CACHE_FA)	+= cache-fa.o
 
 AFLAGS_cache-v6.o	:=-Wa,-march=armv6
@@ -99,14 +105,32 @@ obj-$(CONFIG_CPU_XSCALE)	+= proc-xscale.o
 obj-$(CONFIG_CPU_XSC3)		+= proc-xsc3.o
 obj-$(CONFIG_CPU_MOHAWK)	+= proc-mohawk.o
 obj-$(CONFIG_CPU_FEROCEON)	+= proc-feroceon.o
+ifeq ($(CONFIG_SYNO_ARMADA_ARCH), y)
+obj-$(CONFIG_CPU_SHEEVA_PJ4B_V6)	+= proc-sheeva_pj4bv6.o
+ifeq ($(CONFIG_ARM_LPAE),y)
+obj-$(CONFIG_CPU_SHEEVA_PJ4B_V7)	+= proc-sheeva_pj4bv7lpae.o
+else
+obj-$(CONFIG_CPU_SHEEVA_PJ4B_V7)	+= proc-sheeva_pj4bv7.o
+endif
+else
 obj-$(CONFIG_CPU_V6)		+= proc-v6.o
 obj-$(CONFIG_CPU_V6K)		+= proc-v6.o
 obj-$(CONFIG_CPU_V7)		+= proc-v7.o
+endif
 
 AFLAGS_proc-v6.o	:=-Wa,-march=armv6
 AFLAGS_proc-v7.o	:=-Wa,-march=armv7-a
+
+ifeq ($(CONFIG_SYNO_ARMADA_ARCH), y)
+AFLAGS_proc-sheeva_pj4bv6.o        :=-Wa,-march=armv6
+AFLAGS_proc-sheeva_pj4bv7.o        :=-Wa,-march=armv7-a
+AFLAGS_proc-sheeva_pj4bv7lpae.o    :=-Wa,-march=armv7-a
+endif
 
 obj-$(CONFIG_CACHE_FEROCEON_L2)	+= cache-feroceon-l2.o
 obj-$(CONFIG_CACHE_L2X0)	+= cache-l2x0.o
 obj-$(CONFIG_CACHE_XSC3L2)	+= cache-xsc3l2.o
 obj-$(CONFIG_CACHE_TAUROS2)	+= cache-tauros2.o
+ifeq ($(CONFIG_SYNO_ARMADA_ARCH), y)
+obj-$(CONFIG_CACHE_AURORA_L2)	+= cache-aurora-l2.o
+endif

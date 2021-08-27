@@ -2388,8 +2388,6 @@ config FB_BROADSHEET
 	  and could also have been called by other names when coupled with
 	  a bridge adapter.
 
-source "drivers/video/marvell/Kconfig"
-
 config FB_JZ4740
 	tristate "JZ4740 LCD framebuffer support"
 	depends on FB && MACH_JZ4740
@@ -2419,6 +2417,7 @@ config FB_PUV3_UNIGFX
 	  Choose this option if you want to use the Unigfx device as a
 	  framebuffer device. Without the support of PCI & AGP.
 	  
+source "drivers/video/marvell/Kconfig"
 source "drivers/video/omap/Kconfig"
 source "drivers/video/omap2/Kconfig"
 

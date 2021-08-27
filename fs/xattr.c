@@ -419,7 +419,7 @@ SYSCALL_DEFINE5(fsetxattr, int, fd, const char __user *, name,
 	error = mnt_want_write_file(f);
 	if (!error) {
 		error = setxattr(dentry, name, value, size, flags);
-		mnt_drop_write(f->f_path.mnt);
+		mnt_drop_write_file(f);
 	}
 	fput(f);
 	return error;
@@ -646,7 +646,7 @@ SYSCALL_DEFINE2(fremovexattr, int, fd, const char __user *, name)
 	error = mnt_want_write_file(f);
 	if (!error) {
 		error = removexattr(dentry, name);
-		mnt_drop_write(f->f_path.mnt);
+		mnt_drop_write_file(f);
 	}
 	fput(f);
 	return error;
@@ -824,18 +824,21 @@ EXPORT_SYMBOL(generic_removexattr);
  * Find the handler for the prefix and dispatch its set() operation.
  */
 int
-syno_generic_setxattr(struct dentry *dentry, const char *name, const void *value, size_t size, int flags)
+syno_generic_setxattr(struct inode *target, const char *name, const void *value, size_t size, int flags)
 {
 	const struct xattr_handler *handler;
 
 	if (size == 0)
 		value = "";  /* empty EA, do not remove */
 
-	handler = xattr_resolve_name(dentry->d_sb->s_xattr, &name);
+	handler = xattr_resolve_name(target->i_sb->s_xattr, &name);
 	if (!handler)
 		return -EOPNOTSUPP;
 
-	return handler->set(dentry, name, value, size, 0, handler->flags);
+	if (!handler->set_compact_syno) {
+		return -EOPNOTSUPP;
+	}
+	return handler->set_compact_syno(target, name, value, size, 0, handler->flags);
 }
 
 EXPORT_SYMBOL(syno_generic_setxattr);

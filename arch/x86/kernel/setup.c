@@ -118,6 +118,11 @@
 #include <asm/alternative.h>
 #include <asm/prom.h>
 
+
+#ifdef  MY_ABC_HERE
+extern char gszSynoHWRevision[];
+#endif
+
 #ifdef  MY_ABC_HERE
 extern char gszSynoHWVersion[];
 #endif
@@ -159,11 +164,15 @@ extern char giDiskSeqReverse[8];
 #endif
 
 #ifdef MY_ABC_HERE
+extern int gSynoHasDynModule;
+#endif
+
+#ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[4][16];
 #endif
 
 #ifdef MY_ABC_HERE
-extern char gszSerialNum[12];
+extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
@@ -339,6 +348,17 @@ void * __init extend_brk(size_t size, size_t align)
 
 	return ret;
 }
+
+#if defined(MY_ABC_HERE)
+#if defined(CONFIG_ARCH_GEN3)
+#else
+int sys_SYNOMTDAlloc(char blMalloc)
+{
+	printk("%s: Not supported on this platform.\n", __func__);
+	return 0;
+}
+#endif
+#endif
 
 #ifdef CONFIG_X86_64
 static void __init init_gbpages(void)
@@ -571,11 +591,23 @@ static int __init early_hw_version(char *p)
 	*szPtr = 0;
 	strcat(gszSynoHWVersion, "-j");
 
-	printk("Synology Hareware Version: %s\n", gszSynoHWVersion);
+	printk("Synology Hardware Version: %s\n", gszSynoHWVersion);
 
 	return 1;
 }
 __setup("syno_hw_version=", early_hw_version);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_hw_revision(char *p)
+{
+	snprintf(gszSynoHWRevision, 4, "%s", p);
+
+	printk("Synology Hardware Revision: %s\n", gszSynoHWRevision);
+
+	return 1;
+}
+__setup("rev=", early_hw_revision);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -701,6 +733,28 @@ static int __init early_disk_seq_reserve(char *p)
 }
 __setup("DiskSeqReverse=", early_disk_seq_reserve);
 #endif
+
+#ifdef MY_ABC_HERE
+static int __init early_is_dyn_module(char *p)
+{
+	int iLen = 0;
+
+	gSynoHasDynModule = 1;
+	
+	if ((NULL == p) || (0 == (iLen = strlen(p)))) {
+		goto END;
+	}
+
+	if ( 0 == strcmp (p, "n")) {
+		gSynoHasDynModule = 0;
+		printk("Synology Dynamic Module support disabled.\n");
+	}
+
+END:
+	return 1;
+}
+__setup("syno_dyn_module=", early_is_dyn_module);
+#endif /* MY_ABC_HERE */
 
 #ifdef MY_ABC_HERE
 static int __init early_mac1(char *p)

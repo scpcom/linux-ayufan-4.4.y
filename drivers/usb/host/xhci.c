@@ -487,11 +487,7 @@ int xhci_reset(struct xhci_hcd *xhci)
 	xhci_writel(xhci, command, &xhci->op_regs->command);
 
 	ret = handshake(xhci, &xhci->op_regs->command,
-#ifdef MY_ABC_HERE
-			CMD_RESET, 0, 1000 * 1000);
-#else
-			CMD_RESET, 0, 250 * 1000);
-#endif
+			CMD_RESET, 0, 10 * 1000 * 1000);
 	if (ret)
 		return ret;
 
@@ -803,7 +799,6 @@ static int xhci_all_ports_seen_u0(struct xhci_hcd *xhci)
 	return (xhci->port_status_u0 == ((1 << xhci->num_usb3_ports)-1));
 }
 
-
 /*
  * Initialize memory for HCD and xHC (one-time init).
  *
@@ -895,7 +890,7 @@ int disable_usb3 = 0;
 module_param(disable_usb3, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 static int usb_fast_reset = 0;
 module_param(usb_fast_reset, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
@@ -920,7 +915,7 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 	}
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 	if (usb_fast_reset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
@@ -1119,7 +1114,7 @@ void xhci_stop(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 	if (usb_fast_reset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
@@ -1147,6 +1142,9 @@ void xhci_shutdown(struct usb_hcd *hcd)
 		xhci_task = NULL;
 	}
 #endif
+	if (xhci->quirks & XHCI_SPURIOUS_REBOOT)
+		usb_disable_xhci_ports(to_pci_dev(hcd->self.controller));
+
 	spin_lock_irq(&xhci->lock);
 	xhci_halt(xhci);
 	spin_unlock_irq(&xhci->lock);

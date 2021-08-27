@@ -92,12 +92,19 @@ void fsnotify_put_event(struct fsnotify_event *event)
 	if (atomic_dec_and_test(&event->refcnt)) {
 		pr_debug("%s: event=%p\n", __func__, event);
 
+#ifdef CONFIG_SYNO_NOTIFY
+		if (event->data_type == FSNOTIFY_EVENT_PATH || event->data_type == FSNOTIFY_EVENT_SYNO)
+#else
 		if (event->data_type == FSNOTIFY_EVENT_PATH)
+#endif
 			path_put(&event->path);
 
 		BUG_ON(!list_empty(&event->private_data_list));
 
 		kfree(event->file_name);
+#ifdef CONFIG_SYNO_NOTIFY
+		kfree(event->full_name);
+#endif
 		put_pid(event->tgid);
 		kmem_cache_free(fsnotify_event_cachep, event);
 	}
@@ -377,13 +384,82 @@ struct fsnotify_event *fsnotify_clone_event(struct fsnotify_event *old_event)
 			return NULL;
 		}
 	}
+#ifdef CONFIG_SYNO_NOTIFY
+	if (event->full_name_len) {
+		event->full_name = kstrdup(old_event->full_name, GFP_KERNEL);
+		if (!event->full_name) {
+			kmem_cache_free(fsnotify_event_cachep, event);
+			return NULL;
+		}
+	}
+#endif
 	event->tgid = get_pid(old_event->tgid);
+#ifdef CONFIG_SYNO_NOTIFY
+	if (event->data_type == FSNOTIFY_EVENT_PATH || event->data_type == FSNOTIFY_EVENT_SYNO)
+#else
 	if (event->data_type == FSNOTIFY_EVENT_PATH)
+#endif
 		path_get(&event->path);
 
 	return event;
 }
 
+#ifdef CONFIG_SYNO_NOTIFY
+// base_name should have leading '/'
+static void formalize_full_path(const char *mnt_name, const char *base_name, char *full_path){
+	if (mnt_name[0] == '/'){
+		if(mnt_name[1] == 0){
+			snprintf(full_path, PATH_MAX,"%s", base_name);
+		}else{
+			snprintf(full_path, PATH_MAX,"%s%s", mnt_name, base_name);
+		}
+	}else
+		snprintf(full_path, PATH_MAX,"/%s%s", mnt_name, base_name);
+}
+static int SYNOFetchFullName(struct fsnotify_event *event, int data_type, struct path *path,
+							const unsigned char *name, gfp_t gfp)
+{
+	char *dentry_path_buf = NULL;
+	char *full_path = NULL;
+	struct vfsmount *mnt = path->mnt;
+	struct dentry *dentry = path->dentry;
+	int ret = -1;
+
+	if(data_type == FSNOTIFY_EVENT_PATH){
+		char *dentry_path = NULL;
+		dentry_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
+		full_path = kmalloc(PATH_MAX, GFP_NOFS);
+
+		if(!full_path || !dentry_path_buf){
+			goto ERR;
+		}
+
+		dentry_path = dentry_path_raw(dentry, dentry_path_buf, PATH_MAX - 1);
+		if(IS_ERR(dentry_path)){
+			goto ERR;
+		}
+		formalize_full_path (mnt->mnt_mountpoint->d_name.name, dentry_path, full_path);
+		event->full_name = kstrdup(full_path, gfp);
+		if (!event->full_name) {
+			goto ERR;
+		}
+		event->full_name_len = strlen(event->full_name);
+	} else if(data_type == FSNOTIFY_EVENT_SYNO){
+		full_path = kmalloc(PATH_MAX, GFP_NOFS);
+		if(!full_path){
+			goto ERR;
+		}
+		formalize_full_path (mnt->mnt_mountpoint->d_name.name, name, full_path);
+		event->full_name = kstrdup(full_path, gfp);
+		event->full_name_len = strlen(event->full_name);
+	}
+	ret = 0;
+ERR:
+		kfree(dentry_path_buf);
+		kfree(full_path);
+	return ret;
+}
+#endif
 /*
  * fsnotify_create_event - Allocate a new event which will be sent to each
  * group's handle_event function if the group was interested in this
@@ -420,12 +496,23 @@ struct fsnotify_event *fsnotify_create_event(struct inode *to_tell, __u32 mask, 
 		event->name_len = strlen(event->file_name);
 	}
 
+#ifdef CONFIG_SYNO_NOTIFY
+	if (data_type == FSNOTIFY_EVENT_PATH || data_type == FSNOTIFY_EVENT_SYNO) {
+		if (0 > SYNOFetchFullName(event, data_type, data, name, gfp)){
+			kmem_cache_free(fsnotify_event_cachep, event);
+			return NULL;
+		}
+	}
+#endif /* CONFIG_SYNO_NOTIFY */
 	event->tgid = get_pid(task_tgid(current));
 	event->sync_cookie = cookie;
 	event->to_tell = to_tell;
 	event->data_type = data_type;
 
 	switch (data_type) {
+#ifdef CONFIG_SYNO_NOTIFY
+	case FSNOTIFY_EVENT_SYNO:
+#endif
 	case FSNOTIFY_EVENT_PATH: {
 		struct path *path = data;
 		event->path.dentry = path->dentry;

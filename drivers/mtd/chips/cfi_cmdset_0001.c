@@ -763,6 +763,13 @@ static int chip_ready (struct map_info *map, struct flchip *chip, unsigned long 
 
 	case FL_STATUS:
 		for (;;) {
+#ifdef CONFIG_ARCH_GEN3
+			/* Add issuing READ STATUS command before reading 
+			 * flash status to guarantee the status read is
+			 * correct.
+			 */		
+			map_write(map, CMD(0x70), adr);
+#endif
 			status = map_read(map, adr);
 			if (map_word_andequal(map, status, status_OK, status_OK))
 				break;
@@ -2080,6 +2087,10 @@ static int __xipram do_xxlock_oneblock(struct map_info *map, struct flchip *chip
 	}
 
 	xip_enable(map, chip, adr);
+#ifdef CONFIG_ARCH_GEN3
+	// Intel specs require this call. Because I don't know how xip works I simply add this call. It shouldn't harm
+	map_write(map, CMD(0xFF), adr);
+#endif
 out:	put_chip(map, chip, adr);
 	mutex_unlock(&chip->mutex);
 	return ret;

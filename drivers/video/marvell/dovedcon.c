@@ -82,17 +82,17 @@ static int dovedcon_disable(struct dovedcon_info *ddi)
 	ctrl0 = readl(ddi->reg_base+DCON_CTRL0);
 
 	/*
-	 * Disable LCD Parallel Interface, clear it to enable
+	 * Disable LCD Parallel Interface, set to 1 to disable it.
 	 */
-	ctrl0 &= (0x1 << 17);	
+	ctrl0 |= (0x1 << 17);	
 
 	/*
-	 * Disable LCD clock, clear it to enable
+	 * Disable LCD clock, set to 1 to disable it.
 	 */
 	ctrl0 |= (0x1 << 24);	
 
 	/*
-	 * Disable VGA clock, clear it to enable.
+	 * Disable VGA clock, set to 1 to disable it.
 	 */
 	ctrl0 |= (0x1 << 25);	
 		

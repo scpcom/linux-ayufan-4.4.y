@@ -5,10 +5,6 @@
 #   include <linux/version.h>
 #endif
 
-#ifndef AUTOCONF_INCLUDED
-#   include <linux/config.h>
-#endif /* AUTOCONF_INCLUDED */
-
 #include <linux/list.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -35,7 +31,11 @@
 #include <asm/uaccess.h>
 #include <asm/io.h>
 #include <asm/div64.h>
-
+#if LINUX_VERSION_CODE >  KERNEL_VERSION(2, 6, 19)
+#include <linux/freezer.h>
+#else
+#include <linux/sched.h>
+#endif
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
 #include <scsi/scsi_device.h>
@@ -130,9 +130,8 @@ typedef unsigned long OSSW_TIMER_DATA;
 /*Driver Version for Command Line Interface Query.*/
 #  define VER_MAJOR           1
 
-
 #   define VER_MINOR        2
-#   define VER_BUILD        24
+#   define VER_BUILD        30
 
 #ifdef __OEM_INTEL__
 #   define VER_OEM          VER_OEM_INTEL

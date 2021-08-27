@@ -167,6 +167,11 @@ struct usb_hcd {
 #define	HC_IS_RUNNING(state) ((state) & __ACTIVE)
 #define	HC_IS_SUSPENDED(state) ((state) & __SUSPEND)
 
+	u8		chip_id;
+#define HCD_CHIP_ID_UNKNOWN 0x00
+#define HCD_CHIP_ID_ETRON_EJ168 0x10
+#define HCD_CHIP_ID_ETRON_EJ188 0x20
+
 	/* more shared queuing code would be good; it should support
 	 * smarter scheduling, handle transaction translators, etc;
 	 * input size of periodic table to an interrupt scheduler.
@@ -412,6 +417,8 @@ extern irqreturn_t usb_hcd_irq(int irq, void *__hcd);
 
 extern void usb_hc_died(struct usb_hcd *hcd);
 extern void usb_hcd_poll_rh_status(struct usb_hcd *hcd);
+extern void usb_wakeup_notification(struct usb_device *hdev,
+		unsigned int portnum);
 
 /* The D0/D1 toggle bits ... USE WITH CAUTION (they're almost hcd-internal) */
 #define usb_gettoggle(dev, ep, out) (((dev)->toggle[out] >> (ep)) & 1)
@@ -508,11 +515,7 @@ extern void usb_ep0_reinit(struct usb_device *);
  * Generic bandwidth allocation constants/support
  */
 #define FRAME_TIME_USECS	1000L
-#ifdef CONFIG_MV_INCLUDE_USB
-#define BitTime(bytecount) (9 * 8 * bytecount / 8) /* with integer truncation */
-#else
 #define BitTime(bytecount) (7 * 8 * bytecount / 6) /* with integer truncation */
-#endif
 		/* Trying not to use worst-case bit-stuffing
 		 * of (7/6 * 8 * bytecount) = 9.33 * bytecount */
 		/* bytecount = data payload byte count */

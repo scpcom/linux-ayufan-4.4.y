@@ -136,6 +136,17 @@ extern unsigned char SYNOKirkwoodIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA)
+extern unsigned char SYNOArmadaIsBoardNeedPowerUpHDD(u32);
+extern int SYNO_CTRL_HDD_POWERON(int index, int value);
+#endif
+
+#if defined(CONFIG_ARCH_GEN3)
+extern unsigned char SYNOEvansportIsBoardNeedPowerUpHDD(u32);
+extern int SYNO_CTRL_HDD_POWERON(int index, int value);
+#endif
+
+
 /* param_buf is thrown away after initialization, disallow read */
 module_param_string(force, ata_force_param_buf, sizeof(ata_force_param_buf), 0);
 MODULE_PARM_DESC(force, "Force ATA configurations including cable type, link speed and transfer mode (see Documentation/kernel-parameters.txt for details)");
@@ -1601,7 +1612,7 @@ unsigned syno_ata_exec_internal_gpio(struct ata_device *dev,
 
 	/* prepare & issue qc */
 	qc->tf = *tf;
-	if (ATA_CMD_PMP_READ == tf->command && SATA_PMP_GSCR_3XXX_GPIO == tf->feature) {
+	if (IS_SYNO_PMP_READ_CMD(tf)) {
 		/* only read need result tf */
 		qc->flags |= ATA_QCFLAG_RESULT_TF;
 	}
@@ -1909,9 +1920,7 @@ unsigned ata_exec_internal(struct ata_device *dev,
 	}
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
-	if ((ATA_CMD_PMP_WRITE == tf->command || ATA_CMD_PMP_READ == tf->command) &&
-		SATA_PMP_GSCR_3XXX_GPIO == tf->feature &&
-		!(ehc->i.action & ATA_EH_REVALIDATE))
+	if (IS_SYNO_PMP_CMD(tf) && !(ehc->i.action & ATA_EH_REVALIDATE))
 		return syno_ata_exec_internal_gpio(dev, tf, timeout);
 	else
 #endif
@@ -3046,8 +3055,30 @@ int sata_set_spd(struct ata_link *link)
 	if (!__sata_set_spd_needed(link, &scontrol))
 		return 0;
 
+#ifdef MY_ABC_HERE
+	/* Sil3132 PM doesn't have PHY-off(DET=4h) mode,
+	 * so use RESET(DET=1h) mode to reconfiguing speed.
+	 */
+	if (1 == link->SynoIsSil3132PM) {
+		scontrol = (scontrol & 0x0f0) | 0x301;
+	}
+#endif
+
 	if ((rc = sata_scr_write(link, SCR_CONTROL, scontrol)))
 		return rc;
+
+#ifdef MY_ABC_HERE
+	/* After reconfiguing speed, need to write again
+	 * after a 1ms delay. Otherwise the speed won't
+	 * configue correctly.
+	 */
+	if (1 == link->SynoIsSil3132PM) {
+		ata_msleep(link->ap, 1);
+		if ((rc = sata_scr_write(link, SCR_CONTROL, scontrol))) {
+			return rc;
+		}
+	}
+#endif
 
 	return 1;
 }
@@ -4023,6 +4054,9 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 		}
 #endif
 	}
+#ifdef MY_ABC_HERE
+	link->SynoIsSil3132PM = 0;
+#endif
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;
 }
@@ -5101,6 +5135,9 @@ static void ata_verify_xfer(struct ata_queued_cmd *qc)
 void ata_qc_complete(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
+#if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+	struct ata_taskfile *tf = &qc->tf;
+#endif
 
 	/* XXX: New EH and old EH use different mechanisms to
 	 * synchronize EH with regular execution path.
@@ -5140,9 +5177,7 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 			fill_result_tf(qc);
 
 #if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
-			if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
-				(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_PMP_WRITE == qc->tf.command ||
-				 ATA_CMD_PMP_READ || ATA_CMD_VERIFY == qc->tf.command)) {
+			if (IS_SYNO_PMP_CMD(tf) || IS_SYNO_SPINUP_CMD(qc)) {
 				__ata_qc_complete(qc);
 			} else
 #endif
@@ -5685,6 +5720,9 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 	link->pmp = pmp;
 	link->active_tag = ATA_TAG_POISON;
 	link->hw_sata_spd_limit = UINT_MAX;
+#ifdef MY_ABC_HERE
+	link->uiSflags = 0x0;
+#endif
 
 	/* can't use iterator, ap isn't initialized yet */
 	for (i = 0; i < ATA_MAX_DEVICES; i++) {
@@ -5797,9 +5835,14 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 	ap->stats.idle_irq = 1;
 #endif
 #ifdef MY_ABC_HERE
+	ap->uiSflags = 0x0;
 	ap->iFakeError = 0;
+	ap->iDetectStat = 0;
 	INIT_WORK(&ap->SendPwrResetEventTask, SendPwrResetEvent);
 	INIT_WORK(&ap->SendPortDisEventTask, SendPortDisEvent);
+#endif
+#ifdef MY_ABC_HERE
+	init_completion(&(ap->synoHotplugWait));
 #endif
 	ata_sff_port_init(ap);
 
@@ -6196,6 +6239,21 @@ int ata_port_probe(struct ata_port *ap)
 	}
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA)
+	if(SYNOArmadaIsBoardNeedPowerUpHDD(ap->print_id)) {
+		SYNO_CTRL_HDD_POWERON(ap->print_id, 1);
+		SleepForLatency();
+	}
+#endif
+
+
+#if defined(CONFIG_ARCH_GEN3)
+	if(SYNOEvansportIsBoardNeedPowerUpHDD(ap->print_id)) {
+		SYNO_CTRL_HDD_POWERON(ap->print_id, 1);
+		SleepForLatency();
+	}
+#endif
+
 #if defined(MY_ABC_HERE)
 		/* delay 10s to avoid probe disks in the same time(consume too much power)
 		 * If this async_port_probe(..) function is run asynchronously this code is not work,
@@ -6270,6 +6328,23 @@ static void DelayForHWCtl(struct ata_port *pAp)
 
 #if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_SYNO_MV88F6281)
 	if(SYNOKirkwoodIsBoardNeedPowerUpHDD(pAp->print_id)) {
+		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
+		SleepForLatency();
+		iIsDoLatency = 1;
+	}
+#endif
+
+#if defined(CONFIG_SYNO_ARMADA)
+	if(SYNOArmadaIsBoardNeedPowerUpHDD(pAp->print_id)) {
+		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
+		SleepForLatency();
+		iIsDoLatency = 1;
+	}
+#endif
+
+
+#if defined(CONFIG_ARCH_GEN3)
+	if(SYNOEvansportIsBoardNeedPowerUpHDD(pAp->print_id)) {
 		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		SleepForLatency();
 		iIsDoLatency = 1;

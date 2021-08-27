@@ -552,6 +552,29 @@ sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const c
 }
 static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
 #endif
+ 
+#ifdef MY_ABC_HERE
+/* FIXME: We don't know why SAS disks led blinking when open it, so we add a sysfs interface to prevent it  
+ * The following code is copied from "case SD_IOCTL_IDLE: " ind "sd.c" */
+static ssize_t
+sdev_show_syno_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf (buf, 20, "%lu\n", (jiffies - sdev->idle) / HZ + 1);
+
+END:
+	return iRet;
+}
+
+static DEVICE_ATTR(syno_idle_time, S_IRUGO, sdev_show_syno_idle_time, NULL);
+#endif
+
 /*
  * Create the actual show/store functions and data structures.
  */
@@ -758,6 +781,9 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_modalias.attr,
 #ifdef MY_ABC_HERE
 	&dev_attr_auto_remap.attr,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_idle_time.attr,
 #endif
 	REF_EVT(media_change),
 	NULL
@@ -986,20 +1012,6 @@ void __scsi_remove_device(struct scsi_device *sdev)
 	struct device *dev = &sdev->sdev_gendev;
 
 	if (sdev->is_visible) {
-#ifdef CONFIG_MV_SCATTERED_SPINUP
-		if (scsi_spinup_enabled()) {
-			if (sdev->standby_timeout_secs > 0) {
-				/* if the device had any standby timer */
-				standby_delete_timer(sdev);
-			}
-			if (sdev->spinup_timeout.function) {
-				/* deleting any spinup timer thats may be still there and freeing the semaphore */
-				spinup_delete_timer(sdev);
-				scsi_spinup_up();
-			}
-		}
-#endif
-
 		if (scsi_device_set_state(sdev, SDEV_CANCEL) != 0)
 			return;
 
@@ -1035,6 +1047,9 @@ void scsi_remove_device(struct scsi_device *sdev)
 	mutex_lock(&shost->scan_mutex);
 	__scsi_remove_device(sdev);
 	mutex_unlock(&shost->scan_mutex);
+#ifdef MY_ABC_HERE
+	SynoSpinupRemove(sdev);
+#endif /* MY_ABC_HERE */
 #ifdef MY_ABC_HERE
 	if (funcSYNORaidDiskUnplug) {
 		funcSYNORaidDiskUnplug(sdev->syno_disk_name);
@@ -1076,33 +1091,31 @@ static void __scsi_remove_target(struct scsi_target *starget)
 void scsi_remove_target(struct device *dev)
 {
 	struct Scsi_Host *shost = dev_to_shost(dev->parent);
-	struct scsi_target *starget, *found;
+	struct scsi_target *starget, *last = NULL;
 	unsigned long flags;
 
- restart:
-	found = NULL;
+	/* remove targets being careful to lookup next entry before
+	 * deleting the last
+	 */
 	spin_lock_irqsave(shost->host_lock, flags);
 	list_for_each_entry(starget, &shost->__targets, siblings) {
 		if (starget->state == STARGET_DEL)
 			continue;
 		if (starget->dev.parent == dev || &starget->dev == dev) {
-			found = starget;
-			found->reap_ref++;
-			break;
+			/* assuming new targets arrive at the end */
+			starget->reap_ref++;
+			spin_unlock_irqrestore(shost->host_lock, flags);
+			if (last)
+				scsi_target_reap(last);
+			last = starget;
+			__scsi_remove_target(starget);
+			spin_lock_irqsave(shost->host_lock, flags);
 		}
 	}
 	spin_unlock_irqrestore(shost->host_lock, flags);
 
-	if (found) {
-		__scsi_remove_target(found);
-		scsi_target_reap(found);
-		/* in the case where @dev has multiple starget children,
-		 * continue removing.
-		 *
-		 * FIXME: does such a case exist?
-		 */
-		goto restart;
-	}
+	if (last)
+		scsi_target_reap(last);
 }
 EXPORT_SYMBOL(scsi_remove_target);
 

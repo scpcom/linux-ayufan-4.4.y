@@ -3143,8 +3143,11 @@ static const struct vm_operations_struct snd_pcm_vm_ops_data_fault = {
 
 #ifndef ARCH_HAS_DMA_MMAP_COHERENT
 /* This should be defined / handled globally! */
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_AURORA_IO_CACHE_COHERENCY)
+#else
 #ifdef CONFIG_ARM
 #define ARCH_HAS_DMA_MMAP_COHERENT
+#endif
 #endif
 #endif
 

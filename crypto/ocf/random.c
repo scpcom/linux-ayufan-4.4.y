@@ -172,7 +172,7 @@ crypto_runregister_all(u_int32_t driverid)
 
 	spin_lock_irqsave(&random_lock, flags);
 	if (list_empty(&random_ops) && started)
-		kill_proc(randomproc, SIGKILL, 1);
+		kill_proc_info(SIGKILL, SEND_SIG_PRIV, randomproc);
 	spin_unlock_irqrestore(&random_lock, flags);
 	return(0);
 }

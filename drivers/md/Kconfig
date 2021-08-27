@@ -44,14 +44,6 @@ config MD_AUTODETECT
 
 	  If unsure, say Y.
 
-config SYNO_MODULES_MD_AND_RAID1
-	bool "(SYNO)Making up md0 and md1 automatically"
-	depends on BLK_DEV_MD=m
-	default y
-	---help---
-	  The flag is set when raid1 and md are the kernel modules.
-	  Nerver set this flag n if raid1 and md are kernel modules.
-
 config MD_LINEAR
 	tristate "Linear (append) mode"
 	depends on BLK_DEV_MD

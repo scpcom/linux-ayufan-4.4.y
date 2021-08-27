@@ -372,6 +372,9 @@ ixp_freesession(device_t dev, u_int64_t tid)
 			ixCryptoAccCtxUnregister(ixp_sessions[sid]->ixp_ctx_id);
 			ixp_sessions[sid]->ixp_ctx_id = -1;
 		}
+
+		flush_scheduled_work();
+
 		kfree(ixp_sessions[sid]);
 	}
 	ixp_sessions[sid] = NULL;

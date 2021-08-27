@@ -194,6 +194,15 @@ config IP6_NF_RAW
 	  If you want to compile it as a module, say M here and read
 	  <file:Documentation/kbuild/modules.txt>.  If unsure, say `N'.
 
+config IP6_NF_TARGET_NFP
+	tristate "NFP target support for IPv6"
+	default y
+	depends on NF_CONNTRACK_IPV6 && MV_ETH_NFP_CT && MV_ETH_NFP_LEARN
+	help
+	  This target allows to process selected connections in NFP.
+
+	  To compile it as a module, choose M here.  If unsure, say N.
+
 # security table for MAC policy
 config IP6_NF_SECURITY
        tristate "Security table"

@@ -35,10 +35,6 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-#ifdef CONFIG_MV_SCATTERED_SPINUP
-#include <scsi/scsi_spinup.h>
-#endif
-
 #define SG_MEMPOOL_NR		ARRAY_SIZE(scsi_sg_pools)
 #define SG_MEMPOOL_SIZE		2
 
@@ -666,6 +662,47 @@ static void __scsi_release_buffers(struct scsi_cmnd *cmd, int do_bidi_check)
 		scsi_free_sgtable(cmd->prot_sdb);
 }
 
+#ifdef MY_ABC_HERE
+static void SynoSpinupDone(struct request *req, int uptodate)
+{
+	struct scsi_device *sdev = req->q->queuedata;
+
+	__blk_put_request(req->q, req);
+
+	SynoSpinupEnd(sdev);
+}
+
+static void SynoSubmitSpinupReq(struct scsi_device *device)
+{
+	struct request *req;
+
+	req = blk_get_request(device->request_queue, READ, GFP_ATOMIC);
+
+	req->cmd[0] = START_STOP;
+	req->cmd[1] = 0;
+	req->cmd[2] = 0;
+	req->cmd[3] = 0;
+	req->cmd[4] = 1; /* START */
+	req->cmd[5] = 0;
+
+	req->cmd_len = COMMAND_SIZE(req->cmd[0]);
+
+	req->cmd_type = REQ_TYPE_BLOCK_PC;
+	req->cmd_flags |= REQ_QUIET;
+	req->timeout = 60 * HZ;
+	req->retries = 5;
+
+	blk_execute_rq_nowait(req->q, NULL, req, 1, SynoSpinupDone);
+}
+
+static void SynoSpinupDisk(struct scsi_device *device)
+{
+	if (SynoSpinupBegin(device)) {
+		SynoSubmitSpinupReq(device);
+	}
+}
+#endif /* MY_ABC_HERE */
+
 /*
  * Function:    scsi_release_buffers()
  *
@@ -768,6 +805,53 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 			sense_deferred = scsi_sense_is_deferred(&sshdr);
 	}
 
+#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+	if (0x1b == cmd->cmnd[0]) {
+	    sdev_printk(KERN_ERR, cmd->device, 
+		    "START_STOP done - tag %02x %s - %02x %02x %02x %02x %02x %02x\n",
+			cmd->tag, (cmd->cmnd[4]&0x01)?"START":"STOP ",
+		    cmd->cmnd[0], cmd->cmnd[1], cmd->cmnd[2], 
+		    cmd->cmnd[3], cmd->cmnd[4], cmd->cmnd[5]);
+	}
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
+	/* Check with sense 2:4:2. */
+	if (
+			(cmd->device->spinup_queue) &&
+			(status_byte(result) == CHECK_CONDITION) &&
+			(sshdr.sense_key == NOT_READY) &&
+			(sshdr.asc == 0x04)) {
+		switch (cmd->cmnd[0]) {
+			/* Only spin up on read/write commands */
+			case TEST_UNIT_READY:
+			case REQUEST_SENSE:
+				/* Leave TUR & REQUEST_SENSE results
+				 * untouched for upper layers */
+				break;
+			default:
+				switch (sshdr.ascq) {
+					case 0x02: /* INITIALIZING COMMAND REQUIRED */
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+						sdev_printk(KERN_ERR, cmd->device, 
+								"%s(%d): cmd 0x%02x need start. force retry\n",
+								__func__, __LINE__, cmd->cmnd[0]);
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
+						SynoSpinupDisk(cmd->device);
+						/* and then fall through */
+					case 0x01: /* IN PROCESS OF BECOMING READY */
+					case 0x11: /* NOTIFY (ENABLE SPINUP) REQUIRED */
+						action = ACTION_DELAYED_RETRY;
+						goto handle_cmd;
+						break;
+					default:
+						/* Do not handle other cases */
+						break;
+				}
+				break;
+		}
+	}
+#endif /* MY_ABC_HERE */
+ 
 	if (req->cmd_type == REQ_TYPE_BLOCK_PC) { /* SG_IO ioctl from block level */
 		req->errors = result;
 		if (result) {
@@ -783,7 +867,17 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 				req->sense_len = len;
 			}
 			if (!sense_deferred)
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+			{
  				error = __scsi_error_from_host_byte(cmd, result);
+				sdev_printk(KERN_ERR, cmd->device, "%s(%d): cmd %p 0x%02x, good bytes %d\n", __func__, __LINE__, cmd, cmd->cmnd[0], good_bytes);
+				if (sense_valid) {
+					scsi_print_sense("ERR?", cmd);
+				}
+			}
+#else /* SYNO_SAS_SPINUP_DELAY_DEBUG */
+ 				error = __scsi_error_from_host_byte(cmd, result);
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
 		}
 
 		req->resid_len = scsi_get_resid(cmd);
@@ -843,6 +937,12 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 		return;
 
 	error = __scsi_error_from_host_byte(cmd, result);
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+	sdev_printk(KERN_ERR, cmd->device, "%s(%d): cmd 0x%02x, good bytes %d\n", __func__, __LINE__, cmd->cmnd[0], good_bytes);
+	if (sense_valid) {
+		scsi_print_sense("ERR?", cmd);
+	}
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
  
 	if (host_byte(result) == DID_RESET) {
 		/* Third party bus reset or reset for error recovery
@@ -946,6 +1046,9 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 		action = ACTION_FAIL;
 	}
 
+#ifdef MY_ABC_HERE
+handle_cmd:
+#endif /* MY_ABC_HERE */
 	switch (action) {
 	case ACTION_FAIL:
 		/* Give up and fail the remainder of the request */
@@ -1628,109 +1731,6 @@ static void scsi_request_fn(struct request_queue *q)
 
 		scsi_target(sdev)->target_busy++;
 		shost->host_busy++;
-
-#ifdef CONFIG_MV_SCATTERED_SPINUP
-	if ((cmd->device->host->hostt->support_scattered_spinup == 1) && /*the flag is requaired in order to support the scattered spinup*/
-		(scsi_spinup_enabled()))	/*kernel line parsed ok?*/
-	{
-		switch (cmd->cmnd[0])
-		{
-			case START_STOP:
-				switch (cmd->cmnd[4] & START_STOP_BIT)
-				{
-					case 0x0: /* STOP command */
-						/* drive is going to sleep */
-						//printk("\n Disk [%d] going to standby...\n", cmd->device->id);
-						cmd->device->sdev_power_state = SDEV_PW_STANDBY;
-					break;
-					case 0x1: /* START command */
-						/* drive is going to spin up, checking if possible */
-						if (scsi_spinup_device(cmd) == 1) {
-							/* not possible: drive queued for spinup in side scsi_spinup_device(), device queue is blocked and the current command is requeued */
-							scsi_internal_device_block(cmd->device);
-							goto not_ready;
-						}
-						/* drive was able to get the semaphore, will spinup now */
-					break;
-					default:
-					break;
-				}
-			break;
-			case READ_6:
-			case WRITE_6:
-			case READ_10:
-			case WRITE_10:
-			case SEEK_10:
-			case VERIFY_10:
-			case VERIFY:
-			case READ_16:
-			case WRITE_16:
-			case VERIFY_16:
-#ifdef CONFIG_ARCH_FEROCEON
-			case SYNCHRONIZE_CACHE:
-#endif
-				/* drive is going to spin up, checking if possible */
-				if (scsi_spinup_device(cmd) == 1) {
-					/* not possible: drive queued for spinup in side scsi_spinup_device(), device queue is blocked and the current command is requeued */
-					scsi_internal_device_block(cmd->device);
-					goto not_ready;
-				}
-				/* drive was able to get the semaphore, will spinup now */
-			break;
-			case ATA_16:
-				switch (cmd->cmnd[14])
-				{
-					case STANDBY_IMMEDIATE:
-						/* drive is going to sleep */
-						//printk("\n Disk [%d] going to standby...\n", cmd->device->id);
-						cmd->device->sdev_power_state = SDEV_PW_STANDBY;
-					break;
-					case STANDBY_TIMEOUT:
-						if (cmd->cmnd[6] == 0) {
-							/* resetting the timeout standby value of 0 means remove standby timeout */
-							cmd->device->sdev_power_state = SDEV_PW_ON;
-							cmd->device->standby_timeout_secs = 0;
-						} else {
-							/*setting the timeout standby and starting the timer*/
-							//printk("\n Disk [%d] going to timeout standby with value [%d]...\n", cmd->device->id, (int) cmd->cmnd[6]);
-							cmd->device->sdev_power_state = SDEV_PW_STANDBY_TIMEOUT_WAIT;
-							standby_add_timer(cmd->device, timeout_to_jiffies((int) cmd->cmnd[6]), standby_times_out);
-						}
-					break;
-					default:
-					break;
-				}
-			break;
-			case ATA_12:
-				switch (cmd->cmnd[9])
-				{
-					case STANDBY_IMMEDIATE:
-						/* drive is going to sleep */
-						//printk("\n Disk [%d] going to standby...\n", cmd->device->id);
-						cmd->device->sdev_power_state = SDEV_PW_STANDBY;
-					break;
-					case STANDBY_TIMEOUT:
-						if (cmd->cmnd[4] == 0) {
-							/* resetting the timeout standby value of 0 means remove standby timeout */
-							cmd->device->sdev_power_state = SDEV_PW_ON;
-							cmd->device->standby_timeout_secs = 0;
-						} else {
-							/*setting the timeout standby and starting the timer*/
-							//printk("\n Disk [%d] going to timeout standby with value [%d]...\n", cmd->device->id, (int) cmd->cmnd[4]);
-							cmd->device->sdev_power_state = SDEV_PW_STANDBY_TIMEOUT_WAIT;
-							standby_add_timer(cmd->device, timeout_to_jiffies((int) cmd->cmnd[4]), standby_times_out);
-						}
-					break;
-					default:
-					break;
-				}
-			break;
-			default:
-			break;
-		}
-
-	}
-#endif
 
 		/*
 		 * XXX(hch): This is rather suboptimal, scsi_dispatch_cmd will

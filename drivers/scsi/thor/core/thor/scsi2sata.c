@@ -159,6 +159,8 @@ MV_BOOLEAN Category_CDB_Type(
 					case CDB_CORE_ATA_IDENTIFY:
 						pReq->Cmd_Flag |= (CMD_FLAG_DATA_IN | CMD_FLAG_SMART);
 						break;
+					case CDB_CORE_ATA_DOWNLOAD_MICROCODE:
+						break;
 					case CDB_CORE_SHUTDOWN:
 						if ( pDevice->Device_Type&DEVICE_TYPE_ATAPI )
 							return MV_FALSE;
@@ -269,8 +271,26 @@ static void rw16_taskfile(PMV_Request req, PATA_TaskFile tf, int tag)
 			tf->Command = ATA_CMD_WRITE_DMA_EXT;
 	}
 }
-#ifdef SUPPORT_ATA_SECURITY_CMD
-void scsi_ata_ata_passthru_16_fill_taskfile(MV_Request *req, OUT PATA_TaskFile  taskfile)
+void scsi_ata_passthru_12_fill_taskfile(MV_Request *req, OUT PATA_TaskFile  taskfile)
+{
+	taskfile->Command = req->Cdb[9];
+	taskfile->Features = req->Cdb[3];
+	taskfile->Device = req->Cdb[8];
+
+	taskfile->LBA_Low = req->Cdb[5];
+	taskfile->LBA_Mid = req->Cdb[6];
+	taskfile->LBA_High = req->Cdb[7];
+	taskfile->Sector_Count = req->Cdb[4];
+	taskfile->Control = req->Cdb[11];
+
+	taskfile->LBA_Low_Exp = 0;
+	taskfile->LBA_Mid_Exp = 0;
+	taskfile->LBA_High_Exp = 0;
+	taskfile->Sector_Count_Exp = 0;
+	taskfile->Feature_Exp = 0;
+}
+
+void scsi_ata_passthru_16_fill_taskfile(MV_Request *req, OUT PATA_TaskFile  taskfile)
 {
 	taskfile->Command = req->Cdb[14];
 	taskfile->Features = req->Cdb[4];
@@ -281,7 +301,7 @@ void scsi_ata_ata_passthru_16_fill_taskfile(MV_Request *req, OUT PATA_TaskFile  
 	taskfile->LBA_High = req->Cdb[12];
 	taskfile->Sector_Count = req->Cdb[6];
 	taskfile->Control = req->Cdb[15];
-	if (req->Cdb[1] & 0x01) {
+	if ((req->Cdb[1] & 0x01) ||(req->Cmd_Flag & CMD_FLAG_48BIT)){
 		taskfile->LBA_Low_Exp = req->Cdb[7];
 		taskfile->LBA_Mid_Exp = req->Cdb[9];
 		taskfile->LBA_High_Exp = req->Cdb[11];
@@ -295,7 +315,7 @@ void scsi_ata_ata_passthru_16_fill_taskfile(MV_Request *req, OUT PATA_TaskFile  
 		taskfile->Feature_Exp = 0;
 	}
 }
-#endif
+
 MV_BOOLEAN ATA_CDB2TaskFile(
 	IN PDomain_Device pDevice,
 	IN PMV_Request pReq,
@@ -393,7 +413,7 @@ MV_BOOLEAN ATA_CDB2TaskFile(
 			}
 #ifdef SUPPORT_ATA_SECURITY_CMD
 		case ATA_16:
-			scsi_ata_ata_passthru_16_fill_taskfile(pReq,pTaskFile);
+			scsi_ata_passthru_16_fill_taskfile(pReq,pTaskFile);
 			break;
 #endif
 		case SCSI_CMD_READ_16:
@@ -484,7 +504,7 @@ MV_BOOLEAN ATA_CDB2TaskFile(
 			 #ifdef SUPPORT_ATA_POWER_MANAGEMENT
 					case CDB_CORE_ATA_IDLE:
 						pTaskFile->Command = 0xe3;
-						pTaskFile->Sector_Count = pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_SMART_ATA_12) ?4:6];
+						pTaskFile->Sector_Count = pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_ATA_12) ?4:6];
 							break;
 					case CDB_CORE_ATA_STANDBY:
 						pTaskFile->Command = 0xe2;
@@ -576,7 +596,7 @@ MV_BOOLEAN ATA_CDB2TaskFile(
 						pTaskFile->LBA_Mid = 0x4F;
 						pTaskFile->LBA_High = 0xC2;
 						pTaskFile->Sector_Count = 0x1;
-						pTaskFile->LBA_Low = pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_SMART_ATA_12) ?5:8];
+						pTaskFile->LBA_Low = pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_ATA_12) ?5:8];
 						break;
 					case CDB_CORE_ATA_SMART_WRITE_LOG_SECTOR :
 						pTaskFile->Command = ATA_CMD_SMART;
@@ -584,33 +604,38 @@ MV_BOOLEAN ATA_CDB2TaskFile(
 						pTaskFile->LBA_Mid = 0x4F;
 						pTaskFile->LBA_High = 0xC2;
 						pTaskFile->Sector_Count = 0x1;
-						pTaskFile->LBA_Low = pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_SMART_ATA_12) ?5:8];
+						pTaskFile->LBA_Low = pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_ATA_12) ?5:8];
 						break;
 					case  CDB_CORE_ATA_SMART_AUTO_OFFLINE:
 						pTaskFile->Command = ATA_CMD_SMART;
 						pTaskFile->Features = ATA_SMART_AUTO_OFFLINE;
 						pTaskFile->LBA_Mid = 0x4F;
 						pTaskFile->LBA_High = 0xC2;
-						pTaskFile->LBA_Low= pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_SMART_ATA_12) ?5:8];
-						pTaskFile->Sector_Count = pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_SMART_ATA_12) ?4:6];
+						pTaskFile->LBA_Low= pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_ATA_12) ?5:8];
+						pTaskFile->Sector_Count = pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_ATA_12) ?4:6];
 						break;
 					case CDB_CORE_ATA_SMART_AUTOSAVE:
 						pTaskFile->Command = ATA_CMD_SMART;
 						pTaskFile->Features = ATA_SMART_AUTOSAVE;
 						pTaskFile->LBA_Mid = 0x4F;
 						pTaskFile->LBA_High = 0xC2;
-						pTaskFile->Sector_Count =  pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_SMART_ATA_12) ?4 : 6];
+						pTaskFile->Sector_Count =  pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_ATA_12) ?4 : 6];
 						break;
 					case CDB_CORE_ATA_SMART_IMMEDIATE_OFFLINE:
 						pTaskFile->Command = ATA_CMD_SMART;
 						pTaskFile->Features = ATA_SMART_IMMEDIATE_OFFLINE;
 						pTaskFile->LBA_Mid = 0x4F;
 						pTaskFile->LBA_High = 0xC2;
-						pTaskFile->LBA_Low= pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_SMART_ATA_12) ?5:8];
-						pTaskFile->Sector_Count =  pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_SMART_ATA_12) ?4 : 6];
+						pTaskFile->LBA_Low= pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_ATA_12) ?5:8];
+						pTaskFile->Sector_Count =  pReq->Cdb[(pReq->Cmd_Flag & CMD_FLAG_ATA_12) ?4 : 6];
 						break;
 				#endif /*#ifdef SUPPORT_ATA_SMART*/
-										
+					case CDB_CORE_ATA_DOWNLOAD_MICROCODE:
+						if(pReq->Cmd_Flag & CMD_FLAG_ATA_12)
+							scsi_ata_passthru_12_fill_taskfile(pReq,pTaskFile);
+						else
+							scsi_ata_passthru_16_fill_taskfile(pReq,pTaskFile);
+						break;
 					default:
 						return MV_FALSE;
 				}

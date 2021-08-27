@@ -149,7 +149,7 @@
 #      define   CDB_CORE_ATA_SMART_AUTOSAVE          0x23
 #      define   CDB_CORE_ATA_SMART_IMMEDIATE_OFFLINE    0x24
 #      define   CDB_CORE_ATA_IDENTIFY                 0x25
-
+#      define   CDB_CORE_ATA_DOWNLOAD_MICROCODE       0x26
 
 #      define SMP_CDB_USE_ADDRESS               0x01
 

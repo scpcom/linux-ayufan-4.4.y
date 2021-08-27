@@ -1296,6 +1296,8 @@ source "arch/Kconfig"
 
 endmenu		# General setup
 
+source "synoconfigs/Kconfig"
+
 config HAVE_GENERIC_DMA_COHERENT
 	bool
 	default n

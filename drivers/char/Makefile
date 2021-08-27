@@ -3,6 +3,9 @@
 #
 
 obj-y				+= mem.o random.o
+ifeq ($(CONFIG_ARCH_GEN3),y)
+obj-y				+= mem.o random.o devmem.o
+endif
 obj-$(CONFIG_TTY_PRINTK)	+= ttyprintk.o
 obj-y				+= misc.o
 obj-$(CONFIG_ATARI_DSP56K)	+= dsp56k.o

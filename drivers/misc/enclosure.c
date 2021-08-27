@@ -169,6 +169,7 @@ EXPORT_SYMBOL_GPL(enclosure_register);
 
 static struct enclosure_component_callbacks enclosure_null_callbacks;
 
+#ifndef MY_DEF_HERE
 /**
  * enclosure_unregister - remove an enclosure
  *
@@ -191,6 +192,7 @@ void enclosure_unregister(struct enclosure_device *edev)
 	device_unregister(&edev->edev);
 }
 EXPORT_SYMBOL_GPL(enclosure_unregister);
+#endif
 
 #define ENCLOSURE_NAME_SIZE	64
 
@@ -208,6 +210,55 @@ static void enclosure_remove_links(struct enclosure_component *cdev)
 	sysfs_remove_link(&cdev->dev->kobj, name);
 	sysfs_remove_link(&cdev->cdev.kobj, "device");
 }
+
+#ifdef MY_DEF_HERE
+/**
+ * enclosure_unregister - remove an enclosure
+ *
+ * @edev:	the registered enclosure to remove;
+ */
+void enclosure_unregister(struct enclosure_device *edev)
+{
+	int i;
+	struct enclosure_component *cdev = NULL;
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+	struct scsi_device *scsi_dev;
+	struct scsi_device *scsi_enc;
+#endif
+
+	mutex_lock(&container_list_lock);
+	list_del(&edev->node);
+	mutex_unlock(&container_list_lock);
+
+	for (i = 0; i < edev->components; i++) {
+		if (edev->component[i].number != -1) {
+			//======================================= Following part is copy from enclosure_remove_device ===================
+			cdev = &edev->component[i];
+			if (cdev->dev != NULL) {
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+				if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
+					scsi_dev = to_scsi_device(cdev->dev);
+					scsi_enc = to_scsi_device(edev->edev.parent);
+					printk(KERN_INFO "SCSI device (%s) with disk name (%s) removed from SLOT%02d of enclosure(%s), %.8s-%.16s", 
+							dev_name(cdev->dev), scsi_dev->syno_disk_name, cdev->number + 1, dev_name(&(edev->edev)),
+							scsi_enc->vendor, scsi_enc->model);
+				}
+#endif
+				enclosure_remove_links(cdev);
+				put_device(cdev->dev);
+				cdev->dev = NULL;
+			}
+			//======================================= Following part is copy from enclosure_remove_device ===================
+			device_unregister(&edev->component[i].cdev);
+		}
+	}
+
+	/* prevent any callbacks into service user */
+	edev->cb = &enclosure_null_callbacks;
+	device_unregister(&edev->edev);
+}
+EXPORT_SYMBOL_GPL(enclosure_unregister);
+#endif
 
 static int enclosure_add_links(struct enclosure_component *cdev)
 {
@@ -238,10 +289,14 @@ static void enclosure_component_release(struct device *dev)
 {
 	struct enclosure_component *cdev = to_enclosure_component(dev);
 
+	// the reason of #40515 happen is because of the following code,
+	// unregister will remove sysfs structure, and remove links in release stage will trigger warn on
+#ifndef MY_DEF_HERE
 	if (cdev->dev) {
 		enclosure_remove_links(cdev);
 		put_device(cdev->dev);
 	}
+#endif
 	put_device(dev->parent);
 }
 

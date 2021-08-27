@@ -46,6 +46,15 @@ struct tag_mem32 {
 	__u32	start;	/* physical start address */
 };
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#define ATAG_MEM64	0x54420002
+
+struct tag_mem64 {
+	__u64	size;
+	__u64	start;	/* physical start address */
+};
+#endif
+
 /* VGA text type displays */
 #define ATAG_VIDEOTEXT	0x54410003
 
@@ -147,18 +156,27 @@ struct tag_memclk {
 };
 
 
-#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_ARCH_FEROCEON)
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_ARCH_FEROCEON) || defined(CONFIG_SYNO_ARMADA)
 /* Marvell uboot parameters */
 #define ATAG_MV_UBOOT   0x41000403
-#define MV_ARRAY_SIZE  4
+#define MV_UBOOT_ETH_PORTS	4
 struct tag_mv_uboot {
         __u32 uboot_version;
         __u32 tclk;
         __u32 sysclk;
         __u32 isUsbHost;
-	__u8  macAddr[MV_ARRAY_SIZE][6];
-	__u16 mtu[MV_ARRAY_SIZE];
+        __u8  macAddr[MV_UBOOT_ETH_PORTS][6];
+	__u16 mtu[MV_UBOOT_ETH_PORTS];
 	__u32 nand_ecc;
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if !defined (CONFIG_ARCH_ARMADA370)
+	__u32 rgmii0Src;
+	__u32 feGeSrc;
+#endif
+#if defined (CONFIG_ARCH_ARMADA370)
+	__u32 bit_mask_config;
+#endif
+#endif
 };                     
 #endif
 
@@ -167,6 +185,9 @@ struct tag {
 	union {
 		struct tag_core		core;
 		struct tag_mem32	mem;
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+		struct tag_mem64	mem64;
+#endif
 		struct tag_videotext	videotext;
 		struct tag_ramdisk	ramdisk;
 		struct tag_initrd	initrd;
@@ -184,7 +205,7 @@ struct tag {
 		 * DC21285 specific
 		 */
 		struct tag_memclk	memclk;
-#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_ARCH_FEROCEON)
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_ARCH_FEROCEON) || defined(CONFIG_SYNO_ARMADA)
 		/*
 		 * Marvell specific
 		 */
@@ -198,15 +219,35 @@ struct tagtable {
 	int (*parse)(const struct tag *);
 };
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#ifdef CONFIG_BE8_ON_LE
+#define read_tag(a)	le32_to_cpu(a)
+#else
+#define read_tag(a)	a
+#endif
+#endif
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#define tag_member_present(tag,member)				\
+	((unsigned long)(&((struct tag *)0L)->member + 1)	\
+		<= read_tag((tag)->hdr.size) * 4)
+#define tag_next(t)     ((struct tag *)((__u32 *)(t) + read_tag((t)->hdr.size)))
+#else
 #define tag_member_present(tag,member)				\
  	((unsigned long)(&((struct tag *)0L)->member + 1)	\
 		<= (tag)->hdr.size * 4)
 
 #define tag_next(t)	((struct tag *)((__u32 *)(t) + (t)->hdr.size))
+#endif
 #define tag_size(type)	((sizeof(struct tag_header) + sizeof(struct type)) >> 2)
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#define for_each_tag(t,base)		\
+	for (t = base; read_tag((t)->hdr.size); t = tag_next(t))
+#else
 #define for_each_tag(t,base)		\
 	for (t = base; t->hdr.size; t = tag_next(t))
+#endif
 
 #ifdef __KERNEL__
 

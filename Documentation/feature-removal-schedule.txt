@@ -418,7 +418,7 @@ Who:	FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
 
 What:	iwlwifi disable_hw_scan module parameters
 When:	3.0
-Why:	Hareware scan is the prefer method for iwlwifi devices for
+Why:	Hardware scan is the prefer method for iwlwifi devices for
 	scanning operation. Remove software scan support for all the
 	iwlwifi devices.
 

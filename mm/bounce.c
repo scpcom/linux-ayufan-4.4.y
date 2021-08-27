@@ -18,6 +18,9 @@
 #include <linux/hash.h>
 #include <linux/highmem.h>
 #include <linux/bootmem.h>
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#include <linux/proc_fs.h>
+#endif
 #include <asm/tlbflush.h>
 
 #include <trace/events/block.h>
@@ -25,7 +28,43 @@
 #define POOL_SIZE	64
 #define ISA_POOL_SIZE	16
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#undef BOUNCE_STATS
+#endif
+
 static mempool_t *page_pool, *isa_page_pool;
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+struct proc_dir_entry *bounce_stats_proc;
+
+#ifdef BOUNCE_STATS
+struct {
+	uint32_t calls;
+	uint32_t bounced;
+} bounce_stats;
+#define STATS(field) (bounce_stats.field++)
+#else
+#define STATS(field)
+#endif
+
+#ifdef BOUNCE_STATS
+int bounce_stats_read(char *page, char **start, off_t off,
+		int count, int *eof, void *data)
+{
+	int cnt = 0;
+	char tmp_buffer[1000] = { 0 };
+
+	if (off > 0)
+		return 0;
+
+	cnt += sprintf(tmp_buffer + cnt, "Calls: %d.\n", bounce_stats.calls);
+	cnt += sprintf(tmp_buffer + cnt, "Bounced: %d.\n", bounce_stats.bounced);
+
+	*(tmp_buffer + cnt) = '\0';
+	sprintf(page, "%s", tmp_buffer);
+	return cnt;
+}
+#endif
+#endif
 
 #ifdef CONFIG_HIGHMEM
 static __init int init_emergency_pool(void)
@@ -39,6 +78,12 @@ static __init int init_emergency_pool(void)
 	BUG_ON(!page_pool);
 	printk("highmem bounce pool size: %d pages\n", POOL_SIZE);
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(BOUNCE_STATS)
+	/* Create a proc entry for bounce statistics. */
+	bounce_stats_proc = create_proc_entry("bounce_stats", 0666, NULL);
+	bounce_stats_proc->read_proc = bounce_stats_read;
+	bounce_stats_proc->nlink = 1;
+#endif
 	return 0;
 }
 
@@ -230,6 +275,9 @@ static void __blk_queue_bounce(struct request_queue *q, struct bio **bio_orig,
 	if (!bio)
 		return;
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	STATS(bounced);
+#endif
 	trace_block_bio_bounce(q, *bio_orig);
 
 	/*
@@ -277,6 +325,10 @@ void blk_queue_bounce(struct request_queue *q, struct bio **bio_orig)
 	 */
 	if (!bio_has_data(*bio_orig))
 		return;
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	STATS(calls);
+#endif
 
 	/*
 	 * for non-isa bounce case, just check if the bounce pfn is equal

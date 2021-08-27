@@ -79,6 +79,9 @@ void fsstack_copy_attr_all(struct inode *dest, const struct inode *src)
 	//For ecryptfs archive bit
 	dest->i_mode2 = src->i_mode2;
 #endif
+#ifdef MY_ABC_HERE
+	dest->i_CreateTime = src->i_CreateTime;
+#endif
 	set_nlink(dest, src->i_nlink);
 }
 EXPORT_SYMBOL_GPL(fsstack_copy_attr_all);

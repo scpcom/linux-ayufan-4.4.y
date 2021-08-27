@@ -34,6 +34,9 @@
 #include <net/arp.h>
 #include <linux/rtnetlink.h>
 #include <linux/notifier.h>
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/mv_nfp.h>
+#endif
 #include <net/rtnetlink.h>
 #include <net/net_namespace.h>
 #include <net/netns/generic.h>
@@ -125,6 +128,12 @@ void unregister_vlan_dev(struct net_device *dev, struct list_head *head)
 	if (vlan->flags & VLAN_FLAG_GVRP)
 		vlan_gvrp_request_leave(dev);
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	if (nfp_mgr_p->nfp_hook_vlan_del)
+		nfp_mgr_p->nfp_hook_vlan_del(dev->ifindex);
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 	vlan_group_set_device(grp, vlan_id, NULL);
 	/* Because unregister_netdevice_queue() makes sure at least one rcu
 	 * grace period is respected before device freeing,
@@ -291,6 +300,12 @@ static int register_vlan_device(struct net_device *real_dev, u16 vlan_id)
 	if (err < 0)
 		goto out_free_newdev;
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	if (nfp_mgr_p->nfp_hook_vlan_add)
+		nfp_mgr_p->nfp_hook_vlan_add(new_dev->ifindex, new_dev, real_dev->ifindex, vlan_id);
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 	return 0;
 
 out_free_newdev:
@@ -714,6 +729,29 @@ static void __exit vlan_cleanup_module(void)
 
 	vlan_gvrp_uninit();
 }
+
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+void vlan_sync(void)
+{
+	struct net_device *dev;
+
+	rtnl_lock();
+	for_each_netdev(&init_net, dev) {
+		if (dev->priv_flags & IFF_802_1Q_VLAN) {
+			struct vlan_dev_info *vlan = vlan_dev_info(dev);
+			struct net_device *real_dev = vlan->real_dev;
+			u16 vlan_id = vlan->vlan_id;
+			if (nfp_mgr_p->nfp_hook_vlan_add)
+				if (nfp_mgr_p->nfp_hook_vlan_add(dev->ifindex, dev, real_dev->ifindex, vlan_id))
+					printk(KERN_ERR "nfp_hook_vlan_add failed in %s\n", __func__);
+		}
+	}
+	rtnl_unlock();
+}
+EXPORT_SYMBOL(vlan_sync);
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 
 module_init(vlan_proto_init);
 module_exit(vlan_cleanup_module);

@@ -526,7 +526,8 @@ static int mv_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
 	}
 
 	if (cmd == API_IOCTL_GET_VIRTURL_ID) {
-		if (copy_to_user((void *)arg,(void *)&console_id,sizeof(int)) != 0 ) {
+		if (copy_to_user(((PSCSI_PASS_THROUGH_DIRECT_WITH_BUFFER) arg)->sptd.DataBuffer,
+			(void *)&console_id,sizeof(int)) != 0 ) {
 			MV_DBG(DMSG_IOCTL, "Marvell : Get VIRTUAL_DEVICE_ID Error.\n");
 			return -EIO;
 		}
@@ -534,7 +535,8 @@ static int mv_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
 	}
 
 	if (cmd == API_IOCTL_GET_HBA_COUNT) {
-		if (copy_to_user((void *)arg,(void *)&mv_device_count,sizeof(unsigned int)) != 0) {
+		if (copy_to_user(((PSCSI_PASS_THROUGH_DIRECT_WITH_BUFFER) arg)->sptd.DataBuffer,
+					(void *)&mv_device_count,sizeof(unsigned int)) != 0) {
 			MV_DBG(DMSG_IOCTL, "Marvell : Get Device Number Error.\n");
 			return -EIO;
 		}
@@ -542,7 +544,8 @@ static int mv_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
 	}
 
 	if (cmd == API_IOCTL_LOOKUP_DEV) {
-		if( copy_from_user(&idlun, (void *)arg, sizeof(struct scsi_idlun)) !=0) {
+		if( copy_from_user(&idlun, ((PSCSI_PASS_THROUGH_DIRECT_WITH_BUFFER) arg)->sptd.DataBuffer,
+					sizeof(struct scsi_idlun)) !=0) {
 			MV_DBG(DMSG_IOCTL, "Marvell : Get Device idlun Error.\n");
 			return -EIO;
 		}

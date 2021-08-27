@@ -146,7 +146,6 @@ extern unsigned long nr_iowait(void);
 extern unsigned long nr_iowait_cpu(int cpu);
 extern unsigned long this_cpu_load(void);
 
-
 extern void calc_global_load(unsigned long ticks);
 extern void update_cpu_load_nohz(void);
 
@@ -695,6 +694,9 @@ struct user_struct {
 #ifdef CONFIG_INOTIFY_USER
 	atomic_t inotify_watches; /* How many inotify watches does this user have? */
 	atomic_t inotify_devs;	/* How many inotify devs does this user have opened? */
+#endif
+#ifdef CONFIG_SYNO_NOTIFY
+	atomic_t synotify_instances;
 #endif
 #ifdef CONFIG_FANOTIFY
 	atomic_t fanotify_listeners;

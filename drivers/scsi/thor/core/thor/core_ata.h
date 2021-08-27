@@ -56,6 +56,8 @@
 #define ATA_CMD_STANDBY_IMMEDIATE		0xE0
 #define ATA_CMD_SEEK					0x70
 #define ATA_CMD_READ_LOG_EXT			0x2F
+#define ATA_CMD_DOWNLOAD_MICROCODE			0x92
+
 #ifdef SUPPORT_ATA_SECURITY_CMD
 
 /*	security commmand */

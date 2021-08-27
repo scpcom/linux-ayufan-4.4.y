@@ -2011,8 +2011,14 @@ static void sync_request_write(struct mddev *mddev, struct r1bio *r1_bio)
 
 	if (atomic_dec_and_test(&r1_bio->remaining)) {
 		/* if we're here, all write(s) have completed, so clean up */
-		md_done_sync(mddev, r1_bio->sectors, 1);
+		int s = r1_bio->sectors;
+		if (test_bit(R1BIO_MadeGood, &r1_bio->state) ||
+		    test_bit(R1BIO_WriteError, &r1_bio->state))
+			reschedule_retry(r1_bio);
+		else {
 			put_buf(r1_bio);
+			md_done_sync(mddev, s, 1);
+		}
 	}
 }
 
@@ -3175,21 +3181,7 @@ static struct md_personality raid1_personality =
 
 static int __init raid_init(void)
 {
-#ifdef MY_DEF_HERE
-	mm_segment_t origin_fs;
-	extern void md_run_setup(void);
-
-	register_md_personality(&raid1_personality);
-
-	origin_fs = get_fs();
-	set_fs(get_ds());
-	md_run_setup();
-	set_fs(origin_fs);
-
-	return 0;
-#else
 	return register_md_personality(&raid1_personality);
-#endif
 }
 
 static void raid_exit(void)

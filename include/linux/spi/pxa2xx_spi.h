@@ -143,10 +143,13 @@ static inline int clk_enable(struct clk *clk)
 	return 0;
 }
 
+#ifdef CONFIG_GEN3_SPI
+#else
 static inline unsigned long clk_get_rate(struct clk *clk)
 {
 	return 3686400;
 }
+#endif
 
 #endif
 #endif

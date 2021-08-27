@@ -80,20 +80,20 @@
 #include <linux/file.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/if_arp.h>
+#endif
 
 #include <linux/nsproxy.h>
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/mv_nfp.h>
+#endif
+
 #include <net/net_namespace.h>
 #include <net/netns/generic.h>
 #include <net/sock.h>
 
 #include <asm/uaccess.h>
-
-#ifdef CONFIG_MV_ETH_NFP_PPP
-extern int fp_ppp_db_init(void);
-extern int fp_ppp_info_set(u32 if_ppp, u32 if_eth, u16 sid, u8 *mac, u32 channel);
-extern int fp_ppp_info_del(u32 channel);
-extern int fp_ppp_db_clear(void);
-#endif
 
 #define PPPOE_HASH_BITS 4
 #define PPPOE_HASH_SIZE (1 << PPPOE_HASH_BITS)
@@ -358,6 +358,41 @@ static int pppoe_device_event(struct notifier_block *this,
 
 	/* Only look at sockets that are using this specific device. */
 	switch (event) {
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_PPP_LEARN)
+	case NETDEV_UP: {
+		struct net_device *ppp_netdev;
+		struct pppoe_net *pn;
+		int i;
+
+		if (!(dev->type == ARPHRD_PPP))
+			break;
+
+		pn = pppoe_pernet(&init_net);
+		write_lock_bh(&pn->hash_lock);
+		for (i = 0; i < PPPOE_HASH_SIZE; i++) {
+			struct pppox_sock *po = pn->hash_table[i];
+
+			while (po) {
+				if ((ppp_dev_name(&po->chan) != NULL)
+					&& (!strcmp(ppp_dev_name(&po->chan), dev->name))) {
+					ppp_netdev = dev_get_by_name(&init_net, ppp_dev_name(&po->chan));
+					if (nfp_mgr_p->nfp_hook_ppp_add)
+						nfp_mgr_p->nfp_hook_ppp_add(ppp_netdev->ifindex,
+									po->pppoe_dev->ifindex, po->pppoe_pa.sid,
+									po->pppoe_pa.remote);
+					dev_put(ppp_netdev);
+					break;
+				}
+				po = po->next;
+			}
+		}
+		write_unlock_bh(&pn->hash_lock);
+	}
+	break;
+#endif /* CONFIG_MV_ETH_NFP_PPP_LEARN */
+#endif
+
 	case NETDEV_CHANGEADDR:
 	case NETDEV_CHANGEMTU:
 		/* A change in mtu or address is a bad thing, requiring
@@ -585,14 +620,26 @@ static int pppoe_release(struct socket *sock)
 	}
 
 	po = pppox_sk(sk);
-#ifdef CONFIG_MV_ETH_NFP_PPP
-	fp_ppp_info_del(&po->chan);
-#endif
 
 	if (sk->sk_state & (PPPOX_CONNECTED | PPPOX_BOUND)) {
 		dev_put(po->pppoe_dev);
 		po->pppoe_dev = NULL;
 	}
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_PPP_LEARN)
+	if (ppp_dev_name(&po->chan)) {
+		struct net_device *ppp_netdev = NULL;
+		int ppp_netdev_ifindex = 0;
+
+		ppp_netdev = dev_get_by_name(&init_net, ppp_dev_name(&po->chan));
+		ppp_netdev_ifindex = ppp_netdev->ifindex;
+		dev_put(ppp_netdev);
+		if (nfp_mgr_p->nfp_hook_ppp_del)
+			nfp_mgr_p->nfp_hook_ppp_del(ppp_netdev_ifindex);
+	}
+
+#endif
+#endif
 
 	pppox_unbind_sock(sk);
 
@@ -706,9 +753,6 @@ static int pppoe_connect(struct socket *sock, struct sockaddr *uservaddr,
 		}
 
 		sk->sk_state = PPPOX_CONNECTED;
-#ifdef CONFIG_MV_ETH_NFP_PPP
-		fp_ppp_info_set(0, dev->ifindex, sp->sa_addr.pppoe.sid, po->pppoe_pa.remote, &po->chan);
-#endif
 	}
 
 	po->num = sp->sa_addr.pppoe.sid;
@@ -1147,6 +1191,43 @@ static const struct pppox_proto pppoe_proto = {
 	.owner	= THIS_MODULE,
 };
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_PPP_LEARN)
+void nfp_ppp_sync(void)
+{
+	int i;
+	struct pppoe_net *pn = pppoe_pernet(&init_net);
+	struct net_device *ppp_netdev = NULL;
+	struct pppox_sock *po = NULL;
+
+	rtnl_lock();
+
+	write_lock_bh(&pn->hash_lock);
+	for (i = 0; i < PPPOE_HASH_SIZE; i++) {
+		po = pn->hash_table[i];
+
+		while (po) {
+			if (ppp_dev_name(&po->chan) != NULL) {
+				ppp_netdev = dev_get_by_name(&init_net, ppp_dev_name(&po->chan));
+				if (nfp_mgr_p->nfp_hook_ppp_add)
+					nfp_mgr_p->nfp_hook_ppp_add(ppp_netdev->ifindex,
+							po->pppoe_dev->ifindex,
+							po->pppoe_pa.sid,
+							po->pppoe_pa.remote);
+				dev_put(ppp_netdev);
+				}
+			po = po->next;
+		}
+	}
+	write_unlock_bh(&pn->hash_lock);
+
+	rtnl_unlock();
+}
+EXPORT_SYMBOL(nfp_ppp_sync);
+
+#endif /* CONFIG_MV_ETH_NFP_PPP_LEARN */
+#endif
+
 static __net_init int pppoe_init_net(struct net *net)
 {
 	struct pppoe_net *pn = pppoe_pernet(net);
@@ -1165,9 +1246,6 @@ static __net_init int pppoe_init_net(struct net *net)
 
 static __net_exit void pppoe_exit_net(struct net *net)
 {
-#ifdef CONFIG_MV_ETH_NFP_PPP
-	fp_ppp_db_clear();
-#endif
 	proc_net_remove(net, "pppoe");
 }
 
@@ -1198,9 +1276,6 @@ static int __init pppoe_init(void)
 	dev_add_pack(&pppoed_ptype);
 	register_netdevice_notifier(&pppoe_notifier);
 
-#ifdef CONFIG_MV_ETH_NFP_PPP
-	fp_ppp_db_init();
-#endif
 	return 0;
 
 out_unregister_pppoe_proto:

@@ -438,8 +438,13 @@ armpmu_reserve_hardware(struct arm_pmu *armpmu)
 		}
 
 		err = request_irq(irq, handle_irq,
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+				IRQF_NOBALANCING | IRQF_SHARED,
+				"armpmu", handle_irq);
+#else
 				  IRQF_DISABLED | IRQF_NOBALANCING,
 				  "arm-pmu", armpmu);
+#endif
 		if (err) {
 			pr_err("unable to request IRQ%d for ARM PMU counters\n",
 				irq);
@@ -611,6 +616,9 @@ int __init armpmu_register(struct arm_pmu *armpmu, char *name, int type)
 #include "perf_event_xscale.c"
 #include "perf_event_v6.c"
 #include "perf_event_v7.c"
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#include "perf_event_pj4b.c"
+#endif
 
 /*
  * Ensure the PMU has sane values out of reset.
@@ -728,7 +736,22 @@ init_hw_perf_events(void)
 			cpu_pmu = xscale2pmu_init();
 			break;
 		}
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARCH_ARMADA_XP)
+	/* Marvell Armada XP CPUs */
+	} else if (0x56 == implementor) {
+		part_number = (cpuid >> 4) & 0xFFF;
+		switch (part_number) {
+		case 0x581:
+		case 0x584:
+			printk(KERN_INFO "Armada-XP Performance Monitor Unit detected (Marvell ID)!!!\n");
+			mrvl_pj4b_read_reset_pmnc();
+			cpu_pmu=mrvl_pj4b_pmu_init();
+			break;
+		}
 	}
+#else
+	}
+#endif
 
 	if (cpu_pmu) {
 		pr_info("enabled with %s PMU driver, %d counters available\n",

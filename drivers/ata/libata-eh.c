@@ -609,29 +609,6 @@ void SendPortDisEvent(struct work_struct *work)
 	return;
 }
 
-static int iSynoCountPwrReset(const struct ata_device *dev, int iSet)
-{
-	int iRet = -1;
-	struct scsi_device *sdev = NULL;
-
-	if (!dev) {
-		goto END;
-	}
-
-	sdev = dev->sdev;
-	if (!sdev) {
-		goto END;
-	}
-
-	if (iSet) {
-		sdev->iResetPwrCount += iSet;
-	} else {
-		sdev->iResetPwrCount = 0;
-	}
-
-END:
-	return iRet;
-}
 #endif
 
 /**
@@ -800,62 +777,6 @@ void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 			}
 		}
 		DBGMESG("ata%u: detect stat 0x%x", ap->print_id, uiStatStart);
-	}
-#endif
-
-#ifdef MY_ABC_HERE
-	if (ap->iDetectStat) {
-		struct ata_link *link = NULL;
-		struct ata_device *dev = NULL;
-		int i = 0;
-		ata_for_each_link(link, ap, EDGE) {
-			ata_for_each_dev(dev, link, ALL) {
-				uiStatStart |= (ata_dev_enabled(dev)) << i;
-				++i;
-			}
-		}
-		DBGMESG("ata%u: detect stat 0x%x", ap->print_id, uiStatStart);
-	}
-#endif
-
-#ifdef MY_ABC_HERE
-	if (0 < guiWakeupDisksNum && 1 == ap->nr_active_links) {
-		struct ata_queued_cmd *qc_insert = NULL;
-		int tag = 0;
-		spin_lock_irqsave(ap->lock, flags);
-		for (tag = 0; tag < ATA_MAX_QUEUE; tag++) {
-			struct ata_queued_cmd *qc = __ata_qc_from_tag(ap, tag);
-
-			if (qc->flags & ATA_QCFLAG_ACTIVE && NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
-				(ATA_CMD_VERIFY == qc->tf.command || ATA_CMD_CHK_POWER == qc->tf.command)) {
-				qc_insert = qc;
-			}
-		}
-		if (qc_insert && (qc_insert->flags & ATA_QCFLAG_ACTIVE)) {
-			/* If our insert verify,chkpwr cmd still exist and jiffies not longer than WAKEINTERVAL,
-			 * we must wait it complete to prevent HSM violation error */
-			while((qc_insert && NULL == qc_insert->scsicmd && (qc_insert->flags & ATA_QCFLAG_ACTIVE) &&
-				   (ATA_CMD_VERIFY == qc_insert->tf.command || ATA_CMD_CHK_POWER == qc_insert->tf.command)) &&
-				  time_before(jiffies, qc_insert->dev->ulLastCmd + WAKEINTERVAL)) {
-				spin_unlock_irqrestore(ap->lock, flags);
-				schedule_timeout_uninterruptible(HZ);
-				spin_lock_irqsave(ap->lock, flags);
-			}
-			if(qc_insert && NULL == qc_insert->scsicmd && (qc_insert->flags & ATA_QCFLAG_ACTIVE) &&
-			   (ATA_CMD_VERIFY == qc_insert->tf.command || ATA_CMD_CHK_POWER == qc_insert->tf.command)) {
-				DBGMESG("port %d insert cmd 0x%x still alive, flush and complete it\n",
-						ap->print_id, qc_insert->tf.command);
-				spin_unlock_irqrestore(ap->lock, flags);
-				ata_sff_flush_pio_task(ap);
-				spin_lock_irqsave(ap->lock, flags);
-				if(qc_insert->flags & ATA_QCFLAG_ACTIVE) {
-					qc_insert->flags |= ATA_QCFLAG_FAILED;
-					__ata_qc_complete(qc_insert);
-				}
-
-			}
-		}
-		spin_unlock_irqrestore(ap->lock, flags);
 	}
 #endif
 
@@ -1093,7 +1014,13 @@ acquire_repeat:
 #ifdef MY_DEF_HERE
 	else if (ap->pflags & ATA_PFLAG_SCSI_HOTPLUG) {
 		if (!(ap->pflags & ATA_PFLAG_SYNC_SCSI_DEVICE)) {
+#ifdef MY_ABC_HERE
+			INIT_COMPLETION(ap->synoHotplugWait);
+#endif
 			schedule_delayed_work(&ap->hotplug_task, 0);
+#ifdef MY_ABC_HERE
+			wait_for_completion(&(ap->synoHotplugWait));
+#endif
 		} else {
 			ap->pflags &= ~(ATA_PFLAG_SYNC_SCSI_DEVICE);
 		}
@@ -1622,7 +1549,7 @@ void ata_dev_disable(struct ata_device *dev)
 	if ((dev->link->uiSflags || (dev->link->ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL))
 		&& ata_dev_enabled(dev)) {
 		ata_dev_printk(dev, KERN_WARNING,
-					   "still have recovery flags 0x%x, don't disabled it\n", dev->link->uiSflags);
+					   "still have recovery flags link 0x%x ap 0x%x, don't disabled it\n", dev->link->uiSflags, dev->link->ap->uiSflags);
 		dev->ulSflags |= ATA_SYNO_DFLAG_DISABLE;
 		return;
 	}
@@ -1661,7 +1588,7 @@ void ata_eh_detach_dev(struct ata_device *dev)
 	if ((dev->link->uiSflags || (dev->link->ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL))
 		&& ata_dev_enabled(dev)) {
 		ata_dev_printk(dev, KERN_WARNING,
-					   "still have recovery flags 0x%x, don't detach it\n", dev->link->uiSflags);
+					   "still have recovery flags link 0x%x ap 0x%x, don't detach it\n", dev->link->uiSflags, dev->link->ap->uiSflags);
 		dev->ulSflags |= ATA_SYNO_DFLAG_DETACH;
 		return;
 	}
@@ -2994,6 +2921,9 @@ int ata_eh_reset(struct ata_link *link, int classify,
 	ata_reset_fn_t reset;
 	unsigned long flags;
 	u32 sstatus;
+#ifdef MY_ABC_HERE
+	u32 scontrol;
+#endif
 	int nr_unknown, rc;
 
 	/*
@@ -3306,6 +3236,16 @@ int ata_eh_reset(struct ata_link *link, int classify,
 	spin_lock_irqsave(ap->lock, flags);
 	ap->pflags &= ~ATA_PFLAG_RESETTING;
 	spin_unlock_irqrestore(ap->lock, flags);
+
+#ifdef MY_ABC_HERE
+	if(link->SynoIsSil3132) {
+		//clean up speed negotiation register (scontrol[7:4])
+		sata_scr_read(link, SCR_CONTROL, &scontrol);
+		scontrol = (scontrol & ~0x0f0);
+		sata_scr_write(link, SCR_CONTROL, scontrol);
+		link->SynoIsSil3132 = 0;
+	}
+#endif
 
 #ifdef MY_ABC_HERE
 	spin_lock_irqsave(ap->lock, flags);
@@ -4384,6 +4324,16 @@ void ata_eh_finish(struct ata_port *ap)
 	/* retry or finish qcs */
 	for (tag = 0; tag < ATA_MAX_QUEUE; tag++) {
 		struct ata_queued_cmd *qc = __ata_qc_from_tag(ap, tag);
+
+#ifdef MY_ABC_HERE
+		if (0 < guiWakeupDisksNum && 1 == ap->nr_active_links &&
+			(qc->flags & ATA_QCFLAG_ACTIVE) && IS_SYNO_SPINUP_CMD(qc)) {
+			DBGMESG("ata%u eh finish, set failed to spinup cmd 0x%x\n", ap->print_id, qc->tf.command);
+			qc->flags |= ATA_QCFLAG_FAILED;
+			__ata_qc_complete(qc);
+			continue;
+		}
+#endif
 
 		if (!(qc->flags & ATA_QCFLAG_FAILED))
 			continue;

@@ -280,23 +280,6 @@ config SCSI_WAIT_SCAN
 # disabling it, whereas people who accidentally switch it off may wonder why
 # their mkinitrd gets into trouble.
 
-config MV_SCATTERED_SPINUP
-	bool "Lock disk spinup"
-	default n
-	help
-	  Take care about the power supply health. Prevent to many disks
-	  to spinup at the same time.
-
-	  If in doubt, say N.
-
-config MV_DISKS_POWERUP_TO_STANDBY
-	depends on MV_SCATTERED_SPINUP
-	bool "Disk powerup to standby"
-	default n
-	help
-	  Support for disk power-up in standby mode.
-
-	  If in doubt, use N.
 menu "SCSI Transports"
 	depends on SCSI
 

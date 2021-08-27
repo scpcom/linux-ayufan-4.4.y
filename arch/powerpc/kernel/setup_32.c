@@ -50,6 +50,10 @@ extern char gszSynoHWVersion[];
 #endif
 
 #ifdef  MY_ABC_HERE
+extern char gszSynoHWRevision[];
+#endif
+
+#ifdef MY_ABC_HERE
 extern long g_internal_hd_num;
 #endif
 
@@ -78,7 +82,7 @@ extern unsigned char grgbLanMac[4][16];
 #endif
 
 #ifdef MY_ABC_HERE
-extern char gszSerialNum[12];
+extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
@@ -319,11 +323,23 @@ static int __init early_hw_version(char *p)
 	*szPtr = 0;
 	strcat(szPtr,"-j");
 
-	printk("Synology Hareware Version: %s\n", gszSynoHWVersion);
+	printk("Synology Hardware Version: %s\n", gszSynoHWVersion);
 
 	return 1;
 }
 __setup("syno_hw_version=", early_hw_version);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_hw_revision(char *p)
+{
+       snprintf(gszSynoHWRevision, 4, "%s", p);
+
+       printk("Synology Hardware Revision: %s\n", gszSynoHWRevision);
+
+       return 1;
+}
+__setup("rev=", early_hw_revision);
 #endif
 
 #ifdef MY_ABC_HERE

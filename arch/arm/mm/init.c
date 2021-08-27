@@ -38,6 +38,16 @@
 
 #include "mm.h"
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#ifdef CONFIG_MV_SUPPORT_64KB_PAGE_SIZE
+#define FREEAREA_ROUND_START(addr)	((((unsigned long)addr) + ((PAGE_SIZE) - 1)) & (~((PAGE_SIZE) - 1)))
+#define FREEAREA_ROUND_END(addr)	(((unsigned long)addr) & (~((PAGE_SIZE) - 1)))
+#else
+#define FREEAREA_ROUND_START(addr)	(addr)
+#define FREEAREA_ROUND_END(addr)	(addr)
+#endif
+#endif
+
 static unsigned long phys_initrd_start __initdata = 0;
 static unsigned long phys_initrd_size __initdata = 0;
 
@@ -422,7 +432,11 @@ void __init bootmem_init(void)
 
 static inline int free_area(unsigned long pfn, unsigned long end, char *s)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	unsigned int pages = 0, size = ((end > pfn) ? ((end - pfn) << (PAGE_SHIFT - 10)) : 0);
+#else
 	unsigned int pages = 0, size = (end - pfn) << (PAGE_SHIFT - 10);
+#endif
 
 	for (; pfn < end; pfn++) {
 		struct page *page = pfn_to_page(pfn);
@@ -737,9 +751,15 @@ void free_initmem(void)
 
 	poison_init_mem(__init_begin, __init_end - __init_begin);
 	if (!machine_is_integrator() && !machine_is_cintegrator())
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+		totalram_pages += free_area(__phys_to_pfn(__pa(FREEAREA_ROUND_START(__init_begin))),
+					    __phys_to_pfn(__pa(FREEAREA_ROUND_END(__init_end))),
+					    "init");
+#else
 		totalram_pages += free_area(__phys_to_pfn(__pa(__init_begin)),
 					    __phys_to_pfn(__pa(__init_end)),
 					    "init");
+#endif
 }
 
 #ifdef CONFIG_BLK_DEV_INITRD
@@ -748,6 +768,10 @@ static int keep_initrd;
 
 void free_initrd_mem(unsigned long start, unsigned long end)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	start = FREEAREA_ROUND_START(start);
+	end = FREEAREA_ROUND_END(end);
+#endif
 	if (!keep_initrd) {
 		poison_init_mem((void *)start, PAGE_ALIGN(end) - start);
 		totalram_pages += free_area(__phys_to_pfn(__pa(start)),

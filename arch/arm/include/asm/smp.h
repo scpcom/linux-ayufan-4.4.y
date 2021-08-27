@@ -101,4 +101,8 @@ extern void platform_cpu_enable(unsigned int cpu);
 extern void arch_send_call_function_single_ipi(int cpu);
 extern void arch_send_call_function_ipi_mask(const struct cpumask *mask);
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARCH_ARMADA_XP) && defined(CONFIG_PERF_EVENTS)
+extern void show_local_pmu_irqs(struct seq_file *, int);
+#endif
+
 #endif /* ifndef __ASM_ARM_SMP_H */

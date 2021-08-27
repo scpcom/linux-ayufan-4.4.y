@@ -68,7 +68,11 @@ extern struct processor {
 	 * Set a possibly extended PTE.  Non-extended PTEs should
 	 * ignore 'ext'.
 	 */
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
+	void (*set_pte_ext)(pte_t *ptep, pte_t pte);
+#else
 	void (*set_pte_ext)(pte_t *ptep, pte_t pte, unsigned int ext);
+#endif
 
 	/* Suspend/resume */
 	unsigned int suspend_size;
@@ -82,7 +86,11 @@ extern void cpu_proc_fin(void);
 extern int cpu_do_idle(void);
 extern void cpu_dcache_clean_area(void *, int);
 extern void cpu_do_switch_mm(unsigned long pgd_phys, struct mm_struct *mm);
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
+extern void cpu_set_pte_ext(pte_t *ptep, pte_t pte);
+#else
 extern void cpu_set_pte_ext(pte_t *ptep, pte_t pte, unsigned int ext);
+#endif
 extern void cpu_reset(unsigned long addr) __attribute__((noreturn));
 
 /* These three are private to arch/arm/kernel/suspend.c */
@@ -108,8 +116,34 @@ extern void cpu_resume(void);
 
 #ifdef CONFIG_MMU
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SMP)
+
+#define cpu_switch_mm(pgd,mm)	\
+	({						\
+		unsigned long flags;			\
+		local_irq_save(flags);			\
+		cpu_do_switch_mm(virt_to_phys(pgd),mm);	\
+		local_irq_restore(flags);		\
+	})
+
+#else /* SMP */
+
 #define cpu_switch_mm(pgd,mm) cpu_do_switch_mm(virt_to_phys(pgd),mm)
 
+#endif
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
+#define cpu_get_pgd()  \
+       ({                                              \
+               unsigned long pg, pg2;                  \
+               __asm__("mrrc   p15, 0, %0, %1, c2"     \
+                       : "=r" (pg), "=r" (pg2)         \
+                       :                               \
+                       : "cc");                        \
+               pg &= ~(PTRS_PER_PGD*sizeof(pgd_t)-1);  \
+               (pgd_t *)phys_to_virt(pg);              \
+       })
+#else
 #define cpu_get_pgd()	\
 	({						\
 		unsigned long pg;			\
@@ -119,6 +153,7 @@ extern void cpu_resume(void);
 		(pgd_t *)phys_to_virt(pg);		\
 	})
 
+#endif
 #endif
 
 #endif /* __ASSEMBLY__ */

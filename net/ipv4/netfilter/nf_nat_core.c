@@ -33,13 +33,6 @@
 #include <net/netfilter/nf_conntrack_l4proto.h>
 #include <net/netfilter/nf_conntrack_zones.h>
 
-#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
-extern int fp_disable_flag;
-extern int fp_nat_info_set(u32 src_ip, u32 dst_ip, u16 src_port, u16 dst_port, u8 proto,
-		u32 new_src_ip, u32 new_dst_ip, u16 new_src_port, u16 new_dst_port,
-		int if_index, enum nf_nat_manip_type maniptype);
-#endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
-
 static DEFINE_SPINLOCK(nf_nat_lock);
 
 static struct nf_conntrack_l3proto *l3proto __read_mostly;
@@ -358,29 +351,6 @@ manip_pkt(u_int16_t proto,
 		return false;
 
 	iph = (void *)skb->data + iphdroff;
-
-#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
-	if( (!fp_disable_flag) && ((proto == IPPROTO_TCP) || (proto == IPPROTO_UDP)) )
-	{
-		u16 src_port = 0, dst_port = 0;
-		int if_index = skb->dev ? skb->dev->ifindex : -1;
-
-		if (proto == IPPROTO_TCP) {
-			struct tcphdr *hdr = (struct tcphdr *)(skb->data + iphdroff + iph->ihl*4);
-			src_port = hdr->source;
-			dst_port = hdr->dest;
-		}
-		else if (proto == IPPROTO_UDP) {
-			struct udphdr *hdr = (struct udphdr *)(skb->data + iphdroff + iph->ihl*4);
-			src_port = hdr->source;
-			dst_port = hdr->dest;
-		}
-
-		fp_nat_info_set(iph->saddr, iph->daddr, src_port, dst_port, proto,
-				target->src.u3.ip, target->dst.u3.ip, target->src.u.all, target->dst.u.all,
-				if_index, maniptype);
-	}
-#endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
 
 	/* Manipulate protcol part. */
 

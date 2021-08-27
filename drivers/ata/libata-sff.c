@@ -1012,8 +1012,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			qc = ata_qc_from_tag(ap, qc->tag);
 			if (qc) {
 #if defined(MY_ABC_HERE)
-				if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
-					(ATA_CMD_CHK_POWER == qc->tf.command ||	ATA_CMD_VERIFY == qc->tf.command)) {
+				if (IS_SYNO_SPINUP_CMD(qc)) {
 					ata_sff_irq_on(ap);
 					/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
 					if (qc->err_mask || 
@@ -1048,8 +1047,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			spin_unlock_irqrestore(ap->lock, flags);
 		} else {
 #if defined(MY_ABC_HERE)
-			if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
-				(ATA_CMD_CHK_POWER == qc->tf.command ||	ATA_CMD_VERIFY == qc->tf.command)) {
+			if (IS_SYNO_SPINUP_CMD(qc)) {
 				/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
 				if (qc->err_mask || 
 					qc->flags & ATA_QCFLAG_RESULT_TF || 
@@ -1104,17 +1102,18 @@ int ata_sff_hsm_move(struct ata_port *ap, struct ata_queued_cmd *qc,
 {
 	struct ata_link *link = qc->dev->link;
 	struct ata_eh_info *ehi = &link->eh_info;
+#if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+	struct ata_taskfile *tf = &qc->tf;
+#endif
 	unsigned long flags = 0;
 	int poll_next;
 
-#ifdef MY_ABC_HERE
-	/* if our ATA_CMD_VERIFY command timeout,
+#if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+	/* if our ATA_CMD_FPDMA_READ command timeout,
 	 * it will be flushed (ATA_QCFLAG_ACTIVE = 0).
 	 * But it still in workqueue, so we should be ignore it when called by ata_pio_task
 	 */
-	if (!(NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
-			(ATA_CMD_VERIFY == qc->tf.command || ATA_CMD_CHK_POWER == qc->tf.command ||
-			 ATA_CMD_PMP_READ == qc->tf.command || ATA_CMD_PMP_WRITE == qc->tf.command))) {
+	if (!(IS_SYNO_PMP_CMD(tf) || IS_SYNO_SPINUP_CMD(qc))) {
 		WARN_ON_ONCE((qc->flags & ATA_QCFLAG_ACTIVE) == 0);
 	}
 #else
@@ -1503,7 +1502,7 @@ unsigned int ata_sff_qc_issue(struct ata_queued_cmd *qc)
 		/* copy from ata_pio_task() to send chkpwr cmd directly to prevent work queue timeout issue
 		 * Now we only find sata_mv have timeout issue, so we only on ATA_TFLAG_DIRECT in sata_mv */
 		if (ATA_TFLAG_DIRECT & qc->tf.flags) {
-			DBGMESG("port %d try to use directly issue cmd 0x%x\n", ap->print_id, qc->tf.command);
+			DBGMESG("ata%u: try to use directly issue cmd 0x%x\n", ap->print_id, qc->tf.command);
 			qc->tf.flags &= ~ATA_TFLAG_DIRECT;
 			status = ata_sff_busy_wait(ap, ATA_BUSY, 5);
 			if (status & ATA_BUSY) {
@@ -1512,7 +1511,7 @@ unsigned int ata_sff_qc_issue(struct ata_queued_cmd *qc)
 				if (status & ATA_BUSY) {
 					/*if the status is still BUSY, we use original way ata_pio_queue_task() */
 					ata_sff_queue_pio_task(link, 0);
-					DBGMESG("port %d directly issue cmd 0x%x fail, using queue_task\n", ap->print_id, qc->tf.command);
+					DBGMESG("ata%u: directly issue cmd 0x%x fail, using queue_task\n", ap->print_id, qc->tf.command);
 				} else {
 					ata_sff_hsm_move(ap, qc, status, 0);
 				}

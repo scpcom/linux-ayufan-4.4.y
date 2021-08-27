@@ -1,5 +1,5 @@
-#ifndef __MV_THOR_H__
-#define __MV_THOR_H__
+#ifndef __MV_PRODUCT_THOR_H__
+#define __MV_PRODUCT_THOR_H__
 
 /* OEM Account definition */
 #define VER_OEM_GENERIC			0
@@ -40,7 +40,7 @@
 #define MAX_DEVICE_SUPPORTED	8
 
 /* Core driver macro definition */
-#define MAX_SG_ENTRY			34
+#define MAX_SG_ENTRY			68 //34*2, support > 128k OS tx data
 #define MAX_SG_ENTRY_REDUCED	16
 #define MV_MAX_PHYSICAL_BREAK	(MAX_SG_ENTRY - 1)
 
@@ -169,4 +169,4 @@
 #define SUPPORT_ATA_POWER_MANAGEMENT   1
 //#define SUPPORT_WORKQUEUE             1
 
-#endif /* __MV_THOR_H__ */
+#endif

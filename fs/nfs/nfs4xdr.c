@@ -4991,6 +4991,13 @@ static int decode_getacl(struct xdr_stream *xdr, struct rpc_rqst *req,
 		 * variable length bitmaps.*/
 		xdr->p = bm_p;
 
+		/* The bitmap (xdr len + bitmaps) and the attr xdr len words
+		 * are stored with the acl data to handle the problem of
+		 * variable length bitmaps.*/
+		xdr->p = bm_p;
+		res->acl_data_offset = be32_to_cpup(bm_p) + 2;
+		res->acl_data_offset <<= 2;
+
 		/* We ignore &savep and don't do consistency checks on
 		 * the attr length.  Let userspace figure it out.... */
 		hdrlen = (u8 *)xdr->p - (u8 *)iov->iov_base;

@@ -920,6 +920,12 @@ s32 ixgbe_identify_sfp_module_generic(struct ixgbe_hw *hw)
 			else
 				hw->phy.sfp_type = ixgbe_sfp_type_unknown;
 		} else if (hw->mac.type == ixgbe_mac_82599EB) {
+#ifdef MY_ABC_HERE
+			/* force as cu cable if all eeprom fields are not defined */
+			if (0 == cable_tech && 0 == comp_codes_10g && 0 == comp_codes_1g) {
+				cable_tech = IXGBE_SFF_DA_PASSIVE_CABLE;
+			}
+#endif /* MY_ABC_HERE */
 			if (cable_tech & IXGBE_SFF_DA_PASSIVE_CABLE) {
 				if (hw->bus.lan_id == 0)
 					hw->phy.sfp_type =

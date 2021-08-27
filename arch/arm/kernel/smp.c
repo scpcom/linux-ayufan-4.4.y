@@ -53,6 +53,9 @@
 struct secondary_data secondary_data;
 
 enum ipi_msg_type {
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	IPI_WAKE = 0,
+#endif
 	IPI_TIMER = 2,
 	IPI_RESCHEDULE,
 	IPI_CALL_FUNC,
@@ -300,6 +303,15 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	struct mm_struct *mm = &init_mm;
 	unsigned int cpu = smp_processor_id();
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#ifdef CONFIG_MACH_ARMADA_XP_FPGA
+	unsigned int cpurev;
+
+	__asm__ __volatile__("mrc p15, 1, %0, c0, c0, 7   @ read CPU ID reg\n"
+		: "=r" (cpurev) :: "memory");
+#endif
+#endif
+
 	/*
 	 * All kernel threads share the same mm context; grab a
 	 * reference and switch to it.
@@ -311,7 +323,11 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	enter_lazy_tlb(mm, current);
 	local_flush_tlb_all();
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MACH_ARMADA_XP_FPGA)
+        printk("CPU%u: FPGA Booted secondary processor (ID 0x%04x)\n", cpu, (cpurev & 0xFFFF));
+#else
 	printk("CPU%u: Booted secondary processor\n", cpu);
+#endif
 
 	cpu_init();
 	preempt_disable();
@@ -471,6 +487,22 @@ u64 smp_irq_stat_cpu(unsigned int cpu)
  */
 static DEFINE_PER_CPU(struct clock_event_device, percpu_clockevent);
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_ARCH_ARMADA_XP) && defined(CONFIG_PERF_EVENTS)
+void show_local_pmu_irqs(struct seq_file *p, int prec)
+{
+	 unsigned int cpu;
+
+	 seq_printf(p, "PMU: ");
+	 
+	 for_each_present_cpu(cpu)
+		seq_printf(p, "%10u ", irq_stat[cpu].local_pmu_irqs);
+	 
+	 seq_putc(p, '\n');
+}
+#endif
+#endif
+
 static void ipi_timer(void)
 {
 	struct clock_event_device *evt = &__get_cpu_var(percpu_clockevent);
@@ -572,6 +604,11 @@ void handle_IPI(int ipinr, struct pt_regs *regs)
 		__inc_irq_stat(cpu, ipi_irqs[ipinr - IPI_TIMER]);
 
 	switch (ipinr) {
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	case IPI_WAKE:
+		break;
+#endif
+
 	case IPI_TIMER:
 		irq_enter();
 		ipi_timer();

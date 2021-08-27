@@ -18,6 +18,9 @@
 
 /* ------------< LCD register >------------ */
 /* Video Frame 0&1 start address registers */
+#define	LCD_SPU_ADV_REG				0x0084
+
+/* Video Frame 0&1 start address registers */
 #define	LCD_SPU_DMA_START_ADDR_Y0		0x00C0
 #define	LCD_SPU_DMA_START_ADDR_U0		0x00C4
 #define	LCD_SPU_DMA_START_ADDR_V0		0x00C8
@@ -151,7 +154,8 @@
 #define     CFG_ALPHA_V(v)			(v)
 #define     CFG_ALPHA_V_MASK			0x000000FF
 
-#define LCD_GENERAL_CFG				0x013C
+/* LCD General Configuration Register */
+#define LCD_CFG_RDREG4F				0x013C
 
 /* SPI Read Data Register */
 #define LCD_SPU_SPI_RXDATA			0x0140
@@ -423,7 +427,9 @@
 #define     DMA_FRAME_IRQ1_ENA_MASK		0x40000000
 #define     DMA_FF_UNDERFLOW_ENA(ff)		(ff<<29)
 #define     DMA_FF_UNDERFLOW_ENA_MASK		0x20000000
+#define     GRA_FRAME_IRQ0_ENA(irq)		(irq<<27)
 #define     GRA_FRAME_IRQ0_ENA_MASK		0x08000000
+#define     GRA_FRAME_IRQ1_ENA(irq)		(irq<<26)
 #define     GRA_FRAME_IRQ1_ENA_MASK		0x04000000
 #define     GRA_FF_UNDERFLOW_ENA(ff)		(ff<<25)
 #define     GRA_FF_UNDERFLOW_ENA_MASK		0x02000000
@@ -634,11 +640,14 @@
  */
 #define PIXEL_CMD                  0x81
 
-
-/* KW specific registers. */
+/* KW / DSMP specific registers. */
 #define LCD_CLK_CFG0_REG		0xF0A0
+#define LCD_PLL_LPF_MASK		(0xF << 0)
+#define LCD_PLL_LPF(x)			(x << 0)
 #define LCD_PLL_NDIV_MASK		(0x1FF << 4)
 #define LCD_PLL_NDIV(x)			((x) << 4)
+#define LCD_PLL_VCO_BAND_MASK		(0xF << 13)
+#define LCD_PLL_VCO_BAND(x)		(x << 13)
 #define LCD_PLL_MDIV_MASK		(0x1FF << 17)
 #define LCD_PLL_MDIV(x)			((x) << 17)
 #define LCD_PLL_KDIV_MASK		(0x3 << 26)
@@ -646,15 +655,39 @@
 #define LCD_PLL_PWR_DOWN_MASK		(1 << 31)
 #define LCD_PLL_PWR_DOWN(en)		((en) << 31)
 
-
 #define LCD_CLK_CFG1_REG		0xF0A4
+#ifdef CONFIG_ARCH_ARMADA_XP
+#define LCD_FULL_DIV_MASK		(0x1FFF)
+#define LCD_FULL_DIV(x)			(x)
+#define LCD_HALF_DIV_MASK		(1 << 15)
+#define LCD_HALF_DIV(x)			(x << 15)
+#else
 #define LCD_FULL_DIV_MASK		(0x7F)
 #define LCD_FULL_DIV(x)			(x)
 #define LCD_HALF_DIV_MASK		(1 << 8)
 #define LCD_HALF_DIV(x)			(x << 8)
+#endif /* CONFIG_ARCH_ARMADA_XP */
 #define LCD_REF_CLK_MASK		(1 << 16)
 #define LCD_REF_CLK(x)			(x << 16)
 #define LCD_SMPN_EN_MASK		(1 << 17)
 #define LCD_SMPN_EN(x)			(x << 17)
+
+#define LCD_WIN_NUM			6
+#define LCD_WIN_CTRL(n)			(0xF000 + (n * 0x10))
+#define LCD_WIN_BASE(n)			(0xF004 + (n * 0x10))
+
+/* LVDS related registers. */
+#define LCD_LVDS_CLK_CFG		0xF0AC
+#define LCD_LVDS_CFG_CLK_EN		(1 << 31)
+#define LCD_LVDS_CFG_SER_MASK		(1 << 30)
+#define LCD_LVDS_CFG_SER_EN(x)		(x << 30)
+#define LCD_LVDS_CFG_TICK_DRV_MASK	(0x7 << 8)
+#define LCD_LVDS_CFG_TICK_DRV(x)	(x << 8)
+#define LCD_LVDS_CFG_24BIT_MODE_MASK	(1 << 1)
+#define LCD_LVDS_CFG_24BIT_OPT1		(0 << 1)
+#define LCD_LVDS_CFG_24BIT_OPT2		(1 << 1)
+#define LCD_LVDS_CFG_PIN_CNT_MASK	(1 << 0)
+#define LCD_LVDS_CFG_PIN_CNT_18		(0 << 0)
+#define LCD_LVDS_CFG_PIN_CNT_24		(1 << 0)
 
 #endif

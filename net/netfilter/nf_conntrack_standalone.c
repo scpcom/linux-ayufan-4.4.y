@@ -242,6 +242,27 @@ static int ct_seq_show(struct seq_file *s, void *v)
 	if (ct_show_delta_time(s, ct))
 		goto release;
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
+	if(ct->layer7.app_proto &&
+           seq_printf(s, "l7proto=%s ", ct->layer7.app_proto))
+		goto release;
+#endif
+
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	if ((ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.nfp) && (ct->tuplehash[IP_CT_DIR_REPLY].tuple.nfp)) {
+		if (seq_printf(s, "[NFP (both)] "))
+			goto release;
+	} else if (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.nfp) {
+		if (seq_printf(s, "[NFP (orig)] "))
+			goto release;
+	} else if (ct->tuplehash[IP_CT_DIR_REPLY].tuple.nfp) {
+		if (seq_printf(s, "[NFP (reply)] "))
+			goto release;
+	}
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
+
 	if (seq_printf(s, "use=%u\n", atomic_read(&ct->ct_general.use)))
 		goto release;
 

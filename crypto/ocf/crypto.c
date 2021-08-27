@@ -65,10 +65,6 @@ __FBSDID("$FreeBSD: src/sys/opencrypto/crypto.c,v 1.27 2007/03/21 03:42:51 sam E
 __FBSDID("$FreeBSD: src/sys/opencrypto/crypto.c,v 1.16 2005/01/07 02:29:16 imp Exp $");
  */
 
-
-#ifndef AUTOCONF_INCLUDED
-#include <linux/config.h>
-#endif
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/list.h>
@@ -84,7 +80,7 @@ __FBSDID("$FreeBSD: src/sys/opencrypto/crypto.c,v 1.16 2005/01/07 02:29:16 imp E
  * issue if we are linked into the kernel and a driver gets started before
  * us
  */
-static int crypto_initted = 0;
+int crypto_initted = 0;
 
 /*
  * Crypto drivers register themselves by allocating a slot in the
@@ -142,9 +138,6 @@ struct cryptocap {
 #define CRYPTOCAP_F_CLEANUP	0x80000000	/* needs resource cleanup */
 	int		cc_qblocked;		/* (q) symmetric q blocked */
 	int		cc_kqblocked;		/* (q) asymmetric q blocked */
-
-	int		cc_unqblocked;		/* (q) symmetric q blocked */
-	int		cc_unkqblocked;		/* (q) asymmetric q blocked */
 };
 static struct cryptocap *crypto_drivers = NULL;
 static int crypto_drivers_num = 0;
@@ -213,11 +206,6 @@ static struct kmem_cache *cryptop_zone;
 static struct kmem_cache *cryptodesc_zone;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
-#include <linux/sched.h>
-#define	kill_proc(p,s,v)	send_sig(s,pid_task(find_vpid(p), PIDTYPE_PID),0)
-#endif
-
 #define debug crypto_debug
 int crypto_debug = 0;
 module_param(crypto_debug, int, 0644);
@@ -266,18 +254,6 @@ module_param(crypto_devallowsoft, int, 0644);
 MODULE_PARM_DESC(crypto_devallowsoft,
 	   "Enable/disable use of software crypto support");
 
-/*
- * This parameter controls the maximum number of crypto operations to 
- * do consecutively in the crypto kernel thread before scheduling to allow 
- * other processes to run. Without it, it is possible to get into a 
- * situation where the crypto thread never allows any other processes to run.
- * Default to 1000 which should be less than one second.
- */
-static int crypto_max_loopcount = 1000;
-module_param(crypto_max_loopcount, int, 0644);
-MODULE_PARM_DESC(crypto_max_loopcount,
-	   "Maximum number of crypto ops to do before yielding to other processes");
-
 static pid_t	cryptoproc = (pid_t) -1;
 static struct	completion cryptoproc_exited;
 static DECLARE_WAIT_QUEUE_HEAD(cryptoproc_wait);
@@ -290,7 +266,7 @@ static	int crypto_ret_proc(void *arg);
 static	int crypto_invoke(struct cryptocap *cap, struct cryptop *crp, int hint);
 static	int crypto_kinvoke(struct cryptkop *krp, int flags);
 static	void crypto_exit(void);
-static  int crypto_init(void);
+int crypto_init(void);
 
 static	struct cryptostats cryptostats;
 
@@ -783,12 +759,10 @@ crypto_unblock(u_int32_t driverid, int what)
 	if (cap != NULL) {
 		if (what & CRYPTO_SYMQ) {
 			cap->cc_qblocked = 0;
-			cap->cc_unqblocked = 0;
 			crypto_all_qblocked = 0;
 		}
 		if (what & CRYPTO_ASYMQ) {
 			cap->cc_kqblocked = 0;
-			cap->cc_unkqblocked = 0;
 			crypto_all_kqblocked = 0;
 		}
 		if (crp_sleep)
@@ -808,7 +782,8 @@ int
 crypto_dispatch(struct cryptop *crp)
 {
 	struct cryptocap *cap;
-	int result = -1;
+	u_int32_t hid;
+	int result = 0;
 	unsigned long q_flags;
 
 	dprintk("%s()\n", __FUNCTION__);
@@ -821,52 +796,32 @@ crypto_dispatch(struct cryptop *crp)
 		return ENOMEM;
 	}
 	crypto_q_cnt++;
+	CRYPTO_Q_UNLOCK();
 
-	/* make sure we are starting a fresh run on this crp. */
-	crp->crp_flags &= ~CRYPTO_F_DONE;
-	crp->crp_etype = 0;
-
-	/*
-	 * Caller marked the request to be processed immediately; dispatch
-	 * it directly to the driver unless the driver is currently blocked.
-	 */
-	if ((crp->crp_flags & CRYPTO_F_BATCH) == 0) {
-		int hid = CRYPTO_SESID2HID(crp->crp_sid);
+	hid = CRYPTO_SESID2HID(crp->crp_sid);
 	cap = crypto_checkdriver(hid);
-		/* Driver cannot disappear when there is an active session. */
-		KASSERT(cap != NULL, ("%s: Driver disappeared.", __func__));
-		if (!cap->cc_qblocked) {
-			crypto_all_qblocked = 0;
-			crypto_drivers[hid].cc_unqblocked = 1;
-			CRYPTO_Q_UNLOCK();
+	/* warning: We are using the CRYPTO_F_BATCH to mark processing by HW,
+ 	   it should be disabled for software encryption */
+	if ((crp->crp_flags & CRYPTO_F_BATCH)) {
+        /* If should be done by HW - skip OCF queue */
 		result = crypto_invoke(cap, crp, 0);
-			CRYPTO_Q_LOCK();
-			if (result == ERESTART)
-				if (crypto_drivers[hid].cc_unqblocked)
-					crypto_drivers[hid].cc_qblocked = 1;
-			crypto_drivers[hid].cc_unqblocked = 0;
+		if (result != 0) {
+			cryptostats.cs_drops++;
 		}
-	}
-	if (result == ERESTART) {
+	} else {
 	/*
-		 * The driver ran out of resources, mark the
-		 * driver ``blocked'' for cryptop's and put
-		 * the request back in the queue.  It would
-		 * best to put the request back where we got
-		 * it but that's hard so for now we put it
-		 * at the front.  This should be ok; putting
-		 * it at the end does not work.
+		 * Caller marked the request as ``ok to delay'';
+		 * queue it for the dispatch thread.  This is desirable
+		 * when the operation is low priority and/or suitable
+		 * for batching.
 	 */
-		list_add(&crp->crp_next, &crp_q);
-		cryptostats.cs_blocks++;
-		result = 0;
-	} else if (result == -1) {
+			CRYPTO_Q_LOCK();
 		TAILQ_INSERT_TAIL(&crp_q, crp, crp_next);
-		result = 0;
-	}
 		if (crp_sleep)
 	wake_up_interruptible(&cryptoproc_wait);
 	CRYPTO_Q_UNLOCK();
+	}
+
 	return result;
 }
 
@@ -1277,7 +1232,6 @@ crypto_proc(void *arg)
 	u_int32_t hid;
 	int result, hint;
 	unsigned long q_flags;
-	int loopcount = 0;
 
 	ocf_daemonize("crypto");
 
@@ -1338,7 +1292,7 @@ crypto_proc(void *arg)
 			hid = CRYPTO_SESID2HID(submit->crp_sid);
 			crypto_all_qblocked = 0;
 			list_del(&submit->crp_next);
-			crypto_drivers[hid].cc_unqblocked = 1;
+			crypto_drivers[hid].cc_qblocked = 1;
 			cap = crypto_checkdriver(hid);
 			CRYPTO_Q_UNLOCK();
 			KASSERT(cap != NULL, ("%s:%u Driver disappeared.",
@@ -1358,11 +1312,8 @@ crypto_proc(void *arg)
 				/* XXX validate sid again? */
 				list_add(&submit->crp_next, &crp_q);
 				cryptostats.cs_blocks++;
-				if (crypto_drivers[hid].cc_unqblocked)
+			} else
 					crypto_drivers[hid].cc_qblocked=0;
-				crypto_drivers[hid].cc_unqblocked=0;
-			}
-			crypto_drivers[hid].cc_unqblocked = 0;
 		}
 
 		crypto_all_kqblocked = !list_empty(&crp_kq);
@@ -1431,7 +1382,6 @@ crypto_proc(void *arg)
 					__FUNCTION__,
 					list_empty(&crp_q), crypto_all_qblocked,
 					list_empty(&crp_kq), crypto_all_kqblocked);
-			loopcount = 0;
 			CRYPTO_Q_UNLOCK();
 			crp_sleep = 1;
 			wait_event_interruptible(cryptoproc_wait,
@@ -1453,15 +1403,7 @@ crypto_proc(void *arg)
 			if (cryptoproc == (pid_t) -1)
 				break;
 			cryptostats.cs_intrs++;
-		} else if (loopcount > crypto_max_loopcount) {
-			/*
-			 * Give other processes a chance to run if we've 
-			 * been using the CPU exclusively for a while.
-			 */
-			loopcount = 0;
-			schedule();
 		}
-		loopcount++;
 	}
 	CRYPTO_Q_UNLOCK();
 	complete_and_exit(&cryptoproc_exited, 0);
@@ -1638,7 +1580,7 @@ DB_SHOW_COMMAND(kcrypto, db_show_kcrypto)
 #endif
 
 
-static int
+int
 crypto_init(void)
 {
 	int error;
@@ -1727,7 +1669,7 @@ crypto_exit(void)
 	CRYPTO_DRIVER_LOCK();
 	p = cryptoproc;
 	cryptoproc = (pid_t) -1;
-	kill_proc(p, SIGTERM, 1);
+	kill_proc_info(SIGTERM, SEND_SIG_PRIV, p);
 	wake_up_interruptible(&cryptoproc_wait);
 	CRYPTO_DRIVER_UNLOCK();
 
@@ -1736,7 +1678,7 @@ crypto_exit(void)
 	CRYPTO_DRIVER_LOCK();
 	p = cryptoretproc;
 	cryptoretproc = (pid_t) -1;
-	kill_proc(p, SIGTERM, 1);
+	kill_proc_info(SIGTERM, SEND_SIG_PRIV, p);
 	wake_up_interruptible(&cryptoretproc_wait);
 	CRYPTO_DRIVER_UNLOCK();
 
@@ -1779,6 +1721,6 @@ EXPORT_SYMBOL(crypto_find_device_byhid);
 module_init(crypto_init);
 module_exit(crypto_exit);
 
-MODULE_LICENSE("Dual BSD/GPL");
+MODULE_LICENSE("BSD");
 MODULE_AUTHOR("David McCullough <david_mccullough@securecomputing.com>");
 MODULE_DESCRIPTION("OCF (OpenBSD Cryptographic Framework)");

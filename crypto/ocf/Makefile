@@ -42,8 +42,7 @@ $(_obj)-$(CONFIG_OCF_HIFN)    += hifn$(_slash)
 $(_obj)-$(CONFIG_OCF_IXP4XX)  += ixp4xx$(_slash)
 $(_obj)-$(CONFIG_OCF_TALITOS) += talitos$(_slash)
 $(_obj)-$(CONFIG_OCF_PASEMI)  += pasemi$(_slash)
-$(_obj)-$(CONFIG_OCF_EP80579) += ep80579$(_slash)
-$(_obj)-$(CONFIG_OCF_CRYPTOCTEON) += cryptocteon$(_slash)
+#$(_obj)-$(CONFIG_OCF_EP80579) += ep80579$(_slash)
 $(_obj)-$(CONFIG_OCF_OCFNULL) += ocfnull$(_slash)
 
 ocf-objs := $(OCF_OBJS)
@@ -80,7 +79,7 @@ patch:
 			diff -Nau /dev/null $$t | sed 's?^+++ \./?+++ linux/crypto/ocf/?'; \
 		done > $$patch; \
 		cat patches/linux-2.4.35-ocf.patch $$patch > $$patch24; \
-		cat patches/linux-2.6.30-ocf.patch $$patch > $$patch26
+		cat patches/linux-2.6.26-ocf.patch $$patch > $$patch26
 
 .PHONY: tarball
 tarball:

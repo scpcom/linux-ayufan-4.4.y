@@ -347,6 +347,9 @@ void usb_hcd_pci_shutdown(struct pci_dev *dev)
 	if (hcd->irq >= 0) {
 		//disable_irq(hcd->irq);
 		free_irq(hcd->irq, hcd);
+		if (hcd->irq == dev->irq) {
+			dev->irq = -1;
+		}
 		hcd->irq = -1;
 	}
 #endif

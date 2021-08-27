@@ -431,7 +431,7 @@ struct task_struct *find_task_by_vpid(pid_t vnr)
 {
 	return find_task_by_pid_ns(vnr, current->nsproxy->pid_ns);
 }
-#ifdef CONFIG_SYNO_USE_OCF_LINUX
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_USE_OCF_LINUX)
 EXPORT_SYMBOL(find_task_by_vpid);
 #endif
 

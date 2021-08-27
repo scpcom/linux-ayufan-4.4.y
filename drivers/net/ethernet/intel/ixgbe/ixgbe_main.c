@@ -1672,9 +1672,13 @@ static void ixgbe_set_itr(struct ixgbe_q_vector *q_vector)
 	}
 
 	if (new_itr != q_vector->itr) {
+#ifdef MY_ABC_HERE
+		new_itr = ((q_vector->itr * 9) + new_itr) / 10;
+#else
 		/* do an exponential smoothing */
 		new_itr = (10 * new_itr * q_vector->itr) /
 			  ((9 * new_itr) + q_vector->itr);
+#endif
 
 		/* save the algorithm value here */
 		q_vector->itr = new_itr & IXGBE_MAX_EITR;
@@ -3776,6 +3780,12 @@ void ixgbe_reinit_locked(struct ixgbe_adapter *adapter)
 	/* put off any impending NetWatchDogTimeout */
 	adapter->netdev->trans_start = jiffies;
 
+#ifdef MY_ABC_HERE
+	// if service task is updating info, wait to get lock
+	while (test_and_set_bit(__IXGBE_SERVICE_TASK_MUTEX, &adapter->state)) {
+		usleep_range(1000, 2000);
+	}
+#endif
 	while (test_and_set_bit(__IXGBE_RESETTING, &adapter->state))
 		usleep_range(1000, 2000);
 	ixgbe_down(adapter);
@@ -3789,6 +3799,9 @@ void ixgbe_reinit_locked(struct ixgbe_adapter *adapter)
 		msleep(2000);
 	ixgbe_up(adapter);
 	clear_bit(__IXGBE_RESETTING, &adapter->state);
+#ifdef MY_ABC_HERE
+	clear_bit(__IXGBE_SERVICE_TASK_MUTEX, &adapter->state);
+#endif
 }
 
 void ixgbe_up(struct ixgbe_adapter *adapter)
@@ -6253,6 +6266,20 @@ static void ixgbe_service_task(struct work_struct *work)
 						     service_task);
 
 	ixgbe_reset_subtask(adapter);
+#ifdef MY_ABC_HERE
+	// if device is resetting, don't update information
+	if (test_bit(__IXGBE_RESETTING, &adapter->state) ||
+		test_bit(__IXGBE_DOWN, &adapter->state)) {
+		ixgbe_service_event_complete(adapter);
+		return;
+	}
+
+	// failed to get lock, it may means device is resetting, just bail
+	if (test_and_set_bit(__IXGBE_SERVICE_TASK_MUTEX, &adapter->state)) {
+		ixgbe_service_event_complete(adapter);
+		return;
+	}
+#endif
 	ixgbe_sfp_detection_subtask(adapter);
 	ixgbe_sfp_link_config_subtask(adapter);
 	ixgbe_check_overtemp_subtask(adapter);
@@ -6260,6 +6287,9 @@ static void ixgbe_service_task(struct work_struct *work)
 	ixgbe_fdir_reinit_subtask(adapter);
 	ixgbe_check_hang_subtask(adapter);
 
+#ifdef MY_ABC_HERE
+	clear_bit(__IXGBE_SERVICE_TASK_MUTEX, &adapter->state);
+#endif
 	ixgbe_service_event_complete(adapter);
 }
 

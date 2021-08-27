@@ -1,6 +1,6 @@
 config FB_DOVE
 	bool "Marvell LCD controller"
-	depends on FB && (ARCH_DOVE || ARCH_FEROCEON_KW)
+	depends on FB && (ARCH_DOVE || ARCH_FEROCEON_KW || ARCH_ARMADA_XP)
 	help
 	  Support for Marvell Dove SoC LCD controller.
 
@@ -24,15 +24,72 @@ config FB_DOVE_CLCD
 	Marvell DOVE Color LCD. If not sure, say N. If want to config 
 	resolution, please use bootargs, e.g. dovefb:640x480-16@60.
 
+menu "LCD0 I2C setting"
+	depends on FB_DOVE && FB_DOVE_CLCD && ARCH_DOVE
+
+config FB_DOVE_CLCD0_I2C_DEFAULT_SETTING
+	bool "Use LCD0 I2C default setting"
+	default y
+	---help---
+	LCD0 I2C default setting: use I2C channel 1 and I2C address 0x3F
+	to get EDID data.
+
+config FB_DOVE_CLCD0_I2C_CHANNEL
+	int "Set I2C Channel"
+	depends on !FB_DOVE_CLCD0_I2C_DEFAULT_SETTING
+	range 0 2
+	default 1
+	---help---
+	You can set I2C channel number between 0~2.
+
+config FB_DOVE_CLCD0_I2C_ADDRESS
+	hex "Set I2C Address"
+	depends on !FB_DOVE_CLCD0_I2C_DEFAULT_SETTING
+	range 0x0 0x7f
+	default 0x3f
+	---help---
+	You can set I2C address number between 0~0x7f
+
+endmenu
+
 config FB_DOVE_CLCD1
 	tristate "Marvell DOVE Secondary Color LCD support"
-	depends on FB && ARM && FB_DOVE
+	depends on FB && ARM && FB_DOVE && ARCH_DOVE
 	select FB_CFB_FILLRECT
 	select FB_CFB_COPYAREA
 	select FB_CFB_IMAGEBLIT
 	select FB_DOVE_DCON
 	---help---
 	Say Y here if your Secondary LCD panel is VGA. Default is N.
+
+menu "LCD1 I2C setting"
+	depends on FB_DOVE && FB_DOVE_CLCD1 && ARCH_DOVE
+
+config FB_DOVE_CLCD1_I2C_DEFAULT_SETTING
+	bool "Use LCD1 I2C default setting"
+	default y
+	---help---
+	LCD1 I2C default setting: use I2C channel 1 and I2C address 0x50
+	to get EDID data.
+
+config FB_DOVE_CLCD1_I2C_CHANNEL
+	int "Set I2C Channel"
+	depends on !FB_DOVE_CLCD1_I2C_DEFAULT_SETTING
+	range 0 2
+	default 1
+	---help---
+	You can set I2C channel number between 0~2.
+
+config FB_DOVE_CLCD1_I2C_ADDRESS
+	hex "Set I2C Address"
+	depends on !FB_DOVE_CLCD1_I2C_DEFAULT_SETTING
+	range 0x0 0x7f
+	default 0x50
+	---help---
+	You can set I2C address number between 0~0x7f
+
+endmenu
+
 config FB_DOVE_CLCD_EDID
 	bool "Marvell DOVE read EDID utility"
 	depends on FB_DOVE
@@ -51,7 +108,7 @@ config DOVEFB_FORCE_EDID_RES
 
 config FB_DOVE_DCON
 	tristate "Marvell DOVE DCON support"
-	depends on ARM && FB_DOVE
+	depends on ARM && FB_DOVE && ARCH_DOVE
 	---help---
 	Say Y here if want to enable DCON. (HW default bypass.)
 
@@ -83,7 +140,7 @@ config FB_DOVE_CLCD_DCONA_MODE
 endchoice
 
 choice
-	depends on FB_DOVE && FB_DOVE_DCON
+	depends on FB_DOVE && FB_DOVE_DCON && ARCH_DOVE
 	prompt "DOVE DCON Panel PortB"
 	default FB_DOVE_CLCD_DCONB_BYPASS1
 
@@ -99,23 +156,19 @@ config FB_DOVE_CLCD_DCONB_BYPASS0
 
 endchoice
 
-menu "DOVE LCD clock source"
+menu "PLL clock speed when under inaccurate mode"
 	depends on FB_DOVE && (FB_DOVE_CLCD || FB_DOVE_CLCD1)
 
-config FB_DOVE_CLCD_USE_PLL_CLK
-	bool "Use PLL to be LCD's sclk input"
-	depends on FB_DOVE_CLCD || FB_DOVE_CLCD1
-	---help---
-	choose PLL to be LCD sclk input, otherwise use AXI bus clock.
-
 config FB_DOVE_CLCD_SCLK_VALUE
-	int "LCD SCLK setting"
-	default "266"
+	int "PLL clock speed"
+	default "1000"
 	depends on (FB_DOVE_CLCD || FB_DOVE_CLCD1)
 	---help---
 	This paramter (in MHz) determines the source clock rate.
-	The default is 266MHz(PLL). The real frquency depends on HW
-	setting. Change this if you know how to set it.
+	The default is 1000MHz(PLL). This value only is applied
+	when system is under inaccurate mode and two lcds use
+	PLL as refclk at the same time. The real frquency depends
+	on HW setting. Change this if you know how to set it.
 
 endmenu
 
@@ -141,7 +194,7 @@ config DOVEFB_DISPLAY_MODE
 
 config FB_DOVE_CLCD_FLAREON_GV
 	tristate "Marvell DOVE Color LCD - Flareon GV"
-	depends on FB_DOVE && (FB_DOVE_CLCD || FB_DOVE_CLCD1)
+	depends on FB_DOVE && (FB_DOVE_CLCD || FB_DOVE_CLCD1) && ARCH_DOVE
 	default y if ARCH_REALVIEW
 	---help---
 	Say Y here if your LCD version is on Flareon GV. Default is N.
@@ -150,7 +203,7 @@ config FB_DOVE_CLCD_FLAREON_GV
 config FB_MUSTANG_CLCD
     tristate "Marvell Mustang Color LCD support"
     default n
-    depends on FB_DOVE
+    depends on FB_DOVE && ARCH_DOVE
     select FB_CFB_FILLRECT
     select FB_CFB_COPYAREA
     select FB_CFB_IMAGEBLIT

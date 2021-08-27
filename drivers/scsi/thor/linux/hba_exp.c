@@ -237,3 +237,66 @@ MV_BOOLEAN __is_scsi_cmd_simulated(MV_U8 cmd_type)
 	}
 }
 
+MV_U32 hba_parse_ata_protocol(struct scsi_cmnd *scmd)
+{
+	MV_U8 protocol, t_length, t_dir;
+	MV_U32 cmd_flag =0;
+
+	protocol = (scmd->cmnd[1]>> 1) & 0x0F;
+	if(protocol== HARD_RESET || protocol==SRST){
+		MV_PRINT("Unsupported ATA Protocol = 0x%x\n", protocol);
+		return cmd_flag;
+	}
+
+	t_length = scmd->cmnd[2] & 0x03;
+	t_dir = (scmd->cmnd[2] >> 3) & 0x01;
+
+	if (t_length == 0){
+		cmd_flag = CMD_FLAG_NON_DATA;
+	}else {
+		if (t_dir == 0)
+			cmd_flag = CMD_FLAG_DATA_OUT;
+		else
+			cmd_flag = CMD_FLAG_DATA_IN;
+	}
+	switch (protocol) {
+	case NON_DATA:
+		cmd_flag |= CMD_FLAG_NON_DATA;
+		break;
+	case PIO_DATA_IN:
+		cmd_flag |= CMD_FLAG_PIO;
+		if (!(cmd_flag & CMD_FLAG_DATA_IN))
+			cmd_flag |= CMD_FLAG_DATA_IN;
+		break;
+	case PIO_DATA_OUT:
+		cmd_flag |= CMD_FLAG_PIO;
+		if (!(cmd_flag & CMD_FLAG_DATA_OUT))
+			cmd_flag |= CMD_FLAG_DATA_OUT;
+		break;
+	case DMA:
+		cmd_flag |= CMD_FLAG_DMA;
+		break;
+	case DMA_QUEUED:
+		cmd_flag |= (CMD_FLAG_DMA | CMD_FLAG_TCQ);
+		break;
+	case DEVICE_DIAGNOSTIC:
+	case DEVICE_RESET:
+		/* Do nothing*/
+		break;
+	case UDMA_DATA_IN:
+		cmd_flag |= CMD_FLAG_DMA;
+		break;
+	case UDMA_DATA_OUT:
+		cmd_flag |= CMD_FLAG_DMA;
+		break;
+	case FPDMA:
+		cmd_flag |= (CMD_FLAG_DMA | CMD_FLAG_NCQ);
+		break;
+	case RTN_INFO:
+		break;
+	default:
+		MV_PRINT("Unsupported ATA Protocol = 0x%x\n", protocol);
+		break;
+	}
+	return cmd_flag;
+}

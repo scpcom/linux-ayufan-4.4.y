@@ -57,8 +57,26 @@ void HBA_ModuleStarted(struct mv_mod_desc *mod_desc);
 	 scmd->cmnd[9] ==0xE1||scmd->cmnd[9] ==0xE2|| \
 	 scmd->cmnd[9] ==0xE3|| scmd->cmnd[9] ==0xE5||\
 	 scmd->cmnd[9] ==0xE6||scmd->cmnd[9] ==0xEC|| \
-	 scmd->cmnd[9] ==0xA1||scmd->cmnd[9] ==0xB0))
+	 scmd->cmnd[9] ==0xA1||scmd->cmnd[9] ==0x92|| \
+	 scmd->cmnd[9] ==0xB0))
 
+/*ATA Protocols*/
+enum _ATA_PROTOCOL {
+	HARD_RESET 	= 0x00,
+	SRST  			= 0x01,
+	BUS_IDLE 		= 0x02,
+	NON_DATA 		= 0x03,
+	PIO_DATA_IN 	= 0x04,
+	PIO_DATA_OUT 	= 0x05,
+	DMA			= 0x06,
+	DMA_QUEUED	= 0x07,
+	DEVICE_DIAGNOSTIC	= 0x08,
+	DEVICE_RESET		= 0x09,
+	UDMA_DATA_IN		= 0x0A,
+	UDMA_DATA_OUT	= 0x0B,
+	FPDMA				= 0x0C,
+	RTN_INFO			= 0x0F,
+};
 
 #ifdef SUPPORT_EVENT
 /* wrapper for DriverEvent, needed to implement queue */
@@ -168,6 +186,6 @@ MV_BOOLEAN __is_scsi_cmd_simulated(MV_U8 cmd_type);
 void HBA_kunmap_sg(void*);
 /*set pci Device ID */
 MV_U16 SetDeviceID(MV_U32 pad_test);
-
+MV_U32 hba_parse_ata_protocol(struct scsi_cmnd *scmd);
 
 #endif /* __HBA_EXPOSE_H__ */

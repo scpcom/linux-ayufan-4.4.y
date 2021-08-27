@@ -9,6 +9,13 @@ obj-$(CONFIG_GPIO_GENERIC)	+= gpio-generic.o
 
 obj-$(CONFIG_GPIO_74X164)	+= gpio-74x164.o
 obj-$(CONFIG_GPIO_AB8500)	+= gpio-ab8500.o
+ifeq ($(CONFIG_ARCH_GEN3), y)
+obj-$(CONFIG_GPIO_INTELCE)	+= intelce_gpio.o
+intelce_gpio-objs	+= gpio-intelce.o
+intelce_gpio-objs	+= gpio-ce4100.o
+intelce_gpio-objs	+= gpio-ce4200.o
+intelce_gpio-objs	+= gpio-ce5300.o
+endif
 obj-$(CONFIG_GPIO_ADP5520)	+= gpio-adp5520.o
 obj-$(CONFIG_GPIO_ADP5588)	+= gpio-adp5588.o
 obj-$(CONFIG_GPIO_BT8XX)	+= gpio-bt8xx.o

@@ -42,6 +42,16 @@ void hfs_bnode_read(struct hfs_bnode *node, void *buf, int off, int len)
 	}
 }
 
+#ifdef MY_ABC_HERE
+u32 hfs_bnode_read_u32(struct hfs_bnode *node, int off)
+{
+	__be32 data;
+	/* TODO: optimize later... */
+	hfs_bnode_read(node, &data, off, 4);
+	return be32_to_cpu(data);
+}
+#endif
+
 u16 hfs_bnode_read_u16(struct hfs_bnode *node, int off)
 {
 	__be16 data;
@@ -633,6 +643,11 @@ void hfs_bnode_put(struct hfs_bnode *node)
 	if (node) {
 		struct hfs_btree *tree = node->tree;
 		int i;
+
+#ifdef MY_ABC_HERE
+		if (!tree)
+			return;
+#endif
 
 		dprint(DBG_BNODE_REFS, "put_node(%d:%d): %d\n",
 			node->tree->cnid, node->this,

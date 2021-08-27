@@ -489,6 +489,13 @@ config X86_SUPPORTS_MEMORY_FAILURE
 	depends on X86_64 || !SPARSEMEM
 	select ARCH_SUPPORTS_MEMORY_FAILURE
 
+menu "Intel Media SOC Gen3 support"
+
+config ARCH_GEN3
+	bool "Enable Intel Media SOC Gen3 support"
+
+endmenu
+
 config X86_VISWS
 	bool "SGI 320/540 (Visual Workstation)"
 	depends on X86_32 && PCI && X86_MPPARSE && PCI_GODIRECT

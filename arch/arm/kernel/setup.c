@@ -62,11 +62,16 @@
 #include "atags.h"
 #include "tcm.h"
 
+
 #ifdef  MY_ABC_HERE
 extern char gszSynoHWVersion[];
 #endif
 
 #ifdef  MY_ABC_HERE
+extern char gszSynoHWRevision[];
+#endif
+
+#ifdef MY_ABC_HERE
 extern long g_internal_hd_num;
 #endif
 
@@ -84,7 +89,7 @@ extern unsigned char grgbLanMac[4][16];
 #endif
 
 #ifdef MY_ABC_HERE
-extern char gszSerialNum[12];
+extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
@@ -116,6 +121,10 @@ extern int gSynoHasDynModule;
 extern long gSynoFlashMemorySize;
 #endif
 
+#ifdef CONFIG_SYNO_ARMADA
+extern int gSynoUSBStation;
+#endif
+
 #if defined(CONFIG_FPE_NWFPE) || defined(CONFIG_FPE_FASTFPE)
 char fpe_type[8];
 
@@ -144,11 +153,23 @@ static int __init early_hw_version(char *p)
 	*szPtr = 0;
 	strcat(gszSynoHWVersion, "-j");
 
-	printk("Synology Hareware Version: %s\n", gszSynoHWVersion);
+	printk("Synology Hardware Version: %s\n", gszSynoHWVersion);
 
 	return 1;
 }
 __setup("syno_hw_version=", early_hw_version);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_hw_revision(char *p)
+{
+       snprintf(gszSynoHWRevision, 4, "%s", p);
+
+       printk("Synology Hardware Revision: %s\n", gszSynoHWRevision);
+
+       return 1;
+}
+__setup("rev=", early_hw_revision);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -388,6 +409,28 @@ END:
 	return 1;
 }
 __setup("flash_size=", early_flash_memory_size);
+#endif
+
+#ifdef CONFIG_SYNO_ARMADA
+static int __init early_is_usbstation(char *p)
+{
+	int iLen = 0;
+
+	gSynoUSBStation = 0;
+
+	if ((NULL == p) || (0 == (iLen = strlen(p)))) {
+		goto END;
+	}
+
+	if ( 0 == strcmp (p, "y")) {
+		gSynoUSBStation = 1;
+		printk("Synology USB Station.\n");
+	}
+
+END:
+	return 1;
+}
+__setup("syno_usbstation=", early_is_usbstation);
 #endif
 
 extern void paging_init(struct machine_desc *desc);
@@ -940,11 +983,19 @@ static void __init request_standard_resources(struct machine_desc *mdesc)
  */
 static int __init parse_tag_core(const struct tag *tag)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	if (read_tag(tag->hdr.size) > 2) {
+	if ((read_tag(tag->u.core.flags) & 1) == 0)		
+		root_mountflags &= ~MS_RDONLY;
+		ROOT_DEV = old_decode_dev(read_tag(tag->u.core.rootdev));
+	}
+#else
 	if (tag->hdr.size > 2) {
 		if ((tag->u.core.flags & 1) == 0)
 			root_mountflags &= ~MS_RDONLY;
 		ROOT_DEV = old_decode_dev(tag->u.core.rootdev);
 	}
+#endif
 	return 0;
 }
 
@@ -952,10 +1003,42 @@ __tagtable(ATAG_CORE, parse_tag_core);
 
 static int __init parse_tag_mem32(const struct tag *tag)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	return arm_add_memory(read_tag(tag->u.mem.start), read_tag(tag->u.mem.size));
+#else
 	return arm_add_memory(tag->u.mem.start, tag->u.mem.size);
+#endif
 }
 
 __tagtable(ATAG_MEM, parse_tag_mem32);
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_PHYS_ADDR_T_64BIT)
+static int __init parse_tag_mem64(const struct tag *tag)
+{
+#ifdef CONFIG_ARM_LPAE
+	/* We might have 4GB on a single CS. */
+	if (tag->u.mem64.size >= 0x100000000ll) {
+		u64 tmp_size = tag->u.mem64.size;
+		phys_addr_t tmp_start = tag->u.mem64.start;
+		u32 blk_size;
+		int ret;
+		while (tmp_size > 0ll) {
+			blk_size = ((tmp_size < 0x100000000ll) ? (u32)tmp_size : (2ll << 30ll));
+			ret = arm_add_memory(tmp_start, blk_size);
+			if (ret)
+				return ret;
+			tmp_start += (u64)blk_size;
+			tmp_size -= (u64)blk_size;
+		}
+		return 0;
+	}
+#endif
+	/* We only use 32-bits for the size. */
+	return arm_add_memory(tag->u.mem64.start, (unsigned long)tag->u.mem64.size);
+}
+
+__tagtable(ATAG_MEM64, parse_tag_mem64);
+#endif /* CONFIG_PHYS_ADDR_T_64BIT */
 
 #if defined(CONFIG_VGA_CONSOLE) || defined(CONFIG_DUMMY_CONSOLE)
 struct screen_info screen_info = {
@@ -1005,7 +1088,11 @@ __tagtable(ATAG_SERIAL, parse_tag_serialnr);
 
 static int __init parse_tag_revision(const struct tag *tag)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	system_rev = read_tag(tag->u.revision.rev);
+#else
 	system_rev = tag->u.revision.rev;
+#endif
 	return 0;
 }
 
@@ -1039,7 +1126,11 @@ static int __init parse_tag(const struct tag *tag)
 	struct tagtable *t;
 
 	for (t = &__tagtable_begin; t < &__tagtable_end; t++)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+		if ((read_tag(tag->hdr.tag) == t->tag)) {
+#else
 		if (tag->hdr.tag == t->tag) {
+#endif
 			t->parse(tag);
 			break;
 		}
@@ -1053,9 +1144,17 @@ static int __init parse_tag(const struct tag *tag)
  */
 static void __init parse_tags(const struct tag *t)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	for (; read_tag(t->hdr.size); t = tag_next(t))
+#else
 	for (; t->hdr.size; t = tag_next(t))
+#endif
 		if (!parse_tag(t))
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+			early_printk(KERN_WARNING
+#else
 			printk(KERN_WARNING
+#endif
 				"Ignoring unrecognised tag 0x%08x\n",
 				t->hdr.tag);
 }
@@ -1176,11 +1275,19 @@ static struct machine_desc * __init setup_machine_tags(unsigned int nr)
 	 * If we have the old style parameters, convert them to
 	 * a tag list.
 	 */
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+if (read_tag(tags->hdr.tag) != ATAG_CORE)
+#else
 	if (tags->hdr.tag != ATAG_CORE)
+#endif
 		convert_to_tag_list(tags);
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	if (read_tag(tags->hdr.tag) != ATAG_CORE) {
+#else
 	if (tags->hdr.tag != ATAG_CORE) {
+#endif
 #if defined(CONFIG_OF)
 		/*
 		 * If CONFIG_OF is set, then assume this is a reasonably
@@ -1194,7 +1301,11 @@ static struct machine_desc * __init setup_machine_tags(unsigned int nr)
 	if (mdesc->fixup)
 		mdesc->fixup(tags, &from, &meminfo);
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	if (read_tag(tags->hdr.tag) == ATAG_CORE) {
+#else
 	if (tags->hdr.tag == ATAG_CORE) {
+#endif
 		if (meminfo.nr_banks != 0)
 			squash_mem_tags(tags);
 		save_atags(tags);

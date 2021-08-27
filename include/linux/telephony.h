@@ -28,12 +28,6 @@
  * ON AN "AS IS" BASIS, AND QUICKNET TECHNOLOGIES, INC. HAS NO OBLIGATION
  * TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  *
-#ifdef CONFIG_ARCH_FEROCEON
- * Version:       $Revision: 1.2 $
- *
- * $Id: telephony.h,v 1.2 2010/04/15 15:13:36 khchen Exp $
- *
-#endif
  *****************************************************************************/
 
 #ifndef TELEPHONY_H
@@ -219,32 +213,6 @@ struct phone_codec_data
 ******************************************************************************/
 #define PHONE_VAD			_IOW ('q', 0xA9, int)
 
-#ifdef CONFIG_ARCH_FEROCEON
-/******************************************************************************
-* mv-phone additional commands for Caller-ID support
-******************************************************************************/
-#define PHONE_PSTN_REVERSE_POLARITY  _IO  ('q', 0xAB) /* Timor */
-#define PHONE_PSTN_SEND_NTT_CRA	     _IO  ('q', 0xAC)
-
-#define PHONE_SET_LINE_FEED_CONTROL  _IOW ('q', 0xAD, char)
-#define LF_OPEN              0
-#define LF_FORWARD_ACTIVE    1
-#define LF_FORWARD_ONHOOK_TX 2
-#define LF_TIP_OPEN          3
-#define LF_RINGING           4
-#define LF_REVERSE_ACTIVE    5
-#define LF_REVERSE_ONHOOK_TX 6
-#define LF_RING_OPEN         7
-
-#define PHONE_SET_CID_STATE	     _IO  ('q', 0xAE)
-#define CID_OFF			0
-#define CID_ON			1
-
-#define PHONE_SET_REVERSE_POLARITY   _IO  ('q', 0xAF)
-#define PHONE_SET_DIGITAL_HYBRID     _IO  ('q', 0xB0)
-#define PHONE_GET_LINE_VOLTAGE	     _IO  ('q', 0xB1)
-#endif
-
 /******************************************************************************
 *
 * The exception structure allows us to multiplex multiple events onto the
@@ -266,26 +234,6 @@ struct phone_codec_data
 ******************************************************************************/
 struct phone_except
 {
-#if defined(__BIG_ENDIAN_BITFIELD) && defined(CONFIG_ARCH_FEROCEON)
-	unsigned int reserved:15;
-	unsigned int hookstate2:1;
-	unsigned int drop_out:1;
-	unsigned int reverse_polarity:1;
-	unsigned int fc3:1;
-	unsigned int fc2:1;
-	unsigned int fc1:1;
-	unsigned int fc0:1;
-	unsigned int flash:1;
-	unsigned int f3:1;
-	unsigned int f2:1;
-	unsigned int f1:1;
-	unsigned int f0:1;
-	unsigned int pstn_wink:1;
-	unsigned int caller_id:1;
-	unsigned int pstn_ring:1;
-	unsigned int hookstate:1;
-	unsigned int dtmf_ready:1;
-#else
 	unsigned int dtmf_ready:1;
 	unsigned int hookstate:1;
 	unsigned int pstn_ring:1;
@@ -300,15 +248,7 @@ struct phone_except
 	unsigned int fc1:1;
 	unsigned int fc2:1;
 	unsigned int fc3:1;
-#ifdef CONFIG_ARCH_FEROCEON
-	unsigned int reverse_polarity:1;
-	unsigned int drop_out:1;
-	unsigned int hookstate2:1;
-	unsigned int reserved:15;
-#else
 	unsigned int reserved:18;
-#endif
-#endif
 };
 
 union telephony_exception {

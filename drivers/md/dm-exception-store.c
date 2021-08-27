@@ -205,12 +205,14 @@ int dm_exception_store_create(struct dm_target *ti, int argc, char **argv,
 
 	if (argc < 2) {
 		ti->error = "Insufficient exception store arguments";
+		DMERR("Insufficient exception store arguments"); //print err here in case above ti->error will be overwritten by caller
 		return -EINVAL;
 	}
 
 	tmp_store = kmalloc(sizeof(*tmp_store), GFP_KERNEL);
 	if (!tmp_store) {
 		ti->error = "Exception store allocation failed";
+		DMERR("Exception store allocation failed"); //print err here in case above ti->error will be overwritten by caller
 		return -ENOMEM;
 	}
 
@@ -221,12 +223,14 @@ int dm_exception_store_create(struct dm_target *ti, int argc, char **argv,
 		type = get_type("N");
 	else {
 		ti->error = "Persistent flag is not P or N";
+		DMERR("Persistent flag is not P or N"); //print err here in case above ti->error will be overwritten by caller
 		r = -EINVAL;
 		goto bad_type;
 	}
 
 	if (!type) {
 		ti->error = "Exception store type not recognised";
+		DMERR("Exception store type not recognised"); //print err here in case above ti->error will be overwritten by caller
 		r = -EINVAL;
 		goto bad_type;
 	}
@@ -241,6 +245,7 @@ int dm_exception_store_create(struct dm_target *ti, int argc, char **argv,
 	r = type->ctr(tmp_store, 0, NULL);
 	if (r) {
 		ti->error = "Exception store type constructor failed";
+		DMERR("Exception store type constructor failed"); //print err here in case above ti->error will be overwritten by caller
 		goto bad;
 	}
 

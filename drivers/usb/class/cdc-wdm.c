@@ -419,7 +419,6 @@ static ssize_t wdm_read
 	int i = 0;
 	struct wdm_device *desc = file->private_data;
 
-
 	rv = mutex_lock_interruptible(&desc->rlock); /*concurrent reads */
 	if (rv < 0)
 		return -ERESTARTSYS;
@@ -494,7 +493,9 @@ retry:
 	for (i = 0; i < desc->length - cntr; i++)
 		desc->ubuf[i] = desc->ubuf[i + cntr];
 
+	spin_lock_irq(&desc->iuspin);
 	desc->length -= cntr;
+	spin_unlock_irq(&desc->iuspin);
 	/* in case we had outstanding data */
 	if (!desc->length)
 		clear_bit(WDM_READ, &desc->flags);

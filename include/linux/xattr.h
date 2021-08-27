@@ -85,6 +85,10 @@ struct xattr_handler {
 		   size_t size, int handler_flags);
 	int (*set)(struct dentry *dentry, const char *name, const void *buffer,
 		   size_t size, int flags, int handler_flags);
+#ifdef MY_ABC_HERE
+	int (*set_compact_syno)(struct inode *inode, const char *name, const void *buffer,
+		   size_t size, int flags, int handler_flags);
+#endif
 };
 
 #ifdef MY_ABC_HERE
@@ -114,7 +118,7 @@ int generic_setxattr(struct dentry *dentry, const char *name, const void *value,
 int generic_removexattr(struct dentry *dentry, const char *name);
 
 #ifdef MY_ABC_HERE
-int syno_generic_setxattr(struct dentry *dentry, const char *name, const void *value, size_t size, int flags);
+int syno_generic_setxattr(struct inode *inode, const char *name, const void *value, size_t size, int flags);
 #endif
 ssize_t vfs_getxattr_alloc(struct dentry *dentry, const char *name,
 			   char **xattr_value, size_t size, gfp_t flags);

@@ -671,6 +671,14 @@ int main(int ac, char **av)
 			exit(1);
 		}
 	}
+#ifdef CONFIG_ARCH_GEN3
+	/* This is for Intel Media SOC Gen3 Support, creates "include/linux/autoconf.h" link to be consistent with kernel versions earlier than 2.6.35
+	*/
+	if (access("include/linux/autoconf.h",0)&&(symlink("../generated/autoconf.h","include/linux/autoconf.h")))
+	{
+			fprintf(stderr, _("\n*** can not symlink include/generated/autoconf.h to include/linux/autoconf.h.\n\n"));
+	}
+#endif
 	return 0;
 }
 

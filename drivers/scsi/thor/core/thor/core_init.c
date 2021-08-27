@@ -140,7 +140,7 @@ void mvPMDevReWrReg(
 	mvEnableIntr(portMmio, old_stat);
 
 }
-static MV_U8 mvGetSataDeviceType(PDomain_Port pPort)
+MV_U8 mvGetSataDeviceType(PDomain_Port pPort)
 {
 	MV_LPVOID portMmio = pPort->Mmio_Base;
 	MV_U32 tmp;
@@ -205,7 +205,7 @@ MV_BOOLEAN SATA_DoSoftReset(PDomain_Port pPort, MV_U8 PMPort)
 			temp = MV_REG_READ_DWORD(portMmio, PORT_CMD_ISSUE) & (1<<tag);
 			count++;
 			HBA_SleepMillisecond(pCore, 10);
-		} while (temp != 0 && count < 1000);
+		} while (temp != 0 && count < 3000);
 
 	}while(reset==0);
 
@@ -1193,20 +1193,6 @@ void PATA_PortReset(
 	struct mod_notif_param param;
 #endif /* SUPPORT_ERROR_HANDLING */
 
-	/* No running commands at this moment */
-	MV_ASSERT( pPort->Running_Slot==0 );
-	MV_ASSERT( pPort->Port_State==PORT_STATE_IDLE );
-
-#ifdef MV_DEBUG
-	{
-		MV_U8 i;
-		for ( i=0; i<MAX_SLOT_NUMBER; i++ )
-		{
-			MV_DASSERT(pPort->Running_Req[i]==NULL);
-		}
-	}
-#endif
-		
 	/* If we already reached the max number of devices supported,
 	   disregard the rest */
 	if( pCore->Total_Device_Count >= MAX_DEVICE_SUPPORTED )
@@ -1758,6 +1744,35 @@ void PATA_ResetPort(PCore_Driver_Extension pCore, MV_U8 portId)
 	MV_REG_WRITE_DWORD(portMmio, PORT_IRQ_MASK, MV_BIT(2)|MV_BIT(0));
 #endif
 }
+#ifdef CONFIG_PM
+extern void InitChip(PCore_Driver_Extension pCore);
+
+int core_resume(void *ext)
+{
+	int ret;
+	PCore_Driver_Extension core_ext;
+	core_ext=(PCore_Driver_Extension)ext;
+	MV_REG_WRITE_DWORD(core_ext->Mmio_Base, HOST_CTL, 0);
+	if(ResetController(core_ext) == MV_FALSE) {
+		MV_DPRINT(("Reset controller failed."));
+		return MV_FALSE;
+
+	}
+	InitChip(core_ext);
+	mvEnableGlobalIntr_resume(core_ext->Mmio_Base);
+
+	return 0;
+}
+int core_suspend(void *ext)
+{
+	int ret,tmp;
+	PCore_Driver_Extension core_ext;
+	core_ext=(PCore_Driver_Extension)ext;
+
+	mvDisableGlobalIntr(core_ext->Mmio_Base,tmp);
+	return 0;
+}
+#endif
 
 void SATA_ResetPort(PCore_Driver_Extension pCore, MV_U8 portId)
 {

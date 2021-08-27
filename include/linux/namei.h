@@ -76,7 +76,9 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 #ifdef MY_ABC_HERE
 /* this namei has done to the last component */
 #define LOOKUP_TO_LASTCOMPONENT 0x8000
-#define LOOKUP_CASELESS_COMPARE 0x10000
+#define LOOKUP_MOUNTED			0x10000
+#define LOOKUP_CASELESS_COMPARE 0x20000
+#define LOOKUP_CASELESS_NO_UPDATE 0x40000
 #endif
 
 extern int user_path_at(int, const char __user *, unsigned, struct path *);

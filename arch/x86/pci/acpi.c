@@ -16,11 +16,15 @@ struct pci_root_info {
 	int busnum;
 };
 
-#ifdef MY_ABC_HERE
+#if defined(CONFIG_ARCH_GEN3) && defined(CONFIG_SMP)
+static bool pci_use_crs = false;
+#else
+#if defined(MY_ABC_HERE)
 static bool pci_use_crs = false;
 #else
 static bool pci_use_crs = true;
-#endif
+#endif /* MY_ABC_HERE */
+#endif /* defined(CONFIG_ARCH_GEN3) && defined(CONFIG_SMP) */
 
 static int __init set_use_crs(const struct dmi_system_id *id)
 {

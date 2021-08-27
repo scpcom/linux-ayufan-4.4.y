@@ -28,6 +28,9 @@
 #define DBG_BITMAP	0x00000040
 
 #ifdef MY_ABC_HERE
+#ifndef ENOATTR
+#define ENOATTR ENODATA
+#endif
 #define DBG_XATTR	0x01000000
 #endif
 
@@ -342,6 +345,10 @@ void hfs_bmap_free(struct hfs_bnode *);
 
 /* bnode.c */
 void hfs_bnode_read(struct hfs_bnode *, void *, int, int);
+#ifdef MY_ABC_HERE
+#define hfs_bnode_read_u32 hfsplus_bnode_read_u32
+u32 hfs_bnode_read_u32(struct hfs_bnode *, int);
+#endif
 u16 hfs_bnode_read_u16(struct hfs_bnode *, int);
 u8 hfs_bnode_read_u8(struct hfs_bnode *, int);
 void hfs_bnode_read_key(struct hfs_bnode *, void *, int);
@@ -380,6 +387,7 @@ int __hfsplus_brec_find_first(struct hfs_bnode *, struct hfs_find_data *);
 int hfsplus_brec_find_first(struct hfs_find_data *);
 int hfsplus_attr_cmp_key(const hfsplus_btree_key *, const hfsplus_btree_key *);
 int hfsplus_rmxattr(struct dentry *, const char *);
+int hfsplus_rmxattr_all(struct dentry *);
 #endif
 /* catalog.c */
 int hfsplus_cat_case_cmp_key(const hfsplus_btree_key *,

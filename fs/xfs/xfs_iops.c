@@ -167,7 +167,7 @@ STATIC int
 xfs_vn_mknod(
 	struct inode	*dir,
 	struct dentry	*dentry,
-	int		mode,
+	umode_t		mode,
 	dev_t		rdev)
 {
 	struct inode	*inode;
@@ -229,7 +229,7 @@ STATIC int
 xfs_vn_create(
 	struct inode	*dir,
 	struct dentry	*dentry,
-	int		mode,
+	umode_t		mode,
 	struct nameidata *nd)
 {
 	return xfs_vn_mknod(dir, dentry, mode, 0);
@@ -239,7 +239,7 @@ STATIC int
 xfs_vn_mkdir(
 	struct inode	*dir,
 	struct dentry	*dentry,
-	int		mode)
+	umode_t		mode)
 {
 	return xfs_vn_mknod(dir, dentry, mode|S_IFDIR, 0);
 }

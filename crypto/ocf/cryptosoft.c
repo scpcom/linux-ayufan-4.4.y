@@ -50,7 +50,7 @@
 #include <linux/mm.h>
 #include <linux/skbuff.h>
 #include <linux/random.h>
-#include <linux/scatterlist.h>
+#include <asm/scatterlist.h>
 
 #include <cryptodev.h>
 #include <uio.h>
@@ -69,15 +69,6 @@ struct {
 #define SW_TYPE_HASH		3
 #define SW_TYPE_COMP		4
 #define SW_TYPE_BLKCIPHER	5
-
-#ifdef MY_ABC_HERE
-struct ocf_request {
-    struct ablkcipher_request *req;
-    struct completion complete;
-    int error;
-};
-#endif
-
 
 struct swcr_data {
 	int					sw_type;
@@ -228,50 +219,6 @@ int swcr_debug = 0;
 module_param(swcr_debug, int, 0644);
 MODULE_PARM_DESC(swcr_debug, "Enable debug");
 
-
-#ifdef MY_ABC_HERE
-static void ocf_async_done(struct crypto_async_request *async_req,
-                                int error)
-{
-    struct ocf_request *ocf_req = async_req->data;
-
-    if (error == -EINPROGRESS) {
-        WARN_ON(1);
-        return;
-    }
-
-    ocf_req->error = error;
-    complete(&ocf_req->complete);
-}
-
-static void ocf_async_wait(struct ocf_request *ocf_req,
-                                int rc)
-{
-    switch (rc) {
-    case 0:
-        /* sync */
-        break;
-    case -EBUSY:
-    case -EINPROGRESS:
-        /* async */
-        wait_for_completion(&ocf_req->complete);
-
-        if (ocf_req->error) {
-            printk("error from async request: %d \n", ocf_req->error);
-            WARN_ON(1);
-        }
-
-        break;
-    default:
-        break;
-    }
-
-    kfree(ocf_req->req);
-    ocf_req->req = NULL;
-}
-#endif
-
-
 /*
  * Generate a new software session.
  */
@@ -368,14 +315,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			dprintk("%s crypto_alloc_blkcipher(%s, 0x%x)\n", __FUNCTION__,
 					algo, mode);
 
-#ifdef MY_ABC_HERE
-			(*swd)->sw_tfm = crypto_ablkcipher_tfm(
-								crypto_alloc_ablkcipher(algo, 0, 0));
-#else
 				(*swd)->sw_tfm = crypto_blkcipher_tfm(
 								crypto_alloc_blkcipher(algo, 0,
 									CRYPTO_ALG_ASYNC));
-#endif
 			if (!(*swd)->sw_tfm) {
 				dprintk("cryptosoft: crypto_alloc_blkcipher failed(%s, 0x%x)\n",
 						algo,mode);
@@ -388,20 +330,13 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 						__FUNCTION__, cri->cri_klen, (cri->cri_klen + 7) / 8);
 				for (i = 0; i < (cri->cri_klen + 7) / 8; i++)
 				{
-					dprintk("%s0x%x", (i % 8) ? " " : "\n    ",
-							cri->cri_key[i] & 0xff);
+					dprintk("%s0x%x", (i % 8) ? " " : "\n    ",cri->cri_key[i]);
 				}
 				dprintk("\n");
 			}
-#ifdef MY_ABC_HERE
-			error = crypto_ablkcipher_setkey(
-							(struct crypto_ablkcipher *)((*swd)->sw_tfm), cri->cri_key,
-							(cri->cri_klen + 7) / 8);
-#else
 				error = crypto_blkcipher_setkey(
 						crypto_blkcipher_cast((*swd)->sw_tfm), cri->cri_key,
 							(cri->cri_klen + 7) / 8);
-#endif
 			if (error) {
 				printk("cryptosoft: setkey failed %d (crt_flags=0x%x)\n", error,
 						(*swd)->sw_tfm->crt_flags);
@@ -661,34 +596,16 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 	case SW_TYPE_BLKCIPHER: {
 		unsigned char iv[EALG_MAX_BLOCK_LEN];
 		unsigned char *ivp = iv;
-#ifdef MY_ABC_HERE
-			struct ocf_request ocf_req = {0};
-#endif
-
 			int ivsize = 
-#ifdef MY_ABC_HERE
-				crypto_ablkcipher_ivsize((struct crypto_ablkcipher *)(sw->sw_tfm));
-#else
 				crypto_blkcipher_ivsize(crypto_blkcipher_cast(sw->sw_tfm));
-#endif
-#ifndef MY_ABC_HERE
 		struct blkcipher_desc desc;
-#endif
 
-#ifdef MY_ABC_HERE
-			if (sg_len < crypto_ablkcipher_blocksize((struct crypto_ablkcipher *)sw->sw_tfm)) {
-#else
 		if (sg_len < crypto_blkcipher_blocksize(
 				crypto_blkcipher_cast(sw->sw_tfm))) {
-#endif
 			crp->crp_etype = EINVAL;
 			dprintk("%s,%d: EINVAL len %d < %d\n", __FILE__, __LINE__,
-#ifdef MY_ABC_HERE
-						sg_len, crypto_ablkcipher_blocksize((struct crypto_ablkcipher *)sw->sw_tfm));
-#else
 					sg_len, crypto_blkcipher_blocksize(
 						crypto_blkcipher_cast(sw->sw_tfm)));
-#endif
 			goto done;
 		}
 
@@ -705,17 +622,12 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 				dprintk("%s key:", __FUNCTION__);
 				for (i = 0; i < (crd->crd_klen + 7) / 8; i++)
 					dprintk("%s0x%x", (i % 8) ? " " : "\n    ",
-								crd->crd_key[i] & 0xff);
+								crd->crd_key[i]);
 				dprintk("\n");
 			}
-#ifdef MY_ABC_HERE
-				error = crypto_ablkcipher_setkey((struct crypto_ablkcipher *)sw->sw_tfm, crd->crd_key,
-							(crd->crd_klen + 7) / 8);
-#else
 			error = crypto_blkcipher_setkey(
 						crypto_blkcipher_cast(sw->sw_tfm), crd->crd_key,
 						(crd->crd_klen + 7) / 8);
-#endif
 			if (error) {
 				dprintk("cryptosoft: setkey failed %d (crt_flags=0x%x)\n",
 						error, sw->sw_tfm->crt_flags);
@@ -723,23 +635,8 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 			}
 		}
 
-#ifdef MY_ABC_HERE
-			init_completion(&ocf_req.complete);
-
-			if (NULL == (ocf_req.req = kmalloc(sizeof(struct ablkcipher_request), GFP_KERNEL))) {
-				WARN_ON(1);
-				goto done;
-			}
-
-			ablkcipher_request_set_tfm(ocf_req.req, (struct crypto_ablkcipher *)(sw->sw_tfm));
-			ablkcipher_request_set_callback(ocf_req.req, CRYPTO_TFM_REQ_MAY_BACKLOG |
-							CRYPTO_TFM_REQ_MAY_SLEEP,
-							ocf_async_done,
-							&ocf_req);
-#else
 		memset(&desc, 0, sizeof(desc));
 		desc.tfm = crypto_blkcipher_cast(sw->sw_tfm);
-#endif
 
 		if (crd->crd_flags & CRD_F_ENCRYPT) { /* encrypt */
 
@@ -755,13 +652,8 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 				crypto_copyback(crp->crp_flags, crp->crp_buf,
 						crd->crd_inject, ivsize, (caddr_t)ivp);
 			}
-#ifdef MY_ABC_HERE
-				ablkcipher_request_set_crypt(ocf_req.req, sg, sg, sg_len, ivp);
-				ocf_async_wait(&ocf_req, crypto_ablkcipher_encrypt(ocf_req.req));
-#else
 			desc.info = ivp;
 				crypto_blkcipher_encrypt_iv(&desc, sg, sg, sg_len);
-#endif
 
 		} else { /*decrypt */
 
@@ -771,14 +663,8 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 				crypto_copydata(crp->crp_flags, crp->crp_buf,
 						crd->crd_inject, ivsize, (caddr_t)ivp);
 			}
-#ifdef MY_ABC_HERE
-				ablkcipher_request_set_crypt(ocf_req.req, sg, sg, sg_len, ivp);
-				ocf_async_wait(&ocf_req,
-							   crypto_ablkcipher_decrypt(ocf_req.req));
-#else
 			desc.info = ivp;
 				crypto_blkcipher_decrypt_iv(&desc, sg, sg, sg_len);
-#endif
 		}
 		} break;
 	case SW_TYPE_HMAC:
@@ -976,11 +862,7 @@ cryptosoft_init(void)
 				}
 			break;
 		case SW_TYPE_BLKCIPHER:
-#ifdef MY_ABC_HERE
-				if (crypto_has_ablkcipher(algo, 0, 0))
-#else
 				if (crypto_has_blkcipher(algo, 0, CRYPTO_ALG_ASYNC))
-#endif
 				{
 			REGISTER(i);
 				}
@@ -1009,7 +891,7 @@ cryptosoft_exit(void)
 	swcr_id = -1;
 }
 
-late_initcall(cryptosoft_init);
+module_init(cryptosoft_init);
 module_exit(cryptosoft_exit);
 
 MODULE_LICENSE("Dual BSD/GPL");

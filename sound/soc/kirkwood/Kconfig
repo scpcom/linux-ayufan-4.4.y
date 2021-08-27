@@ -1,6 +1,6 @@
 config SND_KIRKWOOD_SOC
 	tristate "SoC Audio for the Marvell Kirkwood chip"
-	depends on ARCH_KIRKWOOD
+	depends on ARCH_KIRKWOOD || ARCH_ARMADA370
 	help
 	  Say Y or M if you want to add support for codecs attached to
 	  the Kirkwood I2S interface. You will also need to select the
@@ -28,3 +28,11 @@ config SND_KIRKWOOD_SOC_T5325
 	  Say Y if you want to add support for SoC audio on
 	  the HP t5325 thin client.
 
+config SND_ARMADA370_SOC
+        tristate "SoC Audio support for Armada-370 boards"
+        depends on SND_KIRKWOOD_SOC && ARCH_ARMADA370
+        select SND_KIRKWOOD_SOC_I2S
+        select SND_SOC_CS42L51
+        help
+          Say Y if you want to add support for SoC audio on
+          Armada370 DB.

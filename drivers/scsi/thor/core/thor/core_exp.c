@@ -1088,8 +1088,8 @@ void SATA_SendFrame(PDomain_Port pPort, PMV_Request pReq, MV_U8 tag)
 	#endif
 	MV_DASSERT( (pPort->Running_Slot&(1<<tag))==0 );
 	MV_DASSERT( pPort->Running_Req[tag]==0 );
-	MV_DASSERT( (MV_REG_READ_DWORD(portMmio, PORT_CMD_ISSUE)&(1<<tag))==0 );
-	MV_DASSERT( (MV_REG_READ_DWORD(portMmio, PORT_SCR_ACT)&(1<<tag))==0 );
+	//MV_DASSERT( (MV_REG_READ_DWORD(portMmio, PORT_CMD_ISSUE)&(1<<tag))==0 );
+	//MV_DASSERT( (MV_REG_READ_DWORD(portMmio, PORT_SCR_ACT)&(1<<tag))==0 );
 
 	mv_core_set_running_slot(pPort, tag, pReq);
 	#ifdef SUPPORT_ATA_SECURITY_CMD
@@ -1205,12 +1205,12 @@ void Core_FillSenseData(PMV_Request pReq, MV_U8 senseKey, MV_U8 adSenseCode)
 	}
 }
 
-
 void mvScsiInquiry(PCore_Driver_Extension pCore, PMV_Request pReq)
 {
 #ifndef _OS_BIOS
 	PDomain_Device pDevice = NULL;
 	MV_U8 portId, deviceId;
+	MV_U32 tmpLen = 0;
 
 	portId = PATA_MapPortId(pReq->Device_Id);
 	deviceId = PATA_MapDeviceId(pReq->Device_Id);
@@ -1233,7 +1233,6 @@ void mvScsiInquiry(PCore_Driver_Extension pCore, PMV_Request pReq)
 		MV_U8 MV_INQUIRY_VPD_PAGE83_DATA[16] = {
 			0x00, 0x83, 0x00, 0x0C, 0x01, 0x02, 0x00, 0x08,
 			0x00, 0x50, 0x43, 0x00, 0x00, 0x00, 0x00, 0x00};
-		MV_U32 tmpLen = 0;
 		pReq->Scsi_Status = REQ_STATUS_SUCCESS;
 
 		/* Shall return the specific page of Vital Production Data */
@@ -1276,16 +1275,18 @@ void mvScsiInquiry(PCore_Driver_Extension pCore, PMV_Request pReq)
 		}
 		else {
 			MV_U8 Vendor[9],Product[24], temp[24];
-			MV_U8 buff[42];
-			MV_U32 i, inquiryLen = 42;
+			MV_U8 buff[0x60]; //[42];
+			MV_U32 i, inquiryLen = 0x60; //42;
 
 			MV_ZeroMemory(buff, inquiryLen);
+			tmpLen = MV_MIN(pReq->Data_Transfer_Length, 0x60);
+			pReq->Data_Transfer_Length = tmpLen;
 
 			buff[0] = (pDevice->Device_Type&DEVICE_TYPE_ATAPI)?0x5 : 0;
 			buff[1] = (pDevice->Device_Type&DEVICE_TYPE_ATAPI)?MV_BIT(7) : 0;    /* Not Removable disk */
 			buff[2] = 0x05;    /*claim conformance to SPC-3*/
 			buff[3] = 0x12;    /* set RESPONSE DATA FORMAT to 2*/
-			buff[4] = 42 - 5;
+			buff[4] = 0x60 - 5; //42 - 5;
 			buff[6] = 0x0;     /* tagged queuing*/
 			buff[7] = 0X13;
 
@@ -1352,17 +1353,44 @@ void mvScsiInquiry(PCore_Driver_Extension pCore, PMV_Request pReq)
 				MV_CopyMemory(Product, &temp[i], 24 - i);
 				Product[16] = '\0';
 			}
-
+		/*
 			MV_CopyMemory(&buff[8], Vendor, 8);
 			MV_CopyMemory(&buff[16], Product, 16);
 			MV_CopyMemory(&buff[32], pDevice->Firmware_Revision, 4);
 			MV_CopyMemory(&buff[36], "MVSATA", 6);
+		*/
+			if (tmpLen >= 16)
+				MV_CopyMemory(&buff[8], "ATA     ", 8);
+			if (tmpLen >= 32)
+				MV_CopyMemory(&buff[16], Product, 16);
+			if (tmpLen >= 36)
+				MV_CopyMemory(&buff[32], pDevice->Firmware_Revision, 4);
+			if (tmpLen >= 42)
+				MV_CopyMemory(&buff[36], "MVSATA", 6);
+
+			/*
+			* 0x00A0 SAM 5
+			* 0x0460 SPC 4
+			* 0x04C0 SBC 3
+			* 0x1EC0 SAT 2
+			*/
+			if (tmpLen >= 66) {
+				buff[58] = 0x00;
+				buff[59] = 0xA0;
+				buff[60] = 0x04;
+				buff[61] = 0x60;
+				buff[62] = 0x04;
+				buff[63] = 0xC0;
+				buff[64] = 0x1E;
+				buff[65] = 0xC0;
+			}
 
 			/*if pReq->Data_Transfer_Length <=36 ,buff[36]+ data miss*/
 			MV_CopyMemory( pReq->Data_Buffer,
 							buff,
-							MV_MIN(pReq->Data_Transfer_Length, inquiryLen));
-			pReq->Data_Transfer_Length =  MV_MIN(pReq->Data_Transfer_Length, inquiryLen);
+							tmpLen);
+							//MV_MIN(pReq->Data_Transfer_Length, inquiryLen));
+			//pReq->Data_Transfer_Length =  MV_MIN(pReq->Data_Transfer_Length, inquiryLen);
 			pReq->Scsi_Status = REQ_STATUS_SUCCESS;
 		}
 	}
@@ -3579,8 +3607,8 @@ void mvCompleteSlots( PDomain_Port pPort, MV_U32 completeSlot, PATA_TaskFile tas
 		if ( !(completeSlot&(1L<<slotId)) )
 			continue;
 
-		MV_DASSERT( (MV_REG_READ_DWORD(port_mmio, PORT_CMD_ISSUE)&(1<<slotId))==0 );
-		MV_DASSERT( (MV_REG_READ_DWORD(port_mmio, PORT_SCR_ACT)&(1<<slotId))==0 );
+	//	MV_DASSERT( (MV_REG_READ_DWORD(port_mmio, PORT_CMD_ISSUE)&(1<<slotId))==0 );
+	//	MV_DASSERT( (MV_REG_READ_DWORD(port_mmio, PORT_SCR_ACT)&(1<<slotId))==0 );
 
 		completeSlot &= ~(1L<<slotId);
 
@@ -3638,7 +3666,7 @@ void SATA_PortHandleInterrupt(
 	MV_U32 completeSlot = 0;
 	MV_U16 slotId;
 	MV_U8 i,j;
-	MV_BOOLEAN hasError = MV_FALSE, finalError = MV_FALSE,reset_port=MV_FALSE;
+	MV_BOOLEAN tfError = MV_FALSE,hasError = MV_FALSE, finalError = MV_FALSE,reset_port=MV_FALSE;
 	MV_U32 errorSlot = 0;
 	ATA_TaskFile	taskFiles;
 #ifdef MV_DEBUG
@@ -3754,11 +3782,12 @@ void SATA_PortHandleInterrupt(
 							}
 						}else{
 							printk("has error is true\n");
+							tfError = MV_TRUE;
 						}
 					}
 				}
 			#ifdef SUPPORT_ATA_SECURITY_CMD
-				if(intStatus&PORT_IRQ_TF_ERR){
+				if ((intStatus&PORT_IRQ_TF_ERR)&&(tfError != MV_TRUE)) {
 
 					if((MV_REG_READ_DWORD(port_mmio, PORT_TFDATA)&0x451) && pReq){
 
@@ -3856,9 +3885,6 @@ void SATA_PortHandleInterrupt(
 		{
 			SATA_HandleHotplugInterrupt(pPort, intStatus);
 		}
-
-		if(!(pDevice->Device_Type&DEVICE_TYPE_ATAPI))
-			SATA_PortReportNoDevice(pCore, pPort);
 
 		return;
 	}
@@ -4496,11 +4522,11 @@ void CompleteRequestAndSlot(
 	PDomain_Device pDevice = &pPort->Device[PATA_MapDeviceId(pReq->Device_Id)];
 #endif
 	mv_core_reset_running_slot(pPort, slotId);
-	MV_DASSERT( (MV_REG_READ_DWORD(pPort->Mmio_Base, PORT_CMD_ISSUE)&(1<<slotId))==0 );
+	//MV_DASSERT( (MV_REG_READ_DWORD(pPort->Mmio_Base, PORT_CMD_ISSUE)&(1<<slotId))==0 );
 
 	if ( pPort->Type!=PORT_TYPE_PATA )
 	{
-		MV_DASSERT( (MV_REG_READ_DWORD(pPort->Mmio_Base, PORT_SCR_ACT)&(1<<slotId))==0 );
+		//MV_DASSERT( (MV_REG_READ_DWORD(pPort->Mmio_Base, PORT_SCR_ACT)&(1<<slotId))==0 );
 	}
 
 	pDevice->Outstanding_Req--;

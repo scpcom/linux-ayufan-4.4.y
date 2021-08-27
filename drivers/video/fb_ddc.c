@@ -60,6 +60,17 @@ unsigned char *fb_ddc_read(struct i2c_adapter *adapter)
 	unsigned char *edid = NULL;
 	int i, j;
 
+#if defined(CONFIG_SYNO_ARMADA)
+	if (!algo_data) {
+		/* No direct control on I2C bus */
+		for (i = 0; i < 3; i++) {
+			edid = fb_do_probe_ddc_edid(adapter);
+			if (edid)
+				break;
+		}
+		return edid;
+	}
+#endif
 	algo_data->setscl(algo_data->data, 1);
 
 	for (i = 0; i < 3; i++) {

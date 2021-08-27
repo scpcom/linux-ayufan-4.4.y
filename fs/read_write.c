@@ -18,21 +18,11 @@
 #include <linux/syscalls.h>
 #include <linux/pagemap.h>
 #include <linux/splice.h>
-#ifdef CONFIG_ARCH_FEROCEON
-#include <linux/writeback.h>
-#endif
 #include "read_write.h"
 
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
-#ifdef CONFIG_ARCH_FEROCEON
-#define WRITE_ARRAY_SIZE (WRITE_RECEIVE_SIZE/PAGE_SIZE +1)
-
-#ifdef COLLECT_WRITE_SOCK_TO_FILE_STAT
-struct write_sock_to_file_stat write_from_sock = {0};
-#endif /* COLLECT_WRITE_SOCK_TO_FILE_STAT */
-#endif /*CONFIG_ARCH_FEROCEON*/
 
 const struct file_operations generic_ro_fops = {
 	.llseek		= generic_file_llseek,
@@ -1050,7 +1040,7 @@ static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 	if (!(out_file->f_mode & FMODE_WRITE))
 		goto fput_out;
 	retval = -EINVAL;
-#ifndef CONFIG_ARCH_FEROCEON
+#if defined(CONFIG_SYNO_ARMADA)
 	if (!out_file->f_op || !out_file->f_op->sendpage)
 		goto fput_out;
 #endif
@@ -1065,6 +1055,11 @@ static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 		max = min(in_inode->i_sb->s_maxbytes, out_inode->i_sb->s_maxbytes);
 
 	pos = *ppos;
+#if defined(CONFIG_SYNO_ARMADA)
+	retval = -EINVAL;
+	if (unlikely(pos < 0))
+		goto fput_out;
+#endif
 	if (unlikely(pos + count > max)) {
 		retval = -EOVERFLOW;
 		if (pos >= max)
@@ -1138,167 +1133,3 @@ SYSCALL_DEFINE4(sendfile64, int, out_fd, int, in_fd, loff_t __user *, offset, si
 
 	return do_sendfile(out_fd, in_fd, NULL, count, 0);
 }
-
-#ifdef CONFIG_ARCH_FEROCEON
-static int start_write_procces(struct file *file, loff_t position, size_t buf_size)
-{
-	/*code from /fs/btrfs/file.c line 938 - 949 */
-	int ret_val = 0;
-	struct inode *inode=file->f_mapping->host;
-
-	/* lock mutex for inode */
-    	mutex_lock(&inode->i_mutex);
-
-	/* will not let the freeze-related IO syncing through inode->i_sb */
-	vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
-
-	/* set backing_dev_info of inode to current process */
-	current->backing_dev_info = file->f_mapping->backing_dev_info;
-
-	/* performs necessary checks before doing a write */
-	ret_val = generic_write_checks(file, &position, &buf_size, S_ISBLK(inode->i_mode));
-	if (ret_val) {
-		dprintk("Failed in call to generic_write_checks(), ret_val=%d\n", ret_val);
-		return -EFAULT;
-	}
-	if (buf_size == 0) {
-		dprintk("Zero buffer returned by generic_write_checks()\n");
-		return -EFAULT;
-	}
-
-	/* sets the TTR_FORCE flag and we are therefore able to
-	   remove the suid bits and continue */
-	ret_val = file_remove_suid(file);
-	if (ret_val) {
-		dprintk("Failed in call to file_remove_suid(), ret_val=%d\n", ret_val);
-		return -EFAULT;
-	}
-	/* update mtime and ctime time*/
-	file_update_time(file);
-
- 	return 0;
-}
-
-static inline int release_resources(struct file *file, ssize_t err)
-{
-	mutex_unlock(&file->f_mapping->host->i_mutex);
-	current->backing_dev_info = NULL;
-	return err;
-}
-
-ssize_t write_from_socket_to_file(struct socket *sock,struct file *file, loff_t __user *ppos, size_t len)
-{
-	loff_t position;
-	long j, pages, err = 0;
-	struct msghdr message;
-	size_t ret, buf_size = len;
-	unsigned long shift;
-
-	struct curr_pages {
-		struct page *pagep;
-		loff_t pos;
-		size_t  size;
-		void *fsdata;
-	} curr_page[WRITE_ARRAY_SIZE];
-	struct kvec io_vector[WRITE_ARRAY_SIZE];
-
-	/* copy ppos to kernel space */
-	ret = copy_from_user(&position, ppos, sizeof(loff_t));
-    	if(ret) {
-			dprintk("Failed to copy position from user space, ret=%d\n", ret);
-			INC_WRITE_FROM_SOCK_ERR_CNT;
-        	return -EFAULT;
-	}
-
-	/* init write process */
-	ret = start_write_procces(file, position, len);
-	if(ret < 0) {
-		dprintk("Failed in call to start_write_procces(), ret=%d\n", ret);
-		INC_WRITE_FROM_SOCK_ERR_CNT;
-		return release_resources(file, ret);
-	}
-
-	/* Initialization all pages and IOV (input/output vector) */
-	for(pages = 0, j = buf_size; j > 0; pages++, j -= buf_size) {
-		shift = position & (PAGE_CACHE_SIZE - 1);
-		buf_size = PAGE_CACHE_SIZE - shift;
-		buf_size = ((long)buf_size > j) ? j : buf_size;
-
-		curr_page[pages].pos = position;
-		curr_page[pages].size = buf_size;
-		io_vector[pages].iov_len = buf_size;
-		/* code write_begin/write_end from /fs/ext4/move_extent.c line 858, 910 */
-		/* uses write_begin/write_end  to write data into the address_space structure (file->f_mapping) */
-        ret =  file->f_mapping->a_ops->write_begin(file, file->f_mapping,
-				 position, buf_size, AOP_FLAG_UNINTERRUPTIBLE,
-				 &curr_page[pages].pagep, &curr_page[pages].fsdata);
-        if (unlikely(ret)) {
-			dprintk("Failed in call to write_begin() on page %d, ret=%d\n", pages, ret);
-			err = ret;
-			goto unmup_pages;
-		}
-
-		/* set kernel virtual addresses + offset for the page */
-		io_vector[pages].iov_base = kmap(curr_page[pages].pagep) + shift;
-		position = position + curr_page[pages].size;
-    }
-
- 	/* code from drivers/staging/dst/state.c line 89 - 98 */
-   	message.msg_iov = (struct iovec *)&io_vector;
-	message.msg_iovlen = pages;
-	message.msg_name = NULL;
-	message.msg_namelen = 0;
-	message.msg_control = NULL;
-	message.msg_controllen = 0;
-  
-	/* recive packet from soket to IOV */
-	ret = kernel_recvmsg(sock, &message, &io_vector[0], pages, len, MSG_WAITALL);
-	if(ret != len){
-		dprintk("Failed receive packet from socket to IOV, ret=%d\n", ret);
-		err = ret;
-	}
-
-#ifdef COLLECT_WRITE_SOCK_TO_FILE_STAT
-	if (len <= (1 << 12))
-		INC_WRITE_FROM_SOCK_4K_BUF_CNT;
-	else if (len <= (1 << 13))
-		INC_WRITE_FROM_SOCK_8K_BUF_CNT;
-	else if (len <= (1 << 14))
-		INC_WRITE_FROM_SOCK_16K_BUF_CNT;
-	else if (len <= (1 << 15))
-		INC_WRITE_FROM_SOCK_32K_BUF_CNT;
-	else if (len <= (1 << 16))
-		INC_WRITE_FROM_SOCK_64K_BUF_CNT;
-	else
-		INC_WRITE_FROM_SOCK_128K_BUF_CNT;
-#endif /* COLLECT_WRITE_SOCK_TO_FILE_STAT */
-
-unmup_pages:
-	/* free mappings created  with kmap previously and finish writing */
-	for(j = 0, buf_size = 0; j < pages;buf_size += curr_page[j].size, j++) {
-		kunmap(curr_page[j].pagep);
-		/* code write_begin/write_end from /fs/ext4/move_extent.c line 858, 910 */
-		ret = file->f_mapping->a_ops->write_end(file, file->f_mapping,
-					 curr_page[j].pos, curr_page[j].size, curr_page[j].size,
-					 curr_page[j].pagep, curr_page[j].fsdata);
-
-		if (unlikely(ret < 0)) {
-			dprintk("Failed in call to write_end() on page %d, ret=%d\n", j, ret);
-			INC_WRITE_FROM_SOCK_ERR_CNT;
-			err = ret;
-		}
-	}
-
-	if(!err) {
-		/* example balance_dirty_pages_ratelimited_nr from /fs/btrfs/relocation.c  line 2624 from mainline */
-		/* check the system's dirty state and will initiate writeback if needed */
-		balance_dirty_pages_ratelimited_nr(file->f_mapping, pages);
-
-		/* copy ppos to user space */
-		copy_to_user(ppos, &position, sizeof(loff_t));
-		err = buf_size;
-	}
-
-	return release_resources(file, err);
-}
-#endif /* CONFIG_ARCH_FEROCEON */

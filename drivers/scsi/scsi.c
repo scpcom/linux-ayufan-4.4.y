@@ -57,6 +57,9 @@
 #include <linux/notifier.h>
 #include <linux/cpu.h>
 #include <linux/mutex.h>
+#if defined(MY_ABC_HERE)
+#include <linux/ata.h>
+#endif
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
@@ -66,9 +69,6 @@
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_tcq.h>
-#ifdef CONFIG_MV_SCATTERED_SPINUP
-#include <scsi/scsi_spinup.h>
-#endif
 
 #include "scsi_priv.h"
 #include "scsi_logging.h"
@@ -86,6 +86,10 @@ static void scsi_done(struct scsi_cmnd *cmd);
 
 /* Do not call reset on error if we just did a reset within 15 sec. */
 #define MIN_RESET_PERIOD (15*HZ)
+
+#ifdef MY_ABC_HERE
+extern int syno_hibernation_log_sec;
+#endif
 
 /*
  * Note - the initial logging level can be set here to log events at boot time.
@@ -648,6 +652,49 @@ void scsi_cmd_get_serial(struct Scsi_Host *host, struct scsi_cmnd *cmd)
 }
 EXPORT_SYMBOL(scsi_cmd_get_serial);
 
+#if defined(MY_ABC_HERE)
+/**
+ * print disk command, for hibernation debug
+ */
+void syno_disk_hiternation_cmd_printk(struct scsi_device *sdp, struct scsi_cmnd *cmd)
+{
+	/* only sata port into this case, usb case is in the following code */
+	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type ||
+		SYNO_PORT_TYPE_SAS  == sdp->host->hostt->syno_port_type) {
+		/*our SMART read command (SCpnt[0]:ATA_16, SCpnt[14]: 0xb0), it's "disk" is null, so we must check it.*/
+		sdev_printk(KERN_WARNING, cmd->device,
+			" %s: cmd run - tag %02x - %02x %02x %02x %02x %02x %02x, pid:%d, comm:%s\n",
+			sdp->syno_disk_name, cmd->tag,
+			cmd->cmnd[0], cmd->cmnd[1], cmd->cmnd[2],
+			cmd->cmnd[3], cmd->cmnd[4], cmd->cmnd[5],
+			current->pid, current->comm);
+	} else if (SYNO_PORT_TYPE_USB == sdp->host->hostt->syno_port_type) {
+		char szBuf[128];
+		struct mm_struct *mm;
+		int len;
+		if (current) {
+			mm = current->mm;
+			if (mm) {
+				len = mm->arg_end - mm->arg_start;
+				memset(szBuf, 0, sizeof(szBuf));
+				memcpy(szBuf, (unsigned char *)mm->arg_start, len);
+				printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid=%d, name=%s\n",
+					   __FILE__, __LINE__, __FUNCTION__,
+					   sdp->syno_disk_name, current->pid, szBuf);
+			} else {
+				printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid = %d, current->mm = NULL\n",
+					   __FILE__, __LINE__, __FUNCTION__,
+					   sdp->syno_disk_name, current->pid);
+			}
+		} else {
+			printk(KERN_WARNING"%s[%d]:%s(), current = NULL\n",
+				   __FILE__, __LINE__, __FUNCTION__);
+		}
+	}
+}
+#endif
+
+
 /**
  * scsi_dispatch_command - Dispatch a command to the low-level driver.
  * @cmd: command block we are dispatching.
@@ -742,7 +789,36 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 		scsi_done(cmd);
 		goto out;
 	}
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+	/* print out START_STOP commands */
+	if (0x1b == cmd->cmnd[0]) {
+	    sdev_printk(KERN_ERR, cmd->device,
+		    "START_STOP run  - tag %02x %s - %02x %02x %02x %02x %02x %02x\n",
+			cmd->tag, (cmd->cmnd[4]&0x01)?"START":"STOP ",
+		    cmd->cmnd[0], cmd->cmnd[1], cmd->cmnd[2], 
+		    cmd->cmnd[3], cmd->cmnd[4], cmd->cmnd[5]);
+	}
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
 #if defined(MY_ABC_HERE)
+	// this is for SATA disk only, in SATA disk, we don't know which command to wake up disk
+	// so we need spindown to help us to remember whichever disk is sleeping
+	// So if disk is sleeping, then we assume any command will wake up this disk, and update the idle time
+	if (cmd->device->spindown &&
+	/*the following command which for eunit chip shouldn't wake up hdd, so ignore it */
+		!(ATA_16 == cmd->cmnd[0] && (ATA_CMD_PMP_WRITE == cmd->cmnd[14] ||ATA_CMD_PMP_READ == cmd->cmnd[14])) &&
+		TEST_UNIT_READY != cmd->cmnd[0]) {
+#ifdef MY_ABC_HERE
+		if(syno_hibernation_log_sec > 0) {
+			syno_disk_hiternation_cmd_printk(cmd->device, cmd);
+		}
+#endif
+		cmd->device->idle = jiffies;
+		cmd->device->spindown = 0;
+	}
+
+	// generally, we should assume all commands should wake up disk and idle time should be reset,
+	// but we need to check smart(0x0C & ATA_16) in scemd loop and sync cache before call disk to sleep
+	// so we must skip these commands here, and we also skip TEST_UNIT_READY, LOG_SENSE, and START_STOP for SAS disks
 	/* mvSata */
 	if(0x0C == cmd->cmnd[0]) {
 		struct scatterlist *sg;
@@ -757,26 +833,31 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 
 		/* set disk to standby command */
 		if( 0xE0 == pBuffer[0] ) {
-			cmd->device->idle = cmd->device->idle_original;
 			cmd->device->spindown = 1;
 		}
 
 		if( cmd->sdb.table.nents ) {
 			kunmap_atomic(pBuffer - sg->offset, KM_USER0);
 		}
-	}
-
-	/* libata */
+	} else if(ATA_16 == cmd->cmnd[0]) {
 		/* set disk to standby command */
-	if( ATA_16 == cmd->cmnd[0] && 0xE0 == cmd->cmnd[14] ) {
-		cmd->device->idle = cmd->device->idle_original;
+		if (0xE0 == cmd->cmnd[14]) {
 			cmd->device->spindown = 1;
 		}
-
-	/* scsi start stop commamd */
-	/* if it's spindown, we shouln't restore the idle timer */
-	if(!(cmd->device->spindown) && (START_STOP == cmd->cmnd[0] && 0x0 == cmd->cmnd[4])) {
-		cmd->device->idle = cmd->device->idle_original;
+	} else if(START_STOP == cmd->cmnd[0]) {
+		if (0x01 == cmd->cmnd[4]) {
+			// start disks
+#ifdef MY_ABC_HERE
+			if(syno_hibernation_log_sec > 0) {
+				syno_disk_hiternation_cmd_printk(cmd->device, cmd);
+			}
+#endif
+			cmd->device->idle = jiffies;
+		}
+	} else if(LOG_SENSE != cmd->cmnd[0] &&
+			TEST_UNIT_READY != cmd->cmnd[0] &&
+			SYNCHRONIZE_CACHE != cmd->cmnd[0]) {
+		cmd->device->idle = jiffies;
 	}
 #endif /* MY_ABC_HERE  */
 
@@ -821,29 +902,6 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
  */
 static void scsi_done(struct scsi_cmnd *cmd)
 {
-#ifdef CONFIG_MV_SCATTERED_SPINUP
-	unsigned long flags = 0;
-
-	/*
-	* TODO: add support to verify failed commands that didn't woke up the drive.
-	*/
-	if (scsi_spinup_enabled())
-	{
-		spin_lock_irqsave(cmd->device->host->host_lock, flags);
-		if (cmd->device->sdev_power_state == SDEV_PW_SPINNING_UP)
-		{
-			if (cmd->device->standby_timeout_secs > 0)
-			{
-				/* had a timer before spinup, restarting the timer again */
-				cmd->device->sdev_power_state = SDEV_PW_STANDBY_TIMEOUT_WAIT;
-				standby_add_timer(cmd->device, cmd->device->standby_timeout_secs, standby_times_out);
-			}
-			else
-				cmd->device->sdev_power_state = SDEV_PW_ON;
-		}
-			spin_unlock_irqrestore(cmd->device->host->host_lock, flags);
-	}
-#endif
 	trace_scsi_dispatch_cmd_done(cmd);
 	blk_complete_request(cmd->request);
 }
@@ -1335,11 +1393,7 @@ struct scsi_device *__scsi_device_lookup(struct Scsi_Host *shost,
 
 	list_for_each_entry(sdev, &shost->__devices, siblings) {
 		if (sdev->channel == channel && sdev->id == id &&
-#ifdef CONFIG_ARCH_FEROCEON
-				sdev->lun == lun && sdev->sdev_state != SDEV_DEL)
-#else
 				sdev->lun ==lun)
-#endif
 			return sdev;
 	}
 
@@ -1383,13 +1437,6 @@ MODULE_PARM_DESC(scsi_logging_level, "a bit mask of logging levels");
 static int __init init_scsi(void)
 {
 	int error;
-
-#ifdef CONFIG_MV_SCATTERED_SPINUP
-	/* init will parse the kernel line for the spinup param */
-	error = scsi_spinup_init();
-	if (error)
-		return error;
-#endif
 
 	error = scsi_init_queue();
 	if (error)

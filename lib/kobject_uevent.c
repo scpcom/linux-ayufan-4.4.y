@@ -29,7 +29,6 @@
 #include <net/sock.h>
 #include <net/net_namespace.h>
 
-
 u64 uevent_seqnum;
 char uevent_helper[UEVENT_HELPER_PATH_LEN] = CONFIG_UEVENT_HELPER_PATH;
 #ifdef CONFIG_NET

@@ -83,7 +83,11 @@
  */
 #define IOREMAP_MAX_ORDER	24
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && (defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM))
+#define CONSISTENT_END         (0xffc00000UL)
+#else
 #define CONSISTENT_END		(0xffe00000UL)
+#endif
 
 #else /* CONFIG_MMU */
 
@@ -184,8 +188,13 @@ static inline unsigned long __phys_to_virt(unsigned long x)
 	return t;
 }
 #else
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+#define __virt_to_phys(x)	((unsigned long)(x) - PAGE_OFFSET + PHYS_OFFSET)
+#define __phys_to_virt(x)	((unsigned long)(x) - PHYS_OFFSET + PAGE_OFFSET)
+#else
 #define __virt_to_phys(x)	((x) - PAGE_OFFSET + PHYS_OFFSET)
 #define __phys_to_virt(x)	((x) - PHYS_OFFSET + PAGE_OFFSET)
+#endif
 #endif
 #endif
 

@@ -6,7 +6,11 @@
 /* the upper-most page table pointer */
 extern pmd_t *top_pmd;
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
+#define TOP_PTE(x)	pte_offset_kernel(pmd_off_k(x), x)
+#else
 #define TOP_PTE(x)	pte_offset_kernel(top_pmd, x)
+#endif
 
 static inline pmd_t *pmd_off_k(unsigned long virt)
 {

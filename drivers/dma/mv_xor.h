@@ -48,7 +48,11 @@
 #define XOR_INTR_MASK(chan)	(chan->mmr_base + 0x40)
 #define XOR_ERROR_CAUSE(chan)	(chan->mmr_base + 0x50)
 #define XOR_ERROR_ADDR(chan)	(chan->mmr_base + 0x60)
+#if defined(CONFIG_SYNO_ARMADA)
+#define XOR_INTR_MASK_VALUE	0x3F7
+#else
 #define XOR_INTR_MASK_VALUE	0x3F5
+#endif
 
 #define WINDOW_BASE(w)		(0x250 + ((w) << 2))
 #define WINDOW_SIZE(w)		(0x270 + ((w) << 2))
@@ -79,7 +83,10 @@ struct mv_xor_device {
 
 /**
  * struct mv_xor_chan - internal representation of a XOR channel
+#if defined(CONFIG_SYNO_ARMADA)
+#else
  * @pending: allows batching of hardware operations
+#endif
  * @completed_cookie: identifier for the most recently completed operation
  * @lock: serializes enqueue/dequeue operations to the descriptors pool
  * @mmr_base: memory mapped register base
@@ -94,7 +101,10 @@ struct mv_xor_device {
  * @irq_tasklet: bottom half where mv_xor_slot_cleanup runs
  */
 struct mv_xor_chan {
+#if defined(CONFIG_SYNO_ARMADA)
+#else
 	int			pending;
+#endif
 	dma_cookie_t		completed_cookie;
 	spinlock_t		lock; /* protects the descriptor slot pool */
 	void __iomem		*mmr_base;
@@ -122,7 +132,10 @@ struct mv_xor_chan {
  * @completed_node: node on the mv_xor_chan.completed_slots list
  * @hw_desc: virtual address of the hardware descriptor chain
  * @phys: hardware address of the hardware descriptor chain
+#if defined(CONFIG_SYNO_ARMADA)
+#else
  * @group_head: first operation in a transaction
+#endif
  * @slot_cnt: total slots used in an transaction (group of operations)
  * @slots_per_op: number of slots per operation
  * @idx: pool index
@@ -139,14 +152,20 @@ struct mv_xor_desc_slot {
 	struct list_head	completed_node;
 	enum dma_transaction_type	type;
 	void			*hw_desc;
+#if defined(CONFIG_SYNO_ARMADA)
+#else
 	struct mv_xor_desc_slot	*group_head;
 	u16			slot_cnt;
+#endif
 	u16			slots_per_op;
 	u16			idx;
 	u16			unmap_src_cnt;
 	u32			value;
 	size_t			unmap_len;
+#if defined(CONFIG_SYNO_ARMADA)
+#else
 	struct list_head	tx_list;
+#endif
 	struct dma_async_tx_descriptor	async_tx;
 	union {
 		u32		*xor_check_result;
@@ -170,6 +189,14 @@ struct mv_xor_desc {
 	u32 reserved0;
 	u32 reserved1;
 };
+
+#if defined(CONFIG_SYNO_ARMADA)
+/* Stores certain registers during suspend to RAM */
+struct mv_xor_save_regs {
+	int xor_config;
+	int interrupt_mask;
+};
+#endif
 
 #define to_mv_sw_desc(addr_hw_desc)		\
 	container_of(addr_hw_desc, struct mv_xor_desc_slot, hw_desc)

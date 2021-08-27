@@ -34,11 +34,11 @@
 #include <linux/hrtimer.h>
 #include <linux/dma-mapping.h>
 
-#ifdef CONFIG_ARCH_FEROCEON
+#if defined(CONFIG_SYNO_ARMADA)
 #if defined(CONFIG_NET_SKB_HEADROOM)
 # define NET_SKB_PAD  CONFIG_NET_SKB_HEADROOM
 #endif
-#endif /* CONFIG_ARCH_FEROCEON */
+#endif
 
 /* Don't change this without changing skb_csum_unnecessary! */
 #define CHECKSUM_NONE 0
@@ -423,13 +423,12 @@ struct sk_buff {
 	__be16			protocol;
 
 	void			(*destructor)(struct sk_buff *skb);
-#ifdef CONFIG_ARCH_FEROCEON
+#if defined(CONFIG_SYNO_ARMADA)
 #ifdef CONFIG_NET_SKB_RECYCLE
-	int			(*skb_recycle) (struct sk_buff *skb, int reject);
+	int				(*skb_recycle) (struct sk_buff *skb);
 	void			*hw_cookie;
 #endif /* CONFIG_NET_SKB_RECYCLE */
-#endif /* CONFIG_ARCH_FEROCEON */
-
+#endif
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	struct nf_conntrack	*nfct;
 #endif
@@ -2544,7 +2543,7 @@ static inline bool skb_is_recycleable(const struct sk_buff *skb, int skb_size)
 	if (skb_end_pointer(skb) - skb->head < skb_size)
 		return false;
 
-#ifdef CONFIG_ARCH_FEROCEON
+#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
 	if (skb_shared(skb) || skb_cloned(skb) || skb_has_frag_list(skb))
 #else
 	if (skb_shared(skb) || skb_cloned(skb))

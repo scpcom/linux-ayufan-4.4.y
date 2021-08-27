@@ -1665,11 +1665,23 @@ static int ext4_xattr_syno_set(struct dentry *dentry, const char *name,
 			      value, size, flags);
 }
 
+static int ext4_xattr_syno_set_compact(struct inode *inode, const char *name,
+			  const void *value, size_t size, int flags, int handler_flags)
+{
+	if (strcmp(name, "") == 0){
+		return -EINVAL;
+	}
+
+	return ext4_xattr_set(inode, EXT4_XATTR_INDEX_SYNO, name,
+			      value, size, flags);
+}
+
 struct xattr_handler ext4_xattr_syno_handler = {
 	.prefix	= XATTR_SYNO_PREFIX,
 	.list	= ext4_xattr_syno_list,
 	.get	= ext4_xattr_syno_get,
 	.set	= ext4_xattr_syno_set,
+	.set_compact_syno	= ext4_xattr_syno_set_compact,
 };
 
 #endif

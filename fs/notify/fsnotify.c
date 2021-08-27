@@ -298,6 +298,54 @@ out:
 }
 EXPORT_SYMBOL_GPL(fsnotify);
 
+#ifdef CONFIG_SYNO_NOTIFY
+int SYNOFsnotify(__u32 mask, void *data, int data_is,
+	     const unsigned char *file_name, u32 cookie)
+{
+	struct hlist_node *vfsmount_node = NULL;
+	struct fsnotify_mark *vfsmount_mark = NULL;
+	struct fsnotify_event *event = NULL;
+	struct vfsmount *mnt = ((struct path *)data)->mnt;
+	int idx = 0;
+	/* global tests shouldn't care about events on child only the specific event */
+	__u32 test_mask = (mask & ~FS_EVENT_ON_CHILD);
+
+	if (data_is != FSNOTIFY_EVENT_SYNO)
+		return 0;
+
+	if (!(mnt && (test_mask & mnt->mnt_fsnotify_mask)))
+		return 0;
+
+	idx = srcu_read_lock(&fsnotify_mark_srcu);
+
+	vfsmount_node = srcu_dereference(mnt->mnt_fsnotify_marks.first,
+						 &fsnotify_mark_srcu);
+
+	while (vfsmount_node) {
+
+		vfsmount_mark = hlist_entry(srcu_dereference(vfsmount_node, &fsnotify_mark_srcu),
+							struct fsnotify_mark, m.m_list);
+
+		send_to_group(NULL, mnt, NULL, vfsmount_mark, mask, data,
+					    data_is, cookie, file_name, &event);
+
+		vfsmount_node = srcu_dereference(vfsmount_node->next,
+							 &fsnotify_mark_srcu);
+	}
+
+	srcu_read_unlock(&fsnotify_mark_srcu, idx);
+	/*
+	 * fsnotify_create_event() took a reference so the event can't be cleaned
+	 * up while we are still trying to add it to lists, drop that one.
+	 */
+	if (event)
+		fsnotify_put_event(event);
+
+	return 0;
+}
+EXPORT_SYMBOL(SYNOFsnotify);
+#endif /* CONFIG_SYNO_NOTIFY */
+
 static __init int fsnotify_init(void)
 {
 	int ret;

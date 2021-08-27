@@ -23,6 +23,12 @@
 	 * this macro assumes that irqstat (r2) and base (r6) are
 	 * preserved from get_irqnr_and_base above
 	 */
+#if defined(CONFIG_SYNO_ARMADA_ARCH) &&  defined(CONFIG_MV_IPC_DRIVER)
+ 	test_for_ipc r0, r2, r6, lr
+	movne   r1, sp
+	adrne   lr, BSYM(1b)
+	bne     do_ipc_rx_irq
+#endif
 	ALT_SMP(test_for_ipi r0, r2, r6, lr)
 	ALT_UP_B(9997f)
 	movne	r1, sp

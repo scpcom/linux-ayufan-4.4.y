@@ -444,6 +444,10 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	  .driver_data = board_ahci_yes_fbs },			/* 88se9172 on some Gigabyte */
 	{ PCI_DEVICE(0x1b4b, 0x91a3),
 	  .driver_data = board_ahci_yes_fbs },
+#ifdef MY_ABC_HERE
+	{ PCI_DEVICE(0x1b4b, 0x9235),
+	  .driver_data = board_ahci_yes_fbs },			/* 88se9235 */
+#endif
 
 	/* Promise */
 	{ PCI_VDEVICE(PROMISE, 0x3f20), board_ahci },	/* PDC42819 */
@@ -458,12 +462,40 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ }	/* terminate list */
 };
 
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+void ahci_pci_shutdown(struct pci_dev *pdev){
+	int i;
+	struct ata_host *host = dev_get_drvdata(&pdev->dev);
+	struct Scsi_Host *shost;
+
+	if(NULL == host){
+		 goto END;
+	}
+
+		for (i = 0; i < host->n_ports; i++) {
+			shost = host->ports[i]->scsi_host;
+			if (shost->hostt->syno_host_poweroff_task) {
+				shost->hostt->syno_host_poweroff_task(shost);
+			}
+		}
+
+	if (pdev->irq >= 0) {
+		free_irq(pdev->irq, host);
+		pdev->irq = -1;
+	}
+END:
+	return;
+}
+#endif
 
 static struct pci_driver ahci_pci_driver = {
 	.name			= DRV_NAME,
 	.id_table		= ahci_pci_tbl,
 	.probe			= ahci_init_one,
 	.remove			= ata_pci_remove_one,
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+	.shutdown		= ahci_pci_shutdown,
+#endif
 #ifdef CONFIG_PM
 	.suspend		= ahci_pci_device_suspend,
 	.resume			= ahci_pci_device_resume,
@@ -1236,6 +1268,13 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	if (!host)
 		return -ENOMEM;
 	host->private_data = hpriv;
+
+#ifdef MY_ABC_HERE
+	if (pdev->vendor == 0x1b4b && pdev->device == 0x9235) {
+		hpriv->flags |= AHCI_HFLAG_YES_MV9235_FIX;
+		dev_info(&pdev->dev, "enable MV_9235_WORKAROUND\n");
+	}
+#endif
 
 	if (!(hpriv->cap & HOST_CAP_SSS) || ahci_ignore_sss)
 		host->flags |= ATA_HOST_PARALLEL_SCAN;

@@ -41,6 +41,9 @@
 #include <linux/nmi.h>
 #include <linux/mutex.h>
 #include <linux/slab.h>
+#ifdef CONFIG_GEN3_UART
+#include <linux/pci.h>
+#endif
 
 #include <asm/io.h>
 #include <asm/irq.h>
@@ -269,10 +272,20 @@ static const struct serial8250_config uart_config[] = {
 		.flags		= UART_CAP_FIFO | UART_NATSEMI,
 	},
 	[PORT_XSCALE] = {
+#ifdef CONFIG_GEN3_UART
+/*
+ * Since we have legal issue to use "Xscale", so change it to "GEN3_serial".
+*/
+		.name		= "GEN3_serial",
+		.fifo_size	= 64,
+		.tx_loadsz	= 64,
+		.fcr		= UART_FCR_ENABLE_FIFO | UART_FCR_DMA_SELECT | UART_FCR_R_TRIG_10,
+#else
 		.name		= "XScale",
 		.fifo_size	= 32,
 		.tx_loadsz	= 32,
 		.fcr		= UART_FCR_ENABLE_FIFO | UART_FCR_R_TRIG_10,
+#endif
 		.flags		= UART_CAP_FIFO | UART_CAP_UUE | UART_CAP_RTOIE,
 	},
 	[PORT_RM9000] = {
@@ -452,6 +465,50 @@ static void au_serial_out(struct uart_port *p, int offset, int value)
 	__raw_writel(value, p->membase + offset);
 }
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) &&  defined(CONFIG_ARCH_ARMADA370)
+/* Save the LCR value so it can be re-written when a Busy Detect IRQ occurs. */
+static inline void dwapb_save_out_value(struct uart_port *p, int offset,
+                                       int value)
+{
+       struct uart_8250_port *up =
+               container_of(p, struct uart_8250_port, port);
+
+       if (offset == UART_LCR)
+               up->lcr = value;
+}
+
+/* Read the IER to ensure any interrupt is cleared before returning from ISR. */
+static inline void dwapb_check_clear_ier(struct uart_port *p, int offset)
+{
+       if (offset == UART_TX || offset == UART_IER)
+               p->serial_in(p, UART_IER);
+}
+
+static void dwapb_serial_out(struct uart_port *p, int offset, int value)
+{
+       int save_offset = offset;
+       offset = map_8250_out_reg(p, offset) << p->regshift;
+#ifdef CONFIG_PLAT_ARMADA
+       /* If we are accessing DLH (0x4), DLL (0x0), LCR(0xC) or 0x1C
+       ** we need to make sure that the busy bit is cleared in USR register.
+       */
+       if ((((readb(p->membase + 0xC) & 0x80) &&
+            ((save_offset == UART_DLL) || (save_offset == UART_DLM) ||
+             (offset == 0x1C))) ||
+            (save_offset == UART_LCR)) && !(readb(p->membase + 0x14) & 0x1)) {
+               unsigned int status;
+               do {
+                       status = *((volatile u32 *)p->private_data);
+               } while (status & 0x1);
+       }
+#endif
+
+       dwapb_save_out_value(p, save_offset, value);
+       writeb(value, p->membase + offset);
+       dwapb_check_clear_ier(p, save_offset);
+}
+#endif
+
 static unsigned int io_serial_in(struct uart_port *p, int offset)
 {
 	offset = map_8250_in_reg(p, offset) << p->regshift;
@@ -482,6 +539,11 @@ static void set_io_from_upio(struct uart_port *p)
 		break;
 
 	case UPIO_RM9000:
+#if defined(CONFIG_SYNO_ARMADA_ARCH) &&  defined(CONFIG_ARCH_ARMADA370)
+		p->serial_in = mem_serial_in;
+		p->serial_out = dwapb_serial_out;
+		break;
+#endif
 	case UPIO_MEM32:
 		p->serial_in = mem32_serial_in;
 		p->serial_out = mem32_serial_out;
@@ -1048,7 +1110,11 @@ static void autoconfig_16550a(struct uart_8250_port *up)
 			 */
 			DEBUG_AUTOCONF("Xscale ");
 			up->port.type = PORT_XSCALE;
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+			up->capabilities |= UART_CAP_UUE;
+#else
 			up->capabilities |= UART_CAP_UUE | UART_CAP_RTOIE;
+#endif
 			return;
 		}
 	} else {
@@ -1090,6 +1156,9 @@ static void autoconfig(struct uart_8250_port *up, unsigned int probeflags)
 	unsigned char status1, scratch, scratch2, scratch3;
 	unsigned char save_lcr, save_mcr;
 	unsigned long flags;
+#ifdef CONFIG_GEN3_UART
+	unsigned int id;
+#endif
 
 	if (!up->port.iobase && !up->port.mapbase && !up->port.membase)
 		return;
@@ -1104,6 +1173,13 @@ static void autoconfig(struct uart_8250_port *up, unsigned int probeflags)
 	spin_lock_irqsave(&up->port.lock, flags);
 
 	up->capabilities = 0;
+#ifdef CONFIG_GEN3_UART
+	/* do not enable modem status interrupt for IntelCE uart0 port */
+	intelce_get_soc_info(&id, NULL);
+	if((CE4200_SOC_DEVICE_ID == id) && (0 == serial_index(&up->port)))
+		up->bugs = UART_BUG_NOMSR;
+	else
+#endif
 	up->bugs = 0;
 
 	if (!(up->port.flags & UPF_BUGGY_UART)) {
@@ -1593,6 +1669,117 @@ static int serial8250_default_handle_irq(struct uart_port *port)
 	return serial8250_handle_irq(port, iir);
 }
 
+#ifdef CONFIG_GEN3_UART
+/*
+ * The UART Tx interrupts are not set under some conditions and therefore serial
+ * transmission hangs. This is a silicon issue and has not been root caused. The
+ * workaround for this silicon issue checks UART_LSR_THRE bit and UART_LSR_TEMT 
+ * bit of LSR register in interrupt handler to see whether at least one of these
+ * two bits is set, if so then process the transmit request. If this workaround
+ * is not applied, then the serial transmission may hang. This workaround is for
+ * errata number 9 in Errata - B step. 
+*/
+/*
+ * This is the serial driver's interrupt routine.
+ *
+ * Arjan thinks the old way was overly complex, so it got simplified.
+ * Alan disagrees, saying that need the complexity to handle the weird
+ * nature of ISA shared interrupts.  (This is a special exception.)
+ *
+ * In order to handle ISA shared interrupts properly, we need to check
+ * that all ports have been serviced, and therefore the ISA interrupt
+ * line has been de-asserted.
+ *
+ * This means we need to loop through all ports. checking that they
+ * don't have an interrupt pending.
+ */
+static irqreturn_t serial8250_interrupt(int irq, void *dev_id)
+{
+	struct irq_info *i = dev_id;
+	struct list_head *l, *end = NULL;
+	int pass_counter = 0, handled = 0;
+	unsigned int my_flags, ier, lsr;
+
+	DEBUG_INTR("serial8250_interrupt(%d)...", irq);
+
+	spin_lock(&i->lock);
+
+	l = i->head;
+	do {
+		struct uart_8250_port *up;
+		unsigned int iir;
+		my_flags = 0x00;
+
+		up = list_entry(l, struct uart_8250_port, list);
+
+		iir = serial_in(up, UART_IIR);
+		if (!(iir & UART_IIR_NO_INT)) {
+			serial8250_handle_port(up);
+			my_flags |= 0x01;
+
+			handled = 1;
+
+			end = NULL;
+		} else if ((iir & UART_IIR_BUSY) == UART_IIR_BUSY) {
+			/* The DesignWare APB UART has an Busy Detect (0x07)
+			 * interrupt meaning an LCR write attempt occured while the
+			 * UART was busy. The interrupt must be cleared by reading
+			 * the UART status register (USR) and the LCR re-written. */
+			unsigned int status;
+			status = *(volatile u32 *)up->port.private_data;
+			serial_out(up, UART_LCR, up->lcr);
+
+			handled = 1;
+
+			end = NULL;
+		}
+		ier = serial_in(up, UART_IER);
+		/* see if the UART's XMIT interrupt is enabled */
+		if(ier & UART_IER_THRI) {
+			lsr = serial_in(up, UART_LSR);
+			/* now check to see if the UART should be
+			   generating an interrupt (but isn't) */
+			if(lsr & (UART_LSR_THRE | UART_LSR_TEMT)) {
+				/* handle as though we really got the IRQ */
+				spin_lock(&up->port.lock);
+				transmit_chars(up);	/* XMIT only */
+				spin_unlock(&up->port.lock);
+
+				my_flags |= 0x02;  /* handle the old else */
+
+				handled = 1;
+
+				end = NULL;
+			}
+		}
+		/* this was the else in the old code */
+		if(0x00 == my_flags) {
+			if (end == NULL)
+				end = l;
+		}
+
+		l = l->next;
+
+		if (l == i->head && pass_counter++ > PASS_LIMIT) {
+			/* If we hit this, we're dead. */
+#ifdef CONFIG_GEN3_UART
+			printk_ratelimited(KERN_ERR "serial8250: too much work for "
+#else
+			printk(KERN_ERR "serial8250: too much work for "
+#endif
+				"irq%d\n", irq);
+			break;
+		}
+	} while (l != end);
+
+	spin_unlock(&i->lock);
+
+	DEBUG_INTR("end.\n");
+
+	return IRQ_RETVAL(handled);
+}
+
+#else
 /*
  * This is the serial driver's interrupt routine.
  *
@@ -1621,15 +1808,47 @@ static irqreturn_t serial8250_interrupt(int irq, void *dev_id)
 	do {
 		struct uart_8250_port *up;
 		struct uart_port *port;
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+		unsigned int iir;
+#endif
 
 		up = list_entry(l, struct uart_8250_port, list);
 		port = &up->port;
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_ARCH_ARMADA370) || defined(CONFIG_ARCH_ARMADA_XP)
+
+		iir = serial_in(up, UART_IIR);
+		if (!(iir & UART_IIR_NO_INT)) {
+			serial8250_handle_port(up);
+			handled = 1;
+			end = NULL;
+                }
+		else if ((up->port.iotype == UPIO_DWAPB ||
+                            up->port.iotype == UPIO_DWAPB32) &&
+                          (iir & UART_IIR_BUSY) == UART_IIR_BUSY) {
+                        /* The DesignWare APB UART has an Busy Detect (0x07)
+                         * interrupt meaning an LCR write attempt occurred while the
+                         * UART was busy. The interrupt must be cleared by reading
+                         * the UART status register (USR) and the LCR re-written. */
+                        unsigned int status;
+                        status = *(volatile u32 *)up->port.private_data;
+                        serial_out(up, UART_LCR, up->lcr);
+
+                        handled = 1;
+                        end = NULL;
+
+                }
+#endif
+		else if (end == NULL)
+                        end = l;
+#else
  		if (port->handle_irq(port)) {
  			handled = 1;
  			end = NULL;
 		} else if (end == NULL)
 			end = l;
+#endif
 
 		l = l->next;
 
@@ -1648,6 +1867,7 @@ static irqreturn_t serial8250_interrupt(int irq, void *dev_id)
 	return IRQ_RETVAL(handled);
 }
 
+#endif /* CONFIG_GEN3_UART */
 /*
  * To support ISA shared interrupts, we need to have one interrupt
  * handler that ensures that the IRQ line has been deasserted
@@ -2328,10 +2548,11 @@ serial8250_do_set_termios(struct uart_port *port, struct ktermios *termios,
 		quot++;
 
 	if (up->capabilities & UART_CAP_FIFO && up->port.fifosize > 1) {
-		if (baud < 2400)
-			fcr = UART_FCR_ENABLE_FIFO | UART_FCR_TRIGGER_1;
-		else
 		fcr = uart_config[up->port.type].fcr;
+		if (baud < 2400) {
+			fcr &= ~UART_FCR_TRIGGER_MASK;
+			fcr |= UART_FCR_TRIGGER_1;
+		}
 	}
 
 	/*
@@ -2860,10 +3081,17 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 	 */
 	ier = serial_in(up, UART_IER);
 
+#ifdef CONFIG_GEN3_UART
+	/*
+	 * Should enable UUE (Uart Unit Enable) bit.
+	*/
+		serial_out(up, UART_IER, UART_IER_UUE);
+#else
 	if (up->capabilities & UART_CAP_UUE)
 		serial_out(up, UART_IER, UART_IER_UUE);
 	else
 		serial_out(up, UART_IER, 0);
+#endif
 
 	uart_console_write(&up->port, s, count, serial8250_console_putchar);
 

@@ -2396,6 +2396,36 @@ u32 syno_superio_gpio_pin(int pin, int *pValue, int isWrite)
 EXPORT_SYMBOL(syno_superio_gpio_pin);
 #endif
 
+#ifdef MY_ABC_HERE
+int syno_superio_regist_read(u8 ldn, u8 reg, u8 *value)
+{
+	int iRet = -1;
+
+	superio_enter();
+	superio_select(ldn);
+	*value = superio_inb(reg);
+	superio_exit();
+
+	iRet = 0;
+	return iRet;
+}
+EXPORT_SYMBOL(syno_superio_regist_read);
+
+int syno_superio_regist_write(u8 ldn, u8 reg, u8 value)
+{
+	int iRet = -1;
+
+	superio_enter();
+	superio_select(ldn);
+	superio_outb(reg, value);
+	superio_exit();
+
+	iRet = 0;
+	return iRet;
+}
+EXPORT_SYMBOL(syno_superio_regist_write);
+#endif
+
 MODULE_AUTHOR("Chris Gauthron, "
 	      "Jean Delvare <khali@linux-fr.org>");
 MODULE_DESCRIPTION("IT8705F/IT871xF/IT872xF hardware monitoring driver");

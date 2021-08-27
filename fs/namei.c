@@ -958,7 +958,17 @@ static __always_inline int __vfs_follow_link(struct nameidata *nd, const char *l
 	}
 	nd->inode = nd->path.dentry->d_inode;
 
+#ifdef MY_ABC_HERE
+	if (LOOKUP_CASELESS_COMPARE & nd->flags) {
+		nd->flags |= LOOKUP_CASELESS_NO_UPDATE;
+	}
+#endif
 	ret = link_path_walk(link, nd);
+#ifdef MY_ABC_HERE
+	if (LOOKUP_CASELESS_COMPARE & nd->flags) {
+		nd->flags &= ~LOOKUP_CASELESS_NO_UPDATE;
+	}
+#endif
 	return ret;
 fail:
 	path_put(&nd->path);
@@ -1162,12 +1172,19 @@ static int follow_automount(struct path *path, unsigned flags,
  *
  * Serialization is taken care of in namespace.c
  */
+#ifdef MY_ABC_HERE
+static int follow_managed(struct path *path, struct nameidata *nd)
+#else
 static int follow_managed(struct path *path, unsigned flags)
+#endif
 {
 	struct vfsmount *mnt = path->mnt; /* held by caller, must be left alone */
 	unsigned managed;
 	bool need_mntput = false;
 	int ret = 0;
+#ifdef MY_ABC_HERE
+	int flags = nd->flags;
+#endif
 
 	/* Given that we're not holding a lock here, we retain the value in a
 	 * local variable for each dentry as we look at it so that we don't see
@@ -1196,7 +1213,7 @@ static int follow_managed(struct path *path, unsigned flags)
 				path->dentry = dget(mounted->mnt_root);
 				need_mntput = true;
 #ifdef MY_ABC_HERE
-				path->mounted = 1;
+				nd->flags |= LOOKUP_MOUNTED;
 #endif
 				continue;
 			}
@@ -1280,7 +1297,7 @@ static bool __follow_mount_rcu(struct nameidata *nd, struct path *path,
 		 */
 		*inode = path->dentry->d_inode;
 #ifdef MY_ABC_HERE
-		path->mounted = 1;
+		nd->flags |= LOOKUP_MOUNTED;
 #endif
 	}
 	return true;
@@ -1389,8 +1406,15 @@ int follow_down(struct path *path)
 /*
  * Skip to top of mountpoint pile in refwalk mode for follow_dotdot()
  */
+#ifdef MY_ABC_HERE
+static void follow_mount(struct nameidata *nd)
+#else
 static void follow_mount(struct path *path)
+#endif
 {
+#ifdef MY_ABC_HERE
+	struct path *path = &nd->path;
+#endif
 	while (d_mountpoint(path->dentry)) {
 		struct vfsmount *mounted = lookup_mnt(path);
 		if (!mounted)
@@ -1400,7 +1424,7 @@ static void follow_mount(struct path *path)
 		path->mnt = mounted;
 		path->dentry = dget(mounted->mnt_root);
 #ifdef MY_ABC_HERE
-		path->mounted = 1;
+		nd->flags |= LOOKUP_MOUNTED;
 #endif
 	}
 }
@@ -1425,7 +1449,11 @@ static void follow_dotdot(struct nameidata *nd)
 		if (!follow_up(&nd->path))
 			break;
 	}
+#ifdef MY_ABC_HERE
+	follow_mount(nd);
+#else
 	follow_mount(&nd->path);
+#endif
 	nd->inode = nd->path.dentry->d_inode;
 }
 
@@ -1497,6 +1525,9 @@ static int do_lookup(struct nameidata *nd, struct qstr *name,
 	int need_reval = 1;
 	int status = 1;
 	int err;
+#ifdef MY_ABC_HERE
+	int caseless = (LOOKUP_CASELESS_COMPARE & nd->flags)?1:0;
+#endif
 
 	/*
 	 * Rename seqlock is not required here because in the off chance
@@ -1506,7 +1537,11 @@ static int do_lookup(struct nameidata *nd, struct qstr *name,
 	if (nd->flags & LOOKUP_RCU) {
 		unsigned seq;
 		*inode = nd->inode;
+#ifdef MY_ABC_HERE
+		dentry = __d_lookup_rcu(parent, name, &seq, inode, caseless);
+#else
 		dentry = __d_lookup_rcu(parent, name, &seq, inode);
+#endif
 		if (!dentry)
 			goto unlazy;
 
@@ -1536,7 +1571,24 @@ unlazy:
 		if (unlazy_walk(nd, dentry))
 			return -ECHILD;
 	} else {
+#ifdef MY_ABC_HERE
+		dentry = __d_lookup(parent, name, caseless);
+		if (caseless) {
+			if (dentry && !dentry->d_inode) {
+				struct inode *dir = parent->d_inode;
+
+				d_invalidate(dentry);
+				dput(dentry);
+				dentry = NULL;
+
+				mutex_lock(&dir->i_mutex);
+				dentry = d_alloc_and_lookup(parent, name, nd);
+				mutex_unlock(&dir->i_mutex);
+			}
+		}
+#else
 		dentry = __d_lookup(parent, name);
+#endif
 	}
 
 	if (dentry && unlikely(d_need_lookup(dentry))) {
@@ -1549,7 +1601,11 @@ retry:
 		BUG_ON(nd->inode != dir);
 
 		mutex_lock(&dir->i_mutex);
+#ifdef MY_ABC_HERE
+		dentry = d_lookup_case(parent, name, caseless);
+#else
 		dentry = d_lookup(parent, name);
+#endif
 		if (likely(!dentry)) {
 			dentry = d_alloc_and_lookup(parent, name, nd);
 			if (IS_ERR(dentry)) {
@@ -1588,7 +1644,11 @@ retry:
 
 	path->mnt = mnt;
 	path->dentry = dentry;
+#ifdef MY_ABC_HERE
+	err = follow_managed(path, nd);
+#else
 	err = follow_managed(path, nd->flags);
+#endif
 	if (unlikely(err < 0)) {
 		path_put_conditional(path, nd);
 		return err;
@@ -1681,6 +1741,9 @@ static inline int should_follow_link(struct inode *inode, int follow)
 #ifdef MY_ABC_HERE
 static inline int update_real_filename(struct nameidata *nd, char *szTargetName, int targetLen)
 {
+	if (LOOKUP_CASELESS_NO_UPDATE & nd->flags) {
+		return 0;
+	}
 	if ((nd->real_filename_len + targetLen + 2) >= SYNO_SMB_PSTRING_LEN) {
 		return -1;
 	}
@@ -1722,8 +1785,8 @@ static inline int walk_component(struct nameidata *nd, struct path *path,
 		int   targetLen = 0;
 		char *szTargetName = NULL;
 
-		if (path->mounted) {
-			path->mounted = 0;
+		if (nd->flags & LOOKUP_MOUNTED) {
+			nd->flags &= ~LOOKUP_MOUNTED;
 			szTargetName = (char *)path->mnt->mnt_mountpoint->d_name.name;
 			targetLen = path->mnt->mnt_mountpoint->d_name.len;
 		} else {
@@ -1766,9 +1829,6 @@ static inline int walk_component(struct nameidata *nd, struct path *path,
 static inline int nested_symlink(struct path *path, struct nameidata *nd)
 {
 	int res;
-#ifdef MY_ABC_HERE
-	int caselessFlag = LOOKUP_CASELESS_COMPARE & nd->flags;
-#endif
 
 	if (unlikely(current->link_count >= MAX_NESTED_LINKS)) {
 		path_put_conditional(path, nd);
@@ -1784,21 +1844,7 @@ static inline int nested_symlink(struct path *path, struct nameidata *nd)
 		struct path link = *path;
 		void *cookie;
 
-#ifdef MY_ABC_HERE
-		/* 
-		 * we set nd->caseless to 0 to avoid append symbolic link path to nd->realname
-		 * before do_follow_link, and set nd->caseless back after do_follow_link.
-		*/
-		if (caselessFlag) {
-			nd->flags &=~ LOOKUP_CASELESS_COMPARE;
-		}
-#endif
 		res = follow_link(&link, nd, &cookie);
-#ifdef MY_ABC_HERE
-		if (caselessFlag) {
-			nd->flags |= LOOKUP_CASELESS_COMPARE;
-		}
-#endif
 		if (!res)
 			res = walk_component(nd, path, &nd->last,
 								 nd->last_type, LOOKUP_FOLLOW);
@@ -1859,26 +1905,17 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 	 * 3. If converted string longer than SYNO_SMB_PSTRING_LEN, we should return ENAMETOOLONG.
 	 * 	  We use total_len to monitor it.
 	*/
-	int addSlash = 0;
 	int caselessFlag = LOOKUP_CASELESS_COMPARE & nd->flags;
 	struct qstr this;
 
-	if (*name=='/') {
-		addSlash = 1;
-	}
 	while (*name=='/') {
-		name++;
+		if (caselessFlag) {
+			if (update_real_filename(nd, (char *) "", 0)) {
+				terminate_walk(nd);
+				return -ENAMETOOLONG;
 			}
-	if (caselessFlag) {
-		nd->real_filename_cur_locate = nd->real_filename;
-		nd->real_filename_len = 0;
-		if (addSlash) {
-			*(nd->real_filename_cur_locate) = '/';
-			nd->real_filename_cur_locate++;
-			nd->real_filename_len++;
-			addSlash = 0;
 		}
-		*(nd->real_filename_cur_locate) = '\0';
+		name++;
 	}
 #else
 	while (*name=='/')
@@ -1897,15 +1934,8 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 		int type;
 
 #ifdef MY_ABC_HERE
-		next.mounted = 0;
-
-		spin_lock(&nd->path.dentry->d_lock);
-		if (caselessFlag) {
-			nd->path.dentry->d_flags |= DCACHE_CASELESS_COMPARE;
-		} else {
-			nd->path.dentry->d_flags &= ~DCACHE_CASELESS_COMPARE;
-		}
-		spin_unlock(&nd->path.dentry->d_lock);
+		int slashCount = 0;
+		nd->flags &= ~LOOKUP_MOUNTED;
 #endif
 
 		err = may_lookup(nd);
@@ -1933,14 +1963,6 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 				}
 				break;
 			case 1:
-#ifdef MY_ABC_HERE
-				if (caselessFlag) {
-					if (update_real_filename(nd, (char *) this.name, this.len)) {
-						terminate_walk(nd);
-						return -ENAMETOOLONG;
-					}
-				}
-#endif
 				type = LAST_DOT;
 			}
 		if (likely(type == LAST_NORM)) {
@@ -1954,10 +1976,23 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 			}
 		}
 
+#ifdef MY_ABC_HERE
+		if (caselessFlag && (LAST_DOTDOT == type || LAST_DOT == type)) {
+			if (!c) nd->flags |= LOOKUP_TO_LASTCOMPONENT;
+			if (update_real_filename(nd, (char *) this.name, this.len)) {
+				terminate_walk(nd);
+				return -ENAMETOOLONG;
+			}
+		}
+#endif
 		/* remove trailing slashes? */
 		if (!c)
 			goto last_component;
+#ifdef MY_ABC_HERE
+		while (*++name == '/') slashCount++;
+#else
 		while (*++name == '/');
+#endif
 		if (!*name)
 			goto last_component;
 
@@ -1965,6 +2000,17 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 		if (err < 0)
 			return err;
 
+#ifdef MY_ABC_HERE
+		if (caselessFlag) {
+			while (slashCount) {
+				if (update_real_filename(nd, (char *) "", 0)) {
+					terminate_walk(nd);
+					return -ENAMETOOLONG;
+				}
+				slashCount--;
+			}
+		}
+#endif
 		if (err) {
 			err = nested_symlink(&next, nd);
 			if (err)
@@ -2103,7 +2149,7 @@ static inline int lookup_last(struct nameidata *nd, struct path *path)
 
 #ifdef MY_ABC_HERE
 	if (LOOKUP_CASELESS_COMPARE & nd->flags) {
-		path->mounted = 0;
+		nd->flags &= ~LOOKUP_MOUNTED;
 	}
 #endif
 	nd->flags &= ~LOOKUP_PARENT;
@@ -2258,7 +2304,11 @@ static struct dentry *__lookup_hash(struct qstr *name,
 	 * well as unlink, so a lot of the time it would cost
 	 * a double lookup.
 	 */
+#ifdef MY_ABC_HERE
+	dentry = d_lookup_case(base, name, (nd && (LOOKUP_CASELESS_COMPARE & nd->flags))?1:0);
+#else
 	dentry = d_lookup(base, name);
+#endif
 
 	if (dentry && d_need_lookup(dentry)) {
 		/*
@@ -2366,7 +2416,8 @@ int syno_user_path_at(int dfd, const char __user *name, unsigned flags,
 		BUG_ON(flags & LOOKUP_PARENT);
 
 		nd.real_filename = *real_filename;
-		nd.path.mounted = 0;
+		nd.real_filename_cur_locate = nd.real_filename;
+		nd.real_filename_len = 0;
 		err = do_path_lookup(dfd, tmp, flags, &nd);
 		putname(tmp);
 		if (!err) {
@@ -2578,7 +2629,7 @@ void unlock_rename(struct dentry *p1, struct dentry *p2)
 	}
 }
 
-int vfs_create(struct inode *dir, struct dentry *dentry, int mode,
+int vfs_create(struct inode *dir, struct dentry *dentry, umode_t mode,
 		struct nameidata *nd)
 {
 #ifdef CONFIG_FS_SYNO_ACL
@@ -2828,7 +2879,11 @@ static struct file *do_last(struct nameidata *nd, struct path *path,
 	if (open_flag & O_EXCL)
 		goto exit_dput;
 
+#ifdef MY_ABC_HERE
+	error = follow_managed(path, nd);
+#else
 	error = follow_managed(path, nd->flags);
+#endif
 	if (error < 0)
 		goto exit_dput;
 
@@ -3063,7 +3118,7 @@ struct dentry *user_path_create(int dfd, const char __user *pathname, struct pat
 }
 EXPORT_SYMBOL(user_path_create);
 
-int vfs_mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t dev)
+int vfs_mknod(struct inode *dir, struct dentry *dentry, umode_t mode, dev_t dev)
 {
 #ifdef CONFIG_FS_SYNO_ACL
 	int error = may_create(dir, dentry, mode);
@@ -3164,7 +3219,7 @@ SYSCALL_DEFINE3(mknod, const char __user *, filename, int, mode, unsigned, dev)
 	return sys_mknodat(AT_FDCWD, filename, mode, dev);
 }
 
-int vfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
+int vfs_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 {
 #ifdef CONFIG_FS_SYNO_ACL
 	int error = may_create(dir, dentry, S_IFDIR);
@@ -3748,6 +3803,12 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	int is_dir = S_ISDIR(old_dentry->d_inode->i_mode);
 	const unsigned char *old_name;
 
+#ifdef CONFIG_SYNO_NOTIFY
+	char *tmp_old_full = NULL;
+	char *tmp_new_full = NULL;
+	char *tmp_old_buff = NULL;
+	char *tmp_new_buff = NULL;
+#endif
 	if (old_dentry->d_inode == new_dentry->d_inode)
  		return 0;
  
@@ -3769,6 +3830,12 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	if (!old_dir->i_op->rename)
 		return -EPERM;
 
+#ifdef CONFIG_SYNO_NOTIFY
+	tmp_old_buff = kmalloc(PATH_MAX, GFP_NOFS);
+	tmp_new_buff = kmalloc(PATH_MAX, GFP_NOFS);
+	tmp_old_full = dentry_path_raw(old_dentry, tmp_old_buff, PATH_MAX-1);
+	tmp_new_full = dentry_path_raw(new_dentry, tmp_new_buff, PATH_MAX-1);
+#endif
 	old_name = fsnotify_oldname_init(old_dentry->d_name.name);
 
 	if (is_dir)
@@ -3776,10 +3843,19 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	else
 		error = vfs_rename_other(old_dir,old_dentry,new_dir,new_dentry);
 	if (!error)
+#ifdef CONFIG_SYNO_NOTIFY
+		fsnotify_move(old_dir, new_dir, old_name, is_dir,
+			      new_dentry->d_inode, old_dentry, tmp_old_full, tmp_new_full);
+#else
 		fsnotify_move(old_dir, new_dir, old_name, is_dir,
 			      new_dentry->d_inode, old_dentry);
+#endif
 	fsnotify_oldname_free(old_name);
 
+#ifdef CONFIG_SYNO_NOTIFY
+	kfree(tmp_old_buff);
+	kfree(tmp_new_buff);
+#endif
 	return error;
 }
 

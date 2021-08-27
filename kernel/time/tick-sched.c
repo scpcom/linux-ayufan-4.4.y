@@ -326,6 +326,9 @@ void tick_nohz_stop_sched_tick(int inidle)
 	if (unlikely(!cpu_online(cpu))) {
 		if (cpu == tick_do_timer_cpu)
 			tick_do_timer_cpu = TICK_DO_TIMER_NONE;
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+			goto end;
+#endif
 	}
 
 	if (unlikely(ts->nohz_mode == NOHZ_MODE_INACTIVE))

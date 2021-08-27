@@ -85,6 +85,13 @@
 
 #define REG_TEMP_OFFSET_BASE	0x70
 
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#define REG_CONFIG1				0x40	/* ADT7490 only */
+#define REG_PECI0				0x33	/* ADT7490 only */
+#define REG_PECI1_BASE			0x1A	/* ADT7490 only */
+#define REG_PECI_CONFIG			0x88	/* ADT7490 only */
+#endif
+
 #define REG_CONFIG2		0x73
 
 #define REG_EXTEND1		0x76
@@ -121,6 +128,10 @@
 #define ADT7475_TEMP_COUNT	3
 #define ADT7475_TACH_COUNT	4
 #define ADT7475_PWM_COUNT	3
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#define ADT7490_PECI_COUNT	4	/*ADT7490 only*/
+#define SYNO_IS_ADT7490(client) !strcmp(client->name, "adt7490")
+#endif
 
 /* Macro to read the registers */
 
@@ -140,6 +151,9 @@
 #define VOLTAGE_MIN_REG(idx) (REG_VOLTAGE_MIN_BASE + ((idx) * 2))
 #define VOLTAGE_MAX_REG(idx) (REG_VOLTAGE_MAX_BASE + ((idx) * 2))
 
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#define PECI_REG(idx) (idx == 0 ? REG_PECI0:REG_PECI1_BASE + (idx-1))	/* ADT7490 only */
+#endif
 #define TEMP_REG(idx) (REG_TEMP_BASE + (idx))
 #define TEMP_MIN_REG(idx) (REG_TEMP_MIN_BASE + ((idx) * 2))
 #define TEMP_MAX_REG(idx) (REG_TEMP_MAX_BASE + ((idx) * 2))
@@ -187,6 +201,9 @@ struct adt7475_data {
 
 	u8 vid;
 	u8 vrm;
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+	u16 peci[4];	/* ADT7490 only */
+#endif
 };
 
 static struct i2c_driver adt7475_driver;
@@ -371,6 +388,33 @@ static ssize_t set_voltage(struct device *dev, struct device_attribute *attr,
 
 	return count;
 }
+
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+static ssize_t show_peci(struct device *dev, struct device_attribute *attr,
+			 char *buf)
+{
+	// this function is adt7490 only
+	struct adt7475_data *data = adt7475_update_device(dev);
+	struct i2c_client *client = to_i2c_client(dev);
+	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
+	int out;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+	switch (sattr->nr) {
+	default:
+		mutex_lock(&data->lock);
+		out = data->peci[sattr->index] & ~0x80;
+		if (data->peci[sattr->index] >> 7) {
+			out = -out;
+		}
+		mutex_unlock(&data->lock);
+		break;
+	}
+	return sprintf(buf, "%d\n", out);
+}
+#endif
 
 static ssize_t show_temp(struct device *dev, struct device_attribute *attr,
 			 char *buf)
@@ -872,6 +916,47 @@ static ssize_t set_pwm_at_crit(struct device *dev,
 	return count;
 }
 
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+static ssize_t show_adtenable(struct device *dev, struct device_attribute *attr,
+						char *buf)
+{
+	// this function is adt7490 only
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 config1;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+	config1 = adt7475_read(REG_CONFIG1);
+	return sprintf(buf, "%d\n", config1 & 0x1);
+}
+
+static ssize_t set_adtenable(struct device *dev, struct device_attribute *attr,
+						const char *buf, size_t count)
+{
+	// this function is adt7490 only
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 config1;
+	long val;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	if (strict_strtol(buf, 10, &val))
+		return -EINVAL;
+
+	config1 = adt7475_read(REG_CONFIG1);
+	if (val) {
+		config1 |= 0x1;
+	} else {
+		config1 &= ~0x1;
+	}
+	i2c_smbus_write_byte_data(client, REG_CONFIG1, config1);
+	return count;
+}
+#endif
+
 static ssize_t show_vrm(struct device *dev, struct device_attribute *devattr,
 			char *buf)
 {
@@ -1039,6 +1124,14 @@ static SENSOR_DEVICE_ATTR_2(pwm3_auto_point1_pwm, S_IRUGO | S_IWUSR, show_pwm,
 			    set_pwm, MIN, 2);
 static SENSOR_DEVICE_ATTR_2(pwm3_auto_point2_pwm, S_IRUGO | S_IWUSR, show_pwm,
 			    set_pwm, MAX, 2);
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+static SENSOR_DEVICE_ATTR_2(peci0_input, S_IRUGO, show_peci, NULL, INPUT, 0);
+static SENSOR_DEVICE_ATTR_2(peci1_input, S_IRUGO, show_peci, NULL, INPUT, 1);
+static SENSOR_DEVICE_ATTR_2(peci2_input, S_IRUGO, show_peci, NULL, INPUT, 2);
+static SENSOR_DEVICE_ATTR_2(peci3_input, S_IRUGO, show_peci, NULL, INPUT, 3);
+static SENSOR_DEVICE_ATTR_2(enable, S_IRUGO | S_IWUSR, show_adtenable,
+			    set_adtenable, INPUT, 0);
+#endif
 
 /* Non-standard name, might need revisiting */
 static DEVICE_ATTR(pwm_use_point2_pwm_at_crit, S_IWUSR | S_IRUGO,
@@ -1106,6 +1199,13 @@ static struct attribute *adt7475_attrs[] = {
 	&sensor_dev_attr_pwm3_auto_channels_temp.dev_attr.attr,
 	&sensor_dev_attr_pwm3_auto_point1_pwm.dev_attr.attr,
 	&sensor_dev_attr_pwm3_auto_point2_pwm.dev_attr.attr,
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+	&sensor_dev_attr_peci0_input.dev_attr.attr,
+	&sensor_dev_attr_peci1_input.dev_attr.attr,
+	&sensor_dev_attr_peci2_input.dev_attr.attr,
+	&sensor_dev_attr_peci3_input.dev_attr.attr,
+	&sensor_dev_attr_enable.dev_attr.attr,
+#endif
 	&dev_attr_pwm_use_point2_pwm_at_crit.attr,
 	NULL,
 };
@@ -1244,6 +1344,9 @@ static int adt7475_probe(struct i2c_client *client,
 	struct adt7475_data *data;
 	int i, ret = 0, revision;
 	u8 config2, config3;
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+	u8 config1, configPECI;
+#endif
 
 	data = kzalloc(sizeof(*data), GFP_KERNEL);
 	if (data == NULL)
@@ -1268,6 +1371,24 @@ static int adt7475_probe(struct i2c_client *client,
 		data->has_voltage = 0x06;	/* in1, in2 */
 		revision = adt7475_read(REG_DEVID2) & 0x07;
 	}
+
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+	if (SYNO_IS_ADT7490(client)) {
+		config1 = adt7475_read(REG_CONFIG1);
+		// which means adt7490 is not been told to start
+		if (!(config1 & 0x1)) {
+			// which means adt7490 is ready to go...
+			if (config1 & 0x4) {
+				config1 |= 0x11;
+				i2c_smbus_write_byte_data(client, REG_CONFIG1, config1);
+			}
+		}
+
+		configPECI = adt7475_read(REG_PECI_CONFIG);
+		configPECI = 0x00;
+		i2c_smbus_write_byte_data(client, REG_PECI_CONFIG, configPECI);
+	}
+#endif
 
 	config3 = adt7475_read(REG_CONFIG3);
 	/* Pin PWM2 may alternatively be used for ALERT output */
@@ -1516,6 +1637,14 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 			data->voltage[INPUT][5] = adt7475_read(REG_VTT) << 2 |
 				((ext >> 4) & 3);
 		}
+
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+		if (SYNO_IS_ADT7490(client)) {
+			for (i = 0; i < ADT7490_PECI_COUNT; i++) {
+				data->peci[i] = adt7475_read(PECI_REG(i));
+			}
+		}
+#endif
 
 		for (i = 0; i < ADT7475_TACH_COUNT; i++) {
 			if (i == 3 && !data->has_fan4)

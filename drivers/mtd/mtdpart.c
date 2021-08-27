@@ -46,6 +46,9 @@ extern unsigned char grgbLanMac[4][16];
 #ifdef MY_ABC_HERE
 extern char gszSerialNum[];
 extern char gszCustomSerialNum[];
+#define SYNO_SN_TAG "SN="
+#define SYNO_CHKSUM_TAG "CHK="
+#define SYNO_SN_12_SIG SYNO_SN_TAG  // signature for 12 serial number
 #endif
 
 #include "mtdcore.h"
@@ -630,24 +633,78 @@ out_register:
 #endif
 
 #ifdef MY_ABC_HERE
-			//read serial number out, it is in the vender partion shift 32 bytes.
-			x = 32;
-			for (Sum=0,ucSum=0,i=0; i<10; i++) {
-				Sum+=rgbszBuf[i+x];
-				ucSum+=rgbszBuf[i+x];
-				gszSerialNum[i] = rgbszBuf[i+x];
+			char szSerialBuffer[32];
+			char *ptr;
+			char szSerial[32];
+			char szCheckSum[32];
+			unsigned int uichksum = 0;
+			unsigned int uiTemp = 0;
+
+			memset(szSerial, 0, sizeof(szSerial));
+			memset(szCheckSum, 0, sizeof(szCheckSum));
+			memset(gszSerialNum, 0, 32);
+			memcpy(szSerialBuffer, &(rgbszBuf[32]), 32);
+
+			// this is new defined SN
+			if (0 == strncmp(szSerialBuffer, SYNO_SN_12_SIG,strlen(SYNO_SN_12_SIG))) {
+				//paring serial number with format 'SN=1350KKN99999'
+				ptr = strstr(szSerialBuffer, SYNO_SN_TAG);
+				if (NULL == ptr) {
+					printk("no serial tag found, serial buffer='%s'\n", szSerialBuffer);
+					goto SKIP_SERIAL;
 				}
-			x+=10;
-			if (Sum==0 || ucSum!=rgbszBuf[x]) {
-				printk("No Serial Number or Serial Number checksum error ucSum:0x%02x Buf:0x%02x Sum:%d.\n", 
-						ucSum, rgbszBuf[x], Sum);
-				for (i=0; i<11; i++) {
-					gszSerialNum[i] = 0;
+				ptr += strlen(SYNO_SN_TAG);
+				i = 0;
+				while (0 != *ptr && ',' != *ptr) {
+					szSerial[i++] = *ptr;
+					ptr++;
+				}
+				szSerial[i] = '\0';
+
+				//paring serial number with format 'CHK=125'
+				ptr = strstr(szSerialBuffer, SYNO_CHKSUM_TAG);
+				if (NULL == ptr) {
+					printk("no checksum tag found, serial buffer='%s'\n", szSerialBuffer);
+					goto SKIP_SERIAL;
+				}
+				ptr += strlen(SYNO_CHKSUM_TAG);
+				i = 0;
+				while (0 != *ptr && ',' != *ptr) {
+					szCheckSum[i++] = *ptr;
+					ptr++;
+				}
+				szCheckSum[i] = '\0';
+
+				//calculate checksum
+				for (i = 0 ; i < strlen(szSerial); i++) {
+					uichksum += szSerial[i];
+				}
+
+				//------ check checksum ------
+				if (0 != strict_strtoul(szCheckSum, 10, &uiTemp)) {
+					printk("string conversion error: '%s'\n", szCheckSum);
+					goto SKIP_SERIAL;
+				} else if (uichksum != uiTemp) {
+					printk("serial number checksum error, serial='%s', checksum='%u' not '%u'\n", szSerial, uichksum, uiTemp);
+					goto SKIP_SERIAL;
 				}
 			} else {
-				//YMXXZSSSSS
-				printk("Serial Number: %s\n", gszSerialNum );
+				unsigned char ucChkSum = 0;
+				//calculate checksum
+				for (i = 0 ; i < 10; i++) {
+					ucChkSum += szSerialBuffer[i];
+				}
+				//------ check checksum ------
+				if (ucChkSum != szSerialBuffer[10]) {
+					printk("serial number checksum error, serial='%s', checksum='%d' not '%d'", szSerialBuffer, ucChkSum, szSerialBuffer[10]);
+					goto SKIP_SERIAL;
+				} else {
+					memcpy(szSerial, szSerialBuffer, 10);
+				}
 			}
+			snprintf(gszSerialNum, 32, "%s", szSerial);
+SKIP_SERIAL:
+			printk("serial number='%s'", gszSerialNum);
 
 			//read custom serial number out, it is in the vender partion shift 64 bytes.
 			x = 64;

@@ -166,6 +166,11 @@ struct dentry_operations {
 	int (*d_compare)(const struct dentry *, const struct inode *,
 			const struct dentry *, const struct inode *,
 			unsigned int, const char *, const struct qstr *);
+#ifdef MY_ABC_HERE
+	int (*d_compare_case)(const struct dentry *, const struct inode *,
+			const struct dentry *, const struct inode *,
+			unsigned int, const char *, const struct qstr *, int caseless);
+#endif
 	int (*d_delete)(const struct dentry *);
 	void (*d_release)(struct dentry *);
 	void (*d_prune)(struct dentry *);
@@ -209,7 +214,7 @@ struct dentry_operations {
 #define DCACHE_SHRINK_LIST	0x0400
 
 #ifdef MY_ABC_HERE
-#define DCACHE_CASELESS_COMPARE 0x0100000 /* Do caseless compare */
+#define DCACHE_OP_COMPARE_CASE	0x0100000
 #endif
 
 #ifdef MY_ABC_HERE
@@ -317,9 +322,16 @@ extern struct dentry *d_ancestor(struct dentry *, struct dentry *);
 /* appendix may either be NULL or be used for transname suffixes */
 extern struct dentry *d_lookup(struct dentry *, struct qstr *);
 extern struct dentry *d_hash_and_lookup(struct dentry *, struct qstr *);
+#ifdef MY_ABC_HERE
+extern struct dentry *d_lookup_case(struct dentry *, struct qstr *, int caseless);
+extern struct dentry *__d_lookup(struct dentry *, struct qstr *, int caseless);
+extern struct dentry *__d_lookup_rcu(struct dentry *parent, struct qstr *name,
+				unsigned *seq, struct inode **inode, int caseless);
+#else
 extern struct dentry *__d_lookup(struct dentry *, struct qstr *);
 extern struct dentry *__d_lookup_rcu(struct dentry *parent, struct qstr *name,
 				unsigned *seq, struct inode **inode);
+#endif
 
 /**
  * __d_rcu_to_refcount - take a refcount on dentry if sequence check is ok

@@ -63,13 +63,6 @@ struct scsi_host_template {
 	struct module *module;
 	const char *name;
 
-#ifdef CONFIG_ARCH_FEROCEON
-	/*
-	* support to scattered spinup in various drivers
-	*/
-	unsigned char support_scattered_spinup;
-#endif
-
 	/*
 	 * Used to initialize old-style drivers.  For new-style drivers
 	 * just perform all work in your module initialization function.

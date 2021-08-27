@@ -736,6 +736,8 @@ int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
 	default:
 		break;
 	}
+	if (capable(CAP_SYS_RAWIO))
+		return 0;
 #ifdef MY_ABC_HERE
 	/* When create/delete raid, mdadm sends RAID_VERSION ioctl to partition.
 	 *
@@ -749,14 +751,12 @@ int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
 	}
 #else
 
-	if (capable(CAP_SYS_RAWIO))
-		return 0;
-
 	/* In particular, rule out all resets and host-specific ioctls.  */
 	printk_ratelimited(KERN_WARNING
 			   "%s: sending ioctl %x to a partition!\n", current->comm, cmd);
 #endif
-	return capable(CAP_SYS_RAWIO) ? 0 : -ENOTTY;
+
+	return -ENOTTY;
 }
 EXPORT_SYMBOL(scsi_verify_blk_ioctl);
 

@@ -6,8 +6,28 @@
 #include <linux/platform_device.h>
 #include <linux/of_device.h>
 #include <linux/module.h>
+#ifdef CONFIG_GEN3_SPI
+#include <linux/spi/spi.h>
+#endif
 #include <linux/spi/pxa2xx_spi.h>
 
+#ifdef CONFIG_GEN3_SPI
+#define CE4200_NUM_SPI_MASTER 1
+#define CE4200_NUM_CHIPSELECT 4
+#define CE4X00_SPI_MAX_SPEED  1843200
+#define CE5X00_SPI_MAX_SPEED  5000000
+
+#define GEN3_BOARD_INFO_CONFIG
+
+#ifdef  SPI_CE_DEBUG
+#define spi_dbg(fmt, args...) do \
+                             { \
+                               printk(KERN_INFO fmt, ##args); \
+                              } while(0)
+#else
+#define spi_dbg(fmt,args...) do {} while(0)
+#endif
+#endif /* CONFIG_GEN3_SPI */
 struct ce4100_info {
 	struct ssp_device ssp;
 	struct platform_device *spi_pdev;
@@ -16,6 +36,64 @@ struct ce4100_info {
 static DEFINE_MUTEX(ssp_lock);
 static LIST_HEAD(ssp_list);
 
+#ifdef CONFIG_GEN3_SPI
+#ifdef GEN3_BOARD_INFO_CONFIG
+struct spi_board_info CE4X00_spi_devices[]={
+  {
+    .modalias = "spidev",
+    .chip_select = 0,
+    .max_speed_hz = CE4X00_SPI_MAX_SPEED,
+    .bus_num = 0,
+  },
+  {
+    .modalias = "spidev",
+    .chip_select = 1,
+    .max_speed_hz = CE4X00_SPI_MAX_SPEED,
+    .bus_num = 0,
+  },
+  {
+    .modalias = "spidev",
+    .chip_select = 2,
+    .max_speed_hz = CE4X00_SPI_MAX_SPEED,
+    .bus_num = 0,
+  },
+  {
+    .modalias = "spidev",
+    .chip_select = 3,
+    .max_speed_hz = CE4X00_SPI_MAX_SPEED,
+    .bus_num = 0,
+  },
+};
+
+struct spi_board_info CE5X00_spi_devices[]={
+  {
+    .modalias = "spidev",
+    .chip_select = 0,
+    .max_speed_hz = CE5X00_SPI_MAX_SPEED,
+    .bus_num = 0,
+  },
+  {
+    .modalias = "spidev",
+    .chip_select = 1,
+    .max_speed_hz = CE5X00_SPI_MAX_SPEED,
+    .bus_num = 0,
+  },
+  {
+    .modalias = "spidev",
+    .chip_select = 2,
+    .max_speed_hz = CE5X00_SPI_MAX_SPEED,
+    .bus_num = 0,
+  },
+  {
+    .modalias = "spidev",
+    .chip_select = 3,
+    .max_speed_hz = CE5X00_SPI_MAX_SPEED,
+    .bus_num = 0,
+  },
+};
+
+#endif /* GEN3_BOARD_INFO_CONFIG */
+#endif /* CONFIG_GEN3_SPI */
 struct ssp_device *pxa_ssp_request(int port, const char *label)
 {
 	struct ssp_device *ssp = NULL;
@@ -51,16 +129,57 @@ void pxa_ssp_free(struct ssp_device *ssp)
 }
 EXPORT_SYMBOL_GPL(pxa_ssp_free);
 
+#ifdef CONFIG_GEN3_SPI
+#ifdef GEN3_BOARD_INFO_CONFIG
+static void add_spi_dev_devices(void)
+{
+	unsigned int id; 
+
+	spi_dbg("add CE SPI board info\n");
+	intelce_get_soc_info(&id, NULL);
+	switch (id) 
+	{
+		case CE5300_SOC_DEVICE_ID:
+			spi_register_board_info(CE5X00_spi_devices,ARRAY_SIZE(CE5X00_spi_devices)); 
+			break;
+		case CE4200_SOC_DEVICE_ID:
+		default:	
+			spi_register_board_info(CE4X00_spi_devices,ARRAY_SIZE(CE4X00_spi_devices)); 
+			break;
+	}
+}
+static void remove_spi_dev_devices(void)
+{
+	unsigned int id; 
+
+	spi_dbg("remove CE SPI board info\n");
+	intelce_get_soc_info(&id, NULL);
+	switch (id) 
+	{
+		case CE5300_SOC_DEVICE_ID:
+			spi_unregister_board_info(CE5X00_spi_devices, ARRAY_SIZE(CE5X00_spi_devices)); 
+			break;
+		case CE4200_SOC_DEVICE_ID:
+		default:	
+			spi_unregister_board_info(CE4X00_spi_devices, ARRAY_SIZE(CE4X00_spi_devices)); 
+			break;
+	}
+}
+#endif
+#endif
 static int __devinit ce4100_spi_probe(struct pci_dev *dev,
 		const struct pci_device_id *ent)
 {
 	int ret;
 	resource_size_t phys_beg;
 	resource_size_t phys_len;
-	struct ce4100_info *spi_info;
+	struct ce4100_info *spi_info = NULL;
 	struct platform_device *pdev;
-	struct pxa2xx_spi_master spi_pdata;
+	struct pxa2xx_spi_master *spi_pdata = NULL;
 	struct ssp_device *ssp;
+#ifdef CONFIG_GEN3_SPI
+	unsigned int id;
+#endif
 
 	ret = pci_enable_device(dev);
 	if (ret)
@@ -80,8 +199,26 @@ static int __devinit ce4100_spi_probe(struct pci_dev *dev,
 	spi_info = kzalloc(sizeof(*spi_info), GFP_KERNEL);
 	if (!pdev || !spi_info ) {
 		ret = -ENOMEM;
+#ifdef CONFIG_GEN3_SPI
+		goto err_malloc_spi_info;
+#else
 		goto err_nomem;
+#endif
 	}
+#ifdef CONFIG_GEN3_SPI
+	spi_pdata = kzalloc(sizeof(*spi_pdata), GFP_KERNEL);
+	if (!spi_pdata) {
+		ret = -ENOMEM;
+		goto err_malloc_spi_pdata;
+    
+    }
+    printk("spi_pdata is %p\n", spi_pdata);
+	spi_pdata->num_chipselect = dev->devfn;
+	spi_pdata->num_chipselect = CE4200_NUM_CHIPSELECT;
+    pdev->dev.platform_data = spi_pdata;
+
+	pdev->id = CE4200_NUM_SPI_MASTER-1;
+#else
 	memset(&spi_pdata, 0, sizeof(spi_pdata));
 	spi_pdata.num_chipselect = dev->devfn;
 
@@ -89,19 +226,46 @@ static int __devinit ce4100_spi_probe(struct pci_dev *dev,
 	if (ret)
 		goto err_nomem;
 
+#endif /* CONFIG_GEN3_SPI */
 	pdev->dev.parent = &dev->dev;
+#ifdef CONFIG_GEN3_SPI
+#ifdef CONFIG_OF
 	pdev->dev.of_node = dev->dev.of_node;
+#endif
+#else
+	pdev->dev.of_node = dev->dev.of_node;
+#endif
 	ssp = &spi_info->ssp;
 	ssp->phys_base = pci_resource_start(dev, 0);
 	ssp->mmio_base = ioremap(phys_beg, phys_len);
 	if (!ssp->mmio_base) {
 		dev_err(&pdev->dev, "failed to ioremap() registers\n");
 		ret = -EIO;
+#ifdef CONFIG_GEN3_SPI
+		goto err_ioremap;
+#else
 		goto err_nomem;
+#endif
 	}
 	ssp->irq = dev->irq;
 	ssp->port_id = pdev->id;
+#ifdef CONFIG_GEN3_SPI
+	intelce_get_soc_info(&id, NULL);
+	switch (id) 
+	{
+		case CE5300_SOC_DEVICE_ID:
+	   		ssp->type = CE5X00_SSP;
+			printk("ssp type is CE5X00 SSP\n");
+			break;
+		case CE4200_SOC_DEVICE_ID:
+		default:	
+			ssp->type = CE4100_SSP;
+			printk("ssp type is CE4100 SSP\n");
+			break;
+	}
+#else
 	ssp->type = PXA25x_SSP;
+#endif
 
 	mutex_lock(&ssp_lock);
 	list_add(&ssp->node, &ssp_list);
@@ -109,6 +273,12 @@ static int __devinit ce4100_spi_probe(struct pci_dev *dev,
 
 	pci_set_drvdata(dev, spi_info);
 
+#ifdef CONFIG_GEN3_SPI
+#ifdef GEN3_BOARD_INFO_CONFIG
+        add_spi_dev_devices();
+#endif
+	spi_info->spi_pdev = pdev;
+#endif
 	ret = platform_device_add(pdev);
 	if (ret)
 		goto err_dev_add;
@@ -122,10 +292,22 @@ err_dev_add:
 	mutex_unlock(&ssp_lock);
 	iounmap(ssp->mmio_base);
 
+#ifdef CONFIG_GEN3_SPI
+err_ioremap:
+
+err_malloc_spi_pdata:
+    kfree(spi_info);
+
+err_malloc_spi_info:
+#else
 err_nomem:
+#endif
 	release_mem_region(phys_beg, phys_len);
 	platform_device_put(pdev);
+#ifdef CONFIG_GEN3_SPI
+#else
 	kfree(spi_info);
+#endif
 	return ret;
 }
 
@@ -136,6 +318,11 @@ static void __devexit ce4100_spi_remove(struct pci_dev *dev)
 
 	spi_info = pci_get_drvdata(dev);
 	ssp = &spi_info->ssp;
+#ifdef CONFIG_GEN3_SPI
+#ifdef GEN3_BOARD_INFO_CONFIG
+        remove_spi_dev_devices();
+#endif
+#endif
 	platform_device_unregister(spi_info->spi_pdev);
 
 	iounmap(ssp->mmio_base);
@@ -151,6 +338,26 @@ static void __devexit ce4100_spi_remove(struct pci_dev *dev)
 	kfree(spi_info);
 }
 
+#ifdef CONFIG_GEN3_SPI
+#ifdef CONFIG_PM
+static int ce4XXX_spi_suspend(struct pci_dev *dev, pm_message_t state)
+{
+        spi_dbg("Start to do spi pci suspend\n");
+        pci_save_state(dev);
+        pci_set_power_state(dev, pci_choose_state(dev, state));
+        return 0;
+}
+
+static int ce4XXX_spi_resume(struct pci_dev *dev)
+{
+        spi_dbg("Start to do spi pci resume\n");
+        pci_set_power_state(dev, PCI_D0);
+        pci_restore_state(dev);
+
+        return 0;
+}
+#endif
+#endif
 static struct pci_device_id ce4100_spi_devices[] __devinitdata = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, 0x2e6a) },
 	{ },
@@ -162,6 +369,12 @@ static struct pci_driver ce4100_spi_driver = {
 	.id_table       = ce4100_spi_devices,
 	.probe          = ce4100_spi_probe,
 	.remove         = __devexit_p(ce4100_spi_remove),
+#ifdef CONFIG_GEN3_SPI
+#ifdef CONFIG_PM
+        .suspend        = ce4XXX_spi_suspend,
+        .resume         = ce4XXX_spi_resume,
+#endif
+#endif
 };
 
 static int __init ce4100_spi_init(void)

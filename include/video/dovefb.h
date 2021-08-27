@@ -93,6 +93,11 @@
 #define DOVEFB_IOCTL_SET_SRC_MODE		_IO(DOVEFB_IOC_MAGIC, 21)
 #define DOVEFB_IOCTL_GET_SRC_MODE		_IO(DOVEFB_IOC_MAGIC, 22)
 
+/* Dynamic get EDID data */
+#define DOVEFB_IOCTL_GET_EDID_INFO		_IO(DOVEFB_IOC_MAGIC, 23)
+#define DOVEFB_IOCTL_GET_EDID_DATA		_IO(DOVEFB_IOC_MAGIC, 24)
+#define DOVEFB_IOCTL_SET_EDID_INTERVAL		_IO(DOVEFB_IOC_MAGIC, 25)
+
 /* clear framebuffer: Makes resolution or color space changes look nicer */
 #define FBIO_CLEAR_FRAMEBUFFER			_IO(FB_IOC_MAGIC, 19)
 
@@ -169,6 +174,12 @@
 /* ---------------------------------------------- */
 /*              Data Structure                    */
 /* ---------------------------------------------- */
+struct _sEdidInfo {
+	int connect;			/* is monitor connected */
+	int change;			/* is edid data changed */
+	int extension;			/* the number of extension edid block */
+	int interval;			/* the interval to check edid */
+};
 /*
  * The follow structures are used to pass data from
  * user space into the kernel for the creation of
@@ -309,9 +320,14 @@ struct shm_private_info {
 #include <linux/interrupt.h>
 
 enum dovefb_type {
-	DOVEFB_GFX_PLANE = 0,
+	DOVEFB_GFX_PLANE,
 	DOVEFB_OVLY_PLANE
 };
+
+#define MRVL_AXI_CLK		0
+#define MRVL_EXT_CLK0	1
+#define MRVL_PLL_CLK		2
+#define MRVL_EXT_CLK1	3
 
 struct dovefb_layer_info {
 	struct device		*dev;
@@ -336,12 +352,19 @@ struct dovefb_layer_info {
 	struct tasklet_struct	tasklet;
 	char			*mode_option;
 
+	int			ddc_polling_disable;
+	struct timer_list	get_edid_timer;
+	unsigned char*		raw_edid;
+	struct _sEdidInfo	edid_info;
+	struct work_struct      work_queue;
+
 	int			pix_fmt;
 	unsigned		is_blanked:1;
 	unsigned		cursor_enabled:1;
 	unsigned		cursor_cfg:1;
 	unsigned		active:1;
 	unsigned		enabled:1;
+	unsigned                checkbuf_timer_exist:1;
 
 	/*
 	 * 0: DMA mem is from DMA region.
@@ -354,6 +377,8 @@ struct dovefb_layer_info {
 	 */
 	int			cur_fbid;
 	int			src_mode;
+
+	unsigned int		reserved;
 };
 
 /*
@@ -373,12 +398,31 @@ struct dovefb_info {
 
 	char				*mode_option;
 	struct clk			*clk;
+	int				clk_src;
 	int				io_pin_allocation;
 
 	int			pix_fmt;
 	unsigned		edid:1;
 	unsigned		panel_rbswap:1;
 	unsigned		edid_en:1;
+	unsigned		fixed_full_div:1;
+	unsigned		full_div_val;
+
+        /* Hardware cursor related registers */
+	unsigned int LCD_SPU_HWC_HPXL_VLN_saved_value;
+	unsigned int LCD_SPU_ALPHA_COLOR1_saved_value;
+	unsigned int LCD_SPU_ALPHA_COLOR2_saved_value;
+
+	/* Colorkey related registers */
+	unsigned int LCD_SPU_COLORKEY_Y_saved_value;
+	unsigned int LCD_SPU_COLORKEY_U_saved_value;
+	unsigned int LCD_SPU_COLORKEY_V_saved_value;
+	unsigned int LCD_SPU_DMA_CTRL0_saved_value;
+	unsigned int LCD_SPU_DMA_CTRL1_saved_value;
+	unsigned int LCD_SPU_ADV_REG_saved_value;
+
+	unsigned int LCD_CFG_GRA_PITCH_saved_value;
+	unsigned int LCD_CFG_RDREG4F_saved_value;
 };
 
 /*
@@ -391,6 +435,7 @@ struct dovefb_mach_info {
 
 	int		num_modes;
 	struct fb_videomode *modes;
+	struct mbus_dram_target_info *dram;
  
 	/* LCD reference clock value.	*/
 	unsigned int	lcd_ref_clk;
@@ -410,11 +455,16 @@ struct dovefb_mach_info {
 	 * I/O pin allocation.
 	 */
 	unsigned	io_pin_allocation:4;
+	/* 
+	 * auto poll EDID data periodically
+	 */
+	unsigned ddc_polling_disable:1;
 	
 	/*
-	 * I2C bus to read DDC data through. -1 not available
+	 * I2C bus and address to read DDC data through. -1 not available
 	 */
 	int		ddc_i2c_adapter;
+	int		ddc_i2c_address;
 
 	/*
 	 * Dumb panel -- assignment of R/G/B component info to the 24
@@ -440,6 +490,14 @@ struct dovefb_mach_info {
 	unsigned	panel_rbswap:1;
 	unsigned	active:1;
 	unsigned	enable_lcd0:1;
+	unsigned	fixed_full_div:1;
+	unsigned	full_div_val;
+
+	struct {
+		unsigned enabled;
+		unsigned lvds_24b_option;
+		unsigned lvds_tick_drv;
+	} lvds_info;
 };
 
 struct dovebl_platform_data;

@@ -141,13 +141,6 @@ static inline int task_has_rt_policy(struct task_struct *p)
 	return rt_policy(p->policy);
 }
 
-#ifdef CONFIG_MV_REAL_TIME
-int mv_task_has_rt_policy(struct task_struct *p)
-{
-	return task_has_rt_policy(p);
-}
-#endif
-
 /*
  * This is the priority-queue data structure of the RT scheduling class:
  */
@@ -3404,7 +3397,6 @@ unsigned long this_cpu_load(void)
 	struct rq *this = this_rq();
 	return this->cpu_load[0];
 }
-
 
 /*
  * Global load-average calculations

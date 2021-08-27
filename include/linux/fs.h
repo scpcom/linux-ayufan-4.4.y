@@ -382,6 +382,12 @@ struct inodes_stat_t {
 #define FIGETVERSION	_IOWR('x', 122, unsigned int)	/* get syno archive version */
 #define FISETVERSION	_IOWR('x', 123, unsigned int)	/* set syno archive version */
 #define FIINCVERSION	_IO('x', 124)	/* increase syno archive version by 1 */
+#define FISETFILEVERSION	_IOWR('x', 125, unsigned int)	/* set file syno archive version */
+#ifdef MY_ABC_HERE
+#define FIGETBADVERSION	_IOWR('x', 126, unsigned int)	/* fix bad archive version */
+#define FICLEARBADVERSION	_IO('x', 127)	/* fix bad archive version */
+#define FISETBADVERSION	_IOWR('x', 128, unsigned int)	/* fix bad archive version */
+#endif
 #endif
 
 #define	FS_IOC_GETFLAGS			_IOR('f', 1, long)
@@ -468,6 +474,9 @@ struct kstatfs;
 struct vm_area_struct;
 struct vfsmount;
 struct cred;
+#if defined(CONFIG_SYNO_ARMADA)
+struct socket;
+#endif
 
 extern void __init inode_init(void);
 extern void __init inode_init_early(void);
@@ -1564,6 +1573,9 @@ struct super_block {
 	 * create another to flag frozen stat. Awful... */
 	struct mutex s_archive_mutex;  /* protect frozen state, also version */
 	u32		s_archive_version;
+#ifdef MY_ABC_HERE
+	u32		s_archive_version1;
+#endif
 #endif
 	char __rcu *s_options;
 	const struct dentry_operations *s_d_op; /* default d_op for dentries */
@@ -1609,9 +1621,9 @@ extern void unlock_super(struct super_block *);
 /*
  * VFS helper functions..
  */
-extern int vfs_create(struct inode *, struct dentry *, int, struct nameidata *);
-extern int vfs_mkdir(struct inode *, struct dentry *, int);
-extern int vfs_mknod(struct inode *, struct dentry *, int, dev_t);
+extern int vfs_create(struct inode *, struct dentry *, umode_t, struct nameidata *);
+extern int vfs_mkdir(struct inode *, struct dentry *, umode_t);
+extern int vfs_mknod(struct inode *, struct dentry *, umode_t, dev_t);
 extern int vfs_symlink(struct inode *, struct dentry *, const char *);
 extern int vfs_link(struct dentry *, struct inode *, struct dentry *);
 extern int vfs_rmdir(struct inode *, struct dentry *);
@@ -1698,6 +1710,10 @@ struct file_operations {
 	int (*flock) (struct file *, int, struct file_lock *);
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int);
 	ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int);
+#if defined(CONFIG_SYNO_ARMADA)
+	ssize_t (*splice_from_socket)(struct file *file, struct socket *sock,
+				     loff_t __user *ppos, size_t count);
+#endif
 	int (*setlease)(struct file *, long, struct file_lock **);
 	long (*fallocate)(struct file *file, int mode, loff_t offset,
 			  loff_t len);
@@ -1712,13 +1728,13 @@ struct inode_operations {
 	int (*readlink) (struct dentry *, char __user *,int);
 	void (*put_link) (struct dentry *, struct nameidata *, void *);
 
-	int (*create) (struct inode *,struct dentry *,int, struct nameidata *);
+	int (*create) (struct inode *,struct dentry *,umode_t,struct nameidata *);
 	int (*link) (struct dentry *,struct inode *,struct dentry *);
 	int (*unlink) (struct inode *,struct dentry *);
 	int (*symlink) (struct inode *,struct dentry *,const char *);
-	int (*mkdir) (struct inode *,struct dentry *,int);
+	int (*mkdir) (struct inode *,struct dentry *,umode_t);
 	int (*rmdir) (struct inode *,struct dentry *);
-	int (*mknod) (struct inode *,struct dentry *,int,dev_t);
+	int (*mknod) (struct inode *,struct dentry *,umode_t,dev_t);
 	int (*rename) (struct inode *, struct dentry *,
 			struct inode *, struct dentry *);
 	void (*truncate) (struct inode *);
@@ -1740,7 +1756,7 @@ struct inode_operations {
 	ssize_t (*listxattr) (struct dentry *, char *, size_t);
 	int (*removexattr) (struct dentry *, const char *);
 #ifdef MY_ABC_HERE
-	int (*synosetxattr) (struct dentry *, const char *,const void *,size_t,int);
+	int (*synosetxattr) (struct inode *, const char *,const void *,size_t,int);
 #endif
 	void (*truncate_range)(struct inode *, loff_t, loff_t);
 	int (*fiemap)(struct inode *, struct fiemap_extent_info *, u64 start,
@@ -2545,6 +2561,10 @@ extern ssize_t generic_splice_sendpage(struct pipe_inode_info *pipe,
 		struct file *out, loff_t *, size_t len, unsigned int flags);
 extern long do_splice_direct(struct file *in, loff_t *ppos, struct file *out,
 		size_t len, unsigned int flags);
+#if defined(CONFIG_SYNO_ARMADA)
+extern ssize_t generic_splice_from_socket(struct file *file, struct socket *sock,
+				     loff_t __user *ppos, size_t count);
+#endif
 
 extern void
 file_ra_state_init(struct file_ra_state *ra, struct address_space *mapping);

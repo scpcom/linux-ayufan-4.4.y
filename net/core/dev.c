@@ -151,6 +151,12 @@ extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP) || defined(CONFIG_MV_ETH_NFP_MODULE)
+#include <linux/mv_nfp.h>
+#endif /* CONFIG_MV_ETH_NFP || CONFIG_MV_ETH_NFP_MODULE */
+#endif
+
 /* Instead of increasing this, you should create a hash table. */
 #define MAX_GRO_SKBS 8
 
@@ -3289,6 +3295,26 @@ void netdev_rx_handler_unregister(struct net_device *dev)
 }
 EXPORT_SYMBOL_GPL(netdev_rx_handler_unregister);
 
+#if defined(CONFIG_SYNO_ARMADA)
+#ifdef CONFIG_MV_ETH_NFP_EXT
+static struct sk_buff *handle_nfp_extrcv(struct sk_buff *skb, struct net_device *dev)
+{
+	if (nfp_core_p->nfp_rx_ext) {
+
+		MV_EXT_PKT_INFO *pktInfo;
+
+		pktInfo = (MV_EXT_PKT_INFO *)&skb->cb;
+		if (pktInfo->flags == 0)
+			pktInfo = NULL;
+
+		if (!nfp_core_p->nfp_rx_ext(skb->dev, skb, pktInfo))
+			return NULL;
+	}
+	return skb;
+}
+#endif /* CONFIG_MV_ETH_NFP_EXT */
+#endif
+
 static int __netif_receive_skb(struct sk_buff *skb)
 {
 	struct packet_type *ptype, *pt_prev;
@@ -3335,6 +3361,14 @@ another_round:
 		skb->tc_verd = CLR_TC_NCLS(skb->tc_verd);
 		goto ncls;
 	}
+#endif
+
+#if defined(CONFIG_SYNO_ARMADA)
+#ifdef CONFIG_MV_ETH_NFP_EXT
+	skb = handle_nfp_extrcv(skb, orig_dev);
+	if (!skb)
+		goto out;
+#endif /* CONFIG_MV_ETH_NFP_EXT */
 #endif
 
 	list_for_each_entry_rcu(ptype, &ptype_all, list) {
@@ -6733,6 +6767,14 @@ static int __init net_dev_init(void)
 	dst_init();
 	dev_mcast_init();
 	rc = 0;
+
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP) || defined(CONFIG_MV_ETH_NFP_MODULE)
+	nfp_core_ops_init();
+	nfp_hook_ops_init();
+#endif /* CONFIG_MV_ETH_NFP || CONFIG_MV_ETH_NFP_MODULE */
+#endif
+
 out:
 	return rc;
 }

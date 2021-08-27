@@ -463,7 +463,7 @@ config I2C_MPC
 
 config I2C_MV64XXX
 	tristate "Marvell mv64xxx I2C Controller"
-	depends on (MV64X60 || PLAT_ORION || MV88F6281) && EXPERIMENTAL
+	depends on (MV64X60 || PLAT_ORION || MV88F6281 || PLAT_ARMADA) && EXPERIMENTAL
 	help
 	  If you say yes to this option, support will be included for the
 	  built-in I2C interface on the Marvell 64xxx line of host bridges.
@@ -565,6 +565,23 @@ config I2C_PUV3
 
 config I2C_PXA
 	tristate "Intel PXA2XX I2C adapter"
+	depends on ARCH_PXA || ARCH_MMP || (X86_32 && PCI)
+	depends on ARCH_GEN3
+	help
+	  If you have devices in the PXA I2C bus, say yes to this option.
+	  This driver can also be built as a module.  If so, the module
+	  will be called i2c-pxa.
+
+config I2C_PXA_PCI
+	tristate "Intel CE I2C PCI adapter"
+	depends on I2C_PXA && X86_32 && PCI
+	depends on ARCH_GEN3
+	help 
+	  This drivers supports the Intel CEXXXX I2C controller 
+
+config I2C_PXA
+	tristate "Intel PXA2XX I2C adapter"
+	depends on !ARCH_GEN3
 	depends on ARCH_PXA || ARCH_MMP || (X86_32 && PCI && OF)
 	help
 	  If you have devices in the PXA I2C bus, say yes to this option.
@@ -573,6 +590,7 @@ config I2C_PXA
 
 config I2C_PXA_PCI
 	def_bool I2C_PXA && X86_32 && PCI && OF
+	depends on !ARCH_GEN3
 
 config I2C_PXA_SLAVE
 	bool "Intel PXA2XX I2C Slave comms support"

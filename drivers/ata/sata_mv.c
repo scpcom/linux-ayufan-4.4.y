@@ -316,7 +316,7 @@ enum {
 	MV5_LTMODE		= 0x30,
 	MV5_PHY_CTL		= 0x0C,
 	SATA_IFCFG		= 0x050,
-
+	LP_PHY_CTL		= 0x058,
 	MV_M2_PREAMP_MASK	= 0x7e0,
 
 	/* Port registers */
@@ -1400,6 +1400,8 @@ static int mv_scr_write(struct ata_link *link, unsigned int sc_reg_in, u32 val)
 
 	if (ofs != 0xffffffffU) {
 		void __iomem *addr = mv_ap_base(link->ap) + ofs;
+		void __iomem *lp_phy_addr = mv_ap_base(link->ap) + LP_PHY_CTL;
+
 		if (sc_reg_in == SCR_CONTROL) {
 			/*
 			 * Workaround for 88SX60x1 FEr SATA#26:
@@ -1416,6 +1418,15 @@ static int mv_scr_write(struct ata_link *link, unsigned int sc_reg_in, u32 val)
 			 */
 			if ((val & 0xf) == 1 || (readl(addr) & 0xf) == 1)
 				val |= 0xf000;
+
+			/*
+			 * Setting PHY speed according to SControl speed
+			 */
+			if ((val & 0xf0) == 0x10)
+				writelfl(0x7, lp_phy_addr);
+			else
+				writelfl(0x227, lp_phy_addr);
+
 		}
 		writelfl(val, addr);
 		return 0;
@@ -2468,10 +2479,19 @@ static struct ata_queued_cmd *mv_get_active_qc(struct ata_port *ap)
 {
 	struct mv_port_priv *pp = ap->private_data;
 	struct ata_queued_cmd *qc;
+	struct ata_link *link = NULL;
 
 	if (pp->pp_flags & MV_PP_FLAG_NCQ_EN)
 		return NULL;
-	qc = ata_qc_from_tag(ap, ap->link.active_tag);
+
+	ata_for_each_link(link, ap, EDGE)
+		if (ata_link_active(link))
+			break;
+
+        if (!link)
+                link = &ap->link;
+
+	qc = ata_qc_from_tag(ap, link->active_tag);
 	if (qc && !(qc->tf.flags & ATA_TFLAG_POLLING))
 		return qc;
 	return NULL;
@@ -2764,6 +2784,11 @@ static void mv_err_intr(struct ata_port *ap)
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
+#ifdef MY_ABC_HERE
+		if (edma_err_cause & EDMA_ERR_DEV_CON) {
+			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+		}
+#endif
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, edma_err_cause & EDMA_ERR_DEV_DCON ?
 			"dev disconnect" : "dev connect");
@@ -2872,6 +2897,9 @@ static void mv_process_crpb_entries(struct ata_port *ap, struct mv_port_priv *pp
 	in_index = (readl(port_mmio + EDMA_RSP_Q_IN_PTR)
 			>> EDMA_RSP_Q_PTR_SHIFT) & MV_MAX_Q_DEPTH_MASK;
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	dma_io_sync();
+#endif
 	/* Process new responses from since the last time we looked */
 	while (in_index != pp->resp_idx) {
 		unsigned int tag;
@@ -4396,6 +4424,32 @@ static int mv_platform_resume(struct platform_device *pdev)
 #define mv_platform_resume NULL
 #endif
 
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+void mv_pci_shutdown(struct pci_dev *pdev){
+	int i;
+	struct ata_host *host = dev_get_drvdata(&pdev->dev);
+	struct Scsi_Host *shost;
+
+	if(NULL == host){
+		goto END;
+	}
+
+		for (i = 0; i < host->n_ports; i++) {
+			shost = host->ports[i]->scsi_host;
+			if (shost->hostt->syno_host_poweroff_task) {
+				shost->hostt->syno_host_poweroff_task(shost);
+			}
+	}
+
+	if (pdev->irq >= 0) {
+		free_irq(pdev->irq, host);
+		pdev->irq = -1;
+	}
+END:
+	return;
+}
+#endif
+
 static struct platform_driver mv_platform_driver = {
 	.probe			= mv_platform_probe,
 	.remove			= __devexit_p(mv_platform_remove),
@@ -4415,12 +4469,14 @@ static int mv_pci_init_one(struct pci_dev *pdev,
 static int mv_pci_device_resume(struct pci_dev *pdev);
 #endif
 
-
 static struct pci_driver mv_pci_driver = {
 	.name			= DRV_NAME,
 	.id_table		= mv_pci_tbl,
 	.probe			= mv_pci_init_one,
 	.remove			= ata_pci_remove_one,
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+	.shutdown		= mv_pci_shutdown,
+#endif
 #ifdef CONFIG_PM
 	.suspend		= ata_pci_device_suspend,
 	.resume			= mv_pci_device_resume,

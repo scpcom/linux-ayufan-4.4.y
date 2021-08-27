@@ -28,10 +28,15 @@ extern long g_hdd_hotplug;
 #if defined(CONFIG_SYNO_CEDARVIEW)
 static int PrzPinMap[]   = {33, 35, 49, 18};
 static int HddEnPinMap[] = {16, 20, 21, 32};
+#elif defined(CONFIG_ARCH_GEN3)
+static int PrzPinMap[]   = {17, 18};
+static int HddEnPinMap[] = {9, 10};
 #else
 static int *PrzPinMap = NULL;
 static int *HddEnPinMap = NULL;
 #endif
+
+static u8 gblInversePresent = 0;
 
 #if defined(CONFIG_SYNO_X64)
 extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
@@ -132,7 +137,11 @@ static int syno_hddmon_unplug_monitor(void *args)
 #if defined(CONFIG_SYNO_X64)
 			syno_pch_lpc_gpio_pin(pData->iHddPrzPinMap[iIdx], &iPrzPinVal, 0);
 #else
+			if (gblInversePresent) {
+				iPrzPinVal = !gpio_get_value(pData->iHddPrzPinMap[iIdx]);
+			} else {
 				iPrzPinVal = gpio_get_value(pData->iHddPrzPinMap[iIdx]);
+			}
 #endif
 
 			if (iPrzPinVal) {
@@ -178,7 +187,11 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 #if defined(CONFIG_SYNO_X64)
 		syno_pch_lpc_gpio_pin(pData->iHddPrzPinMap[iIdx], &iPrzPinVal, 0);
 #else
+		if (gblInversePresent) {
+			iPrzPinVal = !gpio_get_value(pData->iHddPrzPinMap[iIdx]);
+		} else {
 			iPrzPinVal = gpio_get_value(pData->iHddPrzPinMap[iIdx]);
+		}
 #endif
 
 		if(pData->blHddEnStat[iIdx] != iPrzPinVal) {
@@ -221,13 +234,20 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 		goto END;
 	}
 
+#if defined(CONFIG_ARCH_GEN3)
+	syno_hddmon_task(pData);
+#else
 	for(iIdx = 0; iIdx < pData->iMaxHddNum; iIdx++) {
 		pData->iProcessingIdx = iIdx;
 
 #if defined(CONFIG_SYNO_X64)
 		syno_pch_lpc_gpio_pin(pData->iHddPrzPinMap[iIdx], &iPrzPinVal, 0);
 #else
+		if (gblInversePresent) {
+			iPrzPinVal = !gpio_get_value(pData->iHddPrzPinMap[iIdx]);
+		}else{
 			iPrzPinVal = gpio_get_value(pData->iHddPrzPinMap[iIdx]);
+		}
 #endif
 		/* HDD Enable pins must be high just after boot-up,
 		 * so turns the pins to low if the hdds do not present.
@@ -245,6 +265,7 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 
 	}
 
+#endif /* CONFIG_ARCH_GEN3 */
 END:
 	return;
 }
@@ -283,6 +304,10 @@ static int __init syno_hddmon_init(void)
 {
 	int iRet = -1;
 
+#if defined(CONFIG_ARCH_GEN3)
+	gblInversePresent = 1;
+#endif
+
 	iRet = syno_hddmon_data_init(&synoHddMonData);
 	if( 0 > iRet) {
 		goto END;
@@ -300,6 +325,8 @@ static int __init syno_hddmon_init(void)
 	}
 
 	wake_up_process(pHddPrzPolling);
+
+	printk("Syno_HddMon: Initialization completed.\n");
 
 	iRet = 0;
 END:

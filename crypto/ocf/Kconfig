@@ -2,12 +2,8 @@ menu "OCF Configuration"
 
 config OCF_OCF
 	tristate "OCF (Open Cryptograhic Framework)"
-	select SYNO_USE_OCF_LINUX
 	help
 	  A linux port of the OpenBSD/FreeBSD crypto framework.
-
-config SYNO_USE_OCF_LINUX
-	bool
 
 config OCF_RANDOMHARVEST
 	bool "crypto random --- harvest entropy for /dev/random"
@@ -87,12 +83,6 @@ config OCF_EP80579
 	depends on OCF_OCF
 	help
 	  OCF driver for the Intel EP80579 Integrated Processor Product Line.
-
-config OCF_CRYPTOCTEON
-	tristate "cryptocteon (HW crypto engine)"
-	depends on OCF_OCF
-	help
-	  OCF driver for the Cavium OCTEON Processors.
 
 config OCF_OCFNULL
 	tristate "ocfnull (fake crypto engine)"

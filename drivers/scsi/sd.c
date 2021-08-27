@@ -111,6 +111,24 @@ extern int syno_hibernation_log_sec;
 extern int gSynoHasDynModule;
 #endif
 
+#ifdef CONFIG_SYNO_ARMADA
+extern int gSynoUSBStation;
+#endif
+
+#ifdef MY_ABC_HERE
+
+struct SpinupQueue {
+	spinlock_t q_lock;
+	unsigned int q_id;
+	atomic_t q_spinup_quota;
+	struct list_head q_disk_list;
+	struct list_head q_head;
+};
+
+LIST_HEAD(SpinupListHead);
+DEFINE_SPINLOCK(SpinupListLock);
+#endif /* MY_ABC_HERE */
+
 static void sd_config_discard(struct scsi_disk *, unsigned int);
 static int  sd_revalidate_disk(struct gendisk *);
 static void sd_unlock_native_capacity(struct gendisk *disk);
@@ -224,6 +242,271 @@ sd_store_manage_start_stop(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
+#ifdef MY_ABC_HERE
+
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+static void
+SpinupQueueDump(struct SpinupQueue *q)
+{
+	struct scsi_device *d;
+
+	printk(" QUEUE %d:\n", q->q_id);
+	list_for_each_entry(d, &(q->q_disk_list), spinup_list) {
+		printk("  disk [%d]\n", d->id);
+	}
+}
+
+static void
+SpinupQueueDumpAll(void)
+{
+	struct SpinupQueue *q;
+
+	printk(" -------- queue dump\n");
+	list_for_each_entry(q, &SpinupListHead, q_head) {
+		SpinupQueueDump(q);
+	}
+	printk(" ======== queue dump\n");
+}
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
+
+/**
+ *
+ * Must be called with lock held.
+ */
+static struct SpinupQueue *
+SpinupQueueFindById(unsigned int id)
+{
+	struct SpinupQueue *q;
+
+	list_for_each_entry(q, &SpinupListHead, q_head) {
+		if (q->q_id == id) {
+			return q;
+		}
+	}
+	return NULL;
+}
+
+/**
+ *
+ * Must be called with lock held.
+ */
+static struct SpinupQueue *
+SpinupQueueAlloc(unsigned int id)
+{
+	struct SpinupQueue *qNew;
+
+	/* TODO check parameter */
+
+	qNew = kmalloc(sizeof(struct SpinupQueue), GFP_KERNEL);
+	INIT_LIST_HEAD(&(qNew->q_disk_list));
+	INIT_LIST_HEAD(&(qNew->q_head));
+	qNew->q_id = id;
+	spin_lock_init(&(qNew->q_lock));
+	atomic_set(&(qNew->q_spinup_quota), 4); /* TODO set to some changable default value */
+
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+	printk(" == add queue %p for id %d\n", qNew, id);
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
+	return qNew;
+}
+
+static int
+SpinupQueueDiskAdd(struct SpinupQueue *sq, struct scsi_device *sd)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&(sq->q_lock), flags);
+
+	list_add_tail(&(sd->spinup_list), &(sq->q_disk_list));
+	sd->spinup_queue = sq;
+
+	spin_unlock_irqrestore(&(sq->q_lock), flags);
+	return 0;
+}
+
+static int
+SpinupQueueDiskRemove(struct SpinupQueue *pSQ, struct scsi_device *pSD)
+{
+	unsigned long flags;
+
+	if (NULL == pSD->spinup_queue) {
+		return 0;
+	}
+	spin_lock_irqsave(&(pSQ->q_lock), flags);
+
+	BUG_ON(pSQ != pSD->spinup_queue);
+
+	list_del(&(pSD->spinup_list));
+	pSD->spinup_queue = NULL;
+
+	spin_unlock_irqrestore(&(pSQ->q_lock), flags);
+	return 0;
+}
+
+static void
+SpinupQueueSet(struct scsi_device *sdp, unsigned int new_id)
+{
+	unsigned int old_id;
+	struct SpinupQueue *qOld;
+	struct SpinupQueue *qNew;
+
+	unsigned long flags;
+
+	/* lock */
+	spin_lock_irqsave(&SpinupListLock, flags);
+
+	old_id = sdp->spinup_queue_id;
+
+	if (old_id == new_id) {
+		/* No change. Do nothing. */
+		spin_unlock_irqrestore(&SpinupListLock, flags);
+		return;
+	}
+	/* If it was in another queue, remove first. */
+	if (NULL != sdp->spinup_queue) {
+		unsigned long flags_sd;
+
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+		sdev_printk(KERN_ERR, sdp, " = remove disk from queue %d\n",
+				sdp->spinup_queue->q_id);
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
+		/* delete disk from old list */
+		qOld = sdp->spinup_queue;
+		BUG_ON(NULL == qOld);
+		SpinupQueueDiskRemove(qOld, sdp);
+
+		/* Delete the queue if it is empty */
+		spin_lock_irqsave(&(qOld->q_lock), flags_sd);
+		if (list_empty(&(qOld->q_disk_list))) {
+			list_del(&(qOld->q_head));
+		}
+		spin_unlock_irqrestore(&(qOld->q_lock), flags_sd);
+	}
+	if (new_id) { /* Want to be added to a new queue */
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+		sdev_printk(KERN_ERR, sdp, " = add disk from queue %d\n",
+				new_id);
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
+
+		/* Find list of the given id */
+		 
+		qNew = SpinupQueueFindById(new_id);
+		/* if not found, create a new list for this id. */
+		if (NULL == qNew) {
+			/* alloc & init */
+			qNew = SpinupQueueAlloc(new_id);
+			/* Insert into queue list */
+			list_add_tail( &(qNew->q_head), &SpinupListHead);
+		}
+		/* then add self into disk list of queue. */
+		SpinupQueueDiskAdd(qNew, sdp);
+
+	}
+	sdp->spinup_queue_id = new_id;
+
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+	SpinupQueueDumpAll();
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
+	/* TODO create queue, add to existing queue, or remove queue */
+	spin_unlock_irqrestore(&SpinupListLock, flags);
+
+}
+
+static ssize_t
+sd_store_spinup_queue_id(struct device *dev, struct device_attribute *attr,
+			   const char *buf, size_t count)
+{
+	struct scsi_disk *sdkp = to_scsi_disk(dev);
+	struct scsi_device *sdp = sdkp->device;
+	unsigned int new_id;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EACCES;
+
+	new_id = simple_strtoul(buf, NULL, 10);
+
+	SpinupQueueSet(sdp, new_id);
+
+	return count;
+}
+
+/**
+ *
+ * Check if disk can spin up, and log spinup status.
+ *
+ * To be called from scsi midlayer to reflect spinup status.
+ *
+ * Return:
+ * - 1 if caller can spinup disk
+ * - 0 if caller must not spin up disk.
+ */
+int
+SynoSpinupBegin(struct scsi_device *device)
+{
+	int ret = 0;
+	struct SpinupQueue *q;
+
+	/* Only handle disks that has been added to queue. */
+	q = device->spinup_queue;
+	if (NULL == q) {
+		goto Return;
+	}
+	/* Check if this disk is spinning up */
+	if (device->spinup_in_process) {
+		/* Already spinning up. */
+		goto Return;
+	}
+	/* Atomic dec */
+	if (atomic_read(&(device->spinup_queue->q_spinup_quota))) {
+		atomic_dec(&(device->spinup_queue->q_spinup_quota));
+	} else {
+		/* No quota to spin up more disks. Just let it retry. */
+		goto Return;
+	}
+
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+	sdev_printk(KERN_ERR, device, "Spinup disk...\n");
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
+	device->spinup_in_process = 1;
+
+	/* caller can spin up disk now. */
+	ret = 1;
+Return:
+	return ret;
+}
+
+/**
+ * Clean up spinup status.
+ *
+ * Called from SCSI midlayer when spinup is done.
+ */
+void SynoSpinupEnd(struct scsi_device *sdev)
+{
+	struct SpinupQueue *q;
+
+	q = sdev->spinup_queue;
+	atomic_inc(&(sdev->spinup_queue->q_spinup_quota));
+	sdev->spinup_in_process = 0;
+#ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
+	sdev_printk(KERN_ERR, sdev, "Spinup done. Q %d remaining %d \n",
+			sdev->spinup_queue_id,
+			atomic_read(&(sdev->spinup_queue->q_spinup_quota)));
+#endif /* SYNO_SAS_SPINUP_DELAY_DEBUG */
+}
+
+int SynoSpinupRemove(struct scsi_device *sdev)
+{
+	unsigned long flags;
+	int ret;
+
+	spin_lock_irqsave(&SpinupListLock, flags);
+	ret = SpinupQueueDiskRemove(sdev->spinup_queue, sdev);
+	spin_unlock_irqrestore(&SpinupListLock, flags);
+
+	return ret;
+}
+#endif /* MY_ABC_HERE */
+
 static ssize_t
 sd_store_allow_restart(struct device *dev, struct device_attribute *attr,
 		       const char *buf, size_t count)
@@ -269,6 +552,18 @@ sd_show_manage_start_stop(struct device *dev, struct device_attribute *attr,
 
 	return snprintf(buf, 20, "%u\n", sdp->manage_start_stop);
 }
+
+#ifdef MY_ABC_HERE
+static ssize_t
+sd_show_spinup_queue_id(struct device *dev, struct device_attribute *attr,
+			  char *buf)
+{
+	struct scsi_disk *sdkp = to_scsi_disk(dev);
+	struct scsi_device *sdp = sdkp->device;
+
+	return snprintf(buf, 20, "%u\n", sdp->spinup_queue_id);
+}
+#endif /* MY_ABC_HERE */
 
 static ssize_t
 sd_show_allow_restart(struct device *dev, struct device_attribute *attr,
@@ -383,6 +678,10 @@ static struct device_attribute sd_disk_attrs[] = {
 	       sd_store_allow_restart),
 	__ATTR(manage_start_stop, S_IRUGO|S_IWUSR, sd_show_manage_start_stop,
 	       sd_store_manage_start_stop),
+#ifdef MY_ABC_HERE
+	__ATTR(spinup_queue_id, S_IRUGO|S_IWUSR, sd_show_spinup_queue_id,
+	       sd_store_spinup_queue_id),
+#endif /* MY_ABC_HERE */
 	__ATTR(protection_type, S_IRUGO, sd_show_protection_type, NULL),
 	__ATTR(protection_mode, S_IRUGO, sd_show_protection_mode, NULL),
 	__ATTR(app_tag_own, S_IRUGO, sd_show_app_tag_own, NULL),
@@ -662,77 +961,6 @@ static void sd_unprep_fn(struct request_queue *q, struct request *rq)
 	}
 }
 
-#ifdef MY_ABC_HERE
-/* the function is used for update hdd hibernation timer
- * @param sdp: SCSI device 
- * @param SCpnt: SCSI command
- * @param disk: the device logical disk name(ex: sdX)
- **/
-static void syno_hibernation_timer_update(struct scsi_device *sdp, struct scsi_cmnd *SCpnt, struct gendisk *disk)
-{
-	if(NULL == sdp || NULL == SCpnt ){
-		printk("%s[%d]:%s(), bad parameter", __FILE__, __LINE__, __FUNCTION__);
-		goto out;
-	}
-
-	/*the following command which for eunit chip shouldn't wake up hdd, so ignore it */
-	if (ATA_16 == SCpnt->cmnd[0] && (ATA_CMD_PMP_WRITE == SCpnt->cmnd[14] ||ATA_CMD_PMP_READ == SCpnt->cmnd[14])){
-		goto out;
-	}
-
-	/* When spindown or not SMART command(noly marvell vendor unique command and ATA_16 command)
-	 * Update idle-since time
-	 * Ignore SMART command because we will use SAMRT to read temperature periodically.
-	 * But if it's in spindown, we always update the idle timer */
-	if (sdp->spindown || (0x0C != SCpnt->cmnd[0] && ATA_16 != SCpnt->cmnd[0])) {
-		sdp->idle = jiffies;
-		/* only sata port into this case, usb case is in the following code */
-		if(SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type && sdp->spindown) {
-			if(syno_hibernation_log_sec > 0) {
-				/*our SMART read command (SCpnt[0]:ATA_16, SCpnt[14]: 0xb0), it's "disk" is null, so we must check it.*/
-				if (NULL == disk) {
-					printk(KERN_WARNING"%s[%d]:%s(), <NULL>: cmd 0x%x spin up by pid=%d, comm=%s\n",
-						   __FILE__, __LINE__, __FUNCTION__, SCpnt->cmnd[0], current->pid, current->comm);
-				} else {
-					printk(KERN_WARNING"%s[%d]:%s(), %s: cmd 0x%x spin up by pid=%d, comm=%s\n",
-						   __FILE__, __LINE__, __FUNCTION__,
-						   disk->disk_name, SCpnt->cmnd[0], current->pid, current->comm);
-				}
-			}
-			sdp->spindown = 0;
-		}
-	}
-	/* usb device case  */
-	if (sdp->spindown) {
-		if(syno_hibernation_log_sec > 0) {
-			char szBuf[128];
-			struct mm_struct *mm;
-			int len;
-			if (current) {
-				mm = current->mm;
-				if (mm) {
-					len = mm->arg_end - mm->arg_start;
-					memset(szBuf, 0, sizeof(szBuf));
-					memcpy(szBuf, (unsigned char *)mm->arg_start, len);
-					printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid=%d, name=%s\n",
-						   __FILE__, __LINE__, __FUNCTION__,
-						   disk->disk_name, current->pid, szBuf);
-				} else {
-					printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid = %d, current->mm = NULL\n",
-						   __FILE__, __LINE__, __FUNCTION__,
-						   disk->disk_name, current->pid);
-				}
-			} else {
-				printk(KERN_WARNING"%s[%d]:%s(), current = NULL\n",
-					   __FILE__, __LINE__, __FUNCTION__);
-			}
-		}
-		sdp->spindown = 0;
-	}
-out:
-	return;
-}
-#endif
 /**
  *	sd_init_command - build a scsi (read or write) command from
  *	information in the request structure.
@@ -765,21 +993,6 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 		goto out;
 	} else if (rq->cmd_type == REQ_TYPE_BLOCK_PC) {
 		ret = scsi_setup_blk_pc_cmnd(sdp, rq);
-#ifdef MY_ABC_HERE
-	if(BLKPREP_OK == ret) {
-		SCpnt = rq->special;
-		if(NULL != SCpnt && NULL != SCpnt->cmnd){
-			if(START_STOP == SCpnt->cmnd[0] && 0 == SCpnt->cmnd[4]) {
-				if(SYNO_PORT_TYPE_SATA != sdp->host->hostt->syno_port_type) {
-					sdp->spindown = 1;
-				}
-			}
-			if (TEST_UNIT_READY != SCpnt->cmnd[0]) {
-				syno_hibernation_timer_update(sdp, SCpnt, disk);
-			}
-		}
-	}
-#endif
 		goto out;
 	} else if (rq->cmd_type != REQ_TYPE_FS) {
 		ret = BLKPREP_KILL;
@@ -800,10 +1013,6 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 					"count=%d\n",
 					(unsigned long long)block,
 					this_count));
-
-#ifdef MY_ABC_HERE
-	syno_hibernation_timer_update(sdp, SCpnt, disk);
-#endif
 
 	if (!sdp || !scsi_device_online(sdp) ||
 	    block + blk_rq_sectors(rq) > get_capacity(disk)) {
@@ -1260,9 +1469,6 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 #ifdef MY_ABC_HERE
 		case SD_IOCTL_IDLE:
 		{
-			/* idle_original would set back to idle when standby
-			 * because scemd would query this variable before hibernation */
-			sdp->idle_original = sdp->idle;
 			return (jiffies - sdp->idle) / HZ + 1;
 		}
 		case SD_IOCTL_SUPPORT_SLEEP:
@@ -1270,26 +1476,6 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 			int *pCanSleep = (int *)arg;
 			*pCanSleep = sdp->nospindown ? 0 : 1;
 			return 0;
-		}
-		case SCSI_IOCTL_STOP_UNIT:
-		{
-			error = 0;
-			if (sdp->nospindown == 0) {
-				if ((error = scsi_ioctl(sdp, cmd, p)) == 0) {
-					sdp->spindown = 1;
-				}
-			}
-			return error;
-		}
-		case SCSI_IOCTL_START_UNIT:
-		{
-			error = 0;
-			if (sdp->nospindown == 0) {
-				if ((error = scsi_ioctl(sdp, cmd, p)) == 0) {
-					sdp->spindown = 0;
-				}
-			}
-			return error;
 		}
 #endif /* MY_ABC_HERE */
 		default:
@@ -2874,6 +3060,7 @@ static int sd_probe(struct device *dev)
 #ifdef	MY_ABC_HERE
 	struct ata_port *ap;
 	int start_index;
+	int iRetry = 0;
 	u32 want_idx = 0;
 #endif
 #ifdef	SYNO_SAS_DISK_NAME
@@ -2928,9 +3115,9 @@ static int sd_probe(struct device *dev)
 #endif
 
 #ifdef MY_ABC_HERE
-		if (SYNO_DISK_USB == sdkp->synodisktype) {
+		sdp->idle = jiffies;
 		sdp->nospindown = 0;
-		}
+		sdp->spindown = 0;
 #endif
 
 		spin_lock(&sd_index_lock);
@@ -2962,7 +3149,24 @@ static int sd_probe(struct device *dev)
 					break;
 				}
 #endif
+
+#ifdef CONFIG_SYNO_ARMADA
+				/* The device node of internal micro SD card of USB station 3 should be fixed to sda. */
+				if (1 == gSynoHasDynModule && 1 == gSynoUSBStation) {
+					struct us_data *us = host_to_us(sdp->host);
+					struct usb_device *usbdev = us->pusb_dev;
+
+					if (0 == strcmp((&(&usbdev->dev)->kobj)->name, SYNO_INTERNAL_MICROSD_NAME)) {
+						want_idx = 0;
+					} else {
 				want_idx = SYNO_MAX_INTERNAL_DISK + 1;
+					}
+				} else {
+					want_idx = SYNO_MAX_INTERNAL_DISK + 1;
+				}
+#else /* CONFIG_SYNO_ARMADA */
+				want_idx = SYNO_MAX_INTERNAL_DISK + 1;
+#endif /* CONFIG_SYNO_ARMADA */
 				break;
 			case SYNO_DISK_SAS:
 			case SYNO_DISK_SATA:
@@ -2989,9 +3193,9 @@ static int sd_probe(struct device *dev)
 			sdkp->synoindex = synoidx;
 		}
 #endif
-		// try again
-		if (want_idx != index && 
-			(SYNO_DISK_SATA == sdkp->synodisktype)) {
+		// try at most 5 times
+		while (want_idx != index &&
+			(SYNO_DISK_SATA == sdkp->synodisktype) && iRetry < 15) {
 			/* Sometimes raid is not release all scsi disk yet. Try to delay and reget */
 			printk("want_idx %d index %d. delay and reget\n", want_idx, index);
 
@@ -3004,6 +3208,7 @@ static int sd_probe(struct device *dev)
 			error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
 
 			printk("want_idx %d index %d\n", want_idx, index);
+			iRetry++;
 		}
 
 #else /* MY_ABC_HERE */

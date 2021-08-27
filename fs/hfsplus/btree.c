@@ -104,10 +104,6 @@ struct hfs_btree *hfs_btree_open(struct super_block *sb, u32 id)
 				tree->max_key_len);
 			goto fail_page;
 		}
-		if (!(tree->attributes & HFS_TREE_VARIDXKEYS)) {
-			printk(KERN_ERR "hfs: invalid attribute btree flag\n");
-			goto fail_page;
-		}
 
 		tree->keycmp = hfsplus_attr_cmp_key;
 		break;

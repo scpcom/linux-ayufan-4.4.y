@@ -159,7 +159,7 @@ struct _Domain_Device {
 #define PORT_SETTING_PM_FUNCTIONAL		MV_BIT(2)	// added by Harriet for PM hot plug
 #define PORT_SETTING_DURING_RETRY		MV_BIT(3)
 typedef void (*mv_reset_cmd_completion)(MV_PVOID);
-#define MAX_RESET_TIMES 3	
+#define MAX_RESET_TIMES 1
 
 #define PORT_ERROR_AT_PLUGIN			1
 #define PORT_ERROR_AT_RUNTIME		2

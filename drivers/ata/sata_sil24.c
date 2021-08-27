@@ -376,11 +376,68 @@ static const struct pci_device_id sil24_pci_tbl[] = {
 	{ } /* terminate list */
 };
 
+#if defined(SYNO_ATA_SHUTDOWN_FIX) && defined(CONFIG_SYNO_X64)
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+extern int grgPwrCtlPin[];
+#endif
+
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+void sil24_pci_shutdown(struct pci_dev *pdev){
+	int i;
+	int iValue = 0;
+	int iPin = -1;
+	bool blIsNeedFreeIRQ = true;
+	struct ata_host *host = dev_get_drvdata(&pdev->dev);
+	struct Scsi_Host *shost;
+
+	if(NULL == host){
+		goto END;
+	}
+
+		for (i = 0; i < host->n_ports; i++) {
+
+		if (PWR_PMP_ZERO_WATT_TYPE != syno_get_deep_sleep_pwr_type(host->ports[i])) {
+			/* If the EUnit of this port doesn't support ZERO_WATT deepsleep, we shouldn't free IRQ,
+			 * we will poweroff it in  __syno_host_power_ctl_work, but only when DS do poweroff not reboot
+			 * NOTE: If this port doesn't plug any EUnit, it will also set blIsNeedFreeIRQ to false */
+			blIsNeedFreeIRQ = false;
+		} else {
+			/* we will poweroff EUnit if it support ZERO_WATT deepsleep whether poweroff or reboot */
+			shost = host->ports[i]->scsi_host;
+			if (shost->hostt->syno_host_poweroff_task) {
+				shost->hostt->syno_host_poweroff_task(shost);
+			}
+#ifdef CONFIG_SYNO_X64
+			/* get pwrctl GPIO pin */
+			if (!(iPin = grgPwrCtlPin[host->ports[i]->print_id])) {
+				continue;
+			}
+			iValue = 0;
+			if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
+				continue;
+			}
+			mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
+#endif
+		}
+	}
+
+	if (true == blIsNeedFreeIRQ && pdev->irq >= 0) {
+		free_irq(pdev->irq, host);
+		pdev->irq = -1;
+	}
+END:
+	return;
+}
+#endif
+
 static struct pci_driver sil24_pci_driver = {
 	.name			= DRV_NAME,
 	.id_table		= sil24_pci_tbl,
 	.probe			= sil24_init_one,
 	.remove			= ata_pci_remove_one,
+#ifdef SYNO_ATA_SHUTDOWN_FIX
+	.shutdown		= sil24_pci_shutdown,
+#endif
 #ifdef CONFIG_PM
 	.suspend		= ata_pci_device_suspend,
 	.resume			= sil24_pci_device_resume,
@@ -769,6 +826,10 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 	int tout_msec, rc;
 	u32 tmp;
 
+#ifdef MY_ABC_HERE
+	link->SynoIsSil3132 = 1;
+#endif
+
  retry:
 	/* Sometimes, DEV_RST is not enough to recover the controller.
 	 * This happens often after PM DMA CS errata.
@@ -1051,6 +1112,10 @@ static int sil24_pmp_hardreset(struct ata_link *link, unsigned int *class,
 		sata_std_hardreset(link, class, deadline);
 	}
 #endif
+
+#ifdef MY_ABC_HERE
+	link->SynoIsSil3132PM = 1;
+#endif
 	return sata_std_hardreset(link, class, deadline);
 }
 
@@ -1118,6 +1183,9 @@ static void sil24_error_intr(struct ata_port *ap)
 #endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
+#endif
+#ifdef MY_ABC_HERE
+		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 #endif
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, "%s",

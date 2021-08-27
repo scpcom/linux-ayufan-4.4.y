@@ -25,9 +25,11 @@
 #ifdef CONFIG_SYNO_USE_OCF_LINUX
 #define CRYPTODEV_MINOR		70	/* /dev/crypto */
 #endif
-#ifdef CONFIG_ARCH_FEROCEON
+#if defined(CONFIG_SYNO_ARMADA)
 #define CESADEV_MINOR		71	/* marvell CESA     */
 #define BTNSDEV_MINOR  		72	/* Marvell btns */
+#define SLICDEV_MINOR		73	/* Marvell SLIC control device */
+#define TDMDEV_MINOR		74	/* Marvell TDM test device */
 #endif
 #define WATCHDOG_MINOR		130	/* Watchdog timer     */
 #define TEMP_MINOR		131	/* Temperature Sensor */

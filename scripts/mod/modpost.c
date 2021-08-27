@@ -850,8 +850,6 @@ static void check_section(const char *modname, struct elf_info *elf,
 	}
 }
 
-
-
 #define ALL_INIT_DATA_SECTIONS \
 	".init.setup$", ".init.rodata$", \
 	".devinit.rodata$", ".cpuinit.rodata$", ".meminit.rodata$", \

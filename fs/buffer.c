@@ -109,9 +109,16 @@ static int quiet_error(struct buffer_head *bh)
 static void buffer_io_error(struct buffer_head *bh)
 {
 	char b[BDEVNAME_SIZE];
+
+#ifdef MY_ABC_HERE
+	    if (printk_ratelimit()) {
+#endif
 	printk(KERN_ERR "Buffer I/O error on device %s, logical block %Lu\n",
 			bdevname(bh->b_bdev, b),
 			(unsigned long long)bh->b_blocknr);
+#ifdef MY_ABC_HERE
+		}
+#endif
 }
 
 /*
@@ -981,6 +988,7 @@ init_page_buffers(struct page *page, struct block_device *bdev,
 			bh->b_blocknr = block;
 			if (uptodate)
 				set_buffer_uptodate(bh);
+			if (block < end_block)
 				set_buffer_mapped(bh);
 		}
 		block++;

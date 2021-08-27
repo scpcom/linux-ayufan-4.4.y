@@ -6,7 +6,7 @@
  *          Title:  MPI Configuration messages and pages
  *  Creation Date:  November 10, 2006
  *
- *    mpi2_cnfg.h Version:  02.00.20
+ *    mpi2_cnfg.h Version:  02.00.22
  *
  *  Version History
  *  ---------------
@@ -141,6 +141,14 @@
  *                      MPI2_CONFIG_PAGE_IOC_7.
  *  03-09-11  02.00.19  Fixed IO Unit Page 10 (to match the spec).
  *  05-25-11  02.00.20  Cleaned up a few comments.
+ *  08-24-11  02.00.21  Marked the IO Unit Page 7 PowerManagementCapabilities
+ *                      for PCIe link as obsolete.
+ *                      Added SpinupFlags field containing a Disable Spin-up
+ *                      bit to the MPI2_SAS_IOUNIT4_SPINUP_GROUP fields of
+ *                      SAS IO Unit Page 4.
+ *  11-18-11  02.00.22  Added define MPI2_IOCPAGE6_CAP_FLAGS_4K_SECTORS_SUPPORT.
+ *                      Added UEFIVersion field to BIOS Page 1 and defined new
+ *                      BiosOptions bits.
  *  --------------------------------------------------------------------------
  */
 
@@ -870,8 +878,8 @@ typedef struct _MPI2_CONFIG_PAGE_IO_UNIT_7 {
 #define MPI2_IOUNITPAGE7_PMCAP_12_5_PCT_IOCSPEED    (0x00000400)
 #define MPI2_IOUNITPAGE7_PMCAP_25_0_PCT_IOCSPEED    (0x00000200)
 #define MPI2_IOUNITPAGE7_PMCAP_50_0_PCT_IOCSPEED    (0x00000100)
-#define MPI2_IOUNITPAGE7_PMCAP_PCIE_WIDTH_CHANGE    (0x00000008)
-#define MPI2_IOUNITPAGE7_PMCAP_PCIE_SPEED_CHANGE    (0x00000004)
+#define MPI2_IOUNITPAGE7_PMCAP_PCIE_WIDTH_CHANGE    (0x00000008) /* obsolete */
+#define MPI2_IOUNITPAGE7_PMCAP_PCIE_SPEED_CHANGE    (0x00000004) /* obsolete */
 
 /* defines for IO Unit Page 7 IOCTemperatureUnits field */
 #define MPI2_IOUNITPAGE7_IOC_TEMP_NOT_PRESENT       (0x00)
@@ -1085,9 +1093,10 @@ typedef struct _MPI2_CONFIG_PAGE_IOC_6
 } MPI2_CONFIG_PAGE_IOC_6, MPI2_POINTER PTR_MPI2_CONFIG_PAGE_IOC_6,
   Mpi2IOCPage6_t, MPI2_POINTER pMpi2IOCPage6_t;
 
-#define MPI2_IOCPAGE6_PAGEVERSION                       (0x04)
+#define MPI2_IOCPAGE6_PAGEVERSION                       (0x05)
 
 /* defines for IOC Page 6 CapabilitiesFlags */
+#define MPI2_IOCPAGE6_CAP_FLAGS_4K_SECTORS_SUPPORT      (0x00000020)
 #define MPI2_IOCPAGE6_CAP_FLAGS_RAID10_SUPPORT          (0x00000010)
 #define MPI2_IOCPAGE6_CAP_FLAGS_RAID1_SUPPORT           (0x00000008)
 #define MPI2_IOCPAGE6_CAP_FLAGS_RAID1E_SUPPORT          (0x00000004)
@@ -1161,7 +1170,7 @@ typedef struct _MPI2_CONFIG_PAGE_BIOS_1
 	U32                     Reserved1;                  /* 0x0C */
 	U32                     DeviceSettings;             /* 0x10 */
 	U16                     NumberOfDevices;            /* 0x14 */
-    U16                     Reserved2;                  /* 0x16 */
+	U16                     UEFIVersion;                /* 0x16 */
 	U16                     IOTimeoutBlockDevicesNonRM; /* 0x18 */
 	U16                     IOTimeoutSequential;        /* 0x1A */
 	U16                     IOTimeoutOther;             /* 0x1C */
@@ -1169,9 +1178,14 @@ typedef struct _MPI2_CONFIG_PAGE_BIOS_1
 } MPI2_CONFIG_PAGE_BIOS_1, MPI2_POINTER PTR_MPI2_CONFIG_PAGE_BIOS_1,
   Mpi2BiosPage1_t, MPI2_POINTER pMpi2BiosPage1_t;
 
-#define MPI2_BIOSPAGE1_PAGEVERSION                      (0x04)
+#define MPI2_BIOSPAGE1_PAGEVERSION                      (0x05)
 
 /* values for BIOS Page 1 BiosOptions field */
+#define MPI2_BIOSPAGE1_OPTIONS_MASK_UEFI_HII_REGISTRATION   (0x00000006)
+#define MPI2_BIOSPAGE1_OPTIONS_ENABLE_UEFI_HII              (0x00000000)
+#define MPI2_BIOSPAGE1_OPTIONS_DISABLE_UEFI_HII             (0x00000002)
+#define MPI2_BIOSPAGE1_OPTIONS_VERSION_CHECK_UEFI_HII       (0x00000004)
+
 #define MPI2_BIOSPAGE1_OPTIONS_DISABLE_BIOS                 (0x00000001)
 
 /* values for BIOS Page 1 IOCSettings field */
@@ -1199,6 +1213,11 @@ typedef struct _MPI2_CONFIG_PAGE_BIOS_1
 #define MPI2_BIOSPAGE1_DEVSET_DISABLE_NON_RM_LUN        (0x00000002)
 #define MPI2_BIOSPAGE1_DEVSET_DISABLE_OTHER_LUN         (0x00000001)
 
+/* defines for BIOS Page 1 UEFIVersion field */
+#define MPI2_BIOSPAGE1_UEFI_VER_MAJOR_MASK              (0xFF00)
+#define MPI2_BIOSPAGE1_UEFI_VER_MAJOR_SHIFT             (8)
+#define MPI2_BIOSPAGE1_UEFI_VER_MINOR_MASK              (0x00FF)
+#define MPI2_BIOSPAGE1_UEFI_VER_MINOR_SHIFT             (0)
 
 /* BIOS Page 2 */
 
@@ -1907,16 +1926,19 @@ typedef struct _MPI2_CONFIG_PAGE_SASIOUNIT_1
 
 /* see mpi2_sas.h for values for SAS IO Unit Page 1 ControllerPhyDeviceInfo values */
 
-
 /* SAS IO Unit Page 4 */
 
 typedef struct _MPI2_SAS_IOUNIT4_SPINUP_GROUP
 {
     U8          MaxTargetSpinup;            /* 0x00 */
     U8          SpinupDelay;                /* 0x01 */
-    U16         Reserved1;                  /* 0x02 */
+	U8          SpinupFlags;                /* 0x02 */
+	U8          Reserved1;                  /* 0x03 */
 } MPI2_SAS_IOUNIT4_SPINUP_GROUP, MPI2_POINTER PTR_MPI2_SAS_IOUNIT4_SPINUP_GROUP,
   Mpi2SasIOUnit4SpinupGroup_t, MPI2_POINTER pMpi2SasIOUnit4SpinupGroup_t;
+
+/* defines for SAS IO Unit Page 4 SpinupFlags */
+#define MPI2_SASIOUNIT4_SPINUP_DISABLE_FLAG         (0x01)
 
 /*
  * Host code (drivers, BIOS, utilities, etc.) should leave this define set to
@@ -2142,8 +2164,26 @@ typedef struct _MPI2_CONFIG_PAGE_SASIOUNIT_8 {
 #define MPI2_SASIOUNIT8_PM_IOUNIT_SATA_SLUMBER_MODE     (0x00000002)
 #define MPI2_SASIOUNIT8_PM_IOUNIT_SATA_PARTIAL_MODE     (0x00000001)
 
+/* SAS IO Unit Page 16 */
 
+typedef struct _MPI2_CONFIG_PAGE_SASIOUNIT16 {
+	MPI2_CONFIG_EXTENDED_PAGE_HEADER  Header;                  /* 0x00 */
+	U64                         TimeStamp;                     /* 0x08 */
+	U32                         Reserved1;                     /* 0x10 */
+	U32                         Reserved2;                     /* 0x14 */
+	U32                         FastPathPendedRequests;        /* 0x18 */
+	U32                         FastPathUnPendedRequests;      /* 0x1C */
+	U32                         FastPathHostRequestStarts;     /* 0x20 */
+	U32                         FastPathFirmwareRequestStarts; /* 0x24 */
+	U32                         FastPathHostCompletions;       /* 0x28 */
+	U32                         FastPathFirmwareCompletions;   /* 0x2C */
+	U32                         NonFastPathRequestStarts;      /* 0x30 */
+	U32			    NonFastPathHostCompletions;    /* 0x30 */
+} MPI2_CONFIG_PAGE_SASIOUNIT16,
+MPI2_POINTER PTR_MPI2_CONFIG_PAGE_SASIOUNIT16,
+Mpi2SasIOUnitPage16_t, MPI2_POINTER pMpi2SasIOUnitPage16_t;
 
+#define MPI2_SASIOUNITPAGE16_PAGEVERSION    (0x00)
 
 /****************************************************************************
 *   SAS Expander Config Pages

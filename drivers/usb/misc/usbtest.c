@@ -63,9 +63,6 @@ struct usbtest_dev {
 	struct usbtest_info	*info;
 	int			in_pipe;
 	int			out_pipe;
-#ifdef CONFIG_ARCH_FEROCEON
-	struct usb_endpoint_descriptor	*in_desc, *out_desc;
-#endif
 	int			in_iso_pipe;
 	int			out_iso_pipe;
 	struct usb_endpoint_descriptor	*iso_in, *iso_out;
@@ -81,11 +78,7 @@ static struct usb_device *testdev_to_usbdev(struct usbtest_dev *test)
 }
 
 /* set up all urbs so they can be used with either bulk or interrupt */
-#ifdef CONFIG_ARCH_FEROCEON
-#define UNLINK_RATE     1   /* msec */
-#else
 #define	INTERRUPT_RATE		1	/* msec/transfer */
-#endif
 
 #define ERROR(tdev, fmt, args...) \
 	dev_err(&(tdev)->intf->dev , fmt , ## args)
@@ -121,9 +114,6 @@ get_endpoints(struct usbtest_dev *dev, struct usb_interface *intf)
 			e = alt->endpoint + ep;
 			switch (e->desc.bmAttributes) {
 			case USB_ENDPOINT_XFER_BULK:
-#ifdef CONFIG_ARCH_FEROCEON
-			case USB_ENDPOINT_XFER_INT:
-#endif
 				break;
 			case USB_ENDPOINT_XFER_ISOC:
 				if (dev->info->iso)
@@ -165,29 +155,10 @@ found:
 	}
 
 	if (in) {
-#ifdef CONFIG_ARCH_FEROCEON
-		if(in->desc.bmAttributes == USB_ENDPOINT_XFER_INT) {
-			dev->in_pipe = usb_rcvintpipe (udev,
-			in->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
-			if(out)
-				dev->out_pipe = usb_sndintpipe (udev,
-				out->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
-		}
-		else {
-			dev->in_pipe = usb_rcvbulkpipe (udev,
-				in->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
-			if(out)
-				dev->out_pipe = usb_sndbulkpipe (udev,
-					out->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
-		}
-		dev->in_desc = &in->desc;
-		dev->out_desc = &out->desc;
-#else
 		dev->in_pipe = usb_rcvbulkpipe(udev,
 			in->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
 		dev->out_pipe = usb_sndbulkpipe(udev,
 			out->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
-#endif
 	}
 	if (iso_in) {
 		dev->iso_in = &iso_in->desc;
@@ -222,9 +193,6 @@ static void simple_callback(struct urb *urb)
 static struct urb *usbtest_alloc_urb(
 	struct usb_device	*udev,
 	int			pipe,
-#ifdef CONFIG_ARCH_FEROCEON
-	struct usb_endpoint_descriptor *desc,
-#endif
 	unsigned long		bytes,
 	unsigned		transfer_flags,
 	unsigned		offset)
@@ -235,19 +203,9 @@ static struct urb *usbtest_alloc_urb(
 	if (!urb)
 		return urb;
 	usb_fill_bulk_urb(urb, udev, pipe, NULL, bytes, simple_callback, NULL);
-#ifdef CONFIG_MV_INCLUDE_USB
-	if(desc != NULL) {
-		if( (udev->speed == USB_SPEED_HIGH) ||
-			((desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_ISOC) )
-			urb->interval = (1 << (desc->bInterval - 1));
-		else
-			urb->interval = desc->bInterval;
-	}
-#else
 	urb->interval = (udev->speed == USB_SPEED_HIGH)
 			? (INTERRUPT_RATE << 3)
 			: INTERRUPT_RATE;
-#endif
 	urb->transfer_flags = transfer_flags;
 	if (usb_pipein(pipe))
 		urb->transfer_flags |= URB_SHORT_NOT_OK;
@@ -350,21 +308,12 @@ static int simple_check_buf(struct usbtest_dev *tdev, struct urb *urb)
 		case 0:
 			expected = 0;
 			break;
-#ifdef CONFIG_ARCH_FEROCEON
-		/* mod255 stays in sync with short-terminated transfers,
-		 * or otherwise when host and gadget agree on how large
-		 * each usb transfer request should be.  resync is done
-		 * with set_interface or set_config.
-		 */
-		case 1:			/* mod 255 */
-#else
 		/* mod63 stays in sync with short-terminated transfers,
 		 * or otherwise when host and gadget agree on how large
 		 * each usb transfer request should be.  resync is done
 		 * with set_interface or set_config.
 		 */
 		case 1:			/* mod63 */
-#endif
 			expected = i % 63;
 			break;
 		/* always fail unsupported patterns */
@@ -383,13 +332,6 @@ static int simple_check_buf(struct usbtest_dev *tdev, struct urb *urb)
 static void simple_free_urb(struct urb *urb)
 {
 	unsigned long offset = buffer_offset(urb->transfer_buffer);
-
-#ifdef CONFIG_ARCH_FEROCEON
-	if (urb == NULL) {
-		return;
-	}
-	if((urb->transfer_buffer != NULL) && (urb->transfer_buffer_length > 0))
-#endif
 
 	if (urb->transfer_flags & URB_NO_TRANSFER_DMA_MAP)
 		usb_free_coherent(
@@ -485,9 +427,6 @@ alloc_sglist(int nents, int max, int vary)
 	sg = kmalloc(nents * sizeof *sg, GFP_KERNEL);
 	if (!sg)
 		return NULL;
-#ifdef CONFIG_ARCH_FEROCEON
-	memset(sg, 0, nents * sizeof *sg);
-#endif
 	sg_init_table(sg, nents);
 
 	for (i = 0; i < nents; i++) {
@@ -528,9 +467,6 @@ static int perform_sglist(
 	struct usbtest_dev	*tdev,
 	unsigned		iterations,
 	int			pipe,
-#ifdef CONFIG_ARCH_FEROCEON
-	struct usb_endpoint_descriptor *desc,
-#endif
 	struct usb_sg_request	*req,
 	struct scatterlist	*sg,
 	int			nents
@@ -538,30 +474,14 @@ static int perform_sglist(
 {
 	struct usb_device	*udev = testdev_to_usbdev(tdev);
 	int			retval = 0;
-#ifdef CONFIG_ARCH_FEROCEON
-	int         interval = 0;
-#endif
 
 	while (retval == 0 && iterations-- > 0) {
-#ifdef CONFIG_ARCH_FEROCEON
-		if(desc != NULL) {
-			if( (udev->speed == USB_SPEED_HIGH) ||
-				( (desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_ISOC) )
-				interval = (1 << (desc->bInterval - 1));
-			else
-				interval = desc->bInterval;
-		}
-
-		retval = usb_sg_init (req, udev, pipe, interval,
-					sg, nents, 0, GFP_KERNEL);
-#else
 		retval = usb_sg_init(req, udev, pipe,
 				(udev->speed == USB_SPEED_HIGH)
 					? (INTERRUPT_RATE << 3)
 					: INTERRUPT_RATE,
 				sg, nents, 0, GFP_KERNEL);
 
-#endif
 		if (retval)
 			break;
 		usb_sg_wait(req);
@@ -1105,6 +1025,9 @@ test_ctrl_queue(struct usbtest_dev *dev, struct usbtest_param *param)
 		case 13:	/* short read, resembling case 10 */
 			req.wValue = cpu_to_le16((USB_DT_CONFIG << 8) | 0);
 			/* last data packet "should" be DATA1, not DATA0 */
+			if (udev->speed == USB_SPEED_SUPER)
+				len = 1024 - 512;
+			else
 				len = 1024 - udev->descriptor.bMaxPacketSize0;
 			expected = -EREMOTEIO;
 			break;
@@ -1130,11 +1053,7 @@ test_ctrl_queue(struct usbtest_dev *dev, struct usbtest_param *param)
 			goto cleanup;
 		}
 		req.wLength = cpu_to_le16(len);
-#ifdef CONFIG_ARCH_FEROCEON
-		urb[i] = u = simple_alloc_urb (udev, pipe, NULL, len);
-#else
 		urb[i] = u = simple_alloc_urb(udev, pipe, len);
-#endif
 		if (!u)
 			goto cleanup;
 
@@ -1199,23 +1118,14 @@ static void unlink1_callback(struct urb *urb)
 	}
 }
 
-#ifdef CONFIG_ARCH_FEROCEON
-static int unlink1(struct usbtest_dev *dev, int pipe,
-                    struct usb_endpoint_descriptor *desc, int size, int async)
-#else
 static int unlink1(struct usbtest_dev *dev, int pipe, int size, int async)
-#endif
 {
 	struct urb		*urb;
 	struct completion	completion;
 	int			retval = 0;
 
 	init_completion(&completion);
-#ifdef CONFIG_ARCH_FEROCEON
-	urb = simple_alloc_urb(testdev_to_usbdev (dev), pipe, desc, size);
-#else
 	urb = simple_alloc_urb(testdev_to_usbdev(dev), pipe, size);
-#endif
 	if (!urb)
 		return -ENOMEM;
 	urb->context = &completion;
@@ -1236,11 +1146,7 @@ static int unlink1(struct usbtest_dev *dev, int pipe, int size, int async)
 	/* unlinking that should always work.  variable delay tests more
 	 * hcd states and code paths, even with little other system load.
 	 */
-#ifdef CONFIG_ARCH_FEROCEON
-	msleep(jiffies % (2 * UNLINK_RATE));
-#else
 	msleep(jiffies % (2 * INTERRUPT_RATE));
-#endif
 	if (async) {
 		while (!completion_done(&completion)) {
 			retval = usb_unlink_urb(urb);
@@ -1282,27 +1188,14 @@ static int unlink1(struct usbtest_dev *dev, int pipe, int size, int async)
 				0 : retval - 2000;
 }
 
-#ifdef CONFIG_ARCH_FEROCEON
-static int unlink_simple(struct usbtest_dev *dev, int pipe,
-                          struct usb_endpoint_descriptor *desc, int len)
-#else
 static int unlink_simple(struct usbtest_dev *dev, int pipe, int len)
-#endif
 {
 	int			retval = 0;
 
 	/* test sync and async paths */
-#ifdef CONFIG_ARCH_FEROCEON
-	retval = unlink1(dev, pipe, desc, len, 1);
-#else
 	retval = unlink1(dev, pipe, len, 1);
-#endif
 	if (!retval)
-#ifdef CONFIG_ARCH_FEROCEON
-		retval = unlink1(dev, pipe, desc, len, 0);
-#else
 		retval = unlink1(dev, pipe, len, 0);
-#endif
 	return retval;
 }
 
@@ -1496,12 +1389,12 @@ static int halt_simple(struct usbtest_dev *dev)
 	int			ep;
 	int			retval = 0;
 	struct urb		*urb;
+	struct usb_device	*udev = testdev_to_usbdev(dev);
 
-#ifdef CONFIG_ARCH_FEROCEON
-	urb = simple_alloc_urb(testdev_to_usbdev (dev), 0, NULL, 512);
-#else
-	urb = simple_alloc_urb(testdev_to_usbdev (dev), 0, 512);
-#endif
+	if (udev->speed == USB_SPEED_SUPER)
+		urb = simple_alloc_urb(udev, 0, 1024);
+	else
+		urb = simple_alloc_urb(udev, 0, 512);
 	if (urb == NULL)
 		return -ENOMEM;
 
@@ -1752,17 +1645,9 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 	unsigned		i;
 	unsigned long		packets = 0;
 	int			status = 0;
-#ifdef CONFIG_ARCH_FEROCEON
-	struct urb		*urbs[50];	/* FIXME no limit */
-#else
 	struct urb		*urbs[10];	/* FIXME no limit */
-#endif
 
-#ifdef CONFIG_ARCH_FEROCEON
-	if (param->sglen > 50)
-#else
 	if (param->sglen > 10)
-#endif
 		return -EDOM;
 
 	memset(&context, 0, sizeof context);
@@ -1798,12 +1683,6 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 
 	spin_lock_irq(&context.lock);
 	for (i = 0; i < param->sglen; i++) {
-#ifdef CONFIG_ARCH_FEROCEON
-		/*
-        if (usb_pipeout (urbs [i]->pipe))
-            simple_fill_buf (urbs [i]);
-		*/
-#endif
 		++context.pending;
 		status = usb_submit_urb(urbs[i], GFP_ATOMIC);
 		if (status < 0) {
@@ -1813,12 +1692,8 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 				goto fail;
 			}
 
-#ifdef CONFIG_ARCH_FEROCEON
-			/*simple_free_urb (urbs [i]);*/
-#else
 			simple_free_urb(urbs[i]);
 			urbs[i] = NULL;
-#endif
 			context.pending--;
 			context.submit_error = 1;
 			break;
@@ -1843,9 +1718,7 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 		status = -EACCES;
 	else if (context.errors > context.packet_count / 10)
 		status = -EIO;
-#ifndef CONFIG_ARCH_FEROCEON
 	return status;
-#endif
 
 fail:
 	for (i = 0; i < param->sglen; i++) {
@@ -1972,11 +1845,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 1:  write %d bytes %u times\n",
 				param->length, param->iterations);
-#ifdef CONFIG_ARCH_FEROCEON
-		urb = simple_alloc_urb(udev, dev->out_pipe, dev->out_desc, param->length);
-#else
 		urb = simple_alloc_urb(udev, dev->out_pipe, param->length);
-#endif
 		if (!urb) {
 			retval = -ENOMEM;
 			break;
@@ -1991,11 +1860,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 2:  read %d bytes %u times\n",
 				param->length, param->iterations);
-#ifdef CONFIG_ARCH_FEROCEON
-		urb = simple_alloc_urb(udev, dev->out_pipe, dev->out_desc, param->length);
-#else
 		urb = simple_alloc_urb(udev, dev->in_pipe, param->length);
-#endif
 		if (!urb) {
 			retval = -ENOMEM;
 			break;
@@ -2010,11 +1875,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 3:  write/%d 0..%d bytes %u times\n",
 				param->vary, param->length, param->iterations);
-#ifdef CONFIG_ARCH_FEROCEON
-		urb = simple_alloc_urb(udev, dev->out_pipe, dev->out_desc, param->length);
-#else
 		urb = simple_alloc_urb(udev, dev->out_pipe, param->length);
-#endif
 		if (!urb) {
 			retval = -ENOMEM;
 			break;
@@ -2030,11 +1891,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 4:  read/%d 0..%d bytes %u times\n",
 				param->vary, param->length, param->iterations);
-#ifdef CONFIG_ARCH_FEROCEON
-		urb = simple_alloc_urb(udev, dev->in_pipe, dev->in_desc, param->length);
-#else
 		urb = simple_alloc_urb(udev, dev->in_pipe, param->length);
-#endif
 		if (!urb) {
 			retval = -ENOMEM;
 			break;
@@ -2060,11 +1917,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		/* FIRMWARE:  bulk sink (maybe accepts short writes) */
 		retval = perform_sglist(dev, param->iterations, dev->out_pipe,
-#ifdef CONFIG_ARCH_FEROCEON
-				dev->out_desc, &req, sg, param->sglen);
-#else
 				&req, sg, param->sglen);
-#endif
 		free_sglist(sg, param->sglen);
 		break;
 
@@ -2082,11 +1935,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		/* FIRMWARE:  bulk source (maybe generates short writes) */
 		retval = perform_sglist(dev, param->iterations, dev->in_pipe,
-#ifdef CONFIG_ARCH_FEROCEON
-				dev->in_desc, &req, sg, param->sglen);
-#else
 				&req, sg, param->sglen);
-#endif
 		free_sglist(sg, param->sglen);
 		break;
 	case 7:
@@ -2103,11 +1952,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		/* FIRMWARE:  bulk sink (maybe accepts short writes) */
 		retval = perform_sglist(dev, param->iterations, dev->out_pipe,
-#ifdef CONFIG_ARCH_FEROCEON
-				dev->out_desc, &req, sg, param->sglen);
-#else
 				&req, sg, param->sglen);
-#endif
 		free_sglist(sg, param->sglen);
 		break;
 	case 8:
@@ -2124,11 +1969,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		/* FIRMWARE:  bulk source (maybe generates short writes) */
 		retval = perform_sglist(dev, param->iterations, dev->in_pipe,
-#ifdef CONFIG_ARCH_FEROCEON
-				dev->in_desc, &req, sg, param->sglen);
-#else
 				&req, sg, param->sglen);
-#endif
 		free_sglist(sg, param->sglen);
 		break;
 
@@ -2165,11 +2006,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev, "TEST 11:  unlink %d reads of %d\n",
 				param->iterations, param->length);
 		for (i = param->iterations; retval == 0 && i--; /* NOP */)
-#ifdef CONFIG_ARCH_FEROCEON
-			retval = unlink_simple(dev, dev->in_pipe, dev->in_desc,
-#else
 			retval = unlink_simple(dev, dev->in_pipe,
-#endif
 						param->length);
 		if (retval)
 			dev_err(&intf->dev, "unlink reads failed %d, "
@@ -2182,11 +2019,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev, "TEST 12:  unlink %d writes of %d\n",
 				param->iterations, param->length);
 		for (i = param->iterations; retval == 0 && i--; /* NOP */)
-#ifdef CONFIG_ARCH_FEROCEON
-			retval = unlink_simple(dev, dev->out_pipe, dev->out_desc,
-#else
 			retval = unlink_simple(dev, dev->out_pipe,
-#endif
 						param->length);
 		if (retval)
 			dev_err(&intf->dev, "unlink writes failed %d, "
@@ -2461,29 +2294,10 @@ usbtest_probe(struct usb_interface *intf, const struct usb_device_id *id)
 				dev->out_pipe = usb_sndbulkpipe(udev,
 							info->ep_out);
 		}
-#ifdef CONFIG_ARCH_FEROCEON
-		if (dev->in_pipe) {
-			if(usb_pipeint(dev->in_pipe)) {
-				rtest = " intr-in";
-			}
-			else {
-				rtest = " bulk-in";
-			}
-		}
-		if (dev->out_pipe){
-			if(usb_pipeint(dev->out_pipe)) {
-				wtest = " intr-out";
-			}
-			else {
-				wtest = " bulk-out";
-			}
-		}
-#else
 		if (dev->in_pipe)
 			rtest = " bulk-in";
 		if (dev->out_pipe)
 			wtest = " bulk-out";
-#endif
 		if (dev->in_iso_pipe)
 			irtest = " iso-in";
 		if (dev->out_iso_pipe)

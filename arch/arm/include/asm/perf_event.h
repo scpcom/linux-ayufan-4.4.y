@@ -30,6 +30,9 @@ enum arm_perf_pmu_ids {
 	ARM_PERF_PMU_ID_CA5,
 	ARM_PERF_PMU_ID_CA15,
 	ARM_NUM_PMU_IDS,
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	MRVL_PERF_PMU_ID_PJ4B,
+#endif
 };
 
 extern enum arm_perf_pmu_ids

@@ -94,9 +94,9 @@ static int ext4_dentry_hash(const struct dentry *dentry, const struct inode *ino
 /* return 1 on failure and 0 on success */
 static int ext4_dentry_compare(const struct dentry *parent, const struct inode *pinode,
 							   const struct dentry *dentry, const struct inode *inode,
-							   unsigned int len, const char *str, const struct qstr *name)
+							   unsigned int len, const char *str, const struct qstr *name, int caseless)
 {
-	if (DCACHE_CASELESS_COMPARE & parent->d_flags) {
+	if (caseless) {
 		return SYNOUnicodeUTF8Strcmp(str, name->name, len, name->len, NULL);
 	} else {
 		return dentry_cmp(str, len, name->name, name->len);
@@ -106,7 +106,7 @@ static int ext4_dentry_compare(const struct dentry *parent, const struct inode *
 struct dentry_operations ext4_dentry_operations =
 {
 	.d_hash		= ext4_dentry_hash,
-	.d_compare	= ext4_dentry_compare,
+	.d_compare_case	= ext4_dentry_compare,
 };
 #endif
 
@@ -1902,7 +1902,7 @@ static int ext4_add_nondir(handle_t *handle,
  * If the create succeeds, we fill in the inode information
  * with d_instantiate().
  */
-static int ext4_create(struct inode *dir, struct dentry *dentry, int mode,
+static int ext4_create(struct inode *dir, struct dentry *dentry, umode_t mode,
 		       struct nameidata *nd)
 {
 	handle_t *handle;
@@ -1943,7 +1943,7 @@ retry:
 }
 
 static int ext4_mknod(struct inode *dir, struct dentry *dentry,
-		      int mode, dev_t rdev)
+		      umode_t mode, dev_t rdev)
 {
 	handle_t *handle;
 	struct inode *inode;
@@ -1979,7 +1979,7 @@ retry:
 	return err;
 }
 
-static int ext4_mkdir(struct inode *dir, struct dentry *dentry, int mode)
+static int ext4_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 {
 	handle_t *handle;
 	struct inode *inode;

@@ -6,6 +6,13 @@
 
 struct mtd_partition;
 
+#ifdef CONFIG_ARCH_GEN3
+/* Device info for each chip select */
+struct flash_cs_info{
+	unsigned int cs0_size;		/* flash size in cs0 */
+	unsigned int cs1_size;		/* chip size in cs1   */
+};
+#endif
 /**
  * struct flash_platform_data: board-specific flash data
  * @name: optional flash device name (eg, as used with mtdparts=)

@@ -34,7 +34,7 @@ long ext2_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	case EXT2_IOC_SETFLAGS: {
 		unsigned int oldflags;
 
-		ret = mnt_want_write(filp->f_path.mnt);
+		ret = mnt_want_write_file(filp);
 		if (ret)
 			return ret;
 
@@ -82,7 +82,7 @@ long ext2_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		inode->i_ctime = CURRENT_TIME_SEC;
 		mark_inode_dirty(inode);
 setflags_out:
-		mnt_drop_write(filp->f_path.mnt);
+		mnt_drop_write_file(filp);
 		return ret;
 	}
 	case EXT2_IOC_GETVERSION:
@@ -90,7 +90,7 @@ setflags_out:
 	case EXT2_IOC_SETVERSION:
 		if (!inode_owner_or_capable(inode))
 			return -EPERM;
-		ret = mnt_want_write(filp->f_path.mnt);
+		ret = mnt_want_write_file(filp);
 		if (ret)
 			return ret;
 		if (get_user(inode->i_generation, (int __user *) arg)) {
@@ -99,7 +99,7 @@ setflags_out:
 			inode->i_ctime = CURRENT_TIME_SEC;
 			mark_inode_dirty(inode);
 		}
-		mnt_drop_write(filp->f_path.mnt);
+		mnt_drop_write_file(filp);
 		return ret;
 	case EXT2_IOC_GETRSVSZ:
 		if (test_opt(inode->i_sb, RESERVATION)
@@ -120,7 +120,7 @@ setflags_out:
 		if (get_user(rsv_window_size, (int __user *)arg))
 			return -EFAULT;
 
-		ret = mnt_want_write(filp->f_path.mnt);
+		ret = mnt_want_write_file(filp);
 		if (ret)
 			return ret;
 
@@ -144,7 +144,7 @@ setflags_out:
 			rsv->rsv_goal_size = rsv_window_size;
 		}
 		mutex_unlock(&ei->truncate_mutex);
-		mnt_drop_write(filp->f_path.mnt);
+		mnt_drop_write_file(filp);
 		return 0;
 	}
 	default:

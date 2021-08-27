@@ -14,7 +14,7 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <asm/io.h>
-#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON)
+#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_ARMADA)
 #include <asm-ppc/ppcboot.h>
 #else
 #include <linux/platform_device.h>
@@ -149,6 +149,17 @@ static struct mtd_partition synomtd_partitions[] = {
 		.size   = 0x00010000,           /* 64KB                                 */
 	},
 };
+#elif defined(CONFIG_SYNO_ARMADA)
+extern struct resource physmap_flash_resource;
+/* Partition definition for the first flash bank which is always present. */
+/* currently used by US3, which has only uboot partition */
+static struct mtd_partition synomtd_partitions[] = {
+	{
+		.name	= "RedBoot",		/* u-boot		*/
+		.offset	= 0x00000000,
+		.size	= 0x000C0000,		/* 768KB		*/
+	},
+};
 #else
 /* Partition definition for the first flash bank which is always present. */
 static struct mtd_partition synomtd_partitions[] = {
@@ -191,7 +202,7 @@ static int __init init_synomtd(void)
 	unsigned long flash_addr, flash_size, mtd_size = 0;
 	struct mtd_partition *pMtdPartition = NULL;
 
-#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON)
+#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_ARMADA)
 	bd_t *bd = (bd_t *)__res;
 #endif
 
@@ -201,7 +212,7 @@ static int __init init_synomtd(void)
 	const char *part_probes[] = { "RedBoot", NULL };
 #endif
 
-#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON)
+#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(CONFIG_SYNO_ARMADA)
 	flash_addr = physmap_flash_resource.start;
 	flash_size = physmap_flash_resource.end - physmap_flash_resource.start + 1;
 #else
@@ -251,7 +262,7 @@ static int __init init_synomtd(void)
 			(mtd_banks[idx-1] ? mtd_banks[idx-1]->size : 0) : 0);
 
 		/* start to probe flash chips */
-#if defined(CONFIG_SYNO_MV88F6281)
+#if defined(CONFIG_SYNO_MV88F6281) || defined(CONFIG_SYNO_ARMADA)
 		mtd_banks[idx] = do_map_probe("sflash", map_banks[idx]);
 #else
 		mtd_banks[idx] = do_map_probe("cfi_probe", map_banks[idx]);

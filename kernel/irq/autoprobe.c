@@ -71,7 +71,6 @@ unsigned long probe_irq_on(void)
 		if (!desc->action && irq_settings_can_probe(desc)) {
 			desc->istate |= IRQS_AUTODETECT | IRQS_WAITING;
 			if (irq_startup(desc,false)) {
-				irq_compat_set_pending(desc);
 				desc->istate |= IRQS_PENDING;
 			}
 		}

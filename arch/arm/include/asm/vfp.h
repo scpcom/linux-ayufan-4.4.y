@@ -85,3 +85,10 @@
 #define VFPOPDESC_UNUSED_BIT	(24)
 #define VFPOPDESC_UNUSED_MASK	(0xFF << VFPOPDESC_UNUSED_BIT)
 #define VFPOPDESC_OPDESC_MASK	(~(VFPOPDESC_LENGTH_MASK | VFPOPDESC_UNUSED_MASK))
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#ifndef __ASSEMBLY__
+extern void vfp_save(void);
+extern void vfp_restore(void);
+#endif /* __ASSEMBLY__ */
+#endif

@@ -48,30 +48,6 @@ struct stat {
 	unsigned long  __unused5;
 };
 
-#ifdef MY_ABC_HERE
-#ifndef st_SynoCreateTime
-#define st_SynoCreateTime st_ctime_nsec
-#endif
-#endif
-
-#ifdef MY_ABC_HERE
-#ifndef st_SynoMode
-#define st_SynoMode st_atime_nsec
-#endif
-#endif
-
-#ifdef MY_ABC_HERE
-#ifndef st_syno_achv_ver
-#define st_syno_achv_ver st_mtime_nsec
-#endif
-#endif
-
-#ifdef MY_ABC_HERE
-#ifndef st_SynoUnicodeStat
-#define st_SynoUnicodeStat st_mtime_nsec
-#endif
-#endif
-
 /* This matches struct stat64 in glibc2.1, hence the absolutely
  * insane amounts of padding around dev_t's.
  * Note: The kernel zero's the padded region because glibc might read them

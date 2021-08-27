@@ -572,7 +572,7 @@ static int udf_delete_entry(struct inode *inode, struct fileIdentDesc *fi,
 	return udf_write_fi(inode, cfi, fi, fibh, NULL, NULL);
 }
 
-static int udf_create(struct inode *dir, struct dentry *dentry, int mode,
+static int udf_create(struct inode *dir, struct dentry *dentry, umode_t mode,
 		      struct nameidata *nd)
 {
 	struct udf_fileident_bh fibh;
@@ -616,7 +616,7 @@ static int udf_create(struct inode *dir, struct dentry *dentry, int mode,
 	return 0;
 }
 
-static int udf_mknod(struct inode *dir, struct dentry *dentry, int mode,
+static int udf_mknod(struct inode *dir, struct dentry *dentry, umode_t mode,
 		     dev_t rdev)
 {
 	struct inode *inode;
@@ -660,7 +660,7 @@ out:
 	return err;
 }
 
-static int udf_mkdir(struct inode *dir, struct dentry *dentry, int mode)
+static int udf_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 {
 	struct inode *inode;
 	struct udf_fileident_bh fibh;

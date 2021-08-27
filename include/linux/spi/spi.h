@@ -79,6 +79,10 @@ struct spi_device {
 #define	SPI_MODE_2	(SPI_CPOL|0)
 #define	SPI_MODE_3	(SPI_CPOL|SPI_CPHA)
 #define	SPI_CS_HIGH	0x04			/* chipselect active high? */
+#ifdef CONFIG_ARCH_GEN3
+#define SPI_MODE_QUAD_IO 0x05                   /* Quad IO mode using 4 wire */
+#define SPI_MODE_DUAL_IO 0x06                   /* Dual IO mode using 2 wire */
+#endif
 #define	SPI_LSB_FIRST	0x08			/* per-word bits-on-wire */
 #define	SPI_3WIRE	0x10			/* SI/SO signals shared */
 #define	SPI_LOOP	0x20			/* loopback mode */
@@ -246,6 +250,10 @@ struct spi_master {
 	 */
 	s16			bus_num;
 
+#ifdef CONFIG_GEN3_SPI
+	/*  using_slave is to recognize the slave controller, slave controller is considrer to fake into one master with one spi device*/
+	u16 using_slave;
+#endif
 	/* chipselects will be integral to many controllers; some others
 	 * might use board-specific GPIOs.
 	 */
@@ -751,6 +759,9 @@ struct spi_board_info {
 #ifdef	CONFIG_SPI
 extern int
 spi_register_board_info(struct spi_board_info const *info, unsigned n);
+#ifdef CONFIG_GEN3_SPI
+extern int spi_unregister_board_info(struct spi_board_info *info, unsigned n);
+#endif
 #else
 /* board init code may ignore whether SPI is configured or not */
 static inline int

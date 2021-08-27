@@ -519,7 +519,6 @@ skip:
 	if (!cap_issubset(new->cap_permitted, old->cap_permitted))
 		bprm->per_clear |= PER_CLEAR_ON_SETID;
 
-
 	/* Don't let someone trace a set[ug]id/setpcap binary with the revised
 	 * credentials unless they have the appropriate permit
 	 */

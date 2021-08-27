@@ -90,6 +90,37 @@ struct kstat {
 #endif
 
 #ifdef MY_ABC_HERE
+#ifdef __KERNEL__
+
+// Be careful!! If you want to change following structure, 
+// you should modify libsynocore/lib/file/file.h, too.
+
+struct SYNOSTAT_EXTRA {
+	struct timespec creatTime;  //Create Time
+	unsigned int bkpVer;  		//Backup Version
+	unsigned int archBit; 		//Archive Bit
+	unsigned int lastComponent; //For caseless stat, it means parent directory is found.
+};
+struct SYNOSTAT {
+	struct stat st;
+	struct SYNOSTAT_EXTRA ext;
+};
+
+/*
+ * flags: decide which information to get.
+ */
+#define SYNOST_STAT			0x00000001	/* stat */	
+#define SYNOST_ARBIT		0x00000002	/* Archive Bit */
+#define SYNOST_BKPVER		0x00000004	/* Backup Version */
+#define SYNOST_CREATIME		0x00000008	/* Create Time */
+
+#define SYNOST_ALL			SYNOST_STAT|SYNOST_ARBIT|SYNOST_BKPVER|SYNOST_CREATIME
+#define SYNOST_IS_CASELESS	0x10000000	/* Is Caseless */
+
+#endif /* __KERNEL__ */
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
 #define S2_IARCHIVE    (1<<0)	// synology backup archive bit
 #define S2_SMB_ARCHIVE (1<<1)	// samba backup archive bit (some other windows ap)
 #define S2_SMB_HIDDEN  (1<<2)	// hidden attribute in samba

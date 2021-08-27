@@ -21,6 +21,9 @@
 #include <asm/smp_plat.h>
 #include <asm/system.h>
 #include <asm/tlbflush.h>
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#include <asm/smp_plat.h>
+#endif
 
 #include "mm.h"
 

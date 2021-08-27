@@ -148,33 +148,37 @@ static void next_trb(struct xhci_hcd *xhci,
  */
 static void inc_deq(struct xhci_hcd *xhci, struct xhci_ring *ring)
 {
-	union xhci_trb *next;
 	unsigned long long addr;
 
 	ring->deq_updates++;
 
-	/* If this is not event ring, there is one more usable TRB */
+	/*
+	 * If this is not event ring, and the dequeue pointer
+	 * is not on a link TRB, there is one more usable TRB
+	 */
 	if (ring->type != TYPE_EVENT &&
 			!last_trb(xhci, ring, ring->deq_seg, ring->dequeue))
 		ring->num_trbs_free++;
-	next = ++(ring->dequeue);
 
-	/* Update the dequeue pointer further if that was a link TRB or we're at
-	 * the end of an event ring segment (which doesn't have link TRBS)
-	 */
-	while (last_trb(xhci, ring, ring->deq_seg, next)) {
-		if (ring->type == TYPE_EVENT &&	last_trb_on_last_seg(xhci,
-				ring, ring->deq_seg, next)) {
+	do {
+		/*
+		 * Update the dequeue pointer further if that was a link TRB or
+		 * we're at the end of an event ring segment (which doesn't have
+		 * link TRBS)
+		 */
+		if (last_trb(xhci, ring, ring->deq_seg, ring->dequeue)) {
+			if (ring->type == TYPE_EVENT &&
+					last_trb_on_last_seg(xhci, ring,
+						ring->deq_seg, ring->dequeue)) {
 				ring->cycle_state = (ring->cycle_state ? 0 : 1);
-			if (!in_interrupt())
-				xhci_dbg(xhci, "Toggle cycle state for ring %p = %i\n",
-						ring,
-						(unsigned int) ring->cycle_state);
 			}
 			ring->deq_seg = ring->deq_seg->next;
 			ring->dequeue = ring->deq_seg->trbs;
-		next = ring->dequeue;
+		} else {
+			ring->dequeue++;
 		}
+	} while (last_trb(xhci, ring, ring->deq_seg, ring->dequeue));
+
 	addr = (unsigned long long) xhci_trb_virt_to_dma(ring->deq_seg, ring->dequeue);
 }
 
@@ -264,7 +268,11 @@ static void inc_enq(struct xhci_hcd *xhci, struct xhci_ring *ring,
  * enqueue pointer will not advance into dequeue segment. See rules above.
  */
 static inline int room_on_ring(struct xhci_hcd *xhci, struct xhci_ring *ring,
+#ifdef CONFIG_SYNO_XHCI_RING_EXPANSION
+		unsigned int num_trbs, int *ret_num_trbs_in_deq_seg)
+#else
 		unsigned int num_trbs)
+#endif
 {
 	int num_trbs_in_deq_seg;
 
@@ -273,6 +281,9 @@ static inline int room_on_ring(struct xhci_hcd *xhci, struct xhci_ring *ring,
 
 	if (ring->type != TYPE_COMMAND && ring->type != TYPE_EVENT) {
 		num_trbs_in_deq_seg = ring->dequeue - ring->deq_seg->trbs;
+#ifdef CONFIG_SYNO_XHCI_RING_EXPANSION
+		*ret_num_trbs_in_deq_seg = num_trbs_in_deq_seg;
+#endif
 		if (ring->num_trbs_free < num_trbs + num_trbs_in_deq_seg)
 			return 0;
 	}
@@ -896,6 +907,17 @@ static void update_ring_for_set_deq_completion(struct xhci_hcd *xhci,
 
 	num_trbs_free_temp = ep_ring->num_trbs_free;
 	dequeue_temp = ep_ring->dequeue;
+
+	/* If we get two back-to-back stalls, and the first stalled transfer
+	 * ends just before a link TRB, the dequeue pointer will be left on
+	 * the link TRB by the code in the while loop.  So we have to update
+	 * the dequeue pointer one segment further, or we'll jump off
+	 * the segment into la-la-land.
+	 */
+	if (last_trb(xhci, ep_ring, ep_ring->deq_seg, ep_ring->dequeue)) {
+		ep_ring->deq_seg = ep_ring->deq_seg->next;
+		ep_ring->dequeue = ep_ring->deq_seg->trbs;
+	}
 
 	while (ep_ring->dequeue != dev->eps[ep_index].queued_deq_ptr) {
 		/* We have more usable TRBs */
@@ -1757,8 +1779,12 @@ static int process_isoc_td(struct xhci_hcd *xhci, struct xhci_td *td,
 	/* handle completion code */
 	switch (trb_comp_code) {
 	case COMP_SUCCESS:
+		if (TRB_LEN(le32_to_cpu(event->transfer_len)) == 0) {
 			frame->status = 0;
 			break;
+		}
+		if ((xhci->quirks & XHCI_TRUST_TX_LENGTH))
+			trb_comp_code = COMP_SHORT_TX;
 	case COMP_SHORT_TX:
 		frame->status = td->urb->transfer_flags & URB_SHORT_NOT_OK ?
 				-EREMOTEIO : 0;
@@ -2484,6 +2510,9 @@ static int prepare_ring(struct xhci_hcd *xhci, struct xhci_ring *ep_ring,
 		u32 ep_state, unsigned int num_trbs, gfp_t mem_flags)
 {
 	unsigned int num_trbs_needed;
+#ifdef CONFIG_SYNO_XHCI_RING_EXPANSION
+	int num_trbs_in_deq_seg = 0;
+#endif
 
 	/* Make sure the endpoint has been added to xHC schedule */
 	switch (ep_state) {
@@ -2514,8 +2543,13 @@ static int prepare_ring(struct xhci_hcd *xhci, struct xhci_ring *ep_ring,
 	}
 
 	while (1) {
+#ifdef CONFIG_SYNO_XHCI_RING_EXPANSION
+		if (room_on_ring(xhci, ep_ring, num_trbs, &num_trbs_in_deq_seg))
+			break;
+#else
 		if (room_on_ring(xhci, ep_ring, num_trbs))
 			break;
+#endif
 
 		if (ep_ring == xhci->cmd_ring) {
 			xhci_err(xhci, "Do not support expand command ring\n");
@@ -2524,7 +2558,11 @@ static int prepare_ring(struct xhci_hcd *xhci, struct xhci_ring *ep_ring,
 
 		xhci_dbg(xhci, "ERROR no room on ep ring, "
 					"try ring expansion\n");
+#ifdef CONFIG_SYNO_XHCI_RING_EXPANSION
+		num_trbs_needed = num_trbs + num_trbs_in_deq_seg - ep_ring->num_trbs_free;
+#else
 		num_trbs_needed = num_trbs - ep_ring->num_trbs_free;
+#endif
 		if (xhci_ring_expansion(xhci, ep_ring, num_trbs_needed,
 					mem_flags)) {
 			xhci_err(xhci, "Ring expansion failed\n");

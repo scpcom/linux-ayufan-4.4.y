@@ -114,8 +114,11 @@ static int hba_house_keeper(void *data)
 	set_user_nice(current, -15);
 
 	set_current_state(TASK_INTERRUPTIBLE);
+#if LINUX_VERSION_CODE >  KERNEL_VERSION(2, 6, 22)
+	set_freezable();
+#endif
 	while (!kthread_should_stop()) {
-
+		try_to_freeze();
 		if (!hba_msg_queue_empty() &&
 		    MSG_QUEUE_IDLE == queue_state_get()) {
 			set_current_state(TASK_RUNNING);

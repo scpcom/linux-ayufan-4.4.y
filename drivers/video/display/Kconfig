@@ -23,6 +23,18 @@ comment "Display hardware drivers"
 	
 config ADI9889
 	tristate "ADI9889 support"
+	default y
+	help
+	  ADI9889 device driver support.
+
+config THS8200
+	tristate "THS8200 support"
+	default y
+	help
+	  THS8200 device driver support.
+
+config ADI9889
+	tristate "ADI9889 support"
 	default n
 	help
 	  ADI9889 device driver support.

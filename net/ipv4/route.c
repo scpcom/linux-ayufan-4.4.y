@@ -94,6 +94,9 @@
 #include <linux/rcupdate.h>
 #include <linux/times.h>
 #include <linux/slab.h>
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/mv_nfp.h>
+#endif
 #include <linux/prefetch.h>
 #include <net/dst.h>
 #include <net/net_namespace.h>
@@ -114,16 +117,6 @@
 #endif
 #include <net/atmclip.h>
 #include <net/secure_seq.h>
-
-#ifdef CONFIG_MV_ETH_NFP
-extern int fp_rule_db_init(u32 db_size);
-extern int fp_arp_db_init(u32 db_size);
-extern int fp_routing_info_set(u32 src_ip, u32 dst_ip, u32 def_gtw_ip,
-				int ingress_if, int egress_if);
-extern int fp_routing_info_delete(u32 src_ip, u32 dst_ip);
-extern int fp_is_route_confirmed(u32 src_ip, u32 dst_ip);
-extern int fp_disable_flag;
-#endif /* CONFIG_MV_ETH_NFP */
 
 #define RT_FL_TOS(oldflp4) \
 	((oldflp4)->flowi4_tos & (IPTOS_RT_MASK | RTO_ONLINK))
@@ -670,13 +663,14 @@ static inline int ip_rt_proc_init(void)
 
 static inline void rt_free(struct rtable *rt)
 {
-#ifdef CONFIG_MV_ETH_NFP
-	if ( !fp_disable_flag &&
-	     !(rt->rt_flags & (RTCF_MULTICAST | RTCF_BROADCAST | RTCF_LOCAL | RTCF_REJECT))) {
-		fp_routing_info_delete(rt->rt_src, rt->rt_dst);
-	}
-#endif /* CONFIG_MV_ETH_NFP */
-
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+		if (rt->nfp)
+			if (nfp_mgr_p->nfp_hook_fib_rule_del)
+				nfp_mgr_p->nfp_hook_fib_rule_del(AF_INET, (u8 *)(&rt->rt_src), (u8*)(&rt->rt_dst),
+							rt->rt_iif, rt->dst.dev->ifindex);
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 	call_rcu_bh(&rt->dst.rcu_head, dst_rcu_free);
 }
 
@@ -708,14 +702,16 @@ static int rt_may_expire(struct rtable *rth, unsigned long tmo1, unsigned long t
 	if (atomic_read(&rth->dst.__refcnt))
 		goto out;
 
-#ifdef CONFIG_MV_ETH_NFP
-	if ( !fp_disable_flag &&
-	     !(rth->rt_flags & (RTCF_MULTICAST | RTCF_BROADCAST | RTCF_LOCAL | RTCF_REJECT))) {
-		if (fp_is_route_confirmed(rth->rt_src, rth->rt_dst))
-			rth->u.dst.lastuse = jiffies;
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	if (rth->nfp) {
+		if (nfp_mgr_p->nfp_hook_fib_rule_age)
+			if (nfp_mgr_p->nfp_hook_fib_rule_age(AF_INET, (u8 *)(&rth->rt_src), (u8 *)(&rth->rt_dst),
+						rth->rt_iif, rth->dst.dev->ifindex))
+			rth->dst.lastuse = jiffies;
 	}
-#endif /* CONFIG_MV_ETH_NFP */
-
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 	age = jiffies - rth->dst.lastuse;
 	if ((age <= tmo1 && !rt_fast_clean(rth)) ||
 	    (age <= tmo2 && rt_valuable(rth)))
@@ -829,6 +825,38 @@ static void rt_do_flush(struct net *net, int process_context)
 		}
 	}
 }
+
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+void nfp_fib_sync(void)
+{
+	struct rtable *rt;
+	int h;
+
+	for (h = 0; h <= rt_hash_mask; h++) {
+		if (!rt_hash_table[h].chain)
+			continue;
+
+		rcu_read_lock_bh();
+		for (rt = rcu_dereference_bh(rt_hash_table[h].chain); rt;
+		    rt = rcu_dereference_bh(rt->dst.rt_next)) {
+			if (rt_is_expired(rt))
+				continue;
+
+			rt->nfp = false;
+			if (!(rt->rt_flags & (RTCF_MULTICAST | RTCF_BROADCAST | RTCF_LOCAL | RTCF_REJECT))) {
+				if (nfp_mgr_p->nfp_hook_fib_rule_add)
+					if (!nfp_mgr_p->nfp_hook_fib_rule_add(AF_INET, (u8 *)(&rt->rt_src), (u8 *)(&rt->rt_dst),
+					  (u8 *)(&rt->rt_gateway), rt->rt_iif, rt->dst.dev->ifindex))
+					rt->nfp = true;
+			}
+		}
+		rcu_read_unlock_bh();
+	}
+}
+EXPORT_SYMBOL(nfp_fib_sync);
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif  
 
 /*
  * While freeing expired entries, we compute average chain length
@@ -2076,6 +2104,11 @@ static int ip_route_input_mc(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 	if (!rth)
 		goto e_nobufs;
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	rth->nfp = false;
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 #ifdef CONFIG_IP_ROUTE_CLASSID
 	rth->dst.tclassid = itag;
 #endif
@@ -2236,16 +2269,19 @@ static int __mkroute_input(struct sk_buff *skb,
 	rth->dst.output = ip_output;
 
 	rt_set_nexthop(rth, NULL, res, res->fi, res->type, itag);
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	rth->nfp = false;
+	if (!(rth->rt_flags & (RTCF_MULTICAST | RTCF_BROADCAST | RTCF_LOCAL | RTCF_REJECT))) {
+		if (nfp_mgr_p->nfp_hook_fib_rule_add)
+			if (!nfp_mgr_p->nfp_hook_fib_rule_add(AF_INET, (u8 *)(&rth->rt_src), (u8 *)(&rth->rt_dst),
+					(u8 *)(&rth->rt_gateway), rth->rt_iif, rth->dst.dev->ifindex))
+			rth->nfp = true;
+	}
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 
 	*result = rth;
-
-#ifdef CONFIG_MV_ETH_NFP
-	if ( !fp_disable_flag &&
-	     !(rth->rt_flags & (RTCF_MULTICAST | RTCF_BROADCAST | RTCF_LOCAL | RTCF_REJECT))) {
-		fp_routing_info_set(	rth->rt_src, rth->rt_dst,
-					rth->rt_gateway, rth->rt_iif, rth->u.dst.dev->ifindex);
-	}
-#endif /* CONFIG_MV_ETH_NFP */
 
 	err = 0;
  cleanup:
@@ -2397,6 +2433,11 @@ local_input:
 	if (!rth)
 		goto e_nobufs;
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	rth->nfp = false;
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 	rth->dst.input= ip_local_deliver;
 	rth->dst.output= ip_rt_bug;
 #ifdef CONFIG_IP_ROUTE_CLASSID
@@ -2608,6 +2649,11 @@ static struct rtable *__mkroute_output(const struct fib_result *res,
 	if (!rth)
 		return ERR_PTR(-ENOBUFS);
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	rth->nfp = false;
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 	rth->dst.output = ip_output;
 
 	rth->rt_key_dst	= orig_daddr;
@@ -2944,6 +2990,11 @@ struct dst_entry *ipv4_blackhole_route(struct net *net, struct dst_entry *dst_or
 		if (new->dev)
 			dev_hold(new->dev);
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+		rt->nfp = false;
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 		rt->rt_key_dst = ort->rt_key_dst;
 		rt->rt_key_src = ort->rt_key_src;
 		rt->rt_key_tos = ort->rt_key_tos;
@@ -3533,11 +3584,6 @@ int __init ip_rt_init(void)
 #ifdef CONFIG_SYSCTL
 	register_pernet_subsys(&sysctl_route_ops);
 #endif
-
-#ifdef CONFIG_MV_ETH_NFP
-	fp_rule_db_init(rt_hash_mask + 1);
-	fp_arp_db_init(rt_hash_mask + 1);
-#endif /* CONFIG_MV_ETH_NFP */
 
 	return rc;
 }

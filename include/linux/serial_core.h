@@ -322,6 +322,14 @@ struct uart_port {
 #define UPIO_MEM32		(3)
 #define UPIO_AU			(4)			/* Au1x00 type IO */
 #define UPIO_TSI		(5)			/* Tsi108/109 type IO */
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined (CONFIG_ARCH_ARMADA370) || defined(CONFIG_ARCH_ARMADA_XP)
+#define UPIO_DWAPB		(6)
+#define UPIO_DWAPB32		(7)
+#endif
+#endif
+
 #define UPIO_RM9000		(6)			/* RM9000 type IO */
 
 	unsigned int		read_status_mask;	/* driver specific */

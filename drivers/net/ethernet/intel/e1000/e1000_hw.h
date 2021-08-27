@@ -213,6 +213,11 @@ typedef enum {
 	e1000_phy_igp,
 	e1000_phy_8211,
 	e1000_phy_8201,
+#ifdef CONFIG_ARCH_GEN3
+	e1000_phy_8201e,
+	e1000_phy_8211d,
+	e1000_phy_8201fr,
+#endif
 	e1000_phy_undefined = 0xFF
 } e1000_phy_type;
 
@@ -1423,6 +1428,9 @@ struct e1000_hw {
 	bool leave_av_bit_off;
 	bool bad_tx_carr_stats_fd;
 	bool has_smbus;
+#ifdef CONFIG_ARCH_GEN3
+	bool cegbe_is_link_up;
+#endif
 };
 
 #define E1000_EEPROM_SWDPIN0   0x0001	/* SWDPIN 0 EEPROM Value */
@@ -2242,6 +2250,9 @@ struct e1000_host_command_info {
 #define EEPROM_FLASH_VERSION          0x0032
 #define EEPROM_CHECKSUM_REG           0x003F
 
+#ifdef CONFIG_ARCH_GEN3
+#define EEPROM_CE4100_FAKE_LENGTH     0x80
+#endif
 #define E1000_EEPROM_CFG_DONE         0x00040000	/* MNG config cycle done */
 #define E1000_EEPROM_CFG_DONE_PORT_1  0x00080000	/* ...for second port */
 
@@ -2507,6 +2518,9 @@ struct e1000_host_command_info {
 #define PHY_1000T_CTRL   0x09	/* 1000Base-T Control Reg */
 #define PHY_1000T_STATUS 0x0A	/* 1000Base-T Status Reg */
 #define PHY_EXT_STATUS   0x0F	/* Extended Status Reg */
+#ifdef CONFIG_ARCH_GEN3
+#define PHY_TEST_REG     0x19 /* Test Register */
+#endif
 
 #define MAX_PHY_REG_ADDRESS        0x1F	/* 5 bit address bus (0-0x1F) */
 #define MAX_PHY_MULTI_PAGE_REG     0xF	/* Registers equal on all pages */
@@ -2591,6 +2605,9 @@ struct e1000_host_command_info {
 #define MII_CR_SPEED_SELECT_LSB 0x2000	/* bits 6,13: 10=1000, 01=100, 00=10 */
 #define MII_CR_LOOPBACK         0x4000	/* 0 = normal, 1 = loopback */
 #define MII_CR_RESET            0x8000	/* 0 = normal, 1 = PHY reset */
+#ifdef CONFIG_ARCH_GEN3
+#define RMII_MODE_SET           0x0200  /* 0 = MII Mode, 1 = RMII Mode */
+#endif
 
 /* PHY Status Register */
 #define MII_SR_EXTENDED_CAPS     0x0001	/* Extended register capabilities */
@@ -2920,9 +2937,23 @@ struct e1000_host_command_info {
 #define L1LXT971A_PHY_ID   0x001378E0
 
 #define RTL8211B_PHY_ID    0x001CC910
+#ifdef CONFIG_ARCH_GEN3
+#define RTL8211B_PHY_REV_ID     0b0010//
+#endif
 #define RTL8201N_PHY_ID    0x8200
 #define RTL_PHY_CTRL_FD    0x0100 /* Full duplex.0=half; 1=full */
+#ifdef CONFIG_ARCH_GEN3
+#define RTL_PHY_CTRL_SPD_100    0x2000 /* Force 100Mb */
+#else
 #define RTL_PHY_CTRL_SPD_100    0x200000 /* Force 100Mb */
+#endif
+#ifdef CONFIG_ARCH_GEN3
+#define RTL8201E_PHY_ID     0x001CC810
+#define RTL8211D_PHY_ID     0x001CC910//It's the same as RTL8211B
+#define RTL8211D_PHY_REV_ID     0b0100
+#define RTL8201FR_PHY_ID    0x001CC810
+#define RTL8201FR_PHY_REV_ID    0b0110
+#endif
 
 /* Bits...
  * 15-5: page

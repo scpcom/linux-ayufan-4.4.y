@@ -36,6 +36,9 @@
 #include <linux/nsproxy.h>
 #include <linux/rculist_nulls.h>
 
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/mv_nfp.h>
+#endif
 #include <net/netfilter/nf_conntrack.h>
 #include <net/netfilter/nf_conntrack_l3proto.h>
 #include <net/netfilter/nf_conntrack_l4proto.h>
@@ -49,13 +52,9 @@
 #include <net/netfilter/nf_conntrack_timestamp.h>
 #include <net/netfilter/nf_nat.h>
 #include <net/netfilter/nf_nat_core.h>
-
-#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
-extern int fp_disable_flag;
-extern int fp_nat_db_init(u32 db_size);
-extern int fp_nat_info_delete(u32 src_ip, u32 dst_ip, u16 src_port, u16 dst_port, u8 proto);
-extern int fp_is_nat_confirmed(u32 src_ip, u32 dst_ip, u16 src_port, u16 dst_port, u8 proto);
-#endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/netfilter/ipt_NFP.h>
+#endif
 
 #define NF_CONNTRACK_VERSION	"0.5.0"
 
@@ -223,6 +222,15 @@ destroy_conntrack(struct nf_conntrack *nfct)
 	 * too. */
 	nf_ct_remove_expectations(ct);
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
+	if (ct->layer7.app_proto)
+		kfree(ct->layer7.app_proto);
+	if (ct->layer7.app_data)
+		kfree(ct->layer7.app_data);
+#endif
+#endif
+
 	/* We overload first tuple to link into unconfirmed list. */
 	if (!nf_ct_is_confirmed(ct)) {
 		BUG_ON(hlist_nulls_unhashed(&ct->tuplehash[IP_CT_DIR_ORIGINAL].hnnode));
@@ -295,48 +303,94 @@ static void death_by_timeout(unsigned long ul_conntrack)
 	struct nf_conn *ct = (void *)ul_conntrack;
 	struct nf_conn_tstamp *tstamp;
 
-	tstamp = nf_conn_tstamp_find(ct);
-	if (tstamp && tstamp->stop == 0)
-		tstamp->stop = ktime_to_ns(ktime_get_real());
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	struct nf_conntrack_tuple *t0 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
+	struct nf_conntrack_tuple *t1 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
+	int confirmed_org = 0, confirmed_reply = 0;
 
-#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
-	if(!fp_disable_flag)
-	{
-		int confirmed_org, confirmed_reply;
+	if (t0 && t0->nfp) {
+		if (t0->src.l3num == AF_INET) {
+			if (nfp_mgr_p->nfp_hook_ct_age)
+				confirmed_org = nfp_mgr_p->nfp_hook_ct_age(t0->src.l3num, (u8 *)&(t0->src.u3.ip),
+					(u8 *)&(t0->dst.u3.ip),
+					ntohs(t0->src.u.all),
+					ntohs(t0->dst.u.all),
+					t0->dst.protonum);
+		} else
+			if (nfp_mgr_p->nfp_hook_ct_age)
+				confirmed_org = nfp_mgr_p->nfp_hook_ct_age(t0->src.l3num, (u8 *)&(t0->src.u3.ip6),
+					(u8 *)&(t0->dst.u3.ip6),
+					ntohs(t0->src.u.all),
+					ntohs(t0->dst.u.all),
+					t0->dst.protonum);
+	}
 
-		confirmed_org = fp_is_nat_confirmed(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3.ip,
-				ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3.ip,
-				ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u.all,
-				ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.all,
-				ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum);
-
-		confirmed_reply = fp_is_nat_confirmed(ct->tuplehash[IP_CT_DIR_REPLY].tuple.src.u3.ip,
-				ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u3.ip,
-				ct->tuplehash[IP_CT_DIR_REPLY].tuple.src.u.all,
-				ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u.all,
-				ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.protonum);
+	if (t1 && t1->nfp) {
+		if (t1->src.l3num == AF_INET) {
+			if (nfp_mgr_p->nfp_hook_ct_age)
+				confirmed_reply = nfp_mgr_p->nfp_hook_ct_age(t1->src.l3num, (u8 *)&(t1->src.u3.ip),
+					(u8 *)&(t1->dst.u3.ip),
+					ntohs(t1->src.u.all),
+					ntohs(t1->dst.u.all),
+					t1->dst.protonum);
+		} else
+			if (nfp_mgr_p->nfp_hook_ct_age)
+				confirmed_reply = nfp_mgr_p->nfp_hook_ct_age(t1->src.l3num, (u8 *)&(t1->src.u3.ip6),
+					(u8 *)&(t1->dst.u3.ip6),
+					ntohs(t1->src.u.all),
+					ntohs(t1->dst.u.all),
+					t1->dst.protonum);
+	}
 
 	if (confirmed_org || confirmed_reply) {
-			/* arbitrary value, but larger than CONFIG_MV_ETH_NFP_AGING_TIMER */
-			ct->timeout.expires = jiffies + ((CONFIG_MV_ETH_NFP_AGING_TIMER * 2) * HZ);
+		ct->timeout.expires = jiffies + (20*HZ);
 		add_timer(&ct->timeout);
 		return;
 	}
-		else {
-			fp_nat_info_delete(	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3.ip,
-						ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3.ip,
-						ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u.all,
-						ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.all,
-						ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum);
 
-			fp_nat_info_delete(	ct->tuplehash[IP_CT_DIR_REPLY].tuple.src.u3.ip,
-						ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u3.ip,
-						ct->tuplehash[IP_CT_DIR_REPLY].tuple.src.u.all,
-						ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u.all,
-						ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.protonum);
+	if (t0 && t0->nfp) {
+		t0->nfp = false;
+
+		if (t0->src.l3num == AF_INET) {
+			if (nfp_mgr_p->nfp_hook_ct_del)
+				nfp_mgr_p->nfp_hook_ct_del(t0->src.l3num, (u8 *)&(t0->src.u3.ip),
+					(u8 *)&(t0->dst.u3.ip),
+					ntohs(t0->src.u.all),
+					ntohs(t0->dst.u.all),
+					t0->dst.protonum);
+		} else
+			if (nfp_mgr_p->nfp_hook_ct_del)
+				nfp_mgr_p->nfp_hook_ct_del(t0->src.l3num, (u8 *)&(t0->src.u3.ip6),
+					(u8 *)&(t0->dst.u3.ip6),
+					ntohs(t0->src.u.all),
+					ntohs(t0->dst.u.all),
+					t0->dst.protonum);
 	}
+
+	if (t1 && t1->nfp) {
+		t1->nfp = false;
+
+		if (t1->src.l3num == AF_INET) {
+			if (nfp_mgr_p->nfp_hook_ct_del)
+				nfp_mgr_p->nfp_hook_ct_del(t1->src.l3num, (u8 *)&(t1->src.u3.ip),
+					(u8 *)&(t1->dst.u3.ip),
+					ntohs(t1->src.u.all),
+					ntohs(t1->dst.u.all),
+					t1->dst.protonum);
+		} else
+			nfp_mgr_p->nfp_hook_ct_del(t1->src.l3num, (u8 *)&(t1->src.u3.ip6),
+					(u8 *)&(t1->dst.u3.ip6),
+					ntohs(t1->src.u.all),
+					ntohs(t1->dst.u.all),
+					t1->dst.protonum);
 	}
-#endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
+
+	tstamp = nf_conn_tstamp_find(ct);
+	if (tstamp && tstamp->stop == 0)
+		tstamp->stop = ktime_to_ns(ktime_get_real());
 
 	if (!test_bit(IPS_DYING_BIT, &ct->status) &&
 	    unlikely(nf_conntrack_event(IPCT_DESTROY, ct) < 0)) {
@@ -739,6 +793,21 @@ __nf_conntrack_alloc(struct net *net, u16 zone,
 		nf_ct_zone->id = zone;
 	}
 #endif
+
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.nfp = false;
+	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.ifindex = -1;
+	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.nfpCapable = false;
+	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.info = NULL;
+
+	ct->tuplehash[IP_CT_DIR_REPLY].tuple.nfp = false;
+	ct->tuplehash[IP_CT_DIR_REPLY].tuple.ifindex = -1;
+	ct->tuplehash[IP_CT_DIR_REPLY].tuple.nfpCapable = false;
+	ct->tuplehash[IP_CT_DIR_REPLY].tuple.info = NULL;
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
+
 	/*
 	 * changes to lookup keys must be done before setting refcnt to 1
 	 */
@@ -765,6 +834,16 @@ EXPORT_SYMBOL_GPL(nf_conntrack_alloc);
 void nf_conntrack_free(struct nf_conn *ct)
 {
 	struct net *net = nf_ct_net(ct);
+
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	if (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.info)
+		kfree(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.info);
+
+	if (ct->tuplehash[IP_CT_DIR_REPLY].tuple.info)
+		kfree(ct->tuplehash[IP_CT_DIR_REPLY].tuple.info);
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 
 	nf_ct_ext_destroy(ct);
 	atomic_dec(&net->ct.count);
@@ -1467,6 +1546,91 @@ void nf_ct_untracked_status_or(unsigned long bits)
 }
 EXPORT_SYMBOL_GPL(nf_ct_untracked_status_or);
 
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+void nfp_ct_sync(int family)
+{
+	struct nf_conntrack_tuple_hash *h;
+	struct nf_conn *ct;
+	struct nf_conntrack_tuple *tuple;
+	struct nf_conntrack_tuple target_tuple;
+	struct hlist_nulls_node *n;
+	unsigned int bucket = 0;
+	enum ip_conntrack_dir dir;
+	struct net *net = &init_net;
+	unsigned long status;
+
+	spin_lock_bh(&nf_conntrack_lock);
+	/* Go over all tuples in the Linux database */
+	for (; bucket < net->ct.htable_size; bucket++) {
+		hlist_nulls_for_each_entry(h, n, &net->ct.hash[bucket], hnnode) {
+			dir = NF_CT_DIRECTION(h);
+			tuple = &h[IP_CT_DIR_ORIGINAL].tuple;
+
+			ct = nf_ct_tuplehash_to_ctrack(h);
+			if (tuple->src.l3num != family)
+				continue;
+
+			/* We want to add only NFP capable rules*/
+			if (!tuple->nfpCapable)
+				continue;
+
+			if ((tuple->info->mode != IPT_NFP_DROP) && (tuple->info->mode != IPT_NFP_FWD))
+				continue;
+
+			tuple->nfp = true;
+
+			if (tuple->info->mode == IPT_NFP_DROP) {
+				if (nfp_mgr_p->nfp_hook_ct_fwd_add)
+					nfp_mgr_p->nfp_hook_ct_fwd_add(tuple, 0);
+				continue;
+			}
+
+			status = ct->status;
+
+#ifdef CONFIG_MV_ETH_NFP_NAT
+			if (status & IPS_NAT_MASK) {
+				/* NFP NAT is supported only in IPv4 */
+				if (tuple->src.l3num == AF_INET) {
+					/* status says if the original direction requires SNAT or DNAT (or both) */
+					/* if we currently work on the reply direction, we need to "reverse" the NAT status, */
+					/* e.g. if original direction was SNAT, reply should be DNAT. */
+					if (dir != IP_CT_DIR_ORIGINAL)
+						status ^= IPS_NAT_MASK;
+
+					nf_ct_invert_tuplepr(&target_tuple, &ct->tuplehash[!dir].tuple);
+
+					if ((status & IPS_NAT_MASK) == IPS_DST_NAT) {
+						if (nfp_mgr_p->nfp_hook_ct_nat_add)
+							nfp_mgr_p->nfp_hook_ct_nat_add(tuple, &target_tuple, IP_NAT_MANIP_DST);
+					} else if ((status & IPS_NAT_MASK) == IPS_SRC_NAT) {
+						if (nfp_mgr_p->nfp_hook_ct_nat_add)
+							nfp_mgr_p->nfp_hook_ct_nat_add(tuple, &target_tuple, IP_NAT_MANIP_SRC);
+					} else {
+						if (nfp_mgr_p->nfp_hook_ct_nat_add)
+							nfp_mgr_p->nfp_hook_ct_nat_add(tuple, &target_tuple, IP_NAT_MANIP_DST);
+							nfp_mgr_p->nfp_hook_ct_nat_add(tuple, &target_tuple, IP_NAT_MANIP_SRC);
+					}
+					continue;
+				} else {
+					/* NFP does not support NAT for IPv6, so nothing to do with this tuple */
+					tuple->nfp = false;
+					continue;
+				}
+			}
+#endif /* CONFIG_MV_ETH_NFP_NAT */
+			/* If we got till here, it must be IPT_NFP_FWD */
+			if (nfp_mgr_p->nfp_hook_ct_fwd_add)
+				nfp_mgr_p->nfp_hook_ct_fwd_add(tuple, 1);
+		}
+	}
+
+	spin_unlock_bh(&nf_conntrack_lock);
+}
+EXPORT_SYMBOL(nfp_ct_sync);
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
+
 static int nf_conntrack_init_init_net(void)
 {
 	int max_factor = 8;
@@ -1628,10 +1792,6 @@ int nf_conntrack_init(struct net *net)
 		/* Howto get NAT offsets */
 		RCU_INIT_POINTER(nf_ct_nat_offset, NULL);
 	}
-
-#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
-	fp_nat_db_init(2*nf_conntrack_htable_size);
-#endif
 
 	return 0;
 

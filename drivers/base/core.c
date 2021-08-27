@@ -1199,7 +1199,11 @@ void device_unregister(struct device *dev)
 	put_device(dev);
 }
 
+#ifdef CONFIG_ARCH_GEN3
+struct device *next_device(struct klist_iter *i)
+#else
 static struct device *next_device(struct klist_iter *i)
+#endif
 {
 	struct klist_node *n = klist_next(i);
 	struct device *dev = NULL;

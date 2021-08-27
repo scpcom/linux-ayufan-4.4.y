@@ -1,19 +1,15 @@
 OpenSWAN
 =========
- In order to explore the CESA through the OpenSWAN, 1 patch should be applied to the OpenSWAN.
+In order to explore the CESA through the OpenSWAN, please follow the next steps:
 
- download openswan-2.6.24 (http://www.openswan.org/), then untar+unzip it.
- apply the patch:
+1. Download openswan-2.6.37 (http://www.openswan.org/), then untar+unzip it.
 
- - mv_openswan_2_6_24.patch - 
-	change default configs to remove DEBUG and to include OCF.
-	Fixes:
-		- fix icmp_send failure caused by IFF_XMIT_DST_RELEASE flag set on the net dev.
-		- fix rmmod BUG by removing duplicated free_netdev call.
-		- include patch from openswan git that make sure we have the skb->dst in place before we call
-		  ip_select_ident otherwise we get kernel warn: "rt_bind_peer(0) .. "
+2. Apply the patch:
+	- mv_openswan_2_6_37.patch:
+		> Disable default DEBUG support.
+		> Enable OCF support.
 
-and compile:
+3. Compile:
 
  + ipsec module (cross compilation) :
   'make KERNELSRC=<path to this release, after config> module ARCH=arm CC=<path_to_cross_compile> LD=<path_to_cross_loader>'
@@ -24,8 +20,16 @@ and compile:
   'make KERNELSRC=<path to this release, after config> programs'
   'make install'
 
+Note: before tunnel is enabled on target, reverse path filtering(rp_filter) must be disabled under sysfs, using
+      the following commands:
+      - echo 0  > /proc/sys/net/ipv4/conf/eth<x>/rp_filter
+      - echo 0  > /proc/sys/net/ipv4/conf/all/rp_filter
+      - echo 1  > /proc/sys/net/ipv4/ip_no_pmtu_disc
+Reverse Path Filtering(rp_filter): it is a technology that is used on IP routers to try and prevent source address spoofing,
+which is often used for DenialOfService attacks. RPF works by checking the source IP of each packet received on an interface
+against the routing table. If the best route for the source IP address does not use the same interface that the packet was received on the packet is dropped.
 
-IPSec routing using encryption/authentication only
+IPSec routing using encryption/authentication only:
 
   basic vpn connection:
   +++++++++++++++++++++
@@ -38,7 +42,7 @@ config setup
         klipsdebug="none"             # Debug KLIPS
         plutodebug="none"             # Debug PLUTO
 
-conn dove_psk_vpn
+conn dsmp_psk_vpn
     type=tunnel                    # type of the connection: tunnel(default),passthrough,transport,reject,drop
     authby=secret
     left=192.168.1.1

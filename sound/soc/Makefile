@@ -22,6 +22,6 @@ obj-$(CONFIG_SND_SOC)	+= s6000/
 obj-$(CONFIG_SND_SOC)	+= sh/
 obj-$(CONFIG_SND_SOC)	+= tegra/
 obj-$(CONFIG_SND_SOC)	+= txx9/
+obj-$(CONFIG_SND_MRVL_AUDIO)  += ../../arch/arm/plat-armada/mv_drivers_lsp/mv_audio_soc/
 
-obj-$(CONFIG_SND_MRVL_AUDIO)  += ../../arch/arm/plat-feroceon/mv_drivers_lsp/mv_audio_soc/
 

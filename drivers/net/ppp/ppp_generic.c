@@ -54,6 +54,9 @@
 #include <linux/atomic.h>
 
 #include <linux/nsproxy.h>
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/mv_nfp.h>
+#endif
 #include <net/net_namespace.h>
 #include <net/netns/generic.h>
 

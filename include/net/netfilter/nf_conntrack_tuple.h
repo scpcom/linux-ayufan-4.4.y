@@ -73,6 +73,17 @@ struct nf_conntrack_tuple {
 		/* The direction (for tuplehash) */
 		u_int8_t dir;
 	} dst;
+
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	/* If true, this connection is handled by NFP */
+	bool nfp;
+	int ifindex;
+	bool nfpCapable;
+	bool udpCsum;
+	struct ipt_nfp_info *info;
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 };
 
 struct nf_conntrack_tuple_mask {

@@ -25,11 +25,45 @@ unsigned int cpu_last_asid = ASID_FIRST_VERSION;
 DEFINE_PER_CPU(struct mm_struct *, current_mm);
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#ifdef CONFIG_ARM_LPAE
+static void cpu_set_reserved_ttbr0(void)
+{
+	unsigned long ttbl = __pa(swapper_pg_dir);
+	unsigned long ttbh = 0;
+
+	/*
+	 * Set TTBR0 to swapper_pg_dir. Note that swapper_pg_dir only contains
+	 * global entries so the ASID value is not relevant.
+	 */
+	asm(
+	"	mcrr	p15, 0, %0, %1, c2		@ set TTBR0\n"
+	:
+	: "r" (ttbl), "r" (ttbh));
+}
+#else
+static void cpu_set_reserved_ttbr0(void)
+{
+	u32 ttb;
+
+	/* Copy TTBR1 into TTBR0 */
+	asm volatile(
+	"	mrc	p15, 0, %0, c2, c0, 1		@ read TTBR1\n"
+	"	mcr	p15, 0, %0, c2, c0, 0		@ set TTBR0\n"
+	: "=r" (ttb));
+}
+#endif
+#endif
+
 /*
  * We fork()ed a process, and we need a new context for the child
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+ * to run in.
+#else
  * to run in.  We reserve version 0 for initial tasks so we will
  * always allocate an ASID. The ASID 0 is reserved for the TTBR
  * register changing sequence.
+#endif
  */
 void __init_new_context(struct task_struct *tsk, struct mm_struct *mm)
 {
@@ -39,8 +73,12 @@ void __init_new_context(struct task_struct *tsk, struct mm_struct *mm)
 
 static void flush_context(void)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	cpu_set_reserved_ttbr0();
+#else
 	/* set the reserved ASID before flushing the TLB */
 	asm("mcr	p15, 0, %0, c13, c0, 1\n" : : "r" (0));
+#endif
 	isb();
 	local_flush_tlb_all();
 	if (icache_is_vivt_asid_tagged()) {
@@ -96,14 +134,22 @@ static void reset_context(void *info)
 		return;
 
 	smp_rmb();
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	asid = cpu_last_asid + cpu;
+#else
 	asid = cpu_last_asid + cpu + 1;
+#endif
 
 	flush_context();
 	set_mm_context(mm, asid);
 
 	/* set the new ASID */
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	cpu_switch_mm(mm->pgd, mm);
+#else
 	asm("mcr	p15, 0, %0, c13, c0, 1\n" : : "r" (mm->context.id));
 	isb();
+#endif
 }
 
 #else
@@ -146,13 +192,21 @@ void __new_context(struct mm_struct *mm)
 	 * to start a new version and flush the TLB.
 	 */
 	if (unlikely((asid & ~ASID_MASK) == 0)) {
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+		asid = cpu_last_asid + smp_processor_id();
+#else
 		asid = cpu_last_asid + smp_processor_id() + 1;
+#endif
 		flush_context();
 #ifdef CONFIG_SMP
 		smp_wmb();
 		smp_call_function(reset_context, NULL, 1);
 #endif
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+		cpu_last_asid += NR_CPUS - 1;
+#else
 		cpu_last_asid += NR_CPUS;
+#endif
 	}
 
 	set_mm_context(mm, asid);

@@ -717,6 +717,12 @@ __SYSCALL(__NR_SYNOArchiveBit, sys_SYNOArchiveBit)
 #define recvfile(arg1,arg2,arg3,arg4,arg5)      syscall(__NR_recvfile, arg1, arg2, arg3, arg4, arg5)
 __SYSCALL(__NR_recvfile, sys_recvfile)
 #endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOMTDAlloc                       405
+#define SYNOMTDAlloc(x)				syscall(__NR_SYNOMTDAlloc, x)
+#endif
+
 #ifdef MY_ABC_HERE
 #define __NR_SYNOCaselessStat64                 406
 #define __NR_SYNOCaselessLStat64                407
@@ -767,6 +773,48 @@ __SYSCALL(__NR_SYNOACLIsSupport, sys_SYNOACLIsSupport)
 #define SYNOACLSysGetPerm(arg1, arg2)           syscall(__NR_SYNOACLGetPerm, arg1, arg2)
 __SYSCALL(__NR_SYNOACLGetPerm, sys_SYNOACLGetPerm)
 #endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOStat                           416
+#define __NR_SYNOFStat                          417
+#define __NR_SYNOLStat                          418
+#define __NR_SYNOStat64                         419
+#define __NR_SYNOFStat64                        420
+#define __NR_SYNOLStat64                        421
+
+#if !defined(__KERNEL__)
+/* direct SYNOStat to stat64 in 32-bit platform
+ * 64-bits arch has no stat64 support */
+#include <bits/wordsize.h>
+#if __WORDSIZE == 64
+#define SYNOStat(arg1, arg2, arg3)              syscall(__NR_SYNOStat, arg1, arg2, arg3)
+#define SYNOFStat(arg1, arg2, arg3)             syscall(__NR_SYNOFStat, arg1, arg2, arg3)
+#define SYNOLStat(arg1, arg2, arg3)             syscall(__NR_SYNOLStat, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNOStat, sys_SYNOStat)
+__SYSCALL(__NR_SYNOFStat, sys_SYNOFStat)
+__SYSCALL(__NR_SYNOLStat, sys_SYNOLStat)
+#elif (_FILE_OFFSET_BITS == 64)
+#define SYNOStat(arg1, arg2, arg3)              syscall(__NR_SYNOStat64, arg1, arg2, arg3)
+#define SYNOFStat(arg1, arg2, arg3)             syscall(__NR_SYNOFStat64, arg1, arg2, arg3)
+#define SYNOLStat(arg1, arg2, arg3)             syscall(__NR_SYNOLStat64, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNOStat64, sys_SYNOStat64)
+__SYSCALL(__NR_SYNOFStat64, sys_SYNOFStat64)
+__SYSCALL(__NR_SYNOLStat64, sys_SYNOLStat64)
+#endif
+#endif /* __KERNEL__ */
+#endif /* MY_ABC_HERE */
+
+#ifdef CONFIG_SYNO_NOTIFY
+#define __NR_SYNONotifyInit                     422
+#define SYNONotifyInit(arg1)                    syscall(__NR_SYNONotifyInit, arg1)
+__SYSCALL(__NR_SYNONotifyInit, sys_SYNONotifyInit)
+#define __NR_SYNONotifyAddWatch                 423
+#define SYNONotifyAddWatch(arg1, arg2, arg3)    syscall(__NR_SYNONotifyAddWatch, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNONotifyAddWatch, sys_SYNONotifyAddWatch)
+#define __NR_SYNONotifyRemoveWatch              424
+#define SYNONotifyRemoveWatch(arg1, arg2, arg3) syscall(__NR_SYNONotifyRemoveWatch, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNONotifyRemoveWatch, sys_SYNONotifyRemoveWatch)
+#endif /* CONFIG_SYNO_NOTIFY */
 
 #ifdef MY_ABC_HERE
 #define __syscall_return(type, res) \

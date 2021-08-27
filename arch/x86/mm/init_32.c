@@ -54,6 +54,17 @@
 #include <asm/page_types.h>
 #include <asm/init.h>
 
+#ifdef CONFIG_ARCH_GEN3
+#include <asm/memblock.h>
+
+#define GBE_CONFIG_RAM_BASE    0x60000
+#define GBE_CONFIG_DATA_LENGTH 0x200
+/* from $(KERNEL)/drivers/net/e1000/gbe_mac_access.h */
+#define ACPI_RAM_BASE    0x10000
+#define ACPI_DATA_LENGTH 0x8000
+#define INTEL_8051_RAM_BASE    0x40000
+#define INTEL_8051_DATA_LENGTH 0x10000
+#endif
 unsigned long highstart_pfn, highend_pfn;
 
 static noinline int do_test_wp_bit(void);
@@ -695,6 +706,13 @@ void __init setup_bootmem_allocator(void)
 	printk(KERN_INFO "  mapped low ram: 0 - %08lx\n",
 		 max_pfn_mapped<<PAGE_SHIFT);
 	printk(KERN_INFO "  low ram: 0 - %08lx\n", max_low_pfn<<PAGE_SHIFT);
+#ifdef CONFIG_ARCH_GEN3
+#ifdef CONFIG_SMP
+        memblock_x86_reserve_range(GBE_CONFIG_RAM_BASE, GBE_CONFIG_RAM_BASE + GBE_CONFIG_DATA_LENGTH,"GBE CONFIG"); //RAM reverve for Gbe mac 
+        memblock_x86_reserve_range(ACPI_RAM_BASE,ACPI_RAM_BASE + ACPI_DATA_LENGTH,"ACPI CONFIG"); //RAM reserve for ACPI data
+        memblock_x86_reserve_range(INTEL_8051_RAM_BASE,INTEL_8051_RAM_BASE + INTEL_8051_DATA_LENGTH,"8051 CONFIG");//RAM reserver for 8051 firmware
+#endif
+#endif
 
 	after_bootmem = 1;
 }

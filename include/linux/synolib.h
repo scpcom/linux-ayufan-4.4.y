@@ -65,28 +65,4 @@ void syno_do_hibernation_log(const char __user *filename);
 int SynoSCSIGetDeviceIndex(struct block_device *bdev);
 #endif
 
-#ifdef MY_ABC_HERE
-/**
- * How to use :
- * 1. module itself register the proprietary instance into the kernel
- *    by a predined MAGIC-key.
- * 2. Others can query the module registration by the same MAGIC-key
- *    and get the instance handle.
- * ********************************************************************
- * Beware of casting/handing "instance", you must know
- * what you are doing before accessing the instance.
- * ********************************************************************
- */
-/* For plugin-instance registration */
-int syno_plugin_register(int plugin_magic, void *instance);
-int syno_plugin_unregister(int plugin_magic);
-/* For getting the plugin-instance */
-int syno_plugin_handle_get(int plugin_magic, void **hnd);
-void * syno_plugin_handle_instance(void *hnd);
-void syno_plugin_handle_put(void *hnd);
-
-/* Magic definition */
-#define EPIO_PLUGIN_MAGIC_NUMBER    0x20120815
-#endif
-
 #endif //__SYNOLIB_H_

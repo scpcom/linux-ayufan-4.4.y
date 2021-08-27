@@ -335,6 +335,12 @@ void VFP_bounce(u32 trigger, u32 fpexc, struct pt_regs *regs)
 {
 	u32 fpscr, orig_fpscr, fpsid, exceptions;
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	/* Adjust saved PC for thumb-2 user program */
+	if (regs->ARM_cpsr & PSR_T_BIT)
+		regs->ARM_pc += 2;
+#endif
+
 	pr_debug("VFP: bounce: trigger %08x fpexc %08x\n", trigger, fpexc);
 
 	/*
@@ -559,6 +565,24 @@ static int vfp_hotplug(struct notifier_block *b, unsigned long action,
 		vfp_enable(NULL);
 	return NOTIFY_OK;
 }
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+void vfp_save(void)
+{
+        struct pm_message temp;
+        /*
+         * if VFP was not initialized yet, then do nothing
+         */
+        if (VFP_arch)
+                vfp_pm_suspend();
+}
+
+void vfp_restore(void)
+{
+        if (VFP_arch)
+                vfp_pm_resume();
+}
+#endif
 
 /*
  * VFP support code initialisation.

@@ -88,7 +88,7 @@ static int hfsplus_ioctl_setflags(struct file *file, int __user *user_flags)
 	unsigned int flags;
 	int err = 0;
 
-	err = mnt_want_write(file->f_path.mnt);
+	err = mnt_want_write_file(file);
 	if (err)
 		goto out;
 
@@ -139,7 +139,7 @@ static int hfsplus_ioctl_setflags(struct file *file, int __user *user_flags)
 out_unlock_inode:
 	mutex_unlock(&inode->i_mutex);
 out_drop_write:
-	mnt_drop_write(file->f_path.mnt);
+	mnt_drop_write_file(file);
 out:
 	return err;
 }
@@ -159,22 +159,50 @@ long hfsplus_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 }
 
 #ifdef MY_ABC_HERE
+static ssize_t hfsplus_syno_get_cat_entry(struct inode *inode, hfsplus_cat_entry *entry, struct hfs_find_data *fd)
+{
+	u16 type = 0;
+	ssize_t res = 0;
+
+	res = hfsplus_find_cat(inode->i_sb, inode->i_ino, fd);
+	if (res) {
+		goto out;
+	}
+	type = hfs_bnode_read_u16(fd->bnode, fd->entryoffset);
+	if (type == HFSPLUS_FOLDER) {
+		if (fd->entrylength < sizeof(struct hfsplus_cat_folder)) {
+			dprint(DBG_XATTR, "hfs: Invalid fs structure [%d, %lu]\n", fd->entrylength, sizeof(struct hfsplus_cat_folder));
+			res = -EIO;
+			goto out;
+		}
+		hfs_bnode_read(fd->bnode, entry, fd->entryoffset,
+				sizeof(struct hfsplus_cat_folder));
+	} else if (type == HFSPLUS_FILE) {
+		if (fd->entrylength < sizeof(struct hfsplus_cat_file)) {
+			dprint(DBG_XATTR, "hfs: Invalid fs structure [%d, %lu]\n", fd->entrylength, sizeof(struct hfsplus_cat_file));
+			res = -EIO;
+			goto out;
+		}
+		hfs_bnode_read(fd->bnode, entry, fd->entryoffset,
+				sizeof(struct hfsplus_cat_file));
+	} else {
+		res = -EINVAL;
+	}
+out:
+	return res;
+}
+
 static ssize_t hfsplus_get_cat_entry(struct inode *inode, hfsplus_cat_entry *entry)
 {
-	struct hfs_find_data fd;
 	ssize_t res = 0;
+	struct hfs_find_data fd;
 
 	res = hfs_find_init(HFSPLUS_SB(inode->i_sb)->cat_tree, &fd);
 	if (res)
 		return res;
-	res = hfsplus_find_cat(inode->i_sb, inode->i_ino, &fd);
-	if (res) {
-		goto out;
-	}
-	hfs_bnode_read(fd.bnode, entry, fd.entryoffset,
-			sizeof(hfsplus_cat_entry));
-out:
+	res = hfsplus_syno_get_cat_entry(inode, entry, &fd);
 	hfs_find_exit(&fd);
+
 	return res;
 }
 
@@ -189,11 +217,11 @@ static ssize_t hfsplus_set_cat_flag(struct inode *inode, u16 flags, int add)
 	res = hfs_find_init(HFSPLUS_SB(inode->i_sb)->cat_tree, &fd);
 	if (res)
 		return res;
-	res = hfsplus_find_cat(inode->i_sb, inode->i_ino, &fd);
-	if (res) {
+
+	res = hfsplus_syno_get_cat_entry(inode, &entry, &fd);
+	if (res)
 		goto out;
-	}
-	hfs_bnode_read(fd.bnode, &entry, fd.entryoffset, sizeof(hfsplus_cat_entry));
+
 	switch (be16_to_cpu(entry.type)) {
 		case HFSPLUS_FILE:
 			is_file = 1;
@@ -202,7 +230,7 @@ static ssize_t hfsplus_set_cat_flag(struct inode *inode, u16 flags, int add)
 			is_file = 0;
 			break;
 		default:
-			res = EINVAL;
+			res = -EINVAL;
 			goto out;
 	}
 	if (is_file) {
@@ -258,42 +286,41 @@ int hfsplus_setxattr_buildin(struct dentry *dentry, const char *name,
 	res = hfs_find_init(btree, &fd);
 	if (res)
 		return res;
-	res = hfsplus_find_cat(inode->i_sb, inode->i_ino, &fd);
+	res = hfsplus_syno_get_cat_entry(inode, &entry, &fd);
 	if (res)
 		goto out;
-	hfs_bnode_read(fd.bnode, &entry, fd.entryoffset,
-			sizeof(struct hfsplus_cat_file));
-	file = &entry.file;
 	
 	if (entry.type == cpu_to_be16(HFSPLUS_FILE)) {
 		is_file = 1;
 	}
+	file = (struct hfsplus_cat_file *) &entry.file;
 	res = -ERANGE;
-	if (!strcmp(name, SZ_XATTR_NAME_TYPE) && is_file) {
-		if (size != 4)
+	if (is_file && !strcmp(name, SZ_XATTR_NAME_TYPE)) {
+		if (size > 4)
 			goto out;
-		memcpy(&file->user_info.fdType, value, 4);
-	} else if (!strcmp(name, SZ_XATTR_NAME_CREATOR) && is_file) {
-		if (size != 4)
+		memcpy(&(file->user_info.fdType), value, size);
+	} else if (is_file && !strcmp(name, SZ_XATTR_NAME_CREATOR)) {
+		if (size > 4)
 			goto out;
-		memcpy(&file->user_info.fdCreator, value, 4);
+		memcpy(&(file->user_info.fdCreator), value, size);
 	} else if (!strcmp(name, SZ_XATTR_NAME_FINDRINFO)) {
-		if (memcmp(&file->user_info, &empty_info, sizeof(empty_info))) {
+		if (memcmp(&(file->user_info), &empty_info, sizeof(empty_info))) {
 			if (flags & XATTR_CREATE) {
 				res = -EEXIST;
 				goto out;
 			}
 		} else {
 			if (flags & XATTR_REPLACE) {
-				res = -ENODATA;
+				res = -ENOATTR;
 				goto out;
 			}
 		}
 		// reserve the date_added
-		memcpy(&((struct FXInfo *)value + sizeof(struct FInfo))->date_added, &file->finder_info.date_added, sizeof(__be32));
-		if (size != 32)
+		memcpy(&(((struct FXInfo *)(value + sizeof(struct FInfo)))->date_added),
+			&(file->finder_info.date_added), sizeof(file->finder_info.date_added));
+		if (size > 32)
 			goto out;
-		memcpy(&file->user_info, value, 32);
+		memcpy(&(file->user_info), value, size);
 	} else {
 		res = -EOPNOTSUPP;
 		goto out;
@@ -328,7 +355,7 @@ int hfsplus_setxattr(struct dentry *dentry, const char *name,
 
 	dprint(DBG_XATTR, "hfs: setattr [%s][%s] [%lu]\n", dentry->d_name.name, name, inode->i_ino);
 
-	if (!value) {
+	if (!value && 0 != size) {
 		return -EINVAL;
 	}
 	if (!strcmp(name, SZ_XATTR_NAME_TYPE) ||
@@ -339,12 +366,6 @@ int hfsplus_setxattr(struct dentry *dentry, const char *name,
 		return -EOPNOTSUPP;
 	}
 
-#if 0
-#define HFSPLUS_MAX_ATTR_LEN (128*1024)
-	if (size > HFSPLUS_MAX_ATTR_LEN) {
-		return E2BIG;
-	}
-#endif
 	if (size > hfsplus_get_maxinline_attrsize(btree)) {
 		return -E2BIG;
 	}
@@ -357,7 +378,7 @@ int hfsplus_setxattr(struct dentry *dentry, const char *name,
 	res = hfs_brec_find(&fd);
 	if (res == -ENOENT) {
 		if (flags & XATTR_REPLACE) {
-			res = -ENODATA;
+			res = -ENOATTR;
 			goto out;
 		}
 	} else if (res != 0) {
@@ -416,6 +437,8 @@ static ssize_t hfsplus_getxattr_buildin(struct dentry *dentry, const char *name,
 		return -EOPNOTSUPP;
 
 	res = hfsplus_get_cat_entry(inode, &entry);
+	if (res)
+		goto out;
 	file = &entry.file;
 
 	if (!strcmp(name, SZ_XATTR_NAME_TYPE) && S_ISREG(inode->i_mode)) {
@@ -445,6 +468,7 @@ static ssize_t hfsplus_getxattr_buildin(struct dentry *dentry, const char *name,
 	} else {
 		res = -EOPNOTSUPP;
 	}
+out:
 	return res;
 }
 
@@ -474,6 +498,9 @@ ssize_t hfsplus_getxattr(struct dentry *dentry, const char *name,
 	hfsplus_attr_build_key(inode->i_sb, fd.search_key, cpu_to_be32((u32)(unsigned long)dentry->d_fsdata), name, 0);
 	res = hfs_brec_find(&fd);
 	if (res) {
+		if (res == -ENOENT) {
+			res = -ENOATTR;
+		}
 		goto out;
 	}
 	tmp = kmalloc(fd.entrylength * sizeof(char), GFP_NOFS);
@@ -499,7 +526,7 @@ ssize_t hfsplus_getxattr(struct dentry *dentry, const char *name,
 			res = -EOPNOTSUPP;
 			break;
 		default:
-			printk(KERN_ERR "hfs: found bad record type in attribute btree\n");
+			dprint(DBG_XATTR, "hfs: found bad record type in attribute btree\n");
 			res = -EINVAL;
 			goto out;
 	}
@@ -542,9 +569,8 @@ static ssize_t hfsplus_listxattr_ex(struct dentry *dentry, char *buffer, size_t 
 		type = be16_to_cpu(entry.type);
 
 		if (type != HFSPLUS_FILE && type != HFSPLUS_FOLDER) {
-			printk(KERN_ERR "hfs: invalid catalog entry type in lookup\n");
-			res = -EIO;
-			goto out;
+			dprint(DBG_XATTR, "hfs: invalid catalog entry type in lookup\n");
+			return -EIO;
 		}
 		if (type == HFSPLUS_FILE) {
 			if (0 < be64_to_cpu(entry.file.rsrc_fork.total_size)) {
@@ -560,7 +586,7 @@ static ssize_t hfsplus_listxattr_ex(struct dentry *dentry, char *buffer, size_t 
 		}
 	}
 	if ((res = hfs_find_init(HFSPLUS_SB(inode->i_sb)->attr_tree, &fd))) {
-		goto out;
+		return res;
 	}
 	hfsplus_attr_build_key(inode->i_sb, fd.search_key, cnid, NULL, 0);
 	if ((res = hfsplus_brec_find_first(&fd))) {
@@ -584,6 +610,9 @@ out:
 		if (size < strbuflen && size > 0) {
 			res = -ERANGE;
 		}
+	} else if (res == -ENOENT) {
+		// no such file should already been checked before call this function
+		res = -ENOATTR;
 	}
 	hfs_find_exit(&fd);
 	return res;
@@ -603,14 +632,45 @@ static int hfsplus_has_xattr(struct dentry *dentry)
 	return 0;
 }
 
+int hfsplus_rmxattr_all(struct dentry *dentry)
+{
+	struct inode *inode = dentry->d_inode;
+	hfsplus_cnid cnid = cpu_to_be32((u32)(unsigned long)dentry->d_fsdata);
+	struct hfs_find_data fd;
+	ssize_t res = 0;
+
+	if ((res = hfs_find_init(HFSPLUS_SB(inode->i_sb)->attr_tree, &fd))) {
+		return res;
+	}
+	// traverse other EA
+	hfsplus_attr_build_key(inode->i_sb, fd.search_key, cnid, NULL, 0);
+	res = hfsplus_brec_find(&fd);
+	while (!res) {
+		if ((res = hfs_brec_remove(&fd))) {
+			hfs_find_exit(&fd);
+			goto out;
+		}
+		hfsplus_attr_build_key(inode->i_sb, fd.search_key, cnid, NULL, 0);
+		res = hfsplus_brec_find(&fd);
+	}
+	inode->i_mtime = inode->i_ctime = CURRENT_TIME_SEC;
+	hfsplus_mark_inode_dirty(inode, HFSPLUS_I_ATTR_DIRTY);
+	hfs_find_exit(&fd);
+
+	hfsplus_set_cat_flag(inode, HFS_HAS_ATTR_MASK, 0); // here would lock cat tree.
+	res = 0;
+out:
+	return res;
+}
+
 int hfsplus_rmxattr(struct dentry *dentry, const char *name)
 {
 	struct inode *inode = dentry->d_inode;
 	struct hfs_btree *btree = HFSPLUS_SB(inode->i_sb)->attr_tree;
 	struct hfs_find_data fd;
-	hfsplus_attr_entry entry;
 	char tmp[32] = {0};
 	int res = 0;
+	u32 type = 0;
 
 	dprint(DBG_XATTR, "hfs: rmattr [%s][%s] [%lu]\n", dentry->d_name.name, name, dentry->d_inode->i_ino);
 
@@ -630,11 +690,13 @@ int hfsplus_rmxattr(struct dentry *dentry, const char *name)
 	}
 	hfsplus_attr_build_key(inode->i_sb, fd.search_key, cpu_to_be32((u32)(unsigned long)dentry->d_fsdata), name, 0);
 	if ((res = hfs_brec_find(&fd))) {
+		if (res == -ENOENT)
+			res = -ENOATTR;
 		hfs_find_exit(&fd);
 		goto out;
 	}
-	hfs_bnode_read(fd.bnode, &entry, fd.entryoffset, sizeof(hfsplus_attr_entry));
-	if (be32_to_cpu(entry.type) != kHFSPlusAttrData) {
+	type = hfs_bnode_read_u32(fd.bnode, fd.entryoffset);
+	if (type != kHFSPlusAttrData) {
 		res = -EOPNOTSUPP;
 		hfs_find_exit(&fd);
 		goto out;

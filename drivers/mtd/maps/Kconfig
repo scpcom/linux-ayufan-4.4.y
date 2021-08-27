@@ -539,4 +539,8 @@ config MTD_LATCH_ADDR
 
           If compiled as a module, it will be called latch-addr-flash.
 
+config SYNO_MTD_PHYMAPS
+        bool "Flash device mapped on Synology Board"
+        depends on MTD_CFI && ( SYNO_MPC85XX_COMMON || SYNO_MV_COMMON || SYNO_PLX_PORTING || SYNO_ARMADA)
+
 endmenu

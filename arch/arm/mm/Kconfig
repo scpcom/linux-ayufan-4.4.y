@@ -382,6 +382,23 @@ config CPU_FEROCEON_OLD_ID
 	  for which the CPU ID is equal to the ARM926 ID.
 	  Relevant for Feroceon-1850 and early Feroceon-2850.
 
+choice
+	prompt "Marvell Sheeva CPU Architecture"
+	default CPU_SHEEVA_PJ4B_V7
+
+config CPU_SHEEVA_PJ4B_V6
+	bool "Support Sheeva processor in V6 mode" if ARCH_ARMADA_XP
+	select CPU_V6
+	select CPU_32v6K
+	select CPU_V6K
+	select DMA_CACHE_RWFO if SMP
+
+config CPU_SHEEVA_PJ4B_V7
+	bool "Support Sheeva processor in V7 mode" if ARCH_ARMADA_XP || ARCH_ARMADA370
+	select CPU_V7
+
+endchoice
+	  
 # Marvell PJ4
 config CPU_PJ4
 	bool
@@ -629,6 +646,19 @@ config IO_36
 
 comment "Processor Features"
 
+config ARM_LPAE
+	bool "Support for the Large Physical Address Extension"
+	depends on MMU && CPU_V7
+	help
+	  Say Y if you have an ARMv7 processor supporting the LPAE page table
+	  format and you would like to access memory beyond the 4GB limit.
+
+config ARCH_PHYS_ADDR_T_64BIT
+	def_bool ARM_LPAE
+
+config ARCH_DMA_ADDR_T_64BIT
+	def_bool ARM_LPAE
+
 config ARM_THUMB
 	bool "Support Thumb user binaries"
 	depends on CPU_ARM720T || CPU_ARM740T || CPU_ARM920T || CPU_ARM922T || CPU_ARM925T || CPU_ARM926T || CPU_ARM940T || CPU_ARM946E || CPU_ARM1020 || CPU_ARM1020E || CPU_ARM1022 || CPU_ARM1026 || CPU_XSCALE || CPU_XSC3 || CPU_MOHAWK || CPU_V6 || CPU_V6K || CPU_V7 || CPU_FEROCEON
@@ -687,19 +717,26 @@ config CPU_BIG_ENDIAN
 	  of your chipset/board/processor.
 
 config CPU_ENDIAN_BE8
-	bool
+	bool "Support BE8 Mode"
 	depends on CPU_BIG_ENDIAN
 	default CPU_V6 || CPU_V6K || CPU_V7
 	help
 	  Support for the BE-8 (big-endian) mode on ARMv6 and ARMv7 processors.
 
 config CPU_ENDIAN_BE32
-	bool
+	bool "Support BE32 Mode"
 	depends on CPU_BIG_ENDIAN
 	default !CPU_ENDIAN_BE8
 	help
 	  Support for the BE-32 (big-endian) mode on pre-ARMv6 processors.
 
+config BE8_ON_LE
+	bool "Run BE8 kernel on a little endian machine"
+	depends on CPU_V6 || CPU_V7
+	select CPU_BIG_ENDIAN
+	help
+	  Run BE8 kernel on a little endian machine.
+	  
 config CPU_HIGH_VECTOR
 	depends on !MMU && CPU_CP15 && !CPU_ARM740T
 	bool "Select the High exception vector"
@@ -792,6 +829,14 @@ config DMA_CACHE_RWFO
 	  in hardware, other workarounds are needed (e.g. cache
 	  maintenance broadcasting in software via FIQ).
 
+config SMP_ENABLE_LAZY_FLUSH
+	bool "Enable lazy flush for v6 smp"
+	depends on CPU_V6 && SMP
+	default y
+	help
+	  Enable the lazy flush when calling flush_dcache_page() for smp
+	  v6 mode where cache maintenance breadcasting done in sotfware.
+
 config OUTER_CACHE
 	bool
 
@@ -831,6 +876,348 @@ config CACHE_FEROCEON_L2_WRITETHROUGH
 	help
 	  Say Y here to use the Feroceon L2 cache in writethrough mode.
 	  Unless you specifically require this, say N for writeback mode.
+
+config SHEEVA_ERRATA_ARM_CPU_4742
+	bool "Sheeva Errata 4742: Enable sync barriers after WFI idle"
+	depends on CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7
+	help
+	  When coming out of WFI IDLE state, a specific timing sensitivity exists
+	  between the retiring WFI instruction and the newly issued subsequent 
+	  instructions. This sensitivity can result in a CPU hang scenario.
+	  WA: The software must insert either a Data Synchronization Barrier (DSB)
+	  or Data Memory Barrier (DMB) command immediately after the WFI instruction.
+
+config SHEEVA_ERRATA_ARM_CPU_4786
+	bool "Sheeva Errata 4786: Disable coprocessor dual issue mode"
+	depends on (CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7) && ARM_THUMB && VFP
+	help
+	  If the last instruction inside a Thumb IT block is a branch, and the
+	  following instruction is a VFP instruction, the logic may incorrectly
+	  dual-issue the VFP instruction along with the branch instruction. This
+	  causes the VFP instruction to be executed, even though the branch 
+	  instruction may be taken.
+	  WA: Set the CP15 coprocessor dual-issue disable bit in the Auxiliary
+	  Debug Modes Control 0 register (bit[15]). This setting disables the
+	  dual-issuing of VFP instructions before entering an IT block.
+
+config SHEEVA_ERRATA_ARM_CPU_5315
+	bool "Sheeva Errata 5315: Disable Data Speculative prefetch from MBU/LSU"
+	depends on CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7
+	default n
+	help
+	  When a PLD instruction is used as a memory hint, using a fast load
+	  bypass (load data is used as the address for a subsequent memory access)
+	  can result in data corruption.
+	  WA: Do not operate in Speculative mode
+
+config SHEEVA_ERRATA_ARM_CPU_4413
+	bool "Sheeva Errata 4413: Add SB before L1 Invalidate by MVA"
+	depends on CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7
+	help
+	  Potentially, invalidates by a Modified Virtual Address (MVA) entry can
+	  cause lines to fill into the L1 cache in an "intermediate" state without
+	  the lines being subsequently updated to a valid state. As a result, a 
+	  subsequent "multi-hit" scenario and potential data corruption can occur
+	  when a future operation allocates the same address to a separate line.
+	  WA: The Invalidate by MVA operation (or sequence of MVA operations) must
+	  be preceded by a barrier to ensure that the preceding pre-condition for
+	  the cache miss is completed.
+
+config SHEEVA_ERRATA_ARM_CPU_4659
+	bool "Sheeva Errata 4659: Add ISB following L1 I$ Invalidate by MVA"
+	depends on CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7
+	help
+	  I-Cache maintenance by using an MVA command can cause other instructions
+	  in I-Fetch to be executed twice.
+	  WA: Follow I-Cache maintenance by an MVA command with an Instruction 
+	  Synchronization Barrier (ISB) instruction. This instruction flushes the
+	  pipeline after the maintenance operation, deleting any double-instructions.
+
+config SHEEVA_ERRATA_ARM_CPU_5114
+	bool "Sheeva Errata 5114: Force all MMU pages to be Shared"
+	depends on CPU_SHEEVA_PJ4B_V6 && AURORA_IO_CACHE_COHERENCY
+	help
+	  When a non-shared line fill request causes a shared cacheable eviction
+	  in close proximity to an incoming snoop to the victim line, the incoming
+	  snoop can incorrectly miss and result in data corruption.
+	  WA: When using cacheable shared memory, set all memory pages/descriptors
+	  to be shared in the Translation Table Base Register 0
+
+config SHEEVA_ERRATA_ARM_CPU_4611
+	bool "Sheeva Errata 4611: Preceed every L1 Clean operation with DSB"
+	depends on CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7
+	help
+	  A CP15 clean operation can result in a dead lock state if it is hit by
+	  an incoming snoop evento.
+	  WA: Before any CP15 clean type operation in Cache Coherency mode, issue
+	  a Data Memory Barrier (DMB) or a Data Synchronization Barrier (DSB)
+	  instruction.
+
+config SHEEVA_ERRATA_ARM_CPU_BTS61
+	bool "Sheeva Errata BTS61: Disable WFI and WFE instructions in SMP or Coherent systems"
+	depends on (CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7) && (SMP || AURORA_IO_CACHE_COHERENCY)
+	help
+	  When the CPU is set to WFI mode in the system with a Snoop command, a
+	  snoop response may not occur and that will cause a system hang.
+	  WA: Do not use the WFI mode in SMP/coherent systems.
+
+config SHEEVA_ERRATA_ARM_CPU_4948
+	bool "Sheeva Errata 4948: Disable L0 cache"
+	depends on CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7
+	default n
+	help
+	  In a very rare case, the core can fail to observe the correct data
+	  as follows:
+	    1. After a first load, a second load operation to the same address
+	       occurs, and an invalidate snoop to the same line is arbitrated
+	       between both reads.
+	    2. The core may observe the old data for the second read, while the
+	       first load got the new data laying in this address.
+	    3. A third load to the same address will see the new data.
+	  WA: This event can occur when the first load access crosses a cache
+	  line boundary (i.e., unaligned access). If it does occur, L0 data
+	  cache can be disabled
+
+config SHEEVA_ERRATA_ARM_CPU_6409
+
+        bool "Sheeva Errata 6409: Processor may execute incorrect instructions when two ARM-mode conditional branches are back-toback and double-word-aligned"
+        depends on  CPU_SHEEVA_PJ4B_V7 && (ARMADA_XP_REV_A0 || ARMADA_XP_A0_WITH_B0)
+        default y
+        help
+	In a certain rare case the processor will evaluate a branch incorrectly leading to incorrect execution of instructions.
+	The bug occurs when the static predictor is incorrectly applied to a branch instruction when a dynamic predictor
+	predicts that a branch should not be taken
+	Workaround:
+		To avoid this bug with minimal performance impact, the static branch predictor can be disabled by writing a "0" to bit[2]
+		of the Auxiliary Debug Modes Control Register as follows:
+		mrc p15, 1, r0, c15, c1, 1
+		bic r0, r0, 0x4; disable static prediction
+		mcr p15, 1, r0, c15, c1, 1
+
+config SHEEVA_ERRATA_ARM_CPU_5980
+
+        bool "Sheeva Errata 5980: Ordering Issues associated with Streaming device write"
+        depends on  CPU_SHEEVA_PJ4B_V7 && (ARMADA_XP_REV_A0 || ARMADA_XP_A0_WITH_B0)
+	default y
+        help
+	A stream of device writes are performed with the same AXI ID, followed by a write-back, write-allocate cacheable
+	exclusive write that has the same AXI ID.  There is an issue with the System L2 AXI logic that allows the response of
+	the exclusive write to return with EXOK prior to the response of all of the devices.
+	WA:
+		Disable the device write streaming capability.  This can be done by:
+		;; use read/modify/write
+		;; set bit 29 to .1. (default is 0)
+		MCR p15, 1, <Rd>, c15, c1,2
+
+config SHEEVA_ERRATA_ARM_CPU_6043
+
+        bool "Sheeva Errata 6043: clean operations can cause victim data to be written out of order"
+        depends on  CPU_SHEEVA_PJ4B_V7 && (ARMADA_XP_REV_A0 || ARMADA_XP_A0_WITH_B0)
+        default y
+        help
+		Cache maintenance clean operations leave the L1 in a "right to modify" state.  If a clean operation is stalled due to the
+		memory buffers being full, another store transaction to the same address in L1 can occur, leaving the line in a dirty
+		state.  At this time, if a separate request causes this newly modified line to get evicted, there is a scenario where the
+		more recently modified data can be written out to memory ahead of the original cache maintenance clean operation's
+		data, resulting in data corruption.
+		Workaround:
+		 Note the failure is very rare, and more likely to occur when multiple ways of the L1 cache are locked, increasing the
+		victim traffic.
+		One possible workaround is to replace "Clean" with "Clean & Invalidate" operations.
+		Alternatively, if a DMB or DSB instruction is issued after completing a group of clean operations (before executing any
+		stores to the cleaned lines), the issue also cannot occur.
+
+config SHEEVA_ERRATA_ARM_CPU_6075
+
+        bool "Sheeva Errata 6075: Barriers fail to enforce ordering among pended loads to non-cacheable memory"
+        depends on  CPU_SHEEVA_PJ4B_V7 && (ARMADA_XP_REV_A0 || ARMADA_XP_A0_WITH_B0)
+        default y
+        help
+		When a DMB or DSB is used, the architecture requires that the barrier order explicit memory accesses from before the
+		barrier to ones after the barrier.  Because non-cacheable accesses are permitted to pend to the memory buffers, there
+		exists a rare scenario where the prescribed ordering is not honored.  Consider the following multiprocessor example:
+		Processor 0:
+		STR Data
+		DMB
+		STR Flag
+		Processor 1:
+		LDR Unrelated
+		LDR Flag
+		DMB
+		LDR Data ; Data & Unrelated in same non-cacheable chunk
+		In the above scenario, the LDR Data happens to pend and return the stale (prior to Flag update by Processor 0)
+		version of data.
+		Workaround
+		This issue can be avoided by replacing a DMB with a DSB SYS.
+
+config SHEEVA_ERRATA_ARM_CPU_6076
+
+        bool "Sheeva Errata 6076: Multiple writeback entries hit by snoops can result in data corruption"
+        depends on  CPU_SHEEVA_PJ4B_V7 && (ARMADA_XP_REV_A0 || ARMADA_XP_A0_WITH_B0)
+        default y
+        help
+		In a rare case where a L1 cache eviction (either a WriteEvict or WriteBack) is allocated concurrently with a previous
+		WriteClean request to the same address (as the result of a cache maintenance clean operation), both sets of victim
+		data can be hit by an incoming snoop.  Under a specific scenario, this may result in the WriteBack actually being
+		considered complete.  A future fetch to memory can then potentially read stale data prior to the writeback occurring.
+		Workaround
+		Replacing all clean cache maintenance operations with clean & invalidate will avoid the issue
+		NOTE: This errata is rare and was hit in a scenario where 7/8 ways of the L1 cache were locked to force additional L1
+		cache evictions to the same address.  If L1 locking is not used, this bug is unlikely to occur.
+		Fix
+		-
+config SHEEVA_ERRATA_ARM_CPU_6136
+
+        bool "Sheeva Errata 6136: Base value gets corrupted after a page-crossing, boundary-crossing Load-Store-Multiple (LDSTM)"
+        depends on  CPU_SHEEVA_PJ4B_V7 && (ARMADA_XP_REV_A0 || ARMADA_XP_A0_WITH_B0)
+        default y
+        help
+	The scenario required to hit the bug starts with an LDM which is a cross-boundary, cross-page address.  The first part
+	hits in the cache, while the second part suffers an MMU fault.  Under this scenario, the source register does not get
+	restored after the fault occurs, causing data corruption.  NOTE: This can only happen on an LDM whose source is also
+	one of the destinations.  This can also only happen if the LDM has two destination registers in the register list.
+	Workaround
+	Set the "ldstm_first Two Sgl" bit[12] in the Auxiliary Debug Modes Control 0 Register.  This effectively forces the first
+	issue of a LDSTM to be a single word, avoiding the buggy condition.
+
+config SHEEVA_ERRATA_ARM_CPU_6124
+
+        bool "Sheeva Errata 6124: Clean operation might cause data corruption"
+        depends on  CPU_SHEEVA_PJ4B_V7 && (ARMADA_XP_REV_B0 || ARMADA_XP_A0_WITH_B0)
+        default y
+        help
+		Clean operation might cause data corruption
+		Workaround:
+		Replace "Clean" with "Clean & Invalidate" operations.
+
+config SHEEVA_ERRATA_ARM_CPU_PMU_RESET
+	bool "Sheeva Errata CPU Performance counters reset"
+	depends on CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7
+	help
+	  CPU Performance counters are not reset by writing '1' to Performance
+	  Monitor Control register bit 2 as expected.
+	  WA: Write 0 and then 1 to bit 2 in Performance Monitor Control register.
+
+config SHEEVA_ERRATA_ARM_CPU_ADD_DELAY_FOR_STOP_MACHINE
+	bool "stop_machine function can livelock"
+	depends on CPU_V6 && SMP
+	default y
+	help
+	  add delay when polling the stop_machine state.
+
+config SHEEVA_ERRATA_ARM_CPU_ADD_DELAY_FOR_STREX
+	bool "Spinlocks using LDREX and STREX instructions can livelock"
+	depends on CPU_V6 && SMP
+	default n
+	help
+	  add delay after strex.
+
+config SHEEVA_DEEP_IDLE
+	bool "Enable CPU/L2 Deep Idle Power Management"
+	depends on (ARCH_ARMADA_XP || ARCH_ARMADA370) && CPU_IDLE
+
+config CPU_FREQ_ARMADA_XP
+	bool "Enable CPU frequency scaling"
+	depends on ARCH_ARMADA_XP && CPU_FREQ
+
+config STANDBY_UART_WAKE
+	bool "Enable wake up from standby by UART"
+	depends on ARCH_ARMADA_XP && CPU_IDLE && HOTPLUG_CPU
+
+config ARMADA_DEEP_IDLE_SAVE_WINDOWS_STATE
+	bool "Enable saving of the cpus windows state"
+	default y
+	depends on SHEEVA_DEEP_IDLE && ARCH_ARMADA370
+
+config ARMADA_DEEP_IDLE_UNMASK_INTS_WA
+	bool "Enable deepIdle workaround for regret mode"
+	default y
+	depends on SHEEVA_DEEP_IDLE && ARCH_ARMADA370 
+
+config ARMADA_DEEP_IDLE_SUPPORT_DRAM_SR
+	bool "Enable DDR Self-Refresh in Deep-Idle"
+	default n
+	depends on SHEEVA_DEEP_IDLE && ARCH_ARMADA370
+
+config ARMADA_DEEP_IDLE_SUPPORT_FAST_EXIT
+	bool "Enable Fast Exit from Deep-Idle"
+	default y
+	depends on SHEEVA_DEEP_IDLE && ARCH_ARMADA370
+	help
+	  Enable fast exit from Deep-Idle by using a reserved block in crypto engine SRAM.
+
+config CACHE_AURORA_L2
+	bool "Enable Marvell Aurora L2 cache controller"
+	depends on ARCH_ARMADA_XP || ARCH_ARMADA370
+	default y
+    select OUTER_CACHE if ARCH_ARMADA370
+	help
+	  This option enables the Marvell Aurora L2 cache controller.
+
+config AURORA_L2_PT_WALK
+	bool "Enable Marvell page table walk in L2 to improve performance"
+	depends on CACHE_AURORA_L2
+	default y
+	help
+	  This option enables PTE caching in L2 to improve performance.
+
+config AURORA_L2_OUTER
+	bool
+	depends on CACHE_AURORA_L2 && (CPU_SHEEVA_PJ4B_V6 || ARMADA_XP_REV_Z1)
+	default y
+	select OUTER_CACHE
+	help
+	  This option enables all outer cache operations in V6 mode.
+
+config AURORA_L2_OUTER_WA
+        bool "Enable outer cache (L2) WriteAllocate mode as inner cache (L1)"
+        depends on CACHE_AURORA_L2
+        default n
+        help
+          This option enables outer cache (L2) write-allocate in NMRRR mode 7.
+          If disabled, the L2 cache will be WB no WA.
+
+config AURORA_SF_ENABLED
+        bool "Enable Marvell Aurora Snoop Filter "
+        depends on CPU_SHEEVA_PJ4B_V7 && (ARMADA_XP_REV_A0 || ARMADA_XP_A0_WITH_B0 || ARMADA_XP_REV_B0) && SMP
+        default y
+        help
+          This option enables Snoop Filter feature.
+
+config ENABLE_UNALINGED_ACCESS_FAULT
+	bool "Enable S/W handling for Unaligned Access"
+	default n
+	help
+	  This flag enables S/W handling of unaligned access
+
+config AURORA_IO_CACHE_COHERENCY
+	bool "Enable Marvell Aurora I/O cache coherency"
+	depends on ARCH_ARMADA_XP || ARCH_ARMADA370
+	default y
+	help
+	  This option enables the hardware mechanism for I/O cache coherency.
+
+config CPU_SHEEVA_PJ4B_PMC_ACCESS_IN_USERMODE
+	bool "Enabled User mode access for PMC"
+	depends on CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7
+	default n
+	help
+	  Say Y if you allow user mode application to access Performance 
+	  Monitor Counter of PJ4 in user mode
+
+config MV_SUPPORT_L2_DEPOSIT
+	bool "Support L2 Deposit"
+	depends on ARCH_ARMADA_XP
+	default n
+	help
+	  This option enables L2 deposit.
+
+config MV_SUPPORT_64KB_PAGE_SIZE
+	bool "Support 64KB page size"
+	depends on ARCH_ARMADA_XP || ARCH_ARMADA370
+	default n
+	help
+	  This option enables 64KB pages.
 
 config CACHE_L2X0
 	bool "Enable the L2x0 outer cache controller"

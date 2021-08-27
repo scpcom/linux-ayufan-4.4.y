@@ -25,6 +25,9 @@
 #include <linux/rtnetlink.h>
 #include <linux/if_ether.h>
 #include <linux/slab.h>
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/mv_nfp.h>
+#endif
 #include <net/sock.h>
 
 #include "br_private.h"
@@ -169,10 +172,25 @@ void br_dev_delete(struct net_device *dev, struct list_head *head)
 	struct net_bridge_port *p, *n;
 
 	list_for_each_entry_safe(p, n, &br->port_list, list) {
+
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	if (nfp_mgr_p->nfp_hook_br_port_del)
+		nfp_mgr_p->nfp_hook_br_port_del(br->dev->ifindex, p->dev->ifindex);
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
+
 		del_nbp(p);
 	}
 
 	del_timer_sync(&br->gc_timer);
+
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	if (nfp_mgr_p->nfp_hook_br_del)
+		nfp_mgr_p->nfp_hook_br_del(br->dev->ifindex);
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 
 	br_sysfs_delbr(br->dev);
 	unregister_netdevice_queue(br->dev, head);
@@ -427,6 +445,13 @@ int br_del_if(struct net_bridge *br, struct net_device *dev)
 	p = br_port_get_rtnl(dev);
 	if (!p || p->br != br)
 		return -EINVAL;
+
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	if (nfp_mgr_p->nfp_hook_br_port_del)
+		nfp_mgr_p->nfp_hook_br_port_del(br->dev->ifindex, p->dev->ifindex);
+#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif
 
 	del_nbp(p);
 

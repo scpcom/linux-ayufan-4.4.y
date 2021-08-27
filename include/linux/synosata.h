@@ -84,10 +84,11 @@ static inline void SleepForHW(int iDisk, int iIsDoLatency)
 #define GPIO_3XXX_CMD_POWER_CTL 0x40
 #define GPIO_3XXX_CMD_POWER_CLR 0x00
 
-#define GPI_3XXX_PSU_OFF(x)		(0x2&x)
 #define GPI_3XXX_HDD_PWR_OFF(x)		(0x10&x)
 
 #define GPIO_3826_CMD_ENABLE_POWERBTN	(0 << 15)
+
+#define GPIO_9705_PKG_INIT(addr,data)	((addr << 10) | (0x3 << 8) | data)
 /**
  * Copy from scsi. Used in both marvell and libata
  * when we ask ebox tell us how many disks they had.
@@ -235,6 +236,104 @@ SIMG3xxx_gpio_encode(SYNO_PM_PKG *pPM_pkg, int rw)
 	}
 }
 
+/* 9705 GPIO table */
+/*
+ *   NA      NA      NA      NA      GPIO19  GPIO18  GPIO17  GPIO16
+ * R --      --      --      --      --      --      --      --
+ * W --      --      --      --      A2	     A1      A0      Mask
+ *
+ *   GPIO15  GPIO14  GPIO13  GPIO12  GPIO11  GPIO10  GPIO09  GPIO08
+ * R --      --      GPI8    GPI7    GPI6    LED_5   LED_4   LED_3
+ * W R_CTL   W_CTL   GPO8    GPO7    GPO6    LED_5   LED_4   LED_3
+ *
+ *   GPIO07  GPIO06  GPIO05  GPIO04  GPIO03  GPIO02  GPIO01  GPIO00
+ * R LED_2   LED_1   LED_H   GPI5    GPI4    GPI3    GPI2    GPI1
+ * W LED_2   LED_1   LED_H   GPO5    GPO4    GPO3    GPO2    GPO1
+ *
+ */
+
+/**
+ * You should reference ebox spec for
+ * the gpio definition of our 9705.
+ *
+ * Otherwise, you don't know what we do here
+ *
+ * @param pPM_pkg [OUT] Store the result. Should not be NULL.
+ * @param rw      [IN] indicate the request is read or write.
+ *                0: read
+ *                1: write
+ */
+static inline void
+SIMG9705_gpio_decode(SYNO_PM_PKG *pPM_pkg, int rw)
+{
+#define GPI_9705_BIT1(GPIO)	(1&GPIO)
+#define GPI_9705_BIT2(GPIO)	((1<<1)&GPIO)
+#define GPI_9705_BIT3(GPIO)	((1<<2)&GPIO)
+#define GPI_9705_BIT4(GPIO)	((1<<3)&GPIO)
+#define GPI_9705_BIT5(GPIO)	((1<<4)&GPIO)
+#define GPI_9705_BIT6(GPIO)	((1<<11)&GPIO)>>6
+#define GPI_9705_BIT7(GPIO)	((1<<12)&GPIO)>>6
+#define GPI_9705_BIT8(GPIO)	((1<<13)&GPIO)>>6
+
+	if (!rw) {
+		pPM_pkg->var =
+			GPI_9705_BIT1(pPM_pkg->var)|
+			GPI_9705_BIT2(pPM_pkg->var)|
+			GPI_9705_BIT3(pPM_pkg->var)|
+			GPI_9705_BIT4(pPM_pkg->var)|
+			GPI_9705_BIT5(pPM_pkg->var)|
+			GPI_9705_BIT6(pPM_pkg->var)|
+			GPI_9705_BIT7(pPM_pkg->var)|
+			GPI_9705_BIT8(pPM_pkg->var);
+	}
+}
+
+/**
+ * You should reference ebox spec for
+ * the gpio definition of our 9705.
+ *
+ * Otherwise, you don't know what we do here
+ *
+ * @param pPM_pkg [OUT] Store the result. Should not be NULL.
+ * @param rw      [IN] indicate the request is read or write.
+ *                0: read
+ *                1: write
+ */
+static inline void
+SIMG9705_gpio_encode(SYNO_PM_PKG *pPM_pkg, int rw)
+{
+#define GPIO_9705_BIT00(GPO)	(1&GPO)
+#define GPIO_9705_BIT01(GPO)	((1<<1)&GPO)
+#define GPIO_9705_BIT02(GPO)	((1<<2)&GPO)
+#define GPIO_9705_BIT03(GPO)	((1<<3)&GPO)
+#define GPIO_9705_BIT04(GPO)	((1<<4)&GPO)
+#define GPIO_9705_BIT11(GPO)	((1<<5)&GPO)<<6
+#define GPIO_9705_BIT12(GPO)	((1<<6)&GPO)<<6
+#define GPIO_9705_BIT13(GPO)	((1<<7)&GPO)<<6
+#define GPIO_9705_BIT14(GPO)	((1<<8)&GPO)<<6
+#define GPIO_9705_BIT15(GPO)	((1<<9)&GPO)<<6
+#define GPIO_9705_BIT17(GPO)	((1<<10)&GPO)<<7
+#define GPIO_9705_BIT18(GPO)	((1<<11)&GPO)<<7
+#define GPIO_9705_BIT19(GPO)	((1<<12)&GPO)<<7
+
+	if (rw) {
+		pPM_pkg->var =
+			GPIO_9705_BIT00(pPM_pkg->var)|
+			GPIO_9705_BIT01(pPM_pkg->var)|
+			GPIO_9705_BIT02(pPM_pkg->var)|
+			GPIO_9705_BIT03(pPM_pkg->var)|
+			GPIO_9705_BIT04(pPM_pkg->var)|
+			GPIO_9705_BIT11(pPM_pkg->var)|
+			GPIO_9705_BIT12(pPM_pkg->var)|
+			GPIO_9705_BIT13(pPM_pkg->var)|
+			GPIO_9705_BIT14(pPM_pkg->var)|
+			GPIO_9705_BIT15(pPM_pkg->var)|
+			GPIO_9705_BIT17(pPM_pkg->var)|
+			GPIO_9705_BIT18(pPM_pkg->var)|
+			GPIO_9705_BIT19(pPM_pkg->var);
+	}
+}
+
 static inline unsigned char 
 syno_pm_is_3726(unsigned short vendor, unsigned short devid)
 {
@@ -248,6 +347,12 @@ syno_pm_is_3826(unsigned short vendor, unsigned short devid)
 }
 
 static inline unsigned char
+syno_pm_is_9705(unsigned short vendor, unsigned short devid)
+{
+	return (vendor == 0x1B4B  && devid == 0x9705);
+}
+
+static inline unsigned char 
 syno_pm_is_3xxx(unsigned short vendor, unsigned short devid)
 {
 	return (syno_pm_is_3726(vendor, devid) || syno_pm_is_3826(vendor, devid));
@@ -261,6 +366,8 @@ syno_pm_systemstate_pkg_init(unsigned short vendor, unsigned short devid, SYNO_P
 	memset(pPKG, 0, sizeof(*pPKG));
 	if (syno_pm_is_3xxx(vendor, devid)) {
 		pPKG->var = 0x200;
+	} else if (syno_pm_is_9705(vendor, devid)) {
+		pPKG->var = GPIO_9705_PKG_INIT(3,0);
 	}
 
 	/* add other port multiplier here */
@@ -274,6 +381,8 @@ syno_pm_unique_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG
 	memset(pPKG, 0, sizeof(*pPKG));
 	if (syno_pm_is_3xxx(vendor, devid)) {
 		pPKG->var = 0x100;
+	} else if (syno_pm_is_9705(vendor, devid)) {
+		pPKG->var = GPIO_9705_PKG_INIT(1,0);
 	}
 
 	/* add other port multiplier here */
@@ -287,6 +396,22 @@ syno_pm_raidledstate_pkg_init(unsigned short vendor, unsigned short devid, SYNO_
 	memset(pPKG, 0, sizeof(*pPKG));
 	if (syno_pm_is_3xxx(vendor, devid)) {
 		pPKG->var = 0x280;
+	} else if (syno_pm_is_9705(vendor, devid)) {
+		pPKG->var = GPIO_9705_PKG_INIT(4,0);
+	}
+	/* add other port multiplier here */
+}
+
+static inline void
+syno_pm_fanstatus_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG)
+{
+	/* do not check parameters, caller should do it */
+	 
+	memset(pPKG, 0, sizeof(*pPKG));
+	if (syno_pm_is_3xxx(vendor, devid)) {
+		pPKG->var = 0x80;
+	} else if (syno_pm_is_9705(vendor, devid)) {
+		pPKG->var = GPIO_9705_PKG_INIT(0,0);
 	}
 
 	/* add other port multiplier here */
@@ -304,6 +429,12 @@ syno_pm_poweron_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PK
 		} else {
 			pPKG->var = GPIO_3XXX_CMD_POWER_CTL;
 		}
+	} else if (syno_pm_is_9705(vendor, devid)) {
+		if (blCLR) {
+			pPKG->var = GPIO_9705_PKG_INIT(4,0);
+		} else {
+			pPKG->var = GPIO_9705_PKG_INIT(4,0x10);
+		}
 	}
 
 	/* add other port multiplier here */
@@ -318,32 +449,11 @@ syno_pm_enable_powerbtn_pkg_init(unsigned short vendor, unsigned short devid, SY
 	/* DX513 and DX213 use silicon 3826 chip, but its cpld faked 3726 chip */
 	if (syno_pm_is_3xxx(vendor, devid)) {
 		pPKG->var = GPIO_3826_CMD_ENABLE_POWERBTN;
+	} else if (syno_pm_is_9705(vendor, devid)) {
+		pPKG->var = GPIO_9705_PKG_INIT(4,0x20);
 	}
 
 	/* add other port multiplier here */
-}
-
-static inline unsigned char
-syno_pm_is_poweron(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG)
-{
-	unsigned char ret = 0;
-
-	if (!pPKG) {
-		goto END;
-	}
-
-	if (syno_pm_is_3xxx(vendor, devid)) {
-		if (GPI_3XXX_PSU_OFF(pPKG->var)) {
-			goto END;
-		}
-	}
-
-	/* add other port multiplier here */
-
-	/* the same port multiplier would not goto other condition block */
-	ret = 1;
-END:
-	return ret;
 }
 
 static inline unsigned int
@@ -367,6 +477,13 @@ syno_support_disk_num(unsigned short vendor,
 			ret = 5;
 		}
 		goto END;
+	} else if (syno_pm_is_9705(vendor, devid)) {
+		if (IS_SYNOLOGY_RX413(syno_uniq)) {
+			ret = 4;
+		} else {
+			printk("%s not synology device", __FUNCTION__);
+			ret = 5;
+		}
 	}
 
 	/* add other chip here */

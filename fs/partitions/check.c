@@ -44,28 +44,6 @@
 
 #ifdef CONFIG_BLK_DEV_MD
 extern void md_autodetect_dev(dev_t dev);
-#elif defined(MY_DEF_HERE)
-LIST_HEAD(SYNOAllDetectedDevices);
-EXPORT_SYMBOL(SYNOAllDetectedDevices);
-struct detected_devices_node {
-	struct list_head list;
-	dev_t dev;
-};
-
-/*This function is the same as the md_autodetect_dev function in the md module*/
-void SYNOMdAutodetectDev(dev_t dev)
-{
-	struct detected_devices_node *node_detected_dev;
-
-	node_detected_dev = kzalloc(sizeof(*node_detected_dev), GFP_KERNEL);
-	if (node_detected_dev) {
-		node_detected_dev->dev = dev;
-		list_add_tail(&node_detected_dev->list, &SYNOAllDetectedDevices);
-	} else {
-		printk(KERN_CRIT "md: md_autodetect_dev: kzalloc failed"
-			", skipping dev(%d,%d)\n", MAJOR(dev), MINOR(dev));
-	}
-}
 #endif
 
 int warn_no_part = 1; /*This is ugly: should make genhd removable media aware*/
@@ -731,10 +709,6 @@ rescan:
 #ifdef CONFIG_BLK_DEV_MD
 		if (state->parts[p].flags & ADDPART_FLAG_RAID)
 			md_autodetect_dev(part_to_dev(part)->devt);
-#elif defined(MY_DEF_HERE)
-		if (state->parts[p].flags & ADDPART_FLAG_RAID) {
-			SYNOMdAutodetectDev(part_to_dev(part)->devt);
-		}
 #endif
 	}
 	kfree(state);

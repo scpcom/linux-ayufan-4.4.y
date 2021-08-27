@@ -183,8 +183,15 @@ static struct dentry *hfsplus_file_lookup(struct inode *dir,
 		goto out;
 
 	inode = HFSPLUS_I(dir)->rsrc_inode;
+#ifdef MY_ABC_HERE
+	if (inode) {
+		atomic_inc(&inode->i_count);
+		goto out;
+	}
+#else
 	if (inode)
 		goto out;
+#endif
 
 	inode = new_inode(sb);
 	if (!inode)
@@ -233,12 +240,23 @@ static void hfsplus_get_perms(struct inode *inode,
 	struct hfsplus_sb_info *sbi = HFSPLUS_SB(inode->i_sb);
 	u16 mode;
 
+#ifndef MY_ABC_HERE
 	mode = be16_to_cpu(perms->mode);
+#else
+	// ignore the file permission on disk to let umask working
+	mode = 0;
+#endif
 
+#ifdef MY_ABC_HERE
+	if (!sbi->uid)
+#endif
 	inode->i_uid = be32_to_cpu(perms->owner);
 	if (!inode->i_uid && !mode)
 		inode->i_uid = sbi->uid;
 
+#ifdef MY_ABC_HERE
+	if (!sbi->gid)
+#endif
 	inode->i_gid = be32_to_cpu(perms->group);
 	if (!inode->i_gid && !mode)
 		inode->i_gid = sbi->gid;
@@ -247,7 +265,12 @@ static void hfsplus_get_perms(struct inode *inode,
 		mode = mode ? (mode & S_IALLUGO) : (S_IRWXUGO & ~(sbi->umask));
 		mode |= S_IFDIR;
 	} else if (!mode)
+#ifdef MY_ABC_HERE
+		mode = S_IFREG | (S_IRWXUGO & ~(sbi->umask));
+#else
 		mode = S_IFREG | ((S_IRUGO|S_IWUGO) & ~(sbi->umask));
+#endif
+
 	inode->i_mode = mode;
 
 	HFSPLUS_I(inode)->userflags = perms->userflags;
@@ -326,6 +349,13 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 		return error;
 	mutex_lock(&inode->i_mutex);
 
+#ifdef MY_ABC_HERE
+	error = sync_mapping_buffers(inode->i_mapping);
+	if (!(inode->i_state & I_DIRTY))
+		goto out;
+	if (datasync && !(inode->i_state & I_DIRTY_DATASYNC))
+		goto out;
+#endif
 	/*
 	 * Sync inode metadata into the catalog and extent trees.
 	 */
@@ -361,6 +391,9 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 	if (!test_bit(HFSPLUS_SB_NOBARRIER, &sbi->flags))
 		blkdev_issue_flush(inode->i_sb->s_bdev, GFP_KERNEL, NULL);
 
+#ifdef MY_ABC_HERE
+out:
+#endif
 	mutex_unlock(&inode->i_mutex);
 
 	return error;

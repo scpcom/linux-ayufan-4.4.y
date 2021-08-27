@@ -142,15 +142,77 @@ static void be_get_drvinfo(struct net_device *netdev,
 	drvinfo->eedump_len = 0;
 }
 
+static u32
+lancer_cmd_get_file_len(struct be_adapter *adapter, u8 *file_name)
+{
+	u32 data_read = 0, eof;
+	u8 addn_status;
+	struct be_dma_mem data_len_cmd;
+	int status;
+
+	memset(&data_len_cmd, 0, sizeof(data_len_cmd));
+	/* data_offset and data_size should be 0 to get reg len */
+	status = lancer_cmd_read_object(adapter, &data_len_cmd, 0, 0,
+				file_name, &data_read, &eof, &addn_status);
+
+	return data_read;
+}
+
+static int
+lancer_cmd_read_file(struct be_adapter *adapter, u8 *file_name,
+		u32 buf_len, void *buf)
+{
+	struct be_dma_mem read_cmd;
+	u32 read_len = 0, total_read_len = 0, chunk_size;
+	u32 eof = 0;
+	u8 addn_status;
+	int status = 0;
+
+	read_cmd.size = LANCER_READ_FILE_CHUNK;
+	read_cmd.va = pci_alloc_consistent(adapter->pdev, read_cmd.size,
+			&read_cmd.dma);
+
+	if (!read_cmd.va) {
+		dev_err(&adapter->pdev->dev,
+				"Memory allocation failure while reading dump\n");
+		return -ENOMEM;
+	}
+
+	while ((total_read_len < buf_len) && !eof) {
+		chunk_size = min_t(u32, (buf_len - total_read_len),
+				LANCER_READ_FILE_CHUNK);
+		chunk_size = ALIGN(chunk_size, 4);
+		status = lancer_cmd_read_object(adapter, &read_cmd, chunk_size,
+				total_read_len, file_name, &read_len,
+				&eof, &addn_status);
+		if (!status) {
+			memcpy(buf + total_read_len, read_cmd.va, read_len);
+			total_read_len += read_len;
+			eof &= LANCER_READ_FILE_EOF_MASK;
+		} else {
+			status = -EIO;
+			break;
+		}
+	}
+	pci_free_consistent(adapter->pdev, read_cmd.size, read_cmd.va,
+			read_cmd.dma);
+
+	return status;
+}
+
 static int
 be_get_reg_len(struct net_device *netdev)
 {
 	struct be_adapter *adapter = netdev_priv(netdev);
 	u32 log_size = 0;
 
-	if (be_physfn(adapter))
+	if (be_physfn(adapter)) {
+		if (lancer_chip(adapter))
+			log_size = lancer_cmd_get_file_len(adapter,
+					LANCER_FW_DUMP_FILE);
+		else
 			be_cmd_get_reg_len(adapter, &log_size);
-
+	}
 	return log_size;
 }
 
@@ -161,6 +223,10 @@ be_get_regs(struct net_device *netdev, struct ethtool_regs *regs, void *buf)
 
 	if (be_physfn(adapter)) {
 		memset(buf, 0, regs->len);
+		if (lancer_chip(adapter))
+			lancer_cmd_read_file(adapter, LANCER_FW_DUMP_FILE,
+					regs->len, buf);
+		else
 			be_cmd_get_regs(adapter, regs->len, buf);
 	}
 }
@@ -362,11 +428,14 @@ static int be_get_settings(struct net_device *netdev, struct ethtool_cmd *ecmd)
 	struct be_phy_info phy_info;
 	u8 mac_speed = 0;
 	u16 link_speed = 0;
+	u8 link_status;
 	int status;
 
 	if ((adapter->link_speed < 0) || (!(netdev->flags & IFF_UP))) {
 		status = be_cmd_link_status_query(adapter, &mac_speed,
-						&link_speed, 0);
+						  &link_speed, &link_status, 0);
+		if (!status)
+			be_link_status_update(adapter, link_status);
 
 		/* link_speed is in units of 10 Mbps */
 		if (link_speed) {
@@ -453,16 +522,13 @@ static int be_get_settings(struct net_device *netdev, struct ethtool_cmd *ecmd)
 	return 0;
 }
 
-static void
-be_get_ringparam(struct net_device *netdev, struct ethtool_ringparam *ring)
+static void be_get_ringparam(struct net_device *netdev,
+			     struct ethtool_ringparam *ring)
 {
 	struct be_adapter *adapter = netdev_priv(netdev);
 
-	ring->rx_max_pending = adapter->rx_obj[0].q.len;
-	ring->tx_max_pending = adapter->tx_obj[0].q.len;
-
-	ring->rx_pending = atomic_read(&adapter->rx_obj[0].q.used);
-	ring->tx_pending = atomic_read(&adapter->tx_obj[0].q.used);
+	ring->rx_max_pending = ring->rx_pending = adapter->rx_obj[0].q.len;
+	ring->tx_max_pending = ring->tx_pending = adapter->tx_obj[0].q.len;
 }
 
 static void
@@ -636,7 +702,7 @@ be_self_test(struct net_device *netdev, struct ethtool_test *test, u64 *data)
 	}
 
 	if (be_cmd_link_status_query(adapter, &mac_speed,
-				&qos_link_speed, 0) != 0) {
+				     &qos_link_speed, NULL, 0) != 0) {
 		test->flags |= ETH_TEST_FL_FAILED;
 		data[4] = -1;
 	} else if (!mac_speed) {
@@ -656,8 +722,18 @@ be_do_flash(struct net_device *netdev, struct ethtool_flash *efl)
 static int
 be_get_eeprom_len(struct net_device *netdev)
 {
+	struct be_adapter *adapter = netdev_priv(netdev);
+	if (lancer_chip(adapter)) {
+		if (be_physfn(adapter))
+			return lancer_cmd_get_file_len(adapter,
+					LANCER_VPD_PF_FILE);
+		else
+			return lancer_cmd_get_file_len(adapter,
+					LANCER_VPD_VF_FILE);
+	} else {
 		return BE_READ_SEEPROM_LEN;
 	}
+}
 
 static int
 be_read_eeprom(struct net_device *netdev, struct ethtool_eeprom *eeprom,
@@ -670,6 +746,15 @@ be_read_eeprom(struct net_device *netdev, struct ethtool_eeprom *eeprom,
 
 	if (!eeprom->len)
 		return -EINVAL;
+
+	if (lancer_chip(adapter)) {
+		if (be_physfn(adapter))
+			return lancer_cmd_read_file(adapter, LANCER_VPD_PF_FILE,
+					eeprom->len, data);
+		else
+			return lancer_cmd_read_file(adapter, LANCER_VPD_VF_FILE,
+					eeprom->len, data);
+	}
 
 	eeprom->magic = BE_VENDOR_ID | (adapter->pdev->device<<16);
 

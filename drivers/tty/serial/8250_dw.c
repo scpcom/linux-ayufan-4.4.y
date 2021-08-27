@@ -92,6 +92,9 @@ static int dw8250_handle_irq(struct uart_port *p)
 
 static int __devinit dw8250_probe(struct platform_device *pdev)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && !defined(CONFIG_USE_OF)
+struct plat_serial8250_port *p = pdev->dev.platform_data;
+#endif
 	struct uart_port port = {};
 	struct resource *regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	struct resource *irq = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
@@ -121,6 +124,13 @@ static int __devinit dw8250_probe(struct platform_device *pdev)
 	port.iotype = UPIO_MEM;
 	port.serial_in = dw8250_serial_in;
 	port.serial_out = dw8250_serial_out;
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && !defined(CONFIG_USE_OF)
+	port.iotype = p->iotype;
+        port.serial_in = dw8250_serial_in32;
+        port.serial_out = dw8250_serial_out32;
+        port.regshift = p->regshift;
+        port.uartclk = p->uartclk;
+#else
 	if (!of_property_read_u32(np, "reg-io-width", &val)) {
 		switch (val) {
 		case 1:
@@ -146,6 +156,7 @@ static int __devinit dw8250_probe(struct platform_device *pdev)
 	}
 	port.uartclk = val;
 
+#endif
 	data->line = serial8250_register_port(&port);
 	if (data->line < 0)
 		return data->line;

@@ -48,7 +48,7 @@ asmlinkage int sys_SYNOmmap(SYNO_MMAP_ARG __user *arg)
 	if (copy_from_user(&a, arg, sizeof(a)))
 		goto out;;
 
-	error = sys_mmap2(a.addr, a.len, a.prot, a.flags, a.fd, a.pgoff);
+	error = sys_mmap_pgoff(a.addr, a.len, a.prot, a.flags, a.fd, a.pgoff);
 out:
 	return error;
 }

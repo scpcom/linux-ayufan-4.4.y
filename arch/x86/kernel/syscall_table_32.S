@@ -426,7 +426,11 @@ ENTRY(sys_call_table)
 #else
     .long sys_ni_syscall
 #endif
+#ifdef MY_ABC_HERE
+    .long sys_SYNOMTDAlloc      /* 405 */
+#else
     .long sys_ni_syscall        /* 405 */
+#endif
 #ifdef MY_ABC_HERE
     .long sys_SYNOCaselessStat64    /* 406 */
     .long sys_SYNOCaselessLStat64   /* 407 */
@@ -455,4 +459,28 @@ ENTRY(sys_call_table)
     .long sys_ni_syscall
 #endif
     .long sys_ni_syscall
+#ifdef MY_ABC_HERE
+    .long sys_SYNOStat                   /* 416 */
+    .long sys_SYNOFStat                  /* 417 */
+    .long sys_SYNOLStat                  /* 418 */
+    .long sys_SYNOStat64                   /* 419 */
+    .long sys_SYNOFStat64                  /* 420 */
+    .long sys_SYNOLStat64                  /* 421 */
+#else
+    .long sys_ni_syscall
+    .long sys_ni_syscall
+    .long sys_ni_syscall
+    .long sys_ni_syscall
+    .long sys_ni_syscall
+    .long sys_ni_syscall
+#endif /* MY_ABC_HERE */
+#ifdef CONFIG_SYNO_NOTIFY
+	.long sys_SYNONotifyInit	/* 422 */
+	.long sys_SYNONotifyAddWatch /* 423 */
+	.long sys_SYNONotifyRemoveWatch /* 424 */
+#else
+	.long sys_ni_syscall
+	.long sys_ni_syscall
+	.long sys_ni_syscall
+#endif /* CONFIG_SYNO_NOTIFY */
 #endif

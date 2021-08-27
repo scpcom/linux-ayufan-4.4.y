@@ -16,6 +16,9 @@
 #include <asm/smp_plat.h>
 #include <asm/tlbflush.h>
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#include <asm/cacheflush.h>
+#endif
 static void on_each_cpu_mask(void (*func)(void *), void *info, int wait,
 	const struct cpumask *mask)
 {
@@ -140,3 +143,31 @@ void flush_tlb_kernel_range(unsigned long start, unsigned long end)
 		local_flush_tlb_kernel_range(start, end);
 }
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && ( ( ( defined( CONFIG_SMP ) && defined( CONFIG_CPU_V6 ) ) || ( defined( CONFIG_SMP ) && defined( CONFIG_CPU_V6K ) ) ) )
+static inline void ipi_flush_cache_user_range(void *arg)
+{
+#if 0
+	struct tlb_args *ta = (struct tlb_args *)arg;
+	printk("function %s  line %d\n", __func__,__LINE__);
+	local_flush_cache_user_range((struct vm_area_struct *)ta->ta_vma, ta->ta_start, ta->ta_end);
+#else /* To verify that JAVA is working */
+	__cpuc_flush_kern_all();
+#endif
+}
+
+//#if defined(CONFIG_SMP) && defined(CONFIG_CPU_V6)
+
+void flush_cache_user_range(struct vm_area_struct *vma,
+			    unsigned long start, unsigned long end)
+{
+	if (tlb_ops_need_broadcast()) {
+		struct tlb_args ta;
+		ta.ta_vma = vma;
+		ta.ta_start = start;
+		ta.ta_end = end;
+		on_each_cpu_mask(ipi_flush_cache_user_range, &ta, 1, mm_cpumask(vma->vm_mm));
+	} else{
+		local_flush_cache_user_range(vma, start, end);
+	}
+}
+#endif

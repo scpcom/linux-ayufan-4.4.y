@@ -362,7 +362,7 @@ config MMC_TIFM_SD
 
 config MMC_MVSDIO
 	tristate "Marvell MMC/SD/SDIO host driver"
-	depends on PLAT_ORION || ARCH_FEROCEON
+	depends on PLAT_ORION || ARCH_FEROCEON || PLAT_ARMADA
 	---help---
 	  This selects the Marvell SDIO host driver.
 	  SDIO may currently be found on the Kirkwood 88F6281 and 88F6192

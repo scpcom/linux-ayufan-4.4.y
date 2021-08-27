@@ -272,9 +272,20 @@ extern void flush_cache_page(struct vm_area_struct *vma, unsigned long user_addr
  * Harvard caches are synchronised for the user space address range.
  * This is used for the ARM private sys_cacheflush system call.
  */
-#define flush_cache_user_range(vma,start,end) \
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#define local_flush_cache_user_range(start,end) \
  	__cpuc_coherent_user_range((start) & PAGE_MASK, PAGE_ALIGN(end))
  
+#if defined(CONFIG_SMP) && defined(CONFIG_CPU_V6)
+extern void flush_cache_user_range(unsigned long start, unsigned long end);
+#else
+#define flush_cache_user_range	local_flush_cache_user_range
+#endif
+#else
+#define flush_cache_user_range(start,end) \
+	__cpuc_coherent_user_range((start) & PAGE_MASK, PAGE_ALIGN(end))
+#endif
+
 /*
  * Perform necessary cache operations to ensure that data previously
  * stored within this range of addresses can be executed by the CPU.
@@ -285,7 +296,14 @@ extern void flush_cache_page(struct vm_area_struct *vma, unsigned long user_addr
  * Perform necessary cache operations to ensure that the TLB will
  * see data written in the specified area.
  */
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && (defined (CONFIG_CACHE_AURORA_L2) && defined (CONFIG_AURORA_L2_OUTER) && !defined (CONFIG_AURORA_L2_PT_WALK))
+/*#warning "clean_dcache_area: Using D$ FLUSH instead of CLEAN. To be Checked\n"*/
+extern void aurora_l2_flush_range(unsigned long start, unsigned long end);
+#define clean_dcache_area(start,size)	do {cpu_dcache_clean_area(start, size);	\
+	aurora_l2_flush_range(__pa(start), __pa(start) + size);} while (0)			
+#else
 #define clean_dcache_area(start,size)	cpu_dcache_clean_area(start, size)
+#endif
 
 /*
  * flush_dcache_page is used when the kernel has written to the page

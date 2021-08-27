@@ -2688,7 +2688,11 @@ static int fetch_block(struct stripe_head *sh, struct stripe_head_state *s,
 	     (s->failed >= 2 && fdev[1]->toread) ||
 	     (sh->raid_conf->level <= 5 && s->failed && fdev[0]->towrite &&
 	      !test_bit(R5_OVERWRITE, &fdev[0]->flags)) ||
+#ifdef MY_ABC_HERE
+	     (s->failed && s->to_write))) {
+#else
 	     (sh->raid_conf->level == 6 && s->failed && s->to_write))) {
+#endif
 		/* we would like to get this block, possibly by computing it,
 		 * otherwise read it if the backing disk is insync
 		 */
@@ -2830,7 +2834,12 @@ static void handle_stripe_dirtying(struct r5conf *conf,
 				   int disks)
 {
 	int rmw = 0, rcw = 0, i;
+#ifdef MY_ABC_HERE
+	if (conf->max_degraded == 2 ||
+	    conf->max_degraded == 1) {
+#else
 	if (conf->max_degraded == 2) {
+#endif
 		/* RAID6 requires 'rcw' in current implementation
 		 * Calculate the real rcw later - for now fake it
 		 * look like rcw is cheaper
@@ -3327,6 +3336,32 @@ static void syno_handle_raid6_sync_error(struct r5conf *conf, struct stripe_head
 }
 #endif
 
+#ifdef MY_ABC_HERE
+static void
+syno_handle_failed_expand(struct r5conf *conf, struct stripe_head *sh,
+		   struct stripe_head_state *s)
+{
+	int i;
+	int disks = sh->disks;
+
+	for (i = 0; i < disks; i++) {
+		struct r5dev *dev = &sh->dev[i];
+
+		if (test_bit(R5_Wantwrite, &dev->flags) ||
+			test_bit(R5_Wantread, &dev->flags) ||
+			test_bit(R5_ReWrite, &dev->flags)) {
+			continue;
+		}
+
+		if (test_and_clear_bit(R5_LOCKED, &dev->flags)) {
+			s->locked--;
+		}
+	}
+
+	clear_bit(STRIPE_EXPANDING, &sh->state);
+}
+#endif
+
 /*
  * handle_stripe - do things to a stripe.
  *
@@ -3604,6 +3639,12 @@ static void handle_stripe(struct stripe_head *sh)
 	 * if so, some requests might need to be failed.
 	 */
 	if (s.failed > conf->max_degraded) {
+
+#ifdef MY_ABC_HERE
+		if (sh->reconstruct_state == reconstruct_state_result && s.expanded) {
+			syno_handle_failed_expand(conf, sh, &s);
+		}
+#endif
 		sh->check_state = 0;
 		sh->reconstruct_state = 0;
 		if (s.to_read+s.to_write+s.written)
@@ -3645,7 +3686,11 @@ static void handle_stripe(struct stripe_head *sh)
 	 * or to load a block that is being partially written.
 	 */
 	if (s.to_read || s.non_overwrite
+#ifdef MY_ABC_HERE
+	    || (s.to_write && s.failed)
+#else
 	    || (conf->level == 6 && s.to_write && s.failed)
+#endif
 	    || (s.syncing && (s.uptodate + s.compute < disks)) || s.expanding)
 		handle_stripe_fill(sh, &s, disks);
 
@@ -5706,6 +5751,12 @@ static int check_reshape(struct mddev *mddev)
 #ifdef MY_ABC_HERE
 	if (IsDiskErrorSet(mddev)) {
 		return -EINVAL;
+	}
+#endif
+#ifdef MY_ABC_HERE
+	if (mddev->reshape_interrupt) {
+		mddev->reshape_interrupt = 0;
+		return 0;
 	}
 #endif
 

@@ -275,8 +275,8 @@ struct ucred {
 					   descriptor received through
 					   SCM_RIGHTS */
 #ifdef MY_ABC_HERE
-#define MSG_KERNSPACE       0x20000
-#define MSG_NOCATCHSIGNAL   0x40000
+#define MSG_KERNSPACE       0x40000
+#define MSG_NOCATCHSIGNAL   0x80000
 #endif /* MY_ABC_HERE */
 
 #if defined(CONFIG_COMPAT)

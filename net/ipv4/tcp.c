@@ -860,7 +860,6 @@ new_segment:
 wait_for_sndbuf:
 		set_bit(SOCK_NOSPACE, &sk->sk_socket->flags);
 wait_for_memory:
-		if (copied)
 		tcp_push(sk, flags & ~MSG_MORE, mss_now, TCP_NAGLE_PUSH);
 
 		if ((err = sk_stream_wait_memory(sk, &timeo)) != 0)
@@ -1453,6 +1452,20 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 
 		if (skb)
 			available = TCP_SKB_CB(skb)->seq + skb->len - (*seq);
+#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
+		if (msg->msg_flags & MSG_KERNSPACE) {
+			if ((available >= target) &&
+			    (len > sysctl_tcp_dma_copybreak) && !(flags & MSG_PEEK) &&
+			    !sysctl_tcp_low_latency &&
+			    dma_find_channel(DMA_MEMCPY)) {
+				preempt_enable_no_resched();
+				tp->ucopy.pinned_list =
+						dma_pin_kernel_iovec_pages(msg->msg_iov, len);
+			} else {
+				preempt_enable_no_resched();
+			}
+		}
+#else
 		if ((available < target) &&
 		    (len > sysctl_tcp_dma_copybreak) && !(flags & MSG_PEEK) &&
 		    !sysctl_tcp_low_latency &&
@@ -1463,6 +1476,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		} else {
 			preempt_enable_no_resched();
 		}
+#endif
 	}
 #endif
 
@@ -1727,6 +1741,11 @@ do_prequeue:
 			} else
 #endif
 			{
+#ifdef MY_ABC_HERE
+				if(msg->msg_flags & MSG_KERNSPACE)
+					err = skb_copy_datagram_iovec1(skb, offset, msg->msg_iov, used);
+				else
+#endif /* MY_ABC_HERE */
 				err = skb_copy_datagram_iovec(skb, offset,
 						msg->msg_iov, used);
 				if (err) {
@@ -1794,6 +1813,11 @@ skip_copy:
 	tp->ucopy.dma_chan = NULL;
 
 	if (tp->ucopy.pinned_list) {
+#ifdef CONFIG_SPLICE_NET_DMA_SUPPORT
+		if(msg->msg_flags & MSG_KERNSPACE)
+			dma_unpin_kernel_iovec_pages(tp->ucopy.pinned_list);
+		else
+#endif
 		dma_unpin_iovec_pages(tp->ucopy.pinned_list);
 		tp->ucopy.pinned_list = NULL;
 	}
@@ -2430,6 +2454,9 @@ static int do_tcp_setsockopt(struct sock *sk, int level,
 		/* Cap the max timeout in ms TCP will retry/retrans
 		 * before giving up and aborting (ETIMEDOUT) a connection.
 		 */
+		if (val < 0)
+			err = -EINVAL;
+		else
 			icsk->icsk_user_timeout = msecs_to_jiffies(val);
 		break;
 	default:

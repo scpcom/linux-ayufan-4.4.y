@@ -536,6 +536,9 @@ enum ixbge_state_t {
 	__IXGBE_DOWN,
 	__IXGBE_SERVICE_SCHED,
 	__IXGBE_IN_SFP_INIT,
+#ifdef MY_ABC_HERE
+	__IXGBE_SERVICE_TASK_MUTEX,
+#endif
 };
 
 struct ixgbe_rsc_cb {

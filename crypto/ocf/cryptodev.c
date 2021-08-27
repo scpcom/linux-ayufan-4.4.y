@@ -42,9 +42,6 @@
 __FBSDID("$FreeBSD: src/sys/opencrypto/cryptodev.c,v 1.34 2007/05/09 19:37:02 gnn Exp $");
  */
  
-#ifndef AUTOCONF_INCLUDED
-#include <linux/config.h>
-#endif
 #include <linux/types.h>
 #include <linux/time.h>
 #include <linux/delay.h>
@@ -80,7 +77,6 @@ struct csession_info {
 	u_int16_t	keysize;
 	/* u_int16_t	hashsize;  */
 	u_int16_t	authsize;
-	u_int16_t	authkey;
 	/* u_int16_t	ctxsize; */
 };
 
@@ -212,22 +208,18 @@ cryptodev_op(struct csession *cse, struct crypt_op *cop)
 		goto bail;
 	}
 
-	if (cse->info.authsize && cse->info.blocksize) {
-		if (cop->op == COP_ENCRYPT) {
-			crde = crp->crp_desc;
-			crda = crde->crd_next;
-		} else {
+	if (cse->info.authsize) {
 			crda = crp->crp_desc;
+		if (cse->info.blocksize)
 			crde = crda->crd_next;
-		}
-	} else if (cse->info.authsize) {
-		crda = crp->crp_desc;
-	} else if (cse->info.blocksize) {
-			crde = crp->crp_desc;
 	} else {
+		if (cse->info.blocksize)
+			crde = crp->crp_desc;
+		else {
 		dprintk("%s: bad request\n", __FUNCTION__);
 		error = EINVAL;
 		goto bail;
+	}
 	}
 
 	if ((error = copy_from_user(cse->uio.uio_iov[0].iov_base, cop->src,
@@ -308,11 +300,7 @@ cryptodev_op(struct csession *cse, struct crypt_op *cop)
 	 * entry and the crypto_done callback into us.
 	 */
 	error = crypto_dispatch(crp);
-	if (error) {
-		dprintk("%s error in crypto_dispatch\n", __FUNCTION__);
-		goto bail;
-	}
-
+	if (error == 0) {
 	dprintk("%s about to WAIT\n", __FUNCTION__);
 	/*
 	 * we really need to wait for driver to complete to maintain
@@ -333,6 +321,7 @@ cryptodev_op(struct csession *cse, struct crypt_op *cop)
 		}
 	} while ((crp->crp_flags & CRYPTO_F_DONE) == 0);
 	dprintk("%s finished WAITING error=%d\n", __FUNCTION__, error);
+	}
 
 	if (crp->crp_etype != 0) {
 		error = crp->crp_etype;
@@ -620,8 +609,9 @@ csefree(struct csession *cse)
 	return(error);
 }
 
-static long
+static int
 cryptodev_ioctl(
+	struct inode *inode,
 	struct file *filp,
 	unsigned int cmd,
 	unsigned long arg)
@@ -635,7 +625,7 @@ cryptodev_ioctl(
 	struct crypt_kop kop;
 	struct crypt_find_op fop;
 	u_int64_t sid;
-	u_int32_t ses;
+	u_int32_t ses = 0;
 	int feat, fd, error = 0, crid;
 	mm_segment_t fs;
 
@@ -754,27 +744,21 @@ cryptodev_ioctl(
 			break;
 		case CRYPTO_MD5_HMAC:
 			info.authsize = MD5_HASH_LEN;
-			info.authkey = 16;
 			break;
 		case CRYPTO_SHA1_HMAC:
 			info.authsize = SHA1_HASH_LEN;
-			info.authkey = 20;
 			break;
 		case CRYPTO_SHA2_256_HMAC:
 			info.authsize = SHA2_256_HASH_LEN;
-			info.authkey = 32;
 			break;
 		case CRYPTO_SHA2_384_HMAC:
 			info.authsize = SHA2_384_HASH_LEN;
-			info.authkey = 48;
   			break;
 		case CRYPTO_SHA2_512_HMAC:
 			info.authsize = SHA2_512_HASH_LEN;
-			info.authkey = 64;
 			break;
 		case CRYPTO_RIPEMD160_HMAC:
 			info.authsize = RIPEMD160_HASH_LEN;
-			info.authkey = 20;
 			break;
 		default:
 			dprintk("%s(%s) - bad mac\n", __FUNCTION__, CIOCGSESSSTR);
@@ -806,9 +790,10 @@ cryptodev_ioctl(
 		if (info.authsize) {
 			cria.cri_alg = sop.mac;
 			cria.cri_klen = sop.mackeylen * 8;
-			if (info.authkey && sop.mackeylen != info.authkey) {
-				dprintk("%s(%s) - mackeylen %d != %d\n", __FUNCTION__,
-						CIOCGSESSSTR, sop.mackeylen, info.authkey);
+			if ((info.maxkey && sop.mackeylen > info.maxkey) ||
+					sop.keylen < info.minkey) {
+				dprintk("%s(%s) - mackeylen %d\n", __FUNCTION__, CIOCGSESSSTR,
+						sop.mackeylen);
 				error = EINVAL;
 				goto bail;
 			}
@@ -979,10 +964,16 @@ cryptodev_open(struct inode *inode, struct file *filp)
 	struct fcrypt *fcr;
 
 	dprintk("%s()\n", __FUNCTION__);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
+	/*
+	 * on 2.6.35 private_data points to a miscdevice structure, we override
+	 * it,  which is currently safe to do.
+	 */
 	if (filp->private_data) {
-		printk("cryptodev: Private data already exists !\n");
-		return(0);
+		printk("cryptodev: Private data already exists - %p!\n", filp->private_data);
+		return(-ENODEV);
 	}
+#endif
 
 	fcr = kmalloc(sizeof(*fcr), GFP_KERNEL);
 	if (!fcr) {
@@ -1021,7 +1012,9 @@ static struct file_operations cryptodev_fops = {
 	.owner = THIS_MODULE,
 	.open = cryptodev_open,
 	.release = cryptodev_release,
-	.unlocked_ioctl = cryptodev_ioctl,
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
+	.ioctl = cryptodev_ioctl,
+#endif
 #ifdef HAVE_UNLOCKED_IOCTL
 	.unlocked_ioctl = cryptodev_unlocked_ioctl,
 #endif

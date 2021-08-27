@@ -140,11 +140,14 @@ int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
 
 	mask = type ? PCI_ROM_ADDRESS_MASK : ~0;
 
+#ifdef CONFIG_ARCH_GEN3
+#else
 	if (!dev->mmio_always_on) {
 		pci_read_config_word(dev, PCI_COMMAND, &orig_cmd);
 		pci_write_config_word(dev, PCI_COMMAND,
 			orig_cmd & ~(PCI_COMMAND_MEMORY | PCI_COMMAND_IO));
 	}
+#endif
 
 	res->name = pci_name(dev);
 
@@ -153,8 +156,11 @@ int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
 	pci_read_config_dword(dev, pos, &sz);
 	pci_write_config_dword(dev, pos, l);
 
+#ifdef CONFIG_ARCH_GEN3
+#else
 	if (!dev->mmio_always_on)
 		pci_write_config_word(dev, PCI_COMMAND, orig_cmd);
+#endif
 
 	/*
 	 * All bits set in sz means the device isn't working properly.

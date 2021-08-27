@@ -1867,6 +1867,11 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
+#ifdef MY_ABC_HERE
+		if (irq_stat & PORT_IRQ_CONNECT) {
+			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+		}
+#endif
 		ata_ehi_hotplugged(host_ehi);
 		ata_ehi_push_desc(host_ehi, "%s",
 			irq_stat & PORT_IRQ_CONNECT ?
@@ -1992,6 +1997,16 @@ irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 	irq_stat = readl(mmio + HOST_IRQ_STAT);
 	if (!irq_stat)
 		return IRQ_NONE;
+
+#ifdef MY_ABC_HERE
+	if (hpriv->flags & AHCI_HFLAG_YES_MV9235_FIX) {
+		u32 port_mask[2] = {0x5, 0xa};
+		for (i = 0; i < (host->n_ports/2) ; i++) {
+			if (irq_stat & port_mask[i])
+				irq_stat |= port_mask[i];
+		}
+	}
+#endif
 
 	irq_masked = irq_stat & hpriv->port_map;
 

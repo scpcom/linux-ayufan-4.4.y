@@ -882,6 +882,13 @@ struct dma_pinned_list {
 struct dma_pinned_list *dma_pin_iovec_pages(struct iovec *iov, size_t len);
 void dma_unpin_iovec_pages(struct dma_pinned_list* pinned_list);
 
+#if defined(CONFIG_SYNO_ARMADA)
+#ifdef CONFIG_SPLICE_NET_DMA_SUPPORT
+struct dma_pinned_list *dma_pin_kernel_iovec_pages(struct iovec *iov, size_t len);
+void dma_unpin_kernel_iovec_pages(struct dma_pinned_list* pinned_list);
+#endif
+#endif
+
 dma_cookie_t dma_memcpy_to_iovec(struct dma_chan *chan, struct iovec *iov,
 	struct dma_pinned_list *pinned_list, unsigned char *kdata, size_t len);
 dma_cookie_t dma_memcpy_pg_to_iovec(struct dma_chan *chan, struct iovec *iov,

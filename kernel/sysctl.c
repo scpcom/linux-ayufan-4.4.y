@@ -110,6 +110,11 @@ EXPORT_SYMBOL(gszSynoHWVersion);
 #endif
 
 #ifdef MY_ABC_HERE
+char gszSynoHWRevision[4] = {'\0'};
+EXPORT_SYMBOL(gszSynoHWRevision);
+#endif
+
+#ifdef  MY_ABC_HERE
 int gSynoRaidSyncFlag = 0;
 EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif
@@ -160,7 +165,7 @@ EXPORT_SYMBOL(gSynoInstallFlag);
 #endif
 
 #ifdef MY_ABC_HERE
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
+#if ((defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)) && !defined(CONFIG_ARCH_GEN3) ) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
 int gSynoHasDynModule = 1;
 #else
 int gSynoHasDynModule = 0;
@@ -203,13 +208,14 @@ EXPORT_SYMBOL(gSwitchDev);
 EXPORT_SYMBOL(gDevPCIName);
 #endif
 
+
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
 #endif
 
 #ifdef MY_ABC_HERE
-char gszSerialNum[12];
+char gszSerialNum[32];
 EXPORT_SYMBOL(gszSerialNum);
 char gszCustomSerialNum[32];
 EXPORT_SYMBOL(gszCustomSerialNum);
@@ -230,6 +236,11 @@ EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
 EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 #endif
 
+#endif
+
+#ifdef CONFIG_SYNO_ARMADA
+long gSynoUSBStation= 0;
+EXPORT_SYMBOL(gSynoUSBStation);
 #endif
 
 /* External variables not in a header file. */
@@ -1185,6 +1196,15 @@ static struct ctl_table kern_table[] = {
 #endif
 #ifdef MY_ABC_HERE
 	{
+		.procname		= "syno_hw_revision",
+		.data			= gszSynoHWRevision,
+		.maxlen			= 4,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
 		.procname		= "syno_internal_hd_num",
 		.data			= &g_internal_hd_num,
 		.maxlen			= sizeof (int),
@@ -1269,7 +1289,7 @@ static struct ctl_table kern_table[] = {
 	{
 		.procname		= "syno_serial",
 		.data			= &gszSerialNum,
-		.maxlen			= 12,
+		.maxlen			= 32,
 		.mode			= 0444,
 		.proc_handler	= &proc_dostring,
 	},
@@ -1308,6 +1328,16 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
+#ifdef CONFIG_SYNO_ARMADA
+	{
+		.procname		= "syno_usbstation",
+		.data			= &gSynoUSBStation,
+		.maxlen 			= sizeof (int),
+		.mode			= 0444,
+		.proc_handler		= &proc_dointvec,
+	},
+#endif
+
 	{ }
 };
 

@@ -179,7 +179,7 @@ ext4_fsblk_t ext4_inode_table(struct super_block *sb,
 		 (ext4_fsblk_t)le32_to_cpu(bg->bg_inode_table_hi) << 32 : 0);
 }
 
-__u32 ext4_free_blks_count(struct super_block *sb,
+__u32 ext4_free_group_clusters(struct super_block *sb,
 			       struct ext4_group_desc *bg)
 {
 	return le16_to_cpu(bg->bg_free_blocks_count_lo) |
@@ -235,7 +235,7 @@ void ext4_inode_table_set(struct super_block *sb,
 		bg->bg_inode_table_hi = cpu_to_le32(blk >> 32);
 }
 
-void ext4_free_blks_set(struct super_block *sb,
+void ext4_free_group_clusters_set(struct super_block *sb,
 				  struct ext4_group_desc *bg, __u32 count)
 {
 	bg->bg_free_blocks_count_lo = cpu_to_le16((__u16)count);
@@ -857,10 +857,10 @@ static void ext4_put_super(struct super_block *sb)
 		brelse(sbi->s_group_desc[i]);
 	ext4_kvfree(sbi->s_group_desc);
 	ext4_kvfree(sbi->s_flex_groups);
-	percpu_counter_destroy(&sbi->s_freeblocks_counter);
+	percpu_counter_destroy(&sbi->s_freeclusters_counter);
 	percpu_counter_destroy(&sbi->s_freeinodes_counter);
 	percpu_counter_destroy(&sbi->s_dirs_counter);
-	percpu_counter_destroy(&sbi->s_dirtyblocks_counter);
+	percpu_counter_destroy(&sbi->s_dirtyclusters_counter);
 	brelse(sbi->s_sbh);
 #ifdef CONFIG_QUOTA
 	for (i = 0; i < MAXQUOTAS; i++)
@@ -950,7 +950,6 @@ static int ext4_drop_inode(struct inode *inode)
 static void ext4_i_callback(struct rcu_head *head)
 {
 	struct inode *inode = container_of(head, struct inode, i_rcu);
-	INIT_LIST_HEAD(&inode->i_dentry);
 	kmem_cache_free(ext4_inode_cachep, EXT4_I(inode));
 }
 
@@ -1106,8 +1105,10 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 	}
 #endif
 #else
+#ifdef MY_ABC_HERE
 	if (test_opt(sb, OLDALLOC))
 		seq_puts(seq, ",oldalloc");
+#endif
 #endif
 #ifdef CONFIG_EXT4_FS_XATTR
 	if (test_opt(sb, XATTR_USER))
@@ -2033,7 +2034,7 @@ static int ext4_setup_super(struct super_block *sb, struct ext4_super_block *es,
 		res = MS_RDONLY;
 	}
 	if (read_only)
-		return res;
+		goto done;
 #ifndef MY_ABC_HERE
 	if (!(sbi->s_mount_state & EXT4_VALID_FS))
 		ext4_msg(sb, KERN_WARNING, "warning: mounting unchecked fs, "
@@ -2066,6 +2067,7 @@ static int ext4_setup_super(struct super_block *sb, struct ext4_super_block *es,
 		EXT4_SET_INCOMPAT_FEATURE(sb, EXT4_FEATURE_INCOMPAT_RECOVER);
 
 	ext4_commit_super(sb, 1);
+done:
 	if (test_opt(sb, DEBUG))
 		printk(KERN_INFO "[EXT4 FS bs=%lu, gc=%u, "
 				"bpg=%lu, ipg=%lu, mo=%04x, mo2=%04x]\n",
@@ -2114,8 +2116,8 @@ static int ext4_fill_flex_info(struct super_block *sb)
 		flex_group = ext4_flex_group(sbi, i);
 		atomic_add(ext4_free_inodes_count(sb, gdp),
 			   &sbi->s_flex_groups[flex_group].free_inodes);
-		atomic_add(ext4_free_blks_count(sb, gdp),
-			   &sbi->s_flex_groups[flex_group].free_blocks);
+		atomic_add(ext4_free_group_clusters(sb, gdp),
+			   &sbi->s_flex_groups[flex_group].free_clusters);
 		atomic_add(ext4_used_dirs_count(sb, gdp),
 			   &sbi->s_flex_groups[flex_group].used_dirs);
 	}
@@ -2233,7 +2235,8 @@ static int ext4_check_descriptors(struct super_block *sb,
 	if (NULL != first_not_zeroed)
 		*first_not_zeroed = grp;
 
-	ext4_free_blocks_count_set(sbi->s_es, ext4_count_free_blocks(sb));
+	ext4_free_blocks_count_set(sbi->s_es,
+				   EXT4_C2B(sbi, ext4_count_free_clusters(sb)));
 	sbi->s_es->s_free_inodes_count =cpu_to_le32(ext4_count_free_inodes(sb));
 	return 1;
 }
@@ -2553,7 +2556,8 @@ static ssize_t delayed_allocation_blocks_show(struct ext4_attr *a,
 					      char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%llu\n",
-			(s64) percpu_counter_sum(&sbi->s_dirtyblocks_counter));
+		(s64) EXT4_C2B(sbi,
+			percpu_counter_sum(&sbi->s_dirtyclusters_counter)));
 }
 
 static ssize_t session_write_kbytes_show(struct ext4_attr *a,
@@ -2581,17 +2585,24 @@ static ssize_t lifetime_write_kbytes_show(struct ext4_attr *a,
 			  EXT4_SB(sb)->s_sectors_written_start) >> 1)));
 }
 
-static ssize_t extent_cache_hits_show(struct ext4_attr *a,
+#ifdef MY_ABC_HERE
+static ssize_t lazyinit_info_show(struct ext4_attr *a,
 				       struct ext4_sb_info *sbi, char *buf)
 {
-	return snprintf(buf, PAGE_SIZE, "%lu\n", sbi->extent_cache_hits);
+	return snprintf(buf, PAGE_SIZE, "%u %u\n",
+			sbi->s_li_request ? sbi->s_li_request->lr_next_group : sbi->s_groups_count,
+			sbi->s_groups_count);
 }
+#endif
 
-static ssize_t extent_cache_misses_show(struct ext4_attr *a,
+#if 0 // for test MY_ABC_HERE
+static ssize_t lazyinit_speed_show(struct ext4_attr *a,
 				       struct ext4_sb_info *sbi, char *buf)
 {
-	return snprintf(buf, PAGE_SIZE, "%lu\n", sbi->extent_cache_misses);
+	return snprintf(buf, PAGE_SIZE, "%lu\n",
+			sbi->s_li_request ? sbi->s_li_request->lr_timeout : 0);
 }
+#endif
 
 static ssize_t inode_readahead_blks_store(struct ext4_attr *a,
 					  struct ext4_sb_info *sbi,
@@ -2661,6 +2672,14 @@ EXT4_RW_ATTR_SBI_UI(mb_stream_req, s_mb_stream_request);
 EXT4_RW_ATTR_SBI_UI(mb_group_prealloc, s_mb_group_prealloc);
 EXT4_RW_ATTR_SBI_UI(max_writeback_mb_bump, s_max_writeback_mb_bump);
 
+#ifdef MY_ABC_HERE
+EXT4_RO_ATTR(lazyinit_info);
+#endif
+#if 0 // for test MY_ABC_HERE
+EXT4_RO_ATTR(lazyinit_speed);
+#endif
+
+
 static struct attribute *ext4_attrs[] = {
 	ATTR_LIST(delayed_allocation_blocks),
 	ATTR_LIST(session_write_kbytes),
@@ -2674,6 +2693,12 @@ static struct attribute *ext4_attrs[] = {
 	ATTR_LIST(mb_stream_req),
 	ATTR_LIST(mb_group_prealloc),
 	ATTR_LIST(max_writeback_mb_bump),
+#ifdef MY_ABC_HERE
+	ATTR_LIST(lazyinit_info),
+#endif
+#if 0 // for test MY_ABC_HERE
+	ATTR_LIST(lazyinit_speed),
+#endif
 	NULL,
 };
 
@@ -2776,6 +2801,13 @@ static int ext4_feature_set_ok(struct super_block *sb, int readonly)
 				 "CONFIG_LBDAF");
 			return 0;
 		}
+	}
+	if (EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_BIGALLOC) &&
+	    !EXT4_HAS_INCOMPAT_FEATURE(sb, EXT4_FEATURE_INCOMPAT_EXTENTS)) {
+		ext4_msg(sb, KERN_ERR,
+			 "Can't support bigalloc feature without "
+			 "extents feature\n");
+		return 0;
 	}
 	return 1;
 }
@@ -2926,7 +2958,11 @@ static int ext4_run_li_request(struct ext4_li_request *elr)
 		timeout = jiffies;
 		ret = ext4_init_inode_table(sb, group,
 					    elr->lr_timeout ? 0 : 1);
+#ifdef MY_ABC_HERE
+		if (elr->lr_timeout == 0 || ((elr->lr_next_group % 10) == 0)) {
+#else
 		if (elr->lr_timeout == 0) {
+#endif
 			timeout = (jiffies - timeout) *
 				  elr->lr_sbi->s_li_wait_mult;
 			elr->lr_timeout = timeout;
@@ -3361,10 +3397,10 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	char *cp;
 	const char *descr;
 	int ret = -ENOMEM;
-	int blocksize;
+	int blocksize, clustersize;
 	unsigned int db_count;
 	unsigned int i;
-	int needs_recovery, has_huge_files;
+	int needs_recovery, has_huge_files, has_bigalloc;
 	__u64 blocks_count;
 	int err;
 	unsigned int journal_ioprio = DEFAULT_JOURNAL_IOPRIO;
@@ -3678,12 +3714,53 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		sb->s_dirt = 1;
 	}
 
+	/* Handle clustersize */
+	clustersize = BLOCK_SIZE << le32_to_cpu(es->s_log_cluster_size);
+	has_bigalloc = EXT4_HAS_RO_COMPAT_FEATURE(sb,
+				EXT4_FEATURE_RO_COMPAT_BIGALLOC);
+	if (has_bigalloc) {
+		if (clustersize < blocksize) {
+			ext4_msg(sb, KERN_ERR,
+				 "cluster size (%d) smaller than "
+				 "block size (%d)", clustersize, blocksize);
+			goto failed_mount;
+		}
+		sbi->s_cluster_bits = le32_to_cpu(es->s_log_cluster_size) -
+			le32_to_cpu(es->s_log_block_size);
+		sbi->s_clusters_per_group =
+			le32_to_cpu(es->s_clusters_per_group);
+		if (sbi->s_clusters_per_group > blocksize * 8) {
+			ext4_msg(sb, KERN_ERR,
+				 "#clusters per group too big: %lu",
+				 sbi->s_clusters_per_group);
+			goto failed_mount;
+		}
+		if (sbi->s_blocks_per_group !=
+		    (sbi->s_clusters_per_group * (clustersize / blocksize))) {
+			ext4_msg(sb, KERN_ERR, "blocks per group (%lu) and "
+				 "clusters per group (%lu) inconsistent",
+				 sbi->s_blocks_per_group,
+				 sbi->s_clusters_per_group);
+			goto failed_mount;
+		}
+	} else {
+		if (clustersize != blocksize) {
+			ext4_warning(sb, "fragment/cluster size (%d) != "
+				     "block size (%d)", clustersize,
+				     blocksize);
+			clustersize = blocksize;
+		}
 		if (sbi->s_blocks_per_group > blocksize * 8) {
 			ext4_msg(sb, KERN_ERR,
 				 "#blocks per group too big: %lu",
 				 sbi->s_blocks_per_group);
 			goto failed_mount;
 		}
+		sbi->s_clusters_per_group = sbi->s_blocks_per_group;
+		sbi->s_cluster_bits = 0;
+	}
+	sbi->s_cluster_ratio = clustersize / blocksize;
+
 	if (sbi->s_inodes_per_group > blocksize * 8) {
 		ext4_msg(sb, KERN_ERR,
 		       "#inodes per group too big: %lu",
@@ -3790,8 +3867,8 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	sbi->s_err_report.function = print_daily_error_info;
 	sbi->s_err_report.data = (unsigned long) sb;
 
-	err = percpu_counter_init(&sbi->s_freeblocks_counter,
-			ext4_count_free_blocks(sb));
+	err = percpu_counter_init(&sbi->s_freeclusters_counter,
+			ext4_count_free_clusters(sb));
 	if (!err) {
 		err = percpu_counter_init(&sbi->s_freeinodes_counter,
 				ext4_count_free_inodes(sb));
@@ -3801,7 +3878,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 				ext4_count_dirs(sb));
 	}
 	if (!err) {
-		err = percpu_counter_init(&sbi->s_dirtyblocks_counter, 0);
+		err = percpu_counter_init(&sbi->s_dirtyclusters_counter, 0);
 	}
 	if (err) {
 		ext4_msg(sb, KERN_ERR, "insufficient memory");
@@ -3916,13 +3993,13 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	 * The journal may have updated the bg summary counts, so we
 	 * need to update the global counters.
 	 */
-	percpu_counter_set(&sbi->s_freeblocks_counter,
-			   ext4_count_free_blocks(sb));
+	percpu_counter_set(&sbi->s_freeclusters_counter,
+			   ext4_count_free_clusters(sb));
 	percpu_counter_set(&sbi->s_freeinodes_counter,
 			   ext4_count_free_inodes(sb));
 	percpu_counter_set(&sbi->s_dirs_counter,
 			   ext4_count_dirs(sb));
-	percpu_counter_set(&sbi->s_dirtyblocks_counter, 0);
+	percpu_counter_set(&sbi->s_dirtyclusters_counter, 0);
 
 no_journal:
 	/*
@@ -3981,7 +4058,11 @@ no_journal:
 #ifdef MY_ABC_HERE
 	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
 #endif
-	ext4_setup_super(sb, es, sb->s_flags & MS_RDONLY);
+#ifdef MY_ABC_HERE
+	sb->s_archive_version1 = le32_to_cpu(es->s_archive_version1);
+#endif
+	if (ext4_setup_super(sb, es, sb->s_flags & MS_RDONLY))
+		sb->s_flags |= MS_RDONLY;
 
 	/* determine the minimum size of new large inodes, if present */
 	if (sbi->s_inode_size > EXT4_GOOD_OLD_INODE_SIZE) {
@@ -4097,10 +4178,10 @@ failed_mount3:
 	del_timer(&sbi->s_err_report);
 	if (sbi->s_flex_groups)
 		ext4_kvfree(sbi->s_flex_groups);
-	percpu_counter_destroy(&sbi->s_freeblocks_counter);
+	percpu_counter_destroy(&sbi->s_freeclusters_counter);
 	percpu_counter_destroy(&sbi->s_freeinodes_counter);
 	percpu_counter_destroy(&sbi->s_dirs_counter);
-	percpu_counter_destroy(&sbi->s_dirtyblocks_counter);
+	percpu_counter_destroy(&sbi->s_dirtyclusters_counter);
 	if (sbi->s_mmp_tsk)
 		kthread_stop(sbi->s_mmp_tsk);
 failed_mount2:
@@ -4426,8 +4507,12 @@ static int ext4_commit_super(struct super_block *sb, int sync)
 #ifdef MY_ABC_HERE
 	es->s_archive_version = cpu_to_le32(sb->s_archive_version);
 #endif
-	ext4_free_blocks_count_set(es, percpu_counter_sum_positive(
-					   &EXT4_SB(sb)->s_freeblocks_counter));
+#ifdef MY_ABC_HERE
+	es->s_archive_version1 = cpu_to_le32(sb->s_archive_version1);
+#endif
+	ext4_free_blocks_count_set(es,
+			EXT4_C2B(EXT4_SB(sb), percpu_counter_sum_positive(
+				&EXT4_SB(sb)->s_freeclusters_counter)));
 	es->s_free_inodes_count =
 		cpu_to_le32(percpu_counter_sum_positive(
 				&EXT4_SB(sb)->s_freeinodes_counter));
@@ -4841,55 +4926,20 @@ static int ext4_statfs(struct dentry *dentry, struct kstatfs *buf)
 	struct super_block *sb = dentry->d_sb;
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
 	struct ext4_super_block *es = sbi->s_es;
+	ext4_fsblk_t overhead = 0;
 	u64 fsid;
 	s64 bfree;
 
-	if (test_opt(sb, MINIX_DF)) {
-		sbi->s_overhead_last = 0;
-	} else if (sbi->s_blocks_last != ext4_blocks_count(es)) {
-		ext4_group_t i, ngroups = ext4_get_groups_count(sb);
-		ext4_fsblk_t overhead = 0;
-
-		/*
-		 * Compute the overhead (FS structures).  This is constant
-		 * for a given filesystem unless the number of block groups
-		 * changes so we cache the previous value until it does.
-		 */
-
-		/*
-		 * All of the blocks before first_data_block are
-		 * overhead
-		 */
-		overhead = le32_to_cpu(es->s_first_data_block);
-
-		/*
-		 * Add the overhead attributed to the superblock and
-		 * block group descriptors.  If the sparse superblocks
-		 * feature is turned on, then not all groups have this.
-		 */
-		for (i = 0; i < ngroups; i++) {
-			overhead += ext4_bg_has_super(sb, i) +
-				ext4_bg_num_gdb(sb, i);
-			cond_resched();
-		}
-
-		/*
-		 * Every block group has an inode bitmap, a block
-		 * bitmap, and an inode table.
-		 */
-		overhead += ngroups * (2 + sbi->s_itb_per_group);
-		sbi->s_overhead_last = overhead;
-		smp_wmb();
-		sbi->s_blocks_last = ext4_blocks_count(es);
-	}
+	if (!test_opt(sb, MINIX_DF))
+		overhead = sbi->s_overhead;
 
 	buf->f_type = EXT4_SUPER_MAGIC;
 	buf->f_bsize = sb->s_blocksize;
-	buf->f_blocks = ext4_blocks_count(es) - sbi->s_overhead_last;
-	bfree = percpu_counter_sum_positive(&sbi->s_freeblocks_counter) -
-		       percpu_counter_sum_positive(&sbi->s_dirtyblocks_counter);
+	buf->f_blocks = ext4_blocks_count(es) - EXT4_C2B(sbi, sbi->s_overhead);
+	bfree = percpu_counter_sum_positive(&sbi->s_freeclusters_counter) -
+		percpu_counter_sum_positive(&sbi->s_dirtyclusters_counter);
 	/* prevent underflow in case that few free space is available */
-	buf->f_bfree = max_t(s64, bfree, 0);
+	buf->f_bfree = EXT4_C2B(sbi, max_t(s64, bfree, 0));
 	buf->f_bavail = buf->f_bfree - ext4_r_blocks_count(es);
 	if (buf->f_bfree < ext4_r_blocks_count(es))
 		buf->f_bavail = 0;

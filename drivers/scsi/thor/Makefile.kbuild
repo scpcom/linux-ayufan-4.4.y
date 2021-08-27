@@ -33,6 +33,7 @@ endif
 # we may build for 32bit kernel on a 64bit system
 CONFIG_64BIT=$(shell [ -f $(KERNEL_BLD_DIR)/.config ] && cat $(KERNEL_BLD_DIR)/.config | grep -m 1 CONFIG_64BIT | awk -F= '{print $$2}')
 CONFIG_REGPARM=$(shell [ -f $(KERNEL_BLD_DIR)/.config ] && cat $(KERNEL_BLD_DIR)/.config | grep -m 1 CONFIG_REGPARM | awk -F= '{print $$2}')
+CONFIG_4KSTACKS=$(shell [ -f $(KERNEL_BLD_DIR)/.config ] && cat $(KERNEL_BLD_DIR)/.config | grep -m 1 CONFIG_4KSTACKS | awk -F= '{print $$2}')
 CONFIG_SUSE_KERNEL=$(shell [ -f $(KERNEL_BLD_DIR)/.config ] && cat $(KERNEL_BLD_DIR)/.config | grep -m 1 CONFIG_SUSE_KERNEL | awk -F= '{print $$2}')
 
 ifeq ($(ARCH), )
@@ -64,25 +65,55 @@ odin_objs_$(SUPPORT_ODIN)   := core/odin/core_exp.o   core/odin/core_init.o   \
 		               core/odin/core_i2c.o                           \
 		               core/odin/ata2scsi.o   core/odin/core_helper.o \
 			       core/odin/core_extern.o core/odin/core_swxor.o  \
+#    core/odin/consolid.o \
+#   core/odin/core_eeprom.o \
 
 thor_objs_$(SUPPORT_THOR)   := core/thor/core_exp.o core/thor/core_init.o\
 		   core/thor/core_api.o core/thor/core_xor.o\
-		   core/thor/scsi2sata.o core/thor/core_swxor.o
+		   core/thor/scsi2sata.o core/thor/core_swxor.o core/thor/core_sat.o
+
+#cons_objs_$(SUPPORT_CONSOLIDATE) := core/thor/consolid.o
 
 CORE_OBJS       :=  $(odin_objs_y) $(thor_objs_y)
+
 
 COMM_OBJS       := lib/common/com_util.o lib/common/com_u64.o             \
 		   lib/common/com_scsi.o lib/common/com_tag.o             \
 		   lib/common/com_sgd.o  lib/common/com_nvram.o
+
+raid_objs_$(RAID_MODULE) := raid/ddf_handler.o       raid/raid0.o         \
+			    raid/raid1.o             raid/raid_util_ext.o \
+		            raid/raid_api.o          raid/raid_bga.o      \
+	                    raid/raid_cmd_handler.o  raid/raid_ddf.o      \
+		            raid/raid_eh.o           raid/raid_exp.o      \
+			    raid/raid_manage_ext.o   raid/raid_mp.o       \
+		            raid/raid_manage.o       raid/raid_res_mgmt.o \
+		            raid/raid_tset.o         raid/raid_util.o     \
+			    raid/ddf_handler_ext.o   raid/raid_api_ext.o  \
+                            raid/raid_cmd_ext.o      raid/raid_ddf_ext.o  \
+			    raid/raid_exp_ext.o
+
+cache_objs_$(CACHE_MODULE) := cache/cache_exp.o      cache/cache_mod.o
+
+raid6_objs_$(RAID6_MODULE) := raid/raid6.o math/math_matrix.o
+
+RAID_OBJS       := $(raid_objs_y)  $(raid6_objs_y) $(cache_objs_y)
 
 OSDEP_OBJS      := linux/linux_main.o    linux/hba_exp.o          \
 		   linux/hba_mod.o       linux/hba_timer.o        \
 		   linux/oss_wrapper.o   linux/linux_iface.o      \
 	           linux/res_mgmt.o
 
-LIBMV_OBJS	:= $(CORE_OBJS) $(COMM_OBJS) 
+# for partial source tree building
+core_dir_$(SUPPORT_ODIN) :=core/odin
+core_dir_$(SUPPORT_THOR) :=core/thor
+include_dir := include  include/generic  include/icommon
 
-HBA_OBJS        := $(OSDEP_OBJS) $(LIBMV_OBJS)
+header_dirs     :=   $(include_dir)
+
+LIBMV_OBJS	:=  $(COMM_OBJS) $(RAID_OBJS)
+
+HBA_OBJS        := $(OSDEP_OBJS) $(CORE_OBJS) $(LIBMV_OBJS)
 
 INCLUDE_DIR     = -I$(KERNEL_BLD_DIR)/include                          \
 		  -I$(KERNEL_BLD_DIR)/include/scsi                     \
@@ -118,6 +149,10 @@ EXTRA_CFLAGS  +=   -D_64_BIT_COMPILER
 else
 EXTRA_CFLAGS  +=   -D_32_LEGACY_
 endif
+ifeq ($(CONFIG_4KSTACKS), y)
+EXTRA_CFLAGS  +=   -D_4K_STACKS_
+endif
+
 ifeq ($(CONFIG_SUSE_KERNEL), y)
 EXTRA_CFLAGS  += -DIS_OPENSUSE_SLED_SLES=1
 else

@@ -55,6 +55,9 @@
 #include <linux/raid/md_p.h>
 #include <linux/raid/md_u.h>
 #include <linux/slab.h>
+#ifdef MY_ABC_HERE
+#include <linux/list_sort.h>
+#endif
 #include "md.h"
 #include "bitmap.h"
 
@@ -65,17 +68,16 @@ extern int SynoDebugFlag;
 #endif
 #endif
 
-#ifdef MY_DEF_HERE
-#undef MODULE
-extern int *SYNOMdpMajor;
-extern struct list_head SYNOAllDetectedDevices;
-#endif
 #ifdef MY_ABC_HERE
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
 EXPORT_SYMBOL(SYNORaidRdevUnplug);
 int SYNORaidDiskUnplug(char *szArgDiskName);
 void SYNORaidUnplugTask(struct work_struct *);
 #endif  /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+DEFINE_SPINLOCK(MdListLock);
+#endif
 
 #ifdef __LITTLE_ENDIAN
 #define SYNO_RAID_USE_BE_SB
@@ -6765,6 +6767,9 @@ static int md_ioctl(struct block_device *bdev, fmode_t mode,
 				} else {
 					status.inSync = 0;
 				}
+				if (0 == mddev->level || LEVEL_LINEAR == mddev->level) {
+					status.inSync = 0;
+				}
 				if (mddev->curr_resync > 2) {
 					status.finishSectors = (mddev->curr_resync - atomic_read(&mddev->recovery_active));
 				} else {
@@ -7005,6 +7010,11 @@ void md_error(struct mddev *mddev, struct md_rdev *rdev)
 	sysfs_notify_dirent_safe(rdev->sysfs_state);
 	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
+#ifdef MY_ABC_HERE
+	if (test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery)) {
+		mddev->reshape_interrupt = 1;
+	}
+#endif
 	md_wakeup_thread(mddev->thread);
 	if (mddev->event_work.func)
 		queue_work(md_misc_wq, &mddev->event_work);
@@ -7785,6 +7795,11 @@ void md_do_sync(struct mddev *mddev)
 				goto repeat;
 			}
 		}
+#ifdef MY_ABC_HERE
+		if (mddev->nodev_and_crashed) {
+			j = max_sectors;
+		}
+#endif
 	}
 	printk(KERN_INFO "md: %s: %s done.\n",mdname(mddev), desc);
 	/*
@@ -8660,29 +8675,14 @@ static int md_notify_reboot(struct notifier_block *this,
 	struct mddev *mddev;
 	int need_delay = 0;
 
-	if ((code == SYS_DOWN) || (code == SYS_HALT) || (code == SYS_POWER_OFF)) {
-
-		printk(KERN_INFO "md: stopping all md devices.\n");
-
 	for_each_mddev(mddev, tmp) {
 		if (mddev_trylock(mddev)) {
-				/* Force a switch to readonly even array
-				 * appears to still be in use.  Hence
-				 * the '100'.
-				 */
-				md_set_readonly(mddev, 100);
+			if (mddev->pers)
+				__md_stop_writes(mddev);
+			mddev->safemode = 2;
 			mddev_unlock(mddev);
 		}
 		need_delay = 1;
-	}
-	/*
-	 * certain more exotic SCSI devices are known to be
-	 * volatile wrt too early system reboots. While the
-	 * right place to handle this issue is the given
-	 * driver, we do want to have a safe RAID driver ...
-	 */
-	if (need_delay)
-		mdelay(1000*1);
 	}
 	/*
 	 * certain more exotic SCSI devices are known to be
@@ -8726,11 +8726,9 @@ static int __init md_init(void)
 
 	if ((ret = register_blkdev(0, "mdp")) < 0)
 		goto err_mdp;
+
 	mdp_major = ret;
 
-#ifdef MY_DEF_HERE
-	SYNOMdpMajor = &mdp_major;
-#endif
 	blk_register_region(MKDEV(MD_MAJOR, 0), 1UL<<MINORBITS, THIS_MODULE,
 			    md_probe, NULL, NULL);
 	blk_register_region(MKDEV(mdp_major, 0), 1UL<<MINORBITS, THIS_MODULE,
@@ -8776,10 +8774,12 @@ void md_autodetect_dev(dev_t dev)
 	node_detected_dev = kzalloc(sizeof(*node_detected_dev), GFP_KERNEL);
 	if (node_detected_dev) {
 		node_detected_dev->dev = dev;
-#ifdef MY_DEF_HERE
-		list_add_tail(&node_detected_dev->list, &SYNOAllDetectedDevices);
-#else
+#ifdef MY_ABC_HERE
+		spin_lock(&MdListLock);
+#endif
 		list_add_tail(&node_detected_dev->list, &all_detected_devices);
+#ifdef MY_ABC_HERE
+		spin_unlock(&MdListLock);
 #endif
 	} else {
 		printk(KERN_CRIT "md: md_autodetect_dev: kzalloc failed"
@@ -8828,30 +8828,77 @@ END:
 }
 #endif
 
+#ifdef MY_ABC_HERE
+/**
+ * This function is comparason function for list_sort
+ * database.
+ *
+ * @param priv merge sort key
+ * @param plistHead1 first list_head
+ * @param plistHead2 second list_head
+ *
+ * @return > 0: plistHead1 is front of plistHead2
+ * @return = 0: no operation
+ * @return < 0: plistHead2 is front of plistHead1
+ */
+static int device_sort_cmp(void *priv, struct list_head *plistHead1, struct list_head *plistHead2)
+{
+	struct detected_devices_node *pnode1 = NULL;
+	struct detected_devices_node *pnode2 = NULL;
+	int iRet = 0;
+
+	if (plistHead1 != plistHead2) {
+		pnode1 = list_entry(plistHead1, struct detected_devices_node, list);
+		pnode2 = list_entry(plistHead2, struct detected_devices_node, list);
+
+		if (MAJOR(pnode1->dev) == MAJOR(pnode2->dev)) {
+			iRet = MINOR(pnode1->dev) - MINOR(pnode2->dev);
+		} else {
+			iRet = MAJOR(pnode1->dev) - MAJOR(pnode2->dev);
+		}
+	}
+
+	return iRet;
+}
+#endif
+
 static void autostart_arrays(int part)
 {
 	struct md_rdev *rdev;
 	struct detected_devices_node *node_detected_dev;
 	dev_t dev;
 	int i_scanned, i_passed;
+#ifdef MY_ABC_HERE
+	int iIsEmpty = 0;
+#endif
 
 	i_scanned = 0;
 	i_passed = 0;
 
 	printk(KERN_INFO "md: Autodetecting RAID arrays.\n");
 
-#ifdef MY_DEF_HERE
-	while (!list_empty(&SYNOAllDetectedDevices) && i_scanned < INT_MAX) {
+#ifdef MY_ABC_HERE
+	spin_lock(&MdListLock);
+	iIsEmpty = list_empty(&all_detected_devices);
+#ifdef MY_ABC_HERE
+	list_sort(NULL, &all_detected_devices, device_sort_cmp);
+#endif
+	spin_unlock(&MdListLock);
+	while (!iIsEmpty && i_scanned < INT_MAX) {
 		i_scanned++;
-		node_detected_dev = list_entry(SYNOAllDetectedDevices.next,
+		spin_lock(&MdListLock);
+		node_detected_dev = list_entry(all_detected_devices.next,
 					struct detected_devices_node, list);
+		list_del(&node_detected_dev->list);
+		iIsEmpty = list_empty(&all_detected_devices);
+		spin_unlock(&MdListLock);
 #else
 	while (!list_empty(&all_detected_devices) && i_scanned < INT_MAX) {
 		i_scanned++;
 		node_detected_dev = list_entry(all_detected_devices.next,
 					struct detected_devices_node, list);
-#endif
 		list_del(&node_detected_dev->list);
+#endif
 		dev = node_detected_dev->dev;
 		kfree(node_detected_dev);
 		rdev = md_import_device(dev,0, 90);
@@ -8992,6 +9039,11 @@ static void syno_md_error(struct mddev *mddev, struct md_rdev *rdev)
 	sysfs_notify_dirent_safe(rdev->sysfs_state);
 	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
+#ifdef MY_ABC_HERE
+	if (test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery)) {
+		mddev->reshape_interrupt = 1;
+	}
+#endif
 	md_wakeup_thread(mddev->thread);
 	if (mddev->event_work.func)
 		queue_work(md_misc_wq, &mddev->event_work);
@@ -9450,10 +9502,6 @@ END:
 	return;
 }
 EXPORT_SYMBOL(SynoMDWakeUpDevices);
-#endif
-
-#ifdef MY_DEF_HERE
-#define MODULE
 #endif
 
 EXPORT_SYMBOL(register_md_personality);

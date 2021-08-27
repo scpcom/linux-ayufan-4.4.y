@@ -38,70 +38,107 @@
 #include <linux/uaccess.h>
 #include <linux/io.h>
 #include <asm/irq.h>
+#include <linux/log2.h>
 
 #include "../edid.h"
 #include <video/dovefb.h>
 #include <video/dovefbreg.h>
 
 #include "dovefb_if.h"
-#ifdef CONFIG_CH7025_COMPOSITE
-#include <video/ch7025_composite.h>
-#endif
-#ifdef CONFIG_KG2_ANX7150
-#include <video/kg2.h>
-#endif
 #define MAX_HWC_SIZE		(64*64*2)
 #define DEFAULT_REFRESH		60	/* Hz */
+#define DEFAULT_EDID_INTERVAL   30	/* seconds */
 
 static int dovefb_fill_edid(struct fb_info *fi,
 				struct dovefb_mach_info *dmi);
 static int wait_for_vsync(struct dovefb_layer_info *dfli);
 static void dovefb_set_defaults(struct dovefb_layer_info *dfli);
+static const u8 edid_header[] = {
+        0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00
+};
+
+static u32 get_lcd_k_div_by_ld(u32 tar_freq, u32 l_div)
+{
+	u32 k = 1;
+	u64 f_out;
+
+	/* Calculate K according to F-out. */
+	f_out = tar_freq / l_div;
+	do_div(f_out, 1000000);
+
+	/* K is calculated according to (tar_freq / ld). */
+	if((f_out >= 700) && (f_out <= 4000))
+		k = 1;
+	else if((f_out >= 350) && (f_out <= 2000))
+		k = 2;
+	else if((f_out >= 175) && (f_out <= 1000))
+		k = 4;
+	else if((f_out >= 87) && (f_out <= 500))
+		k = 8;
+	else
+		k = 16;
+
+	return k;
+}
 
 static void set_lcd_clock_dividers(struct dovefb_layer_info *dfli, u32 f_in, 
-		u32 m_div, u32 n_div, u32 full_div, u32 is_half_div)
+		u32 m_div, u32 n_div, u32 k_div, u32 full_div, u32 is_half_div)
 {
-	u32 k;
+//	u32 k;
 	u64 f_vco;
 	u32 reg;
 	u32 pll_vco;
+	u32 apll_lpf;
 
 	/* Calculate K according to Fvco. */
 	f_vco = f_in * n_div;
 	do_div(f_vco, m_div);
 	do_div(f_vco, 1000000);
 
-	/* K is calculated according to (f_in * N / M). */
-	if((f_vco >= 600) && (f_vco <= 2400))
-		k = 1;
-	else if((f_vco >= 300) && (f_vco < 600))
-		k = 2;
-	else if((f_vco >= 150) && (f_vco < 300))
-		k = 4;
-	else if((f_vco >= 75) && (f_vco < 150))
-		k = 8;
-	else if(/*(f_vco >= 37) &&*/ (f_vco < 75))
-		k = 16;
-
 	pll_vco = f_vco; //f_in * n_div;
-	if(/*(pll_vco >= 600) &&*/ (pll_vco <= 720))
+	if(pll_vco <= 920)
 		pll_vco = 1;
-	else if((pll_vco > 720) && (pll_vco <= 840))
+	else if(pll_vco <= 1140)
 		pll_vco = 2;
-	else if((pll_vco > 840) && (pll_vco <= 960))
+	else if(pll_vco <= 1360)
 		pll_vco = 3;
-	else if((pll_vco > 960) && (pll_vco <= 1080))
+	else if(pll_vco <= 1580)
 		pll_vco = 4;
-	else if((pll_vco > 1080) && (pll_vco <= 1200))
+	else if(pll_vco <= 1800)
 		pll_vco = 5;
-	else if((pll_vco > 1200) && (pll_vco <= 1320))
+	else if(pll_vco <= 2020)
 		pll_vco = 6;
-	else
+	else if(pll_vco <= 2240)
 		pll_vco = 7;
+	else if(pll_vco <= 2460)
+		pll_vco = 8;
+	else if(pll_vco <= 2680)
+		pll_vco = 9;
+	else if(pll_vco <= 2900)
+		pll_vco = 10;
+	else if(pll_vco <= 3120)
+		pll_vco = 11;
+	else if(pll_vco <= 3340)
+		pll_vco = 12;
+	else if(pll_vco <= 3560)
+		pll_vco = 13;
+	else if(pll_vco <= 3780)
+		pll_vco = 14;
+	else
+		pll_vco = 15;
 
+	/* Set APLL LPF */
+	if (n_div <= 4)
+		apll_lpf = 12;
+	else if (n_div <= 22)
+		apll_lpf = 7;
+	else if (n_div <= 117)
+		apll_lpf = 4;
+	else
+		apll_lpf = 1;
 
-	printk(KERN_INFO "N = %d, M = %d, K = %d, full_div = %d, half = %d, pll_vco = %d.\n",
-			n_div, m_div, k, full_div, is_half_div, pll_vco);
+	printk(KERN_INFO "N = %d, M = %d, K = %d, full_div = %d, half = %d, pll_vco = %d, pll_lpf = %d.\n",
+			n_div, m_div, k_div, full_div, is_half_div, pll_vco, apll_lpf);
 
 	/* Clear SMPN */
 	reg = readl(dfli->reg_base + LCD_CLK_CFG1_REG);
@@ -117,11 +154,12 @@ static void set_lcd_clock_dividers(struct dovefb_layer_info *dfli, u32 f_in,
 
 	/* Set N, M, K */
 	reg = readl(dfli->reg_base + LCD_CLK_CFG0_REG);
-	reg &= ~(LCD_PLL_NDIV_MASK | LCD_PLL_MDIV_MASK | LCD_PLL_KDIV_MASK);
+	reg &= ~(LCD_PLL_NDIV_MASK | LCD_PLL_MDIV_MASK | LCD_PLL_KDIV_MASK | LCD_PLL_LPF_MASK | LCD_PLL_VCO_BAND_MASK);
 	reg |= LCD_PLL_NDIV(n_div - 1);
 	reg |= LCD_PLL_MDIV(m_div - 1);
-	reg |= LCD_PLL_KDIV(k);
-	reg |= (pll_vco << 13);
+	reg |= LCD_PLL_KDIV((ilog2(k_div) + 1));
+	reg |= LCD_PLL_VCO_BAND(pll_vco);
+	reg |= LCD_PLL_LPF(apll_lpf);
 	writel(reg, dfli->reg_base + LCD_CLK_CFG0_REG);
 
 	/* Set half divider */
@@ -157,77 +195,113 @@ static inline u64 calc_diff(u64 a, u64 b)
 		return b - a;
 }
 
-
 /*
 ** Calculate the best PLL parameters to get the closest output frequency.
 ** out_freq = (Fin * N / M) / X;
 **  OR
 ** out_freq = (Fin * N / M) / (X + 0.5)
 */
-static void calc_best_clock_div(u32 tar_freq, u32 f_in, u32 *m_div,
-		u32 *n_div, u32 *x_div, u32 *is_half_div, u32 *lcd_div)
+static void calc_best_clock_div(struct dovefb_info *info,  u32 tar_freq, u32 f_in,
+		u32 *m_div, u32 *n_div, u32 *k_div, u32 *x_div, u32 *is_half_div, u32 *lcd_div)
 {
 	u64 best_rem = 0xFFFFFFFFFFFFFFFFll;
 	u32 best_m = 0;
 	u32 best_n = 0;
 	u32 best_x = 0;
+	u32 best_k = 0;
+	u32 best_lcd_div = 0;
 	u32 half_div = 0;
 	u64 rem;
 	u64 temp;
-	u32 n, m, x;
+	u32 temp_32;
+	u32 n, m, x, k, ld;
 	int override = 0; 	/* Used to mark special cases where the LCD */
 	u32 n_max;
+	u32 x_start, x_end;
+	u32 ld_end;
 
-	n_max = 2400000000ul / f_in;
+	if (info->fixed_full_div) {
+		x_start = info->full_div_val;
+		x_end = x_start + 1;
+		ld_end = 2;
+	} else {
+		x_start = 1;
+		x_end = 64;
+		ld_end = 2;
+	}
+
+	n_max = /*2400000000ul / f_in;*/480;
 
 	/* Look for the best N & M values assuming that we will NOT use the
 	** HALF divider.
 	*/
-	for (n = 24; n < n_max; n++) {
+
+	for(ld = 1; ld < ld_end; ld++) {
+		for (n = 1; n < n_max; n++) {
 			for(m = 1; m < 4; m++) {
-			for(x = 1; x < 64; x++) {
+				/* N * K must be smaller than 480 */
+				k = get_lcd_k_div_by_ld(tar_freq, ld);
+				/* 700 < F_in * N / (M * K) < 4000 */
+				temp_32 = (((f_in * n) / 1000000) / m / k);
+				if ((temp_32 < (700 / k)) || (temp_32 > (4000 / k)))
+					continue;
+				for(x = x_start; x < x_end; x++) {
 					temp = (u64)f_in * (u64)n;
 					do_div(temp, m);
-				do_div(temp, x);
 					/* Fin * N / M Must be < 1500MHz */
 					if(temp > 1500000000)
 						continue;
+					do_div(temp, k);
+					do_div(temp, x);
+					do_div(temp, ld);
 					rem = calc_diff(tar_freq, temp);
+					/* It's better not to select k = 1. */
 					if ((rem < best_rem) ||
-			    ((override == 1) && (rem == best_rem))) {
+					    ((override == 1) && (rem == best_rem)) ||
+					    ((rem == best_rem) && (k < best_k))) {
 						best_rem = rem;
 						best_m = m;
 						best_n = n;
 						best_x = x;
+						best_k = k;
+						best_lcd_div = ld;
 					}
 					if ((best_rem == 0) && (override == 0))
 						break;
 				}
 			}
 		}
+	}
 
 	/* Look for the best N & M values assuming that we will use the
 	** HALF divider.
 	*/
-	if (best_rem != 0) {
-		for (n = 24; n < n_max; n++) {
+	if ((info->fixed_full_div == 0) && (best_rem != 0)) {
+		for(ld = 1; ld < ld_end; ld++) {
+			for (n = 1; n < n_max; n++) {
 				for(m = 1; m < 4; m++) {
+					k = get_lcd_k_div_by_ld(tar_freq, ld);
 					/* Half div can be between 5.5 & 31.5 */
 					for (x = 55; x <= 315; x += 10) {
 						temp = (u64)f_in * (u64)n * 10;
 						do_div(temp, m);
-					do_div(temp, x);
 						/* Fin * N / M Must be < 1500MHz */
 						if(temp > 15000000000ll)
 							continue;
+						do_div(temp, x);
+						do_div(temp, k);
+						do_div(temp, ld);
 						rem = calc_diff(tar_freq, temp);
 						if ((rem < best_rem) ||
-					    ((override == 1) && (rem == best_rem))) {
+						    ((override == 1) && (rem == best_rem)) ||
+						    ((rem == best_rem) && (k < best_k))) {
 							half_div = 1;
 							best_rem = rem;
 							best_m = m;
 							best_n = n;
 							best_x = x / 10;
+							best_k = k;
+							best_lcd_div = ld;
 							half_div = 1;
 						}
 						if ((best_rem == 0) && (override == 0))
@@ -236,12 +310,14 @@ static void calc_best_clock_div(u32 tar_freq, u32 f_in, u32 *m_div,
 				}
 			}
 		}
+	}
 
 	*is_half_div = half_div;
 	*m_div = best_m;
 	*n_div = best_n;
 	*x_div = best_x;
-	*lcd_div = 1;
+	*k_div = best_k;
+	*lcd_div = best_lcd_div;
 
 	return;
 }
@@ -271,6 +347,7 @@ static void set_clock_divider(struct dovefb_layer_info *dfli,
 	struct dovefb_mach_info *dmi = dfli->dev->platform_data;
 	u32 m_div;
 	u32 n_div;
+	u32 k_div;
 	u32 is_half_div;
 	u32 lcd_div;
 
@@ -306,11 +383,12 @@ static void set_clock_divider(struct dovefb_layer_info *dfli,
 	do_div(div_result, m->pixclock);
 	needed_pixclk = (u32)div_result;
 
-	calc_best_clock_div(needed_pixclk, dmi->lcd_ref_clk, &m_div, &n_div,
-			&full_div, &is_half_div, &lcd_div);
+	calc_best_clock_div(info, needed_pixclk, dmi->lcd_ref_clk, &m_div, &n_div,
+			&k_div, &full_div, &is_half_div, &lcd_div);
 
 	printk(KERN_INFO "needed_pixclk = %d.\n", needed_pixclk);
-	set_lcd_clock_dividers(dfli, dmi->lcd_ref_clk, m_div, n_div, full_div, is_half_div);
+	set_lcd_clock_dividers(dfli, dmi->lcd_ref_clk, m_div, n_div, k_div, full_div, is_half_div);
+	printk(KERN_INFO "LCD-Div = %d.\n", lcd_div);
 
 	/*
 	 * Set setting to reg.
@@ -327,6 +405,7 @@ static void set_clock_divider(struct dovefb_layer_info *dfli,
 static void set_dma_control0(struct dovefb_layer_info *dfli)
 {
 	u32 x, x_bk;
+	struct fb_var_screeninfo *var = &dfli->fb_info->var;
 
 	/*
 	 * Set bit to enable graphics DMA.
@@ -370,6 +449,17 @@ static void set_dma_control0(struct dovefb_layer_info *dfli)
 	x &= ~(1 << 12);
 	x |= ((dfli->pix_fmt & 1) ^ (dfli->info->panel_rbswap)) << 12;
 
+	/*
+	 * Enable toogle to generate interlace mode.
+	 */
+	if (FB_VMODE_INTERLACED & var->vmode) {
+		x |= CFG_GRA_FTOGGLE_MASK;
+		dfli->reserved |= 0x1;
+	} else {
+		x &= ~CFG_GRA_FTOGGLE_MASK;
+		dfli->reserved &= ~0x1;
+	}
+
 	if (x != x_bk)
 		writel(x, dfli->reg_base + LCD_SPU_DMA_CTRL0);
 }
@@ -392,8 +482,6 @@ static void set_dma_control1(struct dovefb_layer_info *dfli, int sync)
 	if (!(sync & FB_SYNC_VERT_HIGH_ACT))
 		x |= 0x08000000;
 
-	x &= ~(0x300000);
-
 	if (x != x_bk)
 		writel(x, dfli->reg_base + LCD_SPU_DMA_CTRL1);
 }
@@ -403,42 +491,25 @@ static int wait_for_vsync(struct dovefb_layer_info *dfli)
 	if (dfli) {
 		u32 irq_ena = readl(dfli->reg_base + SPU_IRQ_ENA);
 		int rc = 0;
+		unsigned int mask = DOVEFB_GFX_INT_MASK | DOVEFB_VSYNC_INT_MASK;
 
-		writel(irq_ena | DOVEFB_GFX_INT_MASK | DOVEFB_VSYNC_INT_MASK, 
-		       dfli->reg_base + SPU_IRQ_ENA);
+		writel(irq_ena | mask, dfli->reg_base + SPU_IRQ_ENA);
 
 		rc = wait_event_interruptible_timeout(dfli->w_intr_wq,
 						      atomic_read(&dfli->w_intr), 4);
-		if ( rc < 0)
-			printk(KERN_ERR "%s: gfx wait for vsync timed out, rc %d\n",
+		if ( rc < 0) {
+			u32 irq_isr = readl(dfli->reg_base + SPU_IRQ_ISR);
+			if ((irq_isr & mask) != 0)
+				printk(KERN_WARNING "%s: gfx wait for vsync"
+				" timed out, rc %d\n",
 				__func__, rc);
+		}
 
 		writel(irq_ena,
 		       dfli->reg_base + SPU_IRQ_ENA);
 		atomic_set(&dfli->w_intr, 0);
 		return 0;
 	}
-
-	return 0;
-}
-
-static void set_graphics_start(struct fb_info *fi, int xoffset, int yoffset)
-{
-	struct dovefb_layer_info *dfli = fi->par;
-	struct fb_var_screeninfo *var = &fi->var;
-	int pixel_offset;
-	unsigned long addr;
-
-	pixel_offset = (yoffset * var->xres_virtual) + xoffset;
-	addr = dfli->fb_start_dma + (pixel_offset * (var->bits_per_pixel >> 3));
-	writel(addr, dfli->reg_base + LCD_CFG_GRA_START_ADDR0);
-}
-
-static int dovefb_pan_display(struct fb_var_screeninfo *var,
-    struct fb_info *fi)
-{
-	wait_for_vsync(fi->par);
-	set_graphics_start(fi, var->xoffset, var->yoffset);
 
 	return 0;
 }
@@ -486,38 +557,221 @@ static void set_dumb_panel_control(struct fb_info *fi, int gpio_only)
 		writel(x, dfli->reg_base + LCD_SPU_DUMB_CTRL);
 }
 
-static void set_dumb_screen_dimensions(struct fb_info *fi)
+static void set_graphics_start(struct fb_info *fi, int xoffset, int yoffset)
 {
 	struct dovefb_layer_info *dfli = fi->par;
-	struct fb_var_screeninfo *v = &fi->var;
-	struct dovefb_info *info = dfli->info;
-	struct fb_videomode	 *ov = &info->out_vmode;
-	int x;
-	int y;
-	u32 reg, reg_bk;
+	struct fb_var_screeninfo *var = &fi->var;
+	int pixel_offset0, pixel_offset1;
+	unsigned long addr0, addr1, x;
 
-	reg_bk = readl(dfli->reg_base + LCD_SPUT_V_H_TOTAL);
+	pixel_offset0 = (yoffset * var->xres_virtual) + xoffset;
+	addr0 = dfli->fb_start_dma +
+		(pixel_offset0 * (var->bits_per_pixel >> 3));
+	/*
+	 * Configure interlace mode.
+	 */
+	if ( FB_VMODE_INTERLACED & var->vmode) {
+		/*
+		 * Calc offset. (double offset).
+		 * frame0 point to odd line,
+		 * frame1 point to even line.
+		 */
+		pixel_offset1 = pixel_offset0 + var->xres_virtual;
+		addr1 = dfli->fb_start_dma +
+			(pixel_offset1 * (var->bits_per_pixel >> 3));
 
-	if (info->fixed_output) {
-		x = ov->xres + ov->right_margin + ov->hsync_len +
-			ov->left_margin;
-		y = ov->yres + ov->lower_margin + ov->vsync_len +
-			ov->upper_margin;
+		/*
+		 * Calc Pitch. (double pitch length)
+		 */
+		x = readl(dfli->reg_base + LCD_CFG_GRA_PITCH);
+		x = (x & ~0xFFFF) | ((var->xres_virtual * var->bits_per_pixel) >> 2);
+
 	} else {
-		x = v->xres + v->right_margin + v->hsync_len + v->left_margin;
-		y = v->yres + v->lower_margin + v->vsync_len + v->upper_margin;
+		/*
+		 * Calc offset.
+		 */
+		addr1 = addr0;
+
+		/*
+		 * Calc Pitch.
+		 */
+		x = readl(dfli->reg_base + LCD_CFG_GRA_PITCH);
+		x = (x & ~0xFFFF) | ((var->xres_virtual * var->bits_per_pixel) >> 3);
 	}
 
-	reg = (y << 16)|x;
+	writel(addr0, dfli->reg_base + LCD_CFG_GRA_START_ADDR0);
+	writel(addr1, dfli->reg_base + LCD_CFG_GRA_START_ADDR1);
+	writel(x, dfli->reg_base + LCD_CFG_GRA_PITCH);
+}
+
+static int set_frame_timings(const struct dovefb_layer_info *dfli,
+	const struct fb_var_screeninfo *var)
+{
+	struct dovefb_info *info = dfli->info;
+	unsigned int active_w, active_h;
+	unsigned int ow, oh;
+	unsigned int zoomed_w, zoomed_h;
+	unsigned int lem, rim, lom, upm, hs, vs;
+	unsigned int x;
+	int total_w, total_h;
+	unsigned int reg, reg_bk;
+
+	/*
+	 * Calc active size, zoomed size, porch.
+	 */
+	if (info->fixed_output) {
+		active_w = info->out_vmode.xres;
+		active_h = info->out_vmode.yres;
+		zoomed_w = info->out_vmode.xres;
+		zoomed_h = info->out_vmode.yres;
+		lem = info->out_vmode.left_margin;
+		rim = info->out_vmode.right_margin;
+		upm = info->out_vmode.upper_margin;
+		lom = info->out_vmode.lower_margin;
+		hs = info->out_vmode.hsync_len;
+		vs = info->out_vmode.vsync_len;
+	} else {
+		active_w = var->xres;
+		active_h = var->yres;
+		zoomed_w = var->xres;
+		zoomed_h = var->yres;
+		lem = var->left_margin;
+		rim = var->right_margin;
+		upm = var->upper_margin;
+		lom = var->lower_margin;
+		hs = var->hsync_len;
+		vs = var->vsync_len;
+	}
+
+	/*
+	 * Calc original size.
+	 */
+	ow = var->xres;
+	oh = var->yres;
+
+	/* interlaced workaround */
+	if (FB_VMODE_INTERLACED & var->vmode) {
+		active_h /= 2;
+		zoomed_h /= 2;
+		oh /= 2;
+	}
+
+	/* calc total width and height.*/
+	total_w = active_w + rim + hs + lem;
+	total_h = active_h + lom + vs + upm;
+
+	/*
+	 * Apply setting to registers.
+	 */
+	writel((active_h << 16) | active_w,
+		dfli->reg_base + LCD_SPU_V_H_ACTIVE);
+
+	writel((oh << 16) | ow,
+		dfli->reg_base + LCD_SPU_GRA_HPXL_VLN);
+
+	writel((zoomed_h << 16) | zoomed_w,
+		dfli->reg_base + LCD_SPU_GZM_HPXL_VLN);
+
+	writel((lem << 16) | rim, dfli->reg_base + LCD_SPU_H_PORCH);
+	writel((upm << 16) | lom, dfli->reg_base + LCD_SPU_V_PORCH);
+
+	reg_bk = readl(dfli->reg_base + LCD_SPUT_V_H_TOTAL);
+	reg = (total_h << 16)|total_w;
 
 	if (reg != reg_bk)
-		writel((y << 16) | x, dfli->reg_base + LCD_SPUT_V_H_TOTAL);
+		writel(reg, dfli->reg_base + LCD_SPUT_V_H_TOTAL);
+	/*
+	 * Configure vsync adjust logic
+	 */
+	x = readl(dfli->reg_base+LCD_SPU_ADV_REG);
+	x &= ~((0x1 << 12) | (0xfff << 20) | 0xfff);
+	x |=	(0x1 << 12) | (active_w+rim) << 20 | (active_w+rim);
+	writel( x, dfli->reg_base+LCD_SPU_ADV_REG);
+
+	return 0;
+}
+
+/*
+ * fake edid is for all LCD default support modes.
+ * [Supported Mode]                     [from which spec]
+ * ------------------------------------------------------
+ * 1. Supported established timings:
+ *     640x480  @60Hz                   (Industry Standard)
+ *     800x600  @56Hz                   (VESA Guidlines)
+ *     800x600  @60Hz                   (VESA Guidlines)
+ *     1024x768 @60Hz                   (VESA Guidlines)
+ *     1280x1024@75Hz                   (VESA Standard)
+ * 2. Supported standard timings:
+ *     1600x1200@60Hz                   (VESA Standard)
+ *     1280x1024@60Hz                   (VESA Standard)
+ *     1280x960 @60Hz                   (VESA Standard)
+ *     1280x800 @60Hz                   (Reduced Blanking)
+ *     1280x720 @60Hz                   (CEA-861)
+ *     1680x1050@60Hz                   (Reduced Blanking)
+ *     1152x864 @60Hz                   (Reduced Blanking)
+ *     1440x900 @60Hz                   (Reduced Blanking)
+ * 3. Supported detailed timing:
+ *     1920x1200@60Hz pixclk 154.0MHz   (Reduced Blanking)
+ *     1920x1080@60Hz pixclk 148.5MHz   (CEA-861)
+ *     1366x768 @60Hz pixclk  85.8MHz   (VESA standard)
+ *     1280x768 @60Hz pixclk  68.2MHz   (Reduced Blanking)
+ * 4. Detailed timing from extension:
+ *     1024x600 @60Hz pixclk  44.64MHz  (MRVL specified)
+ */
+static u8 fake_edid[] = {
+	0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x36, 0xCC, 0x10, 0x05, 0x01, 0x00, 0x00, 0x00,
+	0x1E, 0x14, 0x01, 0x03, 0x80, 0x34, 0x20, 0x78, 0x22, 0xFE, 0x25, 0xA8, 0x53, 0x37, 0xAE, 0x24,
+	0x11, 0x50, 0x54, 0x23, 0x09, 0x00, 0xA9, 0x40, 0x81, 0x80, 0x81, 0x40, 0x81, 0x00, 0x81, 0xC0,
+	0xB3, 0x00, 0x71, 0x40, 0x95, 0x00, 0x28, 0x3C, 0x80, 0xA0, 0x70, 0xB0, 0x23, 0x40, 0x30, 0x20,
+	0x36, 0x00, 0x06, 0x44, 0x21, 0x00, 0x00, 0x1A, 0x02, 0x3A, 0x80, 0x18, 0x71, 0x38, 0x2D, 0x40,
+	0x58, 0x2C, 0x45, 0x00, 0x06, 0x24, 0x21, 0x00, 0x00, 0x1A, 0x7F, 0x21, 0x56, 0xAA, 0x51, 0x00,
+	0x1E, 0x30, 0x46, 0x8F, 0x33, 0x00, 0x71, 0xD0, 0x10, 0x00, 0x00, 0x1A, 0xA9, 0x1A, 0x00, 0xA0,
+	0x50, 0x00, 0x16, 0x30, 0x30, 0x20, 0x37, 0x00, 0x5A, 0xD0, 0x10, 0x00, 0x00, 0x1A, 0x01, 0x2B,
+	/* extended block 1. */
+	0x02, 0x01, 0x04, 0x00, 0x70, 0x11, 0x00, 0xB0, 0x40, 0x58, 0x14, 0x20, 0x26, 0x64, 0x84, 0x00,
+	0x2C, 0xDE, 0x10, 0x00, 0x00, 0x1A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA5,
+};
+
+static u8 *make_fake_edid(void)
+{
+	u8 *edid_block;
+	u32 edid_size;
+
+	edid_size = EDID_LENGTH * (1 + fake_edid[0x7e]);
+	edid_block = kmalloc(edid_size, GFP_KERNEL);
+
+	if (!edid_block)
+		return edid_block;
+
+	memcpy(edid_block, fake_edid, edid_size);
+
+	return edid_block;
+}
+
+static u8 *make_analog_fake_edid(void)
+{
+	u8 *edid_block;
+
+	edid_block = make_fake_edid();
+
+	/* change analog input field.*/
+	if (edid_block) {
+		edid_block[20] = 0x06; /* Analog signal features. */
+		edid_block[127] = 0xA5; /* Checksum */
+	}
+
+	return edid_block;
 }
 
 static int dovefb_gfx_set_par(struct fb_info *fi)
 {
 	struct dovefb_layer_info *dfli = fi->par;
-	struct dovefb_info *info = dfli->info;
 	struct fb_var_screeninfo *var = &fi->var;
 	const struct fb_videomode *m = 0;
 	struct fb_videomode mode;
@@ -531,8 +785,11 @@ static int dovefb_gfx_set_par(struct fb_info *fi)
 	 * Determine which pixel format we're going to use.
 	 */
 	pix_fmt = dovefb_determine_best_pix_fmt(&fi->var, dfli);
-	if (pix_fmt < 0)
+	if (pix_fmt < 0) {
+		printk(KERN_ERR "Unsupported pixel format\n");
 		return pix_fmt;
+	}
+
 	dfli->pix_fmt = pix_fmt;
 
 	/*
@@ -554,15 +811,9 @@ static int dovefb_gfx_set_par(struct fb_info *fi)
 		wait_for_vsync(dfli);
 
 	/*
-	 * Configure global panel parameters.
+	 * Configure frame timings.
 	 */
-	if (info->fixed_output) {
-		writel((info->out_vmode.yres << 16) | info->out_vmode.xres,
-			dfli->reg_base + LCD_SPU_V_H_ACTIVE);
-	} else {
-		writel((var->yres << 16) | var->xres,
-			dfli->reg_base + LCD_SPU_V_H_ACTIVE);
-	}
+	set_frame_timings(dfli, var);
 
 	/*
 	 * convet var to video mode
@@ -582,40 +833,10 @@ static int dovefb_gfx_set_par(struct fb_info *fi)
 	 */
 	set_graphics_start(fi, fi->var.xoffset, fi->var.yoffset);
 
-	x = readl(dfli->reg_base + LCD_CFG_GRA_PITCH);
-	x = (x & ~0xFFFF) | ((var->xres_virtual * var->bits_per_pixel) >> 3);
-	writel(x, dfli->reg_base + LCD_CFG_GRA_PITCH);
-
-	writel((var->yres << 16) | (var->xres),
-		dfli->reg_base + LCD_SPU_GRA_HPXL_VLN);
-
-	if (info->fixed_output) {
-		writel((info->out_vmode.yres << 16) | info->out_vmode.xres,
-				dfli->reg_base + LCD_SPU_GZM_HPXL_VLN);
-	}
-	else
-		writel((var->yres << 16) | var->xres,
-				dfli->reg_base + LCD_SPU_GZM_HPXL_VLN);
-
 	/*
 	 * Configure dumb panel ctrl regs & timings.
 	 */
 	set_dumb_panel_control(fi, 0);
-	set_dumb_screen_dimensions(fi);
-
-	if (info->fixed_output) {
-		writel((info->out_vmode.left_margin << 16) |
-				info->out_vmode.right_margin,
-				dfli->reg_base + LCD_SPU_H_PORCH);
-		writel((info->out_vmode.upper_margin << 16) |
-				info->out_vmode.lower_margin,
-				dfli->reg_base + LCD_SPU_V_PORCH);
-	} else {
-		writel((var->left_margin << 16) | var->right_margin,
-				dfli->reg_base + LCD_SPU_H_PORCH);
-		writel((var->upper_margin << 16) | var->lower_margin,
-				dfli->reg_base + LCD_SPU_V_PORCH);
-	}
 
 	/*
 	 * Re-enable panel output.
@@ -633,7 +854,7 @@ static int dovefb_gfx_set_par(struct fb_info *fi)
 			info.oformat = CH7025_NTSC_M;
 			info.swap = CH7025_RGB_ORDER;
 
-			printk(KERN_INFO "video ch7025 enable.......\n");
+			//printk(KERN_INFO "video ch7025 enable.......\n");
 			ch7025_set_input_stream(&info);
 			ch7025_enable(1);
 		}
@@ -645,6 +866,8 @@ static int dovefb_gfx_set_par(struct fb_info *fi)
 
 		if (strstr(fi->fix.id, "GFX Layer 0"))
 		{
+			//printk(KERN_INFO "dovefb_gfx: Change kg2 input timing\n");
+
 			kg2_timing_param.HTotal = var->left_margin + var->xres + var->right_margin + var->hsync_len;
 			kg2_timing_param.HActive = var->xres;
 			kg2_timing_param.HFrontPorch = var->right_margin;
@@ -655,6 +878,9 @@ static int dovefb_gfx_set_par(struct fb_info *fi)
 			kg2_timing_param.VFrontPorch = var->lower_margin;
 			kg2_timing_param.VSyncWidth = var->vsync_len;
 			kg2_timing_param.VPolarity = (var->sync & FB_SYNC_VERT_HIGH_ACT) ? 0: 1;
+			kg2_timing_param.AspRatio = (var->xres * 100 / var->yres >= 160) ? AVC_CMD_ASP_RATIO_16_9: AVC_CMD_ASP_RATIO_4_3;
+			kg2_timing_param.IsProgressive = 1;
+			kg2_timing_param.RefRate = mode.refresh;
 
 			kg2_set_input_timing(&kg2_timing_param);
 		}
@@ -664,6 +890,16 @@ static int dovefb_gfx_set_par(struct fb_info *fi)
 	return 0;
 }
 
+static int dovefb_pan_display(struct fb_var_screeninfo *var,
+    struct fb_info *fi)
+{
+	wait_for_vsync(fi->par);
+	set_graphics_start(fi, var->xoffset, var->yoffset);
+
+	return 0;
+}
+
+#ifdef CONFIG_PM
 static int dovefb_pwr_off_sram(struct dovefb_layer_info *dfli)
 {
 	unsigned int x;
@@ -693,19 +929,39 @@ static int dovefb_pwr_on_sram(struct dovefb_layer_info *dfli)
 
 	return 0;
 }
+#endif
 
 static int dovefb_blank(int blank, struct fb_info *fi)
 {
 	struct dovefb_layer_info *dfli = fi->par;
+	u32 reg;
 
 	dfli->is_blanked = (blank == FB_BLANK_UNBLANK) ? 0 : 1;
 	set_dumb_panel_control(fi, 0);
 
-	if (blank == FB_BLANK_UNBLANK) {
-		dovefb_pwr_on_sram(dfli);
-	} else {
-		dovefb_pwr_off_sram(dfli);
+	/*
+	 * Fix me: Currently, hardware won't generate video layer
+	 * IRQ or VSync IRQ if diable dumb LCD panel. However, if
+	 * we are playing movies and enter blank mode, video player
+	 * still decode frame to video driver and we can't handle
+	 * those frame data without IRQ events.
+	 * We create a timer to check video buffer and handle those
+	 * frame data to make a workaround version.
+	 */
+	reg = readl(dfli->reg_base + LCD_SPU_DMA_CTRL0) & 0x01;
+	if (reg && dfli->is_blanked && !dfli->checkbuf_timer_exist) {
+		add_timer(&checkbuf_timer);
+		dfli->checkbuf_timer_exist = 1;
 	}
+	if (!dfli->is_blanked && dfli->checkbuf_timer_exist) {
+		del_timer_sync(&checkbuf_timer);
+		dfli->checkbuf_timer_exist = 0;
+	}
+
+	if (dfli->is_blanked)
+		clk_disable(dfli->info->clk);
+	else
+		clk_enable(dfli->info->clk);
 
 	return 0;
 }
@@ -838,12 +1094,31 @@ static int dovefb_fb_sync(struct fb_info *info)
 	return 0; /*wait_for_vsync(dfli);*/
 }
 
-
 /*
  *  dovefb_handle_irq(two lcd controllers)
  */
 int dovefb_gfx_handle_irq(u32 isr, struct dovefb_layer_info *dfli)
 {
+	if (0x1 & dfli->reserved) {
+		unsigned int vs_adj, x;
+		unsigned int active_w, h_fp;
+
+		active_w = 0xffff & readl(dfli->reg_base + LCD_SPU_V_H_ACTIVE);
+		h_fp = 0xffff & readl(dfli->reg_base + LCD_SPU_H_PORCH);
+
+		/* interlace mode workaround. */
+		if (GRA_FRAME_IRQ0_ENA_MASK & isr) {
+			vs_adj = active_w + h_fp;
+		} else {
+			vs_adj = (active_w/2) + h_fp;
+		}
+
+		x = readl(dfli->reg_base+LCD_SPU_ADV_REG);
+		x &= ~((0x1 << 12) | (0xfff << 20) | 0xfff);
+		x |= (0x1 << 12) | (vs_adj << 20) | vs_adj;
+		writel( x, dfli->reg_base+LCD_SPU_ADV_REG);
+	}
+
 	/* wake up queue. */
 	atomic_set(&dfli->w_intr, 1);
 	wake_up(&dfli->w_intr_wq);
@@ -987,6 +1262,28 @@ static int dovefb_gfx_ioctl(struct fb_info *info, unsigned int cmd,
 	case DOVEFB_IOCTL_DUMP_REGS:
 		dovefb_dump_regs(dfli->info);
 		break;
+	case DOVEFB_IOCTL_GET_EDID_INFO:
+		if (copy_to_user(argp, &dfli->edid_info,
+					sizeof(struct _sEdidInfo)))
+			return -EFAULT;
+		dfli->edid_info.change = 0;
+		break;
+	case DOVEFB_IOCTL_GET_EDID_DATA:
+		if (dfli->raw_edid != NULL) {
+			if (copy_to_user(argp, dfli->raw_edid, EDID_LENGTH *
+					 (dfli->edid_info.extension + 1)))
+				return -EFAULT;
+		}
+		break;
+	case DOVEFB_IOCTL_SET_EDID_INTERVAL:
+		if (!dfli->ddc_polling_disable) {
+			dfli->edid_info.interval = (arg > 0) ? arg :
+				DEFAULT_EDID_INTERVAL;
+			mod_timer(&dfli->get_edid_timer, jiffies +
+				  dfli->edid_info.interval * HZ);
+		}
+		break;
+
 	default:
 		;
 	}
@@ -994,33 +1291,136 @@ static int dovefb_gfx_ioctl(struct fb_info *info, unsigned int cmd,
 	return 0;
 }
 
+static bool dovefb_edid_block_valid(u8 *raw_edid)
+{
+        int i;
+
+	if (raw_edid[0] == 0x00)
+		for (i = 0; i < sizeof(edid_header); i++)
+			if (raw_edid[i] != edid_header[i])
+				return 0;
+
+	return 1;
+}
+
+static int dovefb_do_probe_ddc_edid(struct i2c_adapter *adapter, int address,
+			unsigned char *buf, int block, int len)
+{
+        unsigned char start = block * EDID_LENGTH;
+        struct i2c_msg msgs[] = {
+                {
+                        .addr   = address,
+                        .flags  = 0,
+                        .len    = 1,
+                        .buf    = &start,
+                }, {
+                        .addr   = address,
+                        .flags  = I2C_M_RD,
+                        .len    = len,
+                        .buf    = buf + start,
+                }
+        };
+
+	if (adapter->algo->master_xfer) {
+		if (i2c_transfer(adapter, msgs, 2) == 2)
+			return 0;
+	} else {
+		int i;
+		if (0 != i2c_smbus_xfer(adapter, msgs[0].addr, msgs[0].flags,
+					I2C_SMBUS_READ, 0, I2C_SMBUS_BYTE_DATA,
+					(union i2c_smbus_data *)buf)) {
+			printk(KERN_WARNING "%s: failed for address 0\n",
+			       __func__);
+			return -1;
+		}
+		for (i = 0; i < EDID_LENGTH; i++) {
+			if (0 != i2c_smbus_xfer(adapter, msgs[1].addr, 0,
+					I2C_SMBUS_READ, i, I2C_SMBUS_BYTE_DATA,
+					(union i2c_smbus_data *)(buf + i))) {
+				printk(KERN_WARNING "%s: failed for address %d\n",
+				       __func__, i);
+				return -1;
+			}
+
+		}
+		return 0;
+	}
+
+        return -1;
+}
+
+static u8 *dovefb_get_edid(struct i2c_adapter *adapter, int address)
+{
+        int i, j = 0;
+        u8 *block, *new;
+
+        if ((block = kmalloc(EDID_LENGTH, GFP_KERNEL)) == NULL)
+                return NULL;
+
+        /* base block fetch */
+        for (i = 0; i < 4; i++) {
+                if (dovefb_do_probe_ddc_edid(adapter, address, block, 0, EDID_LENGTH))
+                        goto out;
+                if (dovefb_edid_block_valid(block))
+                        break;
+        }
+        if (i == 4)
+                goto carp;
+
+        /* if there's no extensions, we're done */
+        if (block[0x7e] == 0)
+                return block;
+
+        new = krealloc(block, (block[0x7e] + 1) * EDID_LENGTH, GFP_KERNEL);
+        if (!new)
+                goto out;
+        block = new;
+
+        for (j = 1; j <= block[0x7e]; j++) {
+                for (i = 0; i < 4; i++) {
+                        if (dovefb_do_probe_ddc_edid(adapter, address, block, j,
+                                                  EDID_LENGTH))
+                                goto out;
+                        if (dovefb_edid_block_valid(block + j * EDID_LENGTH))
+                                break;
+                }
+                if (i == 4)
+                        goto carp;
+        }
+
+        return block;
+
+carp:
+	//printk(KERN_ERR " EDID block %d invalid.\n", j);
+
+out:
+        kfree(block);
+        return NULL;
+}
+
 static u8 *dove_read_edid(struct fb_info *fi, struct dovefb_mach_info *dmi)
 {
 #ifdef CONFIG_FB_DOVE_CLCD_EDID
 	struct i2c_adapter *dove_i2c;
-	struct dovefb_layer_info *dfli = fi->par;
-	struct dovefb_info *info = dfli->info;
 #endif
 	char *edid_data = NULL;
 	if (-1 == dmi->ddc_i2c_adapter)
 		return edid_data;
 
 #ifdef CONFIG_FB_DOVE_CLCD_EDID
-	if (info->edid_en) {
 	dove_i2c = i2c_get_adapter(dmi->ddc_i2c_adapter);
 	/*
 	 * Check match or not.
 	 */
-		if (dove_i2c)
-			printk(KERN_INFO "  o Found i2c adapter for EDID detection\n");
-		else {
+	if (dove_i2c){
+		//printk(KERN_INFO "  o Found i2c adapter for EDID detection\n");
+	} else {
 		printk(KERN_WARNING "Couldn't find any I2C bus for EDID"
 		       " provider\n");
 		return NULL;
 	}
 	/* Look for EDID data on the selected bus */
-		edid_data = fb_ddc_read(dove_i2c);
-	}
+	edid_data = dovefb_get_edid(dove_i2c,dmi->ddc_i2c_address);
 #endif
 	return edid_data;
 }
@@ -1066,16 +1466,16 @@ static int dovefb_fill_edid(struct fb_info *fi,
 		} else {
 			ret = -2;
 		}
+		if (dfli->raw_edid) kfree(dfli->raw_edid);
+		dfli->raw_edid = edid;
 	}
 
-	kfree(edid);
 	return ret;
 }
 
-
 static void dovefb_set_defaults(struct dovefb_layer_info *dfli)
 {
-	u32 reg;
+	unsigned int x;
 
 	writel(0x80000001, dfli->reg_base + LCD_CFG_SCLK_DIV);
 	writel(0x00000000, dfli->reg_base + LCD_SPU_BLANKCOLOR);
@@ -1090,9 +1490,30 @@ static void dovefb_set_defaults(struct dovefb_layer_info *dfli)
 	writel(CFG_CSB_256x32(0x1)|CFG_CSB_256x24(0x1)|CFG_CSB_256x8(0x1),
 		dfli->reg_base + LCD_SPU_SRAM_PARA1);
 	writel(0x2032FF81, dfli->reg_base + LCD_SPU_DMA_CTRL1);
-	reg = readl(dfli->reg_base + LCD_GENERAL_CFG);
-	reg &= ~(1 << 8);
-	writel(reg, dfli->reg_base + LCD_GENERAL_CFG);
+
+	/*
+	 * Fix me: to avoid jiggling issue for high resolution in
+	 * dual display, we set watermark to affect LCD AXI read
+	 * from MC (default 0x80). Lower watermark means LCD will
+	 * do DMA read more often.
+	 */
+	x = readl(dfli->reg_base + LCD_CFG_RDREG4F);
+	/* watermark */
+	x &= ~0xFF;
+	x |= 0x20;
+	/* Disable LCD SRAM Read Wait State to resolve HWC32 make
+	 * system hang while use external clock.
+	 */
+	x &= ~(1<<11);
+	writel(x, dfli->reg_base + LCD_CFG_RDREG4F);
+
+#if defined(CONFIG_ARCH_FEROCEON_KW) || defined(CONFIG_ARCH_ARMADA_XP)
+	x = readl(dfli->reg_base + SPU_IOPAD_CONTROL);
+	x &= ~CFG_AXICTRL_MASK;
+	x |= CFG_AXICTRL(12);
+	writel(x, dfli->reg_base + SPU_IOPAD_CONTROL);
+#endif
+
 	return;
 }
 
@@ -1185,11 +1606,13 @@ static int dovefb_init_mode(struct fb_info *fi,
 	/*
 	 * Fill up mode data to modelist.
 	 */
-	if (dovefb_fill_edid(fi, dmi))
+	dfli->raw_edid = NULL;
+	if (dovefb_fill_edid(fi, dmi)) {
 		fb_videomode_to_modelist(dmi->modes,
 					dmi->num_modes,
 					&fi->modelist);
-
+		dfli->raw_edid = make_fake_edid();
+	}
 	/*
 	 * Print all video mode in current mode list.
 	 */
@@ -1280,11 +1703,10 @@ int dovefb_gfx_suspend(struct dovefb_layer_info *dfli, pm_message_t mesg)
 	printk(KERN_INFO "dovefb_gfx: save resolution: <%dx%d>\n",
 		var->xres, var->yres);
 
-	init_ext_divider = 0;
-
 	if (mesg.event & PM_EVENT_SLEEP) {
 		fb_set_suspend(fi, 1);
 		dovefb_blank(FB_BLANK_POWERDOWN, fi);
+		dovefb_pwr_off_sram(dfli);
 	}
 
 	return 0;
@@ -1303,6 +1725,7 @@ int dovefb_gfx_resume(struct dovefb_layer_info *dfli)
 	dovefb_set_defaults(dfli);
 	dfli->active = 1;
 
+	dovefb_pwr_on_sram(dfli);
 	if (dovefb_gfx_set_par(fi) != 0) {
 		printk(KERN_INFO "dovefb_gfx_resume(): Failed in "
 				"dovefb_gfx_set_par().\n");
@@ -1315,6 +1738,79 @@ int dovefb_gfx_resume(struct dovefb_layer_info *dfli)
 	return 0;
 }
 #endif
+
+static void dynamic_get_edid(unsigned long data)
+{
+	struct dovefb_layer_info *dfli = (struct dovefb_layer_info *) data;
+
+	mod_timer(&dfli->get_edid_timer, jiffies + dfli->edid_info.interval * HZ);
+	schedule_work(&dfli->work_queue);
+}
+
+static bool is_new_edid(u8* new_edid, struct dovefb_layer_info *dfli)
+{
+	/*
+	 * check if EDID menufactor information is the same.
+	 */
+	int i;
+	if (!dfli->raw_edid) return true;
+
+	for (i = ID_MANUFACTURER_NAME; i < EDID_STRUCT_REVISION; i++) {
+		if ( *(new_edid + i) != *(dfli->raw_edid + i)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static void get_edid_work(struct work_struct *work)
+{
+	struct dovefb_layer_info *dfli =
+		container_of(work, struct dovefb_layer_info, work_queue);
+	struct fb_info *fi = dfli->fb_info;
+	struct dovefb_mach_info *dmi = dfli->dev->platform_data;
+	char* edid_data = NULL;
+
+	edid_data = dove_read_edid(fi, dmi);
+
+	if (edid_data) {
+		if (is_new_edid(edid_data, dfli)) {
+			if (dfli->raw_edid) kfree(dfli->raw_edid);
+			dfli->raw_edid = edid_data;
+			dfli->edid_info.connect = 1;
+			dfli->edid_info.change = 1;
+			dfli->edid_info.extension = dfli->raw_edid[0x7e];
+		} else {
+			if (!dfli->edid_info.connect) {
+				dfli->edid_info.connect = 1;
+				dfli->edid_info.change = 1;
+				dfli->edid_info.extension = dfli->raw_edid[0x7e];
+			}
+			kfree(edid_data);
+		}
+	} else {
+		if (strstr(fi->fix.id, "GFX Layer 0")) {
+			if (dfli->edid_info.connect != 2){
+				if (!dfli->raw_edid) kfree(dfli->raw_edid);
+				dfli->raw_edid = make_fake_edid();
+				dfli->edid_info.connect = 2;
+				dfli->edid_info.change = 1;
+				dfli->edid_info.extension =
+					dfli->raw_edid[0x7e];
+			}
+		} else if (strstr(fi->fix.id, "GFX Layer 1")) {
+			if (dfli->edid_info.connect != 2) {
+				if (!dfli->raw_edid)
+					kfree(dfli->raw_edid);
+				dfli->raw_edid = make_analog_fake_edid();
+				dfli->edid_info.connect = 2;
+				dfli->edid_info.change = 1;
+				dfli->edid_info.extension =
+					dfli->raw_edid[0x7e];
+			}
+		}
+	}
+}
 
 int dovefb_gfx_init(struct dovefb_info *info, struct dovefb_mach_info *dmi)
 {
@@ -1349,6 +1845,32 @@ int dovefb_gfx_init(struct dovefb_info *info, struct dovefb_mach_info *dmi)
 	ret = dovefb_gfx_set_par(fi);
 	if (ret)
 		goto failed;
+
+	/*
+	 * init EDID information
+	 */
+	dfli->edid_info.connect = 0;
+	dfli->edid_info.change = 0;
+	dfli->edid_info.extension = 0;
+	dfli->edid_info.interval = DEFAULT_EDID_INTERVAL;
+
+	/*
+	 * Initialize dynamic get edid timer
+	 */
+	dfli->ddc_polling_disable = dmi->ddc_polling_disable;
+	if(!dmi->ddc_polling_disable) {
+		init_timer(&dfli->get_edid_timer);
+		dfli->get_edid_timer.expires = jiffies + HZ;
+		dfli->get_edid_timer.data = (unsigned long)dfli;
+		dfli->get_edid_timer.function = dynamic_get_edid;
+		add_timer(&dfli->get_edid_timer);
+
+		INIT_WORK(&dfli->work_queue, get_edid_work);
+	} else {
+		dfli->edid_info.connect = 1;
+		dfli->edid_info.change = 1;
+		dfli->edid_info.extension = dfli->raw_edid[0x7e];
+	}
 
 	return 0;
 failed:

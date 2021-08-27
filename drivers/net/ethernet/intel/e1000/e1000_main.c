@@ -497,7 +497,11 @@ out:
 static void e1000_down_and_stop(struct e1000_adapter *adapter)
 {
 	set_bit(__E1000_DOWN, &adapter->flags);
+
+	/* Only kill reset task if adapter is not resetting */
+	if (!test_bit(__E1000_RESETTING, &adapter->flags))
 		cancel_work_sync(&adapter->reset_task);
+
 	cancel_delayed_work_sync(&adapter->watchdog_task);
 	cancel_delayed_work_sync(&adapter->phy_info_task);
 	cancel_delayed_work_sync(&adapter->fifo_stall_task);
@@ -732,6 +736,11 @@ static void e1000_dump_eeprom(struct e1000_adapter *adapter)
 	int i;
 	u16 csum_old, csum_new = 0;
 
+#ifdef CONFIG_ARCH_GEN3
+	if (adapter->hw.mac_type == e1000_ce4100)
+		eeprom.len = EEPROM_CE4100_FAKE_LENGTH;
+	else
+#endif
 	eeprom.len = ops->get_eeprom_len(netdev);
 	eeprom.offset = 0;
 
@@ -2430,10 +2439,31 @@ static void e1000_watchdog(struct work_struct *work)
 	struct e1000_tx_ring *txdr = adapter->tx_ring;
 	u32 link, tctl;
 
+#ifdef CONFIG_ARCH_GEN3
+	u16 link_up;
+	s32 ret_val;
+#endif
 	if (test_bit(__E1000_DOWN, &adapter->flags))
 		return;
 
 	mutex_lock(&adapter->mutex);
+#ifdef CONFIG_ARCH_GEN3
+   /*
+    * Test the PHY for link status on Intel CE SoC MAC.
+    * If the link status is different than the last link status stored
+    * in the adapter->hw structure, then set hw->get_link_status = 1
+    */
+	ret_val = e1000_read_phy_reg(&adapter->hw, PHY_STATUS, &link_up);
+	ret_val = e1000_read_phy_reg(&adapter->hw, PHY_STATUS, &link_up);
+    if (ret_val)
+		pr_info("Link status detection from PHY failed!\n");
+
+	link_up &= MII_SR_LINK_STATUS;
+	if(link_up != adapter->hw.cegbe_is_link_up)
+		adapter->hw.get_link_status = true;
+	else
+		adapter->hw.get_link_status = false;
+#endif
 	link = e1000_has_link(adapter);
 	if ((netif_carrier_ok(netdev)) && link)
 		goto link_up;

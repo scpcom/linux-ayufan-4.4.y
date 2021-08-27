@@ -791,6 +791,9 @@ void __init early_trap_init(void)
 	extern char __stubs_start[], __stubs_end[];
 	extern char __vectors_start[], __vectors_end[];
 	extern char __kuser_helper_start[], __kuser_helper_end[];
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARMADA_XP_A0_WITH_B0)
+	extern unsigned int soc_revision;
+#endif
 	int kuser_sz = __kuser_helper_end - __kuser_helper_start;
 
 	/*
@@ -801,6 +804,11 @@ void __init early_trap_init(void)
 	memcpy((void *)vectors, __vectors_start, __vectors_end - __vectors_start);
 	memcpy((void *)vectors + 0x200, __stubs_start, __stubs_end - __stubs_start);
 	memcpy((void *)vectors + 0x1000 - kuser_sz, __kuser_helper_start, kuser_sz);
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARMADA_XP_A0_WITH_B0)
+	*(unsigned int*)(vectors + 0x1000 - kuser_sz + 0x1C) = soc_revision;
+	*(unsigned int*)(vectors + 0x1000 - kuser_sz + 0x3C) = soc_revision;
+#endif
 
 	/*
 	 * Do processor specific fixups for the kuser helpers

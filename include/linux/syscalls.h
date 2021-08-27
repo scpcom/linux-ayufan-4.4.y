@@ -844,6 +844,12 @@ asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, si
 #endif
 #endif
 
+#ifdef CONFIG_SYNO_NOTIFY
+asmlinkage long sys_SYNONotifyInit(unsigned int event_f_flags);
+asmlinkage long sys_SYNONotifyAddWatch(int synotify_fd, const char  __user *pathname, u64 mask);
+asmlinkage long sys_SYNONotifyRemoveWatch(int synotify_fd, const char  __user *pathname, u64 mask);
+#endif /* CONFIG_SYNO_NOTIFY */
+
 asmlinkage long sys_perf_event_open(
 		struct perf_event_attr __user *attr_uptr,
 		pid_t pid, int cpu, int group_fd, unsigned long flags);

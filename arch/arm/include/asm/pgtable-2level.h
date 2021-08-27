@@ -71,13 +71,31 @@
  * until either the TLB entry is evicted under pressure, or a context
  * switch which changes the user space mapping occurs.
  */
+
+
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef CONFIG_MV_SUPPORT_64KB_PAGE_SIZE
+#define PTRS_PER_PTE           32      /* (512 / (64K / 4K)) */
+#define PTE_HWTABLE_PTRS       (512)
+#else
 #define PTRS_PER_PTE           512
+#define PTE_HWTABLE_PTRS       (PTRS_PER_PTE)
+#endif
+#else
+#define PTRS_PER_PTE		512
+#endif
+
 #define PTRS_PER_PMD		1
 #define PTRS_PER_PGD		2048
 
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+#define PTE_HWTABLE_OFF                (512 * sizeof(pte_t))
+#define PTE_HWTABLE_SIZE       (PTE_HWTABLE_PTRS * sizeof(u32))
+#else
 #define PTE_HWTABLE_PTRS	(PTRS_PER_PTE)
 #define PTE_HWTABLE_OFF		(PTE_HWTABLE_PTRS * sizeof(pte_t))
 #define PTE_HWTABLE_SIZE	(PTRS_PER_PTE * sizeof(u32))
+#endif
 
 /*
  * PMD_SHIFT determines the size of the area a second-level page table can map

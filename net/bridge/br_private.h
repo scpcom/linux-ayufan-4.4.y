@@ -77,6 +77,12 @@ struct net_bridge_fdb_entry
 	mac_addr			addr;
 	unsigned char			is_local;
 	unsigned char			is_static;
+
+#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+	bool 			nfp;
+#endif /* CONFIG_MV_ETH_NFP_FDB_LEARN */
+#endif
 };
 
 struct net_bridge_port_group {

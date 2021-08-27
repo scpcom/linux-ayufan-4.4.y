@@ -874,8 +874,6 @@ close_finish:
 #ifndef MY_ABC_HERE
 late_initcall(software_resume);
 
-#else
-EXPORT_SYMBOL(software_resume);
 #endif
 
 static const char * const hibernation_modes[] = {

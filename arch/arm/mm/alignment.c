@@ -951,6 +951,14 @@ do_alignment(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#ifdef CONFIG_ARM_LPAE
+#define ALIGNMENT_FAULT		33
+#else
+#define ALIGNMENT_FAULT		1
+#endif
+#endif
+
 /*
  * This needs to be done after sysctl_init, otherwise sys/ will be
  * overwritten.  Actually, this shouldn't be in sys/ at all since
@@ -969,13 +977,20 @@ static int __init alignment_init(void)
 #endif
 
 	if (cpu_is_v6_unaligned()) {
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ENABLE_UNALINGED_ACCESS_FAULT)
+#else
 		cr_alignment &= ~CR_A;
 		cr_no_alignment &= ~CR_A;
+#endif
 		set_cr(cr_alignment);
 		ai_usermode = safe_usermode(ai_usermode, false);
 	}
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	hook_fault_code(ALIGNMENT_FAULT, do_alignment, SIGBUS, BUS_ADRALN,
+#else
 	hook_fault_code(1, do_alignment, SIGBUS, BUS_ADRALN,
+#endif
 			"alignment exception");
 
 	/*

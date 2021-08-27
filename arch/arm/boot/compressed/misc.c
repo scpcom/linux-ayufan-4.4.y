@@ -82,7 +82,6 @@ static void icedcc_putc(int ch)
 #define putc(ch)	icedcc_putc(ch)
 #endif
 
-#ifndef CONFIG_ARCH_FEROCEON
 static void putstr(const char *ptr)
 {
 	char c;
@@ -95,7 +94,6 @@ static void putstr(const char *ptr)
 
 	flush();
 }
-#endif
 
 /*
  * gzip declarations

@@ -1053,7 +1053,10 @@ static int __init arch_hw_breakpoint_init(void)
 	register_cpu_notifier(&dbg_reset_nb);
 	return 0;
 }
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#else
 arch_initcall(arch_hw_breakpoint_init);
+#endif
 
 void hw_breakpoint_pmu_read(struct perf_event *bp)
 {

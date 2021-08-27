@@ -65,11 +65,20 @@ static void v6_clear_user_highpage_nonaliasing(struct page *page, unsigned long 
  */
 static void discard_old_kernel_data(void *kto)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+	unsigned long flags;
+
+	raw_local_irq_save(flags);
+	dmb();	
+#endif
 	__asm__("mcrr	p15, 0, %1, %0, c6	@ 0xec401f06"
 	   :
 	   : "r" (kto),
 	     "r" ((unsigned long)kto + PAGE_SIZE - L1_CACHE_BYTES)
 	   : "cc");
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+	raw_local_irq_restore(flags);
+#endif
 }
 
 /*

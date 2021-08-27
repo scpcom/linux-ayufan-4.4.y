@@ -503,7 +503,6 @@ static void dev_forward_change(struct inet6_dev *idev)
 	}
 }
 
-
 static void addrconf_forward_change(struct net *net, __s32 newf)
 {
 	struct net_device *dev;

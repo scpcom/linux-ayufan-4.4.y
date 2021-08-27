@@ -1035,10 +1035,19 @@ static int __init usb_init(void)
 	retval = usb_hub_init();
 	if (retval)
 		goto hub_init_failed;
+#if defined(CONFIG_USB_ETRON_HUB)
+	retval = ethub_init();
+	if (retval)
+		goto ethub_init_failed;
+#endif
 	retval = usb_register_device_driver(&usb_generic_driver, THIS_MODULE);
 	if (!retval)
 		goto out;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	ethub_cleanup();
+ethub_init_failed:
+#endif
 	usb_hub_cleanup();
 hub_init_failed:
 	usbfs_cleanup();

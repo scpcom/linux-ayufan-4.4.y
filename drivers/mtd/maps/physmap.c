@@ -220,7 +220,7 @@ static struct physmap_flash_data physmap_flash_data = {
 	.width		= CONFIG_MTD_PHYSMAP_BANKWIDTH,
 };
 
-#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON)
+#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON)  || defined(CONFIG_SYNO_ARMADA)
 struct resource physmap_flash_resource = {
 #else
 static struct resource physmap_flash_resource = {

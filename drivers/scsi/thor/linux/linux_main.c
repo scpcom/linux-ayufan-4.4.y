@@ -162,6 +162,89 @@ static void mv_shutdown(struct pci_dev *pdev)
 	mv_hba_stop(pdev);
 }
 #endif
+
+#ifdef CONFIG_PM
+
+extern struct mv_mod_desc *
+__get_lowest_module(struct mv_adp_desc *hba_desc);
+extern int core_suspend(void *ext);
+extern int core_resume(void *ext);
+//extern struct _cache_engine* gCache;;
+
+static int mv_suspend(struct pci_dev *pdev, pm_message_t state)
+{
+	struct hba_extension *ext;
+	struct mv_mod_desc *core_mod,*hba_mod = pci_get_drvdata(pdev);
+	struct mv_adp_desc *ioc = hba_mod->hba_desc;
+	int tmp;
+
+	MV_DPRINT(("start  mv_suspend.\n"));
+
+	ext = (struct hba_extension *)hba_mod->extension;
+	core_mod = __get_lowest_module(ioc);
+
+	core_suspend(core_mod->extension);
+
+	free_irq(ext->dev->irq,ext);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,11))
+	pci_save_state(pdev);
+#else
+	pci_save_state(pdev,ioc->pci_config_space);
+#endif
+	pci_disable_device(pdev);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,11))
+	pci_set_power_state(pdev,pci_choose_state(pdev,state));
+#else
+	pci_set_power_state(pdev,state);
+#endif
+
+	return 0;
+}
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
+extern irqreturn_t mv_intr_handler(int irq, void *dev_id, struct pt_regs *regs);
+#else
+extern irqreturn_t mv_intr_handler(int irq, void *dev_id);
+#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19) */
+
+static int mv_resume (struct pci_dev *pdev)
+{
+	int ret;
+	struct hba_extension *ext;
+	struct mv_mod_desc *core_mod,*hba_mod = pci_get_drvdata(pdev);
+	struct mv_adp_desc *ioc = hba_mod->hba_desc;
+
+	ext = (struct hba_extension *)hba_mod->extension;
+	core_mod = __get_lowest_module(ioc);
+	MV_DPRINT(("start  mv_resume.\n"));
+
+	pci_set_power_state(pdev, PCI_D0);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,11))
+	pci_enable_wake(pdev, PCI_D0, 0);
+	pci_restore_state(pdev);
+#else
+	pci_restore_state(pdev,ioc->pci_config_space);
+#endif
+	pci_set_master(pdev);
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 19)
+	ret = request_irq(ext->dev->irq, mv_intr_handler, IRQF_SHARED,
+			  mv_driver_name, ext);
+#else
+	ret = request_irq(ext->dev->irq, mv_intr_handler, SA_SHIRQ,
+			  mv_driver_name, ext);
+#endif
+	if (ret < 0) {
+	        MV_PRINT("request IRQ failed.\n");
+	        return -1;
+	}
+	if (core_resume(core_mod->extension)) {
+		MV_PRINT("mv_resume_core failed.\n");
+		return -1;
+	}
+
+	return 0;
+}
+#endif
+
 static struct pci_driver mv_pci_driver = {
 	.name     = "mv_"mv_driver_name,
 	.id_table = mv_pci_ids,
@@ -169,6 +252,10 @@ static struct pci_driver mv_pci_driver = {
 	.remove   = __devexit_p(mv_remove),
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,12))
 	.shutdown = mv_shutdown,
+#endif
+#ifdef CONFIG_PM
+	.suspend=mv_suspend,
+	.resume=mv_resume,
 #endif
 };
 

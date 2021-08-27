@@ -339,6 +339,18 @@ struct mddev {
 	 * takes a copy of this number and does not attempt recovery again
 	 * until this number changes.
 	 */
+#ifdef MY_ABC_HERE
+	/* Resolve the raid 5 hang problem during expansion with disk error
+	 * or hotplug out.
+	 *
+	 * When set disk error or hotplug, md will receive MD_RECOVERY_INTR.
+	 * It breaks the md_do_sync loop. If following reshape is possible,
+	 * resize_stripes will be re-called again. It result to wrong pool_size
+	 * in stripe_cache of r5conf. And the second resize_stripes is not
+	 * necessary when device is set to error or disapear.
+	 */
+	int	reshape_interrupt;
+#endif
 	int				recovery_disabled;
 
 	int				in_sync;	/* know to not need resync */

@@ -192,7 +192,7 @@ struct _MV_Request {
 #endif /* _OS_LINUX */
 #ifdef _OS_LINUX
 #ifdef _32_LEGACY_
-	MV_U8 dummy[5];
+	MV_U8 dummy[4];
 #endif
 #endif /* _OS_LINUX */
 	MV_ReqCompletion	Completion; /* call back function */
@@ -244,8 +244,8 @@ enum {
 #define CMD_FLAG_DATA_IN                  MV_BIT(3)  /* 1-host read data */
 #define CMD_FLAG_DATA_OUT                 MV_BIT(4)	 /* 1-host write data */
 #define CMD_FLAG_SMART                    MV_BIT(5)  /* 1-SMART command;0-non SMART command*/
-#define CMD_FLAG_SMART_ATA_12       MV_BIT(6)  /* SMART ATA_12  */
-#define CMD_FLAG_SMART_ATA_16       MV_BIT(7)  /* SMART ATA_16; */
+#define CMD_FLAG_ATA_12      	  	  MV_BIT(6)  /* ATA_12  */
+#define CMD_FLAG_ATA_16      	  	  MV_BIT(7)  /* ATA_16; */
 
 /*
  * The last 16 bit only can be set by the target. Only core driver knows

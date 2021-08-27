@@ -257,9 +257,11 @@ static void tdi_reset (struct ehci_hcd *ehci)
 	reg_ptr = (u32 __iomem *)(((u8 __iomem *)ehci->regs) + USBMODE);
 	tmp = ehci_readl(ehci, reg_ptr);
 	tmp |= USBMODE_CM_HC;
-
-#ifdef CONFIG_ARCH_FEROCEON
-	tmp |= (1 << 4); //disable USB streamin
+#if defined(CONFIG_SYNO_ARMADA)
+	/*
+	 * MRVL: Disable USB Streaming
+	 */
+	tmp |= (1 << 4);
 #endif
 
 	/* The default byte access to MMR space is LE after
@@ -1268,11 +1270,8 @@ MODULE_LICENSE ("GPL");
 #define	PLATFORM_DRIVER		ehci_orion_driver
 #endif
 
-#if defined(CONFIG_ARCH_FEROCEON) || defined(CONFIG_MARVELL)
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_USB
-#include "ehci-orion.c"
-#define	PLATFORM_DRIVER		ehci_orion_driver
-#else
+#if defined(CONFIG_SYNO_ARMADA)
+#ifdef CONFIG_PLAT_ARMADA
 #include "ehci_marvell.c"
 #define	PLATFORM_DRIVER		ehci_marvell_driver
 #endif
@@ -1359,12 +1358,25 @@ MODULE_LICENSE ("GPL");
 #error "missing bus glue for ehci-hcd"
 #endif
 
+#ifdef MY_ABC_HERE
+/* kernel command line should use ehci_hcd.noehci */
+static int noehci;
+module_param(noehci, bool, 0444);
+MODULE_PARM_DESC(noehci, "SYNO: skip register ehci_hcd driver");
+#endif
+
 static int __init ehci_hcd_init(void)
 {
 	int retval = 0;
 
 	if (usb_disabled())
 		return -ENODEV;
+
+#ifdef MY_ABC_HERE
+	if (noehci) {
+		return -ENODEV;
+	}
+#endif
 
 	printk(KERN_INFO "%s: " DRIVER_DESC "\n", hcd_name);
 	set_bit(USB_EHCI_LOADED, &usb_hcds_loaded);

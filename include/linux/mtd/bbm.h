@@ -123,6 +123,10 @@ struct nand_bbt_descr {
  */
 #define NAND_BBT_DYNAMICSTRUCT	0x80000000
 
+#if defined(CONFIG_SYNO_ARMADA)
+/* Search the bad block indicators according to Marvell's Naked symantics */
+#define NAND_BBT_SCANMVCUSTOM	0x10000000
+#endif
 /* The maximum number of blocks to scan for a bbt */
 #define NAND_BBT_SCAN_MAXBLOCKS	4
 

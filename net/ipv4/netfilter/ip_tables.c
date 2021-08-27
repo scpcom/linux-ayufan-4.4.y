@@ -37,15 +37,6 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Netfilter Core Team <coreteam@netfilter.org>");
 MODULE_DESCRIPTION("IPv4 packet filter");
 
-#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
-#include <net/netfilter/nf_nat.h>
-extern void init_fp_user_nat_tables(void);
-extern int add_fp_user_nat_rule(struct ipt_entry *e, int table);
-extern void clear_fp_user_nat_table(int table);
-extern void compare_fp_user_nat_tables(void);
-extern int curr_table, old_table;	/* 0 or 1 */
-#endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
-
 /*#define DEBUG_IP_FIREWALL*/
 /*#define DEBUG_ALLOW_ALL*/ /* Useful for remote debugging */
 /*#define DEBUG_IP_FIREWALL_USER*/
@@ -701,10 +692,6 @@ find_check_entry(struct ipt_entry *e, struct net *net, const char *name,
 	if (ret)
 		goto err;
 
-#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
-	add_fp_user_nat_rule(e, curr_table);
-#endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
-
 	return 0;
  err:
 	module_put(t->u.kernel.target->me);
@@ -870,15 +857,6 @@ translate_table(struct net *net, struct xt_table_info *newinfo, void *entry0,
 			break;
 		++i;
 	}
-
-#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
-	old_table = 1 - curr_table;
-	/* compare tables to detect newly deleted rules and newly deleted rules */
-	compare_fp_user_nat_tables();
-	/* prepare for next time */
-	curr_table = old_table;
-	clear_fp_user_nat_table(curr_table);
-#endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
 
 	if (ret != 0) {
 		xt_entry_foreach(iter, entry0, newinfo->size) {
@@ -2268,10 +2246,6 @@ static int __init ip_tables_init(void)
 	if (ret < 0)
 		goto err5;
 
-#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
-	init_fp_user_nat_tables();
-#endif
-
 	pr_info("(C) 2000-2006 Netfilter Core Team\n");
 	return 0;
 
@@ -2288,11 +2262,6 @@ err1:
 static void __exit ip_tables_fini(void)
 {
 	nf_unregister_sockopt(&ipt_sockopts);
-
-#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
-	clear_fp_user_nat_table(0);
-	clear_fp_user_nat_table(1);
-#endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
 
 	xt_unregister_matches(ipt_builtin_mt, ARRAY_SIZE(ipt_builtin_mt));
 	xt_unregister_targets(ipt_builtin_tg, ARRAY_SIZE(ipt_builtin_tg));

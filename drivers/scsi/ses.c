@@ -660,9 +660,26 @@ static int ses_remove(struct device *dev)
 static void ses_intf_remove_component(struct scsi_device *sdev)
 {
 	struct enclosure_device *edev, *prev = NULL;
+	// for #41463, the data structure of ses_component in enclosure_component does not clear when device removed
+	// after checking related function and we decide that here is the best position to clear it
+#ifdef MY_ABC_HERE
+	struct enclosure_component *cdev;
+	struct ses_component *scomp;
+	int i;
+#endif
 
 	while ((edev = enclosure_find(&sdev->host->shost_gendev, prev)) != NULL) {
 		prev = edev;
+#ifdef MY_ABC_HERE
+		for (i = 0; i < edev->components; i++) {
+			cdev = &edev->component[i];
+			scomp = edev->component[i].scratch;
+			if (cdev->dev == &sdev->sdev_gendev) {
+				scomp->addr = 0;
+				scomp->desc = NULL;
+			}
+		}
+#endif
 		if (!enclosure_remove_device(edev, &sdev->sdev_gendev))
 			break;
 	}

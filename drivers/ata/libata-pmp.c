@@ -57,7 +57,10 @@ static unsigned int sata_pmp_read(struct ata_link *link, int reg, u32 *r_val)
 	tf.command = ATA_CMD_PMP_READ;
 	tf.protocol = ATA_PROT_NODATA;
 	tf.flags |= ATA_TFLAG_ISADDR | ATA_TFLAG_DEVICE | ATA_TFLAG_LBA48;
-	tf.feature = reg;
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+	tf.feature = reg & 0xff;
+	tf.hob_feature = (reg >> 8) & 0xff;
+#endif
 	tf.device = link->pmp;
 
 	err_mask = ata_exec_internal(pmp_dev, &tf, NULL, DMA_NONE, NULL, 0,
@@ -93,7 +96,10 @@ static unsigned int sata_pmp_write(struct ata_link *link, int reg, u32 val)
 	tf.command = ATA_CMD_PMP_WRITE;
 	tf.protocol = ATA_PROT_NODATA;
 	tf.flags |= ATA_TFLAG_ISADDR | ATA_TFLAG_DEVICE | ATA_TFLAG_LBA48;
-	tf.feature = reg;
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+	tf.feature = reg & 0xff;
+	tf.hob_feature = (reg >> 8) & 0xff;
+#endif
 	tf.device = link->pmp;
 	tf.nsect = val & 0xff;
 	tf.lbal = (val >> 8) & 0xff;
@@ -105,6 +111,33 @@ static unsigned int sata_pmp_write(struct ata_link *link, int reg, u32 val)
 }
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
+/**
+ * Some PM chips need to config GPIO related 
+ * registers before starting using them.
+ * 
+ * @param ap ata port
+ */
+static inline void
+syno_pm_gpio_config(struct ata_port *ap)
+{
+	if (syno_pm_is_9705(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				        sata_pmp_gscr_devid(ap->link.device->gscr))) {
+		//u32 src_sel1 = 0x2DB6DB6C;//4 | (5 << 3) | (5 << 6) | (5 << 9) | (5 << 12) | (5 << 15) | (5 << 18) | (5 << 21) | (5 << 24) | (5 << 27);
+		//u32 src_sel0 = 0x1A3C5B6D;//5 | (5 << 3) | (5 << 6) | (5 << 9) | (5 << 12) | (0 << 15) | (7 << 18) | (1 << 21) | (2 << 24) | (3 << 27);
+		/* GPIO data_out enable */
+		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_GPO_EN, 0xFFFFF);
+
+		/* GPIO data_in polarity */
+		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_GPI_POLARITY, 0xFFFFF);
+
+		/* GPIO[10~19] source select */
+		//sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_SRC_SEL1, src_sel1);
+
+		/* GPIO[0~9] source select */
+		//sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_SRC_SEL0, src_sel0);
+	}
+}
+
 void
 syno_pm_device_info_set(struct ata_port *ap, u8 rw, SYNO_PM_PKG *pm_pkg)
 {
@@ -114,18 +147,145 @@ syno_pm_device_info_set(struct ata_port *ap, u8 rw, SYNO_PM_PKG *pm_pkg)
 		pm_pkg->encode = SIMG3xxx_gpio_encode;
 		pm_pkg->gpio_addr = SATA_PMP_GSCR_3XXX_GPIO;
 		return;
+	} else if (syno_pm_is_9705(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				               sata_pmp_gscr_devid(ap->link.device->gscr))) {
+		pm_pkg->decode = SIMG9705_gpio_decode;
+		pm_pkg->encode = SIMG9705_gpio_encode;
+		pm_pkg->gpio_addr = READ == rw ? SATA_PMP_GSCR_9705_GPI : SATA_PMP_GSCR_9705_GPO;
+		return;
+	}
+}
+
+/* On 9705, GPI and GPO are the same pin, so each pin can
+ * only be treated as input or output at one time,
+ * Before reading, we need to set "output_enable" to LOW
+ * so that we can read the values CPLD writes on these pins.
+ *
+ * After reading, remember to call syno_pm_gpio_output_enable().
+ */
+void
+syno_pm_gpio_output_disable(struct ata_link *link)
+{
+	if (syno_pm_is_9705(sata_pmp_gscr_vendor(link->device->gscr),
+				               sata_pmp_gscr_devid(link->device->gscr))) {
+		/* Only GPI1~GPI8(GPIO 0~4,11~13) need to set LOW. */
+		sata_pmp_write(link, SATA_PMP_GSCR_9705_GPO_EN, 0xFC7C0);
+	}
+}
+
+/* On 9705, GPI and GPO are the same pin, so each pin can
+ * only be treated as input or output at one time,
+ * After reading, we need to set "output_enable" to HIGH
+ * so that we can write values on these pins later,
+ */
+void
+syno_pm_gpio_output_enable(struct ata_link *link)
+{
+	if (syno_pm_is_9705(sata_pmp_gscr_vendor(link->device->gscr),
+				               sata_pmp_gscr_devid(link->device->gscr))) {
+		sata_pmp_write(link, SATA_PMP_GSCR_9705_GPO_EN, 0xFFFFF);
 	}
 }
 
 unsigned int
 syno_sata_pmp_read_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 {
-	int res = 0;
+	unsigned int uiRet = 1;
+
+	if (syno_pm_is_3xxx(sata_pmp_gscr_vendor(link->device->gscr),
+						sata_pmp_gscr_devid(link->device->gscr))) {
+		uiRet = syno_sata_pmp_write_gpio_core(link, pPM_pkg);
+		if (0 != uiRet) {
+			goto END;
+		}
+		uiRet = syno_sata_pmp_read_gpio_core(link, pPM_pkg);
+		if (0 != uiRet) {
+			goto END;
+		}
+	} else if (syno_pm_is_9705(sata_pmp_gscr_vendor(link->device->gscr),
+				               sata_pmp_gscr_devid(link->device->gscr))) {
+		/* The read machanism of 9705 is totally different from 3xxx.
+		 * Read is issued by controlling the Read bit, which is active low.
+		 * Refer to HW Spec for further details.
+		 */
+		unsigned int uiVar = pPM_pkg->var;
+		unsigned int uiVarActive = pPM_pkg->var & ~(1 << 9); /* pull down the read bit */
+		unsigned int uiResult = 0;
+
+		uiRet = syno_sata_pmp_write_gpio_core(link, pPM_pkg);
+		if (0 != uiRet) {
+			goto END;
+		}
+		pPM_pkg->var = uiVarActive;
+		uiRet = syno_sata_pmp_write_gpio_core(link, pPM_pkg);
+		if (0 != uiRet) {
+			goto END;
+		}
+		pPM_pkg->var = uiVarActive;
+		uiRet = syno_sata_pmp_read_gpio_core(link, pPM_pkg);
+		if (0 != uiRet) {
+			goto END;
+		}
+		uiResult = pPM_pkg->var;
+		pPM_pkg->var = uiVar;
+		uiRet = syno_sata_pmp_write_gpio_core(link, pPM_pkg);
+		if (0 != uiRet) {
+			goto END;
+		}
+		pPM_pkg->var = uiResult;
+	}
+	uiRet = 0;
+END:
+	return uiRet;
+}
+
+unsigned int
+syno_sata_pmp_write_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
+{
+	unsigned int uiRet = 1;
+	if (syno_pm_is_3xxx(sata_pmp_gscr_vendor(link->device->gscr),
+						sata_pmp_gscr_devid(link->device->gscr))) {
+		uiRet = syno_sata_pmp_write_gpio_core(link, pPM_pkg);
+		if (0 != uiRet) {
+			goto END;
+		}
+	} else if (syno_pm_is_9705(sata_pmp_gscr_vendor(link->device->gscr),
+				               sata_pmp_gscr_devid(link->device->gscr))) {
+		/* The write machanism of 9705 is totally different from 3xxx.
+		 * Write is issued by controlling the Write bit, which is active low.
+		 * Refer to HW Spec for further details.
+		 */
+		unsigned int uiVar = pPM_pkg->var;
+		unsigned int uiVarActive = pPM_pkg->var & ~(1 << 8); /* pull down the write bit */
+		uiRet = syno_sata_pmp_write_gpio_core(link, pPM_pkg);
+		if (0 != uiRet) {
+			goto END;
+		}
+		pPM_pkg->var = uiVarActive;
+		uiRet = syno_sata_pmp_write_gpio_core(link, pPM_pkg);
+		if (0 != uiRet) {
+			goto END;
+		}
+		pPM_pkg->var = uiVar;
+		uiRet = syno_sata_pmp_write_gpio_core(link, pPM_pkg);
+		if (0 != uiRet) {
+			goto END;
+		}
+	}
+END:
+	return uiRet;
+}
+
+unsigned int
+syno_sata_pmp_read_gpio_core(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
+{
+	unsigned int uiRet = 1;
 
 	syno_pm_device_info_set(link->ap, READ, pPM_pkg);
+	syno_pm_gpio_output_disable(link);
 
-	res = sata_pmp_read(link, pPM_pkg->gpio_addr, &(pPM_pkg->var));
-	if (0 != res) {
+	uiRet = sata_pmp_read(link, pPM_pkg->gpio_addr, &(pPM_pkg->var));
+	if (0 != uiRet) {
 		goto END;
 	}
 
@@ -134,204 +294,25 @@ syno_sata_pmp_read_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 	}
 
 END:
-	return res;
+	syno_pm_gpio_output_enable(link);
+	return uiRet;
 }
 
 unsigned int
-syno_sata_pmp_is_rp(struct ata_port *ap)
+syno_sata_pmp_write_gpio_core(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 {
-#define GPI_3XXX_PSU1_STAT(GPIO)        ((1<<29)&GPIO)
-#define GPI_3XXX_PSU2_STAT(GPIO)        ((1<<31)&GPIO)
-	int res = 0;
-	SYNO_PM_PKG pm_pkg;
-
-	if(NULL == ap) {
-		goto END;
-	}
-
-	if(0 != ap->PMSynoEMID) {
-		goto END;
-	}
-
-		syno_pm_systemstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
-								  sata_pmp_gscr_devid(ap->link.device->gscr),
-								  &pm_pkg);
-
-	syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
-
-	syno_pm_device_info_set(ap->link.ap, READ, &pm_pkg);
-
-	res = sata_pmp_read(&(ap->link), pm_pkg.gpio_addr, &(pm_pkg.var));
-		if (0 != res) {
-			goto END;
-		}
-
-		if(GPI_3XXX_PSU1_STAT(pm_pkg.var) || GPI_3XXX_PSU2_STAT(pm_pkg.var)) {
-			res = 1;
-		}
-
-END:
-	return res;
-}
-
-static unsigned int
-syno_sata_pmp_read_cpld_ver(struct ata_port *ap)
-{
-#define GPI_3XXX_CPLDVER_BIT1(GPIO)	((1<<4)&GPIO)>>2
-#define GPI_3XXX_CPLDVER_BIT2(GPIO)	((1<<5)&GPIO)>>4
-#define GPI_3XXX_CPLDVER_BIT3(GPIO)	((1<<6)&GPIO)>>6
-	int iRes = 0;
-	SYNO_PM_PKG stPmPkg;
-
-		syno_pm_raidledstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
-				sata_pmp_gscr_devid(ap->link.device->gscr),
-				&stPmPkg);
-
-	syno_sata_pmp_write_gpio(&(ap->link), &stPmPkg);
-
-		iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
-		if(0 != iRes) {
-			goto END;
-		}
-		if (IS_SYNOLOGY_DX513(ap->PMSynoUnique) || IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
-			ap->PMSynoCpldVer =	GPI_3XXX_CPLDVER_BIT3(stPmPkg.var);
-		} else {
-			ap->PMSynoCpldVer =	GPI_3XXX_CPLDVER_BIT1(stPmPkg.var) |
-				GPI_3XXX_CPLDVER_BIT2(stPmPkg.var) |
-				GPI_3XXX_CPLDVER_BIT3(stPmPkg.var);
-		}
-		/*cpld version start from GPIO result 000 (i.e. v1)*/
-		ap->PMSynoCpldVer = ap->PMSynoCpldVer + 1;
-END:
-	return iRes;
-}
-
-unsigned int
-syno_sata_pmp_read_emid(struct ata_port *ap)
-{
-#define GPI_3XXX_EMID_BIT1(GPIO)	((1<<10)&GPIO)>>10
-#define GPI_3XXX_EMID_BIT2(GPIO)	((1<<11)&GPIO)>>10
-#define GPI_3XXX_EMID_BIT3(GPIO)	((1<<12)&GPIO)>>10
-	int res = 0;
-	SYNO_PM_PKG pm_pkg;
-
-	if(NULL == ap) {
-		goto END;
-	}
-
-		syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
-				sata_pmp_gscr_devid(ap->link.device->gscr),
-				&pm_pkg);
-
-		syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
-		syno_pm_device_info_set(ap->link.ap, READ, &pm_pkg);
-		res = sata_pmp_read(&(ap->link), pm_pkg.gpio_addr, &(pm_pkg.var));
-		if (0 != res) {
-			goto END;
-		}
-
-		ap->PMSynoEMID  =	GPI_3XXX_EMID_BIT1(pm_pkg.var)|
-							GPI_3XXX_EMID_BIT2(pm_pkg.var)|
-							GPI_3XXX_EMID_BIT3(pm_pkg.var);
-
-END:
-	return res;
-}
-
-/*
- * Query backplane switch mode 
- *
- * @param ap ata_port
- *
- * @return 0: success 
- *        overwise fail
- */
-static unsigned int
-syno_sata_pmp_read_switch_mode(struct ata_port *ap)
-{
-#define GPI_3XXX_SWITCHMODE_BIT(GPIO)	((1<<5)&GPIO)>>5
-	int iRes = 0;
-	SYNO_PM_PKG stPmPkg;
-
-	if (!IS_SYNOLOGY_DX513(ap->PMSynoUnique) && !IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
-		ap->PMSynoSwitchMode = PMP_SWITCH_MODE_UNKNOWN;
-		goto END;
-	}
-
-		syno_pm_raidledstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
-				sata_pmp_gscr_devid(ap->link.device->gscr),
-				&stPmPkg);
-
-	syno_sata_pmp_write_gpio(&(ap->link), &stPmPkg);
-
-		iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
-		if(0 != iRes) {
-			goto END;
-		}
-
-	if (0 == GPI_3XXX_SWITCHMODE_BIT(stPmPkg.var)){
-			ap->PMSynoSwitchMode = PMP_SWITCH_MODE_MANUAL;
-		} else {
-			ap->PMSynoSwitchMode = PMP_SWITCH_MODE_AUTO;
-		}
-END:
-	return iRes;
-}
-
-/*
- * Check power button whether disable or not
- *
- * @param ap ata_port
- *
- * @return 0: success 
- *        overwise fail
- */
-static unsigned int
-syno_sata_pmp_check_powerbtn(struct ata_port *ap)
-{
-#define GPI_3826_POWERDISABLE_BIT(GPIO)	((1<<4)&GPIO)>>4
-	int iRes = 0;
-	SYNO_PM_PKG stPmPkg;
-
-	if (!IS_SYNOLOGY_DX513(ap->PMSynoUnique) && !IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
-		goto END;
-	}
-
-	syno_pm_raidledstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
-							sata_pmp_gscr_devid(ap->link.device->gscr),
-							&stPmPkg);
-
-	syno_sata_pmp_write_gpio(&(ap->link), &stPmPkg);
-
-	iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
-	if(0 != iRes) {
-		goto END;
-	}
-
-	if (0 == GPI_3826_POWERDISABLE_BIT(stPmPkg.var)){
-		goto END;
-	}
-
-	syno_pm_enable_powerbtn_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
-							sata_pmp_gscr_devid(ap->link.device->gscr),
-							&stPmPkg);
-
-	syno_sata_pmp_write_gpio(&(ap->link), &stPmPkg);
-
-END:
-	return iRes;
-}
-
-unsigned int
-syno_sata_pmp_write_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
-{
+	unsigned int uiRet = 1;
 	syno_pm_device_info_set(link->ap, WRITE, pPM_pkg);
 
 	if(pPM_pkg->encode) {
 		pPM_pkg->encode(pPM_pkg, WRITE);
 	}
 
-	return sata_pmp_write(link, pPM_pkg->gpio_addr, pPM_pkg->var);
+	uiRet = sata_pmp_write(link, pPM_pkg->gpio_addr, pPM_pkg->var);
+	/* HW suggestions: delay 5ms, wait for CPLD ready */
+	mdelay(5);
+
+	return uiRet;
 }
 
 static u8
@@ -356,6 +337,271 @@ syno_pm_is_synology_3xxx(const struct ata_port *ap)
 	ret = 1;
 END:
 	return ret;
+}
+
+static u8
+syno_pm_is_synology_9705(const struct ata_port *ap)
+{
+	u8 ret = 0;
+
+	if (!syno_pm_is_9705(sata_pmp_gscr_vendor(ap->link.device->gscr),
+						sata_pmp_gscr_devid(ap->link.device->gscr))) {
+		goto END;
+	}
+
+	if (!IS_SYNOLOGY_RX413(ap->PMSynoUnique)) {
+		goto END;
+	}
+
+	ret = 1;
+END:
+	return ret;
+}
+
+unsigned int
+syno_sata_pmp_is_rp(struct ata_port *ap)
+{
+#define GPI_3XXX_PSU1_STAT(GPIO)        ((1<<5)&GPIO)>>5
+#define GPI_3XXX_PSU2_STAT(GPIO)        ((1<<6)&GPIO)>>6
+	int res = 0;
+	SYNO_PM_PKG pm_pkg;
+
+	if(NULL == ap) {
+		goto END;
+	}
+
+	if(0 != ap->PMSynoEMID) {
+		goto END;
+	}
+
+		syno_pm_systemstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+								  sata_pmp_gscr_devid(ap->link.device->gscr),
+								  &pm_pkg);
+
+		res = syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg);
+		if (0 != res) {
+			goto END;
+		}
+
+		if(GPI_3XXX_PSU1_STAT(pm_pkg.var) || GPI_3XXX_PSU2_STAT(pm_pkg.var)) {
+			res = 1;
+		}
+
+END:
+	return res;
+}
+
+static unsigned int
+syno_sata_pmp_read_cpld_ver(struct ata_port *ap)
+{
+#define GPI_3XXX_CPLDVER_BIT1(GPIO)	((1<<4)&GPIO)>>2
+#define GPI_3XXX_CPLDVER_BIT2(GPIO)	((1<<5)&GPIO)>>4
+#define GPI_3XXX_CPLDVER_BIT3(GPIO)	((1<<6)&GPIO)>>6
+#define GPI_9705_CPLDVER_BIT0(GPIO) ((1<<1)&GPIO)>>1
+#define GPI_9705_CPLDVER_BIT1(GPIO) ((1<<2)&GPIO)>>1
+	int iRes = 0;
+	SYNO_PM_PKG stPmPkg;
+
+	if(NULL == ap) {
+		goto END;
+	}
+
+	if(syno_pm_is_synology_3xxx(ap)) {
+		syno_pm_raidledstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				sata_pmp_gscr_devid(ap->link.device->gscr),
+				&stPmPkg);
+
+		iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
+		if(0 != iRes) {
+			goto END;
+		}
+		if (IS_SYNOLOGY_DX513(ap->PMSynoUnique) || IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
+			ap->PMSynoCpldVer =	GPI_3XXX_CPLDVER_BIT3(stPmPkg.var);
+		} else {
+			ap->PMSynoCpldVer =	GPI_3XXX_CPLDVER_BIT1(stPmPkg.var) |
+				GPI_3XXX_CPLDVER_BIT2(stPmPkg.var) |
+				GPI_3XXX_CPLDVER_BIT3(stPmPkg.var);
+		}
+		/*cpld version start from GPIO result 000 (i.e. v1)*/
+		ap->PMSynoCpldVer = ap->PMSynoCpldVer + 1;
+	} else if (syno_pm_is_synology_9705(ap)) {
+		syno_pm_systemstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				sata_pmp_gscr_devid(ap->link.device->gscr),
+				&stPmPkg);
+
+		iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
+		if(0 != iRes) {
+			goto END;
+		}
+		ap->PMSynoCpldVer = GPI_9705_CPLDVER_BIT1(stPmPkg.var) |
+							GPI_9705_CPLDVER_BIT0(stPmPkg.var);
+	}
+END:
+	return iRes;
+}
+
+unsigned int
+syno_sata_pmp_read_emid(struct ata_port *ap)
+{
+#define GPI_3XXX_EMID_BIT1(GPIO)	((1<<10)&GPIO)>>10
+#define GPI_3XXX_EMID_BIT2(GPIO)	((1<<11)&GPIO)>>10
+#define GPI_3XXX_EMID_BIT3(GPIO)	((1<<12)&GPIO)>>10
+#define GPI_9705_EMID_BIT1(GPIO)	((1<<5)&GPIO)>>5
+#define GPI_9705_EMID_BIT2(GPIO)	((1<<6)&GPIO)>>5
+#define GPI_9705_EMID_BIT3(GPIO)	((1<<7)&GPIO)>>5
+	int res = 0;
+	SYNO_PM_PKG pm_pkg;
+
+	if(NULL == ap) {
+		goto END;
+	}
+
+	if(syno_pm_is_synology_3xxx(ap)) {
+		syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				sata_pmp_gscr_devid(ap->link.device->gscr),
+				&pm_pkg);
+
+		syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
+		syno_pm_device_info_set(ap->link.ap, READ, &pm_pkg);
+		res = sata_pmp_read(&(ap->link), pm_pkg.gpio_addr, &(pm_pkg.var));
+		if (0 != res) {
+			goto END;
+		}
+
+		ap->PMSynoEMID  =	GPI_3XXX_EMID_BIT1(pm_pkg.var)|
+							GPI_3XXX_EMID_BIT2(pm_pkg.var)|
+							GPI_3XXX_EMID_BIT3(pm_pkg.var);
+	} else if(syno_pm_is_synology_9705(ap)) {
+		syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				sata_pmp_gscr_devid(ap->link.device->gscr),
+				&pm_pkg);
+
+		res = syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg);
+		if (0 != res) {
+			goto END;
+		}
+
+		ap->PMSynoEMID  =	GPI_9705_EMID_BIT1(pm_pkg.var)|
+							GPI_9705_EMID_BIT2(pm_pkg.var)|
+							GPI_9705_EMID_BIT3(pm_pkg.var);
+	}
+
+END:
+	return res;
+}
+
+/*
+ * Query backplane switch mode 
+ *
+ * @param ap ata_port
+ *
+ * @return 0: success 
+ *        overwise fail
+ */
+static unsigned int
+syno_sata_pmp_read_switch_mode(struct ata_port *ap)
+{
+#define GPI_3XXX_SWITCHMODE_BIT(GPIO)	((1<<5)&GPIO)>>5
+#define GPI_9705_SWITCHMODE_BIT(GPIO)	(1&GPIO)
+	int iRes = 0;
+	SYNO_PM_PKG stPmPkg;
+
+	if(NULL == ap) {
+		goto END;
+	}
+
+	if (IS_SYNOLOGY_RX4(ap->PMSynoUnique) ||
+		IS_SYNOLOGY_DX5(ap->PMSynoUnique) ||
+		IS_SYNOLOGY_DXC(ap->PMSynoUnique) ||
+		IS_SYNOLOGY_RXC(ap->PMSynoUnique)) {
+		ap->PMSynoSwitchMode = PMP_SWITCH_MODE_UNKNOWN;
+		goto END;
+	}
+
+	if(syno_pm_is_synology_3xxx(ap)) {
+		syno_pm_raidledstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				sata_pmp_gscr_devid(ap->link.device->gscr),
+				&stPmPkg);
+
+		iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
+		if(0 != iRes) {
+			goto END;
+		}
+
+		if (0 == GPI_3XXX_SWITCHMODE_BIT(stPmPkg.var)){
+			ap->PMSynoSwitchMode = PMP_SWITCH_MODE_MANUAL;
+		} else {
+			ap->PMSynoSwitchMode = PMP_SWITCH_MODE_AUTO;
+		}
+	} else if(syno_pm_is_synology_9705(ap)) {
+		syno_pm_systemstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				sata_pmp_gscr_devid(ap->link.device->gscr),
+				&stPmPkg);
+
+		iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
+		if(0 != iRes) {
+			goto END;
+		}
+
+		if (0 == GPI_9705_SWITCHMODE_BIT(stPmPkg.var)){
+			ap->PMSynoSwitchMode = PMP_SWITCH_MODE_MANUAL;
+		} else {
+			ap->PMSynoSwitchMode = PMP_SWITCH_MODE_AUTO;
+		}
+	}
+END:
+	return iRes;
+}
+
+/*
+ * Check power button whether disable or not
+ *
+ * @param ap ata_port
+ *
+ * @return 0: success 
+ *        overwise fail
+ */
+static unsigned int
+syno_sata_pmp_check_powerbtn(struct ata_port *ap)
+{
+#define GPI_3826_POWERDISABLE_BIT(GPIO)	((1<<4)&GPIO)>>4
+#define GPI_9705_POWERDISABLE_BIT(GPIO)	((1<<5)&GPIO)>>5
+	int iRes = 0;
+	SYNO_PM_PKG stPmPkg;
+
+	if(NULL == ap) {
+		goto END;
+	}
+
+	if (IS_SYNOLOGY_RX4(ap->PMSynoUnique) ||
+		IS_SYNOLOGY_DX5(ap->PMSynoUnique) ||
+		IS_SYNOLOGY_DXC(ap->PMSynoUnique) ||
+		IS_SYNOLOGY_RXC(ap->PMSynoUnique)) {
+		goto END;
+	}
+
+	syno_pm_raidledstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+							sata_pmp_gscr_devid(ap->link.device->gscr),
+							&stPmPkg);
+
+	iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
+	if(0 != iRes) {
+		goto END;
+	}
+
+	if ((syno_pm_is_synology_3xxx(ap) && 0 == GPI_3826_POWERDISABLE_BIT(stPmPkg.var)) ||
+		(syno_pm_is_synology_9705(ap) && 1 == GPI_9705_POWERDISABLE_BIT(stPmPkg.var))) {
+		goto END;
+	}
+
+	syno_pm_enable_powerbtn_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+							sata_pmp_gscr_devid(ap->link.device->gscr),
+							&stPmPkg);
+
+	syno_sata_pmp_write_gpio(&(ap->link), &stPmPkg);
+
+END:
+	return iRes;
 }
 
 u8
@@ -388,6 +634,11 @@ syno_is_synology_pm(const struct ata_port *ap)
 		goto END;
 	}
 
+	if (syno_pm_is_synology_9705(ap)) {
+		ret = 1;
+		goto END;
+	}
+
 	/* add other port multiplier here */
 END:
 	return ret;
@@ -401,17 +652,48 @@ syno_pmp_ports_num(struct ata_port *ap)
 	if (syno_is_synology_pm(ap)) {
 		ret = sata_pmp_gscr_ports(ap->link.device->gscr);
 
-		if (syno_pm_is_synology_3xxx(ap)) {
+		if (syno_pm_is_synology_3xxx(ap) ||
+			syno_pm_is_synology_9705(ap)) {
 			/* it would read 6 ports from GSCR,
 			 * but this is not what we want
 			 * So we modify here.
 			 */
 			ret = 5;
 		}
-
 		/* add other quirk of port multiplier here */
 	}
 	return ret;
+}
+
+static unsigned char
+syno_pm_is_poweron(struct ata_port *ap)
+{
+#define GPI_3XXX_PSU_OFF(GPIO)		(0x2&GPIO)
+#define GPI_9705_PSU_OFF(GPIO)		!(0x20&GPIO)
+	int iRes = 0;
+	SYNO_PM_PKG stPmPkg;
+
+	if(NULL == ap) {
+		goto END;
+	}
+
+	syno_pm_fanstatus_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+			sata_pmp_gscr_devid(ap->link.device->gscr),
+			&stPmPkg);
+
+	iRes = syno_sata_pmp_read_gpio(&(ap->link), &stPmPkg);
+	if(0 != iRes) {
+		goto END;
+	}
+
+	if ((syno_pm_is_synology_3xxx(ap) && GPI_3XXX_PSU_OFF(stPmPkg.var)) ||
+	    (syno_pm_is_synology_9705(ap) && GPI_9705_PSU_OFF(stPmPkg.var))) {
+		goto END;
+	}
+
+	iRes = 1;
+END:
+	return iRes;
 }
 
 static inline void
@@ -441,16 +723,20 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 	}
 	/* lock to prevent others to do pmp power control */
 	ap->pflags |= ATA_PFLAG_PMP_PMCTL;
-	DBGMESG("port %d do pmp power ctl %d\n", ap->print_id, blPowerOn);
+	/* we should make sure this port isn't frozen */
+	if (ap->pflags & ATA_PFLAG_FROZEN) {
+		printk("ata%u: is FROZEN, thaw it now\n", ap->print_id);
+		spin_unlock_irqrestore(ap->lock, flags);
+		ata_eh_thaw_port(ap);
+		spin_lock_irqsave(ap->lock, flags);
+	}
+	DBGMESG("port %d do pmp power ctl %d, and thaw it\n", ap->print_id, blPowerOn);
 	spin_unlock_irqrestore(ap->lock, flags);
-
 	syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 							sata_pmp_gscr_devid(ap->link.device->gscr),
 							&pm_pkg);
-	if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
-		goto END;
-	}
 	if (syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg)) {
+		printk("ata%d pm unique read fail\n", ap->print_id);
 		goto END;
 	}
 
@@ -469,10 +755,8 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		goto SKIP_POWER_ON;
 	}
 
-	for (iRetry = 0; blPowerOn ^ syno_pm_is_poweron(sata_pmp_gscr_vendor(ap->link.device->gscr),
-													sata_pmp_gscr_devid(ap->link.device->gscr),
-													&pm_pkg)
-					 && iRetry < ATA_EH_PMP_TRIES; ++iRetry) {
+	for (iRetry = 0; blPowerOn ^ syno_pm_is_poweron(ap)
+					 && iRetry < SYNO_PMP_PWR_TRIES; ++iRetry) {
 
 		if (!blPowerOn) {
 			if (syno_sata_pmp_check_powerbtn(ap)) {
@@ -484,6 +768,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 0);
 		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
+			printk("ata%d pm poweron write 0 fail\n", ap->print_id);
 			goto END;
 		}
 
@@ -501,6 +786,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 1);
 		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
+			printk("ata%d pm poweron write 1 fail\n", ap->print_id);
 			goto END;
 		}
 
@@ -519,18 +805,14 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 				sata_pmp_gscr_devid(ap->link.device->gscr),
 				&pm_pkg);
-		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
-			goto END;
-		}
 		if (syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg)) {
+			printk("ata%d re-check pm unique read fail\n", ap->print_id);
 			goto END;
 		}
-		if (blPowerOn ^ syno_pm_is_poweron(sata_pmp_gscr_vendor(ap->link.device->gscr),
-										   sata_pmp_gscr_devid(ap->link.device->gscr),
-										   &pm_pkg)) {
-			if (iRetry == (ATA_EH_PMP_TRIES - 1)) {
+		if (blPowerOn ^ syno_pm_is_poweron(ap)) {
+			if (iRetry == (SYNO_PMP_PWR_TRIES - 1)) {
 				printk("port %d do pmp power ctl %d after %d tries fail\n",
-						ap->print_id, blPowerOn, ATA_EH_PMP_TRIES);
+						ap->print_id, blPowerOn, SYNO_PMP_PWR_TRIES);
 			} else {
 				printk("port %d do pmp power ctl %d fail, retry it\n", ap->print_id, blPowerOn);
 			}
@@ -784,7 +1066,12 @@ static int sata_pmp_configure(struct ata_device *dev, int print_info)
 	 * R_OK that was intended for the host. Symptom will be all
 	 * 5 drives under test will timeout, get reset, and recover.
 	 */
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+	/*our DX513 and DX213 use 3826 chip */
+	if (vendor == 0x1095 && (devid == 0x3726 || devid == 0x3826)) {
+#else
 	if (vendor == 0x1095 && devid == 0x3726) {
+#endif
 		u32 reg;
 
 		err_mask = sata_pmp_read(&ap->link, PMP_GSCR_SII_POL, &reg);
@@ -952,9 +1239,19 @@ static void sata_pmp_quirks(struct ata_port *ap)
 				       ATA_LFLAG_NO_SRST |
 				       ATA_LFLAG_ASSUME_ATA;
 		}
+	}else if (vendor == 0x11ab && devid == 0x4140) {
+		/* Marvell 4140 quirks */
+		 
+		ata_for_each_link(link, ap, EDGE) {
+			/* port 4 is for SEMB device and it doesn't like SRST */
+			if (link->pmp == 4)
+
+				link->flags |= ATA_LFLAG_DISABLED;
 		}	
 	}
 	
+}
+
 /**
  *	sata_pmp_attach - attach a SATA PMP device
  *	@dev: SATA PMP device to attach
@@ -1005,6 +1302,7 @@ int sata_pmp_attach(struct ata_device *dev)
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	/* Get information for all PM we supported */
+	syno_pm_gpio_config(ap);
 	syno_prepare_custom_info(ap);
 #ifdef MY_ABC_HERE
 	/*For DS1812+ with older version of DX510, the link should be limited to 1.5G*/
@@ -1100,7 +1398,7 @@ static void sata_pmp_detach(struct ata_device *dev)
 #ifdef MY_ABC_HERE
 	if ((dev->link->uiSflags || dev->link->ap->uiSflags) && ata_dev_enabled(dev)) {
 		ata_dev_printk(dev, KERN_WARNING,
-				"still have recovery flags 0x%x, don't detach this pmp dev\n", dev->link->uiSflags);
+				"still have recovery flags link 0x%x ap 0x%x, don't detach this pmp dev\n", dev->link->uiSflags, dev->link->ap->uiSflags);
 		dev->ulSflags |= ATA_SYNO_DFLAG_PMP_DETACH;
 		/*FIXME: set detach flag, copy form ata_eh_detach_dev */
 		ata_for_each_link(tlink, ap, EDGE) {
@@ -1109,6 +1407,10 @@ static void sata_pmp_detach(struct ata_device *dev)
 		return;
 	}
 	dev->ulSflags &= ~ATA_SYNO_DFLAG_PMP_DETACH;
+	ata_for_each_link(tlink, ap, EDGE) {
+		DBGMESG("ata%u: do pmp detach, clear all link uiSflags\n", dev->link->ap->print_id);
+		tlink->uiSflags = 0;
+	}
 #endif
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	ap->PMSynoUnique = 0;
@@ -1189,6 +1491,7 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	/* power on and re-custom */
+	syno_pm_gpio_config(ap);
 	syno_prepare_custom_info(ap);
 	if (SYNO_UNIQUE(old_syno_unique) != SYNO_UNIQUE(ap->PMSynoUnique)) {
 		ata_dev_printk(dev, KERN_ERR,
@@ -1340,6 +1643,9 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 	int tries = ATA_EH_PMP_TRIES;
 	int detach = 0, rc = 0;
 	int reval_failed = 0;
+#ifdef MY_ABC_HERE
+	unsigned int uiSflags = 0x0;
+#endif
 
 	DPRINTK("ENTER\n");
 
@@ -1413,14 +1719,28 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 #ifdef MY_ABC_HERE
 	/* GSCR fail is not only attached to link, we must check pmp gscr fail here.
 	 * If pmp recover success, we must clear it here. */
-	if (ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
+	if (ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL ||
+		link->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
 		ata_port_printk(ap, KERN_ERR, "recovery success, clear gscr fail flag");
 		ap->uiSflags &= ~ATA_SYNO_FLAG_GSCR_FAIL;
+		link->uiSflags &= ~ATA_SYNO_FLAG_GSCR_FAIL;
 	}
 #endif
 	return 0;
 
  fail:
+#ifdef MY_ABC_HERE
+	/* set link error flags to ata port for ata port error handling.
+	 * GSCR may clear by link reset, but it may still have GSCR error,
+	 * so we must check port GSCR fail */
+	if ((uiSflags = uiCheckPortLinksFlags(ap))) {
+		if (ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
+			ap->uiSflags = uiSflags | ATA_SYNO_FLAG_GSCR_FAIL;
+		} else {
+			ap->uiSflags = uiSflags;
+		}
+	}
+#endif
 	sata_pmp_detach(dev);
 	if (detach)
 		ata_eh_detach_dev(dev);
@@ -1687,9 +2007,6 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 
 	ata_port_err(ap, "failed to recover PMP after %d tries, giving up\n",
 		     ATA_EH_PMP_TRIES);
-	sata_pmp_detach(pmp_dev);
-	ata_dev_disable(pmp_dev);
-
 #ifdef MY_ABC_HERE
 	/* set link error flags to ata port for ata port error handling.
 	 * GSCR may clear by link reset, but it may still have GSCR error,
@@ -1702,6 +2019,9 @@ static int sata_pmp_eh_recover(struct ata_port *ap)
 		}
 	}
 #endif
+	sata_pmp_detach(pmp_dev);
+	ata_dev_disable(pmp_dev);
+
 	return rc;
 }
 

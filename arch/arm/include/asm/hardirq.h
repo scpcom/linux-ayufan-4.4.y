@@ -12,6 +12,9 @@
 
 typedef struct {
 	unsigned int __softirq_pending;
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	unsigned int local_pmu_irqs;
+#endif
 #ifdef CONFIG_SMP
 	unsigned int ipi_irqs[NR_IPI];
 #endif

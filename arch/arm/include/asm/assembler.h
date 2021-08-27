@@ -194,6 +194,19 @@
 #define ALT_UP_B(label) b label
 #endif
 
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+/*
+ * Instruction barrier
+ */
+	.macro	instr_sync
+#if __LINUX_ARM_ARCH__ >= 7
+	isb
+#elif __LINUX_ARM_ARCH__ == 6
+	mcr	p15, 0, r0, c7, c5, 4
+#endif
+	.endm
+#endif
+
 /*
  * SMP data memory barrier
  */
@@ -201,9 +214,17 @@
 #ifdef CONFIG_SMP
 #if __LINUX_ARM_ARCH__ >= 7
 	.ifeqs "\mode","arm"
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
+	ALT_SMP(dsb)
+#else
 	ALT_SMP(dmb)
+#endif
 	.else
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
+	ALT_SMP(W(dsb))
+#else
 	ALT_SMP(W(dmb))
+#endif
 	.endif
 #elif __LINUX_ARM_ARCH__ == 6
 	ALT_SMP(mcr	p15, 0, r0, c7, c10, 5)	@ dmb

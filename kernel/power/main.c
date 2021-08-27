@@ -48,8 +48,15 @@ int pm_notifier_call_chain(unsigned long val)
 	return notifier_to_errno(ret);
 }
 
+#ifdef CONFIG_ARCH_GEN3
+/*
+ *	Devices are suspended and resumed synchronously in Intel Media SOCs 
+*/
+int pm_async_enabled = 0;
+#else
 /* If set, devices may be suspended and resumed asynchronously. */
 int pm_async_enabled = 1;
+#endif
 
 static ssize_t pm_async_show(struct kobject *kobj, struct kobj_attribute *attr,
 			     char *buf)

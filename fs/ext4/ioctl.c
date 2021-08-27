@@ -18,9 +18,12 @@
 #include "ext4_jbd2.h"
 #include "ext4.h"
 
+#define MAX_32_NUM ((((unsigned long long) 1) << 32) - 1)
+
 long ext4_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	struct inode *inode = filp->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
 	struct ext4_inode_info *ei = EXT4_I(inode);
 	unsigned int flags;
 
@@ -44,7 +47,7 @@ long ext4_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		if (get_user(flags, (int __user *) arg))
 			return -EFAULT;
 
-		err = mnt_want_write(filp->f_path.mnt);
+		err = mnt_want_write_file(filp);
 		if (err)
 			return err;
 
@@ -138,7 +141,7 @@ flags_err:
 			err = ext4_ext_migrate(inode);
 flags_out:
 		mutex_unlock(&inode->i_mutex);
-		mnt_drop_write(filp->f_path.mnt);
+		mnt_drop_write_file(filp);
 		return err;
 	}
 	case EXT4_IOC_GETVERSION:
@@ -154,7 +157,7 @@ flags_out:
 		if (!inode_owner_or_capable(inode))
 			return -EPERM;
 
-		err = mnt_want_write(filp->f_path.mnt);
+		err = mnt_want_write_file(filp);
 		if (err)
 			return err;
 		if (get_user(generation, (int __user *) arg)) {
@@ -175,36 +178,11 @@ flags_out:
 		}
 		ext4_journal_stop(handle);
 setversion_out:
-		mnt_drop_write(filp->f_path.mnt);
+		mnt_drop_write_file(filp);
 		return err;
 	}
-#ifdef CONFIG_JBD2_DEBUG
-	case EXT4_IOC_WAIT_FOR_READONLY:
-		/*
-		 * This is racy - by the time we're woken up and running,
-		 * the superblock could be released.  And the module could
-		 * have been unloaded.  So sue me.
-		 *
-		 * Returns 1 if it slept, else zero.
-		 */
-		{
-			struct super_block *sb = inode->i_sb;
-			DECLARE_WAITQUEUE(wait, current);
-			int ret = 0;
-
-			set_current_state(TASK_INTERRUPTIBLE);
-			add_wait_queue(&EXT4_SB(sb)->ro_wait_queue, &wait);
-			if (timer_pending(&EXT4_SB(sb)->turn_ro_timer)) {
-				schedule();
-				ret = 1;
-			}
-			remove_wait_queue(&EXT4_SB(sb)->ro_wait_queue, &wait);
-			return ret;
-		}
-#endif
 	case EXT4_IOC_GROUP_EXTEND: {
 		ext4_fsblk_t n_blocks_count;
-		struct super_block *sb = inode->i_sb;
 		int err, err2=0;
 
 		err = ext4_resize_begin(sb);
@@ -216,7 +194,15 @@ setversion_out:
 			goto group_extend_out;
 		}
 
-		err = mnt_want_write(filp->f_path.mnt);
+		if (EXT4_HAS_RO_COMPAT_FEATURE(sb,
+			       EXT4_FEATURE_RO_COMPAT_BIGALLOC)) {
+			ext4_msg(sb, KERN_ERR,
+				 "Online resizing not supported with bigalloc");
+			err = -EOPNOTSUPP;
+			goto group_extend_out;
+		}
+
+		err = mnt_want_write_file(filp);
 		if (err)
 			goto group_extend_out;
 
@@ -229,7 +215,7 @@ setversion_out:
 		if (err == 0)
 			err = err2;
 
-		mnt_drop_write(filp->f_path.mnt);
+		mnt_drop_write_file(filp);
 group_extend_out:
 		ext4_resize_end(sb);
 		return err;
@@ -258,15 +244,20 @@ group_extend_out:
 			goto mext_out;
 		}
 
-		err = mnt_want_write(filp->f_path.mnt);
+		if (EXT4_HAS_RO_COMPAT_FEATURE(sb,
+			       EXT4_FEATURE_RO_COMPAT_BIGALLOC)) {
+			ext4_msg(sb, KERN_ERR,
+				 "Online defrag not supported with bigalloc");
+			return -EOPNOTSUPP;
+		}
+
+		err = mnt_want_write_file(filp);
 		if (err)
 			goto mext_out;
 
 		err = ext4_move_extents(filp, donor_filp, me.orig_start,
 					me.donor_start, me.len, &me.moved_len);
-		mnt_drop_write(filp->f_path.mnt);
-		if (me.moved_len > 0)
-			file_remove_suid(donor_filp);
+		mnt_drop_write_file(filp);
 
 		if (copy_to_user((struct move_extent __user *)arg,
 				 &me, sizeof(me)))
@@ -278,7 +269,6 @@ mext_out:
 
 	case EXT4_IOC_GROUP_ADD: {
 		struct ext4_new_group_data input;
-		struct super_block *sb = inode->i_sb;
 		int err, err2=0;
 
 		err = ext4_resize_begin(sb);
@@ -291,10 +281,23 @@ mext_out:
 			goto group_add_out;
 		}
 
-		err = mnt_want_write(filp->f_path.mnt);
+		if (EXT4_HAS_RO_COMPAT_FEATURE(sb,
+			       EXT4_FEATURE_RO_COMPAT_BIGALLOC)) {
+			ext4_msg(sb, KERN_ERR,
+				 "Online resizing not supported with bigalloc");
+			err = -EOPNOTSUPP;
+			goto group_add_out;
+		}
+
+		err = mnt_want_write_file(filp);
 		if (err)
 			goto group_add_out;
 
+#ifdef MY_ABC_HERE
+		if (!EXT4_HAS_INCOMPAT_FEATURE(sb, EXT4_FEATURE_INCOMPAT_FLEX_BG))
+			err = ext4_group_add_no_flex(sb, &input);
+		else
+#endif
 		err = ext4_group_add(sb, &input);
 		if (EXT4_SB(sb)->s_journal) {
 			jbd2_journal_lock_updates(EXT4_SB(sb)->s_journal);
@@ -304,7 +307,7 @@ mext_out:
 		if (err == 0)
 			err = err2;
 
-		mnt_drop_write(filp->f_path.mnt);
+		mnt_drop_write_file(filp);
 group_add_out:
 		ext4_resize_end(sb);
 		return err;
@@ -316,7 +319,7 @@ group_add_out:
 		if (!inode_owner_or_capable(inode))
 			return -EACCES;
 
-		err = mnt_want_write(filp->f_path.mnt);
+		err = mnt_want_write_file(filp);
 		if (err)
 			return err;
 		/*
@@ -328,7 +331,7 @@ group_add_out:
 		mutex_lock(&(inode->i_mutex));
 		err = ext4_ext_migrate(inode);
 		mutex_unlock(&(inode->i_mutex));
-		mnt_drop_write(filp->f_path.mnt);
+		mnt_drop_write_file(filp);
 		return err;
 	}
 
@@ -338,17 +341,70 @@ group_add_out:
 		if (!inode_owner_or_capable(inode))
 			return -EACCES;
 
-		err = mnt_want_write(filp->f_path.mnt);
+		err = mnt_want_write_file(filp);
 		if (err)
 			return err;
 		err = ext4_alloc_da_blocks(inode);
-		mnt_drop_write(filp->f_path.mnt);
+		mnt_drop_write_file(filp);
+		return err;
+	}
+
+	case EXT4_IOC_RESIZE_FS: {
+		ext4_fsblk_t n_blocks_count;
+		struct super_block *sb = inode->i_sb;
+		int err = 0, err2 = 0;
+
+		if (EXT4_HAS_RO_COMPAT_FEATURE(sb,
+			       EXT4_FEATURE_RO_COMPAT_BIGALLOC)) {
+			ext4_msg(sb, KERN_ERR,
+				 "Online resizing not (yet) supported with bigalloc");
+			return -EOPNOTSUPP;
+		}
+
+		if (EXT4_HAS_INCOMPAT_FEATURE(sb,
+			       EXT4_FEATURE_INCOMPAT_META_BG)) {
+			ext4_msg(sb, KERN_ERR,
+				 "Online resizing not (yet) supported with meta_bg");
+			return -EOPNOTSUPP;
+		}
+
+		if (copy_from_user(&n_blocks_count, (__u64 __user *)arg,
+				   sizeof(__u64))) {
+			return -EFAULT;
+		}
+
+		if (n_blocks_count > MAX_32_NUM &&
+		    !EXT4_HAS_INCOMPAT_FEATURE(sb,
+					       EXT4_FEATURE_INCOMPAT_64BIT)) {
+			ext4_msg(sb, KERN_ERR,
+				 "File system only supports 32-bit block numbers");
+			return -EOPNOTSUPP;
+		}
+
+		err = ext4_resize_begin(sb);
+		if (err)
+			return err;
+
+		err = mnt_want_write_file(filp);
+		if (err)
+			goto resizefs_out;
+
+		err = ext4_resize_fs(sb, n_blocks_count);
+		if (EXT4_SB(sb)->s_journal) {
+			jbd2_journal_lock_updates(EXT4_SB(sb)->s_journal);
+			err2 = jbd2_journal_flush(EXT4_SB(sb)->s_journal);
+			jbd2_journal_unlock_updates(EXT4_SB(sb)->s_journal);
+		}
+		if (err == 0)
+			err = err2;
+		mnt_drop_write_file(filp);
+resizefs_out:
+		ext4_resize_end(sb);
 		return err;
 	}
 
 	case FITRIM:
 	{
-		struct super_block *sb = inode->i_sb;
 		struct request_queue *q = bdev_get_queue(sb->s_bdev);
 		struct fstrim_range range;
 		int ret = 0;
@@ -359,7 +415,14 @@ group_add_out:
 		if (!blk_queue_discard(q))
 			return -EOPNOTSUPP;
 
-		if (copy_from_user(&range, (struct fstrim_range *)arg,
+		if (EXT4_HAS_RO_COMPAT_FEATURE(sb,
+			       EXT4_FEATURE_RO_COMPAT_BIGALLOC)) {
+			ext4_msg(sb, KERN_ERR,
+				 "FITRIM not supported with bigalloc");
+			return -EOPNOTSUPP;
+		}
+
+		if (copy_from_user(&range, (struct fstrim_range __user *)arg,
 		    sizeof(range)))
 			return -EFAULT;
 
@@ -438,6 +501,7 @@ long ext4_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	}
 	case EXT4_IOC_MOVE_EXT:
 	case FITRIM:
+	case EXT4_IOC_RESIZE_FS:
 		break;
 	default:
 		return -ENOIOCTLCMD;

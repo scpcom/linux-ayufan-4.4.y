@@ -44,6 +44,9 @@ struct mv_adp_desc {
 	MV_PVOID          Base_Address[ROUNDING(MAX_BASE_ADDRESS, 2)];
 
 	MV_U32            max_io;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,11)
+		unsigned int   pci_config_space[16];
+#endif
 
 #ifdef _OS_LINUX
 	dev_t             dev_no;

@@ -402,7 +402,7 @@ SYSCALL_DEFINE1(chdir, const char __user *, filename)
 #ifdef CONFIG_FS_SYNO_ACL
 	inode = path.dentry->d_inode;
 	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(path.dentry, MAY_EXEC | MAY_CHDIR);
+		error = inode->i_op->syno_permission(path.dentry, MAY_EXEC);
 	} else {
 		error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
 	}
@@ -439,7 +439,7 @@ SYSCALL_DEFINE1(fchdir, unsigned int, fd)
 
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(file->f_path.dentry, MAY_EXEC | MAY_CHDIR);
+		error = inode->i_op->syno_permission(file->f_path.dentry, MAY_EXEC);
 	} else
 #endif
 	error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
@@ -466,7 +466,7 @@ SYSCALL_DEFINE1(chroot, const char __user *, filename)
 #ifdef CONFIG_FS_SYNO_ACL
 	inode = path.dentry->d_inode;
 	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(path.dentry, MAY_EXEC | MAY_CHDIR);
+		error = inode->i_op->syno_permission(path.dentry, MAY_EXEC);
 	} else {
 		error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
 	}
@@ -691,7 +691,7 @@ SYSCALL_DEFINE3(fchown, unsigned int, fd, uid_t, user, gid_t, group)
 	dentry = file->f_path.dentry;
 	audit_inode(NULL, dentry);
 	error = chown_common(&file->f_path, user, group);
-	mnt_drop_write(file->f_path.mnt);
+	mnt_drop_write_file(file);
 out_fput:
 	fput(file);
 out:

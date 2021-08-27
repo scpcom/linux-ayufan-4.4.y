@@ -111,6 +111,21 @@ u64 div64_u64(u64 dividend, u64 divisor)
 EXPORT_SYMBOL(div64_u64);
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA)
+u64
+mod_u64_rem64(u64 dividend, u64 divisor)
+{
+	if (dividend < divisor) {
+		return dividend;
+	} else if (dividend == divisor) {
+		return (u64)0;
+	}
+
+	return dividend - (div64_u64(dividend, divisor) * divisor);
+}
+EXPORT_SYMBOL(mod_u64_rem64);
+#endif
+
 /**
  * div64_s64 - signed 64bit divide with 64bit divisor
  * @dividend:	64bit dividend

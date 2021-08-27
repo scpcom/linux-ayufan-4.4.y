@@ -131,6 +131,10 @@
 #define SYNO_SATA_DEVICE_PREFIX	   "sd"
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)    
+#if 0
+#define SYNO_INTERNAL_MICROSD_NAME "4-4"
+#endif
+
 #endif
 
 #define SYNO_RTL8712_DEBUG_MSG 0

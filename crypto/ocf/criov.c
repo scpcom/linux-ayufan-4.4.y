@@ -34,9 +34,6 @@
 __FBSDID("$FreeBSD: src/sys/opencrypto/criov.c,v 1.5 2006/06/04 22:15:13 pjd Exp $");
  */
 
-#ifndef AUTOCONF_INCLUDED
-#include <linux/config.h>
-#endif
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/slab.h>
@@ -154,7 +151,7 @@ skb_copy_bits_back(struct sk_buff *skb, int offset, caddr_t cp, int len)
 	offset -= skb_headlen(skb);
 	for (i = 0; len > 0 && i < skb_shinfo(skb)->nr_frags; i++) {
 		if (offset < skb_shinfo(skb)->frags[i].size) {
-			memcpy(page_address(skb_shinfo(skb)->frags[i].page) +
+			memcpy(page_address(skb_shinfo(skb)->frags[i].page.p) +
 					skb_shinfo(skb)->frags[i].page_offset,
 					cp, min_t(int, skb_shinfo(skb)->frags[i].size, len));
 			len -= skb_shinfo(skb)->frags[i].size;
