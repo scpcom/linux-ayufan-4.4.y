@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -116,7 +113,7 @@ static int axptemp_init_sensor(void)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 int axptemp_read_temp(void)
 #else
 static int axptemp_read_temp(void)
@@ -128,7 +125,7 @@ static int axptemp_read_temp(void)
 	reg = (reg & TSEN_STATUS_TEMP_OUT_MASK) >> TSEN_STATUS_TEMP_OUT_OFFSET;
 	return ARMADAXP_TSEN_RAW2TEMP(reg);
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 EXPORT_SYMBOL(axptemp_read_temp);
 #endif
 

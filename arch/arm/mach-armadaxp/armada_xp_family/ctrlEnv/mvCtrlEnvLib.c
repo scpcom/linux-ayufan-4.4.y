@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "mvCommon.h"
 #include "mvCtrlEnvLib.h"
@@ -432,7 +429,7 @@ MV_U32 mvCtrlTdmUnitIrqGet(MV_VOID)
 
 MV_U16 mvCtrlModelGet(MV_VOID)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 	MV_U32 model = MV_78230_DEV_ID;
 #else
 	MV_U32 devId;

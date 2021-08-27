@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -12,14 +9,14 @@
 #include <linux/platform_device.h>
 #include <linux/memory.h>
 #include <plat/mv_xor.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA)
 #include <linux/prefetch.h>
 #endif
 #include "mv_xor.h"
 
 static void mv_xor_issue_pending(struct dma_chan *chan);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 unsigned int dummy1[MV_XOR_MIN_BYTE_COUNT];
 unsigned int dummy2[MV_XOR_MIN_BYTE_COUNT];
 dma_addr_t dummy1_addr, dummy2_addr;
@@ -37,25 +34,25 @@ static struct mv_xor_save_regs saved_regs;
 #define to_mv_xor_slot(tx)		\
 	container_of(tx, struct mv_xor_desc_slot, async_tx)
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static void mv_desc_init(struct mv_xor_desc_slot *desc, unsigned int srcs, unsigned long flags)
 #else
 static void mv_desc_init(struct mv_xor_desc_slot *desc, unsigned long flags)
 #endif
 {
 	struct mv_xor_desc *hw_desc = desc->hw_desc;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	u32 command = 0;
 #endif
 
 	hw_desc->status = (1 << 31);
 	hw_desc->phy_next_desc = 0;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	hw_desc->desc_command = (1 << 31);
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (flags & DMA_PREP_INTERRUPT)
 		command = (1 << 31);
 
@@ -76,7 +73,7 @@ static u32 mv_desc_get_src_addr(struct mv_xor_desc_slot *desc,
 				int src_idx)
 {
 	struct mv_xor_desc *hw_desc = desc->hw_desc;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	return hw_desc->phy_src_addr[mv_phy_src_idx(src_idx)];
 #else
 	return hw_desc->phy_src_addr[src_idx];
@@ -98,7 +95,7 @@ static void mv_desc_set_next_desc(struct mv_xor_desc_slot *desc,
 	hw_desc->phy_next_desc = next_desc_addr;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 static void mv_desc_clear_next_desc(struct mv_xor_desc_slot *desc)
 {
@@ -119,7 +116,7 @@ static void mv_desc_set_dest_addr(struct mv_xor_desc_slot *desc,
 	hw_desc->phy_dest_addr = addr;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 static int mv_chan_memset_slot_count(size_t len)
 {
@@ -134,12 +131,12 @@ static void mv_desc_set_src_addr(struct mv_xor_desc_slot *desc,
 				 int index, dma_addr_t addr)
 {
 	struct mv_xor_desc *hw_desc = desc->hw_desc;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	hw_desc->phy_src_addr[mv_phy_src_idx(index)] = addr;
 #else
 	hw_desc->phy_src_addr[index] = addr;
 #endif
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	if (desc->type == DMA_XOR)
 		hw_desc->desc_command |= (1 << index);
@@ -148,7 +145,7 @@ static void mv_desc_set_src_addr(struct mv_xor_desc_slot *desc,
 
 static u32 mv_chan_get_current_desc(struct mv_xor_chan *chan)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	return readl_relaxed(XOR_CURR_DESC(chan));
 #else
 	return __raw_readl(XOR_CURR_DESC(chan));
@@ -158,7 +155,7 @@ static u32 mv_chan_get_current_desc(struct mv_xor_chan *chan)
 static void mv_chan_set_next_descriptor(struct mv_xor_chan *chan,
 					u32 next_desc_addr)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	writel_relaxed(next_desc_addr, XOR_NEXT_DESC(chan));
 #else
 	__raw_writel(next_desc_addr, XOR_NEXT_DESC(chan));
@@ -167,7 +164,7 @@ static void mv_chan_set_next_descriptor(struct mv_xor_chan *chan,
 
 static void mv_chan_set_dest_pointer(struct mv_xor_chan *chan, u32 desc_addr)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	writel_relaxed(desc_addr, XOR_DEST_POINTER(chan));
 #else
 	__raw_writel(desc_addr, XOR_DEST_POINTER(chan));
@@ -176,7 +173,7 @@ static void mv_chan_set_dest_pointer(struct mv_xor_chan *chan, u32 desc_addr)
 
 static void mv_chan_set_block_size(struct mv_xor_chan *chan, u32 block_size)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	writel_relaxed(block_size, XOR_BLOCK_SIZE(chan));
 #else
 	__raw_writel(block_size, XOR_BLOCK_SIZE(chan));
@@ -185,7 +182,7 @@ static void mv_chan_set_block_size(struct mv_xor_chan *chan, u32 block_size)
 
 static void mv_chan_set_value(struct mv_xor_chan *chan, u32 value)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	writel_relaxed(value, XOR_INIT_VALUE_LOW(chan));
 	writel_relaxed(value, XOR_INIT_VALUE_HIGH(chan));
 #else
@@ -194,7 +191,7 @@ static void mv_chan_set_value(struct mv_xor_chan *chan, u32 value)
 #endif
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 static void mv_chan_set_outstanding_reads_value(struct mv_xor_chan *chan, u32 value)
 {
 	writel_relaxed(value, XOR_OUTSTANDING_RDEADS(chan));
@@ -203,7 +200,7 @@ static void mv_chan_set_outstanding_reads_value(struct mv_xor_chan *chan, u32 va
 
 static void mv_chan_unmask_interrupts(struct mv_xor_chan *chan)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	u32 val = readl_relaxed(XOR_INTR_MASK(chan));
 	val |= XOR_INTR_MASK_VALUE << (chan->idx * 16);
 	writel_relaxed(val, XOR_INTR_MASK(chan));
@@ -216,7 +213,7 @@ static void mv_chan_unmask_interrupts(struct mv_xor_chan *chan)
 
 static u32 mv_chan_get_intr_cause(struct mv_xor_chan *chan)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	u32 intr_cause = readl_relaxed(XOR_INTR_CAUSE(chan));
 #else
 	u32 intr_cause = __raw_readl(XOR_INTR_CAUSE(chan));
@@ -235,12 +232,12 @@ static int mv_is_err_intr(u32 intr_cause)
 
 static void mv_xor_device_clear_eoc_cause(struct mv_xor_chan *chan)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	u32 val = ~(3 << (chan->idx * 16));
 	dev_dbg(chan->device->common.dev, "%s, val 0x%08x\n", __func__, val);
 	writel_relaxed(val, XOR_INTR_CAUSE(chan));
 #else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA)
 	u32 val = ~(3 << (chan->idx * 16));
 #else
 	u32 val = ~(1 << (chan->idx * 16));
@@ -253,7 +250,7 @@ static void mv_xor_device_clear_eoc_cause(struct mv_xor_chan *chan)
 static void mv_xor_device_clear_err_status(struct mv_xor_chan *chan)
 {
 	u32 val = 0xFFFF0000 >> (chan->idx * 16);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	writel_relaxed(val, XOR_INTR_CAUSE(chan));
 #else
 	__raw_writel(val, XOR_INTR_CAUSE(chan));
@@ -277,7 +274,7 @@ static void mv_set_mode(struct mv_xor_chan *chan,
 			       enum dma_transaction_type type)
 {
 	u32 op_mode;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	u32 config = readl_relaxed(XOR_CONFIG(chan));
 #else
 	u32 config = __raw_readl(XOR_CONFIG(chan));
@@ -303,7 +300,7 @@ static void mv_set_mode(struct mv_xor_chan *chan,
 	config &= ~0x7;
 	config |= op_mode;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(__BIG_ENDIAN)
 	config |= XOR_DESCRIPTOR_SWAP;
 #else
@@ -319,16 +316,16 @@ static void mv_set_mode(struct mv_xor_chan *chan,
 
 static void mv_chan_activate(struct mv_xor_chan *chan)
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	u32 activation;
 #endif
 
 	dev_dbg(chan->device->common.dev, " activate chan.\n");
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	writel_relaxed(1, XOR_ACTIVATION(chan));
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_ARMADA)
 	__raw_writel(1, XOR_ACTIVATION(chan));
 #else
 	activation = __raw_readl(XOR_ACTIVATION(chan));
@@ -339,7 +336,7 @@ static void mv_chan_activate(struct mv_xor_chan *chan)
 
 static char mv_chan_is_busy(struct mv_xor_chan *chan)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 	u32 state = readl_relaxed(XOR_ACTIVATION(chan));
 #else
 	u32 state = __raw_readl(XOR_ACTIVATION(chan));
@@ -349,7 +346,7 @@ static char mv_chan_is_busy(struct mv_xor_chan *chan)
 	return (state == 1) ? 1 : 0;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 static int mv_chan_xor_slot_count(size_t len, int src_cnt)
 {
@@ -385,7 +382,7 @@ static void mv_xor_start_new_chain(struct mv_xor_chan *mv_chan,
 		 
 		mv_chan_set_next_descriptor(mv_chan, sw_desc->async_tx.phys);
 	}
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	mv_chan_activate(mv_chan);
 #else
 	mv_chan->pending += sw_desc->slot_cnt;
@@ -399,7 +396,7 @@ mv_xor_run_tx_complete_actions(struct mv_xor_desc_slot *desc,
 {
 	BUG_ON(desc->async_tx.cookie < 0);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	dev_dbg(mv_chan->device->common.dev, "%s %d: desc %p\n",
 		__func__, __LINE__, desc);
 #endif
@@ -410,7 +407,7 @@ mv_xor_run_tx_complete_actions(struct mv_xor_desc_slot *desc,
 			desc->async_tx.callback(
 				desc->async_tx.callback_param);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		if (desc->unmap_len) {
 			struct mv_xor_desc_slot *unmap = desc;
 #else
@@ -447,7 +444,7 @@ mv_xor_run_tx_complete_actions(struct mv_xor_desc_slot *desc,
 						       DMA_TO_DEVICE);
 				}
 			}
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 			desc->group_head = NULL;
 #endif
@@ -502,7 +499,7 @@ static void __mv_xor_slot_cleanup(struct mv_xor_chan *mv_chan)
 	u32 current_desc = mv_chan_get_current_desc(mv_chan);
 	int seen_current = 0;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	dev_dbg(mv_chan->device->common.dev, "%s %d\n", __func__, __LINE__);
 #endif
@@ -546,7 +543,7 @@ static void
 mv_xor_slot_cleanup(struct mv_xor_chan *mv_chan)
 {
 	spin_lock_bh(&mv_chan->lock);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	dma_io_sync();
 #endif
 	__mv_xor_slot_cleanup(mv_chan);
@@ -560,14 +557,14 @@ static void mv_xor_tasklet(unsigned long data)
 }
 
 static struct mv_xor_desc_slot *
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 mv_xor_alloc_slots(struct mv_xor_chan *mv_chan)
 #else
 mv_xor_alloc_slots(struct mv_xor_chan *mv_chan, int num_slots,
 		    int slots_per_op)
 #endif
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	struct mv_xor_desc_slot *iter, *_iter;
 	int retry = 0;
 #else
@@ -577,7 +574,7 @@ mv_xor_alloc_slots(struct mv_xor_chan *mv_chan, int num_slots,
 #endif
 
 retry:
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	slots_found = 0;
 #endif
@@ -597,14 +594,14 @@ retry:
 			if (retry)
 				break;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 			slots_found = 0;
 #endif
 			continue;
 		}
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		 
 		async_tx_ack(&iter->async_tx);
 		
@@ -676,7 +673,7 @@ mv_xor_tx_submit(struct dma_async_tx_descriptor *tx)
 {
 	struct mv_xor_desc_slot *sw_desc = to_mv_xor_slot(tx);
 	struct mv_xor_chan *mv_chan = to_mv_xor_chan(tx->chan);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	struct mv_xor_desc_slot *old_chain_tail;
 #else
 	struct mv_xor_desc_slot *grp_start, *old_chain_tail;
@@ -685,7 +682,7 @@ mv_xor_tx_submit(struct dma_async_tx_descriptor *tx)
 	int new_hw_chain = 1;
 
 	dev_dbg(mv_chan->device->common.dev,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		"%s sw_desc %p: async_tx %p, hw desc %x\n",
 		__func__, sw_desc, &sw_desc->async_tx, sw_desc->async_tx.phys);
 #else
@@ -693,7 +690,7 @@ mv_xor_tx_submit(struct dma_async_tx_descriptor *tx)
 		__func__, sw_desc, &sw_desc->async_tx);
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	grp_start = sw_desc->group_head;
 #endif
@@ -702,7 +699,7 @@ mv_xor_tx_submit(struct dma_async_tx_descriptor *tx)
 	cookie = mv_desc_assign_cookie(mv_chan, sw_desc);
 
 	if (list_empty(&mv_chan->chain))
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		list_add_tail(&sw_desc->chain_node, &mv_chan->chain);
 #else
 		list_splice_init(&sw_desc->tx_list, &mv_chan->chain);
@@ -713,21 +710,21 @@ mv_xor_tx_submit(struct dma_async_tx_descriptor *tx)
 		old_chain_tail = list_entry(mv_chan->chain.prev,
 					    struct mv_xor_desc_slot,
 					    chain_node);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		list_add_tail(&sw_desc->chain_node, &mv_chan->chain);
 #else
 		list_splice_init(&grp_start->tx_list,
 				 &old_chain_tail->chain_node);
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		if (!mv_can_chain(sw_desc))
 #else
 		if (!mv_can_chain(grp_start))
 #endif
 			goto submit_done;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		dev_dbg(mv_chan->device->common.dev, "Append to last desc %p hw %x\n",
 			old_chain_tail, old_chain_tail->async_tx.phys);
 #else
@@ -735,7 +732,7 @@ mv_xor_tx_submit(struct dma_async_tx_descriptor *tx)
 			old_chain_tail->async_tx.phys);
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		mv_desc_set_next_desc(old_chain_tail, sw_desc->async_tx.phys);
 #else
 		mv_desc_set_next_desc(old_chain_tail, grp_start->async_tx.phys);
@@ -750,7 +747,7 @@ mv_xor_tx_submit(struct dma_async_tx_descriptor *tx)
 	}
 
 	if (new_hw_chain)
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		mv_xor_start_new_chain(mv_chan, sw_desc);
 #else
 		mv_xor_start_new_chain(mv_chan, grp_start);
@@ -787,7 +784,7 @@ static int mv_xor_alloc_chan_resources(struct dma_chan *chan)
 		slot->async_tx.tx_submit = mv_xor_tx_submit;
 		INIT_LIST_HEAD(&slot->chain_node);
 		INIT_LIST_HEAD(&slot->slot_node);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 		INIT_LIST_HEAD(&slot->tx_list);
 #endif
@@ -819,7 +816,7 @@ mv_xor_prep_dma_memcpy(struct dma_chan *chan, dma_addr_t dest, dma_addr_t src,
 		size_t len, unsigned long flags)
 {
 	struct mv_xor_chan *mv_chan = to_mv_xor_chan(chan);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	struct mv_xor_desc_slot *sw_desc;
 #else
 	struct mv_xor_desc_slot *sw_desc, *grp_start;
@@ -827,7 +824,7 @@ mv_xor_prep_dma_memcpy(struct dma_chan *chan, dma_addr_t dest, dma_addr_t src,
 #endif
 
 	dev_dbg(mv_chan->device->common.dev,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		"%s dest: %x src %x len: %u flags: %lx\n",
 #else
 		"%s dest: %x src %x len: %u flags: %ld\n",
@@ -839,7 +836,7 @@ mv_xor_prep_dma_memcpy(struct dma_chan *chan, dma_addr_t dest, dma_addr_t src,
 	BUG_ON(len > MV_XOR_MAX_BYTE_COUNT);
 
 	spin_lock_bh(&mv_chan->lock);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	sw_desc = mv_xor_alloc_slots(mv_chan);
 #else
 	slot_cnt = mv_chan_memcpy_slot_count(len);
@@ -847,13 +844,13 @@ mv_xor_prep_dma_memcpy(struct dma_chan *chan, dma_addr_t dest, dma_addr_t src,
 #endif
 
 	if (sw_desc) {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		sw_desc->type = DMA_XOR;
 #else
 		sw_desc->type = DMA_MEMCPY;
 #endif
 		sw_desc->async_tx.flags = flags;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		mv_desc_init(sw_desc, 1, flags);
 		mv_desc_set_byte_count(sw_desc, len);
 		mv_desc_set_dest_addr(sw_desc, dest);
@@ -877,7 +874,7 @@ mv_xor_prep_dma_memcpy(struct dma_chan *chan, dma_addr_t dest, dma_addr_t src,
 	return sw_desc ? &sw_desc->async_tx : NULL;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 struct dma_async_tx_descriptor *
 mv_xor_prep_dma_interrupt(struct dma_chan *chan, unsigned long flags)
 {
@@ -911,7 +908,7 @@ mv_xor_prep_dma_memset(struct dma_chan *chan, dma_addr_t dest, int value,
 		       size_t len, unsigned long flags)
 {
 	struct mv_xor_chan *mv_chan = to_mv_xor_chan(chan);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	struct mv_xor_desc_slot *sw_desc;
 #else
 	struct mv_xor_desc_slot *sw_desc, *grp_start;
@@ -919,7 +916,7 @@ mv_xor_prep_dma_memset(struct dma_chan *chan, dma_addr_t dest, int value,
 #endif
 
 	dev_dbg(mv_chan->device->common.dev,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		"%s dest: %x len: %u flags: %lx\n",
 #else
 		"%s dest: %x len: %u flags: %ld\n",
@@ -931,7 +928,7 @@ mv_xor_prep_dma_memset(struct dma_chan *chan, dma_addr_t dest, int value,
 	BUG_ON(len > MV_XOR_MAX_BYTE_COUNT);
 
 	spin_lock_bh(&mv_chan->lock);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	sw_desc = mv_xor_alloc_slots(mv_chan);
 #else
 	slot_cnt = mv_chan_memset_slot_count(len);
@@ -940,7 +937,7 @@ mv_xor_prep_dma_memset(struct dma_chan *chan, dma_addr_t dest, int value,
 	if (sw_desc) {
 		sw_desc->type = DMA_MEMSET;
 		sw_desc->async_tx.flags = flags;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		mv_desc_init(sw_desc, 0, flags);
 		mv_desc_set_byte_count(sw_desc, len);
 		mv_desc_set_dest_addr(sw_desc, dest);
@@ -967,7 +964,7 @@ mv_xor_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 		    unsigned int src_cnt, size_t len, unsigned long flags)
 {
 	struct mv_xor_chan *mv_chan = to_mv_xor_chan(chan);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	struct mv_xor_desc_slot *sw_desc;
 #else
 	struct mv_xor_desc_slot *sw_desc, *grp_start;
@@ -977,14 +974,14 @@ mv_xor_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 	if (unlikely(len < MV_XOR_MIN_BYTE_COUNT))
 		return NULL;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	BUG_ON(unlikely(len > MV_XOR_MAX_BYTE_COUNT));
 #else
 	BUG_ON(len > MV_XOR_MAX_BYTE_COUNT);
 #endif
 
 	dev_dbg(mv_chan->device->common.dev,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		"%s src_cnt: %d len: dest %x %u flags: %lx\n",
 #else
 		"%s src_cnt: %d len: dest %x %u flags: %ld\n",
@@ -992,7 +989,7 @@ mv_xor_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 		__func__, src_cnt, len, dest, flags);
 
 	spin_lock_bh(&mv_chan->lock);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	sw_desc = mv_xor_alloc_slots(mv_chan);
 #else
 	slot_cnt = mv_chan_xor_slot_count(len, src_cnt);
@@ -1001,14 +998,14 @@ mv_xor_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 	if (sw_desc) {
 		sw_desc->type = DMA_XOR;
 		sw_desc->async_tx.flags = flags;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		mv_desc_init(sw_desc, src_cnt, flags);
 #else
 		grp_start = sw_desc->group_head;
 		mv_desc_init(grp_start, flags);
 #endif
 		 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		mv_desc_set_byte_count(sw_desc, len);
 		mv_desc_set_dest_addr(sw_desc, dest);
 #else
@@ -1018,7 +1015,7 @@ mv_xor_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 		sw_desc->unmap_src_cnt = src_cnt;
 		sw_desc->unmap_len = len;
 		while (src_cnt--)
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 			mv_desc_set_src_addr(sw_desc, src_cnt, src[src_cnt]);
 #else
 			mv_desc_set_src_addr(grp_start, src_cnt, src[src_cnt]);
@@ -1078,7 +1075,7 @@ static enum dma_status mv_xor_status(struct dma_chan *chan,
 
 	last_used = chan->cookie;
 	last_complete = mv_chan->completed_cookie;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	spin_lock_bh(&mv_chan->lock);
 #endif
 	mv_chan->is_complete_cookie = cookie;
@@ -1087,12 +1084,12 @@ static enum dma_status mv_xor_status(struct dma_chan *chan,
 	ret = dma_async_is_complete(cookie, last_complete, last_used);
 	if (ret == DMA_SUCCESS) {
 		mv_xor_clean_completed_slots(mv_chan);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		spin_unlock_bh(&mv_chan->lock);
 #endif
 		return ret;
 	}
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	spin_unlock_bh(&mv_chan->lock);
 #endif
 	mv_xor_slot_cleanup(mv_chan);
@@ -1108,7 +1105,7 @@ static void mv_dump_xor_regs(struct mv_xor_chan *chan)
 {
 	u32 val;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	val = readl_relaxed(XOR_CONFIG(chan));
 #else
 	val = __raw_readl(XOR_CONFIG(chan));
@@ -1116,7 +1113,7 @@ static void mv_dump_xor_regs(struct mv_xor_chan *chan)
 	dev_printk(KERN_ERR, chan->device->common.dev,
 		   "config       0x%08x.\n", val);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	val = readl_relaxed(XOR_ACTIVATION(chan));
 #else
 	val = __raw_readl(XOR_ACTIVATION(chan));
@@ -1124,7 +1121,7 @@ static void mv_dump_xor_regs(struct mv_xor_chan *chan)
 	dev_printk(KERN_ERR, chan->device->common.dev,
 		   "activation   0x%08x.\n", val);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	val = readl_relaxed(XOR_INTR_CAUSE(chan));
 #else
 	val = __raw_readl(XOR_INTR_CAUSE(chan));
@@ -1132,7 +1129,7 @@ static void mv_dump_xor_regs(struct mv_xor_chan *chan)
 	dev_printk(KERN_ERR, chan->device->common.dev,
 		   "intr cause   0x%08x.\n", val);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	val = readl_relaxed(XOR_INTR_MASK(chan));
 #else
 	val = __raw_readl(XOR_INTR_MASK(chan));
@@ -1140,7 +1137,7 @@ static void mv_dump_xor_regs(struct mv_xor_chan *chan)
 	dev_printk(KERN_ERR, chan->device->common.dev,
 		   "intr mask    0x%08x.\n", val);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	val = readl_relaxed(XOR_ERROR_CAUSE(chan));
 #else
 	val = __raw_readl(XOR_ERROR_CAUSE(chan));
@@ -1148,7 +1145,7 @@ static void mv_dump_xor_regs(struct mv_xor_chan *chan)
 	dev_printk(KERN_ERR, chan->device->common.dev,
 		   "error cause  0x%08x.\n", val);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	val = readl_relaxed(XOR_ERROR_ADDR(chan));
 #else
 	val = __raw_readl(XOR_ERROR_ADDR(chan));
@@ -1195,7 +1192,7 @@ static void mv_xor_issue_pending(struct dma_chan *chan)
 {
 	struct mv_xor_chan *mv_chan = to_mv_xor_chan(chan);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	mv_xor_slot_cleanup(mv_chan);
 #else
 	if (mv_chan->pending >= MV_XOR_THRESHOLD) {
@@ -1411,7 +1408,7 @@ static int __devinit mv_xor_probe(struct platform_device *pdev)
 	struct dma_device *dma_dev;
 	struct mv_xor_platform_data *plat_data = pdev->dev.platform_data;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	dummy1_addr = dma_map_single(NULL, (void *)dummy1,
 				     MV_XOR_MIN_BYTE_COUNT, DMA_FROM_DEVICE);
 	dummy2_addr = dma_map_single(NULL, (void *)dummy1,
@@ -1449,7 +1446,7 @@ static int __devinit mv_xor_probe(struct platform_device *pdev)
 
 	if (dma_has_cap(DMA_MEMCPY, dma_dev->cap_mask))
 		dma_dev->device_prep_dma_memcpy = mv_xor_prep_dma_memcpy;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (dma_has_cap(DMA_INTERRUPT, dma_dev->cap_mask))
 		dma_dev->device_prep_dma_interrupt = mv_xor_prep_dma_interrupt;
 #endif
@@ -1478,7 +1475,7 @@ static int __devinit mv_xor_probe(struct platform_device *pdev)
 
 	mv_xor_device_clear_err_status(mv_chan);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #ifdef CONFIG_ARCH_ARMADA38X
 	 
 	mv_chan_set_outstanding_reads_value(mv_chan, 2);
@@ -1570,7 +1567,7 @@ mv_xor_conf_mbus_windows(struct mv_xor_shared_private *msp,
 	writel(win_enable, base + WINDOW_BAR_ENABLE(1));
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_PM
 static int mv_xor_suspend(struct platform_device *dev, pm_message_t state)
 {
@@ -1609,7 +1606,7 @@ static int mv_xor_resume(struct platform_device *dev)
 static struct platform_driver mv_xor_driver = {
 	.probe		= mv_xor_probe,
 	.remove		= __devexit_p(mv_xor_remove),
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_PM
 	.suspend	= mv_xor_suspend,
 	.resume		= mv_xor_resume,
@@ -1664,7 +1661,7 @@ static int mv_xor_shared_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_PM
 static int mv_xor_shared_resume(struct platform_device *dev)
 {
@@ -1684,7 +1681,7 @@ static int mv_xor_shared_resume(struct platform_device *dev)
 static struct platform_driver mv_xor_shared_driver = {
 	.probe		= mv_xor_shared_probe,
 	.remove		= mv_xor_shared_remove,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_PM
 	.resume		= mv_xor_shared_resume,
 #endif

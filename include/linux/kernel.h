@@ -449,7 +449,7 @@ ftrace_vprintk(const char *fmt, va_list ap)
 static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
 #endif  
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
  
 #define NIPQUAD(addr) \
     ((unsigned char *)&addr)[0], \

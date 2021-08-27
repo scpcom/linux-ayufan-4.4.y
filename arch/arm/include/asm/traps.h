@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _ASMARM_TRAP_H
 #define _ASMARM_TRAP_H
 
@@ -49,7 +46,7 @@ static inline int in_exception_text(unsigned long ptr)
 	return in ? : __in_irqentry_text(ptr);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 extern void __init early_trap_init(void *);
 #else
 extern void __init early_trap_init(void);

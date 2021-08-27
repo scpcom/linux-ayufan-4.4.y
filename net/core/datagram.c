@@ -252,7 +252,7 @@ current_frag:
 #endif
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
  
 int skb_copy_datagram_to_kernel_iovec(const struct sk_buff *skb, int offset,
 				      struct iovec *to, int len)

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __INCmvBoardEnvSpech
 #define __INCmvBoardEnvSpech
@@ -17,7 +14,7 @@
 #define MV_BOARD_DIMM_I2C_CHANNEL		0x0
 
 #define BOARD_ID_BASE			0x0
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 #define BOARD_ID_MAX_RESERVED	0xF
 #endif
 
@@ -25,7 +22,7 @@
 #define DB_88F6710_PCAC_ID		(DB_88F6710_BP_ID + 1)
 #define RD_88F6710_ID                   (DB_88F6710_PCAC_ID + 1)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 
 #define LAST_MV_BOARD_ID	RD_88F6710_ID
 #if LAST_MV_BOARD_ID > BOARD_ID_MAX_RESERVED
@@ -46,7 +43,7 @@
 #endif  
 #define INVALID_BAORD_ID			0xFFFFFFFF
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
  
 #define SYNO_DS213j_MPP0_7		0x00011111
 #define SYNO_DS213j_MPP8_15		0x00000000

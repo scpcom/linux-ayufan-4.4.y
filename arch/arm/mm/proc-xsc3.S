@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * linux/arch/arm/mm/proc-xsc3.S
  *
@@ -337,7 +334,7 @@ ENTRY(xsc3_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(xsc3_dma_unmap_area)
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	.globl	xsc3_flush_kern_cache_louis
 	.equ	xsc3_flush_kern_cache_louis, xsc3_flush_kern_cache_all
 #endif

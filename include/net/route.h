@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _ROUTE_H
 #define _ROUTE_H
@@ -48,7 +45,7 @@ struct rtable {
 	struct inet_peer	*peer;  
 	struct fib_info		*fi;  
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	bool 			nfp;
 #endif  

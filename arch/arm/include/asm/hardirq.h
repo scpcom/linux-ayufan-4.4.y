@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __ASM_HARDIRQ_H
 #define __ASM_HARDIRQ_H
 
@@ -12,7 +9,7 @@
 
 typedef struct {
 	unsigned int __softirq_pending;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	unsigned int local_pmu_irqs;
 #endif
 #ifdef CONFIG_SMP

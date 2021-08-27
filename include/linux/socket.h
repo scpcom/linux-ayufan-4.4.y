@@ -232,7 +232,7 @@ struct ucred {
 #define MSG_KERNSPACE   0x40000
 #define MSG_NOCATCHSIG	0x80000
 #endif
-#if defined(MY_DEF_HERE) 
+#if defined(CONFIG_SYNO_ARMADA_V2) 
 #define MSG_KERNSPACE	0x40000
 #define MSG_NOCATCHSIG	0x80000
 #endif
@@ -311,7 +311,7 @@ extern int put_cmsg(struct msghdr*, int level, int type, int len, void *data);
 extern void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 extern void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len);
 #endif
 

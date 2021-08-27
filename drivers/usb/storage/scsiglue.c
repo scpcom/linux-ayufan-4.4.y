@@ -22,7 +22,7 @@
 #define VENDOR_ID_PENTAX	0x0a17
 #define VENDOR_ID_MOTOROLA	0x22b8
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 extern struct usb_hub *hdev_to_hub(struct usb_device *hdev);
 extern int syno_get_hub_eh(struct usb_hub *hub);
 #endif
@@ -173,7 +173,7 @@ static int queuecommand_lck(struct scsi_cmnd *srb,
 
 static DEF_SCSI_QCMD(queuecommand)
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 static void wait_for_hub_EH(struct us_data *us)
 {
 	struct usb_device *udev = us->pusb_dev;
@@ -191,7 +191,7 @@ static int command_abort(struct scsi_cmnd *srb)
 
 	US_DEBUGP("%s called\n", __func__);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	wait_for_hub_EH(us);
 #endif
 
@@ -221,7 +221,7 @@ static int device_reset(struct scsi_cmnd *srb)
 
 	US_DEBUGP("%s called\n", __func__);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	wait_for_hub_EH(us);
 #endif
 
@@ -237,7 +237,7 @@ static int bus_reset(struct scsi_cmnd *srb)
 	struct us_data *us = host_to_us(srb->device->host);
 	int result;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	wait_for_hub_EH(us);
 #endif
 
@@ -251,7 +251,7 @@ void usb_stor_report_device_reset(struct us_data *us)
 	int i;
 	struct Scsi_Host *host = us_to_host(us);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	wait_for_hub_EH(us);
 #endif
 
@@ -266,7 +266,7 @@ void usb_stor_report_bus_reset(struct us_data *us)
 {
 	struct Scsi_Host *host = us_to_host(us);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	wait_for_hub_EH(us);
 #endif
 

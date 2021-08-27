@@ -1,8 +1,5 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 
 #include <linux/gpio.h>
 #include <linux/synobios.h>

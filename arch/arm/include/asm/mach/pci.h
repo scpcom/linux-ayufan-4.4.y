@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __ASM_MACH_PCI_H
 #define __ASM_MACH_PCI_H
@@ -13,7 +10,7 @@ struct hw_pci {
 	int		domain;
 #endif
 	struct list_head buses;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	void	**private_data;
 #endif
 	int		nr_controllers;
@@ -40,7 +37,7 @@ struct pci_sys_data {
 					 
 	int		(*map_irq)(const struct pci_dev *, u8, u8);
 	struct hw_pci	*hw;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	int		mv_controller_num;
 #endif
 	void		*private_data;	 

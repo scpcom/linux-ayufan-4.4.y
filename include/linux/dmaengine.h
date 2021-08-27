@@ -10,7 +10,7 @@
 #include <linux/dma-direction.h>
 #include <linux/scatterlist.h>
 #include <linux/bitmap.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/types.h>
 #endif
 #include <asm/page.h>
@@ -477,7 +477,7 @@ dma_cookie_t dma_async_memcpy_buf_to_pg(struct dma_chan *chan,
 dma_cookie_t dma_async_memcpy_pg_to_pg(struct dma_chan *chan,
 	struct page *dest_pg, unsigned int dest_off, struct page *src_pg,
 	unsigned int src_off, size_t len);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 dma_cookie_t dma_async_memcpy_sg_to_sg(struct dma_chan *chan,
 	struct scatterlist *dst_sg, unsigned int dst_nents,
 	struct scatterlist *src_sg, unsigned int src_nents);
@@ -621,7 +621,7 @@ int dma_async_device_register(struct dma_device *device);
 void dma_async_device_unregister(struct dma_device *device);
 void dma_run_dependencies(struct dma_async_tx_descriptor *tx);
 struct dma_chan *dma_find_channel(enum dma_transaction_type tx_type);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 struct dma_chan *net_dma_find_channel(void);
 #endif
 #define dma_request_channel(mask, x, y) __dma_request_channel(&(mask), x, y)
@@ -633,25 +633,25 @@ struct dma_page_list {
 };
 
 struct dma_pinned_list {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	int kernel;
 #endif
 	int nr_iovecs;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	int nr_pages;
 	struct sg_table	*sgts;
 #endif
 	struct dma_page_list page_list[0];
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 struct tcp_sock;
 int dma_pin_iovec_pages(struct tcp_sock *tp, struct iovec *iov, size_t len);
 #else
 struct dma_pinned_list *dma_pin_iovec_pages(struct iovec *iov, size_t len);
 #endif
 void dma_unpin_iovec_pages(struct dma_pinned_list* pinned_list);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 void dma_free_iovec_data(struct tcp_sock *tp);
 
 int dma_memcpy_fill_sg_from_iovec(struct dma_chan *chan, struct iovec *iov,
@@ -659,7 +659,7 @@ int dma_memcpy_fill_sg_from_iovec(struct dma_chan *chan, struct iovec *iov,
 	unsigned int offset,size_t len);
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_SPLICE_NET_DMA_SUPPORT
 struct dma_pinned_list *dma_pin_kernel_iovec_pages(struct iovec *iov, size_t len);
 void dma_unpin_kernel_iovec_pages(struct dma_pinned_list* pinned_list);

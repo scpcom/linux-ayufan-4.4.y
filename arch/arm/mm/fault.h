@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #ifndef __ARCH_ARM_FAULT_H
 #define __ARCH_ARM_FAULT_H
 

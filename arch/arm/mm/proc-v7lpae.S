@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * arch/arm/mm/proc-v7lpae.S
  *
@@ -138,7 +135,7 @@ ENTRY(cpu_v7_set_pte_ext)
 #ifdef CONFIG_MMU
 	tst	r2, #L_PTE_PRESENT
 	beq	1f
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 	tst     r3, #1 << (57 - 32)             @ L_PTE_NONE
 	bicne   r2, #L_PTE_VALID
 	bne     1f

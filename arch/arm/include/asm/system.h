@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __ASM_ARM_SYSTEM_H
 #define __ASM_ARM_SYSTEM_H
 
@@ -70,7 +67,7 @@ void die(const char *msg, struct pt_regs *regs, int err);
 struct siginfo;
 void arm_notify_die(const char *str, struct pt_regs *regs, struct siginfo *info,
 		unsigned long err, unsigned long trap);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #ifdef CONFIG_ARM_LPAE
 #define FAULT_CODE_ALIGNMENT	33
 #define FAULT_CODE_DEBUG	34
@@ -127,7 +124,7 @@ extern unsigned int user_debug;
 #if __LINUX_ARM_ARCH__ >= 7
 #define isb() __asm__ __volatile__ ("isb" : : : "memory")
 #define dsb() __asm__ __volatile__ ("dsb" : : : "memory")
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
 #define dmb() __asm__ __volatile__ ("dsb" : : : "memory")
 #else
 #define dmb() __asm__ __volatile__ ("dmb" : : : "memory")
@@ -235,7 +232,7 @@ do {									\
 #define swp_is_buggy
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 static inline int atomic_backoff_delay(void)
 {
 #ifdef CONFIG_SHEEVA_ERRATA_ARM_CPU_ADD_DELAY_FOR_STREX

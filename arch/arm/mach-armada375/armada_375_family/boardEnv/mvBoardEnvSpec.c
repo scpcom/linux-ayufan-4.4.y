@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "mvCommon.h"
 #include "mvBoardEnvLib.h"
@@ -10,7 +7,7 @@
 
 #define ARRSZ(x)                (sizeof(x) / sizeof(x[0]))
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 
 MV_BOARD_MAC_INFO syno_ds215j_BoardMacInfo[] = {
 	 
@@ -431,7 +428,7 @@ MV_BOARD_INFO db88f6720_board_info = {
 };
 
 MV_BOARD_INFO *marvellBoardInfoTbl[] = {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 	&syno_ds215j_info,
 	&syno_ds115_info,
 #else

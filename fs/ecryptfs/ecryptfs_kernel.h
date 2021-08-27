@@ -15,7 +15,7 @@
 #include <linux/nsproxy.h>
 #include <linux/backing-dev.h>
 #include <linux/ecryptfs.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/crypto.h>
 #endif
 
@@ -108,7 +108,7 @@ ecryptfs_get_key_payload_data(struct key *key)
 
 #define ECRYPTFS_MAX_KEYSET_SIZE 1024
 #define ECRYPTFS_MAX_CIPHER_NAME_SIZE 32
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE 32
 #endif
 #define ECRYPTFS_MAX_NUM_ENC_KEYS 64
@@ -120,7 +120,7 @@ ecryptfs_get_key_payload_data(struct key *key)
 #define ECRYPTFS_SIZE_AND_MARKER_BYTES (ECRYPTFS_FILE_SIZE_BYTES \
 					+ MAGIC_ECRYPTFS_MARKER_SIZE_BYTES)
 #define ECRYPTFS_DEFAULT_CIPHER "aes"
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define ECRYPTFS_DEFAULT_CIPHER_MODE "cbc"
 #endif
 #define ECRYPTFS_DEFAULT_KEY_BYTES 16
@@ -203,7 +203,7 @@ struct ecryptfs_crypt_stat {
 #ifdef MY_ABC_HERE
 	struct cryptoini cr_dm;  
 #else
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_ALPINE)
 	struct crypto_ablkcipher *tfm;
 #else
 	struct crypto_blkcipher *tfm;
@@ -211,7 +211,7 @@ struct ecryptfs_crypt_stat {
 #endif
 	struct crypto_hash *hash_tfm;  
 	unsigned char cipher[ECRYPTFS_MAX_CIPHER_NAME_SIZE];
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	unsigned char cipher_mode[ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE + 1];
 #endif
 	unsigned char key[ECRYPTFS_MAX_KEY_BYTES];
@@ -279,7 +279,7 @@ struct ecryptfs_mount_crypt_stat {
 	size_t global_default_fn_cipher_key_bytes;
 	unsigned char global_default_cipher_name[ECRYPTFS_MAX_CIPHER_NAME_SIZE
 						 + 1];
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	unsigned char global_default_cipher_mode_name[
 	    ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE + 1];
 #endif
@@ -556,7 +556,7 @@ int ecryptfs_read_and_validate_xattr_region(struct dentry *dentry,
 					    struct inode *inode);
 u8 ecryptfs_code_for_cipher_string(char *cipher_name, size_t key_bytes);
 int ecryptfs_cipher_code_to_string(char *str, u8 cipher_code);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 u8 ecryptfs_code_for_cipher_mode_string(char *mode_name);
 int ecryptfs_cipher_mode_code_to_string(char *str, u8 mode_code);
 #endif

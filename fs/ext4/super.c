@@ -2685,7 +2685,7 @@ static int ext4_feature_set_ok(struct super_block *sb, int readonly)
 		return 1;
 
 	if (EXT4_HAS_RO_COMPAT_FEATURE(sb, ~EXT4_FEATURE_RO_COMPAT_SUPP)) {
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 		if (EXT4_FEATURE_RO_COMPAT_METADATA_CSUM ==
 			(le32_to_cpu(EXT4_SB(sb)->s_es->s_feature_ro_compat) & ~EXT4_FEATURE_RO_COMPAT_SUPP)
 			&& is_syno_ext(sb)) {
@@ -3689,7 +3689,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		goto no_journal;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (EXT4_HAS_INCOMPAT_FEATURE(sb, EXT4_FEATURE_INCOMPAT_64BIT) &&
 #else
 	if (ext4_blocks_count(es) > 0xffffffffULL &&
@@ -3887,7 +3887,7 @@ no_journal:
 		Ext4Hash_lock_init=1;
 	}
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	{
 		char szDsmVersion[8] = {'\0'};
 		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);

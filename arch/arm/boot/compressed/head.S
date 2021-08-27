@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/boot/compressed/head.S
  *
@@ -12,19 +9,19 @@
  * published by the Free Software Foundation.
  */
 #include <linux/linkage.h>
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_ARMADA_XP)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARCH_ARMADA_XP)
 #include <mach/armadaxp.h>
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_ARMADA38X) 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_ARCH_ARMADA38X) 
 #include <mach/armada38x.h>
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_ARMADA375)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_ARCH_ARMADA375)
 #include <mach/armada375.h>
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_ARMADA370)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARCH_ARMADA370)
 #include <mach/armada370.h>
 #endif
 
@@ -141,7 +138,7 @@ start:
 		.rept	7
 		mov	r0, r0
 		.endr
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_BE8_ON_LE
 		setend	be
 #endif
@@ -156,11 +153,11 @@ start:
 		.word	_edata			@ zImage end address
  THUMB(		.thumb			)
 1:
-#if defined(CONFIG_PLAT_ARMADA) && defined(MY_DEF_HERE)
+#if defined(CONFIG_PLAT_ARMADA) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		bl register_base_fixup
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 1:
 #ifdef CONFIG_PLAT_ARMADA
 /* Update Internal Regs offset in case UBoot is configured
@@ -544,7 +541,7 @@ params:		ldr	r0, =0x10000100		@ params_phys for RPC
 		.align
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 #ifdef CONFIG_PLAT_ARMADA
 /*
  * Update internal registers offset.
@@ -754,10 +751,10 @@ __armv7_mmu_cache_on:
 		mcrne	p15, 0, r3, c2, c0, 0	@ load page table pointer
 		mcrne	p15, 0, r1, c3, c0, 0	@ load domain access control
 #endif
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		mcr     p15, 0, r0, c7, c5, 4   @ ISB
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		mcr	p15, 0, r0, c7, c5, 4	@ ISB
 #endif
 		mcr	p15, 0, r0, c1, c0, 0	@ load control register
@@ -794,7 +791,7 @@ __arm6_mmu_cache_on:
 
 __common_mmu_cache_on:
 #ifndef CONFIG_THUMB2_KERNEL
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_SHEEVA_ERRATA_ARM_CPU_4948
 		mrc 	p15, 1, r1, c15, c1, 0
 		orr     r1, r1, #1			@ Disable L0 cache.
@@ -990,14 +987,14 @@ proc_types:
 		W(b)	__armv4_mmu_cache_off
 		W(b)	__armv5tej_mmu_cache_flush
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_CPU_SHEEVA_PJ4B_V6)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_CPU_SHEEVA_PJ4B_V6)
 		.word	0x000f0000		@ Marvell PJ4B ARMv6
 		.word	0x000f0000
 #else
 		.word	0x0007b000		@ ARMv6
 		.word	0x000ff000
 #endif
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		W(b)	__armv4_mmu_cache_on
 		W(b)	__armv4_mmu_cache_off
 		W(b)	__armv6_mmu_cache_flush

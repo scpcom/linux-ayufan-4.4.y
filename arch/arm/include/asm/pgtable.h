@@ -6,7 +6,7 @@
 #define _ASMARM_PGTABLE_H
 
 #include <linux/const.h>
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 #else
 #include <asm-generic/4level-fixup.h>
 #endif
@@ -14,23 +14,23 @@
 
 #ifndef CONFIG_MMU
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 #include <asm-generic/4level-fixup.h>
 #endif
 #include "pgtable-nommu.h"
 
 #else
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 #include <asm-generic/pgtable-nopud.h>
 #endif
 #include <asm/memory.h>
 #include <mach/vmalloc.h>
 #include <asm/pgtable-hwdef.h>
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 #include <asm/pgtable-3level.h>
-#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
 #include <asm/pgtable-3level.h>
 #else
 #include <asm/pgtable-2level.h>
@@ -140,7 +140,7 @@ extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
 
 #define pgd_offset_k(addr)	pgd_offset(&init_mm, addr)
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_ARM_LPAE
 
 #define pud_none(pud)		(!pud_val(pud))
@@ -173,7 +173,7 @@ static inline pmd_t *pud_page_vaddr(pud_t pud)
 #define set_pud(pud,pudp)	do { } while (0)
 
 #endif	 
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_ALPINE)
 		 
 #else
  
@@ -186,7 +186,7 @@ static inline pmd_t *pud_page_vaddr(pud_t pud)
 
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_ARM_LPAE
 #define pmd_index(addr)		(((addr) >> PMD_SHIFT) & (PTRS_PER_PMD - 1))
 static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
@@ -199,7 +199,7 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 	return (pmd_t *)pud;
 }
 #endif
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_ALPINE)
 	 
 #else
 #define pmd_offset(dir, addr)	((pmd_t *)(dir))
@@ -208,7 +208,7 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 #define pmd_none(pmd)		(!pmd_val(pmd))
 #define pmd_present(pmd)	(pmd_val(pmd))
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 
 #define pmd_bad(pmd)		(!(pmd_val(pmd) & 2))
 
@@ -224,7 +224,7 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 		clean_pmd_entry(pmdp);	\
 	} while (0)
 
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_ALPINE)
 	 
 #else	 
 
@@ -272,7 +272,7 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 {
 #if defined(MY_ABC_HERE)
 	return __va((pmd_val(pmd) & PHYS_MASK & (s32)PMD_PAGE_ADDR_MASK) - PTE_HWTABLE_OFF);
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_ALPINE)
 	return __va(pmd_val(pmd) & PHYS_MASK & (s32)PTE_HWTABLE_MASK);
 #else
 	return __va(pmd_val(pmd) & PHYS_MASK & (s32)PAGE_MASK);
@@ -281,7 +281,7 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 
 #define pmd_page(pmd)		pfn_to_page(__phys_to_pfn(pmd_val(pmd) & PHYS_MASK))
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined (MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined (CONFIG_SYNO_ALPINE)
 #else
  
 #define pmd_addr_end(addr,end)	(end)
@@ -327,12 +327,12 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 	((pte_val(pte) & (L_PTE_PRESENT | L_PTE_USER)) == \
 	 (L_PTE_PRESENT | L_PTE_USER))
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,__pte(pte_val(pte)|(ext)))
 #elif defined(MY_ABC_HERE)
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte_val(pte),ext)
 #define uncache_pte_ext(ptep) cpu_uncache_pte_ext(ptep)
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_ALPINE)
 	 
 #else
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte,ext)

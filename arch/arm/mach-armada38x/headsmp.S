@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/linkage.h>
 #include <linux/init.h>
 
@@ -53,7 +50,7 @@ ENDPROC(v7_invalidate_l1)
  * until we're ready for them to initialise.
  */
 ENTRY(a38x_secondary_startup)
-#if defined(CONFIG_BE8_ON_LE) && defined(MY_DEF_HERE)
+#if defined(CONFIG_BE8_ON_LE) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	setend	be
 #endif
 	bl      v7_invalidate_l1

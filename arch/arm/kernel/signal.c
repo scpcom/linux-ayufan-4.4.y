@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/errno.h>
 #include <linux/signal.h>
@@ -626,7 +623,7 @@ static void do_signal(struct pt_regs *regs, int syscall)
 			}
 		}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 		 
@@ -636,7 +633,7 @@ static void do_signal(struct pt_regs *regs, int syscall)
 		}
 #endif
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	 
 	if (test_and_clear_thread_flag(TIF_RESTORE_SIGMASK))
 		set_current_blocked(&current->saved_sigmask);

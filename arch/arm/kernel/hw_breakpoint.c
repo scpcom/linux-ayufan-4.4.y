@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) "hw-breakpoint: " fmt
 
@@ -853,7 +850,7 @@ static int __init arch_hw_breakpoint_init(void)
 				max_watchpoint_len);
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	hook_fault_code(FAULT_CODE_DEBUG, hw_breakpoint_pending, SIGTRAP,
 			TRAP_HWBKPT, "watchpoint debug exception");
 	hook_ifault_code(FAULT_CODE_DEBUG, hw_breakpoint_pending, SIGTRAP,
@@ -868,7 +865,7 @@ static int __init arch_hw_breakpoint_init(void)
 	register_cpu_notifier(&dbg_reset_nb);
 	return 0;
 }
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #else
 arch_initcall(arch_hw_breakpoint_init);
 #endif

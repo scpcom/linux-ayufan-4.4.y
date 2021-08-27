@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef MV_XOR_H
 #define MV_XOR_H
@@ -17,7 +14,7 @@
 #define XOR_OPERATION_MODE_XOR		0
 #define XOR_OPERATION_MODE_MEMCPY	2
 #define XOR_OPERATION_MODE_MEMSET	4
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #define XOR_DESCRIPTOR_SWAP            BIT(14)
 #endif
 
@@ -35,8 +32,8 @@
 #define XOR_INTR_MASK(chan)	(chan->mmr_base + 0x40)
 #define XOR_ERROR_CAUSE(chan)	(chan->mmr_base + 0x50)
 #define XOR_ERROR_ADDR(chan)	(chan->mmr_base + 0x60)
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 #define XOR_OUTSTANDING_RDEADS(chan)	(chan->mmr_base + 0x80 + (chan->idx * 4))
 #endif
 #define XOR_INTR_MASK_VALUE	0x3F7
@@ -64,7 +61,7 @@ struct mv_xor_device {
 };
 
 struct mv_xor_chan {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	int			pending;
 #endif
@@ -94,7 +91,7 @@ struct mv_xor_desc_slot {
 	struct list_head	completed_node;
 	enum dma_transaction_type	type;
 	void			*hw_desc;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	struct mv_xor_desc_slot	*group_head;
 	u16			slot_cnt;
@@ -104,7 +101,7 @@ struct mv_xor_desc_slot {
 	u16			unmap_src_cnt;
 	u32			value;
 	size_t			unmap_len;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	struct list_head	tx_list;
 #endif
@@ -119,7 +116,7 @@ struct mv_xor_desc_slot {
 #endif
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
  
 #if defined(__LITTLE_ENDIAN)
 struct mv_xor_desc {
@@ -148,7 +145,7 @@ struct mv_xor_desc {
 };
 #define mv_phy_src_idx(src_idx) (src_idx ^ 1)
 #endif 
-#else !MY_DEF_HERE
+#else !CONFIG_SYNO_ARMADA_V2
  
 struct mv_xor_desc {
 	u32 status;		 
@@ -163,7 +160,7 @@ struct mv_xor_desc {
 };
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
  
 struct mv_xor_save_regs {
 	int xor_config;

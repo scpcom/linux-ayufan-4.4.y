@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_TYPES_H
 #define _LINUX_TYPES_H
 
@@ -131,7 +128,7 @@ typedef unsigned long blkcnt_t;
 #endif
 
 #ifndef pgoff_t
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #ifdef CONFIG_LFS_ON_32CPU
 #define pgoff_t unsigned long long
 #define PGOFF_MAX	ULLONG_MAX

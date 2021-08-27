@@ -106,8 +106,8 @@ static inline void l2x0_flush_line(unsigned long addr)
 }
 #endif
 
-#if !defined(MY_DEF_HERE) || \
-      (defined(MY_DEF_HERE) && defined(CONFIG_OUTER_CACHE_SYNC))
+#if !defined(CONFIG_SYNO_ARMADA_ARCH_V2) || \
+      (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_OUTER_CACHE_SYNC))
 static void l2x0_cache_sync(void)
 {
 	unsigned long flags;
@@ -366,7 +366,7 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 
 		l2x0_inv_all();
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 #ifdef CONFIG_PL310_CACHE_PREF_ENABLE
 	 
 	writel_relaxed(0x58800000, l2x0_base + L2X0_PREFETCH_CTRL);
@@ -379,8 +379,8 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 	outer_cache.inv_range = l2x0_inv_range;
 	outer_cache.clean_range = l2x0_clean_range;
 	outer_cache.flush_range = l2x0_flush_range;
-#if !defined(MY_DEF_HERE) || \
-      (defined(MY_DEF_HERE) && defined(CONFIG_OUTER_CACHE_SYNC))
+#if !defined(CONFIG_SYNO_ARMADA_ARCH_V2) || \
+      (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_OUTER_CACHE_SYNC))
 	outer_cache.sync = l2x0_cache_sync;
 #endif
 	outer_cache.flush_all = l2x0_flush_all;

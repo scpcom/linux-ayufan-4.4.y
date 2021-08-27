@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -596,7 +593,7 @@ fill_invalid_ext:
 			}
 			 
 			index = isect >> PAGE_CACHE_SECTOR_SHIFT;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			dprintk("%s zero %dth page: index %llu isect %llu\n",
 				__func__, npg_zero, (unsigned long long)index,
 				(unsigned long long)isect);

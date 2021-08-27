@@ -30,8 +30,8 @@
 
 #include "mm.h"
 
-#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)) || \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE))
 #define FREEAREA_ROUND_START(addr)	((((unsigned long)addr) + ((PAGE_SIZE) - 1)) & (~((PAGE_SIZE) - 1)))
 #define FREEAREA_ROUND_END(addr)	(((unsigned long)addr) & (~((PAGE_SIZE) - 1)))
 #else
@@ -206,7 +206,7 @@ static void __init arm_bootmem_init(unsigned long start_pfn,
 unsigned long arm_dma_zone_size __read_mostly;
 EXPORT_SYMBOL(arm_dma_zone_size);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 phys_addr_t arm_dma_limit;
 #else
 u32 arm_dma_limit;
@@ -281,7 +281,7 @@ EXPORT_SYMBOL(pfn_valid);
 #endif
 
 #ifndef CONFIG_SPARSEMEM
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static void __init arm_memory_present(void)
 #else
 static void arm_memory_present(void)
@@ -289,7 +289,7 @@ static void arm_memory_present(void)
 {
 }
 #else
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static void __init arm_memory_present(void)
 #else
 static void arm_memory_present(void)
@@ -380,7 +380,7 @@ void __init bootmem_init(void)
 
 static inline int free_area(unsigned long pfn, unsigned long end, char *s)
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	unsigned int pages = 0, size = ((end > pfn) ? ((end - pfn) << (PAGE_SHIFT - 10)) : 0);
 #else
 	unsigned int pages = 0, size = (end - pfn) << (PAGE_SHIFT - 10);
@@ -646,7 +646,7 @@ void free_initmem(void)
 #if !defined(MY_ABC_HERE) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	poison_init_mem(__init_begin, __init_end - __init_begin);
 	if (!machine_is_integrator() && !machine_is_cintegrator())
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		totalram_pages += free_area(__phys_to_pfn(__pa(FREEAREA_ROUND_START(__init_begin))),
 					    __phys_to_pfn(__pa(FREEAREA_ROUND_END(__init_end))),
 					    "init");
@@ -664,7 +664,7 @@ static int keep_initrd;
 
 void free_initrd_mem(unsigned long start, unsigned long end)
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	start = FREEAREA_ROUND_START(start);
 	end = FREEAREA_ROUND_END(end);
 #endif

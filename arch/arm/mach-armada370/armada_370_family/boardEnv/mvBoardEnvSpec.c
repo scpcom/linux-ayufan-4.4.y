@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "mvCommon.h"
 #include "mvBoardEnvLib.h"
@@ -328,7 +325,7 @@ MV_BOARD_INFO rd88F6710Info = {
 	.norFlashWriteParams	= RD_88F6710_BOARD_NOR_WRITE_PARAMS
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
  
 MV_BOARD_MAC_INFO synods213jInfoBoardMacInfo[] = {
 	 
@@ -947,7 +944,7 @@ MV_BOARD_INFO *boardInfoTbl[] = {
 	&db88f6710Info,
 	&db88f6710pcacInfo,
 	&rd88F6710Info
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 	,NULL  
 	,NULL
 	,NULL

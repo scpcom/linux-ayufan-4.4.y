@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/i2c.h>
@@ -8,7 +5,7 @@
 #include <linux/init.h>
 #include <linux/errno.h>
 #include <linux/bcd.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/delay.h>
 #endif
 
@@ -53,7 +50,7 @@ static int bq32k_read(struct device *dev, void *data, uint8_t off, uint8_t len)
 		}
 	};
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	 
 	udelay(30);
 #endif

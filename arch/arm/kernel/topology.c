@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/cpu.h>
 #include <linux/cpumask.h>
@@ -96,7 +93,7 @@ void store_cpu_topology(unsigned int cpuid)
 		cpu_topology[cpuid].socket_id, mpidr);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 void __init init_cpu_topology(void)
 #else
 void init_cpu_topology(void)

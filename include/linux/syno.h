@@ -16,7 +16,7 @@
 #define SYNO_HAVE_GCC_VERSION(a,b) (__GNUC__ > (a) || (__GNUC__ == (a) && __GNUC_MINOR__ >= (b)))
 #define SYNO_HAVE_GLIBC_VERSION(a,b) ( __GLIBC__ > (a) || (__GLIBC__ == (a) && __GLIBC_MINOR__ >= (b)))
 
-#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && defined(CONFIG_SYNO_CEDARVIEW)
 #define SYNO_CEDARVIEW_USE_EFI_REBOOT
 #endif
 
@@ -24,18 +24,18 @@
 #define SYNO_X86_AUTO_POWER_ON
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_FLASH_PART
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_GPIO_CTRL
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_POWEROFF
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_POWEROFF
 #define SYNO_EVANSPORT_TTYS1_PORT	0x2F8
 #define SYNO_EVANSPORT_SET8N1		0x3
 #define SYNO_EVANSPORT_SHUTDOWN_CMD	0x31
@@ -44,19 +44,19 @@
 #endif
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_EXPORT_SYMBOL
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_NON_PREEMPT_SMB
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_WOL_WORKAROUND
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_IPV4_ROUTE_WORKAROUND
 #endif
 
@@ -79,15 +79,15 @@
 #define SYNO_PCH_GPIO_CTRL
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_SATA_MV)
+#if defined(CONFIG_ARCH_FEROCEON) && defined(CONFIG_SATA_MV)
 #define SYNO_6281_SOC_USE_OPENSOURCE_SATA
 #endif
 
-#if defined(MY_DEF_HERE) || defined(CONFIG_ARCH_KIRKWOOD) || defined(CONFIG_ARCH_ARMADA370)
+#if defined(CONFIG_ARCH_FEROCEON) || defined(CONFIG_ARCH_KIRKWOOD) || defined(CONFIG_ARCH_ARMADA370)
 #define SYNO_ESATA_7042
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_DUAL_HEAD)
 #define SYNO_SATA_DOM_VENDOR_SAMPLE_RUN_2	"SATADOM "
 #define SYNO_SATA_DOM_MODEL_SAMPLE_RUN_2	"D150SH"
 #define SYNO_SATA_DOM_VENDOR	"SATADOM-"
@@ -100,22 +100,22 @@
 
 #define SYNO_MAC_MAX_V2 8
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV88F6281
 #define SYNO_FLASH_MEMORY_SIZE
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
 #define SYNO_X86_TTY_CONSOLE_OUTPUT
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE)
 #define SYNO_X86_MICROP_CTRL
 #endif
 
-#if defined(CONFIG_SYNO_MPC854X) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_ARCH_FEROCEON)
+#if defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_X86) || defined(MY_DEF_HERE) || defined(CONFIG_ARCH_FEROCEON)
 #define SYNO_SWITCH_NET_DEVICE_NAME
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SWITCH_NET_DEVICE_NAME
 #define SYNO_MAX_SWITCHABLE_NET_DEVICE 8
 #define SYNO_NET_DEVICE_ENCODING_LENGTH 6
 #endif   
@@ -181,7 +181,7 @@
 
 #if	defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
  
-#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && defined(CONFIG_SYNO_BROMOLOW)
 #define SYNO_MAX_INTERNAL_DISK 19
 #else
 #define SYNO_MAX_INTERNAL_DISK	15
@@ -193,7 +193,7 @@
 #else  
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV88F6281
 #define SYNO_LIBATA_JMB_BEHAVIOR
 #endif
 
@@ -201,10 +201,10 @@
 #define SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 #endif
 
-#if defined(CONFIG_SYNO_MPC8533) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_QORIQ)
 #ifdef MY_ABC_HERE
 #define SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 #define SYNO_CREATE_TIME_SWAP_VERSION 3719
 #endif
 #endif
@@ -272,7 +272,7 @@
 #define SYNO_SLOW_DOWN_UEVENT
 #endif
 
-#if defined(MY_DEF_HERE) && !defined(CONFIG_SYNO_MV88F6281_USBSTATION)
+#if defined(CONFIG_SYNO_MV88F6281) && !defined(CONFIG_SYNO_MV88F6281_USBSTATION)
 #define SYNO_CPUFREQ_ADJUST
 #endif
 
@@ -301,17 +301,17 @@
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)     
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
  
 #define SYNO_INTERNAL_MICROSD_NAME "4-4"
 #endif  
 #endif
 
-#if defined(MY_DEF_HERE) || defined(SYNO_MARVELL_88F6180) || defined(SYNO_MARVELL_88F6281)
+#if defined(CONFIG_SYNO_MV88F6281) || defined(SYNO_MARVELL_88F6180) || defined(SYNO_MARVELL_88F6281)
 #define SYNO_ARM_GENERIC_ATOMIC64
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BROMOLOW)
  
 #define SYNO_SAS_MPT2_HOTPLUG_PHY
 
@@ -347,14 +347,14 @@
 #define SYNO_LPC_ICH_GPIO_CTRL
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define SYNO_ALPINE_TEMP_FIXME_PATCH
 #define SYNO_ALPINE_ARCH
 #define SYNO_ALPINE_SUPPORT_WOL
 #define SYNO_ALPINE_SW_SATA_LED
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_ARCH_ARMADA_XP)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_ARCH_ARMADA_XP)
 #define SYNO_SATA_PM_LINK_RETRY
 #endif
 

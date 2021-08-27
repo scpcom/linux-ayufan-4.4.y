@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/cpuidle.h>
@@ -83,7 +80,7 @@ static u64 div_round64(u64 dividend, u32 divisor)
 	return div_u64(dividend + (divisor / 2), divisor);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static void get_typical_interval(struct menu_device *data)
 {
 	int i = 0, divisor = 0;
@@ -154,7 +151,7 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 {
 	struct menu_device *data = &__get_cpu_var(menu_devices);
 	int latency_req = pm_qos_request(PM_QOS_CPU_DMA_LATENCY);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 	unsigned int power_usage = -1;
@@ -188,13 +185,13 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 	data->predicted_us = div_round64(data->expected_us * data->correction_factor[data->bucket],
 					 RESOLUTION * DECAY);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	get_typical_interval(data);
 #else
 	detect_repeating_patterns(data);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (data->expected_us > 5 &&
 		dev->states_usage[CPUIDLE_DRIVER_STATE_START].disable == 0)
 #else
@@ -204,7 +201,7 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 
 	for (i = CPUIDLE_DRIVER_STATE_START; i < drv->state_count; i++) {
 		struct cpuidle_state *s = &drv->states[i];
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		struct cpuidle_state_usage *su = &dev->states_usage[i];
 
 		if (su->disable)
@@ -218,7 +215,7 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 		if (s->exit_latency * multiplier > data->predicted_us)
 			continue;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 		if (s->power_usage < power_usage) {
@@ -226,7 +223,7 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 #endif
 		data->last_state_idx = i;
 		data->exit_us = s->exit_latency;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 		}

@@ -191,7 +191,7 @@ struct nand_oobfree {
  
 struct nand_ecclayout_user {
 	__u32 eccbytes;
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_MTD_NAND_NFC)
+#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_MTD_NAND_NFC)
 	__u32 eccpos[128];
 #else
 	__u32 eccpos[MTD_MAX_ECCPOS_ENTRIES];

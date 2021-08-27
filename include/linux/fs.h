@@ -325,7 +325,7 @@ struct inodes_stat_t {
 #define SYNC_FILE_RANGE_WRITE		2
 #define SYNC_FILE_RANGE_WAIT_AFTER	4
 
-#if defined(MY_DEF_HERE) && !defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2) && !defined(MY_ABC_HERE)
 #define MAX_PAGES_PER_RECVFILE		64
 #endif
 
@@ -379,7 +379,7 @@ struct kstatfs;
 struct vm_area_struct;
 struct vfsmount;
 struct cred;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || (defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE))
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2) || (defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE))
 struct socket;
 #endif
 
@@ -1345,7 +1345,7 @@ extern void prune_dcache_sb(struct super_block *sb, int nr_to_scan);
 
 extern struct timespec current_fs_time(struct super_block *sb);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 #define vfs_check_frozen(sb, level) \
 	wait_event((sb)->s_wait_unfrozen, ((sb)->s_frozen < (level)))
 #endif
@@ -1464,7 +1464,7 @@ struct file_operations {
 	ssize_t (*splice_from_socket)(struct file *file, struct socket *sock,
 				     loff_t __user *ppos, size_t count);
 #endif
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	ssize_t (*splice_from_socket)(struct file *, struct socket *,
 				     loff_t __user *ppos, size_t count);
 #endif
@@ -1701,7 +1701,7 @@ void kill_block_super(struct super_block *sb);
 void kill_anon_super(struct super_block *sb);
 void kill_litter_super(struct super_block *sb);
 void deactivate_super(struct super_block *sb);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_READ_LOCK_IN_THAW_BDEV
 void deactivate_read_locked_super(struct super_block *s);
 #endif
 void deactivate_locked_super(struct super_block *sb);
@@ -2214,7 +2214,7 @@ extern ssize_t generic_splice_sendpage(struct pipe_inode_info *pipe,
 		struct file *out, loff_t *, size_t len, unsigned int flags);
 extern long do_splice_direct(struct file *in, loff_t *ppos, struct file *out,
 		size_t len, unsigned int flags);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 extern ssize_t generic_splice_from_socket(struct file *file, struct socket *sock,
 				     loff_t __user *ppos, size_t count);
 #endif

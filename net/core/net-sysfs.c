@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/capability.h>
 #include <linux/kernel.h>
@@ -675,7 +672,7 @@ static ssize_t store_rps_dev_flow_table_cnt(struct netdev_rx_queue *queue,
 	return len;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 static int init_rps_dev_flow_table_cnt(struct netdev_rx_queue *queue)
 {
 	int i = 0;
@@ -772,7 +769,7 @@ static int rx_queue_add_kobject(struct net_device *net, int index)
 		return error;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 	init_rps_dev_flow_table_cnt(queue);
 #endif  
 	kobject_uevent(kobj, KOBJ_ADD);

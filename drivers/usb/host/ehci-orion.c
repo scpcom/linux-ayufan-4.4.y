@@ -1,18 +1,15 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/mbus.h>
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_SOC_USE_OPENSOURCE_USB
 #include "../../../arch/arm/plat-orion/include/plat/ehci-orion.h"
 #else
 #include <plat/ehci-orion.h>
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_CPU_BIG_ENDIAN)
+#if defined(CONFIG_SYNO_ARMADA_V2) && defined(CONFIG_CPU_BIG_ENDIAN)
 #define rdl(off)		le32_to_cpu(__raw_readl(hcd->regs + (off)))
 #define wrl(off, val)	__raw_writel((cpu_to_le32(val)), hcd->regs + (off))
 #else

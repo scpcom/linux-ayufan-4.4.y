@@ -19,7 +19,7 @@
 #define STD_COM4_FLAGS ASYNC_BOOT_AUTOCONF
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(SYNO_X86_TTY_CONSOLE_OUTPUT) || defined(SYNO_X86_MICROP_CTRL)
 
 #ifdef CONFIG_GEN3_UART
  
@@ -37,7 +37,7 @@
     { 0, BASE_BAUD, 0x3E8, 4, STD_COM_FLAGS },   
 #endif
 #else
-#if !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_CEDARVIEW) && !defined(MY_DEF_HERE)
 #define SERIAL_PORT_DFNS            \
 	           \
 	{ 0, BASE_BAUD, 0x2F8, 3, STD_COM_FLAGS },    \

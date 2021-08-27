@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/slab.h>
@@ -46,7 +43,7 @@
 #define	MV64XXX_I2C_STATUS_MAST_RD_ADDR_2_NO_ACK	0xe8
 #define	MV64XXX_I2C_STATUS_NO_STATUS			0xf8
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
  
 #define	MV64XXX_I2C_REG_TX_DATA_LO			0xC0
 #define	MV64XXX_I2C_REG_TX_DATA_HI			0xC4
@@ -125,7 +122,7 @@ mv64xxx_i2c_hw_init(struct mv64xxx_i2c_data *drv_data)
 	writel(MV64XXX_I2C_REG_CONTROL_TWSIEN | MV64XXX_I2C_REG_CONTROL_STOP,
 		drv_data->reg_base + MV64XXX_I2C_REG_CONTROL);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #ifdef CONFIG_I2C_MV64XXX_BRIDGE
 	writel(0, drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_CONTROL);
 	writel(0, drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_TIMING);
@@ -314,7 +311,7 @@ mv64xxx_i2c_intr(int irq, void *dev_id)
 	irqreturn_t	rc = IRQ_NONE;
 
 	spin_lock_irqsave(&drv_data->lock, flags);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #ifdef CONFIG_I2C_MV64XXX_BRIDGE
 	if (readl(drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_INTR_CAUSE)) {
 		writel(0, drv_data->reg_base +
@@ -436,7 +433,7 @@ mv64xxx_i2c_execute_msg(struct mv64xxx_i2c_data *drv_data, struct i2c_msg *msg)
 	return drv_data->rc;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #ifdef CONFIG_I2C_MV64XXX_BRIDGE
 static int
 mv64xxx_i2c_offload_msg(struct mv64xxx_i2c_data *drv_data, struct i2c_msg *msg)
@@ -524,7 +521,7 @@ mv64xxx_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 	int	i, rc;
 
 	for (i=0; i<num; i++) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #ifdef CONFIG_I2C_MV64XXX_BRIDGE
 		rc = mv64xxx_i2c_offload_msg(drv_data, &msgs[i]);
 		if (rc == 0)
@@ -586,7 +583,7 @@ mv64xxx_i2c_probe(struct platform_device *pd)
 	struct mv64xxx_i2c_pdata	*pdata = pd->dev.platform_data;
 	int	rc;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if ( (pd->id > 1) || (pd->id < 0) || !pdata)
 #else
 	if ((pd->id != 0) || !pdata)

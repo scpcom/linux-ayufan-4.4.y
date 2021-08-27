@@ -339,7 +339,7 @@ extern struct ratelimit_state dm_ratelimit_state;
 
 #define dm_target_offset(ti, sector) ((sector) - (ti)->begin)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DM_TO_SECTOR_FIX
 static inline sector_t to_sector(unsigned long long n)
 #else
 static inline sector_t to_sector(unsigned long n)

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/mm/cache-v6.S
  *
@@ -330,7 +327,7 @@ ENTRY(v6_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(v6_dma_unmap_area)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	.globl	v6_flush_kern_cache_louis
 	.equ	v6_flush_kern_cache_louis, v6_flush_kern_cache_all
 #endif

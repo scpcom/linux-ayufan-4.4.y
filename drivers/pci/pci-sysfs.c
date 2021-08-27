@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/sched.h>
@@ -712,7 +709,7 @@ pci_mmap_resource(struct kobject *kobj, struct bin_attribute *attr,
 
 	if (!pci_mmap_fits(pdev, i, vma, PCI_MMAP_SYSFS)) {
 		WARN(1, "process \"%s\" tried to map 0x%08lx bytes "
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			"at page 0x%016llx on %s BAR %d (start 0x%16llx, size 0x%16llx)\n",
 			current->comm, vma->vm_end-vma->vm_start, (unsigned long long)vma->vm_pgoff,
 #else

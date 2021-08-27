@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/types.h>
 #include <linux/cache.h>
@@ -9,7 +6,7 @@
 #include <linux/module.h>
 #include <linux/atomic.h>
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ARM_GENERIC_ATOMIC64
 #include <asm-generic/atomic64.h>
 #endif
 

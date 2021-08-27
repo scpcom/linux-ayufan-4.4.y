@@ -1,12 +1,9 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
 #include <linux/of_platform.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/syno.h>
 #endif
 
@@ -49,7 +46,7 @@
 #define SERDES_NUM_GROUPS	4
 #define SERDES_GROUP_SIZE	0x400
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/serial_reg.h>
 #ifdef SYNO_ALPINE_SUPPORT_WOL
 #include <linux/netdevice.h>
@@ -131,7 +128,7 @@ static struct clk_lookup lookup[] = {
 		.con_id 	= NULL,
 		.clk		= &sb_clk,
 	},
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	{
 		.dev_id		= "fd882000.spi",
 		.con_id 	= NULL,
@@ -379,7 +376,7 @@ EXPORT_SYMBOL(alpine_serdes_resource_get);
 
 static void __init al_init(void)
 {
-#ifndef MY_DEF_HERE
+#ifndef CONFIG_SYNO_ALPINE
 	pm_power_off = al_power_off;
 #endif
 
@@ -393,7 +390,7 @@ static void __init al_init(void)
 
 	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
 	synology_gpio_init();

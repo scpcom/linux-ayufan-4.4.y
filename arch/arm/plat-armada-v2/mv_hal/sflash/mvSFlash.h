@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __INCmvSFlashH
 #define __INCmvSFlashH
@@ -20,7 +17,7 @@ extern "C" {
  
 typedef enum {
 	MV_WP_NONE,              
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	MV_WP_UPR_1OF256,        
 #endif
 	MV_WP_UPR_1OF128,        

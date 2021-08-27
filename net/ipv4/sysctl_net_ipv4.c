@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/mm.h>
 #include <linux/module.h>
@@ -637,7 +634,7 @@ static struct ctl_table ipv4_table[] = {
 		.mode           = 0644,
 		.proc_handler   = proc_dointvec
 	},
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	{
 		.procname       = "tcp_default_delack_segs",
 		.data           = &sysctl_tcp_default_delack_segs,

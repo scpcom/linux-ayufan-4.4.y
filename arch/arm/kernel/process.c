@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <stdarg.h>
 
@@ -96,7 +93,7 @@ void arm_machine_restart(char mode, const char *cmd)
 
 	flush_cache_all();
 
-#if !defined(MY_DEF_HERE) || (!defined(CONFIG_ARCH_ARMADA375) && !defined(CONFIG_ARCH_ARMADA38X))
+#if !defined(CONFIG_SYNO_ARMADA_ARCH_V2) || (!defined(CONFIG_ARCH_ARMADA375) && !defined(CONFIG_ARCH_ARMADA38X))
 	 
 	cpu_proc_fin();
 #endif
@@ -165,7 +162,7 @@ void cpu_idle(void)
 					pm_idle();
 				start_critical_timings();
 				 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 				 
 #else
 				WARN_ON(irqs_disabled());

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "mvCommon.h"
 #include "mvCtrlEnvLib.h"
@@ -111,7 +108,7 @@ MV_U32 mvCtrlMppRegGet(MV_U32 mppGroup)
  
 MV_U32 mvCtrlPexMaxIfGet(MV_VOID)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 	MV_U32 boardId = mvBoardIdGet();
 
 	switch (boardId) {

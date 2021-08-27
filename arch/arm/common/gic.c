@@ -504,7 +504,7 @@ static void gic_cpu_restore(unsigned int gic_nr)
 	writel_relaxed(1, cpu_base + GIC_CPU_CTRL);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static void gic_cpu_mask(unsigned int gic_nr)
 {
 	void __iomem *cpu_base;
@@ -544,7 +544,7 @@ static int gic_notifier(struct notifier_block *self, unsigned long cmd,	void *v)
 		}
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	 
 	if (cmd == CPU_PM_ENTER)
 	{

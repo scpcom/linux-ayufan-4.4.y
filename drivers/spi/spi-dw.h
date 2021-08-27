@@ -135,7 +135,7 @@ struct dw_spi {
 	u32			dma_width;
 	int			cs_change;
 	irqreturn_t		(*transfer_handler)(struct dw_spi *dws);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	void			(*cs_control)(struct dw_spi *dws, u32 command);
 						 
 #else
@@ -192,7 +192,7 @@ static inline void spi_set_clk(struct dw_spi *dws, u16 div)
 
 static inline void spi_chip_sel(struct dw_spi *dws, u16 cs)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (cs >= dws->num_cs)
 		return;
 
@@ -229,7 +229,7 @@ struct dw_spi_chip {
 	u8 poll_mode;	 
 	u8 type;	 
 	u8 enable_dma;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	void (*cs_control)(struct dw_spi *dws, u32 command);
 #else
 	void (*cs_control)(u32 command);

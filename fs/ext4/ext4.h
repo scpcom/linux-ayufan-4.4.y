@@ -1016,7 +1016,7 @@ struct ext4_sb_info {
 	char *s_mount_path;
 	unsigned long s_last_notify_time;
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	int s_swap_create_time;
 #endif
 
@@ -1275,7 +1275,7 @@ struct ext4_dir_entry_2 {
 	char	name[EXT4_NAME_LEN];	 
 };
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
  
 struct ext4_dir_entry_tail {
 	__le32  det_reserved_zero1;  
@@ -1297,7 +1297,7 @@ struct ext4_dir_entry_tail {
 
 #define EXT4_FT_MAX		8
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 #define EXT4_FT_DIR_CSUM   0xDE
 #endif
 

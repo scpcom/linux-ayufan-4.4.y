@@ -567,7 +567,7 @@ static struct resource aurora_uart1_resources[] = {
 
 static struct platform_device aurora_uart1 = {
 	.name			= "serial8250",
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 	.id			= 1,
 #else
 	.id			= 0,
@@ -1402,7 +1402,7 @@ void axp_db_restore(void)
 	axp_timer_resume();
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 #ifdef MY_ABC_HERE
 extern void syno_mv_net_shutdown();
 #endif
@@ -1441,7 +1441,7 @@ static void __init axp_db_init(void)
 
 	cpu_fabric_common_init();
 
-#ifndef MY_DEF_HERE
+#ifndef CONFIG_SYNO_ARMADA_ARCH
 	 
 #if defined(CONFIG_ARMADA_XP_REV_A0) || defined(CONFIG_ARMADA_XP_REV_B0)
 	gBoardId = DB_88F78XX0_BP_REV2_ID;
@@ -1478,7 +1478,7 @@ static void __init axp_db_init(void)
 #else
 	serial_initialize(CONFIG_MV_UART_PORT);
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 	serial_initialize(1);
 #endif
 
@@ -1545,7 +1545,7 @@ static void __init axp_db_init(void)
 	}
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
 	synology_gpio_init();

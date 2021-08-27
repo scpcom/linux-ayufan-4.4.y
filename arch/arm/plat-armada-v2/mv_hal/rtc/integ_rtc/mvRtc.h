@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __INCmvRtch
 #define __INCmvRtch
@@ -32,7 +29,7 @@ MV_VOID mvRtcTimeGet(MV_RTC_TIME *time);
 
 MV_VOID mvRtcAlarmSet(MV_RTC_TIME *time);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 MV_VOID SYNOmvRtcExtAlarmSet(MV_U32 time);
 MV_VOID SYNOmvRtcExtAlarmClean(void);
 #endif

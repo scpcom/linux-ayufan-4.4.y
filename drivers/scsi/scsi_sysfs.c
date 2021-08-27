@@ -896,7 +896,7 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 	int depth, retval;
 	struct scsi_device *sdev = to_scsi_device(dev);
 	struct scsi_host_template *sht = sdev->host->hostt;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 	unsigned long flags;
 #endif  
 
@@ -908,7 +908,7 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 	if (depth < 1)
 		return -EINVAL;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 	 
 	spin_lock_irqsave(sdev->host->host_lock, flags);
 #endif  
@@ -916,14 +916,14 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 	retval = sht->change_queue_depth(sdev, depth,
 					 SCSI_QDEPTH_DEFAULT);
 	if (retval < 0) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 		spin_unlock_irqrestore(sdev->host->host_lock, flags);
 #endif  
 		return retval;
 	}
 
 	sdev->max_queue_depth = sdev->queue_depth;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 	spin_unlock_irqrestore(sdev->host->host_lock, flags);
 #endif  
 
@@ -1099,7 +1099,7 @@ int scsi_sysfs_add_sdev(struct scsi_device *sdev)
 	return error;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 extern int ss_stats[128];
 #endif
 
@@ -1107,7 +1107,7 @@ void __scsi_remove_device(struct scsi_device *sdev)
 {
 	struct device *dev = &sdev->sdev_gendev;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #ifdef CONFIG_MV_STAGGERED_SPINUP
 	if ((sdev->host->hostt->support_staggered_spinup == 1) &&  
 	    scsi_spinup_enabled()) {

@@ -148,7 +148,7 @@
 			 TLB_V6_I_ASID | TLB_V6_D_ASID)
 
 #ifdef CONFIG_CPU_TLB_V6
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && (defined (CONFIG_ARCH_ARMADA_XP) && !defined (CONFIG_AURORA_L2_PT_WALK))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && (defined (CONFIG_ARCH_ARMADA_XP) && !defined (CONFIG_AURORA_L2_PT_WALK))
 # define v6wbi_possible_flags	(v6wbi_tlb_flags | TLB_L2CLEAN_FR)
 # define v6wbi_always_flags	(v6wbi_tlb_flags | TLB_L2CLEAN_FR)
 #else
@@ -200,7 +200,7 @@
 
 #include <linux/sched.h>
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_CACHE_AURORA_L2)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_CACHE_AURORA_L2)
 extern void l2_clean_pa(unsigned int pa); 
 #endif
 struct cpu_tlb_fns {
@@ -314,7 +314,7 @@ static inline void local_flush_tlb_mm(struct mm_struct *mm)
 static inline void
 local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 #if !defined(CONFIG_MV_LARGE_PAGE_SUPPORT) || defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
 	const int zero = 0;
 #endif
@@ -323,11 +323,11 @@ local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 #endif  
 
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	unsigned long uaddr_last;
 #endif
 
-#if defined(MY_DEF_HERE) && (defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && !defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT))
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && (defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && !defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT))
 	if (tlb_flag(TLB_WB))
 		dsb();
 
@@ -336,14 +336,14 @@ local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 
 #else
 	uaddr = (uaddr & PAGE_MASK) | ASID(vma->vm_mm);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	uaddr_last = uaddr+PAGE_SIZE;
 #endif
 
 	if (tlb_flag(TLB_WB))
 		dsb();
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	 
 	for (; uaddr < uaddr_last; uaddr += HW_PAGE_SIZE) {
 #endif
@@ -372,7 +372,7 @@ local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 #else
 		asm("mcr p15, 0, %0, c8, c3, 1" : : "r" (uaddr) : "cc");
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	}
 #endif
 
@@ -383,7 +383,7 @@ local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 
 static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 #if !defined(CONFIG_MV_LARGE_PAGE_SUPPORT) || defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
 	const int zero = 0;
 #endif
@@ -391,16 +391,16 @@ static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
 	const int zero = 0;
 #endif  
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	unsigned long kaddr_last;
 #endif
 
 	kaddr &= PAGE_MASK;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	kaddr_last = kaddr+PAGE_SIZE;
 #endif
 
-#if defined(MY_DEF_HERE) && (defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && !defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT))
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && (defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && !defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT))
 	if (tlb_flag(TLB_WB))
 		dsb();
 
@@ -410,7 +410,7 @@ static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
 	if (tlb_flag(TLB_WB))
 		dsb();
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	for (; kaddr < kaddr_last; kaddr += HW_PAGE_SIZE) {
 #endif
 	if (tlb_flag(TLB_V3_PAGE))
@@ -432,7 +432,7 @@ static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
 		asm("mcr p15, 0, %0, c8, c5, 1" : : "r" (kaddr) : "cc");
 	if (tlb_flag(TLB_V7_UIS_PAGE))
 		asm("mcr p15, 0, %0, c8, c3, 1" : : "r" (kaddr) : "cc");
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	}
 #endif 
 
@@ -450,25 +450,25 @@ static inline void flush_pmd_entry(void *pmd)
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
 
 	if (tlb_flag(TLB_DCLEAN))
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
 	{
 		unsigned long flags;
         	raw_local_irq_save(flags);
 		dmb();
 #endif
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && (defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6043) || defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6124))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && (defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6043) || defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6124))
 		asm("mcr	p15, 0, %0, c7, c14, 1  @ flush_pmd"
 			: : "r" (pmd) : "cc");
 #else
 		asm("mcr	p15, 0, %0, c7, c10, 1	@ flush_pmd"
 			: : "r" (pmd) : "cc");
 #endif
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
 		raw_local_irq_restore(flags);
 	}
 #endif
 
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_CACHE_AURORA_L2)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_CACHE_AURORA_L2)
 	if (tlb_flag(TLB_L2CLEAN_FR)) 
         	l2_clean_pa(__pa((unsigned long)pmd));
 #else
@@ -485,25 +485,25 @@ static inline void clean_pmd_entry(void *pmd)
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
 
 	if (tlb_flag(TLB_DCLEAN))
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
 	{
 		unsigned long flags;
                 raw_local_irq_save(flags);
                 dmb();
 #endif
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && (defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6043) || defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6124))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && (defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6043) || defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6124))
 		asm("mcr	p15, 0, %0, c7, c14, 1  @ flush_pmd"
 			: : "r" (pmd) : "cc");
 #else
 		asm("mcr	p15, 0, %0, c7, c10, 1	@ flush_pmd"
 			: : "r" (pmd) : "cc");
 #endif
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
 		raw_local_irq_restore(flags);
 	}
 #endif
 
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_CACHE_AURORA_L2)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_CACHE_AURORA_L2)
 	if (tlb_flag(TLB_L2CLEAN_FR))
 		l2_clean_pa(__pa((unsigned long)pmd));
 #else

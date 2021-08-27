@@ -9,7 +9,7 @@
 #include <linux/in.h>
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #ifdef CONFIG_OF
 #include "../../arch/arm/mach-mvebu/include/mach/mvTypes.h"
 #include "../../drivers/crypto/mvebu_cesa/mvSysCesaConfig.h"

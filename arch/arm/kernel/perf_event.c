@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #undef DEBUG
 
 #define pr_fmt(fmt) "hw perfevents: " fmt
@@ -388,7 +385,7 @@ armpmu_reserve_hardware(struct arm_pmu *armpmu)
 		}
 
 		err = request_irq(irq, handle_irq,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 				IRQF_NOBALANCING | IRQF_SHARED,
 				"armpmu", handle_irq);
 #else
@@ -548,7 +545,7 @@ int __init armpmu_register(struct arm_pmu *armpmu, char *name, int type)
 #include "perf_event_xscale.c"
 #include "perf_event_v6.c"
 #include "perf_event_v7.c"
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #include "perf_event_pj4b.c"
 #endif
 
@@ -657,7 +654,7 @@ init_hw_perf_events(void)
 			cpu_pmu = xscale2pmu_init();
 			break;
 		}
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARCH_ARMADA_XP)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARCH_ARMADA_XP)
 	 
 	} else if (0x56 == implementor) {
 		part_number = (cpuid >> 4) & 0xFFF;

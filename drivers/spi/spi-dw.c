@@ -7,12 +7,12 @@
 #include <linux/module.h>
 #include <linux/highmem.h>
 #include <linux/delay.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/version.h>
 #endif
 #include <linux/slab.h>
 #include <linux/spi/spi.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/gpio.h>
 #endif
 #if defined(MY_ABC_HERE)
@@ -57,7 +57,7 @@ struct chip_data {
 	u8 bits_per_word;
 	u16 clk_div;		 
 	u32 speed_hz;		 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	void (*cs_control)(struct dw_spi *dws, u32 command);
 #else
 	void (*cs_control)(u32 command);
@@ -312,7 +312,7 @@ static void giveback(struct dw_spi *dws)
 					struct spi_transfer,
 					transfer_list);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (!last_transfer->cs_change && dws->cs_control &&
 			msg->spi->chip_select == 0)
 		dws->cs_control(dws, MRST_SPI_DEASSERT);
@@ -470,7 +470,7 @@ static void pump_transfers(unsigned long data)
 		cs_change = 1;
 
 	cr0 = chip->cr0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	 
 	if (message->state == START_STATE)
 		spi_chip_sel(dws, spi->chip_select);
@@ -517,7 +517,7 @@ static void pump_transfers(unsigned long data)
 	}
 	message->state = RUNNING_STATE;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 	 
@@ -552,7 +552,7 @@ static void pump_transfers(unsigned long data)
 			dw_writew(dws, DW_SPI_CTRL0, cr0);
 
 		spi_set_clk(dws, clk_div ? clk_div : chip->clk_div);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 		spi_chip_sel(dws, spi->chip_select);
@@ -660,7 +660,7 @@ static int dw_spi_transfer(struct spi_device *spi, struct spi_message *msg)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static int dw_spi_gpio_cs_control_setup(int gpio)
 {
 	int status;
@@ -687,7 +687,7 @@ static int dw_spi_setup(struct spi_device *spi)
 {
 	struct dw_spi_chip *chip_info = NULL;
 	struct chip_data *chip;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	int status;
 #endif
 
@@ -715,7 +715,7 @@ static int dw_spi_setup(struct spi_device *spi)
 
 		chip->enable_dma = chip_info->enable_dma;
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
  	else if (spi->master->cs_gpios) {
 		 
@@ -935,7 +935,7 @@ int __devinit dw_spi_add_host(struct dw_spi *dws)
 	master->cleanup = dw_spi_cleanup;
 	master->setup = dw_spi_setup;
 	master->transfer = dw_spi_transfer;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	master->dev.of_node = dws->parent_dev->of_node;
 #endif
 

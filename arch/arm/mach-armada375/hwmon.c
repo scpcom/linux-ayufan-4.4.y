@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -66,7 +63,7 @@ typedef enum {
 	SHOW_LABEL } SHOW;
 
 #define	SYNO_A375_TEMP
-#ifdef MY_DEF_HERE
+#ifdef SYNO_A375_TEMP
 #define IRQ_AURORA_PMU           107  
 #endif
 
@@ -128,7 +125,7 @@ static int a375_temp_read_temp(void)
 	return A375_TSEN_RAW2TEMP(reg);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 extern unsigned int mvCtrlGetJuncTemp(void);
 int axptemp_read_temp(void)
 {

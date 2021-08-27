@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/pci.h>
@@ -24,7 +21,7 @@
 
 #include "ce5xx_spi_flash.h"
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_FLASH_PART
 #include "synoflashmap.h"
 #endif
  
@@ -43,7 +40,7 @@ static const struct pci_device_id ce5xx_sflash_pci_tbl[] __devinitdata = {
 };
 struct spi_board_info CE5xx_sflash_devices[] = {
   {
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_FLASH_PART
     .modalias = "m25p80",
     .platform_data = &spi_flashdata,
 #else

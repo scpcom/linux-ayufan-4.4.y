@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/mm/proc-sheeva_pj4bv7lpae.S
  *
@@ -261,7 +258,7 @@ __pj4bv7_setup:
 /* DSMP A0 */
 	/* Auxiliary Debug Modes Control 1 Register */
 	mrc        p15, 1, r0, c15, c1, 1                         /* Read */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 	orr        r0, r0, #0x00020                                /* BIT5 STREX backoff_disable--> '1' enable the back off of STREX instr */
 #endif
 	orr	   r0, r0, #0x00100                                /* BIT8 Internal Parity Handling Disable--> '1' Disable Internal Parity Handling */
@@ -302,7 +299,7 @@ __pj4bv7_setup:
 #endif
 	/* Auxiliary Debug Modes Control 1 Register */
 	mrc        p15, 1, r0, c15, c1, 1                         /* Read */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 	orr        r0, r0, #0x00020                                /* BIT5 STREX backoff_disable--> '1' enable the back off of STREX instr */
 #endif
 	orr	   r0, r0, #0x00100                                /* BIT8 Internal Parity Handling Disable--> '1' Disable Internal Parity Handling */

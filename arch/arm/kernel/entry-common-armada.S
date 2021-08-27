@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/kernel/entry-common.S
  *
@@ -584,7 +581,7 @@ ENDPROC(sys_fstatfs64_wrapper)
  * offset, we return EINVAL.
  */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT
 #define PGOFF_MASK 0x1
 #define PGOFF_SHIFT 1
@@ -607,8 +604,8 @@ ENDPROC(sys_fstatfs64_wrapper)
 #endif
 
 sys_mmap2:
-#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
 		tst	r5, #0xF
 		moveq	r5, r5, lsr #4
 		streq	r5, [sp, #4]

@@ -603,8 +603,8 @@ crypto_dispatch(struct cryptop *crp)
 	crp->crp_flags &= ~CRYPTO_F_DONE;
 	crp->crp_etype = 0;
 
-#if (defined(CONFIG_MV_CESA_OCF) && defined(MY_DEF_HERE)) || \
-     ((defined(CONFIG_MV_CESA_OCF) || defined(CONFIG_MV_CESA_OCF_KW2)) && defined(MY_DEF_HERE))
+#if (defined(CONFIG_MV_CESA_OCF) && defined(CONFIG_SYNO_ARMADA)) || \
+     ((defined(CONFIG_MV_CESA_OCF) || defined(CONFIG_MV_CESA_OCF_KW2)) && defined(CONFIG_SYNO_ARMADA_V2))
 
 	CRYPTO_Q_UNLOCK();
 
@@ -629,7 +629,7 @@ crypto_dispatch(struct cryptop *crp)
 		CRYPTO_Q_UNLOCK();
 	}
 
-#elif defined(MY_DEF_HERE) && defined(CONFIG_OF)
+#elif defined(CONFIG_SYNO_ARMADA_V2) && defined(CONFIG_OF)
 	if (mv_cesa_mode == CESA_OCF_M) {
 		dprintk("%s:cesa mode %d\n", __func__, mv_cesa_mode);
 
@@ -1037,7 +1037,7 @@ crypto_proc(void *arg)
 	struct cryptocap *cap;
 	u_int32_t hid;
 	int result, hint;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	unsigned long q_flags, wait_flags;
 #else
 	unsigned long q_flags;
@@ -1143,7 +1143,7 @@ crypto_proc(void *arg)
 					list_empty(&crp_kq), crypto_all_kqblocked);
 			loopcount = 0;
 			CRYPTO_Q_UNLOCK();
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 			spin_lock_irqsave(&cryptoproc_wait.lock, wait_flags);
 			wait_event_interruptible_locked_irq(cryptoproc_wait,
 #else
@@ -1152,7 +1152,7 @@ crypto_proc(void *arg)
 					!(list_empty(&crp_q) || crypto_all_qblocked) ||
 					!(list_empty(&crp_kq) || crypto_all_kqblocked) ||
 					kthread_should_stop());
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 			spin_unlock_irqrestore(&cryptoproc_wait.lock, wait_flags);
 #endif
 			if (signal_pending (current)) {
@@ -1187,7 +1187,7 @@ crypto_ret_proc(void *arg)
 {
 	struct cryptop *crpt;
 	struct cryptkop *krpt;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	unsigned long  r_flags, wait_flags;
 #else
 	unsigned long  r_flags;
@@ -1221,7 +1221,7 @@ crypto_ret_proc(void *arg)
 			 
 			dprintk("%s - sleeping\n", __FUNCTION__);
 			CRYPTO_RETQ_UNLOCK();
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 			spin_lock_irqsave(&cryptoretproc_wait.lock, wait_flags);
 			wait_event_interruptible_locked_irq(cryptoretproc_wait,
 #else
@@ -1230,7 +1230,7 @@ crypto_ret_proc(void *arg)
 					!list_empty(&crp_ret_q) ||
 					!list_empty(&crp_ret_kq) ||
 					kthread_should_stop());
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 			spin_unlock_irqrestore(&cryptoretproc_wait.lock, wait_flags);
 #endif
 			if (signal_pending (current)) {

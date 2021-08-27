@@ -3493,7 +3493,7 @@ asmlinkage void __sched notrace preempt_schedule(void)
 {
 	struct thread_info *ti = current_thread_info();
 
-#ifdef MY_DEF_HERE 
+#ifdef SYNO_EVANSPORT_NON_PREEMPT_SMB 
 	if (0 == strncmp(ti->task->comm, "smbd", 4)) {
 		return;
 	}

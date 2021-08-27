@@ -342,8 +342,8 @@ void kernel_power_off(void)
 }
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
-#ifdef MY_DEF_HERE
-#if defined(MY_DEF_HERE) || defined(CONFIG_ARCH_GEN3) || defined(MY_DEF_HERE)
+#ifdef SYNO_X86_MICROP_CTRL
+#if defined(CONFIG_SYNO_CEDARVIEW) || defined(CONFIG_ARCH_GEN3) || defined(MY_DEF_HERE)
 #define UART_PORT1_IOBASE   0x2F8
 #else
 #define UART_PORT1_IOBASE   0x3F8
@@ -386,7 +386,7 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 	mutex_lock(&reboot_mutex);
 	switch (cmd) {
 	case LINUX_REBOOT_CMD_RESTART:
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_MICROP_CTRL
         outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);
         outb(UART_CMD_PREFIX, UART_PORT1_IOBASE + UART_TX);
         outb(UART_CMD_REBOOT, UART_PORT1_IOBASE + UART_TX);
@@ -411,7 +411,7 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 		panic("cannot halt");
 
 	case LINUX_REBOOT_CMD_POWER_OFF:
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_MICROP_CTRL
 #if defined(CONFIG_ARCH_GEN3)
 #else
         outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);

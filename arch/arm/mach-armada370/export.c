@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -145,7 +142,7 @@ EXPORT_SYMBOL(mvSFlashModelGet);
 EXPORT_SYMBOL(mvSataWinInit);
 #endif
 
-#if (defined (CONFIG_MV_XOR_MEMCOPY) || defined (CONFIG_MV_IDMA_MEMCOPY)) && !defined(MY_DEF_HERE)
+#if (defined (CONFIG_MV_XOR_MEMCOPY) || defined (CONFIG_MV_IDMA_MEMCOPY)) && !defined(CONFIG_SYNO_ARMADA_ARCH)
 EXPORT_SYMBOL(asm_memcpy);
 #endif
 

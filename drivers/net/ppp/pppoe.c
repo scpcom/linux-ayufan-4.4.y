@@ -22,12 +22,12 @@
 #include <linux/file.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <linux/if_arp.h>
 #endif
 
 #include <linux/nsproxy.h>
-#if defined(MY_DEF_HERE) || (defined(MY_DEF_HERE) && defined(CONFIG_MV_ETH_NFP_HOOKS))
+#if defined(CONFIG_SYNO_ARMADA) || (defined(CONFIG_SYNO_ARMADA_V2) && defined(CONFIG_MV_ETH_NFP_HOOKS))
 #include <linux/mv_nfp.h>
 #endif
 
@@ -253,7 +253,7 @@ static int pppoe_device_event(struct notifier_block *this,
 	struct net_device *dev = (struct net_device *)ptr;
 
 	switch (event) {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	case NETDEV_UP: {
 		struct net_device *ppp_netdev;
@@ -481,7 +481,7 @@ static int pppoe_release(struct socket *sock)
 		dev_put(po->pppoe_dev);
 		po->pppoe_dev = NULL;
 	}
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (ppp_dev_name(&po->chan)) {
 		struct net_device *ppp_netdev = NULL;
@@ -1041,7 +1041,7 @@ static const struct pppox_proto pppoe_proto = {
 	.owner	= THIS_MODULE,
 };
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void nfp_ppp_sync(void)
 {

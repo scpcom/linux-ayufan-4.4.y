@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __INCmvSysHwConfigh
 #define __INCmvSysHwConfigh
@@ -213,7 +210,7 @@
 
 #define DRAM_BUF_REG_DV 0
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV88F6281
 #define SDRAM_CS0_BASE  0x00000000
 #define SDRAM_CS0_SIZE  _128M
 
@@ -242,7 +239,7 @@
 #define NFLASH_CS_BASE 0xfa000000
 #define NFLASH_CS_SIZE _2M
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV88F6281
 #define SPI_CS_BASE 0xf8000000
 #define SPI_CS_SIZE _4M
 #else

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "ext2.h"
 #include <linux/buffer_head.h>
@@ -145,7 +142,7 @@ Einumber:
 	error = "inode out of bounds";
 bad_entry:
 	if (!quiet)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		ext2_error(sb, __func__, "bad entry in directory #%lu: : %s - "
 			"offset=%llu, inode=%lu, rec_len=%d, name_len=%d",
 			dir->i_ino, error, (unsigned long long)(page->index<<PAGE_CACHE_SHIFT)+offs,
@@ -162,7 +159,7 @@ bad_entry:
 Eend:
 	if (!quiet) {
 		p = (ext2_dirent *)(kaddr + offs);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		ext2_error(sb, "ext2_check_page",
 			"entry in directory #%lu spans the page boundary"
 			"offset=%llu, inode=%lu",

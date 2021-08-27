@@ -9,7 +9,7 @@
 
 #include <linux/compiler.h>
 #include <asm/fpstate.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <asm/page.h>
 
 #if (PAGE_SHIFT > 12)

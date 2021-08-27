@@ -793,7 +793,7 @@ struct flash_info {
 	})
 
 static const struct spi_device_id m25p_ids[] = {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	 
 	{ "spi_flash_jedec_detection", INFO(0xD373C7, 0, 0, 0, 0) },
 #endif
@@ -827,12 +827,12 @@ static const struct spi_device_id m25p_ids[] = {
 	{ "mx25l6405d",  INFO(0xc22017, 0, 64 * 1024, 128, 0) },
 	{ "mx25l12805d", INFO(0xc22018, 0, 64 * 1024, 256, 0) },
 	{ "mx25l12855e", INFO(0xc22618, 0, 64 * 1024, 256, 0) },
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	{ "mx25u12835f", INFO(0xc22538, 0, 64 * 1024, 256, 0) },
 #endif
 	{ "mx25l25635e", INFO(0xc22019, 0, 64 * 1024, 512, 0) },
 	{ "mx25l25655e", INFO(0xc22619, 0, 64 * 1024, 512, 0) },
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	{ "mx25u6435f",	 INFO(0xc22537, 0, 64 * 1024, 128, 0) },
 #endif
 
@@ -961,7 +961,7 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	unsigned			i;
 	struct mtd_part_parser_data	ppdata;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	memset(&ppdata, 0x00, sizeof(ppdata));
 #endif
 

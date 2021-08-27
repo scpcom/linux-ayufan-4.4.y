@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "mvCommon.h"
 #include "mvOs.h"
@@ -1388,7 +1385,7 @@ MV_U32 mvEthPhyAddGet(MV_U32 ethPortNum)
        return ethphyHalData.phyAddr[ethPortNum];
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
  
 #include <linux/export.h>
 EXPORT_SYMBOL(mvEthPhyRegRead);

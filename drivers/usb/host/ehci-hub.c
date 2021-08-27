@@ -711,7 +711,7 @@ static int ehci_hub_control (
 					PORT_RESET, 0, 1000);
 			if (retval != 0) {
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 				 
 				if (ehci_marvell_hs_detect_wa(ehci,
 							hcd->self.busnum)) {
@@ -777,7 +777,7 @@ static int ehci_hub_control (
 #endif
 		dbg_port (ehci, "GetStatus", wIndex + 1, temp);
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 		if ((temp & PORT_CONNECT) && (temp & PORT_PEC) &&
 				(temp & PORT_CSC)) {
 			if (!ehci_marvell_hs_detect_wa(ehci, hcd->self.busnum))

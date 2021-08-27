@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -11,7 +8,7 @@
 #include <linux/sched.h>
 #include <linux/err.h>
 #include <linux/interrupt.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/of_i2c.h>
 #endif
 #include <linux/platform_device.h>
@@ -116,7 +113,7 @@ static int __devinit dw_i2c_probe(struct platform_device *pdev)
 			sizeof(adap->name));
 	adap->algo = &i2c_dw_algo;
 	adap->dev.parent = &pdev->dev;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	adap->dev.of_node = pdev->dev.of_node;
 #endif
 
@@ -126,7 +123,7 @@ static int __devinit dw_i2c_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "failure adding adapter\n");
 		goto err_free_irq;
 	}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	of_i2c_register_devices(adap);
 #endif
 
@@ -172,7 +169,7 @@ static int __devexit dw_i2c_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static const struct of_device_id dw_i2c_of_match[] = {
 		{ .compatible = "snps,designware-i2c", },
 	{},
@@ -187,7 +184,7 @@ static struct platform_driver dw_i2c_driver = {
 	.driver		= {
 		.name	= "i2c_designware",
 		.owner	= THIS_MODULE,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		.of_match_table = of_match_ptr(dw_i2c_of_match),
 #endif
 	},

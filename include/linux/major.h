@@ -169,7 +169,7 @@
 
 #define VIOTAPE_MAJOR		230
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #define MV_TS_MAJOR		231	 
 #endif
 

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/init.h>
 
 #include <asm/pgalloc.h>
@@ -16,7 +13,7 @@ extern void cpu_resume_mmu(void);
 
 void __cpu_suspend_save(u32 *ptr, u32 ptrsz, u32 sp, u32 *save_ptr)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 	u32 *ctx = ptr;
 #else	
 	*save_ptr = virt_to_phys(ptr);
@@ -28,7 +25,7 @@ void __cpu_suspend_save(u32 *ptr, u32 ptrsz, u32 sp, u32 *save_ptr)
 
 	cpu_do_suspend(ptr);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 flush_cache_louis();
 
 	__cpuc_flush_dcache_area(ctx, ptrsz);

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/module.h>
 #include <linux/reboot.h>
 #include <linux/init.h>
@@ -612,7 +609,7 @@ static void native_machine_power_off(void)
 #ifdef CONFIG_ARCH_GEN3
  
 	machine_shutdown();
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_POWEROFF
 	outb(SYNO_EVANSPORT_SET8N1, SYNO_EVANSPORT_TTYS1_PORT + SYNO_EVANSPORT_LCR);
 	outb(SYNO_EVANSPORT_SHUTDOWN_CMD, SYNO_EVANSPORT_TTYS1_PORT + SYNO_EVANSPORT_TXR);
 #endif

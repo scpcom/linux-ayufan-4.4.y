@@ -188,7 +188,7 @@ extern int sysctl_tcp_cookie_size;
 extern int sysctl_tcp_thin_linear_timeouts;
 extern int sysctl_tcp_thin_dupack;
 extern int sysctl_tcp_challenge_ack_limit;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 extern int sysctl_tcp_default_delack_segs;
 #endif
 

@@ -275,7 +275,7 @@ static void xhci_disable_port(struct usb_hcd *hcd, struct xhci_hcd *xhci,
 			wIndex, port_status);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 		u16 wIndex, __le32 __iomem *addr, __le32 __iomem *addr_map, u32 port_status)
 #else
@@ -285,7 +285,7 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 {
 	char *port_change_bit;
 	u32 status;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 	u32 port_status_map;
 	int link_state_map;
 #endif
@@ -327,7 +327,7 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 	xhci_writel(xhci, port_status | status, addr);
 	port_status = xhci_readl(xhci, addr);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 	port_status_map = xhci_readl(xhci, addr_map);
 	link_state_map = (port_status_map >> 5) & 0xf;
 	xhci_dbg(xhci, "clear port %s change, actual port %d status  = 0x%x. status_map = 0x%x\n",
@@ -344,13 +344,13 @@ static int xhci_get_ports(struct usb_hcd *hcd, __le32 __iomem ***port_array)
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
 
 	if (hcd->speed == HCD_USB3) {
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_DEBUG
 		xhci_dbg(xhci, "main: USB3.hcd:0x%x.xhci:0x%x.\n",hcd,xhci);
 #endif
 		max_ports = xhci->num_usb3_ports;
 		*port_array = xhci->usb3_ports;
 	} else {
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_DEBUG
 		xhci_dbg(xhci, "main: USB2.hcd:0x%x.xhci:0x%x.\n",hcd,xhci);
 #endif
 		max_ports = xhci->num_usb2_ports;
@@ -360,7 +360,7 @@ static int xhci_get_ports(struct usb_hcd *hcd, __le32 __iomem ***port_array)
 	return max_ports;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE)
  
 static int xhci_get_ports_map(struct usb_hcd *hcd, __le32 __iomem ***port_array)
 {
@@ -379,7 +379,7 @@ static int xhci_get_ports_map(struct usb_hcd *hcd, __le32 __iomem ***port_array)
 }
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 extern enum XHCI_SPECIAL_RESET_MODE xhci_special_reset;  
 #endif
 
@@ -408,7 +408,7 @@ void xhci_test_and_clear_bit(struct xhci_hcd *xhci, __le32 __iomem **port_array,
 	}
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 extern enum XHCI_SPECIAL_RESET_MODE xhci_special_reset;  
 #endif
  
@@ -461,12 +461,12 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	int max_ports;
 	unsigned long flags;
 	u32 temp, status;
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	u32 temp_map;
 #endif
 	int retval = 0;
 	__le32 __iomem **port_array;
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE)
 	__le32 __iomem **port_array_map;
 	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
 #endif
@@ -477,12 +477,12 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	u16 wake_mask = 0;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_DEBUG
 	xhci_dbg(xhci, "xhci_hub_control.type:0x%x.wvalue:%d.\n", typeReq, wValue);
 #endif
 
 	max_ports = xhci_get_ports(hcd, &port_array);
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE)
 	if (pdev->vendor == PCI_VENDOR_ID_NEC ||
 		pdev->vendor == PCI_VENDOR_ID_ETRON) {
 		xhci_get_ports_map(hcd, &port_array_map);  
@@ -535,7 +535,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		}
 		xhci_dbg(xhci, "get port status, actual port %d status  = 0x%x\n", wIndex, temp);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 		if (pdev->vendor == PCI_VENDOR_ID_NEC ||
 			pdev->vendor == PCI_VENDOR_ID_ETRON) {
 			temp_map = xhci_readl(xhci, port_array[(wIndex+1)%2]);
@@ -627,7 +627,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		if (bus_state->port_c_suspend & (1 << wIndex))
 			status |= 1 << USB_PORT_FEAT_C_SUSPEND;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 		if (((temp & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_COMP_MOD ||
 				(temp & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_LOOPBACK) &&
 				(temp & PORT_POWER))
@@ -649,7 +649,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			goto error;
 		wIndex--;
 		temp = xhci_readl(xhci, port_array[wIndex]);
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(MY_ABC_HERE)
 		if (pdev->vendor == PCI_VENDOR_ID_NEC ||
 			pdev->vendor == PCI_VENDOR_ID_ETRON) {
 			temp_map = xhci_readl(xhci, port_array_map[wIndex]);
@@ -783,7 +783,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			break;
 		case USB_PORT_FEAT_RESET:
 			temp = (temp | PORT_RESET);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 			 
 			if ((temp & PORT_CONNECT) || (temp_map & PORT_CONNECT) ||  
 				((hcd->speed == HCD_USB2) &&  
@@ -815,7 +815,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			}
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 			 
 			else if((pdev->vendor == PCI_VENDOR_ID_NEC ||
 					 pdev->vendor == PCI_VENDOR_ID_ETRON) &&
@@ -837,7 +837,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 #endif
 			break;
 		case USB_PORT_FEAT_BH_PORT_RESET:
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_DEBUG
 			xhci_dbg(xhci, "set USB_PORT_FEAT_BH_PORT_RESET.\n");
 #endif
 			temp |= PORT_WR;
@@ -856,7 +856,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			goto error;
 		wIndex--;
 		temp = xhci_readl(xhci, port_array[wIndex]);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 		if (pdev->vendor == PCI_VENDOR_ID_NEC ||
 			pdev->vendor == PCI_VENDOR_ID_ETRON) {
 			temp_map = xhci_readl(xhci, port_array_map[wIndex]);
@@ -905,7 +905,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		case USB_PORT_FEAT_C_OVER_CURRENT:
 		case USB_PORT_FEAT_C_ENABLE:
 		case USB_PORT_FEAT_C_PORT_LINK_STATE:
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 			if (pdev->vendor == PCI_VENDOR_ID_NEC ||
 				pdev->vendor == PCI_VENDOR_ID_ETRON) {
 				xhci_clear_port_change_bit(xhci, wValue, wIndex,
@@ -917,7 +917,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 #endif
 			break;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 		case USB_PORT_FEAT_POWER:
 			xhci_dbg(xhci, "clear USB_PORT_FEAT_POWER.\n");
 			xhci_writel(xhci, temp & ~PORT_POWER, port_array[wIndex]);

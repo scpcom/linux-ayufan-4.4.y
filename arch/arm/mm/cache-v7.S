@@ -17,7 +17,7 @@
 #include <linux/init.h>
 #include <asm/assembler.h>
 #include <asm/unwind.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <asm/page.h>
 #endif
 
@@ -37,7 +37,7 @@ ENTRY(v7_flush_icache_all)
 	ALT_UP(mcr	p15, 0, r0, c7, c5, 0)		@ I+BTB cache invalidate
 	mov	pc, lr
 ENDPROC(v7_flush_icache_all)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  /*
  *     v7_flush_dcache_louis()
  *
@@ -143,7 +143,7 @@ ENTRY(v7_flush_kern_cache_all)
  THUMB(	ldmfd	sp!, {r4-r7, r9-r11, lr}	)
 	mov	pc, lr
 ENDPROC(v7_flush_kern_cache_all)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  /*
  *     v7_flush_kern_cache_louis(void)
  *

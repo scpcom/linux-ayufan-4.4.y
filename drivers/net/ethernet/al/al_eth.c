@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -45,7 +42,7 @@
 #ifdef CONFIG_ARCH_ALPINE
 #include "mach/alpine_machine.h"
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/syno.h>
 #include <linux/synobios.h>
 #endif
@@ -188,7 +185,7 @@ static int al_eth_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
 static int al_eth_flow_ctrl_config(struct al_eth_adapter *adapter);
 static uint8_t al_eth_flow_ctrl_mutual_cap_get(struct al_eth_adapter *adapter);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
  
 static void syno_update_rtl8211dn_led(struct phy_device *phydev, int speed)
 {
@@ -228,7 +225,7 @@ static void al_eth_adjust_link(struct net_device *dev)
 			case SPEED_1000:
 			case SPEED_100:
 			case SPEED_10:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
 				if (!syno_is_hw_version(HW_DS2015xs))
 					syno_update_rtl8211dn_led(phydev, phydev->speed);
 #endif
@@ -481,7 +478,7 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 		adapter->phy_exist = false;
 		adapter->an_en = false;
 		adapter->lt_en = false;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 		adapter->rx_eq_en = true;
 #endif
 		adapter->ref_clk_freq = AL_ETH_REF_FREQ_375_MHZ;
@@ -505,7 +502,7 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 			adapter->phy_exist = false;
 			adapter->an_en = false;
 			adapter->lt_en = false;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 			adapter->rx_eq_en = true;
 #endif
 			break;
@@ -528,7 +525,7 @@ al_eth_board_params_init(struct al_eth_adapter *adapter)
 		adapter->phy_addr = params.phy_mdio_addr;
 		adapter->an_en = params.autoneg_enable;
 		adapter->lt_en = params.kr_lt_enable;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 		adapter->rx_eq_en = true;
 #endif
 		adapter->serdes_grp = params.serdes_grp;
@@ -1926,7 +1923,7 @@ al_eth_setup_int_mode(struct al_eth_adapter *adapter, int dis_msi)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 static int al_eth_set_coalesce(struct net_device *net_dev,
 				    struct ethtool_coalesce *coalesce);
 #endif
@@ -1975,7 +1972,7 @@ al_eth_configure_int_mode(struct al_eth_adapter *adapter)
 	adapter->tx_usecs = 0;
 	adapter->rx_usecs = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 	 
 	struct ethtool_coalesce coalesce;
 	coalesce.use_adaptive_tx_coalesce = 0;
@@ -1986,7 +1983,7 @@ al_eth_configure_int_mode(struct al_eth_adapter *adapter)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 typedef struct INTERFACE_CPU_MAPPING_ {
 	char *interface;
 	int cpu;
@@ -2013,7 +2010,7 @@ al_eth_request_irq(struct al_eth_adapter *adapter)
 	unsigned long flags;
 	struct al_eth_irq *irq;
 	int rc = 0, i;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 	unsigned int cpu = first_cpu(*cpu_online_mask);
 
 	if (syno_is_hw_version(HW_DS2015xs)) {
@@ -2054,7 +2051,7 @@ al_eth_request_irq(struct al_eth_adapter *adapter)
 
 		irq_set_affinity_hint(irq->vector, &irq->affinity_hint_mask);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 		cpumask_clear(&irq->affinity_hint_mask);
 		cpumask_set_cpu(cpu, &irq->affinity_hint_mask);
 		irq_set_affinity_hint(irq->vector, &irq->affinity_hint_mask);
@@ -2621,7 +2618,7 @@ void al_eth_serdes_da_rx_basic_config(struct al_serdes_obj	*serdes_obj,
 	struct al_serdes_adv_rx_params basic_rx;
 
 	basic_rx.override		= AL_TRUE;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 	 
 	basic_rx.dcgain			= 0x7;
 	basic_rx.dfe_3db_freq		= 0x7;
@@ -2689,7 +2686,7 @@ void al_eth_serdes_optic_rx_basic_config(struct al_serdes_obj	*serdes_obj,
 
 static void al_eth_serdes_init(struct al_eth_adapter *adapter)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	void __iomem			*serdes_base;
 
 	adapter->serdes_init = false;
@@ -3088,7 +3085,7 @@ static void al_eth_sfp_detection_apply(
 {
 	adapter->lt_en = adapter->sfp_detect_status.lt_en;
 	adapter->an_en = adapter->sfp_detect_status.an_en;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if ((adapter->auto_speed) && ((!adapter->mac_mode_set) ||
 		(adapter->sfp_detect_status.mac_mode != adapter->mac_mode))) {
 		enum alpine_serdes_eth_mode mode =
@@ -3173,7 +3170,7 @@ static void al_eth_link_status_task(struct work_struct *work)
 	alpine_serdes_eth_group_unlock(adapter->serdes_grp);
 
 	if ((rc == 0) && (link_up == true)) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 		netdev_dbg(adapter->netdev, "%s link up\n", __func__);
 #else
 		netdev_info(adapter->netdev, "%s link up\n", __func__);
@@ -3302,7 +3299,7 @@ static void al_eth_lm_config(struct al_eth_adapter *adapter)
 	}
 
 	params.link_training = adapter->lt_en;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 	params.rx_equal = adapter->rx_eq_en;
 #else
 	params.rx_equal = true;
@@ -3897,7 +3894,7 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 		phy_write(priv->phydev, 30, 0x6D);
 		phy_write(priv->phydev, 21, 0x1000);
 		phy_write(priv->phydev, 31, 0x0000);  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
 		if (syno_is_hw_version(HW_DS1515)) {
 			phy_write(priv->phydev, 31, 0x0003);  
 		}

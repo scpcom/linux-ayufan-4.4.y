@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __ASM_ARCH_AURORA_H
 #define __ASM_ARCH_AURORA_H
@@ -101,7 +98,7 @@
 #define DEVICE_BOOTCS_PHYS_BASE		0xF4000000
 #define DEVICE_BOOTCS_SIZE		_32M
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 #define SPI_CS0_PHYS_BASE		0xF0000000
 #else
 #define SPI_CS0_PHYS_BASE		0xF6000000

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -694,7 +691,7 @@ int afs_vnode_store_data(struct afs_writeback *wb, pgoff_t first, pgoff_t last,
 	struct afs_vnode *vnode = wb->vnode;
 	int ret;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	_enter("%s{%x:%u.%u},%x,%llx,%llx,%x,%x",
 #else
 	_enter("%s{%x:%u.%u},%x,%lx,%lx,%x,%x",
@@ -704,7 +701,7 @@ int afs_vnode_store_data(struct afs_writeback *wb, pgoff_t first, pgoff_t last,
 	       vnode->fid.vnode,
 	       vnode->fid.unique,
 	       key_serial(wb->key),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	       (unsigned long long)first, (unsigned long long)last, offset, to);
 #else
 	       first, last, offset, to);

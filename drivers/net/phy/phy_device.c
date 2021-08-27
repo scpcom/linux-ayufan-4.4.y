@@ -26,7 +26,7 @@
 #if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 #include <mach/comcerto-2000/pm.h>
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
 #include <linux/synobios.h>
 #endif
 
@@ -157,7 +157,7 @@ static struct phy_device* phy_device_create(struct mii_bus *bus,
 	dev_set_name(&dev->dev, PHY_ID_FMT, bus->id, addr);
 
 	dev->state = PHY_DOWN;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
 	dev->is_phyerr_reset = 0;
 #endif
 
@@ -496,7 +496,7 @@ EXPORT_SYMBOL(genphy_restart_aneg);
 int genphy_config_aneg(struct phy_device *phydev)
 {
 	int result;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
 	int reg_val = 0;
 
 	if (syno_is_hw_version(HW_DS1515) || syno_is_hw_version(HW_DS715) || syno_is_hw_version(HW_DS215p) || syno_is_hw_version(HW_DS416)) {

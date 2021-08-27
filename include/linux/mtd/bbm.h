@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __LINUX_MTD_BBM_H
 #define __LINUX_MTD_BBM_H
@@ -57,7 +54,7 @@ struct nand_bbt_descr {
 
 #define NAND_BBT_DYNAMICSTRUCT	0x80000000
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
  
 #define NAND_BBT_SCANMVCUSTOM	0x10000000
 #endif

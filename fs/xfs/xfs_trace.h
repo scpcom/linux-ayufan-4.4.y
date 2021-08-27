@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM xfs
@@ -937,7 +934,7 @@ DECLARE_EVENT_CLASS(xfs_page_class,
 		__entry->delalloc = delalloc;
 		__entry->unwritten = unwritten;
 	),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	TP_printk("dev %d:%d ino 0x%llx pgoff 0x%llx size 0x%llx offset %lx "
 #else
 	TP_printk("dev %d:%d ino 0x%llx pgoff 0x%lx size 0x%llx offset %lx "
@@ -949,7 +946,7 @@ DECLARE_EVENT_CLASS(xfs_page_class,
 		  __entry->size,
 		  __entry->offset,
 		  __entry->delalloc,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		  __entry->unwritten)
 #else
 		  __entry->unwritten)

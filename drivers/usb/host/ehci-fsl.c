@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/types.h>
@@ -430,7 +427,7 @@ static struct ehci_fsl *hcd_to_ehci_fsl(struct usb_hcd *hcd)
 static int ehci_fsl_drv_suspend(struct device *dev)
 {
 	struct usb_hcd *hcd = dev_get_drvdata(dev);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 	ehci_stop(hcd);
 	ehci_shutdown(hcd);
 #else
@@ -455,7 +452,7 @@ static int ehci_fsl_drv_suspend(struct device *dev)
 static int ehci_fsl_drv_resume(struct device *dev)
 {
 	struct usb_hcd *hcd = dev_get_drvdata(dev);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 	ehci_fsl_setup(hcd);
 	ehci_run(hcd);
 #else

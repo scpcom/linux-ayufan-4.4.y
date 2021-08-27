@@ -166,7 +166,7 @@ struct dx_map_entry
 	u16 size;
 };
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
  
 struct dx_tail {
 	u32 dt_reserved;
@@ -216,7 +216,7 @@ static struct buffer_head * ext4_dx_find_entry(struct inode *dir,
 static int ext4_dx_add_entry(handle_t *handle, struct dentry *dentry,
 			     struct inode *inode);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
  
 #define EXT4_DIRENT_TAIL(block, blocksize) \
 	((struct ext4_dir_entry_tail *)(((void *)(block)) + \
@@ -285,7 +285,7 @@ static inline unsigned dx_root_limit(struct inode *dir, unsigned infosize)
 	unsigned entry_space = dir->i_sb->s_blocksize - EXT4_DIR_REC_LEN(1) -
 		EXT4_DIR_REC_LEN(2) - infosize;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	if (EXT4_HAS_RO_COMPAT_FEATURE(dir->i_sb,
 					   EXT4_FEATURE_RO_COMPAT_METADATA_CSUM))
 		entry_space -= sizeof(struct dx_tail);
@@ -297,7 +297,7 @@ static inline unsigned dx_node_limit(struct inode *dir)
 {
 	unsigned entry_space = dir->i_sb->s_blocksize - EXT4_DIR_REC_LEN(0);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	if (EXT4_HAS_RO_COMPAT_FEATURE(dir->i_sb,
 					   EXT4_FEATURE_RO_COMPAT_METADATA_CSUM))
 		entry_space -= sizeof(struct dx_tail);
@@ -1202,7 +1202,7 @@ static struct ext4_dir_entry_2 *do_split(handle_t *handle, struct inode *dir,
 	unsigned split, move, size;
 	struct ext4_dir_entry_2 *de = NULL, *de2;
 	int	err = 0, i;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	struct ext4_dir_entry_tail *t;
 	int csum_size = 0;
 
@@ -1255,7 +1255,7 @@ static struct ext4_dir_entry_2 *do_split(handle_t *handle, struct inode *dir,
 
 	de2 = dx_move_dirents(data1, data2, map + split, count - split, blocksize);
 	de = dx_pack_dirents(data1, blocksize);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	de->rec_len = ext4_rec_len_to_disk(data1 + (blocksize - csum_size) -
 					   (char *) de,
 					   blocksize);
@@ -1316,7 +1316,7 @@ static int add_dirent_to_buf(handle_t *handle, struct dentry *dentry,
 	unsigned short	reclen;
 	int		nlen, rlen, err;
 	char		*top;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	int     csum_size = 0;
 
 	if (EXT4_HAS_RO_COMPAT_FEATURE(inode->i_sb,
@@ -1327,7 +1327,7 @@ static int add_dirent_to_buf(handle_t *handle, struct dentry *dentry,
 	reclen = EXT4_DIR_REC_LEN(namelen);
 	if (!de) {
 		de = (struct ext4_dir_entry_2 *)bh->b_data;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 		top = bh->b_data + (blocksize - csum_size) - reclen;
 #else
 		top = bh->b_data + blocksize - reclen;
@@ -1404,7 +1404,7 @@ static int make_indexed_dir(handle_t *handle, struct dentry *dentry,
 	struct dx_hash_info hinfo;
 	ext4_lblk_t  block;
 	struct fake_dirent *fde;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	struct ext4_dir_entry_tail *t;
 	int     csum_size = 0;
 
@@ -1431,7 +1431,7 @@ static int make_indexed_dir(handle_t *handle, struct dentry *dentry,
 		brelse(bh);
 		return -EIO;
 	}
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	len = ((char *) root) + (blocksize - csum_size) - (char *) de;
 #else
 	len = ((char *) root) + blocksize - (char *) de;
@@ -1450,7 +1450,7 @@ static int make_indexed_dir(handle_t *handle, struct dentry *dentry,
 	top = data1 + len;
 	while ((char *)(de2 = ext4_next_entry(de, blocksize)) < top)
 		de = de2;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	de->rec_len = ext4_rec_len_to_disk(data1 + (blocksize - csum_size) -
 					   (char *) de,
 					   blocksize);
@@ -1514,7 +1514,7 @@ static int ext4_add_entry(handle_t *handle, struct dentry *dentry,
 	int	dx_fallback=0;
 	unsigned blocksize;
 	ext4_lblk_t block, blocks;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	struct ext4_dir_entry_tail *t;
 	int csum_size = 0;
 
@@ -1560,7 +1560,7 @@ static int ext4_add_entry(handle_t *handle, struct dentry *dentry,
 		return retval;
 	de = (struct ext4_dir_entry_2 *) bh->b_data;
 	de->inode = 0;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	de->rec_len = ext4_rec_len_to_disk(blocksize - csum_size, blocksize);
 
 	if (csum_size) {
@@ -1716,7 +1716,7 @@ static int ext4_delete_entry(handle_t *handle,
 	struct ext4_dir_entry_2 *de, *pde;
 	unsigned int blocksize = dir->i_sb->s_blocksize;
 	int i, err;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	int csum_size = 0;
 
 	if (EXT4_HAS_RO_COMPAT_FEATURE(dir->i_sb,
@@ -1727,7 +1727,7 @@ static int ext4_delete_entry(handle_t *handle,
 	i = 0;
 	pde = NULL;
 	de = (struct ext4_dir_entry_2 *) bh->b_data;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	while (i < bh->b_size - csum_size) {
 #else
 	while (i < bh->b_size) {
@@ -1878,7 +1878,7 @@ static int ext4_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 	struct ext4_dir_entry_2 *de;
 	unsigned int blocksize = dir->i_sb->s_blocksize;
 	int err, retries = 0;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	struct ext4_dir_entry_tail *t;
 	int csum_size = 0;
 
@@ -1927,7 +1927,7 @@ retry:
 	ext4_set_de_type(dir->i_sb, de, S_IFDIR);
 	de = ext4_next_entry(de, blocksize);
 	de->inode = cpu_to_le32(dir->i_ino);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	de->rec_len = ext4_rec_len_to_disk(blocksize -
 					   (csum_size + EXT4_DIR_REC_LEN(1)),
 					   blocksize);
@@ -1940,7 +1940,7 @@ retry:
 	ext4_set_de_type(dir->i_sb, de, S_IFDIR);
 	set_nlink(inode, 2);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 	if (csum_size) {
 		t = EXT4_DIRENT_TAIL(dir_block->b_data, blocksize);
 		initialize_dirent_tail(t, blocksize);

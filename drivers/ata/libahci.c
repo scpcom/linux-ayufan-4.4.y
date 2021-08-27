@@ -17,11 +17,11 @@
 #include <scsi/scsi_device.h>
 #endif
 #include <linux/libata.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include "libata.h"
 #endif
 #include "ahci.h"
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_ALPINE)
 #include <linux/pci.h>
 #endif
 #ifdef MY_DEF_HERE
@@ -308,7 +308,7 @@ struct ata_port_operations ahci_ops = {
 	.em_store		= ahci_led_store,
 	.sw_activity_show	= ahci_activity_show,
 	.sw_activity_store	= ahci_activity_store,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	.transmit_led_message	= ahci_transmit_led_message,
 #endif
 #ifdef CONFIG_PM
@@ -860,7 +860,7 @@ int syno_is_alpine_internal_ahci(struct ata_port *ap)
 }
 #endif
 
-#if defined(CONFIG_ARCH_GEN3) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_GEN3) || defined(MY_DEF_HERE) || defined(CONFIG_SYNO_ALPINE)
 static void syno_sw_activity(struct ata_port *ap)
 {
 #ifdef MY_DEF_HERE
@@ -891,7 +891,7 @@ static void ahci_start_port(struct ata_port *ap)
 			emp = &pp->em_priv[link->pmp];
 
 			for (i = 0; i < EM_MAX_RETRY; i++) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 				rc = ap->ops->transmit_led_message(ap,
 							       emp->led_state,
 							       4);
@@ -1099,18 +1099,18 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	} else {
 		 
 		led_message &= ~EM_MSG_LED_VALUE_ACTIVITY;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		if ((ata_phys_link_online(link)) || (emp->blink_policy == BLINK_OFF))
 #else
 		if (emp->blink_policy == BLINK_OFF)
 #endif
 			led_message |= (1 << 16);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(500));
 #endif
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	ap->ops->transmit_led_message(ap, led_message, 4);
 #else
 	ahci_transmit_led_message(ap, led_message, 4);
@@ -1125,7 +1125,7 @@ static void ahci_init_sw_activity(struct ata_link *link)
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
 	emp->saved_activity = emp->activity = 0;
-#if defined(MY_DEF_HERE) && !defined(SYNO_ALPINE_SW_SATA_LED)
+#if defined(CONFIG_SYNO_ALPINE) && !defined(SYNO_ALPINE_SW_SATA_LED)
 	emp->blink_policy = BLINK_ON;
 #endif
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
@@ -1230,7 +1230,7 @@ static ssize_t ahci_led_store(struct ata_port *ap, const char *buf,
 	if (emp->blink_policy)
 		state &= ~EM_MSG_LED_VALUE_ACTIVITY;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	return ap->ops->transmit_led_message(ap, state, size);
 #else
 	return ahci_transmit_led_message(ap, state, size);
@@ -1251,7 +1251,7 @@ static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
 
 		port_led_state &= EM_MSG_LED_VALUE_OFF;
 		port_led_state |= (ap->port_no | (link->pmp << 8));
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		ap->ops->transmit_led_message(ap, port_led_state, 4);
 #else
 		ahci_transmit_led_message(ap, port_led_state, 4);
@@ -1263,7 +1263,7 @@ static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
 			port_led_state &= EM_MSG_LED_VALUE_OFF;
 			port_led_state |= (ap->port_no | (link->pmp << 8));
 			port_led_state |= EM_MSG_LED_VALUE_ON;  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			ap->ops->transmit_led_message(ap, port_led_state, 4);
 #else
 			ahci_transmit_led_message(ap, port_led_state, 4);

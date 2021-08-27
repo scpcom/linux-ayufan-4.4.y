@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -56,7 +53,7 @@ int efi_enabled(int facility)
 }
 EXPORT_SYMBOL(efi_enabled);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_EFI
 static bool disable_runtime = true;
 static int __init setup_withefi(char *arg)
 {
@@ -547,7 +544,7 @@ void __init efi_init(void)
 	x86_platform.set_wallclock = efi_set_rtc_mmss;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CEDARVIEW_USE_EFI_REBOOT
 	 
 	reboot_type = BOOT_EFI;
 #endif

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _ASM_PGTABLE_3LEVEL_HWDEF_H
 #define _ASM_PGTABLE_3LEVEL_HWDEF_H
@@ -17,7 +14,7 @@
 #define PMD_SECT_S		(_AT(pmdval_t, 3) << 8)
 #define PMD_SECT_AF		(_AT(pmdval_t, 1) << 10)
 #define PMD_SECT_nG		(_AT(pmdval_t, 1) << 11)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define PMD_SECT_XN		(_AT(pmdval_t, 1) << 54)
 #else
 #ifdef __ASSEMBLY__

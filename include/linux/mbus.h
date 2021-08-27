@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __LINUX_MBUS_H
 #define __LINUX_MBUS_H
@@ -19,7 +16,7 @@ struct mbus_dram_target_info
 	} cs[4];
 };
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
  
 #if defined(CONFIG_PLAT_ORION) || defined(CONFIG_PLAT_ARMADA)
 extern const struct mbus_dram_target_info *mv_mbus_dram_info(void);

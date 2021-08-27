@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/mm/proc-mohawk.S: MMU functions for Marvell PJ1 core
  *
@@ -302,7 +299,7 @@ ENTRY(mohawk_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(mohawk_dma_unmap_area)
 
-#if defined(MY_DEF_HERE)||defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	.globl	mohawk_flush_kern_cache_louis
 	.equ	mohawk_flush_kern_cache_louis, mohawk_flush_kern_cache_all
 #endif

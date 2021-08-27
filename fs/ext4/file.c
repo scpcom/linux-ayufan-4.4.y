@@ -199,7 +199,7 @@ const struct file_operations ext4_file_operations = {
 #else
 	.splice_write	= generic_file_splice_write,
 #endif
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	.splice_from_socket = generic_splice_from_socket,
 #endif
 	.fallocate	= ext4_fallocate,

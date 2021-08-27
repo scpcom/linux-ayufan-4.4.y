@@ -154,7 +154,7 @@ extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SWITCH_NET_DEVICE_NAME
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
@@ -167,11 +167,11 @@ extern int gSynoFactoryUSBFastReset;
 extern int gSynoFactoryUSB3Disable;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 extern int gSynoDualHead;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 extern int gSynoSASWriteConflictPanic;
 #endif
 
@@ -852,11 +852,11 @@ static int __init early_factory_usb3_disable(char *p)
 __setup("syno_disable_usb3=", early_factory_usb3_disable);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 static int __init early_dual_head(char *p)
 {
 	gSynoDualHead = simple_strtol(p, NULL, 10);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 	gSynoSASWriteConflictPanic = gSynoDualHead;
 #endif
 
@@ -867,7 +867,7 @@ static int __init early_dual_head(char *p)
 __setup("dual_head=", early_dual_head);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 static int __init early_sas_reservation_write_conflict(char *p)
 {
 	gSynoSASWriteConflictPanic = simple_strtol(p, NULL, 10);

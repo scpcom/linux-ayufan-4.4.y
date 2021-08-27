@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _SCSI_PRIV_H
 #define _SCSI_PRIV_H
 
@@ -134,7 +131,7 @@ static inline void scsi_netlink_init(void) {}
 static inline void scsi_netlink_exit(void) {}
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
  
 #ifdef CONFIG_MV_STAGGERED_SPINUP
 extern void standby_add_timer(struct scsi_device *, int,

@@ -28,8 +28,8 @@
 	 * this macro assumes that irqstat (r2) and base (r6) are
 	 * preserved from get_irqnr_and_base above
 	 */
-#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_IPC_DRIVER)) || \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_IPC_LINUX_AMP_DRIVER))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_IPC_DRIVER)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_IPC_LINUX_AMP_DRIVER))
  	test_for_ipc r0, r2, r6, lr
 	movne   r1, sp
 	adrne   lr, BSYM(1b)

@@ -27,14 +27,14 @@
 #include <asm/pgtable.h>
 
 #ifdef CONFIG_DEBUG_LL
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include CONFIG_DEBUG_LL_INCLUDE
 #else
 #include <mach/debug-macro.S>
 #endif
 #endif
 
-#if defined(MY_DEF_HERE) && (defined(CONFIG_DEBUG_LL) || defined(CONFIG_SUSPEND))
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && (defined(CONFIG_DEBUG_LL) || defined(CONFIG_SUSPEND))
 #include <mach/debug-macro.S>
 #endif
 
@@ -50,11 +50,11 @@
 #error KERNEL_RAM_VADDR must start at 0xXXXX8000
 #endif
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
        /* LPAE requires an additional page for the PGD */
 #define PG_DIR_SIZE    0x5000
 #define PMD_ORDER      3
-#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
 #define PG_DIR_SIZE    0x5000
 #define PMD_ORDER      3
 #else
@@ -198,7 +198,7 @@ __create_page_tables:
 	teq	r0, r6
 	bne	1b
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)) && defined(CONFIG_ARM_LPAE)
        /*
         * Build the PGD table (first level) to point to the PMD table. A PGD
         * entry is 64-bit wide.
@@ -209,7 +209,7 @@ __create_page_tables:
        mov     r6, #4                          @ PTRS_PER_PGD
        mov     r7, #1 << (55 - 32)             @ L_PGD_SWAPPER
 1:
-#if defined(CONFIG_CPU_ENDIAN_BE8) && defined(MY_DEF_HERE)
+#if defined(CONFIG_CPU_ENDIAN_BE8) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	str     r7, [r0], #4                    @ set top PGD entry bits
 	str     r3, [r0], #4                    @ set bottom PGD entry bits
 #else
@@ -221,7 +221,7 @@ __create_page_tables:
        bne     1b
 
        add     r4, r4, #0x1000                 @ point to the PMD tables
-#if defined(CONFIG_CPU_ENDIAN_BE8) && defined(MY_DEF_HERE)
+#if defined(CONFIG_CPU_ENDIAN_BE8) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
        add     r4, r4, #4                      @ we only write the bottom word
 #endif
 #endif
@@ -280,7 +280,7 @@ __create_page_tables:
 	bls	1b
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	/*
 	 * Then map boot params address in r2 or the first 1MB (2MB with LPAE)
 	 * of ram if boot params address is not specified.
@@ -302,7 +302,7 @@ __create_page_tables:
 	str	r6, [r3], #1 << PMD_ORDER
 	add	r6, r6, #1 << SECTION_SHIFT
 	str	r6, [r3]
-#if defined(MY_DEF_HERE) 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) 
 #if defined(CONFIG_ARM_LPAE) && defined(CONFIG_CPU_ENDIAN_BE8)
 	sub     r4, r4, #4                      @ Fixup page table pointer
 						@ for 64-bit descriptors
@@ -315,15 +315,15 @@ __create_page_tables:
 	 * hook which is called early needs to access internal registers
 	 */
 
-#if  (defined(MY_DEF_HERE) && (defined(CONFIG_DEBUG_LL) || defined(CONFIG_SUSPEND) )) || \
-      (!defined(MY_DEF_HERE) && defined(CONFIG_DEBUG_LL))
+#if  (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && (defined(CONFIG_DEBUG_LL) || defined(CONFIG_SUSPEND) )) || \
+      (!defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_DEBUG_LL))
 #ifndef CONFIG_DEBUG_ICEDCC
 	/*
 	 * Map in IO space for serial debugging.
 	 * This allows debug messages to be output
 	 * via a serial console before paging_init.
 	 */
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	addruart r7, r3
 #else
 	addruart r7, r3, r0
@@ -340,21 +340,21 @@ __create_page_tables:
 	mov	r3, r7, lsr #SECTION_SHIFT
 	ldr	r7, [r10, #PROCINFO_IO_MMUFLAGS] @ io_mmuflags
 	orr	r3, r7, r3, lsl #SECTION_SHIFT
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 	mov     r7, #1 << (54 - 32)             @ XN
-#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
 	mov     r7, #1 << (54 - 32)             @ XN
 #else
-	#ifdef MY_DEF_HERE
+	#ifdef CONFIG_SYNO_ALPINE
 	orr     r3, r3, #PMD_SECT_XN
 	#endif
 #endif
-#if defined(MY_DEF_HERE) && defined(CONFIG_CPU_ENDIAN_BE8) && defined(CONFIG_ARM_LPAE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_CPU_ENDIAN_BE8) && defined(CONFIG_ARM_LPAE)
 1:	str	r7, [r0], #4
 	str     r3, [r0], #4
 #else
 1:	str	r3, [r0], #4
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 #ifdef CONFIG_ARM_LPAE
 	str     r7, [r0], #4
 #endif
@@ -391,9 +391,9 @@ __create_page_tables:
 	str	r3, [r0]
 #endif
 #endif
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 	sub     r4, r4, #0x1000         @ point to the PGD table
-#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
 	sub     r4, r4, #0x1000         @ point to the PGD table
 #endif
 	mov	pc, lr
@@ -485,10 +485,10 @@ __enable_mmu:
 #ifdef CONFIG_CPU_ICACHE_DISABLE
 	bic	r0, r0, #CR_I
 #endif
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 	mov     r5, #0
 	mcrr    p15, 0, r4, r5, c2              @ load TTBR0
-#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
 	mov     r5, #0
 	mcrr    p15, 0, r4, r5, c2              @ load TTBR0
 #else
@@ -519,12 +519,12 @@ ENDPROC(__enable_mmu)
 	.align	5
 __turn_mmu_on:
 	mov	r0, r0
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 	instr_sync
 #endif
 	mcr	p15, 0, r0, c1, c0, 0		@ write control reg
 	mrc	p15, 0, r3, c0, c0, 0		@ read id reg
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 	instr_sync
 #endif
 	mov	r3, r3

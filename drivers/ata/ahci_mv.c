@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/gfp.h>
@@ -20,7 +17,7 @@
 #define AHCI_WINDOW_BASE(win)	(0x64 + ((win)<<4))
 #define AHCI_WINDOW_SIZE(win)	(0x68 + ((win)<<4))
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #define VENDOR_SPECIFIC_0_ADDR  0xa0
 #define VENDOR_SPECIFIC_0_DATA  0xa4
 #endif
@@ -149,7 +146,7 @@ static int ahci_mv_probe(struct platform_device *pdev)
 			ap->ops = &ata_dummy_port_ops;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	 
 	writel(0x4, hpriv->mmio + VENDOR_SPECIFIC_0_ADDR);
 	writel(0x80, hpriv->mmio + VENDOR_SPECIFIC_0_DATA);

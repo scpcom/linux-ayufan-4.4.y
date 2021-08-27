@@ -36,7 +36,7 @@ void __iomem *devm_ioremap(struct device *dev, resource_size_t offset,
 }
 EXPORT_SYMBOL(devm_ioremap);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 void __iomem *devm_request_and_ioremap(struct device *dev,
                          struct resource *res)
 {

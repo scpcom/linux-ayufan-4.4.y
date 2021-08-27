@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "mvCommon.h"
 #include "mvOs.h"
@@ -156,7 +153,7 @@ MV_STATUS mvGppAtomicValueSet(MV_U32 gpionumber)
         return MV_OK;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA
  
 #include <linux/export.h>
 EXPORT_SYMBOL(mvGppPolarityGet);

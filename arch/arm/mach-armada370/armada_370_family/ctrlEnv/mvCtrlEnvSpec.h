@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __INCmvCtrlEnvSpech
 #define __INCmvCtrlEnvSpech
@@ -19,7 +16,7 @@ extern "C" {
 #define MV_DRAM_REGS_OFFSET			(0x0)
 #define MV_AURORA_L2_REGS_OFFSET		(0x8000)
 #define MV_RTC_REGS_OFFSET			(0x10300)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA
 #define MV_RTC_EXTERNAL_ALARM_OFFSET			(0x10320)
 #endif
 #define MV_DEV_BUS_REGS_OFFSET			(0x10400)
@@ -135,7 +132,7 @@ extern "C" {
 #define MV_ETH_MAX_PORTS			2
 #define MV_ETH_MAX_RXQ				8
 #define MV_ETH_MAX_TXQ				8
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA)
 #define MV_ETH_TX_CSUM_MAX_SIZE 		1800
 #else
 #define MV_ETH_TX_CSUM_MAX_SIZE 		2048

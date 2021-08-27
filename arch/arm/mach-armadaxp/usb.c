@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/pci.h>
@@ -64,7 +61,7 @@ int mv_usb_resume(int dev)
 
 	return status;
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 #include <linux/export.h>
 EXPORT_SYMBOL(mv_usb_resume);
 #endif

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __ARM_PERF_EVENT_H__
 #define __ARM_PERF_EVENT_H__
@@ -17,7 +14,7 @@ enum arm_perf_pmu_ids {
 	ARM_PERF_PMU_ID_CA5,
 	ARM_PERF_PMU_ID_CA15,
 	ARM_NUM_PMU_IDS,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	MRVL_PERF_PMU_ID_PJ4B,
 #endif
 };

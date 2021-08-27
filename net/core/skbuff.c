@@ -88,7 +88,7 @@ static void skb_under_panic(struct sk_buff *skb, int sz, void *here)
 	BUG();
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 struct netdev_alloc_cache {
         struct page_frag        frag;
          
@@ -334,7 +334,7 @@ static void skb_clone_fraglist(struct sk_buff *skb)
 		skb_get(list);
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static inline void skb_release_data(struct sk_buff *skb)
 #else
 static void skb_release_data(struct sk_buff *skb)
@@ -345,7 +345,7 @@ static void skb_release_data(struct sk_buff *skb)
 			       &skb_shinfo(skb)->dataref)) {
 		if (skb_shinfo(skb)->nr_frags) {
 			int i;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			int nr_frags = skb_shinfo(skb)->nr_frags;
 
 			if(nr_frags > 1) {
@@ -393,7 +393,7 @@ static void skb_release_data(struct sk_buff *skb)
 		}
 #endif
 	}
-#if defined(MY_DEF_HERE) 
+#if defined(CONFIG_SYNO_ARMADA) 
 #ifdef CONFIG_NET_SKB_RECYCLE
  
 	if (skb->hw_cookie) {
@@ -404,7 +404,7 @@ static void skb_release_data(struct sk_buff *skb)
 #endif  	
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	 
 	if (skb->skb_recycle) {
@@ -416,7 +416,7 @@ static void skb_release_data(struct sk_buff *skb)
 #endif  
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static inline void kfree_skbmem(struct sk_buff *skb)
 #else
 static void kfree_skbmem(struct sk_buff *skb)
@@ -448,7 +448,7 @@ static void kfree_skbmem(struct sk_buff *skb)
 	}
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static inline void skb_release_head_state(struct sk_buff *skb)
 #else
 static void skb_release_head_state(struct sk_buff *skb)
@@ -463,7 +463,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 		skb->destructor(skb);
 	}
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if(skb->nfct) 
 		nf_conntrack_put(skb->nfct);
 #else
@@ -471,7 +471,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 #endif
 #endif
 #ifdef NET_SKBUFF_NF_DEFRAG_NEEDED
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if(skb->nfct_reasm) 
 		nf_conntrack_put_reasm(skb->nfct_reasm);
 #else
@@ -490,7 +490,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 #endif
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static inline void skb_release_all(struct sk_buff *skb)
 #else
 static void skb_release_all(struct sk_buff *skb)
@@ -502,7 +502,7 @@ static void skb_release_all(struct sk_buff *skb)
 
 void __kfree_skb(struct sk_buff *skb)
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	if (skb->skb_recycle && !skb->skb_recycle(skb))
 		return;
@@ -649,14 +649,14 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	n->nohdr = 0;
 	n->destructor = NULL;
 
-#if defined(MY_DEF_HERE) 
+#if defined(CONFIG_SYNO_ARMADA) 
 #ifdef CONFIG_NET_SKB_RECYCLE
 	n->skb_recycle = NULL;
 	n->hw_cookie = NULL;
 #endif  
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	n->skb_recycle = NULL;
 	n->hw_cookie = 0;
@@ -921,7 +921,7 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 
 	if (fastpath) {
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA)
 #ifdef CONFIG_NET_SKB_RECYCLE
 		 
 		if (skb->hw_cookie) {

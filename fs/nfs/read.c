@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/time.h>
 #include <linux/kernel.h>
@@ -515,7 +512,7 @@ int nfs_readpage(struct file *file, struct page *page)
 	struct inode *inode = page->mapping->host;
 	int		error;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	dprintk("NFS: nfs_readpage (%p %ld@%llu)\n",
 		page, PAGE_CACHE_SIZE, (unsigned long long)page->index);
 #else

@@ -21,7 +21,7 @@
 #if defined(MY_ABC_HERE)
 #include <asm/pgtable-2level.h>
 #endif
-#if defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_SYNO_ARMADA_ARCH)
 #define PAGE_OFFSET		UL(CONFIG_PAGE_OFFSET)
 #define TASK_SIZE		(UL(CONFIG_PAGE_OFFSET) - UL(0x01C00000))
 #define TASK_UNMAPPED_BASE	(UL(CONFIG_PAGE_OFFSET) / 3)
@@ -41,7 +41,7 @@
  
 #ifndef CONFIG_THUMB2_KERNEL
  
-#if defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(MY_DEF_HERE) && defined(CONFIG_ARCH_ARMADA370)
+#if defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARCH_ARMADA370)
 #define MODULES_VADDR		(PAGE_OFFSET - 28*1024*1024)
 #else
 #define MODULES_VADDR		(PAGE_OFFSET - 16*1024*1024)
@@ -77,21 +77,21 @@
 
 #define IOREMAP_MAX_ORDER	24
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #ifndef CONSISTENT_DMA_SIZE
 #define CONSISTENT_DMA_SIZE 	SZ_2M
 #endif
 #endif
 
-#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM)) || \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM))
 #define CONSISTENT_END         (0xffc00000UL)
 #else
 #define CONSISTENT_END		(0xffe00000UL)
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define CONSISTENT_BASE		(CONSISTENT_END - CONSISTENT_DMA_SIZE)
 #endif
 #else  
@@ -165,7 +165,7 @@ static inline unsigned long __phys_to_virt(unsigned long x)
 	return t;
 }
 #else
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #define __virt_to_phys(x)	((unsigned long)(x) - PAGE_OFFSET + PHYS_OFFSET)
 #define __phys_to_virt(x)	((unsigned long)(x) - PHYS_OFFSET + PAGE_OFFSET)
 #else

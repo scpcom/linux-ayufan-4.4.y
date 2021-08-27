@@ -1465,7 +1465,7 @@ static int serial_match_port(struct device *dev, void *data)
 	return dev->devt == devt;  
 }
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_STANDBY_UART_WAKE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_STANDBY_UART_WAKE)
 int uart_suspend_port(struct uart_driver *drv, struct uart_port *uport)
 {
 	return 0;
@@ -1623,7 +1623,7 @@ uart_report_port(struct uart_driver *drv, struct uart_port *port)
 	case UPIO_MEM32:
 	case UPIO_AU:
 	case UPIO_TSI:
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(MY_ABC_HERE)
 	case UPIO_DWAPB:
 #endif
 		snprintf(address, sizeof(address),
@@ -1942,7 +1942,7 @@ int uart_match_port(struct uart_port *port1, struct uart_port *port2)
 	case UPIO_MEM32:
 	case UPIO_AU:
 	case UPIO_TSI:
-#if (defined(MY_DEF_HERE) ||defined(MY_DEF_HERE)) || defined(MY_ABC_HERE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) ||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) || defined(MY_ABC_HERE)
 	case UPIO_DWAPB:
 #endif
 		return (port1->mapbase == port2->mapbase);

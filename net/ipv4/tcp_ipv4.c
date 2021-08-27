@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/bottom_half.h>
 #include <linux/types.h>
@@ -1465,7 +1462,7 @@ process:
 	if (!sock_owned_by_user(sk)) {
 #ifdef CONFIG_NET_DMA
 		struct tcp_sock *tp = tcp_sk(sk);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
 			tp->ucopy.dma_chan = net_dma_find_channel();
 #else

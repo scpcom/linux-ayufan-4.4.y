@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -103,7 +100,7 @@ int pci_bus_add_device(struct pci_dev *dev)
 {
 	int retval;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	pci_fixup_device(pci_fixup_final, dev);
 #endif  
 	retval = device_add(&dev->dev);

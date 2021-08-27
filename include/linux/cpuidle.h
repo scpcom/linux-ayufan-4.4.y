@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _LINUX_CPUIDLE_H
 #define _LINUX_CPUIDLE_H
@@ -22,7 +19,7 @@ struct cpuidle_driver;
 struct cpuidle_state_usage {
 	void		*driver_data;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	unsigned long long	disable;
 #endif
 	unsigned long long	usage;
@@ -35,7 +32,7 @@ struct cpuidle_state {
 
 	unsigned int	flags;
 	unsigned int	exit_latency;  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	int		power_usage;  
 #else
 	unsigned int	power_usage;  

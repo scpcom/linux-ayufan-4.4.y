@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "al_init_eth_lm.h"
 #include "al_hal_serdes.h"
@@ -162,7 +159,7 @@ static struct al_serdes_adv_tx_params da_tx_params = {
 
 static struct al_serdes_adv_rx_params da_rx_params = {
 	.override		= AL_TRUE,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
 	 
 	.dcgain			= 0x7,
 	.dfe_3db_freq		= 0x7,

@@ -62,7 +62,7 @@
 #endif /* MY_ABC_HERE && CONFIG_COMCERTO_MSP */
 
 	ldr     \irqstat, [\base, #GIC_CPU_INTACK]
-#if defined(CONFIG_BE8_ON_LE) && defined(MY_DEF_HERE)
+#if defined(CONFIG_BE8_ON_LE) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	rev	\irqstat, \irqstat
 #endif
 	/* bits 12-10 = src CPU, 9-0 = int # */
@@ -118,7 +118,7 @@
 	.macro test_for_ipi, irqnr, irqstat, base, tmp
 	bic	\irqnr, \irqstat, #0x1c00
 	cmp	\irqnr, #16
-#if defined(CONFIG_BE8_ON_LE) && defined(MY_DEF_HERE)
+#if defined(CONFIG_BE8_ON_LE) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	rev	\tmp, \irqstat
 	strcc	\tmp, [\base, #GIC_CPU_EOI]
 #else

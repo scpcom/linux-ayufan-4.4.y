@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 #endif
 
@@ -11,7 +8,7 @@
 #include <asm/pgalloc.h>
 #include <asm/pgtable.h>
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)) && defined(CONFIG_ARM_LPAE)
 static void idmap_add_pmd(pud_t *pud, unsigned long addr, unsigned long end,
 	unsigned long prot)
 {
@@ -19,7 +16,7 @@ static void idmap_add_pmd(pud_t *pud, unsigned long addr, unsigned long end,
 	unsigned long next;
 
 	if (pud_none_or_clear_bad(pud) || (pud_val(*pud) & L_PGD_SWAPPER)) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		pmd = pmd_alloc_one(&init_mm, addr);
 #else
 		pmd = pmd_alloc_one(NULL, addr);
@@ -28,7 +25,7 @@ static void idmap_add_pmd(pud_t *pud, unsigned long addr, unsigned long end,
 			pr_warning("Failed to allocate identity pmd.\n");
 			return;
 		}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		pud_populate(&init_mm, pud, pmd);
 #else
 		pud_populate(NULL, pud, pmd);
@@ -73,7 +70,7 @@ void identity_mapping_add(pgd_t *pgd, unsigned long addr, unsigned long end)
 {
 	unsigned long prot, next;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 	prot = PMD_TYPE_SECT | PMD_SECT_AP_WRITE | PMD_SECT_AF;
 #else
 	prot = PMD_TYPE_SECT | PMD_SECT_AP_WRITE;
@@ -91,7 +88,7 @@ void identity_mapping_add(pgd_t *pgd, unsigned long addr, unsigned long end)
 #ifdef CONFIG_SMP
 static void idmap_del_pmd(pud_t *pud, unsigned long addr, unsigned long end)
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	pmd_t *pmd;
 
 	if (pud_none_or_clear_bad(pud))

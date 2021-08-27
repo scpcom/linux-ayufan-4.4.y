@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _NF_CONNTRACK_TUPLE_H
 #define _NF_CONNTRACK_TUPLE_H
@@ -53,7 +50,7 @@ struct nf_conntrack_tuple {
 		u_int8_t dir;
 	} dst;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	 
 	bool nfp;

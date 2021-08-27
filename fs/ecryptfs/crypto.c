@@ -183,7 +183,7 @@ void ecryptfs_destroy_crypt_stat(struct ecryptfs_crypt_stat *crypt_stat)
 	struct ecryptfs_key_sig *key_sig, *key_sig_tmp;
 
 #ifndef MY_ABC_HERE
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_ALPINE)
 	if (crypt_stat->tfm) {
 		crypto_free_ablkcipher(crypt_stat->tfm);
 	}
@@ -222,7 +222,7 @@ void ecryptfs_destroy_mount_crypt_stat(
 	mutex_unlock(&mount_crypt_stat->global_auth_tok_list_mutex);
 	memset(mount_crypt_stat, 0, sizeof(struct ecryptfs_mount_crypt_stat));
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 struct extent_crypt_result {
 	struct completion completion;
 	int rc;
@@ -476,7 +476,7 @@ static int encrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 	return encrypt_ocf_process(crypt_stat, dest_sg, src_sg, size, iv, iv_size, 1, priv);
 #else
 #ifdef MY_DEF_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	struct ablkcipher_request *req = NULL;
 	struct extent_crypt_result ecr;
 #else
@@ -500,17 +500,17 @@ static int encrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 				  crypt_stat->key_size);
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	init_completion(&ecr.completion);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 	 
 #endif
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	req = ablkcipher_request_alloc(crypt_stat->tfm, GFP_NOFS);
 	if (!req) {
 		mutex_unlock(&crypt_stat->cs_tfm_mutex);
@@ -638,7 +638,7 @@ static int ecryptfs_encrypt_extent(struct page *enc_extent_page,
 #endif
 	if (rc < 0) {
 		printk(KERN_ERR "%s: Error attempting to encrypt page with "
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		       "page->index = [%lld], extent_offset = [%ld]; "
 		       "rc = [%d]\n", __func__, (unsigned long long)page->index, extent_offset,
 #else
@@ -791,7 +791,7 @@ static int ecryptfs_decrypt_extent(struct page *page,
 #endif
 	if (rc < 0) {
 		printk(KERN_ERR "%s: Error attempting to decrypt to page with "
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		       "page->index = [%lld], extent_offset = [%ld]; "
 		       "rc = [%d]\n", __func__, (unsigned long long)page->index, extent_offset,
 #else
@@ -947,7 +947,7 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 	return encrypt_ocf_process(crypt_stat, dest_sg, src_sg, size, iv, iv_size, 0, priv);
 #else
 #ifdef MY_DEF_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	struct ablkcipher_request *req = NULL;
 	struct extent_crypt_result ecr;
 #else
@@ -962,7 +962,7 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 #endif
 	int rc = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	BUG_ON(!crypt_stat || !crypt_stat->tfm
 	       || !(crypt_stat->flags & ECRYPTFS_STRUCT_INITIALIZED));
 	if (unlikely(ecryptfs_verbosity > 0)) {
@@ -975,14 +975,14 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 	init_completion(&ecr.completion);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 	 
 #endif
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
 #ifdef MY_DEF_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	req = ablkcipher_request_alloc(crypt_stat->tfm, GFP_NOFS);
 #else
 	rc = ecryptfs_async_init(&ecryptfs_req, crypt_stat);
@@ -1000,7 +1000,7 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 	rc = crypto_blkcipher_setkey(crypt_stat->tfm, crypt_stat->key,
 				     crypt_stat->key_size);
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (!req) {
 		mutex_unlock(&crypt_stat->cs_tfm_mutex);
 		rc = -ENOMEM;
@@ -1018,7 +1018,7 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 #endif
 
 #ifdef MY_DEF_HERE
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	ablkcipher_request_set_callback(req,
 			CRYPTO_TFM_REQ_MAY_BACKLOG | CRYPTO_TFM_REQ_MAY_SLEEP,
 			extent_crypt_complete, &ecr);
@@ -1045,7 +1045,7 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 	rc = crypto_blkcipher_decrypt_iv(&desc, dest_sg, src_sg, size);
 #endif
 	mutex_unlock(&crypt_stat->cs_tfm_mutex);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	ecryptfs_printk(KERN_DEBUG, "Decrypting [%d] bytes.\n", size);
 	ablkcipher_request_set_crypt(req, src_sg, dest_sg, size, iv);
 	rc = crypto_ablkcipher_decrypt(req);
@@ -1186,7 +1186,7 @@ out_unlock:
 		goto out;
 	}
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  	rc = ecryptfs_crypto_api_algify_cipher_name(&full_alg_name,
 						    crypt_stat->cipher,
 						    crypt_stat->cipher_mode);
@@ -1196,7 +1196,7 @@ out_unlock:
 #endif
 	if (rc)
 		goto out_unlock;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_ALPINE)
 	crypt_stat->tfm = crypto_alloc_ablkcipher(full_alg_name, 0, 0);
 #else
 	crypt_stat->tfm = crypto_alloc_blkcipher(full_alg_name, 0,
@@ -1207,7 +1207,7 @@ out_unlock:
 		rc = PTR_ERR(crypt_stat->tfm);
 		crypt_stat->tfm = NULL;
 		ecryptfs_printk(KERN_ERR, "cryptfs: init_crypt_ctx(): "
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 				"Error initializing cipher [%s] and mode [%s]\n",
 				crypt_stat->cipher,
 				crypt_stat->cipher_mode);
@@ -1217,7 +1217,7 @@ out_unlock:
 #endif
 		goto out_unlock;
 	}
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_ALPINE)
 	crypto_ablkcipher_set_flags(crypt_stat->tfm, CRYPTO_TFM_REQ_WEAK_KEY);
 #else
 	crypto_blkcipher_set_flags(crypt_stat->tfm, CRYPTO_TFM_REQ_WEAK_KEY);
@@ -1255,7 +1255,7 @@ void ecryptfs_set_default_sizes(struct ecryptfs_crypt_stat *crypt_stat)
 	if (crypt_stat->flags & ECRYPTFS_METADATA_IN_XATTR) {
 		crypt_stat->metadata_size = ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
 	} else {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		crypt_stat->metadata_size = ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
 #else
 		if (PAGE_CACHE_SIZE <= ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE)
@@ -1363,7 +1363,7 @@ static void ecryptfs_set_default_crypt_stat_vals(
 						      mount_crypt_stat);
 	ecryptfs_set_default_sizes(crypt_stat);
 	strcpy(crypt_stat->cipher, ECRYPTFS_DEFAULT_CIPHER);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	strcpy(crypt_stat->cipher_mode, ECRYPTFS_DEFAULT_CIPHER_MODE);
 #endif
 	crypt_stat->key_size = ECRYPTFS_DEFAULT_KEY_BYTES;
@@ -1380,7 +1380,7 @@ int ecryptfs_new_file_context(struct inode *ecryptfs_inode)
 	    &ecryptfs_superblock_to_private(
 		    ecryptfs_inode->i_sb)->mount_crypt_stat;
 	int cipher_name_len;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	int cipher_mode_name_len;
 #endif
 	int rc = 0;
@@ -1402,7 +1402,7 @@ int ecryptfs_new_file_context(struct inode *ecryptfs_inode)
 	       mount_crypt_stat->global_default_cipher_name,
 	       cipher_name_len);
 	crypt_stat->cipher[cipher_name_len] = '\0';
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
     cipher_mode_name_len =
     	strlen(mount_crypt_stat->global_default_cipher_mode_name);
     memcpy(crypt_stat->cipher_mode,
@@ -1499,7 +1499,7 @@ void ecryptfs_write_crypt_stat_flags(char *page_virt,
 	(*written) = 4;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 struct ecryptfs_cipher_mode_code_str_map_elem {
 	char mode_str[ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE + 1];
 	u8 mode_code;

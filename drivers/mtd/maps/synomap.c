@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/module.h>
@@ -8,7 +5,7 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <asm/io.h>
-#if !defined(CONFIG_SYNO_MPC85XX_COMMON) && ! (defined(MY_DEF_HERE) || defined(MY_DEF_HERE))
+#if !defined(CONFIG_SYNO_MPC85XX_COMMON) && ! (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2))
 #include <asm-ppc/ppcboot.h>
 #else
 #include <linux/platform_device.h>
@@ -72,8 +69,8 @@ static struct mtd_partition synomtd_partitions[] = {
 		.size	= 0x00010000,		 
 	},
 };
-#elif defined(MY_DEF_HERE)
-#ifdef MY_DEF_HERE
+#elif defined(CONFIG_SYNO_MV88F6281)
+#ifdef SYNO_FLASH_MEMORY_SIZE
 extern long gSynoFlashMemorySize;
 #endif
 extern struct resource physmap_flash_resource;
@@ -142,7 +139,7 @@ static struct mtd_partition synomtd_partitions[] = {
 		.size   = 0x00010000,            
 	},
 };
-#elif defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 extern struct resource physmap_flash_resource;
  
 static struct mtd_partition synomtd_partitions[] = {
@@ -194,7 +191,7 @@ static int __init init_synomtd(void)
 	unsigned long flash_addr, flash_size, mtd_size = 0;
 	struct mtd_partition *pMtdPartition = NULL;
 
-#if !defined(CONFIG_SYNO_MPC85XX_COMMON) && !(defined(MY_DEF_HERE) || defined(MY_DEF_HERE))
+#if !defined(CONFIG_SYNO_MPC85XX_COMMON) && !(defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2))
 	bd_t *bd = (bd_t *)__res;
 #endif
 
@@ -204,7 +201,7 @@ static int __init init_synomtd(void)
 	const char *part_probes[] = { "RedBoot", NULL };
 #endif
 
-#if defined(CONFIG_SYNO_MPC85XX_COMMON) || (defined(MY_DEF_HERE) || defined(MY_DEF_HERE))
+#if defined(CONFIG_SYNO_MPC85XX_COMMON) || (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2))
 	flash_addr = physmap_flash_resource.start;
 	flash_size = physmap_flash_resource.end - physmap_flash_resource.start + 1;
 #else
@@ -252,7 +249,7 @@ static int __init init_synomtd(void)
 			flash_addr + ((idx > 0) ?
 			(mtd_banks[idx-1] ? mtd_banks[idx-1]->size : 0) : 0);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MV88F6281) || defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		mtd_banks[idx] = do_map_probe("sflash", map_banks[idx]);
 #else
 		mtd_banks[idx] = do_map_probe("cfi_probe", map_banks[idx]);
@@ -292,7 +289,7 @@ static int __init init_synomtd(void)
 			 
 			pMtdPartition = &synomtd_partitions;
 			n = ARRAY_SIZE(synomtd_partitions);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FLASH_MEMORY_SIZE
 			if (8 == gSynoFlashMemorySize) {
 				pMtdPartition = &synomtd_partitions_8M;
 				n = ARRAY_SIZE(synomtd_partitions_8M);

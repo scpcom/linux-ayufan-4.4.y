@@ -4,11 +4,11 @@
 #ifndef _ASM_FIXMAP_H
 #define _ASM_FIXMAP_H
 
-#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM)) || \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)) 
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)) 
 #define FIXADDR_START		0xffc00000UL
 #define FIXADDR_TOP		0xfff00000UL
-#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
 #define FIXADDR_START          0xff200000UL
 #define FIXADDR_TOP            0xff600000UL
 #else

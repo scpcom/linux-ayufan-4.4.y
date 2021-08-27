@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/types.h>
 #include <linux/proc_fs.h>
@@ -172,7 +169,7 @@ static int ct_seq_show(struct seq_file *s, void *v)
 	if (ct_show_secctx(s, ct))
 		goto release;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS) 
 	if ((ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.nfp) && (ct->tuplehash[IP_CT_DIR_REPLY].tuple.nfp)) {
 		if (seq_printf(s, "[NFP (both)] "))

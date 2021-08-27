@@ -239,7 +239,7 @@ static int ct_seq_show(struct seq_file *s, void *v)
 	if (ct_show_delta_time(s, ct))
 		goto release;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
 	if(ct->layer7.app_proto &&
            seq_printf(s, "l7proto=%s ", ct->layer7.app_proto))

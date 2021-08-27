@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/backing-dev.h>
 #include <linux/slab.h>
@@ -241,7 +238,7 @@ static void afs_kill_pages(struct afs_vnode *vnode, bool error,
 	struct pagevec pv;
 	unsigned count, loop;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	_enter("{%x:%u},%llx-%llx",
 	       vnode->fid.vid, vnode->fid.vnode, (unsigned long long)first, (unsigned long long)last);
 #else
@@ -252,7 +249,7 @@ static void afs_kill_pages(struct afs_vnode *vnode, bool error,
 	pagevec_init(&pv, 0);
 
 	do {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		_debug("kill %llx-%llx", (unsigned long long)first, (unsigned long long)last);
 #else
 		_debug("kill %lx-%lx", first, last);

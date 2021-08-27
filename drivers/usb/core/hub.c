@@ -70,7 +70,7 @@ struct usb_hub {
 	struct delayed_work	leds;
 	struct delayed_work	init_work;
 	void			**port_owners;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	int				syno_hub_eh;
 #endif
 
@@ -85,7 +85,7 @@ struct usb_hub {
 #endif  
 };
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 static int hub_port_debounce(struct usb_hub *hub, int port1);
 #endif
 
@@ -150,7 +150,7 @@ static inline char *portspeed(struct usb_hub *hub, int portstatus)
 		return "12 Mb/s";
 }
 
-#ifndef MY_DEF_HERE
+#ifndef SYNO_USB_STOR_COMP_ENHANCE
 static struct usb_hub *hdev_to_hub(struct usb_device *hdev)
 #else
 struct usb_hub *hdev_to_hub(struct usb_device *hdev)
@@ -160,7 +160,7 @@ struct usb_hub *hdev_to_hub(struct usb_device *hdev)
 		return NULL;
 	return usb_get_intfdata(hdev->actconfig->interface[0]);
 }
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 EXPORT_SYMBOL(hdev_to_hub);
 #endif
 
@@ -353,7 +353,7 @@ static int hub_port_status(struct usb_hub *hub, int port1,
 	return ret;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 void syno_clear_hub_eh(struct usb_hub *hub)
 {
 	if (!hub)
@@ -794,7 +794,7 @@ static void hub_activate(struct usb_hub *hub, enum hub_activation_type type)
 					USB_PORT_FEAT_C_PORT_LINK_STATE);
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 		if (portchange & USB_PORT_STAT_C_RESET) {
 			need_debounce_delay = true;
 			clear_port_feature(hub->hdev, port1,
@@ -2071,7 +2071,7 @@ delay:
 			port1, warm ? "warm " : "", delay);
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 		 
 		if (!(portstatus & USB_PORT_STAT_CONNECTION))
 			return -ENOTCONN;
@@ -2119,7 +2119,7 @@ static void hub_port_finish_reset(struct usb_hub *hub, int port1,
 	}
 }
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 extern void (*gpfn_ehci_marvell_hs_detect_wa_done)(struct usb_device *);
 #endif
 
@@ -2198,13 +2198,13 @@ static int hub_port_reset(struct usb_hub *hub, int port1,
 done:
 	if (!hub_is_superspeed(hub->hdev))
 		up_read(&ehci_cf_port_reset_rwsem);
-#if defined(MY_DEF_HERE) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 	if (NULL != gpfn_ehci_marvell_hs_detect_wa_done) {
 		gpfn_ehci_marvell_hs_detect_wa_done(hub->hdev);
 	}
 #endif
 
-#if defined(MY_DEF_HERE) &&  defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) &&  defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 	ehci_marvell_hs_detect_wa_done(hub->hdev);
 #endif
 
@@ -2680,7 +2680,7 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	return retval;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 enum XHCI_SPECIAL_RESET_MODE xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
 EXPORT_SYMBOL_GPL(xhci_special_reset);
 #define SPECIAL_RESET_RETRY 20  
@@ -2704,8 +2704,8 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	enum usb_device_speed	oldspeed = udev->speed;
 	const char		*speed;
 	int			devnum = udev->devnum;
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
-#ifdef MY_DEF_HERE
+#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE)
+#ifdef SYNO_USB3_RESET_FOR_ADDR_ERR
 	bool reset_for_addr_err = true;
 #endif
 	int xhci_retry = 0;
@@ -2730,11 +2730,11 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 
 	mutex_lock(&usb_address0_mutex);
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE)
 port_init_retry:
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE)
 	 
 	if (!IS_XHCI(hub) ||
 			(XHCI_SPECIAL_RESET_RUN!= xhci_special_reset)) {
@@ -2884,7 +2884,7 @@ port_init_retry:
 					"device not accepting address %d, error %d\n",
 					devnum, retval);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_RESET_FOR_ADDR_ERR
 				if ((reset_for_addr_err == true) && (oldspeed == USB_SPEED_SUPER)) {
 					oldspeed = USB_SPEED_UNKNOWN;
 					reset_for_addr_err = false;
@@ -2966,7 +2966,7 @@ port_init_retry:
 	syno_usb_quirks_init(udev);
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE)
 		 
 		if (0x0210 <= le16_to_cpu(udev->descriptor.bcdUSB)) {
 			if (IS_XHCI(hub) &&
@@ -3346,7 +3346,7 @@ static void hub_events(void)
 
 	while (1) {
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_DEBUG
 		dbg("hub_events!\n");
 #endif
 
@@ -3363,7 +3363,7 @@ static void hub_events(void)
 		kref_get(&hub->kref);
 		spin_unlock_irq(&hub_event_lock);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 		if ( syno_get_hub_eh(hub) ) {
 			printk(KERN_ERR "hub is performing EH\n");
 			msleep(100);
@@ -3460,7 +3460,7 @@ static void hub_events(void)
 			if (ret < 0)
 				continue;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_DEBUG
 			dev_dbg (hub_dev, "status:0x%x.change:0x%x.\n", portstatus, portchange);
 #endif
 
@@ -3931,12 +3931,12 @@ int usb_reset_device(struct usb_device *udev)
 		}
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	dev_err(&udev->dev, "lock for hub EH\n");
 	syno_set_hub_eh(hdev_to_hub(udev->parent));
 #endif
 	ret = usb_reset_and_verify_device(udev);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	syno_clear_hub_eh(hdev_to_hub(udev->parent));
 	dev_err(&udev->dev, "unlock for hub EH\n");
 #endif

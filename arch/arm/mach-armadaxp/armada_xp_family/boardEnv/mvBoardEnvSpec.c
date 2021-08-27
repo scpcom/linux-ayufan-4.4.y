@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "mvCommon.h"
 #include "mvBoardEnvLib.h"
@@ -1191,7 +1188,7 @@ MV_BOARD_INFO rd78460customerInfo = {
 	.norFlashWriteParams		= RD_78460_CUSTOMER_BOARD_NOR_WRITE_PARAMS
 };
  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
  
 MV_BOARD_MAC_INFO Syno78230AxpBoardMacInfo[] = {
 	 
@@ -1439,7 +1436,7 @@ MV_BOARD_INFO *boardInfoTbl[] = {
 	&rd78460ServerRev2Info,
 	&rd78460gpInfo,
 	&rd78460customerInfo
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 	,NULL
 	,NULL
 	,NULL

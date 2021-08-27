@@ -91,10 +91,10 @@ int dump_task_regs(struct task_struct *t, elf_gregset_t *elfregs);
 
 #define CORE_DUMP_USE_REGSET
 #if defined(MY_ABC_HERE) || \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
+     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
 #define ELF_EXEC_PAGESIZE       PAGE_SIZE
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_ALPINE)
 #define ELF_EXEC_PAGESIZE	PAGE_SIZE
 #else
 #define ELF_EXEC_PAGESIZE	4096

@@ -93,18 +93,18 @@ static int ata_force_tbl_size;
 
 static char ata_force_param_buf[PAGE_SIZE] __initdata;
 
-#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(MY_DEF_HERE)
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_SYNO_MV88F6281)
 extern unsigned char SYNOKirkwoodIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 extern unsigned char SYNOArmadaIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 extern unsigned char SYNOALPINEIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
@@ -4575,7 +4575,7 @@ static void DelayForHWCtl(struct ata_port *pAp)
 		goto END;
 	}
 
-#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(MY_DEF_HERE)
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_SYNO_MV88F6281)
 	if(SYNOKirkwoodIsBoardNeedPowerUpHDD(pAp->print_id)) {
 		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		SleepForLatency();
@@ -4583,7 +4583,7 @@ static void DelayForHWCtl(struct ata_port *pAp)
 	}
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if(SYNOArmadaIsBoardNeedPowerUpHDD(pAp->print_id)) {
 		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		if (0 == SYNO_CHECK_HDD_PRESENT(pAp->print_id)) {
@@ -4616,7 +4616,7 @@ static void DelayForHWCtl(struct ata_port *pAp)
 	}
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
 	if (SYNOALPINEIsBoardNeedPowerUpHDD(pAp->print_id)) {
 		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		if (0 == SYNO_CHECK_HDD_PRESENT(pAp->print_id)) {

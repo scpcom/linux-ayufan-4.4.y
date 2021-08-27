@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __PHY_H
 #define __PHY_H
@@ -166,7 +163,7 @@ struct phy_device {
 
 	void (*adjust_state)(struct net_device *dev);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
 	int is_phyerr_reset;
 #endif
 };

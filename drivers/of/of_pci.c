@@ -1,13 +1,10 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/kernel.h>
 #include <linux/export.h>
 #include <linux/of.h>
 #include <linux/of_pci.h>
 #include <asm/prom.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static inline int __of_pci_pci_compare(struct device_node *node,
 				       unsigned int data)
 {
@@ -54,7 +51,7 @@ struct device_node *of_pci_find_child_device(struct device_node *parent,
 }
 EXPORT_SYMBOL_GPL(of_pci_find_child_device);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 int of_pci_get_devfn(struct device_node *np)
 {

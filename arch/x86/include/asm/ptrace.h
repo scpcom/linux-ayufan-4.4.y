@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _ASM_X86_PTRACE_H
 #define _ASM_X86_PTRACE_H
 

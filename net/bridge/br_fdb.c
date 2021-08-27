@@ -3,7 +3,7 @@
 #endif
  
 #include <linux/kernel.h>
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <linux/module.h>
 #endif
 #include <linux/init.h>
@@ -21,7 +21,7 @@
 #include <linux/slab.h>
 #include <linux/atomic.h>
 #include <asm/unaligned.h>
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 #include <linux/mv_nfp.h>
 #endif
@@ -67,13 +67,13 @@ static inline unsigned long hold_time(const struct net_bridge *br)
 }
 
 static inline int has_expired(const struct net_bridge *br,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 				struct net_bridge_fdb_entry *fdb)
 #else
 				  const struct net_bridge_fdb_entry *fdb)
 #endif
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (fdb->is_static)
 		return 0;
 
@@ -109,7 +109,7 @@ static void fdb_rcu_free(struct rcu_head *head)
 
 static inline void fdb_delete(struct net_bridge_fdb_entry *f)
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (f->nfp) {
 		if (nfp_mgr_p->nfp_hook_fdb_rule_del)
@@ -178,7 +178,7 @@ void br_fdb_cleanup(unsigned long _data)
 			if (f->is_static)
 				continue;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 			if (f->nfp) {
 				if (nfp_mgr_p->nfp_hook_fdb_rule_age)
@@ -375,7 +375,7 @@ static struct net_bridge_fdb_entry *fdb_find_rcu(struct hlist_head *head,
 
 static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 					       struct net_bridge_port *source,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 					       const unsigned char *addr, int is_local)
 #else
 					       const unsigned char *addr)
@@ -387,7 +387,7 @@ static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 	if (fdb) {
 		memcpy(fdb->addr.addr, addr, ETH_ALEN);
 		fdb->dst = source;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		fdb->is_local = is_local;
 		fdb->is_static = is_local;
 #else
@@ -397,7 +397,7 @@ static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 		fdb->updated = fdb->used = jiffies;
 		hlist_add_head_rcu(&fdb->hlist, head);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 		fdb->nfp = false;
 		if (nfp_mgr_p->nfp_hook_fdb_rule_add)
@@ -431,7 +431,7 @@ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 		fdb_delete(fdb);
 	}
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	fdb = fdb_create(head, source, addr, 1);
 #else
 	fdb = fdb_create(head, source, addr);
@@ -493,7 +493,7 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 	} else {
 		spin_lock(&br->hash_lock);
 		if (likely(!fdb_find(head, addr)))
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 			fdb_create(head, source, addr, 0);
 #else
 			fdb_create(head, source, addr);
@@ -527,7 +527,7 @@ static int fdb_to_nud(const struct net_bridge_fdb_entry *fdb)
 		return NUD_PERMANENT;
 	else if (fdb->is_static)
 		return NUD_NOARP;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	else if (has_expired(fdb->dst->br, (struct net_bridge_fdb_entry *)fdb))
 #else
 	else if (has_expired(fdb->dst->br, fdb))
@@ -657,7 +657,7 @@ static int fdb_add_entry(struct net_bridge_port *source, const __u8 *addr,
 		if (!(flags & NLM_F_CREATE))
 			return -ENOENT;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		fdb = fdb_create(head, source, addr,0);
 #else
 		fdb = fdb_create(head, source, addr);
@@ -794,7 +794,7 @@ int br_fdb_delete(struct sk_buff *skb, struct nlmsghdr *nlh, void *arg)
 	return err;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void fdb_sync(void)
 {

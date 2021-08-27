@@ -1,11 +1,8 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/errno.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/export.h>
 #else
 #include <linux/module.h>
@@ -19,7 +16,7 @@
 #include <linux/bitops.h>
 #include <linux/rcupdate.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #ifdef CONFIG_LFS_ON_32CPU
 #define RADIX_TREE_1	1ULL
 #define RADIX_TREE_BITS_PER_KEY		64
@@ -35,7 +32,7 @@
 #define RADIX_TREE_MAP_SHIFT	3	 
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define RADIX_TREE_MAP_SIZE	(RADIX_TREE_1 << RADIX_TREE_MAP_SHIFT)
 #else
 #define RADIX_TREE_MAP_SIZE	(1UL << RADIX_TREE_MAP_SHIFT)
@@ -48,7 +45,7 @@
 struct radix_tree_node {
 	unsigned int	height;		 
 	unsigned int	count;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	union {
 		struct radix_tree_node *parent;	 
 		struct rcu_head	rcu_head;	 
@@ -60,7 +57,7 @@ struct radix_tree_node {
 	unsigned long	tags[RADIX_TREE_MAX_TAGS][RADIX_TREE_TAG_LONGS];
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define RADIX_TREE_INDEX_BITS  (8   * sizeof(rdx_t))
 #else
 struct radix_tree_path {
@@ -73,21 +70,21 @@ struct radix_tree_path {
 #define RADIX_TREE_MAX_PATH (DIV_ROUND_UP(RADIX_TREE_INDEX_BITS, \
 					  RADIX_TREE_MAP_SHIFT))
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static rdx_t height_to_maxindex[RADIX_TREE_MAX_PATH + 1] __read_mostly;
 #else
 static unsigned long height_to_maxindex[RADIX_TREE_MAX_PATH + 1] __read_mostly;
 #endif
 
 static struct kmem_cache *radix_tree_node_cachep;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #define RADIX_TREE_PRELOAD_SIZE (RADIX_TREE_MAX_PATH * 2 - 1)
 #endif
 
 struct radix_tree_preload {
 	int nr;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	struct radix_tree_node *nodes[RADIX_TREE_PRELOAD_SIZE];
 #else
 	struct radix_tree_node *nodes[RADIX_TREE_MAX_PATH];
@@ -158,7 +155,7 @@ static inline int any_tag_set(struct radix_tree_node *node, unsigned int tag)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 static __always_inline unsigned long
 radix_tree_find_next_bit(const unsigned long *addr,
@@ -256,7 +253,7 @@ out:
 }
 EXPORT_SYMBOL(radix_tree_preload);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static inline rdx_t radix_tree_maxindex(unsigned int height)
 #else
 static inline unsigned long radix_tree_maxindex(unsigned int height)
@@ -265,14 +262,14 @@ static inline unsigned long radix_tree_maxindex(unsigned int height)
 	return height_to_maxindex[height];
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static int radix_tree_extend(struct radix_tree_root *root, rdx_t index)
 #else
 static int radix_tree_extend(struct radix_tree_root *root, unsigned long index)
 #endif
 {
 	struct radix_tree_node *node;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	struct radix_tree_node *slot;
 #endif
 	unsigned int height;
@@ -291,7 +288,7 @@ static int radix_tree_extend(struct radix_tree_root *root, unsigned long index)
 		unsigned int newheight;
 		if (!(node = radix_tree_node_alloc(root)))
 			return -ENOMEM;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 
@@ -307,7 +304,7 @@ static int radix_tree_extend(struct radix_tree_root *root, unsigned long index)
 		newheight = root->height+1;
 		node->height = newheight;
 		node->count = 1;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		node->parent = NULL;
 		slot = root->rnode;
 		if (newheight > 1) {
@@ -324,7 +321,7 @@ out:
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 int radix_tree_insert(struct radix_tree_root *root,
 			rdx_t index, void *item)
 #else
@@ -357,7 +354,7 @@ int radix_tree_insert(struct radix_tree_root *root,
 			if (!(slot = radix_tree_node_alloc(root)))
 				return -ENOMEM;
 			slot->height = height;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			slot->parent = node;
 #endif
 			if (node) {
@@ -392,7 +389,7 @@ int radix_tree_insert(struct radix_tree_root *root,
 }
 EXPORT_SYMBOL(radix_tree_insert);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static void *radix_tree_lookup_element(struct radix_tree_root *root,
 				rdx_t index, int is_slot)
 #else
@@ -434,7 +431,7 @@ static void *radix_tree_lookup_element(struct radix_tree_root *root,
 	return is_slot ? (void *)slot : indirect_to_ptr(node);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 void **radix_tree_lookup_slot(struct radix_tree_root *root, rdx_t index)
 #else
 void **radix_tree_lookup_slot(struct radix_tree_root *root, unsigned long index)
@@ -444,7 +441,7 @@ void **radix_tree_lookup_slot(struct radix_tree_root *root, unsigned long index)
 }
 EXPORT_SYMBOL(radix_tree_lookup_slot);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 void *radix_tree_lookup(struct radix_tree_root *root, rdx_t index)
 #else
 void *radix_tree_lookup(struct radix_tree_root *root, unsigned long index)
@@ -454,7 +451,7 @@ void *radix_tree_lookup(struct radix_tree_root *root, unsigned long index)
 }
 EXPORT_SYMBOL(radix_tree_lookup);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 void *radix_tree_tag_set(struct radix_tree_root *root,
 			rdx_t index, unsigned int tag)
 #else
@@ -490,7 +487,7 @@ void *radix_tree_tag_set(struct radix_tree_root *root,
 }
 EXPORT_SYMBOL(radix_tree_tag_set);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 void *radix_tree_tag_clear(struct radix_tree_root *root,
 			rdx_t index, unsigned int tag)
 #else
@@ -498,7 +495,7 @@ void *radix_tree_tag_clear(struct radix_tree_root *root,
 			unsigned long index, unsigned int tag)
 #endif
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	struct radix_tree_node *node = NULL;
 #else
 	 
@@ -506,7 +503,7 @@ void *radix_tree_tag_clear(struct radix_tree_root *root,
 #endif
 	struct radix_tree_node *slot = NULL;
 	unsigned int height, shift;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	int uninitialized_var(offset);
 #endif
 
@@ -514,7 +511,7 @@ void *radix_tree_tag_clear(struct radix_tree_root *root,
 	if (index > radix_tree_maxindex(height))
 		goto out;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	shift = height * RADIX_TREE_MAP_SHIFT;
 #else
 	shift = (height - 1) * RADIX_TREE_MAP_SHIFT;
@@ -522,7 +519,7 @@ void *radix_tree_tag_clear(struct radix_tree_root *root,
 #endif
 	slot = indirect_to_ptr(root->rnode);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	while (shift) {
 #else
 	while (height > 0) {
@@ -532,18 +529,18 @@ void *radix_tree_tag_clear(struct radix_tree_root *root,
 		if (slot == NULL)
 			goto out;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		shift -= RADIX_TREE_MAP_SHIFT;
 #endif
 		offset = (index >> shift) & RADIX_TREE_MAP_MASK;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		node = slot;
 #else
 		pathp[1].offset = offset;
 		pathp[1].node = slot;
 #endif
 		slot = slot->slots[offset];
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 		pathp++;
@@ -555,7 +552,7 @@ void *radix_tree_tag_clear(struct radix_tree_root *root,
 	if (slot == NULL)
 		goto out;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	while (node) {
 		if (!tag_get(node, tag, offset))
 			goto out;
@@ -586,7 +583,7 @@ out:
 }
 EXPORT_SYMBOL(radix_tree_tag_clear);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 int radix_tree_tag_get(struct radix_tree_root *root,
 			rdx_t index, unsigned int tag)
 #else
@@ -632,7 +629,7 @@ int radix_tree_tag_get(struct radix_tree_root *root,
 }
 EXPORT_SYMBOL(radix_tree_tag_get);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 void **radix_tree_next_chunk(struct radix_tree_root *root,
 			     struct radix_tree_iter *iter, unsigned flags)
@@ -731,7 +728,7 @@ EXPORT_SYMBOL(radix_tree_next_chunk);
 #endif
 
 unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		rdx_t *first_indexp, rdx_t last_index,
 #else
 		unsigned long *first_indexp, unsigned long last_index,
@@ -740,7 +737,7 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 		unsigned int iftag, unsigned int settag)
 {
 	unsigned int height = root->height;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	struct radix_tree_node *node = NULL;
 #else
 	struct radix_tree_path path[height];
@@ -749,7 +746,7 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 	struct radix_tree_node *slot;
 	unsigned int shift;
 	unsigned long tagged = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	rdx_t index = *first_indexp;
 #else
 	unsigned long index = *first_indexp;
@@ -773,7 +770,7 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 	shift = (height - 1) * RADIX_TREE_MAP_SHIFT;
 	slot = indirect_to_ptr(root->rnode);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 	 
@@ -781,7 +778,7 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 #endif
 
 	for (;;) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		rdx_t upindex;
 #endif
 		int offset;
@@ -791,7 +788,7 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 			goto next;
 		if (!tag_get(slot, iftag, offset))
 			goto next;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		if (shift) {
 			 
 			shift -= RADIX_TREE_MAP_SHIFT;
@@ -814,7 +811,7 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 		tagged++;
 		tag_set(slot, settag, offset);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		upindex = index;
 		while (node) {
 			upindex >>= RADIX_TREE_MAP_SHIFT;
@@ -836,7 +833,7 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 		}
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		 
 		node = NULL;
 #endif
@@ -851,7 +848,7 @@ next:
 			break;
 		while (((index >> shift) & RADIX_TREE_MAP_MASK) == 0) {
 			 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			slot = slot->parent;
 #else
 			slot = path[height - 1].node;
@@ -869,7 +866,7 @@ next:
 }
 EXPORT_SYMBOL(radix_tree_range_tag_if_tagged);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 rdx_t radix_tree_next_hole(struct radix_tree_root *root,
 				rdx_t index, rdx_t max_scan)
 #else
@@ -877,7 +874,7 @@ unsigned long radix_tree_next_hole(struct radix_tree_root *root,
 				unsigned long index, unsigned long max_scan)
 #endif
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	rdx_t i;
 #else
 	unsigned long i;
@@ -895,7 +892,7 @@ unsigned long radix_tree_next_hole(struct radix_tree_root *root,
 }
 EXPORT_SYMBOL(radix_tree_next_hole);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 rdx_t radix_tree_prev_hole(struct radix_tree_root *root,
 				   rdx_t index, rdx_t max_scan)
 #else
@@ -903,7 +900,7 @@ unsigned long radix_tree_prev_hole(struct radix_tree_root *root,
 				   unsigned long index, unsigned long max_scan)
 #endif
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	rdx_t i;
 #else
 	unsigned long i;
@@ -913,7 +910,7 @@ unsigned long radix_tree_prev_hole(struct radix_tree_root *root,
 		if (!radix_tree_lookup(root, index))
 			break;
 		index--;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		if (index == RDX_TREE_KEY_MAX_VALUE)
 #else
 		if (index == ULONG_MAX)
@@ -925,7 +922,7 @@ unsigned long radix_tree_prev_hole(struct radix_tree_root *root,
 }
 EXPORT_SYMBOL(radix_tree_prev_hole);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 static unsigned int
@@ -979,7 +976,7 @@ out:
 }
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 unsigned int
 radix_tree_gang_lookup(struct radix_tree_root *root, void **results,
 			rdx_t first_index, unsigned int max_items)
@@ -1055,7 +1052,7 @@ radix_tree_gang_lookup(struct radix_tree_root *root, void **results,
 #endif
 EXPORT_SYMBOL(radix_tree_gang_lookup);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 unsigned int
 radix_tree_gang_lookup_slot(struct radix_tree_root *root,
 			void ***results, rdx_t *indices,
@@ -1126,7 +1123,7 @@ radix_tree_gang_lookup_slot(struct radix_tree_root *root,
 #endif
 EXPORT_SYMBOL(radix_tree_gang_lookup_slot);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
  
@@ -1183,7 +1180,7 @@ out:
 }
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 unsigned int
 radix_tree_gang_lookup_tag(struct radix_tree_root *root, void **results,
 		rdx_t first_index, unsigned int max_items,
@@ -1264,7 +1261,7 @@ radix_tree_gang_lookup_tag(struct radix_tree_root *root, void **results,
 #endif
 EXPORT_SYMBOL(radix_tree_gang_lookup_tag);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 unsigned int
 radix_tree_gang_lookup_tag_slot(struct radix_tree_root *root, void ***results,
 		rdx_t first_index, unsigned int max_items,
@@ -1336,7 +1333,7 @@ EXPORT_SYMBOL(radix_tree_gang_lookup_tag_slot);
 #if defined(CONFIG_SHMEM) && defined(CONFIG_SWAP)
 #include <linux/sched.h>  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static rdx_t __locate(struct radix_tree_node *slot, void *item,
 			      rdx_t index, rdx_t *found_index)
 #else
@@ -1345,7 +1342,7 @@ static unsigned long __locate(struct radix_tree_node *slot, void *item,
 #endif
 {
 	unsigned int shift, height;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	rdx_t i;
 #else
 	unsigned long i;
@@ -1359,7 +1356,7 @@ static unsigned long __locate(struct radix_tree_node *slot, void *item,
 		for (;;) {
 			if (slot->slots[i] != NULL)
 				break;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			index &= ~((RADIX_TREE_1 << shift) - 1);
 			index += RADIX_TREE_1 << shift;
 #else
@@ -1391,14 +1388,14 @@ out:
 	return index;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 rdx_t radix_tree_locate_item(struct radix_tree_root *root, void *item)
 #else
 unsigned long radix_tree_locate_item(struct radix_tree_root *root, void *item)
 #endif
 {
 	struct radix_tree_node *node;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	rdx_t max_index;
 	rdx_t cur_index = 0;
 	rdx_t found_index = -1;
@@ -1431,7 +1428,7 @@ unsigned long radix_tree_locate_item(struct radix_tree_root *root, void *item)
 	return found_index;
 }
 #else
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 rdx_t radix_tree_locate_item(struct radix_tree_root *root, void *item)
 #else
 unsigned long radix_tree_locate_item(struct radix_tree_root *root, void *item)
@@ -1446,7 +1443,7 @@ static inline void radix_tree_shrink(struct radix_tree_root *root)
 	 
 	while (root->height > 0) {
 		struct radix_tree_node *to_free = root->rnode;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		struct radix_tree_node *slot;
 #else
 		void *newptr;
@@ -1460,7 +1457,7 @@ static inline void radix_tree_shrink(struct radix_tree_root *root)
 		if (!to_free->slots[0])
 			break;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		slot = to_free->slots[0];
 		if (root->height > 1) {
 			slot->parent = NULL;
@@ -1483,13 +1480,13 @@ static inline void radix_tree_shrink(struct radix_tree_root *root)
 	}
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 void *radix_tree_delete(struct radix_tree_root *root, rdx_t index)
 #else
 void *radix_tree_delete(struct radix_tree_root *root, unsigned long index)
 #endif
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	struct radix_tree_node *node = NULL;
 #else
 	 
@@ -1499,7 +1496,7 @@ void *radix_tree_delete(struct radix_tree_root *root, unsigned long index)
 	struct radix_tree_node *to_free;
 	unsigned int height, shift;
 	int tag;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	int uninitialized_var(offset);
 #else
 	int offset;
@@ -1517,14 +1514,14 @@ void *radix_tree_delete(struct radix_tree_root *root, unsigned long index)
 	}
 	slot = indirect_to_ptr(slot);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	shift = height * RADIX_TREE_MAP_SHIFT;
 #else
 	shift = (height - 1) * RADIX_TREE_MAP_SHIFT;
 	pathp->node = NULL;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	do {
 		if (slot == NULL)
 			goto out;
@@ -1552,13 +1549,13 @@ void *radix_tree_delete(struct radix_tree_root *root, unsigned long index)
 	if (slot == NULL)
 		goto out;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	 
 #else
 	 
 #endif
 	for (tag = 0; tag < RADIX_TREE_MAX_TAGS; tag++) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		if (tag_get(node, tag, offset))
 #else
 		if (tag_get(pathp->node, tag, pathp->offset))
@@ -1568,7 +1565,7 @@ void *radix_tree_delete(struct radix_tree_root *root, unsigned long index)
 
 	to_free = NULL;
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	while (node) {
 		node->slots[offset] = NULL;
 		node->count--;
@@ -1581,7 +1578,7 @@ void *radix_tree_delete(struct radix_tree_root *root, unsigned long index)
 		if (to_free)
 			radix_tree_node_free(to_free);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		if (node->count) {
 			if (node == indirect_to_ptr(root->rnode))
 #else
@@ -1592,14 +1589,14 @@ void *radix_tree_delete(struct radix_tree_root *root, unsigned long index)
 			goto out;
 		}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		to_free = node;
 #else
 		to_free = pathp->node;
 		pathp--;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		index >>= RADIX_TREE_MAP_SHIFT;
 		offset = index & RADIX_TREE_MAP_MASK;
 		node = node->parent;
@@ -1628,7 +1625,7 @@ radix_tree_node_ctor(void *node)
 	memset(node, 0, sizeof(struct radix_tree_node));
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static __init rdx_t __maxindex(unsigned int height)
 #else
 static __init unsigned long __maxindex(unsigned int height)
@@ -1637,7 +1634,7 @@ static __init unsigned long __maxindex(unsigned int height)
 	unsigned int width = height * RADIX_TREE_MAP_SHIFT;
 	int shift = RADIX_TREE_INDEX_BITS - width;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (shift < 0)
 		return RDX_TREE_KEY_MAX_VALUE;
 	if (shift >= RADIX_TREE_BITS_PER_KEY)

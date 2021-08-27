@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/export.h>
 #include <linux/errno.h>
@@ -18,7 +15,7 @@
 #include <linux/uaccess.h>
 
 #include <linux/slab.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/printk.h>
 #endif
 
@@ -105,7 +102,7 @@ asmlinkage long sys_arm_fadvise64_64(int fd, int advice,
 {
 	return sys_fadvise64_64(fd, offset, len, advice);
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #if (PAGE_SHIFT > 12)
 	 
 asmlinkage unsigned long sys_arm_mmap_4koff(unsigned long addr,

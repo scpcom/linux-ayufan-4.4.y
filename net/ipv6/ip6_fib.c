@@ -1,8 +1,5 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <linux/module.h>
 #endif
 #include <linux/errno.h>
@@ -14,7 +11,7 @@
 #include <linux/init.h>
 #include <linux/list.h>
 #include <linux/slab.h>
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 #include <linux/mv_nfp.h>
 #endif
@@ -370,7 +367,7 @@ out:
 	return res;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 static int fib6_add_node(struct fib6_walker_t *w)
 {
@@ -598,7 +595,7 @@ static int fib6_add_rt2node(struct fib6_node *fn, struct rt6_info *rt,
 		fn->fn_flags |= RTN_RTINFO;
 	}
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	rt->nfp = false;
 	if (rt->rt6i_flags & RTF_CACHE)	{
@@ -1029,7 +1026,7 @@ static void fib6_del_route(struct fib6_node *fn, struct rt6_info **rtp,
 	}
 
 	inet6_rt_notify(RTM_DELROUTE, rt, info);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (rt->rt6i_flags & RTF_CACHE)
 		if (rt->nfp)
@@ -1287,7 +1284,7 @@ static int fib6_age(struct rt6_info *rt, void *arg)
 				  rt);
 			return -1;
 		}
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 		if (rt->nfp) {
 			if (nfp_mgr_p->nfp_hook_fib_rule_age)

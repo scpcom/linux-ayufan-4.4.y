@@ -4173,19 +4173,19 @@ static int __e1000_shutdown(struct pci_dev *pdev, bool *enable_wake)
 				phy_wol |= 0x1000;
 
 			e1000_write_phy_reg(hw, 31, 0x0007);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
 			udelay(10);
 #endif
 			e1000_write_phy_reg(hw, 30, 0x006d);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
 			udelay(10);
 #endif
 			e1000_write_phy_reg(hw, 22, 0x9fff);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
 			udelay(10);
 #endif
 			e1000_write_phy_reg(hw, 21, (u16) phy_wol);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_WOL_WORKAROUND
 			udelay(10);
 #endif
 

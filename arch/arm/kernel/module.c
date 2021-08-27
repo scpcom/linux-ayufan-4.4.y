@@ -32,7 +32,7 @@ void *module_alloc(unsigned long size)
 }
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_CPU_ENDIAN_BE8
 #define read_instr32(c)                        __swab32(*(u32 *)c)
 #define read_instr16(c)                        __swab16(*(u16 *)c)
@@ -101,7 +101,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 		case R_ARM_PC24:
 		case R_ARM_CALL:
 		case R_ARM_JUMP24:
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 			offset = (read_instr32(loc) & 0x00ffffff) << 2;
 #else
 			offset = (*(u32 *)loc & 0x00ffffff) << 2;
@@ -122,7 +122,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 
 			offset >>= 2;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 			write_instr32((read_instr32(loc) & 0xff000000) |
 				(offset & 0x00ffffff), loc);
 #else
@@ -133,7 +133,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 
 	       case R_ARM_V4BX:
 		        
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 			write_instr32((read_instr32(loc) & 0xf000000f) |
 						0x01a0f000, loc);
 #endif
@@ -148,7 +148,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 
 		case R_ARM_MOVW_ABS_NC:
 		case R_ARM_MOVT_ABS:
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 			offset = read_instr32(loc);
 #else
 			offset = *(u32 *)loc;
@@ -161,7 +161,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 			if (ELF32_R_TYPE(rel->r_info) == R_ARM_MOVT_ABS)
 				offset >>= 16;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 			write_instr32((read_instr32(loc) & 0xfff0f000) |
 				((offset & 0xf000) << 4) |
 					(offset & 0x0fff), loc);
@@ -176,7 +176,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 		case R_ARM_THM_CALL:
 		case R_ARM_THM_JUMP24:
 			upper = *(u16 *)loc;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 			lower = read_instr16(loc + 2);
 #else
 			lower = *(u16 *)(loc + 2);
@@ -207,7 +207,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 			sign = (offset >> 24) & 1;
 			j1 = sign ^ (~(offset >> 23) & 1);
 			j2 = sign ^ (~(offset >> 22) & 1);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 			write_instr16((u16)((upper & 0xf800) | (sign << 10) |
 						((offset >> 12) & 0x03ff)),loc);
 			write_instr16((u16)((lower & 0xd000) |
@@ -224,7 +224,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 
 		case R_ARM_THM_MOVW_ABS_NC:
 		case R_ARM_THM_MOVT_ABS:
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 			upper = read_instr16(loc);
 
 			lower = read_instr16(loc + 2);
@@ -242,7 +242,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 			if (ELF32_R_TYPE(rel->r_info) == R_ARM_THM_MOVT_ABS)
 				offset >>= 16;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 				write_instr16((u16)((upper & 0xfbf0) |
  					    ((offset & 0xf000) >> 12) |
 					    ((offset & 0x0800) >> 1)),
@@ -251,7 +251,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
  						  ((offset & 0x0700) << 4) |
 						  (offset & 0x00ff)),
 					doc + 2);
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 				write_instr16((u16)((upper & 0xfbf0) |
  					    ((offset & 0xf000) >> 12) |
 					    ((offset & 0x0800) >> 1)),

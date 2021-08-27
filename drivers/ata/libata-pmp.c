@@ -1362,7 +1362,7 @@ int sata_pmp_attach(struct ata_device *dev)
 	rc = sata_pmp_configure(dev, 1);
 	if (rc)
 		goto fail;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_PM_LINK_RETRY
 	 
 	if (!syno_is_hw_version(HW_DS2415p)) {
 		ap->isFirstAttach = 1;

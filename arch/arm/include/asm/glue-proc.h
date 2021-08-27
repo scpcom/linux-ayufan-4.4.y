@@ -235,7 +235,7 @@
 # endif
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_CPU_SHEEVA_PJ4B_V6
 # ifdef CPU_NAME
 #  undef  MULTI_CPU

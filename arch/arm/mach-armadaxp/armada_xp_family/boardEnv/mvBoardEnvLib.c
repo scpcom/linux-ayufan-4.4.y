@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "ctrlEnv/mvCtrlEnvSpec.h"
@@ -48,7 +45,7 @@ MV_VOID mvBoardEnvInit(MV_VOID)
 		return;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 	 
 #else
 	nandDev = boardGetDevCSNum(0, BOARD_DEV_NAND_FLASH);
@@ -136,7 +133,7 @@ MV_BOOL mvBoardIsPortInSgmii(MV_U32 ethPortNum)
 	case DB_78X60_PCAC_REV2_ID:
 		return MV_TRUE;
 		break;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 	case SYNO_AXP_4BAY_2BAY:
 	case SYNO_AXP_4BAY_RACK:
 		return MV_FALSE;
@@ -516,7 +513,7 @@ MV_VOID mvBoardOtherModuleTypePrint(MV_VOID)
 
 MV_BOOL mvBoardIsGbEPortConnected(MV_U32 ethPortNum)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 	MV_U32 boardId = mvBoardIdGet();
 	if (!((boardId >= BOARD_ID_BASE) && (boardId < MV_MAX_BOARD_ID))) {
 		mvOsPrintf("mvBoardIsGbEPortConnected: Board unknown.\n");
@@ -1227,7 +1224,7 @@ MV_U16 mvBoardPexCapabilityGet(MV_VOID)
 	case DB_78X60_PCAC_REV2_ID:
 	case RD_78460_SERVER_ID:
 	case RD_78460_SERVER_REV2_ID:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 	case SYNO_AXP_4BAY_2BAY:
 	case SYNO_AXP_2BAY:
 	case SYNO_AXP_4BAY_RACK:
@@ -1269,7 +1266,7 @@ MV_STATUS mvBoardPexModeSet(MV_U16 conf)
 MV_U16 mvBoardPexModeGet(MV_VOID)
 {
 	MV_U8 sar;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 	MV_U32 boardID = mvBoardIdGet();
 
 	if (SYNO_AXP_4BAY_2BAY == boardID ||
@@ -1646,7 +1643,7 @@ MV_BOARD_PEX_INFO *mvBoardPexInfoGet(void)
 	case RD_78460_CUSTOMER_ID:
 	case DB_78X60_AMC_ID:
 	case DB_78X60_PCAC_REV2_ID:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 	case SYNO_AXP_4BAY_2BAY:
 	case SYNO_AXP_2BAY:
 	case SYNO_AXP_4BAY_RACK:

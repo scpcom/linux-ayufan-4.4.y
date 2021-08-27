@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * We need constants.h for:
  *  VMA_VM_MM
@@ -94,7 +91,7 @@
 #if L_PTE_SHARED != PTE_EXT_SHARED
 #error PTE shared bit mismatch
 #endif
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 #if !defined (CONFIG_ARM_LPAE) && \
 	(L_PTE_XN+L_PTE_USER+L_PTE_RDONLY+L_PTE_DIRTY+L_PTE_YOUNG+\
 	 L_PTE_FILE+L_PTE_PRESENT) > L_PTE_SHARED
@@ -149,7 +146,7 @@
 	.macro	armv6_set_pte_ext pfx
 	str	r1, [r0], #2048			@ linux version
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
 	mov     r3, #0x7C
 	and     r3, r3, r0
 	mov     r3, r3, lsl #4
@@ -159,12 +156,12 @@
 #endif
 
 	bic	r3, r1, #0x000003fc
-#if defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
 	bic	r3, r3, #0x00000F000
 #endif
 	bic	r3, r3, #PTE_TYPE_MASK
 	orr	r3, r3, r2
-#if defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
 	orr	r3, r3, #PTE_EXT_AP0 | 1
 #else
 	orr	r3, r3, #PTE_EXT_AP0 | 2
@@ -195,8 +192,8 @@
 	moveq	r3, #0
 
 	str	r3, [r0]
-#if defined(MY_DEF_HERE)  || defined(MY_DEF_HERE) 
-#if defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)  || defined(CONFIG_SYNO_ARMADA_ARCH_V2) 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
 	@ Need to duplicate the entry 16 times because of overlapping in PTE index bits.
 	str     r3, [r0, #4]
 	str     r3, [r0, #8]
@@ -233,12 +230,12 @@
 #endif // _LINUX_ARM_ARCH__ >= 7
 #endif // CONFIG_SHEEVA_ERRATA_ARM_CPU_4611
 	mcr	p15, 0, r0, c7, c10, 1		@ flush_pte
-#if defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
 	add	r0, r0, #32
 	mcr	p15, 0, r0, c7, c10, 1		@ flush_pte
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #if defined (CONFIG_CACHE_AURORA_L2) && defined (CONFIG_AURORA_L2_OUTER) && !defined (CONFIG_AURORA_L2_PT_WALK)
 #error "armv6_set_pte_ext: calling l2_clean_va corrupts r2. SHOULD BE FIXED"
 	bl	l2_clean_va
@@ -379,7 +376,7 @@ ENTRY(\name\()_processor_functions)
 ENTRY(\name\()_cache_fns)
 	.long	\name\()_flush_icache_all
 	.long	\name\()_flush_kern_cache_all
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	.long   \name\()_flush_kern_cache_louis
 #endif
 	.long	\name\()_flush_user_cache_all

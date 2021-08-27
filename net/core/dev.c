@@ -70,7 +70,7 @@
 
 #include "net-sysfs.h"
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SWITCH_NET_DEVICE_NAME) && defined(MY_ABC_HERE)
 #include <linux/synobios.h>
 extern char gszSynoHWVersion[16];
 #include <linux/pci.h>
@@ -83,7 +83,7 @@ void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
 EXPORT_SYMBOL(funcSynoNicLedCtrl);
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP)
 #include <linux/mv_nfp.h>
 #endif  
@@ -2519,7 +2519,7 @@ void netdev_rx_handler_unregister(struct net_device *dev)
 }
 EXPORT_SYMBOL_GPL(netdev_rx_handler_unregister);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MV_ETH_NFP_EXT
 static struct sk_buff *handle_nfp_extrcv(struct sk_buff *skb, struct net_device *dev)
 {
@@ -2585,7 +2585,7 @@ another_round:
 	}
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MV_ETH_NFP_EXT
 	skb = handle_nfp_extrcv(skb, orig_dev);
 	if (!skb)
@@ -4573,7 +4573,7 @@ int register_netdevice(struct net_device *dev)
 {
 	int ret;
 	struct net *net = dev_net(dev);
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SWITCH_NET_DEVICE_NAME) && defined(MY_ABC_HERE)
 	 
     static int netdevCnt = 0;
 #endif
@@ -4593,7 +4593,7 @@ int register_netdevice(struct net_device *dev)
 	ret = dev_get_valid_name(dev, dev->name);
 	if (ret < 0)
 		goto out;
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SWITCH_NET_DEVICE_NAME) && defined(MY_ABC_HERE)
 	if (gSwitchDev > 0 && netdevCnt < gSwitchDev && !strncmp("eth", dev->name, 3)) {
 		snprintf(dev->name, sizeof(dev->name), "eth%c", gDevPCIName[netdevCnt++][0]);
 	}
@@ -5386,7 +5386,7 @@ static int __init net_dev_init(void)
 	dev_mcast_init();
 	rc = 0;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP)
 	nfp_core_ops_init();
 #endif  

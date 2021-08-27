@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/platform_device.h>
@@ -338,7 +335,7 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 	unsigned int i;
 	unsigned int rate;
 	unsigned int ratio;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	unsigned int speed;
 #endif
 	struct cs42l51_ratios *ratios = NULL;
@@ -361,7 +358,7 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 	rate = params_rate(params);      
 	ratio = cs42l51->mclk / rate;     
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	if (rate < 12500)
 		speed = (1 << CS42L51_QSM_MODE) | (1 << CS42L51_SSM_MODE);
 	else if (rate < 25000)
@@ -373,7 +370,7 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 #endif
 
 	for (i = 0; i < nr_ratios; i++) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 		if (((1 << ratios[i].speed_mode) & speed) == 0)
 			continue;
 #endif

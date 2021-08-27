@@ -22,7 +22,7 @@
 #include <linux/hrtimer.h>
 #include <linux/dma-mapping.h>
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_NET_SKB_HEADROOM)
 # define NET_SKB_PAD  CONFIG_NET_SKB_HEADROOM
 #endif
@@ -243,14 +243,14 @@ struct sk_buff {
 	__u32			ipsec_offload;
 #endif
 	void			(*destructor)(struct sk_buff *skb);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	int				(*skb_recycle) (struct sk_buff *skb);
 	void			*hw_cookie;
 #endif  
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	int			(*skb_recycle) (struct sk_buff *skb);
 	__u32			hw_cookie;
@@ -352,7 +352,7 @@ static inline struct rtable *skb_rtable(const struct sk_buff *skb)
 	return (struct rtable *)skb_dst(skb);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define NETDEV_FRAG_PAGE_MAX_ORDER get_order(32768)
 #define NETDEV_FRAG_PAGE_MAX_SIZE  (PAGE_SIZE << NETDEV_FRAG_PAGE_MAX_ORDER)
 #define NETDEV_PAGECNT_MAX_BIAS    NETDEV_FRAG_PAGE_MAX_SIZE
@@ -1374,7 +1374,7 @@ extern int	       skb_copy_datagram_iovec1(const struct sk_buff *from,
 					       int size);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 extern int		skb_copy_datagram_to_kernel_iovec(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);
@@ -1759,7 +1759,7 @@ static inline bool skb_is_recycleable(const struct sk_buff *skb, int skb_size)
 	if (skb_end_pointer(skb) - skb->head < skb_size)
 		return false;
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_NET_SKB_RECYCLE)
+#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_NET_SKB_RECYCLE)
 	if (skb_shared(skb) || skb_cloned(skb) || skb_has_frag_list(skb))
 #else
 	if (skb_shared(skb) || skb_cloned(skb))

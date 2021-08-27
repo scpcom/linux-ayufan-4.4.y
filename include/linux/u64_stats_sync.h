@@ -1,13 +1,10 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_U64_STATS_SYNC_H
 #define _LINUX_U64_STATS_SYNC_H
 
 #include <linux/seqlock.h>
 
 struct u64_stats_sync {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #if !defined(CONFIG_ARCH_LONG_LONG_ATOMIC) && BITS_PER_LONG==32 && defined(CONFIG_SMP)
 	seqcount_t	seq;
 #endif
@@ -20,7 +17,7 @@ struct u64_stats_sync {
 
 static inline void u64_stats_update_begin(struct u64_stats_sync *syncp)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #if !defined(CONFIG_ARCH_LONG_LONG_ATOMIC) && BITS_PER_LONG==32 && defined(CONFIG_SMP)
 	write_seqcount_begin(&syncp->seq);
 #endif
@@ -33,7 +30,7 @@ static inline void u64_stats_update_begin(struct u64_stats_sync *syncp)
 
 static inline void u64_stats_update_end(struct u64_stats_sync *syncp)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #if !defined(CONFIG_ARCH_LONG_LONG_ATOMIC) && BITS_PER_LONG==32 && defined(CONFIG_SMP)
 	write_seqcount_end(&syncp->seq);
 #endif
@@ -46,7 +43,7 @@ static inline void u64_stats_update_end(struct u64_stats_sync *syncp)
 
 static inline unsigned int u64_stats_fetch_begin(const struct u64_stats_sync *syncp)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #if !defined(CONFIG_ARCH_LONG_LONG_ATOMIC) && BITS_PER_LONG==32 && defined(CONFIG_SMP)
 	return read_seqcount_begin(&syncp->seq);
 #else
@@ -70,7 +67,7 @@ static inline unsigned int u64_stats_fetch_begin(const struct u64_stats_sync *sy
 static inline bool u64_stats_fetch_retry(const struct u64_stats_sync *syncp,
 					 unsigned int start)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #if !defined(CONFIG_ARCH_LONG_LONG_ATOMIC) && BITS_PER_LONG==32 && defined(CONFIG_SMP)
 	return read_seqcount_retry(&syncp->seq, start);
 #else
@@ -93,7 +90,7 @@ static inline bool u64_stats_fetch_retry(const struct u64_stats_sync *syncp,
 
 static inline unsigned int u64_stats_fetch_begin_bh(const struct u64_stats_sync *syncp)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #if !defined(CONFIG_ARCH_LONG_LONG_ATOMIC) && BITS_PER_LONG==32 && defined(CONFIG_SMP)
 	return read_seqcount_begin(&syncp->seq);
 #else
@@ -117,7 +114,7 @@ static inline unsigned int u64_stats_fetch_begin_bh(const struct u64_stats_sync 
 static inline bool u64_stats_fetch_retry_bh(const struct u64_stats_sync *syncp,
 					 unsigned int start)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #if !defined(CONFIG_ARCH_LONG_LONG_ATOMIC) && BITS_PER_LONG==32 && defined(CONFIG_SMP)
 	return read_seqcount_retry(&syncp->seq, start);
 #else

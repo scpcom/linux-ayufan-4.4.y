@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/signal.h>
@@ -21,7 +18,7 @@
 
 #include "fault.h"
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
  
@@ -29,13 +26,13 @@
 #define FSR_WRITE		(1 << 11)
 #define FSR_FS4			(1 << 10)
 #define FSR_FS3_0		(15)
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2))
 #define FSR_FS5_0		(0x3f)
 #endif
 
 static inline int fsr_fs(unsigned int fsr)
 {
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 	return fsr & FSR_FS5_0;
 #else
 	return (fsr & FSR_FS3_0) | (fsr & FSR_FS4) >> 6;
@@ -121,10 +118,10 @@ void show_pte(struct mm_struct *mm, unsigned long addr)
 
 		pte = pte_offset_map(pmd, addr);
 		printk(", *pte=%08llx", (long long)pte_val(*pte));
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
-#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
  
-#elif defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
+#elif defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
 		{
 			unsigned long pte_ptr = (unsigned long)pte;
 			unsigned long tmp = pte_ptr;
@@ -134,7 +131,7 @@ void show_pte(struct mm_struct *mm, unsigned long addr)
 			pte_ptr += (tmp << 4);
 			printk(", *ppte=%08llx", pte_val((pte_t *)pte_ptr));
 		}
-#elif defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
+#elif defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
 		{
 			unsigned long pte_ptr = (unsigned long)pte;
 			unsigned long tmp = pte_ptr;
@@ -391,10 +388,10 @@ do_translation_fault(unsigned long addr, unsigned int fsr,
 	pmd = pmd_offset(pud, addr);
 	pmd_k = pmd_offset(pud_k, addr);
 
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 	 
 	index = 0;
-#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
 	 
 	index = 0;
 #else
@@ -433,7 +430,7 @@ do_bad(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 	return 1;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 struct fsr_info {
 #else
 static struct fsr_info {
@@ -442,11 +439,11 @@ static struct fsr_info {
 	int	sig;
 	int	code;
 	const char *name;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 } fsr_info[] = {
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 	{ do_bad,		SIGBUS,  0,		"unknown 0"			},
 	{ do_bad,		SIGBUS,  0,		"unknown 1"			},
 	{ do_bad,		SIGBUS,  0,		"unknown 2"			},
@@ -550,7 +547,7 @@ static struct fsr_info {
 #endif   
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #ifdef CONFIG_ARM_LPAE
 #include "fsr-3level.c"
@@ -577,7 +574,7 @@ do_DataAbort(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 {
 	const struct fsr_info *inf = fsr_info + fsr_fs(fsr);
 	struct siginfo info;
-#if defined(MY_DEF_HERE) && defined(CONFIG_A375_FIRST_DABT_WA)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_A375_FIRST_DABT_WA)
 	static int a375_first;
 	 
 	if (a375_first == 0) {
@@ -599,10 +596,10 @@ do_DataAbort(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 	arm_notify_die("", regs, &info, fsr, 0);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 #define ifsr_info	fsr_info
 #else	 
 static struct fsr_info ifsr_info[] = {
@@ -674,12 +671,12 @@ do_PrefetchAbort(unsigned long addr, unsigned int ifsr, struct pt_regs *regs)
 	arm_notify_die("", regs, &info, ifsr, 0);
 }
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
+#if defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
  
 #else
 static int __init exceptions_init(void)
 {
-#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 #else
 	if (cpu_architecture() >= CPU_ARCH_ARMv6) {
 		hook_fault_code(4, do_translation_fault, SIGSEGV, SEGV_MAPERR,

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/lib/uaccess.S
  *
@@ -18,13 +15,13 @@
 #include <asm/assembler.h>
 #include <asm/errno.h>
 #include <asm/domain.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <asm/page.h>
 #endif
 
 		.text
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 //do nothing
 #else
 #define PAGE_SHIFT 12

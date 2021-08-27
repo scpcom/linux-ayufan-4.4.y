@@ -113,7 +113,7 @@ int memcpy_toiovecend(const struct iovec *iov, unsigned char *kdata,
 }
 EXPORT_SYMBOL(memcpy_toiovecend);
 
-#if defined(MY_DEF_HERE) && !defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ARMADA_V2) && !defined(MY_ABC_HERE)
  
 void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len)
 {

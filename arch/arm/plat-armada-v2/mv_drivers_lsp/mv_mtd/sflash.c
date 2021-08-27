@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -220,7 +217,7 @@ static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 	MV_SFLASH_INFO *sflash = map->fldrv_priv;
  
 	MV_U32 fsec, lsec;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	MV_U32 count, sleep_interval;
 #endif
 	int i;
@@ -258,17 +255,17 @@ static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 	DB(printk("\nINFO: %s - from sector %u to %u",__FUNCTION__, fsec, 
 		  lsec-1));
 
-#ifndef MY_DEF_HERE
+#ifndef CONFIG_SYNO_ARMADA_V2
 	mutex_lock(&sflash_mtx);
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 	count = lsec - fsec;
 	do_div(count, 4);
 	sleep_interval = fsec + count;
 #endif
 	for (i=fsec; i<lsec; i++)
 	{
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 		if (i == sleep_interval) {
 			sleep_interval += count;
 			msleep(1000);
@@ -281,11 +278,11 @@ static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 			printk(KERN_NOTICE "\nError: %s - mvSFlashSectorErase on sector %d",__FUNCTION__, i);
 			return -1;
 		}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 		mutex_unlock(&sflash_mtx);
 #endif
 	}
-#ifndef MY_DEF_HERE
+#ifndef CONFIG_SYNO_ARMADA_V2
 	mutex_unlock(&sflash_mtx);
 #endif
 	
@@ -311,7 +308,7 @@ static int sflash_lock (struct mtd_info *mtd, loff_t ofs, sflash_size_t len)
 	}
 	mutex_unlock(&sflash_mtx);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #else
 	printk("\nNotice: Serial SPI flash (%s) lock per sector is not supported!\n        Locking the whole device.", mtd->name);
 #endif
@@ -335,7 +332,7 @@ static int sflash_unlock (struct mtd_info *mtd, loff_t ofs, sflash_size_t len)
 	}
 	mutex_unlock(&sflash_mtx);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #else
 	printk("\nNotice: Serial SPI flash (%s) unlock per sector is not supported!\n        Unlocking the whole device.", mtd->name);
 #endif

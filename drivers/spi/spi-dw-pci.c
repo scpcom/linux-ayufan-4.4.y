@@ -1,13 +1,10 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/interrupt.h>
 #include <linux/pci.h>
 #include <linux/slab.h>
 #include <linux/spi/spi.h>
 #include <linux/module.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/of.h>
 #endif
 
@@ -26,7 +23,7 @@ static int __devinit spi_pci_probe(struct pci_dev *pdev,
 	struct dw_spi_pci *dwpci;
 	struct dw_spi *dws;
 	int pci_bar = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	int ret, num_cs, bus_num;
 #else
 	int ret;
@@ -62,7 +59,7 @@ static int __devinit spi_pci_probe(struct pci_dev *pdev,
 		goto err_release_reg;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	ret = of_property_read_u32(pdev->dev.of_node, "bus-num", &bus_num);
 	if (ret < 0)
 		dws->bus_num = 0;
@@ -157,7 +154,7 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
 	{},
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static struct of_device_id dw_spi_pci_of_match[] = {
 		{ .compatible = "snps,dw-spi-pci", },
 		{  }
@@ -171,7 +168,7 @@ static struct pci_driver dw_spi_driver = {
 	.remove =	__devexit_p(spi_pci_remove),
 	.suspend =	spi_suspend,
 	.resume	=	spi_resume,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	.driver		= {
 		.name	= DRIVER_NAME,
 		.owner	= THIS_MODULE,

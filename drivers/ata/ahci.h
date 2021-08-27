@@ -180,7 +180,7 @@ enum {
 	AHCI_HFLAG_NO_SNTF		= (1 << 12),  
 	AHCI_HFLAG_NO_FPDMA_AA		= (1 << 13),  
 	AHCI_HFLAG_YES_FBS		= (1 << 14),  
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LIBATA_JMB_BEHAVIOR
 	AHCI_HFLAG_REPROBE		= (1 << 15),
 #endif
 #ifdef MY_ABC_HERE

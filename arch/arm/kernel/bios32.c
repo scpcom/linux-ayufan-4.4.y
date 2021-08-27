@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/export.h>
 #include <linux/kernel.h>
@@ -370,7 +367,7 @@ static void __init pcibios_init_hw(struct hw_pci *hw)
 		sys->domain  = hw->domain;
 #endif
 		sys->hw      = hw;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		sys->private_data = *hw->private_data;
 #endif
 		sys->busnr   = busnr;

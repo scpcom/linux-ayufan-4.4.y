@@ -246,7 +246,7 @@ static const struct ata_port_info ahci_port_info[] = {
 		.flags		= AHCI_FLAG_COMMON,
 		.pio_mask	= ATA_PIO4,
 		.udma_mask	= ATA_UDMA6,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		.port_ops	= &ahci_pmp_ops,
 #else  
 		.port_ops	= &ahci_ops,
@@ -473,7 +473,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(0x1b4b, 0x91a3),
 	  .driver_data = board_ahci_yes_fbs },
-#if  defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if  defined(MY_ABC_HERE) || defined(CONFIG_SYNO_ALPINE)
 	{ PCI_DEVICE(0x1b4b, 0x9235),
 	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(0x1b4b, 0x9215),
@@ -1130,7 +1130,7 @@ static inline void ahci_gtf_filter_workaround(struct ata_host *host)
 {}
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LIBATA_JMB_BEHAVIOR
 extern void ata_port_wait_eh(struct ata_port *ap);
 extern void ata_scsi_scan_host(struct ata_port *ap, int sync);
 #endif
@@ -1319,7 +1319,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		syno_mv_9235_gpio_active_init(host);
 	}
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LIBATA_JMB_BEHAVIOR
 	 
 	if (pdev->vendor != PCI_VENDOR_ID_JMICRON) {
 		rc = ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,

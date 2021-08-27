@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/highmem.h>
@@ -78,7 +75,7 @@ static inline void l2_inv_all(void)
 }
 
 #define CACHE_LINE_SIZE		32
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #define MAX_RANGE_SIZE		PAGE_SIZE
 #else
 #define MAX_RANGE_SIZE		1024
@@ -86,7 +83,7 @@ static inline void l2_inv_all(void)
 
 static int l2_wt_override;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 static inline unsigned long calc_range_end(unsigned long start, unsigned long end)
 #else
 static unsigned long calc_range_end(unsigned long start, unsigned long end)
@@ -268,7 +265,7 @@ void __init feroceon_l2_init(int __l2_wt_override)
 	outer_cache.clean_range = feroceon_l2_clean_range;
 	outer_cache.flush_range = feroceon_l2_flush_range;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 	outer_cache.inv_all = l2_inv_all;
 #endif
 	enable_l2();

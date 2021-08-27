@@ -89,7 +89,7 @@ extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ESATA_7042
 extern long g_esata_7042;
 #endif
 #ifndef MEM_SIZE
@@ -104,7 +104,7 @@ extern char gszDiskIdxMap[16];
 extern char giDiskSeqReverse[8];
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SWITCH_NET_DEVICE_NAME
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
@@ -113,7 +113,7 @@ extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING
 extern int gSynoHasDynModule;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FLASH_MEMORY_SIZE
 extern long gSynoFlashMemorySize;
 #endif
 
@@ -312,7 +312,7 @@ static int __init early_vender_format_version(char *p)
 __setup("vender_format_version=", early_vender_format_version);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SWITCH_NET_DEVICE_NAME
 static int __init early_netif_seq(char *p)
 {
 	int len;
@@ -364,7 +364,7 @@ static int __init early_custom_sn(char *p)
 __setup("custom_sn=", early_custom_sn);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ESATA_7042
 static int __init early_esata_7042(char *p)
 {
 	g_esata_7042 = simple_strtol(p, NULL, 10);
@@ -426,7 +426,7 @@ END:
 __setup("syno_dyn_module=", early_is_dyn_module);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FLASH_MEMORY_SIZE
 static int __init early_flash_memory_size(char *p)
 {
 	int iLen = 0;
@@ -869,7 +869,7 @@ void __init dump_machine_table(void)
 		 ;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 int __init arm_add_memory(phys_addr_t start, phys_addr_t size)
 #else
 int __init arm_add_memory(phys_addr_t start, unsigned long size)
@@ -885,7 +885,7 @@ int __init arm_add_memory(phys_addr_t start, unsigned long size)
 
 	size -= start & ~PAGE_MASK;
 	bank->start = PAGE_ALIGN(start);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #ifndef CONFIG_ARM_LPAE
 	if (bank->start + size < bank->start) {
 		printk(KERN_CRIT "Truncating memory at 0x%08llx to fit in "
@@ -910,7 +910,7 @@ int __init arm_add_memory(phys_addr_t start, unsigned long size)
 static int __init early_mem(char *p)
 {
 	static int usermem __initdata = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	phys_addr_t size;
 #else
 	unsigned long size;
@@ -992,7 +992,7 @@ static void __init request_standard_resources(struct machine_desc *mdesc)
 
 static int __init parse_tag_core(const struct tag *tag)
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	if (read_tag(tag->hdr.size) > 2) {
 	if ((read_tag(tag->u.core.flags) & 1) == 0)		
 		root_mountflags &= ~MS_RDONLY;
@@ -1012,7 +1012,7 @@ __tagtable(ATAG_CORE, parse_tag_core);
 
 static int __init parse_tag_mem32(const struct tag *tag)
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	return arm_add_memory(read_tag(tag->u.mem.start), read_tag(tag->u.mem.size));
 #else
 	return arm_add_memory(tag->u.mem.start, tag->u.mem.size);
@@ -1021,7 +1021,7 @@ static int __init parse_tag_mem32(const struct tag *tag)
 
 __tagtable(ATAG_MEM, parse_tag_mem32);
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_PHYS_ADDR_T_64BIT)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_PHYS_ADDR_T_64BIT)
 static int __init parse_tag_mem64(const struct tag *tag)
 {
 #ifdef CONFIG_ARM_LPAE
@@ -1097,7 +1097,7 @@ __tagtable(ATAG_SERIAL, parse_tag_serialnr);
 
 static int __init parse_tag_revision(const struct tag *tag)
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	system_rev = read_tag(tag->u.revision.rev);
 #else
 	system_rev = tag->u.revision.rev;
@@ -1130,7 +1130,7 @@ static int __init parse_tag(const struct tag *tag)
 	struct tagtable *t;
 
 	for (t = &__tagtable_begin; t < &__tagtable_end; t++)
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		if ((read_tag(tag->hdr.tag) == t->tag)) {
 #else
 		if (tag->hdr.tag == t->tag) {
@@ -1144,13 +1144,13 @@ static int __init parse_tag(const struct tag *tag)
 
 static void __init parse_tags(const struct tag *t)
 {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	for (; read_tag(t->hdr.size); t = tag_next(t))
 #else
 	for (; t->hdr.size; t = tag_next(t))
 #endif
 		if (!parse_tag(t))
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 			early_printk(KERN_WARNING
 #else
 			printk(KERN_WARNING
@@ -1259,7 +1259,7 @@ static struct machine_desc * __init setup_machine_tags(unsigned int nr)
 
 #if defined(CONFIG_DEPRECATED_PARAM_STRUCT)
 	 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 if (read_tag(tags->hdr.tag) != ATAG_CORE)
 #else
 	if (tags->hdr.tag != ATAG_CORE)
@@ -1267,7 +1267,7 @@ if (read_tag(tags->hdr.tag) != ATAG_CORE)
 		convert_to_tag_list(tags);
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	if (read_tag(tags->hdr.tag) != ATAG_CORE) {
 #else
 	if (tags->hdr.tag != ATAG_CORE) {
@@ -1282,7 +1282,7 @@ if (read_tag(tags->hdr.tag) != ATAG_CORE)
 	if (mdesc->fixup)
 		mdesc->fixup(tags, &from, &meminfo);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	if (read_tag(tags->hdr.tag) == ATAG_CORE) {
 #else
 	if (tags->hdr.tag == ATAG_CORE) {
@@ -1361,7 +1361,7 @@ void __init setup_arch(char **cmdline_p)
 	conswitchp = &dummy_con;
 #endif
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 	early_trap_init();

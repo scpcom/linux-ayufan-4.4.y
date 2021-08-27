@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/export.h>
@@ -883,7 +880,7 @@ int write_cache_pages(struct address_space *mapping,
 			cycled = 1;
 		else
 			cycled = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		end = PGOFF_MAX;
 #else
 		end = -1;

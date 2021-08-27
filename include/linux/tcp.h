@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _LINUX_TCP_H
 #define _LINUX_TCP_H
@@ -285,7 +282,7 @@ struct tcp_sock {
 		struct dma_chan		*dma_chan;
 		int			wakeup;
 		struct dma_pinned_list	*pinned_list;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		bool			pinned;
 #endif
 		dma_cookie_t		dma_cookie;

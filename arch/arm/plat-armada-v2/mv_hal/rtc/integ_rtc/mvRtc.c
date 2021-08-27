@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "mvCommon.h"
 #include "mvOs.h"
@@ -9,7 +6,7 @@
 #include "mvRtcReg.h"
 #include "mvRtc.h"
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 MV_VOID SYNOmvRtcExtAlarmSet(MV_U32 time)
 {
 	SYNOmvRtcExtAlarmClean();
@@ -116,7 +113,7 @@ MV_VOID mvRtcInit(MV_VOID)
 	return;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #include <linux/module.h>
 
 EXPORT_SYMBOL(mvRtcTimeSet);

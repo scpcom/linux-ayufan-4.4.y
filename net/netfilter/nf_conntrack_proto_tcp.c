@@ -702,7 +702,7 @@ static int tcp_packet(struct nf_conn *ct,
 		break;
 	}
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	 
 	{

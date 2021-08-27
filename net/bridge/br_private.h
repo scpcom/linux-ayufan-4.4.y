@@ -65,7 +65,7 @@ struct net_bridge_fdb_entry
 	unsigned char			is_local;
 	unsigned char			is_static;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	bool 			nfp;
 #endif  

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __ASM_ARM_IO_H
 #define __ASM_ARM_IO_H
@@ -61,7 +58,7 @@ static inline void __iomem *__typesafe_io(unsigned long addr)
 #define __iormb()		do { } while (0)
 #define __iowmb()		do { } while (0)
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define PCI_IO_VIRT_BASE        0xfee00000
 
 struct resource;

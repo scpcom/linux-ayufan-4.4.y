@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -51,7 +48,7 @@
 #define STAT_ADD(s,n)
 #endif
 #if defined (CONFIG_MV_XOR_MEMCOPY) || defined (CONFIG_MV_IDMA_MEMCOPY)
-#ifndef MY_DEF_HERE
+#ifndef CONFIG_SYNO_ARMADA_ARCH_V2
 #define memcpy asm_memcpy
 #else
 #define asm_memcpy memcpy
@@ -1166,7 +1163,7 @@ static inline u32 __pa_user(u32 va, int write)
     if (!vm || (vm->vm_flags & (VM_IO|VM_PFNMAP)) || !(flags & vm->vm_flags))
 		return 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
     flags =  FOLL_TOUCH;
 #else
     flags = FOLL_PTE_EXIST | FOLL_TOUCH;

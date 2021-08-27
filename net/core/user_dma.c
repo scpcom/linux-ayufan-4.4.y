@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/dmaengine.h>
 #include <linux/socket.h>
@@ -8,7 +5,7 @@
 #include <net/tcp.h>
 #include <net/netdma.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define NET_DMA_DEFAULT_COPYBREAK  8192  
 #else
 #define NET_DMA_DEFAULT_COPYBREAK 4096
@@ -23,13 +20,13 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 {
 	int start = skb_headlen(skb);
 	int i, copy = start - offset;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 	struct sk_buff *frag_iter;
 #endif
 	dma_cookie_t cookie = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	struct sg_table	*dst_sgt;
 	struct sg_table	*src_sgt;
 	struct scatterlist *dst_sg;
@@ -39,7 +36,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 	size_t	dst_len = len;
 	size_t	dst_offset = offset;
 	int ret;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
 	int retry_limit = 10;
 #endif
 
@@ -62,7 +59,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 	if (copy > 0) {
 		if (copy > len)
 			copy = len;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		sg_set_buf(src_sg, skb->data + offset, copy);
 		pr_debug("%s %d: add src buf page %p. addr %p len 0x%x\n", __func__,
 				__LINE__, virt_to_page(skb->data),
@@ -100,7 +97,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 			if (copy > len)
 				copy = len;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			sg_set_page(src_sg, page, copy, frag->page_offset +
 					offset - start);
 			pr_debug("%s %d: add src buf [%d] page %p. len 0x%x\n", __func__,
@@ -115,7 +112,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 #endif
 			len -= copy;
 			if (len == 0)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 				break;
 #else
 				goto end;
@@ -125,14 +122,14 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 		start = end;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 fill_dst_sg:
 
 	if (src_sg_len > 0) {
 		dst_sg_len = dma_memcpy_fill_sg_from_iovec(chan, to, pinned_list, dst_sg, dst_offset, dst_len);
 		BUG_ON(dst_sg_len <= 0);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
 retry:
 #endif
 		cookie = dma_async_memcpy_sg_to_sg(chan,
@@ -140,7 +137,7 @@ retry:
 						dst_sg_len,
 						src_sgt->sgl,
 						src_sg_len);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
 		if (cookie == -ENOMEM) {
 			if (--retry_limit > 0) {
 				udelay(50);
@@ -177,7 +174,7 @@ retry:
 	}
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 end:
@@ -187,7 +184,7 @@ end:
 		return cookie;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 fault:

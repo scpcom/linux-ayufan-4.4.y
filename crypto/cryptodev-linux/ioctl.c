@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <crypto/hash.h>
 #include <linux/crypto.h>
@@ -18,7 +15,7 @@
 #include "zc.h"
 #include "version.h"
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/miscdevice.h>
 #endif
 

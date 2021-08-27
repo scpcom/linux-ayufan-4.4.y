@@ -151,7 +151,7 @@ int
 cifs_from_utf16(char *to, const __le16 *from, int tolen, int fromlen,
 		const struct nls_table *codepage, int map_type)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CIFS_UTF16_CONVERT_COMPILE_BUG
 	volatile int i;
 	int charlen, safelen;
 #else

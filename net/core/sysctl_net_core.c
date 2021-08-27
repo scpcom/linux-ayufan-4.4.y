@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/mm.h>
 #include <linux/sysctl.h>
@@ -17,7 +14,7 @@
 #include <net/net_ratelimit.h>
 
 #ifdef CONFIG_RPS
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 static int rps_sock_flow_init()
 {
 	unsigned int orig_size = 0, size = 256;
@@ -290,7 +287,7 @@ static __init int sysctl_core_init(void)
 	register_sysctl_paths(net_core_path, empty);
 	register_net_sysctl_rotable(net_core_path, net_core_table);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 	if (0 != rps_sock_flow_init()) {
 		printk("Error! Failed to init RFS for networking!\n");
 	}

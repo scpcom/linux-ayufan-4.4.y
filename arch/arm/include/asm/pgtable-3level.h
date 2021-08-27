@@ -1,11 +1,8 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _ASM_PGTABLE_3LEVEL_H
 #define _ASM_PGTABLE_3LEVEL_H
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
+#if defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
 #define PTRS_PER_PTE		(512 >> (CONFIG_ARM_PAGE_SIZE_LARGE_SHIFT - 12))
 #else
 #define PTRS_PER_PTE		512
@@ -15,7 +12,7 @@
 
 #define PTE_HWTABLE_PTRS	(PTRS_PER_PTE)
 #define PTE_HWTABLE_OFF		(0)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define PTE_HWTABLE_SIZE	(512 * 8)  
 #define PTE_HWTABLE_MASK	(~(PTE_HWTABLE_SIZE-1))
 #else
@@ -65,7 +62,7 @@
 
 #define L_PGD_SWAPPER		(_AT(pgdval_t, 1) << 55)	 
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #ifndef __ASSEMBLY__
 
 #define pud_none(pud)		(!pud_val(pud))

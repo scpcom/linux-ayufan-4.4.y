@@ -588,7 +588,7 @@ static struct scsi_host_template mv5_sht = {
 #ifdef MY_ABC_HERE
 	.syno_index_get         = syno_libata_index_get,
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 	.support_staggered_spinup = 1,
 #endif
 };
@@ -601,7 +601,7 @@ static struct scsi_host_template mv6_sht = {
 #ifdef MY_ABC_HERE
 	.shost_attrs		= sata_mv_shost_attrs,
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 	.support_staggered_spinup = 1,
 #endif
 };
@@ -2287,7 +2287,7 @@ static void mv_process_crpb_entries(struct ata_port *ap, struct mv_port_priv *pp
 	in_index = (readl(port_mmio + EDMA_RSP_Q_IN_PTR)
 			>> EDMA_RSP_Q_PTR_SHIFT) & MV_MAX_Q_DEPTH_MASK;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	dma_io_sync();
 #endif
 	 
@@ -3511,7 +3511,7 @@ static void mv_conf_mbus_windows(struct mv_host_priv *hpriv,
 	}
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
 extern int mvSataWinInit(void);
 #endif
  
@@ -3563,7 +3563,7 @@ static int mv_platform_probe(struct platform_device *pdev)
 
 	if (mv_platform_data->dram != NULL)
 		mv_conf_mbus_windows(hpriv, mv_platform_data->dram);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
 	else
 		mvSataWinInit();
 #endif
@@ -3841,7 +3841,7 @@ static int __devexit mv_platform_remove(struct platform_device *pdev);
 static int __init mv_init(void)
 {
 	int rc = -ENODEV;
-#if defined(MY_DEF_HERE)
+#if defined(SYNO_ESATA_7042)
 	extern long g_esata_7042;
 
 	if (1 == g_esata_7042) {

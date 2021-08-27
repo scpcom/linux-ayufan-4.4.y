@@ -1,10 +1,7 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_PRIO_TREE_H
 #define _LINUX_PRIO_TREE_H
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #ifdef CONFIG_LFS_ON_32CPU
 #define prio_tree_t  unsigned long long
@@ -25,7 +22,7 @@ struct prio_tree_node {
 	struct prio_tree_node	*left;
 	struct prio_tree_node	*right;
 	struct prio_tree_node	*parent;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	prio_tree_t		start;
 	prio_tree_t		last;	 
 #else
@@ -43,7 +40,7 @@ struct prio_tree_root {
 
 struct prio_tree_iter {
 	struct prio_tree_node	*cur;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	prio_tree_t		mask;
 	prio_tree_t		value;
 #else

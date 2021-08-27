@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/mm/proc-arm926.S: MMU functions for ARM926EJ-S
  *
@@ -338,7 +335,7 @@ ENTRY(arm926_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(arm926_dma_unmap_area)
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	.globl	arm926_flush_kern_cache_louis
 	.equ	arm926_flush_kern_cache_louis, arm926_flush_kern_cache_all
 #endif

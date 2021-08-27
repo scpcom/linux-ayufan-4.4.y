@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "ctrlEnv/mvCtrlEnvSpec.h"
@@ -52,7 +49,7 @@ MV_VOID mvBoardEnvInit(MV_VOID)
 	mvBoardSet(mvBoardIdGet());
 	MV_U32 syncCtrl = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 	 
 #else
 	nandDev = boardGetDevCSNum(0, BOARD_DEV_NAND_FLASH);

@@ -61,7 +61,7 @@ enum {
 extern unsigned int guiWakeupDisksNum;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 extern int syno_is_alpine_internal_ahci(struct ata_port *);
 #endif
 
@@ -567,7 +567,7 @@ void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 
 	if (ap->pflags & ATA_PFLAG_LOADING)
 		ap->pflags &= ~ATA_PFLAG_LOADING;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LIBATA_JMB_BEHAVIOR
 	else if (ap->pflags & ATA_PFLAG_SCSI_HOTPLUG) {
 		if (!(ap->pflags & ATA_PFLAG_SYNC_SCSI_DEVICE)) {
 #ifdef MY_ABC_HERE
@@ -2787,7 +2787,7 @@ static int ata_eh_schedule_probe(struct ata_device *dev)
 static int ata_eh_handle_dev_fail(struct ata_device *dev, int err)
 {
 	struct ata_eh_context *ehc = &dev->link->eh_context;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	struct ata_link *link = NULL;
 #endif
 
@@ -2805,7 +2805,7 @@ static int ata_eh_handle_dev_fail(struct ata_device *dev, int err)
 		if (ehc->tries[dev->devno] == 1) {
 			 
 #ifdef CONFIG_SYNO_SATA_LINKSPEED_WORKAROUND
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			link = ata_dev_phys_link(dev);
 			 
 			if (link && link->ap && syno_is_alpine_internal_ahci(link->ap)) {
@@ -2847,7 +2847,7 @@ static int ata_eh_handle_dev_fail(struct ata_device *dev, int err)
 	}
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_PM_LINK_RETRY
 #define EUNIT_DROP_SPEED_RETRY 3
 
 int syno_ata_link_retry(struct ata_link *link)
@@ -2880,7 +2880,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 	struct ata_device *dev;
 	int rc, nr_fails;
 	unsigned long flags, deadline;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_PM_LINK_RETRY
 	bool blResetDone = 0;
 	int iResetTimes = 0;
 #endif
@@ -2962,10 +2962,10 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 		rc = ata_eh_reset(link, ata_link_nr_vacant(link),
 				  prereset, softreset, hardreset, postreset);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_PM_LINK_RETRY
 		 
 		iResetTimes = EUNIT_DROP_SPEED_RETRY;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		 
 		ap->isFirstAttach = 1;
 #endif
@@ -3002,7 +3002,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 			goto out;
 		}
 	}
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_PM_LINK_RETRY
 	if (blResetDone && ap->isFirstAttach) {
 		ap->isFirstAttach = 0;
 	}

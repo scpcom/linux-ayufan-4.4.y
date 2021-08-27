@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/errno.h>
 #include <linux/gpio.h>
@@ -18,7 +15,7 @@
 #include "gpio-ce4200.h"
 #include "gpio-ce5300.h"
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_GPIO_CTRL
 extern void synology_gpio_init(void);
 #endif
 
@@ -194,7 +191,7 @@ static int __devinit intelce_gpio_probe(struct pci_dev *pdev, const struct pci_d
 	sch_gpio_setup(pdev, gpio_base);
 	pci_set_drvdata(pdev, c);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_GPIO_CTRL
 	synology_gpio_init();
 #endif
 

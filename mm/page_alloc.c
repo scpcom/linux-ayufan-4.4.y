@@ -4495,7 +4495,7 @@ static void dump_page_flags(unsigned long flags)
 
 void dump_page(struct page *page)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	printk(KERN_ALERT
 	       "page:%p count:%d mapcount:%d mapping:%p index:%#llx\n",
 		page, atomic_read(&page->_count), page_mapcount(page),

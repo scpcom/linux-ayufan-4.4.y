@@ -1135,7 +1135,7 @@ int deregister_mtd_parser(struct mtd_part_parser *p)
 EXPORT_SYMBOL_GPL(deregister_mtd_parser);
 
 static const char *default_mtd_part_types[] = {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	"RedBoot",
 #endif
 	"cmdlinepart",

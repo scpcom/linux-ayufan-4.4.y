@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _ASM_PGTABLE_3LEVEL_TYPES_H
 #define _ASM_PGTABLE_3LEVEL_TYPES_H
@@ -15,7 +12,7 @@ typedef u64 pgdval_t;
 
 #ifdef STRICT_MM_TYPECHECKS
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 typedef struct { pteval_t pte;
 #if HW_PAGES_PER_PAGE > 1
 	pteval_t unused[HW_PAGES_PER_PAGE-1];
@@ -33,7 +30,7 @@ typedef struct { pteval_t pgprot; } pgprot_t;
 #define pgd_val(x)	((x).pgd)
 #define pgprot_val(x)   ((x).pgprot)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define __pte(x)        ({pte_t __pte = { .pte = (x) }; __pte; })
 #else
 #define __pte(x)        ((pte_t) { (x) } )
@@ -44,7 +41,7 @@ typedef struct { pteval_t pgprot; } pgprot_t;
 
 #else	 
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 typedef struct { pteval_t pte;
 #if HW_PAGES_PER_PAGE > 1
 	pteval_t unused[HW_PAGES_PER_PAGE-1];
@@ -57,7 +54,7 @@ typedef pmdval_t pmd_t;
 typedef pgdval_t pgd_t;
 typedef pteval_t pgprot_t;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define pte_val(x)      ((x).pte)
 #else
 #define pte_val(x)	(x)
@@ -66,7 +63,7 @@ typedef pteval_t pgprot_t;
 #define pgd_val(x)	(x)
 #define pgprot_val(x)	(x)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define __pte(x)        ({pte_t __pte = { .pte = (x) }; __pte; })
 #else
 #define __pte(x)	(x)

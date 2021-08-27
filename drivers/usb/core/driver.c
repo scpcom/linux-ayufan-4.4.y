@@ -1040,7 +1040,7 @@ int usb_resume(struct device *dev, pm_message_t msg)
 		status = 0;
 
 	} else {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		 
 		usb_detect_quirks(udev);
 #endif

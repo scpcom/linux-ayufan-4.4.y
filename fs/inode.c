@@ -89,7 +89,7 @@ int proc_nr_inodes(ctl_table *table, int write,
 }
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/moduleparam.h>
 static int fshighmem = 1;
 core_param(fshighmem, fshighmem, int, 0444);
@@ -152,11 +152,11 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	mapping->a_ops = &empty_aops;
 	mapping->host = inode;
 	mapping->flags = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (fshighmem)
 #endif
 		mapping_set_gfp_mask(mapping, GFP_HIGHUSER_MOVABLE);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	else
 		mapping_set_gfp_mask(mapping, GFP_USER | __GFP_MOVABLE);
 #endif

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "xfs.h"
 #include "xfs_fs.h"
@@ -251,7 +248,7 @@ xfs_sb_validate_fsb_count(
 	ASSERT(sbp->sb_blocklog >= BBSHIFT);
 
 #if XFS_BIG_BLKNOS      
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (nblocks >> (PAGE_CACHE_SHIFT - sbp->sb_blocklog) > PGOFF_MAX)
 #else
 	if (nblocks >> (PAGE_CACHE_SHIFT - sbp->sb_blocklog) > ULONG_MAX)

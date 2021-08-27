@@ -1,13 +1,10 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* ld script to make ARM Linux kernel
  * taken from the i386 version by Russell King
  * Written by Martin Mares <mj@atrey.karlin.mff.cuni.cz>
  */
 
 #include <asm-generic/vmlinux.lds.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <asm/cache.h>
 #endif
 #include <asm/thread_info.h>
@@ -94,7 +91,7 @@ SECTIONS
 			*(.exception.text)
 			__exception_text_end = .;
 			IRQENTRY_TEXT
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #ifdef CONFIG_FUNC_REORDER
 #include "functionlist"
 #endif
@@ -185,7 +182,7 @@ SECTIONS
 	}
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #ifdef CONFIG_SMP
 	PERCPU_SECTION(L1_CACHE_BYTES)
 #endif
@@ -222,7 +219,7 @@ SECTIONS
 #endif
 
 		NOSAVE_DATA
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		CACHELINE_ALIGNED_DATA(L1_CACHE_BYTES)
 		READ_MOSTLY_DATA(L1_CACHE_BYTES)
 #else

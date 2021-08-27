@@ -5,11 +5,11 @@
 #ifndef _ASMARM_PAGE_H
 #define _ASMARM_PAGE_H
 
-#if (defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_64K_PAGES)) || (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE))
+#if (defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_64K_PAGES)) || (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE))
 #define PAGE_SHIFT		16
-#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
 #define PAGE_SHIFT		CONFIG_ARM_PAGE_SIZE_LARGE_SHIFT
-#elif defined(MY_DEF_HERE) 
+#elif defined(CONFIG_SYNO_ARMADA_ARCH_V2) 
 	#ifdef CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT
 	#define PAGE_SHIFT		13
 	#define MV_PAGE_SIZE_STR	"8KB SW Page Size"
@@ -35,7 +35,7 @@
 #define PAGE_SIZE		(_AC(1,UL) << PAGE_SHIFT)
 #define PAGE_MASK		(~(PAGE_SIZE-1))
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #define HW_PAGE_SHIFT		12
 #define HW_PAGE_SIZE		(1 << HW_PAGE_SHIFT)
@@ -165,9 +165,9 @@ extern void copy_page(void *to, const void *from);
 
 #define __HAVE_ARCH_GATE_AREA 1
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 #include <asm/pgtable-3level-types.h>
-#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
 #include <asm/pgtable-3level-types.h>
 #else
 #include <asm/pgtable-2level-types.h>

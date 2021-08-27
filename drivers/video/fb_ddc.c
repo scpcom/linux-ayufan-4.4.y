@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/delay.h>
 #include <linux/device.h>
@@ -51,7 +48,7 @@ unsigned char *fb_ddc_read(struct i2c_adapter *adapter)
 	unsigned char *edid = NULL;
 	int i, j;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (!algo_data) {
 		 
 		for (i = 0; i < 3; i++) {

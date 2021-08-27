@@ -40,7 +40,7 @@
 struct secondary_data secondary_data;
 
 enum ipi_msg_type {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	IPI_WAKE = 0,
 #endif
 	IPI_TIMER = 2,
@@ -223,7 +223,7 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	enter_lazy_tlb(mm, current);
 	local_flush_tlb_all();
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_MACH_ARMADA_XP_FPGA
 	unsigned int cpurev;
 
@@ -237,7 +237,7 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	current->active_mm = mm;
 	cpumask_set_cpu(cpu, mm_cpumask(mm));
 
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_MACH_ARMADA_XP_FPGA)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_MACH_ARMADA_XP_FPGA)
         printk("CPU%u: FPGA Booted secondary processor (ID 0x%04x)\n", cpu, (cpurev & 0xFFFF));
 #else
 	printk("CPU%u: Booted secondary processor\n", cpu);
@@ -315,7 +315,7 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
 
 static void (*smp_cross_call)(const struct cpumask *, unsigned int);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 void arch_send_wakeup_ipi_mask(const struct cpumask *mask)
 {
 	smp_cross_call(mask, 0);
@@ -373,7 +373,7 @@ u64 smp_irq_stat_cpu(unsigned int cpu)
 
 static DEFINE_PER_CPU(struct clock_event_device, percpu_clockevent);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #if defined(CONFIG_ARCH_ARMADA_XP) && defined(CONFIG_PERF_EVENTS)
 void show_local_pmu_irqs(struct seq_file *p, int prec)
 {
@@ -480,7 +480,7 @@ void handle_IPI(int ipinr, struct pt_regs *regs)
 		__inc_irq_stat(cpu, ipi_irqs[ipinr - IPI_TIMER]);
 
 	switch (ipinr) {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	case IPI_WAKE:
 		break;
 #endif

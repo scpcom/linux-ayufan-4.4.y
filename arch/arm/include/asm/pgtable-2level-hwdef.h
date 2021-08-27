@@ -42,8 +42,8 @@
 #define PTE_CACHEABLE		(_AT(pteval_t, 1) << 3)
 
 #if (defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_64K_PAGES)) ||  \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT))
+     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT))
 #define PTE_EXT_XN		(_AT(pteval_t, 1) << 15)         
 #else
 #define PTE_EXT_XN		(_AT(pteval_t, 1) << 0)		 
@@ -56,8 +56,8 @@
 #define PTE_EXT_AP_URO_SRW	(PTE_EXT_AP1)
 #define PTE_EXT_AP_URW_SRW	(PTE_EXT_AP1|PTE_EXT_AP0)
 #if (defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_64K_PAGES)) || \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
-     (defined(MY_DEF_HERE) && defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT))
+     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT))
 #define PTE_EXT_TEX(x)         (_AT(pteval_t, (x)) << 12)      
 #else
 #define PTE_EXT_TEX(x)		(_AT(pteval_t, (x)) << 6)	 

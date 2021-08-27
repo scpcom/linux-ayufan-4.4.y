@@ -212,7 +212,7 @@ enum {
 
 	ATA_PFLAG_PIO32		= (1 << 20),   
 	ATA_PFLAG_PIO32CHANGE	= (1 << 21),   
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LIBATA_JMB_BEHAVIOR
 	ATA_PFLAG_SYNC_SCSI_DEVICE = (1 << 22),
 #endif
 #ifdef MY_ABC_HERE
@@ -865,7 +865,7 @@ struct ata_port {
 #ifdef MY_ABC_HERE
 	struct completion       synoHotplugWait;
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_PM_LINK_RETRY
 	u8 isFirstAttach;
 #endif
 #ifdef MY_ABC_HERE
@@ -950,7 +950,7 @@ struct ata_port_operations {
 	ssize_t (*sw_activity_show)(struct ata_device *dev, char *buf);
 	ssize_t (*sw_activity_store)(struct ata_device *dev,
 				     enum sw_activity val);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	ssize_t (*transmit_led_message)(struct ata_port *ap, u32 state,
 					ssize_t size);
 #endif

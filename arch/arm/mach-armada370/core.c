@@ -375,7 +375,7 @@ static struct platform_device aurora_uart0 = {
 	.num_resources		= ARRAY_SIZE(aurora_uart0_resources),
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
  
 static struct plat_serial8250_port aurora_uart1_data[] = {
 	{
@@ -419,7 +419,7 @@ void __init serial_initialize(void)
 {
 	aurora_uart0_data[0].uartclk = mvBoardTclkGet();
 	platform_device_register(&aurora_uart0);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 	aurora_uart1_data[0].uartclk = mvBoardTclkGet();
 	platform_device_register(&aurora_uart1);
 #endif
@@ -1091,7 +1091,7 @@ static void cpu_fabric_common_init(void)
 #endif
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 #ifdef MY_ABC_HERE
 extern void syno_mv_net_shutdown();
 #endif
@@ -1221,7 +1221,7 @@ static void __init axp_db_init(void)
 	eth_init();
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
 	synology_gpio_init();

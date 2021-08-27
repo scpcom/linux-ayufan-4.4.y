@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/delay.h>
@@ -238,7 +235,7 @@ out:
 
 static int l2_wt_override = 0;
 #if defined(RANGE_OP) || \
-      (defined(MY_DEF_HERE) && defined(CONFIG_AURORA_L2_OUTER))
+      (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_AURORA_L2_OUTER))
 static DEFINE_SPINLOCK(smp_l2cache_lock);
 #endif
  
@@ -484,13 +481,13 @@ void __init aurora_l2_lockdown(u32 cpuId, u32 lock_mask)
 	writel(lock_mask, auroraL2_base+L2_LOCKDOWN_IO_BRG);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 static u32 l2_ways = 0xffffffff;  
 #endif
 
 void auroraL2_inv_all(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	writel(l2_ways, auroraL2_base+L2_INVAL_WAY_REG);
 #else
 	u32 u   = 0xffff;  
@@ -500,7 +497,7 @@ void auroraL2_inv_all(void)
 
 void auroraL2_flush_all(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #else
 	u32 u   = 0xffff;  
 #endif
@@ -508,7 +505,7 @@ void auroraL2_flush_all(void)
     	if (!auroraL2_enable)
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	writel(l2_ways, auroraL2_base + L2_FLUSH_WAY_REG);
 #else
 	writel(u, auroraL2_base + L2_FLUSH_WAY_REG);
@@ -516,7 +513,7 @@ void auroraL2_flush_all(void)
 	cache_sync();
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
  
 static int __init early_l2_ways(char *arg)
 {
@@ -611,12 +608,12 @@ int __init aurora_l2_init(void __iomem *base)
 		aux &= ~L2ACR_REPLACEMENT_MASK;
 		aux |= l2rep;
 
-#if defined(CONFIG_MV_SUPPORT_L2_DEPOSIT) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_MV_SUPPORT_L2_DEPOSIT) && !defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		aux &= ~L2ACR_FORCE_WRITE_POLICY_MASK;
 		aux |= L2ACR_FORCE_WRITE_BACK_POLICY;
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		aux &= ~L2ACR_FORCE_WRITE_POLICY_MASK;
 #if defined(CONFIG_AURORA_L2_WBWT_FORCE_WB) || defined(CONFIG_MV_SUPPORT_L2_DEPOSIT)
 		aux |= L2ACR_FORCE_WRITE_BACK_POLICY;

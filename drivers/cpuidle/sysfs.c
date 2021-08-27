@@ -1,13 +1,10 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/cpuidle.h>
 #include <linux/sysfs.h>
 #include <linux/slab.h>
 #include <linux/cpu.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <linux/capability.h>
 #endif
 
@@ -211,7 +208,7 @@ struct cpuidle_state_attr {
 	struct attribute attr;
 	ssize_t (*show)(struct cpuidle_state *, \
 					struct cpuidle_state_usage *, char *);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	ssize_t (*store)(struct cpuidle_state *, \
 			struct cpuidle_state_usage *, const char *, size_t);
 #else
@@ -221,7 +218,7 @@ struct cpuidle_state_attr {
 
 #define define_one_state_ro(_name, show) \
 static struct cpuidle_state_attr attr_##_name = __ATTR(_name, 0444, show, NULL)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define define_one_state_rw(_name, show, store) \
 static struct cpuidle_state_attr attr_##_name = __ATTR(_name, 0644, show, store)
 #endif
@@ -232,7 +229,7 @@ static ssize_t show_state_##_name(struct cpuidle_state *state, \
 { \
 	return sprintf(buf, "%u\n", state->_name);\
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define define_store_state_ull_function(_name) \
 static ssize_t store_state_##_name(struct cpuidle_state *state, \
 		struct cpuidle_state_usage *state_usage, \
@@ -275,7 +272,7 @@ define_show_state_ull_function(usage)
 define_show_state_ull_function(time)
 define_show_state_str_function(name)
 define_show_state_str_function(desc)
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 define_show_state_ull_function(disable)
 define_store_state_ull_function(disable)
 #endif
@@ -286,7 +283,7 @@ define_one_state_ro(latency, show_state_exit_latency);
 define_one_state_ro(power, show_state_power_usage);
 define_one_state_ro(usage, show_state_usage);
 define_one_state_ro(time, show_state_time);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 define_one_state_rw(disable, show_state_disable, store_state_disable);
 #endif
 
@@ -297,7 +294,7 @@ static struct attribute *cpuidle_state_default_attrs[] = {
 	&attr_power.attr,
 	&attr_usage.attr,
 	&attr_time.attr,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	&attr_disable.attr,
 #endif
 	NULL
@@ -321,7 +318,7 @@ static ssize_t cpuidle_state_show(struct kobject * kobj,
 	return ret;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static ssize_t cpuidle_state_store(struct kobject *kobj,
 	struct attribute *attr, const char *buf, size_t size)
 {
@@ -338,7 +335,7 @@ static ssize_t cpuidle_state_store(struct kobject *kobj,
 #endif
 static const struct sysfs_ops cpuidle_state_sysfs_ops = {
 	.show = cpuidle_state_show,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	.store = cpuidle_state_store,
 #endif
 };

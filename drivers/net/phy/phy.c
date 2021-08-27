@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/string.h>
@@ -24,7 +21,7 @@
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <asm/uaccess.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
 #include <linux/synobios.h>
 #endif
 
@@ -544,7 +541,7 @@ void phy_state_machine(struct work_struct *work)
 			container_of(dwork, struct phy_device, state_queue);
 	int needs_aneg = 0;
 	int err = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
 	struct rtnl_link_stats64 temp;
 	const struct rtnl_link_stats64 *stats = NULL;
 	int reg_val = 0;
@@ -656,7 +653,7 @@ void phy_state_machine(struct work_struct *work)
 			if (PHY_POLL == phydev->irq)
 				phydev->state = PHY_CHANGELINK;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
 			if (syno_is_hw_version(HW_DS1515) || syno_is_hw_version(HW_DS715) || syno_is_hw_version(HW_DS215p) || syno_is_hw_version(HW_DS416)) {
 				if (0 == phydev->is_phyerr_reset) {
 					stats = dev_get_stats(phydev->attached_dev, &temp);

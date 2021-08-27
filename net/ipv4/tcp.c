@@ -900,7 +900,7 @@ void tcp_cleanup_rbuf(struct sock *sk, int copied)
 		    
 		if (icsk->icsk_ack.blocked ||
 		     
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		    tp->rcv_nxt - tp->rcv_wup > (icsk->icsk_ack.rcv_mss * sysctl_tcp_default_delack_segs) ||
 #else
 		    tp->rcv_nxt - tp->rcv_wup > icsk->icsk_ack.rcv_mss ||
@@ -952,7 +952,7 @@ static void tcp_service_net_dma(struct sock *sk, bool wait)
 
 	if (!tp->ucopy.dma_chan)
 		return;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (!tp->ucopy.pinned)
 		return;
 #endif
@@ -1056,7 +1056,7 @@ int tcp_read_sock(struct sock *sk, read_descriptor_t *desc,
 	return copied;
 }
 EXPORT_SYMBOL(tcp_read_sock);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 extern int hwcc;
 
 int q_has_frag_list(struct sock *sk){
@@ -1070,7 +1070,7 @@ int q_has_frag_list(struct sock *sk){
 	return 0;
 }
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(MY_ABC_HERE)
 int is_enough_skb_data_for_dma(struct sk_buff *skb, int offset, int len)
 {
 	int start = skb_headlen(skb);
@@ -1162,13 +1162,13 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	{
 		int available = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 		if (skb)
 			available = TCP_SKB_CB(skb)->seq + skb->len - (*seq);
 #endif
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
+#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
 		if (msg->msg_flags & MSG_KERNSPACE) {
 			if ((available >= target) &&
 			    (len > sysctl_tcp_dma_copybreak) && !(flags & MSG_PEEK) &&
@@ -1182,13 +1182,13 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 			}
 		}
 #else
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		if ((available < target) && hwcc && (msg->msg_flags & MSG_KERNSPACE) && (flags & MSG_KERNSPACE) &&
 #else
 		if ((available < target) &&
 #endif
 		    (len > sysctl_tcp_dma_copybreak) && !(flags & MSG_PEEK) &&
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		    skb && !q_has_frag_list(sk) && !sysctl_tcp_low_latency &&
 		    net_dma_find_channel()) {
 #else
@@ -1196,7 +1196,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		    dma_find_channel(DMA_MEMCPY)) {
 #endif
 			preempt_enable_no_resched();
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			tp->ucopy.pinned =
 					!dma_pin_iovec_pages(tp, msg->msg_iov, len);
 #else
@@ -1233,7 +1233,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
         }
         else
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 		if (flags & MSG_NOCATCHSIG) {
 			if (signal_pending(current)) {
 				if (sigismember(&current->pending.signal, SIGQUIT) ||
@@ -1425,7 +1425,7 @@ do_prequeue:
 
 		if (!(flags & MSG_TRUNC)) {
 #ifdef CONFIG_NET_DMA
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
 				tp->ucopy.dma_chan = net_dma_find_channel();
 #else
@@ -1433,7 +1433,7 @@ do_prequeue:
 				tp->ucopy.dma_chan = dma_find_channel(DMA_MEMCPY);
 #endif
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(MY_ABC_HERE)
 			 
 			if (tp->ucopy.dma_chan && is_enough_skb_data_for_dma(skb, offset, used)) {
 #else
@@ -1446,7 +1446,7 @@ do_prequeue:
 
 				if (tp->ucopy.dma_cookie < 0) {
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
  
 #else
 					printk(KERN_ALERT "dma_cookie < 0\n");
@@ -1461,7 +1461,7 @@ do_prequeue:
 
 				if ((offset + used) == skb->len)
 					copied_early = 1;
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(MY_ABC_HERE)
 			 
 			} else
 #else
@@ -1474,7 +1474,7 @@ do_prequeue:
 					err = skb_copy_datagram_iovec1(skb, offset, msg->msg_iov, used);
 				else
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 				if (msg->msg_flags & MSG_KERNSPACE)
 					err = skb_copy_datagram_to_kernel_iovec(skb,
 							offset, msg->msg_iov, used);
@@ -1546,18 +1546,18 @@ skip_copy:
 	tcp_service_net_dma(sk, true);   
 	tp->ucopy.dma_chan = NULL;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (tp->ucopy.pinned) { 
 #else
 	if (tp->ucopy.pinned_list) {
 #endif
-#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
+#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
 		if(msg->msg_flags & MSG_KERNSPACE)
 			dma_unpin_kernel_iovec_pages(tp->ucopy.pinned_list);
 		else
 #endif
 		dma_unpin_iovec_pages(tp->ucopy.pinned_list);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		tp->ucopy.pinned = false;
 #else
 		tp->ucopy.pinned_list = NULL;
@@ -1792,7 +1792,7 @@ int tcp_disconnect(struct sock *sk, int flags)
 	__skb_queue_purge(&tp->out_of_order_queue);
 #ifdef CONFIG_NET_DMA
 	__skb_queue_purge(&sk->sk_async_wait_queue);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	dma_free_iovec_data(tp);
 #endif
 #endif

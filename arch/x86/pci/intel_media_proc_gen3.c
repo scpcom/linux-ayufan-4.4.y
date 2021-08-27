@@ -1,13 +1,10 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/pci.h>
 #include <linux/init.h>
 #include <asm/pci_x86.h>
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EVANSPORT_EXPORT_SYMBOL
 #include <linux/export.h>
 #endif
 

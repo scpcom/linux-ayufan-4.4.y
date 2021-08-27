@@ -1511,10 +1511,10 @@ static int journal_get_superblock(journal_t *journal)
 	/* Check superblock checksum */
 	if (!jbd2_superblock_csum_verify(journal, sb)) {
 		printk(KERN_ERR "JBD: journal checksum error\n");
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 #else
 		goto out;
-#endif /* MY_DEF_HERE */
+#endif /* SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM */
 	}
 
 #if !defined(MY_ABC_HERE)

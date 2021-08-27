@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_ECRYPTFS_H
 #define _LINUX_ECRYPTFS_H
 
@@ -48,7 +45,7 @@
 #define RFC2440_CIPHER_CAST_6 0x0b
 
 #define RFC2440_CIPHER_RSA 0x01
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #define ECRYPTFS_CIPHER_MODE_CBC 0x01
 #define ECRYPTFS_CIPHER_MODE_CTR 0x02
 #endif

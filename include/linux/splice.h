@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef SPLICE_H
 #define SPLICE_H
@@ -43,7 +40,7 @@ struct splice_pipe_desc {
 	void (*spd_release)(struct splice_pipe_desc *, unsigned int);
 };
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 struct recvfile_ctl_blk {
 	struct page *rv_page;
 	loff_t rv_pos;

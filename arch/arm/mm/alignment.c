@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/moduleparam.h>
 #include <linux/compiler.h>
@@ -830,7 +827,7 @@ do_alignment(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_ARM_LPAE
 #define ALIGNMENT_FAULT		33
 #else
@@ -850,7 +847,7 @@ static int __init alignment_init(void)
 #endif
 
 	if (cpu_is_v6_unaligned()) {
-#if (defined(MY_DEF_HERE)|| defined(MY_DEF_HERE)) && defined(CONFIG_ENABLE_UNALINGED_ACCESS_FAULT)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)|| defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ENABLE_UNALINGED_ACCESS_FAULT)
 #else
 		cr_alignment &= ~CR_A;
 		cr_no_alignment &= ~CR_A;
@@ -859,9 +856,9 @@ static int __init alignment_init(void)
 		ai_usermode = safe_usermode(ai_usermode, false);
 	}
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	hook_fault_code(ALIGNMENT_FAULT, do_alignment, SIGBUS, BUS_ADRALN,
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_ALPINE)
 	hook_fault_code(FAULT_CODE_ALIGNMENT, do_alignment, SIGBUS, BUS_ADRALN,
 #else
 	hook_fault_code(1, do_alignment, SIGBUS, BUS_ADRALN,

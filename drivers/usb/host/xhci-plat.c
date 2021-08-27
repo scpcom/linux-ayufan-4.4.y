@@ -104,7 +104,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		goto put_hcd;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	hcd->regs = ioremap_nocache(hcd->rsrc_start, hcd->rsrc_len);
 #else
 	hcd->regs = ioremap(hcd->rsrc_start, hcd->rsrc_len);
@@ -115,7 +115,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		goto release_mem_region;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #else
 #if 1
 	writel(readl(hcd->regs + 0xc200) & 0x7FFFFFFF, hcd->regs + 0xc200);

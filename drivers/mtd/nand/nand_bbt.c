@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/slab.h>
 #include <linux/types.h>
@@ -314,7 +311,7 @@ static int scan_block_fast(struct mtd_info *mtd, struct nand_bbt_descr *bd,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_MLC_SUPPORT
  
 static int scan_block_custom(struct mtd_info *mtd, struct nand_bbt_descr *bd,
@@ -394,7 +391,7 @@ static int create_bbt(struct mtd_info *mtd, uint8_t *buf,
 		int ret;
 
 		BUG_ON(bd->options & NAND_BBT_NO_OOB);
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_MLC_SUPPORT
 
 		if (bd->options & NAND_BBT_SCANMVCUSTOM)

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "mvCommon.h"
 #include "mvOs.h"
@@ -158,7 +155,7 @@ MV_STATUS mvCesaIfAction(MV_CESA_COMMAND *pCmd)
 
 	return status;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 EXPORT_SYMBOL(mvCesaIfAction);
 #endif
 
@@ -250,7 +247,7 @@ out:
 
 	return status;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 EXPORT_SYMBOL(mvCesaIfReadyGet);
 #endif
 
@@ -317,7 +314,7 @@ MV_STATUS mvCesaIfFinish(void)
 
 	return mvCesaFinish();
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 EXPORT_SYMBOL(mvCesaIfFinish);
 #endif
 
@@ -325,7 +322,7 @@ MV_STATUS mvCesaIfSessionOpen(MV_CESA_OPEN_SESSION *pSession, short *pSid)
 {
 	return mvCesaSessionOpen(pSession, pSid);
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 EXPORT_SYMBOL(mvCesaIfSessionOpen);
 #endif
 
@@ -333,7 +330,7 @@ MV_STATUS mvCesaIfSessionClose(short sid)
 {
 	return mvCesaSessionClose(sid);
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 EXPORT_SYMBOL(mvCesaIfSessionClose);
 #endif
 

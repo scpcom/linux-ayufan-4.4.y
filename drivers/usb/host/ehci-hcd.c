@@ -179,7 +179,7 @@ static void tdi_reset (struct ehci_hcd *ehci)
 	reg_ptr = (u32 __iomem *)(((u8 __iomem *)ehci->regs) + USBMODE);
 	tmp = ehci_readl(ehci, reg_ptr);
 	tmp |= USBMODE_CM_HC;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	 
 	tmp |= (1 << 4);
 #endif
@@ -976,7 +976,7 @@ MODULE_LICENSE ("GPL");
 #define	PLATFORM_DRIVER		ehci_orion_driver
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_PLAT_ARMADA
 #include "ehci_marvell.c"
 #define	PLATFORM_DRIVER		ehci_marvell_driver

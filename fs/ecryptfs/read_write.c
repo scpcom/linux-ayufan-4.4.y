@@ -83,7 +83,7 @@ int ecryptfs_write(struct inode *ecryptfs_inode, char *data, loff_t offset,
 							 ecryptfs_page_idx);
 		if (IS_ERR(ecryptfs_page)) {
 			rc = PTR_ERR(ecryptfs_page);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			printk(KERN_ERR "%s: Error getting page at "
 			       "index [%lld] from eCryptfs inode "
 			       "mapping; rc = [%d]\n", __func__,

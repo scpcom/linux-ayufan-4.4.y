@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/types.h>
@@ -135,7 +132,7 @@ static int physmap_flash_probe(struct platform_device *dev)
 
 		simple_map_init(&info->map[i]);
 
-#if defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		 
 		iounmap(info->map[i].virt);
 		return 0;
@@ -209,7 +206,7 @@ static struct physmap_flash_data physmap_flash_data = {
 	.width		= CONFIG_MTD_PHYSMAP_BANKWIDTH,
 };
 
-#if defined(CONFIG_SYNO_MPC85XX_COMMON)  || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_MPC85XX_COMMON)  || defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 struct resource physmap_flash_resource = {
 #else
 static struct resource physmap_flash_resource = {

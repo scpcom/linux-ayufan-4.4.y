@@ -31,7 +31,7 @@
 #include <linux/atomic.h>
 
 #include <linux/nsproxy.h>
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <linux/mv_nfp.h>
 #endif
 #include <net/net_namespace.h>

@@ -527,12 +527,12 @@ static int do_one_pass(journal_t *journal,
 			if (descr_csum_size > 0 &&
 			    !jbd2_descr_block_csum_verify(journal,
 							  bh->b_data)) {
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 				printk(KERN_ERR "JBD: Invalid checksum of desc block\n");
 #else
 				err = -EIO;
 				goto failed;
-#endif /* MY_DEF_HERE */
+#endif /* SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM */
 			}
 
 			/* If it is a valid descriptor block, replay it
@@ -854,11 +854,11 @@ static int scan_revoke_records(journal_t *journal, struct buffer_head *bh,
 	max = be32_to_cpu(header->r_count);
 
 	if (!jbd2_revoke_block_csum_verify(journal, header))
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
 		printk(KERN_ERR "JBD: Invalid checksum of revoke block\n");
 #else
 		return -EINVAL;
-#endif /* MY_DEF_HERE */
+#endif /* SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM */
 
 	if (JBD2_HAS_INCOMPAT_FEATURE(journal, JBD2_FEATURE_INCOMPAT_64BIT))
 		record_len = 8;

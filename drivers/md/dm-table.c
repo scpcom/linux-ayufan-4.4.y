@@ -601,7 +601,7 @@ static int validate_hardware_logical_block_alignment(struct dm_table *table,
 	while (i < dm_table_get_num_targets(table)) {
 		ti = dm_table_get_target(table, i++);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		blk_set_stacking_limits(&ti_limits);
 #else
 		blk_set_default_limits(&ti_limits);
@@ -1070,14 +1070,14 @@ int dm_calculate_queue_limits(struct dm_table *table,
 	struct queue_limits ti_limits;
 	unsigned i = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	blk_set_stacking_limits(limits);
 #else
 	blk_set_default_limits(limits);
 #endif
 
 	while (i < dm_table_get_num_targets(table)) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		blk_set_stacking_limits(&ti_limits);
 #else
 		blk_set_default_limits(&ti_limits);

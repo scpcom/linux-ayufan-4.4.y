@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -13,7 +10,7 @@
 #include <mach/hardware.h>
 #include <plat/orion_nand.h>
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_RS_ECC
 
 static struct nand_ecclayout mv_nand_rs_oobinfo = {
@@ -510,7 +507,7 @@ static int __init orion_nand_probe(struct platform_device *pdev)
 	nc->read_buf = orion_nand_read_buf;
 	nc->ecc.mode = NAND_ECC_SOFT;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_RS_ECC
 	printk("Using %s ECC for NAND device\n",
 		(ecc_mode == MV_NAND_ECC_4BIT ?

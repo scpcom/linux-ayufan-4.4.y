@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef __INCmvBoardEnvSpech
 #define __INCmvBoardEnvSpech
@@ -32,7 +29,7 @@
 #define DB_784MP_GP_ID				(RD_78460_SERVER_REV2_ID + 1)
 #define RD_78460_CUSTOMER_ID		(DB_784MP_GP_ID+ 1)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH
 #define SYNO_AXP_4BAY_2BAY		(0xf + 1)
 #define SYNO_AXP_2BAY			(SYNO_AXP_4BAY_2BAY + 1)
 #define SYNO_AXP_4BAY_RACK		(SYNO_AXP_2BAY + 1)

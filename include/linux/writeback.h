@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef WRITEBACK_H
 #define WRITEBACK_H
@@ -133,7 +130,7 @@ void __bdi_update_bandwidth(struct backing_dev_info *bdi,
 void page_writeback_init(void);
 void balance_dirty_pages_ratelimited(struct address_space *mapping);
 
-#ifdef MY_DEF_HERE  
+#ifdef CONFIG_SYNO_ARMADA_V2  
 void balance_dirty_pages_ratelimited_nr(struct address_space *mapping,
 					unsigned long nr_pages_dirtied);
 

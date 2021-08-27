@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "logfs.h"
 #include <linux/slab.h>
@@ -278,7 +275,7 @@ static struct dentry *logfs_lookup(struct inode *dir, struct dentry *dentry,
 
 	inode = logfs_iget(dir->i_sb, ino);
 	if (IS_ERR(inode))
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		printk(KERN_ERR"LogFS: Cannot read inode #%llx for dentry (%lx, %llx)n",
 				ino, dir->i_ino, (unsigned long long)index);
 #else

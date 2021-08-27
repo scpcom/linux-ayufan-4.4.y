@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/mm.h>
 #include <linux/slab.h>
@@ -40,7 +37,7 @@ int sysctl_tcp_thin_dupack __read_mostly;
 
 int sysctl_tcp_moderate_rcvbuf __read_mostly = 1;
 int sysctl_tcp_abc __read_mostly;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 int sysctl_tcp_default_delack_segs __read_mostly = 1;
 #endif
 
@@ -3938,7 +3935,7 @@ static void __tcp_ack_snd_check(struct sock *sk, int ofo_possible)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (((tp->rcv_nxt - tp->rcv_wup) > (inet_csk(sk)->icsk_ack.rcv_mss * sysctl_tcp_default_delack_segs) &&
 #else
 	if (((tp->rcv_nxt - tp->rcv_wup) > inet_csk(sk)->icsk_ack.rcv_mss &&
@@ -4081,7 +4078,7 @@ static int tcp_dma_try_early_copy(struct sock *sk, struct sk_buff *skb,
 	if (tp->ucopy.wakeup)
 		return 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
 		tp->ucopy.dma_chan = net_dma_find_channel();
 #else
@@ -4218,7 +4215,7 @@ int tcp_rcv_established(struct sock *sk, struct sk_buff *skb,
 
 			if (tp->copied_seq == tp->rcv_nxt &&
 			    len - tcp_header_len <= tp->ucopy.len) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE)
  
 #elif defined(CONFIG_NET_DMA)
 				if (tp->ucopy.task == current &&

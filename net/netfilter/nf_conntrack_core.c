@@ -24,7 +24,7 @@
 #include <linux/nsproxy.h>
 #include <linux/rculist_nulls.h>
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 #include <linux/mv_nfp.h>
 #endif
@@ -42,7 +42,7 @@
 #include <net/netfilter/nf_conntrack_timestamp.h>
 #include <net/netfilter/nf_nat.h>
 #include <net/netfilter/nf_nat_core.h>
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <linux/netfilter/ipt_NFP.h>
 #endif
 
@@ -201,7 +201,7 @@ destroy_conntrack(struct nf_conntrack *nfct)
 	 
 	nf_ct_remove_expectations(ct);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
 	if (ct->layer7.app_proto)
 		kfree(ct->layer7.app_proto);
@@ -295,7 +295,7 @@ static void death_by_timeout(unsigned long ul_conntrack)
 	struct nf_conntrack_l4proto *l4proto;
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	struct nf_conntrack_tuple *t0 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
 	struct nf_conntrack_tuple *t1 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
@@ -757,7 +757,7 @@ __nf_conntrack_alloc(struct net *net, u16 zone,
 	}
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.nfp = false;
 	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.ifindex = -1;
@@ -795,7 +795,7 @@ void nf_conntrack_free(struct nf_conn *ct)
 {
 	struct net *net = nf_ct_net(ct);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.info)
 		kfree(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.info);
@@ -1517,7 +1517,7 @@ void nf_ct_untracked_status_or(unsigned long bits)
 }
 EXPORT_SYMBOL_GPL(nf_ct_untracked_status_or);
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void nfp_ct_sync(int family)
 {

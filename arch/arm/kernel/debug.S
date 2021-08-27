@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/kernel/debug.S
  *
@@ -13,7 +10,7 @@
  *  32-bit debugging code
  */
 #include <linux/linkage.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #include <asm/assembler.h>
 #endif
 
@@ -25,7 +22,7 @@
  * references to these in a production kernel!
  */
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #if !defined(CONFIG_DEBUG_SEMIHOSTING)
 #include CONFIG_DEBUG_LL_INCLUDE
 #endif
@@ -167,7 +164,7 @@ hexbuf:		.space 16
 
 		.ltorg
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 #ifndef CONFIG_DEBUG_SEMIHOSTING
 ENTRY(printascii)
 		addruart_current r3, r1, r2
@@ -227,7 +224,7 @@ ENTRY(debug_ll_addr)
 ENDPROC(debug_ll_addr)
 
 #endif
-#else // MY_DEF_HERE
+#else // CONFIG_SYNO_ALPINE
 ENTRY(printascii)
 		addruart_current r3, r1, r2
 		b	2f
@@ -250,4 +247,4 @@ ENTRY(printch)
 		mov	r0, #0
 		b	1b
 ENDPROC(printch)
-#endif // MY_DEF_HERE
+#endif // CONFIG_SYNO_ALPINE

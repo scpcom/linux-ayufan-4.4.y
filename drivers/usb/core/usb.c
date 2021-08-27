@@ -38,7 +38,7 @@ MODULE_PARM_DESC(autosuspend, "default autosuspend delay");
 #define usb_autosuspend_delay		0
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 void (*gpfn_ehci_marvell_hs_detect_wa_done)(struct usb_device *) = NULL;
 EXPORT_SYMBOL(gpfn_ehci_marvell_hs_detect_wa_done);
 #endif

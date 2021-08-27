@@ -227,7 +227,7 @@ static inline struct rt6_info *ip6_dst_alloc(struct dst_ops *ops,
 		memset(&rt->rt6i_table, 0,
 			sizeof(*rt) - sizeof(struct dst_entry));
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	rt->nfp = false;
 #endif  
@@ -788,7 +788,7 @@ restart:
 
 	dst_hold(&rt->dst);
 	if (nrt) {
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 			if ((rt->rt6i_flags & RTF_CACHE)) {
 				ipv6_addr_copy(&rt->rt6i_src.addr, &fl6->saddr);

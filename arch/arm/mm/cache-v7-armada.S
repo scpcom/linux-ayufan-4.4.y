@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/mm/cache-v7.S
  *
@@ -20,7 +17,7 @@
 
 #include "proc-macros.S"
 #include "sheeva_pj4b-macros.S"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #include <asm/page.h>
 #endif
 /*
@@ -38,7 +35,7 @@ ENTRY(v7_flush_icache_all)
 	mov	pc, lr
 ENDPROC(v7_flush_icache_all)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
  /*
  *     v7_flush_dcache_louis()
  *
@@ -156,7 +153,7 @@ ENTRY(v7_flush_dcache_all)
 	mov	r3, r3, lsr #23			@ left align loc bit field
 	beq	finished			@ if loc is 0, then no need to clean
 	mov	r10, #0				@ start clean at cache level 0
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 flush_levels:
 #else
 loop1:
@@ -182,13 +179,13 @@ loop1:
 	clz	r5, r4				@ find bit position of way size increment
 	ldr	r7, =0x7fff
 	ands	r7, r7, r1, lsr #13		@ extract max number of the index size
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 loop1:
 #else
 loop2:
 #endif
 	mov	r9, r4				@ create working copy of max way size
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 loop2:
 #else
 loop3:
@@ -201,13 +198,13 @@ loop3:
  THUMB(	orr	r11, r11, r6		)	@ factor index number into r11
 	mcr	p15, 0, r11, c7, c14, 2		@ clean & invalidate by set/way
 	subs	r9, r9, #1			@ decrement the way
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	bge	loop2
 #else
 	bge	loop3
 #endif
 	subs	r7, r7, #1			@ decrement the index
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	bge	loop1
 #else
 	bge	loop2
@@ -215,7 +212,7 @@ loop3:
 skip:
 	add	r10, r10, #2			@ increment cache number
 	cmp	r3, r10
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	bgt	flush_levels
 #else
 	bgt	loop1
@@ -251,7 +248,7 @@ ENTRY(v7_flush_kern_cache_all)
 	mov	pc, lr
 ENDPROC(v7_flush_kern_cache_all)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
  /*
  *     v7_flush_kern_cache_louis(void)
  *
@@ -351,8 +348,8 @@ ENTRY(v7_coherent_user_range)
 	bic	r12, r0, r3
 2:
  USER(	mcr	p15, 0, r12, c7, c5, 1	)	@ invalidate I line
-#if (defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4754) && defined(MY_DEF_HERE)) || \
-     (defined( CONFIG_SHEEVA_ERRATA_ARM_CPU_4659) && defined(MY_DEF_HERE))
+#if (defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4754) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)) || \
+     (defined( CONFIG_SHEEVA_ERRATA_ARM_CPU_4659) && defined(CONFIG_SYNO_ARMADA_ARCH))
 	isb
 #endif
 	add	r12, r12, r2
@@ -371,11 +368,11 @@ ENTRY(v7_coherent_user_range)
  * isn't mapped, just try the next page.
  */
 9001:
-#if defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(MY_DEF_HERE)
+#if defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	mov	r12, r12, lsr #PAGE_SHIFT
 	mov	r12, r12, lsl #PAGE_SHIFT
 	add	r12, r12, #PAGE_SZ
-#elif defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(MY_DEF_HERE)
+#elif defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_SYNO_ARMADA_ARCH)
 	mov	r12, r12, lsr #16
 	mov	r12, r12, lsl #16
 	add	r12, r12, #0x10000

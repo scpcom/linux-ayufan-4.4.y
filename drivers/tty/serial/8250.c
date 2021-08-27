@@ -454,7 +454,7 @@ static void au_serial_out(struct uart_port *p, int offset, int value)
 	__raw_writel(value, p->membase + offset);
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(MY_ABC_HERE)
  
 static inline void dwapb_save_out_value(struct uart_port *p, int offset,
                                        int value)
@@ -476,7 +476,7 @@ static void dwapb_serial_out(struct uart_port *p, int offset, int value)
 {
        int save_offset = offset;
        offset = map_8250_out_reg(p, offset) << p->regshift;
-#if defined(CONFIG_PLAT_ARMADA)  || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_PLAT_ARMADA)  || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(MY_ABC_HERE)
         
        if ((((readb(p->membase + 0xC) & 0x80) &&
             ((save_offset == UART_DLL) || (save_offset == UART_DLM) ||
@@ -525,7 +525,7 @@ static void set_io_from_upio(struct uart_port *p)
 		break;
 
 	case UPIO_RM9000:
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(MY_ABC_HERE)
 		p->serial_in = mem_serial_in;
 		p->serial_out = dwapb_serial_out;
 		break;
@@ -969,7 +969,7 @@ static void autoconfig_16550a(struct uart_8250_port *up)
 			 
 			DEBUG_AUTOCONF("Xscale ");
 			up->port.type = PORT_XSCALE;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(MY_ABC_HERE)
 			up->capabilities |= UART_CAP_UUE;
 #else
 			up->capabilities |= UART_CAP_UUE | UART_CAP_RTOIE;
@@ -1535,14 +1535,14 @@ static irqreturn_t serial8250_interrupt(int irq, void *dev_id)
 	do {
 		struct uart_8250_port *up;
 		struct uart_port *port;
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(MY_ABC_HERE)
 		unsigned int iir;
 #endif
 
 		up = list_entry(l, struct uart_8250_port, list);
 		port = &up->port;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(MY_ABC_HERE)
 		iir = serial_in(up, UART_IIR);
 		if (!(iir & UART_IIR_NO_INT)) {
 			serial8250_handle_port(up);
@@ -1555,7 +1555,7 @@ static irqreturn_t serial8250_interrupt(int irq, void *dev_id)
                          
                         unsigned int status;
                         status = *(volatile u32 *)up->port.private_data;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
 			 
 #else			
                         serial_out(up, UART_LCR, up->lcr);
@@ -2648,7 +2648,7 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 static int __init serial8250_console_setup(struct console *co, char *options)
 {
 	struct uart_port *port;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_TTY_CONSOLE_OUTPUT
 	int baud = 115200;
 #else
 	int baud = 9600;

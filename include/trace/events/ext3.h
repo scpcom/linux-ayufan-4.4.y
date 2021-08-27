@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM ext3
 
@@ -252,7 +249,7 @@ DECLARE_EVENT_CLASS(ext3__page_op,
 		__entry->dev	= page->mapping->host->i_sb->s_dev;
 	),
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	TP_printk("dev %d,%d ino %lu page_index %llu",
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  (unsigned long) __entry->ino, (unsigned long long)__entry->index)
@@ -318,14 +315,14 @@ TRACE_EVENT(ext3_invalidatepage,
 		__entry->dev	= page->mapping->host->i_sb->s_dev;
 	),
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	TP_printk("dev %d,%d ino %lu page_index %llu offset %lu",
 #else
 	TP_printk("dev %d,%d ino %lu page_index %lu offset %lu",
 #endif
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  (unsigned long) __entry->ino,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		  (unsigned long long)__entry->index, __entry->offset)
 #else
 		  __entry->index, __entry->offset)

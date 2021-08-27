@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include "xfs.h"
 #include "xfs_fs.h"
@@ -390,7 +387,7 @@ xfs_file_splice_write(
 	return ret;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 STATIC ssize_t
 xfs_file_splice_from_socket(
        struct file     *file,
@@ -940,7 +937,7 @@ const struct file_operations xfs_file_operations = {
 	.aio_write	= xfs_file_aio_write,
 	.splice_read	= xfs_file_splice_read,
 	.splice_write	= xfs_file_splice_write,
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	.splice_from_socket = xfs_file_splice_from_socket,
 #endif
 	.unlocked_ioctl	= xfs_file_ioctl,

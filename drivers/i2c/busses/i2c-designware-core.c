@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/export.h>
 #include <linux/clk.h>
@@ -295,7 +292,7 @@ i2c_dw_xfer_msg(struct dw_i2c_dev *dev)
 		rx_limit = dev->rx_fifo_depth - dw_readl(dev, DW_IC_RXFLR);
 
 		while (buf_len > 0 && tx_limit > 0 && rx_limit > 0) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 			u32 cmd = 0;
 
 			if (dev->msg_write_idx == dev->msgs_num - 1 &&
@@ -303,14 +300,14 @@ i2c_dw_xfer_msg(struct dw_i2c_dev *dev)
 				cmd |= BIT(9);
 #endif
 			if (msgs[dev->msg_write_idx].flags & I2C_M_RD) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 				dw_writel(dev, cmd | 0x100, DW_IC_DATA_CMD);
 #else
 				dw_writel(dev, 0x100, DW_IC_DATA_CMD);
 #endif
 				rx_limit--;
 			} else
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 				dw_writel(dev, cmd | *buf++, DW_IC_DATA_CMD);
 #else
 				dw_writel(dev, *buf++, DW_IC_DATA_CMD);

@@ -156,7 +156,7 @@ int gSynoHasDynModule = 0;
 EXPORT_SYMBOL(gSynoHasDynModule);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FLASH_MEMORY_SIZE
 long gSynoFlashMemorySize = 0;
 EXPORT_SYMBOL(gSynoFlashMemorySize);
 #endif
@@ -186,7 +186,7 @@ int giVenderFormatVersion = 1;
 EXPORT_SYMBOL(giVenderFormatVersion);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SWITCH_NET_DEVICE_NAME
 unsigned int gSwitchDev = 0;
 char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 EXPORT_SYMBOL(gSwitchDev);
@@ -205,7 +205,7 @@ char gszCustomSerialNum[32];
 EXPORT_SYMBOL(gszCustomSerialNum);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ESATA_7042
 long g_esata_7042 = -1;
 EXPORT_SYMBOL(g_esata_7042);
 #endif
@@ -239,7 +239,7 @@ int gSynoFactoryUSB3Disable = 0;
 EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 int gSynoDualHead = 0;
 EXPORT_SYMBOL(gSynoDualHead);
 unsigned char gszSynoDualHeadPrivateIP[9][32];
@@ -248,7 +248,7 @@ static int iSynoMacIFCount = 9;
 static int iSynoDualheadIPValueLen = 32;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 int gSynoSASWriteConflictPanic = 0;
 EXPORT_SYMBOL(gSynoSASWriteConflictPanic);
 #endif
@@ -1282,7 +1282,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 	{
 		.procname       = "syno_dual_head_private_ip",
 		.data           = &gszSynoDualHeadPrivateIP,
@@ -1391,7 +1391,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FLASH_MEMORY_SIZE
 	{
 		.procname	= "syno_flash_mem_size",
 		.data		= &gSynoFlashMemorySize,
@@ -3158,7 +3158,7 @@ int proc_do_large_bitmap(struct ctl_table *table, int write,
 	}
 }
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_DUAL_HEAD)
  
 int SynoProcDoStringVec(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp, loff_t *ppos)
@@ -3172,7 +3172,7 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 	char stBuf[512] = {'\0'};
 	char *pBuf = stBuf;
 	int iArrayIndex = 0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 	int iOffset = 0;
 	char *p = NULL;
 	char c = -1;
@@ -3185,7 +3185,7 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 
 	if (write) {
 		 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 		for (iArrayIndex = 0; iArrayIndex < *pArraySize; iArrayIndex++) {
 			if (0 == c) {
 				pStr = ((char *)table->data) + iArrayIndex * (*pEntrySize);
@@ -3304,7 +3304,7 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
     return -ENOSYS;
 }
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_DUAL_HEAD)
 int SynoProcDoStringVec(struct ctl_table *table, int write,
 			void __user *buffer, size_t *lenp, loff_t *ppos)
 {

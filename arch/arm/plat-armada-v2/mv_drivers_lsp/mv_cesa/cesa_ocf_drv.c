@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/interrupt.h>
 #include <linux/module.h>
@@ -85,7 +82,7 @@ struct cesa_ocf_process {
 
 static int32_t			cesa_ocf_id 		= -1;
 static struct cesa_ocf_data 	**cesa_ocf_sessions = NULL;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
 static DEFINE_SPINLOCK(syno_cesa_lock);
 #endif
 static u_int32_t		cesa_ocf_sesnum = 0;
@@ -730,7 +727,7 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
                 return EINVAL;
         }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
 	spin_lock_irqsave(&syno_cesa_lock, flags);
 #endif
 	if (cesa_ocf_sessions) {
@@ -774,7 +771,7 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	cesa_ocf_sessions[i] = (struct cesa_ocf_data *) kmalloc(sizeof(struct cesa_ocf_data),
 			SLAB_ATOMIC);
 	if (cesa_ocf_sessions[i] == NULL) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
 		spin_unlock_irqrestore(&syno_cesa_lock, flags);
 		 
 #endif
@@ -786,7 +783,7 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	dprintk("%s,%d: new session %d \n", __FILE__, __LINE__, i);
 	
         *sid = i;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
 	spin_unlock_irqrestore(&syno_cesa_lock, flags);
 #endif
         cesa_ocf_cur_ses = cesa_ocf_sessions[i];
@@ -1027,11 +1024,11 @@ cesa_ocf_freesession(device_t dev, u_int64_t tid)
 	}
 
       	kfree(cesa_ocf_cur_ses);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
 	spin_lock_irqsave(&syno_cesa_lock, flags);
 #endif
 	cesa_ocf_sessions[sid] = NULL;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
 	spin_unlock_irqrestore(&syno_cesa_lock, flags);
 #endif
 

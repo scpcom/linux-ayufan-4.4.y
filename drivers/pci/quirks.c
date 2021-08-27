@@ -439,7 +439,7 @@ static u32 gpiobase = 0;
 static u32 *writable_pin = NULL;
 static u32 SynoGpioCount = 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_CEDARVIEW)
 static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 29, 30, 31, 32, 33, 34, 35, 36, 37, 42, 43, 45, 46, 47, 49, 55, 57};
 #else
 static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 46, 47, 49, 55, 57};
@@ -2192,7 +2192,7 @@ static void __devinit quirk_msi_intx_disable_ati_bug(struct pci_dev *dev)
 		dev->dev_flags |= PCI_DEV_FLAGS_MSI_INTX_DISABLE_BUG;
 	pci_dev_put(p);
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_ANNAPURNA_LABS,
 			PCI_DEVICE_ID_AL_ETH,
 			quirk_msi_intx_disable_bug);
@@ -2628,7 +2628,7 @@ extern struct pci_fixup __end_pci_fixups_resume_early[];
 extern struct pci_fixup __start_pci_fixups_suspend[];
 extern struct pci_fixup __end_pci_fixups_suspend[];
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 static bool pci_apply_fixup_final_quirks;
 #endif  
 
@@ -2648,7 +2648,7 @@ void pci_fixup_device(enum pci_fixup_pass pass, struct pci_dev *dev)
 		break;
 
 	case pci_fixup_final:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 		if (!pci_apply_fixup_final_quirks)
 			return;
 #endif  
@@ -2694,7 +2694,7 @@ static int __init pci_apply_final_quirks(void)
 		printk(KERN_DEBUG "PCI: CLS %u bytes\n",
 		       pci_cache_line_size << 2);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
 	pci_apply_fixup_final_quirks = true;
 #endif  
 	for_each_pci_dev(dev) {
