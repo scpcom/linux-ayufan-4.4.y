@@ -34,12 +34,21 @@
 
 extern int ss_stats[128];
 #endif
+
+#ifdef MY_ABC_HERE
+#include <linux/ata.h>
+#endif  
+
 #define SG_MEMPOOL_NR		ARRAY_SIZE(scsi_sg_pools)
 #define SG_MEMPOOL_SIZE		2
 
 #ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
 #endif
+
+#ifdef MY_ABC_HERE
+#define SYNO_SMART_CMD_TIMEOUT 30 * HZ
+#endif  
 
 struct scsi_host_sg_pool {
 	size_t		size;
@@ -152,7 +161,17 @@ int scsi_execute(struct scsi_device *sdev, const unsigned char *cmd,
 	req->sense = sense;
 	req->sense_len = 0;
 	req->retries = retries;
+#ifdef MY_ABC_HERE
+	req->timeout = ((sdev->scmd_timeout_sec*HZ) > timeout ? (sdev->scmd_timeout_sec*HZ) : timeout);
+	 
+	if ((ATA_CMD_SMART == req->cmd[0] ||
+				(ATA_16 == req->cmd[0] && ATA_CMD_SMART == req->cmd[14])) &&
+			SYNO_SMART_CMD_TIMEOUT > req->timeout) {
+		req->timeout = SYNO_SMART_CMD_TIMEOUT;
+	}
+#else  
 	req->timeout = timeout;
+#endif  
 	req->cmd_type = REQ_TYPE_BLOCK_PC;
 	req->cmd_flags |= flags | REQ_QUIET | REQ_PREEMPT;
 

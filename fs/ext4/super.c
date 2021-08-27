@@ -2687,7 +2687,9 @@ static int ext4_feature_set_ok(struct super_block *sb, int readonly)
 	if (EXT4_HAS_RO_COMPAT_FEATURE(sb, ~EXT4_FEATURE_RO_COMPAT_SUPP)) {
 #ifdef MY_DEF_HERE
 		if (EXT4_FEATURE_RO_COMPAT_METADATA_CSUM ==
-			(le32_to_cpu(EXT4_SB(sb)->s_es->s_feature_ro_compat) & ~EXT4_FEATURE_RO_COMPAT_SUPP)) {
+			(le32_to_cpu(EXT4_SB(sb)->s_es->s_feature_ro_compat) & ~EXT4_FEATURE_RO_COMPAT_SUPP)
+			&& is_syno_ext(sb)) {
+			 
 			ext4_msg(sb, KERN_WARNING, "ignore metadata_csum feature.");
 		} else {
 			ext4_msg(sb, KERN_ERR, "couldn't mount RDWR because of "

@@ -401,8 +401,7 @@ syno_check_smb1_nego_rsp(struct cifs_ses *ses, NEGOTIATE_RSP *pSMBr)
 	struct TCP_Server_Info *server = ses->server;
 
 	server->dialect = le16_to_cpu(pSMBr->DialectIndex);
-	server->values = smb1_values;
-	server->values.version_string = SYNO_VERSION_STRING;
+	server->vals = &smb1_values;
 	/* Check wct = 1 error case */
 	if ((pSMBr->hdr.WordCount < 13) || (server->dialect == BAD_PROT)) {
 		/* core returns wct = 1, but we do not ask for core - otherwise
@@ -477,27 +476,22 @@ syno_check_smb2_nego_rsp(struct cifs_ses *ses, struct smb2_negotiate_rsp *rsp)
 	   dialect, even though we are only requesting one at a time */
 	if (rsp->DialectRevision == cpu_to_le16(SMB20_PROT_ID)) {
 		cifs_dbg(FYI, "negotiated smb2.0 dialect\n");
-		server->values = smb20_values;
-		server->values.version_string = SYNO_VERSION_STRING;
+		server->vals = &smb20_values;
 	} else if (rsp->DialectRevision == cpu_to_le16(SMB21_PROT_ID)) {
 		cifs_dbg(FYI, "negotiated smb2.1 dialect\n");
-		server->values = smb21_values;
-		server->values.version_string = SYNO_VERSION_STRING;
+		server->vals = &smb21_values;
 #ifdef CONFIG_CRYPTO_CMAC
 	} else if (rsp->DialectRevision == cpu_to_le16(SMB30_PROT_ID)) {
 		cifs_dbg(FYI, "negotiated smb3.0 dialect\n");
-		server->values = smb30_values;
-		server->values.version_string = SYNO_VERSION_STRING;
+		server->vals = &smb30_values;
 	} else if (rsp->DialectRevision == cpu_to_le16(SMB302_PROT_ID)) {
 		cifs_dbg(FYI, "negotiated smb3.02 dialect\n");
-		server->values = smb302_values;
-		server->values.version_string = SYNO_VERSION_STRING;
+		server->vals = &smb302_values;
 #endif /* CONFIG_CRYPTO_CMAC */
 #if defined(CONFIG_CIFS_SMB311) && defined(CONFIG_CRYPTO_CMAC)
 	} else if (rsp->DialectRevision == cpu_to_le16(SMB311_PROT_ID)) {
 		cifs_dbg(FYI, "negotiated smb3.1.1 dialect\n");
-		server->values = smb311_values;
-		server->values.version_string = SYNO_VERSION_STRING;
+		server->vals = &smb311_values;
 #endif /* SMB311 && CONFIG_CRYPTO_CMAC */
 	} else if (rsp->DialectRevision == cpu_to_le16(0x02ff)) {
 		cifs_dbg(FYI, "negotiated smb2.FF dialect\n");
@@ -741,8 +735,16 @@ syno_negotiate(const unsigned int xid, struct cifs_ses *ses)
 	rc = syno_SMB2_negotiate(xid, ses);
 	/* BB we probably don't need to retry with modern servers */
 END:
-	if (rc == -EAGAIN)
+	if (rc == -EAGAIN) {
 		rc = -EHOSTDOWN;
+	}
+	if (0 != rc) {
+		//negotiate fail ==> reset need_neg
+		ses->server->maxBuf = 0;
+#ifdef CONFIG_CIFS_SMB2
+		ses->server->max_read = 0;
+#endif
+	}
 	return rc;
 }
 

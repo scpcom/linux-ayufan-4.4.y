@@ -26,6 +26,9 @@
 #include <linux/perf_event.h>
 #include <linux/audit.h>
 #include <linux/khugepaged.h>
+#ifdef MY_ABC_HERE
+#include <linux/fsnotify.h>
+#endif
 
 #include <asm/uaccess.h>
 #include <asm/cacheflush.h>
@@ -1687,6 +1690,11 @@ int do_munmap(struct mm_struct *mm, unsigned long start, size_t len)
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	if (vma->vm_file)
+		fsnotify_modify(vma->vm_file);
+#endif
+	 
 	detach_vmas_to_be_unmapped(mm, vma, prev, end);
 	unmap_region(mm, vma, prev, start, end);
 

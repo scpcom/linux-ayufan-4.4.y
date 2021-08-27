@@ -26,6 +26,9 @@
 #ifdef MY_ABC_HERE
 #include <linux/magic.h>
 #endif
+#ifdef MY_ABC_HERE
+#include <linux/ratelimit.h>
+#endif  
 #ifdef CONFIG_FS_SYNO_ACL
 #include "synoacl_int.h"
 #endif
@@ -36,6 +39,10 @@ int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n);
 int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
 u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void);
 u_int16_t *DefUpcaseTable(void);
+
+#ifdef MY_ABC_HERE
+static DEFINE_RATELIMIT_STATE(_namei_rs, (3600 * HZ), 1);
+#endif  
 
 struct utf8_table {
 	int     cmask;
@@ -787,8 +794,11 @@ int syno_fetch_mountpoint_fullpath(struct vfsmount *mnt, size_t buf_len, char *m
 	mnt_dentry_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
 	mnt_full_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
 
-	if(!mnt_dentry_path_buf || !mnt_full_path_buf)
+	if(!mnt_dentry_path_buf || !mnt_full_path_buf) {
+		if (__ratelimit(&_namei_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		goto ERR;
+	}
 
 	tmp_mnt = mnt;
 	br_read_lock(vfsmount_lock);

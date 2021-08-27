@@ -45,6 +45,10 @@
 #include "hash.h"
 #include "props.h"
 
+#ifdef MY_ABC_HERE
+#include <linux/fsnotify.h>
+#endif
+
 struct btrfs_iget_args {
 	struct btrfs_key *location;
 	struct btrfs_root *root;
@@ -7091,6 +7095,9 @@ int btrfs_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
 	ret  = btrfs_delalloc_reserve_space(inode, PAGE_CACHE_SIZE);
 	if (!ret) {
 		ret = file_update_time(vma->vm_file);
+#ifdef MY_ABC_HERE
+		fsnotify_modify(vma->vm_file);
+#endif
 		reserved = 1;
 	}
 	if (ret) {

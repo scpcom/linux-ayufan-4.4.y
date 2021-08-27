@@ -185,17 +185,18 @@ smb_send_kvec(struct TCP_Server_Info *server, struct kvec *iov, size_t n_vec,
 #ifdef MY_ABC_HERE
 		if (rc == -EAGAIN || rc == -EINTR) {
 			i++;
-			if (119 < i) {
-				cifs_dbg(VFS, "sends on sock %p stuck for 120 seconds\n",
+			if (!server->noblocksnd && (2 < i)) {
+				cifs_dbg(VFS, "sends on sock %p stuck 3 time fail with blocksend (sndtimo=5s)\n", ssocket);
+				rc = -EAGAIN;
+				break;
+			}
+			if (14 <= i) {
+				cifs_dbg(VFS, "sends on sock %p stuck for 15 seconds\n",
 					 ssocket);
 				rc = -EAGAIN;
 				break;
 			}
-			if (14 > i) {
-				msleep(1 << i);
-			} else {
-				msleep(1000);
-			}
+			msleep(1 << i);
 			continue;
 		}
 #else
@@ -771,21 +772,29 @@ SendReceive2(const unsigned int xid, struct cifs_ses *ses,
 
 	mutex_lock(&ses->server->srv_mutex);
 #ifdef MY_ABC_HERE
-	if (SMB20_PROT_ID > ses->server->dialect) {
-		struct smb_hdr *hdr = iov->iov_base;
-		if (0xFE == hdr->Protocol[0]) {
-			cifs_dbg(FYI, "Dialect change from SMB2 to SMB\n");
-			mutex_unlock(&ses->server->srv_mutex);
-			cifs_small_buf_release(buf);
-			return -EAGAIN;
-		}
-	} else {
-		struct smb2_hdr *hdr = iov->iov_base;
-		if (0xFF == hdr->ProtocolId[0]) {
-			cifs_dbg(FYI, "Dialect change from SMB to SMB2\n");
-			mutex_unlock(&ses->server->srv_mutex);
-			cifs_small_buf_release(buf);
-			return -EAGAIN;
+	if (&synocifs_values == ses->server->values) {
+		if (SMB20_PROT_ID > ses->server->dialect) {
+			struct smb_hdr *hdr = iov->iov_base;
+			if (0xFE == hdr->Protocol[0]) {
+				cifs_dbg(FYI, "%s: SMB2 Command(0x%x), but Dialect(0x%x) is SMB1\n",
+						__func__,
+						hdr->Command,
+						ses->server->dialect);
+				mutex_unlock(&ses->server->srv_mutex);
+				cifs_small_buf_release(buf);
+				return -EAGAIN;
+			}
+		} else {
+			struct smb2_hdr *hdr = iov->iov_base;
+			if (0xFF == hdr->ProtocolId[0]) {
+				cifs_dbg(FYI, "%s: SMB1 Command(0x%x), but Dialect(0x%x) is SMB2\n",
+						__func__,
+						hdr->Command,
+						ses->server->dialect);
+				mutex_unlock(&ses->server->srv_mutex);
+				cifs_small_buf_release(buf);
+				return -EAGAIN;
+			}
 		}
 	}
 #endif /* MY_ABC_HERE */
@@ -911,17 +920,26 @@ SendReceive(const unsigned int xid, struct cifs_ses *ses,
 
 	mutex_lock(&ses->server->srv_mutex);
 #ifdef MY_ABC_HERE
-	if (SMB20_PROT_ID <= ses->server->dialect) {
-		if (0xFF == in_buf->Protocol[0]) {
-			cifs_dbg(FYI, "Dialect change from SMB to SMB2\n");
+	if (&synocifs_values == ses->server->values) {
+		if (SMB20_PROT_ID <= ses->server->dialect) {
+			if (0xFF == in_buf->Protocol[0]) {
+				cifs_dbg(FYI, "%s: SMB1 Command(0x%x), but server Dialect(0x%x) is SMB2\n",
+						__func__,
+						in_buf->Command,
+						ses->server->dialect);
+				mutex_unlock(&ses->server->srv_mutex);
+				return -EAGAIN;
+			}
+		} else if (0xFE == in_buf->Protocol[0]) {
+			struct smb2_hdr *hdr = (struct smb2_hdr *)in_buf;
+			// SMB2 header should not send here.
+			cifs_dbg(FYI, "%s: SMB2 Command(0x%x) Dialect(0x%x) use SendReceive\n",
+					__func__,
+					hdr->Command,
+					ses->server->dialect);
 			mutex_unlock(&ses->server->srv_mutex);
 			return -EAGAIN;
 		}
-	} else if (0xFE == in_buf->Protocol[0]) {
-		// SMB2 header should not send here.
-		cifs_dbg(FYI, "Dialect change from SMB2 to SMB\n");
-		mutex_unlock(&ses->server->srv_mutex);
-		return -EAGAIN;
 	}
 #endif /* MY_ABC_HERE */
 

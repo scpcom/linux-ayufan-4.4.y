@@ -282,13 +282,6 @@ unsigned long guSynoScsiCmdSN = 0;
 EXPORT_SYMBOL(guSynoScsiCmdSN);
 #endif
 
-#ifdef MY_ABC_HERE
-unsigned int SynoDiskLatencyType = 0x6;
-EXPORT_SYMBOL(SynoDiskLatencyType);
-unsigned int gSynoDiskLatencyRank[SYNO_DISK_LATENCY_RANK_NUM] = {99, 90, 70, 50, 0};
-EXPORT_SYMBOL(gSynoDiskLatencyRank);
-#endif  
-
 #ifdef SYNO_SAS_ENCOLURE_PWR_CTL
 int giSynoEncPwrCtl = 0;
 extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
@@ -298,6 +291,8 @@ extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 #ifdef MY_ABC_HERE
 int (*syno_test_list)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_test_list);
+int (*syno_get_current)(unsigned char, struct tty_struct *);
+EXPORT_SYMBOL(syno_get_current);
 #endif  
 
 int gSynoSystemShutdown = 0;
@@ -1499,22 +1494,6 @@ static struct ctl_table kern_table[] = {
 		.maxlen         = sizeof (int),
 		.mode           = 0644,
 		.proc_handler   = &SynoProcEncPwrCtl,
-	},
-#endif  
-#ifdef MY_ABC_HERE
-	{
-		.procname       = "syno_disk_latency_type",
-		.data           = &SynoDiskLatencyType,
-		.maxlen         = sizeof (int),
-		.mode           = 0644,
-		.proc_handler   = proc_dointvec,
-	},
-	{
-		.procname       = "syno_disk_latency_rank",
-		.data           = &gSynoDiskLatencyRank,
-		.maxlen         = sizeof (gSynoDiskLatencyRank),
-		.mode           = 0644,
-		.proc_handler   = proc_dointvec,
 	},
 #endif  
 	{ }

@@ -1305,296 +1305,186 @@ DEVICE_ATTR(sw_activity, S_IWUSR | S_IRUGO, ata_scsi_activity_show,
 EXPORT_SYMBOL_GPL(dev_attr_sw_activity);
 
 #ifdef MY_ABC_HERE
+static void disk_latency_hist_get(u64 u64TimeBuckets[SYNO_LATENCY_BUCKETS_END][32],
+								char *szBuf, int cbBuf)
+{
+	ssize_t len				= 0;
+	unsigned int j			= 0;
+	unsigned int i			= 0;
+	char szTmp[32]			= {'\0'};
+	for (j = 0; j < SYNO_LATENCY_BUCKETS_END; j++) {
+		for (i = 0; i < 32; i++) {
+			snprintf(szTmp, sizeof(szTmp), "%llu ", u64TimeBuckets[j][i]);
+			len += strlen(szTmp);
+			strncat(szBuf, szTmp, cbBuf - len - 1);
+		}
+		szBuf[len - 1] = '\n';
+	}
+	return;
+}
+
 static ssize_t
-syno_latency_hist_show(struct device *device,
+syno_latency_read_hist_show(struct device *device,
 		struct device_attribute *attr, char *buf)
 {
 	struct scsi_device *sdev = to_scsi_device(device);
 	struct ata_port *ap = ata_shost_to_port(sdev->host);
 	struct ata_device *dev;
 	struct ata_link *link;
-	ssize_t len				= 0;
-	unsigned long flags		= 0;
-	unsigned int j			= 0;
-	unsigned int i			= 0;
-	int iTime				= 0;
-	char* szTime			= "";
-	char szTmp[512]			= {'\0'};
+	ssize_t len = 0;
+	char szHist[2048] = {'\0'};
 
-	spin_lock_irqsave(ap->lock, flags);
 	dev = ata_scsi_find_dev(ap, sdev);
 	if (!dev) {
-		goto UNLOCK;
+		goto END;
 	}
 	link = dev->link;
 
-	snprintf(szTmp, sizeof(szTmp), "\tread\tread_r\twrite\twrite_r\toth oth_r\n");
-	len += strlen(szTmp);
-	strncat(buf, szTmp, PAGE_SIZE - len - 1);
+	disk_latency_hist_get(link->ata_latency.u64TimeBuckets[1], szHist, sizeof(szHist));
+	len += strlen(szHist);
+	strncat(buf, szHist, PAGE_SIZE - len - 1);
 
-	for (j = 0; j < 3; j++) {
-		if (0 == j) {
-			 
-			iTime = 32;
-			szTime = "us";
-			i = 0;
-		} else if (1 == j) {
-			 
-			iTime = 1;
-			szTime = "ms";
-			i = 1;
-		} else if (2 == j) {
-			 
-			iTime = 32;
-			szTime = "ms";
-			i = 1;
-		}
-		for (; i < 32; i++) {
-			snprintf(szTmp, sizeof(szTmp), "%4d %s\t%5u\t%5u\t%5u\t%5u\t%u %u\n",
-							((i+1) * iTime), szTime,
-							link->ata_latency.u32TimeBuckets[1][j][i],
-							link->ata_latency.u32RespTimeBuckets[1][j][i],
-							link->ata_latency.u32TimeBuckets[2][j][i],
-							link->ata_latency.u32RespTimeBuckets[2][j][i],
-							link->ata_latency.u32TimeBuckets[0][j][i],
-							link->ata_latency.u32RespTimeBuckets[0][j][i]);
-			len += strlen(szTmp);
-			strncat(buf, szTmp, PAGE_SIZE - len - 1);
-		}
-	}
+	memset(szHist, 0, sizeof(szHist));
+	disk_latency_hist_get(link->ata_latency.u64RespTimeBuckets[1], szHist, sizeof(szHist));
+	len += strlen(szHist);
+	strncat(buf, szHist, PAGE_SIZE - len - 1);
 
-UNLOCK:
-	spin_unlock_irqrestore(ap->lock, flags);
+END:
 	return len;
 }
-DEVICE_ATTR(syno_disk_latency_hist, S_IRUGO, syno_latency_hist_show, NULL);
-EXPORT_SYMBOL_GPL(dev_attr_syno_disk_latency_hist);
+DEVICE_ATTR(syno_disk_latency_read_hist, S_IRUGO, syno_latency_read_hist_show, NULL);
+EXPORT_SYMBOL_GPL(dev_attr_syno_disk_latency_read_hist);
 
-extern unsigned int SynoDiskLatencyType;
-extern unsigned int gSynoDiskLatencyRank[SYNO_DISK_LATENCY_RANK_NUM];
-static int reverse_cmpint(const void *l, const void *r)
+static ssize_t
+syno_latency_write_hist_show(struct device *device,
+		struct device_attribute *attr, char *buf)
 {
-	return *((unsigned int *) r) - *((unsigned int *) l);
-}
+	struct scsi_device *sdev = to_scsi_device(device);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *dev;
+	struct ata_link *link;
+	ssize_t len = 0;
+	char szHist[2048] = {'\0'};
 
-static void disk_latency_rank_calculate(
-						const u64 u64TotalIoCount[SYNO_LATENCY_TYPE_COUNT],
-						u32 u32TimeBuckets[SYNO_LATENCY_TYPE_COUNT][3][32],
-						const unsigned int iPrCmdPoint[],
-						u32 u32PrCmdTime[SYNO_LATENCY_TYPE_COUNT][SYNO_DISK_LATENCY_RANK_NUM])
-{
-	int iType = 0;
-	int iStep = 0;
-	int iBucket = 0;
-	int iPrPoint = 0;
-	u64 u64PrCmdSum = 0;
-	u64 u64PrCmdCntTarget = 0;
-	u32 u32PrInterCnt = 0;
-	u32 u32PrInterTime = 0;
-	for (iType = 0; iType < SYNO_LATENCY_TYPE_COUNT; iType++) {
-		u64PrCmdSum = 0;
-		iPrPoint = 0;
-		if (0 == u64TotalIoCount[iType]) {
-			continue;
-		}
-		u64PrCmdCntTarget = div64_u64(u64TotalIoCount[iType] * (100 - iPrCmdPoint[iPrPoint]), 100);
-		u64PrCmdCntTarget = (0 == u64PrCmdCntTarget) ? 1 : u64PrCmdCntTarget;
-		for (iBucket = 2; iBucket >= 0 && iPrPoint < SYNO_DISK_LATENCY_RANK_NUM; iBucket--) {
-			for (iStep = 31; iStep >= 0 && iPrPoint < SYNO_DISK_LATENCY_RANK_NUM; iStep--) {
-				u64PrCmdSum += u32TimeBuckets[iType][iBucket][iStep];
-				 
-				for (;u64PrCmdSum >= u64PrCmdCntTarget
-						&& iPrPoint < SYNO_DISK_LATENCY_RANK_NUM
-						&& 0 != iPrCmdPoint[iPrPoint]; iPrPoint++) {
-					u32PrInterCnt = u64PrCmdSum - u64PrCmdCntTarget;
-					u32PrInterTime = 1 << (5 * (iBucket + 1));
-					u32PrCmdTime[iType][iPrPoint] = (iStep * u32PrInterTime)
-												+ ((u32PrInterTime * u32PrInterCnt)
-														/ u32TimeBuckets[iType][iBucket][iStep]);
-					u64PrCmdCntTarget = div64_u64(u64TotalIoCount[iType] * (100 - iPrCmdPoint[iPrPoint+1]), 100);
-					u64PrCmdCntTarget = (0 == u64PrCmdCntTarget) ? 1 : u64PrCmdCntTarget;
-				}
-			}
-		}
+	dev = ata_scsi_find_dev(ap, sdev);
+	if (!dev) {
+		goto END;
 	}
-	return;
+	link = dev->link;
+
+	disk_latency_hist_get(link->ata_latency.u64TimeBuckets[2], szHist, sizeof(szHist));
+	len += strlen(szHist);
+	strncat(buf, szHist, PAGE_SIZE - len - 1);
+
+	memset(szHist, 0, sizeof(szHist));
+	disk_latency_hist_get(link->ata_latency.u64RespTimeBuckets[2], szHist, sizeof(szHist));
+	len += strlen(szHist);
+	strncat(buf, szHist, PAGE_SIZE - len - 1);
+
+END:
+	return len;
 }
+DEVICE_ATTR(syno_disk_latency_write_hist, S_IRUGO, syno_latency_write_hist_show, NULL);
+EXPORT_SYMBOL_GPL(dev_attr_syno_disk_latency_write_hist);
+
+static ssize_t
+syno_latency_other_hist_show(struct device *device,
+		struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(device);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *dev;
+	struct ata_link *link;
+	ssize_t len = 0;
+	char szHist[2048] = {'\0'};
+
+	dev = ata_scsi_find_dev(ap, sdev);
+	if (!dev) {
+		goto END;
+	}
+	link = dev->link;
+
+	disk_latency_hist_get(link->ata_latency.u64TimeBuckets[0], szHist, sizeof(szHist));
+	len += strlen(szHist);
+	strncat(buf, szHist, PAGE_SIZE - len - 1);
+
+	memset(szHist, 0, sizeof(szHist));
+	disk_latency_hist_get(link->ata_latency.u64RespTimeBuckets[0], szHist, sizeof(szHist));
+	len += strlen(szHist);
+	strncat(buf, szHist, PAGE_SIZE - len - 1);
+
+END:
+	return len;
+}
+DEVICE_ATTR(syno_disk_latency_other_hist, S_IRUGO, syno_latency_other_hist_show, NULL);
+EXPORT_SYMBOL_GPL(dev_attr_syno_disk_latency_other_hist);
 
 static ssize_t
 syno_latency_stat_show(struct device *device,
 		   struct device_attribute *attr, char *buf)
 {
-	int i = 0;
-	unsigned int iPrCmdPoint[SYNO_DISK_LATENCY_RANK_NUM + 1] = {0};
-	int iType						= 0;
-	int iPrPoint					= 0;
-
 	struct scsi_device *sdev = to_scsi_device(device);
 	struct ata_port *ap = ata_shost_to_port(sdev->host);
 	struct ata_device *dev;
 	struct ata_link *link;
-	ssize_t len						= 0;
-	unsigned long ulFlags			= 0;
-	SYNO_LATENCY_TYPE display_type = SYNO_LATENCY_READ | SYNO_LATENCY_WRITE;
+	ssize_t len = 0;
+	unsigned long ulFlags = 0;
+	char szTmp[512] = {'\0'};
+	u64 u64CurrentTime = 0;
 
-	u64 u64TotalBytes				= 0;
-	u64 u64TotalBatchTime			= 0;
-	u64 u64TotalBatchTimeSec		= 0;
-	u64 u64TotalPendingTime			= 0;
-	u64 u64ReportTimeInterval		= 0;
-	u64 u64TotalCmdTime				= 0;
-	u64 u64TotalCmdRespTime			= 0;
-	u64 u64TotalCount				= 0;
-	u64 u64TotalBatchCount			= 0;
-	u64 u64CurReportTime			= 0;
-	u64 u64CurBatchTimeOffset		= 0;
-	u64 u64TotalIoCount[SYNO_LATENCY_TYPE_COUNT] = {0};
-	u32 u32PrCmdTime[SYNO_LATENCY_TYPE_COUNT][SYNO_DISK_LATENCY_RANK_NUM] = {{0}};
-	u32 u32PrCmdRespTime[SYNO_LATENCY_TYPE_COUNT][SYNO_DISK_LATENCY_RANK_NUM] = {{0}};
-
-	char szTmp[512]					= {'\0'};
-
-	for (i = 0; i < SYNO_DISK_LATENCY_RANK_NUM; i++) {
-		iPrCmdPoint[i] = gSynoDiskLatencyRank[i];
-		iPrCmdPoint[i] = (iPrCmdPoint[i] < 100) ? iPrCmdPoint[i] : 0;
-	}
-
-	sort(iPrCmdPoint, SYNO_DISK_LATENCY_RANK_NUM,
-						sizeof(unsigned int), reverse_cmpint, NULL);
-
-	spin_lock_irqsave(ap->lock, ulFlags);
 	dev = ata_scsi_find_dev(ap, sdev);
 	if (!dev) {
-		goto UNLOCK;
+		goto END;
 	}
 	link = dev->link;
-	u64CurReportTime = cpu_clock(0);
 
-	display_type = (SYNO_LATENCY_TYPE)SynoDiskLatencyType;
-
-	for (iType = 0; iType < SYNO_LATENCY_TYPE_COUNT; iType++) {
-		u64TotalIoCount[iType] = link->latency_stat.u64TotalCount[iType]
-								- link->prev_latency_stat.u64TotalCount[iType];
-	}
-
-	if (display_type & SYNO_LATENCY_OTHERS) {
-		u64TotalCount += u64TotalIoCount[0];
-		 
-		u64TotalBytes += ((link->latency_stat.u64TotalBytes[0]
-						- link->prev_latency_stat.u64TotalBytes[0]) >> 10);
-		u64TotalCmdTime += div64_u64((link->latency_stat.u64TotalTime[0]
-						- link->prev_latency_stat.u64TotalTime[0]), 1000);
-		u64TotalCmdRespTime += div64_u64((link->latency_stat.u64TotalRespTime[0]
-						- link->prev_latency_stat.u64TotalRespTime[0]), 1000);
-	}
-	if (display_type & SYNO_LATENCY_READ) {
-		u64TotalCount += u64TotalIoCount[1];
-		 
-		u64TotalBytes += ((link->latency_stat.u64TotalBytes[1]
-						- link->prev_latency_stat.u64TotalBytes[1]) >> 10);
-		u64TotalCmdTime += div64_u64((link->latency_stat.u64TotalTime[1]
-						- link->prev_latency_stat.u64TotalTime[1]), 1000);
-		u64TotalCmdRespTime += div64_u64((link->latency_stat.u64TotalRespTime[1]
-						- link->prev_latency_stat.u64TotalRespTime[1]), 1000);
-	}
-	if (display_type & SYNO_LATENCY_WRITE) {
-		u64TotalCount += u64TotalIoCount[2];
-		 
-		u64TotalBytes += ((link->latency_stat.u64TotalBytes[2]
-						- link->prev_latency_stat.u64TotalBytes[2]) >> 10);
-		u64TotalCmdTime += div64_u64((link->latency_stat.u64TotalTime[2]
-						- link->prev_latency_stat.u64TotalTime[2]), 1000);
-		u64TotalCmdRespTime += div64_u64((link->latency_stat.u64TotalRespTime[2]
-						- link->prev_latency_stat.u64TotalRespTime[2]), 1000);
-	}
-	u64TotalBatchCount = (link->latency_stat.u64TotalBatchCount
-						- link->prev_latency_stat.u64TotalBatchCount);
+	snprintf(szTmp, sizeof(szTmp), "%pU\n",
+					link->latency_stat.uuid);
+	len += strlen(szTmp);
+	strncat(buf, szTmp, PAGE_SIZE - len - 1);
 	 
-	u64ReportTimeInterval =
-		div64_u64((u64CurReportTime - link->ata_latency.u64LastReportTime), 1000000);
-
-	u64TotalBatchTime = (link->latency_stat.u64TotalBatchTime
-						- link->prev_latency_stat.u64TotalBatchTime);
-
-	if (link->ata_latency.u64BatchIssue >= link->ata_latency.u64BatchComplete) {
-		u64CurBatchTimeOffset = u64CurReportTime - link->ata_latency.u64BatchIssue;
-		u64TotalBatchTime += u64CurBatchTimeOffset;
-	}
-
-	u64TotalBatchTime -= link->ata_latency.u64LastBatchTimeOffset;
-	u64TotalBatchTime = div64_u64(u64TotalBatchTime, 1000000);  
-	u64TotalBatchTimeSec = div64_u64(u64TotalBatchTime, 1000);
-	u64TotalPendingTime = u64ReportTimeInterval - u64TotalBatchTime;
-
-	snprintf(szTmp, sizeof(szTmp), "IO Time: %llu ms\t"
-										"Bytes: %llu MB\t"
-										"CmdNum: %llu\t",
-										u64ReportTimeInterval,
-										(u64TotalBytes >> 10),
-										u64TotalCount);
+	snprintf(szTmp, sizeof(szTmp), "%llu %llu %llu\n",
+					link->latency_stat.u64TotalCount[0],
+					link->latency_stat.u64TotalCount[1],
+					link->latency_stat.u64TotalCount[2]);
 	len += strlen(szTmp);
 	strncat(buf, szTmp, PAGE_SIZE - len - 1);
 
-	snprintf(szTmp, sizeof(szTmp),
-				"IO TP: %llu MBs\t"
-				"IOPS: %llu \t"
-				"Pending: %llu ms (%llu%%)\t"
-				"BatchNum: %llu\t"
-				"Batch TP: %3llu MBs\t"
-				"AvgCmdTime: %llu us\t"
-				"AvgCmdResp: %llu us\n",
-				((0 == u64ReportTimeInterval) ? 0
-					: div64_u64(u64TotalBytes, u64ReportTimeInterval)),
-				((0 == u64TotalBatchTimeSec) ? 0
-					: div64_u64(u64TotalCount, u64TotalBatchTimeSec)),
-				u64TotalPendingTime,
-				((0 == u64ReportTimeInterval) ? 100
-					: div64_u64((u64TotalPendingTime*100), u64ReportTimeInterval)),
-				u64TotalBatchCount,
-				((0 == u64TotalBatchTime) ? 0
-					: div64_u64(u64TotalBytes, u64TotalBatchTime)),
-				((0 == u64TotalCount) ? 0
-					: div64_u64(u64TotalCmdTime, u64TotalCount)),
-				((0 == u64TotalCount) ? 0
-					: div64_u64(u64TotalCmdRespTime, u64TotalCount)));
-
+	snprintf(szTmp, sizeof(szTmp), "%llu %llu %llu\n",
+					link->latency_stat.u64TotalTime[0],
+					link->latency_stat.u64TotalTime[1],
+					link->latency_stat.u64TotalTime[2]);
 	len += strlen(szTmp);
 	strncat(buf, szTmp, PAGE_SIZE - len - 1);
 
-	disk_latency_rank_calculate(u64TotalIoCount,
-								link->ata_latency.u32TimeBuckets,
-								iPrCmdPoint,
-								u32PrCmdTime);
-	disk_latency_rank_calculate(u64TotalIoCount,
-								link->ata_latency.u32RespTimeBuckets,
-								iPrCmdPoint,
-								u32PrCmdRespTime);
-	for (iPrPoint = SYNO_DISK_LATENCY_RANK_NUM - 1; iPrPoint >= 0; iPrPoint--) {
-		if (0 == iPrCmdPoint[iPrPoint]) {
-			continue;
-		}
-		snprintf(szTmp, sizeof(szTmp),
-				"lat %2dth: \tr: %7u\tr_r: %7u\tw: %7u\tw_r: %7u\toth: %7u\toth_r: %7u\n",
-							iPrCmdPoint[iPrPoint],
-							u32PrCmdTime[1][iPrPoint], u32PrCmdRespTime[1][iPrPoint],
-							u32PrCmdTime[2][iPrPoint], u32PrCmdRespTime[2][iPrPoint],
-							u32PrCmdTime[0][iPrPoint], u32PrCmdRespTime[0][iPrPoint]);
-		len += strlen(szTmp);
-		strncat(buf, szTmp, PAGE_SIZE - len - 1);
-	}
+	snprintf(szTmp, sizeof(szTmp), "%llu %llu %llu\n",
+					link->latency_stat.u64TotalRespTime[0],
+					link->latency_stat.u64TotalRespTime[1],
+					link->latency_stat.u64TotalRespTime[2]);
+	len += strlen(szTmp);
+	strncat(buf, szTmp, PAGE_SIZE - len - 1);
 
-	link->ata_latency.u64LastReportTime = u64CurReportTime;
-	link->ata_latency.u64LastBatchTimeOffset = u64CurBatchTimeOffset;
-	memcpy(&(link->prev_latency_stat), &(link->latency_stat),
-										sizeof(link->prev_latency_stat));
+	snprintf(szTmp, sizeof(szTmp), "%llu %llu %llu\n",
+					link->latency_stat.u64TotalBytes[0],
+					link->latency_stat.u64TotalBytes[1],
+					link->latency_stat.u64TotalBytes[2]);
+	len += strlen(szTmp);
+	strncat(buf, szTmp, PAGE_SIZE - len - 1);
 
-	memset(&(link->ata_latency.u32TimeBuckets), 0,
-						sizeof(link->ata_latency.u32TimeBuckets));
-	memset(&(link->ata_latency.u32RespTimeBuckets), 0,
-						sizeof(link->ata_latency.u32RespTimeBuckets));
-
-UNLOCK:
+	spin_lock_irqsave(ap->lock, ulFlags);
+	u64CurrentTime = cpu_clock(0);
+	 
+	snprintf(szTmp, sizeof(szTmp), "%llu %llu %llu %llu %llu\n",
+					link->latency_stat.u64TotalBatchCount,
+					link->latency_stat.u64TotalBatchTime,
+					link->ata_latency.u64BatchIssue,
+					link->ata_latency.u64BatchComplete,
+					u64CurrentTime);
 	spin_unlock_irqrestore(ap->lock, ulFlags);
+	len += strlen(szTmp);
+	strncat(buf, szTmp, PAGE_SIZE - len - 1);
+
+END:
 	return len;
 }
 DEVICE_ATTR(syno_disk_latency_stat, S_IRUGO, syno_latency_stat_show, NULL);
@@ -1613,7 +1503,9 @@ struct device_attribute *ata_common_sdev_attrs[] = {
 	&dev_attr_syno_sata_disk_led_ctrl,
 #endif
 #ifdef MY_ABC_HERE
-	&dev_attr_syno_disk_latency_hist,
+	&dev_attr_syno_disk_latency_read_hist,
+	&dev_attr_syno_disk_latency_write_hist,
+	&dev_attr_syno_disk_latency_other_hist,
 	&dev_attr_syno_disk_latency_stat,
 #endif  
 	NULL

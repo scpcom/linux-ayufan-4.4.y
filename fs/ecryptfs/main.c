@@ -475,6 +475,18 @@ out:
 	return rc;
 }
 
+#ifdef MY_ABC_HERE
+static int ecryptfs_test_super(struct super_block *s, void *data)
+{
+	return ecryptfs_dentry_to_lower(s->s_root) == data;
+}
+
+static int ecryptfs_set_super(struct super_block *s, void *data)
+{
+	return set_anon_super(s, data);
+}
+#endif  
+
 struct kmem_cache *ecryptfs_sb_info_cache;
 static struct file_system_type ecryptfs_fs_type;
 
@@ -496,21 +508,53 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
 		goto out;
 	}
 
-	rc = ecryptfs_parse_options(sbi, raw_data, &check_ruid);
+#ifdef MY_ABC_HERE
+	rc = kern_path(dev_name, LOOKUP_FOLLOW | LOOKUP_DIRECTORY, &path);
 	if (rc) {
-		err = "Error parsing options";
+		ecryptfs_printk(KERN_WARNING, "kern_path() failed\n");
 		goto out;
 	}
 
+	s = sget(fs_type, ecryptfs_test_super, ecryptfs_set_super, path.dentry);
+	if (IS_ERR(s)) {
+		rc = PTR_ERR(s);
+		goto out1;
+	}
+
+	if (s->s_root) {
+		kmem_cache_free(ecryptfs_sb_info_cache, sbi);
+		path_put(&path);
+		return dget(s->s_root);
+	}
+
+#endif  
+
+	rc = ecryptfs_parse_options(sbi, raw_data, &check_ruid);
+	if (rc) {
+		err = "Error parsing options";
+#ifdef MY_ABC_HERE
+		goto out_free;
+#else  
+		goto out;
+#endif  
+	}
+
+#ifdef MY_ABC_HERE
+#else  
 	s = sget(fs_type, NULL, set_anon_super, NULL);
 	if (IS_ERR(s)) {
 		rc = PTR_ERR(s);
 		goto out;
 	}
+#endif  
 
 	rc = bdi_setup_and_register(&sbi->bdi, "ecryptfs", BDI_CAP_MAP_COPY);
 	if (rc)
+#ifdef MY_ABC_HERE
+		goto out_free;
+#else  
 		goto out1;
+#endif  
 
 	ecryptfs_set_superblock_private(s, sbi);
 	s->s_bdi = &sbi->bdi;
@@ -520,11 +564,14 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
 	s->s_d_op = &ecryptfs_dops;
 
 	err = "Reading sb failed";
+#ifdef MY_ABC_HERE
+#else  
 	rc = kern_path(dev_name, LOOKUP_FOLLOW | LOOKUP_DIRECTORY, &path);
 	if (rc) {
 		ecryptfs_printk(KERN_WARNING, "kern_path() failed\n");
 		goto out1;
 	}
+#endif  
 	if (path.dentry->d_sb->s_type == &ecryptfs_fs_type) {
 		rc = -EINVAL;
 		printk(KERN_ERR "Mount on filesystem of type "
@@ -578,10 +625,17 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
 	s->s_flags |= MS_ACTIVE;
 	return dget(s->s_root);
 
+#ifdef MY_ABC_HERE
+out_free:
+	deactivate_locked_super(s);
+out1:
+	path_put(&path);
+#else  
 out_free:
 	path_put(&path);
 out1:
 	deactivate_locked_super(s);
+#endif  
 out:
 	if (sbi) {
 		ecryptfs_destroy_mount_crypt_stat(&sbi->mount_crypt_stat);

@@ -521,7 +521,8 @@ struct TCP_Server_Info {
 	struct smb_version_operations	*ops;
 	struct smb_version_values	*vals;
 #ifdef MY_ABC_HERE
-	struct smb_version_values	values;
+	 
+	struct smb_version_values	*values;
 #endif  
 	enum statusEnum tcpStatus;  
 	char *hostname;  
@@ -1382,6 +1383,9 @@ GLOBAL_EXTERN unsigned int cifs_min_small;
 GLOBAL_EXTERN unsigned int cifs_max_pending;  
 
 GLOBAL_EXTERN unsigned short echo_retries;
+#ifdef MY_ABC_HERE
+GLOBAL_EXTERN unsigned short need_nego_timeout;
+#endif  
 
 #ifdef CONFIG_CIFS_ACL
 GLOBAL_EXTERN struct rb_root uidtree;

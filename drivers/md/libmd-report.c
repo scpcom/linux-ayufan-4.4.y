@@ -12,6 +12,16 @@
 
 int (*funcSYNOSendRaidEvent)(unsigned int, unsigned int, unsigned int, unsigned int) = NULL;
 
+void SynoReportFaultyDevice(int md_minor, struct block_device *bdev)
+{
+	int index  = SynoSCSIGetDeviceIndex(bdev);
+
+	if (funcSYNOSendRaidEvent) {
+		funcSYNOSendRaidEvent(MD_FAULTY_DEVICE, md_minor, index, 0);
+	}
+}
+EXPORT_SYMBOL(SynoReportFaultyDevice);
+
 void SynoReportBadSector(sector_t sector, unsigned long rw, 
 						 int md_minor, struct block_device *bdev, const char *szFuncName)
 {

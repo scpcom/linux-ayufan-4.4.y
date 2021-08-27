@@ -20,6 +20,7 @@
 #include <linux/workqueue.h>
 #ifdef MY_ABC_HERE
 #include <linux/xattr.h>
+#include <linux/fsnotify.h>
 #endif
 #include <linux/kernel.h>
 #include <linux/printk.h>
@@ -3559,6 +3560,9 @@ int ext4_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
 	int retries = 0;
 
 	sb_start_pagefault(inode->i_sb);
+#ifdef MY_ABC_HERE
+	fsnotify_modify(vma->vm_file);
+#endif
 	 
 	if (test_opt(inode->i_sb, DELALLOC) &&
 	    !ext4_should_journal_data(inode) &&

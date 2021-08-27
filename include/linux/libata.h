@@ -701,6 +701,7 @@ struct ata_acpi_gtm {
 
 #ifdef MY_ABC_HERE
 #define SYNO_LATENCY_TYPE_COUNT 3
+#define SYNO_LATENCY_BUCKETS_END 4
 
 typedef enum {
 	SYNO_LATENCY_OTHERS = 0x1,
@@ -718,11 +719,12 @@ struct syno_ata_latency {
 
 	u64 u64LastReportTime;
 	u64 u64LastBatchTimeOffset;
-	u32 u32TimeBuckets[SYNO_LATENCY_TYPE_COUNT][3][32];
-	u32 u32RespTimeBuckets[SYNO_LATENCY_TYPE_COUNT][3][32];
+	u64 u64TimeBuckets[SYNO_LATENCY_TYPE_COUNT][SYNO_LATENCY_BUCKETS_END][32];
+	u64 u64RespTimeBuckets[SYNO_LATENCY_TYPE_COUNT][SYNO_LATENCY_BUCKETS_END][32];
 };
 
 struct syno_latency_stat {
+	unsigned char uuid[16];
 	u64 u64TotalCount[SYNO_LATENCY_TYPE_COUNT];
 	u64 u64TotalTime[SYNO_LATENCY_TYPE_COUNT];
 	u64 u64TotalRespTime[SYNO_LATENCY_TYPE_COUNT];
@@ -749,7 +751,6 @@ struct ata_link {
 #ifdef MY_ABC_HERE
 	struct syno_ata_latency ata_latency;
 	struct syno_latency_stat latency_stat;
-	struct syno_latency_stat prev_latency_stat;
 #endif  
 	enum ata_lpm_policy	lpm_policy;
 
@@ -1001,7 +1002,9 @@ extern struct device_attribute dev_attr_syno_diskname_trans;
 extern struct device_attribute dev_attr_syno_sata_disk_led_ctrl;
 #endif
 #ifdef MY_ABC_HERE
-extern struct device_attribute dev_attr_syno_disk_latency_hist;
+extern struct device_attribute dev_attr_syno_disk_latency_read_hist;
+extern struct device_attribute dev_attr_syno_disk_latency_write_hist;
+extern struct device_attribute dev_attr_syno_disk_latency_other_hist;
 extern struct device_attribute dev_attr_syno_disk_latency_stat;
 #endif  
 

@@ -619,6 +619,54 @@ END:
 static DEVICE_ATTR(syno_standby_syncing, S_IRUGO | S_IWUSR, sdev_show_syno_standby_syncing, sdev_store_syno_standby_syncing);
 #endif
 
+#ifdef MY_ABC_HERE
+ 
+static ssize_t
+syno_scmd_min_timeout_show (struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	ssize_t len = -EIO;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	if (0 == sdev->scmd_timeout_sec) {
+		len = sprintf(buf, "%s", "<not set>\n");
+	} else {
+		len = sprintf(buf, "%d%s", sdev->scmd_timeout_sec, "\n");
+	}
+
+END:
+	return len;
+}
+
+static ssize_t
+syno_scmd_min_timeout_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	int iTimeoutSec = 0;
+	ssize_t ret = -EIO;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	sscanf(buf, "%d", &iTimeoutSec);
+	if (0 >= iTimeoutSec || 60 < iTimeoutSec) {
+		printk(KERN_ERR "Invalid argument !!\n");
+		goto END;
+	}
+	sdev->scmd_timeout_sec = iTimeoutSec;
+
+	ret = count;
+
+END:
+	return ret;
+}
+DEVICE_ATTR(syno_scmd_min_timeout, S_IRUGO | S_IWUGO, syno_scmd_min_timeout_show, syno_scmd_min_timeout_store);
+#endif  
+
 sdev_rd_attr (device_blocked, "%d\n");
 sdev_rd_attr (queue_depth, "%d\n");
 sdev_rd_attr (type, "%d\n");
@@ -825,6 +873,9 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_syno_spindown.attr,
 	&dev_attr_syno_standby_syncing.attr,
 #endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_scmd_min_timeout.attr,
+#endif  
 	REF_EVT(media_change),
 	NULL
 };

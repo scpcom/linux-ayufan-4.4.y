@@ -2,7 +2,7 @@
 #ifndef _LINUX_INOTIFY_H
 #define _LINUX_INOTIFY_H
 
-#if !defined(SYNO_PPC_853X) && !defined(SYNO_PPC_854X) && !defined(SYNOPLAT_F_I686) && !defined(SYNOPLAT_F_X86_64)
+#if !defined(SYNO_PPC_853X) && !defined(SYNO_PPC_854X) && !defined(__SYNOPLAT_F_I686__) && !defined(SYNOPLAT_F_X86_64)
  
 #include <linux/fcntl.h>
 #endif

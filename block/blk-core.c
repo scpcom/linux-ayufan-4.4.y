@@ -1194,8 +1194,14 @@ void submit_bio(int rw, struct bio *bio)
 
 		if (unlikely(block_dump)) {
 			char b[BDEVNAME_SIZE];
+#ifdef MY_ABC_HERE
+			printk(KERN_DEBUG "ppid:%d(%s), pid:%d(%s), %s block %Lu on %s (%u sectors)\n",
+			task_pid_nr(current->parent), current->parent->comm,
+			task_pid_nr(current), current->comm,
+#else  
 			printk(KERN_DEBUG "%s(%d): %s block %Lu on %s (%u sectors)\n",
 			current->comm, task_pid_nr(current),
+#endif  
 				(rw & WRITE) ? "WRITE" : "READ",
 				(unsigned long long)bio->bi_sector,
 				bdevname(bio->bi_bdev, b),

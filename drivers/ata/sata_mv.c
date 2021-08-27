@@ -3181,7 +3181,6 @@ static int mv_hardreset(struct ata_link *link, unsigned int *class,
 	mv_edma_cfg(ap, 0, 0);
 
 	return rc;
-
 }
 
 static void mv_eh_freeze(struct ata_port *ap)

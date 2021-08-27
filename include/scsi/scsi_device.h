@@ -193,6 +193,9 @@ struct scsi_device {
 #endif  
 
 	unsigned long		sdev_data[0];
+#ifdef MY_ABC_HERE
+	unsigned int        scmd_timeout_sec;
+#endif  
 } __attribute__((aligned(sizeof(unsigned long))));
 
 struct scsi_dh_devlist {

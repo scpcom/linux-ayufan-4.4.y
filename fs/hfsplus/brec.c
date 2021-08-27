@@ -169,6 +169,8 @@ int hfs_brec_remove(struct hfs_find_data *fd)
 
 	tree = fd->tree;
 	node = fd->bnode;
+
+	hfs_bnode_read_key(node, fd->search_key, 14);
 again:
 	rec_off = tree->node_size - (fd->record + 2) * 2;
 	end_off = tree->node_size - (node->num_recs + 1) * 2;

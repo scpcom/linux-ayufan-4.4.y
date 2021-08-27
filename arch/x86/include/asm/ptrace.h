@@ -248,7 +248,7 @@ static inline unsigned long regs_get_kernel_stack_nth(struct pt_regs *regs,
 
 #define ARCH_HAS_USER_SINGLE_STEP_INFO
 
-#ifdef MY_ABC_HERE
+#ifdef __SYNO_CVE_2014_4699__
  
 #define arch_ptrace_stop_needed(code, info)				\
 ({									\

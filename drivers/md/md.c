@@ -6542,6 +6542,16 @@ void md_error(struct mddev *mddev, struct md_rdev *rdev)
 
 	if (!mddev->pers || !mddev->pers->error_handler)
 		return;
+
+#if defined(MY_ABC_HERE) \
+	&& defined (MY_ABC_HERE) \
+	&& defined (MY_ABC_HERE)
+
+	if (!test_bit(DiskError, &rdev->flags)) {
+		SynoReportFaultyDevice(mddev->md_minor, rdev->bdev);
+	}
+#endif  
+
 #ifdef MY_ABC_HERE
 	printk("%s: %s is being to be set faulty\n",
 		__FUNCTION__, bdevname(rdev->bdev, b));

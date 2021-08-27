@@ -263,4 +263,12 @@ config SYNO_COMCERTO2K_RAID_XORNEON_MODULE
 	depends on KERNEL_MODE_NEON
 	default n
 
+config SYNO_CUSTOM_SCMD_TIMEOUT
+	bool "Customize SCSI commands timeout value per disk"
+	default y
+
+config SYNO_ADD_ROUTE_CHECK
+    bool "check if interface is link up before adding route"
+	default n
+
 endmenu

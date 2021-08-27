@@ -11,6 +11,7 @@
 #include <linux/jiffies.h>
 #include <linux/module.h>
 #include <linux/fs.h>
+#include <linux/list.h>
 
 #ifdef  MY_ABC_HERE
 extern int syno_temperature_debug;
@@ -73,7 +74,4 @@ void syno_plugin_handle_put(void *hnd);
 #define RODSP_PLUGIN_MAGIC_NUMBER    0x20141111
 #endif
 
-#ifdef MY_ABC_HERE
-#define SYNO_DISK_LATENCY_RANK_NUM 10
-#endif  
 #endif  

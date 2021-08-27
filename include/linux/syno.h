@@ -16,11 +16,24 @@
 #define SYNO_HAVE_GCC_VERSION(a,b) (__GNUC__ > (a) || (__GNUC__ == (a) && __GNUC_MINOR__ >= (b)))
 #define SYNO_HAVE_GLIBC_VERSION(a,b) ( __GLIBC__ > (a) || (__GLIBC__ == (a) && __GLIBC_MINOR__ >= (b)))
 
+#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#define SYNO_CEDARVIEW_USE_EFI_REBOOT
+#endif
+
 #if defined(MY_DEF_HERE)
 #define SYNO_X86_AUTO_POWER_ON
 #endif
 
 #if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_FLASH_PART
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_GPIO_CTRL
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_POWEROFF
 
 #ifdef MY_DEF_HERE
 #define SYNO_EVANSPORT_TTYS1_PORT	0x2F8
@@ -29,6 +42,22 @@
 #define SYNO_EVANSPORT_TXR		0
 #define SYNO_EVANSPORT_LCR		3
 #endif
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_EXPORT_SYMBOL
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_NON_PREEMPT_SMB
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_WOL_WORKAROUND
+#endif
+
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_IPV4_ROUTE_WORKAROUND
 #endif
 
 #if !defined(CONFIG_SYNO_MPC85XX_COMMON)
@@ -50,6 +79,14 @@
 #define SYNO_PCH_GPIO_CTRL
 #endif
 
+#if defined(MY_DEF_HERE) && defined(CONFIG_SATA_MV)
+#define SYNO_6281_SOC_USE_OPENSOURCE_SATA
+#endif
+
+#if defined(MY_DEF_HERE) || defined(CONFIG_ARCH_KIRKWOOD) || defined(CONFIG_ARCH_ARMADA370)
+#define SYNO_ESATA_7042
+#endif
+
 #if defined(MY_DEF_HERE)
 #define SYNO_SATA_DOM_VENDOR_SAMPLE_RUN_2	"SATADOM "
 #define SYNO_SATA_DOM_MODEL_SAMPLE_RUN_2	"D150SH"
@@ -63,7 +100,20 @@
 
 #define SYNO_MAC_MAX_V2 8
 
+#ifdef MY_DEF_HERE
+#define SYNO_FLASH_MEMORY_SIZE
+#endif
+
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#define SYNO_X86_TTY_CONSOLE_OUTPUT
+#endif
+
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#define SYNO_X86_MICROP_CTRL
+#endif
+
 #if defined(CONFIG_SYNO_MPC854X) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_ARCH_FEROCEON)
+#define SYNO_SWITCH_NET_DEVICE_NAME
 
 #ifdef MY_DEF_HERE
 #define SYNO_MAX_SWITCHABLE_NET_DEVICE 8
@@ -79,13 +129,47 @@
 #define SYNO_6281_MTU_WA
 #endif
 
+#if defined(CONFIG_PPC_85xx)
+#define SYNO_IPV6_110p_IPV6_READY
+#endif
+
 #define USBCOPY_PORT_LOCATION 99
 
 #ifdef MY_ABC_HERE
 #define SDCOPY_PORT_LOCATION 98
 #endif
+#if 0
+ 
+#define SYNO_USB_STOR_COMP_ENHANCE
+#endif
 
-#define SYNO_USB3_PCI_ID_DEFINE
+#if 0
+ 
+#define SYNO_USB3_TIMEOUT
+#endif
+#if 0
+#define SYNO_USB3_RESET_RETRY
+#define SYNO_USB3_STALL_WAIT
+#endif
+ 
+#if 0
+ 
+#define SYNO_USB3_DEBUG
+
+#define SYNO_USB3_ERR_MONITOR
+#endif
+
+#if 0
+ 
+#define SYNO_USB3_SPECIAL_RESET
+#endif
+
+#if 0
+ 
+#define SYNO_USB3_RESET_FOR_ADDR_ERR
+#endif
+ 
+#define __SYNO_USB3_PCI_ID_DEFINE__
 
 #ifdef MY_ABC_HERE
 #define CHECKINTERVAL (7UL*HZ)
@@ -109,8 +193,17 @@
 #else  
 #endif  
 
+#ifdef MY_DEF_HERE
+#define SYNO_LIBATA_JMB_BEHAVIOR
+#endif
+
+#if !defined(MY_ABC_HERE)
+#define SYNO_EXT4_IGNORE_UNSUPPORTED_METADATA_CSUM
+#endif
+
 #if defined(CONFIG_SYNO_MPC8533) || defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
+#define SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 #ifdef MY_DEF_HERE
 #define SYNO_CREATE_TIME_SWAP_VERSION 3719
 #endif
@@ -179,6 +272,12 @@
 #define SYNO_SLOW_DOWN_UEVENT
 #endif
 
+#if defined(MY_DEF_HERE) && !defined(CONFIG_SYNO_MV88F6281_USBSTATION)
+#define SYNO_CPUFREQ_ADJUST
+#endif
+
+#define __SYNO_CVE_2014_4699__
+
 #ifdef MY_ABC_HERE
 #define MAX_CHANNEL_RETRY       2
 #define CHANNEL_RETRY_INTERVAL  (3*HZ)
@@ -208,9 +307,15 @@
 #endif  
 #endif
 
+#if defined(MY_DEF_HERE) || defined(SYNO_MARVELL_88F6180) || defined(SYNO_MARVELL_88F6281)
+#define SYNO_ARM_GENERIC_ATOMIC64
+#endif
+
 #if defined(MY_DEF_HERE)
  
 #define SYNO_SAS_MPT2_HOTPLUG_PHY
+
+#define SYNO_SAS_LINK_HOTPLUG_UEVENT
 
 #define SYNO_SAS_RECOVER_REMOVED_ENCS
 
@@ -247,6 +352,10 @@
 #define SYNO_ALPINE_ARCH
 #define SYNO_ALPINE_SUPPORT_WOL
 #define SYNO_ALPINE_SW_SATA_LED
+#endif
+
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_ARCH_ARMADA_XP)
+#define SYNO_SATA_PM_LINK_RETRY
 #endif
 
 #ifdef MY_DEF_HERE

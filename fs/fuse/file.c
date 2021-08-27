@@ -1093,12 +1093,6 @@ static ssize_t fuse_file_aio_write(struct kiocb *iocb, const struct iovec *iov,
 	sb_start_write(inode->i_sb);
 	mutex_lock(&inode->i_mutex);
 
-#ifdef MY_DEF_HERE
-	if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
-		do_aggregate_recvfile_flush(-1);
-	}
-#endif  
-
 	current->backing_dev_info = mapping->backing_dev_info;
 
 	err = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
@@ -2378,12 +2372,6 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 
 	if (!(mode & FALLOC_FL_KEEP_SIZE))
 		fuse_write_update_size(inode, offset + length);
-
-#ifdef MY_DEF_HERE
-	if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
-		do_aggregate_recvfile_flush(-1);
-	}
-#endif  
 
 #ifdef MY_ABC_HERE
 	if (mode & FALLOC_FL_PUNCH_HOLE) {

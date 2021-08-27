@@ -271,7 +271,9 @@ struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_fault,
 #endif
 #ifdef MY_ABC_HERE
-	&dev_attr_syno_disk_latency_hist,
+	&dev_attr_syno_disk_latency_read_hist,
+	&dev_attr_syno_disk_latency_write_hist,
+	&dev_attr_syno_disk_latency_other_hist,
 	&dev_attr_syno_disk_latency_stat,
 #endif  
 	NULL

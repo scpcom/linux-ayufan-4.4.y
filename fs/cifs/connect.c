@@ -476,6 +476,23 @@ server_unresponsive(struct TCP_Server_Info *server)
 
 	return false;
 }
+#ifdef MY_ABC_HERE
+static bool
+server_nego_unresponsive(struct TCP_Server_Info *server, unsigned long when_start_recv_nego)
+{
+	if (server->tcpStatus == CifsNeedNegotiate &&
+	    need_nego_timeout != 0 &&
+	    time_after(jiffies, when_start_recv_nego + need_nego_timeout * HZ)) {
+		cifs_dbg(FYI, "Server %s has not responded at need nego stage in %d seconds. "
+			  "Reconnecting...\n", server->hostname, need_nego_timeout);
+		cifs_reconnect(server);
+		wake_up(&server->response_q);
+		return true;
+	}
+
+	return false;
+}
+#endif  
 
 static unsigned int
 kvec_array_init(struct kvec *new, struct kvec *iov, unsigned int nr_segs,
@@ -526,6 +543,9 @@ cifs_readv_from_socket(struct TCP_Server_Info *server, struct kvec *iov_orig,
 	unsigned int segs;
 	struct msghdr smb_msg;
 	struct kvec *iov;
+#ifdef MY_ABC_HERE
+	unsigned long when_start_recv_nego;
+#endif  
 
 	iov = get_server_iovec(server, nr_segs);
 	if (!iov)
@@ -539,6 +559,9 @@ cifs_readv_from_socket(struct TCP_Server_Info *server, struct kvec *iov_orig,
 	smb_msg.msg_iovlen = 0;
 	smb_msg.msg_flags = 0;
 
+#ifdef MY_ABC_HERE
+	when_start_recv_nego = jiffies;
+#endif  
 	for (total_read = 0; to_read; total_read += length, to_read -= length) {
 		try_to_freeze();
 
@@ -546,6 +569,12 @@ cifs_readv_from_socket(struct TCP_Server_Info *server, struct kvec *iov_orig,
 			total_read = -ECONNABORTED;
 			break;
 		}
+#ifdef MY_ABC_HERE
+		if (server_nego_unresponsive(server, when_start_recv_nego)) {
+			total_read = -ECONNABORTED;
+			break;
+		}
+#endif  
 
 		segs = kvec_array_init(iov, iov_orig, nr_segs, total_read);
 
@@ -1879,8 +1908,15 @@ static int match_server(struct TCP_Server_Info *server, struct smb_vol *vol)
 	if (vol->nosharesock)
 		return 0;
 
+#ifdef MY_ABC_HERE
+	if ((server->vals != vol->vals && server->values != vol->vals) ||
+	    (server->ops != vol->ops)) {
+		return 0;
+	}
+#else
 	if ((server->vals != vol->vals) || (server->ops != vol->ops))
 		return 0;
+#endif  
 
 	if (!net_eq(cifs_net_ns(server), current->nsproxy->net_ns))
 		return 0;
@@ -1980,9 +2016,8 @@ cifs_get_tcp_session(struct smb_vol *volume_info)
 	tcp_ses->ops = volume_info->ops;
 	tcp_ses->vals = volume_info->vals;
 #ifdef MY_ABC_HERE
-	if (0 == strcmp(volume_info->vals->version_string, SYNO_VERSION_STRING)) {
-		tcp_ses->vals = &(tcp_ses->values);
-		tcp_ses->values = *(volume_info->vals);
+	if (&synocifs_values == volume_info->vals) {
+		tcp_ses->values = volume_info->vals;
 	}
 #endif  
 	cifs_set_net_ns(tcp_ses, get_net(current->nsproxy->net_ns));

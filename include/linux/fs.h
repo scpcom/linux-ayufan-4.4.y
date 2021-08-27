@@ -727,12 +727,6 @@ struct inode {
 	void			*i_private;  
 };
 
-#ifdef MY_DEF_HERE
- 
-#define AGGREGATE_RECVFILE_DOING 1
-#define AGGREGATE_RECVFILE_FLUSH 2
-#endif  
-
 static inline int inode_unhashed(struct inode *inode)
 {
 	return hlist_unhashed(&inode->i_hash);

@@ -65,6 +65,13 @@ module_param(echo_retries, ushort, 0644);
 MODULE_PARM_DESC(echo_retries, "Number of echo attempts before giving up and "
 			       "reconnecting server. Default: 5. 0 means "
 			       "never reconnect.");
+#ifdef MY_ABC_HERE
+unsigned short need_nego_timeout = 30;
+module_param(need_nego_timeout, ushort, 0644);
+MODULE_PARM_DESC(need_nego_timeout, "The timeout (second) when tcpStatus is"
+			       "CifsNeedNegotiate. After timeout will reconnect server"
+			       "Default: 30. 0 means never reconnect until socket fail.");
+#endif  
 module_param(enable_oplocks, bool, 0644);
 MODULE_PARM_DESC(enable_oplocks, "Enable or disable oplocks. Default: y/Y/1");
 
@@ -357,6 +364,18 @@ cifs_show_options(struct seq_file *s, struct vfsmount *m)
 	srcaddr = (struct sockaddr *)&tcon->ses->server->srcaddr;
 
 	seq_printf(s, ",vers=%s", tcon->ses->server->vals->version_string);
+#ifdef MY_ABC_HERE
+	if (&synocifs_values == tcon->ses->server->values) {
+		seq_puts(s, "(syno)");
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	if (tcon->ses->server->noblocksnd) {
+		seq_puts(s, ",noblocksend");
+	} else {
+		seq_puts(s, ",blocksend");
+	}
+#endif  
 	cifs_show_security(s, tcon->ses);
 	cifs_show_cache_flavor(s, cifs_sb);
 

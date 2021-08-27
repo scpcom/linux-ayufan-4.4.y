@@ -17,6 +17,9 @@
 #include <linux/atomic.h>
 
 #include <linux/fsnotify_backend.h>
+#ifdef MY_ABC_HERE
+#include <linux/ratelimit.h>
+#endif  
 #include "fsnotify.h"
 
 static struct kmem_cache *fsnotify_event_cachep;
@@ -24,6 +27,10 @@ static struct kmem_cache *fsnotify_event_holder_cachep;
  
 static struct fsnotify_event *q_overflow_event;
 static atomic_t fsnotify_sync_cookie = ATOMIC_INIT(0);
+
+#ifdef MY_ABC_HERE
+static DEFINE_RATELIMIT_STATE(_notification_rs, (3600 * HZ), 1);
+#endif  
 
 u32 fsnotify_get_cookie(void)
 {
@@ -123,6 +130,8 @@ static int SYNOFetchFullName(struct fsnotify_event *event, gfp_t gfp)
 	if(data_type == FSNOTIFY_EVENT_PATH){
 		dentry_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
 		if (unlikely(!dentry_path_buf)) {
+			if (__ratelimit(&_notification_rs))
+				printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 			goto ERR;
 		}
 		dentry_path = dentry_path_raw(dentry, dentry_path_buf, PATH_MAX - 1);
@@ -133,6 +142,8 @@ static int SYNOFetchFullName(struct fsnotify_event *event, gfp_t gfp)
 	full_path = kmalloc(PATH_MAX, GFP_ATOMIC);
 	mnt_full_path = kzalloc(PATH_MAX, GFP_ATOMIC);
 	if(!full_path || !mnt_full_path){
+		if (__ratelimit(&_notification_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		goto ERR;
 	}
 	if(syno_fetch_mountpoint_fullpath(mnt, PATH_MAX, mnt_full_path) < 0)
@@ -183,6 +194,10 @@ alloc_holder:
 		return_event = event;
 
 		priv = NULL;
+#ifdef MY_DEF_HERE
+		if (__ratelimit(&_notification_rs))
+			printk(KERN_WARNING "synotify get overflow in file: %s, line: %d\n", __FILE__, __LINE__);
+#endif  
 	}
 
 	if (!list_empty(list) && merge) {

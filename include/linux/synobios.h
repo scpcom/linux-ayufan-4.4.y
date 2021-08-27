@@ -235,6 +235,30 @@
 #define IS_SYNOLOGY_DX517(x) (x == 0x15)
 #define IS_SYNOLOGY_RX418(x) (x == 0x16)
 
+#define HWMON_CPU_TEMP_NAME "CPU_Temperature"
+#define HWMON_SYS_THERMAL_NAME "System_Thermal_Sensor"
+#define HWMON_SYS_VOLTAGE_NAME "System_Voltage_Sensor"
+#define HWMON_SYS_FAN_RPM_NAME "System_Fan_Speed_RPM"
+#define HWMON_SYS_CURRENT_NAME "System_Current_Sensor"
+#define HWMON_SYS_FAN1_RPM "fan1_rpm"
+#define HWMON_SYS_FAN2_RPM "fan2_rpm"
+#define HWMON_SYS_FAN3_RPM "fan3_rpm"
+#define HWMON_SYS_FAN4_RPM "fan4_rpm"
+#define HWMON_PSU_STATUS_NAME "PSU_%d_Status"
+#define HWMON_PSU1_STATUS_NAME "PSU_1_Status"
+#define HWMON_PSU2_STATUS_NAME "PSU_2_Status"
+#define HWMON_PSU_SENSOR_PIN "power_in"
+#define HWMON_PSU_SENSOR_POUT "power_out"
+#define HWMON_PSU_SENSOR_TEMP "temperature"
+#define HWMON_PSU_SENSOR_FAN "fan_speed"
+#define HWMON_PSU_SENSOR_STATUS "status"
+#define HWMON_HDD_BP_STATUS_NAME "HDD_Backplane_Status"
+#define HWMON_HDD_BP_DETECT "hdd_detect"
+#define HWMON_HDD_BP_ENABLE "hdd_enable"
+#define MAX_SENSOR_NUM 10
+#define MAX_SENSOR_NAME 30
+#define MAX_SENSOR_VALUE 30
+
 typedef enum _tag_EUNIT_PWRON_TYPE {
 	EUNIT_NOT_SUPPORT,
 	EUNIT_PWRON_GPIO,
@@ -292,10 +316,37 @@ typedef struct _SynoThermalTemp {
 	int temperature;
 } SYNO_THERMAL_TEMP;
 
+typedef enum {
+	HWMON_CPU_TEMP,
+	HWMON_SYS_THERMAL,
+	HWMON_SYS_VOLTAGE,
+	HWMON_FAN_SPEED_RPM,
+	HWMON_HDD_BACKPLANE,
+	HWMON_PSU_STATUS,
+	HWMON_SYS_CURRENT,
+} SYNO_HWMON_SUPPORT_ID;
+
+typedef struct _SYNO_HWMON_SUPPORT {
+	SYNO_HWMON_SUPPORT_ID id;
+	int support;
+} SYNO_HWMON_SUPPORT;
+
+typedef struct _SYNO_HWMON_SENSOR {
+	char sensor_name[MAX_SENSOR_NAME];
+	char value[MAX_SENSOR_VALUE];
+} SYNO_HWMON_SENSOR;
+
+typedef struct _SYNO_HWMON_SENSOR_TYPE {
+	char type_name[MAX_SENSOR_NAME];
+	int sensor_num;
+	SYNO_HWMON_SENSOR sensor[MAX_SENSOR_NUM];
+} SYNO_HWMON_SENSOR_TYPE;
+
 enum {
     MD_SECTOR_READ_ERROR = 0,
     MD_SECTOR_WRITE_ERROR = 1,
     MD_SECTOR_REWRITE_OK = 2,
+    MD_FAULTY_DEVICE = 3,
 };
 
 typedef enum {
