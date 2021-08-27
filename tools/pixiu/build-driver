@@ -1,0 +1,216 @@
+#!/bin/sh
+
+#  (C) Copyright 2007 Marvell International Ltd.
+#             All Rights Reserved
+#  This software file (the "File") is distributed by Marvell International Ltd.
+#  under the terms of the GNU General Public License Version 2, June 1991 (the "License").
+#  You may use, redistribute and/or modify this File in accordance with the terms and
+#  conditions of the License, a copy of which is available along with the File in the
+#  license.txt file or by writing to the Free Software Foundation, Inc., 59 Temple Place,
+#  Suite 330, Boston, MA 02111-1307 or on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
+#  THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED WARRANTIES
+#  OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY DISCLAIMED.
+#  The License provides additional details about this warranty disclaimer.
+
+CROSS_COMPILE_DEF=/usr/local/arm-linux/bin/arm-linux-
+PXALINUX_DEF=/usr/local/src/preview-kit/linux
+
+SCRIPT=$0
+
+repeat_or_exit()
+{
+  EXIT_CODE=$1
+  echo ""
+  echo -n "Quit or Retry building the driver? [q/R] "
+  read QUIT
+  if [ "${QUIT}x" = "qx" -o "${QUIT}x" = "Qx" ] ; then
+    echo ""
+    exit ${EXIT_CODE}
+  else
+    exec ${SCRIPT}
+  fi
+  echo ""
+}
+
+ask_change_default_pmu_irq()
+{
+	while true
+	do
+		echo -n "Do you want to change the default PMU IRQ number? [y|n]"
+		read ANSWER
+
+		case ${ANSWER} in
+		"Y")
+			return 1;;
+		"y")
+			return 1;;
+		"N")
+			return 0;;
+		"n")
+			return 0;;
+		*)
+			continue;;
+		esac
+	done
+}
+
+ask_pmu_irq_for_cpu_core()
+{
+	while true
+	do
+		echo -n "Input PMU IRQ number for CPU core $1: "
+
+		read pmu_irq
+		if [ $pmu_irq ]; then
+			return $pmu_irq
+		else
+			continue;
+		fi
+	done
+}
+
+select_single_core_pmu_irq()
+{
+	ask_change_default_pmu_irq
+
+	if [ $? -eq 1 ] ; then
+		ask_pmu_irq_for_cpu_core
+		pmu_irq_core0=$?
+
+		EXTRA_FLAG="$EXTRA_FLAG PX_PMU_IRQ_STR=$pmu_irq_core0"
+	fi
+
+}
+
+select_armada370_pmu_irq()
+{
+	# There is only one PMU interrupt number for 4 cores in ARMADA370
+	select_single_core_pmu_irq
+}
+
+select_cpu_type()
+{
+  # prompt for silicon type
+  echo "Which CPU type will the driver be built for?"
+  index=0
+  for CPU_TYPE in "ARMADA370"; do
+	echo "(${index})" ${CPU_TYPE}
+	index=`expr $index + 1`
+  done
+
+  DEFAULT_CPU_INDEX=0
+  echo -n "Select the corresponding number for the CPU type [${DEFAULT_CPU_INDEX}]: "
+
+
+  read cpu_index
+  if [ -z $cpu_index ]; then
+	cpu_index=${DEFAULT_CPU_INDEX}
+  fi
+
+  if [ $cpu_index = 0 ]; then
+	EXTRA_FLAG="$EXTRA_FLAG CPU_TYPE=PJ4B SOC_TYPE=ARMADA370"
+	select_armada370_pmu_irq
+  else
+	echo "Invalid number input for the CPU type!"
+	repeat_or_exit -5
+  fi
+}
+
+# describe default option
+
+echo ""
+echo "Options in brackets \"[ ... ]\" indicate default values"
+echo "that will be used when only the ENTER key is pressed."
+echo ""
+
+# prompt for kernel source directory
+
+echo -n "Kernel source directory: [${PXALINUX_DEF}] "
+read PXALINUX
+if [ -z "${PXALINUX}" ] ; then
+  PXALINUX=${PXALINUX_DEF}
+fi
+
+export PXALINUX
+
+# check avaiability of kernel sources
+version_header=$PXALINUX/include/linux/version.h
+if [ ! -f $version_header ] ; then
+  echo "Invalid kernel source directory or the directory has not been built for the linux image!"
+  repeat_or_exit -5
+fi
+
+# check kernel version
+KERNELVER_STRING=`awk '/UTS_RELEASE/{print $3}' $version_header`
+case $KERNELVER_STRING in
+    *) MAKEFILE_SUFFIX="2.6";;
+esac
+
+# Prompt for tool chain prefix for 2.6 kernel
+echo -n "Please specify the toolchain to use: [$CROSS_COMPILE_DEF]"
+read CROSS_COMPILE
+echo ""
+if [ -z ${CROSS_COMPILE} ]; then
+	CROSS_COMPILE=$CROSS_COMPILE_DEF
+fi
+
+CROSS_TOOL_PATH=`type -p ${CROSS_COMPILE}gcc`
+if [ -z "${CROSS_TOOL_PATH}" ]; then
+	echo "Can't find the toolchain!"
+	repeat_or_exit -5
+fi
+
+export CROSS_COMPILE
+
+# prompt for make command
+MAKE_DEF=make
+echo -n "Make command to use: [${MAKE_DEF}] "
+read MAKE
+if [ -z "${MAKE}" ] ; then
+	MAKE=${MAKE_DEF}
+fi
+
+MAKE_PATH=`type -p $MAKE`
+if [ -z "${MAKE_PATH}" ] ; then
+	echo "Invalid Make command!"
+	repeat_or_exit -5
+fi
+
+echo ""
+
+select_cpu_type
+
+${MAKE} -C HSProfiler clean all ${EXTRA_FLAG}
+ERR=$?
+if [ ${ERR} -ne 0 ] ; then
+	repeat_or_exit -4
+fi
+cp HSProfiler/*.ko .
+
+${MAKE} -C CSSProfiler clean all ${EXTRA_FLAG}
+ERR=$?
+if [ ${ERR} -ne 0 ] ; then
+	repeat_or_exit -4
+fi
+cp CSSProfiler/*.ko .
+
+${MAKE} -C CMProfiler clean all ${EXTRA_FLAG}
+ERR=$?
+if [ ${ERR} -ne 0 ] ; then
+	repeat_or_exit -4
+fi
+cp CMProfiler/*.ko .
+
+${MAKE} -C TPProfiler clean all ${EXTRA_FLAG}
+ERR=$?
+if [ ${ERR} -ne 0 ] ; then
+	repeat_or_exit -4
+fi
+cp TPProfiler/*.ko .
+
+# all done
+echo ""
+echo "Marvell Performance Data Collector driver has been built successfully."
+echo ""
+
+exit 0

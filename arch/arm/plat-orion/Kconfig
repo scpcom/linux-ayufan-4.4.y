@@ -1,0 +1,166 @@
+if ARCH_KIRKWOOD
+
+choice
+	prompt "Marvell Kirkwood SoC type"
+	default MV88F6281
+
+config  MV88F6281
+	bool "Kirkwood family SoC"
+	---help---
+	  Choosing this option will generate a linux kernel for the 88F6281/88F6192/88F6190/88F6180 SoC
+
+endchoice
+
+
+menu "Marvell Kirkwood SoC Options"
+	depends on ARCH_KIRKWOOD
+
+config JTAG_DEBUG
+	bool "Enable JTAG by disable \"wait for interrupt\""
+	depends on MV88F5181 || MV88F6183 || MV88F6281 || MV78XX0
+	default n
+	---help---
+	  Enable the JTAG debugger taking over the CPU by disabling "wait for interrupt" idle loop."
+
+menu "Marvell Kirkwood SoC Included Features"
+
+config MV_INCLUDE_CESA
+	bool "CESA Support"
+	depends on MV88F5182 || MV88F5082 ||  MV88F5181L || MV88F6082 || MV88F6183 || MV88F6281 || MV78XX0
+	default y
+	---help---
+	  Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_TDM
+	bool "Integrated TDM Support"
+	depends on MV88F5181L || MV88F6281 || MV78XX0
+	default y
+	---help---
+	  Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_GIG_ETH
+	bool "Giga Ethernet Support"
+	depends on MV88F5181 || MV88F5182 || MV88F5082 || MV88F5181L || MV88F5180N || MV88F6082 || MV88F6183 || MV88F6281 || MV78XX0
+	default y
+
+config MV_INCLUDE_SPI
+	bool "SPI Support"
+	depends on MV88F6082 || MV88F6183 || MV88F6281 || (MV78XX0 && !MV78XX0_Z0)
+	default y
+	---help---
+	  Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_TS
+	bool "TSU Support"
+	depends on MV88F6281
+	default n
+	---help---
+	  Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_SWITCH
+	bool "Ethernet Switch Support"
+	default y
+
+endmenu
+
+config MV_GPP_MAX_PINS
+	int
+	default 32 if MV88F5181 || MV88F5180N || MV88F5182 || MV88F5082 || MV88F5181L || MV88F6082 || MV88F6183 || MV78XX0
+	default 16 if MV88F1181 || MV88F1281
+	default 64 if MV88F6281
+
+config MV_DCACHE_SIZE
+	hex
+	default 0x8000 if MV88F5181 || MV88F5180N || MV88F5182 || MV88F5082 || MV88F5181L || MV88F1281 || MV78XX0
+	default 0x4000 if MV88F6082 || MV88F6281
+
+config MV_ICACHE_SIZE
+	hex
+	default 0x8000 if MV88F5181 || MV88F5180N || MV88F5182 || MV88F5082 || MV88F5181L || MV88F1281 || MV78XX0
+	default 0x4000 if MV88F6082 || MV88F6281
+
+config ARCH_SUPPORTS_BIG_ENDIAN
+	bool
+	default y
+
+config USE_DSP
+	bool "Use pld/ldrd/strd arm DSP instructions"
+	default n
+
+
+choice
+	prompt "Protect from speculative instruction prefetch"
+	depends on CACHE_FEROCEON_L2
+	default MV_SP_I_FTCH_DB_INV
+
+config MV_SP_I_FTCH_DB_INV
+	bool "Double invalidate for DMA buffers"
+	---help---
+	  Choosing this option will add L2 invalidate for DMA recieved buffers before processing it,
+	  This is done through the pci_unmap_sg/page/single APIs.
+
+config MV_SP_I_FTCH_LCK_L2_ICACHE
+	bool "Lock L2 I-cache"
+	---help---
+	  Choosing this option will lock L2 Icache.
+
+config MV_SP_I_FTCH_NONE
+	bool "Ignore"
+
+endchoice
+
+
+config MV_INTERNAL_REGS_SELECTIVE_MAPPING
+	bool "Internal registers selective mapping"
+	default n
+	---help---
+	  Choosing this option enables selective address mapping for each unit,
+	  in the internal registers address space.
+
+config  KIRKWOOD_PROC
+	bool "Support for MV-shell proc file system"
+	depends on PROC_FS
+	---help---
+	  Choosing this option will enable you to use the MV-shell through the Proc
+	  File system.
+	  The MV-shell is a debug utility which can be run from the shell.
+
+config  MV_DBG_TRACE
+	bool "Enable tracing utility"
+	default n
+	---help---
+	  Choosing this debug option will cause some kernel modules to log operations into
+	  a cyclic buffer and dump them on failures. Enabling this feature decreases performance.
+
+config  MV_REAL_TIME
+	bool "Real Time softirq support"
+	default n
+	---help---
+	  Choosing this option will give more CPU time for user space processes
+
+config  MV_CPU_PERF_CNTRS
+	bool "CPU Performance counters support"
+	default n
+	---help---
+	  Choosing this option will enable you to use CPU Performance counters
+
+config  MV_CPU_L2_PERF_CNTRS
+	bool "CPU L2 Performance counters support"
+	default n
+	---help---
+	  Choosing this option will enable you to use CPU L2 Performance counters
+
+
+menu "SoC Networking support"
+depends on MV_INCLUDE_GIG_ETH
+source arch/arm/plat-orion/mv_drivers_lsp/mv_network/Kconfig
+endmenu
+
+source arch/arm/plat-orion/mv_drivers_lsp/mv_network/Kconfig
+source arch/arm/plat-orion/mv_drivers_lsp/mv_cesa/Kconfig
+source arch/arm/plat-orion/mv_drivers_lsp/mv_phone/Kconfig
+source arch/arm/plat-orion/mv_drivers_lsp/mv_tsu/Kconfig
+
+endmenu
+
+endif
