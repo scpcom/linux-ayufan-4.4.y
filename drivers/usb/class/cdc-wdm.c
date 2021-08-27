@@ -45,7 +45,6 @@ MODULE_DEVICE_TABLE (usb, wdm_ids);
 
 #define WDM_MINOR_BASE	176
 
-
 #define WDM_IN_USE		1
 #define WDM_DISCONNECTING	2
 #define WDM_RESULT		3

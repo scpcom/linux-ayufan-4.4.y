@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
-
+ 
 #ifndef __MTD_ABI_H__
 #define __MTD_ABI_H__
 
@@ -167,7 +167,7 @@ struct otp_info {
  * #define MEMSETOOBSEL           _IOW('M', 9, struct nand_oobinfo)
  * Try to avoid adding a new ioctl with the same ioctl number.
  */
-
+ 
 /* Get basic MTD characteristics info (better to use sysfs) */
 #define MEMGETINFO		_IOR('M', 1, struct mtd_info_user)
 /* Erase segment of MTD */
@@ -228,6 +228,7 @@ struct otp_info {
  * modes (see "struct mtd_write_req")
  */
 #define MEMWRITE		_IOWR('M', 24, struct mtd_write_req)
+
 
 /*
  * Obsolete legacy interface. Keep it in order not to break userspace

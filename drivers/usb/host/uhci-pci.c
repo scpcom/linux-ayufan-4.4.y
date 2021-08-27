@@ -19,7 +19,7 @@
  * (C) Copyright 1999 Gregory P. Smith (from usb-ohci.c)
  * (C) Copyright 2004-2007 Alan Stern, stern@rowland.harvard.edu
  */
-
+ 
 #include "pci-quirks.h"
 
 /*
@@ -140,7 +140,6 @@ static int uhci_pci_init(struct usb_hcd *hcd)
 		uhci_pci_resume_detect_interrupts_are_broken;
 	uhci->global_suspend_mode_is_broken =
 		uhci_pci_global_suspend_mode_is_broken;
-
 
 	/* Kick BIOS off this hardware and reset if the controller
 	 * isn't already safely quiescent.

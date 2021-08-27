@@ -22,29 +22,29 @@ SECTIONS
   }
 
   . = ALIGN(8);
-    _dtb_start = .;
+  _dtb_start = .;
   .kernel:dtb : { *(.kernel:dtb) }
-    _dtb_end = .;
+  _dtb_end = .;
 
   . = ALIGN(4096);
-    _vmlinux_start =  .;
+  _vmlinux_start =  .;
   .kernel:vmlinux.strip : { *(.kernel:vmlinux.strip) }
-    _vmlinux_end =  .;
+  _vmlinux_end =  .;
 
   . = ALIGN(4096);
-    _initrd_start =  .;
+  _initrd_start =  .;
   .kernel:initrd : { *(.kernel:initrd) }
-    _initrd_end =  .;
+  _initrd_end =  .;
 
   . = ALIGN(4096);
-    _edata  =  .;
+  _edata  =  .;
 
   . = ALIGN(4096);
-    __bss_start = .;
+  __bss_start = .;
   .bss       :
   {
-    *(.sbss)
-    *(.bss)
+   *(.sbss)
+   *(.bss)
   }
   . = ALIGN(4096);
   _end = . ;

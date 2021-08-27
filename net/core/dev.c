@@ -74,7 +74,7 @@
  * 		J Hadi Salim	:	- Backlog queue sampling
  *				        - netif_rx() feedback
  */
-
+ 
 #include <asm/uaccess.h>
 #include <asm/system.h>
 #include <linux/bitops.h>
@@ -619,7 +619,6 @@ int netdev_boot_setup_check(struct net_device *dev)
 }
 EXPORT_SYMBOL(netdev_boot_setup_check);
 
-
 /**
  *	netdev_boot_base	- get address from boot time settings
  *	@prefix: prefix for network device
@@ -813,7 +812,6 @@ struct net_device *dev_get_by_index_rcu(struct net *net, int ifindex)
 	return NULL;
 }
 EXPORT_SYMBOL(dev_get_by_index_rcu);
-
 
 /**
  *	dev_get_by_index - find a device by its ifindex
@@ -1162,7 +1160,6 @@ int dev_set_alias(struct net_device *dev, const char *alias, size_t len)
 	return len;
 }
 
-
 /**
  *	netdev_features_change - device changes features
  *	@dev: device to cause notification
@@ -1391,7 +1388,6 @@ int dev_close(struct net_device *dev)
 }
 EXPORT_SYMBOL(dev_close);
 
-
 /**
  *	dev_disable_lro - disable Large Receive Offload on a device
  *	@dev: device
@@ -1424,7 +1420,6 @@ void dev_disable_lro(struct net_device *dev)
 		netdev_WARN(dev, "failed to disable LRO!\n");
 }
 EXPORT_SYMBOL(dev_disable_lro);
-
 
 static int dev_boot_phase = 1;
 
@@ -1894,7 +1889,6 @@ void dev_kfree_skb_any(struct sk_buff *skb)
 		dev_kfree_skb(skb);
 }
 EXPORT_SYMBOL(dev_kfree_skb_any);
-
 
 /**
  * netif_device_detach - mark device as removed
@@ -4085,7 +4079,6 @@ int register_gifconf(unsigned int family, gifconf_func_t *gifconf)
 }
 EXPORT_SYMBOL(register_gifconf);
 
-
 /*
  *	Map an interface index to its name (SIOCGIFNAME)
  */
@@ -4211,7 +4204,7 @@ static inline struct net_device *dev_from_same_bucket(struct seq_file *seq)
 		if (count++ == offset) {
 			state->pos = set_bucket_offset(bucket, count);
 			return dev;
-		}
+	}
 	}
 
 	return NULL;
@@ -4509,7 +4502,6 @@ static const struct file_operations ptype_seq_fops = {
 	.release = seq_release_net,
 };
 
-
 static int __net_init dev_proc_net_init(struct net *net)
 {
 	int rc = -ENOMEM;
@@ -4556,7 +4548,6 @@ static int __init dev_proc_init(void)
 #else
 #define dev_proc_init() 0
 #endif	/* CONFIG_PROC_FS */
-
 
 /**
  *	netdev_set_master	-	set up master pointer
@@ -5127,7 +5118,7 @@ static int dev_ifsioc(struct net *net, struct ifreq *ifr, unsigned int cmd)
 		if (err)
 			return err;
 		/* fall through */
-
+		 
 	/*
 	 *	Unknown or private ioctl
 	 */
@@ -5210,7 +5201,7 @@ int dev_ioctl(struct net *net, unsigned int cmd, void __user *arg)
 	/*
 	 *	See which interface the caller is talking about.
 	 */
-
+	 
 	switch (cmd) {
 	/*
 	 *	These ioctl calls:
@@ -5344,7 +5335,6 @@ int dev_ioctl(struct net *net, unsigned int cmd, void __user *arg)
 	}
 }
 
-
 /**
  *	dev_new_index	-	allocate an ifindex
  *	@net: the applicable net namespace
@@ -5411,7 +5401,6 @@ static void rollback_registered_many(struct list_head *head)
 	list_for_each_entry(dev, head, unreg_list) {
 		/* Shutdown queueing discipline. */
 		dev_shutdown(dev);
-
 
 		/* Notify protocols, that we are about to destroy
 		   this device. They should clean all the things.
@@ -5844,7 +5833,6 @@ int init_dummy_netdev(struct net_device *dev)
 }
 EXPORT_SYMBOL_GPL(init_dummy_netdev);
 
-
 /**
  *	register_netdev	- register a network device
  *	@dev: device to register
@@ -5908,7 +5896,7 @@ static void netdev_wait_allrefs(struct net_device *dev)
 			call_netdevice_notifiers(NETDEV_UNREGISTER, dev);
 			/* don't resend NETDEV_UNREGISTER_BATCH, _BATCH users
 			 * should have already handle it the first time */
-
+			 
 			if (test_bit(__LINK_STATE_LINKWATCH_PENDING,
 				     &dev->state)) {
 				/* We must not have linkwatch events
@@ -6477,7 +6465,6 @@ static int dev_cpu_callback(struct notifier_block *nfb,
 	return NOTIFY_OK;
 }
 
-
 /**
  *	netdev_increment_features - increment feature set by one
  *	@all: current feature set
@@ -6525,7 +6512,7 @@ static struct hlist_head *netdev_create_hash(void)
 /* Initialize per network namespace state */
 static int __net_init netdev_init(struct net *net)
 {
-	INIT_LIST_HEAD(&net->dev_base_head);
+		INIT_LIST_HEAD(&net->dev_base_head);
 
 	net->dev_name_head = netdev_create_hash();
 	if (net->dev_name_head == NULL)
@@ -6795,4 +6782,3 @@ static int __init initialize_hashrnd(void)
 }
 
 late_initcall_sync(initialize_hashrnd);
-

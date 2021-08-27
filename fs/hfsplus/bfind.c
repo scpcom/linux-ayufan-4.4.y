@@ -10,7 +10,7 @@
  *
  * Search routines for btrees
  */
-
+ 
 #include <linux/slab.h>
 #include "hfsplus_fs.h"
 
@@ -82,6 +82,7 @@ int __hfs_brec_find(struct hfs_bnode *bnode, struct hfs_find_data *fd)
 		}
 		hfs_bnode_read(bnode, fd->key, off, keylen);
 	}
+
 done:
 	fd->record = e;
 	fd->keyoffset = off;

@@ -679,7 +679,7 @@ thumb2arm(u16 tinstr)
 			    (tinstr & 255);		/* register_list */
 		}
 		/* Else fall through for illegal instruction case */
-
+		 
 	default:
 		return BAD_INSTR;
 	}

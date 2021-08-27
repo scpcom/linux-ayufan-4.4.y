@@ -18,7 +18,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 021110-1307, USA.
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/pagemap.h>
 #include <linux/highmem.h>
@@ -184,9 +184,9 @@ struct inode_defrag *btrfs_find_defrag_inode(struct btrfs_fs_info *info, u64 ino
 
 	if (next) {
 		while (parent && ino > entry->ino) {
-			parent = rb_next(parent);
+		parent = rb_next(parent);
 			entry = rb_entry(parent, struct inode_defrag, rb_node);
-		}
+	}
 		*next = parent;
 	}
 	return NULL;
@@ -212,7 +212,7 @@ int btrfs_run_defrag_inodes(struct btrfs_fs_info *fs_info)
 	range.len = (u64)-1;
 
 	atomic_inc(&fs_info->defrag_running);
-	spin_lock(&fs_info->defrag_inodes_lock);
+			spin_lock(&fs_info->defrag_inodes_lock);
 	while(1) {
 		n = NULL;
 
@@ -226,8 +226,8 @@ int btrfs_run_defrag_inodes(struct btrfs_fs_info *fs_info)
 				continue;
 			} else {
 				break;
-			}
-		}
+	}
+}
 
 		/* remove it from the rbtree */
 		first_ino = defrag->ino + 1;
@@ -238,58 +238,58 @@ int btrfs_run_defrag_inodes(struct btrfs_fs_info *fs_info)
 
 		spin_unlock(&fs_info->defrag_inodes_lock);
 
-		/* get the inode */
-		key.objectid = defrag->root;
-		btrfs_set_key_type(&key, BTRFS_ROOT_ITEM_KEY);
-		key.offset = (u64)-1;
-		inode_root = btrfs_read_fs_root_no_name(fs_info, &key);
+	/* get the inode */
+	key.objectid = defrag->root;
+	btrfs_set_key_type(&key, BTRFS_ROOT_ITEM_KEY);
+	key.offset = (u64)-1;
+	inode_root = btrfs_read_fs_root_no_name(fs_info, &key);
 		if (IS_ERR(inode_root))
 			goto next;
 
-		key.objectid = defrag->ino;
-		btrfs_set_key_type(&key, BTRFS_INODE_ITEM_KEY);
-		key.offset = 0;
+	key.objectid = defrag->ino;
+	btrfs_set_key_type(&key, BTRFS_INODE_ITEM_KEY);
+	key.offset = 0;
 
-		inode = btrfs_iget(fs_info->sb, &key, inode_root, NULL);
+	inode = btrfs_iget(fs_info->sb, &key, inode_root, NULL);
 		if (IS_ERR(inode))
 			goto next;
 
-		/* do a chunk of defrag */
+	/* do a chunk of defrag */
 		BTRFS_I(inode)->in_defrag = 0;
-		range.start = defrag->last_offset;
-		num_defrag = btrfs_defrag_file(inode, NULL, &range, defrag->transid,
+	range.start = defrag->last_offset;
+	num_defrag = btrfs_defrag_file(inode, NULL, &range, defrag->transid,
 					       defrag_batch);
-		/*
-		 * if we filled the whole defrag batch, there
-		 * must be more work to do.  Queue this defrag
-		 * again
-		 */
+	/*
+	 * if we filled the whole defrag batch, there
+	 * must be more work to do.  Queue this defrag
+	 * again
+	 */
 		if (num_defrag == defrag_batch) {
-			defrag->last_offset = range.start;
+		defrag->last_offset = range.start;
 			__btrfs_add_inode_defrag(inode, defrag);
 			/*
 			 * we don't want to kfree defrag, we added it back to
 			 * the rbtree
 			 */
 			defrag = NULL;
-		} else if (defrag->last_offset && !defrag->cycled) {
-			/*
-			 * we didn't fill our defrag batch, but
-			 * we didn't start at zero.  Make sure we loop
-			 * around to the start of the file.
-			 */
-			defrag->last_offset = 0;
-			defrag->cycled = 1;
+	} else if (defrag->last_offset && !defrag->cycled) {
+		/*
+		 * we didn't fill our defrag batch, but
+		 * we didn't start at zero.  Make sure we loop
+		 * around to the start of the file.
+		 */
+		defrag->last_offset = 0;
+		defrag->cycled = 1;
 			__btrfs_add_inode_defrag(inode, defrag);
 			defrag = NULL;
-		}
+	}
 
-		iput(inode);
+	iput(inode);
 next:
 		spin_lock(&fs_info->defrag_inodes_lock);
 next_free:
 		kfree(defrag);
-	}
+		}
 	spin_unlock(&fs_info->defrag_inodes_lock);
 
 	atomic_dec(&fs_info->defrag_running);
@@ -389,9 +389,9 @@ void btrfs_drop_pages(struct page **pages, size_t num_pages)
  * doing real data extents, marking pages dirty and delalloc as required.
  */
 int btrfs_dirty_pages(struct btrfs_root *root, struct inode *inode,
-		      struct page **pages, size_t num_pages,
-		      loff_t pos, size_t write_bytes,
-		      struct extent_state **cached)
+			     struct page **pages, size_t num_pages,
+			     loff_t pos, size_t write_bytes,
+			     struct extent_state **cached)
 {
 	int err = 0;
 	int i;
@@ -433,7 +433,7 @@ int btrfs_dirty_pages(struct btrfs_root *root, struct inode *inode,
  * [start, end].  Existing extents are split as required.
  */
 int btrfs_drop_extent_cache(struct inode *inode, u64 start, u64 end,
-			    int skip_pinned)
+			     int skip_pinned)
 {
 	struct extent_map *em;
 	struct extent_map *split = NULL;
@@ -485,13 +485,13 @@ int btrfs_drop_extent_cache(struct inode *inode, u64 start, u64 end,
 		    em->start < start) {
 			split->start = em->start;
 			split->len = start - em->start;
-			split->orig_start = em->orig_start;
-			split->block_start = em->block_start;
+				split->orig_start = em->orig_start;
+				split->block_start = em->block_start;
 
-			if (compressed)
-				split->block_len = em->block_len;
-			else
-				split->block_len = split->len;
+				if (compressed)
+					split->block_len = em->block_len;
+				else
+					split->block_len = split->len;
 
 			split->bdev = em->bdev;
 			split->flags = flags;
@@ -512,12 +512,12 @@ int btrfs_drop_extent_cache(struct inode *inode, u64 start, u64 end,
 			split->flags = flags;
 			split->compress_type = em->compress_type;
 
-			if (compressed) {
-				split->block_len = em->block_len;
-				split->block_start = em->block_start;
-				split->orig_start = em->orig_start;
-			} else {
-				split->block_len = split->len;
+				if (compressed) {
+					split->block_len = em->block_len;
+					split->block_start = em->block_start;
+					split->orig_start = em->orig_start;
+				} else {
+					split->block_len = split->len;
 				split->block_start = em->block_start + diff;
 				split->orig_start = split->start;
 			}
@@ -788,7 +788,7 @@ next_slot:
 	if (del_nr > 0) {
 		ret = btrfs_del_items(trans, root, path, del_slot, del_nr);
 		BUG_ON(ret);
-	}
+}
 
 	btrfs_free_path(path);
 	return ret;
@@ -1066,7 +1066,7 @@ static int prepare_uptodate_page(struct page *page, u64 pos,
 static noinline int prepare_pages(struct btrfs_root *root, struct file *file,
 			 struct page **pages, size_t num_pages,
 			 loff_t pos, unsigned long first_index,
-			 size_t write_bytes, bool force_uptodate)
+				  size_t write_bytes, bool force_uptodate)
 {
 	struct extent_state *cached_state = NULL;
 	int i;
@@ -1251,7 +1251,7 @@ static noinline ssize_t __btrfs_buffered_write(struct file *file,
 				BTRFS_I(inode)->outstanding_extents++;
 				spin_unlock(&BTRFS_I(inode)->lock);
 			}
-			btrfs_delalloc_release_space(inode,
+				btrfs_delalloc_release_space(inode,
 					(num_pages - dirty_pages) <<
 					PAGE_CACHE_SHIFT);
 		}
@@ -1260,12 +1260,12 @@ static noinline ssize_t __btrfs_buffered_write(struct file *file,
 			ret = btrfs_dirty_pages(root, inode, pages,
 						dirty_pages, pos, copied,
 						NULL);
-			if (ret) {
+		if (ret) {
 				btrfs_delalloc_release_space(inode,
 					dirty_pages << PAGE_CACHE_SHIFT);
-				btrfs_drop_pages(pages, num_pages);
-				break;
-			}
+			btrfs_drop_pages(pages, num_pages);
+			break;
+		}
 		}
 
 		btrfs_drop_pages(pages, num_pages);
@@ -1558,7 +1558,7 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 				ret = btrfs_end_transaction(trans, root);
 			else
 				ret = btrfs_commit_transaction(trans, root);
-		}
+			}
 	} else {
 		ret = btrfs_end_transaction(trans, root);
 	}
@@ -1648,7 +1648,7 @@ static long btrfs_fallocate(struct file *file, int mode,
 			 * running or with the extent lock held
 			 */
 			btrfs_wait_ordered_range(inode, alloc_start,
-						 alloc_end - alloc_start);
+						       alloc_end - alloc_start);
 		} else {
 			if (ordered)
 				btrfs_put_ordered_extent(ordered);
@@ -1785,14 +1785,14 @@ static int find_desired_extent(struct inode *inode, loff_t *offset, int origin)
 				if (last_end <= orig_start) {
 					free_extent_map(em);
 					ret = -ENXIO;
-					break;
+			break;
 				}
 			}
 
 			if (origin == SEEK_HOLE) {
 				*offset = start;
 				free_extent_map(em);
-				break;
+			break;
 			}
 		} else {
 			if (origin == SEEK_DATA) {
@@ -1804,11 +1804,11 @@ static int find_desired_extent(struct inode *inode, loff_t *offset, int origin)
 					}
 				}
 
-				*offset = start;
-				free_extent_map(em);
-				break;
-			}
-		}
+					*offset = start;
+		free_extent_map(em);
+					break;
+				}
+	}
 
 		start = em->start + em->len;
 		last_end = em->start + em->len;
@@ -1817,7 +1817,7 @@ static int find_desired_extent(struct inode *inode, loff_t *offset, int origin)
 			last_end = min_t(u64, last_end, inode->i_size);
 
 		if (test_bit(EXTENT_FLAG_VACANCY, &em->flags)) {
-			free_extent_map(em);
+	free_extent_map(em);
 			ret = -ENXIO;
 			break;
 		}

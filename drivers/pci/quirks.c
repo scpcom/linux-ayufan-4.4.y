@@ -17,7 +17,7 @@
  *  have a silly BIOS which is unable to set your host bridge right,
  *  use the PowerTweak utility (see http://powertweak.sourceforge.net).
  */
-
+ 
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/export.h>
@@ -243,7 +243,7 @@ static void quirk_vialatency(struct pci_dev *dev)
 	u8 busarb;
 	/* Ok we have a potential problem chipset here. Now see if we have
 	   a buggy southbridge */
-	   
+	 
 	p = pci_get_device(PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_82C686, NULL);
 	if (p!=NULL) {
 		/* 0x40 - 0x4f == 686B, 0x10 - 0x2f == 686A; thanks Dan Hollis */
@@ -271,7 +271,7 @@ static void quirk_vialatency(struct pci_dev *dev)
 	 *	corruption without SB Live! but with things like 3 UDMA IDE
 	 *	controllers. So we ignore that bit of the VIA recommendation..
 	 */
-
+	 
 	pci_read_config_byte(dev, 0x76, &busarb);
 	/* Set bit 4 and bi 5 of byte 76 to 0x01 
 	   "Master priority rotation on every PCI master grant */
@@ -1010,7 +1010,6 @@ static void __devinit quirk_via_acpi(struct pci_dev *d)
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C586_3,	quirk_via_acpi);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C686_4,	quirk_via_acpi);
 
-
 /*
  *	VIA bridges which have VLink
  */
@@ -1300,7 +1299,6 @@ static void __init quirk_eisa_bridge(struct pci_dev *dev)
 	dev->class = PCI_CLASS_BRIDGE_EISA << 8;
 }
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_82375,	quirk_eisa_bridge);
-
 
 /*
  * On ASUS P4B boards, the SMBus PCI Device within the ICH2/4 southbridge
@@ -1597,7 +1595,6 @@ static void quirk_sis_503(struct pci_dev *dev)
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_SI,	PCI_DEVICE_ID_SI_503,		quirk_sis_503);
 DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_SI,	PCI_DEVICE_ID_SI_503,		quirk_sis_503);
 
-
 /*
  * On ASUS A8V and A8V Deluxe boards, the onboard AC97 audio controller
  * and MC97 modem controller are disabled when a second PCI soundcard is
@@ -1743,7 +1740,6 @@ static void __devinit quirk_pcie_mch(struct pci_dev *pdev)
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_E7520_MCH,	quirk_pcie_mch);
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_E7320_MCH,	quirk_pcie_mch);
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_E7525_MCH,	quirk_pcie_mch);
-
 
 /*
  * It's possible for the MSI to get corrupted if shpc and acpi
@@ -2099,7 +2095,7 @@ static void __devinit fixup_rev1_53c810(struct pci_dev* dev)
 	/* rev 1 ncr53c810 chips don't set the class at all which means
 	 * they don't get their resources remapped. Fix that here.
 	 */
-
+	 
 	if (dev->class == PCI_CLASS_NOT_DEFINED) {
 		dev_info(&dev->dev, "NCR 53c810 rev 1 detected; setting PCI class\n");
 		dev->class = PCI_CLASS_STORAGE_SCSI;
@@ -2189,7 +2185,7 @@ static void __devinit quirk_via_cx700_pci_parking_caching(struct pci_dev *dev)
 	 * VT6212L is found -- the CX700 core itself also contains a USB
 	 * host controller with the same PCI ID as the VT6212L.
 	 */
-
+	 
 	/* Count VT6212L instances */
 	struct pci_dev *p = pci_get_device(PCI_VENDOR_ID_VIA,
 		PCI_DEVICE_ID_VIA_8235_USB_2, NULL);
@@ -3129,6 +3125,7 @@ static int __init pci_apply_final_quirks(void)
 			pci_cache_line_size = pci_dfl_cache_line_size;
 		}
 	}
+
 	if (!pci_cache_line_size) {
 		printk(KERN_DEBUG "PCI: CLS %u bytes, default %u\n",
 		       cls << 2, pci_dfl_cache_line_size << 2);

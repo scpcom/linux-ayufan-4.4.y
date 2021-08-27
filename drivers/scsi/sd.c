@@ -34,7 +34,7 @@
  *	Note: when the logging level is set by the user, it must be greater
  *	than the level indicated above to trigger output.	
  */
-
+ 
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/kernel.h>
@@ -1417,7 +1417,6 @@ static int sd_sync_cache(struct scsi_disk *sdkp)
 	if (!scsi_device_online(sdp))
 		return -ENODEV;
 
-
 	for (retries = 3; retries > 0; --retries) {
 		unsigned char cmd[10] = { 0 };
 
@@ -1452,7 +1451,6 @@ static void sd_rescan(struct device *dev)
 		scsi_disk_put(sdkp);
 	}
 }
-
 
 #ifdef CONFIG_COMPAT
 /* 
@@ -1572,7 +1570,7 @@ static int sd_done(struct scsi_cmnd *SCpnt)
 	unsigned char op = SCpnt->cmnd[0];
 
 	if ((SCpnt->request->cmd_flags & REQ_DISCARD) && !result)
-		scsi_set_resid(SCpnt, 0);
+			scsi_set_resid(SCpnt, 0);
 
 	if (result) {
 		sense_valid = scsi_command_normalize_sense(SCpnt, &sshdr);
@@ -1771,7 +1769,6 @@ sd_spinup_disk(struct scsi_disk *sdkp)
 			printk("not responding...\n");
 	}
 }
-
 
 /*
  * Determine whether disk supports Data Integrity Field.
@@ -3003,7 +3000,7 @@ static int sd_probe(struct device *dev)
 
 			schedule_timeout_uninterruptible(HZ);
 
-		spin_lock(&sd_index_lock);
+			spin_lock(&sd_index_lock);
 			error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
 
 			printk("want_idx %d index %d\n", want_idx, index);
@@ -3214,7 +3211,7 @@ static void scsi_disk_release(struct device *dev)
 {
 	struct scsi_disk *sdkp = to_scsi_disk(dev);
 	struct gendisk *disk = sdkp->disk;
-	
+
 	spin_lock(&sd_index_lock);
 	ida_remove(&sd_index_ida, sdkp->index);
 #ifdef SYNO_SAS_DISK_NAME

@@ -10,7 +10,7 @@
  *
  * Handling of directories
  */
-
+ 
 #include <linux/errno.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
@@ -43,7 +43,7 @@ static struct dentry *hfsplus_lookup(struct inode *dir, struct dentry *dentry,
 	dentry->d_fsdata = NULL;
 	err = hfs_find_init(HFSPLUS_SB(sb)->cat_tree, &fd);
 	if (err)
-		return ERR_PTR(err);
+			return ERR_PTR(err);
 	hfsplus_cat_build_key(sb, fd.search_key, dir->i_ino, &dentry->d_name);
 again:
 	err = hfs_brec_read(&fd, &entry, sizeof(entry));
@@ -112,7 +112,7 @@ again:
 	hfs_find_exit(&fd);
 	inode = hfsplus_iget(dir->i_sb, cnid);
 	if (IS_ERR(inode))
-		return ERR_CAST(inode);
+			return ERR_CAST(inode);
 	if (S_ISREG(inode->i_mode))
 		HFSPLUS_I(inode)->linkid = linkid;
 out:
@@ -491,15 +491,15 @@ static int hfsplus_rename(struct inode *old_dir, struct dentry *old_dentry,
 }
 
 const struct inode_operations hfsplus_dir_inode_operations = {
-	.lookup		= hfsplus_lookup,
-	.create		= hfsplus_create,
-	.link		= hfsplus_link,
-	.unlink		= hfsplus_unlink,
-	.mkdir		= hfsplus_mkdir,
-	.rmdir		= hfsplus_rmdir,
-	.symlink	= hfsplus_symlink,
-	.mknod		= hfsplus_mknod,
-	.rename		= hfsplus_rename,
+	.lookup			= hfsplus_lookup,
+	.create			= hfsplus_create,
+	.link			= hfsplus_link,
+	.unlink			= hfsplus_unlink,
+	.mkdir			= hfsplus_mkdir,
+	.rmdir			= hfsplus_rmdir,
+	.symlink		= hfsplus_symlink,
+	.mknod			= hfsplus_mknod,
+	.rename			= hfsplus_rename,
 };
 
 const struct file_operations hfsplus_dir_operations = {

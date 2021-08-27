@@ -9,7 +9,7 @@
  *                        Based upon conversations with large numbers
  *                        of people at Linux Expo.
  */
-
+ 
 #include <linux/bio.h>
 #include <linux/bitops.h>
 #include <linux/blkdev.h>
@@ -264,7 +264,6 @@ int scsi_execute(struct scsi_device *sdev, const unsigned char *cmd,
 	return ret;
 }
 EXPORT_SYMBOL(scsi_execute);
-
 
 int scsi_execute_req(struct scsi_device *sdev, const unsigned char *cmd,
 		     int data_direction, void *buffer, unsigned bufflen,
@@ -777,7 +776,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 				req->sense_len = len;
 			}
 			if (!sense_deferred)
-				error = __scsi_error_from_host_byte(cmd, result);
+ 				error = __scsi_error_from_host_byte(cmd, result);
 		}
 
 		req->resid_len = scsi_get_resid(cmd);
@@ -837,7 +836,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 		return;
 
 	error = __scsi_error_from_host_byte(cmd, result);
-
+ 
 	if (host_byte(result) == DID_RESET) {
 		/* Third party bus reset or reset for error recovery
 		 * reasons.  Just retry the command and see what
@@ -1345,7 +1344,6 @@ static inline int scsi_dev_queue_ready(struct request_queue *q,
 	return 1;
 }
 
-
 /*
  * scsi_target_queue_ready: checks if there we can send commands to target
  * @sdev: scsi device on starget to check.
@@ -1583,7 +1581,6 @@ static void scsi_request_fn(struct request_queue *q)
 			scsi_kill_request(req, q);
 			continue;
 		}
-
 
 		/*
 		 * Remove the request from the request list.
@@ -2050,7 +2047,6 @@ scsi_mode_select(struct scsi_device *sdev, int pf, int sp, int modepage,
 		real_buffer[2] = data->device_specific;
 		real_buffer[3] = data->block_descriptor_length;
 		
-
 		cmd[0] = MODE_SELECT;
 		cmd[4] = len;
 	}

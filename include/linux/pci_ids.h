@@ -11,7 +11,7 @@
  */
 
 /* Device classes and subclasses */
-
+ 
 #define PCI_CLASS_NOT_DEFINED		0x0000
 #define PCI_CLASS_NOT_DEFINED_VGA	0x0001
 
@@ -1467,7 +1467,6 @@
 
 #define PCI_VENDOR_ID_ZIATECH		0x1138
 #define PCI_DEVICE_ID_ZIATECH_5550_HC	0x5550
-
 
 #define PCI_VENDOR_ID_SYSKONNECT	0x1148
 #define PCI_DEVICE_ID_SYSKONNECT_TR	0x4200

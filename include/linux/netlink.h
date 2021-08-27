@@ -171,7 +171,6 @@ struct netlink_skb_parms {
 #define NETLINK_CB(skb)		(*(struct netlink_skb_parms*)&((skb)->cb))
 #define NETLINK_CREDS(skb)	(&NETLINK_CB((skb)).creds)
 
-
 extern void netlink_table_grab(void);
 extern void netlink_table_ungrab(void);
 
@@ -218,7 +217,6 @@ int netlink_sendskb(struct sock *sk, struct sk_buff *skb);
 #endif
 
 #define NLMSG_DEFAULT_SIZE (NLMSG_GOODSIZE - NLMSG_HDRLEN)
-
 
 struct netlink_callback {
 	struct sk_buff		*skb;
@@ -268,7 +266,6 @@ extern int netlink_dump_start(struct sock *ssk, struct sk_buff *skb,
 			      int (*dump)(struct sk_buff *skb, struct netlink_callback*),
 			      int (*done)(struct netlink_callback*),
 			      u16 min_dump_alloc);
-
 
 #define NL_NONROOT_RECV 0x1
 #define NL_NONROOT_SEND 0x2

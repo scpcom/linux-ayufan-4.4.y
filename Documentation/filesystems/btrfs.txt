@@ -35,7 +35,7 @@ The main Btrfs features include:
 
 
 
-	MAILING LIST
+MAILING LIST
 	============
 
 There is a Btrfs mailing list hosted on vger.kernel.org. You can

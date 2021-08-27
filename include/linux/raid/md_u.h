@@ -14,7 +14,7 @@
    (for example /usr/src/linux/COPYING); if not, write to the Free
    Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
 */
-
+ 
 #ifndef _MD_U_H
 #define _MD_U_H
 
@@ -170,4 +170,3 @@ typedef struct mdu_param_s
 } mdu_param_t;
 
 #endif 
-

@@ -17,7 +17,7 @@
  *  Support Multibyte characters and cleanup by
  *				OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
  */
-
+ 
 #include <linux/module.h>
 #include <linux/jiffies.h>
 #include <linux/ctype.h>
@@ -810,7 +810,7 @@ static int vfat_create(struct inode *dir, struct dentry *dentry, int mode,
 	inode->i_version++;
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ts;
 	/* timestamp is already written, so mark_inode_dirty() is unneeded. */
-
+	 
 	dentry->d_time = dentry->d_parent->d_inode->i_version;
 	d_instantiate(dentry, inode);
 out:
@@ -906,7 +906,7 @@ static int vfat_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	set_nlink(inode, 2);
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ts;
 	/* timestamp is already written, so mark_inode_dirty() is unneeded. */
-
+	 
 	dentry->d_time = dentry->d_parent->d_inode->i_version;
 	d_instantiate(dentry, inode);
 

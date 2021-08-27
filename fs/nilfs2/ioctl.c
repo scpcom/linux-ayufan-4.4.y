@@ -37,7 +37,6 @@
 #include "sufile.h"
 #include "dat.h"
 
-
 static int nilfs_ioctl_wrap_copy(struct the_nilfs *nilfs,
 				 struct nilfs_argv *argv, int dir,
 				 ssize_t (*dofunc)(struct the_nilfs *,

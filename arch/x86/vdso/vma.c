@@ -86,7 +86,7 @@ static unsigned long vdso_addr(unsigned long start, unsigned len)
 	end -= len;
 	/* This loses some more bits than a modulo, but is cheaper */
 	offset = get_random_int() & (PTRS_PER_PTE - 1);
-	addr = start + (offset << PAGE_SHIFT);
+		addr = start + (offset << PAGE_SHIFT);
 	if (addr >= end)
 		addr = end;
 

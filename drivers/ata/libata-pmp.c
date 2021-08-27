@@ -9,7 +9,7 @@
  *
  * This file is released under the GPLv2.
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/export.h>
 #include <linux/libata.h>
@@ -934,7 +934,7 @@ static void sata_pmp_quirks(struct ata_port *ap)
 	} else if (vendor == 0x1095 && (devid == 0x5723 || devid == 0x5733 ||
 					devid == 0x5734 || devid == 0x5744)) {
 		/* sil5723/5744 quirks */
-
+		 
 		/* sil5723/5744 has either two or three downstream
 		 * ports depending on operation mode.  The last port
 		 * is empty if any actual IO device is available or
@@ -952,9 +952,9 @@ static void sata_pmp_quirks(struct ata_port *ap)
 				       ATA_LFLAG_NO_SRST |
 				       ATA_LFLAG_ASSUME_ATA;
 		}
+		}	
 	}
-}
-
+	
 /**
  *	sata_pmp_attach - attach a SATA PMP device
  *	@dev: SATA PMP device to attach
@@ -1271,6 +1271,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	return 0;
 
  fail:
+
 	ata_dev_err(dev, "PMP revalidation failed (errno=%d)\n", rc);
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;

@@ -7,7 +7,6 @@
 #include <net/netns/generic.h>
 #include "bonding.h"
 
-
 static void *bond_info_seq_start(struct seq_file *seq, loff_t *pos)
 	__acquires(RCU)
 	__acquires(&bond->lock)
@@ -102,7 +101,6 @@ static void bond_info_show_master(struct seq_file *seq)
 		   bond->params.updelay * bond->params.miimon);
 	seq_printf(seq, "Down Delay (ms): %d\n",
 		   bond->params.downdelay * bond->params.miimon);
-
 
 	/* ARP information */
 	if (bond->params.arp_interval > 0) {

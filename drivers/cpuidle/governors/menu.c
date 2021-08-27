@@ -12,7 +12,7 @@
  * This code is licenced under the GPL version 2 as described
  * in the COPYING file that acompanies the Linux Kernel.
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/cpuidle.h>
 #include <linux/pm_qos.h>
@@ -30,7 +30,6 @@
 #define DECAY 8
 #define MAX_INTERESTING 50000
 #define STDDEV_THRESH 400
-
 
 /*
  * Concepts and ideas behind the menu governor
@@ -125,14 +124,12 @@ struct menu_device {
 	int		interval_ptr;
 };
 
-
 #define LOAD_INT(x) ((x) >> FSHIFT)
 #define LOAD_FRAC(x) LOAD_INT(((x) & (FIXED_1-1)) * 100)
 
 static int get_loadavg(void)
 {
 	unsigned long this = this_cpu_load();
-
 
 	return LOAD_INT(this) * 10 + LOAD_FRAC(this) / 10;
 }
@@ -261,7 +258,6 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 	data->expected_us =
 		t.tv_sec * USEC_PER_SEC + t.tv_nsec / NSEC_PER_USEC;
 
-
 	data->bucket = which_bucket(data->expected_us);
 
 	multiplier = performance_multiplier();
@@ -302,8 +298,8 @@ static int menu_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 
 		if (s->power_usage < power_usage) {
 			power_usage = s->power_usage;
-			data->last_state_idx = i;
-			data->exit_us = s->exit_latency;
+		data->last_state_idx = i;
+		data->exit_us = s->exit_latency;
 		}
 	}
 
@@ -348,7 +344,6 @@ static void menu_update(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 	if (unlikely(!(target->flags & CPUIDLE_FLAG_TIME_VALID)))
 		last_idle_us = data->expected_us;
 
-
 	measured_us = last_idle_us;
 
 	/*
@@ -357,7 +352,6 @@ static void menu_update(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 	 */
 	if (measured_us > data->exit_us)
 		measured_us -= data->exit_us;
-
 
 	/* update our correction ratio */
 

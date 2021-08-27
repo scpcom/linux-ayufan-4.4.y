@@ -82,7 +82,6 @@ struct compat_x25_subscrip_struct {
 };
 #endif
 
-
 int x25_parse_address_block(struct sk_buff *skb,
 		struct x25_address *called_addr,
 		struct x25_address *calling_addr)
@@ -115,7 +114,6 @@ empty:
 
 	return rc;
 }
-
 
 int x25_addr_ntoa(unsigned char *p, struct x25_address *called_addr,
 		  struct x25_address *calling_addr)
@@ -1252,7 +1250,6 @@ out_kfree_skb:
 	goto out;
 }
 
-
 static int x25_recvmsg(struct kiocb *iocb, struct socket *sock,
 		       struct msghdr *msg, size_t size,
 		       int flags)
@@ -1355,7 +1352,6 @@ out:
 	release_sock(sk);
 	return rc;
 }
-
 
 static int x25_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {

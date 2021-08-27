@@ -81,9 +81,9 @@ out:
 }
 
 struct btrfs_csum_item *btrfs_lookup_csum(struct btrfs_trans_handle *trans,
-					  struct btrfs_root *root,
-					  struct btrfs_path *path,
-					  u64 bytenr, int cow)
+		  struct btrfs_root *root,
+		  struct btrfs_path *path,
+		  u64 bytenr, int cow)
 {
 	int ret;
 	struct btrfs_key file_key;
@@ -129,7 +129,6 @@ fail:
 		ret = -ENOENT;
 	return ERR_PTR(ret);
 }
-
 
 int btrfs_lookup_file_extent(struct btrfs_trans_handle *trans,
 			     struct btrfs_root *root,
@@ -254,11 +253,11 @@ found:
 			*dst++ = sum;
 		else
 			set_state_private(io_tree, offset, sum);
-		disk_bytenr += bvec->bv_len;
-		offset += bvec->bv_len;
-		bio_index++;
-		bvec++;
-	}
+			disk_bytenr += bvec->bv_len;
+			offset += bvec->bv_len;
+			bio_index++;
+			bvec++;
+		}
 	btrfs_free_path(path);
 	return 0;
 }
@@ -355,9 +354,9 @@ int btrfs_lookup_csums_range(struct btrfs_root *root, u64 start, u64 end,
 				      struct btrfs_csum_item);
 		while (start < csum_end) {
 			size = min_t(size_t, csum_end - start,
-					MAX_ORDERED_SUM_BYTES(root));
+				     MAX_ORDERED_SUM_BYTES(root));
 			sums = kzalloc(btrfs_ordered_sum_size(root, size),
-					GFP_NOFS);
+				       GFP_NOFS);
 			BUG_ON(!sums);
 
 			sector_sum = sums->sums;
@@ -369,7 +368,7 @@ int btrfs_lookup_csums_range(struct btrfs_root *root, u64 start, u64 end,
 			offset *= csum_size;
 
 			while (size > 0) {
-				read_extent_buffer(path->nodes[0],
+			read_extent_buffer(path->nodes[0],
 						&sector_sum->sum,
 						((unsigned long)item) +
 						offset, csum_size);
@@ -452,7 +451,7 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 		sector_sum->sum = btrfs_csum_data(root,
 						  data + bvec->bv_offset,
 						  sector_sum->sum,
-						  bvec->bv_len);
+						    bvec->bv_len);
 		kunmap_atomic(data, KM_USER0);
 		btrfs_csum_final(sector_sum->sum,
 				 (char *)&sector_sum->sum);
@@ -485,9 +484,9 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
  */
 static noinline int truncate_one_csum(struct btrfs_trans_handle *trans,
 				      struct btrfs_root *root,
-				      struct btrfs_path *path,
-				      struct btrfs_key *key,
-				      u64 bytenr, u64 len)
+				       struct btrfs_path *path,
+				       struct btrfs_key *key,
+				       u64 bytenr, u64 len)
 {
 	struct extent_buffer *leaf;
 	u16 csum_size = btrfs_super_csum_size(root->fs_info->super_copy);

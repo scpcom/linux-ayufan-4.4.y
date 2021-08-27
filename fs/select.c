@@ -29,7 +29,6 @@
 
 #include <asm/uaccess.h>
 
-
 /*
  * Estimate expected accuracy in ns from a timeval.
  *
@@ -86,8 +85,6 @@ long select_estimate_accuracy(struct timespec *tv)
 		return current->timer_slack_ns;
 	return ret;
 }
-
-
 
 struct poll_table_page {
 	struct poll_table_page * next;
@@ -388,9 +385,9 @@ static inline void wait_key_set(poll_table *wait, unsigned long in,
 {
 	if (wait) {
 		wait->key = POLLEX_SET;
-		if (in & bit)
+	if (in & bit)
 			wait->key |= POLLIN_SET;
-		if (out & bit)
+	if (out & bit)
 			wait->key |= POLLOUT_SET;
 	}
 }

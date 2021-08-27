@@ -32,7 +32,6 @@
 #include <linux/usb/cdc.h>
 #include <linux/usb/usbnet.h>
 
-
 #if defined(CONFIG_USB_NET_RNDIS_HOST) || defined(CONFIG_USB_NET_RNDIS_HOST_MODULE)
 
 static int is_rndis(struct usb_interface_descriptor *desc)
@@ -652,7 +651,6 @@ static struct usb_driver cdc_driver = {
 	.reset_resume =	usbnet_resume,
 	.supports_autosuspend = 1,
 };
-
 
 static int __init cdc_init(void)
 {

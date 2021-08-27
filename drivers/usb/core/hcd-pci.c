@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/pci.h>
@@ -36,7 +36,6 @@
 #endif
 
 #include "usb.h"
-
 
 /* PCI-based HCs are common, but plenty of non-PCI HCs are used too */
 
@@ -273,7 +272,6 @@ disable_pci:
 	return retval;
 }
 EXPORT_SYMBOL_GPL(usb_hcd_pci_probe);
-
 
 /* may be called without controller electrically present */
 /* may be called with controller, bus, and devices active */

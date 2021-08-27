@@ -134,7 +134,7 @@ struct elf_info {
 	unsigned int modinfo_len;
 
 	/* support for 32bit section numbers */
-
+	 
 	unsigned int num_sections; /* max_secindex + 1 */
 	unsigned int secindex_strings;
 	/* if Nth symbol table entry has .st_shndx = SHN_XINDEX,

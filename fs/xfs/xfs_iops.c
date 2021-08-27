@@ -102,7 +102,6 @@ xfs_mark_inode_dirty(
 
 }
 
-
 int xfs_initxattrs(struct inode *inode, const struct xattr *xattr_array,
 		   void *fs_info)
 {
@@ -215,7 +214,6 @@ xfs_vn_mknod(
 		if (unlikely(error))
 			goto out_cleanup_inode;
 	}
-
 
 	d_instantiate(dentry, inode);
 	return -error;
@@ -480,7 +478,6 @@ xfs_vn_getattr(
 	stat->ctime = inode->i_ctime;
 	stat->blocks =
 		XFS_FSB_TO_BB(mp, ip->i_d.di_nblocks + ip->i_delayed_blks);
-
 
 	switch (inode->i_mode & S_IFMT) {
 	case S_IFBLK:

@@ -7,7 +7,7 @@
  *
  * This file is released under the GPL.
  */
-
+ 
 #include "dm.h"
 
 #include <linux/module.h>
@@ -45,7 +45,6 @@ struct vers_iter {
     char *end;
     uint32_t flags;
 };
-
 
 #define NUM_BUCKETS 64
 #define MASK_BUCKETS (NUM_BUCKETS - 1)

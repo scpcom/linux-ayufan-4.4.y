@@ -39,7 +39,7 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+ 
 #include <linux/module.h>
 #include <scsi/osd_ore.h>
 
@@ -449,7 +449,7 @@ static void _write_done(struct ore_io_state *ios, void *private)
 	int ret = ore_check_io(ios, &__on_dev_error);
 
 	/* FIXME: _io_free(ios) can we dealocate the libosd resources; */
-
+		 
 	if (likely(!ret)) {
 		/* FIXME: should be based on the OSD's persistence model
 		 * See OSD2r05 Section 4.13 Data persistence model */

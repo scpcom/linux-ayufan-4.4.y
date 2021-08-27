@@ -23,7 +23,6 @@ struct scsi_host_cmd_pool;
 struct scsi_transport_template;
 struct blk_queue_tags;
 
-
 /*
  * The various choices mean:
  * NONE: Self evident.	Host adapter is not capable of scatter-gather.
@@ -101,7 +100,6 @@ struct scsi_host_template {
 	 * Status: OPTIONAL
 	 */
 	int (* ioctl)(struct scsi_device *dev, int cmd, void __user *arg);
-
 
 #ifdef CONFIG_COMPAT
 	/* 
@@ -385,7 +383,6 @@ struct scsi_host_template {
 #define SCSI_ADAPTER_RESET	1
 #define SCSI_FIRMWARE_RESET	2
 
-
 	/*
 	 * Name of proc directory
 	 */
@@ -575,7 +572,6 @@ struct scsi_host_template {
 		return rc;						\
 	}
 
-
 /*
  * shost state: If you alter this, you also need to alter scsi_sysfs.c
  * (for the ascii descriptions) and the state model enforcer:
@@ -743,7 +739,6 @@ struct Scsi_Host {
 	unsigned char dma_channel;
 	unsigned int  irq;
 	
-
 	enum scsi_host_state shost_state;
 
 	/* ldm bits */

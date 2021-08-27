@@ -10,7 +10,6 @@
  *
  */
 
-
 #include <linux/time.h>
 #include <linux/errno.h>
 #include <linux/stat.h>
@@ -186,11 +185,9 @@ static inline int ncp_is_server_root(struct inode *inode)
 		inode == inode->i_sb->s_root->d_inode);
 }
 
-
 /*
  * This is the callback when the dcache has a lookup hit.
  */
-
 
 #ifdef CONFIG_NCPFS_STRONG
 /* try to delete a readonly file (NW R bit set) */
@@ -287,7 +284,6 @@ leave_me:;
         return(res);
 }
 #endif	/* CONFIG_NCPFS_STRONG */
-
 
 static int
 ncp_lookup_validate(struct dentry *dentry, struct nameidata *nd)
@@ -1220,7 +1216,6 @@ static int day_n[] =
 {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 0, 0, 0, 0};
 /* Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec */
 
-
 extern struct timezone sys_tz;
 
 static int utc2local(int time)
@@ -1250,7 +1245,6 @@ ncp_date_dos2unix(__le16 t, __le16 d)
 	/* days since 1.1.70 plus 80's leap day */
 	return local2utc(secs);
 }
-
 
 /* Convert linear UNIX date to a MS-DOS time/date pair. */
 void

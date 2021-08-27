@@ -35,7 +35,6 @@
 #include <asm/irq.h>
 #include <asm/delay.h>
 
-
 MODULE_AUTHOR("Stephen Street");
 MODULE_DESCRIPTION("PXA2xx SSP SPI Controller");
 MODULE_LICENSE("GPL");
@@ -391,7 +390,6 @@ static int map_dma_buffers(struct driver_data *drv_data)
 		drv_data->rx_map_len = 4;
 	} else
 		drv_data->rx_map_len = drv_data->len;
-
 
 	/* Modify setup if tx buffer is null */
 	if (drv_data->tx == NULL) {
@@ -1151,23 +1149,23 @@ static void pump_transfers(unsigned long data)
 	}
 
 	/* see if we need to reload the config registers */
-	if ((read_SSCR0(reg) != cr0)
-		|| (read_SSCR1(reg) & SSCR1_CHANGE_MASK) !=
-			(cr1 & SSCR1_CHANGE_MASK)) {
+		if ((read_SSCR0(reg) != cr0)
+		         || (read_SSCR1(reg) & SSCR1_CHANGE_MASK) !=
+			          (cr1 & SSCR1_CHANGE_MASK)) {
 
-		/* stop the SSP, and update the other bits */
-		write_SSCR0(cr0 & ~SSCR0_SSE, reg);
-		if (!pxa25x_ssp_comp(drv_data))
-			write_SSTO(chip->timeout, reg);
-		/* first set CR1 without interrupt and service enables */
-		write_SSCR1(cr1 & SSCR1_CHANGE_MASK, reg);
-		/* restart the SSP */
-		write_SSCR0(cr0, reg);
+		     /* stop the SSP, and update the other bits */
+		     write_SSCR0(cr0 & ~SSCR0_SSE, reg);
+		     if (!pxa25x_ssp_comp(drv_data))
+			  write_SSTO(chip->timeout, reg);
+		     /* first set CR1 without interrupt and service enables */
+		     write_SSCR1(cr1 & SSCR1_CHANGE_MASK, reg);
+		     /* restart the SSP */
+		     write_SSCR0(cr0, reg);
 
-	} else {
-		if (!pxa25x_ssp_comp(drv_data))
-			write_SSTO(chip->timeout, reg);
-	}
+	        } else {
+		        if (!pxa25x_ssp_comp(drv_data))
+			    write_SSTO(chip->timeout, reg);
+	        }
 
 	cs_assert(drv_data);
 

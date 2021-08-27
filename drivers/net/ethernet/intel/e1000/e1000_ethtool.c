@@ -220,7 +220,6 @@ static int e1000_set_settings(struct net_device *netdev,
 static u32 e1000_get_link(struct net_device *netdev)
 {
 	struct e1000_adapter *adapter = netdev_priv(netdev);
-
 	/*
 	 * If the link is not reported up to netdev, interrupts are disabled,
 	 * and so the physical link state may have changed since we last

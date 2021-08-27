@@ -21,7 +21,7 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  *
  */
-
+ 
 #include <linux/mm.h>
 #include <linux/module.h>
 #include <linux/file.h>
@@ -93,8 +93,6 @@ static inline void snd_leave_user(mm_segment_t fs)
 {
 	set_fs(fs);
 }
-
-
 
 int snd_pcm_info(struct snd_pcm_substream *substream, struct snd_pcm_info *info)
 {
@@ -1046,7 +1044,7 @@ static int snd_pcm_pause(struct snd_pcm_substream *substream, int push)
 
 #ifdef CONFIG_PM
 /* suspend */
-
+ 
 static int snd_pcm_pre_suspend(struct snd_pcm_substream *substream, int state)
 {
 	struct snd_pcm_runtime *runtime = substream->runtime;
@@ -1553,7 +1551,6 @@ static int snd_pcm_drop(struct snd_pcm_substream *substream)
 
 	return result;
 }
-
 
 /* WARNING: Don't forget to fput back the file */
 static struct file *snd_pcm_file_fd(int fd)

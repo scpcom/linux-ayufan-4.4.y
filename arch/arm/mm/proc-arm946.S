@@ -424,4 +424,3 @@ __arm946_proc_info:
 	.long	0
 	.long	arm946_cache_fns
 	.size	__arm946_proc_info, . - __arm946_proc_info
-

@@ -320,6 +320,7 @@ config XEN_NETDEV_BACKEND
 	  The corresponding Linux frontend driver is enabled by the
 	  CONFIG_XEN_NETDEV_FRONTEND configuration option.
 
+
 	  The backend driver presents a standard network device
 	  endpoint for each paravirtual network device to the driver
 	  domain network stack. These can then be bridged or routed

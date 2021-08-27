@@ -198,7 +198,6 @@ struct net_device_stats {
 
 #endif  /*  __KERNEL__  */
 
-
 /* Media selection options. */
 enum {
         IF_PORT_UNKNOWN = 0,
@@ -310,7 +309,6 @@ enum netdev_state_t {
 	__LINK_STATE_LINKWATCH_PENDING,
 	__LINK_STATE_DORMANT,
 };
-
 
 /*
  * This structure holds at boot time configured netdevice settings. They
@@ -1059,7 +1057,6 @@ struct net_device {
 #define NETIF_F_GSO_SOFTWARE	(NETIF_F_TSO | NETIF_F_TSO_ECN | \
 				 NETIF_F_TSO6 | NETIF_F_UFO)
 
-
 #define NETIF_F_GEN_CSUM	(NETIF_F_NO_CSUM | NETIF_F_HW_CSUM)
 #define NETIF_F_V4_CSUM		(NETIF_F_GEN_CSUM | NETIF_F_IP_CSUM)
 #define NETIF_F_V6_CSUM		(NETIF_F_GEN_CSUM | NETIF_F_IPV6_CSUM)
@@ -1143,7 +1140,6 @@ struct net_device {
 	bool			uc_promisc;
 	unsigned int		promiscuity;
 	unsigned int		allmulti;
-
 
 	/* Protocol specific pointers */
 
@@ -1561,9 +1557,7 @@ extern int register_netdevice_notifier(struct notifier_block *nb);
 extern int unregister_netdevice_notifier(struct notifier_block *nb);
 extern int call_netdevice_notifiers(unsigned long val, struct net_device *dev);
 
-
 extern rwlock_t				dev_base_lock;		/* Device list lock */
-
 
 #define for_each_netdev(net, d)		\
 		list_for_each_entry(d, &(net)->dev_base_head, dev_list)
@@ -2207,7 +2201,6 @@ static inline int netif_dormant(const struct net_device *dev)
 	return test_bit(__LINK_STATE_DORMANT, &dev->state);
 }
 
-
 /**
  *	netif_oper_up - test if device is operational
  *	@dev: network device
@@ -2619,7 +2612,7 @@ extern int syno_get_dev_vendor_mac(const char *szDev, char *szMac);
 /* Logging, debugging and troubleshooting/diagnostic helpers. */
 
 /* netdev_printk helpers, similar to dev_printk */
-
+ 
 static inline const char *netdev_name(const struct net_device *dev)
 {
 	if (dev->reg_state != NETREG_REGISTERED)

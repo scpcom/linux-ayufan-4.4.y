@@ -13,7 +13,7 @@
  *  Big-endian to little-endian byte-swapping/bitmaps by
  *        David S. Miller (davem@caip.rutgers.edu), 1995
  */
-
+ 
 #include <linux/time.h>
 #include <linux/capability.h>
 #include <linux/fs.h>
@@ -40,7 +40,6 @@
  * the free blocks count in the block.  The descriptors are loaded in memory
  * when a file system is mounted (see ext3_fill_super).
  */
-
 
 #define in_range(b, first, len)	((b) >= (first) && (b) <= (first) + (len) - 1)
 
@@ -1065,7 +1064,7 @@ static int find_next_reservable_window(
 	 * return the reservation window that we could append to.
 	 * succeed.
 	 */
-
+	 
 	if ((prev != my_rsv) && (!rsv_is_empty(&my_rsv->rsv_window)))
 		rsv_window_remove(sb, my_rsv);
 
@@ -1160,7 +1159,7 @@ static int alloc_new_reservation(struct ext3_reserve_window_node *my_rsv,
 		 * Maybe we could shift the start block of the reservation
 		 * window to the first block of next group.
 		 */
-
+		 
 		if ((my_rsv->rsv_start <= group_end_block) &&
 				(my_rsv->rsv_end > group_end_block) &&
 				(start_block >= my_rsv->rsv_start))

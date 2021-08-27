@@ -50,22 +50,22 @@ u##bits btrfs_##name(struct extent_buffer *eb,				\
 	unsigned long part_offset = (unsigned long)s;			\
 	unsigned long offset = part_offset + offsetof(type, member);	\
 	type *p;							\
-	int err;						\
-	char *kaddr;						\
-	unsigned long map_start;				\
-	unsigned long map_len;					\
-	u##bits res;						\
+	int err;							\
+	char *kaddr;							\
+	unsigned long map_start;					\
+	unsigned long map_len;						\
+	u##bits res;							\
 	err = map_private_extent_buffer(eb, offset,		\
 			sizeof(((type *)0)->member),		\
-			&kaddr, &map_start, &map_len);		\
-	if (err) {						\
-		__le##bits leres;				\
+					&kaddr, &map_start, &map_len);	\
+	if (err) {							\
+		__le##bits leres;					\
 		read_eb_member(eb, s, type, member, &leres);	\
-		return le##bits##_to_cpu(leres);		\
-	}							\
+		return le##bits##_to_cpu(leres);			\
+	}								\
 	p = (type *)(kaddr + part_offset - map_start);		\
 	res = le##bits##_to_cpu(p->member);			\
-	return res;						\
+	return res;							\
 }									\
 void btrfs_set_##name(struct extent_buffer *eb,				\
 				    type *s, u##bits val)		\
@@ -73,19 +73,19 @@ void btrfs_set_##name(struct extent_buffer *eb,				\
 	unsigned long part_offset = (unsigned long)s;			\
 	unsigned long offset = part_offset + offsetof(type, member);	\
 	type *p;							\
-	int err;						\
-	char *kaddr;						\
-	unsigned long map_start;				\
-	unsigned long map_len;					\
+	int err;							\
+	char *kaddr;							\
+	unsigned long map_start;					\
+	unsigned long map_len;						\
 	err = map_private_extent_buffer(eb, offset,		\
 			sizeof(((type *)0)->member),		\
-			&kaddr, &map_start, &map_len);		\
-	if (err) {						\
-		__le##bits val2;				\
-		val2 = cpu_to_le##bits(val);			\
+			&kaddr, &map_start, &map_len);			\
+	if (err) {							\
+		__le##bits val2;					\
+		val2 = cpu_to_le##bits(val);				\
 		write_eb_member(eb, s, type, member, &val2);	\
-		return;						\
-	}							\
+		return;							\
+	}								\
 	p = (type *)(kaddr + part_offset - map_start);		\
 	p->member = cpu_to_le##bits(val);			\
 }

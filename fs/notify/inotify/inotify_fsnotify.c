@@ -24,7 +24,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  */
-
+ 
 #include <linux/dcache.h> /* d_unlinked */
 #include <linux/fs.h> /* struct inode */
 #include <linux/fsnotify_backend.h>
@@ -208,7 +208,6 @@ static void inotify_free_group_priv(struct fsnotify_group *group)
 void inotify_free_event_priv(struct fsnotify_event_private_data *fsn_event_priv)
 {
 	struct inotify_event_private_data *event_priv;
-
 
 	event_priv = container_of(fsn_event_priv, struct inotify_event_private_data,
 				  fsnotify_event_priv_data);

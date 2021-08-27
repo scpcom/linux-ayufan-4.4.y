@@ -27,7 +27,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-
+ 
 #include <linux/string.h>
 #include <linux/syscalls.h>
 #include <linux/pagemap.h>
@@ -298,7 +298,6 @@ parse_tag_65_packet(struct ecryptfs_session_key *session_key, u8 *cipher_code,
 out:
 	return rc;
 }
-
 
 static int
 write_tag_66_packet(char *signature, u8 cipher_code,
@@ -1325,10 +1324,10 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	ecryptfs_to_hex((*new_auth_tok)->token.private_key.signature,
 			&data[(*packet_size)], ECRYPTFS_SIG_SIZE);
 	*packet_size += ECRYPTFS_SIG_SIZE;
-	/* This byte is skipped because the kernel does not need to
-	 * know which public key encryption algorithm was used */
-	(*packet_size)++;
-	(*new_auth_tok)->session_key.encrypted_key_size =
+		/* This byte is skipped because the kernel does not need to
+		 * know which public key encryption algorithm was used */
+		(*packet_size)++;
+(*new_auth_tok)->session_key.encrypted_key_size =
 		body_size - (ECRYPTFS_SIG_SIZE + 2);
 	if ((*new_auth_tok)->session_key.encrypted_key_size
 	    > ECRYPTFS_MAX_ENCRYPTED_KEY_BYTES) {
@@ -2542,4 +2541,3 @@ ecryptfs_add_global_auth_tok(struct ecryptfs_mount_crypt_stat *mount_crypt_stat,
 out:
 	return rc;
 }
-

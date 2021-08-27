@@ -1125,10 +1125,10 @@ mext_inode_double_unlock(struct inode *inode1, struct inode *inode2)
 		goto out;
 
 	if (inode1)
-		mutex_unlock(&inode1->i_mutex);
+	mutex_unlock(&inode1->i_mutex);
 
 	if (inode2 && inode2 != inode1)
-		mutex_unlock(&inode2->i_mutex);
+	mutex_unlock(&inode2->i_mutex);
 
 out:
 	return ret;

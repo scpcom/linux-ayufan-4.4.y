@@ -24,7 +24,7 @@
  *
  *  Assorted race fixes, rewrite of ext3_get_block() by Al Viro, 2000
  */
-
+ 
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/time.h>
@@ -770,7 +770,7 @@ static int ext3_splice_branch(handle_t *handle, struct inode *inode,
 			goto err_out;
 	}
 	/* That's it */
-
+	 
 	*where->p = where->key;
 
 	/*
@@ -871,7 +871,6 @@ int ext3_get_blocks_handle(handle_t *handle, struct inode *inode,
 	struct ext3_inode_info *ei = EXT3_I(inode);
 	int count = 0;
 	ext3_fsblk_t first_block = 0;
-
 
 	trace_ext3_get_blocks_enter(inode, iblock, maxblocks, create);
 	J_ASSERT(handle != NULL || create == 0);
@@ -1349,7 +1348,6 @@ out:
 	return ret;
 }
 
-
 int ext3_journal_dirty_data(handle_t *handle, struct buffer_head *bh)
 {
 	int err = journal_dirty_data(handle, bh);
@@ -1562,7 +1560,7 @@ static sector_t ext3_bmap(struct address_space *mapping, sector_t block)
 		 * hasn't yet been flushed to disk, they deserve
 		 * everything they get.
 		 */
-
+		 
 		ext3_clear_inode_state(inode, EXT3_STATE_JDATA);
 		journal = EXT3_JOURNAL(inode);
 		journal_lock_updates(journal);
@@ -2256,7 +2254,7 @@ static Indirect *ext3_find_shared(struct inode *inode, int depth,
 #endif
 	}
 	/* Writer: end */
-
+	 
 	while(partial > p) {
 		brelse(partial->bh);
 		partial--;

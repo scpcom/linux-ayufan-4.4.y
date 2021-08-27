@@ -2246,10 +2246,10 @@ static void add_kallsyms(struct module *mod, const struct load_info *info)
 		if (!is_core_symbol(src, info->sechdrs, info->hdr->e_shnum))
 			continue;
 		dst[ndst] = *src;
-		dst[ndst].st_name = bitmap_weight(info->strmap,
-						  dst[ndst].st_name);
-		++ndst;
-	}
+			dst[ndst].st_name = bitmap_weight(info->strmap,
+							  dst[ndst].st_name);
+			++ndst;
+		}
 	mod->core_num_syms = ndst;
 
 	mod->core_strtab = s = mod->module_core + info->stroffs;
@@ -3272,7 +3272,7 @@ static char *module_flags(struct module *mod, char *buf)
 		 * TAINT_UNSAFE_SMP, TAINT_MACHINE_CHECK, TAINT_BAD_PAGE don't
 		 * apply to modules.
 		 */
-
+		 
 		/* Show a - for module-is-being-unloaded */
 		if (mod->state == MODULE_STATE_GOING)
 			buf[bx++] = '-';

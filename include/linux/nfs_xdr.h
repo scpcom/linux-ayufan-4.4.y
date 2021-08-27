@@ -871,7 +871,6 @@ struct nfs4_link_res {
 	struct nfs4_sequence_res	seq_res;
 };
 
-
 struct nfs4_lookup_arg {
 	const struct nfs_fh *		dir_fh;
 	const struct qstr *		name;

@@ -365,7 +365,6 @@ out:
 	return r;
 }
 
-
 int kvm_set_irq_routing(struct kvm *kvm,
 			const struct kvm_irq_routing_entry *ue,
 			unsigned nr,

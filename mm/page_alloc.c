@@ -16,7 +16,7 @@
  *  Per cpu hot/cold page lists, bulk allocation, Martin J. Bligh, Sept 2002
  *          (lots of bits borrowed from Ingo Molnar & Andrew Morton)
  */
-
+ 
 #include <linux/stddef.h>
 #include <linux/mm.h>
 #include <linux/swap.h>
@@ -111,7 +111,7 @@ gfp_t gfp_allowed_mask __read_mostly = GFP_BOOT_MASK;
  * only be modified with pm_mutex held, unless the suspend/hibernate code is
  * guaranteed not to run in parallel with that modification).
  */
-
+ 
 static gfp_t saved_gfp_mask;
 
 void pm_restore_gfp_mask(void)
@@ -723,7 +723,6 @@ void __meminit __free_pages_bootmem(struct page *page, unsigned int order)
 	}
 }
 
-
 /*
  * The order of subdivision here is critical for the IO subsystem.
  * Please do not alter this order without good reasons and regression
@@ -825,7 +824,6 @@ struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
 
 	return NULL;
 }
-
 
 /*
  * This array describes the order lists are fallen back to when
@@ -1924,7 +1922,7 @@ __alloc_pages_direct_compact(gfp_t gfp_mask, unsigned int order,
 		 * but not enough to satisfy watermarks.
 		 */
 		count_vm_event(COMPACTFAIL);
-		defer_compaction(preferred_zone);
+			defer_compaction(preferred_zone);
 
 		cond_resched();
 	}
@@ -2531,7 +2529,7 @@ bool skip_free_areas_node(unsigned int flags, int nid)
 		goto out;
 
 	get_mems_allowed();
-	ret = !node_isset(nid, cpuset_current_mems_allowed);
+		ret = !node_isset(nid, cpuset_current_mems_allowed);
 	put_mems_allowed();
 out:
 	return ret;
@@ -2717,7 +2715,6 @@ static int build_zonelists_node(pg_data_t *pgdat, struct zonelist *zonelist,
 	return nr_zones;
 }
 
-
 /*
  *  zonelist_order:
  *  0 = automatic detection of better ordering.
@@ -2736,7 +2733,6 @@ static int build_zonelists_node(pg_data_t *pgdat, struct zonelist *zonelist,
  */
 static int current_zonelist_order = ZONELIST_ORDER_DEFAULT;
 static char zonelist_order_name[3][8] = {"Default", "Node", "Zone"};
-
 
 #ifdef CONFIG_NUMA
 /* The value user specified ....changed by config */
@@ -2822,7 +2818,6 @@ out:
 	return ret;
 }
 
-
 #define MAX_NODE_LOAD (nr_online_nodes)
 static int node_load[MAX_NUMNODES];
 
@@ -2885,7 +2880,6 @@ static int find_next_best_node(int node, nodemask_t *used_node_mask)
 
 	return best_node;
 }
-
 
 /*
  * Build zonelists ordered by node and zones within node.
@@ -3413,25 +3407,25 @@ static void setup_zone_migrate_reserve(struct zone *zone)
 			continue;
 
 		/* Blocks with reserved pages will never free, skip them. */
-		block_end_pfn = min(pfn + pageblock_nr_pages, end_pfn);
-		if (pageblock_is_reserved(pfn, block_end_pfn))
-			continue;
+			block_end_pfn = min(pfn + pageblock_nr_pages, end_pfn);
+			if (pageblock_is_reserved(pfn, block_end_pfn))
+				continue;
 
 		block_migratetype = get_pageblock_migratetype(page);
 
-		/* If this block is reserved, account for it */
+			/* If this block is reserved, account for it */
 		if (reserve > 0 && block_migratetype == MIGRATE_RESERVE) {
-			reserve--;
-			continue;
-		}
+				reserve--;
+				continue;
+			}
 
-		/* Suitable for reserving if this block is movable */
+			/* Suitable for reserving if this block is movable */
 		if (reserve > 0 && block_migratetype == MIGRATE_MOVABLE) {
 			set_pageblock_migratetype(page, MIGRATE_RESERVE);
 			move_freepages_block(zone, page, MIGRATE_RESERVE);
-			reserve--;
-			continue;
-		}
+				reserve--;
+				continue;
+			}
 
 		/*
 		 * If the reserve is met and this is a previous reserved block,

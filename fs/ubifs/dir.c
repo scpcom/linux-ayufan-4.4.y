@@ -996,7 +996,6 @@ static int ubifs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	if (unlink)
 		ubifs_assert(mutex_is_locked(&new_inode->i_mutex));
 
-
 	if (unlink && is_dir) {
 		err = check_dir_empty(c, new_inode);
 		if (err)

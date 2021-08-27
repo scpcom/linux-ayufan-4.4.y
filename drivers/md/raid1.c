@@ -33,7 +33,7 @@
  * (for example /usr/src/linux/COPYING); if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #include <linux/slab.h>
 #include <linux/delay.h>
 #include <linux/blkdev.h>
@@ -545,7 +545,6 @@ static void raid1_end_write_request(struct bio *bio, int error)
 		bio_put(to_put);
 }
 
-
 /*
  * This routine returns the disk from which the requested read should
  * be done. There is a per-array 'next expected sequential IO' sector
@@ -755,7 +754,7 @@ static void flush_pending_writes(struct r1conf *conf)
 		while (bio) { /* submit pending writes */
 			struct bio *next = bio->bi_next;
 			bio->bi_next = NULL;
-			generic_make_request(bio);
+				generic_make_request(bio);
 			bio = next;
 		}
 	} else
@@ -821,7 +820,7 @@ static void wait_barrier(struct r1conf *conf)
 		conf->nr_waiting++;
 		wait_event_lock_irq(conf->wait_barrier, !conf->barrier,
 				    conf->resync_lock,
-				    );
+			);
 		conf->nr_waiting--;
 	}
 	conf->nr_pending++;
@@ -869,7 +868,6 @@ static void unfreeze_array(struct r1conf *conf)
 	wake_up(&conf->wait_barrier);
 	spin_unlock_irq(&conf->resync_lock);
 }
-
 
 /* duplicate the data pages for behind I/O 
  */
@@ -1037,7 +1035,7 @@ read_again:
 			/* could not read all from this device, so we will
 			 * need another r1_bio.
 			 */
-
+			 
 			sectors_handled = (r1_bio->sector + max_sectors
 					   - bio->bi_sector);
 			r1_bio->sectors = max_sectors;
@@ -1547,7 +1545,6 @@ static int raid1_spare_active(struct mddev *mddev)
 	return count;
 }
 
-
 static int raid1_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 {
 	struct r1conf *conf = mddev->private;
@@ -1826,7 +1823,7 @@ static int fix_sync_read_error(struct r1bio *r1_bio)
 					continue;
 				if (!rdev_set_badblocks(rdev, sect, s, 0))
 					abort = 1;
-			}
+				}
 			if (abort) {
 				conf->recovery_disabled =
 					mddev->recovery_disabled;
@@ -1921,7 +1918,7 @@ static int process_checks(struct r1bio *r1_bio)
 					   page_address(s),
 					   PAGE_SIZE))
 					break;
-			}
+				}
 		} else
 			j = 0;
 		if (j >= 0)
@@ -2002,7 +1999,7 @@ static void sync_request_write(struct mddev *mddev, struct r1bio *r1_bio)
 	if (atomic_dec_and_test(&r1_bio->remaining)) {
 		/* if we're here, all write(s) have completed, so clean up */
 		md_done_sync(mddev, r1_bio->sectors, 1);
-		put_buf(r1_bio);
+			put_buf(r1_bio);
 	}
 }
 
@@ -2167,7 +2164,7 @@ static int narrow_write_error(struct r1bio *r1_bio, int i)
 		if (sectors > sect_to_write)
 			sectors = sect_to_write;
 		/* Write at 'sector' for 'sectors'*/
-
+		 
 		wbio = bio_alloc_mddev(GFP_NOIO, vcnt, mddev);
 		memcpy(wbio->bi_io_vec, vec, vcnt * sizeof(struct bio_vec));
 		wbio->bi_sector = r1_bio->sector;
@@ -2411,7 +2408,6 @@ static void raid1d(struct mddev *mddev)
 	blk_finish_plug(&plug);
 }
 
-
 static int init_resync(struct r1conf *conf)
 {
 	int buffs;
@@ -2537,7 +2533,7 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr, int *skipp
 	 * If a read fails, we try reading from something else for which READ
 	 * is OK.
 	 */
-
+	 
 	r1_bio->mddev = mddev;
 	r1_bio->sector = sector_nr;
 	r1_bio->state = 0;

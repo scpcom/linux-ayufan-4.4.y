@@ -10,7 +10,6 @@
 #define USB_MAJOR			180
 #define USB_DEVICE_MAJOR		189
 
-
 #ifdef __KERNEL__
 
 #include <linux/errno.h>        /* for -ENODEV */
@@ -629,7 +628,6 @@ extern struct usb_host_interface *usb_find_alt_setting(
 		struct usb_host_config *config,
 		unsigned int iface_num,
 		unsigned int alt_num);
-
 
 /**
  * usb_make_path - returns stable device path in the usb tree
@@ -1461,7 +1459,6 @@ extern int usb_driver_set_configuration(struct usb_device *udev, int config);
 #define USB_CTRL_GET_TIMEOUT	5000
 #define USB_CTRL_SET_TIMEOUT	5000
 
-
 /**
  * struct usb_sg_request - support for scatter/gather I/O
  * @status: zero indicates success, else negative errno
@@ -1510,7 +1507,6 @@ int usb_sg_init(
 );
 void usb_sg_cancel(struct usb_sg_request *io);
 void usb_sg_wait(struct usb_sg_request *io);
-
 
 /* ----------------------------------------------------------------------- */
 

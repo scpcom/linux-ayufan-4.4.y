@@ -952,7 +952,7 @@ _base_interrupt(int irq, void *bus_id)
 				    reply);
 			if (rc)
 				mpt2sas_base_free_smid(ioc, smid);
-		}
+			}
 		if (!smid)
 			_base_async_event(ioc, msix_index, reply);
 
@@ -1135,7 +1135,6 @@ _base_add_sg_single_32(void *paddr, u32 flags_length, dma_addr_t dma_addr)
 	sgel->FlagsLength = cpu_to_le32(flags_length);
 	sgel->Address = cpu_to_le32(dma_addr);
 }
-
 
 /**
  * _base_add_sg_single_64 - Place a simple 64 bit SGE at address pAddr.
@@ -1478,7 +1477,6 @@ mpt2sas_base_map_resources(struct MPT2SAS_ADAPTER *ioc)
 		return -ENODEV;
 	}
 
-
 	if (pci_request_selected_regions(pdev, ioc->bars,
 	    MPT2SAS_DRIVER_NAME)) {
 		printk(MPT2SAS_WARN_FMT "pci_request_selected_regions: "
@@ -1703,7 +1701,6 @@ mpt2sas_base_get_smid_hpr(struct MPT2SAS_ADAPTER *ioc, u8 cb_idx)
 	return smid;
 }
 
-
 /**
  * mpt2sas_base_free_smid - put smid back on free_list
  * @ioc: per adapter object
@@ -1814,7 +1811,6 @@ mpt2sas_base_put_smid_scsi_io(struct MPT2SAS_ADAPTER *ioc, u16 smid, u16 handle)
 	Mpi2RequestDescriptorUnion_t descriptor;
 	u64 *request = (u64 *)&descriptor;
 
-
 	descriptor.SCSIIO.RequestFlags = MPI2_REQ_DESCRIPT_FLAGS_SCSI_IO;
 	descriptor.SCSIIO.MSIxIndex =  _base_get_msix_index(ioc);
 	descriptor.SCSIIO.SMID = cpu_to_le16(smid);
@@ -1823,7 +1819,6 @@ mpt2sas_base_put_smid_scsi_io(struct MPT2SAS_ADAPTER *ioc, u16 smid, u16 handle)
 	_base_writeq(*request, &ioc->chip->RequestDescriptorPostLow,
 	    &ioc->scsi_lookup_lock);
 }
-
 
 /**
  * mpt2sas_base_put_smid_hi_priority - send Task Management request to firmware
@@ -2380,7 +2375,6 @@ _base_release_memory_pools(struct MPT2SAS_ADAPTER *ioc)
 	}
 }
 
-
 /**
  * _base_allocate_memory_pools - allocate start of day memory pools
  * @ioc: per adapter object
@@ -2480,7 +2474,6 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 		ioc->hba_queue_depth = ioc->reply_free_queue_depth - 64;
 	}
 
-
 	dinitprintk(ioc, printk(MPT2SAS_INFO_FMT "scatter gather: "
 	    "sge_in_main_msg(%d), sge_per_chain(%d), sge_per_io(%d), "
 	    "chains_per_io(%d)\n", ioc->name, ioc->max_sges_in_main_message,
@@ -2529,7 +2522,6 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 		    "total(%d kb)\n", ioc->name, ioc->hba_queue_depth,
 		    ioc->chains_needed_per_io, ioc->request_sz, sz/1024);
 
-
 	/* hi-priority queue */
 	ioc->hi_priority = ioc->request + ((ioc->scsiio_depth + 1) *
 	    ioc->request_sz);
@@ -2541,7 +2533,6 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 	    ioc->request_sz);
 	ioc->internal_dma = ioc->hi_priority_dma + (ioc->hi_priority_depth *
 	    ioc->request_sz);
-
 
 	dinitprintk(ioc, printk(MPT2SAS_INFO_FMT "request pool(0x%p): "
 	    "depth(%d), frame_size(%d), pool_size(%d kB)\n", ioc->name,
@@ -2750,7 +2741,6 @@ chain_done:
  out:
 	return -ENOMEM;
 }
-
 
 /**
  * mpt2sas_base_get_iocstate - Get the current state of a MPT adapter.
@@ -3205,7 +3195,6 @@ mpt2sas_base_sas_iounit_control(struct MPT2SAS_ADAPTER *ioc,
 	return rc;
 }
 
-
 /**
  * mpt2sas_base_scsi_enclosure_processor - sending request to sep device
  * @ioc: per adapter object
@@ -3464,7 +3453,6 @@ _base_send_ioc_init(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	mpi_request.ReplyDescriptorPostQueueAddress =
 	    cpu_to_le64((u64)ioc->reply_post_free_dma);
 
-
 	/* This time stamp specifies number of milliseconds
 	 * since epoch ~ midnight January 1, 1970.
 	 */
@@ -3554,7 +3542,6 @@ mpt2sas_port_enable_done(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index,
 	complete(&ioc->port_enable_cmds.done);
 	return 1;
 }
-
 
 /**
  * _base_send_port_enable - send port_enable(discovery stuff) to firmware
@@ -3709,7 +3696,6 @@ _base_determine_wait_on_discovery(struct MPT2SAS_ADAPTER *ioc)
 
 	return 1;
 }
-
 
 /**
  * _base_unmask_events - turn on notification for this event
@@ -4272,7 +4258,6 @@ mpt2sas_base_attach(struct MPT2SAS_ADAPTER *ioc)
 		goto out_free_resources;
 
 	init_waitqueue_head(&ioc->reset_wq);
-
 	/* allocate memory pd handle bitmask list */
 	ioc->pd_handles_sz = (ioc->facts.MaxDevHandle / 8);
 	if (ioc->facts.MaxDevHandle % 8)
@@ -4388,7 +4373,6 @@ mpt2sas_base_attach(struct MPT2SAS_ADAPTER *ioc)
 	ioc->pfacts = NULL;
 	return r;
 }
-
 
 /**
  * mpt2sas_base_detach - remove controller instance

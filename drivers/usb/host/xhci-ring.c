@@ -66,7 +66,7 @@
  *   updates event ring dequeue pointer.  HC is the consumer for the command and
  *   endpoint rings; it generates events on the event ring for these.
  */
-
+ 
 #include <linux/scatterlist.h>
 #include <linux/slab.h>
 #include "xhci.h"
@@ -165,16 +165,16 @@ static void inc_deq(struct xhci_hcd *xhci, struct xhci_ring *ring)
 	while (last_trb(xhci, ring, ring->deq_seg, next)) {
 		if (ring->type == TYPE_EVENT &&	last_trb_on_last_seg(xhci,
 				ring, ring->deq_seg, next)) {
-			ring->cycle_state = (ring->cycle_state ? 0 : 1);
+				ring->cycle_state = (ring->cycle_state ? 0 : 1);
 			if (!in_interrupt())
 				xhci_dbg(xhci, "Toggle cycle state for ring %p = %i\n",
 						ring,
 						(unsigned int) ring->cycle_state);
-		}
-		ring->deq_seg = ring->deq_seg->next;
-		ring->dequeue = ring->deq_seg->trbs;
+			}
+			ring->deq_seg = ring->deq_seg->next;
+			ring->dequeue = ring->deq_seg->trbs;
 		next = ring->dequeue;
-	}
+		}
 	addr = (unsigned long long) xhci_trb_virt_to_dma(ring->deq_seg, ring->dequeue);
 }
 
@@ -215,33 +215,33 @@ static void inc_enq(struct xhci_hcd *xhci, struct xhci_ring *ring,
 	 */
 	while (last_trb(xhci, ring, ring->enq_seg, next)) {
 		if (ring->type != TYPE_EVENT) {
-				/*
-				 * If the caller doesn't plan on enqueueing more
-				 * TDs before ringing the doorbell, then we
-				 * don't want to give the link TRB to the
-				 * hardware just yet.  We'll give the link TRB
-				 * back in prepare_ring() just before we enqueue
-				 * the TD at the top of the ring.
-				 */
-				if (!chain && !more_trbs_coming)
-					break;
+			/*
+			 * If the caller doesn't plan on enqueueing more
+			 * TDs before ringing the doorbell, then we
+			 * don't want to give the link TRB to the
+			 * hardware just yet.  We'll give the link TRB
+			 * back in prepare_ring() just before we enqueue
+			 * the TD at the top of the ring.
+			 */
+			if (!chain && !more_trbs_coming)
+				break;
 
-				/* If we're not dealing with 0.95 hardware or
-				 * isoc rings on AMD 0.96 host,
-				 * carry over the chain bit of the previous TRB
-				 * (which may mean the chain bit is cleared).
-				 */
+			/* If we're not dealing with 0.95 hardware or
+			 * isoc rings on AMD 0.96 host,
+			 * carry over the chain bit of the previous TRB
+			 * (which may mean the chain bit is cleared).
+			 */
 			if (!(ring->type == TYPE_ISOC &&
 					(xhci->quirks & XHCI_AMD_0x96_HOST))
 						&& !xhci_link_trb_quirk(xhci)) {
-					next->link.control &=
-						cpu_to_le32(~TRB_CHAIN);
-					next->link.control |=
-						cpu_to_le32(chain);
-				}
-				/* Give this link TRB to the hardware */
-				wmb();
-				next->link.control ^= cpu_to_le32(TRB_CYCLE);
+				next->link.control &=
+					cpu_to_le32(~TRB_CHAIN);
+				next->link.control |=
+					cpu_to_le32(chain);
+			}
+			/* Give this link TRB to the hardware */
+			wmb();
+			next->link.control ^= cpu_to_le32(TRB_CYCLE);
 
 			/* Toggle the cycle bit after the last ring segment. */
 			if (last_trb_on_last_seg(xhci, ring, ring->enq_seg, next)) {
@@ -275,7 +275,7 @@ static inline int room_on_ring(struct xhci_hcd *xhci, struct xhci_ring *ring,
 		num_trbs_in_deq_seg = ring->dequeue - ring->deq_seg->trbs;
 		if (ring->num_trbs_free < num_trbs + num_trbs_in_deq_seg)
 			return 0;
-		}
+	}
 
 	return 1;
 }
@@ -364,7 +364,6 @@ static struct xhci_segment *find_trb_seg(
 	}
 	return cur_seg;
 }
-
 
 static struct xhci_ring *xhci_triad_to_transfer_ring(struct xhci_hcd *xhci,
 		unsigned int slot_id, unsigned int ep_index,
@@ -1077,8 +1076,8 @@ static int handle_cmd_in_cmd_wait_list(struct xhci_hcd *xhci,
 		complete(command->completion);
 	else
 		xhci_free_command(xhci, command);
-	return 1;
-}
+			return 1;
+		}
 
 static void handle_cmd_completion(struct xhci_hcd *xhci,
 		struct xhci_event_cmd *event)
@@ -1758,8 +1757,8 @@ static int process_isoc_td(struct xhci_hcd *xhci, struct xhci_td *td,
 	/* handle completion code */
 	switch (trb_comp_code) {
 	case COMP_SUCCESS:
-		frame->status = 0;
-		break;
+			frame->status = 0;
+			break;
 	case COMP_SHORT_TX:
 		frame->status = td->urb->transfer_flags & URB_SHORT_NOT_OK ?
 				-EREMOTEIO : 0;
@@ -2518,8 +2517,8 @@ static int prepare_ring(struct xhci_hcd *xhci, struct xhci_ring *ep_ring,
 		if (xhci_ring_expansion(xhci, ep_ring, num_trbs_needed,
 					mem_flags)) {
 			xhci_err(xhci, "Ring expansion failed\n");
-		return -ENOMEM;
-	}
+			return -ENOMEM;
+		}
 	};
 
 	if (enqueue_is_link_trb(ep_ring)) {
@@ -2534,7 +2533,7 @@ static int prepare_ring(struct xhci_hcd *xhci, struct xhci_ring *ep_ring,
 			 */
 			if (!xhci_link_trb_quirk(xhci) &&
 					!(ring->type == TYPE_ISOC &&
-					(xhci->quirks & XHCI_AMD_0x96_HOST)))
+					 (xhci->quirks & XHCI_AMD_0x96_HOST)))
 				next->link.control &= cpu_to_le32(~TRB_CHAIN);
 			else
 				next->link.control |= cpu_to_le32(TRB_CHAIN);
@@ -3443,7 +3442,7 @@ static int xhci_queue_isoc_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	return 0;
 cleanup:
 	/* Clean up a partially enqueued isoc transfer. */
-
+	 
 	for (i--; i >= 0; i--)
 		list_del_init(&urb_priv->td[i]->td_list);
 

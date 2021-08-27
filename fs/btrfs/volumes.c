@@ -475,7 +475,7 @@ again:
 		if (device->writeable) {
 			list_del_init(&device->dev_alloc_list);
 			device->writeable = 0;
-			fs_devices->rw_devices--;
+				fs_devices->rw_devices--;
 		}
 		list_del_init(&device->dev_list);
 		fs_devices->num_devices--;
@@ -1046,9 +1046,9 @@ out:
 }
 
 int btrfs_alloc_dev_extent(struct btrfs_trans_handle *trans,
-			   struct btrfs_device *device,
-			   u64 chunk_tree, u64 chunk_objectid,
-			   u64 chunk_offset, u64 start, u64 num_bytes)
+				  struct btrfs_device *device,
+				  u64 chunk_tree, u64 chunk_objectid,
+				  u64 chunk_offset, u64 start, u64 num_bytes)
 {
 	int ret;
 	struct btrfs_path *path;
@@ -1173,8 +1173,8 @@ error:
  * the btrfs_device struct should be fully filled in
  */
 int btrfs_add_device(struct btrfs_trans_handle *trans,
-		     struct btrfs_root *root,
-		     struct btrfs_device *device)
+			    struct btrfs_root *root,
+			    struct btrfs_device *device)
 {
 	int ret;
 	struct btrfs_path *path;
@@ -1287,9 +1287,9 @@ int btrfs_rm_device(struct btrfs_root *root, char *device_path)
 	mutex_lock(&uuid_mutex);
 	mutex_lock(&root->fs_info->volume_mutex);
 
-	all_avail = root->fs_info->avail_data_alloc_bits |
-		root->fs_info->avail_system_alloc_bits |
-		root->fs_info->avail_metadata_alloc_bits;
+		all_avail = root->fs_info->avail_data_alloc_bits |
+			    root->fs_info->avail_system_alloc_bits |
+			    root->fs_info->avail_metadata_alloc_bits;
 
 	if ((all_avail & BTRFS_BLOCK_GROUP_RAID10) &&
 	    root->fs_info->fs_devices->num_devices <= 4) {
@@ -1986,7 +1986,7 @@ static int btrfs_relocate_chunk(struct btrfs_root *root,
 	if (map->type & BTRFS_BLOCK_GROUP_SYSTEM) {
 		ret = btrfs_del_sys_chunk(root, chunk_objectid, chunk_offset);
 		BUG_ON(ret);
-	}
+}
 
 	ret = btrfs_remove_block_group(trans, extent_root, chunk_offset);
 	BUG_ON(ret);
@@ -2179,11 +2179,11 @@ int btrfs_balance(struct btrfs_root *dev_root)
 			goto error;
 		key.offset = found_key.offset - 1;
 	}
-	ret = 0;
+				ret = 0;
 error:
 	btrfs_free_path(path);
 	mutex_unlock(&dev_root->fs_info->volume_mutex);
-	return ret;
+		return ret;
 }
 
 /*
@@ -2441,10 +2441,10 @@ static int __btrfs_alloc_chunk(struct btrfs_trans_handle *trans,
 	}
 
 	if (type & BTRFS_BLOCK_GROUP_DATA) {
-		max_stripe_size = 1024 * 1024 * 1024;
-		max_chunk_size = 10 * max_stripe_size;
+			max_stripe_size = 1024 * 1024 * 1024;
+			max_chunk_size = 10 * max_stripe_size;
 	} else if (type & BTRFS_BLOCK_GROUP_METADATA) {
-		max_stripe_size = 256 * 1024 * 1024;
+			max_stripe_size = 256 * 1024 * 1024;
 		max_chunk_size = max_stripe_size;
 	} else if (type & BTRFS_BLOCK_GROUP_SYSTEM) {
 		max_stripe_size = 8 * 1024 * 1024;
@@ -2596,7 +2596,7 @@ static int __btrfs_alloc_chunk(struct btrfs_trans_handle *trans,
 	ret = add_extent_mapping(em_tree, em);
 	write_unlock(&em_tree->lock);
 	BUG_ON(ret);
-	free_extent_map(em);
+		free_extent_map(em);
 
 	ret = btrfs_make_block_group(trans, extent_root, 0, type,
 				     BTRFS_FIRST_CHUNK_TREE_OBJECTID,
@@ -2879,11 +2879,11 @@ static int find_live_mirror(struct map_lookup *map, int first, int num,
 {
 	int i;
 	if (map->stripes[optimal].dev->bdev)
-		return optimal;
-	for (i = first; i < first + num; i++) {
+			return optimal;
+		for (i = first; i < first + num; i++) {
 		if (map->stripes[i].dev->bdev)
-			return i;
-	}
+				return i;
+		}
 	/* we couldn't find one that doesn't fail.  Just return something
 	 * and the io error handling code will clean up eventually
 	 */
@@ -2987,7 +2987,7 @@ again:
 			      BTRFS_BLOCK_GROUP_RAID1 |
 			      BTRFS_BLOCK_GROUP_RAID10 |
 			      BTRFS_BLOCK_GROUP_DUP)) {
-		/* we limit the length of each bio to what fits in a stripe */
+			/* we limit the length of each bio to what fits in a stripe */
 		*length = min_t(u64, em->len - offset,
 				map->stripe_len - stripe_offset);
 	} else {
@@ -3159,10 +3159,10 @@ again:
 		}
 	}
 	if (bbio_ret) {
-		*bbio_ret = bbio;
-		bbio->num_stripes = num_stripes;
-		bbio->max_errors = max_errors;
-		bbio->mirror_num = mirror_num;
+	*bbio_ret = bbio;
+	bbio->num_stripes = num_stripes;
+	bbio->max_errors = max_errors;
+	bbio->mirror_num = mirror_num;
 	}
 out:
 	free_extent_map(em);
@@ -3298,8 +3298,8 @@ struct async_sched {
  * the work struct is scheduled.
  */
 static noinline int schedule_bio(struct btrfs_root *root,
-				 struct btrfs_device *device,
-				 int rw, struct bio *bio)
+					struct btrfs_device *device,
+					int rw, struct bio *bio)
 {
 	int should_queue = 1;
 	struct btrfs_pending_bios *pending_bios;
@@ -3342,8 +3342,8 @@ static noinline int schedule_bio(struct btrfs_root *root,
 
 	if (should_queue)
 		btrfs_queue_worker(&root->fs_info->submit_workers,
-				   &device->work);
-	return 0;
+				 &device->work);
+		return 0;
 }
 
 int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
@@ -3778,13 +3778,13 @@ again:
 		if (key.objectid == BTRFS_DEV_ITEMS_OBJECTID) {
 			if (found_key.objectid != BTRFS_DEV_ITEMS_OBJECTID)
 				break;
-			if (found_key.type == BTRFS_DEV_ITEM_KEY) {
-				struct btrfs_dev_item *dev_item;
-				dev_item = btrfs_item_ptr(leaf, slot,
+		if (found_key.type == BTRFS_DEV_ITEM_KEY) {
+			struct btrfs_dev_item *dev_item;
+			dev_item = btrfs_item_ptr(leaf, slot,
 						  struct btrfs_dev_item);
-				ret = read_one_dev(root, leaf, dev_item);
-				if (ret)
-					goto error;
+			ret = read_one_dev(root, leaf, dev_item);
+			if (ret)
+				goto error;
 			}
 		} else if (found_key.type == BTRFS_CHUNK_ITEM_KEY) {
 			struct btrfs_chunk *chunk;
@@ -3797,7 +3797,7 @@ again:
 	}
 	if (key.objectid == BTRFS_DEV_ITEMS_OBJECTID) {
 		key.objectid = 0;
-		btrfs_release_path(path);
+			btrfs_release_path(path);
 		goto again;
 	}
 	ret = 0;

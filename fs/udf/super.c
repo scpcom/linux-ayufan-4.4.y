@@ -40,7 +40,7 @@
  *                vol descs. rewrote option handling based on isofs
  *  12/20/98      find the free space bitmap (if it exists)
  */
-
+ 
 #include "udfdecl.h"
 
 #include <linux/blkdev.h>
@@ -1998,7 +1998,7 @@ static int udf_fill_super(struct super_block *sb, void *options, int silent)
 		uint16_t minUDFWriteRev = le16_to_cpu(lvidiu->minUDFWriteRev);
 		/* uint16_t maxUDFWriteRev =
 				le16_to_cpu(lvidiu->maxUDFWriteRev); */
-
+		 
 		if (minUDFReadRev > UDF_MAX_READ_VERSION) {
 			udf_err(sb, "minUDFReadRev=%x (max is %x)\n",
 				le16_to_cpu(lvidiu->minUDFReadRev),

@@ -145,7 +145,7 @@ enum {
 	ATA_UDMA6		= ATA_UDMA5 | (1 << 6),
 	ATA_UDMA7		= ATA_UDMA6 | (1 << 7),
 	/* ATA_UDMA7 is just for completeness... doesn't exist (yet?).  */
-
+	 
 	ATA_UDMA24_ONLY		= (1 << 2) | (1 << 4),
 
 	ATA_UDMA_MASK_40C	= ATA_UDMA2,	/* udma0-2 */
@@ -608,7 +608,6 @@ static inline bool ata_id_has_dipm(const u16 *id)
 
 	return val & (1 << 3);
 }
-
 
 static inline bool ata_id_has_fua(const u16 *id)
 {

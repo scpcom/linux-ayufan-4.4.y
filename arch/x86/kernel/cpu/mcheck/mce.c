@@ -1335,7 +1335,7 @@ static int __cpuinit __mcheck_cpu_apply_quirks(struct cpuinfo_x86 *c)
 		 * Don't ignore bank 0 completely because there could be a
 		 * valid event later, merely don't write CTL0.
 		 */
-
+		 
 		if (c->x86 == 6 && c->x86_model < 0x1A && banks > 0)
 			mce_banks[0].init = 0;
 

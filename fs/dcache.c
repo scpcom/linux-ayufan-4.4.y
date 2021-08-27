@@ -16,7 +16,7 @@
  * exists, the inode will always exist. "iput()" is done either when
  * the dcache entry is deleted or garbage collected.
  */
-
+ 
 #include <linux/syscalls.h>
 #include <linux/string.h>
 #include <linux/mm.h>
@@ -980,7 +980,6 @@ static struct dentry *try_to_ascend(struct dentry *old, int locked, unsigned seq
 	return new;
 }
 
-
 /*
  * Search for at least 1 mount point in the dentry's subdirs.
  * We descend to the next level whenever the d_subdirs
@@ -1492,7 +1491,6 @@ static struct dentry * d_find_any_alias(struct inode *inode)
 	spin_unlock(&inode->i_lock);
 	return de;
 }
-
 
 /**
  * d_obtain_alias - find or allocate a dentry for a given inode

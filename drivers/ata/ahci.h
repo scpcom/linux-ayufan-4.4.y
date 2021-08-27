@@ -34,7 +34,7 @@
  * http://www.intel.com/technology/serialata/pdf/rev1_1.pdf
  *
  */
-
+ 
 #ifndef _AHCI_H
 #define _AHCI_H
 

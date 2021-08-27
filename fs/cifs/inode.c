@@ -34,7 +34,6 @@
 #include "cifs_fs_sb.h"
 #include "fscache.h"
 
-
 static void cifs_set_ops(struct inode *inode)
 {
 	struct cifs_sb_info *cifs_sb = CIFS_SB(inode->i_sb);
@@ -1157,7 +1156,6 @@ undo_setattr:
 	goto out_close;
 }
 
-
 /*
  * If dentry->d_inode is null (usually meaning the cached dentry
  * is a negative dentry) then we would attempt a standard SMB delete, but
@@ -1326,7 +1324,7 @@ int cifs_mkdir(struct inode *inode, struct dentry *direntry, int mode)
 /*BB check (cifs_sb->mnt_cifs_flags & CIFS_MOUNT_SET_UID ) to see if need
 	to set uid/gid */
 			inc_nlink(inode);
-
+ 
 			cifs_unix_basic_to_fattr(&fattr, pInfo, cifs_sb);
 			cifs_fill_uniqueid(inode->i_sb, &fattr);
 			newinode = cifs_iget(inode->i_sb, &fattr);
@@ -2232,7 +2230,7 @@ cifs_setattr_nounix(struct dentry *direntry, struct iattr *attrs)
 	    ((attrs->ia_valid & ATTR_MODE) && dosattr)) {
 		rc = cifs_set_file_info(inode, attrs, xid, full_path, dosattr);
 		/* BB: check for rc = -EOPNOTSUPP and switch to legacy mode */
-
+		 
 		/* Even if error on time set, no sense failing the call if
 		the server would set the time to a reasonable value anyway,
 		and this check ensures that we are not being called from

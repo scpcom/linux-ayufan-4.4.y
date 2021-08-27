@@ -835,8 +835,8 @@ static int get_cs_sqnum(struct ubifs_info *c, int lnum, int offs,
 	}
 	if (le64_to_cpu(cs_node->cmt_no) != c->cmt_no) {
 		dbg_err("CS node cmt_no %llu != current cmt_no %llu",
-			(unsigned long long)le64_to_cpu(cs_node->cmt_no),
-			c->cmt_no);
+			  (unsigned long long)le64_to_cpu(cs_node->cmt_no),
+			  c->cmt_no);
 		goto out_err;
 	}
 	*cs_sqnum = le64_to_cpu(cs_node->ch.sqnum);

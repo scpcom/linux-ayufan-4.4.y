@@ -1662,7 +1662,6 @@ extern int security_module_enable(struct security_operations *ops);
 extern int register_security(struct security_operations *ops);
 extern void __init security_fixup_ops(struct security_operations *ops);
 
-
 /* Security operations */
 int security_ptrace_access_check(struct task_struct *child, unsigned int mode);
 int security_ptrace_traceme(struct task_struct *parent);
@@ -2263,7 +2262,7 @@ static inline int security_file_receive(struct file *file)
 }
 
 static inline int security_dentry_open(struct file *file,
-				       const struct cred *cred)
+				     const struct cred *cred)
 {
 	return 0;
 }
@@ -3062,4 +3061,3 @@ static inline void free_secdata(void *secdata)
 #endif /* CONFIG_SECURITY */
 
 #endif /* ! __LINUX_SECURITY_H */
-

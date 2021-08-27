@@ -47,7 +47,6 @@
 #include <net/inet_common.h>
 #include <net/checksum.h>
 
-
 static struct ping_table ping_table;
 
 static u16 ping_port_rover;
@@ -196,7 +195,6 @@ static void inet_get_ping_group_range_net(struct net *net, gid_t *low,
 		*high = data[1];
 	} while (read_seqretry(&sysctl_local_ports.lock, seq));
 }
-
 
 static int ping_init_sock(struct sock *sk)
 {
@@ -465,7 +463,6 @@ static int ping_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 
 	pr_debug("ping_sendmsg(sk=%p,sk->num=%u)\n", inet, inet->inet_num);
 
-
 	if (len > 0xFFFF)
 		return -EMSGSIZE;
 
@@ -685,7 +682,6 @@ static int ping_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	return 0;
 }
 
-
 /*
  *	All we need to do is get the socket.
  */
@@ -891,7 +887,6 @@ static void ping_proc_unregister(struct net *net)
 {
 	proc_net_remove(net, "icmp");
 }
-
 
 static int __net_init ping_proc_init_net(struct net *net)
 {

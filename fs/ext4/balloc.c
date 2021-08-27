@@ -78,10 +78,10 @@ static int ext4_group_used_meta_blocks(struct super_block *sb,
 				sbi->s_itb_per_group; tmp++) {
 			if (!ext4_block_in_group(sb, tmp, block_group))
 				used_blocks -= 1;
+			}
 		}
-	}
 	return used_blocks;
-}
+	}
 
 /* Initializes an uninitialized block bitmap if given, and returns the
  * number of blocks free in the group. */
@@ -670,4 +670,3 @@ ext4_fsblk_t ext4_inode_to_goal_block(struct inode *inode)
 		colour = (current->pid % 16) * ((last_block - bg_start) / 16);
 	return bg_start + colour;
 }
-

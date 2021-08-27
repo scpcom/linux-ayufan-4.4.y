@@ -12,7 +12,7 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  */
-
+ 
 #ifndef _IP6_FIB_H
 #define _IP6_FIB_H
 
@@ -158,7 +158,6 @@ struct rt6_statistics {
  *	priority levels (or metrics)
  *
  */
-
 
 struct fib6_table {
 	struct hlist_node	tb6_hlist;

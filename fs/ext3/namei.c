@@ -26,7 +26,7 @@
  *  Hash Tree Directory indexing cleanup
  *	Theodore Ts'o, 2002
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/pagemap.h>
 #include <linux/jbd.h>
@@ -186,7 +186,6 @@ struct dx_node
 	struct fake_dirent fake;
 	struct dx_entry	entries[0];
 };
-
 
 struct dx_frame
 {
@@ -620,7 +619,6 @@ static int ext3_htree_next_block(struct inode *dir, __u32 hash,
 	return 1;
 }
 
-
 /*
  * This function fills a red-black tree with information from a
  * directory block.  It returns the number directory entries loaded
@@ -670,7 +668,6 @@ static int htree_dirblock_to_tree(struct file *dir_file,
 	brelse(bh);
 	return count;
 }
-
 
 /*
  * This function fills a red-black tree with information from a
@@ -761,7 +758,6 @@ errout:
 	dx_release(frames);
 	return (err);
 }
-
 
 /*
  * Directory block splitting, compacting
@@ -912,7 +908,7 @@ static inline int search_dirblock(struct buffer_head * bh,
 	while ((char *) de < dlimit) {
 		/* this code is executed quadratically often */
 		/* do minimal checking `by hand' */
-
+		 
 		if ((char *) de + namelen <= dlimit &&
 #ifdef MY_ABC_HERE
 			ext3_match (namelen, name, de, caseless)) {
@@ -945,7 +941,6 @@ static inline int search_dirblock(struct buffer_head * bh,
 	}
 	return 0;
 }
-
 
 /*
  *	ext3_find_entry()
@@ -1200,7 +1195,6 @@ static struct dentry *ext3_lookup(struct inode * dir, struct dentry *dentry, str
 	return d_splice_alias(inode, dentry);
 }
 
-
 struct dentry *ext3_get_parent(struct dentry *child)
 {
 	unsigned long ino;
@@ -1389,7 +1383,6 @@ errout:
 	*error = err;
 	return NULL;
 }
-
 
 /*
  * Add a new entry into a directory (leaf) block.  If de is non-NULL,

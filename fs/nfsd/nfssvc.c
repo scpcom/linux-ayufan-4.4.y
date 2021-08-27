@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1995, 1996, 1997 Olaf Kirch <okir@monad.swb.de>
  */
-
+ 
 #include <linux/sched.h>
 #include <linux/freezer.h>
 #include <linux/module.h>
@@ -473,7 +473,6 @@ out:
 	mutex_unlock(&nfsd_mutex);
 	return error;
 }
-
 
 /*
  * This is the NFS server kernel thread

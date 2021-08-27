@@ -1291,7 +1291,6 @@ static int load_superblock(journal_t *journal)
 	return 0;
 }
 
-
 /**
  * int jbd2_journal_load() - Read journal from disk.
  * @journal: Journal to act on.
@@ -1418,7 +1417,6 @@ int jbd2_journal_destroy(journal_t *journal)
 
 	return err;
 }
-
 
 /**
  *int jbd2_journal_check_used_features () - Check if features specified are used.
@@ -1602,7 +1600,6 @@ static int journal_convert_superblock_v1(journal_t *journal,
 	sync_dirty_buffer(bh);
 	return 0;
 }
-
 
 /**
  * int jbd2_journal_flush () - Flush journal
@@ -1908,7 +1905,6 @@ static const char *jbd2_slab_names[JBD2_MAX_SLABS] = {
 	"jbd2_1k", "jbd2_2k", "jbd2_4k", "jbd2_8k",
 	"jbd2_16k", "jbd2_32k", "jbd2_64k", "jbd2_128k"
 };
-
 
 static void jbd2_journal_destroy_slabs(void)
 {
@@ -2401,4 +2397,3 @@ static void __exit journal_exit(void)
 MODULE_LICENSE("GPL");
 module_init(journal_init);
 module_exit(journal_exit);
-

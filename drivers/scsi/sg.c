@@ -20,7 +20,7 @@
  * any later version.
  *
  */
-
+ 
 static int sg_version_num = 30534;	/* 2 digits for each component */
 #define SG_VERSION_STR "3.5.34"
 
@@ -1321,7 +1321,7 @@ static void sg_rq_end_io(struct request *rq, int uptodate)
 		}
 	}
 	/* Rely on write phase to clean out srp status values, so no "else" */
-
+	 
 	write_lock_irqsave(&sfp->rq_list_lock, iflags);
 	if (unlikely(srp->orphan)) {
 		if (sfp->keep_orphan)
@@ -2309,7 +2309,6 @@ static const struct seq_operations debug_seq_ops = {
 	.show  = sg_proc_seq_show_debug,
 };
 
-
 struct sg_proc_leaf {
 	const char * name;
 	const struct file_operations * fops;
@@ -2355,7 +2354,6 @@ sg_proc_cleanup(void)
 		remove_proc_entry(sg_proc_leaf_arr[k].name, sg_proc_sgp);
 	remove_proc_entry(sg_proc_sg_dirname, NULL);
 }
-
 
 static int sg_proc_seq_show_int(struct seq_file *s, void *v)
 {

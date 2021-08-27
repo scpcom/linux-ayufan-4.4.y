@@ -19,7 +19,7 @@
  * domain dependencies may differ from the ancestral dependencies that the
  * subsystem list maintains.
  */
-
+ 
 #include <linux/device.h>
 #include <linux/kallsyms.h>
 #include <linux/export.h>
@@ -44,7 +44,7 @@
  * we must never try to acquire a device lock while holding
  * dpm_list_mutex.
  */
-
+ 
 LIST_HEAD(dpm_list);
 LIST_HEAD(dpm_prepared_list);
 LIST_HEAD(dpm_suspended_list);
@@ -731,7 +731,6 @@ void dpm_resume_end(pm_message_t state)
 	dpm_complete(state);
 }
 EXPORT_SYMBOL_GPL(dpm_resume_end);
-
 
 /*------------------------- Suspend routines -------------------------*/
 

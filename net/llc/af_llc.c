@@ -51,7 +51,6 @@ static int llc_ui_wait_for_busy_core(struct sock *sk, long timeout);
 /* Maybe we'll add some more in the future. */
 #define LLC_CMSG_PKTINFO	1
 
-
 /**
  *	llc_ui_next_link_no - return the next unused link number for a sap
  *	@sap: Address of sap to get link number from.

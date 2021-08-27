@@ -62,7 +62,6 @@
  */
 #define CACHE_DLIMIT	8192
 
-
 	.text
 /*
  * cpu_arm922_proc_init()
@@ -110,7 +109,6 @@ ENTRY(cpu_arm922_reset)
 ENTRY(cpu_arm922_do_idle)
 	mcr	p15, 0, r0, c7, c0, 4		@ Wait for interrupt
 	mov	pc, lr
-
 
 #ifndef CONFIG_CPU_DCACHE_WRITETHROUGH
 
@@ -323,7 +321,6 @@ ENDPROC(arm922_dma_unmap_area)
 	@ define struct cpu_cache_fns (see <asm/cacheflush.h> and proc-macros.S)
 	define_cache_functions arm922
 #endif
-
 
 ENTRY(cpu_arm922_dcache_clean_area)
 #ifndef CONFIG_CPU_DCACHE_WRITETHROUGH

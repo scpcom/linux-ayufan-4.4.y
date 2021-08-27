@@ -6,7 +6,7 @@
  * Extensive rewrite by Neil Brown <neilb@cse.unsw.edu.au> Southern-Spring 1999
  * ... and again Southern-Winter 2001 to support export_operations
  */
-
+ 
 #include <linux/exportfs.h>
 
 #include <linux/sunrpc/svcauth_gss.h>
@@ -396,7 +396,6 @@ out:
 	return error;
 }
 
-
 /*
  * Compose a file handle for an NFS reply.
  *
@@ -469,7 +468,6 @@ static bool fsid_type_ok_for_exp(u8 fsid_type, struct svc_export *exp)
 	return 1;
 }
 
-
 static void set_version_and_fsid_type(struct svc_fh *fhp, struct svc_export *exp, struct svc_fh *ref_fh)
 {
 	u8 version;
@@ -535,7 +533,7 @@ fh_compose(struct svc_fh *fhp, struct svc_export *exp, struct dentry *dentry,
 	 * Then create a 32byte filehandle using nfs_fhbase_old
 	 *
 	 */
-
+	 
 	struct inode * inode = dentry->d_inode;
 	struct dentry *parent = dentry->d_parent;
 	__u32 *datap;

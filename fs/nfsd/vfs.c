@@ -15,7 +15,7 @@
  * Copyright (C) 1995-1999 Olaf Kirch <okir@monad.swb.de>
  * Zerocpy NFS support (C) 2002 Hirokazu Takahashi <taka@valinux.co.jp>
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/file.h>
 #include <linux/splice.h>
@@ -76,14 +76,14 @@ struct raparm_hbucket {
 #define RAPARM_HASH_MASK	(RAPARM_HASH_SIZE-1)
 static struct raparm_hbucket	raparm_hash[RAPARM_HASH_SIZE];
 
-/* 
- * Called from nfsd_lookup and encode_dirent. Check if we have crossed 
+/*
+ * Called from nfsd_lookup and encode_dirent. Check if we have crossed
  * a mount point.
  * Returns -EAGAIN or -ETIMEDOUT leaving *dpp and *expp unchanged,
  *  or nfs_ok having possibly changed *dpp and *expp
  */
 int
-nfsd_cross_mnt(struct svc_rqst *rqstp, struct dentry **dpp, 
+nfsd_cross_mnt(struct svc_rqst *rqstp, struct dentry **dpp,
 		        struct svc_export **expp)
 {
 	struct svc_export *exp = *expp, *exp2 = NULL;
@@ -385,7 +385,7 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 		}
 #endif
 	}
-	    
+
 	/*
 	 * The size case is special.
 	 * It changes the file as well as the attributes.
@@ -732,7 +732,6 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 	else
 		map = nfs3_anyaccess;
 
-
 	query = *access;
 	for  (; map->access; map++) {
 		if (map->access & query) {
@@ -757,7 +756,7 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 			case nfs_ok:
 				result |= map->access;
 				break;
-				
+
 			/* the following error codes just mean the access was not allowed,
 			 * rather than an error occurred */
 			case nfserr_rofs:
@@ -893,7 +892,7 @@ nfsd_get_raparms(dev_t dev, ino_t ino)
 			frap = rap;
 	}
 	depth = nfsdstats.ra_size;
-	if (!frap) {	
+	if (!frap) {
 		spin_unlock(&rab->pb_lock);
 		return NULL;
 	}
@@ -989,7 +988,7 @@ nfsd_vfs_read(struct svc_rqst *rqstp, struct svc_fh *fhp, struct file *file,
 		*count = host_err;
 		err = 0;
 		fsnotify_access(file);
-	} else 
+	} else
 		err = nfserrno(host_err);
 	return err;
 }
@@ -1283,7 +1282,7 @@ nfsd_check_ignore_resizing(struct iattr *iap)
 }
 
 /*
- * Create a file (regular, directory, device, fifo); UNIX sockets 
+ * Create a file (regular, directory, device, fifo); UNIX sockets
  * not yet implemented.
  * If the response fh has been verified, the parent directory should
  * already be locked. Note that the parent directory is left locked.
@@ -1352,7 +1351,7 @@ nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 	if (dchild->d_inode) {
 		dprintk("nfsd_create: dentry %s/%s not negative!\n",
 			dentry->d_name.name, dchild->d_name.name);
-		goto out; 
+		goto out;
 	}
 
 	if (!(iap->ia_valid & ATTR_MODE))
@@ -1495,7 +1494,7 @@ do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		v_mtime = verifier[0]&0x7fffffff;
 		v_atime = verifier[1]&0x7fffffff;
 	}
-	
+
 	host_err = mnt_want_write(fhp->fh_export->ex_path.mnt);
 	if (host_err)
 		goto out_nfserr;
@@ -1553,7 +1552,7 @@ do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		/* Cram the verifier into atime/mtime */
 		iap->ia_valid = ATTR_MTIME|ATTR_ATIME
 			| ATTR_MTIME_SET|ATTR_ATIME_SET;
-		/* XXX someone who knows this better please fix it for nsec */ 
+		/* XXX someone who knows this better please fix it for nsec */
 		iap->ia_mtime.tv_sec = v_mtime;
 		iap->ia_atime.tv_sec = v_atime;
 		iap->ia_mtime.tv_nsec = 0;
@@ -1581,7 +1580,7 @@ do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 	if (dchild && !IS_ERR(dchild))
 		dput(dchild);
  	return err;
- 
+
  out_nfserr:
 	err = nfserrno(host_err);
 	goto out;
@@ -1617,7 +1616,7 @@ nfsd_readlink(struct svc_rqst *rqstp, struct svc_fh *fhp, char *buf, int *lenp)
 	/* N.B. Why does this call need a get_fs()??
 	 * Remove the set_fs and watch the fireworks:-) --okir
 	 */
-
+	 
 	oldfs = get_fs(); set_fs(KERNEL_DS);
 	host_err = inode->i_op->readlink(dentry, buf, *lenp);
 	set_fs(oldfs);
@@ -2069,7 +2068,7 @@ static __be32 nfsd_buffered_readdir(struct file *file, filldir_t func,
  * The  NFSv3/4 verifier we ignore for now.
  */
 __be32
-nfsd_readdir(struct svc_rqst *rqstp, struct svc_fh *fhp, loff_t *offsetp, 
+nfsd_readdir(struct svc_rqst *rqstp, struct svc_fh *fhp, loff_t *offsetp,
 	     struct readdir_cd *cdp, filldir_t func)
 {
 	__be32		err;
@@ -2191,7 +2190,7 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 #endif
 
 	/* Normally we reject any write/sattr etc access on a read-only file
-	 * system.  But if it is IRIX doing check on write-access for a 
+	 * system.  But if it is IRIX doing check on write-access for a
 	 * device special file, we ignore rofs.
 	 */
 	if (!(acc & NFSD_MAY_LOCAL_ACCESS))
@@ -2252,8 +2251,8 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 #endif
 	/* Allow read access to binaries even when mode 111 */
 	if (err == -EACCES && S_ISREG(inode->i_mode) &&
-	     (acc == (NFSD_MAY_READ | NFSD_MAY_OWNER_OVERRIDE) ||
-	      acc == (NFSD_MAY_READ | NFSD_MAY_READ_IF_EXEC)))
+		(acc == (NFSD_MAY_READ | NFSD_MAY_OWNER_OVERRIDE) ||
+		acc == (NFSD_MAY_READ | NFSD_MAY_READ_IF_EXEC)))
 #ifdef CONFIG_FS_SYNO_ACL
 	{
 		if (IS_SYNOACL(inode))
@@ -2297,7 +2296,6 @@ nfsd_racache_init(int cache_size)
 	int	j = 0;
 	int	nperbucket;
 	struct raparms **raparm = NULL;
-
 
 	if (raparm_hash[0].pb_head)
 		return 0;

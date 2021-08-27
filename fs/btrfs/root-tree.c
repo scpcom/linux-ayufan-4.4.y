@@ -45,12 +45,12 @@ int btrfs_find_last_root(struct btrfs_root *root, u64 objectid,
 		return -ENOMEM;
 	ret = btrfs_search_slot(NULL, root, &search_key, path, 0, 0);
 	if (ret < 0)
-		goto out;
+			goto out;
 
 	BUG_ON(ret == 0);
 	if (path->slots[0] == 0) {
 		ret = 1;
-		goto out;
+			goto out;
 	}
 	l = path->nodes[0];
 	slot = path->slots[0] - 1;
@@ -125,12 +125,12 @@ int btrfs_insert_root(struct btrfs_trans_handle *trans, struct btrfs_root
 	return ret;
 }
 
-/*
+	/*
  * at mount time we want to find all the old transaction snapshots that were in
  * the process of being deleted if we crashed.  This is any root item with an
  * offset lower than the latest root.  They need to be queued for deletion to
  * finish what was happening when we crashed.
- */
+	 */
 int btrfs_find_dead_roots(struct btrfs_root *root, u64 objectid)
 {
 	struct btrfs_root *dead_root;
@@ -445,5 +445,5 @@ void btrfs_check_and_init_root_item(struct btrfs_root_item *root_item)
 		root_item->inode.flags = cpu_to_le64(inode_flags);
 		root_item->flags = 0;
 		root_item->byte_limit = 0;
-	}
+}
 }

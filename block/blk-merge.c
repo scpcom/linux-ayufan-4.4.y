@@ -165,12 +165,11 @@ new_segment:
 				sg = sg_next(sg);
 			}
 
-			sg_set_page(sg, bvec->bv_page, nbytes, bvec->bv_offset);
+				sg_set_page(sg, bvec->bv_page, nbytes, bvec->bv_offset);
 			nsegs++;
 		}
 		bvprv = bvec;
 	} /* segments in rq */
-
 
 	if (unlikely(rq->cmd_flags & REQ_COPY_USER) &&
 	    (blk_rq_bytes(rq) & q->dma_pad_mask)) {

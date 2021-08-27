@@ -216,7 +216,6 @@
 	str	r2, [r0]		@ hardware version
 	.endm
 
-
 /*
  * Xscale set_pte_ext translation, split into two halves to cope
  * with work-arounds.  r3 must be preserved by code between these

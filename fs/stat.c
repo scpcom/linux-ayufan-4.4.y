@@ -6,7 +6,7 @@
  *
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
-
+ 
 #include <linux/module.h>
 #include <linux/mm.h>
 #include <linux/errno.h>
@@ -68,6 +68,7 @@ int vfs_getattr(struct vfsmount *mnt, struct dentry *dentry, struct kstat *stat)
 		return inode->i_op->getattr(mnt, dentry, stat);
 
 	generic_fillattr(inode, stat);
+
 	return 0;
 }
 
@@ -210,7 +211,6 @@ SYSCALL_DEFINE2(fstat, unsigned int, fd, struct __old_kernel_stat __user *, stat
 
 	return error;
 }
-
 #endif /* __ARCH_WANT_OLD_STAT */
 
 static int cp_new_stat(struct kstat *stat, struct stat __user *statbuf)

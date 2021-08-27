@@ -1200,7 +1200,6 @@ static int parse_cgroupfs_options(char *data, struct cgroup_sb_opts *opts)
 	    (opts->subsys_bits & mask))
 		return -EINVAL;
 
-
 	/* Can't specify "none" and some subsystems */
 	if (opts->subsys_bits && opts->none)
 		return -EINVAL;
@@ -3246,7 +3245,6 @@ err:
 	return ret;
 }
 
-
 /*
  * seq_file methods for the tasks/procs files. The seq_file position is the
  * next pid to display; the seq_file iterator is a pointer to the pid
@@ -4552,7 +4550,7 @@ void cgroup_post_fork(struct task_struct *child)
 		task_unlock(child);
 		write_unlock(&css_set_lock);
 	}
-}
+	}
 /**
  * cgroup_exit - detach cgroup from exiting task
  * @tsk: pointer to task_struct of exiting process

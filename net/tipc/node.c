@@ -129,7 +129,6 @@ void tipc_node_delete(struct tipc_node *n_ptr)
 	tipc_num_nodes--;
 }
 
-
 /**
  * tipc_node_link_up - handle addition of link
  *

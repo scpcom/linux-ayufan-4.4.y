@@ -8,7 +8,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-
+ 
 #include <linux/types.h>
 #include <linux/netfilter.h>
 #include <linux/slab.h>
@@ -402,7 +402,7 @@ static void nf_conntrack_standalone_fini_proc(struct net *net)
 #endif /* CONFIG_PROC_FS */
 
 /* Sysctl support */
-
+ 
 #ifdef CONFIG_SYSCTL
 /* Log invalid packets of a given protocol */
 static int log_invalid_proto_min = 0;

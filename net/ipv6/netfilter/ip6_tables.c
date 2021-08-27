@@ -1375,7 +1375,6 @@ do_add_counters(struct net *net, const void __user *user, unsigned int len,
 		goto free;
 	}
 
-
 	local_bh_disable();
 	private = t->private;
 	if (private->number != num_counters) {

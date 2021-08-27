@@ -3,8 +3,7 @@
 
   (C) 2002 Andreas Gruenbacher, <a.gruenbacher@computer.org>
 */
-
-
+ 
 #ifndef __LINUX_POSIX_ACL_H
 #define __LINUX_POSIX_ACL_H
 
@@ -31,7 +30,7 @@
 #define ACL_EXECUTE		(0x01)
 //#define ACL_ADD		(0x08)
 //#define ACL_DELETE		(0x10)
-
+ 
 struct posix_acl_entry {
 	short			e_tag;
 	unsigned short		e_perm;
@@ -49,7 +48,6 @@ struct posix_acl {
 
 #define FOREACH_ACL_ENTRY(pa, acl, pe) \
 	for(pa=(acl)->a_entries, pe=pa+(acl)->a_count; pa<pe; pa++)
-
 
 /*
  * Duplicate an ACL handle.
@@ -71,7 +69,6 @@ posix_acl_release(struct posix_acl *acl)
 	if (acl && atomic_dec_and_test(&acl->a_refcount))
 		kfree_rcu(acl, a_rcu);
 }
-
 
 /* posix_acl.c */
 

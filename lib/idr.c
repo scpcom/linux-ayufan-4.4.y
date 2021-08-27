@@ -28,7 +28,7 @@
  * so you don't need to be too concerned about locking and conflicts
  * with the slab allocator.
  */
-
+ 
 #ifndef TEST                        // to test in user space...
 #include <linux/slab.h>
 #include <linux/init.h>
@@ -644,7 +644,6 @@ void *idr_get_next(struct idr *idp, int *nextidp)
 }
 EXPORT_SYMBOL(idr_get_next);
 
-
 /**
  * idr_replace - replace pointer for given id
  * @idp: idr handle
@@ -709,7 +708,6 @@ void idr_init(struct idr *idp)
 	spin_lock_init(&idp->lock);
 }
 EXPORT_SYMBOL(idr_init);
-
 
 /**
  * DOC: IDA description

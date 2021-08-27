@@ -63,8 +63,8 @@ static struct phy_driver rtl821x_driver = {
 	.read_status	= &genphy_read_status,
 	.ack_interrupt	= &rtl821x_ack_interrupt,
 	.config_intr	= &rtl821x_config_intr,
-	.driver		= { .owner = THIS_MODULE,},
-};
+ 	.driver		= { .owner = THIS_MODULE,},
+ };
 
 static int __init realtek_init(void)
 {

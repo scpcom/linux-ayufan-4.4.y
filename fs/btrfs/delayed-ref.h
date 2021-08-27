@@ -99,8 +99,8 @@ struct btrfs_delayed_ref_head {
 struct btrfs_delayed_tree_ref {
 	struct btrfs_delayed_ref_node node;
 	union {
-		u64 root;
-		u64 parent;
+	u64 root;
+	u64 parent;
 	};
 	int level;
 };
@@ -108,8 +108,8 @@ struct btrfs_delayed_tree_ref {
 struct btrfs_delayed_data_ref {
 	struct btrfs_delayed_ref_node node;
 	union {
-		u64 root;
-		u64 parent;
+	u64 root;
+	u64 parent;
 	};
 	u64 objectid;
 	u64 offset;

@@ -20,7 +20,7 @@
  *
  *  Assorted race fixes, rewrite of ext4_get_block() by Al Viro, 2000
  */
-
+ 
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/time.h>
@@ -974,7 +974,6 @@ static int ext4_ordered_write_end(struct file *file,
 		if (inode->i_nlink)
 			ext4_orphan_del(NULL, inode);
 	}
-
 
 	return ret ? ret : copied;
 }
@@ -2106,7 +2105,6 @@ out:
 	return ret;
 }
 
-
 static int ext4_da_writepages(struct address_space *mapping,
 			      struct writeback_control *wbc)
 {
@@ -2616,7 +2614,7 @@ static sector_t ext4_bmap(struct address_space *mapping, sector_t block)
 		 * hasn't yet been flushed to disk, they deserve
 		 * everything they get.
 		 */
-
+		 
 		ext4_clear_inode_state(inode, EXT4_STATE_JDATA);
 		journal = EXT4_JOURNAL(inode);
 		jbd2_journal_lock_updates(journal);
@@ -2729,7 +2727,7 @@ static void ext4_end_io_dio(struct kiocb *iocb, loff_t offset,
 	if (!io_end || !size)
 		goto out;
 
-	ext_debug("ext4_end_io_dio(): io_end 0x%p"
+	ext_debug("ext4_end_io_dio(): io_end 0x%p "
 		  "for inode %lu, iocb 0x%p, offset %llu, size %llu\n",
  		  iocb->private, io_end->inode->i_ino, iocb, offset,
 		  size);
@@ -3055,14 +3053,14 @@ void ext4_set_aops(struct inode *inode)
 {
 	if (ext4_should_order_data(inode) &&
 		test_opt(inode->i_sb, DELALLOC))
-		inode->i_mapping->a_ops = &ext4_da_aops;
+			inode->i_mapping->a_ops = &ext4_da_aops;
 	else if (ext4_should_order_data(inode))
-		inode->i_mapping->a_ops = &ext4_ordered_aops;
+			inode->i_mapping->a_ops = &ext4_ordered_aops;
 	else if (ext4_should_writeback_data(inode) &&
 		 test_opt(inode->i_sb, DELALLOC))
-		inode->i_mapping->a_ops = &ext4_da_aops;
+			inode->i_mapping->a_ops = &ext4_da_aops;
 	else if (ext4_should_writeback_data(inode))
-		inode->i_mapping->a_ops = &ext4_writeback_aops;
+			inode->i_mapping->a_ops = &ext4_writeback_aops;
 	else
 		inode->i_mapping->a_ops = &ext4_journalled_aops;
 }
@@ -3186,7 +3184,6 @@ int ext4_discard_partial_page_buffers_no_lock(handle_t *handle,
 		 */
 		if (range_to_discard > end_of_block)
 			range_to_discard = end_of_block;
-
 
 		/*
 		 * Skip this buffer head if we are only zeroing unampped
@@ -4016,7 +4013,7 @@ static int ext4_do_update_inode(handle_t *handle,
 		raw_inode->i_file_acl_high =
 			cpu_to_le16(ei->i_file_acl >> 32);
 	raw_inode->i_file_acl_lo = cpu_to_le32(ei->i_file_acl);
-	ext4_isize_set(raw_inode, ei->i_disksize);
+		ext4_isize_set(raw_inode, ei->i_disksize);
 	if (ei->i_disksize > 0x7fffffffULL) {
 		struct super_block *sb = inode->i_sb;
 		if (!EXT4_HAS_RO_COMPAT_FEATURE(sb,

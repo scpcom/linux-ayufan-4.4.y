@@ -22,7 +22,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #ifndef __LINUX_XHCI_HCD_H
 #define __LINUX_XHCI_HCD_H
 
@@ -131,7 +131,6 @@ struct xhci_cap_regs {
 /* run_regs_off bitmask - bits 0:4 reserved */
 #define	RTSOFF_MASK	(~0x1f)
 
-
 /* Number of registers per port */
 #define	NUM_PORT_REGS	4
 
@@ -207,7 +206,7 @@ struct xhci_op_regs {
  */
 #define CMD_PM_INDEX	(1 << 11)
 /* bits 12:31 are reserved (and should be preserved on writes). */
-
+ 
 /* USBSTS - USB status - status bitmasks */
 /* HC not running - set to 1 when run/stop bit is cleared. */
 #define STS_HALT	XHCI_STS_HALT
@@ -229,7 +228,7 @@ struct xhci_op_regs {
 /* true: internal Host Controller Error - SW needs to reset and reinitialize */
 #define STS_HCE		(1 << 12)
 /* bits 13:31 reserved and should be preserved */
-
+ 
 /*
  * DNCTRL - Device Notification Control Register - dev_notification bitmasks
  * Generate a device notification event when the HC sees a transaction with a
@@ -258,7 +257,7 @@ struct xhci_op_regs {
 /* bits 0:7 - maximum number of device slots enabled (NumSlotsEn) */
 #define MAX_DEVS(p)	((p) & 0xff)
 /* bits 8:31 - reserved and should be preserved */
-
+ 
 /* PORTSC - Port Status and Control Register - port_status_base bitmasks */
 /* true: device connected */
 #define PORT_CONNECT	(1 << 0)
@@ -364,7 +363,7 @@ struct xhci_op_regs {
 /* Inactivity timer value for transitions into U2 */
 #define PORT_U2_TIMEOUT(p)	(((p) & 0xff) << 8)
 /* Bits 24:31 for port testing */
-
+ 
 /* USB2 Protocol PORTSPMSC */
 #define	PORT_L1S_MASK		7
 #define	PORT_L1S_SUCCESS	1
@@ -673,7 +672,6 @@ struct xhci_ep_ctx {
 /* deq bitmasks */
 #define EP_CTX_CYCLE_MASK		(1 << 0)
 
-
 /**
  * struct xhci_input_control_context
  * Input control context; see section 6.2.5.
@@ -887,7 +885,6 @@ struct xhci_interval_bw_table {
 	unsigned int		ss_bw_out;
 };
 
-
 struct xhci_virt_device {
 	struct usb_device		*udev;
 	/*
@@ -940,7 +937,6 @@ struct xhci_tt_bw_info {
 	int				active_eps;
 };
 
-
 /**
  * struct xhci_device_context_array
  * @dev_context_ptr	array of 64-bit DMA addresses for device contexts
@@ -956,8 +952,7 @@ struct xhci_device_context_array {
  * TODO: change this to be dynamically sized at HC mem init time since the HC
  * might not be able to handle the maximum number of devices possible.
  */
-
-
+ 
 struct xhci_transfer_event {
 	/* 64-bit buffer address, or immediate data */
 	__le64	buffer;
@@ -1078,7 +1073,6 @@ struct xhci_event_cmd {
 /* Set TR Dequeue Pointer command TRB fields */
 #define TRB_TO_STREAM_ID(p)		((((p) & (0xffff << 16)) >> 16))
 #define STREAM_ID_FOR_TRB(p)		((((p)) & 0xffff) << 16)
-
 
 /* Port Status Change Event TRB fields */
 /* Port ID - bits 31:24 */
@@ -1204,7 +1198,7 @@ union xhci_trb {
 /* MFINDEX Wrap Event - microframe counter wrapped */
 #define TRB_MFINDEX_WRAP	39
 /* TRB IDs 40-47 reserved, 48-63 is vendor-defined */
-
+ 
 /* Nec vendor-specific command completion event. */
 #define	TRB_NEC_CMD_COMP	48
 /* Get NEC firmware revision. */
@@ -1338,7 +1332,7 @@ struct urb_priv {
 /* Stop endpoint command timeout (secs) for URB cancellation watchdog timer */
 #define XHCI_STOP_EP_CMD_TIMEOUT	5
 /* XXX: Make these module parameters */
-
+ 
 struct s3_save {
 	u32	command;
 	u32	dev_nt;

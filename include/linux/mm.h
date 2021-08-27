@@ -579,7 +579,6 @@ static inline pte_t maybe_mkwrite(pte_t pte, struct vm_area_struct *vma)
  * sets it, so none of the operations on it need to be atomic.
  */
 
-
 /*
  * page->flags layout:
  *
@@ -1623,7 +1622,6 @@ int vmemmap_populate_basepages(struct page *start_page,
 						unsigned long pages, int node);
 int vmemmap_populate(struct page *start_page, unsigned long pages, int node);
 void vmemmap_populate_print_last(void);
-
 
 enum mf_flags {
 	MF_COUNT_INCREASED = 1 << 0,

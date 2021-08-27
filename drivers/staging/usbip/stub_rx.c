@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  */
-
+ 
 #include <asm/byteorder.h>
 #include <linux/kthread.h>
 #include <linux/usb.h>
@@ -520,7 +520,6 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
 	priv->urb->complete               = stub_complete;
 
 	usbip_pack_pdu(pdu, priv->urb, USBIP_CMD_SUBMIT, 0);
-
 
 	if (usbip_recv_xbuff(ud, priv->urb) < 0)
 		return;

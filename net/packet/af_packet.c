@@ -54,7 +54,7 @@
  *		2 of the License, or (at your option) any later version.
  *
  */
-
+ 
 #include <linux/types.h>
 #include <linux/mm.h>
 #include <linux/capability.h>
@@ -132,7 +132,6 @@ Outgoing, dev->hard_header==NULL
 Resume
   If dev->hard_header==NULL we are unlikely to restore sensible ll header.
 
-
 On transmit:
 ------------
 
@@ -170,7 +169,6 @@ struct packet_mreq_max {
 
 static int packet_set_ring(struct sock *sk, union tpacket_req_u *req_u,
 		int closing, int tx_ring);
-
 
 #define V3_ALIGNMENT	(8)
 
@@ -722,7 +720,7 @@ static void prb_flush_block(struct tpacket_kbdq_core *pkc1,
 		struct tpacket_block_desc *pbd1, __u32 status)
 {
 	/* Flush everything minus the block header */
-
+	 
 #if ARCH_IMPLEMENTS_FLUSH_DCACHE_PAGE == 1
 	u8 *start, *end;
 
@@ -1446,7 +1444,6 @@ out:
 oom:
 	return 0;
 }
-
 
 /*
  *	Output a raw packet to a device layer. This bypasses all the other
@@ -2417,7 +2414,7 @@ static int packet_release(struct socket *sock)
 
 	packet_flush_mclist(sk);
 
-	memset(&req_u, 0, sizeof(req_u));
+		memset(&req_u, 0, sizeof(req_u));
 
 	if (po->rx_ring.pg_vec)
 		packet_set_ring(sk, &req_u, 1, 0);
@@ -2519,7 +2516,6 @@ static int packet_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len
 	struct sock *sk = sock->sk;
 	struct net_device *dev = NULL;
 	int err;
-
 
 	/*
 	 *	Check legality
@@ -3324,7 +3320,6 @@ static int packet_getsockopt(struct socket *sock, int level, int optname,
 	return 0;
 }
 
-
 static int packet_notifier(struct notifier_block *this, unsigned long msg, void *data)
 {
 	struct sock *sk;
@@ -3341,7 +3336,7 @@ static int packet_notifier(struct notifier_block *this, unsigned long msg, void 
 			if (po->mclist)
 				packet_dev_mclist(dev, po->mclist, -1);
 			/* fallthrough */
-
+			 
 		case NETDEV_DOWN:
 			if (dev->ifindex == po->ifindex) {
 				spin_lock(&po->bind_lock);
@@ -3373,7 +3368,6 @@ static int packet_notifier(struct notifier_block *this, unsigned long msg, void 
 	rcu_read_unlock();
 	return NOTIFY_DONE;
 }
-
 
 static int packet_ioctl(struct socket *sock, unsigned int cmd,
 			unsigned long arg)
@@ -3450,7 +3444,6 @@ static unsigned int packet_poll(struct file *file, struct socket *sock,
 	spin_unlock_bh(&sk->sk_write_queue.lock);
 	return mask;
 }
-
 
 /* Dirty? Well, I still did not learn better way to account
  * for user mmaps.
@@ -3908,7 +3901,6 @@ static struct pernet_operations packet_net_ops = {
 	.init = packet_net_init,
 	.exit = packet_net_exit,
 };
-
 
 static void __exit packet_exit(void)
 {

@@ -13,7 +13,7 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
@@ -61,7 +61,6 @@ static int port_cost(struct net_device *dev)
 
 	return 100;	/* assume old 10Mbps */
 }
-
 
 /* Check for port carrier transistions. */
 void br_port_carrier_check(struct net_bridge_port *p)

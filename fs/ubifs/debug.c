@@ -113,27 +113,27 @@ static void sprintf_key(const struct ubifs_info *c, const union ubifs_key *key,
 		switch (type) {
 		case UBIFS_INO_KEY:
 			sprintf(p, "(%lu, %s)", (unsigned long)key_inum(c, key),
-			       get_key_type(type));
+					get_key_type(type));
 			break;
 		case UBIFS_DENT_KEY:
 		case UBIFS_XENT_KEY:
 			sprintf(p, "(%lu, %s, %#08x)",
-				(unsigned long)key_inum(c, key),
-				get_key_type(type), key_hash(c, key));
+					(unsigned long)key_inum(c, key),
+					get_key_type(type), key_hash(c, key));
 			break;
 		case UBIFS_DATA_KEY:
 			sprintf(p, "(%lu, %s, %u)",
-				(unsigned long)key_inum(c, key),
-				get_key_type(type), key_block(c, key));
+					(unsigned long)key_inum(c, key),
+					get_key_type(type), key_block(c, key));
 			break;
 		case UBIFS_TRUN_KEY:
 			sprintf(p, "(%lu, %s)",
-				(unsigned long)key_inum(c, key),
-				get_key_type(type));
+					(unsigned long)key_inum(c, key),
+					get_key_type(type));
 			break;
 		default:
 			sprintf(p, "(bad key type: %#08x, %#08x)",
-				key->u32[0], key->u32[1]);
+					key->u32[0], key->u32[1]);
 		}
 	} else
 		sprintf(p, "bad key format %d", c->key_fmt);
@@ -871,7 +871,7 @@ void dbg_dump_lpt_info(struct ubifs_info *c)
 }
 
 void dbg_dump_sleb(const struct ubifs_info *c,
-		   const struct ubifs_scan_leb *sleb, int offs)
+		     const struct ubifs_scan_leb *sleb, int offs)
 {
 	struct ubifs_scan_node *snod;
 
@@ -930,7 +930,7 @@ out:
 }
 
 void dbg_dump_znode(const struct ubifs_info *c,
-		    const struct ubifs_znode *znode)
+		      const struct ubifs_znode *znode)
 {
 	int n;
 	const struct ubifs_zbranch *zbr;
@@ -985,7 +985,7 @@ void dbg_dump_heap(struct ubifs_info *c, struct ubifs_lpt_heap *heap, int cat)
 }
 
 void dbg_dump_pnode(struct ubifs_info *c, struct ubifs_pnode *pnode,
-		    struct ubifs_nnode *parent, int iip)
+		      struct ubifs_nnode *parent, int iip)
 {
 	int i;
 
@@ -2664,8 +2664,8 @@ static void cut_data(const void *buf, unsigned int len)
 		to = len;
 
 	if (from < to)
-		ubifs_warn("filled bytes %u-%u with %s", from, to - 1,
-			   ffs ? "0xFFs" : "random data");
+	ubifs_warn("filled bytes %u-%u with %s", from, to - 1,
+		   ffs ? "0xFFs" : "random data");
 
 	if (ffs)
 		for (i = from; i < to; i++)
@@ -3010,7 +3010,7 @@ out:
  */
 void dbg_debugfs_exit_fs(struct ubifs_info *c)
 {
-	debugfs_remove_recursive(c->dbg->dfs_dir);
+		debugfs_remove_recursive(c->dbg->dfs_dir);
 }
 
 struct ubifs_global_debug_info ubifs_dbg;
@@ -3159,7 +3159,7 @@ out:
  */
 void dbg_debugfs_exit(void)
 {
-	debugfs_remove_recursive(dfs_rootdir);
+		debugfs_remove_recursive(dfs_rootdir);
 }
 
 /**

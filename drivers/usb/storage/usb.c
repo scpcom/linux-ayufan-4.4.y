@@ -47,7 +47,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #ifdef CONFIG_USB_STORAGE_DEBUG
 #define DEBUG
 #endif

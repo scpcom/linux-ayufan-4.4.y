@@ -4,7 +4,7 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  *  changes by Thomas Schoebel-Theuer
  */
-
+ 
 #include <linux/module.h>
 #include <linux/time.h>
 #include <linux/mm.h>

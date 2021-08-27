@@ -10,7 +10,7 @@
  *  Major rework to support vmap/vunmap, Christoph Hellwig, SGI, August 2002
  *  Numa awareness, Christoph Lameter, SGI, June 2005
  */
-
+ 
 #include <linux/vmalloc.h>
 #include <linux/mm.h>
 #include <linux/module.h>
@@ -244,7 +244,6 @@ unsigned long vmalloc_to_pfn(const void *vmalloc_addr)
 	return page_to_pfn(vmalloc_to_page(vmalloc_addr));
 }
 EXPORT_SYMBOL(vmalloc_to_pfn);
-
 
 /*** Global kva allocator ***/
 
@@ -703,7 +702,6 @@ static void free_unmap_vmap_area_addr(unsigned long addr)
 	BUG_ON(!va);
 	free_unmap_vmap_area(va);
 }
-
 
 /*** Per cpu kva allocator ***/
 
@@ -2143,7 +2141,6 @@ void  __attribute__((weak)) vmalloc_sync_all(void)
 {
 }
 
-
 static int f(pte_t *pte, pgtable_t table, unsigned long addr, void *data)
 {
 	pte_t ***p = data;
@@ -2610,4 +2607,3 @@ static int __init proc_vmalloc_init(void)
 }
 module_init(proc_vmalloc_init);
 #endif
-

@@ -13,7 +13,7 @@
  *
  *
  */
-
+ 
 #include <linux/usb.h>
 #include <linux/usb/quirks.h>
 #include "usb.h"
@@ -164,7 +164,7 @@ static const struct usb_device_id *find_id(struct usb_device *udev)
 			id->driver_info; id++) {
 		if (usb_match_device(udev, id))
 			return id;
-	}
+		}
 	return NULL;
 }
 
@@ -180,7 +180,7 @@ void usb_detect_quirks(struct usb_device *udev)
 		udev->quirks = (u32)(id->driver_info);
 	if (udev->quirks)
 		dev_dbg(&udev->dev, "USB quirks for this device: %x\n",
-				udev->quirks);
+			udev->quirks);
 
 	/* For the present, all devices default to USB-PERSIST enabled */
 #if 0		/* was: #ifdef CONFIG_PM */

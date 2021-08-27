@@ -55,7 +55,7 @@
  * - use pcpu_setup_first_chunk() during percpu area initialization to
  *   setup the first chunk containing the kernel static percpu area
  */
-
+ 
 #include <linux/bitmap.h>
 #include <linux/bootmem.h>
 #include <linux/err.h>

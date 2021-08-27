@@ -33,7 +33,7 @@
  *
  *  For licencing details see kernel-base/COPYING
  */
-
+ 
 #include <linux/cpu.h>
 #include <linux/export.h>
 #include <linux/percpu.h>
@@ -98,7 +98,6 @@ static inline int hrtimer_clockid_to_base(clockid_t clock_id)
 	return hrtimer_clock_to_base_table[clock_id];
 }
 
-
 /*
  * Get the coarse grained time at the softirq based on xtime and
  * wall_to_monotonic.
@@ -154,7 +153,6 @@ struct hrtimer_clock_base *lock_hrtimer_base(const struct hrtimer *timer,
 		cpu_relax();
 	}
 }
-
 
 /*
  * Get the preferred target CPU for NOHZ
@@ -1030,7 +1028,6 @@ hrtimer_start(struct hrtimer *timer, ktime_t tim, const enum hrtimer_mode mode)
 	return __hrtimer_start_range_ns(timer, tim, 0, mode, 1);
 }
 EXPORT_SYMBOL_GPL(hrtimer_start);
-
 
 /**
  * hrtimer_try_to_cancel - try to deactivate a timer

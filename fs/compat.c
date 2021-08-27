@@ -17,7 +17,7 @@
  *  it under the terms of the GNU General Public License version 2 as
  *  published by the Free Software Foundation.
  */
-
+ 
 #include <linux/stddef.h>
 #include <linux/kernel.h>
 #include <linux/linkage.h>
@@ -452,7 +452,7 @@ asmlinkage long compat_sys_fcntl64(unsigned int fd, unsigned int cmd,
 			 * and only allow the app to see that part of the conflicting
 			 * lock that might make sense to it anyway
 			 */
-
+			 
 			if (f.l_start > COMPAT_OFF_T_MAX)
 				ret = -EOVERFLOW;
 			if (f.l_len > COMPAT_OFF_T_MAX)
@@ -720,7 +720,6 @@ static void *do_ncp_super_data_conv(void *raw_data)
 
 	return raw_data;
 }
-
 
 struct compat_nfs_string {
 	compat_uint_t len;
@@ -1362,7 +1361,7 @@ static int poll_select_copy_remaining(struct timespec *end_time, void __user *p,
 	 * successfully. However, because we're not updating the
 	 * timeval, we can't restart the system call.
 	 */
-
+	 
 sticky:
 	if (ret == -ERESTARTNOHAND)
 		ret = -EINTR;
@@ -1431,7 +1430,6 @@ int compat_set_fd_set(unsigned long nr, compat_ulong_t __user *ufdset,
 		return -EFAULT;
 	return 0;
 }
-
 
 /*
  * This is a virtual copy of sys_select from fs/select.c and probably

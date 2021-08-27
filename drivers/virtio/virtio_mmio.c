@@ -55,13 +55,9 @@
 #include <linux/virtio_mmio.h>
 #include <linux/virtio_ring.h>
 
-
-
 /* The alignment to use between consumer and producer parts of vring.
  * Currently hardcoded to the page size. */
 #define VIRTIO_MMIO_VRING_ALIGN		PAGE_SIZE
-
-
 
 #define to_virtio_mmio_device(_plat_dev) \
 	container_of(_plat_dev, struct virtio_mmio_device, vdev)
@@ -94,8 +90,6 @@ struct virtio_mmio_vq_info {
 	/* the list node for the virtqueues list */
 	struct list_head node;
 };
-
-
 
 /* Configuration interface */
 
@@ -171,8 +165,6 @@ static void vm_reset(struct virtio_device *vdev)
 	writel(0, vm_dev->base + VIRTIO_MMIO_STATUS);
 }
 
-
-
 /* Transport interface */
 
 /* the notify function used when creating a virt queue */
@@ -217,8 +209,6 @@ static irqreturn_t vm_interrupt(int irq, void *opaque)
 	return ret;
 }
 
-
-
 static void vm_del_vq(struct virtqueue *vq)
 {
 	struct virtio_mmio_device *vm_dev = to_virtio_mmio_device(vq->vdev);
@@ -250,8 +240,6 @@ static void vm_del_vqs(struct virtio_device *vdev)
 
 	free_irq(platform_get_irq(vm_dev->pdev, 0), vm_dev);
 }
-
-
 
 static struct virtqueue *vm_setup_vq(struct virtio_device *vdev, unsigned index,
 				  void (*callback)(struct virtqueue *vq),
@@ -361,8 +349,6 @@ static int vm_find_vqs(struct virtio_device *vdev, unsigned nvqs,
 	return 0;
 }
 
-
-
 static struct virtio_config_ops virtio_mmio_config_ops = {
 	.get		= vm_get,
 	.set		= vm_set,
@@ -374,8 +360,6 @@ static struct virtio_config_ops virtio_mmio_config_ops = {
 	.get_features	= vm_get_features,
 	.finalize_features = vm_finalize_features,
 };
-
-
 
 /* Platform device */
 

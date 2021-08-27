@@ -1856,7 +1856,6 @@ static int reiserfs_fill_super(struct super_block *s, void *data, int silent)
 		} else
 			set_sb_mnt_count(rs, sb_mnt_count(rs) + 1);
 
-
 		journal_mark_dirty(&th, s, SB_BUFFER_WITH_SB(s));
 		errval = journal_end(&th, s, 1);
 		if (errval) {
@@ -1959,7 +1958,7 @@ static int reiserfs_write_dquot(struct dquot *dquot)
 			REISERFS_QUOTA_TRANS_BLOCKS(dquot->dq_sb));
 	if (!ret && err)
 		ret = err;
-      out:
+out:
 	reiserfs_write_unlock(dquot->dq_sb);
 	return ret;
 }
@@ -1981,7 +1980,7 @@ static int reiserfs_acquire_dquot(struct dquot *dquot)
 			REISERFS_QUOTA_INIT_BLOCKS(dquot->dq_sb));
 	if (!ret && err)
 		ret = err;
-      out:
+out:
 	reiserfs_write_unlock(dquot->dq_sb);
 	return ret;
 }
@@ -2006,7 +2005,7 @@ static int reiserfs_release_dquot(struct dquot *dquot)
 			REISERFS_QUOTA_DEL_BLOCKS(dquot->dq_sb));
 	if (!ret && err)
 		ret = err;
-      out:
+out:
 	reiserfs_write_unlock(dquot->dq_sb);
 	return ret;
 }
@@ -2036,7 +2035,7 @@ static int reiserfs_write_info(struct super_block *sb, int type)
 	err = journal_end(&th, sb, 2);
 	if (!ret && err)
 		ret = err;
-      out:
+out:
 	reiserfs_write_unlock(sb);
 	return ret;
 }

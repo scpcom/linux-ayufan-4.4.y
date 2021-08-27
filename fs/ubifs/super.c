@@ -28,7 +28,7 @@
  * initialization stuff which is rather large and complex is placed at
  * corresponding subsystems, but most of it is here.
  */
-
+ 
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -673,7 +673,7 @@ static int init_constants_sb(struct ubifs_info *c)
 	tmp = ALIGN(tmp, c->min_io_size);
 	if (tmp > c->leb_size) {
 		dbg_err("too small LEB size %d, at least %d needed",
-			c->leb_size, tmp);
+			  c->leb_size, tmp);
 		return -EINVAL;
 	}
 
@@ -688,7 +688,7 @@ static int init_constants_sb(struct ubifs_info *c)
 	tmp += 1;
 	if (c->log_lebs < tmp) {
 		dbg_err("too small log %d LEBs, required min. %d LEBs",
-			c->log_lebs, tmp);
+			  c->log_lebs, tmp);
 		return -EINVAL;
 	}
 
@@ -1435,8 +1435,8 @@ static int mount_ubifs(struct ubifs_info *c)
 		  c->fmt_version, c->ro_compat_version,
 		  UBIFS_FORMAT_VERSION, UBIFS_RO_COMPAT_VERSION);
 	ubifs_msg("default compressor: %s", ubifs_compr_name(c->default_compr));
-	ubifs_msg("reserved for root:  %llu bytes (%llu KiB)",
-		c->report_rp_size, c->report_rp_size >> 10);
+	ubifs_msg("reserved for root: %llu bytes (%llu KiB)",
+		  c->report_rp_size, c->report_rp_size >> 10);
 
 	dbg_msg("compiled on:         " __DATE__ " at " __TIME__);
 	dbg_msg("min. I/O unit size:  %d bytes", c->min_io_size);
@@ -2133,7 +2133,7 @@ static struct dentry *ubifs_mount(struct file_system_type *fs_type, int flags,
 	ubi = open_ubi(name, UBI_READONLY);
 	if (IS_ERR(ubi)) {
 		dbg_err("cannot open \"%s\", error %d",
-			name, (int)PTR_ERR(ubi));
+			  name, (int)PTR_ERR(ubi));
 		return ERR_CAST(ubi);
 	}
 

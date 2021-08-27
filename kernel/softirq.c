@@ -12,7 +12,7 @@
  *
  *	Remote softirq infrastructure is by Jens Axboe.
  */
-
+ 
 #include <linux/export.h>
 #include <linux/kernel_stat.h>
 #include <linux/interrupt.h>
@@ -49,7 +49,7 @@
      is invisible to common code.
    - Tasklets: serialized wrt itself.
  */
-
+ 
 #ifndef __ARCH_IRQ_STAT
 irq_cpustat_t irq_stat[NR_CPUS] ____cacheline_aligned;
 EXPORT_SYMBOL(irq_stat);
@@ -525,7 +525,6 @@ static void tasklet_hi_action(struct softirq_action *a)
 		local_irq_enable();
 	}
 }
-
 
 void tasklet_init(struct tasklet_struct *t,
 		  void (*func)(unsigned long), unsigned long data)

@@ -12,7 +12,7 @@
  *  License.  See the file COPYING in the main directory of this archive
  *  for more details.
  */
-
+ 
 #undef DEBUG
 #undef DEBUG_IPI
 #undef DEBUG_IRQ
@@ -167,7 +167,6 @@ static inline unsigned int mpic_processor_id(struct mpic *mpic)
  * Register accessor functions
  */
 
-
 static inline u32 _mpic_read(enum mpic_reg_type type,
 			     struct mpic_reg_bank *rb,
 			     unsigned int reg)
@@ -303,11 +302,9 @@ static inline void _mpic_irq_write(struct mpic *mpic, unsigned int src_no,
 #define mpic_irq_read(s,r)	_mpic_irq_read(mpic,(s),(r))
 #define mpic_irq_write(s,r,v)	_mpic_irq_write(mpic,(s),(r),(v))
 
-
 /*
  * Low level utility functions
  */
-
 
 static void _mpic_map_mmio(struct mpic *mpic, phys_addr_t phys_addr,
 			   struct mpic_reg_bank *rb, unsigned int offset,
@@ -343,8 +340,6 @@ static inline void mpic_map(struct mpic *mpic, struct device_node *node,
 #define mpic_map(m,n,p,b,o,s)	_mpic_map_mmio(m,p,b,o,s)
 #endif /* !CONFIG_PPC_DCR */
 
-
-
 /* Check if we have one of those nice broken MPICs with a flipped endian on
  * reads from IPI registers
  */
@@ -372,7 +367,6 @@ static inline int mpic_is_ht_interrupt(struct mpic *mpic, unsigned int source)
 		return 0;
 	return mpic->fixups[source].base != NULL;
 }
-
 
 static inline void mpic_ht_end_irq(struct mpic *mpic, unsigned int source)
 {
@@ -537,7 +531,6 @@ static void __init mpic_scan_ht_pic(struct mpic *mpic, u8 __iomem *devbase,
 	}
 }
  
-
 static void __init mpic_scan_ht_pics(struct mpic *mpic)
 {
 	unsigned int devfn;
@@ -668,7 +661,6 @@ static inline void mpic_eoi(struct mpic *mpic)
  * Linux descriptor level callbacks
  */
 
-
 void mpic_unmask_irq(struct irq_data *d)
 {
 	unsigned int loops = 100000;
@@ -723,7 +715,7 @@ void mpic_end_irq(struct irq_data *d)
 	 * should only lower the priority, the MPIC should have properly
 	 * latched another edge interrupt coming in anyway
 	 */
-
+	 
 	mpic_eoi(mpic);
 }
 
@@ -772,7 +764,7 @@ static void mpic_end_ht_irq(struct irq_data *d)
 	 * should only lower the priority, the MPIC should have properly
 	 * latched another edge interrupt coming in anyway
 	 */
-
+	 
 	if (irqd_is_level_type(d))
 		mpic_ht_end_irq(mpic, src);
 	mpic_eoi(mpic);
@@ -970,7 +962,6 @@ static struct irq_chip mpic_irq_ht_chip = {
 	.irq_set_type	= mpic_set_irq_type,
 };
 #endif /* CONFIG_MPIC_U3_HT_IRQS */
-
 
 static int mpic_host_match(struct irq_host *h, struct device_node *node)
 {
@@ -1617,7 +1608,6 @@ void mpic_teardown_this_cpu(int secondary)
 
 	raw_spin_unlock_irqrestore(&mpic_lock, flags);
 }
-
 
 static unsigned int _mpic_get_one_irq(struct mpic *mpic, int reg)
 {

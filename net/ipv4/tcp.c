@@ -247,7 +247,7 @@
  *
  *	TCP_CLOSE		socket is finished
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/types.h>
@@ -858,7 +858,7 @@ wait_for_sndbuf:
 		set_bit(SOCK_NOSPACE, &sk->sk_socket->flags);
 wait_for_memory:
 		if (copied)
-			tcp_push(sk, flags & ~MSG_MORE, mss_now, TCP_NAGLE_PUSH);
+		tcp_push(sk, flags & ~MSG_MORE, mss_now, TCP_NAGLE_PUSH);
 
 		if ((err = sk_stream_wait_memory(sk, &timeo)) != 0)
 			goto do_error;
@@ -1503,7 +1503,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		}
 
 		/* Next get a buffer. */
-
+			 
 		skb_queue_walk(&sk->sk_receive_queue, skb) {
 			/* Now that we have two receive queues this
 			 * shouldn't happen.
@@ -1626,7 +1626,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 
 #ifdef CONFIG_NET_DMA
 		if (tp->ucopy.dma_chan)
-			dma_async_memcpy_issue_pending(tp->ucopy.dma_chan);
+				dma_async_memcpy_issue_pending(tp->ucopy.dma_chan);
 #endif
 		if (copied >= target) {
 			/* Do not sleep, just process backlog. */
@@ -1858,7 +1858,7 @@ EXPORT_SYMBOL_GPL(tcp_set_state);
  *	states. A shutdown() may have already sent the FIN, or we may be
  *	closed.
  */
-
+   
 static const unsigned char new_state[16] = {
   /* current state:        new state:      action:	*/
   /* (Invalid)		*/ TCP_CLOSE,
@@ -2000,7 +2000,6 @@ adjudge_to_death:
 	/* It is the last release_sock in its life. It will remove backlog. */
 	release_sock(sk);
 
-
 	/* Now socket is owned by kernel and we acquire BH lock
 	   to finish close. No need to check for user refs.
 	 */
@@ -2063,7 +2062,7 @@ adjudge_to_death:
 	if (sk->sk_state == TCP_CLOSE)
 		inet_csk_destroy_sock(sk);
 	/* Otherwise, socket is reprieved until protocol close. */
-
+	 
 out:
 	bh_unlock_sock(sk);
 	local_bh_enable();
@@ -2429,7 +2428,7 @@ static int do_tcp_setsockopt(struct sock *sk, int level,
 		/* Cap the max timeout in ms TCP will retry/retrans
 		 * before giving up and aborting (ETIMEDOUT) a connection.
 		 */
-		icsk->icsk_user_timeout = msecs_to_jiffies(val);
+			icsk->icsk_user_timeout = msecs_to_jiffies(val);
 		break;
 	default:
 		err = -ENOPROTOOPT;
@@ -2993,7 +2992,6 @@ retry:
 }
 EXPORT_SYMBOL(tcp_alloc_md5sig_pool);
 
-
 /**
  *	tcp_get_md5sig_pool - get md5sig_pool for this user
  *
@@ -3301,7 +3299,6 @@ void __init tcp_init(void)
 		spin_lock_init(&tcp_hashinfo.bhash[i].lock);
 		INIT_HLIST_HEAD(&tcp_hashinfo.bhash[i].chain);
 	}
-
 
 	cnt = tcp_hashinfo.ehash_mask + 1;
 

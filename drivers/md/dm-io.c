@@ -7,7 +7,7 @@
  *
  * This file is released under the GPL.
  */
-
+ 
 #include "dm.h"
 
 #include <linux/device-mapper.h>
@@ -450,7 +450,7 @@ static int dp_init(struct dm_io_request *io_req, struct dpages *dp,
 		   unsigned long size)
 {
 	/* Set up dpages based on memory type */
-
+	 
 	dp->vma_invalidate_address = NULL;
 	dp->vma_invalidate_size = 0;
 

@@ -19,7 +19,7 @@
  * policy format documentation look in Documentation/security/apparmor.txt
  * All policy is validated before it is used.
  */
-
+ 
 #include <asm/unaligned.h>
 #include <linux/ctype.h>
 #include <linux/errno.h>
@@ -337,7 +337,6 @@ static struct aa_dfa *unpack_dfa(struct aa_ext *e)
 		int flags = TO_ACCEPT1_FLAG(YYTD_DATA32) |
 			TO_ACCEPT2_FLAG(YYTD_DATA32);
 
-
 		if (aa_g_paranoid_load)
 			flags |= DFA_FLAG_VERIFY_STATES;
 
@@ -606,15 +605,15 @@ static int verify_header(struct aa_ext *e, const char **ns)
 	/* get the interface version */
 	if (!unpack_u32(e, &e->version, "version")) {
 		audit_iface(NULL, NULL, "invalid profile format", e, error);
-		return error;
-	}
+			return error;
+		}
 
-	/* check that the interface version is currently supported */
-	if (e->version != 5) {
+		/* check that the interface version is currently supported */
+		if (e->version != 5) {
 		audit_iface(NULL, NULL, "unsupported interface version", e,
 			    error);
-		return error;
-	}
+			return error;
+		}
 
 	/* read the namespace if present */
 	if (!unpack_str(e, ns, "namespace"))
@@ -688,16 +687,16 @@ struct aa_profile *aa_unpack(void *udata, size_t size, const char **ns)
 	};
 
 	error = verify_header(&e, ns);
-	if (error)
+		if (error)
 		return ERR_PTR(error);
 
-	profile = unpack_profile(&e);
+		profile = unpack_profile(&e);
 	if (IS_ERR(profile))
 		return profile;
 
-	error = verify_profile(profile);
-	if (error) {
-		aa_put_profile(profile);
+		error = verify_profile(profile);
+		if (error) {
+			aa_put_profile(profile);
 		profile = ERR_PTR(error);
 	}
 

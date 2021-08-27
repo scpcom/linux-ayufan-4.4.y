@@ -261,7 +261,7 @@ static int coalesce_t2(struct smb_hdr *psecond, struct smb_hdr *pTargetSMB)
 	data_area_of_target = (char *)&pSMBt->hdr.Protocol +
 				get_unaligned_le16(&pSMBt->t2_rsp.DataOffset);
 	/* validate target area */
-
+	 
 	data_area_of_buf2 = (char *)&pSMB2->hdr.Protocol +
 				get_unaligned_le16(&pSMB2->t2_rsp.DataOffset);
 
@@ -1035,7 +1035,7 @@ cifs_parse_mount_options(const char *mountdata, const char *devname,
 
 			/* NB: password legally can have multiple commas and
 			the only illegal character in a password is null */
-
+			 
 			if ((value[temp_len] == 0) &&
 			    (value + temp_len < end) &&
 			    (value[temp_len+1] == separator[0])) {
@@ -1359,7 +1359,7 @@ cifs_parse_mount_options(const char *mountdata, const char *devname,
 				/* BB are there cases in which a comma can be
 				   valid in this workstation netbios name
 				   (and need special handling)? */
-
+				 
 				/* user or mount helper must uppercase
 				   the netbiosname */
 					if (value[i] == 0)
@@ -2427,7 +2427,7 @@ get_dfs_path(int xid, struct cifs_ses *pSesInfo, const char *old_path,
 				     pnum_referrals, nls_codepage, remap);
 	/* BB map targetUNCs to dfs_info3 structures, here or
 		in CIFSGetDFSRefer BB */
-
+	 
 	return rc;
 }
 
@@ -2576,7 +2576,7 @@ ip_rfc1001_connect(struct TCP_Server_Info *server)
 	 * else the negprot may still work without this
 	 * even though malloc failed
 	 */
-
+	 
 	return rc;
 }
 
@@ -3057,7 +3057,6 @@ cifs_cleanup_volume_info(struct smb_vol *volume_info)
 	kfree(volume_info);
 }
 
-
 #ifdef CONFIG_CIFS_DFS_UPCALL
 /* build_path_to_root returns full path to root when
  * we do not have an exiting connection (tcon) */
@@ -3532,7 +3531,6 @@ CIFSTCon(unsigned int xid, struct cifs_ses *ses,
 		else
 			is_unicode = false;
 
-
 		/* skip service field (NB: this field is always ASCII) */
 		if (length == 3) {
 			if ((bcc_ptr[0] == 'I') && (bcc_ptr[1] == 'P') &&
@@ -3631,7 +3629,6 @@ int cifs_negotiate_protocol(unsigned int xid, struct cifs_ses *ses)
 	return rc;
 }
 
-
 int cifs_setup_session(unsigned int xid, struct cifs_ses *ses,
 			struct nls_table *nls_info)
 {
@@ -3686,7 +3683,7 @@ cifs_construct_tcon(struct cifs_sb_info *cifs_sb, uid_t fsuid)
 	char username[28]; /* big enough for "krb50x" + hex of ULONG_MAX 6+16 */
 			   /* We used to have this as MAX_USERNAME which is   */
 			   /* way too big now (256 instead of 32) */
-
+			    
 	vol_info = kzalloc(sizeof(*vol_info), GFP_KERNEL);
 	if (vol_info == NULL) {
 		tcon = ERR_PTR(-ENOMEM);

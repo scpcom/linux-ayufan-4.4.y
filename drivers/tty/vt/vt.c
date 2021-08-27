@@ -72,7 +72,7 @@
  * original codes or '?' as a last resort if replacement glyph is undefined
  * by Adam Tla/lka <atlka@pg.gda.pl>, Aug 2006
  */
-
+ 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/sched.h>
@@ -274,7 +274,7 @@ static void notify_update(struct vc_data *vc)
 /*
  *	Low-Level Functions
  */
-
+ 
 #define IS_FG(vc)	((vc)->vc_num == fg_console)
 
 #ifdef VT_BUF_VRAM_ONLY
@@ -1665,7 +1665,7 @@ static void reset_terminal(struct vc_data *vc, int do_clear)
 	kbd_table[vc->vc_num].ledflagstate = kbd_table[vc->vc_num].default_ledflagstate;
 	/* do not do set_leds here because this causes an endless tasklet loop
 	   when the keyboard hasn't been initialized yet */
-
+	 
 	vc->vc_cursor_type = cur_default;
 	vc->vc_complement_mask = vc->vc_s_complement_mask;
 
@@ -2483,7 +2483,7 @@ int vt_kmsg_redirect(int new)
  *
  * The console must be locked when we get here.
  */
-
+ 
 static void vt_console_print(struct console *co, const char *b, unsigned count)
 {
 	struct vc_data *vc = vc_cons[fg_console].d;
@@ -3648,7 +3648,7 @@ EXPORT_SYMBOL(unregister_con_driver);
  *	when a driver wants to take over some existing consoles
  *	and become default driver for newly opened ones.
  *
- *      take_over_console is basically a register followed by unbind
+ *	take_over_console is basically a register followed by unbind
  */
 int take_over_console(const struct consw *csw, int first, int last, int deflt)
 {
@@ -3658,7 +3658,7 @@ int take_over_console(const struct consw *csw, int first, int last, int deflt)
 	/* if we get an busy error we still want to bind the console driver
 	 * and return success, as we may have unbound the console driver
 	 * but not unregistered it.
-	*/
+	 */
 	if (err == -EBUSY)
 		err = 0;
 	if (!err)

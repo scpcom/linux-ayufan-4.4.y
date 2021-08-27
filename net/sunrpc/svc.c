@@ -12,7 +12,7 @@
  * Copyright (c) 2006 Silicon Graphics, Inc.
  * by Greg Banks <gnb@melbourne.sgi.com>
  */
-
+ 
 #include <linux/linkage.h>
 #include <linux/sched.h>
 #include <linux/errno.h>
@@ -198,10 +198,9 @@ svc_pool_map_init_percpu(struct svc_pool_map *m)
 		pidx++;
 	}
 	/* cpus brought online later all get mapped to pool0, sorry */
-
+	 
 	return pidx;
 };
-
 
 /*
  * Initialise the pool map for SVC_POOL_PERNODE mode.
@@ -227,10 +226,9 @@ svc_pool_map_init_pernode(struct svc_pool_map *m)
 		pidx++;
 	}
 	/* nodes brought online later all get mapped to pool0, sorry */
-
+	 
 	return pidx;
 }
-
 
 /*
  * Add a reference to the global map of cpus to pools (and
@@ -273,7 +271,6 @@ svc_pool_map_get(void)
 	return m->npools;
 }
 
-
 /*
  * Drop a reference to the global map of cpus to pools.
  * When the last reference is dropped, the map data is
@@ -299,7 +296,6 @@ svc_pool_map_put(void)
 
 	mutex_unlock(&svc_pool_map_mutex);
 }
-
 
 static int svc_pool_map_get_node(unsigned int pidx)
 {

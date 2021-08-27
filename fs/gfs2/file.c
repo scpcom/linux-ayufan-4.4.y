@@ -457,7 +457,7 @@ out:
 		set_page_dirty(page);
 		/* This check must be post dropping of transaction lock */
 		if (inode->i_sb->s_frozen == SB_UNFROZEN) {
-			wait_on_page_writeback(page);
+		wait_on_page_writeback(page);
 		} else {
 			ret = -EAGAIN;
 			unlock_page(page);
@@ -1047,4 +1047,3 @@ const struct file_operations gfs2_dir_fops_nolock = {
 	.fsync		= gfs2_fsync,
 	.llseek		= default_llseek,
 };
-

@@ -13,7 +13,7 @@
  * fields. However, gcc 2.95.3 and apparently also gcc 3.0.4 don't support this
  * language extension.
  */
-
+ 
 struct raw_prio_tree_node {
 	struct prio_tree_node	*left;
 	struct prio_tree_node	*right;
@@ -103,7 +103,6 @@ static inline int prio_tree_right_empty(const struct prio_tree_node *node)
 {
 	return node->right == node;
 }
-
 
 struct prio_tree_node *prio_tree_replace(struct prio_tree_root *root,
                 struct prio_tree_node *old, struct prio_tree_node *node);

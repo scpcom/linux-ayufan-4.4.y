@@ -17,7 +17,7 @@
  *	Vitaly E. Lavrov	releasing NULL neighbor in neigh_add.
  *	Harald Welte		Add neighbour cache statistics like rtstat
  */
-
+ 
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -133,7 +133,6 @@ unsigned long neigh_rand_reach_time(unsigned long base)
 	return base ? (net_random() % base) + (base >> 1) : 0;
 }
 EXPORT_SYMBOL(neigh_rand_reach_time);
-
 
 static int neigh_forced_gc(struct neigh_table *tbl)
 {
@@ -632,7 +631,6 @@ out:
 }
 EXPORT_SYMBOL(pneigh_lookup);
 
-
 int pneigh_delete(struct neigh_table *tbl, struct net *net, const void *pkey,
 		  struct net_device *dev)
 {
@@ -1048,8 +1046,6 @@ static void neigh_update_hhs(struct neighbour *neigh)
 	}
 }
 
-
-
 /* Generic update routine.
    -- lladdr is new lladdr or NULL, if it is not supplied.
    -- new    is new state.
@@ -1320,7 +1316,7 @@ int neigh_connected_output(struct neighbour *neigh, struct sk_buff *skb)
 	unsigned int seq;
 	int err;
 
-	__skb_pull(skb, skb_network_offset(skb));
+		__skb_pull(skb, skb_network_offset(skb));
 
 	do {
 		seq = read_seqbegin(&neigh->ha_lock);
@@ -2835,7 +2831,6 @@ int neigh_sysctl_register(struct net_device *dev, struct neigh_parms *p,
 		t->neigh_vars[17].data = (int *)(p + 1) + 3;
 	}
 
-
 	if (handler) {
 		/* RetransTime */
 		t->neigh_vars[3].proc_handler = handler;
@@ -2903,4 +2898,3 @@ static int __init neigh_init(void)
 }
 
 subsys_initcall(neigh_init);
-

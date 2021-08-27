@@ -273,12 +273,12 @@ again:
 		 * we've gone to the end of the rbtree without finding any
 		 * clusters.  start from the beginning and try again
 		 */
-		start = 0;
+			start = 0;
 		node = rb_first(&delayed_refs->root);
-		goto again;
-	}
+			goto again;
+		}
 	return 1;
-}
+	}
 
 /*
  * helper function to update an extent delayed ref in the
@@ -493,7 +493,7 @@ static noinline int add_delayed_tree_ref(struct btrfs_trans_handle *trans,
 
 	full_ref = btrfs_delayed_node_to_tree_ref(ref);
 	if (parent) {
-		full_ref->parent = parent;
+	full_ref->parent = parent;
 		ref->type = BTRFS_SHARED_BLOCK_REF_KEY;
 	} else {
 		full_ref->root = ref_root;
@@ -548,7 +548,7 @@ static noinline int add_delayed_data_ref(struct btrfs_trans_handle *trans,
 
 	full_ref = btrfs_delayed_node_to_data_ref(ref);
 	if (parent) {
-		full_ref->parent = parent;
+	full_ref->parent = parent;
 		ref->type = BTRFS_SHARED_DATA_REF_KEY;
 	} else {
 		full_ref->root = ref_root;

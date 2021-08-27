@@ -33,7 +33,7 @@
  * another group a new event_holder (from fsnotify_event_holder_cachep) will be
  * allocated and used.
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -464,4 +464,3 @@ __init int fsnotify_notification_init(void)
 	return 0;
 }
 subsys_initcall(fsnotify_notification_init);
-

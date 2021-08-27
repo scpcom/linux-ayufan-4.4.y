@@ -6,7 +6,7 @@
  *
  * Copyright (C) 1995, 1996 Olaf Kirch <okir@monad.swb.de>
  */
-
+ 
 #include <linux/slab.h>
 #include <linux/namei.h>
 #include <linux/ctype.h>
@@ -191,7 +191,6 @@ static const struct file_operations pool_stats_operations = {
 /*
  * payload - write methods
  */
-
 
 /**
  * write_unlock_ip - Release all locks used by a client
@@ -859,7 +858,6 @@ static ssize_t write_ports(struct file *file, char *buf, size_t size)
 	mutex_unlock(&nfsd_mutex);
 	return rv;
 }
-
 
 int nfsd_max_blksize;
 

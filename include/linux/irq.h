@@ -89,7 +89,7 @@ enum {
 	IRQ_MOVE_PCNTXT		= (1 << 14),
 	IRQ_NESTED_THREAD	= (1 << 15),
 	IRQ_NOTHREAD		= (1 << 16),
-	IRQ_PER_CPU_DEVID	= (1 << 17),
+	IRQ_PER_CPU_DEVID       = (1 << 17),
 #ifndef CONFIG_GENERIC_HARDIRQS_NO_COMPAT
 	IRQ_INPROGRESS		= (1 << 18),
 	IRQ_REPLAY		= (1 << 19),
@@ -438,7 +438,6 @@ extern void handle_nested_irq(unsigned int irq);
 /* Handling of unhandled and spurious interrupts: */
 extern void note_interrupt(unsigned int irq, struct irq_desc *desc,
 			   irqreturn_t action_ret);
-
 
 /* Enable/disable irq debugging output: */
 extern int noirqdebug_setup(char *str);

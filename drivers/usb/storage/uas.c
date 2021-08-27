@@ -10,7 +10,7 @@
  *
  * Distributed under the terms of the GNU GPL, version two.
  */
-
+ 
 #include <linux/blkdev.h>
 #include <linux/slab.h>
 #include <linux/types.h>
@@ -160,14 +160,14 @@ static void uas_sense(struct urb *urb, struct scsi_cmnd *cmnd)
 		unsigned len = be16_to_cpup(&sense_iu->len);
 		if (len + 16 != urb->actual_length) {
 			int newlen = min(len + 16, urb->actual_length) - 16;
-			if (newlen < 0)
-				newlen = 0;
+				if (newlen < 0)
+					newlen = 0;
 			sdev_printk(KERN_INFO, sdev, "%s: urb length %d "
-				"disagrees with IU sense data length %d, "
-				"using %d bytes of sense data\n", __func__,
-					urb->actual_length, len, newlen);
-			len = newlen;
-		}
+					"disagrees with IU sense data length %d, "
+					"using %d bytes of sense data\n", __func__,
+						urb->actual_length, len, newlen);
+				len = newlen;
+			}
 		memcpy(cmnd->sense_buffer, sense_iu->sense, len);
 	}
 
@@ -176,7 +176,7 @@ static void uas_sense(struct urb *urb, struct scsi_cmnd *cmnd)
 		sdev->current_cmnd = NULL;
 	cmnd->scsi_done(cmnd);
 	usb_free_urb(urb);
-}
+			}
 
 static void uas_sense_old(struct urb *urb, struct scsi_cmnd *cmnd)
 {
@@ -187,16 +187,16 @@ static void uas_sense_old(struct urb *urb, struct scsi_cmnd *cmnd)
 		unsigned len = be16_to_cpup(&sense_iu->len) - 2;
 		if (len + 8 != urb->actual_length) {
 			int newlen = min(len + 8, urb->actual_length) - 8;
-			if (newlen < 0)
-				newlen = 0;
+				if (newlen < 0)
+					newlen = 0;
 			sdev_printk(KERN_INFO, sdev, "%s: urb length %d "
-				"disagrees with IU sense data length %d, "
-				"using %d bytes of sense data\n", __func__,
-					urb->actual_length, len, newlen);
-			len = newlen;
-		}
-		memcpy(cmnd->sense_buffer, sense_iu->sense, len);
-	}
+					"disagrees with IU sense data length %d, "
+					"using %d bytes of sense data\n", __func__,
+						urb->actual_length, len, newlen);
+				len = newlen;
+			}
+			memcpy(cmnd->sense_buffer, sense_iu->sense, len);
+}
 
 	cmnd->result = sense_iu->status;
 	if (sdev->current_cmnd)
@@ -206,7 +206,7 @@ static void uas_sense_old(struct urb *urb, struct scsi_cmnd *cmnd)
 }
 
 static void uas_xfer_data(struct urb *urb, struct scsi_cmnd *cmnd,
-							unsigned direction)
+			  unsigned direction)
 {
 	struct uas_cmd_info *cmdinfo = (void *)&cmnd->SCp;
 	int err;
@@ -250,7 +250,7 @@ static void uas_stat_cmplt(struct urb *urb)
 		if (devinfo->uas_sense_old)
 			uas_sense_old(urb, cmnd);
 		else
-			uas_sense(urb, cmnd);
+		uas_sense(urb, cmnd);
 		break;
 	case IU_ID_READ_READY:
 		uas_xfer_data(urb, cmnd, SUBMIT_DATA_IN_URB);
@@ -267,14 +267,14 @@ static void uas_stat_cmplt(struct urb *urb)
 static void uas_data_cmplt(struct urb *urb)
 {
 	struct scsi_data_buffer *sdb = urb->context;
-	sdb->resid = sdb->length - urb->actual_length;
+		sdb->resid = sdb->length - urb->actual_length;
 	usb_free_urb(urb);
 }
 
 static struct urb *uas_alloc_data_urb(struct uas_dev_info *devinfo, gfp_t gfp,
-				unsigned int pipe, u16 stream_id,
+				      unsigned int pipe, u16 stream_id,
 				struct scsi_data_buffer *sdb,
-				enum dma_data_direction dir)
+				      enum dma_data_direction dir)
 {
 	struct usb_device *udev = devinfo->udev;
 	struct urb *urb = usb_alloc_urb(0, gfp);
@@ -360,13 +360,13 @@ static struct urb *uas_alloc_cmd_urb(struct uas_dev_info *devinfo, gfp_t gfp,
  */
 
 static int uas_submit_urbs(struct scsi_cmnd *cmnd,
-					struct uas_dev_info *devinfo, gfp_t gfp)
+			   struct uas_dev_info *devinfo, gfp_t gfp)
 {
 	struct uas_cmd_info *cmdinfo = (void *)&cmnd->SCp;
 
 	if (cmdinfo->state & ALLOC_STATUS_URB) {
 		cmdinfo->status_urb = uas_alloc_sense_urb(devinfo, gfp, cmnd,
-							  cmdinfo->stream);
+					   cmdinfo->stream);
 		if (!cmdinfo->status_urb)
 			return SCSI_MLQUEUE_DEVICE_BUSY;
 		cmdinfo->state &= ~ALLOC_STATUS_URB;
@@ -419,7 +419,7 @@ static int uas_submit_urbs(struct scsi_cmnd *cmnd,
 
 	if (cmdinfo->state & ALLOC_CMD_URB) {
 		cmdinfo->cmd_urb = uas_alloc_cmd_urb(devinfo, gfp, cmnd,
-							cmdinfo->stream);
+						     cmdinfo->stream);
 		if (!cmdinfo->cmd_urb)
 			return SCSI_MLQUEUE_DEVICE_BUSY;
 		cmdinfo->state &= ~ALLOC_CMD_URB;
@@ -504,8 +504,8 @@ static int uas_eh_abort_handler(struct scsi_cmnd *cmnd)
 							cmnd->request->tag);
 
 /* XXX: Send ABORT TASK Task Management command */
-	return FAILED;
-}
+		return FAILED;
+	}
 
 static int uas_eh_device_reset_handler(struct scsi_cmnd *cmnd)
 {
@@ -539,7 +539,7 @@ static int uas_eh_bus_reset_handler(struct scsi_cmnd *cmnd)
 							cmnd->request->tag);
 
 	if (usb_reset_device(udev))
-		return SUCCESS;
+			return SUCCESS;
 
 	return FAILED;
 }
@@ -608,7 +608,7 @@ static int uas_switch_interface(struct usb_device *udev,
 			return usb_set_interface(udev,
 						alt->desc.bInterfaceNumber,
 						alt->desc.bAlternateSetting);
-	}
+		}
 
 	return -ENODEV;
 }
@@ -670,7 +670,7 @@ static void uas_configure_endpoints(struct uas_dev_info *devinfo)
 		devinfo->use_streams = 0;
 	} else {
 		devinfo->use_streams = 1;
-	}
+}
 }
 
 /*

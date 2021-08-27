@@ -8,7 +8,7 @@
   This program can be distributed under the terms of the GNU GPL.
   See the file COPYING.
 */
-
+ 
 #ifndef _FS_FUSE_I_H
 #define _FS_FUSE_I_H
 

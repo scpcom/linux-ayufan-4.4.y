@@ -144,7 +144,6 @@ extern struct gpio_chip *gpiochip_find(void *data,
 					int (*match)(struct gpio_chip *chip,
 						     void *data));
 
-
 /* Always use the library code for GPIO management calls,
  * or when sleeping may be involved.
  */

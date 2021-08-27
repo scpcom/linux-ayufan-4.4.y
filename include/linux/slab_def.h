@@ -25,7 +25,7 @@
  *
  * manages a cache.
  */
-
+ 
 struct kmem_cache {
 /* 1) Cache tunables. Protected by cache_chain_mutex */
 	unsigned int batchcount;
@@ -35,7 +35,7 @@ struct kmem_cache {
 	unsigned int buffer_size;
 	u32 reciprocal_buffer_size;
 /* 2) touched by every alloc & free from the backend */
-
+ 
 	unsigned int flags;		/* constant flags */
 	unsigned int num;		/* # of objs per slab */
 

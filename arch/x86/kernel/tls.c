@@ -97,7 +97,6 @@ asmlinkage int sys_set_thread_area(struct user_desc __user *u_info)
 	return ret;
 }
 
-
 /*
  * Get the current Thread-Local Storage area:
  */

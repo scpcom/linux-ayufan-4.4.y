@@ -160,7 +160,6 @@ static inline void shm_rmid(struct ipc_namespace *ns, struct shmid_kernel *s)
 	ipc_rmid(&shm_ids(ns), &s->shm_perm);
 }
 
-
 /* This is called by fork, once for every shm attach. */
 static void shm_open(struct vm_area_struct *vma)
 {
@@ -305,7 +304,6 @@ void shm_destroy_orphaned(struct ipc_namespace *ns)
 		idr_for_each(&shm_ids(ns).ipcs_idr, &shm_try_destroy_orphaned, ns);
 	up_write(&shm_ids(ns).rw_mutex);
 }
-
 
 void exit_shm(struct task_struct *task)
 {
@@ -1150,7 +1148,6 @@ SYSCALL_DEFINE1(shmdt, char __user *, shmaddr)
 		 */
 		if ((vma->vm_ops == &shm_vm_ops) &&
 			(vma->vm_start - addr)/PAGE_SIZE == vma->vm_pgoff) {
-
 
 			size = vma->vm_file->f_path.dentry->d_inode->i_size;
 			do_munmap(mm, vma->vm_start, vma->vm_end - vma->vm_start);

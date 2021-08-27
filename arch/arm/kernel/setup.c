@@ -415,7 +415,6 @@ EXPORT_SYMBOL(system_serial_high);
 unsigned int elf_hwcap __read_mostly;
 EXPORT_SYMBOL(elf_hwcap);
 
-
 #ifdef MULTI_CPU
 struct processor processor __read_mostly;
 #endif
@@ -1208,7 +1207,6 @@ static struct machine_desc * __init setup_machine_tags(unsigned int nr)
 	return mdesc;
 }
 
-
 void __init setup_arch(char **cmdline_p)
 {
 	struct machine_desc *mdesc;
@@ -1278,7 +1276,6 @@ void __init setup_arch(char **cmdline_p)
 	if (mdesc->init_early)
 		mdesc->init_early();
 }
-
 
 static int __init topology_init(void)
 {

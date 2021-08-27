@@ -7,7 +7,7 @@
  *
  * This file is released under the GPL.
  */
-
+ 
 #include "dm.h"
 
 #include <linux/module.h>
@@ -518,7 +518,7 @@ EXPORT_SYMBOL(dm_get_device);
 
 int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 			 sector_t start, sector_t len, void *data)
-{
+	{
 	struct queue_limits *limits = data;
 	struct block_device *bdev = dev->bdev;
 	struct request_queue *q = bdev_get_queue(bdev);

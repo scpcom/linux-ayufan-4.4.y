@@ -36,7 +36,7 @@
 
 #define ubi_dbg_dump_stack() dump_stack()
 
-#define ubi_dbg_print_hex_dump(l, ps, pt, r, g, b, len, a)  \
+#define ubi_dbg_print_hex_dump(l, ps, pt, r, g, b, len, a)                   \
 		print_hex_dump(l, ps, pt, r, g, b, len, a)
 
 #define ubi_dbg_msg(type, fmt, ...) \

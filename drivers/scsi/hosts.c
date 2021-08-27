@@ -23,7 +23,7 @@
  *  Restructured scsi_host lists and associated functions.
  *  September 04, 2002 Mike Anderson (andmike@us.ibm.com)
  */
-
+ 
 #include <linux/module.h>
 #include <linux/blkdev.h>
 #include <linux/kernel.h>
@@ -44,9 +44,7 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-
 static atomic_t scsi_host_next_hn;	/* host_no for next new host */
-
 
 static void scsi_host_cls_release(struct device *dev)
 {

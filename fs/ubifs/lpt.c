@@ -2099,7 +2099,7 @@ static int dbg_chk_pnode(struct ubifs_info *c, struct ubifs_pnode *pnode,
 
 	if (pnode->num != col) {
 		dbg_err("pnode num %d expected %d parent num %d iip %d",
-			pnode->num, col, pnode->parent->num, pnode->iip);
+			  pnode->num, col, pnode->parent->num, pnode->iip);
 		return -EINVAL;
 	}
 	for (i = 0; i < UBIFS_LPT_FANOUT; i++) {
@@ -2114,13 +2114,13 @@ static int dbg_chk_pnode(struct ubifs_info *c, struct ubifs_pnode *pnode,
 			continue;
 		if (lprops->lnum != lnum) {
 			dbg_err("bad LEB number %d expected %d",
-				lprops->lnum, lnum);
+				  lprops->lnum, lnum);
 			return -EINVAL;
 		}
 		if (lprops->flags & LPROPS_TAKEN) {
 			if (cat != LPROPS_UNCAT) {
 				dbg_err("LEB %d taken but not uncat %d",
-					lprops->lnum, cat);
+					  lprops->lnum, cat);
 				return -EINVAL;
 			}
 			continue;
@@ -2133,7 +2133,7 @@ static int dbg_chk_pnode(struct ubifs_info *c, struct ubifs_pnode *pnode,
 				break;
 			default:
 				dbg_err("LEB %d index but cat %d",
-					lprops->lnum, cat);
+					  lprops->lnum, cat);
 				return -EINVAL;
 			}
 		} else {
@@ -2146,7 +2146,7 @@ static int dbg_chk_pnode(struct ubifs_info *c, struct ubifs_pnode *pnode,
 				break;
 			default:
 				dbg_err("LEB %d not index but cat %d",
-					lprops->lnum, cat);
+					  lprops->lnum, cat);
 				return -EINVAL;
 			}
 		}
@@ -2187,23 +2187,23 @@ static int dbg_chk_pnode(struct ubifs_info *c, struct ubifs_pnode *pnode,
 		}
 		if (!found) {
 			dbg_err("LEB %d cat %d not found in cat heap/list",
-				lprops->lnum, cat);
+				  lprops->lnum, cat);
 			return -EINVAL;
 		}
 		switch (cat) {
 		case LPROPS_EMPTY:
 			if (lprops->free != c->leb_size) {
 				dbg_err("LEB %d cat %d free %d dirty %d",
-					lprops->lnum, cat, lprops->free,
-					lprops->dirty);
+					  lprops->lnum, cat, lprops->free,
+					  lprops->dirty);
 				return -EINVAL;
 			}
 		case LPROPS_FREEABLE:
 		case LPROPS_FRDI_IDX:
 			if (lprops->free + lprops->dirty != c->leb_size) {
 				dbg_err("LEB %d cat %d free %d dirty %d",
-					lprops->lnum, cat, lprops->free,
-					lprops->dirty);
+					  lprops->lnum, cat, lprops->free,
+					  lprops->dirty);
 				return -EINVAL;
 			}
 		}
@@ -2239,7 +2239,7 @@ int dbg_check_lpt_nodes(struct ubifs_info *c, struct ubifs_cnode *cnode,
 			if (cnode->num != num) {
 				dbg_err("nnode num %d expected %d "
 					"parent num %d iip %d", cnode->num, num,
-					(nnode ? nnode->num : 0), cnode->iip);
+					  (nnode ? nnode->num : 0), cnode->iip);
 				return -EINVAL;
 			}
 			nn = (struct ubifs_nnode *)cnode;

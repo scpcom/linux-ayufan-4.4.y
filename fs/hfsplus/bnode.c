@@ -10,7 +10,7 @@
  *
  * Handle basic btree node operations
  */
-
+ 
 #include <linux/string.h>
 #include <linux/slab.h>
 #include <linux/pagemap.h>
@@ -427,7 +427,7 @@ static struct hfs_bnode *__hfs_bnode_create(struct hfs_btree *tree, u32 cnid)
 	set_bit(HFS_BNODE_NEW, &node->flags);
 	atomic_set(&node->refcnt, 1);
 	dprint(DBG_BNODE_REFS, "new_node(%d:%d): 1\n",
-	       node->tree->cnid, node->this);
+		node->tree->cnid, node->this);
 	init_waitqueue_head(&node->lock_wq);
 	spin_lock(&tree->hash_lock);
 	node2 = hfs_bnode_findhash(tree, cnid);

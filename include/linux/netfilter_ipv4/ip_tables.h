@@ -14,7 +14,7 @@
  * 	flags are stored in host byte order (of course).
  * 	Port numbers are stored in HOST byte order.
  */
-
+ 
 #ifndef _IPTABLES_H
 #define _IPTABLES_H
 

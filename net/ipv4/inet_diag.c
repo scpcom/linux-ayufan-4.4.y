@@ -360,7 +360,6 @@ static int bitstring_match(const __be32 *a1, const __be32 *a2, int bits)
 	return 1;
 }
 
-
 static int inet_diag_bc_run(const void *bc, int len,
 			    const struct inet_diag_entry *entry)
 {

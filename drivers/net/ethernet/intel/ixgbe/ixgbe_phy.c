@@ -27,7 +27,7 @@
   Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
 
 *******************************************************************************/
-
+ 
 #include <linux/pci.h>
 #include <linux/delay.h>
 #include <linux/sched.h>
@@ -1479,7 +1479,6 @@ static s32 ixgbe_get_i2c_ack(struct ixgbe_hw *hw)
 	bool ack = 1;
 
 	ixgbe_raise_i2c_clk(hw, &i2cctl);
-
 
 	/* Minimum high period of clock is 4us */
 	udelay(IXGBE_I2C_T_HIGH);

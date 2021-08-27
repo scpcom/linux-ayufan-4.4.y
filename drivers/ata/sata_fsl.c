@@ -17,7 +17,7 @@
  * option) any later version.
  *
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
@@ -271,7 +271,7 @@ static inline unsigned int sata_fsl_tag(unsigned int tag,
 					void __iomem *hcr_base)
 {
 	/* We let libATA core do actual (queue) tag allocation */
-
+	 
 	/* all non NCQ/queued commands should have tag#0 */
 	if (ata_tag_internal(tag)) {
 		DPRINTK("mapping internal cmds to tag#0\n");
@@ -941,7 +941,7 @@ static int sata_fsl_softreset(struct ata_link *link, unsigned int *class,
 		 * command desc. is not updated, but signature register
 		 * would have been updated
 		 */
-
+		 
 		*class = sata_fsl_dev_classify(ap);
 
 		DPRINTK("class = %d\n", *class);
@@ -970,7 +970,7 @@ static void sata_fsl_post_internal_cmd(struct ata_queued_cmd *qc)
 
 	if (qc->err_mask) {
 		/* make DMA engine forget about the failed command */
-
+		 
 	}
 }
 
@@ -1059,7 +1059,7 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 				 * We should consider this as non fatal error,
                                  * and TF must be updated as done below.
 		                 */
-
+				 
 				err_mask |= AC_ERR_DEV;
 
 			} else {

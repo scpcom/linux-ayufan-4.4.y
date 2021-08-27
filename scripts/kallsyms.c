@@ -17,7 +17,7 @@
  *  of about 50%.
  *
  */
-
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,7 +61,6 @@ int token_profit[0x10000];
 /* the table that holds the result of the compression */
 unsigned char best_table[256][2];
 unsigned char best_table_len[256];
-
 
 static void usage(void)
 {
@@ -375,7 +374,6 @@ static void write_src(void)
 		printf("\t.short\t%d\n", best_idx[i]);
 	printf("\n");
 }
-
 
 /* table lookup compression functions */
 

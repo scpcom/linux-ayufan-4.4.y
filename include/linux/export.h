@@ -11,7 +11,7 @@
  * If you feel the need to add #include <linux/foo.h> to this file
  * then you are doing something wrong and should go away silently.
  */
-
+ 
 /* Some toolchains use a `_' prefix for all user symbols. */
 #ifdef CONFIG_SYMBOL_PREFIX
 #define MODULE_SYMBOL_PREFIX CONFIG_SYMBOL_PREFIX

@@ -26,7 +26,7 @@
  *  Hash Tree Directory indexing cleanup
  *	Theodore Ts'o, 2002
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/pagemap.h>
 #include <linux/jbd2.h>
@@ -190,7 +190,6 @@ struct dx_node
 	struct fake_dirent fake;
 	struct dx_entry	entries[0];
 };
-
 
 struct dx_frame
 {
@@ -625,7 +624,6 @@ static int ext4_htree_next_block(struct inode *dir, __u32 hash,
 	return 1;
 }
 
-
 /*
  * This function fills a red-black tree with information from a
  * directory block.  It returns the number directory entries loaded
@@ -676,7 +674,6 @@ static int htree_dirblock_to_tree(struct file *dir_file,
 	brelse(bh);
 	return count;
 }
-
 
 /*
  * This function fills a red-black tree with information from a
@@ -767,7 +764,6 @@ errout:
 	dx_release(frames);
 	return (err);
 }
-
 
 /*
  * Directory block splitting, compacting
@@ -915,7 +911,7 @@ static inline int search_dirblock(struct buffer_head *bh,
 	while ((char *) de < dlimit) {
 		/* this code is executed quadratically often */
 		/* do minimal checking `by hand' */
-
+		 
 		if ((char *) de + namelen <= dlimit &&
 #ifdef MY_ABC_HERE
 			ext4_match (namelen, name, de, caseless)) {
@@ -948,7 +944,6 @@ static inline int search_dirblock(struct buffer_head *bh,
 	}
 	return 0;
 }
-
 
 /*
  *	ext4_find_entry()
@@ -1207,7 +1202,6 @@ static struct dentry *ext4_lookup(struct inode *dir, struct dentry *dentry, stru
 #endif
 	return d_splice_alias(inode, dentry);
 }
-
 
 struct dentry *ext4_get_parent(struct dentry *child)
 {
@@ -1883,7 +1877,6 @@ static void ext4_dec_count(handle_t *handle, struct inode *inode)
 	if (!S_ISDIR(inode->i_mode) || inode->i_nlink > 2)
 		drop_nlink(inode);
 }
-
 
 static int ext4_add_nondir(handle_t *handle,
 		struct dentry *dentry, struct inode *inode)

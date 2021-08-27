@@ -22,7 +22,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #include <linux/usb.h>
 #include <linux/pci.h>
 #include <linux/slab.h>
@@ -156,8 +156,8 @@ static void xhci_link_rings(struct xhci_hcd *xhci, struct xhci_ring *ring,
 		last->trbs[TRBS_PER_SEGMENT-1].link.control
 			|= cpu_to_le32(LINK_TOGGLE);
 		ring->last_seg = last;
-		}
 	}
+}
 
 /* XXX: Do we need the hcd structure in all these functions? */
 void xhci_ring_free(struct xhci_hcd *xhci, struct xhci_ring *ring)
@@ -419,7 +419,6 @@ struct xhci_ep_ctx *xhci_get_ep_ctx(struct xhci_hcd *xhci,
 	return (struct xhci_ep_ctx *)
 		(ctx->bytes + (ep_index * CTX_SIZE(xhci->hcc_params)));
 }
-
 
 /***************** Streams structures manipulation *************************/
 
@@ -790,7 +789,6 @@ void xhci_free_stream_info(struct xhci_hcd *xhci,
 	kfree(stream_info);
 }
 
-
 /***************** Device context manipulation *************************/
 
 static void xhci_init_endpoint_timer(struct xhci_hcd *xhci,
@@ -838,10 +836,10 @@ static void xhci_free_tt_info(struct xhci_hcd *xhci,
 	tt_next = tt->next;
 	tt_info = list_entry(tt, struct xhci_tt_bw_info,
 			tt_list);
-	/* Multi-TT hubs will have more than one entry */
+		/* Multi-TT hubs will have more than one entry */
 	do {
 		list_del(tt);
-		kfree(tt_info);
+			kfree(tt_info);
 		tt = tt_next;
 		if (list_empty(tt_list_head))
 			break;
@@ -887,7 +885,6 @@ free_tts:
 	xhci_free_tt_info(xhci, virt_dev, virt_dev->udev->slot_id);
 	return -ENOMEM;
 }
-
 
 /* All the xhci_tds in the ring's TD list should be freed at this point.
  * Should be called with xhci->lock held if there is any chance the TT lists
@@ -1281,7 +1278,6 @@ static unsigned int xhci_parse_microframe_interval(struct usb_device *udev,
 			ep->desc.bInterval, 0, 15);
 }
 
-
 static unsigned int xhci_parse_frame_interval(struct usb_device *udev,
 		struct usb_host_endpoint *ep)
 {
@@ -1311,7 +1307,7 @@ static unsigned int xhci_get_endpoint_interval(struct usb_device *udev,
 			break;
 		}
 		/* Fall through - SS and HS isoc/int have same decoding */
-
+		 
 	case USB_SPEED_SUPER:
 		if (usb_endpoint_xfer_int(&ep->desc) ||
 		    usb_endpoint_xfer_isoc(&ep->desc)) {
@@ -1329,7 +1325,7 @@ static unsigned int xhci_get_endpoint_interval(struct usb_device *udev,
 		 * since it uses the same rules as low speed interrupt
 		 * endpoints.
 		 */
-
+		 
 	case USB_SPEED_LOW:
 		if (usb_endpoint_xfer_int(&ep->desc) ||
 		    usb_endpoint_xfer_isoc(&ep->desc)) {
@@ -1435,7 +1431,7 @@ int xhci_endpoint_init(struct xhci_hcd *xhci,
 
 	type = usb_endpoint_type(&ep->desc);
 	/* Set up the endpoint ring */
-		virt_dev->eps[ep_index].new_ring =
+	virt_dev->eps[ep_index].new_ring =
 		xhci_ring_alloc(xhci, 2, 1, type, mem_flags);
 	if (!virt_dev->eps[ep_index].new_ring) {
 		/* Attempt to use the ring cache */
@@ -2358,7 +2354,7 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	/* Any stream context array bigger than MEDIUM_STREAM_ARRAY_SIZE
 	 * will be allocated with dma_alloc_coherent()
 	 */
-
+	 
 	if (!xhci->small_streams_pool || !xhci->medium_streams_pool)
 		goto fail;
 

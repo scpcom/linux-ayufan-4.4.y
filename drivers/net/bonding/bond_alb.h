@@ -22,7 +22,7 @@
  * file called LICENSE.
  *
  */
-
+ 
 #ifndef __BOND_ALB_H__
 #define __BOND_ALB_H__
 
@@ -54,7 +54,6 @@ struct slave;
 				 * because the key hash table is BYTE wide !
 				 */
 
-
 #define TLB_NULL_INDEX		0xffffffff
 #define MAX_LP_BURST		3
 
@@ -70,7 +69,6 @@ struct slave;
  * promiscuous after failover
  */
 #define RLB_PROMISC_TIMEOUT	(10*ALB_TIMER_TICKS_PER_SEC)
-
 
 struct tlb_client_info {
 	struct slave *tx_slave;	/* A pointer to slave used for transmiting

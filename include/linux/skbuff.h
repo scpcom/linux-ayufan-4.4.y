@@ -13,7 +13,7 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  */
-
+ 
 #ifndef _LINUX_SKBUFF_H
 #define _LINUX_SKBUFF_H
 
@@ -139,7 +139,7 @@ struct sk_buff;
 
 /* To allow 64K frame to be packed as single skb without frag_list. Since
  * GRO uses frags we allocate at least 16 regardless of page size.
- */
+ */ 
 #if (65536/PAGE_SIZE + 2) < 16
 #define MAX_SKB_FRAGS 16UL
 #else
@@ -281,7 +281,6 @@ struct skb_shared_info {
 #define SKB_DATAREF_SHIFT 16
 #define SKB_DATAREF_MASK ((1 << SKB_DATAREF_SHIFT) - 1)
 
-
 enum {
 	SKB_FCLONE_UNAVAILABLE,
 	SKB_FCLONE_ORIG,
@@ -377,7 +376,7 @@ typedef unsigned char *sk_buff_data_t;
  *	@truesize: Buffer size
  *	@users: User count - see {datagram,tcp}.c
  */
-
+	 
 struct sk_buff {
 	/* These two members must be first. */
 	struct sk_buff		*next;
@@ -1154,7 +1153,6 @@ static inline struct sk_buff *__skb_dequeue_tail(struct sk_buff_head *list)
 		__skb_unlink(skb, list);
 	return skb;
 }
-
 
 static inline int skb_is_nonlinear(const struct sk_buff *skb)
 {

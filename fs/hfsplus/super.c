@@ -9,7 +9,7 @@
  * (C) 2003 Ardis Technologies <roman@ardistech.com>
  *
  */
-
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/pagemap.h>
@@ -524,7 +524,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 			sbi->hidden_dir = hfsplus_new_inode(sb, S_IFDIR);
 			hfsplus_create_cat(sbi->hidden_dir->i_ino, root, &str,
 					   sbi->hidden_dir);
-			mutex_unlock(&sbi->vh_mutex);
+				mutex_unlock(&sbi->vh_mutex);
 
 			hfsplus_mark_inode_dirty(sbi->hidden_dir,
 						 HFSPLUS_I_CAT_DIRTY);
@@ -628,7 +628,7 @@ static int __init init_hfsplus_fs(void)
 		return -ENOMEM;
 	err = register_filesystem(&hfsplus_fs_type);
 	if (err)
-		kmem_cache_destroy(hfsplus_inode_cachep);
+	kmem_cache_destroy(hfsplus_inode_cachep);
 	return err;
 }
 

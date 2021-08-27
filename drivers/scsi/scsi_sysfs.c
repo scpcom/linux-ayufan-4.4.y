@@ -8,7 +8,7 @@
  *
  * Created to pull SCSI mid layer sysfs routines into one file.
  */
-
+ 
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/init.h>
@@ -466,7 +466,6 @@ sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
 #define sdev_rd_attr(field, format_string)				\
 	sdev_show_function(field, format_string)			\
 static DEVICE_ATTR(field, S_IRUGO, sdev_show_##field, NULL);
-
 
 /*
  * sdev_rw_attr: create a function and attribute variable for a

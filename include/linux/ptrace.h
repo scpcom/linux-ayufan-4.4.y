@@ -7,7 +7,7 @@
 /* structs and defines to help the user use the ptrace system call. */
 
 /* has the defines to get at the registers. */
-
+ 
 #define PTRACE_TRACEME		   0
 #define PTRACE_PEEKTEXT		   1
 #define PTRACE_PEEKDATA		   2
@@ -87,7 +87,7 @@
  * flags is simple.  When a task is running it owns it's task->ptrace
  * flags.  When the a task is stopped the ptracer owns task->ptrace.
  */
-
+ 
 #define PT_SEIZED	0x00010000	/* SEIZE used, enable new behavior */
 #define PT_PTRACED	0x00000001
 #define PT_DTRACE	0x00000002	/* delayed trace (used on m68k, i386) */
@@ -115,7 +115,6 @@
 
 #include <linux/compiler.h>		/* For unlikely.  */
 #include <linux/sched.h>		/* For struct task_struct.  */
-
 
 extern long arch_ptrace(struct task_struct *child, long request,
 			unsigned long addr, unsigned long data);
@@ -275,7 +274,7 @@ static inline void ptrace_release_task(struct task_struct *task)
  * implement single-step.  The kerneldoc comments are here
  * to document the interface for all arch definitions.
  */
-
+ 
 #ifndef arch_has_single_step
 /**
  * arch_has_single_step - does this CPU support user-mode single-step?

@@ -53,7 +53,7 @@
  *		2 of the License, or (at your option) any later version.
  *
  */
-
+ 
 #include <linux/capability.h>
 #include <linux/module.h>
 #include <linux/if_arp.h>
@@ -295,7 +295,6 @@ static int atif_probe_device(struct atalk_iface *atif)
 	return -EADDRINUSE;	/* Network is full... */
 }
 
-
 /* Perform AARP probing for a proxy address */
 static int atif_proxy_probe_device(struct atalk_iface *atif,
 				   struct atalk_addr* proxy_addr)
@@ -340,7 +339,6 @@ static int atif_proxy_probe_device(struct atalk_iface *atif,
 
 	return -EADDRINUSE;	/* Network is full... */
 }
-
 
 struct atalk_addr *atalk_find_dev_addr(struct net_device *dev)
 {
@@ -425,7 +423,6 @@ static struct atalk_iface *atalk_find_interface(__be16 net, int node)
 	return iface;
 }
 
-
 /*
  * Find a route for an AppleTalk packet. This ought to get cached in
  * the socket (later on...). We know about host routes and the fact
@@ -477,7 +474,6 @@ out:
 	read_unlock_bh(&atalk_routes_lock);
 	return r;
 }
-
 
 /*
  * Given an AppleTalk network, find the device to use. This can be
@@ -1559,7 +1555,7 @@ static int ltalk_rcv(struct sk_buff *skb, struct net_device *dev,
 
 		ddp->deh_dnode = skb_mac_header(skb)[0];     /* From physical header */
 		ddp->deh_snode = skb_mac_header(skb)[1];     /* From physical header */
-
+		 
 		ddp->deh_dnet  = ap->s_net;	/* Network number */
 		ddp->deh_snet  = ap->s_net;
 		ddp->deh_sum   = 0;		/* No checksum */
@@ -1782,12 +1778,12 @@ static int atalk_recvmsg(struct kiocb *iocb, struct socket *sock, struct msghdr 
 
 	if (!err) {
 		if (sat) {
-			sat->sat_family      = AF_APPLETALK;
-			sat->sat_port        = ddp->deh_sport;
-			sat->sat_addr.s_node = ddp->deh_snode;
-			sat->sat_addr.s_net  = ddp->deh_snet;
+		sat->sat_family      = AF_APPLETALK;
+		sat->sat_port        = ddp->deh_sport;
+		sat->sat_addr.s_node = ddp->deh_snode;
+		sat->sat_addr.s_net  = ddp->deh_snet;
 		}
-		msg->msg_namelen = sizeof(*sat);
+		msg->msg_namelen     = sizeof(*sat);
 	}
 
 	skb_free_datagram(sk, skb);	/* Free the datagram. */
@@ -1796,7 +1792,6 @@ out:
 	release_sock(sk);
 	return err ? : copied;
 }
-
 
 /*
  * AppleTalk ioctl calls.
@@ -1860,7 +1855,6 @@ static int atalk_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 	return rc;
 }
 
-
 #ifdef CONFIG_COMPAT
 static int atalk_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
@@ -1876,7 +1870,6 @@ static int atalk_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned lo
 	return -ENOIOCTLCMD;
 }
 #endif
-
 
 static const struct net_proto_family atalk_family_ops = {
 	.family		= PF_APPLETALK,

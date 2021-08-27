@@ -67,7 +67,6 @@ static void __exit cleanup_soundcore(void)
 subsys_initcall(init_soundcore);
 module_exit(cleanup_soundcore);
 
-
 #ifdef CONFIG_SOUND_OSS_CORE
 /*
  *	OSS sound core handling. Breaks out sound functions to submodules
@@ -104,7 +103,7 @@ module_exit(cleanup_soundcore);
  *	FIXME: we have to resolve modules and fine grained load/unload
  *	locking at some point in 2.3.x.
  */
-
+ 
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/types.h>
@@ -219,7 +218,6 @@ static int __sound_insert_unit(struct sound_unit * s, struct sound_unit **list, 
 	 
 	s->next=*list;
 	*list=s;
-	
 	
 	return n;
 }
@@ -505,7 +503,6 @@ EXPORT_SYMBOL(register_sound_dsp);
  *	the register function.
  */
 
-
 void unregister_sound_special(int unit)
 {
 	sound_remove_unit(&chains[unit % SOUND_STEP], unit);
@@ -557,7 +554,6 @@ void unregister_sound_dsp(int unit)
 {
 	sound_remove_unit(&chains[3], unit);
 }
-
 
 EXPORT_SYMBOL(unregister_sound_dsp);
 

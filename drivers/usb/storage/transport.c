@@ -45,7 +45,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #include <linux/sched.h>
 #include <linux/gfp.h>
 #include <linux/errno.h>
@@ -256,7 +256,6 @@ int usb_stor_clear_halt(struct us_data *us, unsigned int pipe)
 	return result;
 }
 EXPORT_SYMBOL_GPL(usb_stor_clear_halt);
-
 
 /*
  * Interpret the results of a URB transfer

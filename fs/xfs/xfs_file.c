@@ -323,7 +323,7 @@ xfs_file_aio_read(
 			return XFS_ERROR(-EINVAL);
 	}
 	/* END copy & waste from filemap.c */
-
+	 
 	if (unlikely(ioflags & IO_ISDIRECT)) {
 		xfs_buftarg_t	*target =
 			XFS_IS_REALTIME_INODE(ip) ?
@@ -1040,7 +1040,6 @@ out_unlock:
 	xfs_iunlock(ip, XFS_IOLOCK_EXCL);
 	return error;
 }
-
 
 STATIC int
 xfs_file_open(

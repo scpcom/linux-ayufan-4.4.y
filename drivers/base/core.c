@@ -12,7 +12,7 @@
  * This file is released under the GPLv2
  *
  */
-
+ 
 #include <linux/device.h>
 #include <linux/err.h>
 #include <linux/init.h>
@@ -121,7 +121,6 @@ static const struct sysfs_ops dev_sysfs_ops = {
 	.store	= dev_attr_store,
 };
 
-
 /**
  *	device_release - free device structure.
  *	@kobj:	device's kobject.
@@ -164,7 +163,6 @@ static struct kobj_type device_ktype = {
 	.sysfs_ops	= &dev_sysfs_ops,
 	.namespace	= device_namespace,
 };
-
 
 static int dev_uevent_filter(struct kset *kset, struct kobject *kobj)
 {
@@ -498,7 +496,6 @@ static void device_remove_attrs(struct device *dev)
 	}
 }
 
-
 static ssize_t show_dev(struct device *dev, struct device_attribute *attr,
 			char *buf)
 {
@@ -702,7 +699,6 @@ class_dir_create_and_add(struct class *class, struct kobject *parent_kobj)
 	return &dir->kobj;
 }
 
-
 static struct kobject *get_device_parent(struct device *dev,
 					 struct device *parent)
 {
@@ -797,10 +793,12 @@ static int device_add_class_symlinks(struct device *dev)
 		goto out;
 
 	if (dev->parent && device_is_not_partition(dev)) {
+
 		error = sysfs_create_link(&dev->kobj, &dev->parent->kobj,
 					  "device");
 		if (error)
 			goto out_subsys;
+
 	}
 
 #ifdef CONFIG_BLOCK
@@ -1453,7 +1451,6 @@ void root_device_unregister(struct device *dev)
 	device_unregister(dev);
 }
 EXPORT_SYMBOL_GPL(root_device_unregister);
-
 
 static void device_create_release(struct device *dev)
 {

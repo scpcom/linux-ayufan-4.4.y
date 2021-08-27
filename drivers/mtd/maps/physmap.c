@@ -9,7 +9,7 @@
  *
  * 031022 - [jsun] add run-time configure and partition setup
  */
-
+ 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kernel.h>

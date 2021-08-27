@@ -332,7 +332,6 @@ int exofs_sbi_write_stats(struct exofs_sb_info *sbi)
 	sbi->s_ess.s_numfiles = cpu_to_le64(sbi->s_numfiles);
 	attrs[0].val_ptr = &sbi->s_ess;
 
-
 	ios->done = stats_done;
 	ios->private = sbi;
 	ios->out_attr = attrs;
@@ -403,7 +402,6 @@ static int exofs_sync_fs(struct super_block *sb, int wait)
 		EXOFS_ERR("%s: ore_write failed.\n", __func__);
 	else
 		sb->s_dirt = 0;
-
 
 	unlock_super(sb);
 out:

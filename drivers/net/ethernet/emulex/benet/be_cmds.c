@@ -128,7 +128,7 @@ done:
 static void be_async_link_state_process(struct be_adapter *adapter,
 		struct be_async_event_link_state *evt)
 {
-	be_link_status_update(adapter, evt->port_link_status);
+		be_link_status_update(adapter, evt->port_link_status);
 }
 
 /* Grp5 CoS Priority evt */
@@ -267,7 +267,7 @@ static int be_mcc_wait_compl(struct be_adapter *adapter)
 	struct be_mcc_obj *mcc_obj = &adapter->mcc_obj;
 
 	if (adapter->eeh_err)
-		return -EIO;
+			return -EIO;
 
 	for (i = 0; i < mcc_timeout; i++) {
 		num = be_process_mcc(adapter, &status);
@@ -301,7 +301,7 @@ static int be_mbox_db_ready_wait(struct be_adapter *adapter, void __iomem *db)
 	if (adapter->eeh_err) {
 		dev_err(&adapter->pdev->dev,
 			"Error detected in card.Cannot issue commands\n");
-		return -EIO;
+			return -EIO;
 	}
 
 	do {
@@ -421,12 +421,10 @@ int be_cmd_POST(struct be_adapter *adapter)
 	return -1;
 }
 
-
 static inline struct be_sge *nonembedded_sgl(struct be_mcc_wrb *wrb)
 {
 	return &wrb->payload.sgl[0];
 }
-
 
 /* Don't touch the hdr after it's prepared */
 /* mem will be NULL for embedded commands */
@@ -1261,7 +1259,7 @@ int be_cmd_link_status_query(struct be_adapter *adapter, u8 *mac_speed,
 	if (!status) {
 		struct be_cmd_resp_link_status *resp = embedded_payload(wrb);
 		if (resp->mac_speed != PHY_LINK_SPEED_ZERO) {
-			*link_speed = le16_to_cpu(resp->link_speed);
+				*link_speed = le16_to_cpu(resp->link_speed);
 			if (mac_speed)
 				*mac_speed = resp->mac_speed;
 		}

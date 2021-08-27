@@ -34,7 +34,7 @@
  * published by the Free Software Foundation.
  *
  */
-
+ 
 #include <linux/module.h>
 #include <linux/delay.h>
 #include <linux/errno.h>
@@ -1899,7 +1899,6 @@ out:
 	return ret;
 }
 
-
 /**
  * nand_write_page_raw - [INTERN] raw page write function
  * @mtd: mtd info structure
@@ -2987,7 +2986,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 		return ERR_PTR(-ENODEV);
 
 	if (!mtd->name)
-		mtd->name = type->name;
+ 		mtd->name = type->name;
 
 	chip->chipsize = (uint64_t)type->chipsize << 20;
 
@@ -3225,7 +3224,6 @@ int nand_scan_ident(struct mtd_info *mtd, int maxchips,
 	return 0;
 }
 EXPORT_SYMBOL(nand_scan_ident);
-
 
 /**
  * nand_scan_tail - [NAND Interface] Scan for the NAND device

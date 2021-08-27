@@ -36,7 +36,7 @@
  */
 
 /*****************************************************************************/
-
+ 
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/slab.h>
@@ -112,7 +112,6 @@ enum snoop_when {
 #define USB_DEVICE_DEV		MKDEV(USB_DEVICE_MAJOR, 0)
 
 #define	MAX_USBFS_BUFFER_SIZE	16384
-
 
 static int connected(struct dev_state *ps)
 {
@@ -1598,7 +1597,6 @@ static int proc_reapurbnonblock_compat(struct dev_state *ps, void __user *arg)
 	}
 	return retval;
 }
-
 
 #endif
 

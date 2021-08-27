@@ -8,7 +8,7 @@
   This program can be distributed under the terms of the GNU GPL.
   See the file COPYING.
 */
-
+ 
 #include "fuse_i.h"
 
 #include <linux/pagemap.h>
@@ -345,8 +345,8 @@ static struct dentry *fuse_lookup(struct inode *dir, struct dentry *entry,
 		mutex_lock(&fc->inst_mutex);
 		newent = fuse_d_add_directory(entry, inode);
 		mutex_unlock(&fc->inst_mutex);
-		err = PTR_ERR(newent);
-		if (IS_ERR(newent))
+	err = PTR_ERR(newent);
+	if (IS_ERR(newent))
 			goto out_iput;
 	} else {
 		newent = d_splice_alias(inode, entry);
@@ -1291,7 +1291,7 @@ void fuse_release_nowrite(struct inode *inode)
  * and the actual truncation by hand.
  */
 static int fuse_do_setattr(struct dentry *entry, struct iattr *attr,
-			   struct file *file)
+		    struct file *file)
 {
 	struct inode *inode = entry->d_inode;
 	struct fuse_conn *fc = get_fuse_conn(inode);

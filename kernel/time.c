@@ -29,7 +29,7 @@
  *	Added getnstimeofday to allow the posix timer functions to return
  *	with nanosecond accuracy
  */
-
+ 
 #include <linux/export.h>
 #include <linux/timex.h>
 #include <linux/capability.h>

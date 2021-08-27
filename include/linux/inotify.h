@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2005 John McCutchan
  */
-
+ 
 #ifndef _LINUX_INOTIFY_H
 #define _LINUX_INOTIFY_H
 

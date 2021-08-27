@@ -32,7 +32,7 @@
  *		Also fixed a bug in BLOCKING mode where n_tty_write returns
  *		EAGAIN
  */
-
+ 
 #include <linux/types.h>
 #include <linux/major.h>
 #include <linux/errno.h>
@@ -1333,7 +1333,6 @@ handle_newline:
 	put_tty_queue(c, tty);
 }
 
-
 /**
  *	n_tty_write_wakeup	-	asynchronous I/O notifier
  *	@tty: tty device
@@ -1699,7 +1698,6 @@ static int job_control(struct tty_struct *tty, struct file *file)
 	}
 	return 0;
 }
-
 
 /**
  *	n_tty_read		-	read function for tty

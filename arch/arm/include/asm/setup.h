@@ -199,7 +199,7 @@ struct tagtable {
 };
 
 #define tag_member_present(tag,member)				\
-	((unsigned long)(&((struct tag *)0L)->member + 1)	\
+ 	((unsigned long)(&((struct tag *)0L)->member + 1)	\
 		<= (tag)->hdr.size * 4)
 
 #define tag_next(t)	((struct tag *)((__u32 *)(t) + (t)->hdr.size))

@@ -6,7 +6,7 @@
  *
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
-
+ 
 #include <linux/slab.h> 
 #include <linux/stat.h>
 #include <linux/fcntl.h>
@@ -298,7 +298,6 @@ bad:
 	return retval;
 }
 #endif
-
 
 /*
  * rw_verify_area doesn't like huge counts. We limit

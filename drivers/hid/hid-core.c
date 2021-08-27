@@ -16,7 +16,7 @@
  * Software Foundation; either version 2 of the License, or (at your option)
  * any later version.
  */
-
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/module.h>
@@ -1183,7 +1183,6 @@ static bool hid_hiddev(struct hid_device *hdev)
 	return !!hid_match_id(hdev, hid_hiddev_list);
 }
 
-
 static ssize_t
 read_report_descriptor(struct file *filp, struct kobject *kobj,
 		struct bin_attribute *attr,
@@ -2281,4 +2280,3 @@ MODULE_AUTHOR("Andreas Gal");
 MODULE_AUTHOR("Vojtech Pavlik");
 MODULE_AUTHOR("Jiri Kosina");
 MODULE_LICENSE(DRIVER_LICENSE);
-

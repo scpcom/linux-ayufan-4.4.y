@@ -44,7 +44,7 @@
 /*-------------------------------------------------------------------------*/
 
 /* fill a qtd, returning how much of the buffer we were able to queue up */
-
+ 
 static int
 qtd_fill(struct ehci_hcd *ehci, struct ehci_qtd *qtd, dma_addr_t buf,
 		  size_t len, int token, int maxpacket)
@@ -134,7 +134,7 @@ qh_refresh (struct ehci_hcd *ehci, struct ehci_qh *qh)
 		/* first qtd may already be partially processed */
 		if (cpu_to_hc32(ehci, qtd->qtd_dma) == qh->hw->hw_current)
 			qtd = NULL;
-	}
+		}
 
 	if (qtd)
 		qh_update (ehci, qh, qtd);
@@ -266,8 +266,8 @@ __acquires(ehci->lock)
 		if ((qh->hw->hw_info2 & cpu_to_hc32(ehci, QH_SMASK)) != 0) {
 
 			/* ... update hc-wide periodic stats (for usbfs) */
-			ehci_to_hcd(ehci)->self.bandwidth_int_reqs--;
-		}
+		ehci_to_hcd(ehci)->self.bandwidth_int_reqs--;
+	}
 		qh_put (qh);
 	}
 
@@ -555,7 +555,7 @@ qh_completions (struct ehci_hcd *ehci, struct ehci_qh *qh)
 			 * That should be rare for interrupt transfers,
 			 * except maybe high bandwidth ...
 			 */
-
+			 
 			/* Tell the caller to start an unlink */
 			qh->needs_rescan = 1;
 			break;
@@ -567,7 +567,7 @@ qh_completions (struct ehci_hcd *ehci, struct ehci_qh *qh)
 }
 
 /*-------------------------------------------------------------------------*/
-
+ 
 // high bandwidth multiplier, as encoded in highspeed endpoint descriptors
 #define hb_mult(wMaxPacketSize) (1 + (((wMaxPacketSize) >> 11) & 0x03))
 // ... and packet size, for any kind of endpoint descriptor
@@ -623,7 +623,7 @@ qh_urb_transaction (
 	token = QTD_STS_ACTIVE;
 	token |= (EHCI_TUNE_CERR << 10);
 	/* for split transactions, SplitXState initialized to zero */
-
+	 
 	len = urb->transfer_buffer_length;
 	is_input = usb_pipein (urb->pipe);
 	if (usb_pipecontrol (urb->pipe)) {
@@ -668,7 +668,7 @@ qh_urb_transaction (
 	if (is_input)
 		token |= (1 /* "in" */ << 8);
 	/* else it's already initted to "out" pid (0 << 8) */
-
+	 
 	maxpacket = max_packet(usb_maxpacket(urb->dev, urb->pipe, !is_input));
 
 	/*
@@ -771,7 +771,6 @@ cleanup:
 // any previous qh and cancel its urbs first; endpoints are
 // implicitly reset then (data toggle too).
 // That'd mean updating how usbcore talks to HCDs. (2.7?)
-
 
 /*
  * Each QH holds a qtd list; a QH is used for everything except iso.
@@ -888,7 +887,7 @@ qh_make (
 	case USB_SPEED_LOW:
 		info1 |= (1 << 12);	/* EPS "low" */
 		/* FALL THROUGH */
-
+		 
 	case USB_SPEED_FULL:
 		/* EPS 0 means "full" */
 		if (type != PIPE_INTERRUPT)

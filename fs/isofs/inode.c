@@ -134,7 +134,6 @@ static const struct super_operations isofs_sops = {
 	.show_options	= generic_show_options,
 };
 
-
 static const struct dentry_operations isofs_dentry_ops[] = {
 	{
 		.d_hash		= isofs_hash,
@@ -1038,7 +1037,6 @@ int isofs_get_blocks(struct inode *inode, sector_t iblock,
 		goto abort;
 	}
 
-
 	offset = 0;
 	firstext = ei->i_first_extent;
 	sect_size = ei->i_section_size >> ISOFS_BUFFER_BITS(inode);
@@ -1497,7 +1495,7 @@ static int isofs_iget5_set(struct inode *ino, void *data)
  * code below is otherwise similar to the iget() code in
  * include/linux/fs.h */
 struct inode *isofs_iget(struct super_block *sb,
-			 unsigned long block,
+			   unsigned long block,
 			 unsigned long offset)
 {
 	unsigned long hashval;

@@ -2305,7 +2305,6 @@ done:
 	return retval;
 }
 
-
 static int sitd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	gfp_t mem_flags)
 {

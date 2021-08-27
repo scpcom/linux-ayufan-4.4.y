@@ -200,7 +200,7 @@ int btrfs_tree_unlock(struct extent_buffer *eb)
 		WARN_ON(atomic_read(&eb->spinning_writers));
 		atomic_dec(&eb->blocking_writers);
 		smp_wmb();
-		wake_up(&eb->write_lock_wq);
+			wake_up(&eb->write_lock_wq);
 	} else {
 		WARN_ON(atomic_read(&eb->spinning_writers) != 1);
 		atomic_dec(&eb->spinning_writers);

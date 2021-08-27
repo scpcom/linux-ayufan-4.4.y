@@ -42,7 +42,7 @@
  *	http://www.ce-ata.org (CE-ATA: not supported)
  *
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/pci.h>
@@ -184,7 +184,6 @@ MODULE_AUTHOR("Jeff Garzik");
 MODULE_DESCRIPTION("Library module for ATA devices");
 MODULE_LICENSE("GPL");
 MODULE_VERSION(DRV_VERSION);
-
 
 static bool ata_sstatus_online(u32 sstatus)
 {
@@ -2494,7 +2493,7 @@ int ata_dev_configure(struct ata_device *dev)
 			}
 		} else {
 			/* CHS */
-
+			 
 			/* Default translation */
 			dev->cylinders	= id[1];
 			dev->heads	= id[3];
@@ -2631,7 +2630,7 @@ int ata_dev_configure(struct ata_device *dev)
 		   idiot. Do this after the dev_config call as some controllers
 		   with buggy firmware may want to avoid reporting false device
 		   bugs */
-
+		 
 		if (print_info) {
 			ata_dev_warn(dev,
 "Drive reports diagnostics failure. This may indicate a drive\n");
@@ -3064,7 +3063,7 @@ int sata_set_spd(struct ata_link *link)
  *
  * For PIO 5/6 MWDMA 3/4 see the CFA specification 3.0.
  */
-
+ 
 static const struct ata_timing ata_timing[] = {
 /*	{ XFER_PIO_SLOW, 120, 290, 240, 960, 290, 240, 0,  960,   0 }, */
 	{ XFER_PIO_0,     70, 290, 240, 600, 165, 150, 0,  600,   0 },
@@ -6368,7 +6367,6 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 	for (i = 0; i < host->n_ports; i++)
 		host->ports[i]->print_id = ata_print_id++;
 
-
 	/* Create associated sysfs transport objects  */
 	for (i = 0; i < host->n_ports; i++) {
 		rc = ata_tport_add(host->dev,host->ports[i]);
@@ -6445,11 +6443,11 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		struct ata_port *ap = host->ports[i];
 #if defined(MY_ABC_HERE)
 		if ( 0 == g_internal_hd_num ) {
-		async_schedule(async_port_probe, ap);
+			async_schedule(async_port_probe, ap);
 		} else {
 			ata_port_probe(ap);
 			ata_scsi_scan_host(ap, 1);
-	}
+		}
 #else
 		async_schedule(async_port_probe, ap);
 #endif
@@ -6906,6 +6904,7 @@ static int __init ata_init(void)
 	}
 
 	printk(KERN_DEBUG "libata version " DRV_VERSION " loaded.\n");
+
 	return 0;
 
 err_out:

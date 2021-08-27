@@ -521,7 +521,6 @@ ext4_ext_binsearch_idx(struct inode *inode,
 	struct ext4_extent_header *eh = path->p_hdr;
 	struct ext4_extent_idx *r, *l, *m;
 
-
 	ext_debug("binsearch for %u(idx):  ", block);
 
 	l = EXT_FIRST_INDEX(eh) + 1;
@@ -2253,7 +2252,6 @@ static int ext4_remove_blocks(handle_t *handle, struct inode *inode,
 	return 0;
 }
 
-
 /*
  * ext4_ext_rm_leaf() Removes the extents associated with the
  * blocks appearing between "start" and "end", and splits the extents
@@ -2515,16 +2513,17 @@ cont:
 	 */
 	depth = ext_depth(inode);
 	path = kzalloc(sizeof(struct ext4_ext_path) * (depth + 1), GFP_NOFS);
-	if (path == NULL) {
-		ext4_journal_stop(handle);
-		return -ENOMEM;
-	}
-	path[0].p_depth = depth;
-	path[0].p_hdr = ext_inode_hdr(inode);
-	if (ext4_ext_check(inode, path[0].p_hdr, depth)) {
-		err = -EIO;
-		goto out;
-	}
+		if (path == NULL) {
+			ext4_journal_stop(handle);
+			return -ENOMEM;
+		}
+		path[0].p_depth = depth;
+		path[0].p_hdr = ext_inode_hdr(inode);
+
+		if (ext4_ext_check(inode, path[0].p_hdr, depth)) {
+			err = -EIO;
+			goto out;
+		}
 	i = err = 0;
 
 	while (i >= 0 && err == 0) {
@@ -2788,7 +2787,7 @@ static int ext4_split_extent_at(handle_t *handle,
 
 	err = ext4_ext_insert_extent(handle, inode, path, &newex, flags);
 	if (err == -ENOSPC && (EXT4_EXT_MAY_ZEROOUT & split_flag)) {
-		err = ext4_ext_zeroout(inode, &orig_ex);
+			err = ext4_ext_zeroout(inode, &orig_ex);
 		if (err)
 			goto fix_extent_len;
 		/* update the extent length and mark as initialized */
@@ -3144,8 +3143,8 @@ static int ext4_split_unwritten_extents(handle_t *handle,
 }
 
 static int ext4_convert_unwritten_extents_endio(handle_t *handle,
-					      struct inode *inode,
-					      struct ext4_ext_path *path)
+						struct inode *inode,
+						struct ext4_ext_path *path)
 {
 	struct ext4_extent *ex;
 	int depth;
@@ -3245,7 +3244,7 @@ ext4_ext_handle_uninitialized_extents(handle_t *handle, struct inode *inode,
 	int err = 0;
 	ext4_io_end_t *io = EXT4_I(inode)->cur_aio_dio;
 
-	ext_debug("ext4_ext_handle_uninitialized_extents: inode %lu, logical"
+	ext_debug("ext4_ext_handle_uninitialized_extents: inode %lu, logical "
 		  "block %llu, max_blocks %u, flags %d, allocated %u",
 		  inode->i_ino, (unsigned long long)map->m_lblk, map->m_len,
 		  flags, allocated);
@@ -3462,20 +3461,20 @@ int ext4_ext_map_blocks(handle_t *handle, struct inode *inode,
 				  ee_block, ee_len, newblock);
 
 			if ((flags & EXT4_GET_BLOCKS_PUNCH_OUT_EXT) == 0) {
-				/*
-				 * Do not put uninitialized extent
-				 * in the cache
-				 */
-				if (!ext4_ext_is_uninitialized(ex)) {
-					ext4_ext_put_in_cache(inode, ee_block,
-						ee_len, ee_start);
-					goto out;
-				}
-				ret = ext4_ext_handle_uninitialized_extents(
-					handle, inode, map, path, flags,
-					allocated, newblock);
-				return ret;
+			/*
+			 * Do not put uninitialized extent
+			 * in the cache
+			 */
+			if (!ext4_ext_is_uninitialized(ex)) {
+				ext4_ext_put_in_cache(inode, ee_block,
+					ee_len, ee_start);
+				goto out;
 			}
+			ret = ext4_ext_handle_uninitialized_extents(
+				handle, inode, map, path, flags,
+				allocated, newblock);
+			return ret;
+		}
 
 			/*
 			 * Punch out the map length, but only to the
@@ -3509,7 +3508,7 @@ int ext4_ext_map_blocks(handle_t *handle, struct inode *inode,
 				if (ret < 0) {
 					err = ret;
 					goto out2;
-				}
+	}
 				/*
 				 * find extent for the block at
 				 * the start of the hole
@@ -4287,7 +4286,7 @@ int ext4_ext_punch_hole(struct file *file, loff_t offset, loff_t length)
 	/* Now release the pages */
 	if (last_page_offset > first_page_offset) {
 		truncate_inode_pages_range(mapping, first_page_offset,
-					   last_page_offset-1);
+					 last_page_offset - 1);
 	}
 
 	/* finish any pending end_io work */
@@ -4344,7 +4343,6 @@ int ext4_ext_punch_hole(struct file *file, loff_t offset, loff_t length)
 		}
 	}
 
-
 	/*
 	 * If i_size is contained in the last page, we need to
 	 * unmap and zero the partial page after i_size
@@ -4378,8 +4376,8 @@ int ext4_ext_punch_hole(struct file *file, loff_t offset, loff_t length)
 
 	err = ext4_ext_remove_space(inode, first_block, stop_block - 1);
 
-		ext4_ext_invalidate_cache(inode);
-		ext4_discard_preallocations(inode);
+	ext4_ext_invalidate_cache(inode);
+	ext4_discard_preallocations(inode);
 
 	if (IS_SYNC(inode))
 		ext4_handle_sync(handle);

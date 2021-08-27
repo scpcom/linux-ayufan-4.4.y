@@ -1629,7 +1629,6 @@ static const struct ethtool_ops tun_ethtool_ops = {
 	.get_link	= ethtool_op_get_link,
 };
 
-
 static int __init tun_init(void)
 {
 	int ret = 0;

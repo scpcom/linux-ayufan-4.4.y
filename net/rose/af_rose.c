@@ -1281,7 +1281,6 @@ static int rose_recvmsg(struct kiocb *iocb, struct socket *sock,
 	return copied;
 }
 
-
 static int rose_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
 	struct sock *sk = sock->sk;

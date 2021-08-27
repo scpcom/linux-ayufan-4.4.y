@@ -6,7 +6,7 @@
  *	Generic internet FLOW.
  *
  */
-
+ 
 #ifndef _NET_FLOW_H
 #define _NET_FLOW_H
 
@@ -104,7 +104,6 @@ static inline void flowi4_update_output(struct flowi4 *fl4, int oif, __u8 tos,
 	fl4->saddr = saddr;
 }
 				      
-
 struct flowi6 {
 	struct flowi_common	__fl_common;
 #define flowi6_oif		__fl_common.flowic_oif

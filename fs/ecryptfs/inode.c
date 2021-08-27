@@ -25,7 +25,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-
+ 
 #include <linux/file.h>
 #include <linux/vmalloc.h>
 #include <linux/pagemap.h>
@@ -227,7 +227,7 @@ out:
  * Returns zero on success
  */
 static int ecryptfs_initialize_file(struct dentry *ecryptfs_dentry,
-				    struct inode *ecryptfs_inode)
+			     struct inode *ecryptfs_inode)
 {
 	struct ecryptfs_crypt_stat *crypt_stat =
 		&ecryptfs_inode_to_private(ecryptfs_inode)->crypt_stat;
@@ -295,6 +295,7 @@ ecryptfs_create(struct inode *directory_inode, struct dentry *ecryptfs_dentry,
 	/* At this point, a file exists on "disk"; we need to make sure
 	 * that this on disk file is prepared to be an ecryptfs file */
 	rc = ecryptfs_initialize_file(ecryptfs_dentry, ecryptfs_inode);
+
 	if (rc) {
 		drop_nlink(ecryptfs_inode);
 		unlock_new_inode(ecryptfs_inode);
@@ -457,7 +458,7 @@ static struct dentry *ecryptfs_lookup(struct inode *ecryptfs_dir_inode,
 		ecryptfs_dentry->d_name.len);
 	if (rc) {
 		printk(KERN_ERR "%s: Error attempting to encrypt and encode "
-		       "filename; rc = [%d]\n", __func__, rc);
+				"filename; rc = [%d]\n", __func__, rc);
 		goto out_d_drop;
 	}
 	mutex_lock(&lower_dir_dentry->d_inode->i_mutex);
@@ -1299,6 +1300,7 @@ ecryptfs_getxattr_lower(struct dentry *lower_dentry, const char *name,
 		rc = -EOPNOTSUPP;
 		goto out;
 	}
+
 	mutex_lock(&lower_dentry->d_inode->i_mutex);
 	rc = lower_dentry->d_inode->i_op->getxattr(lower_dentry, name, value,
 						   size);
@@ -1339,6 +1341,7 @@ static int ecryptfs_removexattr(struct dentry *dentry, const char *name)
 	struct dentry *lower_dentry;
 
 	lower_dentry = ecryptfs_dentry_to_lower(dentry);
+
 	if (!lower_dentry->d_inode->i_op->removexattr) {
 		rc = -EOPNOTSUPP;
 		goto out;

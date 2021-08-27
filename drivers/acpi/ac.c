@@ -109,7 +109,6 @@ static int acpi_ac_get_state(struct acpi_ac *ac)
 {
 	acpi_status status = AE_OK;
 
-
 	if (!ac)
 		return -EINVAL;
 
@@ -162,7 +161,6 @@ static struct proc_dir_entry *acpi_ac_dir;
 static int acpi_ac_seq_show(struct seq_file *seq, void *offset)
 {
 	struct acpi_ac *ac = seq->private;
-
 
 	if (!ac)
 		return 0;
@@ -237,7 +235,6 @@ static void acpi_ac_notify(struct acpi_device *device, u32 event)
 {
 	struct acpi_ac *ac = acpi_driver_data(device);
 
-
 	if (!ac)
 		return;
 
@@ -264,7 +261,6 @@ static int acpi_ac_add(struct acpi_device *device)
 {
 	int result = 0;
 	struct acpi_ac *ac = NULL;
-
 
 	if (!device)
 		return -EINVAL;
@@ -327,7 +323,6 @@ static int acpi_ac_resume(struct acpi_device *device)
 static int acpi_ac_remove(struct acpi_device *device, int type)
 {
 	struct acpi_ac *ac = NULL;
-
 
 	if (!device || !acpi_driver_data(device))
 		return -EINVAL;

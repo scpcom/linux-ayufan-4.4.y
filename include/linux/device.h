@@ -12,7 +12,7 @@
  *
  * See Documentation/driver-model/ for more information.
  */
-
+ 
 #ifndef _DEVICE_H_
 #define _DEVICE_H_
 
@@ -215,7 +215,6 @@ struct device_driver {
 	struct driver_private *p;
 };
 
-
 extern int __must_check driver_register(struct device_driver *drv);
 extern void driver_unregister(struct device_driver *drv);
 
@@ -225,7 +224,6 @@ extern struct device_driver *driver_find(const char *name,
 					 struct bus_type *bus);
 extern int driver_probe_done(void);
 extern void wait_for_device_probe(void);
-
 
 /* sysfs interface for exporting driver attributes */
 
@@ -594,7 +592,7 @@ struct device {
 	struct device_dma_parameters *dma_parms;
 
 	struct list_head	dma_pools;	/* dma pools (if dma'ble) */
-
+	 
 	struct dma_coherent_mem	*dma_mem; /* internal for coherent mem
 					     override */
 	/* arch specific additions */
@@ -782,7 +780,6 @@ extern int (*platform_notify)(struct device *dev);
 
 extern int (*platform_notify_remove)(struct device *dev);
 
-
 /*
  * get_device - atomically increment the reference count for the device.
  *
@@ -807,7 +804,6 @@ extern void device_shutdown(void);
 
 /* debugging and troubleshooting/diagnostic helpers. */
 extern const char *dev_driver_string(const struct device *dev);
-
 
 #ifdef CONFIG_PRINTK
 

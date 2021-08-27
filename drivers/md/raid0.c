@@ -8,7 +8,6 @@
 	     <maz@gloups.fdn.fr>
              Copyright (C) 1999, 2000 Ingo Molnar, Red Hat
 
-
    RAID-0 management functions.
 
    This program is free software; you can redistribute it and/or modify
@@ -20,7 +19,7 @@
    (for example /usr/src/linux/COPYING); if not, write to the Free
    Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
 */
-
+ 
 #include <linux/blkdev.h>
 #include <linux/seq_file.h>
 #include <linux/module.h>
@@ -206,7 +205,7 @@ static int create_strip_zones(struct mddev *mddev, struct r0conf **private_conf)
 		 * violating it, so limit ->max_segments to 1, lying within
 		 * a single page.
 		 */
-
+		 
 		if (rdev1->bdev->bd_disk->queue->merge_bvec_fn) {
 			blk_queue_max_segments(mddev->queue, 1);
 			blk_queue_segment_boundary(mddev->queue,

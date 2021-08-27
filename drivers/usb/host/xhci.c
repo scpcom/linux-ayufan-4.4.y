@@ -22,7 +22,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #include <linux/pci.h>
 #include <linux/irq.h>
 #include <linux/log2.h>
@@ -741,7 +741,6 @@ int xhci_init(struct usb_hcd *hcd)
 
 /*-------------------------------------------------------------------------*/
 
-
 #ifdef CONFIG_USB_XHCI_HCD_DEBUGGING
 static void xhci_event_ring_work(unsigned long arg)
 {
@@ -1162,7 +1161,7 @@ int xhci_suspend(struct xhci_hcd *xhci)
 	clear_bit(HCD_FLAG_HW_ACCESSIBLE, &xhci->shared_hcd->flags);
 	/* step 1: stop endpoint */
 	/* skipped assuming that port suspend has done */
-
+	 
 	/* step 2: clear Run/Stop bit */
 	command = xhci_readl(xhci, &xhci->op_regs->command);
 	command &= ~CMD_RUN;
@@ -2764,7 +2763,6 @@ static int xhci_reserve_bandwidth(struct xhci_hcd *xhci,
 	return -ENOMEM;
 }
 
-
 /* Issue a configure endpoint command or evaluate context command
  * and wait for it to finish.
  */
@@ -2849,7 +2847,7 @@ static int xhci_configure_endpoint(struct xhci_hcd *xhci,
 #ifdef MY_DEF_HERE
 					USB_CTRL_SET_TIMEOUT/5);
 #else
-			USB_CTRL_SET_TIMEOUT);
+					USB_CTRL_SET_TIMEOUT);
 #endif
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for %s command\n",
@@ -3642,7 +3640,7 @@ int xhci_discover_or_reset_device(struct usb_hcd *hcd, struct usb_device *udev)
 #ifdef MY_DEF_HERE
 					USB_CTRL_SET_TIMEOUT/5);
 #else
-			USB_CTRL_SET_TIMEOUT);
+					USB_CTRL_SET_TIMEOUT);
 #endif
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for reset device command\n",
@@ -3805,7 +3803,6 @@ static int xhci_reserve_host_control_ep_resources(struct xhci_hcd *xhci)
 	return 0;
 }
 
-
 /*
  * Returns 0 if the xHC ran out of device slots, the Enable Slot command
  * timed out, or allocating memory failed.  Returns 1 on success.
@@ -3836,7 +3833,7 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 #ifdef MY_DEF_HERE
 					USB_CTRL_SET_TIMEOUT/5);
 #else
-			USB_CTRL_SET_TIMEOUT);
+					USB_CTRL_SET_TIMEOUT);
 #endif
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for a slot\n",
@@ -3956,7 +3953,7 @@ int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 #ifdef MY_DEF_HERE
 					USB_CTRL_SET_TIMEOUT/5);
 #else
-			USB_CTRL_SET_TIMEOUT);
+					USB_CTRL_SET_TIMEOUT);
 #endif
 
 	/* FIXME: From section 4.3.4: "Software shall be responsible for timing

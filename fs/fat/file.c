@@ -8,7 +8,7 @@
  *
  *  regular file handling primitives for fat-based filesystems
  */
-
+ 
 #include <linux/capability.h>
 #include <linux/module.h>
 #include <linux/compat.h>
@@ -162,7 +162,6 @@ int fat_file_fsync(struct file *filp, loff_t start, loff_t end, int datasync)
 
 	return res ? res : err;
 }
-
 
 const struct file_operations fat_file_operations = {
 	.llseek		= generic_file_llseek,

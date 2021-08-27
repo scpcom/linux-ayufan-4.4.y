@@ -74,7 +74,6 @@ static void blktrans_dev_put(struct mtd_blktrans_dev *dev)
 	mutex_unlock(&blktrans_ref_mutex);
 }
 
-
 static int do_blktrans_request(struct mtd_blktrans_ops *tr,
 			       struct mtd_blktrans_dev *dev,
 			       struct request *req)
@@ -483,7 +482,6 @@ int del_mtd_blktrans_dev(struct mtd_blktrans_dev *old)
 	/* Stop new requests to arrive */
 	del_gendisk(old->disk);
 
-
 	/* Stop the thread */
 	kthread_stop(old->thread);
 
@@ -546,7 +544,6 @@ int register_mtd_blktrans(struct mtd_blktrans_ops *tr)
 	   us over. */
 	if (!blktrans_notifier.list.next)
 		register_mtd_user(&blktrans_notifier);
-
 
 	mutex_lock(&mtd_table_mutex);
 

@@ -344,7 +344,7 @@ void cpu_idle_wait(void);
 
 #if __LINUX_ARM_ARCH__ < 6
 /* min ARCH < ARMv6 */
-
+ 
 #ifdef CONFIG_SMP
 #error "SMP is not supported on this platform"
 #endif

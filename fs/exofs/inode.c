@@ -33,7 +33,7 @@
  * along with exofs; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+ 
 #include <linux/slab.h>
 
 #include "exofs.h"
@@ -1484,7 +1484,7 @@ void exofs_evict_inode(struct inode *inode)
 	 */
 	wait_obj_created(oi);
 	/* ignore the error, attempt a remove anyway */
-
+	 
 	/* Now Remove the OSD objects */
 	ret = ore_get_io_state(&sbi->layout, &oi->oc, &ios);
 	if (unlikely(ret)) {

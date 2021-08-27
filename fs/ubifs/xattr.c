@@ -402,7 +402,7 @@ ssize_t ubifs_getxattr(struct dentry *dentry, const char *name, void *buf,
 		/* If @buf is %NULL we are supposed to return the length */
 		if (ui->data_len > size) {
 			dbg_err("buffer size %zd, xattr len %d",
-				size, ui->data_len);
+				  size, ui->data_len);
 			err = -ERANGE;
 			goto out_iput;
 		}

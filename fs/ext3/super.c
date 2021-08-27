@@ -18,7 +18,7 @@
  *  Big-endian to little-endian byte-swapping/bitmaps by
  *        David S. Miller (davem@caip.rutgers.edu), 1995
  */
-
+ 
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/fs.h>
@@ -370,7 +370,7 @@ void ext3_update_dynamic_rev(struct super_block *sb)
 	es->s_rev_level = cpu_to_le32(EXT3_DYNAMIC_REV);
 	/* leave es->s_feature_*compat flags alone */
 	/* es->s_uuid will be set by e2fsck if empty */
-
+	 
 	/*
 	 * The rest of the superblock fields should be zero, and if not it
 	 * means they are likely already in use, so leave them alone.  We
@@ -722,7 +722,6 @@ static int ext3_show_options(struct seq_file *seq, struct vfsmount *vfs)
 
 	return 0;
 }
-
 
 static struct inode *ext3_nfs_get_inode(struct super_block *sb,
 		u64 ino, u32 generation)
@@ -1084,7 +1083,7 @@ static int parse_options (char *options, struct super_block *sb,
 			set_opt (sbi->s_mount_opt, OLDALLOC);
 #else
 			ext3_msg(sb, KERN_WARNING,
-				"Ignoring deprecated oldalloc option");
+                     "Ignoring deprecated oldalloc option");
 #endif
 			break;
 		case Opt_orlov:
@@ -1092,7 +1091,7 @@ static int parse_options (char *options, struct super_block *sb,
 			clear_opt (sbi->s_mount_opt, OLDALLOC);
 #else
 			ext3_msg(sb, KERN_WARNING,
-				"Ignoring deprecated orlov option");
+                     "Ignoring deprecated orlov option");
 #endif
 			break;
 #ifdef CONFIG_EXT3_FS_XATTR
@@ -1484,7 +1483,6 @@ static int ext3_check_descriptors(struct super_block *sb)
 	return 1;
 }
 
-
 /* ext3_orphan_cleanup() walks a singly-linked list of inodes (starting at
  * the superblock) which were deleted from all directories, but held open by
  * a process at the time of a crash.  We walk the list and try to delete these
@@ -1627,7 +1625,6 @@ static loff_t ext3_max_size(int bits)
 	/* total blocks in file system block size */
 	upper_limit >>= (bits - 9);
 
-
 	/* indirect blocks */
 	meta_blocks = 1;
 	/* double indirect blocks */
@@ -1669,7 +1666,6 @@ static ext3_fsblk_t descriptor_loc(struct super_block *sb,
 		has_super = 1;
 	return (has_super + ext3_group_first_block_no(sb, bg));
 }
-
 
 static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 {
@@ -2177,7 +2173,7 @@ static void ext3_init_journal_params(struct super_block *sb, journal_t *journal)
 	/* We could also set up an ext3-specific default for the commit
 	 * interval here, but for now we'll just fall back to the jbd
 	 * default. */
-
+	 
 	spin_lock(&journal->j_state_lock);
 	if (test_opt(sb, BARRIER))
 		journal->j_flags |= JFS_BARRIER;
@@ -2503,7 +2499,6 @@ static int ext3_commit_super(struct super_block *sb,
 	}
 	return error;
 }
-
 
 /*
  * Have we just finished recovery?  If so, and if we are mounting (or

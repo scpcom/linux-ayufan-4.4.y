@@ -1681,7 +1681,7 @@ retry:
 			 * swizzled back from swapper_space to tmpfs file
 			 * mapping
 			 */
-
+			 
 			if (nr_pages == 0)
 				lock_page(page);
 			else if (!trylock_page(page))
@@ -2639,7 +2639,7 @@ static int cifs_readpage_worker(struct file *file, struct page *page,
 	page_cache_get(page);
 	read_data = kmap(page);
 	/* for reads over a certain size could initiate async read ahead */
-
+	 
 	rc = cifs_read(file, read_data, PAGE_CACHE_SIZE, poffset);
 
 	if (rc < 0)

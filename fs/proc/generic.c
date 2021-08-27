@@ -10,7 +10,7 @@
  * Copyright (C) 1991, 1992 Linus Torvalds.
  * Copyright (C) 1997 Theodore Ts'o
  */
-
+ 
 #include <linux/errno.h>
 #include <linux/time.h>
 #include <linux/proc_fs.h>
@@ -230,7 +230,6 @@ proc_file_write(struct file *file, const char __user *buffer,
 	}
 	return rv;
 }
-
 
 static loff_t
 proc_file_lseek(struct file *file, loff_t offset, int orig)

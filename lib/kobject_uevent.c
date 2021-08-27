@@ -16,7 +16,7 @@
  *	Arjan van de Ven	<arjanv@redhat.com>
  *	Greg Kroah-Hartman	<greg@kroah.com>
  */
-
+ 
 #include <linux/spinlock.h>
 #include <linux/string.h>
 #include <linux/kobject.h>
@@ -431,7 +431,6 @@ static int __init kobject_uevent_init(void)
 	netlink_set_nonroot(NETLINK_KOBJECT_UEVENT, NL_NONROOT_RECV);
 	return register_pernet_subsys(&uevent_net_ops);
 }
-
 
 postcore_initcall(kobject_uevent_init);
 #endif

@@ -1148,7 +1148,6 @@ static void be_rx_compl_process(struct be_adapter *adapter,
 	if (adapter->netdev->features & NETIF_F_RXHASH)
 		skb->rxhash = rxcp->rss_hash;
 
-
 	if (rxcp->vlanf)
 		__vlan_hwaccel_put_tag(skb, rxcp->vlan_tag);
 
@@ -1729,7 +1728,7 @@ static u32 be_num_rxqs_want(struct be_adapter *adapter)
 {
 	if ((adapter->function_caps & BE_FUNCTION_CAPS_RSS) &&
 		!adapter->sriov_enabled && be_physfn(adapter) &&
-		!be_is_mc(adapter)) {
+	     !be_is_mc(adapter)) {
 		return 1 + MAX_RSS_QS; /* one default non-RSS queue */
 	} else {
 		dev_warn(&adapter->pdev->dev,
@@ -2131,7 +2130,7 @@ static int be_sriov_enable(struct be_adapter *adapter)
 
 		if (num_vfs > nvfs) {
 			dev_info(&adapter->pdev->dev,
-					"Device supports %d VFs and not %d\n",
+				 "Device supports %d VFs and not %d\n",
 					nvfs, num_vfs);
 			num_vfs = nvfs;
 		}
@@ -2469,7 +2468,7 @@ static inline int be_vf_eth_addr_config(struct be_adapter *adapter)
 	be_vf_eth_addr_generate(adapter, mac);
 
 	for (vf = 0; vf < num_vfs; vf++) {
-		status = be_cmd_pmac_add(adapter, mac,
+			status = be_cmd_pmac_add(adapter, mac,
 					adapter->vf_cfg[vf].vf_if_handle,
 					&adapter->vf_cfg[vf].vf_pmac_id,
 					vf + 1);
@@ -2538,9 +2537,9 @@ static int be_vf_setup(struct be_adapter *adapter)
 	}
 
 	if (!lancer_chip(adapter)) {
-		status = be_vf_eth_addr_config(adapter);
-		if (status)
-			goto err;
+	status = be_vf_eth_addr_config(adapter);
+	if (status)
+		goto err;
 	}
 
 	for (vf = 0; vf < num_vfs; vf++) {
@@ -2605,9 +2604,9 @@ static int be_setup(struct be_adapter *adapter)
 
 	/* For BEx, the VF's permanent mac queried from card is incorrect.
 	 * Query the mac configued by the PF using if_handle
-	 */
+	  */
 	if (!be_physfn(adapter) && !lancer_chip(adapter)) {
-		status = be_cmd_mac_addr_query(adapter, mac,
+			status = be_cmd_mac_addr_query(adapter, mac,
 			MAC_ADDRESS_TYPE_NETWORK, false, adapter->if_handle);
 		if (!status) {
 			memcpy(adapter->netdev->dev_addr, mac, ETH_ALEN);
@@ -3082,7 +3081,6 @@ pci_map_err:
 	return -ENOMEM;
 }
 
-
 static void be_ctrl_cleanup(struct be_adapter *adapter)
 {
 	struct be_dma_mem *mem = &adapter->mbox_mem_alloced;
@@ -3365,7 +3363,7 @@ static int __devinit be_probe(struct pci_dev *pdev,
 		goto disable_sriov;
 
 	if (lancer_chip(adapter)) {
-		status = lancer_test_and_set_rdy_state(adapter);
+			status = lancer_test_and_set_rdy_state(adapter);
 		if (status) {
 			dev_err(&pdev->dev, "Adapter in non recoverable error\n");
 			goto ctrl_clean;

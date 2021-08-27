@@ -34,7 +34,7 @@
  * http://www.intel.com/technology/serialata/pdf/rev1_1.pdf
  *
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/gfp.h>
 #include <linux/module.h>
@@ -73,8 +73,6 @@ static ssize_t ahci_led_store(struct ata_port *ap, const char *buf,
 			      size_t size);
 static ssize_t ahci_transmit_led_message(struct ata_port *ap, u32 state,
 					ssize_t size);
-
-
 
 static int ahci_scr_read(struct ata_link *link, unsigned int sc_reg, u32 *val);
 static int ahci_scr_write(struct ata_link *link, unsigned int sc_reg, u32 val);
@@ -1966,7 +1964,6 @@ static void ahci_port_intr(struct ata_port *ap)
 		else
 			qc_active = readl(port_mmio + PORT_CMD_ISSUE);
 	}
-
 
 	rc = ata_qc_complete_multiple(ap, qc_active);
 

@@ -22,4 +22,3 @@ typedef unsigned short umode_t;
 #endif /* __KERNEL__ */
 
 #endif
-

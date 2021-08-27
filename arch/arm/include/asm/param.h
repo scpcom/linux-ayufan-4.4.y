@@ -31,4 +31,3 @@
 #define MAXHOSTNAMELEN  64
 
 #endif
-

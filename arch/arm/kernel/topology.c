@@ -13,7 +13,7 @@
  * License.  See the file "COPYING" in the main directory of this archive
  * for more details.
  */
-
+ 
 #include <linux/cpu.h>
 #include <linux/cpumask.h>
 #include <linux/init.h>
@@ -74,7 +74,7 @@ void store_cpu_topology(unsigned int cpuid)
 		 * This is a multiprocessor system
 		 * multiprocessor format & multiprocessor mode field are set
 		 */
-
+		 
 		if (mpidr & MPIDR_MT_BITMASK) {
 			/* core performance interdependency */
 			cpuid_topo->thread_id = (mpidr >> MPIDR_LEVEL0_SHIFT)

@@ -51,7 +51,7 @@
  * - Should use an own CAP_* category instead of CAP_SYS_ADMIN
  *
  */
-
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/sched.h>
@@ -612,7 +612,6 @@ static void do_loop_switch(struct loop_device *lo, struct switch_request *p)
 out:
 	complete(&p->wait);
 }
-
 
 /*
  * loop_change_fd switched the backing store of a loopback device to

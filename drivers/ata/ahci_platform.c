@@ -14,7 +14,7 @@
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/gfp.h>
 #include <linux/module.h>
@@ -43,7 +43,6 @@ static struct platform_device_id ahci_devtype[] = {
 	}
 };
 MODULE_DEVICE_TABLE(platform, ahci_devtype);
-
 
 static const struct ata_port_info ahci_port_info[] = {
 	/* by features */
@@ -212,13 +211,13 @@ static const struct of_device_id ahci_of_match[] = {
 MODULE_DEVICE_TABLE(of, ahci_of_match);
 
 static struct platform_driver ahci_driver = {
-	.remove = __devexit_p(ahci_remove),
-	.driver = {
-		.name = "ahci",
-		.owner = THIS_MODULE,
-		.of_match_table = ahci_of_match,
+	.remove  = __devexit_p(ahci_remove),
+	.driver  = {
+		 .name = "ahci",
+		 .owner = THIS_MODULE,
+		 .of_match_table = ahci_of_match,
 	},
-	.id_table	= ahci_devtype,
+	.id_table = ahci_devtype,
 };
 
 static int __init ahci_init(void)

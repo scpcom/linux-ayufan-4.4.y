@@ -24,7 +24,7 @@
  * trying until we recognize the file or we run out of supported binary
  * formats. 
  */
-
+ 
 #include <linux/slab.h>
 #include <linux/file.h>
 #include <linux/fdtable.h>
@@ -1286,10 +1286,10 @@ int prepare_binprm(struct linux_binprm *bprm)
 
 	if (!(bprm->file->f_path.mnt->mnt_flags & MNT_NOSUID)) {
 		/* Set-uid? */
-		if (mode & S_ISUID) {
-			bprm->per_clear |= PER_CLEAR_ON_SETID;
+	if (mode & S_ISUID) {
+		bprm->per_clear |= PER_CLEAR_ON_SETID;
 			bprm->cred->euid = inode->i_uid;
-		}
+	}
 
 		/* Set-gid? */
 		/*
@@ -1297,11 +1297,11 @@ int prepare_binprm(struct linux_binprm *bprm)
 		 * is a candidate for mandatory locking, not a setgid
 		 * executable.
 		 */
-		if ((mode & (S_ISGID | S_IXGRP)) == (S_ISGID | S_IXGRP)) {
-			bprm->per_clear |= PER_CLEAR_ON_SETID;
+	if ((mode & (S_ISGID | S_IXGRP)) == (S_ISGID | S_IXGRP)) {
+		bprm->per_clear |= PER_CLEAR_ON_SETID;
 			bprm->cred->egid = inode->i_gid;
-		}
 	}
+}
 
 	/* fill in binprm security blob */
 	retval = security_bprm_set_creds(bprm);
@@ -2040,7 +2040,6 @@ static void wait_for_dump_helpers(struct file *file)
 	pipe_unlock(pipe);
 
 }
-
 
 /*
  * umh_pipe_setup

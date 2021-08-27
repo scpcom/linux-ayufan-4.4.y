@@ -538,7 +538,6 @@ int autofs4_wait(struct autofs_sb_info *sbi, struct dentry *dentry,
 	return status;
 }
 
-
 int autofs4_wait_release(struct autofs_sb_info *sbi, autofs_wqt_t wait_queue_token, int status)
 {
 	struct autofs_wait_queue *wq, **wql;
@@ -565,4 +564,3 @@ int autofs4_wait_release(struct autofs_sb_info *sbi, autofs_wqt_t wait_queue_tok
 
 	return 0;
 }
-

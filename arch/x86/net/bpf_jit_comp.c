@@ -102,7 +102,6 @@ do {								\
 		f_op = FOP;		\
 		goto cond_branch
 
-
 #define SEEN_DATAREF 1 /* might call external helpers */
 #define SEEN_XREG    2 /* ebx is used */
 #define SEEN_MEM     4 /* use mem[] for temporary storage */
@@ -116,7 +115,6 @@ static inline void bpf_flush_icache(void *start, void *end)
 	flush_icache_range((unsigned long)start, (unsigned long)end);
 	set_fs(old_fs);
 }
-
 
 void bpf_jit_compile(struct sk_filter *fp)
 {

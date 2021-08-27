@@ -110,7 +110,7 @@ int ubifs_scan_a_node(const struct ubifs_info *c, void *buf, int len, int lnum,
 		if ((node_len + pad_len) & 7) {
 			if (!quiet)
 				dbg_err("bad padding length %d - %d",
-					offs, offs + node_len + pad_len);
+					  offs, offs + node_len + pad_len);
 			return SCANNED_A_BAD_PAD_NODE;
 		}
 

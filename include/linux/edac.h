@@ -336,7 +336,6 @@ struct mem_ctl_info {
 	 */
 	int (*get_sdram_scrub_rate) (struct mem_ctl_info * mci);
 
-
 	/* pointer to edac checking routine */
 	void (*edac_check) (struct mem_ctl_info * mci);
 

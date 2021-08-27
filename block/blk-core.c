@@ -928,7 +928,7 @@ struct request *blk_get_request(struct request_queue *q, int rw, gfp_t gfp_mask)
 	if (!rq)
 		spin_unlock_irq(q->queue_lock);
 	/* q->queue_lock is unlocked at this point */
-
+	 
 	return rq;
 }
 EXPORT_SYMBOL(blk_get_request);
@@ -1546,7 +1546,7 @@ generic_make_request_checks(struct bio *bio)
 	}
 
 	if (unlikely(!(bio->bi_rw & REQ_DISCARD) &&
-		     nr_sectors > queue_max_hw_sectors(q))) {
+		   nr_sectors > queue_max_hw_sectors(q))) {
 		printk(KERN_ERR "bio too big device %s (%u > %u)\n",
 		       bdevname(bio->bi_bdev, b),
 		       bio_sectors(bio),
@@ -1984,6 +1984,7 @@ struct request *blk_peek_request(struct request_queue *q)
 			printk(KERN_ERR "%s: bad return=%d\n", __func__, ret);
 			break;
 		}
+
 	}
 
 	return rq;
@@ -2294,7 +2295,6 @@ static void blk_finish_request(struct request *req, int error)
 
 	if (req->cmd_flags & REQ_DONTPREP)
 		blk_unprep_request(req);
-
 
 	blk_account_io_done(req);
 
@@ -2782,13 +2782,13 @@ static void flush_plug_callbacks(struct blk_plug *plug)
 	if (list_empty(&plug->cb_list))
 		return;
 
-	list_splice_init(&plug->cb_list, &callbacks);
+		list_splice_init(&plug->cb_list, &callbacks);
 
-	while (!list_empty(&callbacks)) {
-		struct blk_plug_cb *cb = list_first_entry(&callbacks,
+		while (!list_empty(&callbacks)) {
+			struct blk_plug_cb *cb = list_first_entry(&callbacks,
 							  struct blk_plug_cb,
 							  list);
-		list_del(&cb->list);
+			list_del(&cb->list);
 		cb->callback(cb);
 	}
 }

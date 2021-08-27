@@ -114,7 +114,6 @@ static inline void inode_sync_wait(struct inode *inode)
 							TASK_UNINTERRUPTIBLE);
 }
 
-
 /*
  * mm/page-writeback.c
  */
@@ -201,6 +200,5 @@ void tag_pages_for_writeback(struct address_space *mapping,
 /* pdflush.c */
 extern int nr_pdflush_threads;	/* Global so it can be exported to sysctl
 				   read-only. */
-
 
 #endif		/* WRITEBACK_H */

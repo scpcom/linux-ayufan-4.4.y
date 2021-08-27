@@ -14,7 +14,6 @@
 
 #include <linux/types.h>
 
-
 /*
  * Partition definition structure:
  *
@@ -65,7 +64,6 @@ struct mtd_part_parser_data {
 	unsigned long origin;
 	struct device_node *of_node;
 };
-
 
 /*
  * Functions dealing with the various ways of partitioning the space

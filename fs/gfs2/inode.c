@@ -245,7 +245,6 @@ fail_iput:
 	goto fail;
 }
 
-
 struct inode *gfs2_lookup_simple(struct inode *dip, const char *name)
 {
 	struct qstr qstr;
@@ -262,7 +261,6 @@ struct inode *gfs2_lookup_simple(struct inode *dip, const char *name)
 	else
 		return inode;
 }
-
 
 /**
  * gfs2_lookupi - Look up a filename in a directory and return its inode
@@ -1016,7 +1014,6 @@ static int gfs2_unlink_inode(struct gfs2_inode *dip,
 	return 0;
 }
 
-
 /**
  * gfs2_unlink - Unlink an inode (this does rmdir as well)
  * @dir: The inode of the directory containing the inode to unlink
@@ -1044,7 +1041,6 @@ static int gfs2_unlink(struct inode *dir, struct dentry *dentry)
 
 	rgd = gfs2_blk2rgrpd(sdp, ip->i_no_addr);
 	gfs2_holder_init(rgd->rd_gl, LM_ST_EXCLUSIVE, 0, ghs + 2);
-
 
 	error = gfs2_glock_nq(ghs); /* parent */
 	if (error)
@@ -1515,7 +1511,6 @@ int gfs2_permission(struct inode *inode, int mask)
 	int error;
 	int unlock = 0;
 
-
 	ip = GFS2_I(inode);
 	if (gfs2_glock_is_locked_by_me(ip->i_gl) == NULL) {
 		if (mask & MAY_NOT_BLOCK)
@@ -1846,4 +1841,3 @@ const struct inode_operations gfs2_symlink_iops = {
 	.fiemap = gfs2_fiemap,
 	.get_acl = gfs2_get_acl,
 };
-

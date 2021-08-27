@@ -10,7 +10,7 @@
  * Free Software Foundation;  either version 2 of the  License, or (at your
  * option) any later version.
  */
-
+ 
 #include <linux/stddef.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -57,7 +57,6 @@
 #define CM_VER	(0)
 #define CM_CSR	(1)
 #define CM_RST	(2)
-
 
 static int cds_pci_slot = 2;
 static volatile u8 *cadmus;
@@ -389,7 +388,6 @@ static void mpc85xx_cds_show_cpuinfo(struct seq_file *m)
 	phid1 = mfspr(SPRN_HID1);
 	seq_printf(m, "PLL setting\t: 0x%x\n", ((phid1 >> 24) & 0x3f));
 }
-
 
 /*
  * Called very early, device-tree isn't unflattened

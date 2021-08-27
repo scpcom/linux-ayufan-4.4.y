@@ -1113,7 +1113,6 @@ uart_ioctl(struct tty_struct *tty, unsigned int cmd,
 	void __user *uarg = (void __user *)arg;
 	int ret = -ENOIOCTLCMD;
 
-
 	/*
 	 * These ioctls don't rely on the hardware to be present.
 	 */
@@ -1200,7 +1199,6 @@ static void uart_set_termios(struct tty_struct *tty,
 	struct uart_state *state = tty->driver_data;
 	unsigned long flags;
 	unsigned int cflag = tty->termios->c_cflag;
-
 
 	/*
 	 * These are the bits that are used to setup various

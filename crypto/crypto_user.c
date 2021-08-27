@@ -106,7 +106,7 @@ static int crypto_report_one(struct crypto_alg *alg,
 {
 	memcpy(&ualg->cru_name, &alg->cra_name, sizeof(ualg->cru_name));
 	memcpy(&ualg->cru_driver_name, &alg->cra_driver_name,
-	       sizeof(ualg->cru_driver_name));
+		sizeof(ualg->cru_driver_name));
 	memcpy(&ualg->cru_module_name, module_name(alg->cra_module),
 	       CRYPTO_MAX_ALG_NAME);
 

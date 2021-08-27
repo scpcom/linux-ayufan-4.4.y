@@ -14,7 +14,7 @@
    (for example /usr/src/linux/COPYING); if not, write to the Free
    Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
 */
-
+ 
 #ifndef _MD_P_H
 #define _MD_P_H
 
@@ -117,8 +117,7 @@ typedef struct mdp_device_descriptor_s {
  *   "raid_disks-delta_disks" is the old.  If -ve, raid_disks is the
  *   old value and "raid_disks+delta_disks" is the new (smaller) value.
  */
-
-
+	 
 typedef struct mdp_superblock_s {
 	/*
 	 * Constant generic information
@@ -225,7 +224,7 @@ struct mdp_superblock_1 {
 	__le32	level;		/* -4 (multipath), -1 (linear), 0,1,4,5 */
 	__le32	layout;		/* only for raid5 and raid10 currently */
 	__le64	size;		/* used size of component devices, in 512byte sectors */
-
+	 
 	__le32	chunksize;	/* in 512byte sectors */
 	__le32	raid_disks;
 	__le32	bitmap_offset;	/* sectors after start of superblock that bitmap starts

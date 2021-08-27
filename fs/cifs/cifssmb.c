@@ -29,7 +29,7 @@
  /* (mounted volume), but there are eight handle based routines which must be */
  /* treated slightly differently for reconnection purposes since we never     */
  /* want to reuse a stale file handle and only the caller knows the file info */
-
+ 
 #include <linux/fs.h>
 #include <linux/kernel.h>
 #include <linux/vfs.h>
@@ -217,7 +217,7 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 	 *
 	 * FIXME: what about file locks? don't we need to reclaim them ASAP?
 	 */
-
+	 
 out:
 	/*
 	 * Check if handle based operation so we know whether we can continue
@@ -509,7 +509,6 @@ CIFSSMBNegotiate(unsigned int xid, struct cifs_ses *ses)
 		}
 		cFYI(1, "server->timeAdj: %d seconds", server->timeAdj);
 
-
 		/* BB get server time for time conversions and add
 		code to use it and timezone since this is not UTC */
 
@@ -568,7 +567,7 @@ CIFSSMBNegotiate(unsigned int xid, struct cifs_ses *ses)
 		goto neg_err_exit;
 	}
 	/* else ... any others ...? */
-
+	 
 	/* one byte, so no need to convert this or EncryptionKeyLen from
 	   little endian */
 	server->maxReq = le16_to_cpu(pSMBr->MaxMpxCount);
@@ -1225,7 +1224,7 @@ OldOpenRetry:
 	/* set file as system file if special file such
 	   as fifo and server expecting SFU style and
 	   no Unix extensions */
-
+	 
 	if (create_options & CREATE_OPTION_SPECIAL)
 		pSMB->FileAttributes = cpu_to_le16(ATTR_SYSTEM);
 	else /* BB FIXME BB */
@@ -1253,7 +1252,7 @@ OldOpenRetry:
 		cFYI(1, "Error in Open = %d", rc);
 	} else {
 	/* BB verify if wct == 15 */
-
+	 
 /*		*pOplock = pSMBr->OplockLevel; */ /* BB take from action field*/
 
 		*netfid = pSMBr->Fid;   /* cifs fid stays in le */
@@ -1263,7 +1262,7 @@ OldOpenRetry:
 /*		if (cpu_to_le32(FILE_CREATE) == pSMBr->CreateAction)
 			*pOplock |= CIFS_CREATE_ACTION; */
 	/* BB FIXME END */
-
+		 
 		if (pfile_info) {
 			pfile_info->CreationTime = 0; /* BB convert CreateTime*/
 			pfile_info->LastAccessTime = 0; /* BB fixme */
@@ -1852,7 +1851,6 @@ CIFSSMBRead(const int xid, struct cifs_io_parms *io_parms, unsigned int *nbytes,
 	return rc;
 }
 
-
 int
 CIFSSMBWrite(const int xid, struct cifs_io_parms *io_parms,
 	     unsigned int *nbytes, const char *buf,
@@ -2291,7 +2289,6 @@ CIFSSMBWrite2(const int xid, struct cifs_io_parms *io_parms,
 	else /* wct == 12 pad bigger by four bytes */
 		iov[0].iov_len = smb_hdr_len + 8;
 
-
 	rc = SendReceive2(xid, tcon->ses, iov, n_vec + 1, &resp_buf_type,
 			  long_op);
 	cifs_stats_inc(&tcon->num_writes);
@@ -2574,7 +2571,6 @@ plk_err_exit:
 
 	return rc;
 }
-
 
 int
 CIFSSMBClose(const int xid, struct cifs_tcon *tcon, int smb_file_id)
@@ -3155,7 +3151,7 @@ querySymLinkRetry:
 		cFYI(1, "Send error in QuerySymLinkInfo = %d", rc);
 	} else {
 		/* decode response */
-
+		 
 		rc = validate_t2((struct smb_t2_rsp *)pSMBr);
 		/* BB also check enough total bytes returned */
 		if (rc || get_bcc(&pSMBr->hdr) < 2)
@@ -3309,7 +3305,7 @@ static void cifs_convert_ace(posix_acl_xattr_entry *ace,
 	ace->e_tag  = cpu_to_le16(cifs_ace->cifs_e_tag);
 	ace->e_id   = cpu_to_le32(le64_to_cpu(cifs_ace->cifs_uid));
 	/* cFYI(1, "perm %d tag %d id %d",ace->e_perm,ace->e_tag,ace->e_id); */
-
+	 
 	return;
 }
 
@@ -3502,7 +3498,7 @@ queryAclRetry:
 		cFYI(1, "Send error in Query POSIX ACL = %d", rc);
 	} else {
 		/* decode response */
-
+		 
 		rc = validate_t2((struct smb_t2_rsp *)pSMBr);
 		/* BB also check enough total bytes returned */
 		if (rc || get_bcc(&pSMBr->hdr) < 2)
@@ -5320,7 +5316,6 @@ QFSUnixRetry:
 	if (rc == -EAGAIN)
 		goto QFSUnixRetry;
 
-
 	return rc;
 }
 
@@ -5395,8 +5390,6 @@ SETFSUnixRetry:
 
 	return rc;
 }
-
-
 
 int
 CIFSSMBQFSPosixInfo(const int xid, struct cifs_tcon *tcon,
@@ -5483,7 +5476,6 @@ QFSPosixRetry:
 
 	return rc;
 }
-
 
 /* We can not use write of zero bytes trick to
    set file size due to need for large file support.  Also note that
@@ -6172,7 +6164,6 @@ QAllEAsRetry:
 		goto QAllEAsOut;
 	}
 
-
 	/* BB also check enough total bytes returned */
 	/* BB we need to improve the validity checking
 	of these trans2 responses */
@@ -6364,7 +6355,7 @@ SetEARetry:
 	parm_data->list[0].value_len = cpu_to_le16(ea_value_len);
 	/* caller ensures that ea_value_len is less than 64K but
 	we need to ensure that it fits within the smb */
-
+	 
 	/*BB add length check to see if it would fit in
 	     negotiated SMB buffer size BB */
 	/* if (ea_value_len > buffer_size - 512 (enough for header)) */

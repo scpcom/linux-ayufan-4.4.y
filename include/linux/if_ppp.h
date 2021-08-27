@@ -32,7 +32,7 @@
  *     file.  Don't change the format of that line otherwise, so the
  *     installation script can recognize it.
  */
-
+ 
 #ifndef _IF_PPP_H_
 #define _IF_PPP_H_
 
@@ -47,7 +47,6 @@
 #define PPP_MAXMRU	65000	/* Largest MRU we allow */
 #define PROTO_IPX	0x002b	/* protocol numbers */
 #define PROTO_DNA_RT    0x0027  /* DNA Routing */
-
 
 /*
  * Bit definitions for flags.

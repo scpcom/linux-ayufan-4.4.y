@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #ifndef __LINUX_EHCI_HCD_H
 #define __LINUX_EHCI_HCD_H
 
@@ -99,7 +99,6 @@ struct ehci_hcd {			/* one per controller */
 	int			next_uframe;	/* scan periodic, start here */
 	unsigned		periodic_sched;	/* periodic activity count */
 	unsigned		uframe_periodic_max; /* max periodic time per uframe */
-
 
 	/* list of itds & sitds completed while clock_frame was still active */
 	struct list_head	cached_itd_list;
@@ -191,7 +190,6 @@ static inline struct usb_hcd *ehci_to_hcd (struct ehci_hcd *ehci)
 {
 	return container_of ((void *) ehci, struct usb_hcd, hcd_priv);
 }
-
 
 static inline void
 iaa_watchdog_start(struct ehci_hcd *ehci)
@@ -396,7 +394,7 @@ struct ehci_qh {
 };
 
 /*-------------------------------------------------------------------------*/
-
+	 
 /* description of one iso transaction (up to 3 KB data if highspeed) */
 struct ehci_iso_packet {
 	/* These will be copied to iTD when scheduling */
@@ -458,7 +456,7 @@ struct ehci_iso_stream {
 };
 
 /*-------------------------------------------------------------------------*/
-
+	 
 /*
  * EHCI Specification 0.95 Section 3.3
  * Fig 3-4 "Isochronous Transaction Descriptor (iTD)"
@@ -496,7 +494,7 @@ struct ehci_itd {
 } __attribute__ ((aligned (32)));
 
 /*-------------------------------------------------------------------------*/
-
+	 
 /*
  * EHCI Specification 0.95 Section 3.4
  * siTD, aka split-transaction isochronous Transfer Descriptor
@@ -607,7 +605,7 @@ ehci_port_speed(struct ehci_hcd *ehci, unsigned int portsc)
 #endif
 
 /*-------------------------------------------------------------------------*/
-
+ 
 #ifdef CONFIG_PPC_83xx
 /* Some Freescale processors have an erratum in which the TT
  * port number in the queue head was 0..N-1 instead of 1..N.

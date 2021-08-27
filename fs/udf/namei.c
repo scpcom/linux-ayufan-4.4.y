@@ -21,7 +21,7 @@
  *  12/12/98 blf  Created. Split out the lookup code from dir.c
  *  04/19/99 blf  link, mknod, symlink support
  */
-
+ 
 #include "udfdecl.h"
 
 #include "udf_i.h"
@@ -1246,7 +1246,6 @@ static struct dentry *udf_get_parent(struct dentry *child)
 out_unlock:
 	return ERR_PTR(-EACCES);
 }
-
 
 static struct dentry *udf_nfs_get_inode(struct super_block *sb, u32 block,
 					u16 partref, __u32 generation)

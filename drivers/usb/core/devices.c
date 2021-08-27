@@ -51,7 +51,7 @@
  *   Converted file reading routine to dump to buffer once
  *   per device, not per bus
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/gfp.h>
@@ -112,7 +112,6 @@ static const char format_iface[] =
 static const char format_endpt[] =
 /* E:  Ad=xx(s) Atr=xx(ssss) MxPS=dddd Ivl=D?s */
   "E:  Ad=%02x(%c) Atr=%02x(%-4s) MxPS=%4d Ivl=%d%cs\n";
-
 
 /*
  * Need access to the driver and USB bus lists.
@@ -444,7 +443,6 @@ static char *usb_dump_desc(char *start, char *end, struct usb_device *dev)
 	return start;
 }
 
-
 #ifdef PROC_EXTRA /* TBD: may want to add this code later */
 
 static char *usb_dump_hub_descriptor(char *start, char *end,
@@ -623,10 +621,10 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 			   speed, usbdev->maxchild);
 #endif
 	else
-	data_end = pages_start + sprintf(pages_start, format_topo,
-			bus->busnum, level, parent_devnum,
-			index, count, usbdev->devnum,
-			speed, usbdev->maxchild);
+		data_end = pages_start + sprintf(pages_start, format_topo,
+			   bus->busnum, level, parent_devnum,
+			   index, count, usbdev->devnum,
+			   speed, usbdev->maxchild);
 #else
 	data_end = pages_start + sprintf(pages_start, format_topo,
 			bus->busnum, level, parent_devnum,

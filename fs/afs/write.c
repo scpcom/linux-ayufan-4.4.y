@@ -153,7 +153,7 @@ int afs_write_begin(struct file *file, struct address_space *mapping,
 	}
 	*pagep = page;
 	/* page won't leak in error case: it eventually gets cleaned off LRU */
-
+	 
 	if (!PageUptodate(page) && len != PAGE_CACHE_SIZE) {
 		ret = afs_fill_page(vnode, key, index << PAGE_CACHE_SHIFT, page);
 		if (ret < 0) {

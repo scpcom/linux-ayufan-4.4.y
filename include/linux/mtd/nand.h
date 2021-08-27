@@ -159,7 +159,6 @@ typedef enum {
 /* Bit mask for flags passed to do_nand_read_ecc */
 #define NAND_GET_DEVICE		0x80
 
-
 /*
  * Option constants for bizarre disfunctionality and real
  * features.

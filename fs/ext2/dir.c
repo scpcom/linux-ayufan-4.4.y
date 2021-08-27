@@ -23,7 +23,7 @@
  * All code that works with directory layout had been switched to pagecache
  * and moved here. AV
  */
-
+ 
 #include "ext2.h"
 #include <linux/buffer_head.h>
 #include <linux/pagemap.h>

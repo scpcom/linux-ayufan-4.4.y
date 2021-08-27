@@ -200,7 +200,7 @@ struct dentry_operations {
       * directory inode with a DCACHE_DISCONNECTED dentry, will d_move that
       * dentry into place and return that dentry rather than the passed one,
       * typically using d_splice_alias. */
-
+      
 #define DCACHE_REFERENCED	0x0040  /* Recently used, don't discard. */
 #define DCACHE_RCUACCESS	0x0080	/* Entry has ever been RCU-visible */
 
@@ -222,7 +222,7 @@ struct dentry_operations {
 #define DCACHE_COOKIE		0x2000	/* For use by dcookie subsystem */
 #define DCACHE_FSNOTIFY_PARENT_WATCHED 0x4000
      /* Parent inode is watched by some fsnotify listener */
-
+      
 #define DCACHE_MOUNTED		0x10000	/* is a mountpoint */
 #define DCACHE_NEED_AUTOMOUNT	0x20000	/* handle automount on this dir */
 #define DCACHE_MANAGE_TRANSIT	0x40000	/* manage transit from this dirent */

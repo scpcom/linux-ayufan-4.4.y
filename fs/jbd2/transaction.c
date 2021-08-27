@@ -19,7 +19,7 @@
  * journaling code) and handles (individual atomic operations by the
  * filesystem).
  */
-
+ 
 #include <linux/time.h>
 #include <linux/fs.h>
 #include <linux/jbd2.h>
@@ -354,13 +354,11 @@ handle_t *jbd2__journal_start(journal_t *journal, int nblocks, gfp_t gfp_mask)
 }
 EXPORT_SYMBOL(jbd2__journal_start);
 
-
 handle_t *jbd2_journal_start(journal_t *journal, int nblocks)
 {
 	return jbd2__journal_start(journal, nblocks, GFP_NOFS);
 }
 EXPORT_SYMBOL(jbd2_journal_start);
-
 
 /**
  * int jbd2_journal_extend() - extend buffer credits.
@@ -432,7 +430,6 @@ out:
 	return result;
 }
 
-
 /**
  * int jbd2_journal_restart() - restart a handle .
  * @handle:  handle to restart
@@ -487,7 +484,6 @@ int jbd2__journal_restart(handle_t *handle, int nblocks, gfp_t gfp_mask)
 	return ret;
 }
 EXPORT_SYMBOL(jbd2__journal_restart);
-
 
 int jbd2_journal_restart(handle_t *handle, int nblocks)
 {
@@ -624,7 +620,7 @@ repeat:
 	 * dump(8) (which may leave the buffer scheduled for read ---
 	 * ie. locked but not dirty) or tune2fs (which may actually have
 	 * the buffer dirtied, ugh.)  */
-
+		 
 	if (buffer_dirty(bh)) {
 		/*
 		 * First question: is this buffer already part of the current
@@ -761,7 +757,6 @@ repeat:
 		jh->b_next_transaction = transaction;
 	}
 
-
 	/*
 	 * Finally, if the buffer is not journaled right now, we need to make
 	 * sure it doesn't get written to disk before the caller actually
@@ -838,7 +833,6 @@ int jbd2_journal_get_write_access(handle_t *handle, struct buffer_head *bh)
 	jbd2_journal_put_journal_head(jh);
 	return rc;
 }
-
 
 /*
  * When the user wants to journal a newly created buffer_head
@@ -1043,8 +1037,6 @@ void jbd2_buffer_abort_trigger(struct journal_head *jh,
 
 	triggers->t_abort(triggers, jh2bh(jh));
 }
-
-
 
 /**
  * int jbd2_journal_dirty_metadata() -  mark a buffer as containing dirty metadata
@@ -1300,7 +1292,7 @@ int jbd2_journal_forget (handle_t *handle, struct buffer_head *bh)
 		JBUFFER_TRACE(jh, "belongs to older transaction");
 		/* ... but we CAN drop it from the new transaction if we
 		 * have also modified it since the original commit. */
-
+		 
 		if (jh->b_next_transaction) {
 			J_ASSERT(jh->b_next_transaction == transaction);
 			jh->b_next_transaction = NULL;
@@ -1439,7 +1431,7 @@ int jbd2_journal_stop(handle_t *handle)
 		/* Do this even for aborted journals: an abort still
 		 * completes the commit thread, it just doesn't write
 		 * anything to disk. */
-
+		 
 		jbd_debug(2, "transaction too old, requesting commit for "
 					"handle %p\n", handle);
 		/* This is non-blocking */
@@ -1884,7 +1876,7 @@ static int journal_unmap_buffer(journal_t *journal, struct buffer_head *bh)
 		/* OK, it must be in the journal but still not
 		 * written fully to disk: it's metadata or
 		 * journaled data... */
-
+			 
 		if (journal->j_running_transaction) {
 			/* ... and once the current transaction has
 			 * committed, the buffer won't be needed any

@@ -42,7 +42,7 @@ static int do_adjust_pte(struct vm_area_struct *vma, unsigned long address,
 		unsigned long pfn, pte_t *ptep, int update, int only_shared)
 #else
 static int do_adjust_pte(struct vm_area_struct *vma, unsigned long address,
-	unsigned long pfn, pte_t *ptep)
+		unsigned long pfn, pte_t *ptep)
 #endif
 {
 	pte_t entry = *ptep;

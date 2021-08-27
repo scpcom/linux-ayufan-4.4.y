@@ -12,7 +12,7 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  */
-
+ 
 #ifndef _BR_PRIVATE_H
 #define _BR_PRIVATE_H
 
@@ -509,7 +509,6 @@ extern void br_become_designated_port(struct net_bridge_port *p);
 extern int br_set_forward_delay(struct net_bridge *br, unsigned long x);
 extern int br_set_hello_time(struct net_bridge *br, unsigned long x);
 extern int br_set_max_age(struct net_bridge *br, unsigned long x);
-
 
 /* br_stp_if.c */
 extern void br_stp_enable_bridge(struct net_bridge *br);

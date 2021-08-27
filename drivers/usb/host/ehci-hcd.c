@@ -22,7 +22,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <linux/dmapool.h>
@@ -72,7 +72,6 @@
 
 static const char	hcd_name [] = "ehci_hcd";
 
-
 #undef VERBOSE_DEBUG
 #undef EHCI_URB_TRACE
 
@@ -99,7 +98,7 @@ static const char	hcd_name [] = "ehci_hcd";
 #define EHCI_ASYNC_JIFFIES	(HZ/20)		/* async idle timeout */
 #define EHCI_SHRINK_JIFFIES	(DIV_ROUND_UP(HZ, 200) + 1)
 						/* 5-ms async qh unlink delay */
-
+						 
 /* Initial IRQ latency:  faster than hw default */
 static int log2_irq_thresh = 0;		// 0 to 6
 module_param (log2_irq_thresh, int, S_IRUGO);
@@ -726,7 +725,6 @@ static int ehci_run (struct usb_hcd *hcd)
 #endif
 	}
 
-
 	// Philips, Intel, and maybe others need CMD_RUN before the
 	// root hub will detect new devices (why?); NEC doesn't
 	ehci->command &= ~(CMD_LRESET|CMD_IAAD|CMD_PSE|CMD_ASE|CMD_RESET);
@@ -1078,7 +1076,7 @@ static int ehci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 
 	case PIPE_ISOCHRONOUS:
 		// itd or sitd ...
-
+		 
 		// wait till next completion, do it then.
 		// completion irqs can wait up to 1024 msec,
 		break;
@@ -1464,4 +1462,3 @@ static void __exit ehci_hcd_cleanup(void)
 	clear_bit(USB_EHCI_LOADED, &usb_hcds_loaded);
 }
 module_exit(ehci_hcd_cleanup);
-

@@ -27,7 +27,7 @@
  * Should you need to contact me, the author, you can do so either by
  * e-mail - mail your message to Paul Stewart <stewart@wetlogic.net>
  */
-
+ 
 #include <linux/poll.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -235,7 +235,6 @@ static int hiddev_fasync(int fd, struct file *file, int on)
 	return fasync_helper(fd, file, on, &list->fasync);
 }
 
-
 /*
  * release file op
  */
@@ -403,7 +402,6 @@ static ssize_t hiddev_read(struct file * file, char __user * buffer, size_t coun
 			mutex_unlock(&list->thread_lock);
 			return retval;
 		}
-
 
 		while (list->head != list->tail &&
 		       retval + event_size <= count) {

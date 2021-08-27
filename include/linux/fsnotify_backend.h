@@ -6,7 +6,7 @@
  *
  *  Copyright (C) 2008 Red Hat, Inc., Eric Paris <eparis@redhat.com>
  */
-
+ 
 #ifndef __LINUX_FSNOTIFY_BACKEND_H
 #define __LINUX_FSNOTIFY_BACKEND_H
 
@@ -362,7 +362,7 @@ static inline void __fsnotify_d_instantiate(struct dentry *dentry, struct inode 
 }
 
 /* called from fsnotify listeners, such as fanotify or dnotify */
-
+ 
 /* get a reference to an existing or create a new group */
 extern struct fsnotify_group *fsnotify_alloc_group(const struct fsnotify_ops *ops);
 /* drop reference on a group from fsnotify_alloc_group */
@@ -389,7 +389,7 @@ extern struct fsnotify_event *fsnotify_peek_notify_event(struct fsnotify_group *
 extern struct fsnotify_event *fsnotify_remove_notify_event(struct fsnotify_group *group);
 
 /* functions used to manipulate the marks attached to inodes */
-
+ 
 /* run all marks associated with a vfsmount and update mnt->mnt_fsnotify_mask */
 extern void fsnotify_recalc_vfsmount_mask(struct vfsmount *mnt);
 /* run all marks associated with an inode and update inode->i_fsnotify_mask */

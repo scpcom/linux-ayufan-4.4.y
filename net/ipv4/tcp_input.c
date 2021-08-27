@@ -63,7 +63,7 @@
  *					engine. Lots of bugs are found.
  *		Pasi Sarolahti:		F-RTO for dealing with spurious RTOs
  */
-
+ 
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -2871,8 +2871,8 @@ static inline void tcp_complete_cwr(struct sock *sk)
 			tp->snd_cwnd = min(tp->snd_cwnd, tp->snd_ssthresh);
 		else /* PRR */
 			tp->snd_cwnd = tp->snd_ssthresh;
-		tp->snd_cwnd_stamp = tcp_time_stamp;
-	}
+			tp->snd_cwnd_stamp = tcp_time_stamp;
+		}
 	tcp_ca_event(sk, CA_EVENT_COMPLETE_CWR);
 }
 
@@ -3239,7 +3239,7 @@ static void tcp_ack_no_tstamp(struct sock *sk, u32 seq_rtt, int flag)
 	 * where the network delay has increased suddenly.
 	 * I.e. Karn's algorithm. (SIGCOMM '87, p5.)
 	 */
-
+	 
 	if (flag & FLAG_RETRANS_DATA_ACKED)
 		return;
 
@@ -4043,7 +4043,7 @@ static inline void tcp_replace_ts_recent(struct tcp_sock *tp, u32 seq)
 		 *
 		 * Not only, also it occurs for expired timestamps.
 		 */
-
+		 
 		if (tcp_paws_check(&tp->rx_opt, 0))
 			tcp_store_ts_recent(tp);
 	}
@@ -5240,7 +5240,7 @@ out:
  * play significant role here.
  */
 static int tcp_validate_incoming(struct sock *sk, struct sk_buff *skb,
-			      const struct tcphdr *th, int syn_inerr)
+				  const struct tcphdr *th, int syn_inerr)
 {
 	const u8 *hash_location;
 	struct tcp_sock *tp = tcp_sk(sk);
@@ -5272,7 +5272,7 @@ static int tcp_validate_incoming(struct sock *sk, struct sk_buff *skb,
 
 	/* Step 2: check RST bit */
 	if (th->rst) {
-		tcp_reset(sk);
+			tcp_reset(sk);
 		goto discard;
 	}
 
@@ -5363,7 +5363,7 @@ int tcp_rcv_established(struct sock *sk, struct sk_buff *skb,
 		 * is automatically equal to th->doff*4 due to pred_flags
 		 * match.
 		 */
-
+			 
 		/* Check timestamp */
 		if (tcp_header_len == sizeof(struct tcphdr) + TCPOLEN_TSTAMP_ALIGNED) {
 			/* No? Slow path! */
@@ -5731,7 +5731,7 @@ discard:
 		 *
 		 *      Otherwise (no ACK) drop the segment and return."
 		 */
-
+		 
 		goto discard_and_undo;
 	}
 
@@ -5791,7 +5791,7 @@ discard:
 	/* "fifth, if neither of the SYN or RST bits is set then
 	 * drop the segment and return."
 	 */
-
+	 
 discard_and_undo:
 	tcp_clear_options(&tp->rx_opt);
 	tp->rx_opt.mss_clamp = saved_clamp;

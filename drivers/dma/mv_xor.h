@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
+ 
 #ifndef MV_XOR_H
 #define MV_XOR_H
 
@@ -59,7 +59,6 @@ struct mv_xor_shared_private {
 	void __iomem	*xor_base;
 	void __iomem	*xor_high_base;
 };
-
 
 /**
  * struct mv_xor_device - internal representation of a XOR device
@@ -181,6 +180,5 @@ struct mv_xor_desc {
 #define MV_XOR_MIN_BYTE_COUNT	(128)
 #define XOR_MAX_BYTE_COUNT	((16 * 1024 * 1024) - 1)
 #define MV_XOR_MAX_BYTE_COUNT	XOR_MAX_BYTE_COUNT
-
 
 #endif

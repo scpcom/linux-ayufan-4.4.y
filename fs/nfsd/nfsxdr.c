@@ -3,7 +3,7 @@
  *
  * Copyright (C) 1995, 1996 Olaf Kirch <okir@monad.swb.de>
  */
-
+ 
 #include "xdr.h"
 #include "auth.h"
 
@@ -18,7 +18,6 @@ static u32	nfs_ftypes[] = {
 	NFREG,  NFBAD,  NFLNK, NFBAD,
 	NFSOCK, NFBAD,  NFLNK, NFBAD,
 };
-
 
 /*
  * XDR functions for basic NFS types

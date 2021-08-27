@@ -12,6 +12,7 @@
  *
  *  This file is included thrice in entry-common.S
  */
+
 /* 0 */		CALL(sys_restart_syscall)
 		CALL(sys_exit)
 		CALL(sys_fork_wrapper)

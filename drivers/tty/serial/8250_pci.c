@@ -335,7 +335,6 @@ static void __devexit pci_ni8420_exit(struct pci_dev *dev)
 	iounmap(p);
 }
 
-
 /* MITE registers */
 #define MITE_IOWBSR1	0xc4
 #define MITE_IOWCR1	0xf4
@@ -2373,7 +2372,6 @@ static struct pciserial_board pci_boards[] __devinitdata = {
 		.first_offset	= 0x1000,
 	},
 
-
 	/*
 	 * EKF addition for i960 Boards form EKF with serial port.
 	 * Max 256 ports.
@@ -3820,7 +3818,6 @@ static struct pci_device_id serial_pci_tbl[] = {
 		PCI_VENDOR_ID_MAINPINE, PCI_DEVICE_ID_MAINPINE_PBRIDGE,
 		PCI_VENDOR_ID_MAINPINE, 0x3D00,
 		0, 0, pbn_b0_8_115200 },
-
 
 	/*
 	 * PA Semi PA6T-1682M on-chip UART

@@ -514,7 +514,7 @@ static int find_cifs_entry(const int xid, struct cifs_tcon *pTcon,
 	loff_t index_to_find = file->f_pos;
 	struct cifsFileInfo *cifsFile = file->private_data;
 	/* check if index in the buffer */
-
+	 
 	if ((cifsFile == NULL) || (ppCurrentEntry == NULL) ||
 	   (num_to_ret == NULL))
 		return -ENOENT;
@@ -708,7 +708,6 @@ static int cifs_filldir(char *find_entry, struct file *file, filldir_t filldir,
 	return rc;
 }
 
-
 int cifs_readdir(struct file *file, void *direntry, filldir_t filldir)
 {
 	int rc = 0;
@@ -756,7 +755,7 @@ int cifs_readdir(struct file *file, void *direntry, filldir_t filldir)
 			is in current search buffer?
 			if it before then restart search
 			if after then keep searching till find it */
-
+		 
 		if (file->private_data == NULL) {
 			rc = -EINVAL;
 			FreeXid(xid);

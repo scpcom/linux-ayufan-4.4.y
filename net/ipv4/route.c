@@ -64,7 +64,7 @@
  *		as published by the Free Software Foundation; either version
  *		2 of the License, or (at your option) any later version.
  */
-
+ 
 #include <linux/module.h>
 #include <asm/uaccess.h>
 #include <asm/system.h>
@@ -243,7 +243,6 @@ const __u8 ip_tos2prio[16] = {
 	TC_PRIO_INTERACTIVE_BULK,
 	ECN_OR_COST(INTERACTIVE_BULK)
 };
-
 
 /*
  * Route cache.
@@ -484,7 +483,6 @@ static const struct file_operations rt_cache_seq_fops = {
 	.release = seq_release_net,
 };
 
-
 static void *rt_cpu_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	int cpu;
@@ -560,7 +558,6 @@ static const struct seq_operations rt_cpu_seq_ops = {
 	.stop   = rt_cpu_seq_stop,
 	.show   = rt_cpu_seq_show,
 };
-
 
 static int rt_cpu_seq_open(struct inode *inode, struct file *file)
 {
@@ -1205,7 +1202,7 @@ restart:
 		 * we set DST_NOCACHE so that dst_release() can free dst without
 		 * waiting a grace period.
 		 */
-
+		 
 		rt->dst.flags |= DST_NOCACHE;
 		if (rt->rt_type == RTN_UNICAST || rt_is_output_route(rt)) {
 			int err = rt_bind_neighbour(rt);
@@ -1814,7 +1811,6 @@ static void ip_rt_update_pmtu(struct dst_entry *dst, u32 mtu)
 	}
 }
 
-
 static void ipv4_validate_peer(struct rtable *rt)
 {
 	if (rt->rt_peer_genid != rt_peer_genid()) {
@@ -1862,7 +1858,6 @@ static void ipv4_dst_destroy(struct dst_entry *dst)
 		inet_putpeer(peer);
 	}
 }
-
 
 static void ipv4_link_failure(struct sk_buff *skb)
 {
@@ -2126,7 +2121,6 @@ e_err:
 	return err;
 }
 
-
 static void ip_handle_martian_source(struct net_device *dev,
 				     struct in_device *in_dev,
 				     struct sk_buff *skb,
@@ -2179,7 +2173,6 @@ static int __mkroute_input(struct sk_buff *skb,
 			       "_slow(). Please, report\n");
 		return -EINVAL;
 	}
-
 
 	err = fib_validate_source(skb, saddr, daddr, tos, FIB_RES_OIF(*res),
 				  in_dev->dev, &spec_dst, &itag);
@@ -2744,7 +2737,6 @@ static struct rtable *ip_route_output_slow(struct net *net, struct flowi4 *fl4)
 		}
 	}
 
-
 	if (fl4->flowi4_oif) {
 		dev_out = dev_get_by_index_rcu(net, fl4->flowi4_oif);
 		rth = ERR_PTR(-ENODEV);
@@ -2800,11 +2792,10 @@ static struct rtable *ip_route_output_slow(struct net *net, struct flowi4 *fl4)
 			   we send packet, ignoring both routing tables
 			   and ifaddr state. --ANK
 
-
 			   We could make it even if oif is unknown,
 			   likely IPv6, but we do not.
 			 */
-
+			 
 			if (fl4->saddr == 0)
 				fl4->saddr = inet_select_addr(dev_out, 0,
 							      RT_SCOPE_LINK);
@@ -2844,7 +2835,6 @@ static struct rtable *ip_route_output_slow(struct net *net, struct flowi4 *fl4)
 
 	dev_out = FIB_RES_DEV(res);
 	fl4->flowi4_oif = dev_out->ifindex;
-
 
 make_route:
 	rth = __mkroute_output(&res, fl4, orig_daddr, orig_saddr, orig_oif,
@@ -3290,7 +3280,7 @@ static ctl_table ipv4_route_table[] = {
 	},
 	{
 		/*  Deprecated. Use gc_min_interval_ms */
-
+		 
 		.procname	= "gc_min_interval",
 		.data		= &ip_rt_gc_min_interval,
 		.maxlen		= sizeof(int),
@@ -3471,7 +3461,6 @@ static __net_init int rt_genid_init(struct net *net)
 static __net_initdata struct pernet_operations rt_genid_ops = {
 	.init = rt_genid_init,
 };
-
 
 #ifdef CONFIG_IP_ROUTE_CLASSID
 struct ip_rt_acct __percpu *ip_rt_acct __read_mostly;

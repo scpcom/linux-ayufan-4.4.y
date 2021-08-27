@@ -32,7 +32,7 @@
  * of the software, even if it has been or is hereafter advised of the
  * possibility of such damages.
  */
-
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/mount.h>
@@ -259,7 +259,7 @@ bl_read_pagelist(struct nfs_read_data *rdata)
 	par->call_ops.rpc_call_done = bl_rpc_do_nothing;
 	par->pnfs_callback = bl_end_par_io_read;
 	/* At this point, we can no longer jump to use_mds */
-
+	 
 	isect = (sector_t) (f_offset >> SECTOR_SHIFT);
 	/* Code assumes extents are page-aligned */
 	for (i = pg_index; i < rdata->npages; i++) {
@@ -521,7 +521,7 @@ bl_write_pagelist(struct nfs_write_data *wdata, int sync)
 	par->call_ops.rpc_call_done = bl_rpc_do_nothing;
 	par->pnfs_callback = bl_end_par_io_write;
 	/* At this point, have to be more careful with error handling */
-
+	 
 	isect = (sector_t) ((offset & (long)PAGE_CACHE_MASK) >> SECTOR_SHIFT);
 	be = bl_find_get_extent(BLK_LSEG2EXT(wdata->lseg), isect, &cow_read);
 	if (!be || !is_writable(be, isect)) {

@@ -271,12 +271,12 @@ void dbg_dump_lprops(struct ubifs_info *c);
 void dbg_dump_lpt_info(struct ubifs_info *c);
 void dbg_dump_leb(const struct ubifs_info *c, int lnum);
 void dbg_dump_sleb(const struct ubifs_info *c,
-		   const struct ubifs_scan_leb *sleb, int offs);
+		     const struct ubifs_scan_leb *sleb, int offs);
 void dbg_dump_znode(const struct ubifs_info *c,
-		    const struct ubifs_znode *znode);
+		      const struct ubifs_znode *znode);
 void dbg_dump_heap(struct ubifs_info *c, struct ubifs_lpt_heap *heap, int cat);
 void dbg_dump_pnode(struct ubifs_info *c, struct ubifs_pnode *pnode,
-		    struct ubifs_nnode *parent, int iip);
+		      struct ubifs_nnode *parent, int iip);
 void dbg_dump_tnc(struct ubifs_info *c);
 void dbg_dump_index(struct ubifs_info *c);
 void dbg_dump_lpt_lebs(const struct ubifs_info *c);

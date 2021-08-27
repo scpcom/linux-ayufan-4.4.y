@@ -117,7 +117,7 @@ extern int __get_user_4(void *);
 		switch (sizeof(*(__p))) {				\
 		case 1:							\
 			__get_user_x(__r2, __p, __e, 1, "lr");		\
-	       		break;						\
+			break;						\
 		case 2:							\
 			__get_user_x(__r2, __p, __e, 2, "r3", "lr");	\
 			break;						\
@@ -384,7 +384,6 @@ do {									\
 	: "+r" (err), "+r" (__pu_addr)				\
 	: "r" (x), "i" (-EFAULT)				\
 	: "cc")
-
 
 #ifdef CONFIG_MMU
 extern unsigned long __must_check __copy_from_user(void *to, const void __user *from, unsigned long n);

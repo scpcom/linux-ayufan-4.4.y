@@ -43,7 +43,6 @@
 #include "super.h"
 #include "ocfs2_trace.h"
 
-
 static int ocfs2_fault(struct vm_area_struct *area, struct vm_fault *vmf)
 {
 	sigset_t oldset;
@@ -189,4 +188,3 @@ out:
 	vma->vm_flags |= VM_CAN_NONLINEAR;
 	return 0;
 }
-

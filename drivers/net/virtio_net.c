@@ -414,7 +414,7 @@ static int add_recvbuf_big(struct virtnet_info *vi, gfp_t gfp)
 	/* chain first in list head */
 	first->private = (unsigned long)list;
 	err = virtqueue_add_buf_gfp(vi->rvq, vi->rx_sg, 0, MAX_SKB_FRAGS + 2,
-				    first, gfp);
+				first, gfp);
 	if (err < 0)
 		give_pages(vi, first);
 
@@ -1120,7 +1120,6 @@ static void __devexit virtnet_remove(struct virtio_device *vdev)
 
 	/* Stop all the virtqueues. */
 	vdev->config->reset(vdev);
-
 
 	unregister_netdev(vi->dev);
 	cancel_delayed_work_sync(&vi->refill);

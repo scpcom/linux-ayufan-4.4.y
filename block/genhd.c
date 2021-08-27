@@ -4,7 +4,7 @@
 /*
  *  gendisk handling
  */
-
+ 
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/genhd.h>
@@ -946,7 +946,6 @@ static const struct file_operations proc_partitions_operations = {
 	.release	= seq_release,
 };
 #endif
-
 
 static struct kobject *base_probe(dev_t devt, int *partno, void *data)
 {

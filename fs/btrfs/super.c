@@ -18,7 +18,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 021110-1307, USA.
  */
-
+ 
 #include <linux/blkdev.h>
 #include <linux/module.h>
 #include <linux/buffer_head.h>
@@ -139,15 +139,15 @@ void __btrfs_std_error(struct btrfs_fs_info *fs_info, const char *function,
 	 * under MS_RDONLY, then it is safe here.
 	 */
 	if (errno == -EROFS && (sb->s_flags & MS_RDONLY))
-		return;
+  		return;
 
 	errstr = btrfs_decode_error(fs_info, errno, nbuf);
 	printk(KERN_CRIT "BTRFS error (device %s) in %s:%d: %s\n",
 		sb->s_id, function, line, errstr);
 	save_error_info(fs_info);
 
-	btrfs_handle_error(fs_info);
-}
+		btrfs_handle_error(fs_info);
+	}
 
 static void btrfs_put_super(struct super_block *sb)
 {
@@ -263,7 +263,7 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			btrfs_set_opt(info->mount_opt, NODATASUM);
 			break;
 		case Opt_nodatacow:
-			printk(KERN_INFO "btrfs: setting nodatacow\n");
+				printk(KERN_INFO "btrfs: setting nodatacow\n");
 			btrfs_set_opt(info->mount_opt, NODATACOW);
 			btrfs_set_opt(info->mount_opt, NODATASUM);
 			break;
@@ -289,10 +289,10 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			if (compress_force) {
 				btrfs_set_opt(info->mount_opt, FORCE_COMPRESS);
 				pr_info("btrfs: force %s compression\n",
-					compress_type);
+						   compress_type);
 			} else
 				pr_info("btrfs: use %s compression\n",
-					compress_type);
+						   compress_type);
 			break;
 		case Opt_ssd:
 			printk(KERN_INFO "btrfs: use ssd allocation scheme\n");
@@ -745,7 +745,7 @@ static int btrfs_test_super(struct super_block *s, void *data)
 
 static int btrfs_set_super(struct super_block *s, void *data)
 {
-	s->s_fs_info = data;
+		s->s_fs_info = data;
 
 	return set_anon_super(s, data);
 }
@@ -838,7 +838,7 @@ static struct dentry *mount_subvol(const char *subvol_name, int flags,
 		return ERR_PTR(-ENOMEM);
 	mnt = vfs_kern_mount(&btrfs_fs_type, flags, device_name,
 			     newargs);
-	kfree(newargs);
+				kfree(newargs);
 	if (IS_ERR(mnt))
 		return ERR_CAST(mnt);
 
@@ -959,7 +959,7 @@ static struct dentry *btrfs_mount(struct file_system_type *fs_type, int flags,
 		if (error) {
 			deactivate_locked_super(s);
 			return ERR_PTR(error);
-		}
+	}
 
 		s->s_flags |= MS_ACTIVE;
 	}
@@ -994,7 +994,7 @@ static int btrfs_remount(struct super_block *sb, int *flags, char *data)
 	if (*flags & MS_RDONLY) {
 		sb->s_flags |= MS_RDONLY;
 
-		ret =  btrfs_commit_super(root);
+		ret = btrfs_commit_super(root);
 		WARN_ON(ret);
 	} else {
 		if (root->fs_info->fs_devices->rw_devices == 0)
@@ -1264,7 +1264,7 @@ static int btrfs_freeze(struct super_block *sb)
 	struct btrfs_root *root = btrfs_sb(sb);
 	mutex_lock(&root->fs_info->transaction_kthread_mutex);
 	mutex_lock(&root->fs_info->cleaner_mutex);
-	return 0;
+			return 0;
 }
 
 static int btrfs_unfreeze(struct super_block *sb)

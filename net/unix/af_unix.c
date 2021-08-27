@@ -801,7 +801,6 @@ fail:
 	return NULL;
 }
 
-
 static int unix_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 {
 	struct sock *sk = sock->sk;
@@ -1279,7 +1278,6 @@ out:
 	return err;
 }
 
-
 static int unix_getname(struct socket *sock, struct sockaddr *uaddr, int *uaddr_len, int peer)
 {
 	struct sock *sk = sock->sk;
@@ -1579,7 +1577,6 @@ out:
 	return err;
 }
 
-
 static int unix_stream_sendmsg(struct kiocb *kiocb, struct socket *sock,
 			       struct msghdr *msg, size_t len)
 {
@@ -1650,7 +1647,6 @@ static int unix_stream_sendmsg(struct kiocb *kiocb, struct socket *sock,
 		 *	succeed. [Alan]
 		 */
 		size = min_t(int, size, skb_tailroom(skb));
-
 
 		/* Only send the fds in the first buffer */
 		err = unix_scm_to_skb(siocb->scm, skb, !fds_sent);
@@ -1864,8 +1860,6 @@ static long unix_stream_data_wait(struct sock *sk, long timeo)
 	unix_state_unlock(sk);
 	return timeo;
 }
-
-
 
 static int unix_stream_recvmsg(struct kiocb *iocb, struct socket *sock,
 			       struct msghdr *msg, size_t size,
@@ -2326,7 +2320,6 @@ static const struct net_proto_family unix_family_ops = {
 	.create = unix_create,
 	.owner	= THIS_MODULE,
 };
-
 
 static int __net_init unix_net_init(struct net *net)
 {

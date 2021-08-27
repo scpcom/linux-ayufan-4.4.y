@@ -38,7 +38,7 @@
 /*
  *	The functions in this file will not compile correctly with gcc 2.4.x
  */
-
+ 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -94,7 +94,6 @@ static int sock_pipe_buf_steal(struct pipe_inode_info *pipe,
 {
 	return 1;
 }
-
 
 /* Pipe buffer operations for a socket. */
 static const struct pipe_buf_operations sock_pipe_buf_ops = {
@@ -419,7 +418,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 	nf_conntrack_put(skb->nfct);
 #endif
 #ifdef NET_SKBUFF_NF_DEFRAG_NEEDED
-	nf_conntrack_put_reasm(skb->nfct_reasm);
+		nf_conntrack_put_reasm(skb->nfct_reasm);
 #endif
 #ifdef CONFIG_BRIDGE_NETFILTER
 	nf_bridge_put(skb->nf_bridge);
@@ -544,7 +543,6 @@ bool skb_recycle_check(struct sk_buff *skb, int skb_size)
 {
 	if (!skb_is_recycleable(skb, skb_size))
 		return false;
-
 	skb_recycle(skb);
 
 	return true;
@@ -710,7 +708,6 @@ int skb_copy_ubufs(struct sk_buff *skb, gfp_t gfp_mask)
 	skb_shinfo(skb)->tx_flags &= ~SKBTX_DEV_ZEROCOPY;
 	return 0;
 }
-
 
 /**
  *	skb_clone	-	duplicate an sk_buff
@@ -1364,7 +1361,7 @@ unsigned char *__pskb_pull_tail(struct sk_buff *skb, int delta)
 				insp = list;
 			} else {
 				/* Eaten partially. */
-
+				 
 				if (skb_shared(list)) {
 					/* Sucks! We need to fork list. :-( */
 					clone = skb_clone(list, GFP_ATOMIC);
@@ -1397,7 +1394,7 @@ unsigned char *__pskb_pull_tail(struct sk_buff *skb, int delta)
 		}
 	}
 	/* Success! Now we may commit changes to skb data. */
-
+	 
 pull_pages:
 	eat = delta;
 	k = 0;
@@ -3053,7 +3050,7 @@ int skb_cow_data(struct sk_buff *skb, int tailbits, struct sk_buff **trailer)
 		 * This should not happen, when stack is tuned to generate
 		 * good frames. OK, on miss we reallocate and reserve even more
 		 * space, 128 bytes is fair. */
-
+		 
 		if (skb_tailroom(skb) < tailbits &&
 		    pskb_expand_head(skb, 0, tailbits-skb_tailroom(skb)+128, GFP_ATOMIC))
 			return -ENOMEM;
@@ -3195,7 +3192,6 @@ void skb_tstamp_tx(struct sk_buff *orig_skb,
 		kfree_skb(skb);
 }
 EXPORT_SYMBOL_GPL(skb_tstamp_tx);
-
 
 /**
  * skb_partial_csum_set - set up and verify partial csum values for packet

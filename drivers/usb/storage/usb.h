@@ -41,7 +41,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #ifndef _USB_H_
 #define _USB_H_
 
@@ -67,7 +67,6 @@ struct us_unusual_dev {
 	__u8  useTransport;
 	int (*initFunction)(struct us_data *);
 };
-
 
 /* Dynamic bitflag definitions (us->dflags): used in set_bit() etc. */
 #define US_FLIDX_URB_ACTIVE	0	/* current_urb is in use    */

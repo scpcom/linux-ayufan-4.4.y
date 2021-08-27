@@ -127,7 +127,7 @@ static inline void arch_spin_unlock(arch_spinlock_t *lock)
 	: "r" (&lock->lock), "r" (0)
 	: "cc");
 
-	dsb_sev();
+		dsb_sev();
 }
 
 /*

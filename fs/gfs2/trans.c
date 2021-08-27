@@ -184,4 +184,3 @@ void gfs2_trans_add_unrevoke(struct gfs2_sbd *sdp, u64 blkno, unsigned int len)
 	}
 	gfs2_log_unlock(sdp);
 }
-

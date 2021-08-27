@@ -8,7 +8,7 @@
  *  Hidden files 1995 by Albert Cahalan <albert@ccs.neu.edu> <adc@coe.neu.edu>
  *  Rewritten for constant inumbers 1999 by Al Viro
  */
-
+ 
 #include <linux/module.h>
 #include <linux/time.h>
 #include <linux/buffer_head.h>
@@ -303,7 +303,7 @@ static int msdos_create(struct inode *dir, struct dentry *dentry, int mode,
 	}
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ts;
 	/* timestamp is already written, so mark_inode_dirty() is unneeded. */
-
+	 
 	d_instantiate(dentry, inode);
 out:
 	unlock_super(sb);
@@ -393,7 +393,7 @@ static int msdos_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	set_nlink(inode, 2);
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ts;
 	/* timestamp is already written, so mark_inode_dirty() is unneeded. */
-
+	 
 	d_instantiate(dentry, inode);
 
 	unlock_super(sb);

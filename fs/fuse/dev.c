@@ -100,17 +100,17 @@ static void fuse_req_init_context(struct fuse_req *req)
 struct fuse_req *fuse_get_req(struct fuse_conn *fc)
 {
 	struct fuse_req *req;
-	sigset_t oldset;
-	int intr;
+		sigset_t oldset;
+		int intr;
 	int err;
 
 	atomic_inc(&fc->num_waiting);
-	block_sigs(&oldset);
+		block_sigs(&oldset);
 	intr = wait_event_interruptible(fc->blocked_waitq, !fc->blocked);
-	restore_sigs(&oldset);
-	err = -EINTR;
-	if (intr)
-		goto out;
+		restore_sigs(&oldset);
+		err = -EINTR;
+		if (intr)
+			goto out;
 
 	err = -ENOTCONN;
 	if (!fc->connected)
@@ -652,6 +652,7 @@ static int fuse_copy_fill(struct fuse_copy_state *cs)
 }
 
 /* Do as much copy to/from userspace buffer as we can */
+
 static int fuse_copy_do(struct fuse_copy_state *cs, void **val, unsigned *size)
 {
 	unsigned ncpy = min(*size, cs->len);

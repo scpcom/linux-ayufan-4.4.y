@@ -865,7 +865,6 @@ static inline void sk_refcnt_debug_release(const struct sock *sk)
 #define sk_refcnt_debug_release(sk) do { } while (0)
 #endif /* SOCK_REFCNT_DEBUG */
 
-
 #ifdef CONFIG_PROC_FS
 /* Called with local bh disabled */
 extern void sock_prot_inuse_add(struct net *net, struct proto *prot, int inc);
@@ -876,7 +875,6 @@ static void inline sock_prot_inuse_add(struct net *net, struct proto *prot,
 {
 }
 #endif
-
 
 /* With per-bucket locks this operation is not-atomic, so that
  * this version is not worse.
@@ -1084,7 +1082,6 @@ static inline void unlock_sock_fast(struct sock *sk, bool slow)
 	else
 		spin_unlock_bh(&sk->sk_lock.slock);
 }
-
 
 extern struct sock		*sk_alloc(struct net *net, int family,
 					  gfp_t priority,

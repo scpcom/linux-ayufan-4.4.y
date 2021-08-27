@@ -9,7 +9,7 @@
  * (C) 2003 Ardis Technologies <roman@ardistech.com>
  *
  */
-
+ 
 #ifndef _LINUX_HFSPLUS_FS_H
 #define _LINUX_HFSPLUS_FS_H
 
@@ -175,7 +175,6 @@ static inline struct hfsplus_sb_info *HFSPLUS_SB(struct super_block *sb)
 {
 	return sb->s_fs_info;
 }
-
 
 struct hfsplus_inode_info {
 	atomic_t opencnt;

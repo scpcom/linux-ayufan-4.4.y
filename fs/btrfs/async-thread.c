@@ -18,7 +18,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 021110-1307, USA.
  */
-
+ 
 #include <linux/kthread.h>
 #include <linux/slab.h>
 #include <linux/list.h>
@@ -95,7 +95,7 @@ static void start_new_worker_func(struct btrfs_work *work)
 	start = container_of(work, struct worker_start, work);
 	__btrfs_start_workers(start->queue);
 	kfree(start);
-}
+	}
 
 /*
  * helper function to move a thread onto the idle list after it
@@ -157,7 +157,7 @@ static void check_pending_worker_creates(struct btrfs_worker_thread *worker)
 
 	spin_lock_irqsave(&workers->lock, flags);
 	if (!workers->atomic_start_pending)
-		goto out;
+		goto  out;
 
 	workers->atomic_start_pending = 0;
 	if (workers->num_workers + workers->num_workers_starting >=
@@ -291,7 +291,7 @@ out_fail:
 	return work;
 }
 
-/*
+	/*
  * main loop for servicing work items
  */
 static int worker_loop(void *arg)
@@ -318,7 +318,7 @@ again:
 
 			work->worker = worker;
 
-			work->func(work);
+	work->func(work);
 
 			atomic_dec(&worker->num_pending);
 			/*
@@ -329,7 +329,7 @@ again:
 
 			check_pending_worker_creates(worker);
 			cond_resched();
-		}
+	}
 
 		spin_lock_irq(&worker->lock);
 		check_idle_worker(worker);
@@ -376,7 +376,7 @@ again:
 					spin_unlock_irq(&worker->lock);
 					set_current_state(TASK_RUNNING);
 					goto again;
-				}
+}
 
 				/*
 				 * this makes sure we get a wakeup when someone
@@ -479,8 +479,8 @@ static int __btrfs_start_workers(struct btrfs_workers *workers)
 	atomic_set(&worker->refs, 1);
 	worker->workers = workers;
 	worker->task = kthread_run(worker_loop, worker,
-				   "btrfs-%s-%d", workers->name,
-				   workers->num_workers + 1);
+				      "btrfs-%s-%d", workers->name,
+				      workers->num_workers + 1);
 	if (IS_ERR(worker->task)) {
 		ret = PTR_ERR(worker->task);
 		kfree(worker);
@@ -500,7 +500,7 @@ fail:
 	workers->num_workers_starting--;
 	spin_unlock_irq(&workers->lock);
 	return ret;
-}
+	}
 
 int btrfs_start_workers(struct btrfs_workers *workers)
 {
@@ -535,7 +535,7 @@ static struct btrfs_worker_thread *next_worker(struct btrfs_workers *workers)
 		worker = list_entry(next, struct btrfs_worker_thread,
 				    worker_list);
 		return worker;
-	}
+}
 	if (enforce_min || list_empty(&workers->worker_list))
 		return NULL;
 
@@ -586,8 +586,8 @@ again:
 			if (ret)
 				goto fallback;
 			goto again;
-		}
 	}
+}
 	goto found;
 
 fallback:

@@ -48,7 +48,7 @@ struct irq_desc {
 	 * overlay of irq_data.
 	 */
 	union {
-	struct irq_data		irq_data;
+		struct irq_data		irq_data;
 		struct {
 			unsigned int		irq;
 			unsigned int		node;

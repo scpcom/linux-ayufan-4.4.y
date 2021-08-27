@@ -27,7 +27,7 @@
  * This code allows the net stack to make use of a DMA engine for
  * skb to iovec copies.
  */
-
+ 
 #include <linux/dmaengine.h>
 #include <linux/pagemap.h>
 #include <linux/slab.h>
@@ -83,42 +83,42 @@ struct dma_pinned_list *dma_pin_iovec_pages(struct iovec *iov, size_t len)
 
 	local_list->nr_iovecs = 0;
 
-	for (i = 0; i < nr_iovecs; i++) {
-		struct dma_page_list *page_list = &local_list->page_list[i];
+		for (i = 0; i < nr_iovecs; i++) {
+			struct dma_page_list *page_list = &local_list->page_list[i];
 
-		len -= iov[i].iov_len;
+			len -= iov[i].iov_len;
 
-		if (!access_ok(VERIFY_WRITE, iov[i].iov_base, iov[i].iov_len))
-			goto unpin;
+			if (!access_ok(VERIFY_WRITE, iov[i].iov_base, iov[i].iov_len))
+				goto unpin;
 
-		page_list->nr_pages = num_pages_spanned(&iov[i]);
-		page_list->base_address = iov[i].iov_base;
+			page_list->nr_pages = num_pages_spanned(&iov[i]);
+			page_list->base_address = iov[i].iov_base;
 
-		page_list->pages = pages;
-		pages += page_list->nr_pages;
+			page_list->pages = pages;
+			pages += page_list->nr_pages;
 
-		/* pin pages down */
-		down_read(&current->mm->mmap_sem);
+			/* pin pages down */
+			down_read(&current->mm->mmap_sem);
 #ifdef CONFIG_MV_XOR_NET_DMA
 		ret = get_netdma_pages(
 #else
-		ret = get_user_pages(
+			ret = get_user_pages(
 #endif
-			current,
-			current->mm,
-			(unsigned long) iov[i].iov_base,
-			page_list->nr_pages,
-			1,	/* write */
-			0,	/* force */
-			page_list->pages,
-			NULL);
-		up_read(&current->mm->mmap_sem);
+					current,
+					current->mm,
+					(unsigned long) iov[i].iov_base,
+					page_list->nr_pages,
+					1,	/* write */
+					0,	/* force */
+					page_list->pages,
+					NULL);
+			up_read(&current->mm->mmap_sem);
 
-		if (ret != page_list->nr_pages)
-			goto unpin;
+			if (ret != page_list->nr_pages)
+				goto unpin;
 
-		local_list->nr_iovecs = i + 1;
-	}
+			local_list->nr_iovecs = i + 1;
+		}
 
 	return local_list;
 
@@ -135,13 +135,13 @@ void dma_unpin_iovec_pages(struct dma_pinned_list *pinned_list)
 	if (!pinned_list)
 		return;
 
-	for (i = 0; i < pinned_list->nr_iovecs; i++) {
-		struct dma_page_list *page_list = &pinned_list->page_list[i];
-		for (j = 0; j < page_list->nr_pages; j++) {
-			set_page_dirty_lock(page_list->pages[j]);
-			page_cache_release(page_list->pages[j]);
+		for (i = 0; i < pinned_list->nr_iovecs; i++) {
+			struct dma_page_list *page_list = &pinned_list->page_list[i];
+			for (j = 0; j < page_list->nr_pages; j++) {
+				set_page_dirty_lock(page_list->pages[j]);
+				page_cache_release(page_list->pages[j]);
+			}
 		}
-	}
 
 	kfree(pinned_list);
 }

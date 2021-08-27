@@ -1729,7 +1729,6 @@ static void nfs4_state_manager(struct nfs_client *clp)
 			continue;
 		}
 
-
 		nfs4_clear_state_manager_bit(clp);
 		/* Did we race with an attempt to give us more work? */
 		if (clp->cl_state == 0)

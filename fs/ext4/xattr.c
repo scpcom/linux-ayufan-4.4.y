@@ -52,7 +52,7 @@
  * count can change. Multiple writers to the same block are synchronized
  * by the buffer lock.
  */
-
+ 
 #include <linux/init.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
@@ -1376,8 +1376,6 @@ cleanup:
 	up_write(&EXT4_I(inode)->xattr_sem);
 	return error;
 }
-
-
 
 /*
  * ext4_xattr_delete_inode()

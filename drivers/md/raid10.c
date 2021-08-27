@@ -20,7 +20,7 @@
  * (for example /usr/src/linux/COPYING); if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #include <linux/slab.h>
 #include <linux/delay.h>
 #include <linux/blkdev.h>
@@ -326,7 +326,6 @@ static void raid10_end_read_request(struct bio *bio, int error)
 	int slot, dev;
 	struct r10conf *conf = r10_bio->mddev->private;
 
-
 	slot = r10_bio->read_slot;
 	dev = r10_bio->devs[slot].devnum;
 	/*
@@ -473,7 +472,6 @@ static void raid10_end_write_request(struct bio *bio, int error)
 	if (dec_rdev)
 		rdev_dec_pending(conf->mirrors[dev].rdev, conf->mddev);
 }
-
 
 /*
  * RAID10 layout manager
@@ -787,7 +785,7 @@ static void flush_pending_writes(struct r10conf *conf)
 		while (bio) { /* submit pending writes */
 			struct bio *next = bio->bi_next;
 			bio->bi_next = NULL;
-			generic_make_request(bio);
+				generic_make_request(bio);
 			bio = next;
 		}
 	} else
@@ -852,7 +850,7 @@ static void wait_barrier(struct r10conf *conf)
 		conf->nr_waiting++;
 		wait_event_lock_irq(conf->wait_barrier, !conf->barrier,
 				    conf->resync_lock,
-				    );
+			);
 		conf->nr_waiting--;
 	}
 	conf->nr_pending++;
@@ -1617,7 +1615,6 @@ static int raid10_spare_active(struct mddev *mddev)
 	return count;
 }
 
-
 static int raid10_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 {
 	struct r10conf *conf = mddev->private;
@@ -1727,7 +1724,6 @@ abort:
 	print_conf(conf);
 	return err;
 }
-
 
 static void end_sync_read(struct bio *bio, int error)
 {
@@ -2077,7 +2073,6 @@ static void recovery_request_write(struct mddev *mddev, struct r10bio *r10_bio)
 	generic_make_request(wbio);
 }
 
-
 /*
  * Used by fix_read_error() to decay the per rdev read_errors.
  * We halve the read error count for every hour that has elapsed
@@ -2364,7 +2359,7 @@ static int narrow_write_error(struct r10bio *r10_bio, int i)
 	 *
 	 * We currently own a reference to the rdev.
 	 */
-
+	 
 	int block_sectors;
 	sector_t sector;
 	int sectors;
@@ -2470,7 +2465,7 @@ read_more:
 	rdev = conf->mirrors[mirror].rdev;
 	printk_ratelimited(
 		KERN_ERR
-		"md/raid10:%s: %s: redirecting"
+		"md/raid10:%s: %s: redirecting "
 		"sector %llu to another mirror\n",
 		mdname(mddev),
 		bdevname(rdev->bdev, b),
@@ -2643,7 +2638,6 @@ static void raid10d(struct mddev *mddev)
 	}
 	blk_finish_plug(&plug);
 }
-
 
 static int init_resync(struct r10conf *conf)
 {
@@ -2913,7 +2907,7 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
 				atomic_inc(&conf->mirrors[d].rdev->nr_pending);
 				atomic_inc(&r10_bio->remaining);
 				/* and we write to 'i' */
-
+				 
 				for (k=0; k<conf->copies; k++)
 					if (r10_bio->devs[k].devnum == i)
 						break;
@@ -3156,7 +3150,6 @@ raid10_size(struct mddev *mddev, sector_t sectors, int raid_disks)
 	return size << conf->chunk_shift;
 }
 
-
 static struct r10conf *setup_conf(struct mddev *mddev)
 {
 	struct r10conf *conf = NULL;
@@ -3197,7 +3190,6 @@ static struct r10conf *setup_conf(struct mddev *mddev)
 	if (!conf->tmppage)
 		goto out;
 
-
 	conf->raid_disks = mddev->raid_disks;
 	conf->near_copies = nc;
 	conf->far_copies = fc;
@@ -3232,7 +3224,6 @@ static struct r10conf *setup_conf(struct mddev *mddev)
 	else
 		sector_div(stride, fc);
 	conf->stride = stride << conf->chunk_shift;
-
 
 	spin_lock_init(&conf->device_lock);
 	INIT_LIST_HEAD(&conf->retry_list);

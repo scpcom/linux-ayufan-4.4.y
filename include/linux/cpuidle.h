@@ -10,7 +10,7 @@
  *
  * This code is licenced under the GPL.
  */
-
+ 
 #ifndef _LINUX_CPUIDLE_H
 #define _LINUX_CPUIDLE_H
 
@@ -27,7 +27,6 @@ struct module;
 
 struct cpuidle_device;
 struct cpuidle_driver;
-
 
 /****************************
  * CPUIDLE DEVICE INTERFACE *
@@ -114,7 +113,6 @@ static inline int cpuidle_get_last_residency(struct cpuidle_device *dev)
 {
 	return dev->last_residency;
 }
-
 
 /****************************
  * CPUIDLE DRIVER INTERFACE *

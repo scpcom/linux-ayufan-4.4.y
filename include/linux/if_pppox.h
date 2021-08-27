@@ -15,7 +15,7 @@
  *		2 of the License, or (at your option) any later version.
  *
  */
-
+ 
 #ifndef __LINUX_IF_PPPOX_H
 #define __LINUX_IF_PPPOX_H
 
@@ -106,7 +106,7 @@ struct sockaddr_pppol2tpv3 {
 #define PPPOEIOCSFWD	_IOW(0xB1 ,0, size_t)
 #define PPPOEIOCDFWD	_IO(0xB1 ,1)
 /*#define PPPOEIOCGFWD	_IOWR(0xB1,2, size_t)*/
-
+ 
 /* Codes to identify message types */
 #define PADI_CODE	0x09
 #define PADO_CODE	0x07

@@ -7,7 +7,7 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  *  Copyright (C) 2001  Andrea Arcangeli <andrea@suse.de> SuSE
  */
-
+ 
 #include <linux/init.h>
 #include <linux/mm.h>
 #include <linux/fcntl.h>
@@ -1205,7 +1205,7 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
 			 */
 			if (bdev->bd_invalidated) {
 				if (!ret)
-				rescan_partitions(disk, bdev);
+					rescan_partitions(disk, bdev);
 				else if (ret == -ENOMEDIUM)
 					invalidate_partitions(disk, bdev);
 			}
@@ -1240,7 +1240,7 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
 			/* the same as first opener case, read comment there */
 			if (bdev->bd_invalidated) {
 				if (!ret)
-				rescan_partitions(bdev->bd_disk, bdev);
+					rescan_partitions(bdev->bd_disk, bdev);
 				else if (ret == -ENOMEDIUM)
 					invalidate_partitions(bdev->bd_disk, bdev);
 			}

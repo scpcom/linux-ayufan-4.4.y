@@ -23,7 +23,7 @@
  *  - Only I2C is support. Not SPI
  *  - master mode *NOT* supported
  */
-
+ 
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/slab.h>

@@ -119,7 +119,7 @@ extern struct buffer_head *isofs_bread(struct inode *, sector_t);
 extern int isofs_get_blocks(struct inode *, sector_t, struct buffer_head **, unsigned long);
 
 extern struct inode *isofs_iget(struct super_block *sb,
-                                unsigned long block,
+			   unsigned long block,
                                 unsigned long offset);
 
 /* Because the inode number is no longer relevant to finding the

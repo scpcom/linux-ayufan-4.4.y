@@ -8,7 +8,7 @@
   This program can be distributed under the terms of the GNU GPL.
   See the file COPYING.
 */
-
+ 
 #include "fuse_i.h"
 
 #include <linux/pagemap.h>
@@ -200,8 +200,8 @@ void fuse_change_attributes(struct inode *inode, struct fuse_attr *attr,
 	spin_unlock(&fc->lock);
 
 	if (S_ISREG(inode->i_mode) && oldsize != attr->size) {
-		truncate_pagecache(inode, oldsize, attr->size);
-		invalidate_inode_pages2(inode->i_mapping);
+			truncate_pagecache(inode, oldsize, attr->size);
+			invalidate_inode_pages2(inode->i_mapping);
 	}
 }
 

@@ -75,7 +75,7 @@
  *     lists within a namespace use the namespace lock.
  * FIXME: move profile lists to using rcu_lists
  */
-
+ 
 #include <linux/slab.h>
 #include <linux/spinlock.h>
 #include <linux/string.h>
@@ -91,7 +91,6 @@
 #include "include/policy_unpack.h"
 #include "include/resource.h"
 #include "include/sid.h"
-
 
 /* root profile namespace */
 struct aa_namespace *root_ns;
@@ -222,7 +221,7 @@ static struct aa_policy *__policy_strn_find(struct list_head *head,
 /*
  * Routines for AppArmor namespaces
  */
-
+ 
 static const char *hidden_ns_name = "---";
 /**
  * aa_ns_visible - test if @view is visible from @curr
@@ -331,7 +330,7 @@ static void free_namespace(struct aa_namespace *ns)
 	aa_put_namespace(ns->parent);
 
 	if (ns->unconfined && ns->unconfined->ns == ns)
-		ns->unconfined->ns = NULL;
+	ns->unconfined->ns = NULL;
 
 	aa_put_profile(ns->unconfined);
 	kzfree(ns);
@@ -422,14 +421,14 @@ static struct aa_namespace *aa_prepare_namespace(const char *name)
 			new_ns->parent = aa_get_namespace(root);
 
 			list_add(&new_ns->base.list, &root->sub_ns);
-			/* add list ref */
+		/* add list ref */
 			ns = aa_get_namespace(new_ns);
 		} else {
 			/* raced so free the new one */
 			free_namespace(new_ns);
 			/* get reference on namespace */
-			aa_get_namespace(ns);
-		}
+		aa_get_namespace(ns);
+	}
 	}
 out:
 	write_unlock(&root->lock);
@@ -472,7 +471,7 @@ static void __list_remove_profile(struct aa_profile *profile)
 	list_del_init(&profile->base.list);
 	if (!(profile->flags & PFLAG_NO_LIST_REF))
 		/* release list reference */
-		aa_put_profile(profile);
+	aa_put_profile(profile);
 }
 
 /**
@@ -1047,7 +1046,7 @@ ssize_t aa_replace_profiles(void *udata, size_t size, bool noreplace)
 		info = "parent does not exist";
 		error = -ENOENT;
 		goto audit;
-	}
+		}
 
 	old_profile = __find_child(&policy->profiles, new_profile->base.name);
 	/* released below */
@@ -1062,7 +1061,7 @@ ssize_t aa_replace_profiles(void *udata, size_t size, bool noreplace)
 		if (!rename_profile) {
 			info = "profile to rename does not exist";
 			name = new_profile->rename;
-			error = -ENOENT;
+				error = -ENOENT;
 			goto audit;
 		}
 	}
@@ -1142,13 +1141,13 @@ ssize_t aa_remove_profiles(char *fqname, size_t size)
 		char *ns_name;
 		name = aa_split_fqname(fqname, &ns_name);
 		if (ns_name) {
-			/* released below */
-			ns = aa_find_namespace(root, ns_name);
-			if (!ns) {
-				info = "namespace does not exist";
-				error = -ENOENT;
-				goto fail;
-			}
+		/* released below */
+		ns = aa_find_namespace(root, ns_name);
+		if (!ns) {
+			info = "namespace does not exist";
+			error = -ENOENT;
+			goto fail;
+		}
 		}
 	} else
 		/* released below */

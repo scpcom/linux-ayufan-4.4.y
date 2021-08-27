@@ -533,7 +533,6 @@ static void kvm_free_physmem_slot(struct kvm_memory_slot *free,
 	if (!dont || free->dirty_bitmap != dont->dirty_bitmap)
 		kvm_destroy_dirty_bitmap(free);
 
-
 	for (i = 0; i < KVM_NR_PAGE_SIZES - 1; ++i) {
 		if (!dont || free->lpage_info[i] != dont->lpage_info[i]) {
 			vfree(free->lpage_info[i]);
@@ -594,7 +593,6 @@ void kvm_put_kvm(struct kvm *kvm)
 		kvm_destroy_vm(kvm);
 }
 EXPORT_SYMBOL_GPL(kvm_put_kvm);
-
 
 static int kvm_vm_release(struct inode *inode, struct file *filp)
 {
@@ -1736,7 +1734,6 @@ static long kvm_vcpu_ioctl(struct file *filp,
 		return kvm_arch_vcpu_ioctl(filp, ioctl, arg);
 #endif
 
-
 	vcpu_load(vcpu);
 	switch (ioctl) {
 	case KVM_RUN:
@@ -2359,7 +2356,6 @@ static int kvm_cpu_hotplug(struct notifier_block *notifier, unsigned long val,
 	}
 	return NOTIFY_OK;
 }
-
 
 asmlinkage void kvm_spurious_fault(void)
 {

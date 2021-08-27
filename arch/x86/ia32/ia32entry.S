@@ -846,12 +846,12 @@ ia32_sys_call_table:
 	.quad compat_sys_recvmmsg
 	.quad sys_fanotify_init
 	.quad sys32_fanotify_mark
-	.quad sys_prlimit64		/* 340 */
+	.quad sys_prlimit64			/* 340 */
 	.quad sys_name_to_handle_at
 	.quad compat_sys_open_by_handle_at
 	.quad compat_sys_clock_adjtime
 	.quad sys_syncfs
-	.quad compat_sys_sendmmsg	/* 345 */
+	.quad compat_sys_sendmmsg /* 345 */
 	.quad sys_setns
 	.quad compat_sys_process_vm_readv
 	.quad compat_sys_process_vm_writev

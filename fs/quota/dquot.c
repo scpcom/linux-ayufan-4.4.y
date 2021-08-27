@@ -55,7 +55,7 @@
  *
  * (C) Copyright 1994 - 1997 Marco van Wieringen 
  */
-
+ 
 #include <linux/errno.h>
 #include <linux/kernel.h>
 #include <linux/fs.h>
@@ -325,7 +325,7 @@ static inline void remove_inuse(struct dquot *dquot)
 /*
  * End of list functions needing dq_list_lock
  */
-
+ 
 static void wait_on_dquot(struct dquot *dquot)
 {
 	mutex_lock(&dquot->dq_lock);

@@ -240,7 +240,7 @@ struct vm_area_struct {
 	struct list_head anon_vma_chain; /* Serialized by mmap_sem &
 					  * page_table_lock */
 	struct anon_vma *anon_vma;	/* Serialized by page_table_lock */
-
+	
 	/* Function pointers to deal with this struct. */
 	const struct vm_operations_struct *vm_ops;
 
@@ -315,7 +315,6 @@ struct mm_struct {
 						 * together off init_mm.mmlist, and are protected
 						 * by mmlist_lock
 						 */
-
 
 	unsigned long hiwater_rss;	/* High-watermark of RSS usage */
 	unsigned long hiwater_vm;	/* High-water virtual memory usage */

@@ -26,7 +26,6 @@
 #include "include/path.h"
 #include "include/policy.h"
 
-
 /* modified from dcache.c */
 static int prepend(char **buffer, int buflen, const char *str, int namelen)
 {
@@ -94,7 +93,7 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 		connected = 0;
 	}
 
-	res = d_absolute_path(path, buf, buflen);
+		res = d_absolute_path(path, buf, buflen);
 
 	*name = res;
 	/* handle error conditions - and still allow a partial path to

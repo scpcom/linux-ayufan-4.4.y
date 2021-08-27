@@ -256,7 +256,6 @@ static void enqueue_first(irda_queue_t **queue, irda_queue_t* element)
 	}
 }
 
-
 /*
  * Function dequeue (queue)
  *
@@ -376,7 +375,6 @@ hashbin_t *hashbin_new(int type)
 	return hashbin;
 }
 EXPORT_SYMBOL(hashbin_new);
-
 
 /*
  * Function hashbin_delete (hashbin, free_func)
@@ -544,7 +542,6 @@ void *hashbin_remove_first( hashbin_t *hashbin)
 	return entry;
 }
 
-
 /*
  *  Function hashbin_remove (hashbin, hashv, name)
  *
@@ -630,7 +627,6 @@ void* hashbin_remove( hashbin_t* hashbin, long hashv, const char* name)
 	if ( hashbin->hb_type & HB_LOCK ) {
 		spin_unlock_irqrestore(&hashbin->hb_spinlock, flags);
 	} /* Default is no-lock  */
-
 
 	/* Return */
 	if ( found )

@@ -225,7 +225,6 @@ static int crypto_nivaead_report(struct sk_buff *skb, struct crypto_alg *alg)
 }
 #endif
 
-
 static void crypto_nivaead_show(struct seq_file *m, struct crypto_alg *alg)
 	__attribute__ ((unused));
 static void crypto_nivaead_show(struct seq_file *m, struct crypto_alg *alg)

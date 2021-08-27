@@ -46,7 +46,7 @@ static int __inode_info(u64 inum, u64 ioff, u8 key_type,
 
 	ret = btrfs_search_slot(NULL, fs_root, &key, path, 0, 0);
 	if (ret < 0)
-		return ret;
+	return ret;
 
 	eb = path->nodes[0];
 	if (ret && path->slots[0] >= btrfs_header_nritems(eb)) {
@@ -82,7 +82,7 @@ static int inode_ref_info(u64 inum, u64 ioff, struct btrfs_root *fs_root,
 				found_key);
 }
 
-/*
+			/*
  * this iterates to turn a btrfs_inode_ref into a full filesystem path. elements
  * of the path are separated by '/' and the path is guaranteed to be
  * 0-terminated. the path is only given within the current file system.
@@ -98,8 +98,8 @@ static int inode_ref_info(u64 inum, u64 ioff, struct btrfs_root *fs_root,
  */
 static char *iref_to_path(struct btrfs_root *fs_root, struct btrfs_path *path,
 				struct btrfs_inode_ref *iref,
-				struct extent_buffer *eb_in, u64 parent,
-				char *dest, u32 size)
+			struct extent_buffer *eb_in, u64 parent,
+			char *dest, u32 size)
 {
 	u32 len;
 	int slot;
@@ -166,7 +166,7 @@ int extent_from_logical(struct btrfs_fs_info *fs_info, u64 logical,
 	struct btrfs_extent_item *ei;
 	struct btrfs_key key;
 
-	key.type = BTRFS_EXTENT_ITEM_KEY;
+		key.type = BTRFS_EXTENT_ITEM_KEY;
 	key.objectid = logical;
 	key.offset = (u64)-1;
 
@@ -191,7 +191,7 @@ int extent_from_logical(struct btrfs_fs_info *fs_info, u64 logical,
 	ei = btrfs_item_ptr(eb, path->slots[0], struct btrfs_extent_item);
 	flags = btrfs_extent_flags(eb, ei);
 
-	if (flags & BTRFS_EXTENT_FLAG_TREE_BLOCK)
+		if (flags & BTRFS_EXTENT_FLAG_TREE_BLOCK)
 		return BTRFS_EXTENT_FLAG_TREE_BLOCK;
 	if (flags & BTRFS_EXTENT_FLAG_DATA)
 		return BTRFS_EXTENT_FLAG_DATA;
@@ -442,7 +442,7 @@ static int __iter_shared_inline_ref(struct btrfs_fs_info *fs_info,
 		disk_byte = btrfs_file_extent_disk_bytenr(eb, fi);
 		if (disk_byte != orig_extent_item_objectid) {
 			if (found)
-				break;
+			break;
 			else
 				continue;
 		}
@@ -511,7 +511,7 @@ int iterate_extent_inodes(struct btrfs_fs_info *fs_info,
 		if (last < 0) {
 			ret = last;
 			break;
-		}
+	}
 
 		if (type == BTRFS_EXTENT_DATA_REF_KEY) {
 			dref = (struct btrfs_extent_data_ref *)(&eiref->offset);
@@ -604,8 +604,8 @@ int iterate_inodes_from_logical(u64 logical, struct btrfs_fs_info *fs_info,
 }
 
 static int iterate_irefs(u64 inum, struct btrfs_root *fs_root,
-				struct btrfs_path *path,
-				iterate_irefs_t *iterate, void *ctx)
+			      struct btrfs_path *path,
+			      iterate_irefs_t *iterate, void *ctx)
 {
 	int ret;
 	int slot;
@@ -621,7 +621,7 @@ static int iterate_irefs(u64 inum, struct btrfs_root *fs_root,
 
 	while (1) {
 		ret = inode_ref_info(inum, parent ? parent+1 : 0, fs_root, path,
-					&found_key);
+				     &found_key);
 		if (ret < 0)
 			break;
 		if (ret) {
@@ -644,10 +644,10 @@ static int iterate_irefs(u64 inum, struct btrfs_root *fs_root,
 			name_len = btrfs_inode_ref_name_len(eb, iref);
 			/* path must be released before calling iterate()! */
 			ret = iterate(parent, iref, eb, ctx);
-			if (ret) {
+		if (ret) {
 				free_extent_buffer(eb);
-				break;
-			}
+			break;
+		}
 			len = sizeof(*iref) + name_len;
 			iref = (struct btrfs_inode_ref *)((char *)iref + len);
 		}
@@ -664,7 +664,7 @@ static int iterate_irefs(u64 inum, struct btrfs_root *fs_root,
  * returns <0 in case of an error
  */
 static int inode_to_path(u64 inum, struct btrfs_inode_ref *iref,
-				struct extent_buffer *eb, void *ctx)
+			 struct extent_buffer *eb, void *ctx)
 {
 	struct inode_fs_paths *ipath = ctx;
 	char *fspath;
@@ -708,7 +708,7 @@ static int inode_to_path(u64 inum, struct btrfs_inode_ref *iref,
 int paths_from_inode(u64 inum, struct inode_fs_paths *ipath)
 {
 	return iterate_irefs(inum, ipath->fs_root, ipath->btrfs_path,
-				inode_to_path, ipath);
+			     inode_to_path, ipath);
 }
 
 /*

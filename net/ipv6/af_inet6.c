@@ -20,8 +20,7 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  */
-
-
+ 
 #include <linux/module.h>
 #include <linux/capability.h>
 #include <linux/errno.h>
@@ -254,7 +253,6 @@ out_rcu_unlock:
 	rcu_read_unlock();
 	goto out;
 }
-
 
 /* bind for INET6 API */
 int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
@@ -1114,7 +1112,6 @@ static int __init inet6_init(void)
 	if (err)
 		goto out_unregister_udplite_proto;
 
-
 	/* We MUST register RAW sockets before we create the ICMP6,
 	 * IGMP6, or NDISC control sockets.
 	 */
@@ -1140,7 +1137,7 @@ static int __init inet6_init(void)
 	 *	in a host available by both INET and INET6 APIs and
 	 *	able to communicate via both network protocols.
 	 */
-
+	 
 	err = register_pernet_subsys(&inet6_net_ops);
 	if (err)
 		goto register_pernet_fail;

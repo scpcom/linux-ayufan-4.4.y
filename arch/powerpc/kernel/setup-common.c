@@ -9,7 +9,7 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  */
-
+ 
 #undef DEBUG
 
 #include <linux/export.h>
@@ -199,7 +199,6 @@ void machine_halt(void)
 	local_irq_disable();
 	while (1) ;
 }
-
 
 #ifdef CONFIG_TAU
 extern u32 cpu_temp(unsigned long cpu);
@@ -442,7 +441,6 @@ static void __init cpu_init_thread_core_maps(int tpc)
 	       tpc, tpc > 1 ? "s" : "");
 	printk(KERN_DEBUG " (thread shift is %d)\n", threads_shift);
 }
-
 
 /**
  * setup_cpu_maps - initialize the following cpu maps:
@@ -704,7 +702,7 @@ void __init setup_panic(void)
  * will eventually result in DMA failures, we print * and error and call
  * BUG() in that case.
  */
-
+ 
 #ifdef CONFIG_NOT_COHERENT_CACHE
 #define KERNEL_COHERENCY	0
 #else

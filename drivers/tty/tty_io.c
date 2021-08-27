@@ -66,7 +66,7 @@
  * alloc_tty_struct() always uses kmalloc()
  *			 -- Andrew Morton <andrewm@uow.edu.eu> 17Mar01
  */
-
+ 
 #include <linux/types.h>
 #include <linux/major.h>
 #include <linux/errno.h>
@@ -247,7 +247,6 @@ void tty_del_file(struct file *file)
 	spin_unlock(&tty_files_lock);
 	tty_free_file(file);
 }
-
 
 #define TTY_NUMBER(tty) ((tty)->index + (tty)->driver->name_base)
 
@@ -569,7 +568,6 @@ void __tty_hangup(struct tty_struct *tty)
 	if (!tty)
 		return;
 
-
 	spin_lock(&redirect_lock);
 	if (redirect && file_tty(redirect) == tty) {
 		f = redirect;
@@ -724,7 +722,6 @@ void tty_vhangup(struct tty_struct *tty)
 
 EXPORT_SYMBOL(tty_vhangup);
 
-
 /**
  *	tty_vhangup_self	-	process vhangup for own ctty
  *
@@ -866,7 +863,6 @@ void no_tty(void)
 	tty_unlock();
 	proc_clear_tty(tsk);
 }
-
 
 /**
  *	stop_tty	-	propagate flow control
@@ -1122,7 +1118,6 @@ void tty_write_message(struct tty_struct *tty, char *msg)
 	}
 	return;
 }
-
 
 /**
  *	tty_write		-	write method for tty device file
@@ -1692,7 +1687,7 @@ int tty_release(struct inode *inode, struct file *filp)
 	while (1) {
 		/* Guard against races with tty->count changes elsewhere and
 		   opens on /dev/tty */
-
+		 
 		mutex_lock(&tty_mutex);
 		tty_lock();
 		tty_closing = tty->count <= 1;
@@ -1979,7 +1974,6 @@ got_driver:
 	}
 	tty_unlock();
 
-
 	mutex_lock(&tty_mutex);
 	tty_lock();
 	spin_lock_irq(&current->sighand->siglock);
@@ -1993,8 +1987,6 @@ got_driver:
 	mutex_unlock(&tty_mutex);
 	return 0;
 }
-
-
 
 /**
  *	tty_poll	-	check tty status
@@ -2885,7 +2877,6 @@ static struct device *tty_get_device(struct tty_struct *tty)
 	return class_find_device(tty_class, NULL, &devt, dev_match_devt);
 }
 
-
 /**
  *	initialize_tty_struct
  *	@tty: tty to initialize
@@ -3408,4 +3399,3 @@ int __init tty_init(void)
 #endif
 	return 0;
 }
-

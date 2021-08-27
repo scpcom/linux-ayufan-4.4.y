@@ -15,7 +15,7 @@
  *		Add UDP Encapsulation
  *
  */
-
+ 
 #include <linux/workqueue.h>
 #include <net/xfrm.h>
 #include <linux/pfkeyv2.h>
@@ -138,7 +138,7 @@ static void xfrm_hash_resize(struct work_struct *work)
 	nhashmask = (nsize / sizeof(struct hlist_head)) - 1U;
 	for (i = net->xfrm.state_hmask; i >= 0; i--)
 		xfrm_hash_transfer(net->xfrm.state_bydst+i, ndst, nsrc, nspi,
-				   nhashmask);
+				   nhashmask);	
 
 	odst = net->xfrm.state_bydst;
 	osrc = net->xfrm.state_bysrc;
@@ -925,7 +925,6 @@ xfrm_stateonly_find(struct net *net, u32 mark,
 	if (rx)
 		xfrm_state_hold(rx);
 	spin_unlock(&xfrm_state_lock);
-
 
 	return rx;
 }

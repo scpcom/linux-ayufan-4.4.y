@@ -437,7 +437,6 @@ extern int rcu_my_thread_group_empty(void);
 		(p) = (typeof(*v) __force space *)(v); \
 	})
 
-
 /**
  * rcu_access_pointer() - fetch RCU pointer with no dereferencing
  * @p: The pointer to read
@@ -565,7 +564,6 @@ extern int rcu_my_thread_group_empty(void);
  */
 #define rcu_dereference_protected(p, c) \
 	__rcu_dereference_protected((p), (c), __rcu)
-
 
 /**
  * rcu_dereference() - fetch RCU-protected pointer for dereferencing

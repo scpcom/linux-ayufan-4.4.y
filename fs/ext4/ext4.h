@@ -15,7 +15,7 @@
  *
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
-
+ 
 #ifndef _EXT4_H
 #define _EXT4_H
 
@@ -86,7 +86,7 @@ typedef unsigned int ext4_group_t;
  * Also used to show what's going on for debugging purposes when the
  * flag field is exported via the traceport interface
  */
-
+ 
 /* prefer goal again. length */
 #define EXT4_MB_HINT_MERGE		0x0001
 /* blocks already reserved */
@@ -1087,7 +1087,7 @@ struct ext4_super_block {
 	__le32  s_archive_version;      /* Last archived version */
 	__le32  s_syno_reserved;
 	__le32  s_syno_hash_magic;      /* Enable Htree if the magic is given */
-	__le32  s_reserved[109];        /* Padding to the end of the block */
+	__le32	s_reserved[109];        /* Padding to the end of the block */
 #else
 	__le32	s_reserved[112];        /* Padding to the end of the block */
 #endif
@@ -1603,7 +1603,6 @@ struct dx_hash_info
  * Control parameters used by ext4_htree_next_block
  */
 #define HASH_NB_ALWAYS		1
-
 
 /*
  * Describe an inode's exact location on disk and in memory

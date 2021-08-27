@@ -3,7 +3,7 @@
 #endif
 /*
   File: linux/xattr.h
-
+ 
   Extended attributes handling.
 
   Copyright (C) 2001 by Andreas Gruenbacher <a.gruenbacher@computer.org>

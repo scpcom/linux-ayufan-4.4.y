@@ -22,7 +22,7 @@
  * file called LICENSE.
  *
  */
-
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/skbuff.h>
@@ -92,7 +92,7 @@
 #define     AD_LINK_SPEED_BITMASK_1000MBPS    0x8
 #define     AD_LINK_SPEED_BITMASK_10000MBPS   0x10
 //endalloun
-
+ 
 // compare MAC addresses
 #define MAC_ADDRESS_COMPARE(A, B) memcmp(A, B, ETH_ALEN)
 
@@ -118,7 +118,6 @@ static void ad_enable_collecting_distributing(struct port *port);
 static void ad_disable_collecting_distributing(struct port *port);
 static void ad_marker_info_received(struct bond_marker *marker_info, struct port *port);
 static void ad_marker_response_received(struct bond_marker *marker, struct port *port);
-
 
 /////////////////////////////////////////////////////////////////////////////////
 // ================= api to bonding and kernel code ==================
@@ -438,7 +437,6 @@ static u16 __ad_timer_to_ticks(u16 timer_type, u16 par)
 	}
 	return retval;
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////
 // ================= ad_rx_machine helper functions ==================
@@ -1814,7 +1812,7 @@ static void ad_marker_info_received(struct bond_marker *marker_info,
 	// change the marker subtype to marker response
 	marker.tlv_type = AD_MARKER_RESPONSE_SUBTYPE;
 	// send the marker response
-
+	 
 	if (ad_marker_send(port, &marker) >= 0) {
 		pr_debug("Sent Marker Response on port %d\n",
 			 port->actor_port_number);
@@ -1936,7 +1934,6 @@ int bond_3ad_bind_slave(struct slave *slave)
 
 		__disable_port(port);
 		__initialize_port_locks(port);
-
 
 		// aggregator initialization
 		aggregator = &(SLAVE_AD_INFO(slave).aggregator);
@@ -2202,7 +2199,7 @@ static void bond_3ad_rx_indication(struct lacpdu *lacpdu, struct slave *slave, u
 
 		case AD_TYPE_MARKER:
 			// No need to convert fields to Little Endian since we don't use the marker's fields.
-
+			 
 			switch (((struct bond_marker *)lacpdu)->tlv_type) {
 			case AD_MARKER_INFORMATION_SUBTYPE:
 				pr_debug("Received Marker Information on port %d\n",

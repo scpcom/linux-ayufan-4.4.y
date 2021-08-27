@@ -1293,7 +1293,6 @@ static void e1000_initialize_hw_bits_82571(struct e1000_hw *hw)
                 ew32(CTRL_EXT, reg);
         }
 
-
 	/* PCI-Ex Control Registers */
 	switch (hw->mac.type) {
 	case e1000_82574:
@@ -2080,7 +2079,7 @@ const struct e1000_info e1000_82574_info = {
 				  | FLAG_HAS_SMART_POWER_DOWN
 				  | FLAG_HAS_AMT
 				  | FLAG_HAS_CTRLEXT_ON_LOAD,
-	.flags2			  = FLAG2_CHECK_PHY_HANG
+	.flags2			= FLAG2_CHECK_PHY_HANG
 				  | FLAG2_DISABLE_ASPM_L0S
 				  | FLAG2_NO_DISABLE_RX,
 	.pba			= 32,
@@ -2109,4 +2108,3 @@ const struct e1000_info e1000_82583_info = {
 	.phy_ops		= &e82_phy_ops_bm,
 	.nvm_ops		= &e82571_nvm_ops,
 };
-

@@ -19,7 +19,7 @@
  *  for newbie kernel hackers. It features several pointers to major
  *  kernel subsystems and hints as to where to find out what things do.
  */
-
+ 
 #include <linux/oom.h>
 #include <linux/mm.h>
 #include <linux/err.h>

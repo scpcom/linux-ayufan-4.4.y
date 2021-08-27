@@ -52,8 +52,7 @@
  *	Alexey Kuznetsov		allow both IPv4 and IPv6 sockets to bind
  *					a single port at the same time.
  */
-
-
+ 
 #include <linux/bottom_half.h>
 #include <linux/types.h>
 #include <linux/fcntl.h>
@@ -89,7 +88,6 @@
 int sysctl_tcp_tw_reuse __read_mostly;
 int sysctl_tcp_low_latency __read_mostly;
 EXPORT_SYMBOL(sysctl_tcp_low_latency);
-
 
 #ifdef CONFIG_TCP_MD5SIG
 static struct tcp_md5sig_key *tcp_v4_md5_do_lookup(struct sock *sk,
@@ -830,8 +828,6 @@ int tcp_syn_flood_action(struct sock *sk,
 	int want_cookie = 0;
 	struct listen_sock *lopt;
 
-
-
 #ifdef CONFIG_SYN_COOKIES
 	if (sysctl_tcp_syncookies) {
 		msg = "Sending cookies";
@@ -881,7 +877,7 @@ static struct ip_options_rcu *tcp_v4_save_options(struct sock *sk,
  * IP address->MD5 Key.
  * We need to maintain these in the sk structure.
  */
-
+ 
 /* Find the Key structure for an address.  */
 static struct tcp_md5sig_key *
 			tcp_v4_md5_do_lookup(struct sock *sk, __be32 addr)
@@ -1425,7 +1421,6 @@ drop:
 }
 EXPORT_SYMBOL(tcp_v4_conn_request);
 
-
 /*
  * The three way handshake has completed - we got a valid synack -
  * now create the new socket.
@@ -1576,7 +1571,6 @@ static __sum16 tcp_v4_checksum_init(struct sk_buff *skb)
 	}
 	return 0;
 }
-
 
 /* The socket must have it's spinlock held when we get
  * here.
@@ -1986,7 +1980,7 @@ EXPORT_SYMBOL(tcp_v4_destroy_sock);
 
 #ifdef CONFIG_PROC_FS
 /* Proc filesystem TCP sock list dumping. */
-
+ 
 static inline struct inet_timewait_sock *tw_head(struct hlist_nulls_head *head)
 {
 	return hlist_nulls_empty(head) ? NULL :
@@ -2643,7 +2637,6 @@ struct proto tcp_prot = {
 #endif
 };
 EXPORT_SYMBOL(tcp_prot);
-
 
 static int __net_init tcp_sk_init(struct net *net)
 {

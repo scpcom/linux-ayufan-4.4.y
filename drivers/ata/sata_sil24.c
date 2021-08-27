@@ -19,7 +19,7 @@
  * General Public License for more details.
  *
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/gfp.h>
@@ -54,7 +54,6 @@ struct sil24_sge {
 	__le32	cnt;
 	__le32	flags;
 };
-
 
 enum {
 	SIL24_HOST_BAR		= 0,
@@ -919,7 +918,7 @@ static int sil24_qc_defer(struct ata_queued_cmd *qc)
 					ap->excl_link = NULL;
 				}
 			} else {
-			return ATA_DEFER_PORT;
+				return ATA_DEFER_PORT;
 			}
 		}
 #else
@@ -1363,7 +1362,6 @@ static void sil24_init_controller(struct ata_host *host)
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
 		void __iomem *port = sil24_port_base(ap);
-
 
 		/* Initial PHY setting */
 		writel(0x20c, port + PORT_PHY_CFG);

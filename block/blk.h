@@ -139,7 +139,6 @@ int blk_dev_init(void);
 void elv_quiesce_start(struct request_queue *q);
 void elv_quiesce_end(struct request_queue *q);
 
-
 /*
  * Return the threshold (number of used requests) at which the queue is
  * considered to be congested.  It include a little hysteresis to keep the

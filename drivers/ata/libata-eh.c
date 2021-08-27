@@ -34,7 +34,7 @@
  *  http://www.sata-io.org/
  *
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/blkdev.h>
 #include <linux/export.h>
@@ -4267,7 +4267,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 				ehc->i.action = 0;
 				ehc->i.action |= ATA_EH_HARDRESET;
 			}else {
-			ehc->i.action = 0;
+				ehc->i.action = 0;
 			}
 #else
 			ehc->i.action = 0;

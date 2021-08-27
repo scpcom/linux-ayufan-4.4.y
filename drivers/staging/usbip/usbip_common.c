@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  */
-
+ 
 #include <asm/byteorder.h>
 #include <linux/file.h>
 #include <linux/fs.h>
@@ -490,7 +490,7 @@ static void usbip_pack_ret_submit(struct usbip_header *pdu, struct urb *urb,
 
 	if (pack) {
 		/* stub_tx.c */
-
+		 
 		rpdu->status		= urb->status;
 		rpdu->actual_length	= urb->actual_length;
 		rpdu->start_frame	= urb->start_frame;
@@ -498,7 +498,7 @@ static void usbip_pack_ret_submit(struct usbip_header *pdu, struct urb *urb,
 		rpdu->error_count	= urb->error_count;
 	} else {
 		/* vhci_rx.c */
-
+		 
 		urb->status		= rpdu->status;
 		urb->actual_length	= rpdu->actual_length;
 		urb->start_frame	= rpdu->start_frame;

@@ -294,9 +294,9 @@ static int read_znode(struct ubifs_info *c, int lnum, int offs, int len,
 
 	if (znode->child_cnt > c->fanout || znode->level > UBIFS_MAX_LEVELS) {
 		dbg_err("current fanout %d, branch count %d",
-			c->fanout, znode->child_cnt);
+			  c->fanout, znode->child_cnt);
 		dbg_err("max levels %d, znode level %d",
-			UBIFS_MAX_LEVELS, znode->level);
+			  UBIFS_MAX_LEVELS, znode->level);
 		err = 1;
 		goto out_dump;
 	}
@@ -341,7 +341,7 @@ static int read_znode(struct ubifs_info *c, int lnum, int offs, int len,
 		if (c->ranges[type].max_len == 0) {
 			if (zbr->len != c->ranges[type].len) {
 				dbg_err("bad target node (type %d) length (%d)",
-					type, zbr->len);
+					  type, zbr->len);
 				dbg_err("have to be %d", c->ranges[type].len);
 				err = 4;
 				goto out_dump;
@@ -349,10 +349,10 @@ static int read_znode(struct ubifs_info *c, int lnum, int offs, int len,
 		} else if (zbr->len < c->ranges[type].min_len ||
 			   zbr->len > c->ranges[type].max_len) {
 			dbg_err("bad target node (type %d) length (%d)",
-				type, zbr->len);
+				  type, zbr->len);
 			dbg_err("have to be in range of %d-%d",
-				c->ranges[type].min_len,
-				c->ranges[type].max_len);
+				  c->ranges[type].min_len,
+				  c->ranges[type].max_len);
 			err = 5;
 			goto out_dump;
 		}
@@ -376,7 +376,7 @@ static int read_znode(struct ubifs_info *c, int lnum, int offs, int len,
 		} else if (cmp == 0 && !is_hash_key(c, key1)) {
 			/* These can only be keys with colliding hash */
 			dbg_err("keys %d and %d are not hashed but equivalent",
-				i, i + 1);
+				  i, i + 1);
 			err = 7;
 			goto out_dump;
 		}

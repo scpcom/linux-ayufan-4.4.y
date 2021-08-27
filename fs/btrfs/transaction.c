@@ -18,7 +18,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 021110-1307, USA.
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/slab.h>
 #include <linux/sched.h>
@@ -46,8 +46,8 @@ static noinline void put_transaction(struct btrfs_transaction *transaction)
 
 static noinline void switch_commit_root(struct btrfs_root *root)
 {
-	free_extent_buffer(root->commit_root);
-	root->commit_root = btrfs_root_node(root);
+		free_extent_buffer(root->commit_root);
+		root->commit_root = btrfs_root_node(root);
 }
 
 /*
@@ -187,7 +187,6 @@ static int record_root_in_trans(struct btrfs_trans_handle *trans,
 	}
 	return 0;
 }
-
 
 int btrfs_record_root_in_trans(struct btrfs_trans_handle *trans,
 			       struct btrfs_root *root)
@@ -383,7 +382,7 @@ int btrfs_wait_for_commit(struct btrfs_root *root, u64 transid)
 			}
 			if (t->transid > transid)
 				break;
-		}
+			}
 		spin_unlock(&root->fs_info->trans_lock);
 		ret = -EINVAL;
 		if (!cur_trans)
@@ -477,13 +476,13 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 		    trans->transaction->delayed_refs.num_heads_ready > 64) {
 			trans->delayed_ref_updates = 0;
 
-			/*
+		/*
 			 * do a full flush if the transaction is trying
 			 * to close
-			 */
+		 */
 			if (trans->transaction->delayed_refs.flushing)
 				cur = 0;
-			btrfs_run_delayed_refs(trans, root, cur);
+		btrfs_run_delayed_refs(trans, root, cur);
 		} else {
 			break;
 		}
@@ -507,7 +506,7 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 			return btrfs_commit_transaction(trans, root);
 		} else {
 			wake_up_process(info->transaction_kthread);
-		}
+	}
 	}
 
 	WARN_ON(cur_trans != info->running_transaction);
@@ -1125,13 +1124,13 @@ int btrfs_commit_transaction_async(struct btrfs_trans_handle *trans,
 	return 0;
 }
 
-/*
+	/*
  * btrfs_transaction state sequence:
  *    in_commit = 0, blocked = 0  (initial)
  *    in_commit = 1, blocked = 1
  *    blocked = 0
  *    commit_done = 1
- */
+	 */
 int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 			     struct btrfs_root *root)
 {
@@ -1320,8 +1319,8 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 	update_super_roots(root);
 
 	if (!root->fs_info->log_root_recovering) {
-		btrfs_set_super_log_root(root->fs_info->super_copy, 0);
-		btrfs_set_super_log_root_level(root->fs_info->super_copy, 0);
+	btrfs_set_super_log_root(root->fs_info->super_copy, 0);
+	btrfs_set_super_log_root_level(root->fs_info->super_copy, 0);
 	}
 
 	memcpy(root->fs_info->super_for_commit, root->fs_info->super_copy,
@@ -1392,12 +1391,12 @@ int btrfs_clean_old_snapshots(struct btrfs_root *root)
 		root = list_entry(list.next, struct btrfs_root, root_list);
 		list_del(&root->root_list);
 
-		btrfs_kill_all_delayed_nodes(root);
+	btrfs_kill_all_delayed_nodes(root);
 
-		if (btrfs_header_backref_rev(root->node) <
-		    BTRFS_MIXED_BACKREF_REV)
+	if (btrfs_header_backref_rev(root->node) <
+			BTRFS_MIXED_BACKREF_REV)
 			btrfs_drop_snapshot(root, NULL, 0);
-		else
+	else
 			btrfs_drop_snapshot(root, NULL, 1);
 	}
 	return 0;

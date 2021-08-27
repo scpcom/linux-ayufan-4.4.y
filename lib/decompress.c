@@ -6,7 +6,7 @@
  *
  * Detect the decompression method based on magic number
  */
-
+ 
 #include <linux/decompress/generic.h>
 
 #include <linux/decompress/bunzip2.h>

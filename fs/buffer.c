@@ -20,7 +20,7 @@
  *
  * async buffer flushing, 1999 Andrea Arcangeli <andrea@suse.de>
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 #include <linux/fs.h>
@@ -97,7 +97,6 @@ __clear_page_buffers(struct page *page)
 	set_page_private(page, 0);
 	page_cache_release(page);
 }
-
 
 static int quiet_error(struct buffer_head *bh)
 {
@@ -461,7 +460,6 @@ void mark_buffer_async_write(struct buffer_head *bh)
 	mark_buffer_async_write_endio(bh, end_buffer_async_write);
 }
 EXPORT_SYMBOL(mark_buffer_async_write);
-
 
 /*
  * fs/buffer.c contains helper functions for buffer-backed address space's
@@ -982,7 +980,7 @@ init_page_buffers(struct page *page, struct block_device *bdev,
 			bh->b_blocknr = block;
 			if (uptodate)
 				set_buffer_uptodate(bh);
-			set_buffer_mapped(bh);
+				set_buffer_mapped(bh);
 		}
 		block++;
 		bh = bh->b_this_page;
@@ -1101,7 +1099,7 @@ __getblk_slow(struct block_device *bdev, sector_t block, int size)
 	}
 
 	for (;;) {
-		struct buffer_head * bh;
+		struct buffer_head *bh;
 		int ret;
 
 		bh = __find_get_block(bdev, block, size);

@@ -10,7 +10,7 @@
 #define _K_SS_MAXSIZE	128	/* Implementation specific max size */
 #define _K_SS_ALIGNSIZE	(__alignof__ (struct sockaddr *))
 				/* Implementation specific desired alignment */
-
+				 
 typedef unsigned short __kernel_sa_family_t;
 
 struct __kernel_sockaddr_storage {
@@ -284,7 +284,6 @@ struct ucred {
 #else
 #define MSG_CMSG_COMPAT	0		/* We never have 32 bit fixups */
 #endif
-
 
 /* Setsockoptions(2) level. Thanks to BSD these must match IPPROTO_xxx */
 #define SOL_IP		0

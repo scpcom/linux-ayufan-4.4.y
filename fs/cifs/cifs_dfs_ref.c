@@ -102,7 +102,6 @@ static char *cifs_get_share_name(const char *node_name)
 	return UNC;
 }
 
-
 /**
  * cifs_compose_mount_options	-	creates mount options for refferral
  * @sb_mountdata:	parent/root DFS mount options (template)

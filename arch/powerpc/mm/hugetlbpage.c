@@ -282,7 +282,6 @@ static int __init do_gpage_early_setup(char *param, char *val)
 	return 0;
 }
 
-
 /*
  * This function allocates physical space for pages that are larger than the
  * buddy allocator can handle.  We want to allocate these in highmem because
@@ -819,7 +818,6 @@ static int __init hugetlbpage_init(void)
 		HPAGE_SHIFT = mmu_psize_defs[MMU_PAGE_4M].shift;
 	else
 		panic("%s: Unable to set default huge page size\n", __func__);
-
 
 	return 0;
 }

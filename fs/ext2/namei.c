@@ -378,7 +378,6 @@ static int ext2_rename (struct inode * old_dir, struct dentry * old_dentry,
 	}
 	return 0;
 
-
 out_dir:
 	if (dir_de) {
 		kunmap(dir_page);

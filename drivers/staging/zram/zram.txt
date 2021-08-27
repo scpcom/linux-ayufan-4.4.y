@@ -28,8 +28,8 @@ Following shows a typical sequence of steps for using zram.
 	(in bytes). If disksize is not given, default value of 25%
 	of RAM is used.
 
-	# Initialize /dev/zram0 with 50MB disksize
-	echo $((50*1024*1024)) > /sys/block/zram0/disksize
+            # Initialize /dev/zram0 with 50MB disksize
+            echo $((50*1024*1024)) > /sys/block/zram0/disksize
 
 	NOTE: disksize cannot be changed if the disk contains any
 	data. So, for such a disk, you need to issue 'reset' (see below)

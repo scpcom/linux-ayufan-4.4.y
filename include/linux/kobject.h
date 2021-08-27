@@ -15,7 +15,7 @@
  * interface, ESPECIALLY the parts about reference counts and object
  * destructors.
  */
-
+ 
 #ifndef _KOBJECT_H_
 #define _KOBJECT_H_
 

@@ -8,7 +8,7 @@
  * It is used/shared between the USB core, the HCDs and couple of other USB
  * drivers.
  */
-
+ 
 #ifndef __LINUX_CH11_H
 #define __LINUX_CH11_H
 
@@ -194,7 +194,6 @@ struct usb_hub_status {
 #define HUB_STATUS_OVERCURRENT	0x0002
 #define HUB_CHANGE_LOCAL_POWER	0x0001
 #define HUB_CHANGE_OVERCURRENT	0x0002
-
 
 /*
  * Hub descriptor

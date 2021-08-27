@@ -59,7 +59,7 @@
  *		2 of the License, or (at your option) any later version.
  *
  */
-
+ 
 #include <linux/string.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -363,7 +363,7 @@ static int pppoe_device_event(struct notifier_block *this,
 		/* A change in mtu or address is a bad thing, requiring
 		 * LCP re-negotiation.
 		 */
-
+		 
 	case NETDEV_GOING_DOWN:
 	case NETDEV_DOWN:
 		/* Find every socket on this device and kill it. */

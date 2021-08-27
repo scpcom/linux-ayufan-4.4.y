@@ -23,7 +23,7 @@
  * Hash Tree Directory indexing (c) 2001  Daniel Phillips
  *
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/jbd2.h>
 #include <linux/buffer_head.h>
@@ -52,7 +52,6 @@ const struct file_operations ext4_dir_operations = {
 	.fsync		= ext4_sync_file,
 	.release	= ext4_release_dir,
 };
-
 
 static unsigned char get_dtype(struct super_block *sb, int filetype)
 {
@@ -344,7 +343,6 @@ static void free_rb_tree_fname(struct rb_root *root)
 	}
 }
 
-
 static struct dir_private_info *ext4_htree_create_dir_info(loff_t pos)
 {
 	struct dir_private_info *p;
@@ -420,8 +418,6 @@ int ext4_htree_store_dirent(struct file *dir_file, __u32 hash,
 	rb_insert_color(&new_fn->rb_hash, &info->root);
 	return 0;
 }
-
-
 
 /*
  * This is a helper function for ext4_dx_readdir.  It calls filldir

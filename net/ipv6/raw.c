@@ -20,7 +20,7 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  */
-
+ 
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <linux/socket.h>
@@ -456,7 +456,6 @@ int rawv6_rcv(struct sock *sk, struct sk_buff *skb)
 	rawv6_rcv_skb(sk, skb);
 	return 0;
 }
-
 
 /*
  *	This should be easy, if there is something there
@@ -966,7 +965,6 @@ static int rawv6_geticmpfilter(struct sock *sk, int level, int optname,
 
 	return 0;
 }
-
 
 static int do_rawv6_setsockopt(struct sock *sk, int level, int optname,
 			    char __user *optval, unsigned int optlen)

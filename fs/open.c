@@ -6,7 +6,7 @@
  *
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
-
+ 
 #include <linux/string.h>
 #include <linux/mm.h>
 #include <linux/file.h>
@@ -222,7 +222,6 @@ asmlinkage long SyS_ftruncate64(long fd, loff_t length)
 SYSCALL_ALIAS(sys_ftruncate64, SyS_ftruncate64);
 #endif
 #endif /* BITS_PER_LONG == 32 */
-
 
 int do_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 {
@@ -446,6 +445,7 @@ SYSCALL_DEFINE1(fchdir, unsigned int, fd)
 	error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
 	if (!error)
 		set_fs_pwd(current->fs, &file->f_path);
+
 out_putf:
 	fput(file);
 out:

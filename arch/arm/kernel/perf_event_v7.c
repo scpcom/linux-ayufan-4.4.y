@@ -18,7 +18,7 @@
  * All counters can be enabled/disabled and IRQ masked separately. The cycle
  *  counter and all 4 performance counters together can be reset separately.
  */
-
+ 
 #ifdef CONFIG_CPU_V7
 
 static struct arm_pmu armv7pmu;

@@ -273,8 +273,8 @@ extern void flush_cache_page(struct vm_area_struct *vma, unsigned long user_addr
  * This is used for the ARM private sys_cacheflush system call.
  */
 #define flush_cache_user_range(vma,start,end) \
-	__cpuc_coherent_user_range((start) & PAGE_MASK, PAGE_ALIGN(end))
-
+ 	__cpuc_coherent_user_range((start) & PAGE_MASK, PAGE_ALIGN(end))
+ 
 /*
  * Perform necessary cache operations to ensure that data previously
  * stored within this range of addresses can be executed by the CPU.

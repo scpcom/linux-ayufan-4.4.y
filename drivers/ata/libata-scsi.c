@@ -35,7 +35,7 @@
  *  - http://www.t13.org/
  *
  */
-
+ 
 #include <linux/slab.h>
 #include <linux/kernel.h>
 #include <linux/blkdev.h>
@@ -114,7 +114,6 @@ static struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 #define CONTROL_MPAGE_LEN 12
 #define ALL_MPAGES 0x3f
 #define ALL_SUB_MPAGES 0xff
-
 
 static const u8 def_rw_recovery_mpage[RW_RECOVERY_MPAGE_LEN] = {
 	RW_RECOVERY_MPAGE,
@@ -1623,7 +1622,6 @@ int ata_cmd_ioctl(struct scsi_device *scsidev, void __user *arg)
 		}
 	}
 
-
 	if (cmd_result) {
 		rc = -EIO;
 		goto error;
@@ -2523,7 +2521,6 @@ static unsigned int ata_scsi_start_stop_xlat(struct ata_queued_cmd *qc)
 	scmd->result = SAM_STAT_GOOD;
 	return 1;
 }
-
 
 /**
  *	ata_scsi_flush_xlat - Translate SCSI SYNCHRONIZE CACHE command
@@ -3876,7 +3873,7 @@ static unsigned int ata_scsiop_mode_sense(struct ata_scsi_args *args, u8 *rbuf)
 	/*
 	 * LLBA bit in msense(10) ignored (compliant)
 	 */
-
+	 
 	page_control = scsicmd[2] >> 6;
 	switch (page_control) {
 	case 0: /* current */
@@ -4295,7 +4292,6 @@ static unsigned int atapi_xlat(struct ata_queued_cmd *qc)
 			/* some SATA bridges need us to indicate data xfer direction */
 			qc->tf.feature |= ATAPI_DMADIR;
 	}
-
 
 	/* FIXME: We need to translate 0x05 READ_BLOCK_LIMITS to a MODE_SENSE
 	   as ATAPI tape drives don't get this right otherwise */
@@ -4899,7 +4895,6 @@ int ata_scsi_queuecmd(struct Scsi_Host *shost, struct scsi_cmnd *cmd)
 		cmd->result = (DID_BAD_TARGET << 16);
 		cmd->scsi_done(cmd);
 	}
-
 	spin_unlock_irqrestore(ap->lock, irq_flags);
 
 	return rc;
@@ -5003,7 +4998,7 @@ void ata_scsi_simulate(struct ata_device *dev, struct scsi_cmnd *cmd)
 	 */
 	case SYNCHRONIZE_CACHE:
 		/* fall through */
-
+		 
 	/* no-op's, complete with success */
 	case REZERO_UNIT:
 	case SEEK_6:

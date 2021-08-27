@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 021110-1307, USA.
  */
-
+ 
 #include <linux/slab.h>
 #include "delayed-inode.h"
 #include "disk-io.h"
@@ -739,8 +739,8 @@ static void btrfs_delayed_inode_release_metadata(struct btrfs_root *root,
  */
 static int btrfs_batch_insert_items(struct btrfs_trans_handle *trans,
 				struct btrfs_root *root,
-				struct btrfs_path *path,
-				struct btrfs_delayed_item *item)
+				    struct btrfs_path *path,
+				    struct btrfs_delayed_item *item)
 {
 	struct btrfs_delayed_item *curr, *next;
 	int free_space;
@@ -820,7 +820,7 @@ static int btrfs_batch_insert_items(struct btrfs_trans_handle *trans,
 
 	/* insert the keys of the items */
 	ret = setup_items_for_insert(trans, root, path, keys, data_size,
-				     total_data_size, total_size, nitems);
+			       total_data_size, total_size, nitems);
 	if (ret)
 		goto error;
 
@@ -1047,9 +1047,9 @@ static void btrfs_release_delayed_inode(struct btrfs_delayed_node *delayed_node)
 }
 
 static int btrfs_update_delayed_inode(struct btrfs_trans_handle *trans,
-				      struct btrfs_root *root,
-				      struct btrfs_path *path,
-				      struct btrfs_delayed_node *node)
+					struct btrfs_root *root,
+					struct btrfs_path *path,
+					struct btrfs_delayed_node *node)
 {
 	struct btrfs_key key;
 	struct btrfs_inode_item *inode_item;

@@ -299,7 +299,6 @@ ext4_acl_chmod(struct inode *inode)
 	int retries = 0;
 	int error;
 
-
 	if (S_ISLNK(inode->i_mode))
 		return -EOPNOTSUPP;
 	if (!test_opt(inode->i_sb, POSIX_ACL))

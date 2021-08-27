@@ -34,7 +34,7 @@
  *  http://www.sata-io.org/
  *
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/gfp.h>
 #include <linux/pci.h>
@@ -1115,7 +1115,7 @@ int ata_sff_hsm_move(struct ata_port *ap, struct ata_queued_cmd *qc,
 	if (!(NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
 			(ATA_CMD_VERIFY == qc->tf.command || ATA_CMD_CHK_POWER == qc->tf.command ||
 			 ATA_CMD_PMP_READ == qc->tf.command || ATA_CMD_PMP_WRITE == qc->tf.command))) {
-	WARN_ON_ONCE((qc->flags & ATA_QCFLAG_ACTIVE) == 0);
+		WARN_ON_ONCE((qc->flags & ATA_QCFLAG_ACTIVE) == 0);
 	}
 #else
 
@@ -1134,7 +1134,7 @@ fsm_start:
 	switch (ap->hsm_task_state) {
 	case HSM_ST_FIRST:
 		/* Send first data block or PACKET CDB */
-
+		 
 		/* If polling, we will stay in the work queue after
 		 * sending the data. Otherwise, interrupt handler
 		 * takes over after sending the data.
@@ -3213,7 +3213,6 @@ u8 ata_bmdma_status(struct ata_port *ap)
 	return ioread8(ap->ioaddr.bmdma_addr + ATA_DMA_STATUS);
 }
 EXPORT_SYMBOL_GPL(ata_bmdma_status);
-
 
 /**
  *	ata_bmdma_port_start - Set port up for bmdma.

@@ -1205,7 +1205,7 @@ static void print_rsvd_warning(struct ubi_device *ubi,
 		 " need %d", ubi->beb_rsvd_pebs, ubi->beb_rsvd_level);
 	if (ubi->corr_peb_count)
 		ubi_warn("%d PEBs are corrupted and not used",
-			ubi->corr_peb_count);
+			 ubi->corr_peb_count);
 }
 
 /**

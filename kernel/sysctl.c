@@ -20,7 +20,7 @@
  * The list_for_each() macro wasn't appropriate for the sysctl loop.
  *  Removed it and replaced it with older style, 03/23/00, Bill Wendling
  */
-
+ 
 #include <linux/module.h>
 #include <linux/mm.h>
 #include <linux/swap.h>
@@ -2937,7 +2937,6 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
     return do_proc_doulongvec_minmax(table, write, buffer,
 				     lenp, ppos, HZ, 1000l);
 }
-
 
 static int do_proc_dointvec_jiffies_conv(bool *negp, unsigned long *lvalp,
 					 int *valp,

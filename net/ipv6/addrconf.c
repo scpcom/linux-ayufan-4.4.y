@@ -40,7 +40,7 @@
  *						selection; consider scope,
  *						status etc.
  */
-
+ 
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -930,7 +930,7 @@ retry:
 	ift = !max_addresses ||
 	      ipv6_count_addresses(idev) < max_addresses ?
 		ipv6_add_addr(idev, &addr, tmp_plen,
-			      ipv6_addr_type(&addr)&IPV6_ADDR_SCOPE_MASK,
+			    ipv6_addr_type(&addr)&IPV6_ADDR_SCOPE_MASK,
 			      addr_flags) : NULL;
 	if (!ift || IS_ERR(ift)) {
 		in6_ifa_put(ifp);
@@ -1730,7 +1730,6 @@ addrconf_prefix_route(struct in6_addr *pfx, int plen, struct net_device *dev,
 	ip6_route_add(&cfg);
 }
 
-
 static struct rt6_info *addrconf_get_prefix_route(const struct in6_addr *pfx,
 						  int plen,
 						  const struct net_device *dev,
@@ -1762,7 +1761,6 @@ out:
 	write_unlock_bh(&table->tb6_lock);
 	return rt;
 }
-
 
 /* Create "default" multicast route to the interface */
 
@@ -2329,7 +2327,6 @@ static int inet6_addr_del(struct net *net, int ifindex, const struct in6_addr *p
 	return -EADDRNOTAVAIL;
 }
 
-
 int addrconf_add_ifaddr(struct net *net, void __user *arg)
 {
 	struct in6_ifreq ireq;
@@ -2464,7 +2461,6 @@ static void addrconf_add_linklocal(struct inet6_dev *idev, const struct in6_addr
 	    !dev_net(idev->dev)->ipv6.devconf_all->forwarding)
 		addr_flags |= IFA_F_OPTIMISTIC;
 #endif
-
 
 	ifp = ipv6_add_addr(idev, addr, 64, IFA_LINK, addr_flags);
 	if (!IS_ERR(ifp)) {
@@ -3042,7 +3038,7 @@ static void addrconf_dad_timer(unsigned long data)
 		/*
 		 * DAD was successful
 		 */
-
+		 
 		ifp->flags &= ~(IFA_F_TENTATIVE|IFA_F_OPTIMISTIC|IFA_F_DADFAILED);
 		spin_unlock(&ifp->lock);
 		read_unlock(&idev->lock);
@@ -3815,7 +3811,6 @@ static int inet6_dump_ifmcaddr(struct sk_buff *skb, struct netlink_callback *cb)
 
 	return inet6_dump_addr(skb, cb, type);
 }
-
 
 static int inet6_dump_ifacaddr(struct sk_buff *skb, struct netlink_callback *cb)
 {
@@ -4624,7 +4619,6 @@ static int __addrconf_sysctl_register(struct net *net, char *dev_name,
 		{ },
 	};
 
-
 	t = kmemdup(&addrconf_sysctl, sizeof(*t), GFP_KERNEL);
 	if (t == NULL)
 		goto out;
@@ -4689,7 +4683,6 @@ static void addrconf_sysctl_unregister(struct inet6_dev *idev)
 	__addrconf_sysctl_unregister(&idev->cnf);
 	neigh_sysctl_unregister(idev->nd_parms);
 }
-
 
 #endif
 

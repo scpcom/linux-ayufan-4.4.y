@@ -12,7 +12,7 @@
  *
  *	Max Cohan: Fixed invalid FSINFO offset when info_sector is 0
  */
-
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/time.h>
@@ -39,7 +39,6 @@
 
 static int fat_default_codepage = CONFIG_FAT_DEFAULT_CODEPAGE;
 static char fat_default_iocharset[] = CONFIG_FAT_DEFAULT_IOCHARSET;
-
 
 static int fat_add_cluster(struct inode *inode)
 {

@@ -90,7 +90,6 @@
 #define MPT2SAS_SG_DEPTH       128 /* MAX_HW_SEGMENTS */
 #endif
 
-
 /*
  * Generic Defines
  */
@@ -103,7 +102,6 @@
 
 #define MPT_MAX_CALLBACKS		16
 
-
 #define	 CAN_SLEEP			1
 #define  NO_SLEEP			0
 
@@ -112,7 +110,6 @@
 #define MPI2_HIM_MASK			0xFFFFFFFF /* mask every bit*/
 
 #define MPT2SAS_INVALID_DEVICE_HANDLE	0xFFFF
-
 
 /*
  * reset phases
@@ -231,7 +228,6 @@ struct MPT2SAS_TARGET {
 	u8	tm_busy;
 };
 
-
 /*
  * per device private data
  */
@@ -284,7 +280,6 @@ typedef struct _MPI2_CONFIG_PAGE_MAN_10 {
 #define MFG_PAGE10_EXPOSE_ALL_DISKS	(0x01)
 #define MFG_PAGE10_HIDE_IF_VOL_PRESENT	(0x02)
 
-
 struct MPT2SAS_DEVICE {
 	struct MPT2SAS_TARGET *sas_target;
 	unsigned int	lun;
@@ -317,7 +312,6 @@ struct _internal_cmd {
 	u16	status;
 	u16	smid;
 };
-
 
 /**
  * struct _sas_device - attached device information
@@ -977,7 +971,6 @@ struct MPT2SAS_ADAPTER {
 
 typedef u8 (*MPT_CALLBACK)(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index,
     u32 reply);
-
 
 /* base shared API */
 extern struct list_head mpt2sas_ioc_list;

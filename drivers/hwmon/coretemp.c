@@ -22,7 +22,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/module.h>
@@ -197,7 +197,7 @@ static ssize_t show_temp(struct device *dev,
 static int adjust_tjmax(struct cpuinfo_x86 *c, u32 id, struct device *dev)
 {
 	/* The 100C is default for both mobile and non mobile CPUs */
-
+	 
 	int tjmax = 100000;
 	int tjmax_ee = 85000;
 	int usemsr_ee = 1;
@@ -368,7 +368,6 @@ exit_free:
 		device_remove_file(dev, &tdata->sd_attrs[i].dev_attr);
 	return err;
 }
-
 
 static int __cpuinit chk_ucode_version(unsigned int cpu)
 {

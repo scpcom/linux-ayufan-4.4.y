@@ -91,7 +91,7 @@ int verify_compat_iovec(struct msghdr *kern_msg, struct iovec *kern_iov,
 			if (err < 0)
 				return err;
 		}
-		kern_msg->msg_name = kern_address;
+			kern_msg->msg_name = kern_address;
 	} else
 		kern_msg->msg_name = NULL;
 
@@ -554,7 +554,6 @@ struct compat_group_filter {
 #define __COMPAT_GF0_SIZE (sizeof(struct compat_group_filter) - \
 			sizeof(struct __kernel_sockaddr_storage))
 
-
 int compat_mc_setsockopt(struct sock *sock, int level, int optname,
 	char __user *optval, unsigned int optlen,
 	int (*setsockopt)(struct sock *, int, int, char __user *, unsigned int))
@@ -719,7 +718,6 @@ int compat_mc_getsockopt(struct sock *sock, int level, int optname,
 	return err;
 }
 EXPORT_SYMBOL(compat_mc_getsockopt);
-
 
 /* Argument list sizes for compat_sys_socketcall */
 #define AL(x) ((x) * sizeof(u32))

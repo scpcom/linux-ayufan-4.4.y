@@ -14,7 +14,7 @@
  *  Big-endian to little-endian byte-swapping/bitmaps by
  *        David S. Miller (davem@caip.rutgers.edu), 1995
  */
-
+ 
 #include <linux/time.h>
 #include <linux/fs.h>
 #include <linux/jbd.h>
@@ -46,7 +46,6 @@
  * super block.  Each descriptor contains the number of the bitmap block and
  * the free blocks count in the block.
  */
-
 
 /*
  * Read the inode allocation bitmap for a given block_group, reading
@@ -468,7 +467,7 @@ struct inode *ext3_new_inode(handle_t *handle, struct inode * dir,
 	}
 #else
 	if (S_ISDIR(mode))
-		group = find_group_orlov(sb, dir);
+        group = find_group_orlov(sb, dir);
 #endif
 	else
 		group = find_group_other(sb, dir);
@@ -558,7 +557,6 @@ got:
 	percpu_counter_dec(&sbi->s_freeinodes_counter);
 	if (S_ISDIR(mode))
 		percpu_counter_inc(&sbi->s_dirs_counter);
-
 
 	if (test_opt(sb, GRPID)) {
 		inode->i_mode = mode;
@@ -803,4 +801,3 @@ unsigned long ext3_count_dirs (struct super_block * sb)
 	}
 	return count;
 }
-

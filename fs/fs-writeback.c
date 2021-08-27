@@ -15,7 +15,7 @@
  *		Split out of fs/inode.c
  *		Additions for address_space-based writeback
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/spinlock.h>
@@ -233,7 +233,7 @@ static void inode_sync_complete(struct inode *inode)
 	 * Prevent speculative execution through
 	 * spin_unlock(&wb->list_lock);
 	 */
-
+	 
 	smp_mb();
 	wake_up_bit(&inode->i_state, __I_SYNC);
 }
@@ -981,7 +981,6 @@ int bdi_writeback_thread(void *data)
 	trace_writeback_thread_stop(bdi);
 	return 0;
 }
-
 
 /*
  * Start writeback of `nr_pages' pages.  If `nr_pages' is zero, write back

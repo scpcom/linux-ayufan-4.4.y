@@ -288,7 +288,7 @@ int ubi_debugfs_init(void)
  */
 void ubi_debugfs_exit(void)
 {
-	debugfs_remove(dfs_rootdir);
+		debugfs_remove(dfs_rootdir);
 }
 
 /* Read an UBI debugfs file */

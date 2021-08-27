@@ -23,7 +23,7 @@ struct sockaddr_ll {
 };
 
 /* Packet types */
-
+ 
 #define PACKET_HOST		0		/* To us		*/
 #define PACKET_BROADCAST	1		/* To all		*/
 #define PACKET_MULTICAST	2		/* To group		*/

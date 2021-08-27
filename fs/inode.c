@@ -190,7 +190,7 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	mapping->a_ops = &empty_aops;
 	mapping->host = inode;
 	mapping->flags = 0;
-	mapping_set_gfp_mask(mapping, GFP_HIGHUSER_MOVABLE);
+		mapping_set_gfp_mask(mapping, GFP_HIGHUSER_MOVABLE);
 	mapping->assoc_mapping = NULL;
 	mapping->backing_dev_info = &default_backing_dev_info;
 	mapping->writeback_index = 0;
@@ -1305,7 +1305,6 @@ int insert_inode_locked4(struct inode *inode, unsigned long hashval,
 	}
 }
 EXPORT_SYMBOL(insert_inode_locked4);
-
 
 int generic_delete_inode(struct inode *inode)
 {

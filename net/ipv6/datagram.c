@@ -13,7 +13,7 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  */
-
+ 
 #include <linux/capability.h>
 #include <linux/errno.h>
 #include <linux/types.h>
@@ -485,7 +485,6 @@ out:
 	return err;
 }
 
-
 int datagram_recv_ctl(struct sock *sk, struct msghdr *msg, struct sk_buff *skb)
 {
 	struct ipv6_pinfo *np = inet6_sk(sk);
@@ -603,7 +602,7 @@ int datagram_recv_ctl(struct sock *sk, struct msghdr *msg, struct sk_buff *skb)
 			 * first four bytes of the transport header and this function is
 			 * written with this assumption in mind.
 			 */
-
+			 
 			sin6.sin6_family = AF_INET6;
 			ipv6_addr_copy(&sin6.sin6_addr, &ipv6_hdr(skb)->daddr);
 			sin6.sin6_port = ports[1];

@@ -24,7 +24,7 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-
+ 
 #ifndef _LINUX_ACPI_H
 #define _LINUX_ACPI_H
 
@@ -71,7 +71,6 @@ enum acpi_address_range_id {
 	ACPI_ADDRESS_RANGE_NVS	= 4,
 	ACPI_ADDRESS_RANGE_COUNT
 };
-
 
 /* Table Handlers */
 

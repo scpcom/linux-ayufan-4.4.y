@@ -17,7 +17,7 @@
  * Software Foundation; either version 2 of the License, or (at your option)
  * any later version.
  */
-
+ 
 #ifndef HID_IDS_H_FILE
 #define HID_IDS_H_FILE
 

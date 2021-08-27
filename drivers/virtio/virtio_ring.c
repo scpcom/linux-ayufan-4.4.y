@@ -161,11 +161,11 @@ static int vring_add_indirect(struct vring_virtqueue *vq,
 }
 
 int virtqueue_add_buf_gfp(struct virtqueue *_vq,
-			  struct scatterlist sg[],
-			  unsigned int out,
-			  unsigned int in,
-			  void *data,
-			  gfp_t gfp)
+		      struct scatterlist sg[],
+		      unsigned int out,
+		      unsigned int in,
+		      void *data,
+		      gfp_t gfp)
 {
 	struct vring_virtqueue *vq = to_vvq(_vq);
 	unsigned int i, avail, uninitialized_var(prev);
@@ -257,7 +257,7 @@ void virtqueue_kick(struct virtqueue *_vq)
 	if (vq->event ?
 	    vring_need_event(vring_avail_event(&vq->vring), new, old) :
 	    !(vq->vring.used->flags & VRING_USED_F_NO_NOTIFY))
-		/* Prod other side to tell it about changes. */
+	/* Prod other side to tell it about changes. */
 		vq->notify(&vq->vq);
 
 	END_USE(vq);

@@ -11,7 +11,7 @@
  *
  * This file is released under the GPLv2.
  */
-
+ 
 #include <linux/export.h>
 #include <linux/suspend.h>
 #include <linux/syscalls.h>
@@ -32,7 +32,6 @@
 #include <scsi/scsi_scan.h>
 
 #include "power.h"
-
 
 static int nocompress;
 static int noresume;
@@ -383,7 +382,7 @@ int hibernation_snapshot(int platform_mode)
 	 * Control returns here (1) after the image has been created or the
 	 * image creation has failed and (2) after a successful restore.
 	 */
-
+	 
  Resume_devices:
 	/* We may need to release the preallocated image pages here. */
 	if (error || !in_suspend)
@@ -714,7 +713,6 @@ int hibernate(void)
 	mutex_unlock(&pm_mutex);
 	return error;
 }
-
 
 /**
  * software_resume - Resume from a saved hibernation image.
@@ -1070,11 +1068,9 @@ static struct attribute * g[] = {
 	NULL,
 };
 
-
 static struct attribute_group attr_group = {
 	.attrs = g,
 };
-
 
 static int __init pm_disk_init(void)
 {
@@ -1082,7 +1078,6 @@ static int __init pm_disk_init(void)
 }
 
 core_initcall(pm_disk_init);
-
 
 static int __init resume_setup(char *str)
 {

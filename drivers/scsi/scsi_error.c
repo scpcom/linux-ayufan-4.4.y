@@ -16,7 +16,7 @@
  *	minor cleanups.
  *	September 30, 2002 Mike Anderson (andmike@us.ibm.com)
  */
-
+ 
 #include <linux/module.h>
 #include <linux/sched.h>
 #include <linux/gfp.h>
@@ -1000,7 +1000,6 @@ static int scsi_eh_test_devices(struct list_head *cmd_list,
 	return list_empty(work_q);
 }
 
-
 /**
  * scsi_eh_abort_cmds - abort pending commands.
  * @work_q:	&list_head for pending commands.
@@ -1118,7 +1117,6 @@ static int scsi_eh_stu(struct Scsi_Host *shost,
 
 	return list_empty(work_q);
 }
-
 
 /**
  * scsi_eh_bus_device_reset - send bdr if needed

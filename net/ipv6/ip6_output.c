@@ -28,7 +28,7 @@
  *			:       add ip6_append_data and related functions
  *				for datagram xmit
  */
-
+ 
 #include <linux/errno.h>
 #include <linux/kernel.h>
 #include <linux/string.h>
@@ -695,7 +695,7 @@ int ip6_fragment(struct sk_buff *skb, int (*output)(struct sk_buff *))
 		frag = skb_shinfo(skb)->frag_list;
 		skb_frag_list_init(skb);
 		/* BUILD HEADER */
-
+		 
 		*prevhdr = NEXTHDR_FRAGMENT;
 		tmp_hdr = kmemdup(skb_network_header(skb), hlen, GFP_ATOMIC);
 		if (!tmp_hdr) {
@@ -817,7 +817,7 @@ slow_path:
 		/*
 		 *	Allocate buffer.
 		 */
-
+		 
 		if ((frag = alloc_skb(len+hlen+sizeof(struct frag_hdr)+LL_ALLOCATED_SPACE(rt->dst.dev), GFP_ATOMIC)) == NULL) {
 			NETDEBUG(KERN_INFO "IPv6: frag: no memory for new fragment!\n");
 			IP6_INC_STATS(net, ip6_dst_idev(skb_dst(skb)),

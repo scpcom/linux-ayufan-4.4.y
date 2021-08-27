@@ -36,7 +36,7 @@
 #define GPIOMIS 0x418
 #define GPIOIC  0x41C
 
-#define PL061_GPIO_NR	8
+#define PL061_GPIO_NR				8
 
 struct pl061_gpio {
 	/* We use a list of pl061_gpio structs for each trigger IRQ in the main

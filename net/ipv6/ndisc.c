@@ -28,7 +28,7 @@
  *	Pekka Savola			:	RFC2461 validation
  *	YOSHIFUJI Hideaki @USAGI	:	Verify ND options properly
  */
-
+ 
 /* Set to 3 to get tracing... */
 #define ND_DEBUG 1
 
@@ -119,7 +119,6 @@ static const struct neigh_ops ndisc_hh_ops = {
 	.output =		neigh_resolve_output,
 	.connected_output =	neigh_resolve_output,
 };
-
 
 static const struct neigh_ops ndisc_direct_ops = {
 	.family =		AF_INET6,
@@ -683,7 +682,6 @@ void ndisc_send_rs(struct net_device *dev, const struct in6_addr *saddr,
 		     &icmp6h, NULL,
 		     send_sllao ? ND_OPT_SOURCE_LL_ADDR : 0);
 }
-
 
 static void ndisc_error_report(struct neighbour *neigh, struct sk_buff *skb)
 {
@@ -1277,7 +1275,7 @@ static void ndisc_router_discovery(struct sk_buff *skb)
 		rt->rt6i_expires = jiffies + (HZ * lifetime);
 
 	if (ra_msg->icmph.icmp6_hop_limit) {
-		in6_dev->cnf.hop_limit = ra_msg->icmph.icmp6_hop_limit;
+			in6_dev->cnf.hop_limit = ra_msg->icmph.icmp6_hop_limit;
 		if (rt)
 			dst_metric_set(&rt->dst, RTAX_HOPLIMIT,
 				       ra_msg->icmph.icmp6_hop_limit);
@@ -1806,7 +1804,6 @@ int ndisc_ifinfo_sysctl_change(struct ctl_table *ctl, int write, void __user *bu
 	}
 	return ret;
 }
-
 
 #endif
 

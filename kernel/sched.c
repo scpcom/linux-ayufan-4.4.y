@@ -28,7 +28,7 @@
  *  2007-11-29  RT balancing improvements by Steven Rostedt, Gregory Haskins,
  *              Thomas Gleixner, Mike Kravetz
  */
-
+ 
 #include <linux/mm.h>
 #include <linux/module.h>
 #include <linux/nmi.h>
@@ -698,7 +698,7 @@ struct rq {
 	struct sched_info rq_sched_info;
 	unsigned long long rq_cpu_time;
 	/* could above be rq->cfs_rq.exec_clock + rq->rt_rq.rt_runtime ? */
-
+	 
 	/* sys_sched_yield() stats */
 	unsigned int yld_count;
 
@@ -718,7 +718,6 @@ struct rq {
 };
 
 static DEFINE_PER_CPU_SHARED_ALIGNED(struct rq, runqueues);
-
 
 static void check_preempt_curr(struct rq *rq, struct task_struct *p, int flags);
 
@@ -3555,12 +3554,12 @@ static void calc_global_nohz(unsigned long ticks)
 	if (time_before(jiffies, calc_load_update))
 		return;
 
-	/*
+		/*
 	 * If we crossed a calc_load_update boundary, make sure to fold
 	 * any pending idle changes, the respective CPUs might have
 	 * missed the tick driven calc_load_account_active() update
 	 * due to NO_HZ.
-	 */
+		 */
 	delta = calc_load_fold_idle();
 	if (delta)
 		atomic_long_add(delta, &calc_load_tasks);
@@ -6533,7 +6532,7 @@ sd_alloc_ctl_domain_table(struct sched_domain *sd)
 	set_table_entry(&table[11], "name", sd->name,
 		CORENAME_MAX_SIZE, 0444, proc_dostring);
 	/* &table[12] is terminator */
-
+	 
 	return table;
 }
 
@@ -7616,11 +7615,11 @@ static void __sdt_free(const struct cpumask *cpu_map)
 
 		for_each_cpu(j, cpu_map) {
 			struct sched_domain *sd = *per_cpu_ptr(sdd->sd, j);
-			if (sd && (sd->flags & SD_OVERLAP))
-				free_sched_groups(sd->groups, 0);
-			kfree(*per_cpu_ptr(sdd->sd, j));
-			kfree(*per_cpu_ptr(sdd->sg, j));
-			kfree(*per_cpu_ptr(sdd->sgp, j));
+				if (sd && (sd->flags & SD_OVERLAP))
+					free_sched_groups(sd->groups, 0);
+				kfree(*per_cpu_ptr(sdd->sd, j));
+				kfree(*per_cpu_ptr(sdd->sg, j));
+				kfree(*per_cpu_ptr(sdd->sgp, j));
 		}
 		free_percpu(sdd->sd);
 		free_percpu(sdd->sg);
@@ -7727,7 +7726,7 @@ static cpumask_var_t *doms_cur;	/* current sched domains */
 static int ndoms_cur;		/* number of sched domains in 'doms_cur' */
 static struct sched_domain_attr *dattr_cur;
 				/* attribues of custom domains in 'doms_cur' */
-
+				 
 /*
  * Special case: If a kmalloc of a doms_cur partition (array of
  * cpumask) fails, then fallback to a single sched domain,

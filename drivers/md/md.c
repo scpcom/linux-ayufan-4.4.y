@@ -34,7 +34,7 @@
    (for example /usr/src/linux/COPYING); if not, write to the Free
    Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
+ 
 #include <linux/kthread.h>
 #include <linux/blkdev.h>
 #include <linux/sysctl.h>
@@ -119,7 +119,7 @@ static struct workqueue_struct *md_misc_wq;
  * you can change it via /proc/sys/dev/raid/speed_limit_min and _max.
  * or /sys/block/mdX/md/sync_speed_{min,max}
  */
-
+ 
 static int sysctl_speed_limit_min = 1000;
 static int sysctl_speed_limit_max = 200000;
 static inline int speed_min(struct mddev *mddev)
@@ -328,7 +328,6 @@ static void md_new_event_inintr(struct mddev *mddev)
 static LIST_HEAD(all_mddevs);
 static DEFINE_SPINLOCK(all_mddevs_lock);
 
-
 /*
  * iterates through all used mddevs in the system.
  * We take care to grab the all_mddevs_lock whenever navigating
@@ -350,7 +349,6 @@ static DEFINE_SPINLOCK(all_mddevs_lock);
 	     ({ spin_lock(&all_mddevs_lock);				\
 		_tmp = _tmp->next;})					\
 		)
-
 
 /* Rather than calling directly into the personality make_request function,
  * IO requests come here first so that we can check if the device is
@@ -583,7 +581,7 @@ int mddev_check_plugged(struct mddev *mddev)
 				list_move(&mdcb->cb.list, &plug->cb_list);
 			return 1;
 		}
-	}
+}
 	/* Not currently on the callback list */
 	mdcb = kmalloc(sizeof(*mdcb), GFP_ATOMIC);
 	if (!mdcb)
@@ -1115,7 +1113,6 @@ abort:
 	return ret;
 }
 
-
 static u32 md_csum_fold(u32 csum)
 {
 	csum = (csum & 0xffff) + (csum >> 16);
@@ -1136,7 +1133,6 @@ static unsigned int calc_sb_csum(mdp_super_t * sb)
 		newcsum += sb32[i];
 	csum = (newcsum & 0xffffffff) + (newcsum>>32);
 
-
 #ifdef CONFIG_ALPHA
 	/* This used to use csum_partial, which was wrong for several
 	 * reasons including that different results are returned on
@@ -1152,7 +1148,6 @@ static unsigned int calc_sb_csum(mdp_super_t * sb)
 #endif
 	return csum;
 }
-
 
 /*
  * Handle superblock details.
@@ -1449,7 +1444,6 @@ static void super_90_sync(struct mddev *mddev, struct md_rdev *rdev)
 	struct md_rdev *rdev2;
 	int next_spare = mddev->raid_disks;
 
-
 	/* make rdev->sb match mddev data..
 	 *
 	 * 1/ zero out disks
@@ -1616,7 +1610,6 @@ super_90_rdev_size_change(struct md_rdev *rdev, sector_t num_sectors)
 	return num_sectors;
 }
 
-
 /*
  * version 1 superblock
  */
@@ -1684,7 +1677,6 @@ static int super_1_load(struct md_rdev *rdev, struct md_rdev *refdev, int minor_
 	 */
 	ret = read_disk_sb(rdev, 4096);
 	if (ret) return ret;
-
 
 	sb = page_address(rdev->sb_page);
 
@@ -1916,7 +1908,7 @@ static void super_1_sync(struct mddev *mddev, struct md_rdev *rdev)
 	struct md_rdev *rdev2;
 	int max_dev, i;
 	/* make rdev->sb match mddev and rdev data. */
-
+	 
 	sb = page_address(rdev->sb_page);
 
 	sb->feature_map = 0;
@@ -2526,7 +2518,6 @@ static void md_print_devices(void)
 	printk("\n");
 }
 
-
 static void sync_sbs(struct mddev * mddev, int nospares)
 {
 	/* Update each superblock (in-memory image), but
@@ -2687,7 +2678,7 @@ repeat:
 	}
 	md_super_wait(mddev);
 	/* if there was a failure, MD_CHANGE_DEVS was set, and we re-write super */
-
+	 
 	spin_lock_irq(&mddev->write_lock);
 	if (mddev->in_sync != sync_req ||
 	    test_bit(MD_CHANGE_DEVS, &mddev->flags)) {
@@ -2919,7 +2910,7 @@ slot_store(struct md_rdev *rdev, const char *buf, size_t len)
 		/* Activating a spare .. or possibly reactivating
 		 * if we ever get bitmaps working here.
 		 */
-
+		 
 		if (rdev->raid_disk != -1)
 			return -EBUSY;
 
@@ -2966,7 +2957,6 @@ slot_store(struct md_rdev *rdev, const char *buf, size_t len)
 	}
 	return len;
 }
-
 
 static struct rdev_sysfs_entry rdev_slot =
 __ATTR(slot, S_IRUGO|S_IWUSR, slot_show, slot_store);
@@ -3103,7 +3093,6 @@ rdev_size_store(struct md_rdev *rdev, const char *buf, size_t len)
 static struct rdev_sysfs_entry rdev_size =
 __ATTR(size, S_IRUGO|S_IWUSR, rdev_size_show, rdev_size_store);
 
-
 static ssize_t recovery_start_show(struct md_rdev *rdev, char *page)
 {
 	unsigned long long recovery_start = rdev->recovery_offset;
@@ -3139,7 +3128,6 @@ static ssize_t recovery_start_store(struct md_rdev *rdev, const char *buf, size_
 static struct rdev_sysfs_entry rdev_recovery_start =
 __ATTR(recovery_start, S_IRUGO|S_IWUSR, recovery_start_show, recovery_start_store);
 
-
 static ssize_t
 badblocks_show(struct badblocks *bb, char *page, int unack);
 static ssize_t
@@ -3159,7 +3147,6 @@ static ssize_t bb_store(struct md_rdev *rdev, const char *page, size_t len)
 }
 static struct rdev_sysfs_entry rdev_bad_blocks =
 __ATTR(bad_blocks, S_IRUGO|S_IWUSR, bb_show, bb_store);
-
 
 static ssize_t ubb_show(struct md_rdev *rdev, char *page)
 {
@@ -3372,7 +3359,6 @@ abort_free:
  * Check a full RAID array for plausibility
  */
 
-
 static void analyze_sbs(struct mddev * mddev)
 {
 	int i;
@@ -3395,7 +3381,6 @@ static void analyze_sbs(struct mddev * mddev)
 				bdevname(rdev->bdev,b));
 			kick_rdev_from_array(rdev);
 		}
-
 
 	super_types[mddev->major_version].
 		validate_super(mddev, freshest);
@@ -3471,7 +3456,6 @@ int strict_strtoul_scaled(const char *cp, unsigned long *res, int scale)
 	*res = result;
 	return 0;
 }
-
 
 static void md_safemode_timeout(unsigned long data);
 
@@ -3697,7 +3681,6 @@ level_store(struct mddev *mddev, const char *buf, size_t len)
 static struct md_sysfs_entry md_level =
 __ATTR(level, S_IRUGO|S_IWUSR, level_show, level_store);
 
-
 static ssize_t
 layout_show(struct mddev *mddev, char *page)
 {
@@ -3737,7 +3720,6 @@ layout_store(struct mddev *mddev, const char *buf, size_t len)
 }
 static struct md_sysfs_entry md_layout =
 __ATTR(layout, S_IRUGO|S_IWUSR, layout_show, layout_store);
-
 
 static ssize_t
 raid_disks_show(struct mddev *mddev, char *page)
@@ -4085,7 +4067,6 @@ new_dev_store(struct mddev *mddev, const char *buf, size_t len)
 	    minor != MINOR(dev))
 		return -EOVERFLOW;
 
-
 	if (mddev->persistent) {
 		rdev = md_import_device(dev, mddev->major_version,
 					mddev->minor_version);
@@ -4180,7 +4161,6 @@ size_store(struct mddev *mddev, const char *buf, size_t len)
 
 static struct md_sysfs_entry md_size =
 __ATTR(component_size, S_IRUGO|S_IWUSR, size_show, size_store);
-
 
 /* Metdata version.
  * This is one of
@@ -4334,7 +4314,6 @@ mismatch_cnt_show(struct mddev *mddev, char *page)
 
 static struct md_sysfs_entry md_scan_mode =
 __ATTR(sync_action, S_IRUGO|S_IWUSR, action_show, action_store);
-
 
 static struct md_sysfs_entry md_mismatches = __ATTR_RO(mismatch_cnt);
 
@@ -4565,7 +4544,6 @@ suspend_lo_store(struct mddev *mddev, const char *buf, size_t len)
 static struct md_sysfs_entry md_suspend_lo =
 __ATTR(suspend_lo, S_IRUGO|S_IWUSR, suspend_lo_show, suspend_lo_store);
 
-
 static ssize_t
 suspend_hi_show(struct mddev *mddev, char *page)
 {
@@ -4792,7 +4770,6 @@ static struct attribute_group md_redundancy_group = {
 	.name = NULL,
 	.attrs = md_redundancy_attrs,
 };
-
 
 static ssize_t
 md_attr_show(struct kobject *kobj, struct attribute *attr, char *page)
@@ -5295,7 +5272,7 @@ int md_run(struct mddev *mddev)
 		if (rdev->raid_disk >= 0)
 			if (sysfs_link_rdev(mddev, rdev))
 				/* failure here is OK */;
-	
+
 #ifdef MY_ABC_HERE
 	if (0 == mddev->level || LEVEL_LINEAR == mddev->level) {
 		// This bit should be cleared when RAID level is 0
@@ -6178,7 +6155,6 @@ static int set_bitmap_file(struct mddev *mddev, int fd)
 		/* we should be able to change the bitmap.. */
 	}
 
-
 	if (fd >= 0) {
 		if (mddev->bitmap)
 			return -EEXIST; /* cannot add when bitmap is present */
@@ -6376,7 +6352,6 @@ static int update_raid_disks(struct mddev *mddev, int raid_disks)
 		mddev->delta_disks = 0;
 	return rv;
 }
-
 
 /*
  * update_array_info is used to change the configuration of an
@@ -7041,7 +7016,6 @@ static void status_unused(struct seq_file *seq)
 	seq_printf(seq, "\n");
 }
 
-
 static void status_resync(struct seq_file *seq, struct mddev * mddev)
 {
 	sector_t max_sectors, resync, res;
@@ -7433,7 +7407,6 @@ void md_done_sync(struct mddev *mddev, int blocks, int ok)
 	}
 }
 
-
 /* md_write_start(mddev, bi)
  * If we need to update some array metadata (e.g. 'active' flag
  * in superblock) before writing, schedule a superblock update
@@ -7773,10 +7746,8 @@ void md_do_sync(struct mddev *mddev)
 			last_mark = next;
 		}
 
-
 		if (kthread_should_stop())
 			goto interrupted;
-
 
 		/*
 		 * this loop exits only if either when we are slower than
@@ -8097,7 +8068,7 @@ void md_check_recovery(struct mddev *mddev)
 		 * Spare are also removed and re-added, to allow
 		 * the personality to fail the re-add.
 		 */
-
+		 
 		if (mddev->reshape_position != MaxSector) {
 #ifdef MY_ABC_HERE
 			/* If it is possible. remove faulty disks */
@@ -8180,7 +8151,6 @@ void md_wait_for_blocked_rdev(struct md_rdev *rdev, struct mddev *mddev)
 }
 EXPORT_SYMBOL(md_wait_for_blocked_rdev);
 
-
 /* Bad block management.
  * We can record which blocks on each device are 'bad' and so just
  * fail those blocks, or that stripe, rather than the whole device.
@@ -8225,7 +8195,7 @@ int md_is_badblock(struct badblocks *bb, sector_t s, int sectors,
 		sectors = target - s;
 	}
 	/* 'target' is now the first block after the bad range */
-
+	 
 retry:
 	seq = read_seqbegin(&bb->lock);
 
@@ -8678,25 +8648,25 @@ static int md_notify_reboot(struct notifier_block *this,
 
 		printk(KERN_INFO "md: stopping all md devices.\n");
 
-		for_each_mddev(mddev, tmp) {
-			if (mddev_trylock(mddev)) {
+	for_each_mddev(mddev, tmp) {
+		if (mddev_trylock(mddev)) {
 				/* Force a switch to readonly even array
 				 * appears to still be in use.  Hence
 				 * the '100'.
 				 */
 				md_set_readonly(mddev, 100);
-				mddev_unlock(mddev);
-			}
-			need_delay = 1;
+			mddev_unlock(mddev);
 		}
-		/*
-		 * certain more exotic SCSI devices are known to be
-		 * volatile wrt too early system reboots. While the
-		 * right place to handle this issue is the given
-		 * driver, we do want to have a safe RAID driver ...
-		 */
-		if (need_delay)
-			mdelay(1000*1);
+		need_delay = 1;
+	}
+	/*
+	 * certain more exotic SCSI devices are known to be
+	 * volatile wrt too early system reboots. While the
+	 * right place to handle this issue is the given
+	 * driver, we do want to have a safe RAID driver ...
+	 */
+	if (need_delay)
+		mdelay(1000*1);
 	}
 	return NOTIFY_DONE;
 }

@@ -27,7 +27,7 @@
   Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
 
 *******************************************************************************/
-
+ 
 #include <linux/types.h>
 #include <linux/module.h>
 #include <linux/pci.h>
@@ -190,7 +190,6 @@ static const struct ixgbe_reg_info ixgbe_reg_info_tbl[] = {
 	/* List Terminator */
 	{}
 };
-
 
 /*
  * ixgbe_regdump - register printout routine
@@ -3342,7 +3341,6 @@ static void ixgbe_configure_dcb(struct ixgbe_adapter *adapter)
 	if (hw->mac.type == ixgbe_mac_82598EB)
 		netif_set_gso_max_size(adapter->netdev, 32768);
 
-
 	/* Enable VLAN tag insert/strip */
 	adapter->netdev->features |= NETIF_F_HW_VLAN_RX;
 
@@ -6145,7 +6143,7 @@ static void ixgbe_check_for_bad_vf(struct ixgbe_adapter *adapter)
 	 * issue a VFLR to the offending VF(s) and then resume without
 	 * requesting a full slot reset.
 	 */
-
+	 
 	for (vf = 0; vf < adapter->num_vfs; vf++) {
 		ciaa = (vf << 16) | 0x80000000;
 		/* 32 bit read so align, we really want status at offset 6 */
@@ -7106,7 +7104,6 @@ static void ixgbe_validate_rtr(struct ixgbe_adapter *adapter, u8 tc)
 
 	return;
 }
-
 
 /* ixgbe_setup_tc - routine to configure net_device for multiple traffic
  * classes.

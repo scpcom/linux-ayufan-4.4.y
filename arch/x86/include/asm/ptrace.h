@@ -18,7 +18,7 @@
 #ifdef __i386__
 /* this struct defines the way the registers are stored on the
    stack during a system call. */
-
+ 
 #ifndef __KERNEL__
 
 struct pt_regs {
@@ -129,7 +129,6 @@ struct pt_regs {
 
 #endif /* __KERNEL__ */
 #endif /* !__i386__ */
-
 
 #ifdef __KERNEL__
 

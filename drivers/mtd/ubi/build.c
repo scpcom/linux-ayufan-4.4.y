@@ -1219,7 +1219,6 @@ static int __init ubi_init(void)
 	if (err)
 		goto out_slab;
 
-
 	/* Attach MTD devices */
 	for (i = 0; i < mtd_devs; i++) {
 		struct mtd_dev_param *p = &mtd_dev_param[i];
@@ -1230,7 +1229,7 @@ static int __init ubi_init(void)
 		mtd = open_mtd_device(p->name);
 		if (IS_ERR(mtd)) {
 			err = PTR_ERR(mtd);
-			goto out_detach;
+				goto out_detach;
 		}
 
 		mutex_lock(&ubi_devices_mutex);
@@ -1361,7 +1360,7 @@ static int __init ubi_mtd_param_parse(const char *val, struct kernel_param *kp)
 
 	if (mtd_devs == UBI_MAX_DEVICES) {
 		printk(KERN_ERR "UBI error: too many parameters, max. is %d\n",
-		       UBI_MAX_DEVICES);
+			UBI_MAX_DEVICES);
 		return -EINVAL;
 	}
 
@@ -1399,8 +1398,8 @@ static int __init ubi_mtd_param_parse(const char *val, struct kernel_param *kp)
 	if (tokens[1])
 		p->vid_hdr_offs = bytes_str_to_int(tokens[1]);
 
-	if (p->vid_hdr_offs < 0)
-		return p->vid_hdr_offs;
+		if (p->vid_hdr_offs < 0)
+			return p->vid_hdr_offs;
 
 	mtd_devs += 1;
 	return 0;

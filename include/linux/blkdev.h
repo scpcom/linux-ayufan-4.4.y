@@ -1352,7 +1352,6 @@ static inline void blk_schedule_flush_plug(struct task_struct *task)
 {
 }
 
-
 static inline bool blk_needs_flush_plug(struct task_struct *tsk)
 {
 	return false;

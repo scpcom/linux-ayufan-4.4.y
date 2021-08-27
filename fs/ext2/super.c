@@ -18,7 +18,7 @@
  *  Big-endian to little-endian byte-swapping/bitmaps by
  *        David S. Miller (davem@caip.rutgers.edu), 1995
  */
-
+ 
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/fs.h>
@@ -117,7 +117,7 @@ void ext2_update_dynamic_rev(struct super_block *sb)
 	es->s_rev_level = cpu_to_le32(EXT2_DYNAMIC_REV);
 	/* leave es->s_feature_*compat flags alone */
 	/* es->s_uuid will be set by e2fsck if empty */
-
+	 
 	/*
 	 * The rest of the superblock fields should be zero, and if not it
 	 * means they are likely already in use, so leave them alone.  We
@@ -705,7 +705,6 @@ static loff_t ext2_max_size(int bits)
 
 	/* total blocks in file system block size */
 	upper_limit >>= (bits - 9);
-
 
 	/* indirect blocks */
 	meta_blocks = 1;

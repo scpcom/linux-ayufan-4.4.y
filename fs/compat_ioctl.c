@@ -12,7 +12,7 @@
  * These routines maintain argument size conversion between 32bit and 64bit
  * ioctls.
  */
-
+ 
 #include <linux/joystick.h>
 
 #include <linux/types.h>
@@ -587,7 +587,6 @@ static int mt_ioctl_trans(unsigned int fd, unsigned int cmd, void __user *argp)
 #define HIDPGETCONNLIST	_IOR('H', 210, int)
 #define HIDPGETCONNINFO	_IOR('H', 211, int)
 
-
 struct serial_struct32 {
         compat_int_t    type;
         compat_int_t    line;
@@ -830,7 +829,7 @@ static unsigned int ioctl_pointer[] = {
 /* compatible ioctls first */
 COMPATIBLE_IOCTL(0x4B50)   /* KDGHWCLK - not in the kernel, but don't complain */
 COMPATIBLE_IOCTL(0x4B51)   /* KDSHWCLK - not in the kernel, but don't complain */
-
+ 
 /* Big T */
 COMPATIBLE_IOCTL(TCGETA)
 COMPATIBLE_IOCTL(TCSETA)
@@ -1691,7 +1690,7 @@ asmlinkage long compat_sys_ioctl(unsigned int fd, unsigned int cmd,
 		if (S_ISREG(filp->f_path.dentry->d_inode->i_mode))
 			break;
 		/*FALL THROUGH*/
-
+		 
 	default:
 		if (filp->f_op && filp->f_op->compat_ioctl) {
 			error = filp->f_op->compat_ioctl(filp, cmd, arg);

@@ -456,7 +456,7 @@ static struct fib6_node * fib6_add_1(struct fib6_node *root, void *addr,
 		/*
 		 *	Exact match ?
 		 */
-
+			 
 		if (plen == fn->fn_bit) {
 			/* clean up an intermediate node */
 			if ((fn->fn_flags & RTN_RTINFO) == 0) {
@@ -501,7 +501,6 @@ static struct fib6_node * fib6_add_1(struct fib6_node *root, void *addr,
 
 	return ln;
 
-
 insert_above:
 	/*
 	 * split since we don't have a common prefix anymore or
@@ -510,7 +509,7 @@ insert_above:
 	 * this new node will point to the one we need to create
 	 * and the current
 	 */
-
+	 
 	pn = fn->parent;
 
 	/* find 1st bit in difference between the 2 addrs.
@@ -624,12 +623,12 @@ static int fib6_add_rt2node(struct fib6_node *fn, struct rt6_info *rt,
 		/*
 		 *	Search for duplicates
 		 */
-
+		 
 		if (iter->rt6i_metric == rt->rt6i_metric) {
 			/*
 			 *	Same priority level
 			 */
-
+			 
 			if (iter->rt6i_dev == rt->rt6i_dev &&
 			    iter->rt6i_idev == rt->rt6i_idev &&
 			    ipv6_addr_equal(&iter->rt6i_gateway,
@@ -915,7 +914,6 @@ struct fib6_node * fib6_lookup(struct fib6_node *root, const struct in6_addr *da
  *	if subtrees are used)
  */
 
-
 static struct fib6_node * fib6_locate_1(struct fib6_node *root,
 					const struct in6_addr *addr,
 					int plen, int offset)
@@ -969,7 +967,6 @@ struct fib6_node * fib6_locate(struct fib6_node *root,
 
 	return NULL;
 }
-
 
 /*
  *	Deletion

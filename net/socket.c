@@ -60,7 +60,7 @@
  *
  *	Based upon Swansea University Computer Society NET3.039
  */
-
+ 
 #include <linux/mm.h>
 #include <linux/socket.h>
 #include <linux/file.h>
@@ -656,7 +656,6 @@ void __sock_recv_timestamp(struct msghdr *msg, struct sock *sk,
 		}
 	}
 
-
 	memset(ts, 0, sizeof(ts));
 	if (skb->tstamp.tv64 &&
 	    sock_flag(sk, SOCK_TIMESTAMPING_SOFTWARE)) {
@@ -862,7 +861,6 @@ static ssize_t sock_aio_read(struct kiocb *iocb, const struct iovec *iov,
 
 	if (iocb->ki_left == 0)	/* Match SYS5 behaviour */
 		return 0;
-
 
 	x = alloc_sock_iocb(iocb, &siocb);
 	if (!x)
@@ -1099,7 +1097,7 @@ static int sock_close(struct inode *inode, struct file *filp)
 	 *      It was possible the inode is NULL we were
 	 *      closing an unfinished socket.
 	 */
-
+	 
 	if (!inode) {
 		printk(KERN_DEBUG "sock_close: NULL inode\n");
 		return 0;
@@ -1397,7 +1395,7 @@ SYSCALL_DEFINE4(socketpair, int, family, int, type, int, protocol,
 	/* fd1 and fd2 may be already another descriptors.
 	 * Not kernel problem.
 	 */
-
+	 
 	err = put_user(fd1, &usockvec[0]);
 	if (!err)
 		err = put_user(fd2, &usockvec[1]);
@@ -2125,7 +2123,7 @@ static int __sys_recvmsg(struct socket *sock, struct msghdr __user *msg,
 
 	/*
 	 *      Save the user-mode address (verify_iovec will change the
-	 *      kernel msghdr to use the kernel address space)
+	 * kernel msghdr to use the kernel address space)
 	 */
 
 	uaddr = (__force void __user *)msg_sys->msg_name;

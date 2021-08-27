@@ -18,7 +18,7 @@
  *		Alexey Kuznetsov:	2.1 optimisations
  *		Andi Kleen	:	Fix csum*fromiovecend for IPv6.
  */
-
+ 
 #include <linux/errno.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -51,7 +51,7 @@ int verify_iovec(struct msghdr *m, struct iovec *iov, struct sockaddr *address, 
 			if (err < 0)
 				return err;
 		}
-		m->msg_name = address;
+			m->msg_name = address;
 	} else {
 		m->msg_name = NULL;
 	}
@@ -129,7 +129,7 @@ void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len)
 /*
  *	Copy kernel to iovec. Returns -EFAULT on error.
  */
-
+ 
 int memcpy_toiovecend(const struct iovec *iov, unsigned char *kdata,
 		      int offset, int len)
 {

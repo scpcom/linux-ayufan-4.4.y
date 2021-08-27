@@ -28,7 +28,7 @@
   Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
 
 *******************************************************************************/
-
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/module.h>
@@ -1796,14 +1796,12 @@ no_link_interrupt:
 	return IRQ_HANDLED;
 }
 
-
 static irqreturn_t e1000_intr_msix_tx(int irq, void *data)
 {
 	struct net_device *netdev = data;
 	struct e1000_adapter *adapter = netdev_priv(netdev);
 	struct e1000_hw *hw = &adapter->hw;
 	struct e1000_ring *tx_ring = adapter->tx_ring;
-
 
 	adapter->total_tx_bytes = 0;
 	adapter->total_tx_packets = 0;
@@ -3526,7 +3524,7 @@ void e1000e_down(struct e1000_adapter *adapter)
 	if (!(adapter->flags2 & FLAG2_NO_DISABLE_RX))
 		ew32(RCTL, rctl & ~E1000_RCTL_EN);
 	/* flush and sleep below */
-
+	 
 	netif_stop_queue(netdev);
 
 	/* disable transmits in the hardware */
@@ -6462,7 +6460,6 @@ static void __exit e1000_exit_module(void)
 	pci_unregister_driver(&e1000_driver);
 }
 module_exit(e1000_exit_module);
-
 
 MODULE_AUTHOR("Intel Corporation, <linux.nics@intel.com>");
 MODULE_DESCRIPTION("Intel(R) PRO/1000 Network Driver");

@@ -10,8 +10,7 @@
  *
  * This could probably be made into a module, because it is not often in use.
  */
-
-
+ 
 #define EXT4FS_DEBUG
 
 #include <linux/errno.h>
@@ -211,57 +210,57 @@ static int setup_new_group_blocks(struct super_block *sb,
 
 	BUG_ON(input->group != sbi->s_groups_count);
 
-	/* Copy all of the GDT blocks into the backup in this group */
+		/* Copy all of the GDT blocks into the backup in this group */
 	for (i = 0, bit = 1, block = start + 1;
 	     i < gdblocks; i++, block++, bit++) {
-		struct buffer_head *gdb;
+			struct buffer_head *gdb;
 
 		ext4_debug("update backup group %#04llx (+%d)\n", block, bit);
-		err = extend_or_restart_transaction(handle, 1);
-		if (err)
+			err = extend_or_restart_transaction(handle, 1);
+			if (err)
 			goto exit_journal;
 
-		gdb = sb_getblk(sb, block);
-		if (!gdb) {
-			err = -EIO;
+			gdb = sb_getblk(sb, block);
+			if (!gdb) {
+				err = -EIO;
 			goto exit_journal;
-		}
+			}
 		if ((err = ext4_journal_get_write_access(handle, gdb))) {
-			brelse(gdb);
+				brelse(gdb);
 			goto exit_journal;
-		}
+			}
 		memcpy(gdb->b_data, sbi->s_group_desc[i]->b_data, gdb->b_size);
-		set_buffer_uptodate(gdb);
-		err = ext4_handle_dirty_metadata(handle, NULL, gdb);
-		if (unlikely(err)) {
-			brelse(gdb);
+			set_buffer_uptodate(gdb);
+			err = ext4_handle_dirty_metadata(handle, NULL, gdb);
+			if (unlikely(err)) {
+				brelse(gdb);
 			goto exit_journal;
+			}
+			brelse(gdb);
 		}
-		brelse(gdb);
-	}
 
 	/* Zero out all of the reserved backup group descriptor table blocks */
-	ext4_debug("clear inode table blocks %#04llx -> %#04lx\n",
-			block, sbi->s_itb_per_group);
+		ext4_debug("clear inode table blocks %#04llx -> %#04lx\n",
+			   block, sbi->s_itb_per_group);
 	err = sb_issue_zeroout(sb, gdblocks + start + 1, reserved_gdb,
-			       GFP_NOFS);
-	if (err)
+				       GFP_NOFS);
+		if (err)
 		goto exit_journal;
 
 	err = extend_or_restart_transaction(handle, 2);
-	if (err)
+		if (err)
 		goto exit_journal;
 
 	bh = bclean(handle, sb, input->block_bitmap);
-	if (IS_ERR(bh)) {
-		err = PTR_ERR(bh);
+		if (IS_ERR(bh)) {
+			err = PTR_ERR(bh);
 		goto exit_journal;
-	}
+		}
 
 	if (ext4_bg_has_super(sb, input->group)) {
 		ext4_debug("mark backup group tables %#04llx (+0)\n", start);
 		ext4_set_bits(bh->b_data, 0, gdblocks + reserved_gdb + 1);
-	}
+		}
 
 	ext4_debug("mark block bitmap %#04llx (+%llu)\n", input->block_bitmap,
 		   input->block_bitmap - start);
@@ -275,7 +274,7 @@ static int setup_new_group_blocks(struct super_block *sb,
 	ext4_debug("clear inode table blocks %#04llx -> %#04lx\n",
 			block, sbi->s_itb_per_group);
 	err = sb_issue_zeroout(sb, block, sbi->s_itb_per_group, GFP_NOFS);
-	if (err)
+		if (err)
 		goto exit_bh;
 	ext4_set_bits(bh->b_data, input->inode_table - start,
 		      sbi->s_itb_per_group);
@@ -289,21 +288,21 @@ static int setup_new_group_blocks(struct super_block *sb,
 		goto exit_bh;
 	}
 	brelse(bh);
-	/* Mark unused entries in inode bitmap used */
+		/* Mark unused entries in inode bitmap used */
 	ext4_debug("clear inode bitmap %#04llx (+%llu)\n",
 		   input->inode_bitmap, input->inode_bitmap - start);
 	if (IS_ERR(bh = bclean(handle, sb, input->inode_bitmap))) {
-		err = PTR_ERR(bh);
+			err = PTR_ERR(bh);
 		goto exit_journal;
-	}
+		}
 
 	ext4_mark_bitmap_end(EXT4_INODES_PER_GROUP(sb), sb->s_blocksize * 8,
 			     bh->b_data);
-	err = ext4_handle_dirty_metadata(handle, NULL, bh);
+		err = ext4_handle_dirty_metadata(handle, NULL, bh);
 	if (unlikely(err))
 		ext4_std_error(sb, err);
 exit_bh:
-	brelse(bh);
+		brelse(bh);
 
 exit_journal:
 	if ((err2 = ext4_journal_stop(handle)) && !err)
@@ -714,6 +713,7 @@ static void update_backups(struct super_block *sb,
 		if (unlikely(err))
 			ext4_std_error(sb, err);
 		brelse(bh);
+
 	}
 	if ((err2 = ext4_journal_stop(handle)) && !err)
 		err = err2;
@@ -1047,7 +1047,7 @@ int ext4_group_extend(struct super_block *sb, struct ext4_super_block *es,
 
 	/* We will update the superblock, one block bitmap, and
 	 * one group descriptor via ext4_free_blocks().
-	 */
+ */
 	handle = ext4_journal_start_sb(sb, 3);
 	if (IS_ERR(handle)) {
 		err = PTR_ERR(handle);
@@ -1073,7 +1073,7 @@ int ext4_group_extend(struct super_block *sb, struct ext4_super_block *es,
 	if (!err && err2)
 		err = err2;
 
-	if (err)
+		if (err)
 		goto exit_put;
 
 	if (test_opt(sb, DEBUG))

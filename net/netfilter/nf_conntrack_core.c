@@ -13,7 +13,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-
+ 
 #include <linux/types.h>
 #include <linux/netfilter.h>
 #include <linux/module.h>
@@ -1244,7 +1244,7 @@ void nf_ct_iterate_cleanup(struct net *net,
 		if (del_timer(&ct->timeout))
 			death_by_timeout((unsigned long)ct);
 		/* ... else the timer will get him soon. */
-
+		 
 		nf_ct_put(ct);
 	}
 }

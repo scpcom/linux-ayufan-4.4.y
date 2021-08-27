@@ -180,7 +180,6 @@ static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	unsigned char *data;
 	__u32 seq_recv;
 
-
 	struct rtable *rt;
 	struct net_device *tdev;
 	struct iphdr  *iph;

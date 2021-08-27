@@ -8,7 +8,7 @@
  *
  * Address space accounting code	<alan@lxorguk.ukuu.org.uk>
  */
-
+ 
 #include <linux/slab.h>
 #include <linux/backing-dev.h>
 #include <linux/mm.h>
@@ -2041,7 +2041,7 @@ int do_munmap(struct mm_struct *mm, unsigned long start, size_t len)
 		return 0;
 	prev = vma->vm_prev;
 	/* we have  start < vma->vm_end  */
-
+	 
 	/* if it doesn't overlap, we have nothing.. */
 	end = start + len;
 	if (vma->vm_start >= end)
@@ -2395,7 +2395,6 @@ int may_expand_vm(struct mm_struct *mm, unsigned long npages)
 		return 0;
 	return 1;
 }
-
 
 static int special_mapping_fault(struct vm_area_struct *vma,
 				struct vm_fault *vmf)

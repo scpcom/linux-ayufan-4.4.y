@@ -45,7 +45,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #include <linux/module.h>
 #include <linux/mutex.h>
 
@@ -80,7 +80,7 @@ extern int gSynoHasDynModule;
 /***********************************************************************
  * Host functions 
  ***********************************************************************/
-
+ 
 static const char* host_info(struct Scsi_Host *host)
 {
 	struct us_data *us = host_to_us(host);
@@ -564,7 +564,7 @@ static struct device_attribute *sysfs_device_attr_list[] = {
 /*
  * this defines our host template, with which we'll allocate hosts
  */
-
+	 
 struct scsi_host_template usb_stor_host_template = {
 	/* basic userland interface stuff */
 	.name =				"usb-storage",

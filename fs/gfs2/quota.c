@@ -1390,7 +1390,6 @@ void gfs2_wake_up_statfs(struct gfs2_sbd *sdp) {
 	}
 }
 
-
 /**
  * gfs2_quotad - Write cached quota changes into the quota file
  * @sdp: Pointer to GFS2 superblock

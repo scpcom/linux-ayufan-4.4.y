@@ -28,7 +28,7 @@
  *	Arne Redlich
  *	Zhenyu Wang
  */
-
+ 
 #include <linux/types.h>
 #include <linux/inet.h>
 #include <linux/slab.h>
@@ -74,7 +74,6 @@ MODULE_PARM_DESC(debug_iscsi_tcp, "Turn on debugging for iscsi_tcp module "
 					     "%s " dbg_fmt,	\
 					     __func__, ##arg);	\
 	} while (0);
-
 
 /**
  * iscsi_sw_tcp_recv - TCP receive in sendfile fashion

@@ -8,7 +8,7 @@
   This program can be distributed under the terms of the GNU GPL.
   See the file COPYING.
 */
-
+ 
 #include "fuse_i.h"
 
 #include <linux/pagemap.h>
@@ -713,10 +713,10 @@ static ssize_t fuse_file_aio_read(struct kiocb *iocb, const struct iovec *iov,
 
 	if (pos + iov_length(iov, nr_segs) > i_size_read(inode)) {
 		int err;
-		/*
+	/*
 		 * If trying to read past EOF, make sure the i_size
 		 * attribute is up-to-date.
-		 */
+	 */
 		err = fuse_update_attributes(inode, NULL, iocb->ki_filp, NULL);
 		if (err)
 			return err;
@@ -1037,10 +1037,10 @@ static ssize_t fuse_file_aio_write(struct kiocb *iocb, const struct iovec *iov,
 
 	file_update_time(file);
 
-	iov_iter_init(&i, iov, nr_segs, count, 0);
-	written = fuse_perform_write(file, mapping, &i, pos);
-	if (written >= 0)
-		iocb->ki_pos = pos + written;
+		iov_iter_init(&i, iov, nr_segs, count, 0);
+		written = fuse_perform_write(file, mapping, &i, pos);
+		if (written >= 0)
+			iocb->ki_pos = pos + written;
 
 out:
 	current->backing_dev_info = NULL;
@@ -1058,7 +1058,7 @@ static void fuse_release_user_pages(struct fuse_req *req, int write)
 		if (write)
 			set_page_dirty_lock(page);
 		put_page(page);
-	}
+}
 }
 
 static int fuse_get_user_pages(struct fuse_req *req, const char __user *buf,
@@ -1129,7 +1129,7 @@ ssize_t fuse_direct_io(struct file *file, const char __user *buf,
 		else
 			nres = fuse_send_read(req, file, pos, nbytes, owner);
 
-		fuse_release_user_pages(req, !write);
+			fuse_release_user_pages(req, !write);
 		if (req->out.h.error) {
 			if (!res)
 				res = req->out.h.error;
@@ -1190,8 +1190,8 @@ static ssize_t fuse_direct_write(struct file *file, const char __user *buf,
 	res = generic_write_checks(file, ppos, &count, 0);
 	if (!res) {
 		res = fuse_direct_io(file, buf, count, ppos, 1);
-		if (res > 0)
-			fuse_write_update_size(inode, *ppos);
+	if (res > 0)
+		fuse_write_update_size(inode, *ppos);
 	}
 	mutex_unlock(&inode->i_mutex);
 
@@ -1632,7 +1632,7 @@ static loff_t fuse_file_llseek(struct file *file, loff_t offset, int origin)
 
 	mutex_lock(&inode->i_mutex);
 	if (origin != SEEK_CUR && origin != SEEK_SET) {
-		retval = fuse_update_attributes(inode, NULL, file, NULL);
+	retval = fuse_update_attributes(inode, NULL, file, NULL);
 		if (retval)
 			goto exit;
 	}
@@ -1804,7 +1804,6 @@ static int fuse_copy_ioctl_iovec(struct fuse_conn *fc, struct iovec *dst,
 
 	return 0;
 }
-
 
 /*
  * For ioctls, there is no generic way to determine how much memory
@@ -2034,7 +2033,7 @@ long fuse_do_ioctl(struct file *file, unsigned int cmd, unsigned long arg,
 EXPORT_SYMBOL_GPL(fuse_do_ioctl);
 
 static long fuse_file_ioctl_common(struct file *file, unsigned int cmd,
-				   unsigned long arg, unsigned int flags)
+		       unsigned long arg, unsigned int flags)
 {
 	struct inode *inode = file->f_dentry->d_inode;
 	struct fuse_conn *fc = get_fuse_conn(inode);

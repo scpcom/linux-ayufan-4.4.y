@@ -149,7 +149,7 @@ be_get_reg_len(struct net_device *netdev)
 	u32 log_size = 0;
 
 	if (be_physfn(adapter))
-		be_cmd_get_reg_len(adapter, &log_size);
+			be_cmd_get_reg_len(adapter, &log_size);
 
 	return log_size;
 }
@@ -161,7 +161,7 @@ be_get_regs(struct net_device *netdev, struct ethtool_regs *regs, void *buf)
 
 	if (be_physfn(adapter)) {
 		memset(buf, 0, regs->len);
-		be_cmd_get_regs(adapter, regs->len, buf);
+			be_cmd_get_regs(adapter, regs->len, buf);
 	}
 }
 
@@ -660,8 +660,8 @@ be_do_flash(struct net_device *netdev, struct ethtool_flash *efl)
 static int
 be_get_eeprom_len(struct net_device *netdev)
 {
-	return BE_READ_SEEPROM_LEN;
-}
+		return BE_READ_SEEPROM_LEN;
+	}
 
 static int
 be_read_eeprom(struct net_device *netdev, struct ethtool_eeprom *eeprom,

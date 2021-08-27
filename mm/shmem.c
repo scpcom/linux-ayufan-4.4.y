@@ -23,7 +23,7 @@
  *
  * This file is released under the GPL.
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/init.h>
 #include <linux/vfs.h>
@@ -42,7 +42,7 @@ static struct vfsmount *shm_mnt;
  * extends ramfs by the ability to use swap and honor resource limits
  * which makes it a completely usable filesystem.
  */
-
+ 
 #include <linux/xattr.h>
 #include <linux/exportfs.h>
 #include <linux/posix_acl.h>
@@ -636,7 +636,7 @@ static int shmem_unuse_inode(struct shmem_inode_info *info,
 	error = shmem_add_to_page_cache(page, mapping, index,
 						GFP_NOWAIT, radswap);
 	/* which does mem_cgroup_uncharge_cache_page on error */
-
+	 
 	if (error != -ENOMEM) {
 		/*
 		 * Truncation and eviction use free_swap_and_cache(), which
@@ -674,7 +674,7 @@ int shmem_unuse(swp_entry_t swap, struct page *page)
 	if (error)
 		goto out;
 	/* No radix_tree_preload: swap entry keeps a place for page in tree */
-
+	 
 	mutex_lock(&shmem_swaplist_mutex);
 	list_for_each_safe(this, next, &shmem_swaplist) {
 		info = list_entry(this, struct shmem_inode_info, swaplist);
@@ -1706,7 +1706,7 @@ static void shmem_put_link(struct dentry *dentry, struct nameidata *nd, void *co
  * like ACLs, we also need to implement the security.* handlers at
  * filesystem level, though.
  */
-
+ 
 static int shmem_xattr_get(struct dentry *dentry, const char *name,
 			   void *buffer, size_t size)
 {
@@ -2139,8 +2139,8 @@ static int shmem_remount_fs(struct super_block *sb, int *flags, char *data)
 	sbinfo->max_inodes  = config.max_inodes;
 	sbinfo->free_inodes = config.max_inodes - inodes;
 
-	mpol_put(sbinfo->mpol);
-	sbinfo->mpol        = config.mpol;	/* transfers initial ref */
+		mpol_put(sbinfo->mpol);
+		sbinfo->mpol = config.mpol;	/* transfers initial ref */
 out:
 	spin_unlock(&sbinfo->stat_lock);
 	return error;

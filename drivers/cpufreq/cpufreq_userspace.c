@@ -61,7 +61,6 @@ static struct notifier_block userspace_cpufreq_notifier_block = {
 	.notifier_call  = userspace_cpufreq_notifier
 };
 
-
 /**
  * cpufreq_set - set the CPU frequency
  * @policy: pointer to policy struct where freq is being set
@@ -102,7 +101,6 @@ static int cpufreq_set(struct cpufreq_policy *policy, unsigned int freq)
 	mutex_unlock(&userspace_mutex);
 	return ret;
 }
-
 
 static ssize_t show_speed(struct cpufreq_policy *policy, char *buf)
 {
@@ -186,7 +184,6 @@ static int cpufreq_governor_userspace(struct cpufreq_policy *policy,
 	return rc;
 }
 
-
 #ifndef CONFIG_CPU_FREQ_DEFAULT_GOV_USERSPACE
 static
 #endif
@@ -206,12 +203,10 @@ static int __init cpufreq_gov_userspace_init(void)
 	return cpufreq_register_governor(&cpufreq_gov_userspace);
 }
 
-
 static void __exit cpufreq_gov_userspace_exit(void)
 {
 	cpufreq_unregister_governor(&cpufreq_gov_userspace);
 }
-
 
 MODULE_AUTHOR("Dominik Brodowski <linux@brodo.de>, "
 		"Russell King <rmk@arm.linux.org.uk>");

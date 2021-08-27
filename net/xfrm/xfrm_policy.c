@@ -15,7 +15,7 @@
  *	Derek Atkins <derek@ihtfp.com>		Add the post_input processor
  *
  */
-
+ 
 #include <linux/err.h>
 #include <linux/slab.h>
 #include <linux/kmod.h>
@@ -54,7 +54,6 @@ static void xfrm_policy_put_afinfo(struct xfrm_policy_afinfo *afinfo);
 static void xfrm_init_pmtu(struct dst_entry *dst);
 static int stale_bundle(struct dst_entry *dst);
 static int xfrm_bundle_ok(struct xfrm_dst *xdst);
-
 
 static struct xfrm_policy *__xfrm_policy_unlink(struct xfrm_policy *pol,
 						int dir);
@@ -1398,7 +1397,6 @@ static inline int xfrm_fill_dst(struct xfrm_dst *xdst, struct net_device *dev,
 
 	return err;
 }
-
 
 /* Allocate chain of dst_entry's, attach known xfrm's, calculate
  * all the metrics... Shortly, bundle a bundle.

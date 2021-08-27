@@ -898,7 +898,6 @@ rcu_start_gp(struct rcu_state *rsp, unsigned long flags)
 
 	raw_spin_unlock(&rnp->lock);  /* leave irqs disabled. */
 
-
 	/* Exclude any concurrent CPU-hotplug operations. */
 	raw_spin_lock(&rsp->onofflock);  /* irqs already disabled. */
 

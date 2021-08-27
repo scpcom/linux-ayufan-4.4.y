@@ -71,4 +71,3 @@ typedef struct page *pgtable_t;
 #include <asm-generic/getorder.h>
 
 #endif /* _CRIS_PAGE_H */
-

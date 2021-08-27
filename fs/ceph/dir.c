@@ -87,7 +87,6 @@ struct inode *ceph_get_dentry_parent_inode(struct dentry *dentry)
 	return inode;
 }
 
-
 /*
  * for readdir, we encode the directory frag and offset within that
  * frag into f_pos.

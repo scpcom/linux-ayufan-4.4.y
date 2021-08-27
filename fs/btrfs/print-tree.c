@@ -315,7 +315,7 @@ void btrfs_print_tree(struct btrfs_root *root, struct extent_buffer *c)
 	printk(KERN_INFO "node %llu level %d total ptrs %d free spc %u\n",
 	       (unsigned long long)btrfs_header_bytenr(c),
 	      level, nr,
-	       (u32)BTRFS_NODEPTRS_PER_BLOCK(root) - nr);
+		(u32)BTRFS_NODEPTRS_PER_BLOCK(root) - nr);
 	for (i = 0; i < nr; i++) {
 		btrfs_node_key_to_cpu(c, &key, i);
 		printk(KERN_INFO "\tkey %d (%llu %u %llu) block %llu\n",

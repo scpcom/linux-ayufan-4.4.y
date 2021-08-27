@@ -16,7 +16,7 @@
  */
 /* [Feb-Apr 2000, AV] Rewrite to the new namespace architecture.
  */
-
+ 
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -1801,7 +1801,7 @@ static inline int nested_symlink(struct path *path, struct nameidata *nd)
 #endif
 		if (!res)
 			res = walk_component(nd, path, &nd->last,
-					     nd->last_type, LOOKUP_FOLLOW);
+								 nd->last_type, LOOKUP_FOLLOW);
 		put_link(nd, &link, cookie);
 	} while (res > 0);
 
@@ -1909,7 +1909,7 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 #endif
 
 		err = may_lookup(nd);
- 		if (err)
+		if (err)
 			break;
 
 		this.name = name;
@@ -1942,13 +1942,13 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 				}
 #endif
 				type = LAST_DOT;
-		}
+			}
 		if (likely(type == LAST_NORM)) {
 			struct dentry *parent = nd->path.dentry;
 			nd->flags &= ~LOOKUP_JUMPED;
 			if (unlikely(parent->d_flags & DCACHE_OP_HASH)) {
 				err = parent->d_op->d_hash(parent, nd->inode,
-							   &this);
+										   &this);
 				if (err < 0)
 					break;
 			}
@@ -1975,7 +1975,7 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 		err = -ENOTDIR; 
 		break;
 		/* here ends the main loop */
-
+		 
 last_component:
 #ifdef MY_ABC_HERE
 			nd->flags |= LOOKUP_TO_LASTCOMPONENT;
@@ -1985,6 +1985,7 @@ last_component:
 		return 0;
 	}
 	terminate_walk(nd);
+
 	return err;
 }
 
@@ -2244,7 +2245,7 @@ static struct dentry *__lookup_hash(struct qstr *name,
 	if (IS_SYNOACL(inode) && NULL != nd) {
 		err = inode->i_op->syno_exec_permission(nd->path.dentry);
 	} else {
-	err = inode_permission(inode, MAY_EXEC);
+		err = inode_permission(inode, MAY_EXEC);
 	}
 #else
 	err = inode_permission(inode, MAY_EXEC);

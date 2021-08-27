@@ -14,7 +14,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/slab.h>
@@ -43,11 +43,10 @@
 #define FAULT		10
 
 /* 7475 Common Registers */
+#define REG_DEVREV2		0x12    /* ADT7490 only */
 
-#define REG_DEVREV2		0x12	/* ADT7490 only */
-
-#define REG_VTT			0x1E	/* ADT7490 only */
-#define REG_EXTEND3		0x1F	/* ADT7490 only */
+#define REG_VTT			0x1E    /* ADT7490 only */
+#define REG_EXTEND3		0x1F    /* ADT7490 only */
 
 #define REG_VOLTAGE_BASE	0x20
 #define REG_TEMP_BASE		0x25
@@ -457,7 +456,7 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *attr,
 	case HYSTERSIS:
 		/* The value will be given as an absolute value, turn it
 		   into an offset based on THERM */
-
+		 
 		/* Read fresh THERM and HYSTERSIS values from the chip */
 		data->temp[THERM][sattr->index] =
 			adt7475_read(TEMP_THERM_REG(sattr->index)) << 2;
@@ -1434,6 +1433,7 @@ static void adt7475_read_pwm(struct i2c_client *client, int index)
 
 	data->pwm[CONTROL][index] = adt7475_read(PWM_CONFIG_REG(index));
 
+
 	/* Figure out the internal value for pwmctrl and pwmchan
 	   based on the current settings */
 	v = (data->pwm[CONTROL][index] >> 5) & 7;
@@ -1510,7 +1510,6 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 			data->temp[INPUT][i] =
 				(adt7475_read(TEMP_REG(i)) << 2) |
 				((ext >> ((i + 5) * 2)) & 3);
-
 		if (data->has_voltage & (1 << 5)) {
 			data->alarms |= adt7475_read(REG_STATUS4) << 24;
 			ext = adt7475_read(REG_EXTEND3);

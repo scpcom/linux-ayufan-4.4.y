@@ -27,7 +27,7 @@
  *  as Documentation/DocBook/libata.*
  *
  */
-
+ 
 #ifndef __LIBATA_H__
 #define __LIBATA_H__
 
@@ -56,7 +56,7 @@ struct ata_scsi_args {
 enum {
 	/* flags for ata_dev_read_id() */
 	ATA_READID_POSTRESET	= (1 << 0), /* reading ID after reset */
-
+	 
 	/* selector for ata_down_xfermask_limit() */
 	ATA_DNXFER_PIO		= 0,	/* speed down PIO */
 	ATA_DNXFER_DMA		= 1,	/* speed down DMA */
@@ -158,7 +158,6 @@ extern void ata_scsi_dev_rescan(struct work_struct *work);
 extern int ata_bus_probe(struct ata_port *ap);
 extern int ata_scsi_user_scan(struct Scsi_Host *shost, unsigned int channel,
 			      unsigned int id, unsigned int lun);
-
 
 /* libata-eh.c */
 extern unsigned long ata_internal_cmd_timeout(struct ata_device *dev, u8 cmd);

@@ -22,7 +22,7 @@
  * file called LICENSE.
  *
  */
-
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/skbuff.h>
@@ -45,8 +45,6 @@
 #include <asm/byteorder.h>
 #include "bonding.h"
 #include "bond_alb.h"
-
-
 
 #ifndef __long_aligned
 #define __long_aligned __attribute__((aligned((sizeof(long)))))

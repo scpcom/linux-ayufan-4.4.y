@@ -18,7 +18,7 @@
  *  mapbase is the physical address of the IO port.
  *  membase is an 'ioremapped' cookie.
  */
-
+ 
 #if defined(CONFIG_SERIAL_8250_CONSOLE) && defined(CONFIG_MAGIC_SYSRQ)
 #define SUPPORT_SYSRQ
 #endif
@@ -87,7 +87,6 @@ static unsigned int skip_txen_test; /* force skip of txen test at init time */
 #define PASS_LIMIT	512
 
 #define BOTH_EMPTY 	(UART_LSR_TEMT | UART_LSR_THRE)
-
 
 /*
  * We default to IRQ0 for the "no irq" hack.   Some
@@ -1626,9 +1625,9 @@ static irqreturn_t serial8250_interrupt(int irq, void *dev_id)
 		up = list_entry(l, struct uart_8250_port, list);
 		port = &up->port;
 
-		if (port->handle_irq(port)) {
-			handled = 1;
-			end = NULL;
+ 		if (port->handle_irq(port)) {
+ 			handled = 1;
+ 			end = NULL;
 		} else if (end == NULL)
 			end = l;
 
@@ -1928,7 +1927,7 @@ static void wait_for_xmitr(struct uart_8250_port *up, int bits)
  * Console polling routines for writing and reading from the uart while
  * in an interrupt or debug context.
  */
-
+ 
 static int serial8250_get_poll_char(struct uart_port *port)
 {
 	struct uart_8250_port *up =
@@ -1940,7 +1939,6 @@ static int serial8250_get_poll_char(struct uart_port *port)
 
 	return serial_inp(up, UART_RX);
 }
-
 
 static void serial8250_put_poll_char(struct uart_port *port,
 			 unsigned char c)
@@ -2333,7 +2331,7 @@ serial8250_do_set_termios(struct uart_port *port, struct ktermios *termios,
 		if (baud < 2400)
 			fcr = UART_FCR_ENABLE_FIFO | UART_FCR_TRIGGER_1;
 		else
-			fcr = uart_config[up->port.type].fcr;
+		fcr = uart_config[up->port.type].fcr;
 	}
 
 	/*
@@ -2483,7 +2481,6 @@ serial8250_set_ldisc(struct uart_port *port, int new)
 	} else
 		port->flags &= ~UPF_HARDPPS_CD;
 }
-
 
 void serial8250_do_pm(struct uart_port *port, unsigned int state,
 		      unsigned int oldstate)

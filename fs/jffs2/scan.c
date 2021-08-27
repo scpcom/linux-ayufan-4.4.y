@@ -11,7 +11,7 @@
  * For licensing information, see the file 'LICENCE' in this directory.
  *
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/slab.h>
@@ -75,7 +75,7 @@ static int file_dirty(struct jffs2_sb_info *c, struct jffs2_eraseblock *jeb)
 		return ret;
 	if ((ret = jffs2_scan_dirty_space(c, jeb, jeb->free_size)))
 		return ret;
-	/* Turned wasted size into dirty, since we apparently 
+	/* Turned wasted size into dirty, since we apparently
 	   think it's recoverable now. */
 	jeb->dirty_size += jeb->wasted_size;
 	c->dirty_size += jeb->wasted_size;
@@ -250,7 +250,7 @@ int jffs2_scan_medium(struct jffs2_sb_info *c)
 		/* If we're going to start writing into a block which already
 		   contains data, and the end of the data isn't page-aligned,
 		   skip a little and align it. */
-
+		 
 		uint32_t skip = c->nextblock->free_size % c->wbuf_pagesize;
 
 		D1(printk(KERN_DEBUG "jffs2_scan_medium(): Skipping %d bytes in nextblock to ensure page alignment\n",
@@ -406,7 +406,7 @@ static int jffs2_scan_xref_node(struct jffs2_sb_info *c, struct jffs2_eraseblock
 	if (!ref)
 		return -ENOMEM;
 
-	/* BEFORE jffs2_build_xattr_subsystem() called, 
+	/* BEFORE jffs2_build_xattr_subsystem() called,
 	 * and AFTER xattr_ref is marked as a dead xref,
 	 * ref->xid is used to store 32bit xid, xd is not used
 	 * ref->ino is used to store 32bit inode-number, ic is not used
@@ -444,7 +444,6 @@ static int jffs2_scan_eraseblock (struct jffs2_sb_info *c, struct jffs2_eraseblo
 	int err;
 	int noise = 0;
 
-
 #ifdef CONFIG_JFFS2_FS_WRITEBUFFER
 	int cleanmarkerfound = 0;
 #endif
@@ -479,7 +478,7 @@ static int jffs2_scan_eraseblock (struct jffs2_sb_info *c, struct jffs2_eraseblo
 		struct jffs2_sum_marker *sm;
 		void *sumptr = NULL;
 		uint32_t sumlen;
-	      
+
 		if (!buf_size) {
 			/* XIP case. Just look, point at the summary if it's there */
 			sm = (void *)buf + c->sector_size - sizeof(*sm);
@@ -495,9 +494,9 @@ static int jffs2_scan_eraseblock (struct jffs2_sb_info *c, struct jffs2_eraseblo
 				buf_len = sizeof(*sm);
 
 			/* Read as much as we want into the _end_ of the preallocated buffer */
-			err = jffs2_fill_scan_buf(c, buf + buf_size - buf_len, 
+			err = jffs2_fill_scan_buf(c, buf + buf_size - buf_len,
 						  jeb->offset + c->sector_size - buf_len,
-						  buf_len);				
+						  buf_len);
 			if (err)
 				return err;
 
@@ -516,9 +515,9 @@ static int jffs2_scan_eraseblock (struct jffs2_sb_info *c, struct jffs2_eraseblo
 				}
 				if (buf_len < sumlen) {
 					/* Need to read more so that the entire summary node is present */
-					err = jffs2_fill_scan_buf(c, sumptr, 
+					err = jffs2_fill_scan_buf(c, sumptr,
 								  jeb->offset + c->sector_size - sumlen,
-								  sumlen - buf_len);				
+								  sumlen - buf_len);
 					if (err)
 						return err;
 				}
@@ -531,7 +530,7 @@ static int jffs2_scan_eraseblock (struct jffs2_sb_info *c, struct jffs2_eraseblo
 
 			if (buf_size && sumlen > buf_size)
 				kfree(sumptr);
-			/* If it returns with a real error, bail. 
+			/* If it returns with a real error, bail.
 			   If it returns positive, that's a block classification
 			   (i.e. BLK_STATE_xxx) so return that too.
 			   If it returns zero, fall through to full scan. */
@@ -677,7 +676,7 @@ scan_more:
 				scan_end = buf_len;
 				goto more_empty;
 			}
-			
+
 			/* See how much more there is to read in this eraseblock... */
 			buf_len = min_t(uint32_t, buf_size, jeb->offset + c->sector_size - ofs);
 			if (!buf_len) {
@@ -913,7 +912,7 @@ scan_more:
 
 	D1(printk(KERN_DEBUG "Block at 0x%08x: free 0x%08x, dirty 0x%08x, unchecked 0x%08x, used 0x%08x, wasted 0x%08x\n",
 		  jeb->offset,jeb->free_size, jeb->dirty_size, jeb->unchecked_size, jeb->used_size, jeb->wasted_size));
-	
+
 	/* mark_node_obsolete can add to wasted !! */
 	if (jeb->wasted_size) {
 		jeb->dirty_size += jeb->wasted_size;

@@ -35,7 +35,7 @@
 
 // #define	DEBUG			// error path messages, extra info
 // #define	VERBOSE			// more; success messages
-
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/netdevice.h>
@@ -252,7 +252,6 @@ void usbnet_skb_return (struct usbnet *dev, struct sk_buff *skb)
 }
 EXPORT_SYMBOL_GPL(usbnet_skb_return);
 
-
 /*-------------------------------------------------------------------------
  *
  * Network Device Driver (peer link to "Host Device", from USB host)
@@ -388,7 +387,6 @@ static int rx_submit (struct usbnet *dev, struct urb *urb, gfp_t flags)
 	return retval;
 }
 
-
 /*-------------------------------------------------------------------------*/
 
 static inline void rx_process (struct usbnet *dev, struct sk_buff *skb)
@@ -401,7 +399,7 @@ static inline void rx_process (struct usbnet *dev, struct sk_buff *skb)
 		goto done;
 	}
 	// else network stack removes extra byte if we forced a short packet
-
+	 
 	if (skb->len) {
 		/* all data was already cloned from skb inside the driver */
 		if (dev->driver_info->flags & FLAG_MULTI_PACKET)
@@ -451,7 +449,7 @@ static void rx_complete (struct urb *urb)
 		dev->net->stats.rx_errors++;
 		usbnet_defer_kevent (dev, EVENT_RX_HALT);
 		// FALLTHROUGH
-
+		 
 	/* software-driven interface shutdown */
 	case -ECONNRESET:		/* async unlink */
 	case -ESHUTDOWN:		/* hardware gone */
@@ -482,7 +480,7 @@ block:
 	case -EOVERFLOW:
 		dev->net->stats.rx_over_errors++;
 		// FALLTHROUGH
-
+		 
 	default:
 		entry->state = rx_cleanup;
 		dev->net->stats.rx_errors++;
@@ -1238,7 +1236,6 @@ static void usbnet_bh (unsigned long param)
 	}
 }
 
-
 /*-------------------------------------------------------------------------
  *
  * USB Device Driver support
@@ -1404,7 +1401,7 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 				if(0 == strcmp(info->description, SYNO_YOTAWIMAX_DESC)) {
 					strcpy (net->name, SYNO_YOTAWIMAX_ETHERNET_NAME"%d");
 				} else {
-			strcpy (net->name, "eth%d");
+					strcpy (net->name, "eth%d");
 				}
 			}
 #else
@@ -1557,7 +1554,6 @@ int usbnet_resume (struct usb_interface *intf)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(usbnet_resume);
-
 
 /*-------------------------------------------------------------------------*/
 

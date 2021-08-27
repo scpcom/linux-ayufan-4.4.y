@@ -22,7 +22,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 #include <linux/pci.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -50,7 +50,7 @@ static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
 	 * TODO: see if there are any quirks that need to be added to handle
 	 * new extended capabilities.
 	 */
-
+	 
 	/* PCI Memory-Write-Invalidate cycle support is optional (uncommon) */
 	if (!pci_set_mwi(pdev))
 		xhci_dbg(xhci, "MWI active\n");
@@ -308,7 +308,7 @@ static const struct hc_driver xhci_pci_hc_driver = {
 };
 
 /*-------------------------------------------------------------------------*/
-
+	 
 /* PCI driver selection metadata; PCI hotplugging uses this */
 static const struct pci_device_id pci_ids[] = { {
 	/* handle any USB 3.0 xHCI controller */
@@ -327,7 +327,7 @@ static struct pci_driver xhci_pci_driver = {
 	.probe =	xhci_pci_probe,
 	.remove =	xhci_pci_remove,
 	/* suspend and resume implemented later */
-
+	 
 	.shutdown = 	usb_hcd_pci_shutdown,
 #ifdef CONFIG_PM_SLEEP
 	.driver = {

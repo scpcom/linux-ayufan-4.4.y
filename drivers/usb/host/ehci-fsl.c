@@ -25,7 +25,7 @@
  * Jerry Huang <Chang-Ming.Huang@freescale.com> and
  * Anton Vorontsov <avorontsov@ru.mvista.com>.
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/delay.h>
@@ -263,7 +263,7 @@ static void ehci_fsl_usb_setup(struct ehci_hcd *ehci)
 	 * Turn on cache snooping hardware, since some PowerPC platforms
 	 * wholly rely on hardware to deal with cache coherent
 	 */
-
+	 
 	/* Setup Snooping for all the 4GB space */
 	/* SNOOP1 starts from 0x0, size 2G */
 	out_be32(non_ehci + FSL_SOC_USB_SNOOP1, 0x0 | SNOOP_SIZE_2GB);
@@ -620,7 +620,6 @@ static int ehci_start_port_reset(struct usb_hcd *hcd, unsigned port)
 #else
 #define ehci_start_port_reset	NULL
 #endif /* CONFIG_USB_OTG */
-
 
 static const struct hc_driver ehci_fsl_hc_driver = {
 	.description = hcd_name,

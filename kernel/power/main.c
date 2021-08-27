@@ -10,7 +10,7 @@
  * This file is released under the GPLv2
  *
  */
-
+ 
 #include <linux/export.h>
 #include <linux/kobject.h>
 #include <linux/string.h>
@@ -337,7 +337,7 @@ power_attr(state);
  * is allowed to write to 'state', but the transition will be aborted if there
  * are any wakeup events detected after 'wakeup_count' was written to.
  */
-
+ 
 static ssize_t wakeup_count_show(struct kobject *kobj,
 				struct kobj_attribute *attr,
 				char *buf)

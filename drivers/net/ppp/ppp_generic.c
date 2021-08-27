@@ -24,7 +24,7 @@
  *
  * ==FILEVERSION 20041108==
  */
-
+ 
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/kmod.h>
@@ -1763,7 +1763,7 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 
 	} else {
 		/* network protocol frame - give it to the kernel */
-
+		 
 #ifdef CONFIG_PPP_FILTER
 		/* check if the packet passes the pass and active filters */
 		/* the filter instructions are constructed assuming
@@ -2221,7 +2221,6 @@ char *ppp_dev_name(struct ppp_channel *chan)
 	}
 	return name;
 }
-
 
 /*
  * Disconnect a channel from the generic layer.

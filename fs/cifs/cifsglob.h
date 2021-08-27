@@ -878,7 +878,7 @@ require use of the stronger protocol */
 #define   CIFSSEC_MUST_PLNTXT	0x20020
 #ifdef CONFIG_CIFS_UPCALL
 #define   CIFSSEC_MASK          0xBF0BF /* allows weak security but also krb5 */
-#else
+#else  
 #define   CIFSSEC_MASK          0xB70B7 /* current flags supported if weak */
 #endif /* UPCALL */
 #else /* do not allow weak pw hash */
@@ -899,7 +899,7 @@ require use of the stronger protocol */
  * All constants go here
  *****************************************************************
  */
-
+ 
 #define UID_HASH (16)
 
 /*
@@ -967,7 +967,7 @@ GLOBAL_EXTERN struct list_head GlobalDnotifyReqList;
 /* DirNotify response queue */
 GLOBAL_EXTERN struct list_head GlobalDnotifyRsp_Q;
 #endif /* was needed for dnotify, and will be needed for inotify when VFS fix */
-
+					   
 /*
  * Global transaction id (XID) information
  */

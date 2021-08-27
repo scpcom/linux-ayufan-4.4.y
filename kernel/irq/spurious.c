@@ -56,7 +56,6 @@ bool irq_wait_for_poll(struct irq_desc *desc)
 #endif
 }
 
-
 /*
  * Recovery handler for misrouted interrupts.
  */

@@ -586,7 +586,7 @@ config ARCH_LPC32XX
 	select GENERIC_CLOCKEVENTS
 	help
 	  Support for the NXP LPC32XX family of processors
-
+	  
 config ARCH_MV78XX0
 	bool "Marvell MV78xx0"
 	select CPU_FEROCEON

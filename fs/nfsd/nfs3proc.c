@@ -6,7 +6,7 @@
  *
  * Copyright (C) 1996, 1997, 1998 Olaf Kirch <okir@monad.swb.de>
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/ext2_fs.h>
 #include <linux/magic.h>
@@ -78,6 +78,7 @@ nfsd3_proc_setattr(struct svc_rqst *rqstp, struct nfsd3_sattrargs *argp,
 				SVCFH_fmt(&argp->fh));
 
 	fh_copy(&resp->fh, &argp->fh);
+
 	nfserr = nfsd_setattr(rqstp, &resp->fh, &argp->attrs,
 			      argp->check_guard, argp->guardtime);
 	RETURN_STATUS(nfserr);
@@ -622,7 +623,6 @@ nfsd3_proc_pathconf(struct svc_rqst * rqstp, struct nfsd_fhandle      *argp,
 	RETURN_STATUS(nfserr);
 }
 
-
 /*
  * Commit a file (range) to stable storage.
  */
@@ -645,7 +645,6 @@ nfsd3_proc_commit(struct svc_rqst * rqstp, struct nfsd3_commitargs *argp,
 
 	RETURN_STATUS(nfserr);
 }
-
 
 /*
  * NFSv3 Server procedures.

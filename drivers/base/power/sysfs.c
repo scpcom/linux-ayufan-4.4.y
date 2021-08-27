@@ -4,7 +4,7 @@
 /*
  * drivers/base/power/sysfs.c - sysfs entries for device PM
  */
-
+ 
 #include <linux/device.h>
 #include <linux/string.h>
 #include <linux/export.h>

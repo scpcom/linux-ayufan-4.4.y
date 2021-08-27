@@ -291,7 +291,7 @@ static void hfsplus_dump_extent(struct hfsplus_extent *extent)
 	dprint(DBG_EXTENT, "   ");
 	for (i = 0; i < 8; i++)
 		dprint(DBG_EXTENT, " %u:%u", be32_to_cpu(extent[i].start_block),
-				 be32_to_cpu(extent[i].block_count));
+			     be32_to_cpu(extent[i].block_count));
 	dprint(DBG_EXTENT, "\n");
 }
 

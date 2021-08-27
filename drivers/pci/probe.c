@@ -4,7 +4,7 @@
 /*
  * probe.c - PCI detection and setup code
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/delay.h>
 #include <linux/init.h>
@@ -21,7 +21,6 @@
 /* Ugh.  Need to stop exporting this to modules. */
 LIST_HEAD(pci_root_buses);
 EXPORT_SYMBOL(pci_root_buses);
-
 
 static int find_anything(struct device *dev, void *data)
 {
@@ -488,7 +487,6 @@ static enum pci_bus_speed agp_speed(int agp3, int agpstat)
 	return agp_speeds[index];
 }
 
-
 static void pci_set_bus_speed(struct pci_bus *bus)
 {
 	struct pci_dev *bridge = bus->self;
@@ -545,7 +543,6 @@ static void pci_set_bus_speed(struct pci_bus *bus)
 		pcie_update_link_speed(bus, linksta);
 	}
 }
-
 
 static struct pci_bus *pci_alloc_child_bus(struct pci_bus *parent,
 					   struct pci_dev *bridge, int busnr)

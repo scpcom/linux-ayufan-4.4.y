@@ -25,7 +25,7 @@
  *  as Documentation/DocBook/libata.*
  *
  */
-
+ 
 #ifndef __LINUX_LIBATA_H__
 #define __LINUX_LIBATA_H__
 
@@ -63,7 +63,6 @@
 #undef ATA_VERBOSE_DEBUG	/* yet more debugging output */
 #undef ATA_IRQ_TRAP		/* define to ack screaming irqs */
 #undef ATA_NDEBUG		/* define to disable quick runtime checks */
-
 
 /* note: prints function name for you */
 #ifdef ATA_DEBUG
@@ -1865,7 +1864,6 @@ extern void sata_pmp_error_handler(struct ata_port *ap);
 #define sata_pmp_error_handler		ata_std_error_handler
 
 #endif /* CONFIG_SATA_PMP */
-
 
 /**************************************************************************
  * SFF - drivers/ata/libata-sff.c

@@ -4,7 +4,7 @@
 /*
  * drivers/base/cpu.c - basic CPU class support
  */
-
+ 
 #include <linux/sysdev.h>
 #include <linux/module.h>
 #include <linux/init.h>

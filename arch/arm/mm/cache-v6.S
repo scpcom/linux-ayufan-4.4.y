@@ -195,7 +195,6 @@ ENTRY(v6_flush_kern_dcache_area)
 #endif
 	mov	pc, lr
 
-
 /*
  *	v6_dma_inv_range(start,end)
  *

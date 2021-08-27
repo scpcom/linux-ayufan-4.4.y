@@ -300,7 +300,7 @@ setup_affinity(unsigned int irq, struct irq_desc *desc, struct cpumask *mask)
 		else {
 			irq_compat_clr_affinity(desc);
 			irqd_clear(&desc->irq_data, IRQD_AFFINITY_SET);
-	}
+		}
 	}
 
 	cpumask_and(mask, cpu_online_mask, set);
@@ -720,10 +720,10 @@ irq_thread_check_affinity(struct irq_desc *desc, struct irqaction *action)
 	}
 
 	raw_spin_lock_irq(&desc->lock);
-	cpumask_copy(mask, desc->irq_data.affinity);
+		cpumask_copy(mask, desc->irq_data.affinity);
 	raw_spin_unlock_irq(&desc->lock);
 
-	set_cpus_allowed_ptr(current, mask);
+		set_cpus_allowed_ptr(current, mask);
 	free_cpumask_var(mask);
 }
 #else

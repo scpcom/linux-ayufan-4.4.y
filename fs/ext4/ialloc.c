@@ -14,7 +14,7 @@
  *  Big-endian to little-endian byte-swapping/bitmaps by
  *        David S. Miller (davem@caip.rutgers.edu), 1995
  */
-
+ 
 #include <linux/time.h>
 #include <linux/fs.h>
 #include <linux/jbd2.h>
@@ -614,10 +614,10 @@ fallback_retry:
 		desc = ext4_get_group_desc(sb, grp, NULL);
 		if (desc && ext4_free_inodes_count(sb, desc) &&
 		    ext4_free_inodes_count(sb, desc) >= avefreei) {
-			*group = grp;
-			return 0;
+				*group = grp;
+				return 0;
+			}
 		}
-	}
 
 	if (avefreei) {
 		/*
@@ -780,7 +780,7 @@ static int ext4_claim_inode(struct super_block *sb,
 			 * mke2fs could have initialized the same for us.
 			 * Instead we calculated the value below
 			 */
-
+			 
 			free = 0;
 		} else {
 			free = EXT4_INODES_PER_GROUP(sb) -
@@ -892,7 +892,7 @@ struct inode *ext4_new_inode(handle_t *handle, struct inode *dir, int mode,
 	}
 #else
 	if (S_ISDIR(mode))
-		ret2 = find_group_orlov(sb, dir, &group, mode, qstr);
+        ret2 = find_group_orlov(sb, dir, &group, mode, qstr);
 #endif
 	else
 		ret2 = find_group_other(sb, dir, &group, mode);

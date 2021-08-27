@@ -8,7 +8,7 @@
 
   (C) 2001 Andreas Gruenbacher, <a.gruenbacher@computer.org>
 */
-
+ 
 #include <linux/xattr.h>
 
 /* Magic value in attribute blocks */

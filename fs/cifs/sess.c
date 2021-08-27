@@ -23,7 +23,7 @@
  *   along with this library; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-
+ 
 #include "cifspdu.h"
 #include "cifsglob.h"
 #include "cifsproto.h"
@@ -213,7 +213,6 @@ static void unicode_domain_string(char **pbcc_area, struct cifs_ses *ses,
 	*pbcc_area = bcc_ptr;
 }
 
-
 static void unicode_ssetup_strings(char **pbcc_area, struct cifs_ses *ses,
 				   const struct nls_table *nls_cp)
 {
@@ -222,7 +221,7 @@ static void unicode_ssetup_strings(char **pbcc_area, struct cifs_ses *ses,
 
 	/* BB FIXME add check that strings total less
 	than 335 or will need to send them as arrays */
-
+		 
 	/* unicode strings, must be word aligned before the call */
 /*	if ((long) bcc_ptr % 2)	{
 		*bcc_ptr = 0;
@@ -682,7 +681,7 @@ ssetup_ntlmssp_authenticate:
 		to calculate signing key? but what if server
 		changed to do higher than lanman dialect and
 		we reconnected would we ever calc signing_key? */
-
+		 
 		cFYI(1, "Negotiating LANMAN setting up strings");
 		/* Unicode not allowed for LANMAN dialects */
 		ascii_ssetup_strings(&bcc_ptr, ses, nls_cp);
@@ -881,7 +880,7 @@ ssetup_ntlmssp_authenticate:
 	rc = SendReceive2(xid, ses, iov, 3 /* num_iovecs */, &resp_buf_type,
 			  CIFS_LOG_ERROR);
 	/* SMB request buf freed in SendReceive2 */
-
+	 
 	pSMB = (SESSION_SETUP_ANDX *)iov[0].iov_base;
 	smb_buf = (struct smb_hdr *)iov[0].iov_base;
 

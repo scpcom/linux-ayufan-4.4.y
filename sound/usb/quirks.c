@@ -71,7 +71,6 @@ static int ignore_interface_quirk(struct snd_usb_audio *chip,
 	return 0;
 }
 
-
 /*
  * Allow alignment on audio sub-slot (channel samples) rather than
  * on audio slots (audio frames)
@@ -386,7 +385,7 @@ static int snd_usb_fasttrackpro_boot_quirk(struct usb_device *dev)
 		if (err < 0) {
 			snd_printdd("error usb_driver_set_configuration: %d\n",
 				    err);
-			return -ENODEV;
+		return -ENODEV;
 		}
 	} else
 		snd_printk(KERN_INFO "usb-audio: Fast Track Pro config OK\n");
@@ -568,7 +567,6 @@ static int audiophile_skip_setting_quirk(struct snd_usb_audio *chip,
 
 	return 0; /* keep this altsetting */
 }
-
 
 static int fasttrackpro_skip_setting_quirk(struct snd_usb_audio *chip,
 					   int iface, int altno)
@@ -756,4 +754,3 @@ void snd_usb_set_format_quirk(struct snd_usb_substream *subs,
 		break;
 	}
 }
-

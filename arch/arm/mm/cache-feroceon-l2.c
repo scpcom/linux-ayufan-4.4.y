@@ -14,7 +14,7 @@
  * - Unified Layer 2 Cache for Feroceon CPU Cores,
  *   Document ID MV-S104858-00, Rev. A, October 23 2007.
  */
-
+ 
 #include <linux/init.h>
 #include <linux/highmem.h>
 #include <asm/cacheflush.h>
@@ -232,7 +232,6 @@ static void feroceon_l2_flush_range(unsigned long start, unsigned long end)
 
 	dsb();
 }
-
 
 /*
  * Routines to disable and re-enable the D-cache and I-cache at run

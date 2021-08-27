@@ -22,7 +22,7 @@
  * Some of the functions are LE specific currently. These are
  * hopefully all marked.  This should be fixed.
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/fs.h>
@@ -51,7 +51,6 @@
 #include <asm/sys_ia32.h>
 
 #define AA(__x)		((unsigned long)(__x))
-
 
 asmlinkage long sys32_truncate64(const char __user *filename,
 				 unsigned long offset_low,
@@ -490,7 +489,6 @@ asmlinkage long sys32_pwrite(unsigned int fd, const char __user *ubuf,
 	return sys_pwrite64(fd, ubuf, count,
 			  ((loff_t)AA(poshi) << 32) | AA(poslo));
 }
-
 
 asmlinkage long sys32_personality(unsigned long personality)
 {

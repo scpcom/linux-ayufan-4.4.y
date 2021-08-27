@@ -95,10 +95,10 @@
 static int paranoid_check_not_bad(const struct ubi_device *ubi, int pnum);
 static int paranoid_check_peb_ec_hdr(const struct ubi_device *ubi, int pnum);
 static int paranoid_check_ec_hdr(const struct ubi_device *ubi, int pnum,
-				 const struct ubi_ec_hdr *ec_hdr);
+			     const struct ubi_ec_hdr *ec_hdr);
 static int paranoid_check_peb_vid_hdr(const struct ubi_device *ubi, int pnum);
 static int paranoid_check_vid_hdr(const struct ubi_device *ubi, int pnum,
-				  const struct ubi_vid_hdr *vid_hdr);
+			      const struct ubi_vid_hdr *vid_hdr);
 #else
 #define paranoid_check_not_bad(ubi, pnum) 0
 #define paranoid_check_peb_ec_hdr(ubi, pnum)  0
@@ -191,7 +191,7 @@ retry:
 		if (retries++ < UBI_IO_RETRIES) {
 			dbg_io("error %d%s while reading %d bytes from PEB "
 			       "%d:%d, read only %zd bytes, retry",
-			       err, errstr, len, pnum, offset, read);
+				 err, errstr, len, pnum, offset, read);
 			yield();
 			goto retry;
 		}
@@ -365,7 +365,7 @@ retry:
 	if (err) {
 		if (retries++ < UBI_IO_RETRIES) {
 			dbg_io("error %d while erasing PEB %d, retry",
-			       err, pnum);
+				 err, pnum);
 			yield();
 			goto retry;
 		}
@@ -1168,7 +1168,7 @@ static int paranoid_check_not_bad(const struct ubi_device *ubi, int pnum)
  * values, and %-EINVAL if not.
  */
 static int paranoid_check_ec_hdr(const struct ubi_device *ubi, int pnum,
-				 const struct ubi_ec_hdr *ec_hdr)
+			     const struct ubi_ec_hdr *ec_hdr)
 {
 	int err;
 	uint32_t magic;
@@ -1250,7 +1250,7 @@ exit:
  * %-EINVAL if not.
  */
 static int paranoid_check_vid_hdr(const struct ubi_device *ubi, int pnum,
-				  const struct ubi_vid_hdr *vid_hdr)
+			      const struct ubi_vid_hdr *vid_hdr)
 {
 	int err;
 	uint32_t magic;
@@ -1341,7 +1341,7 @@ exit:
  * match and a negative error code if not or in case of failure.
  */
 int ubi_dbg_check_write(struct ubi_device *ubi, const void *buf, int pnum,
-			int offset, int len)
+			    int offset, int len)
 {
 	int err, i;
 	size_t read;

@@ -40,7 +40,6 @@ static unsigned long key_gc_flags;
 #define KEY_GC_REAP_KEYTYPE	1	/* A keytype is being unregistered */
 #define KEY_GC_REAPING_KEYTYPE	2	/* Cleared when keytype reaped */
 
-
 /*
  * Any key whose type gets unregistered will be re-typed to this if it can't be
  * immediately unlinked.

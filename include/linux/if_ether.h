@@ -20,7 +20,7 @@
  *		as published by the Free Software Foundation; either version
  *		2 of the License, or (at your option) any later version.
  */
-
+ 
 #ifndef _LINUX_IF_ETHER_H
 #define _LINUX_IF_ETHER_H
 

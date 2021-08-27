@@ -58,8 +58,6 @@ static void isdn_ppp_ccp_reset_trans(struct ippp_struct *is,
 static void isdn_ppp_ccp_reset_ack_rcvd(struct ippp_struct *is,
 					unsigned char id);
 
-
-
 #ifdef CONFIG_ISDN_MPP
 static ippp_bundle * isdn_ppp_bundle_arr = NULL;
  
@@ -962,7 +960,6 @@ static int isdn_ppp_strip_proto(struct sk_buff *skb)
 	return proto;
 }
 
-
 /*
  * handler for incoming packets on a syncPPP interface
  */
@@ -1616,7 +1613,6 @@ static void isdn_ppp_mp_receive(isdn_net_dev * net_dev, isdn_net_local * lp,
 	newseq = isdn_ppp_mp_get_seq(is->mpppcfg & SC_IN_SHORT_SEQ, 
 						skb, is->last_link_seqno);
 
-
 	/* if this packet seq # is less than last already processed one,
 	 * toss it right away, but check for sequence start case first 
 	 */
@@ -2024,7 +2020,6 @@ isdn_ppp_dev_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	int len;
 	isdn_net_local *lp = netdev_priv(dev);
 
-
 	if (lp->p_encap != ISDN_NET_ENCAP_SYNCPPP)
 		return -EINVAL;
 
@@ -2071,7 +2066,6 @@ isdn_ppp_if_get_unit(char *name)
 
 	return unit;
 }
-
 
 int
 isdn_ppp_dial_slave(char *name)
@@ -2145,7 +2139,6 @@ isdn_ppp_hangup_slave(char *name)
 /*
  * PPP compression stuff
  */
-
 
 /* Push an empty CCP Data Frame up to the daemon to wake it up and let it
    generate a CCP Reset-Request or tear down CCP altogether */
@@ -2348,7 +2341,6 @@ static struct ippp_ccp_reset_state *isdn_ppp_ccp_reset_alloc_state(struct ippp_s
 	}
 	return rs;
 }
-
 
 /* A decompressor wants a reset with a set of parameters - do what is
    necessary to fulfill it */
@@ -2787,7 +2779,6 @@ static void isdn_ppp_receive_ccp(isdn_net_dev *net_dev, isdn_net_local *lp,
 		break;
 	}
 }
-
 
 /*
  * Daemon sends a CCP frame ...

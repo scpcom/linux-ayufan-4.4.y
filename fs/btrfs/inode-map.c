@@ -240,7 +240,7 @@ again:
 		    objectid > root->highest_objectid)
 			__btrfs_add_free_space(ctl, objectid, 1);
 		else
-			__btrfs_add_free_space(pinned, objectid, 1);
+		__btrfs_add_free_space(pinned, objectid, 1);
 
 		mutex_unlock(&root->fs_commit_mutex);
 	}
@@ -463,7 +463,7 @@ again:
 		ret = btrfs_truncate_free_space_cache(root, trans, path, inode);
 		if (ret)
 			goto out_put;
-	}
+		}
 
 	spin_lock(&root->cache_lock);
 	if (root->cached != BTRFS_CACHE_FINISHED) {

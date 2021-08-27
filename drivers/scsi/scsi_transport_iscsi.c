@@ -280,7 +280,6 @@ static void iscsi_iface_release(struct device *dev)
 	put_device(parent);
 }
 
-
 static struct class iscsi_iface_class = {
 	.name = "iscsi_iface",
 	.dev_release = iscsi_iface_release,
@@ -564,7 +563,7 @@ static int iscsi_setup_host(struct transport_container *tc, struct device *dev,
 
 	iscsi_bsg_host_add(shost, ihost);
 	/* ignore any bsg add error - we just can't do sgio */
-
+	 
 	return 0;
 }
 
@@ -1835,7 +1834,6 @@ iscsi_tgt_dscvr(struct iscsi_transport *transport,
 		       ev->u.tgt_dscvr.host_no);
 		return -ENODEV;
 	}
-
 
 	dst_addr = (struct sockaddr *)((char*)ev + sizeof(*ev));
 	err = transport->tgt_dscvr(shost, ev->u.tgt_dscvr.type,

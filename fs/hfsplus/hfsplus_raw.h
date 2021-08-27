@@ -12,7 +12,7 @@
  * Information taken from Apple Technote #1150 (HFS Plus Volume Format)
  *
  */
-
+ 
 #ifndef _LINUX_HFSPLUS_RAW_H
 #define _LINUX_HFSPLUS_RAW_H
 
@@ -225,7 +225,6 @@ struct hfsp_rect {
 	__be16 bottom;
 	__be16 right;
 } __packed;
-
 
 /* HFS directory info (stolen from hfs.h */
 struct DInfo {

@@ -97,7 +97,7 @@ static unsigned int of_bus_default_get_flags(const __be32 *addr)
 /*
  * PCI bus specific translator
  */
-
+ 
 static int of_bus_pci_match(struct device_node *np)
 {
 	/* "vci" is for the /chaos bridge on 1st-gen PCI powermacs */
@@ -597,7 +597,6 @@ struct device_node *of_find_matching_node_by_address(struct device_node *from,
 
 	return NULL;
 }
-
 
 /**
  * of_iomap - Maps the memory mapped IO for a given device_node

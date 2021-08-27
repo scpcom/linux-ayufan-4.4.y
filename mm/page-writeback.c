@@ -13,7 +13,7 @@
  * 10Apr2002	Andrew Morton
  *		Initial version
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/export.h>
 #include <linux/spinlock.h>
@@ -198,7 +198,6 @@ int dirty_ratio_handler(struct ctl_table *table, int write,
 	}
 	return ret;
 }
-
 
 int dirty_bytes_handler(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp,
@@ -1260,9 +1259,9 @@ void balance_dirty_pages_ratelimited_nr(struct address_space *mapping,
 	else {
 		*p += nr_pages_dirtied;
 		if (unlikely(*p >= ratelimit_pages)) {
-			*p = 0;
-			ratelimit = 0;
-		}
+		*p = 0;
+		ratelimit = 0;
+	}
 	}
 	preempt_enable();
 

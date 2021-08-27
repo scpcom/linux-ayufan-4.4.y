@@ -5,7 +5,7 @@
  *
  * - Split from highmem.c
  */
-
+ 
 #include <linux/mm.h>
 #include <linux/export.h>
 #include <linux/swap.h>
@@ -206,7 +206,6 @@ static void __blk_queue_bounce(struct request_queue *q, struct bio **bio_orig,
 			memset(bio->bi_io_vec, 0, cnt * sizeof(struct bio_vec));
 		}
 			
-
 		to = bio->bi_io_vec + i;
 
 		to->bv_page = mempool_alloc(pool, q->bounce_gfp);

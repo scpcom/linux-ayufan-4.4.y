@@ -11,7 +11,7 @@
  * This file may be redistributed under the terms of the GNU Public
  * License.
  */
-
+ 
 #include <linux/fs.h>
 #include <linux/jbd.h>
 #include <linux/ext3_fs.h>
@@ -35,7 +35,6 @@ static void TEA_transform(__u32 buf[4], __u32 const in[])
 	buf[0] += b0;
 	buf[1] += b1;
 }
-
 
 /* The old legacy hash */
 static __u32 dx_hack_hash_unsigned(const char *name, int len)

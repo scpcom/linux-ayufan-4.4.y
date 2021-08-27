@@ -274,7 +274,6 @@ static int proc_pid_auxv(struct task_struct *task, char *buffer)
 	return res;
 }
 
-
 #ifdef CONFIG_KALLSYMS
 /*
  * Provides a wchan file via kallsyms in a proper one-value-per-file format.
@@ -902,7 +901,6 @@ static ssize_t environ_read(struct file *file, char __user *buf,
 	if (!page)
 		goto out;
 
-
 	mm = mm_for_maps(task);
 	ret = PTR_ERR(mm);
 	if (!mm || IS_ERR(mm))
@@ -1300,7 +1298,6 @@ static const struct file_operations proc_fault_inject_operations = {
 };
 #endif
 
-
 #ifdef CONFIG_SCHED_DEBUG
 /*
  * Print out various scheduling related per-task fields:
@@ -1576,7 +1573,6 @@ static const struct inode_operations proc_pid_link_inode_operations = {
 	.follow_link	= proc_pid_follow_link,
 	.setattr	= proc_setattr,
 };
-
 
 /* building an inode */
 
@@ -2150,7 +2146,6 @@ static const struct inode_operations proc_fdinfo_inode_operations = {
 	.lookup		= proc_lookupfdinfo,
 	.setattr	= proc_setattr,
 };
-
 
 static struct dentry *proc_pident_instantiate(struct inode *dir,
 	struct dentry *dentry, struct task_struct *task, const void *ptr)

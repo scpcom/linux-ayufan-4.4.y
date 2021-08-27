@@ -14,7 +14,7 @@
  * Some chunks also taken from arch/x86/kernel/apic/nmi.c, thanks
  * to those contributors as well.
  */
-
+ 
 #include <linux/mm.h>
 #include <linux/cpu.h>
 #include <linux/nmi.h>
@@ -93,7 +93,7 @@ static int __init nosoftlockup_setup(char *str)
 }
 __setup("nosoftlockup", nosoftlockup_setup);
 /*  */
-
+ 
 /*
  * Hard-lockup warnings should be triggered after just a few seconds. Soft-
  * lockups can have false positives under extreme conditions. So we generally
@@ -318,7 +318,6 @@ static enum hrtimer_restart watchdog_timer_fn(struct hrtimer *hrtimer)
 	return HRTIMER_RESTART;
 }
 
-
 /*
  * The watchdog thread - touches the timestamp.
  */
@@ -358,7 +357,6 @@ static int watchdog(void *unused)
 	return 0;
 }
 
-
 #ifdef CONFIG_HARDLOCKUP_DETECTOR
 static int watchdog_nmi_enable(int cpu)
 {
@@ -382,7 +380,6 @@ static int watchdog_nmi_enable(int cpu)
 		printk(KERN_INFO "NMI watchdog enabled, takes one hw-pmu counter.\n");
 		goto out_save;
 	}
-
 
 	/* vary the KERN level based on the returned errno */
 	if (PTR_ERR(event) == -EOPNOTSUPP)
@@ -514,7 +511,6 @@ static void watchdog_disable_all_cpus(void)
 	watchdog_enabled = 0;
 }
 
-
 /*
  * proc handler for /proc/sys/kernel/nmi_watchdog,watchdog_thresh
  */
@@ -537,7 +533,6 @@ out:
 	return ret;
 }
 #endif /* CONFIG_SYSCTL */
-
 
 /*
  * Create/destroy watchdog threads as CPUs come and go:

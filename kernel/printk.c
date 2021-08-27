@@ -15,7 +15,7 @@
  * Rewrote bits to get rid of console_lock
  *	01Mar01 Andrew Morton
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/mm.h>
 #include <linux/tty.h>

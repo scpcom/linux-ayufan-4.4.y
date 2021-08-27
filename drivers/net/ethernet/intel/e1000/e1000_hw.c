@@ -2818,7 +2818,6 @@ static u16 e1000_shift_in_mdi_bits(struct e1000_hw *hw)
 	return data;
 }
 
-
 /**
  * e1000_read_phy_reg - read a phy register
  * @hw: Struct containing variables accessed by shared code
@@ -2839,7 +2838,7 @@ s32 e1000_read_phy_reg(struct e1000_hw *hw, u32 reg_addr, u16 *phy_data)
 						 (u16) reg_addr);
 		if (ret_val)
 			return ret_val;
-	}
+		}
 
 	ret_val = e1000_read_phy_reg_ex(hw, MAX_PHY_REG_ADDRESS & reg_addr,
 					phy_data);
@@ -2974,7 +2973,7 @@ s32 e1000_write_phy_reg(struct e1000_hw *hw, u32 reg_addr, u16 phy_data)
 						 (u16) reg_addr);
 		if (ret_val)
 			return ret_val;
-	}
+		}
 
 	ret_val = e1000_write_phy_reg_ex(hw, MAX_PHY_REG_ADDRESS & reg_addr,
 					 phy_data);
@@ -5688,7 +5687,6 @@ static s32 e1000_set_vco_speed(struct e1000_hw *hw)
 
 	return E1000_SUCCESS;
 }
-
 
 /**
  * e1000_enable_mng_pass_thru - check for bmc pass through

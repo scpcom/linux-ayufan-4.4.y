@@ -7,7 +7,7 @@
  *
  * This file is released under the GPL.
  */
-
+ 
 #include "dm.h"
 #include "dm-uevent.h"
 #ifdef MY_ABC_HERE
@@ -899,8 +899,8 @@ static void dm_done(struct request *clone, int error, bool mapped)
 	struct dm_rq_target_io *tio = clone->end_io_data;
 	dm_request_endio_fn rq_end_io = tio->ti->type->rq_end_io;
 
-	if (mapped && rq_end_io)
-		r = rq_end_io(tio->ti, clone, error, &tio->info);
+		if (mapped && rq_end_io)
+			r = rq_end_io(tio->ti, clone, error, &tio->info);
 
 	if (r <= 0)
 		/* The target wants to complete the I/O */
@@ -1050,7 +1050,7 @@ static void __map_bio(struct dm_target *ti, struct bio *clone,
 	r = ti->type->map(ti, clone, &tio->info);
 	if (r == DM_MAPIO_REMAPPED) {
 		/* the bio has been remapped so dispatch it */
-
+		 
 		trace_block_bio_remap(bdev_get_queue(clone->bi_bdev), clone,
 				      tio->io->bio->bi_bdev->bd_dev, sector);
 
@@ -1383,7 +1383,7 @@ static void __split_and_process_bio(struct mapped_device *md, struct bio *bio)
 /*-----------------------------------------------------------------
  * CRUD END
  *---------------------------------------------------------------*/
-
+ 
 static int dm_merge_bvec(struct request_queue *q,
 			 struct bvec_merge_data *bvm,
 			 struct bio_vec *biovec)

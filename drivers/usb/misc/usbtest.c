@@ -13,9 +13,8 @@
 
 #include <linux/usb.h>
 
-
 /*-------------------------------------------------------------------------*/
-
+	 
 /* FIXME make these public somewhere; usbdevfs.h? */
 struct usbtest_param {
 	/* inputs */
@@ -175,12 +174,12 @@ found:
 				out->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
 		}
 		else {
-		dev->in_pipe = usb_rcvbulkpipe(udev,
-			in->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
+			dev->in_pipe = usb_rcvbulkpipe (udev,
+				in->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
 			if(out)
-		dev->out_pipe = usb_sndbulkpipe(udev,
-			out->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
-	}
+				dev->out_pipe = usb_sndbulkpipe (udev,
+					out->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
+		}
 		dev->in_desc = &in->desc;
 		dev->out_desc = &out->desc;
 #else
@@ -400,8 +399,8 @@ static void simple_free_urb(struct urb *urb)
 			urb->transfer_dma - offset);
 	else
 		kfree(urb->transfer_buffer - offset);
-	usb_free_urb(urb);
-}
+		usb_free_urb(urb);
+	}
 
 static int simple_io(
 	struct usbtest_dev	*tdev,
@@ -455,7 +454,6 @@ static int simple_io(
 				label, iterations, retval, expected);
 	return retval;
 }
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -583,7 +581,6 @@ static int perform_sglist(
 				iterations, retval);
 	return retval;
 }
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -813,7 +810,7 @@ static int ch9_postconfig(struct usbtest_dev *dev)
 		}
 	}
 	/* FIXME fetch strings from at least the device descriptor */
-
+	 
 	/* [9.4.5] get_status always works */
 	retval = usb_get_status(udev, USB_RECIP_DEVICE, 0, dev->buf);
 	if (retval != 2) {
@@ -832,7 +829,7 @@ static int ch9_postconfig(struct usbtest_dev *dev)
 		return (retval < 0) ? retval : -EDOM;
 	}
 	/* FIXME get status for each endpoint in the interface */
-
+	 
 	return 0;
 }
 
@@ -1108,7 +1105,7 @@ test_ctrl_queue(struct usbtest_dev *dev, struct usbtest_param *param)
 		case 13:	/* short read, resembling case 10 */
 			req.wValue = cpu_to_le16((USB_DT_CONFIG << 8) | 0);
 			/* last data packet "should" be DATA1, not DATA0 */
-			len = 1024 - udev->descriptor.bMaxPacketSize0;
+				len = 1024 - udev->descriptor.bMaxPacketSize0;
 			expected = -EREMOTEIO;
 			break;
 		case 14:	/* short read; try to fill the last packet */
@@ -1186,7 +1183,6 @@ cleanup:
 	return context.status;
 }
 #undef NUM_SUBCASES
-
 
 /*-------------------------------------------------------------------------*/
 
@@ -1497,14 +1493,14 @@ static int test_halt(struct usbtest_dev *tdev, int ep, struct urb *urb)
 
 static int halt_simple(struct usbtest_dev *dev)
 {
-	int		ep;
-	int		retval = 0;
-	struct urb	*urb;
+	int			ep;
+	int			retval = 0;
+	struct urb		*urb;
 
 #ifdef CONFIG_ARCH_FEROCEON
 	urb = simple_alloc_urb(testdev_to_usbdev (dev), 0, NULL, 512);
 #else
-	urb = simple_alloc_urb(testdev_to_usbdev(dev), 0, 512);
+	urb = simple_alloc_urb(testdev_to_usbdev (dev), 0, 512);
 #endif
 	if (urb == NULL)
 		return -ENOMEM;
@@ -2515,7 +2511,6 @@ static int usbtest_resume(struct usb_interface *intf)
 	return 0;
 }
 
-
 static void usbtest_disconnect(struct usb_interface *intf)
 {
 	struct usbtest_dev	*dev = usb_get_intfdata(intf);
@@ -2608,7 +2603,6 @@ static struct usbtest_info generic_info = {
 };
 #endif
 
-
 static const struct usb_device_id id_table[] = {
 
 	/*-------------------------------------------------------------*/
@@ -2661,7 +2655,7 @@ static const struct usb_device_id id_table[] = {
 #endif
 
 	/*-------------------------------------------------------------*/
-
+	 
 #ifdef IBOT2
 	/* iBOT2 makes a nice source of high speed bulk-in data */
 	/* this does not coexist with a real iBOT2 driver! */
@@ -2671,7 +2665,7 @@ static const struct usb_device_id id_table[] = {
 #endif
 
 	/*-------------------------------------------------------------*/
-
+	 
 #ifdef GENERIC
 	/* module params can specify devices to use for control tests */
 	{ .driver_info = (unsigned long) &generic_info, },
@@ -2713,4 +2707,3 @@ module_exit(usbtest_exit);
 
 MODULE_DESCRIPTION("USB Core/HCD Testing Driver");
 MODULE_LICENSE("GPL");
-

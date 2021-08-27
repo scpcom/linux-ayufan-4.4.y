@@ -24,7 +24,7 @@
  * real drivers.
  *
  */
-
+ 
 #include <linux/device.h>
 #include <linux/slab.h>
 #include <linux/export.h>
@@ -250,7 +250,6 @@ static const struct usb_device_id *usb_match_dynamic_id(struct usb_interface *in
 	spin_unlock(&drv->dynids.lock);
 	return NULL;
 }
-
 
 /* called from driver core with dev locked */
 static int usb_probe_device(struct device *dev)
@@ -576,7 +575,7 @@ int usb_match_device(struct usb_device *dev, const struct usb_device_id *id)
 
 /* returns 0 if no match, 1 if match */
 int usb_match_one_id(struct usb_interface *interface,
-		     const struct usb_device_id *id)
+			  const struct usb_device_id *id)
 {
 	struct usb_host_interface *intf;
 	struct usb_device *dev;

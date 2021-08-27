@@ -6,7 +6,7 @@
  *
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
-
+ 
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/interrupt.h>
@@ -164,7 +164,6 @@ static void delayed_put_task_struct(struct rcu_head *rhp)
 	trace_sched_process_free(tsk);
 	put_task_struct(tsk);
 }
-
 
 void release_task(struct task_struct * p)
 {

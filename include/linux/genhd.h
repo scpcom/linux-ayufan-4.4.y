@@ -484,7 +484,7 @@ struct solaris_x86_vtoc {
  * BSD disklabel support by Yossi Gottlieb <yogo@math.tau.ac.il>
  * updated by Marc Espie <Marc.Espie@openbsd.org>
  */
-
+ 
 /* check against BSD src/sys/sys/disklabel.h for consistency */
 
 #define BSD_DISKMAGIC	(0x82564557UL)	/* The disk magic number */
@@ -541,7 +541,7 @@ struct bsd_disklabel {
  * Unixware slices support by Andrzej Krzysztofowicz <ankry@mif.pg.gda.pl>
  * and Krzysztof G. Baranowski <kgb@knm.org.pl>
  */
-
+ 
 #define UNIXWARE_DISKMAGIC     (0xCA5E600DUL)	/* The disk magic number */
 #define UNIXWARE_DISKMAGIC2    (0x600DDEEEUL)	/* The slice table magic nr */
 #define UNIXWARE_NUMSLICE      16

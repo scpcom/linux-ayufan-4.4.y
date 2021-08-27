@@ -5,7 +5,7 @@
  * Copyright (C) 2002 Roman Zippel <zippel@linux-m68k.org>
  * Released under the terms of the GNU GPL v2.0.
  */
-
+ 
 #include <sys/stat.h>
 #include <ctype.h>
 #include <errno.h>
@@ -882,7 +882,7 @@ static int conf_split_config(void)
 		 *	isn't saved in auto.conf, so the old value is always
 		 *	different from 'no').
 		 */
-
+		 
 		/* Replace all '_' and append ".h" */
 		s = sym->name;
 		d = path;

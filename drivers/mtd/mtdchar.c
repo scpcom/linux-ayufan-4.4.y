@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
-
+ 
 #include <linux/device.h>
 #include <linux/fs.h>
 #include <linux/mm.h>
@@ -80,8 +80,6 @@ static loff_t mtd_lseek (struct file *file, loff_t offset, int orig)
 
 	return -EINVAL;
 }
-
-
 
 static int mtd_open(struct inode *inode, struct file *file)
 {
@@ -196,7 +194,6 @@ static int mtd_close(struct inode *inode, struct file *file)
  * handling when those head and tail offsets and sizes are such that
  * alignment requirements are not met in the NAND subdriver.
  */
-
 static ssize_t mtd_read(struct file *file, char __user *buf, size_t count,loff_t *ppos)
 {
 	struct mtd_file_info *mfi = file->private_data;

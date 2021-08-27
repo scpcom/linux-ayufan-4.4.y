@@ -18,7 +18,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 021110-1307, USA.
  */
-
+ 
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include "ctree.h"
@@ -159,7 +159,7 @@ static int start_log_trans(struct btrfs_trans_handle *trans,
 	mutex_lock(&root->fs_info->tree_log_mutex);
 	if (!root->fs_info->log_root_tree) {
 		ret = btrfs_init_log_root_tree(trans, root->fs_info);
-		if (ret)
+	if (ret)
 			err = ret;
 	}
 	if (err == 0 && !root->log_root) {
@@ -281,7 +281,7 @@ static int process_one_buffer(struct btrfs_root *log,
 	if (wc->pin)
 		btrfs_pin_extent_for_log_replay(wc->trans,
 						log->fs_info->extent_root,
-						eb->start, eb->len);
+						      eb->start, eb->len);
 
 	if (btrfs_buffer_uptodate(eb, gen)) {
 		if (wc->write)
@@ -385,7 +385,7 @@ insert:
 			btrfs_truncate_item(trans, root, path, item_size, 1);
 		} else if (found_size < item_size) {
 			ret = btrfs_extend_item(trans, root, path,
-						item_size - found_size);
+					  item_size - found_size);
 		}
 	} else if (ret) {
 		return ret;
@@ -625,7 +625,7 @@ static noinline int replay_one_extent(struct btrfs_trans_handle *trans,
 				sums = list_entry(ordered_sums.next,
 						struct btrfs_ordered_sum,
 						list);
-				ret = btrfs_csum_file_blocks(trans,
+					ret = btrfs_csum_file_blocks(trans,
 						root->fs_info->csum_root,
 						sums);
 				BUG_ON(ret);
@@ -934,16 +934,16 @@ again:
 	btrfs_release_path(path);
 
 insert:
-	/* insert our name */
+			/* insert our name */
 	ret = btrfs_add_link(trans, dir, inode, name, namelen, 0,
 			     btrfs_inode_ref_index(eb, ref));
 	BUG_ON(ret);
 
-	btrfs_update_inode(trans, root, inode);
+			btrfs_update_inode(trans, root, inode);
 
 out:
 	ref_ptr = (unsigned long)(ref + 1) + namelen;
-	kfree(name);
+		kfree(name);
 	if (ref_ptr < ref_end)
 		goto again;
 
@@ -1107,7 +1107,6 @@ out:
 	return ret;
 }
 
-
 /*
  * record a given inode in the fixup dir so we can check its link
  * count when replay is done.  The link count is incremented here
@@ -1134,7 +1133,7 @@ static noinline int link_to_fixup_dir(struct btrfs_trans_handle *trans,
 
 	btrfs_release_path(path);
 	if (ret == 0) {
-		btrfs_inc_nlink(inode);
+			btrfs_inc_nlink(inode);
 		btrfs_update_inode(trans, root, inode);
 	} else if (ret == -EEXIST) {
 		ret = 0;
@@ -1171,6 +1170,7 @@ static noinline int insert_one_name(struct btrfs_trans_handle *trans,
 		iput(inode);
 		return -EIO;
 	}
+
 	ret = btrfs_add_link(trans, dir, inode, name, name_len, 1, index);
 
 	/* FIXME, put inode into FIXUP list */
@@ -1756,11 +1756,11 @@ static noinline int walk_down_log_tree(struct btrfs_trans_handle *trans,
 			if (wc->free) {
 				btrfs_read_buffer(next, ptr_gen);
 
-				btrfs_tree_lock(next);
-				btrfs_set_lock_blocking(next);
-				clean_tree_block(trans, root, next);
-				btrfs_wait_tree_block_writeback(next);
-				btrfs_tree_unlock(next);
+					btrfs_tree_lock(next);
+					btrfs_set_lock_blocking(next);
+					clean_tree_block(trans, root, next);
+					btrfs_wait_tree_block_writeback(next);
+					btrfs_tree_unlock(next);
 
 				WARN_ON(root_owner !=
 					BTRFS_TREE_LOG_OBJECTID);
@@ -1825,11 +1825,11 @@ static noinline int walk_up_log_tree(struct btrfs_trans_handle *trans,
 
 				next = path->nodes[*level];
 
-				btrfs_tree_lock(next);
-				btrfs_set_lock_blocking(next);
-				clean_tree_block(trans, root, next);
-				btrfs_wait_tree_block_writeback(next);
-				btrfs_tree_unlock(next);
+					btrfs_tree_lock(next);
+					btrfs_set_lock_blocking(next);
+					clean_tree_block(trans, root, next);
+					btrfs_wait_tree_block_writeback(next);
+					btrfs_tree_unlock(next);
 
 				WARN_ON(root_owner != BTRFS_TREE_LOG_OBJECTID);
 				ret = btrfs_free_and_pin_reserved_extent(root,
@@ -1893,11 +1893,11 @@ static int walk_log_tree(struct btrfs_trans_handle *trans,
 
 			next = path->nodes[orig_level];
 
-			btrfs_tree_lock(next);
-			btrfs_set_lock_blocking(next);
-			clean_tree_block(trans, log, next);
-			btrfs_wait_tree_block_writeback(next);
-			btrfs_tree_unlock(next);
+				btrfs_tree_lock(next);
+				btrfs_set_lock_blocking(next);
+				clean_tree_block(trans, log, next);
+				btrfs_wait_tree_block_writeback(next);
+				btrfs_tree_unlock(next);
 
 			WARN_ON(log->root_key.objectid !=
 				BTRFS_TREE_LOG_OBJECTID);
@@ -1966,7 +1966,7 @@ static int wait_log_commit(struct btrfs_trans_handle *trans,
 }
 
 static int wait_for_writer(struct btrfs_trans_handle *trans,
-			   struct btrfs_root *root)
+			    struct btrfs_root *root)
 {
 	DEFINE_WAIT(wait);
 	while (atomic_read(&root->log_writers)) {
@@ -2116,8 +2116,8 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	}
 
 	ret = btrfs_write_and_wait_marked_extents(log_root_tree,
-				&log_root_tree->dirty_log_pages,
-				EXTENT_DIRTY | EXTENT_NEW);
+					 &log_root_tree->dirty_log_pages,
+					 EXTENT_DIRTY | EXTENT_NEW);
 	BUG_ON(ret);
 	btrfs_wait_marked_extents(log, &log->dirty_log_pages, mark);
 
@@ -2825,12 +2825,12 @@ static int btrfs_log_inode(struct btrfs_trans_handle *trans,
 		max_key.type = (u8)-1;
 	max_key.offset = (u64)-1;
 
-	ret = btrfs_commit_inode_delayed_items(trans, inode);
-	if (ret) {
-		btrfs_free_path(path);
-		btrfs_free_path(dst_path);
-		return ret;
-	}
+		ret = btrfs_commit_inode_delayed_items(trans, inode);
+		if (ret) {
+			btrfs_free_path(path);
+			btrfs_free_path(dst_path);
+			return ret;
+		}
 
 	mutex_lock(&BTRFS_I(inode)->log_mutex);
 
@@ -2913,7 +2913,7 @@ next_slot:
 			min_key.objectid++;
 		else
 			break;
-	}
+		}
 	if (ins_nr) {
 		ret = copy_items(trans, log, dst_path, src,
 				 ins_start_slot,
@@ -2926,8 +2926,8 @@ next_slot:
 	}
 	WARN_ON(ins_nr);
 	if (inode_only == LOG_INODE_ALL && S_ISDIR(inode->i_mode)) {
-		btrfs_release_path(path);
-		btrfs_release_path(dst_path);
+	btrfs_release_path(path);
+	btrfs_release_path(dst_path);
 		ret = log_directory_changes(trans, root, inode, path, dst_path);
 		if (ret) {
 			err = ret;
@@ -2977,7 +2977,7 @@ static noinline int check_parent_dirs_for_sync(struct btrfs_trans_handle *trans,
 	}
 
 	while (1) {
-		BTRFS_I(inode)->logged_trans = trans->transid;
+			BTRFS_I(inode)->logged_trans = trans->transid;
 		smp_mb();
 
 		if (BTRFS_I(inode)->last_unlink_trans > last_committed) {
@@ -3032,8 +3032,8 @@ static int inode_in_log(struct btrfs_trans_handle *trans,
  * the last committed transaction
  */
 int btrfs_log_inode_parent(struct btrfs_trans_handle *trans,
-		    struct btrfs_root *root, struct inode *inode,
-		    struct dentry *parent, int exists_only)
+			    	  struct btrfs_root *root, struct inode *inode,
+			    	  struct dentry *parent, int exists_only)
 {
 	int inode_only = exists_only ? LOG_INODE_EXISTS : LOG_INODE_ALL;
 	struct super_block *sb;

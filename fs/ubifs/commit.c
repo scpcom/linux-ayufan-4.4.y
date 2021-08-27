@@ -294,7 +294,7 @@ int ubifs_bg_thread(void *info)
 	struct ubifs_info *c = info;
 
 	dbg_msg("background thread \"%s\" started, PID %d",
-		c->bgt_name, current->pid);
+		  c->bgt_name, current->pid);
 	set_freezable();
 
 	while (1) {

@@ -250,8 +250,8 @@ int btrfs_add_ordered_extent_compress(struct inode *inode, u64 file_offset,
  * ordered extent, it is split across multiples.
  */
 int btrfs_add_ordered_sum(struct inode *inode,
-			  struct btrfs_ordered_extent *entry,
-			  struct btrfs_ordered_sum *sum)
+			   struct btrfs_ordered_extent *entry,
+			   struct btrfs_ordered_sum *sum)
 {
 	struct btrfs_ordered_inode_tree *tree;
 
@@ -409,7 +409,7 @@ int btrfs_put_ordered_extent(struct btrfs_ordered_extent *entry)
  * while you call this function.
  */
 static int __btrfs_remove_ordered_extent(struct inode *inode,
-				struct btrfs_ordered_extent *entry)
+				 struct btrfs_ordered_extent *entry)
 {
 	struct btrfs_ordered_inode_tree *tree;
 	struct btrfs_root *root = BTRFS_I(inode)->root;
@@ -418,7 +418,7 @@ static int __btrfs_remove_ordered_extent(struct inode *inode,
 	tree = &BTRFS_I(inode)->ordered_tree;
 	node = &entry->rb_node;
 	rb_erase(node, &tree->tree);
-	tree->last = NULL;
+		tree->last = NULL;
 	set_bit(BTRFS_ORDERED_COMPLETE, &entry->flags);
 
 	spin_lock(&root->fs_info->ordered_extent_lock);
@@ -478,7 +478,7 @@ int btrfs_wait_ordered_extents(struct btrfs_root *root,
 	while (!list_empty(&splice)) {
 		cur = splice.next;
 		ordered = list_entry(cur, struct btrfs_ordered_extent,
-				     root_extent_list);
+					   root_extent_list);
 		if (nocow_only &&
 		    !test_bit(BTRFS_ORDERED_NOCOW, &ordered->flags) &&
 		    !test_bit(BTRFS_ORDERED_PREALLOC, &ordered->flags)) {
@@ -506,8 +506,8 @@ int btrfs_wait_ordered_extents(struct btrfs_root *root,
 			else
 				iput(inode);
 		} else {
-			btrfs_put_ordered_extent(ordered);
-		}
+		btrfs_put_ordered_extent(ordered);
+}
 
 		spin_lock(&root->fs_info->ordered_extent_lock);
 	}
@@ -541,7 +541,6 @@ again:
 	while (!list_empty(&splice)) {
 		btrfs_inode = list_entry(splice.next, struct btrfs_inode,
 				   ordered_operations);
-
 		inode = &btrfs_inode->vfs_inode;
 
 		list_del_init(&btrfs_inode->ordered_operations);
@@ -633,7 +632,7 @@ again:
 	 * writepage without setting the page writeback.  Starting again
 	 * with WB_SYNC_ALL will end up waiting for the IO to actually start.
 	 */
-	filemap_fdatawrite_range(inode->i_mapping, start, orig_end);
+		filemap_fdatawrite_range(inode->i_mapping, start, orig_end);
 
 	filemap_fdatawait_range(inode->i_mapping, start, orig_end);
 
@@ -924,7 +923,7 @@ int btrfs_find_ordered_sum(struct inode *inode, u64 offset, u64 disk_bytenr,
 				if (sector_sums[i].bytenr == disk_bytenr) {
 					*sum = sector_sums[i].sum;
 					ret = 0;
-					goto out;
+				goto out;
 				}
 			}
 		}
@@ -976,7 +975,7 @@ int btrfs_add_ordered_operation(struct btrfs_trans_handle *trans,
 	if (list_empty(&BTRFS_I(inode)->ordered_operations)) {
 		list_add_tail(&BTRFS_I(inode)->ordered_operations,
 			      &root->fs_info->ordered_operations);
-	}
+}
 	spin_unlock(&root->fs_info->ordered_extent_lock);
 
 	return 0;

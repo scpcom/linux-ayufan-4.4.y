@@ -51,7 +51,7 @@
  * and only in device slots 0..7, not higher.  The chips may not
  * work correctly otherwise  (note: this is a pretty rare condition).
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/pci.h>
@@ -170,7 +170,7 @@ enum {
 	MV_PORTS_PER_HC		= (1 << MV_PORT_HC_SHIFT), /* 4 */
 	/* Determine hc port from 0-7 port: hardport = port & MV_PORT_MASK */
 	MV_PORT_MASK		= (MV_PORTS_PER_HC - 1),   /* 3 */
-
+	 
 	/* Host Flags */
 	MV_FLAG_DUAL_HC		= (1 << 30),  /* two SATA Host Controllers */
 
@@ -276,7 +276,7 @@ enum {
 	SOC_LED_CTRL_BLINK	= (1 << 0),	/* Active LED blink */
 	SOC_LED_CTRL_ACT_PRESENCE = (1 << 2),	/* Multiplex dev presence */
 						/*  with dev activity LED */
-
+						 
 	/* Shadow block registers */
 	SHD_BLK			= 0x100,
 	SHD_CTL_AST		= 0x20,		/* ofs from SHD_BLK */
@@ -1483,8 +1483,8 @@ static int mv_qc_defer(struct ata_queued_cmd *qc)
 				}
 				return 0;
 			} else {
-			return ATA_DEFER_PORT;
-	}
+				return ATA_DEFER_PORT;
+			}
 		}
 #else
 			return ATA_DEFER_PORT;
@@ -3215,7 +3215,6 @@ static void mv5_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	writel(tmp, phy_mmio + MV5_PHY_MODE);
 }
 
-
 #undef ZERO
 #define ZERO(reg) writel(0, port_mmio + (reg))
 static void mv5_reset_hc_port(struct mv_host_priv *hpriv, void __iomem *mmio,
@@ -3845,6 +3844,7 @@ static int mv_hardreset(struct ata_link *link, unsigned int *class,
 	mv_edma_cfg(ap, 0, 0);
 
 	return rc;
+
 }
 
 static void mv_eh_freeze(struct ata_port *ap)

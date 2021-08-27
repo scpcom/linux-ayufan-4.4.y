@@ -44,7 +44,7 @@
  *					datagrams.
  *		Hirokazu Takahashi:	sendfile() on UDP works now.
  */
-
+ 
 #include <asm/uaccess.h>
 #include <asm/system.h>
 #include <linux/module.h>
@@ -273,7 +273,7 @@ int ip_mc_output(struct sk_buff *skb)
 		   by ip_mr_input in any case.
 		   Note, that local frames are looped back to be delivered
 		   to local recipients.
-
+		 
 		   This check is duplicated in ip_mr_input at the moment.
 		 */
 		    &&
@@ -387,7 +387,7 @@ packet_routed:
 	iph->saddr    = fl4->saddr;
 	iph->daddr    = fl4->daddr;
 	/* Transport layer set skb->h.foo itself. */
-
+	 
 	if (inet_opt && inet_opt->opt.optlen) {
 		iph->ihl += inet_opt->opt.optlen >> 2;
 		ip_options_build(skb, &inet_opt->opt, inet->inet_daddr, rt, 0);
@@ -410,7 +410,6 @@ no_route:
 	return -EHOSTUNREACH;
 }
 EXPORT_SYMBOL(ip_queue_xmit);
-
 
 static void ip_copy_metadata(struct sk_buff *to, struct sk_buff *from)
 {
@@ -624,7 +623,7 @@ slow_path:
 		/*
 		 *	Allocate buffer.
 		 */
-
+		 
 		if ((skb2 = alloc_skb(len+hlen+ll_rs, GFP_ATOMIC)) == NULL) {
 			NETDEBUG(KERN_INFO "IP: frag: no memory for new fragment!\n");
 			err = -ENOMEM;
@@ -1170,7 +1169,6 @@ ssize_t	ip_append_page(struct sock *sk, struct flowi4 *fl4, struct page *page,
 		skb_shinfo(skb)->gso_size = mtu - fragheaderlen;
 		skb_shinfo(skb)->gso_type = SKB_GSO_UDP;
 	}
-
 
 	while (size > 0) {
 		int i;

@@ -62,7 +62,6 @@ struct stat64 {
 
 	unsigned long long	st_ino;
 };
-
 #else /* __i386__ */
 
 struct stat {

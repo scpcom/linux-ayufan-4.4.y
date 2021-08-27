@@ -715,7 +715,6 @@ static void copy_sec_desc(const struct cifs_ntsd *pntsd,
 	return;
 }
 
-
 /*
    change posix mode to reflect permissions
    pmode is the existing mode (we only want to overwrite part of this
@@ -828,7 +827,6 @@ static __u16 fill_ace_for_sid(struct cifs_ace *pntace,
 	return size;
 }
 
-
 #ifdef CONFIG_CIFS_DEBUG2
 static void dump_ace(struct cifs_ace *pace, char *end_of_acl)
 {
@@ -864,7 +862,6 @@ static void dump_ace(struct cifs_ace *pace, char *end_of_acl)
 	return;
 }
 #endif
-
 
 static void parse_dacl(struct cifs_acl *pdacl, char *end_of_acl,
 		       struct cifs_sid *pownersid, struct cifs_sid *pgrpsid,
@@ -942,7 +939,6 @@ static void parse_dacl(struct cifs_acl *pdacl, char *end_of_acl,
 						     &fattr->cf_mode,
 						     &other_mask);
 
-
 /*			memcpy((void *)(&(cifscred->aces[i])),
 				(void *)ppace[i],
 				sizeof(struct cifs_ace)); */
@@ -956,7 +952,6 @@ static void parse_dacl(struct cifs_acl *pdacl, char *end_of_acl,
 
 	return;
 }
-
 
 static int set_chmod_dacl(struct cifs_acl *pndacl, struct cifs_sid *pownersid,
 			struct cifs_sid *pgrpsid, __u64 nmode)
@@ -978,7 +973,6 @@ static int set_chmod_dacl(struct cifs_acl *pndacl, struct cifs_sid *pownersid,
 
 	return 0;
 }
-
 
 static int parse_sid(struct cifs_sid *psid, char *end_of_acl)
 {
@@ -1011,7 +1005,6 @@ static int parse_sid(struct cifs_sid *psid, char *end_of_acl)
 
 	return 0;
 }
-
 
 /* Convert CIFS ACL to POSIX form */
 static int parse_sec_desc(struct cifs_sb_info *cifs_sb,

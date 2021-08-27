@@ -4,7 +4,7 @@
 /*
  * Common prep/pmac/chrp boot and setup code.
  */
-
+ 
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/sched.h>
@@ -151,7 +151,6 @@ notrace unsigned long __init early_init(unsigned long dt_ptr)
 
 	return KERNELBASE + offset;
 }
-
 
 /*
  * Find out what kind of machine we're on and save any data we need

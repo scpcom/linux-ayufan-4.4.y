@@ -20,7 +20,7 @@
  *      2 of the License, or (at your option) any later version.
  *
  */
-
+ 
 #include <linux/module.h>
 #include <linux/capability.h>
 #include <linux/errno.h>
@@ -881,7 +881,7 @@ static inline int ip6_tnl_xmit_ctl(struct ip6_tnl *t)
  *   -1 fail
  *   %-EMSGSIZE message too big. return mtu in this case.
  **/
-
+ 
 static int ip6_tnl_xmit2(struct sk_buff *skb,
 			 struct net_device *dev,
 			 __u8 dsfield,
@@ -1363,7 +1363,6 @@ ip6_tnl_change_mtu(struct net_device *dev, int new_mtu)
 	return 0;
 }
 
-
 static const struct net_device_ops ip6_tnl_netdev_ops = {
 	.ndo_uninit	= ip6_tnl_dev_uninit,
 	.ndo_start_xmit = ip6_tnl_xmit,
@@ -1371,7 +1370,6 @@ static const struct net_device_ops ip6_tnl_netdev_ops = {
 	.ndo_change_mtu = ip6_tnl_change_mtu,
 	.ndo_get_stats	= ip6_get_stats,
 };
-
 
 /**
  * ip6_tnl_dev_setup - setup virtual tunnel device
@@ -1399,7 +1397,6 @@ static void ip6_tnl_dev_setup(struct net_device *dev)
 	dev->features |= NETIF_F_NETNS_LOCAL;
 	dev->priv_flags &= ~IFF_XMIT_DST_RELEASE;
 }
-
 
 /**
  * ip6_tnl_dev_init_gen - general initializer for all tunnel devices

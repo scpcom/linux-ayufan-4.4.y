@@ -75,7 +75,6 @@ extern int poll_schedule_timeout(struct poll_wqueues *pwq, int state,
 				 ktime_t *expires, unsigned long slack);
 extern long select_estimate_accuracy(struct timespec *tv);
 
-
 static inline int poll_schedule(struct poll_wqueues *pwq, int state)
 {
 	return poll_schedule_timeout(pwq, state, NULL, 0);

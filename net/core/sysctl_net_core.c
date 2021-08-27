@@ -7,7 +7,7 @@
  * Begun April 1, 1996, Mike Shaver.
  * Added /proc/sys/net/core directory entry (empty =) ). [MS]
  */
-
+ 
 #include <linux/mm.h>
 #include <linux/sysctl.h>
 #include <linux/module.h>

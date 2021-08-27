@@ -9,7 +9,7 @@
  * 10Sep2002	Andrew Morton
  *		Initial version.
  */
-
+ 
 #include <linux/kernel.h>
 #include <linux/backing-dev.h>
 #include <linux/gfp.h>
@@ -24,7 +24,6 @@
 				   do_invalidatepage */
 #include <linux/cleancache.h>
 #include "internal.h"
-
 
 /**
  * do_invalidatepage - invalidate part or all of a page

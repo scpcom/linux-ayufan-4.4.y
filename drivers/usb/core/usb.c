@@ -23,7 +23,7 @@
  * It should be considered a slave, with no callbacks. Callbacks
  * are evil.
  */
-
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/string.h>
@@ -46,7 +46,6 @@
 #include <linux/dma-mapping.h>
 
 #include "usb.h"
-
 
 const char *usbcore_name = "usbcore";
 
@@ -328,7 +327,6 @@ static const struct dev_pm_ops usb_device_pm_ops = {
 
 #endif	/* CONFIG_PM */
 
-
 static char *usb_devnode(struct device *dev, mode_t *mode)
 {
 	struct usb_device *usb_dev;
@@ -348,14 +346,12 @@ struct device_type usb_device_type = {
 #endif
 };
 
-
 /* Returns 1 if @usb_bus is WUSB, 0 otherwise */
 static unsigned usb_bus_is_wusb(struct usb_bus *bus)
 {
 	struct usb_hcd *hcd = container_of(bus, struct usb_hcd, self);
 	return hcd->wireless;
 }
-
 
 /**
  * usb_alloc_dev - usb device constructor (usbcore-internal)

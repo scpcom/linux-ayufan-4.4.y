@@ -18,7 +18,7 @@
  *  Big-endian to little-endian byte-swapping/bitmaps by
  *        David S. Miller (davem@caip.rutgers.edu), 1995
  */
-
+ 
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/fs.h>
@@ -112,7 +112,6 @@ static struct file_system_type ext2_fs_type = {
 #else
 #define IS_EXT2_SB(sb) (0)
 #endif
-
 
 #if !defined(CONFIG_EXT3_FS) && !defined(CONFIG_EXT3_FS_MODULE) && defined(CONFIG_EXT4_USE_FOR_EXT23)
 static struct file_system_type ext3_fs_type = {
@@ -268,7 +267,6 @@ void ext4_itable_unused_set(struct super_block *sb,
 		bg->bg_itable_unused_hi = cpu_to_le16(count >> 16);
 }
 
-
 /* Just increment the non-pointer handle value */
 static handle_t *ext4_get_nojournal(void)
 {
@@ -283,7 +281,6 @@ static handle_t *ext4_get_nojournal(void)
 	current->journal_info = handle;
 	return handle;
 }
-
 
 /* Decrement the non-pointer handle value */
 static void ext4_put_nojournal(handle_t *handle)
@@ -452,7 +449,6 @@ static int block_device_ejected(struct super_block *sb)
 
 	return bdi->dev == NULL;
 }
-
 
 /* Deal with the reporting of failure conditions on a filesystem such as
  * inconsistencies detected or read IO failures.
@@ -746,7 +742,7 @@ void ext4_update_dynamic_rev(struct super_block *sb)
 	es->s_rev_level = cpu_to_le32(EXT4_DYNAMIC_REV);
 	/* leave es->s_feature_*compat flags alone */
 	/* es->s_uuid will be set by e2fsck if empty */
-
+	 
 	/*
 	 * The rest of the superblock fields should be zero, and if not it
 	 * means they are likely already in use, so leave them alone.  We
@@ -1645,7 +1641,7 @@ static int parse_options(char *options, struct super_block *sb,
 			set_opt (sb, OLDALLOC);
 #else
 			ext4_msg(sb, KERN_WARNING,
-				 "Ignoring deprecated oldalloc option");
+                     "Ignoring deprecated oldalloc option");
 #endif
 			break;
 		case Opt_orlov:
@@ -1653,7 +1649,7 @@ static int parse_options(char *options, struct super_block *sb,
 			clear_opt (sb, OLDALLOC);
 #else
 			ext4_msg(sb, KERN_WARNING,
-				 "Ignoring deprecated orlov option");
+                     "Ignoring deprecated orlov option");
 #endif
 			break;
 #ifdef CONFIG_EXT4_FS_XATTR
@@ -2425,7 +2421,7 @@ static loff_t ext4_max_bitmap_size(int bits, int has_huge_files)
 	 * __u32 i_blocks_lo and _u16 i_blocks_high represent the total
 	 * number of 512-byte sectors of the file.
 	 */
-
+	 
 	if (!has_huge_files || sizeof(blkcnt_t) < sizeof(u64)) {
 		/*
 		 * !has_huge_files or CONFIG_LBDAF not enabled implies that
@@ -2584,13 +2580,13 @@ static ssize_t lifetime_write_kbytes_show(struct ext4_attr *a,
 }
 
 static ssize_t extent_cache_hits_show(struct ext4_attr *a,
-				      struct ext4_sb_info *sbi, char *buf)
+				       struct ext4_sb_info *sbi, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%lu\n", sbi->extent_cache_hits);
 }
 
 static ssize_t extent_cache_misses_show(struct ext4_attr *a,
-					struct ext4_sb_info *sbi, char *buf)
+				       struct ext4_sb_info *sbi, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%lu\n", sbi->extent_cache_misses);
 }
@@ -3617,7 +3613,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	 * of the filesystem.
 	 */
 	if (le32_to_cpu(es->s_first_data_block) >= ext4_blocks_count(es)) {
-                ext4_msg(sb, KERN_WARNING, "bad geometry: first data"
+		ext4_msg(sb, KERN_WARNING, "bad geometry: first data "
 			 "block %u is beyond end of filesystem (%llu)",
 			 le32_to_cpu(es->s_first_data_block),
 			 ext4_blocks_count(es));
@@ -5145,7 +5141,7 @@ static inline int ext3_feature_set_ok(struct super_block *sb) { return 0; }
 static struct file_system_type ext4_fs_type = {
 	.owner		= THIS_MODULE,
 	.name		= "ext4",
-	.mount		= ext4_mount,
+	.mount          = ext4_mount,
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
 	.kill_sb	= ext4_kill_sb,
 #else

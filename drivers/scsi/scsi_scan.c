@@ -27,7 +27,7 @@
  * 		sequentially scan LUNs up until some maximum is reached,
  * 		or a LUN is seen that cannot have a device attached to it.
  */
-
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
@@ -2035,4 +2035,3 @@ void scsi_free_host_dev(struct scsi_device *sdev)
 	__scsi_remove_device(sdev);
 }
 EXPORT_SYMBOL(scsi_free_host_dev);
-
