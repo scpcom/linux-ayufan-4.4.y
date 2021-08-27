@@ -2078,6 +2078,13 @@ int __ata_change_queue_depth(struct ata_port *ap, struct scsi_device *sdev,
 		queue_depth = 1;
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
+	
+#ifdef MY_ABC_HERE	
+	 
+	if (!ata_ncq_enabled(dev) && 1 == sdev->queue_depth) {
+		return sdev->queue_depth;
+	}
+#endif  
 
 	queue_depth = min(queue_depth, sdev->host->can_queue);
 	queue_depth = min(queue_depth, ata_id_queue_depth(dev->id));

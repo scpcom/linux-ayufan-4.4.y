@@ -284,6 +284,13 @@ static int ecryptfs_i_size_read(struct dentry *dentry, struct inode *inode)
 	if (!(crypt_stat->flags & ECRYPTFS_POLICY_APPLIED))
 		ecryptfs_set_default_sizes(crypt_stat);
 
+#ifdef MY_ABC_HERE
+	rc = ecryptfs_read_and_validate_xattr_region(dentry, inode);
+	if (rc) {
+		rc = ecryptfs_read_and_validate_header_region(inode);
+	}
+	ecryptfs_put_lower_file(inode);
+#else
 	rc = ecryptfs_read_and_validate_header_region(inode);
 	ecryptfs_put_lower_file(inode);
 	if (rc) {
@@ -291,6 +298,7 @@ static int ecryptfs_i_size_read(struct dentry *dentry, struct inode *inode)
 		if (!rc)
 			crypt_stat->flags |= ECRYPTFS_METADATA_IN_XATTR;
 	}
+#endif  
 
 	return 0;
 }
@@ -1171,7 +1179,7 @@ ecryptfs_setxattr(struct dentry *dentry, const char *name, const void *value,
 #endif
 
 	rc = vfs_setxattr(lower_dentry, name, value, size, flags);
-	if (!rc)
+	if (!rc && dentry->d_inode)
 		fsstack_copy_attr_all(dentry->d_inode, lower_dentry->d_inode);
 out:
 	return rc;

@@ -681,6 +681,13 @@ syno_pmp_ports_num(struct ata_port *ap)
 			ret = 0;
 		}
 #endif
+#if defined (MY_ABC_HERE) && defined (MY_ABC_HERE)
+		 
+		if (IS_SYNOLOGY_DX517(ap->PMSynoUnique) && (ap->link.uiStsFlags & SYNO_STATUS_IS_SIL)) {
+			ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
+			ret = 0;
+		}
+#endif  
 	}
 	return ret;
 }
@@ -1311,6 +1318,9 @@ int sata_pmp_attach(struct ata_device *dev)
 		syno_pm_9705_max_tx_amp(ap);
 	}
 #ifdef MY_ABC_HERE
+	if (0 == ap->PMSynoEMID) {
+		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+	}
 	 
 	if (syno_is_hw_version(HW_DS1812p)) {
 		 

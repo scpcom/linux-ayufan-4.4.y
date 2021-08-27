@@ -354,6 +354,15 @@ struct inodes_stat_t {
 #include <linux/time.h>
 #endif  
 
+#ifdef MY_ABC_HERE
+enum bypass_synoacl_type {
+	BYPASS_SYNOACL_SYNOUTIME,
+	BYPASS_SYNOACL_SYNOARCHIVE_OVERWRITE,
+	BYPASS_SYNOACL_SYNOARCHIVE_OVERWRITE_ACL,
+	BYPASS_SYNOACL_SYNOACL_XATTR,
+	BYPASS_SYNOACL_MAX
+};
+#endif  
 struct export_operations;
 struct hd_geometry;
 struct iovec;
@@ -1314,6 +1323,10 @@ struct super_block {
 #ifdef MY_ABC_HERE
 	u64 	s_syno_opt;
 #endif
+#ifdef MY_ABC_HERE
+	 
+	long relatime_period;
+#endif  
 };
 
 #ifdef MY_ABC_HERE

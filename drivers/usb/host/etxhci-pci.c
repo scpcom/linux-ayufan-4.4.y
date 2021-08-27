@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/pci.h>
 #include <linux/slab.h>
@@ -8,7 +5,7 @@
 
 #include "etxhci.h"
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_USB3_PCI_ID_DEFINE
 #define PCI_VENDOR_ID_ETRON		0x1b6f
 #define PCI_DEVICE_ID_ETRON_EJ168	0x7023
 #define PCI_DEVICE_ID_ETRON_EJ188	0x7052
@@ -16,7 +13,7 @@
 unsigned short xhci_vendor = 0;
 #endif
 
-static const char hcd_name[] = "etxhci_hcd_150119";
+static const char hcd_name[] = "etxhci_hcd-161118";
 
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
 {
@@ -33,7 +30,7 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 	struct pci_dev		*pdev = to_pci_dev(dev);
 	struct usb_hcd		*hcd = xhci_to_hcd(xhci);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_PCI_ID_DEFINE
 	xhci_vendor = pdev->vendor;
 #endif
 
@@ -42,7 +39,7 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		pci_read_config_dword(pdev, 0x58, &xhci->hcc_params1);
 		xhci->hcc_params1 &= 0xffff;
 		xhci_init_ejxxx(xhci);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_PCI_ID_DEFINE
 		xhci_err(xhci, "Etron chip found.\n");
 #endif
 		if (pdev->device == PCI_DEVICE_ID_ETRON_EJ168)
@@ -96,6 +93,7 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	struct xhci_hcd *xhci;
 	struct hc_driver *driver;
 	struct usb_hcd *hcd;
+	char name[16];
 
 	if (dev->vendor != PCI_VENDOR_ID_ETRON)
 		return -ENODEV;
@@ -123,7 +121,8 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	if (retval)
 		goto put_usb3_hcd;
 
-	xhci->bulk_xfer_wq = create_singlethread_workqueue(pci_name(dev));
+	snprintf(name, sizeof(name), "etxhci_wq%d", hcd->self.busnum);
+	xhci->bulk_xfer_wq = create_singlethread_workqueue(name);
 	if (!xhci->bulk_xfer_wq) {
 		retval = -ENOMEM;
 		goto put_usb3_hcd;

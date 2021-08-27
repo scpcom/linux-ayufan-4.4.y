@@ -377,13 +377,24 @@ out:
 int ecryptfs_write_inode_size_to_metadata(struct inode *ecryptfs_inode)
 {
 	struct ecryptfs_crypt_stat *crypt_stat;
+#ifdef MY_ABC_HERE
+	int rc;
+#endif  
 
 	crypt_stat = &ecryptfs_inode_to_private(ecryptfs_inode)->crypt_stat;
 	BUG_ON(!(crypt_stat->flags & ECRYPTFS_ENCRYPTED));
+#ifdef MY_ABC_HERE
+	rc = ecryptfs_write_inode_size_to_xattr(ecryptfs_inode);
+	if (rc) {
+		return rc;
+	}
+	return ecryptfs_write_inode_size_to_header(ecryptfs_inode);
+#else
 	if (crypt_stat->flags & ECRYPTFS_METADATA_IN_XATTR)
 		return ecryptfs_write_inode_size_to_xattr(ecryptfs_inode);
 	else
 		return ecryptfs_write_inode_size_to_header(ecryptfs_inode);
+#endif  
 }
 
 static int ecryptfs_write_end(struct file *file,

@@ -1406,6 +1406,18 @@ static int sil24_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	pci_set_master(pdev);
+
+#ifdef MY_ABC_HERE
+	if (pdev->vendor == 0x1095 && (pdev->device == 0x3132 || pdev->device == 0x3531)) {
+		int i=0;
+
+		for (i = 0; i < host->n_ports; i++) {
+			struct ata_port *ap = host->ports[i];
+			ap->link.uiStsFlags |= SYNO_STATUS_IS_SIL;
+		}
+	}
+#endif  
+
 	return ata_host_activate(host, pdev->irq, sil24_interrupt, IRQF_SHARED,
 				 &sil24_sht);
 }

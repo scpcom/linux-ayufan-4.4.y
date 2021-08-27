@@ -39,6 +39,17 @@ END:
 }
 #endif
 
+#ifdef MY_ABC_HERE
+static inline unsigned char SynoIsRaidReachMaxDegrade(struct mddev *mddev)
+{
+	struct r1conf *conf = mddev->private;
+	if (mddev->degraded >= conf->raid_disks - 1) {
+		return true;
+	}
+	return false;
+}
+#endif
+
 static void * r1bio_pool_alloc(gfp_t gfp_flags, void *data)
 {
 	struct pool_info *pi = data;
@@ -260,22 +271,15 @@ static void raid1_end_read_request(struct bio *bio, int error)
 	 
 	update_head_pos(mirror, r1_bio);
 
-	if (uptodate)
 #ifdef MY_ABC_HERE
-	{
-		if (r1_bio->read_failed) {
-			if (mirror == r1_bio->orig_disk_idx) {
-				SynoReportCorrectBadSector(bio->bi_sector, conf->mddev->md_minor, 
-										   conf->mirrors[mirror].rdev->bdev, __FUNCTION__);
-			}
-			r1_bio->read_failed = 0;
-			r1_bio->orig_disk_idx = -1;
-		}
-		set_bit(R1BIO_Uptodate, &r1_bio->state);
+	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
+		SynoAutoRemapReport(conf->mddev, r1_bio->sector, conf->mirrors[mirror].rdev->bdev);
 	}
-#else
-		set_bit(R1BIO_Uptodate, &r1_bio->state);
 #endif
+
+	if (uptodate)
+		set_bit(R1BIO_Uptodate, &r1_bio->state);
 	else {
 		 
 		unsigned long flags;
@@ -288,10 +292,15 @@ static void raid1_end_read_request(struct bio *bio, int error)
 
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 		if (!IsDeviceDisappear(conf->mirrors[mirror].rdev->bdev)) {
+#ifdef MY_ABC_HERE
+			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+				SynoReportBadSector(bio->bi_sector, READ,
+								conf->mddev->md_minor, conf->mirrors[mirror].rdev->bdev, __FUNCTION__);
+			}
+#else
 			SynoReportBadSector(bio->bi_sector, READ,
 								conf->mddev->md_minor, conf->mirrors[mirror].rdev->bdev, __FUNCTION__);
-			r1_bio->read_failed = 1;
-			r1_bio->orig_disk_idx = mirror;
+#endif
 
 			if (uptodate) {
 				 
@@ -301,9 +310,10 @@ static void raid1_end_read_request(struct bio *bio, int error)
 #endif
 	}
 
-	if (uptodate)
+	if (uptodate) {
 		raid_end_bio_io(r1_bio);
-	else {
+		rdev_dec_pending(conf->mirrors[mirror].rdev, conf->mddev);
+	} else {
 		 
 		char b[BDEVNAME_SIZE];
 		printk_ratelimited(
@@ -315,9 +325,8 @@ static void raid1_end_read_request(struct bio *bio, int error)
 			(unsigned long long)r1_bio->sector);
 		set_bit(R1BIO_ReadError, &r1_bio->state);
 		reschedule_retry(r1_bio);
+		 
 	}
-
-	rdev_dec_pending(conf->mirrors[mirror].rdev, conf->mddev);
 }
 
 static void close_write(struct r1bio *r1_bio)
@@ -801,10 +810,6 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 	r1_bio->state = 0;
 	r1_bio->mddev = mddev;
 	r1_bio->sector = bio->bi_sector;
-#ifdef MY_ABC_HERE
-	r1_bio->read_failed = 0;
-	r1_bio->orig_disk_idx = -1;
-#endif
 
 	bio->bi_phys_segments = 0;
 	clear_bit(BIO_SEG_VALID, &bio->bi_flags);
@@ -1344,6 +1349,12 @@ static void end_sync_read(struct bio *bio, int error)
 	update_head_pos(r1_bio->read_disk, r1_bio);
 
 #ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
+		SynoAutoRemapReport(conf->mddev, r1_bio->sector, conf->mirrors[mirror].rdev->bdev);
+	}
+#endif
 	if (uptodate) {
 		set_bit(R1BIO_Uptodate, &r1_bio->state);
 	}else{
@@ -1754,6 +1765,9 @@ static void fix_read_error(struct r1conf *conf, int read_disk,
 					       (unsigned long long)(sect +
 					           rdev->data_offset),
 					       bdevname(rdev->bdev, b));
+#ifdef MY_ABC_HERE
+					SynoReportCorrectBadSector(sect + rdev->data_offset, mddev->md_minor, rdev->bdev, __FUNCTION__);
+#endif  
 				}
 			}
 		}
@@ -1928,6 +1942,7 @@ static void handle_read_error(struct r1conf *conf, struct r1bio *r1_bio)
 		unfreeze_array(conf);
 	} else
 		md_error(mddev, conf->mirrors[r1_bio->read_disk].rdev);
+	rdev_dec_pending(conf->mirrors[r1_bio->read_disk].rdev, conf->mddev);
 
 	bio = r1_bio->bios[r1_bio->read_disk];
 #ifdef MY_ABC_HERE
@@ -2744,6 +2759,9 @@ static struct md_personality raid1_personality =
 	.check_reshape	= raid1_reshape,
 	.quiesce	= raid1_quiesce,
 	.takeover	= raid1_takeover,
+#ifdef MY_ABC_HERE
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+#endif
 };
 
 static int __init raid_init(void)

@@ -1114,6 +1114,18 @@ int zap_vma_ptes(struct vm_area_struct *vma, unsigned long address,
 }
 EXPORT_SYMBOL_GPL(zap_vma_ptes);
 
+static inline bool can_follow_write_pte(pte_t pte, struct page *page,
+					unsigned int flags)
+{
+	if (pte_write(pte))
+		return true;
+
+	if ((flags & FOLL_FORCE) && (flags & FOLL_COW))
+		return page && PageAnon(page) && !PageKsm(page);
+
+	return false;
+}
+
 struct page *follow_page(struct vm_area_struct *vma, unsigned long address,
 			unsigned int flags)
 {
@@ -1184,10 +1196,13 @@ split_fallthrough:
 	pte = *ptep;
 	if (!pte_present(pte))
 		goto no_page;
-	if ((flags & FOLL_WRITE) && !pte_write(pte))
-		goto unlock;
 
 	page = vm_normal_page(vma, address, pte);
+	if ((flags & FOLL_WRITE) && !can_follow_write_pte(pte, page, flags)) {
+		pte_unmap_unlock(ptep, ptl);
+		return NULL;
+	}
+
 	if (unlikely(!page)) {
 		if ((flags & FOLL_DUMP) ||
 		    !is_zero_pfn(pte_pfn(pte)))
@@ -1214,7 +1229,7 @@ split_fallthrough:
 			unlock_page(page);
 		}
 	}
-unlock:
+
 	pte_unmap_unlock(ptep, ptl);
 out:
 	return page;
@@ -1380,7 +1395,7 @@ int __get_user_pages(struct task_struct *tsk, struct mm_struct *mm,
 
 				if ((ret & VM_FAULT_WRITE) &&
 				    !(vma->vm_flags & VM_WRITE))
-					foll_flags &= ~FOLL_WRITE;
+					foll_flags |= FOLL_COW;
 
 				cond_resched();
 			}

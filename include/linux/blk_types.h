@@ -75,6 +75,9 @@ struct bio {
 #define BIO_QUIET	10	 
 #define BIO_MAPPED_INTEGRITY 11 
 #ifdef MY_ABC_HERE
+#define BIO_AUTO_REMAP 12	 
+#endif
+#ifdef MY_ABC_HERE
  
 #define BIO_MD_RETURN_ERROR 13
 #endif

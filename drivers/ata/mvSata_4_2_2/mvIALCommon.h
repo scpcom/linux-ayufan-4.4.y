@@ -20,7 +20,7 @@ extern "C" {
 #define MV_IAL_SRST_TIMEOUT             31000
 #define MV_IAL_WAIT_FOR_RDY_TIMEOUT     10000
  
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #define syno_eh_printk(pMvSataAdapter, channel, fmt, args...) \
         printk("mvSata[%d %d]: "fmt".\n", pMvSataAdapter->adapterId, channel, ##args)
 #endif

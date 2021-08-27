@@ -2065,6 +2065,133 @@ SALCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
     return MV_TRUE;
 }
 
+#ifdef MY_ABC_HERE
+#include <scsi/scsi_cmnd.h>
+extern unsigned char
+blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd, sector_t lba);
+
+static MV_BOOLEAN
+SynoBadSectorRemapCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
+                               MV_U8 channelNum,
+                               MV_COMPLETION_TYPE comp_type,
+                               MV_VOID_PTR commandId,
+                               MV_U16 responseFlags,
+                               MV_U32 timeStamp,
+                               MV_STORAGE_DEVICE_REGISTERS *registerStruct)
+{
+    switch (comp_type)
+    {
+    case MV_COMPLETION_TYPE_NORMAL:
+        syno_eh_printk(pSataAdapter, channelNum, "bad sector remap result : MV_COMPLETION_TYPE_NORMAL. buf %p", commandId);
+        break;
+    case MV_COMPLETION_TYPE_ABORT:
+        syno_eh_printk(pSataAdapter, channelNum, "bad sector remap result : MV_COMPLETION_TYPE_ABORT. buf %p", commandId);
+        break;
+    case MV_COMPLETION_TYPE_ERROR:
+        syno_eh_printk(pSataAdapter, channelNum, "bad sector remap result : MV_COMPLETION_TYPE_ERROR. buf %p", commandId);
+        break;
+    default:
+        syno_eh_printk(pSataAdapter, channelNum, "bad sector remap result : default. buf %p", commandId);
+        break;
+    }
+
+    kfree(commandId);
+    return MV_TRUE;
+}
+ 
+static MV_BOOLEAN
+SynoInsertBadSectorRemap(MV_SATA_SCSI_CMD_BLOCK *pScb,
+                         MV_STORAGE_DEVICE_REGISTERS *registerStruct,
+                         MV_BOOLEAN blRead)
+{
+    MV_QUEUE_COMMAND_INFO commandInfo;
+    MV_BOOLEAN ret = MV_FALSE;
+    MV_U8 *pBuf = NULL;
+    MV_U8 blLBA48 = 0;
+    MV_U64 lba = 0;
+
+    if (!registerStruct ||
+        !pScb) {
+        WARN_ON(1);
+        goto END;
+    }
+
+    if (!(registerStruct->errorRegister & UNC_ERR)) {
+        goto END;
+    }
+
+    blLBA48 = pScb->isExtended;
+    lba = ((MV_U64)registerStruct->lbaLowRegister & 0xff) | 
+          ((MV_U64)(registerStruct->lbaMidRegister & 0xff) << 8) |
+          ((MV_U64)(registerStruct->lbaHighRegister & 0xff) << 16);
+    if (blLBA48) {
+        lba |=  ((MV_U64)(registerStruct->lbaLowRegister & 0xff00) << 16) | 
+                ((MV_U64)(registerStruct->lbaMidRegister & 0xff00) << 24) |
+                ((MV_U64)(registerStruct->lbaHighRegister & 0xff00) << 32);
+    } else {
+        lba |= (registerStruct->deviceRegister & 0xf) << 24;
+    }
+
+    syno_eh_printk(pScb->pSalAdapterExtension->pSataAdapter, pScb->bus, "%s unc at LBA %llu", blRead ? "read" : "write", lba);
+
+    if (blRead &&
+        !blSectorNeedAutoRemap(pScb->IALData, lba)) {
+        goto END;
+    }    
+
+    if (NULL == (pBuf = kzalloc(sizeof(MV_U16)*ATA_SECTOR_SIZE_IN_WORDS, GFP_ATOMIC))) {
+        goto END;
+    }  
+
+    commandInfo.type = MV_QUEUED_COMMAND_TYPE_NONE_UDMA;
+    commandInfo.PMPort = pScb->target;
+    commandInfo.pQueueCmdEntry = NULL;
+    commandInfo.commandParams.NoneUdmaCommand.protocolType = MV_NON_UDMA_PROTOCOL_PIO_DATA_OUT;
+    commandInfo.commandParams.NoneUdmaCommand.callBack = SynoBadSectorRemapCompletionCB;
+    commandInfo.commandParams.NoneUdmaCommand.bufPtr = (MV_U16 *)pBuf;
+    commandInfo.commandParams.NoneUdmaCommand.count = ATA_SECTOR_SIZE_IN_WORDS;
+    commandInfo.commandParams.NoneUdmaCommand.command = (blLBA48) ? 
+                                                        MV_ATA_COMMAND_WRITE_SECTORS_EXT : 
+                                                        MV_ATA_COMMAND_WRITE_SECTORS;
+    commandInfo.commandParams.NoneUdmaCommand.sectorCount = 1;            
+    commandInfo.commandParams.NoneUdmaCommand.lbaHigh = registerStruct->lbaHighRegister;
+    commandInfo.commandParams.NoneUdmaCommand.lbaLow = registerStruct->lbaLowRegister;
+    commandInfo.commandParams.NoneUdmaCommand.lbaMid = registerStruct->lbaMidRegister;
+    commandInfo.commandParams.NoneUdmaCommand.device = (MV_U8)(MV_BIT6);
+    commandInfo.commandParams.NoneUdmaCommand.device |= (blLBA48) ? 0 : (registerStruct->deviceRegister & 0x0f);
+    commandInfo.commandParams.NoneUdmaCommand.features = 0;
+    commandInfo.commandParams.NoneUdmaCommand.isEXT = blLBA48;
+     
+    commandInfo.commandParams.NoneUdmaCommand.commandId = pBuf;
+#ifdef MY_ABC_HERE
+    commandInfo.commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
+    commandInfo.pSynoCmdExt = NULL;
+#endif
+
+    if (MV_QUEUE_COMMAND_RESULT_OK != mvSataQueueCommand(pScb->pSalAdapterExtension->pSataAdapter,
+                                                         pScb->bus, &commandInfo)) {
+        syno_eh_printk(pScb->pSalAdapterExtension->pSataAdapter, pScb->bus, "Queue remap command fail");
+        kfree(pBuf);
+        goto END;
+    }
+
+    syno_eh_printk(pScb->pSalAdapterExtension->pSataAdapter, pScb->bus, 
+                   "%02x/%04x:%04x:%04x:%04x:%04x/%02x buf %p",
+                   commandInfo.commandParams.NoneUdmaCommand.command,
+                   commandInfo.commandParams.NoneUdmaCommand.features,
+                   commandInfo.commandParams.NoneUdmaCommand.sectorCount,
+                   commandInfo.commandParams.NoneUdmaCommand.lbaLow,
+                   commandInfo.commandParams.NoneUdmaCommand.lbaMid,
+                   commandInfo.commandParams.NoneUdmaCommand.lbaHigh,
+                   commandInfo.commandParams.NoneUdmaCommand.device,
+                   pBuf);
+
+    ret = MV_TRUE;
+END:
+    return ret;
+}
+#endif
+
 MV_VOID
 handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
                     MV_STORAGE_DEVICE_REGISTERS *registerStruct)
@@ -2117,6 +2244,10 @@ handleNoneUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
         }
         else if (errorReg & UNC_ERR)
         {
+#ifdef MY_ABC_HERE
+             
+            SynoInsertBadSectorRemap(pScb, registerStruct, MV_TRUE);
+#endif
 #if 0
             MV_U32  LowLbaAddress = pScb->LowLbaAddress;
 #endif
@@ -2222,6 +2353,9 @@ handleUdmaError(MV_SATA_SCSI_CMD_BLOCK  *pScb,
         else if ((registerStruct->errorRegister & UNC_ERR) ||
 		 (registerStruct->errorRegister == 1))
         {
+#ifdef MY_ABC_HERE
+            SynoInsertBadSectorRemap(pScb, registerStruct, (MV_UDMA_TYPE_READ == pScb->udmaType));
+#endif
 #if 0
             MV_U32  LowLbaAddress = pScb->LowLbaAddress;
 

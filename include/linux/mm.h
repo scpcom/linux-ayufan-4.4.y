@@ -1203,6 +1203,7 @@ struct page *follow_page(struct vm_area_struct *, unsigned long address,
 #define FOLL_MLOCK	0x40	 
 #define FOLL_SPLIT	0x80	 
 #define FOLL_HWPOISON	0x100	 
+#define FOLL_COW	0x4000	 
 
 typedef int (*pte_fn_t)(pte_t *pte, pgtable_t token, unsigned long addr,
 			void *data);

@@ -1013,6 +1013,7 @@ struct ext4_sb_info {
 #ifdef MY_ABC_HERE
 	int s_new_error_fs_event_flag;
 	char *s_mount_path;
+	unsigned long s_last_notify_time;
 #endif
 #ifdef MY_DEF_HERE
 	int s_swap_create_time;

@@ -1,6 +1,6 @@
 #!/bin/bash
-theArmada375Platfrom=`cat /env${BUILD_ARCH}.mak|grep MARVELL_ARMADA375`
-theArmadaPlatfrom=`cat /env${BUILD_ARCH}.mak|grep MARVELL_ARMADA`
+theArmada375Platfrom=`echo $SYNO_PLATFORM|grep MARVELL_ARMADA375`
+theArmadaPlatfrom=`echo $SYNO_PLATFORM|grep MARVELL_ARMADA`
 ARMADA_PLAT_PJ=plat-armada
 ARMADA_PLAT=arch/arm/$ARMADA_PLAT_PJ        
 
@@ -30,4 +30,3 @@ else
 		BuildArmadaLink
 	fi
 fi
- 

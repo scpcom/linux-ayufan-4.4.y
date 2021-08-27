@@ -249,6 +249,12 @@ static void raid10_end_read_request(struct bio *bio, int error)
 	dev = r10_bio->devs[slot].devnum;
 	 
 	update_head_pos(slot, r10_bio);
+#ifdef MY_ABC_HERE
+	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__, __FUNCTION__, __LINE__);
+		SynoAutoRemapReport(conf->mddev, r10_bio->sector, conf->mirrors[dev].rdev->bdev);
+	}
+#endif  
 
 	if (uptodate) {
 		 
@@ -260,8 +266,15 @@ static void raid10_end_read_request(struct bio *bio, int error)
 		char b[BDEVNAME_SIZE];
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 		if (!IsDeviceDisappear(conf->mirrors[dev].rdev->bdev)) {
+#ifdef MY_ABC_HERE
+			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+				SynoReportBadSector(bio->bi_sector, READ,
+								conf->mddev->md_minor, conf->mirrors[dev].rdev->bdev, __FUNCTION__);
+			}
+#else
 			SynoReportBadSector(bio->bi_sector, READ,
 								conf->mddev->md_minor, conf->mirrors[dev].rdev->bdev, __FUNCTION__);
+#endif
 		}
 #endif
 		printk_ratelimited(KERN_ERR
@@ -1014,6 +1027,92 @@ static int enough(struct r10conf *conf, int ignore)
 }
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#ifdef MY_ABC_HERE
+static inline void SynoSetRdevAutoRemap(struct mddev *mddev)
+{
+	struct r10conf *conf = mddev->private;
+	struct md_rdev *rdev, *tmp;
+	char b[BDEVNAME_SIZE];
+	int rdev_idx = 0;
+
+	if (1 >= conf->near_copies || (conf->raid_disks % conf->near_copies)) {
+		printk("md: %s: not a standard RAID 10, does not support auto remap mode", mdname(mddev));
+		return;
+	}
+
+	rdev_for_each(rdev, tmp, mddev) {
+		RaidRemapModeSet(rdev->bdev, MD_AUTO_REMAP_MODE_FORCE_OFF);
+	}
+
+	do {
+		int num_data_copies = conf->copies;
+		int survival_cnt = 0;
+		int last_survival_rdev = -1;
+
+		while (num_data_copies--) {
+			if (conf->mirrors[rdev_idx].rdev &&
+				!test_bit(Faulty, &conf->mirrors[rdev_idx].rdev->flags) &&
+				test_bit(In_sync, &conf->mirrors[rdev_idx].rdev->flags)) {
+				survival_cnt++;
+				last_survival_rdev = rdev_idx;
+			}
+			rdev_idx = (rdev_idx + 1) % conf->raid_disks;
+		}
+
+		if (1 == survival_cnt) {
+			RaidRemapModeSet(conf->mirrors[last_survival_rdev].rdev->bdev, MD_AUTO_REMAP_MODE_FORCE_ON);
+		}
+	} while (0 != rdev_idx);
+
+	rdev_for_each(rdev, tmp, mddev) {
+		if (rdev && rdev->bdev && rdev->bdev->bd_part) {
+			bdevname(rdev->bdev, b);
+			printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, rdev->bdev->bd_part->auto_remap);
+		}
+	}
+}
+
+static inline unsigned char SynoIsRaidReachMaxDegrade(struct mddev *mddev)
+{
+	struct r10conf *conf = mddev->private;
+	int first = 0;
+	int first_orig = first;
+	int blStandardRaid10 = 0;
+	int ret = 0;
+
+	if (1 < conf->near_copies && !(conf->raid_disks % conf->near_copies)) {
+		blStandardRaid10 = 1;
+	}
+
+	do {
+		int n = conf->copies;
+		int cnt = 0;
+
+		while (n--) {
+			if (conf->mirrors[first].rdev &&
+				!test_bit(Faulty, &conf->mirrors[first].rdev->flags)&&
+				test_bit(In_sync, &conf->mirrors[first].rdev->flags)) {
+				cnt++;
+			}
+			first = (first+1) % conf->raid_disks;
+		}
+
+		if (cnt <= 1) {
+			ret = 1;
+			goto END;
+		}
+
+		if (!blStandardRaid10) {
+			first_orig = (first_orig+1) % conf->raid_disks;
+			first = first_orig;
+		}
+	} while (first != 0);
+
+END:
+	return ret;
+}
+#endif
+
 static int
 blRaid10Enough(struct r10conf *conf,
 			   struct md_rdev *rdev)
@@ -1358,6 +1457,13 @@ static void end_sync_read(struct bio *bio, int error)
 	int d;
 
 	d = find_bio_disk(conf, r10_bio, bio, NULL);
+
+#ifdef MY_ABC_HERE
+	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__, __FUNCTION__, __LINE__);
+		SynoAutoRemapReport(conf->mddev, r10_bio->sector, conf->mirrors[d].rdev->bdev);
+	}
+#endif  
 
 	if (test_bit(BIO_UPTODATE, &bio->bi_flags))
 		set_bit(R10BIO_Uptodate, &r10_bio->state);
@@ -2935,6 +3041,10 @@ static struct md_personality raid10_personality =
 	.sync_request	= sync_request,
 	.quiesce	= raid10_quiesce,
 	.size		= raid10_size,
+#ifdef MY_ABC_HERE
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+	.syno_set_rdev_auto_remap = SynoSetRdevAutoRemap,
+#endif
 	.takeover	= raid10_takeover,
 };
 

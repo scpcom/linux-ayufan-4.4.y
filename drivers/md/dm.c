@@ -49,6 +49,11 @@ static unsigned int _major = 0;
 
 static DEFINE_IDR(_minor_idr);
 
+#ifdef MY_ABC_HERE
+extern sector_t (*funcSYNOLvLgSectorCount)(void *private, sector_t sector);
+sector_t SynoLvLgSectorCount(void *, sector_t);
+#endif
+
 static DEFINE_SPINLOCK(_minor_lock);
  
 struct dm_io {
@@ -269,6 +274,10 @@ static int __init dm_init(void)
 		if (r)
 			goto bad;
 	}
+
+#ifdef MY_ABC_HERE
+	funcSYNOLvLgSectorCount = SynoLvLgSectorCount;
+#endif
 
 	return 0;
 
@@ -812,6 +821,20 @@ static sector_t max_io_len(sector_t sector, struct dm_target *ti)
 
 	return len;
 }
+
+#ifdef MY_ABC_HERE
+sector_t SynoLvLgSectorCount(void *private, sector_t sector)
+{
+	struct dm_target *ti = (struct dm_target *)private;
+
+	if (ti && ti->type->lg_sector_get) {
+		return ti->type->lg_sector_get(sector, ti);
+	}
+
+	return 0;
+}
+EXPORT_SYMBOL(SynoLvLgSectorCount);
+#endif
 
 static void __map_bio(struct dm_target *ti, struct bio *clone,
 		      struct dm_target_io *tio)

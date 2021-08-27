@@ -32,7 +32,8 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 	if (!strcmp(name, SYNO_ACL_XATTR_ACCESS)) {
 		if (inode->i_op->syno_bypass_is_synoacl) {
 			 
-			return inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
+			return inode->i_op->syno_bypass_is_synoacl(dentry,
+					        BYPASS_SYNOACL_SYNOACL_XATTR, -EOPNOTSUPP);
 		} else if (MAY_WRITE == mask || MAY_WRITE_PERMISSION == mask) {
 			return synoacl_check_xattr_perm(name, dentry, MAY_WRITE_PERMISSION);
 		} else if (MAY_READ == mask || MAY_READ_PERMISSION == mask) {
@@ -46,7 +47,8 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 		if (!strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
 			if (inode->i_op->syno_bypass_is_synoacl) {
 				 
-				return inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
+				return inode->i_op->syno_bypass_is_synoacl(dentry,
+						        BYPASS_SYNOACL_SYNOACL_XATTR, -EOPNOTSUPP);
 			} else if (!IS_SYNOACL(dentry)) {
 				return -EOPNOTSUPP;
 			}
@@ -55,7 +57,8 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 		if (!strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY)) {
 			if (inode->i_op->syno_bypass_is_synoacl) {
 				 
-				return inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
+				return inode->i_op->syno_bypass_is_synoacl(dentry,
+						        BYPASS_SYNOACL_SYNOACL_XATTR, -EOPNOTSUPP);
 			}
 			return synoacl_op_perm(dentry, MAY_READ_PERMISSION);
 		}

@@ -211,6 +211,7 @@ struct mm_struct {
 	void (*unmap_area) (struct mm_struct *mm, unsigned long addr);
 #endif
 	unsigned long mmap_base;		 
+	unsigned long mmap_legacy_base;          
 	unsigned long task_size;		 
 	unsigned long cached_hole_size; 	 
 	unsigned long free_area_cache;		 

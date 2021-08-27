@@ -27,6 +27,9 @@
 #include <linux/fsnotify.h>
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
+#ifdef MY_ABC_HERE
+#include <linux/string.h>
+#endif  
 #include "pnode.h"
 #include "internal.h"
 
@@ -843,6 +846,11 @@ static void show_mnt_opts(struct seq_file *m, struct vfsmount *mnt)
 		if (mnt->mnt_flags & fs_infop->flag)
 			seq_puts(m, fs_infop->str);
 	}
+#ifdef MY_ABC_HERE
+	if ((mnt->mnt_flags & MNT_RELATIME) && mnt->mnt_root->d_sb->relatime_period > 1) {
+		seq_printf(m, ",relatime_period=%ld", mnt->mnt_root->d_sb->relatime_period);
+	}
+#endif  
 }
 
 static void show_type(struct seq_file *m, struct super_block *sb)
@@ -1527,11 +1535,75 @@ static int change_mount_flags(struct vfsmount *mnt, int ms_flags)
 	return error;
 }
 
+#ifdef MY_ABC_HERE
+static struct syno_mnt_options {
+	long relatime_period;
+};
+
+static void option_erase(char *str) {
+	char *next = strchr(str, ',');
+
+	if (next) {
+		next++;
+		while (*next) {
+			*str = *next;
+			str++;
+			next++;
+		}
+	}
+	while (*str) {
+		*str = '\0';
+		str++;
+	}
+}
+
+enum {
+	Opt_relatime_period,
+	Opt_err,
+};
+
+static struct option_table {
+	int token;
+	const char *name;
+	const char *pattern;
+} tokens[] = {
+	{Opt_relatime_period, "relatime_period", "relatime_period=%ld"},
+	{Opt_err, NULL, NULL},
+};
+
+static int syno_parse_options(struct syno_mnt_options *options, char *data) {
+	struct option_table *p;
+	char *str;
+
+	if (!data)
+		return 0;
+
+	for (p = tokens; p->token != Opt_err; p++) {
+		while (NULL != (str = strstr(data, p->name))) {
+			switch (p->token) {
+				case Opt_relatime_period:
+					if (1 != sscanf(str, p->pattern, &(options->relatime_period))
+						|| options->relatime_period <= 0 || options->relatime_period > 365*10)
+						return -EINVAL;
+					break;
+				default:
+					break;
+			}
+			option_erase(str);
+		}
+	}
+	return 0;
+}
+#endif  
+
 static int do_remount(struct path *path, int flags, int mnt_flags,
 		      void *data)
 {
 	int err;
 	struct super_block *sb = path->mnt->mnt_sb;
+#ifdef MY_ABC_HERE
+	struct syno_mnt_options options;
+#endif  
 
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
@@ -1541,6 +1613,13 @@ static int do_remount(struct path *path, int flags, int mnt_flags,
 
 	if (path->dentry != path->mnt->mnt_root)
 		return -EINVAL;
+
+#ifdef MY_ABC_HERE
+	memset(&options, 0, sizeof(struct syno_mnt_options));
+	err = syno_parse_options(&options, data);
+	if (err)
+		return -EINVAL;
+#endif  
 
 	err = security_sb_remount(sb, data);
 	if (err)
@@ -1557,6 +1636,10 @@ static int do_remount(struct path *path, int flags, int mnt_flags,
 		path->mnt->mnt_flags = mnt_flags;
 		br_write_unlock(vfsmount_lock);
 	}
+#ifdef MY_ABC_HERE
+	if (options.relatime_period > 0)
+		sb->relatime_period = options.relatime_period;
+#endif  
 	up_write(&sb->s_umount);
 	if (!err) {
 		br_write_lock(vfsmount_lock);
@@ -1712,12 +1795,22 @@ static int do_new_mount(struct path *path, char *type, int flags,
 {
 	struct vfsmount *mnt;
 	int err;
+#ifdef MY_ABC_HERE
+	struct syno_mnt_options options;
+#endif  
 
 	if (!type)
 		return -EINVAL;
 
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
+
+#ifdef MY_ABC_HERE
+	memset(&options, 0, sizeof(struct syno_mnt_options));
+	err = syno_parse_options(&options, data);
+	if (err)
+		return -EINVAL;
+#endif  
 
 	mnt = do_kern_mount(type, flags, name, data);
 	if (IS_ERR(mnt))
@@ -1730,6 +1823,11 @@ static int do_new_mount(struct path *path, char *type, int flags,
 		ext4_fill_mount_path(mnt->mnt_sb, d_path(path, buf, sizeof(buf)));
 	}
 #endif
+
+#ifdef MY_ABC_HERE
+	if (options.relatime_period > 0)
+		mnt->mnt_sb->relatime_period = options.relatime_period;
+#endif  
 
 	if (err)
 		mntput(mnt);

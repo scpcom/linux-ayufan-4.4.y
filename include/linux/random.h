@@ -93,6 +93,14 @@ void prandom_seed(u32 seed);
 u32 prandom_u32_state(struct rnd_state *);
 void prandom_bytes_state(struct rnd_state *state, void *buf, int nbytes);
 
+#ifdef MY_ABC_HERE
+ 
+static inline u32 prandom_u32_max(u32 ep_ro)
+{
+	return (u32)(((u64) prandom_u32() * ep_ro) >> 32);
+}
+#endif  
+
 static inline u32 __seed(u32 x, u32 m)
 {
 	return (x < m) ? x + m : x;

@@ -1479,6 +1479,253 @@ static void shrink_stripes(struct r5conf *conf)
 	conf->slab_cache = NULL;
 }
 
+#ifdef MY_ABC_HERE
+ 
+static int syno_raid5_parity_disk_get(const struct r5conf* conf, sector_t chunk_number, int *pd_idx, int *qd_idx, int *st_idx)
+{
+	int raid_disks = conf->raid_disks;
+	int data_disks = raid_disks - conf->max_degraded;
+
+	switch (conf->level) {
+	case 4:
+		*pd_idx = data_disks;
+		*qd_idx = -1;
+		*st_idx = 0;
+		break;
+	case 5:
+		*qd_idx = -1;
+		switch (conf->algorithm) {
+		case ALGORITHM_LEFT_ASYMMETRIC:
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks);
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+		case ALGORITHM_RIGHT_ASYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+		case ALGORITHM_LEFT_SYMMETRIC:
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks);
+			*st_idx = (*pd_idx + 1) % raid_disks;
+			break;
+		case ALGORITHM_RIGHT_SYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*st_idx = (*pd_idx + 1) % raid_disks;
+			break;
+		case ALGORITHM_PARITY_0:
+			*pd_idx = 0;
+			*st_idx = 1;
+			break;
+		case ALGORITHM_PARITY_N:
+			*pd_idx = data_disks;
+			*st_idx = 0;
+			break;
+		default:
+			BUG();
+		}
+		break;
+	case 6:
+		switch(conf->algorithm) {
+		case ALGORITHM_LEFT_ASYMMETRIC:
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+		case ALGORITHM_RIGHT_ASYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+		case ALGORITHM_LEFT_SYMMETRIC:
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (*qd_idx + 1) % raid_disks;
+			break;
+		case ALGORITHM_RIGHT_SYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (*qd_idx + 1) % raid_disks;
+			break;
+
+		case ALGORITHM_PARITY_0:
+			*pd_idx = 0;
+			*qd_idx = 1;
+			*st_idx = 2;
+			break;
+		case ALGORITHM_PARITY_N:
+			*pd_idx = data_disks;
+			*qd_idx = data_disks + 1;
+			*st_idx = 0;
+			break;
+
+		case ALGORITHM_ROTATING_ZERO_RESTART:
+			 
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+
+		case ALGORITHM_ROTATING_N_RESTART:
+			 
+			chunk_number += 1;
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+
+		case ALGORITHM_ROTATING_N_CONTINUE:
+			 
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + raid_disks - 1) % raid_disks;
+			*st_idx = (*pd_idx + 1) % raid_disks;
+			break;
+
+		case ALGORITHM_LEFT_ASYMMETRIC_6:
+			 
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks - 1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+
+		case ALGORITHM_RIGHT_ASYMMETRIC_6:
+			*pd_idx = sector_mod(chunk_number, raid_disks-1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+
+		case ALGORITHM_LEFT_SYMMETRIC_6:
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks - 1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (*pd_idx + 1) % (raid_disks - 1);
+			break;
+
+		case ALGORITHM_RIGHT_SYMMETRIC_6:
+			*pd_idx = sector_mod(chunk_number, raid_disks - 1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (*pd_idx + 1) % (raid_disks - 1);
+			break;
+
+		case ALGORITHM_PARITY_0_6:
+			*pd_idx = 0;
+			*qd_idx = raid_disks - 1;
+			*st_idx = 1;
+			break;
+		default:
+			BUG();
+			break;
+		}
+		break;
+	default:
+		BUG();
+		break;
+	}
+
+	return 0;
+}
+
+static int syno_raid5_data_corrupt_disk_get(const struct r5conf* conf, const int pd_idx, const int qd_idx, int bad_disk, int* bad_disks, int max_bad_disk)
+{
+	int d = 0;
+	int num_repair = 0;
+	int repair_disk[2] = {-1, -1};
+	int num_bad_disk = 0;
+
+	if (pd_idx != bad_disk && qd_idx != bad_disk) {
+		bad_disks[num_bad_disk++] = bad_disk;
+	}
+
+	for (d = 0; d < conf->raid_disks; d++) {
+		if (conf->disks[d].rdev) {
+			if (!test_bit(In_sync, &conf->disks[d].rdev->flags)) {
+				BUG_ON(num_repair >= conf->max_degraded);
+				repair_disk[num_repair++] = d;
+			}
+		} else {
+			BUG_ON(num_repair >= conf->max_degraded);
+			repair_disk[num_repair++] = d;
+		}
+	}
+	BUG_ON(conf->max_degraded != num_repair);
+
+	for (d = 0; d < num_repair && num_bad_disk < max_bad_disk; d++) {
+		if (pd_idx != repair_disk[d] && qd_idx != repair_disk[d]) {
+			bad_disks[num_bad_disk++] = repair_disk[d];
+		}
+	}
+
+	return num_bad_disk;
+}
+
+static int syno_raid5_disk_ahead_get(const int raid_disks, const int st_idx, int pd_idx, int qd_idx, int disk)
+{
+	int disk_ahead = -1;
+
+	if (0 > st_idx || 0 > pd_idx || 0 > disk) {
+		goto END;
+	}
+
+	if (disk < st_idx) {
+		disk += raid_disks;
+	}
+	disk_ahead = disk - st_idx ;
+
+	if (pd_idx < st_idx) {
+		pd_idx += raid_disks;
+	}
+	disk_ahead -= (pd_idx < disk? 1: 0);
+
+	if (-1 != qd_idx) {
+		if (qd_idx < st_idx) {
+			qd_idx += raid_disks;
+		}
+		disk_ahead -= (qd_idx < disk? 1: 0);
+	}
+
+END:
+	return disk_ahead;
+}
+
+static int syno_raid5_autoremap_report_sectors(const struct r5conf* conf, sector_t bad_sector, int bad_disk)
+{
+	sector_t sector = bad_sector ;
+	sector_t chunk_offset = sector_mod(sector, conf->chunk_sectors);
+	sector_t chunk_number = sector;
+	sector_t raid_sector = 0;
+
+	int ret = -1;
+	int raid_disks = conf->raid_disks ;
+	int data_disks = raid_disks - conf->max_degraded ;
+	int pd_idx = -1, qd_idx = -1, st_idx = -1;
+	int d = 0;
+	int bad_disks[3] = {0};  
+	int num_bad_disk = 0;
+
+	int disk_ahead = 0;
+
+	struct md_rdev *rdev = conf->disks[bad_disk].rdev;
+
+	if (0 > syno_raid5_parity_disk_get(conf, chunk_number, &pd_idx, &qd_idx, &st_idx)) {
+		printk("Failed to syno_raid5_parity_disk_get\n");
+		goto END;
+	}
+
+	num_bad_disk = syno_raid5_data_corrupt_disk_get(conf, pd_idx, qd_idx, bad_disk, bad_disks, 3);
+
+	for (d = 0; d < num_bad_disk; d++) {
+		if (0 > (disk_ahead = syno_raid5_disk_ahead_get(raid_disks, st_idx, pd_idx, qd_idx, bad_disks[d]))) {
+			printk("Failed to syno_raid5_disk_ahead_get\n");
+			goto END;
+		}
+		raid_sector = (chunk_number * data_disks + disk_ahead) * conf->chunk_sectors + chunk_offset ;
+		SynoAutoRemapReport(conf->mddev, raid_sector, rdev->bdev);
+	}
+
+	ret = 0;
+END:
+	return ret;
+}
+
+#endif
+
 static void raid5_end_read_request(struct bio * bi, int error)
 {
 	struct stripe_head *sh = bi->bi_private;
@@ -1487,6 +1734,9 @@ static void raid5_end_read_request(struct bio * bi, int error)
 	int uptodate = test_bit(BIO_UPTODATE, &bi->bi_flags);
 	char b[BDEVNAME_SIZE];
 	struct md_rdev *rdev;
+#ifdef MY_ABC_HERE
+	char blIsRemapping = 0;
+#endif
 
 	for (i=0 ; i<disks; i++)
 		if (bi == &sh->dev[i].req)
@@ -1499,6 +1749,15 @@ static void raid5_end_read_request(struct bio * bi, int error)
 		BUG();
 		return;
 	}
+
+#ifdef MY_ABC_HERE
+	if (bio_flagged(bi, BIO_AUTO_REMAP)) {
+		blIsRemapping = 1;
+		clear_bit(BIO_AUTO_REMAP, &bi->bi_flags);
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected, sector:[%llu], sh count:[%d] disk count:[%d]\n", __FILE__,__FUNCTION__,__LINE__, (unsigned long long)sh->sector, atomic_read(&sh->count), i);
+		syno_raid5_autoremap_report_sectors(conf, sh->sector, i);
+	}
+#endif
 
 	if (uptodate) {
 		set_bit(R5_UPTODATE, &sh->dev[i].flags);
@@ -1529,7 +1788,21 @@ static void raid5_end_read_request(struct bio * bi, int error)
 		clear_bit(R5_UPTODATE, &sh->dev[i].flags);
 		atomic_inc(&rdev->read_errors);
 
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+		if (conf->mddev->auto_remap &&
+			0 == IsDeviceDisappear(rdev->bdev) &&
+			!test_bit(R5_ReWrite, &sh->dev[i].flags) &&
+			test_bit(STRIPE_SYNCING, &sh->state)) {
+			 
+			retry = 1;
+		}
+#endif
+
+#ifdef MY_ABC_HERE
+		if ((conf->mddev->degraded >= conf->max_degraded) && !conf->mddev->auto_remap)
+#else
 		if (conf->mddev->degraded >= conf->max_degraded)
+#endif
 #ifdef MY_ABC_HERE
 		{
 			if (!test_bit(DiskError, &rdev->flags)) {
@@ -1582,7 +1855,13 @@ static void raid5_end_read_request(struct bio * bi, int error)
 
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 		if (0 == IsDeviceDisappear(rdev->bdev)) {
+#ifdef MY_ABC_HERE
+			if (1 == blIsRemapping) {
+				SynoReportBadSector(bi->bi_sector, READ, conf->mddev->md_minor, rdev->bdev, __FUNCTION__);
+			}
+#else
 			SynoReportBadSector(bi->bi_sector, READ, conf->mddev->md_minor, rdev->bdev, __FUNCTION__);
+#endif
 		}
 #endif
 
@@ -2914,6 +3193,41 @@ static void handle_stripe_expansion(struct r5conf *conf, struct stripe_head *sh)
 
 #ifdef MY_ABC_HERE
  
+void syno_read_err_retry5(struct r5conf *conf, struct stripe_head *sh,
+						  struct stripe_head_state *s, struct r5dev *dev, int idr)
+{
+	char b[BDEVNAME_SIZE];
+	struct md_rdev *rdev;
+
+	rcu_read_lock();
+	rdev = rcu_dereference(conf->disks[idr].rdev);
+	if(rdev) {
+		bdevname(rdev->bdev, b);
+	}else{
+		strlcpy(b, " ", BDEVNAME_SIZE);
+	}
+	rcu_read_unlock();
+
+	if (!test_bit(R5_ReWrite, &dev->flags)) {
+		printk("%s[%s]: set rewrite, raid%d, %s, sector %llu\n",
+			   __FILE__, __FUNCTION__,
+			   conf->mddev->md_minor, b, (unsigned long long)sh->sector);
+		set_bit(R5_Wantwrite, &dev->flags);
+		set_bit(R5_ReWrite, &dev->flags);
+		set_bit(R5_LOCKED, &dev->flags);
+	} else {
+		printk("%s[%s]: set reread, md%d, %s, sector %llu\n",
+			   __FILE__, __FUNCTION__,
+			   conf->mddev->md_minor, b, (unsigned long long)sh->sector);
+		 
+		set_bit(R5_Wantread, &dev->flags);
+		set_bit(R5_LOCKED, &dev->flags);
+	}
+}
+#endif
+
+#ifdef MY_ABC_HERE
+ 
 static void syno_handle_raid6_sync_error(struct r5conf *conf, struct stripe_head *sh, int disks)
 {
 	int i;
@@ -2958,11 +3272,19 @@ syno_handle_failed_expand(struct r5conf *conf, struct stripe_head *sh,
 }
 #endif
 
+#ifdef MY_ABC_HERE
+ 
+static char analyse_stripe(struct stripe_head *sh, struct stripe_head_state *s)
+#else
 static void analyse_stripe(struct stripe_head *sh, struct stripe_head_state *s)
+#endif
 {
 	struct r5conf *conf = sh->raid_conf;
 	int disks = sh->disks;
 	struct r5dev *dev;
+#ifdef MY_ABC_HERE
+	unsigned char isSyncError = 0;
+#endif
 #ifdef MY_ABC_HERE
 	unsigned char isBadSH = 0;
 #endif
@@ -3090,15 +3412,37 @@ static void analyse_stripe(struct stripe_head *sh, struct stripe_head_state *s)
 		if (test_bit(R5_ReadError, &dev->flags))
 			clear_bit(R5_Insync, &dev->flags);
 		if (!test_bit(R5_Insync, &dev->flags)) {
+#ifdef MY_ABC_HERE
+			if (s->syncing && conf->mddev->auto_remap) {
+				if(!(rdev && test_bit(In_sync, &rdev->flags)
+					 && test_bit(R5_ReadError, &dev->flags))) {
+					if (s->failed < 2)
+						s->failed_num[s->failed] = i;
+					s->failed++;
+				}else{
+					 
+					isSyncError = 1;
+				}
+			}else{
+				if (s->failed < 2)
+					s->failed_num[s->failed] = i;
+				s->failed++;
+			}
+#else
 			if (s->failed < 2)
 				s->failed_num[s->failed] = i;
 			s->failed++;
+#endif
 		}
 	}
 #ifndef MY_ABC_HERE
 	spin_unlock_irq(&conf->device_lock);
 #endif
 	rcu_read_unlock();
+
+#ifdef MY_ABC_HERE
+	return isSyncError;
+#endif
 }
 
 static void handle_stripe(struct stripe_head *sh)
@@ -3109,6 +3453,9 @@ static void handle_stripe(struct stripe_head *sh)
 	int prexor;
 	int disks = sh->disks;
 	struct r5dev *pdev, *qdev;
+#ifdef MY_ABC_HERE
+	unsigned char isSyncError = 0;
+#endif
 
 #ifdef MY_ABC_HERE
 	spin_lock(&sh->lock);
@@ -3148,7 +3495,11 @@ static void handle_stripe(struct stripe_head *sh)
 	       atomic_read(&sh->count), sh->pd_idx, sh->qd_idx,
 	       sh->check_state, sh->reconstruct_state);
 
+#ifdef MY_ABC_HERE
+	isSyncError = analyse_stripe(sh, &s);
+#else
 	analyse_stripe(sh, &s);
+#endif
 
 	if (s.handle_bad_blocks) {
 		set_bit(STRIPE_HANDLE, &sh->state);
@@ -3257,6 +3608,19 @@ static void handle_stripe(struct stripe_head *sh)
 
 	if (s.to_write && !sh->reconstruct_state && !sh->check_state)
 		handle_stripe_dirtying(conf, sh, &s, disks);
+
+#ifdef MY_ABC_HERE
+	if (s.failed == 1 && isSyncError == 1) {
+		struct r5dev *dev = NULL;
+		for (i=disks; i--;) {
+			dev = &sh->dev[i];
+			if (test_bit(R5_ReadError, &dev->flags)) {
+				syno_read_err_retry5(conf, sh, &s, dev, i);
+				s.locked++;
+			}
+		}
+	}
+#endif
 
 	if (sh->check_state ||
 	    (s.syncing && s.locked == 0 &&
@@ -3518,6 +3882,9 @@ static void raid5_align_endio(struct bio *bi, int error)
 	struct mddev *mddev;
 	struct r5conf *conf;
 	int uptodate = test_bit(BIO_UPTODATE, &bi->bi_flags);
+#ifdef MY_ABC_HERE
+	int auto_remap = test_and_clear_bit(BIO_AUTO_REMAP, &bi->bi_flags);
+#endif
 	struct md_rdev *rdev;
 
 	bio_put(bi);
@@ -3528,6 +3895,13 @@ static void raid5_align_endio(struct bio *bi, int error)
 	conf = mddev->private;
 
 	rdev_dec_pending(rdev, conf->mddev);
+
+#ifdef MY_ABC_HERE
+	if (auto_remap) {
+		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
+		SynoAutoRemapReport(conf->mddev, raid_bi->bi_sector, rdev->bdev);
+	}
+#endif
 
 	if (!error && uptodate) {
 		bio_endio(raid_bi, 0);
@@ -5682,6 +6056,9 @@ static struct md_personality raid6_personality =
 	.finish_reshape = raid5_finish_reshape,
 	.quiesce	= raid5_quiesce,
 	.takeover	= raid6_takeover,
+#ifdef MY_ABC_HERE
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+#endif
 };
 static struct md_personality raid5_personality =
 {
@@ -5709,6 +6086,9 @@ static struct md_personality raid5_personality =
 	.finish_reshape = raid5_finish_reshape,
 	.quiesce	= raid5_quiesce,
 	.takeover	= raid5_takeover,
+#ifdef MY_ABC_HERE
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+#endif
 };
 
 static struct md_personality raid4_personality =
@@ -5737,6 +6117,9 @@ static struct md_personality raid4_personality =
 	.finish_reshape = raid5_finish_reshape,
 	.quiesce	= raid5_quiesce,
 	.takeover	= raid4_takeover,
+#ifdef MY_ABC_HERE
+	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
+#endif
 };
 
 static int __init raid5_init(void)

@@ -414,6 +414,9 @@ enum {
 #ifdef MY_ABC_HERE
 	SYNO_STATUS_IS_MV9235		= 1 << 3,
 #endif
+#ifdef MY_ABC_HERE
+	SYNO_STATUS_IS_SIL			= 1 << 4,
+#endif  
 };
 
 enum ata_xfer_mask {

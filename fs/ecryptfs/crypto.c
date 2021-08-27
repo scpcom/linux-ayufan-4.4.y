@@ -1759,12 +1759,26 @@ int ecryptfs_write_metadata(struct dentry *ecryptfs_dentry,
 		       __func__, rc);
 		goto out_free;
 	}
+
+#ifdef MY_ABC_HERE
+	rc = ecryptfs_write_metadata_to_contents(ecryptfs_inode, virt, virt_len);
+	if (rc) {
+#ifdef MY_ABC_HERE
+		if (-EDQUOT != rc && -EIO != rc && -ENOSPC != rc)
+#endif  
+		printk(KERN_ERR "%s: Error writing metadata out to lower file; "
+		       "rc = [%d]\n", __func__, rc);
+		goto out_free;
+	}
+	rc = ecryptfs_write_metadata_to_xattr(ecryptfs_dentry, virt, ECRYPTFS_SIZE_AND_MARKER_BYTES);
+#else
 	if (crypt_stat->flags & ECRYPTFS_METADATA_IN_XATTR)
 		rc = ecryptfs_write_metadata_to_xattr(ecryptfs_dentry, virt,
 						      size);
 	else
 		rc = ecryptfs_write_metadata_to_contents(ecryptfs_inode, virt,
 							 virt_len);
+#endif  
 	if (rc) {
 #ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -EIO != rc && -ENOSPC != rc)
@@ -1904,6 +1918,35 @@ out:
 int ecryptfs_read_and_validate_xattr_region(struct dentry *dentry,
 					    struct inode *inode)
 {
+#ifdef MY_ABC_HERE
+	char *page_virt = NULL;
+	int rc;
+
+	page_virt = kmem_cache_alloc(ecryptfs_header_cache, GFP_USER);
+	if (!page_virt) {
+		rc = -ENOMEM;
+		printk(KERN_ERR "%s: Unable to allocate page_virt\n",
+		       __func__);
+		goto out;
+	}
+
+	rc = ecryptfs_getxattr_lower(ecryptfs_dentry_to_lower(dentry),
+				     ECRYPTFS_XATTR_NAME, page_virt,
+				     PAGE_CACHE_SIZE);
+	if (rc < ((int)ECRYPTFS_SIZE_AND_MARKER_BYTES)) {
+		rc = rc >= 0 ? -EINVAL : rc;
+		goto out;
+	}
+	rc = ecryptfs_validate_marker(page_virt+ECRYPTFS_FILE_SIZE_BYTES);
+	if (!rc)
+		ecryptfs_i_size_init(page_virt, inode);
+out:
+	if (page_virt) {
+		memset(page_virt, 0, PAGE_CACHE_SIZE);
+		kmem_cache_free(ecryptfs_header_cache, page_virt);
+	}
+	return rc;
+#else
 	u8 file_size[ECRYPTFS_SIZE_AND_MARKER_BYTES];
 	u8 *marker = file_size + ECRYPTFS_FILE_SIZE_BYTES;
 	int rc;
@@ -1917,6 +1960,7 @@ int ecryptfs_read_and_validate_xattr_region(struct dentry *dentry,
 	if (!rc)
 		ecryptfs_i_size_init(file_size, inode);
 	return rc;
+#endif  
 }
 
 int ecryptfs_read_metadata(struct dentry *ecryptfs_dentry)
