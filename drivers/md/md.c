@@ -435,6 +435,8 @@ void mddev_suspend(struct mddev *mddev)
 	synchronize_rcu();
 	wait_event(mddev->sb_wait, atomic_read(&mddev->active_io) == 0);
 	mddev->pers->quiesce(mddev, 1);
+
+	del_timer_sync(&mddev->safemode_timer);
 }
 EXPORT_SYMBOL_GPL(mddev_suspend);
 
@@ -1306,8 +1308,11 @@ static int super_90_load(struct md_rdev *rdev, struct md_rdev *refdev, int minor
 			ret = 0;
 	}
 	rdev->sectors = rdev->sb_start;
-	/* Limit to 4TB as metadata cannot record more than that */
-	if (rdev->sectors >= (2ULL << 32))
+	/* Limit to 4TB as metadata cannot record more than that.
+	 * (not needed for Linear and RAID0 as metadata doesn't
+	 * record this size)
+	 */
+	if (rdev->sectors >= (2ULL << 32) && sb->level >= 1)
 		rdev->sectors = (2ULL << 32) - 2;
 
 	if (rdev->sectors < ((sector_t)sb->size) * 2 && sb->level >= 1)
@@ -1602,7 +1607,7 @@ super_90_rdev_size_change(struct md_rdev *rdev, sector_t num_sectors)
 	/* Limit to 4TB as metadata cannot record more than that.
 	 * 4TB == 2^32 KB, or 2*2^32 sectors.
 	 */
-	if (num_sectors >= (2ULL << 32))
+	if (num_sectors >= (2ULL << 32) && rdev->mddev->level >= 1)
 		num_sectors = (2ULL << 32) - 2;
 	md_super_write(rdev->mddev, rdev, rdev->sb_start, rdev->sb_size,
 		       rdev->sb_page);
@@ -1983,13 +1988,13 @@ retry:
 						| BB_LEN(internal_bb));
 				*bbp++ = cpu_to_le64(store_bb);
 			}
+			bb->changed = 0;
 			if (read_seqretry(&bb->lock, seq))
 				goto retry;
 
 			bb->sector = (rdev->sb_start +
 				      (int)le32_to_cpu(sb->bblog_offset));
 			bb->size = le16_to_cpu(sb->bblog_size);
-			bb->changed = 0;
 		}
 	}
 
@@ -2565,6 +2570,7 @@ repeat:
 			clear_bit(MD_CHANGE_PENDING, &mddev->flags);
 			list_for_each_entry(rdev, &mddev->disks, same_set) {
 				if (rdev->badblocks.changed) {
+					rdev->badblocks.changed = 0;
 					md_ack_all_badblocks(&rdev->badblocks);
 					md_error(mddev, rdev);
 				}
@@ -3910,8 +3916,8 @@ array_state_show(struct mddev *mddev, char *page)
 	return sprintf(page, "%s\n", array_states[st]);
 }
 
-static int do_md_stop(struct mddev * mddev, int ro, int is_open);
-static int md_set_readonly(struct mddev * mddev, int is_open);
+static int do_md_stop(struct mddev * mddev, int ro, struct block_device *bdev);
+static int md_set_readonly(struct mddev * mddev, struct block_device *bdev);
 static int do_md_run(struct mddev * mddev);
 static int restart_array(struct mddev *mddev);
 
@@ -3927,14 +3933,14 @@ array_state_store(struct mddev *mddev, const char *buf, size_t len)
 		/* stopping an active array */
 		if (atomic_read(&mddev->openers) > 0)
 			return -EBUSY;
-		err = do_md_stop(mddev, 0, 0);
+		err = do_md_stop(mddev, 0, NULL);
 		break;
 	case inactive:
 		/* stopping an active array */
 		if (mddev->pers) {
 			if (atomic_read(&mddev->openers) > 0)
 				return -EBUSY;
-			err = do_md_stop(mddev, 2, 0);
+			err = do_md_stop(mddev, 2, NULL);
 		} else
 			err = 0; /* already inactive */
 		break;
@@ -3942,7 +3948,7 @@ array_state_store(struct mddev *mddev, const char *buf, size_t len)
 		break; /* not supported yet */
 	case readonly:
 		if (mddev->pers)
-			err = md_set_readonly(mddev, 0);
+			err = md_set_readonly(mddev, NULL);
 		else {
 			mddev->ro = 1;
 			set_disk_ro(mddev->gendisk, 1);
@@ -3952,7 +3958,7 @@ array_state_store(struct mddev *mddev, const char *buf, size_t len)
 	case read_auto:
 		if (mddev->pers) {
 			if (mddev->ro == 0)
-				err = md_set_readonly(mddev, 0);
+				err = md_set_readonly(mddev, NULL);
 			else if (mddev->ro == 1)
 				err = restart_array(mddev);
 			if (err == 0) {
@@ -5455,15 +5461,17 @@ void md_stop(struct mddev *mddev)
 }
 EXPORT_SYMBOL_GPL(md_stop);
 
-static int md_set_readonly(struct mddev *mddev, int is_open)
+static int md_set_readonly(struct mddev *mddev, struct block_device *bdev)
 {
 	int err = 0;
 	mutex_lock(&mddev->open_mutex);
-	if (atomic_read(&mddev->openers) > is_open) {
+	if (atomic_read(&mddev->openers) > !!bdev) {
 		printk("md: %s still in use.\n",mdname(mddev));
 		err = -EBUSY;
 		goto out;
 	}
+	if (bdev)
+		sync_blockdev(bdev);
 	if (mddev->pers) {
 		__md_stop_writes(mddev);
 
@@ -5485,18 +5493,26 @@ out:
  *   0 - completely stop and dis-assemble array
  *   2 - stop but do not disassemble array
  */
-static int do_md_stop(struct mddev * mddev, int mode, int is_open)
+static int do_md_stop(struct mddev * mddev, int mode,
+		      struct block_device *bdev)
 {
 	struct gendisk *disk = mddev->gendisk;
 	struct md_rdev *rdev;
 
 	mutex_lock(&mddev->open_mutex);
-	if (atomic_read(&mddev->openers) > is_open ||
+	if (atomic_read(&mddev->openers) > !!bdev ||
 	    mddev->sysfs_active) {
 		printk("md: %s still in use.\n",mdname(mddev));
 		mutex_unlock(&mddev->open_mutex);
 		return -EBUSY;
 	}
+	if (bdev)
+		/* It is possible IO was issued on some other
+		 * open file which was closed before we took ->open_mutex.
+		 * As that was not the last close __blkdev_put will not
+		 * have called sync_blockdev, so we must.
+		 */
+		sync_blockdev(bdev);
 
 	if (mddev->pers) {
 		if (mddev->ro)
@@ -5577,7 +5593,7 @@ static void autorun_array(struct mddev *mddev)
 	err = do_md_run(mddev);
 	if (err) {
 		printk(KERN_WARNING "md: do_md_run() returned %d\n", err);
-		do_md_stop(mddev, 0, 0);
+		do_md_stop(mddev, 0, NULL);
 	}
 }
 
@@ -6622,11 +6638,11 @@ static int md_ioctl(struct block_device *bdev, fmode_t mode,
 			goto done_unlock;
 
 		case STOP_ARRAY:
-			err = do_md_stop(mddev, 0, 1);
+			err = do_md_stop(mddev, 0, bdev);
 			goto done_unlock;
 
 		case STOP_ARRAY_RO:
-			err = md_set_readonly(mddev, 1);
+			err = md_set_readonly(mddev, bdev);
 			goto done_unlock;
 
 		case BLKROSET:
@@ -8668,6 +8684,15 @@ static int md_notify_reboot(struct notifier_block *this,
 	if (need_delay)
 		mdelay(1000*1);
 	}
+	/*
+	 * certain more exotic SCSI devices are known to be
+	 * volatile wrt too early system reboots. While the
+	 * right place to handle this issue is the given
+	 * driver, we do want to have a safe RAID driver ...
+	 */
+	if (need_delay)
+		mdelay(1000*1);
+
 	return NOTIFY_DONE;
 }
 

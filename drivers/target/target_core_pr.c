@@ -120,7 +120,7 @@ static struct t10_pr_registration *core_scsi3_locate_pr_reg(struct se_device *,
 					struct se_node_acl *, struct se_session *);
 static void core_scsi3_put_pr_reg(struct t10_pr_registration *);
 
-static int target_check_scsi2_reservation_conflict(struct se_cmd *cmd, int *ret)
+static int target_check_scsi2_reservation_conflict(struct se_cmd *cmd)
 {
 	struct se_session *se_sess = cmd->se_sess;
 	struct se_subsystem_dev *su_dev = cmd->se_dev->se_sub_dev;
@@ -130,7 +130,7 @@ static int target_check_scsi2_reservation_conflict(struct se_cmd *cmd, int *ret)
 	int conflict = 0;
 
 	if (!crh)
-		return false;
+		return -EINVAL;
 
 	pr_reg = core_scsi3_locate_pr_reg(cmd->se_dev, se_sess->se_node_acl,
 			se_sess);
@@ -158,16 +158,14 @@ static int target_check_scsi2_reservation_conflict(struct se_cmd *cmd, int *ret)
 		 */
 		if (pr_reg->pr_res_holder) {
 			core_scsi3_put_pr_reg(pr_reg);
-			*ret = 0;
-			return false;
+			return 1;
 		}
 		if ((pr_reg->pr_res_type == PR_TYPE_WRITE_EXCLUSIVE_REGONLY) ||
 		    (pr_reg->pr_res_type == PR_TYPE_EXCLUSIVE_ACCESS_REGONLY) ||
 		    (pr_reg->pr_res_type == PR_TYPE_WRITE_EXCLUSIVE_ALLREG) ||
 		    (pr_reg->pr_res_type == PR_TYPE_EXCLUSIVE_ACCESS_ALLREG)) {
 			core_scsi3_put_pr_reg(pr_reg);
-			*ret = 0;
-			return true;
+			return 1;
 		}
 		core_scsi3_put_pr_reg(pr_reg);
 		conflict = 1;
@@ -192,10 +190,10 @@ static int target_check_scsi2_reservation_conflict(struct se_cmd *cmd, int *ret)
 			" while active SPC-3 registrations exist,"
 			" returning RESERVATION_CONFLICT\n");
 		cmd->scsi_sense_reason = TCM_RESERVATION_CONFLICT;
-		return true;
+		return -EBUSY;
 	}
 
-	return false;
+	return 0;
 }
 
 int target_scsi2_reservation_release(struct se_task *task)
@@ -204,12 +202,18 @@ int target_scsi2_reservation_release(struct se_task *task)
 	struct se_device *dev = cmd->se_dev;
 	struct se_session *sess = cmd->se_sess;
 	struct se_portal_group *tpg = sess->se_tpg;
-	int ret = 0;
+	int ret = 0, rc;
 
 	if (!sess || !tpg)
 		goto out;
-	if (target_check_scsi2_reservation_conflict(cmd, &ret))
+	rc = target_check_scsi2_reservation_conflict(cmd);
+	if (rc == 1)
 		goto out;
+	else if (rc < 0) {
+		cmd->scsi_sense_reason = TCM_RESERVATION_CONFLICT;
+		ret = -EINVAL;
+		goto out;
+	}
 
 	ret = 0;
 	spin_lock(&dev->dev_reservation_lock);
@@ -217,6 +221,9 @@ int target_scsi2_reservation_release(struct se_task *task)
 		goto out_unlock;
 
 	if (dev->dev_reserved_node_acl != sess->se_node_acl)
+		goto out_unlock;
+
+	if (dev->dev_res_bin_isid != sess->sess_bin_isid)
 		goto out_unlock;
 
 	dev->dev_reserved_node_acl = NULL;
@@ -246,7 +253,7 @@ int target_scsi2_reservation_reserve(struct se_task *task)
 	struct se_device *dev = cmd->se_dev;
 	struct se_session *sess = cmd->se_sess;
 	struct se_portal_group *tpg = sess->se_tpg;
-	int ret = 0;
+	int ret = 0, rc;
 
 	if ((cmd->t_task_cdb[1] & 0x01) &&
 	    (cmd->t_task_cdb[1] & 0x02)) {
@@ -262,8 +269,14 @@ int target_scsi2_reservation_reserve(struct se_task *task)
 	 */
 	if (!sess || !tpg)
 		goto out;
-	if (target_check_scsi2_reservation_conflict(cmd, &ret))
+	rc = target_check_scsi2_reservation_conflict(cmd);
+	if (rc == 1)
 		goto out;
+	else if (rc < 0) {
+		cmd->scsi_sense_reason = TCM_RESERVATION_CONFLICT;
+		ret = -EINVAL;
+		goto out;
+	}
 
 	ret = 0;
 	spin_lock(&dev->dev_reservation_lock);
@@ -2028,7 +2041,7 @@ static int __core_scsi3_write_aptpl_to_file(
 	if (IS_ERR(file) || !file || !file->f_dentry) {
 		pr_err("filp_open(%s) for APTPL metadata"
 			" failed\n", path);
-		return (PTR_ERR(file) < 0 ? PTR_ERR(file) : -ENOENT);
+		return IS_ERR(file) ? PTR_ERR(file) : -ENOENT;
 	}
 
 	iov[0].iov_base = &buf[0];
@@ -3838,7 +3851,7 @@ int target_scsi3_emulate_pr_out(struct se_task *task)
 			" SPC-2 reservation is held, returning"
 			" RESERVATION_CONFLICT\n");
 		cmd->scsi_sense_reason = TCM_RESERVATION_CONFLICT;
-		ret = EINVAL;
+		ret = -EINVAL;
 		goto out;
 	}
 
@@ -3848,7 +3861,8 @@ int target_scsi3_emulate_pr_out(struct se_task *task)
 	 */
 	if (!cmd->se_sess) {
 		cmd->scsi_sense_reason = TCM_LOGICAL_UNIT_COMMUNICATION_FAILURE;
-		return -EINVAL;
+		ret = -EINVAL;
+		goto out;
 	}
 
 	if (cmd->data_length < 24) {

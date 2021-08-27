@@ -1647,6 +1647,28 @@ i915_gem_process_flushing_list(struct intel_ring_buffer *ring,
 	}
 }
 
+static u32
+i915_gem_get_seqno(struct drm_device *dev)
+{
+	drm_i915_private_t *dev_priv = dev->dev_private;
+	u32 seqno = dev_priv->next_seqno;
+
+	/* reserve 0 for non-seqno */
+	if (++dev_priv->next_seqno == 0)
+		dev_priv->next_seqno = 1;
+
+	return seqno;
+}
+
+u32
+i915_gem_next_request_seqno(struct intel_ring_buffer *ring)
+{
+	if (ring->outstanding_lazy_request == 0)
+		ring->outstanding_lazy_request = i915_gem_get_seqno(ring->dev);
+
+	return ring->outstanding_lazy_request;
+}
+
 int
 i915_add_request(struct intel_ring_buffer *ring,
 		 struct drm_file *file,
@@ -1658,6 +1680,7 @@ i915_add_request(struct intel_ring_buffer *ring,
 	int ret;
 
 	BUG_ON(request == NULL);
+	seqno = i915_gem_next_request_seqno(ring);
 
 	ret = ring->add_request(ring, &seqno);
 	if (ret)
@@ -3084,10 +3107,13 @@ i915_gem_object_finish_gpu(struct drm_i915_gem_object *obj)
 			return ret;
 	}
 
+	ret = i915_gem_object_wait_rendering(obj);
+	if (ret)
+		return ret;
+
 	/* Ensure that we invalidate the GPU's caches and TLBs. */
 	obj->base.read_domains &= ~I915_GEM_GPU_DOMAINS;
-
-	return i915_gem_object_wait_rendering(obj);
+	return 0;
 }
 
 /**
@@ -3309,6 +3335,10 @@ i915_gem_ring_throttle(struct drm_device *dev, struct drm_file *file)
 
 			if (ret == 0 && atomic_read(&dev_priv->mm.wedged))
 				ret = -EIO;
+		} else if (wait_for(i915_seqno_passed(ring->get_seqno(ring),
+						      seqno) ||
+				    atomic_read(&dev_priv->mm.wedged), 3000)) {
+			ret = -EBUSY;
 		}
 	}
 
