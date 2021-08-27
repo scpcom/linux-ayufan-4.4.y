@@ -1,0 +1,199 @@
+menu "Marvell Telephony options"
+	depends on MV_INCLUDE_TDM
+
+config  MV_PHONE
+	bool "Support for Marvell telephony(VoIP)"
+	depends on MV_INCLUDE_TDM && PHONE
+	default y
+	---help---
+	Choosing this option enables the Marvell telephony underlying
+	support for various VoIP applications.
+	Note, kernel Telephony subsystem must be chosen too.
+
+choice
+	prompt "TDM Unit"
+	depends on MV_PHONE
+	default MV_TDM_SUPPORT
+
+config MV_TDM_SUPPORT
+	bool "Support legacy TDM(2 channels)"
+	---help---
+	Choosing this option enables Marvell
+	2CH TDM voice interface.
+	The TDM bus may be used for transferring
+	voice samples thru analog phone interface.
+
+config MV_COMM_UNIT_SUPPORT
+	depends on ARCH_FEROCEON_KW2
+	bool "Support CommUnit(up to 32 channels)"
+	---help---
+	Choosing this option enables Marvell 32CH CommUnit voice interface.
+
+endchoice
+
+choice
+	prompt "SLIC Vendor"
+	depends on MV_PHONE
+	default ZARLINK_SLIC_SUPPORT
+
+config LANTIQ_SLIC_SUPPORT
+	bool "Support Lantiq devices"
+	---help---
+	Choosing this option enables Lantiq external
+	SLIC device.
+	Lantiq external SLIC interface may
+	be connected to external analog phone equipment.
+
+config SILABS_SLIC_SUPPORT
+	bool "Support Silicon Labs devices"
+	---help---
+	Choosing this option enables Silabs external
+	SLIC device.
+	Silabs external SLIC interface may
+	be connected to external analog phone equipment.
+
+config ZARLINK_SLIC_SUPPORT
+	bool "Support Zarlink/Legirity devices"
+
+endchoice
+
+choice
+	prompt "SLIC Device"
+	depends on MV_PHONE && LANTIQ_SLIC_SUPPORT
+	default LANTIQ_SLIC_DUSLIC_XT
+
+config LANTIQ_SLIC_DUSLIC_XT
+	bool "Support Lantiq DUSLIC-xT SLIC family"
+
+endchoice
+
+choice
+	prompt "SLIC Device"
+	depends on MV_PHONE && SILABS_SLIC_SUPPORT
+	default SILAB_SLIC_EXTERNAL_DRIVER
+
+config SILAB_SLIC_EXTERNAL_DRIVER
+	bool "Support Silicon Labs SLIC external driver modules"
+
+endchoice
+
+choice
+	prompt "SLIC Device"
+	depends on MV_PHONE && ZARLINK_SLIC_SUPPORT
+	default ZARLINK_SLIC_EXTERNAL_DRIVER
+
+config ZARLINK_SLIC_EXTERNAL_DRIVER
+	bool "Support Zarlink SLIC external driver modules"
+	---help---
+	Choosing this option enables Zarlink external slic driver support.
+
+endchoice
+
+choice
+	prompt "TDM Clock Source"
+	depends on MV_PHONE
+	default MV_TDM_USE_INTERNAL_PCLK_SOURCE
+
+config MV_TDM_USE_INTERNAL_PCLK_SOURCE
+	bool "Support PCLK internally generated"
+	depends on ARCH_FEROCEON || ARCH_ARMADA370
+	---help---
+	Choosing this option will enable
+	use of internally generated source clock
+	as PCM clock output, provided to TDM
+	interface.
+
+config MV_TDM_USE_EXTERNAL_PCLK_SOURCE
+	bool "Support PCLK from external source"
+	depends on ARCH_FEROCEON || ARCH_ARMADA370
+	---help---
+	Choosing this option will enable
+	use of external source clock
+	as PCM clock output, provided to TDM
+	interface.
+
+config MV_TDM_USE_DCO
+	bool "Support PCLK from DCO enabled PLL"
+	---help---
+	Choosing this option will enable
+	the use of DCO source clock provided
+	to TDM interface.
+
+endchoice
+
+choice
+	prompt "PCM Clock Frequency"
+	depends on MV_PHONE
+	default MV_TDM_PCM_CLK_8MHZ
+	---help---
+	This menu selects the PCM clock frequency generated
+	by the TDM master.
+	SLIC should be configured accordingly in order to
+	maintain bus coherency.
+
+config MV_TDM_PCM_CLK_8MHZ
+	bool "Support 8MHz PCM clock"
+	---help---
+	Choosing this option selects 8MHz PCM
+	clock frequency.
+	The source clock is driver according to
+	TDM Clock Source user selection.
+
+config MV_TDM_PCM_CLK_4MHZ
+	bool "Support 4MHz PCM clock"
+	---help---
+	Choosing this option selects 4MHz PCM
+	clock frequency.
+	The source clock is driver according to
+	TDM Clock Source user selection.
+
+config MV_TDM_PCM_CLK_2MHZ
+	bool "Support 2MHz PCM clock"
+	---help---
+	Choosing this option selects 2MHz PCM
+	clock frequency.
+	The source clock is driver according to
+	TDM Clock Source user selection.
+
+endchoice
+
+choice
+	prompt "TDM voice processing"
+	depends on MV_PHONE
+	default MV_PHONE_USE_SOFTIRQ_PROCESSING
+
+config MV_PHONE_USE_SOFTIRQ_PROCESSING
+	bool "Support TDM voice processing in softIRQ"
+	---help---
+	Choosing this option enables TDM voice
+	processing in softIRQ.
+	The voice data path is handled in high
+	tasklet context.
+
+config MV_PHONE_USE_IRQ_PROCESSING
+	bool "Support TDM voice processing in IRQ"
+	---help---
+	Choosing this option enables TDM voice
+	processing in IRQ.
+	The voice data path is fully handled in
+	interrupt context.
+
+config MV_PHONE_USE_FIQ_PROCESSING
+	bool "Support TDM voice processing in FIQ"
+	---help---
+	Choosing this option enables TDM voice
+	processing in FIQ.
+	The voice data path is fully handled in
+	fast interrupt context.
+
+endchoice
+
+config MV_TDM_EXT_STATS
+	bool "Enable legacy TDM extended statistics"
+	depends on MV_TDM_SUPPORT
+	default n
+	---help---
+	Choosing this option will export extended statistics to procfs.
+	This is relevant only for the legacy TDM unit.
+
+endmenu

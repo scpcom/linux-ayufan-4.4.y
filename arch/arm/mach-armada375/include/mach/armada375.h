@@ -1,0 +1,144 @@
+/*
+ * This file is licensed under the terms of the GNU General Public
+ * License version 2.  This program is licensed "as is" without any
+ * warranty of any kind, whether express or implied.
+ */
+
+#ifndef __ASM_ARCH_AURORA_H
+#define __ASM_ARCH_AURORA_H
+
+/*
+ * The base address of memory that should be reserved for IO windows.
+ * The reserved end address is 0xFFFFFFFF.
+ */
+#define CONFIG_DRAM_IO_RESERVE_BASE	0xC0000000ll
+
+/*
+ * SDRAM Address decoding
+ * These values are dummy. Uboot configures these values.
+ */
+#define SDRAM_CS0_BASE			0x00000000
+#define SDRAM_CS0_SIZE			_256M
+#define SDRAM_CS1_BASE			0x10000000
+#define SDRAM_CS1_SIZE			_256M
+#define SDRAM_CS2_BASE			0x20000000
+#define SDRAM_CS2_SIZE			_256M
+#define SDRAM_CS3_BASE			0x30000000
+#define SDRAM_CS3_SIZE			_256M
+
+/*
+ * Physical address map
+ */
+#define INTER_REGS_PHYS_BASE		0xF1000000
+
+#define PEX0_MEM_PHYS_BASE		0xE0000000
+#define PEX0_MEM_SIZE			_16M
+#define PEX1_MEM_PHYS_BASE		0xE2000000
+#define PEX1_MEM_SIZE			_16M
+
+#define PEX0_IO_PHYS_BASE		0xF1100000
+#define PEX0_IO_SIZE			_1M
+#define PEX1_IO_PHYS_BASE		0xF1200000
+#define PEX1_IO_SIZE			_1M
+
+#define SPI_CS0_PHYS_BASE		0xF0000000
+#define SPI_CS0_SIZE			_16M
+
+#define UART_REGS_BASE			0xF1B00000
+#define UART_SIZE			_1M
+
+#define DEVICE_BOOTCS_PHYS_BASE		0xF2000000
+#define DEVICE_BOOTCS_SIZE		_32M
+
+#define DEVICE_CS0_PHYS_BASE		0xF4000000
+#define DEVICE_CS0_SIZE			_1M
+#define DEVICE_CS1_PHYS_BASE		0xF4100000
+#define DEVICE_CS1_SIZE			_1M
+#define DEVICE_CS2_PHYS_BASE		0xF4200000
+#define DEVICE_CS2_SIZE			_1M
+#define DEVICE_CS3_PHYS_BASE		0xF4300000
+#define DEVICE_CS3_SIZE			_1M
+
+#define CRYPT_ENG_PHYS_BASE(chan)	((chan == 0) ? 0xC8010000 : 0xF4480000)
+#define CRYPT_ENG_SIZE			_64K
+
+#define XOR0_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0x60800)
+#define XOR1_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0x60900)
+#define XOR0_HIGH_PHYS_BASE		(INTER_REGS_PHYS_BASE | 0x60A00)
+#define XOR1_HIGH_PHYS_BASE		(INTER_REGS_PHYS_BASE | 0x60B00)
+
+#define PP2_CPU0_PHYS_BASE		0xF4500000
+#define PP2_CPU1_PHYS_BASE		0xF4510000
+#define PP2_SIZE			_64K
+
+#define BOOTROM_PHYS_BASE		0xFFF00000
+#define BOOTROM_SIZE			_1M
+
+#define LEGACY_NAND_PHYS_BASE		0xF4800000
+#define LEGACY_NAND_SIZE		_1M
+
+#define NFC_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0xD0000)
+
+#define IOCC_WA_WIN0_PHYS_BASE		0xFF000000
+
+#define USB3_REGS_PHYS_BASE		(INTER_REGS_PHYS_BASE + 0x58000)
+#define USB3_REGS_SIZE			_128K
+
+/*
+ * Virtual address map
+ */
+#define SPI_CS0_VIRT_BASE		0xFAB00000
+#define INTER_REGS_VIRT_BASE		0xFBB00000
+
+#define PEX0_IO_VIRT_BASE		0xFBC00000
+#define PEX1_IO_VIRT_BASE		0xFBD00000
+
+#define PEX0_MEM_VIRT_BASE		0xF5000000
+#define PEX1_MEM_VIRT_BASE		0xF6000000
+
+#define IOCC_WA_WIN0_VIRT_BASE		0xFBE00000
+
+#define USB3_REGS_VIRT_BASE		0xFBF00000
+
+#define UART_VIRT_BASE			0xFC600000
+
+#define DEVICE_BOOTCS_VIRT_BASE		0xFC700000
+#define DEVICE_CS0_VIRT_BASE		0xFE700000
+#define DEVICE_CS1_VIRT_BASE		0xFE800000
+#define DEVICE_CS2_VIRT_BASE		0xFE900000
+#define DEVICE_CS3_VIRT_BASE		0xFEA00000
+
+#define CRYPT_ENG_VIRT_BASE(chan)	((chan == 0) ? 0xFEB00000 : 0xFEB10000)
+#define PP2_CPU0_VIRT_BASE		0xFEC00000
+#define PP2_CPU1_VIRT_BASE		0xFEC10000
+#define BOOTROM_VIRT_BASE		0xFED00000
+#define LEGACY_NAND_VIRT_BASE		0xFEF00000
+
+/*
+ * Linux native definitiotns
+ */
+#define SDRAM_OPERATION_REG		(INTER_REGS_VIRT_BASE | 0x1418)
+#define SDRAM_CONFIG_REG		(INTER_REGS_VIRT_BASE | 0x1400)
+#define SDRAM_DLB_EVICT_REG		(INTER_REGS_VIRT_BASE | 0x170C)
+
+#define UART_PHYS_BASE(port)		(INTER_REGS_PHYS_BASE | \
+						(0x12000 + (port * 0x100)))
+#define DDR_VIRT_BASE			(INTER_REGS_VIRT_BASE | 0x00000)
+#define DDR_WINDOW_CPU_BASE		(DDR_VIRT_BASE | 0x1500)
+
+#define BRIDGE_VIRT_BASE		(INTER_REGS_VIRT_BASE | 0x20000)
+#define BRIDGE_PHYS_BASE		(INTER_REGS_PHYS_BASE | 0x20000)
+#define SW_TRIG_IRQ			(BRIDGE_VIRT_BASE | 0x0A04)
+#define SW_TRIG_IRQ_PHYS		(BRIDGE_PHYS_BASE | 0x0A04)
+#define SW_TRIG_IRQ_CPU_TARGET_OFFS	8
+#define SW_TRIG_IRQ_INITID_MASK	0x1F
+#define PER_CPU_BASE			(BRIDGE_VIRT_BASE | 0x1000)
+#define IRQ_VIRT_BASE			(PER_CPU_BASE)
+#define CPU_INTACK			0xB4
+#define IRQ_SEL_CAUSE_OFF		0xA0
+#define IN_DOORBELL_CAUSE		0x78
+#define IN_DRBEL_CAUSE			(PER_CPU_BASE | 0x78)
+#define IN_DRBEL_MSK			(PER_CPU_BASE | 0x7c)
+#define CPU_IO_SYNC_BARRIER_CTRL_REG	(PER_CPU_BASE | 0x10)
+
+#endif /* __ASM_ARCH_AURORA_H */

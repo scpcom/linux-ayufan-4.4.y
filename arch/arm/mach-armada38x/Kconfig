@@ -1,0 +1,41 @@
+if ARCH_ARMADA38X
+
+config MV_HAL_RULES_PATH
+	string "path of the mvRules.mk file for HAL drivers"
+	default "arch/arm/mach-armada38x/mv_hal_support/mvRules.mk"
+
+menu "Marvell Armada-38x Options"
+
+config ARMADA_38X
+	bool "Armada-38x SoC Family"
+	default y
+
+choice
+	prompt "Armada-38x Chip revision"
+	depends on ARMADA_38X
+	default ARMADA_38X_REV_XX
+
+config  ARMADA_38X_REV_XX
+	bool "Armada-38x SoC devices"
+	select ARM_GIC
+	select ARM_ERRATA_720789
+	select ARM_ERRATA_751472
+	select ARM_ERRATA_753970
+	select NEON
+	help
+	  Choosing this option will generate a linux kernel for the
+	  Armada-38x devices
+
+endchoice
+
+config MACH_ARMADA_38X
+	bool "Marvell Armada-38x SoC Family"
+	default y
+	help
+	  Choosing this option will generate a linux kernel for the
+	  MV68XX devices
+
+
+endmenu
+
+endif

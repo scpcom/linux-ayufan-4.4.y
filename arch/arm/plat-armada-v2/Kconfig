@@ -1,0 +1,720 @@
+if PLAT_ARMADA
+
+menu "Armada SoC options"
+	depends on PLAT_ARMADA
+
+#since the Kconfig parser dispatch all source commands, we call the machines Kconfigs from here and
+#not vice versa because otherwise the plat-feroceon Kconfig will be dispatched twice.     
+#if ARCH_FEROCEON_ORION
+#source "arch/arm/mach-feroceon-orion/Kconfig"
+#endif
+
+#if ARCH_FEROCEON_KW
+#source "arch/arm/mach-feroceon-kw/Kconfig"
+#endif
+
+#if ARCH_FEROCEON_KW2
+#source "arch/arm/mach-feroceon-kw2/Kconfig"
+#endif
+
+#if ARCH_FEROCEON_MV78XX0
+#source "arch/arm/mach-feroceon-mv78xx0/Kconfig"
+#endif
+
+
+menu "Armada SoC in Synology's options"
+	depends on PLAT_ARMADA
+
+config SYNO_ARMADA
+	bool "synology armada porting define"
+	default y
+	depends on ARCH_ARMADA_XP || ARCH_ARMADA370
+
+config SYNO_ARMADA_ARCH
+	bool "synology armada porting define for architecture"
+	default y
+	depends on ARCH_ARMADA_XP || ARCH_ARMADA370
+
+config SYNO_ARMADA_V2
+    bool "synology armada porting define for A375 & A38X"
+    default y
+    depends on ARCH_ARMADA375
+
+config SYNO_ARMADA_ARCH_V2
+    bool "synology armada porting define for architecture A375 & A38X"
+    default y
+    depends on ARCH_ARMADA375 
+
+config SYNO_ARMADA_ARCH_COMM
+	bool "synology armada porting defined for make file"
+	default y 
+	depends on SYNO_ARMADA_ARCH || SYNO_ARMADA_ARCH_V2
+	---help---
+       it's hard to include both SYNO_ARMADA & SYNO_ARMADA_V2 in make file, so
+       we add a this defination for make file. 
+		
+endmenu
+
+if ARCH_ARMADA370
+source "arch/arm/mach-armada370/Kconfig"
+endif
+
+config JTAG_DEBUG
+        bool "Enable JTAG by disable \"wait for interrupt\"."
+	depends on MV88F6500 || MV88F6281 || MV78XX0
+        default n
+        ---help---
+           Enable the JTAG debugger taking over the CPU by disabling "wait for interrupt" idle loop."
+
+
+menu "Armada SoC Included Features"
+
+if ARMADA_XP || ARMADA_375 || ARMADA_38X
+config MV_INCLUDE_PEX
+	bool "PCI Express Support"
+	depends on PCI && (MV88F6500 || MV88F6281 || MV78XX0 || ARMADA_XP || ARMADA_375 || ARMADA_38X)
+	default y
+	select MV_PEX_2_1X4 if ARMADA_XP
+	select MV_PEX_3_1X4 if ARMADA_XP
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+
+choice
+	prompt "PEX-0 Mode"
+	depends on MV_INCLUDE_PEX && ARMADA_XP
+	default MV_PEX_0_4X1
+
+config MV_PEX_0_4X1
+	bool "Quad X1 interfaces"
+
+config MV_PEX_0_1X4
+	bool "Single X4 interface"
+endchoice
+
+choice
+	prompt "PEX-1 Mode"
+	depends on MV_INCLUDE_PEX && ARMADA_XP
+	default MV_PEX_1_4X1
+
+config MV_PEX_1_4X1
+	bool "Quad X1 interfaces"
+
+config MV_PEX_1_1X4
+	bool "Single X4 interface"
+endchoice
+
+config MV_PEX_2_1X4
+	bool "PEX-2 in 1x4 Mode"
+	depends on MV_INCLUDE_PEX && ARMADA_XP
+
+config MV_PEX_3_1X4
+	bool "PEX-3 in 1x4 Mode"
+	depends on MV_INCLUDE_PEX && ARMADA_XP
+endif
+
+if ARMADA_370
+config MV_INCLUDE_PEX
+	bool "PCI Express Support"
+    depends on PCI && (MV88F6500 || MV88F6281 || MV78XX0 || ARMADA_370)
+    default y
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+endif
+
+config MV_INCLUDE_PCI
+	bool "PCI Support"
+	depends on PCI && (MV88F6500 || MV88F6281 || MV78XX0 || ARMADA_XP || ARMADA_370 || ARMADA_375 || ARMADA_38X)
+	default n
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_USB
+	bool "USB Support"
+	depends on MV88F6500 || MV88F6281 || MV78XX0 || ARMADA_XP || ARMADA_370 || ARMADA_375 || ARMADA_38X
+	default y
+	select USB_XHCI_PLATFORM if ARMADA_375 || ARMADA_38X
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_XOR
+	bool "XOR Support"
+	depends on MV88F6500 || MV88F6281 || MV78XX0 || ARMADA_XP || ARMADA_370 || ARMADA_375 || ARMADA_38X
+	default y
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_CESA
+	bool "CESA Support"
+	depends on MV88F6500 || MV88F6082 || MV88F6183 || MV88F6281 || MV78XX0 \
+		|| ARMADA_XP || ARMADA_370 || ARMADA_375 || ARMADA_38X
+	default y
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_NFC
+	bool "Nand Flash Controller Support"
+	depends on MV88F6500 || ARMADA_XP || ARMADA_370 \
+		|| (MV_CM_NFC && (ARMADA_375 || ARMADA_38X))
+	default y
+        ---help---
+	For Armada375 and Armada38x, the NFC,
+	Legacy NAND, SPI and NOR share the same
+	MPP pins. You can not select more
+	than 1 at a time.
+
+config MV_INCLUDE_LEGACY_NAND
+	bool "Legacy NAND Support"
+	depends on MV88F6500 || MV88F6281 || MV78XX0 \
+		|| ARMADA_XP || (ARMADA_370 && !MV_INCLUDE_NFC) \
+		|| (MV_CM_LEGACY_NAND && (ARMADA_375 || ARMADA_38X))
+	default y
+        ---help---
+	For Armada375 and Armada38x, the NFC,
+	Legacy NAND, SPI and NOR share the same
+	MPP pins. You can not select more
+	than 1 at a time.
+
+config MV_INCLUDE_INTEG_SATA
+	bool "Integrated SATA Support"
+	depends on MV88F6500 || MV88F6281 || MV78XX0 \
+		|| ARMADA_XP || ARMADA_370 || ARMADA_375 || ARMADA_38X
+	default y
+	select SATA_AHCI_MV if ARMADA_38X
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_TDM
+	bool "Integrated TDM Support"
+	depends on MV88F6500 || MV88F6281 || MV78XX0 \
+		|| ARMADA_XP || ARMADA_370 || ARMADA_375 || ARMADA_38X
+	default y
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_GIG_ETH
+	bool "Giga Ethernet Support"
+	depends on MV88F6500 || MV88F6281 || MV78XX0 \
+		|| ARMADA_XP || ARMADA_370 || ARMADA_375 || ARMADA_38X
+	default y
+
+config MV_INCLUDE_SPI
+	bool "SPI Support"
+	depends on MV88F6500 || MV88F6281 || (MV78XX0 && !MV78XX0_Z0) \
+		|| ARMADA_XP || ARMADA_370 || (MV_CM_SPI && (ARMADA_375 \
+		|| ARMADA_38X))
+	default y
+        ---help---
+	For Armada375 and Armada38x, the NFC,
+	Legacy NAND, SPI and NOR share the same
+	MPP pins. You can not select more
+	than 1 at a time.
+
+config MV_INCLUDE_NOR
+	bool "NOR Support"
+	depends on MV88F6500 || MV88F6281 || (MV78XX0 && !MV78XX0_Z0) \
+		|| ARMADA_XP || (ARMADA_370 && !MV_INCLUDE_NFC) \
+		|| (MV_CM_NOR && (ARMADA_375 || ARMADA_38X))
+	default y
+        ---help---
+	For Armada375 and Armada38x, the NFC,
+	Legacy NAND, SPI and NOR share the same
+	MPP pins. You can not select more
+	than 1 at a time.
+
+
+config MV_INCLUDE_SDIO
+	bool "SDIO Support"
+	depends on MV88F6500 || MV88F6281 || ARMADA_XP || ARMADA_370 || ARMADA_375 || ARMADA_38X
+	default y
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_TS
+	bool "TSU Support"
+	depends on MV88F6500 || MV88F6281
+	default n
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_PON
+	bool "PON Support"
+	depends on MV88F6500
+	default y
+        ---help---
+        Please don't change this configs unless you know what you are doing.
+
+config MV_INCLUDE_SWITCH
+        bool "Ethernet Switch Support"
+        depends on MV88F6500 || MV88F6281 || MV78XX0 || ARMADA_XP || ARMADA_370
+        default y
+
+config MV_SUPPORT_COMMON_MPP_FLASH
+	bool "Flash Support"
+	depends on ARMADA_375 || ARMADA_38X
+	default n
+        ---help---
+	For Armada375 and Armada38x, the NFC,
+	Legacy NAND, SPI and NOR share the same
+	MPP pins. You can not select more
+	than 1 at a time.
+
+choice
+	prompt "Supported flash type"
+	depends on MV_SUPPORT_COMMON_MPP_FLASH
+	default MV_INCLUDE_SPI
+
+config MV_CM_SPI
+	bool "SPI Support"
+	select MV_INCLUDE_SPI
+
+config MV_CM_NOR
+	bool "NOR Support"
+	select MV_INCLUDE_NOR
+
+config MV_CM_NFC
+	bool "Nand Flash Controller Support"
+	select MV_INCLUDE_NFC
+
+config MV_CM_LEGACY_NAND
+	bool "Legacy NAND Support"
+	select MV_INCLUDE_LEGACY_NAND
+
+endchoice
+
+endmenu
+
+
+
+menu "Armada AMP options"
+
+config MV_AMP_ENABLE
+        bool "Enable AMP support"
+	depends on (ARMADA_XP || (MV78XX0) || ARMADA_375 || ARMADA_38X) && \
+		(!ARMADA_XP_REV_Z1) && (SMP) && (!MV_ETH_BM) && \
+		!(CPU_IDLE || SUSPEND)
+	default n
+
+config MV_DRAM_BASE_G0
+        hex "Image 0 - Base address of physical memory"
+        depends on   MV_AMP_ENABLE
+        default 0x00000000
+
+config MV_DRAM_BASE_G1
+        hex "Image 1 - Base address of physical memory"
+        depends on   MV_AMP_ENABLE
+        default 0x20000000
+
+config MV_UART_PORT_G0
+        int "Image 0 - UART port for prints"
+        depends on   MV_AMP_ENABLE
+        default 0
+
+config MV_UART_PORT_G1
+        int "Image 1 - UART port for prints"
+        depends on   MV_AMP_ENABLE
+        default 1
+
+config MV_IPC_LINUX_AMP_DRIVER
+        bool "Enable IPC basic driver"
+        depends on   MV_AMP_ENABLE
+        default y
+
+config MV_IPC_NET
+        bool "Enable IPC pseudo network driver"
+        depends on   MV_IPC_LINUX_AMP_DRIVER
+        default y
+
+config MV_DRAM_BASE
+       hex  "AMP build usage - Do not change"
+       depends on   MV_AMP_ENABLE
+       default 0x00000000
+
+config MV_UART_PORT
+        int "AMP build usage - Do not change"
+        depends on   MV_AMP_ENABLE
+        default 0
+
+config MV_ZREL_ADDR
+	hex "AMP build usage - Do not change"
+        depends on   MV_AMP_ENABLE
+        default 0x00008000
+
+config MV_PARAM_PHYS
+        hex "AMP build usage - Do not change"
+        depends on   MV_AMP_ENABLE
+        default 0x00000100
+
+config MV_INITRD_PHYS
+        hex "AMP build usage - Do not change"
+        depends on   MV_AMP_ENABLE
+        default 0x00800000
+
+endmenu
+
+
+config MV_GPP_MAX_PINS
+	int
+	default 32 if MV78XX0
+	default 64 if MV88F6281
+	default 70 if MV88F6500
+	default 67 if ARMADA_XP
+	default 67 if ARMADA_370
+	
+config MV_DCACHE_SIZE
+	hex
+	default 0x8000 if MV78XX0 || ARMADA_XP || ARMADA_370
+	default 0x4000 if MV88F6500 || MV88F6281
+
+config MV_ICACHE_SIZE
+	hex
+	default 0x8000 if MV78XX0 || ARMADA_XP || ARMADA_370
+	default 0x4000 if MV88F6500 || MV88F6281
+	          
+menu "Armada SoC MTD support"
+
+config MV_FLASH_CTRL
+	bool
+	default n
+
+config MV_INCLUDE_SFLASH_MTD
+    bool "Marvell support for MTD SPI flash device"
+    select MV_FLASH_CTRL
+    depends on MTD && MV_INCLUDE_SPI
+   	default y
+
+config MV_SPI_BOOT
+	bool "Marvell boot support from MTD SPI device"
+	depends on MV_INCLUDE_SFLASH_MTD
+	default n
+	---help---
+	Choose this option if SPI MTD is the system boot device.
+	This option controls the various flash types support in the board
+	device chip-select information structure under mvBoardEnvSpec.c
+
+config MV_INCLUDE_MFLASH_MTD
+    bool "Marvell support for MTD Marvell flash device"
+    select MV_FLASH_CTRL
+    depends on MTD && MV_INCLUDE_INTEG_MFLASH && !ARMADA_XP
+   	default y
+
+config MTD_NAND_LNC
+	bool "MTD driver for the Legacy NAND controller"
+	depends on MTD && MV_INCLUDE_LEGACY_NAND
+	default y
+
+config MTD_NAND_LNC_WITH_NOR
+	bool "Support for simultaneous NAND and NOR operations"
+	depends on MTD && MTD_NAND_LNC && ARMADA_370
+	default y
+	---help---
+	This option enables both NAND and NOR to operate at the same time,
+	using Device Bus interface.
+	DEV_BOOT_CS should be connected to NAND CS and DEV_CS#0 to NOR CS
+	on the board.
+
+config MTD_NAND_LNC_BOOT
+	bool "Marvell boot support from MTD NAND device"
+	depends on MTD_NAND_LNC
+	default n
+	---help---
+	Choose this option if NAND MTD is the system boot device.	            
+	This option controls the various flash types support in the board
+	device chip-select information structure under mvBoardEnvSpec.c
+
+config MTD_NAND_LNC_RS_ECC
+	bool "Support Reed-Solomon 4-bit ECC algorithm for Legacy Nand Controller"
+	depends on MTD_NAND_LNC && !MTD_NAND_LNC_WITH_NOR
+	default y
+	---help---
+	Choose this option to support Reed-Solomon 4-bit ECC algorithm.
+	Note this option also requires support by low-level boot loader.
+
+config MTD_NAND_LNC_8BYTE_READ
+	bool "Support 8B burst Read for Legacy Nand Controller"
+	depends on MTD_NAND_LNC && !MTD_NAND_LNC_WITH_NOR
+	default n
+	---help---
+	Choose this option to support NAND 8 Byte Read burst algorithm.
+
+config MTD_NAND_NFC
+        tristate "MTD driver for the Armada Nand Flash Controller"
+        depends on MTD_NAND && MV_INCLUDE_NFC
+	default y
+        help
+          This enables the driver for the NAND flash controller found in
+          the Marvell Armada SoC devices.
+
+config MTD_NAND_NFC_GANG_SUPPORT
+        bool "NAND Ganged mode support for the NFC"
+        depends on MTD_NAND_NFC
+	default y
+        help
+          This option enables the support for 2x8bit ganged mode in
+          Marvell's NFC HAL driver and the MTD stack.
+
+config MTD_NAND_NFC_MLC_SUPPORT
+        bool "NAND MLC devices support for the NFC"
+        depends on MTD_NAND_NFC
+	default y
+	help
+          This option allows support for Nand devices with non-standard
+          page/oob layout. These devices are detected incorrectly with
+          standard autodetection mechanism based on the READ_ID command.
+
+config MTD_NAND_NFC_INIT_RESET
+        bool "NAND Enable Reset on Initialization"
+        depends on MTD_NAND_NFC
+	default n
+	help
+          This option forces NAND reset command on initialization. This
+	  is required by certain NAND vendors (Micron).
+
+config MTD_NAND_NFC_NEGLECT_RNB
+	bool "NAND Neglect Read/Busy Signal"
+        depends on MTD_NAND_NFC
+	default n
+	help
+          This option forces allows operation withou the RnBx signal. In this
+	  mode, tR taken as worst case in every operation
+
+endmenu
+
+choice
+	prompt "SoC USB Mode"
+	depends on MV_INCLUDE_USB
+	default MV_USB_HOST
+
+config MV_USB_HOST
+	bool "Support for USB Host"
+	---help---
+	Choosing this option will configure on chip USB Controller to work in Host mode
+
+config MV_USB_DEVICE
+	bool "Support for USB Device"
+	---help---
+	Choosing this option will configure on chip USB Controller to work in Device mode
+endchoice
+
+config ERRATA_FE_215660
+	bool "WA for Marvell USB errata FE_215660"
+	depends on MV_INCLUDE_USB && (ARMADA_XP || ARMADA_370 || ARMADA_375 || ARMADA_38X)
+	default y
+	---help---
+	Underruns can occur due to memory bandwidth limitations when a USB host
+	transmits data. When an underrun occurs, the host that transmits a truncated
+	packet corrupts the packets CRC bytes. The receiving device ignores truncated
+	packets with a corrupt CRC, and the host re-transmits the packet. The USB host
+	calculates the CRC bytes during packet transmission. When a packet is truncated
+	due to an underrun, the host must invert the CRC byte value that is to be
+	transmitted. Due to a logic error, one extra data byte is transmitted between
+	the first and second CRC bytes. In very rare cases, there is a chance that a
+	corrupted packet is transmitted with a good CRC.
+	This WA resolves the issue by disabling streaming mode in the host controller
+
+config ARMADA370_SSCG_WA
+	bool "WA for Marvell SSCG deviation"
+	depends on ARMADA_370
+	default n
+	---help---
+	Workaround for the SSCG deviation issue.
+	When the SSCG is in spread up or down a
+	frequency swing should be calculated according to
+	the correct frequency vs the incorrect published.
+
+config ARCH_SUPPORTS_BIG_ENDIAN
+	bool
+	default y
+
+config USE_DSP
+	bool "Use pld/ldrd/strd arm DSP instructions"
+	depends on !ARMADA_XP
+	default n
+
+config  FEROCEON_PROC
+	bool "Support for MV-shell proc file system"
+	depends on PROC_FS
+	---help---	
+	  Choosing this option will enable you to use the MV-shell through the Proc
+	  File system.
+	  The MV-shell is a debug utility which can be run from the shell.
+
+config  MV_PMU_PROC
+        bool "Support procfs control on Power-Management features"
+        depends on PROC_FS
+        ---help---
+          Choose this option to enable control over the power-management features through
+          the proc file-system.
+
+config  MV_DBG_TRACE
+	bool "Enable tracing utility"
+	default n
+	---help---
+	  Choosing this debug option will cause some kernel modules to log operations into
+	  a cyclic buffer and dump them on failures. Enabling this feature decreases performance.
+
+config  MV_CPU_PERF_CNTRS
+        bool "CPU Performance counters support"
+        default n
+        ---help---
+        Choosing this option will enable you to use CPU Performance counters
+
+config  MV_CPU_L2_PERF_CNTRS
+        bool "CPU L2 Performance counters support"
+        default n
+        ---help---
+        Choosing this option will enable you to use CPU L2 Performance counters
+
+config	ERROR_HANDLING
+	bool "Error handling notification support"
+        default n
+        ---help---
+        Choosing this option will enable error notification
+
+config	ERROR_HANDLING_DRAM_ECC
+	bool "DRAM ECC Error handling notification support"
+	depends on ERROR_HANDLING
+        default n
+        ---help---
+        Choosing this option will enable DRAM ECC error notification by netlink
+
+menu "Soc DMA accelerations"
+
+source arch/arm/plat-armada/mv_drivers_lsp/mv_xor/Kconfig
+
+endmenu
+
+menu "SoC Network SKB Features"
+
+config NET_SKB_HEADROOM
+	int "SKB headroom size"
+	default 64
+	---help---
+	Customize SKB headroom size. Must be power of 2.
+	It is share by Marvell nrtworks modules.
+	It is common for all modules.
+	Note the patch depends on it.
+
+config NET_SKB_RECYCLE
+	bool "Skb recycle"
+	default y
+	---help---
+	Work-in-progress and experimental.
+	This option enables skb's to be returned via a callback at kfree to
+	the allocator to make a fastpath for very skb consuming network
+	applications.
+
+config NET_SKB_RECYCLE_DEF
+	depends on NET_SKB_RECYCLE
+	int "Default value for SKB recycle:  0 - disable, 1 - enable"
+	default 1
+	---help---
+
+endmenu
+
+
+menu "SoC Networking support"
+depends on MV_INCLUDE_GIG_ETH
+
+config MV_ETHERNET
+	bool
+	default y
+        ---help---
+        Choose this option to support Marvell Gigabit Ethernet Controller 
+
+config MV_ETH_DEBUG_CODE
+	bool "Add run-time debug code"
+	default n
+	---help---
+	Enable run-time enable/disable enter debug code blocks
+	It is share by NETA and PP2 driver module.
+	It is also control debug code in mux module.
+	Note the patch depends on it.
+
+config MV_ETH_LEGACY
+	bool "Legacy driver"
+	depends on ARCH_FEROCEON_KW
+	default y
+	help
+	  Use legacy network driver.
+	  HAL part of the driver located uner directory mv_hal/eth
+	  Linux part of the driver located under directory mv_drivers_lsp/mv_network
+
+if MV_ETH_LEGACY
+source arch/arm/plat-armada/mv_drivers_lsp/mv_network/Kconfig
+endif
+
+config MV_ETH_NETA
+	tristate "NETA driver"
+	depends on ARCH_FEROCEON_KW2 || ARCH_ARMADA_XP || ARCH_ARMADA370 || ARCH_ARMADA38X
+	default y
+	help
+	  Use NETA network driver
+          HAL part of the driver located uner directory mv_hal/neta
+          Linux part of the driver located under directory mv_drivers_lsp/mv_neta
+
+if MV_ETH_NETA
+source arch/arm/plat-armada/mv_drivers_lsp/mv_neta/Kconfig
+endif
+
+config MV_ETH_PP2
+	tristate "PPv2 driver "
+	depends on ARCH_AVANTA_LP || ARCH_ARMADA375
+	default y
+	select MV_ETH_PP2_CLS2
+	select MV_ETH_PP2_CLS3
+	select MV_ETH_PP2_CLS4
+	select MV_ETH_PP2_CLS_MC
+	help
+	  Use PPv2 network driver
+          HAL part of the driver located uner directory mv_hal/pp2
+          Linux part of the driver located under directory mv_drivers_lsp/mv_pp2
+
+if MV_ETH_PP2
+source arch/arm/plat-armada/mv_drivers_lsp/mv_pp2/Kconfig
+endif
+
+config MV_INCLUDE_ETH_PHY
+	bool "Choose to compile Ethernet PHY support"
+	depends on MV_ETH_LEGACY || MV_ETH_NETA || MV_ETH_PP2
+	default y
+	help
+	  Use HAL based PHY driver. Needed for all kind of Network drivers.
+          HAL part of the driver located uner directory mv_hal/eth-phy
+          Linux part of the driver located under directory mv_drivers_lsp/mv_phy
+
+
+endmenu # "SoC Networking support"
+
+source arch/arm/plat-armada/mv_drivers_lsp/mv_cesa/Kconfig
+
+source arch/arm/plat-armada/mv_drivers_lsp/mv_phone/Kconfig
+
+
+#source arch/arm/plat-armada/mv_drivers_lsp/mv_sdio/Kconfig
+
+source arch/arm/plat-armada/mv_drivers_lsp/mv_tsu/Kconfig
+
+
+config  SCSI_MVSATA
+	tristate "Support for Marvell Sata Adapters"
+	depends on ( MV_INCLUDE_INTEG_SATA && SCSI ) || ( PCI && SCSI )
+	---help---
+	  Choosing this option will enable you to use the Marvell Sata
+	  adapters support with emulation as SCSI adapters.
+	  Note that the kernel scsi subsystem must be chosen too.
+
+source arch/arm/plat-armada/mv_drivers_lsp/mv_sata/Kconfig
+
+config MV_UART_POLLING_MODE
+        bool "Enable Polling mode for UART driver"
+        depends on ARCH_FEROCEON_KW2
+	default y
+        ---help---
+        Configure UART driver to work in polling mode.
+
+endmenu
+
+
+endif
+
+

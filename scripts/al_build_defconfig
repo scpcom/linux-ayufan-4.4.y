@@ -1,0 +1,46 @@
+#!/bin/bash
+
+echo "Creating arch/arm/configs/alpine_sa_defconfig - Storage Advance"
+cp arch/arm/configs/alpine_defconfig arch/arm/configs/alpine_sa_defconfig
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig --set-str CONFIG_LOCALVERSION _sa
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -e CONFIG_ARM_LPAE
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -e CONFIG_ARM_PAGE_SIZE_LARGE
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -e CONFIG_ARM_PAGE_SIZE_32KB
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -e CONFIG_LFS_ON_32CPU
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -e CONFIG_BTRFS_FS_AHASH_CRC
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -e CONFIG_NET_DMA
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -d CONFIG_XFRM_ALGO
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -d CONFIG_XFRM_USER
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -d CONFIG_NET_KEY
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -d CONFIG_INET_AH
+./scripts/config --file arch/arm/configs/alpine_sa_defconfig -d CONFIG_INET_ESP
+
+echo "Creating arch/arm/configs/alpine_sa_at_defconfig - AHCI Target"
+cp arch/arm/configs/alpine_sa_defconfig arch/arm/configs/alpine_sa_at_defconfig
+./scripts/config --file arch/arm/configs/alpine_sa_at_defconfig --set-str CONFIG_LOCALVERSION _sa_at
+./scripts/config --file arch/arm/configs/alpine_sa_at_defconfig -e CONFIG_AL_AHCI_TARGET
+./scripts/config --file arch/arm/configs/alpine_sa_at_defconfig -e CONFIG_AL_AHCI_TARGET_STATS
+./scripts/config --file arch/arm/configs/alpine_sa_at_defconfig -m CONFIG_TCM_AL
+./scripts/config --file arch/arm/configs/alpine_sa_at_defconfig -d CONFIG_NET_DMA
+
+echo "Creating arch/arm/configs/alpine_rtn_defconfig - Routing"
+cp arch/arm/configs/alpine_defconfig arch/arm/configs/alpine_rtn_defconfig
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig --set-str CONFIG_LOCALVERSION _rtn
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig -e CONFIG_FUNC_REORDER
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig -d CONFIG_NET_VENDOR_INTEL
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig -d CONFIG_XFS_FS
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig -d CONFIG_BTRFS_FS
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig -d CONFIG_NETWORK_FILESYSTEMS
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig -d CONFIG_DEBUG_KERNEL
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig -d CONFIG_DEBUG_USER
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig -d CONFIG_ARM_UNWIND
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig -d CONFIG_DNOTIFY
+./scripts/config --file arch/arm/configs/alpine_rtn_defconfig -d CONFIG_INOTIFY_USER
+
+echo "Creating arch/arm/configs/alpine_rtn_nf_defconfig - Routing with NETFILTER"
+cp arch/arm/configs/alpine_rtn_defconfig arch/arm/configs/alpine_rtn_nf_defconfig
+./scripts/config --file arch/arm/configs/alpine_rtn_nf_defconfig --set-str CONFIG_LOCALVERSION _rtn_nf
+./scripts/config --file arch/arm/configs/alpine_rtn_nf_defconfig -e CONFIG_NETFILTER
+./scripts/config --file arch/arm/configs/alpine_rtn_nf_defconfig -d CONFIG_NETFILTER_ADVANCED
+./scripts/config --file arch/arm/configs/alpine_rtn_nf_defconfig -d CONFIG_NF_CONNTRACK_PROC_COMPAT
+

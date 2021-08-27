@@ -1,0 +1,9 @@
+al-patches
+==========
+
+This module contain a tracking mechanism to patches added to the GA version.
+
+each *.c file in this directory (except al_patches_main.c) represent one patch.
+al_patches_main.c included register API to all patches and will create sysfs
+read-only file to each one.
+This file will include the commit massage of the patch.

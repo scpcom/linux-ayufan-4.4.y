@@ -1,0 +1,68 @@
+if ARCH_ARMADA375
+
+config  MV_HAL_RULES_PATH
+	string "path of the mvRules.mk file for HAL drivers"
+	default "arch/arm/mach-armada375/mv_hal_support/mvRules.mk"
+	help
+	  No help currently.
+
+config A375_CPU1_ENABLE_WA
+	depends on SMP
+	bool "SMP CPU1 Enable WA"
+	default y
+
+menu "Marvell Armada-375 Options"
+
+config ARMADA_375
+	bool "Armada-375 SoC Family"
+	default y
+
+choice
+	prompt "Armada-375 Chip revision"
+	depends on ARMADA_375
+	default ARMADA_375_REV_XX
+
+config  ARMADA_375_REV_XX
+	bool "Armada-375 SoC devices"
+	select ARM_GIC
+	select ARM_ERRATA_720789
+	select ARM_ERRATA_751472
+	select ARM_ERRATA_753970
+	select NEON
+	help
+	  Choosing this option will generate a linux kernel for the
+	  Armada-375 devices
+
+endchoice
+
+config MACH_ARMADA_375
+	bool "Marvell Armada-375 SoC Family"
+	default y
+	help
+	  No help currently.
+
+config CFU_DRAM_BYPASS
+        bool "Bypass CFU to DRAM via Punit"
+	default n
+	help
+	  No help currently.
+
+config A375_FIRST_DABT_WA
+	bool "Discard first data abort"
+	default n
+	help
+	  Workaround that discards first data abort to avoid getting
+	  unhandled fault on boot.
+
+config ARMADA_375_USE_LEGACY_USB2
+	bool "Use legacy USB2 IP instead of USB3 IP"
+	default n
+	help
+	 Armada 375 contain 2 USB host controllers: A legacy USB2
+	 only controller and a new USB3 controller which also supports USB2.
+	 This flag enables to choose which of the host controllers to use.
+	 It mainly affects the USB2 PHY to host connectivity
+
+endmenu
+
+endif

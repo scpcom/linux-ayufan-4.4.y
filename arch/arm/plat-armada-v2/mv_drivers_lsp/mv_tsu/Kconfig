@@ -1,0 +1,95 @@
+menu "TSU options"
+	depends on MV_INCLUDE_TS
+
+config  MV_TSU
+	bool "Support for Marvell Transport Stream Interface"
+#	depends on MV_INCLUDE_TS
+	default n
+choice
+	prompt "TSU interface type"
+	depends on MV_TSU
+	default TSU_PARALLEL_IF_ARMADA
+
+config TSU_SERIAL_IF_ARMADA
+	bool "Serial Interface"
+	select TSU_SERIAL_IF
+	---help---
+	The TSU will work in serial mode (2 ports).
+
+config TSU_PARALLEL_IF_ARMADA
+	bool "Parallel Interface"
+	select TSU_PARALLEL_IF
+	---help---
+	The TSU will work in parallel mode (1 port).
+endchoice
+
+config TSU_SERIAL_IF
+	depends on TSU_SERIAL_IF_ARMADA
+	bool
+
+config TSU_PARALLEL_IF
+	depends on TSU_PARALLEL_IF_ARMADA
+	bool
+
+
+choice
+	prompt "TSU Core-Clock"
+	depends on MV_TSU
+	default TSU_CORE_CLK_83MHZ_ARMADA
+
+config TSU_CORE_CLK_71MHZ_ARMADA
+	bool "71 MHz TSU Core Clock"
+	select TSU_CORE_CLK_71MHZ
+
+config TSU_CORE_CLK_83MHZ_ARMADA
+	bool "83 MHz TSU Core Clock"
+	select TSU_CORE_CLK_83MHZ
+
+config TSU_CORE_CLK_91MHZ_ARMADA
+	bool "91 MHz TSU Core Clock"
+	select TSU_CORE_CLK_91MHZ
+
+config TSU_CORE_CLK_100MHZ_ARMADA
+	bool "100 MHz TSU Core Clock"
+	select TSU_CORE_CLK_100MHZ
+
+endchoice
+
+config TSU_CORE_CLK_71MHZ
+	depends on TSU_CORE_CLK_71MHZ_ARMADA
+	bool
+
+config TSU_CORE_CLK_83MHZ
+	depends on TSU_CORE_CLK_83MHZ_ARMADA
+	bool
+
+config TSU_CORE_CLK_91MHZ
+	depends on TSU_CORE_CLK_91MHZ_ARMADA
+	bool
+
+config TSU_CORE_CLK_100MHZ
+	depends on TSU_CORE_CLK_100MHZ_ARMADA
+	bool
+
+
+config  MV_TSU_PKT_SIZE
+        int "TSU packet size"
+        depends on MV_TSU
+	default 188
+	range 188, 256
+        ---help---
+          Define the TS packet size to be used (Same for both ports)
+	  Must be >= 188 and <= 256.
+
+config  MV_TSU_PROC
+	bool "Support for TSU proc interface"
+	depends on MV_TSU
+	default y
+        ---help---
+          Support Proc-fs interface to configuring the TS control driver.
+
+endmenu
+
+
+
+
