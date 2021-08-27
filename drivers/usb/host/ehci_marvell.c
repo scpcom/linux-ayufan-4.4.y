@@ -42,7 +42,7 @@
 
 static int ehci_marvell_setup(struct usb_hcd *hcd);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 /* In a370 and axp USB UTMI PHY there is an errata which causes
  * error in detection of high speed devices. For certain devices
  * with low pull up values the USB MAC doesnt detect the end of the
@@ -99,16 +99,23 @@ void ehci_marvell_hs_detect_wa_done(struct usb_device *udev)
 	hs_wa_applied[busnum] = 0;
 }
 
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#else
 extern void (*gpfn_ehci_marvell_hs_detect_wa_done)(struct usb_device *udev);
+#endif
 
 int ehci_marvell_hs_detect_wa(struct ehci_hcd *ehci, int busnum)
 {
 	u32 __iomem *portsc_reg;
 	u32 val = 0;
 	u32 timeout;
+
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#else
 	if (NULL == gpfn_ehci_marvell_hs_detect_wa_done) {
 		gpfn_ehci_marvell_hs_detect_wa_done = &ehci_marvell_hs_detect_wa_done;
 	}
+#endif
 
 	/* Apply the WA only once in a reset cycle */
 	if (hs_wa_applied[busnum]++)
@@ -145,7 +152,7 @@ int ehci_marvell_hs_detect_wa(struct ehci_hcd *ehci, int busnum)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_ARMADA_ARCH && CONFIG_USB_MARVELL_ERRATA_FE_9049667 */
+#endif /* (CONFIG_SYNO_ARMADA_ARCH || CONFIG_SYNO_ARMADA_ARCH_V2) && CONFIG_USB_MARVELL_ERRATA_FE_9049667 */
 
 void 	ehci_marvell_port_status_changed(struct ehci_hcd *ehci)
 {

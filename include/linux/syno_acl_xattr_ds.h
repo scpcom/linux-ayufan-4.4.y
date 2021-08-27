@@ -19,6 +19,12 @@
 #define SYNO_ACL_XATTR_INHERIT	"system.syno_acl_inherit"
 #define SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY	"system.syno_acl_pseudo_inherit_only"
 
+/* MAC EA Exttend attribute names */
+#define SYNO_XATTR_EA_PREFIX "user.syno."
+#define SYNO_XATTR_EA_PREFIX_LEN 10
+#define SYNO_XATTR_NETATALK_PREFIX "user.netatalk."
+#define SYNO_XATTR_NETATALK_PREFIX_LEN 14
+
 /* Supported ACL a_version fields */
 #define SYNO_ACL_XATTR_VERSION		0x0001
 

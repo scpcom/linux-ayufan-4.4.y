@@ -94,7 +94,7 @@
 #if L_PTE_SHARED != PTE_EXT_SHARED
 #error PTE shared bit mismatch
 #endif
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 #if !defined (CONFIG_ARM_LPAE) && \
 	(L_PTE_XN+L_PTE_USER+L_PTE_RDONLY+L_PTE_DIRTY+L_PTE_YOUNG+\
 	 L_PTE_FILE+L_PTE_PRESENT) > L_PTE_SHARED
@@ -195,8 +195,8 @@
 	moveq	r3, #0
 
 	str	r3, [r0]
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
-#ifdef CONFIG_MV_SUPPORT_64KB_PAGE_SIZE
+#if defined(CONFIG_SYNO_ARMADA_ARCH)  || defined(CONFIG_SYNO_ARMADA_ARCH_V2) 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
 	@ Need to duplicate the entry 16 times because of overlapping in PTE index bits.
 	str     r3, [r0, #4]
 	str     r3, [r0, #8]
@@ -224,27 +224,30 @@
 	a0_with_b0_errata_6075 r3
 #else
 	dsb
-#endif
+#endif // CONFIG_ARMADA_XP_A0_WITH_B0
 #else
 	dmb					@ ensure ordering with previous memory accesses
-#endif
+#endif // CONFIG_SHEEVA_ERRATA_ARM_CPU_6075
 #elif __LINUX_ARM_ARCH__ == 6
         mcr     p15, 0, r0, c7, c10, 5          @ DMB for V6
-#endif
-#endif
+#endif // _LINUX_ARM_ARCH__ >= 7
+#endif // CONFIG_SHEEVA_ERRATA_ARM_CPU_4611
 	mcr	p15, 0, r0, c7, c10, 1		@ flush_pte
-#ifdef CONFIG_MV_SUPPORT_64KB_PAGE_SIZE
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
 	add	r0, r0, #32
 	mcr	p15, 0, r0, c7, c10, 1		@ flush_pte
 #endif
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #if defined (CONFIG_CACHE_AURORA_L2) && defined (CONFIG_AURORA_L2_OUTER) && !defined (CONFIG_AURORA_L2_PT_WALK)
 #error "armv6_set_pte_ext: calling l2_clean_va corrupts r2. SHOULD BE FIXED"
 	bl	l2_clean_va
 #endif
+#endif
 #ifdef CONFIG_SHEEVA_ERRATA_ARM_CPU_4611
 	msr     cpsr_c, r2                      @ Restore interrupts
 	mcr     p15, 0, r0, c7, c10, 4          @ drain write buffer
-#endif
+#endif // CONFIG_SHEEVA_ERRATA_ARM_CPU_4611
 	.endm
 #else
 	mcr	p15, 0, r0, c7, c10, 1		@ flush_pte
@@ -376,6 +379,9 @@ ENTRY(\name\()_processor_functions)
 ENTRY(\name\()_cache_fns)
 	.long	\name\()_flush_icache_all
 	.long	\name\()_flush_kern_cache_all
+#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	.long   \name\()_flush_kern_cache_louis
+#endif
 	.long	\name\()_flush_user_cache_all
 	.long	\name\()_flush_user_cache_range
 	.long	\name\()_coherent_kern_range

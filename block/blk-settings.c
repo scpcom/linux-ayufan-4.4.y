@@ -107,9 +107,13 @@ EXPORT_SYMBOL_GPL(blk_queue_lld_busy);
  * @lim:  the queue_limits structure to reset
  *
  * Description:
+#ifdef CONFIG_SYNO_ALPINE
+ *   Returns a queue_limit struct to its default state.
+#else
  *   Returns a queue_limit struct to its default state.  Can be used by
  *   stacking drivers like DM that stage table swaps and reuse an
  *   existing device queue.
+#endif
  */
 void blk_set_default_limits(struct queue_limits *lim)
 {
@@ -117,13 +121,21 @@ void blk_set_default_limits(struct queue_limits *lim)
 	lim->max_integrity_segments = 0;
 	lim->seg_boundary_mask = BLK_SEG_BOUNDARY_MASK;
 	lim->max_segment_size = BLK_MAX_SEGMENT_SIZE;
+#ifdef CONFIG_SYNO_ALPINE
+	lim->max_sectors = lim->max_hw_sectors = BLK_SAFE_MAX_SECTORS;
+#else
 	lim->max_sectors = BLK_DEF_MAX_SECTORS;
 	lim->max_hw_sectors = INT_MAX;
+#endif
 	lim->max_discard_sectors = 0;
 	lim->discard_granularity = 0;
 	lim->discard_alignment = 0;
 	lim->discard_misaligned = 0;
+#ifdef CONFIG_SYNO_ALPINE
+	lim->discard_zeroes_data = 0;
+#else
 	lim->discard_zeroes_data = 1;
+#endif
 	lim->logical_block_size = lim->physical_block_size = lim->io_min = 512;
 	lim->bounce_pfn = (unsigned long)(BLK_BOUNCE_ANY >> PAGE_SHIFT);
 	lim->alignment_offset = 0;
@@ -132,6 +144,28 @@ void blk_set_default_limits(struct queue_limits *lim)
 	lim->cluster = 1;
 }
 EXPORT_SYMBOL(blk_set_default_limits);
+#ifdef CONFIG_SYNO_ALPINE
+/**
+ * blk_set_stacking_limits - set default limits for stacking devices
+ * @lim:  the queue_limits structure to reset
+ *
+ * Description:
+ *   Returns a queue_limit struct to its default state. Should be used
+ *   by stacking drivers like DM that have no internal limits.
+ */
+void blk_set_stacking_limits(struct queue_limits *lim)
+{
+	blk_set_default_limits(lim);
+
+	/* Inherit limits from component devices */
+	lim->discard_zeroes_data = 1;
+	lim->max_segments = USHRT_MAX;
+	lim->max_hw_sectors = UINT_MAX;
+
+	lim->max_sectors = BLK_DEF_MAX_SECTORS;
+}
+EXPORT_SYMBOL(blk_set_stacking_limits);
+#endif
 
 /**
  * blk_queue_make_request - define an alternate make_request function for a device
@@ -168,8 +202,12 @@ void blk_queue_make_request(struct request_queue *q, make_request_fn *mfn)
 	q->nr_batching = BLK_BATCH_REQ;
 
 	blk_set_default_limits(&q->limits);
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 	blk_queue_max_hw_sectors(q, BLK_SAFE_MAX_SECTORS);
 	q->limits.discard_zeroes_data = 0;
+#endif
 
 	/*
 	 * by default assume old behaviour and bounce for any highmem page
@@ -315,6 +353,24 @@ void blk_queue_max_segment_size(struct request_queue *q, unsigned int max_size)
 }
 EXPORT_SYMBOL(blk_queue_max_segment_size);
 
+#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+/*
+ * Export this function for device mapper layer
+ * to set logical block size via limits
+ */
+void syno_limits_logical_block_size(struct queue_limits *limits, unsigned short size)
+{
+	limits->logical_block_size = size;
+
+	if (limits->physical_block_size < size)
+		limits->physical_block_size = size;
+
+	if (limits->io_min < limits->physical_block_size)
+		limits->io_min = limits->physical_block_size;
+}
+EXPORT_SYMBOL(syno_limits_logical_block_size);
+#endif
+
 /**
  * blk_queue_logical_block_size - set logical block size for the queue
  * @q:  the request queue for the device
@@ -327,6 +383,9 @@ EXPORT_SYMBOL(blk_queue_max_segment_size);
  **/
 void blk_queue_logical_block_size(struct request_queue *q, unsigned short size)
 {
+#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+	syno_limits_logical_block_size(&q->limits, size);
+#else
 	q->limits.logical_block_size = size;
 
 	if (q->limits.physical_block_size < size)
@@ -334,6 +393,7 @@ void blk_queue_logical_block_size(struct request_queue *q, unsigned short size)
 
 	if (q->limits.io_min < q->limits.physical_block_size)
 		q->limits.io_min = q->limits.physical_block_size;
+#endif
 }
 EXPORT_SYMBOL(blk_queue_logical_block_size);
 

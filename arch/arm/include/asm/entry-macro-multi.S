@@ -7,8 +7,13 @@
  * Interrupt handling.  Preserves r7, r8, r9
  */
 	.macro	arch_irq_handler_default
+#if defined(CONFIG_SYNO_COMCERTO)
+	get_irqnr_preamble r6, r3, lr
+1:	get_irqnr_and_base r0, r2, r6, r3, lr
+#else
 	get_irqnr_preamble r6, lr
 1:	get_irqnr_and_base r0, r2, r6, lr
+#endif
 	movne	r1, sp
 	@
 	@ routine called with r0 = irq number, r1 = struct pt_regs *
@@ -23,7 +28,8 @@
 	 * this macro assumes that irqstat (r2) and base (r6) are
 	 * preserved from get_irqnr_and_base above
 	 */
-#if defined(CONFIG_SYNO_ARMADA_ARCH) &&  defined(CONFIG_MV_IPC_DRIVER)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_IPC_DRIVER)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_IPC_LINUX_AMP_DRIVER))
  	test_for_ipc r0, r2, r6, lr
 	movne   r1, sp
 	adrne   lr, BSYM(1b)

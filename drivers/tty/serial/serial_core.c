@@ -1885,7 +1885,7 @@ static int serial_match_port(struct device *dev, void *data)
 	return dev->devt == devt; /* Actually, only one tty per port */
 }
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_STANDBY_UART_WAKE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_STANDBY_UART_WAKE)
 int uart_suspend_port(struct uart_driver *drv, struct uart_port *uport)
 {
 	return 0;
@@ -2061,10 +2061,8 @@ uart_report_port(struct uart_driver *drv, struct uart_port *port)
 	case UPIO_MEM32:
 	case UPIO_AU:
 	case UPIO_TSI:
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
-#if defined(CONFIG_ARCH_ARMADA370) || defined(CONFIG_ARCH_ARMADA_XP) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
 	case UPIO_DWAPB:
-#endif
 #endif
 		snprintf(address, sizeof(address),
 			 "MMIO 0x%llx", (unsigned long long)port->mapbase);
@@ -2479,10 +2477,8 @@ int uart_match_port(struct uart_port *port1, struct uart_port *port2)
 	case UPIO_MEM32:
 	case UPIO_AU:
 	case UPIO_TSI:
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
-#if defined(CONFIG_ARCH_ARMADA370) || defined(CONFIG_ARCH_ARMADA_XP) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) ||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
 	case UPIO_DWAPB:
-#endif
 #endif
 		return (port1->mapbase == port2->mapbase);
 	}

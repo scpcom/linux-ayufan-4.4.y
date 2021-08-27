@@ -415,11 +415,11 @@ EXPORT_SYMBOL_GPL(kernel_halt);
  */
 void kernel_power_off(void)
 {
-#ifdef MY_DEF_HERE 
+#ifdef SYNO_X86_AUTO_POWER_ON 
 	extern int syno_schedule_power_on_prepare(void);
 #endif
 	kernel_shutdown_prepare(SYSTEM_POWER_OFF);
-#ifdef MY_DEF_HERE 
+#ifdef SYNO_X86_AUTO_POWER_ON 
 	syno_schedule_power_on_prepare();
 #endif
 	if (pm_power_off_prepare)
@@ -432,7 +432,7 @@ void kernel_power_off(void)
 }
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_MICROP_CTRL
 #if defined(CONFIG_SYNO_CEDARVIEW) || defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON)
 #define UART_PORT1_IOBASE   0x2F8
 #else

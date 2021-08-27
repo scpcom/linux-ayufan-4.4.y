@@ -1373,7 +1373,6 @@ int cifs_mkdir(struct inode *inode, struct dentry *direntry, umode_t mode)
 			}
 /*BB check (cifs_sb->mnt_cifs_flags & CIFS_MOUNT_SET_UID ) to see if need
 	to set uid/gid */
-			inc_nlink(inode);
  
 			cifs_unix_basic_to_fattr(&fattr, pInfo, cifs_sb);
 			cifs_fill_uniqueid(inode->i_sb, &fattr);
@@ -1406,7 +1405,6 @@ mkdir_retry_old:
 		d_drop(direntry);
 	} else {
 mkdir_get_info:
-		inc_nlink(inode);
 		if (pTcon->unix_ext)
 			rc = cifs_get_inode_info_unix(&newinode, full_path,
 						      inode->i_sb, xid);
@@ -1487,6 +1485,11 @@ mkdir_get_info:
 		}
 	}
 mkdir_out:
+	/*
+	 * Force revalidate to get parent dir info when needed since cached
+	 * attributes are invalid now.
+	 */
+	CIFS_I(inode)->time = 0;
 	kfree(full_path);
 	FreeXid(xid);
 	cifs_put_tlink(tlink);
@@ -1526,7 +1529,6 @@ int cifs_rmdir(struct inode *inode, struct dentry *direntry)
 	cifs_put_tlink(tlink);
 
 	if (!rc) {
-		drop_nlink(inode);
 		spin_lock(&direntry->d_inode->i_lock);
 		i_size_write(direntry->d_inode, 0);
 		clear_nlink(direntry->d_inode);
@@ -1534,12 +1536,15 @@ int cifs_rmdir(struct inode *inode, struct dentry *direntry)
 	}
 
 	cifsInode = CIFS_I(direntry->d_inode);
-	cifsInode->time = 0;	/* force revalidate to go get info when
-				   needed */
+	/* force revalidate to go get info when needed */
+	cifsInode->time = 0;
 
 	cifsInode = CIFS_I(inode);
-	cifsInode->time = 0;	/* force revalidate to get parent dir info
-				   since cached search results now invalid */
+	/*
+	 * Force revalidate to get parent dir info when needed since cached
+	 * attributes are invalid now.
+	 */
+	cifsInode->time = 0;
 
 	direntry->d_inode->i_ctime = inode->i_ctime = inode->i_mtime =
 		current_fs_time(inode->i_sb);

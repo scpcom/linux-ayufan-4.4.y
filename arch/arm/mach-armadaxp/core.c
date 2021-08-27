@@ -1532,7 +1532,7 @@ void axp_db_restore(void)
 }
 
 #ifdef CONFIG_SYNO_ARMADA_ARCH
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 extern void syno_mv_net_shutdown();
 #endif
 #define UART1_REG(x)		(PORT1_BASE + ((UART_##x) << 2))

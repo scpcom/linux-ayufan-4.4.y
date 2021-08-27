@@ -112,7 +112,7 @@ QD_OBJS		= $(HAL_QD_DIR)/src/driver/gtDrvConfig.o $(HAL_QD_DIR)/src/driver/gtDrv
 		  $(HAL_QD_DIR)/src/msapi/gtPIRL2.o $(HAL_QD_DIR)/src/msapi/gtCCPVT.o		\
 		  $(HAL_QD_DIR)/src/msapi/gtPCSCtrl.o $(HAL_QD_DIR)/src/msapi/gtBrgStu.o
 
-LSP_OBJS        = core.o irq.o time.o leds.o sysmap.o export.o clock.o synology-gpio.o synology-platform.o
+LSP_OBJS        = core.o irq.o time.o leds.o sysmap.o export.o clock.o synology-gpio.o
 
 obj-y   				:=  armada370.o
 armada370-objs  			:=$(LSP_OBJS) $(COMMON_OBJS) $(OSSERVICES_OBJS) $(HAL_OBJS) 	\

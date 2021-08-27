@@ -21,8 +21,13 @@
 #include <plat/ehci-orion.h>
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA_V2) && defined(CONFIG_CPU_BIG_ENDIAN)
+#define rdl(off)		le32_to_cpu(__raw_readl(hcd->regs + (off)))
+#define wrl(off, val)	__raw_writel((cpu_to_le32(val)), hcd->regs + (off))
+#else
 #define rdl(off)	__raw_readl(hcd->regs + (off))
 #define wrl(off, val)	__raw_writel((val), hcd->regs + (off))
+#endif
 
 #define USB_CMD			0x140
 #define USB_MODE		0x1a8

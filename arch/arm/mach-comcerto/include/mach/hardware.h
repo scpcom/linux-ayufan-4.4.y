@@ -30,12 +30,13 @@
 		#error "mach/hardware.h :  Unknown architecture" 
 	#endif
 	
-
 	/***** Board *****/
 	#if defined(CONFIG_C2K_ASIC)
 		#include <mach/board-c2kasic.h>
 	#elif defined(CONFIG_C2K_EVM)
 		#include <mach/board-c2kevm.h>
+	#elif defined(CONFIG_C2K_MFCN_EVM)
+		#include <mach/board-c2kmfcnevm.h>
 	#elif defined(CONFIG_RTSM_C2K)
 		#include <mach/board-c2krtsm.h>
 	

@@ -5880,10 +5880,17 @@ static void dump_page_flags(unsigned long flags)
 
 void dump_page(struct page *page)
 {
+#ifdef CONFIG_SYNO_ALPINE
+	printk(KERN_ALERT
+	       "page:%p count:%d mapcount:%d mapping:%p index:%#llx\n",
+		page, atomic_read(&page->_count), page_mapcount(page),
+		page->mapping, (unsigned long long)page->index);
+#else
 	printk(KERN_ALERT
 	       "page:%p count:%d mapcount:%d mapping:%p index:%#lx\n",
 		page, atomic_read(&page->_count), page_mapcount(page),
 		page->mapping, page->index);
+#endif
 	dump_page_flags(page->flags);
 	mem_cgroup_print_bad_page(page);
 }

@@ -92,7 +92,7 @@ static int dw8250_handle_irq(struct uart_port *p)
 
 static int __devinit dw8250_probe(struct platform_device *pdev)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && !defined(CONFIG_USE_OF)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && !defined(CONFIG_USE_OF)
 struct plat_serial8250_port *p = pdev->dev.platform_data;
 #endif
 	struct uart_port port = {};
@@ -124,7 +124,7 @@ struct plat_serial8250_port *p = pdev->dev.platform_data;
 	port.iotype = UPIO_MEM;
 	port.serial_in = dw8250_serial_in;
 	port.serial_out = dw8250_serial_out;
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && !defined(CONFIG_USE_OF)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && !defined(CONFIG_USE_OF)
 	port.iotype = p->iotype;
         port.serial_in = dw8250_serial_in32;
         port.serial_out = dw8250_serial_out32;

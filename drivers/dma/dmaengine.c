@@ -63,7 +63,7 @@
 #include <linux/rculist.h>
 #include <linux/idr.h>
 #include <linux/slab.h>
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <linux/pagemap.h>
 #endif
 
@@ -71,7 +71,7 @@ static DEFINE_MUTEX(dma_list_mutex);
 static DEFINE_IDR(dma_idr);
 static LIST_HEAD(dma_device_list);
 static long dmaengine_ref_count;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static struct page *temp_page = NULL;
 #endif
 
@@ -341,6 +341,21 @@ struct dma_chan *dma_find_channel(enum dma_transaction_type tx_type)
 }
 EXPORT_SYMBOL(dma_find_channel);
 
+#ifdef CONFIG_SYNO_ALPINE
+/*
+ * net_dma_find_channel - find a channel for net_dma
+ * net_dma has alignment requirements
+ */
+struct dma_chan *net_dma_find_channel(void)
+{
+	struct dma_chan *chan = dma_find_channel(DMA_SG);
+	if (chan && !is_dma_copy_aligned(chan->device, 1, 1, 1))
+		return NULL;
+
+	return chan;
+}
+EXPORT_SYMBOL(net_dma_find_channel);
+#endif
 /**
  * dma_issue_pending_all - flush all pending operations across all channels
  */
@@ -891,7 +906,7 @@ dma_async_memcpy_buf_to_buf(struct dma_chan *chan, void *dest,
 }
 EXPORT_SYMBOL(dma_async_memcpy_buf_to_buf);
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #define DMA_ENGINE_MIN_OP_SIZE 128
 #endif
 
@@ -918,7 +933,7 @@ dma_async_memcpy_buf_to_pg(struct dma_chan *chan, struct page *page,
 	dma_cookie_t cookie;
 	unsigned long flags;
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (!page) {
 		printk(KERN_ERR "%s page %x\n", __FUNCTION__, (void*)page);
 		return -EFAULT;
@@ -1002,7 +1017,7 @@ dma_async_memcpy_pg_to_pg(struct dma_chan *chan, struct page *dest_pg,
 	dma_cookie_t cookie;
 	unsigned long flags;
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (!dest_pg || !src_pg) {
 		printk(KERN_ERR "%s dest_pg %x src_pg %x\n", __FUNCTION__, (void*)dest_pg, (void*)src_pg);
 		return -EFAULT;
@@ -1061,6 +1076,60 @@ dma_async_memcpy_pg_to_pg(struct dma_chan *chan, struct page *dest_pg,
 	return cookie;
 }
 EXPORT_SYMBOL(dma_async_memcpy_pg_to_pg);
+#ifdef CONFIG_SYNO_ALPINE
+/**
+ * dma_async_memcpy_sg_to_sg - offloaded copy from sg to sg
+ * @chan: DMA channel to offload copy to
+ * @dest_pg: destination page
+ * @dest_off: offset in page to copy to
+ * @src_pg: source page
+ * @src_off: offset in page to copy from
+ * @len: length
+ */
+dma_cookie_t
+dma_async_memcpy_sg_to_sg(struct dma_chan *chan,
+	struct scatterlist *dst_sg, unsigned int dst_nents,
+	struct scatterlist *src_sg, unsigned int src_nents)
+{
+	struct dma_device *dev = chan->device;
+	struct dma_async_tx_descriptor *tx;
+	dma_cookie_t cookie;
+	unsigned long flags;
+	int src_sglen;
+	int dst_sglen;
+
+	/* Map DMA buffers */
+	src_sglen = dma_map_sg(chan->device->dev, src_sg,
+				src_nents, DMA_TO_DEVICE);
+	BUG_ON(!src_sglen);
+
+	dst_sglen = dma_map_sg(chan->device->dev, dst_sg,
+				dst_nents, DMA_FROM_DEVICE);
+	BUG_ON(!dst_sglen);
+
+	flags = DMA_CTRL_ACK;
+
+	tx = dev->device_prep_dma_sg(chan, dst_sg, dst_sglen,
+					     src_sg, src_sglen, flags);
+	if (!tx) {
+		dma_unmap_sg(chan->device->dev, src_sg,
+			   src_nents, DMA_TO_DEVICE);
+		dma_unmap_sg(chan->device->dev, dst_sg,
+			   dst_nents, DMA_FROM_DEVICE);
+		return -ENOMEM;
+	}
+
+	tx->callback = NULL;
+	cookie = tx->tx_submit(tx);
+
+	preempt_disable();
+	__this_cpu_inc(chan->local->memcpy_count);
+	preempt_enable();
+
+	return cookie;
+}
+EXPORT_SYMBOL(dma_async_memcpy_sg_to_sg);
+#endif
 
 void dma_async_tx_descriptor_init(struct dma_async_tx_descriptor *tx,
 	struct dma_chan *chan)
@@ -1135,7 +1204,7 @@ EXPORT_SYMBOL_GPL(dma_run_dependencies);
 
 static int __init dma_bus_init(void)
 {
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	temp_page = alloc_pages(GFP_KERNEL, 0);
 	if (!temp_page)
                 BUG();

@@ -694,7 +694,7 @@ static inline void set_ohci_hcfs(struct ehci_hcd *ehci, int operational)
 { }
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 extern int ehci_marvell_hs_detect_wa(struct ehci_hcd *ehci, int busnum);
 #endif
 

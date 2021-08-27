@@ -134,9 +134,9 @@ static uint8_t mirror_pattern[] = { '1', 't', 'b', 'B' };
 static struct nand_bbt_descr bbt_main_descr = {
 	.options = NAND_BBT_LASTBLOCK | NAND_BBT_CREATE | NAND_BBT_WRITE
 		| NAND_BBT_8BIT | NAND_BBT_VERSION | NAND_BBT_PERCHIP,
-	.offs = 180,
+	.offs = 44,
 	.len = 4,
-	.veroffs = 184,
+	.veroffs = 48,
 	.maxblocks = 8,
 	.pattern = bbt_pattern,
 };
@@ -144,9 +144,9 @@ static struct nand_bbt_descr bbt_main_descr = {
 static struct nand_bbt_descr bbt_mirror_descr = {
 	.options = NAND_BBT_LASTBLOCK | NAND_BBT_CREATE | NAND_BBT_WRITE
 		| NAND_BBT_8BIT | NAND_BBT_VERSION | NAND_BBT_PERCHIP,
-	.offs = 180,
+	.offs = 44,
 	.len = 4,
-	.veroffs = 184,
+	.veroffs = 48,
 	.maxblocks = 8,
 	.pattern = mirror_pattern,
 };
@@ -196,12 +196,12 @@ static void comcerto_enable_hw_ecc(struct mtd_info *mtd, int mode)
 
 #if defined (CONFIG_NAND_COMCERTO_ECC_8_HW_BCH) || defined (CONFIG_NAND_COMCERTO_ECC_24_HW_BCH)
 	ecc_gen_cfg_val &= BCH_MODE;
+	ecc_gen_cfg_val = (ecc_gen_cfg_val & ~(ECC_LVL_MASK)) | (ECC_LVL_VAL << ECC_LVL_SHIFT);
 #else
 	ecc_gen_cfg_val |= HAMM_MODE;
 #endif
 
-	ecc_gen_cfg_val = (ecc_gen_cfg_val & ~(ECC_LVL_MASK)) | (ECC_LVL_VAL << ECC_LVL_SHIFT);
-	ecc_gen_cfg_val = (ecc_gen_cfg_val & ~(BLK_SIZE_MASK)) | nand_device->ecc.size; ;
+	ecc_gen_cfg_val = (ecc_gen_cfg_val & ~(BLK_SIZE_MASK)) | nand_device->ecc.size;
 
 	writel_relaxed(ecc_gen_cfg_val, ecc_base_addr + ECC_GEN_CFG);
 	/* Reset parity module and latch configured values */
@@ -290,13 +290,6 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 
 	udelay(25);
 
-	/* Check if the block has uncorrectable number of errors */
-	if ((readl_relaxed(ecc_base_addr + ECC_CORR_STAT)) & ECC_UNCORR) {
-		printk(KERN_WARNING "ECC: uncorrectable error  2 !!!\n");
-		temp_nand_ecc_errors[1] += 1 ;
-		return -EIO;
-	}
-
 	err_corr_data_prev = 0;
 	/* Read Correction data status register till header is 0x7FD */
 	do {
@@ -333,6 +326,12 @@ static int comcerto_correct_ecc(struct mtd_info *mtd, uint8_t *dat,
 		return -1;
 	}
 
+	/* Check if the block has uncorrectable number of errors */
+	if ((readl_relaxed(ecc_base_addr + ECC_CORR_STAT)) & ECC_UNCORR) {
+		printk(KERN_WARNING "ECC: uncorrectable error  2 !!!\n");
+		temp_nand_ecc_errors[1] += 1 ;
+		return -EIO;
+	}
 
 	temp_nand_ecc_errors[3] += err_count;
 
@@ -649,10 +648,10 @@ static int comcerto_nand_probe(struct platform_device *pdev)
 	}
 	nand_device->ecc.total = nand_device->ecc.steps * nand_device->ecc.bytes;
 
-
 	nand_device->bbt_td = &bbt_main_descr;
 	nand_device->bbt_md = &bbt_mirror_descr;
 	nand_device->badblock_pattern = &c2000_badblock_pattern;
+	nand_device->bbt_options |= NAND_BBT_USE_FLASH;
 
 	} else {
 		nand_device->ecc.mode = NAND_ECC_SOFT;

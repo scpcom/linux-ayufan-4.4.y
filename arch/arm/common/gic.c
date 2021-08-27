@@ -601,6 +601,25 @@ static void gic_cpu_restore(unsigned int gic_nr)
 	writel_relaxed(1, cpu_base + GIC_CPU_CTRL);
 }
 
+#ifdef CONFIG_SYNO_ALPINE
+static void gic_cpu_mask(unsigned int gic_nr)
+{
+	void __iomem *cpu_base;
+
+	if (gic_nr >= MAX_GIC_NR)
+		BUG();
+
+	cpu_base = gic_data[gic_nr].cpu_base;
+
+	if (!cpu_base)
+		return;
+
+	/* do not raise any interrupt from cpu interface.
+	 * do not bypass to legacy_irq and legacy_fiq legs*/
+	writel_relaxed(0 | (3<<5), cpu_base + GIC_CPU_CTRL);
+}
+#endif
+
 static int gic_notifier(struct notifier_block *self, unsigned long cmd,	void *v)
 {
 	int i;
@@ -623,6 +642,14 @@ static int gic_notifier(struct notifier_block *self, unsigned long cmd,	void *v)
 			break;
 		}
 	}
+
+#ifdef CONFIG_SYNO_ALPINE
+	/*do not accept interrupt from main gic*/
+	if (cmd == CPU_PM_ENTER)
+	{
+		gic_cpu_mask(0);
+	}
+#endif
 
 	return NOTIFY_OK;
 }

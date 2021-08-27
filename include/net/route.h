@@ -73,7 +73,7 @@ struct rtable {
 	struct inet_peer	*peer; /* long-living peer info */
 	struct fib_info		*fi; /* for client ref to shared metrics */
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	bool 			nfp;
 #endif /* CONFIG_MV_ETH_NFP_HOOKS */

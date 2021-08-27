@@ -14,7 +14,7 @@
 #define _ASMARM_PGTABLE_H
 
 #include <linux/const.h>
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 #else
 #include <asm-generic/4level-fixup.h>
 #endif
@@ -22,21 +22,23 @@
 
 #ifndef CONFIG_MMU
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 #include <asm-generic/4level-fixup.h>
 #endif
 #include "pgtable-nommu.h"
 
 #else
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 #include <asm-generic/pgtable-nopud.h>
 #endif
 #include <asm/memory.h>
 #include <mach/vmalloc.h>
 #include <asm/pgtable-hwdef.h>
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
+#include <asm/pgtable-3level.h>
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
 #include <asm/pgtable-3level.h>
 #else
 #include <asm/pgtable-2level.h>
@@ -76,6 +78,15 @@ extern void __pgd_error(const char *file, int line, pgd_t);
  * non-high vector CPUs.
  */
 #define FIRST_USER_ADDRESS	PAGE_SIZE
+
+/*
+ * Use TASK_SIZE as the ceiling argument for free_pgtables() and
+ * free_pgd_range() to avoid freeing the modules pmd when LPAE is enabled (pmd
+ * page shared between user and kernel).
+ */
+#if defined(CONFIG_ARM_LPAE) && defined(CONFIG_SYNO_ALPINE_FIX_USB_HANG)
+#define USER_PGTABLES_CEILING	TASK_SIZE
+#endif
 
 /*
  * The pgprot_* and protection_map entries will be fixed up in runtime
@@ -178,7 +189,7 @@ extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
 /* to find an entry in a kernel page-table-directory */
 #define pgd_offset_k(addr)	pgd_offset(&init_mm, addr)
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_ARM_LPAE
 
 #define pud_none(pud)		(!pud_val(pud))
@@ -216,6 +227,8 @@ static inline pmd_t *pud_page_vaddr(pud_t pud)
 #define set_pud(pud,pudp)	do { } while (0)
 
 #endif	/* CONFIG_ARM_LPAE */
+#elif defined(CONFIG_SYNO_ALPINE)
+		/* Do nothing */
 #else
 /*
  * The "pgd_xxx()" functions here are trivial for a folded two-level
@@ -232,7 +245,7 @@ static inline pmd_t *pud_page_vaddr(pud_t pud)
 #endif
 
 /* Find an entry in the second-level page table.. */
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_ARM_LPAE
 #define pmd_index(addr)		(((addr) >> PMD_SHIFT) & (PTRS_PER_PMD - 1))
 static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
@@ -245,6 +258,8 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 	return (pmd_t *)pud;
 }
 #endif
+#elif defined(CONFIG_SYNO_ALPINE)
+	/* Do nothing */
 #else
 #define pmd_offset(dir, addr)	((pmd_t *)(dir))
 #endif
@@ -252,7 +267,7 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 #define pmd_none(pmd)		(!pmd_val(pmd))
 #define pmd_present(pmd)	(pmd_val(pmd))
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 
 #define pmd_bad(pmd)		(!(pmd_val(pmd) & 2))
 
@@ -268,6 +283,8 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 		clean_pmd_entry(pmdp);	\
 	} while (0)
 
+#elif defined(CONFIG_SYNO_ALPINE)
+	/* Do nothing */
 #else	/* !CONFIG_ARM_LPAE */
 
 #define pmd_bad(pmd)		(pmd_val(pmd) & 2)
@@ -314,6 +331,8 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 {
 #if defined(CONFIG_SYNO_COMCERTO)
 	return __va((pmd_val(pmd) & PHYS_MASK & (s32)PMD_PAGE_ADDR_MASK) - PTE_HWTABLE_OFF);
+#elif defined(CONFIG_SYNO_ALPINE)
+	return __va(pmd_val(pmd) & PHYS_MASK & (s32)PTE_HWTABLE_MASK);
 #else
 	return __va(pmd_val(pmd) & PHYS_MASK & (s32)PAGE_MASK);
 #endif
@@ -321,7 +340,7 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 
 #define pmd_page(pmd)		pfn_to_page(__phys_to_pfn(pmd_val(pmd) & PHYS_MASK))
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined (CONFIG_SYNO_ALPINE)
 #else
 /* we don't need complex calculations here as the pmd is folded into the pgd */
 #define pmd_addr_end(addr,end)	(end)
@@ -367,10 +386,13 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 	((pte_val(pte) & (L_PTE_PRESENT | L_PTE_USER)) == \
 	 (L_PTE_PRESENT | L_PTE_USER))
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,__pte(pte_val(pte)|(ext)))
 #elif defined(CONFIG_SYNO_COMCERTO)
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte_val(pte),ext)
+#define uncache_pte_ext(ptep) cpu_uncache_pte_ext(ptep)
+#elif defined(CONFIG_SYNO_ALPINE)
+	/*Do nothing */
 #else
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte,ext)
 #endif

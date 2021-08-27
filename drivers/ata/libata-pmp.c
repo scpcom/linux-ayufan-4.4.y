@@ -20,7 +20,7 @@
 #include "libata.h"
 #include "libata-transport.h"
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_EBOX_REFRESH
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
 
@@ -134,6 +134,21 @@ syno_pm_gpio_config(struct ata_port *ap)
 
 		/* 9705 SATA Blink rate*/
 		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_SATA_BLINK_RATE, 0x2082082);
+
+	}
+}
+
+/* 9705 TX Amp enhanced */
+static void
+syno_pm_9705_max_tx_amp(struct ata_port *ap)
+{
+	/* Set MV9705 register for Denlow DS3615xs */
+	if (syno_is_hw_version(HW_DS3615xs) ||
+		IS_SYNOLOGY_DX1215(ap->PMSynoUnique)){ // this modification applied to DX1215 with all modles
+			sata_pmp_write(&(ap->link), 0x091, 0xE7F);
+			sata_pmp_write(&(ap->link), 0x191, 0xE7F);
+			sata_pmp_write(&(ap->link), 0x291, 0xE7F);
+			sata_pmp_write(&(ap->link), 0x391, 0xE7F);
 	}
 }
 
@@ -405,7 +420,8 @@ syno_pm_is_synology_3xxx(const struct ata_port *ap)
 		!IS_SYNOLOGY_DX513(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_DXC(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_RXC(ap->PMSynoUnique) &&
-		!IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
+		!IS_SYNOLOGY_DX213(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_RX415(ap->PMSynoUnique)) {
 		goto END;
 	}
 
@@ -425,7 +441,8 @@ syno_pm_is_synology_9705(const struct ata_port *ap)
 	}
 
 	if (!IS_SYNOLOGY_RX413(ap->PMSynoUnique) &&
-		!IS_SYNOLOGY_RX1214(ap->PMSynoUnique)) {
+		!IS_SYNOLOGY_RX1214(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) {
 		goto END;
 	}
 
@@ -846,6 +863,42 @@ CONTINUE_FOR:
 	}
 }
 
+int syno_libata_pmp_deepsleep_indicator_set(struct ata_port *ap, const int blCLR)
+{
+#define CLEAR_DEEPSLEEP_BIT(BITMAP)	(BITMAP & (~0x80))
+	SYNO_PM_PKG pm_pkg;
+	int iRet = -1;
+	unsigned int uiVar = 0;
+
+	if (!ap) {
+		goto END;
+	}
+
+	syno_pm_hddled_status_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				sata_pmp_gscr_devid(ap->link.device->gscr), &pm_pkg);
+
+	iRet = syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg);
+	if(0 != iRet) {
+		goto END;
+	}
+	uiVar = CLEAR_DEEPSLEEP_BIT(pm_pkg.var);
+
+	if (syno_pm_deepsleep_indicator_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+				sata_pmp_gscr_devid(ap->link.device->gscr), &pm_pkg, blCLR)) {
+		pm_pkg.var |= uiVar;
+		if (syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg)) {
+			printk("ata%d pm deepsleep indicator write 0 fail\n", ap->print_id);
+			ata_port_printk(ap, KERN_INFO, "Set PMP deepsleep indicator %d failed\n", blCLR);
+			goto END;
+		}
+
+	}
+
+	iRet = 0;
+END:
+	return iRet;
+}
+
 int
 syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 {
@@ -900,7 +953,8 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 
 	if(IS_SYNOLOGY_DXC(ap->PMSynoUnique) ||
 	   IS_SYNOLOGY_RXC(ap->PMSynoUnique) ||
-	   IS_SYNOLOGY_RX1214(ap->PMSynoUnique)) {
+	   IS_SYNOLOGY_RX1214(ap->PMSynoUnique) ||
+	   IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) {
 		if(0 != ap->PMSynoEMID) {
 			goto END;
 		}
@@ -1299,6 +1353,9 @@ static void sata_pmp_quirks(struct ata_port *ap)
 	u16 vendor = sata_pmp_gscr_vendor(gscr);
 	u16 devid = sata_pmp_gscr_devid(gscr);
 	struct ata_link *link;
+#ifdef SYNO_PM_DISABLE_LINK_LIMIT
+	u32 scontrol;
+#endif
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	/*our DX513 and DX213 use 3826 chip */
@@ -1319,6 +1376,15 @@ static void sata_pmp_quirks(struct ata_port *ap)
 			if (link->pmp == 5)
 				link->flags |= ATA_LFLAG_NO_SRST |
 					       ATA_LFLAG_ASSUME_SEMB;
+
+#ifdef SYNO_PM_DISABLE_LINK_LIMIT
+			sata_pmp_scr_read(link, SATA_PMP_PSCR_CONTROL, &scontrol);
+
+			// Has speed limit before negotiate link speed, clear it.
+			if (scontrol & 0x0f0) {
+				sata_pmp_scr_write(link, SATA_PMP_PSCR_CONTROL, (scontrol & (~0x0f0)));
+			}
+#endif
 		}
 	} else if (vendor == 0x1095 && devid == 0x4723) {
 		/* sil4723 quirks */
@@ -1450,7 +1516,10 @@ int sata_pmp_attach(struct ata_device *dev)
 	/* Get information for all PM we supported */
 	syno_pm_gpio_config(ap);
 	syno_prepare_custom_info(ap);
-#ifdef MY_ABC_HERE
+	if (syno_pm_is_synology_9705(ap)){
+		syno_pm_9705_max_tx_amp(ap);
+	}
+#ifdef SYNO_HW_VERSION
 	/*For DS1812+ with older version of DX510, the link should be limited to 1.5G*/
 	if (syno_is_hw_version(HW_DS1812p)) {
 		/* The old version should be b000 */
@@ -1507,6 +1576,12 @@ int sata_pmp_attach(struct ata_device *dev)
 	rc = sata_pmp_configure(dev, 1);
 	if (rc)
 		goto fail;
+#ifdef SYNO_SATA_PM_LINK_RETRY
+	/* DS2415 doesn't use the sil3132, so we don't do the retry */
+	if (!syno_is_hw_version(HW_DS2415p)) {
+		ap->isFirstAttach = 1;
+	}
+#endif
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	rc = sata_pmp_init_links(ap, syno_pmp_ports_num(ap));
@@ -1571,7 +1646,7 @@ static void sata_pmp_detach(struct ata_device *dev)
 	WARN_ON(!ata_is_host_link(link) || dev->devno ||
 		link->pmp != SATA_PMP_CTRL_PORT);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PM_CLEANUP_CLASS
 	ata_for_each_link(tlink, ap, EDGE) {
 		unsigned int *classes = tlink->eh_context.classes;
 		struct ata_device *tdev = tlink->device;
@@ -1689,7 +1764,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	struct ata_port *ap = link->ap;
 	u32 *gscr = (void *)ap->sector_buf;
 	int rc;
-#if defined(MY_DEF_HERE)
+#if defined(SYNO_SATA_EBOX_REFRESH)
 	struct ata_port *master_ap = NULL;
 #endif
 
@@ -1727,7 +1802,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 
 	ata_eh_done(link, NULL, ATA_EH_REVALIDATE);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_EBOX_REFRESH
 	if(funcSYNOSendEboxRefreshEvent) {
 		master_ap = SynoEunitFindMaster(ap);
 		if (NULL != master_ap) {

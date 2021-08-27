@@ -909,34 +909,32 @@ ia32_sys_call_table:
 	.quad sys_ni_syscall
 	.quad sys_ni_syscall
 	.quad sys_ni_syscall
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	.quad compat_sys_SYNOUtime		/* 402 */
 #else
 	.quad sys_ni_syscall
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.quad sys_SYNOArchiveBit	/* 403 */
 #else
 	.quad sys_ni_syscall
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
  .quad compat_sys_recvfile
 #else
 	.quad sys_ni_syscall
 #endif
 	.quad sys_ni_syscall /* 405 */
-#ifdef MY_ABC_HERE
-	.quad sys32_SYNOCaselessStat /* 406 */
-	.quad sys32_SYNOCaselessLStat /* 407 */
-	.quad sys_ni_syscall
-	.quad sys_ni_syscall
+#ifdef SYNO_UNICODE_STAT
+	.quad sys32_SYNOCaselessStat64 /* 406 */
+	.quad sys32_SYNOCaselessLStat64 /* 407 */
 #else
 	.quad sys_ni_syscall
 	.quad sys_ni_syscall
-	.quad sys_ni_syscall
-	.quad sys_ni_syscall
-#endif
-#ifdef MY_ABC_HERE
+#endif  /* SYNO_UNICODE_STAT */
+	.quad sys_ni_syscall		/* 408 */
+	.quad sys_ni_syscall		/* 409 */
+#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
 	.quad sys_SYNOEcryptName /* 410 */
 	.quad sys_SYNODecryptName /* 411 */
 #else
@@ -953,21 +951,18 @@ ia32_sys_call_table:
 	.quad sys_ni_syscall
 #endif
 	.quad sys_ni_syscall
-#ifdef MY_ABC_HERE
-    .quad sys_ni_syscall
-    .quad sys_ni_syscall
-    .quad sys_ni_syscall
-    .quad sys32_SYNOStat                   /* 419 */
-    .quad sys32_SYNOFStat                  /* 420 */
-    .quad sys32_SYNOLStat                  /* 421 */
+    .quad sys_ni_syscall        /* 416 */
+    .quad sys_ni_syscall        /* 417 */
+    .quad sys_ni_syscall        /* 418 */
+#ifdef SYNO_STAT
+    .quad sys32_SYNOStat64                   /* 419 */
+    .quad sys32_SYNOFStat64                  /* 420 */
+    .quad sys32_SYNOLStat64                  /* 421 */
 #else
     .quad sys_ni_syscall
     .quad sys_ni_syscall
     .quad sys_ni_syscall
-    .quad sys_ni_syscall
-    .quad sys_ni_syscall
-    .quad sys_ni_syscall
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_STAT */
 #ifdef CONFIG_SYNO_NOTIFY
 	.quad sys_SYNONotifyInit /* 422 */
 	.quad sys_SYNONotifyAddWatch /* 423 */
@@ -981,7 +976,7 @@ ia32_sys_call_table:
 	.quad sys_ni_syscall
 	.quad sys_ni_syscall
 #endif /* CONFIG_SYNO_NOTIFY */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
 	.quad sys_SYNOArchiveOverwrite /* 427 */
 #else
 	.quad sys_ni_syscall

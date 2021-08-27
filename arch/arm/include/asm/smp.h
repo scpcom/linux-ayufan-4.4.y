@@ -93,6 +93,9 @@ extern int platform_cpu_disable(unsigned int cpu);
 
 extern void __cpu_die(unsigned int cpu);
 extern void cpu_die(void);
+#ifdef CONFIG_SYNO_ALPINE
+extern void arch_send_wakeup_ipi_mask(const struct cpumask *mask);
+#endif
 
 extern void platform_cpu_die(unsigned int cpu);
 extern int platform_cpu_kill(unsigned int cpu);
@@ -101,7 +104,7 @@ extern void platform_cpu_enable(unsigned int cpu);
 extern void arch_send_call_function_single_ipi(int cpu);
 extern void arch_send_call_function_ipi_mask(const struct cpumask *mask);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARCH_ARMADA_XP) && defined(CONFIG_PERF_EVENTS)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARCH_ARMADA_XP) && defined(CONFIG_PERF_EVENTS)
 extern void show_local_pmu_irqs(struct seq_file *, int);
 #endif
 

@@ -103,6 +103,9 @@ int sysctl_tcp_thin_dupack __read_mostly;
 
 int sysctl_tcp_moderate_rcvbuf __read_mostly = 1;
 int sysctl_tcp_abc __read_mostly;
+#ifdef CONFIG_SYNO_ALPINE
+int sysctl_tcp_default_delack_segs __read_mostly = 1;
+#endif
 
 #define FLAG_DATA		0x01 /* Incoming frame contained data.		*/
 #define FLAG_WIN_UPDATE		0x02 /* Incoming ACK was a window update.	*/
@@ -5056,7 +5059,11 @@ static void __tcp_ack_snd_check(struct sock *sk, int ofo_possible)
 	struct tcp_sock *tp = tcp_sk(sk);
 
 	    /* More than one full frame received... */
+#ifdef CONFIG_SYNO_ALPINE
+	if (((tp->rcv_nxt - tp->rcv_wup) > (inet_csk(sk)->icsk_ack.rcv_mss * sysctl_tcp_default_delack_segs) &&
+#else
 	if (((tp->rcv_nxt - tp->rcv_wup) > inet_csk(sk)->icsk_ack.rcv_mss &&
+#endif
 	     /* ... and right edge of window advances far enough.
 	      * (tcp_recvmsg() will send ACK otherwise). Or...
 	      */
@@ -5240,8 +5247,13 @@ static int tcp_dma_try_early_copy(struct sock *sk, struct sk_buff *skb,
 	if (tp->ucopy.wakeup)
 		return 0;
 
+#ifdef CONFIG_SYNO_ALPINE
+	if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
+		tp->ucopy.dma_chan = net_dma_find_channel();
+#else
 	if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)
 		tp->ucopy.dma_chan = dma_find_channel(DMA_MEMCPY);
+#endif
 
 	if (tp->ucopy.dma_chan && skb_csum_unnecessary(skb)) {
 
@@ -5458,7 +5470,9 @@ int tcp_rcv_established(struct sock *sk, struct sk_buff *skb,
 
 			if (tp->copied_seq == tp->rcv_nxt &&
 			    len - tcp_header_len <= tp->ucopy.len) {
-#ifdef CONFIG_NET_DMA
+#if defined(CONFIG_SYNO_ALPINE)
+//Remove for smb2 issue.
+#elif defined(CONFIG_NET_DMA)
 				if (tp->ucopy.task == current &&
 				    sock_owned_by_user(sk) &&
 				    tcp_dma_try_early_copy(sk, skb, tcp_header_len)) {

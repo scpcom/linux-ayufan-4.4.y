@@ -46,18 +46,29 @@
 #include <linux/device.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ATA_AHCI_LED_MSG
 #include <scsi/scsi_device.h>
 #endif
 #include <linux/libata.h>
+#ifdef CONFIG_SYNO_ALPINE
+#include "libata.h"
+#endif
 #include "ahci.h"
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(CONFIG_SYNO_AVOTON) || defined(CONFIG_SYNO_ALPINE)
 #include <linux/pci.h>
 #endif
+#ifdef CONFIG_SYNO_LEDS_TRIGGER
+#include <linux/leds.h>
+#endif /* CONFIG_SYNO_LEDS_TRIGGER */
 
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON)
+#if defined(CONFIG_ARCH_GEN3) || defined(SYNO_ALPINE_SW_SATA_LED)
 extern int SYNO_CTRL_HDD_ACT_NOTIFY(int index);
 #endif
+
+#ifdef CONFIG_SYNO_LEDS_TRIGGER
+extern void syno_ledtrig_active_set(int iLedNum);
+extern int *gpGreenLedMap;
+#endif /* CONFIG_SYNO_LEDS_TRIGGER */
 
 static int ahci_skip_host_reset;
 int ahci_ignore_sss;
@@ -250,7 +261,7 @@ ata_ahci_fault_store(struct device *dev, struct device_attribute *attr,
 	return -EINVAL;
 }
 DEVICE_ATTR(sw_fault, S_IWUSR | S_IRUGO, ata_ahci_fault_show, ata_ahci_fault_store);
-#endif //MY_DEF_HERE
+#endif //SYNO_ATA_AHCI_LED_MSG
 
 static DEVICE_ATTR(em_buffer, S_IWUSR | S_IRUGO,
 		   ahci_read_em_buffer, ahci_store_em_buffer);
@@ -271,10 +282,10 @@ struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TRANS_HOST_TO_DISK
 	&dev_attr_syno_diskname_trans,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DISK_LED_CONTROL
 	&dev_attr_syno_sata_disk_led_ctrl,
 #endif
 	NULL
@@ -326,6 +337,9 @@ struct ata_port_operations ahci_ops = {
 	.em_store		= ahci_led_store,
 	.sw_activity_show	= ahci_activity_show,
 	.sw_activity_store	= ahci_activity_store,
+#ifdef CONFIG_SYNO_ALPINE
+	.transmit_led_message	= ahci_transmit_led_message,
+#endif
 #ifdef CONFIG_PM
 	.port_suspend		= ahci_port_suspend,
 	.port_resume		= ahci_port_resume,
@@ -896,11 +910,38 @@ static int syno_is_avoton_ahci(struct ata_port *ap)
 	struct pci_dev *pdev = NULL;
 	int ret = 0;
 
+	if (syno_is_hw_version(HW_DS2415p)) {
+		goto END;
+	}
 	if (ap != NULL) {
 		pdev = to_pci_dev(ap->dev);
 		if (pdev != NULL && pdev->vendor == 0x8086) {
 			switch (pdev->device) {
 				case 0x1f22:
+				case 0x1f32:
+					ret = 1;
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+END:
+	return ret;
+}
+#endif
+#if defined(SYNO_ALPINE_SW_SATA_LED)
+int syno_is_alpine_internal_ahci(struct ata_port *ap)
+{
+	struct pci_dev *pdev = NULL;
+	int ret = 0;
+
+	if (ap != NULL) {
+		pdev = to_pci_dev(ap->dev);
+		if (pdev != NULL && pdev->vendor == PCI_VENDOR_ID_ANNAPURNA_LABS) {
+			switch (pdev->device) {
+			case 0x0031:
 					ret = 1;
 					break;
 			default:
@@ -910,6 +951,20 @@ static int syno_is_avoton_ahci(struct ata_port *ap)
 	}
 
 	return ret;
+}
+#endif
+
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(CONFIG_SYNO_ALPINE)
+static void syno_sw_activity(struct ata_port *ap)
+{
+#ifdef CONFIG_SYNO_LEDS_TRIGGER
+		if(NULL == gpGreenLedMap){
+			return;
+		}
+		syno_ledtrig_active_set(gpGreenLedMap[ap->syno_disk_index]);
+#else /* CONFIG_SYNO_LEDS_TRIGGER */
+		SYNO_CTRL_HDD_ACT_NOTIFY(ap->syno_disk_index);
+#endif /* CONFIG_SYNO_LEDS_TRIGGER */
 }
 #endif
 
@@ -934,9 +989,15 @@ static void ahci_start_port(struct ata_port *ap)
 
 			/* EM Transmit bit maybe busy during init */
 			for (i = 0; i < EM_MAX_RETRY; i++) {
+#ifdef CONFIG_SYNO_ALPINE
+				rc = ap->ops->transmit_led_message(ap,
+							       emp->led_state,
+							       4);
+#else
 				rc = ahci_transmit_led_message(ap,
 							       emp->led_state,
 							       4);
+#endif
 				if (rc == -EBUSY)
 					ata_msleep(ap, 1);
 				else
@@ -947,6 +1008,10 @@ static void ahci_start_port(struct ata_port *ap)
 
 #if defined(CONFIG_SYNO_AVOTON)
 	if (syno_is_avoton_ahci(ap)) {
+		ap->flags |= ATA_FLAG_SW_ACTIVITY;
+	}
+#elif defined(SYNO_ALPINE_SW_SATA_LED)
+	if (syno_is_alpine_internal_ahci(ap)) {
 		ap->flags |= ATA_FLAG_SW_ACTIVITY;
 	}
 #endif
@@ -1102,7 +1167,7 @@ static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable)
 END:
 	return;
 }
-#endif //MY_DEF_HERE
+#endif //SYNO_ATA_AHCI_LED_MSG
 
 static void ahci_sw_activity_blink(unsigned long arg)
 {
@@ -1111,7 +1176,9 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 	unsigned long led_message = emp->led_state;
+#if !defined(CONFIG_ARCH_GEN3) && !defined(CONFIG_SYNO_AVOTON)
 	u32 activity_led_state;
+#endif
 	unsigned long flags;
 
 	led_message &= EM_MSG_LED_VALUE;
@@ -1121,12 +1188,12 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	 * toggle state of LED and reset timer.  If not,
 	 * turn LED to desired idle state.
 	 */
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON)
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(SYNO_ALPINE_SW_SATA_LED)
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
 
-		SYNO_CTRL_HDD_ACT_NOTIFY(ap->syno_disk_index);
+		syno_sw_activity(ap);
 
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(100));
 	}
@@ -1152,11 +1219,22 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	} else {
 		/* switch to idle */
 		led_message &= ~EM_MSG_LED_VALUE_ACTIVITY;
+#ifdef CONFIG_SYNO_ALPINE
+		if ((ata_phys_link_online(link)) || (emp->blink_policy == BLINK_OFF))
+#else
 		if (emp->blink_policy == BLINK_OFF)
+#endif
 			led_message |= (1 << 16);
+#ifdef CONFIG_SYNO_ALPINE
+		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(500));
+#endif
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
+#ifdef CONFIG_SYNO_ALPINE
+	ap->ops->transmit_led_message(ap, led_message, 4);
+#else
 	ahci_transmit_led_message(ap, led_message, 4);
+#endif
 #endif
 }
 
@@ -1168,9 +1246,12 @@ static void ahci_init_sw_activity(struct ata_link *link)
 
 	/* init activity stats, setup timer */
 	emp->saved_activity = emp->activity = 0;
+#if defined(CONFIG_SYNO_ALPINE) && !defined(SYNO_ALPINE_SW_SATA_LED)
+	emp->blink_policy = BLINK_ON;
+#endif
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
 
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON)
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(SYNO_ALPINE_SW_SATA_LED)
 #else
 	/* check our blink policy and set flag for link if it's enabled */
 	if (emp->blink_policy)
@@ -1289,7 +1370,11 @@ static ssize_t ahci_led_store(struct ata_port *ap, const char *buf,
 	if (emp->blink_policy)
 		state &= ~EM_MSG_LED_VALUE_ACTIVITY;
 
+#ifdef CONFIG_SYNO_ALPINE
+	return ap->ops->transmit_led_message(ap, state, size);
+#else
 	return ahci_transmit_led_message(ap, state, size);
+#endif
 }
 
 static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
@@ -1308,7 +1393,11 @@ static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
 		/* set the LED to OFF */
 		port_led_state &= EM_MSG_LED_VALUE_OFF;
 		port_led_state |= (ap->port_no | (link->pmp << 8));
+#ifdef CONFIG_SYNO_ALPINE
+		ap->ops->transmit_led_message(ap, port_led_state, 4);
+#else
 		ahci_transmit_led_message(ap, port_led_state, 4);
+#endif
 	} else {
 		link->flags |= ATA_LFLAG_SW_ACTIVITY;
 		if (val == BLINK_OFF) {
@@ -1316,7 +1405,11 @@ static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
 			port_led_state &= EM_MSG_LED_VALUE_OFF;
 			port_led_state |= (ap->port_no | (link->pmp << 8));
 			port_led_state |= EM_MSG_LED_VALUE_ON; /* check this */
+#ifdef CONFIG_SYNO_ALPINE
+			ap->ops->transmit_led_message(ap, port_led_state, 4);
+#else
 			ahci_transmit_led_message(ap, port_led_state, 4);
+#endif
 		}
 	}
 	emp->blink_policy = val;
@@ -1543,7 +1636,24 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
 	/* issue the second D2H Register FIS */
 	tf.ctl &= ~ATA_SRST;
+#ifdef SYNO_MV_9235_SRST_FIX
+	if (!(hpriv->flags & AHCI_HFLAG_YES_MV9235_FIX)) {
+#endif
 	ahci_exec_polled_cmd(ap, pmp, &tf, 0, 0, 0);
+#ifdef SYNO_MV_9235_SRST_FIX
+	} else {
+		/* 9235 may fail at 2nd D2H, so we use the same check as 1st D2H */
+		msecs = 0;
+		now = jiffies;
+		if (time_after(deadline, now))
+			msecs = jiffies_to_msecs(deadline - now);
+		if(ahci_exec_polled_cmd(ap, pmp, &tf, 0, 0, msecs)) {
+			rc = -EIO;
+			reason = "2nd FIS failed";
+			goto fail;
+		}
+	}
+#endif
 
 	/* wait for link to become ready */
 	rc = ata_wait_after_reset(link, deadline, check_ready);
@@ -2002,21 +2112,7 @@ static void ahci_port_intr(struct ata_port *ap)
 /*
 */
 
-#if defined (CONFIG_COMCERTO_AHCI_PROF)
-unsigned int ahci_time_counter[256]; // 4 ms -> 1S
-unsigned int ahci_data_counter[256]; // 4K-> 1020K
-unsigned int ahci_int_before_req;
-static struct timeval last_ahci_req;
-unsigned int init_ahci_prof = 0;
-unsigned int enable_ahci_prof = 0;
-extern struct timeval ahci_last_qc_comp[32];
-extern unsigned int ahci_last_qc_comp_flag[32];
 #endif
-
-static struct timeval time;
-
-#endif
-
 
 irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 {
@@ -2085,33 +2181,6 @@ static unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 	void __iomem *port_mmio = ahci_port_base(ap);
 	struct ahci_port_priv *pp = ap->private_data;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_AHCI_PROF)
-	struct timeval now;
-
-	if (enable_ahci_prof) {
-		do_gettimeofday(&now);
-
-		if (init_ahci_prof) {
-			int diff_time_ms;
-			diff_time_ms = ((now.tv_sec - last_ahci_req.tv_sec) * 1000) + ((now.tv_usec - last_ahci_req.tv_usec) / 1000);
-			if (diff_time_ms < 1000) {//Don't record more than 1s
-				ahci_time_counter[diff_time_ms >> 3]++;
-			}
-			else
-				ahci_time_counter[255]++;
-		}
-		else {
-			init_ahci_prof = 1;
-		}
-		last_ahci_req = now;
-
-		if (qc->nbytes < (1 << 21))
-			ahci_data_counter[(qc->nbytes >> 13) & 0xFF]++;
-		else
-			ahci_data_counter[255]++;
-	}
-#endif
-
 	/* Keep track of the currently active link.  It will be used
 	 * in completion path to determine whether NCQ phase is in
 	 * progress.
@@ -2128,10 +2197,55 @@ static unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 		writel(fbs, port_mmio + PORT_FBS);
 		pp->fbs_last_dev = qc->dev->link->pmp;
 	}
+
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_AHCI_PROF)
 	if (enable_ahci_prof) {
-		ahci_last_qc_comp[qc->tag] = now;
-		ahci_last_qc_comp_flag[qc->tag] = 1;
+		struct ahci_port_stats *stats = &ahci_port_stats[ap->port_no];
+		struct timeval now;
+		int bin;
+
+		do_gettimeofday(&now);
+
+		if (stats->init_prof) {
+			int diff_time_us;
+
+			diff_time_us = (now.tv_sec - stats->last_req.tv_sec) * 1000 * 1000 + (now.tv_usec - stats->last_req.tv_usec);
+
+			bin = diff_time_us >> US_SHIFT;
+			if (bin >= MAX_BINS)
+				bin = MAX_BINS - 1;
+
+			stats->time_counter[bin]++;
+		}
+		else {
+			stats->init_prof = 1;
+		}
+
+		stats->last_req = now;
+
+		bin = qc->nbytes >> BYTE_SHIFT;
+		if (bin >= MAX_BINS)
+			bin = MAX_BINS - 1;
+
+		stats->data_counter[bin]++;
+
+		if (!stats->nb_pending) {
+			stats->first_issue = now;
+			stats->nb_pending_total = 0;
+		}
+
+		stats->nb_pending_total++;
+
+		/* This should never overflow */
+		stats->pending_counter[stats->nb_pending & (MAX_AHCI_SLOTS - 1)]++;
+
+		stats->nb_pending++;
+
+		if (stats->nb_pending_total > stats->nb_pending_max)
+			stats->nb_pending_max = stats->nb_pending_total;
+
+		stats->bytes_pending += qc->nbytes;
+		stats->pending_flag |= 1 << qc->tag;
 	}
 #endif
 

@@ -69,6 +69,12 @@
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_tcq.h>
+#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef CONFIG_MV_STAGGERED_SPINUP
+#include <scsi/scsi_spinup.h>
+#endif
+#include <linux/proc_fs.h>
+#endif
 
 #include "scsi_priv.h"
 #include "scsi_logging.h"
@@ -87,8 +93,9 @@ static void scsi_done(struct scsi_cmnd *cmd);
 /* Do not call reset on error if we just did a reset within 15 sec. */
 #define MIN_RESET_PERIOD (15*HZ)
 
-#ifdef MY_ABC_HERE
-extern int syno_hibernation_log_sec;
+#ifdef SYNO_DEBUG_FLAG
+#include <linux/synolib.h>
+extern int syno_hibernation_log_level;
 #endif
 
 /*
@@ -662,12 +669,7 @@ void syno_disk_hiternation_cmd_printk(struct scsi_device *sdp, struct scsi_cmnd 
 	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type ||
 		SYNO_PORT_TYPE_SAS  == sdp->host->hostt->syno_port_type) {
 		/*our SMART read command (SCpnt[0]:ATA_16, SCpnt[14]: 0xb0), it's "disk" is null, so we must check it.*/
-		sdev_printk(KERN_WARNING, cmd->device,
-			" %s: cmd run - tag %02x - %02x %02x %02x %02x %02x %02x, pid:%d, comm:%s\n",
-			sdp->syno_disk_name, cmd->tag,
-			cmd->cmnd[0], cmd->cmnd[1], cmd->cmnd[2],
-			cmd->cmnd[3], cmd->cmnd[4], cmd->cmnd[5],
-			current->pid, current->comm);
+		syno_do_hibernation_log_print(sdp->syno_disk_name);
 	} else if (SYNO_PORT_TYPE_USB == sdp->host->hostt->syno_port_type) {
 		char szBuf[128];
 		struct mm_struct *mm;
@@ -807,8 +809,8 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 	/*the following command which for eunit chip shouldn't wake up hdd, so ignore it */
 		!(ATA_16 == cmd->cmnd[0] && (ATA_CMD_PMP_WRITE == cmd->cmnd[14] ||ATA_CMD_PMP_READ == cmd->cmnd[14])) &&
 		TEST_UNIT_READY != cmd->cmnd[0]) {
-#ifdef MY_ABC_HERE
-		if(syno_hibernation_log_sec > 0) {
+#ifdef SYNO_DEBUG_FLAG
+		if(syno_hibernation_log_level > 0) {
 			syno_disk_hiternation_cmd_printk(cmd->device, cmd);
 		}
 #endif
@@ -847,8 +849,8 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 	} else if(START_STOP == cmd->cmnd[0]) {
 		if (0x01 == cmd->cmnd[4]) {
 			// start disks
-#ifdef MY_ABC_HERE
-			if(syno_hibernation_log_sec > 0) {
+#ifdef SYNO_DEBUG_FLAG
+			if(syno_hibernation_log_level > 0) {
 				syno_disk_hiternation_cmd_printk(cmd->device, cmd);
 			}
 #endif
@@ -857,9 +859,15 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 	} else if(LOG_SENSE != cmd->cmnd[0] &&
 			TEST_UNIT_READY != cmd->cmnd[0] &&
 			SYNCHRONIZE_CACHE != cmd->cmnd[0]) {
+
+#ifdef SYNO_DEBUG_FLAG
+			if(syno_hibernation_log_level > 1) { // only works in log level 2, 3
+				syno_disk_hiternation_cmd_printk(cmd->device, cmd);
+			}
+#endif // SYNO_DEBUG_FLAG
 		cmd->device->idle = jiffies;
 	}
-#endif /* MY_ABC_HERE  */
+#endif /* SYNO_DISK_HIBERNATION  */
 
 	if (unlikely(host->shost_state == SHOST_DEL)) {
 		cmd->result = (DID_NO_CONNECT << 16);
@@ -887,6 +895,9 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 	return rtn;
 }
 
+#ifdef CONFIG_SYNO_ARMADA_V2
+int ss_stats[128];
+#endif
 /**
  * scsi_done - Enqueue the finished SCSI command into the done queue.
  * @cmd: The SCSI Command for which a low-level device driver (LLDD) gives
@@ -902,6 +913,39 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
  */
 static void scsi_done(struct scsi_cmnd *cmd)
 {
+#ifdef CONFIG_SYNO_ARMADA_V2
+        unsigned long flags = 0;
+
+#ifdef CONFIG_MV_STAGGERED_SPINUP
+        /*
+	 * TODO: add support to verify failed commands that didn't woke up the drive.
+	 */
+	if ((cmd->device->host->hostt->support_staggered_spinup == 1) && /*host has spinup feature avaliable?*/
+	    scsi_spinup_enabled())
+        {
+                spin_lock_irqsave(cmd->device->host->host_lock, flags);
+                if (cmd->device->sdev_power_state == SDEV_PW_SPINNING_UP)
+                {
+                        if (cmd->device->standby_timeout_secs > 0)
+                        {
+                                /* had a timer before spinup, restarting the timer again */
+                                cmd->device->sdev_power_state = SDEV_PW_STANDBY_TIMEOUT_WAIT;
+				ss_stats[cmd->device->ss_id] = cmd->device->sdev_power_state;
+                                standby_add_timer(cmd->device, cmd->device->standby_timeout_secs, standby_times_out);
+				//printk("\nDisk [%d] done spinup, resetting timer...\n", cmd->device->ss_id);
+                        }
+                        else
+			{
+                                cmd->device->sdev_power_state = SDEV_PW_ON;
+				ss_stats[cmd->device->ss_id] = cmd->device->sdev_power_state;
+			}
+			scsi_internal_device_unblock(cmd->device);
+                }
+		spin_unlock_irqrestore(cmd->device->host->host_lock, flags);
+        }
+#endif
+
+#endif
 	trace_scsi_dispatch_cmd_done(cmd);
 	blk_complete_request(cmd->request);
 }
@@ -1434,9 +1478,43 @@ MODULE_LICENSE("GPL");
 module_param(scsi_logging_level, int, S_IRUGO|S_IWUSR);
 MODULE_PARM_DESC(scsi_logging_level, "a bit mask of logging levels");
 
+#ifdef CONFIG_SYNO_ARMADA_V2
+struct proc_dir_entry *ss_info;
+
+int ss_info_read(char *buffer, char **buffer_location, off_t offset, int buffer_length, int *zero, void *ptr)
+{
+	int count = 0, i;
+
+	if (offset > 0)
+		return 0;
+	count += sprintf(buffer, "SS Engine statistics:\n");
+	for (i = 0; i < 128; i++) {
+		if (ss_stats[i] == 0)
+			continue;
+		count += sprintf(buffer + count, "%d - %d.\n", i, ss_stats[i]);
+	}
+
+	return count;
+}
+#endif
+
 static int __init init_scsi(void)
 {
 	int error;
+
+#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef CONFIG_MV_STAGGERED_SPINUP
+        /* init will parse the kernel line for the spinup param */
+        error = scsi_spinup_init();
+        if (error)
+                return error;
+	struct proc_dir_entry *parent = NULL;
+	ss_info = create_proc_entry("ss_info", 0666, parent);
+	ss_info->read_proc = ss_info_read;
+	ss_info->write_proc = NULL;
+	ss_info->nlink = 1;
+#endif
+#endif
 
 	error = scsi_init_queue();
 	if (error)

@@ -17,6 +17,10 @@
 #ifndef _PXA_SDHCI_H_
 #define _PXA_SDHCI_H_
 
+#if defined(CONFIG_SYNO_ARMADA) || || defined(CONFIG_SYNO_ARMADA_V2)
+#include <linux/mbus.h>
+#endif
+
 /* pxa specific flag */
 /* Require clock free running */
 #define PXA_FLAG_ENABLE_CLOCK_GATING (1<<0)
@@ -54,6 +58,9 @@ struct sdhci_pxa_platdata {
 	unsigned int	host_caps;
 	unsigned int	quirks;
 	unsigned int	pm_caps;
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+	struct		mbus_dram_target_info *dram;
+#endif
 };
 
 struct sdhci_pxa {

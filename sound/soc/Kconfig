@@ -71,16 +71,6 @@ config SND_MRVL_AUDIO
 	  To compile this driver as a module, choose M here: the module
 	  will be called snd-mrvl-audio.
 
-config SND_MRVL_AUDIO
-        tristate "Marvell mv88fx Audio ALSA driver"
-        depends on MV_INCLUDE_AUDIO && SND
-        select SND_PCM
-        select SND_SOC_CS42L51
-        ---help---
-          Say Y here to include support for Marvell Audio device
-          To compile this driver as a module, choose M here: the module
-          will be called snd-mrvl-audio.
-
 # Supported codecs
 source "sound/soc/codecs/Kconfig"
 

@@ -36,7 +36,11 @@ struct sg_io_hdr;
 struct bsg_job;
 
 #define BLKDEV_MIN_RQ	4
+#ifdef CONFIG_SYNO_ALPINE
+#define BLKDEV_MAX_RQ	1024	/* Default maximum */
+#else
 #define BLKDEV_MAX_RQ	128	/* Default maximum */
+#endif
 
 struct request;
 typedef void (rq_end_io_fn)(struct request *, int);
@@ -853,6 +857,9 @@ extern void blk_queue_max_segments(struct request_queue *, unsigned short);
 extern void blk_queue_max_segment_size(struct request_queue *, unsigned int);
 extern void blk_queue_max_discard_sectors(struct request_queue *q,
 		unsigned int max_discard_sectors);
+#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+extern void syno_limits_logical_block_size(struct queue_limits *limits, unsigned short size);
+#endif
 extern void blk_queue_logical_block_size(struct request_queue *, unsigned short);
 extern void blk_queue_physical_block_size(struct request_queue *, unsigned int);
 extern void blk_queue_alignment_offset(struct request_queue *q,
@@ -862,6 +869,9 @@ extern void blk_queue_io_min(struct request_queue *q, unsigned int min);
 extern void blk_limits_io_opt(struct queue_limits *limits, unsigned int opt);
 extern void blk_queue_io_opt(struct request_queue *q, unsigned int opt);
 extern void blk_set_default_limits(struct queue_limits *lim);
+#ifdef CONFIG_SYNO_ALPINE
+extern void blk_set_stacking_limits(struct queue_limits *lim);
+#endif
 extern int blk_stack_limits(struct queue_limits *t, struct queue_limits *b,
 			    sector_t offset);
 extern int bdev_stack_limits(struct queue_limits *t, struct block_device *bdev,
@@ -929,7 +939,7 @@ extern struct blk_plug_cb *blk_check_plugged(blk_plug_cb_fn unplug,
 extern void blk_start_plug(struct blk_plug *);
 extern void blk_finish_plug(struct blk_plug *);
 extern void blk_flush_plug_list(struct blk_plug *, bool);
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_FLASHCACHE_SUPPORT
 extern void syno_flashcache_return_error(struct bio *bio);
 #endif
 

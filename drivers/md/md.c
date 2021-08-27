@@ -55,27 +55,27 @@
 #include <linux/raid/md_p.h>
 #include <linux/raid/md_u.h>
 #include <linux/slab.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MD_DISK_SORT
 #include <linux/list_sort.h>
 #endif
 #include "md.h"
 #include "bitmap.h"
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FAST_VOLUME_WAKEUP
 void SynoMDWakeUpDevices(void *md);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 extern int SynoDebugFlag;
 #endif
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_DEVICE_NOTIFY
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
 EXPORT_SYMBOL(SYNORaidRdevUnplug);
 int SYNORaidDiskUnplug(char *szArgDiskName);
 void SYNORaidUnplugTask(struct work_struct *);
-#endif  /* MY_ABC_HERE */
+#endif  /* SYNO_RAID_DEVICE_NOTIFY */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MD_AUTODETECT_LOCK
 DEFINE_SPINLOCK(MdListLock);
 #endif
 
@@ -85,6 +85,10 @@ DEFINE_SPINLOCK(MdListLock);
 
 #ifndef MODULE
 static void autostart_arrays(int part);
+#endif
+
+#if defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
+#include <linux/syno_affinity.h>
 #endif
 
 /* pers_list is a list of registered personalities protected
@@ -868,7 +872,7 @@ static void super_written(struct bio *bio, int error)
 	bio_put(bio);
 }
 
-#if defined(SYNO_RAID_USE_BE_SB) || defined(MY_ABC_HERE)
+#if defined(SYNO_RAID_USE_BE_SB) || defined(SYNO_RAID_READ_09SB_ENDIANLESS)
 void SYNOSwapSuperblock0(mdp_super_t *sb)
 {
 	int i;
@@ -995,7 +999,7 @@ static int sync_sb_page_io(struct block_device *bdev, sector_t sector, int size,
 static int read_disk_sb(struct md_rdev * rdev, int size)
 {
 	char b[BDEVNAME_SIZE];
-#if defined(MY_ABC_HERE) || defined(SYNO_RAID_USE_BE_SB)
+#if defined(SYNO_RAID_READ_09SB_ENDIANLESS) || defined(SYNO_RAID_USE_BE_SB)
 	mdp_super_t *sb;
 #endif
 	if (!rdev->sb_page) {
@@ -1014,7 +1018,7 @@ static int read_disk_sb(struct md_rdev * rdev, int size)
 		goto fail;
 #endif
 
-#if defined(MY_ABC_HERE) || defined(SYNO_RAID_USE_BE_SB)
+#if defined(SYNO_RAID_READ_09SB_ENDIANLESS) || defined(SYNO_RAID_USE_BE_SB)
 	sb = (mdp_super_t*)page_address(rdev->sb_page);
 	if (sb->major_version == 0) {
 		if (sb->md_magic != MD_SB_MAGIC) {
@@ -4644,6 +4648,45 @@ md_active_store(struct mddev *mddev, const char *page, size_t len)
 static struct md_sysfs_entry md_active =
 __ATTR(active, S_IRUGO|S_IWUSR, md_active_show, md_active_store);
 #endif
+
+#ifdef SYNO_RAID5_PARITY_CHECK
+static ssize_t
+disable_force_rcw_show(struct mddev *mddev, char *page)
+{
+	return sprintf(page, "%d\n", mddev->disable_force_rcw);
+}
+
+static ssize_t
+disable_force_rcw_store(struct mddev *mddev, const char *page, size_t len)
+{
+	if (!mddev->pers){
+		len = -EINVAL;
+		goto END;
+	}
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+	if (mddev->nodev_and_crashed) {
+		/* No responce for faulty raid */
+		goto END;
+	}
+#endif
+
+	if (cmd_match(page, "1")) {
+		mddev->disable_force_rcw = 1;
+	} else if (cmd_match(page, "0")) {
+		mddev->disable_force_rcw = 0;
+	} else {
+		printk("md: %s: disable_force_rcw, error input\n", mdname(mddev));
+		goto END;
+	}
+
+END:
+	return len;
+}
+
+static struct md_sysfs_entry md_disable_force_rcw =
+__ATTR(disable_force_rcw, S_IRUGO|S_IWUSR, disable_force_rcw_show, disable_force_rcw_store);
+#endif
+
 static ssize_t
 array_size_show(struct mddev *mddev, char *page)
 {
@@ -4706,6 +4749,9 @@ static struct attribute *md_default_attrs[] = {
 #endif
 #ifdef SYNO_FAST_VOLUME_WAKEUP
 	&md_active.attr,
+#endif
+#ifdef SYNO_RAID5_PARITY_CHECK
+	&md_disable_force_rcw.attr,
 #endif
 	NULL,
 };
@@ -4872,6 +4918,9 @@ static int md_alloc(dev_t dev, char *name)
 	mddev->queue->queuedata = mddev;
 
 	blk_queue_make_request(mddev->queue, md_make_request);
+#ifdef CONFIG_SYNO_ALPINE
+	blk_set_stacking_limits(&mddev->queue->limits);
+#endif
 
 	disk = alloc_disk(1 << shift);
 	if (!disk) {
@@ -5243,9 +5292,9 @@ int md_run(struct mddev *mddev)
 	} else {
 		set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 	}
-#else /* MY_ABC_HERE */
+#else /* SYNO_RAID_STATUS */
 	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
-#endif	/* MY_ABC_HERE */
+#endif	/* SYNO_RAID_STATUS */
 	
 	if (mddev->flags)
 		md_update_sb(mddev, 0);
@@ -6855,6 +6904,9 @@ static const struct block_device_operations md_fops =
 static int md_thread(void * arg)
 {
 	struct md_thread *thread = arg;
+#if defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
+	SYNOSetTaskAffinity(current, 0);
+#endif
 
 	/*
 	 * md_thread is a 'system-thread', it's priority should be very
@@ -7491,12 +7543,13 @@ void md_do_sync(struct md_thread *thread)
 	int skipped = 0;
 	struct md_rdev *rdev;
 	char *desc;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 	int old_auto_remap_setting = -1;
 #endif
 	 
-#ifdef MY_ABC_HERE
-	set_user_nice(current, 10);
+#ifdef SYNO_RAID_STATUS
+	// # Test for DSM #56012. Workaround
+	//set_user_nice(current, 10);
 #endif
 
 	/* just incase thread restarts... */
@@ -8764,14 +8817,9 @@ blDenyDisks(const struct block_device *pBDev)
 		goto END;
 	}
 	// this disk are not going to be used as system disk
-#ifdef CONFIG_SYNO_KVMX64
-	/* CONFIG_SYNO_KVMX64 */
-	/* XXX TODO FIXME ugly hack needed to get rid for production */
-#else
 	if (!(pBDev->bd_disk->systemDisk)) {
 		goto END;
 	}
-#endif
 
 	part = MINOR(pBDev->bd_dev) - pBDev->bd_disk->first_minor;
 	// only assemble the first and second partition

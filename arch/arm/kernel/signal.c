@@ -774,6 +774,9 @@ static void do_signal(struct pt_regs *regs, int syscall)
 			}
 		}
 
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 		/* If there's no signal to deliver, we just put the saved sigmask
 		 * back.
 		 */
@@ -781,7 +784,15 @@ static void do_signal(struct pt_regs *regs, int syscall)
 			clear_thread_flag(TIF_RESTORE_SIGMASK);
 			sigprocmask(SIG_SETMASK, &current->saved_sigmask, NULL);
 		}
+#endif
 	}
+#ifdef CONFIG_SYNO_ALPINE
+	/* If there's no signal to deliver, we just put the saved sigmask
+	 * back.
+	 */
+	if (test_and_clear_thread_flag(TIF_RESTORE_SIGMASK))
+		set_current_blocked(&current->saved_sigmask);
+#endif
 }
 
 asmlinkage void

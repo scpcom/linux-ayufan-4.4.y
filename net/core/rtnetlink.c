@@ -1009,6 +1009,7 @@ static int rtnl_fill_ifinfo(struct sk_buff *skb, struct net_device *dev,
 			 * report anything.
 			 */
 			ivi.spoofchk = -1;
+			memset(ivi.mac, 0, sizeof(ivi.mac));
 			if (dev->netdev_ops->ndo_get_vf_config(dev, i, &ivi))
 				break;
 			vf_mac.vf =
@@ -1987,14 +1988,22 @@ static int rtnl_dump_all(struct sk_buff *skb, struct netlink_callback *cb)
 	return skb->len;
 }
 
+#if defined(CONFIG_SYNO_COMCERTO)
+void __rtmsg_ifinfo(int type, struct net_device *dev, unsigned change, gfp_t flags)
+#else
 void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
+#endif
 {
 	struct net *net = dev_net(dev);
 	struct sk_buff *skb;
 	int err = -ENOBUFS;
 	size_t if_info_size;
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	skb = nlmsg_new((if_info_size = if_nlmsg_size(dev, 0)), flags);
+#else
 	skb = nlmsg_new((if_info_size = if_nlmsg_size(dev, 0)), GFP_KERNEL);
+#endif
 	if (skb == NULL)
 		goto errout;
 
@@ -2005,16 +2014,29 @@ void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
 		kfree_skb(skb);
 		goto errout;
 	}
+#if defined(CONFIG_SYNO_COMCERTO)
+	rtnl_notify(skb, net, 0, RTNLGRP_LINK, NULL, flags);
+#else
 	rtnl_notify(skb, net, 0, RTNLGRP_LINK, NULL, GFP_KERNEL);
+#endif
 	return;
 errout:
 	if (err < 0)
 		rtnl_set_sk_err(net, RTNLGRP_LINK, err);
 }
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
-EXPORT_SYMBOL(rtmsg_ifinfo);
+#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(CONFIG_ARCH_COMCERTO)
+EXPORT_SYMBOL(__rtmsg_ifinfo);
 #endif
 
+void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
+{
+	__rtmsg_ifinfo(type, dev, change, GFP_KERNEL);
+}
+#if defined(CONFIG_COMCERTO_FP)
+EXPORT_SYMBOL(rtmsg_ifinfo);
+#endif
+#endif
 
 /* Protected by RTNL sempahore.  */
 static struct rtattr **rta_buf;

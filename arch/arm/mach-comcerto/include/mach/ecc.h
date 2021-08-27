@@ -64,11 +64,11 @@
 #define ECC_LVL_30 0x1E
 #define ECC_LVL_32 0x20
 
-/* ECC Level 8 is used */
-/* #define ECC_LVL_VAL ECC_LVL_8 */
-
-/* ECC Level 24 is used */
-#define ECC_LVL_VAL ECC_LVL_24
+#if defined (CONFIG_NAND_COMCERTO_ECC_24_HW_BCH)
+	#define ECC_LVL_VAL ECC_LVL_24 /* ECC Level 24 is used */
+#elif defined (CONFIG_NAND_COMCERTO_ECC_8_HW_BCH)
+	#define ECC_LVL_VAL ECC_LVL_8 /* ECC Level 8 is used */
+#endif
 
 /* Block size used in Bytes*/
 #define ECC_BLOCK_SIZE_512 512

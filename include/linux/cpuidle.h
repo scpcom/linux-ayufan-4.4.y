@@ -35,6 +35,9 @@ struct cpuidle_driver;
 struct cpuidle_state_usage {
 	void		*driver_data;
 
+#ifdef CONFIG_SYNO_ALPINE
+	unsigned long long	disable;
+#endif
 	unsigned long long	usage;
 	unsigned long long	time; /* in US */
 };
@@ -45,7 +48,11 @@ struct cpuidle_state {
 
 	unsigned int	flags;
 	unsigned int	exit_latency; /* in US */
+#ifdef CONFIG_SYNO_ALPINE
+	int		power_usage; /* in mW */
+#else
 	unsigned int	power_usage; /* in mW */
+#endif
 	unsigned int	target_residency; /* in US */
 
 	int (*enter)	(struct cpuidle_device *dev,

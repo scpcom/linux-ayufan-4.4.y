@@ -106,7 +106,25 @@ typedef enum {
 	COMPONENT_TDMNTG,
 }C2000_RESET_COMPONENT;
 
+extern void comcerto_rst_cntrl_set(unsigned int dev_rst_cntrl_bit);
 extern void c2000_block_reset(int block,int state);
 extern void reset_init(void);
 
+#if defined(CONFIG_C2K_MFCN_EVM)
+/* C2000 device blocks which are to be put
+ * in out of reset(GPIO).
+ */
+typedef enum {
+	COMPONENT_ATHEROS_SWITCH=0,
+	COMPONENT_SLIC,
+	COMPONENT_PCIE0,
+	COMPONENT_PCIE1,
+	COMPONENT_USB_HUB,
+	COMPONENT_EXP_DAUGTHER_CARD,
+	COMPONENT_RGMII0,
+	COMPONENT_RGMII1
+}C2000_GEN2_GPIO_RESET_COMPONENT;
+
+void GPIO_reset_external_device(int block,int state);
+#endif
 #endif

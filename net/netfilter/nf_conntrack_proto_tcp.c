@@ -996,7 +996,7 @@ static int tcp_packet(struct nf_conn *ct,
 		break;
 	}
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	/*
 	 * When connection is handled by NFP, we have to relax TCP tracking

@@ -60,7 +60,7 @@
 
 #ifdef SYNO_DEBUG_FLAG
 #include <linux/synolib.h>
-extern int syno_hibernation_log_sec;
+extern int syno_hibernation_log_level;
 #endif
 
 #ifdef CONFIG_FS_SYNO_ACL
@@ -1307,8 +1307,8 @@ compat_sys_vmsplice(int fd, const struct compat_iovec __user *iov32,
 asmlinkage long
 compat_sys_open(const char __user *filename, int flags, int mode)
 {
-#ifdef MY_ABC_HERE
-        if(syno_hibernation_log_sec > 0) {
+#ifdef SYNO_DEBUG_FLAG
+        if(syno_hibernation_log_level > 0) {
                 syno_do_hibernation_log(filename);
         }
 #endif

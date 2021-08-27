@@ -335,7 +335,7 @@ void VFP_bounce(u32 trigger, u32 fpexc, struct pt_regs *regs)
 {
 	u32 fpscr, orig_fpscr, fpsid, exceptions;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	/* Adjust saved PC for thumb-2 user program */
 	if (regs->ARM_cpsr & PSR_T_BIT)
 		regs->ARM_pc += 2;
@@ -566,7 +566,7 @@ static int vfp_hotplug(struct notifier_block *b, unsigned long action,
 	return NOTIFY_OK;
 }
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_CPU_PM
 void vfp_save(void)
 {
@@ -579,11 +579,13 @@ void vfp_save(void)
 }
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)  || (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_CPU_PM))
 void vfp_restore(void)
 {
         if (VFP_arch)
                 vfp_pm_resume();
 }
+#endif
 #endif
 
 void vfp_kmode_exception(void)

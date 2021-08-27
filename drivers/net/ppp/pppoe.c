@@ -80,12 +80,12 @@
 #include <linux/file.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <linux/if_arp.h>
 #endif
 
 #include <linux/nsproxy.h>
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || (defined(CONFIG_SYNO_ARMADA_V2) && defined(CONFIG_MV_ETH_NFP_HOOKS))
 #include <linux/mv_nfp.h>
 #endif
 
@@ -358,7 +358,7 @@ static int pppoe_device_event(struct notifier_block *this,
 
 	/* Only look at sockets that are using this specific device. */
 	switch (event) {
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	case NETDEV_UP: {
 		struct net_device *ppp_netdev;
@@ -625,7 +625,7 @@ static int pppoe_release(struct socket *sock)
 		dev_put(po->pppoe_dev);
 		po->pppoe_dev = NULL;
 	}
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (ppp_dev_name(&po->chan)) {
 		struct net_device *ppp_netdev = NULL;
@@ -1061,8 +1061,6 @@ static int pppoe_recvmsg(struct kiocb *iocb, struct socket *sock,
 	if (error < 0)
 		goto end;
 
-	m->msg_namelen = 0;
-
 	if (skb) {
 		total_len = min_t(size_t, total_len, skb->len);
 		error = skb_copy_datagram_iovec(skb, 0, m->msg_iov, total_len);
@@ -1223,7 +1221,7 @@ static const struct pppox_proto pppoe_proto = {
 	.owner	= THIS_MODULE,
 };
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void nfp_ppp_sync(void)
 {

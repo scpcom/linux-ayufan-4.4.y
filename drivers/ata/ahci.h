@@ -224,8 +224,11 @@ enum {
 	AHCI_HFLAG_NO_SNTF		= (1 << 12), /* no sntf */
 	AHCI_HFLAG_NO_FPDMA_AA		= (1 << 13), /* no FPDMA AA */
 	AHCI_HFLAG_YES_FBS		= (1 << 14), /* force FBS cap on */
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LIBATA_JMB_BEHAVIOR
 	AHCI_HFLAG_REPROBE		= (1 << 15),
+#endif
+#ifdef SYNO_MV_9235_PORTING
+	AHCI_HFLAG_YES_MV9235_FIX   = (1 << 31),
 #endif
 
 	/* ap->flags bits */
@@ -391,5 +394,36 @@ static inline int ahci_nr_ports(u32 cap)
 {
 	return (cap & 0x1f) + 1;
 }
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined (CONFIG_COMCERTO_AHCI_PROF)
+
+#define MAX_AHCI_PORTS		4
+#define MAX_AHCI_SLOTS		32
+#define MAX_BINS		64
+#define US_SHIFT		8
+#define BYTE_SHIFT		14
+#define RATE_SHIFT		2
+
+struct ahci_port_stats {
+	struct timeval first_issue;
+	unsigned int pending_flag;
+	unsigned int nb_pending;
+	unsigned int nb_pending_max;
+	unsigned int nb_pending_total;
+	unsigned int bytes_pending;
+	unsigned int diff_us;
+	unsigned int pending_counter[MAX_BINS];
+	unsigned int rate_counter[MAX_BINS];
+
+	unsigned int init_prof;
+	unsigned int time_counter[MAX_BINS]; // 128us -> 16ms
+	unsigned int data_counter[MAX_BINS]; // 4K-> 1020K
+	unsigned int no_free_slot;
+	struct timeval last_req;
+};
+
+extern struct ahci_port_stats ahci_port_stats[MAX_AHCI_PORTS];
+extern unsigned int enable_ahci_prof;
+#endif
 
 #endif /* _AHCI_H */

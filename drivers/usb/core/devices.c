@@ -535,7 +535,7 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
-#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_ARMADA_XP)
+#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_ARMADA_XP)
 		if(!strcmp(buf, "ehci_marvell.1-1") ||
 		   !strcmp(buf, "ehci_marvell.0-1")) {
 			return 1;
@@ -561,9 +561,11 @@ int blIsCardReader(struct usb_device *usbdev)
 #endif
 #if defined(CONFIG_SYNO_X86)
 #if defined(CONFIG_ARCH_GEN3)
+		if (syno_is_hw_version(HW_DS214play)) {
 			if(!strcmp(buf,"0000:01:0d.1-1")) {
 			return 1;
 			}
+		}
 #endif
 #endif
 #if defined(CONFIG_SYNO_QORIQ)
@@ -571,7 +573,7 @@ int blIsCardReader(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		if (syno_is_hw_version(HW_US3v10)) {
 			if (!strcmp(buf, "0000:00:00.0-1")) {
 				return 1;

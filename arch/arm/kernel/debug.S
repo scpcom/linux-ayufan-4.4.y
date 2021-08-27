@@ -13,6 +13,9 @@
  *  32-bit debugging code
  */
 #include <linux/linkage.h>
+#ifdef CONFIG_SYNO_ALPINE
+#include <asm/assembler.h>
+#endif
 
 		.text
 
@@ -22,6 +25,11 @@
  * references to these in a production kernel!
  */
 
+#ifdef CONFIG_SYNO_ALPINE
+#if !defined(CONFIG_DEBUG_SEMIHOSTING)
+#include CONFIG_DEBUG_LL_INCLUDE
+#endif
+#else
 #if defined(CONFIG_DEBUG_ICEDCC)
 		@@ debug using ARM EmbeddedICE DCC channel
 
@@ -106,6 +114,7 @@
 #else
 #include <mach/debug-macro.S>
 #endif	/* CONFIG_DEBUG_ICEDCC */
+#endif
 
 #ifdef CONFIG_MMU
 		.macro	addruart_current, rx, tmp1, tmp2
@@ -158,6 +167,8 @@ hexbuf:		.space 16
 
 		.ltorg
 
+#ifdef CONFIG_SYNO_ALPINE
+#ifndef CONFIG_DEBUG_SEMIHOSTING
 ENTRY(printascii)
 		addruart_current r3, r1, r2
 		b	2f
@@ -180,3 +191,63 @@ ENTRY(printch)
 		mov	r0, #0
 		b	1b
 ENDPROC(printch)
+#ifdef CONFIG_MMU
+ENTRY(debug_ll_addr)
+		addruart r2, r3, ip
+		str	r2, [r0]
+		str	r3, [r1]
+		mov	pc, lr
+ENDPROC(debug_ll_addr)
+#endif
+
+#else
+
+ENTRY(printascii)
+		mov	r1, r0
+		mov	r0, #0x04		@ SYS_WRITE0
+	ARM(	svc	#0x123456	)
+	THUMB(	svc	#0xab		)
+		mov	pc, lr
+ENDPROC(printascii)
+
+ENTRY(printch)
+		adr	r1, hexbuf
+		strb	r0, [r1]
+		mov	r0, #0x03		@ SYS_WRITEC
+	ARM(	svc	#0x123456	)
+	THUMB(	svc	#0xab		)
+		mov	pc, lr
+ENDPROC(printch)
+
+ENTRY(debug_ll_addr)
+		mov	r2, #0
+		str	r2, [r0]
+		str	r2, [r1]
+		mov	pc, lr
+ENDPROC(debug_ll_addr)
+
+#endif
+#else // CONFIG_SYNO_ALPINE
+ENTRY(printascii)
+		addruart_current r3, r1, r2
+		b	2f
+1:		waituart r2, r3
+		senduart r1, r3
+		busyuart r2, r3
+		teq	r1, #'\n'
+		moveq	r1, #'\r'
+		beq	1b
+2:		teq	r0, #0
+		ldrneb	r1, [r0], #1
+		teqne	r1, #0
+		bne	1b
+		mov	pc, lr
+ENDPROC(printascii)
+
+ENTRY(printch)
+		addruart_current r3, r1, r2
+		mov	r1, r0
+		mov	r0, #0
+		b	1b
+ENDPROC(printch)
+#endif // CONFIG_SYNO_ALPINE

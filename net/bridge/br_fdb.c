@@ -15,7 +15,7 @@
  */
 
 #include <linux/kernel.h>
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <linux/module.h>
 #endif
 #include <linux/init.h>
@@ -24,13 +24,19 @@
 #include <linux/times.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#include <linux/rtnetlink.h>
+#include <linux/module.h>
+#endif
 #include <linux/jhash.h>
 #include <linux/random.h>
 #include <linux/slab.h>
 #include <linux/atomic.h>
 #include <asm/unaligned.h>
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 #include <linux/mv_nfp.h>
+#endif
 #endif
 #include "br_private.h"
 
@@ -40,6 +46,11 @@ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 static void fdb_notify(const struct net_bridge_fdb_entry *, int);
 
 static u32 fdb_salt __read_mostly;
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+	int(*br_fdb_can_expire)(unsigned char *mac_addr, struct net_device *dev) = NULL;
+	DEFINE_SPINLOCK(br_fdb_cb_lock);
+#endif
 
 int __init br_fdb_init(void)
 {
@@ -51,6 +62,9 @@ int __init br_fdb_init(void)
 		return -ENOMEM;
 
 	get_random_bytes(&fdb_salt, sizeof(fdb_salt));
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+	spin_lock_init(&br_fdb_cb_lock);
+#endif
 	return 0;
 }
 
@@ -68,9 +82,13 @@ static inline unsigned long hold_time(const struct net_bridge *br)
 }
 
 static inline int has_expired(const struct net_bridge *br,
+#ifdef CONFIG_SYNO_ARMADA_V2
+				struct net_bridge_fdb_entry *fdb)
+#else
 				  const struct net_bridge_fdb_entry *fdb)
+#endif
 {
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (fdb->is_static)
 		return 0;
 
@@ -106,7 +124,7 @@ static void fdb_rcu_free(struct rcu_head *head)
 
 static inline void fdb_delete(struct net_bridge_fdb_entry *f)
 {
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (f->nfp) {
 		if (nfp_mgr_p->nfp_hook_fdb_rule_del)
@@ -177,7 +195,7 @@ void br_fdb_cleanup(unsigned long _data)
 			if (f->is_static)
 				continue;
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 			if (f->nfp) {
 				if (nfp_mgr_p->nfp_hook_fdb_rule_age)
@@ -188,6 +206,15 @@ void br_fdb_cleanup(unsigned long _data)
 #endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+				spin_lock(&br_fdb_cb_lock);
+				if(br_fdb_can_expire && !(*br_fdb_can_expire)(f->addr.addr, f->dst->dev)){
+					f->updated = jiffies;
+					spin_unlock(&br_fdb_cb_lock);
+					continue;
+				}
+				spin_unlock(&br_fdb_cb_lock);
+#endif
 			this_timer = f->updated + delay;
 			if (time_before_eq(this_timer, jiffies))
 				fdb_delete(f);
@@ -381,7 +408,7 @@ static struct net_bridge_fdb_entry *fdb_find_rcu(struct hlist_head *head,
 
 static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 					       struct net_bridge_port *source,
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 					       const unsigned char *addr, int is_local)
 #else
 					       const unsigned char *addr)
@@ -393,7 +420,7 @@ static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 	if (fdb) {
 		memcpy(fdb->addr.addr, addr, ETH_ALEN);
 		fdb->dst = source;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		fdb->is_local = is_local;
 		fdb->is_static = is_local;
 #else
@@ -402,8 +429,8 @@ static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 #endif
 		fdb->updated = fdb->used = jiffies;
 		hlist_add_head_rcu(&fdb->hlist, head);
-#if defined(CONFIG_SYNO_ARMADA)
 
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 		fdb->nfp = false;
 		if (nfp_mgr_p->nfp_hook_fdb_rule_add)
@@ -439,7 +466,7 @@ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 		fdb_delete(fdb);
 	}
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	fdb = fdb_create(head, source, addr, 1);
 #else
 	fdb = fdb_create(head, source, addr);
@@ -488,13 +515,25 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 					source->dev->name);
 		} else {
 			/* fastpath: update of existing entry */
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+				if (fdb->dst != source) {
+					struct brevent_fdb_update fdb_update;
+
+					fdb_update.dev = source->dev;
+					fdb_update.mac_addr = fdb->addr.addr;
+					//FIXME
+					//__rtmsg_ifinfo(RTM_NEWLINK, br->dev, 0, GFP_ATOMIC);
+					//FIXME
+					call_brevent_notifiers(BREVENT_FDB_UPDATE, &fdb_update);
+				}
+#endif
 			fdb->dst = source;
 			fdb->updated = jiffies;
 		}
 	} else {
 		spin_lock(&br->hash_lock);
 		if (likely(!fdb_find(head, addr)))
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 			fdb_create(head, source, addr, 0);
 #else
 			fdb_create(head, source, addr);
@@ -507,13 +546,35 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 	}
 }
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+void br_fdb_register_can_expire_cb(int(*cb)(unsigned char *mac_addr, struct net_device *dev))
+{
+        spin_lock_bh(&br_fdb_cb_lock);
+        br_fdb_can_expire = cb;
+        spin_unlock_bh(&br_fdb_cb_lock);
+}
+EXPORT_SYMBOL(br_fdb_register_can_expire_cb);
+
+void br_fdb_deregister_can_expire_cb()
+{
+        spin_lock_bh(&br_fdb_cb_lock);
+        br_fdb_can_expire = NULL;
+        spin_unlock_bh(&br_fdb_cb_lock);
+}
+EXPORT_SYMBOL(br_fdb_deregister_can_expire_cb);
+#endif
+
 static int fdb_to_nud(const struct net_bridge_fdb_entry *fdb)
 {
 	if (fdb->is_local)
 		return NUD_PERMANENT;
 	else if (fdb->is_static)
 		return NUD_NOARP;
+#ifdef CONFIG_SYNO_ARMADA_V2
+	else if (has_expired(fdb->dst->br, (struct net_bridge_fdb_entry *)fdb))
+#else
 	else if (has_expired(fdb->dst->br, fdb))
+#endif
 		return NUD_STALE;
 	else
 		return NUD_REACHABLE;
@@ -641,7 +702,7 @@ static int fdb_add_entry(struct net_bridge_port *source, const __u8 *addr,
 		if (!(flags & NLM_F_CREATE))
 			return -ENOENT;
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		fdb = fdb_create(head, source, addr,0);
 #else
 		fdb = fdb_create(head, source, addr);
@@ -780,7 +841,7 @@ int br_fdb_delete(struct sk_buff *skb, struct nlmsghdr *nlh, void *arg)
 	return err;
 }
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void fdb_sync(void)
 {

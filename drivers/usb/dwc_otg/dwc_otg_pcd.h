@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_pcd.h $
- * $Revision: #44 $
- * $Date: 2010/11/29 $
- * $Change: 1636033 $
+ * $Revision: #46 $
+ * $Date: 2011/10/20 $
+ * $Change: 1870124 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -60,9 +60,6 @@ struct cfiobject;
 
 /** Max Transfer size for any EP */
 #define DDMA_MAX_TRANSFER_SIZE 65535
-
-/** Max DMA Descriptor count for any EP */
-#define MAX_DMA_DESC_CNT 256
 
 /**
  * Get the pointer to the core_if from the pcd pointer.
@@ -136,6 +133,12 @@ typedef struct dwc_otg_pcd_request {
 	uint32_t length;
 	uint32_t actual;
 	unsigned sent_zlp:1;
+    /**
+     * Used instead of original buffer if
+     * it(physical address) is not dword-aligned.
+     **/
+     uint8_t *dw_align_buf;
+     dwc_dma_t dw_align_buf_dma;
 
 	 DWC_CIRCLEQ_ENTRY(dwc_otg_pcd_request) queue_entry;
 #ifdef DWC_UTE_PER_IO

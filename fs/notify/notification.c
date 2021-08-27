@@ -167,7 +167,7 @@ static int SYNOFetchFullName(struct fsnotify_event *event, gfp_t gfp)
 
 	char *dentry_path = NULL;
 	if(data_type == FSNOTIFY_EVENT_PATH){
-		dentry_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
+		dentry_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
 		if (unlikely(!dentry_path_buf)) {
 			goto ERR;
 		}
@@ -176,8 +176,8 @@ static int SYNOFetchFullName(struct fsnotify_event *event, gfp_t gfp)
 			goto ERR;
 		}
 	}
-	full_path = kmalloc(PATH_MAX, GFP_NOFS);
-	mnt_full_path = kzalloc(PATH_MAX, GFP_NOFS);
+	full_path = kmalloc(PATH_MAX, GFP_ATOMIC);
+	mnt_full_path = kzalloc(PATH_MAX, GFP_ATOMIC);
 	if(!full_path || !mnt_full_path){
 		goto ERR;
 	}
@@ -292,7 +292,7 @@ alloc_holder:
 	if (event->data_type == FSNOTIFY_EVENT_SYNO || event->data_type == FSNOTIFY_EVENT_PATH)
 	{
 		if (event->full_name == NULL) {
-			if (0 > SYNOFetchFullName(event, GFP_KERNEL))
+			if (0 > SYNOFetchFullName(event, GFP_ATOMIC))
 			{
 				return ERR_PTR(-ENOMEM);
 			}

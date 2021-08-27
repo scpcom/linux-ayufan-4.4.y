@@ -14,12 +14,19 @@ fhci-$(CONFIG_FHCI_DEBUG) += fhci-dbg.o
 xhci-hcd-y := xhci.o xhci-mem.o
 xhci-hcd-y += xhci-ring.o xhci-hub.o xhci-dbg.o
 xhci-hcd-$(CONFIG_PCI)	+= xhci-pci.o
+ifneq ($(CONFIG_USB_ETRON_HUB),y)
+xhci-hcd-y += etxhci-ejxxx.o
+endif
+
 etxhci-hcd-y := etxhci.o etxhci-mem.o etxhci-pci.o
 etxhci-hcd-y += etxhci-ring.o etxhci-hub.o etxhci-dbg.o
 etxhci-hcd-y += etxhci-ejxxx.o
 
 ifneq ($(CONFIG_USB_XHCI_PLATFORM), )
-	xhci-hcd-y		+= xhci-plat.o xhci-comcerto2000.o
+	xhci-hcd-y		+= xhci-plat.o 
+	ifeq ($(CONFIG_SYNO_COMCERTO),y)
+		xhci-hcd-y	+= xhci-comcerto2000.o
+	endif
 endif
 
 obj-$(CONFIG_USB_WHCI_HCD)	+= whci/

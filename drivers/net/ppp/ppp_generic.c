@@ -54,7 +54,7 @@
 #include <linux/atomic.h>
 
 #include <linux/nsproxy.h>
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <linux/mv_nfp.h>
 #endif
 #include <net/net_namespace.h>
@@ -2888,12 +2888,15 @@ ppp_connect_channel(struct channel *pch, int unit)
 	write_unlock_bh(&pch->upl);
 
 #if defined(CONFIG_SYNO_COMCERTO)
+/*We need to revisit below changes when PPPoE automode is introduced to C2K*/
+#if 0
 #if defined(CONFIG_COMCERTO_FP)
 	if ((ppp->dev) && (!ppp->closing)) {
 		rtnl_lock();
 		rtmsg_ifinfo(RTM_NEWLINK, ppp->dev, 0);
 		rtnl_unlock();
 	}
+#endif
 #endif
 	ret = 0;
 #endif
@@ -2923,12 +2926,17 @@ ppp_disconnect_channel(struct channel *pch)
 			wake_up_interruptible(&ppp->file.rwait);
 		ppp_unlock(ppp);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(CONFIG_SYNO_COMCERTO)
+/*We need to revisit below changes when PPPoE automode is introduced to C2K*/
+#if 0
+#if defined(CONFIG_COMCERTO_FP)
 		if ((ppp->dev) && (!ppp->closing)) {
 			rtnl_lock();
 			rtmsg_ifinfo(RTM_NEWLINK, ppp->dev, 0);
 			rtnl_unlock();
 		}
+#endif
+#endif
 #endif
 
 		if (atomic_dec_and_test(&ppp->file.refcnt))

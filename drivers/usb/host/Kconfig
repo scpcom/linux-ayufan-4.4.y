@@ -56,7 +56,7 @@ config USB_XHCI_HCD
 
 config USB_XHCI_PLATFORM
         tristate
-        depends on USB_XHCI_HCD && SYNO_COMCERTO
+        depends on USB_XHCI_HCD && (SYNO_COMCERTO||SYNO_ARMADA_V2)
 	default y 
 
 config USB_XHCI_HCD_DEBUGGING

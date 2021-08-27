@@ -124,6 +124,24 @@
 #define GPIO_1_S	0x00000002
 #define GPIO_2_S	0x00000004
 
+/* GPIO Pin Number and Description */
+#define GPIO_PIN_NUM_0		0
+#define GPIO_PIN_NUM_1		1
+#define GPIO_PIN_NUM_2		2
+#define GPIO_PIN_NUM_3		3
+#define GPIO_PIN_NUM_4		4
+#define GPIO_PIN_NUM_5		5
+
+#define GPIO_PIN_DESC_0		"gpio-0"
+#define GPIO_PIN_DESC_1		"gpio-1"
+#define GPIO_PIN_DESC_2		"gpio-2"
+#define GPIO_PIN_DESC_3		"gpio-3"
+#define GPIO_PIN_DESC_4		"gpio-4"
+#define GPIO_PIN_DESC_5		"gpio-5"
+
+#define	GPIO_SET_0	0
+#define	GPIO_SET_1	1
+
 /* GPIO Pin Mask */
 #define GPIO_PIN_0		(0x1 << 0)
 #define GPIO_PIN_1		(0x1 << 1)

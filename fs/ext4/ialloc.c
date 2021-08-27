@@ -26,6 +26,9 @@
 #include <linux/bitops.h>
 #include <linux/blkdev.h>
 #include <asm/byteorder.h>
+#ifdef CONFIG_SYNO_FIX_RESIZE_16TB_IN_32BIT
+#include <asm/div64.h>
+#endif
 
 #include "ext4.h"
 #include "ext4_jbd2.h"
@@ -317,7 +320,12 @@ static int find_group_dir(struct super_block *sb, struct inode *parent,
 	int ret = -1;
 
 	freei = percpu_counter_read_positive(&EXT4_SB(sb)->s_freeinodes_counter);
+#ifdef CONFIG_SYNO_FIX_RESIZE_16TB_IN_32BIT
+	avefreei = freei;
+	do_div(avefreei, ngroups);
+#else
 	avefreei = freei / ngroups;
+#endif
 
 	for (group = 0; group < ngroups; group++) {
 		desc = ext4_get_group_desc(sb, group, NULL);
@@ -513,7 +521,12 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent,
 	}
 
 	freei = percpu_counter_read_positive(&sbi->s_freeinodes_counter);
+#ifdef CONFIG_SYNO_FIX_RESIZE_16TB_IN_32BIT
+	avefreei = freei;
+	do_div(avefreei, ngroups);
+#else
 	avefreei = freei / ngroups;
+#endif
 	freeb = EXT4_C2B(sbi,
 		percpu_counter_read_positive(&sbi->s_freeclusters_counter));
 	avefreec = freeb;
@@ -607,7 +620,12 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent,
 
 fallback:
 	ngroups = real_ngroups;
+#ifdef CONFIG_SYNO_FIX_RESIZE_16TB_IN_32BIT
+	avefreei = freei;
+	do_div(avefreei, ngroups);
+#else
 	avefreei = freei / ngroups;
+#endif
 fallback_retry:
 	parent_group = EXT4_I(parent)->i_block_group;
 	for (i = 0; i < ngroups; i++) {
@@ -818,21 +836,6 @@ err_ret:
 	return retval;
 }
 
-#if defined(CONFIG_SYNO_ARMADA)
-static __always_inline void
-div_u64_rem64(u64 dividend, u64 divisor, u64 *remainder)
-{
-	while (dividend >= divisor) {
-		/* The following asm() prevents the compiler from
-		   optimising this loop into a modulo operation.  */
-		asm("" : "+rm"(dividend));
-
-		dividend -= divisor;
-	}
-
-	*remainder = dividend;
-}
-#endif
 /*
  * There are two policies for allocating an inode.  If the new inode is
  * a directory, then a forward search is made for a block group with both
@@ -920,20 +923,24 @@ got_group:
 	if (ret2 == -1)
 		goto out;
 
-#ifdef MY_ABC_HERE
-	if ((u64)(~0U) < (u64)group*EXT4_INODES_PER_GROUP(sb)) {
-#if defined(CONFIG_SYNO_ARMADA)
-		u64 max_group =	div64_u64(((u64)((~0U)+1)), EXT4_INODES_PER_GROUP(sb));
-		div_u64_rem64(group, max_group, &group);
+#ifdef SYNO_FIX_DIRENT_INODE_NUMBER_OVERFLOW
+#ifndef MAX_U32_IN_U64
+#define MAX_U32_IN_U64 ((u64)(~0U))
+#endif
+	if (MAX_U32_IN_U64 < (u64)group*EXT4_INODES_PER_GROUP(sb)) {
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2) || defined(CONFIG_SYNO_ALPINE)
+		u64 max_group =	div64_u64((MAX_U32_IN_U64+1), EXT4_INODES_PER_GROUP(sb));
+		group = mod_u64_rem64(group, max_group);
 #else
 #if defined(CONFIG_64BIT)
-		unsigned long long max_group = ((u64)(~0U)+1) / EXT4_INODES_PER_GROUP(sb);
+		unsigned long long max_group = (MAX_U32_IN_U64+1) / EXT4_INODES_PER_GROUP(sb);
 #else
-		unsigned long max_group = (unsigned long) ((u64)(~0U)+1) / EXT4_INODES_PER_GROUP(sb);
+		unsigned long max_group = (unsigned long) (MAX_U32_IN_U64+1) / EXT4_INODES_PER_GROUP(sb);
 #endif
 		group = group % max_group;
 #endif
 	}
+#undef MAX_U32_IN_U64
 #endif
 	for (i = 0; i < ngroups; i++, ino = 0) {
 		err = -EIO;

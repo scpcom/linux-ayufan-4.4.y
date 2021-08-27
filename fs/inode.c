@@ -73,6 +73,9 @@ static struct hlist_head *inode_hashtable __read_mostly;
 static __cacheline_aligned_in_smp DEFINE_SPINLOCK(inode_hash_lock);
 
 __cacheline_aligned_in_smp DEFINE_SPINLOCK(inode_sb_list_lock);
+#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+EXPORT_SYMBOL(inode_sb_list_lock);
+#endif
 
 /*
  * Empty aops. Can be used for the cases where the user does not
@@ -130,6 +133,11 @@ int proc_nr_inodes(ctl_table *table, int write,
 }
 #endif
 
+#ifdef CONFIG_SYNO_ALPINE
+#include <linux/moduleparam.h>
+static int fshighmem = 1;
+core_param(fshighmem, fshighmem, int, 0444);
+#endif
 /**
  * inode_init_always - perform inode structure intialisation
  * @sb: superblock inode belongs to
@@ -195,7 +203,14 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	mapping->a_ops = &empty_aops;
 	mapping->host = inode;
 	mapping->flags = 0;
+#ifdef CONFIG_SYNO_ALPINE
+	if (fshighmem)
+#endif
 		mapping_set_gfp_mask(mapping, GFP_HIGHUSER_MOVABLE);
+#ifdef CONFIG_SYNO_ALPINE
+	else
+		mapping_set_gfp_mask(mapping, GFP_USER | __GFP_MOVABLE);
+#endif
 	mapping->assoc_mapping = NULL;
 	mapping->backing_dev_info = &default_backing_dev_info;
 	mapping->writeback_index = 0;
@@ -423,6 +438,9 @@ void __iget(struct inode *inode)
 {
 	atomic_inc(&inode->i_count);
 }
+#ifdef SYNO_BTRFS_FREE_EXTENT_MAPS
+EXPORT_SYMBOL(__iget);
+#endif
 
 /*
  * get additional reference to inode; caller must already hold one.

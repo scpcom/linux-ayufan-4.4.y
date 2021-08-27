@@ -29,6 +29,9 @@
 #include <linux/dma-direction.h>
 #include <linux/scatterlist.h>
 #include <linux/bitmap.h>
+#ifdef CONFIG_SYNO_ALPINE
+#include <linux/types.h>
+#endif
 #include <asm/page.h>
 
 /**
@@ -76,6 +79,23 @@ enum dma_transaction_type {
 	DMA_SLAVE,
 	DMA_CYCLIC,
 };
+
+#if defined(CONFIG_SYNO_COMCERTO)
+/**
+ * enum dma_transfer_direction - dma transfer mode and direction indicator
+ * @DMA_MEM_TO_MEM: Async/Memcpy mode
+ * @DMA_MEM_TO_DEV: Slave mode & From Memory to Device
+ * @DMA_DEV_TO_MEM: Slave mode & From Device to Memory
+ * @DMA_DEV_TO_DEV: Slave mode & From Device to Device
+ */
+enum dma_transfer_direction {
+        DMA_MEM_TO_MEM,
+        DMA_MEM_TO_DEV,
+        DMA_DEV_TO_MEM,
+        DMA_DEV_TO_DEV,
+        DMA_TRANS_NONE,
+};
+#endif
 
 /* last transaction type for creation of the capabilities mask */
 #define DMA_TX_TYPE_END (DMA_CYCLIC + 1)
@@ -188,6 +208,9 @@ struct dma_chan_percpu {
 struct dma_chan {
 	struct dma_device *device;
 	dma_cookie_t cookie;
+#if defined(CONFIG_SYNO_COMCERTO)
+	dma_cookie_t completed_cookie;
+#endif
 
 	/* sysfs */
 	int chan_id;
@@ -277,6 +300,10 @@ struct dma_slave_config {
 	enum dma_slave_buswidth dst_addr_width;
 	u32 src_maxburst;
 	u32 dst_maxburst;
+#if defined(CONFIG_SYNO_COMCERTO)
+	bool device_fc;
+	unsigned int slave_id;
+#endif
 };
 
 static inline const char *dma_chan_name(struct dma_chan *chan)
@@ -521,6 +548,13 @@ static inline int dmaengine_slave_config(struct dma_chan *chan,
 			(unsigned long)config);
 }
 
+#if defined(CONFIG_SYNO_COMCERTO)
+static inline bool is_slave_direction(enum dma_transfer_direction direction)
+{
+        return (direction == DMA_MEM_TO_DEV) || (direction == DMA_DEV_TO_MEM);
+}
+#endif
+
 static inline struct dma_async_tx_descriptor *dmaengine_prep_slave_single(
 	struct dma_chan *chan, void *buf, size_t len,
 	enum dma_data_direction dir, unsigned long flags)
@@ -696,6 +730,11 @@ dma_cookie_t dma_async_memcpy_buf_to_pg(struct dma_chan *chan,
 dma_cookie_t dma_async_memcpy_pg_to_pg(struct dma_chan *chan,
 	struct page *dest_pg, unsigned int dest_off, struct page *src_pg,
 	unsigned int src_off, size_t len);
+#ifdef CONFIG_SYNO_ALPINE
+dma_cookie_t dma_async_memcpy_sg_to_sg(struct dma_chan *chan,
+	struct scatterlist *dst_sg, unsigned int dst_nents,
+	struct scatterlist *src_sg, unsigned int src_nents);
+#endif
 void dma_async_tx_descriptor_init(struct dma_async_tx_descriptor *tx,
 	struct dma_chan *chan);
 
@@ -864,6 +903,9 @@ int dma_async_device_register(struct dma_device *device);
 void dma_async_device_unregister(struct dma_device *device);
 void dma_run_dependencies(struct dma_async_tx_descriptor *tx);
 struct dma_chan *dma_find_channel(enum dma_transaction_type tx_type);
+#ifdef CONFIG_SYNO_ALPINE
+struct dma_chan *net_dma_find_channel(void);
+#endif
 #define dma_request_channel(mask, x, y) __dma_request_channel(&(mask), x, y)
 
 /* --- Helper iov-locking functions --- */
@@ -875,14 +917,33 @@ struct dma_page_list {
 };
 
 struct dma_pinned_list {
+#ifdef CONFIG_SYNO_ALPINE
+	int kernel;
+#endif
 	int nr_iovecs;
+#ifdef CONFIG_SYNO_ALPINE
+	int nr_pages;
+	struct sg_table	*sgts;
+#endif
 	struct dma_page_list page_list[0];
 };
 
+#ifdef CONFIG_SYNO_ALPINE
+struct tcp_sock;
+int dma_pin_iovec_pages(struct tcp_sock *tp, struct iovec *iov, size_t len);
+#else
 struct dma_pinned_list *dma_pin_iovec_pages(struct iovec *iov, size_t len);
+#endif
 void dma_unpin_iovec_pages(struct dma_pinned_list* pinned_list);
+#ifdef CONFIG_SYNO_ALPINE
+void dma_free_iovec_data(struct tcp_sock *tp);
 
-#if defined(CONFIG_SYNO_ARMADA)
+int dma_memcpy_fill_sg_from_iovec(struct dma_chan *chan, struct iovec *iov,
+	struct dma_pinned_list *pinned_list, struct scatterlist *dst_sg,
+	unsigned int offset,size_t len);
+#endif
+
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_SPLICE_NET_DMA_SUPPORT
 struct dma_pinned_list *dma_pin_kernel_iovec_pages(struct iovec *iov, size_t len);
 void dma_unpin_kernel_iovec_pages(struct dma_pinned_list* pinned_list);

@@ -49,7 +49,7 @@
 
 #include "m86xxx_spacchw.h"
 #include "m86xxx_var.h"
-#include "../cryptodev.h"
+#include "cryptodev.h"
 
 #define CRYPTO_INVALID_ICV_KEY_SIZE  (S32)-100
 #define CRYPTO_INVALID_PARAMETER_SIZE (S32)-101
@@ -143,7 +143,7 @@
 
 // Each module have the same number of contexts
 #ifndef CRYPTO_CONTEXTS_MAX
-#define CRYPTO_CONTEXTS_MAX    10
+#define CRYPTO_CONTEXTS_MAX	16
 #endif
 
 enum crypto_modes {
@@ -272,6 +272,7 @@ typedef struct handle_ctx_
    ddt_entry *ddt, *sddt;
    ddt_descr ddt_desc[MAX_DDT_ENTRIES];   // assosiated user bugffers
    ddt_descr sddt_desc[MAX_DDT_ENTRIES];  // assosiated user bugffers
+   int ddt_descr_status[MAX_DDT_ENTRIES];  // status array to mark if both input and output buffer address is same
    U32 ddt_len;                           //  total length of the chain
    int ddt_idx;                           // next free ddt index 
    U32 sddt_len;                          //  total length of the chain
@@ -416,7 +417,7 @@ struct elp_spacc_device {
    int job_pool[1U<<SPACC_SW_ID_ID_W][2];
 };
 
-extern struct elp_spacc_device _spacc_dev;
+//extern struct elp_spacc_device _spacc_dev;
 
 void elp_register_ocf(struct elp_softc *sc);
 
@@ -425,13 +426,12 @@ S32 spacc_init (U32 opmodules, U32 regmap);
 void spacc_fini(void);
 void spacc_set_debug (S32 dflag);
 U8 *spacc_error_msg (S32 err);
-//S32 spacc_open (S32 type, S32 mode, S32 ctx, S32 ctx_skip);
-S32 spacc_open (S32 enc, S32 hash,  S32 ctxid, S32 ctxid_skip, UINT rc4len);
-S32 spacc_close (S32 handle);
-S32 spacc_release_ddt(S32 handle);
-S32 spacc_add_ddt (S32 handle, U8 *data, U32 len);
-S32 spacc_release_dst_ddt(S32 handle);
-S32 spacc_add_dst_ddt (S32 handle, U8 *data, U32 len);
+S32 spacc_open (S32 enc, S32 hash,  S32 ctxid, S32 ctxid_skip, UINT rc4len, UINT first_packet);
+S32 spacc_close (S32 handle, struct elp_softc *sc);
+S32 spacc_release_ddt(S32 handle, struct elp_softc *sc);
+S32 spacc_add_ddt (S32 handle, U8 *data, U32 len, struct elp_softc *sc);
+S32 spacc_release_dst_ddt(S32 handle, struct elp_softc *sc);
+S32 spacc_add_dst_ddt (S32 handle, U8 *data, U32 len, struct elp_softc *sc, bool same_buff);
 S32 spacc_set_context (S32 handle, S32 op, U8 * key, S32 ksz, U8 * iv, S32 ivsz);
 S32 spacc_get_context (S32 handle, U8 * iv, S32 ivsize, S32 * psize);
 S32 spacc_set_operation (S32 handle, S32 op, U32 prot, U32 icvpos, U32 icvoff, U32 icvsz);
@@ -585,5 +585,7 @@ typedef struct spacc_if_ {
 #else
 int spacc_register_device_if (spacc_if *dif);
 #endif
+
+#define spacc_ack_int() 	ELP_WRITE_UINT(_spacc_dev.reg.irq_stat, ELP_READ_UINT(_spacc_dev.reg.irq_stat) | SPACC_IRQ_STAT_STAT | SPACC_IRQ_STAT_CMD)
 
 #endif

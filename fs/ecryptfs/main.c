@@ -174,6 +174,9 @@ void ecryptfs_put_lower_file(struct inode *inode)
 
 enum { ecryptfs_opt_sig, ecryptfs_opt_ecryptfs_sig,
        ecryptfs_opt_cipher, ecryptfs_opt_ecryptfs_cipher,
+#ifdef CONFIG_SYNO_ALPINE
+       ecryptfs_opt_cipher_mode, ecryptfs_opt_ecryptfs_cipher_mode,
+#endif
        ecryptfs_opt_ecryptfs_key_bytes,
        ecryptfs_opt_passthrough, ecryptfs_opt_xattr_metadata,
        ecryptfs_opt_encrypted_view, ecryptfs_opt_fnek_sig,
@@ -186,7 +189,13 @@ static const match_table_t tokens = {
 	{ecryptfs_opt_sig, "sig=%s"},
 	{ecryptfs_opt_ecryptfs_sig, "ecryptfs_sig=%s"},
 	{ecryptfs_opt_cipher, "cipher=%s"},
+#ifdef CONFIG_SYNO_ALPINE
+	{ecryptfs_opt_cipher_mode, "cipher_mode=%s"},
+#endif
 	{ecryptfs_opt_ecryptfs_cipher, "ecryptfs_cipher=%s"},
+#ifdef CONFIG_SYNO_ALPINE
+	{ecryptfs_opt_ecryptfs_cipher_mode, "ecryptfs_cipher_mode=%s"},
+#endif
 	{ecryptfs_opt_ecryptfs_key_bytes, "ecryptfs_key_bytes=%u"},
 	{ecryptfs_opt_passthrough, "ecryptfs_passthrough"},
 	{ecryptfs_opt_xattr_metadata, "ecryptfs_xattr_metadata"},
@@ -261,10 +270,19 @@ static void ecryptfs_init_mount_crypt_stat(
 static int ecryptfs_parse_options(struct ecryptfs_sb_info *sbi, char *options,
 				  uid_t *check_ruid)
 {
+#ifdef CONFIG_SYNO_ALPINE
+	const char *mode_white_list[] = {"cbc", "ctr"};
+#endif
 	char *p;
 	int rc = 0;
+#ifdef CONFIG_SYNO_ALPINE
+	int i;
+#endif
 	int sig_set = 0;
 	int cipher_name_set = 0;
+#ifdef CONFIG_SYNO_ALPINE
+	int cipher_mode_name_set = 0;
+#endif
 	int fn_cipher_name_set = 0;
 	int cipher_key_bytes;
 	int cipher_key_bytes_set = 0;
@@ -277,6 +295,10 @@ static int ecryptfs_parse_options(struct ecryptfs_sb_info *sbi, char *options,
 	char *sig_src;
 	char *cipher_name_dst;
 	char *cipher_name_src;
+#ifdef CONFIG_SYNO_ALPINE
+	char *cipher_mode_name_dst;
+	char *cipher_mode_name_src;
+#endif
 	char *fn_cipher_name_dst;
 	char *fn_cipher_name_src;
 	char *fnek_dst;
@@ -320,6 +342,19 @@ static int ecryptfs_parse_options(struct ecryptfs_sb_info *sbi, char *options,
 			cipher_name_dst[ECRYPTFS_MAX_CIPHER_NAME_SIZE] = '\0';
 			cipher_name_set = 1;
 			break;
+#ifdef CONFIG_SYNO_ALPINE
+		case ecryptfs_opt_cipher_mode:
+		case ecryptfs_opt_ecryptfs_cipher_mode:
+		   cipher_mode_name_src = args[0].from;
+		   cipher_mode_name_dst = mount_crypt_stat->
+				   global_default_cipher_mode_name;
+		   strncpy(cipher_mode_name_dst, cipher_mode_name_src,
+			   ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE);
+		   cipher_mode_name_dst[
+			   ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE] = '\0';
+		   cipher_mode_name_set = 1;
+		   break;
+#endif
 		case ecryptfs_opt_ecryptfs_key_bytes:
 			cipher_key_bytes_src = args[0].from;
 			cipher_key_bytes =
@@ -415,6 +450,16 @@ static int ecryptfs_parse_options(struct ecryptfs_sb_info *sbi, char *options,
 		strcpy(mount_crypt_stat->global_default_cipher_name,
 		       ECRYPTFS_DEFAULT_CIPHER);
 	}
+#ifdef CONFIG_SYNO_ALPINE
+	if (!cipher_mode_name_set) {
+	   int cipher_mode_name_len = strlen(ECRYPTFS_DEFAULT_CIPHER_MODE);
+
+	   BUILD_BUG_ON(cipher_mode_name_len >=
+		  ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE);
+	   strcpy(mount_crypt_stat->global_default_cipher_mode_name,
+		  ECRYPTFS_DEFAULT_CIPHER_MODE);
+	}
+#endif
 	if ((mount_crypt_stat->flags & ECRYPTFS_GLOBAL_ENCRYPT_FILENAMES)
 	    && !fn_cipher_name_set)
 		strcpy(mount_crypt_stat->global_default_fn_cipher_name,
@@ -437,6 +482,23 @@ static int ecryptfs_parse_options(struct ecryptfs_sb_info *sbi, char *options,
 		goto out;
 	}
 
+#ifdef CONFIG_SYNO_ALPINE
+    rc = -EINVAL;
+    for (i = 0; i < ARRAY_SIZE(mode_white_list); i++) {
+    	if (strcmp(mount_crypt_stat->global_default_cipher_mode_name,
+    			mode_white_list[i]) == 0) {
+    		rc = 0;
+    		break;
+    	}
+    }
+    if (rc) {
+    	ecryptfs_printk(KERN_ERR,
+		"eCryptfs doesn't support cipher mode: %s",
+	    mount_crypt_stat->
+	    	global_default_cipher_mode_name);
+	    goto out;
+    }
+#endif
     mutex_lock(&key_tfm_list_mutex);
 	if (!ecryptfs_tfm_exists(mount_crypt_stat->global_default_cipher_name,
 				 NULL)) {
@@ -818,7 +880,11 @@ static int __init ecryptfs_init(void)
 		ecryptfs_printk(KERN_ERR, "The eCryptfs extent size is "
 				"larger than the host's page size, and so "
 				"eCryptfs cannot run on this system. The "
+#ifdef CONFIG_SYNO_ALPINE
+				"default eCryptfs extent size is [%lu] bytes; "
+#else
 				"default eCryptfs extent size is [%u] bytes; "
+#endif
 				"the page size is [%lu] bytes.\n",
 				ECRYPTFS_DEFAULT_EXTENT_SIZE,
 				(unsigned long)PAGE_CACHE_SIZE);

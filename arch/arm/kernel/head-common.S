@@ -52,7 +52,7 @@ __vet_atags:
 
 	ldr	r5, [r2, #0]
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_BE8_ON_LE
 	rev	r5, r5
 #endif
@@ -66,7 +66,7 @@ __vet_atags:
 	cmpne	r5, #ATAG_CORE_SIZE_EMPTY
 	bne	1f
 	ldr	r5, [r2, #4]
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_BE8_ON_LE
 	rev	r5, r5
 #endif

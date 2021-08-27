@@ -66,12 +66,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef LINUX_MV_NFP_H
 #define LINUX_MV_NFP_H
 
-#ifdef CONFIG_NETFILTER
+#include <linux/types.h>
+#include <linux/netdevice.h>
+#include <linux/skbuff.h>
+
+#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 #include <net/netfilter/nf_conntrack.h>
 #include <net/netfilter/nf_nat.h>
 #endif
-#include <linux/types.h>
-#include <linux/netdevice.h>
 
 #if defined(CONFIG_MV_ETH_NFP)
 

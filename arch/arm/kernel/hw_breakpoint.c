@@ -1044,16 +1044,23 @@ static int __init arch_hw_breakpoint_init(void)
 	}
 
 	/* Register debug fault handler. */
+#ifdef CONFIG_SYNO_ALPINE
+	hook_fault_code(FAULT_CODE_DEBUG, hw_breakpoint_pending, SIGTRAP,
+			TRAP_HWBKPT, "watchpoint debug exception");
+	hook_ifault_code(FAULT_CODE_DEBUG, hw_breakpoint_pending, SIGTRAP,
+			TRAP_HWBKPT, "breakpoint debug exception");
+#else
 	hook_fault_code(2, hw_breakpoint_pending, SIGTRAP, TRAP_HWBKPT,
 			"watchpoint debug exception");
 	hook_ifault_code(2, hw_breakpoint_pending, SIGTRAP, TRAP_HWBKPT,
 			"breakpoint debug exception");
+#endif
 
 	/* Register hotplug notifier. */
 	register_cpu_notifier(&dbg_reset_nb);
 	return 0;
 }
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #else
 arch_initcall(arch_hw_breakpoint_init);
 #endif

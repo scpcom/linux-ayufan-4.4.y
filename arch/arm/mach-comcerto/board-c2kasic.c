@@ -170,7 +170,7 @@ static struct platform_device rtc_dev = {
 static struct resource dw_dmac_resource[] = {
 	{
 		.start          = DW_DMA_DMAC_BASEADDR,
-		.end            = DW_DMA_DMAC_BASEADDR + 0x2C0,
+		.end            = DW_DMA_DMAC_BASEADDR + 0x400,
 		.flags          = IORESOURCE_MEM,
 	},
 	{
@@ -181,6 +181,7 @@ static struct resource dw_dmac_resource[] = {
 
 static struct dw_dma_platform_data dw_dmac_data = {
 	.nr_channels    = 8,
+	.chan_priority = 1,
 };
 
 static u64 dw_dmac_dma_mask = DMA_BIT_MASK(32);
@@ -226,6 +227,26 @@ static struct platform_device comcerto_nand = {
  * -------------------------------------------------------------------- */
 #if defined(CONFIG_SPI_MSPD_LOW_SPEED) || defined(CONFIG_SPI_MSPD_HIGH_SPEED)
 
+/*This structure is same as struct flash_platform_data defined in include/linux/spi/flash.h, but since
+that structure is conflicting with struct flash_platform_data defined in arch/arm/include/asm/mach/flash.h
+for nor flash, and is already used in this file for nor flash, so defining a new structure for spi flash
+which matches struct flash_platform_data of include/linux/spi/flash.h
+
+FIXME: Need to resolve this structure conflict
+*/
+struct spi_flash_platform_data {
+       char            *name;
+       struct mtd_partition *parts;
+       unsigned int    nr_parts;
+
+       char            *type;
+
+       u32             num_resources;
+       struct resource * resource;
+
+       /* we'll likely add more ... use JEDEC IDs, etc */
+};
+
 #define	CLK_NAME	10
 struct spi_controller_pdata {
 	int use_dma;
@@ -233,6 +254,7 @@ struct spi_controller_pdata {
 	int bus_num;
 	u32 max_freq;
 	char clk_name[CLK_NAME];
+	char type[32];
 };
 
 struct spi_platform_data {
@@ -240,34 +262,74 @@ struct spi_platform_data {
 	int dummy;
 };
 
+struct spi_controller_data {
+        u8 poll_mode;   /* 0 for contoller polling mode */
+        u8 type;        /* SPI/SSP/Micrwire */
+        u8 enable_dma;
+        void (*cs_control)(u32 command);
+};
+
 struct spi_platform_data spi_pdata = {
 	.type = 0,
 	.dummy = 0,
 };
 
+struct spi_platform_data fast_spi_pdata = {
+	.type = 0,
+	.dummy = 0,
+};
+
+struct spi_controller_data spi_ctrl_data =  {
+        .poll_mode = 1,
+};
+
+#if defined(CONFIG_SPI_MSPD_HIGH_SPEED)
+struct spi_controller_pdata hs_spi_pdata = {
+	.use_dma = 1,
+	.num_chipselects = 2,
+	.bus_num = 1,
+	.max_freq = 5 * 1000 * 1000,
+	.clk_name = "DUS",
+	.type="m25p80",
+};
+#endif
+
+static struct resource m25p80_flash_resource[] = {
+	{
+		.start  = COMCERTO_FASTSPI_IRAM_LOC,
+		.end    = COMCERTO_FASTSPI_IRAM_LOC + COMCERTO_FASTSPI_IRAM_SIZE - 1,
+		.flags  = IORESOURCE_MEM,
+	},
+};
+
+static struct spi_flash_platform_data comcerto_spi_flash_data = {
+	.num_resources = ARRAY_SIZE(m25p80_flash_resource),
+	.resource = m25p80_flash_resource,
+};
+
 static struct spi_board_info comcerto_spi_board_info[] = {
 	{
 		/* FIXME: for chipselect-0 */
-		.modalias = "comcerto_spi1",
+		.modalias = "m25p80",
 		.chip_select = 0,
-		.max_speed_hz = 4*1000*1000,
-		.bus_num = 0,
+		.max_speed_hz = 5*1000*1000,
+		.bus_num = 1,
 		.irq = -1,
 		.mode = SPI_MODE_3,
-		.platform_data = &spi_pdata,
+		.platform_data = &comcerto_spi_flash_data,
+		.controller_data = &spi_ctrl_data,
 	},
-
 	{
 		/* FIXME: for chipselect-1 */
 		.modalias = "proslic",
-		.chip_select = 1,
 		.max_speed_hz = 4*1000*1000,
+		.chip_select = 1,
+		.mode = SPI_MODE_3,
 		.bus_num = 0,
 		.irq = -1,
-		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
 	},
-
 	{
 		.modalias = "comcerto_spi3",
 		.chip_select = 2,
@@ -276,8 +338,22 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.irq = -1,
 		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
 	},
 
+#if 0 //MSIF
+
+	{
+		.modalias = "proslic",
+		.max_speed_hz = 2*1000*1000,
+		.chip_select = 3,
+                .mode = SPI_MODE_1,
+		.bus_num = 0,
+		.irq = -1,
+		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
+	},
+#else
 	{
 		.modalias = "legerity",
 		.chip_select = 3,
@@ -286,18 +362,9 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.irq = -1,
 		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
 	},
-
-};
 #endif
-
-#if defined(CONFIG_SPI_MSPD_HIGH_SPEED)
-struct spi_controller_pdata fast_spi_pdata = {
-	.use_dma = 0,
-	.num_chipselects = 2,
-	.bus_num = 1,
-	.max_freq = 60 * 1000 * 1000,
-	.clk_name = "DUS",
 };
 #endif
 
@@ -321,7 +388,7 @@ static struct platform_device comcerto_fast_spi = {
 	.resource = comcerto_fast_spi_resource,
 #if defined(CONFIG_SPI_MSPD_HIGH_SPEED)
 	.dev = {
-		.platform_data = &fast_spi_pdata,
+		.platform_data = &hs_spi_pdata,
 	},
 #endif
 };
@@ -387,6 +454,47 @@ static struct platform_device comcerto_i2c = {
 };
 #endif
 
+/* --------------------------------------------------------------------
+*  Watchdog
+* -------------------------------------------------------------------- */
+#ifdef CONFIG_MPCORE_WATCHDOG
+static struct resource comcerto_a9wd_resources[] = {
+	{
+		.start	= COMCERTO_TWD_BASE,
+		.end	= COMCERTO_TWD_BASE + 0xFF,
+		.flags	= IORESOURCE_MEM,
+	},
+	{
+		.name	= "mpcore_wdt",
+		.start	= IRQ_LOCALWDOG,
+		.flags	= IORESOURCE_IRQ,
+	},
+};
+
+static struct platform_device comcerto_a9wd = {
+	.name		= "mpcore_wdt",
+	.id             = -1,
+	.num_resources  = ARRAY_SIZE(comcerto_a9wd_resources),
+	.resource       = comcerto_a9wd_resources,
+};
+#endif
+
+#ifdef CONFIG_COMCERTO_WATCHDOG
+static struct resource comcerto_wdt_resources[] = {
+	{
+		.start	= COMCERTO_APB_TIMER_BASE + 0xD0,
+		.end	= COMCERTO_APB_TIMER_BASE + 0xD8,
+		.flags	= IORESOURCE_MEM,
+	},
+};
+
+static struct platform_device comcerto_wdt = {
+        .name   = "comcerto_wdt",
+        .id     = -1,
+	.num_resources  = ARRAY_SIZE(comcerto_wdt_resources),
+	.resource       = comcerto_wdt_resources,
+};
+#endif
 
 #if defined(CONFIG_COMCERTO_ELP_SUPPORT)
 /* --------------------------------------------------------------------
@@ -421,13 +529,13 @@ static struct platform_device  comcerto_elp_device = {
 };
 #endif
 
-
 static struct comcerto_tdm_data comcerto_tdm_pdata = {
 	.fsoutput = 1, /* Generic Pad Control and Version ID Register[2] */
 	.fspolarity = 0, /* 28 FSYNC_FALL(RISE)_EDGE */
 	.fshwidth = 1, /* High_Phase_Width[10:0] */
 	.fslwidth = 0xFF, /* Low_Phase_Width[10:0] */
-	.clockhz = 2048000, /* INC_VALUE[29:0] According to the desired TDM clock output frequency, this field should be configured */
+	.clockhz = 2048000, /* INC_VALUE[29:0] According to the desired TDM clock output 
+			frequency, this field should be configured */
 	.clockout = 1, /* 0 -> set bit 21, clear bit 20 in COMCERTO_GPIO_IOCTRL_REG
 			  (software control, clock input)
 			  1 -> set bit 21 and 20 in COMCERTO_GPIO_IOCTRL_REG
@@ -603,6 +711,15 @@ static struct platform_device *comcerto_devices[] __initdata = {
 #if defined(CONFIG_COMCERTO_I2C_SUPPORT)
 		&comcerto_i2c,
 #endif
+
+#if defined (CONFIG_MPCORE_WATCHDOG)
+		&comcerto_a9wd,
+#endif
+
+#if defined(CONFIG_COMCERTO_WATCHDOG)
+		&comcerto_wdt,
+#endif
+
 #if defined(CONFIG_SPI_MSPD_HIGH_SPEED) || defined(CONFIG_SPI2_MSPD_HIGH_SPEED)
 		&comcerto_fast_spi,
 #endif

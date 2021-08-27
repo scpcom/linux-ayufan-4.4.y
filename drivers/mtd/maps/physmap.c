@@ -214,13 +214,12 @@ static struct platform_driver physmap_flash_driver = {
 	},
 };
 
-
 #ifdef CONFIG_MTD_PHYSMAP_COMPAT
 static struct physmap_flash_data physmap_flash_data = {
 	.width		= CONFIG_MTD_PHYSMAP_BANKWIDTH,
 };
 
-#if defined(CONFIG_SYNO_MPC85XX_COMMON)  || defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_MPC85XX_COMMON)  || defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 struct resource physmap_flash_resource = {
 #else
 static struct resource physmap_flash_resource = {

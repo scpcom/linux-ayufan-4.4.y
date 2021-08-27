@@ -175,14 +175,22 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 	arch_suspend_disable_irqs();
 	BUG_ON(!irqs_disabled());
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	/* FIXME syscore suspend/resume is not working for HGW build */
+	//error = syscore_suspend();
+	error = 0;
+#else
 	error = syscore_suspend();
+#endif
 	if (!error) {
 		*wakeup = pm_wakeup_pending();
 		if (!(suspend_test(TEST_CORE) || *wakeup)) {
 			error = suspend_ops->enter(state);
 			events_check_enabled = false;
 		}
+#if !defined(CONFIG_SYNO_COMCERTO)
 		syscore_resume();
+#endif
 	}
 
 	arch_suspend_enable_irqs();

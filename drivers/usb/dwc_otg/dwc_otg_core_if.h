@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_core_if.h $
- * $Revision: #10 $
- * $Date: 2011/05/17 $
- * $Change: 1774110 $
+ * $Revision: #12 $
+ * $Date: 2011/10/24 $
+ * $Change: 1871159 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -63,7 +63,7 @@ extern uint8_t dwc_otg_is_host_mode(dwc_otg_core_if_t * _core_if);
 extern uint8_t dwc_otg_is_dma_enable(dwc_otg_core_if_t * core_if);
 
 /** This function should be called on every hardware interrupt. */
-extern int32_t dwc_otg_handle_common_intr(dwc_otg_core_if_t * _core_if);
+extern int32_t dwc_otg_handle_common_intr(void *otg_dev);
 
 /** @name OTG Core Parameters */
 /** @{ */
@@ -109,8 +109,7 @@ extern int32_t dwc_otg_get_param_dma_enable(dwc_otg_core_if_t * core_if);
 extern int dwc_otg_set_param_dma_desc_enable(dwc_otg_core_if_t * core_if,
 					     int32_t val);
 extern int32_t dwc_otg_get_param_dma_desc_enable(dwc_otg_core_if_t * core_if);
-//#define dwc_param_dma_desc_enable_default 1
-#define dwc_param_dma_desc_enable_default 0 // TEST
+#define dwc_param_dma_desc_enable_default 0
 
 /** The DMA Burst size (applicable only for External DMA
  * Mode). 1, 4, 8 16, 32, 64, 128, 256 (default 32)
@@ -218,8 +217,7 @@ extern int32_t dwc_otg_get_param_dev_perio_tx_fifo_size(dwc_otg_core_if_t *
 extern int dwc_otg_set_param_host_rx_fifo_size(dwc_otg_core_if_t * core_if,
 					       int32_t val);
 extern int32_t dwc_otg_get_param_host_rx_fifo_size(dwc_otg_core_if_t * core_if);
-//#define dwc_param_host_rx_fifo_size_default 1024
-#define dwc_param_host_rx_fifo_size_default 776 // Makarand: USB2 DEBUG
+#define dwc_param_host_rx_fifo_size_default 776
 
 /** Number of 4-byte words in the non-periodic Tx FIFO in host mode
  * when Dynamic FIFO sizing is enabled in the core.
@@ -229,8 +227,7 @@ extern int dwc_otg_set_param_host_nperio_tx_fifo_size(dwc_otg_core_if_t *
 						      core_if, int32_t val);
 extern int32_t dwc_otg_get_param_host_nperio_tx_fifo_size(dwc_otg_core_if_t *
 							  core_if);
-//#define dwc_param_host_nperio_tx_fifo_size_default 1024
-#define dwc_param_host_nperio_tx_fifo_size_default 512 // Makarand: USB2 DEBUG
+#define dwc_param_host_nperio_tx_fifo_size_default 512
 
 /** Number of 4-byte words in the host periodic Tx FIFO when dynamic
  * FIFO sizing is enabled.
@@ -240,8 +237,7 @@ extern int dwc_otg_set_param_host_perio_tx_fifo_size(dwc_otg_core_if_t *
 						     core_if, int32_t val);
 extern int32_t dwc_otg_get_param_host_perio_tx_fifo_size(dwc_otg_core_if_t *
 							 core_if);
-//#define dwc_param_host_perio_tx_fifo_size_default 1024
-#define dwc_param_host_perio_tx_fifo_size_default 768 // Makarand: USB2 DEBUG
+#define dwc_param_host_perio_tx_fifo_size_default 768
 
 /** The maximum transfer size supported in bytes.
  * 2047 to 65,535  (default 65,535)
@@ -266,9 +262,7 @@ extern int32_t dwc_otg_get_param_max_packet_count(dwc_otg_core_if_t * core_if);
 extern int dwc_otg_set_param_host_channels(dwc_otg_core_if_t * core_if,
 					   int32_t val);
 extern int32_t dwc_otg_get_param_host_channels(dwc_otg_core_if_t * core_if);
-//#define dwc_param_host_channels_default 12
-//#define dwc_param_host_channels_default 13 // original
-#define dwc_param_host_channels_default 14 // Makarand: USB2 DEBUG
+#define dwc_param_host_channels_default 14
 
 /** The number of endpoints in addition to EP0 available for device
  * mode operations.
@@ -279,8 +273,8 @@ extern int32_t dwc_otg_get_param_host_channels(dwc_otg_core_if_t * core_if);
 extern int dwc_otg_set_param_dev_endpoints(dwc_otg_core_if_t * core_if,
 					   int32_t val);
 extern int32_t dwc_otg_get_param_dev_endpoints(dwc_otg_core_if_t * core_if);
-//#define dwc_param_dev_endpoints_default 6
-#define dwc_param_dev_endpoints_default 7 // Makarand: USB2 DEBUG
+#define dwc_param_dev_endpoints_default 7
+
 /**
  * Specifies the type of PHY interface to use. By default, the driver
  * will automatically detect the phy_type.
@@ -379,7 +373,6 @@ extern int dwc_otg_set_param_dev_tx_fifo_size(dwc_otg_core_if_t * core_if,
 extern int32_t dwc_otg_get_param_dev_tx_fifo_size(dwc_otg_core_if_t * core_if,
 						  int fifo_num);
 #define dwc_param_dev_tx_fifo_size_default 768
-//#define dwc_param_dev_tx_fifo_size_default 256 //Try this
 
 /** Thresholding enable flag-
  * bit 0 - enable non-ISO Tx thresholding
@@ -467,9 +460,19 @@ extern int dwc_otg_set_param_dev_out_nak(dwc_otg_core_if_t * core_if,
 extern int32_t dwc_otg_get_param_dev_out_nak(dwc_otg_core_if_t * core_if);
 #define dwc_param_dev_out_nak_default 0
 
+extern int dwc_otg_set_param_cont_on_bna(dwc_otg_core_if_t * core_if,
+										 int32_t val);
+extern int32_t dwc_otg_get_param_cont_on_bna(dwc_otg_core_if_t * core_if);
+#define dwc_param_cont_on_bna_default 0
+
+extern int dwc_otg_set_param_ahb_single(dwc_otg_core_if_t * core_if,
+										 int32_t val);
+extern int32_t dwc_otg_get_param_ahb_single(dwc_otg_core_if_t * core_if);
+#define dwc_param_ahb_single_default 0
+
 extern int dwc_otg_set_param_otg_ver(dwc_otg_core_if_t * core_if, int32_t val);
 extern int32_t dwc_otg_get_param_otg_ver(dwc_otg_core_if_t * core_if);
-#define dwc_param_otg_ver_default 1
+#define dwc_param_otg_ver_default 0
 
 /** @} */
 

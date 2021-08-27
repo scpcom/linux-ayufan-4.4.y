@@ -186,7 +186,7 @@ config MMC_SDHCI_PXAV3
 	depends on CLKDEV_LOOKUP
 	select MMC_SDHCI
 	select MMC_SDHCI_PLTFM
-	default CPU_MMP2
+	default CPU_MMP2 || (ARCH_ARMADA38X && MV_INCLUDE_SDIO)
 	help
 	  This selects the Marvell(R) PXAV3 SD Host Controller.
 	  If you have a MMP2 platform with SD Host Controller
@@ -362,7 +362,7 @@ config MMC_TIFM_SD
 
 config MMC_MVSDIO
 	tristate "Marvell MMC/SD/SDIO host driver"
-	depends on PLAT_ORION || ARCH_FEROCEON || PLAT_ARMADA
+	depends on PLAT_ORION || ARCH_FEROCEON ||  ARCH_ARMADA_XP || ARCH_ARMADA370 || ARCH_ARMADA375
 	---help---
 	  This selects the Marvell SDIO host driver.
 	  SDIO may currently be found on the Kirkwood 88F6281 and 88F6192

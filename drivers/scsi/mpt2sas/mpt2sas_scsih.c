@@ -7527,7 +7527,7 @@ _scsih_expander_node_remove(struct MPT2SAS_ADAPTER *ioc,
 {
 	struct _sas_port *mpt2sas_port, *next;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SAS_RECOVER_REMOVED_ENCS
 	msleep(100);
 #endif
 	/* remove sibling ports attached to this expander */

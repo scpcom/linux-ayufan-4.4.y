@@ -253,7 +253,8 @@ out:
 #define RANGE_OP
 
 static int l2_wt_override = 0;
-#ifdef RANGE_OP
+#if defined(RANGE_OP) || \
+      (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_AURORA_L2_OUTER))
 static DEFINE_SPINLOCK(smp_l2cache_lock);
 #endif
 /*
@@ -563,24 +564,47 @@ void __init aurora_l2_lockdown(u32 cpuId, u32 lock_mask)
 	writel(lock_mask, auroraL2_base+L2_LOCKDOWN_IO_BRG);
 }
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+static u32 l2_ways = 0xffffffff; /* all ways init to L2$ ways */
+#endif
 
 void auroraL2_inv_all(void)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	writel(l2_ways, auroraL2_base+L2_INVAL_WAY_REG);
+#else
 	u32 u   = 0xffff; // all ways
 	writel(u, auroraL2_base+L2_INVAL_WAY_REG);
+#endif
 }
 
 void auroraL2_flush_all(void)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#else
 	u32 u   = 0xffff; // all ways
+#endif
 
     	if (!auroraL2_enable)
 		return;
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	writel(l2_ways, auroraL2_base + L2_FLUSH_WAY_REG);
+#else
 	writel(u, auroraL2_base + L2_FLUSH_WAY_REG);
+#endif
 	cache_sync();
 }
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+/* get the L2$ ways - to enable invalidate of only the L2$ ways */
+static int __init early_l2_ways(char *arg)
+{
+	l2_ways = memparse(arg, NULL);
+	return 0;
+}
+early_param("l2_ways", early_l2_ways);
+#endif
 
 struct regs_entry {
 	u32             reg_address;
@@ -666,15 +690,41 @@ int __init aurora_l2_init(void __iomem *base)
 	{
 
 		/* 1. Write to AuroraL2 Auxiliary Control Register, 0x104
-		*    Setting up Associativity, Way Size, and Latencies
+		*    Setting up Associativity, Way Size, ECC and Latencies
 		*/
 		aux = readl(auroraL2_base + L2_AUX_CTRL_REG);
 		aux &= ~L2ACR_REPLACEMENT_MASK;
 		aux |= l2rep;
-#ifdef CONFIG_MV_SUPPORT_L2_DEPOSIT
+
+#if defined(CONFIG_MV_SUPPORT_L2_DEPOSIT) && !defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		aux &= ~L2ACR_FORCE_WRITE_POLICY_MASK;
 		aux |= L2ACR_FORCE_WRITE_BACK_POLICY;
 #endif
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+		aux &= ~L2ACR_FORCE_WRITE_POLICY_MASK;
+#if defined(CONFIG_AURORA_L2_WBWT_FORCE_WB) || defined(CONFIG_MV_SUPPORT_L2_DEPOSIT)
+		aux |= L2ACR_FORCE_WRITE_BACK_POLICY;
+#elif defined(CONFIG_AURORA_L2_WBWT_FORCE_WT)
+		aux |= L2ACR_FORCE_WRITE_THRO_POLICY;
+#else /* CONFIG_AURORA_L2_WBWT_PAGE_ATTRIBUTE */
+		aux |= L2ACR_FORCE_WRITE_POLICY_DIS;
+#endif
+
+		aux &= ~L2ACR_FORCE_WA_MASK;
+#if defined(CONFIG_AURORA_L2_WA_FORCE_NO_ALLOCATE) || (!defined(CONFIG_AURORA_L2_ECC))
+		aux |= L2ACR_FORCE_WA_NONE;
+#elif defined(CONFIG_AURORA_L2_WA_FORCE_ALLOCATE)  || defined(CONFIG_CACHE_AURORA_L2_ERRATA_ECC_PARTIALS)
+		aux |= L2ACR_FORCE_WA_ALL;
+#else /* CONFIG_AURORA_L2_WA_PAGE_ATTRIBUTE */
+		aux |= L2ACR_FORCE_WA_REQ_ATTRIB;
+#endif
+
+#if defined(CONFIG_AURORA_L2_ECC)
+		/* Enable L2 ECC. 1bit can be corrected, 2bit will cause an excpetion */
+		aux |= L2ACR_ECC_ENABLE;
+#endif
+#endif // CONFIG_SYNO_ARMADA_ARCH_V2
 		writel(aux, auroraL2_base + L2_AUX_CTRL_REG);
 
 		l2_wt_override = ((aux & (0x3)) == 0x2 ? 1:0);

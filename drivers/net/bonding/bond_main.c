@@ -1357,6 +1357,9 @@ static u32 bond_fix_features(struct net_device *dev, u32 features)
 		goto out;
 	}
 
+#ifdef CONFIG_SYNO_ALPINE
+	features &= ~(NETIF_F_GSO_SOFTWARE | NETIF_F_GSO_ROBUST);
+#endif
 	mask = features;
 	features &= ~NETIF_F_ONE_FOR_ALL;
 	features |= NETIF_F_ALL_FOR_ALL;
@@ -1372,9 +1375,16 @@ out:
 	return features;
 }
 
+#ifdef CONFIG_SYNO_ALPINE
+#define BOND_VLAN_FEATURES	(NETIF_F_ALL_CSUM | NETIF_F_SG | \
+				 NETIF_F_FRAGLIST | \
+				 NETIF_F_HIGHDMA | NETIF_F_LRO)
+
+#else
 #define BOND_VLAN_FEATURES	(NETIF_F_ALL_CSUM | NETIF_F_SG | \
 				 NETIF_F_FRAGLIST | NETIF_F_ALL_TSO | \
 				 NETIF_F_HIGHDMA | NETIF_F_LRO)
+#endif
 
 static void bond_compute_features(struct bonding *bond)
 {

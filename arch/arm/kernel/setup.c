@@ -62,74 +62,74 @@
 #include "atags.h"
 #include "tcm.h"
 
-
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_VERSION
 extern char gszSynoHWVersion[];
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_REVISION
 extern char gszSynoHWRevision[];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_HD_NUM
 extern long g_internal_hd_num;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 extern long g_internal_netif_num;
 long g_egiga = 1;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_LED_SPECIAL
 extern long g_sata_led_special;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HDD_HOTPLUG
 extern long g_hdd_hotplug;
 #endif
 
-#ifdef MY_ABC_HERE
-extern unsigned char grgbLanMac[4][16];
+#ifdef SYNO_MAC_ADDRESS
+extern unsigned char grgbLanMac[SYNO_MAC_MAX_V2][16];
+extern int giVenderFormatVersion;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ESATA_7042
 extern long g_esata_7042;
 #endif
 #ifndef MEM_SIZE
 #define MEM_SIZE	(16*1024*1024)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 extern char gszDiskIdxMap[16];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DISK_SEQ_REVERSE
 extern char giDiskSeqReverse[8];
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SWITCH_NET_DEVICE_NAME
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 extern int gSynoHasDynModule;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FLASH_MEMORY_SIZE
 extern long gSynoFlashMemorySize;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 extern int gSynoFactoryUSBFastReset;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
@@ -196,7 +196,7 @@ static int __init early_internal_hd_num(char *p)
 __setup("ihd_num=", early_internal_hd_num);
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_INTERNAL_NETIF_NUM
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);
@@ -288,6 +288,38 @@ static int __init early_mac4(char *p)
 	return 1;
 }
 __setup("mac4=", early_mac4);
+
+static int __init early_macs(char *p)
+{
+	int iMacCount = 0;
+	char *pBegin = p;
+	char *pEnd = strstr(pBegin, ",");
+
+	while (NULL != pEnd && SYNO_MAC_MAX_V2 > iMacCount) {
+		*pEnd = '\0';
+		snprintf(grgbLanMac[iMacCount], sizeof(grgbLanMac[iMacCount]), "%s", pBegin);
+		pBegin = pEnd + 1;
+		pEnd = strstr(pBegin, ",");
+		iMacCount++;
+	}
+
+	if ('\0' != *pBegin && SYNO_MAC_MAX_V2 > iMacCount) {
+		snprintf(grgbLanMac[iMacCount], sizeof(grgbLanMac[iMacCount]), "%s", pBegin);
+	}
+
+	return 1;
+}
+__setup("macs=", early_macs);
+
+static int __init early_vender_format_version(char *p)
+{
+	giVenderFormatVersion = simple_strtol(p, NULL, 10);
+
+	printk("Vender format version: %d\n", giVenderFormatVersion);
+
+	return 1;
+}
+__setup("vender_format_version=", early_vender_format_version);
 #endif
 
 #ifdef SYNO_SWITCH_NET_DEVICE_NAME
@@ -437,7 +469,7 @@ END:
 __setup("flash_size=", early_flash_memory_size);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 static int __init early_factory_usb_fast_reset(char *p)
 {
 	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
@@ -449,7 +481,7 @@ static int __init early_factory_usb_fast_reset(char *p)
 __setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 static int __init early_factory_usb3_disable(char *p)
 {
 	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);
@@ -471,6 +503,17 @@ static int __init early_no_ehci(char *p)
 	return 1;
 }
 __setup("syno_no_ehci=", early_no_ehci);
+#endif
+
+#if defined(SYNO_MVSDIO) && defined(CONFIG_ARCH_ARMADA370) && defined(CONFIG_MV_INCLUDE_SDIO)
+int g_enable_mvsdio = 0;
+
+static int __init enable_mvsdio(char *p) {
+	g_enable_mvsdio = simple_strtol(p, NULL, 10);
+	printk("mvsdio enable : %d\n", (int)g_enable_mvsdio);
+	return 1;
+}
+__setup("enable_mvsdio=", enable_mvsdio);
 #endif
 
 extern void paging_init(struct machine_desc *desc);
@@ -887,7 +930,11 @@ void __init dump_machine_table(void)
 		/* can't use cpu_relax() here as it may require MMU setup */;
 }
 
+#ifdef CONFIG_SYNO_ALPINE
+int __init arm_add_memory(phys_addr_t start, phys_addr_t size)
+#else
 int __init arm_add_memory(phys_addr_t start, unsigned long size)
+#endif
 {
 	struct membank *bank = &meminfo.bank[meminfo.nr_banks];
 
@@ -903,7 +950,24 @@ int __init arm_add_memory(phys_addr_t start, unsigned long size)
 	 */
 	size -= start & ~PAGE_MASK;
 	bank->start = PAGE_ALIGN(start);
+#ifdef CONFIG_SYNO_ALPINE
+#ifndef CONFIG_ARM_LPAE
+	if (bank->start + size < bank->start) {
+		printk(KERN_CRIT "Truncating memory at 0x%08llx to fit in "
+			"32-bit physical address space\n", (long long)start);
+		/*
+		 * To ensure bank->start + bank->size is representable in
+		 * 32 bits, we use ULONG_MAX as the upper limit rather than 4GB.
+		 * This means we lose a page after masking.
+		 */
+		size = ULONG_MAX - bank->start;
+	}
+#endif
+
+	bank->size = size & ~(phys_addr_t)(PAGE_SIZE - 1);
+#else
 	bank->size  = size & PAGE_MASK;
+#endif
 
 	/*
 	 * Check whether this memory region has non-zero size or
@@ -923,7 +987,11 @@ int __init arm_add_memory(phys_addr_t start, unsigned long size)
 static int __init early_mem(char *p)
 {
 	static int usermem __initdata = 0;
+#ifdef CONFIG_SYNO_ALPINE
+	phys_addr_t size;
+#else
 	unsigned long size;
+#endif
 	phys_addr_t start;
 	char *endp;
 
@@ -1020,7 +1088,7 @@ static void __init request_standard_resources(struct machine_desc *mdesc)
  */
 static int __init parse_tag_core(const struct tag *tag)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	if (read_tag(tag->hdr.size) > 2) {
 	if ((read_tag(tag->u.core.flags) & 1) == 0)		
 		root_mountflags &= ~MS_RDONLY;
@@ -1040,7 +1108,7 @@ __tagtable(ATAG_CORE, parse_tag_core);
 
 static int __init parse_tag_mem32(const struct tag *tag)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	return arm_add_memory(read_tag(tag->u.mem.start), read_tag(tag->u.mem.size));
 #else
 	return arm_add_memory(tag->u.mem.start, tag->u.mem.size);
@@ -1049,7 +1117,7 @@ static int __init parse_tag_mem32(const struct tag *tag)
 
 __tagtable(ATAG_MEM, parse_tag_mem32);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_PHYS_ADDR_T_64BIT)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_PHYS_ADDR_T_64BIT)
 static int __init parse_tag_mem64(const struct tag *tag)
 {
 #ifdef CONFIG_ARM_LPAE
@@ -1125,7 +1193,7 @@ __tagtable(ATAG_SERIAL, parse_tag_serialnr);
 
 static int __init parse_tag_revision(const struct tag *tag)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	system_rev = read_tag(tag->u.revision.rev);
 #else
 	system_rev = tag->u.revision.rev;
@@ -1163,7 +1231,7 @@ static int __init parse_tag(const struct tag *tag)
 	struct tagtable *t;
 
 	for (t = &__tagtable_begin; t < &__tagtable_end; t++)
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		if ((read_tag(tag->hdr.tag) == t->tag)) {
 #else
 		if (tag->hdr.tag == t->tag) {
@@ -1181,13 +1249,13 @@ static int __init parse_tag(const struct tag *tag)
  */
 static void __init parse_tags(const struct tag *t)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	for (; read_tag(t->hdr.size); t = tag_next(t))
 #else
 	for (; t->hdr.size; t = tag_next(t))
 #endif
 		if (!parse_tag(t))
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 			early_printk(KERN_WARNING
 #else
 			printk(KERN_WARNING
@@ -1312,7 +1380,7 @@ static struct machine_desc * __init setup_machine_tags(unsigned int nr)
 	 * If we have the old style parameters, convert them to
 	 * a tag list.
 	 */
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 if (read_tag(tags->hdr.tag) != ATAG_CORE)
 #else
 	if (tags->hdr.tag != ATAG_CORE)
@@ -1320,7 +1388,7 @@ if (read_tag(tags->hdr.tag) != ATAG_CORE)
 		convert_to_tag_list(tags);
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	if (read_tag(tags->hdr.tag) != ATAG_CORE) {
 #else
 	if (tags->hdr.tag != ATAG_CORE) {
@@ -1338,7 +1406,7 @@ if (read_tag(tags->hdr.tag) != ATAG_CORE)
 	if (mdesc->fixup)
 		mdesc->fixup(tags, &from, &meminfo);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	if (read_tag(tags->hdr.tag) == ATAG_CORE) {
 #else
 	if (tags->hdr.tag == ATAG_CORE) {
@@ -1419,7 +1487,11 @@ void __init setup_arch(char **cmdline_p)
 	conswitchp = &dummy_con;
 #endif
 #endif
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 	early_trap_init();
+#endif
 
 	if (mdesc->init_early)
 		mdesc->init_early();

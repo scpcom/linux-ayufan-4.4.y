@@ -1568,8 +1568,7 @@ static uint8_t resize_fifos(dwc_otg_core_if_t * core_if)
 		/* Non-periodic Tx FIFO */
 		nptxfsz_bak = DWC_READ_REG32(&global_regs->gnptxfsiz);
 		nptxfifosize.b.depth = params->dev_nperio_tx_fifo_size;
-		//start_address = params->dev_rx_fifo_size;
-		start_address = 0x400; // Makarand: USB2 DEBUG
+		start_address = 0x400;
 		nptxfifosize.b.startaddr = start_address;
 
 		DWC_WRITE_REG32(&global_regs->gnptxfsiz, nptxfifosize.d32);

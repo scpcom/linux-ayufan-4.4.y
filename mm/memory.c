@@ -722,9 +722,15 @@ static void print_bad_pte(struct vm_area_struct *vma, unsigned long addr,
 		(long long)pte_val(pte), (long long)pmd_val(*pmd));
 	if (page)
 		dump_page(page);
+#ifdef CONFIG_SYNO_ALPINE
+	printk(KERN_ALERT
+		"addr:%p vm_flags:%08lx anon_vma:%p mapping:%p index:%llx\n",
+		(void *)addr, vma->vm_flags, vma->anon_vma, mapping, (unsigned long long)index);
+#else
 	printk(KERN_ALERT
 		"addr:%p vm_flags:%08lx anon_vma:%p mapping:%p index:%lx\n",
 		(void *)addr, vma->vm_flags, vma->anon_vma, mapping, index);
+#endif
 	/*
 	 * Choose text because data symbols depend on CONFIG_KALLSYMS_ALL=y
 	 */

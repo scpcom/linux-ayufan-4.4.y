@@ -541,6 +541,6 @@ config MTD_LATCH_ADDR
 
 config SYNO_MTD_PHYMAPS
         bool "Flash device mapped on Synology Board"
-        depends on MTD_CFI && ( SYNO_MPC85XX_COMMON || SYNO_PLX_PORTING || SYNO_ARMADA)
+        depends on MTD_CFI && ( SYNO_MPC85XX_COMMON || SYNO_PLX_PORTING || SYNO_ARMADA|| SYNO_ARMADA_V2)
 
 endmenu

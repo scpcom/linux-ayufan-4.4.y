@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd_if.h $
- * $Revision: #11 $
- * $Date: 2011/05/17 $
- * $Change: 1774110 $
+ * $Revision: #12 $
+ * $Date: 2011/10/26 $
+ * $Change: 1873028 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -177,7 +177,7 @@ extern uint32_t dwc_otg_hcd_otg_port(dwc_otg_hcd_t * hcd);
 /**
  * Returns OTG version - either 1.3 or 2.0.
  *
- * @param hcd The HCD
+ * @param core_if The core_if structure pointer
  */
 extern uint16_t dwc_otg_get_otg_version(dwc_otg_core_if_t * core_if);
 
@@ -332,6 +332,7 @@ extern uint32_t dwc_otg_hcd_urb_get_iso_desc_actual_length(dwc_otg_hcd_urb_t *
  * @param dwc_otg_hcd The HCD
  * @param dwc_otg_urb DWC_OTG URB
  * @param ep_handle Out parameter for returning endpoint handle
+ * @param atomic_alloc Flag to do atomic allocation if needed
  *
  * Returns -DWC_E_NO_DEVICE if no device is connected.
  * Returns -DWC_E_NO_MEMORY if there is no enough memory.

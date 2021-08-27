@@ -89,19 +89,7 @@ static void ecryptfs_destroy_inode(struct inode *inode)
 	struct ecryptfs_inode_info *inode_info;
 
 	inode_info = ecryptfs_inode_to_private(inode);
-#ifdef MY_ABC_HERE
-	if (inode_info->lower_file) {
-		struct dentry *lower_dentry = inode_info->lower_file->f_dentry;
-
-		BUG_ON(!lower_dentry);
-		if (lower_dentry->d_inode) {
-			fput(inode_info->lower_file);
-			inode_info->lower_file = NULL;
-		}
-	}
-#else
 	BUG_ON(inode_info->lower_file);
-#endif
 	ecryptfs_destroy_crypt_stat(&inode_info->crypt_stat);
 	call_rcu(&inode->i_rcu, ecryptfs_i_callback);
 }

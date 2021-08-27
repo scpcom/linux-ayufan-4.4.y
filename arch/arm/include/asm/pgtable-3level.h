@@ -32,13 +32,22 @@
  * There are enough spare bits in a page table entry for the kernel specific
  * state.
  */
+#if defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
+#define PTRS_PER_PTE		(512 >> (CONFIG_ARM_PAGE_SIZE_LARGE_SHIFT - 12))
+#else
 #define PTRS_PER_PTE		512
+#endif
 #define PTRS_PER_PMD		512
 #define PTRS_PER_PGD		4
 
 #define PTE_HWTABLE_PTRS	(PTRS_PER_PTE)
 #define PTE_HWTABLE_OFF		(0)
+#ifdef CONFIG_SYNO_ALPINE
+#define PTE_HWTABLE_SIZE	(512 * 8) /*512 64bit values*/
+#define PTE_HWTABLE_MASK	(~(PTE_HWTABLE_SIZE-1))
+#else
 #define PTE_HWTABLE_SIZE	(PTRS_PER_PTE * sizeof(u64))
+#endif
 
 /*
  * PGDIR_SHIFT determines the size a top-level page table entry can map.
@@ -107,4 +116,70 @@
  */
 #define L_PGD_SWAPPER		(_AT(pgdval_t, 1) << 55)	/* swapper_pg_dir entry */
 
+#ifdef CONFIG_SYNO_ALPINE
+#ifndef __ASSEMBLY__
+
+#define pud_none(pud)		(!pud_val(pud))
+#define pud_bad(pud)		(!(pud_val(pud) & 2))
+#define pud_present(pud)	(pud_val(pud))
+
+#define pud_clear(pudp)			\
+	do {				\
+		*pudp = __pud(0);	\
+		clean_pmd_entry(pudp);	\
+	} while (0)
+
+#define set_pud(pudp, pud)		\
+	do {				\
+		*pudp = pud;		\
+		flush_pmd_entry(pudp);	\
+	} while (0)
+
+static inline pmd_t *pud_page_vaddr(pud_t pud)
+{
+	return __va(pud_val(pud) & PHYS_MASK & (s32)PTE_HWTABLE_MASK);
+}
+
+/* Find an entry in the second-level page table.. */
+#define pmd_index(addr)		(((addr) >> PMD_SHIFT) & (PTRS_PER_PMD - 1))
+static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
+{
+	return (pmd_t *)pud_page_vaddr(*pud) + pmd_index(addr);
+}
+
+#define pmd_bad(pmd)		(!(pmd_val(pmd) & 2))
+
+#define copy_pmd(pmdpd,pmdps)		\
+	do {				\
+		*pmdpd = *pmdps;	\
+		flush_pmd_entry(pmdpd);	\
+	} while (0)
+
+#define pmd_clear(pmdp)			\
+	do {				\
+		*pmdp = __pmd(0);	\
+		clean_pmd_entry(pmdp);	\
+	} while (0)
+
+/*
+ * For 3 levels of paging the PTE_EXT_NG bit will be set for user address ptes
+ * that are written to a page table but not for ptes created with mk_pte.
+ *
+ * In hugetlb_no_page, a new huge pte (new_pte) is generated and passed to
+ * hugetlb_cow, where it is compared with an entry in a page table.
+ * This comparison test fails erroneously leading ultimately to a memory leak.
+ *
+ * To correct this behaviour, we mask off PTE_EXT_NG for any pte that is
+ * present before running the comparison.
+ */
+#define __HAVE_ARCH_PTE_SAME
+#define pte_same(pte_a,pte_b)	((pte_present(pte_a) ? pte_val(pte_a) & ~PTE_EXT_NG	\
+					: pte_val(pte_a))				\
+				== (pte_present(pte_b) ? pte_val(pte_b) & ~PTE_EXT_NG	\
+					: pte_val(pte_b)))
+
+#define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,__pte(pte_val(pte)|(ext)))
+
+#endif /* __ASSEMBLY__ */
+#endif  
 #endif /* _ASM_PGTABLE_3LEVEL_H */

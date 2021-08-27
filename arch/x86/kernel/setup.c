@@ -118,20 +118,19 @@
 #include <asm/alternative.h>
 #include <asm/prom.h>
 
-
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_REVISION
 extern char gszSynoHWRevision[];
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_VERSION
 extern char gszSynoHWVersion[];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_HD_NUM
 extern long g_internal_hd_num;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 extern long g_internal_netif_num;
 #endif
 
@@ -139,58 +138,68 @@ extern long g_internal_netif_num;
 extern long g_is_sas_model;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AHCI_SWITCH
 extern long g_ahci_switch;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_LED_SPECIAL
 extern long g_sata_led_special;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HDD_HOTPLUG
 extern long g_hdd_hotplug;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PORT_MAP
 extern char gszSataPortMap[8];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 extern char gszDiskIdxMap[16];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DISK_SEQ_REVERSE
 extern char giDiskSeqReverse[8];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 extern int gSynoHasDynModule;
 #endif
 
-#ifdef MY_ABC_HERE
-extern unsigned char grgbLanMac[4][16];
+#ifdef SYNO_MAC_ADDRESS
+extern unsigned char grgbLanMac[SYNO_MAC_MAX_V2][16];
+extern int giVenderFormatVersion;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SWITCH_NET_DEVICE_NAME
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 extern int gSynoFactoryUSBFastReset;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
 #ifdef CONFIG_SYNO_DUAL_HEAD
 extern int gSynoDualHead;
+#endif
+
+#ifdef SYNO_DETECT_ERROR_BOOT
+extern char gszErrorBoot[16];
+#endif
+
+#ifdef SYNO_SPECIFY_SYSTEM_RAID
+extern char gszRaidRootUuid[48];
+extern char gszRaidSwapUuid[48];
 #endif
 
 /*
@@ -639,7 +648,7 @@ static int __init early_internal_hd_num(char *p)
 __setup("ihd_num=", early_internal_hd_num);
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_INTERNAL_NETIF_NUM
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);
@@ -667,7 +676,7 @@ static int __init early_SASmodel(char *p)
 __setup("SASmodel=", early_SASmodel);
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_AHCI_SWITCH
 static int __init early_ahci_switch(char *p)
 {
         g_ahci_switch = simple_strtol(p, NULL, 10);
@@ -813,6 +822,38 @@ static int __init early_mac4(char *p)
 	return 1;
 }
 __setup("mac4=", early_mac4);
+
+static int __init early_macs(char *p)
+{
+	int iMacCount = 0;
+	char *pBegin = p;
+	char *pEnd = strstr(pBegin, ",");
+
+	while (NULL != pEnd && SYNO_MAC_MAX_V2 > iMacCount) {
+		*pEnd = '\0';
+		snprintf(grgbLanMac[iMacCount], sizeof(grgbLanMac[iMacCount]), "%s", pBegin);
+		pBegin = pEnd + 1;
+		pEnd = strstr(pBegin, ",");
+		iMacCount++;
+	}
+
+	if ('\0' != *pBegin && SYNO_MAC_MAX_V2 > iMacCount) {
+		snprintf(grgbLanMac[iMacCount], sizeof(grgbLanMac[iMacCount]), "%s", pBegin);
+	}
+
+	return 1;
+}
+__setup("macs=", early_macs);
+
+static int __init early_vender_format_version(char *p)
+{
+	giVenderFormatVersion = simple_strtol(p, NULL, 10);
+
+	printk("Vender format version: %d\n", giVenderFormatVersion);
+
+	return 1;
+}
+__setup("vender_format_version=", early_vender_format_version);
 #endif
 
 #ifdef SYNO_SERIAL
@@ -833,7 +874,7 @@ static int __init early_custom_sn(char *p)
 __setup("custom_sn=", early_custom_sn);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 static int __init early_factory_usb_fast_reset(char *p)
 {
 	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
@@ -845,7 +886,7 @@ static int __init early_factory_usb_fast_reset(char *p)
 __setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 static int __init early_factory_usb3_disable(char *p)
 {
 	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);
@@ -867,6 +908,34 @@ static int __init early_dual_head(char *p)
 	return 1;
 }
 __setup("dual_head=", early_dual_head);
+#endif
+
+#ifdef SYNO_DETECT_ERROR_BOOT
+static int __init early_error_boot(char *p)
+{
+        snprintf(gszErrorBoot, sizeof(gszErrorBoot), "%s", p);
+        printk("DS doesn't boot from default boot device: %s\n", gszErrorBoot);
+        return 1;
+}
+__setup("error_boot=", early_error_boot);
+#endif
+
+#ifdef SYNO_SPECIFY_SYSTEM_RAID
+static int __init early_root_uuid(char *p)
+{
+        snprintf(gszRaidRootUuid, sizeof(gszRaidRootUuid), "%s", p);
+        printk("Specify the UUID of root: %s\n", gszRaidRootUuid);
+        return 1;
+}
+__setup("root_uuid=", early_root_uuid);
+
+static int __init early_swap_uuid(char *p)
+{
+        snprintf(gszRaidSwapUuid, sizeof(gszRaidSwapUuid), "%s", p);
+        printk("Specify the UUID of swap: %s\n", gszRaidSwapUuid);
+        return 1;
+}
+__setup("swap_uuid=", early_swap_uuid);
 #endif
 
 /*

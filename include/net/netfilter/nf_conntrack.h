@@ -139,7 +139,7 @@ struct nf_conn {
 	u_int32_t secmark;
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || \
     defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
 	struct {
@@ -375,7 +375,7 @@ extern unsigned int nf_conntrack_max;
 extern unsigned int nf_conntrack_hash_rnd;
 void init_nf_conntrack_hash_rnd(void);
 
-#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_MV_LINUX_COUNTERS_DISABLE)
+#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_MV_LINUX_COUNTERS_DISABLE)
 
 #define NF_CT_STAT_INC(net, count)
 #define NF_CT_STAT_INC_ATOMIC(net, count)

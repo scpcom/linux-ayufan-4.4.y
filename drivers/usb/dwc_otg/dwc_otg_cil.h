@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_cil.h $
- * $Revision: #118 $
- * $Date: 2011/05/17 $
- * $Change: 1774110 $
+ * $Revision: #122 $
+ * $Date: 2011/10/24 $
+ * $Change: 1871160 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -73,6 +73,7 @@ typedef enum _data_buffer_mode {
 #define OTG_CORE_REV_2_91a	0x4F54291A
 #define OTG_CORE_REV_2_92a	0x4F54292A
 #define OTG_CORE_REV_2_93a	0x4F54293A
+#define OTG_CORE_REV_2_94a	0x4F54294A
 
 /**
  * Information for each ISOC packet.
@@ -97,8 +98,8 @@ typedef struct dwc_ep {
 	unsigned active:1;
 
 	/**
-	 *Periodic Tx FIFO # for IN EPs For INTR EP set to 0 to use non-periodic Tx FIFO
-	 * If dedicated Tx FIFOs are enabled for all IN Eps - Tx FIFO # FOR IN EPs*/
+	 * Periodic Tx FIFO # for IN EPs For INTR EP set to 0 to use non-periodic
+	 * Tx FIFO. If dedicated Tx FIFOs are enabled Tx FIFO # FOR IN EPs*/
 	unsigned tx_fifo_num:4;
 	/** EP type: 0 - Control, 1 - ISOC,	 2 - BULK,	3 - INTR */
 	unsigned type:2;
@@ -160,8 +161,17 @@ typedef struct dwc_ep {
 	uint32_t cfi_req_len;
 #endif				//DWC_UTE_CFI
 
+/** Max DMA Descriptor count for any EP */
+#define MAX_DMA_DESC_CNT 256
 	/** Allocated DMA Desc count */
 	uint32_t desc_cnt;
+
+	/** bInterval */
+	uint32_t bInterval;
+	/** Next frame num to setup next ISOC transfer */
+	uint32_t frame_num;
+	/** Indicates SOF number overrun in DSTS */
+	uint8_t frm_overrun;
 
 #ifdef DWC_UTE_PER_IO
 	/** Next frame num for which will be setup DMA Desc */
@@ -201,8 +211,6 @@ typedef struct dwc_ep {
 	/** Frame number of pattern data */
 	uint32_t sync_frame;
 
-	/** bInterval */
-	uint32_t bInterval;
 	/** ISO Packet number per frame */
 	uint32_t pkt_per_frm;
 	/** Next frame num for which will be setup DMA Desc */
@@ -433,9 +441,9 @@ typedef struct dwc_otg_core_params {
 	int32_t dma_enable;
 
 	/**
-	 * When DMA mode is enabled specifies whether to use address DMA or DMA Descritor mode for accessing the data
-	 * FIFOs in device mode. The driver will automatically detect the value for this
-	 * parameter if none is specified.
+	 * When DMA mode is enabled specifies whether to use address DMA or DMA
+	 * Descriptor mode for accessing the data FIFOs in device mode. The driver
+	 * will automatically detect the value for this if none is specified.
 	 * 0 - address DMA
 	 * 1 - DMA Descriptor(default, if available)
 	 */
@@ -680,6 +688,22 @@ typedef struct dwc_otg_core_params {
 	 */
 	int32_t dev_out_nak;
 
+	/** DCFG: Enable Continue on BNA
+	 * After receiving BNA interrupt the core disables the endpoint,when the
+	 * endpoint is re-enabled by the application the core starts processing
+	 * 0 - from the DOEPDMA descriptor
+	 * 1 - from the descriptor which received the BNA.
+	 */
+	int32_t cont_on_bna;
+
+	/** GAHBCFG: AHB Single Support
+	 * This bit when programmed supports SINGLE transfers for remainder
+	 * data in a transfer for DMA mode of operation.
+	 * 0 - in this case the remainder data will be sent using INCR burst size.
+	 * 1 - in this case the remainder data will be sent using SINGLE burst size.
+	 */
+	int32_t ahb_single;
+
 	/** Core Power down mode
 	 * 0 - No Power Down is enabled
 	 * 1 - Reserved
@@ -757,7 +781,6 @@ struct dwc_otg_dev_regs_backup {
 	uint32_t diepctl[MAX_EPS_CHANNELS];
 	uint32_t dieptsiz[MAX_EPS_CHANNELS];
 	uint32_t diepdma[MAX_EPS_CHANNELS];
-	uint32_t doepfn[MAX_EPS_CHANNELS];
 };
 /**
  * The <code>dwc_otg_core_if</code> structure contains information needed to manage
@@ -958,6 +981,9 @@ struct dwc_otg_core_if {
 
 	/** Index of fisrt EP in nextep_seq array which should be re-enabled **/
 	uint8_t first_in_nextep_seq;
+
+	/** Frame number while entering to ISR - needed for ISOCs **/
+	uint32_t frame_num;
 
 };
 

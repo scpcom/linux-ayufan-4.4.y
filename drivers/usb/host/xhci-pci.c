@@ -63,6 +63,9 @@ static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
 static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
 	struct pci_dev		*pdev = to_pci_dev(dev);
+#ifndef CONFIG_USB_ETRON_HUB
+	struct usb_hcd      *hcd = xhci_to_hcd(xhci);
+#endif
 
 	/* Look for vendor-specific quirks */
 	if (pdev->vendor == PCI_VENDOR_ID_FRESCO_LOGIC &&
@@ -118,12 +121,33 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 
 	if (pdev->vendor == PCI_VENDOR_ID_ETRON &&
 			pdev->device == PCI_DEVICE_ID_ASROCK_P67) {
-#ifdef MY_ABC_HERE
-		xhci_err(xhci, "Etron chip found.\n");
-#endif
+#ifndef CONFIG_USB_ETRON_HUB
+		hcd->chip_id = HCD_CHIP_ID_UNKNOWN;
+		pci_read_config_dword(pdev, 0x58, &xhci->hcc_params1);
+		xhci->hcc_params1 &= 0xffff;
+		xhci_init_ejxxx(xhci);
+		if (pdev->device == PCI_DEVICE_ID_ETRON_EJ168)
+			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ168;
+		else if (pdev->device == PCI_DEVICE_ID_ETRON_EJ188)
+			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ188;
+
+		xhci_dbg(xhci, "Etron chip ID %02x\n", hcd->chip_id);
+		xhci->quirks |= XHCI_SPURIOUS_SUCCESS;
+		xhci->quirks |= XHCI_HUB_INFO_QUIRK;
+		xhci->quirks |= XHCI_RESET_ON_RESUME;
+		xhci_dbg(xhci, "QUIRK: Resetting on resume\n");
+		if (((xhci->hcc_params1 & 0xff) == 0x30) ||
+			((xhci->hcc_params1 & 0xff) == 0x40)) {
+			xhci->quirks |= XHCI_EP_INFO_QUIRK;
+		}
+#else
 		xhci->quirks |= XHCI_RESET_ON_RESUME;
 		xhci_dbg(xhci, "QUIRK: Resetting on resume\n");
 		xhci->quirks |= XHCI_TRUST_TX_LENGTH;
+#endif
+#ifdef SYNO_USB3_PCI_ID_DEFINE
+		xhci_err(xhci, "Etron chip found.\n");
+#endif
 	}
 	if (pdev->vendor == PCI_VENDOR_ID_VIA)
 		xhci->quirks |= XHCI_RESET_ON_RESUME;
@@ -167,8 +191,10 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	struct hc_driver *driver;
 	struct usb_hcd *hcd;
 
+#ifdef CONFIG_USB_ETRON_HUB
 	if (dev->vendor == PCI_VENDOR_ID_ETRON)
 		return -ENODEV;
+#endif
 
 	driver = (struct hc_driver *)id->driver_data;
 	/* Register the USB 2.0 roothub.

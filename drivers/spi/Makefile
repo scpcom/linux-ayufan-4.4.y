@@ -37,12 +37,17 @@ endif
 ifeq ($(CONFIG_SPI_MSPD_LOW_SPEED),y)
     SPI_MSPD=y
 endif
-obj-$(SPI_MSPD)				+= spi-c2000-dma.o
-obj-$(SPI_MSPD)				+= spi-c2000.o
+#obj-$(SPI_MSPD)				+= spi-c2000-dma.o
+#obj-$(SPI_MSPD)				+= spi-c2000.o
 endif
 
 obj-$(CONFIG_SPI_DAVINCI)		+= spi-davinci.o
+ifeq ($(CONFIG_SYNO_COMCERTO),y)
+obj-$(CONFIG_SPI_DESIGNWARE)		+= designware_spi.o
+obj-$(CONFIG_SPI_DESIGNWARE)		+= designware_spi_dma.o
+else
 obj-$(CONFIG_SPI_DESIGNWARE)		+= spi-dw.o
+endif
 obj-$(CONFIG_SPI_DW_MMIO)		+= spi-dw-mmio.o
 obj-$(CONFIG_SPI_DW_PCI)		+= spi-dw-midpci.o
 spi-dw-midpci-objs			:= spi-dw-pci.o spi-dw-mid.o

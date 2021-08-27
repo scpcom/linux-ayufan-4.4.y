@@ -367,11 +367,11 @@ typedef enum _retcode
 #define DMA_CTL_SINC_MASK				0x3
 #define DMA_CTL_SINC_SHIFT				9
 
-#define DMA_CTL_DEST_MSIZE				0x3 //0x1 		/* Number of data items to be transferred = 4 */
+#define DMA_CTL_DEST_MSIZE				0x1 //0x1	/* Number of data items to be transferred = 4 */
 #define DMA_CTL_DEST_MSIZE_MASK			0x7
 #define DMA_CTL_DEST_MSIZE_SHIFT		11
 
-#define DMA_CTL_SRC_MSIZE				0x3 //0x1			/* Number of data items to be transferred = 4 */
+#define DMA_CTL_SRC_MSIZE		0x2 //0x3			/* Number of data items to be transferred = 4 */
 #define DMA_CTL_SRC_MSIZE_MASK			0x7
 #define DMA_CTL_SRC_MSIZE_SHIFT			14
 

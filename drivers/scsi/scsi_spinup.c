@@ -37,6 +37,10 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
+#ifdef CONFIG_SYNO_ARMADA_V2
+extern int ss_stats[128];
+#endif
+
 /*structure: spinup_config=<spinup_max>,<spinup_timout> example: spinup_config=2,6 (two max spinup disks, 6 seconds timeout) */
 static char *cmdline = NULL;
 
@@ -136,7 +140,7 @@ int timeout_to_jiffies (int timeout)
 			break;
 		case 253:	//printf("vendor-specific");
 			break;
-		case 254:	//printf("?reserved");
+		case 254:	//printf("reserved");
 			break;
 		case 255:	//printf("21 minutes + 15 seconds");
 			secs = 21 * 60 + 15;
@@ -193,15 +197,21 @@ int standby_delete_timer(struct scsi_device *sdev)
 	return rtn;
 }
 
-
 void standby_times_out(struct scsi_device *sdev)
 {
 	unsigned long flags = 0;
 
+#ifdef CONFIG_SYNO_ARMADA_V2
+	//printk("\nDisk [%d] timeout done, going to sleep...\n",sdev->ss_id);
+	sdev->sdev_power_state = SDEV_PW_STANDBY_TIMEOUT_PASSED;
+	ss_stats[sdev->ss_id] = sdev->sdev_power_state;
+#else
 // 	printk("\nDisk [%d] timeout done, going to sleep...\n",sdev->id);
 	spin_unlock_irqrestore(sdev->host->host_lock, flags);
 	sdev->sdev_power_state = SDEV_PW_STANDBY_TIMEOUT_PASSED;
 	spin_lock_irqsave(sdev->host->host_lock, flags);
+#endif
+
 	standby_delete_timer(sdev);
 }
 
@@ -265,16 +275,16 @@ int scsi_spinup_get_timeout(void)
 /* __setup kernel line parsing and setting up the spinup feature */
 int __init scsi_spinup_init(void)
 {
-	printk("SCSI Scattered Spinup:\n");
+	printk("SCSI Staggered Spinup:\n");
 	spinup_max = scsi_parse_spinup_max(cmdline);
 	spinup_timeout = scsi_parse_spinup_timeout(cmdline);
 	if ((spinup_max == 0) || (spinup_timeout == 0)){
 		spinup_enabled = 0;
-		printk("SCSI Scattered Spinup Feature Status: Disabled\n");
+		printk("SCSI Staggered Spinup Feature Status: Disabled\n");
 	}else{
 		spinup_enabled = 1;
 		atomic_set(&spinup_now,spinup_max);
-		printk("SCSI Scattered Spinup Feature Status: Enabled\n");
+		printk("SCSI Staggered Spinup Feature Status: Enabled\n");
 	}
 	INIT_LIST_HEAD(&spinup_list);
 	return 0;
@@ -303,6 +313,9 @@ int scsi_spinup_device(struct scsi_cmnd *cmd)
 		case SDEV_PW_STANDBY:
 		case SDEV_PW_STANDBY_TIMEOUT_PASSED:
 			cmd->device->sdev_power_state = SDEV_PW_WAIT_FOR_SPIN_UP;
+#ifdef CONFIG_SYNO_ARMADA_V2
+			ss_stats[cmd->device->ss_id] = cmd->device->sdev_power_state;
+#endif
 			/* disk will wait here to his turn to spinup */
 // 			printk("\nDisk [%d] waiting to spinup...\n",cmd->device->id);
 			if (!scsi_spinup_down())
@@ -312,6 +325,9 @@ int scsi_spinup_device(struct scsi_cmnd *cmd)
 				return 1;
 			}
 			cmd->device->sdev_power_state = SDEV_PW_SPINNING_UP;
+#ifdef CONFIG_SYNO_ARMADA_V2
+			ss_stats[cmd->device->ss_id] = cmd->device->sdev_power_state;
+#endif
 			/* starting timer for the spinup process */
 // 			printk("\nDisk [%d] spinning up...\n",cmd->device->id);
 			spinup_add_timer(cmd->device, scsi_spinup_get_timeout(), spinup_times_out);
@@ -354,6 +370,9 @@ int scsi_spinup_device_dequeue_next(void)
 		if (scsi_spinup_down())
 		{
 			entry->sdev->sdev_power_state = SDEV_PW_SPINNING_UP;
+#ifdef CONFIG_SYNO_ARMADA_V2
+			ss_stats[entry->sdev->ss_id] = entry->sdev->sdev_power_state;
+#endif
 			spinup_add_timer(entry->sdev, scsi_spinup_get_timeout(), spinup_times_out);
 			scsi_internal_device_unblock(entry->sdev);
 			list_del(ptr);

@@ -383,7 +383,7 @@ config CPU_FEROCEON_OLD_ID
 	  Relevant for Feroceon-1850 and early Feroceon-2850.
 
 choice
-	prompt "Marvell Sheeva CPU Architecture"
+	prompt "CPU Architecture"
 	default CPU_SHEEVA_PJ4B_V7
 
 config CPU_SHEEVA_PJ4B_V6
@@ -434,7 +434,8 @@ config CPU_V6K
 
 # ARMv7
 config CPU_V7
-	bool "Support ARM V7 processor" if ARCH_INTEGRATOR || MACH_REALVIEW_EB || MACH_REALVIEW_PBX
+	bool "Support ARM V7 processor" if ARCH_INTEGRATOR || MACH_REALVIEW_EB || MACH_REALVIEW_PBX ||\
+					   ARCH_ARMADA375 || ARCH_ARMADA38X
 	select CPU_32v6K
 	select CPU_32v7
 	select CPU_ABRT_EV7
@@ -794,14 +795,52 @@ config CPU_SPECULATIVE_ACCESS_DISABLED
 	bool "Disable speculative accesses"
 	depends on CPU_V7 && ARCH_COMCERTO && SYNO_COMCERTO
 	help
-	  Disable speculative accesses for the processor. This reduces overhead of cache maintenance for
-	  DMA mapped memory zones but may reduce overall system memory performance. If unsure, say N.
+	  Disable speculative accesses for the processor. This may reduce overall system memory performance but
+	  can allow other, potentially unsafe, optimizations (see below). If unsure, say N.
+
+config CPU_DMA_PARTIAL_INVALIDATES
+	bool "Do partial invalidates in the DMA management functions"
+	depends on CPU_V7 && ARCH_COMCERTO && CPU_SPECULATIVE_ACCESS_DISABLED && SYNO_COMCERTO
+	help
+	  Say Y here to reduce the overhead of cache maintenance for DMA mapped memory zones. 
+	  WARNING: UNSAFE, this may lead to random memory corruption. If unsure, say N.
 
 config CPU_BPREDICT_DISABLE
 	bool "Disable branch prediction"
 	depends on CPU_ARM1020 || CPU_V6 || CPU_V6K || CPU_MOHAWK || CPU_XSC3 || CPU_V7 || CPU_FA526
 	help
 	  Say Y here to disable branch prediction.  If unsure, say N.
+
+config CPU_L1_CACHE_PREF_ENABLE
+	bool "Enable CPU L1 Cache Prefetch"
+	depends on CPU_V7 && SYNO_ARMADA_ARCH_V2
+	default y if CPU_V7 && (ARCH_ARMADA375 || ARCH_ARMADA38X)
+	help
+	  Say Y here to enable L1 cache prefetch.
+	  If unsure, say N.
+	  L1 cache prefetch is performance feature,
+	  impact mainly cpu read operations.
+
+config PL310_CACHE_PREF_ENABLE
+	bool "Enable PL310 L2 Cache Prefetch"
+	depends on CACHE_PL310  && SYNO_ARMADA_ARCH_V2
+	default y if CACHE_PL310 && (ARCH_ARMADA375 || ARCH_ARMADA38X)
+	help
+	  Say Y here to enable PL310 L2 cache prefetch features.
+	  If unsure, say N.
+	  PL310 L2 cache prefetch-related features may improve
+	  overall system performance.
+
+config SCU_SPECULATIVE_LINEFILLS_ENABLE
+	bool "Enable SCU Speculative linefills to L2"
+	depends on CACHE_PL310 && HAVE_ARM_SCU && SYNO_ARMADA_ARCH_V2
+	default y if ARCH_ARMADA38X
+	help
+	  Say Y here to enable SCU Speculative linefills to L2.
+	  If unsure, say N.
+	  When set, coherent linefill requests are sent speculatively
+	  to the L2C-310 in parallel with the tag look-up.
+	  This feature may improve overall system performance.
 
 config TLS_REG_EMUL
 	bool
@@ -916,7 +955,17 @@ config SHEEVA_ERRATA_ARM_CPU_4413
 
 config SHEEVA_ERRATA_ARM_CPU_4659
 	bool "Sheeva Errata 4659: Add ISB following L1 I$ Invalidate by MVA"
-	depends on CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7
+	depends on (CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7) && (SYNO_ARMADA_ARCH || SYNO_ARMADA_ARCH_V2)
+	help
+	  I-Cache maintenance by using an MVA command can cause other instructions
+	  in I-Fetch to be executed twice.
+	  WA: Follow I-Cache maintenance by an MVA command with an Instruction 
+	  Synchronization Barrier (ISB) instruction. This instruction flushes the
+	  pipeline after the maintenance operation, deleting any double-instructions.
+
+config SHEEVA_ERRATA_ARM_CPU_4754
+	bool "Sheeva Errata 4754: Add ISB following L1 I$ Invalidate by MVA"
+	depends on (CPU_SHEEVA_PJ4B_V6 || CPU_SHEEVA_PJ4B_V7) && SYNO_ARMADA_ARCH_V2
 	help
 	  I-Cache maintenance by using an MVA command can cause other instructions
 	  in I-Fetch to be executed twice.
@@ -1114,7 +1163,7 @@ config CPU_FREQ_ARMADA_XP
 
 config STANDBY_UART_WAKE
 	bool "Enable wake up from standby by UART"
-	depends on ARCH_ARMADA_XP && CPU_IDLE && HOTPLUG_CPU
+	depends on ((ARCH_ARMADA_XP && HOTPLUG_CPU) || (ARCH_ARMADA370 && SYNO_ARMADA_ARCH_V2)) && CPU_IDLE
 
 config ARMADA_DEEP_IDLE_SAVE_WINDOWS_STATE
 	bool "Enable saving of the cpus windows state"
@@ -1139,6 +1188,16 @@ config ARMADA_SUPPORT_DEEP_IDLE_CESA_USE
 	  This setup is required to override the bootROM code when internal registers
 	  offeset is other than 0xD0000000.
 
+config ARMADA_XP_SW_SNOOP_DISABLE
+	bool "Enable Snoop disabling by SW"
+	depends on SHEEVA_DEEP_IDLE && ARCH_ARMADA_XP && SYNO_ARMADA_ARCH_V2
+	default y
+	help
+	 In ArmadaXP, disabling the cpu's snoop enable bit by the HW mechanism
+	 might lead to a race that may cause wrong setting of the snoop enable bits.
+	 This issue is solved by letting SW to modify those bits under STREX/LDREX
+	 loop protection.
+
 config CACHE_AURORA_L2
 	bool "Enable Marvell Aurora L2 cache controller"
 	depends on ARCH_ARMADA_XP || ARCH_ARMADA370
@@ -1147,12 +1206,106 @@ config CACHE_AURORA_L2
 	help
 	  This option enables the Marvell Aurora L2 cache controller.
 
+config CACHE_AURORA_L2_ECC
+	bool "Enable Marvell Aurora L2 ECC"
+	depends on (ARCH_ARMADA_XP || ARCH_ARMADA370) && SYNO_ARMADA_ARCH_V2
+	default y
+	select CACHE_AURORA_L2_ERRATA_ECC_PARTIALS
+	help
+	  This config enables the Marvell Aurora L2 ECC.
+	  The L2 ECC protection is guaranteed to detect a double-bit error,
+	  and to correct a single-bit error in the L2 data arrays.
+	  If unsure, say Y.
+
+config CACHE_AURORA_L2_ERRATA_ECC_PARTIALS
+	bool "Aurora L2 Cache ECC Errata: Force L2 cache WA"
+	depends on (ARCH_ARMADA_XP || ARCH_ARMADA370) && CACHE_AURORA_L2_ECC && SYNO_ARMADA_ARCH_V2
+	help
+	  Due to wrong handling of cache line partials when the L2 ECC is enabled,
+	  an L2 ECC exception might be generated.
+	  This failure has no effect as long that L2 ECC is not enabled.
+	  WA: Force L2 cache Write Allocate (WA) regardless of the specific cache
+	  line attribute in the PT.
+
 config AURORA_L2_PT_WALK
 	bool "Enable Marvell page table walk in L2 to improve performance"
 	depends on CACHE_AURORA_L2
 	default y
 	help
 	  This option enables PTE caching in L2 to improve performance.
+
+choice
+	prompt "Aurora L2 Cache Write Allocate (WA) mode"
+	depends on (CACHE_AURORA_L2 && CPU_SHEEVA_PJ4B_V7 && !ARMADA_XP_REV_Z1) && SYNO_ARMADA_ARCH_V2
+	default AURORA_L2_WA_PAGE_ATTRIBUTE
+
+config AURORA_L2_WA_PAGE_ATTRIBUTE
+	bool "L2 WA based on requester PT attribute"
+	depends on SYNO_ARMADA_ARCH_V2
+	help
+	  L2 Write Allocate (WA) mode is based on the page table attribute
+	  of the requester.
+	  When this option is selected th L2 WA option is kept in its HW
+	  default value. This option is the recommended configuration.
+	  Please don't change this option unless you are aware of its effect.
+
+config AURORA_L2_WA_FORCE_NO_ALLOCATE
+	bool "L2 WA forced disabled"
+	depends on SYNO_ARMADA_ARCH_V2
+	help
+	  L2 Write Allocate (WA) is disabled regardless of the requester
+	  page table attribute.
+	  When this option is selected, the L2 cache allocation mechansim
+	  will NOT allocate a new cacheline regardless of the specfifc address
+	  attribute in the originator page table.
+
+config AURORA_L2_WA_FORCE_ALLOCATE
+	bool "L2 WA forced allocate"
+	depends on SYNO_ARMADA_ARCH_V2
+	help
+	  L2 Write Allocate (WA) is forced to allocate regardless of the requester
+	  page table attribute
+	  When this option is selected, the L2 cache allocation mechansim
+	  WILL always allocate a new cacheline regardless of the specfic address
+	  attribute in the originator page table.
+
+endchoice
+
+choice
+	prompt "Aurora L2 Cache Write-Back/Write-Through mode"
+	depends on (CACHE_AURORA_L2 && CPU_SHEEVA_PJ4B_V7 && !ARMADA_XP_REV_Z1) && SYNO_ARMADA_ARCH_V2
+	default AURORA_L2_WBWT_FORCE_WT
+
+config AURORA_L2_WBWT_PAGE_ATTRIBUTE
+	bool "L2 WB/WT based on requester PT attribute"
+	depends on SYNO_ARMADA_ARCH_V2
+	help
+	  L2 Write-Back (WB) or Write-Through (WT) mode is based on the requester
+	  page table atribute. When this option is selected the L2 WB/WT option
+	  is kept in its HW default value. This option is the recommended configuration.
+	  Please don't change this option unless you are aware of its effect.
+
+config AURORA_L2_WBWT_FORCE_WB
+	bool "L2 forced to WB mode"
+	depends on SYNO_ARMADA_ARCH_V2
+	help
+	  L2 is forced to Write-Back (WB) mode regardless of the requester page
+	  table attribute.
+	  When this option is selected, the L2 cache Write mechansim will
+	  always work in WB mode regardless of the specific address attribute
+	  in the originator page table.
+
+config AURORA_L2_WBWT_FORCE_WT
+	bool "L2 forced to WT mode"
+	depends on SYNO_ARMADA_ARCH_V2
+	help
+	  L2 is forced to Write-Through (WT) mode regardless of the requester
+	  page table attribute.
+	  When this option is selected, the L2 cache Write mechansim will
+	  always work in WT mode regardless of the specfific address attribute
+	  in the originator page table.
+
+endchoice
 
 config AURORA_L2_OUTER
 	bool
@@ -1185,10 +1338,21 @@ config ENABLE_UNALINGED_ACCESS_FAULT
 
 config AURORA_IO_CACHE_COHERENCY
 	bool "Enable Marvell Aurora I/O cache coherency"
-	depends on ARCH_ARMADA_XP || ARCH_ARMADA370
+	depends on ARCH_ARMADA_XP || ARCH_ARMADA370 || ARCH_ARMADA375 || ARCH_ARMADA38X
 	default y
+	select HAVE_ARM_SCU if ARCH_ARMADA375 || ARCH_ARMADA38X
 	help
 	  This option enables the hardware mechanism for I/O cache coherency.
+
+config ARMADA_IOCC_SYNC_BARRIER_WA
+	depends on ARCH_ARMADA375 && AURORA_IO_CACHE_COHERENCY && SYNO_ARMADA_ARCH_V2
+	bool "Enable IO Sync Barrier WA"
+	default y
+	help
+	 Enables IO Sync Barrier work-around using reads from/write to
+	 SoC memory using XOR Unit 0.
+	 This WA enables driver to keep in sync with memory
+	 updated by IO engine.
 
 config CPU_SHEEVA_PJ4B_PMC_ACCESS_IN_USERMODE
 	bool "Enabled User mode access for PMC"
@@ -1212,16 +1376,173 @@ config MV_SUPPORT_64KB_PAGE_SIZE
 	help
 	  This option enables 64KB pages.
 
+config MV_LARGE_PAGE_SUPPORT
+	bool
+	depends on SYNO_ARMADA_ARCH_V2
+
+choice
+	prompt "Kernel Large Page Support"
+	default MV_NO_LARGE_PAGE_SUPPORT
+	depends on SYNO_ARMADA_ARCH_V2
+	help
+	  Support kennel large pages (> 4KB), this includes MMU large pages
+	  (64KB) and software emulation of large pages (using 4KB MMU pages).
+	  Select one of the page sizes below. Notice that using 64KB modes
+	  will require building the file-system with 64KB enabled compiler
+	  (basically changing the default prodocued elf alignment to 64KB)
+
+config MV_NO_LARGE_PAGE_SUPPORT
+	bool "Disabled - Use default"
+	help
+	  Use kernel default page size (4KB).
+	  If you are not sure, select this option.
+	  This option does not make any changes to default kernel page size
+	  MMU management.
+
+config MV_8KB_SW_PAGE_SIZE_SUPPORT
+	bool "8KB software page size support"
+#	depends on !HIGHMEM
+	select MV_LARGE_PAGE_SUPPORT
+	help
+	  The kernel uses 8KB pages, MMU page table will still use 4KB pages.
+	  This feature provides higher performance (specifically in NAS
+	  applications) at the expense of higher memory fragmentation. This also
+	  enables support for large storage volumes up to 32TB.
+
+config MV_16KB_SW_PAGE_SIZE_SUPPORT
+	bool "16KB software page size support"
+#	depends on !HIGHMEM
+	select MV_LARGE_PAGE_SUPPORT
+	help
+	  The kernel uses 16KB pages, MMU page table will still use 4KB pages.
+	  This feature provides higher performance (specifically in NAS
+	  applications) at the expense of higher memory fragmentation. This also
+	  enables support for large storage volumes up to 64TB.
+
+config MV_32KB_SW_PAGE_SIZE_SUPPORT
+	bool "32KB software page size support"
+#	depends on !HIGHMEM
+	select MV_LARGE_PAGE_SUPPORT
+	help
+	  The kernel uses 32KB pages, MMU page table will still use 4KB pages.
+	  This feature provides higher performance (specifically in NAS
+	  applications) at the expense of higher memory fragmentation. This also
+	  enables support for large storage volumes up to 64TB.
+
+config MV_64KB_SW_PAGE_SIZE_SUPPORT
+	bool "64KB software page size support"
+#	depends on !HIGHMEM
+	select MV_LARGE_PAGE_SUPPORT
+	help
+	  The kernel uses 64KB pages, MMU page table will still use 4KB pages.
+	  This feature provides higher performance (specifically in NAS
+	  applications) at the expense of higher memory fragmentation. This also
+	  enables support for large storage volumes up to 128TB.
+	  If you need 64KB pages, consider using the MV_64KB_MMU_PAGE_SIZE_SUPPORT
+	  option.
+
+config MV_64KB_MMU_PAGE_SIZE_SUPPORT
+	bool "64KB MMU page size support"
+	select MV_LARGE_PAGE_SUPPORT
+	help
+	  The kernel uses 64KB pages. The page-table will use large-pages (64KB)
+	  as well.
+	  This feature provides higher performance (specifically in NAS
+	  applications) at the expense of higher memory fragmentation. This also
+	  enables support for large storage volumes up to 128TB.
+
+endchoice
+
+
+config ARM_UNIPROCESSOR_IOCC
+	bool "Enable (IO)Cache Coherency for Uniprocessor Systems"
+	depends on CPU_V7 && SYNO_ALPINE
+	default n
+	help
+	 Uniprocessor systems do not support cache coherency by default, including
+	 IO-Cache Coherency.
+	 This option forces cache coherency support even for uniprocessor systems.
+	 For architectures that support it - this allows efficient IO handeling,
+	 without unrequired SMP-kernel overhead.
+
+	 If unsure, say N.
+
+
+config ARM_PAGE_SIZE_LARGE
+	bool "Support large page sizes"
+	depends on CPU_V7 && ARM_LPAE && SYNO_ALPINE
+	default n
+	help
+	  Say Y to use page-sizes larger than 4KB.
+	  Advantages for large page size:
+		>Support for large storage volumes.
+		>Improvement for DMA (e.g. RAID) performance.
+	  Disadvantages for large pages:
+	    >Memory fragmentation increases.
+	    >Some existing software assumes 4KB page size, and may be incompatible.
+
+	  ARM architecture uses 4KB page. This options allows joining several H/W
+	  pages and using them as a single page in software.
+
+	  Unless you specifically require this, say N.
+
+choice
+	prompt "Page size to use"
+	default ARM_PAGE_SIZE_32KB
+	depends on ARM_PAGE_SIZE_LARGE && ARM_LPAE && SYNO_ALPINE
+
+config ARM_PAGE_SIZE_64KB
+	bool "64KB pages"
+	help
+	  Sets page size to 64KB. Each linux-page is composed of 16 consecutive
+	  hardware pages. The consecutive hint bit is turned on, so all 16
+	  page-table entries are presented in H/W by a single TLB entry. This will
+	  minimise TLB misses.
+
+	  Binaries not specifically compiled for 64KB pages will probably crash.
+
+config ARM_PAGE_SIZE_32KB
+	bool "32KB pages"
+	help
+	  Sets page size to 32KB. Each linux-page is composed of 8 consecutive
+	  hardware pages.
+
+	  Binutills by default define maximum page size to be 32KB.
+	  Well-behaved, standard-compiled user-space programs will be able to
+	  work with a kernel using 32KB pages, even if not specifically
+	  compiled with this in mind.
+
+config ARM_PAGE_SIZE_4KB
+	bool "4KB pages"
+	help
+	  This setting will enable some large_page code, but keep the normal
+	  4KB pagesize.
+	  It is used for debugging.
+
+endchoice
+
+config ARM_PAGE_SIZE_LARGE_SHIFT
+	int
+	depends on ARM_PAGE_SIZE_LARGE
+	default 16 if ARM_PAGE_SIZE_64KB
+	default 15 if ARM_PAGE_SIZE_32KB
+	default 12 if ARM_PAGE_SIZE_4KB
+
+config MIGHT_HAVE_CACHE_L2X0
+	bool
+	depends on SYNO_ALPINE || ARCH_ARMADA375 || ARCH_ARMADA38X
+
 config CACHE_L2X0
 	bool "Enable the L2x0 outer cache controller"
 	depends on REALVIEW_EB_ARM11MP || MACH_REALVIEW_PB11MP || MACH_REALVIEW_PB1176 || \
 		   REALVIEW_EB_A9MP || ARCH_IMX_V6_V7 || MACH_REALVIEW_PBX || \
 		   ARCH_NOMADIK || ARCH_OMAP4 || ARCH_EXYNOS4 || ARCH_TEGRA || \
 		   ARCH_U8500 || ARCH_VEXPRESS_CA9X4 || ARCH_SHMOBILE || \
-		   ARCH_PRIMA2 || ARCH_ZYNQ || ARCH_CNS3XXX || ARCH_HIGHBANK || ARCH_COMCERTO
+		   ARCH_PRIMA2 || ARCH_ZYNQ || ARCH_CNS3XXX || ARCH_HIGHBANK || ARCH_COMCERTO|| \
+                 ARCH_ARMADA375 || ARCH_ARMADA38X
 	default y
 	select OUTER_CACHE
-	select OUTER_CACHE_SYNC
+	select OUTER_CACHE_SYNC if !(SYNO_ARMADA_ARCH_V2) || (SYNO_ARMADA_ARCH_V2 && !AURORA_IO_CACHE_COHERENCY)
 	help
 	  This option enables the L2x0 PrimeCell.
 
@@ -1297,6 +1618,7 @@ config CACHE_XSC3L2
 
 config ARM_L1_CACHE_SHIFT_6
 	bool
+	default y if CPU_V7 && SYNO_ARMADA_ARCH_V2
 	help
 	  Setting ARM L1 cache line size to 64 Bytes.
 

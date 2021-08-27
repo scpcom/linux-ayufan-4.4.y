@@ -2495,7 +2495,13 @@ retry:
 		ext4_journal_stop(handle);
 		if (err)
 			goto err_drop_inode;
+#ifdef SYNO_FS_EXT4_SKIP_JOURNAL_SYMLINK
+		ext4_set_writeback_aops(inode);
+#endif
 		err = __page_symlink(inode, symname, l, 1);
+#ifdef SYNO_FS_EXT4_SKIP_JOURNAL_SYMLINK
+		ext4_set_aops(inode);
+#endif
 		if (err)
 			goto err_drop_inode;
 		/*

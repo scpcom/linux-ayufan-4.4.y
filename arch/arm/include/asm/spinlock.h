@@ -79,14 +79,42 @@ static inline void dsb_sev(void)
 
 #define arch_spin_lock_flags(lock, flags) arch_spin_lock(lock)
 
+#ifdef CONFIG_SYNO_ALPINE_V2_5_3
+extern unsigned int al_spin_lock_wfe_enable;
+#endif
+
 static inline void arch_spin_lock(arch_spinlock_t *lock)
 {
 	unsigned long tmp;
 
+#ifdef CONFIG_SYNO_ALPINE_V2_5_3
+	if (unlikely(al_spin_lock_wfe_enable)) {
+		__asm__ __volatile__(
+	"1:	ldrex	%0, [%1]\n"
+	"	teq	%0, #0\n"
+		WFE("ne")
+	"	strexeq	%0, %2, [%1]\n"
+	"	teqeq	%0, #0\n"
+	"	bne	1b"
+		: "=&r" (tmp)
+		: "r" (&lock->lock), "r" (1)
+		: "cc");
+	} else {
+		__asm__ __volatile__(
+	"1:	ldrex	%0, [%1]\n"
+	"	teq	%0, #0\n"
+	"	strexeq	%0, %2, [%1]\n"
+	"	teqeq	%0, #0\n"
+	"	bne	1b"
+		: "=&r" (tmp)
+		: "r" (&lock->lock), "r" (1)
+		: "cc");
+	} 
+#else
 	__asm__ __volatile__(
 "1:	ldrex	%0, [%1]\n"
 "	teq	%0, #0\n"
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
 #else
 	WFE("ne")
 #endif
@@ -96,6 +124,7 @@ static inline void arch_spin_lock(arch_spinlock_t *lock)
 	: "=&r" (tmp)
 	: "r" (&lock->lock), "r" (1)
 	: "cc");
+#endif
 
 	smp_mb();
 }
@@ -104,6 +133,20 @@ static inline int arch_spin_trylock(arch_spinlock_t *lock)
 {
 	unsigned long tmp;
 
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+	unsigned long strex_fail = 0;
+
+	do {
+		__asm__ __volatile__(
+	"	mov	%1, #0\n"
+	"	ldrex	%0, [%2]\n"
+	"	teq	%0, #0\n"
+	"	strexeq	%1, %3, [%2]"
+		: "=&r" (tmp), "=&r" (strex_fail)
+		: "r" (&lock->lock), "r" (1)
+		: "cc");
+	} while (strex_fail);
+#else
 	__asm__ __volatile__(
 "	ldrex	%0, [%1]\n"
 "	teq	%0, #0\n"
@@ -111,7 +154,7 @@ static inline int arch_spin_trylock(arch_spinlock_t *lock)
 	: "=&r" (tmp)
 	: "r" (&lock->lock), "r" (1)
 	: "cc");
-
+#endif
 	if (tmp == 0) {
 		smp_mb();
 		return 1;
@@ -129,7 +172,9 @@ static inline void arch_spin_unlock(arch_spinlock_t *lock)
 	:
 	: "r" (&lock->lock), "r" (0)
 	: "cc");
-
+#ifdef CONFIG_SYNO_ALPINE_V2_5_3
+	if (unlikely(al_spin_lock_wfe_enable))
+#endif
 		dsb_sev();
 }
 
@@ -145,13 +190,13 @@ static inline void arch_write_lock(arch_rwlock_t *rw)
 {
 	unsigned long tmp;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	do{
 #endif
 	__asm__ __volatile__(
 "1:	ldrex	%0, [%1]\n"
 "	teq	%0, #0\n"
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
 #else
 	WFE("ne")
 #endif
@@ -162,7 +207,7 @@ static inline void arch_write_lock(arch_rwlock_t *rw)
 	: "r" (&rw->lock), "r" (0x80000000)
 	: "cc");
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	} while (tmp && atomic_backoff_delay());
 #endif
 	smp_mb();
@@ -184,7 +229,7 @@ static inline int arch_write_trylock(arch_rwlock_t *rw)
 		smp_mb();
 		return 1;
 	} else {
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		atomic_backoff_delay();
 #endif
 		return 0;
@@ -227,7 +272,7 @@ static inline void arch_read_lock(arch_rwlock_t *rw)
 "1:	ldrex	%0, [%2]\n"
 "	adds	%0, %0, #1\n"
 "	strexpl	%1, %0, [%2]\n"
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
 #else
 	WFE("mi")
 #endif

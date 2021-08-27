@@ -38,14 +38,13 @@
 
 #include "mm.h"
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
-#ifdef CONFIG_MV_SUPPORT_64KB_PAGE_SIZE
+#if (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE))
 #define FREEAREA_ROUND_START(addr)	((((unsigned long)addr) + ((PAGE_SIZE) - 1)) & (~((PAGE_SIZE) - 1)))
 #define FREEAREA_ROUND_END(addr)	(((unsigned long)addr) & (~((PAGE_SIZE) - 1)))
 #else
 #define FREEAREA_ROUND_START(addr)	(addr)
 #define FREEAREA_ROUND_END(addr)	(addr)
-#endif
 #endif
 
 static unsigned long phys_initrd_start __initdata = 0;
@@ -236,7 +235,11 @@ EXPORT_SYMBOL(arm_dma_zone_size);
  * allocations.  This must be the smallest DMA mask in the system,
  * so a successful GFP_DMA allocation will always satisfy this.
  */
+#ifdef CONFIG_SYNO_ALPINE
+phys_addr_t arm_dma_limit;
+#else
 u32 arm_dma_limit;
+#endif
 
 static void __init arm_adjust_dma_zone(unsigned long *size, unsigned long *hole,
 	unsigned long dma_size)
@@ -322,11 +325,19 @@ EXPORT_SYMBOL(pfn_valid);
 #endif
 
 #ifndef CONFIG_SPARSEMEM
+#ifdef CONFIG_SYNO_ALPINE
+static void __init arm_memory_present(void)
+#else
 static void arm_memory_present(void)
+#endif
 {
 }
 #else
+#ifdef CONFIG_SYNO_ALPINE
+static void __init arm_memory_present(void)
+#else
 static void arm_memory_present(void)
+#endif
 {
 	struct memblock_region *reg;
 
@@ -436,7 +447,7 @@ void __init bootmem_init(void)
 
 static inline int free_area(unsigned long pfn, unsigned long end, char *s)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	unsigned int pages = 0, size = ((end > pfn) ? ((end - pfn) << (PAGE_SHIFT - 10)) : 0);
 #else
 	unsigned int pages = 0, size = (end - pfn) << (PAGE_SHIFT - 10);
@@ -759,9 +770,10 @@ void free_initmem(void)
 				    "TCM link");
 #endif
 
+#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	poison_init_mem(__init_begin, __init_end - __init_begin);
 	if (!machine_is_integrator() && !machine_is_cintegrator())
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 		totalram_pages += free_area(__phys_to_pfn(__pa(FREEAREA_ROUND_START(__init_begin))),
 					    __phys_to_pfn(__pa(FREEAREA_ROUND_END(__init_end))),
 					    "init");
@@ -769,6 +781,7 @@ void free_initmem(void)
 		totalram_pages += free_area(__phys_to_pfn(__pa(__init_begin)),
 					    __phys_to_pfn(__pa(__init_end)),
 					    "init");
+#endif
 #endif
 }
 
@@ -778,7 +791,7 @@ static int keep_initrd;
 
 void free_initrd_mem(unsigned long start, unsigned long end)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	start = FREEAREA_ROUND_START(start);
 	end = FREEAREA_ROUND_END(end);
 #endif

@@ -171,7 +171,7 @@
 			 TLB_V6_I_ASID | TLB_V6_D_ASID)
 
 #ifdef CONFIG_CPU_TLB_V6
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && (defined (CONFIG_ARCH_ARMADA_XP) && !defined (CONFIG_AURORA_L2_PT_WALK))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && (defined (CONFIG_ARCH_ARMADA_XP) && !defined (CONFIG_AURORA_L2_PT_WALK))
 # define v6wbi_possible_flags	(v6wbi_tlb_flags | TLB_L2CLEAN_FR)
 # define v6wbi_always_flags	(v6wbi_tlb_flags | TLB_L2CLEAN_FR)
 #else
@@ -223,7 +223,7 @@
 
 #include <linux/sched.h>
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_CACHE_AURORA_L2)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_CACHE_AURORA_L2)
 extern void l2_clean_pa(unsigned int pa); 
 #endif
 struct cpu_tlb_fns {
@@ -395,14 +395,42 @@ static inline void local_flush_tlb_mm(struct mm_struct *mm)
 static inline void
 local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 {
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#if !defined(CONFIG_MV_LARGE_PAGE_SUPPORT) || defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
 	const int zero = 0;
-	const unsigned int __tlb_flag = __cpu_tlb_flags;
+#endif
+#else // !CONFIG_SYNO_ARMADA_ARCH_V2
+	const int zero = 0;
+#endif // CONFIG_SYNO_ARMADA_ARCH_V2
 
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+#ifdef CONFIG_SYNO_ALPINE
+	unsigned long uaddr_last;
+#endif
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && (defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && !defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT))
+	if (tlb_flag(TLB_WB))
+		dsb();
+
+	uaddr = (uaddr & PAGE_MASK);
+	__cpu_flush_user_tlb_range(uaddr, uaddr + PAGE_SIZE, vma);
+
+#else
 	uaddr = (uaddr & PAGE_MASK) | ASID(vma->vm_mm);
+#ifdef CONFIG_SYNO_ALPINE
+	uaddr_last = uaddr+PAGE_SIZE;
+#endif
 
 	if (tlb_flag(TLB_WB))
 		dsb();
 
+#ifdef CONFIG_SYNO_ALPINE
+	/*
+	 * normal case is HW_PAGE_SIZE==PAGE_SIZE,
+	 * After optimization, the for-loop will be gone
+	 */
+	for (; uaddr < uaddr_last; uaddr += HW_PAGE_SIZE) {
+#endif
 	if (cpumask_test_cpu(smp_processor_id(), mm_cpumask(vma->vm_mm))) {
 		if (tlb_flag(TLB_V3_PAGE))
 			asm("mcr p15, 0, %0, c6, c0, 0" : : "r" (uaddr) : "cc");
@@ -428,21 +456,47 @@ local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 #else
 		asm("mcr p15, 0, %0, c8, c3, 1" : : "r" (uaddr) : "cc");
 #endif
+#ifdef CONFIG_SYNO_ALPINE
+	}
+#endif
 
+#endif /* CONFIG_MV_LARGE_PAGE_SUPPORT && !CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT */
 	if (tlb_flag(TLB_BARRIER))
 		dsb();
 }
 
 static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
 {
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#if !defined(CONFIG_MV_LARGE_PAGE_SUPPORT) || defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
 	const int zero = 0;
+#endif
+#else // !CONFIG_SYNO_ARMADA_ARCH_V2
+	const int zero = 0;
+#endif // CONFIG_SYNO_ARMADA_ARCH_V2
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
+#ifdef CONFIG_SYNO_ALPINE
+	unsigned long kaddr_last;
+#endif
 
 	kaddr &= PAGE_MASK;
+#ifdef CONFIG_SYNO_ALPINE
+	kaddr_last = kaddr+PAGE_SIZE;
+#endif
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && (defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && !defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT))
+	if (tlb_flag(TLB_WB))
+		dsb();
+
+	__cpu_flush_kern_tlb_range(kaddr, kaddr + PAGE_SIZE);
+#else
 
 	if (tlb_flag(TLB_WB))
 		dsb();
 
+#ifdef CONFIG_SYNO_ALPINE
+	for (; kaddr < kaddr_last; kaddr += HW_PAGE_SIZE) {
+#endif
 	if (tlb_flag(TLB_V3_PAGE))
 		asm("mcr p15, 0, %0, c6, c0, 0" : : "r" (kaddr) : "cc");
 	if (tlb_flag(TLB_V4_U_PAGE))
@@ -462,6 +516,11 @@ static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
 		asm("mcr p15, 0, %0, c8, c5, 1" : : "r" (kaddr) : "cc");
 	if (tlb_flag(TLB_V7_UIS_PAGE))
 		asm("mcr p15, 0, %0, c8, c3, 1" : : "r" (kaddr) : "cc");
+#ifdef CONFIG_SYNO_ALPINE
+	}
+#endif 
+
+#endif /* CONFIG_MV_LARGE_PAGE_SUPPORT && !CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT */
 
 	if (tlb_flag(TLB_BARRIER)) {
 		dsb();
@@ -488,25 +547,25 @@ static inline void flush_pmd_entry(void *pmd)
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
 
 	if (tlb_flag(TLB_DCLEAN))
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
 	{
 		unsigned long flags;
         	raw_local_irq_save(flags);
 		dmb();
 #endif
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && (defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6043) || defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6124))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && (defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6043) || defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6124))
 		asm("mcr	p15, 0, %0, c7, c14, 1  @ flush_pmd"
 			: : "r" (pmd) : "cc");
 #else
 		asm("mcr	p15, 0, %0, c7, c10, 1	@ flush_pmd"
 			: : "r" (pmd) : "cc");
 #endif
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
 		raw_local_irq_restore(flags);
 	}
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_CACHE_AURORA_L2)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_CACHE_AURORA_L2)
 	if (tlb_flag(TLB_L2CLEAN_FR)) 
         	l2_clean_pa(__pa((unsigned long)pmd));
 #else
@@ -523,25 +582,25 @@ static inline void clean_pmd_entry(void *pmd)
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
 
 	if (tlb_flag(TLB_DCLEAN))
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
 	{
 		unsigned long flags;
                 raw_local_irq_save(flags);
                 dmb();
 #endif
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && (defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6043) || defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6124))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && (defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6043) || defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6124))
 		asm("mcr	p15, 0, %0, c7, c14, 1  @ flush_pmd"
 			: : "r" (pmd) : "cc");
 #else
 		asm("mcr	p15, 0, %0, c7, c10, 1	@ flush_pmd"
 			: : "r" (pmd) : "cc");
 #endif
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
 		raw_local_irq_restore(flags);
 	}
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_CACHE_AURORA_L2)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_CACHE_AURORA_L2)
 	if (tlb_flag(TLB_L2CLEAN_FR))
 		l2_clean_pa(__pa((unsigned long)pmd));
 #else

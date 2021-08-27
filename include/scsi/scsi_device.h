@@ -12,6 +12,12 @@
 #include <scsi/scsi.h>
 #include <linux/atomic.h>
 
+#ifdef CONFIG_SYNO_ARAMDA_V2
+#ifdef CONFIG_MV_STAGGERED_SPINUP
+#include <scsi/scsi_spinup.h>
+#endif
+#endif
+
 struct request_queue;
 struct scsi_cmnd;
 struct scsi_lun;
@@ -189,7 +195,17 @@ struct scsi_device {
 	struct scsi_dh_data	*scsi_dh_data;
 	enum scsi_device_state sdev_state;
 
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef CONFIG_MV_STAGGERED_SPINUP
+	int ss_id;
+        enum scsi_device_power_state sdev_power_state;  /*Used to save the disk current power state*/
+        struct timer_list spinup_timeout;       /* Used to time out the spinup process when done. */
+        unsigned int standby_timeout_secs;
+        struct timer_list standby_timeout;      /* Used to time out the standby timeout command. */
+#endif
+#endif
+
+#ifdef SYNO_SAS_SPINUP_DELAY
 	/* Which queue is this disk in. 
 	 * 0 indicates none and should spin up immediately. */
 	unsigned int	    spinup_queue_id;
@@ -199,7 +215,7 @@ struct scsi_device {
 	struct list_head    spinup_list;
 	/* Indicates the disk is already spinning up */
 	unsigned int	    spinup_in_process;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SAS_SPINUP_DELAY */
 
 	unsigned long		sdev_data[0];
 } __attribute__((aligned(sizeof(unsigned long))));
@@ -307,11 +323,11 @@ static inline struct scsi_target *scsi_target(struct scsi_device *sdev)
 #define starget_printk(prefix, starget, fmt, a...)	\
 	dev_printk(prefix, &(starget)->dev, fmt, ##a)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_SPINUP_DELAY
 int SynoSpinupBegin(struct scsi_device *device);
 void SynoSpinupEnd(struct scsi_device *sdev);
 int SynoSpinupRemove(struct scsi_device *sdev);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SAS_SPINUP_DELAY */
 
 #ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
 #define SYNO_DISK_MODEL_LEN "24"

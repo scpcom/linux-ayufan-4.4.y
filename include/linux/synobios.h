@@ -207,6 +207,10 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_DISK_RETRY_REPORT 0x2c00
 #endif
 
+#ifdef SYNO_BTRFS_ERROR_FS_REPORT
+#define SYNO_EVENT_ERROR_FS_BTRFS 0x2d00
+#endif
+
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
 #define SYNO_EVENT_BACK_TEMP_HIGH       0x4003
 #define SYNO_EVENT_BACK_TEMP_HEAT       0x4002
@@ -498,7 +502,8 @@ typedef enum {
 	FAN_MICROP_PWM_WITH_CPUFAN,
 	FAN_MICROP_PWM_WITH_GPIO,
 	FAN_MICROP_PWM_WITH_CPUFAN_AND_GPIO,
-	FAN_MICROP_PWM_WITH_ADT,
+	FAN_ADT,
+	FAN_ADT_FANFAIL_WITH_MICROP,
 } FAN_T;
 
 typedef enum {
@@ -558,6 +563,8 @@ typedef enum {
 	FAN_NUMBER_2 = 2,
 	FAN_NUMBER_3 = 3,
 	FAN_NUMBER_4 = 4,
+	FAN_NUMBER_5 = 5,
+	FAN_NUMBER_6 = 6,
 } FAN_NUMBER_T;
 
 typedef enum _tag_EUNIT_PWRON_TYPE {
@@ -594,7 +601,7 @@ typedef enum {
 } LCM_T;
 
 typedef enum {
-	WIFI_WPS_214air = 0x0, /* GPIO PIN 0  */
+	WIFI_WPS_215air = 0x0, /* GPIO PIN 0  */
 	WIFI_WPS_213air = 0x28, /* GPIO PIN 40  */
 	WIFI_WPS_NO = 0xFE,
 	WIFI_WPS_UNKNOWN = 0xFF
@@ -669,11 +676,14 @@ typedef enum {
 	MICROP_ID_RS814p = 0x55, /* 'U' */
 	MICROP_ID_RS814rpp = 0x56, /* 'V' */
 	MICROP_ID_RS3614xsp = 0x57, /* 'W' RS3614xsp */
+	MICROP_ID_ES3614xsp = 0x57, /* 'W' ES3614xsp */
 	MICROP_ID_RS3614xs = 0x5B, /* 'W' RS3614xs */
 	MICROP_ID_RS3614rpxs = 0x5C, /* 'W' RS3614rpxs */
-	MICROP_ID_9615xsp = 0x4d, /* 'M' Temporarily using the same microp ID as 10613 */
-	MICROP_ID_9615vmxsp = 0x4d, /* 'M' Temporarily using the same microp ID as 10613 */
+	MICROP_ID_RC18015xsp = 0x4d, /* 'M' Temporarily using the same microp ID as 10613 */
+	MICROP_ID_RS18015xsp = 0x4d, /* 'M' */
 	MICROP_ID_DS2414xs = 0x57, /* 'W' DS2414xs */
+	MICROP_ID_RS3415xsp = 0x60, /* '`' RS3415xs+ cheese cake*/
+	MICROP_ID_3615xs = 0x5D, /* ']' DS3615xs*/
 	MICROP_ID_UNKNOW = 0xFF,
 } SYNO_MICROP_ID;
 
@@ -687,6 +697,7 @@ typedef enum {
 typedef enum {
 	ONE_DISK_DENO_ONE = 0x11,     /* this is default settings */
 	FOUR_DISK_DENO_SEVEN = 0x47,  /* if the model is >=8bay, you must use this */
+	FIVE_DISK_DENO_ONE = 0x51,    /* for 5bay, wakeup simultaneously, but insert command before wakeup */
 	UNKNOW_DISK_DENO = 0x00,
 } GROUP_WAKE_CONFIG_T;
 
@@ -705,12 +716,28 @@ typedef enum {
 	CPU_88F6282,
 	CPU_88F6702,
 	CPU_88F6707,
+	CPU_88F6720,
 	CPU_MV78230,
 	CPU_8241,
 	CPU_8533e,
 	CPU_P1022,
 	CPU_C2000,
+	CPU_AL212,
+	CPU_AL314,
+	CPU_AL514,
+	CPU_C2538,
+	CPU_BCM58622,
+	CPU_J1800,
 } CPU_ARCH_INFO_T;
+
+typedef enum {
+	CRYPTO_HW_NONE,
+	CRYPTO_A370,
+	CRYPTO_A375,
+	CRYPTO_AXP,
+	CRYPTO_COMCERTO2K,
+	CRYPTO_ALPINE,
+} CRYPTO_HW_INFO_T;
 
 /**
  * This structure is used to store types of each module
@@ -741,6 +768,7 @@ typedef struct {
 	SYNO_MICROP_ID microp_id         :8;
 	GROUP_WAKE_CONFIG_T group_wake_config :8;
 	CPU_ARCH_INFO_T cpu_arch_info    :8;
+	CRYPTO_HW_INFO_T crypto_hw_info  :8;
 } __attribute__((packed)) module_t;
 
 #define HW_DS107e      "DS107e"
@@ -813,10 +841,12 @@ typedef struct {
 #define HW_RS3412rpxs  "RS3412rpxs"    //"RS3412rpxs"
 #define HW_RS3412xs    "RS3412xs"      //"RS3412xs"
 #define HW_DS3612xs    "DS3612xs"      //"DS3612xs"
+#define HW_DS3615xs    "DS3615xs"      //"DS3615xs"
 #define HW_RS3413xsp    "RS3413xs+"      //"RS3413xs+"
 #define HW_RS3614xs    "RS3614xs"      //"RS3614xs"
 #define HW_RS3614rpxs    "RS3614rpxs"      //"RS3614rpxs"
 #define HW_RS3614xsp    "RS3614xs+"      //"RS3614xs+"
+#define HW_ES3614xsp    "ES3614xs+"      //"ES3614xs+"
 #define HW_DS2414xs    "DS2414xs"      //"DS2414xs"
 #define HW_DS111j      "DS111j"        //"DS111j"
 #define HW_DS212       "DS212"         //"DS212v10"
@@ -832,7 +862,7 @@ typedef struct {
 #define HW_RS2414p     "RS2414+"       //"RS2414+"
 #define HW_RS2414rpp   "RS2414rp+"     //"RS2414rp+"
 #define HW_DS2413p     "DS2413+"       //"DS2413+"
-#define HW_DS2414p     "DS2414+"       //"DS2414+"
+#define HW_DS2415p     "DS2415+"       //"DS2415+"
 #define HW_RS212       "RS212"         //"RS212"
 #define HW_DS212jv10   "DS212j"        //"DS212j"
 #define HW_DS212jv20   "DS212jv20"     //"DS212j"
@@ -847,7 +877,7 @@ typedef struct {
 #define HW_DS112slim   "DS112slim"     //"DS112slim"
 #define HW_DS413jv10   "DS413jv10"     //"DS413jv10"
 #define HW_DS414jv10   "DS414jv10"     //"DS414jv10"
-#define HW_DS214airv10   "DS214airv10"     //"DS214airv10"
+#define HW_DS215airv10   "DS215airv10"     //"DS215airv10"
 #define HW_DS213pv10   "DS213pv10"     //"DS213pv10"
 #define HW_DS213airv10 "DS213airv10"   //"DS213airv10"
 #define HW_DS213v10    "DS213v10"      //"DS213v10"
@@ -865,14 +895,30 @@ typedef struct {
 #define HW_DS414v10    "DS414v10"
 #define HW_RS814v10    "RS814v10"
 #define HW_DS114p      "DS114+"      //"DS114+"
-#define HW_RS9615xsp  "RS9615xs+"    //"RS9615xs+"
-#define HW_RS9615vmxsp  "RS9615vmxs+"    //"RS9615vmxs+"
+#define HW_RC18015xsp  "RC18015xs+"    //"RC18015xs+"
+#define HW_RS18015xsp  "RS18015xs+"    //"RS18015xs+"
 #define HW_DS714v10    "DS714v10"
 #define HW_RS814p      "RS814+"        //"RS814+"
 #define HW_RS814rpp    "RS814rp+"      //"RS814rp+"
 #define HW_DS214play      "DS214play"
-#define HW_DS414play      "DS414play"   //"DS414play"
+#define HW_DS415play      "DS415play"   //"DS415play"
 #define HW_DS414slim   "DS414slim"    //DS414slim
+#define HW_DS2015xs   "DS2015xs"
+#define HW_DS115j     "DS115j"
+#define HW_RS3415xsp    "RS3415xs+"      //"RS3415xs+"
+#define HW_DS415p      "DS415+"        //"DS415+"
+#define HW_DS1815p      "DS1815+"      //"DS1815+"
+#define HW_DS1515p      "DS1515+"      //"DS1515+"
+#define HW_DS215j	   "DS215j"
+#define HW_DS115	  "DS115"
+#define HW_RS815p      "RS815+"        //"RS815+"
+#define HW_RS815rpp    "RS815rp+"      //"RS815rp+"
+#define HW_DS215router	"DS215router"      //"DS215router"
+#define HW_DS815	   "DS815"        //"DS815"
+#define HW_DS1515       "DS1515"
+#define HW_DS715p       "DS715+"
+#define HW_DS215p       "DS215+"
+#define HW_DS415        "DS415"
 #define HW_UNKNOWN     "DSUnknown"
 
 typedef struct _tag_HwCapability {
@@ -946,6 +992,7 @@ typedef enum {
 	MODEL_RS3614xs,
 	MODEL_RS3614rpxs,
 	MODEL_RS3614xsp,
+	MODEL_ES3614xsp,
 	MODEL_DS2414xs,
 	MODEL_RS411,
 	MODEL_DS111j,
@@ -975,7 +1022,7 @@ typedef enum {
 	MODEL_DS112slim,
 	MODEL_DS413j,	//90
 	MODEL_DS414j,
-	MODEL_DS214air,
+	MODEL_DS215air,
 	MODEL_DS213p,
 	MODEL_DS213air,
 	MODEL_DS213,
@@ -994,23 +1041,40 @@ typedef enum {
 	MODEL_DS414,
 	MODEL_RS814,
 	MODEL_DS114p,
-	MODEL_RS9615xsp,  //110
-	MODEL_RS9615vmxsp,
+	MODEL_RC18015xsp,  // 110
 	MODEL_DS714,
 	MODEL_RS814p,
 	MODEL_RS814rpp,
 	MODEL_DS214se,
 	MODEL_DS214play,
-	MODEL_DS2414p,
+	MODEL_DS2415p,
 	MODEL_DS414slim,
-	MODEL_DS414play,
+	MODEL_DS415play,
+	MODEL_DS2015xs,
+	MODEL_DS115j, // 120
+	MODEL_RS3415xsp,
+	MODEL_DS415p,
+	MODEL_DS3615xs,
+	MODEL_DS1815p,
+	MODEL_DS1515p,
+	MODEL_DS215j,
+	MODEL_RS815p,
+	MODEL_RS815rpp,
+	MODEL_DS215router,
+	MODEL_DS715p, // 130
+	MODEL_DS115,
+	MODEL_RS815,
+	MODEL_RS18015xsp,
+	MODEL_DS1515,
+	MODEL_DS215p,
+	MODEL_DS415,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
 typedef struct _tag_SYNO_MODEL_NAME {
 	PRODUCT_MODEL	model;
 	char*			szHwVersion;
-} MY_DEF_HERE;
+} MY_ABC_HERE;
 
 
 typedef struct _tag_CPLDReg {
@@ -1483,6 +1547,8 @@ struct synobios_ops {
 #define EBOX_INFO_UNIQUE_RX1214	"RX1214"
 #define EBOX_INFO_UNIQUE_RX1214RP	"RX1214rp"
 #define EBOX_INFO_UNIQUE_DX213	"DX213"
+#define EBOX_INFO_UNIQUE_RX415  "RX415"
+#define EBOX_INFO_UNIQUE_DX1215 "DX1215"
 
 #define SYNO_UNIQUE(x)		(x>>2)
 #define IS_SYNOLOGY_RX4(x) (SYNO_UNIQUE(x) == 0x15 || SYNO_UNIQUE(x) == 0xd)
@@ -1495,6 +1561,8 @@ struct synobios_ops {
 #define IS_SYNOLOGY_DX213(x) (SYNO_UNIQUE(x) == 0x16)
 #define IS_SYNOLOGY_RX413(x) (x == 0x11)
 #define IS_SYNOLOGY_RX1214(x) (x == 0x12)
+#define IS_SYNOLOGY_RX415(x) (SYNO_UNIQUE(x) == 0x1d)
+#define IS_SYNOLOGY_DX1215(x) (x == 0x13)
 
 /**************************/
 #define IXP425

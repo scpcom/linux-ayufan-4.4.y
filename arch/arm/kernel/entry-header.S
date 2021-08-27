@@ -113,8 +113,13 @@
 
 #if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
 	.macro	get_thread_info, rd
+#ifdef CONFIG_SYNO_ALPINE
+	mov	\rd, sp, lsr #(PAGE_SHIFT + THREAD_SIZE_ORDER)
+	mov	\rd, \rd, lsl #(PAGE_SHIFT + THREAD_SIZE_ORDER)
+#else
 	mov	\rd, sp, lsr #13
 	mov	\rd, \rd, lsl #13
+#endif
 	.endm
 #else
 	.macro	get_thread_info, rd

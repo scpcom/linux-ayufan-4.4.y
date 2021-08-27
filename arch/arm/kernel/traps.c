@@ -781,6 +781,11 @@ static void __init kuser_get_tls_init(unsigned long vectors)
 		memcpy((void *)vectors + 0xfe0, (void *)vectors + 0xfe8, 4);
 }
 
+#ifdef CONFIG_SYNO_ALPINE
+void __init early_trap_init(void *vectors_base)
+{
+	unsigned long vectors = (unsigned long)vectors_base;
+#else
 void __init early_trap_init(void)
 {
 #if defined(CONFIG_CPU_USE_DOMAINS)
@@ -788,14 +793,18 @@ void __init early_trap_init(void)
 #else
 	unsigned long vectors = (unsigned long)vectors_page;
 #endif
+#endif
 	extern char __stubs_start[], __stubs_end[];
 	extern char __vectors_start[], __vectors_end[];
 	extern char __kuser_helper_start[], __kuser_helper_end[];
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARMADA_XP_A0_WITH_B0)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARMADA_XP_A0_WITH_B0)
 	extern unsigned int soc_revision;
 #endif
 	int kuser_sz = __kuser_helper_end - __kuser_helper_start;
 
+#ifdef CONFIG_SYNO_ALPINE
+	vectors_page = vectors_base;
+#endif
 	/*
 	 * Copy the vectors, stubs and kuser helpers (in entry-armv.S)
 	 * into the vector page, mapped at 0xffff0000, and ensure these
@@ -805,7 +814,7 @@ void __init early_trap_init(void)
 	memcpy((void *)vectors + 0x200, __stubs_start, __stubs_end - __stubs_start);
 	memcpy((void *)vectors + 0x1000 - kuser_sz, __kuser_helper_start, kuser_sz);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARMADA_XP_A0_WITH_B0)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARMADA_XP_A0_WITH_B0)
 	*(unsigned int*)(vectors + 0x1000 - kuser_sz + 0x1C) = soc_revision;
 	*(unsigned int*)(vectors + 0x1000 - kuser_sz + 0x3C) = soc_revision;
 #endif
@@ -826,4 +835,8 @@ void __init early_trap_init(void)
 
 	flush_icache_range(vectors, vectors + PAGE_SIZE);
 	modify_domain(DOMAIN_USER, DOMAIN_CLIENT);
+#ifdef CONFIG_SYNO_ALPINE
 }
+#else
+}
+#endif

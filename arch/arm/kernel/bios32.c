@@ -505,6 +505,9 @@ static void __init pcibios_init_hw(struct hw_pci *hw)
 		sys->domain  = hw->domain;
 #endif
 		sys->hw      = hw;
+#ifdef CONFIG_SYNO_ALPINE
+		sys->private_data = *hw->private_data;
+#endif
 		sys->busnr   = busnr;
 		sys->swizzle = hw->swizzle;
 		sys->map_irq = hw->map_irq;

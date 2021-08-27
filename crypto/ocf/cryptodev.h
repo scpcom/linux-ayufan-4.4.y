@@ -67,6 +67,14 @@
 #if  defined(CONFIG_OCF_M86XXX_MODULE) && (defined(__KERNEL__) || !defined(__GLIBC__) || (__GLIBC__ < 2))
 #include <linux/in.h>
 #endif
+
+#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef CONFIG_OF
+#include "../../arch/arm/mach-mvebu/include/mach/mvTypes.h"
+#include "../../drivers/crypto/mvebu_cesa/mvSysCesaConfig.h"
+#endif
+#endif
+
 /* Some initial values */
 #define CRYPTO_DRIVERS_INITIAL	4
 #define CRYPTO_SW_SESSIONS	32
@@ -438,6 +446,9 @@ struct cryptop {
 #define CRYPTO_F_CBIFSYNC	0x0040	/* Do CBIMM if op is synchronous */
 
 	caddr_t		crp_buf;	/* Data to be processed */
+#if defined(CONFIG_SYNO_COMCERTO)
+	caddr_t		crp_out_buf;	/* Crypto Result Buffer */
+#endif
 	caddr_t		crp_opaque;	/* Opaque pointer, passed along */
 	struct cryptodesc *crp_desc;	/* Linked list of processing descriptors */
 

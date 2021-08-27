@@ -340,10 +340,11 @@ config INET_ESP
 	  If unsure, say Y.
 
 config INET_IPSEC_OFFLOAD
-	bool "IPsec Fast Path Processing offload"
-	depends on (INET_ESP || INET_AH) && COMCERTO_FP && SYNO_COMCERTO
+	tristate "IPsec Fast Path Processing offload"
+	depends on (INET_ESP || INET_AH) && SYNO_COMCERTO
 		---help---
 	  Support for IPsec Fast Path offload.
+	  Synology removes COMCERTO_FP dependency temporarily and makes it tristate not bool
 
 config INET_IPCOMP
 	tristate "IP: IPComp transformation"

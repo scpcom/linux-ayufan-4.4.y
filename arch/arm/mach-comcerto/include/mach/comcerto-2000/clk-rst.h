@@ -97,6 +97,12 @@
 #define SATA_OOB_CLK_CNTRL 		APB_VADDR(COMCERTO_APB_CLK_BASE + 0x170)
 #define SATA_OOB_CLK_DIV_CNTRL 		APB_VADDR(COMCERTO_APB_CLK_BASE + 0x174)
 #define SATA_OOB_RESET 			APB_VADDR(COMCERTO_APB_CLK_BASE + 0x178)
+#define SATA_OCC_CLK_CNTRL		APB_VADDR(COMCERTO_APB_CLK_BASE + 0x180)
+#define SATA_OCC_CLK_DIV_CNTRL		APB_VADDR(COMCERTO_APB_CLK_BASE + 0x184)
+#define SATA_OCC_RESET			APB_VADDR(COMCERTO_APB_CLK_BASE + 0x188)
+#define PCIE_OCC_CLK_CNTRL		APB_VADDR(COMCERTO_APB_CLK_BASE + 0x190)
+#define PCIE_OCC_CLK_DIV_CNTRL		APB_VADDR(COMCERTO_APB_CLK_BASE + 0x194)
+#define PCIE_OCC_RESET			APB_VADDR(COMCERTO_APB_CLK_BASE + 0x198)
 #define SGMII_OCC_CLK_CNTRL 		APB_VADDR(COMCERTO_APB_CLK_BASE + 0x1A0)
 #define SGMII_OCC_CLK_DIV_CNTRL 	APB_VADDR(COMCERTO_APB_CLK_BASE + 0x1A4)
 #define SGMII_OCC_RESET 		APB_VADDR(COMCERTO_APB_CLK_BASE + 0x1A8)
@@ -141,6 +147,22 @@
 #define PLL1				1
 #define PLL2				2
 #define PLL3				3
+
+/* Device Reset Control Register (DEVICE_RST_CNTRL)*/
+
+#define CLK_DIV_RESTART         (1 << 7)
+#define WD_STATUS_CLR           (1 << 6)
+#define AXI_WD_RST_EN           (1 << 5)
+#define DEBUG_RST               (1 << 4)
+#define CLKRST_SCLR_RST         (1 << 3)
+#define FUNC_SCLR_RST           (1 << 2)
+#define GLB_SCLR_RST            (1 << 1)
+#define PWR_ON_SOFT_RST         (1 << 0)
+
+/* General Device Configuration Status Register (GNRL_DEVICE_STATUS) */
+#define CPU1_WD_RST_ACTIVATED   (1 << 2)
+#define CPU0_WD_RST_ACTIVATED   (1 << 1)
+#define AXI_WD_RST_ACTIVATED    (1 << 0)
 
 /* Clock Control Register */
 #define CLOCK_DOMAIN_ENABLE		1

@@ -37,3 +37,5 @@ AFLAGS_sha1_ssse3_asm.o += -DSHA1_ENABLE_AVX_SUPPORT
 CFLAGS_sha1_ssse3_glue.o += -DSHA1_ENABLE_AVX_SUPPORT
 endif
 sha1-ssse3-y := sha1_ssse3_asm.o sha1_ssse3_glue.o
+crc32c-intel-y := crc32c-intel_glue.o
+crc32c-intel-$(CONFIG_64BIT) += crc32c-pcl-intel-asm_64.o

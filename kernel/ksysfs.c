@@ -144,7 +144,8 @@ static ssize_t fscaps_show(struct kobject *kobj,
 }
 KERNEL_ATTR_RO(fscaps);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_MDMA_PROF)
+#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(CONFIG_COMCERTO_MDMA_PROF)
 extern unsigned int mdma_time_counter[256]; // 16 -> 4000 us
 extern unsigned int mdma_reqtime_counter[256]; // 16 -> 4000 us
 extern unsigned int mdma_data_counter[256];
@@ -166,7 +167,7 @@ static ssize_t comcerto_mdma_prof_enable_show(struct kobject *kobj,
 }
 
 static ssize_t comcerto_mdma_prof_enable_store(struct kobject *kobj,
-				  struct kobj_attribute *attr, char *buf, size_t count)
+				  struct kobj_attribute *attr, const char *buf, size_t count)
 {
 	unsigned int enable;
 
@@ -274,7 +275,7 @@ static ssize_t comcerto_splice_prof_enable_show(struct kobject *kobj,
 	return (n + 1);
 }
 static ssize_t comcerto_splice_prof_enable_store(struct kobject *kobj,
-				  struct kobj_attribute *attr, char *buf, size_t count)
+				  struct kobj_attribute *attr, const char *buf, size_t count)
 {
 	unsigned int enable;
 
@@ -457,10 +458,9 @@ KERNEL_ATTR_RO(comcerto_splicer_tcp_rsock);
 #endif
 
 #if defined(CONFIG_COMCERTO_AHCI_PROF)
-extern unsigned int ahci_time_counter[256]; // 4 ms -> 1S
-extern unsigned int ahci_data_counter[256]; 
-extern unsigned int init_ahci_prof;
-extern unsigned int enable_ahci_prof;
+
+#include "../drivers/ata/ahci.h"
+
 static ssize_t comcerto_ahci_prof_enable_show(struct kobject *kobj,
 				  struct kobj_attribute *attr, char *buf)
 {
@@ -475,7 +475,7 @@ static ssize_t comcerto_ahci_prof_enable_show(struct kobject *kobj,
 	return (n + 1);
 }
 static ssize_t comcerto_ahci_prof_enable_store(struct kobject *kobj,
-				  struct kobj_attribute *attr, char *buf, size_t count)
+				  struct kobj_attribute *attr, const char *buf, size_t count)
 {
 	unsigned int enable;
 
@@ -493,95 +493,133 @@ KERNEL_ATTR_RW(comcerto_ahci_prof_enable);
 static ssize_t comcerto_ahci_timing_show(struct kobject *kobj,
 				  struct kobj_attribute *attr, char *buf)
 {
-	int i;
-	int n;
+	int i, n, p;
 
 	buf[0] = '\0';
 	n = 0;
-	n += sprintf(buf, "Histogram of inter ahci write time (up to 1 sec otherwise date is discarded)\n");
-	init_ahci_prof = 0;
-	for (i = 0; i < 255; i++)
+	n += sprintf(buf, "Histogram of ahci inter request time (us)\n");
+
+	for (p = 0; p < MAX_AHCI_PORTS; p++) {
+		struct ahci_port_stats *stats = &ahci_port_stats[p];
+
+		n += sprintf(buf + n, "AHCI Port %d\n", p);
+
+		stats->init_prof = 0;
+
+		for (i = 0; i < MAX_BINS - 1; i++)
 	{
-		if (ahci_time_counter[i]) {
-			n += sprintf(buf + n, "%d in [%d-%d] ms\n", ahci_time_counter[i], (i * 8), (i * 8) + 8);
-			ahci_time_counter[i] = 0;
-	}
+			if (stats->time_counter[i]) {
+				n += sprintf(buf + n, "%8d in [%5d-%5d]\n", stats->time_counter[i], i << US_SHIFT, (i + 1) << US_SHIFT);
+				stats->time_counter[i] = 0;
 		}
-	if (ahci_time_counter[255]) {
-	 	n += sprintf(buf + n, "%d > 1 second\n", ahci_time_counter[255]);
-		ahci_time_counter[255] = 0;
 	}
+
+		if (stats->time_counter[MAX_BINS - 1]) {
+		 	n += sprintf(buf + n, "%d > %d us\n", stats->time_counter[MAX_BINS - 1], (MAX_BINS - 1) << US_SHIFT);
+			stats->time_counter[MAX_BINS - 1] = 0;
+		}
+	}
+
 	return (n + 1);
 }
 KERNEL_ATTR_RO(comcerto_ahci_timing);
 static ssize_t comcerto_ahci_data_show(struct kobject *kobj,
 				  struct kobj_attribute *attr, char *buf)
 {
-	int i;
-	int n;
+	int i, n, p;
 
 	buf[0] = '\0';
 	n = 0;
-	n += sprintf(buf, "Histogram of ahci write data length (up to 1M)\n");
+	n += sprintf(buf, "Histogram of ahci requests data length (KiB)\n");
 
-	for (i = 0; i < 256; i++)
+	for (p = 0; p < MAX_AHCI_PORTS; p++) {
+		struct ahci_port_stats *stats = &ahci_port_stats[p];
+
+		n += sprintf(buf + n, "AHCI Port %d\n", p);
+
+		for (i = 0; i < MAX_BINS; i++)
 	{
-		if (ahci_data_counter[i]) {
-			n += sprintf(buf + n, "%d in [%d-%d] KB\n", ahci_data_counter[i], (i * 8), (i * 8) + 8);
-			ahci_data_counter[i] = 0;
+			if (stats->data_counter[i]) {
+				n += sprintf(buf + n, "%8d in [%3d-%3d]\n", stats->data_counter[i], (i << BYTE_SHIFT) / 1024, ((i + 1) << BYTE_SHIFT) / 1024);
+				stats->data_counter[i] = 0;
+			}
 		}
 	}
+
 	return (n + 1);
 }
 KERNEL_ATTR_RO(comcerto_ahci_data);
 
-
-extern unsigned int ahci_qc_comp_counter[33];
-static ssize_t comcerto_ahci_qc_comp_timing_show(struct kobject *kobj,
+extern struct ahci_port_stats ahci_port_stats[MAX_AHCI_PORTS];
+static ssize_t comcerto_ahci_qc_rate_show(struct kobject *kobj,
 				  struct kobj_attribute *attr, char *buf)
 {
-	int i;
-	int n;
+	int i, n, p;
+	unsigned int mean_rate, total_kb;
 
 	buf[0] = '\0';
 	n = 0;
-	sprintf(buf, "Histogram of AHCI qc_complete time (in ms):\n");
-	n = strlen(buf);
-	for (i = 0; i < 32; i++)
+	n += sprintf(buf, "Histogram of AHCI requests rate completion (MiB MiB/s):\n");
+
+	for (p = 0; p < MAX_AHCI_PORTS; p++) {
+		struct ahci_port_stats *stats = &ahci_port_stats[p];
+
+		n += sprintf(buf + n, "AHCI Port %d\n", p);
+		total_kb = 0;
+		mean_rate = 0;
+
+		for (i = 0; i < MAX_BINS; i++)
 	{
-		if (ahci_qc_comp_counter[i]) {
-			sprintf(buf + n, "%d, in [%d-%d]ms\n",ahci_qc_comp_counter[i], (i * 16), (i * 16) + 16);
-			n = strlen(buf);
-			ahci_qc_comp_counter[i] = 0;
+			if (stats->rate_counter[i]) {
+				n += sprintf(buf + n, "%8d in [%3d-%3d]\n", stats->rate_counter[i] / 1024, i << RATE_SHIFT, (i + 1) << RATE_SHIFT);
+				mean_rate += stats->rate_counter[i] * (((2 * i + 1) << RATE_SHIFT) / 2);
+				total_kb += stats->rate_counter[i];
+				stats->rate_counter[i] = 0;
 			}
 		}
-	if (ahci_qc_comp_counter[i]) {
-		sprintf(buf + n, "%d, in [> 512]ms\n",ahci_qc_comp_counter[i]);
-		n = strlen(buf);
-		ahci_qc_comp_counter[i] = 0;
+		n += sprintf(buf + n, "\n");
+
+		for (i = 0; i < MAX_AHCI_SLOTS; i++) {
+			if (stats->pending_counter[i]) {
+				n += sprintf(buf + n, "%8d in [%2d]\n", stats->pending_counter[i], i);
+				stats->pending_counter[i] = 0;
 	}
+	}
+
+		if (total_kb) {
+			n += sprintf(buf + n, "Mean: %d MiB/s for %d MiB\n", mean_rate / total_kb, total_kb / 1024);
+			n += sprintf(buf + n, "Max issues in a row : %d \n\n", stats->nb_pending_max);
+		}
+
+		stats->nb_pending_max = 0;
+	}
+
 	return (n + 1);
 }
-KERNEL_ATTR_RO(comcerto_ahci_qc_comp_timing);
-
+KERNEL_ATTR_RO(comcerto_ahci_qc_rate);
 
 extern unsigned int ahci_qc_no_free_slot;
 static ssize_t comcerto_ahci_qc_no_free_slot_show(struct kobject *kobj,
 				  struct kobj_attribute *attr, char *buf)
 {
-	int n;
+	int n, p;
 
 	buf[0] = '\0';
 	n = 0;
-	sprintf(buf, "AHCI qc_no_free_slot count: %d\n", ahci_qc_no_free_slot);
-	ahci_qc_no_free_slot = 0;
 
-	n = strlen(buf);
+	for (p = 0; p < MAX_AHCI_PORTS; p++) {
+		struct ahci_port_stats *stats = &ahci_port_stats[p];
+
+		n += sprintf(buf + n, "AHCI Port %d no_free_slot count: %d\n", p, stats->no_free_slot);
+
+		stats->no_free_slot = 0;
+	}
 
 	return (n + 1);
 }
 KERNEL_ATTR_RO(comcerto_ahci_qc_no_free_slot);
 #endif
+#endif /* CONFIG_SYNO_COMCERTO */
 
 /*
  * Make /sys/kernel/notes give the raw contents of our kernel .notes section.
@@ -644,7 +682,7 @@ static struct attribute * kernel_attrs[] = {
 	&comcerto_ahci_prof_enable_attr.attr,
 	&comcerto_ahci_timing_attr.attr,
 	&comcerto_ahci_data_attr.attr,
-	&comcerto_ahci_qc_comp_timing_attr.attr,
+	&comcerto_ahci_qc_rate_attr.attr,
 	&comcerto_ahci_qc_no_free_slot_attr.attr,
 #endif
 	NULL

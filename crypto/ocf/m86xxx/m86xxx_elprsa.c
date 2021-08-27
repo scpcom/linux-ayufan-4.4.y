@@ -71,8 +71,7 @@
 #endif
 
 #include <asm/io.h>
-#include "../uio.h"
-
+#include "uio.h"
 
 #include "m86xxx_spacc.h"
 

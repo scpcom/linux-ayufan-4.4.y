@@ -60,8 +60,21 @@ static struct table_header *unpack_table(char *blob, size_t bsize)
 	if (bsize < tsize)
 		goto out;
 
+#ifdef SYNO_APPARMOR_PATCH
+	/* Pad table allocation for next/check by 256 entries to remain
+	 * backwards compatible with old (buggy) tools and remain safe without
+	 * run time checks
+	 */
+	if (th.td_id == YYTD_ID_NXT || th.td_id == YYTD_ID_CHK)
+		tsize += 256 * th.td_flags;
+#endif /* SYNO_APPARMOR_PATCH */
+
 	table = kvmalloc(tsize);
 	if (table) {
+#ifdef SYNO_APPARMOR_PATCH
+		/* ensure the pad is clear, else there will be errors */
+		memset(table, 0, tsize);
+#endif /* SYNO_APPARMOR_PATCH */
 		*table = th;
 		if (th.td_flags == YYTD_DATA8)
 			UNPACK_ARRAY(table->td_data, blob, th.td_lolen,
@@ -137,11 +150,23 @@ static int verify_dfa(struct aa_dfa *dfa, int flags)
 		goto out;
 
 	if (flags & DFA_FLAG_VERIFY_STATES) {
+#ifdef SYNO_APPARMOR_PATCH
+		int warning = 0;
+#endif /* SYNO_APPARMOR_PATCH */
 		for (i = 0; i < state_count; i++) {
 			if (DEFAULT_TABLE(dfa)[i] >= state_count)
 				goto out;
 			/* TODO: do check that DEF state recursion terminates */
 			if (BASE_TABLE(dfa)[i] + 255 >= trans_count) {
+#ifdef SYNO_APPARMOR_PATCH
+				if (warning)
+					continue;
+				printk(KERN_WARNING "AppArmor DFA next/check "
+				       "upper bounds error fixed, upgrade "
+				       "user space tools \n");
+				warning = 1;
+			} else if (BASE_TABLE(dfa)[i] >= trans_count) {
+#endif /* SYNO_APPARMOR_PATCH */
 				printk(KERN_ERR "AppArmor DFA next/check upper "
 				       "bounds error\n");
 				goto out;

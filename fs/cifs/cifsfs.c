@@ -474,7 +474,13 @@ static void cifs_umount_begin(struct super_block *sb)
 		   all waiting network requests, nothing to do */
 		spin_unlock(&cifs_tcp_ses_lock);
 		return;
+#ifdef SYNO_CIFS_FORCE_UMOUNT
+	// tcon->tc_count will always 1. Because it will re-use the exist tcon
+	// So we need to check the same value which is checked before kill_sb.
+	} else if (atomic_read(&sb->s_active) == 1)
+#else
 	} else if (tcon->tc_count == 1)
+#endif /* SYNO_CIFS_FORCE_UMOUNT */
 		tcon->tidStatus = CifsExiting;
 	spin_unlock(&cifs_tcp_ses_lock);
 

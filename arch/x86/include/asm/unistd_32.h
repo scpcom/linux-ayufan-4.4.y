@@ -385,35 +385,23 @@
 #ifdef SYNO_UNICODE_STAT
 #define __NR_SYNOCaselessStat64                 406
 #define __NR_SYNOCaselessLStat64                407
-#define __NR_SYNOCaselessStat                   408
-#define __NR_SYNOCaselessLStat                  409
 
 #if !defined(__KERNEL__)
-/* direct SYNOCaselessStat to stat64 in 32-bit platform
- * 64-bits arch has no stat64 support */
-#include <bits/wordsize.h>
-#if __WORDSIZE == 64
-#define SYNOCaselessStat(arg1, arg2)            syscall(__NR_SYNOCaselessStat, arg1, arg2)
-#define SYNOCaselessLStat(arg1, arg2)           syscall(__NR_SYNOCaselessLStat, arg1, arg2)
-#elif (_FILE_OFFSET_BITS == 64)
+#if (_FILE_OFFSET_BITS == 64)
 #define SYNOCaselessStat(arg1, arg2)            syscall(__NR_SYNOCaselessStat64, arg1, arg2)
 #define SYNOCaselessLStat(arg1, arg2)           syscall(__NR_SYNOCaselessLStat64, arg1, arg2)
-#endif
-/* define stat64 interface for compatibility
-   These should be removed after AP modification */
-#define SYNOCaselessStat64(arg1, arg2)          syscall(__NR_SYNOCaselessStat64, arg1, arg2)
-#define SYNOCaselessLStat64(arg1, arg2)         syscall(__NR_SYNOCaselessLStat64, arg1, arg2)
-#endif
-#endif /* MY_ABC_HERE */
+#endif /* (_FILE_OFFSET_BITS == 64) */
+#endif /* !__KERNEL__ */
+#endif /* SYNO_UNICODE_STAT */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
 #define __NR_SYNOEcryptName                     410
 #define __NR_SYNODecryptName                    411
 #define SYNOEcryptName(arg1, arg2)              syscall(__NR_SYNOEcryptName, arg1, arg2)
 #define SYNODecryptName(arg1, arg2, arg3)       syscall(__NR_SYNODecryptName, arg1, arg2, arg3)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_SYNO_ACL
 #define __NR_SYNOACLCheckPerm                   412
 #define SYNOACLSysCheckPerm(arg1, arg2)         syscall(__NR_SYNOACLCheckPerm, arg1, arg2)
 #define __NR_SYNOACLIsSupport                   413
@@ -422,10 +410,7 @@
 #define SYNOACLSysGetPerm(arg1, arg2)           syscall(__NR_SYNOACLGetPerm, arg1, arg2)
 #endif
 
-#ifdef MY_ABC_HERE
-#define __NR_SYNOStat                           416
-#define __NR_SYNOFStat                          417
-#define __NR_SYNOLStat                          418
+#ifdef SYNO_STAT
 #define __NR_SYNOStat64                         419
 #define __NR_SYNOFStat64                        420
 #define __NR_SYNOLStat64                        421
@@ -433,19 +418,14 @@
 #if !defined(__KERNEL__)
 /* direct SYNOStat to stat64 in 32-bit platform
  * 64-bits arch has no stat64 support */
-#include <bits/wordsize.h>
-#if __WORDSIZE == 64
-#define SYNOStat(arg1, arg2, arg3)              syscall(__NR_SYNOStat, arg1, arg2, arg3)
-#define SYNOFStat(arg1, arg2, arg3)             syscall(__NR_SYNOFStat, arg1, arg2, arg3)
-#define SYNOLStat(arg1, arg2, arg3)             syscall(__NR_SYNOLStat, arg1, arg2, arg3)
-#elif (_FILE_OFFSET_BITS == 64)
+#if (_FILE_OFFSET_BITS == 64)
 #define SYNOStat(arg1, arg2, arg3)              syscall(__NR_SYNOStat64, arg1, arg2, arg3)
 #define SYNOFStat(arg1, arg2, arg3)             syscall(__NR_SYNOFStat64, arg1, arg2, arg3)
 #define SYNOLStat(arg1, arg2, arg3)             syscall(__NR_SYNOLStat64, arg1, arg2, arg3)
 #endif
 #endif /* __KERNEL__ */
+#endif /* SYNO_STAT */
 
-#endif /* MY_ABC_HERE */
 #ifdef CONFIG_SYNO_NOTIFY
 #define __NR_SYNONotifyInit                     422
 #define SYNONotifyInit(arg1)                    syscall(__NR_SYNONotifyInit, arg1)
@@ -459,12 +439,12 @@
 #define SYNONotifyRemoveWatch32(arg1,arg2,arg3) syscall(__NR_SYNONotifyRemoveWatch32, arg1, arg2, arg3)
 #endif /* CONFIG_SYNO_NOTIFY */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
 #define __NR_SYNOArchiveOverwrite               427
 #define SYNOArchiveOverwrite(arg1, arg2)        syscall(__NR_SYNOArchiveOverwrite, arg1, arg2)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SYSTEM_CALL
 #define __syscall_return(type, res) \
 do { \
 	if ((unsigned long)(res) >= (unsigned long)(-(128 + 1))) { \

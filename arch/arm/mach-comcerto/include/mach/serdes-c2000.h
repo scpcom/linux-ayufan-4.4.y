@@ -1017,7 +1017,7 @@ static struct serdes_regs_s pcie_phy_reg_file_48[] =
 	  /* Common CMU block */
   	  { 0x000 << 2, 0x06},
   	  { 0x001 << 2, 0x00},
-  	  { 0x002 << 2, 0x89}, //
+  	  { 0x002 << 2, 0x09}, //
  	  { 0x003 << 2, 0x00},
  	  { 0x004 << 2, 0x60}, //
  	  { 0x005 << 2, 0x09}, //

@@ -149,6 +149,74 @@ static void skb_under_panic(struct sk_buff *skb, int sz, void *here)
 	BUG();
 }
 
+#ifdef CONFIG_SYNO_ALPINE
+struct netdev_alloc_cache {
+        struct page_frag        frag;
+        /* we maintain a pagecount bias, so that we dont dirty cache line
+         * containing page->_count every time we allocate a fragment.
+         */
+        unsigned int            pagecnt_bias;
+};
+static DEFINE_PER_CPU(struct netdev_alloc_cache, netdev_alloc_cache);
+
+static void *__netdev_alloc_frag(unsigned int fragsz, gfp_t gfp_mask)
+{
+        struct netdev_alloc_cache *nc;
+        void *data = NULL;
+        int order;
+        unsigned long flags;
+
+        local_irq_save(flags);
+        nc = &__get_cpu_var(netdev_alloc_cache);
+        if (unlikely(!nc->frag.page)) {
+refill:
+               for (order = NETDEV_FRAG_PAGE_MAX_ORDER; ;) {
+                        gfp_t gfp = gfp_mask;
+
+                        if (order)
+                                gfp |= __GFP_COMP | __GFP_NOWARN;
+                        nc->frag.page = alloc_pages(gfp, order);
+                        if (likely(nc->frag.page))
+                                break;
+                        if (--order < 0)
+                                goto end;
+                }
+                nc->frag.size = PAGE_SIZE << order;
+recycle:
+                atomic_set(&nc->frag.page->_count, NETDEV_PAGECNT_MAX_BIAS);
+                nc->pagecnt_bias = NETDEV_PAGECNT_MAX_BIAS;
+                nc->frag.offset = 0;
+        }
+
+        if (nc->frag.offset + fragsz > nc->frag.size) {
+                /* avoid unnecessary locked operations if possible */
+                if ((atomic_read(&nc->frag.page->_count) == nc->pagecnt_bias) ||
+                    atomic_sub_and_test(nc->pagecnt_bias, &nc->frag.page->_count))
+                        goto recycle;
+                goto refill;
+        }
+
+        data = page_address(nc->frag.page) + nc->frag.offset;
+        nc->frag.offset += fragsz;
+        nc->pagecnt_bias--;
+end:
+        local_irq_restore(flags);
+        return data;
+}
+/**
+ * netdev_alloc_frag - allocate a page fragment
+ * @fragsz: fragment size
+ *
+ * Allocates a frag from a page for receive buffer.
+ * Uses GFP_ATOMIC allocations.
+ */
+void *netdev_alloc_frag(unsigned int fragsz)
+{
+        return __netdev_alloc_frag(fragsz, GFP_ATOMIC | __GFP_COLD);
+}
+EXPORT_SYMBOL(netdev_alloc_frag);
+#endif
+
 /* 	Allocate a new skbuff. We do this ourselves so we can fill in a few
  *	'private' fields and also do memory statistics to find all the
  *	[BEEP] leaks.
@@ -220,6 +288,10 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	skb->mac_header = ~0U;
 #endif
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	skb->mspd_data = NULL;
+	skb->mspd_len = 0;
+#endif
 	/* make sure we initialize shinfo sequentially */
 	shinfo = skb_shinfo(skb);
 	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
@@ -303,6 +375,11 @@ struct sk_buff *__alloc_skb_header(unsigned int size, void *data, gfp_t gfp_mask
 	skb->end = skb->tail + size;
 #ifdef NET_SKBUFF_DATA_USES_OFFSET
 	skb->mac_header = ~0U;
+#endif
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	skb->mspd_data = NULL;
+	skb->mspd_len = 0;
 #endif
 
 	/* make sure we initialize shinfo sequentially */
@@ -413,7 +490,7 @@ static void skb_clone_fraglist(struct sk_buff *skb)
 		skb_get(list);
 }
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static inline void skb_release_data(struct sk_buff *skb)
 #else
 static void skb_release_data(struct sk_buff *skb)
@@ -424,8 +501,32 @@ static void skb_release_data(struct sk_buff *skb)
 			       &skb_shinfo(skb)->dataref)) {
 		if (skb_shinfo(skb)->nr_frags) {
 			int i;
+#ifdef CONFIG_SYNO_ALPINE
+			int nr_frags = skb_shinfo(skb)->nr_frags;
+
+			if(nr_frags > 1) {
+				unsigned int c = 0;
+				for (i = 0; i < nr_frags - 1; i++) {
+					struct page *page = skb_frag_page(&skb_shinfo(skb)->frags[i]);
+					struct page *next_page = skb_frag_page(&skb_shinfo(skb)->frags[i + 1]);
+					if (!PageCompound(page) && (page == next_page)) {
+						c++;
+						continue;
+					} else {
+						put_page_n(page, c + 1);
+						c = 0;
+					}
+				}
+
+				put_page_n(skb_frag_page(&skb_shinfo(skb)->frags[i]), c + 1);
+			} else {
+				for (i = 0; i < nr_frags; i++)
+					skb_frag_unref(skb, i);
+			}
+#else
 			for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
 				skb_frag_unref(skb, i);
+#endif
 		}
 
 		/*
@@ -444,6 +545,13 @@ static void skb_release_data(struct sk_buff *skb)
 			skb_drop_fraglist(skb);
 
 		kfree(skb->head);
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+		if (skb->mspd_data) {
+			kfree(skb->mspd_data);
+			skb->mspd_data = NULL;
+		}
+#endif
 	}
 #if defined(CONFIG_SYNO_ARMADA) 
 #ifdef CONFIG_NET_SKB_RECYCLE
@@ -455,12 +563,23 @@ static void skb_release_data(struct sk_buff *skb)
 	skb->skb_recycle = NULL;
 #endif /* CONFIG_NET_SKB_RECYCLE */	
 #endif
+
+#if defined(CONFIG_SYNO_ARMADA_V2)
+#ifdef CONFIG_NET_SKB_RECYCLE
+	/* Workaround for the cases when recycle callback was not called */
+	if (skb->skb_recycle) {
+		/* Sign that skb is not available for recycle */
+		skb->hw_cookie |= BIT(0);
+		skb->skb_recycle(skb);
+	}
+#endif /* CONFIG_NET_SKB_RECYCLE */
+#endif // CONFIG_SYNO_ARMADA_V2
 }
 
 /*
  *	Free an skbuff by memory without cleaning the state.
  */
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static inline void kfree_skbmem(struct sk_buff *skb)
 #else
 static void kfree_skbmem(struct sk_buff *skb)
@@ -495,7 +614,7 @@ static void kfree_skbmem(struct sk_buff *skb)
 	}
 }
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static inline void skb_release_head_state(struct sk_buff *skb)
 #else
 static void skb_release_head_state(struct sk_buff *skb)
@@ -510,7 +629,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 		skb->destructor(skb);
 	}
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if(skb->nfct) 
 		nf_conntrack_put(skb->nfct);
 #else
@@ -518,7 +637,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 #endif
 #endif
 #ifdef NET_SKBUFF_NF_DEFRAG_NEEDED
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if(skb->nfct_reasm) 
 		nf_conntrack_put_reasm(skb->nfct_reasm);
 #else
@@ -538,7 +657,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 }
 
 /* Free everything but the sk_buff shell. */
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static inline void skb_release_all(struct sk_buff *skb)
 #else
 static void skb_release_all(struct sk_buff *skb)
@@ -559,7 +678,7 @@ static void skb_release_all(struct sk_buff *skb)
 
 void __kfree_skb(struct sk_buff *skb)
 {
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	if (skb->skb_recycle && !skb->skb_recycle(skb))
 		return;
@@ -624,6 +743,9 @@ void skb_recycle(struct sk_buff *skb)
 {
 	struct skb_shared_info *shinfo;
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	WARN_ON(skb->mspd_len);
+#endif
 	skb_release_head_state(skb);
 
 	shinfo = skb_shinfo(skb);
@@ -712,6 +834,24 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 {
 #define C(x) n->x = skb->x
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	if (skb->mspd_data) {
+		if (skb->mspd_len) {
+			int ofst = skb->len - skb->mspd_len;
+
+			memcpy(skb->data + ofst, skb->mspd_data + skb->mspd_ofst, skb->mspd_len);
+			skb->mspd_len = 0;
+		}
+
+		WARN_ON(skb_shared(skb));
+
+		if (!skb_shared(skb)) {
+			kfree(skb->mspd_data);
+			skb->mspd_data = NULL;
+		}
+	}
+#endif
+
 	n->next = n->prev = NULL;
 	n->sk = NULL;
 	__copy_skb_header(n, skb);
@@ -731,12 +871,26 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 #endif /* CONFIG_NET_SKB_RECYCLE */
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA_V2)
+#ifdef CONFIG_NET_SKB_RECYCLE
+	n->skb_recycle = NULL;
+	n->hw_cookie = 0;
+#endif /* CONFIG_NET_SKB_RECYCLE */
+#endif // CONFIG_SYNO_ARMADA_V2
+
 	C(tail);
 	C(end);
 	C(head);
 	C(data);
 	C(truesize);
 	atomic_set(&n->users, 1);
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	WARN_ON(skb->mspd_data);
+	C(mspd_data);
+	C(mspd_len);
+	C(mspd_ofst);
+#endif
 
 	atomic_inc(&(skb_shinfo(skb)->dataref));
 	skb->cloned = 1;
@@ -913,6 +1067,24 @@ struct sk_buff *skb_copy(const struct sk_buff *skb, gfp_t gfp_mask)
 	if (!n)
 		return NULL;
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	if (skb->mspd_data) {
+		if (skb->mspd_len) {
+			int ofst = skb->len - skb->mspd_len;
+
+			memcpy(skb->data + ofst, skb->mspd_data + skb->mspd_ofst, skb->mspd_len);
+			((struct sk_buff *)skb)->mspd_len = 0;
+		}
+
+		WARN_ON(skb_shared(skb));
+
+		if (!skb_shared(skb)) {
+			kfree(skb->mspd_data);
+			((struct sk_buff *)skb)->mspd_data = NULL;
+		}
+	}
+#endif
+
 	/* Set the data pointer */
 	skb_reserve(n, headerlen);
 	/* Set the tail pointer and length */
@@ -943,6 +1115,10 @@ struct sk_buff *pskb_copy(struct sk_buff *skb, gfp_t gfp_mask)
 {
 	unsigned int size = skb_end_pointer(skb) - skb->head;
 	struct sk_buff *n = alloc_skb(size, gfp_mask);
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+	WARN_ON(skb->mspd_len);
+#endif
 
 	if (!n)
 		goto out;

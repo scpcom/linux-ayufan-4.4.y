@@ -133,7 +133,11 @@ void store_cpu_topology(unsigned int cpuid)
  * init_cpu_topology is called at boot when only one cpu is running
  * which prevent simultaneous write access to cpu_topology array
  */
+#ifdef CONFIG_SYNO_ALPINE
+void __init init_cpu_topology(void)
+#else
 void init_cpu_topology(void)
+#endif
 {
 	unsigned int cpu;
 

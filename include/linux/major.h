@@ -174,14 +174,14 @@
 
 #define VIOTAPE_MAJOR		230
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #define MV_TS_MAJOR		231	/* Marvell Transport Stream driver */
 #endif
 
 #define BLOCK_EXT_MAJOR		259
 #define SCSI_OSD_MAJOR		260	/* open-osd's OSD scsi device */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DISK_HIBERNATION
 #define SCSI_DISK_MAJOR(M) ((M) == SCSI_DISK0_MAJOR || \
 	((M) >= SCSI_DISK1_MAJOR && (M) <= SCSI_DISK15_MAJOR))
 #endif

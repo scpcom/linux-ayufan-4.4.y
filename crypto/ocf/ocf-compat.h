@@ -240,6 +240,10 @@ typedef irqreturn_t (*irq_handler_t)(int irq, void *arg, struct pt_regs *regs);
 /*
  * common debug for all
  */
+#ifdef CONFIG_SYNO_ARMADA_V2
+#undef dprintk
+#endif
+
 #if 1
 #define dprintk(a...)	do { if (debug) printk(a); } while(0)
 #else

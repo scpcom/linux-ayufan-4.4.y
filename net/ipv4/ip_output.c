@@ -101,6 +101,15 @@ int __ip_local_out(struct sk_buff *skb)
 
 	iph->tot_len = htons(skb->len);
 	ip_send_check(iph);
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_INET_IPSEC_OFFLOAD)
+	if(skb->ipsec_offload)
+	{	
+		dst_output(skb);	
+		return 0;
+	}	
+	else
+#endif
 	return nf_hook(NFPROTO_IPV4, NF_INET_LOCAL_OUT, skb, NULL,
 		       skb_dst(skb)->dev, dst_output);
 }
@@ -241,7 +250,13 @@ static int ip_finish_output(struct sk_buff *skb)
 		return dst_output(skb);
 	}
 #endif
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_INET_IPSEC_OFFLOAD)
+	if ((skb->ipsec_offload == 0) &&
+		skb->len > ip_skb_dst_mtu(skb) && !skb_is_gso(skb))
+#else
 	if (skb->len > ip_skb_dst_mtu(skb) && !skb_is_gso(skb))
+#endif
 		return ip_fragment(skb, ip_finish_output2);
 	else
 		return ip_finish_output2(skb);
@@ -835,7 +850,7 @@ static int __ip_append_data(struct sock *sk,
 		csummode = CHECKSUM_PARTIAL;
 
 	cork->length += length;
-	if (((length > mtu) || (skb && skb_is_gso(skb))) &&
+	if (((length > mtu) || (skb && skb_has_frags(skb))) &&
 	    (sk->sk_protocol == IPPROTO_UDP) &&
 	    (rt->dst.dev->features & NETIF_F_UFO) && !rt->dst.header_len) {
 		err = ip_ufo_append_data(sk, queue, getfrag, from, length,

@@ -66,7 +66,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _SILABS_LIB_H
 
 #include <stdbool.h>
-#include <slic/silabs_dev.h>
+#include <silabs_dev.h>
 
 int silabs_open_device(void);
 int silabs_close_device(void);

@@ -1519,7 +1519,11 @@ int write_cache_pages(struct address_space *mapping,
 			cycled = 1;
 		else
 			cycled = 0;
+#ifdef CONFIG_SYNO_ALPINE
+		end = PGOFF_MAX;
+#else
 		end = -1;
+#endif
 	} else {
 		index = wbc->range_start >> PAGE_CACHE_SHIFT;
 		end = wbc->range_end >> PAGE_CACHE_SHIFT;

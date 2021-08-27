@@ -63,6 +63,13 @@ struct scsi_host_template {
 	struct module *module;
 	const char *name;
 
+#ifdef CONFIG_SYNO_ARMADA_V2
+        /*
+	 * support to staggered spinup in various drivers
+	 */
+        unsigned char support_staggered_spinup;
+#endif
+
 	/*
 	 * Used to initialize old-style drivers.  For new-style drivers
 	 * just perform all work in your module initialization function.

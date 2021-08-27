@@ -34,6 +34,11 @@
 #define NFSD_MAY_CREATE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE)
 #define NFSD_MAY_REMOVE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE|NFSD_MAY_TRUNC)
 
+#ifdef SYNO_NFS_VAAI
+#define NFSD_COPYBUFFERSIZE			(1<<17)
+#define NFSD_PAGESIZE				(1<<12)
+#endif
+
 /*
  * Callback function for readdir
  */
@@ -79,6 +84,12 @@ __be32 		nfsd_read_file(struct svc_rqst *, struct svc_fh *, struct file *,
 				loff_t, struct kvec *, int, unsigned long *);
 __be32 		nfsd_write(struct svc_rqst *, struct svc_fh *,struct file *,
 				loff_t, struct kvec *,int, unsigned long *, int *);
+#ifdef SYNO_NFS_VAAI
+__be32 		nfsd_writezero(struct svc_rqst *, struct svc_fh *,
+				loff_t, unsigned long *);
+__be32 		nfsd_synocopy(const char *, struct svc_rqst *, struct svc_fh *,
+				loff_t, unsigned long *, bool);
+#endif
 __be32		nfsd_readlink(struct svc_rqst *, struct svc_fh *,
 				char *, int *);
 __be32		nfsd_symlink(struct svc_rqst *, struct svc_fh *,

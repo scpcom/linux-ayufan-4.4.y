@@ -30,6 +30,9 @@
 #include "capability.h"
 #include "domain.h"
 #include "file.h"
+#ifdef SYNO_APPARMOR_PATCH
+#include "net.h"
+#endif /* SYNO_APPARMOR_PATCH */
 #include "resource.h"
 
 extern const char *profile_mode_names[];
@@ -148,6 +151,7 @@ struct aa_namespace {
  * @size: the memory consumed by this profiles rules
  * @file: The set of rules governing basic file access and domain transitions
  * @caps: capabilities for the profile
+ * @net: network controls for the profile
  * @rlimits: rlimits for the profile
  *
  * The AppArmor profile contains the basic confinement data.  Each profile
@@ -184,6 +188,9 @@ struct aa_profile {
 
 	struct aa_file_rules file;
 	struct aa_caps caps;
+#ifdef SYNO_APPARMOR_PATCH
+	struct aa_net net;
+#endif /* SYNO_APPARMOR_PATCH */
 	struct aa_rlimit rlimits;
 };
 

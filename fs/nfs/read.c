@@ -567,8 +567,13 @@ int nfs_readpage(struct file *file, struct page *page)
 	struct inode *inode = page->mapping->host;
 	int		error;
 
+#ifdef CONFIG_SYNO_ALPINE
+	dprintk("NFS: nfs_readpage (%p %ld@%llu)\n",
+		page, PAGE_CACHE_SIZE, (unsigned long long)page->index);
+#else
 	dprintk("NFS: nfs_readpage (%p %ld@%lu)\n",
 		page, PAGE_CACHE_SIZE, page->index);
+#endif
 	nfs_inc_stats(inode, NFSIOS_VFSREADPAGE);
 	nfs_add_stats(inode, NFSIOS_READPAGES, 1);
 

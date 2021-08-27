@@ -230,6 +230,9 @@ static void pcpu_set_page_chunk(struct page *page, struct pcpu_chunk *pcpu)
 /* obtain pointer to a chunk from a page struct */
 static struct pcpu_chunk *pcpu_get_page_chunk(struct page *page)
 {
+#ifdef CONFIG_SYNO_ALPINE
+	BUG_ON(page->index > (pgoff_t)(~(unsigned long)0));
+#endif
 	return (struct pcpu_chunk *)page->index;
 }
 

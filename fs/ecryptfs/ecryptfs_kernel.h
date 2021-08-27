@@ -41,8 +41,11 @@
 #include <linux/nsproxy.h>
 #include <linux/backing-dev.h>
 #include <linux/ecryptfs.h>
+#ifdef CONFIG_SYNO_ALPINE
+#include <linux/crypto.h>
+#endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_OCF
 #include <cryptodev.h>
 #endif
 
@@ -131,6 +134,9 @@ ecryptfs_get_key_payload_data(struct key *key)
 
 #define ECRYPTFS_MAX_KEYSET_SIZE 1024
 #define ECRYPTFS_MAX_CIPHER_NAME_SIZE 32
+#ifdef CONFIG_SYNO_ALPINE
+#define ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE 32
+#endif
 #define ECRYPTFS_MAX_NUM_ENC_KEYS 64
 #define ECRYPTFS_MAX_IV_BYTES 16	/* 128 bits */
 #define ECRYPTFS_SALT_BYTES 2
@@ -140,6 +146,9 @@ ecryptfs_get_key_payload_data(struct key *key)
 #define ECRYPTFS_SIZE_AND_MARKER_BYTES (ECRYPTFS_FILE_SIZE_BYTES \
 					+ MAGIC_ECRYPTFS_MARKER_SIZE_BYTES)
 #define ECRYPTFS_DEFAULT_CIPHER "aes"
+#ifdef CONFIG_SYNO_ALPINE
+#define ECRYPTFS_DEFAULT_CIPHER_MODE "cbc"
+#endif
 #define ECRYPTFS_DEFAULT_KEY_BYTES 16
 #define ECRYPTFS_DEFAULT_HASH "md5"
 #define ECRYPTFS_TAG_70_DIGEST ECRYPTFS_DEFAULT_HASH
@@ -227,10 +236,10 @@ struct ecryptfs_crypt_stat {
 	size_t extent_shift;
 	unsigned int extent_mask;
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_OCF
 	struct cryptoini cr_dm; /* OCF session */
 #else
-#ifdef MY_DEF_HERE
+#if defined(SYNO_ECRYPTFS_WITH_ABLKCIPHER) || defined(CONFIG_SYNO_ALPINE)
 	struct crypto_ablkcipher *tfm;
 #else
 	struct crypto_blkcipher *tfm;
@@ -239,6 +248,9 @@ struct ecryptfs_crypt_stat {
 	struct crypto_hash *hash_tfm; /* Crypto context for generating
 				       * the initialization vectors */
 	unsigned char cipher[ECRYPTFS_MAX_CIPHER_NAME_SIZE];
+#ifdef CONFIG_SYNO_ALPINE
+	unsigned char cipher_mode[ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE + 1];
+#endif
 	unsigned char key[ECRYPTFS_MAX_KEY_BYTES];
 	unsigned char root_iv[ECRYPTFS_MAX_IV_BYTES];
 	struct list_head keysig_list;
@@ -343,6 +355,10 @@ struct ecryptfs_mount_crypt_stat {
 	size_t global_default_fn_cipher_key_bytes;
 	unsigned char global_default_cipher_name[ECRYPTFS_MAX_CIPHER_NAME_SIZE
 						 + 1];
+#ifdef CONFIG_SYNO_ALPINE
+	unsigned char global_default_cipher_mode_name[
+	    ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE + 1];
+#endif
 	unsigned char global_default_fn_cipher_name[
 		ECRYPTFS_MAX_CIPHER_NAME_SIZE + 1];
 	char global_default_fnek_sig[ECRYPTFS_SIG_SIZE_HEX + 1];
@@ -625,6 +641,10 @@ int ecryptfs_read_and_validate_xattr_region(struct dentry *dentry,
 					    struct inode *inode);
 u8 ecryptfs_code_for_cipher_string(char *cipher_name, size_t key_bytes);
 int ecryptfs_cipher_code_to_string(char *str, u8 cipher_code);
+#ifdef CONFIG_SYNO_ALPINE
+u8 ecryptfs_code_for_cipher_mode_string(char *mode_name);
+int ecryptfs_cipher_mode_code_to_string(char *str, u8 mode_code);
+#endif
 void ecryptfs_set_default_sizes(struct ecryptfs_crypt_stat *crypt_stat);
 int ecryptfs_generate_key_packet_set(char *dest_base,
 				     struct ecryptfs_crypt_stat *crypt_stat,

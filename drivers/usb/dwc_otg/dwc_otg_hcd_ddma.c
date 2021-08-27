@@ -1,8 +1,8 @@
 /*==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd_ddma.c $
- * $Revision: #8 $
- * $Date: 2010/11/29 $
- * $Change: 1636033 $
+ * $Revision: #10 $
+ * $Date: 2011/10/20 $
+ * $Change: 1869464 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -523,6 +523,7 @@ static void init_isoc_dma_desc(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh,
 				qh->n_bytes[idx] = frame_desc->length;
 			dma_desc->status.b_isoc.n_bytes = qh->n_bytes[idx];
 			dma_desc->status.b_isoc.a = 1;
+			dma_desc->status.b_isoc.sts = 0;
 
 			dma_desc->buf = qtd->urb->dma + frame_desc->offset;
 
@@ -640,6 +641,7 @@ static void init_non_isoc_dma_desc(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 				dma_desc->status.b.sup = 1;	/* Setup Packet */
 
 			dma_desc->status.b.a = 1;	/* Active descriptor */
+			dma_desc->status.b.sts = 0;
 
 			dma_desc->buf =
 			    ((unsigned long)hc->xfer_buff & 0xffffffff);
@@ -660,8 +662,10 @@ static void init_non_isoc_dma_desc(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 		}
 		while ((hc->xfer_len > 0) && (n_desc != MAX_DMA_DESC_NUM_GENERIC));
 		
-
 		qtd->in_process = 1;
+
+		if (qh->ep_type == UE_CONTROL)
+			break;
 
 		if (n_desc == MAX_DMA_DESC_NUM_GENERIC)
 			break;

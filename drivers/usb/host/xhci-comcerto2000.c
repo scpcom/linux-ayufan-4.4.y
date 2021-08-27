@@ -130,15 +130,17 @@ static void comcerto_usb3_phy_init(void)
         writel(0x00000801, USB3_PHY_BASE + 0x2C);
 }
 
-
 void comcerto_start_xhci(void)
 {
         u32 val;
 
         printk(KERN_INFO "### %s\n", __func__);
 
+#if defined(CONFIG_C2K_MFCN_EVM)
+	printk("%s: Reseting usb3...\n", __func__);
+	GPIO_reset_external_device(COMPONENT_USB_HUB, 0);
+#endif
 		/* Enable the USB 3.0 controller clock */
-
 		/* Get the usb3 clock structure  */
 		usb3_clk = clk_get(NULL,"usb1");
 

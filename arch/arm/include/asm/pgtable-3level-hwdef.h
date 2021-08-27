@@ -44,11 +44,15 @@
 #define PMD_SECT_S		(_AT(pmdval_t, 3) << 8)
 #define PMD_SECT_AF		(_AT(pmdval_t, 1) << 10)
 #define PMD_SECT_nG		(_AT(pmdval_t, 1) << 11)
+#ifdef CONFIG_SYNO_ALPINE
+#define PMD_SECT_XN		(_AT(pmdval_t, 1) << 54)
+#else
 #ifdef __ASSEMBLY__
 /* avoid 'shift count out of range' warning */
 #define PMD_SECT_XN		(0)
 #else
 #define PMD_SECT_XN		((pmdval_t)1 << 54)
+#endif
 #endif
 #define PMD_SECT_AP_WRITE	(_AT(pmdval_t, 0))
 #define PMD_SECT_AP_READ	(_AT(pmdval_t, 0))

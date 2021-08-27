@@ -365,7 +365,7 @@ static ssize_t _otg_attr_name_##_store (struct device *_dev, struct device_attri
 #define DWC_OTG_DEVICE_ATTR_BITFIELD_SHOW(_otg_attr_name_,_string_) \
 static ssize_t _otg_attr_name_##_show (struct device *_dev, struct device_attribute *attr, char *buf) \
 { \
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);		\
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);		\
 	uint32_t val; \
 	val = dwc_otg_get_##_otg_attr_name_ (otg_dev->core_if); \
 	return sprintf (buf, "%s = 0x%x\n", _string_, val); \
@@ -374,7 +374,7 @@ static ssize_t _otg_attr_name_##_show (struct device *_dev, struct device_attrib
 static ssize_t _otg_attr_name_##_store (struct device *_dev, struct device_attribute *attr, \
 					const char *buf, size_t count) \
 { \
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev); \
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev); \
 	uint32_t set = simple_strtoul(buf, NULL, 16); \
 	dwc_otg_set_##_otg_attr_name_(otg_dev->core_if, set);\
 	return count; \
@@ -427,7 +427,7 @@ static ssize_t _otg_attr_name_##_store (struct device *_dev, struct device_attri
 #define DWC_OTG_DEVICE_ATTR_REG_SHOW(_otg_attr_name_,_string_) \
 static ssize_t _otg_attr_name_##_show (struct device *_dev, struct device_attribute *attr, char *buf) \
 { \
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev); \
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev); \
 	uint32_t val; \
 	val = dwc_otg_get_##_otg_attr_name_ (otg_dev->core_if); \
 	return sprintf (buf, "%s = 0x%08x\n", _string_, val); \
@@ -436,7 +436,7 @@ static ssize_t _otg_attr_name_##_show (struct device *_dev, struct device_attrib
 static ssize_t _otg_attr_name_##_store (struct device *_dev, struct device_attribute *attr, \
 					const char *buf, size_t count) \
 { \
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev); \
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev); \
 	uint32_t val = simple_strtoul(buf, NULL, 16); \
 	dwc_otg_set_##_otg_attr_name_ (otg_dev->core_if, val); \
 	return count; \
@@ -476,7 +476,7 @@ static ssize_t regoffset_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	return snprintf(buf, sizeof("0xFFFFFFFF\n") + 1, "0x%08x\n",
@@ -496,7 +496,7 @@ static ssize_t regoffset_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	uint32_t offset = simple_strtoul(buf, NULL, 16);
@@ -530,7 +530,7 @@ static ssize_t regvalue_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	uint32_t val;
@@ -566,7 +566,7 @@ static ssize_t regvalue_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	volatile uint32_t *addr;
@@ -643,7 +643,7 @@ static ssize_t hnp_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 	return sprintf(buf, "HstNegScs = 0x%x\n",
 		       dwc_otg_get_hnpstatus(otg_dev->core_if));
@@ -662,7 +662,7 @@ static ssize_t hnp_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 	uint32_t in = simple_strtoul(buf, NULL, 16);
 	dwc_otg_set_hnpreq(otg_dev->core_if, in);
@@ -687,7 +687,7 @@ static ssize_t srp_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 	return sprintf(buf, "SesReqScs = 0x%x\n",
 		       dwc_otg_get_srpstatus(otg_dev->core_if));
@@ -710,7 +710,7 @@ static ssize_t srp_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 	dwc_otg_pcd_initiate_srp(otg_dev->pcd);
 #endif
@@ -734,7 +734,7 @@ static ssize_t buspower_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 	return sprintf(buf, "Bus Power = 0x%x\n",
 		       dwc_otg_get_prtpower(otg_dev->core_if));
@@ -753,7 +753,7 @@ static ssize_t buspower_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 	uint32_t on = simple_strtoul(buf, NULL, 16);
 	dwc_otg_set_prtpower(otg_dev->core_if, on);
@@ -777,7 +777,7 @@ static ssize_t bussuspend_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	return sprintf(buf, "Bus Suspend = 0x%x\n",
@@ -797,7 +797,7 @@ static ssize_t bussuspend_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	uint32_t in = simple_strtoul(buf, NULL, 16);
@@ -819,7 +819,7 @@ static ssize_t mode_ch_tim_en_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	return sprintf(buf, "Mode Change Ready Timer Enable = 0x%x\n",
@@ -839,7 +839,7 @@ static ssize_t mode_ch_tim_en_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	uint32_t in = simple_strtoul(buf, NULL, 16);
@@ -861,7 +861,7 @@ static ssize_t fr_interval_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	return sprintf(buf, "Frame Interval = 0x%x\n",
@@ -881,7 +881,7 @@ static ssize_t fr_interval_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	uint32_t in = simple_strtoul(buf, NULL, 10);
@@ -904,7 +904,7 @@ static ssize_t remote_wakeup_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	return sprintf(buf,
@@ -934,7 +934,7 @@ static ssize_t remote_wakeup_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	uint32_t val = simple_strtoul(buf, NULL, 16);
@@ -964,7 +964,7 @@ static ssize_t rem_wakeup_pwrdn_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 	if (dwc_otg_get_core_state(otg_dev->core_if)) {
 		DWC_PRINTF("Core is in hibernation\n");
@@ -992,7 +992,7 @@ static ssize_t rem_wakeup_pwrdn_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 	dwc_otg_device_hibernation_restore(otg_dev->core_if, 1, 0);
 #endif
@@ -1014,7 +1014,7 @@ static ssize_t disconnect_us(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 	uint32_t val = simple_strtoul(buf, NULL, 16);
 	DWC_PRINTF("The Passed value is %04x\n", val);
@@ -1040,7 +1040,7 @@ static ssize_t regdump_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	dwc_otg_dump_global_registers(otg_dev->core_if);
@@ -1068,7 +1068,7 @@ static ssize_t spramdump_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	dwc_otg_dump_spram(otg_dev->core_if);
@@ -1091,7 +1091,7 @@ static ssize_t hcddump_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	dwc_otg_hcd_dump_state(otg_dev->hcd);
@@ -1116,7 +1116,7 @@ static ssize_t hcd_frrem_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	dwc_otg_hcd_dump_frrem(otg_dev->hcd);
@@ -1141,7 +1141,7 @@ static ssize_t rd_reg_test_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
 
 	int i;
@@ -1175,9 +1175,8 @@ static ssize_t wr_reg_test_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
-
 
 	uint32_t reg_val;
 	int i;
@@ -1213,9 +1212,8 @@ static ssize_t lpmresp_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
-
 
 	if (!dwc_otg_get_param_lpm_enable(otg_dev->core_if))
 		return sprintf(buf, "** LPM is DISABLED **\n");
@@ -1240,9 +1238,8 @@ static ssize_t lpmresp_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
-
 
 	uint32_t val = simple_strtoul(buf, NULL, 16);
 
@@ -1272,9 +1269,8 @@ static ssize_t sleepstatus_show(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
-
 
 	return sprintf(buf, "Sleep Status = %d\n",
 		       dwc_otg_get_lpm_portsleepstatus(otg_dev->core_if));
@@ -1293,9 +1289,8 @@ static ssize_t sleepstatus_store(struct device *_dev,
 #elif defined(PCI_INTERFACE)
 	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
 #else
-	dwc_otg_device_t *otg_dev = dev_get_drvdata(_dev);
+	dwc_otg_device_t *otg_dev = dev_get_platdata(_dev);
 #endif
-
 
 	dwc_otg_core_if_t *core_if = otg_dev->core_if;
 

@@ -904,6 +904,101 @@ MV_BOARD_INFO synods414slimInfo = {
 	.norFlashWriteParams	= 0
 };
 
+/***********************/
+/* SYNO DS115j        */
+/***********************/
+	 
+MV_BOARD_MAC_INFO synods115jInfoBoardMacInfo[] = {
+	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	{BOARD_MAC_SPEED_AUTO, 0x1, 0, 0},
+};
+
+MV_BOARD_MODULE_TYPE_INFO synods115jInfoBoardModTypeInfo[] = {
+	{
+		.boardMppGrp1Mod	= MV_BOARD_RGMII0,
+		.boardMppGrp2Mod	= MV_BOARD_AUTO
+	}
+};
+
+MV_DEV_CS_INFO synods115jInfoBoardDeCsInfo[] = {
+	/*{deviceCS, params, devType, devWidth, busWidth }*/
+#if defined(MV_INCLUDE_SPI)
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}, /* SPI DEV */
+#endif
+#if defined(MV_INCLUDE_NOR)
+	{DEV_BOOCS, N_A, BOARD_DEV_NOR_FLASH, 16, 16} /* NOR DEV */
+#endif
+};
+
+MV_BOARD_MPP_INFO synods115jInfoBoardMppConfigValue[] = {
+	{ {
+		SYNO_DS115j_MPP0_7,
+		SYNO_DS115j_MPP8_15,
+		SYNO_DS115j_MPP16_23,
+		SYNO_DS115j_MPP24_31,
+		SYNO_DS115j_MPP32_39,
+		SYNO_DS115j_MPP40_47,
+		SYNO_DS115j_MPP48_55,
+		SYNO_DS115j_MPP56_63,
+		SYNO_DS115j_MPP64_67,
+	} }
+};
+
+MV_BOARD_TDM_INFO	synods115jTdm880[]	= { {0} };
+
+MV_BOARD_TDM_SPI_INFO synods115jTdmSpiInfo[] = { {1} };
+
+MV_BOARD_INFO synods115jInfo = {
+	.boardName					= "SYNO-DS115j",
+	.enableModuleScan 			= MV_FALSE,
+	.numBoardMppTypeValue		= ARRSZ(synods115jInfoBoardModTypeInfo),
+	.pBoardModTypeValue			= synods115jInfoBoardModTypeInfo,
+	.numBoardMppConfigValue		= ARRSZ(synods115jInfoBoardMppConfigValue),
+	.pBoardMppConfigValue		= synods115jInfoBoardMppConfigValue,
+	.intsGppMaskLow				= 0,
+	.intsGppMaskMid				= 0,
+	.intsGppMaskHigh			= 0,
+	.numBoardDeviceIf			= ARRSZ(synods115jInfoBoardDeCsInfo),
+	.pDevCsInfo					= synods115jInfoBoardDeCsInfo,
+	.numBoardTwsiDev			= 0,
+	.pBoardTwsiDev				= NULL,
+	.numBoardMacInfo			= ARRSZ(synods115jInfoBoardMacInfo),
+	.pBoardMacInfo				= synods115jInfoBoardMacInfo,
+	.numBoardGppInfo			= 0,
+	.pBoardGppInfo				= NULL,
+	.activeLedsNumber			= 0,
+	.pLedGppPin					= NULL,
+	.ledsPolarity				= 0,
+
+	/* PMU Power */
+	.pmuPwrUpPolarity			= 0,
+	.pmuPwrUpDelay				= 16000,
+
+	/* GPP values */
+	.gppOutEnValLow			= SYNO_DS115j_GPP_OUT_ENA_LOW,
+	.gppOutEnValMid			= SYNO_DS115j_GPP_OUT_ENA_MID,
+	.gppOutEnValHigh		= SYNO_DS115j_GPP_OUT_ENA_HIGH,
+	.gppOutValLow			= SYNO_DS115j_GPP_OUT_VAL_LOW,
+	.gppOutValMid			= SYNO_DS115j_GPP_OUT_VAL_MID,
+	.gppOutValHigh			= SYNO_DS115j_GPP_OUT_VAL_HIGH,
+	.gppPolarityValLow		= SYNO_DS115j_GPP_POL_LOW,
+	.gppPolarityValMid		= SYNO_DS115j_GPP_POL_MID,
+	.gppPolarityValHigh		= SYNO_DS115j_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
+
+	/* TDM configuration */
+	.numBoardTdmInfo		= {1},
+	.pBoardTdmInt2CsInfo		= {synods115jTdm880},
+	.boardTdmInfoIndex		= 0,
+	.pBoardTdmSpiInfo 		= synods115jTdmSpiInfo,
+
+	/* NOR init params */
+	.norFlashReadParams		= 0,
+	.norFlashWriteParams	= 0
+};
 #endif /* CONFIG_SYNO_ARMADA_ARCH */
 
 MV_BOARD_INFO *boardInfoTbl[] = {
@@ -929,5 +1024,6 @@ MV_BOARD_INFO *boardInfoTbl[] = {
 	,&synors214Info
 	,&synods214seInfo
 	,&synods414slimInfo
+	,&synods115jInfo
 #endif
 };

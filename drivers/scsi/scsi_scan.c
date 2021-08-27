@@ -61,6 +61,8 @@ typedef struct _tag_SYNO_DISK_VENDOR {
 
 SYNO_DISK_VENDOR gDiskVendor[] = {
 	{"OCZ", 3},
+	{"Crucial", 7},
+	{"Micron", 6},
 	{NULL, 0}
 };
 #if defined(SYNO_INCREASE_DISK_MODEL_NAME_LENGTH)
@@ -70,6 +72,10 @@ SYNO_DISK_VENDOR gDiskVendor[] = {
 extern int syno_get_ata_identity(struct scsi_device *sdev, u16 *id);
 #endif  
 #endif  
+
+#ifdef CONFIG_SYNO_ARMADA_V2
+extern int ss_stats[128];
+#endif
 
 #define ALLOC_FAILURE_MSG	KERN_ERR "%s: Allocation failure during" \
 	" SCSI scanning, some SCSI devices might not be configured\n"
@@ -259,6 +265,9 @@ static void scsi_unlock_floptical(struct scsi_device *sdev,
  * Return value:
  *     scsi_Device pointer, or NULL on failure.
  **/
+#ifdef CONFIG_SYNO_ARMADA_V2
+static int ss_id = 0;
+#endif
 static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 					   unsigned int lun, void *hostdata)
 {
@@ -285,6 +294,26 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 	sdev->lun = lun;
 	sdev->channel = starget->channel;
 	sdev->sdev_state = SDEV_CREATED;
+
+#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef CONFIG_MV_STAGGERED_SPINUP
+	if ((sdev->host->hostt->support_staggered_spinup == 1) && /*host has spinup feature avaliable?*/
+	    scsi_spinup_enabled()) {
+		sdev->ss_id = ss_id;
+		ss_id++;
+#ifdef CONFIG_MV_DISKS_POWERUP_TO_STANDBY
+		sdev->sdev_power_state = SDEV_PW_STANDBY;
+#else
+		sdev->sdev_power_state = SDEV_PW_ON;
+#endif
+		ss_stats[sdev->ss_id] = sdev->sdev_power_state;
+		init_timer(&sdev->standby_timeout);
+		init_timer(&sdev->spinup_timeout);
+		sdev->standby_timeout_secs = 0;
+	}
+#endif
+#endif
+
 	INIT_LIST_HEAD(&sdev->siblings);
 	INIT_LIST_HEAD(&sdev->same_target_siblings);
 	INIT_LIST_HEAD(&sdev->cmd_list);
@@ -293,11 +322,11 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 	spin_lock_init(&sdev->list_lock);
 	INIT_WORK(&sdev->event_work, scsi_evt_thread);
 	INIT_WORK(&sdev->requeue_work, scsi_requeue_run_queue);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_SPINUP_DELAY
 	INIT_LIST_HEAD(&sdev->spinup_list);
 	sdev->spinup_in_process = 0;
 	sdev->spinup_queue = NULL;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SAS_SPINUP_DELAY */
 
 	sdev->sdev_gendev.parent = get_device(&starget->dev);
 	sdev->sdev_target = starget;
@@ -707,7 +736,9 @@ static void scsi_ata_identify_device_get_model_name(struct scsi_device *sdev, un
 	}
 
 	if (1 == blSpecialVendor) {
-		if (' ' == szInqResult[54 + gDiskVendor[i].iLength] || '-' == szInqResult[54 + gDiskVendor[i].iLength]) {
+		if (' ' == szInqResult[54 + gDiskVendor[i].iLength] ||
+				'-' == szInqResult[54 + gDiskVendor[i].iLength] ||
+				'_' == szInqResult[54 + gDiskVendor[i].iLength]) {
 			i = gDiskVendor[i].iLength + 1;
 		} else {
 			i = gDiskVendor[i].iLength;

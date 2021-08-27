@@ -1,8 +1,40 @@
 #!/bin/bash
 
-echo " * Version: 3.4"
+echo " * Version: 4.7"
 
 # LOG:
+# 4.7:
+#   1. adding option none to -s parameters.
+# 4.6:
+#   1. a388 interrupt affinity.
+#   2. a375 optimizations (network apadtive coalescing).
+#   3. a375 interrupt affinity.
+#   4. RAID stripe cache size changed to 4K.
+# 4.4:
+#   1. initial support for a380, a385, a388 configurations.
+#   2. added support for 3 HDDs RD0 and RD5 setups.
+# 4.3:
+#   1. fixed wrong partnum usage.
+#   2. min receivefile size set to 16k.
+# 4.2:
+#   1. removed strip_cache_size on RD1 configuration (no such entity in RD1).
+#   2. fixing mdadm -S command.
+# 4.1:
+#   1. added support to encrypted single disk configuration (e.g. -t crypt_sd)
+#   2. added new option -j that create offset partition in disk (e.g. -j 150)
+# 4.0:
+#   1. complete redesign of the nas_init script.
+#   2. added new option -s that transfer SoC used, please see help.
+#   3. new functions to consolidate mkfs and mount utilities.
+#   4. removed old -b option, no support for rootfs copy.
+#   5. removed old -s option, SSD support was broken anyway.
+#   6. adding support for a370 adaptive coaleaing.
+# 3.6:
+#   1. fixing option u: will not start samba processes.
+#   2. remove the NONE option for FS.
+#   3. removing reboot command.
+# 3.5:
+#   1. moving raid-5 to 128 chunk size
 # 3.4:
 #   1. adding support for ubuntu systems by using -u param.
 #   2. when using ubuntu, users will have to stop and start samba manually, 
@@ -48,31 +80,27 @@ echo " * Version: 3.4"
 #   1. setting coal to 100 in net queue 0 and fixing for in NETQ.
 
 PREPARE_HDD="no"
-ZAP_ROOTFS="no"
 MKFS="no"
-TOPOLOGY="rd5"
-HDD_NUM="4"
-ARCH=`uname -m`
+TOPOLOGY="sd"
+HDD_NUM=4
+PLATFORM=""
 FS="ext4"
-NFS="no"
-SSD="no"
 SYSDISKEXIST="no"
 CPU_COUNT=`grep -c ^processor /proc/cpuinfo`
-COPY_CMD="/bin/cp"
-ROOTFS_DEVICE="/dev/nfs"
 LARGE_PAGE=`/usr/bin/getconf PAGESIZE`
 PARTNUM="1"
 LINK_NUM=`dmesg |grep "Giga ports" |awk '{print $2}'`
 PARTSIZE="55GB"
+JUMPPARTSIZE="0"
 NETQ="0"
-SYSTEM="sdk"
-
+SAMBASTATUS="enabled"
 MNT_DIR="/mnt/public"
-mkdir -p $MNT_DIR
-chmod 777 $MNT_DIR
+# Encryption variables
+CRYPTO_NAME="cryptovol1"
+KEY_SIZE="192"
+ALGORITHIM="aes"
 
 
-ARGV0=$(basename ${0} | cut -f1 -d'.')
 STAMP="[$(date +%H:%M-%d%b%Y)]:"
 echo -e "Script parameters has been updated! please read help!"
 
@@ -88,93 +116,84 @@ function do_error_hold {
 function do_error {
     echo -e "\n*************************** Error ******************************\n"
     echo -e " ${STAMP}: ${1}"
+    echo -e " Please see help\n"
     echo -e "\n****************************************************************\n"
     exit 1
-}
-
-function do_error_reboot {
-    echo -e "\n*************************** Error ******************************\n"
-    echo -e "${STAMP}: ${1}"
-    echo -e "\n****************************************************************\n"
-    reboot
 }
 
 if [ "$CPU_COUNT" == "0" ]; then
     CPU_COUNT="1"
 fi
 
-# verify supporting arch
-case "$ARCH" in
-    armv5tel | armv6l | armv7l)	;;
-    *)	do_error_hold "Architecture ${ARCH} unsupported" ;;
-esac
-
-while getopts "l:pbmzun:sf:t:h:" flag; do
+while getopts "l:ps:mzun:f:t:h:j:" flag; do
     case "$flag" in
 	f)
 	    FS=$OPTARG
 	    case "$OPTARG" in
-		ext4|btrfs|xfs|NONE)	echo "Filesystem: ${OPTARG}" ;;
-		*)			do_error "Usage: file-system: ext4|xfs|btrfs" ;;
+		ext4|btrfs|xfs)	echo "Filesystem: ${OPTARG}" ;;
+		*)   do_error "-f: wrong option" ;;
 	    esac
 	    ;;
-	
-	s)	SSD="yes"
-	    ;;
-	
-	b)	ZAP_ROOTFS="yes"
-	    ROOTFS_TARBALL="$OPTARG"
-	    ;;
-	
 	m)	MKFS="yes"
 	    ;;
-
 	z)	SYSDISKEXIST="yes"
 	    ;;
-	
 	n)	PARTNUM="$OPTARG"
 	    ;;
-	
 	p)	PREPARE_HDD="yes"
 	    ;;
-	
 	l)	LINK_NUM=$OPTARG
 	    case "$OPTARG" in
 		0|1|2|4) ;;
-		*)	do_error "Usage: links options: 0|1|2|4" ;;
+		*)	do_error "-l: wrong option" ;;
 	    esac
 	    ;;
-	
 	t)	TOPOLOGY=$OPTARG
 	    case "$OPTARG" in
-	sd|rd0|rd1|rd5|rd6) ;;
-		*)	do_error "Usage: drive toplogy: sd|rd0|rd1|rd5|rd6" ;;
+		sd|rd0|rd1|rd5|rd6|crypt_sd) ;;
+		*)	do_error "-t: wrong option" ;;
 	    esac
 	    ;;
-	
+	s)	PLATFORM=$OPTARG
+	    case "$OPTARG" in
+		a310|a310|axp|a370|a375|a380|a385|a388|none) ;;
+		*)	do_error "-s: wrong option" ;;
+	    esac
+	    ;;
 	h)	HDD_NUM=$OPTARG
 	    case "$OPTARG" in
-		4|5|8) ;;
-		*)	do_error "Usage: drive toplogy: 4|8" ;;
+		2|3|4|5|8) ;;
+		*)	do_error "-h: wrong option" ;;
 	    esac
 	    ;;
-	u)      SYSTEM="ubuntu"
+	u)      SAMBASTATUS="disabled"
+	    ;;
+	j)	JUMPPARTSIZE=$OPTARG
+		if [ $OPTARG -lt 1 ]; then
+			do_error "-j: wrong input"
+		fi
 		;;
-	
 	*)	echo "Usage: $0"
-	    echo "           -f <ext4|xfs|btrfs|fat32>: file system type ext4, xfs, btrfs or fat32"
+	    echo "           -s <a300|a310|axp|a370|a375|a380|a385|a388|none>: platform used with nas_init"
+	    echo "           -f <ext4|xfs|btrfs>: file system type ext4, xfs, btrfs or fat32"
 	    echo "           -t <sd|rd0|rd1|rd5|rd6>: drive topology"
 	    echo "           -n <num>: partition number to be mounted"
-	    echo "           -m: create RAID and FD (mkfs/mdadm)"
-	    echo "           -p: prepare drives (fdisk)"
+	    echo "           -m create RAID and FD (mkfs/mdadm)"
+	    echo "           -p prepare drives (fdisk)"
 	    echo "           -h <num>: number of HDDs to use"
 	    echo "           -l <num>: number of links to use"
-	    echo "           -b <rootfs_tarball_path>:  path to rootfs tarball to be placed on /dev/sda2"
-	    echo "           -u: running script on ubuntu filesystem"
+	    echo "           -u adding this flag will disable SAMBA support"
+		echo "			 -j <num>: offset in disk for the new partition to be created (in GB)"
 	    exit 1
 	    ;;
     esac
 done
+
+# verify supporting arch
+case "$PLATFORM" in
+    a300|a310|axp|a370|a375|a380|a385|a388|none)	;;
+    *)	do_error "Platform ${PLATFORM} unsupported, please pass valid -s option" ;;
+esac
 
 echo -ne "************** System info ***************\n"
 echo -ne "    Topology:      "
@@ -184,33 +203,25 @@ case "$TOPOLOGY" in
     rd1)	echo -ne "RAID1\n" ;;
     rd5)	echo -ne "RAID5\n" ;;
     rd6)	echo -ne "RAID6\n" ;;
-    *)	do_error "Invalid Topology" ;;
+    crypt_sd) 	echo -ne "Encrypted single drive\n" ;;
+    *)	do_error "Invalid drive topology" ;;
 esac
 
 echo -ne "    Filesystem:    $FS\n"
-echo -ne "    Arch:          $ARCH\n"
+echo -ne "    Platform:      $PLATFORM\n"
 echo -ne "    Cores:         $CPU_COUNT\n"
 echo -ne "    Links:         $LINK_NUM\n"
 echo -ne "    Page Size:     $LARGE_PAGE\n"
 echo -ne "    Disk mount:    $SYSDISKEXIST\n"
-echo -ne "    * Option above will used for the system configuration\n      if you like to change them, please pass different parameters to the nas_init.sh\n"
-if [ "$MKFS" == "yes" ]; then
-    case "$FS" in
-	xfs)	[ ! -e "$(which mkfs.xfs)" ]	&&	do_error "missing mkfs.xfs in rootfs (aptitude install xfsprogs)" ;;
-	ext4)	[ ! -e "$(which mkfs.ext4)" ]	&&	do_error "missing mkfs.ext4 in rootfs (aptitude install e2fsprogs)" ;;
-	fat32)	[ ! -e "$(which mkdosfs)" ]	&&	do_error "missing mkdosfs in rootfs (aptitude install dosfstools)" ;;
-	btrfs)	[ ! -e "$(which mkfs.btrfs)" ]	&&	do_error "missing mkfs.btrfs in rootfs (aptitude install btrfs-tools)" ;;
-	NONE)						echo "no filesystem specified" ;;
-	*)						do_error "no valid filesystem specified" ;;
-    esac
-fi
+echo -ne "    * Option above will used for the system configuration\n"
+echo -ne "      if you like to change them, please pass different parameters to the nas_init.sh\n"
 echo -ne "******************************************\n"
-[[ "$TOPOLOGY" == "rd0" || "$TOPOLOGY" == "rd1" || "$TOPOLOGY" == "rd5" || "$TOPOLOGY" == "rd6" ]] && [ ! -e "$(which mdadm)" ] && do_error "missing mdadm in rootfs (aptitude install mdadm)"
+
+if [ "$SAMBASTATUS" == "enabled" ]; then
 
     [ ! -e "$(which smbd)" ] && do_error "SAMBA in not installed on your filesystem (aptitude install samba)"
     [ ! -e "$(which nmbd)" ] && do_error "SAMBA in not installed on your filesystem (aptitude install samba)"
 
-if [ "$SYSTEM" == "sdk" ]; then
     echo -ne " * Stopping SAMBA processes:   "
     if [ "$(pidof smbd)" ]; then
 	killall smbd
@@ -219,14 +230,18 @@ if [ "$SYSTEM" == "sdk" ]; then
     if [ "$(pidof nmbd)" ]; then
 	killall nmbd
     fi
-fi
+    echo -ne "[Done]\n"
     sleep 2
 
     echo -ne " * Checking SAMBA is not running:  "
     if [ `ps -ef |grep smb |grep -v grep |wc -l` != 0 ]; then
-    do_error "Unable to stop Samba processes, when using ubuntu you need to stop them manually"
+	do_error "Unable to stop Samba processes, to stop them manually use -u flag"
     fi
     echo -ne "[Done]\n"
+fi
+
+mkdir -p $MNT_DIR
+chmod 777 $MNT_DIR
 
 echo -ne " * Unmounting $MNT_DIR:            "
 if [ `mount | grep $MNT_DIR | grep -v grep | wc -l` != 0 ]; then
@@ -235,15 +250,13 @@ fi
 
 sleep 2
 
-#if [ `mount | grep mnt | grep -v grep | wc -l` != 0 ]; then
-#    do_error "Unable to unmount /mnt"
-#fi
+if [ `mount | grep mnt | grep -v grep | wc -l` != 0 ]; then
+    do_error "Unable to unmount $MNT_DIR"
+fi
 echo -ne "[Done]\n"
 
-#[ -e /dev/md_d0 ] && mdadm --manage --stop /dev/md_d0
-#[ -e /dev/md_d1 ] && mdadm --manage --stop /dev/md_d1
-
-if [ "$TOPOLOGY" == "sd" ]; then
+# examine disk topology
+if [ "$TOPOLOGY" == "sd" -o "$TOPOLOGY" == "crypt_sd" ]; then
     if [ "$SYSDISKEXIST" == "yes" ]; then
 	DRIVES="b"
     else
@@ -251,12 +264,37 @@ if [ "$TOPOLOGY" == "sd" ]; then
     fi
     PARTSIZE="55GB"
 elif [ "$TOPOLOGY" == "rd0" ]; then
+    if [ "$HDD_NUM" == "5" ]; then
+	if [ "$SYSDISKEXIST" == "yes" ]; then
+	    DRIVES="b c d e f"
+	else
+	    DRIVES="a b c d e"
+	fi
+	PARTSIZE="20GB"
+    elif [ "$HDD_NUM" == "4" ]; then
+	if [ "$SYSDISKEXIST" == "yes" ]; then
+	    DRIVES="b c d e"
+	else
+	    DRIVES="a b c d"
+	fi
+	PARTSIZE="20GB"
+    elif [ "$HDD_NUM" == "3" ]; then
+	if [ "$SYSDISKEXIST" == "yes" ]; then
+	    DRIVES="b c d"
+	else
+	    DRIVES="a b c"
+	fi
+	PARTSIZE="25GB"
+    else # [ "$HDD_NUM" == "2" ] default
 	if [ "$SYSDISKEXIST" == "yes" ]; then
 	    DRIVES="b c"
 	else
 	    DRIVES="a b"
 	fi
-    PARTSIZE="30GB"
+	HDD_NUM=2
+	PARTSIZE="50GB"
+    fi
+    LEVEL=0
 elif [ "$TOPOLOGY" == "rd1" ]; then
     if [ "$SYSDISKEXIST" == "yes" ]; then
 	DRIVES="b c"
@@ -264,6 +302,8 @@ elif [ "$TOPOLOGY" == "rd1" ]; then
 	DRIVES="a b"
     fi
     PARTSIZE="55GB"
+    HDD_NUM=2
+    LEVEL=1
 elif [ "$TOPOLOGY" == "rd5" ]; then
     if [ "$HDD_NUM" == "8" ]; then
 	if [ "$SYSDISKEXIST" == "yes" ]; then
@@ -272,13 +312,6 @@ elif [ "$TOPOLOGY" == "rd5" ]; then
 	    DRIVES="a b c d e f g h"
 	fi
 	PARTSIZE="10GB"
-    elif [ "$HDD_NUM" == "4" ]; then
-	if [ "$SYSDISKEXIST" == "yes" ]; then
-	    DRIVES="b c d e"
-	else
-	    DRIVES="a b c d"
-	fi
-	PARTSIZE="20GB"
     elif [ "$HDD_NUM" == "5" ]; then
 	if [ "$SYSDISKEXIST" == "yes" ]; then
 	    DRIVES="b c d e f"
@@ -286,7 +319,23 @@ elif [ "$TOPOLOGY" == "rd5" ]; then
 	    DRIVES="a b c d e"
 	fi
 	PARTSIZE="20GB"
+    elif [ "$HDD_NUM" == "3" ]; then
+	if [ "$SYSDISKEXIST" == "yes" ]; then
+	    DRIVES="b c d"
+	else
+	    DRIVES="a b c"
+	fi
+	PARTSIZE="25GB"
+    else # [ "$HDD_NUM" == "4" ] default HDD_NUM
+	if [ "$SYSDISKEXIST" == "yes" ]; then
+	    DRIVES="b c d e"
+	else
+	    DRIVES="a b c d"
+	fi
+	PARTSIZE="20GB"
+	HDD_NUM=4
     fi
+    LEVEL=5
 elif [ "$TOPOLOGY" == "rd6" ]; then
     if [ "$HDD_NUM" == "8" ]; then
 	if [ "$SYSDISKEXIST" == "yes" ]; then
@@ -295,22 +344,98 @@ elif [ "$TOPOLOGY" == "rd6" ]; then
 	    DRIVES="a b c d e f g h"
 	fi
 	PARTSIZE="10GB"
-    elif [ "$HDD_NUM" == "4" ]; then
+    elif [ "$HDD_NUM" == "5" ]; then
+	if [ "$SYSDISKEXIST" == "yes" ]; then
+	    DRIVES="b c d e f"
+	else
+	    DRIVES="a b c d e"
+	fi
+	PARTSIZE="20GB"
+    else #[ "$HDD_NUM" == "4" ] default HDD_NUM
 	if [ "$SYSDISKEXIST" == "yes" ]; then
 	    DRIVES="b c d e"
 	else
 	    DRIVES="a b c d"
 	fi
 	PARTSIZE="20GB"
-    elif [ "$HDD_NUM" == "5" ]; then
-	if [ "$SYSDISKEXIST" == "yes" ]; then
-	    DRIVES="b c d e f"
+	HDD_NUM=4
+    fi
+    LEVEL=6
+fi
+
+# create_fs function variables:
+# $1 filesystem type
+# $2 RAID topology
+# $3 device to use
+# $4 number of HDDs (optional, for RAID only)
+function create_fs {
+    STRIDE=32
+    STRIPE=0
+    HDD_NUM=$4
+    case "$1" in
+	ext4)	[ ! -e "$(which mkfs.ext4)" ] \
+	    && do_error "missing mkfs.ext4 in rootfs (aptitude install e2fsprogs)" ;;
+	xfs)	[ ! -e "$(which mkfs.xfs)" ] \
+	    && do_error "missing mkfs.xfs in rootfs (aptitude install xfsprogs)" ;;
+	btrfs)	[ ! -e "$(which mkfs.btrfs)" ] \
+	    && do_error "missing mkfs.btrfs in rootfs (aptitude install btrfs-tools)" ;;
+	*) do_error "no valid filesystem specified" ;;
+    esac
+
+    case "$1" in
+	ext4)
+	    case "$2" in
+		sd) STRIPE=0
+		    ;;
+		rd1) STRIPE=$STRIDE
+		    ;;
+		rd0) STRIPE=$((STRIDE * HDD_NUM))
+	            ;;
+		rd5) HDD_NUM=$((HDD_NUM - 1))
+		    STRIPE=$((STRIDE * HDD_NUM))
+		    ;;
+		rd6) HDD_NUM=$(($HDD_NUM - 2))
+		    STRIPE=$((STRIDE * HDD_NUM))
+		    ;;
+		*) do_error "unsupported topology $2\n"
+		    ;;
+	    esac
+	    if [ $STRIPE -gt 0 ]; then
+		E_OPTION="-E stride=$STRIDE,stripe-width=$STRIPE"
 	    else
-	    DRIVES="a b c d e"
+		E_OPTION=""
 	    fi
-	PARTSIZE="20GB"
+	    # create the filesystem
+	    mkfs.ext4 -j -m 0 -O large_file,extent -b 4096 $E_OPTION -F $3
+	    ;;
+        xfs) mkfs.xfs -f $3
+	    ;;
+        btrfs) mkfs.btrfs $3
+	    ;;
+	*) do_error "unsupported filesystem $1\n"
+	    ;;
+    esac
+}
+
+# mount_fs function variables:
+# $1 filesystem type
+# $2 device to use
+# $3 mount dir
+function mount_fs {
+    if [ "$1" == "ext4" ]; then
+	mount -t ext4 $2 $3 -o noatime,data=writeback,barrier=0,nobh
+    elif [ "$1" == "xfs" ]; then
+	mount -t xfs $2 $3 -o noatime,nodirspread
+    elif [ "$1" == "btrfs" ]; then
+	mount -t btrfs $2 $3 -o noatime
+    else
+	do_error "unsupported filesystem $1\n"
     fi
+
+    if [ `mount | grep $3 | grep -v grep | wc -l` == 0 ]; then
+	do_error "Failed to mount FS $1 from $2 to dir $3"
     fi
+}
 
 # Checking drives existence 
 #for drive in `echo $DRIVES`; do 
@@ -319,53 +444,150 @@ elif [ "$TOPOLOGY" == "rd6" ]; then
  #   fi
 #done
 
-    echo -ne " * Preparing disks partitions: "
+[ ! -e "$(which mdadm)" ] && do_error "missing mdadm in rootfs (aptitude install mdadm)"
+
 if [ "$PREPARE_HDD" == "yes" ]; then
+    echo -ne " * Preparing disks partitions: "
     [ ! -e "$(which fdisk)" ] && do_error "missing fdisk in rootfs"
 
-    set -o verbose
-    if [ "$SSD" == "no" ]; then
-	for drive in `echo $DRIVES`; do echo -e "c\no\nn\np\n1\n4096\n+${PARTSIZE}\nt\n83\nw\n" | fdisk -u /dev/sd${drive}; done
-    else
-	for drive in `echo $DRIVES`; do echo -e "c\no\nn\np\n1\n63\n+${PARTSIZE}\nt\n83\nw\n" | fdisk  -H 224 -S 56 /dev/sd${drive}; done
-#		for drive in `echo $DRIVES`; do echo -e "c\no\nn\np\n1\n2\n+${PARTSIZE}\nt\n83\nw\n" | fdisk -H 32 -S 32 /dev/sd${drive}; done
-    fi
-    set +o verbose
-    fdisk -ul
+    mdadm -S /dev/md*
+    sleep 2
 
-    blockdev --rereadpt /dev/sd${drive} || do_error_reboot "The partition table has been altered, please reboot device and run nas_init again"
+    for partition in `echo $DRIVES`; do mdadm --zero-superblock /dev/sd${partition}${PARTNUM}; done
+    sleep 2
+
+    set -o verbose
+
+    FDISK_LINE="c\no\nn\np\n1\n4096\n+$PARTSIZE\nt\n83\nw\n"
+    if [ "$JUMPPARTSIZE" -ne "0" ]; then
+	FDISK_LINE="c\no\nn\np\n1\n\n+${JUMPPARTSIZE}GB\nt\n83\nn\np\n2\n\n+$PARTSIZE\nt\n2\n83\nw\n"
+	PARTNUM="2"
+    fi
+
+    for drive in `echo $DRIVES`; \
+		do echo -e "${FDISK_LINE}" | fdisk -u /dev/sd${drive}; done
+    sleep 3
+    mdadm -S /dev/md*
+    sleep 2
+    set +o verbose
+
+    blockdev --rereadpt /dev/sd${drive} \
+    || do_error "The partition table has been altered, please reboot device and run nas_init again"
+    echo -ne "[Done]\n"
 fi
+
+echo -ne " * Stopping all MD devices:    "
+mdadm -S /dev/md*
+sleep 2
 echo -ne "[Done]\n"
 
-if [ "$ZAP_ROOTFS" == "yes" ]; then
-    [ ! -e "$ROOTFS_TARBALL" ] && do_error "missing rootfs tarball, use option -b <rootfs_tarball_path>"
-    
-    mkfs.ext3 ${ROOTFS_DEVICE}
-    mount ${ROOTFS_DEVICE} $MNT_DIR
-    cd $MNT_DIR
-    $COPY_CMD "$ROOTFS_TARBALL" | tar xpjf -
+if [ "$TOPOLOGY" == "sd" ]; then
+    PARTITIONS="/dev/sd${DRIVES}${PARTNUM}"
+    echo -ne " * Starting single disk:       "
+    set -o verbose
 
-	# overwrite tarball files with NFS based files
-	#cp /etc/hostname           /mnt/etc/hostname
-	#cp /usr/sbin/nas_init.sh   /mnt/usr/sbin/
-	#cp /etc/network/interfaces /mnt/etc/network/interfaces
-    cd /root
-    umount $MNT_DIR
-    sleep 2
+    echo -e 1024 > /sys/block/sd${DRIVES}/queue/read_ahead_kb
+
+    if [ "$MKFS" == "yes" ]; then
+	for partition in `echo $DRIVES`; do mdadm --zero-superblock /dev/sd${partition}${PARTNUM}; done
+	sleep 2
+	create_fs $FS $TOPOLOGY $PARTITIONS
+    fi
+
+    mount_fs $FS $PARTITIONS $MNT_DIR
+
+    set +o verbose
+    echo -ne "[Done]\n"
+elif [ "$TOPOLOGY" == "crypt_sd" ]; then
+    PARTITIONS="/dev/sd${DRIVES}${PARTNUM}"
+    CRYPTO_PARTITIONS="/dev/mapper/$CRYPTO_NAME"
+    echo -ne " * Starting encrypted single disk:       "
+    set -o verbose
+
+    echo -e 1024 > /sys/block/sd${DRIVES}/queue/read_ahead_kb
+
+    # create encryption key
+    dd if=/dev/urandom of=key bs=$KEY_SIZE count=1
+    cryptsetup -c $ALGORITHIM -d key -s $KEY_SIZE create $CRYPTO_NAME $PARTITIONS
+
+    if [ "$MKFS" == "yes" ]; then
+	create_fs $FS "sd" $CRYPTO_PARTITIONS
+    fi
+
+    mount_fs $FS $CRYPTO_PARTITIONS $MNT_DIR
+
+    set +o verbose
+    echo -ne "[Done]\n"
+else # RAID TOPOLOGY
+    [ ! -e "$(which mdadm)" ] && do_error "missing mdadm in rootfs (aptitude install mdadm)"
+
+    echo -ne " * Starting $TOPOLOGY build:       "
+    for drive in `echo $DRIVES`; do PARTITIONS="${PARTITIONS} /dev/sd${drive}${PARTNUM}"; done
+
+    set -o verbose
+
+    if [ "$MKFS" == "yes" ]; then
+	mdadm -S /dev/md*
+	sleep 2
+	for partition in `echo $DRIVES`; do mdadm --zero-superblock /dev/sd${partition}${PARTNUM}; done
+	sleep 2
+
+	echo "y" | mdadm --create -c 128 /dev/md0 --level=$LEVEL -n $HDD_NUM --force $PARTITIONS
+	sleep 2
+
+	if [ `cat /proc/mdstat  |grep md0 |wc -l` == 0 ]; then
+	    do_error "Unable to create RAID device"
+	fi
+
+	create_fs $FS $TOPOLOGY /dev/md0 $HDD_NUM
+
+    else
+	# need to reassemble the raid
+	mdadm --assemble /dev/md0 --force $PARTITIONS
+
+	if [ `cat /proc/mdstat  |grep md0 |wc -l` == 0 ]; then
+	    do_error "Unable to assemble RAID device"
+	fi
+    fi
+
+    mount_fs $FS /dev/md0 $MNT_DIR
+
+    if [ "$TOPOLOGY" != "rd1" ]; then
+       # no stripe_cache_size support in rd1
+	if [ "$LARGE_PAGE" == "65536" ]; then
+            echo 256 > /sys/block/md0/md/stripe_cache_size
+	else
+            echo 4096 > /sys/block/md0/md/stripe_cache_size
+	fi
+    fi
+
+    for drive in `echo $DRIVES`; do echo -e 192 > /sys/block/sd${drive}/queue/read_ahead_kb; done
+
+    echo -e 2048 > /sys/block/md0/queue/read_ahead_kb
+    echo 100000 > /sys/block/md0/md/sync_speed_min
+
+    set +o verbose
+    echo -ne "[Done]\n"
+
 fi
+
+sleep 2
 echo -ne " * Network setup:              "
 if [ "$LINK_NUM" == "2" ]; then
+    [ ! -e "$(which ifenslave)" ] && do_error "missing ifenslave in rootfs (aptitude install ifenslave)"
     set -o verbose
     ifconfig eth0 0.0.0.0 down
     ifconfig eth1 0.0.0.0 down
 
     ifconfig bond0 192.168.0.5 netmask 255.255.255.0 down
     echo balance-xor > /sys/class/net/bond0/bonding/mode
-    ifconfig bond0 up 
+    ifconfig bond0 up
     ifenslave bond0 eth0 eth1
 
     set +o verbose
+    echo -ne "[Done]\n"
 elif [ "$LINK_NUM" == "4" ]; then
+    [ ! -e "$(which ifenslave)" ] && do_error "missing ifenslave in rootfs (aptitude install ifenslave)"
     set -o verbose
     ifconfig eth0 0.0.0.0 down
     ifconfig eth1 0.0.0.0 down
@@ -374,23 +596,25 @@ elif [ "$LINK_NUM" == "4" ]; then
 
     ifconfig bond0 192.168.0.5 netmask 255.255.255.0 down
     echo balance-xor > /sys/class/net/bond0/bonding/mode
-    ifconfig bond0 up 
+    ifconfig bond0 up
     ifenslave bond0 eth0 eth1 eth2 eth3
 
     set +o verbose
+    echo -ne "[Done]\n"
 elif [ "$LINK_NUM" == "1" ]; then
     set -o verbose
     ifconfig eth0 192.168.0.5 netmask 255.255.255.0 up
     set +o verbose
+    echo -ne "[Done]\n"
 elif [ "$LINK_NUM" == "0" ]; then
-    echo -ne "Skipping network setup\n"
-    fi
-echo -ne "[Done]\n"
+    echo -ne "[Skip]\n"
+fi
 
 echo -ne " * Network optimization:       "
 
-if [ "$ARCH" == "armv5tel" ]; then
+if [ "$PLATFORM" == "a300" ] || [ "$PLATFORM" == "a310" ]; then
 # KW section, LSP_5.1.3
+    [ ! -e "$(which mv_eth_tool)" ] && do_error "missing mv_eth_tool in rootfs"
     set -o verbose
     mv_eth_tool -txdone 8
     mv_eth_tool -txen 0 1
@@ -399,345 +623,53 @@ if [ "$ARCH" == "armv5tel" ]; then
     mv_eth_tool -lro 0 1
     mv_eth_tool -rxcoal 0 160
     set +o verbose
-elif [[ "$ARCH" == "armv6l" || "$ARCH" == "armv7l" ]]; then
-# AXP / KW40
+elif [ "$PLATFORM" == "axp" ]; then
+    [ ! -e "$(which ethtool)" ] && do_error "missing ethtool in rootfs"
     set -o verbose
     echo 1 > /sys/devices/platform/neta/gbe/skb
     for (( j=0; j<$LINK_NUM; j++ )); do
-	#ethtool  --offload eth$j gso on
-        #ethtool  --offload eth$j tso on
-
-	# following offload lower NAS BM, we do not use it
-	#ethtool  --offload eth$j gro on
-
         # set RX coalecing to zero on all port 0 queues
 	for (( i=0; i<=$NETQ; i++ )); do
 	    echo "$j $i 100" > /sys/devices/platform/neta/gbe/rxq_time_coal
 	done
-	    
+
 	ethtool -k eth$j > /dev/null
     done
     set +o verbose
-else
-    do_error "Unsupported ARCH=$ARCH"
+elif [ "$PLATFORM" == "a370" ]; then
+    [ ! -e "$(which ethtool)" ] && do_error "missing ethtool in rootfs"
+    set -o verbose
+    ethtool -C eth0 pkt-rate-low 20000 pkt-rate-high 3000000 rx-frames 100 \
+	rx-usecs 1500 rx-usecs-high 1500 adaptive-rx on
+    set +o verbose
+elif [ "$PLATFORM" == "a375" ]; then
+    [ ! -e "$(which ethtool)" ] && do_error "missing ethtool in rootfs"
+    set -o verbose
+    ethtool -C eth0 pkt-rate-low 20000 pkt-rate-high 3000000 rx-frames 32 \
+        rx-usecs 1150 rx-usecs-high 1150 rx-usecs-low 100 rx-frames-low 32 \
+	rx-frames-high 32 adaptive-rx on
+    set +o verbose
+elif [ "$PLATFORM" == "a380" ]; then
+    [ ! -e "$(which ethtool)" ] && do_error "missing ethtool in rootfs"
+#    set -o verbose
+#    ethtool -C eth0 pkt-rate-low 20000 pkt-rate-high 3000000 rx-frames 100 \
+#	rx-usecs 1500 rx-usecs-high 1500 adaptive-rx on
+#    set +o verbose
+elif [ "$PLATFORM" == "a385" ]; then
+    [ ! -e "$(which ethtool)" ] && do_error "missing ethtool in rootfs"
+#    set -o verbose
+#    ethtool -C eth0 pkt-rate-low 20000 pkt-rate-high 3000000 rx-frames 100 \
+#	rx-usecs 1500 rx-usecs-high 1500 adaptive-rx on
+#    set +o verbose
+elif [ "$PLATFORM" == "a388" ]; then
+    [ ! -e "$(which ethtool)" ] && do_error "missing ethtool in rootfs"
+#    set -o verbose
+#    ethtool -C eth0 pkt-rate-low 20000 pkt-rate-high 3000000 rx-frames 100 \
+#	rx-usecs 1500 rx-usecs-high 1500 adaptive-rx on
+#    set +o verbose
 fi
+
 echo -ne "[Done]\n"
-sleep 2
-
-if [ "$TOPOLOGY" == "rd5" ]; then
-    echo -ne " * Starting RAID5 build:       "
-    for drive in `echo $DRIVES`; do PARTITIONS="${PARTITIONS} /dev/sd${drive}${PARTNUM}"; done
-
-    set -o verbose
-
-    if [ "$MKFS" == "yes" ]; then
-	[ -e /dev/md0 ] && mdadm --manage --stop /dev/md0
-
-	for partition in `echo $DRIVES`; do mdadm --zero-superblock /dev/sd${partition}1; done
-
-	if [ "$SSD" == "no" ]; then
-	    echo "y" | mdadm --create -c 64 /dev/md0 --level=5 -n $HDD_NUM --force $PARTITIONS
-	else
-			# most SSD use eraseblock of 512, so for performance reasons we use it
-	    echo "y" | mdadm --create -c 512 /dev/md0 --level=5 -n $HDD_NUM --force $PARTITIONS
-	fi
-
-	sleep 2
-
-	if [ `cat /proc/mdstat  |grep md0 |wc -l` == 0 ]; then
-	    do_error "Unable to create RAID device"
-    fi
-
-	if [ "$FS" == "ext4" ]; then
-	    if [ "$SSD" == "no" ]; then
-		if [ "$HDD_NUM" == "8" ]; then
-		    mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=16,stripe-width=112 -F /dev/md0
-		elif [ "$HDD_NUM" == "4" ]; then
-		    mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=16,stripe-width=48 -F /dev/md0
-		elif [ "$HDD_NUM" == "5" ]; then
-		    mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=16,stripe-width=64 -F /dev/md0
-		fi
-	    else
-		mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=128,stripe-width=384 -F /dev/md0
-	    fi
-	elif [ "$FS" == "xfs" ]; then
-	    mkfs.xfs -f /dev/md0
-	elif [ "$FS" == "btrfs" ]; then
-	    mkfs.btrfs /dev/md0
-	fi
-    else
-	# need to reassemble the raid
-	mdadm --assemble /dev/md0 --force $PARTITIONS
-
-	if [ `cat /proc/mdstat  |grep md0 |wc -l` == 0 ]; then
-	    do_error "Unable to assemble RAID device"
-	fi
-    fi
-
-    if [ "$FS" == "ext4" ]; then
-	mount -t ext4 /dev/md0 $MNT_DIR -o noatime,data=writeback,barrier=0,nobh
-    elif [ "$FS" == "xfs" ]; then
-	mount -t xfs /dev/md0 $MNT_DIR -o noatime,nodirspread
-    elif [ "$FS" == "btrfs" ]; then
-	mount -t btrfs /dev/md0 $MNT_DIR -o noatime
-    fi
-
-    if [ `mount | grep $MNT_DIR | grep -v grep | wc -l` == 0 ]; then
-	do_error "Unable to mount FS"
-    fi
-
-    if [ "$LARGE_PAGE" == "65536" ]; then
-	echo 256 > /sys/block/md0/md/stripe_cache_size
-    else
-	echo 1024 > /sys/block/md0/md/stripe_cache_size
-    fi
-
-    for drive in `echo $DRIVES`; do echo -e 192 > /sys/block/sd${drive}/queue/read_ahead_kb; done
-
-    /bin/echo -e 2048 > /sys/block/md0/queue/read_ahead_kb
-
-    set +o verbose
-    echo -ne "[Done]\n"
-
-elif [ "$TOPOLOGY" == "rd6" ]; then
-    echo -ne " * Starting RAID6 build:       "
-    for drive in `echo $DRIVES`; do PARTITIONS="${PARTITIONS} /dev/sd${drive}${PARTNUM}"; done
-
-    set -o verbose
-
-    for drive in `echo $DRIVES`; do echo -e 1024 > /sys/block/sd${drive}/queue/read_ahead_kb; done
-    
-    if [ "$MKFS" == "yes" ]; then
-	[ -e /dev/md0 ] && mdadm --manage --stop /dev/md0
-
-	for partition in `echo $DRIVES`; do mdadm --zero-superblock /dev/sd${partition}1; done
-
-	if [ "$SSD" == "no" ]; then
-	    echo "y" | mdadm --create -c 128 /dev/md0 --level=6 -n $HDD_NUM --force $PARTITIONS
-	else
-	    # most SSD use eraseblock of 512, so for performance reasons we use it
-	    echo "y" | mdadm --create -c 512 /dev/md0 --level=6 -n $HDD_NUM --force $PARTITIONS
-	fi
-
-	sleep 2
-
-	if [ `cat /proc/mdstat  |grep md0 |wc -l` == 0 ]; then
-	    do_error "Unable to create RAID device"
-	fi
-
-	if [ "$FS" == "ext4" ]; then
-	    if [ "$SSD" == "no" ]; then
-		if [ "$HDD_NUM" == "8" ]; then
-		    mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=32,stripe-width=224 -F /dev/md0
-		elif [ "$HDD_NUM" == "4" ]; then
-		    mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=32,stripe-width=96 -F /dev/md0
-		elif [ "$HDD_NUM" == "5" ]; then
-		    mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=32,stripe-width=128 -F /dev/md0
-		fi
-	    else
-		mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=128,stripe-width=384 -F /dev/md0
-	    fi
-	elif [ "$FS" == "xfs" ]; then
-	    mkfs.xfs -f /dev/md0
-	elif [ "$FS" == "btrfs" ]; then
-	    mkfs.btrfs /dev/md0
-	fi
-    else
-	# need to reassemble the raid
-	mdadm --assemble /dev/md0 --force $PARTITIONS
-
-	if [ `cat /proc/mdstat  |grep md0 |wc -l` == 0 ]; then
-	    do_error "Unable to assemble RAID device"
-	fi
-    fi
-
-    if [ "$FS" == "ext4" ]; then
-	mount -t ext4 /dev/md0 $MNT_DIR -o noatime,data=writeback,barrier=0,nobh
-    elif [ "$FS" == "xfs" ]; then
-	mount -t xfs /dev/md0 $MNT_DIR -o noatime,nodirspread
-    elif [ "$FS" == "btrfs" ]; then
-	mount -t btrfs /dev/md0 $MNT_DIR -o noatime
-    fi
-
-    if [ `mount | grep $MNT_DIR | grep -v grep | wc -l` == 0 ]; then
-	do_error "Unable to mount FS"
-    fi
-
-	if [ "$LARGE_PAGE" == "65536" ]; then
-            echo 256 > /sys/block/md0/md/stripe_cache_size
-	else
-            echo 4096 > /sys/block/md0/md/stripe_cache_size
-	fi
-    /bin/echo -e 4096 > /sys/block/md0/queue/read_ahead_kb
-
-    for drive in `echo $DRIVES`; do echo noop > /sys/block/sd${drive}/queue/scheduler; done
-    echo 4 > /proc/sys/vm/dirty_ratio
-    echo 2 > /proc/sys/vm/dirty_background_ratio
-    set +o verbose
-    echo -ne "[Done]\n"
-
-elif [ "$TOPOLOGY" == "rd1" ]; then
-    echo -ne " * Starting RAID1 build:       "
-    for drive in `echo $DRIVES`; do PARTITIONS="${PARTITIONS} /dev/sd${drive}${PARTNUM}"; done
-
-    set -o verbose
-
-    for drive in `echo $DRIVES`; do echo -e 1024 > /sys/block/sd${drive}/queue/read_ahead_kb; done
-
-    if [ "$MKFS" == "yes" ]; then
-	[ -e /dev/md0 ] && mdadm --manage --stop /dev/md0
-
-	for partition in `echo $DRIVES`; do mdadm --zero-superblock /dev/sd${partition}1; done
-	echo "y" | mdadm --create -c 128 /dev/md0 --level=1 -n 2 --force $PARTITIONS
-
-	sleep 2
-
-	if [ `cat /proc/mdstat  |grep md0 |wc -l` == 0 ]; then
-	    do_error "Unable to create RAID device"
-    fi
-
-	if [ "$LARGE_PAGE" == "65536" ]; then
-	    echo 256 > /sys/block/md0/md/stripe_cache_size
-	else
-	    echo 4096 > /sys/block/md0/md/stripe_cache_size
-	fi
-
-	if [ "$FS" == "ext4" ];	then
-	    mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=32,stripe-width=32 -F /dev/md0
-	elif [ "$FS" == "btrfs" ]; then
-	    mkfs.btrfs -m raid1 -d raid1 /dev/md0
-	fi
-    else
-		# need to reassemble the raid
-	mdadm --assemble /dev/md0 --force $PARTITIONS
-
-	if [ `cat /proc/mdstat  |grep md0 |wc -l` == 0 ]; then
-	    do_error "Unable to assemble RAID device"
-	fi
-    fi
-
-    if [ "$FS" == "ext4" ]; then
-	mount -t ext4 /dev/md0 $MNT_DIR -o noatime,data=writeback,barrier=0
-    elif [ "$FS" == "btrfs" ]; then
-	mount -t btrfs /dev/md0 $MNT_DIR -o noatime
-    fi
-
-    if [ `mount | grep $MNT_DIR | grep -v grep | wc -l` == 0 ]; then
-	do_error "Unable to mount FS"
-    fi
-
-    for drive in `echo $DRIVES`; do /bin/echo -e 1024 > /sys/block/sd${drive}/queue/read_ahead_kb; done
-    /bin/echo -e 2048 > /sys/block/md0/queue/read_ahead_kb
-    echo 4 > /proc/sys/vm/dirty_ratio
-    echo 2 > /proc/sys/vm/dirty_background_ratio
-    set +o verbose
-    echo -ne "[Done]\n"
-
-elif [ "$TOPOLOGY" == "rd0" ]; then
-    echo -ne " * Starting RAID0 build:       "
-
-    for drive in `echo $DRIVES`; do PARTITIONS="${PARTITIONS} /dev/sd${drive}${PARTNUM}"; done
-
-    set -o verbose
-
-    for drive in `echo $DRIVES`; do echo -e 1024 > /sys/block/sd${drive}/queue/read_ahead_kb; done
-
-    if [ "$MKFS" == "yes" ]; then
-	if [ -e /dev/md0 ]; then
-	    mdadm --manage --stop /dev/md0
-	fi
-	for partition in `echo $DRIVES`; do mdadm --zero-superblock /dev/sd${partition}1; done
-	if [ "$SSD" == "no" ]; then
-	    echo "y" | mdadm --create -c 256 /dev/md0 --level=0 -n 2 --force $PARTITIONS
-	else
-	    echo "y" | mdadm --create -c 256 /dev/md0 --level=0 -n 2 --force $PARTITIONS
-fi
-
-sleep 2
-
-	if [ `cat /proc/mdstat  |grep md0 |wc -l` == 0 ]; then
-	    do_error "Unable to create RAID device"
-	fi
-
-	echo 256 > /sys/block/md0/md/stripe_cache_size
-	if [ "$FS" == "ext4" ]; then
-	    if [ "$SSD" == "no" ]; then
-		mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=64,stripe-width=128 -F /dev/md0
-	    else
-		mkfs.ext4 -j -m 0 -T largefile -b 4096 -E stride=64,stripe-width=128 -F /dev/md0
-	    fi
-	elif [ "$FS" == "btrfs" ]; then
-	    mkfs.btrfs -m raid0 -d raid0 /dev/md0
-	fi
-    else
-	mdadm --assemble /dev/md0 --force $PARTITIONS
-
-	if [ `cat /proc/mdstat  |grep md0 |wc -l` == 0 ]; then
-	    do_error "Unable to create RAID device"
-	fi
-    fi
-
-
-    if [ "$FS" == "ext4" ]; then
-	mount -t ext4 /dev/md0 $MNT_DIR -o noatime,data=writeback,barrier=0
-    elif [ "$FS" == "btrfs" ]; then
-	mount -t ext4 /dev/md0 $MNT_DIR -o noatime
-    fi
-
-    if [ `mount | grep $MNT_DIR | grep -v grep | wc -l` == 0 ]; then
-	do_error "Unable to mount FS"
-    fi
-
-    for drive in `echo $DRIVES`; do /bin/echo -e 1024 > /sys/block/sd${drive}/queue/read_ahead_kb; done
-    echo -e 4096 > /sys/block/md0/queue/read_ahead_kb
-
-    set +o verbose
-    echo -ne "[Done]\n"
-elif [ "$TOPOLOGY" == "sd" ]; then
-    PARTITIONS="/dev/sd${DRIVES}${PARTNUM}"
-    echo -ne " * Starting single disk:       "
-    set -o verbose
-    
-    echo -e 1024 > /sys/block/sd${DRIVES}/queue/read_ahead_kb
-
-    if [ "$FS" == "fat32" ]; then
-		# wait for DAS recongnition by udev
-	sleep 5
-	if [ "$MKFS" == "yes" ]; then
-	    [ -e /dev/md0 ] && mdadm --manage --stop /dev/md0
-	    mkdosfs -s 64 -S 4096 -F 32 $PARTITIONS
-fi
-	mount -t vfat -o umask=000,rw,noatime,nosuid,nodev,noexec,async $PARTITIONS $MNT_DIR
-    elif [ "$FS" == "ext4" ]; then
-	if [ "$MKFS" == "yes" ]; then
-	    [ -e /dev/md0 ] && mdadm --manage --stop /dev/md0
-
-	    mkfs.ext4 -j -m 0 -b 4096 -O large_file,extents -F $PARTITIONS
-	fi
-	mount -t ext4 $PARTITIONS $MNT_DIR -o noatime,data=writeback,barrier=0
-    elif [ "$FS" == "btrfs" ]; then
-	if [ "$MKFS" == "yes" ]; then
-	    [ -e /dev/md0 ] && mdadm --manage --stop /dev/md0
-	    mkfs.btrfs -m single -d single $PARTITIONS
-	fi
-
-	mount -t btrfs $PARTITIONS $MNT_DIR -o noatime
-    else
-	if [ "$MKFS" == "yes" ]; then
-	    [ -e /dev/md0 ] && mdadm --manage --stop /dev/md0
-	    mkfs.xfs -f $PARTITIONS
-	fi
-	mount -t xfs $PARTITIONS $MNT_DIR -o noatime,nodirspread
-    fi
-
-    if [ `mount | grep $MNT_DIR | grep -v grep | wc -l` == 0 ]; then
-	do_error "Unable to mount FS"
-fi
-
-    set +o verbose
-echo -ne "[Done]\n"
-fi
-
 sleep 2
 
 chmod 777 /mnt/
@@ -750,7 +682,8 @@ for (( i=0; i<4; i++ )); do
 done
 
 # Samba
-if [ "$FS" != "NONE" ]; then
+if [ "$SAMBASTATUS" == "enabled" ]; then
+
     echo -ne " * Starting Samba daemons:     "
     if [[ -e "$(which smbd)" && -e "$(which nmbd)" ]]; then
 	chmod 0755 /var/lock
@@ -782,11 +715,11 @@ if [ "$FS" != "NONE" ]; then
 	echo ' disable netbios = yes'			>>  /etc/smb.conf
 	echo ' csc policy = disable'			>>  /etc/smb.conf
 	if [ "$FS" == "btrfs" ]; then
-	# crash identified with these FS
-	    echo '# min receivefile size = 128k'	>>  /etc/smb.conf
+	# crash identified with btrfs
+	    echo '# min receivefile size = 16k'	>>  /etc/smb.conf
 	    echo '# strict allocate = yes'		>>  /etc/smb.conf
 	else
-	    echo ' min receivefile size = 128k'	>>  /etc/smb.conf
+	    echo ' min receivefile size = 16k'	>>  /etc/smb.conf
 	    echo ' strict allocate = yes'		>>  /etc/smb.conf
 	fi
 	echo ''						>>  /etc/smb.conf
@@ -809,21 +742,16 @@ if [ "$FS" != "NONE" ]; then
 	rm -rf /var/log/log.smbd
 	rm -rf /var/log/log.nmbd
 
-	if [ "$SYSTEM" == "sdk" ]; then
 	$(which nmbd) -D -s /etc/smb.conf
 	$(which smbd) -D -s /etc/smb.conf
-	fi
 
 	sleep 1
 	echo -ne "[Done]\n"
-    else
-	sleep 1
-	echo "[Skip]\n"
     fi
 fi
 
 echo -ne " * Setting up affinity:        "
-if [[ "$ARCH" == "armv6l" || "$ARCH" == "armv7l" ]]; then
+if [ "$PLATFORM" == "axp" ]; then
     if [ "$CPU_COUNT" = "4" ]; then
 	set -o verbose
 
@@ -852,21 +780,65 @@ if [[ "$ARCH" == "armv6l" || "$ARCH" == "armv7l" ]]; then
 	echo 2 > /proc/irq/52/smp_affinity
 	echo 1 > /proc/irq/94/smp_affinity
 	echo 2 > /proc/irq/95/smp_affinity
-
 	# ETH
 	echo 1 > /proc/irq/8/smp_affinity
 	echo 2 > /proc/irq/10/smp_affinity
-
-        # SATA
+	# SATA
 	echo 2 > /proc/irq/55/smp_affinity
-
 	# PCI-E SATA controller
 	echo 2  > /proc/irq/99/smp_affinity
 
 	set +o verbose
-fi
+    fi
+elif [ "$PLATFORM" == "a375" ]; then
+        set -o verbose
+
+        # XOR Engines
+        #echo 1 > /proc/irq/54/smp_affinity
+        #echo 2 > /proc/irq/55/smp_affinity
+        echo 2 > /proc/irq/97/smp_affinity
+        echo 2 > /proc/irq/98/smp_affinity
+        # SATA
+	echo 2 > /proc/irq/58/smp_affinity
+
+        set +o verbose
+elif [ "$PLATFORM" == "a385" ]; then
+	set -o verbose
+
+	# XOR Engines
+	echo 1 > /proc/irq/54/smp_affinity
+	echo 2 > /proc/irq/55/smp_affinity
+	echo 1 > /proc/irq/97/smp_affinity
+	echo 2 > /proc/irq/98/smp_affinity
+	# ETH
+	echo 1 > /proc/irq/363/smp_affinity
+	echo 2 > /proc/irq/365/smp_affinity
+	# SATA
+#	echo 2 > /proc/irq/61/smp_affinity
+	# PCI-E SATA controller
+	echo 2  > /proc/irq/61/smp_affinity
+
+	set +o verbose
+elif [ "$PLATFORM" == "a388" ]; then
+	set -o verbose
+
+	# XOR Engines
+	echo 1 > /proc/irq/54/smp_affinity
+	echo 1 > /proc/irq/55/smp_affinity
+	echo 2 > /proc/irq/97/smp_affinity
+	echo 2 > /proc/irq/98/smp_affinity
+	# ETH
+#	echo 1 > /proc/irq/363/smp_affinity
+#	echo 2 > /proc/irq/365/smp_affinity
+	# SATA
+	echo 2 > /proc/irq/60/smp_affinity
+	# PCI-E SATA controller
+	echo 2  > /proc/irq/61/smp_affinity
+
+	set +o verbose
 fi
 echo -ne "[Done]\n"
+
 case "$TOPOLOGY" in
     rd1 | rd5 | rd6)
 		#watch "cat /proc/mdstat|grep finish"

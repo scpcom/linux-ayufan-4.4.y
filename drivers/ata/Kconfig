@@ -114,6 +114,17 @@ config SATA_SIL24
 
 	  If unsure, say N.
 
+config SATA_AHCI_MV
+	tristate "Marvell SATA support"
+	depends on SYNO_ARMADA_ARCH_V2
+	help
+	  This option enables support for the Marvell
+	  Serial ATA platform AHCI controller.
+	  Currently supports SOC devices
+	  compliant to AHCI rev. 1.0
+
+	  If unsure, say N.
+
 config ATA_SFF
 	bool "ATA SFF support"
 	default y
@@ -899,6 +910,15 @@ config PATA_LEGACY
 	  ports and allows them to be accessed via the new ATA layer.
 
 	  If unsure, say N.
+
+config SYNO_SATA_LINKSPEED_WORKAROUND
+	bool "Workaround for SATA link speed degradation"
+	default n
+	help
+	  This option enables SATA link speed degradation workaround.
+	  In Alpine platform's implementation, it cancels down linking speed
+	  when retrying, which avoids Intel 520 series SSD link speed drops to
+	  1.5Gbps on Alpine internal AHCI.
 
 endif # ATA_SFF
 endif # ATA

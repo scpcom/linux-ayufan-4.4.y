@@ -747,6 +747,9 @@ static void free_profile(struct aa_profile *profile)
 
 	aa_free_file_rules(&profile->file);
 	aa_free_cap_rules(&profile->caps);
+#ifdef SYNO_APPARMOR_PATCH
+	aa_free_net_rules(&profile->net);
+#endif /* SYNO_APPARMOR_PATCH */
 	aa_free_rlimit_rules(&profile->rlimits);
 
 	aa_free_sid(profile->sid);

@@ -16,7 +16,7 @@
 #include <asm/smp_plat.h>
 #include <asm/tlbflush.h>
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #include <asm/cacheflush.h>
 #endif
 static void on_each_cpu_mask(void (*func)(void *), void *info, int wait,
@@ -143,7 +143,7 @@ void flush_tlb_kernel_range(unsigned long start, unsigned long end)
 		local_flush_tlb_kernel_range(start, end);
 }
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && ( ( ( defined( CONFIG_SMP ) && defined( CONFIG_CPU_V6 ) ) || ( defined( CONFIG_SMP ) && defined( CONFIG_CPU_V6K ) ) ) )
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && ( ( ( defined( CONFIG_SMP ) && defined( CONFIG_CPU_V6 ) ) || ( defined( CONFIG_SMP ) && defined( CONFIG_CPU_V6K ) ) ) )
 static inline void ipi_flush_cache_user_range(void *arg)
 {
 #if 0

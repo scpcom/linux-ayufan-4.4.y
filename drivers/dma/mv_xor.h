@@ -33,6 +33,9 @@
 #define XOR_OPERATION_MODE_XOR		0
 #define XOR_OPERATION_MODE_MEMCPY	2
 #define XOR_OPERATION_MODE_MEMSET	4
+#ifdef CONFIG_SYNO_ARMADA_V2
+#define XOR_DESCRIPTOR_SWAP            BIT(14)
+#endif
 
 #define XOR_CURR_DESC(chan)	(chan->mmr_base + 0x210 + (chan->idx * 4))
 #define XOR_NEXT_DESC(chan)	(chan->mmr_base + 0x200 + (chan->idx * 4))
@@ -48,7 +51,10 @@
 #define XOR_INTR_MASK(chan)	(chan->mmr_base + 0x40)
 #define XOR_ERROR_CAUSE(chan)	(chan->mmr_base + 0x50)
 #define XOR_ERROR_ADDR(chan)	(chan->mmr_base + 0x60)
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(CONFIG_SYNO_ARMADA_V2)
+#define XOR_OUTSTANDING_RDEADS(chan)	(chan->mmr_base + 0x80 + (chan->idx * 4))
+#endif
 #define XOR_INTR_MASK_VALUE	0x3F7
 #else
 #define XOR_INTR_MASK_VALUE	0x3F5
@@ -101,7 +107,7 @@ struct mv_xor_device {
  * @irq_tasklet: bottom half where mv_xor_slot_cleanup runs
  */
 struct mv_xor_chan {
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	int			pending;
 #endif
@@ -152,7 +158,7 @@ struct mv_xor_desc_slot {
 	struct list_head	completed_node;
 	enum dma_transaction_type	type;
 	void			*hw_desc;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	struct mv_xor_desc_slot	*group_head;
 	u16			slot_cnt;
@@ -162,7 +168,7 @@ struct mv_xor_desc_slot {
 	u16			unmap_src_cnt;
 	u32			value;
 	size_t			unmap_len;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #else
 	struct list_head	tx_list;
 #endif
@@ -177,6 +183,44 @@ struct mv_xor_desc_slot {
 #endif
 };
 
+#ifdef CONFIG_SYNO_ARMADA_V2
+/*
+ * This structure describes XOR descriptor size 64bytes. The
+ * mv_phy_src_idx() macro must be used when indexing the values of the
+ * phy_src_addr[] array. This is due to the fact that the 'descriptor
+ * swap' feature, used on big endian systems, swaps descriptors data
+ * within blocks of 8 bytes. So two consecutive values of the
+ * phy_src_addr[] array are actually swapped in big-endian, which
+ * explains the different mv_phy_src_idx() implementation.
+ */
+#if defined(__LITTLE_ENDIAN)
+struct mv_xor_desc {
+	u32 status;		/* descriptor execution status */
+	u32 crc32_result;	/* result of CRC-32 calculation */
+	u32 desc_command;	/* type of operation to be carried out */
+	u32 phy_next_desc;	/* next descriptor address pointer */
+	u32 byte_count;		/* size of src/dst blocks in bytes */
+	u32 phy_dest_addr;	/* destination block address */
+	u32 phy_src_addr[8];	/* source block addresses */
+	u32 reserved0;
+	u32 reserved1;
+};
+#define mv_phy_src_idx(src_idx) (src_idx)
+#else // !__LITTLE_ENDIAN
+struct mv_xor_desc {
+	u32 crc32_result;	/* result of CRC-32 calculation */
+	u32 status;		/* descriptor execution status */
+	u32 phy_next_desc;	/* next descriptor address pointer */
+	u32 desc_command;	/* type of operation to be carried out */
+	u32 phy_dest_addr;	/* destination block address */
+	u32 byte_count;		/* size of src/dst blocks in bytes */
+	u32 phy_src_addr[8];	/* source block addresses */
+	u32 reserved1;
+	u32 reserved0;
+};
+#define mv_phy_src_idx(src_idx) (src_idx ^ 1)
+#endif 
+#else !CONFIG_SYNO_ARMADA_V2
 /* This structure describes XOR descriptor size 64bytes	*/
 struct mv_xor_desc {
 	u32 status;		/* descriptor execution status */
@@ -189,8 +233,9 @@ struct mv_xor_desc {
 	u32 reserved0;
 	u32 reserved1;
 };
+#endif // CONFIG_SYNO_ARMADA_V2
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 /* Stores certain registers during suspend to RAM */
 struct mv_xor_save_regs {
 	int xor_config;

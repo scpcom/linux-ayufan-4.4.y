@@ -20,4 +20,12 @@
 
 extern void __init aa_destroy_aafs(void);
 
+#ifdef SYNO_APPARMOR_PATCH
+#ifdef CONFIG_SECURITY_APPARMOR_COMPAT_24
+extern const struct file_operations aa_fs_matching_fops;
+extern const struct file_operations aa_fs_features_fops;
+extern const struct file_operations aa_fs_profiles_fops;
+#endif
+#endif /* SYNO_APPARMOR_PATCH */
+
 #endif /* __AA_APPARMORFS_H */

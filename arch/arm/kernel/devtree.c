@@ -29,6 +29,28 @@
 
 void __init early_init_dt_add_memory_arch(u64 base, u64 size)
 {
+#ifdef CONFIG_SYNO_ALPINE
+#ifndef CONFIG_ARM_LPAE
+	const u64 sz_4g = 4 * (u64)SZ_1G;
+
+	if (base >= sz_4g) {
+		pr_info("Ignoring memory at 0x%08llx to fit in "
+			"32-bit physical address space\n", base);
+		return;
+	}
+
+	if ((base + size) >= sz_4g) {
+		pr_info("Truncating memory at 0x%08llx to fit in "
+			"32-bit physical address space\n", base);
+		/*
+		 * Ensure 'base + size' fits 32 bits and yet size is aligned
+		 * to page size (assuming base & size were aligned in the first
+		 * place)
+		 */
+		size = sz_4g - base - PAGE_SIZE;
+	}
+#endif
+#endif
 	arm_add_memory(base, size);
 }
 

@@ -24,6 +24,7 @@ struct ip6_tnl {
 	u32 dst_cookie;
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_INET6_IPSEC_OFFLOAD)
 	u32 genid;
+       struct ip6_tnl_4rd_parm ip4rd; /* 4rd parameters for the tunnel */ 
 #endif
 };
 

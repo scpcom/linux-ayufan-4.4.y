@@ -1,6 +1,9 @@
 header-y += ip6_tables.h
 header-y += ip6t_HL.h
 header-y += ip6t_LOG.h
+ifdef CONFIG_SYNO_COMCERTO
+header-y += ip6t_NPT.h
+endif
 header-y += ip6t_REJECT.h
 header-y += ip6t_ah.h
 header-y += ip6t_frag.h

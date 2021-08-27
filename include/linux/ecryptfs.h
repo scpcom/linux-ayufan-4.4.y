@@ -54,6 +54,10 @@
 #define RFC2440_CIPHER_CAST_6 0x0b
 
 #define RFC2440_CIPHER_RSA 0x01
+#ifdef CONFIG_SYNO_ALPINE
+#define ECRYPTFS_CIPHER_MODE_CBC 0x01
+#define ECRYPTFS_CIPHER_MODE_CTR 0x02
+#endif
 
 /**
  * For convenience, we may need to pass around the encrypted session

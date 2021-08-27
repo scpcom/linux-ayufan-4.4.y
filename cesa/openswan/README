@@ -2,25 +2,39 @@ OpenSWAN
 =========
 In order to explore the CESA through the OpenSWAN, please follow the next steps:
 
-1. Download openswan-2.6.37 (http://www.openswan.org/), then untar+unzip it.
+1. Download openswan-2.6.41 (http://www.openswan.org/), then untar+unzip it.
 
 2. Apply the patch:
-	- mv_openswan_2_6_37.patch:
+	- mv_openswan_2_6_41.patch:
 		> Disable default DEBUG support.
 		> Enable OCF support.
+		> Set OCF flag CRYPTO_F_CBIMM to mark immediate callback handling.
 
 3. Compile:
 
- + ipsec module (cross compilation) :
+ + Rootfs and kernel should have the same openswan version (during last test
+  both kernel and Buildroot was aligned to openswan_2_6_41)
+
+ + Make sure that you are using proper rootfs for SoC e.g.:
+  a375 -> buildroot_ca9_armv7_le_hfp
+  axp  -> buildroot_pj4b_armv7_le_hfp
+
+ + Before you build kernel please make sure that you've done:
+  make mrproper
+
+ + Build kernel for appropriate SoC before ipsec module (so the module will be built
+  with the same configuration), otherwise you may encounter some issues
+
+ + To build ipsec module (cross compilation) :
   'make KERNELSRC=<path to this release, after config> module ARCH=arm CC=<path_to_cross_compile> LD=<path_to_cross_loader>'
   then copy the module to the host FS: /lib/modules/<kernel_name>/kernel/net/ipsec/
 
- + ipsec user (native) :
+ + To build ipsec user tools for rootfs (native, if not already installed) :
   make sure that you have the kernel source on the FS.
   'make KERNELSRC=<path to this release, after config> programs'
   'make install'
 
-Note: before tunnel is enabled on target, reverse path filtering(rp_filter) must be disabled under sysfs, using
+4. Before tunnel is enabled on target, reverse path filtering(rp_filter) must be disabled under sysfs, using
       the following commands:
       - echo 0  > /proc/sys/net/ipv4/conf/eth<x>/rp_filter
       - echo 0  > /proc/sys/net/ipv4/conf/all/rp_filter
@@ -28,6 +42,9 @@ Note: before tunnel is enabled on target, reverse path filtering(rp_filter) must
 Reverse Path Filtering(rp_filter): it is a technology that is used on IP routers to try and prevent source address spoofing,
 which is often used for DenialOfService attacks. RPF works by checking the source IP of each packet received on an interface
 against the routing table. If the best route for the source IP address does not use the same interface that the packet was received on the packet is dropped.
+
+5. Before tunnel is enabled on target, PMTU discovery must be disabled under procfs, using the following command:
+      - echo 1 > /proc/sys/net/ipv4/ip_no_pmtu_disc
 
 IPSec routing using encryption/authentication only:
 

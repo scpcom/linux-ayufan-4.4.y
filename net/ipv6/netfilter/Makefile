@@ -32,4 +32,7 @@ obj-$(CONFIG_IP6_NF_TARGET_NFP) += ip6t_NFP.o
 
 # targets
 obj-$(CONFIG_IP6_NF_TARGET_LOG) += ip6t_LOG.o
+ifeq ($(CONFIG_SYNO_COMCERTO),y)
+obj-$(CONFIG_IP6_NF_TARGET_NPT) += ip6t_NPT.o
+endif
 obj-$(CONFIG_IP6_NF_TARGET_REJECT) += ip6t_REJECT.o

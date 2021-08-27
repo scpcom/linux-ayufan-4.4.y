@@ -45,52 +45,52 @@
 
 #include "setup.h"
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_VERSION
 extern char gszSynoHWVersion[];
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_REVISION
 extern char gszSynoHWRevision[];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_HD_NUM
 extern long g_internal_hd_num;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 extern long g_internal_netif_num;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HDD_HOTPLUG
 extern long g_hdd_hotplug;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 extern char gszDiskIdxMap[16];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DISK_SEQ_REVERSE
 extern char giDiskSeqReverse[8];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 extern int gSynoHasDynModule;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 extern unsigned char grgbLanMac[4][16];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 extern int gSynoFactoryUSBFastReset;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
@@ -362,7 +362,7 @@ static int __init early_internal_hd_num(char *p)
 __setup("ihd_num=", early_internal_hd_num);
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_INTERNAL_NETIF_NUM
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);
@@ -430,7 +430,7 @@ int __init ppc_setup_l3cr(char *str)
 }
 __setup("l3cr=", ppc_setup_l3cr);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 static int __init early_factory_usb_fast_reset(char *p)
 {
 	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
@@ -442,7 +442,7 @@ static int __init early_factory_usb_fast_reset(char *p)
 __setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 static int __init early_factory_usb3_disable(char *p)
 {
 	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);

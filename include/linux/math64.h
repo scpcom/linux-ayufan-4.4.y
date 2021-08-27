@@ -48,6 +48,13 @@ static inline s64 div64_s64(s64 dividend, s64 divisor)
 	return dividend / divisor;
 }
 
+#ifdef SYNO_EMULATE_U64_DIVISOR
+static inline u64 mod_u64_rem64(u64 dividend, u64 divisor)
+{
+        return dividend % divisor;
+}
+#endif
+
 #elif BITS_PER_LONG == 32
 
 #define div64_long(x,y) div_s64((x),(y))
@@ -68,12 +75,25 @@ extern s64 div_s64_rem(s64 dividend, s32 divisor, s32 *remainder);
 extern u64 div64_u64(u64 dividend, u64 divisor);
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA) || (defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3))
-extern u64 mod_u64_rem64(u64 dividend, u64 divisor);
-#endif
-
 #ifndef div64_s64
 extern s64 div64_s64(s64 dividend, s64 divisor);
+#endif
+
+#ifdef SYNO_EMULATE_U64_DIVISOR
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2) || defined(CONFIG_SYNO_COMCERTO) || (defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)) || defined(CONFIG_SYNO_ALPINE)
+static inline u64 mod_u64_rem64(u64 dividend, u64 divisor)
+{
+        if (dividend < divisor) {
+                return dividend;
+        } else if (dividend == divisor) {
+                return (u64)0;
+        }
+
+        return dividend - (div64_u64(dividend, divisor) * divisor);
+}
+#elif !(defined(CONFIG_SYNO_MV88F6281) || defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_QORIQ))
+#error "WARNING: possible lack of rem64 ksymbol"
+#endif
 #endif
 
 #endif /* BITS_PER_LONG */

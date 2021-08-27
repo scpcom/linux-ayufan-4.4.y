@@ -20,6 +20,9 @@
 #define XATTR_OS2_PREFIX "os2."
 #define XATTR_OS2_PREFIX_LEN (sizeof (XATTR_OS2_PREFIX) - 1)
 
+#define XATTR_BTRFS_PREFIX "btrfs."
+#define XATTR_BTRFS_PREFIX_LEN (sizeof(XATTR_BTRFS_PREFIX) - 1)
+
 #define XATTR_SECURITY_PREFIX	"security."
 #define XATTR_SECURITY_PREFIX_LEN (sizeof (XATTR_SECURITY_PREFIX) - 1)
 
@@ -44,13 +47,14 @@
 #define XATTR_SELINUX_SUFFIX "selinux"
 #define XATTR_NAME_SELINUX XATTR_SECURITY_PREFIX XATTR_SELINUX_SUFFIX
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 #define XATTR_SYNO_ARCHIVE_VERSION "archive_version"
+#define XATTR_SYNO_ARCHIVE_VERSION_VOLUME "archive_version_volume"
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 #define XATTR_SYNO_CREATE_TIME "create_time"
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 #define XATTR_SYNO_ARCHIVE_BIT "archive_bit"
 #define XATTR_SYNO_ARCHIVE_BIT_NOPERM "archive_bit_noperm" //for glusterfs
 #endif

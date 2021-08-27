@@ -175,6 +175,7 @@ static int mtd_close(struct inode *inode, struct file *file)
 */
 #ifdef SYNO_MTD_ALLOC
 #define MAX_KMALLOC_SIZE 0x10000
+static int syno_write_buf_size = 0x1000;
 #endif
 
 /* Back in June 2001, dwmw2 wrote:
@@ -337,7 +338,7 @@ int sys_SYNOMTDAlloc(BOOL blMalloc)
             goto End;
         }
 
-        write_kbuf_len = MAX_KMALLOC_SIZE;
+        write_kbuf_len = syno_write_buf_size;
         kbuf = kmalloc(write_kbuf_len, GFP_KERNEL);
         if (!kbuf) {
             DBGMSG("%s:%d(%s) malloc fail write_kbuf_len=[%d], kbuf=[%p]\n", __FILE__, __LINE__, __func__, write_kbuf_len, kbuf);
@@ -376,6 +377,17 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 	int len;
 
 	pr_debug("MTD_write\n");
+#ifdef SYNO_MTD_ALLOC
+	if (syno_write_buf_size < mtd->writesize) {
+		printk(KERN_ERR "mtd kmalloc size small than mtd driver minimal write size !!\n");
+		WARN_ON(1);
+		syno_write_buf_size = mtd->writesize;
+		if (write_kbuf_len) {
+			sys_SYNOMTDAlloc(FALSE);
+		}
+		printk(KERN_ERR "mtd kmalloc size replace with mtd driver minimal write size !!\n");
+	}
+#endif
 
 	if (*ppos == mtd->size)
 		return -ENOSPC;
@@ -402,9 +414,9 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 #endif
 
 	while (count) {
-#ifdef MY_ABC_HERE
-		if (count > MAX_KMALLOC_SIZE)
-			len = MAX_KMALLOC_SIZE;
+#ifdef SYNO_MTD_ALLOC
+		if (count > syno_write_buf_size)
+			len = syno_write_buf_size;
 		else
 			len = count;
 #else
@@ -414,7 +426,7 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 		if (copy_from_user(kbuf, buf, len)) {
 #ifdef SYNO_MTD_ALLOC
 			up(&write_kbuf_sem);
-#else /* !MY_ABC_HERE */
+#else /* !SYNO_MTD_ALLOC */
 			kfree(kbuf);
 #endif
 			return -EFAULT;
@@ -459,7 +471,7 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 		else {
 #ifdef SYNO_MTD_ALLOC
 			up(&write_kbuf_sem);
-#else /* !MY_ABC_HERE */
+#else /* !SYNO_MTD_ALLOC */
 			kfree(kbuf);
 #endif
 			return ret;
@@ -468,7 +480,7 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 
 #ifdef SYNO_MTD_ALLOC
 	up(&write_kbuf_sem);
-#else /* !MY_ABC_HERE */
+#else /* !SYNO_MTD_ALLOC */
 	kfree(kbuf);
 #endif
 	return total_retlen;
@@ -1087,7 +1099,7 @@ static int mtd_ioctl(struct file *file, u_int cmd, u_long arg)
 	}
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_MTD_INFO
 	case MEMMODIFYPARTINFO:
 	{
 		unsigned long adrs[2];

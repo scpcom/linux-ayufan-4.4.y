@@ -182,20 +182,36 @@ Einumber:
 	error = "inode out of bounds";
 bad_entry:
 	if (!quiet)
+#ifdef CONFIG_SYNO_ALPINE
+		ext2_error(sb, __func__, "bad entry in directory #%lu: : %s - "
+			"offset=%llu, inode=%lu, rec_len=%d, name_len=%d",
+			dir->i_ino, error, (unsigned long long)(page->index<<PAGE_CACHE_SHIFT)+offs,
+			(unsigned long) le32_to_cpu(p->inode),
+			rec_len, p->name_len);
+#else
 		ext2_error(sb, __func__, "bad entry in directory #%lu: : %s - "
 			"offset=%lu, inode=%lu, rec_len=%d, name_len=%d",
 			dir->i_ino, error, (page->index<<PAGE_CACHE_SHIFT)+offs,
 			(unsigned long) le32_to_cpu(p->inode),
 			rec_len, p->name_len);
+#endif
 	goto fail;
 Eend:
 	if (!quiet) {
 		p = (ext2_dirent *)(kaddr + offs);
+#ifdef CONFIG_SYNO_ALPINE
+		ext2_error(sb, "ext2_check_page",
+			"entry in directory #%lu spans the page boundary"
+			"offset=%llu, inode=%lu",
+			dir->i_ino, (unsigned long long)(page->index<<PAGE_CACHE_SHIFT)+offs,
+			(unsigned long) le32_to_cpu(p->inode));
+#else
 		ext2_error(sb, "ext2_check_page",
 			"entry in directory #%lu spans the page boundary"
 			"offset=%lu, inode=%lu",
 			dir->i_ino, (page->index<<PAGE_CACHE_SHIFT)+offs,
 			(unsigned long) le32_to_cpu(p->inode));
+#endif
 	}
 fail:
 	SetPageChecked(page);

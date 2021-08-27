@@ -138,6 +138,11 @@ ENTRY(cpu_v7_set_pte_ext)
 #ifdef CONFIG_MMU
 	tst	r2, #L_PTE_PRESENT
 	beq	1f
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+	tst     r3, #1 << (57 - 32)             @ L_PTE_NONE
+	bicne   r2, #L_PTE_VALID
+	bne     1f
+#endif
 	tst	r3, #1 << (55 - 32)		@ L_PTE_DIRTY
 	orreq	r2, #L_PTE_RDONLY
 1:	strd	r2, r3, [r0]

@@ -140,27 +140,33 @@ void dumpstruct(FILE *out, char *mem, int size, char *sname,char *msg);
 
 //#endif
 
-
-
 #define SIZE_QUANT   64
 void   minit(void *buffer, long len);
 void  *mget(long size);
 void   mfree(void *buf);
 
-#define ELP_ERR		0x1
-#define ELP_DBG		0x2
-#define ELP_WRN		0x4
-#define ELP_DUMP	0x8
+#define ELP_ERR		(1 << 0)
+#define ELP_WRN		(1 << 1)
+#define ELP_DBG		(1 << 2)
+#define ELP_DUMP	(1 << 3)
 #define EDDUMP      	0
 
 #define PDUMPWORD(t,b,s,m,e)     do {if(1){ dumpword(b,s,m);}}  while(0)
 
-#if 0
-extern int elp_debug;
-#define	DPRINTF(flags, a...)	if (elp_debug&flags) { printk("elp : " a); } 
-#else
 #if defined(CONFIG_SYNO_COMCERTO)
-#define	DPRINTF(flags, a...)	if (flags&ELP_ERR) { printk("elp : " a); }
+
+extern int elp_debug;
+#define	DPRINTF(flags, a...)	if (flags&ELP_ERR) {\
+					printk("%s: ", __func__); \
+					printk(a);\
+				}
+#else
+#if 1
+extern int elp_debug;
+#define	DPRINTF(flags, a...)	if (elp_debug&flags) {\
+					printk("%s: ", __func__); \
+					printk(a);\
+				}
 #else
 #define	DPRINTF(a...)
 #endif

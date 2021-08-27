@@ -370,6 +370,9 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 	unsigned int i;
 	unsigned int rate;
 	unsigned int ratio;
+#ifdef CONFIG_SYNO_ARMADA_V2
+	unsigned int speed;
+#endif
 	struct cs42l51_ratios *ratios = NULL;
 	int nr_ratios = 0;
 	int intf_ctl, power_ctl, fmt;
@@ -390,7 +393,23 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 	/* Figure out which MCLK/LRCK ratio to use */
 	rate = params_rate(params);     /* Sampling rate, in Hz */
 	ratio = cs42l51->mclk / rate;    /* MCLK/LRCK ratio */
+
+#ifdef CONFIG_SYNO_ARMADA_V2
+	if (rate < 12500)
+		speed = (1 << CS42L51_QSM_MODE) | (1 << CS42L51_SSM_MODE);
+	else if (rate < 25000)
+		speed = (1 << CS42L51_HSM_MODE) | (1 << CS42L51_SSM_MODE);
+	else if (rate < 50000)
+		speed = (1 << CS42L51_SSM_MODE);
+	else
+		speed = (1 << CS42L51_DSM_MODE);
+#endif
+
 	for (i = 0; i < nr_ratios; i++) {
+#ifdef CONFIG_SYNO_ARMADA_V2
+		if (((1 << ratios[i].speed_mode) & speed) == 0)
+			continue;
+#endif
 		if (ratios[i].ratio == ratio)
 			break;
 	}

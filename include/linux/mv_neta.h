@@ -69,10 +69,67 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef LINUX_MV_NETA_H
 #define LINUX_MV_NETA_H
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 struct netaSmpGroupStruct {
 	MV_U32 portMask;
 	MV_U32 cpuMask;
 };
+#endif
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#define MV_NETA_PORT_NAME	"mv_neta_port"
+struct mv_neta_pdata {
+	/* Global parameters common for all ports */
+	unsigned int  tclk;
+	unsigned int  pclk;
+	int           max_port;
+	int           max_cpu;
+	unsigned int  ctrl_model;
+	unsigned int  ctrl_rev;
+
+	/* Per port parameters */
+	unsigned int  cpu_mask;
+	int           mtu;
+
+	/* Whether a PHY is present, and if yes, at which address. */
+	int      phy_addr;
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	/* Maximum packet size for L4 checksum generation */
+	int      tx_csum_limit;
+#endif
+
+	/* Use this MAC address if it is valid */
+	u8       mac_addr[6];
+
+	/*
+	* If speed is 0, autonegotiation is enabled.
+	*   Valid values for speed: 0, SPEED_10, SPEED_100, SPEED_1000.
+	*   Valid values for duplex: DUPLEX_HALF, DUPLEX_FULL.
+	*/
+	int      speed;
+	int      duplex;
+
+	/* Port configuration: indicates if this port is LB, and if PCS block is active */
+	int      lb_enable;
+	int      is_sgmii;
+	int      is_rgmii;
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	/* port interrupt line number */
+	int      irq;
+#endif
+
+	/*
+	* How many RX/TX queues to use.
+	*/
+	int      rx_queue_count;
+	int      tx_queue_count;
+
+	/*
+	* Override default RX/TX queue sizes if nonzero.
+	*/
+	int      rx_queue_size;
+	int      tx_queue_size;
+};
+#endif
 
 #endif  /* LINUX_MV_NETA_H */

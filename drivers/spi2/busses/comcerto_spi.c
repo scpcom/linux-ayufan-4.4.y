@@ -46,7 +46,7 @@
  *
  *
  */
-static int do_write_read_transfer8(struct comcerto_spi *spi, u8 *wbuf, unsigned int *wlen, u8 *rbuf, unsigned int *rlen)
+static int do_write_read_transfer8(struct comcerto_spi *spi, u8 *wbuf, unsigned int *wlen, u8 *rbuf, unsigned int *rlen, u32 ser_reg)
 {
 	unsigned int len_now;
 	int rc = 0;
@@ -54,6 +54,7 @@ static int do_write_read_transfer8(struct comcerto_spi *spi, u8 *wbuf, unsigned 
 	u32 dr = spi->membase + COMCERTO_SPI_DR;
 	u32 txflr = spi->membase + COMCERTO_SPI_TXFLR;
 	u32 rxflr = spi->membase + COMCERTO_SPI_RXFLR;
+	int ser_done = 0;
 
 //	printk(KERN_INFO "do_write_read_transfer(%#lx, %#lx, %d, %#lx, %d)\n", (unsigned long)spi,
 //                                                                      (unsigned long)wbuf, *wlen,
@@ -70,6 +71,10 @@ static int do_write_read_transfer8(struct comcerto_spi *spi, u8 *wbuf, unsigned 
 		while (len_now--)
 			__raw_writew(cpu_to_le16((u16) *wbuf++), dr);
 
+		if (!ser_done){
+			__raw_writel(ser_reg, spi->membase + COMCERTO_SPI_SER);
+			ser_done = 1;
+		}
 
 		len_now = __raw_readl(rxflr);
 		if (len_now > rtmp)
@@ -92,9 +97,8 @@ static int do_write_read_transfer8(struct comcerto_spi *spi, u8 *wbuf, unsigned 
 /**
  * do_write_read_transfer16 -
  *
- *
  */
-static int do_write_read_transfer16(struct comcerto_spi *spi, u16 *wbuf, unsigned int *wlen, u16 *rbuf, unsigned int *rlen)
+static int do_write_read_transfer16(struct comcerto_spi *spi, u16 *wbuf, unsigned int *wlen, u16 *rbuf, unsigned int *rlen, u32 ser_reg)
 {
 	unsigned int len_now;
 	int rc = 0;
@@ -103,6 +107,7 @@ static int do_write_read_transfer16(struct comcerto_spi *spi, u16 *wbuf, unsigne
 	u32 dr = spi->membase + COMCERTO_SPI_DR;
 	u32 txflr = spi->membase + COMCERTO_SPI_TXFLR;
 	u32 rxflr = spi->membase + COMCERTO_SPI_RXFLR;
+	int ser_done = 0;
 
 //	printk(KERN_INFO "do_write_read_transfer(%#lx, %#lx, %d, %#lx, %d)\n", (unsigned long)spi
 //                                                                      (unsigned long)wbuf, *wlen,
@@ -138,6 +143,11 @@ static int do_write_read_transfer16(struct comcerto_spi *spi, u16 *wbuf, unsigne
 				__raw_writew(0, dr);
 		}
 
+		if (!ser_done){
+			__raw_writel(ser_reg, spi->membase + COMCERTO_SPI_SER);
+			ser_done = 1;
+		}
+
 		len_now = __raw_readl(rxflr);
 		if (rtmp) {
 			if (len_now > rtmp)
@@ -166,19 +176,19 @@ static int do_write_read_transfer16(struct comcerto_spi *spi, u16 *wbuf, unsigne
 	return rc;
 }
 
-
 /**
  * do_write_only_transfer8 -
  *
  *
  */
-static int do_write_only_transfer8(struct comcerto_spi *spi, u8 *buf, unsigned int *len)
+static int do_write_only_transfer8(struct comcerto_spi *spi, u8 *buf, unsigned int *len, u32 ser_reg)
 {
 	unsigned int len_now;
 	int rc = 0;
 	unsigned int tmp = *len;
 	u32 dr = spi->membase + COMCERTO_SPI_DR;
 	u32 txflr = spi->membase + COMCERTO_SPI_TXFLR;
+	int ser_done = 0;
 
 //	printk(KERN_INFO "do_write_only_transfer8(%#lx, %#lx, %d)\n", (unsigned long)spi, (unsigned long)buf, *len);
 
@@ -191,6 +201,12 @@ static int do_write_only_transfer8(struct comcerto_spi *spi, u8 *buf, unsigned i
 
 		while (len_now--)
 			__raw_writew(cpu_to_le16((u16) *buf++), dr);
+
+		if (!ser_done)
+		{
+			__raw_writel(ser_reg, spi->membase + COMCERTO_SPI_SER);
+			ser_done = 1;
+		}
 	}
 
 	*len -= tmp;
@@ -205,13 +221,14 @@ static int do_write_only_transfer8(struct comcerto_spi *spi, u8 *buf, unsigned i
  *
  *
  */
-static int do_write_only_transfer16(struct comcerto_spi *spi, u16 *buf, unsigned int *len)
+static int do_write_only_transfer16(struct comcerto_spi *spi, u16 *buf, unsigned int *len, u32 ser_reg)
 {
 	unsigned int len_now;
 	int rc = 0;
 	unsigned int tmp = *len;
 	u32 dr = spi->membase + COMCERTO_SPI_DR;
 	u32 txflr = spi->membase + COMCERTO_SPI_TXFLR;
+	int ser_done = 0;
 
 //      printk(KERN_INFO "do_write_only_transfer(%#lx, %#lx, %d)\n", (unsigned long)spi, (unsigned long)buf, *len);
 
@@ -224,6 +241,12 @@ static int do_write_only_transfer16(struct comcerto_spi *spi, u16 *buf, unsigned
 
 		while (len_now--)
 			__raw_writew(cpu_to_le16(*buf++), dr);
+
+		if (!ser_done)
+		{
+			__raw_writel(ser_reg, spi->membase + COMCERTO_SPI_SER);
+			ser_done = 1;
+		}
 	}
 
 	*len -= tmp;
@@ -342,16 +365,16 @@ static int comcerto_spi_do_transfer(struct spi_adapter *adapter, struct spi_tran
 
 		__raw_writel(ctrlr0, spi->membase + COMCERTO_SPI_CTRLR0);
 		__raw_writel(baudr, spi->membase + COMCERTO_SPI_BAUDR);
-		__raw_writel(ser, spi->membase + COMCERTO_SPI_SER);
+		//__raw_writel(ser, spi->membase + COMCERTO_SPI_SER);
 		__raw_writel(8, spi->membase + COMCERTO_SPI_RXFTLR);
 		__raw_writel(0, spi->membase + COMCERTO_SPI_TXFTLR);
 		__raw_writel(0, spi->membase + COMCERTO_SPI_IMR);
 		__raw_writel(1, spi->membase + COMCERTO_SPI_SSIENR);
 
 		if (transfer->fs <= 8)
-			rc = do_write_only_transfer8(spi, transfer->wbuf, &transfer->wlen);
+			rc = do_write_only_transfer8(spi, transfer->wbuf, &transfer->wlen, ser);
 		else
-			rc = do_write_only_transfer16(spi, (u16 *) transfer->wbuf, &transfer->wlen);
+			rc = do_write_only_transfer16(spi, (u16 *) transfer->wbuf, &transfer->wlen, ser);
 
 		break;
 
@@ -380,26 +403,27 @@ static int comcerto_spi_do_transfer(struct spi_adapter *adapter, struct spi_tran
 
 		__raw_writel(ctrlr0, spi->membase + COMCERTO_SPI_CTRLR0);
 		__raw_writel(baudr, spi->membase + COMCERTO_SPI_BAUDR);
-		__raw_writel(ser, spi->membase + COMCERTO_SPI_SER);
+	//	__raw_writel(ser, spi->membase + COMCERTO_SPI_SER);
 		__raw_writel(8, spi->membase + COMCERTO_SPI_RXFTLR);
 		__raw_writel(0, spi->membase + COMCERTO_SPI_TXFTLR);
 		__raw_writel(0, spi->membase + COMCERTO_SPI_IMR);
 		__raw_writel(1, spi->membase + COMCERTO_SPI_SSIENR);
 
 		if (transfer->fs <= 8)
-			rc = do_write_read_transfer8(spi, transfer->wbuf, &transfer->wlen, transfer->rbuf, &transfer->rlen);
+		rc = do_write_read_transfer8(spi, transfer->wbuf, &transfer->wlen, transfer->rbuf, &transfer->rlen, ser);
 		else
-			rc = do_write_read_transfer16(spi, (u16 *) transfer->wbuf, &transfer->wlen, (u16 *) transfer->rbuf, &transfer->rlen);
+		rc = do_write_read_transfer16(spi, (u16 *) transfer->wbuf, &transfer->wlen, (u16 *) transfer->rbuf, &transfer->rlen, ser);
 
 		break;
 	}
 
 	if (config->ba_delay) {
+		udelay(config->ba_delay);
 	        /* make sure this transaction is finished */
         	while (__raw_readl(spi->membase + COMCERTO_SPI_SR) & BUSY) ;
-
-		udelay(config->ba_delay);
 	}
+
+	__raw_writel(0, spi->membase + COMCERTO_SPI_SER);
 
 	return rc;
 }

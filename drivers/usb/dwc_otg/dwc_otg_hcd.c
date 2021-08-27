@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd.c $
- * $Revision: #102 $
- * $Date: 2011/05/17 $
- * $Change: 1774110 $
+ * $Revision: #104 $
+ * $Date: 2011/10/24 $
+ * $Change: 1871159 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -447,6 +447,7 @@ int dwc_otg_hcd_urb_enqueue(dwc_otg_hcd_t * hcd,
 	dwc_irqflags_t flags;
 	int retval = 0;
 	dwc_otg_qtd_t *qtd;
+	gintmsk_data_t intr_mask = {.d32 = 0 };
 
 	if (!hcd->flags.b.port_connect_status) {
 		/* No longer connected. */
@@ -469,12 +470,12 @@ int dwc_otg_hcd_urb_enqueue(dwc_otg_hcd_t * hcd,
 	} else {
 		qtd->qh = *ep_handle;
 	}
-
-	if (hcd->core_if->dma_desc_enable && retval == 0) {
+	intr_mask.d32 = DWC_READ_REG32(&hcd->core_if->core_global_regs->gintmsk);
+	if (!intr_mask.b.sofintr && retval == 0) {
 		dwc_otg_transaction_type_e tr_type;
 		if ((qtd->qh->ep_type == UE_BULK)
 		    && !(qtd->urb->flags & URB_GIVEBACK_ASAP)) {
-			/* Do not schedule SG transcations until qtd has URB_GIVEBACK_ASAP set */
+			/* Do not schedule SG transactions until qtd has URB_GIVEBACK_ASAP set */
 			return 0;
 		}
 		DWC_SPINLOCK_IRQSAVE(hcd->lock, &flags);
@@ -566,10 +567,7 @@ int dwc_otg_hcd_endpoint_disable(dwc_otg_hcd_t * hcd, void *ep_handle,
 
 	dwc_otg_hcd_qh_remove(hcd, qh);
 
-#if !defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
 	DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
-#endif
-
 	/*
 	 * Split dwc_otg_hcd_qh_remove_and_free() into qh_remove
 	 * and qh_free to prevent stack dump on DWC_DMA_FREE() with
@@ -577,9 +575,6 @@ int dwc_otg_hcd_endpoint_disable(dwc_otg_hcd_t * hcd, void *ep_handle,
 	 * and dwc_otg_hcd_frame_list_alloc().
 	 */
 	dwc_otg_hcd_qh_free(hcd, qh);
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
-	DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
-#endif
 
 done:
 	return retval;
@@ -876,6 +871,7 @@ int dwc_otg_hcd_init(dwc_otg_hcd_t * hcd, dwc_otg_core_if_t * core_if)
 	hcd->otg_port = 1;
 	hcd->frame_list = NULL;
 	hcd->frame_list_dma = 0;
+	hcd->periodic_qh_count = 0;
 out:
 	return retval;
 }
@@ -2465,6 +2461,7 @@ int dwc_otg_hcd_hub_control(dwc_otg_hcd_t * dwc_otg_hcd,
 			}
 
 			/** @todo - check how sw can wait for 1 sec to check asesvld??? */
+#if 0 //vahrama !!!!!!!!!!!!!!!!!!
 			if (core_if->adp_enable) {
 				gotgctl_data_t gotgctl = {.d32 = 0 };
 				gpwrdn_data_t gpwrdn;
@@ -2491,6 +2488,7 @@ int dwc_otg_hcd_hub_control(dwc_otg_hcd_t * dwc_otg_hcd,
 
 				dwc_otg_adp_probe_start(core_if);
 			}
+#endif
 			break;
 		case UHF_PORT_POWER:
 			DWC_DEBUGPL(DBG_HCD, "DWC OTG HCD HUB CONTROL - "

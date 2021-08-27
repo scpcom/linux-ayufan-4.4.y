@@ -18,14 +18,9 @@
 #include <linux/circ_buf.h>
 #include <linux/delay.h>
 
-
 #define XOR_MAX_SRC_CNT	6
 
-#if defined(CONFIG_COMCERTO_DMA_BASIC)
 #define virt_to_xor_dma(pbase, vbase, vaddr)		((pbase + ((unsigned long)vaddr - (unsigned long)vbase)))
-#else
-#define virt_to_xor_phy(v)				virt_to_aram(v)
-#endif
 
 struct comcerto_xor_device {
         struct dma_device        device;
@@ -75,8 +70,6 @@ static int xor_current_batch_count = 0;
 struct timer_list comcerto_xor_timer;
 #define COMPLETION_TIMEOUT      msecs_to_jiffies(100)
 static int comerto_xor_timer_first = 1;
-
-static int comcerto_tasklet_state = 0;
 
 struct comcerto_xor_inbound_fdesc *xor_in_fdesc[XOR_FDESC_COUNT];
 struct comcerto_xor_outbound_fdesc *xor_out_fdesc[XOR_FDESC_COUNT];
@@ -295,7 +288,6 @@ static void comcerto_xor_cleanup(void)
 	struct comcerto_sw_xor_desc *sw_desc;
 
 	spin_lock_irqsave(&mdma_lock, flags);
-	comcerto_tasklet_state = 1;
 	cleanup_count = CIRC_CNT(xor_dma_idx, xor_rd_idx, XOR_FDESC_COUNT);
 	spin_unlock_irqrestore(&mdma_lock, flags);
 
@@ -380,10 +372,8 @@ static void comcerto_xor_cleanup(void)
 
 #if defined(CONFIG_SYNO_COMCERTO)
 END:
+	return;
 #endif
-        spin_lock_irqsave(&mdma_lock, flags);
-	comcerto_tasklet_state = 0;
-	spin_unlock_irqrestore(&mdma_lock, flags);
 }
 
 static void comcerto_xor_tasklet(unsigned long data)
@@ -608,10 +598,9 @@ void comcerto_dma_profiling_start(struct comcerto_dma_sg *sg, unsigned int len) 
 void comcerto_dma_profiling_end(struct comcerto_dma_sg *sg) {}
 #endif
 
-
-static inline dma_addr_t dma_acp_map_page(struct comcerto_dma_sg *sg, struct page *page, unsigned int offset, unsigned int len, int dir, int use_acp)
+static inline dma_addr_t dma_acp_map_page(struct comcerto_dma_sg *sg, void *p, unsigned int len, int dir, int use_acp)
 {
-	dma_addr_t phys_addr = page_to_phys(page) + offset;
+	dma_addr_t phys_addr = virt_to_phys(p);
 	dma_addr_t low, high;
 
 	if (!use_acp)
@@ -642,11 +631,10 @@ static inline dma_addr_t dma_acp_map_page(struct comcerto_dma_sg *sg, struct pag
 	}
 
 map:
-	return dma_map_page(NULL, page, offset, len, dir); //TODO add proper checks
+	return dma_map_single(NULL, p, len, dir); //TODO add proper checks
 }
 
-
-int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, struct page *page, unsigned int offset, unsigned int len, int use_acp)
+int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, void *p, unsigned int len, int use_acp)
 {
 	dma_addr_t phys_addr;
 
@@ -659,8 +647,9 @@ int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, struct page *page, uns
 		if (sg->input_idx >= MDMA_INBOUND_BUF_DESC)
 			return -1;
 
-		phys_addr = dma_acp_map_page(sg, page, offset, len, DMA_TO_DEVICE, use_acp);
+		phys_addr = dma_acp_map_page(sg, p, len, DMA_TO_DEVICE, use_acp);
 
+		sg->in_bdesc[sg->input_idx].split = 0;
 		sg->in_bdesc[sg->input_idx].phys_addr = phys_addr;
 		sg->in_bdesc[sg->input_idx].len = len;
 		sg->input_idx++;
@@ -671,13 +660,15 @@ int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, struct page *page, uns
 		if (sg->input_idx >= (MDMA_INBOUND_BUF_DESC - 1))
 			return -1;
 
-		phys_addr = dma_acp_map_page(sg, page, offset, len, DMA_TO_DEVICE, use_acp);
+		phys_addr = dma_acp_map_page(sg, p, len, DMA_TO_DEVICE, use_acp);
 
+		sg->in_bdesc[sg->input_idx].split = 1;
 		sg->in_bdesc[sg->input_idx].phys_addr = phys_addr;
 		sg->in_bdesc[sg->input_idx].len = MDMA_SPLIT_BUF_SIZE;
 		sg->input_idx++;
+		sg->in_bdesc[sg->input_idx].split = 0;
 		sg->in_bdesc[sg->input_idx].phys_addr = phys_addr + MDMA_SPLIT_BUF_SIZE;
-		sg->in_bdesc[sg->input_idx].len = MDMA_SPLIT_BUF_SIZE;
+		sg->in_bdesc[sg->input_idx].len = len - MDMA_SPLIT_BUF_SIZE;
 		sg->input_idx++;
 
 		return 0;
@@ -685,7 +676,7 @@ int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, struct page *page, uns
 }
 EXPORT_SYMBOL(comcerto_dma_sg_add_input);
 
-int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, struct page *page, unsigned int offset, unsigned int len, int use_acp)
+int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, void *p, unsigned int len, int use_acp)
 {
 	dma_addr_t phys_addr;
 
@@ -698,8 +689,9 @@ int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, struct page *page, un
 		if (sg->output_idx >= MDMA_OUTBOUND_BUF_DESC)
 			return -1;
 
-		phys_addr = dma_acp_map_page(sg, page, offset, len, DMA_FROM_DEVICE, use_acp);
+		phys_addr = dma_acp_map_page(sg, p, len, DMA_FROM_DEVICE, use_acp);
 
+		sg->out_bdesc[sg->output_idx].split = 0;
 		sg->out_bdesc[sg->output_idx].phys_addr = phys_addr;
 		sg->out_bdesc[sg->output_idx].len = len;
 		sg->output_idx++;
@@ -710,13 +702,15 @@ int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, struct page *page, un
 		if (sg->output_idx >= (MDMA_OUTBOUND_BUF_DESC - 1))
 			return -1;
 
-		phys_addr = dma_acp_map_page(sg, page, offset, len, DMA_FROM_DEVICE, use_acp);
+		phys_addr = dma_acp_map_page(sg, p, len, DMA_FROM_DEVICE, use_acp);
 
+		sg->out_bdesc[sg->output_idx].split = 1;
 		sg->out_bdesc[sg->output_idx].phys_addr = phys_addr;
 		sg->out_bdesc[sg->output_idx].len = MDMA_SPLIT_BUF_SIZE;
 		sg->output_idx++;
+		sg->out_bdesc[sg->output_idx].split = 0;
 		sg->out_bdesc[sg->output_idx].phys_addr = phys_addr + MDMA_SPLIT_BUF_SIZE;
-		sg->out_bdesc[sg->output_idx].len = MDMA_SPLIT_BUF_SIZE;
+		sg->out_bdesc[sg->output_idx].len = len - MDMA_SPLIT_BUF_SIZE;
 		sg->output_idx++;
 
 		return 0;
@@ -780,10 +774,15 @@ void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg, unsigned int len)
 	remaining = len;
 	i = 0;
 	while (remaining > sg->in_bdesc[i].len) {
+		if (sg->in_bdesc[i].split) {
+			sg->in_bdesc[i+1].phys_addr = sg->in_bdesc[i].phys_addr;
+			sg->in_bdesc[i+1].len += sg->in_bdesc[i].len;
+		}
+		else {
 		if (sg->in_bdesc[i].phys_addr < COMCERTO_AXI_ACP_BASE)
 			dma_unmap_page(NULL, sg->in_bdesc[i].phys_addr, sg->in_bdesc[i].len, DMA_TO_DEVICE);
-
 		remaining -= sg->in_bdesc[i].len;
+		}
 		i++;
 	}
 
@@ -793,10 +792,15 @@ void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg, unsigned int len)
 	remaining = len;
 	i = 0;
 	while (remaining > sg->out_bdesc[i].len) {
+		if (sg->out_bdesc[i].split) {
+			sg->out_bdesc[i+1].phys_addr = sg->out_bdesc[i].phys_addr;
+			sg->out_bdesc[i+1].len += sg->out_bdesc[i].len;
+		}
+		else {
 		if (sg->out_bdesc[i].phys_addr < COMCERTO_AXI_ACP_BASE)
 			dma_unmap_page(NULL, sg->out_bdesc[i].phys_addr, sg->out_bdesc[i].len, DMA_FROM_DEVICE);
-
 		remaining -= sg->out_bdesc[i].len;
+		}
 		i++;
 	}
 
@@ -830,6 +834,7 @@ void comcerto_dma_get(void)
 
 		finish_wait(&mdma_memcpy_busy_queue, &wait);
 	}
+	dma_owned = OWNER_MEMCPY_BUSY;
 
 	dma_owned = OWNER_MEMCPY_BUSY;
 
@@ -1045,11 +1050,8 @@ static irqreturn_t c2k_dma_handle_interrupt(int irq, void *data)
 				wake_up(&comcerto_xor_wait_queue);
 			}
 
-			if(!comcerto_tasklet_state)
-			{
 				tasklet_schedule(&comcerto_xor_ch.irq_tasklet);
 			}
-		}
 		else //memcpy
 		{
 			mdma_done = 1;
@@ -1161,7 +1163,6 @@ static int __devinit comcerto_dma_probe(struct platform_device *pdev)
 	ret = dma_async_device_register(dma_dev);
 	if (unlikely(ret)) {
 		printk(KERN_ERR "%s: Failed to register XOR DMA channel %d\n",__func__,ret);
-		kfree(comcerto_xor_dev);
 		goto err_free_dma;
 	}
 	else
@@ -1172,7 +1173,7 @@ static int __devinit comcerto_dma_probe(struct platform_device *pdev)
 
 	spin_lock_init(&mdma_lock);
 
-	//initializing
+	//Memcpy descriptor initializing
 	mdma_in_desc = (struct comcerto_memcpy_inbound_fdesc *) (memcpy_pool);
 	memcpy_pool += sizeof(struct comcerto_memcpy_inbound_fdesc);
 	memcpy_pool = (void *)((unsigned long)(memcpy_pool + 15) & ~15);
@@ -1183,13 +1184,10 @@ static int __devinit comcerto_dma_probe(struct platform_device *pdev)
 	mdma_in_desc_phy = virt_to_aram(mdma_in_desc);
 	mdma_out_desc_phy = virt_to_aram(mdma_out_desc);
 
-#if defined(CONFIG_COMCERTO_DMA_BASIC)
+	//XOR descriptor initializing
 	comcerto_xor_pool_virt = dma_alloc_coherent(NULL, XOR_FDESC_COUNT * (sizeof(struct comcerto_xor_inbound_fdesc) 
 						+  sizeof(struct comcerto_xor_outbound_fdesc)), &comcerto_xor_pool_phy, GFP_KERNEL);
 	xor_pool = comcerto_xor_pool_virt;
-#else
-	xor_pool = memcpy_pool;
-#endif
 
 	for (i = 0; i < XOR_FDESC_COUNT; i++) {
 		xor_in_fdesc[i] = (struct comcerto_xor_inbound_fdesc *) (xor_pool);

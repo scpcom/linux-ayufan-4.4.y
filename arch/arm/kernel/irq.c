@@ -60,7 +60,7 @@ int arch_show_interrupts(struct seq_file *p, int prec)
 #endif
 #ifdef CONFIG_SMP
 	show_ipi_list(p, prec);
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && (defined(CONFIG_ARCH_ARMADA_XP) && defined(CONFIG_PERF_EVENTS))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && (defined(CONFIG_ARCH_ARMADA_XP) && defined(CONFIG_PERF_EVENTS))
         show_local_pmu_irqs(p, prec);
 #endif
 #endif

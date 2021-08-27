@@ -95,10 +95,11 @@ config INET6_ESP
 	  If unsure, say Y.
 
 config INET6_IPSEC_OFFLOAD
-	bool "IPsec IPv6 Fast Path Processing offload"
-	depends on (INET6_ESP && COMCERTO_FP && SYNO_COMCERTO)
+	tristate "IPsec IPv6 Fast Path Processing offload"
+	depends on (INET6_ESP && SYNO_COMCERTO)
 		---help---
 	  Support for IPsec IPv6 Fast Path offload.
+	  Synology removes COMCERTO_FP dependency temporarily and makes it tristate not bool
 
 config INET6_IPCOMP
 	tristate "IPv6: IPComp transformation"

@@ -261,7 +261,9 @@ __pj4bv7_setup:
 /* DSMP A0 */
 	/* Auxiliary Debug Modes Control 1 Register */
 	mrc        p15, 1, r0, c15, c1, 1                         /* Read */
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 	orr        r0, r0, #0x00020                                /* BIT5 STREX backoff_disable--> '1' enable the back off of STREX instr */
+#endif
 	orr	   r0, r0, #0x00100                                /* BIT8 Internal Parity Handling Disable--> '1' Disable Internal Parity Handling */
 	mcr        p15, 1, r0, c15, c1, 1                         /* Write */
 
@@ -300,7 +302,9 @@ __pj4bv7_setup:
 #endif
 	/* Auxiliary Debug Modes Control 1 Register */
 	mrc        p15, 1, r0, c15, c1, 1                         /* Read */
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 	orr        r0, r0, #0x00020                                /* BIT5 STREX backoff_disable--> '1' enable the back off of STREX instr */
+#endif
 	orr	   r0, r0, #0x00100                                /* BIT8 Internal Parity Handling Disable--> '1' Disable Internal Parity Handling */
 	mcr        p15, 1, r0, c15, c1, 1                         /* Write */
 

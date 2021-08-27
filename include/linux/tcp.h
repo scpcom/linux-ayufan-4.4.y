@@ -333,6 +333,9 @@ struct tcp_sock {
 		struct dma_chan		*dma_chan;
 		int			wakeup;
 		struct dma_pinned_list	*pinned_list;
+#ifdef CONFIG_SYNO_ALPINE
+		bool			pinned;
+#endif
 		dma_cookie_t		dma_cookie;
 #endif
 	} ucopy;

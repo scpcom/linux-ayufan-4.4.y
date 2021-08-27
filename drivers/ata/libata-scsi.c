@@ -75,11 +75,7 @@ static unsigned long gulLastWake = 0;
 DEFINE_SPINLOCK(SYNOLastWakeLock);
 #endif
 
-#ifdef SYNO_SATA_ERROR_REPORT
-extern int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-#endif
-
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EUNIT_POWERCTL_PIN
 extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
 #endif
 
@@ -189,7 +185,7 @@ static ssize_t ata_scsi_lpm_show(struct device *dev,
 DEVICE_ATTR(link_power_management_policy, S_IRUGO | S_IWUSR,
 	    ata_scsi_lpm_show, ata_scsi_lpm_store);
 EXPORT_SYMBOL_GPL(dev_attr_link_power_management_policy);
-#if defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(MY_ABC_HERE)
+#if defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(SYNO_SATA_MV_SHUTDOWN_PHY)
 struct scsi_device *
 look_up_scsi_dev_from_ap(struct ata_port *ap)
 {
@@ -288,7 +284,7 @@ syno_pm_gpio_output_enable_with_sdev(bool blEnable,
 	int ret = 0;
 	u8 scsi_cmd[MAX_COMMAND_SIZE];
 	u16 feature = SATA_PMP_GSCR_9705_GPO_EN;
-	u8* sense;
+	u8* sense = NULL;
 
 	/* Only GPI1~GPI8(GPIO 0~4,11~13) need to set LOW. */
 	u32 var = (blEnable ? 0xFFFFF : 0xFC7C0);
@@ -325,6 +321,10 @@ syno_pm_gpio_output_enable_with_sdev(bool blEnable,
 	ret = scsi_execute(sdev, scsi_cmd, DMA_NONE, NULL, 0, sense, (10*HZ), 5, 0, NULL);
 
 END:
+	if (NULL != sense) {
+		kfree(sense);
+	}
+
 	return ret;
 }
 
@@ -986,6 +986,22 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 						EBOX_INFO_EMID_KEY,
 						ap->PMSynoEMID);
 			}
+		}else if(IS_SYNOLOGY_RX415(ap->PMSynoUnique)) {
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"%d\"\n",
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_RX415,
+					EBOX_INFO_EMID_KEY,
+					ap->PMSynoEMID);
+		}else if(IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) {
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"%d\"\n",
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_DX1215,
+					EBOX_INFO_EMID_KEY,
+					ap->PMSynoEMID);
 		}else {
 			snprintf(szTmp,
 					BDEVNAME_SIZE,
@@ -1026,7 +1042,7 @@ DEVICE_ATTR(syno_pm_info, S_IRUGO, syno_pm_info_show, NULL);
 EXPORT_SYMBOL_GPL(dev_attr_syno_pm_info);
 #endif /* SYNO_SATA_PM_DEVICE_GPIO */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_WCACHE_DISABLE
 static ssize_t syno_wcache_show(struct device *device,
 				  struct device_attribute *attr, char *buf)
 {
@@ -1210,7 +1226,8 @@ END:
 DEVICE_ATTR(syno_diskname_trans, S_IRUGO, syno_trans_host_to_disk_show, NULL);
 EXPORT_SYMBOL_GPL(dev_attr_syno_diskname_trans);
 #endif
-#ifdef MY_ABC_HERE
+
+#ifdef SYNO_SATA_DISK_LED_CONTROL
 int (*funcSYNOSATADiskLedCtrl) (int iHostNum, SYNO_DISK_LED diskLed) = NULL;
 EXPORT_SYMBOL(funcSYNOSATADiskLedCtrl);
 
@@ -2995,7 +3012,7 @@ static int SynoIssueRead(struct ata_device *dev)
 	}
 
 	/* copy from ata_scsi_rw_xlat(..) and ata_exec_internal(..) */
-	psg = kmalloc(ATA_SECT_SIZE, GFP_KERNEL);//will free in complete function
+	psg = kmalloc(ATA_SECT_SIZE, GFP_ATOMIC);//will free in complete function
 	sg_init_one(psg, buf, ATA_SECT_SIZE);
 	ata_sg_init(qc, psg, 1);
 	qc->flags |= ATA_QCFLAG_IO;
@@ -4619,6 +4636,12 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 	u8 scsi_op = scmd->cmnd[0];
 	ata_xlat_func_t xlat_func;
 	int rc = 0;
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+	static unsigned long iStuckTimeout;
+	static int icPMRWDefer = 0;
+	struct ata_queued_cmd *active_qc;
+	u8 active_command;
+#endif /* SYNO_SATA_PM_DEVICE_GPIO */
 
 	if (dev->class == ATA_DEV_ATA) {
 		if (unlikely(!scmd->cmd_len || scmd->cmd_len > dev->cdb_len))
@@ -4647,10 +4670,10 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 	}
 
 	if (xlat_func)
-/* As you see if MY_ABC_HERE is not ported, this is not work */
-#if defined(MY_ABC_HERE)
+/* As you see if SYNO_INTERNAL_HD_NUM is not ported, this is not work */
+#if defined(SYNO_SPINUP_DELAY)
 	{
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ATA_FAST_PROBE
 		if (dev->link->ap->nr_pmp_links && dev->link->ap->pflags & ATA_PFLAG_SYNO_BOOT_PROBE) {
 			/* I don't know why some EUnit master may not clear ATA_PFLAG_SYNO_BOOT_PROBE,
 			 * so we must clear it again by schedule_eh*/
@@ -4683,6 +4706,31 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 #endif
 	else
 		ata_scsi_simulate(dev, scmd);
+
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+        /* This is a work around for the problem that PMP GPIO command stucked in the low level driver and cause in system hang.
+		 * When multiple commands are deferred in a row longer than normal ATA command timeout(10 sec),
+		 * and the command occupying the lower level queue is an PMP R/W command, we force it to abort.
+		 * Also, we assumed that there won't be more than 64 commands(twice of the default ATA queue depth)
+		 * be deffered in common cases. */
+		active_qc = __ata_qc_from_tag(dev->link->ap, 0);
+		active_command = active_qc->tf.command;
+		/* we abort the PMP R/W command if it stuck in ata queue too long and caused too many defer */
+		if (SCSI_MLQUEUE_DEVICE_BUSY != rc && SCSI_MLQUEUE_HOST_BUSY != rc){
+			icPMRWDefer = 0;
+			iStuckTimeout = jiffies + 10*HZ;
+		}else if (64 <= icPMRWDefer &&
+				  time_after_eq(jiffies, iStuckTimeout) &&
+				  active_qc->flags & ATA_QCFLAG_ACTIVE &&
+				  (ATA_CMD_PMP_READ == active_command || ATA_CMD_PMP_WRITE == active_command)){
+			icPMRWDefer = 0;
+			iStuckTimeout = jiffies + 10*HZ;
+			ata_dev_printk(dev, KERN_INFO,"Abort stucked PMP R/W command\n");
+			ata_port_abort(dev->link->ap);
+		}else{
+			icPMRWDefer++;
+		}
+#endif /* SYNO_SATA_PM_DEVICE_GPIO */
 
 	return rc;
 
@@ -5138,7 +5186,7 @@ void ata_syno_pmp_hotplug(struct work_struct *work)
 	envp[1] = NULL;
 	kobject_uevent_env(&ap->scsi_host->shost_dev.kobj, KOBJ_CHANGE, envp);
 }
-#endif //MY_ABC_HERE
+#endif //SYNO_PMP_HOTPLUG_TASK
 
 /**
  *	ata_scsi_hotplug - SCSI part of hotplug
@@ -5760,7 +5808,7 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 		index = ((mapped_idx+1)*26) + channel; /* + 1 is for jumping to sdax */
 	} else {
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DISK_SEQ_REVERSE
 		index = syno_libata_disk_sequence_reverse(host);
 #else
 		index = syno_is_reversed_scsi_host_model(host->host_no);

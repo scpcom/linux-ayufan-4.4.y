@@ -21,6 +21,11 @@
  
 #ifndef _UAPI_LINUX_BTRFS_H
 #define _UAPI_LINUX_BTRFS_H
+
+#ifndef __KERNEL__
+#include <linux/syno_autoconf.h>
+#endif
+
 #include <linux/types.h>
 #include <linux/ioctl.h>
 
@@ -185,6 +190,12 @@ struct btrfs_ioctl_fs_info_args {
 	__u64 num_devices;			/* out */
 	__u8 fsid[BTRFS_FSID_SIZE];		/* out */
 	__u64 reserved[124];			/* pad to 1k */
+};
+
+struct btrfs_ioctl_feature_flags {
+	__u64 compat_flags;
+	__u64 compat_ro_flags;
+	__u64 incompat_flags;
 };
 
 /* balance control ioctl modes */
@@ -610,5 +621,11 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 				    struct btrfs_ioctl_dev_replace_args)
 #define BTRFS_IOC_FILE_EXTENT_SAME _IOWR(BTRFS_IOCTL_MAGIC, 54, \
 					 struct btrfs_ioctl_same_args)
+#define BTRFS_IOC_GET_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
+				   struct btrfs_ioctl_feature_flags)
+#define BTRFS_IOC_SET_FEATURES _IOW(BTRFS_IOCTL_MAGIC, 57, \
+				   struct btrfs_ioctl_feature_flags[2])
+#define BTRFS_IOC_GET_SUPPORTED_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
+				   struct btrfs_ioctl_feature_flags[3])
 
 #endif /* _UAPI_LINUX_BTRFS_H */

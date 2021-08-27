@@ -30,6 +30,7 @@
 #include "transaction.h"
 #include "xattr.h"
 #include "disk-io.h"
+#include "props.h"
 
 
 ssize_t __btrfs_getxattr(struct inode *inode, const char *name,
@@ -201,7 +202,11 @@ int __btrfs_setxattr(struct btrfs_trans_handle *trans,
 	if (trans)
 		return do_setxattr(trans, inode, name, value, size, flags);
 
+#ifdef SYNO_BTRFS_NOCHECK_QUOTA
+	trans = btrfs_start_transaction_nocheckquota(root, 2);
+#else
 	trans = btrfs_start_transaction(root, 2);
+#endif
 	if (IS_ERR(trans))
 		return PTR_ERR(trans);
 
@@ -319,10 +324,6 @@ const struct xattr_handler *btrfs_xattr_handlers[] = {
 	&btrfs_xattr_acl_access_handler,
 	&btrfs_xattr_acl_default_handler,
 #endif
-#ifdef CONFIG_BTRFS_FS_SYNO_ACL
-	&btrfs_xattr_synoacl_access_handler,
-	&btrfs_xattr_synoacl_noperm_access_handler,
-#endif
 	NULL,
 };
 
@@ -341,7 +342,8 @@ static bool btrfs_is_valid_xattr(const char *name)
 #ifdef SYNO_XATTR
 	       !strncmp(name, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN) ||
 #endif
-	       !strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN);
+	       !strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN) ||
+		!strncmp(name, XATTR_BTRFS_PREFIX, XATTR_BTRFS_PREFIX_LEN);
 }
 
 ssize_t btrfs_getxattr(struct dentry *dentry, const char *name,
@@ -383,6 +385,10 @@ int btrfs_setxattr(struct dentry *dentry, const char *name, const void *value,
 	if (!btrfs_is_valid_xattr(name))
 		return -EOPNOTSUPP;
 
+	if (!strncmp(name, XATTR_BTRFS_PREFIX, XATTR_BTRFS_PREFIX_LEN))
+		return btrfs_set_prop(dentry->d_inode, name,
+				      value, size, flags);
+
 	if (size == 0)
 		value = "";  /* empty EA, do not remove */
 
@@ -411,6 +417,10 @@ int btrfs_removexattr(struct dentry *dentry, const char *name)
 
 	if (!btrfs_is_valid_xattr(name))
 		return -EOPNOTSUPP;
+
+	if (!strncmp(name, XATTR_BTRFS_PREFIX, XATTR_BTRFS_PREFIX_LEN))
+		return btrfs_set_prop(dentry->d_inode, name,
+				      NULL, 0, XATTR_REPLACE);
 
 	return __btrfs_setxattr(NULL, dentry->d_inode, name, NULL, 0,
 				XATTR_REPLACE);

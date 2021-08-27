@@ -1625,28 +1625,6 @@ int ext4_resize_fs(struct super_block *sb, ext4_fsblk_t n_blocks_count)
 			EXT4_DESC_PER_BLOCK(sb);
 	desc_blocks = n_desc_blocks - o_desc_blocks;
 
-
-	if (desc_blocks &&
-	    (!EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_RESIZE_INODE) ||
-	     le16_to_cpu(es->s_reserved_gdt_blocks) < desc_blocks)) {
-		ext4_warning(sb, "No reserved GDT blocks, can't resize");
-		return -EPERM;
-	}
-
-	resize_inode = ext4_iget(sb, EXT4_RESIZE_INO);
-	if (IS_ERR(resize_inode)) {
-		ext4_warning(sb, "Error opening resize inode");
-		return PTR_ERR(resize_inode);
-	}
-
-	/* See if the device is actually as big as what was requested */
-	bh = sb_bread(sb, n_blocks_count - 1);
-	if (!bh) {
-		ext4_warning(sb, "can't read last block, resize aborted");
-		return -ENOSPC;
-	}
-	brelse(bh);
-
 	/* extend the last group */
 	if (n_group == o_group)
 		add = n_blocks_count - o_blocks_count;

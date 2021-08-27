@@ -123,7 +123,7 @@ struct rt6_info {
 
 	u8				rt6i_protocol;
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	int				rt6i_iifindex;
 	bool 			nfp;

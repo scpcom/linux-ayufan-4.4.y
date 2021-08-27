@@ -151,12 +151,12 @@ extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_E1000E_LED_SWITCH
 void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
 EXPORT_SYMBOL(funcSynoNicLedCtrl);
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP)
 #include <linux/mv_nfp.h>
 #endif /* CONFIG_MV_ETH_NFP */
@@ -198,38 +198,31 @@ void convert_str_to_mac( char *source , char *dest )
 #define SYNO_VENDOR_MAC_FAIL        2
 int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
 {
-	extern unsigned char grgbLanMac[4][16];
+	extern unsigned char grgbLanMac[SYNO_MAC_MAX_V2][16];
+	extern unsigned long g_internal_netif_num;
 	int err = SYNO_VENDOR_MAC_FAIL;
+	char szIFPrefix[IFNAMSIZ] = "eth";
+	int iMacIndex = 0;
+	const char *pMacIndex = NULL;
 
 	if (!szMac || !szDev)
 		goto ERR;
 
 	// According to function __dev_get_by_name
 	// we can use strncmp & IFNAMSIZ to replace memcmp to avoid #48870
-	if (!strncmp(szDev, "eth0", IFNAMSIZ)) {
-		if (!strcmp(grgbLanMac[0], "")) {
+	if (!strncmp(szDev, szIFPrefix, strlen(szIFPrefix))) {
+		pMacIndex = szDev + strlen(szIFPrefix);
+		iMacIndex = simple_strtol(pMacIndex, NULL, 10);
+		if (0 > iMacIndex || g_internal_netif_num <= iMacIndex) {
+			err = SYNO_VENDOR_MAC_FAIL;
+			goto ERR;
+		}
+
+		if (!strcmp(grgbLanMac[iMacIndex], "")) {
 			err = SYNO_VENDOR_MAC_EMPTY;
 			goto ERR;
 		}
-		convert_str_to_mac(grgbLanMac[0], szMac);
-	} else if (!strncmp(szDev, "eth1", IFNAMSIZ)) {
-		if (!strcmp(grgbLanMac[1], "")) {
-			err = SYNO_VENDOR_MAC_EMPTY;
-			goto ERR;
-		}
-		convert_str_to_mac(grgbLanMac[1], szMac);
-	} else if (!strncmp(szDev, "eth2", IFNAMSIZ)) {
-		if (!strcmp(grgbLanMac[2], "")) {
-			err = SYNO_VENDOR_MAC_EMPTY;
-			goto ERR;
-		}
-		convert_str_to_mac(grgbLanMac[2], szMac);
-	} else if (!strncmp(szDev, "eth3", IFNAMSIZ)) {
-		if (!strcmp(grgbLanMac[3], "")) {
-			err = SYNO_VENDOR_MAC_EMPTY;
-			goto ERR;
-		}
-		convert_str_to_mac(grgbLanMac[3], szMac);
+		convert_str_to_mac(grgbLanMac[iMacIndex], szMac);
 	} else {
 		goto ERR;
 	}
@@ -2569,6 +2562,16 @@ static DEFINE_PER_CPU(int, xmit_recursion);
  */
 int dev_queue_xmit(struct sk_buff *skb)
 {
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+	if (skb->dev->flags & IFF_WIFI_OFLD)
+		skb->dev = skb->dev->wifi_offload_dev;
+
+	return original_dev_queue_xmit(skb);
+}
+
+int original_dev_queue_xmit(struct sk_buff *skb)
+{
+#endif
 	struct net_device *dev = skb->dev;
 	struct netdev_queue *txq;
 	struct Qdisc *q;
@@ -2648,6 +2651,9 @@ out:
 }
 EXPORT_SYMBOL(dev_queue_xmit);
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+EXPORT_SYMBOL(original_dev_queue_xmit);
+#endif
 
 /*=======================================================================
 			Receiver routines
@@ -2697,6 +2703,8 @@ ip:
 			goto done;
 
 		ip = (const struct iphdr *) (skb->data + nhoff);
+		if (ip->ihl < 5)
+			goto done;
 		if (ip_is_fragment(ip))
 			ip_proto = 0;
 		else
@@ -3306,7 +3314,7 @@ void netdev_rx_handler_unregister(struct net_device *dev)
 }
 EXPORT_SYMBOL_GPL(netdev_rx_handler_unregister);
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MV_ETH_NFP_EXT
 static struct sk_buff *handle_nfp_extrcv(struct sk_buff *skb, struct net_device *dev)
 {
@@ -3373,7 +3381,7 @@ another_round:
 	}
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MV_ETH_NFP_EXT
 	skb = handle_nfp_extrcv(skb, orig_dev);
 	if (!skb)
@@ -3508,6 +3516,52 @@ int netif_receive_skb(struct sk_buff *skb)
 #endif
 }
 EXPORT_SYMBOL(netif_receive_skb);
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+int capture_receive_skb(struct sk_buff *skb)
+{
+        struct net_device *null_or_orig = NULL;
+        struct packet_type *ptype, *pt_prev;
+        struct net_device *orig_dev;
+        int ret = NET_RX_DROP;
+
+	if (!netdev_tstamp_prequeue)
+		net_timestamp_check(skb);
+
+        if (!skb->skb_iif)
+                skb->skb_iif = skb->dev->ifindex;
+
+        skb_reset_network_header(skb);
+        skb_reset_transport_header(skb);
+	skb_reset_mac_len(skb);
+
+        pt_prev = NULL;
+        orig_dev = skb->dev;
+
+        rcu_read_lock();
+        list_for_each_entry_rcu(ptype, &ptype_all, list) {
+                if (!ptype->dev || ptype->dev == skb->dev) {
+                        if (pt_prev)
+                                ret = deliver_skb(skb, pt_prev, orig_dev);
+                        pt_prev = ptype;
+                }
+        }
+
+        if (pt_prev) {
+                ret = pt_prev->func(skb, skb->dev, pt_prev, orig_dev);
+        } else {
+                kfree_skb(skb);
+                /* Jamal, now you will not able to escape explaining
+                 * me how you were going to use this. :-)
+                 */
+                ret = NET_RX_DROP;
+        }
+        rcu_read_unlock();
+        return ret;
+}
+
+EXPORT_SYMBOL(capture_receive_skb);
+#endif
 
 /* Network device is going away, flush any packets still pending
  * Called with irqs disabled.
@@ -6773,7 +6827,7 @@ static int __init net_dev_init(void)
 	dev_mcast_init();
 	rc = 0;
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP)
 	nfp_core_ops_init();
 #endif /* CONFIG_MV_ETH_NFP */

@@ -258,7 +258,11 @@ static int afs_send_pages(struct afs_call *call, struct msghdr *msg,
 	call->first_offset = 0;
 
 	do {
+#ifdef CONFIG_SYNO_ALPINE
+		_debug("attach %llx-%llx", (unsigned long long)first, (unsigned long long)last);
+#else
 		_debug("attach %lx-%lx", first, last);
+#endif
 
 		count = last - first + 1;
 		if (count > ARRAY_SIZE(pages))

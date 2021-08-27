@@ -52,7 +52,7 @@
 #include <linux/io.h>
 #include <linux/mtd/partitions.h>
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 static char nand_name[128];
 #endif
@@ -2988,7 +2988,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 	if (!type->name)
 		return ERR_PTR(-ENODEV);
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (!mtd->name){
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 		sprintf(nand_name, "%s%s", type->name,
@@ -3002,9 +3002,8 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
  		mtd->name = type->name;
 #endif
 
-
 	chip->chipsize = (uint64_t)type->chipsize << 20;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 	chip->chipsize *= chip->num_devs;
 	if(chip->num_devs > 1)
@@ -3060,7 +3059,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 		} else {
 			/* Calc pagesize */
 			mtd->writesize = 1024 << (extid & 0x03);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 			mtd->writesize *= chip->num_devs;
 #endif
@@ -3072,7 +3071,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 			extid >>= 2;
 			/* Calc blocksize. Blocksize is multiples of 64KiB */
 			mtd->erasesize = (64 * 1024) << (extid & 0x03);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 			mtd->erasesize *= chip->num_devs;
 #endif
@@ -3080,7 +3079,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 			extid >>= 2;
 			/* Get buswidth information */
 			busw = (extid & 0x01) ? NAND_BUSWIDTH_16 : 0;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 			if(chip->num_devs > 1)
 				busw = NAND_BUSWIDTH_16;
@@ -3094,7 +3093,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 		mtd->erasesize = type->erasesize;
 		mtd->writesize = type->pagesize;
 		mtd->oobsize = mtd->writesize / 32;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_MLC_SUPPORT
 		/* New devices have non standard OOB size */
 		if (chip->oobsize_ovrd)
@@ -3102,7 +3101,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 #endif
 #endif
 		busw = type->options & NAND_BUSWIDTH_16;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 		mtd->erasesize *= chip->num_devs;
 		mtd->writesize *= chip->num_devs;

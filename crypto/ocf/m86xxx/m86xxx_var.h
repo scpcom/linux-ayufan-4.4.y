@@ -52,9 +52,11 @@
 
 #include <asm/io.h>
 #include "m86xxx_utils.h"
+#if defined(CONFIG_SYNO_COMCERTO)
 #include "../ocf-compat.h"
-
-
+#else
+#include "ocf-compat.h"
+#endif
 
 #define DRV_NAME "Comcerto 2000 ELP Crypto Offload Engine " 
 
@@ -109,9 +111,8 @@ struct elp_session {
 	u_int32_t 	ses_sa_in_aram;
 	u_int32_t 	ses_sa_in_aram_index;
 	u_int32_t 	ses_spacc_handle;
+	u_int32_t 	ses_first_packet;
 };
-
-
 
 /*
  * Cryptographic operand state.  One of these exists for each
@@ -208,17 +209,31 @@ struct elp_packet_engine{
 
 };
 
-
 struct elp_aram_sa {
 	int		sa_used;
 	dma_addr_t	sa_aram_dma;		/* SADB address in internal SRAM (ARAM)*/
 	void		*sa_aram_vma;
 };	
 
-
-
 #define PE_INBOUND	0
 #define PE_OUTBOUND	1
+
+enum {
+  Below_512_size = 0,
+  Req_512_size,
+  Req_1024_size,
+  Req_2048_size,
+  Req_4096_size,
+  Above_4k_size
+};
+
+struct elp_stats {
+	u32	open_sessions;
+	u32	close_sessions;
+	u32	nr_hash_req;
+	u32	nr_enc_req;
+	u32	crypto_len_counters[32];
+};
 
 struct elp_softc {
 	struct	ocf_device	_device;
@@ -241,27 +256,13 @@ struct elp_softc {
 	struct cryptkop 	*krp;		/* key genration request descriptor from OCF */
 	struct list_head	sc_pkq;		/* queue of PKA requests */
 	struct pka_pkq		*sc_pkq_cur;	/* PKA request in use */
+	int			sc_needwakeup;	/* notify crypto layer */
 
 	struct tasklet_struct	irq_in_tasklet;
 	struct tasklet_struct 	irq_out_tasklet;
 
 	spinlock_t		 reg_lock;
-
-};
-
-
-struct elp_stats {
-	u_int64_t st_ibytes;
-	u_int64_t st_obytes;
-	u_int32_t st_ipackets;
-	u_int32_t st_opackets;
-	u_int32_t st_invalid;		/* invalid argument */
-	u_int32_t st_badsession;	/* invalid session id */
-	u_int32_t st_badflags;		/* flags indicate !(mbuf | uio) */
-	u_int32_t st_inpefull;		/* inbound packet engine full */
-	u_int32_t st_outpefull;		/* outbound packet engine full */
-	u_int32_t st_maxqchip;
-	u_int32_t st_nodesc;
+	struct elp_stats	stats;
 };
 
 #endif

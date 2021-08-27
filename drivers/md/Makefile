@@ -29,7 +29,11 @@ obj-$(CONFIG_MD_FAULTY)		+= faulty.o
 obj-$(CONFIG_BLK_DEV_MD)	+= md-mod.o
 obj-$(CONFIG_BLK_DEV_DM)	+= dm-mod.o
 obj-$(CONFIG_DM_BUFIO)		+= dm-bufio.o
+ifeq ($(CONFIG_SYNO_ARMADA_V2),y)
+obj-$(CONFIG_DM_CRYPT)      += dm-crypt-armada.o
+else
 obj-$(CONFIG_DM_CRYPT)		+= dm-crypt.o
+endif
 obj-$(CONFIG_DM_DELAY)		+= dm-delay.o
 obj-$(CONFIG_DM_FLAKEY)		+= dm-flakey.o
 obj-$(CONFIG_DM_MULTIPATH)	+= dm-multipath.o dm-round-robin.o

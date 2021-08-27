@@ -4,6 +4,14 @@
 
 menu "Synology special config"
 
+config SYNO_LP3943_FEATURES
+	bool "Customized features of LP3943 led dirver for Synology Corp. NAS product"
+	depends on LEDS_LP3943
+	default n
+	help
+		Set to yes to enable customize features for Synology NAS product
+		Including i2c board info and led default trigger setting
+
 config SYNO_ADT7490_FEATURES
 	bool "Enhance features for adt7490 for Synology Corp. NAS product"
 	depends on SENSORS_ADT7475
@@ -14,7 +22,7 @@ config SYNO_ADT7490_FEATURES
 
 config SYNO_INCREASE_SIL3132_OUT_SWING
 	bool "SATA Sil3132 OUT SWING to prevent DRDY"
-	depends on SYNO_CEDARVIEW
+	depends on SYNO_CEDARVIEW || SYNO_AVOTON
 	default y
 	help
 	  Increase SATA Sil3132 OUT SWING to prevent DRDY
@@ -122,12 +130,142 @@ config SYNO_C2K_USB_VBUS_CONTROL
 	help
 	  Say Y to enable controlling of USB vbus
 
+config SYNO_C2K_DWC_OTG_URB_DEQUEUE
+	bool "Avoid NULL pointer accessing when calling dwc_otg_hcd_urb_dequeue()"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to enable this bug fixing
+	  Bug #58038,#57125,#58384 , NULL pointer accessing in dwc_otg_hcd_urb_dequeue()
+	  So we check urb->hcpriv , if it's NULL , don't go into dwc_otg_hcd_urb_dequeue()
+	  This refers from ehci_urb_dequeue() and xhci_urb_dequeue()
+
+config SYNO_C2K_DAC_TERRIBLE_SOUND
+	bool "Terrible sound when playing music with DAC on dwc otg USB2"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to enable this bug fixing
+	  Bug DSM #57520. You will hear terrible sound when playing music with DAC.
+	  Don't skip a SOF(start of frame) or it influences the sound
+
+config SYNO_C2K_HS_SPI_DMA_READ_ERROR
+	bool "RX flow control should be false(DW_ahb_dmac) , or the read will occur error"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to enable this bug fixing
+	  Bug DSM #69068. The old retry mechanism will be reverted.
+
 config SYNO_EFI
 	bool "Enable EFI runtime service"
 	depends on SYNO_BROMOLOW
 	default y
 	help
 	  Enable EFI runtime service for UEFI platform
+
+config SYNO_FIX_RESIZE_16TB_IN_32BIT
+	bool "Support on-line resize over 16TB on 32-bit platform"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  32-bit platforms with 4K page size are bounded to UINT32_MAX*4K=16TB volume size.
+	  With larger page size, it is possible to use and resize volumes larger than 16TB;
+	  but some numeric overflows must be cleaned up first by using 64-bit API.
+
+config SYNO_DM_TO_SECTOR_FIX
+	bool "Fix to_sector can't work with u64 parameter"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  Let to_sector() function be able to accept u64 parameter in 32-bit platform
+
+config SYNO_ZRAM_32KB_PAGE_SUPPORT
+	bool "Let zram feature support 32KB page"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  Enable this function to fix an issue in zsmalloc module (used by zram) to support
+	  32 KB page size
+
+config SYNO_PKMAP_NOT_ENOUGH_FIX
+	bool "Allocate low pages incase pkmap address is not enough"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  In 32-bit arm, pkmap is limited resource and if kernel wants to map high page, this page will
+	  be mapped to pkmap address and shall be unmapped ASAP. In max connection test, kernel will try
+	  to grab pages and map it to address space. Sometimes, kernel will always get high pages and 
+	  run out of pkmap address. So, limit kernel to get low pages in write-begin of file system.
+
+config SYNO_NETDMA_BUF_NOT_ENOUGH_FIX
+	bool "Allocate enough management data structure for net DMA operation"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  In APNA enhancement for net DMA, a fixed-size management data structure is used to manage
+	  io vector and related pages. For some heavy conditions, a request of data transfer of big
+	  size will be issued and it is not enough to handle. Current management data for pages is 
+	  20 and I enlarge to 128 for most cases. If it is still not enough, a BUGON will be shown
+	  and then we need to consider a more dynamic solution for such case.
+
+config SYNO_CRYPTO_ASYNC_RACE_COND_FIX
+	bool "Fix the race condition when using ANPA crypto engine"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  When a user wants to encrypt/decrypt data, he needs to prepare related data and then issue
+	  a request for hw crypto engine and wait for notification. In ANPA LSP, they use
+	  wait_for_completion_interruptiable() to wait crypto completion. In some cases, it will be 
+	  interrupted and then the use wakes up, frees management data memory. When HW finishes, an
+	  interrupt is issued and then raise a bottom half. In this bottom, it does know that management
+	  data is freed, so kernel panic occurs. Use wait_for_completion() for blocking wait. The drawback
+	  is the user must wait for the completion of encryption/decrytion of an unit of data.
+
+config SYNO_ALPINE_V2_5_3
+	bool "Apply patches from Annapurna with v2.5.3"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  This value is used to enclose codes that belong to v2.5.3 patch provide by Annapurna.
+	  This patch includes system hang fix, ANPA LM enhancement ...etc.
+
+config SYNO_FORCE_EH_FULL_RECOVER_RETRY
+	bool "Force to reset all links of a PMP while retrying EH recover"
+	default y
+    help
+	  The EH recover will not clean the flags of the rested link if an error occurred on an frozen port.
+	  This could leads to port dysfunction, so we add this fix to prevent the PMP SATA ports from improper initializing.
+	  Set to Y if you want to enable it.
+
+config SYNO_ALPINE_ADJUST_RX_EQUAL
+	bool "Add an option to turn on/off 10G rx equalization according to sys entry"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  RX equalization is used to turn best parameters for 10G transmission. Add an option to turn on/off
+	  RX equalization according to the entry in sys file system.
+
+config SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+	bool "Adjust network interface settings for tuning performance"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  Some settings such as binding interrupt affinity may boost samba performance. This option enables them.
+
+config SYNO_SUPPORT_EMMC_ERASE
+	bool "Enable erase capability for Marvell sdio host"
+	depends on ARCH_ARMADA370
+	default y
+	help
+	  This config will enable erase capability for Marvell sdio host.
+	  Then we could send erase command to eMMC
+
+config SYNO_ALPINE_FIX_DMA_RECVFILE
+	bool "Fix issue of checksum error when using NETDMA"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  When using recvfile, it expects it can receive full data (not partial). If it receives partial data, file checksum
+	  will be incorrect. In alpine, if NETDMA is enabled, sometimes tcp_recvmsg will return partial data and cause recvfile
+	  behaves incorrectly. When the DMA resource can not satify request, turn to use CPU to copy data from socket buffer.
 
 endmenu
 

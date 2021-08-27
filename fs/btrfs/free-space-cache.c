@@ -31,7 +31,11 @@
 #include "extent_io.h"
 #include "inode-map.h"
 
+#ifdef CONFIG_SYNO_ALPINE
+#define BITS_PER_BITMAP		(PAGE_CACHE_SIZE * 8LLU)
+#else
 #define BITS_PER_BITMAP		(PAGE_CACHE_SIZE * 8)
+#endif
 #define MAX_CACHE_BYTES_PER_GIG	(32 * 1024)
 
 static int link_free_space(struct btrfs_free_space_ctl *ctl,
@@ -221,7 +225,6 @@ int btrfs_check_trunc_cache_free_space(struct btrfs_root *root,
 
 int btrfs_truncate_free_space_cache(struct btrfs_root *root,
 				    struct btrfs_trans_handle *trans,
-				    struct btrfs_path *path,
 				    struct inode *inode)
 {
 	loff_t oldsize;
@@ -353,8 +356,8 @@ static int io_ctl_prepare_pages(struct io_ctl *io_ctl, struct inode *inode,
 			btrfs_readpage(NULL, page);
 			lock_page(page);
 			if (!PageUptodate(page)) {
-				printk(KERN_ERR "btrfs: error reading free "
-				       "space cache\n");
+				btrfs_err(BTRFS_I(inode)->root->fs_info,
+					   "error reading free space cache");
 				io_ctl_drop_pages(io_ctl);
 				return -EIO;
 			}
@@ -411,7 +414,7 @@ static int io_ctl_check_generation(struct io_ctl *io_ctl, u64 generation)
 
 	gen = io_ctl->cur;
 	if (le64_to_cpu(*gen) != generation) {
-		printk_ratelimited(KERN_ERR "btrfs: space cache generation "
+		printk_ratelimited(KERN_ERR "BTRFS: space cache generation "
 				   "(%Lu) does not match inode (%Lu)\n", *gen,
 				   generation);
 		io_ctl_unmap_page(io_ctl);
@@ -469,7 +472,7 @@ static int io_ctl_check_crc(struct io_ctl *io_ctl, int index)
 			      PAGE_CACHE_SIZE - offset);
 	btrfs_csum_final(crc, (char *)&crc);
 	if (val != crc) {
-		printk_ratelimited(KERN_ERR "btrfs: csum mismatch on free "
+		printk_ratelimited(KERN_ERR "BTRFS: csum mismatch on free "
 				   "space cache\n");
 		io_ctl_unmap_page(io_ctl);
 		return -EIO;
@@ -1014,8 +1017,13 @@ static int __btrfs_write_out_cache(struct btrfs_root *root, struct inode *inode,
 	if (ret)
 		goto out;
 
-
-	btrfs_wait_ordered_range(inode, 0, (u64)-1);
+	ret = btrfs_wait_ordered_range(inode, 0, (u64)-1);
+	if (ret) {
+		clear_extent_bit(&BTRFS_I(inode)->io_tree, 0, inode->i_size - 1,
+				 EXTENT_DIRTY | EXTENT_DELALLOC, 0, 0, NULL,
+				 GFP_NOFS);
+		goto out;
+}
 
 	key.objectid = BTRFS_FREE_SPACE_OBJECTID;
 	key.offset = offset;
@@ -1905,7 +1913,7 @@ out:
 	spin_unlock(&ctl->tree_lock);
 
 	if (ret) {
-		printk(KERN_CRIT "btrfs: unable to add free space :%d\n", ret);
+		printk(KERN_CRIT "BTRFS: unable to add free space :%d\n", ret);
 		ASSERT(ret != -EEXIST);
 	}
 
@@ -2014,14 +2022,15 @@ void btrfs_dump_free_space(struct btrfs_block_group_cache *block_group,
 		info = rb_entry(n, struct btrfs_free_space, offset_index);
 		if (info->bytes >= bytes && !block_group->ro)
 			count++;
-		printk(KERN_CRIT "entry offset %llu, bytes %llu, bitmap %s\n",
+		btrfs_crit(block_group->fs_info,
+			   "entry offset %llu, bytes %llu, bitmap %s",
 			   info->offset, info->bytes,
 		       (info->bitmap) ? "yes" : "no");
 	}
-	printk(KERN_INFO "block group has cluster?: %s\n",
+	btrfs_info(block_group->fs_info, "block group has cluster?: %s",
 	       list_empty(&block_group->cluster_list) ? "no" : "yes");
-	printk(KERN_INFO "%d blocks of free space at or bigger than bytes is"
-	       "\n", count);
+	btrfs_info(block_group->fs_info,
+		   "%d blocks of free space at or bigger than bytes is", count);
 }
 
 void btrfs_init_free_space_ctl(struct btrfs_block_group_cache *block_group)
@@ -2426,7 +2435,6 @@ setup_cluster_no_bitmap(struct btrfs_block_group_cache *block_group,
 	struct btrfs_free_space *entry = NULL;
 	struct btrfs_free_space *last;
 	struct rb_node *node;
-	u64 window_start;
 	u64 window_free;
 	u64 max_extent;
 	u64 total_size = 0;
@@ -2448,7 +2456,6 @@ setup_cluster_no_bitmap(struct btrfs_block_group_cache *block_group,
 		entry = rb_entry(node, struct btrfs_free_space, offset_index);
 	}
 
-	window_start = entry->offset;
 	window_free = entry->bytes;
 	max_extent = entry->bytes;
 	first = entry;
@@ -2976,17 +2983,13 @@ out:
 
 int btrfs_write_out_ino_cache(struct btrfs_root *root,
 			      struct btrfs_trans_handle *trans,
-			      struct btrfs_path *path)
+			      struct btrfs_path *path,
+			      struct inode *inode)
 {
 	struct btrfs_free_space_ctl *ctl = root->free_ino_ctl;
-	struct inode *inode;
 	int ret;
 
 	if (!btrfs_test_opt(root, INODE_MAP_CACHE))
-		return 0;
-
-	inode = lookup_free_ino_inode(root, path);
-	if (IS_ERR(inode))
 		return 0;
 
 	ret = __btrfs_write_out_cache(root, inode, ctl, NULL, trans, path, 0);
@@ -2999,7 +3002,6 @@ int btrfs_write_out_ino_cache(struct btrfs_root *root,
 #endif
 	}
 
-	iput(inode);
 	return ret;
 }
 

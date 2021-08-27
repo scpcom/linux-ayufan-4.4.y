@@ -458,20 +458,20 @@ int mv_ial_lib_init_channel(IAL_ADAPTER_T *pAdapter, MV_U8 channelNum)
     mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "[%d,%d]: response queue allocated: 0x%p\n",
              pAdapter->mvSataAdapter.adapterId, channelNum,
              pMvSataChannel->responseQueue);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 	setup_timer(&pMvSataChannel->rstimer, ResubmitMvCommand, (unsigned long)pMvSataChannel);
 	INIT_LIST_HEAD(&pMvSataChannel->pendinglh);
 	pMvSataChannel->chkpower_flags = 0;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SPINUP_DELAY */
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
     pMvSataChannel->PMSynoUnique = 0;
     pMvSataChannel->PMdeviceId = 0;
     pMvSataChannel->PMvendorId = 0;
 #endif
-#if defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(MY_ABC_HERE)
+#if defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(SYNO_SATA_MV_EH)
     pMvSataChannel->oldDeviceType = MV_SATA_DEVICE_TYPE_UNKNOWN;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SSD_DETECT
     pMvSataChannel->ssd_list = 0;
 #endif
     return 0;
@@ -1137,26 +1137,26 @@ MV_BOOLEAN mv_ial_lib_event_notify(MV_SATA_ADAPTER *pMvSataAdapter, MV_EVENT_TYP
             {
                 mvLogMsg(MV_IAL_LOG_ID,  MV_DEBUG, "[%d,%d]: device disconnected event received \n",
                          pMvSataAdapter->adapterId, channel);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_INFO
                 syno_eh_printk(pMvSataAdapter, channel, "Sata Cable Event: Disconnect");
 #endif
                 if (mvSataIsStorageDeviceConnected(pMvSataAdapter, channel, NULL) ==
                     MV_FALSE)
                 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_EH
                     if (MV_FALSE == SynoEHDisConnectHandle(pAdapter, pMvSataAdapter, channel)) {
                         syno_eh_printk(pMvSataAdapter, channel, 
                                        "SynoEHDisConnectHandle Error");
                     }
-#else /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
+#else /* SYNO_SATA_MV_EH */
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
                     SynomvStopChannel(&pAdapter->ialCommonExt, channel,
                                       pAdapter->ataScsiAdapterExt);
 #else
                     mvStopChannel(&pAdapter->ialCommonExt, channel,
                                   pAdapter->ataScsiAdapterExt);
 #endif
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SATA_MV_EH */
                 }
                 else
                 {
@@ -1889,7 +1889,7 @@ MV_BOOLEAN IALCompletion(struct mvSataAdapter *pSataAdapter,
     return MV_TRUE;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_SATA_EBOX_REFRESH) || defined(SYNO_SPINUP_DELAY)
 int syno_mv_scsi_host_no_get(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex)
 {
     IAL_ADAPTER_T   *pAdapter = NULL;

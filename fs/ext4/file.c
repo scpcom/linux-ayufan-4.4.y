@@ -251,17 +251,17 @@ const struct file_operations ext4_file_operations = {
 #else
 	.splice_write	= generic_file_splice_write,
 #endif
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	.splice_from_socket = generic_splice_from_socket,
 #endif
 	.fallocate	= ext4_fallocate,
 };
 
 const struct inode_operations ext4_file_inode_operations = {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 	.syno_getattr	= syno_ext4_getattr,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	.syno_get_archive_ver = syno_ext4_get_archive_ver,
 	.syno_set_archive_ver = syno_ext4_set_archive_ver,
 #endif

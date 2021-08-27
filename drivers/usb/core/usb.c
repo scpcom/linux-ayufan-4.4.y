@@ -1152,6 +1152,9 @@ static void __exit usb_exit(void)
 	usbfs_cleanup();
 	usb_deregister(&usbfs_driver);
 	usb_devio_cleanup();
+#if defined(CONFIG_USB_ETRON_HUB)
+    ethub_cleanup();
+#endif
 	usb_hub_cleanup();
 	bus_unregister_notifier(&usb_bus_type, &usb_bus_nb);
 	bus_unregister(&usb_bus_type);

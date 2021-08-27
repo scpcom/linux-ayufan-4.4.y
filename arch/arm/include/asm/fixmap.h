@@ -16,11 +16,19 @@
  * 0xfffe0000 and 0xfffeffff.
  */
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && (defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM))
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)) 
 #define FIXADDR_START		0xffc00000UL
 #define FIXADDR_TOP		0xfff00000UL
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+#define FIXADDR_START          0xff200000UL
+#define FIXADDR_TOP            0xff600000UL
+#else
+#if defined(CONFIG_SYNO_COMCERTO)
+#define FIXADDR_START		0xfff30000UL
 #else
 #define FIXADDR_START		0xfff00000UL
+#endif
 #define FIXADDR_TOP		0xfffe0000UL
 #endif
 #define FIXADDR_SIZE		(FIXADDR_TOP - FIXADDR_START)

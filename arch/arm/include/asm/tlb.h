@@ -201,11 +201,25 @@ static inline void __pte_free_tlb(struct mmu_gather *tlb, pgtable_t pte,
 	unsigned long addr)
 {
 	pgtable_page_dtor(pte);
+#if defined(CONFIG_SYNO_ALPINE)
+#if defined(CONFIG_ARM_LPAE) && defined(CONFIG_SYNO_ALPINE_FIX_USB_HANG)
 	tlb_add_flush(tlb, addr);
+#else
+	/*
+	 * With the classic ARM MMU, a pte page has two corresponding pmd
+	 * entries, each covering 1MB.
+	 */
+	addr &= PMD_MASK;
+	tlb_add_flush(tlb, addr + SZ_1M - PAGE_SIZE);
+	tlb_add_flush(tlb, addr + SZ_1M);
+#endif
+#else
+	tlb_add_flush(tlb, addr);
+#endif
 	tlb_remove_page(tlb, pte);
 }
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 static inline void __pmd_free_tlb(struct mmu_gather *tlb, pmd_t *pmdp,
 				  unsigned long addr)
 {
@@ -217,7 +231,7 @@ static inline void __pmd_free_tlb(struct mmu_gather *tlb, pmd_t *pmdp,
 #endif
 
 #define pte_free_tlb(tlb, ptep, addr)	__pte_free_tlb(tlb, ptep, addr)
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
 #define pmd_free_tlb(tlb, pmdp, addr)	__pmd_free_tlb(tlb, pmdp, addr)
 #define pud_free_tlb(tlb, pudp, addr)	pud_free((tlb)->mm, pudp)
 #else

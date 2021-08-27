@@ -160,7 +160,7 @@
 #ifdef SPACC_CTX_CIPH_PAGE_SIZE
 #   define SPACC_CTX_CIPH_PAGE     SPACC_CTX_CIPH_PAGE_SIZE 
 #else
-#   define SPACC_CTX_CIPH_PAGE      64
+#   define SPACC_CTX_CIPH_PAGE      128
 #endif
 // Hash
 #ifdef SPACC_CTX_HASH_PAGE_SIZE
@@ -539,9 +539,8 @@ enum spacc_ret_code
   SPACC_BLOCKERR,
 };
 
-
-#define ELP_READ_UINT(mem)		     *(volatile U32 *)(mem)
-#define ELP_WRITE_UINT(mem, val)	     (*(volatile U32 *)(mem)=(U32)(val))
+#define ELP_READ_UINT(mem)		     readl(mem)
+#define ELP_WRITE_UINT(mem, val)	     writel(val, mem)
 
 /***********************************************************************************/
 /*  MEMORY LAYOUT   MEMORY LAYOUT     MEMORY LAYOUT     MEMORY LAYOUT   */

@@ -516,6 +516,35 @@ int dm_get_device(struct dm_target *ti, const char *path, fmode_t mode,
 }
 EXPORT_SYMBOL(dm_get_device);
 
+#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+int dm_handle_4kn_target_support(struct dm_target *ti, struct dm_dev *dev,
+			 sector_t start, sector_t len, void *data)
+{
+	struct queue_limits *limits = data;
+	struct block_device *bdev = dev->bdev;
+	struct request_queue *target_queue = bdev_get_queue(bdev);
+	char b[BDEVNAME_SIZE];
+	unsigned short logical_block_size = 0;
+
+	if (unlikely(!target_queue)) {
+		DMWARN("%s: requset_queue should not be NULL (%s)",
+		       dm_device_name(ti->table->md), bdevname(bdev, b));
+		return 0;
+	}
+
+	logical_block_size = target_queue->limits.logical_block_size;
+
+	if (4096 == logical_block_size) {
+		// Target is a 4KN disk
+		syno_limits_logical_block_size(limits, logical_block_size);
+	}
+
+	return 0;
+}
+
+EXPORT_SYMBOL_GPL(dm_handle_4kn_target_support);
+#endif
+
 int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 			 sector_t start, sector_t len, void *data)
 	{
@@ -702,7 +731,11 @@ static int validate_hardware_logical_block_alignment(struct dm_table *table,
 	while (i < dm_table_get_num_targets(table)) {
 		ti = dm_table_get_target(table, i++);
 
+#ifdef CONFIG_SYNO_ALPINE
+		blk_set_stacking_limits(&ti_limits);
+#else
 		blk_set_default_limits(&ti_limits);
+#endif
 
 		/* combine all target devices' limits */
 		if (ti->type->iterate_devices)
@@ -1230,10 +1263,18 @@ int dm_calculate_queue_limits(struct dm_table *table,
 	struct queue_limits ti_limits;
 	unsigned i = 0;
 
+#ifdef CONFIG_SYNO_ALPINE
+	blk_set_stacking_limits(limits);
+#else
 	blk_set_default_limits(limits);
+#endif
 
 	while (i < dm_table_get_num_targets(table)) {
+#ifdef CONFIG_SYNO_ALPINE
+		blk_set_stacking_limits(&ti_limits);
+#else
 		blk_set_default_limits(&ti_limits);
+#endif
 
 		ti = dm_table_get_target(table, i++);
 
@@ -1267,6 +1308,13 @@ int dm_calculate_queue_limits(struct dm_table *table,
 			return -EINVAL;
 
 combine_limits:
+
+#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+		if (ti->type->handle_4kn_target_support) {
+			ti->type->handle_4kn_target_support(ti, dm_handle_4kn_target_support,
+						  &ti_limits);
+		}
+#endif
 		/*
 		 * Merge this target's queue limits into the overall limits
 		 * for the table.

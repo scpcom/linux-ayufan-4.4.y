@@ -155,7 +155,7 @@ int kobject_uevent_env(struct kobject *kobj, enum kobject_action action,
 	const struct kset_uevent_ops *uevent_ops;
 	int i = 0;
 	int retval = 0;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SLOW_DOWN_UEVENT
 	static u32 ullCount = 0;
 #endif
 #ifdef CONFIG_NET
@@ -323,7 +323,7 @@ int kobject_uevent_env(struct kobject *kobj, enum kobject_action action,
 		if (retval)
 			goto exit;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SLOW_DOWN_UEVENT
 		ullCount++;
 		if (0 == ullCount % 30 && subsystem && strstr((char *)subsystem, "block")) {
 			msleep(10000);

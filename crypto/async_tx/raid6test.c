@@ -86,7 +86,11 @@ static void raid6_dual_recov(int disks, size_t bytes, int faila, int failb, stru
 	if (failb == disks-1) {
 		if (faila == disks-2) {
 			/* P+Q failure.  Just rebuild the syndrome. */
+#ifdef CONFIG_SYNO_ALPINE
+			init_async_submit(&submit, ASYNC_TX_FENCE, NULL, NULL, NULL, addr_conv);
+#else
 			init_async_submit(&submit, 0, NULL, NULL, NULL, addr_conv);
+#endif
 			tx = async_gen_syndrome(ptrs, 0, disks, bytes, &submit);
 		} else {
 			struct page *blocks[disks];
@@ -103,21 +107,38 @@ static void raid6_dual_recov(int disks, size_t bytes, int faila, int failb, stru
 				blocks[count++] = ptrs[i];
 			}
 			dest = ptrs[faila];
+#ifdef CONFIG_SYNO_ALPINE
+			init_async_submit(&submit, ASYNC_TX_FENCE | ASYNC_TX_XOR_ZERO_DST, NULL,
+					  NULL, NULL, addr_conv);
+#else
 			init_async_submit(&submit, ASYNC_TX_XOR_ZERO_DST, NULL,
 					  NULL, NULL, addr_conv);
+#endif
 			tx = async_xor(dest, blocks, 0, count, bytes, &submit);
 
+#ifdef CONFIG_SYNO_ALPINE
+			init_async_submit(&submit, ASYNC_TX_FENCE, tx, NULL, NULL, addr_conv);
+#else
 			init_async_submit(&submit, 0, tx, NULL, NULL, addr_conv);
+#endif
 			tx = async_gen_syndrome(ptrs, 0, disks, bytes, &submit);
 		}
 	} else {
 		if (failb == disks-2) {
 			/* data+P failure. */
+#ifdef CONFIG_SYNO_ALPINE
+			init_async_submit(&submit, ASYNC_TX_FENCE, NULL, NULL, NULL, addr_conv);
+#else
 			init_async_submit(&submit, 0, NULL, NULL, NULL, addr_conv);
+#endif
 			tx = async_raid6_datap_recov(disks, bytes, faila, ptrs, &submit);
 		} else {
 			/* data+data failure. */
+#ifdef CONFIG_SYNO_ALPINE
+			init_async_submit(&submit, ASYNC_TX_FENCE, NULL, NULL, NULL, addr_conv);
+#else
 			init_async_submit(&submit, 0, NULL, NULL, NULL, addr_conv);
+#endif
 			tx = async_raid6_2data_recov(disks, bytes, faila, failb, ptrs, &submit);
 		}
 	}

@@ -33,7 +33,6 @@
 #include <linux/raid/xor.h>
 #include <linux/vmalloc.h>
 #include <asm/div64.h>
-#include "compat.h"
 #include "ctree.h"
 #include "extent_map.h"
 #include "disk-io.h"
@@ -1414,19 +1413,17 @@ cleanup:
 
 static void async_rmw_stripe(struct btrfs_raid_bio *rbio)
 {
-	rbio->work.flags = 0;
-	rbio->work.func = rmw_work;
+	btrfs_init_work(&rbio->work, rmw_work, NULL, NULL);
 
-	btrfs_queue_worker(&rbio->fs_info->rmw_workers,
+	btrfs_queue_work(rbio->fs_info->rmw_workers,
 			 &rbio->work);
 }
 
 static void async_read_rebuild(struct btrfs_raid_bio *rbio)
 {
-	rbio->work.flags = 0;
-	rbio->work.func = read_rebuild_work;
+	btrfs_init_work(&rbio->work, read_rebuild_work, NULL, NULL);
 
-	btrfs_queue_worker(&rbio->fs_info->rmw_workers,
+	btrfs_queue_work(rbio->fs_info->rmw_workers,
 			 &rbio->work);
 }
 
@@ -1665,9 +1662,8 @@ static void btrfs_raid_unplug(struct blk_plug_cb *cb, bool from_schedule)
 	plug = container_of(cb, struct btrfs_plug_cb, cb);
 
 	if (from_schedule) {
-		plug->work.flags = 0;
-		plug->work.func = unplug_work;
-		btrfs_queue_worker(&plug->info->rmw_workers,
+		btrfs_init_work(&plug->work, unplug_work, NULL, NULL);
+		btrfs_queue_work(plug->info->rmw_workers,
 				 &plug->work);
 		return;
 	}

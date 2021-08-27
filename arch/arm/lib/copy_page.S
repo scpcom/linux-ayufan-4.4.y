@@ -31,9 +31,10 @@ ENTRY(copy_page)
 		stmfd	sp!, {r4, lr}			@	2
 	PLD(	pld	[r1, #0]		)
 	PLD(	pld	[r1, #L1_CACHE_BYTES]		)
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
 		ldr	r2, =COPY_COUNT
-#elif defined(CONFIG_SYNO_COMCERTO)
+#elif defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ALPINE)
 		ldr	r2, =COPY_COUNT			@	1
 #else
 		mov	r2, #COPY_COUNT			@	1

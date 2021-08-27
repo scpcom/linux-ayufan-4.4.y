@@ -573,7 +573,7 @@ int security_inode_permission(struct inode *inode, int mask)
 		return 0;
 	return security_ops->inode_permission(inode, mask);
 }
-#ifdef CONFIG_AUFS_FS
+#if defined(CONFIG_AUFS_FS) || defined(CONFIG_FS_SYNO_ACL)
 EXPORT_SYMBOL(security_inode_permission);
 #endif /* SYNO_AUFS */
 

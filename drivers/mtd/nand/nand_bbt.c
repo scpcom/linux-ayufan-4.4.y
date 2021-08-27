@@ -451,7 +451,7 @@ static int scan_block_fast(struct mtd_info *mtd, struct nand_bbt_descr *bd,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_MLC_SUPPORT
 /*
  * Scan a given block in the custom location based on Naked symantics
@@ -548,7 +548,7 @@ static int create_bbt(struct mtd_info *mtd, uint8_t *buf,
 		int ret;
 
 		BUG_ON(bd->options & NAND_BBT_NO_OOB);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #ifdef CONFIG_MTD_NAND_NFC_MLC_SUPPORT
 
 		if (bd->options & NAND_BBT_SCANMVCUSTOM)

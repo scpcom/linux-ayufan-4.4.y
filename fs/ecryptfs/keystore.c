@@ -1165,7 +1165,7 @@ decrypt_pki_encrypted_session_key(struct ecryptfs_auth_tok *auth_tok,
 	struct ecryptfs_msg_ctx *msg_ctx;
 	struct ecryptfs_message *msg = NULL;
 	char *auth_tok_sig;
-	char *payload;
+	char *payload = NULL;
 	size_t payload_len;
 	int rc;
 
@@ -1220,6 +1220,8 @@ decrypt_pki_encrypted_session_key(struct ecryptfs_auth_tok *auth_tok,
 out:
 	if (msg)
 		kfree(msg);
+	if (payload)
+		kfree(payload);
 	return rc;
 }
 
@@ -1264,6 +1266,9 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	size_t body_size;
 	struct ecryptfs_auth_tok_list_item *auth_tok_list_item;
 	size_t length_size;
+#ifdef CONFIG_SYNO_ALPINE
+	u8 tag_version;
+#endif
 	int rc = 0;
 
 	(*packet_size) = 0;
@@ -1276,7 +1281,11 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	 * Max Tag 1 packet size (max 3 bytes)
 	 * Version (1 byte)
 	 * Key identifier (8 bytes; ECRYPTFS_SIG_SIZE)
+#ifdef CONFIG_SYNO_ALPINE
+	 * Cipher mode identifier (1 byte) (ignored if packet version is 0x03)
+#else
 	 * Cipher identifier (1 byte)
+#endif
 	 * Encrypted key size (arbitrary)
 	 *
 	 * 12 bytes minimum packet size
@@ -1321,18 +1330,45 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		rc = -EINVAL;
 		goto out_free;
 	}
+#ifdef CONFIG_SYNO_ALPINE
+	tag_version = data[(*packet_size)++];
+	if (unlikely(tag_version != 0x03 && tag_version != 0x04)) {
+		printk(KERN_WARNING "Unknown version number [%d]\n",
+		       tag_version);
+		rc = -EINVAL;
+		goto out_free;
+	}
+#else
 	if (unlikely(data[(*packet_size)++] != 0x03)) {
 		printk(KERN_WARNING "Unknown version number [%d]\n",
 		       data[(*packet_size) - 1]);
 		rc = -EINVAL;
 		goto out_free;
 	}
+#endif
 	ecryptfs_to_hex((*new_auth_tok)->token.private_key.signature,
 			&data[(*packet_size)], ECRYPTFS_SIG_SIZE);
 	*packet_size += ECRYPTFS_SIG_SIZE;
+#ifdef CONFIG_SYNO_ALPINE
+	if (tag_version == 0x03) {
 		/* This byte is skipped because the kernel does not need to
 		 * know which public key encryption algorithm was used */
 		(*packet_size)++;
+		strcpy(crypt_stat->cipher_mode, "cbc");
+	} else {
+		/* This field is repurposed in packet version 0x04 to hold the
+		 * cipher mode. It is ignored in earlier packet versions. */
+		rc = ecryptfs_cipher_mode_code_to_string(
+				crypt_stat->cipher_mode,
+				data[(*packet_size)++]);
+		if (rc)
+			goto out_free;
+	}
+#else
+	/* This byte is skipped because the kernel does not need to
+	 * know which public key encryption algorithm was used */
+	(*packet_size)++;
+#endif
 (*new_auth_tok)->session_key.encrypted_key_size =
 		body_size - (ECRYPTFS_SIG_SIZE + 2);
 	if ((*new_auth_tok)->session_key.encrypted_key_size
@@ -1396,18 +1432,41 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	size_t body_size;
 	struct ecryptfs_auth_tok_list_item *auth_tok_list_item;
 	size_t length_size;
+#ifdef CONFIG_SYNO_ALPINE
+	size_t min_body_size;
+	u8 file_version;
+#endif
 	int rc = 0;
 
 	(*packet_size) = 0;
 	(*new_auth_tok) = NULL;
-	/**
-	 *This format is inspired by OpenPGP; see RFC 2440
+	/* This format is inspired by OpenPGP; see RFC 2440
 	 * packet tag 3
+#ifdef CONFIG_SYNO_ALPINE
+	 *
+	 * This packet format deviates from the RFC in two ways:
+	 * 1. There is an additional field describing which cipher
+	 * mode was used.
+	 *
+	 * 2. The version field is used to differentiate between different
+	 * versions of the packet as used in eCryptfs instead of the different
+	 * version of tag 3 in the RFC.
+	 *
+	 * Version 0x04 is a packet that does not have the additional
+	 * cipher mode field. The cipher mode is then assumed to be CBC.
+	 *
+	 * Version 0x05 is a packet that does have the additional cipher mode
+	 * field. The cipher mode is taken from this header.
+	 *
+#endif
 	 *
 	 * Tag 3 identifier (1 byte)
 	 * Max Tag 3 packet size (max 3 bytes)
 	 * Version (1 byte)
 	 * Cipher code (1 byte)
+#ifdef CONFIG_SYNO_ALPINE
+	 * Cipher mode code (1 byte) (if version >=0x5)
+#endif
 	 * S2K specifier (1 byte)
 	 * Hash identifier (1 byte)
 	 * Salt (ECRYPTFS_SALT_SIZE)
@@ -1416,6 +1475,16 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	 *
 	 * (ECRYPTFS_SALT_SIZE + 7) minimum packet size
 	 */
+#ifdef CONFIG_SYNO_ALPINE
+	/* Holds the minimum amount of data for a version 0x04 packet */
+	min_body_size = (1 /* Version */
+			   + 1 /* Cipher Code */
+			   + 1 /* S2K Specifier */
+			   + 1 /* Hash Identifier */
+			   + ECRYPTFS_SALT_SIZE
+			   + 1 /* Hash Iterations */
+			  );
+#endif
 	if (max_packet_size < (ECRYPTFS_SALT_SIZE + 7)) {
 		printk(KERN_ERR "Max packet size too large\n");
 		rc = -EINVAL;
@@ -1444,19 +1513,44 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		       rc);
 		goto out_free;
 	}
+#ifdef CONFIG_SYNO_ALPINE
+	if (unlikely(body_size < min_body_size)) {
+#else
 	if (unlikely(body_size < (ECRYPTFS_SALT_SIZE + 5))) {
+#endif
 		printk(KERN_WARNING "Invalid body size ([%td])\n", body_size);
 		rc = -EINVAL;
 		goto out_free;
+#ifdef CONFIG_SYNO_ALPINE
 	}
+#else
+	}
+#endif
 	(*packet_size) += length_size;
 	if (unlikely((*packet_size) + body_size > max_packet_size)) {
 		printk(KERN_ERR "Packet size exceeds max\n");
 		rc = -EINVAL;
 		goto out_free;
 	}
+#ifdef CONFIG_SYNO_ALPINE
+	file_version = data[(*packet_size)++];
+	if (unlikely(file_version != 0x04 && file_version != 0x05)) {
+		printk(KERN_WARNING "Unknown version number [%d]\n",
+			   file_version);
+		rc = -EINVAL;
+		goto out_free;
+	}
+	if (file_version != 0x04) {
+		/* This file version has an extra byte for cipher mode code */
+		min_body_size += 1;
+	}
+
+	(*new_auth_tok)->session_key.encrypted_key_size =
+			body_size - min_body_size;
+#else
 	(*new_auth_tok)->session_key.encrypted_key_size =
 		(body_size - (ECRYPTFS_SALT_SIZE + 5));
+#endif
 	if ((*new_auth_tok)->session_key.encrypted_key_size
 	    > ECRYPTFS_MAX_ENCRYPTED_KEY_BYTES) {
 		printk(KERN_WARNING "Tag 3 packet contains key larger "
@@ -1464,12 +1558,16 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		rc = -EINVAL;
 		goto out_free;
 	}
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 	if (unlikely(data[(*packet_size)++] != 0x04)) {
 		printk(KERN_WARNING "Unknown version number [%d]\n",
 		       data[(*packet_size) - 1]);
 		rc = -EINVAL;
 		goto out_free;
 	}
+#endif
 	rc = ecryptfs_cipher_code_to_string(crypt_stat->cipher,
 					    (u16)data[(*packet_size)]);
 	if (rc)
@@ -1484,6 +1582,18 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		crypt_stat->key_size =
 			(*new_auth_tok)->session_key.encrypted_key_size;
 	}
+#ifdef CONFIG_SYNO_ALPINE
+	/* Read the cipher mode if it is present */
+	if (file_version != 0x04) {
+		rc = ecryptfs_cipher_mode_code_to_string(
+				crypt_stat->cipher_mode,
+				data[(*packet_size)++]);
+		if (rc)
+			goto out_free;
+	} else {
+		strcpy(crypt_stat->cipher_mode, "cbc");
+	}
+#endif
 	rc = ecryptfs_init_crypt_ctx(crypt_stat);
 	if (rc)
 		goto out_free;
@@ -2050,6 +2160,9 @@ write_tag_1_packet(char *dest, size_t *remaining_bytes,
 	size_t encrypted_session_key_valid = 0;
 	size_t packet_size_length;
 	size_t max_packet_size;
+#ifdef CONFIG_SYNO_ALPINE
+	u8 cipher_mode_code;
+#endif
 	int rc = 0;
 
 	(*packet_size) = 0;
@@ -2088,7 +2201,11 @@ encrypted_session_key_set:
 			   + 3                       /* Max Tag 1 packet size */
 			   + 1                       /* Version */
 			   + ECRYPTFS_SIG_SIZE       /* Key identifier */
+#ifdef CONFIG_SYNO_ALPINE
+			   + 1                       /* Cipher mode code */
+#else
 			   + 1                       /* Cipher identifier */
+#endif
 			   + key_rec->enc_key_size); /* Encrypted key size */
 	if (max_packet_size > (*remaining_bytes)) {
 		printk(KERN_ERR "Packet length larger than maximum allowable; "
@@ -2107,10 +2224,36 @@ encrypted_session_key_set:
 		goto out;
 	}
 	(*packet_size) += packet_size_length;
+#ifdef CONFIG_SYNO_ALPINE
+	cipher_mode_code =
+		ecryptfs_code_for_cipher_mode_string(crypt_stat->cipher_mode);
+	if (cipher_mode_code == 0) {
+		ecryptfs_printk(KERN_WARNING, "Unable to generate code for "
+				"cipher mode [%s]\n", crypt_stat->cipher_mode);
+		rc = -EINVAL;
+		goto out;
+	}
+
+	/* Tag Version */
+	if (cipher_mode_code == ECRYPTFS_CIPHER_MODE_CBC)
+		dest[(*packet_size)++] = 0x03;
+	else
+		dest[(*packet_size)++] = 0x04;
+#else
 	dest[(*packet_size)++] = 0x03; /* version 3 */
+#endif
 	memcpy(&dest[(*packet_size)], key_rec->sig, ECRYPTFS_SIG_SIZE);
 	(*packet_size) += ECRYPTFS_SIG_SIZE;
+#ifdef CONFIG_SYNO_ALPINE
+	if (cipher_mode_code == ECRYPTFS_CIPHER_MODE_CBC) {
+		/* Version 0x03 packets always contain this constant */
+		dest[(*packet_size)++] = RFC2440_CIPHER_RSA;
+	} else {
+		dest[(*packet_size)++] = cipher_mode_code;
+	}
+#else
 	dest[(*packet_size)++] = RFC2440_CIPHER_RSA;
+#endif
 	memcpy(&dest[(*packet_size)], key_rec->enc_key,
 	       key_rec->enc_key_size);
 	(*packet_size) += key_rec->enc_key_size;
@@ -2208,6 +2351,9 @@ write_tag_3_packet(char *dest, size_t *remaining_bytes,
 	struct scatterlist src_sg[2];
 	struct mutex *tfm_mutex = NULL;
 	u8 cipher_code;
+#ifdef CONFIG_SYNO_ALPINE
+	u8 cipher_mode_code;
+#endif
 	size_t packet_size_length;
 	size_t max_packet_size;
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat =
@@ -2331,8 +2477,44 @@ write_tag_3_packet(char *dest, size_t *remaining_bytes,
 				  key_rec->enc_key_size);
 	}
 encrypted_session_key_set:
+#ifdef CONFIG_SYNO_ALPINE
+	/* This format is inspired by OpenPGP; see RFC 2440
+	 * packet tag 3
+	 *
+	 * This packet format deviates from the RFC in two ways:
+	 * 1. There is an additional field describing which cipher
+	 * mode was used.
+	 *
+	 * 2. The version field is used to differentiate between different
+	 * versions of the packet as used in eCryptfs instead of the different
+	 * version of tag 3 in the RFC.
+	 *
+	 * Version 0x04 is a packet that does not have the additional
+	 * cipher mode field. The cipher mode is then assumed to be CBC.
+	 *
+	 * Version 0x05 is a packet that does have the additional cipher mode
+	 * field. The cipher mode is taken from this header.
+	 *
+	 * This is for forwards compatability, so that older versions of
+	 * eCryptfs can still read and write CBC encrypted files from new
+	 * versions, but will refuse to open files encrypted in modes they do
+	 * not understand.
+	 *
+	 * */
+	 
+	cipher_mode_code =
+		ecryptfs_code_for_cipher_mode_string(crypt_stat->cipher_mode);
+
+	if (cipher_mode_code == 0) {
+		ecryptfs_printk(KERN_WARNING, "Unable to generate code for "
+				"cipher mode [%s]\n", crypt_stat->cipher_mode);
+		rc = -EINVAL;
+		goto out;
+	}
+#else
 	/* This format is inspired by OpenPGP; see RFC 2440
 	 * packet tag 3 */
+#endif
 	max_packet_size = (1                         /* Tag 3 identifier */
 			   + 3                       /* Max Tag 3 packet size */
 			   + 1                       /* Version */
@@ -2342,6 +2524,11 @@ encrypted_session_key_set:
 			   + ECRYPTFS_SALT_SIZE      /* Salt */
 			   + 1                       /* Hash iterations */
 			   + key_rec->enc_key_size); /* Encrypted key size */
+#ifdef CONFIG_SYNO_ALPINE
+	if (cipher_mode_code != ECRYPTFS_CIPHER_MODE_CBC) {
+		max_packet_size += 1; /* Cipher mode code. 1 Byte */
+	}
+#endif
 	if (max_packet_size > (*remaining_bytes)) {
 		printk(KERN_ERR "Packet too large; need up to [%td] bytes, but "
 		       "there are only [%td] available\n", max_packet_size,
@@ -2361,7 +2548,16 @@ encrypted_session_key_set:
 		goto out;
 	}
 	(*packet_size) += packet_size_length;
+#ifdef CONFIG_SYNO_ALPINE
+	/* Write out tag version */
+	if (cipher_mode_code == ECRYPTFS_CIPHER_MODE_CBC) {
+			dest[(*packet_size)++] = 0x04;
+	} else {
+			dest[(*packet_size)++] = 0x05;
+	}
+#else
 	dest[(*packet_size)++] = 0x04; /* version 4 */
+#endif
 	/* TODO: Break from RFC2440 so that arbitrary ciphers can be
 	 * specified with strings */
 	cipher_code = ecryptfs_code_for_cipher_string(crypt_stat->cipher,
@@ -2373,6 +2569,10 @@ encrypted_session_key_set:
 		goto out;
 	}
 	dest[(*packet_size)++] = cipher_code;
+#ifdef CONFIG_SYNO_ALPINE
+	if (cipher_mode_code != ECRYPTFS_CIPHER_MODE_CBC)
+		dest[(*packet_size)++] = cipher_mode_code;
+#endif
 	dest[(*packet_size)++] = 0x03;	/* S2K */
 	dest[(*packet_size)++] = 0x01;	/* MD5 (TODO: parameterize) */
 	memcpy(&dest[(*packet_size)], auth_tok->token.password.salt,

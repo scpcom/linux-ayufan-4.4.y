@@ -136,7 +136,7 @@ extern unsigned char SYNOKirkwoodIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 extern unsigned char SYNOArmadaIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
@@ -1907,7 +1907,8 @@ unsigned ata_exec_internal(struct ata_device *dev,
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	if (IS_SYNO_PMP_CMD(tf) &&
-		(!(ehc->i.action & ATA_EH_REVALIDATE)))
+		(!(ehc->i.action & ATA_EH_REVALIDATE)
+	   ))
 
 		return syno_ata_exec_internal_gpio(dev, tf, timeout);
 	else if (1 == dev->link->ap->PMSynoPowerDisable &&
@@ -2365,7 +2366,7 @@ int ata_dev_configure(struct ata_device *dev)
 
 	/* set horkage */
 	dev->horkage |= ata_dev_blacklisted(dev);
-#if defined(SYNO_SATA_PM_DEVICE_GPIO) && defined(MY_ABC_HERE)
+#if defined(SYNO_SATA_PM_DEVICE_GPIO) && defined(SYNO_HW_VERSION)
 	if(ap->nr_pmp_links) {
 		if (syno_is_hw_version(HW_DS1812p) &&
 				IS_SYNOLOGY_DX510(ap->PMSynoUnique) && (1 == ap->PMSynoCpldVer)) {
@@ -3101,10 +3102,11 @@ int sata_set_spd(struct ata_link *link)
 	if (link->ap->host != NULL) {
 		pdev = to_pci_dev(link->ap->host->dev);
 		// to fix WD Red link up 3.0 Gbps only issue
-		// to prevent side effect on other chips, it only works on 9235
-		if (pdev != NULL && pdev->vendor == 0x1b4b && pdev->device == 0x9235) {
+		// to prevent side effect on other chips, it only works on 9235 & 9215
+		if (pdev != NULL && pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215)) {
 			scontrol |= 0x30;
 		}
+
 	}
 #endif
 #ifdef SYNO_SIL3132_PM_WORKAROUND
@@ -3119,7 +3121,7 @@ int sata_set_spd(struct ata_link *link)
 	if ((rc = sata_scr_write(link, SCR_CONTROL, scontrol)))
 		return rc;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SIL3132_PM_WORKAROUND
 	/* After reconfiguing speed, need to write again
 	 * after a 1ms delay. Otherwise the speed won't
 	 * configue correctly.
@@ -5034,11 +5036,12 @@ void swap_buf_le16(u16 *buf, unsigned int buf_words)
 }
 
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_AHCI_PROF)
-unsigned int ahci_qc_comp_counter[33];
-struct timeval ahci_last_qc_comp[32];
-unsigned int ahci_last_qc_comp_flag[32];
-unsigned int ahci_qc_no_free_slot = 0;
-extern unsigned int enable_ahci_prof;
+
+#include "ahci.h"
+
+struct ahci_port_stats ahci_port_stats[MAX_AHCI_PORTS];
+unsigned int enable_ahci_prof = 0;
+
 #endif
 
 /**
@@ -5071,7 +5074,7 @@ static struct ata_queued_cmd *ata_qc_new(struct ata_port *ap)
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_AHCI_PROF)
 	if (enable_ahci_prof)
 		if (qc == NULL) {
-			ahci_qc_no_free_slot++;
+			ahci_port_stats[ap->port_no].no_free_slot++;
 		}
 #endif
 
@@ -5118,11 +5121,6 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 	struct ata_port *ap;
 	unsigned int tag;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_AHCI_PROF)
-	struct timeval now;
-	int diff_time_ms;
-#endif
-
 	WARN_ON_ONCE(qc == NULL); /* ata_qc_from_tag _might_ return NULL */
 	ap = qc->ap;
 
@@ -5134,20 +5132,42 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_AHCI_PROF)
 	if (enable_ahci_prof) {
-		if (ahci_last_qc_comp_flag[tag]) {
-			int inx = 32;
+			struct ahci_port_stats *stats = &ahci_port_stats[ap->port_no];
+
+			if (stats->pending_flag & (1 << tag)) {
+				stats->pending_flag &= ~(1 << tag);
+				stats->nb_pending--;
+
+				if (!stats->nb_pending) {
+					struct timeval now;
+					int diff_time_us;
+					unsigned int rate;
+					int bin;
 
 			do_gettimeofday(&now);
 
-			diff_time_ms = ((now.tv_sec - ahci_last_qc_comp[tag].tv_sec) * 1000) + 
-                                ((now.tv_usec - ahci_last_qc_comp[tag].tv_usec) / 1000);
+					diff_time_us = ((now.tv_sec - stats->first_issue.tv_sec) * 1000 * 1000) +
+								(now.tv_usec - stats->first_issue.tv_usec);
 
-			if (diff_time_ms < 512) 
-				inx = diff_time_ms >> 4;
+					stats->diff_us += diff_time_us;
 
-			ahci_qc_comp_counter[inx]++;
+					/* Do the average for at least 10MiB of data transfered */
+					if (stats->bytes_pending > (10 * (1 << 20))) {
 
-			ahci_last_qc_comp_flag[tag] = 0;
+						rate = ((stats->bytes_pending / stats->diff_us) * 1000 * 1000) >> 20; //MiBps
+
+						bin = rate >> RATE_SHIFT;
+						if (bin >= MAX_BINS)
+							bin = MAX_BINS - 1;
+
+						/* Track how many KiB were transfered at this rate */
+						stats->rate_counter[bin] += stats->bytes_pending >> 10;
+
+						/* Reset stats */
+						stats->bytes_pending = 0;
+						stats->diff_us = 0;
+					}
+				}
 		}
 	}
 #endif
@@ -5232,7 +5252,7 @@ static void ata_verify_xfer(struct ata_queued_cmd *qc)
 void ata_qc_complete(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
-#if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+#if defined(SYNO_SPINUP_DELAY) || defined(SYNO_SATA_PM_DEVICE_GPIO)
 	struct ata_taskfile *tf = &qc->tf;
 #endif
 
@@ -5273,7 +5293,7 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 		if (unlikely(qc->flags & ATA_QCFLAG_FAILED)) {
 			fill_result_tf(qc);
 
-#if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+#if defined(SYNO_SPINUP_DELAY) || defined(SYNO_SATA_PM_DEVICE_GPIO)
 			if ((IS_SYNO_PMP_CMD(tf) && NULL == qc->scsicmd) || IS_SYNO_SPINUP_CMD(qc)) {
 				__ata_qc_complete(qc);
 			} else
@@ -5859,11 +5879,7 @@ int sata_link_init_spd(struct ata_link *link)
 		return rc;
 
 	spd = (link->saved_scontrol >> 4) & 0xf;
-#ifdef MY_ABC_HERE
-	if (spd && !(link->ap->PMSynoUnique && IS_SYNOLOGY_RX410(link->ap->PMSynoUnique)))
-#else
 	if (spd)
-#endif
 		link->hw_sata_spd_limit &= (1 << spd) - 1;
 
 	ata_force_link_limits(link);
@@ -5914,7 +5930,7 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 	INIT_DELAYED_WORK(&ap->hotplug_task, ata_scsi_hotplug);
 #ifdef SYNO_PMP_HOTPLUG_TASK
 	INIT_DELAYED_WORK(&ap->syno_pmp_task, ata_syno_pmp_hotplug);
-#endif //MY_ABC_HERE
+#endif //SYNO_PMP_HOTPLUG_TASK
 	INIT_WORK(&ap->scsi_rescan_task, ata_scsi_dev_rescan);
 	INIT_LIST_HEAD(&ap->eh_done_q);
 	init_waitqueue_head(&ap->eh_wait_q);
@@ -6022,11 +6038,11 @@ struct ata_host *ata_host_alloc(struct device *dev, int max_ports)
 
 	devres_remove_group(dev, NULL);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	host->host_no = gSynoSataHostCnt;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PORT_MAP
 	gSynoSataHostCnt += 1;
 #endif
 
@@ -6350,7 +6366,7 @@ static void DelayForHWCtl(struct ata_port *pAp)
 	}
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if(SYNOArmadaIsBoardNeedPowerUpHDD(pAp->print_id)) {
 		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		if (0 == SYNO_CHECK_HDD_PRESENT(pAp->print_id)) {
@@ -6572,22 +6588,7 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		}
 	}
 #endif
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
-	if (0 == g_internal_hd_num) {
-		printk("Enable Synology sata fast booting\n");
-	}
 
-	for (i = 0; i < host->n_ports; i++) {
-		struct ata_port *ap = host->ports[i];
-		int class = 0;
-
-		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
-		if (0 == g_internal_hd_num) {
-			if(ap->ops->hardreset)
-				ap->ops->hardreset(&ap->link, &class, 0);
-		}
-	}
-#endif
 	/* perform each probe asynchronously */
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
@@ -7414,8 +7415,10 @@ int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigne
 EXPORT_SYMBOL(funcSYNOSataErrorReport);
 int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNODeepSleepEvent);
+int (*funcSYNODiskRetryReport)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODiskRetryReport);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_EBOX_REFRESH
 int (*funcSYNOSendEboxRefreshEvent)(int portIndex) = NULL;
 EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
 #endif

@@ -22,6 +22,9 @@ struct hw_pci {
 	int		domain;
 #endif
 	struct list_head buses;
+#ifdef CONFIG_SYNO_ALPINE
+	void	**private_data;
+#endif
 	int		nr_controllers;
 	int		(*setup)(int nr, struct pci_sys_data *);
 	struct pci_bus *(*scan)(int nr, struct pci_sys_data *);
@@ -49,7 +52,7 @@ struct pci_sys_data {
 					/* IRQ mapping				*/
 	int		(*map_irq)(const struct pci_dev *, u8, u8);
 	struct hw_pci	*hw;
-#ifdef CONFIG_SYNO_ARMADA
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	int		mv_controller_num;
 #endif
 	void		*private_data;	/* platform controller private data	*/

@@ -68,15 +68,15 @@
 
 #define SYNO_DS214p_HDD_NOTIFY_INIT_STAT		0
 
-#define SYNO_DS414play_GPP_HDD4_PWR_EN  26
-#define SYNO_DS414play_GPP_HDD3_PWR_EN  28
-#define SYNO_DS414play_GPP_HDD4_ONLINE  30
-#define SYNO_DS414play_GPP_HDD3_ONLINE  31
-#define SYNO_DS414play_GPP_USB_PWR_EN   43
-#define SYNO_DS414play_GPP_MODEL_ID_0   51
-#define SYNO_DS414play_GPP_MODEL_ID_1   52
-#define SYNO_DS414play_GPP_MODEL_ID_2   56
-
+#define SYNO_DS415play_GPP_HDD4_PWR_EN  26
+#define SYNO_DS415play_GPP_HDD3_PWR_EN  28
+#define SYNO_DS415play_GPP_HDD4_ONLINE  30
+#define SYNO_DS415play_GPP_HDD3_ONLINE  31
+#define SYNO_DS415play_GPP_USB_PWR_EN   43
+#define SYNO_DS415play_GPP_MODEL_ID_0   51
+#define SYNO_DS415play_GPP_MODEL_ID_1   52
+#define SYNO_DS415play_GPP_MODEL_ID_2   56
+#define SYNO_DS415play_GPP_EXT_FAN2_FAIL		100
 
 typedef struct __tag_SYNO_EVANSPORT_HDD_PM_GPIO {
 	u8 hdd1_pm;
@@ -371,7 +371,7 @@ int SYNO_CTRL_FAN_STATUS_GET(int index, int *pValue)
 u8 SYNOEvansportIsBoardNeedPowerUpHDD(u32 disk_id) {
 	u8 ret = 0;
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_VERSION
 	if (syno_is_hw_version(HW_DS214play)) {
 		if (2 >= disk_id ) {
 			ret = 1;
@@ -380,7 +380,7 @@ u8 SYNOEvansportIsBoardNeedPowerUpHDD(u32 disk_id) {
 		if (1 >= disk_id ) {
 			ret = 1;
 		}
-	}else if (syno_is_hw_version(HW_DS414play)){
+	}else if (syno_is_hw_version(HW_DS415play)){
 	    if (4 >= disk_id ) {
 			ret = 1;
 		}
@@ -520,9 +520,9 @@ EVANSPORT_214p_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 		{ SYNO_DS214p_GPP_HDD2_ACT, GPIOF_OUT_INIT_LOW, "HDD2 Activity Notify" },
 		{ SYNO_DS214p_GPP_HDD1_ACT, GPIOF_OUT_INIT_LOW, "HDD1 Activity Notify" },
 		{ SYNO_DS214p_GPP_LED_EN, GPIOF_OUT_INIT_HIGH, "LED Enable" },
-		{ SYNO_DS414play_GPP_MODEL_ID_0, GPIOF_IN, "MODEL ID : bit 0" },
-		{ SYNO_DS414play_GPP_MODEL_ID_1, GPIOF_IN, "MODEL ID : bit 1" },
-		{ SYNO_DS414play_GPP_MODEL_ID_2, GPIOF_IN, "MODEL ID : bit 2" },
+		{ SYNO_DS415play_GPP_MODEL_ID_0, GPIOF_IN, "MODEL ID : bit 0" },
+		{ SYNO_DS415play_GPP_MODEL_ID_1, GPIOF_IN, "MODEL ID : bit 1" },
+		{ SYNO_DS415play_GPP_MODEL_ID_2, GPIOF_IN, "MODEL ID : bit 2" },
 	};
 
 	SYNO_EVANSPORT_GENERIC_GPIO gpio_214p = {
@@ -594,9 +594,9 @@ EVANSPORT_114p_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 		{ SYNO_DS214p_GPP_INTER_LOCK, GPIOF_IN, "Inter Lock" },
 		{ SYNO_DS214p_GPP_HDD1_ACT, GPIOF_OUT_INIT_LOW, "HDD1 Activity Notify" },
 		{ SYNO_DS214p_GPP_LED_EN, GPIOF_OUT_INIT_HIGH, "LED Enable" },
-		{ SYNO_DS414play_GPP_MODEL_ID_0, GPIOF_IN, "MODEL ID : bit 0" },
-		{ SYNO_DS414play_GPP_MODEL_ID_1, GPIOF_IN, "MODEL ID : bit 1" },
-		{ SYNO_DS414play_GPP_MODEL_ID_2, GPIOF_IN, "MODEL ID : bit 2" },
+		{ SYNO_DS415play_GPP_MODEL_ID_0, GPIOF_IN, "MODEL ID : bit 0" },
+		{ SYNO_DS415play_GPP_MODEL_ID_1, GPIOF_IN, "MODEL ID : bit 1" },
+		{ SYNO_DS415play_GPP_MODEL_ID_2, GPIOF_IN, "MODEL ID : bit 2" },
 	};
 
 	SYNO_EVANSPORT_GENERIC_GPIO gpio_114p = {
@@ -656,9 +656,9 @@ EVANSPORT_114p_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 }
 
 static void
-EVANSPORT_414play_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
+EVANSPORT_415play_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 {
-	struct gpio gpiocfg_414play[] = {
+	struct gpio gpiocfg_415play[] = {
 		{ SYNO_DS214p_GPP_SCHEDULE_ON, GPIOF_IN, "Schedule ON" },
 		{ SYNO_DS214p_GPP_HDD1_PWR_EN, GPIOF_OUT_INIT_LOW, "HDD1 PWR EN" },
 		{ SYNO_DS214p_GPP_HDD2_PWR_EN, GPIOF_OUT_INIT_LOW, "HDD2 PWR EN" },
@@ -666,18 +666,19 @@ EVANSPORT_414play_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 		{ SYNO_DS214p_GPP_HDD1_ONLINE, GPIOF_IN, "HDD1 On-line" },
 		{ SYNO_DS214p_GPP_HDD2_ONLINE, GPIOF_IN, "HDD2 On-line" },
 		{ SYNO_DS214p_GPP_INTER_LOCK, GPIOF_IN, "Internal Lock" },
-		{ SYNO_DS414play_GPP_HDD4_PWR_EN, GPIOF_OUT_INIT_LOW, "HDD4 PWR EN" },
-		{ SYNO_DS414play_GPP_HDD3_PWR_EN, GPIOF_OUT_INIT_LOW, "HDD3 PWR EN" },
-		{ SYNO_DS414play_GPP_HDD4_ONLINE, GPIOF_IN, "HDD4 On-line" },
-		{ SYNO_DS414play_GPP_HDD3_ONLINE, GPIOF_IN, "HDD3 On-line" },
+		{ SYNO_DS415play_GPP_HDD4_PWR_EN, GPIOF_OUT_INIT_LOW, "HDD4 PWR EN" },
+		{ SYNO_DS415play_GPP_HDD3_PWR_EN, GPIOF_OUT_INIT_LOW, "HDD3 PWR EN" },
+		{ SYNO_DS415play_GPP_HDD4_ONLINE, GPIOF_IN, "HDD4 On-line" },
+		{ SYNO_DS415play_GPP_HDD3_ONLINE, GPIOF_IN, "HDD3 On-line" },
 		{ SYNO_DS214p_GPP_LED_EN, GPIOF_OUT_INIT_HIGH, "LED Enable" },
-		{ SYNO_DS414play_GPP_USB_PWR_EN, GPIOF_OUT_INIT_HIGH, "USB Enable" },
-		{ SYNO_DS414play_GPP_MODEL_ID_0, GPIOF_IN, "MODEL ID : bit 0" },
-		{ SYNO_DS414play_GPP_MODEL_ID_1, GPIOF_IN, "MODEL ID : bit 1" },
-		{ SYNO_DS414play_GPP_MODEL_ID_2, GPIOF_IN, "MODEL ID : bit 2" },
+		{ SYNO_DS415play_GPP_USB_PWR_EN, GPIOF_OUT_INIT_HIGH, "USB Enable" },
+		{ SYNO_DS415play_GPP_MODEL_ID_0, GPIOF_IN, "MODEL ID : bit 0" },
+		{ SYNO_DS415play_GPP_MODEL_ID_1, GPIOF_IN, "MODEL ID : bit 1" },
+		{ SYNO_DS415play_GPP_MODEL_ID_2, GPIOF_IN, "MODEL ID : bit 2" },
+		{ SYNO_DS415play_GPP_EXT_FAN2_FAIL, GPIOF_IN, "Ext Fan2 Fail" },
 	};
 
-	SYNO_EVANSPORT_GENERIC_GPIO gpio_414play = {
+	SYNO_EVANSPORT_GENERIC_GPIO gpio_415play = {
 		.ext_sata_led	= {
 							.hdd1_led_0 = GPIO_UNDEF,
 							.hdd1_led_1 = GPIO_UNDEF,
@@ -700,13 +701,13 @@ EVANSPORT_414play_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 							.fan_1 = GPIO_UNDEF,
 							.fan_2 = GPIO_UNDEF,
 							.fan_fail = SYNO_DS214p_GPP_EXT_FAN1_FAIL,
-							.fan_fail_2 = GPIO_UNDEF,
+							.fan_fail_2 = SYNO_DS415play_GPP_EXT_FAN2_FAIL,
 						},
 		.hdd_pm		= {
 							.hdd1_pm = SYNO_DS214p_GPP_HDD1_PWR_EN,
 							.hdd2_pm = SYNO_DS214p_GPP_HDD2_PWR_EN,
-							.hdd3_pm = SYNO_DS414play_GPP_HDD3_PWR_EN,
-							.hdd4_pm = SYNO_DS414play_GPP_HDD4_PWR_EN,
+							.hdd3_pm = SYNO_DS415play_GPP_HDD3_PWR_EN,
+							.hdd4_pm = SYNO_DS415play_GPP_HDD4_PWR_EN,
 						},
 		.hdd_act_notify = {
 							.hdd1_act_notify = GPIO_UNDEF,
@@ -720,20 +721,18 @@ EVANSPORT_414play_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 		.hdd_detect	= {
 							.hdd1_present_detect = SYNO_DS214p_GPP_HDD1_ONLINE,
 							.hdd2_present_detect = SYNO_DS214p_GPP_HDD2_ONLINE,
-							.hdd3_present_detect = SYNO_DS414play_GPP_HDD3_ONLINE,
-							.hdd4_present_detect = SYNO_DS414play_GPP_HDD4_ONLINE,
+							.hdd3_present_detect = SYNO_DS415play_GPP_HDD3_ONLINE,
+							.hdd4_present_detect = SYNO_DS415play_GPP_HDD4_ONLINE,
                         },
         .usb		= {
-							.usb_power = SYNO_DS414play_GPP_USB_PWR_EN,
+							.usb_power = SYNO_DS415play_GPP_USB_PWR_EN,
 						},
 	};
 
-	*global_gpio = gpio_414play;
+	*global_gpio = gpio_415play;
 
-	gpio_request_array(gpiocfg_414play, ARRAY_SIZE(gpiocfg_414play));
+	gpio_request_array(gpiocfg_415play, ARRAY_SIZE(gpiocfg_415play));
 }
-
-
 
 static void
 EVANSPORT_default_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
@@ -786,21 +785,21 @@ EVANSPORT_default_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 
 void synology_gpio_init(void)
 {
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_VERSION
 	if (syno_is_hw_version(HW_DS214play)) {
 		EVANSPORT_214p_GPIO_init(&generic_gpio);
 		printk("Synology Evansport 2 bay GPIO Init\n");
 	} else if (syno_is_hw_version(HW_DS114p)) {
 		EVANSPORT_114p_GPIO_init(&generic_gpio);
 		printk("Synology Evansport 1 bay GPIO Init\n");
-	} else if (syno_is_hw_version(HW_DS414play)) {
-		EVANSPORT_414play_GPIO_init(&generic_gpio);
+	} else if (syno_is_hw_version(HW_DS415play)) {
+		EVANSPORT_415play_GPIO_init(&generic_gpio);
 		printk("Synology Evansport 4 bay GPIO Init\n");
 	} else {
 #endif
 		EVANSPORT_default_GPIO_init(&generic_gpio);
 		printk("%s: Failed to get model id or model not supported\n", __func__);
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_VERSION
 	}
 #endif
 }

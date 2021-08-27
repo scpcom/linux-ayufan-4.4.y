@@ -1268,7 +1268,11 @@ void tcp_cleanup_rbuf(struct sock *sk, int copied)
 		    * receive. */
 		if (icsk->icsk_ack.blocked ||
 		    /* Once-per-two-segments ACK was not sent by tcp_input.c */
+#ifdef CONFIG_SYNO_ALPINE
+		    tp->rcv_nxt - tp->rcv_wup > (icsk->icsk_ack.rcv_mss * sysctl_tcp_default_delack_segs) ||
+#else
 		    tp->rcv_nxt - tp->rcv_wup > icsk->icsk_ack.rcv_mss ||
+#endif
 		    /*
 		     * If this read emptied read buffer, we send ACK, if
 		     * connection is not bidirectional, user drained
@@ -1336,6 +1340,10 @@ static void tcp_service_net_dma(struct sock *sk, bool wait)
 
 	if (!tp->ucopy.dma_chan)
 		return;
+#ifdef CONFIG_SYNO_ALPINE
+	if (!tp->ucopy.pinned)
+		return;
+#endif
 
 	last_issued = tp->ucopy.dma_cookie;
 	dma_async_memcpy_issue_pending(tp->ucopy.dma_chan);
@@ -1453,6 +1461,70 @@ int tcp_read_sock(struct sock *sk, read_descriptor_t *desc,
 	return copied;
 }
 EXPORT_SYMBOL(tcp_read_sock);
+#ifdef CONFIG_SYNO_ALPINE
+extern int hwcc;
+
+int q_has_frag_list(struct sock *sk){
+	struct sk_buff *skb;
+	skb_queue_walk(&sk->sk_receive_queue, skb) {
+		if(skb_has_frag_list(skb)) {
+			//printk("Got Q with SKB fag list seq %x\n", TCP_SKB_CB(skb)->seq);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(SYNO_RECVFILE)
+int is_enough_skb_data_for_dma(struct sk_buff *skb, int offset, int len)
+{
+	int start = skb_headlen(skb);
+	int i, copy = start - offset;
+
+	if (copy > 0) {
+		if (copy > len) {
+			copy = len;
+		}
+
+		len -= copy;
+		if (0 == len) {
+			return 1;
+		}
+
+		offset += copy;
+	}
+
+	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
+		int end;
+		const skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
+
+		end = start + skb_frag_size(frag);
+		copy = end - offset;
+		if (copy > 0) {
+			if (copy > len) {
+				copy = len;
+			}
+
+			len -= copy;
+			if (0 == len) {
+				return 1;
+			}
+
+			offset += copy;
+		}
+
+		start = end;
+	}
+
+	if (0 == len) {
+		return 1;
+	}
+
+	//printk("tcp:recvmsg: No enough skb %d\n", len);
+	return 0;
+}
+#endif
+#endif
 
 /*
  *	This routine copies from a sock struct into the user buffer.
@@ -1505,9 +1577,13 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	{
 		int available = 0;
 
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 		if (skb)
 			available = TCP_SKB_CB(skb)->seq + skb->len - (*seq);
-#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
+#endif
+#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
 		if (msg->msg_flags & MSG_KERNSPACE) {
 			if ((available >= target) &&
 			    (len > sysctl_tcp_dma_copybreak) && !(flags & MSG_PEEK) &&
@@ -1521,13 +1597,27 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 			}
 		}
 #else
+#ifdef CONFIG_SYNO_ALPINE
+		if ((available < target) && hwcc && (msg->msg_flags & MSG_KERNSPACE) && (flags & MSG_KERNSPACE) &&
+#else
 		if ((available < target) &&
+#endif
 		    (len > sysctl_tcp_dma_copybreak) && !(flags & MSG_PEEK) &&
+#ifdef CONFIG_SYNO_ALPINE
+		    skb && !q_has_frag_list(sk) && !sysctl_tcp_low_latency &&
+		    net_dma_find_channel()) {
+#else
 		    !sysctl_tcp_low_latency &&
 		    dma_find_channel(DMA_MEMCPY)) {
+#endif
 			preempt_enable_no_resched();
+#ifdef CONFIG_SYNO_ALPINE
+			tp->ucopy.pinned =
+					!dma_pin_iovec_pages(tp, msg->msg_iov, len);
+#else
 			tp->ucopy.pinned_list =
 					dma_pin_iovec_pages(msg->msg_iov, len);
+#endif
 		} else {
 			preempt_enable_no_resched();
 		}
@@ -1562,7 +1652,25 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 			}
         }
         else
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
+#ifdef CONFIG_SYNO_ARMADA_V2
+		if (flags & MSG_NOCATCHSIG) {
+			if (signal_pending(current)) {
+				if (sigismember(&current->pending.signal, SIGQUIT) ||
+				    sigismember(&current->pending.signal, SIGABRT) ||
+				    sigismember(&current->pending.signal, SIGKILL) ||
+				    sigismember(&current->pending.signal, SIGTERM) ||
+				    sigismember(&current->pending.signal, SIGSTOP)) {
+
+					if (copied)
+						break;
+					copied = timeo ? sock_intr_errno(timeo) : -EAGAIN;
+					break;
+				}
+			}
+		}
+	else
+#endif /* CONFIG_SYNO_ARMADA_V2 */
 		/* Are we at urgent data? Stop if we have read anything or have SIGURG pending. */
 		if (tp->urg_data && tp->urg_seq == *seq) {
 			if (copied)
@@ -1775,10 +1883,25 @@ do_prequeue:
 
 		if (!(flags & MSG_TRUNC)) {
 #ifdef CONFIG_NET_DMA
+#ifdef CONFIG_SYNO_ALPINE
+			if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
+				tp->ucopy.dma_chan = net_dma_find_channel();
+#else
 			if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)
 				tp->ucopy.dma_chan = dma_find_channel(DMA_MEMCPY);
+#endif
 
+#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(SYNO_RECVFILE)
+			/**
+			* For alpine, if there is no enough skb data to satify this request,
+			* we need to use CPU to copy data instead of DMA. The reason is SYNOLOGY RECVFILE
+			* can't not accept partial result of read. If it has this condition, file checksum
+			* will be incorrect. 
+			*/
+			if (tp->ucopy.dma_chan && is_enough_skb_data_for_dma(skb, offset, used)) {
+#else
 			if (tp->ucopy.dma_chan) {
+#endif
 				tp->ucopy.dma_cookie = dma_skb_copy_datagram_iovec(
 					tp->ucopy.dma_chan, skb, offset,
 					msg->msg_iov, used,
@@ -1786,7 +1909,11 @@ do_prequeue:
 
 				if (tp->ucopy.dma_cookie < 0) {
 
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 					printk(KERN_ALERT "dma_cookie < 0\n");
+#endif
 
 					/* Exception. Bailout! */
 					if (!copied)
@@ -1798,15 +1925,25 @@ do_prequeue:
 
 				if ((offset + used) == skb->len)
 					copied_early = 1;
-
+#if defined(CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE) && defined(SYNO_RECVFILE)
+			// This is to match left brace of previous section.
+			} else
+#else
 			} else
 #endif
+#endif
 			{
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 				if(msg->msg_flags & MSG_KERNSPACE)
 					err = skb_copy_datagram_iovec1(skb, offset, msg->msg_iov, used);
 				else
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
+#ifdef CONFIG_SYNO_ARMADA_V2
+				if (msg->msg_flags & MSG_KERNSPACE)
+					err = skb_copy_datagram_to_kernel_iovec(skb,
+							offset, msg->msg_iov, used);
+				else
+#endif
 				err = skb_copy_datagram_iovec(skb, offset,
 						msg->msg_iov, used);
 				if (err) {
@@ -1873,14 +2010,22 @@ skip_copy:
 	tcp_service_net_dma(sk, true);  /* Wait for queue to drain */
 	tp->ucopy.dma_chan = NULL;
 
+#ifdef CONFIG_SYNO_ALPINE
+	if (tp->ucopy.pinned) { 
+#else
 	if (tp->ucopy.pinned_list) {
-#ifdef CONFIG_SPLICE_NET_DMA_SUPPORT
+#endif
+#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
 		if(msg->msg_flags & MSG_KERNSPACE)
 			dma_unpin_kernel_iovec_pages(tp->ucopy.pinned_list);
 		else
 #endif
 		dma_unpin_iovec_pages(tp->ucopy.pinned_list);
+#ifdef CONFIG_SYNO_ALPINE
+		tp->ucopy.pinned = false;
+#else
 		tp->ucopy.pinned_list = NULL;
+#endif
 	}
 #endif
 
@@ -2197,6 +2342,9 @@ int tcp_disconnect(struct sock *sk, int flags)
 	__skb_queue_purge(&tp->out_of_order_queue);
 #ifdef CONFIG_NET_DMA
 	__skb_queue_purge(&sk->sk_async_wait_queue);
+#ifdef CONFIG_SYNO_ALPINE
+	dma_free_iovec_data(tp);
+#endif
 #endif
 
 	inet->inet_dport = 0;

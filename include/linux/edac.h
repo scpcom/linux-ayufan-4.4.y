@@ -133,6 +133,29 @@ enum edac_type {
 #define EDAC_FLAG_S16ECD16ED	BIT(EDAC_S16ECD16ED)
 
 /* scrubbing capabilities */
+#ifdef CONFIG_SYNO_ALPINE
+enum scrub_type {
+	SCRUB_UNKNOWN		= BIT(0), /* nknown if scrubber is available */
+	SCRUB_NONE		= BIT(1), /* No scrubber */
+	CRUB_SW_PROG		= BIT(2), /* SW progressive (sequential) scrubbing */
+	SCRUB_SW_SRC		= BIT(3), /* Software scrub only errors */
+ 	SCRUB_SW_PROG_SRC	= BIT(4), /* Progressive software scrub from an error */
+	SCRUB_SW_TUNABLE	= BIT(5), /* Software scrub frequency is tunable */
+	SCRUB_HW_PROG		= BIT(6), /* HW progressive (sequential) scrubbing */
+	SCRUB_HW_SRC		= BIT(7), /* Hardware scrub only errors */
+	SCRUB_HW_PROG_SRC	= BIT(8), /* Progressive hardware scrub from an error */
+	SCRUB_HW_TUNABLE	= BIT(9), /* Hardware scrub frequency is tunable */
+};
+
+#define SCRUB_FLAG_SW_PROG	SCRUB_SW_PROG
+#define SCRUB_FLAG_SW_SRC	SCRUB_SW_SRC
+#define SCRUB_FLAG_SW_PROG_SRC	SCRUB_SW_PROG_SRC
+#define SCRUB_FLAG_SW_TUN	SCRUB_SW_SCRUB_TUNABLE
+#define SCRUB_FLAG_HW_PROG	SCRUB_HW_PROG
+#define SCRUB_FLAG_HW_SRC	SCRUB_HW_SRC
+#define SCRUB_FLAG_HW_PROG_SRC	SCRUB_HW_PROG_SRC
+#define SCRUB_FLAG_HW_TUN	SCRUB_HW_TUNABLE
+#else
 enum scrub_type {
 	SCRUB_UNKNOWN = 0,	/* Unknown if scrubber is available */
 	SCRUB_NONE,		/* No scrubber */
@@ -154,6 +177,7 @@ enum scrub_type {
 #define SCRUB_FLAG_HW_SRC	BIT(SCRUB_HW_SRC)
 #define SCRUB_FLAG_HW_PROG_SRC	BIT(SCRUB_HW_PROG_SRC)
 #define SCRUB_FLAG_HW_TUN	BIT(SCRUB_HW_TUNABLE)
+#endif
 
 /* FIXME - should have notify capabilities: NMI, LOG, PROC, etc */
 

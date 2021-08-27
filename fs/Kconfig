@@ -6,6 +6,16 @@ menu "File systems"
 
 if BLOCK
 
+config LFS_ON_32CPU
+	bool "Support for large (16TB+) filesystems on 32-bit cpu"
+	depends on LBDAF && SYNO_ALPINE
+	depends on !HUGETLBFS #hugetlbfs not supported yet
+	default n
+	help
+	  Enable support of running filesystem on block devices that are larger
+	  than 16TB on 32bit cpus
+
+
 source "fs/ext2/Kconfig"
 source "fs/ext3/Kconfig"
 source "fs/ext4/Kconfig"
@@ -34,7 +44,7 @@ config FS_SYNO_ACL
 # Synology ACL utility routines (for now, only ext4)
 # ACL depends on SYNO_ARCHIVE_BIT
 	bool
-	default n
+	default y
 
 
 config FS_POSIX_ACL

@@ -1132,7 +1132,36 @@ ctnetlink_change_status(struct nf_conn *ct, const struct nlattr * const cda[])
 	ct->status |= status & ~(IPS_NAT_DONE_MASK | IPS_NAT_MASK);
 	return 0;
 }
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+/*
+ * This function detects ctnetlink messages that require
+ * to set the conntrack status to IPS_PERMANENT.
+ * It updates only this bit regardless of other possible
+ * changes.
+ * Return 0 if succesfull
+ */
+static int
+ctnetlink_change_permanent(struct nf_conn *ct, const struct nlattr * const cda[])
+{
+	unsigned int status;
+	u_int32_t id;
 
+	if (cda[CTA_STATUS] && cda[CTA_ID]) {
+		status = ntohl(nla_get_be32(cda[CTA_STATUS]));
+		id = ntohl(nla_get_be32(cda[CTA_ID]));
+
+		if (status & IPS_PERMANENT) {
+			if ((u32)(unsigned long)ct == id) {
+				ct->status |= IPS_PERMANENT;
+				return 0;
+			}
+			else
+				return -ENOENT;
+		}
+	}
+	return -1;
+}
+#endif
 static int
 ctnetlink_change_nat(struct nf_conn *ct, const struct nlattr * const cda[])
 {
@@ -1603,6 +1632,13 @@ ctnetlink_new_conntrack(struct sock *ctnl, struct sk_buff *skb,
 	if (!(nlh->nlmsg_flags & NLM_F_EXCL)) {
 		struct nf_conn *ct = nf_ct_tuplehash_to_ctrack(h);
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+		/* If the permanent status has been set, this is a specific
+		 * message. Don't broadcast the event and don't update the ct */
+		err = ctnetlink_change_permanent(ct, cda);
+		if ((err == 0) || (err == -ENOENT))
+			goto out_unlock;
+#endif
 		err = ctnetlink_change_conntrack(ct, cda);
 		if (err == 0) {
 			nf_conntrack_get(&ct->ct_general);

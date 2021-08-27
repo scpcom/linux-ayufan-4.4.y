@@ -50,9 +50,8 @@ extern int gSynoHasDynModule;
 extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
 #endif
 
-#ifdef CONFIG_SYNO_DUAL_HEAD
-extern int gSynoDualHead;
-#endif
+int (*funcSYNOSendErrorFsBtrfsEvent)(const u8*) = NULL;
+EXPORT_SYMBOL(funcSYNOSendErrorFsBtrfsEvent);
 
 static int event;
 static DEFINE_IDA(mnt_id_ida);
@@ -2383,9 +2382,6 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 	if ( 0 == gSynoInstallFlag &&
 			NULL != dev_name &&
 			strstr(dev_name, SYNO_USB_FLASH_DEVICE_PATH) &&
-#ifdef CONFIG_SYNO_DUAL_HEAD
-			!(1 == gSynoDualHead && strstr(dev_name, SYNO_DUALHEAD_SYSTEM_DEVICE_PATH)) &&
-#endif
 			gSynoHasDynModule) {
 		return -EINVAL;
 	}

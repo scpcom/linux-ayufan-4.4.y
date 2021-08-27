@@ -285,7 +285,7 @@ MV_BOOLEAN mvAdapterStartInitialization(MV_SATA_ADAPTER *pSataAdapter,
     return mvAdapterStateMachine(ialExt, scsiAdapterExt);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_EBOX_REFRESH
 extern int syno_mv_scsi_host_no_get(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex);
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
@@ -329,7 +329,7 @@ void mvRestartChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
             == MV_SATA_DEVICE_TYPE_PM)
         {
             bBusChangeNotify = MV_TRUE;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_EBOX_REFRESH
 			if(funcSYNOSendEboxRefreshEvent) {
 				funcSYNOSendEboxRefreshEvent(syno_mv_scsi_host_no_get(pSataAdapter, channelIndex));
 			}
@@ -2809,7 +2809,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
          classifyAndInitDevice(scsiAdapterExt, ialExt, channelIndex, PMPort);
 #endif
 	 }	 
-#else /* MY_ABC_HERE */
+#else /* SYNO_SATA_MV422_PM_FIX */
      if(SError & MV_BIT16)
 	 {
 	      mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_INFO, "[%d %d %d]: "
@@ -3318,7 +3318,7 @@ END:
 }
 #endif // SYNO_SATA_PM_DEVICE_GPIO
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_EH
 /**
  * Because we support shock protection.
  * So we need revalidate whether the device

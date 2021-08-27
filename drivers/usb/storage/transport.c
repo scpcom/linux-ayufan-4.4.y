@@ -66,6 +66,9 @@
 #include <linux/blkdev.h>
 #include "../../scsi/sd.h"
 
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
+#include <linux/module.h>
+#endif
 
 /***********************************************************************
  * Data transfer routines
@@ -1053,16 +1056,27 @@ int usb_stor_Bulk_max_lun(struct us_data *us)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
-int extra_delay = 1;
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
+int extra_delay = 0;
 module_param(extra_delay, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+int extra_delay_time = 0;
+module_param(extra_delay_time, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 static inline void delay_for_JM(struct us_data *us)
 {
 	u32 id_vendor = le16_to_cpu(us->pusb_dev->descriptor.idVendor);
 	u32 id_product = le16_to_cpu(us->pusb_dev->descriptor.idProduct);
 
-	if (!extra_delay) return;
+	//0 : no delay
+	//1 : for customized
+	//others : for original delay mechanism(just for Jmicron, Samsung, Lacie, Freecom, Iomega, SimpleTech, Icybox)
+	if (likely(extra_delay == 0))
+		return;
+
+	if (1 == extra_delay) {
+		udelay(extra_delay_time);
+		return;
+	}
 
 	switch (id_vendor) {
 		case 0x152d: // Jmicron
@@ -1130,7 +1144,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 			bcb->Length);
 	result = usb_stor_bulk_transfer_buf(us, us->send_bulk_pipe,
 				bcb, cbwlen, NULL);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 	delay_for_JM(us);
 #endif
 	US_DEBUGP("Bulk command transfer result=%d\n", result);
@@ -1150,7 +1164,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		unsigned int pipe = srb->sc_data_direction == DMA_FROM_DEVICE ? 
 				us->recv_bulk_pipe : us->send_bulk_pipe;
 		result = usb_stor_bulk_srb(us, pipe, srb);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 		delay_for_JM(us);
 #endif
 		US_DEBUGP("Bulk data transfer result 0x%x\n", result);
@@ -1175,7 +1189,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 	US_DEBUGP("Attempting to get CSW...\n");
 	result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 	delay_for_JM(us);
 #endif
 
@@ -1187,7 +1201,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		US_DEBUGP("Received 0-length CSW; retrying...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 	delay_for_JM(us);
 #endif
 	}
@@ -1199,7 +1213,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		US_DEBUGP("Attempting to get CSW (2nd try)...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, NULL);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 	delay_for_JM(us);
 #endif
 	}
@@ -1259,7 +1273,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		}
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 	delay_for_JM(us);
 #endif
 

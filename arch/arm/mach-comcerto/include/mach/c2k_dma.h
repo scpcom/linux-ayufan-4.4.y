@@ -219,8 +219,8 @@ extern void comcerto_dma_wait(void);
 extern void comcerto_do_mdma_xor(unsigned int src_count, unsigned int bytes, dma_addr_t dest, dma_addr_t *srcs);
 extern void comcerto_do_mdma_memcpy(void);
 
-int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, struct page *page, unsigned int offset, unsigned int len, int use_acp);
-int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, struct page *page, unsigned int offset, unsigned int len, int use_acp);
+int comcerto_dma_sg_add_input(struct comcerto_dma_sg *sg, void *p, unsigned int len, int use_acp);
+int comcerto_dma_sg_add_output(struct comcerto_dma_sg *sg, void *p, unsigned int len, int use_acp);
 void comcerto_dma_sg_setup(struct comcerto_dma_sg *sg, unsigned int len);
 void comcerto_dma_sg_cleanup(struct comcerto_dma_sg *sg, unsigned int len);
 

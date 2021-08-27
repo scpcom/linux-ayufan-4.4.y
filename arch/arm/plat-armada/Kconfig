@@ -28,13 +28,31 @@ menu "Armada SoC in Synology's options"
 config SYNO_ARMADA
 	bool "synology armada porting define"
 	default y
-	depends on PLAT_ARMADA
+	depends on ARCH_ARMADA_XP || ARCH_ARMADA370
 
 config SYNO_ARMADA_ARCH
 	bool "synology armada porting define for architecture"
 	default y
 	depends on ARCH_ARMADA_XP || ARCH_ARMADA370
 
+config SYNO_ARMADA_V2
+    bool "synology armada porting define for A375 & A38X"
+    default y
+    depends on ARCH_ARMADA375
+
+config SYNO_ARMADA_ARCH_V2
+    bool "synology armada porting define for architecture A375 & A38X"
+    default y
+    depends on ARCH_ARMADA375 
+
+config SYNO_ARMADA_ARCH_COMM
+	bool "synology armada porting defined for make file"
+	default y 
+	depends on SYNO_ARMADA_ARCH || SYNO_ARMADA_ARCH_V2
+	---help---
+       it's hard to include both SYNO_ARMADA & SYNO_ARMADA_V2 in make file, so
+       we add a this defination for make file. 
+		
 endmenu
 
 if ARCH_ARMADA370

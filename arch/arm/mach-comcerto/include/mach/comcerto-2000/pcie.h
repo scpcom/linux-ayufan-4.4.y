@@ -54,15 +54,14 @@
 #define AXI_OP_TYPE_COMPLETION_LOCKED	11
 #define AXI_OP_TYPE_DBI_ELBI_ENABLE	1
 
-
-
 /* CFG5 Register definitions */
 #define 	CFG5_APP_INIT_RST	0x01
 #define 	CFG5_LTSSM_ENABLE	0x02
 #define 	CFG5_APP_RDY_L23	0x04
-
+#define 	CFG5_LINK_DOWN_RST	0x200
 
 /* STS0 Register definitions */
+#define 	STS0_LINK_REQ_RST_NOT	0x0001
 #define 	STS0_XMLH_LINK_UP	0x8000
 #define 	STS0_RDLH_LINK_UP	0x10000
 

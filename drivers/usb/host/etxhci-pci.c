@@ -30,7 +30,7 @@
 #include "etxhci.h"
 
 /* Device for a quirk */
-#ifndef MY_DEF_HERE
+#ifndef SYNO_USB3_PCI_ID_DEFINE
 #define PCI_VENDOR_ID_ETRON		0x1b6f
 #define PCI_DEVICE_ID_ETRON_EJ168	0x7023
 #define PCI_DEVICE_ID_ETRON_EJ188	0x7052
@@ -38,7 +38,7 @@
 unsigned short xhci_vendor = 0;
 #endif
 
-static const char hcd_name[] = "etxhci_hcd_140303";
+static const char hcd_name[] = "etxhci_hcd_141015";
 
 /* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
@@ -62,7 +62,7 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 	struct pci_dev		*pdev = to_pci_dev(dev);
 	struct usb_hcd		*hcd = xhci_to_hcd(xhci);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_PCI_ID_DEFINE
 	xhci_vendor = pdev->vendor;
 #endif
 
@@ -72,13 +72,15 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		pci_read_config_dword(pdev, 0x58, &xhci->hcc_params1);
 		xhci->hcc_params1 &= 0xffff;
 		xhci_init_ejxxx(xhci);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_PCI_ID_DEFINE
 		xhci_err(xhci, "Etron chip found.\n");
 #endif
 		if (pdev->device == PCI_DEVICE_ID_ETRON_EJ168)
 			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ168;
-		else if (pdev->device == PCI_DEVICE_ID_ETRON_EJ188)
+		else if (pdev->device == PCI_DEVICE_ID_ETRON_EJ188) {
 			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ188;
+			xhci->quirks |= XHCI_BULK_XFER_QUIRK;
+		}
 
 		xhci_dbg(xhci, "Etron chip ID %02x\n", hcd->chip_id);
 		xhci->quirks |= XHCI_SPURIOUS_SUCCESS;
@@ -165,6 +167,17 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 			IRQF_SHARED);
 	if (retval)
 		goto put_usb3_hcd;
+
+	xhci->bulk_xfer_wq = create_singlethread_workqueue(pci_name(dev));
+	if (!xhci->bulk_xfer_wq) {
+		retval = -ENOMEM;
+		goto put_usb3_hcd;
+	}
+
+	INIT_WORK(&xhci->bulk_xfer_work, xhci_bulk_xfer_work);
+	INIT_LIST_HEAD(&xhci->bulk_xfer_list);
+	xhci->bulk_xfer_count = 0;
+
 	/* Roothub already marked as USB 3.0 speed */
 	return 0;
 
@@ -185,6 +198,9 @@ static void xhci_pci_remove(struct pci_dev *dev)
 		usb_put_hcd(xhci->shared_hcd);
 	}
 	usb_hcd_pci_remove(dev);
+	if (xhci->bulk_xfer_wq)
+		destroy_workqueue(xhci->bulk_xfer_wq);
+
 	kfree(xhci);
 }
 

@@ -65,8 +65,8 @@ void SynoAutoRemapReport(struct mddev *mddev, sector_t sector, struct block_devi
 		if (NULL == funcSYNOSendAutoRemapRaidEvent) {
 			printk("Can't reference to function 'SYNOSendAutoRemapRaidEvent'\n");
 		} else {
-			printk("report md[%d] [%d]th disk auto-remapped sector:[%llu]\n",
-				mddev->md_minor, index, (unsigned long long)sector);
+			printk("report md[%d] auto-remapped sector:[%llu]\n",
+				mddev->md_minor, (unsigned long long)sector);
 			funcSYNOSendAutoRemapRaidEvent(mddev->md_minor, sector, (unsigned int)index);
 		}
 	} else {

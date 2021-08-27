@@ -926,4 +926,4 @@ endif	# if CRYPTO
 
 source "crypto/ocf/Kconfig"
 
-source "crypto/ocf/Kconfig"
+source "crypto/cryptodev-linux/Kconfig"

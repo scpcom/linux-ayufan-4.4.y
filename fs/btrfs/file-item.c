@@ -246,8 +246,8 @@ static int __btrfs_lookup_bio_sums(struct btrfs_root *root,
 						offset + bvec->bv_len - 1,
 						EXTENT_NODATASUM, GFP_NOFS);
 				} else {
-					printk(KERN_INFO "btrfs no csum found "
-					       "for inode %llu start %llu\n",
+					btrfs_info(BTRFS_I(inode)->root->fs_info,
+						   "no csum found for inode %llu start %llu",
 					       btrfs_ino(inode), offset);
 				}
 				item = NULL;
@@ -328,6 +328,9 @@ int btrfs_lookup_csums_range(struct btrfs_root *root, u64 start, u64 end,
 	size_t size;
 	u64 csum_end;
 	u16 csum_size = btrfs_super_csum_size(root->fs_info->super_copy);
+
+	ASSERT(start == ALIGN(start, root->sectorsize) &&
+	       (end + 1) == ALIGN(end + 1, root->sectorsize));
 
 	path = btrfs_alloc_path();
 	if (!path)
@@ -846,10 +849,8 @@ insert:
 	path->leave_spinning = 0;
 	if (ret < 0)
 		goto fail_unlock;
-	if (ret != 0) {
-		WARN_ON(1);
+	if (WARN_ON(ret != 0))
 		goto fail_unlock;
-	}
 	leaf = path->nodes[0];
 csum:
 	item = btrfs_item_ptr(leaf, path->slots[0], struct btrfs_csum_item);

@@ -97,12 +97,12 @@ static int cp_stat64(struct stat64 __user *ubuf, struct kstat *stat)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 #include <linux/synolib.h>
-extern int syno_hibernation_log_sec;
+extern int syno_hibernation_log_level;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 
 #include <linux/namei.h>
 
@@ -110,7 +110,7 @@ extern int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct k
 extern int syno_vfs_stat(const char __user *name, struct kstat *stat, int flags, int stat_flags);
 extern int syno_vfs_fstat(unsigned int fd, struct kstat *stat, int stat_flags);
 
-asmlinkage long sys32_SYNOCaselessStat(char __user * filename, struct stat64 __user *statbuf)
+asmlinkage long sys32_SYNOCaselessStat64(char __user * filename, struct stat64 __user *statbuf)
 {
 	int lastComponent = 0;
 	long error = -1;
@@ -124,7 +124,7 @@ asmlinkage long sys32_SYNOCaselessStat(char __user * filename, struct stat64 __u
 	return error;
 }
 
-asmlinkage long sys32_SYNOCaselessLStat(char __user * filename, struct stat64 __user *statbuf)
+asmlinkage long sys32_SYNOCaselessLStat64(char __user * filename, struct stat64 __user *statbuf)
 {
 	int lastComponent = 0;
 	long error = -1;
@@ -156,7 +156,7 @@ struct SYNOSTAT64 {
 	struct SYNOSTAT64_EXTRA ext;
 };
 
-static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYNOSTAT64 __user * pSt)
+static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct SYNOSTAT64 __user * pSt)
 {
 	int error = -EFAULT;
 
@@ -199,7 +199,7 @@ Out:
 	return error;
 }
 
-static long do_SYNOStat32(char __user * filename, int nofollowLink, unsigned int flags, struct SYNOSTAT64 __user * pSt)
+static long do_SYNOStat64(char __user * filename, int nofollowLink, unsigned int flags, struct SYNOSTAT64 __user * pSt)
 {
 	long error = -EINVAL;
 	int lastComponent = 0;
@@ -220,12 +220,12 @@ static long do_SYNOStat32(char __user * filename, int nofollowLink, unsigned int
 		if (nofollowLink) {
 			error = syno_vfs_stat(filename, &kst, 0, flags);
 		} else {
-			error = syno_vfs_stat(filename, &kst, LOOKUP_FOLLOW, flags);
-#ifdef MY_ABC_HERE
-			if(syno_hibernation_log_sec > 0) {
+#ifdef SYNO_DEBUG_FLAG
+			if(syno_hibernation_log_level > 0) {
 				syno_do_hibernation_log(filename);
 			}
 #endif
+			error = syno_vfs_stat(filename, &kst, LOOKUP_FOLLOW, flags);
 		}
 	}
 
@@ -233,31 +233,31 @@ static long do_SYNOStat32(char __user * filename, int nofollowLink, unsigned int
 		goto Out;
 	}
 
-	error = SYNOStatCopyToUser(&kst, flags, pSt);
+	error = SYNOStat64CopyToUser(&kst, flags, pSt);
 Out:
 	return error;
 }
 
-asmlinkage long sys32_SYNOStat(char __user * filename, unsigned int flags, struct SYNOSTAT64 __user * pSt)
+asmlinkage long sys32_SYNOStat64(char __user * filename, unsigned int flags, struct SYNOSTAT64 __user * pSt)
 {
-	return do_SYNOStat32(filename, 0, flags, pSt);
+	return do_SYNOStat64(filename, 0, flags, pSt);
 }
 
-asmlinkage long sys32_SYNOFStat(unsigned int fd, unsigned int flags, struct SYNOSTAT64 __user * pSt)
+asmlinkage long sys32_SYNOFStat64(unsigned int fd, unsigned int flags, struct SYNOSTAT64 __user * pSt)
 {
 	int error;
 	struct kstat kst;
 
 	error = syno_vfs_fstat(fd, &kst, flags);
 	if (!error) {
-		error = SYNOStatCopyToUser(&kst, flags, pSt);
+		error = SYNOStat64CopyToUser(&kst, flags, pSt);
 	}
 	return error;
 }
 
-asmlinkage long sys32_SYNOLStat(char __user * filename, unsigned int flags, struct SYNOSTAT64 __user * pSt)
+asmlinkage long sys32_SYNOLStat64(char __user * filename, unsigned int flags, struct SYNOSTAT64 __user * pSt)
 {
-	return do_SYNOStat32(filename, 1, flags, pSt);
+	return do_SYNOStat64(filename, 1, flags, pSt);
 }
 
 #endif /* SYNO_STAT */

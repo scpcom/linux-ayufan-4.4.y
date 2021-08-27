@@ -61,7 +61,7 @@ struct splice_pipe_desc {
 	void (*spd_release)(struct splice_pipe_desc *, unsigned int);
 };
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 struct recvfile_ctl_blk {
 	struct page *rv_page;
 	loff_t rv_pos;

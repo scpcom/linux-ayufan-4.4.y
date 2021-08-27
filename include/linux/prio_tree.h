@@ -4,6 +4,16 @@
 #ifndef _LINUX_PRIO_TREE_H
 #define _LINUX_PRIO_TREE_H
 
+#ifdef CONFIG_SYNO_ALPINE
+/* index type */
+#ifdef CONFIG_LFS_ON_32CPU
+#define prio_tree_t  unsigned long long
+#define PRIO_TREE_KEY_MAX_VALUE ULLONG_MAX
+#else
+#define prio_tree_t	unsigned long
+#define PRIO_TREE_KEY_MAX_VALUE	ULONG_MAX
+#endif
+#endif
 /*
  * K&R 2nd ed. A8.3 somewhat obliquely hints that initial sequences of struct
  * fields with identical types should end up at the same location. We'll use
@@ -24,8 +34,13 @@ struct prio_tree_node {
 	struct prio_tree_node	*left;
 	struct prio_tree_node	*right;
 	struct prio_tree_node	*parent;
+#ifdef CONFIG_SYNO_ALPINE
+	prio_tree_t		start;
+	prio_tree_t		last;	/* last location _in_ interval */
+#else
 	unsigned long		start;
 	unsigned long		last;	/* last location _in_ interval */
+#endif
 };
 
 struct prio_tree_root {
@@ -40,8 +55,13 @@ struct prio_tree_root {
 
 struct prio_tree_iter {
 	struct prio_tree_node	*cur;
+#ifdef CONFIG_SYNO_ALPINE
+	prio_tree_t		mask;
+	prio_tree_t		value;
+#else
 	unsigned long		mask;
 	unsigned long		value;
+#endif
 	int			size_level;
 
 	struct prio_tree_root	*root;

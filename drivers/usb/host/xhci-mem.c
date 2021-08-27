@@ -1479,7 +1479,7 @@ int xhci_endpoint_init(struct xhci_hcd *xhci,
 			ep_ctx->ep_info2 &= cpu_to_le32(~MAX_BURST_MASK);
 			ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(1));
 		}
-#endif //MY_ABC_HERE
+#endif //SYNO_USB3_SMALL_MAX_BURST
 		break;
 	case USB_SPEED_HIGH:
 		/* bits 11:12 specify the number of additional transaction

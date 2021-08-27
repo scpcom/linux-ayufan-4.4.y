@@ -92,9 +92,11 @@ enum ip_conntrack_status {
 	IPS_PERMANENT_BIT = 13,
 	IPS_PERMANENT = (1 << IPS_PERMANENT_BIT),
 
+#ifdef CONFIG_COMCERTO_FP
    /* Connection is assured by DPI application */
    IPS_DPI_ALLOWED_BIT = 14,
    IPS_DPI_ALLOWED = (1 << IPS_DPI_ALLOWED_BIT),
+#endif
 #endif
 };
 

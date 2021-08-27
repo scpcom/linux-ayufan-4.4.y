@@ -464,8 +464,11 @@ int xhci_reset(struct xhci_hcd *xhci)
 {
 	u32 command;
 	u32 state;
+#ifdef CONFIG_SYNO_ARMADA_V2
+	int ret, i;
+#else
 	int ret;
-
+#endif
 	state = xhci_readl(xhci, &xhci->op_regs->status);
 	if ((state & STS_HALT) == 0) {
 #ifdef SYNO_USB3_RESET_RETRY
@@ -499,8 +502,21 @@ int xhci_reset(struct xhci_hcd *xhci)
 	 * xHCI cannot write to any doorbells or operational registers other
 	 * than status until the "Controller Not Ready" flag is cleared.
 	 */
+#ifdef CONFIG_SYNO_ARMADA_V2
+	ret = handshake(xhci, &xhci->op_regs->status,
+			STS_CNR, 0, 10 * 1000 * 1000);
+
+	for (i = 0; i < 2; ++i) {
+		xhci->bus_state[i].port_c_suspend = 0;
+		xhci->bus_state[i].suspended_ports = 0;
+/*		xhci->bus_state[i].resuming_ports = 0;*/
+	}
+
+	return ret;
+#else
 	return handshake(xhci, &xhci->op_regs->status,
 			 STS_CNR, 0, 10 * 1000 * 1000);
+#endif
 }
 
 #ifdef CONFIG_PCI
@@ -552,7 +568,7 @@ static void xhci_free_irq(struct xhci_hcd *xhci)
 	int ret;
 
 	/* return if using legacy interrupt */
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (xhci_to_hcd(xhci)->irq > 0)
 #else
 	if (xhci_to_hcd(xhci)->irq >= 0)
@@ -562,7 +578,7 @@ static void xhci_free_irq(struct xhci_hcd *xhci)
 	ret = xhci_free_msi(xhci);
 	if (!ret)
 		return;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (pdev->irq > 0)
 #else
 	if (pdev->irq >= 0)
@@ -677,7 +693,7 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 	/* unregister the legacy interrupt */
 	if (hcd->irq)
 		free_irq(hcd->irq, hcd);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
 	hcd->irq = 0;
 #else
 	hcd->irq = -1;
@@ -689,7 +705,7 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 		ret = xhci_setup_msi(xhci);
 
 	if (!ret)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
 		/* hcd->irq is 0, we have MSI */
 #else
 		/* hcd->irq is -1, we have MSI */
@@ -907,11 +923,11 @@ static void xhci_event_ring_work(unsigned long arg)
 #endif
 
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 extern int gSynoFactoryUSBFastReset;
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
 #endif
@@ -930,35 +946,35 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 
 	xhci_dbg(xhci, "Finished xhci_run for USB3 roothub\n");
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
 	}
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
-#ifdef MY_ABC_HERE
+#if defined(SYNO_USB3_ERR_MONITOR) || defined(SYNO_USB3_LIGHTWEIGHT_SPECIAL_RESET)
+#ifdef SYNO_FACTORY_USB3_DISABLE
 	if(1 == gSynoFactoryUSB3Disable || PCI_VENDOR_ID_ETRON == xhci_vendor) {
 		xhci_special_reset = XHCI_SPECIAL_RESET_DISABLE;
 	} else {
 		xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
-#if defined(MY_DEF_HERE)
+#if defined(SYNO_USB3_ERR_MONITOR)
 		xhci_task = kthread_run(xhci_thread, NULL, "xhci_thread");
 #endif
 	}
 #else
-#if defined(MY_DEF_HERE)
+#if defined(SYNO_USB3_ERR_MONITOR)
 	xhci_task = kthread_run(xhci_thread, NULL, "xhci_thread");
 #endif
-#endif //MY_ABC_HERE
-#endif //MY_DEF_HERE || MY_ABC_HERE
+#endif //SYNO_FACTORY_USB3_DISABLE
+#endif //SYNO_USB3_ERR_MONITOR || SYNO_USB3_LIGHTWEIGHT_SPECIAL_RESET
 
 	return 0;
 }
@@ -1087,6 +1103,9 @@ void xhci_stop(struct usb_hcd *hcd)
 {
 	u32 temp;
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
+#ifndef CONFIG_USB_ETRON_HUB
+	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
+#endif
 
 #ifdef SYNO_USB3_ERR_MONITOR
 	if (xhci_task) {
@@ -1118,6 +1137,9 @@ void xhci_stop(struct usb_hcd *hcd)
 	del_timer_sync(&xhci->event_ring_timer);
 #endif
 
+#ifndef CONFIG_USB_ETRON_HUB
+	if (pdev->vendor != PCI_VENDOR_ID_ETRON) {
+#endif
 	/* Deleting Compliance Mode Recovery Timer */
 	if ((xhci->quirks & XHCI_COMP_MODE_QUIRK) &&
 			(!(xhci_all_ports_seen_u0(xhci))))
@@ -1125,6 +1147,9 @@ void xhci_stop(struct usb_hcd *hcd)
 
 	if (xhci->quirks & XHCI_AMD_PLL_FIX)
 		usb_amd_dev_put();
+#ifndef CONFIG_USB_ETRON_HUB
+	}
+#endif
 
 	xhci_dbg(xhci, "// Disabling event ring interrupts\n");
 	temp = xhci_readl(xhci, &xhci->op_regs->status);
@@ -1139,7 +1164,7 @@ void xhci_stop(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
@@ -4624,7 +4649,11 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 {
 	struct xhci_hcd		*xhci;
 	struct device		*dev = hcd->self.controller;
+#ifdef CONFIG_SYNO_ALPINE
+	int			retval = -ENOMEM;
+#else
 	int			retval;
+#endif
 	u32			temp;
 
 	/* Accept arbitrarily long scatter-gather lists */
@@ -4653,12 +4682,24 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 		 */
 		xhci = hcd_to_xhci(hcd);
 		temp = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
+#ifdef CONFIG_SYNO_ALPINE
+		if (HCC_64BIT_ADDR(temp) &&
+				!dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64))) {
+			xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
+			dma_set_coherent_mask(hcd->self.controller, DMA_BIT_MASK(64));
+		} else {
+			if (dma_set_mask(hcd->self.controller, DMA_BIT_MASK(32)))
+				goto error;
+			dma_set_coherent_mask(hcd->self.controller, DMA_BIT_MASK(32));
+		}
+#else
 		if (HCC_64BIT_ADDR(temp)) {
 			xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
 			dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64));
 		} else {
 			dma_set_mask(hcd->self.controller, DMA_BIT_MASK(32));
 		}
+#endif
 		return 0;
 	}
 
@@ -4691,12 +4732,24 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 	xhci_dbg(xhci, "Reset complete\n");
 
 	temp = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
+#ifdef CONFIG_SYNO_ALPINE
+	if (HCC_64BIT_ADDR(temp) &&
+			!dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64))) {
+		xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
+		dma_set_coherent_mask(hcd->self.controller, DMA_BIT_MASK(64));
+	} else {
+		if (dma_set_mask(hcd->self.controller, DMA_BIT_MASK(32)))
+			goto error;
+		dma_set_coherent_mask(hcd->self.controller, DMA_BIT_MASK(32));
+	}
+#else
 	if (HCC_64BIT_ADDR(temp)) {
 		xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
 		dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64));
 	} else {
 		dma_set_mask(hcd->self.controller, DMA_BIT_MASK(32));
 	}
+#endif
 
 	xhci_dbg(xhci, "Calling HCD init\n");
 	/* Initialize HCD and host controller data structures. */
@@ -4723,7 +4776,7 @@ static int __init xhci_hcd_init(void)
 		printk(KERN_DEBUG "Problem registering PCI driver.");
 		return retval;
 	}
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
 	retval = xhci_register_plat();
 	if (retval < 0) {
 		printk(KERN_DEBUG "Problem registering platform driver.");
@@ -4749,7 +4802,7 @@ static int __init xhci_hcd_init(void)
 	BUILD_BUG_ON(sizeof(struct xhci_run_regs) != (8+8*128)*32/8);
 	BUILD_BUG_ON(sizeof(struct xhci_doorbell_array) != 256*32/8);
 	return 0;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
 unreg_pci:
 	xhci_unregister_pci();
 	return retval;
@@ -4760,7 +4813,7 @@ module_init(xhci_hcd_init);
 static void __exit xhci_hcd_cleanup(void)
 {
 	xhci_unregister_pci();
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
 	xhci_unregister_plat();
 #endif
 }

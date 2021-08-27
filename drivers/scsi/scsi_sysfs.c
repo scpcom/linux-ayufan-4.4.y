@@ -1062,9 +1062,34 @@ int scsi_sysfs_add_sdev(struct scsi_device *sdev)
 	return error;
 }
 
+#ifdef CONFIG_SYNO_ARMADA_V2
+extern int ss_stats[128];
+#endif
+
 void __scsi_remove_device(struct scsi_device *sdev)
 {
 	struct device *dev = &sdev->sdev_gendev;
+
+#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef CONFIG_MV_STAGGERED_SPINUP
+	if ((sdev->host->hostt->support_staggered_spinup == 1) && /*host has spinup feature avaliable?*/
+	    scsi_spinup_enabled()) {
+                if (sdev->standby_timeout_secs > 0) {
+                        /* if the device had any standby timer */
+			//printk("Device removed, canceling standby timer...\n");
+                        standby_delete_timer(sdev);
+                }
+                if (sdev->spinup_timeout.function) {
+                        /* deleting any spinup timer thats may be still there and freeing the semaphore */
+			//printk("Device removed, canceling spinup timer...\n");
+                        spinup_delete_timer(sdev);
+                        scsi_spinup_up();
+                }
+		sdev->sdev_power_state = SDEV_PW_UNKNOWN;
+		ss_stats[sdev->ss_id] = sdev->sdev_power_state;
+        }
+#endif
+#endif
 
 	if (sdev->is_visible) {
 		if (scsi_device_set_state(sdev, SDEV_CANCEL) != 0)
@@ -1102,14 +1127,14 @@ void scsi_remove_device(struct scsi_device *sdev)
 	mutex_lock(&shost->scan_mutex);
 	__scsi_remove_device(sdev);
 	mutex_unlock(&shost->scan_mutex);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_SPINUP_DELAY
 	SynoSpinupRemove(sdev);
-#endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
+#endif /* SYNO_SAS_SPINUP_DELAY */
+#ifdef SYNO_RAID_DEVICE_NOTIFY
 	if (funcSYNORaidDiskUnplug) {
 		funcSYNORaidDiskUnplug(sdev->syno_disk_name);
 	}
-#endif  /* MY_ABC_HERE */
+#endif  /* SYNO_RAID_DEVICE_NOTIFY */
 }
 EXPORT_SYMBOL(scsi_remove_device);
 

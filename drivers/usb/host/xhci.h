@@ -661,7 +661,7 @@ struct xhci_ep_ctx {
 #define MAX_BURST(p)	(((p)&0xff) << 8)
 #ifdef SYNO_USB3_SMALL_MAX_BURST
 #define MAX_BURST_MASK (0xff << 8)
-#endif //MY_ABC_HERE
+#endif //SYNO_USB3_SMALL_MAX_BURST
 #define CTX_TO_MAX_BURST(p)	(((p) >> 8) & 0xff)
 #define MAX_PACKET(p)	(((p)&0xffff) << 16)
 #define MAX_PACKET_MASK		(0xffff << 16)
@@ -1416,6 +1416,9 @@ struct xhci_hcd {
 	__u32		hcs_params2;
 	__u32		hcs_params3;
 	__u32		hcc_params;
+#ifndef CONFIG_USB_ETRON_HUB
+	__u32       hcc_params1;
+#endif
 
 	spinlock_t	lock;
 
@@ -1512,6 +1515,10 @@ struct xhci_hcd {
 #define	XHCI_SW_BW_CHECKING	(1 << 8)
 #define XHCI_AMD_0x96_HOST	(1 << 9)
 #define XHCI_TRUST_TX_LENGTH	(1 << 10)
+#ifndef CONFIG_USB_ETRON_HUB
+#define XHCI_HUB_INFO_QUIRK (1 << 13)
+#define XHCI_EP_INFO_QUIRK  (1 << 14)
+#endif
 #define XHCI_SPURIOUS_REBOOT	(1 << 13)
 #define XHCI_COMP_MODE_QUIRK	(1 << 14)
 #define XHCI_AVOID_BEI		(1 << 15)
@@ -1703,12 +1710,15 @@ void xhci_free_command(struct xhci_hcd *xhci,
 /* xHCI PCI glue */
 int xhci_register_pci(void);
 void xhci_unregister_pci(void);
+#ifndef CONFIG_USB_ETRON_HUB
+void xhci_init_ejxxx(struct xhci_hcd *xhci);
+#endif
 #else
 static inline int xhci_register_pci(void) { return 0; }
 static inline void xhci_unregister_pci(void) {}
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) 
+#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
 int xhci_register_plat(void);
 void xhci_unregister_plat(void);

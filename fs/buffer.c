@@ -1027,7 +1027,7 @@ grow_dev_page(struct block_device *bdev, sector_t block,
 		bh = page_buffers(page);
 		if (bh->b_size == size) {
 			end_block = init_page_buffers(page, bdev,
-#ifdef CONFIG_SYNO_ARMADA
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 				(sector_t)((sector_t)index <<
 					(sector_t)sizebits), size);
 #else
@@ -1053,7 +1053,7 @@ grow_dev_page(struct block_device *bdev, sector_t block,
 	 */
 	spin_lock(&inode->i_mapping->private_lock);
 	link_dev_buffers(page, bh);
-#ifdef CONFIG_SYNO_ARMADA
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	end_block = init_page_buffers(page, bdev,
 			(sector_t)((sector_t)index << (sector_t)sizebits),
 			size);

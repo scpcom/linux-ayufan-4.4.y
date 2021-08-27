@@ -20,39 +20,22 @@ AR := $(CROSS_COMPILE)ar
 #CFLAGS += -I$(KSRC)/tools/voice/
 
 ifeq ($(CONFIG_SILABS_SLIC_SUPPORT),y)
-TARGETS += siapi_lib.o
-LIBS := libsiapi.a
-TOOL := mv_voice_tool.c
-CFLAGS += -I$(KSRC)/arch/arm/plat-feroceon/mv_hal/voiceband/slic/silabs/arch_marvell/
+ifeq ($(CONFIG_SILAB_SLIC_EXTERNAL_DRIVER),y)
+
 CFLAGS += -I$(KSRC)/arch/arm/plat-feroceon/mv_drivers_lsp/mv_phone/
-CFLAGS += -I$(KSRC)/arch/arm/plat-feroceon/mv_hal/voiceband/slic/silabs/inc
-CFLAGS += -I$(KSRC)/arch/arm/plat-feroceon/mv_hal/voiceband/slic/silabs/custom/
-CFLAGS += -I$(KSRC)/arch/arm/plat-feroceon/mv_drivers_lsp/mv_phone/test/
+CFLAGS += -I$(SILABS_SLIC)/proslic_api/inc -I$(SILABS_SLIC)/proslic_api/custom
+CFLAGS += -I$(SILABS_SLIC)/silabs_dev
 
-ifeq ($(CONFIG_SILAB_SLIC_SI3217x),y)
- CFLAGS += -DSI3217x
-endif
-ifeq ($(CONFIG_SILAB_SLIC_SI3226x),y)
- CFLAGS += -DSI3226x
-endif
+all: mv_voice_tool-si3217x mv_voice_tool-si3226x
 
-ifeq ($(CONFIG_MV_TDM_USE_DCO),y)
- CFLAGS += -DMV_TDM_USE_DCO
-endif
+mv_voice_tool-si3217x: mv_voice_tool.c silabs_lib.c
+	$(CC) $(CFLAGS) -DMV_TDM_USE_DCO -DSI3217x -o $@ $^
 
-CFLAGS += -I$(KSRC)/arch/arm/plat-feroceon/mv_drivers_lsp/mv_phone/test/
-
-all:
-	$(CC) $(CFLAGS) -static -c silabs_lib.c -o $(TARGETS)
-	$(AR) rcs $(LIBS) $(TARGETS)
-	$(CC) $(CFLAGS) -static $(PROFILE) $(TOOL) -L. $(LIBS) -o mv_voice_tool
-
-mv_voice_tool: $(PROFILE) $(TOOL)
-	$(CC) $(CFLAGS) -static $(PROFILE) $(TOOL) -L. $(LIBS) -o mv_voice_tool
+mv_voice_tool-si3226x: mv_voice_tool.c silabs_lib.c
+	$(CC) $(CFLAGS) -DMV_TDM_USE_DCO -DSI3226x -o $@ $^
 
 clean:
-	rm -f *.o *.a mv_voice_tool
-	@for subdir in $(SUBDIRS); do \
-                (cd $$subdir && $(MAKE) $@) || exit 1; \
-        done
+	rm -f mv_voice_tool-si3217x mv_voice_tool-si3226x
+
+endif #CONFIG_SILAB_SLIC_EXTERNAL_DRIVER
 endif #CONFIG_SILABS_SLIC_SUPPORT

@@ -106,7 +106,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SYNO_RS214_ID			(SYNO_US3_ID + 1)
 #define SYNO_DS214se_ID			(SYNO_RS214_ID + 1)
 #define SYNO_DS414slim_ID			(SYNO_DS214se_ID + 1)
-#define MV_MAX_BOARD_ID			(SYNO_DS414slim_ID + 1)
+#define SYNO_DS115j_ID			(SYNO_DS414slim_ID + 1)
+#define MV_MAX_BOARD_ID			(SYNO_DS115j_ID + 1)
 
 #else /* CONFIG_SYNO_ARMADA_ARCH */
 #define MV_MAX_BOARD_ID			(RD_88F6710_ID + 1)
@@ -247,6 +248,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SYNO_DS414slim_GPP_POL_MID            0x0
 #define SYNO_DS414slim_GPP_POL_HIGH           0x0
 
+/*********************/
+/*    SYNO DS115j    */
+/*********************/
+#define SYNO_DS115j_MPP0_7          0x11111111
+#define SYNO_DS115j_MPP8_15         0x11111111
+#define SYNO_DS115j_MPP16_23        0x00000111
+#define SYNO_DS115j_MPP24_31        0x00000000
+#define SYNO_DS115j_MPP32_39        0x00022220
+#define SYNO_DS115j_MPP40_47        0x00000220
+#define SYNO_DS115j_MPP48_55        0x00000000
+#define SYNO_DS115j_MPP56_63        0x00030000
+#define SYNO_DS115j_MPP64_67        0x00000000
+
+#define SYNO_DS115j_GPP_OUT_ENA_LOW     (~(BIT31))
+#define SYNO_DS115j_GPP_OUT_ENA_MID     (~(BIT5|BIT16|BIT28|BIT31))
+#define SYNO_DS115j_GPP_OUT_ENA_HIGH    (~(BIT0|BIT1))
+
+#define SYNO_DS115j_GPP_OUT_VAL_LOW     0x0
+#define SYNO_DS115j_GPP_OUT_VAL_MID     (BIT5|BIT12)
+#define SYNO_DS115j_GPP_OUT_VAL_HIGH    0x0
+
+#define SYNO_DS115j_GPP_POL_LOW         0x0
+#define SYNO_DS115j_GPP_POL_MID         0x0
+#define SYNO_DS115j_GPP_POL_HIGH        0x0
+
 #define GPIO_UNDEF 0xFF
 
 #endif /* CONFIG_SYNO_ARMADA_ARCH */
@@ -328,7 +354,7 @@ MPP#	NAME			IN/OUT
 /*******************/
 /* RD_88F6710 */
 /*******************/
-#define RD_88F6710_MPP0_7         0x00001111
+#define RD_88F6710_MPP0_7         0x00011111
 #define RD_88F6710_MPP8_15        0x33333030
 #define RD_88F6710_MPP16_23       0x22222110
 #define RD_88F6710_MPP24_31       0x02222222

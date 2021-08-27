@@ -736,6 +736,12 @@ static void xhci_giveback_urb_in_irq(struct xhci_hcd *xhci,
 
 	/* Only giveback urb when this is the last td in urb */
 	if (urb_priv->td_cnt == urb_priv->length) {
+		if (urb_priv->state == XHCI_URB_IN_QUEUED &&
+			xhci->bulk_xfer_count) {
+			xhci->bulk_xfer_count--;
+			queue_work(xhci->bulk_xfer_wq, &xhci->bulk_xfer_work);
+		}
+
 		usb_hcd_unlink_urb_from_ep(hcd, urb);
 
 		spin_unlock(&xhci->lock);
@@ -2541,7 +2547,7 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		 * TD list.
 		 */
 		if (list_empty(&ep_ring->td_list)) {
-#ifdef MY_DEF_HERE
+#ifdef SYNO_USB3_SURPRESS_WARN
 			xhci_dbg(xhci, "WARN Event TRB for slot %d ep %d "
 #else
 			xhci_warn(xhci, "WARN Event TRB for slot %d ep %d "
@@ -2664,6 +2670,11 @@ cleanup:
 		if (ret) {
 			urb = td->urb;
 			urb_priv = urb->hcpriv;
+			if (urb_priv->state == XHCI_URB_IN_QUEUED &&
+				xhci->bulk_xfer_count) {
+				xhci->bulk_xfer_count--;
+				queue_work(xhci->bulk_xfer_wq, &xhci->bulk_xfer_work);
+			}
 			/* Leave the TD around for the reset endpoint function
 			 * to use(but only if it's not a control endpoint,
 			 * since we already queued the Set TR dequeue pointer
@@ -3131,6 +3142,24 @@ static void check_trb_math(struct urb *urb, int num_trbs, int running_total)
 				urb->transfer_buffer_length);
 }
 
+static void clear_first_trb(struct xhci_hcd *xhci, struct xhci_ring *ring)
+{
+	struct xhci_generic_trb *trb;
+	int start_cycle;
+
+	start_cycle = ring->cycle_state;
+	trb = &ring->enqueue->generic;
+
+	if ((le32_to_cpu(trb->field[3]) & TRB_CYCLE) == start_cycle)
+	{
+		xhci_warn(xhci, "WARN cycle bit error, start_cycle=%d\n",start_cycle);
+		if (start_cycle == 0)
+			trb->field[3] |= cpu_to_le32(TRB_CYCLE);
+		else
+			trb->field[3] &= cpu_to_le32(~TRB_CYCLE);
+	}
+}
+
 static void requeue_first_trb(struct xhci_hcd *xhci, int slot_id,
 		unsigned int ep_index, unsigned int stream_id,
 		struct xhci_generic_trb *start_trb,
@@ -3372,6 +3401,7 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 			temp_trb.field[1] = cpu_to_le32(upper_32_bits(addr));
 			temp_trb.field[2] = cpu_to_le32(length_field);
 			temp_trb.field[3] = cpu_to_le32(field | TRB_TYPE(TRB_NORMAL));
+			clear_first_trb(xhci, ep_ring);
 			inc_enq(xhci, ep_ring, more_trbs_coming);
 		} else {
 			queue_trb(xhci, ep_ring, more_trbs_coming,
@@ -3523,6 +3553,7 @@ int etxhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 			temp_trb.field[1] = cpu_to_le32(upper_32_bits(addr));
 			temp_trb.field[2] = cpu_to_le32(length_field);
 			temp_trb.field[3] = cpu_to_le32(field | TRB_TYPE(TRB_NORMAL));
+			clear_first_trb(xhci, ep_ring);
 			inc_enq(xhci, ep_ring, more_trbs_coming);
 		} else {
 			queue_trb(xhci, ep_ring, more_trbs_coming,

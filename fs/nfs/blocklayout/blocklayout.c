@@ -664,9 +664,15 @@ fill_invalid_ext:
 			}
 			/* page ref released in bl_end_io_write_zero */
 			index = isect >> PAGE_CACHE_SECTOR_SHIFT;
+#ifdef CONFIG_SYNO_ALPINE
+			dprintk("%s zero %dth page: index %llu isect %llu\n",
+				__func__, npg_zero, (unsigned long long)index,
+				(unsigned long long)isect);
+#else
 			dprintk("%s zero %dth page: index %lu isect %llu\n",
 				__func__, npg_zero, index,
 				(unsigned long long)isect);
+#endif
 			page =
 			    find_or_create_page(wdata->inode->i_mapping, index,
 						GFP_NOFS);

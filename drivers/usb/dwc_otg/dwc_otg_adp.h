@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_adp.h $
- * $Revision: #6 $
- * $Date: 2011/05/17 $
- * $Change: 1774110 $
+ * $Revision: #7 $
+ * $Date: 2011/10/24 $
+ * $Change: 1871159 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -57,6 +57,8 @@ typedef struct dwc_otg_adp {
 	dwc_timer_t *vbuson_timer;
 	uint32_t vbuson_timer_started;
 	uint32_t attached;
+	uint32_t probe_counter;
+	uint32_t gpwrdn;
 } dwc_otg_adp_t;
 
 /**
@@ -69,7 +71,7 @@ extern uint32_t dwc_otg_adp_probe_start(dwc_otg_core_if_t * core_if);
 extern uint32_t dwc_otg_adp_sense_start(dwc_otg_core_if_t * core_if);
 extern uint32_t dwc_otg_adp_probe_stop(dwc_otg_core_if_t * core_if);
 extern uint32_t dwc_otg_adp_sense_stop(dwc_otg_core_if_t * core_if);
-extern void dwc_otg_adp_start(dwc_otg_core_if_t * core_if);
+extern void dwc_otg_adp_start(dwc_otg_core_if_t * core_if, uint8_t is_host);
 extern void dwc_otg_adp_init(dwc_otg_core_if_t * core_if);
 extern void dwc_otg_adp_remove(dwc_otg_core_if_t * core_if);
 extern int32_t dwc_otg_adp_handle_intr(dwc_otg_core_if_t * core_if);

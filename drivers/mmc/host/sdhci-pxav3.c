@@ -31,6 +31,9 @@
 #include <linux/slab.h>
 #include <linux/delay.h>
 #include <linux/module.h>
+#ifdef CONFIG_SYNO_ARMADA_V2
+#include <linux/mbus.h>
+#endif
 #include "sdhci.h"
 #include "sdhci-pltfm.h"
 
@@ -51,6 +54,56 @@
 #define SDCE_MISC_INT		(1<<2)
 #define SDCE_MISC_INT_EN	(1<<1)
 
+#ifdef CONFIG_SYNO_ARMADA_V2
+/*
+ * These registers are relative to the second register region, for the
+ * MBus bridge.
+ */
+#define SDHCI_WINDOW_CTRL(i)	(0x80 + ((i) << 3))
+#define SDHCI_WINDOW_BASE(i)	(0x84 + ((i) << 3))
+#define SDHCI_MAX_WIN_NUM	8
+
+static int mv_conf_mbus_windows(struct platform_device *pdev,
+				const struct mbus_dram_target_info *dram)
+{
+	int i;
+	void __iomem *regs;
+	struct resource *res;
+
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
+	if (!res) {
+		dev_err(&pdev->dev, "cannot get mbus registers\n");
+		return -EINVAL;
+	}
+
+	regs = ioremap(res->start, resource_size(res));
+	if (!regs) {
+		dev_err(&pdev->dev, "cannot map mbus registers\n");
+		return -ENOMEM;
+	}
+
+	for (i = 0; i < SDHCI_MAX_WIN_NUM; i++) {
+		writel(0, regs + SDHCI_WINDOW_CTRL(i));
+		writel(0, regs + SDHCI_WINDOW_BASE(i));
+	}
+
+	for (i = 0; i < dram->num_cs; i++) {
+		const struct mbus_dram_window *cs = dram->cs + i;
+
+		/* Write size, attributes and target id to control register */
+		writel(((cs->size - 1) & 0xffff0000) |
+			(cs->mbus_attr << 8) |
+			(dram->mbus_dram_target_id << 4) | 1,
+			regs + SDHCI_WINDOW_CTRL(i));
+		/* Write base address to base register */
+		writel(cs->base, regs + SDHCI_WINDOW_BASE(i));
+	}
+
+	iounmap(regs);
+
+	return 0;
+}
+#endif
 static void pxav3_set_private_registers(struct sdhci_host *host, u8 mask)
 {
 	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
@@ -188,6 +241,14 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
 	}
 	pltfm_host = sdhci_priv(host);
 	pltfm_host->priv = pxa;
+
+#ifdef CONFIG_SYNO_ARMADA_V2
+	if (pdata->dram != NULL) {
+		ret = mv_conf_mbus_windows(pdev, pdata->dram);
+		if (ret < 0)
+			goto err_clk_get;
+	}
+#endif
 
 	clk = clk_get(dev, "PXA-SDHCLK");
 	if (IS_ERR(clk)) {

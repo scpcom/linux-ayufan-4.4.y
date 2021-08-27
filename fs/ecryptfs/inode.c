@@ -226,6 +226,9 @@ ecryptfs_do_create(struct inode *directory_inode,
 	rc = ecryptfs_create_underlying_file(lower_dir_dentry->d_inode,
 					     ecryptfs_dentry, mode);
 	if (rc) {
+#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+		if (-EDQUOT != rc && -ENOSPC != rc)
+#endif
 		printk(KERN_ERR "%s: Failure to create dentry in lower fs; "
 		       "rc = [%d]\n", __func__, rc);
 		inode = ERR_PTR(rc);
@@ -313,6 +316,9 @@ ecryptfs_create(struct inode *directory_inode, struct dentry *ecryptfs_dentry,
 	ecryptfs_inode = ecryptfs_do_create(directory_inode, ecryptfs_dentry,
 					    mode);
 	if (unlikely(IS_ERR(ecryptfs_inode))) {
+#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+		if (-EDQUOT != PTR_ERR(ecryptfs_inode) && -ENOSPC != PTR_ERR(ecryptfs_inode))
+#endif
 		ecryptfs_printk(KERN_WARNING, "Failed to create file in"
 				"lower filesystem\n");
 		rc = PTR_ERR(ecryptfs_inode);
@@ -333,17 +339,6 @@ ecryptfs_create(struct inode *directory_inode, struct dentry *ecryptfs_dentry,
 	d_instantiate(ecryptfs_dentry, ecryptfs_inode);
 	unlock_new_inode(ecryptfs_inode);
 out:
-#ifdef MY_ABC_HERE
-	/* if the encrypted file created fail because QUOTA FULL (-EDQUOT), we delete it to
-	 * prevent can't crate the same file again */
-	if (-EDQUOT == rc || -EIO == rc || -ENOSPC == rc) {
-		struct dentry *lower_dentry = ecryptfs_dentry_to_lower(ecryptfs_dentry);
-		struct inode *lower_dir_inode = ecryptfs_inode_to_lower(directory_inode);
-
-		vfs_unlink(lower_dir_inode, lower_dentry);
-		d_drop(lower_dentry);
-	}
-#endif
 	return rc;
 }
 
@@ -1047,7 +1042,7 @@ static int ecryptfs_syno_set_archive_bit(struct dentry *dentry, unsigned int arb
 	}
 	return error;
 }
-#endif //MY_ABC_HERE
+#endif //SYNO_ARCHIVE_BIT
 
 #ifdef SYNO_ARCHIVE_VERSION
 static int ecryptfs_syno_set_archive_ver(struct dentry *dentry, u32 version)
@@ -1159,7 +1154,7 @@ ecryptfs_syno_getattr(struct dentry *dentry, struct kstat *st, int flags)
 	}
 	return -EOPNOTSUPP;
 }
-#endif //MY_ABC_HERE
+#endif //SYNO_STAT
 
 static int
 ecryptfs_permission(struct inode *inode, int mask)

@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_driver.c $
- * $Revision: #89 $
- * $Date: 2011/05/17 $
- * $Change: 1774110 $
+ * $Revision: #91 $
+ * $Date: 2011/10/24 $
+ * $Change: 1871159 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -60,6 +60,7 @@
 #include <mach/hardware.h>
 
 #include <linux/clk.h>
+#include <mach/comcerto-2000/pm.h>
 
 /* USB 3.0 clock */
 static struct clk *usb2_clk;
@@ -67,7 +68,7 @@ static struct clk *usb2_clk;
 extern void dwc_otg_host_port_suspend(struct usb_hcd *hcd);
 extern void dwc_otg_host_port_resume(struct usb_hcd *hcd);
 
-#define DWC_DRIVER_VERSION	"2.93a 15-MAY-2011"
+#define DWC_DRIVER_VERSION	"2.94a 27-OCT-2011"
 #define DWC_DRIVER_DESC		"HS OTG USB Controller driver"
 
 static const char dwc_driver_name[] = "dwc_otg";
@@ -111,7 +112,7 @@ extern void hcd_remove(
 #endif
     );
 
-extern void dwc_otg_adp_start(dwc_otg_core_if_t * core_if);
+extern void dwc_otg_adp_start(dwc_otg_core_if_t * core_if, uint8_t is_host);
 
 /*-------------------------------------------------------------------------*/
 /* Encapsulate the module parameter settings */
@@ -157,6 +158,8 @@ struct dwc_otg_driver_module_params {
 	int32_t power_down;
 	int32_t reload_ctl;
 	int32_t dev_out_nak;
+	int32_t cont_on_bna;
+	int32_t ahb_single;
 	int32_t otg_ver;
 	int32_t adp_enable;
 };
@@ -238,6 +241,8 @@ static struct dwc_otg_driver_module_params dwc_otg_module_params = {
 	.power_down = -1,
 	.reload_ctl = -1,
 	.dev_out_nak = -1,
+	.cont_on_bna = -1,
+	.ahb_single = -1,
 	.otg_ver = -1,
 	.adp_enable = -1,
 };
@@ -442,7 +447,7 @@ static int set_parameters(dwc_otg_core_if_t * core_if)
 							  dwc_otg_module_params.
 							  en_multiple_tx_fifo);
 	}
-	//for (i = 0; i < 15; i++) { // Makarand: USB2 DEBUG
+
 	for (i = 0; i < 7; i++) {
 		if (dwc_otg_module_params.dev_perio_tx_fifo_size[i] != -1) {
 			retval +=
@@ -453,7 +458,6 @@ static int set_parameters(dwc_otg_core_if_t * core_if)
 		}
 	}
 
-	//for (i = 0; i < 15; i++) { // Makarand: USB2 DEBUG
 	for (i = 0; i < 7; i++) {
 		if (dwc_otg_module_params.dev_tx_fifo_size[i] != -1) {
 			retval += dwc_otg_set_param_dev_tx_fifo_size(core_if,
@@ -522,6 +526,18 @@ static int set_parameters(dwc_otg_core_if_t * core_if)
 		retval +=
 			dwc_otg_set_param_dev_out_nak(core_if,
 			dwc_otg_module_params.dev_out_nak);
+	}
+
+	if (dwc_otg_module_params.cont_on_bna != -1) {
+		retval +=
+			dwc_otg_set_param_cont_on_bna(core_if,
+			dwc_otg_module_params.cont_on_bna);
+	}
+
+	if (dwc_otg_module_params.ahb_single != -1) {
+		retval +=
+			dwc_otg_set_param_ahb_single(core_if,
+			dwc_otg_module_params.ahb_single);
 	}
 
 	if (dwc_otg_module_params.otg_ver != -1) {
@@ -636,17 +652,15 @@ static void comcerto_stop_dwc_otg(void)
 	clk_put(usb2_clk);
 }
 
-
 /**
  * This function is the top level interrupt handler for the Common
  * (Device and host modes) interrupts.
  */
 static irqreturn_t dwc_otg_common_irq(int irq, void *dev)
 {
-	dwc_otg_device_t *otg_dev = dev;
 	int32_t retval = IRQ_NONE;
 
-	retval = dwc_otg_handle_common_intr(otg_dev->core_if);
+	retval = dwc_otg_handle_common_intr(dev);
 	if (retval != 0) {
 		S3C2410X_CLEAR_EINTPEND();
 	}
@@ -724,11 +738,8 @@ static void dwc_otg_driver_remove(
 	/*
 	 * Remove the device attributes
 	 */
-#if 1
 	dwc_otg_attr_remove(_dev);
-#else
-	dwc_otg_attr_remove(otg_dev->os_dep.parent);
-#endif
+
 	/*
 	 * Return the memory.
 	 */
@@ -904,6 +915,7 @@ static int dwc_otg_driver_probe(
 	lm_set_drvdata(_dev, dwc_otg_device);
 #else
 	platform_set_drvdata(_dev, dwc_otg_device);
+	_dev->dev.platform_data = (void *) dwc_otg_device;
 #endif
 	dev_dbg(&_dev->dev, "dwc_otg_device=0x%p\n", dwc_otg_device);
 
@@ -939,7 +951,6 @@ static int dwc_otg_driver_probe(
 	/*
 	 * Create Device Attributes in sysfs
 	 */
-	//dwc_otg_attr_create(&_dev->dev);
 	dwc_otg_attr_create(_dev);
 
 	/*
@@ -967,9 +978,6 @@ static int dwc_otg_driver_probe(
 
 #ifdef LM_INTERFACE
 	set_irq_type(_dev->irq, IRQT_LOW);
-#else
-	/* FIXME : Makarand - Need to check about it */
-	//set_irq_type(dwc_otg_device->irq, IRQT_LOW);
 #endif
 	/*
 	 * Initialize the DWC_otg core.
@@ -1011,7 +1019,8 @@ static int dwc_otg_driver_probe(
 	if (!dwc_otg_get_param_adp_enable(dwc_otg_device->core_if))
 		dwc_otg_enable_global_interrupts(dwc_otg_device->core_if);
 	else
-		dwc_otg_adp_start(dwc_otg_device->core_if);
+		dwc_otg_adp_start(dwc_otg_device->core_if,
+							dwc_otg_is_host_mode(dwc_otg_device->core_if));
 
 	return 0;
 
@@ -1136,6 +1145,19 @@ int comcerto_usb2_bus_suspend(struct platform_device * pd, pm_message_t state)
 	int error_status = 0, val = 0;
 	struct usb_hcd *hcd = NULL;
 
+	/* Check for the Bit Mask bit for USB2, if not enabled
+         * then we are not going suspend the USB2 device , as by
+         * this device , we will wake from resume.
+         */
+        if ( !(host_utilpe_shared_pmu_bitmask & USB2p0_IRQ )){
+
+                /* We will return here.
+                 * Not prepared yet for suspend , so that device suspend
+                 * will not occur.
+                */
+		return error_status;
+	}
+
 	hcd = (struct usb_hcd *) platform_get_drvdata(pd);
 
 	/* Do the port suspend for USB 2.0 Controller */
@@ -1146,6 +1168,10 @@ int comcerto_usb2_bus_suspend(struct platform_device * pd, pm_message_t state)
 
 	/* Disable the Clock */
 	clk_disable(usb2_clk);
+
+	/* PM Performance Enhancement : USB0 PD */
+	/* Common Block Power-Down Control and powering down all analog blocks */
+	writel(0x01220040, COMCERTO_USB0_PHY_CTRL_REG0);
 
 	return error_status;
 }
@@ -1159,6 +1185,23 @@ int comcerto_usb2_bus_resume(struct platform_device *pd)
 {
 	int error_status = 0;
 	struct usb_hcd *hcd = NULL;
+
+	/* Check for the Bit Mask bit for USB2, if not enabled
+         * then we are not going suspend the USB2 device , as by
+         * this device , we will wake from resume.
+         */
+        if ( host_utilpe_shared_pmu_bitmask & USB2p0_IRQ ){
+
+                /* We will return here.
+                 * Not prepared yet for suspend , so that device suspend
+                 * will not occur.
+                */
+		return error_status;
+	}
+
+	/* PM Performance Enhancement : USB0 PD */
+	/* Common Block Power-Down Control and powering down all analog blocks */
+	writel(0x00220000, COMCERTO_USB0_PHY_CTRL_REG0);
 
 	/* Enable the Clock */
 	if (clk_enable(usb2_clk)){
@@ -1475,6 +1518,10 @@ module_param_named(reload_ctl, dwc_otg_module_params.reload_ctl, int, 0444);
 MODULE_PARM_DESC(reload_ctl, "HFIR Reload Control");
 module_param_named(dev_out_nak, dwc_otg_module_params.dev_out_nak, int, 0444);
 MODULE_PARM_DESC(dev_out_nak, "Enable Device OUT NAK");
+module_param_named(cont_on_bna, dwc_otg_module_params.cont_on_bna, int, 0444);
+MODULE_PARM_DESC(cont_on_bna, "Enable Enable Continue on BNA");
+module_param_named(ahb_single, dwc_otg_module_params.ahb_single, int, 0444);
+MODULE_PARM_DESC(ahb_single, "Enable AHB Single Support");
 module_param_named(adp_enable, dwc_otg_module_params.adp_enable, int, 0444);
 MODULE_PARM_DESC(adp_enable, "ADP Enable 0=ADP Disabled 1=ADP Enabled");
 module_param_named(otg_ver, dwc_otg_module_params.otg_ver, int, 0444);
@@ -1800,6 +1847,24 @@ MODULE_PARM_DESC(otg_ver, "OTG revision supported 0=OTG 1.3 1=OTG 2.0");
  </td></tr>
 
  <tr>
+ <td>cont_on_bna</td>
+ <td>Specifies whether Enable Continue on BNA enabled or no.
+ After receiving BNA interrupt the core disables the endpoint,when the
+ endpoint is re-enabled by the application the
+ - 0: Core starts processing from the DOEPDMA descriptor (default)
+ - 1: Core starts processing from the descriptor which received the BNA.
+ This parameter is valid only when OTG_EN_DESC_DMA == 1’b1.
+ </td></tr>
+
+ <tr>
+ <td>ahb_single</td>
+ <td>This bit when programmed supports SINGLE transfers for remainder data
+ in a transfer for DMA mode of operation.
+ - 0: The remainder data will be sent using INCR burst size (default)
+ - 1: The remainder data will be sent using SINGLE burst size.
+ </td></tr>
+
+<tr>
  <td>adp_enable</td>
  <td>Specifies whether ADP feature is enabled.
  The driver will automatically detect the value for this parameter if none is

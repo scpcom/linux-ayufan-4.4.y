@@ -1027,8 +1027,8 @@ int syno_fetch_mountpoint_fullpath(struct vfsmount *mnt, size_t buf_len, char *m
 	char *mnt_dentry_path = NULL;
 	char *mnt_dentry_path_buf = NULL;
 	char *mnt_full_path_buf = NULL;
-	mnt_dentry_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
-	mnt_full_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
+	mnt_dentry_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
+	mnt_full_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
 
 	if(!mnt_dentry_path_buf || !mnt_full_path_buf)
 		goto ERR;
@@ -2528,7 +2528,7 @@ static int may_delete(struct inode *dir,struct dentry *victim,int isdir)
 
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_FS_SYNOACL(dir)) {
-		error = synoacl_mod_may_delete(victim, dir);
+		error = synoacl_op_may_delete(victim, dir);
 	} else
 #endif
 	error = inode_permission(dir, MAY_WRITE | MAY_EXEC);
@@ -4132,10 +4132,10 @@ EXPORT_SYMBOL(get_write_access); /* binfmt_aout */
 EXPORT_SYMBOL(getname);
 EXPORT_SYMBOL(lock_rename);
 EXPORT_SYMBOL(lookup_one_len);
-#if defined(CONFIG_AUFS_FS ) || defined(MY_ABC_HERE)
+#if defined(CONFIG_AUFS_FS ) || defined(SYNO_EXPORT_SYMBOL_FOR_LIO)
 EXPORT_SYMBOL(lookup_hash);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXPORT_SYMBOL_FOR_LIO
 EXPORT_SYMBOL(kern_path_parent);
 #endif
 EXPORT_SYMBOL(page_follow_link_light);

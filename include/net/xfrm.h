@@ -1522,6 +1522,12 @@ extern int xfrm4_tunnel_register(struct xfrm_tunnel *handler, unsigned short fam
 extern int xfrm4_tunnel_deregister(struct xfrm_tunnel *handler, unsigned short family);
 extern int xfrm6_extract_header(struct sk_buff *skb);
 extern int xfrm6_extract_input(struct xfrm_state *x, struct sk_buff *skb);
+#if defined(CONFIG_SYNO_COMCERTO)
+/* NAT-T changes Start */
+extern int xfrm6_rcv_encap(struct sk_buff *skb, int nexthdr, __be32 spi,
+			   int encap_type);
+/* NAT-T changes End */
+#endif
 extern int xfrm6_rcv_spi(struct sk_buff *skb, int nexthdr, __be32 spi);
 extern int xfrm6_transport_finish(struct sk_buff *skb, int async);
 extern int xfrm6_rcv(struct sk_buff *skb);
@@ -1540,12 +1546,25 @@ extern int xfrm6_find_1stfragopt(struct xfrm_state *x, struct sk_buff *skb,
 
 #ifdef CONFIG_XFRM
 extern int xfrm4_udp_encap_rcv(struct sock *sk, struct sk_buff *skb);
+#if defined(CONFIG_SYNO_COMCERTO)
+extern int xfrm6_udp_encap_rcv(struct sock *sk, struct sk_buff *skb);
+#endif
 extern int xfrm_user_policy(struct sock *sk, int optname, u8 __user *optval, int optlen);
 #else
 static inline int xfrm_user_policy(struct sock *sk, int optname, u8 __user *optval, int optlen)
 {
  	return -ENOPROTOOPT;
 } 
+#if defined(CONFIG_SYNO_COMCERTO)
+/* NAT-T changes Start */
+static inline int xfrm6_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
+{
+	/* should not happen */
+	kfree_skb(skb);
+	return 0;
+}
+/* NAT-T changes End */
+#endif
 
 static inline int xfrm4_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
 {

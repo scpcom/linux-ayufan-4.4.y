@@ -34,7 +34,11 @@
 #include <net/tcp.h>
 #include <net/netdma.h>
 
+#ifdef CONFIG_SYNO_ALPINE
+#define NET_DMA_DEFAULT_COPYBREAK  8192 /* don't enable NET_DMA by default */
+#else
 #define NET_DMA_DEFAULT_COPYBREAK 4096
+#endif
 
 int sysctl_tcp_dma_copybreak = NET_DMA_DEFAULT_COPYBREAK;
 EXPORT_SYMBOL(sysctl_tcp_dma_copybreak);
@@ -55,13 +59,56 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 {
 	int start = skb_headlen(skb);
 	int i, copy = start - offset;
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 	struct sk_buff *frag_iter;
+#endif
 	dma_cookie_t cookie = 0;
+#ifdef CONFIG_SYNO_ALPINE
+	struct sg_table	*dst_sgt;
+	struct sg_table	*src_sgt;
+	struct scatterlist *dst_sg;
+	int	dst_sg_len;
+	struct scatterlist *src_sg;
+	int		src_sg_len = skb_shinfo(skb)->nr_frags;
+	size_t	dst_len = len;
+	size_t	dst_offset = offset;
+	int ret;
+
+	pr_debug("%s %d copy %d len %d nr_iovecs %d skb frags %d\n",
+			__func__, __LINE__, copy, len, pinned_list->nr_iovecs,
+			src_sg_len);
+
+	dst_sgt = pinned_list->sgts;
+
+	if (copy > 0)
+		src_sg_len += 1;
+
+	src_sgt = pinned_list->sgts + 1;
+
+	dst_sg = dst_sgt->sgl;
+	src_sg = src_sgt->sgl;
+	src_sg_len = 0;
+#endif
 
 	/* Copy header. */
 	if (copy > 0) {
 		if (copy > len)
 			copy = len;
+#ifdef CONFIG_SYNO_ALPINE
+		sg_set_buf(src_sg, skb->data + offset, copy);
+		pr_debug("%s %d: add src buf page %p. addr %p len 0x%x\n", __func__,
+				__LINE__, virt_to_page(skb->data),
+				skb->data, copy);
+
+		len -= copy;
+		src_sg_len++;
+		if (len == 0)
+			goto fill_dst_sg;
+		offset += copy;
+		src_sg = sg_next(src_sg);
+#else
 		cookie = dma_memcpy_to_iovec(chan, to, pinned_list,
 					    skb->data + offset, copy);
 		if (cookie < 0)
@@ -70,6 +117,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 		if (len == 0)
 			goto end;
 		offset += copy;
+#endif
 	}
 
 	/* Copy paged appendix. Hmm... why does this look so complicated? */
@@ -87,18 +135,45 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 			if (copy > len)
 				copy = len;
 
+#ifdef CONFIG_SYNO_ALPINE
+			sg_set_page(src_sg, page, copy, frag->page_offset +
+					offset - start);
+			pr_debug("%s %d: add src buf [%d] page %p. len 0x%x\n", __func__,
+				__LINE__, i, page, copy);
+			src_sg = sg_next(src_sg);
+			src_sg_len++;
+#else
 			cookie = dma_memcpy_pg_to_iovec(chan, to, pinned_list, page,
 					frag->page_offset + offset - start, copy);
 			if (cookie < 0)
 				goto fault;
+#endif
 			len -= copy;
 			if (len == 0)
+#ifdef CONFIG_SYNO_ALPINE
+				break;
+#else
 				goto end;
+#endif
 			offset += copy;
 		}
 		start = end;
 	}
 
+#ifdef CONFIG_SYNO_ALPINE
+fill_dst_sg:
+
+	if (src_sg_len > 0) {
+		dst_sg_len = dma_memcpy_fill_sg_from_iovec(chan, to, pinned_list, dst_sg, dst_offset, dst_len);
+		BUG_ON(dst_sg_len <= 0);
+
+		cookie = dma_async_memcpy_sg_to_sg(chan,
+						dst_sgt->sgl,
+						dst_sg_len,
+						src_sgt->sgl,
+						src_sg_len);
+	}
+#else
 	skb_walk_frags(skb, frag_iter) {
 		int end;
 
@@ -122,13 +197,22 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 		}
 		start = end;
 	}
+#endif
 
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 end:
+#endif
 	if (!len) {
 		skb->dma_cookie = cookie;
 		return cookie;
 	}
 
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 fault:
+#endif
 	return -EFAULT;
 }

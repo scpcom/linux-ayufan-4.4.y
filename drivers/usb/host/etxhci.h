@@ -811,8 +811,8 @@ struct xhci_virt_device {
 	u32				cmd_status;
 	struct list_head		cmd_list;
 	u8				port;
+	unsigned int	defer_queue_bulk_td :1;
 };
-
 
 /**
  * struct xhci_device_context_array
@@ -1189,6 +1189,10 @@ struct xhci_scratchpad {
 };
 
 struct urb_priv {
+	struct list_head list;
+	struct urb *urb;
+	int state;
+#define XHCI_URB_IN_QUEUED	1
 	int	length;
 	int	td_cnt;
 	struct	xhci_td	*td[0];
@@ -1345,6 +1349,7 @@ struct xhci_hcd {
 #define XHCI_TRUST_TX_LENGTH	(1 << 10)
 #define XHCI_HUB_INFO_QUIRK	(1 << 13)
 #define XHCI_EP_INFO_QUIRK	(1 << 14)
+#define XHCI_BULK_XFER_QUIRK	(1 << 15)
 	/* There are two roothubs to keep track of bus suspend info for */
 	struct xhci_bus_state   bus_state[2];
 	/* Is each xHCI roothub port a USB 3.0, USB 2.0, or USB 1.1 port? */
@@ -1355,6 +1360,11 @@ struct xhci_hcd {
 	/* Array of pointers to USB 2.0 PORTSC registers */
 	__le32 __iomem		**usb2_ports;
 	unsigned int		num_usb2_ports;
+
+	struct workqueue_struct *bulk_xfer_wq;
+	struct work_struct bulk_xfer_work;
+	struct list_head bulk_xfer_list;
+	int bulk_xfer_count;
 };
 
 struct table_item {
@@ -1590,6 +1600,7 @@ int etxhci_check_bandwidth(struct usb_hcd *hcd, struct usb_device *udev);
 void etxhci_reset_bandwidth(struct usb_hcd *hcd, struct usb_device *udev);
 int etxhci_update_uas_device(struct usb_hcd *hcd, struct usb_device *udev,
 		int type);
+void xhci_bulk_xfer_work(struct work_struct *work);
 
 /* xHCI ring, segment, TRB, and TD functions */
 dma_addr_t etxhci_trb_virt_to_dma(struct xhci_segment *seg, union xhci_trb *trb);

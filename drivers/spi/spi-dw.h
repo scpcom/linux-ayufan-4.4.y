@@ -143,7 +143,13 @@ struct dw_spi {
 	u32			dma_width;
 	int			cs_change;
 	irqreturn_t		(*transfer_handler)(struct dw_spi *dws);
+#ifdef CONFIG_SYNO_ALPINE
+	void			(*cs_control)(struct dw_spi *dws, u32 command);
+						/* current cs_control usage
+						 * supports only CS#0 */
+#else
 	void			(*cs_control)(u32 command);
+#endif
 
 	/* Dma info */
 	int			dma_inited;
@@ -197,11 +203,19 @@ static inline void spi_set_clk(struct dw_spi *dws, u16 div)
 
 static inline void spi_chip_sel(struct dw_spi *dws, u16 cs)
 {
+#ifdef CONFIG_SYNO_ALPINE
+	if (cs >= dws->num_cs)
+		return;
+
+	if (dws->cs_control && cs == 0)
+		dws->cs_control(dws, 1);
+#else
 	if (cs > dws->num_cs)
 		return;
 
 	if (dws->cs_control)
 		dws->cs_control(1);
+#endif
 
 	dw_writel(dws, DW_SPI_SER, 1 << cs);
 }
@@ -234,7 +248,11 @@ struct dw_spi_chip {
 	u8 poll_mode;	/* 0 for contoller polling mode */
 	u8 type;	/* SPI/SSP/Micrwire */
 	u8 enable_dma;
+#ifdef CONFIG_SYNO_ALPINE
+	void (*cs_control)(struct dw_spi *dws, u32 command);
+#else
 	void (*cs_control)(u32 command);
+#endif
 };
 
 extern int dw_spi_add_host(struct dw_spi *dws);

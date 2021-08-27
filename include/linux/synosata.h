@@ -75,7 +75,7 @@ static inline void SleepForHW(int iDisk, int iIsDoLatency)
 	}
 	syno_boot_hd_count++;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_INTERNAL_HD_NUM */
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 #include <linux/fs.h>
@@ -430,9 +430,9 @@ syno_pm_poweron_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PK
 		}
 	} else if (syno_pm_is_9705(vendor, devid)) {
 		if (blCLR) {
-			pPKG->var = GPIO_9705_PKG_INIT(4,0);
+			pPKG->var = GPIO_9705_PKG_INIT(4,0b10);
 		} else {
-			pPKG->var = GPIO_9705_PKG_INIT(4,0x10);
+			pPKG->var = GPIO_9705_PKG_INIT(4,0b10010);
 		}
 	}
 
@@ -493,7 +493,7 @@ syno_support_disk_num(unsigned short vendor,
 	unsigned int ret = 0;
 
 	if (syno_pm_is_3xxx(vendor, devid)) {
-		if (IS_SYNOLOGY_RX4(syno_uniq)) {
+		if (IS_SYNOLOGY_RX4(syno_uniq) || IS_SYNOLOGY_RX415(syno_uniq)) {
 			ret = 4;
 		} else if (IS_SYNOLOGY_DX5(syno_uniq) || IS_SYNOLOGY_DX513(syno_uniq)) {
 			ret = 5;
@@ -509,7 +509,7 @@ syno_support_disk_num(unsigned short vendor,
 	} else if (syno_pm_is_9705(vendor, devid)) {
 		if (IS_SYNOLOGY_RX413(syno_uniq)) {
 			ret = 4;
-		} else if (IS_SYNOLOGY_RX1214(syno_uniq)) {
+		} else if (IS_SYNOLOGY_RX1214(syno_uniq) || IS_SYNOLOGY_DX1215(syno_uniq)) {
 			ret = 3;
 		} else {
 			printk("%s not synology device", __FUNCTION__);
@@ -522,7 +522,23 @@ END:
 	return ret;
 }
 
-#ifdef MY_DEF_HERE
+static inline void
+syno_pm_hddled_status_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG)
+{
+	/* do not check parameters, caller should do it */
+	 
+	memset(pPKG, 0, sizeof(*pPKG));
+
+	if (syno_pm_is_3xxx(vendor, devid)) {
+		pPKG->var = 0x180;
+	} else if (syno_pm_is_9705(vendor, devid)) {
+		pPKG->var = GPIO_9705_PKG_INIT(1,0);
+	}
+
+	/* add other port multiplier here */
+}
+
+#ifdef SYNO_EUNIT_POWERCTL_PIN
 extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
 #endif
 extern char gszSynoHWVersion[16];
@@ -531,7 +547,7 @@ is_ebox_support(void)
 {
 	unsigned char ret = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EUNIT_POWERCTL_PIN
 	if (funcSynoEunitPowerctlType) {
 		if (EUNIT_NOT_SUPPORT == funcSynoEunitPowerctlType()) {
 			goto END;
@@ -545,7 +561,7 @@ is_ebox_support(void)
 	 */
 	 
 	ret = 1;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EUNIT_POWERCTL_PIN
 END:
 #endif
 	return ret;

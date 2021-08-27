@@ -27,8 +27,22 @@
 #include <asm/io.h>
 #include <linux/spinlock.h>
 
+#include <linux/gpio.h>
+
 static char i2cspi_state[2],dus_state[3];
 spinlock_t reset_lock;
+static spinlock_t gpio_lock;
+
+void comcerto_rst_cntrl_set(unsigned int dev_rst_cntrl_bit)
+{
+	unsigned long flags;
+	spin_lock_irqsave(&reset_lock, flags);
+
+	__raw_writel((dev_rst_cntrl_bit | __raw_readl(DEVICE_RST_CNTRL)), DEVICE_RST_CNTRL);
+
+	spin_unlock_irqrestore(&reset_lock,flags);
+}
+EXPORT_SYMBOL(comcerto_rst_cntrl_set);
 
 /* @ int block : Id of device block to be put in reset 
  * @ int state : State value 0->OUT-OF-RESET , 1->RESET. 
@@ -365,6 +379,144 @@ if(state){
 spin_unlock_irqrestore(&reset_lock,flags);
 }
 EXPORT_SYMBOL(c2000_block_reset);
+
+#if defined(CONFIG_C2K_MFCN_EVM)
+void GPIO_reset_external_device(int block,int state)
+{
+	unsigned long flags;
+	spin_lock_irqsave(&gpio_lock, flags);
+
+	/* Blocks to be put in out of Reset and reset mode
+	 * 0 ----> out of reset
+	 * 1 ----> reset
+	 */
+	switch (block){
+		case COMPONENT_ATHEROS_SWITCH:
+			if(gpio_request_one(GPIO_PIN_NUM_5, GPIOF_OUT_INIT_HIGH, GPIO_PIN_DESC_5)){
+				printk(KERN_ERR "%s:%d: Cannot request gpio for gpio-%d\n", \
+						__func__, __LINE__, GPIO_PIN_NUM_4);
+				return;
+			}
+
+			if (state){
+				gpio_set_value(GPIO_PIN_NUM_5, GPIO_SET_0);
+
+				gpio_direction_input(GPIO_PIN_NUM_5);
+			}else{
+				gpio_set_value(GPIO_PIN_NUM_5, GPIO_SET_0);
+
+				gpio_direction_output(GPIO_PIN_NUM_5, GPIO_SET_0);
+
+				gpio_set_value(GPIO_PIN_NUM_5, GPIO_SET_1);
+			}
+
+			gpio_free(GPIO_PIN_NUM_5);
+
+			break;
+
+		case COMPONENT_SLIC:
+			if(gpio_request_one(GPIO_PIN_NUM_4, GPIOF_OUT_INIT_HIGH, GPIO_PIN_DESC_4)){
+				printk(KERN_ERR "%s:%d: Cannot request gpio for gpio-%d\n", \
+						__func__, __LINE__, GPIO_PIN_NUM_4);
+				return;
+			}
+
+			if (state){
+				gpio_set_value(GPIO_PIN_NUM_4, GPIO_SET_0);
+
+				gpio_direction_input(GPIO_PIN_NUM_4);
+			}else{
+				gpio_set_value(GPIO_PIN_NUM_4, GPIO_SET_0);
+
+				gpio_direction_output(GPIO_PIN_NUM_4, GPIO_SET_0);
+
+				gpio_set_value(GPIO_PIN_NUM_4, GPIO_SET_1);
+			}
+
+			gpio_free(GPIO_PIN_NUM_4);
+
+			break;
+
+		case COMPONENT_PCIE0:
+			if (state){
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_48, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_48, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_48, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}else{
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_48, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_48, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_48, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_48, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}
+			break;
+		case COMPONENT_PCIE1:
+			if (state){
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_47, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_47, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_47, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}else{
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_47, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_47, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_47, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_47, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}
+			break;
+		case COMPONENT_USB_HUB:
+			if (state){
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}else{
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_50, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}
+			break;
+		case COMPONENT_EXP_DAUGTHER_CARD:
+			if (state){
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_49, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_49, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_49, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}else{
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_49, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_49, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_49, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_49, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}
+			break;
+		case COMPONENT_RGMII0:
+			if (state){
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_46, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_46, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) & ~GPIO_PIN_46, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}else{
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_46, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_46, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_46, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_46, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}
+			break;
+		case COMPONENT_RGMII1:
+			if (state){
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_45, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) | GPIO_PIN_45, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT)& ~GPIO_PIN_45, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}else{
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) & ~GPIO_PIN_45, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel( readl(COMCERTO_GPIO_63_32_PIN_OUTPUT_EN) & ~GPIO_PIN_45, COMCERTO_GPIO_63_32_PIN_OUTPUT_EN);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_OUTPUT) | GPIO_PIN_45, COMCERTO_GPIO_63_32_PIN_OUTPUT);
+				writel(readl(COMCERTO_GPIO_63_32_PIN_SELECT) | GPIO_PIN_45, COMCERTO_GPIO_63_32_PIN_SELECT);
+			}
+			break;
+		default:
+			break;
+	}
+
+	spin_unlock_irqrestore(&gpio_lock,flags);
+}
+EXPORT_SYMBOL(GPIO_reset_external_device);
+#endif
 
 void reset_init(void){
 	

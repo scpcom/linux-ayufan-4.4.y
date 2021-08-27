@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd.h $
- * $Revision: #57 $
- * $Date: 2010/11/29 $
- * $Change: 1636033 $
+ * $Revision: #58 $
+ * $Date: 2011/09/15 $
+ * $Change: 1846647 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -473,6 +473,11 @@ struct dwc_otg_hcd {
 	uint16_t frame_number;
 
 	/**
+	 * Count of periodic QHs, if using several eps. For SOF enable/disable.
+	 */
+	uint16_t periodic_qh_count;
+
+	/**
 	 * Free host channels in the controller. This is a list of
 	 * dwc_hc_t items.
 	 */
@@ -608,13 +613,8 @@ static inline void dwc_otg_hcd_qh_remove_and_free(dwc_otg_hcd_t * hcd,
 	dwc_irqflags_t flags;
 	DWC_SPINLOCK_IRQSAVE(hcd->lock, &flags);
 	dwc_otg_hcd_qh_remove(hcd, qh);
-#if !defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
 	DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
-#endif
 	dwc_otg_hcd_qh_free(hcd, qh);
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
-	DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
-#endif
 }
 
 /** Allocates memory for a QH structure.

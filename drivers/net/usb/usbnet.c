@@ -52,6 +52,14 @@
 
 #define DRIVER_VERSION		"22-Aug-2005"
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+/* 
+ * We alllocate extra 64 Bytes to reserve headroom in the sk_buff 
+ * To be used by Fast Path (Head Room must be 4 Byte aligned 
+ * because USB 2.0 controller doesn't support 2 byte alignment
+ */
+#define C2K_USBNET_SKB_HEADROOM_FAST_PATH 64
+#endif
 
 /*-------------------------------------------------------------------------*/
 
@@ -346,13 +354,26 @@ static int rx_submit (struct usbnet *dev, struct urb *urb, gfp_t flags)
 	unsigned long		lockflags;
 	size_t			size = dev->rx_urb_size;
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+    /* 
+     * We alllocate extra 64 Bytes to reserve headroom in the sk_buff 
+     * To be used by Fast Path (Head Room must be 4 Byte aligned 
+     * because USB 2.0 controller doesn't support 2 byte alignment
+     */
+	if ((skb = alloc_skb (size + C2K_USBNET_SKB_HEADROOM_FAST_PATH, flags)) == NULL) {
+#else
 	if ((skb = alloc_skb (size + NET_IP_ALIGN, flags)) == NULL) {
+#endif        
 		netif_dbg(dev, rx_err, dev->net, "no rx skb\n");
 		usbnet_defer_kevent (dev, EVENT_RX_MEMORY);
 		usb_free_urb (urb);
 		return -ENOMEM;
 	}
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+	skb_reserve (skb, C2K_USBNET_SKB_HEADROOM_FAST_PATH);
+#else
 	skb_reserve (skb, NET_IP_ALIGN);
+#endif        
 
 	entry = (struct skb_data *) skb->cb;
 	entry->urb = urb;
@@ -1429,17 +1450,7 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 		if ((dev->driver_info->flags & FLAG_ETHER) != 0 &&
 		    ((dev->driver_info->flags & FLAG_POINTTOPOINT) == 0 ||
 		     (net->dev_addr [0] & 0x02) == 0))
-#ifdef MY_ABC_HERE
-			{
-				if(0 == strcmp(info->description, SYNO_YOTAWIMAX_DESC)) {
-					strcpy (net->name, SYNO_YOTAWIMAX_ETHERNET_NAME"%d");
-				} else {
-					strcpy (net->name, "eth%d");
-				}
-			}
-#else
 			strcpy (net->name, "eth%d");
-#endif
 		/* WLAN devices should always be named "wlan%d" */
 		if ((dev->driver_info->flags & FLAG_WLAN) != 0)
 			strcpy(net->name, "wlan%d");

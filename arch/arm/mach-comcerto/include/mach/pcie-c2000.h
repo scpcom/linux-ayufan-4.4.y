@@ -28,6 +28,7 @@
 struct pcie_port {
 	u8			port;
 	u8			root_bus_nr;
+	u16			reset;
 	unsigned long		base;
 	unsigned long		remote_mem_baseaddr;
 	unsigned long		app_base;
@@ -55,13 +56,17 @@ struct pcie_port {
 	struct pcie_app_reg	*app_regs;
 	struct resource		res[2];
 	struct clk		*ref_clock;
+#if defined(CONFIG_COMCERTO_PCIE_OCC_CLOCK)
+	struct clk              *occ_clock;
+#endif
 };
 
 #define PCIE_PORT_MODE_NONE 	-1
 #define PCIE_PORT_MODE_EP 	CFG0_DEV_TYPE_EP
 #define PCIE_PORT_MODE_RC 	CFG0_DEV_TYPE_RC
 
-
+/* PCIe PM related defines */
+#define PCI_CAP_PM 0x40
 
 /* The following register definitions are as per "DWC_regs_rev04.doc" document */
 

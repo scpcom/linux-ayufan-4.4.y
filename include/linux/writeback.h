@@ -176,6 +176,12 @@ void __bdi_update_bandwidth(struct backing_dev_info *bdi,
 void page_writeback_init(void);
 void balance_dirty_pages_ratelimited(struct address_space *mapping);
 
+#ifdef CONFIG_SYNO_ARMADA_V2 // extract from 3.2.54
+void balance_dirty_pages_ratelimited_nr(struct address_space *mapping,
+					unsigned long nr_pages_dirtied);
+
+#endif
+
 typedef int (*writepage_t)(struct page *page, struct writeback_control *wbc,
 				void *data);
 

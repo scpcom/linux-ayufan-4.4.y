@@ -94,6 +94,11 @@ typedef int (*iterate_devices_callout_fn) (struct dm_target *ti,
 typedef int (*dm_iterate_devices_fn) (struct dm_target *ti,
 				      iterate_devices_callout_fn fn,
 				      void *data);
+#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+typedef int (*dm_handle_4kn_target_support_fn) (struct dm_target *ti,
+				      iterate_devices_callout_fn fn,
+				      void *data);
+#endif
 
 typedef void (*dm_io_hints_fn) (struct dm_target *ti,
 				struct queue_limits *limits);
@@ -158,8 +163,11 @@ struct target_type {
 	dm_merge_fn merge;
 	dm_busy_fn busy;
 	dm_iterate_devices_fn iterate_devices;
+#ifdef SYNO_FLASHCACHE_4KN_SUPPORT
+	dm_handle_4kn_target_support_fn handle_4kn_target_support;
+#endif
 	dm_io_hints_fn io_hints;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 	dm_lvinfoset_fn lvinfoset;
 	dm_lg_sector_get_fn lg_sector_get;
 #endif
@@ -518,7 +526,11 @@ extern struct ratelimit_state dm_ratelimit_state;
  */
 #define dm_target_offset(ti, sector) ((sector) - (ti)->begin)
 
+#ifdef CONFIG_SYNO_DM_TO_SECTOR_FIX
+static inline sector_t to_sector(unsigned long long n)
+#else
 static inline sector_t to_sector(unsigned long n)
+#endif
 {
 	return (n >> SECTOR_SHIFT);
 }

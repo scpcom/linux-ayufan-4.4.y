@@ -1,8 +1,8 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_regs.h $
- * $Revision: #93 $
- * $Date: 2011/05/17 $
- * $Change: 1774110 $
+ * $Revision: #97 $
+ * $Date: 2011/10/24 $
+ * $Change: 1871160 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -254,7 +254,8 @@ typedef union gahbcfg_data {
 		unsigned reserved9_20:12;
 		unsigned remmemsupp:1;
 		unsigned notialldmawrit:1;
-		unsigned reserved23_31:9;
+		unsigned ahbsingle:1;
+		unsigned reserved24_31:8;
 	} b;
 } gahbcfg_data_t;
 
@@ -565,8 +566,8 @@ typedef union host_grxsts_data {
 
 /**
  * This union represents the bit fields in the FIFO Size Registers (HPTXFSIZ,
- * GNPTXFSIZ, DPTXFSIZn, DIEPTXFn). Read the register into the <i>d32</i> element then
- * read out the bits using the <i>b</i>it elements.
+ * GNPTXFSIZ, DPTXFSIZn, DIEPTXFn). Read the register into the <i>d32</i> element 
+ * then read out the bits using the <i>b</i>it elements.
  */
 typedef union fifosize_data {
 	/** raw register data */
@@ -984,8 +985,8 @@ typedef union adpctl_data {
 		 *  2'b11  -  Reserved
 		 */
 		unsigned prb_per:2;
-		/** These bits capture the latest time it took for VBUS to ramp from VADP_SINK
-		 *  to VADP_PRB.  The bits are defined in units of 32 kHz clock cycles as follows:
+		/** These bits capture the latest time it took for VBUS to ramp from 
+		 *  VADP_SINK to VADP_PRB. 
 		 *  0x000  -  1 cycles
 		 *  0x001  -  2 cycles
 		 *  0x002  -  3 cycles
@@ -1205,8 +1206,10 @@ typedef union dctl_data {
 		unsigned ifrmnum:1;
 		/** NAK on Babble */
 		unsigned nakonbble:1;
+		/** Enable Continue on BNA */
+		unsigned encontonbna:1;
 
-		unsigned reserved17_31:15;
+		unsigned reserved18_31:14;
 	} b;
 } dctl_data_t;
 
@@ -1495,9 +1498,8 @@ typedef struct dwc_otg_dev_out_ep_regs {
 	/** Device OUT Endpoint Control Register. <i>Offset:B00h +
 	 * (ep_num * 20h) + 00h</i> */
 	volatile uint32_t doepctl;
-	/** Device OUT Endpoint Frame number Register.	<i>Offset:
-	 * B00h + (ep_num * 20h) + 04h</i> */
-	volatile uint32_t doepfn;
+	/** Reserved. <i>Offset:B00h + (ep_num * 20h) + 04h</i> */
+	uint32_t reserved04;
 	/** Device OUT Endpoint Interrupt Register. <i>Offset:B00h +
 	 * (ep_num * 20h) + 08h</i> */
 	volatile uint32_t doepint;
@@ -1627,6 +1629,8 @@ typedef union deptsiz_data {
 	struct {
 		/** Transfer size */
 		unsigned xfersize:19;
+/** Max packet count for EP (pow(2,10)-1) */
+#define MAX_PKT_CNT 1023
 		/** Packet Count */
 		unsigned pktcnt:10;
 		/** Multi Count - Periodic IN endpoints */
@@ -1690,8 +1694,9 @@ typedef union dev_dma_desc_sts {
 	struct {
 		/** Received number of bytes */
 		unsigned bytes:16;
-
-		unsigned reserved16_22:7;
+		/** NAK bit - only for OUT EPs */
+		unsigned nak:1;
+		unsigned reserved17_22:6;
 		/** Multiple Transfer - only for OUT EPs */
 		unsigned mtrf:1;
 		/** Setup Packet received - only for OUT EPs */
@@ -1833,6 +1838,8 @@ typedef struct dwc_otg_dev_if {
 
 	/** Setup Packet Detected - if set clear NAK when queueing */
 	uint32_t spd;
+	/** Isoc ep pointer on which incomplete happens */
+	void *isoc_ep;
 
 } dwc_otg_dev_if_t;
 
@@ -2455,9 +2462,9 @@ typedef union pcgcctl_data {
 } pcgcctl_data_t;
 
 /**
- * This union represents the bit fields in the Global Data FIFO Software Configuration Register.
- * Read the register into the <i>d32</i> member then set/clear the
- * bits using the <i>b</i>it elements.
+ * This union represents the bit fields in the Global Data FIFO Software
+ * Configuration Register. Read the register into the <i>d32</i> member then
+ * set/clear the bits using the <i>b</i>it elements.
  */
 typedef union gdfifocfg_data {
 	/* raw register data */

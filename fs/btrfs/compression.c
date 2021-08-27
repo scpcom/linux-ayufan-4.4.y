@@ -32,7 +32,6 @@
 #include <linux/writeback.h>
 #include <linux/bit_spinlock.h>
 #include <linux/slab.h>
-#include "compat.h"
 #include "ctree.h"
 #include "disk-io.h"
 #include "transaction.h"
@@ -129,9 +128,8 @@ static int check_compressed_csum(struct inode *inode,
 		kunmap_atomic(kaddr);
 
 		if (csum != *cb_sum) {
-			printk(KERN_INFO "btrfs csum failed ino %llu "
-			       "extent %llu csum %u "
-			       "wanted %u mirror %d\n",
+			btrfs_info(BTRFS_I(inode)->root->fs_info,
+			   "csum failed ino %llu extent %llu csum %u wanted %u mirror %d",
 			   btrfs_ino(inode), disk_start, csum, *cb_sum,
 			   cb->mirror_num);
 			ret = -EIO;
@@ -413,7 +411,8 @@ int btrfs_submit_compressed_write(struct inode *inode, u64 start,
 			bio_add_page(bio, page, PAGE_CACHE_SIZE, 0);
 		}
 		if (bytes_left < PAGE_CACHE_SIZE) {
-			printk("bytes left %lu compress len %lu nr %lu\n",
+			btrfs_info(BTRFS_I(inode)->root->fs_info,
+					"bytes left %lu compress len %lu nr %lu",
 			       bytes_left, cb->compressed_len, cb->nr_pages);
 		}
 		bytes_left -= PAGE_CACHE_SIZE;
@@ -1012,6 +1011,8 @@ int btrfs_decompress_buf2page(char *buf, unsigned long buf_start,
 		bytes = min(bytes, working_bytes);
 		kaddr = kmap_atomic(page_out);
 		memcpy(kaddr + *pg_offset, buf + buf_offset, bytes);
+		if (*pg_index == (vcnt - 1) && *pg_offset == 0)
+			memset(kaddr + bytes, 0, PAGE_CACHE_SIZE - bytes);
 		kunmap_atomic(kaddr);
 		flush_dcache_page(page_out);
 

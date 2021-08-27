@@ -439,6 +439,9 @@ struct mddev {
 	void                            *syno_private;    // store lv struct for auto remap report
 	char                            lv_name[16];
 #endif
+#ifdef SYNO_RAID5_PARITY_CHECK
+	unsigned char			disable_force_rcw;     // 0 ==> force rcw path.
+#endif
 
 	struct attribute_group		*to_remove;
 

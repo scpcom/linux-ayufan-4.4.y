@@ -812,18 +812,21 @@ crypto_dispatch(struct cryptop *crp)
 	cryptostats.cs_ops++;
 
 	CRYPTO_Q_LOCK();
+#if !defined(CONFIG_SYNO_COMCERTO)
 	if (crypto_q_cnt >= crypto_q_max) {
 		cryptostats.cs_drops++;
 		CRYPTO_Q_UNLOCK();
 		return ENOMEM;
 	}
+#endif
 	crypto_q_cnt++;
 
 	/* make sure we are starting a fresh run on this crp. */
 	crp->crp_flags &= ~CRYPTO_F_DONE;
 	crp->crp_etype = 0;
 
-#ifdef CONFIG_MV_CESA_OCF
+#if (defined(CONFIG_MV_CESA_OCF) && defined(CONFIG_SYNO_ARMADA)) || \
+     ((defined(CONFIG_MV_CESA_OCF) || defined(CONFIG_MV_CESA_OCF_KW2)) && defined(CONFIG_SYNO_ARMADA_V2))
 
 	CRYPTO_Q_UNLOCK();
 
@@ -849,8 +852,80 @@ crypto_dispatch(struct cryptop *crp)
 		wake_up_interruptible(&cryptoproc_wait);
 		CRYPTO_Q_UNLOCK();
 	}
-#else
 
+#elif defined(CONFIG_SYNO_ARMADA_V2) && defined(CONFIG_OF)
+	if (mv_cesa_mode == CESA_OCF_M) {
+		dprintk("%s:cesa mode %d\n", __func__, mv_cesa_mode);
+
+		CRYPTO_Q_UNLOCK();
+
+		/* warning: We are using the CRYPTO_F_BATCH to mark processing by HW,
+		   it should be disabled for software encryption */
+		if ((crp->crp_flags & CRYPTO_F_BATCH)) {
+			int hid = CRYPTO_SESID2HID(crp->crp_sid);
+			cap = crypto_checkdriver(hid);
+			/* Driver cannot disappear when there is an active session. */
+			KASSERT(cap != NULL, ("%s: Driver disappeared.", __func__));
+
+			result = crypto_invoke(cap, crp, 0);
+			if (result != 0) {
+				CRYPTO_Q_LOCK();
+				crypto_q_cnt--;
+				cryptostats.cs_drops++;
+				CRYPTO_Q_UNLOCK();
+			}
+		} else {
+			CRYPTO_Q_LOCK();
+			TAILQ_INSERT_TAIL(&crp_q, crp, crp_next);
+			result = 0;
+			wake_up_interruptible(&cryptoproc_wait);
+			CRYPTO_Q_UNLOCK();
+		}
+
+	} else {
+
+		/*
+		 * Caller marked the request to be processed immediately; dispatch
+		 * it directly to the driver unless the driver is currently blocked.
+		 */
+		if ((crp->crp_flags & CRYPTO_F_BATCH) == 0) {
+			int hid = CRYPTO_SESID2HID(crp->crp_sid);
+			cap = crypto_checkdriver(hid);
+			/* Driver cannot disappear when there is an active session. */
+			KASSERT(cap != NULL, ("%s: Driver disappeared.", __func__));
+			if (!cap->cc_qblocked) {
+				crypto_all_qblocked = 0;
+				crypto_drivers[hid].cc_unqblocked = 1;
+				CRYPTO_Q_UNLOCK();
+				result = crypto_invoke(cap, crp, 0);
+				CRYPTO_Q_LOCK();
+				if (result == ERESTART)
+					if (crypto_drivers[hid].cc_unqblocked)
+						crypto_drivers[hid].cc_qblocked = 1;
+				crypto_drivers[hid].cc_unqblocked = 0;
+			}
+		}
+		if (result == ERESTART) {
+			/*
+			 * The driver ran out of resources, mark the
+			 * driver ``blocked'' for cryptop's and put
+			 * the request back in the queue.  It would
+			 * best to put the request back where we got
+			 * it but that's hard so for now we put it
+			 * at the front.  This should be ok; putting
+			 * it at the end does not work.
+			 */
+			list_add(&crp->crp_next, &crp_q);
+			cryptostats.cs_blocks++;
+			result = 0;
+		} else if (result == -1) {
+			TAILQ_INSERT_TAIL(&crp_q, crp, crp_next);
+			result = 0;
+		}
+		wake_up_interruptible(&cryptoproc_wait);
+		CRYPTO_Q_UNLOCK();
+	}
+#else
 	/*
 	 * Caller marked the request to be processed immediately; dispatch
 	 * it directly to the driver unless the driver is currently blocked.
@@ -1299,7 +1374,11 @@ crypto_proc(void *arg)
 	struct cryptocap *cap;
 	u_int32_t hid;
 	int result, hint;
+#ifdef CONFIG_SYNO_ARMADA_V2
+	unsigned long q_flags, wait_flags;
+#else
 	unsigned long q_flags;
+#endif
 	int loopcount = 0;
 
 	set_current_state(TASK_INTERRUPTIBLE);
@@ -1456,10 +1535,18 @@ crypto_proc(void *arg)
 					list_empty(&crp_kq), crypto_all_kqblocked);
 			loopcount = 0;
 			CRYPTO_Q_UNLOCK();
+#ifdef CONFIG_SYNO_ARMADA_V2
+			spin_lock_irqsave(&cryptoproc_wait.lock, wait_flags);
+			wait_event_interruptible_locked_irq(cryptoproc_wait,
+#else
 			wait_event_interruptible(cryptoproc_wait,
+#endif
 					!(list_empty(&crp_q) || crypto_all_qblocked) ||
 					!(list_empty(&crp_kq) || crypto_all_kqblocked) ||
 					kthread_should_stop());
+#ifdef CONFIG_SYNO_ARMADA_V2
+			spin_unlock_irqrestore(&cryptoproc_wait.lock, wait_flags);
+#endif
 			if (signal_pending (current)) {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 				spin_lock_irq(&current->sigmask_lock);
@@ -1500,8 +1587,11 @@ crypto_ret_proc(void *arg)
 {
 	struct cryptop *crpt;
 	struct cryptkop *krpt;
+#ifdef CONFIG_SYNO_ARMADA_V2
+	unsigned long  r_flags, wait_flags;
+#else
 	unsigned long  r_flags;
-
+#endif
 	set_current_state(TASK_INTERRUPTIBLE);
 
 	CRYPTO_RETQ_LOCK();
@@ -1536,10 +1626,18 @@ crypto_ret_proc(void *arg)
 			 */
 			dprintk("%s - sleeping\n", __FUNCTION__);
 			CRYPTO_RETQ_UNLOCK();
+#ifdef CONFIG_SYNO_ARMADA_V2
+			spin_lock_irqsave(&cryptoretproc_wait.lock, wait_flags);
+			wait_event_interruptible_locked_irq(cryptoretproc_wait,
+#else
 			wait_event_interruptible(cryptoretproc_wait,
+#endif
 					!list_empty(&crp_ret_q) ||
 					!list_empty(&crp_ret_kq) ||
 					kthread_should_stop());
+#ifdef CONFIG_SYNO_ARMADA_V2
+			spin_unlock_irqrestore(&cryptoretproc_wait.lock, wait_flags);
+#endif
 			if (signal_pending (current)) {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 				spin_lock_irq(&current->sigmask_lock);

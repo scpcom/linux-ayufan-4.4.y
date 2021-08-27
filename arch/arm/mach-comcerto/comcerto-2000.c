@@ -60,12 +60,13 @@
 #include <linux/clockchips.h>
 #include <linux/clk.h>
 #include <mach/comcerto-2000/clock.h>
+#include <mach/comcerto-2000/pm.h>
 #include <mach/gpio.h>
 #if defined(CONFIG_SYNO_COMCERTO)
 #include <linux/synobios.h>
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_VERSION
 extern char gszSynoHWVersion[];
 #endif
 
@@ -168,7 +169,12 @@ static struct map_desc comcerto_io_desc[] __initdata =
 	},
 };
 
-#define PFE_DMA_SIZE		SZ_4M
+#if defined(CONFIG_COMCERTO_64K_PAGES)
+#define PFE_DMA_SIZE		(4 * SZ_1M)
+#else
+#define PFE_DMA_SIZE            (16 * SZ_1M)
+#endif
+
 #define DSPG_DECT_CSS_DMA_SIZE	(10 * SZ_1M)
 
 void __init device_map_io(void)
@@ -211,10 +217,6 @@ static __init void gpio_init(void)
 
 #if defined(CONFIG_SYNO_COMCERTO)
 	synology_gpio_init();
-	if(0 == strncmp(gszSynoHWVersion, HW_DS214airv10, strlen(HW_DS214airv10))){
-		/*set gpio0 to IRQ_FALLING_EDGE */
-		__raw_writel(GPIO_0, COMCERTO_GPIO_INT_CFG_REG);
-	}
 #else
 	/*
 	 * Configure each GPIO to be Output or Input
@@ -228,6 +230,7 @@ static __init void gpio_init(void)
 	/*[FIXME]: GPIO IRQ Configuration */
 	__raw_writel(COMCERTO_IRQ_RISING_EDGE_GPIO, COMCERTO_GPIO_INT_CFG_REG);
 
+#if !defined(CONFIG_C2K_MFCN_EVM)
 	/* [FIXME]: Need to have proper defines for enabling the GPIO irq */
 	__raw_writel(__raw_readl(COMCERTO_GPIO_OE_REG)     | (0x1 << 5), COMCERTO_GPIO_OE_REG);		// enable GPIO5 (SLIC_RESET_n) as output
 	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);     // clear reset
@@ -235,8 +238,8 @@ static __init void gpio_init(void)
 	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) & ~(0x1 << 5), COMCERTO_GPIO_OUTPUT_REG);	// put in reset
 	udelay(15);
 	__raw_writel(__raw_readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 5), COMCERTO_GPIO_OUTPUT_REG); 	// clear reset after some time
+#endif
 	__raw_writel(0x4, COMCERTO_GPIO_INT_CFG_REG); /* si3227 is falling edge interrupt(gpio1) */
-
 
 	/* [FIXME]: Are pins GPIO or pins used by another block*/
 	//__raw_writel(COMCERTO_GPIO_PIN_USAGE, COMCERTO_GPIO_IOCTRL_REG);
@@ -302,9 +305,9 @@ static __init void exp_bus_init(void)
 
 			/*Chip select timing configuration*/
 			/* [FIXME] : Using default timing values */
-			//__raw_writel(comcerto_exp_values[cs][4], COMCERTO_EXP_CSx_TMG1_R(cs));
-			//__raw_writel(comcerto_exp_values[cs][5], COMCERTO_EXP_CSx_TMG2_R(cs));
-			//__raw_writel(comcerto_exp_values[cs][6], COMCERTO_EXP_CSx_TMG3_R(cs));
+			__raw_writel(comcerto_exp_values[cs][4], COMCERTO_EXP_CSx_TMG1_R(cs));
+			__raw_writel(comcerto_exp_values[cs][5], COMCERTO_EXP_CSx_TMG2_R(cs));
+			__raw_writel(comcerto_exp_values[cs][6], COMCERTO_EXP_CSx_TMG3_R(cs));
 		}
 	}
 
@@ -370,23 +373,6 @@ void comcerto_l2cc_init(void)
 #ifdef CONFIG_L2X0_INSTRUCTION_ONLY
 	int i;
 #endif
-
-	struct clk *l2cc_clk;
-
-	/* Get the L2CC clock */
-	l2cc_clk = clk_get(NULL,"l2cc");
-	if (IS_ERR(l2cc_clk)) {
-		pr_err("%s: Unable to obtain L2CC clock: %ld\n",__func__,PTR_ERR(l2cc_clk));
-		/* L2CC initilization cannot proceed from here */
-		BUG();
-	}
-
-	/* Enable the L2CC clk  */
-	if (clk_enable(l2cc_clk)){
-		pr_err("%s: Unable to enable L2CC clock:\n",__func__);
-		/* L2CC initilization cannot proceed from here */
-		BUG();
-	}
 
 	l2cache_base = (void *)COMCERTO_L310_VADDR;
 	BUG_ON(!l2cache_base);
@@ -470,6 +456,9 @@ static int comcerto_ahci_init(struct device *dev, void __iomem *mmio)
 	int serdes_regs_size;
         u32 val;
 	int ref_clk_24;
+
+	/* Move SATA controller to DDRC2 port */
+	writel(readl(COMCERTO_GPIO_FABRIC_CTRL_REG) | 0x2, COMCERTO_GPIO_FABRIC_CTRL_REG);
 
 	val = readl(COMCERTO_GPIO_SYSTEM_CONFIG);
 	ref_clk_24 = val & (BIT_5_MSK|BIT_7_MSK);
@@ -838,6 +827,16 @@ struct platform_device comcerto_device_epavis_decomp = {
 };
 #endif
 
+#if defined(CONFIG_COMCERTO_CSYS_TPI_CLOCK) 
+struct platform_device comcerto_device_tpi_csys_clk = {
+	.name		= "tpi_csys",
+	.id		= -1,
+	.dev		=  {
+		.platform_data		= NULL,
+	},
+};
+#endif
+
 int usb3_clk_internal = 1;
 static int __init get_usb3_clk_mode(char *str)
 {
@@ -921,7 +920,7 @@ void __init mac_addr_init(struct comcerto_pfe_platform_data * comcerto_pfe_data_
 #if defined(CONFIG_SYNO_C2K_NET)
 	int num = NUM_GEMAC_SUPPORT;
 
-	// DS214air gem_port_id same as c2kevm
+	// DS215air gem_port_id same as c2kevm
 	if(0 == strncmp(gszSynoHWVersion, HW_DS414jv10, strlen(HW_DS414jv10))) {
 		num = 1;
 	}
@@ -962,11 +961,16 @@ static struct platform_device *comcerto_common_devices[] __initdata = {
 	&comcerto_device_epavis_cie,
 	&comcerto_device_epavis_decomp,
 #endif
+#if defined(CONFIG_COMCERTO_CSYS_TPI_CLOCK)
+	&comcerto_device_tpi_csys_clk,
+#endif
 };
 
 void __init device_init(void)
 {
-	struct clk *axi_clk,*ddr_clk,*arm_clk;
+	/* Default value for the bit mask */
+	unsigned int default_host_utilpe_shared_bitmask = ~(USB2p0_IRQ|WOL_IRQ);
+	struct clk *axi_clk,*ddr_clk,*arm_clk,*l2cc_clk;
 	HAL_clk_div_backup_relocate_table ();
 	system_rev = (readl(COMCERTO_GPIO_DEVICE_ID_REG) >> 24) & 0xf;
 
@@ -1022,6 +1026,21 @@ void __init device_init(void)
 		BUG();
 	}
 	
+	/* Get the L2CC clock */
+	l2cc_clk = clk_get(NULL,"l2cc");
+	if (IS_ERR(l2cc_clk)) {
+		pr_err("%s: Unable to obtain L2CC clock: %ld\n",__func__,PTR_ERR(l2cc_clk));
+		/* L2CC initilization cannot proceed from here */
+		BUG();
+	}
+
+	/* Enable the L2CC clk  */
+	if (clk_enable(l2cc_clk)){
+		pr_err("%s: Unable to enable L2CC clock:\n",__func__);
+		/* L2CC initilization cannot proceed from here */
+		BUG();
+	}
+	
 #ifdef CONFIG_CACHE_L2X0
 	comcerto_l2cc_init();
 #endif
@@ -1034,6 +1053,8 @@ void __init device_init(void)
 	// [FIXME] Take TDM out of reset
 	//writel(readl(COMCERTO_BLOCK_RESET_REG) | TDM_RST, COMCERTO_BLOCK_RESET_REG);
 #endif
+	/* Default bit mask is applied here , which will be passed to Util-Pe*/
+	c2k_pm_bitmask_store(default_host_utilpe_shared_bitmask);
 
 	platform_add_devices(comcerto_common_devices, ARRAY_SIZE(comcerto_common_devices));
 }

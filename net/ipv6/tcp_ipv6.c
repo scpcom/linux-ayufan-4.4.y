@@ -1779,8 +1779,13 @@ process:
 	if (!sock_owned_by_user(sk)) {
 #ifdef CONFIG_NET_DMA
 		struct tcp_sock *tp = tcp_sk(sk);
+#ifdef CONFIG_SYNO_ALPINE
+		if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
+			tp->ucopy.dma_chan = net_dma_find_channel();
+#else
 		if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)
 			tp->ucopy.dma_chan = dma_find_channel(DMA_MEMCPY);
+#endif
 		if (tp->ucopy.dma_chan)
 			ret = tcp_v6_do_rcv(sk, skb);
 		else

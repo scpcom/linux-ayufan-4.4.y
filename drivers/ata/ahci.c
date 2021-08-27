@@ -89,6 +89,13 @@ enum board_ids {
 	board_ahci_sb700,	/* for SB700 and SB800 */
 	board_ahci_vt8251,
 
+#ifdef SYNO_SATA_AHCI_FBS_QCDEFER
+	board_ahci_yes_fbs_with_qcdefer,
+#endif /* SYNO_SATA_AHCI_FBS_QCDEFER */
+#ifdef SYNO_SATA_AHCI_FBS_NONCQ
+	board_ahci_yes_fbs_no_ncq,
+#endif /* SYNO_SATA_AHCI_FBS_NONCQ */
+
 	/* aliases */
 	board_ahci_mcp_linux	= board_ahci_mcp65,
 	board_ahci_mcp67	= board_ahci_mcp65,
@@ -253,6 +260,30 @@ static const struct ata_port_info ahci_port_info[] = {
 		.udma_mask	= ATA_UDMA6,
 		.port_ops	= &ahci_vt8251_ops,
 	},
+#ifdef SYNO_SATA_AHCI_FBS_QCDEFER
+	[board_ahci_yes_fbs_with_qcdefer] =
+	{
+		AHCI_HFLAGS	(AHCI_HFLAG_YES_FBS),
+		.flags		= AHCI_FLAG_COMMON,
+		.pio_mask	= ATA_PIO4,
+		.udma_mask	= ATA_UDMA6,
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+		.port_ops	= &ahci_pmp_ops,
+#else /* SYNO_SATA_PM_DEVICE_GPIO */
+		.port_ops	= &ahci_ops,
+#endif /* SYNO_SATA_PM_DEVICE_GPIO */
+	},
+#endif /* SYNO_SATA_AHCI_FBS_QCDEFER */
+#ifdef SYNO_SATA_AHCI_FBS_NONCQ
+	[board_ahci_yes_fbs_no_ncq] =
+	{
+		AHCI_HFLAGS	(AHCI_HFLAG_YES_FBS | AHCI_HFLAG_NO_NCQ),
+		.flags		= AHCI_FLAG_COMMON,
+		.pio_mask	= ATA_PIO4,
+		.udma_mask	= ATA_UDMA6,
+		.port_ops	= &ahci_ops,
+	},
+#endif /* SYNO_SATA_AHCI_FBS_NONCQ */
 };
 
 static const struct pci_device_id ahci_pci_tbl[] = {
@@ -481,10 +512,16 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	  .driver_data = board_ahci_yes_fbs },			/* 88se9172 on some Gigabyte */
 	{ PCI_DEVICE(0x1b4b, 0x91a3),
 	  .driver_data = board_ahci_yes_fbs },
-#ifdef MY_ABC_HERE
+#if  defined(SYNO_MV_9235_PORTING) || defined(CONFIG_SYNO_ALPINE)
 	{ PCI_DEVICE(0x1b4b, 0x9235),
 	  .driver_data = board_ahci_yes_fbs },			/* 88se9235 */
+	{ PCI_DEVICE(0x1b4b, 0x9215),
+	  .driver_data = board_ahci_yes_fbs },			/* 88se9215 */
 #endif
+#ifdef SYNO_SATA_AHCI_FBS_NONCQ
+	{ PCI_DEVICE(0x1b4b, 0x9170),
+	  .driver_data = board_ahci_yes_fbs_no_ncq },	/* 88se9170 */
+#endif /* SYNO_SATA_AHCI_FBS_QCDEFER */
 
 	/* Promise */
 	{ PCI_VDEVICE(PROMISE, 0x3f20), board_ahci },	/* PDC42819 */
@@ -643,9 +680,35 @@ END:
 }
 
 EXPORT_SYMBOL(syno_mv_9235_disk_led_set);
-#endif /* MY_ABC_HERE*/
+#endif /* SYNO_MV_9235_GPIO_CTRL*/
 
 #ifdef SYNO_ATA_SHUTDOWN_FIX
+#ifdef CONFIG_SYNO_X64
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+extern int grgPwrCtlPin[];
+
+static int syno_pulldown_eunit_gpio(struct ata_port *ap)
+{
+	int iRet = -1;
+	int iValue = 0;
+	int iPin = -1;
+
+	/* Due to EUnit is edge trigger, we have to pull the GPIO PIN to low before EUnit poweroff */
+	if (!(iPin = grgPwrCtlPin[ap->print_id])) { /* get pwrctl GPIO pin */
+		goto END;
+	}
+	iValue = 0;
+	if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
+		goto END;
+	}
+	mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
+
+	iRet = 0;
+END:
+	return iRet;
+}
+#endif /* CONFIG_SYNO_X64 */
+
 void ahci_pci_shutdown(struct pci_dev *pdev){
 	int i;
 	struct ata_host *host = dev_get_drvdata(&pdev->dev);
@@ -660,6 +723,9 @@ void ahci_pci_shutdown(struct pci_dev *pdev){
 			if (shost->hostt->syno_host_poweroff_task) {
 				shost->hostt->syno_host_poweroff_task(shost);
 			}
+#ifdef CONFIG_SYNO_X64
+			syno_pulldown_eunit_gpio(host->ports[i]);
+#endif /* CONFIG_SYNO_X64 */
 		}
 
 	if (pdev->irq >= 0) {
@@ -1468,6 +1534,8 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 #ifdef SYNO_MV_9235_PORTING
 	if (pdev->vendor == 0x1b4b && pdev->device == 0x9235) {
+		hpriv->flags |= AHCI_HFLAG_YES_MV9235_FIX;
+
 		for (i = 0; i < host->n_ports; i++) {
 			struct ata_port *ap = host->ports[i];
 			ap->link.uiStsFlags |= SYNO_STATUS_IS_MV9235;
@@ -1518,12 +1586,12 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	ahci_pci_print_info(host);
 
 	pci_set_master(pdev);
-#ifdef MY_ABC_HERE
-	if (pdev->vendor == 0x1b4b && pdev->device == 0x9235) {
+#ifdef SYNO_MV_9235_GPIO_CTRL
+	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215 )) {
 		syno_mv_9235_gpio_active_init(host);
 	}
-#endif /* MY_ABC_HERE */
-#ifdef MY_DEF_HERE
+#endif /* SYNO_MV_9235_GPIO_CTRL */
+#ifdef SYNO_LIBATA_JMB_BEHAVIOR
 	/* Only wait for JMiron in 6281 platform */
 	if (pdev->vendor != PCI_VENDOR_ID_JMICRON) {
 		rc = ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,

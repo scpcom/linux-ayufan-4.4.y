@@ -7,6 +7,9 @@
  */
 
 #include <asm-generic/vmlinux.lds.h>
+#ifdef CONFIG_SYNO_ALPINE
+#include <asm/cache.h>
+#endif
 #include <asm/thread_info.h>
 #include <asm/memory.h>
 #include <asm/page.h>
@@ -91,6 +94,11 @@ SECTIONS
 			*(.exception.text)
 			__exception_text_end = .;
 			IRQENTRY_TEXT
+#ifdef CONFIG_SYNO_ALPINE
+#ifdef CONFIG_FUNC_REORDER
+#include "functionlist"
+#endif
+#endif
 			TEXT_TEXT
 			SCHED_TEXT
 			LOCK_TEXT
@@ -177,7 +185,13 @@ SECTIONS
 	}
 #endif
 
+#ifdef CONFIG_SYNO_ALPINE
+#ifdef CONFIG_SMP
+	PERCPU_SECTION(L1_CACHE_BYTES)
+#endif
+#else
 	PERCPU_SECTION(32)
+#endif
 
 #ifdef CONFIG_XIP_KERNEL
 	__data_loc = ALIGN(4);		/* location in binary */
@@ -208,8 +222,13 @@ SECTIONS
 #endif
 
 		NOSAVE_DATA
+#ifdef CONFIG_SYNO_ALPINE
+		CACHELINE_ALIGNED_DATA(L1_CACHE_BYTES)
+		READ_MOSTLY_DATA(L1_CACHE_BYTES)
+#else
 		CACHELINE_ALIGNED_DATA(32)
 		READ_MOSTLY_DATA(32)
+#endif
 
 		/*
 		 * The exception fixup table (might need resorting at runtime)

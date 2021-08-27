@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #include "lkc.h"
+#define SYNO_EXPORT_CONFIG
 
 static void conf_warning(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)));
@@ -934,6 +935,9 @@ int conf_write_autoconf(void)
 	const char *name;
 	FILE *out, *tristate, *out_h;
 	int i;
+#ifdef SYNO_EXPORT_CONFIG
+	FILE *syno_h;
+#endif
 
 	sym_clear_all_valid();
 
@@ -959,12 +963,27 @@ int conf_write_autoconf(void)
 		return 1;
 	}
 
+#ifdef SYNO_EXPORT_CONFIG
+	syno_h = fopen(".tmpsynoconfig.h", "w");
+	if (!syno_h) {
+		fclose(out);
+		fclose(tristate);
+		fclose(out_h);
+		return 1;
+	}
+#endif
+
 	conf_write_heading(out, &kconfig_printer_cb, NULL);
 
 	conf_write_heading(tristate, &tristate_printer_cb, NULL);
 
 	conf_write_heading(out_h, &header_printer_cb, NULL);
 
+#ifdef SYNO_EXPORT_CONFIG
+	conf_write_heading(syno_h, &header_printer_cb, NULL);
+	fprintf(syno_h, "#ifndef __SYNO_AUTOCONF_H__\n"
+			"#define __SYNO_AUTOCONF_H__\n");
+#endif
 	for_all_symbols(i, sym) {
 		if (!sym->name)
 			continue;
@@ -981,10 +1000,22 @@ int conf_write_autoconf(void)
 		conf_write_symbol(tristate, sym, &tristate_printer_cb, (void *)1);
 
 		conf_write_symbol(out_h, sym, &header_printer_cb, NULL);
+#ifdef SYNO_EXPORT_CONFIG
+		if (strncmp(sym->name, "SYNO", 4) == 0 ||
+		    strcmp(sym->name, "FS_SYNO_ACL") == 0) {
+			conf_write_symbol(syno_h, sym, &header_printer_cb, NULL);
+		}
+#endif
 	}
 	fclose(out);
 	fclose(tristate);
 	fclose(out_h);
+#ifdef SYNO_EXPORT_CONFIG
+	fprintf(syno_h, "#endif /* __SYNO_AUTOCONF_H__ */");
+	fclose(syno_h);
+	if (rename(".tmpsynoconfig.h", "include/linux/syno_autoconf.h"))
+		return 1;
+#endif
 
 	name = getenv("KCONFIG_AUTOHEADER");
 	if (!name)

@@ -46,7 +46,7 @@ struct tag_mem32 {
 	__u32	start;	/* physical start address */
 };
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #define ATAG_MEM64	0x54420002
 
 struct tag_mem64 {
@@ -155,8 +155,7 @@ struct tag_memclk {
 	__u32 fmemclk;
 };
 
-
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 /* Marvell uboot parameters */
 #define ATAG_MV_UBOOT   0x41000403
 #define MV_UBOOT_ETH_PORTS	4
@@ -168,14 +167,12 @@ struct tag_mv_uboot {
         __u8  macAddr[MV_UBOOT_ETH_PORTS][6];
 	__u16 mtu[MV_UBOOT_ETH_PORTS];
 	__u32 nand_ecc;
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
 #if !defined (CONFIG_ARCH_ARMADA370)
 	__u32 rgmii0Src;
 	__u32 feGeSrc;
 #endif
 #if defined (CONFIG_ARCH_ARMADA370)
 	__u32 bit_mask_config;
-#endif
 #endif
 };                     
 #endif
@@ -185,7 +182,7 @@ struct tag {
 	union {
 		struct tag_core		core;
 		struct tag_mem32	mem;
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_V2)
 		struct tag_mem64	mem64;
 #endif
 		struct tag_videotext	videotext;
@@ -205,7 +202,7 @@ struct tag {
 		 * DC21285 specific
 		 */
 		struct tag_memclk	memclk;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		/*
 		 * Marvell specific
 		 */
@@ -219,7 +216,7 @@ struct tagtable {
 	int (*parse)(const struct tag *);
 };
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_BE8_ON_LE
 #define read_tag(a)	le32_to_cpu(a)
 #else
@@ -227,7 +224,7 @@ struct tagtable {
 #endif
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #define tag_member_present(tag,member)				\
 	((unsigned long)(&((struct tag *)0L)->member + 1)	\
 		<= read_tag((tag)->hdr.size) * 4)
@@ -241,7 +238,7 @@ struct tagtable {
 #endif
 #define tag_size(type)	((sizeof(struct tag_header) + sizeof(struct type)) >> 2)
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #define for_each_tag(t,base)		\
 	for (t = base; read_tag((t)->hdr.size); t = tag_next(t))
 #else
@@ -266,7 +263,11 @@ static const struct tagtable __tagtable_##fn __tag = { tag, fn }
 
 struct membank {
 	phys_addr_t start;
+#ifdef CONFIG_SYNO_ALPINE
+	phys_addr_t size;
+#else
 	unsigned long size;
+#endif
 	unsigned int highmem;
 };
 
@@ -287,7 +288,11 @@ extern struct meminfo meminfo;
 #define bank_phys_end(bank)	((bank)->start + (bank)->size)
 #define bank_phys_size(bank)	(bank)->size
 
+#ifdef CONFIG_SYNO_ALPINE
+extern int arm_add_memory(phys_addr_t start, phys_addr_t size);
+#else
 extern int arm_add_memory(phys_addr_t start, unsigned long size);
+#endif
 extern void early_print(const char *str, ...);
 extern void dump_machine_table(void);
 

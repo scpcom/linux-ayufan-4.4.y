@@ -662,7 +662,7 @@ static void ses_intf_remove_component(struct scsi_device *sdev)
 	struct enclosure_device *edev, *prev = NULL;
 	// for #41463, the data structure of ses_component in enclosure_component does not clear when device removed
 	// after checking related function and we decide that here is the best position to clear it
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_DISK_LED_CONTROL
 	struct enclosure_component *cdev;
 	struct ses_component *scomp;
 	int i;
@@ -670,7 +670,7 @@ static void ses_intf_remove_component(struct scsi_device *sdev)
 
 	while ((edev = enclosure_find(&sdev->host->shost_gendev, prev)) != NULL) {
 		prev = edev;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_DISK_LED_CONTROL
 		for (i = 0; i < edev->components; i++) {
 			cdev = &edev->component[i];
 			scomp = edev->component[i].scratch;

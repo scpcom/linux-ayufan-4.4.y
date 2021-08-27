@@ -280,6 +280,13 @@ static inline int put_page_testzero(struct page *page)
 	return atomic_dec_and_test(&page->_count);
 }
 
+#ifdef CONFIG_SYNO_ALPINE
+static inline int put_page_n_testzero(struct page *page, unsigned int c)
+{
+	VM_BUG_ON(atomic_read(&page->_count) < c);
+	return atomic_sub_and_test(c, &page->_count);
+}
+#endif
 /*
  * Try to grab a ref unless the page has a refcount of zero, return false if
  * that is the case.
@@ -450,6 +457,9 @@ static inline void __ClearPageBuddy(struct page *page)
 }
 
 void put_page(struct page *page);
+#ifdef CONFIG_SYNO_ALPINE
+void put_page_n(struct page *page, unsigned int c);
+#endif
 void put_pages_list(struct list_head *pages);
 
 void split_page(struct page *page, unsigned int order);
@@ -1444,7 +1454,7 @@ int write_one_page(struct page *page, int wait);
 void task_dirty_inc(struct task_struct *tsk);
 
 /* readahead.c */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INCREASE_READAHEAD
 #if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
 #define VM_MAX_READAHEAD        192     /* kbytes */
 #elif defined(CONFIG_SYNO_MV88F6281)
@@ -1454,7 +1464,7 @@ void task_dirty_inc(struct task_struct *tsk);
 #else
 #define VM_MAX_READAHEAD	512	/* kbytes */
 #endif
-#else /* MY_ABC_HERE */
+#else /* SYNO_INCREASE_READAHEAD */
 #define VM_MAX_READAHEAD	128	/* kbytes */
 #endif /* SYNO_INCREASE_READAHEAD */
 #define VM_MIN_READAHEAD	16	/* kbytes (includes current page) */

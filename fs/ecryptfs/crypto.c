@@ -256,8 +256,8 @@ void ecryptfs_destroy_crypt_stat(struct ecryptfs_crypt_stat *crypt_stat)
 {
 	struct ecryptfs_key_sig *key_sig, *key_sig_tmp;
 
-#ifndef MY_ABC_HERE
-#ifdef MY_DEF_HERE
+#ifndef SYNO_ECRYPTFS_OCF
+#if defined(SYNO_ECRYPTFS_WITH_ABLKCIPHER) || defined(CONFIG_SYNO_ALPINE)
 	if (crypt_stat->tfm) {
 		crypto_free_ablkcipher(crypt_stat->tfm);
 	}
@@ -296,6 +296,23 @@ void ecryptfs_destroy_mount_crypt_stat(
 	mutex_unlock(&mount_crypt_stat->global_auth_tok_list_mutex);
 	memset(mount_crypt_stat, 0, sizeof(struct ecryptfs_mount_crypt_stat));
 }
+#ifdef CONFIG_SYNO_ALPINE
+struct extent_crypt_result {
+	struct completion completion;
+	int rc;
+};
+
+static void extent_crypt_complete(struct crypto_async_request *req, int rc)
+{
+	struct extent_crypt_result *ecr = req->data;
+
+	if (rc == -EINPROGRESS)
+		return;
+
+	ecr->rc = rc;
+	complete(&ecr->completion);
+}
+#endif
 
 /**
  * virt_to_scatterlist
@@ -367,13 +384,12 @@ static int ecryptfs_async_init(struct ecryptfs_request *ecryptfs_req,
 	init_completion(&(ecryptfs_req->complete));
 	ecryptfs_req->crypt_stat = crypt_stat;
 
-	if (NULL == (ecryptfs_req->req = kmalloc(sizeof(struct ablkcipher_request), GFP_KERNEL))) {
+	if (NULL == (ecryptfs_req->req = ablkcipher_request_alloc(crypt_stat->tfm, GFP_NOFS))) {
 		WARN_ON(1);
 		rc = -EINVAL;
 		goto out;
 	}
 
-	ablkcipher_request_set_tfm(ecryptfs_req->req, crypt_stat->tfm);
 	ablkcipher_request_set_callback(ecryptfs_req->req, CRYPTO_TFM_REQ_MAY_BACKLOG |
 					CRYPTO_TFM_REQ_MAY_SLEEP,
 					ecryptfs_async_done,
@@ -404,7 +420,7 @@ static void ecryptfs_async_wait(struct ecryptfs_request *ecryptfs_req,
 		break;
 	}
 
-	kfree(ecryptfs_req->req);
+	ablkcipher_request_free(ecryptfs_req->req);
 	ecryptfs_req->req = NULL;
 }
 #endif
@@ -553,16 +569,21 @@ static inline int encrypt_ocf_process(struct ecryptfs_crypt_stat *crypt_stat, st
 static int encrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 			       struct scatterlist *dest_sg,
 			       struct scatterlist *src_sg, int size,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_OCF
 			       void *priv, int iv_size,
 #endif
 			       unsigned char *iv)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_OCF
 	return encrypt_ocf_process(crypt_stat, dest_sg, src_sg, size, iv, iv_size, 1, priv);
 #else
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef CONFIG_SYNO_ALPINE
+	struct ablkcipher_request *req = NULL;
+	struct extent_crypt_result ecr;
+#else
 	struct ecryptfs_request ecryptfs_req = {0};
+#endif
 #else
 	struct blkcipher_desc desc = {
 		.tfm = crypt_stat->tfm,
@@ -581,14 +602,70 @@ static int encrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 				  crypt_stat->key_size);
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ALPINE
+	init_completion(&ecr.completion);
+#endif
+
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
+	/* Consider doing this once, when the file is opened */
+#endif
+	mutex_lock(&crypt_stat->cs_tfm_mutex);
+#ifdef CONFIG_SYNO_ALPINE
+	req = ablkcipher_request_alloc(crypt_stat->tfm, GFP_NOFS);
+	if (!req) {
+		mutex_unlock(&crypt_stat->cs_tfm_mutex);
+		rc = -ENOMEM;
+		goto out;
+	}
+
+	ablkcipher_request_set_callback(req,
+			CRYPTO_TFM_REQ_MAY_BACKLOG | CRYPTO_TFM_REQ_MAY_SLEEP,
+			extent_crypt_complete, &ecr);
+	/* Consider doing this once, when the file is opened */
+	if (!(crypt_stat->flags & ECRYPTFS_KEY_SET)) {
+		rc = crypto_ablkcipher_setkey(crypt_stat->tfm, crypt_stat->key,
+					      crypt_stat->key_size);
+		if (rc) {
+			ecryptfs_printk(KERN_ERR,
+					"Error setting key; rc = [%d]\n",
+					rc);
+			mutex_unlock(&crypt_stat->cs_tfm_mutex);
+			rc = -EINVAL;
+			goto out;
+		}
+		crypt_stat->flags |= ECRYPTFS_KEY_SET;
+	}
+	mutex_unlock(&crypt_stat->cs_tfm_mutex);
+	ecryptfs_printk(KERN_DEBUG, "Encrypting [%d] bytes.\n", size);
+	ablkcipher_request_set_crypt(req, src_sg, dest_sg, size, iv);
+	rc = crypto_ablkcipher_encrypt(req);
+	if (rc == -EINPROGRESS || rc == -EBUSY) {
+		struct extent_crypt_result *ecr = req->base.data;
+
+#ifdef CONFIG_SYNO_CRYPTO_ASYNC_RACE_COND_FIX
+		wait_for_completion(&ecr->completion);
+		rc = ecr->rc;
+#else
+		rc = wait_for_completion_interruptible(&ecr->completion);
+		if (!rc)
+			rc = ecr->rc;
+#endif
+		INIT_COMPLETION(ecr->completion);
+	}
+ out:
+	ablkcipher_request_free(req);
+ 	return rc;
+#else
+#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
 	rc = ecryptfs_async_init(&ecryptfs_req, crypt_stat);
 	if (rc) {
+		mutex_unlock(&crypt_stat->cs_tfm_mutex);
 		goto out;
 	}
 #endif
-	/* Consider doing this once, when the file is opened */
-	mutex_lock(&crypt_stat->cs_tfm_mutex);
+
 	if (!(crypt_stat->flags & ECRYPTFS_KEY_SET)) {
 #ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
 		rc = crypto_ablkcipher_setkey(crypt_stat->tfm, crypt_stat->key,
@@ -617,6 +694,7 @@ static int encrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 	mutex_unlock(&crypt_stat->cs_tfm_mutex);
 out:
 	return rc;
+#endif // end of CONFIG_SYNO_ALPINE
 #endif
 }
 
@@ -680,8 +758,13 @@ static int ecryptfs_encrypt_extent(struct page *enc_extent_page,
 #endif
 	if (rc < 0) {
 		printk(KERN_ERR "%s: Error attempting to encrypt page with "
+#ifdef CONFIG_SYNO_ALPINE
+		       "page->index = [%lld], extent_offset = [%ld]; "
+		       "rc = [%d]\n", __func__, (unsigned long long)page->index, extent_offset,
+#else
 		       "page->index = [%ld], extent_offset = [%ld]; "
 		       "rc = [%d]\n", __func__, page->index, extent_offset,
+#endif
 		       rc);
 		goto out;
 	}
@@ -844,8 +927,13 @@ static int ecryptfs_decrypt_extent(struct page *page,
 #endif
 	if (rc < 0) {
 		printk(KERN_ERR "%s: Error attempting to decrypt to page with "
+#ifdef CONFIG_SYNO_ALPINE
+		       "page->index = [%lld], extent_offset = [%ld]; "
+		       "rc = [%d]\n", __func__, (unsigned long long)page->index, extent_offset,
+#else
 		       "page->index = [%ld], extent_offset = [%ld]; "
 		       "rc = [%d]\n", __func__, page->index, extent_offset,
+#endif
 		       rc);
 		goto out;
 	}
@@ -918,8 +1006,8 @@ int ecryptfs_decrypt_page(struct page *page)
 		goto out;
 	}
 	enc_extent_virt = kmap(enc_extent_page);
-#ifdef MY_ABC_HERE
-	syno_zero_virt = kzalloc(PAGE_CACHE_SIZE, GFP_KERNEL);
+#ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+	syno_zero_virt = kzalloc(crypt_stat->extent_size, GFP_KERNEL);
 	if (!syno_zero_virt) {
 		rc = -ENOMEM;
 		goto out;
@@ -948,11 +1036,11 @@ int ecryptfs_decrypt_page(struct page *page)
 #ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
 		// check pre 16 byte first, in order to filter unnecessary memcmp
 		if (!memcmp(enc_extent_virt, syno_zero_virt, 16) &&
-			!memcmp(enc_extent_virt+16, syno_zero_virt+16, PAGE_CACHE_SIZE-16)){
+			!memcmp(enc_extent_virt+16, syno_zero_virt+16, crypt_stat->extent_size-16)){
 			char *ecryptfs_page_virt;
 			ecryptfs_page_virt = kmap_atomic(page, KM_USER0);
-			memcpy((char *)ecryptfs_page_virt,
-			enc_extent_virt, PAGE_CACHE_SIZE);
+			memcpy((char *)(ecryptfs_page_virt + (extent_offset * crypt_stat->extent_size)),
+			enc_extent_virt, crypt_stat->extent_size);
 			kunmap_atomic(ecryptfs_page_virt, KM_USER0);
 			rc = 0;
 			continue;
@@ -1012,16 +1100,21 @@ out:
 static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 			       struct scatterlist *dest_sg,
 			       struct scatterlist *src_sg, int size,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_OCF
 			       void *priv, int iv_size,
 #endif
 			       unsigned char *iv)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_OCF
 	return encrypt_ocf_process(crypt_stat, dest_sg, src_sg, size, iv, iv_size, 0, priv);
 #else
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef CONFIG_SYNO_ALPINE
+	struct ablkcipher_request *req = NULL;
+	struct extent_crypt_result ecr;
+#else
 	struct ecryptfs_request ecryptfs_req = {0};
+#endif
 #else
 	struct blkcipher_desc desc = {
 		.tfm = crypt_stat->tfm,
@@ -1031,25 +1124,51 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 #endif
 	int rc = 0;
 
-#ifdef MY_DEF_HERE
-	rc = ecryptfs_async_init(&ecryptfs_req, crypt_stat);
-	if (rc) {
-		goto out;
+#ifdef CONFIG_SYNO_ALPINE
+	BUG_ON(!crypt_stat || !crypt_stat->tfm
+	       || !(crypt_stat->flags & ECRYPTFS_STRUCT_INITIALIZED));
+	if (unlikely(ecryptfs_verbosity > 0)) {
+		ecryptfs_printk(KERN_DEBUG, "Key size [%zd]; key:\n",
+				crypt_stat->key_size);
+		ecryptfs_dump_hex(crypt_stat->key,
+				  crypt_stat->key_size);
 	}
+
+	init_completion(&ecr.completion);
 #endif
 
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 	/* Consider doing this once, when the file is opened */
+#endif
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef CONFIG_SYNO_ALPINE
+	req = ablkcipher_request_alloc(crypt_stat->tfm, GFP_NOFS);
+#else
+	rc = ecryptfs_async_init(&ecryptfs_req, crypt_stat);
+	if (rc) {
+		mutex_unlock(&crypt_stat->cs_tfm_mutex);
+		goto out;
+	}
 	if (!(crypt_stat->flags & ECRYPTFS_KEY_SET)) {
 		rc = crypto_ablkcipher_setkey(crypt_stat->tfm, crypt_stat->key,
 									  crypt_stat->key_size);
 		crypt_stat->flags |= ECRYPTFS_KEY_SET;
 	}
+#endif
 #else
 	rc = crypto_blkcipher_setkey(crypt_stat->tfm, crypt_stat->key,
 				     crypt_stat->key_size);
 #endif
+#ifdef CONFIG_SYNO_ALPINE
+	if (!req) {
+		mutex_unlock(&crypt_stat->cs_tfm_mutex);
+		rc = -ENOMEM;
+		goto out;
+	}
+#else
 	if (rc) {
 		ecryptfs_printk(KERN_ERR, "Error setting key; rc = [%d]\n",
 				rc);
@@ -1058,14 +1177,57 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 		goto out;
 	}
 	ecryptfs_printk(KERN_DEBUG, "Decrypting [%d] bytes.\n", size);
-#ifdef MY_DEF_HERE
+#endif
+
+#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef CONFIG_SYNO_ALPINE
+	ablkcipher_request_set_callback(req,
+			CRYPTO_TFM_REQ_MAY_BACKLOG | CRYPTO_TFM_REQ_MAY_SLEEP,
+			extent_crypt_complete, &ecr);
+	/* Consider doing this once, when the file is opened */
+	if (!(crypt_stat->flags & ECRYPTFS_KEY_SET)) {
+		rc = crypto_ablkcipher_setkey(crypt_stat->tfm, crypt_stat->key,
+					      crypt_stat->key_size);
+		if (rc) {
+			ecryptfs_printk(KERN_ERR,
+					"Error setting key; rc = [%d]\n",
+					rc);
+			mutex_unlock(&crypt_stat->cs_tfm_mutex);
+			rc = -EINVAL;
+			goto out;
+		}
+		crypt_stat->flags |= ECRYPTFS_KEY_SET;
+	}
+#else
 	ablkcipher_request_set_crypt(ecryptfs_req.req, src_sg, dest_sg, size, iv);
 	ecryptfs_async_wait(&ecryptfs_req,
 						crypto_ablkcipher_decrypt(ecryptfs_req.req));
+#endif
 #else
 	rc = crypto_blkcipher_decrypt_iv(&desc, dest_sg, src_sg, size);
 #endif
 	mutex_unlock(&crypt_stat->cs_tfm_mutex);
+#ifdef CONFIG_SYNO_ALPINE
+	ecryptfs_printk(KERN_DEBUG, "Decrypting [%d] bytes.\n", size);
+	ablkcipher_request_set_crypt(req, src_sg, dest_sg, size, iv);
+	rc = crypto_ablkcipher_decrypt(req);
+	if (rc == -EINPROGRESS || rc == -EBUSY) {
+		struct extent_crypt_result *ecr = req->base.data;
+
+#ifdef CONFIG_SYNO_CRYPTO_ASYNC_RACE_COND_FIX
+		wait_for_completion(&ecr->completion);
+		rc = ecr->rc;
+#else
+		rc = wait_for_completion_interruptible(&ecr->completion);
+		if (!rc)
+			rc = ecr->rc;
+#endif
+		INIT_COMPLETION(ecr->completion);
+	}
+out:
+	ablkcipher_request_free(req);
+	return rc;
+#else
 	if (rc) {
 		ecryptfs_printk(KERN_ERR, "Error decrypting; rc = [%d]\n",
 				rc);
@@ -1075,6 +1237,7 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 out:
 	return rc;
 #endif 
+#endif
 }
 
 /**
@@ -1218,11 +1381,17 @@ out_unlock:
 		goto out;
 	}
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
+#ifdef CONFIG_SYNO_ALPINE
+ 	rc = ecryptfs_crypto_api_algify_cipher_name(&full_alg_name,
+						    crypt_stat->cipher,
+						    crypt_stat->cipher_mode);
+#else
 	rc = ecryptfs_crypto_api_algify_cipher_name(&full_alg_name,
 						    crypt_stat->cipher, "cbc");
+#endif
 	if (rc)
 		goto out_unlock;
-#ifdef MY_DEF_HERE
+#if defined(SYNO_ECRYPTFS_WITH_ABLKCIPHER) || defined(CONFIG_SYNO_ALPINE)
 	crypt_stat->tfm = crypto_alloc_ablkcipher(full_alg_name, 0, 0);
 #else
 	crypt_stat->tfm = crypto_alloc_blkcipher(full_alg_name, 0,
@@ -1233,11 +1402,17 @@ out_unlock:
 		rc = PTR_ERR(crypt_stat->tfm);
 		crypt_stat->tfm = NULL;
 		ecryptfs_printk(KERN_ERR, "cryptfs: init_crypt_ctx(): "
+#ifdef CONFIG_SYNO_ALPINE
+				"Error initializing cipher [%s] and mode [%s]\n",
+				crypt_stat->cipher,
+				crypt_stat->cipher_mode);
+#else
 				"Error initializing cipher [%s]\n",
 				crypt_stat->cipher);
+#endif
 		goto out_unlock;
 	}
-#ifdef MY_DEF_HERE
+#if defined(SYNO_ECRYPTFS_WITH_ABLKCIPHER) || defined(CONFIG_SYNO_ALPINE)
 	crypto_ablkcipher_set_flags(crypt_stat->tfm, CRYPTO_TFM_REQ_WEAK_KEY);
 #else
 	crypto_blkcipher_set_flags(crypt_stat->tfm, CRYPTO_TFM_REQ_WEAK_KEY);
@@ -1273,14 +1448,18 @@ void ecryptfs_set_default_sizes(struct ecryptfs_crypt_stat *crypt_stat)
 	crypt_stat->extent_size = ECRYPTFS_DEFAULT_EXTENT_SIZE;
 	set_extent_mask_and_shift(crypt_stat);
 	crypt_stat->iv_bytes = ECRYPTFS_DEFAULT_IV_BYTES;
-	if (crypt_stat->flags & ECRYPTFS_METADATA_IN_XATTR)
+	if (crypt_stat->flags & ECRYPTFS_METADATA_IN_XATTR) {
 		crypt_stat->metadata_size = ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
-	else {
+	} else {
+#ifdef CONFIG_SYNO_ALPINE
+		crypt_stat->metadata_size = ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
+#else
 		if (PAGE_CACHE_SIZE <= ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE)
 			crypt_stat->metadata_size =
 				ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
 		else
 			crypt_stat->metadata_size = PAGE_CACHE_SIZE;
+#endif
 	}
 }
 
@@ -1401,6 +1580,9 @@ static void ecryptfs_set_default_crypt_stat_vals(
 						      mount_crypt_stat);
 	ecryptfs_set_default_sizes(crypt_stat);
 	strcpy(crypt_stat->cipher, ECRYPTFS_DEFAULT_CIPHER);
+#ifdef CONFIG_SYNO_ALPINE
+	strcpy(crypt_stat->cipher_mode, ECRYPTFS_DEFAULT_CIPHER_MODE);
+#endif
 	crypt_stat->key_size = ECRYPTFS_DEFAULT_KEY_BYTES;
 	crypt_stat->flags &= ~(ECRYPTFS_KEY_VALID);
 	crypt_stat->file_version = ECRYPTFS_FILE_VERSION;
@@ -1434,6 +1616,9 @@ int ecryptfs_new_file_context(struct inode *ecryptfs_inode)
 	    &ecryptfs_superblock_to_private(
 		    ecryptfs_inode->i_sb)->mount_crypt_stat;
 	int cipher_name_len;
+#ifdef CONFIG_SYNO_ALPINE
+	int cipher_mode_name_len;
+#endif
 	int rc = 0;
 
 	ecryptfs_set_default_crypt_stat_vals(crypt_stat, mount_crypt_stat);
@@ -1453,6 +1638,14 @@ int ecryptfs_new_file_context(struct inode *ecryptfs_inode)
 	       mount_crypt_stat->global_default_cipher_name,
 	       cipher_name_len);
 	crypt_stat->cipher[cipher_name_len] = '\0';
+#ifdef CONFIG_SYNO_ALPINE
+    cipher_mode_name_len =
+    	strlen(mount_crypt_stat->global_default_cipher_mode_name);
+    memcpy(crypt_stat->cipher_mode,
+    mount_crypt_stat->global_default_cipher_mode_name,
+    	cipher_mode_name_len);
+    crypt_stat->cipher_mode[cipher_mode_name_len] = '\0';
+#endif
 	crypt_stat->key_size =
 		mount_crypt_stat->global_default_cipher_key_size;
 	ecryptfs_generate_new_key(crypt_stat);
@@ -1564,6 +1757,69 @@ void ecryptfs_write_crypt_stat_flags(char *page_virt,
 	(*written) = 4;
 }
 
+#ifdef CONFIG_SYNO_ALPINE
+struct ecryptfs_cipher_mode_code_str_map_elem {
+	char mode_str[ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE + 1];
+	u8 mode_code;
+};
+
+static struct ecryptfs_cipher_mode_code_str_map_elem
+ecryptfs_cipher_mode_code_str_map[] = {
+	{"cbc", ECRYPTFS_CIPHER_MODE_CBC},
+	{"ctr", ECRYPTFS_CIPHER_MODE_CTR}
+};
+
+/**
++ * ecryptfs_code_for_cipher_mode_string
++ *  <at> mode_name: The string alias for the cipher mode
++ *
++ * Retruns zero on no match, or the cipher code on match
++ */
+u8 ecryptfs_code_for_cipher_mode_string(char *mode_name)
+{
+	int i;
+	u8 code = 0;
+	struct ecryptfs_cipher_mode_code_str_map_elem *map =
+		ecryptfs_cipher_mode_code_str_map;
+
+	for (i = 0; i < ARRAY_SIZE(ecryptfs_cipher_mode_code_str_map); i++)
+		if (strcmp(mode_name, map[i].mode_str) == 0) {
+			code = map[i].mode_code;
+			break;
+		}
+
+	return code;
+}
+
+/**
+ * ecryptfs_cipher_mode_code_to_string
+ *  <at> str: Destination to write out the cipher mode name
+ *  <at> cipher_code: The code to conver to cipher mode name string
+ *
+ * Retruns zero in success
+ */
+int ecryptfs_cipher_mode_code_to_string(char *str, u8 mode_code)
+{
+	int rc = 0;
+	int i;
+	struct ecryptfs_cipher_mode_code_str_map_elem *map =
+		ecryptfs_cipher_mode_code_str_map;
+
+	str[0] = '\0';
+	for (i = 0; i < ARRAY_SIZE(ecryptfs_cipher_mode_code_str_map); i++)
+		if (mode_code == map[i].mode_code) {
+			strcpy(str, map[i].mode_str);
+			break;
+		}
+	if (str[0] == '\0') {
+		ecryptfs_printk(KERN_WARNING, "Cipher mode not recognized: "
+				"[%d]\n", mode_code);
+		rc = -EINVAL;
+	}
+
+	return rc;
+}
+#endif
 struct ecryptfs_cipher_code_str_map_elem {
 	char cipher_str[16];
 	u8 cipher_code;

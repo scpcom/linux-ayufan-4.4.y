@@ -226,8 +226,8 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 	if (dev->driver)
 		add_uevent_var(env, "DRIVER=%s", dev->driver->name);
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-#ifdef CONFIG_SYSFS_DEPRECATED
+#if defined(SYNO_USB_COPY) || defined(SYNO_SD_COPY)
+#if defined(CONFIG_SYSFS_DEPRECATED) || defined(SYNO_DEPRECATED_UEVENT_ENV)
 	if (dev->class) {
 		struct device *parent = dev->parent;
 

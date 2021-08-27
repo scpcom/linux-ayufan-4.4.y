@@ -62,4 +62,6 @@
 #define SOCKFS_MAGIC		0x534F434B
 #define V9FS_MAGIC		0x01021997
 
+#define BTRFS_TEST_MAGIC	0x73727279
+
 #endif /* __LINUX_MAGIC_H__ */

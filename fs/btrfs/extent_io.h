@@ -46,6 +46,10 @@
 #define EXTENT_BUFFER_WRITEBACK 7
 #define EXTENT_BUFFER_IOERR 8
 #define EXTENT_BUFFER_DUMMY 9
+#define EXTENT_BUFFER_IN_TREE 10
+#ifdef SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
+#define EXTENT_BUFFER_CLONE 63
+#endif
 
 /* these are flags for extent_clear_unlock_delalloc */
 #define PAGE_UNLOCK		(1 << 0)
@@ -97,12 +101,10 @@ struct extent_io_ops {
 
 struct extent_io_tree {
 	struct rb_root state;
-	struct radix_tree_root buffer;
 	struct address_space *mapping;
 	u64 dirty_bytes;
 	int track_uptodate;
 	spinlock_t lock;
-	spinlock_t buffer_lock;
 	struct extent_io_ops *ops;
 };
 
@@ -133,7 +135,7 @@ struct extent_buffer {
 	unsigned long map_start;
 	unsigned long map_len;
 	unsigned long bflags;
-	struct extent_io_tree *tree;
+	struct btrfs_fs_info *fs_info;
 	spinlock_t refs_lock;
 	atomic_t refs;
 	atomic_t io_pages;
@@ -269,12 +271,12 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 int get_state_private(struct extent_io_tree *tree, u64 start, u64 *private);
 void set_page_extent_mapped(struct page *page);
 
-struct extent_buffer *alloc_extent_buffer(struct extent_io_tree *tree,
+struct extent_buffer *alloc_extent_buffer(struct btrfs_fs_info *fs_info,
 					  u64 start, unsigned long len);
 struct extent_buffer *alloc_dummy_extent_buffer(u64 start, unsigned long len);
 struct extent_buffer *btrfs_clone_extent_buffer(struct extent_buffer *src);
-struct extent_buffer *find_extent_buffer(struct extent_io_tree *tree,
-					 u64 start, unsigned long len);
+struct extent_buffer *find_extent_buffer(struct btrfs_fs_info *fs_info,
+					 u64 start);
 void free_extent_buffer(struct extent_buffer *eb);
 void free_extent_buffer_stale(struct extent_buffer *eb);
 #define WAIT_NONE	0
@@ -324,6 +326,7 @@ int set_extent_buffer_dirty(struct extent_buffer *eb);
 int set_extent_buffer_uptodate(struct extent_buffer *eb);
 int clear_extent_buffer_uptodate(struct extent_buffer *eb);
 int extent_buffer_uptodate(struct extent_buffer *eb);
+int extent_buffer_under_io(struct extent_buffer *eb);
 int map_private_extent_buffer(struct extent_buffer *eb, unsigned long offset,
 		      unsigned long min_len, char **map,
 		      unsigned long *map_start,
@@ -348,4 +351,10 @@ int repair_io_failure(struct btrfs_fs_info *fs_info, u64 start,
 int end_extent_writepage(struct page *page, int err, u64 start, u64 end);
 int repair_eb_io_failure(struct btrfs_root *root, struct extent_buffer *eb,
 			 int mirror_num);
+#ifdef CONFIG_BTRFS_FS_RUN_SANITY_TESTS
+noinline u64 find_lock_delalloc_range(struct inode *inode,
+				      struct extent_io_tree *tree,
+				      struct page *locked_page, u64 *start,
+				      u64 *end, u64 max_bytes);
+#endif
 #endif

@@ -688,8 +688,13 @@ static int hrtimer_switch_to_hres(void)
 
 	if (tick_init_highres()) {
 		local_irq_restore(flags);
+#ifdef CONFIG_SYNO_ALPINE
+/*		printk(KERN_WARNING "Could not switch to high resolution "
+				    "mode on CPU %d\n", cpu);*/
+#else
 		printk(KERN_WARNING "Could not switch to high resolution "
 				    "mode on CPU %d\n", cpu);
+#endif
 		return 0;
 	}
 	base->hres_active = 1;

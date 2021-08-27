@@ -3,9 +3,9 @@
 #endif
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd_intr.c $
- * $Revision: #87 $
- * $Date: 2011/05/17 $
- * $Change: 1774110 $
+ * $Revision: #89 $
+ * $Date: 2011/10/20 $
+ * $Change: 1869487 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -788,6 +788,7 @@ static void release_channel(dwc_otg_hcd_t * hcd,
 {
 	dwc_otg_transaction_type_e tr_type;
 	int free_qtd;
+    gintmsk_data_t intr_mask = {.d32 = 0 };
 
 	DWC_DEBUGPL(DBG_HCDV, "  %s: channel %d, halt_status %d\n",
 		    __func__, hc->hc_num, halt_status);
@@ -823,6 +824,14 @@ static void release_channel(dwc_otg_hcd_t * hcd,
 	case DWC_OTG_HC_XFER_NO_HALT_STATUS:
 		free_qtd = 0;
 		break;
+	case DWC_OTG_HC_XFER_PERIODIC_INCOMPLETE:
+		DWC_DEBUGPL(DBG_HCDV,
+			"  Complete URB with I/O error\n");
+		free_qtd = 1;
+		qtd->urb->status = -DWC_E_IO;
+		hcd->fops->complete(hcd, qtd->urb->priv,
+			qtd->urb, -DWC_E_IO);
+		break;
 	default:
 		free_qtd = 0;
 		break;
@@ -855,11 +864,18 @@ cleanup:
 	}
 
 	/* Try to queue more transfers now that there's a free channel. */
+    intr_mask.d32 = DWC_READ_REG32(&hcd->core_if->core_global_regs->gintmsk);
+#if defined(CONFIG_SYNO_C2K_DAC_TERRIBLE_SOUND)
+    if (!intr_mask.b.sofintr || (intr_mask.b.sofintr && (hc->ep_type != DWC_OTG_EP_TYPE_BULK))) {
+#else
+    if (!intr_mask.b.sofintr) {
+#endif
         tr_type = dwc_otg_hcd_select_transactions(hcd);
         if (tr_type != DWC_OTG_TRANSACTION_NONE) {
             dwc_otg_hcd_queue_transactions(hcd, tr_type);
         }
     }
+}
 
 /**
  * Halts a host channel. If the channel cannot be halted immediately because
@@ -1135,16 +1151,22 @@ static int32_t handle_hc_xfercomp_intr(dwc_otg_hcd_t * hcd,
 		break;
 	case UE_INTERRUPT:
 		DWC_DEBUGPL(DBG_HCDV, "  Interrupt transfer complete\n");
+		urb_xfer_done =
 			update_urb_state_xfer_comp(hc, hc_regs, urb, qtd);
 
 		/*
 		 * Interrupt URB is done on the first transfer complete
 		 * interrupt.
 		 */
+		if (urb_xfer_done) {
 				hcd->fops->complete(hcd, urb->priv, urb, urb->status);
+				halt_status = DWC_OTG_HC_XFER_URB_COMPLETE;
+		} else {
+				halt_status = DWC_OTG_HC_XFER_COMPLETE;
+		}
+
 		dwc_otg_hcd_save_data_toggle(hc, hc_regs, qtd);
-		complete_periodic_xfer(hcd, hc, hc_regs, qtd,
-				       DWC_OTG_HC_XFER_URB_COMPLETE);
+		complete_periodic_xfer(hcd, hc, hc_regs, qtd, halt_status);
 		break;
 	case UE_ISOCHRONOUS:
 		DWC_DEBUGPL(DBG_HCDV, "  Isochronous transfer complete\n");
@@ -1655,6 +1677,15 @@ static int32_t handle_hc_xacterr_intr(dwc_otg_hcd_t * hcd,
 		goto handle_xacterr_done;
 	}
 
+	if (qtd == NULL)
+		goto handle_xacterr_done;
+
+	if(qtd->urb == NULL)
+		goto handle_xacterr_done;
+
+	if (&qtd->urb->pipe_info == NULL)
+		goto handle_xacterr_done;
+
 	switch (dwc_otg_hcd_get_pipe_type(&qtd->urb->pipe_info)) {
 	case UE_CONTROL:
 	case UE_BULK:
@@ -1836,6 +1867,8 @@ static void handle_hc_chhltd_intr_dma(dwc_otg_hcd_t * hcd,
 	hcintmsk_data_t hcintmsk;
 	int out_nak_enh = 0;
 
+    clear_hc_int(hc_regs, chhltd);
+
 	/* For core with OUT NAK enhancement, the flow for high-
 	 * speed CONTROL/BULK OUT is handled a little differently.
 	 */
@@ -1954,6 +1987,8 @@ static void handle_hc_chhltd_intr_dma(dwc_otg_hcd_t * hcd,
 				     DWC_READ_REG32(&hcd->
 						    core_if->core_global_regs->
 						    gintsts));
+				halt_channel(hcd, hc, qtd,
+					     DWC_OTG_HC_XFER_PERIODIC_INCOMPLETE);
 			}
 
 		}

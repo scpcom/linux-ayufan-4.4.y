@@ -1574,7 +1574,11 @@ cifs_readv_receive(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 	/* determine the eof that the server (probably) has */
 	eof = CIFS_I(rdata->mapping->host)->server_eof;
 	eof_index = eof ? (eof - 1) >> PAGE_CACHE_SHIFT : 0;
+#ifdef CONFIG_SYNO_ALPINE
+	cFYI(1, "eof=%llu eof_index=%llu", eof, (unsigned long long)eof_index);
+#else
 	cFYI(1, "eof=%llu eof_index=%lu", eof, eof_index);
+#endif
 
 	cifs_kmap_lock();
 	list_for_each_entry_safe(page, tpage, &rdata->pages, lru) {
@@ -1582,10 +1586,17 @@ cifs_readv_receive(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 			/* enough data to fill the page */
 			rdata->iov[rdata->nr_iov].iov_base = kmap(page);
 			rdata->iov[rdata->nr_iov].iov_len = PAGE_CACHE_SIZE;
+#ifdef CONFIG_SYNO_ALPINE
+			cFYI(1, "%u: idx=%llu iov_base=%p iov_len=%zu",
+				rdata->nr_iov, (unsigned long long)page->index,
+				rdata->iov[rdata->nr_iov].iov_base,
+				rdata->iov[rdata->nr_iov].iov_len);
+#else
 			cFYI(1, "%u: idx=%lu iov_base=%p iov_len=%zu",
 				rdata->nr_iov, page->index,
 				rdata->iov[rdata->nr_iov].iov_base,
 				rdata->iov[rdata->nr_iov].iov_len);
+#endif
 			++rdata->nr_iov;
 			len += PAGE_CACHE_SIZE;
 			remaining -= PAGE_CACHE_SIZE;
@@ -1593,10 +1604,17 @@ cifs_readv_receive(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 			/* enough for partial page, fill and zero the rest */
 			rdata->iov[rdata->nr_iov].iov_base = kmap(page);
 			rdata->iov[rdata->nr_iov].iov_len = remaining;
+#ifdef CONFIG_SYNO_ALPINE
+			cFYI(1, "%u: idx=%llu iov_base=%p iov_len=%zu",
+				rdata->nr_iov, (unsigned long long)page->index,
+				rdata->iov[rdata->nr_iov].iov_base,
+				rdata->iov[rdata->nr_iov].iov_len);
+#else
 			cFYI(1, "%u: idx=%lu iov_base=%p iov_len=%zu",
 				rdata->nr_iov, page->index,
 				rdata->iov[rdata->nr_iov].iov_base,
 				rdata->iov[rdata->nr_iov].iov_len);
+#endif
 			memset(rdata->iov[rdata->nr_iov].iov_base + remaining,
 				'\0', PAGE_CACHE_SIZE - remaining);
 			++rdata->nr_iov;

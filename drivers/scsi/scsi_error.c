@@ -55,6 +55,10 @@ static void scsi_eh_done(struct scsi_cmnd *scmd);
 #define BUS_RESET_SETTLE_TIME   (10)
 #define HOST_RESET_SETTLE_TIME  (10)
 
+#ifdef SYNO_DISK_EH_FLAG
+extern int giSynoDsikEhFlag;
+extern unsigned long guSynoScsiCmdSN;
+#endif
 static int scsi_eh_try_stu(struct scsi_cmnd *scmd);
 
 /* called with shost->host_lock held */
@@ -654,6 +658,13 @@ static int scsi_try_to_abort_cmd(struct scsi_host_template *hostt, struct scsi_c
 {
 	if (!hostt->eh_abort_handler)
 		return FAILED;
+
+#ifdef SYNO_DISK_EH_FLAG
+			if (giSynoDsikEhFlag == 1 && guSynoScsiCmdSN == scmd->serial_number) {
+				giSynoDsikEhFlag = 0;
+				guSynoScsiCmdSN = 0;
+			}
+#endif
 
 	return hostt->eh_abort_handler(scmd);
 }
@@ -1733,6 +1744,12 @@ void scsi_eh_flush_done_q(struct list_head *done_q)
 		if (scsi_device_online(scmd->device) &&
 		    !scsi_noretry_cmd(scmd) &&
 		    (++scmd->retries <= scmd->allowed)) {
+#ifdef SYNO_DISK_EH_FLAG
+			if (0 == giSynoDsikEhFlag) {
+				giSynoDsikEhFlag = 1;
+				guSynoScsiCmdSN = scmd->serial_number;
+			}
+#endif
 			SCSI_LOG_ERROR_RECOVERY(3, printk("%s: flush"
 							  " retry cmd: %p\n",
 							  current->comm,
@@ -1750,6 +1767,12 @@ void scsi_eh_flush_done_q(struct list_head *done_q)
 							" cmd: %p\n",
 							current->comm, scmd));
 			scsi_finish_command(scmd);
+#ifdef SYNO_DISK_EH_FLAG
+			if (giSynoDsikEhFlag == 1 && guSynoScsiCmdSN == scmd->serial_number) {
+				giSynoDsikEhFlag = 0;
+				guSynoScsiCmdSN = 0;
+			}
+#endif
 		}
 	}
 }

@@ -187,7 +187,7 @@ ENTRY(v6_coherent_user_range)
  * isn't mapped, just try the next page.
  */
 9001:
-#ifdef CONFIG_MV_SUPPORT_64KB_PAGE_SIZE
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
 	mov	r0, r0, lsr #16
 	mov	r0, r0, lsl #16
 	add	r0, r0, #0x10000
@@ -415,6 +415,10 @@ ENTRY(v6_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(v6_dma_unmap_area)
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	.globl	v6_flush_kern_cache_louis
+	.equ	v6_flush_kern_cache_louis, v6_flush_kern_cache_all
+#endif
 	__INITDATA
 
 	@ define struct cpu_cache_fns (see <asm/cacheflush.h> and proc-macros.S)

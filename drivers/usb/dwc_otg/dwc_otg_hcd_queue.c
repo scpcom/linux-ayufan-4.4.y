@@ -3,9 +3,9 @@
 #endif
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd_queue.c $
- * $Revision: #42 $
- * $Date: 2010/11/29 $
- * $Change: 1636033 $
+ * $Revision: #44 $
+ * $Date: 2011/10/26 $
+ * $Change: 1873028 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
  * "Software") is an Unsupported proprietary work of Synopsys, Inc. unless
@@ -56,6 +56,9 @@
 void dwc_otg_hcd_qh_free(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 	dwc_otg_qtd_t *qtd, *qtd_tmp;
+#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+	dwc_irqflags_t flags;
+#endif
 
 	/* Free each QTD in the QTD list */
 #if !defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
@@ -66,17 +69,37 @@ void dwc_otg_hcd_qh_free(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 		dwc_otg_hcd_qtd_free(qtd);
 	}
 
+#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+	DWC_SPINLOCK_IRQSAVE(hcd->lock, &flags);
+#endif
 	if (hcd->core_if->dma_desc_enable) {
 		dwc_otg_hcd_qh_free_ddma(hcd, qh);
+#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+		DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
+#endif
 	} else if (qh->dw_align_buf) {
+#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+		DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
+#endif
 		uint32_t buf_size;
 		if (qh->ep_type == UE_ISOCHRONOUS) {
 			buf_size = 4096;
 		} else {
+#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+			DWC_SPINLOCK_IRQSAVE(hcd->lock, &flags);
+#endif
 			buf_size = hcd->core_if->core_params->max_transfer_size;
+#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+			DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
+#endif
 		}
 		DWC_DMA_FREE(buf_size, qh->dw_align_buf, qh->dw_align_buf_dma);
 	}
+#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+	else {
+		DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
+	}
+#endif
 
 	DWC_FREE(qh);
 #if !defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
@@ -291,15 +314,13 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
  * @param hcd The HCD state structure for the DWC OTG controller.
  * @param urb Holds the information about the device/endpoint that we need
  * 	      to initialize the QH.
+ * @param atomic_alloc Flag to do atomic allocation if needed
  *
  * @return Returns pointer to the newly allocated QH, or NULL on error. */
 dwc_otg_qh_t *dwc_otg_hcd_qh_create(dwc_otg_hcd_t * hcd,
 				    dwc_otg_hcd_urb_t * urb, int atomic_alloc)
 {
 	dwc_otg_qh_t *qh;
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
-	unsigned long flags;
-#endif
 
 	/* Allocate memory */
 	/** @todo add memflags argument */
@@ -313,13 +334,7 @@ dwc_otg_qh_t *dwc_otg_hcd_qh_create(dwc_otg_hcd_t * hcd,
 
 	if (hcd->core_if->dma_desc_enable
 	    && (dwc_otg_hcd_qh_init_ddma(hcd, qh) < 0)) {
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
-		DWC_SPINLOCK_IRQSAVE(hcd->lock, &flags);
-#endif
 		dwc_otg_hcd_qh_free(hcd, qh);
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
-		DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
-#endif
 		return NULL;
 	}
 
@@ -483,6 +498,7 @@ static int schedule_periodic(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 int dwc_otg_hcd_qh_add(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 	int status = 0;
+	gintmsk_data_t intr_mask = {.d32 = 0 };
 
 	if (!DWC_LIST_EMPTY(&qh->qh_list_entry)) {
 		/* QH already in a schedule. */
@@ -496,6 +512,12 @@ int dwc_otg_hcd_qh_add(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 				     &qh->qh_list_entry);
 	} else {
 		status = schedule_periodic(hcd, qh);
+		if ( !hcd->periodic_qh_count ) {
+			intr_mask.b.sofintr = 1;
+			DWC_MODIFY_REG32(&hcd->core_if->core_global_regs->gintmsk,
+								intr_mask.d32, intr_mask.d32);
+		}
+		hcd->periodic_qh_count++;
 	}
 
 	return status;
@@ -526,6 +548,8 @@ static void deschedule_periodic(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
  * @param qh QH to remove from schedule. */
 void dwc_otg_hcd_qh_remove(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
+	gintmsk_data_t intr_mask = {.d32 = 0 };
+
 	if (DWC_LIST_EMPTY(&qh->qh_list_entry)) {
 		/* QH is not in a schedule. */
 		return;
@@ -539,6 +563,12 @@ void dwc_otg_hcd_qh_remove(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 		DWC_LIST_REMOVE_INIT(&qh->qh_list_entry);
 	} else {
 		deschedule_periodic(hcd, qh);
+		hcd->periodic_qh_count--;
+		if( !hcd->periodic_qh_count ) {
+			intr_mask.b.sofintr = 1;
+				DWC_MODIFY_REG32(&hcd->core_if->core_global_regs->gintmsk,
+									intr_mask.d32, 0);
+		}
 	}
 }
 
@@ -632,6 +662,7 @@ void dwc_otg_hcd_qh_deactivate(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh,
  *
  * @param urb The URB to create a QTD from.  Each URB-QTD pair will end up
  * 	      pointing to each other so each pair should have a unique correlation.
+ * @param atomic_alloc Flag to do atomic alloc if needed
  *
  * @return Returns pointer to the newly allocated QTD, or NULL on error. */
 dwc_otg_qtd_t *dwc_otg_hcd_qtd_create(dwc_otg_hcd_urb_t * urb, int atomic_alloc)
@@ -686,6 +717,7 @@ void dwc_otg_hcd_qtd_init(dwc_otg_qtd_t * qtd, dwc_otg_hcd_urb_t * urb)
  * @param[in] qtd The QTD to add
  * @param[in] hcd The DWC HCD structure
  * @param[out] qh out parameter to return queue head
+ * @param atomic_alloc Flag to do atomic alloc if needed
  *
  * @return 0 if successful, negative error code otherwise.
  */

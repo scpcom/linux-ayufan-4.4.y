@@ -24,7 +24,7 @@
 
 #include "etxhci.h"
 #include "etxhci-ej168v0.0660.c"
-#include "etxhci-ej188v0.01.00.900.c"
+#include "etxhci-ej188v0.03.01.500.c"
 
 void xhci_init_ejxxx(struct xhci_hcd *xhci)
 {
@@ -43,7 +43,7 @@ void xhci_init_ejxxx(struct xhci_hcd *xhci)
 		xhci_writel(xhci, reg32, hcd->regs + 0x40d4);
 		break;
 	case 0x40:
-		xhci_init_ej188_v00100900(xhci);
+		xhci_init_ej188_v00301500(xhci);
 
 		reg32 = xhci_readl(xhci, hcd->regs + 0x4294);
 		reg32 = (reg32 & 0xfffffffe) | 0x01;

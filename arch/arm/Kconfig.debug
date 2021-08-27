@@ -238,6 +238,13 @@ choice
 		  Say Y here if you want the debug print routines to direct
 		  their output to the serial port on RealView EB, PB11MP, PBA8
 		  and PBX platforms.
+	config DEBUG_ALPINE_UART
+		bool "Kernel low-level debugging messages via ALPINE UART"
+		depends on ARCH_ALPINE
+		help
+		  Say Y here if you want kernel low-level debugging support
+		  on ALPINE based platforms.
+
 
 	config DEBUG_REALVIEW_PB1176_PORT
 		bool "RealView PB1176 UART"
@@ -248,6 +255,11 @@ choice
 		  PB1176 platform.
 
 endchoice
+
+config DEBUG_LL_INCLUDE
+	string
+	default "debug/alpine.S" if DEBUG_ALPINE_UART
+	depends on SYNO_ALPINE
 
 config EARLY_PRINTK
 	bool "Early printk"

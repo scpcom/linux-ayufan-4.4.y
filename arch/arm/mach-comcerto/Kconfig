@@ -51,6 +51,12 @@ config C2K_EVM
 	help
 	  Say Y here if you intend to run this kernel with a C2K EVM.
 
+config C2K_MFCN_EVM
+	bool "MFCN EVM"
+	depends on ARCH_M86XXX
+	help
+	  Say Y here if you intend to run this kernel with a C2K MFCN EVM.
+
 config C2K_ASIC
 	bool "ASIC"
 	depends on ARCH_M86XXX
@@ -77,6 +83,30 @@ config COMCERTO_TDM_CLOCK
 	help
 	  Say Y if you intend to use the Comcerto TDM and be able to change
 	  different parameters through sysfs.
+
+config COMCERTO_CSYS_TPI_CLOCK
+        bool "Comcerto device TPI and CSYS clock control "
+	default n
+	help
+	  Say Y if you intend to use the Comcerto TPI (Cortex A9 JTAG interface) and CSYS clock (Cortex A9 CoreSight module).
+
+config COMCERTO_PCIE_OCC_CLOCK
+        bool "Comcerto device PCIE OCC clock control "
+	default n
+	help
+	  Say Y if you intend to use the Comcerto PCIE OCC clock.
+
+config COMCERTO_SATA_OCC_CLOCK
+        bool "Comcerto device SATA OCC clock control "
+	default n
+	help
+	  Say Y if you intend to use the Comcerto SATA OCC clock.
+
+config COMCERTO_SGMII_OCC_CLOCK
+        bool "Comcerto device SGMII OCC clock control "
+	default n
+	help
+	  Say Y if you intend to use the Comcerto SGMII OCC clock.
 
 config COMCERTO_MEMBUF
 	bool "Comcerto memory buffer driver"
@@ -181,6 +211,11 @@ config COMCERTO_ZONE_DMA_NCNB
 	select ZONE_DMA
 	default n
 
+config COMCERTO_CUSTOM_SKB_LAYOUT
+	bool "Mindspeed customized skb layout, to reduce NCNB access overhead, when NCNB buffer is used in skb"
+	depends on COMCERTO_ZONE_DMA_NCNB
+	default n
+
 config DSPG_DECT_CSS
 	bool "DSPG DECT CSS"
 	default n
@@ -218,6 +253,38 @@ config COMCERTO_CC_OPTIMIZE_O3
 	help
 	  Compile the kernel with -O3 instead of -O2 option. Resulting kernel can be a bit faster, but
 	  it will also be bigger.
+
+config COMCERTO_HW_KERNEL_PAGETABLE
+	bool "Use the 2nd HW page table for kernel memory space"
+	select VMSPLIT_2G
+	default n
+	help
+	  By default, Linux uses only one page table at a time, and switches page tables when switching
+	  between processes. Say Y to enable the 2nd hardware page table, which will be used to map kernel
+	  addresses.
+	  Note that because of the way the ARM MMU determines which page table to use, this option can
+	  only be enabled with a 2G/2G userspace/kernel memory split.
+
+config COMCERTO_UNCACHED_DMA
+	bool "Make pages uncacheable when doing DMA operations"
+	depends on COMCERTO_HW_KERNEL_PAGETABLE
+	default n
+	help
+	  When transferring ownership of a page to a device through the DMA API, make the page uncacheable
+	  for the duration of the transfer. This makes the 2nd cache invalidate (that was needed because
+	  of the possibility of speculative accesses by the A9 cores) unnecessary, which can increase
+	  performance during heavy IO workloads. The page tables will be more complex though, resulting in
+	  more TLB misses when a DMA transfer is going on.
+
+config COMCERTO_SPLICE_READ_NOCONTIG
+	bool "Use find_get_pages in splice read code"
+	default n
+	help
+	  The splice read code normally calls find_get_pages_contig to retrieve pages mapping the requested
+	  portion of the file to read. However, using find_get_pages works just as well, as the splice code
+	  is able to handle both situations.
+	  Say Y to use find_get_pages instead of find_get_pages_contig, which seems to yield a significant
+	  performance improvement in Samba read tests.
 
 config SYNO_COMCERTO
 	bool "Synology Minspeed Comcerto Customize"

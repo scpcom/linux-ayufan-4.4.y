@@ -498,6 +498,33 @@ void fuse_read_fill(struct fuse_req *req, struct file *file, loff_t pos,
 	req->out.args[0].size = count;
 }
 
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+/*
+ * args[0]: syno.archive_bit_noperm
+ * args[1]: system.syno_acl_noperm_self
+ * args[2]: readdir response buffer (szie: 1 page)
+ */
+void syno_fuse_read_fill(struct fuse_req *req, struct file *file, loff_t pos,
+		    size_t count, int opcode)
+{
+	struct fuse_read_in *inarg = &req->misc.read.in;
+	struct fuse_file *ff = file->private_data;
+
+	inarg->fh = ff->fh;
+	inarg->offset = pos;
+	inarg->size = count;
+	inarg->flags = file->f_flags;
+	req->in.h.opcode = opcode;
+	req->in.h.nodeid = ff->nodeid;
+	req->in.numargs = 1;
+	req->in.args[0].size = sizeof(struct fuse_read_in);
+	req->in.args[0].value = inarg;
+	req->out.argvar = 1;
+	req->out.numargs = 3;
+	req->out.args[2].size = count;
+}
+#endif
+
 static void fuse_release_user_pages(struct fuse_req *req, int write)
 {
 	unsigned i;
@@ -941,6 +968,7 @@ static int fuse_buffered_write(struct file *file, struct inode *inode,
        struct fuse_conn *fc = get_fuse_conn(inode);
        unsigned offset = pos & (PAGE_CACHE_SIZE - 1);
        struct fuse_req *req;
+       struct fuse_io_priv io = { .async = 0, .file = file };
 
        if (is_bad_inode(inode))
                return -EIO;
@@ -959,7 +987,7 @@ static int fuse_buffered_write(struct file *file, struct inode *inode,
        req->num_pages = 1;
        req->pages[0] = page;
        req->page_descs[0].offset = offset;
-       nres = fuse_send_write(req, file, pos, count, NULL);
+       nres = fuse_send_write(req, &io, pos, count, NULL);
        err = req->out.h.error;
        fuse_put_request(fc, req);
        if (!err && !nres)

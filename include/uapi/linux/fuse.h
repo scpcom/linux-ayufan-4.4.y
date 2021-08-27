@@ -103,6 +103,15 @@
 /** Minor version number of this interface */
 #define FUSE_KERNEL_MINOR_VERSION 22
 
+#if defined(SYNO_GLUSTERFS_PREFETCH_ACL) || defined(SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP)
+#define SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION 10
+#endif
+
+#ifdef SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION
+#define SYNO_FUSE_KERNEL_MINOR_SHIFT 1000
+#define SYNO_FUSE_KERNEL_MINOR_VERSION  (SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION * SYNO_FUSE_KERNEL_MINOR_SHIFT) + FUSE_KERNEL_MINOR_VERSION
+#endif // SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION
+
 /** The node ID of the root inode */
 #define FUSE_ROOT_ID 1
 
@@ -210,6 +219,9 @@ struct fuse_file_lock {
 #define FUSE_READDIRPLUS_AUTO	(1 << 14)
 #define FUSE_ASYNC_DIO		(1 << 15)
 
+#ifdef SYNO_FUSE_KERNEL_MINOR_VERSION
+#define SYNO_FUSE_ACL_CACHE	(1 << 31)
+#endif
 /**
  * CUSE INIT request/reply flags
  *
@@ -642,6 +654,17 @@ struct fuse_dirent {
 	char name[];
 };
 
+#ifdef SYNO_GLUSTER_FS
+struct syno_fuse_acl_data {
+	__u32 len;
+	char value[];
+};
+
+#define SYNO_FUSE_ACL_VALUE_OFFSET offsetof(struct syno_fuse_acl_data, value)
+
+#define SYNO_FUSE_ACL_CACHE_SIZE 8192
+#endif // SYNO_GLUSTER_FS
+
 #define FUSE_NAME_OFFSET offsetof(struct fuse_dirent, name)
 #define FUSE_DIRENT_ALIGN(x) (((x) + sizeof(__u64) - 1) & ~(sizeof(__u64) - 1))
 #define FUSE_DIRENT_SIZE(d) \
@@ -700,7 +723,5 @@ struct fuse_notify_retrieve_in {
 	__u64	dummy3;
 	__u64	dummy4;
 };
-
-#define SYNO_FUSE_ACL_CACHE_SIZE 2048
 
 #endif /* _UAPI_LINUX_FUSE_H */

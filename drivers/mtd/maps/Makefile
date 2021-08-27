@@ -60,10 +60,9 @@ obj-$(CONFIG_MTD_BCM963XX)	+= bcm963xx-flash.o
 obj-$(CONFIG_MTD_LATCH_ADDR)	+= latch-addr-flash.o
 obj-$(CONFIG_MTD_LANTIQ)	+= lantiq-flash.o
 
-ifeq ($(CONFIG_PLAT_ARMADA),y)
-ifeq ($(CONFIG_MV_INCLUDE_SPI),y)
+ifeq ($(CONFIG_PLAT_ARMADA_COMM),y)
+ifneq (,$(filter y, $(CONFIG_MV_INCLUDE_SPI) $(CONFIG_MV_INCLUDE_NOR)))
 	include $(srctree)/$(MACHINE)/config/mvRules.mk
-	obj-$(CONFIG_MV_INCLUDE_SPI) += ../../../$(MACHINE)/flashmap.o
+	obj-y += mv-flash.o
 endif
 endif
-obj-$(CONFIG_MTD_COMCERTO_NOR)  += comcerto-nor.o

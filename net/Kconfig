@@ -225,7 +225,8 @@ config RFS_ACCEL
 	boolean
 	depends on RPS && GENERIC_HARDIRQS
 	select CPU_RMAP
-	default y
+	default n if SYNO_ALPINE
+	default y if !SYNO_ALPINE
 
 config XPS
 	boolean

@@ -77,6 +77,14 @@ static inline int synoacl_op_access(struct dentry * dentry, int mode)
 	return synoacl_mod_access(dentry, mode);
 }
 
+static inline int synoacl_op_may_delete(struct dentry *victim, struct inode *dir)
+{
+	if (dir->i_op->syno_may_delete) {
+		return dir->i_op->syno_may_delete(victim, dir);
+	}
+	return synoacl_mod_may_delete(victim, dir);
+}
+
 static inline void synoacl_op_to_mode(struct dentry *dentry, struct kstat *stat)
 {
 	struct inode *inode = dentry->d_inode;

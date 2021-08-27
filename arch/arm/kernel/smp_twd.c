@@ -42,7 +42,11 @@ static void twd_set_mode(enum clock_event_mode mode,
 		/* timer load already set up */
 		ctrl = TWD_TIMER_CONTROL_ENABLE | TWD_TIMER_CONTROL_IT_ENABLE
 			| TWD_TIMER_CONTROL_PERIODIC;
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+		writel_relaxed(twd_timer_rate / HZ, twd_base + TWD_TIMER_LOAD);
+#else
 		__raw_writel(twd_timer_rate / HZ, twd_base + TWD_TIMER_LOAD);
+#endif
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
 		/* period set, and timer enabled in 'next_event' hook */
@@ -54,18 +58,31 @@ static void twd_set_mode(enum clock_event_mode mode,
 		ctrl = 0;
 	}
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	writel_relaxed(ctrl, twd_base + TWD_TIMER_CONTROL);
+#else
 	__raw_writel(ctrl, twd_base + TWD_TIMER_CONTROL);
+#endif
 }
 
 static int twd_set_next_event(unsigned long evt,
 			struct clock_event_device *unused)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	unsigned long ctrl = readl_relaxed(twd_base + TWD_TIMER_CONTROL);
+#else
 	unsigned long ctrl = __raw_readl(twd_base + TWD_TIMER_CONTROL);
+#endif
 
 	ctrl |= TWD_TIMER_CONTROL_ENABLE;
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	writel_relaxed(evt, twd_base + TWD_TIMER_COUNTER);
+	writel_relaxed(ctrl, twd_base + TWD_TIMER_CONTROL);
+#else
 	__raw_writel(evt, twd_base + TWD_TIMER_COUNTER);
 	__raw_writel(ctrl, twd_base + TWD_TIMER_CONTROL);
+#endif
 
 	return 0;
 }
@@ -78,8 +95,13 @@ static int twd_set_next_event(unsigned long evt,
  */
 int twd_timer_ack(void)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	if (readl_relaxed(twd_base + TWD_TIMER_INTSTAT)) {
+		writel_relaxed(1, twd_base + TWD_TIMER_INTSTAT);
+#else
 	if (__raw_readl(twd_base + TWD_TIMER_INTSTAT)) {
 		__raw_writel(1, twd_base + TWD_TIMER_INTSTAT);
+#endif
 		return 1;
 	}
 
@@ -114,15 +136,27 @@ static void __cpuinit twd_calibrate_rate(void)
 		waitjiffies += 5;
 
 				 /* enable, no interrupt or reload */
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+		writel_relaxed(0x1, twd_base + TWD_TIMER_CONTROL);
+#else
 		__raw_writel(0x1, twd_base + TWD_TIMER_CONTROL);
+#endif
 
 				 /* maximum value */
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+		writel_relaxed(0xFFFFFFFFU, twd_base + TWD_TIMER_COUNTER);
+#else
 		__raw_writel(0xFFFFFFFFU, twd_base + TWD_TIMER_COUNTER);
+#endif
 
 		while (get_jiffies_64() < waitjiffies)
 			udelay(10);
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+		count = readl_relaxed(twd_base + TWD_TIMER_COUNTER);
+#else
 		count = __raw_readl(twd_base + TWD_TIMER_COUNTER);
+#endif
 
 		twd_timer_rate = (0xFFFFFFFFU - count) * (HZ / 5);
 
@@ -169,6 +203,10 @@ void __cpuinit twd_timer_setup(struct clock_event_device *clk)
 	}
 
 	twd_calibrate_rate();
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	writel_relaxed(0, twd_base + TWD_TIMER_CONTROL);
+#endif
 
 	clk->name = "local_timer";
 	clk->features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT |

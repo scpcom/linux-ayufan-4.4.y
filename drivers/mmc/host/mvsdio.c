@@ -33,6 +33,9 @@
 
 #define DRIVER_NAME	"mvsdio"
 
+#if defined(SYNO_MVSDIO) && defined(CONFIG_ARCH_ARMADA370) && defined(CONFIG_MV_INCLUDE_SDIO)
+extern int g_enable_mvsdio;
+#endif
 static int maxfreq = MVSD_CLOCKRATE_MAX;
 static int nodma;
 
@@ -705,6 +708,12 @@ static void __init mv_conf_mbus_windows(struct mvsd_host *host,
 
 static int __init mvsd_probe(struct platform_device *pdev)
 {
+#if defined(SYNO_MVSDIO) && defined(CONFIG_ARCH_ARMADA370) && defined(CONFIG_MV_INCLUDE_SDIO)
+	if (!g_enable_mvsdio)	{
+		printk("cancel mvsdio probe\n");
+		return 0;
+	}
+#endif
 	struct mmc_host *mmc = NULL;
 	struct mvsd_host *host = NULL;
 	const struct mvsdio_platform_data *mvsd_data;
@@ -737,7 +746,11 @@ static int __init mvsd_probe(struct platform_device *pdev)
 
 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
 	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ |
+#ifdef CONFIG_SYNO_SUPPORT_EMMC_ERASE
+		    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED | MMC_CAP_ERASE;
+#else
 		    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+#endif
 
 	mmc->f_min = DIV_ROUND_UP(host->base_clock, MVSD_BASE_DIV_MAX);
 	mmc->f_max = maxfreq;

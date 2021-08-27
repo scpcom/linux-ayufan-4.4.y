@@ -30,10 +30,16 @@
  */
 unsigned int __init scu_get_core_count(void __iomem *scu_base)
 {
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	unsigned int ncores = readl_relaxed(scu_base + SCU_CONFIG);
+#else
 	unsigned int ncores = __raw_readl(scu_base + SCU_CONFIG);
+#endif
 	return (ncores & 0x03) + 1;
 }
+#endif
 
+#if defined(CONFIG_SMP) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) 
 /*
  * Enable the SCU
  */
@@ -44,23 +50,40 @@ void scu_enable(void __iomem *scu_base)
 #ifdef CONFIG_ARM_ERRATA_764369
 	/* Cortex-A9 only */
 	if ((read_cpuid(CPUID_ID) & 0xff0ffff0) == 0x410fc090) {
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+		scu_ctrl = readl_relaxed(scu_base + 0x30);
+#else
 		scu_ctrl = __raw_readl(scu_base + 0x30);
+#endif
 		if (!(scu_ctrl & 1))
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+			writel_relaxed(scu_ctrl | 0x1, scu_base + 0x30);
+#else
 			__raw_writel(scu_ctrl | 0x1, scu_base + 0x30);
+#endif
 	}
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	scu_ctrl = readl_relaxed(scu_base + SCU_CTRL);
+#else
 	scu_ctrl = __raw_readl(scu_base + SCU_CTRL);
+#endif
 	/* already enabled? */
 	if (scu_ctrl & 1)
 		return;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_SCU_SPECULATIVE_LINE_FILLS)
+#if (defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_SCU_SPECULATIVE_LINE_FILLS)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_SCU_SPECULATIVE_LINEFILLS_ENABLE))
 	scu_ctrl |= (1 << 3);
 #endif
 
 	scu_ctrl |= 1;
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	writel_relaxed(scu_ctrl, scu_base + SCU_CTRL);
+#else
 	__raw_writel(scu_ctrl, scu_base + SCU_CTRL);
+#endif
 
 	/*
 	 * Ensure that the data accessed by CPU0 before the SCU was

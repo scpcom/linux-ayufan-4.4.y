@@ -153,10 +153,17 @@ int ecryptfs_write(struct inode *ecryptfs_inode, char *data, loff_t offset,
 							 ecryptfs_page_idx);
 		if (IS_ERR(ecryptfs_page)) {
 			rc = PTR_ERR(ecryptfs_page);
+#ifdef CONFIG_SYNO_ALPINE
+			printk(KERN_ERR "%s: Error getting page at "
+			       "index [%lld] from eCryptfs inode "
+			       "mapping; rc = [%d]\n", __func__,
+			       (unsigned long long)ecryptfs_page_idx, rc);
+#else
 			printk(KERN_ERR "%s: Error getting page at "
 			       "index [%ld] from eCryptfs inode "
 			       "mapping; rc = [%d]\n", __func__,
 			       ecryptfs_page_idx, rc);
+#endif
 			goto out;
 		}
 		ecryptfs_page_virt = kmap_atomic(ecryptfs_page, KM_USER0);
@@ -209,6 +216,10 @@ int ecryptfs_write(struct inode *ecryptfs_inode, char *data, loff_t offset,
 			rc2 = ecryptfs_write_inode_size_to_metadata(
 								ecryptfs_inode);
 			if (rc2) {
+#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+				if (-EDQUOT != rc && -ENOSPC != rc)
+#endif
+
 				printk(KERN_ERR	"Problem with "
 				       "ecryptfs_write_inode_size_to_metadata; "
 				       "rc = [%d]\n", rc2);

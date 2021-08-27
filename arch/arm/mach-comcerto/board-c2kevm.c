@@ -39,7 +39,7 @@
 
 #include <linux/synobios.h>
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_VERSION
 extern char gszSynoHWVersion[];
 #endif
 #include <asm/sizes.h>
@@ -183,7 +183,7 @@ static struct platform_device rtc_dev = {
 static struct resource dw_dmac_resource[] = {
 	{
 		.start          = DW_DMA_DMAC_BASEADDR,
-		.end            = DW_DMA_DMAC_BASEADDR + 0x2C0,
+		.end            = DW_DMA_DMAC_BASEADDR + 0x400,
 		.flags          = IORESOURCE_MEM,
 	},
 	{
@@ -194,6 +194,7 @@ static struct resource dw_dmac_resource[] = {
 
 static struct dw_dma_platform_data dw_dmac_data = {
 	.nr_channels    = 8,
+	.chan_priority = 1,
 };
 
 static u64 dw_dmac_dma_mask = DMA_BIT_MASK(32);
@@ -239,6 +240,23 @@ static struct platform_device comcerto_nand = {
  * -------------------------------------------------------------------- */
 #if defined(CONFIG_SPI_MSPD_LOW_SPEED) || defined(CONFIG_SPI_MSPD_HIGH_SPEED)
 
+/*This structure is same as struct flash_platform_data defined in include/linux/spi/flash.h, 
+  but since that structure is conflicting with struct flash_platform_data defined in 
+  arch/arm/include/asm/mach/flash.h for nor flash, and is already used in this file for nor
+  flash, so defining a new structure for spi flash which matches struct flash_platform_data
+  of include/linux/spi/flash.h
+  FIXME: Need to resolve this structure conflict
+*/
+struct spi_flash_platform_data {
+       char            *name;
+       struct mtd_partition *parts;
+       unsigned int    nr_parts;
+       char            *type;
+       u32             num_resources;
+       struct resource * resource;
+       /* we'll likely add more ... use JEDEC IDs, etc */
+};
+
 #define	CLK_NAME	10
 struct spi_controller_pdata {
 	int use_dma;
@@ -246,6 +264,7 @@ struct spi_controller_pdata {
 	int bus_num;
 	u32 max_freq;
 	char clk_name[CLK_NAME];
+	char type[32];
 };
 
 struct spi_platform_data {
@@ -253,9 +272,50 @@ struct spi_platform_data {
 	int dummy;
 };
 
+struct spi_controller_data {
+        u8 poll_mode;   /* 0 for contoller polling mode */
+        u8 type;        /* SPI/SSP/Micrwire */
+        u8 enable_dma;
+        void (*cs_control)(u32 command);
+};
+
+struct spi_controller_data spi_ctrl_data =  {
+        .poll_mode = 1,
+};
+
 struct spi_platform_data spi_pdata = {
 	.type = 0,
 	.dummy = 0,
+};
+
+struct spi_platform_data fast_spi_pdata = {
+	.type = 0,
+	.dummy = 0,
+};
+
+#if defined(CONFIG_SPI_MSPD_HIGH_SPEED)
+struct spi_controller_pdata hs_spi_pdata = {
+	.use_dma = 1,
+	.num_chipselects = 2,
+	.bus_num = 1,
+/*	.max_freq = 60 * 1000 * 1000, */
+	.max_freq = 5 * 1000 * 1000,
+	.clk_name = "DUS",
+	.type="m25p80",
+};
+#endif
+
+static struct resource m25p80_flash_resource[] = {
+	{
+		.start  = COMCERTO_FASTSPI_IRAM_LOC,
+		.end    = COMCERTO_FASTSPI_IRAM_LOC + COMCERTO_FASTSPI_IRAM_SIZE - 1,
+		.flags  = IORESOURCE_MEM,
+	},
+};
+
+static struct spi_flash_platform_data comcerto_spi_flash_data = {
+	.num_resources = ARRAY_SIZE(m25p80_flash_resource),
+	.resource = m25p80_flash_resource,
 };
 
 #ifdef CONFIG_SYNO_C2K_SPI_PARTITION
@@ -297,7 +357,7 @@ static struct spi_board_info synology_spi_16m_info[] = {
 	{
 		.modalias = "n25q128a13",
 		.chip_select = 0,
-		.max_speed_hz = 4*1000*1000,
+		.max_speed_hz = 30*1000*1000,
 		.bus_num = 1,
 		.irq = -1,
 		.mode = SPI_MODE_3,
@@ -343,7 +403,7 @@ static struct spi_board_info synology_spi_info[] = {
 	{
 		.modalias = "n25q064",
 		.chip_select = 0,
-		.max_speed_hz = 4*1000*1000,
+		.max_speed_hz = 30*1000*1000,
 		.bus_num = 1,
 		.irq = -1,
 		.mode = SPI_MODE_3,
@@ -355,26 +415,27 @@ static struct spi_board_info synology_spi_info[] = {
 static struct spi_board_info comcerto_spi_board_info[] = {
 	{
 		/* FIXME: for chipselect-0 */
-		.modalias = "comcerto_spi1",
+		.modalias = "m25p80",
 		.chip_select = 0,
-		.max_speed_hz = 4*1000*1000,
-		.bus_num = 0,
+		.max_speed_hz = 30*1000*1000,
+		.bus_num = 1,
 		.irq = -1,
 		.mode = SPI_MODE_3,
-		.platform_data = &spi_pdata,
+		.platform_data = &comcerto_spi_flash_data,
+                .controller_data = &spi_ctrl_data,
 	},
-
 	{
 		/* FIXME: for chipselect-1 */
 		.modalias = "proslic",
-		.chip_select = 1,
 		.max_speed_hz = 4*1000*1000,
+		.chip_select = 1,
+		.mode = SPI_MODE_3,
 		.bus_num = 0,
 		.irq = -1,
-		.mode = SPI_MODE_3,
+	/*  .mode = SPI_MODE_3, */
 		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
 	},
-
 	{
 		.modalias = "comcerto_spi3",
 		.chip_select = 2,
@@ -383,8 +444,23 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.irq = -1,
 		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
 	},
 
+#if 0 //MSIF
+
+	{
+		.modalias = "proslic",
+		.max_speed_hz = 2*1000*1000,
+		.chip_select = 3,
+		.mode = SPI_MODE_1,
+		.bus_num = 0,
+		.irq = -1,
+		.mode = SPI_MODE_3,
+		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
+	},
+#else
 	{
 		.modalias = "legerity",
 		.chip_select = 3,
@@ -393,18 +469,9 @@ static struct spi_board_info comcerto_spi_board_info[] = {
 		.irq = -1,
 		.mode = SPI_MODE_3,
 		.platform_data = &spi_pdata,
+                .controller_data = &spi_ctrl_data,
 	},
-
-};
 #endif
-
-#if defined(CONFIG_SPI_MSPD_HIGH_SPEED)
-struct spi_controller_pdata fast_spi_pdata = {
-	.use_dma = 0,
-	.num_chipselects = 2,
-	.bus_num = 1,
-	.max_freq = 60 * 1000 * 1000,
-	.clk_name = "DUS",
 };
 #endif
 
@@ -428,7 +495,7 @@ static struct platform_device comcerto_fast_spi = {
 	.resource = comcerto_fast_spi_resource,
 #if defined(CONFIG_SPI_MSPD_HIGH_SPEED)
 	.dev = {
-		.platform_data = &fast_spi_pdata,
+		.platform_data = &hs_spi_pdata,
 	},
 #endif
 };
@@ -494,6 +561,47 @@ static struct platform_device comcerto_i2c = {
 };
 #endif
 
+/* --------------------------------------------------------------------
+*  Watchdog
+* -------------------------------------------------------------------- */
+#ifdef CONFIG_MPCORE_WATCHDOG
+static struct resource comcerto_a9wd_resources[] = {
+	{
+		.start	= COMCERTO_TWD_BASE,
+		.end	= COMCERTO_TWD_BASE + 0xFF,
+		.flags	= IORESOURCE_MEM,
+	},
+	{
+		.name	= "mpcore_wdt",
+		.start	= IRQ_LOCALWDOG,
+		.flags	= IORESOURCE_IRQ,
+	},
+};
+
+static struct platform_device comcerto_a9wd = {
+	.name		= "mpcore_wdt",
+	.id             = -1,
+	.num_resources  = ARRAY_SIZE(comcerto_a9wd_resources),
+	.resource       = comcerto_a9wd_resources,
+};
+#endif
+
+#ifdef CONFIG_COMCERTO_WATCHDOG
+static struct resource comcerto_wdt_resources[] = {
+	{
+		.start	= COMCERTO_APB_TIMER_BASE + 0xD0,
+		.end	= COMCERTO_APB_TIMER_BASE + 0xD8,
+		.flags	= IORESOURCE_MEM,
+	},
+};
+
+static struct platform_device comcerto_wdt = {
+        .name   = "comcerto_wdt",
+        .id     = -1,
+	.num_resources  = ARRAY_SIZE(comcerto_wdt_resources),
+	.resource       = comcerto_wdt_resources,
+};
+#endif
 
 #if defined(CONFIG_COMCERTO_ELP_SUPPORT)
 /* --------------------------------------------------------------------
@@ -533,7 +641,8 @@ static struct comcerto_tdm_data comcerto_tdm_pdata = {
 	.fspolarity = 0, /* 28 FSYNC_FALL(RISE)_EDGE */
 	.fshwidth = 1, /* High_Phase_Width[10:0] */
 	.fslwidth = 0xFF, /* Low_Phase_Width[10:0] */
-	.clockhz = 2048000, /* INC_VALUE[29:0] According to the desired TDM clock output frequency, this field should be configured */
+	.clockhz = 2048000, /* INC_VALUE[29:0] According to the desired TDM clock output \
+			       frequency, this field should be configured */
 	.clockout = 1, /* 0 -> set bit 21, clear bit 20 in COMCERTO_GPIO_IOCTRL_REG
 			  (software control, clock input)
 			  1 -> set bit 21 and 20 in COMCERTO_GPIO_IOCTRL_REG
@@ -557,6 +666,40 @@ static struct platform_device comcerto_tdm_device = {
 	.num_resources	= 0,
 	.resource = NULL,
 };
+
+#if defined(CONFIG_DSPG_DECT_CSS)
+#define CSS_ITCM_BASE		COMCERTO_AXI_DECT_BASE
+#define CSS_ITCM_SIZE		(SZ_1M)
+
+#define CSS_DTCM_BASE		(CSS_ITCM_BASE + CSS_ITCM_SIZE)
+#define CSS_DTCM_SIZE		(SZ_1M)
+
+static struct resource comcerto_css_resources[] = {
+	{
+		.name	= "itcm",
+		.start	= CSS_ITCM_BASE,
+		.end	= CSS_ITCM_BASE + CSS_ITCM_SIZE - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+	{
+		.name	= "dtcm",
+		.start	= CSS_DTCM_BASE,
+		.end	= CSS_DTCM_BASE + CSS_DTCM_SIZE - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+};
+
+static struct platform_device comcerto_css_device = {
+	.name		= "css",
+	.id		= 0,
+	.dev		= {
+		.platform_data = 0,
+		.coherent_dma_mask = DMA_BIT_MASK(32),
+	},
+	.num_resources	= ARRAY_SIZE(comcerto_css_resources),
+	.resource	= comcerto_css_resources,
+};
+#endif
 
 static struct resource comcerto_pfe_resources[] = {
 	{
@@ -661,7 +804,7 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 };
 
 #if defined(CONFIG_SYNO_C2K_NET)
-static struct comcerto_pfe_platform_data comcerto_pfe_pdata_ds214air = {
+static struct comcerto_pfe_platform_data comcerto_pfe_pdata_ds215air = {
 	.comcerto_eth_pdata[0] = {
 		.name = GEM0_ITF_NAME,
 		.device_flags = CONFIG_COMCERTO_GEMAC,
@@ -741,6 +884,15 @@ static struct platform_device *comcerto_devices[] __initdata = {
 #if defined(CONFIG_COMCERTO_I2C_SUPPORT)
 		&comcerto_i2c,
 #endif
+
+#if defined (CONFIG_MPCORE_WATCHDOG)
+		&comcerto_a9wd,
+#endif
+
+#if defined(CONFIG_COMCERTO_WATCHDOG)
+		&comcerto_wdt,
+#endif
+
 #if defined(CONFIG_SPI_MSPD_HIGH_SPEED) || defined(CONFIG_SPI2_MSPD_HIGH_SPEED)
 		&comcerto_fast_spi,
 #endif
@@ -753,6 +905,9 @@ static struct platform_device *comcerto_devices[] __initdata = {
 		&comcerto_tdm_device,
 		&comcerto_pfe_device,
 		&rtc_dev,
+#if defined(CONFIG_DSPG_DECT_CSS)
+		&comcerto_css_device,
+#endif
 #if defined(CONFIG_COMCERTO_ELP_SUPPORT)
 	&comcerto_elp_device,
 #endif
@@ -765,11 +920,11 @@ static struct platform_device *comcerto_devices[] __initdata = {
 /* This variable is used by comcerto-2000.c to initialize the expansion bus */
 int comcerto_exp_values[5][7]= {
 	/* ENABLE, BASE, SEG_SZ, CFG, TMG1, TMG2, TMG3 */
-	{1, (EXP_BUS_REG_BASE_CS0 >> 12), ((EXP_BUS_REG_BASE_CS0 + EXP_CS0_SEG_SIZE - 1) >> 12), EXP_MEM_BUS_SIZE_16, 0x1A1A401F, 0x06060A04, 0x00000002},		/*TODO Values to check*/
+	{1, (EXP_BUS_REG_BASE_CS0 >> 12), ((EXP_BUS_REG_BASE_CS0 + EXP_CS0_SEG_SIZE - 1) >> 12), EXP_MEM_BUS_SIZE_16, 0x03034007, 0x04040502, 0x00000002},		/*TODO Values to check*/
 	{0, (EXP_BUS_REG_BASE_CS1 >> 12), ((EXP_BUS_REG_BASE_CS1 + EXP_CS1_SEG_SIZE - 1) >> 12), EXP_RDY_EN|EXP_MEM_BUS_SIZE_32, 0x1A1A401F, 0x06060A04, 0x00000002},	/*TODO Values to check*/
 	{0, (EXP_BUS_REG_BASE_CS2 >> 12), ((EXP_BUS_REG_BASE_CS2 + EXP_CS2_SEG_SIZE - 1) >> 12), EXP_STRB_MODE|EXP_ALE_MODE|EXP_MEM_BUS_SIZE_8, 0x1A10201A, 0x03080403, 0x0000002},	/*TODO Values to check*/
 	{0, (EXP_BUS_REG_BASE_CS3 >> 12), ((EXP_BUS_REG_BASE_CS3 + EXP_CS3_SEG_SIZE - 1) >> 12), EXP_STRB_MODE|EXP_ALE_MODE|EXP_MEM_BUS_SIZE_8, 0x1A10201A, 0x03080403, 0x0000002},	/*BT8370*/
-	{0, (EXP_BUS_REG_BASE_CS4 >> 12), ((EXP_BUS_REG_BASE_CS4 + EXP_CS4_SEG_SIZE - 1) >> 12), EXP_NAND_MODE|EXP_MEM_BUS_SIZE_8, 0x1A1A401F, 0x06060A04, 0x00000002},	/* NAND: TODO Values to check */
+	{1, (EXP_BUS_REG_BASE_CS4 >> 12), ((EXP_BUS_REG_BASE_CS4 + EXP_CS4_SEG_SIZE - 1) >> 12), EXP_NAND_MODE|EXP_MEM_BUS_SIZE_8, 0x00000001, 0x01010001, 0x00000002},	/* NAND: TODO Values to check */
 };
 
 /************************************************************************
@@ -827,7 +982,7 @@ static void __init platform_init(void)
 
 #if defined(CONFIG_SPI_MSPD_LOW_SPEED) || defined(CONFIG_SPI_MSPD_HIGH_SPEED)
 #ifdef CONFIG_SYNO_C2K_SPI_PARTITION
-	if(0 == strncmp(gszSynoHWVersion, HW_DS214airv10, strlen(HW_DS214airv10))) {
+	if(0 == strncmp(gszSynoHWVersion, HW_DS215airv10, strlen(HW_DS215airv10))) {
 		spi_register_board_info(synology_spi_16m_info, ARRAY_SIZE(synology_spi_16m_info));
 	} else {
 		spi_register_board_info(synology_spi_info, ARRAY_SIZE(synology_spi_info));
@@ -837,12 +992,12 @@ static void __init platform_init(void)
 #endif
 #endif
 #if defined(CONFIG_SYNO_C2K_NET)
-	if(0 == strncmp(gszSynoHWVersion, HW_DS214airv10, strlen(HW_DS214airv10))) {
-		mac_addr_init(&comcerto_pfe_pdata_ds214air);
+	if(0 == strncmp(gszSynoHWVersion, HW_DS215airv10, strlen(HW_DS215airv10))) {
+		mac_addr_init(&comcerto_pfe_pdata_ds215air);
 
 		for (i = 0; i < ARRAY_SIZE(comcerto_devices); i++){
 			if(0 == strncmp(comcerto_devices[i]->name, SYNO_PFE_NAME, strlen(SYNO_PFE_NAME))) {
-				comcerto_devices[i]->dev.platform_data = &comcerto_pfe_pdata_ds214air;
+				comcerto_devices[i]->dev.platform_data = &comcerto_pfe_pdata_ds215air;
 				break;
 			}
 		}

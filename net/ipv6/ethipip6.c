@@ -891,8 +891,20 @@ static int ethipip6_tnl_xmit2(struct sk_buff *skb,
         } else {
 		dst = ip6_route_output(net, NULL, &fl->u.ip6);
 
+#if defined(CONFIG_SYNO_COMCERTO)
+		if(dst->error)
+			goto tx_err_link_failure;
+		dst = xfrm_lookup(net, dst, fl, NULL, 0);
+		if(IS_ERR(dst))
+		{
+			err = PTR_ERR(dst);
+			dst = NULL;
+			goto tx_err_link_failure;
+		}
+#else
 		if (dst->error || xfrm_lookup(net, dst, fl, NULL, 0) < 0)
 			goto tx_err_link_failure;
+#endif
 #if defined(CONFIG_INET6_IPSEC_OFFLOAD)
 		t->genid = atomic_read(&flow_cache_genid);
 #endif
@@ -949,6 +961,9 @@ static int ethipip6_tnl_xmit2(struct sk_buff *skb,
 	skb_dst_set(skb, dst_clone(dst));
 
 	skb->transport_header = skb->network_header;
+#if defined(CONFIG_SYNO_COMCERTO)
+	IP6CB(skb)->nhoff = offsetof(struct ipv6hdr, nexthdr);
+#endif
 
 	etherip_ver  = (__u16 *)skb_push(skb, ETH_IPHLEN);
 	*etherip_ver = htons(ETHERIP_VERSION);
@@ -970,6 +985,9 @@ static int ethipip6_tnl_xmit2(struct sk_buff *skb,
 	ipv6_addr_copy(&ipv6h->daddr, &fl->u.ip6.daddr);
 	nf_reset(skb);
 	pkt_len = skb->len;
+#if defined(CONFIG_SYNO_COMCERTO)
+	skb->local_df = 1;
+#endif
 	err = ip6_local_out(skb);
 
 	if (net_xmit_eval(err) == 0) {
@@ -1122,6 +1140,10 @@ static void ethipip6_tnl_link_config(struct ip6_tnl *t)
 	struct net_device *dev = t->dev;
 	struct ip6_tnl_parm *p = &t->parms;
 	struct flowi *fl = &t->fl;
+#if defined(CONFIG_SYNO_COMCERTO)
+	struct net_device *ldev = NULL;
+	struct net *net = dev_net(t->dev);
+#endif
 
 	memcpy(dev->dev_addr, &p->laddr, dev->addr_len);
 	/* Make sure that dev_addr is nither mcast nor all zeros */
@@ -1149,6 +1171,19 @@ static void ethipip6_tnl_link_config(struct ip6_tnl *t)
 		dev->flags &= ~IFF_POINTOPOINT;
 
 	dev->iflink = p->link;
+
+#if defined(CONFIG_SYNO_COMCERTO)
+	/* Initialize the default mtu  of tunnel with it's parent interface
+	mtu */
+	rcu_read_lock();
+	if (p->link)
+	{
+		ldev = dev_get_by_index_rcu(net, p->link);
+		if (ldev)
+			dev->mtu = ldev->mtu;
+	}
+	rcu_read_unlock();
+#endif
 
 	if (p->flags & IP6_TNL_F_CAP_XMIT) {
 		int strict = (ipv6_addr_type(&p->raddr) &

@@ -194,6 +194,14 @@ cat << EOF
 #define __IGNORE_getpmsg
 #define __IGNORE_putpmsg
 #define __IGNORE_vserver
+
+/* SYNOStat and SYNOCaselessStat for 32bit application version*/
+#define __IGNORE_SYNOStat64
+#define __IGNORE_SYNOFStat64
+#define __IGNORE_SYNOLStat64
+#define __IGNORE_SYNOCaselessStat64
+#define __IGNORE_SYNOCaselessLStat64
+
 EOF
 }
 

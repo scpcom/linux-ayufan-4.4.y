@@ -1314,6 +1314,10 @@ again:
 	raw_spin_lock(&logbuf_lock);
 	if (con_start != log_end)
 		retry = 1;
+#ifdef CONFIG_SYNO_ALPINE_V2_5_3
+	else
+		retry = 0;
+#endif
 	raw_spin_unlock_irqrestore(&logbuf_lock, flags);
 
 	if (retry && console_trylock())

@@ -235,7 +235,7 @@ u32 etxhci_port_state_to_neutral(u32 state)
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 #include <linux/pci.h>
 
 extern int gSynoFactoryUSB3Disable;
@@ -767,7 +767,7 @@ int etxhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 			xhci_dbg(xhci, "set port power. hcd->speed:%d.\n",hcd->speed);
 			if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3)
 				xhci_writel(xhci, temp & ~PORT_POWER,
@@ -990,14 +990,19 @@ int xhci_downgrade_to_usb2(struct usb_hcd *hcd,
 	int max_ports, slot_id, ret = -ENODEV;
 	u32 portsc;
 
-	switch(udev->descriptor.idVendor) {
-	case cpu_to_le16(0x1759):
-		if (udev->descriptor.idProduct == cpu_to_le16(0x5100))
+	switch(le16_to_cpu(udev->descriptor.idVendor)) {
+	case 0x1759:
+		if (0x5100 == le16_to_cpu(udev->descriptor.idProduct))
 			goto err_done;
 		else
 			break;
-	case cpu_to_le16(0x054c):
-		if (udev->descriptor.idProduct == cpu_to_le16(0x05bf))
+	case 0x054c:
+		if (0x05bf == le16_to_cpu(udev->descriptor.idProduct))
+			goto err_done;
+		else
+			break;
+	case 0x04c5:
+		if (0x120e == le16_to_cpu(udev->descriptor.idProduct))
 			goto err_done;
 		else
 			break;

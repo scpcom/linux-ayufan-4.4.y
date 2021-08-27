@@ -637,7 +637,7 @@ static int parse_fuse_opt(char *opt, struct fuse_mount_data *d, int is_bdev)
 		case OPT_SYNOMETA_XATTR:
 			sb->s_syno_opt |= SYNO_MS_META_XATTR;
 			break;
-#endif //MY_ABC_HERE
+#endif //SYNO_FS_OPTIONS
 		default:
 			return 0;
 		}
@@ -1047,6 +1047,9 @@ static void fuse_send_init(struct fuse_conn *fc, struct fuse_req *req)
 		FUSE_EXPORT_SUPPORT | FUSE_BIG_WRITES | FUSE_DONT_MASK |
 		FUSE_SPLICE_WRITE | FUSE_SPLICE_MOVE | FUSE_SPLICE_READ |
 		FUSE_FLOCK_LOCKS | FUSE_IOCTL_DIR | FUSE_AUTO_INVAL_DATA |
+#ifdef SYNO_FUSE_KERNEL_MINOR_VERSION
+		SYNO_FUSE_ACL_CACHE |
+#endif
 		FUSE_DO_READDIRPLUS | FUSE_READDIRPLUS_AUTO | FUSE_ASYNC_DIO;
 	req->in.h.opcode = FUSE_INIT;
 	req->in.numargs = 1;
@@ -1437,7 +1440,11 @@ static int __init fuse_init(void)
 	int res;
 
 	printk(KERN_INFO "fuse init (API version %i.%i)\n",
+#ifdef SYNO_FUSE_KERNEL_MINOR_VERSION
+	       FUSE_KERNEL_VERSION, SYNO_FUSE_KERNEL_MINOR_VERSION);
+#else
 	       FUSE_KERNEL_VERSION, FUSE_KERNEL_MINOR_VERSION);
+#endif
 
 	INIT_LIST_HEAD(&fuse_conn_list);
 	res = fuse_fs_init();

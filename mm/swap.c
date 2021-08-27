@@ -147,6 +147,22 @@ void put_page(struct page *page)
 }
 EXPORT_SYMBOL(put_page);
 
+#ifdef CONFIG_SYNO_ALPINE
+void put_page_n(struct page *page, unsigned int c)
+{
+	if (c == 1) {
+		put_page(page);
+		return;
+	}
+
+	if (unlikely(PageCompound(page)))
+		BUG();
+	else if (put_page_n_testzero(page, c))
+		__put_single_page(page);
+}
+EXPORT_SYMBOL(put_page_n);
+#endif
+
 /*
  * This function is exported but must not be called by anything other
  * than get_page(). It implements the slow path of get_page().

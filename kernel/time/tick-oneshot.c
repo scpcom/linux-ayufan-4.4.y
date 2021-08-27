@@ -68,6 +68,9 @@ int tick_switch_to_oneshot(void (*handler)(struct clock_event_device *))
 	if (!dev || !(dev->features & CLOCK_EVT_FEAT_ONESHOT) ||
 		    !tick_device_is_functional(dev)) {
 
+#ifdef CONFIG_SYNO_ALPINE
+/*
+#endif		
 printk(KERN_INFO "Clockevents: "
 		       "could not switch to one-shot mode:");
 		if (!dev) {
@@ -79,6 +82,9 @@ printk(KERN_INFO "Clockevents: "
 				printk(" %s does not support one-shot mode.\n",
 				       dev->name);
 		}
+#ifdef CONFIG_SYNO_ALPINE
+*/
+#endif
 		return -EINVAL;
 	}
 

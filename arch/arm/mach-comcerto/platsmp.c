@@ -79,49 +79,6 @@ void __init smp_init_cpus(void)
 #define JUMP_TO_KERNEL_START_1		0xe3a00020 	/* mov	r0, #32 */
 #define JUMP_TO_KERNEL_START_2		0xe590f000 	/* ldr	pc, [r0] */
 
-/* Creating Task for Cpu-1 Hotplug */
-struct task_struct *thread1=NULL;
-
-DECLARE_WAIT_QUEUE_HEAD(cpu1_hotplug);
-
-/*
- * Hotplug signal from CPU Hotplug framework
- * to invoke the Hotplug task
- */
-u32 cpu1_hotplug_done;
-
-/* Cpu-1 Hotplug Task */
-void hotplug_cpu1_die(void)
-{
-	unsigned int reset;
-	struct cpumask in_mask;
-	int cpu = 0;
-	int pid = 0;
-
-	cpumask_set_cpu(cpu, &in_mask);
-	sched_setaffinity(pid, &in_mask);
-
-wait_for_cpu1_hotplug_done:
-
-	/* Waiting for hotplug event invoked by CPU hotplug framework */
-	wait_event(cpu1_hotplug, cpu1_hotplug_done>0);
-
-#ifdef CONFIG_NEON
-	__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) & ~NEON1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
-	__raw_writel((__raw_readl(A9DP_CPU_RESET) | NEON1_RST), A9DP_CPU_RESET);
-#endif
-	__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) & ~CPU1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
-	__raw_writel((__raw_readl(A9DP_PWR_CNTRL) | CLAMP_CORE1), A9DP_PWR_CNTRL);
-	__raw_writel((__raw_readl(A9DP_PWR_CNTRL) | CORE_PWRDWN1), A9DP_PWR_CNTRL);
-	__raw_writel((__raw_readl(A9DP_CPU_RESET) | CPU1_RST), A9DP_CPU_RESET);
-	__raw_writel((__raw_readl(A9DP_PWR_CNTRL) & ~CORE_PWRDWN1), A9DP_PWR_CNTRL);
-
-	cpu1_hotplug_done = 0;
-	goto wait_for_cpu1_hotplug_done;
-
-	return;
-}
-
 void __init platform_smp_prepare_cpus(unsigned int max_cpus)
 {
 	int i;
@@ -135,18 +92,6 @@ void __init platform_smp_prepare_cpus(unsigned int max_cpus)
 		set_cpu_present(i, true);
 
 	scu_enable(scu_base_addr());
-
-        /* Create cpu1_hotplug_thread */
-
-	printk(" Creating cpu1_hotplug_thread....\n");
-	cpu1_hotplug_done = 0;
-	thread1 = kthread_create(hotplug_cpu1_die,NULL,our_thread);
-
-	if((thread1))
-		{
-		printk(" cpu1_hotplug_thread Created\n");
-		wake_up_process(thread1);
-		}
 
 	return 0;
 }

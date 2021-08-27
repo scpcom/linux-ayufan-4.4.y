@@ -19,9 +19,10 @@
 #include <linux/slab.h>
 
 #include "xhci.h"
+
+#if defined(CONFIG_SYNO_COMCERTO)
 #include "xhci-comcerto2000.h"
-
-
+#endif
 
 static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
@@ -84,7 +85,7 @@ static const struct hc_driver xhci_plat_xhci_driver = {
 	/* Root hub support */
 	.hub_control =		xhci_hub_control,
 	.hub_status_data =	xhci_hub_status_data,
-#ifdef CONFIG_PM	
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_PM)
 	.bus_suspend =		comcerto_xhci_bus_suspend,
 	.bus_resume =		comcerto_xhci_bus_resume,
 #endif
@@ -104,8 +105,10 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	if (usb_disabled())
 		return -ENODEV;
 
+#if defined(CONFIG_SYNO_COMCERTO)
 	/* Do the Platform specific initializations */
 	comcerto_start_xhci();
+#endif
 
 	driver = &xhci_plat_xhci_driver;
 
@@ -131,21 +134,29 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		goto put_hcd;
 	}
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	hcd->regs = ioremap_nocache(hcd->rsrc_start, hcd->rsrc_len);
+#else
 	hcd->regs = ioremap(hcd->rsrc_start, hcd->rsrc_len);
+#endif
 	if (!hcd->regs) {
 		dev_dbg(&pdev->dev, "error mapping memory\n");
 		ret = -EFAULT;
 		goto release_mem_region;
 	}
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#else
 #if 1
 	writel(readl(hcd->regs + 0xc200) & 0x7FFFFFFF, hcd->regs + 0xc200);
 	writel(readl(hcd->regs + 0xc2c0) & 0x7FFFFFFF, hcd->regs + 0xc2c0);
 	writel(0x5Dc11000, hcd->regs + 0xc110);
 #endif
 
-#if defined(CONFIG_SYNO_C2K_USB_VBUS_CONTROL)
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_SYNO_C2K_USB_VBUS_CONTROL)
 	//We use gpio15 to control the vbus power
 	writel((readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 15)), COMCERTO_GPIO_OUTPUT_REG);
+#endif
 #endif
 
 	ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
@@ -204,8 +215,10 @@ static int xhci_plat_remove(struct platform_device *dev)
 	iounmap(hcd->regs);
 	usb_put_hcd(hcd);
 
+#if defined(CONFIG_SYNO_COMCERTO)
 	/* Do the Platform specific shutdown */
 	comcerto_stop_xhci();
+#endif
 
 	kfree(xhci);
 

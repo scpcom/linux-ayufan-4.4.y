@@ -1334,27 +1334,42 @@ static u32 xhci_get_max_esit_payload(struct xhci_hcd *xhci,
 static void xhci_apply_device_quirk(struct xhci_hcd * xhci,
 	struct usb_device * udev, struct usb_host_endpoint *ep)
 {
-	unsigned int ep_index;
+#define XHCI_QUIRK_ONE_BURST_SIZE	(1 << 0)
+
+	static const struct usb_device_id quirk_device_ids[] = {
+		{ USB_DEVICE(0x1759, 0x5002), .driver_info = XHCI_QUIRK_ONE_BURST_SIZE },
+		{ USB_DEVICE(0x1759, 0x5000), .driver_info = XHCI_QUIRK_ONE_BURST_SIZE },
+	};
 	struct xhci_virt_device *virt_dev;
-	struct xhci_ep_ctx *ep_ctx;
+	int i;
 
 	if (!(udev->parent && !udev->parent->parent))
 		return;
-	if (udev->speed != USB_SPEED_SUPER)
-		return;
-	if (!usb_endpoint_is_bulk_in(&ep->desc))
-		return;
-	if (udev->descriptor.idVendor != cpu_to_le16(0x1759))
-		return;
-	if (udev->descriptor.idProduct == cpu_to_le16(0x5000) ||
-		udev->descriptor.idProduct == cpu_to_le16(0x5002)) {
+
 	virt_dev = xhci->devs[udev->slot_id];
-		ep_index = etxhci_get_endpoint_index(&ep->desc);
-		ep_ctx = etxhci_get_ep_ctx(xhci, virt_dev->in_ctx, ep_index);
+	if ((xhci->quirks & XHCI_BULK_XFER_QUIRK) &&
+		xhci_is_mass_storage_device(xhci, udev->slot_id)) {
+		virt_dev->defer_queue_bulk_td = 1;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(quirk_device_ids); i++) {
+		const struct usb_device_id *id = &quirk_device_ids[i];
+
+		if ((id->idVendor == le16_to_cpu(udev->descriptor.idVendor)) &&
+			(id->idProduct == le16_to_cpu(udev->descriptor.idProduct))) {
+			if (id->driver_info & XHCI_QUIRK_ONE_BURST_SIZE) {
+				if (udev->speed == USB_SPEED_SUPER && usb_endpoint_is_bulk_in(&ep->desc)) {
+					unsigned int ep_index = etxhci_get_endpoint_index(&ep->desc);
+					struct xhci_ep_ctx *ep_ctx = etxhci_get_ep_ctx(xhci, virt_dev->in_ctx, ep_index);
 					ep_ctx->ep_info2 &= cpu_to_le32(~MAX_BURST_MASK);
 					ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(1));
 				}
 			}
+
+			break;
+		}
+	}
+}
 
 /* Set up an endpoint with one ring segment.  Do not allocate stream rings.
  * Drivers will have to call usb_alloc_streams() to do that.
@@ -1411,24 +1426,17 @@ int etxhci_endpoint_init(struct xhci_hcd *xhci,
 	ep_ctx->ep_info2 |= cpu_to_le32(xhci_get_endpoint_type(udev, ep));
 
 	/* Set the max packet size and max burst */
+	max_packet = GET_MAX_PACKET(usb_endpoint_maxp(&ep->desc));
+	max_burst = 0;
 	switch (udev->speed) {
 	case USB_SPEED_SUPER:
-		max_packet = usb_endpoint_maxp(&ep->desc);
-		ep_ctx->ep_info2 |= cpu_to_le32(MAX_PACKET(max_packet));
 		/* dig out max burst from ep companion desc */
-		max_packet = ep->ss_ep_comp.bMaxBurst;
-		ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(max_packet));
-#ifdef MY_DEF_HERE
-		if (cpu_to_le16(0x1759) == udev->descriptor.idVendor &&
-			cpu_to_le16(0x5002) == udev->descriptor.idProduct &&
-			cpu_to_le16(0x2580) == udev->descriptor.bcdDevice &&
-			usb_endpoint_is_bulk_in(&ep->desc)) {
-			ep_ctx->ep_info2 &= cpu_to_le32(~MAX_BURST_MASK);
-			ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(1));
-		}
-#endif //MY_DEF_HERE
+		max_burst = ep->ss_ep_comp.bMaxBurst;
 		break;
 	case USB_SPEED_HIGH:
+		/* Some devices get this wrong */
+		if (usb_endpoint_xfer_bulk(&ep->desc))
+			max_packet = 512;
 		/* bits 11:12 specify the number of additional transaction
 		 * opportunities per microframe (USB 2.0, section 9.6.6)
 		 */
@@ -1436,17 +1444,16 @@ int etxhci_endpoint_init(struct xhci_hcd *xhci,
 				usb_endpoint_xfer_int(&ep->desc)) {
 			max_burst = (usb_endpoint_maxp(&ep->desc)
 				     & 0x1800) >> 11;
-			ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(max_burst));
 		}
-		/* Fall through */
+		break;
 	case USB_SPEED_FULL:
 	case USB_SPEED_LOW:
-		max_packet = GET_MAX_PACKET(usb_endpoint_maxp(&ep->desc));
-		ep_ctx->ep_info2 |= cpu_to_le32(MAX_PACKET(max_packet));
 		break;
 	default:
 		BUG();
 	}
+	ep_ctx->ep_info2 |= cpu_to_le32(MAX_PACKET(max_packet) |
+			MAX_BURST(max_burst));
 	max_esit_payload = xhci_get_max_esit_payload(xhci, udev, ep);
 	ep_ctx->tx_info = cpu_to_le32(MAX_ESIT_PAYLOAD_FOR_EP(max_esit_payload));
 

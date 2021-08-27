@@ -29,3 +29,14 @@ config SECURITY_APPARMOR_BOOTPARAM_VALUE
 	  boot.
 
 	  If you are unsure how to answer this question, answer 1.
+
+# SYNO_APPARMOR_PATCH
+config SECURITY_APPARMOR_COMPAT_24
+	bool "Enable AppArmor 2.4 compatability"
+	depends on SECURITY_APPARMOR
+	default y
+	help
+	  This option enables compatability with AppArmor 2.4.  It is
+          recommended if compatability with older versions of AppArmor
+          is desired.
+# SYNO_APPARMOR_PATCH

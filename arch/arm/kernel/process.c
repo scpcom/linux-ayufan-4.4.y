@@ -112,7 +112,10 @@ void arm_machine_restart(char mode, const char *cmd)
 	flush_cache_all();
 
 	/* Turn off caching */
+#if !defined(CONFIG_SYNO_ARMADA_ARCH_V2) || (!defined(CONFIG_ARCH_ARMADA375) && !defined(CONFIG_ARCH_ARMADA38X))
+	/* Temporrary skip the disabling of the caches for Armada 375 until we resolve the reboot hang issue */
 	cpu_proc_fin();
+#endif
 
 	/* Push out any further dirty data, and ensure cache is empty */
 	flush_cache_all();
@@ -212,7 +215,16 @@ void cpu_idle(void)
 				 * functions should always return with IRQs
 				 * enabled.
 				 */
+#ifdef CONFIG_SYNO_ALPINE
+				/* 
+				*  After disabling irqs above this warn_on checks
+				*  irq are enabled and then at the following
+				*  instruction enables them. This code is redundant
+				*/
+//				WARN_ON(irqs_disabled());
+#else
 				WARN_ON(irqs_disabled());
+#endif
 				local_irq_enable();
 			}
 		}

@@ -26,6 +26,9 @@
 #include <linux/amba/bus.h>
 #include <linux/amba/pl061.h>
 #include <linux/slab.h>
+#ifdef CONFIG_SYNO_ALPINE
+#include <linux/of.h>
+#endif
 
 #define GPIODIR 0x400
 #define GPIOIS  0x404
@@ -37,6 +40,9 @@
 #define GPIOIC  0x41C
 
 #define PL061_GPIO_NR				8
+#ifdef CONFIG_SYNO_ALPINE
+#define PL061_GPIO_IRQ_BITMAP_SIZE 64
+#endif
 
 struct pl061_gpio {
 	/* We use a list of pl061_gpio structs for each trigger IRQ in the main
@@ -239,7 +245,11 @@ static int pl061_probe(struct amba_device *dev, const struct amba_id *id)
 	struct pl061_gpio *chip;
 	struct list_head *chip_list;
 	int ret, irq, i;
+#ifdef CONFIG_SYNO_ALPINE
+	static DECLARE_BITMAP(init_irq, PL061_GPIO_IRQ_BITMAP_SIZE);
+#else
 	static DECLARE_BITMAP(init_irq, NR_IRQS);
+#endif
 
 	chip = kzalloc(sizeof(*chip), GFP_KERNEL);
 	if (chip == NULL)
@@ -250,8 +260,21 @@ static int pl061_probe(struct amba_device *dev, const struct amba_id *id)
 		chip->gc.base = pdata->gpio_base;
 		chip->irq_base = pdata->irq_base;
 	} else if (dev->dev.of_node) {
+#ifdef CONFIG_SYNO_ALPINE
+		const void *ptr;
+		unsigned int baseidx = -1; /* GPIO dynamic allocation */
+
+		ptr = of_get_property(dev->dev.of_node, "baseidx", NULL);
+		if (ptr)
+			baseidx = be32_to_cpup(ptr);
+		chip->gc.base = baseidx;
+
+		/* allocate interrupt descriptors for each of the GPIOs */
+		chip->irq_base = irq_alloc_descs(-1, 0, PL061_GPIO_NR, -1);
+#else
 		chip->gc.base = -1;
 		chip->irq_base = NO_IRQ;
+#endif
 	} else {
 		ret = -ENODEV;
 		goto free_mem;

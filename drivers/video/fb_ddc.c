@@ -60,7 +60,7 @@ unsigned char *fb_ddc_read(struct i2c_adapter *adapter)
 	unsigned char *edid = NULL;
 	int i, j;
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (!algo_data) {
 		/* No direct control on I2C bus */
 		for (i = 0; i < 3; i++) {

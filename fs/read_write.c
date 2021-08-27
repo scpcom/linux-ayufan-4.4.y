@@ -23,6 +23,11 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
+#ifdef SYNO_DEBUG_FLAG
+#include <linux/synolib.h>
+extern int SynoDebugFlag;
+extern int syno_hibernation_log_level;
+#endif
 
 const struct file_operations generic_ro_fops = {
 	.llseek		= generic_file_llseek,
@@ -466,6 +471,12 @@ SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
 	ssize_t ret = -EBADF;
 	int fput_needed;
 
+#ifdef SYNO_DEBUG_FLAG
+	if(syno_hibernation_log_level > 0) {
+		syno_do_hibernation_fd_log(fd);
+	}
+#endif
+
 	file = fget_light(fd, &fput_needed);
 	if (file) {
 		loff_t pos = file_pos_read(file);
@@ -484,6 +495,12 @@ SYSCALL_DEFINE3(write, unsigned int, fd, const char __user *, buf,
 	ssize_t ret = -EBADF;
 	int fput_needed;
 
+#ifdef SYNO_DEBUG_FLAG
+	if(syno_hibernation_log_level > 0) {
+		syno_do_hibernation_fd_log(fd);
+	}
+#endif
+
 	file = fget_light(fd, &fput_needed);
 	if (file) {
 		loff_t pos = file_pos_read(file);
@@ -495,7 +512,8 @@ SYSCALL_DEFINE3(write, unsigned int, fd, const char __user *, buf,
 	return ret;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
+
 asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, size_t *rwbytes)
 {
 	int ret = 0;
@@ -607,8 +625,7 @@ out:
 
 	return ret;
 }
-
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 
 SYSCALL_DEFINE(pread64)(unsigned int fd, char __user *buf,
 			size_t count, loff_t pos)
@@ -1040,7 +1057,7 @@ static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 	if (!(out_file->f_mode & FMODE_WRITE))
 		goto fput_out;
 	retval = -EINVAL;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (!out_file->f_op || !out_file->f_op->sendpage)
 		goto fput_out;
 #endif
@@ -1055,7 +1072,7 @@ static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 		max = min(in_inode->i_sb->s_maxbytes, out_inode->i_sb->s_maxbytes);
 
 	pos = *ppos;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	retval = -EINVAL;
 	if (unlikely(pos < 0))
 		goto fput_out;

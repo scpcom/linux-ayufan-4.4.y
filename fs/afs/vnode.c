@@ -776,13 +776,21 @@ int afs_vnode_store_data(struct afs_writeback *wb, pgoff_t first, pgoff_t last,
 	struct afs_vnode *vnode = wb->vnode;
 	int ret;
 
+#ifdef CONFIG_SYNO_ALPINE
+	_enter("%s{%x:%u.%u},%x,%llx,%llx,%x,%x",
+#else
 	_enter("%s{%x:%u.%u},%x,%lx,%lx,%x,%x",
+#endif
 	       vnode->volume->vlocation->vldb.name,
 	       vnode->fid.vid,
 	       vnode->fid.vnode,
 	       vnode->fid.unique,
 	       key_serial(wb->key),
+#ifdef CONFIG_SYNO_ALPINE
+	       (unsigned long long)first, (unsigned long long)last, offset, to);
+#else
 	       first, last, offset, to);
+#endif
 
 	/* this op will fetch the status */
 	spin_lock(&vnode->lock);

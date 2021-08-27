@@ -27,14 +27,21 @@
 #if defined(CONFIG_SYNO_COMCERTO)
 #include <linux/clk.h>
 #include <mach/reset.h>
+#include <mach/comcerto-2000/pm.h>
 #endif
 #include "ahci.h"
+#if defined(CONFIG_SYNO_COMCERTO)
+#include <mach/serdes-c2000.h>
+#endif
 
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
 /* SATA Clocks */
 static struct clk *sata_oob_clk; /* Core clock */
 static struct clk *sata_pmu_clk; /* PMU alive clock */
 static struct clk *sata_clk;	/* Sata AXI ref clock */
+#if defined(CONFIG_COMCERTO_SATA_OCC_CLOCK)
+static struct clk *sata_occ_clk; /* sata OCC clock */
+#endif
 #endif 
 
 enum ahci_type {
@@ -80,6 +87,20 @@ static int ahci_platform_suspend(struct platform_device *pdev, pm_message_t stat
 {
         struct ata_host *host = platform_get_drvdata(pdev);
 	int ret=0;
+
+#ifdef CONFIG_ARCH_M86XXX
+	 /* Check for the Bit_Mask bit for SATA, if it is enabled
+	  * then we are not going suspend the SATA device , as by
+	  * this device , we will wake from System Resume.
+	 */
+	if ( !(host_utilpe_shared_pmu_bitmask & SATA_IRQ )){
+
+                /* We will Just return
+                */
+		return ret;
+	}
+#endif
+
         if (host)
 		ret = ata_host_suspend(host, state);
 
@@ -90,6 +111,14 @@ static int ahci_platform_suspend(struct platform_device *pdev, pm_message_t stat
 		clk_disable(sata_clk);
 		clk_disable(sata_oob_clk);
 		clk_disable(sata_pmu_clk);
+
+		/* PM Performance Enhancement : SRDS1 PD SATA1/SRDS2 PD SATA2 - P2 state, */
+		/* Resets the entire PHY module and CMU power down */
+		if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES1_CNF_SATA0)
+			writel((readl((COMCERTO_DWC1_CFG_BASE+0x44)) | 0xCC), (COMCERTO_DWC1_CFG_BASE+0x44));
+		else if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES2_CNF_SATA1)
+			writel((readl((COMCERTO_DWC1_CFG_BASE+0x54)) | 0xCC), (COMCERTO_DWC1_CFG_BASE+0x54));
+
 	}
 #endif
 	
@@ -101,6 +130,25 @@ static int ahci_platform_resume(struct platform_device *pdev)
         struct ata_host *host = platform_get_drvdata(pdev);
 
 #ifdef CONFIG_ARCH_M86XXX
+	/* PM Performance Enhancement : SRDS1 PD SATA1/SRDS2 PD SATA2 - P2 state, */
+	/* Enable PHY module and CMU power UP */
+	if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES1_CNF_SATA0)
+ 		writel((readl((COMCERTO_DWC1_CFG_BASE+0x44)) & ~0xCC), (COMCERTO_DWC1_CFG_BASE+0x44));
+	else if (readl(COMCERTO_GPIO_SYSTEM_CONFIG) & BOOT_SERDES2_CNF_SATA1)
+		writel((readl((COMCERTO_DWC1_CFG_BASE+0x54)) & ~0xCC), (COMCERTO_DWC1_CFG_BASE+0x54));
+
+	/* Check for the Bit_Mask bit for SATA, if it is enabled
+	 * then we are not going suspend the SATA device , as by
+	 * this device , we will wake from System Resume.
+	*/
+
+	if ( !(host_utilpe_shared_pmu_bitmask & SATA_IRQ )){
+
+                /* We will Just return
+                */
+		return 0;
+	}
+
 	/* Do the  clock enable here  PMU,OOB,AXI */
 	clk_enable(sata_clk);
 	clk_enable(sata_oob_clk);
@@ -172,7 +220,20 @@ static int __init ahci_probe(struct platform_device *pdev)
 		pr_err("%s: SATA_PMU clock enable failed \n",__func__);
 		return rc;
 	}
-
+#if defined(CONFIG_COMCERTO_SATA_OCC_CLOCK)
+	sata_occ_clk = clk_get(NULL,"sata_occ");
+	/* Error Handling , if no sata occ clock reference: return error */
+	if (IS_ERR(sata_occ_clk)) {
+		pr_err("%s: Unable to obtain sata occ clock: %ld\n",__func__,PTR_ERR(sata_occ_clk));
+		return PTR_ERR(sata_occ_clk);
+ 	}
+	/*Enable the sata_occ clocks here */
+        rc = clk_enable(sata_occ_clk);
+	if (rc){
+		pr_err("%s: sata occ clock enable failed \n",__func__);
+		return rc;
+	}
+#endif
 	/* Set the SATA PMU clock to 30 MHZ and OOB clock to 125MHZ */
 	clk_set_rate(sata_oob_clk,125000000);
 	clk_set_rate(sata_pmu_clk,30000000);
@@ -268,8 +329,8 @@ static int __init ahci_probe(struct platform_device *pdev)
 
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
 		/* Optimized PFE/SATA DDR interaction,
-		limit burst size of SATA controller */
-		writel(0 , ahci_port_base(ap) + 0x70);
+		limit read burst size of SATA controller */
+		writel(0x41, ahci_port_base(ap) + 0x70);
 #endif
 
 		/* disabled/not-implemented port */
@@ -314,7 +375,10 @@ static int __devexit ahci_remove(struct platform_device *pdev)
 	clk_put(sata_oob_clk);
 	clk_disable(sata_pmu_clk);
 	clk_put(sata_pmu_clk);
-
+#if defined(CONFIG_COMCERTO_SATA_OCC_CLOCK)
+	clk_disable(sata_occ_clk);
+	clk_put(sata_occ_clk);
+#endif
 	/*Putting  SATA in reset state 
 	 * Sata axi clock domain in reset state
 	 * Serdes 1/2 in reset state, this depends upon PCIE1 and SGMII 

@@ -119,7 +119,7 @@ ENTRY(cpu_feroceon_reset)
  *
  * Called with IRQs disabled
  */
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_JTAG_DEBUG
 support_wait_for_interrupt_address:
         .word   support_wait_for_interrupt
@@ -128,7 +128,7 @@ support_wait_for_interrupt_address:
 
 	.align	5
 ENTRY(cpu_feroceon_do_idle)
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 #ifdef CONFIG_JTAG_DEBUG
         ldr     r0, support_wait_for_interrupt_address
         ldr     r0, [r0]
@@ -137,16 +137,16 @@ ENTRY(cpu_feroceon_do_idle)
 #endif
 #endif
 	mov	r0, #0
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	mrc	p15, 0, r1, c1, c0, 0		@ Read control register
 #endif
 	mcr	p15, 0, r0, c7, c10, 4		@ Drain write buffer
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	bic	r2, r1, #1 << 12
 	mcr	p15, 0, r2, c1, c0, 0		@ Disable I cache
 #endif
 	mcr	p15, 0, r0, c7, c0, 4		@ Wait for interrupt
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	mcr	p15, 0, r1, c1, c0, 0		@ Restore ICache enable
 1:
 #endif
@@ -440,6 +440,10 @@ ENTRY(feroceon_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(feroceon_dma_unmap_area)
 
+#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	.globl	feroceon_flush_kern_cache_louis
+	.equ	feroceon_flush_kern_cache_louis, feroceon_flush_kern_cache_all
+#endif
 	@ define struct cpu_cache_fns (see <asm/cacheflush.h> and proc-macros.S)
 	define_cache_functions feroceon
 
@@ -456,6 +460,9 @@ ENDPROC(feroceon_dma_unmap_area)
 	range_alias flush_icache_all
 	range_alias flush_user_cache_all
 	range_alias flush_kern_cache_all
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) 
+	range_alias flush_kern_cache_louis
+#endif
 	range_alias flush_user_cache_range
 	range_alias coherent_kern_range
 	range_alias coherent_user_range

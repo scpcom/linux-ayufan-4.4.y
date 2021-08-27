@@ -3164,6 +3164,13 @@ static const struct address_space_operations ext4_da_aops = {
 	.error_remove_page	= generic_error_remove_page,
 };
 
+#ifdef SYNO_FS_EXT4_SKIP_JOURNAL_SYMLINK
+void ext4_set_writeback_aops(struct inode *inode)
+{
+	inode->i_mapping->a_ops = &ext4_writeback_aops;
+}
+#endif
+
 void ext4_set_aops(struct inode *inode)
 {
 	switch (ext4_inode_journal_mode(inode)) {

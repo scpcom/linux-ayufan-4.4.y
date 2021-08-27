@@ -409,45 +409,43 @@ SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 SYSCALL(SYNOUtime)             /* 402 */
 #else
 SYSCALL(ni_syscall)
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 SYSCALL(SYNOArchiveBit)        /* 403 */
 #else
 SYSCALL(ni_syscall)
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 SYSCALL(recvfile)              /* 404 */
 #else
 SYSCALL(ni_syscall)
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_ALLOC
 SYSCALL(SYNOMTDAlloc)		/* 405 */
 #else
 SYSCALL(ni_syscall)
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 SYSCALL(SYNOCaselessStat64)            /* 406 */
 SYSCALL(SYNOCaselessLStat64)           /* 407 */
-SYSCALL(SYNOCaselessStat)              /* 408 */
-SYSCALL(SYNOCaselessLStat)             /* 409 */
 #else
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
-SYSCALL(ni_syscall)
-SYSCALL(ni_syscall)
-#endif
-#ifdef MY_ABC_HERE
+#endif /* SYNO_UNICODE_STAT */
+SYSCALL(ni_syscall)                    /* 408 */
+SYSCALL(ni_syscall)                    /* 409 */
+#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
 SYSCALL(SYNOEcryptName)		/* 410 */
 SYSCALL(SYNODecryptName)	/* 411 */
 #else
 SYSCALL(ni_syscall)			/* 410 */
 SYSCALL(ni_syscall)
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_SYNO_ACL
 SYSCALL(SYNOACLCheckPerm)		/* 412 */
 SYSCALL(SYNOACLIsSupport)		/* 413 */
 SYSCALL(SYNOACLGetPerm)		    /* 414 */
@@ -457,21 +455,18 @@ SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 #endif
 SYSCALL(ni_syscall)
-#ifdef MY_ABC_HERE
-SYSCALL(SYNOStat)  			 /* 416 */
-SYSCALL(SYNOFStat)  		 /* 417 */
-SYSCALL(SYNOLStat)  		 /* 418 */
+SYSCALL(ni_syscall)          /* 416 */
+SYSCALL(ni_syscall)          /* 417 */
+SYSCALL(ni_syscall)          /* 418 */
+#ifdef SYNO_STAT
 SYSCALL(SYNOStat64)             /* 419 */
 SYSCALL(SYNOFStat64)            /* 420 */
 SYSCALL(SYNOLStat64)            /* 421 */
 #else
-SYSCALL(ni_syscall)          /* 416 */
-SYSCALL(ni_syscall)          /* 417 */
-SYSCALL(ni_syscall)          /* 418 */
 SYSCALL(ni_syscall)			 /* 419 */
 SYSCALL(ni_syscall)			 /* 420 */
 SYSCALL(ni_syscall)			 /* 421 */
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_STAT */
 #ifdef CONFIG_SYNO_NOTIFY
 SYSCALL(SYNONotifyInit) /* 422 */
 SYSCALL(SYNONotifyAddWatch) /* 423 */
@@ -485,7 +480,7 @@ SYSCALL(ni_syscall) /* 424 */
 SYSCALL(ni_syscall) /* 425 */
 SYSCALL(ni_syscall) /* 426 */
 #endif /* CONFIG_SYNO_NOTIFY */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
 SYSCALL(SYNOArchiveOverwrite) /* 427 */
 #else
 SYSCALL(ni_syscall)			/* 427 */

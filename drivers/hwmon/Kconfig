@@ -229,6 +229,20 @@ config SENSORS_ARMADA
 	  This driver provides support for the Marvell's Armada XP SoC thermal
 	  Controller, which provides onchip temperature sensors.
 
+config ERRATA_FE_982377
+	bool "Marvell Errata: Internal CPU Temperature Read Out Stability"
+	depends on SENSORS_ARMADA && SYNO_ARMADA_ARCH_V2
+	default y
+	help
+	  This option enables the workaround for the FE_982377 erratum.
+	  The device incorporates a Thermal Management engine for monitoring
+	  the die temperature. The temperature reading accuracy + / - 2 C.
+	  However, due to this erratum, The temperature read out of the
+	  <ThermTempOut> field (bits[27:19]) in the Thermal Manager Control and
+	  Status Register (offset:0x000184C4) might be inaccurate.
+	  This inaccuracy can occur because there is a synchronization
+	  malfunction between the temperature sensor and the read out register.
+
 config SENSORS_ASC7621
 	tristate "Andigilog aSC7621"
 	depends on I2C

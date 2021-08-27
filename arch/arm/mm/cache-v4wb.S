@@ -253,6 +253,10 @@ ENTRY(v4wb_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(v4wb_dma_unmap_area)
 
+#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+	.globl	v4wb_flush_kern_cache_louis
+	.equ	v4wb_flush_kern_cache_louis, v4wb_flush_kern_cache_all
+#endif
 	__INITDATA
 
 	@ define struct cpu_cache_fns (see <asm/cacheflush.h> and proc-macros.S)

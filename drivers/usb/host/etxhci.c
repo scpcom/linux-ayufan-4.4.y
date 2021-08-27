@@ -496,11 +496,11 @@ static void xhci_event_ring_work(unsigned long arg)
 }
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 extern int gSynoFactoryUSBFastReset;
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
 #endif
@@ -516,13 +516,13 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 
 	xhci_dbg(xhci, "Finished xhci_run for USB3 roothub\n");
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
@@ -677,7 +677,7 @@ void etxhci_stop(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
@@ -1138,6 +1138,39 @@ static int xhci_check_maxpacket(struct xhci_hcd *xhci, unsigned int slot_id,
 	return ret;
 }
 
+void xhci_bulk_xfer_work(struct work_struct *work)
+{
+	struct xhci_hcd *xhci = container_of(work, struct xhci_hcd, bulk_xfer_work);
+	struct usb_hcd *hcd;
+	struct urb *urb;
+	struct urb_priv	*urb_priv;
+	unsigned int slot_id, ep_index;
+	unsigned long flags;
+	int ret = 0;
+
+	spin_lock_irqsave(&xhci->lock, flags);
+	if (!list_empty(&xhci->bulk_xfer_list)) {
+		urb_priv = list_entry(xhci->bulk_xfer_list.next, struct urb_priv, list);
+		list_del_init(&urb_priv->list);
+		urb = urb_priv->urb;
+		if (urb && urb->dev && urb->dev->slot_id) {	
+			slot_id = urb->dev->slot_id;
+			ep_index = etxhci_get_endpoint_index(&urb->ep->desc);
+			ret = etxhci_queue_bulk_tx(xhci, GFP_ATOMIC, urb, slot_id, ep_index);
+			if (ret) {
+				xhci->bulk_xfer_count--;
+				hcd = bus_to_hcd(urb->dev->bus);
+				usb_hcd_unlink_urb_from_ep(hcd, urb);
+				spin_unlock_irqrestore(&xhci->lock, flags);
+				usb_hcd_giveback_urb(hcd, urb, -EPROTO);
+				etxhci_urb_free_priv(xhci, urb_priv);
+				spin_lock_irqsave(&xhci->lock, flags);
+			}
+		}
+	}
+	spin_unlock_irqrestore(&xhci->lock, flags);
+}
+
 /*
  * non-error returns are a promise to giveback() the urb later
  * we drop ownership so next owner (or urb unlink) can get it
@@ -1232,9 +1265,20 @@ int etxhci_urb_enqueue(struct usb_hcd *hcd, struct urb *urb, gfp_t mem_flags)
 					"not having streams.\n");
 			ret = -EINVAL;
 		} else {
+			if (xhci->devs[slot_id]->defer_queue_bulk_td) {
+				urb_priv->urb = urb;
+				INIT_LIST_HEAD(&urb_priv->list);
+				urb_priv->state = XHCI_URB_IN_QUEUED;
+				list_add_tail(&urb_priv->list, &xhci->bulk_xfer_list);
+				xhci->bulk_xfer_count++;
+				if (xhci->bulk_xfer_count == 1) {
+					queue_work(xhci->bulk_xfer_wq, &xhci->bulk_xfer_work);
+				}
+			} else {
 				ret = etxhci_queue_bulk_tx(xhci, GFP_ATOMIC, urb,
 						slot_id, ep_index);
 			}
+		}
 		if (ret)
 			goto free_priv;
 		spin_unlock_irqrestore(&xhci->lock, flags);
@@ -1354,6 +1398,7 @@ int etxhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 	unsigned int ep_index;
 	struct xhci_ring *ep_ring;
 	struct xhci_virt_ep *ep;
+	struct list_head *tmp;
 
 	xhci = hcd_to_xhci(hcd);
 	spin_lock_irqsave(&xhci->lock, flags);
@@ -1361,6 +1406,22 @@ int etxhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 	ret = usb_hcd_check_unlink_urb(hcd, urb, status);
 	if (ret || !urb->hcpriv)
 		goto done;
+
+	if (xhci->devs[urb->dev->slot_id]->defer_queue_bulk_td) {
+		list_for_each(tmp, &xhci->bulk_xfer_list) {
+			urb_priv = list_entry(tmp, struct urb_priv, list);
+			if (urb_priv->urb == urb) {
+				list_del_init(&urb_priv->list);
+				xhci->bulk_xfer_count--;
+				usb_hcd_unlink_urb_from_ep(hcd, urb);
+				spin_unlock_irqrestore(&xhci->lock, flags);
+				usb_hcd_giveback_urb(hcd, urb, status);
+				etxhci_urb_free_priv(xhci, urb_priv);
+				return 0;
+			}
+		}
+	}
+
 	temp = xhci_readl(xhci, &xhci->op_regs->status);
 	if (temp == 0xffffffff || (xhci->xhc_state & XHCI_STATE_HALTED)) {
 		xhci_dbg(xhci, "HW died, freeing TD.\n");
@@ -3335,7 +3396,11 @@ int etxhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 {
 	struct xhci_hcd		*xhci;
 	struct device		*dev = hcd->self.controller;
+#ifdef CONFIG_SYNO_ALPINE
+	int			retval = -ENOMEM;
+#else
 	int			retval;
+#endif
 	u32			temp;
 
 	/* Accept arbitrarily long scatter-gather lists */
@@ -3364,12 +3429,24 @@ int etxhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 		 */
 		xhci = hcd_to_xhci(hcd);
 		temp = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
+#ifdef CONFIG_SYNO_ALPINE
+		if (HCC_64BIT_ADDR(temp) &&
+				!dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64))) {
+			xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
+			dma_set_coherent_mask(hcd->self.controller, DMA_BIT_MASK(64));
+		} else {
+			if (dma_set_mask(hcd->self.controller, DMA_BIT_MASK(32)))
+				goto error;
+			dma_set_coherent_mask(hcd->self.controller, DMA_BIT_MASK(32));
+		}
+#else
 		if (HCC_64BIT_ADDR(temp)) {
 			xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
 			dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64));
 		} else {
 			dma_set_mask(hcd->self.controller, DMA_BIT_MASK(32));
 		}
+#endif
 
 		hcd->chip_id = xhci->main_hcd->chip_id;
 		return 0;
@@ -3405,12 +3482,24 @@ int etxhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 	xhci_dbg(xhci, "Reset complete\n");
 
 	temp = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
+#ifdef CONFIG_SYNO_ALPINE
+	if (HCC_64BIT_ADDR(temp) &&
+			!dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64))) {
+		xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
+		dma_set_coherent_mask(hcd->self.controller, DMA_BIT_MASK(64));
+	} else {
+		if (dma_set_mask(hcd->self.controller, DMA_BIT_MASK(32)))
+			goto error;
+		dma_set_coherent_mask(hcd->self.controller, DMA_BIT_MASK(32));
+	}
+#else
 	if (HCC_64BIT_ADDR(temp)) {
 		xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
 		dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64));
 	} else {
 		dma_set_mask(hcd->self.controller, DMA_BIT_MASK(32));
 	}
+#endif
 
 	xhci_dbg(xhci, "Calling HCD init\n");
 	/* Initialize HCD and host controller data structures. */

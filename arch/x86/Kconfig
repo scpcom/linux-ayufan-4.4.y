@@ -101,10 +101,6 @@ config SYNO_AVOTON
 	bool "Intel-Avoton"
 	depends on X86_64
 
-config SYNO_KVMX64
-	bool "KVM X64 Virtual machine"
-	depends on X86_64
-
 config OUTPUT_FORMAT
 	string
 	default "elf32-i386" if X86_32

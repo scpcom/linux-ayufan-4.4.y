@@ -69,7 +69,6 @@
 # include <asm/param.h>
 # include <asm/io.h>
 # include <mach/irqs.h>
-//# include <asm/arch/regs-irq.h>
 #endif
 
 /** The OS page size */

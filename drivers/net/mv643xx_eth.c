@@ -62,7 +62,7 @@
 #include <linux/slab.h>
 #include <asm/system.h>
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_MTU_WA
 #define ETH_CSUM_MAX_BYTE_COUNT 1600
 #endif
 
@@ -435,8 +435,7 @@ struct mv643xx_eth_private {
 	struct tx_queue txq[8];
 };
 
-
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_MTU_WA
 /* Tailgate and Kirwood have only 2K TX FIFO, so disable NETIF_F_IP_CSUM when mtu bigger than 1600 */
 static void mv_set_features(struct net_device *dev)
 {
@@ -2458,7 +2457,7 @@ static int mv643xx_eth_change_mtu(struct net_device *dev, int new_mtu)
 	if (!netif_running(dev))
 		return 0;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_MTU_WA
 	mv_set_features(dev);
 #endif
 
@@ -2474,7 +2473,7 @@ static int mv643xx_eth_change_mtu(struct net_device *dev, int new_mtu)
 			   "fatal error on re-opening device after MTU change\n");
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_MTU_WA
 	/* phy reset is slower let it is easy to loop in scemd. So we sleep 3 sec. */
 	msleep(3000);
 #endif
@@ -2938,7 +2937,7 @@ static int mv643xx_eth_probe(struct platform_device *pdev)
 		NETIF_F_RXCSUM | NETIF_F_LRO;
 	dev->features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_RXCSUM;
 	dev->vlan_features = NETIF_F_SG | NETIF_F_IP_CSUM;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_MTU_WA
 	if(dev->mtu > ETH_CSUM_MAX_BYTE_COUNT) {
 		dev->features &= ~NETIF_F_IP_CSUM;
 		dev->vlan_features &= ~NETIF_F_IP_CSUM;

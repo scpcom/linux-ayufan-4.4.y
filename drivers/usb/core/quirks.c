@@ -204,7 +204,7 @@ void usb_detect_quirks(struct usb_device *udev)
 		dev_dbg(&udev->dev, "USB quirks for this device: %x\n",
 			udev->quirks);
 
-#ifdef CONFIG_SYNO_ARMADA
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	/*
 	 * Set USB_QUIRK_RESET_RESUME permanently
 	 * when power management is enabled.

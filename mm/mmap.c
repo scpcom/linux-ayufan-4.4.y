@@ -1593,12 +1593,24 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 				vma_tmp = rb_entry(rb_node,
 						struct vm_area_struct, vm_rb);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
+     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
 				/* Take into account a wrap-around of the
 				** vm_end field to 0x0. e.g. vm_start =
 				** 0xFFFF0000 size PAGE_SIZE.
 				*/
 				if ((vma_tmp->vm_end - 1) >= addr) {
+#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_64KB)
+	/* Take into account a wrap-around of the vm_end field to 0x0.
+	** This happends on last arm page with 64KB page sizes.
+	** vm_start =0xFFFF0000, size 64KB.
+	**
+	** This fix is apparently enough, but should be revisited.
+	*/
+				if ((vma_tmp->vm_end - 1) >= addr) {
+					WARN(!(vma_tmp->vm_end),
+						"find vma found the last page,"
+						"ending in address 0x0");
 #else
 				if (vma_tmp->vm_end > addr) {
 #endif
@@ -1903,6 +1915,9 @@ static void unmap_region(struct mm_struct *mm,
 #if defined(CONFIG_SYNO_COMCERTO)
 	free_pgtables(&tlb, vma, prev ? prev->vm_end : FIRST_USER_ADDRESS,
 				 next ? next->vm_start : mm->task_size);
+#elif defined(CONFIG_SYNO_ALPINE_FIX_USB_HANG)
+	free_pgtables(&tlb, vma, prev ? prev->vm_end : FIRST_USER_ADDRESS,
+				 next ? next->vm_start : USER_PGTABLES_CEILING);
 #else
 	free_pgtables(&tlb, vma, prev ? prev->vm_end : FIRST_USER_ADDRESS,
 				 next ? next->vm_start : 0);
@@ -2283,6 +2298,8 @@ void exit_mmap(struct mm_struct *mm)
 
 #if defined(CONFIG_SYNO_COMCERTO)
 	free_pgtables(&tlb, vma, FIRST_USER_ADDRESS, mm->task_size);
+#elif defined(CONFIG_SYNO_ALPINE_FIX_USB_HANG)
+	free_pgtables(&tlb, vma, FIRST_USER_ADDRESS, USER_PGTABLES_CEILING);
 #else
 	free_pgtables(&tlb, vma, FIRST_USER_ADDRESS, 0);
 #endif

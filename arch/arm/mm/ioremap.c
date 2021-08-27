@@ -45,6 +45,19 @@
  */
 #define VM_ARM_SECTION_MAPPING	0x80000000
 
+#ifdef CONFIG_SYNO_ALPINE
+#ifdef CONFIG_PCI
+int pci_ioremap_io(unsigned int offset, phys_addr_t phys_addr)
+{
+	BUG_ON(offset + SZ_64K > IO_SPACE_LIMIT);
+	return ioremap_page_range(PCI_IO_VIRT_BASE + offset,
+		   PCI_IO_VIRT_BASE + offset + SZ_64K,
+		   phys_addr,
+		   __pgprot(get_mem_type(MT_DEVICE)->prot_pte));
+}
+EXPORT_SYMBOL_GPL(pci_ioremap_io);
+#endif
+#endif
 int ioremap_page(unsigned long virt, unsigned long phys,
 		 const struct mem_type *mtype)
 {
@@ -67,7 +80,7 @@ void __check_kvm_seq(struct mm_struct *mm)
 	} while (seq != init_mm.context.kvm_seq);
 }
 
-#ifndef CONFIG_SMP
+#if !defined(CONFIG_SMP) && (!defined(CONFIG_SYNO_ALPINE) || (defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_ARM_LPAE)))
 /*
  * Section support is unsafe on SMP - If you iounmap and ioremap a region,
  * the other CPUs will not see this change until their next context switch.
@@ -198,11 +211,13 @@ void __iomem * __arm_ioremap_pfn_caller(unsigned long pfn,
 	unsigned long addr;
  	struct vm_struct * area;
 
+#if (defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_ARM_LPAE)) || !defined(CONFIG_SYNO_ALPINE)
 	/*
 	 * High mappings must be supersection aligned
 	 */
 	if (pfn >= 0x100000 && (__pfn_to_phys(pfn) & ~SUPERSECTION_MASK))
 		return NULL;
+#endif
 
 	/*
 	 * Don't allow RAM to be mapped - this causes problems with ARMv6+
@@ -224,7 +239,7 @@ void __iomem * __arm_ioremap_pfn_caller(unsigned long pfn,
  		return NULL;
  	addr = (unsigned long)area->addr;
 
-#ifndef CONFIG_SMP
+#if !defined(CONFIG_SMP) && ((defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_ARM_LPAE)) || !defined(CONFIG_SYNO_ALPINE))
 	if (DOMAIN_IO == 0 &&
 	    (((cpu_architecture() >= CPU_ARCH_ARMv6) && (get_cr() & CR_XP)) ||
 	       cpu_is_xsc3()) && pfn >= 0x100000 &&
@@ -316,7 +331,7 @@ __arm_ioremap_exec(unsigned long phys_addr, size_t size, bool cached)
 void __iounmap(volatile void __iomem *io_addr)
 {
 	void *addr = (void *)(PAGE_MASK & (unsigned long)io_addr);
-#ifndef CONFIG_SMP
+#if !defined(CONFIG_SMP) && ((defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_ARM_LPAE)) || !defined(CONFIG_SYNO_ALPINE))
 	struct vm_struct **p, *tmp;
 
 	/*

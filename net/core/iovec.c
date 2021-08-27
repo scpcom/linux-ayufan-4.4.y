@@ -51,6 +51,7 @@ int verify_iovec(struct msghdr *m, struct iovec *iov, struct sockaddr *address, 
 			if (err < 0)
 				return err;
 		}
+		if (m->msg_name)
 			m->msg_name = address;
 	} else {
 		m->msg_name = NULL;
@@ -151,6 +152,28 @@ int memcpy_toiovecend(const struct iovec *iov, unsigned char *kdata,
 	return 0;
 }
 EXPORT_SYMBOL(memcpy_toiovecend);
+
+#if defined(CONFIG_SYNO_ARMADA_V2) && !defined(SYNO_RECVFILE)
+/*
+ *	In kernel copy to iovec. Returns -EFAULT on error.
+ *
+ *	Note: this modifies the original iovec.
+ */
+void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len)
+{
+	while (len > 0) {
+		if (iov->iov_len) {
+			int copy = min_t(unsigned int, iov->iov_len, len);
+			memcpy(iov->iov_base, kdata, copy);
+			len -= copy;
+			kdata += copy;
+			iov->iov_base += copy;
+			iov->iov_len -= copy;
+		}
+		iov++;
+	}
+}
+#endif
 
 /*
  *	Copy iovec to kernel. Returns -EFAULT on error.

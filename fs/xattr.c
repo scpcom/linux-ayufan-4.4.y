@@ -29,9 +29,65 @@
  * Check permissions for extended attribute access.  This is a bit complicated
  * because different namespaces have very different rules.
  */
+#ifdef CONFIG_FS_SYNO_ACL
+static int
+xattr_permission(struct dentry *dentry, const char *name, int mask)
+#else
 static int
 xattr_permission(struct inode *inode, const char *name, int mask)
+#endif /* CONFIG_FS_SYNO_ACL */
 {
+#ifdef CONFIG_FS_SYNO_ACL
+	struct inode *inode = dentry->d_inode;
+	/**
+	 * For synoacl getxattr setxattr
+	 * getxattr: mask should be MAY_READ
+	 * setxattr: mask should be MAY_WRITE
+	 * removexattr: mask should be MAY_WRITE
+	 * Need to use synoacl_check_xattr_perm to check permission
+	 */
+	if (!strcmp(name, SYNO_ACL_XATTR_ACCESS)) {
+		if (MAY_WRITE == mask || MAY_WRITE_PERMISSION == mask) {
+			return synoacl_check_xattr_perm(name, dentry, MAY_WRITE_PERMISSION);
+		} else if (MAY_READ == mask || MAY_READ_PERMISSION == mask) {
+			return synoacl_check_xattr_perm(name, dentry, MAY_READ_PERMISSION);
+		} else {
+			return -EPERM;
+		}
+	}
+
+	/**
+	 * getxattr for inherit ACL;
+	 * The mask should be MAY_READ
+	 * Need to check the MAY_READ_PERMISSION
+	 */
+	if (MAY_READ == mask) {
+		if (!strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
+			if (!IS_SYNOACL(dentry)) {
+				return -EOPNOTSUPP;
+			}
+			return synoacl_op_perm(dentry, MAY_READ_PERMISSION);
+		}
+		if (!strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY)) {
+			return synoacl_op_perm(dentry, MAY_READ_PERMISSION);
+		}
+	}
+
+	/**
+	 * MAC EA need add read/write attribute permission
+	 */
+	if (IS_SYNOACL(dentry) &&
+	    (!strncmp(name, SYNO_XATTR_EA_PREFIX, SYNO_XATTR_EA_PREFIX_LEN) ||
+	     !strncmp(name, SYNO_XATTR_NETATALK_PREFIX, SYNO_XATTR_NETATALK_PREFIX_LEN))) {
+		if (MAY_READ & mask) {
+			mask |= MAY_READ_ATTR;
+		}
+		if (MAY_WRITE & mask) {
+			mask |= MAY_WRITE_ATTR;
+		}
+		return synoacl_op_perm(dentry, mask);
+	}
+#endif /* CONFIG_FS_SYNO_ACL */
 	/*
 	 * We can never set or remove an extended attribute on a read-only
 	 * filesystem  or on an immutable / append-only inode.
@@ -71,6 +127,13 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 			return -EPERM;
 	}
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_SYNOACL(dentry)) {
+		//ACL file but not the syno key.
+		//still need to check mask permission with ACL
+		return synoacl_op_perm(dentry, mask);
+	} else
+#endif /* CONFIG_FS_SYNO_ACL */
 	return inode_permission(inode, mask);
 }
 
@@ -101,11 +164,6 @@ int __vfs_setxattr_noperm(struct dentry *dentry, const char *name,
 	if (issec)
 		inode->i_flags &= ~S_NOSEC;
 	if (inode->i_op->setxattr) {
-#ifdef CONFIG_FS_SYNO_ACL
-		if (0 > (error = synoacl_check_xattr_perm(name, dentry, MAY_WRITE_PERMISSION))) {
-			return error;
-		}
-#endif
 		error = inode->i_op->setxattr(dentry, name, value, size, flags);
 		if (!error) {
 			fsnotify_xattr(dentry);
@@ -122,9 +180,6 @@ int __vfs_setxattr_noperm(struct dentry *dentry, const char *name,
 
 	return error;
 }
-#ifdef CONFIG_FS_SYNO_ACL
-EXPORT_SYMBOL(__vfs_setxattr_noperm);
-#endif
 
 int
 vfs_setxattr(struct dentry *dentry, const char *name, const void *value,
@@ -133,7 +188,11 @@ vfs_setxattr(struct dentry *dentry, const char *name, const void *value,
 	struct inode *inode = dentry->d_inode;
 	int error;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	error = xattr_permission(dentry, name, MAY_WRITE);
+#else
 	error = xattr_permission(inode, name, MAY_WRITE);
+#endif /* CONFIG_FS_SYNO_ACL */
 	if (error)
 		return error;
 
@@ -149,6 +208,24 @@ out:
 	return error;
 }
 EXPORT_SYMBOL_GPL(vfs_setxattr);
+#ifdef CONFIG_FS_SYNO_ACL
+int
+vfs_setxattr_nolock(struct dentry *dentry, const char *name, const void *value,
+		size_t size, int flags)
+{
+	int error;
+	if (error = xattr_permission(dentry, name, MAY_WRITE)) {
+		goto out;
+	}
+	if (error = security_inode_setxattr(dentry, name, value, size, flags)) {
+		goto out;
+	}
+	error = __vfs_setxattr_noperm(dentry, name, value, size, flags);
+out:
+	return error;
+}
+EXPORT_SYMBOL(vfs_setxattr_nolock);
+#endif /* CONFIG_FS_SYNO_ACL */
 
 ssize_t
 xattr_getsecurity(struct inode *inode, const char *name, void *value,
@@ -193,7 +270,11 @@ vfs_getxattr_alloc(struct dentry *dentry, const char *name, char **xattr_value,
 	char *value = *xattr_value;
 	int error;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	error = xattr_permission(dentry, name, MAY_READ);
+#else
 	error = xattr_permission(inode, name, MAY_READ);
+#endif /* CONFIG_FS_SYNO_ACL */
 	if (error)
 		return error;
 
@@ -241,7 +322,11 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 	struct inode *inode = dentry->d_inode;
 	int error;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	error = xattr_permission(dentry, name, MAY_READ);
+#else
 	error = xattr_permission(inode, name, MAY_READ);
+#endif /* CONFIG_FS_SYNO_ACL */
 	if (error)
 		return error;
 
@@ -249,28 +334,15 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 	if (error)
 		return error;
 #ifdef CONFIG_FS_SYNO_ACL
-	if (name && (!strcmp(name, SYNO_ACL_XATTR_INHERIT) || !strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY))) {
-		int error = 0;
-		int cmd = SYNO_ACL_INHERITED;
-
+	if (name) {
 		if (!strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
-			if (!IS_SYNOACL(dentry)) {
-				return -EOPNOTSUPP;
-			}
-			cmd = SYNO_ACL_INHERITED;
+			return synoacl_op_xattr_get(dentry, SYNO_ACL_INHERITED, value, size);
 		} else if (!strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY)) {
 			//We should return possible inherited ACL even file is in linux mode.
-			cmd = SYNO_ACL_PSEUDO_INHERIT_ONLY;
+			return synoacl_op_xattr_get(dentry, SYNO_ACL_PSEUDO_INHERIT_ONLY, value, size);
 		}
-
-		error = synoacl_op_perm(dentry, MAY_READ_PERMISSION);
-		if (error) {
-			return error;
-		}
-
-		return synoacl_op_xattr_get(dentry, cmd, value, size);
 	}
-#endif //CONFIG_FS_SYNO_ACL
+#endif /* CONFIG_FS_SYNO_ACL */
 	if (!strncmp(name, XATTR_SECURITY_PREFIX,
 				XATTR_SECURITY_PREFIX_LEN)) {
 		const char *suffix = name + XATTR_SECURITY_PREFIX_LEN;
@@ -285,12 +357,6 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 	}
 nolsm:
 	if (inode->i_op->getxattr) {
-
-#ifdef CONFIG_FS_SYNO_ACL
-		if (0 > (error = synoacl_check_xattr_perm(name, dentry, MAY_READ_PERMISSION))) {
-			return error;
-		}
-#endif
 		error = inode->i_op->getxattr(dentry, name, value, size);
 	}
 	else {
@@ -330,7 +396,11 @@ vfs_removexattr(struct dentry *dentry, const char *name)
 	if (!inode->i_op->removexattr)
 		return -EOPNOTSUPP;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	error = xattr_permission(dentry, name, MAY_WRITE);
+#else
 	error = xattr_permission(inode, name, MAY_WRITE);
+#endif /* CONFIG_FS_SYNO_ACL */
 	if (error)
 		return error;
 
@@ -338,11 +408,6 @@ vfs_removexattr(struct dentry *dentry, const char *name)
 	if (error)
 		return error;
 
-#ifdef CONFIG_FS_SYNO_ACL
-	if (0 > (error = synoacl_check_xattr_perm(name, dentry, MAY_WRITE_PERMISSION))) {
-		return error;
-	}
-#endif
 	mutex_lock(&inode->i_mutex);
 	error = inode->i_op->removexattr(dentry, name);
 	mutex_unlock(&inode->i_mutex);

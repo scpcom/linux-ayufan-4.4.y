@@ -122,6 +122,14 @@ enum {
 #define RTM_GETDCB RTM_GETDCB
 	RTM_SETDCB,
 #define RTM_SETDCB RTM_SETDCB
+#if defined(CONFIG_SYNO_COMCERTO)
+       RTM_NEW4RD = 80,
+#define RTM_NEW4RD      RTM_NEW4RD
+       RTM_DEL4RD,
+#define RTM_DEL4RD      RTM_DEL4RD
+       RTM_GET4RD,
+#define RTM_GET4RD      RTM_GET4RD
+#endif
 
 	__RTM_MAX,
 #define RTM_MAX		(((__RTM_MAX + 3) & ~3) - 1)
@@ -745,6 +753,9 @@ __rta_reserve(struct sk_buff *skb, int attrtype, int attrlen)
    	__rta_reserve(skb, attrtype, attrlen); })
 
 extern void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change);
+#if defined(CONFIG_SYNO_COMCERTO)
+extern void __rtmsg_ifinfo(int type, struct net_device *dev, unsigned change, gfp_t flags);
+#endif
 
 /* RTNL is used as a global lock for all changes to network configuration  */
 extern void rtnl_lock(void);

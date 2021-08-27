@@ -447,10 +447,39 @@ static unsigned int mem_serial_in(struct uart_port *p, int offset)
 	return readb(p->membase + offset);
 }
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+void serial8250_clear_and_reinit_fifos(struct uart_8250_port *p);
+
+void dw8250_force_idle(struct uart_port *p)
+{
+	struct uart_8250_port *up = container_of(p, struct uart_8250_port, port);
+
+	serial8250_clear_and_reinit_fifos(up);
+	(void)p->serial_in(p, UART_RX);
+}
+#endif
+
 static void mem_serial_out(struct uart_port *p, int offset, int value)
 {
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+	int offset1 = map_8250_out_reg(p, offset) << p->regshift;
+	writeb(value, p->membase + offset1);
+
+	/* Make sure LCR write wasn't ignored */
+	if (offset == UART_LCR) {
+		int tries = 1000;
+		while (tries--) {
+			if (value == p->serial_in(p, UART_LCR))
+				return;
+			dw8250_force_idle(p);
+			writeb(value, p->membase + offset1);
+		}
+		dev_err(p->dev, "Couldn't set LCR to %d\n", value);
+	}
+#else
 	offset = map_8250_out_reg(p, offset) << p->regshift;
 	writeb(value, p->membase + offset);
+#endif
 }
 
 static void mem32_serial_out(struct uart_port *p, int offset, int value)
@@ -477,7 +506,7 @@ static void au_serial_out(struct uart_port *p, int offset, int value)
 	__raw_writel(value, p->membase + offset);
 }
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
 /* Save the LCR value so it can be re-written when a Busy Detect IRQ occurs. */
 static inline void dwapb_save_out_value(struct uart_port *p, int offset,
                                        int value)
@@ -500,7 +529,7 @@ static void dwapb_serial_out(struct uart_port *p, int offset, int value)
 {
        int save_offset = offset;
        offset = map_8250_out_reg(p, offset) << p->regshift;
-#if defined(CONFIG_PLAT_ARMADA) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(CONFIG_PLAT_ARMADA)  || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
        /* If we are accessing DLH (0x4), DLL (0x0), LCR(0xC) or 0x1C
        ** we need to make sure that the busy bit is cleared in USR register.
        */
@@ -551,7 +580,7 @@ static void set_io_from_upio(struct uart_port *p)
 		break;
 
 	case UPIO_RM9000:
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
 		p->serial_in = mem_serial_in;
 		p->serial_out = dwapb_serial_out;
 		break;
@@ -691,6 +720,17 @@ static void serial8250_clear_fifos(struct uart_8250_port *p)
 		serial_outp(p, UART_FCR, 0);
 	}
 }
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+void serial8250_clear_and_reinit_fifos(struct uart_8250_port *p)
+{
+         unsigned char fcr;
+
+         serial8250_clear_fifos(p);
+         fcr = uart_config[p->port.type].fcr;
+         serial_outp(p, UART_FCR, fcr);
+}
+#endif
 
 /*
  * IER sleep support.  UARTs which have EFRs need the "extended
@@ -1122,7 +1162,7 @@ static void autoconfig_16550a(struct uart_8250_port *up)
 			 */
 			DEBUG_AUTOCONF("Xscale ");
 			up->port.type = PORT_XSCALE;
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
 			up->capabilities |= UART_CAP_UUE;
 #else
 			up->capabilities |= UART_CAP_UUE | UART_CAP_RTOIE;
@@ -1825,16 +1865,14 @@ static irqreturn_t serial8250_interrupt(int irq, void *dev_id)
 	do {
 		struct uart_8250_port *up;
 		struct uart_port *port;
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
 		unsigned int iir;
 #endif
 
 		up = list_entry(l, struct uart_8250_port, list);
 		port = &up->port;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
-#if defined(CONFIG_ARCH_ARMADA370) || defined(CONFIG_ARCH_ARMADA_XP) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
-
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
 		iir = serial_in(up, UART_IIR);
 		if (!(iir & UART_IIR_NO_INT)) {
 			serial8250_handle_port(up);
@@ -1850,13 +1888,15 @@ static irqreturn_t serial8250_interrupt(int irq, void *dev_id)
                          * the UART status register (USR) and the LCR re-written. */
                         unsigned int status;
                         status = *(volatile u32 *)up->port.private_data;
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+			/* serial_out(up, UART_LCR, up->lcr); */
+#else			
                         serial_out(up, UART_LCR, up->lcr);
-
+#endif
                         handled = 1;
                         end = NULL;
 
                 }
-#endif
 		else if (end == NULL)
                         end = l;
 #else
@@ -2580,11 +2620,17 @@ serial8250_do_set_termios(struct uart_port *port, struct ktermios *termios,
 	 * have sufficient FIFO entries for the latency of the remote
 	 * UART to respond.  IOW, at least 32 bytes of FIFO.
 	 */
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+	up->mcr &= ~UART_MCR_AFE;
+        if (termios->c_cflag & CRTSCTS)
+               up->mcr |= UART_MCR_AFE;
+#else
 	if (up->capabilities & UART_CAP_AFE && up->port.fifosize >= 32) {
 		up->mcr &= ~UART_MCR_AFE;
 		if (termios->c_cflag & CRTSCTS)
 			up->mcr |= UART_MCR_AFE;
 	}
+#endif
 
 	/*
 	 * Ok, we're now changing the port state.  Do it with

@@ -30,6 +30,8 @@
 #include <linux/gpio.h>
 #include <linux/synobios.h>
 #include <linux/export.h>
+#include <mach/gpio.h>
+#include <asm/io.h>
 
 #define GPIO_UNDEF				0xFF
 
@@ -44,7 +46,7 @@
 #define SYNO_LED_ON			1
 #define SYNO_LED_BLINKING	2
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_HW_VERSION
 extern char gszSynoHWVersion[];
 #endif
 
@@ -349,7 +351,7 @@ unsigned char SYNOComcerto2kIsBoardNeedPowerUpHDD(u32 disk_id) {
 	if(0 == strncmp(gszSynoHWVersion, HW_DS414jv10, strlen(HW_DS414jv10))) {
 	    if ( 4 >= disk_id )
 			ret = 1;
-	} else if(0 == strncmp(gszSynoHWVersion, HW_DS214airv10, strlen(HW_DS214airv10))){
+	} else if(0 == strncmp(gszSynoHWVersion, HW_DS215airv10, strlen(HW_DS215airv10))){
 	    if ( 2 >= disk_id )
 			ret = 1;
 	}
@@ -421,7 +423,8 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 		gpio_set_value(act_led, 0);
 		gpio_set_value(fail_led, 1);
 	}
-	else if ( DISK_LED_GREEN_SOLID == status )
+	else if ( DISK_LED_GREEN_SOLID == status ||
+			  DISK_LED_GREEN_BLINK == status)
 	{
 		gpio_set_value(fail_led, 0);
 		gpio_set_value(act_led, 1);
@@ -461,6 +464,26 @@ int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 	return iRet;
 }
 
+void SYNO_GPIO_SET_FALLING_EDGE(int gpio)
+{
+	switch(gpio) {
+		case 0:
+			__raw_writel(0x1, COMCERTO_GPIO_INT_CFG_REG);
+			break;
+		default:
+			break;
+	}
+}
+void SYNO_GPIO_SET_RISING_EDGE(int gpio)
+{
+	switch(gpio) {
+		case 0:
+			__raw_writel(0x2, COMCERTO_GPIO_INT_CFG_REG);
+			break;
+		default:
+			break;
+	}
+}
 EXPORT_SYMBOL(SYNOComcerto2kIsBoardNeedPowerUpHDD);
 EXPORT_SYMBOL(SYNO_COMCERTO2K_GPIO_PIN);
 EXPORT_SYMBOL(SYNO_MASK_HDD_LED);
@@ -474,6 +497,8 @@ EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
 EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
 EXPORT_SYMBOL(SYNO_SOC_HDD_LED_SET);
+EXPORT_SYMBOL(SYNO_GPIO_SET_FALLING_EDGE);
+EXPORT_SYMBOL(SYNO_GPIO_SET_RISING_EDGE);
 
 /*
 DS414J GPIO config table
@@ -566,9 +591,9 @@ COMCERTO2K_414j_GPIO_init(SYNO_GPIO *global_gpio)
 }
 
 static void
-COMCERTO2K_214air_GPIO_init(SYNO_GPIO *global_gpio)
+COMCERTO2K_215air_GPIO_init(SYNO_GPIO *global_gpio)
 {
-	SYNO_GPIO gpio_ds214air = {
+	SYNO_GPIO gpio_ds215air = {
 		.hdd_detect = {
 			.hdd1_present_detect = GPIO_UNDEF,
 			.hdd2_present_detect = GPIO_UNDEF,
@@ -600,9 +625,9 @@ COMCERTO2K_214air_GPIO_init(SYNO_GPIO *global_gpio)
 			.model_id_3 = GPIO_UNDEF,
 		},
 		.fan		  = {
-			.fan_1 = 10,
-			.fan_2 = 11,
-			.fan_3 = 12,
+			.fan_1 = GPIO_UNDEF,
+			.fan_2 = GPIO_UNDEF,
+			.fan_3 = GPIO_UNDEF,
 			.fan_fail = 44,
 			.fan_fail_2 = GPIO_UNDEF,
 			.fan_fail_3 = GPIO_UNDEF,
@@ -628,7 +653,7 @@ COMCERTO2K_214air_GPIO_init(SYNO_GPIO *global_gpio)
 		},
 	};
 
-	*global_gpio = gpio_ds214air;
+	*global_gpio = gpio_ds215air;
 }
 static void
 COMCERTO2K_default_GPIO_init(SYNO_GPIO *global_gpio)
@@ -695,9 +720,9 @@ void synology_gpio_init(void)
 	if(0 == strncmp(gszSynoHWVersion, HW_DS414jv10, strlen(HW_DS414jv10))) {
 		COMCERTO2K_414j_GPIO_init(&generic_gpio);
 		printk("Synology %s GPIO Init\n", HW_DS414jv10);
-	} else if(0 == strncmp(gszSynoHWVersion, HW_DS214airv10, strlen(HW_DS214airv10))) {
-		COMCERTO2K_214air_GPIO_init(&generic_gpio);
-		printk("Synology %s GPIO Init\n", HW_DS214airv10);
+	} else if(0 == strncmp(gszSynoHWVersion, HW_DS215airv10, strlen(HW_DS215airv10))) {
+		COMCERTO2K_215air_GPIO_init(&generic_gpio);
+		printk("Synology %s GPIO Init\n", HW_DS215airv10);
 	} else {
 		COMCERTO2K_default_GPIO_init(&generic_gpio);
 		printk("Not supported hw version!\n");

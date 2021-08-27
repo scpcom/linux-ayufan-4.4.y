@@ -595,7 +595,7 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82801DB_12,
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82801EB_0,		quirk_ich4_lpc_acpi);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_ESB_1,		quirk_ich4_lpc_acpi);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_PCH_GPIO_CTRL
 static u32 gpiobase = 0;
 static u32 *writable_pin = NULL;
 static u32 SynoGpioCount = 0;
@@ -605,7 +605,7 @@ static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 2
 #else
 static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 46, 47, 49, 55, 57};
 #endif
-static u32 c206_writable_pin[] = {0, 5, 16, 20, 21, 22, 34, 38, 48, 52, 54, 69, 70, 71};
+static u32 c206_writable_pin[] = {0, 5, 16, 20, 21, 22, 34, 35, 38, 48, 52, 54, 69, 70, 71};
 static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36, 37, 45};
 
 u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
@@ -721,7 +721,7 @@ static void __devinit ich6_lpc_acpi_gpio(struct pci_dev *dev)
 			quirk_io_region(dev, region, 64,
 					PCI_BRIDGE_RESOURCES + 1, "ICH6 GPIO");
 	}
-#ifdef MY_DEF_HERE
+#ifdef SYNO_PCH_GPIO_CTRL
 	gpiobase = region & 0x0000FF80;
 	if (PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_C206 == dev->device) {
 		writable_pin = c206_writable_pin;
@@ -824,7 +824,7 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_ICH9_4, quirk_
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_ICH9_7, quirk_ich7_lpc);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_ICH9_8, quirk_ich7_lpc);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,   PCI_DEVICE_ID_INTEL_ICH10_1, quirk_ich7_lpc);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_PCH_GPIO_CTRL
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,   PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_C206, quirk_ich7_lpc);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,   PCI_DEVICE_ID_INTEL_LYNXPOINT_LPC_C226, quirk_ich7_lpc);
 #endif
@@ -2748,6 +2748,17 @@ static void __devinit quirk_msi_intx_disable_ati_bug(struct pci_dev *dev)
 		dev->dev_flags |= PCI_DEV_FLAGS_MSI_INTX_DISABLE_BUG;
 	pci_dev_put(p);
 }
+#ifdef CONFIG_SYNO_ALPINE
+DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_ANNAPURNA_LABS,
+			PCI_DEVICE_ID_AL_ETH,
+			quirk_msi_intx_disable_bug);
+DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_ANNAPURNA_LABS,
+			PCI_DEVICE_ID_AL_CRYPTO,
+			quirk_msi_intx_disable_bug);
+DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_ANNAPURNA_LABS,
+			PCI_DEVICE_ID_AL_RAID_DMA,
+			quirk_msi_intx_disable_bug);
+#endif
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_BROADCOM,
 			PCI_DEVICE_ID_TIGON3_5780,
 			quirk_msi_intx_disable_bug);
@@ -3091,6 +3102,9 @@ extern struct pci_fixup __end_pci_fixups_resume_early[];
 extern struct pci_fixup __start_pci_fixups_suspend[];
 extern struct pci_fixup __end_pci_fixups_suspend[];
 
+#ifdef CONFIG_SYNO_ALPINE
+static bool pci_apply_fixup_final_quirks;
+#endif /* CONFIG_SYNO_ALPINE */
 
 void pci_fixup_device(enum pci_fixup_pass pass, struct pci_dev *dev)
 {
@@ -3108,6 +3122,10 @@ void pci_fixup_device(enum pci_fixup_pass pass, struct pci_dev *dev)
 		break;
 
 	case pci_fixup_final:
+#ifdef CONFIG_SYNO_ALPINE
+		if (!pci_apply_fixup_final_quirks)
+			return;
+#endif /* CONFIG_SYNO_ALPINE */
 		start = __start_pci_fixups_final;
 		end = __end_pci_fixups_final;
 		break;
@@ -3150,6 +3168,9 @@ static int __init pci_apply_final_quirks(void)
 		printk(KERN_DEBUG "PCI: CLS %u bytes\n",
 		       pci_cache_line_size << 2);
 
+#ifdef CONFIG_SYNO_ALPINE
+	pci_apply_fixup_final_quirks = true;
+#endif /* CONFIG_SYNO_ALPINE */
 	for_each_pci_dev(dev) {
 		pci_fixup_device(pci_fixup_final, dev);
 		/*

@@ -86,6 +86,8 @@
 
 #define JEDEC_MFR(_jedec_id)	((_jedec_id) >> 16)
 
+#define DMA_ALIGN	64
+
 /****************************************************************************/
 
 struct m25p {
@@ -95,7 +97,9 @@ struct m25p {
 	u16			page_size;
 	u16			addr_width;
 	u8			erase_opcode;
-	u8			*command;
+	u8			*command __attribute__((aligned(64)));
+	u8			*value __attribute__((aligned(64)));
+	u8			*data __attribute__((aligned(64)));
 };
 
 static inline struct m25p *mtd_to_m25p(struct mtd_info *mtd)
@@ -111,11 +115,7 @@ int m25p80_write_then_read(struct spi_device *spi,
 	int			status;
 	struct spi_message	message;
 	struct spi_transfer	x[2];
-	u8			*local_buf;
-	u_char rx_data[8];
-	int len_to_tx = 0;
-	int len_tx_total = 0;
-	int len_tx_done = 0;
+	int len_to_tx = 0, i;
 
 	/* Use preallocated DMA-safe buffer.  We can't avoid copying here,
 	 * (as a pure convenience thing), but we can keep heap costs
@@ -128,22 +128,24 @@ int m25p80_write_then_read(struct spi_device *spi,
 	}
 
 	spi_message_init(&message);
+	message.is_dma_mapped = 1;
 	memset(x, 0, sizeof x);
 
 	len_to_tx = n_tx + n_rx;
 
-	x[0].len = len_to_tx;
+	x[0].len = n_tx;
 	x[0].tx_buf = txbuf;
-	x[0].rx_buf = &rx_data[0];
+	x[0].tx_dma = virt_to_aram(x[0].tx_buf);
 
 	spi_message_add_tail(&x[0], &message);
-
-	mutex_lock(&m25p80_lock);
+	x[1].len = n_rx;
+	x[1].rx_buf = rxbuf;
+	x[1].rx_dma = virt_to_aram(x[1].rx_buf);
+	spi_message_add_tail(&x[1], &message);
 
 	/* do the i/o */
+	mutex_lock(&m25p80_lock);
 	status = spi_sync(spi, &message);
-	if (status == 0)
-		memcpy(rxbuf, rx_data + n_tx, n_rx);
 
 	mutex_unlock(&m25p80_lock);
 
@@ -164,10 +166,17 @@ int m25p80_write_then_read(struct spi_device *spi,
 static int read_sr(struct m25p *flash)
 {
 	ssize_t retval;
-	u8 code = OPCODE_RDSR;
-	u8 val;
+	u8 *val __attribute__((aligned(64)));
+	u8 *code __attribute__((aligned(64)));
+	u8  val1;
 
-	retval = m25p80_write_then_read(flash->spi, &code, 1, &val, 1);
+	code = flash->command;
+	code[0] = OPCODE_RDSR;
+
+	val = flash->value;
+	val[0] = 0;
+
+	retval = m25p80_write_then_read(flash->spi, code, 1, val, 1);
 
 	if (retval < 0) {
 		dev_err(&flash->spi->dev, "error %d reading SR\n",
@@ -175,7 +184,9 @@ static int read_sr(struct m25p *flash)
 		return retval;
 	}
 
-	return val;
+	val1 = *val;
+
+	return val1;
 }
 
 /*
@@ -184,10 +195,25 @@ static int read_sr(struct m25p *flash)
  */
 static int write_sr(struct m25p *flash, u8 val)
 {
-	flash->command[0] = OPCODE_WRSR;
-	flash->command[1] = val;
+	u8 *code __attribute__((aligned(64)));
+	int retval;
+	struct spi_transfer     t ;
+	struct spi_message      m;
 
-	return spi_write(flash->spi, flash->command, 2);
+	spi_message_init(&m);
+	m.is_dma_mapped = 1;
+	memset(&t, 0, (sizeof t));
+
+	code = flash->command;
+	code[0] = OPCODE_WRSR;
+	code[1] = val;
+	t.tx_buf = code;
+	t.tx_dma = virt_to_aram(t.tx_buf);
+	t.len = 2;
+	spi_message_add_tail(&t, &m);
+	retval = spi_sync(flash->spi, &m);
+
+	return retval;
 }
 
 /*
@@ -196,9 +222,15 @@ static int write_sr(struct m25p *flash, u8 val)
  */
 static inline int write_enable(struct m25p *flash)
 {
-	u8	code = OPCODE_WREN;
+	u8 *code __attribute__((aligned(64)));
+	int retval;
 
-	return m25p80_write_then_read(flash->spi, &code, 1, NULL, 0);
+	code = flash->command;
+	code[0] = OPCODE_WREN;
+
+	retval = m25p80_write_then_read(flash->spi, code, 1, NULL, 0);
+
+	return retval;
 }
 
 /*
@@ -206,9 +238,15 @@ static inline int write_enable(struct m25p *flash)
  */
 static inline int write_disable(struct m25p *flash)
 {
-	u8	code = OPCODE_WRDI;
+	u8	*code __attribute__((aligned(64)));
+	int	retval;
+
+	code = flash->command;
+	code[0] = OPCODE_WRDI;
  
-	return m25p80_write_then_read(flash->spi, &code, 1, NULL, 0);
+	retval = m25p80_write_then_read(flash->spi, code, 1, NULL, 0);
+
+	return retval;
 }
 
 /*
@@ -216,15 +254,31 @@ static inline int write_disable(struct m25p *flash)
  */
 static inline int set_4byte(struct m25p *flash, u32 jedec_id, int enable)
 {
+
+	struct spi_transfer     t ;
+	struct spi_message      m;
+
+	spi_message_init(&m);
+	m.is_dma_mapped = 1;
+	memset(&t, 0, (sizeof t));
+
 	switch (JEDEC_MFR(jedec_id)) {
 		case CFI_MFR_MACRONIX:
 			flash->command[0] = enable ? OPCODE_EN4B : OPCODE_EX4B;
-		return spi_write(flash->spi, flash->command, 1);
+			t.tx_buf = flash->command;
+			t.tx_dma = virt_to_aram(t.tx_buf);
+			t.len = 1;
+			spi_message_add_tail(&t, &m);
+			return spi_sync(flash->spi, &m);
 		default:
 			/* Spansion style */
 			flash->command[0] = OPCODE_BRWR;
 			flash->command[1] = enable << 7;
-		return spi_write(flash->spi, flash->command, 2);
+			t.tx_buf = flash->command;
+			t.tx_dma = virt_to_aram(t.tx_buf);
+			t.len = 2;
+			spi_message_add_tail(&t, &m);
+			return spi_sync(flash->spi, &m);
 	}
 }
 
@@ -272,6 +326,14 @@ static int lock_chip(struct mtd_info *mtd, loff_t ofs, size_t len)
  */
 static int erase_chip(struct m25p *flash)
 {
+	u8 *code __attribute__((aligned(64)));
+	struct spi_transfer     t ;
+	struct spi_message      m;
+
+	spi_message_init(&m);
+	m.is_dma_mapped = 1;
+	memset(&t, 0, (sizeof t));
+
 	pr_debug("%s: %s %lldKiB\n", dev_name(&flash->spi->dev), __func__,
 			(long long)(flash->mtd.size >> 10));
 
@@ -283,9 +345,13 @@ static int erase_chip(struct m25p *flash)
 	write_enable(flash);
 
 	/* Set up command buffer. */
-	flash->command[0] = OPCODE_CHIP_ERASE;
-
-	spi_write(flash->spi, flash->command, 1);
+	code = flash->command;
+	code[0] = OPCODE_CHIP_ERASE;
+	t.tx_buf = code;
+	t.tx_dma = virt_to_aram(t.tx_buf);
+	t.len = 1;
+	spi_message_add_tail(&t, &m);
+	spi_sync(flash->spi, &m);
 
 	return 0;
 }
@@ -312,6 +378,14 @@ static int m25p_cmdsz(struct m25p *flash)
  */
 static int erase_sector(struct m25p *flash, u32 offset)
 {
+	u8 *code __attribute__((aligned(64)));
+	struct spi_transfer     t ;
+	struct spi_message      m;
+
+	spi_message_init(&m);
+	m.is_dma_mapped = 1;
+	memset(&t, 0, (sizeof t));
+
 	pr_debug("%s: %s %dKiB at 0x%08x cmdsz %d\n", dev_name(&flash->spi->dev),
 			__func__, flash->mtd.erasesize / 1024, offset, m25p_cmdsz(flash));
 
@@ -323,10 +397,16 @@ static int erase_sector(struct m25p *flash, u32 offset)
 	write_enable(flash);
 
 	/* Set up command buffer. */
-	flash->command[0] = flash->erase_opcode;
-	m25p_addr2cmd(flash, offset, flash->command);
+	code = flash->command;
+	code[0] = flash->erase_opcode;
+	m25p_addr2cmd(flash, offset, code);
 
-	spi_write(flash->spi, flash->command, m25p_cmdsz(flash));
+	t.tx_buf = code;
+	t.tx_dma = virt_to_aram(t.tx_buf);
+	t.len =  m25p_cmdsz(flash);
+
+	spi_message_add_tail(&t, &m);
+	spi_sync(flash->spi, &m);
 
 	return 0;
 }
@@ -352,11 +432,14 @@ static int m25p80_erase(struct mtd_info *mtd, struct erase_info *instr)
 			(long long)instr->len);
 
 	/* sanity checks */
-	if (instr->addr + instr->len > flash->mtd.size)
+	if (instr->addr + instr->len > flash->mtd.size){
 		return -EINVAL;
+	}
+
 	div_u64_rem(instr->len, mtd->erasesize, &rem);
-	if (rem)
+	if (rem){
 		return -EINVAL;
+	}
 
 	addr = instr->addr;
 	len = instr->len;
@@ -402,13 +485,19 @@ static int m25p80_erase(struct mtd_info *mtd, struct erase_info *instr)
  * Read an address range from the flash chip.  The address range
  * may be any size provided it is within the physical boundaries.
  */
-#if 0
+#ifdef CONFIG_DW_DMAC
+#define	READ_CHUNK	32
 static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	size_t *retlen, u_char *buf)
 {
 	struct m25p *flash = mtd_to_m25p(mtd);
 	struct spi_transfer t[2];
 	struct spi_message m;
+	int left_to_read = len;
+	int cnt = 0;
+	unsigned int chunk = READ_CHUNK;
+
+	u_char	*local_buf __attribute__((aligned(64)));
 
 	pr_debug("%s: %s from 0x%08x, len %zd\n", dev_name(&flash->spi->dev),
 			__func__, (u32)from, len);
@@ -420,7 +509,12 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	if (from + len > flash->mtd.size)
 		return -EINVAL;
 
+	mutex_lock(&flash->lock);
+
+	local_buf = flash->data;
+
 	spi_message_init(&m);
+	m.is_dma_mapped = 1;
 	memset(t, 0, (sizeof t));
 
 	/* NOTE:
@@ -428,11 +522,13 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	 * Should add 1 byte DUMMY_BYTE.
 	 */
 	t[0].tx_buf = flash->command;
-	t[0].len = m25p_cmdsz(flash) + FAST_READ_DUMMY_BYTE;
+	t[0].tx_dma = virt_to_aram(t[0].tx_buf);
+	//t[0].len = m25p_cmdsz(flash) + FAST_READ_DUMMY_BYTE;
+	t[0].len = m25p_cmdsz(flash);
 	spi_message_add_tail(&t[0], &m);
 
-	t[1].rx_buf = buf;
-	t[1].len = len;
+	t[1].rx_buf = local_buf;
+	t[1].rx_dma = virt_to_aram(t[1].rx_buf);
 	spi_message_add_tail(&t[1], &m);
 
 	pr_debug("%s: t[0].len 0x%x t[1].len 0x%x\n",__func__, t[0].len, t[1].len);
@@ -440,8 +536,16 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	/* Byte count starts at zero. */
 	*retlen = 0;
 
-	mutex_lock(&flash->lock);
+	cnt = left_to_read/chunk;
 
+	if(left_to_read%chunk)
+		cnt += 1;
+
+	if (cnt == 1)
+		chunk = left_to_read;
+
+	/* write everything in flash->page_size chunks */
+	while(cnt) {
 		/* Wait till previous write/erase is done. */
 		if (wait_till_ready(flash)) {
 			/* REVISIT status return?? */
@@ -454,20 +558,39 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 		 * supports that opcode.
 		 */
 
+		t[1].len = chunk;
+
 		/* Set up the write data buffer. */
 		flash->command[0] = OPCODE_READ;
 		m25p_addr2cmd(flash, from, flash->command);
 
 		spi_sync(flash->spi, &m);
 
-	*retlen = m.actual_length - m25p_cmdsz(flash) - FAST_READ_DUMMY_BYTE;
+		*retlen += m.actual_length - m25p_cmdsz(flash);
+		if(!m.actual_length){
+			printk ("%s:%d: we got m.actual_length=%d error ....\n", \
+					__func__, __LINE__, m.actual_length);
+		}
+
+		memcpy(buf, local_buf, chunk);
+
+		from += chunk;
+		buf += chunk;
+
+		left_to_read -= chunk;
+		if(left_to_read <= READ_CHUNK)
+			chunk = left_to_read;
+		else
+			chunk = READ_CHUNK;
+
+		cnt--;
+	}
 
 	mutex_unlock(&flash->lock);
 
 	return 0;
 }
-#endif
-
+#else
 static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	size_t *retlen, u_char *buf)
 {
@@ -545,13 +668,16 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 
 	return 0;
 }
+#endif
 
 /*
  * Write an address range to the flash chip.  Data must be written in
  * FLASH_PAGESIZE chunks.  The address range may be any size provided
  * it is within the physical boundaries.
  */
-#if 0
+
+#ifdef CONFIG_DW_DMAC
+#define	WRITE_CHUNK	32
 static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 		size_t *retlen, const u_char *buf)
 {
@@ -559,6 +685,8 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 	u32 page_offset, page_size;
 	struct spi_transfer t[2];
 	struct spi_message m;
+
+	u_char  *wr_local_buf __attribute__((aligned(64)));
 
 	pr_debug("%s: %s to 0x%08x, len %zd\n", dev_name(&flash->spi->dev),
 			__func__, (u32)to, len);
@@ -572,17 +700,17 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 	if (to + len > flash->mtd.size)
 		return -EINVAL;
 
+	mutex_lock(&flash->lock);
+
+	wr_local_buf = flash->data;
+
 	spi_message_init(&m);
+	m.is_dma_mapped = 1;
 	memset(t, 0, (sizeof t));
 
-	t[0].tx_buf = flash->command;
-	t[0].len = m25p_cmdsz(flash);
+	t[0].tx_buf = wr_local_buf;
+	t[0].tx_dma = virt_to_aram(t[0].tx_buf);
 	spi_message_add_tail(&t[0], &m);
-
-	t[1].tx_buf = buf;
-	spi_message_add_tail(&t[1], &m);
-
-	mutex_lock(&flash->lock);
 
 	/* Wait until finished previous write command. */
 	if (wait_till_ready(flash)) {
@@ -593,15 +721,16 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 	write_enable(flash);
 
 	/* Set up the opcode in the write buffer. */
-	flash->command[0] = OPCODE_PP;
-	m25p_addr2cmd(flash, to, flash->command);
+	wr_local_buf[0] = OPCODE_PP;
+	m25p_addr2cmd(flash, to, wr_local_buf);
 
-	page_offset = to & (flash->page_size - 1);
+	page_offset = to & (WRITE_CHUNK - 1);
 
 	/* do all the bytes fit onto one page? */
-	if (page_offset + len <= flash->page_size) {
-		t[1].len = len;
+	if (page_offset + len <= WRITE_CHUNK) {
+		t[0].len = m25p_cmdsz(flash)+len;
 
+		memcpy(wr_local_buf+m25p_cmdsz(flash), buf, len);
 		spi_sync(flash->spi, &m);
 
 		*retlen = m.actual_length - m25p_cmdsz(flash);
@@ -609,9 +738,10 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 		u32 i;
 
 		/* the size of data remaining on the first page */
-		page_size = flash->page_size - page_offset;
+		page_size = WRITE_CHUNK - page_offset;
 
-		t[1].len = page_size;
+		memcpy(wr_local_buf+m25p_cmdsz(flash), buf, page_size);
+		t[0].len = m25p_cmdsz(flash)+page_size;
 		spi_sync(flash->spi, &m);
 
 		*retlen = m.actual_length - m25p_cmdsz(flash);
@@ -619,14 +749,14 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 		/* write everything in flash->page_size chunks */
 		for (i = page_size; i < len; i += page_size) {
 			page_size = len - i;
-			if (page_size > flash->page_size)
-				page_size = flash->page_size;
+			if (page_size > WRITE_CHUNK)
+				page_size = WRITE_CHUNK;
 
 			/* write the next page to flash */
-			m25p_addr2cmd(flash, to + i, flash->command);
+			m25p_addr2cmd(flash, to + i, wr_local_buf);
 
-			t[1].tx_buf = buf + i;
-			t[1].len = page_size;
+			memcpy(wr_local_buf+m25p_cmdsz(flash), buf + i, page_size);
+			t[0].len = m25p_cmdsz(flash)+page_size;
 
 			wait_till_ready(flash);
 
@@ -642,8 +772,7 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 	return 0;
 }
-#endif
-
+#else
 static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 		size_t *retlen, const u_char *buf)
 {
@@ -713,7 +842,7 @@ static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 	return 0;
 }
-
+#endif
 
 static int sst_write(struct mtd_info *mtd, loff_t to, size_t len,
 		size_t *retlen, const u_char *buf)
@@ -990,20 +1119,27 @@ static const struct spi_device_id m25p_ids[] = {
 };
 MODULE_DEVICE_TABLE(spi, m25p_ids);
 
-static const struct spi_device_id *__devinit jedec_probe(struct spi_device *spi)
+static const struct spi_device_id *__devinit jedec_probe(struct spi_device *spi, struct m25p *flash)
 {
-	int			tmp;
-	u8			code = OPCODE_RDID;
-	u8			id[5];
+	int			tmp, i;
 	u32			jedec;
 	u16                     ext_jedec;
 	struct flash_info	*info;
+	u8                      *id __attribute__((aligned(64)));
+	u8                      *code __attribute__((aligned(64)));
+
+	code = flash->command;
+	memset(code, 0, 4);
+	code[0] = OPCODE_RDID;
+
+	id = flash->value;
+	memset(id, 0, 8);
 
 	/* JEDEC also defines an optional "extended device information"
 	 * string for after vendor-specific data, after the three bytes
 	 * we use here.  Supporting some chips might require using it.
 	 */
-	tmp = m25p80_write_then_read(spi, &code, 1, id, 5);
+	tmp = m25p80_write_then_read(spi, code, 1, id, 5);
 	if (tmp < 0) {
 		pr_debug("%s: error %d reading JEDEC ID\n",
 				dev_name(&spi->dev), tmp);
@@ -1016,6 +1152,7 @@ static const struct spi_device_id *__devinit jedec_probe(struct spi_device *spi)
 	jedec |= id[2];
 
 	ext_jedec = id[3] << 8 | id[4];
+	printk("jedec %u ext_jedec %u \n", jedec, ext_jedec);
 
 	for (tmp = 0; tmp < ARRAY_SIZE(m25p_ids) - 1; tmp++) {
 		info = (void *)m25p_ids[tmp].driver_data;
@@ -1042,6 +1179,9 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	struct flash_info		*info;
 	unsigned			i;
 	struct mtd_part_parser_data	ppdata;
+	struct resource *res;
+	unsigned long size;
+	int err;
 
 #ifdef CONFIG_MTD_OF_PARTS
 	if (!of_device_is_available(spi->dev.of_node))
@@ -1054,6 +1194,19 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	 * newer chips, even if we don't recognize the particular chip.
 	 */
 	data = spi->dev.platform_data;
+
+	if(data && data->resource)
+	{
+
+		res = data->resource;
+		size = res->end - res->start + 1;
+		if (!request_mem_region(res->start, size, "m25p80_flash")) {
+			dev_err(&spi->dev, "%s: request mem region failed\n",__func__);
+			err = -ENOMEM;
+			goto out_err;
+		}
+	}
+
 	if (data && data->type) {
 		const struct spi_device_id *plat_id;
 
@@ -1072,10 +1225,21 @@ static int __devinit m25p_probe(struct spi_device *spi)
 
 	info = (void *)id->driver_data;
 
+	flash = kzalloc(sizeof *flash, GFP_KERNEL);
+	if (!flash)
+	{
+		err = -ENOMEM;
+		goto out_release_mem_region;
+	}
+
+	flash->command = COMCERTO_FASTSPI_IRAM_VADDR;
+	flash->value = flash->command + DMA_ALIGN;
+	flash->data = flash->command + 2*DMA_ALIGN;
+
 	if (info->jedec_id) {
 		const struct spi_device_id *jid;
 
-		jid = jedec_probe(spi);
+		jid = jedec_probe(spi, flash);
 		if (IS_ERR(jid)) {
 			return PTR_ERR(jid);
 		} else if (jid != id) {
@@ -1091,15 +1255,6 @@ static int __devinit m25p_probe(struct spi_device *spi)
 			id = jid;
 			info = (void *)jid->driver_data;
 		}
-	}
-
-	flash = kzalloc(sizeof *flash, GFP_KERNEL);
-	if (!flash)
-		return -ENOMEM;
-	flash->command = kmalloc(MAX_CMD_SIZE + FAST_READ_DUMMY_BYTE, GFP_KERNEL);
-	if (!flash->command) {
-		kfree(flash);
-		return -ENOMEM;
 	}
 
 	flash->spi = spi;
@@ -1188,15 +1343,18 @@ static int __devinit m25p_probe(struct spi_device *spi)
 					flash->mtd.eraseregions[i].erasesize / 1024,
 					flash->mtd.eraseregions[i].numblocks);
 
-
 	/* partitions should match sector boundaries; and it may be good to
 	 * use readonly partitions for writeprotected sectors (BP2..BP0).
 	 */
 	return mtd_device_parse_register(&flash->mtd, NULL, &ppdata,
 			data ? data->parts : NULL,
 			data ? data->nr_parts : 0);
-}
 
+out_release_mem_region:
+	release_mem_region(res->start, size);
+out_err:
+	return err;
+}
 
 static int __devexit m25p_remove(struct spi_device *spi)
 {
@@ -1206,7 +1364,6 @@ static int __devexit m25p_remove(struct spi_device *spi)
 	/* Clean up MTD stuff. */
 	status = mtd_device_unregister(&flash->mtd);
 	if (status == 0) {
-		kfree(flash->command);
 		kfree(flash);
 	}
 	return 0;

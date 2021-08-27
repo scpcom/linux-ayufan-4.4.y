@@ -31,6 +31,7 @@ obj-$(CONFIG_USB_PXA_U2O)	+= mv_udc.o
 mv_udc-y			:= mv_udc_core.o
 obj-$(CONFIG_USB_CI13XXX_MSM)	+= ci13xxx_msm.o
 obj-$(CONFIG_USB_FUSB300)	+= fusb300_udc.o
+obj-$(CONFIG_USB_GADGET_MRVL)	+= ../../../arch/arm/plat-armada/mv_drivers_lsp/mv_udc/
 
 #
 # USB gadget drivers

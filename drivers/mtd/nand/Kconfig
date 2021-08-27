@@ -561,4 +561,10 @@ config MTD_NAND_COMCERTO
 	help
 		Comcerto NAND Driver.
 
+config MTD_NAND_AL
+	bool "NAND support for Annapurna Labs NAND controller"
+	depends on MTD_NAND && SYNO_ALPINE
+	help
+	  Enable support for NAND Flash chips on Annapurna Labs NAND controllers.
+
 endif # MTD_NAND

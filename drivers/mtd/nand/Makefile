@@ -50,6 +50,7 @@ obj-$(CONFIG_MTD_NAND_RICOH)		+= r852.o
 obj-$(CONFIG_MTD_NAND_JZ4740)		+= jz4740_nand.o
 obj-$(CONFIG_MTD_NAND_GPMI_NAND)	+= gpmi-nand/
 obj-$(CONFIG_MTD_NAND_COMCERTO)		+= comcerto_nand.o
+obj-$(CONFIG_MTD_NAND_AL)		+= al/
 
 
 nand-objs := nand_base.o nand_bbt.o

@@ -93,7 +93,7 @@ struct mtd_write_req {
 	__u8 padding[7];
 };
 
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_MTD_INFO
 struct SYNO_MTD_FIS_INFO {
 	unsigned char name[16]; // Null terminated name
 	u_int32_t offset;
@@ -221,7 +221,7 @@ struct otp_info {
 #define MSYSMEMPARTITIONINFO    _IOR('M', 26, int*)
 #define MEMREADOOB64        _IOWR('M', 27, struct mtd_oob_buf64)
 #define MEMISLOCKED     _IOR('M', 28, struct erase_info_user)
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MTD_INFO */
 
 /*
  * Most generic write interface; can write in-band and/or out-of-band in various
@@ -264,7 +264,7 @@ struct nand_oobfree {
  */
 struct nand_ecclayout_user {
 	__u32 eccbytes;
-#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_MTD_NAND_NFC)
+#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_MTD_NAND_NFC)
 	__u32 eccpos[128];
 #else
 	__u32 eccpos[MTD_MAX_ECCPOS_ENTRIES];

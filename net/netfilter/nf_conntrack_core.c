@@ -36,8 +36,10 @@
 #include <linux/nsproxy.h>
 #include <linux/rculist_nulls.h>
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 #include <linux/mv_nfp.h>
+#endif
 #endif
 #include <net/netfilter/nf_conntrack.h>
 #include <net/netfilter/nf_conntrack_l3proto.h>
@@ -52,7 +54,7 @@
 #include <net/netfilter/nf_conntrack_timestamp.h>
 #include <net/netfilter/nf_nat.h>
 #include <net/netfilter/nf_nat_core.h>
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <linux/netfilter/ipt_NFP.h>
 #endif
 
@@ -222,7 +224,7 @@ destroy_conntrack(struct nf_conntrack *nfct)
 	 * too. */
 	nf_ct_remove_expectations(ct);
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
 	if (ct->layer7.app_proto)
 		kfree(ct->layer7.app_proto);
@@ -319,7 +321,7 @@ static void death_by_timeout(unsigned long ul_conntrack)
 	struct nf_conntrack_l4proto *l4proto;
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	struct nf_conntrack_tuple *t0 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
 	struct nf_conntrack_tuple *t1 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
@@ -751,9 +753,17 @@ static noinline int early_drop(struct net *net, unsigned int hash)
 	if (del_timer(&ct->timeout)) {
 #endif
 		death_by_timeout((unsigned long)ct);
+#if defined(CONFIG_SYNO_COMCERTO)
+		/* Check if we indeed killed this entry. Reliable event
+		   delivery may have inserted it into the dying list. */
+		if (test_bit(IPS_DYING_BIT, &ct->status)) {
+#endif
 		dropped = 1;
 		NF_CT_STAT_INC_ATOMIC(net, early_drop);
 	}
+#if defined(CONFIG_SYNO_COMCERTO)
+	}
+#endif
 	nf_ct_put(ct);
 	return dropped;
 }
@@ -838,7 +848,7 @@ __nf_conntrack_alloc(struct net *net, u16 zone,
 	}
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.nfp = false;
 	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.ifindex = -1;
@@ -879,7 +889,7 @@ void nf_conntrack_free(struct nf_conn *ct)
 {
 	struct net *net = nf_ct_net(ct);
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.info)
 		kfree(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.info);
@@ -1540,6 +1550,7 @@ void *nf_ct_alloc_hashtable(unsigned int *sizep, int nulls)
 EXPORT_SYMBOL_GPL(nf_ct_alloc_hashtable);
 
 #if defined(CONFIG_SYNO_COMCERTO)
+#ifdef CONFIG_COMCERTO_FP
 int nf_conntrack_set_dpi_allow_report(struct sk_buff *skb)
 {
 	int err = 0;
@@ -1566,7 +1577,9 @@ int nf_conntrack_set_dpi_allow_and_mark(struct sk_buff *skb, int mark)
 
 	set_bit(IPS_DPI_ALLOWED_BIT, &ct->status);
 
+#ifdef CONFIG_NF_CONNTRACK_MARK
 	ct->mark = mark;
+#endif
 
 	nf_conntrack_event_cache(IPCT_PROTOINFO, ct);
 
@@ -1575,6 +1588,7 @@ int nf_conntrack_set_dpi_allow_and_mark(struct sk_buff *skb, int mark)
 	return err;
 }
 EXPORT_SYMBOL(nf_conntrack_set_dpi_allow_and_mark);
+#endif
 #endif
 
 int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp)
@@ -1641,7 +1655,7 @@ void nf_ct_untracked_status_or(unsigned long bits)
 }
 EXPORT_SYMBOL_GPL(nf_ct_untracked_status_or);
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void nfp_ct_sync(int family)
 {

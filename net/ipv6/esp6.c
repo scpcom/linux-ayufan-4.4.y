@@ -141,11 +141,30 @@ static void esp_output_done(struct crypto_async_request *base, int err)
 	kfree(ESP_SKB_CB(skb)->tmp);
 	xfrm_output_resume(skb, err);
 }
+#if defined(CONFIG_SYNO_COMCERTO)
+static void udp_v6_send_check(struct sk_buff *skb)
+{
+	struct ipv6hdr *ipv6h=ipv6_hdr(skb);
+	struct udphdr *uh=udp_hdr(skb);
+	uh->check = ~csum_ipv6_magic(&ipv6h->saddr, &ipv6h->daddr, skb->len,
+			IPPROTO_UDP, 0);
+	skb->csum_start = skb_transport_header(skb) - skb->head;
+	skb->csum_offset = offsetof(struct udphdr, check);
+	skb->ip_summed = CHECKSUM_PARTIAL;
+
+	if (uh->check == 0)
+		uh->check = CSUM_MANGLED_0;
+
+}
+#endif
 
 static int esp6_output(struct xfrm_state *x, struct sk_buff *skb)
 {
 	int err;
 	struct ip_esp_hdr *esph;
+#if defined(CONFIG_SYNO_COMCERTO)
+	struct udphdr *uh=NULL;
+#endif
 	struct crypto_aead *aead;
 	struct aead_givcrypt_request *req;
 	struct scatterlist *sg;
@@ -231,6 +250,40 @@ static int esp6_output(struct xfrm_state *x, struct sk_buff *skb)
 	esph = ip_esp_hdr(skb);
 	*skb_mac_header(skb) = IPPROTO_ESP;
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	/* NAT-T changes Start */
+	/* this is non-NULL only with UDP Encapsulation */
+	if (x->encap) {
+		struct xfrm_encap_tmpl *encap = x->encap;
+		__be32 *udpdata32;
+		__be16 sport, dport;
+		int encap_type;
+		spin_lock_bh(&x->lock);
+		sport = encap->encap_sport;
+		dport = encap->encap_dport;
+		encap_type = encap->encap_type;
+		spin_unlock_bh(&x->lock);
+		uh = (struct udphdr *)esph;
+		uh->source = sport;
+		uh->dest = dport;
+		uh->len = htons(skb->len - skb_transport_offset(skb));
+		uh->check = 0;
+
+		switch (encap_type) {
+			default:
+			case UDP_ENCAP_ESPINUDP:
+				esph = (struct ip_esp_hdr *)(uh + 1);
+				break;
+			case UDP_ENCAP_ESPINUDP_NON_IKE:
+				udpdata32 = (__be32 *)(uh + 1);
+				udpdata32[0] = udpdata32[1] = 0;
+				esph = (struct ip_esp_hdr *)(udpdata32 + 2);
+				break;
+		}
+		*skb_mac_header(skb) = IPPROTO_UDP;
+	}
+#endif
+
 	esph->spi = x->id.spi;
 	esph->seq_no = htonl(XFRM_SKB_CB(skb)->seq.output.low);
 
@@ -262,6 +315,14 @@ static int esp6_output(struct xfrm_state *x, struct sk_buff *skb)
 	if (err == -EBUSY)
 		err = NET_XMIT_DROP;
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	/* NAT-T changes Start */
+	if (x->encap) {
+		udp_v6_send_check(skb);
+	}
+	/* NAT-T changes End */
+#endif
+
 	kfree(tmp);
 
 error:
@@ -270,6 +331,9 @@ error:
 
 static int esp_input_done2(struct sk_buff *skb, int err)
 {
+#if defined(CONFIG_SYNO_COMCERTO)
+	struct ipv6hdr *ipv6h;
+#endif
 	struct xfrm_state *x = xfrm_input_state(skb);
 	struct esp_data *esp = x->data;
 	struct crypto_aead *aead = esp->aead;
@@ -297,6 +361,45 @@ static int esp_input_done2(struct sk_buff *skb, int err)
 	}
 
 	/* ... check padding bits here. Silly. :-) */
+#if defined(CONFIG_SYNO_COMCERTO)
+	/* NAT-T changes Start */
+	ipv6h = ipv6_hdr(skb);
+	if (x->encap) {
+		struct xfrm_encap_tmpl *encap = x->encap;
+		struct udphdr *uh = (void *)(skb_network_header(skb) + hdr_len);
+
+		/* 1) if the NAT-T peer's IP or port changed then
+		 *    advertize the change to the keying daemon.
+		 *    This is an inbound SA, so just compare
+		 *    SRC ports.
+		 */
+		if (memcmp(&ipv6h->saddr, x->props.saddr.a6 ,sizeof(ipv6h->saddr)) ||
+				uh->source != encap->encap_sport) {
+			xfrm_address_t ipaddr;
+			memcpy(ipaddr.a6, &ipv6h->saddr, sizeof(ipaddr.a6));
+			km_new_mapping(x, &ipaddr, uh->source);
+			/* XXX: perhaps add an extra
+			 * policy check here, to see
+			 * if we should allow or
+			 * reject a packet from a
+			 * different source
+			 * address/port.
+			 */
+		}
+
+		/*
+		 * 2) ignore UDP/TCP checksums in case
+		 *    of NAT-T in Transport Mode, or
+		 *    perform other post-processing fixes
+		 *    as per draft-ietf-ipsec-udp-encaps-06,
+		 *    section 3.1.2
+		 */
+		if (x->props.mode == XFRM_MODE_TRANSPORT || x->props.mode == XFRM_MODE_BEET) 
+			skb->ip_summed = CHECKSUM_UNNECESSARY;
+
+	}
+	/*NAT-T changes End*/
+#endif
 
 	pskb_trim(skb, skb->len - alen - padlen - 2);
 	__skb_pull(skb, hlen);
@@ -580,8 +683,10 @@ static int esp6_init_state(struct xfrm_state *x)
 	u32 align;
 	int err;
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	if (x->encap)
 		return -EINVAL;
+#endif
 
 	esp = kzalloc(sizeof(*esp), GFP_KERNEL);
 	if (esp == NULL)
@@ -617,6 +722,24 @@ static int esp6_init_state(struct xfrm_state *x)
 	default:
 		goto error;
 	}
+
+#if defined(CONFIG_SYNO_COMCERTO)
+	/* NAT-T  changes Start */
+	if (x->encap) {
+		struct xfrm_encap_tmpl *encap = x->encap;
+		switch (encap->encap_type) {
+		default:
+			goto error;
+		case UDP_ENCAP_ESPINUDP:
+			x->props.header_len += sizeof(struct udphdr);
+			break;
+		case UDP_ENCAP_ESPINUDP_NON_IKE:
+			x->props.header_len += sizeof(struct udphdr) + 2 * sizeof(u32) * 4;
+			break;
+		}
+	}
+	/* NAT-T changes End */
+#endif
 
 	align = ALIGN(crypto_aead_blocksize(aead), 4);
 	if (esp->padlen)

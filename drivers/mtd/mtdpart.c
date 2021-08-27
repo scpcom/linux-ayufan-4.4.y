@@ -37,17 +37,17 @@
 #include <linux/magic.h>
 #endif
 #include <linux/err.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 #include <linux/rtnetlink.h>
 #include <linux/netdevice.h>
 #include <linux/if_arp.h>
 #endif
 
-#ifdef MY_ABC_HERE
-extern unsigned char grgbLanMac[4][16];
+#ifdef SYNO_MAC_ADDRESS
+extern unsigned char grgbLanMac[SYNO_MAC_MAX_V2][16];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 extern char gszSerialNum[];
 extern char gszCustomSerialNum[];
 #define SYNO_SN_TAG "SN="
@@ -703,13 +703,18 @@ out_register:
 			int i, n, x;
 			unsigned int Sum;
 			u_char ucSum;
-			char rgbLanMac[4][6];
+			char rgbLanMac[SYNO_MAC_MAX_V2][6];
 
+			/**
+			 * FIXME: current vender structure on arm platform only support
+			 * max 4 lans instead of SYNO_MAC_MAX_V2.
+			 * If more lans needed, check DSM #52055
+			 */
 			part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
 #ifdef SYNO_MAC_ADDRESS
 			x = 0;
 			gVenderMacNumber = 0;
-			for (n = 0; n<4; n++) {
+			for (n = 0; n < SYNO_MAC_MAX_V2; n++) {
 				for (Sum=0,ucSum=0,i=0; i<6; i++) {
 					Sum+=rgbszBuf[i+x];
 					ucSum+=rgbszBuf[i+x];
@@ -1190,6 +1195,9 @@ EXPORT_SYMBOL_GPL(deregister_mtd_parser);
  * are changing this array!
  */
 static const char *default_mtd_part_types[] = {
+#ifdef CONFIG_SYNO_ALPINE
+	"RedBoot",
+#endif
 	"cmdlinepart",
 	"ofpart",
 	NULL

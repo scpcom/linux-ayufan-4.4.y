@@ -22,6 +22,10 @@
 
 #include "usb.h"
 
+#ifdef SYNO_SET_DEFAULT_URB_TIMEOUT
+#define SYNO_URB_TIMEOUT		(10 * HZ)
+#endif /* SYNO_SET_DEFAULT_URB_TIMEOUT */
+
 static void cancel_async_set_config(struct usb_device *udev);
 
 struct api_context {
@@ -57,10 +61,20 @@ static int usb_start_wait_urb(struct urb *urb, int timeout, int *actual_length)
 		goto out;
 
 	expire = timeout ? msecs_to_jiffies(timeout) : MAX_SCHEDULE_TIMEOUT;
+#ifdef SYNO_SET_DEFAULT_URB_TIMEOUT
+	if (0 == timeout) {
+		expire = SYNO_URB_TIMEOUT;
+	}
+#endif /* SYNO_SET_DEFAULT_URB_TIMEOUT */
 	if (!wait_for_completion_timeout(&ctx.done, expire)) {
+#ifdef SYNO_SET_DEFAULT_URB_TIMEOUT
+		if (0 == timeout) {
+			dev_warn(&urb->dev->dev, "URB time out!!\n");
+			WARN_ON(1);
+		}
+#endif /* SYNO_SET_DEFAULT_URB_TIMEOUT */
 		usb_kill_urb(urb);
 		retval = (ctx.status == -ENOENT ? -ETIMEDOUT : ctx.status);
-
 		dev_dbg(&urb->dev->dev,
 			"%s timed out on ep%d%s len=%u/%u\n",
 			current->comm,

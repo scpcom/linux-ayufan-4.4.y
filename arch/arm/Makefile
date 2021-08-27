@@ -33,6 +33,11 @@ else
 KBUILD_DEFCONFIG := versatile_defconfig
 endif
 
+ifeq ($(CONFIG_SYNO_ALPINE),y)
+ifeq ($(CONFIG_FUNC_REORDER),y)
+KBUILD_CFLAGS          += -ffunction-sections
+endif
+endif
 # defines filename extension depending memory management type.
 ifeq ($(CONFIG_MMU),)
 MMUEXT		:= -nommu
@@ -140,6 +145,8 @@ textofs-$(CONFIG_ARCH_MSM8960) := 0x00208000
 # Machine directory name.  This list is sorted alphanumerically
 # by CONFIG_* macro name.
 machine-$(CONFIG_ARCH_ARMADA370)	:= armada370
+machine-$(CONFIG_ARCH_ARMADA375)	:= armada375
+machine-$(CONFIG_ARCH_ARMADA38X)	:= armada38x
 machine-$(CONFIG_ARCH_AT91)		:= at91
 machine-$(CONFIG_ARCH_BCMRING)		:= bcmring
 machine-$(CONFIG_ARCH_CLPS711X)		:= clps711x
@@ -198,6 +205,9 @@ machine-$(CONFIG_ARCH_TCC8K)		:= tcc8k
 machine-$(CONFIG_ARCH_TEGRA)		:= tegra
 machine-$(CONFIG_ARCH_ALPINE)		+= alpine
 machine-$(CONFIG_ARCH_U300)		:= u300
+ifeq ($(CONFIG_SYNO_ALPINE),y)
+machine-$(CONFIG_ARCH_SLICKROCK)	+= slickrock
+endif
 machine-$(CONFIG_ARCH_U8500)		:= ux500
 machine-$(CONFIG_ARCH_VERSATILE)	:= versatile
 machine-$(CONFIG_ARCH_VEXPRESS)		:= vexpress

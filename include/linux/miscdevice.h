@@ -22,10 +22,13 @@
 #define APOLLO_MOUSE_MINOR	7
 #define PC110PAD_MINOR		9
 /*#define ADB_MOUSE_MINOR	10	FIXME OBSOLETE */
-#ifdef CONFIG_SYNO_USE_OCF_LINUX
+#if defined(CONFIG_SYNO_USE_OCF_LINUX) || defined(CONFIG_SYNO_ALPINE)
 #define CRYPTODEV_MINOR		70	/* /dev/crypto */
 #endif
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA_V2)
+#define CRYPTODEV_MINOR		70	/* OCF async crypto */
+#endif
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #define CESADEV_MINOR		71	/* marvell CESA     */
 #define BTNSDEV_MINOR  		72	/* Marvell btns */
 #define SLICDEV_MINOR		73	/* Marvell SLIC control device */

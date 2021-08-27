@@ -65,6 +65,10 @@
 #include <linux/mfd/core.h>
 #include <linux/mfd/lpc_ich.h>
 
+#ifdef CONFIG_SYNO_AVOTON
+#include <linux/synobios.h>
+#endif
+
 #define ACPIBASE		0x40
 #define ACPIBASE_GPE_OFF	0x28
 #define ACPIBASE_GPE_END	0x2f
@@ -607,7 +611,7 @@ static void __devinit lpc_ich_finalize_cell(struct mfd_cell *cell,
 	cell->pdata_size = sizeof(struct lpc_ich_info);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LPC_ICH_GPIO_CTRL
 /*
  * Now only Avoton use this way to control gpio
  * the others x64 platform syno_pch_lpc_gpio_pin is in
@@ -623,22 +627,19 @@ static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 2
 #else
 static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 46, 47, 49, 55, 57};
 #endif
-static u32 c206_writable_pin[] = {0, 5, 16, 20, 21, 22, 34, 38, 48, 52, 54, 69, 70, 71};
+static u32 c206_writable_pin[] = {0, 5, 16, 20, 21, 22, 34, 35, 38, 48, 52, 54, 69, 70, 71};
 static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36, 37, 45};
-static u32 avoton_writable_pin[] = {4, 5, 10, 27, 36, 49, 50, 51, 52, 53, 54, 58, 59};
+static u32 avoton_writable_pin[] = {10, 15, 16, 17, 49, 50, 53, 54};
 
 #if defined(CONFIG_SYNO_AVOTON)
-static u32 *int_disk_act_pin = NULL;
 /* for avoton gpio we define that
  * CORE WELL gpio (GPIOS_X) start from 0 to 31
  * SUS WELL gpio (GPIO_SUSX) start from 32 to 63
  */
 static u32 coreWellGpio = 0;
 static u32 susWellGpio = 0;
-static u32 avoton_disk_act_value[4] = {0};
-static u32 avoton_disk_act_pin[4] = {52, 53, 54, 58};
-static u32 avoton_corewell_gpioin_pin = 0x1800; //pin 11 12 for fan tach
-static u32 avoton_suswell_gpioin_pin = 0x0;
+static u32 avoton_corewell_gpioin_pin = 0x18041831; //pin 15 16 and 17 used as output pin for DS415+, so we don't read these pin from CPU
+static u32 avoton_suswell_gpioin_pin = 0xC181114;
 #endif
 
 #if defined(CONFIG_SYNO_AVOTON)
@@ -721,10 +722,13 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
 #if defined(CONFIG_SYNO_AVOTON)
 	if (0 == isWrite) {
         //out put value
+		if ((1 << mppPin) & gpioin_pin) {
+			// Input pin is GPI, read from GPI register directly
 			val_lvl = inl(addr_lvl);
-		val_lvl &= gpioin_pin;
-		*pVal_lvl |= val_lvl;
+			*pValue = (val_lvl & (1 << mppPin)) >> mppPin;
+		} else {
 			*pValue = (*pVal_lvl & (1 << mppPin)) >> mppPin;
+		}
 	} else {
 		if (1 == *pValue) {
 			tmpVal = 1 << mppPin;
@@ -784,35 +788,7 @@ END:
 EXPORT_SYMBOL(syno_pch_lpc_gpio_pin);
 #endif
 
-#if defined(CONFIG_SYNO_AVOTON)
-#define GPIO_UNDEF	0xFF
-int SYNO_CTRL_HDD_ACT_NOTIFY(int index)
-{
-	int ret = 0;
-	u32 pin = GPIO_UNDEF;
-	int value = 0;
-
-	switch (index) {
-		case 0 ... 3:
-			pin = int_disk_act_pin[index];
-			avoton_disk_act_value[index] = !avoton_disk_act_value[index];
-			value = avoton_disk_act_value[index];
-			break;
-		default:
-			ret = -1;
-			printk("%s: unsupported disk index [%d]\n", __FUNCTION__, index);
-			goto END;
-	}
-
-	WARN_ON(GPIO_UNDEF == pin);
-	syno_pch_lpc_gpio_pin(pin, &value, 1);
-END:
-	return ret;
-}
-EXPORT_SYMBOL(SYNO_CTRL_HDD_ACT_NOTIFY);
-#endif
-
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LPC_ICH_GPIO_CTRL
 static int syno_gpio_init(struct pci_dev *dev)
 {
 	if (PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_C206 == dev->device) {
@@ -824,9 +800,6 @@ static int syno_gpio_init(struct pci_dev *dev)
 	} else if (PCI_DEVICE_ID_INTEL_AVOTON_LPC == dev->device) {
 		writable_pin = avoton_writable_pin;
 		SynoGpioCount = ARRAY_SIZE(avoton_writable_pin);
-#if defined(CONFIG_SYNO_AVOTON)
-		int_disk_act_pin = avoton_disk_act_pin;
-#endif
 	} else {
 		writable_pin = ich9_writable_pin;
 		SynoGpioCount = ARRAY_SIZE(ich9_writable_pin);
@@ -879,9 +852,21 @@ gpe0_done:
 		ret = -ENODEV;
 		goto gpio_done;
 	}
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LPC_ICH_GPIO_CTRL
 	gpiobase = base_addr;
 	syno_gpio_init(dev);
+#ifdef CONFIG_SYNO_AVOTON
+	/* For Avoton models
+	 * gpio_sus18 and gpio_sus22 is output pin and the default valuse is 1
+	 * gpio sus21 is for ds415+ phy reset
+	 * So we need set the default value to 1
+	 */
+	if (syno_is_hw_version(HW_DS415p)) {
+		susWellGpio = 0x640000;
+	} else {
+		susWellGpio = 0x440000;
+	}
+#endif /* CONFIG_SYNO_AVOTON */
 #endif
 
 	/* Older devices provide fewer GPIO and have a smaller resource size. */

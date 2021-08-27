@@ -103,7 +103,7 @@ MODULE_ALIAS_SCSI_DEVICE(TYPE_RBC);
 #define SD_MINORS	0
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 extern int gSynoHasDynModule;
 #endif
 
@@ -111,7 +111,7 @@ extern int gSynoHasDynModule;
 extern int gSynoDualHead;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_SPINUP_DELAY
 
 struct SpinupQueue {
 	spinlock_t q_lock;
@@ -123,7 +123,7 @@ struct SpinupQueue {
 
 LIST_HEAD(SpinupListHead);
 DEFINE_SPINLOCK(SpinupListLock);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SAS_SPINUP_DELAY */
 
 static void sd_config_discard(struct scsi_disk *, unsigned int);
 static int  sd_revalidate_disk(struct gendisk *);
@@ -238,7 +238,7 @@ sd_store_manage_start_stop(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_SPINUP_DELAY
 
 #ifdef SYNO_SAS_SPINUP_DELAY_DEBUG
 static void
@@ -501,7 +501,7 @@ int SynoSpinupRemove(struct scsi_device *sdev)
 
 	return ret;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SAS_SPINUP_DELAY */
 
 static ssize_t
 sd_store_allow_restart(struct device *dev, struct device_attribute *attr,
@@ -549,7 +549,7 @@ sd_show_manage_start_stop(struct device *dev, struct device_attribute *attr,
 	return snprintf(buf, 20, "%u\n", sdp->manage_start_stop);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_SPINUP_DELAY
 static ssize_t
 sd_show_spinup_queue_id(struct device *dev, struct device_attribute *attr,
 			  char *buf)
@@ -559,7 +559,7 @@ sd_show_spinup_queue_id(struct device *dev, struct device_attribute *attr,
 
 	return snprintf(buf, 20, "%u\n", sdp->spinup_queue_id);
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SAS_SPINUP_DELAY */
 
 static ssize_t
 sd_show_allow_restart(struct device *dev, struct device_attribute *attr,
@@ -674,10 +674,10 @@ static struct device_attribute sd_disk_attrs[] = {
 	       sd_store_allow_restart),
 	__ATTR(manage_start_stop, S_IRUGO|S_IWUSR, sd_show_manage_start_stop,
 	       sd_store_manage_start_stop),
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_SPINUP_DELAY
 	__ATTR(spinup_queue_id, S_IRUGO|S_IWUSR, sd_show_spinup_queue_id,
 	       sd_store_spinup_queue_id),
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SAS_SPINUP_DELAY */
 	__ATTR(protection_type, S_IRUGO, sd_show_protection_type, NULL),
 	__ATTR(protection_mode, S_IRUGO, sd_show_protection_mode, NULL),
 	__ATTR(app_tag_own, S_IRUGO, sd_show_app_tag_own, NULL),
@@ -1460,7 +1460,7 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 		case SCSI_IOCTL_SET_BADSECTORS:
 			return ScsiSetBadSector(disk, p);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DISK_HIBERNATION
 		case SD_IOCTL_IDLE:
 		{
 			return (jiffies - sdp->idle) / HZ + 1;
@@ -3031,15 +3031,18 @@ OUT:
 static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 {
 	struct scsi_device *sdp = to_scsi_device(dev);
+#ifdef CONFIG_SYNO_DUAL_HEAD
+	bool blIsSynoboot = false;
+#endif /* CONFIG_SYNO_DUAL_HEAD */
 
 	// iscsi
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ISCSI_DEVICE
 	if(strcmp(sdp->host->hostt->name, "iSCSI Initiator over TCP/IP") == 0){
 		return SYNO_DISK_ISCSI;
 	}
 #endif
 	if (SYNO_PORT_TYPE_USB == sdp->host->hostt->syno_port_type) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 		struct us_data *us = host_to_us(sdp->host);
 		//Since the UAS doesn't has the us_data structure , the us will be NULL , avoid the NULL pointer accessing
 		if (NULL == us) {
@@ -3062,11 +3065,22 @@ static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 
 	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type) {
 #ifdef CONFIG_SYNO_DUAL_HEAD
-		if (1 == gSynoDualHead && (!strncmp(SYNO_SATA_DOM_VENDOR, sdp->vendor, strlen(SYNO_SATA_DOM_VENDOR))
-					|| !strncmp(SYNO_SATA_DOM_MODEL, sdp->model, strlen(SYNO_SATA_DOM_MODEL)))){
+		if (1 == gSynoDualHead) {
+			if (!strncmp(SYNO_SATA_DOM_VENDOR, sdp->vendor, strlen(SYNO_SATA_DOM_VENDOR))
+				&& !strncmp(SYNO_SATA_DOM_MODEL, sdp->model, strlen(SYNO_SATA_DOM_MODEL))) {
+				blIsSynoboot = true;
+			} else if (!strncmp(SYNO_SATA_DOM_VENDOR_SAMPLE_RUN_2, sdp->vendor, strlen(SYNO_SATA_DOM_VENDOR_SAMPLE_RUN_2))
+				&& !strncmp(SYNO_SATA_DOM_MODEL_SAMPLE_RUN_2, sdp->model, strlen(SYNO_SATA_DOM_MODEL_SAMPLE_RUN_2))) {
+				// FIXME: reserve sample run 2 string for development use, remember to delete the string after BOM confirm
+				blIsSynoboot = true;
+			}
+#ifdef SYNO_USB_FLASH_BOOT
+			if (blIsSynoboot && !syno_find_synoboot()) {
 				return SYNO_DISK_SYNOBOOT;
 			}
-#endif
+#endif /* SYNO_USB_FLASH_BOOT */
+		}
+#endif /* CONFIG_SYNO_DUAL_HEAD */
 		// else treat as internal disks
 		return SYNO_DISK_SATA;
 	}
@@ -3240,7 +3254,7 @@ static int sd_probe(struct device *dev)
 			iRetry++;
 		}
 
-#else /* MY_ABC_HERE */
+#else /* SYNO_FIXED_DISK_NAME */
 		error = ida_get_new(&sd_index_ida, &index);
 #endif /* SYNO_FIXED_DISK_NAME */
 		spin_unlock(&sd_index_lock);
@@ -3355,14 +3369,14 @@ static int sd_probe(struct device *dev)
 
 	get_device(&sdkp->dev);	/* prevent release before async_schedule */
 	async_schedule(sd_probe_async, sdkp);
-#if defined(MY_ABC_HERE) && defined(CONFIG_SYNO_MV88F6281_USBSTATION)
+#if defined(SYNO_USB_FLASH_BOOT) && defined(CONFIG_SYNO_MV88F6281_USBSTATION)
 	if (SYNO_DISK_SYNOBOOT != sdkp->synodisktype || !gSynoHasDynModule) {
 		extern int SYNO_CTRL_USB_HDD_LED_SET(int status);
 		/* we set green blink for usb disk ready. */
 		SYNO_CTRL_USB_HDD_LED_SET(0x4);
 	}
-#endif /*MY_ABC_HERE*/
-#ifdef MY_ABC_HERE
+#endif /*SYNO_USB_FLASH_BOOT*/
+#ifdef SYNO_FIXED_DISK_NAME
 	strlcpy(sdp->syno_disk_name, gd->disk_name, BDEVNAME_SIZE);
 #endif
 

@@ -25,8 +25,14 @@
 #include <linux/module.h>
 #include <linux/highmem.h>
 #include <linux/delay.h>
+#ifdef CONFIG_SYNO_ALPINE
+#include <linux/version.h>
+#endif
 #include <linux/slab.h>
 #include <linux/spi/spi.h>
+#ifdef CONFIG_SYNO_ALPINE
+#include <linux/gpio.h>
+#endif
 #if defined(CONFIG_SYNO_COMCERTO)
 #include <linux/clk.h>
 #endif
@@ -70,7 +76,11 @@ struct chip_data {
 	u8 bits_per_word;
 	u16 clk_div;		/* baud rate divider */
 	u32 speed_hz;		/* baud rate */
+#ifdef CONFIG_SYNO_ALPINE
+	void (*cs_control)(struct dw_spi *dws, u32 command);
+#else
 	void (*cs_control)(u32 command);
+#endif
 };
 
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_C2K_DEVFREQ_DW)
@@ -339,8 +349,16 @@ static void giveback(struct dw_spi *dws)
 					struct spi_transfer,
 					transfer_list);
 
+#ifdef CONFIG_SYNO_ALPINE
+	if (!last_transfer->cs_change && dws->cs_control &&
+			msg->spi->chip_select == 0)
+		dws->cs_control(dws, MRST_SPI_DEASSERT);
+
+	dw_writel(dws, DW_SPI_SER, 0);
+#else
 	if (!last_transfer->cs_change && dws->cs_control)
 		dws->cs_control(MRST_SPI_DEASSERT);
+#endif
 
 	msg->state = NULL;
 	if (msg->complete)
@@ -496,6 +514,11 @@ static void pump_transfers(unsigned long data)
 		cs_change = 1;
 
 	cr0 = chip->cr0;
+#ifdef CONFIG_SYNO_ALPINE
+	/* Enable CS when starting the message */
+	if (message->state == START_STATE)
+		spi_chip_sel(dws, spi->chip_select);
+#endif
 
 	/* Handle per transfer options for bpw and speed */
 	if (transfer->speed_hz) {
@@ -540,6 +563,9 @@ static void pump_transfers(unsigned long data)
 	}
 	message->state = RUNNING_STATE;
 
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 	/*
 	 * Adjust transfer mode if necessary. Requires platform dependent
 	 * chipselect mechanism.
@@ -555,6 +581,7 @@ static void pump_transfers(unsigned long data)
 		cr0 &= ~SPI_TMOD_MASK;
 		cr0 |= (chip->tmode << SPI_TMOD_OFFSET);
 	}
+#endif
 
 	/* Check if current transfer is a DMA transaction */
 	dws->dma_mapped = map_dma_buffers(dws);
@@ -585,7 +612,11 @@ static void pump_transfers(unsigned long data)
 			dw_writew(dws, DW_SPI_CTRL0, cr0);
 
 		spi_set_clk(dws, clk_div ? clk_div : chip->clk_div);
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 		spi_chip_sel(dws, spi->chip_select);
+#endif
 
 		/* Set the interrupt mask, for poll mode just disable all int */
 		spi_mask_intr(dws, 0xff);
@@ -696,11 +727,36 @@ static int dw_spi_transfer(struct spi_device *spi, struct spi_message *msg)
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_ALPINE
+static int dw_spi_gpio_cs_control_setup(int gpio)
+{
+	int status;
+
+	status = gpio_request(gpio, "dw_spi_gpio_cs_control");
+	if (status < 0)
+		return status;
+
+	status = gpio_direction_output(gpio, 1);
+
+	return status;
+}
+
+static void dw_spi_gpio_cs_control(struct dw_spi *dws, u32 value)
+{
+	/* CS is active low */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
+	gpio_set_value(dws->master->cs_gpios[0], value ? 0 : 1);
+#endif
+}
+#endif
 /* This may be called twice for each spi dev */
 static int dw_spi_setup(struct spi_device *spi)
 {
 	struct dw_spi_chip *chip_info = NULL;
 	struct chip_data *chip;
+#ifdef CONFIG_SYNO_ALPINE
+	int status;
+#endif
 
 	if (spi->bits_per_word != 8 && spi->bits_per_word != 16)
 		return -EINVAL;
@@ -732,6 +788,18 @@ static int dw_spi_setup(struct spi_device *spi)
 
 		chip->enable_dma = chip_info->enable_dma;
 	}
+#ifdef CONFIG_SYNO_ALPINE
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
+ 	else if (spi->master->cs_gpios) {
+		/* DT defined GPIO to control the CS, perform setup and use it */
+		status = dw_spi_gpio_cs_control_setup(spi->master->cs_gpios[0]);
+		if (status)
+			return status;
+
+		chip->cs_control = dw_spi_gpio_cs_control;
+	}
+#endif
+#endif
 
 	if (spi->bits_per_word <= 8) {
 		chip->n_bytes = 1;
@@ -949,6 +1017,9 @@ int __devinit dw_spi_add_host(struct dw_spi *dws)
 	master->cleanup = dw_spi_cleanup;
 	master->setup = dw_spi_setup;
 	master->transfer = dw_spi_transfer;
+#ifdef CONFIG_SYNO_ALPINE
+	master->dev.of_node = dws->parent_dev->of_node;
+#endif
 
 	/* Basic HW init */
 	spi_hw_init(dws);

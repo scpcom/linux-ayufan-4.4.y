@@ -194,7 +194,20 @@
 #define ALT_UP_B(label) b label
 #endif
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+/*
+ * Instruction barrier
+ */
+	.macro	instr_sync
+#if __LINUX_ARM_ARCH__ >= 7
+	isb
+#elif __LINUX_ARM_ARCH__ == 6
+	mcr	p15, 0, r0, c7, c5, 4
+#endif
+	.endm
+#endif
+
+#ifdef CONFIG_SYNO_ALPINE
 /*
  * Instruction barrier
  */
@@ -214,13 +227,13 @@
 #ifdef CONFIG_SMP
 #if __LINUX_ARM_ARCH__ >= 7
 	.ifeqs "\mode","arm"
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
 	ALT_SMP(dsb)
 #else
 	ALT_SMP(dmb)
 #endif
 	.else
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
+#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
 	ALT_SMP(W(dsb))
 #else
 	ALT_SMP(W(dmb))
@@ -329,6 +342,14 @@
 \name:
 	.asciz "\string"
 	.size \name , . - \name
+	.endm
+
+	.macro check_uaccess, addr:req, size:req, limit:req, tmp:req, bad:req
+#ifndef CONFIG_CPU_USE_DOMAINS
+	adds	\tmp, \addr, #\size - 1
+	sbcccs	\tmp, \tmp, \limit
+	bcs	\bad
+#endif
 	.endm
 
 #endif /* __ASM_ASSEMBLER_H__ */

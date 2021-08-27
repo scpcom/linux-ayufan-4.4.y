@@ -1925,6 +1925,9 @@ extern void ext4_set_inode_flags(struct inode *);
 extern void ext4_get_inode_flags(struct ext4_inode_info *);
 extern int ext4_alloc_da_blocks(struct inode *inode);
 extern void ext4_set_aops(struct inode *inode);
+#ifdef SYNO_FS_EXT4_SKIP_JOURNAL_SYMLINK
+extern void ext4_set_writeback_aops(struct inode *inode);
+#endif
 extern int ext4_writepage_trans_blocks(struct inode *);
 extern int ext4_chunk_trans_blocks(struct inode *, int nrblocks);
 extern int ext4_discard_partial_page_buffers(handle_t *handle,

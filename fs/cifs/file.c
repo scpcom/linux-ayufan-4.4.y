@@ -1701,8 +1701,13 @@ retry:
 		pgoff_t next = 0, tofind;
 		struct page **pages;
 
+#ifdef CONFIG_SYNO_ALPINE
+		tofind = min((pgoff_t)((cifs_sb->wsize / PAGE_CACHE_SIZE) - 1),
+				end - index) + 1;
+#else
 		tofind = min((cifs_sb->wsize / PAGE_CACHE_SIZE) - 1,
 				end - index) + 1;
+#endif
 
 		wdata = cifs_writedata_alloc((unsigned int)tofind);
 		if (!wdata) {

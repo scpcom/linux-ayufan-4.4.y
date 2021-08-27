@@ -35,12 +35,31 @@
 #include <linux/wait.h>
 #include <linux/workqueue.h>
 
-
-
 extern volatile int pen_release;
 
 extern cpu1_hotplug;
 extern u32 cpu1_hotplug_done;
+
+void cpu1_full_power_down(void *info)
+{
+	int cpu = get_cpu();
+
+	printk(" Powering Down CPU-1 from CPU-%u\n", cpu);
+
+	if (!cpu) {
+#ifdef CONFIG_NEON
+		__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) & ~NEON1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
+		__raw_writel((__raw_readl(A9DP_CPU_RESET) | NEON1_RST), A9DP_CPU_RESET);
+#endif
+		__raw_writel((__raw_readl(A9DP_CPU_CLK_CNTRL) & ~CPU1_CLK_ENABLE), A9DP_CPU_CLK_CNTRL);
+		__raw_writel((__raw_readl(A9DP_PWR_CNTRL) | CLAMP_CORE1), A9DP_PWR_CNTRL);
+		__raw_writel((__raw_readl(A9DP_PWR_CNTRL) | CORE_PWRDWN1), A9DP_PWR_CNTRL);
+		__raw_writel((__raw_readl(A9DP_CPU_RESET) | CPU1_RST), A9DP_CPU_RESET);
+		__raw_writel((__raw_readl(A9DP_PWR_CNTRL) & ~CORE_PWRDWN1), A9DP_PWR_CNTRL);
+	}
+
+	return;
+}
 
 int platform_cpu_kill(unsigned int cpu)
 {
@@ -64,12 +83,9 @@ void platform_cpu_die(unsigned int cpu)
          /* Entering to LOW power state. 
 	  * Go to Low power ,Configure the CPU to reset mode.
 	  */
-
 	if(cpu) {
 		/* Put A9 CPU-1 to reset */
-		cpu1_hotplug_done = 1;
-		wake_up(&cpu1_hotplug);
-		while(1);
+	        smp_call_function(cpu1_full_power_down, NULL, 1);
 	}
 }
 

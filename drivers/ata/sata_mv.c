@@ -80,11 +80,11 @@
  * module options
  */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_88SX7042_MSI
 static int msi = 1;
-#else /* MY_ABC_HERE */
+#else /* SYNO_SATA_88SX7042_MSI */
 static int msi;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SATA_88SX7042_MSI */
 #ifdef CONFIG_PCI
 module_param(msi, int, S_IRUGO);
 MODULE_PARM_DESC(msi, "Enable use of PCI MSI (0=off, 1=on)");
@@ -663,7 +663,7 @@ static void mv_bmdma_stop(struct ata_queued_cmd *qc);
 static u8   mv_bmdma_status(struct ata_port *ap);
 static u8 mv_sff_check_status(struct ata_port *ap);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_SHUTDOWN_PHY
 static ssize_t
 syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count);
 DEVICE_ATTR(syno_phy_ctl, S_IWUGO, NULL, syno_mv_phy_ctl_store);
@@ -674,13 +674,13 @@ static struct device_attribute *sata_mv_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_SHUTDOWN_PHY
 	&dev_attr_syno_phy_ctl,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TRANS_HOST_TO_DISK
 	&dev_attr_syno_diskname_trans,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DISK_LED_CONTROL
 	&dev_attr_syno_sata_disk_led_ctrl,
 #endif
 	NULL
@@ -698,6 +698,9 @@ static struct scsi_host_template mv5_sht = {
 #ifdef SYNO_FIXED_DISK_NAME
 	.syno_index_get         = syno_libata_index_get,
 #endif
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+	.support_staggered_spinup = 1,
+#endif
 };
 
 static struct scsi_host_template mv6_sht = {
@@ -707,6 +710,9 @@ static struct scsi_host_template mv6_sht = {
 	.dma_boundary		= MV_DMA_BOUNDARY,
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	.shost_attrs		= sata_mv_shost_attrs,
+#endif
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+	.support_staggered_spinup = 1,
 #endif
 };
 
@@ -2875,7 +2881,7 @@ static void mv_process_crpb_entries(struct ata_port *ap, struct mv_port_priv *pp
 	in_index = (readl(port_mmio + EDMA_RSP_Q_IN_PTR)
 			>> EDMA_RSP_Q_PTR_SHIFT) & MV_MAX_Q_DEPTH_MASK;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
 	dma_io_sync();
 #endif
 	/* Process new responses from since the last time we looked */
@@ -3424,7 +3430,7 @@ static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 #else
 	writel(0x00000060, mmio + GPIO_PORT_CTL);
 #endif
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_SATA_LED_SPECIAL
 	}
 #endif
 }

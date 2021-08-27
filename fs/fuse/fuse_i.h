@@ -681,6 +681,16 @@ void fuse_force_forget(struct file *file, u64 nodeid);
 void fuse_read_fill(struct fuse_req *req, struct file *file,
 		    loff_t pos, size_t count, int opcode);
 
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+/*
+ * args[0]: syno.archive_bit_noperm
+ * args[1]: system.syno_acl_noperm_self
+ * args[2]: readdir response buffer (szie: 1 page)
+ */
+void syno_fuse_read_fill(struct fuse_req *req, struct file *file, loff_t pos,
+		    size_t count, int opcode);
+#endif
+
 /**
  * Send OPEN or OPENDIR request
  */
@@ -905,5 +915,37 @@ void fuse_write_update_size(struct inode *inode, loff_t pos);
 
 int fuse_do_setattr(struct inode *inode, struct iattr *attr,
 		    struct file *file);
+
+#ifdef SYNO_FUSE_KERNEL_MINOR_VERSION
+inline static u32
+syno_fuse_get_minor(struct fuse_conn *pFc)
+{
+	uint32_t minor = 0;
+
+	if (NULL == pFc) {
+		goto END;
+	}
+
+	minor = pFc->minor / SYNO_FUSE_KERNEL_MINOR_SHIFT;
+END:
+	return minor;
+}
+
+inline static int
+syno_is_fuse_version_compatible(struct fuse_conn *pFc)
+{
+	int blIsCompatible = 0;
+
+	if (NULL == pFc) {
+		goto END;
+	}
+
+	if (SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION == syno_fuse_get_minor(pFc)) {
+		blIsCompatible = 1;
+	}
+END:
+	return blIsCompatible;
+}
+#endif // SYNO_FUSE_KERNEL_MINOR_VERSION
 
 #endif /* _FS_FUSE_I_H */

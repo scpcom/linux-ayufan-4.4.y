@@ -17,17 +17,17 @@ MODULE_LICENSE("Proprietary");
 #define SYNO_HDDMON_STR "Syno_HDDMon"
 #define SYNO_HDDMON_UPLG_STR "Syno_HDDMon_UPLGM"
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_HD_NUM
 extern long g_internal_hd_num;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HDD_HOTPLUG
 extern long g_hdd_hotplug;
 #endif
 
 #define GPIO_UNDEF				0xFF
 
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_ARCH_COMCERTO)
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)|| defined(CONFIG_ARCH_COMCERTO) || defined(CONFIG_SYNO_ALPINE)
 extern int SYNO_CHECK_HDD_PRESENT(int index);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void);

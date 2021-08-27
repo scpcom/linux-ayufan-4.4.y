@@ -124,6 +124,8 @@ static inline void l2x0_flush_line(unsigned long addr)
 }
 #endif
 
+#if !defined(CONFIG_SYNO_ARMADA_ARCH_V2) || \
+      (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_OUTER_CACHE_SYNC))
 static void l2x0_cache_sync(void)
 {
 	unsigned long flags;
@@ -132,6 +134,7 @@ static void l2x0_cache_sync(void)
 	cache_sync();
 	raw_spin_unlock_irqrestore(&l2x0_lock, flags);
 }
+#endif
 
 static void __l2x0_flush_all(void)
 {
@@ -394,6 +397,18 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 
 		l2x0_inv_all();
 
+#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef CONFIG_PL310_CACHE_PREF_ENABLE
+	/* Support following configuration:
+	 *  Incr double linefill enable
+	 *  Data prefetch enable
+	 *  Double linefill enable
+	 *  Double linefill on WRAP disable
+	 *  NO prefetch drop enable
+	 */
+	writel_relaxed(0x58800000, l2x0_base + L2X0_PREFETCH_CTRL);
+#endif
+#endif
 		/* enable L2X0 */
 		writel_relaxed(1, l2x0_base + L2X0_CTRL);
 	}
@@ -401,7 +416,10 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 	outer_cache.inv_range = l2x0_inv_range;
 	outer_cache.clean_range = l2x0_clean_range;
 	outer_cache.flush_range = l2x0_flush_range;
+#if !defined(CONFIG_SYNO_ARMADA_ARCH_V2) || \
+      (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_OUTER_CACHE_SYNC))
 	outer_cache.sync = l2x0_cache_sync;
+#endif
 	outer_cache.flush_all = l2x0_flush_all;
 	outer_cache.inv_all = l2x0_inv_all;
 	outer_cache.disable = l2x0_disable;

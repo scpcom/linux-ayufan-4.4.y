@@ -17,7 +17,7 @@
 #include <linux/namei.h>
 #include <linux/slab.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_XATTR
 #include <linux/xattr.h>
 #endif
 
@@ -145,17 +145,32 @@ static void fuse_invalidate_entry(struct dentry *entry)
 	fuse_invalidate_entry_cache(entry);
 }
 
+#if SYNO_FUSE_PROFILE
+extern unsigned long syno_fuse_xattr_profile_time;
+extern unsigned long syno_fuse_xattr_profile_schedule_count;
+#endif
 static void fuse_lookup_init(struct fuse_conn *fc, struct fuse_req *req,
 			     u64 nodeid, struct qstr *name,
 			     struct fuse_entry_out *outarg)
 {
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	int out_numargs = 1;
+
+	if (1 == syno_is_fuse_version_compatible(fc) && 0 == strcmp(SZ_FS_GLUSTER, fc->sb->s_subtype)) {
+		out_numargs = 3;
+	}
+#endif
 	memset(outarg, 0, sizeof(struct fuse_entry_out));
 	req->in.h.opcode = FUSE_LOOKUP;
 	req->in.h.nodeid = nodeid;
 	req->in.numargs = 1;
 	req->in.args[0].size = name->len + 1;
 	req->in.args[0].value = name->name;
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	req->out.numargs = out_numargs;
+#else
 	req->out.numargs = 1;
+#endif
 	if (fc->minor < 9)
 		req->out.args[0].size = FUSE_COMPAT_ENTRY_OUT_SIZE;
 	else
@@ -178,6 +193,134 @@ u64 fuse_get_attr_version(struct fuse_conn *fc)
 	return curr_version;
 }
 
+#ifdef SYNO_GLUSTER_FS
+static int syno_fuse_get_acl_cache_index(const char *name)
+{
+	int index = -1;
+	if (IS_SYNO_ACL_XATTR_ACCESS_NOPERM(name)) {
+		index = 0;
+	} else if (IS_SYNO_ARCHIVE_BIT_NOPERM(name)) {
+		index = 1;
+	}
+
+	return index;
+}
+
+extern unsigned long syno_fuse_xattr_expired_time_seconds;
+extern unsigned long syno_fuse_xattr_expired_time_milliseconds;
+
+#define CONVERT_MILLI_TO_NANO(milli) (((u64)milli) * 1000000llu)
+
+static int syno_fuse_update_acl_cache(const char *name, const void *value, ssize_t size, struct fuse_inode *pFuse_inode)
+{
+	int ret = -1;
+	int index = -1;
+	struct fuse_conn *fc = NULL;
+
+	if (!name || !size || !pFuse_inode) {
+		goto END;
+	}
+
+	fc = get_fuse_conn(&pFuse_inode->inode);
+	if (NULL == fc) {
+		goto END;
+	}
+
+	if (0 > (index = syno_fuse_get_acl_cache_index(name))) {
+		goto END;
+	}
+
+	spin_lock(&fc->lock);
+	pFuse_inode->synoacl_cache_table[index].expired_time = time_to_jiffies(syno_fuse_xattr_expired_time_seconds, CONVERT_MILLI_TO_NANO(syno_fuse_xattr_expired_time_milliseconds));
+#ifdef SYNO_FUSE_DEBUG
+	printk("name: [%s] expired_time_jiffied: [%llu] second: [%lu] millisecond: [%lu]\n",
+			name,
+			pFuse_inode->synoacl_cache_table[index].expired_time,
+			syno_fuse_xattr_expired_time_seconds,
+			CONVERT_MILLI_TO_NANO(syno_fuse_xattr_expired_time_milliseconds));
+#endif
+	pFuse_inode->synoacl_cache_table[index].size = size;
+	if (!value || 0 > size) {
+		// this request only query attribute size
+		ret = 0;
+		goto UNLOCK;
+	}
+	if (pFuse_inode->synoacl_cache_table[index].value) {
+		kfree(pFuse_inode->synoacl_cache_table[index].value);
+		pFuse_inode->synoacl_cache_table[index].value = NULL;
+	}
+	if (NULL == (pFuse_inode->synoacl_cache_table[index].value = kmalloc(size, GFP_KERNEL))) {
+		ret = -ENOMEM;
+		goto UNLOCK;
+	}
+	memcpy(pFuse_inode->synoacl_cache_table[index].value, value, size);
+
+#ifdef SYNO_FUSE_DEBUG
+	printk("value: [%llx] size: [%zd]\n", *(u64 *)value, size);
+#endif
+	ret = 0;
+UNLOCK:
+	spin_unlock(&fc->lock);
+END:
+	return ret;
+}
+
+static ssize_t syno_fuse_get_acl_cache(const char *name, void **value, struct fuse_inode *pFuse_inode, size_t size)
+{
+	ssize_t ret = 0;
+	int index = -1;
+
+	if (!name || !value || !pFuse_inode) {
+		goto END;
+	}
+	if (0 > (index = syno_fuse_get_acl_cache_index(name))) {
+		goto END;
+	}
+
+	if (pFuse_inode->synoacl_cache_table[index].expired_time < get_jiffies_64()) {
+		goto END;
+	}
+	if (!IS_FUSE_SYNOACL_SIZE_CACHED(pFuse_inode, index)) {
+		goto END;
+	}
+	ret = pFuse_inode->synoacl_cache_table[index].size;
+	if (!(*value) || 0 > ret) {
+		goto END;
+	}
+	if (IS_FUSE_SYNOACL_ATTR_CACHED(pFuse_inode, index)) {
+		if (ret != size) {
+			ret = 0;
+			goto END;
+		}
+		memcpy(*value, pFuse_inode->synoacl_cache_table[index].value, ret);
+		goto END;
+	} else {
+		ret = 0;
+	}
+END:
+	return ret;
+}
+#endif // SYNO_GLUSTER_FS
+
+
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+static int syno_init_acl_cache(void **pCache)
+{
+	int ret = -1;
+
+	*pCache = (void *) kmalloc(SYNO_FUSE_ACL_CACHE_SIZE, GFP_KERNEL);
+
+	if (NULL == *pCache) {
+		ret = -ENOMEM;
+		goto END;
+	}
+	memset(*pCache, 0, SYNO_FUSE_ACL_CACHE_SIZE);
+	ret = 0;
+END:
+	return ret;
+}
+#endif
+
 /*
  * Check whether the dentry is still valid
  *
@@ -194,6 +337,12 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 	struct fuse_conn *fc;
 	struct fuse_inode *fi;
 	int ret;
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	void *pCache_syno_acl_noperm_self = NULL;
+	void *pCache_archive_bit_noperm = NULL;
+	int bIsGlusterFS = 0;
+	int blIsCompatible = 0;
+#endif
 
 	inode = ACCESS_ONCE(entry->d_inode);
 	if (inode && is_bad_inode(inode))
@@ -226,11 +375,30 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 			goto out;
 		}
 
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+		blIsCompatible = syno_is_fuse_version_compatible(fc);
+		if (IS_GLUSTER_FS(inode) && 0 != blIsCompatible) {
+			bIsGlusterFS = 1;
+		}
+		if (1 == bIsGlusterFS &&
+				(0 != syno_init_acl_cache(&pCache_syno_acl_noperm_self) || 0 != syno_init_acl_cache(&pCache_archive_bit_noperm))) {
+			WARN_ON(1);
+			goto out;
+		}
+#endif
 		attr_version = fuse_get_attr_version(fc);
 
 		parent = dget_parent(entry);
 		fuse_lookup_init(fc, req, get_node_id(parent->d_inode),
 				 &entry->d_name, &outarg);
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	if (1 == bIsGlusterFS) {
+		req->out.args[1].size = SYNO_FUSE_ACL_CACHE_SIZE;
+		req->out.args[1].value = pCache_syno_acl_noperm_self;
+		req->out.args[2].size = SYNO_FUSE_ACL_CACHE_SIZE;
+		req->out.args[2].value = pCache_archive_bit_noperm;
+	}
+#endif // SYNO_GLUSTER_FS
 		fuse_request_send(fc, req);
 		dput(parent);
 		err = req->out.h.error;
@@ -256,6 +424,18 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 				       entry_attr_timeout(&outarg),
 				       attr_version);
 		fuse_change_entry_timeout(entry, &outarg);
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+		if (1 == bIsGlusterFS) {
+			struct fuse_inode *pFuse_inode = NULL;
+			struct syno_fuse_acl_data *pAcl = (struct syno_fuse_acl_data *)pCache_syno_acl_noperm_self;
+			struct syno_fuse_acl_data *pArchiveBit = (struct syno_fuse_acl_data *)pCache_archive_bit_noperm;
+
+			if (NULL != (pFuse_inode = get_fuse_inode(inode))) {
+				syno_fuse_update_acl_cache(SYNO_ACL_XATTR_ACCESS_NOPERM, pAcl->value, pAcl->len, pFuse_inode);
+				syno_fuse_update_acl_cache(XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_BIT_NOPERM, pArchiveBit->value, pArchiveBit->len, pFuse_inode);
+			}
+		}
+#endif
 	} else if (inode) {
 		fi = get_fuse_inode(inode);
 #ifdef SYNO_FUSE_BACK_PORTING
@@ -273,6 +453,16 @@ static int fuse_dentry_revalidate(struct dentry *entry, struct nameidata *nd)
 	}
 	ret = 1;
 out:
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	if (NULL != pCache_syno_acl_noperm_self) {
+		kfree(pCache_syno_acl_noperm_self);
+		pCache_syno_acl_noperm_self = NULL;
+	}
+	if (NULL != pCache_archive_bit_noperm) {
+		kfree(pCache_archive_bit_noperm);
+		pCache_archive_bit_noperm = NULL;
+	}
+#endif
 	return ret;
 
 invalid:
@@ -303,6 +493,22 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 	struct fuse_forget_link *forget;
 	u64 attr_version;
 	int err;
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	void *pCache_syno_acl_noperm_self = NULL;
+	void *pCache_archive_bit_noperm = NULL;
+	int bIsGlusterFS = 0;
+	int blIsCompatible = 0;
+
+	blIsCompatible = syno_is_fuse_version_compatible(fc);
+	if (IS_GLUSTER_FS_SB(sb) && 0 != blIsCompatible) {
+		bIsGlusterFS = 1;
+	}
+	if (1 == bIsGlusterFS &&
+		(0 != syno_init_acl_cache(&pCache_syno_acl_noperm_self) || 0 != syno_init_acl_cache(&pCache_archive_bit_noperm))) {
+		err = -ENOMEM;
+		goto out;
+	}
+#endif
 
 	*inode = NULL;
 	err = -ENAMETOOLONG;
@@ -324,6 +530,19 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 	attr_version = fuse_get_attr_version(fc);
 
 	fuse_lookup_init(fc, req, nodeid, name, outarg);
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	if (1 == bIsGlusterFS) {
+		req->out.args[1].size = SYNO_FUSE_ACL_CACHE_SIZE;
+		req->out.args[1].value = pCache_syno_acl_noperm_self;
+		req->out.args[2].size = SYNO_FUSE_ACL_CACHE_SIZE;
+		req->out.args[2].value = pCache_archive_bit_noperm;
+	}
+#ifdef SYNO_FUSE_DEBUG
+#define DUMP_ARGS(msg, out) printk("%s %x %u\n", msg, *(u32 *)out.value, out.size)
+	DUMP_ARGS("before send: [1]", req->out.args[1]);
+	DUMP_ARGS("before send: [2]", req->out.args[2]);
+#endif // SYNO_FUSE_DEBUG
+#endif // SYNO_GLUSTER_FS
 	fuse_request_send(fc, req);
 	err = req->out.h.error;
 	fuse_put_request(fc, req);
@@ -345,11 +564,41 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 		fuse_queue_forget(fc, forget, outarg->nodeid, 1);
 		goto out;
 	}
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+#ifdef SYNO_FUSE_DEBUG
+	DUMP_ARGS("after send: [1]", req->out.args[1]);
+	DUMP_ARGS("after send: [2]", req->out.args[2]);
+#endif // SYNO_FUSE_DEBUG
+#endif // SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
 	err = 0;
+
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	if (1 == bIsGlusterFS) {
+		struct fuse_inode *pFuse_inode = NULL;
+		struct syno_fuse_acl_data *pAcl = (struct syno_fuse_acl_data *)pCache_syno_acl_noperm_self;
+		struct syno_fuse_acl_data *pArchiveBit = (struct syno_fuse_acl_data *)pCache_archive_bit_noperm;
+
+		if (NULL == (pFuse_inode = get_fuse_inode(*inode))) {
+			goto out;
+		}
+		syno_fuse_update_acl_cache(SYNO_ACL_XATTR_ACCESS_NOPERM, pAcl->value, pAcl->len, pFuse_inode);
+		syno_fuse_update_acl_cache(XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_BIT_NOPERM, pArchiveBit->value, pArchiveBit->len, pFuse_inode);
+	}
+#endif
 
  out_put_forget:
 	kfree(forget);
  out:
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	if (NULL != pCache_syno_acl_noperm_self) {
+		kfree(pCache_syno_acl_noperm_self);
+		pCache_syno_acl_noperm_self = NULL;
+	}
+	if (NULL != pCache_archive_bit_noperm) {
+		kfree(pCache_archive_bit_noperm);
+		pCache_archive_bit_noperm = NULL;
+	}
+#endif
 	return err;
 }
 
@@ -536,6 +785,24 @@ static int create_new_entry(struct fuse_conn *fc, struct fuse_req *req,
 	struct inode *inode;
 	int err;
 	struct fuse_forget_link *forget;
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	void *pCache_syno_acl_noperm_self = NULL;
+	void *pCache_archive_bit_noperm = NULL;
+	int bIsGlusterFS = 0;
+	int numargs = 1;
+	int blIsCompatible = 0;
+
+	blIsCompatible = syno_is_fuse_version_compatible(fc);
+	if (IS_GLUSTER_FS(dir) && 0 != blIsCompatible) {
+		bIsGlusterFS = 1;
+		numargs = 3;
+	}
+	if (1 == bIsGlusterFS &&
+		(0 != syno_init_acl_cache(&pCache_syno_acl_noperm_self) || 0 != syno_init_acl_cache(&pCache_archive_bit_noperm))) {
+		fuse_put_request(fc, req);
+		return -ENOMEM;
+	}
+#endif
 
 	forget = fuse_alloc_forget();
 	if (!forget) {
@@ -545,12 +812,26 @@ static int create_new_entry(struct fuse_conn *fc, struct fuse_req *req,
 
 	memset(&outarg, 0, sizeof(outarg));
 	req->in.h.nodeid = get_node_id(dir);
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	req->out.numargs = numargs;
+#else
 	req->out.numargs = 1;
+#endif
 	if (fc->minor < 9)
 		req->out.args[0].size = FUSE_COMPAT_ENTRY_OUT_SIZE;
 	else
 		req->out.args[0].size = sizeof(outarg);
 	req->out.args[0].value = &outarg;
+
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	if (1 == bIsGlusterFS) {
+		req->out.args[1].size = SYNO_FUSE_ACL_CACHE_SIZE;
+		req->out.args[1].value = pCache_syno_acl_noperm_self;
+		req->out.args[2].size = SYNO_FUSE_ACL_CACHE_SIZE;
+		req->out.args[2].value = pCache_archive_bit_noperm;
+	}
+#endif // SYNO_GLUSTER_FS
+
 	fuse_request_send(fc, req);
 	err = req->out.h.error;
 	fuse_put_request(fc, req);
@@ -590,9 +871,44 @@ static int create_new_entry(struct fuse_conn *fc, struct fuse_req *req,
 
 	fuse_change_entry_timeout(entry, &outarg);
 	fuse_invalidate_attr(dir);
+
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	if (1 == bIsGlusterFS) {
+		struct fuse_inode *pFuse_inode = NULL;
+		struct syno_fuse_acl_data *pAcl = (struct syno_fuse_acl_data *)pCache_syno_acl_noperm_self;
+		struct syno_fuse_acl_data *pArchiveBit = (struct syno_fuse_acl_data *)pCache_archive_bit_noperm;
+
+		if (NULL == (pFuse_inode = get_fuse_inode(dir))) {
+			WARN_ON(1);
+			goto END;
+		}
+
+		syno_fuse_update_acl_cache(SYNO_ACL_XATTR_ACCESS_NOPERM, pAcl->value, pAcl->len, pFuse_inode);
+		syno_fuse_update_acl_cache(XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_BIT_NOPERM, pArchiveBit->value, pArchiveBit->len, pFuse_inode);
+	}
+END:
+	if (NULL != pCache_syno_acl_noperm_self) {
+		kfree(pCache_syno_acl_noperm_self);
+		pCache_syno_acl_noperm_self = NULL;
+	}
+	if (NULL != pCache_archive_bit_noperm) {
+		kfree(pCache_archive_bit_noperm);
+		pCache_archive_bit_noperm = NULL;
+	}
+#endif
 	return 0;
 
  out_put_forget_req:
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL_LOOKUP
+	if (NULL != pCache_syno_acl_noperm_self) {
+		kfree(pCache_syno_acl_noperm_self);
+		pCache_syno_acl_noperm_self = NULL;
+	}
+	if (NULL != pCache_archive_bit_noperm) {
+		kfree(pCache_archive_bit_noperm);
+		pCache_archive_bit_noperm = NULL;
+	}
+#endif
 	kfree(forget);
 	return err;
 }
@@ -1175,9 +1491,70 @@ static int parse_dirfile(char *buf, size_t nbytes, struct file *file,
 	return 0;
 }
 
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+static int syno_fuse_direntplus_link_acl(struct inode *inode, const struct syno_fuse_acl_data *pAcl, const struct syno_fuse_acl_data *pArchiveBit)
+{
+	struct fuse_inode *pFuse_inode = NULL;
+	int ret = -1;
+
+	if (NULL == inode ||
+		NULL == pAcl ||
+		NULL == pArchiveBit ||
+		NULL == (pFuse_inode = get_fuse_inode(inode))) {
+		goto END;
+	}
+
+	syno_fuse_update_acl_cache(SYNO_ACL_XATTR_ACCESS_NOPERM, pAcl->value, pAcl->len, pFuse_inode);
+	syno_fuse_update_acl_cache(XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_BIT_NOPERM, pArchiveBit->value, pArchiveBit->len, pFuse_inode);
+
+	ret = 0;
+END:
+	return ret;
+}
+
+static int syno_is_valid_acl_entry(struct fuse_direntplus *direntplus)
+{
+	struct fuse_entry_out *o = &direntplus->entry_out;
+	struct fuse_dirent *dirent = &direntplus->dirent;
+	struct qstr name = { .len = dirent->namelen, .name = dirent->name};
+	int ret = 1;
+
+	if (!o->nodeid) {
+		/*
+		 * Unlike in the case of fuse_lookup, zero nodeid does not mean
+		 * ENOENT. Instead, it only means the userspace filesystem did
+		 * not want to return attributes/handle for this entry.
+		 *
+		 * So do nothing.
+		 */
+		ret = 0;
+		goto END;
+	}
+
+	if (name.name[0] == '.') {
+		/*
+		 * We could potentially refresh the attributes of the directory
+		 * and its parent?
+		 */
+		if (name.len == 1) {
+			ret = 0;
+		}
+		if (name.name[1] == '.' && name.len == 2) {
+			ret = 0;
+		}
+	}
+END:
+	return ret;
+}
+#endif // SYNO_GLUSTERFS_PREFETCH_ACL
+
 static int fuse_direntplus_link(struct file *file,
 				struct fuse_direntplus *direntplus,
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+				u64 attr_version, struct syno_fuse_acl_data *pAcl, struct syno_fuse_acl_data *pArchiveBit)
+#else
 				u64 attr_version)
+#endif
 {
 	int err;
 	struct fuse_entry_out *o = &direntplus->entry_out;
@@ -1194,6 +1571,9 @@ static int fuse_direntplus_link(struct file *file,
 	struct fuse_conn *fc;
 	struct inode *inode;
 
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+	int blIsCompatible = 0;
+#endif
 	if (!o->nodeid) {
 		/*
 		 * Unlike in the case of fuse_lookup, zero nodeid does not mean
@@ -1283,19 +1663,40 @@ found:
 	fuse_change_entry_timeout(dentry, o);
 
 	err = 0;
+
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+	blIsCompatible = syno_is_fuse_version_compatible(fc);
+	if (0 != blIsCompatible && 0 != syno_fuse_direntplus_link_acl(inode, pAcl, pArchiveBit)) {
+		printk("cannot update ACL cache name: [%s]\n", name.name);
+	}
+#endif
 out:
 	dput(dentry);
 	return err;
 }
 
 static int parse_dirplusfile(char *buf, size_t nbytes, struct file *file,
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+			     void *dstbuf, filldir_t filldir, u64 attr_version,
+				 void *pCache_syno_acl_noperm_self, void *pCache_archive_bit_noperm)
+#else
 			     void *dstbuf, filldir_t filldir, u64 attr_version)
+#endif
 {
 	struct fuse_direntplus *direntplus;
 	struct fuse_dirent *dirent;
 	size_t reclen;
 	int over = 0;
 	int ret;
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+	struct syno_fuse_acl_data *pAcl = NULL;
+	struct syno_fuse_acl_data *pArchiveBit = NULL;
+	off_t acl_offset = 0;
+	off_t archive_bit_offset = 0;
+
+	pAcl = (struct syno_fuse_acl_data *)pCache_syno_acl_noperm_self;
+	pArchiveBit = (struct syno_fuse_acl_data *)pCache_archive_bit_noperm;
+#endif
 
 	while (nbytes >= FUSE_NAME_OFFSET_DIRENTPLUS) {
 		direntplus = (struct fuse_direntplus *) buf;
@@ -1325,7 +1726,19 @@ static int parse_dirplusfile(char *buf, size_t nbytes, struct file *file,
 		buf += reclen;
 		nbytes -= reclen;
 
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+		ret = fuse_direntplus_link(file, direntplus, attr_version, pAcl, pArchiveBit);
+		if (NULL != pAcl &&
+			NULL != pArchiveBit &&
+			syno_is_valid_acl_entry(direntplus)) {
+			acl_offset += SYNO_FUSE_ACL_VALUE_OFFSET + pAcl->len;
+			archive_bit_offset += SYNO_FUSE_ACL_VALUE_OFFSET + pArchiveBit->len;
+			pAcl = (struct syno_fuse_acl_data *)(((char *)pCache_syno_acl_noperm_self) + acl_offset);
+			pArchiveBit = (struct syno_fuse_acl_data *)(((char *)pCache_archive_bit_noperm) + archive_bit_offset);
+		}
+#else
 		ret = fuse_direntplus_link(file, direntplus, attr_version);
+#endif
 		if (ret)
 			fuse_force_forget(file, direntplus->entry_out.nodeid);
 	}
@@ -1342,9 +1755,23 @@ static int fuse_readdir(struct file *file, void *dstbuf, filldir_t filldir)
 	struct fuse_conn *fc = get_fuse_conn(inode);
 	struct fuse_req *req;
 	u64 attr_version = 0;
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+	void *pCache_syno_acl_noperm_self = NULL;
+	void *pCache_archive_bit_noperm = NULL;
+	int bIsGlusterFS = 0;
+	int blIsCompatible = 0;
+
+	blIsCompatible = syno_is_fuse_version_compatible(fc);
+#endif
 
 	if (is_bad_inode(inode))
 		return -EIO;
+
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+	if (IS_GLUSTER_FS(inode) && 0 != blIsCompatible) {
+		bIsGlusterFS = 1;
+	}
+#endif
 
 	req = fuse_get_req(fc, 1);
 	if (IS_ERR(req))
@@ -1358,32 +1785,79 @@ static int fuse_readdir(struct file *file, void *dstbuf, filldir_t filldir)
 
 	plus = fuse_use_readdirplus(inode, file);
 	req->out.argpages = 1;
+
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+	if (1 == bIsGlusterFS &&
+		(0 != syno_init_acl_cache(&pCache_syno_acl_noperm_self) || 0 != syno_init_acl_cache(&pCache_archive_bit_noperm))) {
+		err = -ENOMEM;
+		WARN_ON(1);
+		goto out;
+	}
+#endif
 	req->num_pages = 1;
 	req->pages[0] = page;
 	req->page_descs[0].length = PAGE_SIZE;
 	if (plus) {
 		attr_version = fuse_get_attr_version(fc);
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+		if (1 == bIsGlusterFS) {
+			req->out.args[0].size = SYNO_FUSE_ACL_CACHE_SIZE;
+			req->out.args[0].value = pCache_syno_acl_noperm_self;
+			req->out.args[1].size = SYNO_FUSE_ACL_CACHE_SIZE;
+			req->out.args[1].value = pCache_archive_bit_noperm;
+			syno_fuse_read_fill(req, file, file->f_pos, PAGE_SIZE,
+					   FUSE_READDIRPLUS);
+		} else {
 		fuse_read_fill(req, file, file->f_pos, PAGE_SIZE,
 			       FUSE_READDIRPLUS);
+		}
+#else
+		fuse_read_fill(req, file, file->f_pos, PAGE_SIZE,
+			       FUSE_READDIRPLUS);
+#endif
 	} else {
 		fuse_read_fill(req, file, file->f_pos, PAGE_SIZE,
 			       FUSE_READDIR);
 	}
 	fuse_request_send(fc, req);
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+	if (1 == bIsGlusterFS) {
+		nbytes = req->out.args[2].size;
+	} else {
 	nbytes = req->out.args[0].size;
+	}
+#else
+	nbytes = req->out.args[0].size;
+#endif
 	err = req->out.h.error;
 	fuse_put_request(fc, req);
 	if (!err) {
 		if (plus) {
 			err = parse_dirplusfile(page_address(page), nbytes,
 						file, dstbuf, filldir,
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+						attr_version,
+						pCache_syno_acl_noperm_self, pCache_archive_bit_noperm);
+#else
 						attr_version);
+#endif
 		} else {
 			err = parse_dirfile(page_address(page), nbytes, file,
 					    dstbuf, filldir);
 		}
 	}
 
+#ifdef SYNO_GLUSTERFS_PREFETCH_ACL
+out:
+	if (NULL != pCache_syno_acl_noperm_self) {
+		kfree(pCache_syno_acl_noperm_self);
+		pCache_syno_acl_noperm_self = NULL;
+	}
+	if (NULL != pCache_archive_bit_noperm) {
+		kfree(pCache_archive_bit_noperm);
+		pCache_archive_bit_noperm = NULL;
+	}
+#endif
 	__free_page(page);
 	fuse_invalidate_attr(inode); /* atime changed */
 	return err;
@@ -1590,9 +2064,15 @@ int fuse_do_setattr(struct inode *inode, struct iattr *attr,
 	if (!(fc->flags & FUSE_DEFAULT_PERMISSIONS))
 		attr->ia_valid |= ATTR_FORCE;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (inode && (!(inode->i_sb->s_flags & MS_SYNOACL))) {
+#endif
 	err = inode_change_ok(inode, attr);
 	if (err)
 		return err;
+#ifdef CONFIG_FS_SYNO_ACL
+	}
+#endif
 
 	if (attr->ia_valid & ATTR_OPEN) {
 		if (fc->atomic_o_trunc)
@@ -1708,112 +2188,6 @@ static int fuse_getattr(struct vfsmount *mnt, struct dentry *entry,
 	return fuse_update_attributes(inode, stat, NULL, NULL);
 }
 
-#ifdef SYNO_GLUSTER_FS
-static int syno_fuse_get_acl_cache_index(const char *name)
-{
-	int index = -1;
-	if (IS_SYNO_ACL_XATTR_ACCESS_NOPERM(name)) {
-		index = 0;
-	} else if (IS_SYNO_ARCHIVE_BIT_NOPERM(name)) {
-		index = 1;
-	}
-
-	return index;
-}
-
-extern unsigned long syno_fuse_xattr_expired_time_seconds;
-extern unsigned long syno_fuse_xattr_expired_time_milliseconds;
-
-#define CONVERT_MILLI_TO_NANO(milli) (((u64)milli) * 1000000llu)
-
-static int syno_fuse_update_acl_cache(const char *name, const void *value, ssize_t size, struct fuse_inode *pFuse_inode)
-{
-	int ret = -1;
-	int index = -1;
-	struct fuse_conn *fc = NULL;
-
-	if (!name || !size || !pFuse_inode) {
-		goto END;
-	}
-
-	fc = get_fuse_conn(&pFuse_inode->inode);
-	if (NULL == fc) {
-		goto END;
-	}
-
-	if (0 > (index = syno_fuse_get_acl_cache_index(name))) {
-		goto END;
-	}
-
-	spin_lock(&fc->lock);
-	pFuse_inode->synoacl_cache_table[index].expired_time = time_to_jiffies(syno_fuse_xattr_expired_time_seconds, CONVERT_MILLI_TO_NANO(syno_fuse_xattr_expired_time_milliseconds));
-#ifdef SYNO_FUSE_DEBUG
-	printk("name: [%s] expired_time_jiffied: [%llu] second: [%lu] millisecond: [%lu]\n",
-			name,
-			pFuse_inode->synoacl_cache_table[index].expired_time,
-			syno_fuse_xattr_expired_time_seconds,
-			CONVERT_MILLI_TO_NANO(syno_fuse_xattr_expired_time_milliseconds));
-#endif
-	pFuse_inode->synoacl_cache_table[index].size = size;
-	if (!value || 0 > size) {
-		// this request only query attribute size
-		ret = 0;
-		goto UNLOCK;
-	}
-	if (pFuse_inode->synoacl_cache_table[index].value) {
-		kfree(pFuse_inode->synoacl_cache_table[index].value);
-		pFuse_inode->synoacl_cache_table[index].value = NULL;
-	}
-	if (NULL == (pFuse_inode->synoacl_cache_table[index].value = kmalloc(size, GFP_KERNEL))) {
-		ret = -ENOMEM;
-		goto UNLOCK;
-	}
-	memcpy(pFuse_inode->synoacl_cache_table[index].value, value, size);
-
-	ret = 0;
-UNLOCK:
-	spin_unlock(&fc->lock);
-END:
-	return ret;
-}
-
-static ssize_t syno_fuse_get_acl_cache(const char *name, void **value, struct fuse_inode *pFuse_inode, size_t size)
-{
-	ssize_t ret = 0;
-	int index = -1;
-
-	if (!name || !value || !pFuse_inode) {
-		goto END;
-	}
-	if (0 > (index = syno_fuse_get_acl_cache_index(name))) {
-		goto END;
-	}
-
-	if (pFuse_inode->synoacl_cache_table[index].expired_time < get_jiffies_64()) {
-		goto END;
-	}
-	if (!IS_FUSE_SYNOACL_SIZE_CACHED(pFuse_inode, index)) {
-		goto END;
-	}
-	ret = pFuse_inode->synoacl_cache_table[index].size;
-	if (!(*value) || 0 > ret) {
-		goto END;
-	}
-	if (IS_FUSE_SYNOACL_ATTR_CACHED(pFuse_inode, index)) {
-		if (ret != size) {
-			ret = 0;
-			goto END;
-		}
-		memcpy(*value, pFuse_inode->synoacl_cache_table[index].value, ret);
-		goto END;
-	} else {
-		ret = 0;
-	}
-END:
-	return ret;
-}
-#endif // SYNO_GLUSTER_FS
-
 static int fuse_setxattr(struct dentry *entry, const char *name,
 			 const void *value, size_t size, int flags)
 {
@@ -1865,10 +2239,6 @@ static int fuse_setxattr(struct dentry *entry, const char *name,
 	return err;
 }
 
-#if SYNO_FUSE_PROFILE
-extern unsigned long syno_fuse_xattr_profile_time;
-extern unsigned long syno_fuse_xattr_profile_schedule_count;
-#endif
 static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 			     void *value, size_t size)
 {
@@ -2078,7 +2448,7 @@ static int fuse_removexattr(struct dentry *entry, const char *name)
 	return err;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 static int fuse_syno_arbit_get(struct dentry *dentry, unsigned int *pArbit)
 {
 	unsigned int arVal = 0;
@@ -2117,7 +2487,6 @@ static int fuse_syno_arbit_set(struct dentry *dentry, unsigned int arbit)
 #endif
 
 	err = fuse_setxattr(dentry, XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_BIT_NOPERM, &arbit, sizeof(arbit), 0);
-	//printk(KERN_ERR "fuse_arbit_set: [%s] xattr name: ["XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_BIT_NOPERM"], value: [%u] err: [%d] \n", d->d_name.name, arbit, err);
 	if (0 > err)
 		goto Err;
 
@@ -2125,7 +2494,7 @@ static int fuse_syno_arbit_set(struct dentry *dentry, unsigned int arbit)
 Err:
 	return err;
 }
-#endif //MY_ABC_HERE
+#endif //SYNO_ARCHIVE_BIT
 
 #ifdef SYNO_CREATE_TIME
 static int fuse_create_time_set(struct dentry *dentry, struct timespec *t)
@@ -2166,7 +2535,7 @@ static int fuse_create_time_get(struct dentry *dentry, struct timespec *t)
 Err:
 	return err;
 }
-#endif //MY_ABC_HERE 
+#endif //SYNO_CREATE_TIME
 
 #ifdef SYNO_STAT
 static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int flags)
@@ -2198,7 +2567,7 @@ static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int flag
 #endif
 	return 0;
 }
-#endif //MY_ABC_HERE
+#endif //SYNO_STAT
 
 static const struct inode_operations fuse_dir_inode_operations = {
 	.lookup		= fuse_lookup,

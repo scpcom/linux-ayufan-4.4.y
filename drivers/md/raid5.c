@@ -1656,6 +1656,263 @@ static void shrink_stripes(struct r5conf *conf)
 	conf->slab_cache = NULL;
 }
 
+#ifdef SYNO_AUTO_REMAP_REPORT
+// given chunk_number in "device", get parity disks (P, Q), and first data disk
+static int syno_raid5_parity_disk_get(const struct r5conf* conf, sector_t chunk_number, int *pd_idx, int *qd_idx, int *st_idx)
+{
+	int raid_disks = conf->raid_disks;
+	int data_disks = raid_disks - conf->max_degraded;
+
+	switch (conf->level) {
+	case 4:
+		*pd_idx = data_disks;
+		*qd_idx = -1;
+		*st_idx = 0;
+		break;
+	case 5:
+		*qd_idx = -1;
+		switch (conf->algorithm) {
+		case ALGORITHM_LEFT_ASYMMETRIC:
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks);
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+		case ALGORITHM_RIGHT_ASYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+		case ALGORITHM_LEFT_SYMMETRIC:
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks);
+			*st_idx = (*pd_idx + 1) % raid_disks;
+			break;
+		case ALGORITHM_RIGHT_SYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*st_idx = (*pd_idx + 1) % raid_disks;
+			break;
+		case ALGORITHM_PARITY_0:
+			*pd_idx = 0;
+			*st_idx = 1;
+			break;
+		case ALGORITHM_PARITY_N:
+			*pd_idx = data_disks;
+			*st_idx = 0;
+			break;
+		default:
+			BUG();
+		}
+		break;
+	case 6:
+		switch(conf->algorithm) {
+		case ALGORITHM_LEFT_ASYMMETRIC:
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+		case ALGORITHM_RIGHT_ASYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+		case ALGORITHM_LEFT_SYMMETRIC:
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (*qd_idx + 1) % raid_disks;
+			break;
+		case ALGORITHM_RIGHT_SYMMETRIC:
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (*qd_idx + 1) % raid_disks;
+			break;
+
+		case ALGORITHM_PARITY_0:
+			*pd_idx = 0;
+			*qd_idx = 1;
+			*st_idx = 2;
+			break;
+		case ALGORITHM_PARITY_N:
+			*pd_idx = data_disks;
+			*qd_idx = data_disks + 1;
+			*st_idx = 0;
+			break;
+
+		case ALGORITHM_ROTATING_ZERO_RESTART:
+			/* Exactly the same as RIGHT_ASYMMETRIC, but or
+			 * of blocks for computing Q is different.
+			 */
+			*pd_idx = sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+
+		case ALGORITHM_ROTATING_N_RESTART:
+			/* Same a left_asymmetric, by first stripe is
+			 * D D D P Q  rather than
+			 * Q D D D P
+			 */
+			chunk_number += 1;
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + 1) % raid_disks;
+			*st_idx = (1 >= *qd_idx? *qd_idx + 1: 0);
+			break;
+
+		case ALGORITHM_ROTATING_N_CONTINUE:
+			/* Same as left_symmetric but Q is before P */
+			*pd_idx = raid_disks - 1 - sector_mod(chunk_number, raid_disks);
+			*qd_idx = (*pd_idx + raid_disks - 1) % raid_disks;
+			*st_idx = (*pd_idx + 1) % raid_disks;
+			break;
+
+		case ALGORITHM_LEFT_ASYMMETRIC_6:
+			/* RAID5 left_asymmetric, with Q on last device */
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks - 1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+
+		case ALGORITHM_RIGHT_ASYMMETRIC_6:
+			*pd_idx = sector_mod(chunk_number, raid_disks-1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (0 == *pd_idx? 1: 0);
+			break;
+
+		case ALGORITHM_LEFT_SYMMETRIC_6:
+			*pd_idx = data_disks - sector_mod(chunk_number, raid_disks - 1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (*pd_idx + 1) % (raid_disks - 1);
+			break;
+
+		case ALGORITHM_RIGHT_SYMMETRIC_6:
+			*pd_idx = sector_mod(chunk_number, raid_disks - 1);
+			*qd_idx = raid_disks - 1;
+			*st_idx = (*pd_idx + 1) % (raid_disks - 1);
+			break;
+
+		case ALGORITHM_PARITY_0_6:
+			*pd_idx = 0;
+			*qd_idx = raid_disks - 1;
+			*st_idx = 1;
+			break;
+		default:
+			BUG();
+			break;
+		}
+		break;
+	default:
+		BUG();
+		break;
+	}
+
+	return 0;
+}
+
+/*
+ * conf [in]
+ * bad_disk [in] disk with bad sector
+ * bad_disks [out] disk which data will corrupt
+ */
+static int syno_raid5_data_corrupt_disk_get(const struct r5conf* conf, const int pd_idx, const int qd_idx, int bad_disk, int* bad_disks, int max_bad_disk)
+{
+	int d = 0;
+	int num_repair = 0;
+	int repair_disk[2] = {-1, -1};
+	int num_bad_disk = 0;
+
+	if (pd_idx != bad_disk && qd_idx != bad_disk) {
+		bad_disks[num_bad_disk++] = bad_disk;
+	}
+
+	for (d = 0; d < conf->raid_disks; d++) {
+		if (conf->disks[d].rdev) {
+			if (!test_bit(In_sync, &conf->disks[d].rdev->flags)) {
+				BUG_ON(num_repair >= conf->max_degraded);
+				repair_disk[num_repair++] = d;
+			}
+		} else {
+			BUG_ON(num_repair >= conf->max_degraded);
+			repair_disk[num_repair++] = d;
+		}
+	}
+	BUG_ON(conf->max_degraded != num_repair);
+
+	for (d = 0; d < num_repair && num_bad_disk < max_bad_disk; d++) {
+		if (pd_idx != repair_disk[d] && qd_idx != repair_disk[d]) {
+			bad_disks[num_bad_disk++] = repair_disk[d];
+		}
+	}
+
+	return num_bad_disk;
+}
+
+static int syno_raid5_disk_ahead_get(const int raid_disks, const int st_idx, int pd_idx, int qd_idx, int disk)
+{
+	int disk_ahead = -1;
+
+	if (0 > st_idx || 0 > pd_idx || 0 > disk) {
+		goto END;
+	}
+
+	if (disk < st_idx) {
+		disk += raid_disks;
+	}
+	disk_ahead = disk - st_idx ;
+
+	if (pd_idx < st_idx) {
+		pd_idx += raid_disks;
+	}
+	disk_ahead -= (pd_idx < disk? 1: 0);
+
+	if (-1 != qd_idx) {
+		if (qd_idx < st_idx) {
+			qd_idx += raid_disks;
+		}
+		disk_ahead -= (qd_idx < disk? 1: 0);
+	}
+
+END:
+	return disk_ahead;
+}
+
+static int syno_raid5_autoremap_report_sectors(const struct r5conf* conf, sector_t bad_sector, int bad_disk)
+{
+	sector_t sector = bad_sector ;
+	sector_t chunk_offset = sector_mod(sector, conf->chunk_sectors);
+	sector_t chunk_number = sector;
+	sector_t raid_sector = 0;
+
+	int ret = -1;
+	int raid_disks = conf->raid_disks ;
+	int data_disks = raid_disks - conf->max_degraded ;
+	int pd_idx = -1, qd_idx = -1, st_idx = -1;
+	int d = 0;
+	int bad_disks[3] = {0}; // for now, maximum possible disk with data-corruption is max_degraded of RAID6 (2) + 1
+	int num_bad_disk = 0;
+
+	int disk_ahead = 0;
+
+	struct md_rdev *rdev = conf->disks[bad_disk].rdev;
+
+	if (0 > syno_raid5_parity_disk_get(conf, chunk_number, &pd_idx, &qd_idx, &st_idx)) {
+		printk("Failed to syno_raid5_parity_disk_get\n");
+		goto END;
+	}
+
+	num_bad_disk = syno_raid5_data_corrupt_disk_get(conf, pd_idx, qd_idx, bad_disk, bad_disks, 3);
+
+	for (d = 0; d < num_bad_disk; d++) {
+		if (0 > (disk_ahead = syno_raid5_disk_ahead_get(raid_disks, st_idx, pd_idx, qd_idx, bad_disks[d]))) {
+			printk("Failed to syno_raid5_disk_ahead_get\n");
+			goto END;
+		}
+		raid_sector = (chunk_number * data_disks + disk_ahead) * conf->chunk_sectors + chunk_offset ;
+		SynoAutoRemapReport(conf->mddev, raid_sector, rdev->bdev);
+	}
+
+	ret = 0;
+END:
+	return ret;
+}
+
+#endif
+
 static void raid5_end_read_request(struct bio * bi, int error)
 {
 	struct stripe_head *sh = bi->bi_private;
@@ -1683,10 +1940,9 @@ static void raid5_end_read_request(struct bio * bi, int error)
 #ifdef SYNO_AUTO_REMAP_REPORT
 	if (bio_flagged(bi, BIO_AUTO_REMAP)) {
 		blIsRemapping = 1;
-		rdev = conf->disks[i].rdev;
 		clear_bit(BIO_AUTO_REMAP, &bi->bi_flags);
 		printk("%s:%s(%d) BIO_AUTO_REMAP detected, sector:[%llu], sh count:[%d] disk count:[%d]\n", __FILE__,__FUNCTION__,__LINE__, (unsigned long long)sh->sector, atomic_read(&sh->count), i);
-		SynoAutoRemapReport(conf->mddev, sh->sector, rdev->bdev);
+		syno_raid5_autoremap_report_sectors(conf, sh->sector, i);
 	}
 #endif
 
@@ -2679,6 +2935,8 @@ handle_failed_sync(struct r5conf *conf, struct stripe_head *sh,
 
 	md_done_sync(conf->mddev, STRIPE_SECTORS, 0);
 	clear_bit(STRIPE_SYNCING, &sh->state);
+	if (test_and_clear_bit(R5_Overlap, &sh->dev[sh->pd_idx].flags))
+		wake_up(&conf->wait_for_overlap);
 	s->syncing = 0;
 	/* There is nothing more to do for sync/check/repair.
 	 * For recover we need to record a bad block on all
@@ -2705,6 +2963,16 @@ handle_failed_sync(struct r5conf *conf, struct stripe_head *sh,
 	}
 }
 
+#ifdef SYNO_RAID5_PARITY_CHECK
+static inline int is_force_rcw(struct r5conf *conf, struct stripe_head_state *s)
+{
+	if (0 == conf->mddev->disable_force_rcw) {
+		return (s->failed && s->to_write);
+	}
+	return (conf->level == 6 && s->failed && s->to_write);
+}
+#endif
+
 /* fetch_block - checks the given member device to see if its data needs
  * to be read or computed to satisfy a request.
  *
@@ -2717,6 +2985,9 @@ static int fetch_block(struct stripe_head *sh, struct stripe_head_state *s,
 	struct r5dev *dev = &sh->dev[disk_idx];
 	struct r5dev *fdev[2] = { &sh->dev[s->failed_num[0]],
 				  &sh->dev[s->failed_num[1]] };
+#ifdef SYNO_RAID5_PARITY_CHECK
+	struct r5conf *conf = sh->raid_conf;
+#endif
 
 	/* is the data in this block needed, and can we get it? */
 	if (!test_bit(R5_LOCKED, &dev->flags) &&
@@ -2728,8 +2999,8 @@ static int fetch_block(struct stripe_head *sh, struct stripe_head_state *s,
 	     (s->failed >= 2 && fdev[1]->toread) ||
 	     (sh->raid_conf->level <= 5 && s->failed && fdev[0]->towrite &&
 	      !test_bit(R5_OVERWRITE, &fdev[0]->flags)) ||
-#ifdef MY_ABC_HERE
-	     (s->failed && s->to_write))) {
+#ifdef SYNO_RAID5_PARITY_CHECK
+	     (is_force_rcw(conf, s)))) {
 #else
 	     (sh->raid_conf->level == 6 && s->failed && s->to_write))) {
 #endif
@@ -2828,17 +3099,20 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 {
 	int i;
 	struct r5dev *dev;
+	int discard_pending = 0;
 
 	for (i = disks; i--; )
 		if (sh->dev[i].written) {
 			dev = &sh->dev[i];
 			if (!test_bit(R5_LOCKED, &dev->flags) &&
 			    (test_bit(R5_UPTODATE, &dev->flags) ||
-			     test_and_clear_bit(R5_Discard, &dev->flags))) {
+			     test_bit(R5_Discard, &dev->flags))) {
 				/* We can return any write requests */
 				struct bio *wbi, *wbi2;
 				int bitmap_end = 0;
 				pr_debug("Return write for disc %d\n", i);
+				if (test_and_clear_bit(R5_Discard, &dev->flags))
+					clear_bit(R5_UPTODATE, &dev->flags);
 				spin_lock_irq(&conf->device_lock);
 				wbi = dev->written;
 				dev->written = NULL;
@@ -2861,7 +3135,30 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 							STRIPE_SECTORS,
 					 !test_bit(STRIPE_DEGRADED, &sh->state),
 							0);
+			} else if (test_bit(R5_Discard, &dev->flags))
+				discard_pending = 1;
 		}
+	if (!discard_pending &&
+	    test_bit(R5_Discard, &sh->dev[sh->pd_idx].flags)) {
+		clear_bit(R5_Discard, &sh->dev[sh->pd_idx].flags);
+		clear_bit(R5_UPTODATE, &sh->dev[sh->pd_idx].flags);
+		if (sh->qd_idx >= 0) {
+			clear_bit(R5_Discard, &sh->dev[sh->qd_idx].flags);
+			clear_bit(R5_UPTODATE, &sh->dev[sh->qd_idx].flags);
+		}
+		/* now that discard is done we can proceed with any sync */
+		clear_bit(STRIPE_DISCARD, &sh->state);
+		/*
+		 * SCSI discard will change some bio fields and the stripe has
+		 * no updated data, so remove it from hash list and the stripe
+		 * will be reinitialized
+		 */
+		spin_lock_irq(&conf->device_lock);
+		remove_hash(sh);
+		spin_unlock_irq(&conf->device_lock);
+		if (test_bit(STRIPE_SYNC_REQUESTED, &sh->state))
+			set_bit(STRIPE_HANDLE, &sh->state);
+
 	}
 
 	if (test_and_clear_bit(STRIPE_FULL_WRITE, &sh->state))
@@ -2875,9 +3172,12 @@ static void handle_stripe_dirtying(struct r5conf *conf,
 				   int disks)
 {
 	int rmw = 0, rcw = 0, i;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID5_PARITY_CHECK
 	if (conf->max_degraded == 2 ||
-	    conf->max_degraded == 1) {
+#ifdef SYNO_ENABLE_RMW_WHEN_SYNC
+	   (conf->mddev->recovery_cp < MaxSector && sh->sector >= conf->mddev->recovery_cp) ||
+#endif
+	   (0 == conf->mddev->disable_force_rcw && conf->max_degraded == 1)) {
 #else
 	if (conf->max_degraded == 2) {
 #endif
@@ -3618,10 +3918,14 @@ static void handle_stripe(struct stripe_head *sh)
 
 #ifdef SYNO_KERNEL_3_RAID5_REVERT_STRIPE_LOCK_REMOVAL
 	spin_lock(&sh->lock);
-	if (test_and_clear_bit(STRIPE_SYNC_REQUESTED, &sh->state)) {
+	if (test_bit(STRIPE_SYNC_REQUESTED, &sh->state)) {
+		/* Cannot process 'sync' concurrently with 'discard' */
+		if (!test_bit(STRIPE_DISCARD, &sh->state) &&
+		    test_and_clear_bit(STRIPE_SYNC_REQUESTED, &sh->state)) {
 			set_bit(STRIPE_SYNCING, &sh->state);
 			clear_bit(STRIPE_INSYNC, &sh->state);
 		}
+	}
 	clear_bit(STRIPE_HANDLE, &sh->state);
 #else
 	clear_bit(STRIPE_HANDLE, &sh->state);
@@ -3632,10 +3936,16 @@ static void handle_stripe(struct stripe_head *sh)
 		return;
 	}
 
-	if (test_and_clear_bit(STRIPE_SYNC_REQUESTED, &sh->state)) {
+	if (test_bit(STRIPE_SYNC_REQUESTED, &sh->state)) {
+		spin_lock(&sh->stripe_lock);
+		/* Cannot process 'sync' concurrently with 'discard' */
+		if (!test_bit(STRIPE_DISCARD, &sh->state) &&
+		    test_and_clear_bit(STRIPE_SYNC_REQUESTED, &sh->state)) {
 			set_bit(STRIPE_SYNCING, &sh->state);
 			clear_bit(STRIPE_INSYNC, &sh->state);
 		}
+		spin_unlock(&sh->stripe_lock);
+	}
 #endif
 	clear_bit(STRIPE_DELAYED, &sh->state);
 
@@ -3701,6 +4011,45 @@ static void handle_stripe(struct stripe_head *sh)
 #endif
 	}
 
+	/* Now we check to see if any write operations have recently
+	 * completed
+	 */
+	prexor = 0;
+	if (sh->reconstruct_state == reconstruct_state_prexor_drain_result)
+		prexor = 1;
+	if (sh->reconstruct_state == reconstruct_state_drain_result ||
+	    sh->reconstruct_state == reconstruct_state_prexor_drain_result) {
+		sh->reconstruct_state = reconstruct_state_idle;
+
+		/* All the 'written' buffers and the parity block are ready to
+		 * be written back to disk
+		 */
+		BUG_ON(!test_bit(R5_UPTODATE, &sh->dev[sh->pd_idx].flags) &&
+		       !test_bit(R5_Discard, &sh->dev[sh->pd_idx].flags));
+		BUG_ON(sh->qd_idx >= 0 &&
+		       !test_bit(R5_UPTODATE, &sh->dev[sh->qd_idx].flags) &&
+		       !test_bit(R5_Discard, &sh->dev[sh->qd_idx].flags));
+		for (i = disks; i--; ) {
+			struct r5dev *dev = &sh->dev[i];
+			if (test_bit(R5_LOCKED, &dev->flags) &&
+				(i == sh->pd_idx || i == sh->qd_idx ||
+				 dev->written)) {
+				pr_debug("Writing block %d\n", i);
+				set_bit(R5_Wantwrite, &dev->flags);
+				if (prexor)
+					continue;
+				if (s.failed > 1)
+					continue;
+				if (!test_bit(R5_Insync, &dev->flags) ||
+				    ((i == sh->pd_idx || i == sh->qd_idx)  &&
+				     s.failed == 0))
+					set_bit(STRIPE_INSYNC, &sh->state);
+			}
+		}
+		if (test_and_clear_bit(STRIPE_PREREAD_ACTIVE, &sh->state))
+			s.dec_preread_active = 1;
+	}
+
 	/*
 	 * might be able to return some write requests if the parity blocks
 	 * are safe, or on a failed drive
@@ -3729,50 +4078,13 @@ static void handle_stripe(struct stripe_head *sh)
 	 * or to load a block that is being partially written.
 	 */
 	if (s.to_read || s.non_overwrite
-#ifdef MY_ABC_HERE
-	    || (s.to_write && s.failed)
+#ifdef SYNO_RAID5_PARITY_CHECK
+	    || (is_force_rcw(conf, &s))
 #else
 	    || (conf->level == 6 && s.to_write && s.failed)
 #endif
 	    || (s.syncing && (s.uptodate + s.compute < disks)) || s.expanding)
 		handle_stripe_fill(sh, &s, disks);
-
-	/* Now we check to see if any write operations have recently
-	 * completed
-	 */
-	prexor = 0;
-	if (sh->reconstruct_state == reconstruct_state_prexor_drain_result)
-		prexor = 1;
-	if (sh->reconstruct_state == reconstruct_state_drain_result ||
-	    sh->reconstruct_state == reconstruct_state_prexor_drain_result) {
-		sh->reconstruct_state = reconstruct_state_idle;
-
-		/* All the 'written' buffers and the parity block are ready to
-		 * be written back to disk
-		 */
-		BUG_ON(!test_bit(R5_UPTODATE, &sh->dev[sh->pd_idx].flags) &&
-		       !test_bit(R5_Discard, &sh->dev[sh->pd_idx].flags));
-		BUG_ON(sh->qd_idx >= 0 &&
-		       !test_bit(R5_UPTODATE, &sh->dev[sh->qd_idx].flags) &&
-		       !test_bit(R5_Discard, &sh->dev[sh->qd_idx].flags));
-		for (i = disks; i--; ) {
-			struct r5dev *dev = &sh->dev[i];
-			if (test_bit(R5_LOCKED, &dev->flags) &&
-				(i == sh->pd_idx || i == sh->qd_idx ||
-				 dev->written)) {
-				pr_debug("Writing block %d\n", i);
-				set_bit(R5_Wantwrite, &dev->flags);
-				if (prexor)
-					continue;
-				if (!test_bit(R5_Insync, &dev->flags) ||
-				    ((i == sh->pd_idx || i == sh->qd_idx)  &&
-				     s.failed == 0))
-					set_bit(STRIPE_INSYNC, &sh->state);
-			}
-		}
-		if (test_and_clear_bit(STRIPE_PREREAD_ACTIVE, &sh->state))
-			s.dec_preread_active = 1;
-	}
 
 	/* Now to consider new write requests and what else, if anything
 	 * should be read.  We do not handle new writes when:
@@ -3814,6 +4126,8 @@ static void handle_stripe(struct stripe_head *sh)
 	if (s.syncing && s.locked == 0 && test_bit(STRIPE_INSYNC, &sh->state)) {
 		md_done_sync(conf->mddev, STRIPE_SECTORS, 1);
 		clear_bit(STRIPE_SYNCING, &sh->state);
+		if (test_and_clear_bit(R5_Overlap, &sh->dev[sh->pd_idx].flags))
+			wake_up(&conf->wait_for_overlap);
 	}
 
 	/* If the failed drives are just a ReadError, then we might need
@@ -4309,18 +4623,24 @@ static void make_discard_request(struct mddev *mddev, struct bio *bi)
 		sh = get_active_stripe(conf, logical_sector, 0, 0, 0);
 		prepare_to_wait(&conf->wait_for_overlap, &w,
 				TASK_UNINTERRUPTIBLE);
-		spin_lock_irq(&sh->lock);
+		set_bit(R5_Overlap, &sh->dev[sh->pd_idx].flags);
+		if (test_bit(STRIPE_SYNCING, &sh->state)) {
+			release_stripe(sh);
+			schedule();
+			goto again;
+		}
+		clear_bit(R5_Overlap, &sh->dev[sh->pd_idx].flags);
 		for (d = 0; d < conf->raid_disks; d++) {
 			if (d == sh->pd_idx || d == sh->qd_idx)
 				continue;
 			if (sh->dev[d].towrite || sh->dev[d].toread) {
 				set_bit(R5_Overlap, &sh->dev[d].flags);
-				spin_unlock_irq(&sh->lock);
 				release_stripe(sh);
 				schedule();
 				goto again;
 			}
 		}
+		set_bit(STRIPE_DISCARD, &sh->state);
 		finish_wait(&conf->wait_for_overlap, &w);
 		for (d = 0; d < conf->raid_disks; d++) {
 			if (d == sh->pd_idx || d == sh->qd_idx)
@@ -4329,7 +4649,6 @@ static void make_discard_request(struct mddev *mddev, struct bio *bi)
 			set_bit(R5_OVERWRITE, &sh->dev[d].flags);
 			raid5_inc_bi_active_stripes(bi);
 		}
-		spin_unlock_irq(&sh->lock);
 		if (conf->mddev->bitmap) {
 			for (d = 0;
 			     d < conf->raid_disks - conf->max_degraded;
@@ -4346,7 +4665,6 @@ static void make_discard_request(struct mddev *mddev, struct bio *bi)
 		clear_bit(STRIPE_DELAYED, &sh->state);
 		if (!test_and_set_bit(STRIPE_PREREAD_ACTIVE, &sh->state))
 			atomic_inc(&conf->preread_active_stripes);
-		release_stripe(sh);
 	}
 
 	remaining = raid5_dec_bi_active_stripes(bi);
@@ -4372,13 +4690,13 @@ static void make_request(struct mddev *mddev, struct bio * bi)
 		return;
 	}
 
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 	if (mddev->nodev_and_crashed) {
 #else
 	if (mddev->degraded > conf->max_degraded) {
 #endif
-#ifdef  MY_ABC_HERE
+#ifdef  SYNO_FLASHCACHE_SUPPORT
 		syno_flashcache_return_error(bi);
 #else
 		/* if there has more than max_degraded disks lose, we would not permit keeping acceess on it*/
@@ -6014,6 +6332,13 @@ static int raid5_start_reshape(struct mddev *mddev)
 	conf->reshape_safe = conf->reshape_progress;
 	conf->generation++;
 	spin_unlock_irq(&conf->device_lock);
+
+	/* Now make sure any requests that proceeded on the assumption
+	 * the reshape wasn't running - like Discard or Read - have
+	 * completed.
+	 */
+	mddev_suspend(mddev);
+	mddev_resume(mddev);
 
 	/* Add some new drives, as many as will fit.
 	 * We know there are enough to make the newly sized array work.

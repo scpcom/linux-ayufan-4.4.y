@@ -11,7 +11,9 @@
 
 #include <linux/limits.h>
 #include <linux/ioctl.h>
+#ifdef __KERNEL__
 #include <linux/blk_types.h>
+#endif
 #include <linux/types.h>
 
 #ifdef SYNO_RECVFILE
@@ -83,6 +85,9 @@ struct inodes_stat_t {
 #define MAY_DEL					(0x1000)
 #define MAY_DEL_CHILD			(0x2000)
 #define MAY_GET_OWNER_SHIP		(0x4000)
+
+#define MASK_RDONLY_CHECK (MAY_WRITE|MAY_APPEND|MAY_WRITE_ATTR|MAY_WRITE_EXT_ATTR|MAY_WRITE_PERMISSION|MAY_DEL|MAY_DEL_CHILD|MAY_GET_OWNER_SHIP)
+
 #else /* CONFIG_FS_SYNO_ACL */
 #define MAY_EXEC		0x00000001
 #define MAY_WRITE		0x00000002
@@ -426,11 +431,13 @@ struct inodes_stat_t {
 #define FS_FL_USER_VISIBLE		0x0003DFFF /* User visible flags */
 #define FS_FL_USER_MODIFIABLE		0x000380FF /* User modifiable flags */
 
-
 #define SYNC_FILE_RANGE_WAIT_BEFORE	1
 #define SYNC_FILE_RANGE_WRITE		2
 #define SYNC_FILE_RANGE_WAIT_AFTER	4
 
+#if defined(CONFIG_SYNO_ARMADA_V2) && !defined(SYNO_RECVFILE)
+#define MAX_PAGES_PER_RECVFILE		64
+#endif
 
 #ifdef __KERNEL__
 
@@ -469,7 +476,7 @@ struct kstatfs;
 struct vm_area_struct;
 struct vfsmount;
 struct cred;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2) || (defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE))
 struct socket;
 #endif
 
@@ -1610,7 +1617,7 @@ struct super_block {
 
 	/* Number of inodes with nlink == 0 but still referenced */
 	atomic_long_t s_remove_count;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_OPTIONS
 	u64 	s_syno_opt;
 #endif
 };
@@ -1618,6 +1625,7 @@ struct super_block {
 #ifdef SYNO_GLUSTER_FS
 #define SZ_FS_GLUSTER	"glusterfs"
 #define IS_GLUSTER_FS(inode) (inode->i_sb->s_subtype && !strcmp(SZ_FS_GLUSTER, inode->i_sb->s_subtype))
+#define IS_GLUSTER_FS_SB(sb) (sb->s_subtype && !strcmp(SZ_FS_GLUSTER, sb->s_subtype))
 #endif
 
 /* superblock cache pruning functions */
@@ -1629,6 +1637,11 @@ extern struct timespec current_fs_time(struct super_block *sb);
 /*
  * Snapshotting support.
  */
+
+#if defined(CONFIG_SYNO_ARMADA_V2)
+#define vfs_check_frozen(sb, level) \
+	wait_event((sb)->s_wait_unfrozen, ((sb)->s_frozen < (level)))
+#endif
 
 void __sb_end_write(struct super_block *sb, int level);
 int __sb_start_write(struct super_block *sb, int level, bool wait);
@@ -1844,21 +1857,25 @@ struct file_operations {
 	int (*flock) (struct file *, int, struct file_lock *);
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int);
 	ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+	ssize_t (*splice_from_socket)(struct file *file, struct socket *sock,
+				     loff_t __user *ppos, size_t count);
+#endif
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	ssize_t (*splice_from_socket)(struct file *, struct socket *,
 				     loff_t __user *ppos, size_t count);
 #endif
 	int (*setlease)(struct file *, long, struct file_lock **);
 	long (*fallocate)(struct file *file, int mode, loff_t offset,
 			  loff_t len);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	ssize_t (*syno_recvfile)(struct file *file, struct socket *sock,
 	                                              loff_t *ppos, size_t count, size_t * rbytes, size_t * wbytes);
 #endif
 };
 
 struct inode_operations {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 	int (*syno_getattr)(struct dentry *, struct kstat *, int flags);
 #endif
 	struct dentry * (*lookup) (struct inode *,struct dentry *, struct nameidata *);
@@ -1886,6 +1903,7 @@ struct inode_operations {
 	int (*syno_permission)(struct dentry *, int);
 	int (*syno_exec_permission)(struct dentry *);
 	int (*syno_acl_access)(struct dentry *, int);
+	int (*syno_may_delete)(struct dentry *, struct inode *);
 	int (*syno_inode_change_ok)(struct dentry *, struct iattr *);
 	int (*syno_arbit_chg_ok)(struct dentry *, unsigned int cmd, int tag, int mask);
 	int (*syno_setattr_post)(struct dentry *, struct iattr *);
@@ -2506,6 +2524,13 @@ static inline bool execute_ok(struct inode *inode)
 	return (inode->i_mode & S_IXUGO) || S_ISDIR(inode->i_mode);
 }
 
+#ifdef SYNO_BTRFS_PORTING
+static inline struct inode *file_inode(struct file *f)
+{
+	return f->f_path.dentry->d_inode;
+}
+#endif
+
 /*
  * get_write_access() gets write permission for a file.
  * put_write_access() releases this write permission.
@@ -2647,8 +2672,15 @@ extern int generic_file_mmap(struct file *, struct vm_area_struct *);
 extern int generic_file_readonly_mmap(struct file *, struct vm_area_struct *);
 extern int file_read_actor(read_descriptor_t * desc, struct page *page, unsigned long offset, unsigned long size);
 int generic_write_checks(struct file *file, loff_t *pos, size_t *count, int isblk);
-#ifdef MY_ABC_HERE
-#define MAX_PAGES_PER_RECVFILE 32
+#ifdef SYNO_RECVFILE
+/**
+* Description for page buffer in recvfile:
+* The max size of per receive file request is "128KB". If PAGE_SIZE is changed from 4K to 64K,
+* maximal number of pages shall change dynamically to keep consistent maximal size "128K".
+* 128K = 2^17 and PAGE_SIZE is determined by PAGE_SHIFT, so formula for max page is
+* "2^(17 - PAGE_SHIFT)".
+*/
+#define MAX_PAGES_PER_RECVFILE (1 << (17 - PAGE_SHIFT))
 extern int do_recvfile(struct file *file, struct socket *sock, loff_t *ppos, size_t count, size_t *rbytes , size_t *wbytes);
 #endif
 extern ssize_t generic_file_aio_read(struct kiocb *, const struct iovec *, unsigned long, loff_t);
@@ -2685,7 +2717,7 @@ extern ssize_t generic_splice_sendpage(struct pipe_inode_info *pipe,
 		struct file *out, loff_t *, size_t len, unsigned int flags);
 extern long do_splice_direct(struct file *in, loff_t *ppos, struct file *out,
 		size_t len, unsigned int flags);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 extern ssize_t generic_splice_from_socket(struct file *file, struct socket *sock,
 				     loff_t __user *ppos, size_t count);
 #endif
@@ -2971,7 +3003,7 @@ static inline void inode_has_no_xattr(struct inode *inode)
 #define UNICODE_UTF8_BUFSIZE		8192
 int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int clenUtf8Str1, int clenUtf8Str2, u_int16_t *upcasetable);
 int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable);
-#endif /*MY_ABC_HERE */
+#endif /*SYNO_KERNEL_UNICODE */
 
 #ifdef SYNO_CREATE_TIME
 static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *time)
@@ -3051,7 +3083,7 @@ static inline int syno_op_set_archive_bit(struct dentry *dentry, unsigned int ar
 	return err;
 }
 
-#endif //MY_ABC_HERE
+#endif //SYNO_ARCHIVE_BIT
 
 #if defined(CONFIG_FS_SYNO_ACL) && defined(SYNO_ARCHIVE_BIT)
 #define IS_SYNOACL_SUPERUSER() (0 == current_fsuid())

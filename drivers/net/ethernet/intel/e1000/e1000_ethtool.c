@@ -227,10 +227,16 @@ static u32 e1000_get_link(struct net_device *netdev)
 	 * state is interrogated, rather than pulling a cached and possibly
 	 * stale link state from the driver.
 	 */
+	mutex_lock(&adapter->mutex);
+
 	if (!netif_carrier_ok(netdev))
 		adapter->hw.get_link_status = 1;
 
-	return e1000_has_link(adapter);
+	u32 ret = e1000_has_link(adapter);
+
+	mutex_unlock(&adapter->mutex);
+
+	return ret;
 }
 
 static void e1000_get_pauseparam(struct net_device *netdev,

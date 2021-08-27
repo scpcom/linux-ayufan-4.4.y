@@ -74,7 +74,7 @@ struct nf_conntrack_tuple {
 		u_int8_t dir;
 	} dst;
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	/* If true, this connection is handled by NFP */
 	bool nfp;

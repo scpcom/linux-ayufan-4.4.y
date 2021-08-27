@@ -1399,7 +1399,7 @@ int usb_resume(struct device *dev, pm_message_t msg)
 	 * Unbind the interfaces that will need rebinding later.
 	 */
 	} else {
-#ifdef CONFIG_SYNO_ARMADA
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 		/*
 		 * Detect USB quirks again as they are lost after
 		 * suspend to mem.

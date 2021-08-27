@@ -63,6 +63,9 @@ struct usbtest_dev {
 	struct usbtest_info	*info;
 	int			in_pipe;
 	int			out_pipe;
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	struct usb_endpoint_descriptor	*in_desc, *out_desc;
+#endif
 	int			in_iso_pipe;
 	int			out_iso_pipe;
 	struct usb_endpoint_descriptor	*iso_in, *iso_out;
@@ -78,8 +81,11 @@ static struct usb_device *testdev_to_usbdev(struct usbtest_dev *test)
 }
 
 /* set up all urbs so they can be used with either bulk or interrupt */
+#if defined(CONFIG_SYNO_ARMADA_V2)
+#define UNLINK_RATE     1   /* msec */
+#else
 #define	INTERRUPT_RATE		1	/* msec/transfer */
-
+#endif
 #define ERROR(tdev, fmt, args...) \
 	dev_err(&(tdev)->intf->dev , fmt , ## args)
 #define WARNING(tdev, fmt, args...) \
@@ -114,6 +120,9 @@ get_endpoints(struct usbtest_dev *dev, struct usb_interface *intf)
 			e = alt->endpoint + ep;
 			switch (e->desc.bmAttributes) {
 			case USB_ENDPOINT_XFER_BULK:
+#if defined(CONFIG_SYNO_ARMADA_V2)
+			case USB_ENDPOINT_XFER_INT:
+#endif
 				break;
 			case USB_ENDPOINT_XFER_ISOC:
 				if (dev->info->iso)
@@ -155,10 +164,28 @@ found:
 	}
 
 	if (in) {
+#if defined(CONFIG_SYNO_ARMADA_V2)
+        if(in->desc.bmAttributes == USB_ENDPOINT_XFER_INT) {
+			dev->in_pipe = usb_rcvintpipe (udev,
+				in->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
+			if (out)
+				dev->out_pipe = usb_sndintpipe (udev,
+					out->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
+		} else {
+			dev->in_pipe = usb_rcvbulkpipe (udev,
+				in->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
+			if (out)
+				dev->out_pipe = usb_sndbulkpipe (udev,
+					out->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
+        }
+        dev->in_desc = &in->desc;
+        dev->out_desc = &out->desc;
+#else
 		dev->in_pipe = usb_rcvbulkpipe(udev,
 			in->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
 		dev->out_pipe = usb_sndbulkpipe(udev,
 			out->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
+#endif
 	}
 	if (iso_in) {
 		dev->iso_in = &iso_in->desc;
@@ -193,19 +220,37 @@ static void simple_callback(struct urb *urb)
 static struct urb *usbtest_alloc_urb(
 	struct usb_device	*udev,
 	int			pipe,
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	struct usb_endpoint_descriptor *desc,
+#endif
 	unsigned long		bytes,
 	unsigned		transfer_flags,
 	unsigned		offset)
 {
 	struct urb		*urb;
 
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	if (bytes < 0)
+		return NULL;
+#endif
 	urb = usb_alloc_urb(0, GFP_KERNEL);
 	if (!urb)
 		return urb;
 	usb_fill_bulk_urb(urb, udev, pipe, NULL, bytes, simple_callback, NULL);
+
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	if(desc != NULL) {
+		if( (udev->speed == USB_SPEED_HIGH) ||
+			((desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_ISOC))
+			urb->interval = (1 << (desc->bInterval - 1));
+		else
+			urb->interval = desc->bInterval;
+    }
+#else
 	urb->interval = (udev->speed == USB_SPEED_HIGH)
 			? (INTERRUPT_RATE << 3)
 			: INTERRUPT_RATE;
+#endif
 	urb->transfer_flags = transfer_flags;
 	if (usb_pipein(pipe))
 		urb->transfer_flags |= URB_SHORT_NOT_OK;
@@ -241,9 +286,16 @@ static struct urb *usbtest_alloc_urb(
 static struct urb *simple_alloc_urb(
 	struct usb_device	*udev,
 	int			pipe,
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	struct usb_endpoint_descriptor *desc,
+#endif
 	unsigned long		bytes)
 {
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	return usbtest_alloc_urb(udev, pipe, desc, bytes, URB_NO_TRANSFER_DMA_MAP, 0);
+#else
 	return usbtest_alloc_urb(udev, pipe, bytes, URB_NO_TRANSFER_DMA_MAP, 0);
+#endif
 }
 
 static unsigned pattern;
@@ -333,6 +385,10 @@ static void simple_free_urb(struct urb *urb)
 {
 	unsigned long offset = buffer_offset(urb->transfer_buffer);
 
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	if (urb != NULL) {
+		if ((urb->transfer_buffer != NULL) && (urb->transfer_buffer_length > 0)) {
+#endif
 	if (urb->transfer_flags & URB_NO_TRANSFER_DMA_MAP)
 		usb_free_coherent(
 			urb->dev,
@@ -341,8 +397,14 @@ static void simple_free_urb(struct urb *urb)
 			urb->transfer_dma - offset);
 	else
 		kfree(urb->transfer_buffer - offset);
+#if defined(CONFIG_SYNO_ARMADA_V2)
+		}
 		usb_free_urb(urb);
 	}
+#else
+	usb_free_urb(urb);
+#endif
+}
 
 static int simple_io(
 	struct usbtest_dev	*tdev,
@@ -427,6 +489,10 @@ alloc_sglist(int nents, int max, int vary)
 	sg = kmalloc(nents * sizeof *sg, GFP_KERNEL);
 	if (!sg)
 		return NULL;
+
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	memset(sg, 0, nents * sizeof *sg);
+#endif
 	sg_init_table(sg, nents);
 
 	for (i = 0; i < nents; i++) {
@@ -467,6 +533,9 @@ static int perform_sglist(
 	struct usbtest_dev	*tdev,
 	unsigned		iterations,
 	int			pipe,
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	struct usb_endpoint_descriptor *desc,
+#endif
 	struct usb_sg_request	*req,
 	struct scatterlist	*sg,
 	int			nents
@@ -476,12 +545,24 @@ static int perform_sglist(
 	int			retval = 0;
 
 	while (retval == 0 && iterations-- > 0) {
+#if defined(CONFIG_SYNO_ARMADA_V2)
+		if(desc != NULL) {
+			if( (udev->speed == USB_SPEED_HIGH) ||
+				((desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_ISOC))
+				interval = (1 << (desc->bInterval - 1));
+			else
+				interval = desc->bInterval;
+		}
+
+		retval = usb_sg_init (req, udev, pipe, interval,
+				                sg, nents, 0, GFP_KERNEL);
+#else
 		retval = usb_sg_init(req, udev, pipe,
 				(udev->speed == USB_SPEED_HIGH)
 					? (INTERRUPT_RATE << 3)
 					: INTERRUPT_RATE,
 				sg, nents, 0, GFP_KERNEL);
-
+#endif
 		if (retval)
 			break;
 		usb_sg_wait(req);
@@ -1053,7 +1134,11 @@ test_ctrl_queue(struct usbtest_dev *dev, struct usbtest_param *param)
 			goto cleanup;
 		}
 		req.wLength = cpu_to_le16(len);
+#if defined(CONFIG_SYNO_ARMADA_V2)
+		urb [i] = u = simple_alloc_urb (udev, pipe, NULL, len);
+#else
 		urb[i] = u = simple_alloc_urb(udev, pipe, len);
+#endif
 		if (!u)
 			goto cleanup;
 
@@ -1118,14 +1203,23 @@ static void unlink1_callback(struct urb *urb)
 	}
 }
 
+#if defined(CONFIG_SYNO_ARMADA_V2)
+static int unlink1 (struct usbtest_dev *dev, int pipe,
+                    struct usb_endpoint_descriptor *desc, int size, int async)
+#else
 static int unlink1(struct usbtest_dev *dev, int pipe, int size, int async)
+#endif
 {
 	struct urb		*urb;
 	struct completion	completion;
 	int			retval = 0;
 
 	init_completion(&completion);
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	urb = simple_alloc_urb (testdev_to_usbdev (dev), pipe, desc, size);
+#else
 	urb = simple_alloc_urb(testdev_to_usbdev(dev), pipe, size);
+#endif
 	if (!urb)
 		return -ENOMEM;
 	urb->context = &completion;
@@ -1146,7 +1240,11 @@ static int unlink1(struct usbtest_dev *dev, int pipe, int size, int async)
 	/* unlinking that should always work.  variable delay tests more
 	 * hcd states and code paths, even with little other system load.
 	 */
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	msleep (jiffies % (2 * UNLINK_RATE));
+#else
 	msleep(jiffies % (2 * INTERRUPT_RATE));
+#endif
 	if (async) {
 		while (!completion_done(&completion)) {
 			retval = usb_unlink_urb(urb);
@@ -1188,14 +1286,25 @@ static int unlink1(struct usbtest_dev *dev, int pipe, int size, int async)
 				0 : retval - 2000;
 }
 
+#if defined(CONFIG_SYNO_ARMADA_V2)
+static int unlink_simple (struct usbtest_dev *dev, int pipe,
+						struct usb_endpoint_descriptor *desc, int len)
+#else
 static int unlink_simple(struct usbtest_dev *dev, int pipe, int len)
+#endif
 {
 	int			retval = 0;
 
 	/* test sync and async paths */
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	retval = unlink1 (dev, pipe, desc, len, 1);
+	if (!retval)
+		retval = unlink1 (dev, pipe, desc, len, 0);
+#else
 	retval = unlink1(dev, pipe, len, 1);
 	if (!retval)
 		retval = unlink1(dev, pipe, len, 0);
+#endif
 	return retval;
 }
 
@@ -1391,10 +1500,18 @@ static int halt_simple(struct usbtest_dev *dev)
 	struct urb		*urb;
 	struct usb_device	*udev = testdev_to_usbdev(dev);
 
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	if (udev->speed == USB_SPEED_SUPER)
+		urb = simple_alloc_urb(udev, 0, NULL, 1024);
+	else
+		urb = simple_alloc_urb(udev, 0, NULL, 512);
+#else
 	if (udev->speed == USB_SPEED_SUPER)
 		urb = simple_alloc_urb(udev, 0, 1024);
 	else
 		urb = simple_alloc_urb(udev, 0, 512);
+#endif
+
 	if (urb == NULL)
 		return -ENOMEM;
 
@@ -1645,9 +1762,16 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 	unsigned		i;
 	unsigned long		packets = 0;
 	int			status = 0;
+
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	struct urb		*urbs[50];  /* FIXME no limit */
+
+	if (param->sglen > 50)
+#else
 	struct urb		*urbs[10];	/* FIXME no limit */
 
 	if (param->sglen > 10)
+#endif
 		return -EDOM;
 
 	memset(&context, 0, sizeof context);
@@ -1692,8 +1816,11 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 				goto fail;
 			}
 
+#if defined(CONFIG_SYNO_ARMADA_V2)
+#else
 			simple_free_urb(urbs[i]);
 			urbs[i] = NULL;
+#endif
 			context.pending--;
 			context.submit_error = 1;
 			break;
@@ -1703,10 +1830,13 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 
 	wait_for_completion(&context.done);
 
+#if defined(CONFIG_SYNO_ARMADA_V2)
+#else
 	for (i = 0; i < param->sglen; i++) {
 		if (urbs[i])
 			simple_free_urb(urbs[i]);
 	}
+#endif
 	/*
 	 * Isochronous transfers are expected to fail sometimes.  As an
 	 * arbitrary limit, we will report an error if any submissions
@@ -1718,7 +1848,10 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 		status = -EACCES;
 	else if (context.errors > context.packet_count / 10)
 		status = -EIO;
+#if defined(CONFIG_SYNO_ARMADA_V2)
+#else
 	return status;
+#endif
 
 fail:
 	for (i = 0; i < param->sglen; i++) {
@@ -1738,7 +1871,11 @@ static int test_unaligned_bulk(
 {
 	int retval;
 	struct urb *urb = usbtest_alloc_urb(
+#if defined(CONFIG_SYNO_ARMADA_V2)
+		testdev_to_usbdev(tdev), pipe, NULL, length, transfer_flags, 1);
+#else
 		testdev_to_usbdev(tdev), pipe, length, transfer_flags, 1);
+#endif
 
 	if (!urb)
 		return -ENOMEM;
@@ -1845,7 +1982,11 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 1:  write %d bytes %u times\n",
 				param->length, param->iterations);
+#if defined(CONFIG_SYNO_ARMADA_V2)
+		urb = simple_alloc_urb (udev, dev->out_pipe, dev->out_desc, param->length);
+#else
 		urb = simple_alloc_urb(udev, dev->out_pipe, param->length);
+#endif
 		if (!urb) {
 			retval = -ENOMEM;
 			break;
@@ -1860,7 +2001,11 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 2:  read %d bytes %u times\n",
 				param->length, param->iterations);
+#if defined(CONFIG_SYNO_ARMADA_V2)
+		urb = simple_alloc_urb (udev, dev->in_pipe, dev->in_desc, param->length);
+#else
 		urb = simple_alloc_urb(udev, dev->in_pipe, param->length);
+#endif
 		if (!urb) {
 			retval = -ENOMEM;
 			break;
@@ -1875,7 +2020,11 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 3:  write/%d 0..%d bytes %u times\n",
 				param->vary, param->length, param->iterations);
+#if defined(CONFIG_SYNO_ARMADA_V2)
+		urb = simple_alloc_urb (udev, dev->out_pipe, dev->out_desc, param->length);
+#else
 		urb = simple_alloc_urb(udev, dev->out_pipe, param->length);
+#endif
 		if (!urb) {
 			retval = -ENOMEM;
 			break;
@@ -1891,7 +2040,11 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 4:  read/%d 0..%d bytes %u times\n",
 				param->vary, param->length, param->iterations);
+#if defined(CONFIG_SYNO_ARMADA_V2)
+		urb = simple_alloc_urb (udev, dev->in_pipe, dev->in_desc, param->length);
+#else
 		urb = simple_alloc_urb(udev, dev->in_pipe, param->length);
+#endif
 		if (!urb) {
 			retval = -ENOMEM;
 			break;
@@ -1917,7 +2070,11 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		/* FIRMWARE:  bulk sink (maybe accepts short writes) */
 		retval = perform_sglist(dev, param->iterations, dev->out_pipe,
+#if defined(CONFIG_SYNO_ARMADA_V2)
+				dev->out_desc, &req, sg, param->sglen);
+#else
 				&req, sg, param->sglen);
+#endif
 		free_sglist(sg, param->sglen);
 		break;
 
@@ -1935,7 +2092,11 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		/* FIRMWARE:  bulk source (maybe generates short writes) */
 		retval = perform_sglist(dev, param->iterations, dev->in_pipe,
+#if defined(CONFIG_SYNO_ARMADA_V2)
+				dev->in_desc, &req, sg, param->sglen);
+#else
 				&req, sg, param->sglen);
+#endif
 		free_sglist(sg, param->sglen);
 		break;
 	case 7:
@@ -1952,7 +2113,11 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		/* FIRMWARE:  bulk sink (maybe accepts short writes) */
 		retval = perform_sglist(dev, param->iterations, dev->out_pipe,
+#if defined(CONFIG_SYNO_ARMADA_V2)
+				dev->out_desc, &req, sg, param->sglen);
+#else
 				&req, sg, param->sglen);
+#endif
 		free_sglist(sg, param->sglen);
 		break;
 	case 8:
@@ -1969,7 +2134,11 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		/* FIRMWARE:  bulk source (maybe generates short writes) */
 		retval = perform_sglist(dev, param->iterations, dev->in_pipe,
+#if defined(CONFIG_SYNO_ARMADA_V2)
+				dev->in_desc, &req, sg, param->sglen);
+#else
 				&req, sg, param->sglen);
+#endif
 		free_sglist(sg, param->sglen);
 		break;
 
@@ -2006,7 +2175,11 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev, "TEST 11:  unlink %d reads of %d\n",
 				param->iterations, param->length);
 		for (i = param->iterations; retval == 0 && i--; /* NOP */)
+#if defined(CONFIG_SYNO_ARMADA_V2)
+			retval = unlink_simple (dev, dev->in_pipe, dev->in_desc,
+#else
 			retval = unlink_simple(dev, dev->in_pipe,
+#endif
 						param->length);
 		if (retval)
 			dev_err(&intf->dev, "unlink reads failed %d, "
@@ -2019,7 +2192,11 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev, "TEST 12:  unlink %d writes of %d\n",
 				param->iterations, param->length);
 		for (i = param->iterations; retval == 0 && i--; /* NOP */)
+#if defined(CONFIG_SYNO_ARMADA_V2)
+			retval = unlink_simple (dev, dev->out_pipe, dev->out_desc,
+#else
 			retval = unlink_simple(dev, dev->out_pipe,
+#endif
 						param->length);
 		if (retval)
 			dev_err(&intf->dev, "unlink writes failed %d, "
@@ -2294,10 +2471,30 @@ usbtest_probe(struct usb_interface *intf, const struct usb_device_id *id)
 				dev->out_pipe = usb_sndbulkpipe(udev,
 							info->ep_out);
 		}
+
+#if defined(CONFIG_SYNO_ARMADA_V2)
+        if (dev->in_pipe) {
+            if(usb_pipeint(dev->in_pipe)) {
+                rtest = " intr-in";
+            }
+            else {
+                rtest = " bulk-in";
+            }
+        }
+        if (dev->out_pipe){
+            if(usb_pipeint(dev->out_pipe)) {
+                wtest = " intr-out";
+            }
+            else {
+                wtest = " bulk-out";
+            }
+        }
+#else
 		if (dev->in_pipe)
 			rtest = " bulk-in";
 		if (dev->out_pipe)
 			wtest = " bulk-out";
+#endif
 		if (dev->in_iso_pipe)
 			irtest = " iso-in";
 		if (dev->out_iso_pipe)

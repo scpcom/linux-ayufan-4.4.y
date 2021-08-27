@@ -10,7 +10,12 @@ obj-$(CONFIG_INTEL_IOP_ADMA) += iop-adma.o
 obj-$(CONFIG_FSL_DMA) += fsldma.o
 obj-$(CONFIG_MPC512X_DMA) += mpc512x_dma.o
 obj-$(CONFIG_MV_XOR) += mv_xor.o
+obj-$(CONFIG_MV_MEMCPY) += mv_memcpy.o
+ifeq ($(CONFIG_SYNO_COMCERTO),y)
+obj-$(CONFIG_DW_DMAC_CORE) += dw/
+else
 obj-$(CONFIG_DW_DMAC) += dw_dmac.o
+endif
 obj-$(CONFIG_AT_HDMAC) += at_hdmac.o
 obj-$(CONFIG_MX3_IPU) += ipu/
 obj-$(CONFIG_TXX9_DMAC) += txx9dmac.o
@@ -26,5 +31,6 @@ obj-$(CONFIG_PL330_DMA) += pl330.o
 obj-$(CONFIG_PCH_DMA) += pch_dma.o
 obj-$(CONFIG_AMBA_PL08X) += amba-pl08x.o
 obj-$(CONFIG_EP93XX_DMA) += ep93xx_dma.o
+obj-$(CONFIG_AL_DMA) += al/
 obj-$(CONFIG_COMCERTO_XOR) += comcerto_xor.o
 obj-$(CONFIG_COMCERTO_DMA_BASIC) += c2k_dma.o

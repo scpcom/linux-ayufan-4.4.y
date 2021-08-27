@@ -32,9 +32,17 @@
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
 #include <linux/libata.h>
+#ifdef CONFIG_SYNO_LEDS_TRIGGER
+#include <linux/leds.h>
+#endif /* CONFIG_SYNO_LEDS_TRIGGER */
 
 #define DRV_NAME	"sata_sil24"
 #define DRV_VERSION	"1.1"
+
+#ifdef CONFIG_SYNO_LEDS_TRIGGER
+extern void syno_ledtrig_active_set(int iLedNum);
+extern int *gpGreenLedMap;
+#endif /* CONFIG_SYNO_LEDS_TRIGGER */
 
 /*
  * Port request block (PRB) 32 bytes
@@ -322,6 +330,13 @@ static const struct sil24_cerr_info {
 				    "FIS received while sending service FIS" },
 };
 
+#ifdef SYNO_SIL3132_ACTIVITY
+struct sil3132_em_priv {
+	struct timer_list timer;
+	unsigned long saved_activity;
+	unsigned long activity;
+};
+#endif
 /*
  * ap->private_data
  *
@@ -332,6 +347,9 @@ struct sil24_port_priv {
 	union sil24_cmd_block *cmd_block;	/* 32 cmd blocks */
 	dma_addr_t cmd_block_dma;		/* DMA base addr for them */
 	int do_port_rst;
+#ifdef SYNO_SIL3132_ACTIVITY
+	struct sil3132_em_priv em_st;
+#endif
 };
 
 static void sil24_dev_config(struct ata_device *dev);
@@ -378,34 +396,56 @@ extern int grgPwrCtlPin[];
 #endif
 
 #ifdef SYNO_ATA_SHUTDOWN_FIX
+static int syno_shutdown_eunit(struct ata_port *ap)
+{
+	int iRet = -1;
+	int iValue = 0;
+	int iPin = -1;
+	struct Scsi_Host *shost;
+
+	/* we will poweroff EUnit if it support ZERO_WATT deepsleep whether poweroff or reboot */
+	shost = ap->scsi_host;
+	if (shost->hostt->syno_host_poweroff_task) {
+		shost->hostt->syno_host_poweroff_task(shost);
+	}
+
+#ifdef CONFIG_SYNO_X64
+	/* Due to EUnit is edge trigger, we have to pull the GPIO PIN to low before EUnit poweroff */
+	if (!(iPin = grgPwrCtlPin[ap->print_id])) { /* get pwrctl GPIO pin */
+		goto END;
+	}
+	iValue = 0;
+	if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
+		goto END;
+	}
+	mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
+#endif
+
+	iRet = 0;
+END:
+	return iRet;
+}
+
 void sil24_pci_shutdown(struct pci_dev *pdev){
 	int i;
-	int iValue = 0;
 	int iPin = -1;
 	bool blIsNeedFreeIRQ = true;
 	struct ata_host *host = dev_get_drvdata(&pdev->dev);
-	struct Scsi_Host *shost;
 
 	if(NULL == host){
 		goto END;
 	}
 
 		for (i = 0; i < host->n_ports; i++) {
-
 		if (PWR_PMP_ZERO_WATT_TYPE != syno_get_deep_sleep_pwr_type(host->ports[i])) {
 #ifdef CONFIG_SYNO_X64
 			/* get pwrctl GPIO pin */
-			if (!(iPin = grgPwrCtlPin[host->ports[i]->print_id])) {
-				/* If the EUnit of this port doesn't support ZERO_WATT deepsleep, we shouldn't free IRQ,
-				 * we will poweroff it in  __syno_host_power_ctl_work, but only when DS do poweroff not reboot
-				 * NOTE: If this port doesn't plug any EUnit, it will also set blIsNeedFreeIRQ to false */
-				blIsNeedFreeIRQ = false;
-			} else {
-				iValue = 0;
-				if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
+			if (0 != (iPin = grgPwrCtlPin[host->ports[i]->print_id])) {
+				if (0 != syno_shutdown_eunit(host->ports[i])) {
 					continue;
 				}
-				mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
+			} else {
+				blIsNeedFreeIRQ = false;
 			}
 #else
 			/* If the EUnit of this port doesn't support ZERO_WATT deepsleep, we shouldn't free IRQ,
@@ -414,22 +454,9 @@ void sil24_pci_shutdown(struct pci_dev *pdev){
 			blIsNeedFreeIRQ = false;
 #endif
 		} else {
-			/* we will poweroff EUnit if it support ZERO_WATT deepsleep whether poweroff or reboot */
-			shost = host->ports[i]->scsi_host;
-			if (shost->hostt->syno_host_poweroff_task) {
-				shost->hostt->syno_host_poweroff_task(shost);
-			}
-#ifdef CONFIG_SYNO_X64
-			/* get pwrctl GPIO pin */
-			if (!(iPin = grgPwrCtlPin[host->ports[i]->print_id])) {
+			if (0 != syno_shutdown_eunit(host->ports[i])) {
 				continue;
 			}
-			iValue = 0;
-			if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
-				continue;
-			}
-			mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
-#endif
 		}
 	}
 
@@ -461,10 +488,10 @@ static struct device_attribute *sil24_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TRANS_HOST_TO_DISK
 	&dev_attr_syno_diskname_trans,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DISK_LED_CONTROL
 	&dev_attr_syno_sata_disk_led_ctrl,
 #endif
 	NULL
@@ -1038,6 +1065,23 @@ static void sil24_qc_prep(struct ata_queued_cmd *qc)
 		sil24_fill_sg(qc, sge);
 }
 
+#ifdef SYNO_SIL3132_ACTIVITY
+static void sil3132_sw_activity(struct ata_port *ap)
+{
+	struct sil24_port_priv *pp = ap->private_data;
+	struct sil3132_em_priv *emp = &pp->em_st;
+
+	if (!(ap->flags & ATA_FLAG_SW_ACTIVITY)) {
+		return;
+	}
+
+	emp->activity++;
+	if (!timer_pending(&emp->timer)) {
+		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(10));
+	}
+}
+#endif
+
 static unsigned int sil24_qc_issue(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
@@ -1057,6 +1101,9 @@ static unsigned int sil24_qc_issue(struct ata_queued_cmd *qc)
 	wmb();
 	writel((u32)paddr, activate);
 	writel((u64)paddr >> 32, activate + 4);
+#ifdef SYNO_SIL3132_ACTIVITY
+	sil3132_sw_activity(ap);
+#endif
 
 	return 0;
 }
@@ -1080,6 +1127,12 @@ static void sil24_pmp_attach(struct ata_port *ap)
 			"disabling NCQ support due to sil24-mv4140 quirk\n");
 		ap->flags &= ~ATA_FLAG_NCQ;
 	}
+#ifdef CONFIG_SYNO_AVOTON
+	if (syno_is_hw_version(HW_DS415p)) {
+		ap->flags &= ~ATA_FLAG_NCQ;
+	}
+#endif
+
 }
 
 static void sil24_pmp_detach(struct ata_port *ap)
@@ -1358,6 +1411,83 @@ static void sil24_post_internal_cmd(struct ata_queued_cmd *qc)
 		ata_eh_freeze_port(ap);
 }
 
+#ifdef SYNO_SIL3132_ACTIVITY
+static void sil3132_sw_activity_blink(unsigned long arg)
+{
+	struct ata_port *ap = (struct ata_port *)arg;
+	struct sil24_port_priv *pp = ap->private_data;
+	struct sil3132_em_priv *emp = &pp->em_st;
+	unsigned long flags;
+
+	/* check to see if we've had activity.  If so,
+	 * toggle state of LED and reset timer.  If not,
+	 * turn LED to desired idle state.
+	 */
+	spin_lock_irqsave(ap->lock, flags);
+	if (emp->saved_activity != emp->activity) {
+		emp->saved_activity = emp->activity;
+#ifdef CONFIG_SYNO_LEDS_TRIGGER
+		if(NULL == gpGreenLedMap){
+			goto END;
+		}
+		syno_ledtrig_active_set(gpGreenLedMap[ap->syno_disk_index]);
+#endif /* CONFIG_SYNO_LEDS_TRIGGER */
+		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(100));
+	}
+END:
+	spin_unlock_irqrestore(ap->lock, flags);
+}
+
+static void sil3132_init_sw_activity(struct ata_port *ap, const int enable)
+{
+	struct sil24_port_priv *pp = ap->private_data;
+	struct sil3132_em_priv *emp = &pp->em_st;
+
+	/* init activity stats, setup timer */
+	emp->saved_activity = emp->activity = 0;
+
+	del_timer(&emp->timer);
+	if (enable) {
+		setup_timer(&emp->timer, sil3132_sw_activity_blink, (unsigned long)ap);
+	}
+}
+
+/**
+ * This function is used for Sil3132 software activity led,
+ *
+ * hostnum is scsi_host index
+ */
+int syno_sil3132_disk_led_enable(const unsigned short hostnum, const int iValue)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	int ret = -EINVAL;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	if (iValue) {
+		ap->flags |= ATA_FLAG_SW_ACTIVITY;
+	} else {
+		ap->flags &= ~ATA_FLAG_SW_ACTIVITY;
+	}
+	sil3132_init_sw_activity(ap, iValue);
+	ret = 0;
+
+END:
+	if (shost) {
+		scsi_host_put(shost);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_sil3132_disk_led_enable);
+#endif
+
 static int sil24_port_start(struct ata_port *ap)
 {
 	struct device *dev = ap->host->dev;
@@ -1418,10 +1548,21 @@ static void sil24_init_controller(struct ata_host *host)
 					"failed to clear port RST\n");
 		}
 #ifdef CONFIG_SYNO_INCREASE_SIL3132_OUT_SWING
-		dev_info(host->dev, "Increas sil3132 swing to 0xf\n");
 		tmp = readl(port + PORT_PHY_CFG);
 		tmp &= ~0x1f;
+		if (syno_is_hw_version(HW_DS1815p)) {
+			dev_info(host->dev, "Increase sil3132 swing to 0x15\n");
+			// out swing to 1000mV
+			tmp |= 0x15;
+		} else if (syno_is_hw_version(HW_DS1515p)) {
+			dev_info(host->dev, "Increase sil3132 swing to 0x13\n");
+			// out swing to 900mV
+			tmp |= 0x13;
+		} else {
+			dev_info(host->dev, "Increase sil3132 swing to 0xf\n");
+			// out swing to 700mV
 			tmp |= 0x0f;
+		}
 		writel(tmp, port + PORT_PHY_CFG);
 #endif
 

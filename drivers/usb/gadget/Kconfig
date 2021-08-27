@@ -135,6 +135,19 @@ choice
 # Integrated controllers
 #
 
+config USB_GADGET_MRVL
+        tristate "Marvell USB Device support"
+        depends on PLAT_ARMADA && SYNO_ARMADA_ARCH_V2
+	select USB_GADGET_DUALSPEED
+	help
+	   To enable device mode for particular USB port, please
+	   set "usbXMode" u-boot variable to "device", where X is
+	   the number of USB port to be configured as device.
+
+	   Say "y" to link the driver statically, or "m" to build a
+	   dynamically linked module called "mv_udc" and force all
+	   gadget drivers to also be dynamically linked.
+
 config USB_AT91
 	tristate "Atmel AT91 USB Device Port"
 	depends on ARCH_AT91 && !ARCH_AT91SAM9RL && !ARCH_AT91CAP9 && !ARCH_AT91SAM9G45

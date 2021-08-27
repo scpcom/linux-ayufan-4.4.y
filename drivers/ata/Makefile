@@ -15,6 +15,10 @@ obj-$(CONFIG_SATA_INIC162X)	+= sata_inic162x.o
 obj-$(CONFIG_SCSI_MVSATA_BSP422)   += mvSata_4_2_2/
 obj-$(CONFIG_SATA_DWC)		+= sata_dwc_460ex.o
 
+ifeq ($(CONFIG_SYNO_ARMADA_ARCH_V2),y)
+obj-$(CONFIG_SATA_AHCI_MV)	+= ahci_mv.o libahci.o
+endif
+
 # SFF w/ custom DMA
 obj-$(CONFIG_PDC_ADMA)		+= pdc_adma.o
 obj-$(CONFIG_PATA_ARASAN_CF)	+= pata_arasan_cf.o

@@ -482,6 +482,14 @@ config I2C_MV64XXX
 	  This driver can also be built as a module.  If so, the module
 	  will be called i2c-mv64xxx.
 
+config I2C_MV64XXX_BRIDGE
+	bool "Use Marvell mv64xxx I2C Transaction Generator"
+	depends on (I2C_MV64XXX && ARMADA_XP) && SYNO_ARMADA_ARCH_V2
+	default y
+	help
+	  Use I2C Transaction Generator to offload CPU from doing all
+	  I2C transfer stages step by step.
+
 config I2C_MXS
 	tristate "Freescale i.MX28 I2C interface"
 	depends on SOC_IMX28

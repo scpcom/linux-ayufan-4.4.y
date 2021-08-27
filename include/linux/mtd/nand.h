@@ -89,12 +89,20 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 #define NAND_CMD_READOOB	0x50
 #define NAND_CMD_ERASE1		0x60
 #define NAND_CMD_STATUS		0x70
+#ifdef CONFIG_SYNO_ALPINE
+//do nothing
+#else
 #define NAND_CMD_STATUS_MULTI	0x71
+#endif
 #define NAND_CMD_SEQIN		0x80
 #define NAND_CMD_RNDIN		0x85
 #define NAND_CMD_READID		0x90
 #define NAND_CMD_ERASE2		0xd0
 #define NAND_CMD_PARAM		0xec
+#ifdef CONFIG_SYNO_ALPINE
+#define NAND_CMD_GET_FEATURES	0xee
+#define NAND_CMD_SET_FEATURES	0xef
+#endif
 #define NAND_CMD_RESET		0xff
 
 #define NAND_CMD_LOCK		0x2a
@@ -505,7 +513,7 @@ struct nand_chip {
 
 	int chip_delay;
 	unsigned int options;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	unsigned int	num_devs;
 #ifdef CONFIG_MTD_NAND_NFC_MLC_SUPPORT
 	unsigned int	oobsize_ovrd;

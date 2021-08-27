@@ -34,8 +34,10 @@
 #include <net/arp.h>
 #include <linux/rtnetlink.h>
 #include <linux/notifier.h>
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 #include <linux/mv_nfp.h>
+#endif
 #endif
 #include <net/rtnetlink.h>
 #include <net/net_namespace.h>
@@ -128,7 +130,7 @@ void unregister_vlan_dev(struct net_device *dev, struct list_head *head)
 	if (vlan->flags & VLAN_FLAG_GVRP)
 		vlan_gvrp_request_leave(dev);
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (nfp_mgr_p->nfp_hook_vlan_del)
 		nfp_mgr_p->nfp_hook_vlan_del(dev->ifindex);
@@ -300,7 +302,7 @@ static int register_vlan_device(struct net_device *real_dev, u16 vlan_id)
 	if (err < 0)
 		goto out_free_newdev;
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (nfp_mgr_p->nfp_hook_vlan_add)
 		nfp_mgr_p->nfp_hook_vlan_add(new_dev->ifindex, new_dev, real_dev->ifindex, vlan_id);
@@ -730,7 +732,7 @@ static void __exit vlan_cleanup_module(void)
 	vlan_gvrp_uninit();
 }
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void vlan_sync(void)
 {

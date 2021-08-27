@@ -2758,9 +2758,9 @@ void mv_eth_link_event(struct eth_port *pp, int print)
 		/* change log level to avoid writing to syslog,
 		   which will stop hibernation */
 		if (dev)
-			printk(KERN_NOTICE "%s: ", dev->name);
+			printk(KERN_INFO ":%s: ", dev->name);
 		else
-			printk(KERN_NOTICE "%s: ", "none");
+			printk(KERN_INFO "%s: ", "none");
 #else
 		if (dev)
 			printk(KERN_ERR "%s: ", dev->name);

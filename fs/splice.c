@@ -29,6 +29,9 @@
 #include <linux/swap.h>
 #include <linux/writeback.h>
 #include <linux/buffer_head.h>
+#ifdef CONFIG_SYNO_ALPINE
+#include <linux/export.h>
+#endif
 #include <linux/module.h>
 #include <linux/syscalls.h>
 #include <linux/uio.h>
@@ -38,7 +41,7 @@
 #if defined(CONFIG_SYNO_COMCERTO)
 #include <linux/time.h>
 #endif
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 #include <net/sock.h>
 #include <linux/net.h>
 #include <linux/socket.h>
@@ -47,6 +50,12 @@
 struct common_mempool;
 static struct common_mempool/*struct gen_pool*/ * rcv_pool = NULL;
 static struct common_mempool/*struct gen_pool*/ * kvec_pool = NULL;
+#endif
+
+#if defined(CONFIG_SYNO_COMCERTO)
+#include <net/sock.h>
+#include <linux/net.h>
+#include <linux/genalloc.h>
 #endif
 
 /*
@@ -351,7 +360,11 @@ __generic_file_splice_read(struct file *in, loff_t *ppos,
 	/*
 	 * Lookup the (hopefully) full range of pages we need.
 	 */
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_SPLICE_READ_NOCONTIG)
+	spd.nr_pages = find_get_pages(mapping, index, nr_pages, spd.pages);
+#else
 	spd.nr_pages = find_get_pages_contig(mapping, index, nr_pages, spd.pages);
+#endif
 	index += spd.nr_pages;
 
 	/*
@@ -551,7 +564,7 @@ ssize_t generic_file_splice_read(struct file *in, loff_t *ppos,
 		len = left;
 
 	ret = __generic_file_splice_read(in, ppos, pipe, len, flags);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	if (ret > 0)
 		*ppos += ret;
 #else
@@ -712,7 +725,7 @@ static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 {
 	struct file *file = sd->u.file;
 	loff_t pos = sd->pos;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	int ret, more;
 
 	ret = buf->ops->confirm(pipe, buf);
@@ -950,7 +963,7 @@ start:
 
 #if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
 		// Is there a risk of getting the same page more than once (several buffers in a single page)?
-		ret = comcerto_dma_sg_add_input(sg, buf->page, buf->offset, buf->len, 0);
+		ret = comcerto_dma_sg_add_input(sg, page_address(buf->page) + buf->offset, buf->len, 0);
 		if (unlikely(ret)) {
 			printk(KERN_WARNING "%s: out of input bdescs\n", __func__);
 			break; //We will transfer what we could up to the previous buffer, based on nrbufs_len
@@ -1001,7 +1014,7 @@ start:
 		goto err;		// We failed early, so we still have an easy way out
 
 #if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
-	comcerto_dma_sg_add_output(sg, *page, offset, len, 1); //Don't check result since we should have at least one entry at this point
+	comcerto_dma_sg_add_output(sg, page_address(*page) + offset, len, 1); //Don't check result since we should have at least one entry at this point
 #endif
 
 	pos += len;
@@ -1017,7 +1030,7 @@ start:
 			goto write_begin_done;
 
 #if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
-		ret = comcerto_dma_sg_add_output(sg, *page, 0, PAGE_CACHE_SIZE, 1);
+		ret = comcerto_dma_sg_add_output(sg, page_address(*page), PAGE_CACHE_SIZE, 1);
 		if (unlikely(ret)) {
 			pagecache_write_end(file, mapping, pos, PAGE_CACHE_SIZE, 0, *page, *fsdata);
 			goto write_begin_done;
@@ -1037,7 +1050,7 @@ start:
 			goto write_begin_done;
 
 #if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
-		ret = comcerto_dma_sg_add_output(sg, *page, 0, remaining, 1);
+		ret = comcerto_dma_sg_add_output(sg, page_address(*page), remaining, 1);
 		if (unlikely(ret)) {
 			pagecache_write_end(file, mapping, pos, remaining, 0, *page, *fsdata);
 			goto write_begin_done;
@@ -1422,15 +1435,21 @@ generic_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 
 		mutex_lock_nested(&inode->i_mutex, I_MUTEX_CHILD);
 		ret = file_remove_suid(out);
+
+#if defined(CONFIG_SYNO_ARMADA_V2)
+		if (!ret)
+			ret = splice_from_pipe_feed(pipe, &sd, pipe_to_file);
+#else
 		if (!ret) {
 #if defined(CONFIG_SYNO_ARMADA)
 #else
 			ret = file_update_time(out);
-#endif
+#endif // CONFIG_SYNO_ARMADA
 			if (!ret)
 				ret = splice_from_pipe_feed(pipe, &sd,
 							    pipe_to_file);
 		}
+#endif // CONFIG_SYNO_ARMADA_V2
 		mutex_unlock(&inode->i_mutex);
 	} while (ret > 0);
 	splice_from_pipe_end(pipe, &sd);
@@ -1640,9 +1659,14 @@ static long do_splice_from(struct pipe_inode_info *pipe, struct file *out,
 	if (unlikely(ret < 0))
 		return ret;
 
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	splice_write = out->f_op->splice_write;
+	if (!splice_write)
+#else
 	if (out->f_op && out->f_op->splice_write)
 		splice_write = out->f_op->splice_write;
 	else
+#endif
 		splice_write = default_file_splice_write;
 
 	return splice_write(pipe, out, ppos, len, flags);
@@ -1675,9 +1699,14 @@ static long do_splice_to(struct file *in, loff_t *ppos,
 	if (unlikely(ret < 0))
 		return ret;
 
+#if defined(CONFIG_SYNO_ARMADA_V2)
+	splice_read = in->f_op->splice_read;
+	if (!splice_read)
+#else
 	if (in->f_op && in->f_op->splice_read)
 		splice_read = in->f_op->splice_read;
 	else
+#endif
 		splice_read = default_file_splice_read;
 
 	return splice_read(in, ppos, pipe, len, flags);
@@ -1930,7 +1959,157 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 	return -EINVAL;
 }
 
-#if defined(CONFIG_SYNO_ARMADA)
+#ifdef CONFIG_SYNO_ALPINE
+#include <net/sock.h>
+struct RECV_FILE_CONTROL_BLOCK
+{
+    struct page *rv_page;
+    loff_t rv_pos;
+    size_t  rv_count;
+    void *rv_fsdata;
+};
+
+static ssize_t do_splice_from_socket(struct file *file, struct socket *sock,
+				     loff_t __user *ppos,size_t count)
+{
+	struct address_space *mapping = file->f_mapping;
+	struct inode	*inode = mapping->host;
+	loff_t pos;
+	int count_tmp;
+	int err = 0;
+	int cPagePtr = 0;
+	int cPagesAllocated = 0;
+	struct RECV_FILE_CONTROL_BLOCK rv_cb[MAX_PAGES_PER_RECVFILE + 1];
+	struct kvec iov[MAX_PAGES_PER_RECVFILE + 1];
+	struct msghdr msg;
+	long rcvtimeo;
+	int ret;
+
+	if(copy_from_user(&pos, ppos, sizeof(loff_t)))
+		return -EFAULT;
+
+	if(count > MAX_PAGES_PER_RECVFILE * PAGE_SIZE){
+		printk("%s: count(%d) exceed maximum\n",__func__,count);
+		return -EINVAL;
+	}
+
+	mutex_lock(&inode->i_mutex);
+
+	// vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
+	// TODO: add sb_start_write(inode->i_sb); and end somewhere
+	/* We can write back this queue in page reclaim */
+	current->backing_dev_info = mapping->backing_dev_info;
+
+	err = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
+	if (err != 0 || count == 0)
+		goto done;
+
+	file_remove_suid(file);
+	file_update_time(file);
+
+	count_tmp = count;
+	do {
+		unsigned long bytes;	/* Bytes to write to page */
+		unsigned long offset;	/* Offset into pagecache page */
+		struct page *pageP;
+		void *fsdata;
+
+		offset = (pos & (PAGE_CACHE_SIZE - 1));
+		bytes = PAGE_CACHE_SIZE - offset;
+		if (bytes > count_tmp)
+			bytes = count_tmp;
+
+		ret =  mapping->a_ops->write_begin(file, mapping, pos, bytes,
+						   AOP_FLAG_UNINTERRUPTIBLE,
+						   &pageP,&fsdata);
+
+		if (unlikely(ret)) {
+			err = ret;
+			for(cPagePtr = 0; cPagePtr < cPagesAllocated; cPagePtr++) {
+				kunmap(rv_cb[cPagePtr].rv_page);
+				ret = mapping->a_ops->write_end(file, mapping,
+								rv_cb[cPagePtr].rv_pos,
+								rv_cb[cPagePtr].rv_count,
+								rv_cb[cPagePtr].rv_count,
+								rv_cb[cPagePtr].rv_page,
+								rv_cb[cPagePtr].rv_fsdata);
+			}
+			goto done;
+		}
+		rv_cb[cPagesAllocated].rv_page = pageP;
+		rv_cb[cPagesAllocated].rv_pos = pos;
+		rv_cb[cPagesAllocated].rv_count = bytes;
+		rv_cb[cPagesAllocated].rv_fsdata = fsdata;
+		iov[cPagesAllocated].iov_base = kmap(pageP) + offset;
+		iov[cPagesAllocated].iov_len = bytes;
+		cPagesAllocated++;
+		count_tmp -= bytes;
+		pos += bytes;
+	} while (count_tmp);
+
+	/* IOV is ready, receive the data from socket now */
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+	msg.msg_iov = (struct iovec *)&iov[0];
+	msg.msg_iovlen = cPagesAllocated ;
+	msg.msg_control = NULL;
+	msg.msg_controllen = 0;
+	msg.msg_flags = MSG_KERNSPACE;
+	rcvtimeo = sock->sk->sk_rcvtimeo;
+	sock->sk->sk_rcvtimeo = 8 * HZ;
+
+	ret = kernel_recvmsg(sock, &msg, &iov[0], cPagesAllocated, count,
+			     MSG_WAITALL | MSG_NOCATCHSIGNAL);
+
+	sock->sk->sk_rcvtimeo = rcvtimeo;
+
+	if(unlikely(ret < 0)) {
+		err = ret;
+		for(cPagePtr = 0; cPagePtr < cPagesAllocated; cPagePtr++){
+			kunmap(rv_cb[cPagePtr].rv_page);
+			ret = mapping->a_ops->write_end(file, mapping,
+							rv_cb[cPagePtr].rv_pos,
+							rv_cb[cPagePtr].rv_count,
+							rv_cb[cPagePtr].rv_count,
+							rv_cb[cPagePtr].rv_page,
+							rv_cb[cPagePtr].rv_fsdata);
+		}
+		goto done;
+	} else {
+		err = 0;
+		pos = pos - count + ret;
+		count = ret;
+	}
+
+	for (cPagePtr=0;cPagePtr < cPagesAllocated;cPagePtr++) {
+		//flush_dcache_page(pageP);
+		kunmap(rv_cb[cPagePtr].rv_page);
+		ret = mapping->a_ops->write_end(file, mapping,
+						rv_cb[cPagePtr].rv_pos,
+						rv_cb[cPagePtr].rv_count,
+						rv_cb[cPagePtr].rv_count,
+						rv_cb[cPagePtr].rv_page,
+						rv_cb[cPagePtr].rv_fsdata);
+
+		if (unlikely(ret < 0))
+			printk("%s: write_end fail,ret = %d\n",__func__,ret);
+		//cond_resched();
+	}
+	balance_dirty_pages_ratelimited(mapping);
+	copy_to_user(ppos,&pos,sizeof(loff_t));
+
+done:
+    current->backing_dev_info = NULL;
+    mutex_unlock(&inode->i_mutex);
+
+    if(err)
+        return err;
+    else
+        return count;
+}
+#endif
+
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 /****************************** POOL MANAGER *************************************/
 /* Forward declarations */
 typedef struct common_mempool common_mempool_t;
@@ -2637,37 +2816,60 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		int, fd_out, loff_t __user *, off_out,
 		size_t, len, unsigned int, flags)
 {
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 	int error;
+#elif defined(CONFIG_SYNO_COMCERTO)
+	int error = -EBADF;
 #else
 	long error;
 #endif
+#if defined(CONFIG_SYNO_COMCERTO)
+	struct file *in, *out = NULL;
+#else
 	struct file *in, *out;
+#endif
 	int fput_in, fput_out;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)  || defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ALPINE)
 	struct socket *sock = NULL;
 #endif
 
 	if (unlikely(!len))
 		return 0;
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	error = -EBADF;
+#endif
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2) || defined(CONFIG_SYNO_ALPINE)
 	/* check if fd_in is a socket */
+#ifdef CONFIG_SYNO_ALPINE
+	sock = sockfd_lookup(fd_in, (int *)&error);
+#else
 	sock = sockfd_lookup(fd_in, &error);
+#endif
 	if (sock) {
+#ifdef CONFIG_SYNO_ALPINE
+		if(!sock->sk) {
+			BUG();
+			goto done;
+		}
+#else
 		out = NULL;
 		if (!sock->sk)
 			goto done;
+#endif
 		out = fget_light(fd_out, &fput_out);
 
 		if (out) {
 			if (!(out->f_mode & FMODE_WRITE))
 				goto done;
+#ifdef CONFIG_SYNO_ALPINE
+			error = do_splice_from_socket(out, sock, off_out,len);
+#else
 			if (!out->f_op->splice_from_socket)
 				goto done;
 			error = out->f_op->splice_from_socket(out, sock, off_out, len);
+#endif
 		}
 done:
 		if(out)
@@ -2676,7 +2878,35 @@ done:
 		return error;
 	}
 #endif
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (!(out = fget_light(fd_out, &fput_out)))
+		return -EBADF;
 
+	if (!(out->f_mode & FMODE_WRITE))
+		goto out;
+
+	/* Check if fd_in is a socket while out_fd is NOT a pipe. */
+	if (!get_pipe_info(out) &&
+		(sock = sockfd_lookup(fd_in, &error))) {
+#if defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+		if (sock->sk && out->f_op->splice_from_socket)
+			error = out->f_op->splice_from_socket(out, sock,
+								off_out, len);
+#endif
+		fput(sock->file);
+	} else
+	{
+		if (!(in = fget_light(fd_in, &fput_in)))
+			goto out;
+		if ((in->f_mode & FMODE_READ))
+			error = do_splice(in, off_in, out, off_out, len, flags);
+
+   		fput_light(in, fput_in);
+   }
+
+out:
+	fput_light(out, fput_out);
+#else
 	in = fget_light(fd_in, &fput_in);
 	if (in) {
 		if (in->f_mode & FMODE_READ) {
@@ -2693,6 +2923,7 @@ done:
 			fput_light(in, fput_in);
 	}
 
+#endif
 	return error;
 }
 
@@ -2702,7 +2933,11 @@ done:
  */
 static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 {
+#if defined(CONFIG_SYNO_COMCERTO)
+	int ret = 0;
+#else
 	int ret;
+#endif
 
 	/*
 	 * Check ->nrbufs without the inode lock first. This function
@@ -2711,7 +2946,9 @@ static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 	if (pipe->nrbufs)
 		return 0;
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	ret = 0;
+#endif
 	pipe_lock(pipe);
 
 	while (!pipe->nrbufs) {
@@ -2740,7 +2977,11 @@ static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
  */
 static int opipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 {
+#if defined(CONFIG_SYNO_COMCERTO)
+	int ret = 0;
+#else
 	int ret;
+#endif
 
 	/*
 	 * Check ->nrbufs without the inode lock first. This function
@@ -2749,7 +2990,9 @@ static int opipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 	if (pipe->nrbufs < pipe->buffers)
 		return 0;
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	ret = 0;
+#endif
 	pipe_lock(pipe);
 
 	while (pipe->nrbufs >= pipe->buffers) {
@@ -3027,7 +3270,7 @@ SYSCALL_DEFINE4(tee, int, fdin, int, fdout, size_t, len, unsigned int, flags)
 	return error;
 }
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
 static int __init init_splice_pools(void)
 {
 	unsigned int rcv_pool_size= sizeof(struct recvfile_ctl_blk) * MAX_PAGES_PER_RECVFILE;
