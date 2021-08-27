@@ -44,7 +44,7 @@ extern int gSynoHasDynModule;
 extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
 extern struct rw_semaphore s_reshape_mount_key;
 #endif  
 
@@ -1181,13 +1181,7 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 dput_and_out:
 	 
 	dput(path.dentry);
-#ifdef MY_ABC_HERE
-	down_read(&s_reshape_mount_key);
-#endif  
 	mntput_no_expire(path.mnt);
-#ifdef MY_ABC_HERE
-	up_read(&s_reshape_mount_key);
-#endif  
 out:
 	return retval;
 }
@@ -2080,9 +2074,6 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 		   MS_NOATIME | MS_NODIRATIME | MS_RELATIME| MS_KERNMOUNT |
 		   MS_STRICTATIME);
 
-#ifdef MY_ABC_HERE
-	down_read(&s_reshape_mount_key);
-#endif  
 	if (flags & MS_REMOUNT)
 		retval = do_remount(&path, flags & ~MS_REMOUNT, mnt_flags,
 				    data_page);
@@ -2095,9 +2086,6 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 	else
 		retval = do_new_mount(&path, type_page, flags, mnt_flags,
 				      dev_name, data_page);
-#ifdef MY_ABC_HERE
-	up_read(&s_reshape_mount_key);
-#endif  
 
 dput_out:
 	path_put(&path);

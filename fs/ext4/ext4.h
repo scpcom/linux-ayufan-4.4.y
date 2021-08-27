@@ -538,6 +538,10 @@ struct ext4_inode {
 	__le32  i_crtime;        
 	__le32  i_crtime_extra;  
 	__le32  i_version_hi;	 
+#ifdef MY_ABC_HERE
+	__le32  i_projid;    
+	__le32  i_syno_archive_bit;  
+#endif
 };
 
 struct move_extent {
@@ -639,10 +643,6 @@ do {									       \
 #define i_reserved2	osd2.masix2.m_i_reserved2
 
 #endif  
-
-#ifdef MY_ABC_HERE
-#define ext4_mode2			i_pad1
-#endif
 
 struct ext4_ext_cache {
 	ext4_fsblk_t	ec_start;
@@ -883,13 +883,14 @@ struct ext4_super_block {
 	__le32	s_grp_quota_inum;	 
 	__le32	s_overhead_clusters;	 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-	__le32  s_reserved[106];         
+	__le32  s_reserved[105];         
+	__le32  s_syno_hash_magic;       
 	__le32  s_archive_version;       
 	__le32  s_archive_version_obsoleted;
-	__le32  s_syno_hash_magic;       
 #else
-	__le32	s_reserved[109];         
+	__le32	s_reserved[108];         
 #endif
+	__le32  s_checksum;      
 };
 
 #define EXT4_S_ERR_LEN (EXT4_S_ERR_END - EXT4_S_ERR_START)
@@ -1211,6 +1212,28 @@ static inline void ext4_clear_state_flags(struct ext4_inode_info *ei)
 					 EXT4_FEATURE_RO_COMPAT_HUGE_FILE |\
 					 EXT4_FEATURE_RO_COMPAT_BIGALLOC)
 
+#ifdef MY_ABC_HERE
+ 
+#define EXT4_INODE_GET_SYNO_ARCHIVE_BIT(inode, raw_inode) \
+do { \
+	if (EXT4_HAS_RO_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) { \
+		inode->i_archive_bit = le32_to_cpu(raw_inode->i_syno_archive_bit); \
+	} else { \
+		inode->i_archive_bit = le16_to_cpu(raw_inode->i_pad1); \
+	} \
+} while (0)
+
+#define EXT4_INODE_SET_SYNO_ARCHIVE_BIT(inode, raw_inode) \
+do { \
+	if (EXT4_HAS_RO_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) { \
+		raw_inode->i_syno_archive_bit = cpu_to_le32(inode->i_archive_bit); \
+	} else { \
+		raw_inode->i_pad1 = cpu_to_le16(inode->i_archive_bit);   \
+	} \
+} while (0)
+
+#endif  
+
 #define	EXT4_DEF_RESUID		0
 #define	EXT4_DEF_RESGID		0
 
@@ -1252,6 +1275,17 @@ struct ext4_dir_entry_2 {
 	char	name[EXT4_NAME_LEN];	 
 };
 
+#ifdef MY_DEF_HERE
+ 
+struct ext4_dir_entry_tail {
+	__le32  det_reserved_zero1;  
+	__le16  det_rec_len;         
+	__u8    det_reserved_zero2;  
+	__u8    det_reserved_ft;     
+	__le32  det_checksum;        
+};
+#endif
+
 #define EXT4_FT_UNKNOWN		0
 #define EXT4_FT_REG_FILE	1
 #define EXT4_FT_DIR		2
@@ -1262,6 +1296,10 @@ struct ext4_dir_entry_2 {
 #define EXT4_FT_SYMLINK		7
 
 #define EXT4_FT_MAX		8
+
+#ifdef MY_DEF_HERE
+#define EXT4_FT_DIR_CSUM   0xDE
+#endif
 
 #define EXT4_DIR_PAD			4
 #define EXT4_DIR_ROUND			(EXT4_DIR_PAD - 1)
@@ -1304,9 +1342,13 @@ static inline __le16 ext4_rec_len_to_disk(unsigned len, unsigned blocksize)
 
 #ifdef MY_ABC_HERE
 #define SYNO_HASH_MAGIC	0x01856E96       
-#define is_dx(dir) ((EXT4_SB(dir->i_sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) && \
-					!(EXT4_HAS_COMPAT_FEATURE(dir->i_sb, \
-						EXT4_FEATURE_COMPAT_DIR_INDEX)) && \
+
+#define is_syno_ext(sb) \
+	((EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) ? \
+	 (EXT4_SB(sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) : \
+	 (EXT4_SB(sb)->s_es->s_checksum == cpu_to_le32(SYNO_HASH_MAGIC)))
+
+#define is_dx(dir) (is_syno_ext(dir->i_sb) && \
 					(EXT4_I(dir)->i_flags & EXT4_INDEX_FL))
 #else
 #define is_dx(dir) (EXT4_HAS_COMPAT_FEATURE(dir->i_sb, \
@@ -1333,7 +1375,8 @@ struct dx_hash_info
 	u32		*seed;
 };
 
-#define EXT4_HTREE_EOF	0x7fffffff
+#define EXT4_HTREE_EOF_32BIT   ((1UL  << (32 - 1)) - 1)
+#define EXT4_HTREE_EOF_64BIT   ((1ULL << (64 - 1)) - 1)
 
 #define HASH_NB_ALWAYS		1
 

@@ -160,7 +160,17 @@ static void __release_stripe(struct r5conf *conf, struct stripe_head *sh)
 		if (test_bit(STRIPE_HANDLE, &sh->state)) {
 			if (test_bit(STRIPE_DELAYED, &sh->state) &&
 			    !test_bit(STRIPE_PREREAD_ACTIVE, &sh->state))
+#ifdef MY_ABC_HERE
+			{
+				if (test_bit(STRIPE_ACTIVATE_STABLE, &sh->state) ||
+					test_bit(STRIPE_CHECK_STABLE_LIST, &sh->state))
+					list_add_tail(&sh->lru, &conf->stable_list);
+				else
+					list_add_tail(&sh->lru, &conf->delayed_list);
+			}
+#else  
 				list_add_tail(&sh->lru, &conf->delayed_list);
+#endif  
 			else if (test_bit(STRIPE_BIT_DELAY, &sh->state) &&
 				   sh->bm_seq - conf->seq_write > 0)
 				list_add_tail(&sh->lru, &conf->bitmap_list);
@@ -172,6 +182,10 @@ static void __release_stripe(struct r5conf *conf, struct stripe_head *sh)
 			md_wakeup_thread(conf->mddev->thread);
 		} else {
 			BUG_ON(stripe_operations_active(sh));
+#ifdef MY_ABC_HERE
+			clear_bit(STRIPE_ACTIVATE_STABLE, &sh->state);
+			clear_bit(STRIPE_CHECK_STABLE_LIST, &sh->state);
+#endif  
 			if (test_and_clear_bit(STRIPE_PREREAD_ACTIVE, &sh->state)) {
 				atomic_dec(&conf->preread_active_stripes);
 				if (atomic_read(&conf->preread_active_stripes) < IO_THRESHOLD)
@@ -286,6 +300,9 @@ static void init_stripe(struct stripe_head *sh, sector_t sector, int previous)
 	sh->sector = sector;
 	stripe_set_idx(sector, conf, previous, sh);
 	sh->state = 0;
+#ifdef MY_ABC_HERE
+	atomic_set(&sh->delayed_cnt, 0);
+#endif  
 
 	for (i = sh->disks; i--; ) {
 		struct r5dev *dev = &sh->dev[i];
@@ -489,6 +506,11 @@ static void ops_run_io(struct stripe_head *sh, struct stripe_head_state *s)
 				md_sync_acct(rdev->bdev, STRIPE_SECTORS);
 
 			set_bit(STRIPE_IO_STARTED, &sh->state);
+#ifdef MY_ABC_HERE
+			if (test_bit(STRIPE_CHECK_STABLE_LIST, &sh->state) && (rw & WRITE)) {
+				atomic_inc(&sh->delayed_cnt);
+			}
+#endif  
 
 			bi->bi_bdev = rdev->bdev;
 			pr_debug("%s: for %llu schedule op %ld on disc %d\n",
@@ -1932,14 +1954,18 @@ static void raid5_end_write_request(struct bio *bi, int error)
 		set_bit(R5_MadeGood, &sh->dev[i].flags);
 
 	rdev_dec_pending(conf->disks[i].rdev, conf->mddev);
-	
+
+#ifdef MY_ABC_HERE
+	if (test_bit(STRIPE_CHECK_STABLE_LIST, &sh->state))
+		atomic_dec(&sh->delayed_cnt);
+#endif  
 	clear_bit(R5_LOCKED, &sh->dev[i].flags);
 	set_bit(STRIPE_HANDLE, &sh->state);
 	release_stripe(sh);
 }
 
 static sector_t compute_blocknr(struct stripe_head *sh, int i, int previous);
-	
+
 static void raid5_build_block(struct stripe_head *sh, int i, int previous)
 {
 	struct r5dev *dev = &sh->dev[i];
@@ -1985,8 +2011,8 @@ static void error_orig(struct mddev *mddev, struct md_rdev *rdev)
 			mddev->degraded++;
 #ifdef MY_ABC_HERE
 			if (mddev->degraded > conf->max_degraded) {
-				if (0 == mddev->nodev_and_crashed) {
-					mddev->nodev_and_crashed = 1;
+				if (MD_NOT_CRASHED == mddev->nodev_and_crashed) {
+					mddev->nodev_and_crashed = MD_CRASHED;
 				}
 			}
 #endif
@@ -2047,7 +2073,7 @@ static void syno_error_for_hotplug(struct mddev *mddev, struct md_rdev *rdev)
 		SynoIsRaidReachMaxDegrade(mddev)) {
 		list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
 			if(!test_bit(In_sync, &rdev_tmp->flags) && !test_bit(Faulty, &rdev_tmp->flags)) {
-				printk("[%s] %d: %s is being to unplug, but %s is building parity now, disable both\n", 
+				printk("[%s] %d: %s is being to unplug, but %s is building parity now, disable both\n",
 					   __FILE__, __LINE__, bdevname(rdev->bdev, b2), bdevname(rdev_tmp->bdev, b1));
 				SYNORaidRdevUnplug(mddev, rdev_tmp);
 			}
@@ -2708,9 +2734,11 @@ static int fetch_block(struct stripe_head *sh, struct stripe_head_state *s,
 		 
 		BUG_ON(test_bit(R5_Wantcompute, &dev->flags));
 		BUG_ON(test_bit(R5_Wantread, &dev->flags));
+
 		if ((s->uptodate == disks - 1) &&
+		    ((sh->qd_idx >= 0 && sh->pd_idx == disk_idx) ||
 		    (s->failed && (disk_idx == s->failed_num[0] ||
-				   disk_idx == s->failed_num[1]))) {
+				   disk_idx == s->failed_num[1])))) {
 			 
 			pr_debug("Computing stripe %llu block %d\n",
 			       (unsigned long long)sh->sector, disk_idx);
@@ -2778,6 +2806,9 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 	int i;
 	struct r5dev *dev;
 	int discard_pending = 0;
+#ifdef MY_ABC_HERE
+	int all_written_done = 1;
+#endif  
 
 	for (i = disks; i--; )
 		if (sh->dev[i].written) {
@@ -2813,8 +2844,16 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 							STRIPE_SECTORS,
 					 !test_bit(STRIPE_DEGRADED, &sh->state),
 							0);
+#ifdef MY_ABC_HERE
+			} else {
+				all_written_done = 0;
+				if (test_bit(R5_Discard, &dev->flags))
+					discard_pending = 1;
+			}
+#else  
 			} else if (test_bit(R5_Discard, &dev->flags))
 				discard_pending = 1;
+#endif  
 		}
 	if (!discard_pending &&
 	    test_bit(R5_Discard, &sh->dev[sh->pd_idx].flags)) {
@@ -2835,6 +2874,10 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 
 	}
 
+#ifdef MY_ABC_HERE
+	if (all_written_done)
+		set_bit(STRIPE_ACTIVATE_STABLE, &sh->state);
+#endif  
 	if (test_and_clear_bit(STRIPE_FULL_WRITE, &sh->state))
 		if (atomic_dec_and_test(&conf->pending_full_writes))
 			md_wakeup_thread(conf->mddev->thread);
@@ -3561,6 +3604,9 @@ static void handle_stripe(struct stripe_head *sh)
 		BUG_ON(sh->qd_idx >= 0 &&
 		       !test_bit(R5_UPTODATE, &sh->dev[sh->qd_idx].flags) &&
 		       !test_bit(R5_Discard, &sh->dev[sh->qd_idx].flags));
+#ifdef MY_ABC_HERE
+		set_bit(STRIPE_CHECK_STABLE_LIST, &sh->state);
+#endif  
 		for (i = disks; i--; ) {
 			struct r5dev *dev = &sh->dev[i];
 			if (test_bit(R5_LOCKED, &dev->flags) &&
@@ -3755,6 +3801,28 @@ finish:
 #endif
 }
 
+#ifdef MY_ABC_HERE
+static void raid5_activate_stable_delayed(struct r5conf *conf)
+{
+	struct stripe_head *sh;
+	struct stripe_head *tmp_sh;
+
+	if (list_empty(&conf->stable_list))
+		return;
+
+	list_for_each_entry_safe(sh, tmp_sh, &conf->stable_list, lru) {
+		if ((test_and_clear_bit(STRIPE_ACTIVATE_STABLE, &sh->state)) ||
+			(test_bit(STRIPE_CHECK_STABLE_LIST, &sh->state) && atomic_read(&sh->delayed_cnt) == 0)) {
+			clear_bit(STRIPE_CHECK_STABLE_LIST, &sh->state);
+			clear_bit(STRIPE_DELAYED, &sh->state);
+			if (!test_and_set_bit(STRIPE_PREREAD_ACTIVE, &sh->state))
+				atomic_inc(&conf->preread_active_stripes);
+			list_del_init(&sh->lru);
+			list_add_tail(&sh->lru, &conf->hold_list);
+		}
+	}
+}
+#endif  
 static void raid5_activate_delayed(struct r5conf *conf)
 {
 	if (atomic_read(&conf->preread_active_stripes) < IO_THRESHOLD) {
@@ -3764,6 +3832,10 @@ static void raid5_activate_delayed(struct r5conf *conf)
 			sh = list_entry(l, struct stripe_head, lru);
 			list_del_init(l);
 			clear_bit(STRIPE_DELAYED, &sh->state);
+#ifdef MY_ABC_HERE
+			clear_bit(STRIPE_ACTIVATE_STABLE, &sh->state);
+			clear_bit(STRIPE_CHECK_STABLE_LIST, &sh->state);
+#endif  
 			if (!test_and_set_bit(STRIPE_PREREAD_ACTIVE, &sh->state))
 				atomic_inc(&conf->preread_active_stripes);
 			list_add_tail(&sh->lru, &conf->hold_list);
@@ -3818,8 +3890,8 @@ static int raid5_mergeable_bvec(struct request_queue *q,
 	unsigned int chunk_sectors = mddev->chunk_sectors;
 	unsigned int bio_sectors = bvm->bi_size >> 9;
 
-	if ((bvm->bi_rw & 1) == WRITE)
-		return biovec->bv_len;  
+	if ((bvm->bi_rw & 1) == WRITE || mddev->degraded)
+		return biovec->bv_len;
 
 	if (mddev->new_chunk_sectors < mddev->chunk_sectors)
 		chunk_sectors = mddev->new_chunk_sectors;
@@ -4202,7 +4274,7 @@ static void make_request(struct mddev *mddev, struct bio * bi)
 
 	md_write_start(mddev, bi);
 
-	if (rw == READ &&
+	if (rw == READ && mddev->degraded == 0 &&
 	     mddev->reshape_position == MaxSector &&
 	     chunk_aligned_read(mddev,bi))
 		return;
@@ -4252,7 +4324,7 @@ static void make_request(struct mddev *mddev, struct bio * bi)
 						  previous,
 						  &dd_idx, NULL);
 		pr_debug("raid456: make_request, sector %llu logical %llu\n",
-			(unsigned long long)new_sector, 
+			(unsigned long long)new_sector,
 			(unsigned long long)logical_sector);
 
 		sh = get_active_stripe(conf, new_sector, previous,
@@ -4310,7 +4382,7 @@ static void make_request(struct mddev *mddev, struct bio * bi)
 			finish_wait(&conf->wait_for_overlap, &w);
 			break;
 		}
-			
+
 	}
 	if (!plugged)
 		md_wakeup_thread(mddev->thread);
@@ -4659,6 +4731,9 @@ static void raid5d(struct md_thread *thread)
 		}
 		if (atomic_read(&mddev->plug_cnt) == 0)
 			raid5_activate_delayed(conf);
+#ifdef MY_ABC_HERE
+		raid5_activate_stable_delayed(conf);
+#endif  
 
 		while ((bio = remove_bio_from_retry(conf))) {
 			int ok;
@@ -4675,7 +4750,7 @@ static void raid5d(struct md_thread *thread)
 		if (!sh)
 			break;
 		spin_unlock_irq(&conf->device_lock);
-		
+
 		handled++;
 		handle_stripe(sh);
 		release_stripe(sh);
@@ -4990,6 +5065,9 @@ static struct r5conf *setup_conf(struct mddev *mddev)
 	INIT_LIST_HEAD(&conf->delayed_list);
 	INIT_LIST_HEAD(&conf->bitmap_list);
 	INIT_LIST_HEAD(&conf->inactive_list);
+#ifdef MY_ABC_HERE
+	INIT_LIST_HEAD(&conf->stable_list);
+#endif  
 	atomic_set(&conf->active_stripes, 0);
 	atomic_set(&conf->preread_active_stripes, 0);
 	atomic_set(&conf->active_aligned_reads, 0);
@@ -5094,7 +5172,7 @@ static int only_parity(int raid_disk, int algo, int raid_disks, int max_degraded
 			return 1;
 		break;
 	case ALGORITHM_PARITY_0_6:
-		if (raid_disk == 0 || 
+		if (raid_disk == 0 ||
 		    raid_disk == raid_disks - 1)
 			return 1;
 		break;
@@ -5149,7 +5227,7 @@ static int run(struct mddev *mddev)
 		 
 		if (mddev->delta_disks == 0) {
 			 
-			if ((here_new * mddev->new_chunk_sectors != 
+			if ((here_new * mddev->new_chunk_sectors !=
 			     here_old * mddev->chunk_sectors) ||
 			    mddev->ro == 0) {
 				printk(KERN_ERR "md/raid:%s: in-place reshape must be started"
@@ -5157,11 +5235,20 @@ static int run(struct mddev *mddev)
 				       mdname(mddev));
 				return -EINVAL;
 			}
+#ifdef MY_ABC_HERE
+		} else if ((mddev->delta_disks < 0
+		    ? (here_new * mddev->new_chunk_sectors <=
+		       here_old * mddev->chunk_sectors)
+		    : (here_new * mddev->new_chunk_sectors >=
+		       here_old * mddev->chunk_sectors))
+			&& mddev->reshape_position != 0) {
+#else  
 		} else if (mddev->delta_disks < 0
 		    ? (here_new * mddev->new_chunk_sectors <=
 		       here_old * mddev->chunk_sectors)
 		    : (here_new * mddev->new_chunk_sectors >=
 		       here_old * mddev->chunk_sectors)) {
+#endif  
 			 
 			printk(KERN_ERR "md/raid:%s: reshape_position too early for "
 			       "auto-recovery - aborting.\n",
@@ -5201,7 +5288,7 @@ static int run(struct mddev *mddev)
 		if (mddev->major_version == 0 &&
 		    mddev->minor_version > 90)
 			rdev->recovery_offset = reshape_offset;
-			
+
 		if (rdev->recovery_offset < reshape_offset) {
 			 
 			if (!only_parity(rdev->raid_disk,
@@ -5223,7 +5310,9 @@ static int run(struct mddev *mddev)
 
 	if (has_failed(conf)) {
 #ifdef MY_ABC_HERE
-		mddev->nodev_and_crashed = 1;
+		if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+			mddev->nodev_and_crashed = MD_CRASHED;
+		}
 #endif
 		printk(KERN_ERR "md/raid:%s: not enough operational devices"
 			" (%d/%d failed)\n",
@@ -5265,7 +5354,11 @@ static int run(struct mddev *mddev)
 
 	print_raid5_conf(conf);
 
+#ifdef MY_ABC_HERE
+	if (conf->reshape_progress != MaxSector && mddev->degraded <= conf->max_degraded) {
+#else  
 	if (conf->reshape_progress != MaxSector) {
+#endif  
 		conf->reshape_safe = conf->reshape_progress;
 		atomic_set(&conf->reshape_stripes, 0);
 		clear_bit(MD_RECOVERY_SYNC, &mddev->recovery);
@@ -5569,12 +5662,6 @@ static int check_reshape(struct mddev *mddev)
 		return -EINVAL;
 	}
 #endif
-#ifdef MY_ABC_HERE
-	if (mddev->reshape_interrupt) {
-		mddev->reshape_interrupt = 0;
-		return 0;
-	}
-#endif
 
 	if (mddev->delta_disks == 0 &&
 	    mddev->new_layout == mddev->layout &&
@@ -5745,9 +5832,12 @@ static void raid5_finish_reshape(struct mddev *mddev)
 	if (!test_bit(MD_RECOVERY_INTR, &mddev->recovery)) {
 
 		if (mddev->delta_disks > 0) {
+#ifdef MY_ABC_HERE
+#else  
 			md_set_array_sectors(mddev, raid5_size(mddev, 0, 0));
 			set_capacity(mddev->gendisk, mddev->array_sectors);
 			revalidate_disk(mddev->gendisk);
+#endif  
 		} else {
 			int d;
 			mddev->degraded = conf->raid_disks;

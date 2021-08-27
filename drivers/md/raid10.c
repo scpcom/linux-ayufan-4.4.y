@@ -1125,11 +1125,11 @@ blRaid10Enough(struct r10conf *conf,
 	if (1 < conf->near_copies && !(conf->raid_disks % conf->near_copies)) {
 		blStandardRaid10 = 1;
 	}
- 
+
  	do {
  		int n = conf->copies;
  		int cnt = 0;
-	
+
  		while (n--) {
  			if (conf->mirrors[first].rdev &&
 				!test_bit(Faulty, &conf->mirrors[first].rdev->flags)&&
@@ -1172,8 +1172,8 @@ syno_error_common(struct mddev *mddev,
 
 #ifdef MY_ABC_HERE
 		if (!blRaid10Enough(conf, rdev)) {
-			if (0 == mddev->nodev_and_crashed) {
-				mddev->nodev_and_crashed = 1;
+			if (MD_NOT_CRASHED == mddev->nodev_and_crashed) {
+				mddev->nodev_and_crashed = MD_CRASHED;
 			}
 		}
 #endif
@@ -2386,7 +2386,7 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
 			int any_working;
 
 			if (conf->mirrors[i].rdev == NULL ||
-			    test_bit(In_sync, &conf->mirrors[i].rdev->flags)) 
+			    test_bit(In_sync, &conf->mirrors[i].rdev->flags))
 				continue;
 
 			still_degraded = 0;
@@ -2871,7 +2871,9 @@ static int run(struct mddev *mddev)
 	if (!enough(conf, -1)) {
 #endif
 #ifdef MY_ABC_HERE
-		mddev->nodev_and_crashed = 1;
+		if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+			mddev->nodev_and_crashed = MD_CRASHED;
+		}
 #endif
 		printk(KERN_ERR "md/raid10:%s: not enough operational mirrors.\n",
 		       mdname(mddev));

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/jbd2/commit.c
  *
@@ -86,6 +89,26 @@ nope:
 	__brelse(bh);
 }
 
+static void jbd2_commit_block_csum_set(journal_t *j,
+				       struct journal_head *descriptor)
+{
+	struct commit_header *h;
+	__u32 csum;
+
+	if (!jbd2_journal_has_csum_v2or3(j))
+		return;
+
+	h = (struct commit_header *)(jh2bh(descriptor)->b_data);
+	h->h_chksum_type = 0;
+	h->h_chksum_size = 0;
+	h->h_chksum[0] = 0;
+#if !defined(MY_ABC_HERE)
+	csum = jbd2_chksum(j, j->j_csum_seed, jh2bh(descriptor)->b_data,
+			   j->j_blocksize);
+#endif /* MY_ABC_HERE */
+	h->h_chksum[0] = cpu_to_be32(csum);
+}
+
 /*
  * Done it all: now submit the commit record.  We should have
  * cleaned up our previous buffers by now, so if we are in abort
@@ -129,6 +152,7 @@ static int journal_submit_commit_record(journal_t *journal,
 		tmp->h_chksum_size 	= JBD2_CRC32_CHKSUM_SIZE;
 		tmp->h_chksum[0] 	= cpu_to_be32(crc32_sum);
 	}
+	jbd2_commit_block_csum_set(journal, descriptor);
 
 	JBUFFER_TRACE(descriptor, "submit commit block");
 	lock_buffer(bh);
@@ -294,14 +318,60 @@ static __u32 jbd2_checksum_data(__u32 crc32_sum, struct buffer_head *bh)
 	return checksum;
 }
 
-static void write_tag_block(int tag_bytes, journal_block_tag_t *tag,
+static void write_tag_block(journal_t *j, journal_block_tag_t *tag,
 				   unsigned long long block)
 {
 	tag->t_blocknr = cpu_to_be32(block & (u32)~0);
-	if (tag_bytes > JBD2_TAG_SIZE32)
+	if (JBD2_HAS_INCOMPAT_FEATURE(j, JBD2_FEATURE_INCOMPAT_64BIT))
 		tag->t_blocknr_high = cpu_to_be32((block >> 31) >> 1);
 }
 
+static void jbd2_descr_block_csum_set(journal_t *j,
+				      struct journal_head *descriptor)
+{
+	struct jbd2_journal_block_tail *tail;
+	__u32 csum;
+
+	if (!jbd2_journal_has_csum_v2or3(j))
+		return;
+
+	tail = (struct jbd2_journal_block_tail *)
+			(jh2bh(descriptor)->b_data + j->j_blocksize -
+			sizeof(struct jbd2_journal_block_tail));
+	tail->t_checksum = 0;
+#if !defined(MY_ABC_HERE)
+	csum = jbd2_chksum(j, j->j_csum_seed, jh2bh(descriptor)->b_data,
+			   j->j_blocksize);
+#endif /* MY_ABC_HERE */
+	tail->t_checksum = cpu_to_be32(csum);
+}
+
+static void jbd2_block_tag_csum_set(journal_t *j, journal_block_tag_t *tag,
+				    struct buffer_head *bh, __u32 sequence)
+{
+	journal_block_tag3_t *tag3 = (journal_block_tag3_t *)tag;
+	struct page *page = bh->b_page;
+	__u8 *addr;
+	__u32 csum32;
+
+	if (!jbd2_journal_has_csum_v2or3(j))
+		return;
+
+	sequence = cpu_to_be32(sequence);
+	addr = kmap_atomic(page);
+#if !defined(MY_ABC_HERE)
+	csum32 = jbd2_chksum(j, j->j_csum_seed, (__u8 *)&sequence,
+			     sizeof(sequence));
+	csum32 = jbd2_chksum(j, csum32, addr + offset_in_page(bh->b_data),
+			     bh->b_size);
+#endif /* MY_ABC_HERE */
+	kunmap_atomic(addr);
+
+	if (JBD2_HAS_INCOMPAT_FEATURE(j, JBD2_FEATURE_INCOMPAT_CSUM_V3))
+		tag3->t_checksum = cpu_to_be32(csum32);
+	else
+		tag->t_checksum = cpu_to_be16(csum32);
+}
 /*
  * jbd2_journal_commit_transaction
  *
@@ -331,6 +401,14 @@ void jbd2_journal_commit_transaction(journal_t *journal)
 	struct buffer_head *cbh = NULL; /* For transactional checksums */
 	__u32 crc32_sum = ~0;
 	struct blk_plug plug;
+	/* Tail of the journal */
+	unsigned long first_block;
+	tid_t first_tid;
+	int update_tail;
+	int csum_size = 0;
+
+	if (jbd2_journal_has_csum_v2or3(journal))
+		csum_size = sizeof(struct jbd2_journal_block_tail);
 
 	/*
 	 * First job: lock down the current transaction and wait for
@@ -617,8 +695,10 @@ void jbd2_journal_commit_transaction(journal_t *journal)
 			tag_flag |= JBD2_FLAG_SAME_UUID;
 
 		tag = (journal_block_tag_t *) tagp;
-		write_tag_block(tag_bytes, tag, jh2bh(jh)->b_blocknr);
-		tag->t_flags = cpu_to_be32(tag_flag);
+		write_tag_block(journal, tag, jh2bh(jh)->b_blocknr);
+		tag->t_flags = cpu_to_be16(tag_flag);
+		jbd2_block_tag_csum_set(journal, tag, jh2bh(new_jh),
+					commit_transaction->t_tid);
 		tagp += tag_bytes;
 		space_left -= tag_bytes;
 
@@ -634,7 +714,7 @@ void jbd2_journal_commit_transaction(journal_t *journal)
 
 		if (bufs == journal->j_wbufsize ||
 		    commit_transaction->t_buffers == NULL ||
-		    space_left < tag_bytes + 16) {
+		    space_left < tag_bytes + 16 + csum_size) {
 
 			jbd_debug(4, "JBD2: Submit %d IOs\n", bufs);
 
@@ -642,8 +722,9 @@ void jbd2_journal_commit_transaction(journal_t *journal)
                            submitting the IOs.  "tag" still points to
                            the last tag we set up. */
 
-			tag->t_flags |= cpu_to_be32(JBD2_FLAG_LAST_TAG);
+			tag->t_flags |= cpu_to_be16(JBD2_FLAG_LAST_TAG);
 
+			jbd2_descr_block_csum_set(journal, descriptor);
 start_journal_io:
 			for (i = 0; i < bufs; i++) {
 				struct buffer_head *bh = wbuf[i];
@@ -682,10 +763,30 @@ start_journal_io:
 		err = 0;
 	}
 
+	/*
+	 * Get current oldest transaction in the log before we issue flush
+	 * to the filesystem device. After the flush we can be sure that
+	 * blocks of all older transactions are checkpointed to persistent
+	 * storage and we will be safe to update journal start in the
+	 * superblock with the numbers we get here.
+	 */
+	update_tail =
+		jbd2_journal_get_log_tail(journal, &first_tid, &first_block);
+
 	write_lock(&journal->j_state_lock);
+	if (update_tail) {
+		long freed = first_block - journal->j_tail;
+
+		if (first_block < journal->j_tail)
+			freed += journal->j_last - journal->j_first;
+		/* Update tail only if we free significant amount of space */
+		if (freed < journal->j_maxlen / 4)
+			update_tail = 0;
+	}
 	J_ASSERT(commit_transaction->t_state == T_COMMIT);
 	commit_transaction->t_state = T_COMMIT_DFLUSH;
 	write_unlock(&journal->j_state_lock);
+
 	/* 
 	 * If the journal is not located on the file system device,
 	 * then we must flush the file system device before we issue
@@ -835,6 +936,14 @@ wait_for_iobuf:
 
 	if (err)
 		jbd2_journal_abort(journal, err);
+
+	/*
+	 * Now disk caches for filesystem device are flushed so we are safe to
+	 * erase checkpointed transactions from the log by updating journal
+	 * superblock.
+	 */
+	if (update_tail)
+		jbd2_update_log_tail(journal, first_tid, first_block);
 
 	/* End of a transaction!  Finally, we can do checkpoint
            processing: any buffers committed as a result of this

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/jbd2/journal.c
  *
@@ -99,6 +102,45 @@ EXPORT_SYMBOL(jbd2_inode_cache);
 static int journal_convert_superblock_v1(journal_t *, journal_superblock_t *);
 static void __journal_abort_soft (journal_t *journal, int errno);
 static int jbd2_journal_create_slab(size_t slab_size);
+
+/* Checksumming functions */
+int jbd2_verify_csum_type(journal_t *j, journal_superblock_t *sb)
+{
+	if (!jbd2_journal_has_csum_v2or3(j))
+		return 1;
+
+	return sb->s_checksum_type == JBD2_CRC32C_CHKSUM;
+}
+
+static __u32 jbd2_superblock_csum(journal_t *j, journal_superblock_t *sb)
+{
+	__u32 csum, old_csum;
+
+	old_csum = sb->s_checksum;
+	sb->s_checksum = 0;
+#if !defined(MY_ABC_HERE)
+	csum = jbd2_chksum(j, ~0, (char *)sb, sizeof(journal_superblock_t));
+#endif /* MY_ABC_HERE */
+	sb->s_checksum = old_csum;
+
+	return cpu_to_be32(csum);
+}
+
+int jbd2_superblock_csum_verify(journal_t *j, journal_superblock_t *sb)
+{
+	if (!jbd2_journal_has_csum_v2or3(j))
+		return 1;
+
+	return sb->s_checksum == jbd2_superblock_csum(j, sb);
+}
+
+void jbd2_superblock_csum_set(journal_t *j, journal_superblock_t *sb)
+{
+	if (!jbd2_journal_has_csum_v2or3(j))
+		return;
+
+	sb->s_checksum = jbd2_superblock_csum(j, sb);
+}
 
 /*
  * Helper function used to manage commit timeouts
@@ -830,6 +872,19 @@ out:
 	return ret;
 }
 
+/*
+ * This is a variaon of __jbd2_update_log_tail which checks for validity of
+ * provided log tail and locks j_checkpoint_mutex. So it is safe against races
+ * with other threads updating log tail.
+ */
+void jbd2_update_log_tail(journal_t *journal, tid_t tid, unsigned long block)
+{
+	mutex_lock(&journal->j_checkpoint_mutex);
+	if (tid_gt(tid, journal->j_tail_sequence))
+		__jbd2_update_log_tail(journal, tid, block);
+	mutex_unlock(&journal->j_checkpoint_mutex);
+}
+
 struct jbd2_stats_proc_session {
 	journal_t *journal;
 	struct transaction_stats_s *stats;
@@ -1231,6 +1286,7 @@ static int journal_reset(journal_t *journal)
 static int jbd2_write_superblock(journal_t *journal, int write_op)
 {
 	struct buffer_head *bh = journal->j_sb_buffer;
+	journal_superblock_t *sb = journal->j_superblock;
 	int ret;
 
 	if (!(journal->j_flags & JBD2_BARRIER))
@@ -1251,6 +1307,7 @@ static int jbd2_write_superblock(journal_t *journal, int write_op)
 		clear_buffer_write_io_error(bh);
 		set_buffer_uptodate(bh);
 	}
+	jbd2_superblock_csum_set(journal, sb);
 	get_bh(bh);
 	bh->b_end_io = end_buffer_write_sync;
 	ret = submit_bh(write_op, bh);
@@ -1377,6 +1434,9 @@ static int journal_get_superblock(journal_t *journal)
 		}
 	}
 
+	if (buffer_verified(bh))
+		return 0;
+
 	sb = journal->j_superblock;
 
 	err = -EINVAL;
@@ -1413,6 +1473,58 @@ static int journal_get_superblock(journal_t *journal)
 			be32_to_cpu(sb->s_first));
 		goto out;
 	}
+
+	if (jbd2_journal_has_csum_v2or3(journal) &&
+	    JBD2_HAS_COMPAT_FEATURE(journal, JBD2_FEATURE_COMPAT_CHECKSUM)) {
+		/* Can't have checksum v1 and v2 on at the same time! */
+		printk(KERN_ERR "JBD: Can't enable checksumming v1 and v2 "
+		       "at the same time!\n");
+		goto out;
+	}
+
+	if (JBD2_HAS_INCOMPAT_FEATURE(journal, JBD2_FEATURE_INCOMPAT_CSUM_V2) &&
+	    JBD2_HAS_INCOMPAT_FEATURE(journal, JBD2_FEATURE_INCOMPAT_CSUM_V3)) {
+		/* Can't have checksum v2 and v3 at the same time! */
+		printk(KERN_ERR "JBD2: Can't enable checksumming v2 and v3 "
+		       "at the same time!\n");
+		goto out;
+	}
+
+	if (!jbd2_verify_csum_type(journal, sb)) {
+		printk(KERN_ERR "JBD: Unknown checksum type\n");
+		goto out;
+	}
+
+#if !defined(MY_ABC_HERE)
+	/* Load the checksum driver */
+	if (jbd2_journal_has_csum_v2or3(journal)) {
+		journal->j_chksum_driver = crypto_alloc_shash("crc32c", 0, 0);
+		if (IS_ERR(journal->j_chksum_driver)) {
+			printk(KERN_ERR "JBD: Cannot load crc32c driver.\n");
+			err = PTR_ERR(journal->j_chksum_driver);
+			journal->j_chksum_driver = NULL;
+			goto out;
+		}
+	}
+#endif /* MY_ABC_HERE */
+
+	/* Check superblock checksum */
+	if (!jbd2_superblock_csum_verify(journal, sb)) {
+		printk(KERN_ERR "JBD: journal checksum error\n");
+#ifdef MY_DEF_HERE
+#else
+		goto out;
+#endif /* MY_DEF_HERE */
+	}
+
+#if !defined(MY_ABC_HERE)
+	/* Precompute checksum seed for all metadata */
+	if (jbd2_journal_has_csum_v2or3(journal))
+		journal->j_csum_seed = jbd2_chksum(journal, ~0, sb->s_uuid,
+						   sizeof(sb->s_uuid));
+#endif /* MY_ABC_HERE */
+
+	set_buffer_verified(bh);
 
 	return 0;
 
@@ -1573,6 +1685,10 @@ int jbd2_journal_destroy(journal_t *journal)
 		iput(journal->j_inode);
 	if (journal->j_revoke)
 		jbd2_journal_destroy_revoke(journal);
+#if !defined(MY_ABC_HERE)
+	if (journal->j_chksum_driver)
+		crypto_free_shash(journal->j_chksum_driver);
+#endif /* MY_ABC_HERE */
 	kfree(journal->j_wbuf);
 	kfree(journal);
 
@@ -1661,6 +1777,10 @@ int jbd2_journal_check_available_features (journal_t *journal, unsigned long com
 int jbd2_journal_set_features (journal_t *journal, unsigned long compat,
 			  unsigned long ro, unsigned long incompat)
 {
+#define INCOMPAT_FEATURE_ON(f) \
+		((incompat & (f)) && !(sb->s_feature_incompat & cpu_to_be32(f)))
+#define COMPAT_FEATURE_ON(f) \
+		((compat & (f)) && !(sb->s_feature_compat & cpu_to_be32(f)))
 	journal_superblock_t *sb;
 
 	if (jbd2_journal_check_used_features(journal, compat, ro, incompat))
@@ -1669,16 +1789,61 @@ int jbd2_journal_set_features (journal_t *journal, unsigned long compat,
 	if (!jbd2_journal_check_available_features(journal, compat, ro, incompat))
 		return 0;
 
+	/* If enabling v2 checksums, turn on v3 instead */
+	if (incompat & JBD2_FEATURE_INCOMPAT_CSUM_V2) {
+		incompat &= ~JBD2_FEATURE_INCOMPAT_CSUM_V2;
+		incompat |= JBD2_FEATURE_INCOMPAT_CSUM_V3;
+	}
+
+	/* Asking for checksumming v3 and v1?  Only give them v3. */
+	if (incompat & JBD2_FEATURE_INCOMPAT_CSUM_V3 &&
+	    compat & JBD2_FEATURE_COMPAT_CHECKSUM)
+		compat &= ~JBD2_FEATURE_COMPAT_CHECKSUM;
+
 	jbd_debug(1, "Setting new features 0x%lx/0x%lx/0x%lx\n",
 		  compat, ro, incompat);
 
 	sb = journal->j_superblock;
+
+	/* If enabling v3 checksums, update superblock */
+	if (INCOMPAT_FEATURE_ON(JBD2_FEATURE_INCOMPAT_CSUM_V3)) {
+		sb->s_checksum_type = JBD2_CRC32C_CHKSUM;
+		sb->s_feature_compat &=
+			~cpu_to_be32(JBD2_FEATURE_COMPAT_CHECKSUM);
+
+#if !defined(MY_ABC_HERE)
+		/* Load the checksum driver */
+		if (journal->j_chksum_driver == NULL) {
+			journal->j_chksum_driver = crypto_alloc_shash("crc32c",
+								      0, 0);
+			if (IS_ERR(journal->j_chksum_driver)) {
+				printk(KERN_ERR "JBD: Cannot load crc32c "
+				       "driver.\n");
+				journal->j_chksum_driver = NULL;
+				return 0;
+			}
+
+			/* Precompute checksum seed for all metadata */
+			journal->j_csum_seed = jbd2_chksum(journal, ~0,
+							   sb->s_uuid,
+							   sizeof(sb->s_uuid));
+		}
+#endif /* MY_ABC_HERE */
+	}
+
+	/* If enabling v1 checksums, downgrade superblock */
+	if (COMPAT_FEATURE_ON(JBD2_FEATURE_COMPAT_CHECKSUM))
+		sb->s_feature_incompat &=
+			~cpu_to_be32(JBD2_FEATURE_INCOMPAT_CSUM_V2 |
+				     JBD2_FEATURE_INCOMPAT_CSUM_V3);
 
 	sb->s_feature_compat    |= cpu_to_be32(compat);
 	sb->s_feature_ro_compat |= cpu_to_be32(ro);
 	sb->s_feature_incompat  |= cpu_to_be32(incompat);
 
 	return 1;
+#undef COMPAT_FEATURE_ON
+#undef INCOMPAT_FEATURE_ON
 }
 
 /*
@@ -2045,10 +2210,20 @@ int jbd2_journal_blocks_per_page(struct inode *inode)
  */
 size_t journal_tag_bytes(journal_t *journal)
 {
+	size_t sz;
+
+	if (JBD2_HAS_INCOMPAT_FEATURE(journal, JBD2_FEATURE_INCOMPAT_CSUM_V3))
+		return sizeof(journal_block_tag3_t);
+
+	sz = sizeof(journal_block_tag_t);
+
+	if (JBD2_HAS_INCOMPAT_FEATURE(journal, JBD2_FEATURE_INCOMPAT_CSUM_V2))
+		sz += sizeof(__u16);
+
 	if (JBD2_HAS_INCOMPAT_FEATURE(journal, JBD2_FEATURE_INCOMPAT_64BIT))
-		return JBD2_TAG_SIZE64;
+		return sz;
 	else
-		return JBD2_TAG_SIZE32;
+		return sz - sizeof(__u32);
 }
 
 /*

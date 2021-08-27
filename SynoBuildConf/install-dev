@@ -13,25 +13,14 @@ case "$BUILD_TARGET" in
 esac
 
 ModCrypto=" \
-	${KernelDir}/crypto/aead.ko \
 	${KernelDir}/crypto/aes_generic.ko \
 	${KernelDir}/crypto/ansi_cprng.ko \
 	${KernelDir}/crypto/cbc.ko \
-	${KernelDir}/crypto/chainiv.ko \
-	${KernelDir}/crypto/crypto_algapi.ko \
-	${KernelDir}/crypto/crypto_blkcipher.ko \
-	${KernelDir}/crypto/crypto_hash.ko \
-	${KernelDir}/crypto/crypto_wq.ko \
-	${KernelDir}/crypto/cryptomgr.ko \
 	${KernelDir}/crypto/des_generic.ko \
 	${KernelDir}/crypto/ecb.ko \
-	${KernelDir}/crypto/eseqiv.ko \
-	${KernelDir}/crypto/krng.ko \
 	${KernelDir}/crypto/hmac.ko \
 	${KernelDir}/crypto/md4.ko \
 	${KernelDir}/crypto/md5.ko \
-	${KernelDir}/crypto/pcompress.ko \
-	${KernelDir}/crypto/rng.ko \
 	${KernelDir}/crypto/sha1_generic.ko \
 	${KernelDir}/crypto/sha256_generic.ko \
 	${KernelDir}/crypto/sha512_generic.ko \
@@ -40,7 +29,6 @@ ModCrypto=" \
 ModFS=" \
 	${KernelDir}/fs/fat/fat.ko \
 	${KernelDir}/fs/fat/vfat.ko \
-	${KernelDir}/crypto/crc32c.ko \
 	${KernelDir}/lib/zlib_deflate/zlib_deflate.ko \
 	${KernelDir}/lib/libcrc32c.ko \
 	${KernelDir}/fs/hfsplus/hfsplus.ko \
@@ -119,7 +107,6 @@ ModTunnel=" \
 	${KernelDir}/drivers/net/tun.ko \
 	"
 ModISCSI=" \
-	${KernelDir}/crypto/crc32c.ko \
 	${KernelDir}/lib/libcrc32c.ko \
 	${KernelDir}/drivers/scsi/libiscsi.ko \
 	${KernelDir}/drivers/scsi/libiscsi_tcp.ko \
@@ -280,9 +267,7 @@ ModOCF=" \
 ModRaid=" \
 	${KernelDir}/drivers/md/dm-mod.ko \
 	${KernelDir}/drivers/md/linear.ko \
-	${KernelDir}/drivers/md/md-mod.ko \
 	${KernelDir}/drivers/md/raid0.ko \
-	${KernelDir}/drivers/md/raid1.ko \
 	${KernelDir}/drivers/md/raid10.ko \
 	${KernelDir}/drivers/md/raid456.ko \
 	${KernelDir}/lib/raid6/raid6_pq.ko \
@@ -352,6 +337,20 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModNetlink}"
 		ModuleList="${ModuleList} ${ModIPv6Tun}"
 		ModuleList="${ModuleList} ${ModNFQ}"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/aead.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/chainiv.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/crypto_algapi.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/crypto_blkcipher.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/crypto_hash.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/crypto_wq.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/cryptomgr.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/eseqiv.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/krng.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/pcompress.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/rng.ko"
+		ModuleList="${ModuleList} ${KernelDir}/crypto/crc32c.ko"
+		ModuleList="${ModuleList} ${ModRaid}"
+		ModuleList="${ModuleList} ${KernelDir}/arch/arm/lib/xor-neon.ko"
 
 		;;
 	ALPINE)

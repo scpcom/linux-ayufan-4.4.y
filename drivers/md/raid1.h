@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _RAID1_H
 #define _RAID1_H
 
@@ -34,6 +37,10 @@ struct r1conf {
 	int			nr_waiting;
 	int			nr_queued;
 	int			barrier;
+
+#ifdef MY_ABC_HERE
+	int                     read_target;
+#endif  
 
 	int			fullsync;
 

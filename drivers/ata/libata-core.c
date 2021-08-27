@@ -29,6 +29,10 @@
 #include <linux/cdrom.h>
 #include <linux/ratelimit.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/math64.h>
+#endif  
+
 #include "libata.h"
 #include "libata-transport.h"
 
@@ -2942,7 +2946,12 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 
 			pmp_deadline = ata_deadline(jiffies,
 						    ATA_TMOUT_PMP_SRST_WAIT);
+#ifdef MY_ABC_HERE
+			 
+			if (time_before(pmp_deadline, deadline))
+#else
 			if (time_after(pmp_deadline, deadline))
+#endif  
 				pmp_deadline = deadline;
 			ata_wait_ready(link, pmp_deadline, check_ready);
 		}
@@ -3645,6 +3654,61 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 	}
 }
 
+#ifdef MY_ABC_HERE
+static inline unsigned int syno_ata_latency_bucket_offset_get(const u64 u64Latency)
+{
+	unsigned int uOffset = 0;
+
+	if ( 0x1F < u64Latency) {
+		uOffset += 1;
+	}
+
+	if (unlikely( 0x3FF < u64Latency)) {
+		uOffset += 1;
+	}
+
+	return uOffset;
+}
+
+static void syno_ata_cmd_latency_preprocess(struct ata_queued_cmd *qc,
+											struct ata_link *link,
+											u64 u64AtaIntrTime)
+{
+	u8 u8QcType = 0;
+	unsigned int uBucketOffset = 0;
+	u64 u64StepOffset = 0;
+	u64 u64CmdRespTime = 0;
+
+	u8QcType = qc->qc_stat.u8QcType;
+	if (unlikely(2 < u8QcType)) {
+		u8QcType = 0;
+	}
+
+	u64CmdRespTime = (u64AtaIntrTime - qc->qc_stat.u64IssueTime);;
+
+	link->ata_latency.u16TotalCplCmdCnt += 1;
+	link->ata_latency.u16CplCmdCnt[u8QcType] += 1;
+	link->latency_stat.u64TotalCount[u8QcType] += 1;
+	link->latency_stat.u64TotalBytes[u8QcType] += qc->nbytes;
+	link->latency_stat.u64TotalRespTime[u8QcType] += u64CmdRespTime;
+	if ((0 == link->ata_latency.u64FirstCmdStartTime)
+			|| (qc->qc_stat.u64IssueTime < link->ata_latency.u64FirstCmdStartTime)) {
+		link->ata_latency.u64FirstCmdStartTime = qc->qc_stat.u64IssueTime;
+	}
+
+	u64StepOffset = (u64CmdRespTime >> 15);
+	 
+	uBucketOffset = syno_ata_latency_bucket_offset_get(u64StepOffset);
+	u64StepOffset >>= (5 * uBucketOffset);
+	if (unlikely(31 < u64StepOffset)) {
+		uBucketOffset = 2;
+		u64StepOffset = 31;
+	}
+	link->ata_latency.u32RespTimeBuckets[u8QcType][uBucketOffset][u64StepOffset] += 1;
+	return;
+}
+#endif  
+
 void __ata_qc_complete(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap;
@@ -3670,6 +3734,10 @@ void __ata_qc_complete(struct ata_queued_cmd *qc)
 	if (unlikely(qc->flags & ATA_QCFLAG_CLEAR_EXCL &&
 		     ap->excl_link == link))
 		ap->excl_link = NULL;
+
+#ifdef MY_ABC_HERE
+	syno_ata_cmd_latency_preprocess(qc, link, ap->u64AtaIntrTime);
+#endif  
 
 	qc->flags &= ~ATA_QCFLAG_ACTIVE;
 	ap->qc_active &= ~(1 << qc->tag);
@@ -3767,12 +3835,74 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 		__ata_qc_complete(qc);
 	}
 }
+#ifdef MY_ABC_HERE
+ 
+static void syno_ata_latency_calculate(struct ata_link *link, u64 u64AtaIntrTime)
+{
+	int iType					= 0;
+	unsigned int uBucketOffset	= 0;
+	u64 u64CmdStartTime			= 0;
+	u64 u64CmdLatencyTime		= 0;
+	u64 u64StepOffset			= 0;
+
+	if (0 == link->ata_latency.u16TotalCplCmdCnt) {
+		goto END;
+	}
+
+	u64CmdStartTime = (link->ata_latency.u64FirstCmdStartTime
+						> link->ata_latency.u64LastIntrTime)
+									? link->ata_latency.u64FirstCmdStartTime
+									: link->ata_latency.u64LastIntrTime;
+	u64CmdLatencyTime = div_u64((u64AtaIntrTime - u64CmdStartTime),
+										link->ata_latency.u16TotalCplCmdCnt);
+	 
+	u64StepOffset = (u64CmdLatencyTime >> 15);
+	 
+	uBucketOffset = syno_ata_latency_bucket_offset_get(u64StepOffset);
+	u64StepOffset >>= (5 * uBucketOffset);
+	if (unlikely(31 < u64StepOffset)) {
+		uBucketOffset = 2;
+		u64StepOffset = 31;
+	}
+
+	for (iType = 0 ; iType < SYNO_LATENCY_TYPE_COUNT; iType++) {
+		link->latency_stat.u64TotalTime[iType]
+				+= (u64CmdLatencyTime * link->ata_latency.u16CplCmdCnt[iType]);
+
+		link->ata_latency.u32TimeBuckets[iType][uBucketOffset][u64StepOffset]
+									+= link->ata_latency.u16CplCmdCnt[iType];
+	}
+
+	if (!link->sactive) {
+		 
+		link->ata_latency.u64BatchComplete = u64AtaIntrTime;
+		link->latency_stat.u64TotalBatchCount += 1;
+		link->latency_stat.u64TotalBatchTime +=
+					(u64AtaIntrTime - link->ata_latency.u64BatchIssue);
+	}
+
+	link->ata_latency.u64LastIntrTime = u64AtaIntrTime;
+END:
+	 
+	link->ata_latency.u64FirstCmdStartTime = 0;
+	link->ata_latency.u16TotalCplCmdCnt = 0;
+	for (iType = 0 ; iType < SYNO_LATENCY_TYPE_COUNT; iType++) {
+		link->ata_latency.u16CplCmdCnt[iType] = 0;
+	}
+	return;
+}
+#endif  
 
 int ata_qc_complete_multiple(struct ata_port *ap, u32 qc_active)
 {
 	int nr_done = 0;
 	u32 done_mask;
 
+#ifdef MY_ABC_HERE
+	struct ata_link *link = NULL;
+
+	ap->u64AtaIntrTime = cpu_clock(0);
+#endif  
 	done_mask = ap->qc_active ^ qc_active;
 
 	if (unlikely(done_mask & qc_active)) {
@@ -3792,15 +3922,39 @@ int ata_qc_complete_multiple(struct ata_port *ap, u32 qc_active)
 		}
 		done_mask &= ~(1 << tag);
 	}
+#ifdef MY_ABC_HERE
+	ata_for_each_link(link, ap, HOST_FIRST) {
+		syno_ata_latency_calculate(link, ap->u64AtaIntrTime);
+	}
+#endif  
 
 	return nr_done;
 }
+
+#ifdef MY_ABC_HERE
+static inline void syno_ata_latency_start(struct ata_queued_cmd *qc, u8 blIsBatchHead)
+{
+	struct ata_link *link = qc->dev->link;
+
+	qc->qc_stat.u64IssueTime = cpu_clock(0);
+
+	if (1 == blIsBatchHead) {
+		 
+		link->ata_latency.u64BatchIssue = qc->qc_stat.u64IssueTime;
+	}
+
+	return;
+}
+#endif  
 
 void ata_qc_issue(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
 	struct ata_link *link = qc->dev->link;
 	u8 prot = qc->tf.protocol;
+#ifdef MY_ABC_HERE
+	u8 blIsBatchHead = 0;
+#endif  
 
 	WARN_ON_ONCE(ap->ops->error_handler && ata_tag_valid(link->active_tag));
 
@@ -3808,9 +3962,20 @@ void ata_qc_issue(struct ata_queued_cmd *qc)
 		WARN_ON_ONCE(link->sactive & (1 << qc->tag));
 
 		if (!link->sactive)
+#ifdef MY_ABC_HERE
+		{
+			 
+#endif  
 			ap->nr_active_links++;
+#ifdef MY_ABC_HERE
+			blIsBatchHead = 1;
+		}
+#endif  
 		link->sactive |= 1 << qc->tag;
 	} else {
+#ifdef MY_ABC_HERE
+		blIsBatchHead = 1;
+#endif  
 		WARN_ON_ONCE(link->sactive);
 
 		ap->nr_active_links++;
@@ -3837,6 +4002,10 @@ void ata_qc_issue(struct ata_queued_cmd *qc)
 	}
 
 	ap->ops->qc_prep(qc);
+
+#ifdef MY_ABC_HERE
+	syno_ata_latency_start(qc, blIsBatchHead);
+#endif  
 
 	qc->err_mask |= ap->ops->qc_issue(qc);
 	if (unlikely(qc->err_mask))
@@ -4040,6 +4209,11 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 	link->pmp = pmp;
 	link->active_tag = ATA_TAG_POISON;
 	link->hw_sata_spd_limit = UINT_MAX;
+#ifdef MY_ABC_HERE
+	memset(&(link->ata_latency), 0, sizeof(struct syno_ata_latency));
+	memset(&(link->latency_stat), 0, sizeof(struct syno_latency_stat));
+	memset(&(link->prev_latency_stat), 0, sizeof(struct syno_latency_stat));
+#endif  
 
 	for (i = 0; i < ATA_MAX_DEVICES; i++) {
 		struct ata_device *dev = &link->device[i];

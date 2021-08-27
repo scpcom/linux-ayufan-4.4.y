@@ -530,6 +530,13 @@ struct ata_host {
 	struct ata_port		*ports[0];
 };
 
+#ifdef MY_ABC_HERE
+struct syno_qc_stat {
+	u8		u8QcType;
+	u64		u64IssueTime;
+};
+#endif  
+
 struct ata_queued_cmd {
 	struct ata_port		*ap;
 	struct ata_device	*dev;
@@ -566,6 +573,9 @@ struct ata_queued_cmd {
 
 	void			*private_data;
 	void			*lldd_task;
+#ifdef MY_ABC_HERE
+	struct syno_qc_stat	qc_stat;
+#endif  
 };
 
 struct ata_port_stats {
@@ -689,6 +699,40 @@ struct ata_acpi_gtm {
 	u32 flags;
 } __packed;
 
+#ifdef MY_ABC_HERE
+#define SYNO_LATENCY_TYPE_COUNT 3
+
+typedef enum {
+	SYNO_LATENCY_OTHERS = 0x1,
+	SYNO_LATENCY_READ   = 0x2,
+	SYNO_LATENCY_WRITE  = 0x4,
+} SYNO_LATENCY_TYPE;
+
+struct syno_ata_latency {
+	u16 u16TotalCplCmdCnt;
+	u16 u16CplCmdCnt[SYNO_LATENCY_TYPE_COUNT];
+	u64 u64FirstCmdStartTime;
+	u64 u64LastIntrTime;
+	u64 u64BatchIssue;
+	u64 u64BatchComplete;
+
+	u64 u64LastReportTime;
+	u64 u64LastBatchTimeOffset;
+	u32 u32TimeBuckets[SYNO_LATENCY_TYPE_COUNT][3][32];
+	u32 u32RespTimeBuckets[SYNO_LATENCY_TYPE_COUNT][3][32];
+};
+
+struct syno_latency_stat {
+	u64 u64TotalCount[SYNO_LATENCY_TYPE_COUNT];
+	u64 u64TotalTime[SYNO_LATENCY_TYPE_COUNT];
+	u64 u64TotalRespTime[SYNO_LATENCY_TYPE_COUNT];
+	u64 u64TotalBytes[SYNO_LATENCY_TYPE_COUNT];
+
+	u64 u64TotalBatchCount;
+	u64 u64TotalBatchTime;
+};
+#endif  
+
 struct ata_link {
 	struct ata_port		*ap;
 	int			pmp;		 
@@ -702,6 +746,11 @@ struct ata_link {
 	unsigned int		hw_sata_spd_limit;
 	unsigned int		sata_spd_limit;
 	unsigned int		sata_spd;	 
+#ifdef MY_ABC_HERE
+	struct syno_ata_latency ata_latency;
+	struct syno_latency_stat latency_stat;
+	struct syno_latency_stat prev_latency_stat;
+#endif  
 	enum ata_lpm_policy	lpm_policy;
 
 	struct ata_eh_info	eh_info;
@@ -818,6 +867,9 @@ struct ata_port {
 #ifdef MY_DEF_HERE
 	u8 isFirstAttach;
 #endif
+#ifdef MY_ABC_HERE
+	u64 u64AtaIntrTime;
+#endif  
 };
 
 #define ATA_OP_NULL		(void *)(unsigned long)(-ENOENT)
@@ -948,6 +1000,10 @@ extern struct device_attribute dev_attr_syno_diskname_trans;
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_sata_disk_led_ctrl;
 #endif
+#ifdef MY_ABC_HERE
+extern struct device_attribute dev_attr_syno_disk_latency_hist;
+extern struct device_attribute dev_attr_syno_disk_latency_stat;
+#endif  
 
 extern const unsigned long sata_deb_timing_normal[];
 extern const unsigned long sata_deb_timing_hotplug[];
@@ -1217,7 +1273,9 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 
 #ifdef MY_ABC_HERE
 #define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
-			ATA_CMD_IDLEIMMEDIATE == qc->tf.command)
+			(ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
+			 ATA_CMD_READ_EXT == qc->tf.command || ATA_CMD_PIO_READ == qc->tf.command || ATA_CMD_PIO_READ_EXT == qc->tf.command || \
+			 ATA_CMD_READ_MULTI == qc->tf.command || ATA_CMD_READ_MULTI_EXT == qc->tf.command))
 #endif
 
 extern const struct ata_port_operations ata_base_port_ops;
@@ -1538,6 +1596,11 @@ static inline void ata_qc_reinit(struct ata_queued_cmd *qc)
 	qc->n_elem = 0;
 	qc->err_mask = 0;
 	qc->sect_size = ATA_SECT_SIZE;
+
+#ifdef MY_ABC_HERE
+	qc->qc_stat.u8QcType = 0;
+	qc->qc_stat.u64IssueTime = 0;
+#endif  
 
 	ata_tf_init(qc->dev, &qc->tf);
 

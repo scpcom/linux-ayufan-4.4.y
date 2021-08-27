@@ -339,7 +339,9 @@ static int raid0_run(struct mddev *mddev)
 #ifdef MY_ABC_HERE
 		if (ret < 0) {
 #ifdef MY_ABC_HERE
-			mddev->nodev_and_crashed = 1;
+			if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+				mddev->nodev_and_crashed = MD_CRASHED;
+			}
 #endif
 			 
 			mddev->array_sectors = raid0_size(mddev, 0, 0);
@@ -640,12 +642,18 @@ END:
 
 static void SynoRaid0Error(struct mddev *mddev, struct md_rdev *rdev)
 {
+	char b[BDEVNAME_SIZE];
+	printk(KERN_ALERT
+		"md/raid:%s: Disk failure on %s, disabling device.\n",
+		mdname(mddev), bdevname(rdev->bdev, b));
 	if (test_and_clear_bit(In_sync, &rdev->flags)) {
 		if (mddev->degraded < mddev->raid_disks) {
 			SYNO_UPDATE_SB_WORK *update_sb = NULL;
 			mddev->degraded++;
 #ifdef MY_ABC_HERE
-			mddev->nodev_and_crashed = 1;
+			if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+				mddev->nodev_and_crashed = MD_CRASHED;
+			}
 #endif
 			set_bit(Faulty, &rdev->flags);
 #ifdef MY_ABC_HERE
@@ -671,6 +679,10 @@ END:
 
 static void SynoRaid0ErrorInternal(struct mddev *mddev, struct md_rdev *rdev)
 {
+	char b[BDEVNAME_SIZE];
+	printk(KERN_ALERT
+		"md/raid:%s: Disk failure on %s, disabling device.\n",
+		mdname(mddev), bdevname(rdev->bdev, b));
 #ifdef MY_ABC_HERE
 	if (!test_bit(DiskError, &rdev->flags)) {
 		SYNO_UPDATE_SB_WORK *update_sb = NULL;

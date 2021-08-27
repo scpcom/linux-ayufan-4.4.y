@@ -68,6 +68,10 @@
 #include <linux/nmi.h>
 #endif
 
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+#endif  
+
 #if defined(CONFIG_SYSCTL)
 
 #ifdef MY_ABC_HERE
@@ -98,11 +102,6 @@ EXPORT_SYMBOL(gszSynoHWRevision);
 int gSynoRaidSyncFlag = 0;
 EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif
-
-#ifdef MY_ABC_HERE
-DECLARE_RWSEM(s_reshape_mount_key);
-EXPORT_SYMBOL(s_reshape_mount_key);
-#endif  
 
 #ifdef MY_ABC_HERE
 long g_internal_hd_num = -1;
@@ -282,6 +281,13 @@ EXPORT_SYMBOL(giSynoDsikEhFlag);
 unsigned long guSynoScsiCmdSN = 0;
 EXPORT_SYMBOL(guSynoScsiCmdSN);
 #endif
+
+#ifdef MY_ABC_HERE
+unsigned int SynoDiskLatencyType = 0x6;
+EXPORT_SYMBOL(SynoDiskLatencyType);
+unsigned int gSynoDiskLatencyRank[SYNO_DISK_LATENCY_RANK_NUM] = {99, 90, 70, 50, 0};
+EXPORT_SYMBOL(gSynoDiskLatencyRank);
+#endif  
 
 #ifdef SYNO_SAS_ENCOLURE_PWR_CTL
 int giSynoEncPwrCtl = 0;
@@ -1493,6 +1499,22 @@ static struct ctl_table kern_table[] = {
 		.maxlen         = sizeof (int),
 		.mode           = 0644,
 		.proc_handler   = &SynoProcEncPwrCtl,
+	},
+#endif  
+#ifdef MY_ABC_HERE
+	{
+		.procname       = "syno_disk_latency_type",
+		.data           = &SynoDiskLatencyType,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+	{
+		.procname       = "syno_disk_latency_rank",
+		.data           = &gSynoDiskLatencyRank,
+		.maxlen         = sizeof (gSynoDiskLatencyRank),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
 	},
 #endif  
 	{ }

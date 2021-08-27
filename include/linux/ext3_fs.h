@@ -645,7 +645,8 @@ struct dx_hash_info
 	u32		*seed;
 };
 
-#define EXT3_HTREE_EOF	0x7fffffff
+#define EXT3_HTREE_EOF_32BIT   ((1UL  << (32 - 1)) - 1)
+#define EXT3_HTREE_EOF_64BIT   ((1ULL << (64 - 1)) - 1)
 
 #define HASH_NB_ALWAYS		1
 

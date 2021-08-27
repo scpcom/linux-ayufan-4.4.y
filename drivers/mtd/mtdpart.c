@@ -23,6 +23,7 @@
 
 #ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[SYNO_MAC_MAX_V2][16];
+extern int giVenderFormatVersion;
 #endif
 
 #ifdef MY_ABC_HERE
@@ -644,7 +645,7 @@ out_register:
 #if defined(MY_ABC_HERE) 
 	if ((memcmp(part->name, "vender", 7)==0) ||
 		(memcmp(part->name, "vendor", 7)==0)) {
-			int gVenderMacNumber = 0;
+			int MacNumber = 0;
 
 			u_char rgbszBuf[128];
 			size_t retlen;
@@ -656,8 +657,18 @@ out_register:
 			part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
 #ifdef MY_ABC_HERE
 			x = 0;
-			gVenderMacNumber = 0;
-			for (n = 0; n < SYNO_MAC_MAX_V2; n++) {
+			switch (giVenderFormatVersion) {
+			case 1:
+				MacNumber = 4;
+				break;
+			case 2:
+				MacNumber = 8;
+				break;
+			default:
+				printk(KERN_ERR, "Undefined verder version %d\n", giVenderFormatVersion);
+			}
+
+			for (n = 0; n < MacNumber; n++) {
 				for (Sum=0,ucSum=0,i=0; i<6; i++) {
 					Sum+=rgbszBuf[i+x];
 					ucSum+=rgbszBuf[i+x];
@@ -665,11 +676,20 @@ out_register:
 				}
 				x+=6;
 
-				if (Sum==0 || ucSum!=rgbszBuf[x]) {
-					printk("vender Mac%d checksum error ucSum:0x%02x Buf:0x%02x Sum:%d.\n", 
+				if (0==Sum) {
+					printk("vender Mac%d doesn't set ucSum:0x%02x Buf:0x%02x Sum:%d.\n",
+							n, ucSum, rgbszBuf[x], Sum);
+				} else if (ucSum!=rgbszBuf[x]) {
+					printk("vender Mac%d checksum error ucSum:0x%02x Buf:0x%02x Sum:%d.\n",
 							n, ucSum, rgbszBuf[x], Sum);
 					grgbLanMac[n][0] = '\0';
 				} else {
+					printk("vender Mac%d address : %02x:%02x:%02x:%02x:%02x:%02x\n",n,rgbLanMac[n][0],
+													  rgbLanMac[n][1],
+													  rgbLanMac[n][2],
+													  rgbLanMac[n][3],
+													  rgbLanMac[n][4],
+													  rgbLanMac[n][5]);
 					snprintf(grgbLanMac[n], sizeof(grgbLanMac[n]),
 							"%02x%02x%02x%02x%02x%02x",
 					rgbLanMac[n][0],
@@ -681,7 +701,6 @@ out_register:
 				}
 
 				x++;
-				gVenderMacNumber++;
 			}
 #endif
 

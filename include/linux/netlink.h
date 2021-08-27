@@ -201,6 +201,7 @@ int netlink_sendskb(struct sock *sk, struct sk_buff *skb);
 struct netlink_callback {
 	struct sk_buff		*skb;
 	const struct nlmsghdr	*nlh;
+	int			(*start)(struct netlink_callback *);
 	int			(*dump)(struct sk_buff * skb,
 					struct netlink_callback *cb);
 	int			(*done)(struct netlink_callback *cb);
@@ -241,11 +242,16 @@ __nlmsg_put(struct sk_buff *skb, u32 pid, u32 seq, int type, int len, int flags)
 #define NLMSG_PUT(skb, pid, seq, type, len) \
 	NLMSG_NEW(skb, pid, seq, type, len, 0)
 
+struct netlink_dump_control {
+	int (*start)(struct netlink_callback *);
+	int (*dump)(struct sk_buff *skb, struct netlink_callback *);
+	int (*done)(struct netlink_callback*);
+	u16 min_dump_alloc;
+};
+
 extern int netlink_dump_start(struct sock *ssk, struct sk_buff *skb,
 			      const struct nlmsghdr *nlh,
-			      int (*dump)(struct sk_buff *skb, struct netlink_callback*),
-			      int (*done)(struct netlink_callback*),
-			      u16 min_dump_alloc);
+			      struct netlink_dump_control *control);
 
 #define NL_NONROOT_RECV 0x1
 #define NL_NONROOT_SEND 0x2

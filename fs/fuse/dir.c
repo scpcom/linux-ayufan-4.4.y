@@ -1618,6 +1618,11 @@ int fuse_do_setattr(struct inode *inode, struct iattr *attr,
 	spin_unlock(&fc->lock);
 
 	if (S_ISREG(inode->i_mode) && oldsize != outarg.attr.size) {
+#ifdef MY_DEF_HERE
+		if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
+			do_aggregate_recvfile_flush(-1);
+		}
+#endif  
 		truncate_pagecache(inode, oldsize, outarg.attr.size);
 		invalidate_inode_pages2(inode->i_mapping);
 	}

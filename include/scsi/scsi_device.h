@@ -85,6 +85,8 @@ struct scsi_device {
 #ifdef MY_ABC_HERE
 	unsigned char auto_remap;
 #endif
+	int reverved;
+
 	unsigned int manufacturer;	 
 	unsigned sector_size;	 
 

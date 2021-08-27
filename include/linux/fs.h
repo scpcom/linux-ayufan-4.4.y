@@ -98,6 +98,10 @@ struct inodes_stat_t {
 #define FMODE_EXCL		((__force fmode_t)0x80)
  
 #define FMODE_WRITE_IOCTL	((__force fmode_t)0x100)
+ 
+#define FMODE_32BITHASH         ((__force fmode_t)0x200)
+ 
+#define FMODE_64BITHASH         ((__force fmode_t)0x400)
 
 #define FMODE_NOCMTIME		((__force fmode_t)0x800)
 
@@ -722,6 +726,12 @@ struct inode {
 #endif
 	void			*i_private;  
 };
+
+#ifdef MY_DEF_HERE
+ 
+#define AGGREGATE_RECVFILE_DOING 1
+#define AGGREGATE_RECVFILE_FLUSH 2
+#endif  
 
 static inline int inode_unhashed(struct inode *inode)
 {
@@ -1469,7 +1479,7 @@ struct file_operations {
 			  loff_t len);
 #ifdef MY_ABC_HERE
 	ssize_t (*syno_recvfile)(struct file *file, struct socket *sock,
-	                                              loff_t *ppos, size_t count, size_t * rbytes, size_t * wbytes);
+	                                              loff_t pos, size_t count, size_t * rbytes, size_t * wbytes);
 #endif
 };
 
@@ -2175,7 +2185,8 @@ int generic_write_checks(struct file *file, loff_t *pos, size_t *count, int isbl
 #ifdef MY_ABC_HERE
  
 #define MAX_PAGES_PER_RECVFILE (1 << (17 - PAGE_SHIFT))
-extern int do_recvfile(struct file *file, struct socket *sock, loff_t *ppos, size_t count, size_t *rbytes , size_t *wbytes);
+#define MAX_RECVFILE_BUF (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)
+extern int do_recvfile(struct file *file, struct socket *sock, loff_t pos, size_t count, size_t *rbytes , size_t *wbytes);
 #endif
 extern ssize_t generic_file_aio_read(struct kiocb *, const struct iovec *, unsigned long, loff_t);
 extern ssize_t __generic_file_aio_write(struct kiocb *, const struct iovec *, unsigned long,
@@ -2220,7 +2231,7 @@ extern loff_t noop_llseek(struct file *file, loff_t offset, int origin);
 extern loff_t no_llseek(struct file *file, loff_t offset, int origin);
 extern loff_t generic_file_llseek(struct file *file, loff_t offset, int origin);
 extern loff_t generic_file_llseek_size(struct file *file, loff_t offset,
-		int origin, loff_t maxsize);
+		int origin, loff_t maxsize, loff_t eof);
 extern int generic_file_open(struct inode * inode, struct file * filp);
 extern int nonseekable_open(struct inode * inode, struct file * filp);
 

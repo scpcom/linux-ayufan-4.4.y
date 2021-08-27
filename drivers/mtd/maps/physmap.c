@@ -135,11 +135,11 @@ static int physmap_flash_probe(struct platform_device *dev)
 
 		simple_map_init(&info->map[i]);
 
-#if defined(CONFIG_SYNO_MPC85XX_COMMON)
+#if defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 		 
 		iounmap(info->map[i].virt);
 		return 0;
-#endif
+#endif  
 
 		probe_type = rom_probe_types;
 		if (physmap_data->probe_type == NULL) {

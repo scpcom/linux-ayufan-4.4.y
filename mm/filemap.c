@@ -1663,12 +1663,11 @@ EXPORT_SYMBOL(pagecache_write_end);
 
 #ifdef MY_ABC_HERE
 int
-do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
+do_recvfile(struct file *file, struct socket *sock, loff_t pos,
 			size_t count, size_t * rbytes, size_t * wbytes)
 {
 	struct address_space *mapping = file->f_mapping;
 	struct inode   *inode = mapping->host;
-	loff_t          pos;
 	struct page    *page;
 	ssize_t         err = 0;
 	unsigned        bytes;
@@ -1693,7 +1692,6 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 
 	*rbytes = 0;
 	*wbytes = 0;
-	pos = *ppos;
 
 	sb_start_write(inode->i_sb);
 
@@ -1707,7 +1705,7 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 	if (file->f_op->syno_recvfile) {
 		file_remove_suid(file);
 		file_update_time(file);
-		err = file->f_op->syno_recvfile(file, sock, ppos, count, rbytes, wbytes);
+		err = file->f_op->syno_recvfile(file, sock, pos, count, rbytes, wbytes);
 		sb_end_write(inode->i_sb);
 		current->backing_dev_info = NULL;
 		return err;
@@ -1794,8 +1792,6 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 #endif
 
 done:
-	*ppos = pos;
-
 	crgPagePtr = 0;
 
 		while (crgPagePtr < cPagesAllocated) {

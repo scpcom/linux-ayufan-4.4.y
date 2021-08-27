@@ -162,6 +162,7 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	case DX_HASH_LEGACY_UNSIGNED:
 #ifdef MY_ABC_HERE
 		hash = dx_hack_hash_unsigned(szUpperName, upperlen);
+		minor_hash = dx_hack_hash_unsigned(name, len);
 #else
 		hash = dx_hack_hash_unsigned(name, len);
 #endif
@@ -169,6 +170,7 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	case DX_HASH_LEGACY:
 #ifdef MY_ABC_HERE
 		hash = dx_hack_hash_signed(szUpperName, upperlen);
+		minor_hash = dx_hack_hash_signed(name, len);
 #else
 		hash = dx_hack_hash_signed(name, len);
 #endif
@@ -184,6 +186,19 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 			upperlen -= 32;
 			p += 32;
 		}
+		hash = buf[1];
+		p = name;
+		buf[0] = 0x67452301;
+		buf[1] = 0xefcdab89;
+		buf[2] = 0x98badcfe;
+		buf[3] = 0x10325476;
+		while (len > 0) {
+			(*str2hashbuf)(p, len, in, 8);
+			half_md4_transform(buf, in);
+			len -= 32;
+			p += 32;
+		}
+		minor_hash = buf[2];
 #else
 		p = name;
 		while (len > 0) {
@@ -192,9 +207,9 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 			len -= 32;
 			p += 32;
 		}
-#endif
 		minor_hash = buf[2];
 		hash = buf[1];
+#endif
 		break;
 	case DX_HASH_TEA_UNSIGNED:
 		str2hashbuf = str2hashbuf_unsigned;
@@ -207,6 +222,19 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 			upperlen -= 16;
 			p += 16;
 		}
+		hash = buf[0];
+		p = name;
+		buf[0] = 0x67452301;
+		buf[1] = 0xefcdab89;
+		buf[2] = 0x98badcfe;
+		buf[3] = 0x10325476;
+		while (len > 0) {
+			(*str2hashbuf)(p, len, in, 4);
+			TEA_transform(buf, in);
+			len -= 16;
+			p += 16;
+		}
+		minor_hash = buf[1];
 #else
 		p = name;
 		while (len > 0) {
@@ -215,9 +243,9 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 			len -= 16;
 			p += 16;
 		}
-#endif
 		hash = buf[0];
 		minor_hash = buf[1];
+#endif
 		break;
 	default:
 		hinfo->hash = 0;
@@ -227,8 +255,8 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 		return -1;
 	}
 	hash = hash & ~1;
-	if (hash == (EXT4_HTREE_EOF << 1))
-		hash = (EXT4_HTREE_EOF-1) << 1;
+	if (hash == (EXT4_HTREE_EOF_32BIT << 1))
+		hash = (EXT4_HTREE_EOF_32BIT - 1) << 1;
 	hinfo->hash = hash;
 	hinfo->minor_hash = minor_hash;
 #ifdef MY_ABC_HERE

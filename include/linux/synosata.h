@@ -371,7 +371,7 @@ syno_support_disk_num(unsigned short vendor,
 		}
 		goto END;
 	} else if (syno_pm_is_9705(vendor, devid)) {
-		if (IS_SYNOLOGY_RX413(syno_uniq)) {
+		if (IS_SYNOLOGY_RX413(syno_uniq) || IS_SYNOLOGY_RX418(syno_uniq)) {
 			ret = 4;
 		} else if (IS_SYNOLOGY_RX1214(syno_uniq) || IS_SYNOLOGY_DX1215(syno_uniq)) {
 			ret = 3;

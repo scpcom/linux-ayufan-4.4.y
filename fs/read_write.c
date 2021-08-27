@@ -56,13 +56,13 @@ static loff_t lseek_execute(struct file *file, struct inode *inode,
 
 loff_t
 generic_file_llseek_size(struct file *file, loff_t offset, int origin,
-		loff_t maxsize)
+		loff_t maxsize, loff_t eof)
 {
 	struct inode *inode = file->f_mapping->host;
 
 	switch (origin) {
 	case SEEK_END:
-		offset += i_size_read(inode);
+		offset += eof;
 		break;
 	case SEEK_CUR:
 		 
@@ -76,14 +76,14 @@ generic_file_llseek_size(struct file *file, loff_t offset, int origin,
 		return offset;
 	case SEEK_DATA:
 		 
-		if (offset >= i_size_read(inode))
+		if (offset >= eof)
 			return -ENXIO;
 		break;
 	case SEEK_HOLE:
 		 
-		if (offset >= i_size_read(inode))
+		if (offset >= eof)
 			return -ENXIO;
-		offset = i_size_read(inode);
+		offset = eof;
 		break;
 	}
 
@@ -96,7 +96,8 @@ loff_t generic_file_llseek(struct file *file, loff_t offset, int origin)
 	struct inode *inode = file->f_mapping->host;
 
 	return generic_file_llseek_size(file, offset, origin,
-					inode->i_sb->s_maxbytes);
+					inode->i_sb->s_maxbytes,
+					i_size_read(inode));
 }
 EXPORT_SYMBOL(generic_file_llseek);
 
@@ -444,7 +445,6 @@ SYSCALL_DEFINE3(write, unsigned int, fd, const char __user *, buf,
 }
 
 #ifdef MY_ABC_HERE
-
 asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, size_t *rwbytes)
 {
 	int ret = 0;
@@ -453,6 +453,8 @@ asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, si
 	struct inode *inode;
 	size_t bytes_received = 0;
 	size_t bytes_written = 0;
+	size_t total_received = 0;
+	size_t total_written = 0;
 	loff_t pos;                  
 
 	if (!offset) {
@@ -494,57 +496,33 @@ asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, si
 
 	inode = file->f_dentry->d_inode->i_mapping->host;
 	mutex_lock(&inode->i_mutex);
-	 
-	if (nbytes <= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)){
-			ret = do_recvfile(file, sock, &pos, nbytes, &bytes_received, &bytes_written);
-	} else {
-		 
-		size_t nbytes_left = nbytes;
-		size_t cBytereceived = 0;
-		size_t cBytewritten = 0;
 
-		do {
-				ret = do_recvfile(file, sock, &pos,
-							  (nbytes_left >= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE - (pos & (PAGE_CACHE_SIZE - 1)))) ?
-							   (MAX_PAGES_PER_RECVFILE * PAGE_SIZE - (pos & (PAGE_CACHE_SIZE - 1))) : nbytes_left
-							  , &cBytereceived, &cBytewritten);
-			if(ret > 0) {
-				bytes_received += ret;
-				bytes_written += ret;
-				nbytes_left -= ret;
-			}
-			else  {
-				bytes_received += cBytereceived;
-				bytes_written += cBytewritten;
-				break;
-			}
-		} while(nbytes_left > 0);
-		if(ret >= 0)
-			ret = bytes_received;
-	}
+	do {
+		ret = do_recvfile(file, sock, pos, (nbytes > (MAX_RECVFILE_BUF - (pos & (PAGE_CACHE_SIZE - 1)))) ?
+			   (MAX_RECVFILE_BUF - (pos & (PAGE_CACHE_SIZE - 1))) : nbytes, &bytes_received, &bytes_written);
+		total_received += bytes_received;
+		total_written += bytes_written;
+		if (0 >= ret) {
+			break;
+		}
+		nbytes -= bytes_written;
+		pos += bytes_written;
+	} while(nbytes > 0);
 	mutex_unlock(&inode->i_mutex);
 
-	if(0 > ret && rwbytes) {
-#ifdef CONFIG_IA32_EMULATION
-		rwbytes[0]=bytes_received;
-		rwbytes[1]=bytes_written;
-#else
-		int ret_copy_to_user = 0;
-		ret_copy_to_user = copy_to_user(&rwbytes[0], &bytes_received, sizeof(size_t));
-		if (ret_copy_to_user < 0) {
-			ret = -ENOMEM;
-			goto out;
-		}
-		ret_copy_to_user = copy_to_user(&rwbytes[1], &bytes_written, sizeof(size_t));
-		if (ret_copy_to_user < 0) {
-			ret = -ENOMEM;
-			goto out;
-		}
-#endif
-	}
-
-	if (ret >= 0)
+	if(ret >= 0) {
 		fsnotify_modify(file);
+		ret = total_written;
+	} else if(rwbytes) {
+		if (copy_to_user(&rwbytes[0], &total_received, sizeof(size_t))) {
+			ret = -ENOMEM;
+			goto out;
+		}
+		if (copy_to_user(&rwbytes[1], &total_written, sizeof(size_t))) {
+			ret = -ENOMEM;
+			goto out;
+		}
+	}
 
 out:
 	if(file)

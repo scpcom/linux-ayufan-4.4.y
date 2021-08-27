@@ -227,7 +227,7 @@
 #define IS_SYNOLOGY_DXC(x) (SYNO_UNIQUE(x) == 0x13) // 0x4c ~ 0x4f
 #define IS_SYNOLOGY_RXC(x) (SYNO_UNIQUE(x) == 0xb) // 0x2c ~ 0x2f
 #define IS_SYNOLOGY_DX213(x) (SYNO_UNIQUE(x) == 0x16) // 0x58 ~ 0x5b
-#define IS_SYNOLOGY_RX413(x) (x == 0x11)
+#define IS_SYNOLOGY_RX413(x) (x == 0x11) // This model is obsoleted
 #define IS_SYNOLOGY_RX1214(x) (x == 0x12)
 #define IS_SYNOLOGY_RX1217(x) (x == 0x14)
 #define IS_SYNOLOGY_RX415(x) (SYNO_UNIQUE(x) == 0x1d) // 0x54 ~ 0x57
@@ -286,6 +286,11 @@ typedef struct _SynoCpuTemp {
 	int cpu_num;
 	int cpu_temp[MAX_CPU];
 } SYNOCPUTEMP;
+
+typedef struct _SynoThermalTemp {
+	unsigned char blSurface;
+	int temperature;
+} SYNO_THERMAL_TEMP;
 
 enum {
     MD_SECTOR_READ_ERROR = 0,

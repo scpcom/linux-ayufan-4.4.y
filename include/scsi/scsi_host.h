@@ -162,6 +162,11 @@ struct scsi_host_template {
 	 
 	int  (* syno_host_power_ctl)(struct Scsi_Host *host, u8 blPowerOn);
 #endif
+
+	int  (* syno_set_dbg)(struct Scsi_Host *host, unsigned int uiDbglvl);
+	int  (* syno_get_dbg)(struct Scsi_Host *host, unsigned int *uiDbglvl);
+	int  (* syno_dbg_info)(struct Scsi_Host *host);
+
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	int  syno_port_type;
 #endif

@@ -229,8 +229,38 @@ config SYNO_SATA_PM_DEVICE_GPIO
 	depends on SATA_PMP
 	default y
 
+config SYNO_SATA_INTEL_SSD_COMPATIBILITY
+    bool "Solution of Intel S4500 3.84TB Hotplug 100% failed on Marvell 88SE9235"
+    default y
+
 config SYNO_NF_NAT_WORKAROUND
 	bool "Fix BUG_ON on nf_nat_setup_info"
 	default y
+
+config SYNO_CIFS_SMB_OPS
+	bool "add vers=syno for switch SMB1~3 from negotiate"
+	default y
+
+config SYNO_OCF_PERMISSION
+	bool "Adjust /dev/crypto permission to 666"
+	depends on OCF_CRYPTODEV
+	default y
+
+config SYNO_CIFS_UTF16_CONVERT_COMPILE_BUG
+	bool "cifs_from_utf16 not optimize for evansport"
+	default n
+
+config SYNO_CIFS_RECONNECT
+	bool "modify cifs reconnect behavior to prevent wait mutex lock cause hung task"
+	default y
+
+config SYNO_DISK_MONITOR_TOOL
+	bool "Disk performance monitor tool"
+	default y
+
+config SYNO_COMCERTO2K_RAID_XORNEON_MODULE
+	bool "To reduce comcerto2k kernel size, modulize raid and xor-neon"
+	depends on KERNEL_MODE_NEON
+	default n
 
 endmenu

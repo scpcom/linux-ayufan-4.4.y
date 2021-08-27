@@ -634,12 +634,15 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 		return res;
 #endif
 #ifdef MY_ABC_HERE
-	res += hfsplus_listxattr_rfork(dentry, buffer + res, size);
-	if (res < 0) {
+	err = hfsplus_listxattr_rfork(dentry, buffer ?
+		buffer + res : buffer, size < res ? 0 : size - res);
+
+	res += err;
+	if (err < 0) {
 #ifdef MY_ABC_HERE
 		mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
-		return res;
+		return err;
 	}
 #endif
 	else if (!HFSPLUS_SB(inode->i_sb)->attr_tree) {

@@ -123,6 +123,11 @@ static void fuse_destroy_inode(struct inode *inode)
 
 static void fuse_evict_inode(struct inode *inode)
 {
+#ifdef MY_DEF_HERE
+	if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
+		do_aggregate_recvfile_flush(-1);
+	}
+#endif  
 	truncate_inode_pages(&inode->i_data, 0);
 	end_writeback(inode);
 	if (inode->i_sb->s_flags & MS_ACTIVE) {
@@ -209,6 +214,11 @@ void fuse_change_attributes(struct inode *inode, struct fuse_attr *attr,
 		bool inval = false;
 
 		if (oldsize != attr->size) {
+#ifdef MY_DEF_HERE
+			if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
+				do_aggregate_recvfile_flush(-1);
+			}
+#endif  
 			truncate_pagecache(inode, oldsize, attr->size);
 			inval = true;
 		} else if (fc->auto_inval_data) {

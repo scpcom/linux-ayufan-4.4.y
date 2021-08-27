@@ -49,8 +49,10 @@ endif
 $(obj)/csumpartialcopy.o:	$(obj)/csumpartialcopygeneric.S
 $(obj)/csumpartialcopyuser.o:	$(obj)/csumpartialcopygeneric.S
 
+ifeq ($(CONFIG_SYNO_COMCERTO2K_RAID_XORNEON_MODULE),y)
 ifeq ($(CONFIG_KERNEL_MODE_NEON),y)
   NEON_FLAGS          		 := -mfloat-abi=softfp -mfpu=neon
   CFLAGS_xor-neon.o		+= $(NEON_FLAGS)
-  lib-$(CONFIG_XOR_BLOCKS)	+= xor-neon.o
+  obj-$(CONFIG_XOR_BLOCKS)	+= xor-neon.o
 endif
+endif # CONFIG_SYNO_COMCERTO2K_RAID_XORNEON_MODULE

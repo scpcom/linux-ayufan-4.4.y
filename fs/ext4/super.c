@@ -397,7 +397,7 @@ static void __save_error_info(struct super_block *sb, const char *func,
 			&& (0 == sbi->s_new_error_fs_event_flag)
 			&& (sbi->s_last_notify_time == 0 ||
 			    time_after(jiffies, sbi->s_last_notify_time + 24*60*60*HZ))
-			&& (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC))) {
+			&& is_syno_ext(sb)) {
 		sbi->s_new_error_fs_event_flag = 1;
 		sbi->s_last_notify_time = jiffies;
 		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);
@@ -2685,11 +2685,24 @@ static int ext4_feature_set_ok(struct super_block *sb, int readonly)
 		return 1;
 
 	if (EXT4_HAS_RO_COMPAT_FEATURE(sb, ~EXT4_FEATURE_RO_COMPAT_SUPP)) {
+#ifdef MY_DEF_HERE
+		if (EXT4_FEATURE_RO_COMPAT_METADATA_CSUM ==
+			(le32_to_cpu(EXT4_SB(sb)->s_es->s_feature_ro_compat) & ~EXT4_FEATURE_RO_COMPAT_SUPP)) {
+			ext4_msg(sb, KERN_WARNING, "ignore metadata_csum feature.");
+		} else {
+			ext4_msg(sb, KERN_ERR, "couldn't mount RDWR because of "
+				 "unsupported optional features (%x)",
+				 (le32_to_cpu(EXT4_SB(sb)->s_es->s_feature_ro_compat) &
+					~EXT4_FEATURE_RO_COMPAT_SUPP));
+			return 0;
+		}
+#else
 		ext4_msg(sb, KERN_ERR, "couldn't mount RDWR because of "
 			 "unsupported optional features (%x)",
 			 (le32_to_cpu(EXT4_SB(sb)->s_es->s_feature_ro_compat) &
 				~EXT4_FEATURE_RO_COMPAT_SUPP));
 		return 0;
+#endif
 	}
 	 
 	if (EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_HUGE_FILE)) {
@@ -3047,6 +3060,45 @@ static void ext4_destroy_lazyinit_thread(void)
 		return;
 
 	kthread_stop(ext4_lazyinit_task);
+}
+
+static int set_journal_csum_feature_set(struct super_block *sb)
+{
+	int ret = 1;
+	int compat, incompat;
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+
+	if (EXT4_HAS_RO_COMPAT_FEATURE(sb,
+				       EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
+		 
+		compat = 0;
+		incompat = JBD2_FEATURE_INCOMPAT_CSUM_V3;
+	} else {
+		 
+		compat = JBD2_FEATURE_COMPAT_CHECKSUM;
+		incompat = 0;
+	}
+
+	if (test_opt(sb, JOURNAL_ASYNC_COMMIT)) {
+		ret = jbd2_journal_set_features(sbi->s_journal,
+				compat, 0,
+				JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT |
+				incompat);
+	} else if (test_opt(sb, JOURNAL_CHECKSUM)) {
+		ret = jbd2_journal_set_features(sbi->s_journal,
+				compat, 0,
+				incompat);
+		jbd2_journal_clear_features(sbi->s_journal, 0, 0,
+				JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT);
+	} else {
+		jbd2_journal_clear_features(sbi->s_journal,
+				JBD2_FEATURE_COMPAT_CHECKSUM, 0,
+				JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT |
+				JBD2_FEATURE_INCOMPAT_CSUM_V3 |
+				JBD2_FEATURE_INCOMPAT_CSUM_V2);
+	}
+
+	return ret;
 }
 
 static int count_overhead(struct super_block *sb, ext4_group_t grp,
@@ -3646,19 +3698,10 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		goto failed_mount_wq;
 	}
 
-	if (test_opt(sb, JOURNAL_ASYNC_COMMIT)) {
-		jbd2_journal_set_features(sbi->s_journal,
-				JBD2_FEATURE_COMPAT_CHECKSUM, 0,
-				JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT);
-	} else if (test_opt(sb, JOURNAL_CHECKSUM)) {
-		jbd2_journal_set_features(sbi->s_journal,
-				JBD2_FEATURE_COMPAT_CHECKSUM, 0, 0);
-		jbd2_journal_clear_features(sbi->s_journal, 0, 0,
-				JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT);
-	} else {
-		jbd2_journal_clear_features(sbi->s_journal,
-				JBD2_FEATURE_COMPAT_CHECKSUM, 0,
-				JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT);
+	if (!set_journal_csum_feature_set(sb)) {
+		ext4_msg(sb, KERN_ERR, "Failed to set journal checksum "
+			 "feature set");
+		goto failed_mount_wq;
 	}
 
 	switch (test_opt(sb, DATA_FLAGS)) {
@@ -3743,9 +3786,23 @@ no_journal:
 	if (ext4_setup_super(sb, es, sb->s_flags & MS_RDONLY))
 		sb->s_flags |= MS_RDONLY;
 
+#ifdef MY_ABC_HERE
+	 
+	BUILD_BUG_ON(offsetof(struct ext4_inode, i_projid) != offsetof(struct ext4_inode, i_version_hi) + sizeof(__le32));
+	BUILD_BUG_ON(sizeof(struct ext4_inode) != (offsetof(struct ext4_inode, i_projid) + sizeof(__le32) + sizeof(__le32)));
+#endif  
+	 
 	if (sbi->s_inode_size > EXT4_GOOD_OLD_INODE_SIZE) {
+#ifdef MY_ABC_HERE
+		if (EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
+			sbi->s_want_extra_isize = sizeof(struct ext4_inode) - EXT4_GOOD_OLD_INODE_SIZE;
+		} else {
+			sbi->s_want_extra_isize = offsetof(struct ext4_inode, i_projid) - EXT4_GOOD_OLD_INODE_SIZE;
+		}
+#else
 		sbi->s_want_extra_isize = sizeof(struct ext4_inode) -
 						     EXT4_GOOD_OLD_INODE_SIZE;
+#endif  
 		if (EXT4_HAS_RO_COMPAT_FEATURE(sb,
 				       EXT4_FEATURE_RO_COMPAT_EXTRA_ISIZE)) {
 			if (sbi->s_want_extra_isize <
@@ -3761,8 +3818,16 @@ no_journal:
 	 
 	if (EXT4_GOOD_OLD_INODE_SIZE + sbi->s_want_extra_isize >
 							sbi->s_inode_size) {
+#ifdef MY_ABC_HERE
+		if (EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
+			sbi->s_want_extra_isize = sizeof(struct ext4_inode) - EXT4_GOOD_OLD_INODE_SIZE;
+		} else {
+			sbi->s_want_extra_isize = offsetof(struct ext4_inode, i_projid) - EXT4_GOOD_OLD_INODE_SIZE;
+		}
+#else
 		sbi->s_want_extra_isize = sizeof(struct ext4_inode) -
 						       EXT4_GOOD_OLD_INODE_SIZE;
+#endif  
 		ext4_msg(sb, KERN_INFO, "required extra inode space not"
 			 "available");
 	}

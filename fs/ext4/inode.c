@@ -2774,8 +2774,16 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 		}
 		if (ei->i_extra_isize == 0) {
 			 
+#ifdef MY_ABC_HERE
+			if (EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
+				ei->i_extra_isize = sizeof(struct ext4_inode) - EXT4_GOOD_OLD_INODE_SIZE;
+			} else {
+				ei->i_extra_isize = offsetof(struct ext4_inode, i_projid) - EXT4_GOOD_OLD_INODE_SIZE;
+			}
+#else
 			ei->i_extra_isize = sizeof(struct ext4_inode) -
 					    EXT4_GOOD_OLD_INODE_SIZE;
+#endif  
 		} else {
 			__le32 *magic = (void *)raw_inode +
 					EXT4_GOOD_OLD_INODE_SIZE +
@@ -2805,7 +2813,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 #endif
 #endif
 #ifdef MY_ABC_HERE
-	inode->i_archive_bit = le16_to_cpu(raw_inode->ext4_mode2);
+	EXT4_INODE_GET_SYNO_ARCHIVE_BIT(inode, raw_inode);
 #endif
 
 	inode->i_version = le32_to_cpu(raw_inode->i_disk_version);
@@ -2969,7 +2977,7 @@ static int ext4_do_update_inode(handle_t *handle,
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #endif
 #ifdef MY_ABC_HERE
-	raw_inode->ext4_mode2 = cpu_to_le16(inode->i_archive_bit);  
+	EXT4_INODE_SET_SYNO_ARCHIVE_BIT(inode, raw_inode);
 #endif
 
 	if (ext4_inode_blocks_set(handle, raw_inode, ei))

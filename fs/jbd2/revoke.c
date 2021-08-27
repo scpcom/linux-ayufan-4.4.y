@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/jbd2/revoke.c
  *
@@ -87,8 +90,9 @@
 #include <linux/list.h>
 #include <linux/init.h>
 #include <linux/bio.h>
-#endif
 #include <linux/log2.h>
+#include <linux/hash.h>
+#endif
 
 static struct kmem_cache *jbd2_revoke_record_cache;
 static struct kmem_cache *jbd2_revoke_table_cache;
@@ -123,16 +127,9 @@ static void flush_descriptor(journal_t *, struct journal_head *, int, int);
 
 /* Utility functions to maintain the revoke table */
 
-/* Borrowed from buffer.c: this is a tried and tested block hash function */
 static inline int hash(journal_t *journal, unsigned long long block)
 {
-	struct jbd2_revoke_table_s *table = journal->j_revoke;
-	int hash_shift = table->hash_shift;
-	int hash = (int)block ^ (int)((block >> 31) >> 1);
-
-	return ((hash << (hash_shift - 6)) ^
-		(hash >> 13) ^
-		(hash << (hash_shift - 12))) & (table->hash_size - 1);
+	return hash_64(block, journal->j_revoke->hash_shift);
 }
 
 static int insert_revoke_hash(journal_t *journal, unsigned long long blocknr,
@@ -545,6 +542,7 @@ static void write_one_revoke_record(journal_t *journal,
 				    struct jbd2_revoke_record_s *record,
 				    int write_op)
 {
+	int csum_size = 0;
 	struct journal_head *descriptor;
 	int offset;
 	journal_header_t *header;
@@ -559,9 +557,13 @@ static void write_one_revoke_record(journal_t *journal,
 	descriptor = *descriptorp;
 	offset = *offsetp;
 
+	/* Do we need to leave space at the end for a checksum? */
+	if (jbd2_journal_has_csum_v2or3(journal))
+		csum_size = sizeof(struct jbd2_journal_revoke_tail);
+
 	/* Make sure we have a descriptor with space left for the record */
 	if (descriptor) {
-		if (offset == journal->j_blocksize) {
+		if (offset >= journal->j_blocksize - csum_size) {
 			flush_descriptor(journal, descriptor, offset, write_op);
 			descriptor = NULL;
 		}
@@ -598,6 +600,26 @@ static void write_one_revoke_record(journal_t *journal,
 	*offsetp = offset;
 }
 
+static void jbd2_revoke_csum_set(journal_t *j,
+				 struct journal_head *descriptor)
+{
+	struct jbd2_journal_revoke_tail *tail;
+	__u32 csum;
+
+	if (!jbd2_journal_has_csum_v2or3(j))
+		return;
+
+	tail = (struct jbd2_journal_revoke_tail *)
+			(jh2bh(descriptor)->b_data + j->j_blocksize -
+			sizeof(struct jbd2_journal_revoke_tail));
+	tail->r_checksum = 0;
+#if !defined(MY_ABC_HERE)
+	csum = jbd2_chksum(j, j->j_csum_seed, jh2bh(descriptor)->b_data,
+			   j->j_blocksize);
+#endif /* MY_ABC_HERE */
+	tail->r_checksum = cpu_to_be32(csum);
+}
+
 /*
  * Flush a revoke descriptor out to the journal.  If we are aborting,
  * this is a noop; otherwise we are generating a buffer which needs to
@@ -619,6 +641,8 @@ static void flush_descriptor(journal_t *journal,
 
 	header = (jbd2_journal_revoke_header_t *) jh2bh(descriptor)->b_data;
 	header->r_count = cpu_to_be32(offset);
+	jbd2_revoke_csum_set(journal, descriptor);
+
 	set_buffer_jwrite(bh);
 	BUFFER_TRACE(bh, "write");
 	set_buffer_dirty(bh);

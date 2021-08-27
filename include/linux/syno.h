@@ -253,8 +253,4 @@
 #define SYNO_SATA_PM_FIRST_PORT_DELAY
 #endif
 
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
-#define SYNO_EUNIT_DEADLOCK_FIX
-#endif  
-
 #endif  

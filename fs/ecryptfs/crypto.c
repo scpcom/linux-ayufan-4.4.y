@@ -1702,9 +1702,25 @@ ecryptfs_write_metadata_to_xattr(struct dentry *ecryptfs_dentry,
 				 char *page_virt, size_t size)
 {
 	int rc;
+#ifdef MY_ABC_HERE
+	struct dentry *lower_dentry;
+	struct inode *lower_inode;
 
+	lower_dentry = ecryptfs_dentry_to_lower(ecryptfs_dentry);
+	lower_inode = lower_dentry->d_inode;
+	if (!lower_inode->i_op->setxattr) {
+		rc = -EOPNOTSUPP;
+		goto out;
+	}
+	mutex_lock(&lower_inode->i_mutex);
+	rc = lower_inode->i_op->setxattr(lower_dentry, ECRYPTFS_XATTR_NAME,
+					 page_virt, size, 0);
+	mutex_unlock(&lower_inode->i_mutex);
+out:
+#else
 	rc = ecryptfs_setxattr(ecryptfs_dentry, ECRYPTFS_XATTR_NAME, page_virt,
 			       size, 0);
+#endif  
 	return rc;
 }
 

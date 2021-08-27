@@ -373,7 +373,8 @@ syno_pm_is_synology_9705(const struct ata_port *ap)
 
 	if (!IS_SYNOLOGY_RX413(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_RX1214(ap->PMSynoUnique) &&
-		!IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) {
+		!IS_SYNOLOGY_DX1215(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_RX418(ap->PMSynoUnique)) {
 		goto END;
 	}
 
@@ -736,39 +737,24 @@ syno_9705_workaround(struct ata_port *ap)
 	struct ata_port *pAp_master = NULL;
 	int i = 0;
 
-	for (i = 1; i < ata_print_id; i++) {
-		if (NULL == (pMaster_host = scsi_host_lookup(i - 1))) {
+	for (i = 0; i < ap->host->n_ports; i++) {
+		pAp_master = ap->host->ports[i];
+		if (NULL == pAp_master) {
 			continue;
 		}
 
-		if (NULL == (pAp_master = ata_shost_to_port(pMaster_host))) {
-			goto CONTINUE_FOR;
-		}
-
-		if (ap->host == pAp_master->host || ap->port_no == pAp_master->port_no) {
-			if (ap->PMSynoUnique != pAp_master->PMSynoUnique) {
-				if (syno_pm_is_synology_9705(pAp_master)) {
-					ata_port_printk(ap, KERN_ERR,
-							"replace unique %x with master unique %x\n",
-							ap->PMSynoUnique, pAp_master->PMSynoUnique);
-					ap->PMSynoUnique = pAp_master->PMSynoUnique;
-				} else {
-					ata_port_printk(ap, KERN_ERR,
-							"WARNING : master unique is not syno 9705, don't replace\n");
-				}
-
-				break;
+		if (ap->PMSynoUnique != pAp_master->PMSynoUnique) {
+			if (syno_pm_is_synology_9705(pAp_master)) {
+				ata_port_printk(ap, KERN_ERR,
+						"replace unique %x with master unique %x\n",
+						ap->PMSynoUnique, pAp_master->PMSynoUnique);
+				ap->PMSynoUnique = pAp_master->PMSynoUnique;
+			} else {
+				ata_port_printk(ap, KERN_ERR,
+						"WARNING : master unique is not syno 9705, don't replace\n");
 			}
+			break;
 		}
-
-CONTINUE_FOR:
-		scsi_host_put(pMaster_host);
-		pMaster_host = NULL;
-		pAp_master = NULL;
-	}
-
-	if (NULL != pMaster_host) {
-		scsi_host_put(pMaster_host);
 	}
 }
 

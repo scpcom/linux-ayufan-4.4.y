@@ -39,6 +39,9 @@ struct stripe_head {
 	unsigned long		state;		 
 	atomic_t		count;	       
 #ifdef MY_ABC_HERE
+	atomic_t delayed_cnt;
+#endif  
+#ifdef MY_ABC_HERE
 	spinlock_t		lock;
 #endif
 	int			bm_seq;	 
@@ -126,11 +129,14 @@ enum {
 	STRIPE_COMPUTE_RUN,
 	STRIPE_OPS_REQ_PENDING,
 	STRIPE_DISCARD,
-};
-
 #ifdef MY_ABC_HERE
-#define STRIPE_NORETRY		17
+	STRIPE_NORETRY,
 #endif
+#ifdef MY_ABC_HERE
+	STRIPE_ACTIVATE_STABLE,
+	STRIPE_CHECK_STABLE_LIST,
+#endif  
+};
 
 #define STRIPE_OP_BIOFILL	0
 #define STRIPE_OP_COMPUTE_BLK	1
@@ -166,6 +172,10 @@ struct r5conf {
 	struct list_head	hold_list;  
 	struct list_head	delayed_list;  
 	struct list_head	bitmap_list;  
+#ifdef MY_ABC_HERE
+	 
+	struct list_head    stable_list;
+#endif  
 	struct bio		*retry_read_aligned;  
 	struct bio		*retry_read_aligned_list;  
 	atomic_t		preread_active_stripes;  

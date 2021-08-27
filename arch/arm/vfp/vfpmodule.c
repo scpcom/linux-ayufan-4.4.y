@@ -12,6 +12,9 @@
 #include <linux/sched.h>
 #include <linux/smp.h>
 #include <linux/init.h>
+#if defined(MY_ABC_HERE)
+#include <linux/export.h>
+#endif  
 
 #include <asm/cputype.h>
 #include <asm/thread_notify.h>
