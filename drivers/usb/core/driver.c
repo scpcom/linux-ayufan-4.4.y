@@ -574,7 +574,8 @@ int usb_match_device(struct usb_device *dev, const struct usb_device_id *id)
 }
 
 /* returns 0 if no match, 1 if match */
-int usb_match_one_id(struct usb_interface *interface,
+int usb_match_one_id_intf(struct usb_device *dev,
+			  struct usb_host_interface *intf,
 			  const struct usb_device_id *id)
 {
 	/* The interface class, subclass, and protocol should never be
