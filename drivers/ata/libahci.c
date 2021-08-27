@@ -46,15 +46,15 @@
 #include <linux/device.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #include <scsi/scsi_device.h>
 #endif
 #include <linux/libata.h>
 #include "ahci.h"
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern unsigned int ata_print_id;
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 static int ahci_skip_host_reset;
 int ahci_ignore_sss;
@@ -130,7 +130,7 @@ static DEVICE_ATTR(ahci_host_cap2, S_IRUGO, ahci_show_host_cap2, NULL);
 static DEVICE_ATTR(ahci_host_version, S_IRUGO, ahci_show_host_version, NULL);
 static DEVICE_ATTR(ahci_port_cmd, S_IRUGO, ahci_show_port_cmd, NULL);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static ssize_t
 ata_ahci_locate_show(struct device *dev, struct device_attribute *attr,
 		char *buf)
@@ -185,7 +185,7 @@ ata_ahci_fault_show(struct device *dev, struct device_attribute *attr,
 
 static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 void sata_syno_ahci_diskled_set(int iDiskNo, int iPresent, int iFault)
 {
 	struct ata_port *pAp = NULL;
@@ -227,7 +227,7 @@ END:
 	return;
 }
 EXPORT_SYMBOL(sata_syno_ahci_diskled_set);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 static ssize_t
 ata_ahci_fault_store(struct device *dev, struct device_attribute *attr,
@@ -252,7 +252,7 @@ ata_ahci_fault_store(struct device *dev, struct device_attribute *attr,
 	return -EINVAL;
 }
 DEVICE_ATTR(sw_fault, S_IWUSR | S_IRUGO, ata_ahci_fault_show, ata_ahci_fault_store);
-#endif //MY_ABC_HERE
+#endif //MY_DEF_HERE
 
 static DEVICE_ATTR(em_buffer, S_IWUSR | S_IRUGO,
 		   ahci_read_em_buffer, ahci_store_em_buffer);
@@ -296,7 +296,7 @@ struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_syno_fake_error_ctrl,
 	&dev_attr_syno_pwr_reset_count,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	&dev_attr_sw_locate,
 	&dev_attr_sw_fault,
 #endif
@@ -1012,7 +1012,7 @@ static void ahci_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	if (!giSynoHddLedEnabled) {
 		return;
 	}
@@ -1025,7 +1025,7 @@ static void ahci_sw_activity(struct ata_link *link)
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(10));
 }
 
-#ifdef MY_ABC_HERE 
+#ifdef MY_DEF_HERE 
 static void ahci_sw_locate_set(struct ata_link *link, u8 blEnable)
 {
 	struct ata_port *ap = link->ap;
@@ -1082,7 +1082,7 @@ static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable)
 END:
 	return;
 }
-#endif //MY_ABC_HERE
+#endif //MY_DEF_HERE
 
 static void ahci_sw_activity_blink(unsigned long arg)
 {
@@ -2475,7 +2475,7 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 		pi->flags |= ATA_FLAG_EM;
 		if (!(em_ctl & EM_CTL_ALHD))
 			pi->flags |= ATA_FLAG_SW_ACTIVITY;
-#ifdef MY_ABC_HERE 
+#ifdef MY_DEF_HERE 
 		if (em_ctl & EM_CTL_LED) {
 			pi->flags |= ATA_FLAG_SW_LOCATE;
 			pi->flags |= ATA_FLAG_SW_FAULT;

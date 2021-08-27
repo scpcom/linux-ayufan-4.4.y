@@ -42,7 +42,7 @@
 #include <linux/backing-dev.h>
 #include <linux/ecryptfs.h>
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 #include <cryptodev.h>
 #endif
 
@@ -188,7 +188,7 @@ struct ecryptfs_filename {
 	char dentry_name[ECRYPTFS_ENCRYPTED_DENTRY_NAME_LEN + 1];
 };
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 struct ecryptfs_request {
 	struct ablkcipher_request *req;
 	struct completion complete;
@@ -227,10 +227,10 @@ struct ecryptfs_crypt_stat {
 	size_t extent_shift;
 	unsigned int extent_mask;
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat;
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 	struct cryptoini cr_dm; /* OCF session */
 #else
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct crypto_ablkcipher *tfm;
 #else
 	struct crypto_blkcipher *tfm;

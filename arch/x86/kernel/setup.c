@@ -176,7 +176,7 @@ extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
@@ -798,7 +798,7 @@ static int __init early_mac4(char *p)
 __setup("mac4=", early_mac4);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static int __init early_netif_seq(char *p)
 {
 	int len;

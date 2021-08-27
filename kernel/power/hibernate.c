@@ -514,7 +514,7 @@ int hibernation_restore(int platform_mode)
 	return error;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 void syno_schedule_power_on_prepare(void)
 {
     if (!hibernation_ops)
@@ -736,7 +736,7 @@ int hibernate(void)
  * attempts to recover gracefully and make the kernel return to the normal mode
  * of operation.
  */
-#ifdef  MY_ABC_HERE
+#ifdef  MY_DEF_HERE
 int software_resume(void)
 #else
 static int software_resume(void)
@@ -871,7 +871,7 @@ close_finish:
 	goto Finish;
 }
 
-#ifndef MY_ABC_HERE
+#ifndef MY_DEF_HERE
 late_initcall(software_resume);
 
 #endif

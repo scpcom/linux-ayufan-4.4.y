@@ -176,7 +176,7 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_SHUTDOWN_LOG			0x2200
 #define SYNO_EVENT_EBOX_REFRESH      0x2300
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #define SYNO_EVENT_ECC_NOTIFICATION		0x2400
 #endif
 

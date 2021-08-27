@@ -293,7 +293,7 @@ mext_out:
 		if (err)
 			goto group_add_out;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (!EXT4_HAS_INCOMPAT_FEATURE(sb, EXT4_FEATURE_INCOMPAT_FLEX_BG))
 			err = ext4_group_add_no_flex(sb, &input);
 		else

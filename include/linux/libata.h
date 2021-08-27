@@ -85,7 +85,7 @@ extern int giSynoAtaDebug;
 	if (0 < giSynoAtaDebug) printk(x)
 #endif
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 extern int giSynoHddLedEnabled;
 #endif
 

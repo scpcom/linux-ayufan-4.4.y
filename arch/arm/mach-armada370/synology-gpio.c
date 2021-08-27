@@ -37,10 +37,6 @@
 
 #define GPIO_UNDEF				0xFF
 
-#define SATAHC_LED_CONFIG_REG	(MV_SATA_REGS_BASE | 0x2C)
-#define SATAHC_LED_ACT          0x0
-#define SATAHC_LED_ACT_PRESENT  0x4
-
 /* copied from synobios.h */
 #define DISK_LED_OFF			0
 #define DISK_LED_GREEN_SOLID	1
@@ -199,20 +195,17 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	int mode_sata_present;
 	int mode_gpio;
 	int fail_led;
-	const int active = 0; //note: led is low active
+	int active = 0; //note: led is low active
 
 #ifdef MY_ABC_HERE
-	extern long g_internal_hd_num;
-
-	if ( 1 >= g_internal_hd_num ) {
-		return 0;
+	if (0 == strcmp(gszSynoHWVersion, "RS214v10-j")) {
+		// RS214 led is high active
+		active = 1;
 	}
 #endif
 
 		WARN_ON(GPIO_UNDEF == generic_gpio.soc_sata_led.hdd1_fail_led);
 		WARN_ON(GPIO_UNDEF == generic_gpio.soc_sata_led.hdd2_fail_led);
-
-	MV_REG_WRITE(SATAHC_LED_CONFIG_REG, SATAHC_LED_ACT_PRESENT);
 
 	/* assign pin info according to hdd */
 	switch (index) {

@@ -18,7 +18,7 @@
 #include <linux/stop_machine.h>
 #include <linux/mutex.h>
 #include <linux/gfp.h>
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #include <linux/delay.h>
 #endif
 #include <linux/suspend.h>
@@ -264,7 +264,7 @@ static int __ref _cpu_down(unsigned int cpu, int tasks_frozen)
 	/* This actually kills the CPU. */
 	__cpu_die(cpu);
 
-#ifdef MY_ABC_HERE 
+#ifdef MY_DEF_HERE 
 	msleep(500);
 #endif
 

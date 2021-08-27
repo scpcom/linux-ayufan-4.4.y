@@ -415,7 +415,7 @@ static struct temp_data *init_temp_data(unsigned int cpu, int pkg_flag)
 	tdata->is_pkg_data = pkg_flag;
 	tdata->cpu = cpu;
 	tdata->cpu_core_id = TO_CORE_ID(cpu);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	/* if the cpu temp can't read, syno_cpu_temperature() still return this value,
 	 * so we must set a valid value(default 20 degree C) when init*/
 	tdata->temp = 20 * 1000;
@@ -814,7 +814,7 @@ static void __exit coretemp_exit(void)
 	platform_driver_unregister(&coretemp_driver);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #include <linux/synobios.h>
 /* update core temp
  * p.s. copy from "show_temp(..)"

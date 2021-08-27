@@ -201,7 +201,7 @@ unsigned char grgbLanMac[4][16];
 EXPORT_SYMBOL(grgbLanMac);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 unsigned int gSwitchDev = 0;
 char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 EXPORT_SYMBOL(gSwitchDev);
@@ -209,7 +209,7 @@ EXPORT_SYMBOL(gDevPCIName);
 #endif
 
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
 #endif

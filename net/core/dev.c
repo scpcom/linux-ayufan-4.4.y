@@ -143,7 +143,7 @@
 
 #include "net-sysfs.h"
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 #include <linux/synobios.h>
 extern char gszSynoHWVersion[16];
 #include <linux/pci.h>
@@ -5672,7 +5672,7 @@ int register_netdevice(struct net_device *dev)
 {
 	int ret;
 	struct net *net = dev_net(dev);
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	// we assume internal lans are comming up before extension lans
     static int netdevCnt = 0;
 #endif
@@ -5693,7 +5693,7 @@ int register_netdevice(struct net_device *dev)
 	ret = dev_get_valid_name(dev, dev->name);
 	if (ret < 0)
 		goto out;
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	if ( 0 == strncmp(gszSynoHWVersion, HW_DS508, strlen(HW_DS508)) ||
 		 0 == strncmp(gszSynoHWVersion, HW_DS1010p, strlen(HW_DS1010p)) ||
 		 0 == strncmp(gszSynoHWVersion, HW_DS1511p, strlen(HW_DS1511p))) {

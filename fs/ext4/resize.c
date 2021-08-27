@@ -1369,7 +1369,7 @@ static int ext4_setup_next_flex_gd(struct super_block *sb,
 	return 1;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 /*
  * Set up the block and inode bitmaps, and the inode table for the new group.
  * This doesn't need to be part of the main transaction, since we are only

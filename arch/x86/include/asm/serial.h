@@ -29,7 +29,7 @@
 #define STD_COM4_FLAGS ASYNC_BOOT_AUTOCONF
 #endif
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 
 #ifdef CONFIG_GEN3_UART
 /*
@@ -73,6 +73,6 @@
 	{ 0, BASE_BAUD, 0x2F8, 3, STD_COM_FLAGS },	/* ttyS1 */	\
 	{ 0, BASE_BAUD, 0x3E8, 4, STD_COM_FLAGS },	/* ttyS2 */	\
 	{ 0, BASE_BAUD, 0x2E8, 3, STD_COM4_FLAGS },	/* ttyS3 */
-#endif /* MY_ABC_HERE || MY_ABC_HERE */
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
 
 #endif /* _ASM_X86_SERIAL_H */

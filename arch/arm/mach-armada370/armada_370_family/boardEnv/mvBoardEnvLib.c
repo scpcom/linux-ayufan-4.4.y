@@ -176,6 +176,11 @@ MV_VOID mvBoardEnvInit(MV_VOID)
 	mvGppTypeSet(1, 0xFFFFFFFF, BOARD_INFO(boardId)->gppOutEnValMid);
 	mvGppTypeSet(2, 0xFFFFFFFF, BOARD_INFO(boardId)->gppOutEnValHigh);
 
+	if(boardId == SYNO_RS214_ID) {
+		/* RS214 disk LED is HIGH active, so we need invert the active indication */
+		MV_REG_WRITE(0xa002c, 0x0000000c);
+	}
+
 	/* Set GPIO interrupts type & polarity as needed */
 	for (i = 0; i < MV_GPP_MAX_GROUP; i++) {
 		gppMask = mvBoardGpioIntMaskGet(i);

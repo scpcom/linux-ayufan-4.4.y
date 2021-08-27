@@ -98,7 +98,7 @@ typedef unsigned int (*ata_xlat_func_t)(struct ata_queued_cmd *qc);
 
 static struct ata_device *__ata_scsi_find_dev(struct ata_port *ap,
 					const struct scsi_device *scsidev);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 					    const struct scsi_device *scsidev);
 #else
@@ -4344,7 +4344,7 @@ static struct ata_device *__ata_scsi_find_dev(struct ata_port *ap,
  *	RETURNS:
  *	Associated ATA device, or %NULL if not found.
  */
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 struct ata_device *
 ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
 #else
@@ -4359,7 +4359,7 @@ ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
 
 	return dev;
 }
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(ata_scsi_find_dev);
 #endif
 

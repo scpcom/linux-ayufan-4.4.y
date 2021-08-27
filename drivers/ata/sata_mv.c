@@ -3483,7 +3483,7 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	 * Achieves better receiver noise performance than the h/w default:
 	 */
 	m3 = readl(port_mmio + PHY_MODE3);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	m3 = (m3 & 0x03) | (0x5555601 << 5);
 	m3 |= 0x0c;
 #else

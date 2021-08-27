@@ -5599,7 +5599,7 @@ static void autorun_array(struct mddev *mddev)
 	}
 }
 
-#if defined(MY_ABC_HERE) && defined(CONFIG_PM_SLEEP) 
+#if defined(MY_DEF_HERE) && defined(CONFIG_PM_SLEEP) 
 	extern int software_resume(void);
 #endif
 /*
@@ -5730,7 +5730,7 @@ static void autorun_devices(int part)
 	}
 	printk(KERN_INFO "md: ... autorun DONE.\n");
 
-#if defined(MY_ABC_HERE) && defined(CONFIG_PM_SLEEP) 
+#if defined(MY_DEF_HERE) && defined(CONFIG_PM_SLEEP) 
 	software_resume();
 #endif
 }

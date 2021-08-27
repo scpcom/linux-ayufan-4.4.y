@@ -48,7 +48,7 @@
 #include <linux/gfp.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #include <scsi/scsi.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>

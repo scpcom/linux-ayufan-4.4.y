@@ -15,7 +15,7 @@
 #define SYNO_USB_FLASH_DEVICE_INDEX 255
 #define SYNO_USB_FLASH_DEVICE_NAME  "synoboot"
 #define SYNO_USB_FLASH_DEVICE_PATH  "/dev/synoboot"
-#if 1
+#if 0
 #define IS_SYNO_USBBOOT_ID_VENDOR(VENDOR) (0xF400 == (VENDOR) || 0xF401 == (VENDOR))
 #define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT) || 0xF401 == (PRODUCT))
 #else
@@ -25,8 +25,8 @@
 
 #endif
 
-#if 1
-#ifdef MY_ABC_HERE
+#if 0
+#ifdef MY_DEF_HERE
 #define SYNO_MAX_SWITCHABLE_NET_DEVICE 8
 #define SYNO_NET_DEVICE_ENCODING_LENGTH 6
 #endif
@@ -131,7 +131,7 @@
 #define SYNO_SATA_DEVICE_PREFIX	   "sd"
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)    
-#if 0
+#if 1
 #define SYNO_INTERNAL_MICROSD_NAME "4-4"
 #endif
 
