@@ -1,0 +1,19 @@
+# description of the syntax of this configuration file,
+# see Documentation/kbuild/kconfig-language.txt.
+#
+
+config SYNO_INQUIRY_USE_ATA_COMMAND
+	bool "Using ATA command to obtain STAT disk vendor and model name"
+	depends on SYNO_BROMOLOW
+	default y
+	help
+	  Using ATA command to obtain STAT disk complete information
+
+config SYNO_ADT7490_FEATURES
+	bool "Enhance features for adt7490 for Synology Corp. NAS product"
+	depends on SENSORS_ADT7475
+	default n
+	help
+		If you need Synology enhance features for adt7490 supports, choose yes.
+		Which will open peci supports and some other features for adt7490
+

@@ -1,0 +1,13 @@
+config SYNO_NOTIFY
+	bool "Synology notification"
+	select ANON_INODES
+	select FSNOTIFY
+	default y
+	---help---
+	  Say Y here to enable syno notify support for userspace, including the
+	  associated system calls.  Syno notify allows monitoring of both files and
+	  directories via a single open fd.  Events are read from the file
+	  descriptor, which is also select()- and poll()-able.
+	  Syno notify is whole mount point file system event monitor.
+
+	  If unsure, say Y.

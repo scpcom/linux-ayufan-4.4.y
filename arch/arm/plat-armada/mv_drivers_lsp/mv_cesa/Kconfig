@@ -1,0 +1,72 @@
+menu "Cesa options"
+	depends on MV_INCLUDE_CESA
+
+config  MV_CESA
+	bool "Support for Marvell Cryptographic Engine and Security Acceleration(CESA)"
+	default y
+
+config  MV_CESA_TOOL
+	bool "Support for Marvell CESA Tool"
+	default y
+	depends on MV_CESA
+	---help---
+
+config MV_CESA_CHANNELS
+	int "Total CESA HW channels supported"
+        depends on MV_CESA
+	range 1 2 if ARCH_ARMADA_XP
+	range 1 1 if ARCH_ARMADA370
+	default "2" if ARCH_ARMADA_XP
+	default "1" if ARCH_ARMADA370
+         ---help---
+	Select the number of CESA channels to be used for crypto operations acceleration.
+
+choice
+	prompt "CESA Features"
+	depends on MV_CESA
+	default MV_CESA_CHAIN_MODE if (ARCH_ARMADA370 || ARMADA_XP_REV_Z1)
+	default MV_CESA_INT_COALESCING_SUPPORT if (ARMADA_XP_REV_A0 || ARMADA_XP_REV_B0)
+
+config MV_CESA_CHAIN_MODE
+	bool "Support CESA chain-mode"
+        depends on MV_CESA
+         ---help---
+	Choosing this option will enable CESA chain mode support.
+
+config MV_CESA_INT_COALESCING_SUPPORT
+	bool "Support Interrupt Coalescing"
+	depends on MV_CESA && (ARMADA_XP_REV_A0 || ARMADA_XP_REV_B0)
+	---help---
+	Choosing this option will enable CESA interrupt coalescing support.
+
+config MV_CESA_INT_PER_PACKET
+	bool "Support interrupt per packet(no optimization)"
+	depends on MV_CESA
+	---help---
+	Choosing this option will enforce CESA to work in interrupt per packet mode.
+
+endchoice
+
+choice 
+        prompt "CESA Mode"
+        depends on MV_CESA
+        default MV_CESA_OCF
+
+config	MV_CESA_OCF
+	tristate "Support for Marvell CESA OCF driver"
+	depends on OCF_OCF
+	---help---
+	  Choosing this option will enable you to use the Marvell Cryptographic Engine and
+	  Security Accelerator, under the OCF package.
+
+config  MV_CESA_TEST
+	bool "Support for Marvell CESA test driver"
+	depends on MV_CESA_TOOL 
+	---help---
+	  Choosing this option will enable you to use the Marvell Cryptographic Engine and
+	  Security Accelerator, with the mv_cesa_tool in test mode.
+
+endchoice
+
+endmenu
+

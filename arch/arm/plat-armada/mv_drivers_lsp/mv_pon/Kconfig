@@ -1,0 +1,72 @@
+menu "SoC PON support"
+depends on MV_INCLUDE_PON
+
+config MV_GPON_TCONTS
+        int "GPON T-CONT's number"
+        default 8 
+        ---help---
+
+choice
+	prompt "PON Driver mode"
+	default MV_GPON
+
+config  MV_GPON
+	tristate "Support for Marvell GPON Driver"
+        select CONFIG_MV_GPON_MODULE
+
+config  MV_EPON
+	tristate "Support for Marvell EPON Driver"
+        select CONFIG_MV_EPON_MODULE
+
+endchoice
+
+comment "GPON Driver Options"
+depends on MV_GPON
+
+config  MV_GPON_HW_INTERRUPT
+	bool "Support for GPON HW Interrupt"
+	depends on MV_GPON
+      	default y
+	---help---
+
+config  MV_GPON_DEBUG_PRINT
+	bool "Support for GPON Debug printing"
+	depends on MV_GPON
+      	default y
+	---help---
+
+config  MV_GPON_STATIC_GEM_PORT
+	bool "Support for static GPON Gem Port"
+	depends on MV_GPON
+      	default y
+	---help---
+
+config  MV_GPON_PERFORMANCE_CHECK
+	bool "Support for GPON Performance Validation"
+	depends on MV_GPON
+      	default n
+	---help---
+
+comment "EPON Driver Options"
+depends on MV_EPON
+
+config  MV_EPON_HW_INTERRUPT
+	bool "Support for EPON HW Interrupt"
+	depends on MV_EPON
+      	default y
+	---help---
+
+config MV_EPON_SINGLE_MAC
+	bool "EPON with single MAC"
+        depends on MV_EPON
+        default y
+        ---help---
+
+config MV_EPON_MAC
+	int "EPON LLID's number"
+        depends on MV_EPON
+        default 1
+        ---help---
+
+endmenu
+

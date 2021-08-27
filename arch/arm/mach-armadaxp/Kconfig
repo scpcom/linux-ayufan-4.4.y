@@ -1,0 +1,121 @@
+if ARCH_ARMADA_XP
+
+config  MV_HAL_RULES_PATH
+        string "path of the mvRules.mk file for HAL drivers"
+        default "arch/arm/mach-armadaxp/mv_hal_support/mvRules.mk"
+        ---help---
+	
+#source "arch/arm/plat-orion/mv_hal_drivers/Kconfig"
+
+menu "Marvell Armada Options"
+
+config ARMADA_XP
+	bool "Armada XP SoC Family"
+	default y
+
+choice
+	prompt "Armada XP Chip revision"
+	depends on ARMADA_XP
+	default ARMADA_XP_REV_B0
+
+config  ARMADA_XP_REV_Z1
+	bool "MV88F78x30 and MV88F78x60 Z1 SoC devices"
+	select ARMADA_XP_ERRATA_SMI_1
+#	select ARMADA_XP_DEEP_IDLE_L2_WA if CACHE_AURORA_L2
+#	select ARMADA_XP_DEEP_IDLE_UNMASK_INTS_WA
+	select SHEEVA_ERRATA_ARM_CPU_4742
+	select SHEEVA_ERRATA_ARM_CPU_4786 if (ARM_THUMB && VFP)
+#	select SHEEVA_ERRATA_ARM_CPU_5315
+	select SHEEVA_ERRATA_ARM_CPU_4413
+	select SHEEVA_ERRATA_ARM_CPU_4659
+	select SHEEVA_ERRATA_ARM_CPU_5114 if (CPU_SHEEVA_PJ4B_V6 && AURORA_IO_CACHE_COHERENCY)
+	select SHEEVA_ERRATA_ARM_CPU_4611
+#	select SHEEVA_ERRATA_ARM_CPU_4948
+	select SHEEVA_ERRATA_ARM_CPU_PMU_RESET
+	select SHEEVA_ERRATA_ARM_CPU_BTS61 if (SMP || AURORA_IO_CACHE_COHERENCY)
+	---help---
+	Choosing this option will generate a linux kernel for the
+	  MV78x30 and MV78x60 devices with revision Z1
+
+config  ARMADA_XP_REV_A0
+	bool "MV88F78x30 and MV88F78x60 A0 SoC devices"
+	---help---
+	Choosing this option will generate a linux kernel for the
+	  MV78x30 and MV78x60 devices with revision A0
+
+config  ARMADA_XP_REV_B0
+	bool "MV88F78x30 and MV88F78x60 B0 SoC devices"
+	---help---
+	Choosing this option will generate a linux kernel for the
+	  MV78x30 and MV78x60 devices with revision B0
+
+endchoice
+
+config  ARMADA_XP_A0_WITH_B0
+	bool "Armada XP A0 and B0 Runtime Support"
+	default n
+	depends on ARMADA_XP_REV_B0
+	---help---
+	Choosing this option will generate a linux kernel supporting both A0 and B0 revisions
+	Selection is done at runtime based on silicon revision.
+	Due to performance impact, it is recommended to disable this option in case of B0 only.
+
+
+config MACH_ARMADA_XP_DB
+	bool "Marvell Armada XP Development Board"	
+	default y
+	help
+
+config MACH_ARMADA_XP_GP
+	bool "Marvell Armada XP General Purpose Board"
+	default y
+	help
+
+config MACH_ARMADA_XP_RDSRV
+	bool "Marvell Armada XP Server Board"
+	default y
+	help
+
+config MACH_ARMADA_XP_RD_NAS
+	bool "Marvell Armada XP NAS RD Board"
+	default y
+	help
+
+config MACH_ARMADA_XP_FPGA
+	bool "Marvell Armada XP FPGA Board"	
+	depends on !MACH_ARMADA_XP_DB && !MACH_ARMADA_XP_RDSRV
+	default y
+	help
+
+config CFU_DRAM_BYPASS
+        bool "Bypass CFU to DRAM via Punit"
+	default n
+	help
+
+config ARMADA_XP_SPARSEMEM
+	bool "Use sparse memory model"
+	select ARCH_SPARSEMEM_ENABLE
+	default n
+
+config ARMADAXP_USE_IRQ_INDIRECT_MODE
+       bool "Use indirect mode for handling interrupt controller"
+       default n
+       help
+         This mode enables using indirect mode for handling interrupts, in this
+	 mode, the Interrupt Set Enable/Clear Enable registers are used for
+	 unmasking/masking shared interrupts, and Interrupt Set Mask/Clear Mask
+	 used for masking/unmasking per-cpu interrupts. Without this mode, the
+	 Interrupt Source register is used directly. and this requires the
+	 following:
+	 - Locking mechanism to protect the access to the Interrupt Source Register
+	 - Reads operation of those registers.
+	 - Using the affinity variable for restoring the mask values
+
+config ARMADAXP_USE_IRQ_INTERRUPT_ACK
+       bool "Use Interrupt Ack register to detect pending interrupts"
+	default n
+	help
+
+endmenu
+
+endif
