@@ -66,6 +66,9 @@ ICP_LAC_API=$(ICP_ROOT)/Acceleration/include/lac
 ICP_BTR_API=$(ICP_ROOT)/Acceleration/include/btr
 ICP_API_DIR=$(ICP_ROOT)/Acceleration/include
 ICP_OCF_SHIM_DIR?=$(KERNEL_SOURCE_ROOT)/crypto/ocf/
+ifeq ($(wildcard $(ICP_OCF_SHIM_DIR)),)
+ICP_OCF_SHIM_DIR?=$(ROOTDIR)/modules/ocf/
+endif
 
 ICP_OS_LEVEL?=kernel_space
 

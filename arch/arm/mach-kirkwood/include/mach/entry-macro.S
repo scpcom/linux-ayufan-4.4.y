@@ -20,17 +20,37 @@
 	ldr	\base, =IRQ_VIRT_BASE
 	.endm
 
+#if defined(CONFIG_CPU_BIG_ENDIAN)
+	.macro	HTOLL sr, tt		@ sr   = A  ,B  ,C  ,D
+	eor \tt, \sr, \sr, ror #16 ;    @ temp = A^C,B^
+	bic \tt, \tt, #0xff0000 ;       @ temp = A^C,0  ,C^A,D^B
+	mov \sr, \sr, ror #8 ;          @ sr   = D  ,A  ,B  ,C
+	eor \sr, \sr, \tt, lsr #8       @ sr   = D  ,C  ,B  ,A
+	.endm
+#else
+	.macro	HTOLL sr, tt
+	.endm
+#endif
+
 	.macro  get_irqnr_and_base, irqnr, irqstat, base, tmp
 	@ check low interrupts
-	ldr	\irqstat, [\base, #IRQ_CAUSE_LOW_OFF]
-	ldr	\tmp, [\base, #IRQ_MASK_LOW_OFF]
+	ldr	\base, =IRQ_VIRT_CAUSE_LOW_REG
+	ldr	\irqstat, [\base]
+	HTOLL	\irqstat, \base
+	ldr	\base, =IRQ_VIRT_MASK_LOW_REG
+	ldr	\tmp, [\base]
+	HTOLL	\tmp, \base
 	mov	\irqnr, #31
 	ands	\irqstat, \irqstat, \tmp
 	bne	1001f
 
 	@ if no low interrupts set, check high interrupts
-	ldr	\irqstat, [\base, #IRQ_CAUSE_HIGH_OFF]
-	ldr	\tmp, [\base, #IRQ_MASK_HIGH_OFF]
+	ldr	\base, =IRQ_VIRT_CAUSE_HIGH_REG
+	ldr	\irqstat, [\base]
+	HTOLL	\irqstat, \base
+	ldr	\base, =IRQ_VIRT_MASK_HIGH_REG
+	ldr	\tmp, [\base]
+	HTOLL	\tmp, \base
 	mov	\irqnr, #63
 	ands	\irqstat, \irqstat, \tmp
 

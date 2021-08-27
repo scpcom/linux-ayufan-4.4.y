@@ -239,7 +239,7 @@ void enclosure_unregister(struct enclosure_device *edev)
 				if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
 					scsi_dev = to_scsi_device(cdev->dev);
 					scsi_enc = to_scsi_device(edev->edev.parent);
-					printk(KERN_INFO "SCSI device (%s) with disk name (%s) removed from SLOT%02d of enclosure(%s), %.8s-%.16s", 
+					printk(KERN_INFO "SCSI device (%s) with disk name (%s) removed from SLOT%02d of enclosure(%s), %.8s-%."SYNO_DISK_MODEL_LEN"s", 
 							dev_name(cdev->dev), scsi_dev->syno_disk_name, cdev->number + 1, dev_name(&(edev->edev)),
 							scsi_enc->vendor, scsi_enc->model);
 				}
@@ -411,7 +411,7 @@ int enclosure_add_device(struct enclosure_device *edev, int component,
 	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
 		scsi_dev = to_scsi_device(dev);
 		scsi_enc = to_scsi_device(edev->edev.parent);
-		printk(KERN_INFO "SCSI device (%s) with disk name (%s) plugged in SLOT%02d of enclosure(%s), %.8s-%.16s", 
+		printk(KERN_INFO "SCSI device (%s) with disk name (%s) plugged in SLOT%02d of enclosure(%s), %.8s-%."SYNO_DISK_MODEL_LEN"s", 
 				dev_name(dev), scsi_dev->syno_disk_name, cdev->number + 1, dev_name(&(edev->edev)),
 				scsi_enc->vendor, scsi_enc->model);
 	}
@@ -454,7 +454,7 @@ int enclosure_remove_device(struct enclosure_device *edev, struct device *dev)
 			if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
 				scsi_dev = to_scsi_device(dev);
 				scsi_enc = to_scsi_device(edev->edev.parent);
-				printk(KERN_INFO "SCSI device (%s) with disk name (%s) removed from SLOT%02d of enclosure(%s), %.8s-%.16s", 
+				printk(KERN_INFO "SCSI device (%s) with disk name (%s) removed from SLOT%02d of enclosure(%s), %.8s-%."SYNO_DISK_MODEL_LEN"s", 
 						dev_name(dev), scsi_dev->syno_disk_name, cdev->number + 1, dev_name(&(edev->edev)),
 						scsi_enc->vendor, scsi_enc->model);
 			}

@@ -85,6 +85,9 @@ extern "C" {
 /* enumerations */
 typedef enum {
 	MV_WP_NONE,             /* Unprotect the whole chip */
+#ifdef CONFIG_SYNO_ARMADA
+	MV_WP_UPR_1OF256,       /* Write protect the upper 1/256 part */
+#endif
 	MV_WP_UPR_1OF128,       /* Write protect the upper 1/128 part */
 	MV_WP_UPR_1OF64,        /* Write protect the upper 1/64 part */
 	MV_WP_UPR_1OF32,        /* Write protect the upper 1/32 part */
@@ -118,6 +121,7 @@ typedef struct {
     MV_U32  spiMaxFreq;     /* The MAX frequency that can be used with the device */
     MV_U32  spiMaxFastFreq; /* The MAX frequency that can be used with the device for fast reads */
     MV_U32  spiFastRdDummyBytes; /* Number of dumy bytes to read before real data when working in fast read mode. */
+    MV_U32  addrCycCnt;		/* Address cycles count */
 } MV_SFLASH_DEVICE_PARAMS;
 
 typedef struct {

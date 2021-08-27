@@ -1359,10 +1359,8 @@ MODULE_LICENSE ("GPL");
 #endif
 
 #ifdef MY_ABC_HERE
-/* kernel command line should use ehci_hcd.noehci */
-static int noehci;
-module_param(noehci, bool, 0444);
-MODULE_PARM_DESC(noehci, "SYNO: skip register ehci_hcd driver");
+/* kernel command line should use syno_no_ehci=1 to skip ehci controller insert*/
+extern int gSynoNoEhci;
 #endif
 
 static int __init ehci_hcd_init(void)
@@ -1373,7 +1371,7 @@ static int __init ehci_hcd_init(void)
 		return -ENODEV;
 
 #ifdef MY_ABC_HERE
-	if (noehci) {
+	if (gSynoNoEhci) {
 		return -ENODEV;
 	}
 #endif

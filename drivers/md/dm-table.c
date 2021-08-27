@@ -1237,6 +1237,14 @@ int dm_calculate_queue_limits(struct dm_table *table,
 
 		ti = dm_table_get_target(table, i++);
 
+#ifdef MY_ABC_HERE
+		if (!ti->type->iterate_devices && ti->force_io_hints) {
+			if (ti->type->io_hints) {
+				ti->type->io_hints(ti, &ti_limits);
+			}
+			goto combine_limits;
+		}
+#endif
 		if (!ti->type->iterate_devices)
 			goto combine_limits;
 
@@ -1326,6 +1334,9 @@ static bool dm_table_supports_flush(struct dm_table *t, unsigned flush)
 
 		if (!ti->num_flush_requests)
 			continue;
+
+		if (ti->flush_supported)
+			return 1;
 
 		if (ti->type->iterate_devices &&
 		    ti->type->iterate_devices(ti, device_flush_capable, &flush))

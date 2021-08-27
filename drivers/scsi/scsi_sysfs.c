@@ -367,6 +367,9 @@ static void scsi_device_dev_release_usercontext(struct work_struct *work)
 	scsi_target_reap(scsi_target(sdev));
 
 	kfree(sdev->inquiry);
+#ifdef MY_ABC_HERE
+	kfree(sdev->model);
+#endif
 	kfree(sdev);
 
 	if (parent)
@@ -446,6 +449,18 @@ void scsi_sysfs_unregister(void)
  * sdev_show_function: macro to create an attr function that can be used to
  * show a non-bit field.
  */
+#ifdef MY_ABC_HERE
+#define sdev_show_function(field, format_string)				\
+static ssize_t								\
+sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
+		   char *buf)						\
+{									\
+	struct scsi_device *sdev;					\
+	sdev = to_scsi_device(dev);					\
+	return snprintf (buf, SYNO_DISK_MODEL_NUM + 4, format_string, sdev->field);		\
+}									\
+
+#else
 #define sdev_show_function(field, format_string)				\
 static ssize_t								\
 sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
@@ -455,6 +470,8 @@ sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
 	sdev = to_scsi_device(dev);					\
 	return snprintf (buf, 20, format_string, sdev->field);		\
 }									\
+
+#endif
 
 /*
  * sdev_rd_attr: macro to create a function and attribute variable for a
@@ -570,6 +587,24 @@ END:
 }
 
 static DEVICE_ATTR(syno_idle_time, S_IRUGO, sdev_show_syno_idle_time, NULL);
+
+static ssize_t
+sdev_show_syno_spindown(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf (buf, 20, "%d\n", sdev->spindown);
+
+END:
+	return iRet;
+}
+
+static DEVICE_ATTR(syno_spindown, S_IRUGO, sdev_show_syno_spindown, NULL);
 #endif
 
 /*
@@ -580,7 +615,11 @@ sdev_rd_attr (queue_depth, "%d\n");
 sdev_rd_attr (type, "%d\n");
 sdev_rd_attr (scsi_level, "%d\n");
 sdev_rd_attr (vendor, "%.8s\n");
+#ifdef MY_ABC_HERE
+sdev_rd_attr (model, "%."SYNO_DISK_MODEL_LEN"s\n");
+#else
 sdev_rd_attr (model, "%.16s\n");
+#endif
 sdev_rd_attr (rev, "%.4s\n");
 
 /*
@@ -781,6 +820,7 @@ static struct attribute *scsi_sdev_attrs[] = {
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_idle_time.attr,
+	&dev_attr_syno_spindown.attr,
 #endif
 	REF_EVT(media_change),
 	NULL

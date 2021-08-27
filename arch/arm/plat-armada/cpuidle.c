@@ -26,10 +26,6 @@
 #include "cpuidle.h"
 #include "mvOs.h"
 
-extern int armadaxp_cpu_resume(void);
-extern int armadaxp_cpu_suspend(unsigned long);
-extern int axp_secondary_startup(void);
-
 #ifdef	CONFIG_CPU_IDLE
 #if defined CONFIG_ARMADA_DEEP_IDLE_SAVE_WINDOWS_STATE
 static MV_AHB_TO_MBUS_DEC_WIN ahbAddrDecWin[MAX_AHB_TO_MBUS_WINS];
@@ -75,6 +71,11 @@ void armadaxp_fabric_setup_deepIdle(void)
 	reg |= MV_L2C_NFABRIC_PM_CTRL_CFG_PWR_DOWN;
 	MV_REG_WRITE(MV_L2C_NFABRIC_PM_CTRL_CFG_REG, reg);
 
+#if defined CONFIG_ARCH_ARMADA_XP
+	/* Re-set default value for the pmuPowerUpDelay parameter */
+	/* ArmadaXP uses on-die power switches so the pmuPowerUpDelay must be preserved */
+	MV_REG_WRITE(MV_RUNIT_PMU_REGS_OFFSET + 0x14, 0x100);
+#endif
 	/* Set the resume control registers to do nothing */
 	MV_REG_WRITE(0x20980, 0);
 	MV_REG_WRITE(0x20988, 0);
@@ -98,6 +99,10 @@ void mv_cpuidle_reset_cpu_win_state(void)
 	u32 i;
 	MV_AHB_TO_MBUS_DEC_WIN	winInfo;
 
+#ifdef CONFIG_ARMADA_SUPPORT_DEEP_IDLE_CESA_USE
+	u32 length = &armadaxp_deep_idle_exit_end - &armadaxp_deep_idle_exit_start;
+	memcpy((void *)CRYPT_ENG_VIRT_BASE(0), &armadaxp_deep_idle_exit_start, length);
+#endif
 	/* Save CPU windows state, and enable access for Bootrom	*
 	** according to SoC default address decoding windows.		*/
 	for (i = 0; i < MAX_AHB_TO_MBUS_WINS; i++) {
@@ -108,6 +113,15 @@ void mv_cpuidle_reset_cpu_win_state(void)
 		mvAhbToMbusWinEnable(i, MV_FALSE);
 	}
 
+#ifdef CONFIG_ARMADA_SUPPORT_DEEP_IDLE_CESA_USE
+	/* Cesa SRAM */
+	winInfo.target = CRYPT0_ENG;
+	winInfo.addrWin.baseLow = 0xFFFF0000;
+	winInfo.addrWin.baseHigh = 0x0;
+	winInfo.addrWin.size = _64K;
+	winInfo.enable = MV_TRUE;
+	mvAhbToMbusWinSet(13, &winInfo);
+#else
 	winInfo.target = BOOT_ROM_CS;
 	winInfo.addrWin.baseLow = 0xF8000000;
 	winInfo.addrWin.baseHigh = 0x0;
@@ -121,6 +135,7 @@ void mv_cpuidle_reset_cpu_win_state(void)
 	winInfo.addrWin.size = _64K;
 	winInfo.enable = MV_TRUE;
 	mvAhbToMbusWinSet(8, &winInfo);
+#endif
 }
 #endif
 
@@ -162,25 +177,22 @@ void armadaxp_fabric_prepare_deepIdle(void)
 	/* Mask interrupts */
 	reg |= PM_STATUS_AND_MASK_IRQ_MASK | PM_STATUS_AND_MASK_FIQ_MASK;
 #endif
-
 	MV_REG_WRITE(PM_STATUS_AND_MASK_REG(processor_id), reg);
-
-	/* Disable delivering of other CPU core cache maintenance instruction,
-	 * TLB, and Instruction synchronization to the CPU core 
-	 */
-	/* TODO */
-#ifdef CONFIG_CACHE_AURORA_L2
-	if (pm_mode == SNOOZE) {
-		/* ask HW to power down the L2 Cache if possible */
-		reg = MV_REG_READ(PM_CONTROL_AND_CONFIG_REG(processor_id));
-		reg |= PM_CONTROL_AND_CONFIG_L2_PWDDN;
-		MV_REG_WRITE(PM_CONTROL_AND_CONFIG_REG(processor_id), reg);
-	}
-#endif
 
 	/* request power down */
 	reg = MV_REG_READ(PM_CONTROL_AND_CONFIG_REG(processor_id));
 	reg |= PM_CONTROL_AND_CONFIG_PWDDN_REQ;
+#ifdef CONFIG_CACHE_AURORA_L2 && CONFIG_ARCH_ARMADA_XP
+	if (pm_mode == SNOOZE) {
+		/* ask HW to power down the L2 Cache if possible */
+		reg |= PM_CONTROL_AND_CONFIG_L2_PWDDN;
+	}
+#endif
+#ifdef CONFIG_ARCH_ARMADA370
+	/* Armada370 has single power domain so the L2 power down request bit
+	must be set as well */
+	reg |= PM_CONTROL_AND_CONFIG_L2_PWDDN;
+#endif
 	MV_REG_WRITE(PM_CONTROL_AND_CONFIG_REG(processor_id), reg);
 
 	/* Disable snoop disable by HW */

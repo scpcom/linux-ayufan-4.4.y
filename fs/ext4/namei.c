@@ -905,6 +905,10 @@ static inline int search_dirblock(struct buffer_head *bh,
 	int de_len;
 	const char *name = d_name->name;
 	int namelen = d_name->len;
+#ifdef MY_ABC_HERE
+	char *new_dname = NULL;
+	const char *ext_dname = NULL;
+#endif
 
 	de = (struct ext4_dir_entry_2 *) bh->b_data;
 	dlimit = bh->b_data + dir->i_sb->s_blocksize;
@@ -928,9 +932,29 @@ static inline int search_dirblock(struct buffer_head *bh,
 			* So we should make sure it is the real name before dentry be added to queue.
 			*/
 			if (caseless && dentry_cmp(d_name->name, d_name->len, de->name, de->name_len)) {
+				if (de->name_len > (DNAME_INLINE_LEN - 1) && de->name_len > d_name->len) {
+					new_dname = kmalloc(de->name_len + 1, GFP_KERNEL);
+					if (!new_dname) {
+						return -1;
+					}
+					if (d_name->len > (DNAME_INLINE_LEN -1)) {
+						ext_dname = d_name->name;
+					}
+					memcpy((unsigned char*)new_dname, de->name, de->name_len);
+					new_dname[de->name_len] = 0;
+
+					((struct qstr*)d_name)->len = de->name_len;
+					((struct qstr*)d_name)->name = new_dname;
+
+					if (ext_dname) {
+						kfree(ext_dname);
+					}
+				} else {
 					memcpy((unsigned char*)d_name->name, de->name, de->name_len);
+					((char*)d_name->name)[de->name_len] = 0;
 					((struct qstr*)d_name)->len = de->name_len;
 				}
+			}
 #endif
 			return 1;
 		}

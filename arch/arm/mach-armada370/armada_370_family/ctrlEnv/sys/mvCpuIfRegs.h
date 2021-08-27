@@ -229,9 +229,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CPU_MAIN_INT_TWSI_OFFS(i)			(2 + i)
 #define CPU_MAIN_INT_CAUSE_TWSI(i)			(31 + i)
 
-/* To keep compatibility with HAL add dummy cpu parameter */
-#define MV_TWSI_CPU_MAIN_INT_CAUSE(chNum, cpu)		(CPU_MAIN_INT_CAUSE_REG(1))
-
 #define CPU_CF_LOCAL_MASK_REG				(MV_CPUIF_REGS_BASE + 0x8c4)
 #define CPU_INT_SOURCE_CONTROL_REG(i)		(MV_CPUIF_SHARED_REGS_BASE + 0xB00 + (i * 0x4))
 

@@ -1,6 +1,6 @@
 /*-
- * Linux port done by David McCullough <david_mccullough@securecomputing.com>
- * Copyright (C) 2004-2007 David McCullough
+ * Linux port done by David McCullough <david_mccullough@mcafee.com>
+ * Copyright (C) 2004-2010 David McCullough
  * The license and original author are listed below.
  *
  * Copyright (c) 2003 Sam Leffler, Errno Consulting
@@ -31,7 +31,8 @@
 __FBSDID("$FreeBSD: src/sys/dev/safe/safe.c,v 1.18 2007/03/21 03:42:50 sam Exp $");
  */
 
-#ifndef AUTOCONF_INCLUDED
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38) && !defined(AUTOCONF_INCLUDED)
 #include <linux/config.h>
 #endif
 #include <linux/module.h>
@@ -46,7 +47,6 @@ __FBSDID("$FreeBSD: src/sys/dev/safe/safe.c,v 1.18 2007/03/21 03:42:50 sam Exp $
 #include <linux/interrupt.h>
 #include <linux/spinlock.h>
 #include <linux/random.h>
-#include <linux/version.h>
 #include <linux/skbuff.h>
 #include <asm/io.h>
 
@@ -77,40 +77,11 @@ __FBSDID("$FreeBSD: src/sys/dev/safe/safe.c,v 1.18 2007/03/21 03:42:50 sam Exp $
  */
 #define HMAC_HACK 1
 #ifdef HMAC_HACK
-#define LITTLE_ENDIAN 1234
-#define BIG_ENDIAN 4321
-#ifdef __LITTLE_ENDIAN
-#define BYTE_ORDER LITTLE_ENDIAN
-#endif
-#ifdef __BIG_ENDIAN
-#define BYTE_ORDER BIG_ENDIAN
-#endif
+#include <safe/hmachack.h>
 #include <safe/md5.h>
 #include <safe/md5.c>
 #include <safe/sha1.h>
 #include <safe/sha1.c>
-
-u_int8_t hmac_ipad_buffer[64] = {
-    0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
-    0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
-    0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
-    0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
-    0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
-    0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
-    0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
-    0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36
-};
-
-u_int8_t hmac_opad_buffer[64] = {
-    0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C,
-    0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C,
-    0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C,
-    0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C,
-    0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C,
-    0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C,
-    0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C,
-    0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C, 0x5C
-};
 #endif /* HMAC_HACK */
 
 /* add proc entry for this */
@@ -237,7 +208,7 @@ pci_map_skb(struct safe_softc *sc,struct safe_operand *buf,struct sk_buff *skb)
 
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
 		pci_map_linear(sc, buf,
-				page_address(skb_shinfo(skb)->frags[i].page) +
+				page_address(skb_frag_page(&skb_shinfo(skb)->frags[i])) +
 				                        skb_shinfo(skb)->frags[i].page_offset,
 				skb_shinfo(skb)->frags[i].size);
 	}
@@ -558,10 +529,6 @@ safe_newsession(device_t dev, u_int32_t *sidp, struct cryptoini *cri)
 	ses->ses_used = 1;
 
 	if (encini) {
-		/* get an IV */
-		/* XXX may read fewer than requested */
-		read_random(ses->ses_iv, sizeof(ses->ses_iv));
-
 		ses->ses_klen = encini->cri_klen;
 		if (encini->cri_key != NULL)
 			safe_setup_enckey(ses, encini->cri_key);
@@ -623,7 +590,7 @@ safe_process(device_t dev, struct cryptop *crp, int hint)
 	struct safe_ringentry *re;
 	struct safe_sarec *sa;
 	struct safe_pdesc *pd;
-	u_int32_t cmd0, cmd1, staterec;
+	u_int32_t cmd0, cmd1, staterec, rand_iv[4];
 	unsigned long flags;
 
 	DPRINTF(("%s()\n", __FUNCTION__));
@@ -772,7 +739,7 @@ safe_process(device_t dev, struct cryptop *crp, int hint)
 			if (enccrd->crd_flags & CRD_F_IV_EXPLICIT)
 				iv = enccrd->crd_iv;
 			else
-				iv = (caddr_t) ses->ses_iv;
+				read_random((iv = (caddr_t) &rand_iv[0]), sizeof(rand_iv));
 			if ((enccrd->crd_flags & CRD_F_IV_PRESENT) == 0) {
 				crypto_copyback(crp->crp_flags, crp->crp_buf,
 				    enccrd->crd_inject, ivsize, iv);
@@ -1120,31 +1087,6 @@ safe_callback(struct safe_softc *sc, struct safe_ringentry *re)
 		/* kfree_skb(skb) */
 		/* crp->crp_buf = (caddr_t)re->re_dst_skb */
 		return;
-	}
-
-	if (re->re_flags & SAFE_QFLAGS_COPYOUTIV) {
-		/* copy out IV for future use */
-		for (crd = crp->crp_desc; crd; crd = crd->crd_next) {
-			int i;
-			int ivsize;
-
-			if (crd->crd_alg == CRYPTO_DES_CBC ||
-			    crd->crd_alg == CRYPTO_3DES_CBC) {
-				ivsize = 2*sizeof(u_int32_t);
-			} else if (crd->crd_alg == CRYPTO_AES_CBC) {
-				ivsize = 4*sizeof(u_int32_t);
-			} else
-				continue;
-			crypto_copydata(crp->crp_flags, crp->crp_buf,
-			    crd->crd_skip + crd->crd_len - ivsize, ivsize,
-			    (caddr_t)sc->sc_sessions[re->re_sesn].ses_iv);
-			for (i = 0;
-					i < ivsize/sizeof(sc->sc_sessions[re->re_sesn].ses_iv[0]);
-					i++)
-				sc->sc_sessions[re->re_sesn].ses_iv[i] =
-					cpu_to_le32(sc->sc_sessions[re->re_sesn].ses_iv[i]);
-			break;
-		}
 	}
 
 	if (re->re_flags & SAFE_QFLAGS_COPYOUTICV) {
@@ -2276,5 +2218,5 @@ module_init(safe_init);
 module_exit(safe_exit);
 
 MODULE_LICENSE("BSD");
-MODULE_AUTHOR("David McCullough <david_mccullough@securecomputing.com>");
+MODULE_AUTHOR("David McCullough <david_mccullough@mcafee.com>");
 MODULE_DESCRIPTION("OCF driver for safenet PCI crypto devices");

@@ -777,7 +777,6 @@ void usbip_pad_iso(struct usbip_device *ud, struct urb *urb)
 {
 	int np = urb->number_of_packets;
 	int i;
-	int ret=0;
 	int actualoffset = urb->actual_length;
 
 	if (!usb_pipeisoc(urb->pipe))

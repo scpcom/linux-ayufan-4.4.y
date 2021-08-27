@@ -46,14 +46,14 @@
 #define	TSEN_CONF_REF_CAL_MASK			(0x1FF << 11)
 #define	TSEN_CONF_SOFT_RESET_MASK		(0x1 << 1)
 
-#define ARMADAXP_OVERHEAT_TEMP	105000		/* milidegree Celsius */
+#define ARMADAXP_OVERHEAT_TEMP	105		/* milidegree Celsius */
 #define ARMADAXP_OVERHEAT_DELAY	0x700
-#define ARMADAXP_OVERCOOL_TEMP	10000		/* milidegree Celsius */
+#define ARMADAXP_OVERCOOL_TEMP	10		/* milidegree Celsius */
 #define	ARMADAXP_OVERCOOL_DELAY	0x700
 #define ARMADAXP_OVERHEAT_MIN	0
-#define ARMADAXP_OVERHEAT_MAX	110000
+#define ARMADAXP_OVERHEAT_MAX	110
 #define ARMADAXP_OVERCOOL_MIN	0
-#define ARMADAXP_OVERCOOL_MAX	110000
+#define ARMADAXP_OVERCOOL_MAX	110
 
 /* Junction Temperature */
 #define ARMADAXP_TSEN_TEMP2RAW(x) ((3153000 - (13825 * x)) / 10000)

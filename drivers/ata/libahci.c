@@ -52,9 +52,9 @@
 #include <linux/libata.h>
 #include "ahci.h"
 
-#ifdef MY_DEF_HERE
-extern unsigned int ata_print_id;
-#endif /* MY_DEF_HERE */
+#ifdef CONFIG_ARCH_GEN3
+extern int SYNO_CTRL_HDD_ACT_NOTIFY(int index);
+#endif
 
 static int ahci_skip_host_reset;
 int ahci_ignore_sss;
@@ -185,15 +185,14 @@ ata_ahci_fault_show(struct device *dev, struct device_attribute *attr,
 
 static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable);
 
-#ifdef MY_DEF_HERE
-void sata_syno_ahci_diskled_set(int iDiskNo, int iPresent, int iFault)
+void sata_syno_ahci_diskled_set(int iHostNum, int iPresent, int iFault)
 {
 	struct ata_port *pAp = NULL;
 	struct ata_device *pAtaDev = NULL;
 	struct Scsi_Host *pScsiHost = NULL;
 	struct ata_link *pAtaLink = NULL;
 
-	if (NULL == (pScsiHost = scsi_host_lookup(iDiskNo - 1))) {
+	if (NULL == (pScsiHost = scsi_host_lookup(iHostNum))) {
 			goto END;
 	}
 
@@ -227,7 +226,6 @@ END:
 	return;
 }
 EXPORT_SYMBOL(sata_syno_ahci_diskled_set);
-#endif /* MY_DEF_HERE */
 
 static ssize_t
 ata_ahci_fault_store(struct device *dev, struct device_attribute *attr,
@@ -278,6 +276,9 @@ struct device_attribute *ahci_shost_attrs[] = {
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_sata_disk_led_ctrl,
 #endif
 	NULL
 };
@@ -1101,6 +1102,17 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	 * toggle state of LED and reset timer.  If not,
 	 * turn LED to desired idle state.
 	 */
+#if defined(CONFIG_ARCH_GEN3)
+	spin_lock_irqsave(ap->lock, flags);
+	if (emp->saved_activity != emp->activity) {
+		emp->saved_activity = emp->activity;
+
+		SYNO_CTRL_HDD_ACT_NOTIFY(ap->syno_disk_index);
+
+		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(100));
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+#else
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
@@ -1126,6 +1138,7 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
 	ahci_transmit_led_message(ap, led_message, 4);
+#endif
 }
 
 static void ahci_init_sw_activity(struct ata_link *link)
@@ -1138,8 +1151,11 @@ static void ahci_init_sw_activity(struct ata_link *link)
 	emp->saved_activity = emp->activity = 0;
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
 
+#ifdef CONFIG_ARCH_GEN3
+#else
 	/* check our blink policy and set flag for link if it's enabled */
 	if (emp->blink_policy)
+#endif
 		link->flags |= ATA_LFLAG_SW_ACTIVITY;
 }
 
@@ -1508,7 +1524,24 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
 	/* issue the second D2H Register FIS */
 	tf.ctl &= ~ATA_SRST;
+#ifdef MY_ABC_HERE
+	if (!(hpriv->flags & AHCI_HFLAG_YES_MV9235_FIX)) {
+#endif
 	ahci_exec_polled_cmd(ap, pmp, &tf, 0, 0, 0);
+#ifdef MY_ABC_HERE
+	} else {
+		/* 9235 may fail at 2nd D2H, so we use the same check as 1st D2H */
+		msecs = 0;
+		now = jiffies;
+		if (time_after(deadline, now))
+			msecs = jiffies_to_msecs(deadline - now);
+		if(ahci_exec_polled_cmd(ap, pmp, &tf, 0, 0, msecs)) {
+			rc = -EIO;
+			reason = "2nd FIS failed";
+			goto fail;
+		}
+	}
+#endif
 
 	/* wait for link to become ready */
 	rc = ata_wait_after_reset(link, deadline, check_ready);
@@ -1775,8 +1808,12 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 		u32 fbs = readl(port_mmio + PORT_FBS);
 		int pmp = fbs >> PORT_FBS_DWE_OFFSET;
 
+#ifdef MY_ABC_HERE
+		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links)) {
+#else
 		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links) &&
 		    ata_link_online(&ap->pmp_link[pmp])) {
+#endif
 			link = &ap->pmp_link[pmp];
 			fbs_need_dec = true;
 		}
@@ -2482,6 +2519,9 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 		}
 #endif
 	}
+#ifdef CONFIG_ARCH_GEN3
+	pi->flags |= ATA_FLAG_SW_ACTIVITY;
+#endif
 }
 EXPORT_SYMBOL_GPL(ahci_set_em_messages);
 

@@ -924,5 +924,5 @@ source "drivers/crypto/Kconfig"
 
 endif	# if CRYPTO
 
-source "crypto/ocf_20100325/Kconfig"
+source "crypto/ocf/Kconfig"
 

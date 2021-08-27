@@ -106,9 +106,7 @@ void 	mvSysNetaInit(MV_U32 portMask, MV_U32 cpuMask)
 			addrWinMap[i].attrib &= ~(0x30);
 			addrWinMap[i].attrib |= 0x30;
 		}
-#endif
-		mvOsPrintf("%d - Base 0x%08x , Size = 0x%08llx.\n", i,
-						addrWinMap[i].addrWin.baseLow, addrWinMap[i].addrWin.size);
+#endif /* CONFIG_MV_SUPPORT_L2_DEPOSIT */
 	}
 
 	halData.portMask = portMask;

@@ -97,10 +97,10 @@ MV_BOARD_TWSI_INFO	db88f78XX0InfoBoardTwsiDev[] = {
 
 MV_BOARD_MAC_INFO db88f78XX0InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x0,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x1,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x19,0x800},  /* Port 1 */
-	{BOARD_MAC_SPEED_AUTO, 0x1B,0x1800}  /* Port 3 */
+	{BOARD_MAC_SPEED_AUTO, 0x0,0x0, 0x0,},
+	{BOARD_MAC_SPEED_AUTO, 0x1,0x0, 0x1,},
+	{BOARD_MAC_SPEED_AUTO, 0x19,0x800 , 0x18},  /* Port 1 */
+	{BOARD_MAC_SPEED_AUTO, 0x1B,0x1800, 0x18}  /* Port 3 */
 };
 
 MV_BOARD_MODULE_TYPE_INFO db88f78XX0InfoBoardModTypeInfo[] = {
@@ -184,15 +184,6 @@ MV_BOARD_MPP_INFO db88f78XX0InfoBoardMppConfigValue[] = {
 	} },
 };
 
-MV_SERDES_CFG db88f78XX0InfoBoardSerdesConfigValue[] = {
-	/* Z1B */
-	{MV_TRUE, 0x32221111, 0x11111111, PEX_BUS_MODE_X1, PEX_BUS_DISABLED,PEX_BUS_MODE_X4, PEX_BUS_MODE_X4, 0x00000030},	/* Default */
-	{MV_TRUE, 0x31211111, 0x11111111, PEX_BUS_MODE_X1, PEX_BUS_MODE_X1,PEX_BUS_MODE_X4, PEX_BUS_MODE_X4, 0x00000030},	/* PEX module */
-	/* Z1A */
-	{MV_TRUE, 0x32220000, 0x00000000, PEX_BUS_DISABLED, PEX_BUS_DISABLED,PEX_BUS_DISABLED, PEX_BUS_DISABLED, 0x00000030},	/* Default - Z1A */
-	{MV_TRUE, 0x31210000, 0x00000000, PEX_BUS_DISABLED, PEX_BUS_MODE_X1,PEX_BUS_DISABLED, PEX_BUS_DISABLED, 0x00000030}	/* PEX module - Z1A */
-};
-
 MV_BOARD_TDM_INFO	db88f78XX0Tdm880[]	= { {1}, {2} };
 MV_BOARD_TDM_INFO	db88f78XX0Tdm792[]	= { {1}, {2}, {3}, {4}, {6}, {7} };
 MV_BOARD_TDM_INFO	db88f78XX0Tdm3215[]	= { {1} };
@@ -203,8 +194,6 @@ MV_BOARD_INFO db88f78XX0Info = {
 	.pBoardModTypeValue		= db88f78XX0InfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(db88f78XX0InfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= db88f78XX0InfoBoardMppConfigValue,
-	.numBoardSerdesConfigValue	= ARRSZ(db88f78XX0InfoBoardSerdesConfigValue),
-	.pBoardSerdesConfigValue	= db88f78XX0InfoBoardSerdesConfigValue,
 	.intsGppMaskLow			= 0,
 	.intsGppMaskMid			= 0,
 	.intsGppMaskHigh		= 0,
@@ -220,10 +209,6 @@ MV_BOARD_INFO db88f78XX0Info = {
 	.pLedGppPin			= db88f6781InfoBoardDebugLedIf,
 	.ledsPolarity			= 0,
 
-	/* PMU Power */
-	.pmuPwrUpPolarity		= 0,
-	.pmuPwrUpDelay			= 80000,
-
 	/* GPP values */
 	.gppOutEnValLow			= DB_88F78XX0_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= DB_88F78XX0_GPP_OUT_ENA_MID,
@@ -234,6 +219,10 @@ MV_BOARD_INFO db88f78XX0Info = {
 	.gppPolarityValLow		= DB_88F78XX0_GPP_POL_LOW,
 	.gppPolarityValMid		= DB_88F78XX0_GPP_POL_MID,
 	.gppPolarityValHigh		= DB_88F78XX0_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
 	/* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -283,10 +272,10 @@ MV_BOARD_TWSI_INFO	db88f78XX0rev2InfoBoardTwsiDev[] = {
 
 MV_BOARD_MAC_INFO db88f78XX0rev2InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x0,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x1,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x19,0x800},  /* Port 1 */
-	{BOARD_MAC_SPEED_AUTO, 0x1B,0x1800}  /* Port 3 */
+	{BOARD_MAC_SPEED_AUTO, 0x0,0x0 	  , 0x0 },
+	{BOARD_MAC_SPEED_AUTO, 0x1,0x0	  , 0x1 },
+	{BOARD_MAC_SPEED_AUTO, 0x19,0x800 , 0x18},  /* Port 1 */
+	{BOARD_MAC_SPEED_AUTO, 0x1B,0x1800, 0x18}  /* Port 3 */
 };
 
 MV_BOARD_MODULE_TYPE_INFO db88f78XX0rev2InfoBoardModTypeInfo[] = {
@@ -370,16 +359,6 @@ MV_BOARD_MPP_INFO db88f78XX0rev2InfoBoardMppConfigValue[] = {
 	} },
 };
 
-MV_SERDES_CFG db88f78XX0rev2InfoBoardSerdesConfigValue[] = {
-	/* A0 */
-	{MV_TRUE, 0x33221111, 0x11111111, PEX_BUS_MODE_X1, PEX_BUS_DISABLED, PEX_BUS_MODE_X4,PEX_BUS_MODE_X4, 0x00000030},/* Default: No Pex module, PEX0 x1, disabled*/
-	{MV_TRUE, 0x31211111, 0x11111111, PEX_BUS_MODE_X1, PEX_BUS_MODE_X1, PEX_BUS_MODE_X4,PEX_BUS_MODE_X4, 0x00000030},/* Pex module, PEX0 x1, PEX1 x1*/
-	{MV_TRUE, 0x33221111, 0x11111111, PEX_BUS_MODE_X4, PEX_BUS_DISABLED,PEX_BUS_MODE_X4,PEX_BUS_MODE_X4, 0x00000030},/* no Pex module, PEX0 x4, PEX1 disabled*/
-	{MV_TRUE, 0x31211111, 0x11111111, PEX_BUS_MODE_X4, PEX_BUS_MODE_X1,PEX_BUS_MODE_X4,PEX_BUS_MODE_X4, 0x00000030},/* Pex module, PEX0 x4, PEX1 x1*/
-	{MV_TRUE, 0x11111111, 0x11111111, PEX_BUS_MODE_X1, PEX_BUS_MODE_X4,PEX_BUS_MODE_X4,PEX_BUS_MODE_X4, 0x00000030},/* Pex module, PEX0 x1, PEX1 x4*/
-	{MV_TRUE, 0x11111111, 0x11111111, PEX_BUS_MODE_X4, PEX_BUS_MODE_X4,PEX_BUS_MODE_X4,PEX_BUS_MODE_X4, 0x00000030},/* Pex module, PEX0 x4, PEX1 x4*/
-};
-
 MV_BOARD_TDM_INFO	db88f78XX0rev2Tdm880[]	= { {1}, {2} };
 MV_BOARD_TDM_INFO	db88f78XX0rev2Tdm792[]	= { {1}, {2}, {3}, {4}, {6}, {7} };
 MV_BOARD_TDM_INFO	db88f78XX0rev2Tdm3215[]	= { {1} };
@@ -390,8 +369,6 @@ MV_BOARD_INFO db88f78XX0rev2Info = {
 	.pBoardModTypeValue		= db88f78XX0rev2InfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(db88f78XX0rev2InfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= db88f78XX0rev2InfoBoardMppConfigValue,
-	.numBoardSerdesConfigValue	= ARRSZ(db88f78XX0rev2InfoBoardSerdesConfigValue),
-	.pBoardSerdesConfigValue	= db88f78XX0rev2InfoBoardSerdesConfigValue,
 	.intsGppMaskLow			= 0,
 	.intsGppMaskMid			= 0,
 	.intsGppMaskHigh		= 0,
@@ -407,10 +384,6 @@ MV_BOARD_INFO db88f78XX0rev2Info = {
 	.pLedGppPin			= db88f6781InfoBoardDebugLedIf,
 	.ledsPolarity			= 0,
 
-	/* PMU Power */
-	.pmuPwrUpPolarity		= 0,
-	.pmuPwrUpDelay			= 80000,
-
 	/* GPP values */
 	.gppOutEnValLow			= DB_88F78XX0_REV2_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= DB_88F78XX0_REV2_GPP_OUT_ENA_MID,
@@ -421,6 +394,10 @@ MV_BOARD_INFO db88f78XX0rev2Info = {
 	.gppPolarityValLow		= DB_88F78XX0_REV2_GPP_POL_LOW,
 	.gppPolarityValMid		= DB_88F78XX0_REV2_GPP_POL_MID,
 	.gppPolarityValHigh		= DB_88F78XX0_REV2_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
 	/* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -459,10 +436,10 @@ MV_BOARD_INFO db88f78XX0rev2Info = {
 MV_BOARD_MAC_INFO rd78460nasInfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
         /* speed will toggle to force link 1000 when SW module detected */
-	{BOARD_MAC_SPEED_AUTO, 0x10,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x11,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x12,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x13,0x0}
+	{BOARD_MAC_SPEED_AUTO, 0x10,0x0, 0x10},
+	{BOARD_MAC_SPEED_AUTO, 0x11,0x0, 0x10},
+	{BOARD_MAC_SPEED_AUTO, 0x12,0x0, 0x10},
+	{BOARD_MAC_SPEED_AUTO, 0x13,0x0, 0x10}
 };
 
 MV_BOARD_MODULE_TYPE_INFO rd78460nasInfoBoardModTypeInfo[] = {
@@ -498,19 +475,12 @@ MV_BOARD_MPP_INFO rd78460nasInfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG rd78460nasInfoBoardSerdesConfigValue[] = {
-	{MV_TRUE, 0x00223001, 0x11111111, PEX_BUS_MODE_X1, PEX_BUS_DISABLED,PEX_BUS_MODE_X4, PEX_BUS_MODE_X4, 0x00000030},	/* Default */
-	{MV_TRUE, 0x33320201, 0x11111111, PEX_BUS_MODE_X1, PEX_BUS_DISABLED,PEX_BUS_MODE_X4, PEX_BUS_MODE_X4, 0x000000f4},	/* Switch module */
-};
-
 MV_BOARD_INFO rd78460nasInfo = {
 	.boardName			= "RD-AXP-NAS rev 1.0",
 	.numBoardMppTypeValue		= ARRSZ(rd78460nasInfoBoardModTypeInfo),
 	.pBoardModTypeValue		= rd78460nasInfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(rd78460nasInfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= rd78460nasInfoBoardMppConfigValue,
-	.numBoardSerdesConfigValue	= ARRSZ(rd78460nasInfoBoardSerdesConfigValue),
-	.pBoardSerdesConfigValue	= rd78460nasInfoBoardSerdesConfigValue,
 	.intsGppMaskLow			= 0,
 	.intsGppMaskMid			= 0,
 	.intsGppMaskHigh		= 0,
@@ -526,10 +496,6 @@ MV_BOARD_INFO rd78460nasInfo = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* PMU Power */
-	.pmuPwrUpPolarity		= 0,
-	.pmuPwrUpDelay			= 80000,
-
 	/* GPP values */
 	.gppOutEnValLow			= RD_78460_NAS_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= RD_78460_NAS_GPP_OUT_ENA_MID,
@@ -540,6 +506,10 @@ MV_BOARD_INFO rd78460nasInfo = {
 	.gppPolarityValLow		= RD_78460_NAS_GPP_POL_LOW,
 	.gppPolarityValMid		= RD_78460_NAS_GPP_POL_MID,
 	.gppPolarityValHigh		= RD_78460_NAS_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
 	/* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -572,10 +542,10 @@ MV_BOARD_INFO rd78460nasInfo = {
 
 MV_BOARD_MAC_INFO rd78460InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_1000M, 0x1,0x0},
-	{BOARD_MAC_SPEED_1000M, 0x2,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x0,0x0},
-	{BOARD_MAC_SPEED_1000M, 0x1B,0x0}
+	{BOARD_MAC_SPEED_1000M, 0x1, 0x0, 0x1},
+	{BOARD_MAC_SPEED_1000M, 0x2, 0x0, 0x2},
+	{BOARD_MAC_SPEED_AUTO,  0x0, 0x0, 0x0},
+	{BOARD_MAC_SPEED_1000M, 0x1B,0x0,0x18}
 };
 
 MV_BOARD_MODULE_TYPE_INFO rd78460InfoBoardModTypeInfo[] = {
@@ -606,19 +576,12 @@ MV_BOARD_MPP_INFO rd78460InfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG rd78460InfoBoardSerdesConfigValue[] = {
-	{MV_TRUE, 0x22321111, 0x00000000, PEX_BUS_MODE_X4, PEX_BUS_DISABLED,PEX_BUS_DISABLED, PEX_BUS_DISABLED, 0x00000010},	/* CPU0 */
-	{MV_TRUE, 0x00321111, 0x00000000, PEX_BUS_MODE_X4, PEX_BUS_DISABLED,PEX_BUS_DISABLED, PEX_BUS_DISABLED, 0x00000010}	/* CPU1-3 */
-};
-
 MV_BOARD_INFO rd78460Info = {
  .boardName				= "RD-78460-SERVER",
  .numBoardMppTypeValue			= ARRSZ(rd78460InfoBoardModTypeInfo),
  .pBoardModTypeValue			= rd78460InfoBoardModTypeInfo,
  .numBoardMppConfigValue		= ARRSZ(rd78460InfoBoardMppConfigValue),
  .pBoardMppConfigValue			= rd78460InfoBoardMppConfigValue,
- .numBoardSerdesConfigValue		= ARRSZ(rd78460InfoBoardSerdesConfigValue),
- .pBoardSerdesConfigValue		= rd78460InfoBoardSerdesConfigValue,
  .intsGppMaskLow			= 0,
  .intsGppMaskMid			= 0,
  .intsGppMaskHigh			= 0,
@@ -644,6 +607,10 @@ MV_BOARD_INFO rd78460Info = {
  .gppPolarityValLow			= RD_78460_GPP_POL_LOW,
  .gppPolarityValMid			= RD_78460_GPP_POL_MID,
  .gppPolarityValHigh			= RD_78460_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
  /* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -673,10 +640,10 @@ MV_BOARD_INFO rd78460Info = {
 
 MV_BOARD_MAC_INFO rd78460ServerRev2InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_1000M, 0x1,0x0},
-	{BOARD_MAC_SPEED_1000M, 0x2,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x0,0x0},
-	{BOARD_MAC_SPEED_1000M, 0x1B,0x0}
+	{BOARD_MAC_SPEED_1000M, 0x1,0x0, 0x1},
+	{BOARD_MAC_SPEED_1000M, 0x2,0x0, 0x1},
+	{BOARD_MAC_SPEED_AUTO,  0x0,0x0, 0x1},
+	{BOARD_MAC_SPEED_1000M, 0x1B,0x0,0x18}
 };
 
 MV_BOARD_MODULE_TYPE_INFO rd78460ServerRev2InfoBoardModTypeInfo[] = {
@@ -707,19 +674,12 @@ MV_BOARD_MPP_INFO rd78460ServerRev2InfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG rd78460ServerRev2InfoBoardSerdesConfigValue[] = {
-	{MV_TRUE, 0x00321111, 0x00000000, PEX_BUS_MODE_X4, PEX_BUS_DISABLED,PEX_BUS_DISABLED, PEX_BUS_DISABLED, 0x00000010},	/* CPU0 */
-	{MV_TRUE, 0x00321111, 0x00000000, PEX_BUS_MODE_X4, PEX_BUS_DISABLED,PEX_BUS_DISABLED, PEX_BUS_DISABLED, 0x00000010}	/* CPU1-3 */
-};
-
 MV_BOARD_INFO rd78460ServerRev2Info = {
  .boardName				= "RD-78460-SERVER-REV2",
  .numBoardMppTypeValue			= ARRSZ(rd78460ServerRev2InfoBoardModTypeInfo),
  .pBoardModTypeValue			= rd78460ServerRev2InfoBoardModTypeInfo,
  .numBoardMppConfigValue		= ARRSZ(rd78460ServerRev2InfoBoardMppConfigValue),
  .pBoardMppConfigValue			= rd78460ServerRev2InfoBoardMppConfigValue,
- .numBoardSerdesConfigValue		= ARRSZ(rd78460ServerRev2InfoBoardSerdesConfigValue),
- .pBoardSerdesConfigValue		= rd78460ServerRev2InfoBoardSerdesConfigValue,
  .intsGppMaskLow			= 0,
  .intsGppMaskMid			= 0,
  .intsGppMaskHigh			= 0,
@@ -745,6 +705,10 @@ MV_BOARD_INFO rd78460ServerRev2Info = {
  .gppPolarityValLow			= RD_78460_SERVER_REV2_GPP_POL_LOW,
  .gppPolarityValMid			= RD_78460_SERVER_REV2_GPP_POL_MID,
  .gppPolarityValHigh			= RD_78460_SERVER_REV2_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
  /* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -783,12 +747,11 @@ MV_BOARD_TWSI_INFO	db78X60pcacInfoBoardTwsiDev[] = {
 
 MV_BOARD_MAC_INFO db78X60pcacInfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x1,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x3,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x2,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x0,0x0}		/* Dummy */
+	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x3,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x2,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x0,0x0,0x0}		/* Dummy */
 };
-
 
 MV_BOARD_MODULE_TYPE_INFO db78X60pcacInfoBoardModTypeInfo[] = {
 	{
@@ -823,11 +786,6 @@ MV_BOARD_MPP_INFO db78X60pcacInfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG db78X60pcacInfoBoardSerdesConfigValue[] = {
-	 {MV_TRUE, 0x22321111, 0x00000000, PEX_BUS_MODE_X4, PEX_BUS_DISABLED,PEX_BUS_DISABLED, PEX_BUS_DISABLED, 0x00000010} /* Default */
-};
-
-
 MV_BOARD_TDM_INFO	db78X60pcacTdm880[]		= { {1}, {2} };
 MV_BOARD_TDM_INFO	db78X60pcacTdm792[]		= { {1}, {2}, {3}, {4}, {6}, {7} };
 MV_BOARD_TDM_INFO	db78X60pcacTdm3215[]	= { {1} };
@@ -838,8 +796,6 @@ MV_BOARD_INFO db78X60pcacInfo = {
 	.pBoardModTypeValue		= db78X60pcacInfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(db78X60pcacInfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= db78X60pcacInfoBoardMppConfigValue,
-	.numBoardSerdesConfigValue	= ARRSZ(db78X60pcacInfoBoardSerdesConfigValue),
-	.pBoardSerdesConfigValue	= db78X60pcacInfoBoardSerdesConfigValue,
 	.intsGppMaskLow			= 0,
 	.intsGppMaskMid			= 0,
 	.intsGppMaskHigh		= 0,
@@ -866,6 +822,9 @@ MV_BOARD_INFO db78X60pcacInfo = {
 	.gppPolarityValMid		= DB_78X60_PCAC_GPP_POL_MID,
 	.gppPolarityValHigh		= DB_78X60_PCAC_GPP_POL_HIGH,
 
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
 	/* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -899,12 +858,11 @@ MV_U8	db78X60pcacrev2InfoBoardDebugLedIf[] = {53, 54, 55, 56};
 
 MV_BOARD_MAC_INFO db78X60pcacrev2InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x1,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x3,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x2,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x0,0x0}		/* Dummy */
+	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x3,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x2,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x0,0x0,0x0}		/* Dummy */
 };
-
 
 MV_BOARD_MODULE_TYPE_INFO db78X60pcacrev2InfoBoardModTypeInfo[] = {
 	{
@@ -939,18 +897,12 @@ MV_BOARD_MPP_INFO db78X60pcacrev2InfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG db78X60pcacrev2InfoBoardSerdesConfigValue[] = {
-	 {MV_TRUE, 0x23321111, 0x00000000, PEX_BUS_MODE_X4, PEX_BUS_DISABLED, PEX_BUS_DISABLED, PEX_BUS_DISABLED, 0x00000010} /* Default */
-};
-
 MV_BOARD_INFO db78X60pcacrev2Info = {
 	.boardName			= "DB-78460-PCAC-REV2",
 	.numBoardMppTypeValue		= ARRSZ(db78X60pcacrev2InfoBoardModTypeInfo),
 	.pBoardModTypeValue		= db78X60pcacrev2InfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(db78X60pcacrev2InfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= db78X60pcacrev2InfoBoardMppConfigValue,
-	.numBoardSerdesConfigValue	= ARRSZ(db78X60pcacrev2InfoBoardSerdesConfigValue),
-	.pBoardSerdesConfigValue	= db78X60pcacrev2InfoBoardSerdesConfigValue,
 	.intsGppMaskLow			= 0,
 	.intsGppMaskMid			= 0,
 	.intsGppMaskHigh		= 0,
@@ -977,6 +929,9 @@ MV_BOARD_INFO db78X60pcacrev2Info = {
 	.gppPolarityValMid		= DB_78X60_PCAC_REV2_GPP_POL_MID,
 	.gppPolarityValHigh		= DB_78X60_PCAC_REV2_GPP_POL_HIGH,
 
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
 	/* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -1014,10 +969,10 @@ MV_BOARD_TWSI_INFO	fpga88f78XX0InfoBoardTwsiDev[] = {
 
 MV_BOARD_MAC_INFO fpga88f78XX0InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x1,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x2,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x3,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x4,0x0}
+	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x2,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x3,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x4,0x0,0x0}
 };
 
 MV_BOARD_MODULE_TYPE_INFO fpga88f78XX0InfoBoardModTypeInfo[] = {
@@ -1053,10 +1008,6 @@ MV_BOARD_MPP_INFO fpga88f78XX0InfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG fpga88f78XX0InfoBoardSerdesConfigValue[] = {
-	{MV_TRUE, 0x00000000, 0x00000000, PEX_BUS_DISABLED, PEX_BUS_DISABLED, PEX_BUS_DISABLED, PEX_BUS_DISABLED, 0x00000000} /* No PEX in FPGA */
-};
-
 MV_BOARD_TDM_INFO	fpga88f78XX0Tdm880[]	= { {1}, {2} };
 MV_BOARD_TDM_INFO	fpga88f78XX0Tdm792[]	= { {1}, {2}, {3}, {4}, {6}, {7} };
 MV_BOARD_TDM_INFO	fpga88f78XX0Tdm3215[]	= { {1} };
@@ -1067,8 +1018,6 @@ MV_BOARD_INFO fpga88f78XX0Info = {
 	.pBoardModTypeValue		= fpga88f78XX0InfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(fpga88f78XX0InfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= fpga88f78XX0InfoBoardMppConfigValue,
-	.numBoardSerdesConfigValue	= ARRSZ(fpga88f78XX0InfoBoardSerdesConfigValue),
-	.pBoardSerdesConfigValue	= fpga88f78XX0InfoBoardSerdesConfigValue,
 	.intsGppMaskLow			= 0,
 	.intsGppMaskMid			= 0,
 	.intsGppMaskHigh		= 0,
@@ -1084,10 +1033,6 @@ MV_BOARD_INFO fpga88f78XX0Info = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* PMU Power */
-	.pmuPwrUpPolarity		= 0,
-	.pmuPwrUpDelay			= 80000,
-
 	/* GPP values */
 	.gppOutEnValLow			= FPGA_88F78XX0_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= FPGA_88F78XX0_GPP_OUT_ENA_MID,
@@ -1098,6 +1043,10 @@ MV_BOARD_INFO fpga88f78XX0Info = {
 	.gppPolarityValLow		= FPGA_88F78XX0_GPP_POL_LOW,
 	.gppPolarityValMid		= FPGA_88F78XX0_GPP_POL_MID,
 	.gppPolarityValHigh		= FPGA_88F78XX0_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
 	/* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -1136,12 +1085,11 @@ MV_BOARD_TWSI_INFO	db78X60amcInfoBoardTwsiDev[] = {
 
 MV_BOARD_MAC_INFO db78X60amcInfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x1,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0xF,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0xE,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x0,0x0}
+	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0xF,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0xE,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x0,0x0,0x0}
 };
-
 
 MV_BOARD_MODULE_TYPE_INFO db78X60amcInfoBoardModTypeInfo[] = {
 	/* No Modules */
@@ -1173,11 +1121,6 @@ MV_BOARD_MPP_INFO db78X60amcInfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG db78X60amcInfoBoardSerdesConfigValue[] = {
-	 {MV_TRUE, 0x33111111, 0x11111111, PEX_BUS_MODE_X4, PEX_BUS_MODE_X4, PEX_BUS_MODE_X4, PEX_BUS_MODE_X4, 0x00000030} /* Default */
-};
-
-
 MV_BOARD_TDM_INFO	db78X60amcTdm880[]	= {};
 MV_BOARD_TDM_INFO	db78X60amcTdm792[]	= {};
 MV_BOARD_TDM_INFO	db78X60amcTdm3215[]	= {};
@@ -1188,8 +1131,6 @@ MV_BOARD_INFO db78X60amcInfo = {
 	.pBoardModTypeValue		= db78X60amcInfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(db78X60amcInfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= db78X60amcInfoBoardMppConfigValue,
-	.numBoardSerdesConfigValue	= ARRSZ(db78X60amcInfoBoardSerdesConfigValue),
-	.pBoardSerdesConfigValue	= db78X60amcInfoBoardSerdesConfigValue,
 	.intsGppMaskLow			= 0,
 	.intsGppMaskMid			= 0,
 	.intsGppMaskHigh		= 0,
@@ -1216,6 +1157,9 @@ MV_BOARD_INFO db78X60amcInfo = {
 	.gppPolarityValMid		= DB_78X60_AMC_GPP_POL_MID,
 	.gppPolarityValHigh		= DB_78X60_AMC_GPP_POL_HIGH,
 
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
 	/* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -1235,7 +1179,7 @@ MV_BOARD_INFO db78X60amcInfo = {
 	.nandFlashControl		= DB_78X60_AMC_BOARD_NAND_CONTROL
 };
 
-//////////////////////////////////////////////////////////////////////////////////
+/*********************************************************************************/
 
 /***************************/
 /* ARMADA-XP RD GP  BOARD */
@@ -1258,10 +1202,10 @@ MV_BOARD_TWSI_INFO   rd78460gpInfoBoardTwsiDev[] = {
 MV_BOARD_MAC_INFO rd78460gpInfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
         /* speed will toggle to force link 1000 when SW module detected */
-	{BOARD_MAC_SPEED_AUTO, 0x10,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x11,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x12,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x13,0x0}
+	{BOARD_MAC_SPEED_AUTO, 0x10,0x0000, 0x10},
+	{BOARD_MAC_SPEED_AUTO, 0x11,0x0800, 0x10},
+	{BOARD_MAC_SPEED_AUTO, 0x12,0x1000, 0x10},
+	{BOARD_MAC_SPEED_AUTO, 0x13,0x1800, 0x10}
 };
 
 MV_BOARD_MODULE_TYPE_INFO rd78460gpInfoBoardModTypeInfo[] = {
@@ -1279,7 +1223,10 @@ MV_BOARD_GPP_INFO rd78460gpInfoBoardGppInfo[] = {
 MV_DEV_CS_INFO rd78460gpInfoBoardDeCsInfo[] = {
 	/*{deviceCS, params, devType, devWidth, busWidth }*/
 #if defined(MV_INCLUDE_SPI)
-	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8} /* SPI DEV */
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}, /* SPI DEV */
+#endif
+#if defined(MV_INCLUDE_NOR)
+	{DEV_BOOCS, N_A, BOARD_DEV_NOR_FLASH, 16, 16} /* NOR DEV */
 #endif
 };
 
@@ -1297,18 +1244,12 @@ MV_BOARD_MPP_INFO rd78460gpInfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG rd78460gpInfoBoardSerdesConfigValue[] = {
-	{MV_TRUE, 0x00223001, 0x11111111, PEX_BUS_MODE_X1, PEX_BUS_DISABLED,PEX_BUS_MODE_X4, PEX_BUS_MODE_X4, 0x00000030},	/* Default */
-};
-
 MV_BOARD_INFO rd78460gpInfo = {
 	.boardName			= "RD-AXP-GP rev 1.0",
 	.numBoardMppTypeValue		= ARRSZ(rd78460gpInfoBoardModTypeInfo),
 	.pBoardModTypeValue		= rd78460gpInfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(rd78460gpInfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= rd78460gpInfoBoardMppConfigValue,
-	.numBoardSerdesConfigValue	= ARRSZ(rd78460gpInfoBoardSerdesConfigValue),
-	.pBoardSerdesConfigValue	= rd78460gpInfoBoardSerdesConfigValue,
 	.intsGppMaskLow			= 0,
 	.intsGppMaskMid			= 0,
 	.intsGppMaskHigh		= 0,
@@ -1324,10 +1265,6 @@ MV_BOARD_INFO rd78460gpInfo = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* PMU Power */
-	.pmuPwrUpPolarity		= 0,
-	.pmuPwrUpDelay			= 80000,
-
 	/* GPP values */
 	.gppOutEnValLow			= RD_78460_GP_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= RD_78460_GP_GPP_OUT_ENA_MID,
@@ -1338,6 +1275,10 @@ MV_BOARD_INFO rd78460gpInfo = {
 	.gppPolarityValLow		= RD_78460_GP_GPP_POL_LOW,
 	.gppPolarityValMid		= RD_78460_GP_GPP_POL_MID,
 	.gppPolarityValHigh		= RD_78460_GP_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
 	/* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -1373,10 +1314,10 @@ MV_BOARD_INFO rd78460gpInfo = {
 
 MV_BOARD_MAC_INFO rd78460customerInfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x10,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x11,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x12,0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x13,0x0}
+	{BOARD_MAC_SPEED_AUTO, 0x10,0x0000, 0x10},
+	{BOARD_MAC_SPEED_AUTO, 0x11,0x0800, 0x10},
+	{BOARD_MAC_SPEED_AUTO, 0x12,0x1000, 0x10},
+	{BOARD_MAC_SPEED_AUTO, 0x13,0x1800, 0x10}
 };
 
 MV_BOARD_MODULE_TYPE_INFO rd78460customerInfoBoardModTypeInfo[] = {
@@ -1385,7 +1326,7 @@ MV_BOARD_MODULE_TYPE_INFO rd78460customerInfoBoardModTypeInfo[] = {
 		.boardOtherMod		= MV_BOARD_NONE
 	}
 };
-//////////////////////////////////////////////////////////////////////////////////
+/*********************************************************************************/
  
 MV_BOARD_GPP_INFO rd78460customerInfoBoardGppInfo[] = {
 	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
@@ -1413,19 +1354,12 @@ MV_BOARD_MPP_INFO rd78460customerInfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG rd78460customerInfoBoardSerdesConfigValue[] = {
-	{MV_TRUE, 0x00223001, 0x11111111, PEX_BUS_MODE_X1, PEX_BUS_DISABLED,PEX_BUS_MODE_X4, PEX_BUS_MODE_X4, 0x00000030},	/* Default */
-	{MV_TRUE, 0x33320201, 0x11111111, PEX_BUS_MODE_X1, PEX_BUS_DISABLED,PEX_BUS_MODE_X4, PEX_BUS_MODE_X4, 0x00000030},	/* Switch module */
-};
-
 MV_BOARD_INFO rd78460customerInfo = {
 	.boardName			= "RD-AXP-CUSTOMER",
 	.numBoardMppTypeValue		= ARRSZ(rd78460customerInfoBoardModTypeInfo),
 	.pBoardModTypeValue		= rd78460customerInfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(rd78460customerInfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= rd78460customerInfoBoardMppConfigValue,
-	.numBoardSerdesConfigValue	= ARRSZ(rd78460customerInfoBoardSerdesConfigValue),
-	.pBoardSerdesConfigValue	= rd78460customerInfoBoardSerdesConfigValue,
 	.intsGppMaskLow			= 0,
 	.intsGppMaskMid			= 0,
 	.intsGppMaskHigh		= 0,
@@ -1441,10 +1375,6 @@ MV_BOARD_INFO rd78460customerInfo = {
 	.pLedGppPin			= NULL,
 	.ledsPolarity			= 0,
 
-	/* PMU Power */
-	.pmuPwrUpPolarity		= 0,
-	.pmuPwrUpDelay			= 80000,
-
 	/* GPP values */
 	.gppOutEnValLow			= RD_78460_CUSTOMER_GPP_OUT_ENA_LOW,
 	.gppOutEnValMid			= RD_78460_CUSTOMER_GPP_OUT_ENA_MID,
@@ -1455,6 +1385,10 @@ MV_BOARD_INFO rd78460customerInfo = {
 	.gppPolarityValLow		= RD_78460_CUSTOMER_GPP_POL_LOW,
 	.gppPolarityValMid		= RD_78460_CUSTOMER_GPP_POL_MID,
 	.gppPolarityValHigh		= RD_78460_CUSTOMER_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
 
 	/* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
@@ -1476,7 +1410,291 @@ MV_BOARD_INFO rd78460customerInfo = {
 	.norFlashReadParams		= RD_78460_CUSTOMER_BOARD_NOR_READ_PARAMS,
 	.norFlashWriteParams		= RD_78460_CUSTOMER_BOARD_NOR_WRITE_PARAMS
 };
-//////////////////////////////////////////////////////////////////////////////////////
+/*********************************************************************************/
+
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+/*************************************************************************************
+ *
+ * Synology customized board
+ *
+**/
+
+/***************************/
+/* ARMADA-XP B0 4Bay       */
+/***************************/
+ 
+MV_BOARD_MAC_INFO Syno78230AxpBoardMacInfo[] = {
+	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x0,0x0,0x0},
+};
+
+MV_BOARD_MODULE_TYPE_INFO Syno78230AxpBoardModTypeInfo[] = {
+	{
+		.boardMppMod		= MV_BOARD_AUTO,
+		.boardOtherMod		= MV_BOARD_NONE
+	}
+};
+
+MV_BOARD_GPP_INFO Syno78230AxpBoardGppInfo[] = {
+	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
+	{BOARD_GPP_USB_VBUS,    24} /* from MPP map */
+	/*{BOARD_GPP_RESET,       47},*/
+};
+
+MV_DEV_CS_INFO Syno78230AxpBoardDeCsInfo[] = {
+	/*{deviceCS, params, devType, devWidth, busWidth }*/
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}, /* SPI DEV */
+};
+
+#define SYNOAXP_4BAY_MPP0_7			0x11111111
+#define SYNOAXP_4BAY_MPP8_15		0x22221111
+#define SYNOAXP_4BAY_MPP16_23		0x22222222
+#define SYNOAXP_4BAY_MPP24_31		0x00000000
+#define SYNOAXP_4BAY_MPP32_39		0x11110000
+#define SYNOAXP_4BAY_MPP40_47		0x00004000
+#define SYNOAXP_4BAY_MPP48_55		0x00000000
+#define SYNOAXP_4BAY_MPP56_63		0x00000000
+#define SYNOAXP_4BAY_MPP64_67		0x00000000
+
+MV_BOARD_MPP_INFO Syno78230AxpBoardMppConfigValue[] = {
+	{ {
+		SYNOAXP_4BAY_MPP0_7,
+		SYNOAXP_4BAY_MPP8_15,
+		SYNOAXP_4BAY_MPP16_23,
+		SYNOAXP_4BAY_MPP24_31,
+		SYNOAXP_4BAY_MPP32_39,
+		SYNOAXP_4BAY_MPP40_47,
+		SYNOAXP_4BAY_MPP48_55,
+		SYNOAXP_4BAY_MPP56_63,
+		SYNOAXP_4BAY_MPP64_67,
+	} },
+};
+
+MV_BOARD_INFO Syno78230AxpInfo = {
+	.boardName			= "Synology AXP 78230",
+	.numBoardMppTypeValue		= ARRSZ(Syno78230AxpBoardModTypeInfo),
+	.pBoardModTypeValue		= Syno78230AxpBoardModTypeInfo,
+	.numBoardMppConfigValue		= ARRSZ(Syno78230AxpBoardMppConfigValue),
+	.pBoardMppConfigValue		= Syno78230AxpBoardMppConfigValue,
+	.intsGppMaskLow			= 0,
+	.intsGppMaskMid			= 0,
+	.intsGppMaskHigh		= 0,
+	.numBoardDeviceIf		= ARRSZ(Syno78230AxpBoardDeCsInfo),
+	.pDevCsInfo			= Syno78230AxpBoardDeCsInfo,
+	.numBoardTwsiDev		= 0,
+	.pBoardTwsiDev			= NULL,
+	.numBoardMacInfo		= ARRSZ(Syno78230AxpBoardMacInfo),
+	.pBoardMacInfo			= Syno78230AxpBoardMacInfo,
+	.numBoardGppInfo		= 0,
+	.pBoardGppInfo			= NULL,
+	.activeLedsNumber		= 0,
+	.pLedGppPin			= NULL,
+	.ledsPolarity			= 0,
+
+	/* GPP values */
+	.gppOutEnValLow			= (~(BIT25 | BIT30)),
+	.gppOutEnValMid			= (~(BIT10 | BIT12 | BIT13 | BIT14 | BIT15)),
+	.gppOutEnValHigh		= (~(0x0)),
+	.gppOutValLow			= BIT25 | BIT30,
+	.gppOutValMid			= BIT10,
+	.gppOutValHigh			= 0x0,
+	.gppPolarityValLow		= 0x0,
+	.gppPolarityValMid		= 0x0,
+	.gppPolarityValHigh		= 0x0,
+
+	/* TDM configuration */
+	/* We hold a different configuration array for each possible slic that
+	** can be connected to board.
+	** When modules are scanned, then we select the index of the relevant
+	** slic's information array.
+	** For RD and Customers boards we only need to initialize a single
+	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
+	*/
+	.numBoardTdmInfo		= {},
+	.pBoardTdmInt2CsInfo		= {},
+	.boardTdmInfoIndex		= -1,
+
+	/* NAND init params */
+	.nandFlashReadParams		= 0,
+	.nandFlashWriteParams		= 0,
+	.nandFlashControl		= 0,
+	/* NOR init params */
+	.norFlashReadParams		= 0,
+	.norFlashWriteParams		= 0
+};
+
+/***************************/
+/* ARMADA-XP B0 2Bay       */
+/***************************/
+	 
+MV_BOARD_MAC_INFO Syno78230AxpBoardMacInfo_2bay[] = {
+	/* {{MV_BOARD_MAC_SPEED boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	{BOARD_MAC_SPEED_AUTO, 0x1,0x0,0x0},
+};
+
+#define SYNOAXP_2BAY_MPP0_7			0x00000000
+#define SYNOAXP_2BAY_MPP8_15		0x00000000
+#define SYNOAXP_2BAY_MPP16_23		0x00000000
+#define SYNOAXP_2BAY_MPP24_31		0x00000000  // disable MPP[24,25] sata present, enable in synobios
+#define SYNOAXP_2BAY_MPP32_39		0x11110000
+#define SYNOAXP_2BAY_MPP40_47		0x00004000
+#define SYNOAXP_2BAY_MPP48_55		0x00000000
+#define SYNOAXP_2BAY_MPP56_63		0x00000000
+#define SYNOAXP_2BAY_MPP64_67		0x00000000
+
+MV_BOARD_MPP_INFO Syno78230AxpBoardMppConfigValue_2bay[] = {
+	{ {
+		SYNOAXP_2BAY_MPP0_7,
+		SYNOAXP_2BAY_MPP8_15,
+		SYNOAXP_2BAY_MPP16_23,
+		SYNOAXP_2BAY_MPP24_31,
+		SYNOAXP_2BAY_MPP32_39,
+		SYNOAXP_2BAY_MPP40_47,
+		SYNOAXP_2BAY_MPP48_55,
+		SYNOAXP_2BAY_MPP56_63,
+		SYNOAXP_2BAY_MPP64_67,
+	} },
+};
+
+MV_BOARD_INFO Syno78230AxpInfo_2bay = {
+	.boardName			= "Synology AXP 78230 2 bay",
+	.numBoardMppTypeValue		= ARRSZ(Syno78230AxpBoardModTypeInfo),
+	.pBoardModTypeValue		= Syno78230AxpBoardModTypeInfo,
+	.numBoardMppConfigValue		= ARRSZ(Syno78230AxpBoardMppConfigValue_2bay),
+	.pBoardMppConfigValue		= Syno78230AxpBoardMppConfigValue_2bay,
+	.intsGppMaskLow			= 0,
+	.intsGppMaskMid			= 0,
+	.intsGppMaskHigh		= 0,
+	.numBoardDeviceIf		= ARRSZ(Syno78230AxpBoardDeCsInfo),
+	.pDevCsInfo			= Syno78230AxpBoardDeCsInfo,
+	.numBoardTwsiDev		= 0,
+	.pBoardTwsiDev			= NULL,
+	.numBoardMacInfo		= ARRSZ(Syno78230AxpBoardMacInfo_2bay),
+	.pBoardMacInfo			= Syno78230AxpBoardMacInfo_2bay,
+	.numBoardGppInfo		= 0,
+	.pBoardGppInfo			= NULL,
+	.activeLedsNumber		= 0,
+	.pLedGppPin			= NULL,
+	.ledsPolarity			= 0,
+
+	/* PMU Power */
+	.pmuPwrUpPolarity		= 0,
+	.pmuPwrUpDelay			= 80000,
+
+	/* GPP values */
+	.gppOutEnValLow			= (~(BIT24 | BIT25)),  /* low active */
+	.gppOutEnValMid			= (~(BIT12 | BIT13 | BIT14)),
+	.gppOutEnValHigh		= (~(0x0)),
+	.gppOutValLow			= 0x0,
+	.gppOutValMid			= BIT12,
+	.gppOutValHigh			= 0x0,
+	.gppPolarityValLow		= 0x0,
+	.gppPolarityValMid		= 0x0,
+	.gppPolarityValHigh		= 0x0,
+
+	/* TDM configuration */
+	/* We hold a different configuration array for each possible slic that
+	** can be connected to board.
+	** When modules are scanned, then we select the index of the relevant
+	** slic's information array.
+	** For RD and Customers boards we only need to initialize a single
+	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
+	*/
+	.numBoardTdmInfo		= {},
+	.pBoardTdmInt2CsInfo		= {},
+	.boardTdmInfoIndex		= -1,
+
+	/* NAND init params */
+	.nandFlashReadParams		= 0,
+	.nandFlashWriteParams		= 0,
+	.nandFlashControl		= 0,
+	/* NOR init params */
+	.norFlashReadParams		= 0,
+	.norFlashWriteParams		= 0
+};
+
+/***************************/
+/* ARMADA-XP B0 4Bay rack  */
+/***************************/
+
+#define SYNOAXP_4_RACK_MPP0_7		0x11111111
+#define SYNOAXP_4_RACK_MPP8_15		0x22221111
+#define SYNOAXP_4_RACK_MPP16_23		0x22222222
+#define SYNOAXP_4_RACK_MPP24_31		0x00000000
+#define SYNOAXP_4_RACK_MPP32_39		0x11110000
+#define SYNOAXP_4_RACK_MPP40_47		0x00004000
+#define SYNOAXP_4_RACK_MPP48_55		0x00000000
+#define SYNOAXP_4_RACK_MPP56_63		0x00000000
+#define SYNOAXP_4_RACK_MPP64_67		0x00000000
+
+MV_BOARD_MPP_INFO Syno78230AxpBoardMppConfigValue_4bay_rack[] = {
+	{ {
+		SYNOAXP_4_RACK_MPP0_7,
+		SYNOAXP_4_RACK_MPP8_15,
+		SYNOAXP_4_RACK_MPP16_23,
+		SYNOAXP_4_RACK_MPP24_31,
+		SYNOAXP_4_RACK_MPP32_39,
+		SYNOAXP_4_RACK_MPP40_47,
+		SYNOAXP_4_RACK_MPP48_55,
+		SYNOAXP_4_RACK_MPP56_63,
+		SYNOAXP_4_RACK_MPP64_67,
+	} },
+};
+
+MV_BOARD_INFO Syno78230AxpInfo_4bay_rack = {
+	.boardName			= "Synology AXP 78230 4-bay rack",
+	.numBoardMppTypeValue		= ARRSZ(Syno78230AxpBoardModTypeInfo),
+	.pBoardModTypeValue		= Syno78230AxpBoardModTypeInfo,
+	.numBoardMppConfigValue		= ARRSZ(Syno78230AxpBoardMppConfigValue_4bay_rack),
+	.pBoardMppConfigValue		= Syno78230AxpBoardMppConfigValue_4bay_rack,
+	.intsGppMaskLow			= 0,
+	.intsGppMaskMid			= 0,
+	.intsGppMaskHigh		= 0,
+	.numBoardDeviceIf		= ARRSZ(Syno78230AxpBoardDeCsInfo),
+	.pDevCsInfo			= Syno78230AxpBoardDeCsInfo,
+	.numBoardTwsiDev		= 0,
+	.pBoardTwsiDev			= NULL,
+	.numBoardMacInfo		= ARRSZ(Syno78230AxpBoardMacInfo),
+	.pBoardMacInfo			= Syno78230AxpBoardMacInfo,
+	.numBoardGppInfo		= 0,
+	.pBoardGppInfo			= NULL,
+	.activeLedsNumber		= 0,
+	.pLedGppPin			= NULL,
+	.ledsPolarity			= 0,
+
+	/* GPP values */
+	.gppOutEnValLow			= (~(0x0)),  /* low active */
+	.gppOutEnValMid			= (~(BIT8 | BIT13 | BIT15)),
+	.gppOutEnValHigh		= (~(0x0)),
+	.gppOutValLow			= 0x0,
+	.gppOutValMid			= BIT15,
+	.gppOutValHigh			= 0x0,
+	.gppPolarityValLow		= 0x0,
+	.gppPolarityValMid		= 0x0,
+	.gppPolarityValHigh		= 0x0,
+
+	/* TDM configuration */
+	/* We hold a different configuration array for each possible slic that
+	** can be connected to board.
+	** When modules are scanned, then we select the index of the relevant
+	** slic's information array.
+	** For RD and Customers boards we only need to initialize a single
+	** entry of the arrays below, and set the boardTdmInfoIndex to 0.
+	*/
+	.numBoardTdmInfo		= {},
+	.pBoardTdmInt2CsInfo		= {},
+	.boardTdmInfoIndex		= -1,
+
+	/* NAND init params */
+	.nandFlashReadParams		= 0,
+	.nandFlashWriteParams		= 0,
+	.nandFlashControl		= 0,
+	/* NOR init params */
+	.norFlashReadParams		= 0,
+	.norFlashWriteParams		= 0
+};
+#endif
 
 MV_BOARD_INFO *boardInfoTbl[] = {
 	&db88f78XX0Info,
@@ -1490,4 +1708,14 @@ MV_BOARD_INFO *boardInfoTbl[] = {
 	&rd78460ServerRev2Info,
 	&rd78460gpInfo,
 	&rd78460customerInfo
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	,NULL
+	,NULL
+	,NULL
+	,NULL
+	,NULL
+	,&Syno78230AxpInfo
+	,&Syno78230AxpInfo_2bay
+	,&Syno78230AxpInfo_4bay_rack
+#endif
 };

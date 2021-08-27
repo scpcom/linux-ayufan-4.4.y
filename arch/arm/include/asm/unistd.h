@@ -509,7 +509,17 @@
 #define SYNONotifyAddWatch(arg1, arg2, arg3)		syscall(__NR_SYNONotifyAddWatch, arg1, arg2, arg3)
 #define __NR_SYNONotifyRemoveWatch		(__NR_SYSCALL_BASE+424)
 #define SYNONotifyRemoveWatch(arg1, arg2, arg3)		syscall(__NR_SYNONotifyRemoveWatch, arg1, arg2, arg3)
+#define __NR_SYNONotifyAddWatch32		(__NR_SYSCALL_BASE+425)
+#define SYNONotifyAddWatch32(arg1, arg2, arg3)		syscall(__NR_SYNONotifyAddWatch32, arg1, arg2, arg3)
+#define __NR_SYNONotifyRemoveWatch32		(__NR_SYSCALL_BASE+426)
+#define SYNONotifyRemoveWatch32(arg1, arg2, arg3)		syscall(__NR_SYNONotifyRemoveWatch32, arg1, arg2, arg3)
 #endif /* CONFIG_SYNO_NOTIFY */
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOArchiveOverwrite			(__NR_SYSCALL_BASE+427)
+#define SYNOArchiveOverwrite(arg1, arg2)		syscall(__NR_SYNOArchiveOverwrite, arg1, arg2)
+#endif
+
 /*
  * The following SWIs are ARM private.
  */

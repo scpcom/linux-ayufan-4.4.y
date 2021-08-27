@@ -2243,15 +2243,15 @@ static void add_kallsyms(struct module *mod, const struct load_info *info)
 
 	mod->core_symtab = dst = mod->module_core + info->symoffs;
 	src = mod->symtab;
-	*dst = *src;
-	for (ndst = i = 1; i < mod->num_symtab; ++i, ++src) {
-		if (!is_core_symbol(src, info->sechdrs, info->hdr->e_shnum))
-			continue;
-		dst[ndst] = *src;
+	for (ndst = i = 0; i < mod->num_symtab; i++) {
+		if (i == 0 ||
+		    is_core_symbol(src+i, info->sechdrs, info->hdr->e_shnum)) {
+			dst[ndst] = src[i];
 			dst[ndst].st_name = bitmap_weight(info->strmap,
 							  dst[ndst].st_name);
 			++ndst;
 		}
+	}
 	mod->core_num_syms = ndst;
 
 	mod->core_strtab = s = mod->module_core + info->stroffs;

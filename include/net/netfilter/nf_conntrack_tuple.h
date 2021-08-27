@@ -75,14 +75,14 @@ struct nf_conntrack_tuple {
 	} dst;
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	/* If true, this connection is handled by NFP */
 	bool nfp;
 	int ifindex;
 	bool nfpCapable;
 	bool udpCsum;
 	struct ipt_nfp_info *info;
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 };
 

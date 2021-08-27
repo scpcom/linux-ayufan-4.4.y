@@ -1711,7 +1711,7 @@ struct file_operations {
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int);
 	ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int);
 #if defined(CONFIG_SYNO_ARMADA)
-	ssize_t (*splice_from_socket)(struct file *file, struct socket *sock,
+	ssize_t (*splice_from_socket)(struct file *, struct socket *,
 				     loff_t __user *ppos, size_t count);
 #endif
 	int (*setlease)(struct file *, long, struct file_lock **);

@@ -1193,6 +1193,20 @@ void PATA_PortReset(
 	struct mod_notif_param param;
 #endif /* SUPPORT_ERROR_HANDLING */
 
+	/* No running commands at this moment */
+	MV_ASSERT( pPort->Running_Slot==0 );
+	MV_ASSERT( pPort->Port_State==PORT_STATE_IDLE );
+
+#ifdef MV_DEBUG
+	{
+		MV_U8 i;
+		for ( i=0; i<MAX_SLOT_NUMBER; i++ )
+		{
+			MV_DASSERT(pPort->Running_Req[i]==NULL);
+		}
+	}
+#endif
+
 	/* If we already reached the max number of devices supported,
 	   disregard the rest */
 	if( pCore->Total_Device_Count >= MAX_DEVICE_SUPPORTED )

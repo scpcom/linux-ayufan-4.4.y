@@ -433,7 +433,7 @@ void kernel_power_off(void)
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
 #ifdef MY_DEF_HERE
-#ifdef CONFIG_SYNO_CEDARVIEW
+#if defined(CONFIG_SYNO_CEDARVIEW) || defined(CONFIG_ARCH_GEN3)
 #define UART_PORT1_IOBASE   0x2F8
 #else
 #define UART_PORT1_IOBASE   0x3F8
@@ -514,12 +514,15 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 
 	case LINUX_REBOOT_CMD_POWER_OFF:
 #ifdef MY_DEF_HERE
+#if defined(CONFIG_ARCH_GEN3)
+#else
         outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);
         outb(UART_CMD_PREFIX, UART_PORT1_IOBASE + UART_TX);
         outb(UART_CMD_POWEROFF, UART_PORT1_IOBASE + UART_TX);
         outb(13, UART_PORT1_IOBASE + UART_TX);
         outb(10, UART_PORT1_IOBASE + UART_TX);
         outb(UART_STOP_TX, UART_PORT1_IOBASE + UART_IER);
+#endif
 #endif
 		kernel_power_off();
 		do_exit(0);

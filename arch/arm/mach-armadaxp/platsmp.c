@@ -112,6 +112,11 @@ int  boot_secondary(unsigned int cpu, struct task_struct *idle)
 
 	/* send ipi to wake cpu in case it is in offline state */
 	axp_smp_cross_call(cpumask_of(cpu), 0);
+	/*
+	 * Make memory consistent for secondary CPUs
+	 * before waking them up and enabling memory coherency.
+	 */
+	flush_cache_all();
 
 	/* Set resume control and address */
 	MV_REG_WRITE(AXP_CPU_RESUME_CTRL_REG, 0x0);

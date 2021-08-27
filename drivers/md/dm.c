@@ -905,8 +905,12 @@ static void dm_done(struct request *clone, int error, bool mapped)
 	struct dm_rq_target_io *tio = clone->end_io_data;
 	dm_request_endio_fn rq_end_io = NULL;
 
+	if (tio->ti) {
+		rq_end_io = tio->ti->type->rq_end_io;
+
 		if (mapped && rq_end_io)
 			r = rq_end_io(tio->ti, clone, error, &tio->info);
+	}
 
 	if (r <= 0)
 		/* The target wants to complete the I/O */

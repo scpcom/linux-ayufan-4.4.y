@@ -32,7 +32,8 @@
 /*
  * Driver for various Hifn encryption processors.
  */
-#ifndef AUTOCONF_INCLUDED
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38) && !defined(AUTOCONF_INCLUDED)
 #include <linux/config.h>
 #endif
 #include <linux/module.h>
@@ -46,7 +47,6 @@
 #include <linux/interrupt.h>
 #include <linux/spinlock.h>
 #include <linux/random.h>
-#include <linux/version.h>
 #include <linux/skbuff.h>
 #include <linux/uio.h>
 #include <linux/sysfs.h>

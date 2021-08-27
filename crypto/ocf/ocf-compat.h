@@ -7,8 +7,8 @@
 /*
  * Provide compat routines for older linux kernels and BSD kernels
  *
- * Written by David McCullough <david_mccullough@securecomputing.com>
- * Copyright (C) 2007 David McCullough <david_mccullough@securecomputing.com>
+ * Written by David McCullough <david_mccullough@mcafee.com>
+ * Copyright (C) 2010 David McCullough <david_mccullough@mcafee.com>
  *
  * LICENSE TERMS
  *
@@ -37,6 +37,11 @@
  */
 /****************************************************************************/
 #ifdef __KERNEL__
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38) && !defined(AUTOCONF_INCLUDED)
+#include <linux/config.h>
+#endif
+
 /*
  * fake some BSD driver interface stuff specifically for OCF use
  */
@@ -187,11 +192,33 @@ struct ocf_device {
 #define DMA_32BIT_MASK  0x00000000ffffffffULL
 #endif
 
+#ifndef htole32
 #define htole32(x)	cpu_to_le32(x)
+#endif
+#ifndef htobe32
 #define htobe32(x)	cpu_to_be32(x)
+#endif
+#ifndef htole16
 #define htole16(x)	cpu_to_le16(x)
+#endif
+#ifndef htobe16
 #define htobe16(x)	cpu_to_be16(x)
+#endif
 
+/* older kernels don't have these */
+
+#include <asm/irq.h>
+#if !defined(IRQ_NONE) && !defined(IRQ_RETVAL)
+#define IRQ_NONE
+#define IRQ_HANDLED
+#define IRQ_WAKE_THREAD
+#define IRQ_RETVAL
+#define irqreturn_t void
+typedef irqreturn_t (*irq_handler_t)(int irq, void *arg, struct pt_regs *regs);
+#endif
+#ifndef IRQF_SHARED
+#define IRQF_SHARED	SA_SHIRQ
+#endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0)
 # define strlcpy(dest,src,len) \
@@ -202,7 +229,12 @@ struct ocf_device {
 #define MAX_ERRNO	4095
 #endif
 #ifndef IS_ERR_VALUE
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,5)
+#include <linux/err.h>
+#endif
+#ifndef IS_ERR_VALUE
 #define IS_ERR_VALUE(x) ((unsigned long)(x) >= (unsigned long)-MAX_ERRNO)
+#endif
 #endif
 
 /*
@@ -240,6 +272,7 @@ struct ocf_device {
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
 
+#include <linux/mm.h>
 #include <asm/scatterlist.h>
 
 static inline void sg_set_page(struct scatterlist *sg,  struct page *page,
@@ -255,6 +288,84 @@ static inline void *sg_virt(struct scatterlist *sg)
 	return page_address(sg->page) + sg->offset;
 }
 
+#define sg_init_table(sg, n)
+
+#define sg_mark_end(sg)
+
+#endif
+
+#ifndef late_initcall
+#define late_initcall(init) module_init(init)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,4) || !defined(CONFIG_SMP)
+#define ocf_for_each_cpu(cpu) for ((cpu) = 0; (cpu) == 0; (cpu)++)
+#else
+#define ocf_for_each_cpu(cpu) for_each_present_cpu(cpu)
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
+#include <linux/sched.h>
+#define	kill_proc(p,s,v)	send_sig(s,find_task_by_vpid(p),0)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,4)
+
+struct ocf_thread {
+	struct task_struct	*task;
+	int					(*func)(void *arg);
+	void				*arg;
+};
+
+/* thread startup helper func */
+static inline int ocf_run_thread(void *arg)
+{
+	struct ocf_thread *t = (struct ocf_thread *) arg;
+	if (!t)
+		return -1; /* very bad */
+	t->task = current;
+	daemonize();
+	spin_lock_irq(&current->sigmask_lock);
+	sigemptyset(&current->blocked);
+	recalc_sigpending(current);
+	spin_unlock_irq(&current->sigmask_lock);
+	return (*t->func)(t->arg);
+}
+
+#define kthread_create(f,a,fmt...) \
+	({ \
+		struct ocf_thread t; \
+		pid_t p; \
+		t.task = NULL; \
+		t.func = (f); \
+		t.arg = (a); \
+		p = kernel_thread(ocf_run_thread, &t, CLONE_FS|CLONE_FILES); \
+		while (p != (pid_t) -1 && t.task == NULL) \
+			schedule(); \
+		if (t.task) \
+			snprintf(t.task->comm, sizeof(t.task->comm), fmt); \
+		(t.task); \
+	})
+
+#define kthread_bind(t,cpu)	/**/
+
+#define kthread_should_stop()	(strcmp(current->comm, "stopping") == 0)
+
+#define kthread_stop(t) \
+	({ \
+		strcpy((t)->comm, "stopping"); \
+		kill_proc((t)->pid, SIGTERM, 1); \
+		do { \
+			schedule(); \
+		} while (kill_proc((t)->pid, SIGTERM, 1) == 0); \
+	})
+
+#else
+#include <linux/kthread.h>
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)
+#define	skb_frag_page(x)	((x)->page)
 #endif
 
 #endif /* __KERNEL__ */

@@ -40,7 +40,9 @@ static void mv_xor_issue_pending(struct dma_chan *chan);
 unsigned int dummy1[MV_XOR_MIN_BYTE_COUNT];
 unsigned int dummy2[MV_XOR_MIN_BYTE_COUNT];
 dma_addr_t dummy1_addr, dummy2_addr;
+#ifdef CONFIG_PM
 static struct mv_xor_save_regs saved_regs;
+#endif
 #endif
 
 #define to_mv_xor_chan(chan)		\

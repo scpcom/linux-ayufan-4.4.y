@@ -204,6 +204,19 @@ void usb_detect_quirks(struct usb_device *udev)
 		dev_dbg(&udev->dev, "USB quirks for this device: %x\n",
 			udev->quirks);
 
+#ifdef CONFIG_SYNO_ARMADA
+	/*
+	 * Set USB_QUIRK_RESET_RESUME permanently
+	 * when power management is enabled.
+	 * This will allow successful resume from mem
+	 * without changing the drive's letter and detecting
+	 * new USB drive on every resume.
+	 */
+#ifdef CONFIG_PM
+	udev->quirks = USB_QUIRK_RESET_RESUME;
+#endif
+#endif
+
 	/* For the present, all devices default to USB-PERSIST enabled */
 #if 0		/* was: #ifdef CONFIG_PM */
 	/* Hubs are automatically enabled for USB-PERSIST */

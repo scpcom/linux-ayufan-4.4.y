@@ -317,6 +317,52 @@ static void xhci_reinit_cached_ring(struct xhci_hcd *xhci,
 	INIT_LIST_HEAD(&ring->td_list);
 }
 
+static int xhci_radix_tree_insert(struct xhci_hcd *xhci,
+		struct xhci_ring *ring, struct radix_tree_root *root)
+{
+	struct xhci_segment *seg;
+	struct xhci_segment *first_seg = ring->first_seg;
+	struct xhci_ring *mapped_ring;
+	dma_addr_t addr;
+	int ret = 0;
+
+	addr = first_seg->dma;
+	mapped_ring = radix_tree_lookup(ring->trb_address_map, addr >> SEGMENT_SHIFT);
+	if (mapped_ring != ring) {
+		ret = radix_tree_insert(root, addr >> SEGMENT_SHIFT, ring);
+		if (ret < 0)
+			goto error;
+	}
+
+	for (seg = first_seg->next; seg != first_seg; seg = seg->next) {
+		addr = seg->dma;
+		mapped_ring = radix_tree_lookup(ring->trb_address_map, addr >> SEGMENT_SHIFT);
+		if (mapped_ring != ring) {
+			ret = radix_tree_insert(root, addr >> SEGMENT_SHIFT, ring);
+			if (ret < 0)
+				goto error;
+		}
+	}
+
+error:
+	return ret;
+}
+
+static void xhci_radix_tree_delete(struct xhci_hcd *xhci,
+		struct xhci_ring *ring, struct radix_tree_root *root)
+{
+	struct xhci_segment *seg;
+	struct xhci_segment *first_seg = ring->first_seg;
+	dma_addr_t addr;
+
+	addr = first_seg->dma;
+	radix_tree_delete(root, addr >> SEGMENT_SHIFT);
+	for (seg = first_seg->next; seg != first_seg; seg = seg->next) {
+		addr = seg->dma;
+		radix_tree_delete(root, addr >> SEGMENT_SHIFT);
+	}
+}
+
 /*
  * Expand an existing ring.
  * Look for a cached ring or allocate a new ring which has same segment numbers
@@ -344,6 +390,9 @@ int etxhci_ring_expansion(struct xhci_hcd *xhci, struct xhci_ring *ring,
 		return -ENOMEM;
 
 	xhci_link_rings(xhci, ring, first, last, num_segs);
+	if ((xhci->quirks & XHCI_EP_INFO_QUIRK) &&
+		ring->type == TYPE_STREAM)
+		xhci_radix_tree_insert(xhci, ring, ring->trb_address_map);
 	xhci_dbg(xhci, "ring expansion succeed, now has %d segments\n",
 			ring->num_segs);
 
@@ -416,12 +465,17 @@ static void xhci_free_stream_ctx(struct xhci_hcd *xhci,
 		struct xhci_stream_ctx *stream_ctx, dma_addr_t dma)
 {
 	struct pci_dev *pdev = to_pci_dev(xhci_to_hcd(xhci)->self.controller);
+	int array_size;
 
-	if (num_stream_ctxs > MEDIUM_STREAM_ARRAY_SIZE)
+	array_size = num_stream_ctxs;
+	if (xhci->quirks & XHCI_EP_INFO_QUIRK)
+		array_size *= sizeof(struct xhci_stream_ctx);
+
+	if (array_size > MEDIUM_STREAM_ARRAY_SIZE)
 		dma_free_coherent(&pdev->dev,
-				sizeof(struct xhci_stream_ctx)*num_stream_ctxs,
+				array_size,
 				stream_ctx, dma);
-	else if (num_stream_ctxs <= SMALL_STREAM_ARRAY_SIZE)
+	else if (array_size <= SMALL_STREAM_ARRAY_SIZE)
 		return dma_pool_free(xhci->small_streams_pool,
 				stream_ctx, dma);
 	else
@@ -444,12 +498,17 @@ static struct xhci_stream_ctx *xhci_alloc_stream_ctx(struct xhci_hcd *xhci,
 		gfp_t mem_flags)
 {
 	struct pci_dev *pdev = to_pci_dev(xhci_to_hcd(xhci)->self.controller);
+	int array_size;
 
-	if (num_stream_ctxs > MEDIUM_STREAM_ARRAY_SIZE)
+	array_size = num_stream_ctxs;
+	if (xhci->quirks & XHCI_EP_INFO_QUIRK)
+		array_size *= sizeof(struct xhci_stream_ctx);
+
+	if (array_size > MEDIUM_STREAM_ARRAY_SIZE)
 		return dma_alloc_coherent(&pdev->dev,
-				sizeof(struct xhci_stream_ctx)*num_stream_ctxs,
+				array_size,
 				dma, mem_flags);
-	else if (num_stream_ctxs <= SMALL_STREAM_ARRAY_SIZE)
+	else if (array_size <= SMALL_STREAM_ARRAY_SIZE)
 		return dma_pool_alloc(xhci->small_streams_pool,
 				mem_flags, dma);
 	else
@@ -593,7 +652,6 @@ struct xhci_stream_info *etxhci_alloc_stream_info(struct xhci_hcd *xhci,
 	struct xhci_stream_info *stream_info;
 	u32 cur_stream;
 	struct xhci_ring *cur_ring;
-	unsigned long key;
 	u64 addr;
 	int ret;
 
@@ -657,11 +715,11 @@ struct xhci_stream_info *etxhci_alloc_stream_info(struct xhci_hcd *xhci,
 		xhci_dbg(xhci, "Setting stream %d ring ptr to 0x%08llx\n",
 				cur_stream, (unsigned long long) addr);
 
-		key = (unsigned long)
-			(cur_ring->first_seg->dma >> SEGMENT_SHIFT);
-		ret = radix_tree_insert(&stream_info->trb_address_map,
-				key, cur_ring);
+		if (xhci->quirks & XHCI_EP_INFO_QUIRK)
+			cur_ring->trb_address_map = &stream_info->trb_address_map;
+		ret = xhci_radix_tree_insert(xhci, cur_ring, cur_ring->trb_address_map);
 		if (ret) {
+			xhci_radix_tree_delete(xhci, cur_ring, cur_ring->trb_address_map);
 			etxhci_ring_free(xhci, cur_ring);
 			stream_info->stream_rings[cur_stream] = NULL;
 			goto cleanup_rings;
@@ -687,9 +745,7 @@ cleanup_rings:
 	for (cur_stream = 1; cur_stream < num_streams; cur_stream++) {
 		cur_ring = stream_info->stream_rings[cur_stream];
 		if (cur_ring) {
-			addr = cur_ring->first_seg->dma;
-			radix_tree_delete(&stream_info->trb_address_map,
-					addr >> SEGMENT_SHIFT);
+			xhci_radix_tree_delete(xhci, cur_ring, cur_ring->trb_address_map);
 			etxhci_ring_free(xhci, cur_ring);
 			stream_info->stream_rings[cur_stream] = NULL;
 		}
@@ -722,6 +778,9 @@ void etxhci_setup_streams_ep_input_ctx(struct xhci_hcd *xhci,
 	ep_ctx->ep_info &= cpu_to_le32(~EP_MAXPSTREAMS_MASK);
 	ep_ctx->ep_info |= cpu_to_le32(EP_MAXPSTREAMS(max_primary_streams)
 				       | EP_HAS_LSA);
+	ep_ctx->ep_info2 &= cpu_to_le32(~MAX_BURST_MASK);
+	if (xhci->quirks & XHCI_EP_INFO_QUIRK)
+		ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(15));
 	ep_ctx->deq  = cpu_to_le64(stream_info->ctx_array_dma);
 }
 
@@ -749,7 +808,6 @@ void etxhci_free_stream_info(struct xhci_hcd *xhci,
 {
 	int cur_stream;
 	struct xhci_ring *cur_ring;
-	dma_addr_t addr;
 
 	if (!stream_info)
 		return;
@@ -758,9 +816,7 @@ void etxhci_free_stream_info(struct xhci_hcd *xhci,
 			cur_stream++) {
 		cur_ring = stream_info->stream_rings[cur_stream];
 		if (cur_ring) {
-			addr = cur_ring->first_seg->dma;
-			radix_tree_delete(&stream_info->trb_address_map,
-					addr >> SEGMENT_SHIFT);
+			xhci_radix_tree_delete(xhci, cur_ring, cur_ring->trb_address_map);
 			etxhci_ring_free(xhci, cur_ring);
 			stream_info->stream_rings[cur_stream] = NULL;
 		}

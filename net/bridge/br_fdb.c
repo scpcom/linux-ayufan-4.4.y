@@ -73,14 +73,15 @@ static inline int has_expired(const struct net_bridge *br,
 #if defined(CONFIG_SYNO_ARMADA)
 	if (fdb->is_static)
 		return 0;
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (fdb->nfp) {
 		if (nfp_mgr_p->nfp_hook_fdb_rule_age)
 			if (nfp_mgr_p->nfp_hook_fdb_rule_age(fdb->dst->br->dev->ifindex,
 					fdb->dst->dev->ifindex, fdb->addr.addr) > 0)
 			fdb->updated = jiffies + fdb->dst->br->forward_delay;
 	}
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 
 	return time_before_eq(fdb->updated + hold_time(br), jiffies);
 #else
@@ -106,13 +107,13 @@ static void fdb_rcu_free(struct rcu_head *head)
 static inline void fdb_delete(struct net_bridge_fdb_entry *f)
 {
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (f->nfp) {
 		if (nfp_mgr_p->nfp_hook_fdb_rule_del)
 			nfp_mgr_p->nfp_hook_fdb_rule_del(f->dst->br->dev->ifindex,
 					f->dst->dev->ifindex, f->addr.addr);
 	}
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 	fdb_notify(f, RTM_DELNEIGH);
@@ -177,14 +178,14 @@ void br_fdb_cleanup(unsigned long _data)
 				continue;
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 			if (f->nfp) {
 				if (nfp_mgr_p->nfp_hook_fdb_rule_age)
 					if (nfp_mgr_p->nfp_hook_fdb_rule_age(f->dst->br->dev->ifindex,
 							f->dst->dev->ifindex, f->addr.addr) > 0)
 					f->updated = jiffies + f->dst->br->forward_delay;
 			}
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 			this_timer = f->updated + delay;
@@ -403,12 +404,12 @@ static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 		hlist_add_head_rcu(&fdb->hlist, head);
 #if defined(CONFIG_SYNO_ARMADA)
 
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 		fdb->nfp = false;
 		if (nfp_mgr_p->nfp_hook_fdb_rule_add)
 			if (!nfp_mgr_p->nfp_hook_fdb_rule_add(fdb->dst->br->dev->ifindex, fdb->dst->dev->ifindex, (u8 *)addr, is_local))
 				fdb->nfp = true;
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #else
 		fdb_notify(fdb, RTM_NEWNEIGH);
 #endif
@@ -780,7 +781,7 @@ int br_fdb_delete(struct sk_buff *skb, struct nlmsghdr *nlh, void *arg)
 }
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void fdb_sync(void)
 {
 	struct net_device *dev;
@@ -815,5 +816,5 @@ void fdb_sync(void)
 }
 EXPORT_SYMBOL(fdb_sync);
 
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif

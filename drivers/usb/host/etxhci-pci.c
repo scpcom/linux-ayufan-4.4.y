@@ -38,7 +38,7 @@
 unsigned short xhci_vendor = 0;
 #endif
 
-static const char hcd_name[] = "etxhci_hcd_121130";
+static const char hcd_name[] = "etxhci_hcd_130207";
 
 /* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
@@ -61,7 +61,6 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
 	struct pci_dev		*pdev = to_pci_dev(dev);
 	struct usb_hcd		*hcd = xhci_to_hcd(xhci);
-	u32			temp;
 
 #ifdef MY_ABC_HERE
 	xhci_vendor = pdev->vendor;
@@ -70,23 +69,26 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 	/* Look for vendor-specific quirks */
 	hcd->chip_id = HCD_CHIP_ID_UNKNOWN;
 	if (pdev->vendor == PCI_VENDOR_ID_ETRON) {
+		pci_read_config_dword(pdev, 0x58, &xhci->hcc_params1);
+		xhci->hcc_params1 &= 0xffff;
+		xhci_init_ejxxx(xhci);
 #ifdef MY_ABC_HERE
 		xhci_err(xhci, "Etron chip found.\n");
 #endif
-		if (pdev->device == PCI_DEVICE_ID_ETRON_EJ168) {
+		if (pdev->device == PCI_DEVICE_ID_ETRON_EJ168)
 			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ168;
-			xhci_init_ej168(xhci);
-
-			temp = xhci_readl(xhci, hcd->regs + 0x4074);
-			temp |= 0x8000;
-			xhci_writel(xhci, temp, hcd->regs + 0x4074);
-		} else if (pdev->device == PCI_DEVICE_ID_ETRON_EJ188)
+		else if (pdev->device == PCI_DEVICE_ID_ETRON_EJ188)
 			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ188;
 
 		xhci_dbg(xhci, "Etron chip ID %02x\n", hcd->chip_id);
 		xhci->quirks |= XHCI_HUB_INFO_QUIRK;
 		xhci->quirks |= XHCI_RESET_ON_RESUME;
 		xhci_dbg(xhci, "QUIRK: Resetting on resume\n");
+	}
+
+	if (((xhci->hcc_params1 & 0xff) == 0x30) ||
+		((xhci->hcc_params1 & 0xff) == 0x40)) {
+		xhci->quirks |= XHCI_EP_INFO_QUIRK;
 	}
 }
 

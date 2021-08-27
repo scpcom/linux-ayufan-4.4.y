@@ -26,8 +26,6 @@
                 cpunum &= 0x0F;                         \
         })
 
-extern int armadaxp_snoop_dis_virt(void);
-
 static DECLARE_COMPLETION(cpu_killed);
 
 static inline void platform_do_lowpower(unsigned int cpu)

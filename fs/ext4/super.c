@@ -400,10 +400,46 @@ void ext4_journal_abort_handle(const char *caller, unsigned int line,
 	jbd2_journal_abort_handle(handle);
 }
 
+#ifdef MY_ABC_HERE
+int (*funcSYNOSendErrorFsEvent)(const unsigned char*, const unsigned int) = NULL;
+static void SynoAutoErrorFsReport(const unsigned char* szDsmVersion, const unsigned int iErrorCount)
+{
+	if (NULL == funcSYNOSendErrorFsEvent) {
+		printk(KERN_ERR "EXT4-fs error: Can't reference to function 'funcSYNOSendErrorFsEvent', DSM(%s), error count(%d)\n", szDsmVersion, iErrorCount);
+		return;
+	}
+
+	funcSYNOSendErrorFsEvent(szDsmVersion, iErrorCount);
+}
+
+static void SYNOExt4GetDSMVersion(const unsigned char* szVersionName, char* szDsmVersion) {
+	int i = 0;
+
+	/*
+	 * get DSM version from szVersionName.
+	 * eg. get 3202 from "1.42.6-3032"
+	 */
+	for (i = 0; i < strlen(szVersionName); i++) {
+		if ('-' == szVersionName[i]) {
+			break;
+		}
+	}
+
+	if (i < strlen(szVersionName)) {
+		strncpy(szDsmVersion, &szVersionName[i+1], strlen(szVersionName) - i - 1);
+	}
+}
+EXPORT_SYMBOL(funcSYNOSendErrorFsEvent);
+#endif
+
 static void __save_error_info(struct super_block *sb, const char *func,
 			    unsigned int line)
 {
 	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
+#ifdef MY_ABC_HERE
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+	char szDsmVersion[8] = {'\0'};
+#endif
 
 	EXT4_SB(sb)->s_mount_state |= EXT4_ERROR_FS;
 	es->s_state |= cpu_to_le16(EXT4_ERROR_FS);
@@ -425,6 +461,18 @@ static void __save_error_info(struct super_block *sb, const char *func,
 	if (!es->s_error_count)
 		mod_timer(&EXT4_SB(sb)->s_err_report, jiffies + 24*60*60*HZ);
 	es->s_error_count = cpu_to_le32(le32_to_cpu(es->s_error_count) + 1);
+#ifdef MY_ABC_HERE
+	/* We don't need to care system FS */
+	if ((0 != strcmp(es->s_last_mounted, "/"))
+			&& (0 == sbi->s_new_error_fs_event_flag)
+			&& (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC))) {
+		sbi->s_new_error_fs_event_flag = 1;
+		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);
+		if ('\0' != szDsmVersion[0]) {
+			SynoAutoErrorFsReport(szDsmVersion ,(unsigned int)es->s_error_count);
+		}
+	}
+#endif
 }
 
 static void save_error_info(struct super_block *sb, const char *func,
@@ -2603,14 +2651,44 @@ static ssize_t lazyinit_info_show(struct ext4_attr *a,
 			sbi->s_li_request ? sbi->s_li_request->lr_next_group : sbi->s_groups_count,
 			sbi->s_groups_count);
 }
-#endif
 
-#if 0 // for test MY_ABC_HERE
 static ssize_t lazyinit_speed_show(struct ext4_attr *a,
 				       struct ext4_sb_info *sbi, char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%lu\n",
 			sbi->s_li_request ? sbi->s_li_request->lr_timeout : 0);
+}
+#endif
+
+#ifdef MY_ABC_HERE
+static ssize_t syno_fs_error_new_event_flag_show(struct ext4_attr *a,
+				       struct ext4_sb_info *sbi, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", sbi->s_new_error_fs_event_flag);
+}
+
+static ssize_t syno_fs_error_new_event_flag_store(struct ext4_attr *a,
+				       struct ext4_sb_info *sbi, const char *buf, size_t count)
+{
+	int t = (int) simple_strtol(buf, NULL, 0);
+
+	if (!(1 == t || 0 == t)) {
+		return -EINVAL;
+	}
+	sbi->s_new_error_fs_event_flag = t;
+	return count;
+}
+
+static ssize_t syno_fs_error_mounted_show(struct ext4_attr *a,
+				       struct ext4_sb_info *sbi, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%s\n", sbi->s_es->s_last_mounted);
+}
+
+static ssize_t syno_fs_error_count_show(struct ext4_attr *a,
+				       struct ext4_sb_info *sbi, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", sbi->s_es->s_error_count);
 }
 #endif
 
@@ -2684,11 +2762,13 @@ EXT4_RW_ATTR_SBI_UI(max_writeback_mb_bump, s_max_writeback_mb_bump);
 
 #ifdef MY_ABC_HERE
 EXT4_RO_ATTR(lazyinit_info);
-#endif
-#if 0 // for test MY_ABC_HERE
 EXT4_RO_ATTR(lazyinit_speed);
 #endif
-
+#ifdef MY_ABC_HERE
+EXT4_RW_ATTR(syno_fs_error_new_event_flag);
+EXT4_RO_ATTR(syno_fs_error_mounted);
+EXT4_RO_ATTR(syno_fs_error_count);
+#endif
 
 static struct attribute *ext4_attrs[] = {
 	ATTR_LIST(delayed_allocation_blocks),
@@ -2705,9 +2785,12 @@ static struct attribute *ext4_attrs[] = {
 	ATTR_LIST(max_writeback_mb_bump),
 #ifdef MY_ABC_HERE
 	ATTR_LIST(lazyinit_info),
-#endif
-#if 0 // for test MY_ABC_HERE
 	ATTR_LIST(lazyinit_speed),
+#endif
+#ifdef MY_ABC_HERE
+	ATTR_LIST(syno_fs_error_new_event_flag),
+	ATTR_LIST(syno_fs_error_mounted),
+	ATTR_LIST(syno_fs_error_count),
 #endif
 	NULL,
 };
@@ -3575,15 +3658,6 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		(test_opt(sb, POSIX_ACL) ? MS_POSIXACL : 0);
 #endif
 
-	blocksize = BLOCK_SIZE << le32_to_cpu(es->s_log_block_size);
-	if (test_opt(sb, DIOREAD_NOLOCK)) {
-		if (blocksize < PAGE_SIZE) {
-			ext4_msg(sb, KERN_ERR, "can't mount with "
-				 "dioread_nolock if block size != PAGE_SIZE");
-			goto failed_mount;
-		}
-	}
-
 	if (le32_to_cpu(es->s_rev_level) == EXT4_GOOD_OLD_REV &&
 	    (EXT4_HAS_COMPAT_FEATURE(sb, ~0U) ||
 	     EXT4_HAS_RO_COMPAT_FEATURE(sb, ~0U) ||
@@ -4151,6 +4225,17 @@ no_journal:
 	if (!Ext4Hash_lock_init) {
 		spin_lock_init(&Ext4Hash_buf_lock);
 		Ext4Hash_lock_init=1;
+	}
+#endif
+#ifdef MY_DEF_HERE
+	{
+		char szDsmVersion[8] = {'\0'};
+		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);
+		if ('\0' == szDsmVersion[0] || SYNO_CREATE_TIME_SWAP_VERSION < simple_strtoul(szDsmVersion, NULL, 10)) {
+			sbi->s_swap_create_time = 1;
+		} else {
+			sbi->s_swap_create_time = 0;
+		}
 	}
 #endif
 	ext4_msg(sb, KERN_INFO, "mounted filesystem with%s. "

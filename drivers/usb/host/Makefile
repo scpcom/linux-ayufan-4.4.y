@@ -16,7 +16,7 @@ xhci-hcd-y += xhci-ring.o xhci-hub.o xhci-dbg.o
 xhci-hcd-$(CONFIG_PCI)	+= xhci-pci.o
 etxhci-hcd-y := etxhci.o etxhci-mem.o etxhci-pci.o
 etxhci-hcd-y += etxhci-ring.o etxhci-hub.o etxhci-dbg.o
-etxhci-hcd-y += etxhci-ej168.o
+etxhci-hcd-y += etxhci-ejxxx.o
 
 obj-$(CONFIG_USB_WHCI_HCD)	+= whci/
 

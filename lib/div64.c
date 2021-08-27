@@ -111,7 +111,7 @@ u64 div64_u64(u64 dividend, u64 divisor)
 EXPORT_SYMBOL(div64_u64);
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || (defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3))
 u64
 mod_u64_rem64(u64 dividend, u64 divisor)
 {

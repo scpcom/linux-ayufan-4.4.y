@@ -511,7 +511,7 @@ config MTD_VMU
 
 config SYNO_MTD_PHYMAPS
 	bool "Flash device mapped on Synology Board"
-	depends on MTD_CFI && ( SYNO_MPC85XX_COMMON || SYNO_MV_COMMON)
+	depends on MTD_CFI && ( SYNO_MPC85XX_COMMON)
 
 config MTD_PISMO
 	tristate "MTD discovery driver for PISMO modules"
@@ -541,6 +541,6 @@ config MTD_LATCH_ADDR
 
 config SYNO_MTD_PHYMAPS
         bool "Flash device mapped on Synology Board"
-        depends on MTD_CFI && ( SYNO_MPC85XX_COMMON || SYNO_MV_COMMON || SYNO_PLX_PORTING || SYNO_ARMADA)
+        depends on MTD_CFI && ( SYNO_MPC85XX_COMMON || SYNO_PLX_PORTING || SYNO_ARMADA)
 
 endmenu

@@ -139,19 +139,21 @@ int mv_eth_skb_recycle(struct sk_buff *skb);
 	if (!in_interrupt())                                  \
 		local_irq_restore(flags);
 
-
 #define mv_eth_lock(txq_ctrl, flags)			     \
+{							     \
 	if (txq_ctrl->flags & MV_ETH_F_TX_SHARED)	     \
 		MV_ETH_LOCK(&txq_ctrl->queue_lock, flags)    \
 	else                                                 \
-		MV_ETH_LIGHT_LOCK(flags)
+		MV_ETH_LIGHT_LOCK(flags)		     \
+}
 
 #define mv_eth_unlock(txq_ctrl, flags)    	              \
+{							      \
 	if (txq_ctrl->flags & MV_ETH_F_TX_SHARED)	      \
 		MV_ETH_UNLOCK(&txq_ctrl->queue_lock, flags)   \
 	else                                                  \
-		MV_ETH_LIGHT_UNLOCK(flags)
-
+		MV_ETH_LIGHT_UNLOCK(flags)		      \
+}
 
 /******************************************************
  * rx / tx queues --                                  *
@@ -393,19 +395,12 @@ struct eth_port {
 	MV_U32 rx_indir_table[256];
 	struct cpu_ctrl	*cpu_config[CONFIG_NR_CPUS];
 	MV_U32  sgmii_serdes;
-	int	pm_mode;
+	int	wol_mode;
 #ifdef MY_ABC_HERE
 	MV_U32 phy_chip;
 	MV_U32 phy_id;
 	MV_U32  wol;
 #endif
-};
-
-enum eth_pm_mode {
-	MV_ETH_PM_WOL = 0,
-	MV_ETH_PM_CLOCK,
-	MV_ETH_PM_DISABLE,
-	MV_ETH_PM_LAST
 };
 
 struct eth_netdev {
@@ -455,6 +450,7 @@ struct bm_pool {
 	int         capacity;
 	int         buf_num;
 	int         pkt_size;
+	MV_ULONG    physAddr;
 	u32         *bm_pool;
 	MV_STACK    *stack;
 	spinlock_t  lock;
@@ -484,6 +480,7 @@ int mv_eth_bm_config_long_buf_num_get(int port);
 void mv_eth_bm_config_print(void);
 #endif /* CONFIG_MV_ETH_BM */
 
+void mv_eth_stack_print(int port, MV_BOOL isPrintElements);
 extern struct bm_pool mv_eth_pool[MV_ETH_BM_POOLS];
 extern struct eth_port **mv_eth_ports;
 
@@ -735,20 +732,9 @@ int         mv_eth_restore_registers(struct eth_port *pp, int mtu);
 
 void        mv_eth_win_init(int port);
 int         mv_eth_resume_network_interfaces(struct eth_port *pp);
-int         mv_eth_pm_mode_set(int port, int mode);
+int         mv_eth_wol_mode_set(int port, int mode);
 
 int	    mv_eth_cpu_txq_mask_set(int port, int cpu, int txqMask);
-
-#if defined(CONFIG_MV_ETH_NFP) || defined(CONFIG_MV_ETH_NFP_MODULE)
-typedef MV_STATUS mv_eth_nfp_func_t(struct eth_port *pp, int rxq, struct neta_rx_desc *rx_desc,
-					struct eth_pbuf *pkt, struct bm_pool *pool);
-struct mv_eth_nfp_ops {
-	MV_STATUS (*mv_eth_nfp)(struct eth_port *pp, int rxq, struct neta_rx_desc *rx_desc,
-					struct eth_pbuf *pkt, struct bm_pool *pool);
-};
-int         mv_eth_nfp_register(mv_eth_nfp_func_t *func);
-void        mv_eth_nfp_unregister(void);
-#endif /* CONFIG_MV_ETH_NFP || CONFIG_MV_ETH_NFP_MODULE */
 
 irqreturn_t mv_eth_isr(int irq, void *dev_id);
 int         mv_eth_start_internals(struct eth_port *pp, int mtu);
@@ -852,6 +838,13 @@ MV_STATUS mv_eth_hwf_bm_create(int port, int mtuPktSize);
 void      mv_hwf_bm_dump(void);
 #endif /* CONFIG_MV_ETH_HWF && !CONFIG_MV_ETH_BM_CPU */
 
-
+#ifdef CONFIG_MV_ETH_NFP
+int         mv_eth_nfp_ctrl(struct net_device *dev, int en);
+int         mv_eth_nfp_ext_ctrl(struct net_device *dev, int en);
+int         mv_eth_nfp_ext_add(struct net_device *dev, int port);
+int         mv_eth_nfp_ext_del(struct net_device *dev);
+MV_STATUS   mv_eth_nfp(struct eth_port *pp, int rxq, struct neta_rx_desc *rx_desc,
+					struct eth_pbuf *pkt, struct bm_pool *pool);
+#endif /* CONFIG_MV_ETH_NFP */
 
 #endif /* __mv_netdev_h__ */

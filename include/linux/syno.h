@@ -11,6 +11,17 @@
 #define SYNO_HAVE_KERNEL_VERSION(a,b,c) (LINUX_VERSION_CODE >= KERNEL_VERSION((a),(b),(c)) )
 #define SYNO_HAVE_GCC_VERSION(a,b) (__GNUC__ > (a) || (__GNUC__ == (a) && __GNUC_MINOR__ >= (b)))
 #define SYNO_HAVE_GLIBC_VERSION(a,b) ( __GLIBC__ > (a) || (__GLIBC__ == (a) && __GLIBC_MINOR__ >= (b)))
+#if 0
+#ifdef MY_DEF_HERE
+#define SYNO_EVANSPORT_TTYS1_PORT	0x2F8
+#define SYNO_EVANSPORT_SET8N1		0x3
+#define SYNO_EVANSPORT_SHUTDOWN_CMD	0x31
+#define SYNO_EVANSPORT_TXR		0
+#define SYNO_EVANSPORT_LCR		3
+#endif
+
+#endif
+
 #if 1
 #define SYNO_USB_FLASH_DEVICE_INDEX 255
 #define SYNO_USB_FLASH_DEVICE_NAME  "synoboot"
@@ -48,6 +59,8 @@
 #define CHECKINTERVAL (7UL*HZ)
 #endif
 
+#define SYNO_MD_CHUNK_SIZE 65536
+#define SYNO_FIX_MD_RESIZE_BUSY_LOOP 5
 #if	defined(MY_ABC_HERE) || defined(SYNO_BADSECTOR_TEST)
 #if 0
 #define SYNO_MAX_INTERNAL_DISK 19
@@ -67,6 +80,16 @@
 #define SYNO_PWRPIN_ENCODE_LEN 2
 #define SYNO_PORT_SIGN 'N'
 #define SYNO_PWRPIN_ITEM_LEN 1 + SYNO_PWRPIN_ENCODE_LEN*2
+#endif
+
+#endif
+
+#if 0
+#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+#define SYNO_CREATE_TIME_SWAP_VERSION 3719
+#endif
+
 #endif
 
 #endif
@@ -127,6 +150,12 @@
 #include <linux/syno_user.h>
 #include <linux/syno_debug.h>
 #define SYNO_NFSD_WRITE_SIZE_MIN 131072
+#ifdef MY_ABC_HERE
+#define SYNO_NFSD_UDP_MAX_PACKET_SIZE 32768
+#define SYNO_NFSD_UDP_MIN_PACKET_SIZE 4096
+#define SYNO_NFSD_UDP_DEF_PACKET_SIZE 8192
+#endif
+
 #ifdef MY_ABC_HERE
 #define SYNO_SATA_DEVICE_PREFIX	   "sd"
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"

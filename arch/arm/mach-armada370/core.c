@@ -191,6 +191,14 @@ void mv_early_printk(char *fmt,...)
 /*********************************************************************************/
 /**************               UBoot Tagging Parameters              **************/
 /*********************************************************************************/
+#ifdef CONFIG_BE8_ON_LE
+#define read_tag(a)	le32_to_cpu(a)
+#define read_mtu(a)	le16_to_cpu(a)
+#else
+#define read_tag(a)	a
+#define read_mtu(a)	a
+#endif
+
 extern MV_U32 gBoardId;
 extern unsigned int elf_hwcap;
 extern u32 mvIsUsbHost;
@@ -201,10 +209,10 @@ static int __init parse_tag_mv_uboot(const struct tag *tag)
 	int i = 0;
 
 	printk("Using UBoot passing parameters structure\n");
-	mvUbootVer = tag->u.mv_uboot.uboot_version;
-	mvIsUsbHost = tag->u.mv_uboot.isUsbHost;
+	mvUbootVer = read_tag(tag->u.mv_uboot.uboot_version);
+	mvIsUsbHost = read_tag(tag->u.mv_uboot.isUsbHost);
 	gBoardId =  (mvUbootVer & 0xff);
-	bit_mask_config = tag->u.mv_uboot.bit_mask_config;
+	bit_mask_config = read_tag(tag->u.mv_uboot.bit_mask_config);
 
 #ifdef CONFIG_MV_INCLUDE_GIG_ETH
 	for (i = 0; i < CONFIG_MV_ETH_PORTS_NUM; i++) {
@@ -215,14 +223,14 @@ static int __init parse_tag_mv_uboot(const struct tag *tag)
 printk(">>>>>>>Tag MAC %02x:%02x:%02x:%02x:%02x:%02x\n", tag->u.mv_uboot.macAddr[i][5], tag->u.mv_uboot.macAddr[i][4],
 	tag->u.mv_uboot.macAddr[i][3], tag->u.mv_uboot.macAddr[i][2], tag->u.mv_uboot.macAddr[i][1], tag->u.mv_uboot.macAddr[i][0]);
 		memcpy(mvMacAddr[i], tag->u.mv_uboot.macAddr[i], 6);
-		mvMtu[i] = tag->u.mv_uboot.mtu[i];
+		mvMtu[i] = read_mtu(tag->u.mv_uboot.mtu[i]);
 #endif
 	}
 #endif
 
 #ifdef CONFIG_MV_NAND
 	/* get NAND ECC type(1-bit or 4-bit) */
-	mv_nand_ecc = tag->u.mv_uboot.nand_ecc;
+	mv_nand_ecc = read_tag(tag->u.mv_uboot.nand_ecc);
 #endif
 	return 0;
 }

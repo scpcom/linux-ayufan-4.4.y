@@ -20,6 +20,11 @@
 
 #include "hfsplus_fs.h"
 #include "hfsplus_raw.h"
+#include "xattr.h"
+
+#ifdef MY_ABC_HERE
+extern struct mutex syno_hfsplus_global_mutex;
+#endif
 
 static int hfsplus_readpage(struct file *file, struct page *page)
 {
@@ -29,6 +34,16 @@ static int hfsplus_readpage(struct file *file, struct page *page)
 static int hfsplus_writepage(struct page *page, struct writeback_control *wbc)
 {
 	return block_write_full_page(page, hfsplus_get_block, wbc);
+}
+
+static void hfsplus_write_failed(struct address_space *mapping, loff_t to)
+{
+	struct inode *inode = mapping->host;
+
+	if (to > inode->i_size) {
+		truncate_pagecache(inode, to, inode->i_size);
+		hfsplus_file_truncate(inode);
+	}
 }
 
 static int hfsplus_write_begin(struct file *file, struct address_space *mapping,
@@ -41,11 +56,8 @@ static int hfsplus_write_begin(struct file *file, struct address_space *mapping,
 	ret = cont_write_begin(file, mapping, pos, len, flags, pagep, fsdata,
 				hfsplus_get_block,
 				&HFSPLUS_I(mapping->host)->phys_size);
-	if (unlikely(ret)) {
-		loff_t isize = mapping->host->i_size;
-		if (pos + len > isize)
-			vmtruncate(mapping->host, isize);
-	}
+	if (unlikely(ret))
+		hfsplus_write_failed(mapping, pos + len);
 
 	return ret;
 }
@@ -119,7 +131,12 @@ static ssize_t hfsplus_direct_IO(int rw, struct kiocb *iocb,
 		const struct iovec *iov, loff_t offset, unsigned long nr_segs)
 {
 	struct file *file = iocb->ki_filp;
+	struct address_space *mapping = file->f_mapping;
+#ifdef MY_ABC_HERE
 	struct inode *inode = file->f_path.dentry->d_inode->i_mapping->host;
+#else
+	struct inode *inode = file_inode(file)->i_mapping->host;
+#endif
 	ssize_t ret;
 
 	ret = blockdev_direct_IO(rw, iocb, inode, iov, offset, nr_segs,
@@ -134,7 +151,7 @@ static ssize_t hfsplus_direct_IO(int rw, struct kiocb *iocb,
 		loff_t end = offset + iov_length(iov, nr_segs);
 
 		if (end > isize)
-			vmtruncate(inode, isize);
+			hfsplus_write_failed(mapping, end);
 	}
 
 	return ret;
@@ -170,8 +187,13 @@ const struct dentry_operations hfsplus_dentry_operations = {
 	.d_compare    = hfsplus_compare_dentry,
 };
 
+#ifdef MY_ABC_HERE
 static struct dentry *hfsplus_file_lookup(struct inode *dir,
 		struct dentry *dentry, struct nameidata *nd)
+#else
+static struct dentry *hfsplus_file_lookup(struct inode *dir,
+		struct dentry *dentry, unsigned int flags)
+#endif
 {
 	struct hfs_find_data fd;
 	struct super_block *sb = dir->i_sb;
@@ -203,6 +225,7 @@ static struct dentry *hfsplus_file_lookup(struct inode *dir,
 	mutex_init(&hip->extents_lock);
 	hip->extent_state = 0;
 	hip->flags = 0;
+	hip->userflags = 0;
 	set_bit(HFSPLUS_I_RSRC, &hip->flags);
 
 	err = hfs_find_init(HFSPLUS_SB(sb)->cat_tree, &fd);
@@ -250,15 +273,25 @@ static void hfsplus_get_perms(struct inode *inode,
 #ifdef MY_ABC_HERE
 	if (!sbi->uid)
 #endif
+#ifdef MY_ABC_HERE
 	inode->i_uid = be32_to_cpu(perms->owner);
 	if (!inode->i_uid && !mode)
+#else
+	i_uid_write(inode, be32_to_cpu(perms->owner));
+	if (!i_uid_read(inode) && !mode)
+#endif
 		inode->i_uid = sbi->uid;
 
 #ifdef MY_ABC_HERE
 	if (!sbi->gid)
 #endif
+#ifdef MY_ABC_HERE
 	inode->i_gid = be32_to_cpu(perms->group);
 	if (!inode->i_gid && !mode)
+#else
+	i_gid_write(inode, be32_to_cpu(perms->group));
+	if (!i_gid_read(inode) && !mode)
+#endif
 		inode->i_gid = sbi->gid;
 
 	if (dir) {
@@ -324,11 +357,15 @@ static int hfsplus_setattr(struct dentry *dentry, struct iattr *attr)
 
 	if ((attr->ia_valid & ATTR_SIZE) &&
 	    attr->ia_size != i_size_read(inode)) {
+#ifdef MY_ABC_HERE
+		loff_t old_size = i_size_read(inode);
+#endif
 		inode_dio_wait(inode);
-
-		error = vmtruncate(inode, attr->ia_size);
-		if (error)
-			return error;
+		truncate_setsize(inode, attr->ia_size);
+#ifdef MY_ABC_HERE
+		if (0 != old_size)
+#endif
+		hfsplus_file_truncate(inode);
 	}
 
 	setattr_copy(inode, attr);
@@ -348,14 +385,10 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 	if (error)
 		return error;
 	mutex_lock(&inode->i_mutex);
-
 #ifdef MY_ABC_HERE
-	error = sync_mapping_buffers(inode->i_mapping);
-	if (!(inode->i_state & I_DIRTY))
-		goto out;
-	if (datasync && !(inode->i_state & I_DIRTY_DATASYNC))
-		goto out;
+	mutex_lock(&syno_hfsplus_global_mutex);
 #endif
+
 	/*
 	 * Sync inode metadata into the catalog and extent trees.
 	 */
@@ -367,19 +400,23 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 	if (test_and_clear_bit(HFSPLUS_I_CAT_DIRTY, &hip->flags))
 		error = filemap_write_and_wait(sbi->cat_tree->inode->i_mapping);
 
-#ifdef MY_ABC_HERE
-	if (test_and_clear_bit(HFSPLUS_I_ATTR_DIRTY, &hip->flags)) {
-		error2 = filemap_write_and_wait(sbi->attr_tree->inode->i_mapping);
+	if (test_and_clear_bit(HFSPLUS_I_EXT_DIRTY, &hip->flags)) {
+		error2 =
+			filemap_write_and_wait(sbi->ext_tree->inode->i_mapping);
 		if (!error)
 			error = error2;
 	}
-#endif
 
-	if (test_and_clear_bit(HFSPLUS_I_EXT_DIRTY, &hip->flags)) {
+	if (test_and_clear_bit(HFSPLUS_I_ATTR_DIRTY, &hip->flags)) {
+		if (sbi->attr_tree) {
 			error2 =
-			filemap_write_and_wait(sbi->ext_tree->inode->i_mapping);
+				filemap_write_and_wait(
+					    sbi->attr_tree->inode->i_mapping);
 			if (!error)
 				error = error2;
+		} else {
+			pr_err("sync non-existent attributes tree\n");
+		}
 	}
 
 	if (test_and_clear_bit(HFSPLUS_I_ALLOC_DIRTY, &hip->flags)) {
@@ -392,7 +429,7 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 		blkdev_issue_flush(inode->i_sb->s_bdev, GFP_KERNEL, NULL);
 
 #ifdef MY_ABC_HERE
-out:
+	mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
 	mutex_unlock(&inode->i_mutex);
 
@@ -401,14 +438,11 @@ out:
 
 static const struct inode_operations hfsplus_file_inode_operations = {
 	.lookup		= hfsplus_file_lookup,
-	.truncate	= hfsplus_file_truncate,
 	.setattr	= hfsplus_setattr,
-	.setxattr	= hfsplus_setxattr,
-	.getxattr	= hfsplus_getxattr,
+	.setxattr	= generic_setxattr,
+	.getxattr	= generic_getxattr,
 	.listxattr	= hfsplus_listxattr,
-#ifdef MY_ABC_HERE
-	.removexattr= hfsplus_rmxattr,
-#endif
+	.removexattr	= hfsplus_removexattr,
 };
 
 static const struct file_operations hfsplus_file_operations = {
@@ -425,7 +459,7 @@ static const struct file_operations hfsplus_file_operations = {
 	.unlocked_ioctl = hfsplus_ioctl,
 };
 
-struct inode *hfsplus_new_inode(struct super_block *sb, int mode)
+struct inode *hfsplus_new_inode(struct super_block *sb, umode_t mode)
 {
 	struct hfsplus_sb_info *sbi = HFSPLUS_SB(sb);
 	struct inode *inode = new_inode(sb);
@@ -447,6 +481,7 @@ struct inode *hfsplus_new_inode(struct super_block *sb, int mode)
 	atomic_set(&hip->opencnt, 0);
 	hip->extent_state = 0;
 	hip->flags = 0;
+	hip->userflags = 0;
 	memset(hip->first_extents, 0, sizeof(hfsplus_extent_rec));
 	memset(hip->cached_extents, 0, sizeof(hfsplus_extent_rec));
 	hip->alloc_blocks = 0;
@@ -476,7 +511,7 @@ struct inode *hfsplus_new_inode(struct super_block *sb, int mode)
 		sbi->file_count++;
 	insert_inode_hash(inode);
 	mark_inode_dirty(inode);
-	sb->s_dirt = 1;
+	hfsplus_mark_mdb_dirty(sb);
 
 	return inode;
 }
@@ -487,7 +522,7 @@ void hfsplus_delete_inode(struct inode *inode)
 
 	if (S_ISDIR(inode->i_mode)) {
 		HFSPLUS_SB(sb)->folder_count--;
-		sb->s_dirt = 1;
+		hfsplus_mark_mdb_dirty(sb);
 		return;
 	}
 	HFSPLUS_SB(sb)->file_count--;
@@ -500,7 +535,7 @@ void hfsplus_delete_inode(struct inode *inode)
 		inode->i_size = 0;
 		hfsplus_file_truncate(inode);
 	}
-	sb->s_dirt = 1;
+	hfsplus_mark_mdb_dirty(sb);
 }
 
 void hfsplus_inode_read_fork(struct inode *inode, struct hfsplus_fork_raw *fork)
@@ -599,7 +634,7 @@ int hfsplus_cat_read_inode(struct inode *inode, struct hfs_find_data *fd)
 		inode->i_ctime = hfsp_mt2ut(file->attribute_mod_date);
 		HFSPLUS_I(inode)->create_date = file->create_date;
 	} else {
-		printk(KERN_ERR "hfs: bad catalog entry used to create inode\n");
+		pr_err("bad catalog entry used to create inode\n");
 		res = -EIO;
 	}
 	return res;

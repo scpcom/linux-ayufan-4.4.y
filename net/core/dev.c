@@ -151,10 +151,15 @@ extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
+#ifdef MY_ABC_HERE
+void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
+EXPORT_SYMBOL(funcSynoNicLedCtrl);
+#endif
+
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP) || defined(CONFIG_MV_ETH_NFP_MODULE)
+#if defined(CONFIG_MV_ETH_NFP)
 #include <linux/mv_nfp.h>
-#endif /* CONFIG_MV_ETH_NFP || CONFIG_MV_ETH_NFP_MODULE */
+#endif /* CONFIG_MV_ETH_NFP */
 #endif
 
 /* Instead of increasing this, you should create a hash table. */
@@ -3303,15 +3308,14 @@ EXPORT_SYMBOL_GPL(netdev_rx_handler_unregister);
 #ifdef CONFIG_MV_ETH_NFP_EXT
 static struct sk_buff *handle_nfp_extrcv(struct sk_buff *skb, struct net_device *dev)
 {
-	if (nfp_core_p->nfp_rx_ext) {
-
 		MV_EXT_PKT_INFO *pktInfo;
 
 		pktInfo = (MV_EXT_PKT_INFO *)&skb->cb;
 		if (pktInfo->flags == 0)
 			pktInfo = NULL;
 
-		if (!nfp_core_p->nfp_rx_ext(skb->dev, skb, pktInfo))
+	if (!mv_eth_nfp_ext(skb->dev, skb, pktInfo)) {
+		/* packet processed by NFP */
 			return NULL;
 	}
 	return skb;
@@ -5701,15 +5705,6 @@ int register_netdevice(struct net_device *dev)
 	if (ret < 0)
 		goto out;
 #if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
-	if ( 0 == strncmp(gszSynoHWVersion, HW_DS508, strlen(HW_DS508)) ||
-		 0 == strncmp(gszSynoHWVersion, HW_DS1010p, strlen(HW_DS1010p)) ||
-		 0 == strncmp(gszSynoHWVersion, HW_DS1511p, strlen(HW_DS1511p))) {
-		static int swapped = 0;
-		if ( swapped == 0 && !strcmp(dev->name, "eth0") ) {
-			snprintf(dev->name, sizeof(dev->name), "eth1");
-			swapped = 1;
-		}
-	}
 	if (gSwitchDev > 0 && netdevCnt < gSwitchDev && !strncmp("eth", dev->name, 3)) {
 		snprintf(dev->name, sizeof(dev->name), "eth%c", gDevPCIName[netdevCnt++][0]);
 	}
@@ -6517,6 +6512,7 @@ static struct hlist_head *netdev_create_hash(void)
 /* Initialize per network namespace state */
 static int __net_init netdev_init(struct net *net)
 {
+	if (net != &init_net)
 		INIT_LIST_HEAD(&net->dev_base_head);
 
 	net->dev_name_head = netdev_create_hash();
@@ -6776,10 +6772,13 @@ static int __init net_dev_init(void)
 	rc = 0;
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP) || defined(CONFIG_MV_ETH_NFP_MODULE)
+#if defined(CONFIG_MV_ETH_NFP)
 	nfp_core_ops_init();
+#endif /* CONFIG_MV_ETH_NFP */
+
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	nfp_hook_ops_init();
-#endif /* CONFIG_MV_ETH_NFP || CONFIG_MV_ETH_NFP_MODULE */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 out:

@@ -113,6 +113,43 @@ static MV_VOID mvCtrlTdmClkCtrlSet(MV_VOID);
 #define DB(x)
 #endif
 
+/*******************************************************************************
+* mvCtrlGetCpuNum - Get number of Processors
+*
+* DESCRIPTION:
+*       This function returns the number of Processors
+* INPUT:
+*       None.
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:
+*	returns always 0 for KW-40
+*******************************************************************************/
+MV_U32 mvCtrlGetCpuNum(MV_VOID)
+{
+	return 0;
+}
+
+/*******************************************************************************
+* mvCtrlIsValidSatR - Verify if the SatR is Valid
+*
+* DESCRIPTION:
+*       This function determines if the SatR is Valid or customized
+* INPUT:
+*       None.
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:
+*	returns MV_TRUE for a valid SatR, or MV_FALSE for a customized SatR
+*******************************************************************************/
+MV_BOOL mvCtrlIsValidSatR(MV_VOID)
+{
+	return MV_TRUE;
+}
 
 /*******************************************************************************
 * mvCtrlEnvInit - Initialize Marvell controller environment.
@@ -153,9 +190,6 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
 		MV_REG_WRITE(mvCtrlMppRegGet(mppGroup), mppVal);
 	}
 
-	/* Scan for Serdes modules */
-	mvBoardSerdesModulesScan();
-
 	/* MPP Init - scan attached modules. */
 	mvBoardMppModulesScan();
 
@@ -175,7 +209,7 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
 	if (MV_OK != mvCtrlSerdesPhyConfig())
 		mvOsPrintf("mvCtrlEnvInit: Can't init some or all SERDES lanes\n");
 
-	mvOsDelay(100);
+	mvOsDelay(10);
 
 #if defined(MV_INCLUDE_TDM)
 	mvCtrlTdmClkCtrlSet();
@@ -240,6 +274,8 @@ MV_U32 mvCtrlPexMaxIfGet(MV_VOID)
 	case SYNO_US3_ID:
 		return 1;
 	case SYNO_RS214_ID:
+		return 2;
+	case SYNO_DS214se_ID:
 		return 1;
 	default:
 		return MV_PEX_MAX_IF;
@@ -500,9 +536,11 @@ MV_U32 mvCtrlTdmSupport(MV_VOID)
 	devId = mvCtrlModelGet();
 
 	switch (devId) {
+	case MV_6W11_DEV_ID:
 	case MV_6710_DEV_ID:
 		res = ARMADA_370_TDM;
 		break;
+	case MV_6707_DEV_ID:
 	default:
 		res = 0;
 		break;
@@ -680,55 +718,6 @@ MV_U16 mvCtrlModelGet(MV_VOID)
 }
 
 /*******************************************************************************
-* mvCtrlModelGet - Set Marvell controller device model (Id)
-*
-* DESCRIPTION:
-*       This function returns 16bit describing the device model (ID) as defined
-*       in PCI Device and Vendor ID configuration register offset 0x0.
-*
-* INPUT:
-*       None.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       16bit desscribing Marvell controller ID
-*
-*******************************************************************************/
-MV_VOID mvCtrlModelSet(MV_VOID)
-{
-	MV_U32 devId;
-	MV_U32 reg, reg2;
-
-	/* if PEX0 clocks are disabled - enabled it to read */
-	reg = MV_REG_READ(POWER_MNG_CTRL_REG);
-	if ((reg & PMC_PEXSTOPCLOCK_MASK(0)) == PMC_PEXSTOPCLOCK_STOP(0)) {
-		reg2 = ((reg & ~PMC_PEXSTOPCLOCK_MASK(0)) | PMC_PEXSTOPCLOCK_EN(0));
-		MV_REG_WRITE(POWER_MNG_CTRL_REG, reg2);
-	}
-
-	devId = MV_REG_READ(PEX_CFG_DIRECT_ACCESS(0, PEX_DEVICE_AND_VENDOR_ID));
-	devId &= 0xFFFF;
-
-#if defined(MV88F6710)
-	devId |= (MV_6710_DEV_ID << 16);
-#elif defined(MV88F6707)
-	devId |= (MV_6707_DEV_ID << 16);
-#elif defined(MV88F6W11)
-	devId |= (MV_6W11_DEV_ID << 16); 
-#endif
-
-	MV_REG_WRITE(PEX_CFG_DIRECT_ACCESS(0, PEX_DEVICE_AND_VENDOR_ID), devId);
-
-	/* Reset the original value of the PEX0 clock */
-	if ((reg & PMC_PEXSTOPCLOCK_MASK(0)) == PMC_PEXSTOPCLOCK_STOP(0))
-		MV_REG_WRITE(POWER_MNG_CTRL_REG, reg);
-
-	return;
-}
-
-/*******************************************************************************
 * mvCtrlRevGet - Get Marvell controller device revision number
 *
 * DESCRIPTION:
@@ -866,6 +855,41 @@ MV_STATUS mvCtrlModelRevNameGet(char *pNameBuff)
 	}
 
 	return MV_OK;
+}
+MV_U32 gDevId = -1;
+/*******************************************************************************
+* mvCtrlDevFamilyIdGet - Get Device ID
+*
+* DESCRIPTION:
+*       This function returns Device ID.
+*
+* INPUT:
+*       ctrlModel.
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:
+*       32bit board Device ID number, '-1' if Device ID is undefined.
+*
+*******************************************************************************/
+MV_U32 mvCtrlDevFamilyIdGet(MV_U16 ctrlModel)
+{
+	if (gDevId == -1)
+	{
+		switch (ctrlModel) {
+		case MV_6710_DEV_ID:
+		case MV_6W11_DEV_ID:
+		case MV_6707_DEV_ID:
+			gDevId=MV_67XX;
+			return gDevId;
+			break;
+		default:
+			return MV_ERROR;
+		}
+	}
+	else
+		return gDevId;
 }
 
 static const char *cntrlName[] = TARGETS_NAME_ARRAY;
@@ -1792,307 +1816,24 @@ static const MV_U8 serdesCfg[][5] = SERDES_CFG;
 *       Status
 *
 *******************************************************************************/
+/* #define DB(x) x */
 MV_STATUS mvCtrlSerdesPhyConfig(MV_VOID)
 {
-	MV_U32		serdesLineCfg;
-	MV_U8		serdesLineNum;
-	MV_U32		regAddr[MV_SERDES_MAX_LANES][10], regVal[MV_SERDES_MAX_LANES][10];
-	/* addr/value for each line @ every setup step */
-	MV_U8		pexUnit, pexLineNum;
-	MV_U8		step;
-	MV_U8		maxSerdesLines = mvCtrlSerdesMaxLinesGet();
-	MV_SERDES_CFG	*pSerdesUserInfo = mvBoardSerdesCfgGet();
-	MV_SERDES_REG_CFG	serdesInfo;
+	MV_U32		socCtrlReg;
+	MV_U8		pexUnit;
+	MV_U32 		pexIfNum = mvCtrlPexMaxIfGet();
 	MV_BOARD_PEX_INFO 	*boardPexInfo = mvBoardPexInfoGet();
-	MV_STATUS	status = MV_OK;
-	MV_U32		tmp;
-	MV_U16		val;
 
-	if (pSerdesUserInfo == NULL) {
-		DB(mvOsPrintf("%s: Error reading SERDES configuration!\n", __func__));
-		return MV_ERROR;
-	}
-
-	mvBoardSerdesUserToRegConv(pSerdesUserInfo, &serdesInfo);
-
-	memset(regAddr, 0, sizeof(regAddr));
-	memset(regVal,  0, sizeof(regVal));
 	memset(boardPexInfo, 0, sizeof(MV_BOARD_PEX_INFO));
 
-	/* Prepare PHY parameters for each step according to MUX selection */
-	for (serdesLineNum = 0; serdesLineNum < maxSerdesLines; serdesLineNum++) {
-		/* for each serdes lane*/
-		MV_U32	*pRegVal = regVal[serdesLineNum];
-		MV_U32	*pRegAddr = regAddr[serdesLineNum];
-		MV_U8	sgmiiPort = 0;
+	socCtrlReg = MV_REG_READ(SOC_CTRL_REG);
 
-		serdesLineCfg = (serdesInfo.serdesMode >> (serdesLineNum << 2)) & 0xF;
-
-		/* PEX */
-		if (serdesLineCfg == serdesCfg[serdesLineNum][SERDES_UNIT_PEX]) {
-			pexUnit    = serdesLineNum;
-			pexLineNum = serdesLineNum;
-
-			boardPexInfo->pexUnitCfg[pexUnit] = PEX_BUS_MODE_X1;
-			boardPexInfo->boardPexIfNum++;
-
-			/* regVal bits:
-			bit[31] - 0:write, 1:read
-			bit[23:16] - PHY REG offset
-			bit[29:24] - PEX line
-			bit[15:0] - value to be set in PHY REG
-			*/
-			pRegAddr[0] = PEX_PHY_ACCESS_REG(pexUnit);
-			pRegAddr[1] = 0; /*PEX_PHY_ACCESS_REG(pexUnit); */
-			pRegAddr[2] = PEX_PHY_ACCESS_REG(pexUnit);
-			pRegAddr[3] = 0;
-			pRegAddr[4] = 0;
-			pRegAddr[5] = 0;
-			pRegAddr[6] = 0;
-			pRegAddr[7] = 0;
-			pRegAddr[8] = 0;
-			pRegAddr[9] = 0;
-
-			/* PHY_MODE [7:5] - 3 (PCIe)
-			   REF_FREF_SEL [4:0] - 0 (100MHz) */
-			pRegVal[0]  = (0x01 << 16) | (pexLineNum << 24) | 0xFC60;
-#if 0
-			/* SEL_BITS [11:10]
-				For 2.5G: 0 (10bit)
-				For 5G:   1 (20bit) */
-			pRegVal[1]  = (pSerdesInfo.busSpeed & (1 << serdesLineNum)) != 0 ? 0x0400 : 0x0;
-			pRegVal[1] |= (0x23 << 16) | (pexLineNum << 24);
-#endif
-			/* SEL_BITS [11:10] - NA */
-			pRegVal[1] = 0;
-
-			/* REFCLK_SEL [10] - 0 */
-			pRegVal[2]  = (0x46 << 16) | (pexLineNum << 24);
-
-			/* PIN_PHY_GEN [12:5] - NA */
-			pRegVal[3]  = 0;
-			pRegVal[4]  = 0;
-
-		/* SATA */
-		} else if (serdesLineCfg == serdesCfg[serdesLineNum][SERDES_UNIT_SATA]) {
-
-			MV_U8	sataPort;
-
-			if ((serdesLineNum == 0) || (serdesLineNum == 2))
-				sataPort = 0;
-			else if (serdesLineNum == 3)
-				sataPort = 1;
+	for (pexUnit = 0; pexUnit < pexIfNum; pexUnit++) {
+		if ((socCtrlReg & (1<< pexUnit)) == 0)
+			boardPexInfo->pexUnitCfg[pexUnit] = PEX_BUS_DISABLED;
 			else
-				goto err_cfg;
-
-			pRegAddr[0] = SATA_PWR_PLL_CTRL_REG(sataPort);
-			pRegAddr[1] = SATA_DIG_LP_ENA_REG(sataPort);
-			pRegAddr[2] = SATA_REF_CLK_SEL_REG(sataPort);
-			pRegAddr[3] = SATA_LP_PHY_EXT_CTRL_REG(sataPort);
-			pRegAddr[4] = SATA_LP_PHY_EXT_STAT_REG(sataPort);
-			pRegAddr[5] = SATA_IMP_TX_SSC_CTRL_REG(sataPort);
-			pRegAddr[6] = SATA_GEN_1_SET_0_REG(sataPort);
-			pRegAddr[7] = SATA_GEN_1_SET_1_REG(sataPort);
-			pRegAddr[8] = SATA_GEN_2_SET_0_REG(sataPort);
-			pRegAddr[9] = SATA_GEN_2_SET_1_REG(sataPort);
-			pRegVal[0]  = 0xF801;
-			pRegVal[1]  = 0x400;
-			pRegVal[2]  = 0x400;
-			/* Force to GEn 1 is disabled. if needed, set this value to 0x7 and set
-			"force gen 1" at the SATA HAL Driver
-			pRegVal[3]  = (serdesInfo.serdesSpeed & (1 << serdesLineNum)) != 0 ? 0x227 : 0x7; */
-			pRegVal[3]  = 0x227;
-			pRegVal[4]  = 0x7;
-			pRegVal[5]  = 0x6F14;
-			pRegVal[6]  = 0xC928;
-			pRegVal[7]  = 0x30F0;
-			pRegVal[8]  = 0xAA31;
-			pRegVal[9]  = 0x30F5;
-
-		/* SGMII */
-		} else {
-			if (serdesLineCfg == serdesCfg[serdesLineNum][SERDES_UNIT_SGMII]) {
-				if ((serdesLineNum == 0) || (serdesLineNum == 3))
-					sgmiiPort = 1;
-				else if ((serdesLineNum == 1) || (serdesLineNum == 2))
-					sgmiiPort = 0;
-			} else  /*  (serdesLineCfg == serdesCfg[serdesLineNum][SERDES_UNIT_UNCONNECTED]) */
-				continue;
-
-			pRegAddr[0] = SGMII_PWR_PLL_CTRL_REG(sgmiiPort);
-			pRegAddr[1] = SGMII_DIG_LP_ENA_REG(sgmiiPort);
-			pRegAddr[2] = SGMII_REF_CLK_SEL_REG(sgmiiPort);
-			pRegAddr[3] = SGMII_SERDES_CFG_REG(sgmiiPort);
-			pRegAddr[4] = SGMII_SERDES_STAT_REG(sgmiiPort);
-			pRegAddr[5] = 0;
-			pRegAddr[6] = 0;
-			pRegAddr[7] = 0;
-			pRegAddr[8] = 0;
-			pRegAddr[9] = 0;
-			pRegVal[0]  = 0xF881;
-			pRegVal[1]  = 0;
-			pRegVal[2]  = 0x400;
-			pRegVal[3]  = (serdesInfo.serdesSpeed & (1 << serdesLineNum)) != 0 ? 0x1547 : 0xCC7;
-			pRegVal[4]  = 0x7;
+			boardPexInfo->pexUnitCfg[pexUnit] = PEX_BUS_MODE_X1;
 		}
-	} /* for each serdes lane*/
-
-	/* Step 0 - configure SERDES MUXes */
-	MV_REG_WRITE(SERDES_LINE_MUX_REG_0_3,  serdesInfo.serdesMode);
-	DB(mvOsPrintf("\nStep[0] Addr[0x%08x] Value[0x%08x]\n", SERDES_LINE_MUX_REG_0_3, serdesInfo.serdesMode));
-
-	/* Step 1 [PEX-Only] PEX-Main configuration: */
-	/* First disable all PEXs in SoC Control Reg */
-	MV_REG_WRITE(SOC_CTRL_REG, 0x0);
-
-	/* Set terminations (see Stage 8 ComPhy Init V13) */
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_SATA0_LANE0)
-		MV_REG_BIT_RESET(SATA_PHY_CONTROL_REGISTER(0), BIT2);
-
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_SATA0_LANE2)
-		MV_REG_BIT_RESET(SATA_PHY_CONTROL_REGISTER(0), BIT2);
-
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_SATA1_LANE3)
-		MV_REG_BIT_RESET(SATA_PHY_CONTROL_REGISTER(1), BIT2);
-
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_SGMII0_LANE1)
-		MV_REG_BIT_RESET(SGMII_PHY_CTRL_REG(0), BIT2);
-
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_SGMII1_LANE0)
-		MV_REG_BIT_RESET(SGMII_PHY_CTRL_REG(1), BIT2);
-
-#if 0
-	for (pexUnit = 0; pexUnit < mvCtrlPexMaxUnitGet(); pexUnit++) {
-		if (boardPexInfo->pexUnitCfg[pexUnit] == PEX_BUS_DISABLED)
-			continue;
-
-		tmp = MV_REG_READ(SOC_CTRL_REG);
-		tmp |= (1 << pexUnit);
-
-		DB(mvOsPrintf("Step[1].1 Addr[0x%08x] pexUnit [%d] value [0x%x]\n", SOC_CTRL_REG, pexUnit, tmp));
-		MV_REG_WRITE(SOC_CTRL_REG, tmp);
-		}
-#endif
-	for (serdesLineNum = 0; serdesLineNum < maxSerdesLines; serdesLineNum++) {
-		serdesLineCfg = (serdesInfo.serdesMode >> (serdesLineNum << 2)) & 0xF;
-		if (serdesLineCfg == serdesCfg[serdesLineNum][SERDES_UNIT_PEX]) {
-			tmp = MV_REG_READ(PEX_LINK_CAPABILITIES_REG(MV_SERDES_NUM_TO_PEX_NUM(serdesLineNum)));
-			tmp &= ~(0x3F0);
-			tmp |= (0x1 << 4);
-			MV_REG_WRITE(PEX_LINK_CAPABILITIES_REG(MV_SERDES_NUM_TO_PEX_NUM(serdesLineNum)), tmp);
-			DB(mvOsPrintf("Step[1].2 Addr[0x%08x] serdesLine [%d] value [0x%x]\n",
-			   PEX_LINK_CAPABILITIES_REG(MV_SERDES_NUM_TO_PEX_NUM(serdesLineNum)), serdesLineNum, tmp));
-
-		}
-	}
-	DB(mvOsPrintf("\n"));
-
-	/* STEP 2 [PEX-Only] First phase of PEX-PIPE Configuration:*/
-	for (pexUnit = 0; pexUnit < mvCtrlPexMaxUnitGet(); pexUnit++) {
-		if (boardPexInfo->pexUnitCfg[pexUnit] == PEX_BUS_DISABLED)
-			continue;
-		DB(mvOsPrintf("Step[2].1 Addr[0x%08x] Value[0x%08x]\n", PEX_PHY_ACCESS_REG(pexUnit), (0xC1 << 16) | 0x25));
-		DB(mvOsPrintf("Step[2].2 Addr[0x%08x] Value[0x%08x]\n", PEX_PHY_ACCESS_REG(pexUnit), (0xC3 << 16) | 0x0F));
-		DB(mvOsPrintf("Step[2].3 Addr[0x%08x] Value[0x%08x]\n", PEX_PHY_ACCESS_REG(pexUnit), (0xC8 << 16) | 0x05));
-		DB(mvOsPrintf("Step[2].4 Addr[0x%08x] Value[0x%08x]\n", PEX_PHY_ACCESS_REG(pexUnit), (0xD0 << 16) | 0x100));
-		DB(mvOsPrintf("Step[2].5 Addr[0x%08x] Value[0x%08x]\n", PEX_PHY_ACCESS_REG(pexUnit), (0xD1 << 16) | 0x3014));
-		DB(mvOsPrintf("Step[2].6 Addr[0x%08x] Value[0x%08x]\n", PEX_PHY_ACCESS_REG(pexUnit), (0xC5 << 16) | 0x11F));
-		DB(mvOsPrintf("Step[2].7 Addr[0x%08x] Value[0x%08x]\n", PEX_PHY_ACCESS_REG(pexUnit), (0x80 << 16) | 0x1000));
-		DB(mvOsPrintf("Step[2].8 Addr[0x%08x] Value[0x%08x]\n\n", PEX_PHY_ACCESS_REG(pexUnit), (0x81 << 16) | 0x11));
-
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexUnit), (0xC1 << 16) | 0x25);
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexUnit), (0xC3 << 16) | 0x0F);
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexUnit), (0xC8 << 16) | 0x05);
-		/* MV_REG_WRITE(PEX_PHY_ACCESS_REG(0), (0xC2 << 16) | 0x200); *//* BC was disabled per HW team request */
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexUnit), (0xD0 << 16) | 0x100);
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexUnit), (0xD1 << 16) | 0x3014);
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexUnit), (0xC5 << 16) | 0x11F);
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexUnit), (0x80 << 16) | 0x1000);
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexUnit), (0x81 << 16) | 0x11);
-	}
-
-	/* Steps 3, 4, 5, 6 - use prepared REG addresses and values */
-	for (step = 0; step < 4; step++) {
-		for (serdesLineNum = 0; serdesLineNum < maxSerdesLines; serdesLineNum++) {
-			if (regAddr[serdesLineNum][step] != 0) {
-				DB(mvOsPrintf("Step[%d] Lane[%d] Addr[0x%08x] Value[0x%08x]\n",
-					   step + 3, serdesLineNum, regAddr[serdesLineNum][step], regVal[serdesLineNum][step]));
-				MV_REG_WRITE(regAddr[serdesLineNum][step], regVal[serdesLineNum][step]);
-			}
-		}
-		DB(mvOsPrintf("\n"));
-	}
-
-	/* set Pex terminations on Lanes 0 & 1 if needed (see Stage 8 ComPhy Init V13) */
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_PCIE0_LANE0) {
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(0), (BIT31 | ((0x48 & 0x3fff) << 16)));
-		val = (MV_REG_READ(PEX_PHY_ACCESS_REG(0)) & ~0x4);
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(0), (((0x48 & 0x3fff) << 16) | val));
-	}
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_PCIE1_LANE1) {
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(1), (BIT31 | ((0x148 & 0x3fff) << 16)));
-		val = (MV_REG_READ(PEX_PHY_ACCESS_REG(1)) & ~0x4);
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(1), (((0x148 & 0x3fff) << 16) | val));
-	}
-	
-	/* BTS 232 - PCIE Clock */
-	MV_REG_WRITE(CPU_PEX_IO_CONF_5_REG, 0x77);
-
-	/*Step 7 [PEX-Only] Last phase of PEX-PIPE Configuration */
-	for (pexUnit = 0; pexUnit < mvCtrlPexMaxUnitGet(); pexUnit++) {
-		if (boardPexInfo->pexUnitCfg[pexUnit] == PEX_BUS_DISABLED)
-			continue;
-		DB(mvOsPrintf("Step[7].1 Addr[0x%08x] Value[0x%08x]\n", PEX_PHY_ACCESS_REG(pexUnit), (0x2 << 16) | 0x40));
-		DB(mvOsPrintf("Step[7].2 Addr[0x%08x] Value[0x%08x]\n\n", PEX_PHY_ACCESS_REG(pexUnit), (0xC1 << 16) | 0x24));
-
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexUnit), (0x2 << 16) | 0x40);
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexUnit), (0xC1 << 16) | 0x24);
-	}
-
-	/*Step 8 [SATA-Only] - Init additional SATA registers */
-	for (step = 0; step < 5; step++) {
-		for (serdesLineNum = 0; serdesLineNum < maxSerdesLines; serdesLineNum++) {
-			if (regAddr[serdesLineNum][step+5] != 0) { /* SATA */
-				DB(mvOsPrintf("Step[8].%d Lane[%d] Addr[0x%08x] Value[0x%08x]\n",
-				   step, serdesLineNum, regAddr[serdesLineNum][step+5], regVal[serdesLineNum][step+5]));
-				MV_REG_WRITE(regAddr[serdesLineNum][step+5], regVal[serdesLineNum][step+5]);
-			}
-		}
-	}
-	DB(mvOsPrintf("\n"));
-
-	/* Wait 5ms before checking results */
-	mvOsDelay(15);
-
-	/* Step 9 - check that PLL RX/TX is ready and RX init done */
-	for (serdesLineNum = 0; serdesLineNum < maxSerdesLines; serdesLineNum++) {
-		MV_U32	tmp;
-		if (regAddr[serdesLineNum][4] != 0) { /* SATA, SGMII */
-			tmp = MV_REG_READ(regAddr[serdesLineNum][4]);
-			if ((tmp & 0x7) != regVal[serdesLineNum][4]) { /* check bits[2:0] */
-				DB(mvOsPrintf("%s: PHY on SERDES lane %d is not ready!\n",
-				   __func__, serdesLineNum));
-				status = MV_ERROR;
-			}
-#if 1
-		} else if (regAddr[serdesLineNum][0] != 0) { /* PEX that is enabled and passed step1 */
-			/* First step writes into Power and PLL control register.
-			   It's possible to read it back now for checking the PLL lock status */
-			MV_REG_WRITE(regAddr[serdesLineNum][0], (regVal[serdesLineNum][0] | BIT31) & 0xFFFF0000);
-			tmp = MV_REG_READ(regAddr[serdesLineNum][0]);
-			if ((tmp & BIT8) == 0) {
-				DB(mvOsPrintf("%s: PEX PHY PLL on SERDES lane %d is not locked!\n",
-					   __func__, serdesLineNum));
-				status = MV_ERROR;
-			}
-#endif
-		}
-	}
-
-	return status;
-
-err_cfg:
-	DB(mvOsPrintf("%s: Wrong CFG (%#x) for SERDES line %d.\n",
-		__func__, serdesLineCfg, serdesLineNum));
-	return MV_ERROR;
+	boardPexInfo->boardPexIfNum = pexIfNum;
+	return MV_OK;
 }

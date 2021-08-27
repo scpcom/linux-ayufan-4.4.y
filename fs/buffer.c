@@ -1027,7 +1027,12 @@ grow_dev_page(struct block_device *bdev, sector_t block,
 		bh = page_buffers(page);
 		if (bh->b_size == size) {
 			end_block = init_page_buffers(page, bdev,
+#ifdef CONFIG_SYNO_ARMADA
+				(sector_t)((sector_t)index <<
+					(sector_t)sizebits), size);
+#else
 						index << sizebits, size);
+#endif
 			goto done;
 		}
 		if (!try_to_free_buffers(page))
@@ -1048,7 +1053,13 @@ grow_dev_page(struct block_device *bdev, sector_t block,
 	 */
 	spin_lock(&inode->i_mapping->private_lock);
 	link_dev_buffers(page, bh);
+#ifdef CONFIG_SYNO_ARMADA
+	end_block = init_page_buffers(page, bdev,
+			(sector_t)((sector_t)index << (sector_t)sizebits),
+			size);
+#else
 	end_block = init_page_buffers(page, bdev, index << sizebits, size);
+#endif
 	spin_unlock(&inode->i_mapping->private_lock);
 done:
 	ret = (block < end_block) ? 1 : -ENXIO;

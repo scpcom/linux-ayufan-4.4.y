@@ -539,6 +539,7 @@ static void dma_cache_maint_page(struct page *page, unsigned long offset,
 			vaddr = page_address(page) + offset;
 			op(vaddr, len, dir);
 		}
+
 		offset = 0;
 		pfn++;
 		left -= len;

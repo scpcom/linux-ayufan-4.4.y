@@ -81,11 +81,7 @@ static unsigned long ai_half;
 static unsigned long ai_word;
 static unsigned long ai_dword;
 static unsigned long ai_multi;
-#ifdef CONFIG_ARCH_FEROCEON
-static int ai_usermode = 2;
-#else
 static int ai_usermode;
-#endif
 
 core_param(alignment, ai_usermode, int, 0600);
 

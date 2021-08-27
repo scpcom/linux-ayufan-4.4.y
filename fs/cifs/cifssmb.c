@@ -1370,7 +1370,11 @@ openRetry:
 	/* XP does not handle ATTR_POSIX_SEMANTICS */
 	/* but it helps speed up case sensitive checks for other
 	servers such as Samba */
-	if (tcon->ses->capabilities & CAP_UNIX)
+	if ((tcon->ses->capabilities & CAP_UNIX)
+#ifdef MY_ABC_HERE
+		&& SynoPosixSemanticsEnabled
+#endif
+	)
 		pSMB->FileAttributes |= cpu_to_le32(ATTR_POSIX_SEMANTICS);
 
 	if (create_options & CREATE_OPTION_READONLY)

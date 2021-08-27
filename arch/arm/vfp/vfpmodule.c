@@ -567,6 +567,7 @@ static int vfp_hotplug(struct notifier_block *b, unsigned long action,
 }
 
 #if defined(CONFIG_SYNO_ARMADA_ARCH)
+#ifdef CONFIG_CPU_PM
 void vfp_save(void)
 {
         struct pm_message temp;
@@ -576,6 +577,7 @@ void vfp_save(void)
         if (VFP_arch)
                 vfp_pm_suspend();
 }
+#endif
 
 void vfp_restore(void)
 {

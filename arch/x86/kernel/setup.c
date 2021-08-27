@@ -181,6 +181,14 @@ extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
+#ifdef MY_ABC_HERE
+extern int gSynoFactoryUSBFastReset;
+#endif
+
+#ifdef MY_ABC_HERE
+extern int gSynoFactoryUSB3Disable;
+#endif
+
 /*
  * end_pfn only includes RAM, while max_pfn_mapped includes all e820 entries.
  * The direct mapping extends to max_pfn_mapped, so that we can directly access
@@ -525,6 +533,11 @@ static void __init parse_setup_data(void)
 		case SETUP_DTB:
 			add_dtb(pa_data);
 			break;
+#ifdef CONFIG_ARCH_GEN3			
+		case SETUP_BOARD_TYPE:
+			intelce_set_board_type(readl(data->data));
+			break;
+#endif			
 		default:
 			break;
 		}
@@ -798,54 +811,6 @@ static int __init early_mac4(char *p)
 __setup("mac4=", early_mac4);
 #endif
 
-#ifdef MY_DEF_HERE
-static int __init early_netif_seq(char *p)
-{
-	int len;
-	int netDevCount;
-
-	// no net device switch required
-	if ((NULL == p) || (0 == (len = strlen(p)))) {
-        return 1;
-}
-
-	/**
-	 *	We change the way that we represent the net device name is due to a truth that
-	 *	when a PCIE extension card is plugged in, the pcie name will change
-	 *	So we give up the pci-name as our matching condition, we use NIC up sequence instead.
-	 *	Because the NIC layout is fixed on our board, we the NIC up sequence won't change.
-	 *	And according to this sequence, we assign the device name to NIC
-	 *
-	 *	Following codes are designed to compatible with bromolow/x64 which has already been produced.
-	 *	Based on the truth that our bromolow/x64 has at least 2 internal lan so far (2011/5/24)
-	 *	And 2 internal lan needs netif_seq whose length is 12
-	 *	So we judge that if netif_seq is less than 12, then it should be new version of netif_seq
-	 *	2411+ has 2 internal lans now so we use 12 as our boundary condition
-	 */
-	if (len <= SYNO_MAX_SWITCHABLE_NET_DEVICE) {
-		netDevCount = len;
-		for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
-			gDevPCIName[gSwitchDev][0] = *p++;
-		}
-        return 1;
-}
-
-	netDevCount = len/SYNO_NET_DEVICE_ENCODING_LENGTH;
-	if (0 == netDevCount) {
-		return 1;
-	}
-
-	for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
-		// the format of netif_seq string is device seq (1 character) + device pci name (last 5 characters only)
-		memcpy(gDevPCIName[gSwitchDev], p, SYNO_NET_DEVICE_ENCODING_LENGTH);
-		p += SYNO_NET_DEVICE_ENCODING_LENGTH;
-	}
-	return 1;
-}
-
-__setup("netif_seq=",early_netif_seq);
-#endif
-
 #ifdef MY_ABC_HERE
 static int __init early_sn(char *p)
 {
@@ -859,9 +824,33 @@ static int __init early_custom_sn(char *p)
 {
         snprintf(gszCustomSerialNum, sizeof(gszCustomSerialNum), "%s", p);
         printk("Custom Serial Number: %s\n", gszCustomSerialNum);
-	return 1;
+        return 1;
 }
 __setup("custom_sn=", early_custom_sn);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_factory_usb_fast_reset(char *p)
+{
+	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
+
+	printk("Factory USB Fast Reset: %d\n", (int)gSynoFactoryUSBFastReset);
+
+	return 1;
+}
+__setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_factory_usb3_disable(char *p)
+{
+	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);
+
+	printk("Factory USB3 Disable: %d\n", (int)gSynoFactoryUSB3Disable);
+
+	return 1;
+}
+__setup("syno_disable_usb3=", early_factory_usb3_disable);
 #endif
 
 /*

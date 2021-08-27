@@ -375,12 +375,7 @@ changes. */
 
 #define  VUSBHS_OTGSC_DP                           (0x00000010)   /* Data-pulsing */
 #define  VUSBHS_OTGSC_OT                           (0x00000008)   /* OTG termination */
-#if 0
-    #define  VUSBHS_OTGSC_VO                       (0x00000004)   /* Vbus on */
-#endif
-
 #define  VUSBHS_OTGSC_HAAR                         (0x00000004)   /* Auto reset bit*/
-
 #define  VUSBHS_OTGSC_VC                           (0x00000002)   /* Vbus charge */
 #define  VUSBHS_OTGSC_VD                           (0x00000001)   /* Vbus discharge */
 

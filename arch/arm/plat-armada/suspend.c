@@ -33,8 +33,6 @@
 #include "ctrlEnv/sys/mvCpuIf.h"
 #include "mvOs.h"
 
-int armadaxp_powerdown(unsigned long);
-void armadaxp_cpu_resume(void);
 void smp_resume(void);
 
 /*
@@ -66,7 +64,8 @@ void write_pattern(void)
 	
 	ptr = ioremap(BASE_PATTERN,SIZE_PATTERN);
 	pattern_ptr = ptr;
-	pr_info("Writing pattern to %p(%p) + %x\n", ptr, (void*)virt_to_phys(ptr), SIZE_PATTERN);
+	pr_info("Writing pattern to %p(%p) + %x\n", ptr,
+		(void *)virt_to_phys(ptr), SIZE_PATTERN);
 
 	if(ptr == 0)
 	{
@@ -91,7 +90,8 @@ void test_pattern(void)
 	if(pattern_ptr == 0)
 		return;
 
-	pr_info("Testing pattern from %p (%p) + %x\n", ptr, (void*)virt_to_phys(ptr), SIZE_PATTERN);
+	pr_info("Testing pattern from %p (%p) + %x\n", ptr,
+		(void *)virt_to_phys(ptr), SIZE_PATTERN);
 
 	__asm__("b .");
 
@@ -126,7 +126,8 @@ void armadaxp_store_boot_info(void)
 	 * Now store registers that need to be proggrammed before
 	 * comming back to linux. format is addr->value
 	 */
-	/* Disable X-Bar window 12 which is opend in the bootROM by default to 0xF0000000 */
+	/* Disable X-Bar window 12 which is opend in the bootROM
+	 * by default to 0xF0000000 */
 	*store_addr++ = BOOTROM_INTER_REGS_PHYS_BASE + 0x200B0;
 	*store_addr++ = 0x0;
 

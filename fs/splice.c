@@ -715,7 +715,7 @@ static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 	ret = buf->ops->confirm(pipe, buf);
 	if (!ret) {
 		more = (sd->flags & SPLICE_F_MORE) ? MSG_MORE : 0;
-		if (sd->len < sd->total_len)
+		if (sd->len < sd->total_len && pipe->nrbufs > 1)
 			more |= MSG_SENDPAGE_NOTLAST;
 
 		ret = file->f_op->sendpage(file, buf->page, buf->offset,

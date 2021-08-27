@@ -23,6 +23,3 @@ obj-$(CONFIG_NETWORK_PHY_TIMESTAMPING) += timestamping.o
 ifeq ($(CONFIG_MV_ETH_NFP),y)
 obj-y += mv_nfp.o
 endif
-ifeq ($(CONFIG_MV_ETH_NFP),m)
-obj-y += mv_nfp.o
-endif

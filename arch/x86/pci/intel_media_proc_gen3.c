@@ -42,6 +42,9 @@
 #include <linux/init.h>
 #include <asm/pci_x86.h>
 
+#ifdef MY_DEF_HERE
+#include <linux/export.h>
+#endif
 
 #undef DBG
 #undef DEBUG_PCI_SIM
@@ -760,6 +763,23 @@ int  intelce_get_soc_info(unsigned int *pid, unsigned int *prev)
 
 }
 EXPORT_SYMBOL(intelce_get_soc_info);
+
+static unsigned int soc_board_type = 0;
+int intelce_get_board_type(unsigned int *board)
+{
+	if (board) {
+		*board = soc_board_type;
+	}
+	return 0;
+}
+EXPORT_SYMBOL(intelce_get_board_type);
+
+int intelce_set_board_type(unsigned int board)
+{
+	soc_board_type = board;
+	return 0;
+}	
+EXPORT_SYMBOL(intelce_set_board_type);
 
 static int __init gen3_pci_init(void)
 {

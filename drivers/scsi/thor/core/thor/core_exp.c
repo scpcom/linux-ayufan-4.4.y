@@ -3886,6 +3886,9 @@ void SATA_PortHandleInterrupt(
 			SATA_HandleHotplugInterrupt(pPort, intStatus);
 		}
 
+		if(!(pDevice->Device_Type&DEVICE_TYPE_ATAPI))
+			SATA_PortReportNoDevice(pCore, pPort);
+
 		return;
 	}
 

@@ -103,7 +103,7 @@ MV_STATUS mvSysCesaInit(int numOfSession, int queueDepth, void *osHandle)
 			}
 			halData.sramPhysBase[chan] = (MV_ULONG)mv_crypto_phys_base_get(chan);
 			halData.sramVirtBase[chan] = (MV_U8*)mv_crypto_virt_base_get(chan);
-#ifdef CONFIG_ARMADA_SUPPORT_DEEP_IDLE_FAST_EXIT
+#ifdef CONFIG_ARMADA_SUPPORT_DEEP_IDLE_CESA_USE
 			halData.sramOffset[chan] = 32;
 #else
 			halData.sramOffset[chan] = 0;

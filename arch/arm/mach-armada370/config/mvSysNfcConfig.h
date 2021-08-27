@@ -34,3 +34,11 @@ disclaimer.
 ** Base address for SPI registers.
 */
 #define MV_NFC_REGS_BASE		(MV_NFC_REGS_OFFSET)
+
+#ifdef CONFIG_MV_INCLUDE_PDMA
+#define MV_INCLUDE_PDMA
+#endif
+
+#ifdef CONFIG_MTD_NAND_NFC_INIT_RESET
+#define MTD_NAND_NFC_INIT_RESET
+#endif

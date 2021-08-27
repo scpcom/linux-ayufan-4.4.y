@@ -1900,6 +1900,7 @@ out_authorized:
 
 static int hub_port_reset(struct usb_hub *hub, int port1,
 			struct usb_device *udev, unsigned int delay, bool warm, bool init);
+static int hub_port_debounce(struct usb_hub *hub, int port1);
 
 /* Is a USB 3.0 port in the Inactive or Complinance Mode state?
  * Port worm reset is required to recover
@@ -1938,13 +1939,12 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		 * when the port appears not to be connected.
 		 */
 		if (init) {
-			/* Device went away? */
-			if (!(portstatus & USB_PORT_STAT_CONNECTION))
-				return -ENOTCONN;
-
-			/* bomb out completely if the connection bounced */
-			if ((portchange & USB_PORT_STAT_C_CONNECTION))
-				return -ENOTCONN;
+			if (portchange & USB_PORT_STAT_C_CONNECTION) {
+				hub_port_debounce(hub, port1);
+				ret = hub_port_status(hub, port1, &portstatus, &portchange);
+				if (ret < 0)
+					return ret;
+			}
 
 			/* if we`ve finished resetting, then break out of
 			 * the loop
@@ -1975,6 +1975,16 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		dev_dbg (hub->intfdev,
 			"port %d not %sreset yet, waiting %dms\n",
 			port1, warm ? "warm " : "", delay);
+	}
+
+	if (init) {
+		/* Device went away? */
+		if (!(portstatus & USB_PORT_STAT_CONNECTION))
+			return -ENOTCONN;
+
+		/* bomb out completely if the connection bounced */
+		if ((portchange & USB_PORT_STAT_C_CONNECTION))
+		return -ENOTCONN;
 	}
 
 	return -EBUSY;
@@ -2043,13 +2053,24 @@ static int hub_port_reset(struct usb_hub *hub, int port1,
 
 			if (hub_port_warm_reset_required(hub, portstatus)) {
 				warm = true;
-				delay = HUB_BH_RESET_TIME;
+				delay = HUB_LONG_RESET_TIME;
 			}
 		}
 	}
 
 	/* Reset the port */
 	for (i = 0; i < PORT_RESET_TRIES; i++) {
+		if (portchange & USB_PORT_STAT_C_CONNECTION) {
+			clear_port_feature(hub->hdev, port1,
+				USB_PORT_FEAT_C_CONNECTION);
+		}
+
+		if ((portchange & USB_PORT_STAT_C_LINK_STATE) &&
+				hub_is_superspeed(hub->hdev)) {
+			clear_port_feature(hub->hdev, port1,
+				USB_PORT_FEAT_C_PORT_LINK_STATE);
+		}
+
 		status = set_port_feature(hub->hdev, port1, (warm ?
 					USB_PORT_FEAT_BH_PORT_RESET :
 					USB_PORT_FEAT_RESET));
@@ -2064,6 +2085,17 @@ static int hub_port_reset(struct usb_hub *hub, int port1,
 				dev_dbg(hub->intfdev,
 						"port_wait_reset: err = %d\n",
 						status);
+		}
+
+		if (hub_is_superspeed(hub->hdev)) {
+			status = hub_port_status(hub, port1, &portstatus, &portchange);
+			if (status < 0)
+			goto done;
+
+			if (hub_port_warm_reset_required(hub, portstatus)) {
+				warm = true;
+				status = -EBUSY;
+			}
 		}
 
 		/* return on disconnect or reset */
@@ -3024,6 +3056,15 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 				USB_PORT_STAT_C_ENABLE);
 #endif
 
+	if (hub_port_warm_reset_required(hub, portstatus)) {
+		hub_port_reset(hub, port1, NULL,
+				HUB_BH_RESET_TIME, true, false);
+		status = hub_port_status(hub, port1,
+				&portstatus, &portchange);
+		if (status < 0)
+			return;
+	}
+
 	/* Try to resuscitate an existing device */
 	udev = hdev->children[port1-1];
 	if ((portstatus & USB_PORT_STAT_CONNECTION) && udev &&
@@ -3091,6 +3132,11 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 
 		if (portstatus & USB_PORT_STAT_ENABLE)
   			goto done;
+
+		if (hub_port_warm_reset_required(hub, portstatus)) {
+			set_bit(port1, hub->change_bits);
+			kick_kethubd(hub);
+		}
 		return;
 	}
 
@@ -3368,19 +3414,6 @@ static void hub_events(void)
 					&portstatus, &portchange);
 			if (ret < 0)
 				continue;
-
-			/* Warm reset a USB3 protocol port if it's in
-			 * SS.Inactive, Compliance Mode or Polling state.
-			 */
-			if (hub_port_warm_reset_required(hub, portstatus)) {
-				dev_dbg(hub_dev, "warm reset port %d\n", i);
-				hub_port_reset(hub, i, NULL,
-						HUB_BH_RESET_TIME, true, false);
-				ret = hub_port_status(hub, i,
-						&portstatus, &portchange);
-				if (ret < 0)
-					continue;
-			}
 
 			if (portchange & USB_PORT_STAT_C_CONNECTION) {
 				clear_port_feature(hdev, i,

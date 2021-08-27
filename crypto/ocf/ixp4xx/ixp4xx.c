@@ -3,8 +3,8 @@
  * This driver requires the IXP400 Access Library that is available
  * from Intel in order to operate (or compile).
  *
- * Written by David McCullough <david_mccullough@securecomputing.com>
- * Copyright (C) 2006-2007 David McCullough
+ * Written by David McCullough <david_mccullough@mcafee.com>
+ * Copyright (C) 2006-2011 David McCullough
  * Copyright (C) 2004-2005 Intel Corporation.
  *
  * LICENSE TERMS
@@ -33,7 +33,8 @@
  * and/or fitness for purpose.
  */
 
-#ifndef AUTOCONF_INCLUDED
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38) && !defined(AUTOCONF_INCLUDED)
 #include <linux/config.h>
 #endif
 #include <linux/module.h>
@@ -372,9 +373,6 @@ ixp_freesession(device_t dev, u_int64_t tid)
 			ixCryptoAccCtxUnregister(ixp_sessions[sid]->ixp_ctx_id);
 			ixp_sessions[sid]->ixp_ctx_id = -1;
 		}
-
-		flush_scheduled_work();
-
 		kfree(ixp_sessions[sid]);
 	}
 	ixp_sessions[sid] = NULL;
@@ -446,15 +444,29 @@ ixp_q_process(struct ixp_q *q)
 	dprintk("%s(%p)\n", __FUNCTION__, q);
 
 	if (q->ixp_q_ccrd) {
+		if (q->ixp_q_ccrd->crd_flags & CRD_F_ENCRYPT) {
 			if (q->ixp_q_ccrd->crd_flags & CRD_F_IV_EXPLICIT) {
 				q->ixp_q_iv = q->ixp_q_ccrd->crd_iv;
 			} else {
+				q->ixp_q_iv = q->ixp_q_iv_data;
+				read_random(q->ixp_q_iv, ixp->ixp_ctx.cipherCtx.cipherInitialVectorLen);
+			}
+			if ((q->ixp_q_ccrd->crd_flags & CRD_F_IV_PRESENT) == 0)
+				crypto_copyback(q->ixp_q_crp->crp_flags, q->ixp_q_crp->crp_buf,
+						q->ixp_q_ccrd->crd_inject,
+						ixp->ixp_ctx.cipherCtx.cipherInitialVectorLen,
+						(caddr_t) q->ixp_q_iv);
+		} else {
+			if (q->ixp_q_ccrd->crd_flags & CRD_F_IV_EXPLICIT)
+				q->ixp_q_iv = q->ixp_q_ccrd->crd_iv;
+			else {
 				q->ixp_q_iv = q->ixp_q_iv_data;
 				crypto_copydata(q->ixp_q_crp->crp_flags, q->ixp_q_crp->crp_buf,
 						q->ixp_q_ccrd->crd_inject,
 						ixp->ixp_ctx.cipherCtx.cipherInitialVectorLen,
 						(caddr_t) q->ixp_q_iv);
 			}
+		}
 
 		if (q->ixp_q_acrd) {
 			auth_off = q->ixp_q_acrd->crd_skip;
@@ -592,8 +604,7 @@ ixp_process_pending(void *arg)
 static void
 ixp_process_pending_wq(struct work_struct *work)
 {
-	struct ixp_data *ixp = container_of(work, struct ixp_data,
-								ixp_pending_work);
+	struct ixp_data *ixp = container_of(work, struct ixp_data, ixp_pending_work);
 	ixp_process_pending(ixp);
 }
 #endif

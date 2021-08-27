@@ -13,8 +13,12 @@ WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
 DISCLAIMED.  The GPL License provides additional details about this warranty
 disclaimer.
 *******************************************************************************/
+
+#include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/miscdevice.h>
+#include <linux/interrupt.h>
+#include <mach/irqs.h>
 #include "btns_dev.h"
 #include "mvCommon.h"
 #include "mvOs.h"
@@ -134,12 +138,8 @@ mv_btns_handler(int irq , void *dev_id)
 	return IRQ_HANDLED;
 }
 
-static int
-btnsdev_ioctl(
-        struct inode *inode,
-        struct file *filp,
-        unsigned int cmd,
-        unsigned long arg)
+static long
+btnsdev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	unsigned int btn_id;
 	BTN btn_sts;
@@ -270,11 +270,10 @@ btnsdev_release(struct inode *inode, struct file *filp)
         return(0);
 }
 
-
 static struct file_operations btnsdev_fops = {
 	.open = btnsdev_open,
 	.release = btnsdev_release,
-        .ioctl = btnsdev_ioctl,
+	.compat_ioctl = btnsdev_ioctl,
 };
 
 static struct miscdevice btnsdev = {
@@ -350,5 +349,4 @@ module_exit(btnsdev_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Ronen Shitrit & Haim Boot");
 MODULE_DESCRIPTION("PH: Buttons press handling.");
-
-
+MODULE_ALIAS("platform:mvbtns");

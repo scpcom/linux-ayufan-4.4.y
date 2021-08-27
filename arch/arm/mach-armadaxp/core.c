@@ -337,16 +337,6 @@ static int __init noWFI_setup(char *__unused)
 
 __setup("noWFI", noWFI_setup);
 
-MV_U32 support_Z1A_serdes_cfg = 0x0;
-static int __init serdesZ1A_setup(char *__unused)
-{
-     printk("Supporting Z1A Serdes Configurations.\n");
-     support_Z1A_serdes_cfg = 1;
-     return 1;
-}
-
-__setup("Z1A", serdesZ1A_setup);
-
 char *nfcConfig = NULL;
 static int __init nfcConfig_setup(char *s)
 {
@@ -634,7 +624,11 @@ static struct resource aurora_uart1_resources[] = {
 
 static struct platform_device aurora_uart1 = {
 	.name			= "serial8250",
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	.id			= 1,
+#else
 	.id			= 0,
+#endif
 	.dev			= {
 		.platform_data	= aurora_uart1_data,
 	},
@@ -1537,6 +1531,37 @@ void axp_db_restore(void)
 	axp_timer_resume();
 }
 
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_ABC_HERE
+extern void syno_mv_net_shutdown();
+#endif
+#define UART1_REG(x)		(PORT1_BASE + ((UART_##x) << 2))
+#define SET8N1			0x3
+#define SOFTWARE_SHUTDOWN	0x31
+#define SOFTWARE_REBOOT		0x43
+extern void synology_gpio_init(void);
+
+static void synology_power_off(void)
+{
+#ifdef MY_ABC_HERE
+	/* platform driver will not shutdown when poweroff */
+	syno_mv_net_shutdown();
+#endif
+	writel(SET8N1, UART1_REG(LCR));
+	writel(SOFTWARE_SHUTDOWN, UART1_REG(TX));
+}
+
+static void synology_restart(char mode, const char *cmd)
+{
+	writel(SET8N1, UART1_REG(LCR));
+	writel(SOFTWARE_REBOOT, UART1_REG(TX));
+
+        /* Calls original reset function for models those do not use uP
+        * I.e. USB Station. */
+        arm_machine_restart(mode, cmd);
+}
+#endif /* CONFIG_SYNO_ARMADA_ARCH */
+
 /*****************************************************************************
  * DB BOARD: Main Initialization
  ****************************************************************************/
@@ -1551,18 +1576,15 @@ static void __init axp_db_init(void)
 	/* Call Aurora/cpu special configurations */
 	cpu_fabric_common_init();
 
-
 	/* Select appropriate Board ID for Machine */
+#ifndef CONFIG_SYNO_ARMADA_ARCH
+	/* bypass manually assign board ID, using from uboot */
 #if defined(CONFIG_ARMADA_XP_REV_A0) || defined(CONFIG_ARMADA_XP_REV_B0)
 	gBoardId = DB_88F78XX0_BP_REV2_ID;
 #else
 	gBoardId = DB_88F78XX0_BP_ID;
 #endif
-	/* Before initializing the HAL, select Z1A serdes cfg if needed */
-	if (support_Z1A_serdes_cfg)
-		mvBoardSerdesZ1ASupport();
-	/* Bypass serdes reconfiguration since already done at bootloader */
-        mvBoardSerdesConfigurationEnableSet(MV_FALSE);
+#endif
 
 	/* init the Board environment */
 	mvBoardEnvInit();
@@ -1595,6 +1617,9 @@ static void __init axp_db_init(void)
 	serial_initialize(0);
 #else
 	serial_initialize(CONFIG_MV_UART_PORT);
+#endif
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	serial_initialize(1);
 #endif
 
 	/* At this point, the CPU windows are configured according to default definitions in mvSysHwConfig.h */
@@ -1670,15 +1695,13 @@ static void __init axp_db_init(void)
 	}
 #endif
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+	pm_power_off = synology_power_off;
+	arm_pm_restart = synology_restart;
+	synology_gpio_init();
+#endif
 	return;
 }
-
-#ifdef CONFIG_MV_AMP_ENABLE
-void __init axp_reserve_regs_space(void)
-{
-	memblock_reserve(INTER_REGS_PHYS_BASE, INTER_REGS_SIZE);
-}
-#endif
 
 #ifdef CONFIG_FB_DOVE
 /*
@@ -1726,7 +1749,22 @@ void __init reserve_training_mem(void)
 	MV_UNIT_WIN_INFO addr_win_map[MAX_TARGETS + 1];
 	phys_addr_t base;
 	phys_addr_t size = (phys_addr_t)(TRAINING_SPACE);
+	struct map_desc  early_mem_table;
 
+	/*
+	 * When the reserve hook is called the MMU enabled but the page
+	 * table entries for the machine are still not set so its impossible
+	 * to access internal registers. To resolve that, we create a
+	 * temporary mapping for the register space only.
+	 */
+	early_mem_table.virtual = INTER_REGS_BASE;
+	early_mem_table.pfn     = __phys_to_pfn(INTER_REGS_PHYS_BASE);
+	early_mem_table.length  = SZ_1M;
+	early_mem_table.type    = MT_DEVICE;
+
+	iotable_init(&early_mem_table , 1);
+
+	/* Create a map of address decode windows */
 	mvCtrlAddrWinMapBuild(addr_win_map, MAX_TARGETS + 1);
 	for (i = 0; i < MAX_TARGETS; i++) {
 		if (!MV_TARGET_IS_DRAM(i))
@@ -1764,9 +1802,6 @@ MACHINE_START(ARMADA_XP_DB, "Marvell Armada XP Development Board")
 #ifdef CONFIG_SUSPEND
 	.reserve	= reserve_training_mem,
 #endif /* CONFIG_SUSPEND */
-#ifdef CONFIG_MV_AMP_ENABLE
-	.reserve	= axp_reserve_regs_space,
-#endif
 MACHINE_END
 
 /*****************************************************************************
@@ -1784,10 +1819,7 @@ static void __init axp_gp_init(void)
 	cpu_fabric_common_init();
 
 	/* Select appropriate Board ID for Machine */
-	gBoardId = RD_78460_GP_ID;
-
-	/* Bypass serdes reconfiguration since already done at bootloader */
-        mvBoardSerdesConfigurationEnableSet(MV_FALSE);
+	gBoardId = DB_784MP_GP_ID;
 
 	/* init the Board environment */
 	mvBoardEnvInit();
@@ -1909,9 +1941,151 @@ MACHINE_START(ARMADA_XP_GP, "Marvell Armada XP GP Board")
 #ifdef CONFIG_SUSPEND
 	.reserve	= reserve_training_mem,
 #endif /* CONFIG_SUSPEND */
+MACHINE_END
+
+/*****************************************************************************
+ * AMC BOARD
+ ****************************************************************************/
+static void __init axp_amc_init(void)
+{
 #ifdef CONFIG_MV_AMP_ENABLE
-	.reserve	= axp_reserve_regs_space,
+	/* Init Resource sharing */
+	if (mvUnitMapIsRsrcLimited() == MV_FALSE)
+		mvUnitMapSetAllMine();
 #endif
+
+	/* Call Aurora/cpu special configurations */
+	cpu_fabric_common_init();
+
+	/* Select appropriate Board ID for Machine */
+	gBoardId = DB_78X60_AMC_ID;
+
+	/* init the Board environment */
+	mvBoardEnvInit();
+
+	/* init the controller environment */
+	if (mvCtrlEnvInit()) {
+		printk(KERN_ERR "Controller env initialization failed.\n");
+		return;
+	}
+
+	armadaxp_setup_cpu_mbus();
+
+	/* Init the CPU windows setting and the access protection windows. */
+#ifdef CONFIG_MV_AMP_ENABLE
+	if (mvAmpInitCpuIf()) {
+#else
+	if (mvCpuIfInit(mv_sys_map())) {
+#endif
+		printk(KERN_ERR "Cpu Interface initialization failed.\n");
+		return;
+	}
+
+	/* Init Tclk & SysClk */
+	mvTclk = mvBoardTclkGet();
+	mvSysclk = mvBoardSysClkGet();
+
+	elf_hwcap &= ~HWCAP_JAVA;
+
+#ifndef CONFIG_MV_UART_PORT
+	serial_initialize(0);
+#else
+	serial_initialize(CONFIG_MV_UART_PORT);
+#endif
+
+	/* At this point, the CPU windows are configured according to default
+	   definitions in mvSysHwConfig.h and cpuAddrWinMap table in mvCpuIf.c.
+	   Now it's time to change defaults for each platform.         */
+
+	/* mvCpuIfAddDecShow();*/
+
+	print_board_info();
+
+	/* GPIO */
+	mv_gpio_init();
+
+	/* RTC */
+	rtc_init();
+
+#ifdef CONFIG_MV_INCLUDE_SPI
+	/* SPI */
+	if (mvUnitMapIsMine(SPI) == MV_TRUE)
+		mvSysSpiInit(0, _16M);
+#endif
+
+	/* ETH-PHY */
+	mvSysEthPhyInit();
+
+	/* Sata */
+#ifdef CONFIG_SATA_MV
+	armadaxp_sata_init(&dbdsmp_sata_data);
+#endif
+#ifdef CONFIG_MTD_NAND_NFC
+	/* NAND */
+	axp_db_nfc_init();
+#endif
+	/* HWMON */
+	armadaxp_hwmon_init();
+
+	/* XOR */
+#ifdef XOR0_ENABLE
+	armadaxp_xor0_init();
+#endif
+	armadaxp_xor1_init();
+
+	/* I2C */
+	armadaxp_i2c0_init();
+
+#ifdef CONFIG_FB_DOVE
+	if ((lcd0_enable == 1) && (lcd_panel == 0))
+		armadaxp_i2c1_init();
+#endif
+	/* SDIO */
+#if defined(CONFIG_MV_INCLUDE_SDIO)
+	armadaxp_sdio_init();
+#endif
+
+#ifdef CONFIG_MV_ETHERNET
+	/* Ethernet */
+	eth_init();
+#endif
+
+#ifdef CONFIG_MV_IPC_NET
+	platform_device_register(&mv_ipc_net);
+#endif
+
+#ifdef CONFIG_FB_DOVE
+	if (mvUnitMapIsMine(LCD) == MV_TRUE) {
+		kw_lcd0_dmi.dram = &armadaxp_mbus_dram_info;
+		if (lcd_panel) {
+			kw_lcd0_dmi.lvds_info.enabled = 1;
+			kw_lcd0_dmi.fixed_full_div = 1;
+			kw_lcd0_dmi.full_div_val = 7;
+			/* kw_lcd0_dmi.lcd_ref_clk = 27000000; */
+			printk(KERN_INFO "LCD Panel enabled.\n");
+		}
+		clcd_platform_init(&kw_lcd0_dmi, &kw_lcd0_vid_dmi,
+						&dsmp_backlight_data);
+	}
+#endif
+
+	return;
+}
+
+MACHINE_START(ARMADA_XP_AMC, "Marvell Armada XP AMC Board")
+	/* MAINTAINER("MARVELL") */
+	.atag_offset	= 0x00000100,
+	.map_io		= axp_map_io,
+	.init_irq	= axp_init_irq,
+	.timer		= &axp_timer,
+	.init_machine	= axp_amc_init,
+#ifdef CONFIG_FB_DOVE
+	/* reserve memory for LCD */
+	.fixup		= axp_tag_fixup_mem32,
+#endif /* CONFIG_FB_DOVE */
+#ifdef CONFIG_SUSPEND
+	.reserve	= reserve_training_mem,
+#endif /* CONFIG_SUSPEND */
 MACHINE_END
 
 /*****************************************************************************
@@ -1924,9 +2098,6 @@ static void __init axp_rd_nas_init(void)
 
 	/* Select appropriate Board ID for Machine */
 	gBoardId = RD_78460_NAS_ID;
-
-	/* Bypass serdes reconfiguration since already done at bootloader */
-        mvBoardSerdesConfigurationEnableSet(MV_FALSE);
 
 	/* init the Board environment */
 	mvBoardEnvInit();
@@ -2048,11 +2219,7 @@ MACHINE_START(ARMADA_XP_RD_NAS, "Marvell Armada XP RD NAS Board")
 	/* reserve memory for LCD */
 	.fixup		= axp_tag_fixup_mem32,
 #endif /* CONFIG_FB_DOVE */
-#ifdef CONFIG_MV_AMP_ENABLE
-	.reserve	= axp_reserve_regs_space,
-#endif
 MACHINE_END
-
 
 /*****************************************************************************
 * RDSRV BOARD: Main Initialization
@@ -2068,8 +2235,6 @@ static void __init axp_rdsrv_init(void)
 #else
 	gBoardId = RD_78460_SERVER_ID;
 #endif
-	/* Bypass serdes reconfiguration since already done at bootloader */
-        mvBoardSerdesConfigurationEnableSet(MV_FALSE);
 
 	/* init the Board environment */
 	mvBoardEnvInit();
@@ -2159,9 +2324,6 @@ MACHINE_START(ARMADA_XP_RDSRV, "Marvell Armada XP Server Board")
   	.init_irq	= axp_init_irq,
   	.timer		= &axp_timer,
   	.init_machine	= axp_rdsrv_init,
-#ifdef CONFIG_MV_AMP_ENABLE
-	.reserve	= axp_reserve_regs_space,
-#endif
   MACHINE_END
 
 /*****************************************************************************
@@ -2175,8 +2337,6 @@ static void __init axp_fpga_init(void)
 
 	/* Select appropriate Board ID for Machine */
 	gBoardId = FPGA_88F78XX0_ID;
-	/* Bypass serdes reconfiguration since already done at bootloader */
-        mvBoardSerdesConfigurationEnableSet(MV_FALSE);
 
         /* init the Board environment */
        	mvBoardEnvInit();
@@ -2232,7 +2392,4 @@ MACHINE_START(ARMADA_XP_FPGA, "Marvell Armada XP FPGA Board")
 	.init_irq	= axp_init_irq,
 	.timer		= &axp_timer,
 	.init_machine	= axp_fpga_init,
-#ifdef CONFIG_MV_AMP_ENABLE
-	.reserve	= axp_reserve_regs_space,
-#endif
 MACHINE_END

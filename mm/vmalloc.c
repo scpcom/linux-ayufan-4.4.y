@@ -567,9 +567,6 @@ void set_iounmap_nonlazy(void)
 	atomic_set(&vmap_lazy_nr, lazy_max_pages()+1);
 }
 
-#ifdef CONFIG_ARCH_GEN3
-static DEFINE_SPINLOCK(purge_lock);
-#endif
 /*
  * Purges all lazily-freed vmap areas.
  *
@@ -583,10 +580,7 @@ static DEFINE_SPINLOCK(purge_lock);
 static void __purge_vmap_area_lazy(unsigned long *start, unsigned long *end,
 					int sync, int force_flush)
 {
-#ifdef CONFIG_ARCH_GEN3
-#else
 	static DEFINE_SPINLOCK(purge_lock);
-#endif
 	LIST_HEAD(valist);
 	struct vmap_area *va;
 	struct vmap_area *n_va;
@@ -664,14 +658,8 @@ static void purge_vmap_area_lazy(void)
  */
 static void free_vmap_area_noflush(struct vmap_area *va)
 {
-#ifdef CONFIG_ARCH_GEN3
-        spin_lock(&purge_lock);  /* Make execution of following two lines code atomic */
-#endif
 	va->flags |= VM_LAZY_FREE;
 	atomic_add((va->va_end - va->va_start) >> PAGE_SHIFT, &vmap_lazy_nr);
-#ifdef CONFIG_ARCH_GEN3
-        spin_unlock(&purge_lock);
-#endif
 	if (unlikely(atomic_read(&vmap_lazy_nr) > lazy_max_pages()))
 		try_purge_vmap_area_lazy();
 }

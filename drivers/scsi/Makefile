@@ -146,7 +146,6 @@ obj-$(CONFIG_VMWARE_PVSCSI)	+= vmw_pvscsi.o
 
 obj-$(CONFIG_ARM)		+= arm/
 
-obj-$(CONFIG_SCSI_MVSATA)       += ../../arch/arm/plat-feroceon/mv_drivers_lsp/mv_sata/
 obj-$(CONFIG_CHR_DEV_ST)	+= st.o
 obj-$(CONFIG_CHR_DEV_OSST)	+= osst.o
 obj-$(CONFIG_BLK_DEV_SD)	+= sd_mod.o

@@ -272,6 +272,8 @@ typedef enum _boardMacSpeed {
 typedef struct _boardMacInfo {
 	MV_BOARD_MAC_SPEED boardMacSpeed;
 	MV_U8 boardEthSmiAddr;
+	MV_U16	LinkCryptPortAddr;
+	MV_U8	boardEthSmiAddr0;
 } MV_BOARD_MAC_INFO;
 
 typedef struct _boardMppInfo {
@@ -306,7 +308,6 @@ typedef struct _boardInfo {
 	MV_BOARD_MODULE_TYPE_INFO *pBoardModTypeValue;
 	MV_U8 numBoardMppConfigValue;
 	MV_BOARD_MPP_INFO *pBoardMppConfigValue;
-	MV_SERDES_CFG *pBoardSerdesConfigValue;
 	MV_BOARD_PEX_INFO boardPexInfo;	/* filled in runtime */
 	MV_U32 intsGppMaskLow;
 	MV_U32 intsGppMaskMid;
@@ -392,8 +393,11 @@ MV_BOOL mvBoardIsSwitchConnected(void);
 MV_BOOL mvBoardIsGMIIConnected(void);
 MV_BOOL mvBoardIsGbEPortConnected(MV_U32 ethPortNum);
 MV_32 mvBoardPhyAddrGet(MV_U32 ethPortNum);
+MV_32 mvBoardQuadPhyAddr0Get(MV_U32 ethPortNum);
+MV_32 mvBoardPhyLinkCryptPortAddrGet(MV_U32 ethPortNum);
 MV_BOARD_MAC_SPEED mvBoardMacSpeedGet(MV_U32 ethPortNum);
 MV_32 mvBoardSmiScanModeGet(MV_U32 switchIdx);
+MV_BOOL mvBoardIsPortInGmii(MV_U32 ethPortNum);
 MV_BOOL mvBoardIsPortInSgmii(MV_U32 ethPortNum);
 MV_BOOL mvBoardIsPortInRgmii(MV_U32 ethPortNum);
 MV_32 mvBoardSwitchPortGet(MV_U32 switchIdx, MV_U32 boardPortNum);
@@ -404,6 +408,8 @@ MV_BOOL mvBoardIsQsgmiiModuleConnected(MV_VOID);
 MV_32 mvBoardGePhySwitchPortGet(MV_VOID);
 MV_32 mvBoardRgmiiASwitchPortGet(MV_VOID);
 MV_32 mvBoardSwitchIrqGet(MV_VOID);
+MV_32 mvBoardSwitchCpuPortGet(MV_U32 switchIdx);
+MV_32 mvBoardSmiScanModeGet(MV_U32 switchIdx);
 
 /* TDM */
 MV_32 mvBoardTdmSpiModeGet(MV_VOID);
@@ -423,9 +429,10 @@ MV_32 mvBoardNandWidthGet(void);
 /* Twsi */
 MV_U8 mvBoardTwsiAddrTypeGet(MV_BOARD_TWSI_CLASS twsiClass, MV_U32 index);
 MV_U8 mvBoardTwsiAddrGet(MV_BOARD_TWSI_CLASS twsiClass, MV_U32 index);
+MV_U32 mvBoardIdGet(MV_VOID);
+MV_VOID mvBoardIdSet(MV_VOID);
 MV_U8 mvBoardTwsiSatRGet(MV_U8 devNum, MV_U8 regNum);
 MV_STATUS mvBoardTwsiSatRSet(MV_U8 devNum, MV_U8 regNum, MV_U8 regVal);
-MV_U32 mvBoardIdGet(MV_VOID);
 MV_U8 mvBoardFabFreqGet(MV_VOID);
 MV_STATUS mvBoardFabFreqSet(MV_U8 freqVal);
 MV_U8 mvBoardCpuFreqGet(MV_VOID);
@@ -441,14 +448,11 @@ MV_STATUS mvBoardCpu0CoreModeSet(MV_U8 val);
 MV_STATUS mvBoardMppModulesScan(void);
 MV_STATUS mvBoardUpdateMppAfterScan(void);
 MV_BOOL mvBoardIsModScanEnabled(void);
-MV_STATUS mvBoardSerdesModulesScan(void);
 MV_STATUS mvBoardUpdateEthAfterScan(void);
-MV_SERDES_CFG *mvBoardSerdesCfgGet(void);
-MV_STATUS mvBoardSerdesUserToRegConv(MV_SERDES_CFG *pSerdesUserInfo, MV_SERDES_REG_CFG *pSerdesInfo);
 MV_U32 mvBoardMppModulesCfgGet(MV_U8 group);
-MV_U32 mvBoardSerdesModeGet(void);
 MV_VOID mvBoardMppModuleTypePrint(MV_VOID);
 MV_VOID mvBoardOtherModuleTypePrint(MV_VOID);
+MV_U32 mvBoardSerdesModeGet(void);
 
 /* PEX */
 MV_BOOL	mvBoardIsPciEConnected(MV_U32 pcieIdx);

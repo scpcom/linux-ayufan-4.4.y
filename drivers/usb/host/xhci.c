@@ -893,13 +893,11 @@ static void xhci_event_ring_work(unsigned long arg)
 
 
 #ifdef MY_ABC_HERE
-int disable_usb3 = 0;
-module_param(disable_usb3, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+extern int gSynoFactoryUSB3Disable;
 #endif
 
 #ifdef MY_ABC_HERE
-static int usb_fast_reset = 0;
-module_param(usb_fast_reset, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+extern int gSynoFactoryUSBFastReset;
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
 #endif
 
@@ -918,13 +916,13 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 	xhci_dbg(xhci, "Finished xhci_run for USB3 roothub\n");
 
 #ifdef MY_ABC_HERE
-	if (disable_usb3) {
+	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
 #endif
 
 #ifdef MY_ABC_HERE
-	if (usb_fast_reset) {
+	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
 	}
@@ -932,7 +930,7 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 
 #ifdef MY_DEF_HERE
 #ifdef MY_ABC_HERE
-	if(disable_usb3 || PCI_VENDOR_ID_ETRON == xhci_vendor) {
+	if(1 == gSynoFactoryUSB3Disable || PCI_VENDOR_ID_ETRON == xhci_vendor) {
 		xhci_special_reset = XHCI_SPECIAL_RESET_DISABLE;
 	} else {
 		xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
@@ -1123,7 +1121,7 @@ void xhci_stop(struct usb_hcd *hcd)
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
 #ifdef MY_ABC_HERE
-	if (usb_fast_reset) {
+	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
 	}
@@ -2986,9 +2984,9 @@ static int xhci_configure_endpoint(struct xhci_hcd *xhci,
 	timeleft = wait_for_completion_interruptible_timeout(
 			cmd_completion,
 #ifdef MY_DEF_HERE
-					USB_CTRL_SET_TIMEOUT/5);
+			XHCI_CMD_DEFAULT_TIMEOUT/5);
 #else
-					USB_CTRL_SET_TIMEOUT);
+			XHCI_CMD_DEFAULT_TIMEOUT);
 #endif
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for %s command\n",
@@ -3977,9 +3975,9 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	/* XXX: how much time for xHC slot assignment? */
 	timeleft = wait_for_completion_interruptible_timeout(&xhci->addr_dev,
 #ifdef MY_DEF_HERE
-					USB_CTRL_SET_TIMEOUT/5);
+			XHCI_CMD_DEFAULT_TIMEOUT/5);
 #else
-					USB_CTRL_SET_TIMEOUT);
+			XHCI_CMD_DEFAULT_TIMEOUT);
 #endif
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for a slot\n",
@@ -4099,9 +4097,9 @@ int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 	/* ctrl tx can take up to 5 sec; XXX: need more time for xHC? */
 	timeleft = wait_for_completion_interruptible_timeout(&xhci->addr_dev,
 #ifdef MY_DEF_HERE
-					USB_CTRL_SET_TIMEOUT/5);
+			XHCI_CMD_DEFAULT_TIMEOUT);
 #else
-					USB_CTRL_SET_TIMEOUT);
+			XHCI_CMD_DEFAULT_TIMEOUT);
 #endif
 
 	/* FIXME: From section 4.3.4: "Software shall be responsible for timing

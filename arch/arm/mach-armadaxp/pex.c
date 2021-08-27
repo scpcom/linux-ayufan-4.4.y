@@ -47,16 +47,16 @@
 
 #define MV_PEX_MASK_ABCD              (BIT24 | BIT25 | BIT26 | BIT27)
 
-static int __init mv_map_irq_0(struct pci_dev *dev, u8 slot, u8 pin);
-static int __init mv_map_irq_1(struct pci_dev *dev, u8 slot, u8 pin);
-static int __init mv_map_irq_2(struct pci_dev *dev, u8 slot, u8 pin);
-static int __init mv_map_irq_3(struct pci_dev *dev, u8 slot, u8 pin);
-static int __init mv_map_irq_4(struct pci_dev *dev, u8 slot, u8 pin);
-static int __init mv_map_irq_5(struct pci_dev *dev, u8 slot, u8 pin);
-static int __init mv_map_irq_6(struct pci_dev *dev, u8 slot, u8 pin);
-static int __init mv_map_irq_7(struct pci_dev *dev, u8 slot, u8 pin);
-static int __init mv_map_irq_8(struct pci_dev *dev, u8 slot, u8 pin);
-static int __init mv_map_irq_9(struct pci_dev *dev, u8 slot, u8 pin);
+static int __init mv_map_irq_0(const struct pci_dev *dev, u8 slot, u8 pin);
+static int __init mv_map_irq_1(const struct pci_dev *dev, u8 slot, u8 pin);
+static int __init mv_map_irq_2(const struct pci_dev *dev, u8 slot, u8 pin);
+static int __init mv_map_irq_3(const struct pci_dev *dev, u8 slot, u8 pin);
+static int __init mv_map_irq_4(const struct pci_dev *dev, u8 slot, u8 pin);
+static int __init mv_map_irq_5(const struct pci_dev *dev, u8 slot, u8 pin);
+static int __init mv_map_irq_6(const struct pci_dev *dev, u8 slot, u8 pin);
+static int __init mv_map_irq_7(const struct pci_dev *dev, u8 slot, u8 pin);
+static int __init mv_map_irq_8(const struct pci_dev *dev, u8 slot, u8 pin);
+static int __init mv_map_irq_9(const struct pci_dev *dev, u8 slot, u8 pin);
 
 extern u32 mv_pci_mem_size_get(int ifNum);
 extern u32 mv_pci_io_base_get(int ifNum);
@@ -127,8 +127,12 @@ void __init mv_pex_preinit(void)
 		/* Assign bus number 0 to first active/available bus */
 		if (pex0flg == 0) {
 	       		mvPexLocalBusNumSet(pexHWInf, 0x0);
+			mvPexLocalDevNumSet(pexHWInf, 0x1);
 	       		pex0flg = 1;
 		}
+
+		/* Clear the secondary bus number */
+		MV_REG_WRITE(PEX_SECONDARY_BUS_REG(pexHWInf), 0);
 
 		MV_REG_BIT_SET(PEX_MASK_REG(pexHWInf), MV_PEX_MASK_ABCD);
 		if (mv_is_pci_io_mapped(pexHWInf))
@@ -173,8 +177,12 @@ void mv_pex_reinit(void)
 		/* Assign bus number 0 to first active/available bus */
 		if (pex0flg == 0) {
 			mvPexLocalBusNumSet(pexHWInf, 0x0);
+			mvPexLocalDevNumSet(pexHWInf, 0x1);
 			pex0flg = 1;
 		}
+
+		/* Clear the secondary bus number */
+		MV_REG_WRITE(PEX_SECONDARY_BUS_REG(pexHWInf), 0);
 
 		MV_REG_BIT_SET(PEX_MASK_REG(pexHWInf), MV_PEX_MASK_ABCD);
 		if (mv_is_pci_io_mapped(pexHWInf))
@@ -187,6 +195,43 @@ void mv_pex_reinit(void)
 	}
 }
 
+static int  pci_read_cfg(u32 pciIf, u32 bus_num, u32 dev_no,
+		u32 func, u32 where)
+{
+	u32 cfgCmd;
+	u32 regOff = (MV_U32)where & (PXCAR_REG_NUM_MASK
+			| PXCAR_REAL_EXT_REG_NUM_MASK);
+
+	/* Creating PEX address to be passed */
+	cfgCmd  = (bus_num << PXCAR_BUS_NUM_OFFS);
+	cfgCmd |= (dev_no << PXCAR_DEVICE_NUM_OFFS);
+	cfgCmd |= (func << PXCAR_FUNC_NUM_OFFS);
+	/* lgacy register space */
+	cfgCmd |= (regOff & PXCAR_REG_NUM_MASK);
+	/* extended register space */
+	cfgCmd |= (((regOff & PXCAR_REAL_EXT_REG_NUM_MASK) >>
+		     PXCAR_REAL_EXT_REG_NUM_OFFS) << PXCAR_EXT_REG_NUM_OFFS);
+	cfgCmd |= PXCAR_CONFIG_EN;
+
+	/* Write the address to the PEX configuration address register */
+	MV_REG_WRITE(PEX_CFG_ADDR_REG(pciIf), cfgCmd);
+
+	/*
+	 * In order to let the PEX controller absorbed the address of the
+	 * read transaction we perform a validity check that the address
+	 * was written
+	 * */
+	if (cfgCmd != MV_REG_READ(PEX_CFG_ADDR_REG(pciIf)))
+		return 0xFFFFFFFF;
+
+	/* cleaning Master Abort */
+	MV_REG_BIT_SET(PEX_CFG_DIRECT_ACCESS(pciIf, PEX_STATUS_AND_COMMAND),
+			PXSAC_MABORT);
+
+	/* Read the Data returned in the PEX Data register */
+	return  MV_REG_READ(PEX_CFG_DATA_REG(pciIf));
+
+}
 
 /* Currentlly the PCI config read/write are implemented as read modify write
    to 32 bit.
@@ -197,7 +242,7 @@ static int mv_pci_read_config(struct pci_bus *bus,
 				  unsigned int devfn, int where,
 				  int size, u32 *val)
 {
-	u32 bus_num,func,regOff,dev_no,temp, localBus;		
+	u32 bus_num, func, dev_no, temp, localBus;
 	struct pci_sys_data *sysdata = (struct pci_sys_data *)bus->sysdata;
 	u32 pciIf = sysdata->mv_controller_num;
 
@@ -208,20 +253,18 @@ static int mv_pci_read_config(struct pci_bus *bus,
 	bus_num = bus->number;
 	dev_no = PCI_SLOT(devfn);
 
-	/* don't return for our device */
+	/* Our local bus is PEX so enable reading only device 0 */
 	localBus = mvPexLocalBusNumGet(pciIf);
-	if ((dev_no == 0) && ( bus_num == localBus))
-	{
-		DB(printk("PCI %d read from our own dev return 0xffffffff \n", pciIf));
+	if ((dev_no !=  0) && (bus_num == localBus)) {
+		DB(pr_info("PCI %d device %d illegal on local bus\n", pciIf,
+					dev_no));
 		return 0xffffffff;
 	}
 
 	func = PCI_FUNC(devfn);
-	regOff = (MV_U32)where & (PXCAR_REG_NUM_MASK | PXCAR_REAL_EXT_REG_NUM_MASK); /* total of 12 bits: 8 legacy + 4 extended */
 
-	DB(printk("PCI %d read: bus = %x dev = %x func = %x regOff = %x ",pciIf, bus_num,dev_no,func,regOff));
+	temp = pci_read_cfg(pciIf, bus_num, dev_no, func, where);
 
-	temp = (u32) mvPexConfigRead(pciIf, bus_num, dev_no, func, regOff);
 	switch (size) {
 		case 1:
 			temp = (temp >>  (8*(where & 0x3))) & 0xff;
@@ -237,35 +280,35 @@ static int mv_pci_read_config(struct pci_bus *bus,
 
 	*val = temp;
 
-	DB(printk(" got %x \n",temp));
+	DB(pr_info("PCI %d read: bus = %x dev = %x func = %x regOff = %x"
+		   "val = 0x%08x\n", pciIf, bus_num, dev_no, func,
+		   where, temp));
 
 	return 0;
 }
 
-static int mv_pci_write_config(struct pci_bus *bus, unsigned int devfn, int where,
-                           int size, u32 val)
+static int mv_pci_write_config(struct pci_bus *bus, unsigned int devfn,
+		int where, int size, u32 val)
 {
 	u32 bus_num,func,regOff,dev_no,temp, mask , shift;
 	struct pci_sys_data *sysdata = (struct pci_sys_data *)bus->sysdata;	
 	u32 pciIf = sysdata->mv_controller_num;		
+	u32 cfgCmd;
 
 	if (MV_FALSE == mvCtrlPwrClckGet(PEX_UNIT_ID, pciIf))
 		return 0xFFFFFFFF;
+
 	bus_num = bus->number;
 	dev_no = PCI_SLOT(devfn);
 	func = PCI_FUNC(devfn);
-	regOff = (MV_U32)where & (PXCAR_REG_NUM_MASK | PXCAR_REAL_EXT_REG_NUM_MASK); /* total of 12 bits: 8 legacy + 4 extended */
+	/* total of 12 bits: 8 legacy + 4 extended */
+	regOff = (MV_U32)where & (PXCAR_REG_NUM_MASK |
+			PXCAR_REAL_EXT_REG_NUM_MASK);
 
-	DB(printk("PCI %d: writing data %x size %x to bus %x dev %x func %x offs %x \n",
-			  pciIf, val,size,bus_num,dev_no,func,regOff));
 	if (size != 4)
-	{
-		temp = (u32) mvPexConfigRead(pciIf, bus_num, dev_no, func, regOff);
-	}
+		temp = pci_read_cfg(pciIf, bus_num, dev_no, func, where);
 	else
-	{
 		temp = val;
-	}
 
 	switch (size) {
 		case 1:
@@ -284,7 +327,37 @@ static int mv_pci_write_config(struct pci_bus *bus, unsigned int devfn, int wher
 	}
 
 	temp = (temp & (~(mask << shift))) | ((val & mask) << shift);
-	mvPexConfigWrite(pciIf, bus_num, dev_no, func, regOff, temp);
+
+	/* Creating PEX address to be passed */
+	cfgCmd  = (bus_num << PXCAR_BUS_NUM_OFFS);
+	cfgCmd |= (dev_no << PXCAR_DEVICE_NUM_OFFS);
+	cfgCmd |= (func << PXCAR_FUNC_NUM_OFFS);
+	/* lgacy register space */
+	cfgCmd |= (regOff & PXCAR_REG_NUM_MASK);
+	/* extended register space */
+	cfgCmd |= (((regOff & PXCAR_REAL_EXT_REG_NUM_MASK) >>
+		     PXCAR_REAL_EXT_REG_NUM_OFFS) << PXCAR_EXT_REG_NUM_OFFS);
+	cfgCmd |= PXCAR_CONFIG_EN;
+
+	DB(pr_info("PCI %d: write data 0x%08x size %x to bus %x dev %x func %x"
+		   "offs %x\n", pciIf, temp, size, bus_num, dev_no,
+		   func, regOff));
+
+	/* Write the address to the PEX configuration address register */
+	MV_REG_WRITE(PEX_CFG_ADDR_REG(pciIf), cfgCmd);
+
+	/*
+	 * In order to let the PEX controller absorbed the address of the read
+	 * transaction we perform a validity check that the address was written
+	 */
+	if (cfgCmd != MV_REG_READ(PEX_CFG_ADDR_REG(pciIf))) {
+		pr_info("Error: mv_pci_write_config failed to write\n");
+		return 1;
+	}
+
+	/* Write the Data passed to the PEX Data register */
+	MV_REG_WRITE(PEX_CFG_DATA_REG(pciIf), temp);
+
 	return 0;
 }
 
@@ -382,6 +455,7 @@ struct pci_bus *mv_pex_scan_bus(int nr, struct pci_sys_data *sys)
 
 		if (MV_TRUE == mvCtrlPwrClckGet(PEX_UNIT_ID, pexNextHWInf)) {
 			mvPexLocalBusNumSet(pexNextHWInf, (bus->subordinate + 1));
+			mvPexLocalDevNumSet(pexNextHWInf, 0x1);
 			break;
 		}
 	}
@@ -389,53 +463,52 @@ struct pci_bus *mv_pex_scan_bus(int nr, struct pci_sys_data *sys)
 	return bus;
 }
 
-
-static int __init mv_map_irq_0(struct pci_dev *dev, u8 slot, u8 pin)
+static int __init mv_map_irq_0(const struct pci_dev *dev, u8 slot, u8 pin)
 {	
 	return IRQ_AURORA_PCIE0;
 }
 
-static int __init mv_map_irq_1(struct pci_dev *dev, u8 slot, u8 pin)
+static int __init mv_map_irq_1(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	return IRQ_AURORA_PCIE1;
 }
 
-static int __init mv_map_irq_2(struct pci_dev *dev, u8 slot, u8 pin)
+static int __init mv_map_irq_2(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	return IRQ_AURORA_PCIE2;
 }
 
-static int __init mv_map_irq_3(struct pci_dev *dev, u8 slot, u8 pin)
+static int __init mv_map_irq_3(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	return IRQ_AURORA_PCIE3;
 }
 
-static int __init mv_map_irq_4(struct pci_dev *dev, u8 slot, u8 pin)
+static int __init mv_map_irq_4(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	return IRQ_AURORA_PCIE4;
 }
 
-static int __init mv_map_irq_5(struct pci_dev *dev, u8 slot, u8 pin)
+static int __init mv_map_irq_5(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	return IRQ_AURORA_PCIE5;
 }
 
-static int __init mv_map_irq_6(struct pci_dev *dev, u8 slot, u8 pin)
+static int __init mv_map_irq_6(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	return IRQ_AURORA_PCIE6;
 }
 
-static int __init mv_map_irq_7(struct pci_dev *dev, u8 slot, u8 pin)
+static int __init mv_map_irq_7(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	return IRQ_AURORA_PCIE7;
 }
 
-static int __init mv_map_irq_8(struct pci_dev *dev, u8 slot, u8 pin)
+static int __init mv_map_irq_8(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	return IRQ_AURORA_PCIE8;
 }
 
-static int __init mv_map_irq_9(struct pci_dev *dev, u8 slot, u8 pin)
+static int __init mv_map_irq_9(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	return IRQ_AURORA_PCIE9;
 }

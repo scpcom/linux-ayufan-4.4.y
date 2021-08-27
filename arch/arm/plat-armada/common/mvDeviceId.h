@@ -251,8 +251,8 @@ extern "C" {
 #define MV_6560_Z0_ID          		((MV_6560_DEV_ID << 16) | MV_6560_Z0_REV)
 #define MV_6560_Z0_NAME         	"88F6560 Z0"
 
-
 /* KW40 */
+#define MV_67XX			0x6700
 #define MV_6710_DEV_ID		0x6710
 
 #define MV_6710_Z1_REV		0x0
@@ -284,8 +284,8 @@ extern "C" {
 #define MV_6707_A1_ID           ((MV_6707_DEV_ID << 16) | MV_6707_A1_REV)
 #define MV_6707_A1_NAME         "MV6707 A1"
 
-
 /* Armada XP Family */
+#define MV_78XX0		0x78000
 #define MV_78130_DEV_ID		0x7813
 #define MV_78160_DEV_ID		0x7816
 #define MV_78230_DEV_ID		0x7823

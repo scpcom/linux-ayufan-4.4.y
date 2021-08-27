@@ -67,7 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/mvCtrlEnvSpec.h"
 #include "mvSysNfcConfig.h"
 #include "mvNfcRegs.h"
-#ifdef CONFIG_MV_INCLUDE_PDMA
+#ifdef MV_INCLUDE_PDMA
 #include "pdma/mvPdma.h"
 #include "pdma/mvPdmaRegs.h"
 #endif
@@ -137,6 +137,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ns_clk(ns, ns2clk)	((ns % ns2clk) ? (MV_U32)((ns/ns2clk)+1) : (MV_U32)(ns/ns2clk))
 #define maxx(a, b)		((a > b) ? a : b)
 #define check_limit(val, pwr)	((val > ((1 << pwr)-1)) ? ((1 << pwr)-1) : val)
+
+#ifdef CONFIG_CPU_BIG_ENDIAN
+#define MV_LE32_TO_CPU(x)	le32_to_cpu(x)
+#define MV_CPU_TO_LE32(x)	cpu_to_le32(x)
+#else
+#define MV_LE32_TO_CPU(x)	(x)
+#define MV_CPU_TO_LE32(x)	(x)
+#endif
 
 #define DBGPRINT(x) 	printk x
 #define DBGLVL	 	KERN_INFO
@@ -666,24 +674,17 @@ MV_STATUS mvNfcInit(MV_NFC_INFO *nfcInfo, MV_NFC_CTRL *nfcCtrl)
 	/* Write registers before device detection */
 	MV_REG_WRITE(NFC_CONTROL_REG, ctrl_reg);
 
-#ifdef CONFIG_MTD_NAND_NFC_INIT_RESET
+#ifdef MTD_NAND_NFC_INIT_RESET
 	/* reset the device */
 	ret = mvNfcReset();
-
 	if (ret != MV_OK)
-	{
-		mvOsPrintf("mvNfcReset failed. Returned %d\n", ret);
 		return ret;
-	}
 #endif
 
 	/* Read the device ID */
 	ret = mvNfcReadIdNative(nfcCtrl->currCs, &read_id);
 	if (ret != MV_OK)
-	{
-		mvOsPrintf("mvNfcReadIdNative failed. Returned %d\n", ret);
 		return ret;
-	}
 
 	/* Look for device ID in knwon device table */
 	for (i = 0; i < (sizeof(flashDeviceInfo) / sizeof(MV_NFC_FLASH_INFO)); i++) {
@@ -699,11 +700,8 @@ MV_STATUS mvNfcInit(MV_NFC_INFO *nfcInfo, MV_NFC_CTRL *nfcCtrl)
 	if (flashDeviceInfo[i].flags & NFC_FLAGS_ONFI_MODE_3_SET) {
 		ret = mvNfcDeviceModeSet(nfcCtrl, MV_NFC_ONFI_MODE_3);
 		if (ret != MV_OK)
-		{
-			mvOsPrintf("mvNfcDeviceModeSet failed. Returned %d\n", ret);
 			return ret;
 		}
-	}
 
 	/* Critical Initialization done. Raise NFC clock if needed */
 	if (flashDeviceInfo[i].flags & NFC_CLOCK_UPSCALE_200M) {
@@ -720,10 +718,7 @@ MV_STATUS mvNfcInit(MV_NFC_INFO *nfcInfo, MV_NFC_CTRL *nfcCtrl)
 	/* calculate Timing parameters */
 	ret = mvNfcTimingSet(nand_clock, &flashDeviceInfo[i]);
 	if (ret != MV_OK)
-	{
-		mvOsPrintf("mvNfcTimingSet failed. Returned %d\n", ret);
 		return ret;
-	}
 
 	/* Configure the control register based on the device detected */
 	ctrl_reg = MV_REG_READ(NFC_CONTROL_REG);
@@ -792,7 +787,7 @@ MV_STATUS mvNfcInit(MV_NFC_INFO *nfcInfo, MV_NFC_CTRL *nfcCtrl)
 	/* Write the updated control register */
 	MV_REG_WRITE(NFC_CONTROL_REG, ctrl_reg);
 
-#ifdef CONFIG_MV_INCLUDE_PDMA
+#ifdef MV_INCLUDE_PDMA
 	/* DMA resource allocation */
 	if (nfcInfo->ioMode == MV_NFC_PDMA_ACCESS) {
 		/* Allocate command buffer */
@@ -855,7 +850,7 @@ MV_STATUS mvNfcInit(MV_NFC_INFO *nfcInfo, MV_NFC_CTRL *nfcCtrl)
 	nfcCtrl->ifMode = nfcInfo->ifMode;
 	nfcCtrl->currCs = MV_NFC_CS_NONE;
 	nfcCtrl->regsPhysAddr = nfcInfo->regsPhysAddr;
-#ifdef CONFIG_MV_INCLUDE_PDMA
+#ifdef MV_INCLUDE_PDMA
 	nfcCtrl->dataPdmaIntMask = nfcInfo->dataPdmaIntMask;
 	nfcCtrl->cmdPdmaIntMask = nfcInfo->cmdPdmaIntMask;
 #endif
@@ -1925,7 +1920,7 @@ MV_STATUS mvNfcReadWrite(MV_NFC_CTRL *nfcCtrl, MV_NFC_CMD_TYPE cmd, MV_U32 *virt
 		} else {	/* PIO mode */
 
 			for (i = 0; i < data_len; i += 4) {
-				*virtBufAddr = MV_REG_READ(NFC_DATA_BUFF_REG);
+				*virtBufAddr = MV_LE32_TO_CPU(MV_REG_READ(NFC_DATA_BUFF_REG));
 				virtBufAddr++;
 			}
 		}
@@ -1950,7 +1945,7 @@ MV_STATUS mvNfcReadWrite(MV_NFC_CTRL *nfcCtrl, MV_NFC_CMD_TYPE cmd, MV_U32 *virt
 		} else {	/* PIO mode */
 
 			for (i = 0; i < data_len; i += 4) {
-				MV_REG_WRITE(NFC_DATA_BUFF_REG, *virtBufAddr);
+				MV_REG_WRITE(NFC_DATA_BUFF_REG, MV_CPU_TO_LE32(*virtBufAddr));
 				virtBufAddr++;
 			}
 		}
@@ -1988,14 +1983,14 @@ MV_VOID mvNfcReadWritePio(MV_NFC_CTRL *nfcCtrl, MV_U32 *buff, MV_U32 data_len, M
 	switch (mode) {
 	case MV_NFC_PIO_READ:
 		for (i = 0; i < data_len; i += 4) {
-			*buff = MV_REG_READ(NFC_DATA_BUFF_REG);
+			*buff = MV_LE32_TO_CPU(MV_REG_READ(NFC_DATA_BUFF_REG));
 			buff++;
 		}
 		break;
 
 	case MV_NFC_PIO_WRITE:	/* Program a single page of 512B or 2KB */
 		for (i = 0; i < data_len; i += 4) {
-			MV_REG_WRITE(NFC_DATA_BUFF_REG, *buff);
+			MV_REG_WRITE(NFC_DATA_BUFF_REG, MV_CPU_TO_LE32(*buff));
 			buff++;
 		}
 		break;
@@ -2328,7 +2323,7 @@ static MV_STATUS mvNfcDeviceFeatureSet(MV_NFC_CTRL *nfcCtrl, MV_U8 cmd, MV_U8 ad
 	/* Wait for Command WRITE request */
 	errCode = mvDfcWait4Complete(NFC_SR_WRCMDREQ_MASK, 1);
 	if (errCode != MV_OK)
-		goto Error;
+		goto Error_1;
 
 	reg = MV_REG_READ(NFC_STATUS_REG);
 	MV_REG_WRITE(NFC_STATUS_REG, reg);
@@ -2370,7 +2365,7 @@ static MV_STATUS mvNfcDeviceFeatureSet(MV_NFC_CTRL *nfcCtrl, MV_U8 cmd, MV_U8 ad
 	if (timeout == 0)
 		return MV_BAD_STATE;
 
-Error:
+Error_1:
 	return errCode;
 }
 
@@ -2411,7 +2406,7 @@ static MV_STATUS mvNfcDeviceFeatureGet(MV_NFC_CTRL *nfcCtrl, MV_U8 cmd, MV_U8 ad
 	/* Wait for Command WRITE request */
 	errCode = mvDfcWait4Complete(NFC_SR_WRCMDREQ_MASK, 1);
 	if (errCode != MV_OK)
-		goto Error;
+		goto Error_2;
 
 	reg = MV_REG_READ(NFC_STATUS_REG);
 	MV_REG_WRITE(NFC_STATUS_REG, reg);
@@ -2433,7 +2428,7 @@ static MV_STATUS mvNfcDeviceFeatureGet(MV_NFC_CTRL *nfcCtrl, MV_U8 cmd, MV_U8 ad
 	if (errCode != MV_OK)
 		return errCode;
 
-	udelay(100);
+	udelay(500);
 	/* Send Last-Naked Read Command */
 	reg = 0x0;
 	reg |= NFC_CB0_CMD_XTYPE_LAST_NAKED;
@@ -2463,7 +2458,7 @@ static MV_STATUS mvNfcDeviceFeatureGet(MV_NFC_CTRL *nfcCtrl, MV_U8 cmd, MV_U8 ad
 	}
 	if (timeout == 0)
 		return MV_BAD_STATE;
-Error:
+Error_2:
 	return errCode;
 }
 
@@ -2507,8 +2502,7 @@ static MV_STATUS mvNfcDeviceModeSet(MV_NFC_CTRL *nfcCtrl, MV_NFC_ONFI_MODE mode)
 	return MV_OK;
 }
 
-
-#ifdef CONFIG_MTD_NAND_NFC_INIT_RESET
+#ifdef MTD_NAND_NFC_INIT_RESET
 MV_STATUS mvNfcReset(void)
 {
 	MV_U32 reg;
@@ -2527,10 +2521,7 @@ MV_STATUS mvNfcReset(void)
 	/* Wait for Command WRITE request */
 	errCode = mvDfcWait4Complete(NFC_SR_WRCMDREQ_MASK, 1);
 	if (errCode != MV_OK)
-	{
-		mvOsPrintf("%s() - Failed wait for NFC_SR_WRCMDREQ_MASK\n", __func__ );
-		goto Error;
-	}
+		goto Error_3;
 
 	/* Send Command */
 	MV_REG_WRITE(NFC_COMMAND_BUFF_0_REG, 0x00A000FF);	/* DFC_NDCB0_RESET */
@@ -2540,10 +2531,7 @@ MV_STATUS mvNfcReset(void)
 	/* Wait for Command completion */
 	errCode = mvDfcWait4Complete(NFC_SR_RDY0_MASK, 1000);
 	if (errCode != MV_OK)
-	{
-		mvOsPrintf("%s() - Failed wait for NFC_SR_RDY0_MASK\n", __func__ );
-		goto Error;
-	}
+		goto Error_3;
 
 	/* Wait for ND_RUN bit to get cleared. */
 	while (timeout > 0) {
@@ -2555,7 +2543,7 @@ MV_STATUS mvNfcReset(void)
 	if (timeout == 0)
 		return MV_BAD_STATE;
 
-Error:
+Error_3:
 	return errCode;
 }
 #endif
@@ -2653,7 +2641,7 @@ static MV_STATUS mvNfcTimingSet(MV_U32 tclk, MV_NFC_FLASH_INFO *flInfo)
 	MV_U32 tadl_nfc, tch_nfc, tcs_nfc, twh_nfc, twp_nfc, trh_nfc, trp_nfc;
 	MV_U32 tr_nfc, trhw_nfc, twhr_nfc, tar_nfc;
 	MV_U32 tr_pre_nfc = 0;
-	MV_U32 ret = MV_OK;
+/*	MV_U32 ret = MV_OK; */
 
 	switch (tclk) {
 	case 125000000:
@@ -2696,37 +2684,37 @@ static MV_STATUS mvNfcTimingSet(MV_U32 tclk, MV_NFC_FLASH_INFO *flInfo)
 	trp_nfc = (trp - 1);
 
 	if (check_limit(tadl_nfc, 5) != tadl_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		tadl_nfc = check_limit(tadl_nfc, 5);
 	}
 
 	if (check_limit(tch_nfc, 3) != tch_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		tch_nfc = check_limit(tch_nfc, 3);
 	}
 
 	if (check_limit(tcs_nfc, 3) != tcs_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		tcs_nfc = check_limit(tcs_nfc, 3);
 	}
 
 	if (check_limit(twh_nfc, 3) != twh_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		twh_nfc = check_limit(twh_nfc, 3);
 	}
 
 	if (check_limit(twp_nfc, 3) != twp_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		twp_nfc = check_limit(twp_nfc, 3);
 	}
 
 	if (check_limit(trh_nfc, 3) != trh_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		trh_nfc = check_limit(trh_nfc, 3);
 	}
 
 	if (check_limit(trp_nfc, 4) != trp_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		trp_nfc = check_limit(trp_nfc, 4);
 	}
 
@@ -2760,7 +2748,7 @@ static MV_STATUS mvNfcTimingSet(MV_U32 tclk, MV_NFC_FLASH_INFO *flInfo)
 
 	if (twhr_nfc >= 16) {
 		twhr_nfc = 15; /* worst case - best we can do */
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 	}
 
 	tar_nfc = twhr_nfc; /* our initial assumption */
@@ -2777,22 +2765,22 @@ static MV_STATUS mvNfcTimingSet(MV_U32 tclk, MV_NFC_FLASH_INFO *flInfo)
 #endif
 
 	if (check_limit(tr_nfc, 16) != tr_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		tr_nfc = check_limit(tr_nfc, 16);
 	}
 
 	if (check_limit(trhw_nfc, 2) != trhw_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		trhw_nfc = check_limit(trhw_nfc, 2);
 	}
 
 	if (check_limit(twhr_nfc, 4) != twhr_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		twhr_nfc = check_limit(twhr_nfc, 4);
 	}
 
 	if (check_limit(tar_nfc, 4) != tar_nfc) {
-		ret = MV_OUT_OF_RANGE;
+/*		ret = MV_OUT_OF_RANGE; */
 		tar_nfc = check_limit(tar_nfc, 5);
 	}
 

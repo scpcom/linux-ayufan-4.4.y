@@ -814,7 +814,19 @@ __SYSCALL(__NR_SYNONotifyAddWatch, sys_SYNONotifyAddWatch)
 #define __NR_SYNONotifyRemoveWatch              424
 #define SYNONotifyRemoveWatch(arg1, arg2, arg3) syscall(__NR_SYNONotifyRemoveWatch, arg1, arg2, arg3)
 __SYSCALL(__NR_SYNONotifyRemoveWatch, sys_SYNONotifyRemoveWatch)
+#define __NR_SYNONotifyAddWatch32               425
+#define SYNONotifyAddWatch32(arg1, arg2, arg3)  syscall(__NR_SYNONotifyAddWatch32, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNONotifyAddWatch32, sys_SYNONotifyAddWatch32)
+#define __NR_SYNONotifyRemoveWatch32            426
+#define SYNONotifyRemoveWatch32(arg1,arg2,arg3) syscall(__NR_SYNONotifyRemoveWatch32, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNONotifyRemoveWatch32, sys_SYNONotifyRemoveWatch32)
 #endif /* CONFIG_SYNO_NOTIFY */
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOArchiveOverwrite               427
+#define SYNOArchiveOverwrite(arg1, arg2)        syscall(__NR_SYNOArchiveOverwrite, arg1, arg2)
+__SYSCALL(__NR_SYNOArchiveOverwrite, sys_SYNOArchiveOverwrite)
+#endif
 
 #ifdef MY_ABC_HERE
 #define __syscall_return(type, res) \

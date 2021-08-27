@@ -73,10 +73,10 @@ extern "C" {
 #endif
 
 /* Constants */
-#define		MV_SFLASH_READ_CMND_LENGTH		    4		/* 1B opcode + 3B address */
-#define		MV_SFLASH_SE_CMND_LENGTH		    4		/* 1B opcode + 3B address */
+#define		MV_SFLASH_READ_CMND_LENGTH		    5		/* 1B opcode + 3B address */
+#define		MV_SFLASH_SE_CMND_LENGTH		    5		/* 1B opcode + 3B address */
 #define		MV_SFLASH_BE_CMND_LENGTH		    1		/* 1B opcode */
-#define		MV_SFLASH_PP_CMND_LENGTH		    4		/* 1B opcode + 3B address */
+#define		MV_SFLASH_PP_CMND_LENGTH		    5		/* 1B opcode + 3B address */
 #define		MV_SFLASH_WREN_CMND_LENGTH		    1		/* 1B opcode */
 #define		MV_SFLASH_WRDI_CMND_LENGTH		    1		/* 1B opcode */
 #define		MV_SFLASH_RDID_CMND_LENGTH		    1		/* 1B opcode */
@@ -101,16 +101,28 @@ extern "C" {
 #define     MV_SFLASH_DEFAULT_WREN_OPCD         0x06	/* Default Write Enable */
 #define     MV_SFLASH_NO_SPECIFIC_OPCD          0x00
 
+#ifdef CONFIG_SYNO_ARMADA
+#define GD_SFLASH_STATUS_REG_WEL_MASK			0x2
+#endif
 /********************************/
 /*  ST M25Pxxx Device Specific  */
 /********************************/
  
 /* Manufacturer IDs and Device IDs for SFLASHs supported by the driver */
 #define     MV_M25PXXX_ST_MANF_ID               0x20
+#ifdef CONFIG_SYNO_ARMADA
+#define     MV_M25P80_DEVICE_ID                 0x2014
+#define     MV_M25P80_MAX_SPI_FREQ              20000000    /* 20MHz */
+#define     MV_M25P80_MAX_FAST_SPI_FREQ         50000000    /* 50MHz */
+#define     MV_M25P80_FAST_READ_DUMMY_BYTES     1
+#define     MV_M25P80_SECTOR_SIZE               0x10000     /* 64K */
+#define     MV_M25P80_SECTOR_NUMBER             16
+#endif
 #define     MV_M25P32_DEVICE_ID                 0x2016
 #define     MV_M25P32_MAX_SPI_FREQ              20000000    /* 20MHz */
 #define     MV_M25P32_MAX_FAST_SPI_FREQ         50000000    /* 50MHz */
 #define     MV_M25P32_FAST_READ_DUMMY_BYTES     1
+#define	    MV_M25P32_ADDR_CYC_CNT	        3
 #define     MV_M25P64_DEVICE_ID                 0x2017
 #ifdef CONFIG_SYNO_ARMADA
 #define     MV_NU25P64_DEVICE_ID                 0xBA17
@@ -118,22 +130,24 @@ extern "C" {
 #define     MV_M25P64_MAX_SPI_FREQ              20000000    /* 20MHz */
 #define     MV_M25P64_MAX_FAST_SPI_FREQ         50000000    /* 50MHz */
 #define     MV_M25P64_FAST_READ_DUMMY_BYTES     1
+#define	    MV_M25P64_ADDR_CYC_CNT	        3
 #define     MV_M25P128_DEVICE_ID                0x2018
 #define     MV_M25P128_MAX_SPI_FREQ             20000000    /* 20MHz */
 #define     MV_M25P128_MAX_FAST_SPI_FREQ        50000000    /* 50MHz */
 #define     MV_M25P128_FAST_READ_DUMMY_BYTES    1
-
+#define	    MV_M25P128_ADDR_CYC_CNT	        3
 #define     MV_M25PX64_DEVICE_ID                 0x7117
 #define     MV_M25PX64_MAX_SPI_FREQ              20000000    /* 20MHz */
 #define     MV_M25PX64_MAX_FAST_SPI_FREQ         50000000    /* 50MHz */
 #define     MV_M25PX64_FAST_READ_DUMMY_BYTES     1
+#define	    MV_M25PX64_ADDR_CYC_CNT	         3
 
 /* Manufacturer IDs and Device IDs for SFLASHs supported by the driver */
 #define     MV_M25Q128_DEVICE_ID                 0xBA18
 #define     MV_M25Q128_MAX_SPI_FREQ              20000000    /* 20MHz */
 #define     MV_M25Q128_MAX_FAST_SPI_FREQ         50000000    /* 50MHz */
 #define     MV_M25Q128_FAST_READ_DUMMY_BYTES     1
-
+#define     MV_M25Q128_ADDR_CYC_CNT             3
 
 /* Sector Sizes and population per device model*/
 #define     MV_M25P32_SECTOR_SIZE               0x10000 /* 64K */
@@ -158,6 +172,7 @@ extern "C" {
 #define		MV_M25P_SE_CMND_OPCD			    0xD8	/* Sector Erase */
 #define		MV_M25P_BE_CMND_OPCD			    0xC7	/* Bulk Erase */
 #define		MV_M25P_RES_CMND_OPCD			    0xAB	/* Read Electronic Signature */
+#define		MV_M25P_ADDR_CYC_CNT			3
 
 /* Status Register Write Protect Bit Masks - 3bits */
 #define		MV_M25P_STATUS_REG_WP_MASK	        (0x07 << MV_SFLASH_STATUS_REG_WP_OFFSET)
@@ -181,25 +196,29 @@ extern "C" {
 #define     MV_MX25L8006E_MAX_SPI_FREQ           20000000    /* 20MHz */
 #define     MV_MX25L8006E_MAX_FAST_SPI_FREQ      86000000    /* 86MHz */
 #define     MV_MX25L8006E_FAST_READ_DUMMY_BYTES  1
+#define     MV_MX25L8006E_ADDR_CYC_CNT           3
 #endif
 #define     MV_MX25L1605_DEVICE_ID              0x2015
 #define     MV_MX25L1605_MAX_SPI_FREQ           20000000    /* 20MHz */
 #define     MV_MX25L1605_MAX_FAST_SPI_FREQ      50000000    /* 50MHz */
 #define     MV_MX25L1605_FAST_READ_DUMMY_BYTES  1
+#define	MV_MX25L1605_ADDR_CYC_CNT	    3
 #define     MV_MX25L3205_DEVICE_ID              0x2016
 #define     MV_MX25L3205_MAX_SPI_FREQ           20000000    /* 20MHz */
 #define     MV_MX25L3205_MAX_FAST_SPI_FREQ      50000000    /* 50MHz */
 #define     MV_MX25L3205_FAST_READ_DUMMY_BYTES  1
+#define	MV_MX25L3205_ADDR_CYC_CNT	    3
 #define     MV_MX25L6405_DEVICE_ID              0x2017
 #define     MV_MX25L6405_MAX_SPI_FREQ           20000000    /* 20MHz */
 #define     MV_MX25L6405_MAX_FAST_SPI_FREQ      50000000    /* 50MHz */
 #define     MV_MX25L6405_FAST_READ_DUMMY_BYTES  1
-#define     MV_MXIC_DP_EXIT_DELAY               30          /* 30 ms */
+#define	MV_MX25L6405_ADDR_CYC_CNT	    3
 #define	    MV_MX25L257_DEVICE_ID		0x2019
 #define	    MV_MX25L257_MAX_SPI_FREQ      	20000000    /* 20MHz */
 #define	    MV_MX25L257_MAX_FAST_SPI_FREQ       50000000    /* 104MHz */
 #define	    MV_MX25L257_FAST_READ_DUMMY_BYTES   1
 #define	    MV_MX25L257_ADDR_CYC_CNT	        4
+#define     MV_MXIC_DP_EXIT_DELAY               30          /* 30 ms */
 
 /* Sector Sizes and population per device model*/
 #define     MV_MX25L1605_SECTOR_SIZE            0x10000 /* 64K */
@@ -253,6 +272,7 @@ extern "C" {
 #define     MV_S25FL128_MAX_SPI_FREQ           		33000000    /* 33MHz */
 #define     MV_S25FL128_MAX_FAST_SPI_FREQ        	104000000    /* 104MHz */
 #define     MV_S25FL128_FAST_READ_DUMMY_BYTES    	1
+#define	    MV_S25FL128_ADDR_CYC_CNT	        	3
 
 /* Sector Sizes and population per device model*/
 #define     MV_S25FL128_SECTOR_SIZE            			0x40000 /* 256K */
@@ -284,6 +304,45 @@ extern "C" {
 #define     	MV_S25FL_STATUS_BP_1_OF_2           	(0x07 << MV_SFLASH_STATUS_REG_WP_OFFSET)
 #define     	MV_S25FL_STATUS_BP_ALL              	(0x0F << MV_SFLASH_STATUS_REG_WP_OFFSET)
 
+#ifdef CONFIG_SYNO_ARMADA
+
+#define		GD_GD25Q_WREN_CMND_OPCD				0x06
+#define		GD_GD25Q_WRDI_CMND_OPCD				0x04
+#define		GD_GD25Q_RDID_CMND_OPCD				0x9F
+#define		GD_GD25Q_RDSR_CMND_OPCD				0x05
+#define		GD_GD25Q_WRSR_CMND_OPCD				0x01
+#define		GD_GD25Q_READ_CMND_OPCD				0x03
+#define		GD_GD25Q_FAST_RD_CMND_OPCD			0x0B
+#define		GD_GD25Q_PP_CMND_OPCD				0x02
+#define		GD_GD25Q_SE_CMND_OPCD				0xD8
+#define		GD_GD25Q_BE_CMND_OPCD				0xC7
+#define		GD_GD25Q_RES_CMND_OPCD				0xAB
+#define		GD_SFLASH_NO_SPECIFIC_OPCD			0x0
+
+#define		GD_GD25Q_SECTOR_SIZE				0x10000 /* 64K bytes */
+#define		GD_GD25Q_SECTOR_NUMBER				0x80
+#define		GD_GD25Q_PAGE_SIZE					0x100 /* 256 bytes */
+#define		GD_GD25Q_MANF_ID					0xC8
+#define		GD_GD25Q64B_DEVICE_ID				0x4017
+#define		GD_GD25Q_MAX_SPI_FREQ				50000000
+#define		GD_GD25Q_MAX_FAST_SPI_FREQ			50000000
+#define		GD_GD25Q_FAST_READ_DUMMY_BYTES		1
+#define		GD_GD25Q_ADDR_CYC_CNT				3
+
+/* Status Register Write Protect Bit Masks - 5bits */
+#define		GD_GD25Q_STATUS_REG_WP_MASK          (0x1F << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define		GD_GD25Q_STATUS_BP_NONE              (0x00 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define		GD_GD25Q_STATUS_BP_1_OF_256          (0x01 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define		GD_GD25Q_STATUS_BP_1_OF_128          (0x02 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define		GD_GD25Q_STATUS_BP_1_OF_64           (0x03 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define		GD_GD25Q_STATUS_BP_1_OF_32           (0x04 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define		GD_GD25Q_STATUS_BP_1_OF_16           (0x05 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define		GD_GD25Q_STATUS_BP_1_OF_8            (0x06 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define		GD_GD25Q_STATUS_BP_1_OF_4            (0x07 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define		GD_GD25Q_STATUS_BP_1_OF_2            (0x08 << MV_SFLASH_STATUS_REG_WP_OFFSET)
+#define		GD_GD25Q_STATUS_BP_ALL               (0x1F << MV_SFLASH_STATUS_REG_WP_OFFSET)
+
+#endif
 #ifdef __cplusplus
 }
 #endif

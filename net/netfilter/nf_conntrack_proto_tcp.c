@@ -818,11 +818,6 @@ static int tcp_packet(struct nf_conn *ct,
 {
 	struct net *net = nf_ct_net(ct);
 	struct nf_conntrack_tuple *tuple;
-#if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
-	struct nf_conntrack_tuple *tupleInverseDir;
-#endif
-#endif
 	enum tcp_conntrack new_state, old_state;
 	enum ip_conntrack_dir dir;
 	const struct tcphdr *th;
@@ -840,11 +835,6 @@ static int tcp_packet(struct nf_conn *ct,
 	new_state = tcp_conntracks[dir][index][old_state];
 	tuple = &ct->tuplehash[dir].tuple;
 
-#if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
-	tupleInverseDir	= &ct->tuplehash[!dir].tuple;
-#endif
-#endif
 	switch (new_state) {
 	case TCP_CONNTRACK_SYN_SENT:
 		if (old_state < TCP_CONNTRACK_TIME_WAIT)
@@ -997,14 +987,19 @@ static int tcp_packet(struct nf_conn *ct,
 	}
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	/*
 	 * When connection is handled by NFP, we have to relax TCP tracking
 	 * rules as not all packets goes through Linux conntrack.
 	 */
+	{
+		struct nf_conntrack_tuple *tupleInverseDir;
+
+		tupleInverseDir	= &ct->tuplehash[!dir].tuple;
 		if ((tuple->nfp) || (tupleInverseDir->nfp))
 			goto in_window;
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+	}
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 	if (!tcp_in_window(ct, &ct->proto.tcp, dir, index,

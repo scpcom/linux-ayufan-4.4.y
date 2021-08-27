@@ -255,9 +255,9 @@ static inline struct rt6_info *ip6_dst_alloc(struct dst_ops *ops,
 			sizeof(*rt) - sizeof(struct dst_entry));
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_FIB_LEARN)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	rt->nfp = false;
-#endif /* CONFIG_MV_ETH_NFP_FIB_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 	return rt;
@@ -842,13 +842,13 @@ restart:
 	dst_hold(&rt->dst);
 	if (nrt) {
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_FIB_LEARN)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 			if ((rt->rt6i_flags & RTF_CACHE)) {
 				ipv6_addr_copy(&rt->rt6i_src.addr, &fl6->saddr);
 				rt->rt6i_src.plen = 128;
 				rt->rt6i_iifindex = fl6->flowi6_iif;
 			}
-#endif /* CONFIG_MV_ETH_NFP_FIB_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 		err = ip6_ins_rt(nrt);

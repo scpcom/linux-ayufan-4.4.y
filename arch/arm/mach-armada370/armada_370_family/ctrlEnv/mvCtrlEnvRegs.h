@@ -322,6 +322,7 @@ extern "C" {
 #define	TSEN_CONF_OTF_CALIB_MASK		(0x1 << 30)
 #define	TSEN_CONF_REF_CAL_MASK			(0x1FF << 11)
 #define	TSEN_CONF_SOFT_RESET_MASK		(0x1 << 1)
+#define	TSEN_CONF_START_CALIB_MASK		(0x1 << 25)
 
 /* Controler environment registers offsets */
 #define GEN_PURP_RES_1_REG				0x182F4

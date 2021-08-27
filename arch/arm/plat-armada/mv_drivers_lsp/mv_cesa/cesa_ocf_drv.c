@@ -109,12 +109,14 @@ struct cesa_ocf_process {
 	int					digest_len;
 	struct cryptop 				*crp;
 	int 					need_cb;
-	int					valid;
 };
 
 /* global variables */
 static int32_t			cesa_ocf_id 		= -1;
 static struct cesa_ocf_data 	**cesa_ocf_sessions = NULL;
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
+static DEFINE_SPINLOCK(syno_cesa_lock);
+#endif
 static u_int32_t		cesa_ocf_sesnum = 0;
 static DEFINE_SPINLOCK(cesa_lock);
 static atomic_t result_count;
@@ -138,7 +140,9 @@ static struct tasklet_struct cesa_ocf_tasklet;
 static struct timeval          tt_start;
 static struct timeval          tt_end;
 static struct cesa_ocf_process *cesa_ocf_pool = NULL;
-static int proc_empty;
+static struct cesa_ocf_process *cesa_ocf_stack[CESA_OCF_POOL_SIZE];
+static unsigned int cesa_ocf_stack_idx;
+
 /*
  * dummy device structure
  */
@@ -266,23 +270,19 @@ ocf_check_action(struct cryptop *crp, struct cesa_ocf_data *cesa_ocf_cur_ses) {
 
 static inline struct cesa_ocf_process* cesa_ocf_alloc(void)
 {
-	int proc = 0;
+	struct cesa_ocf_process *retval;
 	unsigned long flags;
 	
 	spin_lock_irqsave(&cesa_lock, flags);
-
-	if(cesa_ocf_pool[proc_empty].valid != 0) {
+	if (cesa_ocf_stack_idx == 0) {
 		spin_unlock_irqrestore(&cesa_lock, flags);
-		printk("%s,%d: Error, entry is overrided in cesa_ocf_pool(%d)\n", __FILE__, __LINE__,proc_empty);
 		return NULL;
 	}
 
-	cesa_ocf_pool[proc_empty].valid = 1;
-	proc = proc_empty;
-	proc_empty = ((proc_empty+1) % CESA_OCF_POOL_SIZE);
+	retval = cesa_ocf_stack[--cesa_ocf_stack_idx];
 	spin_unlock_irqrestore(&cesa_lock, flags);
 
-	return &cesa_ocf_pool[proc];
+	return retval;
 }
 
 static inline void cesa_ocf_free(struct cesa_ocf_process *ocf_process_p)
@@ -290,7 +290,7 @@ static inline void cesa_ocf_free(struct cesa_ocf_process *ocf_process_p)
 	unsigned long flags;
 
 	spin_lock_irqsave(&cesa_lock, flags);
-	ocf_process_p->valid = 0;
+	cesa_ocf_stack[cesa_ocf_stack_idx++] = ocf_process_p;
 	spin_unlock_irqrestore(&cesa_lock, flags);
 }
 
@@ -325,30 +325,28 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 			should be available in CESA fifo */
 		if (free_resrc < 2) {
                 	dprintk("%s,%d: ERESTART\n", __FILE__, __LINE__);
-#ifdef CONFIG_SMP
-			crypto_freereq(crp);
-#endif
-                	return ERESTART;
+			return -ERESTART;
 		}
 
 #ifdef RT_DEBUG
         /* Sanity check */
         if (crp == NULL) {
                 printk("%s,%d: EINVAL\n", __FILE__, __LINE__);
-                return EINVAL;
+		return -EINVAL;
         }
 
         if (crp->crp_desc == NULL || crp->crp_buf == NULL ) {
                 printk("%s,%d: EINVAL\n", __FILE__, __LINE__);
                 crp->crp_etype = EINVAL;
-                return EINVAL;
+		return -EINVAL;
         }
 
         sid = crp->crp_sid & 0xffffffff;
         if ((sid >= cesa_ocf_sesnum) || (cesa_ocf_sessions[sid] == NULL)) {
-                crp->crp_etype = ENOENT;
-                printk("%s,%d: ENOENT session %d \n", __FILE__, __LINE__, sid);
-                return EINVAL;
+		crp->crp_etype = -ENOENT;
+		printk(KERN_ERR "%s,%d: ENOENT session %d\n", __FILE__,
+				__LINE__, sid);
+		return -EINVAL;
         }
 #endif
 
@@ -682,12 +680,9 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 			cesa_ocf_free(cesa_ocf_cmd);
 		if(cesa_ocf_cmd_wa)
 			cesa_ocf_free(cesa_ocf_cmd_wa);
-#ifdef CONFIG_SMP
-		crypto_freereq(crp);
-#endif
-		return ERESTART;
-	} 
-	else if((status != MV_NO_MORE) && (status != MV_OK)) {
+
+		return -ERESTART;
+	} else if ((status != MV_NO_MORE) && (status != MV_OK)) {
                 printk("%s,%d: cesa action failed, status = 0x%x\n", __FILE__, __LINE__, status);
 		goto p_error;
         }
@@ -695,15 +690,13 @@ cesa_ocf_process(device_t dev, struct cryptop *crp, int hint)
 	return 0;
 
 p_error:
-	crp->crp_etype = EINVAL;
+	crp->crp_etype = -EINVAL;
 	if(cesa_ocf_cmd)
 		cesa_ocf_free(cesa_ocf_cmd);
 	if(cesa_ocf_cmd_wa)
 		cesa_ocf_free(cesa_ocf_cmd_wa);
-#ifdef CONFIG_SMP
-	crypto_freereq(crp);
-#endif
-       	return EINVAL;
+
+	return -EINVAL;
 }
 
 /*
@@ -714,6 +707,7 @@ cesa_callback(unsigned long dummy)
 {
 	struct cesa_ocf_process *cesa_ocf_cmd = NULL;
 	struct cryptop 		*crp = NULL;
+	int need_cb;
 
 	dprintk("%s()\n", __func__);
 
@@ -721,19 +715,22 @@ cesa_callback(unsigned long dummy)
 
 	while (atomic_read(&result_count) != 0) {
 		cesa_ocf_cmd = result_Q[result_done];
+		need_cb = cesa_ocf_cmd->need_cb;
 		crp = cesa_ocf_cmd->crp; 
 
-		if (cesa_ocf_cmd->need_cb) {
-			if (debug) {
+		if (debug && need_cb)
 				mvCesaIfDebugMbuf("DST BUFFER", cesa_ocf_cmd->cesa_cmd.pDst, 0,
 							cesa_ocf_cmd->cesa_cmd.pDst->mbufSize);
-			}
-			crypto_done(crp);
-		}
 	
 		result_done = ((result_done + 1) % CESA_RESULT_Q_SIZE);
 		atomic_dec(&result_count);
-		cesa_ocf_cmd->valid = 0;
+		cesa_ocf_stack[cesa_ocf_stack_idx++] = cesa_ocf_cmd;
+
+		if (need_cb) {
+			spin_unlock(&cesa_lock);
+			crypto_done(crp);
+			spin_lock(&cesa_lock);
+		}
 	}
 
 	spin_unlock(&cesa_lock);
@@ -814,13 +811,15 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	MV_CESA_OPEN_SESSION cesa_session;
 	MV_CESA_OPEN_SESSION *cesa_ses = &cesa_session;
 
-
         dprintk("%s()\n", __func__);
         if (sid == NULL || cri == NULL) {
                 printk("%s,%d: EINVAL\n", __FILE__, __LINE__);
                 return EINVAL;
         }
 
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
+	spin_lock_irqsave(&syno_cesa_lock, flags);
+#endif
 	if (cesa_ocf_sessions) {
 		for (i = 1; i < cesa_ocf_sesnum; i++)
 			if (cesa_ocf_sessions[i] == NULL)
@@ -863,6 +862,13 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	cesa_ocf_sessions[i] = (struct cesa_ocf_data *) kmalloc(sizeof(struct cesa_ocf_data),
 			SLAB_ATOMIC);
 	if (cesa_ocf_sessions[i] == NULL) {
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
+		spin_unlock_irqrestore(&syno_cesa_lock, flags);
+		/* !! small lock LEAKAGE after !!
+		 * should NOT call cesa_ocf_freesession since
+		 * it does nothing in current implementation
+		 */
+#endif
 		cesa_ocf_freesession(NULL, i);
 		dprintk("%s,%d: EINVAL\n", __FILE__, __LINE__);
 		return ENOBUFS;
@@ -871,6 +877,9 @@ cesa_ocf_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	dprintk("%s,%d: new session %d \n", __FILE__, __LINE__, i);
 	
         *sid = i;
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
+	spin_unlock_irqrestore(&syno_cesa_lock, flags);
+#endif
         cesa_ocf_cur_ses = cesa_ocf_sessions[i];
         memset(cesa_ocf_cur_ses, 0, sizeof(struct cesa_ocf_data));
 	cesa_ocf_cur_ses->sid_encrypt = -1;
@@ -1117,13 +1126,21 @@ cesa_ocf_freesession(device_t dev, u_int64_t tid)
 	}
 
       	kfree(cesa_ocf_cur_ses);
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
+	spin_lock_irqsave(&syno_cesa_lock, flags);
+#endif
 	cesa_ocf_sessions[sid] = NULL;
+#ifdef CONFIG_SYNO_FIX_MV_CESA_RACE
+	spin_unlock_irqrestore(&syno_cesa_lock, flags);
+#endif
 
         return 0;
 }
 
+#ifndef CONFIG_SYNO_ARMADA_ARCH
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,30))
 extern int crypto_init(void);
+#endif
 #endif
 
 /*
@@ -1143,8 +1160,10 @@ cesa_ocf_init(void)
 
 	dprintk("%s\n", __func__);
 
+#ifndef CONFIG_SYNO_ARMADA_ARCH
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,30))
 	crypto_init();
+#endif
 #endif
 
 	/* Init globals */
@@ -1159,7 +1178,9 @@ cesa_ocf_init(void)
             	return EINVAL;
       	}
 
-	proc_empty = 0;
+	for (cesa_ocf_stack_idx = 0; cesa_ocf_stack_idx < CESA_OCF_POOL_SIZE; cesa_ocf_stack_idx++)
+		cesa_ocf_stack[cesa_ocf_stack_idx] = &cesa_ocf_pool[cesa_ocf_stack_idx];
+
 	memset(cesa_ocf_pool, 0, (sizeof(struct cesa_ocf_process) * CESA_OCF_POOL_SIZE));
 	memset(&mv_cesa_dev, 0, sizeof(mv_cesa_dev));
 	softc_device_init(&mv_cesa_dev, "MV CESA", 0, mv_cesa_methods);

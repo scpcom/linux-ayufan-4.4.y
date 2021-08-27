@@ -481,7 +481,7 @@ static struct xor_channel* xor_get(void)
 	while(retry--) { 
 		rr &= (CHANNELS-1);
 
-		if ((2 == rr) || xor_channels[rr].busy || xor_is_active(rr)) {
+		if (xor_channels[rr].busy || xor_is_active(rr)) {
 			rr++;
 			continue;
 		}

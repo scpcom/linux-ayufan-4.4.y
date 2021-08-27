@@ -29,13 +29,12 @@
 #endif
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-static inline void SYNO_ArchiveModify(struct inode *TargetInode)
+static inline void SYNO_ArchiveModify(struct inode *TargetInode, int blSetSMBArchive)
 {
 #ifdef MY_ABC_HERE
 	int old_version;
 	int new_version;
 #endif
-	int markDirty = 0;
 	if (NULL == TargetInode) {
 		return;
 	}
@@ -45,9 +44,12 @@ static inline void SYNO_ArchiveModify(struct inode *TargetInode)
 	}
 #ifdef MY_ABC_HERE
 	mutex_lock(&TargetInode->i_syno_mutex);
-	TargetInode->i_mode2 |= ALL_SYNO_ARCHIVE;
+	if (blSetSMBArchive) {
+		TargetInode->i_mode2 |= (S2_SMB_ARCHIVE|ALL_IARCHIVE);
+	} else {
+		TargetInode->i_mode2 |= ALL_IARCHIVE;
+	}
 	mutex_unlock(&TargetInode->i_syno_mutex);
-	markDirty = 1;
 #endif
 #ifdef MY_ABC_HERE
 	old_version = TargetInode->i_archive_version;
@@ -61,13 +63,9 @@ static inline void SYNO_ArchiveModify(struct inode *TargetInode)
 			value.v_archive_version = cpu_to_le32(new_version);
 			TargetInode->i_op->synosetxattr(TargetInode, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value), 0);
 		}
-		markDirty = 1;
 	}
 #endif
-
-	if(markDirty) {
 	mark_inode_dirty_sync(TargetInode);
-}
 }
 #endif
 
@@ -116,6 +114,7 @@ static inline int SYNONotify(struct dentry *dentry, __u32 mask)
 		ret = -EINVAL;
 		goto ERR;
 	}
+	path.dentry = dentry;
 	mntget(path.mnt);
 	dentry_buf = kmalloc(PATH_MAX, GFP_NOFS);
 	if(!dentry_buf){
@@ -253,23 +252,23 @@ static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 	fsnotify(new_dir, new_dir_mask, new_dir, FSNOTIFY_EVENT_INODE, new_name, fs_cookie);
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-	SYNO_ArchiveModify(old_dir);
+	SYNO_ArchiveModify(old_dir, 0);
 	if (old_dir != new_dir) {
-		SYNO_ArchiveModify(new_dir);
+		SYNO_ArchiveModify(new_dir, 0);
 	}
 #endif
 
 	if (target) {
 		fsnotify_link_count(target);
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-		SYNO_ArchiveModify(target);
+		SYNO_ArchiveModify(target, 0);
 #endif
 	}
 
 	if (source) {
 		fsnotify(source, FS_MOVE_SELF, moved->d_inode, FSNOTIFY_EVENT_INODE, NULL, 0);
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-		SYNO_ArchiveModify(source);
+		SYNO_ArchiveModify(source, 1);
 #endif
 	}
 	audit_inode_child(moved, new_dir);
@@ -302,7 +301,7 @@ static inline void fsnotify_nameremove(struct dentry *dentry, int isdir)
 		mask |= FS_ISDIR;
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-	SYNO_ArchiveModify(dentry->d_parent->d_inode);
+	SYNO_ArchiveModify(dentry->d_parent->d_inode, 0);
 #endif
 
 #ifdef CONFIG_SYNO_NOTIFY
@@ -329,8 +328,7 @@ static inline void fsnotify_create(struct inode *inode, struct dentry *dentry)
 	audit_inode_child(dentry, inode);
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-	SYNO_ArchiveModify(inode);
-	SYNO_ArchiveModify(dentry->d_inode);
+	SYNO_ArchiveModify(dentry->d_inode, 0);
 #endif
 
 #ifdef CONFIG_SYNO_NOTIFY
@@ -367,8 +365,7 @@ static inline void fsnotify_mkdir(struct inode *inode, struct dentry *dentry)
 	audit_inode_child(dentry, inode);
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-	SYNO_ArchiveModify(inode);
-	SYNO_ArchiveModify(d_inode);
+	SYNO_ArchiveModify(d_inode, 0);
 #endif
 
 #ifdef CONFIG_SYNO_NOTIFY
@@ -409,7 +406,7 @@ static inline void fsnotify_modify(struct file *file)
 
 	if (!(file->f_mode & FMODE_NONOTIFY)) {
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-		SYNO_ArchiveModify(inode);
+		SYNO_ArchiveModify(inode, 1);
 #endif
 		fsnotify_parent(path, NULL, mask);
 		fsnotify(inode, mask, path, FSNOTIFY_EVENT_PATH, NULL, 0);
@@ -463,7 +460,7 @@ static inline void fsnotify_xattr(struct dentry *dentry)
 		mask |= FS_ISDIR;
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-	SYNO_ArchiveModify(inode);
+	SYNO_ArchiveModify(inode, 1);
 #endif
 	fsnotify_parent(NULL, dentry, mask);
 
@@ -491,7 +488,7 @@ static inline void fsnotify_change(struct dentry *dentry, unsigned int ia_valid)
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	{
 		mask |= FS_MODIFY;
-		SYNO_ArchiveModify(inode);
+		SYNO_ArchiveModify(inode, 1);
 	}
 #else
 		mask |= FS_MODIFY;

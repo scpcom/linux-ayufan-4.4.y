@@ -2,9 +2,11 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
+#include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
 #include <linux/mtd/nand.h>
 #include <asm/io.h>
+#include <drivers/mtd/mtdcore.h>
 #include "ctrlEnv/sys/mvCpuIf.h"
 #include "boardEnv/mvBoardEnvLib.h"
 #include "nand_lnc.h"
@@ -60,6 +62,7 @@ static void board_hwcontrol(struct mtd_info *mtd, int cmd, unsigned int ctrl)
 	}	
 }
 
+#ifdef	CONFIG_MTD_NAND_LNC_8BYTE_READ
 static void mv_nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 {
 	struct nand_chip *chip = mtd->priv;
@@ -87,7 +90,7 @@ static void mv_nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 		buf[i++] = readb(io_base);
 	}
 }
-
+#endif
 
 int __init mv_nand_init(void)
 {
@@ -179,8 +182,9 @@ int __init mv_nand_init(void)
         }
 
 	printk("Using %s partition definition\n", part_type);
-	add_mtd_partitions(mv_mtd, mtd_parts, num_of_parts);
 #endif
+	err = mtd_device_register(mv_mtd, mtd_parts, num_of_parts);
+	if (!err)
 	goto out;
 
 out_ior:

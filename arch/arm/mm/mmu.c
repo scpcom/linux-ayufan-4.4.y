@@ -901,6 +901,9 @@ void __init sanity_check_meminfo(void)
 
 		j++;
 	}
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(ARCH_PLAT_ARMADA)
+#else
 #ifdef CONFIG_HIGHMEM
 	if (highmem) {
 		const char *reason = NULL;
@@ -920,6 +923,7 @@ void __init sanity_check_meminfo(void)
 				j--;
 		}
 	}
+#endif
 #endif
 	meminfo.nr_banks = j;
 	memblock_set_current_limit(lowmem_limit);

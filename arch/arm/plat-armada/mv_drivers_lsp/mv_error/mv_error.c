@@ -77,6 +77,7 @@ static int listener_pid;
 #define DDR_INTR_ERROR_CAUSE        0x014D0
 #define DDR_INTR_ERROR_MASK         0x014D4
 #define DDR_INTR_ERROR_ADDR         0x01450
+#define DDR_INTR_ERROR_MASK_ECC     0x3
 #endif /*CONFIG_ERROR_HANDLING_DRAM_ECC */
 
 struct axp_error_info_struct axp_error_info;
@@ -316,6 +317,9 @@ static int armadaxp_error_event(struct notifier_block *this,
 	    mbus_error == 1 ? 0x20A20 : 0x20258;
 	/*Send Netlink message */
 	nl_send_msg(&nl_message, sizeof(nl_message));
+	/*unmask the interrupts*/
+	writel(DDR_INTR_ERROR_MASK_ECC,
+		(INTER_REGS_BASE | DDR_INTR_ERROR_MASK));
 #endif
 
 	return NOTIFY_DONE;
@@ -389,12 +393,6 @@ static int __init errorhandling_notification_setup(void)
 		     IRQ_AURORA_SOC_ERROR, err);
 		return err;
 	}
-#ifdef CONFIG_ARMADAXP_USE_IRQ_INDIRECT_MODE
-#ifdef CONFIG_ERROR_HANDLING_DRAM_ECC
-/*Enable the main mask of the interrupt*/
-	writel(0x1100000F, INTER_REGS_BASE | 0x20b10);
-#endif
-#endif
 
 	/*setup the axp_error_info struct */
 	axp_error_info.head = 0;
@@ -413,10 +411,11 @@ static int __init errorhandling_notification_setup(void)
 
 #ifdef CONFIG_ERROR_HANDLING_DRAM_ECC
 	/*Register DRAM ECC error handler */
-	IO_error_register(0x3, DDR_INTR_ERROR_CAUSE, DDR_INTR_ERROR_MASK, 0x9);
+	IO_error_register(DDR_INTR_ERROR_MASK_ECC,
+		DDR_INTR_ERROR_CAUSE, DDR_INTR_ERROR_MASK, 0x9);
 #endif
 
-	printk("ARMADA XP error handling module was loaded \n");
+	printk(KERN_INFO "ARMADA XP error handling module was loaded\n");
 	return 0;
 }
 

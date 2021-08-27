@@ -33,3 +33,9 @@ disclaimer.
 ** Base address for TWSI registers.
 */
 #define MV_TWSI_SLAVE_REGS_BASE(unit) 	(MV_TWSI_SLAVE_REGS_OFFSET(unit))
+
+/*
+** Specific definition for Main CPU interrupt cause register.
+** Needed for TWSI operation completion monitoring.
+*/
+#define MV_TWSI_CPU_MAIN_INT_CAUSE(chNum, cpu)	TWSI_CPU_MAIN_INT_CAUSE_REG(cpu)

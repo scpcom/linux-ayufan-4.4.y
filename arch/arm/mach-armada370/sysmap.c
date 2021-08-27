@@ -84,6 +84,7 @@ MV_CPU_DEC_WIN* mv_sys_map(void)
 		case SYNO_DS213j_ID:
 		case SYNO_US3_ID:
 		case SYNO_RS214_ID:
+		case SYNO_DS214se_ID:
 #endif
 			return SYSMAP_ARMADA_370;
 		default:

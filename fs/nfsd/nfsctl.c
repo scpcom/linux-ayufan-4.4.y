@@ -48,6 +48,9 @@ enum {
 	NFSD_Gracetime,
 	NFSD_RecoveryDir,
 #endif
+#ifdef MY_ABC_HERE
+	NFSD_UDP_Size,
+#endif
 };
 
 /*
@@ -66,6 +69,9 @@ static ssize_t write_leasetime(struct file *file, char *buf, size_t size);
 static ssize_t write_gracetime(struct file *file, char *buf, size_t size);
 static ssize_t write_recoverydir(struct file *file, char *buf, size_t size);
 #endif
+#ifdef MY_ABC_HERE
+static ssize_t write_udp_size(struct file *file, char *buf, size_t size);
+#endif
 
 static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 	[NFSD_Fh] = write_filehandle,
@@ -80,6 +86,9 @@ static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 	[NFSD_Leasetime] = write_leasetime,
 	[NFSD_Gracetime] = write_gracetime,
 	[NFSD_RecoveryDir] = write_recoverydir,
+#endif
+#ifdef MY_ABC_HERE
+	[NFSD_UDP_Size] = write_udp_size,
 #endif
 };
 
@@ -490,6 +499,45 @@ out_free:
 	mutex_unlock(&nfsd_mutex);
 	return rv;
 }
+
+#ifdef MY_ABC_HERE
+u32 nfs_udp_f_rtpref;
+u32 nfs_udp_f_wtpref;
+
+static ssize_t write_udp_size(struct file *file, char *buf, size_t size)
+{
+	int err = 0;
+	u32 preferReadSize = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+	u32 preferWriteSize = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+
+	if (0 == size) {
+		goto End;
+	}
+
+	// use sscanf to get read and write size
+	if (2 != sscanf(buf, "%u %u", &preferReadSize, &preferWriteSize)) {
+		err = -EINVAL;
+		goto End;
+	}
+
+	// make sure the packet size is on the range we want
+	if (SYNO_NFSD_UDP_MIN_PACKET_SIZE > preferReadSize || SYNO_NFSD_UDP_MAX_PACKET_SIZE < preferReadSize ||
+		SYNO_NFSD_UDP_MIN_PACKET_SIZE > preferWriteSize || SYNO_NFSD_UDP_MAX_PACKET_SIZE < preferWriteSize) {
+		err = -EINVAL;
+		goto End;
+	}
+
+	nfs_udp_f_rtpref = preferReadSize;
+	nfs_udp_f_wtpref = preferWriteSize;
+
+End:
+	if (err) {
+		return err;
+	} else {
+		return scnprintf(buf, SIMPLE_TRANSACTION_LIMIT, "rsize=%d,wsize=%d\n", nfs_udp_f_rtpref, nfs_udp_f_wtpref);
+	}
+}
+#endif
 
 static ssize_t __write_versions(struct file *file, char *buf, size_t size)
 {
@@ -1086,6 +1134,9 @@ static int nfsd_fill_super(struct super_block * sb, void * data, int silent)
 		[NFSD_Gracetime] = {"nfsv4gracetime", &transaction_ops, S_IWUSR|S_IRUSR},
 		[NFSD_RecoveryDir] = {"nfsv4recoverydir", &transaction_ops, S_IWUSR|S_IRUSR},
 #endif
+#ifdef MY_ABC_HERE
+		[NFSD_UDP_Size] = {"udppacketsize", &transaction_ops, S_IWUSR|S_IRUGO},
+#endif /* MY_ABC_HERE */
 		/* last one */ {""}
 	};
 	return simple_fill_super(sb, 0x6e667364, nfsd_files);
@@ -1128,6 +1179,12 @@ static int __init init_nfsd(void)
 {
 	int retval;
 	printk(KERN_INFO "Installing knfsd (copyright (C) 1996 okir@monad.swb.de).\n");
+
+#ifdef MY_ABC_HERE
+	/*initial default udp packet size*/
+	nfs_udp_f_rtpref = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+	nfs_udp_f_wtpref = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+#endif /*MY_ABC_HERE*/
 
 	retval = nfs4_state_init(); /* nfs4 locking state */
 	if (retval)

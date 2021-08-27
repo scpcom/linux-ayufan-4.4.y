@@ -2025,7 +2025,6 @@ static int reiserfs_release_dquot(struct dquot *dquot)
 			REISERFS_QUOTA_DEL_BLOCKS(dquot->dq_sb));
 	if (!ret && err)
 		ret = err;
-out:
 	reiserfs_write_unlock(dquot->dq_sb);
 out:
 	return ret;

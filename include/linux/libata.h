@@ -91,6 +91,8 @@ extern int giSynoHddLedEnabled;
 
 #ifdef MY_ABC_HERE
 #define WAKEINTERVAL (7UL*HZ)
+/* WD suggest 30s */
+#define ISSUEREADTIMEOUT (30UL*HZ)
 #endif
 
 #define ata_print_version_once(dev, version)			\
@@ -436,6 +438,7 @@ enum {
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	ATA_EH_PMP_TRIES	= 3,
 	SYNO_PMP_PWR_TRIES	= 10,
+	SYNO_PMP_GPIO_TRIES	= 4,
 #else
 	ATA_EH_PMP_TRIES	= 5,
 #endif
@@ -517,6 +520,17 @@ enum {
 	ATA_ACPI_FILTER_DEFAULT	= ATA_ACPI_FILTER_SETXFER |
 				  ATA_ACPI_FILTER_LOCK |
 				  ATA_ACPI_FILTER_DIPM,
+
+	/* struct ap_link uiStsFlags*/
+#ifdef MY_ABC_HERE
+	SYNO_STATUS_IS_SIL3132PM	= 1 << 0,	/* DET=4h has no action, use DET=1h */
+#endif
+#ifdef MY_ABC_HERE
+	SYNO_STATUS_IS_SIL3132		= 1 << 1,	/* For Intel 6G SSD speed drop fix */
+#endif
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+	SYNO_STATUS_GPIO_CTRL		= 1 << 2,
+#endif
 };
 
 enum ata_xfer_mask {
@@ -716,7 +730,6 @@ struct ata_device {
 	unsigned long ulLastCmd;
 	unsigned long ulSpinupState;
 	int			  iCheckPwr;
-	struct work_struct	SendWakeEventTask;
 
 	/* bit definitions */
 	#define CHKPOWER_CHECKING 0
@@ -821,13 +834,6 @@ struct ata_link {
 #ifdef MY_ABC_HERE
 	unsigned int		uiSflags;		/* ATA_SYNO_FLAG_xxx, the same as ata_port */
 #endif
-#ifdef MY_ABC_HERE
-	int			SynoIsSil3132PM; /* DET=4h has no action, use DET=1h */
-#endif
-#ifdef MY_ABC_HERE
-	int			SynoIsSil3132; /* For Intel 6G SSD speed drop fix */
-#endif
-
 	u32			saved_scontrol;	/* SControl on probe */
 	unsigned int		hw_sata_spd_limit;
 	unsigned int		sata_spd_limit;
@@ -840,6 +846,11 @@ struct ata_link {
 	struct ata_eh_context	eh_context;
 
 	struct ata_device	device[ATA_MAX_DEVICES];
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || \
+	defined(SYNO_SATA_PM_DEVICE_GPIO)
+	unsigned int	uiStsFlags; /* SYNO_STATUS_xxx */
+#endif
 };
 #define ATA_LINK_CLEAR_BEGIN		offsetof(struct ata_link, active_tag)
 #define ATA_LINK_CLEAR_END		offsetof(struct ata_link, device[0])
@@ -1112,6 +1123,9 @@ extern struct device_attribute dev_attr_syno_diskname_trans;
 #ifdef MY_ABC_HERE
 extern unsigned int uiCheckPortLinksFlags(struct ata_port *pAp);
 #endif
+#ifdef MY_ABC_HERE
+extern struct device_attribute dev_attr_syno_sata_disk_led_ctrl;
+#endif
 
 extern const unsigned long sata_deb_timing_normal[];
 extern const unsigned long sata_deb_timing_hotplug[];
@@ -1361,25 +1375,13 @@ extern unsigned int syno_sata_pmp_write_gpio_core(struct ata_link *, SYNO_PM_PKG
 extern u8 syno_is_synology_pm(const struct ata_port *ap);
 extern u32 syno_pmp_ports_num(struct ata_port *ap);
 extern void syno_pm_device_info_set(struct ata_port *ap, u8 rw, SYNO_PM_PKG *pm_pkg);
-extern void syno_pm_gpio_output_disable(struct ata_link *link);
-extern void syno_pm_gpio_output_enable(struct ata_link *link);
+extern unsigned int syno_pm_gpio_output_disable(struct ata_link *link);
+extern unsigned int syno_pm_gpio_output_enable(struct ata_link *link);
 extern int syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo);
 extern unsigned int syno_sata_pmp_is_rp(struct ata_port *ap);
 extern struct ata_port *SynoEunitFindMaster(struct ata_port *ap);
 int syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn);
 #endif /* SYNO_SATA_PM_DEVICE_GPIO */
-
-
-#ifdef SYNO_FIX_HORKAGE_15G_MISSING
-typedef enum {
-	UNKNOW_HORKAGE_STAGE = 0,
-	NOT_APPLY_15G,
-	FIRST_APPLY_15G,
-	ALREADY_APPLY_15G,
-} SYNO_HORKAGE_STAGE;
-extern SYNO_HORKAGE_STAGE SynoGetHorkageStage(struct ata_link *pLink);
-extern int iNeedResetAgainFor15G(struct ata_link *pLink);
-#endif
 
 #ifdef MY_ABC_HERE
 extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun);
@@ -1388,8 +1390,8 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 #define IS_SYNO_PMP_GSCR_9705_CONFIG(tf) (SATA_PMP_GSCR_9705_GPO_EN == ((tf->hob_feature << 8) | tf->feature) || \
 										  SATA_PMP_GSCR_9705_GPI_POLARITY == ((tf->hob_feature << 8) | tf->feature) || \
-										  SATA_PMP_GSCR_9705_SRC_SEL1 == ((tf->hob_feature << 8) | tf->feature) || \
-										  SATA_PMP_GSCR_9705_SRC_SEL0 == ((tf->hob_feature << 8) | tf->feature))
+										  SATA_PMP_GSCR_9705_SATA_BLINK_RATE == ((tf->hob_feature << 8) | tf->feature))
+
 #define IS_SYNO_PMP_WRITE_CMD(tf) (ATA_CMD_PMP_WRITE == tf->command && \
 								  (SATA_PMP_GSCR_3XXX_GPIO == tf->feature || \
 								   SATA_PMP_GSCR_9705_GPO == ((tf->hob_feature << 8) | tf->feature) || \
@@ -1403,7 +1405,9 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 
 #ifdef MY_ABC_HERE
 #define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
-			(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_FPDMA_READ == qc->tf.command))
+			(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
+			 ATA_CMD_READ_EXT == qc->tf.command || ATA_CMD_PIO_READ == qc->tf.command || ATA_CMD_PIO_READ_EXT == qc->tf.command || \
+			 ATA_CMD_READ_MULTI == qc->tf.command || ATA_CMD_READ_MULTI_EXT == qc->tf.command))
 #endif
 
 /*

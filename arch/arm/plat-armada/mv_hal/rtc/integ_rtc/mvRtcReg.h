@@ -79,7 +79,10 @@ extern "C" {
 
 /* RTC Date Register */
 #define RTC_DATE_REG				(MV_RTC_REGS_BASE + 4)
-
+#ifdef CONFIG_SYNO_ARMADA
+#define RTC_EXT_ALARM_CTRL_REG				(MV_RTC_EXTERNAL_ALARM_OFFSET + 0)
+#define RTC_EXT_ALARM_CONFIG_REG				(MV_RTC_EXTERNAL_ALARM_OFFSET + 4)
+#endif
 
 /* RTC Time Bit Definitions */
 #define RTC_TIME_SECONDS_SHF			0

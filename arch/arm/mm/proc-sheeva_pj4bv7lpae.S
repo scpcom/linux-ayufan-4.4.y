@@ -236,6 +236,9 @@ ENTRY(cpu_v7_do_resume)
 	mov	r0, r8			@ control register
 	b	cpu_resume_mmu
 ENDPROC(cpu_v7_do_resume)
+#else
+#define cpu_v7_do_suspend	0
+#define cpu_v7_do_resume	0
 #endif
 
 	__CPUINIT
@@ -332,7 +335,7 @@ __pj4bv7_setup:
 __v7_setup:
 	adr	r12, __pj4bv7_setup_stack	@ the local stack
 	stmia	r12, {r0-r5, r7, r9, r11, lr}
-	bl	v7_flush_dcache_all
+	bl	v7_invalidate_dcache_all
 	ldmia	r12, {r0-r5, r7, r9, r11, lr}
 
 	mov	r10, #0

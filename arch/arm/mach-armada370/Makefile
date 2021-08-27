@@ -84,7 +84,7 @@ COMMON_OBJS	= $(COMMON_DIR)/mvDebug.o $(COMMON_DIR)/mvCommon.o $(COMMON_DIR)/mvS
 OSSERVICES_OBJS	= $(OSSERV_DIR)/mvOs.o
 
 HAL_OBJS	= $(HAL_RTC_DIR)/mvRtc.o					\
-                  $(HAL_CNTMR_DIR)/mvCntmr.o					\
+                  $(HAL_CNTMR_DIR)/mvCntmr.o $(HAL_IF_DIR)/mvSysCntmr.o		\
 		  $(HAL_TWSI_DIR)/mvTwsi.o $(HAL_IF_DIR)/mvSysTwsi.o		\
                   $(HAL_UART_DIR)/mvUart.o $(HAL_GPP_DIR)/mvGpp.o               \
                   $(HAL_DRAM_DIR)/mvDramIf.o  					\
@@ -171,7 +171,6 @@ armada370-$(CONFIG_MV_INCLUDE_AUDIO) 	+= $(HAL_AUDIO_DIR)/mvAudio.o $(HAL_IF_DIR
 armada370-$(CONFIG_MV_INCLUDE_TS) 	+= $(HAL_TS_DIR)/mvTsu.o $(HAL_IF_DIR)/mvSysTs.o		\
 					   $(HAL_TS_DIR)/mvTsuAddrDec.o
 armada370-$(CONFIG_MV_CPU_PERF_CNTRS)    += $(HAL_CPU_DIR)/mvCpuCntrs.o $(HAL_CPU_DIR)/pj4/mvPJ4Cntrs.o
-armada370-$(CONFIG_PCIE_VIRTUAL_BRIDGE_SUPPORT) += $(HAL_PEX_DIR)/mvVrtBrgPex.o
 armada370-$(CONFIG_MV_CPU_L2_PERF_CNTRS) += $(HAL_CPU_DIR)/mvCpuL2Cntrs.o
 
 obj-$(CONFIG_MV_INCLUDE_SWITCH) 	+= $(QD_OBJS)
@@ -189,6 +188,7 @@ obj-$(CONFIG_MV_ETH_BM)                 += $(LSP_BM_DIR)/bm_sysfs.o  $(LSP_BM_DI
 obj-$(CONFIG_MV_ETH_PMT)		+= $(LSP_PMT_DIR)/pmt_sysfs.o
 obj-$(CONFIG_MV_ETH_HWF)        	+= $(LSP_HWF_DIR)/hwf_sysfs.o
 obj-$(CONFIG_MV_ETH_L2FW)               += $(LSP_L2FW_DIR)/l2fw_sysfs.o $(LSP_L2FW_DIR)/mv_eth_l2fw.o
+obj-$(CONFIG_MV_ETH_L2SEC)		+= $(LSP_L2FW_DIR)/mv_eth_l2sec.o
 endif
 
 obj-$(CONFIG_MV_USE_XOR_ENGINE) 	+= $(PLAT_DRIVERS)/mv_xor/

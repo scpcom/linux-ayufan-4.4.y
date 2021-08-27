@@ -276,6 +276,24 @@ SYSCALL_DEFINE2(newstat, const char __user *, filename,
 }
 
 #ifdef MY_ABC_HERE
+SYSCALL_DEFINE2(SYNOArchiveOverwrite, unsigned int, fd, unsigned int, flags)
+{
+	int ret = -EBADF;
+	struct file *file;
+	int fput_needed;
+	extern long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags);
+
+	file = fget_light(fd, &fput_needed);
+	if (!file) {
+		return ret;
+	}
+	ret = __SYNOArchiveOverwrite(file->f_path.dentry, flags);
+	fput_light(file, fput_needed);
+	return ret;
+}
+#endif
+
+#ifdef MY_ABC_HERE
 #include "../fs/ecryptfs/ecryptfs_kernel.h"
 int (*fecryptfs_decode_and_decrypt_filename)(char **plaintext_name,
                                         size_t *plaintext_name_size,

@@ -473,6 +473,111 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ }	/* terminate list */
 };
 
+#ifdef MY_ABC_HERE
+
+/*
+ * 9235 gpio mmio address, to control 9235 GPIO, please read register manual section 1.6
+ */
+enum {
+	/* MV_9235_GPIO_DATA_OUT the actual address is 0x71020, the 0x07000000 is MBUS_ID for vendor specific register 1 */
+	MV_9235_GPIO_DATA_OUT				= 0x07071020,
+	MV_9235_GPIO_DATA_OUT_ENABLE		= 0x07071024,
+	MV_9235_GPIO_ACTIVE					= 0x07071058,
+	MV_9235_VENDOR_SPEC1_ADDR_OFFSET	= 0xA8,			/* To manipulate GPIO via Vendor specific register */
+	MV_9235_VENDOR_SPEC1_DATA_OFFSET	= 0xAC,
+};
+
+/*
+ *	Read value from 9235 gpio register
+ */
+u32 syno_mv_9235_gpio_reg_read(struct ata_host *host, const unsigned int gpioaddr)
+{
+	void __iomem *host_mmio = NULL;
+	u32 value = 0;
+
+	if(NULL == (host_mmio = ahci_host_base(host))) {
+		goto END;
+	}
+
+	// write to 9235 gpio active register address to VENDER_SPEC_ADDR1
+	writel(gpioaddr, host_mmio + MV_9235_VENDOR_SPEC1_ADDR_OFFSET);
+	// read original value from vendor specific data1
+	value = readl(host_mmio + MV_9235_VENDOR_SPEC1_DATA_OFFSET);
+END:
+	return value;
+}
+
+/*
+ *	9235 GPIO register set
+ */
+void syno_mv_9235_gpio_reg_set(struct ata_host *host, const unsigned int gpioaddr, u32 value)
+{
+	void __iomem *host_mmio = NULL;
+	u32 reg_val;
+
+	if(NULL == (host_mmio = ahci_host_base(host))) {
+		goto END;
+	}
+
+	// write to 9235 gpio active register address to VENDER_SPEC_ADDR1
+	writel(gpioaddr, host_mmio + MV_9235_VENDOR_SPEC1_ADDR_OFFSET);
+	// read original value from vendor specific data1
+	reg_val = readl(host_mmio + MV_9235_VENDOR_SPEC1_DATA_OFFSET);
+	// then write value to it
+	writel(value, host_mmio + MV_9235_VENDOR_SPEC1_DATA_OFFSET);
+END:
+	return;
+}
+
+/*
+ *	9235 GPIO init
+ */
+void syno_mv_9235_gpio_active_init(struct ata_host *host)
+{
+	// gpio enable is low active
+	syno_mv_9235_gpio_reg_set(host, MV_9235_GPIO_DATA_OUT_ENABLE, 0x0);
+	syno_mv_9235_gpio_reg_set(host, MV_9235_GPIO_DATA_OUT, 0x0);
+	// set the lower 4 GPIO as link/active to disk 1~4 and upper 4 GPIO as faulty to disk 1~4
+	syno_mv_9235_gpio_reg_set(host, MV_9235_GPIO_ACTIVE, 0x00B6D8D1);
+}
+
+/*
+ *	Write value to 9235 gpio
+ */
+int syno_mv_9235_disk_led_set(const unsigned short hostnum, SYNO_DISK_LED status)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	int ret = -EINVAL;
+	u32 value;
+	int led_idx;
+
+	if(NULL == shost) {
+		goto END;
+	}
+
+	if(NULL == (ap = ata_shost_to_port(shost))) {
+		scsi_host_put(shost);
+		goto END;
+	}
+
+	led_idx = ap->print_id - ap->host->ports[0]->print_id + 4;
+	value = syno_mv_9235_gpio_reg_read(ap->host, MV_9235_GPIO_DATA_OUT);
+	if (DISK_LED_ORANGE_BLINK == status || DISK_LED_ORANGE_SOLID == status) {
+		value |= (1 << led_idx);
+	} else {
+		value &= ~(1 << led_idx);
+	}
+	syno_mv_9235_gpio_reg_set(ap->host, MV_9235_GPIO_DATA_OUT, value);
+	scsi_host_put(shost);
+	ret = 0;
+END:
+	return ret;
+}
+
+EXPORT_SYMBOL(syno_mv_9235_disk_led_set);
+#endif /* MY_ABC_HERE*/
+
 #ifdef SYNO_ATA_SHUTDOWN_FIX
 void ahci_pci_shutdown(struct pci_dev *pdev){
 	int i;
@@ -1344,6 +1449,11 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	ahci_pci_print_info(host);
 
 	pci_set_master(pdev);
+#ifdef MY_ABC_HERE
+	if (pdev->vendor == 0x1b4b && pdev->device == 0x9235) {
+		syno_mv_9235_gpio_active_init(host);
+	}
+#endif /* MY_ABC_HERE */
 #ifdef MY_DEF_HERE
 	/* Only wait for JMiron in 6281 platform */
 	if (pdev->vendor != PCI_VENDOR_ID_JMICRON) {

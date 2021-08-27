@@ -2460,7 +2460,7 @@ static void e1000_watchdog(struct work_struct *work)
     if (ret_val)
 		pr_info("Link status detection from PHY failed!\n");
 
-	link_up &= MII_SR_LINK_STATUS;
+	link_up = ((link_up & MII_SR_LINK_STATUS) != 0);
 	if(link_up != adapter->hw.cegbe_is_link_up)
 		adapter->hw.get_link_status = true;
 	else
@@ -2470,6 +2470,15 @@ static void e1000_watchdog(struct work_struct *work)
 	if ((netif_carrier_ok(netdev)) && link)
 		goto link_up;
 
+#ifdef CONFIG_ARCH_GEN3
+	if (hw->mac_type == e1000_ce4100) {
+		ret_val = e1000_read_phy_reg(&adapter->hw, PHY_STATUS, &link_up);
+		ret_val = e1000_read_phy_reg(&adapter->hw, PHY_STATUS, &link_up);
+		if (ret_val)
+			pr_info("Link status detection from PHY failed!\n");
+		link = ((link_up & MII_SR_LINK_STATUS) != 0);
+	}
+#endif
 	if (link) {
 		if (!netif_carrier_ok(netdev)) {
 			u32 ctrl;
@@ -4817,6 +4826,39 @@ static int __e1000_shutdown(struct pci_dev *pdev, bool *enable_wake)
 	if (adapter->en_mng_pt)
 		*enable_wake = true;
 
+#ifdef CONFIG_ARCH_GEN3
+	/* enable WoL on the 8211E PHY */
+	if (*enable_wake == true) {
+		if (hw->phy_type == e1000_phy_8211e) {
+			u16 phy_wol = 0;
+			if (adapter->wol & E1000_WUFC_EX)
+				phy_wol |= 0x0400;
+			if (adapter->wol & E1000_WUFC_MC)
+				phy_wol |= 0x0200;
+			if (adapter->wol & E1000_WUFC_BC)
+				phy_wol |= 0x0100;
+			if (adapter->wol & E1000_WUFC_MAG)
+				phy_wol |= 0x1000;
+
+			/* Enable WoL for selected modes */
+			e1000_write_phy_reg(hw, 31, 0x0007);
+			e1000_write_phy_reg(hw, 30, 0x006d);
+			e1000_write_phy_reg(hw, 22, 0x9fff);
+			e1000_write_phy_reg(hw, 21, (u16) phy_wol);
+
+			/* Disable GMII/RGMII pad for power saving */
+			/* FIXME: for the S5 -> S0 wake to work, the BIOS
+			   needs to re-enable it */
+			// e1000_write_phy_reg(hw, 25, 0x0001);
+
+			/* Back to Page 0 */
+			e1000_write_phy_reg(hw, 31, 0x0000);
+			msleep(10);
+			e1000_phy_reset(hw);
+		}
+	}
+#endif
+
 	if (netif_running(netdev))
 		e1000_free_irq(adapter);
 
@@ -4874,6 +4916,26 @@ static int e1000_resume(struct pci_dev *pdev)
 		if (err)
 			return err;
 	}
+
+#ifdef CONFIG_ARCH_GEN3
+	/* disable WoL on the 8211E PHY */
+	if (hw->phy_type == e1000_phy_8211e) {
+
+		/* Disable WoL for selected modes */
+		e1000_write_phy_reg(hw, 31, 0x0007);
+		e1000_write_phy_reg(hw, 30, 0x006d);
+		e1000_write_phy_reg(hw, 22, 0x9fff);
+		e1000_write_phy_reg(hw, 21, 0x0000);
+
+		/* Reenable GMII/RGMII pad in case it was disabled */
+		// e1000_write_phy_reg(hw, 25, 0x0001);
+
+		/* Back to Page 0 */
+		e1000_write_phy_reg(hw, 31, 0x0000);
+		msleep(10);
+		e1000_phy_reset(hw);
+	}
+#endif
 
 	e1000_power_up_phy(adapter);
 	e1000_reset(adapter);

@@ -588,4 +588,9 @@ extern int gBadSectorTest;
 #define SynoGetInternalDiskSeq(szBdevName) (szBdevName[2] - 'a')
 #endif
 
+#ifdef MY_ABC_HERE
+#define SYNO_DISK_MODEL_LEN "24"
+#define SYNO_DISK_MODEL_NUM 24
+#endif
+
 #endif /* _SCSI_SCSI_H */

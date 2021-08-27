@@ -71,7 +71,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/interrupt.h>
 #include <linux/spinlock.h>
 #include <linux/spinlock_types.h>
-
+#include <linux/module.h>
 
 #define MV_CESA_IF_MAX_WEIGHT	0xFFFFFFFF
 
@@ -236,6 +236,9 @@ MV_STATUS mvCesaIfAction(MV_CESA_COMMAND *pCmd)
 
 	return status;
 }
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+EXPORT_SYMBOL(mvCesaIfAction);
+#endif
 
 MV_STATUS mvCesaIfReadyGet(MV_U8 chan, MV_CESA_RESULT *pResult)
 {
@@ -332,6 +335,9 @@ out:
 
 	return status;
 }
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+EXPORT_SYMBOL(mvCesaIfReadyGet);
+#endif
 
 MV_STATUS mvCesaIfPolicySet(MV_CESA_POLICY policy, MV_CESA_FLOW_TYPE flow)
 {
@@ -397,16 +403,25 @@ MV_STATUS mvCesaIfFinish(void)
 
 	return mvCesaFinish();
 }
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+EXPORT_SYMBOL(mvCesaIfFinish);
+#endif
 
 MV_STATUS mvCesaIfSessionOpen(MV_CESA_OPEN_SESSION *pSession, short *pSid)
 {
 	return mvCesaSessionOpen(pSession, pSid);
 }
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+EXPORT_SYMBOL(mvCesaIfSessionOpen);
+#endif
 
 MV_STATUS mvCesaIfSessionClose(short sid)
 {
 	return mvCesaSessionClose(sid);
 }
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
+EXPORT_SYMBOL(mvCesaIfSessionClose);
+#endif
 
 MV_VOID mvCesaIfDebugMbuf(const char *str, MV_CESA_MBUF *pMbuf, int offset, int size)
 {

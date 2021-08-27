@@ -480,14 +480,20 @@ SYSCALL(ni_syscall)			 /* 421 */
 SYSCALL(SYNONotifyInit) /* 422 */
 SYSCALL(SYNONotifyAddWatch) /* 423 */
 SYSCALL(SYNONotifyRemoveWatch) /* 424 */
+SYSCALL(SYNONotifyAddWatch32) /* 425 */
+SYSCALL(SYNONotifyRemoveWatch32) /* 426 */
 #else
 SYSCALL(ni_syscall) /* 422 */
 SYSCALL(ni_syscall) /* 423 */
 SYSCALL(ni_syscall) /* 424 */
+SYSCALL(ni_syscall) /* 425 */
+SYSCALL(ni_syscall) /* 426 */
 #endif /* CONFIG_SYNO_NOTIFY */
-SYSCALL(ni_syscall)			/* 425 */
-SYSCALL(ni_syscall)
-SYSCALL(ni_syscall)
+#ifdef MY_ABC_HERE
+SYSCALL(SYNOArchiveOverwrite) /* 427 */
+#else
+SYSCALL(ni_syscall)			/* 427 */
+#endif
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)			/* 430 */

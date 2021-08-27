@@ -84,8 +84,8 @@ static inline void __dma_single_cpu_to_dev(const void *kaddr, size_t size,
 	extern void ___dma_single_cpu_to_dev(const void *, size_t,
 		enum dma_data_direction);
 
-#ifdef CONFIG_ARCH_FEROCEON
-	if (!arch_is_coherent() && (size > 0) )
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	if (!arch_is_coherent() && size > 0)
 #else
 	if (!arch_is_coherent())
 #endif
@@ -98,7 +98,11 @@ static inline void __dma_single_dev_to_cpu(const void *kaddr, size_t size,
 	extern void ___dma_single_dev_to_cpu(const void *, size_t,
 		enum dma_data_direction);
 
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	if (!arch_is_coherent() && size > 0)
+#else
 	if (!arch_is_coherent())
+#endif
 		___dma_single_dev_to_cpu(kaddr, size, dir);
 #ifdef CONFIG_SYNO_ARMADA_ARCH
 	else if (dir != DMA_TO_DEVICE)
@@ -112,7 +116,11 @@ static inline void __dma_page_cpu_to_dev(struct page *page, unsigned long off,
 	extern void ___dma_page_cpu_to_dev(struct page *, unsigned long,
 		size_t, enum dma_data_direction);
 
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	if (!arch_is_coherent() && size > 0)
+#else
 	if (!arch_is_coherent())
+#endif
 		___dma_page_cpu_to_dev(page, off, size, dir);
 }
 
@@ -122,7 +130,11 @@ static inline void __dma_page_dev_to_cpu(struct page *page, unsigned long off,
 	extern void ___dma_page_dev_to_cpu(struct page *, unsigned long,
 		size_t, enum dma_data_direction);
 
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	if (!arch_is_coherent() && size > 0)
+#else
 	if (!arch_is_coherent())
+#endif
 		___dma_page_dev_to_cpu(page, off, size, dir);
 #ifdef CONFIG_SYNO_ARMADA_ARCH
 	else if (dir != DMA_TO_DEVICE)
@@ -226,45 +238,6 @@ int dma_mmap_writecombine(struct device *, struct vm_area_struct *,
  */
 extern void __init init_consistent_dma_size(unsigned long size);
 
-
-#ifdef CONFIG_MV_SP_I_FTCH_DB_INV
-extern void mv_l2_inv_range(const void *start, const void *end);
-extern void mv_l2_inv_range_pa(dma_addr_t start, dma_addr_t end);
-static inline void mv_l2_sync(const void *start, size_t size, int direction)
-{
-	const void *end = start + size;
-
-	BUG_ON(!virt_addr_valid(start) || !virt_addr_valid(end - 1));
-
-	switch (direction) {
-	case DMA_FROM_DEVICE:		/*  */
-	case DMA_BIDIRECTIONAL:		/*  */
-		mv_l2_inv_range(start, end);
-		break;
-	case DMA_TO_DEVICE:		/* */
-		break;
-	default:
-		BUG();
-	}
-}
-
-static inline void mv_l2_sync_pa(dma_addr_t start, size_t size, int direction)
-{
-	dma_addr_t end = start + size;
-
-	switch (direction) {
-	case DMA_FROM_DEVICE:           /*  */
-	case DMA_BIDIRECTIONAL:         /*  */
-		mv_l2_inv_range_pa(start, end);
-		break;
-	case DMA_TO_DEVICE:             /* */
-		break;
-	default:
-		BUG();
-	}
-}
-
-#endif
 #ifdef CONFIG_DMABOUNCE
 /*
  * For SA-1111, IXP425, and ADI systems  the dma-mapping functions are "magic"
@@ -425,13 +398,6 @@ static inline dma_addr_t dma_map_page(struct device *dev, struct page *page,
 static inline void dma_unmap_single(struct device *dev, dma_addr_t handle,
 		size_t size, enum dma_data_direction dir)
 {
-#ifdef CONFIG_MV_SP_I_FTCH_DB_INV
-#ifndef CONFIG_HIGHMEM
-	mv_l2_sync(phys_to_virt(handle), size, dir);
-#else
-	mv_l2_sync_pa(handle, size, dir);
-#endif
-#endif
 	debug_dma_unmap_page(dev, handle, size, dir, true);
 	__dma_unmap_page(dev, handle, size, dir);
 }

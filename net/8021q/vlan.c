@@ -129,10 +129,10 @@ void unregister_vlan_dev(struct net_device *dev, struct list_head *head)
 		vlan_gvrp_request_leave(dev);
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (nfp_mgr_p->nfp_hook_vlan_del)
 		nfp_mgr_p->nfp_hook_vlan_del(dev->ifindex);
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 	vlan_group_set_device(grp, vlan_id, NULL);
 	/* Because unregister_netdevice_queue() makes sure at least one rcu
@@ -301,10 +301,10 @@ static int register_vlan_device(struct net_device *real_dev, u16 vlan_id)
 		goto out_free_newdev;
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (nfp_mgr_p->nfp_hook_vlan_add)
 		nfp_mgr_p->nfp_hook_vlan_add(new_dev->ifindex, new_dev, real_dev->ifindex, vlan_id);
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 	return 0;
 
@@ -731,7 +731,7 @@ static void __exit vlan_cleanup_module(void)
 }
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void vlan_sync(void)
 {
 	struct net_device *dev;
@@ -750,7 +750,7 @@ void vlan_sync(void)
 	rtnl_unlock();
 }
 EXPORT_SYMBOL(vlan_sync);
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 module_init(vlan_proto_init);

@@ -53,6 +53,9 @@
 #define EXT4_EXT_MARK_UNINIT1	0x2  /* mark first half uninitialized */
 #define EXT4_EXT_MARK_UNINIT2	0x4  /* mark second half uninitialized */
 
+#define EXT4_EXT_DATA_VALID1	0x8  /* first half contains valid data */
+#define EXT4_EXT_DATA_VALID2	0x10 /* second half contains valid data */
+
 static int ext4_split_extent(handle_t *handle,
 				struct inode *inode,
 				struct ext4_ext_path *path,
@@ -2104,32 +2107,19 @@ ext4_ext_in_cache(struct inode *inode, ext4_lblk_t block,
 	return ret;
 }
 
-
 /*
  * ext4_ext_rm_idx:
  * removes index from the index block.
  */
-#ifdef MY_ABC_HERE
 static int ext4_ext_rm_idx(handle_t *handle, struct inode *inode,
 			struct ext4_ext_path *path, int depth)
-#else
-static int ext4_ext_rm_idx(handle_t *handle, struct inode *inode,
-			struct ext4_ext_path *path)
-#endif
 {
 	int err;
 	ext4_fsblk_t leaf;
-#ifdef MY_ABC_HERE
-	__le32 border;
-#endif
 
 	/* free index block */
-#ifdef MY_ABC_HERE
 	depth--;
 	path = path + depth;
-#else
-	path--;
-#endif
 	leaf = ext4_idx_pblock(path->p_idx);
 	if (unlikely(path->p_hdr->eh_entries == 0)) {
 		EXT4_ERROR_INODE(inode, "path->p_hdr->eh_entries == 0");
@@ -2155,8 +2145,6 @@ static int ext4_ext_rm_idx(handle_t *handle, struct inode *inode,
 	ext4_free_blocks(handle, inode, NULL, leaf, 1,
 			 EXT4_FREE_BLOCKS_METADATA | EXT4_FREE_BLOCKS_FORGET);
 
-#ifdef MY_ABC_HERE
-	border = path->p_idx->ei_block;
 	while (--depth >= 0) {
 		if (path->p_idx != EXT_FIRST_INDEX(path->p_hdr))
 			break;
@@ -2164,12 +2152,11 @@ static int ext4_ext_rm_idx(handle_t *handle, struct inode *inode,
 		err = ext4_ext_get_access(handle, inode, path);
 		if (err)
 			break;
-		path->p_idx->ei_block = border;
+		path->p_idx->ei_block = (path+1)->p_idx->ei_block;
 		err = ext4_ext_dirty(handle, inode, path);
 		if (err)
 			break;
 	}
-#endif
 	return err;
 }
 
@@ -2502,11 +2489,7 @@ ext4_ext_rm_leaf(handle_t *handle, struct inode *inode,
 	/* if this leaf is free, then we should
 	 * remove it from index block above */
 	if (err == 0 && eh->eh_entries == 0 && path[depth].p_bh != NULL)
-#ifdef MY_ABC_HERE
 		err = ext4_ext_rm_idx(handle, inode, path, depth);
-#else
-		err = ext4_ext_rm_idx(handle, inode, path + depth);
-#endif
 
 out:
 	return err;
@@ -2710,11 +2693,7 @@ again:
 				/* index is empty, remove it;
 				 * handle must be already prepared by the
 				 * truncatei_leaf() */
-#ifdef MY_ABC_HERE
 				err = ext4_ext_rm_idx(handle, inode, path, i);
-#else
-				err = ext4_ext_rm_idx(handle, inode, path + i);
-#endif
 			}
 			/* root level has p_bh == NULL, brelse() eats this */
 			brelse(path[i].p_bh);
@@ -2932,7 +2911,14 @@ static int ext4_split_extent_at(handle_t *handle,
 
 	err = ext4_ext_insert_extent(handle, inode, path, &newex, flags);
 	if (err == -ENOSPC && (EXT4_EXT_MAY_ZEROOUT & split_flag)) {
+		if (split_flag & (EXT4_EXT_DATA_VALID1|EXT4_EXT_DATA_VALID2)) {
+			if (split_flag & EXT4_EXT_DATA_VALID1)
+				err = ext4_ext_zeroout(inode, ex2);
+			else
+				err = ext4_ext_zeroout(inode, ex);
+		} else
 			err = ext4_ext_zeroout(inode, &orig_ex);
+
 		if (err)
 			goto fix_extent_len;
 		/* update the extent length and mark as initialized */
@@ -2977,6 +2963,7 @@ static int ext4_split_extent(handle_t *handle,
 	int err = 0;
 	int uninitialized;
 	int split_flag1, flags1;
+	int allocated = map->m_len;
 
 	depth = ext_depth(inode);
 	ex = path[depth].p_ext;
@@ -2996,6 +2983,8 @@ static int ext4_split_extent(handle_t *handle,
 				map->m_lblk + map->m_len, split_flag1, flags1);
 		if (err)
 			goto out;
+	} else {
+		allocated = ee_len - (map->m_lblk - ee_block);
 	}
 
 	ext4_ext_drop_refs(path);
@@ -3018,7 +3007,7 @@ static int ext4_split_extent(handle_t *handle,
 
 	ext4_ext_show_leaf(inode, path);
 out:
-	return err ? err : map->m_len;
+	return err ? err : allocated;
 }
 
 #define EXT4_EXT_ZERO_LEN 7
@@ -3291,6 +3280,7 @@ static int ext4_split_unwritten_extents(handle_t *handle,
 
 static int ext4_convert_unwritten_extents_endio(handle_t *handle,
 						struct inode *inode,
+						struct ext4_map_blocks *map,
 						struct ext4_ext_path *path)
 {
 	struct ext4_extent *ex;
@@ -3682,6 +3672,7 @@ out:
 					allocated - map->m_len);
 		allocated = map->m_len;
 	}
+	map->m_len = allocated;
 
 	/*
 	 * If we have done fallocate with the offset that is already

@@ -196,7 +196,7 @@ config NET_SKB_RECYCLE_DEF
         ---help---
 
 config  MV_ETH_NFP
-        tristate "Use Network Fast Processing (NFP)"
+        bool "Use Network Fast Processing (NFP)"
 	default y
         ---help---
         Choosing this option will include NFP support in the image.

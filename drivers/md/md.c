@@ -543,61 +543,13 @@ void md_flush_request(struct mddev *mddev, struct bio *bio)
 }
 EXPORT_SYMBOL(md_flush_request);
 
-/* Support for plugging.
- * This mirrors the plugging support in request_queue, but does not
- * require having a whole queue or request structures.
- * We allocate an md_plug_cb for each md device and each thread it gets
- * plugged on.  This links tot the private plug_handle structure in the
- * personality data where we keep a count of the number of outstanding
- * plugs so other code can see if a plug is active.
- */
-struct md_plug_cb {
-	struct blk_plug_cb cb;
-	struct mddev *mddev;
-};
-
-static void plugger_unplug(struct blk_plug_cb *cb)
+void md_unplug(struct blk_plug_cb *cb, bool from_schedule)
 {
-	struct md_plug_cb *mdcb = container_of(cb, struct md_plug_cb, cb);
-	if (atomic_dec_and_test(&mdcb->mddev->plug_cnt))
-		md_wakeup_thread(mdcb->mddev->thread);
-	kfree(mdcb);
+	struct mddev *mddev = cb->data;
+	md_wakeup_thread(mddev->thread);
+	kfree(cb);
 }
-
-/* Check that an unplug wakeup will come shortly.
- * If not, wakeup the md thread immediately
- */
-int mddev_check_plugged(struct mddev *mddev)
-{
-	struct blk_plug *plug = current->plug;
-	struct md_plug_cb *mdcb;
-
-	if (!plug)
-		return 0;
-
-	list_for_each_entry(mdcb, &plug->cb_list, cb.list) {
-		if (mdcb->cb.callback == plugger_unplug &&
-		    mdcb->mddev == mddev) {
-			/* Already on the list, move to top */
-			if (mdcb != list_first_entry(&plug->cb_list,
-						    struct md_plug_cb,
-						    cb.list))
-				list_move(&mdcb->cb.list, &plug->cb_list);
-			return 1;
-		}
-}
-	/* Not currently on the callback list */
-	mdcb = kmalloc(sizeof(*mdcb), GFP_ATOMIC);
-	if (!mdcb)
-		return 0;
-
-	mdcb->mddev = mddev;
-	mdcb->cb.callback = plugger_unplug;
-	atomic_inc(&mddev->plug_cnt);
-	list_add(&mdcb->cb.list, &plug->cb_list);
-	return 1;
-}
-EXPORT_SYMBOL_GPL(mddev_check_plugged);
+EXPORT_SYMBOL(md_unplug);
 
 static inline struct mddev *mddev_get(struct mddev *mddev)
 {
@@ -6314,6 +6266,69 @@ void md_set_array_sectors(struct mddev *mddev, sector_t array_sectors)
 }
 EXPORT_SYMBOL(md_set_array_sectors);
 
+#ifdef MY_ABC_HERE
+/*
+ * Duplicate from mdadm/mdadm-3.1.4/super1.c
+ * choose an appropriate space for bitmap.
+ */
+static unsigned long choose_bm_space(unsigned long long devsize)
+{
+	/* if the device is bigger than 8Gig, save 64k for bitmap usage,
+	 * if bigger than 200Gig, save 128k
+	 * NOTE: result must be multiple of 4K else bad things happen
+	 * on 4K-sector devices.
+	 */
+	if (devsize < 64*2) return 0;
+	if (devsize - 64*2 >= 200*1024*1024*2)
+		return 128*2;
+	if (devsize - 4*2 > 8*1024*1024*2)
+		return 64*2;
+	return 4*2;
+}
+
+/*
+ * Examine the max device size that can used for data and aligned with
+ * 64KB chunk size.
+ */
+static sector_t max_avail_data_size(struct md_rdev *rdev, int minor_version)
+{
+	unsigned long long avail = 0;
+	unsigned long long devsize = i_size_read(rdev->bdev->bd_inode) / 512;
+
+	if (devsize < 24)
+		return 0;
+
+	devsize -= choose_bm_space(devsize);
+	if (minor_version > 1) {
+		if (devsize > 1024*1024*2)
+			devsize -= 1024*2;
+	}
+
+	switch(minor_version) {
+		case 0:
+			/* at end */
+			avail = ((devsize - 8*2 ) & ~(4*2-1));
+			break;
+		case 1:
+			/* at start, 4K for superblock and possible bitmap */
+			avail = devsize - 4*2;
+			break;
+		case 2:
+			/* 4k from start, 4K for superblock and possible bitmap */
+			avail = devsize - (4+4)*2;
+			break;
+		default:
+			return 0;
+	}
+
+	//aligned with 64 KB chunk
+	if (avail) {
+		avail &= ~(unsigned long long)(0x0000007fULL);
+	}
+	return (sector_t)avail;
+}
+#endif
+
 static int update_size(struct mddev *mddev, sector_t num_sectors)
 {
 	struct md_rdev *rdev;
@@ -6341,6 +6356,11 @@ static int update_size(struct mddev *mddev, sector_t num_sectors)
 	list_for_each_entry(rdev, &mddev->disks, same_set) {
 		sector_t avail = rdev->sectors;
 
+#ifdef MY_ABC_HERE
+		if (fit) {
+			avail = max_avail_data_size(rdev, mddev->minor_version);
+		}
+#endif
 		if (fit && (num_sectors == 0 || num_sectors > avail))
 			num_sectors = avail;
 		if (avail < num_sectors)
@@ -6935,7 +6955,7 @@ static int md_thread(void * arg)
 
 		clear_bit(THREAD_WAKEUP, &thread->flags);
 		if (!kthread_should_stop())
-			thread->run(thread->mddev);
+			thread->run(thread);
 	}
 
 	return 0;
@@ -6950,8 +6970,8 @@ void md_wakeup_thread(struct md_thread *thread)
 	}
 }
 
-struct md_thread *md_register_thread(void (*run) (struct mddev *), struct mddev *mddev,
-				 const char *name)
+struct md_thread *md_register_thread(void (*run) (struct md_thread *),
+		struct mddev *mddev, const char *name)
 {
 	struct md_thread *thread;
 
@@ -7524,8 +7544,9 @@ EXPORT_SYMBOL_GPL(md_allow_write);
 
 #define SYNC_MARKS	10
 #define	SYNC_MARK_STEP	(3*HZ)
-void md_do_sync(struct mddev *mddev)
+void md_do_sync(struct md_thread *thread)
 {
+	struct mddev *mddev = thread->mddev;
 	struct mddev *mddev2;
 	unsigned int currspeed = 0,
 		 window;

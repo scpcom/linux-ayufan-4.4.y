@@ -44,20 +44,15 @@
 #include "internal.h"
 
 #ifdef MY_ABC_HERE
-int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n);
+inline int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n);
 int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n);
-int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
+inline int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
 int SYNOUnicodeUTF16StrToUTF8Str(u_int8_t *s, const u_int16_t *pwcs, int maxlen);
 u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void);
-int SYNOUnicodeUTF16Strcmp(u_int16_t *utf16str1,u_int16_t *utf16str2, int len,u_int16_t *upcasetable);
 u_int16_t *DefUpcaseTable(void);
-void SYNOUnicodeTblAdd(u_int16_t *UpcaseTbl);
-u_int16_t *SYNOUnicodeTblGet(char *szLocaleName);
 
 static u_int16_t UTF16NameiStrBuf1[UNICODE_UTF16_BUFSIZE];
-static u_int16_t UTF16NameiStrBuf2[UNICODE_UTF16_BUFSIZE];
 extern spinlock_t Namei_buf_lock_1;  /* init at alloc_super() */
-extern spinlock_t Namei_buf_lock_2;  /* init at alloc_super() */
 
 /*
  * Sample implementation from Unicode home page.
@@ -82,7 +77,7 @@ static struct utf8_table utf8_table[] =
     {0,						       /* end of table    */}
 };
 
-int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
+inline int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
 {
 	long l;
 	int c0, c, nc;
@@ -119,7 +114,7 @@ int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n)
 
 	op = pwcs;
 	ip = s;
-	while (*ip && n > 0) {
+	while (n > 0 && *ip) {
 		if (*ip & 0x80) {
 			size = SYNOUnicodeUTF8ChrToUTF16Chr(op, ip, n);
 			if (size == -1) {
@@ -144,7 +139,7 @@ int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n)
 	return (op - pwcs);
 }
 
-int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
+inline int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
 {
 	long l;
 	int c, nc;
@@ -318,15 +313,6 @@ u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void)
 	return uc;
 }
 
-int SYNOUnicodeUTF16Strcmp(u_int16_t *utf16str1,u_int16_t *utf16str2, int len,u_int16_t *upcasetable)
-{
-    int i;
-    for (i = 0; i < len; i++)
-        if(upcasetable[utf16str1[i]] != upcasetable[utf16str2[i]])
-            return -1;
-    return 0;
-}
-
 static u_int16_t *UpcaseTable = NULL;
 
 u_int16_t *DefUpcaseTable()
@@ -355,37 +341,43 @@ int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int cl
 	UTF16NameiStrBuf1[clenUtf16] = 0;
 	err = SYNOUnicodeUTF16StrToUTF8Str(to, UTF16NameiStrBuf1, maxlen);
 	spin_unlock(&Namei_buf_lock_1);
-
 	return err;
+
 }
 EXPORT_SYMBOL(SYNOUnicodeUTF8toUpper);
 
 int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int clenUtf8Str1, int clenUtf8Str2, u_int16_t *upcasetable)
 {
-    int clenUtf16Str1,clenUtf16Str2;
 	u_int16_t *UpcaseTbl;
-	int err;
-
-    spin_lock(&Namei_buf_lock_1);
-    spin_lock(&Namei_buf_lock_2);
+	u_int16_t wc1, wc2;
+	int size1, size2;
+	int result = -1;
 
 	UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
 
-    clenUtf16Str1 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf1, utf8str1, clenUtf8Str1);
-    clenUtf16Str2 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf2, utf8str2, clenUtf8Str2);
+	while (clenUtf8Str1 && clenUtf8Str2) {
+		size1 = SYNOUnicodeUTF8ChrToUTF16Chr(&wc1, utf8str1, clenUtf8Str1);
+		size2 = SYNOUnicodeUTF8ChrToUTF16Chr(&wc2, utf8str2, clenUtf8Str2);
 
-    if(clenUtf16Str1 != clenUtf16Str2)
-        err = -1;
-    else
-        err = SYNOUnicodeUTF16Strcmp((u_int16_t *)UTF16NameiStrBuf1
-                                      ,(u_int16_t *)UTF16NameiStrBuf2
-                                      ,clenUtf16Str1
-                                      ,UpcaseTbl);
-
-    spin_unlock(&Namei_buf_lock_1);
-    spin_unlock(&Namei_buf_lock_2);
-
-	return err;
+		if (size1 != -1 && size2 != -1) {
+			if (UpcaseTbl[wc1] != UpcaseTbl[wc2])
+				goto END;
+		} else if (size1 == -1 && size2 == -1) {
+			if (*utf8str1 != *utf8str2)
+				goto END;
+			size1 = size2 = 1;
+		} else {
+			goto END;
+		}
+		utf8str1 += size1;
+		clenUtf8Str1 -= size1;
+		utf8str2 += size2;
+		clenUtf8Str2 -= size2;
+	}
+	if (clenUtf8Str1 == 0 && clenUtf8Str2 == 0)
+		result = 0;
+END:
+	return result;
 }
 EXPORT_SYMBOL(SYNOUnicodeUTF8Strcmp);
 
@@ -958,17 +950,7 @@ static __always_inline int __vfs_follow_link(struct nameidata *nd, const char *l
 	}
 	nd->inode = nd->path.dentry->d_inode;
 
-#ifdef MY_ABC_HERE
-	if (LOOKUP_CASELESS_COMPARE & nd->flags) {
-		nd->flags |= LOOKUP_CASELESS_NO_UPDATE;
-	}
-#endif
 	ret = link_path_walk(link, nd);
-#ifdef MY_ABC_HERE
-	if (LOOKUP_CASELESS_COMPARE & nd->flags) {
-		nd->flags &= ~LOOKUP_CASELESS_NO_UPDATE;
-	}
-#endif
 	return ret;
 fail:
 	path_put(&nd->path);
@@ -1086,6 +1068,51 @@ int follow_up(struct path *path)
 	path->mnt = parent;
 	return 1;
 }
+
+#ifdef CONFIG_SYNO_NOTIFY
+/*
+   Fetch full mount point path,
+   It traverse vfsmount from down to up by following mnt_parent
+   @in: struct vfsmount: vfsmount structure, size_t buf_len: path buffer length
+   @out: mnt_full_path: full path of vfsmount struct
+   @return: -1: failed, 0 : success
+ */
+int syno_fetch_mountpoint_fullpath(struct vfsmount *mnt, size_t buf_len, char *mnt_full_path)
+{
+	int ret = -1;
+	struct vfsmount *tmp_mnt = NULL;
+	char *mnt_dentry_path = NULL;
+	char *mnt_dentry_path_buf = NULL;
+	char *mnt_full_path_buf = NULL;
+	mnt_dentry_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
+	mnt_full_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
+
+	if(!mnt_dentry_path_buf || !mnt_full_path_buf)
+		goto ERR;
+
+	tmp_mnt = mnt;
+	br_read_lock(vfsmount_lock);
+	do{
+		mnt_dentry_path = dentry_path_raw(tmp_mnt->mnt_mountpoint, mnt_dentry_path_buf, PATH_MAX - 1);
+		if(IS_ERR(mnt_dentry_path)){
+			br_read_unlock(vfsmount_lock);
+			goto ERR;
+		}
+		snprintf(mnt_full_path_buf, PATH_MAX, "%s", mnt_full_path);
+		if(mnt_full_path_buf[0] == '/' && (mnt_dentry_path[0] == '/' && mnt_dentry_path[1] == 0))
+			snprintf(mnt_full_path, buf_len, "%s", mnt_full_path_buf);
+		else
+			snprintf(mnt_full_path, buf_len, "%s%s", mnt_dentry_path, mnt_full_path_buf);
+		tmp_mnt = tmp_mnt->mnt_parent;
+	}while(tmp_mnt != tmp_mnt->mnt_parent);
+	br_read_unlock(vfsmount_lock);
+	ret = 0;
+ERR:
+	kfree(mnt_dentry_path_buf);
+	kfree(mnt_full_path_buf);
+	return ret;
+}
+#endif
 
 /*
  * Perform an automount
@@ -1584,6 +1611,9 @@ unlazy:
 				mutex_lock(&dir->i_mutex);
 				dentry = d_alloc_and_lookup(parent, name, nd);
 				mutex_unlock(&dir->i_mutex);
+				if (IS_ERR(dentry)) {
+					dentry = NULL;
+				}
 			}
 		}
 #else
@@ -1727,7 +1757,11 @@ static void terminate_walk(struct nameidata *nd)
 static inline int should_follow_link(struct inode *inode, int follow)
 {
 	if (unlikely(!(inode->i_opflags & IOP_NOFOLLOW))) {
+#ifdef MY_ABC_HERE
+		if (likely(inode->i_op && inode->i_op->follow_link))
+#else
 		if (likely(inode->i_op->follow_link))
+#endif
 			return follow;
 
 		/* This gets set once for the inode lifetime */
@@ -1741,9 +1775,6 @@ static inline int should_follow_link(struct inode *inode, int follow)
 #ifdef MY_ABC_HERE
 static inline int update_real_filename(struct nameidata *nd, char *szTargetName, int targetLen)
 {
-	if (LOOKUP_CASELESS_NO_UPDATE & nd->flags) {
-		return 0;
-	}
 	if ((nd->real_filename_len + targetLen + 2) >= SYNO_SMB_PSTRING_LEN) {
 		return -1;
 	}
@@ -1829,6 +1860,9 @@ static inline int walk_component(struct nameidata *nd, struct path *path,
 static inline int nested_symlink(struct path *path, struct nameidata *nd)
 {
 	int res;
+#ifdef MY_ABC_HERE
+	int blCaselessSet = 0;
+#endif
 
 	if (unlikely(current->link_count >= MAX_NESTED_LINKS)) {
 		path_put_conditional(path, nd);
@@ -1840,6 +1874,12 @@ static inline int nested_symlink(struct path *path, struct nameidata *nd)
 	nd->depth++;
 	current->link_count++;
 
+#ifdef MY_ABC_HERE
+	if (LOOKUP_CASELESS_COMPARE & nd->flags) {
+		blCaselessSet = 1;
+		nd->flags &= ~LOOKUP_CASELESS_COMPARE;
+	}
+#endif
 	do {
 		struct path link = *path;
 		void *cookie;
@@ -1850,6 +1890,11 @@ static inline int nested_symlink(struct path *path, struct nameidata *nd)
 								 nd->last_type, LOOKUP_FOLLOW);
 		put_link(nd, &link, cookie);
 	} while (res > 0);
+#ifdef MY_ABC_HERE
+	if (blCaselessSet) {
+		nd->flags |= LOOKUP_CASELESS_COMPARE;
+	}
+#endif
 
 	current->link_count--;
 	nd->depth--;
@@ -2164,6 +2209,9 @@ static int path_lookupat(int dfd, const char *name,
 	struct file *base = NULL;
 	struct path path;
 	int err;
+#ifdef MY_ABC_HERE
+	int blCaselessSet = 0;
+#endif
 
 	/*
 	 * Path walking is largely split up into 2 different synchronisation
@@ -2189,6 +2237,12 @@ static int path_lookupat(int dfd, const char *name,
 
 	if (!err && !(flags & LOOKUP_PARENT)) {
 		err = lookup_last(nd, &path);
+#ifdef MY_ABC_HERE
+		if (LOOKUP_CASELESS_COMPARE & nd->flags) {
+			blCaselessSet = 1;
+			nd->flags &= ~LOOKUP_CASELESS_COMPARE;
+		}
+#endif
 		while (err > 0) {
 			void *cookie;
 			struct path link = path;
@@ -2198,6 +2252,11 @@ static int path_lookupat(int dfd, const char *name,
 				err = lookup_last(nd, &path);
 			put_link(nd, &link, cookie);
 		}
+#ifdef MY_ABC_HERE
+		if (blCaselessSet) {
+			nd->flags |= LOOKUP_CASELESS_COMPARE;
+		}
+#endif
 	}
 
 	if (!err)
@@ -4107,6 +4166,9 @@ EXPORT_SYMBOL(user_path_at);
 EXPORT_SYMBOL(follow_down_one);
 EXPORT_SYMBOL(follow_down);
 EXPORT_SYMBOL(follow_up);
+#ifdef CONFIG_SYNO_NOTIFY
+EXPORT_SYMBOL(syno_fetch_mountpoint_fullpath);
+#endif
 EXPORT_SYMBOL(get_write_access); /* binfmt_aout */
 EXPORT_SYMBOL(getname);
 EXPORT_SYMBOL(lock_rename);

@@ -62,8 +62,7 @@ struct splice_pipe_desc {
 };
 
 #if defined(CONFIG_SYNO_ARMADA)
-struct recvfile_ctl_blk
-{
+struct recvfile_ctl_blk {
 	struct page *rv_page;
 	loff_t rv_pos;
 	size_t rv_count;

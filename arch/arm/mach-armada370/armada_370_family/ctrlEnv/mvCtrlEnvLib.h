@@ -175,7 +175,9 @@ typedef struct {
 	MV_U32 serdesSpeed;		/* Bitmap of SRDS_LANE_SPEED - one bit per SERDES line 		*/
 } MV_SERDES_REG_CFG;
 
-
+MV_U32 mvCtrlGetCpuNum(MV_VOID);
+MV_BOOL mvCtrlIsValidSatR(MV_VOID);
+void mvCtrlSetSkipSerdesPhyConfig(MV_VOID);
 MV_STATUS mvCtrlEnvInit(MV_VOID);
 MV_U32 mvCtrlMppRegGet(MV_U32 mppGroup);
 #if defined(MV_INCLUDE_PEX)
@@ -211,8 +213,8 @@ MV_U32 mvCtrlTdmMaxGet(MV_VOID);
 MV_UNIT_ID mvCtrlTdmUnitTypeGet(MV_VOID);
 MV_U32 mvCtrlTdmUnitIrqGet(MV_VOID);
 #endif /* if defined(MV_INCLUDE_TDM) */
+MV_U32 mvCtrlDevFamilyIdGet(MV_U16 ctrlModel);
 MV_U16 mvCtrlModelGet(MV_VOID);
-MV_VOID mvCtrlModelSet(MV_VOID);
 MV_U8 mvCtrlRevGet(MV_VOID);
 MV_STATUS mvCtrlNameGet(char *pNameBuff);
 MV_U32 mvCtrlModelRevGet(MV_VOID);
@@ -225,6 +227,7 @@ MV_U32 ctrlSizeRegRoundUp(MV_U32 size, MV_U32 alignment);
 MV_U32 mvCtrlIsBootFromNOR(MV_VOID);
 MV_U32 mvCtrlIsBootFromSPI(MV_VOID);
 MV_U32 mvCtrlIsBootFromNAND(MV_VOID);
+MV_U32 mvCtrlAudioSupport(MV_VOID);
 #if defined(MV_INCLUDE_CLK_PWR_CNTRL)
 MV_VOID mvCtrlPwrClckSet(MV_UNIT_ID unitId, MV_U32 index, MV_BOOL enable);
 MV_BOOL mvCtrlPwrClckGet(MV_UNIT_ID unitId, MV_U32 index);

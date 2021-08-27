@@ -58,14 +58,21 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-
 #include "mvCommon.h"
 #include "mvOs.h"
 #include "ctrlEnv/mvCtrlEnvSpec.h"
 #include "mvUart.h"
 
 /* static variables */
-static volatile MV_UART_PORT * uartBase[MV_UART_MAX_CHAN];
+static volatile MV_UART_PORT * uartBase[MV_UART_MAX_CHAN]=
+{
+	mvUartBase(0),
+	mvUartBase(1),
+#ifdef MV88F78X60
+	mvUartBase(2),
+	mvUartBase(3)
+#endif
+};
 
 /*******************************************************************************
 * mvUartInit - Init a uart port.

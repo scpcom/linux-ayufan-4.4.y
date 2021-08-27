@@ -683,6 +683,9 @@ static struct device_attribute *sata_mv_shost_attrs[] = {
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
 #endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_sata_disk_led_ctrl,
+#endif
 	NULL
 };
 #endif
@@ -4671,7 +4674,7 @@ static int __devexit mv_platform_remove(struct platform_device *pdev);
 static int __init mv_init(void)
 {
 	int rc = -ENODEV;
-#if defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE)
 	extern long g_esata_7042;
 
 	/* 211p use 7042 as external sata device. So we need to reverse the register order. */

@@ -90,8 +90,8 @@ MV_BOARD_TWSI_INFO	db88f6710InfoBoardTwsiDev[] = {
 
 MV_BOARD_MAC_INFO db88f6710InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x1},
+	{BOARD_MAC_SPEED_AUTO, 0x0,0,0},
+	{BOARD_MAC_SPEED_AUTO, 0x1,0,0},
 };
 
 MV_BOARD_SWITCH_INFO db88f6710InfoBoardSwitchValue[] = {
@@ -142,13 +142,6 @@ MV_BOARD_MPP_INFO db88f6710InfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG db88f6710InfoBoardSerdesConfigValue[] = {
-	/* Default - Auto detection */
-	{ SRDS_MOD_AUTO,  0x0 },
-	/* DB6710 Basic Modules Setup */
-	{ SRDS_MOD_PCIE0_LANE0 | SRDS_MOD_PCIE1_LANE1 | SRDS_MOD_SATA0_LANE2 | SRDS_MOD_SATA1_LANE3, 0 }
-};
-
 MV_BOARD_TDM_INFO	db88f6710Tdm880[]	= { {0} }; /* SPI Cs */
 
 MV_BOARD_TDM_SPI_INFO db88f6710TdmSpiInfo[] = { {1} }; /* SPI controller ID */
@@ -160,7 +153,6 @@ MV_BOARD_INFO db88f6710Info = {
 	.pBoardModTypeValue			= db88f6710InfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(db88f6710InfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= db88f6710InfoBoardMppConfigValue,
-	.pBoardSerdesConfigValue	= db88f6710InfoBoardSerdesConfigValue,
 	.intsGppMaskLow				= BIT31,	/* for Switch link interrupt */
 	.intsGppMaskMid				= 0,
 	.intsGppMaskHigh			= 0,
@@ -214,8 +206,8 @@ MV_U8	db88f6710pcacInfoBoardDebugLedIf[] = {58, 59, 61};
 
 MV_BOARD_MAC_INFO db88f6710pcacInfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x0},
-	{BOARD_MAC_SPEED_AUTO, 0x1},
+	{BOARD_MAC_SPEED_AUTO, 0x0, 0, 0},
+	{BOARD_MAC_SPEED_AUTO, 0x1, 0, 0},
 };
 
 MV_BOARD_MODULE_TYPE_INFO db88f6710pcacInfoBoardModTypeInfo[] = {
@@ -251,13 +243,6 @@ MV_BOARD_MPP_INFO db88f6710pcacInfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG db88f6710pcacInfoBoardSerdesConfigValue[] = {
-	/* Default - Auto detection */
-	{ SRDS_MOD_AUTO,  0x0 },
-	/* DB6710 PCAC Serdes static configuration */
-	{ SRDS_MOD_PCIE0_LANE0 | SRDS_MOD_SGMII0_LANE2, 0 }
-};
-
 MV_BOARD_INFO db88f6710pcacInfo = {
 	.boardName					= "DB-88F6710-PCAC",
 	.enableModuleScan 			= MV_FALSE,
@@ -265,7 +250,6 @@ MV_BOARD_INFO db88f6710pcacInfo = {
 	.pBoardModTypeValue			= db88f6710pcacInfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(db88f6710pcacInfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= db88f6710pcacInfoBoardMppConfigValue,
-	.pBoardSerdesConfigValue	= db88f6710pcacInfoBoardSerdesConfigValue,
 	.intsGppMaskLow				= BIT31,	/* for Switch link interrupt */
 	.intsGppMaskMid				= 0,
 	.intsGppMaskHigh			= 0,
@@ -324,8 +308,8 @@ MV_BOARD_TWSI_INFO	rd88F6710InfoBoardTwsiDev[] = {
 
 MV_BOARD_MAC_INFO rd88F6710InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x0},
-	{BOARD_MAC_SPEED_1000M, 0x10},
+	{BOARD_MAC_SPEED_AUTO, 0x0,  0, 0},
+	{BOARD_MAC_SPEED_1000M, 0x10, 0, 0},
 };
 
 MV_BOARD_SWITCH_INFO rd88F6710InfoBoardSwitchValue[] = {
@@ -376,13 +360,6 @@ MV_BOARD_MPP_INFO rd88F6710InfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG rd88F6710InfoBoardSerdesConfigValue[] = {
-	/* Default - Auto detection */
-	{ SRDS_MOD_AUTO,  0x0 },
-	/* RD_88F6710 Basic Modules Setup */
-	{ SRDS_MOD_PCIE0_LANE0 | SRDS_MOD_PCIE1_LANE1 | SRDS_MOD_SGMII0_LANE2 | SRDS_MOD_SATA1_LANE3, 0 }
-};
-
 MV_BOARD_TDM_INFO	rd88F6710Tdm880[]	= { {1}, {2} };
 MV_BOARD_TDM_INFO	rd88F6710Tdm792[]	= { {1}, {2}, {3}, {4}, {6}, {7} };
 MV_BOARD_TDM_INFO	rd88F6710Tdm3215[]	= { {1} };
@@ -394,7 +371,6 @@ MV_BOARD_INFO rd88F6710Info = {
 	.pBoardModTypeValue			= rd88F6710InfoBoardModTypeInfo,
 	.numBoardMppConfigValue			= ARRSZ(rd88F6710InfoBoardMppConfigValue),
 	.pBoardMppConfigValue			= rd88F6710InfoBoardMppConfigValue,
-	.pBoardSerdesConfigValue		= rd88F6710InfoBoardSerdesConfigValue,
 	.intsGppMaskLow				= BIT31,	/* for Switch link interrupt */
 	.intsGppMaskMid				= 0,
 	.intsGppMaskHigh			= 0,
@@ -487,13 +463,6 @@ MV_BOARD_MPP_INFO synods213jInfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG synods213jInfoBoardSerdesConfigValue[] = {
-	/* Default - Auto detection */
-	{ SRDS_MOD_AUTO,  0x0 },
-	/* SYNO DS213j Basic Modules Setup */
-	{ SRDS_MOD_PCIE0_LANE0 | SRDS_MOD_SGMII0_LANE1 | SRDS_MOD_SATA0_LANE2 | SRDS_MOD_SATA1_LANE3, 0 }
-};
-
 MV_BOARD_TDM_INFO	synods213jTdm880[]	= { {0} };
 
 MV_BOARD_TDM_SPI_INFO synods213jTdmSpiInfo[] = { {1} };
@@ -505,7 +474,6 @@ MV_BOARD_INFO synods213jInfo = {
 	.pBoardModTypeValue			= synods213jInfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(synods213jInfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= synods213jInfoBoardMppConfigValue,
-	.pBoardSerdesConfigValue	= synods213jInfoBoardSerdesConfigValue,
 	.intsGppMaskLow				= 0,
 	.intsGppMaskMid				= 0,
 	.intsGppMaskHigh			= 0,
@@ -553,6 +521,103 @@ MV_BOARD_INFO synods213jInfo = {
 
 
 /***********************/
+/* SYNO DS214se BOARD   */
+/***********************/
+	 
+MV_BOARD_MAC_INFO synods214seInfoBoardMacInfo[] = {
+	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	{BOARD_MAC_SPEED_AUTO, 0x1},
+};
+
+MV_BOARD_MODULE_TYPE_INFO synods214seInfoBoardModTypeInfo[] = {
+	{
+		.boardMppGrp1Mod	= MV_BOARD_RGMII0,
+		.boardMppGrp2Mod	= MV_BOARD_AUTO
+	}
+};
+
+MV_DEV_CS_INFO synods214seInfoBoardDeCsInfo[] = {
+	/*{deviceCS, params, devType, devWidth, busWidth }*/
+#if defined(MV_INCLUDE_SPI)
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}, /* SPI DEV */
+#endif
+#if defined(MV_INCLUDE_NOR)
+	{DEV_BOOCS, N_A, BOARD_DEV_NOR_FLASH, 16, 16} /* NOR DEV */
+#endif
+};
+
+MV_BOARD_MPP_INFO synods214seInfoBoardMppConfigValue[] = {
+	{ {
+		SYNO_DS214se_MPP0_7,
+		SYNO_DS214se_MPP8_15,
+		SYNO_DS214se_MPP16_23,
+		SYNO_DS214se_MPP24_31,
+		SYNO_DS214se_MPP32_39,
+		SYNO_DS214se_MPP40_47,
+		SYNO_DS214se_MPP48_55,
+		SYNO_DS214se_MPP56_63,
+		SYNO_DS214se_MPP64_67,
+	} }
+};
+
+MV_BOARD_TDM_INFO	synods214seTdm880[]	= { {0} };
+
+MV_BOARD_TDM_SPI_INFO synods214seTdmSpiInfo[] = { {1} };
+
+MV_BOARD_INFO synods214seInfo = {
+	.boardName				= "SYNO-DS214se-BP",
+	.enableModuleScan 			= MV_FALSE,
+	.numBoardMppTypeValue		= ARRSZ(synods214seInfoBoardModTypeInfo),
+	.pBoardModTypeValue			= synods214seInfoBoardModTypeInfo,
+	.numBoardMppConfigValue		= ARRSZ(synods214seInfoBoardMppConfigValue),
+	.pBoardMppConfigValue		= synods214seInfoBoardMppConfigValue,
+	.intsGppMaskLow				= 0,
+	.intsGppMaskMid				= 0,
+	.intsGppMaskHigh			= 0,
+	.numBoardDeviceIf			= ARRSZ(synods214seInfoBoardDeCsInfo),
+	.pDevCsInfo					= synods214seInfoBoardDeCsInfo,
+	.numBoardTwsiDev			= 0,
+	.pBoardTwsiDev				= NULL,
+	.numBoardMacInfo			= ARRSZ(synods214seInfoBoardMacInfo),
+	.pBoardMacInfo				= synods214seInfoBoardMacInfo,
+	.numBoardGppInfo			= 0,
+	.pBoardGppInfo				= NULL,
+	.activeLedsNumber			= 0,
+	.pLedGppPin					= NULL,
+	.ledsPolarity				= 0,
+
+	/* PMU Power */
+	.pmuPwrUpPolarity			= 0,
+	.pmuPwrUpDelay				= 16000,
+
+	/* GPP values */
+	.gppOutEnValLow			= SYNO_DS214se_GPP_OUT_ENA_LOW,
+	.gppOutEnValMid			= SYNO_DS214se_GPP_OUT_ENA_MID,
+	.gppOutEnValHigh		= SYNO_DS214se_GPP_OUT_ENA_HIGH,
+	.gppOutValLow			= SYNO_DS214se_GPP_OUT_VAL_LOW,
+	.gppOutValMid			= SYNO_DS214se_GPP_OUT_VAL_MID,
+	.gppOutValHigh			= SYNO_DS214se_GPP_OUT_VAL_HIGH,
+	.gppPolarityValLow		= SYNO_DS214se_GPP_POL_LOW,
+	.gppPolarityValMid		= SYNO_DS214se_GPP_POL_MID,
+	.gppPolarityValHigh		= SYNO_DS214se_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
+
+	/* TDM configuration */
+	.numBoardTdmInfo		= {1},
+	.pBoardTdmInt2CsInfo		= {synods214seTdm880},
+	.boardTdmInfoIndex		= 0,
+	.pBoardTdmSpiInfo 		= synods214seTdmSpiInfo,
+
+	/* NOR init params */
+	.norFlashReadParams		= 0,
+	.norFlashWriteParams	= 0
+};
+
+
+/***********************/
 /*   SYNO US3 BOARD    */
 /***********************/
 MV_BOARD_MAC_INFO synous3InfoBoardMacInfo[] = {
@@ -591,13 +656,6 @@ MV_BOARD_MPP_INFO synous3InfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG synous3InfoBoardSerdesConfigValue[] = {
-	/* Default - Auto detection */
-	{ SRDS_MOD_AUTO,  0x0 },
-	/* SYNO US3 Basic Modules Setup */
-	{ SRDS_MOD_PCIE0_LANE0 | SRDS_MOD_SGMII0_LANE1, 0 }
-};
-
 MV_BOARD_TDM_INFO	synous3Tdm880[]	= { {0} };
 
 MV_BOARD_TDM_SPI_INFO synous3TdmSpiInfo[] = { {1} };
@@ -609,7 +667,6 @@ MV_BOARD_INFO synous3Info = {
 	.pBoardModTypeValue			= synous3InfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(synous3InfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= synous3InfoBoardMppConfigValue,
-	.pBoardSerdesConfigValue	= synous3InfoBoardSerdesConfigValue,
 	.intsGppMaskLow				= 0,
 	.intsGppMaskMid				= 0,
 	.intsGppMaskHigh			= 0,
@@ -695,13 +752,6 @@ MV_BOARD_MPP_INFO synors214InfoBoardMppConfigValue[] = {
 	} }
 };
 
-MV_SERDES_CFG synors214InfoBoardSerdesConfigValue[] = {
-	/* Default - Auto detection */
-	{ SRDS_MOD_AUTO,  0x0 },
-	/* SYNO RS214 Basic Modules Setup */
-	{ SRDS_MOD_PCIE0_LANE0 | SRDS_MOD_PCIE1_LANE1 | SRDS_MOD_SATA0_LANE2 | SRDS_MOD_SATA1_LANE3, 0 }
-};
-
 MV_BOARD_TDM_INFO	synors214Tdm880[]	= { {0} };
 
 MV_BOARD_TDM_SPI_INFO synors214TdmSpiInfo[] = { {1} };
@@ -713,7 +763,6 @@ MV_BOARD_INFO synors214Info = {
 	.pBoardModTypeValue			= synors214InfoBoardModTypeInfo,
 	.numBoardMppConfigValue		= ARRSZ(synors214InfoBoardMppConfigValue),
 	.pBoardMppConfigValue		= synors214InfoBoardMppConfigValue,
-	.pBoardSerdesConfigValue	= synors214InfoBoardSerdesConfigValue,
 	.intsGppMaskLow				= 0,
 	.intsGppMaskMid				= 0,
 	.intsGppMaskHigh			= 0,
@@ -781,5 +830,6 @@ MV_BOARD_INFO *boardInfoTbl[] = {
 	,&synods213jInfo
 	,&synous3Info
 	,&synors214Info
+	,&synods214seInfo
 #endif
 };

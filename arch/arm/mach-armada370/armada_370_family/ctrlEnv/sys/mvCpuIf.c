@@ -233,7 +233,7 @@ MV_STATUS mvCpuIfDramInit()
 
 	for (cs = 0; cs < SDRAM_MAX_CS; cs++) {
 		size = MV_REG_READ(SDRAM_SIZE_REG(cs)) & SDRAM_ADDR_MASK;
-		if (size > 0 && base < SDRAM_MAX_ADDR) {
+		if ((size > 0) && (base < SDRAM_MAX_ADDR)) {
 			size |= ~(SDRAM_ADDR_MASK);
 
 			/* Set Base Address */
@@ -242,7 +242,7 @@ MV_STATUS mvCpuIfDramInit()
 			/* Check if out of max window size and resize the window */
 			if (base+size > SDRAM_MAX_ADDR) {
 				size = SDRAM_MAX_ADDR - base - 1;
-				MV_REG_WRITE(SDRAM_SIZE_REG(cs), 0);
+/*				MV_REG_WRITE(SDRAM_SIZE_REG(cs), 0); */
 			}
 
 			temp = (MV_REG_READ(SDRAM_WIN_CTRL_REG(cs)) & ~(SDRAM_ADDR_MASK)) | (1<<SDRAM_WIN_CTRL_WIN_ENA_OFFS);
@@ -850,36 +850,3 @@ MV_VOID mvCpuIfAddDecShow(MV_VOID)
 		}
 	}
 }
-
-#if defined(MV_INCLUDE_PEX)
-/*******************************************************************************
-* mvCpuIfEnablePex - Enable PCI Express unit.
-*
-* DESCRIPTION:
-*	This function enables PCI Express access to the device address
-*	space.
-*
-* INPUT:
-*	pexIf - The PCI-E interface to enable.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
-MV_VOID mvCpuIfEnablePex(MV_U32 pexUnit)
-{
-	MV_U32 socMaxPexUnit = mvCtrlPexMaxUnitGet();
-
-	if (pexUnit > socMaxPexUnit) {
-		DB(mvOsPrintf("mvCpuIfEnablePex: Bad PEX unit ID (%x)\n", pexUnit));
-		return;
-	}
-
-	/* SOC config register Pex enable */
-	MV_REG_BIT_SET(SOC_CTRL_REG, SCR_PEX_ENA_MASK(pexUnit));
-}
-
-#endif

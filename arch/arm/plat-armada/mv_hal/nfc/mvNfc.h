@@ -250,7 +250,7 @@ typedef struct {
 	MV_BOOL			readyBypass;
 	MV_VOID			*osHandle;
 	MV_U32			regsPhysAddr;
-#ifdef CONFIG_MV_INCLUDE_PDMA
+#ifdef MV_INCLUDE_PDMA
 	MV_U32			dataPdmaIntMask;
 	MV_U32			cmdPdmaIntMask;
 #endif
@@ -322,7 +322,7 @@ typedef struct {
 	MV_NFC_ECC_MODE eccMode;
 	MV_NFC_IF_MODE 	ifMode;
 	MV_NFC_CHIP_SEL currCs;
-#ifdef CONFIG_MV_INCLUDE_PDMA
+#ifdef MV_INCLUDE_PDMA
 	MV_PDMA_CHANNEL dataChanHndl;
 	MV_PDMA_CHANNEL cmdChanHndl;
 #endif
@@ -330,7 +330,7 @@ typedef struct {
 	MV_BUF_INFO	cmdDescBuff;
 	MV_BUF_INFO	dataDescBuff;
 	MV_U32		regsPhysAddr;
-#ifdef CONFIG_MV_INCLUDE_PDMA
+#ifdef MV_INCLUDE_PDMA
 	MV_U32		dataPdmaIntMask;
 	MV_U32		cmdPdmaIntMask;
 #endif

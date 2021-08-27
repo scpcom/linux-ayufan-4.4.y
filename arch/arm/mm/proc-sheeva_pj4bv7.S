@@ -357,6 +357,9 @@ ENTRY(cpu_v7_do_resume)
 	mov	r0, r8			@ control register
 	b	cpu_resume_mmu
 ENDPROC(cpu_v7_do_resume)
+#else
+#define cpu_v7_do_suspend	0
+#define cpu_v7_do_resume	0
 #endif
 	__CPUINIT
 
@@ -470,7 +473,7 @@ __pj4bv7_setup:
 #endif /* CONFIG_CPU_SHEEVA_PJ4B_PMC_ACCESS_IN_USERMODE */
 adr	r12, __pj4bv7_setup_stack		@ the local stack
 	stmia	r12, {r0-r5, r7, r9, r11, lr}
-	bl	v7_flush_dcache_all
+	bl	v7_invalidate_dcache_all
 	ldmia	r12, {r0-r5, r7, r9, r11, lr}
 
 	mrc	p15, 0, r0, c0, c0, 0		@ read main ID register
@@ -543,9 +546,7 @@ adr	r12, __pj4bv7_setup_stack		@ the local stack
 #endif
 
 3:	mov	r10, #0
-#ifdef HARVARD_CACHE
 	mcr	p15, 0, r10, c7, c5, 0		@ I+BTB cache invalidate
-#endif
 	dsb
 #ifdef CONFIG_MMU
 	mcr	p15, 0, r10, c8, c7, 0		@ invalidate I + D TLBs

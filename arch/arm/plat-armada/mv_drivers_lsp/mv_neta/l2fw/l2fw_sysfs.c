@@ -1,4 +1,29 @@
-/* l2fw_sysfs.c */
+/*******************************************************************************
+Copyright (C) Marvell International Ltd. and its affiliates
+
+This software file (the "File") is owned and distributed by Marvell
+International Ltd. and/or its affiliates ("Marvell") under the following
+alternative licensing terms.  Once you have made an election to distribute the
+File under one of the following license alternatives, please (i) delete this
+introductory statement regarding license alternatives, (ii) delete the two
+license alternatives that you have not elected to use and (iii) preserve the
+Marvell copyright notice above.
+
+********************************************************************************
+Marvell GPL License Option
+
+If you received this File from Marvell, you may opt to use, redistribute and/or
+modify this File in accordance with the terms and conditions of the General
+Public License Version 2, June 1991 (the "GPL License"), a copy of which is
+available along with the File in the license.txt file or by writing to the Free
+Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
+on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
+
+THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
+WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
+DISCLAIMED.  The GPL License provides additional details about this warranty
+disclaimer.
+*******************************************************************************/
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/types.h>
@@ -8,24 +33,32 @@
 
 #include "mvTypes.h"
 #include "mv_eth_l2fw.h"
-#include "linux/inet.h"
-
 #ifdef CONFIG_MV_ETH_L2SEC
-extern int l2fw_set_cesa_chan(int port, int cesaChan);
+#include "mv_eth_l2sec.h"
 #endif
+#include "linux/inet.h"
 
 static ssize_t l2fw_help(char *buf)
 {
 	int off = 0;
-	off += sprintf(buf+off, "help\n");
-	off += sprintf(buf+off, "echo mode rxp txp > l2fw - set l2f <rxp>->");
-	off += sprintf(buf+off, "<txp><mode> 0-dis,1-as_is,2-swap,3-copy\n");
-	off += sprintf(buf+off, "echo threshold > l2fw_xor: set threshold\n");
+
+	off += sprintf(buf+off, "cat rules_dump                        - display L2fw rules DB\n");
+	off += sprintf(buf+off, "cat ports_dump                        - display L2fw ports DB\n");
+	off += sprintf(buf+off, "cat stats                             - show debug information\n");
+
+	/* inputs in decimal */
+	off += sprintf(buf+off, "echo rxp txp mode    > l2fw           - set l2fw <rxp> --> <txp,mode> 0-dis,1-as_is,2-swap,3-copy,4-ipsec, inputs in decimal\n");
+	off += sprintf(buf+off, "echo rxp thresh      > l2fw_xor       - set for port <rxp> xor threshold , input in decimal\n");
+	off += sprintf(buf+off, "echo rxp en          > lookup         - set for port <rxp> if hash lookup is enable <en=0> or disable <en=1>\n");
+	off += sprintf(buf+off, "echo 1               > flush          - flush L2fw rules DB\n");
+
+	/* inputs in hex */
+	off += sprintf(buf+off, "echo srcIp dstIp txp > l2fw_add_ip    - set rule, srcIp and DstIp in ip address format\n");
 #ifdef CONFIG_MV_ETH_L2SEC
-	off += sprintf(buf+off, "echo 1 > esp   - enable ESP\n");
+	off += sprintf(buf+off, "echo p chan          > cesa_chan      - set cesa channel <chan> for port <p>.\n");
+
 #endif
-	off += sprintf(buf+off, "cat dump - display L2fw rules DB\n");
-	off += sprintf(buf+off, "echo 1 > flush - flush L2fw rules DB\n");
+
 	return off;
 }
 
@@ -41,32 +74,16 @@ static ssize_t l2fw_show(struct device *dev,
 	if (!strcmp(name, "help")) {
 	    off = l2fw_help(buf);
 		return off;
-	}
-	if (!strcmp(name, "dump")) {
-		l2fw_dump();
+	} else if (!strcmp(name, "rules_dump")) {
+		l2fw_rules_dump();
 		return off;
-	}
-	if (!strcmp(name, "numHashEntries")) {
-		l2fw_show_numHashEntries();
+	} else if (!strcmp(name, "ports_dump")) {
+		l2fw_ports_dump();
 		return off;
-	}
-#ifdef CONFIG_MV_ETH_L2SEC
-	if (!strcmp(name, "esp")) {
-		l2fw_esp_show();
-		return off;
-	}
-#endif
-	if (!strcmp(name, "help")) {
-	    off = l2fw_help(buf);
-		return off;
-	}
-
-#ifdef CONFIG_MV_ETH_L2SEC
-	if (!strcmp(name, "stats")) {
+	} else if (!strcmp(name, "stats")) {
 	    l2fw_stats();
 		return off;
 	}
-#endif
 
 	return off;
 }
@@ -79,29 +96,58 @@ static ssize_t l2fw_hex_store(struct device *dev, struct device_attribute *attr,
 	unsigned int    addr1, addr2;
 	int port;
 	unsigned long   flags;
-#ifdef CONFIG_MV_ETH_L2SEC
-	int             enableEsp;
-#endif
+
 	if (!capable(CAP_NET_ADMIN))
 		return -EPERM;
 	err = addr1 = addr2 = port = 0;
 
 	local_irq_save(flags);
-	if (!strcmp(name, "l2fw_add")) {
-		sscanf(buf, "%x %x %d", &addr1, &addr2, &port);
-		l2fw_add(addr1, addr2, port);
-	} else if (!strcmp(name, "l2fw_add_ip")) {
-		l2fw_add_ip(buf);
-#ifdef CONFIG_MV_ETH_L2SEC
-	} else if (!strcmp(name, "esp")) {
-		sscanf(buf, "%d", &enableEsp);
-		l2fw_esp_set(enableEsp);
-#endif
-	} else if (!strcmp(name, "flush")) {
+
+	if (!strcmp(name, "flush")) {
 		l2fw_flush();
+	} else {
+		err = 1;
+		printk(KERN_ERR "%s: illegal operation <%s>\n", __func__, attr->attr.name);
 	}
 
 	local_irq_restore(flags);
+
+	return err ? -EINVAL : len;
+}
+
+static ssize_t l2fw_ip_store(struct device *dev,
+			 struct device_attribute *attr, const char *buf, size_t len)
+{
+	const char *name = attr->attr.name;
+
+	unsigned int err = 0;
+	unsigned int srcIp = 0, dstIp = 0;
+	unsigned char * sipArr = (unsigned char *)&srcIp;
+	unsigned char * dipArr = (unsigned char *)&dstIp;
+	int port;
+	unsigned long flags;
+
+	if (!capable(CAP_NET_ADMIN))
+		return -EPERM;
+
+	sscanf(buf, "%hhu.%hhu.%hhu.%hhu %hhu.%hhu.%hhu.%hhu %d",
+		sipArr, sipArr+1, sipArr+2, sipArr+3,
+		dipArr, dipArr+1, dipArr+2, dipArr+3, &port);
+
+	printk(KERN_INFO "0x%x->0x%x in %s\n", srcIp, dstIp, __func__);
+	local_irq_save(flags);
+
+	if (!strcmp(name, "l2fw_add_ip"))
+		l2fw_add(srcIp, dstIp, port);
+	else {
+		err = 1;
+		printk(KERN_ERR "%s: illegal operation <%s>\n", __func__, attr->attr.name);
+	}
+
+	local_irq_restore(flags);
+
+	if (err)
+		printk(KERN_ERR "%s: <%s>, error %d\n", __func__, attr->attr.name, err);
 
 	return err ? -EINVAL : len;
 }
@@ -112,25 +158,27 @@ static ssize_t l2fw_store(struct device *dev,
 	const char	*name = attr->attr.name;
 	int             err;
 
-	unsigned int    p, txp, txq, v;
+	unsigned int    a, b, c;
 	unsigned long   flags;
 
 	if (!capable(CAP_NET_ADMIN))
 		return -EPERM;
 
-	err = p = txp = txq = v = 0;
-	sscanf(buf, "%d %d %d %d", &p, &txp, &txq, &v);
+	err = a = b = c = 0;
+	sscanf(buf, "%d %d %d", &a, &b, &c);
 
 	local_irq_save(flags);
 
 	if (!strcmp(name, "l2fw_xor"))
-		l2fw_xor(p);
+		l2fw_xor(a, b);
+	else if (!strcmp(name, "lookup"))
+		l2fw_lookupEn(a, b);
 
 	else if (!strcmp(name, "l2fw"))
-		l2fw(p, txp, txq);
+		l2fw(c, a, b);
 #ifdef CONFIG_MV_ETH_L2SEC
 	else if (!strcmp(name, "cesa_chan"))
-		err = l2fw_set_cesa_chan(p, txp);
+		err = mv_l2sec_set_cesa_chan(a, b);
 #endif
 	local_irq_restore(flags);
 
@@ -141,36 +189,33 @@ static ssize_t l2fw_store(struct device *dev,
 
 }
 
-
 static DEVICE_ATTR(l2fw,		S_IWUSR, l2fw_show, l2fw_store);
 static DEVICE_ATTR(l2fw_xor,		S_IWUSR, l2fw_show, l2fw_store);
-static DEVICE_ATTR(l2fw_add,		S_IWUSR, l2fw_show, l2fw_hex_store);
-static DEVICE_ATTR(l2fw_add_ip,		S_IWUSR, l2fw_show, l2fw_hex_store);
+static DEVICE_ATTR(lookup,		S_IWUSR, l2fw_show, l2fw_store);
+static DEVICE_ATTR(l2fw_add_ip,		S_IWUSR, l2fw_show, l2fw_ip_store);
 static DEVICE_ATTR(help,		S_IRUSR, l2fw_show,  NULL);
-static DEVICE_ATTR(dump,			S_IRUSR, l2fw_show,  NULL);
-static DEVICE_ATTR(numHashEntries,	S_IRUSR, l2fw_show,  NULL);
+static DEVICE_ATTR(rules_dump,		S_IRUSR, l2fw_show,  NULL);
+static DEVICE_ATTR(ports_dump,		S_IRUSR, l2fw_show,  NULL);
+static DEVICE_ATTR(flush,		S_IWUSR, NULL,	l2fw_hex_store);
+static DEVICE_ATTR(stats,		S_IRUSR, l2fw_show, NULL);
+
 #ifdef CONFIG_MV_ETH_L2SEC
-static DEVICE_ATTR(stats,			S_IRUSR, l2fw_show, NULL);
-static DEVICE_ATTR(esp,				S_IWUSR, l2fw_show,  l2fw_hex_store);
 static DEVICE_ATTR(cesa_chan,		S_IWUSR, NULL,  l2fw_store);
 #endif
-static DEVICE_ATTR(flush,			S_IWUSR, NULL,  	 l2fw_hex_store);
-
 
 static struct attribute *l2fw_attrs[] = {
 	&dev_attr_l2fw.attr,
 	&dev_attr_l2fw_xor.attr,
-	&dev_attr_l2fw_add.attr,
+	&dev_attr_lookup.attr,
 	&dev_attr_l2fw_add_ip.attr,
 	&dev_attr_help.attr,
-	&dev_attr_dump.attr,
+	&dev_attr_rules_dump.attr,
+	&dev_attr_ports_dump.attr,
 	&dev_attr_flush.attr,
-#ifdef CONFIG_MV_ETH_L2SEC
-	&dev_attr_esp.attr,
 	&dev_attr_stats.attr,
+#ifdef CONFIG_MV_ETH_L2SEC
 	&dev_attr_cesa_chan.attr,
 #endif
-	&dev_attr_numHashEntries.attr,
 	NULL
 };
 

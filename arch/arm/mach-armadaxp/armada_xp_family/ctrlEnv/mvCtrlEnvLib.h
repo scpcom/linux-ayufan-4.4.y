@@ -146,38 +146,36 @@ typedef struct _boardSerdesConf {
 #define	TSEN_CONF_SOFT_RESET_MASK		(0x1 << 1)
 #define	TSEN_CONF_START_CALIB_MASK		(0x1 << 25)
 
-
 /* BIOS Modes related defines */
-#define SAR0_CPU_FREQ_MASK	0x00E00000
-#define SAR0_CPU_FREQ_OFFSET	21
-#define SAR0_FABRIC_FREQ_MASK	0x0F000000
-#define SAR0_FABRIC_FREQ_OFFSET	24
-#define SAR0_L2_SIZE_MASK	0x00180000
-#define SAR0_L2_SIZE_OFFSET	19
-#define SAR0_BOOTSRC_MASK	0X1E0
-#define SAR0_BOOTSRC_OFFSET	5
-#define SAR0_BOOTWIDTH_MASK	0X18
+
 #define SAR0_BOOTWIDTH_OFFSET	3
-#define SAR0_CPU0CORE_MASK	0X80000000
+#define SAR0_BOOTWIDTH_MASK		(0x3 << SAR0_BOOTWIDTH_OFFSET)
+#define SAR0_BOOTSRC_OFFSET		5
+#define SAR0_BOOTSRC_MASK		(0xF << SAR0_BOOTSRC_OFFSET)
+
+#define SAR0_L2_SIZE_OFFSET		19
+#define SAR0_L2_SIZE_MASK		(0x3 << SAR0_L2_SIZE_OFFSET)
+#define SAR0_CPU_FREQ_OFFSET	21
+#define SAR0_CPU_FREQ_MASK		(0x7 << SAR0_CPU_FREQ_OFFSET)
+#define SAR0_FABRIC_FREQ_OFFSET	24
+#define SAR0_FABRIC_FREQ_MASK	(0xF << SAR0_FABRIC_FREQ_OFFSET)
 #define SAR0_CPU0CORE_OFFSET	31
-#define PEX_CLK_100MHZ_MASK    0x00000004
-#define PEX_CLK_100MHZ_OFFSET	2
-#define SAR1_CPU0CORE_MASK	0x1
+#define SAR0_CPU0CORE_MASK		(0x1 << SAR0_CPU0CORE_OFFSET)
 #define SAR1_CPU0CORE_OFFSET	0
-#define SAR1_CPU_CORE_MASK	0x00000018
+#define SAR1_CPU0CORE_MASK		(0x1 << SAR1_CPU0CORE_OFFSET)
+
+#define PEX_CLK_100MHZ_OFFSET	2
+#define PEX_CLK_100MHZ_MASK     (0x1 << PEX_CLK_100MHZ_OFFSET)
+
 #define SAR1_CPU_CORE_OFFSET	3
-#define SAR1_CPU_MODE_MASK	0x00100000
-#define SAR1_CPU_MODE_OFFSET	20
-#define SAR1_FABRIC_MODE_MASK	0x00080000
+#define SAR1_CPU_CORE_MASK		(0x3 << SAR1_CPU_CORE_OFFSET)
 #define SAR1_FABRIC_MODE_OFFSET	19
+#define SAR1_FABRIC_MODE_MASK	(0x1 << SAR1_FABRIC_MODE_OFFSET)
+#define SAR1_CPU_MODE_OFFSET	20
+#define SAR1_CPU_MODE_MASK		(0x1 << SAR1_CPU_MODE_OFFSET)
 
 #define SAR_CPU_FAB_GET(cpu, fab)	(((cpu & 0x7) << 21) | ((fab & 0xF) << 24))
-#ifdef MV88F78X60_Z1
-#define BIOS_MODES_NUM			7
-#else
-#define BIOS_MODES_NUM			6
-#endif
-
+#define BIOS_MODES_NUM			4
 
 typedef struct {
 	char *name;
@@ -190,22 +188,19 @@ typedef struct {
 	MV_U8 AltfabricFreq;
 	MV_U8 fabricFreqMode;
 	MV_U8 cpuEna;
-#ifdef MV88F78X60_Z1
-	MV_U8 cpuMode;
-#else
 	MV_U8 cpuEndianess;
-#endif
 	MV_U8 dramBusWidth;
 	MV_U8 bootSource;
 	MV_U8 bootWidth;
 } MV_BIOS_MODE;
 
 extern MV_BIOS_MODE bios_modes[];
+extern MV_BIOS_MODE bios_modes_b0[];
 
 /* mcspLib.h API list */
 MV_U32 mvCtrlGetCpuNum(MV_VOID);
 MV_U32 mvCtrlGetQuadNum(MV_VOID);
-MV_STATUS mvCtrlUpdatePexId(MV_VOID);
+MV_BOOL mvCtrlIsValidSatR(MV_VOID);
 
 MV_STATUS mvCtrlEnvInit(MV_VOID);
 MV_U32    mvCtrlMppRegGet(MV_U32 mppGroup);
@@ -225,6 +220,10 @@ MV_U32	mvCtrlPciMaxIfGet(MV_VOID);
 
 MV_U32	  mvCtrlEthMaxPortGet(MV_VOID);
 MV_U8	  mvCtrlEthMaxCPUsGet(MV_VOID);
+#if defined(MV_INCLUDE_IDMA)
+MV_U32 mvCtrlIdmaMaxUnitGet(MV_VOID);
+MV_U32 mvCtrlIdmaMaxChanGet(MV_VOID);
+#endif
 #if defined(MV_INCLUDE_XOR)
 MV_U32 mvCtrlXorMaxChanGet(MV_VOID);
 MV_U32 mvCtrlXorMaxUnitGet(MV_VOID);
@@ -244,7 +243,7 @@ MV_U32	  mvCtrlTdmMaxGet(MV_VOID);
 MV_UNIT_ID mvCtrlTdmUnitTypeGet(MV_VOID);
 MV_U32    mvCtrlTdmUnitIrqGet(MV_VOID);
 #endif
-
+MV_U32 mvCtrlDevFamilyIdGet(MV_U16 ctrlModel);
 MV_U16    mvCtrlModelGet(MV_VOID);
 MV_U8     mvCtrlRevGet(MV_VOID);
 MV_STATUS mvCtrlNameGet(char *pNameBuff);

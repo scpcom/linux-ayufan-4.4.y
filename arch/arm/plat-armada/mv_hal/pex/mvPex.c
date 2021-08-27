@@ -65,6 +65,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mvCommon.h"
 #include "mvOs.h"
 #include "ctrlEnv/mvCtrlEnvSpec.h"
+#include "ctrlEnv/sys/mvCpuIf.h"
 #include "mvSysPexConfig.h"
 #include "mvPexRegs.h"
 /* #include "pci-if/mvPciIf.h" */
@@ -85,118 +86,17 @@ MV_STATUS mvPexInit(MV_U32 pexIf, MV_PEX_TYPE pexType, MV_PEX_HAL_DATA *halData)
 	MV_PEX_MODE pexMode;
 	MV_U32 regVal;
 	MV_U32 status;
-	MV_U16 ctrlModel, phyRegVal = 0;
 
 	mvOsMemcpy(&pexHalData[pexIf], halData, sizeof(MV_PEX_HAL_DATA));
-
-	/* First implement Guideline (GL# PCI Express-2) Wrong Default Value    */
-	/* to Transmitter Output Current (TXAMP) Relevant for: 88F5181-A1/B0/B1 */
-	/* and 88F5281-B0 and above, 88F5182, 88F5082, 88F5181L, 88F6082/L      */
-	ctrlModel = pexHalData[pexIf].ctrlModel;
-	if ((ctrlModel != MV_1281_DEV_ID) &&
-			(ctrlModel != MV_6281_DEV_ID) &&
-			(ctrlModel != MV_6282_DEV_ID) &&
-			(ctrlModel != MV_6280_DEV_ID) &&
-			(ctrlModel != MV_6192_DEV_ID) &&
-			(ctrlModel != MV_6190_DEV_ID) &&
-			(ctrlModel != MV_6180_DEV_ID) &&
-			(ctrlModel != MV_6183_DEV_ID) &&
-			(ctrlModel != MV_6183L_DEV_ID) &&
-			(ctrlModel != MV_78100_DEV_ID) &&
-			(ctrlModel != MV_78200_DEV_ID) &&
-			(ctrlModel != MV_76100_DEV_ID) &&
-			(ctrlModel != MV_6323_DEV_ID) &&
-			(ctrlModel != MV_6322_DEV_ID) &&
-			(ctrlModel != MV_6321_DEV_ID) &&
-			(ctrlModel != MV_78XX0_DEV_ID) &&
-			(ctrlModel != MV_6510_DEV_ID) &&
-			(ctrlModel != MV_6530_DEV_ID) &&
-			(ctrlModel != MV_6550_DEV_ID) &&
-			(ctrlModel != MV_6560_DEV_ID) &&
-			(ctrlModel != MV_6710_DEV_ID) &&
-			(ctrlModel != MV_78130_DEV_ID) &&
-			(ctrlModel != MV_78160_DEV_ID) &&
-			(ctrlModel != MV_78230_DEV_ID) &&
-			(ctrlModel != MV_78260_DEV_ID) &&
-			(ctrlModel != MV_78460_DEV_ID) &&
-			(ctrlModel != MV_78000_DEV_ID)) {
-		/* Read current value of TXAMP */
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexIf), 0x80820000);	/* Write the read command   */
-		regVal = MV_REG_READ(PEX_PHY_ACCESS_REG(pexIf));	/* Extract the data         */
-
-		/* Prepare new data for write */
-		regVal &= ~0x7;	/* Clear bits [2:0]         */
-		regVal |= 0x4;	/* Set the new value        */
-		regVal &= ~0x80000000;	/* Set "write" command      */
-		MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexIf), regVal);	/* Write the write command  */
-
-#ifndef MV88F78X60_Z1
-		/* in DSMP A0 we should enable the target link width */
-		/* Read current value of Dynamic width management register 0x1A30*/
-		regVal = MV_REG_READ(PEX_DYNMC_WIDTH_MNG_REG(pexIf));	/* Read the dynamic width management register */
-		regVal &= ~0x3;	/* Clear bits [1:0]         */
-		regVal |= 0x3;	/* Set the new value '11'   */
-		MV_REG_WRITE(PEX_DYNMC_WIDTH_MNG_REG(pexIf), regVal);	/* Write the new value */
-
-		/* Enabling the SSPL message */
-		regVal = MV_REG_READ(PEX_ROOT_CMPLX_SSPL_REG(pexIf));	/* Read the PEX root complex SSPL register */
-		regVal &= ~0x10000;	/* Clear bit [16]         */
-		regVal |= 0x10000;	/* Set the new value  '1' */
-		MV_REG_WRITE(PEX_ROOT_CMPLX_SSPL_REG(pexIf), regVal);	/* Write the new value */
-
-		/* Setting dynamic speed*/
-		regVal = MV_REG_READ(PEX_CTRL_REG(pexIf));	/* Read the PEX control register */
-		regVal &= ~0x400;	/* Clear bit [10]         */
-		regVal |= 0x400;	/* Set the new value '11'   */
-		MV_REG_WRITE(PEX_CTRL_REG(pexIf), regVal);	/* Write the new value */
-#endif
-	} else {
-		/* Implement 1.0V termination GL for 88F1281 device only */
-		/* BIT0 - Common mode feedback */
-		/* BIT3 - TxBuf, extra drive for 1.0V termination */
-		if (ctrlModel == MV_1281_DEV_ID) {
-			MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexIf), 0x80860000);	/* Write the read command   */
-			regVal = MV_REG_READ(0x41b00);	/* Extract the data         */
-			regVal |= (BIT0 | BIT3);
-			regVal &= ~0x80000000;	/* Set "write" command      */
-			MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexIf), regVal);	/* Write the write command  */
-			MV_REG_WRITE(0x31b00, 0x80860000);	/* Write the read command   */
-			regVal = MV_REG_READ(0x31b00);	/* Extract the data         */
-			regVal |= (BIT0 | BIT3);
-			regVal &= ~0x80000000;	/* Set "write" command      */
-			MV_REG_WRITE(0x31b00, regVal);	/* Write the write command  */
-		}
-	}
-	if ((ctrlModel == MV_6281_DEV_ID) ||
-			(ctrlModel == MV_6282_DEV_ID) ||
-			(ctrlModel == MV_6280_DEV_ID) ||
-			(ctrlModel == MV_6192_DEV_ID) ||
-			(ctrlModel == MV_6190_DEV_ID) ||
-			(ctrlModel == MV_6180_DEV_ID)) {
-		regVal = MV_REG_READ(0x100e4);	/* This register currently doesn't appear in the FS */
-		regVal |= 0x3 << 25;
-		MV_REG_WRITE(0x100e4, regVal);
-	}
-
-	if (ctrlModel == MV_6282_DEV_ID) {
-		mvPexPhyRegRead(pexIf, 0x92, &phyRegVal);
-		phyRegVal &= ~(0x80F0);
-		phyRegVal |= 0x8080;
-		mvPexPhyRegWrite(pexIf, 0x92, phyRegVal);
-	} else if ((ctrlModel == MV_6510_DEV_ID) ||
-			(ctrlModel == MV_6530_DEV_ID) || (ctrlModel == MV_6550_DEV_ID) || (ctrlModel == MV_6560_DEV_ID)) {
-		regVal = MV_REG_READ(0x100e4);	/* This register currently doesn't appear in the FS */
-		regVal |= 0x3 << 25;
-		MV_REG_WRITE(0x100e4, regVal);
-		mvPexPhyRegRead(pexIf, 0x92, &phyRegVal);
-		phyRegVal &= ~(0x80F0);
-		phyRegVal |= 0x8080;
-		mvPexPhyRegWrite(pexIf, 0x92, phyRegVal);
-	}
 
 	if (mvPexModeGet(pexIf, &pexMode) != MV_OK) {
 		mvOsPrintf("PEX init ERR. mvPexModeGet failed (pexType=%d)\n", pexMode.pexType);
 		return MV_ERROR;
+	}
+
+	if (pexMode.pexLinkUp == MV_FALSE) {
+		/*  interface detected no Link. */
+		return MV_NO_SUCH;
 	}
 
 	/* Check that required PEX type is the one set in reset time */
@@ -215,35 +115,18 @@ MV_STATUS mvPexInit(MV_U32 pexIf, MV_PEX_TYPE pexType, MV_PEX_HAL_DATA *halData)
 		mvPexMasterEnable(pexIf, MV_TRUE);
 
 		/* Local device slave Enable */
+		mvPexSlaveEnable(pexIf, 0xFF, mvPexLocalDevNumGet(pexIf), MV_TRUE);
 		mvPexSlaveEnable(pexIf, mvPexLocalBusNumGet(pexIf), mvPexLocalDevNumGet(pexIf), MV_TRUE);
 		/* Interrupt disable */
 		status = MV_REG_READ(PEX_CFG_DIRECT_ACCESS(pexIf, PEX_STATUS_AND_COMMAND));
 		status |= PXSAC_INT_DIS;
 		MV_REG_WRITE(PEX_CFG_DIRECT_ACCESS(pexIf, PEX_STATUS_AND_COMMAND), status);
 	} else {
-		/* TODO: added by NadavH 14/12/10 - requested by CV to support EP Compliance */
 		regVal = MV_REG_READ(PEX_DBG_CTRL_REG(pexIf));
 		regVal &= ~(BIT16 | BIT19);
 		MV_REG_WRITE(PEX_DBG_CTRL_REG(pexIf), regVal);
-
 	}
-	/* now wait 1ms to be sure the link is valid */
-	mvOsDelay(1);
 
-	/* Check if we have link */
-	if (MV_REG_READ(PEX_STATUS_REG(pexIf)) & PXSR_DL_DOWN) {
-		/*mvOsPrintf("PEX%d interface detected no Link.\n", pexIf);*/
-		return MV_NO_SUCH;
-	}
-#if 0
-	if (MV_PEX_WITDH_X1 == pexMode.pexWidth)
-		mvOsPrintf("PEX%d interface detected Link X1\n", pexIf);
-	else
-		mvOsPrintf("PEX%d interface detected Link X4\n", pexIf);
-#endif
-#ifdef PCIE_VIRTUAL_BRIDGE_SUPPORT
-	mvPexVrtBrgInit(pexIf);
-#endif
 	return MV_OK;
 }
 
@@ -268,17 +151,6 @@ MV_U32 mvPexModeGet(MV_U32 pexIf, MV_PEX_MODE *pexMode)
 
 	if (pexIf >= MV_PEX_MAX_IF)
 		return MV_BAD_PARAM;
-#if 0 /* maen - disabled because there is a conflict with SysPexInit
-	sysPexInit need pexMode, however pexHalData[pexIf].maxPexIf is needed in mvPexModeGe */
-      */
-	/* Parameter checking   */
-	if (PEX_DEFAULT_IF != pexIf) {
-		if (pexIf >= pexHalData[pexIf].maxPexIf) {
-			mvOsPrintf("mvPexModeGet: ERR. Invalid PEX interface %d\n", pexIf);
-			return MV_ERROR;
-		}
-	}
-#endif
 
 	pexData = MV_REG_READ(PEX_CTRL_REG(pexIf));
 
@@ -293,20 +165,17 @@ MV_U32 mvPexModeGet(MV_U32 pexIf, MV_PEX_MODE *pexMode)
 	}
 
 	/* Check if we have link */
-	if (MV_REG_READ(PEX_STATUS_REG(pexIf)) & PXSR_DL_DOWN) {
+/*	if (MV_REG_READ(PEX_STATUS_REG(pexIf)) & PXSR_DL_DOWN) { */
+
+	if ((MV_REG_READ(PEX_DBG_STATUS_REG(pexIf)) & 0x7f) != 0x7E) {
+
 		pexMode->pexLinkUp = MV_FALSE;
 
 		/* If there is no link, the auto negotiation data is worthless */
 		pexMode->pexWidth = MV_PEX_WITDH_INVALID;
 	}
 	else { /* We have Link negotiation started */
-		if ((MV_REG_READ(PEX_DBG_STATUS_REG(pexIf))) == 0x7e)
 			pexMode->pexLinkUp = MV_TRUE;
-		else {
-			mvOsPrintf("Link negotiation failed ");
-			pexMode->pexLinkUp = MV_FALSE;
-		}
-
 		/* We have link. The link width is now valid */
 		pexData = MV_REG_READ(PEX_CFG_DIRECT_ACCESS(pexIf, PEX_LINK_CTRL_STAT_REG));
 		pexMode->pexWidth = ((pexData & PXLCSR_NEG_LNK_WDTH_MASK) >> PXLCSR_NEG_LNK_WDTH_OFFS);
@@ -344,13 +213,6 @@ MV_U32 mvPexModeGet(MV_U32 pexIf, MV_PEX_MODE *pexMode)
 *******************************************************************************/
 MV_U32 mvPexConfigRead(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, MV_U32 regOff)
 {
-#if defined(PCIE_VIRTUAL_BRIDGE_SUPPORT)
-	return mvPexVrtBrgConfigRead(pexIf, bus, dev, func, regOff);
-}
-
-MV_U32 mvPexHwConfigRead(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, MV_U32 regOff)
-{
-#endif
 	MV_U32 pexData = 0;
 	MV_U32 localDev, localBus;
 
@@ -377,7 +239,7 @@ MV_U32 mvPexHwConfigRead(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, MV_U
 
 	if (bus >= MAX_PEX_BUSSES) {
 		DB(mvOsPrintf("mvPexConfigRead: ERR. bus number illigal %d\n", bus));
-		return MV_ERROR;
+		return 0xFFFFFFFF;
 	}
 
 	DB(mvOsPrintf("mvPexConfigRead: pexIf %d, bus %d, dev %d, func %d, regOff 0x%x\n",
@@ -391,7 +253,7 @@ MV_U32 mvPexHwConfigRead(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, MV_U
 		pexData = MV_REG_READ(PEX_STATUS_REG(pexIf));
 
 		if ((pexData & PXSR_DL_DOWN))
-			return MV_ERROR;
+			return 0xFFFFFFFF;
 	}
 
 	/* in PCI Express we have only one device number */
@@ -403,16 +265,15 @@ MV_U32 mvPexHwConfigRead(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, MV_U
 			/* if local dev is 0 then the first number we encounter
 			   after 0 is 1 */
 			if ((dev != 1) && (dev != localDev))
-				return MV_ERROR;
+				return 0xFFFFFFFF;
 		} else {
 			/* if local dev is not 0 then the first number we encounter
 			   is 0 */
 
 			if ((dev != 0) && (dev != localDev))
-				return MV_ERROR;
+				return 0xFFFFFFFF;
 		}
 	}
-
 	/* Creating PEX address to be passed */
 	pexData = (bus << PXCAR_BUS_NUM_OFFS);
 	pexData |= (dev << PXCAR_DEVICE_NUM_OFFS);
@@ -435,134 +296,8 @@ MV_U32 mvPexHwConfigRead(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, MV_U
 
 	/* cleaning Master Abort */
 	MV_REG_BIT_SET(PEX_CFG_DIRECT_ACCESS(pexIf, PEX_STATUS_AND_COMMAND), PXSAC_MABORT);
-#if 0
-	/* Guideline (GL# PCI Express-1) Erroneous Read Data on Configuration   */
-	/* This guideline is relevant for all devices except of the following devices:
-	   88F5281-BO and above, 88F5181L-A0 and above, 88F1281 A0 and above
-	   88F6183 A0 and above, 88F6183L  */
-	ctrlModel = pexHalData[pexIf].ctrlModel;
-	if (((dev != localDev) || (bus != localBus)) &&
-			(!(MV_5281_DEV_ID == ctrlModel) &&
-			 !((MV_5181_DEV_ID == ctrlModel) && (mvCtrlRevGet() >= MV_5181L_A0_REV)) &&
-			 !(MV_1281_DEV_ID == ctrlModel) &&
-			 !(MV_6183_DEV_ID == ctrlModel) &&
-			 !(MV_6183L_DEV_ID == ctrlModel) &&
-			 !(MV_6281_DEV_ID == ctrlModel) &&
-			 !(MV_6282_DEV_ID == ctrlModel) &&
-			 !(MV_6192_DEV_ID == ctrlModel) &&
-			 !(MV_6190_DEV_ID == ctrlModel) &&
-			 !(MV_6180_DEV_ID == ctrlModel) && !(MV_6280_DEV_ID == ctrlModel) && !(MV_78XX0_DEV_ID == ctrlModel)
-			)) {
-
-		/* PCI-Express configuration read work-around */
-
-		/* we will use one of the Punit (AHBToMbus) windows to access the xbar
-		   and read the data from there */
-		/*
-		   Need to configure the 2 free Punit (AHB to MBus bridge)
-		   address decoding windows:
-		   Configure the flash Window to handle Configuration space requests
-		   for PEX0/1:
-		   1.    write 0x7931/0x7941 to the flash window and the size,
-		   79-xbar attr (pci cfg), 3/4-xbar target (pex0/1), 1-WinEn
-		   2.    write base to flash window
-
-		   Configuration transactions from the CPU should write/read the data
-		   to/from address of the form:
-		   addr[31:28] = 0x5 (for PEX0) or 0x6 (for PEX1)
-		   addr[27:24] = extended register number
-		   addr[23:16] = bus number
-		   addr[15:11] = device number
-		   addr[10:8]   = function number
-		   addr[7:0]     = register number
-		 */
-
-#include "ctrlEnv/sys/mvAhbToMbus.h"
-		{
-			MV_U32 winNum;
-			MV_AHB_TO_MBUS_DEC_WIN originWin;
-			MV_U32 pciAddr = 0;
-			MV_U32 remapLow = 0, remapHigh = 0;
-
-			/*
-			   We will use DEV_CS2\Flash window for this workarround
-			 */
-
-			winNum = mvAhbToMbusWinTargetGet(PEX_CONFIG_RW_WA_TARGET);
-
-			/* save remap values if exist */
-			if ((1 == winNum) || (0 == winNum)) {
-				remapLow = MV_REG_READ(AHB_TO_MBUS_WIN_REMAP_LOW_REG(winNum));
-				remapHigh = MV_REG_READ(AHB_TO_MBUS_WIN_REMAP_HIGH_REG(winNum));
-
-			}
-
-			/* save the original window values */
-			mvAhbToMbusWinGet(winNum, &originWin);
-
-			if (PEX_CONFIG_RW_WA_USE_ORIGINAL_WIN_VALUES) {
-				/* set the window as xbar window */
-				if (pexIf) {
-					MV_REG_WRITE(AHB_TO_MBUS_WIN_CTRL_REG(winNum),
-						     (0x7931 | (((originWin.addrWin.size >> 16) - 1)) << 16));
-				} else {
-					MV_REG_WRITE(AHB_TO_MBUS_WIN_CTRL_REG(winNum),
-						     (0x7941 | (((originWin.addrWin.size >> 16) - 1)) << 16));
-				}
-
-				MV_REG_WRITE(AHB_TO_MBUS_WIN_BASE_REG(winNum), originWin.addrWin.baseLow);
-
-				/*pciAddr = originWin.addrWin.baseLow; */
-				pciAddr = (MV_U32) CPU_MEMIO_UNCACHED_ADDR((MV_U32) originWin.addrWin.baseLow);
-
-			} else {
-				/* set the window as xbar window */
-				if (pexIf) {
-					MV_REG_WRITE(AHB_TO_MBUS_WIN_CTRL_REG(winNum),
-						     (0x7931 | (((PEX_CONFIG_RW_WA_SIZE >> 16) - 1)) << 16));
-				} else {
-					MV_REG_WRITE(AHB_TO_MBUS_WIN_CTRL_REG(winNum),
-						     (0x7941 | (((PEX_CONFIG_RW_WA_SIZE >> 16) - 1)) << 16));
-				}
-
-				MV_REG_WRITE(AHB_TO_MBUS_WIN_BASE_REG(winNum), PEX_CONFIG_RW_WA_BASE);
-
-				pciAddr = (MV_U32) CPU_MEMIO_UNCACHED_ADDR(PEX_CONFIG_RW_WA_BASE);
-			}
-
-			/* remap should be as base */
-			if ((1 == winNum) || (0 == winNum)) {
-				MV_REG_WRITE(AHB_TO_MBUS_WIN_REMAP_LOW_REG(winNum), pciAddr);
-				MV_REG_WRITE(AHB_TO_MBUS_WIN_REMAP_HIGH_REG(winNum), 0);
-
-			}
-
-			/* extended register space */
-			pciAddr |= (bus << 16);
-			pciAddr |= (dev << 11);
-			pciAddr |= (func << 8);
-			pciAddr |= (regOff & PXCAR_REG_NUM_MASK);	/* lgacy register space */
-
-			pexData = *(MV_U32 *) pciAddr;
-			pexData = MV_32BIT_LE(pexData);	/* Data always in LE */
-
-			/* restore the original window values */
-			mvAhbToMbusWinSet(winNum, &originWin);
-
-			/* restore original remap values */
-			if ((1 == winNum) || (0 == winNum)) {
-				MV_REG_WRITE(AHB_TO_MBUS_WIN_REMAP_LOW_REG(winNum), remapLow);
-				MV_REG_WRITE(AHB_TO_MBUS_WIN_REMAP_HIGH_REG(winNum), remapHigh);
-
-			}
-		}
-	} else
-#endif
-	{
 		/* Read the Data returned in the PEX Data register */
 		pexData = MV_REG_READ(PEX_CFG_DATA_REG(pexIf));
-
-	}
 
 	DB(mvOsPrintf("mvPexConfigRead: got : %x \n", pexData));
 
@@ -597,13 +332,6 @@ MV_U32 mvPexHwConfigRead(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, MV_U
 *******************************************************************************/
 MV_STATUS mvPexConfigWrite(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, MV_U32 regOff, MV_U32 data)
 {
-#if defined(PCIE_VIRTUAL_BRIDGE_SUPPORT)
-	return mvPexVrtBrgConfigWrite(pexIf, bus, dev, func, regOff, data);
-}
-
-MV_STATUS mvPexHwConfigWrite(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, MV_U32 regOff, MV_U32 data)
-{
-#endif
 	MV_U32 pexData = 0;
 	MV_U32 localDev, localBus;
 
@@ -723,17 +451,12 @@ MV_STATUS mvPexHwConfigWrite(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_U32 func, 
 MV_STATUS mvPexMasterEnable(MV_U32 pexIf, MV_BOOL enable)
 {
 	MV_U32 pexCommandStatus;
-	MV_U32 localBus;
-	MV_U32 localDev;
 
 	/* Parameter checking   */
 	if (pexIf >= pexHalData[pexIf].maxPexIf) {
 		mvOsPrintf("mvPexMasterEnable: ERR. Invalid PEX interface %d\n", pexIf);
 		return MV_ERROR;
 	}
-
-	localBus = mvPexLocalBusNumGet(pexIf);
-	localDev = mvPexLocalDevNumGet(pexIf);
 
 	pexCommandStatus = MV_REG_READ(PEX_CFG_DIRECT_ACCESS(pexIf, PEX_STATUS_AND_COMMAND));
 
@@ -822,8 +545,6 @@ MV_STATUS mvPexSlaveEnable(MV_U32 pexIf, MV_U32 bus, MV_U32 dev, MV_BOOL enable)
 MV_STATUS mvPexLocalBusNumSet(MV_U32 pexIf, MV_U32 busNum)
 {
 	MV_U32 pexStatus;
-	MV_U32 localBus;
-	MV_U32 localDev;
 
 	/* Parameter checking   */
 	if (pexIf >= pexHalData[pexIf].maxPexIf) {
@@ -834,9 +555,6 @@ MV_STATUS mvPexLocalBusNumSet(MV_U32 pexIf, MV_U32 busNum)
 		mvOsPrintf("mvPexLocalBusNumSet: ERR. bus number illigal %d\n", busNum);
 		return MV_ERROR;
 	}
-
-	localBus = mvPexLocalBusNumGet(pexIf);
-	localDev = mvPexLocalDevNumGet(pexIf);
 
 	pexStatus = MV_REG_READ(PEX_STATUS_REG(pexIf));
 
@@ -910,8 +628,6 @@ MV_U32 mvPexLocalBusNumGet(MV_U32 pexIf)
 MV_STATUS mvPexLocalDevNumSet(MV_U32 pexIf, MV_U32 devNum)
 {
 	MV_U32 pexStatus;
-	MV_U32 localBus;
-	MV_U32 localDev;
 
 	if (pexIf >= MV_PEX_MAX_IF)
 		return MV_BAD_PARAM;
@@ -925,9 +641,6 @@ MV_STATUS mvPexLocalDevNumSet(MV_U32 pexIf, MV_U32 devNum)
 		mvOsPrintf("mvPexLocalDevNumSet: ERR. device number illigal %d\n", devNum);
 		return MV_BAD_PARAM;
 	}
-
-	localBus = mvPexLocalBusNumGet(pexIf);
-	localDev = mvPexLocalDevNumGet(pexIf);
 
 	pexStatus = MV_REG_READ(PEX_STATUS_REG(pexIf));
 
@@ -1123,28 +836,3 @@ MV_VOID mvPexPhyPowerDown(MV_U32 pexIf)
 	MV_REG_WRITE(PEX_PHY_ACCESS_REG(pexIf), 0x20800087);
 	return;
 }
-
-#if 0
-/*  These APIs will be removed, OS glue should call the mvCtrlPwerClkxxx() */
-/*  functions directly. */
-MV_BOOL mvPexIsPowerUp(MV_U32 pexIf)
-{
-	if (pexIf >= pexHalData[pexIf].maxPexIf) {
-		mvOsPrintf("mvPexIsPowerUp: ERR. Invalid PEX interface %d\n", pexIf);
-		return MV_FALSE;
-	}
-	return mvCtrlPwrClckGet(PEX_UNIT_ID, pexIf);
-}
-
-MV_VOID mvPexPowerDown(MV_U32 pexIf)
-{
-	MV_U32 ctrlModel = pexHalData[pexIf].ctrlModel;
-
-	if ((ctrlModel == MV_78XX0_DEV_ID) ||
-			(ctrlModel == MV_76100_DEV_ID) || (ctrlModel == MV_78100_DEV_ID) || (ctrlModel == MV_78200_DEV_ID)) {
-		mvCtrlPwrClckSet(PEX_UNIT_ID, pexIf, MV_FALSE);
-	} else {
-		MV_REG_WRITE((0x41B00 - (pexIf) * 0x10000), 0x20800087);
-	}
-}
-#endif

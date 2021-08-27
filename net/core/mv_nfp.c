@@ -67,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/mv_nfp.h>
 
 struct nfp_core_ops *nfp_core_p = NULL;
-struct nfp_hook_ops *nfp_mgr_p = NULL;
 
 int nfp_core_ops_init(void)
 {
@@ -81,6 +80,8 @@ int nfp_core_ops_init(void)
 }
 EXPORT_SYMBOL(nfp_core_p);
 
+#ifdef CONFIG_MV_ETH_NFP_HOOKS
+struct nfp_hook_ops *nfp_mgr_p = NULL;
 int nfp_hook_ops_init(void)
 {
 	nfp_mgr_p = kzalloc(sizeof(struct nfp_hook_ops), GFP_KERNEL);
@@ -93,3 +94,4 @@ int nfp_hook_ops_init(void)
 	return 0;
 }
 EXPORT_SYMBOL(nfp_mgr_p);
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */

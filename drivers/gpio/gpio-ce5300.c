@@ -297,7 +297,7 @@ __devinit int ce5300_gpio_irq_setup(struct intelce_gpio_chip *c, struct pci_dev 
 	int irq;
 	int ret;
 
-	c->irq_base = irq_alloc_descs(-1, 0, CE5300_PUB_GPIOS_PER_BANK, -1);
+	c->irq_base = irq_alloc_descs(-1, INTELCE_GPIO_IRQ_BASE, CE5300_PUB_GPIOS_PER_BANK, -1);
 	if (c->irq_base < 0)
 		return c->irq_base;
 

@@ -174,10 +174,10 @@ void br_dev_delete(struct net_device *dev, struct list_head *head)
 	list_for_each_entry_safe(p, n, &br->port_list, list) {
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (nfp_mgr_p->nfp_hook_br_port_del)
 		nfp_mgr_p->nfp_hook_br_port_del(br->dev->ifindex, p->dev->ifindex);
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 		del_nbp(p);
@@ -186,10 +186,10 @@ void br_dev_delete(struct net_device *dev, struct list_head *head)
 	del_timer_sync(&br->gc_timer);
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (nfp_mgr_p->nfp_hook_br_del)
 		nfp_mgr_p->nfp_hook_br_del(br->dev->ifindex);
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 	br_sysfs_delbr(br->dev);
@@ -447,10 +447,10 @@ int br_del_if(struct net_bridge *br, struct net_device *dev)
 		return -EINVAL;
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (nfp_mgr_p->nfp_hook_br_port_del)
 		nfp_mgr_p->nfp_hook_br_port_del(br->dev->ifindex, p->dev->ifindex);
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 	del_nbp(p);

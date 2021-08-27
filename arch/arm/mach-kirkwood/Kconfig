@@ -8,6 +8,29 @@ config MACH_DB88F6281_BP
 	  Say 'Y' here if you want your kernel to support the
 	  Marvell DB-88F6281-BP Development Board.
 
+config MACH_XCAT98DX
+	bool "Marvell XCAT-98DX Development Board"
+	select MV_XCAT98DX
+	help
+	  Say 'Y' here if you want your kernel to support the
+	  Marvell xCat-98DX Development Board.
+
+config MV_XCAT98DX
+	bool
+
+config MV_XCAT98DX_WARM_RESET
+	depends on MACH_XCAT98DX && NO_HZ
+	bool "Marvell XCAT-98DX Development Board Warm reset support"
+	default n
+	help
+	  Say 'Y' here if you want your kernel to support the Warm reset on
+	  Marvell xCat-98DX Development Board
+	  U-Boot support required - U-Boot should enable external reset
+	  and restore high Address Map windows to default.
+
+config MV_XCAT98DX_WARM_RESET
+	bool
+
 config MACH_RD88F6192_NAS
 	bool "Marvell RD-88F6192-NAS Reference Board"
 	help
@@ -19,6 +42,12 @@ config MACH_RD88F6281
 	help
 	  Say 'Y' here if you want your kernel to support the
 	  Marvell RD-88F6281 Reference Board.
+
+config MACH_RD88F6282_A
+	bool "Marvell RD-88F6282-A Reference Board"
+	help
+	  Say 'Y' here if you want your kernel to support the
+	  Marvell RD-88F6282-A Reference Board.
 
 config MACH_MV88F6281GTW_GE
 	bool "Marvell 88F6281 GTW GE Board"

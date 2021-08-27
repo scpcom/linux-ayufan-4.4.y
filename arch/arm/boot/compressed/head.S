@@ -15,6 +15,9 @@
 #if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARCH_ARMADA_XP)
 #include <mach/armadaxp.h>
 #endif
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARCH_ARMADA370)
+#include <mach/armada370.h>
+#endif
 
 /*
  * Debugging stuff
@@ -145,17 +148,23 @@ start:
  THUMB(		.thumb			)
 #if defined(CONFIG_SYNO_ARMADA_ARCH)
 1:
-#if defined(CONFIG_ARCH_ARMADA_XP) && !defined(CONFIG_MV_AMP_ENABLE)
-
-/* Disable in AMP since in AMP mode the internal register base must match
- * U-BOOTs base. Two operating systems cannot modify the base during boot
- * as is done with a single image */
-
+#ifdef CONFIG_PLAT_ARMADA
 /* Update Internal Regs offset in case UBoot is configured
 ** to use a different base address.
 */
+		mrc p15, 0, r0, c5, c0, 0	@ Get the internal registers indication
+		tst r0, #(1 << 11)		@ Check 0xF1000000 indication - bit 11
+		beq 1f				@ If bit 11 is not set (equal):
+						@ AXP - Need to check original Internal regs offset CP15 register
+						@ A370 - U-Boot was using 0xD0000000
+		b 2f				@ Else, bit 11 is set - U-Boot was using 0xF1000000 - Nothing to do
+1:
+#ifdef CONFIG_ARCH_ARMADA_XP
 		mrc p15, 4, r0, c15, c0, 0	@ Get the internal registers base address
 		lsl r0, r0, #13			@ the address is R-shifted, need to recover it
+#else	/* CONFIG_ARCH_ARMADA_370 */
+		ldr r0, =0xD0000000
+#endif
 		ldr r5, =0x20080
 		add r0, r0, r5
 		ldr r6, =INTER_REGS_PHYS_BASE
@@ -163,6 +172,7 @@ start:
 		rev r6, r6
 #endif
 		str r6, [r0]
+2:
 #endif
 
 		mov	r7, r1			@ save architecture ID
@@ -657,18 +667,6 @@ __armv4_mmu_cache_on:
 		mov	r12, lr
 #ifdef CONFIG_MMU
 		bl	__setup_mmu
-#ifdef CONFIG_CACHE_FEROCEON_L2
-		/* Cancel L2 prefetch */
-		mrc	p15, 1, r0, c15, c1, 0	@ Read r15 register
-		orr	r0, #0x01000000		@ No prefetching
-		mcr	p15, 1, r0, c15, c1, 0	@ Write r15 register
-/*
- * In this step, the I/DCaches are closed, but L2 cache might be present
- * containing valid data (from u-boot). We do not assume u-boot invalidates L2,
- * so we do it ourselves
- */
-		mcr	p15, 1, r0, c15, c11, 0	@ Invalidate whole L2
-#endif
 		mov	r0, #0
 		mcr	p15, 0, r0, c7, c10, 4	@ drain write buffer
 		mcr	p15, 0, r0, c8, c7, 0	@ flush I,D TLBs
@@ -696,9 +694,7 @@ __armv7_mmu_cache_on:
 		mcrne	p15, 0, r0, c8, c7, 0	@ flush I,D TLBs
 #endif
 		mrc	p15, 0, r0, c1, c0, 0	@ read control reg
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
 		bic	r0, r0, #1 << 28	@ clear SCTLR.TRE
-#endif
 		orr	r0, r0, #0x5000		@ I-cache enable, RR cache replacement
 		orr	r0, r0, #0x003c		@ write buffer
 #ifdef CONFIG_MMU
@@ -1203,20 +1199,10 @@ no_cache_id:
  THUMB(		add     r1, r1, r11		)
 		teq	r1, r2
 		bne	1b
-#ifdef CONFIG_ARCH_FEROCEON
-                /* 4 way cache, load of new cache lines won't be enough. */
-2:              mrc     p15, 0, r15, c7, c14, 3         @ test,clean,invalidate
-                bne     2b
-#endif
 
 		mcr	p15, 0, r1, c7, c5, 0	@ flush I cache
 		mcr	p15, 0, r1, c7, c6, 0	@ flush D cache
 		mcr	p15, 0, r1, c7, c10, 4	@ drain WB
-#ifdef CONFIG_CACHE_FEROCEON_L2
-		mcr	p15, 1, r1, c15, c9, 0	@ clean entire L2 cache
-		mcr	p15, 1, r1, c15, c11, 0	@ Invalidate entire L2 cache
-		mcr	p15, 0, r1, c7, c10, 4	@ drain WB
-#endif
 		mov	pc, lr
 
 __armv3_mmu_cache_flush:

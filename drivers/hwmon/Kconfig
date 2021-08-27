@@ -558,6 +558,13 @@ config SENSORS_SYNO_HDDMON
 	  Hdd Monitor to monitor the hdds' presentation and to
 	  enable/disable the power supply of each hdd.
 
+config SENSORS_ORION
+        tristate "Marvell Orion temperature sensor"
+        help
+	  This driver provides support for the Marvell's Kirkwood SoC thermal
+	  controller, which provides on-chip temperature sensors.
+	  Thermal sensor is supported for Kirkwood SoCs 88F6282 and 88F6283.
+
 config SENSORS_LM63
 	tristate "National Semiconductor LM63 and LM64"
 	depends on I2C

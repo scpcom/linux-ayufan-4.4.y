@@ -271,6 +271,19 @@ config NET_SB1000
 
 	  If you don't have this card, of course say N.
 
+config UDMA
+	tristate "Intel(R) UDMA Driver support"
+        depends on ARCH_GEN3
+	default y
+	---help---
+	  For general information and support, go to the Intel support
+	  website at:
+
+	  <http://support.intel.com>
+
+	  To compile this driver as a module, choose M here. The module
+	  will be called udma.ko
+
 source "drivers/net/phy/Kconfig"
 
 source "drivers/net/plip/Kconfig"

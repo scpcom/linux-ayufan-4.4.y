@@ -68,7 +68,7 @@ extern s64 div_s64_rem(s64 dividend, s32 divisor, s32 *remainder);
 extern u64 div64_u64(u64 dividend, u64 divisor);
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA) || (defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3))
 extern u64 mod_u64_rem64(u64 dividend, u64 divisor);
 #endif
 

@@ -3125,7 +3125,6 @@ err:
 	return retval;
 };
 
-
 static int bind_con_driver(const struct consw *csw, int first, int last,
 			   int deflt)
 {
@@ -3683,6 +3682,32 @@ EXPORT_SYMBOL_GPL(do_unregister_con_driver);
  *
  *	take_over_console is basically a register followed by unbind
  */
+int do_take_over_console(const struct consw *csw, int first, int last, int deflt)
+{
+	int err;
+
+	err = do_register_con_driver(csw, first, last);
+	/*
+	 * If we get an busy error we still want to bind the console driver
+	 * and return success, as we may have unbound the console driver
+	 * but not unregistered it.
+	 */
+	if (err == -EBUSY)
+		err = 0;
+	if (!err)
+		do_bind_con_driver(csw, first, last, deflt);
+
+	return err;
+}
+EXPORT_SYMBOL_GPL(do_take_over_console);
+
+/*
+ *	If we support more console drivers, this function is used
+ *	when a driver wants to take over some existing consoles
+ *	and become default driver for newly opened ones.
+ *
+ *	take_over_console is basically a register followed by unbind
+ */
 int take_over_console(const struct consw *csw, int first, int last, int deflt)
 {
 	int err;
@@ -3691,7 +3716,7 @@ int take_over_console(const struct consw *csw, int first, int last, int deflt)
 	/*
 	 * If we get an busy error we still want to bind the console driver
 	 * and return success, as we may have unbound the console driver
-	 * but not unregistered it.
+	 * but not unregistered it.
 	 */
 	if (err == -EBUSY)
 		err = 0;

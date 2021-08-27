@@ -71,6 +71,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mvDeviceId.h"
 #include "mvSysHwConfig.h"
 
+#include "ctrlEnv/sys/mvCpuIfRegs.h"
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -84,6 +85,9 @@ extern "C" {
 #define MV_DRAM_REGS_OFFSET			(0x0)
 #define MV_AURORA_L2_REGS_OFFSET		(0x8000)
 #define MV_RTC_REGS_OFFSET			(0x10300)
+#ifdef CONFIG_SYNO_ARMADA
+#define MV_RTC_EXTERNAL_ALARM_OFFSET			(0x10320)
+#endif
 #define MV_DEV_BUS_REGS_OFFSET			(0x10400)
 #define MV_SPI_REGS_OFFSET(unit)		(0x10600 + (unit * 0x80))
 #define MV_TWSI_SLAVE_REGS_OFFSET(chanNum)	(0x11000 + (chanNum * 0x100))
@@ -96,7 +100,7 @@ extern "C" {
 #define MV_COHERENCY_FABRIC_OFFSET		(0x20200)
 #define MV_CIB_CTRL_STATUS_OFFSET		(0x20280)
 #define MV_CNTMR_REGS_OFFSET			(0x20300)
-#define MV_CPUIF_LOCAL_REGS_OFFSET		(0x21000)
+#define MV_CPUIF_LOCAL_REGS_OFFSET		(0x21800)
 #define MV_AVS_REGS_OFFSET				(0x20860)
 #define MV_CPUIF_REGS_OFFSET(x)			(0x21000)
 #define MV_PMU_NFABRIC_UNIT_SERV_OFFSET		(0x22000)
@@ -130,6 +134,7 @@ extern "C" {
 #define INTER_REGS_SIZE				_1M
 
 /* TWSI bus speed.	*/
+#define TWSI_CPU_MAIN_INT_CAUSE_REG(cpu)	CPU_MAIN_INT_CAUSE_REG(1)
 #define TWSI_SPEED				100000
 
 #define MV_GPP_MAX_PINS				65
@@ -148,7 +153,7 @@ extern "C" {
 #define MV_XOR_MAX_CHAN_PER_UNIT		2 /* channels for units */
 
 #define MV_SATA_MAX_CHAN			2
-#define MV_SATA_MV6W11_CHAN			1
+#define MV_SATA_MV6W11_CHAN			0
 
 #define MV_AUDIO_MAX_UNITS			1
 

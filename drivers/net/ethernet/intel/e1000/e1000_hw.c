@@ -139,6 +139,8 @@ static s32 e1000_set_phy_type(struct e1000_hw *hw)
 #ifdef CONFIG_ARCH_GEN3
 		if (hw->phy_revision == RTL8211D_PHY_REV_ID)
         		hw->phy_type = e1000_phy_8211d;
+		else if (hw->phy_revision == RTL8211E_PHY_REV_ID)
+			hw->phy_type = e1000_phy_8211e;
 #endif
 		break;
 	case RTL8201N_PHY_ID:
@@ -149,6 +151,9 @@ static s32 e1000_set_phy_type(struct e1000_hw *hw)
 		hw->phy_type = e1000_phy_8201e;
 		if (hw->phy_revision == RTL8201FR_PHY_REV_ID)
 			hw->phy_type = e1000_phy_8201fr;
+		break;
+	case LAN8720A_PHY_ID:
+		hw->phy_type = e1000_phy_lan8720a;
 		break;
 #endif
 	default:
@@ -1014,6 +1019,25 @@ static s32 gbe_dhg_phy_setup(struct e1000_hw *hw)
 		break;
 #ifdef CONFIG_ARCH_GEN3
 	case e1000_phy_8211d:
+	case e1000_phy_8211e:
+		/* Set max packet length / WoL reset bit = 0 */
+		e1000_write_phy_reg(hw, 31, 0x0007);
+		e1000_write_phy_reg(hw, 30, 0x006d);
+		e1000_write_phy_reg(hw, 22, 0x9fff);
+
+		/* Set MAC Address on PHY (needed in some WoL applications) */
+		e1000_write_phy_reg(hw, 30, 0x006e);
+		e1000_write_phy_reg(hw, 21,
+			(u16) (hw->mac_addr[1] << 8 | hw->mac_addr[0]));
+		e1000_write_phy_reg(hw, 22,
+			(u16) (hw->mac_addr[3] << 8 | hw->mac_addr[2]));
+		e1000_write_phy_reg(hw, 23,
+			(u16) (hw->mac_addr[5] << 8 | hw->mac_addr[4]));
+
+		/* Switch to Page 0 */
+		e1000_write_phy_reg(hw, 31, 0x0000);
+		msleep(10);
+
 		ret_val = e1000_copper_link_rtl_setup(hw);
 		if(ret_val){
 			printk(" e1000_copper_link_rtl_setup failed!\n");
@@ -1042,18 +1066,6 @@ static s32 gbe_dhg_phy_setup(struct e1000_hw *hw)
 		}
 		break;
 #ifdef CONFIG_ARCH_GEN3
-		/* RMII mode setting in 8201N PHY chip */
-		ret_val = e1000_read_phy_reg(hw, PHY_CTRL, &phy_data);
-		if (ret_val)
-			return ret_val;
-
-		phy_data |= 0x01;
-		ret_val = e1000_write_phy_reg(hw, PHY_CTRL, phy_data);
-		if (ret_val){
-			printk(" 8201N RMII mode setup failed!\n");
-		}
-		break;
-
 	case e1000_phy_8201e:
 		/* Set RMII mode */
 		ctrl_aux = er32(CTL_AUX);
@@ -1092,6 +1104,24 @@ static s32 gbe_dhg_phy_setup(struct e1000_hw *hw)
 		/* enable the J/K bits requried for recieve */
 		ctrl_aux = er32(CTL_AUX);
 		ctrl_aux &= ~0x4;
+		ctrl_aux &= ~0x2;
+		ew32(CTL_AUX, ctrl_aux);
+		E1000_WRITE_FLUSH();
+		ret_val = e1000_copper_link_rtl_setup(hw);
+		if(ret_val){
+			printk(" e1000_copper_link_rtl_setup failed!\n");
+			return ret_val;
+		}
+		break;
+	case e1000_phy_lan8720a:
+		/* Set RMII mode */
+		ctrl_aux = er32(CTL_AUX);
+		ctrl_aux |= E1000_CTL_AUX_RMII;
+		ew32(CTL_AUX, ctrl_aux);
+		E1000_WRITE_FLUSH();
+		/* disable the J/K bits requried for recieve */
+		ctrl_aux = er32(CTL_AUX);
+		ctrl_aux |= 0x4;
 		ctrl_aux &= ~0x2;
 		ew32(CTL_AUX, ctrl_aux);
 		E1000_WRITE_FLUSH();
@@ -1446,7 +1476,12 @@ static s32 e1000_copper_link_autoneg(struct e1000_hw *hw)
 		hw->autoneg_advertised = AUTONEG_ADVERTISE_SPEED_DEFAULT;
 
 	/* IFE/RTL8201N PHY only supports 10/100 */
+#ifdef CONFIG_ARCH_GEN3	
+	if ((hw->phy_type == e1000_phy_8201) || (hw->phy_type == e1000_phy_8201e) || \
+		(hw->phy_type == e1000_phy_8201fr) || (hw->phy_type == e1000_phy_lan8720a)) 
+#else
 	if (hw->phy_type == e1000_phy_8201)
+#endif
 		hw->autoneg_advertised &= AUTONEG_ADVERTISE_10_100_ALL;
 
 	e_dbg("Reconfiguring auto-neg advertisement params\n");
@@ -1595,7 +1630,7 @@ static s32 e1000_setup_copper_link(struct e1000_hw *hw)
 			return ret_val;
 
 #ifdef CONFIG_ARCH_GEN3		
-		hw->cegbe_is_link_up = (phy_data & MII_SR_LINK_STATUS) != 0;
+		hw->cegbe_is_link_up = ((phy_data & MII_SR_LINK_STATUS) != 0);
 #endif
 		if (phy_data & MII_SR_LINK_STATUS) {
 			/* Config the MAC and PHY after link is up */
@@ -1634,9 +1669,10 @@ s32 e1000_phy_setup_autoneg(struct e1000_hw *hw)
 
 	/* Read the MII 1000Base-T Control Register (Address 9). */
 #ifdef CONFIG_ARCH_GEN3
-	if (hw->phy_type == e1000_phy_8201 || hw->phy_type == e1000_phy_8201e || hw->phy_type == e1000_phy_8201fr)
+	if ((hw->phy_type == e1000_phy_8201) || (hw->phy_type == e1000_phy_8201e) || \
+		(hw->phy_type == e1000_phy_8201fr) || (hw->phy_type == e1000_phy_lan8720a)) {
 		mii_1000t_ctrl_reg = 0;
-	else{
+	} else{
 		ret_val = e1000_write_phy_reg(hw, PHY_1000T_CTRL, mii_1000t_ctrl_reg);
 		if (ret_val)
 			return ret_val;
@@ -1761,7 +1797,8 @@ s32 e1000_phy_setup_autoneg(struct e1000_hw *hw)
 	e_dbg("Auto-Neg Advertising %x\n", mii_autoneg_adv_reg);
 
 #ifdef CONFIG_ARCH_GEN3
-	if ((hw->phy_type == e1000_phy_8201)||(hw->phy_type == e1000_phy_8201e)||(hw->phy_type == e1000_phy_8201fr)) {
+	if ((hw->phy_type == e1000_phy_8201) || (hw->phy_type == e1000_phy_8201e)|| \
+		(hw->phy_type == e1000_phy_8201fr) || (hw->phy_type == e1000_phy_lan8720a)) {
 #else
 	if (hw->phy_type == e1000_phy_8201) {
 #endif
@@ -3597,8 +3634,10 @@ s32 e1000_phy_get_info(struct e1000_hw *hw, struct e1000_phy_info *phy_info)
 #ifdef CONFIG_ARCH_GEN3
 	else if ((hw->phy_type == e1000_phy_8211) ||
 			(hw->phy_type == e1000_phy_8201e) ||
+			(hw->phy_type == e1000_phy_lan8720a) ||
 			(hw->phy_type == e1000_phy_8201fr) ||
 			(hw->phy_type == e1000_phy_8211d) ||
+			(hw->phy_type == e1000_phy_8211e) ||
 	         	(hw->phy_type == e1000_phy_8201))
 #else
 	else if ((hw->phy_type == e1000_phy_8211) ||

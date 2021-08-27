@@ -175,6 +175,7 @@ static struct mtd_info *sflash_probe(struct map_info *map)
 	mtd->flags = (MTD_WRITEABLE | MTD_BIT_WRITEABLE); /* just like MTD_CAP_NORFLASH */
 	mtd->name = map->name;
 	mtd->writesize = 1;
+	mtd->writebufsize = 1; /* Set write buffer size to minimal */
 	
 	map->fldrv = &sflash_chipdrv;
 	map->fldrv_priv = sflash;

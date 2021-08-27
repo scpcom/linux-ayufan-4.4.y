@@ -1158,15 +1158,6 @@ EXPORT_SYMBOL(bio_unmap_user);
 
 static void bio_map_kern_endio(struct bio *bio, int err)
 {
-#ifdef CONFIG_ARM_MARVELL_BSP_MM_ADD_API_FOR_DMA
-	void *kaddr = bio->bi_private;
-	if (is_vmalloc_addr(kaddr)) {
-		void *addr;
-		for (addr = kaddr; addr < kaddr + bio->bi_size;
-		     addr += PAGE_SIZE)
-			invalidate_kernel_dcache_addr(addr);
-	}
-#endif
 	bio_put(bio);
 }
 
@@ -1184,17 +1175,9 @@ static struct bio *__bio_map_kern(struct request_queue *q, void *data,
 	if (!bio)
 		return ERR_PTR(-ENOMEM);
 
-#ifdef CONFIG_ARM_MARVELL_BSP_MM_ADD_API_FOR_DMA
-	bio->bi_private = data;
-#endif
-
 	offset = offset_in_page(kaddr);
 	for (i = 0; i < nr_pages; i++) {
 		unsigned int bytes = PAGE_SIZE - offset;
-
-#ifdef CONFIG_ARM_MARVELL_BSP_MM_ADD_API_FOR_DMA
-		struct page *page;
-#endif
 
 		if (len <= 0)
 			break;
@@ -1202,20 +1185,9 @@ static struct bio *__bio_map_kern(struct request_queue *q, void *data,
 		if (bytes > len)
 			bytes = len;
 
-#ifdef CONFIG_ARM_MARVELL_BSP_MM_ADD_API_FOR_DMA
-		if (is_vmalloc_addr(data)) {
-			flush_kernel_dcache_addr(data);
-			page = vmalloc_to_page(data);
-		} else
-			page = virt_to_page(data);
-
-		if (bio_add_pc_page(q, bio, page, bytes, offset) < bytes)
-			break;
-#else
 		if (bio_add_pc_page(q, bio, virt_to_page(data), bytes,
 				    offset) < bytes)
 			break;
-#endif
 
 		data += bytes;
 		len -= bytes;
@@ -1525,7 +1497,7 @@ struct bio_pair *bio_split(struct bio *bi, int first_sectors)
 	trace_block_split(bdev_get_queue(bi->bi_bdev), bi,
 				bi->bi_sector + first_sectors);
 
-	BUG_ON(bi->bi_vcnt != 1);
+	BUG_ON(bi->bi_vcnt != 1 && bi->bi_vcnt != 0);
 	BUG_ON(bi->bi_idx != 0);
 	atomic_set(&bp->cnt, 3);
 	bp->error = 0;
@@ -1535,6 +1507,7 @@ struct bio_pair *bio_split(struct bio *bi, int first_sectors)
 	bp->bio2.bi_size -= first_sectors << 9;
 	bp->bio1.bi_size = first_sectors << 9;
 
+	if (bi->bi_vcnt != 0) {
 		bp->bv1 = bi->bi_io_vec[0];
 		bp->bv2 = bi->bi_io_vec[0];
 		bp->bv2.bv_offset += first_sectors << 9;
@@ -1546,6 +1519,7 @@ struct bio_pair *bio_split(struct bio *bi, int first_sectors)
 
 		bp->bio1.bi_max_vecs = 1;
 		bp->bio2.bi_max_vecs = 1;
+	}
 
 	bp->bio1.bi_end_io = bio_pair_end_1;
 	bp->bio2.bi_end_io = bio_pair_end_2;

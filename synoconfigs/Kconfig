@@ -2,12 +2,7 @@
 # see Documentation/kbuild/kconfig-language.txt.
 #
 
-config SYNO_INQUIRY_USE_ATA_COMMAND
-	bool "Using ATA command to obtain STAT disk vendor and model name"
-	depends on SYNO_BROMOLOW
-	default y
-	help
-	  Using ATA command to obtain STAT disk complete information
+menu "Synology special config"
 
 config SYNO_ADT7490_FEATURES
 	bool "Enhance features for adt7490 for Synology Corp. NAS product"
@@ -17,3 +12,23 @@ config SYNO_ADT7490_FEATURES
 		If you need Synology enhance features for adt7490 supports, choose yes.
 		Which will open peci supports and some other features for adt7490
 
+config SYNO_INCREASE_SIL3132_OUT_SWING
+	bool "SATA Sil3132 OUT SWING to prevent DRDY"
+	depends on SYNO_CEDARVIEW
+	default y
+	help
+	  Increase SATA Sil3132 OUT SWING to prevent DRDY
+
+config SYNO_DISPLAY_CPUINFO
+    bool "Support display CPU Infomation"
+	help
+	  Say Y to Support display CPU Infomation
+
+config SYNO_FIX_MV_CESA_RACE
+	bool "Fix Marvell's crypto driver race"
+	depends on MV_CESA
+	default y
+	help
+		Say Y here to fix Marvell crypto driver race condition
+
+endmenu

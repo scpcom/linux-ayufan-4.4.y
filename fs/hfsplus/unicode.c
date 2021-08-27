@@ -119,9 +119,30 @@ static u16 *hfsplus_compose_lookup(u16 *p, u16 cc)
 	return NULL;
 }
 
+#ifdef MY_ABC_HERE
+static int hfsplus_uni2asc_ex(struct super_block *sb,
+		const struct hfsplus_unistr *ustr,
+		char *astr, int *len_p, int convert);
 int hfsplus_uni2asc(struct super_block *sb,
 		const struct hfsplus_unistr *ustr,
 		char *astr, int *len_p)
+{
+	return hfsplus_uni2asc_ex(sb, ustr, astr, len_p, 1);
+}
+int hfsplus_attr_uni2asc(struct super_block *sb,
+		const struct hfsplus_unistr *ustr,
+		char *astr, int *len_p)
+{
+	return hfsplus_uni2asc_ex(sb, ustr, astr, len_p, 0);
+}
+int hfsplus_uni2asc_ex(struct super_block *sb,
+		const struct hfsplus_unistr *ustr,
+		char *astr, int *len_p, int convert)
+#else
+int hfsplus_uni2asc(struct super_block *sb,
+		const struct hfsplus_unistr *ustr,
+		char *astr, int *len_p)
+#endif
 {
 	const hfsplus_unichr *ip;
 	struct nls_table *nls = HFSPLUS_SB(sb)->nls;
@@ -187,6 +208,9 @@ int hfsplus_uni2asc(struct super_block *sb,
 				c0 = 0x2400;
 				break;
 			case '/':
+#ifdef MY_ABC_HERE
+				if (convert)
+#endif
 				c0 = ':';
 				break;
 			}
@@ -280,10 +304,8 @@ static inline int asc2unichar(struct super_block *sb, const char *astr, int len,
 	case ':':
 #ifdef MY_ABC_HERE
 		if (convert)
-		*uc = '/';
-#else
-		*uc = '/';
 #endif
+		*uc = '/';
 		break;
 	}
 	return size;
@@ -312,17 +334,29 @@ static inline u16 *decompose_unichar(wchar_t uc, int *size)
 		return NULL;
 	return hfsplus_decompose_table + (off / 4);
 }
+
 #ifdef MY_ABC_HERE
-inline int hfsplus_asc2uni(struct super_block *sb, struct hfsplus_unistr *ustr,
+static int hfsplus_asc2uni_ex(struct super_block *sb,
+		    struct hfsplus_unistr *ustr, int max_unistr_len,
+		    const char *astr, int len, int convert);
+int hfsplus_asc2uni(struct super_block *sb,
+		    struct hfsplus_unistr *ustr, int max_unistr_len,
 		    const char *astr, int len)
 {
-	return hfsplus_asc2uni_ex(sb, ustr, astr, len, 1);
+	return hfsplus_asc2uni_ex(sb, ustr, max_unistr_len, astr, len, 1);
 }
-
-int hfsplus_asc2uni_ex(struct super_block *sb, struct hfsplus_unistr *ustr,
+int hfsplus_attr_asc2uni(struct super_block *sb,
+		    struct hfsplus_unistr *ustr, int max_unistr_len,
+		    const char *astr, int len)
+{
+	return hfsplus_asc2uni_ex(sb, ustr, max_unistr_len, astr, len, 0);
+}
+static int hfsplus_asc2uni_ex(struct super_block *sb,
+		    struct hfsplus_unistr *ustr, int max_unistr_len,
 		    const char *astr, int len, int convert)
 #else
-int hfsplus_asc2uni(struct super_block *sb, struct hfsplus_unistr *ustr,
+int hfsplus_asc2uni(struct super_block *sb,
+		    struct hfsplus_unistr *ustr, int max_unistr_len,
 		    const char *astr, int len)
 #endif
 {
@@ -331,7 +365,7 @@ int hfsplus_asc2uni(struct super_block *sb, struct hfsplus_unistr *ustr,
 	wchar_t c;
 
 	decompose = !test_bit(HFSPLUS_SB_NODECOMPOSE, &HFSPLUS_SB(sb)->flags);
-	while (outlen < HFSPLUS_MAX_STRLEN && len > 0) {
+	while (outlen < max_unistr_len && len > 0) {
 #ifdef MY_ABC_HERE
 		size = asc2unichar_ex(sb, astr, len, &c, convert);
 #else
@@ -343,7 +377,7 @@ int hfsplus_asc2uni(struct super_block *sb, struct hfsplus_unistr *ustr,
 		else
 			dstr = NULL;
 		if (dstr) {
-			if (outlen + dsize > HFSPLUS_MAX_STRLEN)
+			if (outlen + dsize > max_unistr_len)
 				break;
 			do {
 				ustr->unicode[outlen++] = cpu_to_be16(*dstr++);
@@ -499,5 +533,10 @@ int hfsplus_compare_dentry(const struct dentry *parent,
 		return -1;
 	if (len1 > len2)
 		return 1;
+#ifdef MY_ABC_HERE
+	if (casefold) {
+		strncpy(str, name->name, len);
+	}
+#endif
 	return 0;
 }

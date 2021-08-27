@@ -32,6 +32,22 @@
 
 #define MV_COHERENCY_FABRIC_CTRL_REG		(0x20200)
 
+#ifdef CONFIG_ARMADA_SUPPORT_DEEP_IDLE_CESA_USE
+#define PMU_RESUME_ADDR_REG			(INTER_REGS_PHYS_BASE + 0x22124)
+
+.global	armadaxp_deep_idle_exit_start
+.global	armadaxp_deep_idle_exit_end
+
+ENTRY(armadaxp_deep_idle_exit)
+armadaxp_deep_idle_exit_start:
+	ldr	r0, [pc, #4]
+	ldr	r1, [r0]
+	mov	pc, r1
+	.word	(PMU_RESUME_ADDR_REG)
+armadaxp_deep_idle_exit_end:
+ENDPROC(armadaxp_deep_idle_exit)
+#endif
+
 /*
 * armadaxp_snoop_dis_virt:
 * Disable delivery of snoop requests to the CPU core by setting

@@ -14,6 +14,8 @@
 #include <linux/io.h>
 #include <mach/hardware.h>
 #include "common.h"
+#include "boardEnv/mvBoardEnvSpec.h"
+#include "boardEnv/mvBoardEnvLib.h"
 
 /*
  * Generic Address Decode Windows bit settings
@@ -22,6 +24,7 @@
 #define TARGET_DEV_BUS		1
 #define TARGET_SRAM		3
 #define TARGET_PCIE		4
+#define TARGET_PP		0xc
 #define ATTR_DEV_SPI_ROM	0x1e
 #define ATTR_DEV_BOOT		0x1d
 #define ATTR_DEV_NAND		0x2f
@@ -34,6 +37,7 @@
 #define ATTR_PCIE1_IO		0xd0
 #define ATTR_PCIE1_MEM		0xd8
 #define ATTR_SRAM		0x01
+#define ATTR_PP			0x00
 
 /*
  * Helpers to get DDR bank info
@@ -103,26 +107,41 @@ void __init kirkwood_setup_cpu_mbus(void)
 	/*
 	 * Setup windows for PCIe IO+MEM space.
 	 */
-	setup_cpu_win(0, KIRKWOOD_PCIE_IO_PHYS_BASE, KIRKWOOD_PCIE_IO_SIZE,
-		      TARGET_PCIE, ATTR_PCIE_IO, KIRKWOOD_PCIE_IO_BUS_BASE);
-	setup_cpu_win(1, KIRKWOOD_PCIE_MEM_PHYS_BASE, KIRKWOOD_PCIE_MEM_SIZE,
+	setup_cpu_win(0, KIRKWOOD_PCIE_MEM_PHYS_BASE, KIRKWOOD_PCIE_MEM_SIZE,
 		      TARGET_PCIE, ATTR_PCIE_MEM, KIRKWOOD_PCIE_MEM_BUS_BASE);
-	setup_cpu_win(2, KIRKWOOD_PCIE1_IO_PHYS_BASE, KIRKWOOD_PCIE1_IO_SIZE,
-		      TARGET_PCIE, ATTR_PCIE1_IO, KIRKWOOD_PCIE1_IO_BUS_BASE);
-	setup_cpu_win(3, KIRKWOOD_PCIE1_MEM_PHYS_BASE, KIRKWOOD_PCIE1_MEM_SIZE,
+	setup_cpu_win(1, KIRKWOOD_PCIE1_MEM_PHYS_BASE, KIRKWOOD_PCIE1_MEM_SIZE,
 		      TARGET_PCIE, ATTR_PCIE1_MEM, KIRKWOOD_PCIE1_MEM_BUS_BASE);
 
 	/*
 	 * Setup window for NAND controller.
 	 */
-	setup_cpu_win(4, KIRKWOOD_NAND_MEM_PHYS_BASE, KIRKWOOD_NAND_MEM_SIZE,
+	setup_cpu_win(2, KIRKWOOD_NAND_MEM_PHYS_BASE, KIRKWOOD_NAND_MEM_SIZE,
 		      TARGET_DEV_BUS, ATTR_DEV_NAND, -1);
 
 	/*
 	 * Setup window for SRAM.
 	 */
-	setup_cpu_win(5, KIRKWOOD_SRAM_PHYS_BASE, KIRKWOOD_SRAM_SIZE,
+	setup_cpu_win(4, KIRKWOOD_SRAM_PHYS_BASE, KIRKWOOD_SRAM_SIZE,
 		      TARGET_SRAM, ATTR_SRAM, -1);
+
+	/*
+	 * Setup window for SPI controller.
+	 */
+	setup_cpu_win(5, KIRKWOOD_SPI_MEM_PHYS_BASE, KIRKWOOD_SPI_MEM_SIZE,
+		      TARGET_DEV_BUS, ATTR_DEV_SPI_ROM, -1);
+
+	if (mvBoardIdGet() == XCAT98DX_ID) {
+		/*
+		 * Window for PP (Prestera Switch).
+		 */
+		setup_cpu_win(6, KIRKWOOD_PP_PHYS_BASE, KIRKWOOD_PP_SIZE,
+			      TARGET_PP, ATTR_PP, -1);
+	}
+	/*
+	 * Setup window for BOOTROM controller.
+	 */
+	setup_cpu_win(7, KIRKWOOD_BOOT_PHYS_BASE, KIRKWOOD_BOOT_SIZE,
+		      TARGET_DEV_BUS, ATTR_DEV_BOOT, -1);
 
 	/*
 	 * Setup MBUS dram target info.

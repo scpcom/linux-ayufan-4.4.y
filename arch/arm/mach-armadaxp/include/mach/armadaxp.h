@@ -25,10 +25,14 @@
 /* The base address of memory that should be reserved for IO windows.
 ** The reserved end address is 0xFFFFFFFF.
 */
-#define CONFIG_DRAM_IO_RESERVE_BASE	0xC0000000ll
+#define CONFIG_DRAM_IO_RESERVE_BASE	0xF0000000ll
 
 /*
  * Armada-XP address maps.
+ * Virtual Addresses should be between 0xFA800000 and 0xFEFFFFFF (72MB)
+ * Physical Addresses should be between 0xF0000000 and 0xFFFFFFFF (256MB)
+ * If a larger physical address space is needed, then the amount of DRAM
+ * available for Linux will be smaller.
  *
  * phys		virt		size
  * e0000000	@runtime	128M	PCIe-0 Memory space
@@ -71,245 +75,190 @@
 #define SDRAM_CS3_BASE  		0x30000000
 #define SDRAM_CS3_SIZE  		_256M
 
-/*
- * PEX Address Decoding
- * Virtual address not specified - remapped @runtime
+/* First, we place the "static" windows (that has less chance to have a size
+ * change), then all the "dynamic" windows (the ones that might need different
+ * sizes depending on the system configuration - SPI flash size, PEX cards...).
  */
-#define PEX0_MEM_PHYS_BASE		0xE0000000
-#define PEX0_MEM_SIZE			_32M
-#define PEX1_MEM_PHYS_BASE		0xE2000000
-#define PEX1_MEM_SIZE			_32M
-#define PEX2_MEM_PHYS_BASE		0xE4000000
-#define PEX2_MEM_SIZE			_32M
-#define PEX3_MEM_PHYS_BASE		0xE6000000
-#define PEX3_MEM_SIZE			_32M
-#define PEX4_MEM_PHYS_BASE		0xE8000000
-#define PEX4_MEM_SIZE			_32M
-#define PEX5_MEM_PHYS_BASE		0x0	/*TBD*/
-#define PEX5_MEM_SIZE			_32M
-#define PEX6_MEM_PHYS_BASE		0xEA000000		
-#define PEX6_MEM_SIZE			_32M
-#define PEX7_MEM_PHYS_BASE		0x0	/*TBD*/
-#define PEX7_MEM_SIZE			_32M
-#define PEX8_MEM_PHYS_BASE		0xEC000000		
-#define PEX8_MEM_SIZE			_32M
-#define PEX9_MEM_PHYS_BASE		0xEE000000
-#define PEX9_MEM_SIZE			_32M
 
-#ifdef CONFIG_ARM_LPAE
-
-
-#define SPI_CS0_PHYS_BASE		0xF0000000
-#define SPI_CS0_VIRT_BASE		0xFAA00000
-#define SPI_CS0_SIZE			_16M
-
-
-#ifdef CONFIG_MV_AMP_ENABLE
-/* In AMP mode the internal register base must match U-BOOTs base since
- * Two operating systems cannot modify the base during boot as is done
- * with a single image */
-#define INTER_REGS_PHYS_BASE	0xD0000000
-#else
+/*
+ * Internal registers.
+ * PHYS: 0xF1000000 to 0xF1100000
+ * VIRT: 0xFBC00000 to 0xFBC00000
+ * INTER_REGS_VIRT_BASE Must be 2MB aligned in order to support CONFIG_DEBUG_LL.
+ * Before paging_init, the UART port is mapped by a section entry (2MB in LPAE).
+ */
 #define INTER_REGS_PHYS_BASE	0xF1000000
-#endif
 #define INTER_REGS_VIRT_BASE	0xFBC00000
-#define INTER_REGS_BASE			INTER_REGS_VIRT_BASE
+#define INTER_REGS_BASE			INTER_REGS_VIRT_BASE /* For compatibility */
 
-#define PEX0_IO_PHYS_BASE		0xF1100000
-#define PEX0_IO_VIRT_BASE		0xFBE00000
-#define PEX0_IO_SIZE			_1M
-#define PEX1_IO_PHYS_BASE		0xF1200000
-#define PEX1_IO_VIRT_BASE		0xFBF00000
-#define PEX1_IO_SIZE			_1M
-#define PEX2_IO_PHYS_BASE		0xF1300000
-#define PEX2_IO_VIRT_BASE		0xFC000000
-#define PEX2_IO_SIZE			_1M
-#define PEX3_IO_PHYS_BASE		0xF1400000
-#define PEX3_IO_VIRT_BASE		0xFC100000
-#define PEX3_IO_SIZE			_1M
-#define PEX4_IO_PHYS_BASE		0xF1500000
-#define PEX4_IO_VIRT_BASE		0xFC200000
-#define PEX4_IO_SIZE			_1M
-#define PEX5_IO_PHYS_BASE		0xF1600000
-#define PEX5_IO_VIRT_BASE		0xFC300000
-#define PEX5_IO_SIZE			_1M
-#define PEX6_IO_PHYS_BASE		0xF1700000
-#define PEX6_IO_VIRT_BASE		0xFC400000
-#define PEX6_IO_SIZE			_1M
-#define PEX7_IO_PHYS_BASE		0xF1800000
-#define PEX7_IO_VIRT_BASE		0xFC500000
-#define PEX7_IO_SIZE			_1M
-#define PEX8_IO_PHYS_BASE		0xF1900000
-#define PEX8_IO_VIRT_BASE		0xFC600000
-#define PEX8_IO_SIZE			_1M
-#define PEX9_IO_PHYS_BASE		0xF1A00000
-#define PEX9_IO_VIRT_BASE		0xFC700000
-#define PEX9_IO_SIZE			_1M
-
-#define UART_REGS_BASE			0xF1B00000
-#define UART_VIRT_BASE			0xFC800000
+/*
+ * Uart registers.
+ * PHYS: 0xF1200000 - 0xF1300000
+ * VIRT: 0xFBE00000
+ */
+#define UART_REGS_BASE			0xF1200000
+#define UART_VIRT_BASE			0xFBE00000
 #define UART_SIZE			_1M
 
-#define DEVICE_BOOTCS_PHYS_BASE		0xF2000000
-#define DEVICE_BOOTCS_VIRT_BASE		0xFCA00000
-#define DEVICE_BOOTCS_SIZE		_32M
-#define DEVICE_CS0_PHYS_BASE		0xF4000000
-#define DEVICE_CS0_VIRT_BASE		0xFEA00000
-#define DEVICE_CS0_SIZE			_1M
-#define DEVICE_CS1_PHYS_BASE		0xF4100000
-#define DEVICE_CS1_VIRT_BASE		0xFEB00000
-#define DEVICE_CS1_SIZE			_1M
-#define DEVICE_CS2_PHYS_BASE		0xF4200000
-#define DEVICE_CS2_VIRT_BASE		0xFEC00000
-#define DEVICE_CS2_SIZE			_1M
-#define DEVICE_CS3_PHYS_BASE		0xF4300000
-#define DEVICE_CS3_VIRT_BASE		0xFED00000
-#define DEVICE_CS3_SIZE			_1M
-
-#define CRYPT_ENG_PHYS_BASE(chan)	((chan == 0) ? 0xC8010000 : 0xF4480000)
-#define CRYPT_ENG_VIRT_BASE(chan)	((chan == 0) ? 0xFEE00000 : 0xFEE10000)
-#define CRYPT_ENG_SIZE			_64K
-
-
-#ifdef CONFIG_ARMADA_XP_REV_Z1
-#define XOR0_PHYS_BASE                 (INTER_REGS_PHYS_BASE | 0x60800)
-#define XOR1_PHYS_BASE                 (INTER_REGS_PHYS_BASE | 0x60900)
-#else
-#define XOR0_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0x60900)
-#define XOR1_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0xF0900)
-#endif
-#define XOR0_HIGH_PHYS_BASE		(INTER_REGS_PHYS_BASE | 0x60B00)
-#define XOR1_HIGH_PHYS_BASE		(INTER_REGS_PHYS_BASE | 0xF0B00)
-
-#define PNC_BM_PHYS_BASE		0xF4500000
-#define PNC_BM_VIRT_BASE		0xFEF00000
+/*
+ * BM / PNC window
+ * PHYS: 0xF1300000 - 0xF1400000
+ * VIRT: @runtime
+ */
+#define PNC_BM_PHYS_BASE		0xF1300000
 #define PNC_BM_SIZE			_1M
 
+/*
+ * Crypto Engine(s)
+ * PHYS: 0xF1400000 - 0xF1500000
+ * VIRT: 0xFC000000
+ */
+#define CRYPT_ENG_PHYS_BASE(chan)	(0xF1400000 + (chan * 0x10000))
+#define CRYPT_ENG_VIRT_BASE(chan)	(0xFC000000 + (chan * 0x10000))
+#define CRYPT_ENG_SIZE			_64K
+
+/*
+ * PMU Scratch PAD
+ * PHYS: 0xF1600000 - 0xF1700000
+ * VIRT: 0xFC200000
+ */
+#define PMU_SCRATCH_PHYS_BASE		0xF1500000
+#define PMU_SCRATCH_VIRT_BASE		0xFC100000
+#define PMU_SCRATCH_SIZE		_1M
+
+/*
+ * PHYS: 0xF1700000 to 0xF100000
+ * VIRT: 0xFC300000 - 0xFCC00000
+ * PEX IO Address Decoding
+ * Allocate 1MB for each IO windowi, total of 10MB.
+ */
+#define PEX0_IO_PHYS_BASE		0xF1600000
+#define PEX0_IO_VIRT_BASE		0xFC200000
+#define PEX0_IO_SIZE			_1M
+#define PEX1_IO_PHYS_BASE		0xF1700000
+#define PEX1_IO_VIRT_BASE		0xFC300000
+#define PEX1_IO_SIZE			_1M
+#define PEX2_IO_PHYS_BASE		0xF1800000
+#define PEX2_IO_VIRT_BASE		0xFC400000
+#define PEX2_IO_SIZE			_1M
+#define PEX3_IO_PHYS_BASE		0xF1900000
+#define PEX3_IO_VIRT_BASE		0xFC500000
+#define PEX3_IO_SIZE			_1M
+#define PEX4_IO_PHYS_BASE		0xF1A00000
+#define PEX4_IO_VIRT_BASE		0xFC600000
+#define PEX4_IO_SIZE			_1M
+#define PEX5_IO_PHYS_BASE		0xF1B00000
+#define PEX5_IO_VIRT_BASE		0xFC700000
+#define PEX5_IO_SIZE			_1M
+#define PEX6_IO_PHYS_BASE		0xF1C00000
+#define PEX6_IO_VIRT_BASE		0xFC800000
+#define PEX6_IO_SIZE			_1M
+#define PEX7_IO_PHYS_BASE		0xF1D00000
+#define PEX7_IO_VIRT_BASE		0xFC900000
+#define PEX7_IO_SIZE			_1M
+#define PEX8_IO_PHYS_BASE		0xF1E00000
+#define PEX8_IO_VIRT_BASE		0xFCA00000
+#define PEX8_IO_SIZE			_1M
+#define PEX9_IO_PHYS_BASE		0xF1F00000
+#define PEX9_IO_VIRT_BASE		0xFCB00000
+#define PEX9_IO_SIZE			_1M
+
+/*
+ * Below are the IOs that might require size change depending on the
+ * system peripherals.
+ */
+
+/*
+ * PHYS: 0xF8000000 to 0xFFEFFFFF
+ * VIRT: @runtime
+ * PEX Memory Address Decoding
+ * Virtual address not specified - remapped @runtime
+ * Reserve 127MB for PEX MEM space, so that in case an interface needs more
+ * than 2MB, it will be possible to relocate it within the reserved 127MB.
+ */
+#define PEX0_MEM_PHYS_BASE		0xF2000000
+#define PEX0_MEM_SIZE			_2M
+#define PEX1_MEM_PHYS_BASE		0xF2200000
+#define PEX1_MEM_SIZE			_2M
+#define PEX2_MEM_PHYS_BASE		0xF2400000
+#define PEX2_MEM_SIZE			_2M
+#define PEX3_MEM_PHYS_BASE		0xF2600000
+#define PEX3_MEM_SIZE			_2M
+#define PEX4_MEM_PHYS_BASE		0xF2800000
+#define PEX4_MEM_SIZE			_2M
+#define PEX5_MEM_PHYS_BASE		0xF2A00000
+#define PEX5_MEM_SIZE			_2M
+#define PEX6_MEM_PHYS_BASE		0xF2C00000
+#define PEX6_MEM_SIZE			_2M
+#define PEX7_MEM_PHYS_BASE		0xF2E00000
+#define PEX7_MEM_SIZE			_2M
+#define PEX8_MEM_PHYS_BASE		0xF3000000
+#define PEX8_MEM_SIZE			_2M
+#define PEX9_MEM_PHYS_BASE		0xF3200000
+#define PEX9_MEM_SIZE			_2M
+
+/*
+ * Device Bus address decode windows.
+ * PHYS: 0xF3300000 - 0xF3400000
+ * VIRT: @runtime
+ */
+#define DEVICE_CS0_PHYS_BASE		0xF3300000
+#define DEVICE_CS0_SIZE			_1M
+#define DEVICE_CS1_PHYS_BASE		0xF3400000
+#define DEVICE_CS1_SIZE			_1M
+#define DEVICE_CS2_PHYS_BASE		0xF3500000
+#define DEVICE_CS2_SIZE			_1M
+#define DEVICE_CS3_PHYS_BASE		0xF3600000
+#define DEVICE_CS3_SIZE			_1M
+
+/*
+ * Device Boot-CS Window
+ * PHYS: 0xF4000000 - 0xF6000000
+ * VIRT: @runtime
+ */
+#define DEVICE_BOOTCS_PHYS_BASE		0xF4000000
+#define DEVICE_BOOTCS_SIZE		_32M
+
+/*
+ * SPI Flash window.
+ * PHYS: 0xF6000000 - 0xF7000000
+ * VIRT: @runtime
+ * This is a 16MB window, if a larger flash exists, then the
+ * window needs to be enlarged.
+ */
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+#define SPI_CS0_PHYS_BASE		0xF0000000
+#else
+#define SPI_CS0_PHYS_BASE		0xF6000000
+#endif
+#define SPI_CS0_SIZE			_16M
+
+/*
+ * Free area from 0xF7000000 to 0xFFF00000 (143MB).
+ * This can be used to map a larger window for PCI / SPI / Device-CS....
+ */
+
+/*
+ * PHYS: 0xFFF00000 - 0xFFFFFFFF
+ * VIRT: 0xFF000000 - 0xFF0FFFFF
+ * Bootrom window
+ */
 #define BOOTROM_PHYS_BASE		0xFFF00000
 #define BOOTROM_VIRT_BASE		0xFF000000
 #define BOOTROM_SIZE			_1M
 
-#define PMU_SCRATCH_PHYS_BASE		0xF4700000
-#define PMU_SCRATCH_VIRT_BASE		0xFF100000
-#define PMU_SCRATCH_SIZE		_1M
-
-#define LEGACY_NAND_PHYS_BASE		0xF4800000
-#define LEGACY_NAND_VIRT_BASE		0xFF200000
-#define LEGACY_NAND_SIZE		_1M
-
-#define	LCD_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0xE0000)
-
-#define AXP_NFC_PHYS_BASE	(INTER_REGS_PHYS_BASE | 0xD0000)
-
-#else /* !CONFIG_ARM_LPAE */
-
-#define SPI_CS0_PHYS_BASE		0xF0000000
-#define SPI_CS0_VIRT_BASE		0xFAB00000
-#define SPI_CS0_SIZE			_16M
-
-#ifdef CONFIG_MV_AMP_ENABLE
-/* In AMP mode the internal register base must match U-BOOTs base since
- * Two operating systems cannot modify the base during boot as is done
- * with a single image */
-#define INTER_REGS_PHYS_BASE	0xD0000000
-#else
-#define INTER_REGS_PHYS_BASE	0xF1000000
-#endif
-#define INTER_REGS_VIRT_BASE	0xFBB00000
-#define INTER_REGS_BASE			INTER_REGS_VIRT_BASE
-
-#define PEX0_IO_PHYS_BASE		0xF1100000
-#define PEX0_IO_VIRT_BASE		0xFBC00000
-#define PEX0_IO_SIZE			_1M
-#define PEX1_IO_PHYS_BASE		0xF1200000
-#define PEX1_IO_VIRT_BASE		0xFBD00000
-#define PEX1_IO_SIZE			_1M
-#define PEX2_IO_PHYS_BASE		0xF1300000
-#define PEX2_IO_VIRT_BASE		0xFBE00000
-#define PEX2_IO_SIZE			_1M
-#define PEX3_IO_PHYS_BASE		0xF1400000
-#define PEX3_IO_VIRT_BASE		0xFBF00000
-#define PEX3_IO_SIZE			_1M
-#define PEX4_IO_PHYS_BASE		0xF1500000
-#define PEX4_IO_VIRT_BASE		0xFC000000
-#define PEX4_IO_SIZE			_1M
-#define PEX5_IO_PHYS_BASE		0xF1600000
-#define PEX5_IO_VIRT_BASE		0xFC100000
-#define PEX5_IO_SIZE			_1M
-#define PEX6_IO_PHYS_BASE		0xF1700000
-#define PEX6_IO_VIRT_BASE		0xFC200000
-#define PEX6_IO_SIZE			_1M
-#define PEX7_IO_PHYS_BASE		0xF1800000
-#define PEX7_IO_VIRT_BASE		0xFC300000
-#define PEX7_IO_SIZE			_1M
-#define PEX8_IO_PHYS_BASE		0xF1900000
-#define PEX8_IO_VIRT_BASE		0xFC400000
-#define PEX8_IO_SIZE			_1M
-#define PEX9_IO_PHYS_BASE		0xF1A00000
-#define PEX9_IO_VIRT_BASE		0xFC500000
-#define PEX9_IO_SIZE			_1M
-
-#define UART_REGS_BASE			0xF1B00000
-#define UART_VIRT_BASE			0xFC600000
-#define UART_SIZE			_1M
-
-#define DEVICE_BOOTCS_PHYS_BASE		0xF2000000
-#define DEVICE_BOOTCS_VIRT_BASE		0xFC700000
-#define DEVICE_BOOTCS_SIZE		_32M
-#define DEVICE_CS0_PHYS_BASE		0xF4000000
-#define DEVICE_CS0_VIRT_BASE		0xFE700000
-#define DEVICE_CS0_SIZE			_1M
-#define DEVICE_CS1_PHYS_BASE		0xF4100000
-#define DEVICE_CS1_VIRT_BASE		0xFE800000
-#define DEVICE_CS1_SIZE			_1M
-#define DEVICE_CS2_PHYS_BASE		0xF4200000
-#define DEVICE_CS2_VIRT_BASE		0xFE900000
-#define DEVICE_CS2_SIZE			_1M
-#define DEVICE_CS3_PHYS_BASE		0xF4300000
-#define DEVICE_CS3_VIRT_BASE		0xFEA00000
-#define DEVICE_CS3_SIZE			_1M
-
-#define CRYPT_ENG_PHYS_BASE(chan)	((chan == 0) ? 0xC8010000 : 0xF4480000)
-#define CRYPT_ENG_VIRT_BASE(chan)	((chan == 0) ? 0xFEB00000 : 0xFEB10000)
-#define CRYPT_ENG_SIZE			_64K
-
-
-#ifdef CONFIG_ARMADA_XP_REV_Z1
-#define XOR0_PHYS_BASE                 (INTER_REGS_PHYS_BASE | 0x60800)
-#define XOR1_PHYS_BASE                 (INTER_REGS_PHYS_BASE | 0x60900)
-#else
-#define XOR0_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0x60900)
-#define XOR1_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0xF0900)
-#endif
-#define XOR0_HIGH_PHYS_BASE		(INTER_REGS_PHYS_BASE | 0x60B00)
-#define XOR1_HIGH_PHYS_BASE		(INTER_REGS_PHYS_BASE | 0xF0B00)
-
-#define PNC_BM_PHYS_BASE		0xF4500000
-#define PNC_BM_VIRT_BASE		0xFEC00000
-#define PNC_BM_SIZE			_1M
-
-#define BOOTROM_PHYS_BASE		0xFFF00000
-#define BOOTROM_VIRT_BASE		0xFED00000
-#define BOOTROM_SIZE			_1M
-
-
-#define PMU_SCRATCH_PHYS_BASE		0xF4700000
-#define PMU_SCRATCH_VIRT_BASE		0xFEE00000
-#define PMU_SCRATCH_SIZE		_1M
-
-#define LEGACY_NAND_PHYS_BASE		0xF4800000
-#define LEGACY_NAND_VIRT_BASE		0xFEF00000
-#define LEGACY_NAND_SIZE		_1M
-
-#define	LCD_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0xE0000)
-
-#define AXP_NFC_PHYS_BASE	(INTER_REGS_PHYS_BASE | 0xD0000)
-
-#endif /* CONFIG_ARM_LPAE */
-
 /*
  * Linux native definitiotns
  */
+#define XOR0_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0x60900)
+#define XOR1_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0xF0900)
+#define XOR0_HIGH_PHYS_BASE		(INTER_REGS_PHYS_BASE | 0x60B00)
+#define XOR1_HIGH_PHYS_BASE		(INTER_REGS_PHYS_BASE | 0xF0B00)
+
+#define	LCD_PHYS_BASE			(INTER_REGS_PHYS_BASE | 0xE0000)
+
+#define AXP_NFC_PHYS_BASE	(INTER_REGS_PHYS_BASE | 0xD0000)
+
 #define SDRAM_OPERATION_REG		(INTER_REGS_BASE | 0x1418)
 #define SDRAM_CONFIG_REG		(INTER_REGS_BASE | 0x1400)
 #define SDRAM_DLB_EVICT_REG		(INTER_REGS_BASE | 0x170C)
@@ -345,9 +294,4 @@
 #define AXP_SNOOP_FILTER_PHYS_REG	(INTER_REGS_PHYS_BASE | 0x21020)
 #define AXP_REVISION_ID_PHYS_REG	(INTER_REGS_PHYS_BASE | 0x40008)
 #define AXP_REVISION_ID_VIRT_REG	(INTER_REGS_BASE | 0x40008)
-
-#define AXP_HW_SEMAPHORE_0_VIRT_REG		(INTER_REGS_BASE | 0x20500)
-#define AXP_HW_SEMAPHORE_0_PHYS_REG		(INTER_REGS_PHYS_BASE | 0x20500)
-#define AXP_COHER_FABRIC_CTRL_VIRT_REG	(INTER_REGS_BASE | 0x20200)
-#define AXP_COHER_FABRIC_CTRL_PHYS_REG	(INTER_REGS_PHYS_BASE | 0x20200)
 #endif

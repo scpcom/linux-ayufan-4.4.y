@@ -19,6 +19,9 @@
 #include <linux/slab.h>
 #include "libata.h"
 #include "libata-transport.h"
+#ifdef MY_ABC_HERE
+#include "ahci.h"
+#endif
 
 #ifdef MY_DEF_HERE
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
@@ -60,6 +63,8 @@ static unsigned int sata_pmp_read(struct ata_link *link, int reg, u32 *r_val)
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	tf.feature = reg & 0xff;
 	tf.hob_feature = (reg >> 8) & 0xff;
+#else
+	tf.feature = reg;
 #endif
 	tf.device = link->pmp;
 
@@ -99,6 +104,8 @@ static unsigned int sata_pmp_write(struct ata_link *link, int reg, u32 val)
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	tf.feature = reg & 0xff;
 	tf.hob_feature = (reg >> 8) & 0xff;
+#else
+	tf.feature = reg;
 #endif
 	tf.device = link->pmp;
 	tf.nsect = val & 0xff;
@@ -122,19 +129,14 @@ syno_pm_gpio_config(struct ata_port *ap)
 {
 	if (syno_pm_is_9705(sata_pmp_gscr_vendor(ap->link.device->gscr),
 				        sata_pmp_gscr_devid(ap->link.device->gscr))) {
-		//u32 src_sel1 = 0x2DB6DB6C;//4 | (5 << 3) | (5 << 6) | (5 << 9) | (5 << 12) | (5 << 15) | (5 << 18) | (5 << 21) | (5 << 24) | (5 << 27);
-		//u32 src_sel0 = 0x1A3C5B6D;//5 | (5 << 3) | (5 << 6) | (5 << 9) | (5 << 12) | (0 << 15) | (7 << 18) | (1 << 21) | (2 << 24) | (3 << 27);
 		/* GPIO data_out enable */
 		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_GPO_EN, 0xFFFFF);
 
 		/* GPIO data_in polarity */
 		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_GPI_POLARITY, 0xFFFFF);
 
-		/* GPIO[10~19] source select */
-		//sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_SRC_SEL1, src_sel1);
-
-		/* GPIO[0~9] source select */
-		//sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_SRC_SEL0, src_sel0);
+		/* 9705 SATA Blink rate*/
+		sata_pmp_write(&(ap->link), SATA_PMP_GSCR_9705_SATA_BLINK_RATE, 0x2082082);
 	}
 }
 
@@ -163,14 +165,18 @@ syno_pm_device_info_set(struct ata_port *ap, u8 rw, SYNO_PM_PKG *pm_pkg)
  *
  * After reading, remember to call syno_pm_gpio_output_enable().
  */
-void
+unsigned int
 syno_pm_gpio_output_disable(struct ata_link *link)
 {
+	unsigned int uiRet = 0;
+
 	if (syno_pm_is_9705(sata_pmp_gscr_vendor(link->device->gscr),
 				               sata_pmp_gscr_devid(link->device->gscr))) {
 		/* Only GPI1~GPI8(GPIO 0~4,11~13) need to set LOW. */
-		sata_pmp_write(link, SATA_PMP_GSCR_9705_GPO_EN, 0xFC7C0);
+		uiRet = sata_pmp_write(link, SATA_PMP_GSCR_9705_GPO_EN, 0xFC7C0);
 	}
+
+	return uiRet;
 }
 
 /* On 9705, GPI and GPO are the same pin, so each pin can
@@ -178,13 +184,18 @@ syno_pm_gpio_output_disable(struct ata_link *link)
  * After reading, we need to set "output_enable" to HIGH
  * so that we can write values on these pins later,
  */
-void
+unsigned int
 syno_pm_gpio_output_enable(struct ata_link *link)
 {
+	unsigned int uiRet = 0;
+
 	if (syno_pm_is_9705(sata_pmp_gscr_vendor(link->device->gscr),
 				               sata_pmp_gscr_devid(link->device->gscr))) {
-		sata_pmp_write(link, SATA_PMP_GSCR_9705_GPO_EN, 0xFFFFF);
+		/* Only GPI1~GPI8(GPIO 0~4,11~13) need to set LOW. */
+		uiRet = sata_pmp_write(link, SATA_PMP_GSCR_9705_GPO_EN, 0xFFFFF);
 	}
+
+	return uiRet;
 }
 
 unsigned int
@@ -280,9 +291,34 @@ unsigned int
 syno_sata_pmp_read_gpio_core(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 {
 	unsigned int uiRet = 1;
+	unsigned long flags = 0;
+	int iRetries = 0;
+
+	/* Get gpio ctrl lock in 2s */
+	spin_lock_irqsave(link->ap->lock, flags);
+	while((link->uiStsFlags & SYNO_STATUS_GPIO_CTRL) && (SYNO_PMP_GPIO_TRIES > iRetries)) {
+		spin_unlock_irqrestore(link->ap->lock, flags);
+		schedule_timeout_uninterruptible(HZ/2);
+		spin_lock_irqsave(link->ap->lock, flags);
+		++iRetries;
+	}
+
+	if (SYNO_PMP_GPIO_TRIES <= iRetries) {
+		DBGMESG("syno_sata_pmp_read_gpio_core get gpio lock timeout\n");
+		spin_unlock_irqrestore(link->ap->lock, flags);
+		goto END;
+	}
+
+	/* lock to prevent others to do pmp gpio control */
+	link->uiStsFlags |= SYNO_STATUS_GPIO_CTRL;
+	spin_unlock_irqrestore(link->ap->lock, flags);
 
 	syno_pm_device_info_set(link->ap, READ, pPM_pkg);
-	syno_pm_gpio_output_disable(link);
+
+	uiRet = syno_pm_gpio_output_disable(link);
+	if (0 != uiRet) {
+		goto END;
+	}
 
 	uiRet = sata_pmp_read(link, pPM_pkg->gpio_addr, &(pPM_pkg->var));
 	if (0 != uiRet) {
@@ -294,7 +330,12 @@ syno_sata_pmp_read_gpio_core(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 	}
 
 END:
-	syno_pm_gpio_output_enable(link);
+
+	/* unlock to let others can do pmp gpio control */
+	spin_lock_irqsave(link->ap->lock, flags);
+	link->uiStsFlags &= ~SYNO_STATUS_GPIO_CTRL;
+	spin_unlock_irqrestore(link->ap->lock, flags);
+
 	return uiRet;
 }
 
@@ -302,15 +343,52 @@ unsigned int
 syno_sata_pmp_write_gpio_core(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 {
 	unsigned int uiRet = 1;
+	unsigned long flags = 0;
+	int iRetries = 0;
+
+	/* Get gpio ctrl lock in 2s */
+	spin_lock_irqsave(link->ap->lock, flags);
+	while((link->uiStsFlags & SYNO_STATUS_GPIO_CTRL) && (SYNO_PMP_GPIO_TRIES > iRetries)) {
+		spin_unlock_irqrestore(link->ap->lock, flags);
+		schedule_timeout_uninterruptible(HZ/2);
+		spin_lock_irqsave(link->ap->lock, flags);
+		++iRetries;
+	}
+
+	if (SYNO_PMP_GPIO_TRIES <= iRetries) {
+		DBGMESG("syno_sata_pmp_write_gpio_core get gpio lock timeout\n");
+		spin_unlock_irqrestore(link->ap->lock, flags);
+		goto END;
+	}
+
+	/* lock to prevent others to do pmp gpio control */
+	link->uiStsFlags |= SYNO_STATUS_GPIO_CTRL;
+	spin_unlock_irqrestore(link->ap->lock, flags);
+
 	syno_pm_device_info_set(link->ap, WRITE, pPM_pkg);
+
+	uiRet = syno_pm_gpio_output_enable(link);
+	if (0 != uiRet) {
+		goto END;
+	}
 
 	if(pPM_pkg->encode) {
 		pPM_pkg->encode(pPM_pkg, WRITE);
 	}
 
 	uiRet = sata_pmp_write(link, pPM_pkg->gpio_addr, pPM_pkg->var);
+	if (0 != uiRet) {
+		goto END;
+	}
+
 	/* HW suggestions: delay 5ms, wait for CPLD ready */
 	mdelay(5);
+END:
+
+	/* unlock to let others can do pmp gpio control */
+	spin_lock_irqsave(link->ap->lock, flags);
+	link->uiStsFlags &= ~SYNO_STATUS_GPIO_CTRL;
+	spin_unlock_irqrestore(link->ap->lock, flags);
 
 	return uiRet;
 }
@@ -349,7 +427,8 @@ syno_pm_is_synology_9705(const struct ata_port *ap)
 		goto END;
 	}
 
-	if (!IS_SYNOLOGY_RX413(ap->PMSynoUnique)) {
+	if (!IS_SYNOLOGY_RX413(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_RX1214(ap->PMSynoUnique)) {
 		goto END;
 	}
 
@@ -363,6 +442,8 @@ syno_sata_pmp_is_rp(struct ata_port *ap)
 {
 #define GPI_3XXX_PSU1_STAT(GPIO)        ((1<<5)&GPIO)>>5
 #define GPI_3XXX_PSU2_STAT(GPIO)        ((1<<6)&GPIO)>>6
+#define GPI_9705_PSU1_STAT(GPIO)        ((1<<6)&GPIO)>>6
+#define GPI_9705_PSU2_STAT(GPIO)        ((1<<7)&GPIO)>>7
 	int res = 0;
 	SYNO_PM_PKG pm_pkg;
 
@@ -374,6 +455,7 @@ syno_sata_pmp_is_rp(struct ata_port *ap)
 		goto END;
 	}
 
+	if(syno_pm_is_synology_3xxx(ap)) {
 		syno_pm_systemstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 								  sata_pmp_gscr_devid(ap->link.device->gscr),
 								  &pm_pkg);
@@ -386,6 +468,20 @@ syno_sata_pmp_is_rp(struct ata_port *ap)
 		if(GPI_3XXX_PSU1_STAT(pm_pkg.var) || GPI_3XXX_PSU2_STAT(pm_pkg.var)) {
 			res = 1;
 		}
+	} else if (syno_pm_is_synology_9705(ap)) {
+		syno_pm_fanstatus_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+								  sata_pmp_gscr_devid(ap->link.device->gscr),
+								  &pm_pkg);
+
+		res = syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg);
+		if (0 != res) {
+			goto END;
+		}
+
+		if(GPI_9705_PSU1_STAT(pm_pkg.var) || GPI_9705_PSU2_STAT(pm_pkg.var)) {
+			res = 1;
+		}
+	}
 
 END:
 	return res;
@@ -648,6 +744,7 @@ u32
 syno_pmp_ports_num(struct ata_port *ap)
 {
 	u32 ret = 1;
+	struct ahci_host_priv *hpriv = ap->host->private_data;
 
 	if (syno_is_synology_pm(ap)) {
 		ret = sata_pmp_gscr_ports(ap->link.device->gscr);
@@ -661,6 +758,14 @@ syno_pmp_ports_num(struct ata_port *ap)
 			ret = 5;
 		}
 		/* add other quirk of port multiplier here */
+		 
+#ifdef MY_ABC_HERE
+		/* Block sata 6Gbps host + sata 3Gbps expansion unit case*/
+		if (syno_pm_is_synology_3xxx(ap) && (hpriv->flags & AHCI_HFLAG_YES_MV9235_FIX)){
+			ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
+			ret = 0;
+		}
+#endif
 	}
 	return ret;
 }
@@ -741,11 +846,18 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 	}
 
 	if (blCustomInfo) {
+		if (syno_pm_is_3xxx(sata_pmp_gscr_vendor(ap->link.device->gscr),
+							sata_pmp_gscr_devid(ap->link.device->gscr))) {
 			ap->PMSynoUnique = pm_pkg.var;
+		} else if (syno_pm_is_9705(sata_pmp_gscr_vendor(ap->link.device->gscr),
+								   sata_pmp_gscr_devid(ap->link.device->gscr))) {
+			ap->PMSynoUnique = pm_pkg.var & 0x1f;
+		}
 	}
 
 	if(IS_SYNOLOGY_DXC(ap->PMSynoUnique) ||
-	   IS_SYNOLOGY_RXC(ap->PMSynoUnique)) {
+	   IS_SYNOLOGY_RXC(ap->PMSynoUnique) ||
+	   IS_SYNOLOGY_RX1214(ap->PMSynoUnique)) {
 		if(0 != ap->PMSynoEMID) {
 			goto END;
 		}
@@ -1229,6 +1341,13 @@ static void sata_pmp_quirks(struct ata_port *ap)
 		 * otherwise.  Don't try hard to recover it.
 		 */
 		ap->pmp_link[ap->nr_pmp_links - 1].flags |= ATA_LFLAG_NO_RETRY;
+	} else if (vendor == 0x11ab && devid == 0x4140) {
+		/* Marvell 4140 quirks */
+		ata_for_each_link(link, ap, EDGE) {
+			/* port 4 is for SEMB device and it doesn't like SRST */
+			if (link->pmp == 4)
+				link->flags |= ATA_LFLAG_DISABLED;
+		}
 	} else if (vendor == 0x197b && devid == 0x2352) {
 		/* chip found in Thermaltake BlackX Duet, jmicron JMB350? */
 		ata_for_each_link(link, ap, EDGE) {
@@ -1318,6 +1437,40 @@ int sata_pmp_attach(struct ata_device *dev)
 
 				link->sata_spd_limit = target_limit;
 			}
+		}
+	/*For DS412+, qoriq, 6282 with DX513, the link should be limited to 1.5G*/
+	} else if (IS_SYNOLOGY_DX513(ap->PMSynoUnique) &&
+			(0 == strncmp(gszSynoHWVersion, HW_DS412p, strlen(HW_DS412p)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS112 , strlen(HW_DS112)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS112pv10, strlen(HW_DS112pv10)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS213pv10, strlen(HW_DS213pv10)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS413, strlen(HW_DS413)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS212pv10, strlen(HW_DS212pv10)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS212pv20, strlen(HW_DS212pv20)))) {
+		target = 1;
+		target_limit = (1 << target) - 1;
+
+		if(link->sata_spd_limit != target_limit) {
+			ata_dev_printk(dev, KERN_ERR,
+					"DX513 workaround, limit the speed to 1.5 GBPS\n");
+
+			link->sata_spd_limit = target_limit;
+		}
+	/*For DS412+, qoriq, 212p with and DX213, the link should be limited to 1.5G*/
+	} else if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) &&
+			(0 == strncmp(gszSynoHWVersion, HW_DS412p, strlen(HW_DS412p)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS213pv10, strlen(HW_DS213pv10)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS413, strlen(HW_DS413)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS212pv10, strlen(HW_DS212pv10)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS212pv20, strlen(HW_DS212pv20)))) {
+		target = 1;
+		target_limit = (1 << target) - 1;
+
+		if(link->sata_spd_limit != target_limit) {
+			ata_dev_printk(dev, KERN_ERR,
+					"DX213 workaround, limit the speed to 1.5 GBPS\n");
+
+			link->sata_spd_limit = target_limit;
 		}
 	}
 #endif	

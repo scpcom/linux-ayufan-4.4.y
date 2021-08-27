@@ -40,6 +40,15 @@ config USB_WDM
 	  To compile this driver as a module, choose M here: the
 	  module will be called cdc-wdm.
 
+config USB_WDM_SYNO
+	tristate "USB Wireless Device Management support for Synology"
+	depends on USB
+	---help---
+	  this is copy from USB_WDM
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called cdc-wdm_syno.
+
 config USB_TMC
 	tristate "USB Test and Measurement Class support"
 	depends on USB

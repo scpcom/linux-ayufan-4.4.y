@@ -574,3 +574,18 @@ void etxhci_dbg_ctx(struct xhci_hcd *xhci,
 	xhci_dbg_slot_ctx(xhci, ctx);
 	xhci_dbg_ep_ctx(xhci, ctx, last_ep);
 }
+
+void etxhci_dbg_stream_info(struct xhci_hcd *xhci,
+		unsigned int ep_index, struct xhci_stream_info *stream_info)
+{
+	 int i;
+
+	xhci_dbg(xhci, "Endpoint %d stream information:\n", ep_index);
+	xhci_dbg(xhci, "Stream ID %d\n", stream_info->num_streams);
+	xhci_dbg(xhci, "Stream context array %d, @%08llx (dma)\n",
+		stream_info->num_stream_ctxs, (unsigned long long)stream_info->ctx_array_dma);
+	for (i = 0; i < stream_info->num_stream_ctxs; i++) {
+		xhci_dbg(xhci, "Stream ID %d @%08llx (dma) - deq\n",
+			i, le64_to_cpu(stream_info->stream_ctx_array[i].stream_ring));
+	}
+}

@@ -273,7 +273,11 @@ static int marvell_of_reg_init(struct phy_device *phydev)
 
 static int m88e1121_config_aneg(struct phy_device *phydev)
 {
+#ifdef CONFIG_SYNO_ARMADA
+	int err, oldpage, mscr, val;
+#else
 	int err, oldpage, mscr;
+#endif
 
 	oldpage = phy_read(phydev, MII_MARVELL_PHY_PAGE);
 
@@ -317,7 +321,15 @@ static int m88e1121_config_aneg(struct phy_device *phydev)
 	oldpage = phy_read(phydev, MII_MARVELL_PHY_PAGE);
 
 	phy_write(phydev, MII_MARVELL_PHY_PAGE, MII_88E1121_PHY_LED_PAGE);
+#ifdef CONFIG_SYNO_ARMADA
+	/* Fixes power-down issue on RD-88F6282-A board by bypassing WoL logic */
+	val = phy_read(phydev, MII_88E1121_PHY_LED_CTRL);
+	val &= ~0xfff;
+	val |= 0x813;
+	phy_write(phydev, MII_88E1121_PHY_LED_CTRL, val);
+#else
 	phy_write(phydev, MII_88E1121_PHY_LED_CTRL, MII_88E1121_PHY_LED_DEF);
+#endif
 	phy_write(phydev, MII_MARVELL_PHY_PAGE, oldpage);
 
 	err = genphy_config_aneg(phydev);

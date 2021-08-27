@@ -185,9 +185,10 @@ config IP_NF_TARGET_NETMAP
 config IP_NF_TARGET_NFP
 	tristate "NFP target support"
 	default y
-	depends on NF_CONNTRACK_IPV4 && MV_ETH_NFP_CT && MV_ETH_NFP_LEARN
+	depends on NF_CONNTRACK_IPV4 && MV_ETH_NFP_HOOKS
 	help
 	  This target allows to process selected connections in NFP.
+
 	  To compile it as a module, choose M here.  If unsure, say N.
 
 config IP_NF_TARGET_REDIRECT

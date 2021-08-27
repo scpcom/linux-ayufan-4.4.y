@@ -204,6 +204,7 @@ disclaimer.
 #endif
 
 /* convert chip revision definitions */
+#define MV88F78X60
 #ifdef CONFIG_ARMADA_XP_REV_Z1
 #define MV88F78X60_Z1
 #endif

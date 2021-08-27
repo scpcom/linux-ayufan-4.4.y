@@ -113,26 +113,6 @@ struct cpu_cache_fns {
 	void (*dma_flush_range)(const void *, const void *);
 };
 
-#ifdef CONFIG_MV_XOR_NET_DMA
-/*
- * Clean and Invalidate L1 cache w/o dsb()
- * The call is intended for multiple calls and when dsb() on commit endpoint
- * HW would align addresses. If 'end' was already aligned, put it
- * one cacheline up.
- */
-static inline void flush_user_range_fast(unsigned long start,
-										 unsigned long end, unsigned int vmflags)
-{
-	unsigned long flags;
-
-	raw_local_irq_save(flags);
-	__asm__("mcr p15, 5, %0, c15, c15, 0" : : "r" (start));
-	__asm__("mcr p15, 5, %0, c15, c15, 1" : : "r" (end-1));
-	raw_local_irq_restore(flags);
-
-	/* dsb();*/
-}
-#endif
 /*
  * Select the calling method
  */
@@ -345,19 +325,6 @@ static inline void flush_anon_page(struct vm_area_struct *vma,
 static inline void flush_kernel_dcache_page(struct page *page)
 {
 }
-
-#ifdef CONFIG_ARM_MARVELL_BSP_MM_ADD_API_FOR_DMA
-static inline void flush_kernel_dcache_addr(void *addr)
-{
-	if ((cache_is_vivt() || cache_is_vipt_aliasing()))
-		__cpuc_flush_dcache_page(addr);
-}
-static inline void invalidate_kernel_dcache_addr(void *addr)
-{
-	if ((cache_is_vivt() || cache_is_vipt_aliasing()))
-		__cpuc_flush_dcache_page(addr);
-}
-#endif
 
 #define flush_dcache_mmap_lock(mapping) \
 	spin_lock_irq(&(mapping)->tree_lock)

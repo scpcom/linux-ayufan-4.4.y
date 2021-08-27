@@ -226,6 +226,12 @@ struct dm_target {
 	char *error;
 
 	/*
+	 * Set if this target needs to receive flushes regardless of
+	 * whether or not its underlying devices have support.
+	 */
+	bool flush_supported:1;
+
+	/*
 	 * Set if this target needs to receive discards regardless of
 	 * whether or not its underlying devices have support.
 	 */
@@ -235,6 +241,10 @@ struct dm_target {
 	 * Set if this target does not return zeroes on discarded blocks.
 	 */
 	unsigned discard_zeroes_data_unsupported:1;
+
+#ifdef MY_ABC_HERE
+	unsigned force_io_hints:1;
+#endif
 };
 
 /* Each target can link one of these into the table */

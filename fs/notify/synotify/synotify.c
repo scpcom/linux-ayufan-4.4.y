@@ -12,90 +12,39 @@
 static bool should_merge(struct fsnotify_event *old, struct fsnotify_event *new)
 {
 	pr_debug("%s: old=%p, mask=%x, new=%p, mask=%x\n", __func__, old, old->mask, new, new->mask);
-	// old event is Event overflow and new event is event overflow too.
 	if (old->data_type == FSNOTIFY_EVENT_NONE && new->data_type ==FSNOTIFY_EVENT_NONE) {
-		if((old->mask & FS_Q_OVERFLOW) && (new->mask & FS_Q_OVERFLOW))
-				return true;
-		return false;
-	}else
-		return false;
-
-	if (old->data_type == new->data_type &&
-	    (old->full_name_len == new->full_name_len) &&
-	    (old->path.mnt == new->path.mnt)) {
-		switch (old->data_type) {
-		case (FSNOTIFY_EVENT_SYNO):
-			/* MOVE_FROM & MOVE_TO will assign dentry as NULL, and those two event should not be merged */
-			if (strcmp(old->full_name, new->full_name)==0)
-			    return true;
-			break;
-		case (FSNOTIFY_EVENT_PATH):
-			if (old->path.dentry == new->path.dentry)
-		return true;
-			break;
-		case (FSNOTIFY_EVENT_NONE):
-			return true;
-		default:
-			BUG();
-		};
+		return (old->mask & FS_Q_OVERFLOW) && (new->mask & FS_Q_OVERFLOW);
 	}
+	if (old->mask != new->mask) return false;
+
+	if ( (new->mask & (FS_ATTRIB | FS_ACCESS | FS_MODIFY))
+			&& (old->path.mnt == new->path.mnt)
+			&& (old->path.dentry == new->path.dentry))
+		return true;
 	return false;
 }
-
 
 /* and the list better be locked by something too! */
 static struct fsnotify_event *synotify_merge(struct list_head *list,
 					     struct fsnotify_event *event)
 {
-	struct fsnotify_event_holder *test_holder;
-	struct fsnotify_event *test_event = NULL;
-	struct fsnotify_event *new_event;
-
+	struct fsnotify_event_holder *last_holder;
+	struct fsnotify_event *last_event;
 	pr_debug("%s: list=%p event=%p, mask=%x\n", __func__, list, event, event->mask);
 
+	spin_lock(&event->lock);
 
-	list_for_each_entry_reverse(test_holder, list, event_list) {
-		if (should_merge(test_holder->event, event)) {
-			test_event = test_holder->event;
-			break;
-		}
+	last_holder = list_entry(list->prev, struct fsnotify_event_holder, event_list);
+	last_event = last_holder->event;
+
+	if (should_merge(last_event, event)) {
+		fsnotify_get_event(last_event);
+	} else {
+		last_event = NULL;
 	}
+	spin_unlock(&event->lock);
 
-	if (!test_event){
-		return NULL;
-	}
-
-	fsnotify_get_event(test_event);
-
-	/* if they are exactly the same we are done */
-	if (test_event->mask == event->mask)
-		return test_event;
-
-	/*
-	 * if the refcnt == 2 this is the only queue
-	 * for this event and so we can update the mask
-	 * in place.
-	 */
-	if (atomic_read(&test_event->refcnt) == 2) {
-		test_event->mask |= event->mask;
-		return test_event;
-	}
-
-	new_event = fsnotify_clone_event(test_event);
-
-	/* done with test_event */
-	fsnotify_put_event(test_event);
-
-	/* couldn't allocate memory, merge was not possible */
-	if (unlikely(!new_event))
-		return ERR_PTR(-ENOMEM);
-
-	/* build new event and replace it on the list */
-	new_event->mask = (test_event->mask | event->mask);
-	fsnotify_replace_event(test_holder, new_event);
-
-	/* we hold a reference on new_event from clone_event */
-	return new_event;
+	return last_event;
 }
 
 static int synotify_handle_event(struct fsnotify_group *group,

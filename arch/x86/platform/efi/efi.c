@@ -550,6 +550,9 @@ void __init efi_init(void)
 	early_iounmap(config_tables,
 			  efi.systab->nr_tables * sizeof(efi_config_table_t));
 
+	set_bit(EFI_CONFIG_TABLES, &x86_efi_facility);
+
+	if (!disable_runtime) {
 		/*
 		 * Check out the runtime services table. We need to map
 		 * the runtime services table so that we can grab the physical
@@ -573,10 +576,13 @@ void __init efi_init(void)
 			 * virtual mode.
 			 */
 			efi.get_time = phys_efi_get_time;
+			
+			set_bit(EFI_RUNTIME_SERVICES, &x86_efi_facility);
 		} else
 			printk(KERN_ERR "Could not map the EFI runtime service "
 			       "table!\n");
 		early_iounmap(runtime, sizeof(efi_runtime_services_t));
+	}
 
 	/* Map the EFI memory map */
 	memmap.map = early_ioremap((unsigned long)memmap.phys_map,

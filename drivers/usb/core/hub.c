@@ -1998,8 +1998,12 @@ static int usb_enumerate_device(struct usb_device *udev)
 		udev->serial = usb_cache_string(udev, udev->descriptor.iSerialNumber);
 	}
 	err = usb_enumerate_device_otg(udev);
-fail:
+	if (err < 0)
 		return err;
+
+	usb_detect_interface_quirks(udev);
+
+	return 0;
 }
 
 #ifdef MY_ABC_HERE
@@ -2312,7 +2316,7 @@ static unsigned hub_is_wusb(struct usb_hub *hub)
 #ifdef MY_ABC_HERE
 #define HUB_RESET_TIMEOUT	3000
 #else
-#define HUB_RESET_TIMEOUT   500
+#define HUB_RESET_TIMEOUT   800
 #endif
 #ifdef MY_ABC_HERE
 // wait device reset, some devices are slow, then set address will fail
@@ -2420,11 +2424,8 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 			if ((portchange & USB_PORT_STAT_C_CONNECTION))
 			return -ENOTCONN;
 #endif
-			/* if we`ve finished resetting, then break out of
-			 * the loop
-			 */
-			if (!(portstatus & USB_PORT_STAT_RESET) &&
-			    (portstatus & USB_PORT_STAT_ENABLE)) {
+
+		if ((portstatus & USB_PORT_STAT_ENABLE)) {
 			if (hub_is_wusb(hub))
 				udev->speed = USB_SPEED_WIRELESS;
 			else if (hub_is_superspeed(hub->hdev))
@@ -2438,7 +2439,11 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 			return 0;
 		}
 		} else {
-			if (portchange & USB_PORT_STAT_C_BH_RESET)
+			if (!(portstatus & USB_PORT_STAT_CONNECTION) ||
+					hub_port_warm_reset_required(hub,
+						portstatus))
+				return -ENOTCONN;
+
 			return 0;
 		}
 
@@ -4130,8 +4135,8 @@ static void hub_events(void)
 				dev_dbg(hub_dev, "warm reset port %d\n", i);
 				status = hub_port_reset(hub, i, NULL,
 						HUB_BH_RESET_TIME, true);
-				if (status < 0)
-					hub_port_disable(hub, i, 1);
+					if (status < 0)
+						hub_port_disable(hub, i, 1);
 				connect_change = 0;
 			}
 

@@ -13,6 +13,8 @@
 
 #define IO_SPACE_LIMIT		0xffffffff
 
+#define dma_io_sync()	do { } while (0)
+
 static inline void __iomem *__io(unsigned long addr)
 {
 	return (void __iomem *)((addr - KIRKWOOD_PCIE_IO_BUS_BASE)

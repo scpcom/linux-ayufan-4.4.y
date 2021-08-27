@@ -27,15 +27,6 @@
 
 #define GPIO_BASE(pin)		((pin < 32) ? GPIO_BASE_LO : GPIO_BASE_HI)
 
-#define GPIO_OUT(pin)		(GPIO_BASE(pin) + 0x00)
-#define GPIO_IO_CONF(pin)	(GPIO_BASE(pin) + 0x04)
-#define GPIO_BLINK_EN(pin)	(GPIO_BASE(pin) + 0x08)
-#define GPIO_IN_POL(pin)	(GPIO_BASE(pin) + 0x0c)
-#define GPIO_DATA_IN(pin)	(GPIO_BASE(pin) + 0x10)
-#define GPIO_EDGE_CAUSE(pin)	(GPIO_BASE(pin) + 0x14)
-#define GPIO_EDGE_MASK(pin)	(GPIO_BASE(pin) + 0x18)
-#define GPIO_LEVEL_MASK(pin)	(GPIO_BASE(pin) + 0x1c)
-
 static inline int gpio_to_irq(int pin)
 {
 	if (pin < NR_GPIO_IRQS)

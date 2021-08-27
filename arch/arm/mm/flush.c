@@ -304,13 +304,6 @@ void flush_dcache_page(struct page *page)
 			__flush_dcache_aliases(mapping, page);
 		else if (mapping)
 			__flush_icache_all();
-#ifdef CONFIG_ARM_ARMV5_L2_CACHE_COHERENCY_FIX
-		{
-			unsigned long pfn = page_to_pfn(page);
-			outer_flush_range((pfn << PAGE_SHIFT),
-				(pfn << PAGE_SHIFT) + PAGE_SIZE);
-		}
-#endif
 		set_bit(PG_dcache_clean, &page->flags);
 	}
 }

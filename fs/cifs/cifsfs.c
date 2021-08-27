@@ -58,6 +58,9 @@ int cifsERROR = 1;
 int traceSMB = 0;
 bool enable_oplocks = true;
 unsigned int linuxExtEnabled = 1;
+#ifdef MY_ABC_HERE
+unsigned int SynoPosixSemanticsEnabled = 1;
+#endif
 unsigned int lookupCacheEnabled = 1;
 unsigned int multiuser_mount = 0;
 unsigned int global_secflags = CIFSSEC_DEF;

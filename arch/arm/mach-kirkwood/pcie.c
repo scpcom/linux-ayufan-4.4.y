@@ -26,7 +26,7 @@ void kirkwood_enable_pcie(void)
 		writel(curr | CGC_PEX0, CLOCK_GATING_CTRL);
 }
 
-void __init kirkwood_pcie_id(u32 *dev, u32 *rev)
+void kirkwood_pcie_id(u32 *dev, u32 *rev)
 {
 #ifdef CONFIG_MACH_SYNOLOGY_6281
 	u32 reg = readl(POWER_MNG_CTRL_REG);

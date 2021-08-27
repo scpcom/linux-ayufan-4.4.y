@@ -22,6 +22,7 @@
 #include <plat/orion_wdt.h>
 #include <plat/mv_xor.h>
 #include <plat/ehci-orion.h>
+#include <plat/orion_hwmon.h>
 
 /* Fill in the resources structure and link it into the platform
    device structure. There is always a memory region, and nearly
@@ -196,6 +197,21 @@ void __init orion_rtc_init(unsigned long mapbase,
 	orion_rtc_resource[1].flags = IORESOURCE_IRQ;
 
 	platform_device_register_simple("rtc-mv", -1, orion_rtc_resource, 2);
+}
+
+/*****************************************************************************
+ * HW monitor (thermal sensor)
+ ****************************************************************************/
+static struct resource orion_hwmon_resource[2];
+
+void __init orion_hwmon_init(unsigned long mapbase)
+{
+	orion_hwmon_resource[0].start = mapbase;
+	orion_hwmon_resource[0].end = mapbase + SZ_4 - 1;
+	orion_hwmon_resource[0].flags = IORESOURCE_MEM;
+
+	platform_device_register_simple(ORION_HWMON_NAME, -1,
+					orion_hwmon_resource, 1);
 }
 
 /*****************************************************************************
@@ -467,6 +483,24 @@ void __init orion_ge00_switch_init(struct dsa_platform_data *d, int irq)
 	}
 
 	d->netdev = &orion_ge00.dev;
+	for (i = 0; i < d->nr_chips; i++)
+		d->chip[i].mii_bus = &orion_ge00_shared.dev;
+	orion_switch_device.dev.platform_data = d;
+
+	platform_device_register(&orion_switch_device);
+}
+
+void __init orion_ge01_switch_init(struct dsa_platform_data *d, int irq)
+{
+	int i;
+
+	if (irq != NO_IRQ) {
+		orion_switch_resources[0].start = irq;
+		orion_switch_resources[0].end = irq;
+		orion_switch_device.num_resources = 1;
+	}
+
+	d->netdev = &orion_ge01.dev;
 	for (i = 0; i < d->nr_chips; i++)
 		d->chip[i].mii_bus = &orion_ge00_shared.dev;
 	orion_switch_device.dev.platform_data = d;

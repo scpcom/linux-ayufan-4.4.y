@@ -44,6 +44,7 @@ static ssize_t mv_eth_help(char *buf)
 	off += mvOsSPrintf(buf+off, "\n");
 
 	off += sprintf(buf+off, "cat                ports           - show all ports info\n");
+	off += sprintf(buf+off, "echo p d           > stack         - show pools stack for port <p>. d=0-brief, d=1-full\n");
 	off += sprintf(buf+off, "echo p             > port          - show a port info\n");
 	off += sprintf(buf+off, "echo p             > stats         - show a port statistics\n");
 	off += sprintf(buf+off, "echo p txp         > cntrs         - show a port counters\n");
@@ -95,7 +96,9 @@ static ssize_t mv_eth_help(char *buf)
 	off += sprintf(buf+off, "echo p d           > rx_weight     - set weight for the poll function; <d> - new weight, max val: 255\n");
 	off += sprintf(buf+off, "echo p cpu mask    > txq_mask      - set cpu <cpu> accessible txq bitmap <mask>.\n");
 	off += sprintf(buf+off, "echo p txp txq d   > txq_shared    - set/reset shared bit for <port/txp/txq>. <d> - 1/0 for set/reset.\n");
-	off += sprintf(buf+off, "echo p {0|1|2}     > pm_mode       - set port <p> pm mode. 0 wol, 1 clock, 2 disabled.\n");
+#ifdef CONFIG_MV_ETH_PNC_WOL
+	off += sprintf(buf+off, "echo p wol         > wol_mode      - set port <p> pm mode. 0 wol, 1 suspend.\n");
+#endif
 	return off;
 }
 
@@ -216,6 +219,8 @@ static ssize_t mv_eth_port_store(struct device *dev,
 		mv_eth_status_print();
 		mvNetaPortStatus(p);
 		mv_eth_port_status_print(p);
+	} else if (!strcmp(name, "stack")) {
+		mv_eth_stack_print(p, v);
 	} else if (!strcmp(name, "stats")) {
 		mv_eth_port_stats_print(p);
 	} else if (!strcmp(name, "tos")) {
@@ -230,8 +235,6 @@ static ssize_t mv_eth_port_store(struct device *dev,
 		printk(KERN_INFO "\n");
 		mvEthPortRegs(p);
 		mvNetaPortRegs(p);
-	} else if (!strcmp(name, "pm_mode")) {
-		err = mv_eth_pm_mode_set(p, v);
 #ifdef MV_ETH_GMAC_NEW
 	} else if (!strcmp(name, "gmac_regs")) {
 		mvNetaGmacRegs(p);
@@ -240,6 +243,10 @@ static ssize_t mv_eth_port_store(struct device *dev,
 	} else if (!strcmp(name, "pnc")) {
 		mv_eth_ctrl_pnc(p);
 #endif /* CONFIG_MV_ETH_PNC */
+#ifdef CONFIG_MV_ETH_PNC_WOL
+	} else if (!strcmp(name, "wol_mode")) {
+		err = mv_eth_wol_mode_set(p, v);
+#endif /* CONFIG_MV_ETH_PNC_WOL */
 	} else if (!strcmp(name, "napi")) {
 		mv_eth_napi_group_show(p);
 	} else {
@@ -462,6 +469,7 @@ static DEVICE_ATTR(debug,       S_IWUSR, mv_eth_show, mv_eth_port_store);
 static DEVICE_ATTR(wrr_regs,    S_IWUSR, mv_eth_show, mv_eth_4_store);
 static DEVICE_ATTR(cntrs,       S_IWUSR, mv_eth_show, mv_eth_4_store);
 static DEVICE_ATTR(port,        S_IWUSR, mv_eth_show, mv_eth_port_store);
+static DEVICE_ATTR(stack,        S_IWUSR, mv_eth_show, mv_eth_port_store);
 static DEVICE_ATTR(rxq_regs,    S_IWUSR, mv_eth_show, mv_eth_3_store);
 static DEVICE_ATTR(txq_regs,    S_IWUSR, mv_eth_show, mv_eth_4_store);
 static DEVICE_ATTR(mac,         S_IWUSR, mv_eth_show, mv_eth_port_store);
@@ -480,12 +488,14 @@ static DEVICE_ATTR(tx_done,     S_IWUSR, mv_eth_show, mv_eth_3_store);
 #ifdef CONFIG_MV_ETH_PNC
 static DEVICE_ATTR(pnc,         S_IWUSR, NULL, mv_eth_port_store);
 #endif /* CONFIG_MV_ETH_PNC */
+#ifdef CONFIG_MV_ETH_PNC_WOL
+static DEVICE_ATTR(wol_mode,	S_IWUSR, mv_eth_show, mv_eth_port_store);
+#endif /* CONFIG_MV_ETH_PNC_WOL */
 static DEVICE_ATTR(cpu_group,   S_IWUSR, mv_eth_show, mv_eth_3_hex_store);
 static DEVICE_ATTR(rxq_group,   S_IWUSR, mv_eth_show, mv_eth_3_hex_store);
 static DEVICE_ATTR(napi,        S_IWUSR, mv_eth_show, mv_eth_port_store);
 static DEVICE_ATTR(txq_mask,    S_IWUSR, mv_eth_show, mv_eth_3_hex_store);
 static DEVICE_ATTR(txq_shared,  S_IWUSR, mv_eth_show, mv_eth_4_store);
-static DEVICE_ATTR(pm_mode,	S_IWUSR, mv_eth_show, mv_eth_port_store);
 
 static struct attribute *mv_eth_attrs[] = {
 
@@ -518,6 +528,7 @@ static struct attribute *mv_eth_attrs[] = {
 	&dev_attr_rxq_regs.attr,
 	&dev_attr_txq_regs.attr,
 	&dev_attr_port.attr,
+	&dev_attr_stack.attr,
 	&dev_attr_stats.attr,
 	&dev_attr_cntrs.attr,
 	&dev_attr_ports.attr,
@@ -535,12 +546,14 @@ static struct attribute *mv_eth_attrs[] = {
 #ifdef CONFIG_MV_ETH_PNC
     &dev_attr_pnc.attr,
 #endif /* CONFIG_MV_ETH_PNC */
+#ifdef CONFIG_MV_ETH_PNC_WOL
+	&dev_attr_wol_mode.attr,
+#endif
 	&dev_attr_cpu_group.attr,
 	&dev_attr_rxq_group.attr,
 	&dev_attr_napi.attr,
 	&dev_attr_txq_mask.attr,
 	&dev_attr_txq_shared.attr,
-	&dev_attr_pm_mode.attr,
 	NULL
 };
 

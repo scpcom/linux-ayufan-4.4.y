@@ -87,11 +87,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * RETURN:
 *       MV_BAD_PARAM if parameters to function invalid, MV_OK otherwise.
 *******************************************************************************/
-MV_VOID mvXorHalInit(MV_U32 xorChanNum)
+MV_VOID mvXorHalInit(MV_U32 unit)
 {
 	MV_U32 i;
+	MV_U32 maxChan;
+
 	/* Abort any XOR activity & set default configuration */
-	for (i = 0; i < xorChanNum; i++) {
+	/* loop over unit channels */
+	maxChan = (MV_XOR_MAX_CHAN_PER_UNIT * unit) + MV_XOR_MAX_CHAN_PER_UNIT;
+	for (i = (MV_XOR_MAX_CHAN_PER_UNIT * unit); i < maxChan; i++) {
 		mvXorCommandSet(i, MV_STOP);
 		mvXorCtrlSet(i, (1 << XEXCR_REG_ACC_PROTECT_OFFS) |
 			     (4 << XEXCR_DST_BURST_LIMIT_OFFS) | (4 << XEXCR_SRC_BURST_LIMIT_OFFS)
@@ -279,13 +283,6 @@ MV_STATUS mvXorMemInit(MV_U32 chan, MV_U32 startPtr, MV_U32 blockSize, MV_U32 in
 			   __func__, XEXBSR_BLOCK_SIZE_MIN_VALUE, XEXBSR_BLOCK_SIZE_MAX_VALUE);
 		return MV_BAD_PARAM;
 	}
-#if 0
-/* tzachi - this is done purposely by u-boot */
-	if (0x0 == startPtr) {
-		mvOsPrintf("%s: ERR. startPtr is NULL pointer\n", __func__);
-		return MV_BAD_PARAM;
-	}
-#endif
 
 	/* set the operation mode to Memory Init */
 	temp = MV_REG_READ(XOR_CONFIG_REG(XOR_UNIT(chan), XOR_CHAN(chan)));
@@ -509,7 +506,7 @@ MV_STATUS mvXorCommandSet(MV_U32 chan, MV_COMMAND command)
 		return MV_OK;
 	}
 	/* command is paused and current state is active */
-	else if ((command == MV_PAUSED) && (state == MV_ACTIVE)) {
+	else if ((MV_PAUSE == command) && (MV_ACTIVE == state)) {
 		MV_REG_BIT_SET(XOR_ACTIVATION_REG(XOR_UNIT(chan), XOR_CHAN(chan)), XEXACTR_XEPAUSE_MASK);
 		return MV_OK;
 	}
@@ -584,4 +581,17 @@ MV_STATUS mvXorOverrideSet(MV_U32 chan, MV_XOR_OVERRIDE_TARGET target, MV_U32 wi
 	temp |= (winNum << XEXAOCR_OVR_PTR_OFFS(target));
 	MV_REG_WRITE(XOR_OVERRIDE_CTRL_REG(chan), temp);
 	return MV_OK;
+}
+
+MV_VOID mvXorOverrideDisable(MV_U32 chan)
+{
+	MV_REG_WRITE(XOR_OVERRIDE_CTRL_REG(chan), 0);
+}
+
+MV_VOID xorSetSrcBurstLimit(MV_U32 chan, MV_XOR_BURST_LIMIT srcBurstLimit)
+{
+    MV_U32 temp = MV_REG_READ(XOR_CONFIG_REG(XOR_UNIT(chan), XOR_CHAN(chan)));
+    temp &= ~XEXCR_SRC_BURST_LIMIT_MASK;
+    temp |= srcBurstLimit << XEXCR_SRC_BURST_LIMIT_OFFS;
+    MV_REG_WRITE(XOR_CONFIG_REG(XOR_UNIT(chan),XOR_CHAN(chan)), temp);
 }

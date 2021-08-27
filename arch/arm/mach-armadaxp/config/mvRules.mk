@@ -18,6 +18,7 @@ endif
 # Main directory structure
 PLAT_PATH	  = ../plat-armada
 PLAT_DRIVERS	  = $(PLAT_PATH)/mv_drivers_lsp
+PLAT_ORION_PATH	  = ../plat-orion
 HAL_DIR           = $(PLAT_PATH)/mv_hal
 COMMON_DIR        = $(PLAT_PATH)/common
 OSSERV_DIR        = $(PLAT_PATH)/linux_oss
@@ -169,10 +170,6 @@ endif
 
 ifeq ($(CONFIG_MV_SATA_ENABLE_1MB_IOS),y)
 EXTRA_CFLAGS    += -DMV_SUPPORT_1MBYTE_IOS
-endif
-
-ifeq ($(CONFIG_PCIE_VIRTUAL_BRIDGE_SUPPORT),y)
-EXTRA_CFLAGS    +=-DPCIE_VIRTUAL_BRIDGE_SUPPORT
 endif
 
 ifeq ($(CONFIG_MV_CESA_CHAIN_MODE_SUPPORT),y)

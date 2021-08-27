@@ -58,6 +58,7 @@
 #include <linux/bootmem.h>
 #include <linux/splice.h>
 #include <linux/pfn.h>
+#include <linux/pci.h>
 
 #include <asm/uaccess.h>
 #include <asm/io.h>
@@ -66,51 +67,11 @@
 # include <linux/efi.h>
 #endif
 
+/* I/O range starts from 2GB on CE4100/CE4200/CE5300 platforms. */
+#define CE_MEDIA_IO_BASE 0x80000000UL 
 
 extern unsigned long max_pfn;
-
-
-#ifndef ARCH_HAS_VALID_PHYS_ADDR_RANGE
-static inline int valid_phys_addr_range(unsigned long addr, size_t count)
-{
-	if (addr + count > __pa(high_memory))
-		return 0;
-
-	return 1;
-}
-
-static inline int valid_mmap_phys_addr_range(unsigned long pfn, size_t size)
-{
-	return 1;
-}
-#endif
-
-
-#ifndef CONFIG_MMU
-static unsigned long get_unmapped_area_mem(struct file *file,
-					   unsigned long addr,
-					   unsigned long len,
-					   unsigned long pgoff,
-					   unsigned long flags)
-{
-	if (!valid_mmap_phys_addr_range(pgoff, len))
-		return (unsigned long) -EINVAL;
-	return pgoff << PAGE_SHIFT;
-}
-
-/* can't do an in-place private mapping if there's no MMU */
-static inline int private_mapping_ok(struct vm_area_struct *vma)
-{
-	return vma->vm_flags & VM_MAYSHARE;
-}
-#else
-#define get_unmapped_area_mem	NULL
-
-static inline int private_mapping_ok(struct vm_area_struct *vma)
-{
-	return 1;
-}
-#endif
+static unsigned long io_base, io_base_pfn; 
 
 int __attribute__((weak)) phys_mem_access_prot_allowed(struct file *file,
 	unsigned long pfn, unsigned long size, pgprot_t *vma_prot)
@@ -176,28 +137,37 @@ static struct vm_operations_struct mmap_mem_ops = {
 #endif
 };
 
+static inline int range_is_sys_ram(unsigned long pfn, unsigned long size)
+{
+        u64 from = ((u64)pfn) << PAGE_SHIFT;
+        u64 to = from + size;
+        u64 cursor = from;
+
+        while (cursor < to) {
+                if (page_is_ram(pfn)) {
+                        printk(KERN_INFO "system ram! pfn 0x%x.\n", (unsigned int)pfn);
+                        return 1;
+                }
+                cursor += PAGE_SIZE;
+                pfn++;
+        }
+        return 0;
+}
+
 static int mmap_mem(struct file * file, struct vm_area_struct * vma)
 {
 	size_t size = vma->vm_end - vma->vm_start;
 
-	/* max_phy_mem_pfn = (4GB >> PAGE_SHIFT) - 1  */
-	unsigned long max_phy_mem_pfn = (0x100000000ULL >> PAGE_SHIFT ) - 1;
 	unsigned long size_of_pfn = (size % PAGE_SIZE) ? ((size >> PAGE_SHIFT) + 1) : (size >> PAGE_SHIFT);
-		
-	if (((vma->vm_pgoff + size_of_pfn) > max_phy_mem_pfn) || (vma->vm_pgoff < 0) || (size < 0))
+	if ((vma->vm_pgoff < 0) || (size < 0))
 		return -EINVAL;
 
-	if ((vma->vm_pgoff < max_pfn) && !capable(CAP_SYS_RAWIO) )
-	{
-		printk("Memory map fail for permission deny!\n");
+	/* I/O registers space access without CAP_SYS_RAWIO capability is not allowed. */
+	if ((vma->vm_pgoff + size_of_pfn > io_base_pfn) && !capable(CAP_SYS_RAWIO))
 		return -EPERM;
-	}
 	
-        if (!valid_mmap_phys_addr_range(vma->vm_pgoff, size))
-                return -EINVAL;
-
-        if (!private_mapping_ok(vma))
-                return -ENOSYS;
+	if (range_is_sys_ram(vma->vm_pgoff, size))
+		return -EPERM;
 
 	if (!range_is_allowed(vma->vm_pgoff, size))
 		return -EPERM;
@@ -237,8 +207,23 @@ static const struct file_operations mem_fops = {
 
 static int __init devmem_init(void)
 {
+	unsigned int soc_id = 0;
 	if (0 > register_chrdev(0,"devmem",&mem_fops))
 		printk("unable to get major for memory devs\n");
+
+	intelce_get_soc_info(&soc_id, NULL);
+
+	switch(soc_id) {
+		case CE3100_SOC_DEVICE_ID:
+		case CE4100_SOC_DEVICE_ID:
+		case CE4200_SOC_DEVICE_ID:
+		case CE5300_SOC_DEVICE_ID:
+			io_base = CE_MEDIA_IO_BASE;
+			break;
+		default:
+			return -ENODEV;
+	}
+	io_base_pfn = (io_base >> PAGE_SHIFT ) - 1;
 	return 0;
 }
 

@@ -1206,7 +1206,6 @@ _base_check_enable_msix(struct MPT2SAS_ADAPTER *ioc)
 	int base;
 	u16 message_control;
 
-
 	/* Check whether controller SAS2008 B0 controller,
 	   if it is SAS2008 B0 controller use IO-APIC instead of MSIX */
 	if (ioc->pdev->device == MPI2_MFGPAGE_DEVID_SAS2008 &&

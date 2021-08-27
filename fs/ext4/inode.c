@@ -3817,8 +3817,18 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	EXT4_INODE_GET_XTIME(i_atime, inode, raw_inode);
 	EXT4_EINODE_GET_XTIME(i_crtime, ei, raw_inode);
 #ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+	if (EXT4_SB(sb)->s_swap_create_time) {
+		inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
+		inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
+	} else {
 		inode->i_CreateTime.tv_sec = raw_inode->i_crtime;
 		inode->i_CreateTime.tv_nsec = raw_inode->i_crtime_extra;
+	}
+#else
+	inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
+	inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
+#endif
 #endif
 #ifdef MY_ABC_HERE
 	inode->i_mode2 = le16_to_cpu(raw_inode->ext4_mode2);
@@ -3995,8 +4005,18 @@ static int ext4_do_update_inode(handle_t *handle,
 	EXT4_INODE_SET_XTIME(i_mtime, inode, raw_inode);
 	EXT4_INODE_SET_XTIME(i_atime, inode, raw_inode);
 #ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+	if (EXT4_SB(inode->i_sb)->s_swap_create_time) {
+		raw_inode->i_crtime = cpu_to_le32(inode->i_CreateTime.tv_sec);
+		raw_inode->i_crtime_extra = cpu_to_le32(inode->i_CreateTime.tv_nsec);
+	} else {
 		raw_inode->i_crtime = inode->i_CreateTime.tv_sec;
 		raw_inode->i_crtime_extra = inode->i_CreateTime.tv_nsec;
+	}
+#else
+	raw_inode->i_crtime = cpu_to_le32(inode->i_CreateTime.tv_sec);
+	raw_inode->i_crtime_extra = cpu_to_le32(inode->i_CreateTime.tv_nsec);
+#endif
 #else
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #endif
@@ -4013,7 +4033,10 @@ static int ext4_do_update_inode(handle_t *handle,
 		raw_inode->i_file_acl_high =
 			cpu_to_le16(ei->i_file_acl >> 32);
 	raw_inode->i_file_acl_lo = cpu_to_le32(ei->i_file_acl);
+	if (ei->i_disksize != ext4_isize(raw_inode)) {
 		ext4_isize_set(raw_inode, ei->i_disksize);
+		need_datasync = 1;
+	}
 	if (ei->i_disksize > 0x7fffffffULL) {
 		struct super_block *sb = inode->i_sb;
 		if (!EXT4_HAS_RO_COMPAT_FEATURE(sb,

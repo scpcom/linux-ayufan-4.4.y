@@ -97,22 +97,13 @@ config ARMADA_XP_SPARSEMEM
 	select ARCH_SPARSEMEM_ENABLE
 	default n
 
-config ARMADAXP_USE_IRQ_INDIRECT_MODE
-       bool "Use indirect mode for handling interrupt controller"
-       default n
-       help
-         This mode enables using indirect mode for handling interrupts, in this
-	 mode, the Interrupt Set Enable/Clear Enable registers are used for
-	 unmasking/masking shared interrupts, and Interrupt Set Mask/Clear Mask
-	 used for masking/unmasking per-cpu interrupts. Without this mode, the
-	 Interrupt Source register is used directly. and this requires the
-	 following:
-	 - Locking mechanism to protect the access to the Interrupt Source Register
-	 - Reads operation of those registers.
-	 - Using the affinity variable for restoring the mask values
-
 config ARMADAXP_USE_IRQ_INTERRUPT_ACK
        bool "Use Interrupt Ack register to detect pending interrupts"
+       default n
+       help
+
+config ARMADA_XP_BTNS_DEVICE
+	bool "Add support for ArmadaXP buttons driver for GPIOs"
 	default n
 	help
 

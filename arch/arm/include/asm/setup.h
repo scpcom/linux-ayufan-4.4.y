@@ -156,7 +156,7 @@ struct tag_memclk {
 };
 
 
-#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_ARCH_FEROCEON) || defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA)
 /* Marvell uboot parameters */
 #define ATAG_MV_UBOOT   0x41000403
 #define MV_UBOOT_ETH_PORTS	4
@@ -205,7 +205,7 @@ struct tag {
 		 * DC21285 specific
 		 */
 		struct tag_memclk	memclk;
-#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_ARCH_FEROCEON) || defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA)
 		/*
 		 * Marvell specific
 		 */

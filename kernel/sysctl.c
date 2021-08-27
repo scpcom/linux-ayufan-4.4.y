@@ -165,7 +165,7 @@ EXPORT_SYMBOL(gSynoInstallFlag);
 #endif
 
 #ifdef MY_ABC_HERE
-#if ((defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)) && !defined(CONFIG_ARCH_GEN3) ) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
+#if defined(CONFIG_SYNO_X64) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
 int gSynoHasDynModule = 1;
 #else
 int gSynoHasDynModule = 0;
@@ -221,7 +221,7 @@ char gszCustomSerialNum[32];
 EXPORT_SYMBOL(gszCustomSerialNum);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 long g_esata_7042 = -1;
 EXPORT_SYMBOL(g_esata_7042);
 #endif
@@ -241,6 +241,28 @@ EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 #ifdef CONFIG_SYNO_ARMADA
 long gSynoUSBStation= 0;
 EXPORT_SYMBOL(gSynoUSBStation);
+#endif
+
+#ifdef CONFIG_SYNO_DISPLAY_CPUINFO
+unsigned int gSynoCPUInfoCore = 0;
+EXPORT_SYMBOL(gSynoCPUInfoCore);
+char gSynoCPUInfoClock[16];
+EXPORT_SYMBOL(gSynoCPUInfoClock);
+#endif
+
+#ifdef MY_ABC_HERE
+int gSynoFactoryUSBFastReset = 0;
+EXPORT_SYMBOL(gSynoFactoryUSBFastReset);
+#endif
+
+#ifdef MY_ABC_HERE
+int gSynoFactoryUSB3Disable = 0;
+EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
+#endif
+
+#ifdef MY_ABC_HERE
+int gSynoNoEhci = 0;
+EXPORT_SYMBOL(gSynoNoEhci);
 #endif
 
 /* External variables not in a header file. */
@@ -1337,7 +1359,50 @@ static struct ctl_table kern_table[] = {
 		.proc_handler		= &proc_dointvec,
 	},
 #endif
+#ifdef CONFIG_SYNO_DISPLAY_CPUINFO
+        {
+            .procname       = "syno_CPU_info_core",
+            .data           = &gSynoCPUInfoCore,
+            .maxlen         = sizeof (unsigned int),
+            .mode           = 0644,
+            .proc_handler   = &proc_dointvec,
+        },
+        {
+            .procname       = "syno_CPU_info_clock",
+            .data           = &gSynoCPUInfoClock,
+            .maxlen         = 16,
+            .mode           = 0644,
+            .proc_handler   = &proc_dostring,
+        },
+#endif
 
+#ifdef MY_ABC_HERE
+	{
+		.procname		= "syno_usb_fast_reset",
+		.data			= &gSynoFactoryUSBFastReset,
+		.maxlen			= sizeof (int),
+		.mode			= 0444,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname		= "syno_disable_usb3",
+		.data			= &gSynoFactoryUSB3Disable,
+		.maxlen			= sizeof (int),
+		.mode			= 0444,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname		= "syno_no_ehci",
+		.data			= &gSynoNoEhci,
+		.maxlen			= sizeof (int),
+		.mode			= 0444,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
 	{ }
 };
 

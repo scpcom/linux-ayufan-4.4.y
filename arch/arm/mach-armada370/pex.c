@@ -71,18 +71,24 @@ void __init mv_pci_preinit(void)
 	if (MV_FALSE == mvCtrlPwrClckGet(PEX_UNIT_ID, 0))
 		return;
 
-	for (pciIf = 0; pciIf < maxif; pciIf++)
-        {
+	for (pciIf = 0; pciIf < maxif; pciIf++)	{
 
 		retval = mvSysPexInit(pciIf, MV_PEX_ROOT_COMPLEX);
+
+		if (pciIf == 0) {
+			mvPexLocalBusNumSet(pciIf, 0);
+			mvPexLocalDevNumSet(pciIf, 1);
+		}
+
+		/* Clear the secondary bus number */
+		MV_REG_WRITE(PEX_SECONDARY_BUS_REG(pciIf), 0);
 
 		if (retval == MV_NO_SUCH) {
 			//printk("pci_init:no such calling mvPexInit for PEX-%x\n",pciIf);
 			continue;
 		}
 
-		if (retval != MV_OK)
-		{
+		if (retval != MV_OK) {
 			printk("pci_init:Error calling mvPexInit for PEX-%x\n",pciIf);
 			continue;
 		}
@@ -135,50 +141,76 @@ void mv_pci_error_init(u32 pciIf)
    TBD: adjust it to realy use 1/2/4 byte(partial) read/write, after the pex
 	read config WA will be removed.
 */
-static int mv_pci_read_config(struct pci_bus *bus, unsigned int devfn, int where,
+
+static int  pci_read_cfg(u32 pciIf, u32 bus_num, u32 dev_no,
+		u32 func, u32 where)
+{
+	u32 cfgCmd;
+	u32 regOff = (MV_U32)where & (PXCAR_REG_NUM_MASK
+			| PXCAR_REAL_EXT_REG_NUM_MASK);
+
+	/* Creating PEX address to be passed */
+	cfgCmd  = (bus_num << PXCAR_BUS_NUM_OFFS);
+	cfgCmd |= (dev_no << PXCAR_DEVICE_NUM_OFFS);
+	cfgCmd |= (func << PXCAR_FUNC_NUM_OFFS);
+	/* lgacy register space */
+	cfgCmd |= (regOff & PXCAR_REG_NUM_MASK);
+	/* extended register space */
+	cfgCmd |= (((regOff & PXCAR_REAL_EXT_REG_NUM_MASK) >>
+		     PXCAR_REAL_EXT_REG_NUM_OFFS) << PXCAR_EXT_REG_NUM_OFFS);
+	cfgCmd |= PXCAR_CONFIG_EN;
+
+	/* Write the address to the PEX configuration address register */
+	MV_REG_WRITE(PEX_CFG_ADDR_REG(pciIf), cfgCmd);
+
+	/*
+	 * In order to let the PEX controller absorbed the address of the
+	 * read transaction we perform a validity check that the address
+	 * was written
+	 * */
+	if (cfgCmd != MV_REG_READ(PEX_CFG_ADDR_REG(pciIf)))
+		return 0xFFFFFFFF;
+
+	/* cleaning Master Abort */
+	MV_REG_BIT_SET(PEX_CFG_DIRECT_ACCESS(pciIf, PEX_STATUS_AND_COMMAND),
+			PXSAC_MABORT);
+
+	/* Read the Data returned in the PEX Data register */
+	return  MV_REG_READ(PEX_CFG_DATA_REG(pciIf));
+
+}
+
+/* Currentlly the PCI config read/write are implemented as read modify write
+   to 32 bit.
+   TBD: adjust it to realy use 1/2/4 byte(partial) read/write, after the pex
+	read config WA will be removed.
+*/
+static int mv_pci_read_config(struct pci_bus *bus,
+				  unsigned int devfn, int where,
 				  int size, u32 *val)
 {
-
-        MV_U32 bus_num,func,regOff,dev_no,temp;
-	MV_U32 localBus;
+	u32 bus_num, func, dev_no, temp, localBus;
 	struct pci_sys_data *sysdata = (struct pci_sys_data *)bus->sysdata;
 	u32 pciIf = sysdata->mv_controller_num;
 
 	*val = 0xffffffff;
 
-	/* Check Power State */
-	if (MV_FALSE == mvCtrlPwrClckGet(PEX_UNIT_ID, 0))
+	if (MV_FALSE == mvCtrlPwrClckGet(PEX_UNIT_ID, pciIf))
 		return 0;
 
 	bus_num = bus->number;
 	dev_no = PCI_SLOT(devfn);
 
-	/* don't return for our device */
+	/* Our local bus is PEX so enable reading only device 0 */
 	localBus = mvPexLocalBusNumGet(pciIf);
-	if((dev_no == 0) && ( bus_num == localBus))
-	{
-		DB(printk("PCI %x read from our own dev return 0xffffffff \n", pciIf));
+	if ((dev_no !=  0) && (bus_num == localBus)) {
+		DB(pr_info("PCI %d device %d illegal on local bus\n", pciIf,
+					dev_no));
 		return 0xffffffff;
 	}
 
 	func = PCI_FUNC(devfn);
-        regOff = (MV_U32)where & PXCAR_REG_NUM_MASK;
-
-#if PEX0_PTP
-	/* WA: use only the first function of the bridge and te first bus*/
-	if( (bus_num == mvPexLocalBusNumGet(pciIf)) && (dev_no == 1) && (func != 0) )
-	{
-		DB(printk("PCI %x read from bridge func != 0 return 0xffffffff \n",pciIf));
-		return 0xffffffff;
-	}
-#endif
-	if ((func == 0)&&(dev_no < 2))
-	{
-		DB(printk("PCI %x read: bus = %x dev = %x func = %x regOff = %x ",pciIf, bus_num,dev_no,func,regOff));
-	}
-
-
-        temp = (u32) mvPexConfigRead(pciIf, bus_num, dev_no, func, regOff);
+	temp = pci_read_cfg(pciIf, bus_num, dev_no, func, where);
 
 	switch (size) {
 	case 1:
@@ -193,38 +225,37 @@ static int mv_pci_read_config(struct pci_bus *bus, unsigned int devfn, int where
 		break;
 	}
 
-
 	*val = temp;
 
-	if ((func == 0)&&(dev_no < 2))
-	{
-		DB(printk(" got %x \n",temp));
-	}
+	DB(pr_info("PCI %d read: bus = %x dev = %x func = %x regOff = %x"
+		   "val = 0x%08x\n", pciIf, bus_num, dev_no, func,
+		   where, temp));
 
 	return 0;
 }
 
-static int mv_pci_write_config(struct pci_bus *bus, unsigned int devfn, int where,
-                           int size, u32 val)
+static int mv_pci_write_config(struct pci_bus *bus, unsigned int devfn,
+		int where, int size, u32 val)
 {
-        MV_U32 bus_num,func,regOff,dev_no,temp, mask , shift;
+	u32 bus_num, func, regOff, dev_no, temp, mask, shift;
 	struct pci_sys_data *sysdata = (struct pci_sys_data *)bus->sysdata;
 	u32 pciIf = sysdata->mv_controller_num;
+	u32 cfgCmd;
+
+	if (MV_FALSE == mvCtrlPwrClckGet(PEX_UNIT_ID, pciIf))
+		return 0xFFFFFFFF;
 
 	bus_num = bus->number;
 	dev_no = PCI_SLOT(devfn);
 	func = PCI_FUNC(devfn);
-	regOff = (MV_U32)where & PXCAR_REG_NUM_MASK;
+	/* total of 12 bits: 8 legacy + 4 extended */
+	regOff = (MV_U32)where & (PXCAR_REG_NUM_MASK |
+			PXCAR_REAL_EXT_REG_NUM_MASK);
 
-	DB(printk("PCI %x: writing data %x size %x to bus %x dev %x func %x offs %x \n",pciIf, val,size,bus_num,dev_no,func,regOff));
 	if (size != 4)
-	{
-		temp = (u32) mvPexConfigRead(pciIf, bus_num, dev_no, func, regOff);
-	}
+		temp = pci_read_cfg(pciIf, bus_num, dev_no, func, where);
 	else
-	{
 		temp = val;
-	}
 
 	switch (size) {
 	case 1:
@@ -243,14 +274,39 @@ static int mv_pci_write_config(struct pci_bus *bus, unsigned int devfn, int wher
 	}
 
 	temp = (temp & (~(mask << shift))) | ((val & mask) << shift);
-	mvPexConfigWrite(pciIf,bus_num,dev_no,func,regOff,temp);
 
-        return 0;
+	/* Creating PEX address to be passed */
+	cfgCmd  = (bus_num << PXCAR_BUS_NUM_OFFS);
+	cfgCmd |= (dev_no << PXCAR_DEVICE_NUM_OFFS);
+	cfgCmd |= (func << PXCAR_FUNC_NUM_OFFS);
+	/* lgacy register space */
+	cfgCmd |= (regOff & PXCAR_REG_NUM_MASK);
+	/* extended register space */
+	cfgCmd |= (((regOff & PXCAR_REAL_EXT_REG_NUM_MASK) >>
+		     PXCAR_REAL_EXT_REG_NUM_OFFS) << PXCAR_EXT_REG_NUM_OFFS);
+	cfgCmd |= PXCAR_CONFIG_EN;
 
+	DB(pr_info("PCI %d: write data 0x%08x size %x to bus %x dev %x func %x"
+		   "offs %x\n", pciIf, temp, size, bus_num, dev_no,
+		   func, regOff));
+
+	/* Write the address to the PEX configuration address register */
+	MV_REG_WRITE(PEX_CFG_ADDR_REG(pciIf), cfgCmd);
+
+	/*
+	 * In order to let the PEX controller absorbed the address of the read
+	 * transaction we perform a validity check that the address was written
+	 */
+	if (cfgCmd != MV_REG_READ(PEX_CFG_ADDR_REG(pciIf))) {
+		pr_info("Error: mv_pci_write_config failed to write\n");
+		return 1;
 	}
 
+	/* Write the Data passed to the PEX Data register */
+	MV_REG_WRITE(PEX_CFG_DATA_REG(pciIf), temp);
 
-
+	return 0;
+}
 
 static struct pci_ops mv_pci_ops = {
         .read   = mv_pci_read_config,
@@ -327,9 +383,10 @@ struct pci_bus *mv_pci_scan_bus(int nr, struct pci_sys_data *sys)
 
 	bus = pci_scan_bus(sys->busnr, ops, sys);
 
-	if(sys->mv_controller_num == 0)
-		mvPexLocalBusNumSet(1,
-			bus->number + bus->subordinate - bus->secondary + 1);
+	if (sys->mv_controller_num == 0) {
+		mvPexLocalBusNumSet(1, bus->subordinate + 1);
+		mvPexLocalDevNumSet(1, 1);
+	}
 
 	return bus;
 }

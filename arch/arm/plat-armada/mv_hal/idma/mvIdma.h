@@ -106,10 +106,10 @@ MV_STATUS mvDmaCtrlHighSet(MV_U32 chan, MV_U32 ctrlWord);
 MV_STATUS mvDmaTransfer(MV_U32 chan, MV_U32 phySrc, MV_U32 phyDst, MV_U32 size, MV_U32 phyNextDescPtr);
 MV_STATUS mvDmaMemInit(MV_U32 chan, MV_U32 ptrnPtr, MV_U32 startPtr, MV_U32 size);
 MV_STATE  mvDmaStateGet(MV_U32 chan);
+MV_VOID   mvDmaStopAll(MV_VOID);
 MV_STATUS mvDmaCommandSet(MV_U32 chan, MV_COMMAND command);
 
 MV_VOID mvIdmaRegs(MV_U32 chan);
+MV_STATUS mvDmaWinInit(MV_UNIT_WIN_INFO *addrWinMap);
 
 #endif /* __INCmvIdmah */
-
-

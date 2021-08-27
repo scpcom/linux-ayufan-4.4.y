@@ -23,8 +23,7 @@
 *  0 : do not spinup delay
 * >0 : The number that we would delay
 */
-#ifdef MY_ABC_HERE
-
+#if defined(MY_ABC_HERE) && defined(__KERNEL__)
 extern long g_internal_hd_num;
 extern long syno_boot_hd_count;
 
@@ -382,7 +381,7 @@ syno_pm_unique_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG
 	if (syno_pm_is_3xxx(vendor, devid)) {
 		pPKG->var = 0x100;
 	} else if (syno_pm_is_9705(vendor, devid)) {
-		pPKG->var = GPIO_9705_PKG_INIT(1,0);
+		pPKG->var = GPIO_9705_PKG_INIT(0,0);
 	}
 
 	/* add other port multiplier here */
@@ -411,7 +410,7 @@ syno_pm_fanstatus_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_
 	if (syno_pm_is_3xxx(vendor, devid)) {
 		pPKG->var = 0x80;
 	} else if (syno_pm_is_9705(vendor, devid)) {
-		pPKG->var = GPIO_9705_PKG_INIT(0,0);
+		pPKG->var = GPIO_9705_PKG_INIT(2,0);
 	}
 
 	/* add other port multiplier here */
@@ -480,6 +479,8 @@ syno_support_disk_num(unsigned short vendor,
 	} else if (syno_pm_is_9705(vendor, devid)) {
 		if (IS_SYNOLOGY_RX413(syno_uniq)) {
 			ret = 4;
+		} else if (IS_SYNOLOGY_RX1214(syno_uniq)) {
+			ret = 3;
 		} else {
 			printk("%s not synology device", __FUNCTION__);
 			ret = 5;

@@ -22,7 +22,7 @@ COMMON_OBJS	= $(COMMON_DIR)/mvDebug.o $(COMMON_DIR)/mvCommon.o $(COMMON_DIR)/mvS
 OSSERVICES_OBJS	= $(OSSERV_DIR)/mvOs.o
 
 HAL_OBJS	= $(HAL_RTC_DIR)/mvRtc.o					\
-                  $(HAL_CNTMR_DIR)/mvCntmr.o					\
+                  $(HAL_CNTMR_DIR)/mvCntmr.o $(HAL_IF_DIR)/mvSysCntmr.o		\
 		  $(HAL_TWSI_DIR)/mvTwsi.o					\
                   $(HAL_UART_DIR)/mvUart.o $(HAL_GPP_DIR)/mvGpp.o               \
                   $(HAL_DRAM_DIR)/mvDramIf.o					\
@@ -49,9 +49,12 @@ QD_OBJS		= $(HAL_QD_DIR)/src/driver/gtDrvConfig.o $(HAL_QD_DIR)/src/driver/gtDrv
                   $(HAL_QD_DIR)/src/msapi/gtSysStatus.o $(HAL_QD_DIR)/src/msapi/gtPortRateCtrl.o\
                   $(HAL_QD_DIR)/src/msapi/gtPortPav.o $(HAL_QD_DIR)/src/msapi/gtVct.o		\
 		  $(HAL_QD_DIR)/src/msapi/gtPIRL2.o $(HAL_QD_DIR)/src/msapi/gtCCPVT.o		\
-		  $(HAL_QD_DIR)/src/msapi/gtPCSCtrl.o $(HAL_QD_DIR)/src/msapi/gtBrgStu.o
+		  $(HAL_QD_DIR)/src/msapi/gtPCSCtrl.o
 
 LSP_OBJS        = core.o irq.o time.o leds.o sysmap.o export.o clock.o
+ifeq ($(CONFIG_SYNO_ARMADA_ARCH),y)
+LSP_OBJS	+= synology-gpio.o
+endif
 
 obj-y   				:=  armadaxp.o
 armadaxp-objs  				:=$(LSP_OBJS) $(COMMON_OBJS) $(OSSERVICES_OBJS) $(HAL_OBJS) 	\
@@ -104,7 +107,6 @@ armadaxp-$(CONFIG_MV_INCLUDE_AUDIO) 	+= $(HAL_AUDIO_DIR)/mvAudio.o $(HAL_IF_DIR)
 armadaxp-$(CONFIG_MV_INCLUDE_TS) 	+= $(HAL_TS_DIR)/mvTsu.o $(HAL_IF_DIR)/mvSysTs.o		\
 					   $(HAL_TS_DIR)/mvTsuAddrDec.o
 armadaxp-$(CONFIG_MV_CPU_PERF_CNTRS)    += $(HAL_CPU_DIR)/mvCpuCntrs.o $(HAL_CPU_DIR)/pj4/mvPJ4Cntrs.o
-armadaxp-$(CONFIG_PCIE_VIRTUAL_BRIDGE_SUPPORT) += $(HAL_PEX_DIR)/mvVrtBrgPex.o
 armadaxp-$(CONFIG_MV_CPU_L2_PERF_CNTRS) += $(HAL_CPU_DIR)/mvCpuL2Cntrs.o
 
 obj-$(CONFIG_MV_INCLUDE_SWITCH) 	+= $(QD_OBJS)
@@ -132,8 +134,10 @@ obj-$(CONFIG_MV_USE_XOR_ENGINE) 	+= $(PLAT_DRIVERS)/mv_xor/
 obj-$(CONFIG_MV_CESA) 			+= $(PLAT_DRIVERS)/mv_cesa/
 obj-$(CONFIG_MV_IPC_DRIVER)		+= $(PLAT_DRIVERS)/mv_ipc/
 obj-$(CONFIG_MV_IPC_NET)		+= $(PLAT_DRIVERS)/mv_ipc_net/
-#obj-y					+= $(PLAT_DRIVERS)/mv_btns/
-obj-y					+= $(PLAT_DRIVERS)/mv_gpio/
+obj-$(CONFIG_GENERIC_GPIO)		+= $(PLAT_DRIVERS)/mv_btns/
+obj-$(CONFIG_GENERIC_GPIO)		+= $(PLAT_ORION_PATH)/gpio.o
+obj-$(CONFIG_ARMADA_XP_BTNS_DEVICE)	+= btns_device.o
+#obj-$(CONFIG_GENERIC_GPIO)		+= $(PLAT_DRIVERS)/mv_gpio/
 obj-$(CONFIG_MV_DBG_TRACE)              += $(PLAT_DRIVERS)/mv_trace/
 obj-$(CONFIG_MV_INCLUDE_SWITCH)         += $(LSP_SWITCH_DIR)/
 obj-$(CONFIG_SENSORS_ARMADA)		+= hwmon.o
@@ -153,51 +157,3 @@ obj-$(CONFIG_FB_DOVE_CLCD)		+= clcd.o
 obj-$(CONFIG_PM)			+= pm.o
 
 
-ifdef CONFIG_MV_ETH_NFP
-NFP_OBJS += $(LSP_NFP_MGR_DIR)/mv_nfp_mgr.o $(LSP_NFP_MGR_DIR)/nfp_sysfs.o
-NFP_OBJS += $(LSP_NET_DEV_DIR)/mv_eth_nfp.o $(HAL_ETH_NFP_DIR)/mvNfp.o
-endif
-
-ifdef CONFIG_MV_ETH_NFP_FIB
-NFP_OBJS += $(LSP_NFP_MGR_DIR)/nfp_fib_arp_sysfs.o
-NFP_OBJS += $(HAL_ETH_NFP_DIR)/mvNfpFib.o
-ifdef CONFIG_IPV6
-NFP_OBJS += $(LSP_NFP_MGR_DIR)/ipv6_parsing.o $(LSP_NFP_MGR_DIR)/nfp_fib6_arp_sysfs.o
-endif
-endif
-
-ifdef CONFIG_MV_ETH_NFP_CT
-NFP_OBJS += $(LSP_NFP_MGR_DIR)/nfp_ct_sysfs.o
-NFP_OBJS += $(HAL_ETH_NFP_DIR)/mvNfpCt.o
-ifdef CONFIG_IPV6
-NFP_OBJS += $(LSP_NFP_MGR_DIR)/nfp_ct6_sysfs.o
-endif
-endif
-
-ifdef CONFIG_MV_ETH_NFP_CLASSIFY
-NFP_OBJS += $(LSP_NFP_MGR_DIR)/nfp_classification_sysfs.o $(LSP_NFP_MGR_DIR)/nfp_exact_classification_sysfs.o \
-	   $(LSP_NFP_MGR_DIR)/nfp_prio_classification_sysfs.o
-endif
-
-ifdef CONFIG_MV_ETH_NFP_BRIDGE
-NFP_OBJS += $(LSP_NFP_MGR_DIR)/nfp_bridge_sysfs.o
-ifdef CONFIG_MV_ETH_NFP_FDB_MODE
-NFP_OBJS += $(HAL_ETH_NFP_DIR)/mvNfpFdb.o
-else
-NFP_OBJS += $(HAL_ETH_NFP_DIR)/mvNfpBridge.o
-endif
-endif
-
-ifdef CONFIG_MV_ETH_NFP_VLAN
-NFP_OBJS += $(LSP_NFP_MGR_DIR)/nfp_vlan_sysfs.o
-endif
-
-ifdef CONFIG_MV_ETH_NFP_PPP
-NFP_OBJS += $(LSP_NFP_MGR_DIR)/nfp_ppp_sysfs.o
-endif
-
-nfp-objs = $(NFP_OBJS)
-obj-$(CONFIG_MV_ETH_NFP) += nfp.o
-
-nfp_learn-objs = $(LSP_NFP_MGR_DIR)/mv_nfp_hooks.o
-obj-$(CONFIG_MV_ETH_NFP_LEARN) += nfp_learn.o

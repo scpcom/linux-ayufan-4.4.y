@@ -668,15 +668,23 @@ static void nfp_sec_init_rule(void)
 
 static int nfp_sec_init(void)
 {
+	int mask;
+
 	spin_lock_init( &nfp_sec_lock );
 	if( MV_OK != mvCesaInit(MV_NFP_SEC_MAX_SES, MV_NFP_SEC_Q_SIZE, (char *)mv_crypto_base_get(),
 				NULL) ) {
 		printk("%s,%d: mvCesaInit Failed.\n", __FILE__, __LINE__);
 		return EINVAL;
 	}
+
+#ifdef CONFIG_MV_CESA_INT_COALESCING_SUPPORT
+	mask = MV_CESA_CAUSE_EOP_COAL_MASK;
+#else
+	mask = MV_CESA_CAUSE_ACC_DMA_MASK;
+#endif
 	/* clear and unmask Int */
 	MV_REG_WRITE(MV_CESA_ISR_CAUSE_REG, 0);
-	MV_REG_WRITE( MV_CESA_ISR_MASK_REG, MV_CESA_CAUSE_ACC_DMA_MASK);
+	MV_REG_WRITE(MV_CESA_ISR_MASK_REG, mask);
 
 	tasklet_init(&nfp_sec_tasklet, req_handler, (unsigned long) 0);
 	/* register interrupt */

@@ -14,7 +14,7 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <asm/io.h>
-#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_ARMADA)
+#if !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_ARMADA)
 #include <asm-ppc/ppcboot.h>
 #else
 #include <linux/platform_device.h>
@@ -202,7 +202,7 @@ static int __init init_synomtd(void)
 	unsigned long flash_addr, flash_size, mtd_size = 0;
 	struct mtd_partition *pMtdPartition = NULL;
 
-#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_ARMADA)
+#if !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_ARMADA)
 	bd_t *bd = (bd_t *)__res;
 #endif
 
@@ -212,7 +212,7 @@ static int __init init_synomtd(void)
 	const char *part_probes[] = { "RedBoot", NULL };
 #endif
 
-#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(CONFIG_SYNO_ARMADA)
+#if defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(CONFIG_SYNO_ARMADA)
 	flash_addr = physmap_flash_resource.start;
 	flash_size = physmap_flash_resource.end - physmap_flash_resource.start + 1;
 #else

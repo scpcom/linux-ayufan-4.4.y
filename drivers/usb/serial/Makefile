@@ -54,6 +54,7 @@ obj-$(CONFIG_USB_SERIAL_SPCP8X5)		+= spcp8x5.o
 obj-$(CONFIG_USB_SERIAL_SSU100)			+= ssu100.o
 obj-$(CONFIG_USB_SERIAL_SYMBOL)			+= symbolserial.o
 obj-$(CONFIG_USB_SERIAL_WWAN)			+= usb_wwan.o
+obj-$(CONFIG_USB_SERIAL_WWAN_SYNO)			+= usb_wwan_syno.o
 obj-$(CONFIG_USB_SERIAL_TI)			+= ti_usb_3410_5052.o
 obj-$(CONFIG_USB_SERIAL_VISOR)			+= visor.o
 obj-$(CONFIG_USB_SERIAL_WHITEHEAT)		+= whiteheat.o

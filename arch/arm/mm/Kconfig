@@ -848,27 +848,11 @@ config OUTER_CACHE_SYNC
 
 config CACHE_FEROCEON_L2
 	bool "Enable the Feroceon L2 cache controller"
-	depends on ARCH_KIRKWOOD || ARCH_MV78XX0 || ARCH_FEROCEON_KW
+	depends on ARCH_KIRKWOOD || ARCH_MV78XX0
 	default y
 	select OUTER_CACHE
 	help
 	  This option enables the Feroceon L2 cache controller.
-
-config ARM_ARMV5_L2_CACHE_COHERENCY_FIX
-	bool "Enable L2 coherency problem fix on ARMv5"
-	depends on OUTER_CACHE && CPU_CACHE_VIVT
-	default y
-	help
-	  Fixes coherency problems on ARM systems that have
-	  a non-disableable VIVT L1 cache and a PIPT L2 one.
-
-config ARM_MARVELL_BSP_MM_ADD_API_FOR_DMA
-	bool "add mm API for DMA to vmalloc/vmap areas"
-	default n
-	help
-		add mm API for DMA to vmalloc/vmap areas
-		Marvell add it from http://kerneltrap.org/mailarchive/linux-fsdevel/2009/9/17/6427443/thread
-		Please do not enable this unless you know what you do.
 
 config CACHE_FEROCEON_L2_WRITETHROUGH
 	bool "Force Feroceon L2 cache write through"
@@ -1115,6 +1099,7 @@ config SHEEVA_ERRATA_ARM_CPU_ADD_DELAY_FOR_STREX
 config SHEEVA_DEEP_IDLE
 	bool "Enable CPU/L2 Deep Idle Power Management"
 	depends on (ARCH_ARMADA_XP || ARCH_ARMADA370) && CPU_IDLE
+	select ARMADA_SUPPORT_DEEP_IDLE_CESA_USE if ARCH_ARMADA370
 
 config CPU_FREQ_ARMADA_XP
 	bool "Enable CPU frequency scaling"
@@ -1139,12 +1124,13 @@ config ARMADA_DEEP_IDLE_SUPPORT_DRAM_SR
 	default n
 	depends on SHEEVA_DEEP_IDLE && ARCH_ARMADA370
 
-config ARMADA_DEEP_IDLE_SUPPORT_FAST_EXIT
-	bool "Enable Fast Exit from Deep-Idle"
-	default y
+config ARMADA_SUPPORT_DEEP_IDLE_CESA_USE
+	bool "Enable CESA SRAM usage for Deep-Idle"
 	depends on SHEEVA_DEEP_IDLE && ARCH_ARMADA370
 	help
-	  Enable fast exit from Deep-Idle by using a reserved block in crypto engine SRAM.
+	  Enable exit from Deep-Idle by using a reserved block in crypto engine SRAM.
+	  This setup is required to override the bootROM code when internal registers
+	  offeset is other than 0xD0000000.
 
 config CACHE_AURORA_L2
 	bool "Enable Marvell Aurora L2 cache controller"
@@ -1293,3 +1279,11 @@ config ARCH_HAS_BARRIERS
 	help
 	  This option allows the use of custom mandatory barriers
 	  included via the mach/barriers.h file.
+
+config ARM_ARMV5_L2_CACHE_COHERENCY_FIX
+	bool "Enable L2 coherency problem fix on ARMv5"
+	depends on OUTER_CACHE && CPU_CACHE_VIVT
+	default y
+	help
+	Fixes coherency problems on ARM systems that have
+	a non-disableable VIVT L1 cache and a PIPT L2 one.

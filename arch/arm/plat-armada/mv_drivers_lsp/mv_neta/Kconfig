@@ -668,216 +668,41 @@ config MV_ETH_EXTRA_BUF_NUM
 	Number of extra buffers allocated for each port
 endmenu
 
-menu "NFP support"
+menu "Network Fast Processing (NFP) support"
 
 config  MV_ETH_NFP
-        tristate "Use Network Fast Processing (NFP)"
+	depends on MV_ETH_NETA
+        bool "NFP support"
 	default n
         ---help---
         Choosing this option will enable Network Fast Processing.
 
-config MV_ETH_NFP_DEF
+config MV_ETH_NFP_HOOKS
+        bool "NFP IP stack Hooks"
         depends on MV_ETH_NFP
-        int "Default value for NFP state:  0 - OFF, 1 - ON"
-        default 0
-
-config MV_ETH_NFP_LEARN
-        tristate "NFP Dynamic Learning"
-		depends on MV_ETH_NFP
-	default n
+	default y
         ---help---
         Choosing this option will enable NFP Dynamic Learning.
-
-config MV_ETH_NFP_MODE_DEF
-        depends on MV_ETH_NFP
-        int "Default value for NFP mode:  1 - 2 tuple mode, 2 - 5 tuple mode"
-        default 1
-	range 1 2
-        ---help---
 
 config  MV_ETH_NFP_EXT
         bool "Support NFP for External (non GBE) network interfaces"
         depends on MV_ETH_NFP
         default n
-         ---help---
-        Choosing this option will enable NFP for non-GBE network interfaces.
 
 config  MV_ETH_NFP_EXT_NUM
-	int "Maximum number of External (non-Gbe) interfaces"
         depends on MV_ETH_NFP_EXT
+	int "Maximum number of External (non-Gbe) interfaces"
         default 1
 	range 1 4
-         ---help---
-
-config MV_ETH_NFP_BRIDGE
-        bool "Support NFP Bridging"
-        default y
-        depends on MV_ETH_NFP
-        ---help---
-        Choosing this option will enable NFP bridging support.
-
-choice
-        prompt "NFP Bridging Mode"
-        depends on MV_ETH_NFP_BRIDGE
-        default MV_ETH_NFP_FDB_MODE
-
-config	MV_ETH_NFP_FDB_MODE
-	bool "NFP FDB"
-	depends on MV_ETH_NFP_BRIDGE
-	---help---
-	  enable NFP FDB mode
-
-config  MV_ETH_NFP_BRIDGE_MODE
-	bool "NFP Bridge"
-	depends on MV_ETH_NFP_BRIDGE
-	---help---
-	  enable NFP Bridge Mode
-
-endchoice
-
-config	MV_ETH_NFP_FDB_LEARN
-	depends on MV_ETH_NFP_BRIDGE && MV_ETH_NFP_FDB_MODE && BRIDGE && MV_ETH_NFP_LEARN
-	bool "Support NFP FDB Dynamic Learning"
-        default y
-	---help---
-	  enable NFP bridging dynamic learning via NFP hooks
-
-config MV_ETH_NFP_FDB_LEARN_DEF
-        depends on MV_ETH_NFP_FDB_LEARN
-        int "Default value for NFP FDB Dynamic Learning:  0 - disable, 1 - enable"
-        default 1
-	range 0 1
-        ---help---
-
-config MV_ETH_NFP_VLAN
-        bool "Support NFP VLANs processing"
-        default y
-        depends on MV_ETH_NFP
-        ---help---
-        Choosing this option will enable NFP VLANs support.
-
-config MV_ETH_NFP_VLAN_LEARN
-        depends on MV_ETH_NFP_VLAN && VLAN_8021Q && MV_ETH_NFP_LEARN
-        bool "Support NFP VLAN Dynamic Learning"
-        default y
-        ---help---
-        Choosing this option will enable NFP VLAN dynamic learning via NFP hooks
-	in Linux Network stack.
-
-config MV_ETH_NFP_VLAN_LEARN_DEF
-        depends on MV_ETH_NFP_VLAN_LEARN
-        int "Default value for NFP VLAN Dynamic Learning:  0 - disable, 1 - enable"
-        default 1
-	range 0 1
-        ---help---
-
-config MV_ETH_NFP_FIB
-        bool "Support NFP Routing"
-	default y
-        depends on MV_ETH_NFP
-        ---help---
-        Choosing this option will enable NFP routing support.
-
-config MV_ETH_NFP_FIB_LEARN
-        depends on MV_ETH_NFP_FIB && MV_ETH_NFP_LEARN
-        bool "Support NFP Routing Dynamic Learning"
-        default y
-        ---help---
-        Choosing this option will enable NFP Routing dynamic learning via NFP hooks
-	in Linux Network stack.
-
-config MV_ETH_NFP_FIB_LEARN_DEF
-        depends on MV_ETH_NFP_FIB_LEARN
-        int "Default value for NFP Routing Dynamic Learning:  0 - disable, 1 - enable"
-        default 1
-	range 0 1
-        ---help---
-
-config MV_ETH_NFP_CT
-        bool "Support NFP 5 Tuple Rules"
-        depends on MV_ETH_NFP_FIB
-	default y
-        ---help---
-        Choosing this option will enable NFP 5 Tuple Rules support.
-
-config MV_ETH_NFP_CT_LEARN
-        depends on MV_ETH_NFP_CT && NF_CONNTRACK && MV_ETH_NFP_LEARN
-        bool "Support NFP 5 Tuple Dynamic Learning"
-        default y
-        ---help---
-        Choosing this option will enable NFP 5 Tuple dynamic learning via NFP hooks
-	in Linux Network stack.
-
-config MV_ETH_NFP_CT_LEARN_DEF
-        depends on MV_ETH_NFP_CT_LEARN
-        int "Default value for NFP 5 Tuple Dynamic Learning:  0 - disable, 1 - enable"
-        default 1
-	range 0 1
-        ---help---
-
-config MV_ETH_NFP_NAT
-        bool "Support NFP NAT"
-        depends on MV_ETH_NFP_CT
-	default y
-        ---help---
-        Choosing this option will enable NFP NAT support.
-
-config MV_ETH_NFP_LIMIT
-        bool "Support NFP Ingress Rate Limiting"
-        depends on MV_ETH_NFP_CT
-	default n
-        ---help---
-        Choosing this option will enable NFP rate limitation support based on 5 tuple rule.
-
-config  MV_ETH_NFP_CLASSIFY
-	bool "Support NFP Classification rules"
-	depends on MV_ETH_NFP_CT || MV_ETH_NFP_BRIDGE
-	default y
-	---help---
-	Choosing this option will enable NFP classification rules (DSCP and VLAN modification and Tx queue selection)
-
-config  MV_ETH_NFP_PPP
-	bool "Support NFP PPPoE"
-	depends on MV_ETH_NFP_FIB && MV_ETH_PNC
-	default n
-	 ---help---
-	Choosing this option will enable NFP PPPoE protocol.
-
-config MV_ETH_NFP_PPP_LEARN
-        depends on MV_ETH_NFP_PPP && PPPOE && MV_ETH_NFP_LEARN
-        bool "Support NFP PPPoE Dynamic Learning"
-        default y
-        ---help---
-        Choosing this option will enable NFP PPPoE dynamic learning via NFP hooks
-	in Linux Network stack.
-
-config MV_ETH_NFP_PPP_LEARN_DEF
-        depends on MV_ETH_NFP_PPP_LEARN
-        int "Default value for NFP PPPoE Dynamic Learning:  0 - disable, 1 - enable"
-        default 1
-	range 0 1
-        ---help---
-
-config  MV_ETH_NFP_STATS
-        bool "Collect NFP Statistics"
-	depends on MV_ETH_NFP
-        default n
-        ---help---
-        Collect NFP statistics. Can be displayed using mv_eth_tool.
-
-config  MV_ETH_NFP_DEBUG
-	bool "Add NFP debug code"
-	depends on MV_ETH_NFP
-	default n
-        ---help---
-	Add NFP sanity check code
-
 endmenu
 
-menu "NAPI Groups"
+menuconfig MV_ETH_NAPI
+        bool "NAPI configuration"
+        default y
 
 config  MV_ETH_NAPI_GROUPS
         int "Number of NAPI instances can be used per port"
+	depends on MV_ETH_NAPI
 	range 1 NR_CPUS if SMP
 	range 1 1 if !SMP
         default 1
@@ -885,6 +710,7 @@ config  MV_ETH_NAPI_GROUPS
 	Different RXQs and TXQs can be processed by different CPU using different NAPI instances
 
 menu "NAPI group #0 configuration"
+	depends on MV_ETH_NAPI
 
 config MV_ETH_GROUP0_CPU
 	hex "CPU affinity for group0"
@@ -901,6 +727,7 @@ config MV_ETH_GROUP0_RXQ
 endmenu
 
 menu "NAPI group #1 configuration"
+        depends on MV_ETH_NAPI
 	depends on (MV_ETH_NAPI_GROUPS != 1)
 
 config MV_ETH_GROUP1_CPU
@@ -918,6 +745,7 @@ config MV_ETH_GROUP1_RXQ
 endmenu
 
 menu "NAPI group #2 configuration"
+	depends on MV_ETH_NAPI
 	depends on (MV_ETH_NAPI_GROUPS != 1) && (MV_ETH_NAPI_GROUPS != 2)
 
 config MV_ETH_GROUP2_CPU
@@ -935,6 +763,7 @@ config MV_ETH_GROUP2_RXQ
 endmenu
 
 menu "NAPI group #3 configuration"
+	depends on MV_ETH_NAPI
 	depends on (MV_ETH_NAPI_GROUPS != 1) && (MV_ETH_NAPI_GROUPS != 2) && (MV_ETH_NAPI_GROUPS != 3)
 
 config MV_ETH_GROUP3_CPU
@@ -949,7 +778,6 @@ config MV_ETH_GROUP3_RXQ
 	hex "RXQ affinity for group3"
 	range 0x0 0xff
 	default 0x0
-endmenu
 endmenu
 
 menu "PON support for Network driver"

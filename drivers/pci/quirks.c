@@ -598,13 +598,15 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_ESB_1,		qui
 #ifdef MY_DEF_HERE
 static u32 gpiobase = 0;
 static u32 *writable_pin = NULL;
+static u32 SynoGpioCount = 0;
 
 #if defined(CONFIG_SYNO_CEDARVIEW)
-static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 29, 30, 31, 32, 33, 34, 35, 36, 37, 45, 46, 47, 49, 55, 57, 0};
+static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 29, 30, 31, 32, 33, 34, 35, 36, 37, 45, 46, 47, 49, 55, 57};
 #else
-static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 46, 47, 49, 55, 57, 0};
+static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 46, 47, 49, 55, 57};
 #endif
-static u32 c206_writable_pin[] = {5, 0};
+static u32 c206_writable_pin[] = {0, 5, 16, 20, 21, 22, 34, 38, 48, 52, 54, 69, 70, 71};
+static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 29, 30, 32, 33, 34, 35, 36, 37, 58, 62, 64, 75};
 
 u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
 {
@@ -624,13 +626,14 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     }
     
     if ( 1 == isWrite ) {
-		while( 0 != writable_pin[i] ) {
+		// SynoGpioCount should follow the assigned array size of writable_pin
+		while( i < SynoGpioCount ) {
             if ( pin == writable_pin[i] ) {
                 break;
             }
 			i++;
         }
-        if ( 0 == writable_pin[i] ) {
+        if ( i == SynoGpioCount ) {
             printk("pin %d is protected by driver.\n", pin);
             goto END;
         }
@@ -722,8 +725,13 @@ static void __devinit ich6_lpc_acpi_gpio(struct pci_dev *dev)
 	gpiobase = region & 0x0000FF80;
 	if (PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_C206 == dev->device) {
 		writable_pin = c206_writable_pin;
+		SynoGpioCount = ARRAY_SIZE(c206_writable_pin);
+	} else if (PCI_DEVICE_ID_INTEL_LYNXPOINT_LPC_C226 == dev->device) {
+		writable_pin = c226_writable_pin;
+		SynoGpioCount = ARRAY_SIZE(c226_writable_pin);
 	} else {
 		writable_pin = ich9_writable_pin;
+		SynoGpioCount = ARRAY_SIZE(ich9_writable_pin);
 	}
 #endif
 }
@@ -818,8 +826,8 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_ICH9_8, quirk_
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,   PCI_DEVICE_ID_INTEL_ICH10_1, quirk_ich7_lpc);
 #ifdef MY_DEF_HERE
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,   PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_C206, quirk_ich7_lpc);
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,   PCI_DEVICE_ID_INTEL_LYNXPOINT_LPC_C226, quirk_ich7_lpc);
 #endif
-
 
 /*
  * VIA ACPI: One IO region pointed to by longword at

@@ -5,8 +5,8 @@
  *
  * This should be fast and callable from timers/interrupts
  *
- * Written by David McCullough <david_mccullough@securecomputing.com>
- * Copyright (C) 2006-2007 David McCullough
+ * Written by David McCullough <david_mccullough@mcafee.com>
+ * Copyright (C) 2006-2010 David McCullough
  * Copyright (C) 2004-2005 Intel Corporation.
  *
  * LICENSE TERMS
@@ -35,7 +35,8 @@
  * and/or fitness for purpose.
  */
 
-#ifndef AUTOCONF_INCLUDED
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38) && !defined(AUTOCONF_INCLUDED)
 #include <linux/config.h>
 #endif
 #include <linux/module.h>
@@ -45,7 +46,6 @@
 #include <linux/wait.h>
 #include <linux/sched.h>
 #include <linux/spinlock.h>
-#include <linux/version.h>
 #include <linux/unistd.h>
 #include <linux/poll.h>
 #include <linux/random.h>
@@ -172,7 +172,7 @@ crypto_runregister_all(u_int32_t driverid)
 
 	spin_lock_irqsave(&random_lock, flags);
 	if (list_empty(&random_ops) && started)
-		kill_proc_info(SIGKILL, SEND_SIG_PRIV, randomproc);
+		kill_proc(randomproc, SIGKILL, 1);
 	spin_unlock_irqrestore(&random_lock, flags);
 	return(0);
 }

@@ -163,6 +163,13 @@ void ecryptfs_put_lower_file(struct inode *inode)
 	struct ecryptfs_inode_info *inode_info;
 
 	inode_info = ecryptfs_inode_to_private(inode);
+#ifdef MY_ABC_HERE
+	if (atomic_dec_and_test(&inode_info->lower_file_count)) {
+		filemap_write_and_wait(inode->i_mapping);
+		fput(inode_info->lower_file);
+		inode_info->lower_file = NULL;
+	}
+#else
 	if (atomic_dec_and_mutex_lock(&inode_info->lower_file_count,
 				      &inode_info->lower_file_mutex)) {
 		filemap_write_and_wait(inode->i_mapping);
@@ -170,6 +177,7 @@ void ecryptfs_put_lower_file(struct inode *inode)
 		inode_info->lower_file = NULL;
 		mutex_unlock(&inode_info->lower_file_mutex);
 	}
+#endif
 }
 
 enum { ecryptfs_opt_sig, ecryptfs_opt_ecryptfs_sig,
@@ -425,6 +433,18 @@ static int ecryptfs_parse_options(struct ecryptfs_sb_info *sbi, char *options,
 	    && !fn_cipher_key_bytes_set)
 		mount_crypt_stat->global_default_fn_cipher_key_bytes =
 			mount_crypt_stat->global_default_cipher_key_size;
+
+	cipher_code = ecryptfs_code_for_cipher_string(
+		mount_crypt_stat->global_default_cipher_name,
+		mount_crypt_stat->global_default_cipher_key_size);
+	if (!cipher_code) {
+		ecryptfs_printk(KERN_ERR,
+				"eCryptfs doesn't support cipher: %s",
+				mount_crypt_stat->global_default_cipher_name);
+		rc = -EINVAL;
+		goto out;
+	}
+
     mutex_lock(&key_tfm_list_mutex);
 	if (!ecryptfs_tfm_exists(mount_crypt_stat->global_default_cipher_name,
 				 NULL)) {
@@ -528,11 +548,6 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
 		ecryptfs_printk(KERN_WARNING, "kern_path() failed\n");
 		goto out1;
 	}
-#ifdef CONFIG_FS_SYNO_ACL
-	if (IS_FS_SYNOACL(path.dentry->d_inode)) {
-		s->s_flags |= MS_SYNOACL;
-	}
-#endif
 	if (path.dentry->d_sb->s_type == &ecryptfs_fs_type) {
 		rc = -EINVAL;
 		printk(KERN_ERR "Mount on filesystem of type "
@@ -558,7 +573,11 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
 	 */
 	s->s_flags = flags & ~MS_POSIXACL;
 	s->s_flags |= path.dentry->d_sb->s_flags & (MS_RDONLY | MS_POSIXACL);
-
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_FS_SYNOACL(path.dentry->d_inode)) {
+		s->s_flags |= MS_SYNOACL;
+	}
+#endif
 	s->s_maxbytes = path.dentry->d_sb->s_maxbytes;
 	s->s_blocksize = path.dentry->d_sb->s_blocksize;
 	s->s_magic = ECRYPTFS_SUPER_MAGIC;

@@ -87,17 +87,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static MV_BOOL cpuTargetWinOverlap(MV_TARGET target, MV_ADDR_WIN *pAddrWin);
 
 MV_TARGET sampleAtResetTargetArray[] = BOOT_TARGETS_NAME_ARRAY;
-
-/*******************************************************************************
-* mvCpuIfVerify - Verify that the address decode registers matches the table
-*
-* INPUT:
-*       cpuAddrWinMap 	- Address decode table
-*
-* RETURN:
-*       MV_OK - pass MV_ERROR - fail
-*
-*******************************************************************************/
 MV_STATUS mvCpuIfVerify(MV_CPU_DEC_WIN *cpuAddrWinMap)
 {
 	MV_CPU_DEC_WIN win;
@@ -263,16 +252,9 @@ MV_STATUS mvCpuIfInitForCpu(MV_U32 cpu, MV_CPU_DEC_WIN *cpuAddrWinMap)
 		if (MV_TARGET_IS_PEX(target))
 			continue;
 #endif
-		if ((0 == cpuAddrWinMap[target].addrWin.size) || (DIS == cpuAddrWinMap[target].enable)) {
-			#if 0 /* TODO: windows are already disabled above, we need to skip only*/
-			if (MV_OK != mvCpuIfTargetWinEnable(target, MV_FALSE)) {
-				DB(mvOsPrintf("mvCpuIfInit:ERR. mvCpuIfTargetWinEnable fail\n"));
-				return MV_ERROR;
-			}
-			#else
-			{continue; }
-			#endif
-		} else {
+		if ((0 == cpuAddrWinMap[target].addrWin.size) || (DIS == cpuAddrWinMap[target].enable))
+			continue;
+		else {
 			if (MV_OK != mvCpuIfTargetWinSet(target, &cpuAddrWinMap[target])) {
 				DB(mvOsPrintf("mvCpuIfInit:ERR. mvCpuIfTargetWinSet fail\n"));
 				return MV_ERROR;
@@ -285,16 +267,6 @@ MV_STATUS mvCpuIfInitForCpu(MV_U32 cpu, MV_CPU_DEC_WIN *cpuAddrWinMap)
 			}
 		}
 	}
-#if 0
-/* This is not needed anymore cause pex enabled is already at CtrlEnvInit */
-#ifdef MV_INCLUDE_PEX
-	if (cpu == 0) {		/* Not needed for all CPUs */
-		MV_U32 pexUnits = mvCtrlPexMaxUnitGet();
-		for (i = 0; i < pexUnits; i++)
-			mvCpuIfEnablePex(i);
-	}
-#endif
-#endif
 	return MV_OK;
 }
 
@@ -328,7 +300,7 @@ MV_STATUS mvCpuIfDramInit()
 
 	for (cs = 0; cs < SDRAM_MAX_CS; cs++) {
 		size = MV_REG_READ(SDRAM_SIZE_REG(cs)) & SDRAM_ADDR_MASK;
-//		if (size > 0 && base < SDRAM_MAX_ADDR) {
+/*		if (size > 0 && base < SDRAM_MAX_ADDR) { */
 		if (size != 0) {
 			size |= ~(SDRAM_ADDR_MASK);
 
@@ -956,66 +928,6 @@ MV_VOID mvCpuIfAddDecShow(MV_VOID)
 		}
 	}
 }
-
-#if defined(MV_INCLUDE_PEX)
-/*******************************************************************************
-* mvCpuIfEnablePex - Enable PCI Express unit.
-*
-* DESCRIPTION:
-*	This function enables PCI Express access to the device address
-*	space.
-*
-* INPUT:
-*	pexUnit	- PEX unit (0 - 3).
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
-MV_VOID mvCpuIfEnablePex(MV_U32 pexUnit)
-{
-	MV_U32 socMaxPexUnit = mvCtrlPexMaxUnitGet();
-
-	if (pexUnit > socMaxPexUnit) {
-		DB(mvOsPrintf("mvCpuIfEnablePex: Bad PEX unit ID (%x)\n", pexUnit));
-		return;
-	}
-
-	/* SOC config register Pex enable */
-	MV_REG_BIT_SET(SOC_CTRL_REG, SCR_PEX_ENA_MASK(pexUnit));
-}
-
-/*******************************************************************************
-* mvCpuIfPex4x1Enable - Enable/Disable the 4x1 mode on PCI Express unit.
-*
-* DESCRIPTION:
-*	This function enables/disables 4x1 mode on PCI Express unit 0 or 1
-*
-* INPUT:
-*	pexUnit	- PEX unit (0 or 1).
-*	enable	- enable (MV_TRUE) or disable (MV_FALSE) 4x1 mode
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
-MV_VOID mvCpuIfPex4x1Enable(MV_U32 pexUnit, MV_BOOL enable)
-{
-	if (pexUnit == 0)
-		MV_REG_BIT_SET(SOC_CTRL_REG, SCR_PEX0_4BY1_MASK);
-	else if (pexUnit == 1)
-		MV_REG_BIT_SET(SOC_CTRL_REG, SCR_PEX1_4BY1_MASK);
-	else
-		DB(mvOsPrintf("mvCpuIfPex4x1Enable: Bad PEX unit ID (%x)\n", pexUnit));
-}
-
-#endif
 
 /*******************************************************************************
 * mvCpuIfLvdsPadsEnable

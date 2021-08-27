@@ -8,37 +8,69 @@ config  MV_TSU
 choice
 	prompt "TSU interface type"
 	depends on MV_TSU
-	default TSU_PARALLEL_IF
+	default TSU_PARALLEL_IF_ARMADA
 
-config TSU_SERIAL_IF
+config TSU_SERIAL_IF_ARMADA
 	bool "Serial Interface"
+	select TSU_SERIAL_IF
 	---help---
 	The TSU will work in serial mode (2 ports).
 
-config TSU_PARALLEL_IF
+config TSU_PARALLEL_IF_ARMADA
 	bool "Parallel Interface"
+	select TSU_PARALLEL_IF
 	---help---
 	The TSU will work in parallel mode (1 port).
 endchoice
+
+config TSU_SERIAL_IF
+	depends on TSU_SERIAL_IF_ARMADA
+	bool
+
+config TSU_PARALLEL_IF
+	depends on TSU_PARALLEL_IF_ARMADA
+	bool
 
 
 choice
 	prompt "TSU Core-Clock"
 	depends on MV_TSU
-	default TSU_CORE_CLK_83MHZ
+	default TSU_CORE_CLK_83MHZ_ARMADA
 
-config TSU_CORE_CLK_71MHZ
+config TSU_CORE_CLK_71MHZ_ARMADA
 	bool "71 MHz TSU Core Clock"
+	select TSU_CORE_CLK_71MHZ
 
-config TSU_CORE_CLK_83MHZ
+config TSU_CORE_CLK_83MHZ_ARMADA
 	bool "83 MHz TSU Core Clock"
+	select TSU_CORE_CLK_83MHZ
 
-config TSU_CORE_CLK_91MHZ
+config TSU_CORE_CLK_91MHZ_ARMADA
 	bool "91 MHz TSU Core Clock"
-config TSU_CORE_CLK_100MHZ
+	select TSU_CORE_CLK_91MHZ
+
+config TSU_CORE_CLK_100MHZ_ARMADA
 	bool "100 MHz TSU Core Clock"
+	select TSU_CORE_CLK_100MHZ
 
 endchoice
+
+config TSU_CORE_CLK_71MHZ
+	depends on TSU_CORE_CLK_71MHZ_ARMADA
+	bool
+
+config TSU_CORE_CLK_83MHZ
+	depends on TSU_CORE_CLK_83MHZ_ARMADA
+	bool
+
+config TSU_CORE_CLK_91MHZ
+	depends on TSU_CORE_CLK_91MHZ_ARMADA
+	bool
+
+config TSU_CORE_CLK_100MHZ
+	depends on TSU_CORE_CLK_100MHZ_ARMADA
+	bool
+
 
 config  MV_TSU_PKT_SIZE
         int "TSU packet size"

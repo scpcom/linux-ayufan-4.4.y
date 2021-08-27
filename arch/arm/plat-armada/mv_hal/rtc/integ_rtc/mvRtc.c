@@ -73,6 +73,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 #include "mvRtcReg.h"
 #include "mvRtc.h"
 
+#ifdef CONFIG_SYNO_ARMADA
+MV_VOID SYNOmvRtcExtAlarmSet(MV_U32 time)
+{
+	SYNOmvRtcExtAlarmClean();
+	MV_REG_WRITE(RTC_EXT_ALARM_CONFIG_REG, time);
+	MV_REG_WRITE(RTC_EXT_ALARM_CTRL_REG, 2);
+}
+
+MV_VOID SYNOmvRtcExtAlarmClean(void)
+{
+	MV_REG_WRITE(RTC_EXT_ALARM_CTRL_REG, 1);
+}
+#endif
 
 /*******************************************************************************
 * mvRtcTimeSet - Update the Real Time Clock.
@@ -241,5 +254,6 @@ MV_VOID mvRtcInit(MV_VOID)
 /* Export RTC get/set function for synobios */
 EXPORT_SYMBOL(mvRtcTimeSet);
 EXPORT_SYMBOL(mvRtcTimeGet);
+EXPORT_SYMBOL(SYNOmvRtcExtAlarmClean);
+EXPORT_SYMBOL(SYNOmvRtcExtAlarmSet);
 #endif
-

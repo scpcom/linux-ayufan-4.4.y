@@ -4741,6 +4741,11 @@ asmlinkage void __sched notrace preempt_schedule(void)
 {
 	struct thread_info *ti = current_thread_info();
 
+#ifdef MY_DEF_HERE 
+	if (0 == strncmp(ti->task->comm, "smbd", 4)) {
+		return;
+	}
+#endif
 	/*
 	 * If there is a non-zero preempt_count or interrupts are disabled,
 	 * we do not want to preempt the current task. Just return..

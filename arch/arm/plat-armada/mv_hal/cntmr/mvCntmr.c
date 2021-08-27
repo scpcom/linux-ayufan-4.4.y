@@ -79,25 +79,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CNTMR_EVENTS_STATUS_REG_GLOBAL	(MV_CNTMR_REGS_OFFSET + 4)
 
-#if defined(CONFIG_ARCH_ARMADA370)
-#define TIMER_GLOBAL_BIT(timer)		(1 << (timer * 8 - ((timer == MAX_GLOBAL_TIMER) ? 1 : 0)))
-#else
 #define TIMER_GLOBAL_BIT(timer)		((timer == MAX_GLOBAL_TIMER) ? (1<<31) : (1 << (timer * 8)))
-#endif
 
-#if defined(MV88F78X60_Z1)
-#define CNTMR_EVENTS_STATUS_REG_PRIVATE(t)	(MV_CPUIF_REGS_OFFSET(TIMER_TO_CPU(t) + 0x68))
-#define TIMER_PRIVATE_BIT(timer)	(1 << ((CPU_TIMER(timer) * 8)))
-#elif defined(MV88F78X60_A0) || defined(MV88F78X60_B0)
 #define CNTMR_EVENTS_STATUS_REG_PRIVATE		(MV_CPUIF_LOCAL_REGS_OFFSET + 0x68)
 #define TIMER_PRIVATE_BIT(timer)	(1 << ((timer - FIRST_PRIVATE_TIMER) * 8))
-#elif defined(CONFIG_ARCH_ARMADA370)
-#define CNTMR_EVENTS_STATUS_REG_PRIVATE (MV_CPUIF_REGS_OFFSET(0) + 0x68)
-#define TIMER_PRIVATE_BIT(timer)        (1 << ((timer - FIRST_PRIVATE_TIMER) * 8 + ((timer == TIMER7) ? 8 : 0)))
-#else
-#error "No device is defined!"
-#endif
 
+static MV_CNTMR_HAL_DATA cntmrHalData;
+
+MV_STATUS mvCntmrHalInit(MV_CNTMR_HAL_DATA *halData)
+{
+	mvOsMemcpy(&cntmrHalData, halData, sizeof(MV_CNTMR_HAL_DATA));
+	return MV_OK;
+}
 /*******************************************************************************
 * mvCntmrLoad -
 *
@@ -148,6 +141,26 @@ MV_U32 mvCntmrRead(MV_U32 countNum)
 {
 	return MV_REG_READ(CNTMR_VAL_REG(countNum));
 }
+/*******************************************************************************
+* mvCntmrReadDiff -
+*
+* DESCRIPTION:
+*  	Returns the number of counts of the given Counter/Timer
+*
+* INPUT:
+*       countNum - counter number
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:
+*       MV_U32 the number of counts of the given Counter/Timer
+*******************************************************************************/
+MV_U32 mvCntmrReadDiff(MV_U32 countNum)
+{
+	/* counter counts down */
+	return TVR_ARM_TIMER_MAX - MV_REG_READ(CNTMR_VAL_REG(countNum));
+}
 
 /*******************************************************************************
 * mvCntmrWrite -
@@ -197,24 +210,25 @@ MV_STATUS mvCntmrCtrlSet(MV_U32 countNum, MV_CNTMR_CTRL *pCtrl)
 
 	/* read control register */
 	cntmrCtrl = MV_REG_READ(CNTMR_CTRL_REG(countNum));
-	cntmrCtrl &= ~((CTCR_ARM_TIMER_EN_MASK(countNum)) | (CTCR_ARM_TIMER_AUTO_MASK(countNum)));
-
 	if (pCtrl->enable)	/* enable counter\timer */
 		cntmrCtrl |= (CTCR_ARM_TIMER_EN(countNum));
+	else			/* disable counter\timer */
+		cntmrCtrl &= ~(CTCR_ARM_TIMER_EN(countNum));
 
 	if (pCtrl->autoEnable)	/* Auto mode */
 		cntmrCtrl |= (CTCR_ARM_TIMER_AUTO_EN(countNum));
+	else			/* no auto mode */
+		cntmrCtrl &= ~(CTCR_ARM_TIMER_AUTO_EN(countNum));
 
-#ifndef MV88F78X60_Z1
-	cntmrCtrl &= ~((CTCR_ARM_TIMER_RATIO_MASK(countNum)) | (CTCR_ARM_TIMER_25MhzFRQ_MASK(countNum)));
-
+	if (cntmrHalData.ctrlFamily==MV_78XX0) {
+		cntmrCtrl &= ~(CTCR_ARM_TIMER_RATIO_MASK(countNum));
 	cntmrCtrl |= (pCtrl->Ratio & 0x7) << (CTCR_ARM_TIMER_RATIO_OFFS(countNum));
 
 	if (pCtrl->enable_25Mhz)	/* 25Mhz enable */
 		cntmrCtrl |= (CTCR_ARM_TIMER_25MhzFRQ_EN(countNum));
-
-#endif
-
+		else
+			cntmrCtrl &= ~(CTCR_ARM_TIMER_25MhzFRQ_EN(countNum));
+	}
 
 	MV_REG_WRITE(CNTMR_CTRL_REG(countNum), cntmrCtrl);
 
@@ -261,14 +275,11 @@ MV_STATUS mvCntmrCtrlGet(MV_U32 countNum, MV_CNTMR_CTRL *pCtrl)
 		pCtrl->autoEnable = MV_TRUE;
 	else
 		pCtrl->autoEnable = MV_FALSE;
-
-
-#ifndef MV88F78X60_Z1
+	if (cntmrHalData.ctrlFamily==MV_78XX0)
+	{
 	pCtrl->Ratio = (cntmrCtrl & (CTCR_ARM_TIMER_RATIO_MASK(countNum))) / (1 << (CTCR_ARM_TIMER_RATIO_OFFS(countNum)));
-
 	pCtrl->enable_25Mhz = (cntmrCtrl & CTCR_ARM_TIMER_25MhzFRQ_MASK(countNum)) ? MV_TRUE : MV_FALSE;
-#endif
-
+	}
 	return MV_OK;
 }
 
@@ -410,11 +421,9 @@ MV_STATUS mvCntmrIntClear(MV_U32 cntmrNum)
 		/* Reset cause bit to acknowledge interrupt */
 		MV_REG_WRITE(CNTMR_EVENTS_STATUS_REG_GLOBAL, ~(TIMER_GLOBAL_BIT(cntmrNum)));
 	} else {
-#ifdef MV88F78X60_Z1
-		MV_REG_WRITE(CNTMR_EVENTS_STATUS_REG_PRIVATE(cntmrNum), ~(TIMER_PRIVATE_BIT(cntmrNum)));
-#else
+
 		MV_REG_WRITE(CNTMR_EVENTS_STATUS_REG_PRIVATE, ~(TIMER_PRIVATE_BIT(cntmrNum)));
-#endif
+
 	}
 	return MV_OK;
 }
@@ -436,17 +445,15 @@ MV_STATUS mvCntmrIntClear(MV_U32 cntmrNum)
 *******************************************************************************/
 MV_U32 mvCntmrFrqGet(MV_U32 cntmrNum)
 {
-#ifndef MV88F78X60_Z1
+	if (cntmrHalData.ctrlFamily==MV_78XX0)
+	{
                 if (INVALID_CNTMR(cntmrNum))
                                 return MV_ERROR;
-                {
+
                                 MV_U32 cntmrCtrl;
                                 cntmrCtrl = MV_REG_READ(CNTMR_CTRL_REG(cntmrNum));
-
-
                                 if (cntmrCtrl & CTCR_ARM_TIMER_25MhzFRQ_MASK(cntmrNum))
                                                 return MV_BOARD_REFCLK_25MHZ;
                 }
-#endif
                 return mvCpuL2ClkGet();
 }

@@ -81,6 +81,10 @@ long g_egiga = 1;
 #endif
 
 #ifdef MY_ABC_HERE
+extern long g_sata_led_special;
+#endif
+
+#ifdef MY_ABC_HERE
 extern long g_hdd_hotplug;
 #endif
 
@@ -93,7 +97,7 @@ extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 extern long g_esata_7042;
 #endif
 #ifndef MEM_SIZE
@@ -123,6 +127,18 @@ extern long gSynoFlashMemorySize;
 
 #ifdef CONFIG_SYNO_ARMADA
 extern int gSynoUSBStation;
+#endif
+
+#ifdef MY_ABC_HERE
+extern int gSynoFactoryUSBFastReset;
+#endif
+
+#ifdef MY_ABC_HERE
+extern int gSynoFactoryUSB3Disable;
+#endif
+
+#ifdef MY_ABC_HERE
+extern int gSynoNoEhci;
 #endif
 
 #if defined(CONFIG_FPE_NWFPE) || defined(CONFIG_FPE_FASTFPE)
@@ -206,6 +222,20 @@ static void __init early_egiga(char *p)
 	}
 }
 __setup("egiga=", early_egiga);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_sataled_special(char *p)
+{
+        g_sata_led_special = simple_strtol(p, NULL, 10);
+
+        if ( g_sata_led_special >= 0 ) {
+                printk("Special Sata LEDs.\n");
+        }
+
+        return 1;
+}
+__setup("SataLedSpecial=", early_sataled_special);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -330,7 +360,7 @@ static int __init early_custom_sn(char *p)
 __setup("custom_sn=", early_custom_sn);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 static int __init early_esata_7042(char *p)
 {
 	g_esata_7042 = simple_strtol(p, NULL, 10);
@@ -431,6 +461,42 @@ END:
 	return 1;
 }
 __setup("syno_usbstation=", early_is_usbstation);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_factory_usb_fast_reset(char *p)
+{
+	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
+
+	printk("Factory USB Fast Reset: %d\n", (int)gSynoFactoryUSBFastReset);
+
+	return 1;
+}
+__setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_factory_usb3_disable(char *p)
+{
+	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);
+
+	printk("Factory USB3 Disable: %d\n", (int)gSynoFactoryUSB3Disable);
+
+	return 1;
+}
+__setup("syno_disable_usb3=", early_factory_usb3_disable);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_no_ehci(char *p)
+{
+	gSynoNoEhci = simple_strtol(p, NULL, 10);
+
+	printk("No Ehci: %d\n", gSynoNoEhci);
+
+	return 1;
+}
+__setup("syno_no_ehci=", early_no_ehci);
 #endif
 
 extern void paging_init(struct machine_desc *desc);
@@ -861,9 +927,6 @@ int __init arm_add_memory(phys_addr_t start, unsigned long size)
 	 * Ensure that start/size are aligned to a page boundary.
 	 * Size is appropriately rounded down, start is rounded up.
 	 */
-#ifdef CONFIG_ARCH_FEROCEON
-       if(size != 0) /* overcome bug in U-Boot */
-#endif
 	size -= start & ~PAGE_MASK;
 	bank->start = PAGE_ALIGN(start);
 	bank->size  = size & PAGE_MASK;

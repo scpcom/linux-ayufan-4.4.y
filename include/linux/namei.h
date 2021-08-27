@@ -78,7 +78,6 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 #define LOOKUP_TO_LASTCOMPONENT 0x8000
 #define LOOKUP_MOUNTED			0x10000
 #define LOOKUP_CASELESS_COMPARE 0x20000
-#define LOOKUP_CASELESS_NO_UPDATE 0x40000
 #endif
 
 extern int user_path_at(int, const char __user *, unsigned, struct path *);
@@ -113,6 +112,10 @@ extern struct dentry *lookup_one_len(const char *, struct dentry *, int);
 extern int follow_down_one(struct path *);
 extern int follow_down(struct path *);
 extern int follow_up(struct path *);
+
+#ifdef CONFIG_SYNO_NOTIFY
+extern int syno_fetch_mountpoint_fullpath(struct vfsmount *, size_t, char *);
+#endif
 
 extern struct dentry *lock_rename(struct dentry *, struct dentry *);
 extern void unlock_rename(struct dentry *, struct dentry *);

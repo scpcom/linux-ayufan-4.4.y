@@ -86,21 +86,16 @@ extern "C" {
 #define MV_DRAM_REGS_OFFSET			(0x0)
 #define MV_AURORA_L2_REGS_OFFSET		(0x8000)
 #define MV_RTC_REGS_OFFSET			(0x10300)
-#define MV_DEV_BUS_REGS_OFFSET			(0x10400)
-#ifdef MV88F78X60_Z1
-#define MV_SPI_REGS_OFFSET(unit)               (0x10600)
-#else
-#define MV_SPI_REGS_OFFSET(unit)		(0x10600 + (unit * 0x80))
+#ifdef CONFIG_SYNO_ARMADA
+#define MV_RTC_EXTERNAL_ALARM_OFFSET			(0x10320)
 #endif
+#define MV_DEV_BUS_REGS_OFFSET			(0x10400)
+#define MV_SPI_REGS_OFFSET(unit)		(0x10600 + (unit * 0x80))
 #define MV_TWSI_SLAVE_REGS_OFFSET(chanNum)	(0x11000 + (chanNum * 0x100))
 #define MV_UART_REGS_OFFSET(chanNum)		(0x12000 + (chanNum * 0x100))
 #define MV_RUNIT_PMU_REGS_OFFSET		(0x1C000)
 #define MV_MPP_REGS_OFFSET			(0x18000)
-#ifdef MV88F78X60_Z1
-#define MV_GPP_REGS_OFFSET(unit)		(0x18100 + ((unit) * 0x20))
-#else
 #define MV_GPP_REGS_OFFSET(unit)		(0x18100 + ((unit) * 0x40))
-#endif
 #define MV_MISC_REGS_OFFSET			(0x18200)
 #define MV_CLK_CMPLX_REGS_OFFSET	(0x18700)
 #define MV_MBUS_REGS_OFFSET			(0x20000)
@@ -120,9 +115,12 @@ extern "C" {
 #endif
 #define MV_ETH_REGS_OFFSET(port)		(MV_ETH_BASE_ADDR - ((port) / 2) * 0x40000 + ((port) % 2) * 0x4000)
 #define MV_PEX_IF_REGS_OFFSET(pexIf)		(pexIf < 8 ? (0x40000 + ((pexIf) / 4) * 0x40000 + ((pexIf) % 4) * 0x4000) \
-							   : (0X42000 + ((pexIf) % 8) * 0x40000))
+											 : (0x42000 + ((pexIf) % 8) * 0x40000))
 #define MV_USB_REGS_OFFSET(dev)       		(0x50000 + (dev * 0x1000))
 #define MV_XOR_REGS_OFFSET(unit)		(unit ? 0xF0900 : 0x60900)
+#if defined(MV_INCLUDE_IDMA)
+#define MV_IDMA_REGS_OFFSET			(0x60800)
+#endif
 #define MV_CESA_TDMA_REGS_OFFSET(chanNum)	(0x90000 + (chanNum * 0x2000))
 #define MV_CESA_REGS_OFFSET(chanNum)		(0x9D000 + (chanNum * 0x2000))
 #define MV_SATA_REGS_OFFSET			(0xA0000)
@@ -132,7 +130,7 @@ extern "C" {
 #define MV_PNC_REGS_OFFSET			(0xC8000)
 #define MV_SDMMC_REGS_OFFSET			(0xD4000)
 
-#ifdef ARMADA_XP_ERRATA_SMI_1
+#ifdef CONFIG_ARMADA_XP_ERRATA_SMI_1
 	#define MV_ETH_SMI_PORT   1
 #else
     #define MV_ETH_SMI_PORT   0
@@ -142,6 +140,10 @@ extern "C" {
 /*
  * Miscellanuous Controller Configurations
  */
+ 
+#define AVS_CONTROL2_REG			0x20868
+#define AVS_LOW_VDD_LIMIT			0x20860
+
 #define INTER_REGS_SIZE				_1M
 
 /* This define describes the TWSI interrupt bit and location */
@@ -151,11 +153,8 @@ extern "C" {
 
 #define MV_GPP_MAX_PINS				68
 #define MV_GPP_MAX_GROUP    			3 /* group == configuration register? */
-#ifndef MV88F78X60_Z1
 #define MV_CNTMR_MAX_COUNTER 		8 /* 4 global + 1 global WD + 2 current private CPU + 1 private CPU WD*/
-#else
-#define MV_CNTMR_MAX_COUNTER 		17/* 4 global + 1 global WD + 2 per CPU + 4 CPU WD*/
-#endif
+
 /*
 	MV88F78X60_Z1								MV88F78X60_A0
 	-------------------------------             -------------------------------
@@ -177,6 +176,11 @@ extern "C" {
 #define MV_XOR_MAX_UNIT				2 /* XOR unit == XOR engine */
 #define MV_XOR_MAX_CHAN         		4 /* total channels for all units together*/
 #define MV_XOR_MAX_CHAN_PER_UNIT		2 /* channels for units */
+
+#if defined(MV_INCLUDE_IDMA)
+#define MV_IDMA_MAX_UNIT			1 /* IDMA unit == IDMA engine */
+#define MV_IDMA_MAX_CHAN			4 /* total channels for all units together */
+#endif
 
 #define MV_SATA_MAX_CHAN			2
 
@@ -238,7 +242,6 @@ extern "C" {
 #define MV_ETH_TX_CSUM_MAX_SIZE 		9800
 #define MV_PNC_TCAM_LINES			1024	/* TCAM num of entries */
 
-#if defined(MV88F78X60_A0) || defined(MV88F78X60_B0)
 /* New GMAC module is used */
 #define MV_ETH_GMAC_NEW
 /* New WRR/EJP module is used */
@@ -249,7 +252,7 @@ extern "C" {
 #define MV_ETH_PNC_NEW
 /* PNC Load Balancing support */
 #define MV_ETH_PNC_LB
-#endif /* MV88F78X60_A0, MV88F78X60_B0*/
+
 #define MV_78130_ETH_MAX_PORT			3
 #define MV_78460_ETH_MAX_PORT			4
 

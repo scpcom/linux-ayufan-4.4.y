@@ -32,10 +32,6 @@
 #include <asm/ptrace.h>
 #include "proc-macros.S"
 
-#ifdef CONFIG_ARCH_FEROCEON_KW
-#include <mach/kw_macro.h>
-#endif
-
 /*
  * This is the maximum size of an area which will be invalidated
  * using the single invalidate entry instructions.  Anything larger
@@ -59,56 +55,6 @@ __cache_params_loc:
 	.text
 __cache_params:
 	.word	__cache_params_loc
-
-#ifdef CONFIG_ARCH_FEROCEON
-/*
- *      mv_l2_inv_range(start, end)
- *
- *      Invalidate (discard) the specified virtual address range on L2.
- *      May not write back any entries.  If 'start' or 'end'
- *      are not cache line aligned, those lines must be written
- *      back.
- *
- *      - start - virtual start address
- *      - end   - virtual end address
- *
- */
-#ifdef CONFIG_CACHE_FEROCEON_L2
-ENTRY(mv_l2_inv_range)
-#ifndef CONFIG_CPU_L2_DCACHE_WRITETHROUGH
-        tst     r0, #CACHE_DLINESIZE - 1
-        mcrne   p15, 1, r0, c15, c9, 1          @ clean L2 entry
-        tst     r1, #CACHE_DLINESIZE - 1
-        mcrne   p15, 1, r1, c15, c9, 1          @ clean L2 entry
-        mcr     p15, 0, r0, c7, c10, 4          @ drain WB
-#endif
-        cmp     r1, r0
-        subne   r1, r1, #1                      @ Prevent cleaning of top address
-                                                @ cache line when top is cache line aligned
-        mrs     r2, cpsr
-        orr     r3, r2, #PSR_F_BIT | PSR_I_BIT
-        msr     cpsr_c, r3                      @ Disable interrupts
-        mcr     p15, 1, r0, c15, c11, 4         @ L2 invalidation zone start addr
-        mcr     p15, 1, r1, c15, c11, 5         @ L2 invalidation zone end addr and
-                                                @ invalidate procedure trigger
-        msr     cpsr_c, r2                      @ Restore interrupts
-        mov     pc, lr
-
-ENTRY(mv_l2_inv_range_pa)
-#ifndef CONFIG_CPU_L2_DCACHE_WRITETHROUGH
-	tst     r0, #CACHE_DLINESIZE - 1
-	mcrne   p15, 1, r0, c15, c9, 3          @ clean L2 entry by PA
-	tst     r1, #CACHE_DLINESIZE - 1
-	mcrne   p15, 1, r1, c15, c9, 3          @ clean L2 entry by PA
-	mcr     p15, 0, r0, c7, c10, 4          @ drain WB
-#endif
-1:	mcr     p15, 0, r0, c15, c11, 3          @ invalidate L2 entry by PA
-	add     r0, r0, #CACHE_DLINESIZE
-	cmp     r0, r1
-	blo     1b
-	mov     pc, lr
-#endif
-#endif
 
 /*
  * cpu_feroceon_proc_init()
@@ -173,18 +119,35 @@ ENTRY(cpu_feroceon_reset)
  *
  * Called with IRQs disabled
  */
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef CONFIG_JTAG_DEBUG
+support_wait_for_interrupt_address:
+        .word   support_wait_for_interrupt
+#endif
+#endif
+
 	.align	5
 ENTRY(cpu_feroceon_do_idle)
-#ifdef CONFIG_ARCH_FEROCEON_KW
-        ldr     r0, support_wait_for_interrupt_address /* this variable set in core.c*/
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef CONFIG_JTAG_DEBUG
+        ldr     r0, support_wait_for_interrupt_address
         ldr     r0, [r0]
         cmp     r0, #1    /* check if the device doesn't support wait for interrupt */
         bne     1f        /* if yes, then go out */
 #endif
+#endif
 	mov	r0, #0
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	mrc	p15, 0, r1, c1, c0, 0		@ Read control register
+#endif
 	mcr	p15, 0, r0, c7, c10, 4		@ Drain write buffer
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	bic	r2, r1, #1 << 12
+	mcr	p15, 0, r2, c1, c0, 0		@ Disable I cache
+#endif
 	mcr	p15, 0, r0, c7, c0, 4		@ Wait for interrupt
-#ifdef CONFIG_ARCH_FEROCEON
+#ifdef CONFIG_SYNO_ARMADA_ARCH
+	mcr	p15, 0, r1, c1, c0, 0		@ Restore ICache enable
 1:
 #endif
 	mov	pc, lr

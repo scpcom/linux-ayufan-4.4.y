@@ -1198,7 +1198,6 @@ static void xhci_complete_cmd_in_cmd_wait_list(struct xhci_hcd *xhci,
 		xhci_free_command(xhci, command);
 }
 
-
 /* Check to see if a command in the device's command queue matches this one.
  * Signal the completion or free the command, and return 1.  Return 0 if the
  * completed command isn't at the head of the command list.
@@ -1217,14 +1216,10 @@ static int handle_cmd_in_cmd_wait_list(struct xhci_hcd *xhci,
 	if (xhci->cmd_ring->dequeue != command->command_trb)
 		return 0;
 
-	command->status = GET_COMP_CODE(le32_to_cpu(event->status));
-	list_del(&command->cmd_list);
-	if (command->completion)
-		complete(command->completion);
-	else
-		xhci_free_command(xhci, command);
-			return 1;
-		}
+	xhci_complete_cmd_in_cmd_wait_list(xhci, command,
+			GET_COMP_CODE(le32_to_cpu(event->status)));
+	return 1;
+}
 
 /*
  * Finding the command trb need to be cancelled and modifying it to
@@ -1406,7 +1401,7 @@ static void handle_cmd_completion(struct xhci_hcd *xhci,
 		 */
 		if (handle_stopped_cmd_ring(xhci,
 				GET_COMP_CODE(le32_to_cpu(event->status)))) {
-			inc_deq(xhci, xhci->cmd_ring, false);
+			inc_deq(xhci, xhci->cmd_ring);
 			return;
 		}
 	}
@@ -1978,11 +1973,6 @@ static int process_ctrl_td(struct xhci_hcd *xhci, struct xhci_td *td,
 		}
 		break;
 	case COMP_SHORT_TX:
-#ifdef MY_ABC_HERE
-		xhci_dbg(xhci, "WARN: short transfer on control ep\n");
-#else
-		xhci_warn(xhci, "WARN: short transfer on control ep\n");
-#endif
 		if (td->urb->transfer_flags & URB_SHORT_NOT_OK)
 			*status = -EREMOTEIO;
 		else
@@ -2339,11 +2329,7 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		xhci_dbg(xhci, "Stopped on No-op or Link TRB\n");
 		break;
 	case COMP_STALL:
-#ifdef MY_ABC_HERE
-		xhci_dbg(xhci, "WARN: Stalled endpoint\n");
-#else
-		xhci_warn(xhci, "WARN: Stalled endpoint\n");
-#endif
+		xhci_dbg(xhci, "Stalled endpoint\n");
 		ep->ep_state |= EP_HALTED;
 		status = -EPIPE;
 		break;
@@ -2353,19 +2339,11 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		break;
 	case COMP_SPLIT_ERR:
 	case COMP_TX_ERR:
-#ifdef MY_ABC_HERE
-		xhci_dbg(xhci, "WARN: transfer error on endpoint\n");
-#else
-		xhci_warn(xhci, "WARN: transfer error on endpoint\n");
-#endif
+		xhci_dbg(xhci, "Transfer error on endpoint\n");
 		status = -EPROTO;
 		break;
 	case COMP_BABBLE:
-#ifdef MY_ABC_HERE
-		xhci_dbg(xhci, "WARN: babble error on endpoint\n");
-#else
-		xhci_warn(xhci, "WARN: babble error on endpoint\n");
-#endif
+		xhci_dbg(xhci, "Babble error on endpoint\n");
 		status = -EOVERFLOW;
 		break;
 	case COMP_DB_ERR:

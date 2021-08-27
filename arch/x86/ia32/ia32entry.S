@@ -976,10 +976,19 @@ ia32_sys_call_table:
 	.quad sys_SYNONotifyInit /* 422 */
 	.quad sys_SYNONotifyAddWatch /* 423 */
 	.quad sys_SYNONotifyRemoveWatch /* 424 */
+	.quad sys_SYNONotifyAddWatch32 /* 425 */
+	.quad sys_SYNONotifyRemoveWatch32 /* 426 */
 #else
 	.quad sys_ni_syscall
 	.quad sys_ni_syscall
 	.quad sys_ni_syscall
+	.quad sys_ni_syscall
+	.quad sys_ni_syscall
 #endif /* CONFIG_SYNO_NOTIFY */
+#ifdef MY_ABC_HERE
+	.quad sys_SYNOArchiveOverwrite /* 427 */
+#else
+	.quad sys_ni_syscall
+#endif
 #endif
 ia32_syscall_end:

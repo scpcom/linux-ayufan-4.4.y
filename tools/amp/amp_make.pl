@@ -38,9 +38,9 @@ while( $line = <cfg_file>)
 }
 while( $line = <boot_file>)
 {
-	if($line =~ m/zreladdr-y	:= (\S*)/){$load_addr = $1;}
-	if($line =~ m/params_phys-y	:= (\S*)/){$pars_addr = $1;}
-	if($line =~ m/initrd_phys-y	:= (\S*)/){$ramd_addr = $1;}
+	if($line =~ m/zreladdr-y\s:= (0x[0-9a-fA-F]*)$/){$load_addr = $1;}
+	if($line =~ m/params_phys-y\s:= (0x[0-9a-fA-F]*)$/){$pars_addr = $1;}
+	if($line =~ m/initrd_phys-y\s:= (0x[0-9a-fA-F]*)$/){$ramd_addr = $1;}
 }
 
 
@@ -97,11 +97,9 @@ for (; ($g_id < 2) and ($g_id >= 0); $g_id += $add)
 	# Modify .config
 	system("perl -p -i -e \"s/CONFIG_MV_DRAM_BASE=.*/CONFIG_MV_DRAM_BASE=$base[$g_id]/\" .config");
 	system("perl -p -i -e \"s/CONFIG_MV_UART_PORT=.*/CONFIG_MV_UART_PORT=$port[$g_id]/\" .config");
-
-	# Modify Makefile.boot
-	system("perl -p -i -e \"s/zreladdr-y	:= .*/zreladdr-y	:= $new_load/\" arch/arm/mach-armadaxp/Makefile.boot");
-	system("perl -p -i -e \"s/params_phys-y	:= .*/params_phys-y	:= $new_pars/\" arch/arm/mach-armadaxp/Makefile.boot");
-	system("perl -p -i -e \"s/initrd_phys-y	:= .*/initrd_phys-y	:= $new_ramd/\" arch/arm/mach-armadaxp/Makefile.boot");
+	system("perl -p -i -e \"s/CONFIG_MV_ZREL_ADDR=.*/CONFIG_MV_ZREL_ADDR=$new_load/\" .config");
+	system("perl -p -i -e \"s/CONFIG_MV_PARAM_PHYS=.*/CONFIG_MV_PARAM_PHYS=$new_pars/\" .config");
+	system("perl -p -i -e \"s/CONFIG_MV_INITRD_PHYS=.*/CONFIG_MV_INITRD_PHYS=$new_ramd/\" .config");
 
 	#Compile
 	$fail = system("make uImage -j4");
@@ -116,12 +114,7 @@ for (; ($g_id < 2) and ($g_id >= 0); $g_id += $add)
 	print "\nAMP: Image $g_id ready at $out_dir/uImage_g$g_id\n";
 }
 
-
 END:
-
-system("perl -p -i -e \"s/zreladdr-y	:= .*/zreladdr-y	:= $load_addr/\" arch/arm/mach-armadaxp/Makefile.boot");
-system("perl -p -i -e \"s/params_phys-y	:= .*/params_phys-y	:= $pars_addr/\" arch/arm/mach-armadaxp/Makefile.boot");
-system("perl -p -i -e \"s/initrd_phys-y	:= .*/initrd_phys-y	:= $ramd_addr/\" arch/arm/mach-armadaxp/Makefile.boot");
 
 close cfg_file;
 close boot_file;

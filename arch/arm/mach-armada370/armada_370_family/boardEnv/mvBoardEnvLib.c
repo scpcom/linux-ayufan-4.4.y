@@ -176,11 +176,6 @@ MV_VOID mvBoardEnvInit(MV_VOID)
 	mvGppTypeSet(1, 0xFFFFFFFF, BOARD_INFO(boardId)->gppOutEnValMid);
 	mvGppTypeSet(2, 0xFFFFFFFF, BOARD_INFO(boardId)->gppOutEnValHigh);
 
-	if(boardId == SYNO_RS214_ID) {
-		/* RS214 disk LED is HIGH active, so we need invert the active indication */
-		MV_REG_WRITE(0xa002c, 0x0000000c);
-	}
-
 	/* Set GPIO interrupts type & polarity as needed */
 	for (i = 0; i < MV_GPP_MAX_GROUP; i++) {
 		gppMask = mvBoardGpioIntMaskGet(i);
@@ -302,6 +297,32 @@ MV_BOOL mvBoardIsPortInSgmii(MV_U32 ethPortNum)
 	}
 
 	return MV_FALSE;
+}
+
+/*******************************************************************************
+* mvBoardIsPortInGmii -
+*
+* DESCRIPTION:
+*       This routine returns MV_TRUE for port number works in GMII or MV_FALSE
+*	For all other options.
+*
+* INPUT:
+*       ethPortNum - Ethernet port number.
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:
+*       MV_TRUE - port in GMII.
+*       MV_FALSE - other.
+*
+*******************************************************************************/
+MV_BOOL mvBoardIsPortInGmii(MV_U32 ethPortNum)
+{
+	if (mvBoardIsGMIIConnected() && (ethPortNum ==0))
+		return MV_TRUE;
+	else
+		return MV_FALSE;
 }
 
 /*******************************************************************************
@@ -595,6 +616,61 @@ MV_32 mvBoardPhyAddrGet(MV_U32 ethPortNum)
 	}
 
 	return BOARD_INFO(boardId)->pBoardMacInfo[ethPortNum].boardEthSmiAddr;
+}
+/*******************************************************************************
+* mvBoardQuadPhyAddr0Get - Get the phy address
+*
+* DESCRIPTION:
+*       This routine returns the Phy address of a given ethernet port.
+*
+* INPUT:
+*       ethPortNum - Ethernet port number.
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:
+*       32bit describing Phy address, -1 if the port number is wrong.
+*
+*******************************************************************************/
+MV_32 mvBoardQuadPhyAddr0Get(MV_U32 ethPortNum)
+{
+	MV_U32 boardId = mvBoardIdGet();
+
+	if (!((boardId >= BOARD_ID_BASE) && (boardId < MV_MAX_BOARD_ID))) {
+		mvOsPrintf("mvBoardQuadPhyAddr0Get: Board unknown.\n");
+		return MV_ERROR;
+	}
+
+	return BOARD_INFO(boardId)->pBoardMacInfo[ethPortNum].boardEthSmiAddr0;
+}
+
+/*******************************************************************************
+* mvBoardPhyLinkCryptPortAddrGet - Get the phy gbe address
+*
+* DESCRIPTION:
+*       This routine returns the Phy address of a given ethernet port.
+*
+* INPUT:
+*       ethPortNum - Ethernet port number.
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:
+*       32bit describing Phy address, -1 if the port number is wrong.
+*
+*******************************************************************************/
+MV_32 mvBoardPhyLinkCryptPortAddrGet(MV_U32 ethPortNum)
+{
+	MV_U32 boardId = mvBoardIdGet();
+
+	if (!((boardId >= BOARD_ID_BASE) && (boardId < MV_MAX_BOARD_ID))) {
+		mvOsPrintf("mvBoardPhyLinkCryptPortAddrGet: Board unknown.\n");
+		return MV_ERROR;
+	}
+
+	return BOARD_INFO(boardId)->pBoardMacInfo[ethPortNum].LinkCryptPortAddr;
 }
 
 /*******************************************************************************
@@ -1195,46 +1271,59 @@ MV_U8 mvBoardTdmSpiIdGet(MV_VOID)
 *******************************************************************************/
 MV_U32 mvBoardSerdesModeGet(void)
 {
-	MV_SERDES_CFG *pSerdesInfo = mvBoardSerdesCfgGet();
+	MV_U32 serdesInfo = MV_REG_READ(SERDES_LINE_MUX_REG_0_3);
+	MV_U32 serdesMode = 0;
 
-	return pSerdesInfo->serdesMode;
+	switch (serdesInfo & 0x0f){
+	case 1:
+		serdesMode |= SRDS_MOD_PCIE0_LANE0;
+		break;
+	case 2:
+		serdesMode |= SRDS_MOD_SATA0_LANE0;
+		break;
+	case 3:
+		serdesMode |= SRDS_MOD_SGMII1_LANE0;
+		break;
+	case 0:
+	default:
+		break;
 	}
 
+	switch (serdesInfo & 0x0f0){
+	case 0x10:
+		serdesMode |= SRDS_MOD_PCIE1_LANE1;
+		break;
+	case 0x20:
+		serdesMode |= SRDS_MOD_SGMII0_LANE1;
+		break;
+	default:
+		break;
+	}
 
-/*******************************************************************************
-* mvBoardIsPciEConnected
-*
-* DESCRIPTION:
-*	Check if a given PCI-E bus connected in serdes.
-*
-* INPUT:
-*	pcieIdx - Index of PCI-E bus.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*	MV_TRUE - If given PCI-E is connected.
-*	MV_FALSE - Otherwise.
-*
-*******************************************************************************/
-MV_BOOL	mvBoardIsPciEConnected(MV_U32 pcieIdx)
-{
-	MV_U32 srdsMode = mvBoardSerdesModeGet();
+	switch (serdesInfo & 0x0f00){
+	case 0x100:
+		serdesMode |= SRDS_MOD_SATA0_LANE2;
+		break;
+	case 0x200:
+		serdesMode |= SRDS_MOD_SGMII0_LANE2;
+		break;
+	default:
+		break;
+	}
 
-	if (srdsMode == -1)
-		return MV_FALSE;
+	switch (serdesInfo & 0xf000){
+	case 0x1000:
+		serdesMode |= SRDS_MOD_SATA1_LANE3;
+		break;
+	case 0x2000:
+		serdesMode |= SRDS_MOD_SGMII1_LANE3;
+		break;
+	default:
+		break;
+	}
 
-	if ((pcieIdx == 0) && (srdsMode & SRDS_MOD_PCIE0_LANE0))
-		return MV_TRUE;
-
-	if ((pcieIdx == 1) && (srdsMode & SRDS_MOD_PCIE1_LANE1))
-		return MV_TRUE;
-
-	return MV_FALSE;
+	return serdesMode;
 }
-
-
 /*******************************************************************************
 * mvBoardModuleTypePrint
 *
@@ -1339,8 +1428,8 @@ MV_VOID mvBoardOtherModuleTypePrint(MV_VOID)
 MV_BOOL mvBoardIsGbEPortConnected(MV_U32 ethPortNum)
 {
 	MV_U32 boardId = mvBoardIdGet();
-	MV_U32 mppMask, srdsMask;
-	MV_SERDES_CFG *pSerdesInfo;
+	MV_U32 mppMask;
+	MV_U32 srdsMask = mvBoardSerdesModeGet();
 
 	if (!((boardId >= BOARD_ID_BASE) && (boardId < MV_MAX_BOARD_ID))) {
 		mvOsPrintf("mvBoardIsGbEPortConnected: Board unknown.\n");
@@ -1351,8 +1440,6 @@ MV_BOOL mvBoardIsGbEPortConnected(MV_U32 ethPortNum)
 		return MV_FALSE;
 
 	mppMask = BOARD_INFO(boardId)->pBoardModTypeValue->boardMppGrp1Mod;
-	pSerdesInfo = mvBoardSerdesCfgGet();
-	srdsMask = pSerdesInfo->serdesMode;
 
 	if ((ethPortNum == 0) && (((mppMask & (MV_BOARD_RGMII0 | MV_BOARD_GMII0))) ||
 			(srdsMask & (SRDS_MOD_SGMII0_LANE1 | SRDS_MOD_SGMII0_LANE2))))
@@ -1711,7 +1798,41 @@ MV_32 mvBoardNandWidthGet(void)
 }
 
 MV_U32 gBoardId = -1;
-
+/*******************************************************************************
+* mvBoardIdSet - Set Board model
+*
+* DESCRIPTION:
+*       This function sets the board ID.
+*       Board ID is 32bit word constructed of board model (16bit) and
+*       board revision (16bit) in the following way: 0xMMMMRRRR.
+*
+* INPUT:
+*       None.
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:
+*       void
+*
+*******************************************************************************/
+MV_VOID mvBoardIdSet(MV_VOID)
+{
+	if (gBoardId == -1) {
+#if defined(DB_88F6710)
+		gBoardId = DB_88F6710_BP_ID;
+#elif defined(DB_88F6710_PCAC)
+		gBoardId = DB_88F6710_PCAC_ID;
+#elif defined(RD_88F6710)
+		gBoardId = RD_88F6710_ID;
+#else
+		mvOsPrintf("mvBoardIdSet: Board ID must be defined!\n");
+		while (1) {
+			continue;
+		}
+#endif
+	}
+}
 /*******************************************************************************
 * mvBoardIdGet - Get Board model
 *
@@ -1732,19 +1853,17 @@ MV_U32 gBoardId = -1;
 *******************************************************************************/
 MV_U32 mvBoardIdGet(MV_VOID)
 {
-	MV_U32 tmpBoardId = -1;
-
 	if (gBoardId == -1) {
 #if defined(DB_88F6710)
-		tmpBoardId = DB_88F6710_BP_ID;
+		gBoardId = DB_88F6710_BP_ID;
+#elif defined(DB_88F6710_PCAC)
+		gBoardId = DB_88F6710_PCAC_ID;
+#elif defined(RD_88F6710)
+		gBoardId = RD_88F6710_ID;
+#else
+		mvOsWarning();
+		return INVALID_BAORD_ID;
 #endif
-#if defined(DB_88F6710_PCAC)
-		tmpBoardId = DB_88F6710_PCAC_ID;
-#endif
-#if defined(RD_88F6710)
-		tmpBoardId = RD_88F6710_ID;
-#endif
-		gBoardId = tmpBoardId;
 	}
 
 	return gBoardId;
@@ -2282,97 +2401,6 @@ MV_BOOL mvBoardIsModScanEnabled(void)
 }
 
 /*******************************************************************************
-* mvBoardSerdesModulesScan
-*
-* DESCRIPTION:
-*	Scan for modules connected through SERDES lines.
-*
-* INPUT:
-*	None.
-*
-* OUTPUT:
-*	None
-*
-* RETURN:
-*       MV_STATUS - MV_OK, MV_ERROR.
-*
-*******************************************************************************/
-MV_STATUS mvBoardSerdesModulesScan(void)
-{
-	MV_U8 regVal;
-	MV_U8 swCfg;
-	MV_TWSI_SLAVE twsiSlave;
-	MV_U32 srdsMode = 0;
-	MV_U32 boardId = mvBoardIdGet();
-	MV_BOOL scanEn = mvBoardIsModScanEnabled();
-	MV_U8 usedLanes = 0;
-
-	/* Check if scan is enabled.	*/
-	if (scanEn == MV_FALSE)
-		return MV_OK;
-
-	/* Read SW EEPROM */
-	FILL_TWSI_SLAVE(twsiSlave, MV_BOARD_EEPROM_MODULE_ADDR);
-	mvTwsiRead(0, &twsiSlave, &swCfg, 1);
-
-	/* SGMII module. */
-	FILL_TWSI_SLAVE(twsiSlave, MV_BOARD_SERDES_CON_ADDR);
-	if (mvTwsiRead(0, &twsiSlave, &regVal, 1) == MV_OK) {
-		/* This sets Lanes 2 & 3 to SGMII. */
-		srdsMode |= (SRDS_MOD_SGMII0_LANE2 | SRDS_MOD_SGMII1_LANE3);
-		usedLanes = LANE2 | LANE3;
-	}
-
-	/* PCIE config. */
-	switch (MV_BOARD_CFG_PCIE_MODE(swCfg)) {
-	case (1):
-		srdsMode |= SRDS_MOD_PCIE0_LANE0;
-		usedLanes |= LANE0;
-		break;
-	case (2):
-		srdsMode |= SRDS_MOD_PCIE1_LANE1;
-		usedLanes |= LANE1;
-		break;
-	case (3):
-		srdsMode |= (SRDS_MOD_PCIE0_LANE0 | SRDS_MOD_PCIE1_LANE1);
-		usedLanes |= LANE0 | LANE1;
-		break;
-	default:
-		break;
-	}
-
-	/* Sata0 config. */
-	switch (MV_BOARD_CFG_SATA0_MODE(swCfg)) {
-	case (1):
-		if (!(usedLanes & LANE0)) {
-			srdsMode |= SRDS_MOD_SATA0_LANE0;
-			usedLanes |= LANE0;
-		}
-		break;
-	case (2):
-		if (!(usedLanes & LANE2)) {
-			srdsMode |= SRDS_MOD_SATA0_LANE2;
-			usedLanes |= LANE2;
-		}
-		break;
-	default:
-		break;
-	}
-
-	/* Sata1 config. */
-	if (MV_BOARD_CFG_SATA1_MODE(swCfg) == 1) {
-		if (!(usedLanes & LANE3)) {
-			srdsMode |= SRDS_MOD_SATA1_LANE3;
-			usedLanes |= LANE3;
-		}
-	}
-
-	BOARD_INFO(boardId)->pBoardSerdesConfigValue[SRDS_AUTO_CFG].serdesMode = srdsMode;
-
-	return MV_OK;
-}
-
-/*******************************************************************************
 * mvBoardIsSwitchConnected
 *
 * DESCRIPTION:
@@ -2530,125 +2558,6 @@ MV_STATUS mvBoardUpdateEthAfterScan(void)
 	return MV_OK;
 }
 
-
-/*******************************************************************************
-* mvBoardSerdesCfgGet
-*
-* DESCRIPTION:
-*	Get board SERDES configuration.
-*
-* INPUT:
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       SERDES configuration structure or NULL on error
-*
-*******************************************************************************/
-MV_SERDES_CFG *mvBoardSerdesCfgGet(void)
-{
-	MV_U32 boardId;
-	MV_U32 serdesCfg = 0; /* default - Auto detection */
-
-	boardId = mvBoardIdGet();
-
-	if (!((boardId >= BOARD_ID_BASE) && (boardId < MV_MAX_BOARD_ID))) {
-		mvOsPrintf("mvBoardSerdesCfgGet: Board unknown.\n");
-		return NULL;
-	}
-
-	if (mvBoardIsModScanEnabled())
-		serdesCfg = 0;
-	else
-		serdesCfg = 1;
-
-	return &BOARD_INFO(boardId)->pBoardSerdesConfigValue[serdesCfg];
-
-}
-
-static const MV_U8 serdesCfg[][5] = SERDES_CFG;
-/*******************************************************************************
-* mvBoardSerdesUserToRegConv
-*
-* DESCRIPTION:
-*	Convert the user's SERDES configuration to the register modes convention
-*
-* INPUT:
-*		userModes - SERDES configuration by the user
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       SERDES configuration in the register format
-*
-*******************************************************************************/
-MV_STATUS mvBoardSerdesUserToRegConv(MV_SERDES_CFG *pSerdesUserInfo, MV_SERDES_REG_CFG *pSerdesInfo)
-{
-	MV_U32 boardId;
-
-	boardId = mvBoardIdGet();
-
-	if (!((boardId >= BOARD_ID_BASE) && (boardId < MV_MAX_BOARD_ID))) {
-		mvOsPrintf("mvBoardSerdesUserToRegConv: Board unknown.\n");
-		return 0;
-	}
-
-	pSerdesInfo->serdesMode = 0;
-	pSerdesInfo->serdesSpeed = 0;
-
-	/* Lane - 0 */
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_PCIE0_LANE0) {
-		pSerdesInfo->serdesMode |= serdesCfg[0][SERDES_UNIT_PEX];
-		if (pSerdesUserInfo->serdesSpeed & SRDS_SPEED_PCIE0_LANE0)
-			pSerdesInfo->serdesSpeed |= (SRDS_SPEED_HIGH << 0);
-	} else if (pSerdesUserInfo->serdesMode & SRDS_MOD_SATA0_LANE0) {
-		pSerdesInfo->serdesMode |= serdesCfg[0][SERDES_UNIT_SATA];
-		if (pSerdesUserInfo->serdesSpeed & SRDS_SPEED_SATA0_LANE0)
-			pSerdesInfo->serdesSpeed |= (SRDS_SPEED_HIGH << 0);
-	} else if (pSerdesUserInfo->serdesMode & SRDS_MOD_SGMII1_LANE0) {
-		pSerdesInfo->serdesMode |= serdesCfg[0][SERDES_UNIT_SGMII];
-		if (pSerdesUserInfo->serdesSpeed & SRDS_SPEED_SGMII1_LANE0)
-			pSerdesInfo->serdesSpeed |= (SRDS_SPEED_HIGH << 0);
-	}
-
-	/* Lane - 1 */
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_PCIE1_LANE1) {
-		pSerdesInfo->serdesMode |= (serdesCfg[1][SERDES_UNIT_PEX] << (1*SRDS_MOD_SHIFT));
-		if (pSerdesUserInfo->serdesSpeed & SRDS_SPEED_PCIE1_LANE1)
-			pSerdesInfo->serdesSpeed |= (SRDS_SPEED_HIGH << 1);
-	} else if (pSerdesUserInfo->serdesMode & SRDS_MOD_SGMII0_LANE1) {
-		pSerdesInfo->serdesMode |= (serdesCfg[1][SERDES_UNIT_SGMII] << (1*SRDS_MOD_SHIFT));
-		if (pSerdesUserInfo->serdesSpeed & SRDS_SPEED_SGMII0_LANE1)
-			pSerdesInfo->serdesSpeed |= (SRDS_SPEED_HIGH << 1);
-	}
-
-	/* Lane - 2 */
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_SATA0_LANE2) {
-		pSerdesInfo->serdesMode |= (serdesCfg[2][SERDES_UNIT_SATA] << (2*SRDS_MOD_SHIFT));
-		if (pSerdesUserInfo->serdesSpeed & SRDS_MOD_SATA0_LANE2)
-			pSerdesInfo->serdesSpeed |= (SRDS_SPEED_HIGH << 2);
-	} else if (pSerdesUserInfo->serdesMode & SRDS_MOD_SGMII0_LANE2) {
-		pSerdesInfo->serdesMode |= (serdesCfg[2][SERDES_UNIT_SGMII] << (2*SRDS_MOD_SHIFT));
-		if (pSerdesUserInfo->serdesSpeed & SRDS_MOD_SGMII0_LANE2)
-			pSerdesInfo->serdesSpeed |= (SRDS_SPEED_HIGH << 2);
-	}
-
-	/* Lane - 3 */
-	if (pSerdesUserInfo->serdesMode & SRDS_MOD_SATA1_LANE3) {
-		pSerdesInfo->serdesMode |= (serdesCfg[3][SERDES_UNIT_SATA] << (3*SRDS_MOD_SHIFT));
-		if (pSerdesUserInfo->serdesSpeed & SRDS_MOD_SATA1_LANE3)
-			pSerdesInfo->serdesSpeed |= (SRDS_SPEED_HIGH << 3);
-	} else if (pSerdesUserInfo->serdesMode & SRDS_MOD_SGMII1_LANE3) {
-		pSerdesInfo->serdesMode |= (serdesCfg[3][SERDES_UNIT_SGMII] << (3*SRDS_MOD_SHIFT));
-		if (pSerdesUserInfo->serdesSpeed & SRDS_MOD_SGMII1_LANE3)
-			pSerdesInfo->serdesSpeed |= (SRDS_SPEED_HIGH << 3);
-	}
-
-	return MV_OK;
-}
-
-
 /*******************************************************************************
 * mvBoardMppModulesCfgGet
 *
@@ -2706,6 +2615,7 @@ MV_BOARD_PEX_INFO *mvBoardPexInfoGet(void)
 	case SYNO_DS213j_ID:
 	case SYNO_US3_ID:
 	case SYNO_RS214_ID:
+	case SYNO_DS214se_ID:
 #endif
 		return &BOARD_INFO(boardId)->boardPexInfo;
 		break;
@@ -2740,8 +2650,7 @@ MV_VOID mvBoardBitMaskConfigSet(MV_U32 config)
 			MV_REG_BIT_SET(GPP_DATA_OUT_REG(1), BIT31);
 			MV_REG_BIT_RESET(GPP_DATA_OUT_REG(2), BIT0);
 			MV_REG_BIT_SET(GPP_DATA_OUT_REG(2), BIT1);
-		}
-		else {
+		} else {
 			MV_REG_BIT_RESET(GPP_DATA_OUT_REG(1), BIT31);
 			MV_REG_BIT_SET(GPP_DATA_OUT_REG(2), BIT0);
 			MV_REG_BIT_RESET(GPP_DATA_OUT_REG(2), BIT1);

@@ -115,6 +115,11 @@ struct irq_desc *irq_to_desc(unsigned int irq)
 {
 	return radix_tree_lookup(&irq_desc_tree, irq);
 }
+#ifdef MY_DEF_HERE
+#ifdef CONFIG_ARCH_GEN3
+EXPORT_SYMBOL(irq_to_desc);
+#endif
+#endif
 
 static void delete_irq_desc(unsigned int irq)
 {

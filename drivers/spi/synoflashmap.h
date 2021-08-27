@@ -9,12 +9,12 @@ static struct mtd_partition synomtd_partitions[] = {
 	{
 		.name	= "RedBoot",		/* u-boot		*/
 		.offset	= 0x00000000,
-		.size	= 0x000B0000,		/* 768KB		*/
+		.size	= 0x000D0000,		/* 832KB		*/
 	},
 	{
 		.name	= "zImage",		/* linux kernel image	*/
-		.offset	= 0x000C0000,
-		.size	= 0x00310000,		/* 2880 KB		*/
+		.offset	= 0x000D0000,
+		.size	= 0x00300000,		/* 3 MB 		*/
 	},
 	{
 		.name	= "rd.gz",			/* ramdisk image*/

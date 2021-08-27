@@ -471,7 +471,7 @@ static void au_serial_out(struct uart_port *p, int offset, int value)
 	__raw_writel(value, p->membase + offset);
 }
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) &&  defined(CONFIG_ARCH_ARMADA370)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 /* Save the LCR value so it can be re-written when a Busy Detect IRQ occurs. */
 static inline void dwapb_save_out_value(struct uart_port *p, int offset,
                                        int value)
@@ -545,7 +545,7 @@ static void set_io_from_upio(struct uart_port *p)
 		break;
 
 	case UPIO_RM9000:
-#if defined(CONFIG_SYNO_ARMADA_ARCH) &&  defined(CONFIG_ARCH_ARMADA370)
+#if defined(CONFIG_SYNO_ARMADA_ARCH)
 		p->serial_in = mem_serial_in;
 		p->serial_out = dwapb_serial_out;
 		break;

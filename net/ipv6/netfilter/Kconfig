@@ -197,7 +197,7 @@ config IP6_NF_RAW
 config IP6_NF_TARGET_NFP
 	tristate "NFP target support for IPv6"
 	default y
-	depends on NF_CONNTRACK_IPV6 && MV_ETH_NFP_CT && MV_ETH_NFP_LEARN
+	depends on NF_CONNTRACK_IPV6 && MV_ETH_NFP_HOOKS
 	help
 	  This target allows to process selected connections in NFP.
 

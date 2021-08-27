@@ -216,7 +216,9 @@ typedef enum {
 #ifdef CONFIG_ARCH_GEN3
 	e1000_phy_8201e,
 	e1000_phy_8211d,
+ 	e1000_phy_8211e,
 	e1000_phy_8201fr,
+	e1000_phy_lan8720a,
 #endif
 	e1000_phy_undefined = 0xFF
 } e1000_phy_type;
@@ -2951,8 +2953,13 @@ struct e1000_host_command_info {
 #define RTL8201E_PHY_ID     0x001CC810
 #define RTL8211D_PHY_ID     0x001CC910//It's the same as RTL8211B
 #define RTL8211D_PHY_REV_ID     0b0100
+#define RTL8211E_PHY_ID     0x001CC910//It's the same as RTL8211B
+#define RTL8211E_PHY_REV_ID     0b0101
+
 #define RTL8201FR_PHY_ID    0x001CC810
 #define RTL8201FR_PHY_REV_ID    0b0110
+
+#define LAN8720A_PHY_ID		 0x0007C0F0
 #endif
 
 /* Bits...

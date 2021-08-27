@@ -316,6 +316,10 @@ void SynoSpinupEnd(struct scsi_device *sdev);
 int SynoSpinupRemove(struct scsi_device *sdev);
 #endif /* MY_ABC_HERE */
 
+#ifdef MY_ABC_HERE
+#define SYNO_DISK_MODEL_LEN "24"
+#endif
+
 extern struct scsi_device *__scsi_add_device(struct Scsi_Host *,
 		uint, uint, uint, void *hostdata);
 extern int scsi_add_device(struct Scsi_Host *host, uint channel,

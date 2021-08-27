@@ -240,7 +240,7 @@ u32 xhci_port_state_to_neutral(u32 state)
 #ifdef MY_ABC_HERE
 #include <linux/pci.h>
 
-extern int disable_usb3;
+extern int gSynoFactoryUSB3Disable;
 #endif
 
 /*
@@ -342,7 +342,7 @@ void xhci_ring_device(struct xhci_hcd *xhci, int slot_id)
 }
 
 #ifdef MY_ABC_HERE
-extern int disable_usb3;
+extern int gSynoFactoryUSB3Disable;
 #endif
 
 static void xhci_disable_port(struct usb_hcd *hcd, struct xhci_hcd *xhci,
@@ -582,13 +582,14 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	int max_ports;
 	unsigned long flags;
 	u32 temp, status;
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	u32 temp_map;
 #endif
 	int retval = 0;
 	__le32 __iomem **port_array;
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	__le32 __iomem **port_array_map;
+	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
 #endif
 	int slot_id;
 	struct xhci_bus_state *bus_state;
@@ -600,7 +601,10 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 
 	max_ports = xhci_get_ports(hcd, &port_array);
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
-	xhci_get_ports_map(hcd, &port_array_map); // max_ports should be the same
+	if (pdev->vendor == PCI_VENDOR_ID_NEC ||
+		pdev->vendor == PCI_VENDOR_ID_ETRON) {
+		xhci_get_ports_map(hcd, &port_array_map); // max_ports should be the same, only for NEC fixes
+	}
 #endif
 	bus_state = &xhci->bus_state[hcd_index(hcd)];
 
@@ -653,12 +657,15 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		xhci_dbg(xhci, "get port status, actual port %d status  = 0x%x\n", wIndex, temp);
 
 #ifdef MY_DEF_HERE
+		if (pdev->vendor == PCI_VENDOR_ID_NEC ||
+			pdev->vendor == PCI_VENDOR_ID_ETRON) {
 			temp_map = xhci_readl(xhci, port_array[(wIndex+1)%2]);
 			xhci_dbg(xhci, "get port status, actual port %d status  = 0x%x\n", (wIndex+1)%2, temp_map);
 			temp_map = xhci_readl(xhci, port_array_map[wIndex]);
 			xhci_dbg(xhci, "get port_map status, actual port %d status  = 0x%x\n", wIndex, temp_map);
 			temp_map = xhci_readl(xhci, port_array_map[(wIndex+1)%2]);
 			xhci_dbg(xhci, "get port_map status, actual port %d status  = 0x%x\n", (wIndex+1)%2, temp_map);
+		}
 #endif
 
 		/* wPortChange bits */
@@ -769,7 +776,10 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		wIndex--;
 		temp = xhci_readl(xhci, port_array[wIndex]);
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+		if (pdev->vendor == PCI_VENDOR_ID_NEC ||
+			pdev->vendor == PCI_VENDOR_ID_ETRON) {
 			temp_map = xhci_readl(xhci, port_array_map[wIndex]);
+		}
 #endif
 		if (temp == 0xffffffff) {
 			retval = -ENODEV;
@@ -892,12 +902,13 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 */
 #ifdef MY_ABC_HERE
 			xhci_dbg(xhci, "set port power. hcd->speed:%d.\n",hcd->speed);
-			if (1 == disable_usb3 && hcd->speed == HCD_USB3)
+			if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3)
 				xhci_writel(xhci, temp & ~PORT_POWER,
 					port_array[wIndex]);
-			else {
+			else if (pdev->vendor == PCI_VENDOR_ID_NEC ||
+					 pdev->vendor == PCI_VENDOR_ID_ETRON) {
 				// set power on usb3 port before usb2 port
-				if((0 == disable_usb3) && (hcd->speed == HCD_USB2) && !(temp_map & PORT_POWER)) {
+				if((0 == gSynoFactoryUSB3Disable) && (hcd->speed == HCD_USB2) && !(temp_map & PORT_POWER)) {
 					xhci_writel(xhci, temp_map | PORT_POWER,
 						port_array_map[wIndex]);
 					temp_map = xhci_readl(xhci, port_array_map[wIndex]);
@@ -931,7 +942,9 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 
 			temp = xhci_readl(xhci, port_array[wIndex]);
 			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
+			if (pdev->vendor == PCI_VENDOR_ID_NEC ||
+				pdev->vendor == PCI_VENDOR_ID_ETRON) {
 				xhci_dbg(xhci, "set port reset map, actual port %d status  = 0x%x\n", wIndex, temp_map);
 
 				temp_map = xhci_readl(xhci, port_array_map[wIndex]);
@@ -943,10 +956,15 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 					xhci_writel(xhci, temp_map | PORT_RESET, port_array_map[wIndex]);
 					temp_map = xhci_readl(xhci, port_array_map[wIndex]);
 				}
+			}
+#endif
 
+#ifdef MY_DEF_HERE
 			// if host controller reported usb2 connected, try to reset to check if it can morph into SuperSpeed
 			// the sequence and delay time are critical, test before modifying.
-			else if((XHCI_SPECIAL_RESET_RUN == xhci_special_reset)  && (hcd->speed == HCD_USB2) &&
+			else if((pdev->vendor == PCI_VENDOR_ID_NEC ||
+					 pdev->vendor == PCI_VENDOR_ID_ETRON) &&
+					(XHCI_SPECIAL_RESET_RUN == xhci_special_reset)  && (hcd->speed == HCD_USB2) &&
 							(temp & PORT_CONNECT) &&
 							!(temp_map & PORT_CONNECT)) { // if temp_map connected already, no need to do special reset (ex. external hub)
 				xhci_dbg(xhci, "set port special reset.\n");
@@ -984,7 +1002,10 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		wIndex--;
 		temp = xhci_readl(xhci, port_array[wIndex]);
 #ifdef MY_DEF_HERE
+		if (pdev->vendor == PCI_VENDOR_ID_NEC ||
+			pdev->vendor == PCI_VENDOR_ID_ETRON) {
 			temp_map = xhci_readl(xhci, port_array_map[wIndex]);
+		}
 #endif
 		if (temp == 0xffffffff) {
 			retval = -ENODEV;
@@ -1030,8 +1051,11 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		case USB_PORT_FEAT_C_ENABLE:
 		case USB_PORT_FEAT_C_PORT_LINK_STATE:
 #ifdef MY_DEF_HERE
+			if (pdev->vendor == PCI_VENDOR_ID_NEC ||
+				pdev->vendor == PCI_VENDOR_ID_ETRON) {
 				xhci_clear_port_change_bit(xhci, wValue, wIndex,
 					port_array[wIndex], port_array_map[wIndex], temp);
+			}
 #else
 			xhci_clear_port_change_bit(xhci, wValue, wIndex,
 					port_array[wIndex], temp);

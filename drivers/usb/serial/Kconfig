@@ -252,7 +252,7 @@ config USB_SERIAL_GARMIN
 
 config USB_SERIAL_IPW
         tristate "USB IPWireless (3G UMTS TDD) Driver"
-	select USB_SERIAL_WWAN
+	select USB_SERIAL_WWAN_SYNO
 	help
 	  Say Y here if you want to use a IPWireless USB modem such as
 	  the ones supplied by Axity3G/Sentech South Africa.
@@ -496,7 +496,7 @@ config USB_SERIAL_QCAUX
 
 config USB_SERIAL_QUALCOMM
 	tristate "USB Qualcomm Serial modem"
-	select USB_SERIAL_WWAN
+	select USB_SERIAL_WWAN_SYNO
 	help
 	  Say Y here if you have a Qualcomm USB modem device.  These are
 	  usually wireless cellular modems.
@@ -591,9 +591,14 @@ config USB_SERIAL_XIRCOM
 config USB_SERIAL_WWAN
 	tristate
 
+config USB_SERIAL_WWAN_SYNO
+	tristate
+	help
+	  this is copy from USB_SERIAL_WWAN
+
 config USB_SERIAL_OPTION
 	tristate "USB driver for GSM and CDMA modems"
-	select USB_SERIAL_WWAN
+	select USB_SERIAL_WWAN_SYNO
 	help
 	  Say Y here if you have a GSM or CDMA modem that's connected to USB.
 

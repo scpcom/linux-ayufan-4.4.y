@@ -73,13 +73,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 MV_VOID mvSysXorInit (void)
 {
 	MV_UNIT_WIN_INFO addrWinMap[MAX_TARGETS + 1];
-	MV_STATUS status;
+	MV_STATUS status, unit;
 
 	status = mvCtrlAddrWinMapBuild(addrWinMap, MAX_TARGETS + 1);
 	if (status == MV_OK)
 		status = mvXorWinInit(addrWinMap);
 
-	if(status == MV_OK)
-		mvXorHalInit(MV_XOR_MAX_CHAN);
+	if (status == MV_OK) {
+		for (unit = 0; unit < MV_XOR_MAX_UNIT; unit++)
+			mvXorHalInit(unit);
+
+	}
 	return;
 }

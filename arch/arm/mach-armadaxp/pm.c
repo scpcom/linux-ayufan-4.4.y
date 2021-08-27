@@ -23,6 +23,7 @@
 extern void armadaxp_deepidle(int power_state);
 extern void armadaxp_suspend(void);
 extern void axp_db_restore(void);
+extern void axp_irq_restore(void);
 
 typedef enum  {
 	DISABLED,
@@ -54,8 +55,8 @@ static int armadaxp_pm_enter(suspend_state_t state)
 		/* Reenable the Uart IRQ in order to wake from it */
 		/* Enable Uart IRQ */
 		reg = MV_REG_READ(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_UART0));
-		reg &= ~0xF;
-		reg |= 0x1;
+		reg |= (1 << CPU_INT_SOURCE_CONTROL_IRQ_OFFS);	/* Enable the IRQ */
+		reg = (reg & ~0xF) | 0x1;			/* Mask all non-boot CPUs */
 		MV_REG_WRITE(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_UART0), reg);
 
 		/* Disable IPI IRQs */
@@ -69,19 +70,19 @@ static int armadaxp_pm_enter(suspend_state_t state)
 
 		/* Reenable the NETA IRQ in order to wake from it */
 		reg = MV_REG_READ(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_GBE0_FIC));
-		reg |= 0x1;
+		reg = (reg & ~0xF) | 0x1;	/* Mask all non-boot CPUs */
 		MV_REG_WRITE(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_GBE0_FIC), reg);
 
 		reg = MV_REG_READ(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_GBE1_FIC));
-		reg |= 0x1;
+		reg = (reg & ~0xF) | 0x1;	/* Mask all non-boot CPUs */
 		MV_REG_WRITE(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_GBE1_FIC), reg);
 
 		reg = MV_REG_READ(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_GBE2_FIC));
-		reg |= 0x1;
+		reg = (reg & ~0xF) | 0x1;	/* Mask all non-boot CPUs */
 		MV_REG_WRITE(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_GBE2_FIC), reg);
 
 		reg = MV_REG_READ(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_GBE3_FIC));
-		reg |= 0x1;
+		reg = (reg & ~0xF) | 0x1;	/* Mask all non-boot CPUs */
 		MV_REG_WRITE(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_GBE3_FIC), reg);
 #endif /* CONFIG_MV_ETH_PNC_WOL */
 
@@ -94,7 +95,7 @@ static int armadaxp_pm_enter(suspend_state_t state)
 
 		/* Disable it since it will be re-enabled by the stack */
 		reg = MV_REG_READ(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_UART0));
-		reg &= ~0x1;
+		reg &= ~(1 << CPU_INT_SOURCE_CONTROL_IRQ_OFFS);
 		MV_REG_WRITE(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_UART0), reg);
 #ifdef CONFIG_MV_ETH_PNC_WOL
 		reg = MV_REG_READ(CPU_INT_SOURCE_CONTROL_REG(IRQ_AURORA_GBE0_FIC));
@@ -124,6 +125,7 @@ static int armadaxp_pm_enter(suspend_state_t state)
 
 		pr_info("Restoring Armada XP\n");
 		axp_db_restore();
+		axp_irq_restore();
 
 		break;
 	default:

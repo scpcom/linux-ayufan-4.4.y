@@ -43,6 +43,7 @@
 #define DISK_LED_ORANGE_SOLID	2
 #define DISK_LED_ORANGE_BLINK	3
 #define DISK_LED_GREEN_BLINK    4
+#define DISK_LED_BLUE			5
 
 #define SYNO_LED_OFF		0
 #define SYNO_LED_ON			1
@@ -207,6 +208,13 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 		WARN_ON(GPIO_UNDEF == generic_gpio.soc_sata_led.hdd1_fail_led);
 		WARN_ON(GPIO_UNDEF == generic_gpio.soc_sata_led.hdd2_fail_led);
 
+        if (SYNO_RS214_ID == mvBoardIdGet()) {
+                /* RS214 disk LED is HIGH active, so we need invert the active indication */
+                MV_REG_WRITE(MV_SATA_REGS_OFFSET + 0x2c, 0xc);
+        } else {
+                MV_REG_WRITE(MV_SATA_REGS_OFFSET + 0x2c, 0x4);
+        }
+
 	/* assign pin info according to hdd */
 	switch (index) {
 		case 1:
@@ -236,7 +244,8 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 		gpio_set_value(fail_led, active);
 	}
 	else if ( DISK_LED_GREEN_SOLID == status ||
-			  DISK_LED_OFF == status )
+			  DISK_LED_OFF == status ||
+			  DISK_LED_BLUE == status)
 	{
 		SYNOMppCtrlRegWrite(mpp_pin, mode_sata_present);  // change MPP to sata present mode
 		gpio_set_value(fail_led, !active);
@@ -329,6 +338,7 @@ SYNO_CTRL_USB_HDD_LED_SET(int status)
 		blink2 = 0;
 		break;
 	case DISK_LED_GREEN_SOLID:
+	case DISK_LED_BLUE:
 		bit1 = 0;
 		bit2 = 1;
 		blink1 = 0;
@@ -544,6 +554,10 @@ MV_U8 SYNOArmadaIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 	case SYNO_RS214_ID:
 		def_max_disk = 2;
 		break;
+	case SYNO_DS214se_ID:
+		def_max_disk = 2;
+		break;
+
 	default:
 		break;
 	}
@@ -566,6 +580,16 @@ MV_U8 SYNOArmadaIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 	return ret;
 }
 
+/* SYNO_CHECK_HDD_PRESENT
+ * Check HDD present for evansport
+ * input : index - disk index, 1-based.
+ * output: 0 - HDD not present,  1 - HDD present.
+ */
+int SYNO_CHECK_HDD_PRESENT(int index)
+{
+	return 1;
+}
+
 EXPORT_SYMBOL(SYNOArmadaIsBoardNeedPowerUpHDD);
 EXPORT_SYMBOL(SYNO_ARMADA_GPIO_PIN);
 EXPORT_SYMBOL(SYNO_ARMADA_GPIO_BLINK);
@@ -579,6 +603,7 @@ EXPORT_SYMBOL(SYNO_CTRL_FAN_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_ALARM_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_BACKPLANE_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
+EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
 
 /*
  Pin 		Mode	Signal select and definition	Input/output	Pull-up/pull-down
@@ -740,8 +765,8 @@ Armada_370_rs214_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.hdd5_led_1 = GPIO_UNDEF,
 						},
 		.soc_sata_led = {
-							.hdd2_fail_led = 49,
-							.hdd1_fail_led = 32,
+							.hdd2_fail_led = 32,
+							.hdd1_fail_led = 49,
 						},
 		.model		  = {
 							.model_id_0 = 55,
@@ -750,9 +775,9 @@ Armada_370_rs214_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.model_id_3 = 58,
 						},
 		.fan		  = {
-							.fan_1 = 63,
+							.fan_1 = 65,
 							.fan_2 = 64,
-							.fan_3 = 65,
+							.fan_3 = 63,
 							.fan_fail = 38,
 							.fan_fail_2 = 50,
 							.fan_fail_3 = 51,
@@ -782,6 +807,63 @@ Armada_370_rs214_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 }
 
 static void 
+Armada_370_214se_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
+{
+	SYNO_ARMADA_GENERIC_GPIO gpio_214se = {
+		.ext_sata_led = {
+							.hdd1_led_0 = GPIO_UNDEF,
+							.hdd1_led_1 = GPIO_UNDEF,
+							.hdd2_led_0 = GPIO_UNDEF,
+							.hdd2_led_1 = GPIO_UNDEF,
+							.hdd3_led_0 = GPIO_UNDEF,
+							.hdd3_led_1 = GPIO_UNDEF,
+							.hdd4_led_0 = GPIO_UNDEF,
+							.hdd4_led_1 = GPIO_UNDEF,
+							.hdd5_led_0 = GPIO_UNDEF,
+							.hdd5_led_1 = GPIO_UNDEF,
+						},
+		.soc_sata_led = {
+							.hdd2_fail_led = 32,
+							.hdd1_fail_led = 31,
+						},
+		.model		  = {
+							.model_id_0 = 55,
+							.model_id_1 = 56,
+							.model_id_2 = 57,
+							.model_id_3 = 58,
+						},
+		.fan		  = {
+							.fan_1 = 63,
+							.fan_2 = 64,
+							.fan_3 = 65,
+							.fan_fail = 38,
+							.fan_fail_2 = GPIO_UNDEF,
+							.fan_fail_3 = GPIO_UNDEF,
+						},
+		.hdd_pm		  = {
+							.hdd1_pm = 37,
+							.hdd2_pm = 62,
+							.hdd3_pm = GPIO_UNDEF,
+							.hdd4_pm = GPIO_UNDEF,
+						},
+		.rack		  = {
+							.buzzer_mute_req = GPIO_UNDEF,
+							.buzzer_mute_ack = GPIO_UNDEF,
+							.rps1_on = GPIO_UNDEF,
+							.rps2_on = GPIO_UNDEF,
+						},
+		.multi_bay	  = {
+							.inter_lock = GPIO_UNDEF,
+						},
+		.status		  = {
+							.power_led = GPIO_UNDEF,
+							.alarm_led = GPIO_UNDEF,
+						},
+	};
+
+	*global_gpio = gpio_214se;
+}
+static void
 ARMADA_default_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 {
 	SYNO_ARMADA_GENERIC_GPIO gpio_default = {
@@ -855,6 +937,11 @@ void synology_gpio_init(void)
 		Armada_370_rs214_GPIO_init(&generic_gpio);
 		printk("Synology Armada370 RS214 GPIO Init\n");
 		break;
+	case SYNO_DS214se_ID:
+		Armada_370_214se_GPIO_init(&generic_gpio);
+		printk("Synology Armada370 DS214se GPIO Init\n");
+		break;
+
 	default:
 		printk("%s BoardID not match\n", __FUNCTION__);
 		ARMADA_default_GPIO_init(&generic_gpio);

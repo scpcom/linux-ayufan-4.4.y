@@ -369,6 +369,13 @@ int ahci_reset_em(struct ata_host *host);
 irqreturn_t ahci_interrupt(int irq, void *dev_instance);
 void ahci_print_info(struct ata_host *host, const char *scc_s);
 
+#ifdef MY_ABC_HERE
+static inline void __iomem *ahci_host_base(struct ata_host *host)
+{
+	struct ahci_host_priv *hpriv = host->private_data;
+	return hpriv->mmio;
+}
+#endif
 static inline void __iomem *__ahci_port_base(struct ata_host *host,
 					     unsigned int port_no)
 {

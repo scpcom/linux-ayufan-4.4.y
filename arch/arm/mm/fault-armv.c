@@ -37,13 +37,8 @@ static pteval_t shared_pte_mask = L_PTE_MT_BUFFERABLE;
  * Therefore those configurations which might call adjust_pte (those
  * without CONFIG_CPU_CACHE_VIPT) cannot support split page_table_lock.
  */
-#ifdef CONFIG_ARM_ARMV5_L2_CACHE_COHERENCY_FIX
-static int do_adjust_pte(struct vm_area_struct *vma, unsigned long address,
-		unsigned long pfn, pte_t *ptep, int update, int only_shared)
-#else
 static int do_adjust_pte(struct vm_area_struct *vma, unsigned long address,
 		unsigned long pfn, pte_t *ptep)
-#endif
 {
 	pte_t entry = *ptep;
 	int ret;
@@ -57,14 +52,7 @@ static int do_adjust_pte(struct vm_area_struct *vma, unsigned long address,
 	 * If this page isn't present, or is already setup to
 	 * fault (ie, is old), we can safely ignore any issues.
 	 */
-#ifdef CONFIG_ARM_ARMV5_L2_CACHE_COHERENCY_FIX
-	if (ret &&
-	    (pte_val(entry) & L_PTE_MT_MASK) != shared_pte_mask &&
-	    update) {
-#else
 	if (ret && (pte_val(entry) & L_PTE_MT_MASK) != shared_pte_mask) {
-#endif
-		unsigned long pfn = pte_pfn(entry);
 		flush_cache_page(vma, address, pfn);
 		outer_flush_range((pfn << PAGE_SHIFT),
 				  (pfn << PAGE_SHIFT) + PAGE_SIZE);
@@ -72,19 +60,7 @@ static int do_adjust_pte(struct vm_area_struct *vma, unsigned long address,
 		pte_val(entry) |= shared_pte_mask;
 		set_pte_at(vma->vm_mm, address, ptep, entry);
 		flush_tlb_page(vma, address);
-#ifdef CONFIG_ARM_ARMV5_L2_CACHE_COHERENCY_FIX
-		printk(KERN_DEBUG "Uncached vma %08x "
-			"(addr %08lx flags %08lx phy %08x) from pid %d\n",
-			(unsigned int) vma, vma->vm_start, vma->vm_flags,
-			(unsigned int) (pfn << PAGE_SHIFT),
-			current->pid);
-#endif
 	}
-#ifdef CONFIG_ARM_ARMV5_L2_CACHE_COHERENCY_FIX
-	if (only_shared && (pte_val(entry) & L_PTE_MT_MASK) != shared_pte_mask)
-		ret = 0;
-#endif
-	pte_unmap(pte);
 
 	return ret;
 }
@@ -162,9 +138,6 @@ make_coherent(struct address_space *mapping, struct vm_area_struct *vma,
 	unsigned long offset;
 	pgoff_t pgoff;
 	int aliases = 0;
-#ifdef CONFIG_ARM_ARMV5_L2_CACHE_COHERENCY_FIX
-	int run;
-#endif
 
 	pgoff = vma->vm_pgoff + ((addr - vma->vm_start) >> PAGE_SHIFT);
 
@@ -174,39 +147,6 @@ make_coherent(struct address_space *mapping, struct vm_area_struct *vma,
 	 * cache coherency.
 	 */
 	flush_dcache_mmap_lock(mapping);
-#ifdef CONFIG_ARM_ARMV5_L2_CACHE_COHERENCY_FIX
-	/*
-	 * In the first run we just check if we have to make some
-	 * address space uncacheable because of L1 VIVT. In the second
-	 * we check if there is an uncached map in other processes.  If
-	 * one of the previous condition is true we proceed to make
-	 * *all* (both in current process VMA and that of others) of
-	 * them so. This should solve both cases of multiple shared
-	 * memories attached in the same process but not impact the
-	 * common case of just one mapping per process.
-	 */
-	for (run = 0; run < 3; run++) {
-		vma_prio_tree_foreach(mpnt, &iter, &mapping->i_mmap,
-				pgoff, pgoff) {
-			if ((mpnt->vm_mm != mm || mpnt == vma) && run == 0)
-				continue;
-			if (!(mpnt->vm_flags & VM_MAYSHARE) &&
-				run != 2) /* update all mappings */
-				continue;
-			offset = (pgoff - mpnt->vm_pgoff) << PAGE_SHIFT;
-			aliases += adjust_pte(mpnt, mpnt->vm_start + offset,
-					/* update only on the last run */
-					run == 2,
-					/*
-					 * on the second run
-					 * catch shared in other procs
-					 */
-					run == 1);
-		}
-		if (aliases == 0 && run == 1)
-			break;
-	}
-#else
 	vma_prio_tree_foreach(mpnt, &iter, &mapping->i_mmap, pgoff, pgoff) {
 		/*
 		 * If this VMA is not in our MM, we can ignore it.
@@ -218,20 +158,11 @@ make_coherent(struct address_space *mapping, struct vm_area_struct *vma,
 		if (!(mpnt->vm_flags & VM_MAYSHARE))
 			continue;
 		offset = (pgoff - mpnt->vm_pgoff) << PAGE_SHIFT;
-#ifdef CONFIG_ARM_ARMV5_L2_CACHE_COHERENCY_FIX
-		aliases += adjust_pte(mpnt, mpnt->vm_start + offset, pfn, 1, 0);
-#else
 		aliases += adjust_pte(mpnt, mpnt->vm_start + offset, pfn);
-#endif
 	}
-#endif
 	flush_dcache_mmap_unlock(mapping);
 	if (aliases)
-#ifdef CONFIG_ARM_ARMV5_L2_CACHE_COHERENCY_FIX
-		do_adjust_pte(vma, addr, pfn, ptep, 1, 0);
-#else
 		do_adjust_pte(vma, addr, pfn, ptep);
-#endif
 }
 
 /*

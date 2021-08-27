@@ -455,6 +455,9 @@ static struct device_attribute *sil24_shost_attrs[] = {
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
 #endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_sata_disk_led_ctrl,
+#endif
 	NULL
 };
 #endif
@@ -827,7 +830,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 	u32 tmp;
 
 #ifdef MY_ABC_HERE
-	link->SynoIsSil3132 = 1;
+	link->uiStsFlags |= SYNO_STATUS_IS_SIL3132;
 #endif
 
  retry:
@@ -1104,17 +1107,8 @@ static int sil24_pmp_hardreset(struct ata_link *link, unsigned int *class,
 		return rc;
 	}
 
-#ifdef SYNO_FIX_HORKAGE_15G_MISSING
-	/* test if we need reset it again */
-	if(iNeedResetAgainFor15G(link)) {
-		DBGMESG("ata port %d has ALREADY_APPLY_15G and not 1.5G speed, need to reset it again\n",
-				link->ap->print_id);
-		sata_std_hardreset(link, class, deadline);
-	}
-#endif
-
 #ifdef MY_ABC_HERE
-	link->SynoIsSil3132PM = 1;
+	link->uiStsFlags |= SYNO_STATUS_IS_SIL3132PM;
 #endif
 	return sata_std_hardreset(link, class, deadline);
 }
@@ -1445,6 +1439,14 @@ static void sil24_init_controller(struct ata_host *host)
 				dev_err(host->dev,
 					"failed to clear port RST\n");
 		}
+#ifdef CONFIG_SYNO_INCREASE_SIL3132_OUT_SWING
+		dev_info(host->dev, "Increas sil3132 swing to 0xf\n");
+		tmp = readl(port + PORT_PHY_CFG);
+		tmp &= ~0x1f;
+			tmp |= 0x0f;
+		writel(tmp, port + PORT_PHY_CFG);
+#endif
+
 
 		/* configure port */
 		sil24_config_port(ap);

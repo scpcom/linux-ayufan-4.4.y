@@ -52,6 +52,7 @@
  *   per device, not per bus
  */
  
+#include <linux/export.h>
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/gfp.h>
@@ -61,6 +62,7 @@
 #include <linux/usb/hcd.h>
 #include <linux/mutex.h>
 #include <linux/uaccess.h>
+#include <linux/synobios.h>
 
 #include "usb.h"
 
@@ -485,7 +487,14 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 	if(usbdev && usbdev->bus) {
 		memset(buf, 0, sizeof(buf));
 		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath);
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
+#if defined(CONFIG_SYNO_X86)
+#if defined(CONFIG_ARCH_GEN3)
+		if(!strcmp(buf,"0000:01:0d.0-1")) {
+			return 1;
+		}
+#endif
+#endif
+#if defined(CONFIG_SYNO_X64)
 #if defined(CONFIG_SYNO_CEDARVIEW)
 		if(!strcmp(buf,"0000:00:1d.7-2")) {
 			return 1;
@@ -495,7 +504,7 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 			return 1;
 		}
 #endif /*CONFIG_SYNO_CEDARVIEW*/
-#endif /*CONFIG_SYNO_X86 || CONFIG_SYNO_X64*/
+#endif /*CONFIG_SYNO_X64*/
 #ifdef CONFIG_SYNO_MV88F5x8x
 		if(0 == strcmp(buf,"ehci_marvell.4523-1.1")) {
 			return 1;
@@ -526,12 +535,19 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
+#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_ARMADA_XP)
+		if(!strcmp(buf, "ehci_marvell.1-1") ||
+		   !strcmp(buf, "ehci_marvell.0-1")) {
+			return 1;
+		}
+#endif
 	}
 	return 0;
 }
 #endif
 
 #ifdef MY_ABC_HERE
+extern char gszSynoHWVersion[];
 int blIsCardReader(struct usb_device *usbdev)
 {
 	char buf[256];
@@ -544,14 +560,29 @@ int blIsCardReader(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
+#if defined(CONFIG_SYNO_X86)
+#if defined(CONFIG_ARCH_GEN3)
+			if(!strcmp(buf,"0000:01:0d.1-1")) {
+			return 1;
+			}
+#endif
+#endif
 #if defined(CONFIG_SYNO_QORIQ)
 		if(!strcmp(buf,"fsl-ehci.0-1.3")) {
 			return 1;
 		}
 #endif
+#if defined(CONFIG_SYNO_ARMADA)
+		if (!strncmp(gszSynoHWVersion, HW_US3v10, strlen(HW_US3v10))) {
+			if (!strcmp(buf, "0000:00:01.0-1") || !strcmp(buf, "0000:00:01.0-4")) {
+				return 1;
+			}
+		}
+#endif
 	}
 	return 0;
 }
+EXPORT_SYMBOL(blIsCardReader);
 #endif
 
 /*****************************************************************/

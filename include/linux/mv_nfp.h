@@ -73,8 +73,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/types.h>
 #include <linux/netdevice.h>
 
-
-#if defined(CONFIG_MV_ETH_NFP) || defined(CONFIG_MV_ETH_NFP_MODULE)
+#if defined(CONFIG_MV_ETH_NFP)
 
 /* Supported flags */
 #define MV_EXT_L3_VALID_MASK	0x0001
@@ -92,12 +91,15 @@ typedef struct {
 } MV_EXT_PKT_INFO;
 
 struct nfp_core_ops {
-	int (*nfp_rx_ext)(struct net_device *dev, struct sk_buff *skb, MV_EXT_PKT_INFO *pktInfo);
+	int (*nfp_rx)(unsigned int port, void *rx_desc, void *pkt, void *res);
 };
 
 extern struct nfp_core_ops *nfp_core_p;
 int nfp_core_ops_init(void);
 
+#endif /* CONFIG_MV_ETH_NFP */
+
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 struct nfp_hook_ops {
 	int (*nfp_is_learning_enabled)(void);
 
@@ -137,6 +139,10 @@ struct nfp_hook_ops {
 extern struct nfp_hook_ops *nfp_mgr_p;
 int nfp_hook_ops_init(void);
 
-#endif /* CONFIG_MV_ETH_NFP || CONFIG_MV_ETH_NFP_MODULE */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
+
+#ifdef CONFIG_MV_ETH_NFP_EXT
+int mv_eth_nfp_ext(struct net_device *dev, struct sk_buff *skb, MV_EXT_PKT_INFO *pktInfo);
+#endif /* CONFIG_MV_ETH_NFP_EXT */
 
 #endif /* LINUX_MV_NFP_H */

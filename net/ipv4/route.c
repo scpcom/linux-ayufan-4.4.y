@@ -664,12 +664,12 @@ static inline int ip_rt_proc_init(void)
 static inline void rt_free(struct rtable *rt)
 {
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 		if (rt->nfp)
 			if (nfp_mgr_p->nfp_hook_fib_rule_del)
 				nfp_mgr_p->nfp_hook_fib_rule_del(AF_INET, (u8 *)(&rt->rt_src), (u8*)(&rt->rt_dst),
 							rt->rt_iif, rt->dst.dev->ifindex);
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 	call_rcu_bh(&rt->dst.rcu_head, dst_rcu_free);
 }
@@ -703,14 +703,14 @@ static int rt_may_expire(struct rtable *rth, unsigned long tmo1, unsigned long t
 		goto out;
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (rth->nfp) {
 		if (nfp_mgr_p->nfp_hook_fib_rule_age)
 			if (nfp_mgr_p->nfp_hook_fib_rule_age(AF_INET, (u8 *)(&rth->rt_src), (u8 *)(&rth->rt_dst),
 						rth->rt_iif, rth->dst.dev->ifindex))
 			rth->dst.lastuse = jiffies;
 	}
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 	age = jiffies - rth->dst.lastuse;
 	if ((age <= tmo1 && !rt_fast_clean(rth)) ||
@@ -827,7 +827,7 @@ static void rt_do_flush(struct net *net, int process_context)
 }
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void nfp_fib_sync(void)
 {
 	struct rtable *rt;
@@ -855,7 +855,7 @@ void nfp_fib_sync(void)
 	}
 }
 EXPORT_SYMBOL(nfp_fib_sync);
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif  
 
 /*
@@ -2105,9 +2105,9 @@ static int ip_route_input_mc(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 		goto e_nobufs;
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	rth->nfp = false;
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 #ifdef CONFIG_IP_ROUTE_CLASSID
 	rth->dst.tclassid = itag;
@@ -2270,7 +2270,7 @@ static int __mkroute_input(struct sk_buff *skb,
 
 	rt_set_nexthop(rth, NULL, res, res->fi, res->type, itag);
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	rth->nfp = false;
 	if (!(rth->rt_flags & (RTCF_MULTICAST | RTCF_BROADCAST | RTCF_LOCAL | RTCF_REJECT))) {
 		if (nfp_mgr_p->nfp_hook_fib_rule_add)
@@ -2278,7 +2278,7 @@ static int __mkroute_input(struct sk_buff *skb,
 					(u8 *)(&rth->rt_gateway), rth->rt_iif, rth->dst.dev->ifindex))
 			rth->nfp = true;
 	}
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 	*result = rth;
@@ -2434,9 +2434,9 @@ local_input:
 		goto e_nobufs;
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	rth->nfp = false;
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 	rth->dst.input= ip_local_deliver;
 	rth->dst.output= ip_rt_bug;
@@ -2650,9 +2650,9 @@ static struct rtable *__mkroute_output(const struct fib_result *res,
 		return ERR_PTR(-ENOBUFS);
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	rth->nfp = false;
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 	rth->dst.output = ip_output;
 
@@ -2991,9 +2991,9 @@ struct dst_entry *ipv4_blackhole_route(struct net *net, struct dst_entry *dst_or
 			dev_hold(new->dev);
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 		rt->nfp = false;
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 		rt->rt_key_dst = ort->rt_key_dst;
 		rt->rt_key_src = ort->rt_key_src;

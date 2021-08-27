@@ -21,11 +21,12 @@
 #include <linux/pci.h>
 #include <linux/platform_device.h>
 
-
 #define INTELCE_GPIO_DRV_NAME		"intelce_gpio"
 #define PCI_INTELCE_GPIO_DEVICE_ID	0x2e67
 
 #define INTELCE_GPIO_BAR        0
+
+#define INTELCE_GPIO_IRQ_BASE 128 /* Search free IRQS start from this number*/
 
 struct intelce_gpio_chip{
 	int irq_base;

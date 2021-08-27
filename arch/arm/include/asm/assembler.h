@@ -56,7 +56,7 @@
 /*
  * Data preload for architectures that support it
  */
-#if __LINUX_ARM_ARCH__ >= 5 && defined(CONFIG_USE_DSP)
+#if __LINUX_ARM_ARCH__ >= 5
 #define PLD(code...)	code
 #else
 #define PLD(code...)
@@ -71,7 +71,7 @@
  *
  * On Feroceon there is much to gain however, regardless of cache mode.
  */
-#if defined(CONFIG_CPU_FEROCEON) || defined(CONFIG_ARCH_FEROCEON)
+#ifdef CONFIG_CPU_FEROCEON
 #define CALGN(code...) code
 #else
 #define CALGN(code...)

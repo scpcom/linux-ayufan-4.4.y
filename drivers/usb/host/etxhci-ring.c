@@ -571,9 +571,13 @@ void etxhci_find_new_dequeue_state(struct xhci_hcd *xhci,
 	}
 
 	/* Dig out the cycle state saved by the xHC during the stop ep cmd */
-	xhci_dbg(xhci, "Finding endpoint context\n");
+	xhci_dbg(xhci, "Finding dequeue cycle state\n");
 	ep_ctx = etxhci_get_ep_ctx(xhci, dev->out_ctx, ep_index);
+	if (!xhci->hcc_params1 || !(dev->eps[ep_index].ep_state & EP_HAS_STREAMS))
 		state->new_cycle_state = 0x1 & le64_to_cpu(ep_ctx->deq);
+	else
+		state->new_cycle_state = 0x1 &
+			le64_to_cpu(dev->eps[ep_index].stream_info->stream_ctx_array[stream_id].stream_ring);
 
 	state->new_deq_ptr = cur_td->last_trb;
 	xhci_dbg(xhci, "Finding segment containing last TRB in TD.\n");
@@ -1057,6 +1061,7 @@ static void handle_set_deq_completion(struct xhci_hcd *xhci,
 	struct xhci_virt_device *dev;
 	struct xhci_ep_ctx *ep_ctx;
 	struct xhci_slot_ctx *slot_ctx;
+	u64 addr;
 
 	slot_id = TRB_TO_SLOT_ID(le32_to_cpu(trb->generic.field[3]));
 	ep_index = TRB_TO_EP_INDEX(le32_to_cpu(trb->generic.field[3]));
@@ -1114,9 +1119,14 @@ static void handle_set_deq_completion(struct xhci_hcd *xhci,
 	} else {
 		xhci_dbg(xhci, "Successful Set TR Deq Ptr cmd, deq = @%08llx\n",
 			 le64_to_cpu(ep_ctx->deq));
+		if (!xhci->hcc_params1 || !(dev->eps[ep_index].ep_state & EP_HAS_STREAMS))
+			addr = le64_to_cpu(ep_ctx->deq) & ~(EP_CTX_CYCLE_MASK);
+		else
+			addr = le64_to_cpu(dev->eps[ep_index].stream_info->stream_ctx_array[stream_id].stream_ring) &
+				~(STREAM_CTX_SCT_MASK | STREAM_CTX_CYCLE_MASK);
+
 		if (etxhci_trb_virt_to_dma(dev->eps[ep_index].queued_deq_seg,
-					 dev->eps[ep_index].queued_deq_ptr) ==
-		    (le64_to_cpu(ep_ctx->deq) & ~(EP_CTX_CYCLE_MASK))) {
+					 dev->eps[ep_index].queued_deq_ptr) == addr) {
 			/* Update the ring's dequeue segment and dequeue pointer
 			 * to reflect the new position.
 			 */
@@ -2387,6 +2397,14 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		 */
 		ep->skip = true;
 		xhci_dbg(xhci, "Miss service interval error, set skip flag\n");
+		goto cleanup;
+	case COMP_STREAM_ERR:
+		xhci_warn(xhci, "WARN: Invalid Stream Type error on endpoint\n");
+		status = -EPROTO;
+		goto cleanup;
+	case COMP_STRID_ERR:
+		xhci_warn(xhci, "WARN: Invalid Stream ID error on endpoint\n");
+		status = -EPROTO;
 		goto cleanup;
 	default:
 		if (etxhci_is_vendor_info_code(xhci, trb_comp_code)) {
@@ -3940,6 +3958,9 @@ static int queue_set_tr_deq(struct xhci_hcd *xhci, int slot_id,
 		xhci_warn(xhci, "A Set TR Deq Ptr command is pending.\n");
 		return 0;
 	}
+	if ((xhci->quirks & XHCI_EP_INFO_QUIRK) &&
+		(ep->ep_state & EP_HAS_STREAMS))
+		addr |= SCT_FOR_CTX(SCT_PRI_TR);
 	ep->queued_deq_seg = deq_seg;
 	ep->queued_deq_ptr = deq_ptr;
 	return queue_command(xhci, lower_32_bits(addr) | cycle_state,

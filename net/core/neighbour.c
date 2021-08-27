@@ -706,14 +706,14 @@ void neigh_destroy(struct neighbour *neigh)
 		printk(KERN_WARNING "Impossible event.\n");
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
        if (neigh->nfp) {
 		if (nfp_mgr_p->nfp_hook_arp_delete)
 			nfp_mgr_p->nfp_hook_arp_delete(neigh->tbl->family, neigh->primary_key);
                NEIGH_PRINTK2("0x%8lx: neigh %p, ref=%d, state=%d, nfp=%d is connected in %s.\n",
                        jiffies, neigh, atomic_read(&neigh->refcnt), neigh->nud_state, neigh->nfp, __func__);
        }
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 	skb_queue_purge(&neigh->arp_queue);
@@ -748,7 +748,7 @@ static void neigh_suspect(struct neighbour *neigh)
 static void neigh_connect(struct neighbour *neigh)
 {
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	neigh->nfp = false;
 	if (nfp_mgr_p->nfp_hook_arp_add)
 		if (!nfp_mgr_p->nfp_hook_arp_add(neigh->tbl->family, neigh->primary_key, neigh->ha, neigh->dev->ifindex)) {
@@ -756,7 +756,7 @@ static void neigh_connect(struct neighbour *neigh)
                NEIGH_PRINTK2("0x%8lx: neigh %p, ref=%d, state=%d, nfp=%d is connected in %s.\n",
                        jiffies, neigh, atomic_read(&neigh->refcnt), neigh->nud_state, neigh->nfp, __func__);
        }
-#endif /* CONFIG_MV_ETH_NFP_LEARN  */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS  */
 #else
 	NEIGH_PRINTK2("neigh %p is connected.\n", neigh);
 #endif
@@ -808,7 +808,7 @@ static void neigh_periodic_work(struct work_struct *work)
 				n->used = n->confirmed;
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 			if ((atomic_read(&n->refcnt) == 1) && (state != NUD_FAILED) &&
 				time_after(jiffies, n->used + n->parms->gc_staletime)) {
 				if (n->nfp) {
@@ -820,7 +820,7 @@ static void neigh_periodic_work(struct work_struct *work)
 						jiffies, n, atomic_read(&n->refcnt), n->nud_state, __func__);
 				}
 			}
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 			if (atomic_read(&n->refcnt) == 1 &&
 			    (state == NUD_FAILED ||
@@ -1357,8 +1357,6 @@ int neigh_connected_output(struct neighbour *neigh, struct sk_buff *skb)
 	struct net_device *dev = neigh->dev;
 	unsigned int seq;
 	int err;
-
-		__skb_pull(skb, skb_network_offset(skb));
 
 	do {
 		__skb_pull(skb, skb_network_offset(skb));
@@ -2928,7 +2926,7 @@ EXPORT_SYMBOL(neigh_sysctl_unregister);
 #endif	/* CONFIG_SYSCTL */
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void neigh_sync(int family)
 {
 	struct neigh_table *tbl;
@@ -2964,7 +2962,7 @@ void neigh_sync(int family)
 	read_unlock(&neigh_tbl_lock);
 }
 EXPORT_SYMBOL(neigh_sync);
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 static int __init neigh_init(void)

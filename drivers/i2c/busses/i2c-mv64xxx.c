@@ -21,6 +21,7 @@
 #include <linux/mv643xx_i2c.h>
 #include <linux/platform_device.h>
 #include <linux/io.h>
+#include <linux/delay.h>
 
 /* Register defines */
 #define	MV64XXX_I2C_REG_SLAVE_ADDR			0x00
@@ -276,6 +277,10 @@ mv64xxx_i2c_do_action(struct mv64xxx_i2c_data *drv_data)
 		writel(drv_data->cntl_bits | MV64XXX_I2C_REG_CONTROL_STOP,
 			drv_data->reg_base + MV64XXX_I2C_REG_CONTROL);
 		drv_data->block = 0;
+#if defined(CONFIG_ARMADA_XP_REV_A0) || defined(CONFIG_ARMADA_XP_REV_B0)
+		/* Add 5us delay in order to avoid repeated start timing violation */
+		udelay(5);
+#endif /* CONFIG_ARMADA_XP_REV_A0 || CONFIG_ARMADA_XP_REV_B0 */
 		wake_up_interruptible(&drv_data->waitq);
 		break;
 

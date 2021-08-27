@@ -25,21 +25,26 @@ extern long g_internal_hd_num;
 extern long g_hdd_hotplug;
 #endif
 
-#if defined(CONFIG_SYNO_CEDARVIEW)
-static int PrzPinMap[]   = {33, 35, 49, 18};
-static int HddEnPinMap[] = {16, 20, 21, 32};
-#elif defined(CONFIG_ARCH_GEN3)
-static int PrzPinMap[]   = {17, 18};
-static int HddEnPinMap[] = {9, 10};
+#define GPIO_UNDEF				0xFF
+
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_ARMADA)
+extern int SYNO_CHECK_HDD_PRESENT(int index);
+extern int SYNO_CTRL_HDD_POWERON(int index, int value);
+extern int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void);
 #else
-static int *PrzPinMap = NULL;
-static int *HddEnPinMap = NULL;
-#endif
+int SYNO_CHECK_HDD_PRESENT(int index)
+{
+	return 1;
+}
 
-static u8 gblInversePresent = 0;
-
-#if defined(CONFIG_SYNO_X64)
-extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+int SYNO_CTRL_HDD_POWERON(int index, int value)
+{
+	return 0;
+}
+bool SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
+{
+	return false;
+}
 #endif
 
 typedef struct __SynoHddMonData {
@@ -47,33 +52,10 @@ typedef struct __SynoHddMonData {
 	int blHddHotPlugSupport;
 	int iMaxHddNum;
 	int blHddEnStat[SYNO_MAX_HDD_PRZ];
-	int iHddPrzPinMap[SYNO_MAX_HDD_PRZ];
-	int iHddEnPinMap[SYNO_MAX_HDD_PRZ];
 } SynoHddMonData_t;
 
 static struct task_struct *pHddPrzPolling;
 static SynoHddMonData_t synoHddMonData;
-
-static int syno_hddmon_pin_mapping(SynoHddMonData_t *pData)
-{
-	int iRet = -1;
-
-	if (NULL == pData) {
-		goto END;
-	}
-
-	if((NULL != PrzPinMap) && (NULL != HddEnPinMap)) {
-		memcpy(pData->iHddPrzPinMap, PrzPinMap, sizeof(PrzPinMap));
-		memcpy(pData->iHddEnPinMap, HddEnPinMap, sizeof(HddEnPinMap));
-	}else{
-		pData->blHddHotPlugSupport = 0;
-		goto END;
-	}
-
-	iRet = 0;
-END:
-	return iRet;	
-}
 
 static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 {
@@ -99,7 +81,9 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 		goto END;
 	}
 
-	syno_hddmon_pin_mapping (pData);
+	if(!SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER()){
+		pData->blHddHotPlugSupport = 0;
+	}
 
 	if(0 == pData->blHddHotPlugSupport) {
 		goto END;
@@ -129,32 +113,20 @@ static int syno_hddmon_unplug_monitor(void *args)
 			break;
 		}
 
-		for(iIdx = 0; iIdx < pData->iMaxHddNum; iIdx++) {
+		for(iIdx = 1; iIdx <= pData->iMaxHddNum; iIdx++) {
 			if(pData->iProcessingIdx == iIdx) {
 				continue;
 			}
 
-#if defined(CONFIG_SYNO_X64)
-			syno_pch_lpc_gpio_pin(pData->iHddPrzPinMap[iIdx], &iPrzPinVal, 0);
-#else
-			if (gblInversePresent) {
-				iPrzPinVal = !gpio_get_value(pData->iHddPrzPinMap[iIdx]);
-			} else {
-				iPrzPinVal = gpio_get_value(pData->iHddPrzPinMap[iIdx]);
-			}
-#endif
+			iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
 
 			if (iPrzPinVal) {
 				continue;
 			}
 
-#if defined(CONFIG_SYNO_X64)
-			syno_pch_lpc_gpio_pin(pData->iHddEnPinMap[iIdx], &iPrzPinVal, 1);
-#else
-			gpio_set_value(pData->iHddEnPinMap[iIdx], iPrzPinVal);
-#endif
-			pData->blHddEnStat[iIdx] = iPrzPinVal;
 
+			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
+			pData->blHddEnStat[iIdx] = iPrzPinVal;
 		}
 
 		uiTimeout = SYNO_HDDMON_POLL_SEC * HZ;
@@ -180,19 +152,11 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 		goto END;
 	}
 
-	for(iIdx = 0; iIdx < pData->iMaxHddNum; iIdx++) {
+	for(iIdx = 1; iIdx <= pData->iMaxHddNum; iIdx++) {
 		pUnplugMonitor = NULL;
 		pData->iProcessingIdx = iIdx;
 
-#if defined(CONFIG_SYNO_X64)
-		syno_pch_lpc_gpio_pin(pData->iHddPrzPinMap[iIdx], &iPrzPinVal, 0);
-#else
-		if (gblInversePresent) {
-			iPrzPinVal = !gpio_get_value(pData->iHddPrzPinMap[iIdx]);
-		} else {
-			iPrzPinVal = gpio_get_value(pData->iHddPrzPinMap[iIdx]);
-		}
-#endif
+		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
 
 		if(pData->blHddEnStat[iIdx] != iPrzPinVal) {
 			if(iPrzPinVal) {
@@ -200,11 +164,7 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 				pUnplugMonitor = kthread_run(syno_hddmon_unplug_monitor, pData, SYNO_HDDMON_UPLG_STR);
 			}
 
-#if defined(CONFIG_SYNO_X64)
-			syno_pch_lpc_gpio_pin(pData->iHddEnPinMap[iIdx], &iPrzPinVal, 1);
-#else
-			gpio_set_value(pData->iHddEnPinMap[iIdx], iPrzPinVal);
-#endif
+			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
 			pData->blHddEnStat[iIdx] = iPrzPinVal;
 
 			if(iPrzPinVal) {
@@ -234,30 +194,17 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 		goto END;
 	}
 
-#if defined(CONFIG_ARCH_GEN3)
-	syno_hddmon_task(pData);
-#else
-	for(iIdx = 0; iIdx < pData->iMaxHddNum; iIdx++) {
+	for(iIdx = 1; iIdx <= pData->iMaxHddNum; iIdx++) {
 		pData->iProcessingIdx = iIdx;
 
-#if defined(CONFIG_SYNO_X64)
-		syno_pch_lpc_gpio_pin(pData->iHddPrzPinMap[iIdx], &iPrzPinVal, 0);
-#else
-		if (gblInversePresent) {
-			iPrzPinVal = !gpio_get_value(pData->iHddPrzPinMap[iIdx]);
-		}else{
-			iPrzPinVal = gpio_get_value(pData->iHddPrzPinMap[iIdx]);
-		}
-#endif
+		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
+
 		/* HDD Enable pins must be high just after boot-up,
 		 * so turns the pins to low if the hdds do not present.
 		 */
 		if(!iPrzPinVal) {
-#if defined(CONFIG_SYNO_X64)
-			syno_pch_lpc_gpio_pin(pData->iHddEnPinMap[iIdx], &iPrzPinVal, 1);
-#else
-			gpio_set_value(pData->iHddEnPinMap[iIdx], iPrzPinVal);
-#endif
+			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
+			pData->blHddEnStat[iIdx] = iPrzPinVal;
 		}
 
 		/*sync the states*/
@@ -265,7 +212,6 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 
 	}
 
-#endif /* CONFIG_ARCH_GEN3 */
 END:
 	return;
 }
@@ -303,10 +249,6 @@ END:
 static int __init syno_hddmon_init(void)
 {
 	int iRet = -1;
-
-#if defined(CONFIG_ARCH_GEN3)
-	gblInversePresent = 1;
-#endif
 
 	iRet = syno_hddmon_data_init(&synoHddMonData);
 	if( 0 > iRet) {

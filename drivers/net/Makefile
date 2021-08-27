@@ -1,8 +1,10 @@
 #
 # Makefile for the Linux network device drivers.
 #
+ifeq ($(CONFIG_PLAT_ARMADA),y)
 obj-$(CONFIG_MV_ETH_LEGACY) += ../../arch/arm/plat-armada/mv_drivers_lsp/mv_network/mv_ethernet/
 obj-$(CONFIG_MV_ETH_NETA) += ../../arch/arm/plat-armada/mv_drivers_lsp/mv_neta/net_dev/
+endif
 
 obj-$(CONFIG_SK98LIN) += sk98lin/
 #
@@ -55,6 +57,9 @@ obj-$(CONFIG_TR) += tokenring/
 obj-$(CONFIG_WAN) += wan/
 obj-$(CONFIG_WLAN) += wireless/
 obj-$(CONFIG_WIMAX) += wimax/
+ifeq ($(CONFIG_ARCH_GEN3),y)
+obj-$(CONFIG_UDMA) += udma/
+endif
 
 obj-$(CONFIG_VMXNET3) += vmxnet3/
 obj-$(CONFIG_XEN_NETDEV_FRONTEND) += xen-netfront.o

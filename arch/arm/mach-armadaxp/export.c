@@ -204,12 +204,11 @@ EXPORT_SYMBOL(TRC_START);
 EXPORT_SYMBOL(TRC_RELEASE);
 #endif
 
-#ifdef CONFIG_MV_ETH_NFP_MODULE
 #ifdef CONFIG_MV_ETH_BM
 #include "bm/mvBm.h"
 EXPORT_SYMBOL(mvBmVirtBase);
 #endif
+
 #include "mvList.h"
 EXPORT_SYMBOL(mvListCreate);
 EXPORT_SYMBOL(mvListDestroy);
-#endif

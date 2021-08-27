@@ -398,8 +398,7 @@ enum {
 	SATA_PMP_GSCR_9705_GPO = 928,
 	SATA_PMP_GSCR_9705_GPO_EN = 932,       /* GPIO dataout enable */
 	SATA_PMP_GSCR_9705_GPI_POLARITY = 940, /* GPIO datain polarity */
-	SATA_PMP_GSCR_9705_SRC_SEL1 = 964,     /* GPIO[10]-GPIO[19] source select */
-	SATA_PMP_GSCR_9705_SRC_SEL0 = 984,     /* GPIO[0]-GPIO[9] source select */
+	SATA_PMP_GSCR_9705_SATA_BLINK_RATE = 1004, /* Blink rate counter register */
 #endif
 
 	SATA_PMP_PSCR_STATUS	= 0,

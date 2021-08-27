@@ -281,6 +281,7 @@ struct stripe_head_state {
 #define	R5_WantFUA	14	/* Write should be FUA */
 #define	R5_WriteError	15	/* got a write error - need to record it */
 #define	R5_MadeGood	16	/* A bad block has been fixed by writing to it*/
+#define	R5_Discard	19	/* Discard the stripe */
 /*
  * Write method
  */

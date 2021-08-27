@@ -255,6 +255,10 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 			//We should return possible inherited ACL even file is in linux mode.
 			cmd = SYNO_ACL_PSEUDO_INHERIT_ONLY;
 		}
+
+		if (!inode->i_op->syno_permission || !inode->i_op->syno_acl_get) {
+			return -EOPNOTSUPP;
+		}
 		error = inode->i_op->syno_permission(dentry, MAY_READ_PERMISSION);
 		if (error) {
 			return error;
@@ -708,11 +712,15 @@ generic_getxattr(struct dentry *dentry, const char *name, void *buffer, size_t s
 #ifdef CONFIG_FS_SYNO_ACL
 	if (name && !strcmp(name, SYNO_ACL_XATTR_ACCESS)) {
 		int error = 0;
+		struct inode *inode = dentry->d_inode;
 
-		if (!IS_SYNOACL(dentry->d_inode)) {
+		if (!IS_SYNOACL(inode)) {
 			return -EOPNOTSUPP;
 		}
-		error = dentry->d_inode->i_op->syno_permission(dentry, MAY_READ_PERMISSION);
+		if (!inode->i_op->syno_permission) {
+			return -EOPNOTSUPP;
+		}
+		error = inode->i_op->syno_permission(dentry, MAY_READ_PERMISSION);
 		if (error) {
 			return error;
 		}
@@ -769,11 +777,12 @@ generic_setxattr(struct dentry *dentry, const char *name, const void *value, siz
 #ifdef CONFIG_FS_SYNO_ACL
 	if (strcmp_prefix(name, SYNO_ACL_XATTR_ACCESS)) {
 		int error = -1;
+		struct inode *inode = dentry->d_inode;
 
-		if (!IS_FS_SYNOACL(dentry->d_inode)) {
+		if (!IS_FS_SYNOACL(inode) || !inode->i_op->syno_permission) {
 			return -EOPNOTSUPP;
 		}
-		error = dentry->d_inode->i_op->syno_permission(dentry, MAY_WRITE_PERMISSION);
+		error = inode->i_op->syno_permission(dentry, MAY_WRITE_PERMISSION);
 		if (error) {
 			return error;
 		}
@@ -797,11 +806,12 @@ generic_removexattr(struct dentry *dentry, const char *name)
 #ifdef CONFIG_FS_SYNO_ACL
 	if (strcmp_prefix(name, SYNO_ACL_XATTR_ACCESS)) {
 		int error = -1;
+		struct inode *inode = dentry->d_inode;
 
-		if (!IS_FS_SYNOACL(dentry->d_inode)) {
+		if (!IS_FS_SYNOACL(inode) || !inode->i_op->syno_permission) {
 			return -EOPNOTSUPP;
 		}
-		error = dentry->d_inode->i_op->syno_permission(dentry, MAY_WRITE_PERMISSION);
+		error = inode->i_op->syno_permission(dentry, MAY_WRITE_PERMISSION);
 		if (error) {
 			return error;
 		}

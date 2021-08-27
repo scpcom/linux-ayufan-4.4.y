@@ -74,9 +74,9 @@ struct rtable {
 	struct fib_info		*fi; /* for client ref to shared metrics */
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	bool 			nfp;
-#endif /* CONFIG_MV_ETH_NFP_FIB_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 };
 

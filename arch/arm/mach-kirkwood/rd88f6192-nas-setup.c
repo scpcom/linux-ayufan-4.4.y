@@ -20,7 +20,10 @@
 #include <asm/mach-types.h>
 #include <asm/mach/arch.h>
 #include <mach/kirkwood.h>
+#include <plat/gpio.h>
 #include "common.h"
+#include "mpp.h"
+#include "ctrlEnv/mvCtrlEnvLib.h"
 
 #define RD88F6192_GPIO_USB_VBUS		10
 
@@ -50,9 +53,29 @@ static struct spi_board_info __initdata rd88F6192_spi_slave_info[] = {
 static void __init rd88f6192_init(void)
 {
 	/*
+	 * Init board id (Marvell-internal) and MPPs
+	 */
+	mvBoardIdSet(RD_88F6192A_ID);
+	mvBoardEnvInit();
+	mvCtrlEnvInit();
+
+	/*
 	 * Basic setup. Needs to be called early.
 	 */
 	kirkwood_init();
+
+	/*
+	 * Enable joystick support for LCD panel
+	 */
+#define UP_GPP		30
+#define DOWN_GPP	34
+#define LEFT_GPP	32
+#define RIGHT_GPP	31
+
+	orion_gpio_set_valid(UP_GPP,	GPIO_INPUT_OK);
+	orion_gpio_set_valid(DOWN_GPP,	GPIO_INPUT_OK);
+	orion_gpio_set_valid(LEFT_GPP,	GPIO_INPUT_OK);
+	orion_gpio_set_valid(RIGHT_GPP,	GPIO_INPUT_OK);
 
 	orion_gpio_set_valid(RD88F6192_GPIO_USB_VBUS, 1);
 	if (gpio_request(RD88F6192_GPIO_USB_VBUS, "USB VBUS") != 0 ||

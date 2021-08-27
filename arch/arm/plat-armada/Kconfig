@@ -173,7 +173,7 @@ config MV_INCLUDE_SPI
 
 config MV_INCLUDE_NOR
 	bool "NOR Support"
-	depends on MV88F6500 || MV88F6281 || (MV78XX0 && !MV78XX0_Z0) || ARMADA_XP
+	depends on MV88F6500 || MV88F6281 || (MV78XX0 && !MV78XX0_Z0) || ARMADA_XP || (ARMADA_370 && !MV_INCLUDE_NFC)
 	default y
         ---help---
         Please don't change this configs unless you know what you are doing.
@@ -213,7 +213,7 @@ menu "Armada AMP options"
 
 config MV_AMP_ENABLE
         bool "Enable AMP support"
-	depends on   (ARMADA_XP || (MV78XX0)) && (!ARMADA_XP_REV_Z1) && (SMP) && (!MV_ETH_BM) && (!ARMADAXP_USE_IRQ_INDIRECT_MODE)
+	depends on (ARMADA_XP || (MV78XX0)) && (!ARMADA_XP_REV_Z1) && (SMP) && (!MV_ETH_BM) && !(CPU_IDLE || SUSPEND)
 	default n
 
 config MV_DRAM_BASE_G0
@@ -289,7 +289,7 @@ config MV_DCACHE_SIZE
 
 config MV_ICACHE_SIZE
 	hex
-	default 0x8000 if MV78XX0 || ARMDAD_XP || ARMADA_370
+	default 0x8000 if MV78XX0 || ARMADA_XP || ARMADA_370
 	default 0x4000 if MV88F6500 || MV88F6281
 	          
 menu "Armada SoC MTD support"
@@ -417,27 +417,6 @@ config USE_DSP
 	depends on !ARMADA_XP
 	default n
 
-choice
-	prompt "Protect from speculative instruction prefetch"
-	depends on CACHE_FEROCEON_L2
-	default MV_SP_I_FTCH_DB_INV
-
-config MV_SP_I_FTCH_DB_INV
-	bool "Double invalidate for DMA buffers"
-	---help---
-	Choosing this option will add L2 invalidate for DMA recieved buffers before processing it,
-	This is done through the pci_unmap_sg/page/single APIs.
-
-config MV_SP_I_FTCH_LCK_L2_ICACHE
-	bool "Lock L2 I-cache"
-	---help---
-	Choosing this option will lock L2 Icache.
-
-config MV_SP_I_FTCH_NONE
-	bool "Ignore"
-
-endchoice
-
 config  FEROCEON_PROC
 	bool "Support for MV-shell proc file system"
 	depends on PROC_FS
@@ -485,13 +464,9 @@ config	ERROR_HANDLING_DRAM_ECC
         ---help---
         Choosing this option will enable DRAM ECC error notification by netlink
 
-
-
 menu "Soc DMA accelerations"
 
 source arch/arm/plat-armada/mv_drivers_lsp/mv_xor/Kconfig
-
-source arch/arm/plat-armada/mv_drivers_lsp/mv_dma/Kconfig
 
 endmenu
 
@@ -557,12 +532,6 @@ config  SCSI_MVSATA
 	  Note that the kernel scsi subsystem must be chosen too.
 
 source arch/arm/plat-armada/mv_drivers_lsp/mv_sata/Kconfig
-
-config PCIE_VIRTUAL_BRIDGE_SUPPORT
-        bool "Enable virtual bridge on PCIe"
-        depends on PCI
-        ---help---
-        Enable virtual bridge module to support PCIe switches
 
 config MV_UART_POLLING_MODE
         bool "Enable Polling mode for UART driver"

@@ -188,18 +188,19 @@ static int tcp_v6_connect(struct sock *sk, struct sockaddr *uaddr,
 
 #ifdef MY_ABC_HERE
 		if (!sk->sk_bound_dev_if) {
+			unsigned flags;
 			struct net_device *dev = NULL;
 			for_each_netdev(sock_net(sk), dev) {
-				if(dev && (dev->flags & IFF_UP) && !(dev->flags & (IFF_LOOPBACK | IFF_SLAVE))) {
-					dev_hold(dev);
+				flags = dev_get_flags(dev);
+				if((flags & IFF_RUNNING) && 
+				 !(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+					sk->sk_bound_dev_if = dev->ifindex;
 					break;
 				}
 			}
-			if(!dev) {
-				return -ENODEV;
+			if(!sk->sk_bound_dev_if) {
+				return -EINVAL;
 			}
-			sk->sk_bound_dev_if = dev->ifindex;
-			dev_put(dev);
 		}
 #else
 		/* Connect to link-local address requires an interface */
@@ -1067,6 +1068,7 @@ static void tcp_v6_send_response(struct sk_buff *skb, u32 seq, u32 ack, u32 win,
 	__tcp_v6_send_check(buff, &fl6.saddr, &fl6.daddr);
 
 	fl6.flowi6_proto = IPPROTO_TCP;
+	if (ipv6_addr_type(&fl6.daddr) & IPV6_ADDR_LINKLOCAL)
 		fl6.flowi6_oif = inet6_iif(skb);
 	fl6.fl6_dport = t1->dest;
 	fl6.fl6_sport = t1->source;

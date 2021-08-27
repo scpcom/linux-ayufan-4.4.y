@@ -137,7 +137,7 @@
 
 #define IRQ_MAIN_INTS_NUM	116
 
-#define MAX_PER_CPU_IRQ_NUMBER  7
+#define MAX_PER_CPU_IRQ_NUMBER  28
 /*
  * AURORA General Purpose Pins
  */
@@ -166,6 +166,7 @@
  * IRQ HAL remapping
  */
 #define NET_TH_RXTX_IRQ_NUM(x)		(IRQ_AURORA_GBE0_FIC + ((x) * 2))
+#define IRQ_GPP_START			IRQ_AURORA_GPIO_START
 #define SATA_IRQ_NUM			(IRQ_AURORA_SATA0)
 #define CESA_IRQ(chan)			IRQ_AURORA_CRYPTO(chan)
 #endif

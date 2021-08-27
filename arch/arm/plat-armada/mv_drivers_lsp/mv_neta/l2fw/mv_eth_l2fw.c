@@ -1,5 +1,33 @@
-/* mv_eth_l2fw.c */
+/*******************************************************************************
+Copyright (C) Marvell International Ltd. and its affiliates
+
+This software file (the "File") is owned and distributed by Marvell
+International Ltd. and/or its affiliates ("Marvell") under the following
+alternative licensing terms.  Once you have made an election to distribute the
+File under one of the following license alternatives, please (i) delete this
+introductory statement regarding license alternatives, (ii) delete the two
+license alternatives that you have not elected to use and (iii) preserve the
+Marvell copyright notice above.
+
+********************************************************************************
+Marvell GPL License Option
+
+If you received this File from Marvell, you may opt to use, redistribute and/or
+modify this File in accordance with the terms and conditions of the General
+Public License Version 2, June 1991 (the "GPL License"), a copy of which is
+available along with the File in the license.txt file or by writing to the Free
+Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
+on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
+
+THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
+WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
+DISCLAIMED.  The GPL License provides additional details about this warranty
+disclaimer.
+*******************************************************************************/
+
 #include <linux/ctype.h>
+#include <linux/module.h>
+#include  <linux/interrupt.h>
 
 #include "xor/mvXor.h"
 #include "xor/mvXorRegs.h"
@@ -10,17 +38,17 @@
 #include "mv_neta/net_dev/mv_netdev.h"
 #include "gbe/mvNeta.h"
 #include "gbe/mvNetaRegs.h"
-
-#include "mv_eth_l2fw.h"
+#include "mvDebug.h"
+#include "mv_eth_l2sec.h"
 #include "ctrlEnv/mvCtrlEnvLib.h"
+#include "gbe/mvNeta.h"
 
 #ifdef CONFIG_MV_ETH_L2SEC
-extern int cesa_init(void);
-extern MV_STATUS handleEsp(struct eth_pbuf *pkt, struct neta_rx_desc *rx_desc,
-							struct eth_port  *new_pp, int inPort);
+#include "mv_eth_l2sec.h"
 #endif
+extern spinlock_t l2sec_lock;
 
-int espEnabled = 0;
+static int numHashEntries;
 
 struct eth_pbuf *mv_eth_pool_get(struct bm_pool *pool);
 
@@ -28,67 +56,15 @@ static int mv_eth_ports_l2fw_num;
 
 static L2FW_RULE **l2fw_hash = NULL;
 
-#define	L2FW_HASH_MASK   (L2FW_HASH_SIZE - 1)
-
 static MV_U32 l2fw_jhash_iv;
 
-static int numHashEntries;
+static MV_XOR_DESC *eth_xor_desc = NULL;
+static MV_LONG      eth_xor_desc_phys_addr;
 
 struct eth_port_l2fw **mv_eth_ports_l2fw;
 static inline int       mv_eth_l2fw_rx(struct eth_port *pp, int rx_todo, int rxq);
 static inline MV_STATUS mv_eth_l2fw_tx(struct eth_pbuf *pkt, struct eth_port *pp,
 					   int withXor, struct neta_rx_desc *rx_desc);
-
-
-void printBufVirtPtr(MV_BUF_INFO *pBuf)
-{
-	int i;
-	if (pBuf->bufVirtPtr == NULL) {
-		printk(KERN_INFO "pBuf->bufVirtPt==NULL in %s\n", __func__);
-		return;
-	}
-	for (i = 0; i < 40; i++) {
-		printk(KERN_INFO "KERN_INFO [%d]=%x ", i, pBuf->bufVirtPtr[i]);
-		if (!(i%10) && i > 1)
-			printk(KERN_INFO "\n");
-	}
-	printk(KERN_INFO "\n****************** %s\n", __func__);
-
-}
-void printBufInfo(MV_BUF_INFO *pbuf)
-{
-	printk(KERN_INFO "bufSize=%d\n"      , pbuf->bufSize);
-	printk(KERN_INFO "dataSize=%d\n"     , pbuf->dataSize);
-	printk(KERN_INFO "memHandle=%d\n"    , pbuf->memHandle);
-	printk(KERN_INFO "bufAddrShift=%d\n" , pbuf->bufAddrShift);
-	printk(KERN_INFO "*****************************************\n\n");
-
-}
-
-
-static s32 atoi(char *psz_buf)
-{
-	char *pch = psz_buf;
-	s32 base = 0;
-	unsigned long res;
-	int ret_val;
-
-	while (isspace(*pch))
-			pch++;
-
-	if (*pch == '-' || *pch == '+') {
-			base = 10;
-			pch++;
-	} else if (*pch && tolower(pch[strlen(pch) - 1]) == 'h') {
-			base = 16;
-	}
-
-	ret_val = strict_strtoul(pch, base, &res);
-
-	return ret_val ? : res;
-}
-
-
 
 static L2FW_RULE *l2fw_lookup(MV_U32 srcIP, MV_U32 dstIP)
 {
@@ -131,8 +107,7 @@ void l2fw_flush(void)
 	numHashEntries = 0;
 }
 
-
-void l2fw_dump(void)
+void l2fw_rules_dump(void)
 {
 	MV_U32 i = 0;
 	L2FW_RULE *currRule;
@@ -156,6 +131,21 @@ void l2fw_dump(void)
 
 }
 
+void l2fw_ports_dump(void)
+{
+	MV_U32 rx_port = 0;
+	struct eth_port_l2fw *ppl2fw;
+
+	mvOsPrintf("\nPrinting L2fw ports Database: \n");
+	mvOsPrintf("*******************************\n");
+
+	for (rx_port = 0; rx_port < mv_eth_ports_l2fw_num; rx_port++) {
+		ppl2fw = mv_eth_ports_l2fw[rx_port];
+		mvOsPrintf("rx_port=%d cmd = %d tx_port=%d lookup=%d xor_threshold = %d\n",
+				rx_port, ppl2fw->cmd, ppl2fw->txPort, ppl2fw->lookupEn, ppl2fw->xorThreshold);
+
+	}
+}
 
 MV_STATUS l2fw_add(MV_U32 srcIP, MV_U32 dstIP, int port)
 {
@@ -179,102 +169,9 @@ MV_STATUS l2fw_add(MV_U32 srcIP, MV_U32 dstIP, int port)
 #endif
 
 	l2fw_rule = l2fw_lookup(srcIP, dstIP);
-	if (l2fw_rule)
-		return MV_OK;
-
-	l2fw_rule = (L2FW_RULE *)mvOsMalloc(sizeof(L2FW_RULE));
-	if (!l2fw_rule) {
-		mvOsPrintf("%s: OOM\n", __func__);
-		return MV_FAIL;
-	}
-#ifdef CONFIG_MV_ETH_L2FW_DEBUG
-	mvOsPrintf("adding a rule to l2fw hash in %s\n", __func__);
-#endif
-	l2fw_rule->srcIP = srcIP;
-	l2fw_rule->dstIP = dstIP;
-		l2fw_rule->port = port;
-
-	l2fw_rule->next = l2fw_hash[hash];
-	l2fw_hash[hash] = l2fw_rule;
-	numHashEntries++;
-    return MV_OK;
-}
-
-MV_STATUS l2fw_add_ip(const char *buf)
-{
-	char *addr1, *addr2;
-	L2FW_RULE *l2fw_rule;
-	MV_U32 srcIP;
-	MV_U32 dstIP;
-	MV_U8	  *srcIPchr, *dstIPchr;
-	char dest1[15];
-	char dest2[15];
-	char *portStr;
-	int offset1, offset2, port;
-	MV_U32 hash    = 0;
-	if (numHashEntries == L2FW_HASH_SIZE) {
-		printk(KERN_INFO "cannot add entry, hash table is full, there are %d entires \n", L2FW_HASH_SIZE);
-		return MV_ERROR;
-	}
-
-	memset(dest1,   0, sizeof(dest1));
-	memset(dest2,   0, sizeof(dest2));
-
-	addr1 = strchr(buf, ',');
-	addr2 =	strchr(addr1+1, ',');
-	offset1 = addr1-buf;
-	offset2 = addr2-addr1;
-	if (!addr1) {
-			printk(KERN_INFO "first separating comma (',') missing in input in %s\n", __func__);
-			return MV_FAIL;
-	}
-	if (!addr2) {
-			printk(KERN_INFO "second separating comma (',') missing in input in %s\n", __func__);
-			return MV_FAIL;
-	}
-
-	strncpy(dest1, buf, addr1-buf);
-	srcIP = in_aton(dest1);
-	strncpy(dest2, buf+offset1+1, addr2-addr1-1);
-	dstIP = in_aton(dest2);
-	srcIPchr = (MV_U8 *)&(srcIP);
-	dstIPchr = (MV_U8 *)&(dstIP);
-	portStr = addr2+1;
-	if (*portStr == 'D') {
-		L2FW_RULE *l2fw_rule_to_del, *prev;
-		hash = mv_jhash_3words(srcIP, dstIP, (MV_U32) 0, l2fw_jhash_iv);
-		hash &= L2FW_HASH_MASK;
-		l2fw_rule_to_del = l2fw_hash[hash];
-		prev = NULL;
-
-		while (l2fw_rule_to_del) {
-		if ((l2fw_rule_to_del->srcIP == srcIP) &&
-			(l2fw_rule_to_del->dstIP == dstIP)) {
-			if (prev)
-				prev->next = l2fw_rule_to_del->next;
-			else
-				l2fw_hash[hash] = l2fw_rule_to_del->next;
-			mvOsPrintf("%u.%u.%u.%u->%u.%u.%u.%u deleted\n", MV_IPQUAD(srcIPchr), MV_IPQUAD(dstIPchr));
-			mvOsFree(l2fw_rule_to_del);
-			numHashEntries--;
-			return MV_OK;
-		}
-
-		prev = l2fw_rule_to_del;
-		l2fw_rule_to_del = l2fw_rule_to_del->next;
-	}
-		mvOsPrintf("%u.%u.%u.%u->%u.%u.%u.%u : entry not found\n", MV_IPQUAD(srcIPchr), MV_IPQUAD(dstIPchr));
-		return MV_NOT_FOUND;
-	}
-
-	port = atoi(portStr);
-	hash = mv_jhash_3words(srcIP, dstIP, (MV_U32) 0, l2fw_jhash_iv);
-	hash &= L2FW_HASH_MASK;
-
-	l2fw_rule = l2fw_lookup(srcIP, dstIP);
 	if (l2fw_rule) {
-		mvOsPrintf("%u.%u.%u.%u->%u.%u.%u.%u : entry already exist\n",
-				MV_IPQUAD(srcIPchr), MV_IPQUAD(dstIPchr));
+		/* overwite port */
+		l2fw_rule->port = port;
 		return MV_OK;
 	}
 
@@ -294,15 +191,6 @@ MV_STATUS l2fw_add_ip(const char *buf)
 	l2fw_hash[hash] = l2fw_rule;
 	numHashEntries++;
     return MV_OK;
-
-}
-
-void l2fw_esp_show(void)
-{
-	if (espEnabled)
-		printk(KERN_INFO "ESP is enabled in %s\n", __func__);
-	else
-		printk(KERN_INFO "ESP is not enabled in %s\n", __func__);
 }
 
 #ifdef CONFIG_MV_INCLUDE_XOR
@@ -334,26 +222,11 @@ static void dump_xor(void)
 }
 #endif
 
-
-/* L2fw defines */
-#define L2FW_DISABLE				0
-#define TX_AS_IS					1
-#define SWAP_MAC					2
-#define COPY_AND_SWAP		        3
-
-#define XOR_CAUSE_DONE_MASK(chan) ((BIT0|BIT1) << (chan * 16))
-
-static int         l2fw_xor_threshold = 200;
-static MV_XOR_DESC *eth_xor_desc = NULL;
-static MV_LONG      eth_xor_desc_phys_addr;
-
-
 static int mv_eth_poll_l2fw(struct napi_struct *napi, int budget)
 {
 	int rx_done = 0;
 	MV_U32 causeRxTx;
 	struct eth_port *pp = MV_ETH_PRIV(napi->dev);
-	read_lock(&pp->rwlock);
 
 	STAT_INFO(pp->stats.poll[smp_processor_id()]++);
 
@@ -374,7 +247,7 @@ static int mv_eth_poll_l2fw(struct napi_struct *napi, int budget)
 		MV_REG_WRITE(NETA_INTR_MISC_CAUSE_REG(pp->port), 0);
 	}
 
-	causeRxTx |= pp->causeRxTx[smp_processor_id()];
+	causeRxTx |= pp->cpu_config[smp_processor_id()]->causeRxTx;
 #ifdef CONFIG_MV_ETH_TXDONE_ISR
 	if (causeRxTx & MV_ETH_TXDONE_INTR_MASK) {
 		/* TX_DONE process */
@@ -420,20 +293,23 @@ static int mv_eth_poll_l2fw(struct napi_struct *napi, int budget)
 
 		local_irq_restore(flags);
 	}
-	pp->causeRxTx[smp_processor_id()] = causeRxTx;
-
-	read_unlock(&pp->rwlock);
+	pp->cpu_config[smp_processor_id()]->causeRxTx = causeRxTx;
 
 	return rx_done;
 }
 
-
-void mv_eth_set_l2fw(int cmd, int rx_port, int out_tx_port)
+void mv_eth_set_l2fw(struct eth_port_l2fw *ppl2fw, int cmd, int rx_port, int tx_port)
 {
 	struct eth_port *pp;
 	struct net_device *dev;
 	int group;
 
+#ifndef CONFIG_MV_ETH_L2SEC
+	if (cmd == CMD_L2FW_CESA) {
+		mvOsPrintf("Invalid command (%d) - Ipsec is not defined (%s)\n", cmd, __func__);
+		return;
+	}
+#endif
 	pp = mv_eth_ports[rx_port];
 	if (!pp) {
 		mvOsPrintf("pp is NULL in setting L2FW (%s)\n", __func__);
@@ -442,7 +318,7 @@ void mv_eth_set_l2fw(int cmd, int rx_port, int out_tx_port)
 
 	dev = pp->dev;
 	if (dev == NULL) {
-		mvOsPrintf("device is NULL in in setting L2FW (%s)\n", __func__);
+		mvOsPrintf("device is NULL in setting L2FW (%s)\n", __func__);
 		return;
 	}
 	if (!test_bit(MV_ETH_F_STARTED_BIT, &(pp->flags))) {
@@ -451,37 +327,41 @@ void mv_eth_set_l2fw(int cmd, int rx_port, int out_tx_port)
 		return;
 	}
 
-	/* when disabling l2fw, and then ifdown/up, we should
-	   enable MV_ETH_F_CONNECT_LINUX_BIT bit so that the port will be started ok.
-	   TBD: remember last state */
+	if (cmd == ppl2fw->cmd) {
+		ppl2fw->txPort = tx_port;
+		return;
+	}
 
-	if (cmd == L2FW_DISABLE)
-		set_bit(MV_ETH_F_CONNECT_LINUX_BIT, &(pp->flags));
-	else
-		clear_bit(MV_ETH_F_CONNECT_LINUX_BIT, &(pp->flags));
+	if ((cmd != CMD_L2FW_DISABLE) && (ppl2fw->cmd != CMD_L2FW_DISABLE) && (ppl2fw->cmd != CMD_L2FW_LAST)) {
+		ppl2fw->txPort = tx_port;
+		ppl2fw->cmd	= cmd;
+		return;
+	}
+
+	/*TODO disconnect from linux in case that command != 0, connact back if cmd == 0
+	 use netif_carrier_on/netif_carrier_off
+	 netif_tx_stop_all_queues/netif_tx_wake_all_queues
+	*/
+
+	ppl2fw->txPort = tx_port;
+	ppl2fw->cmd	= cmd;
 
 	for (group = 0; group < CONFIG_MV_ETH_NAPI_GROUPS; group++) {
-		if (cmd == L2FW_DISABLE) {
 		if (test_bit(MV_ETH_F_STARTED_BIT, &(pp->flags)))
 			napi_disable(pp->napiGroup[group]);
+
 		netif_napi_del(pp->napiGroup[group]);
-			netif_napi_add(dev, pp->napiGroup[group], mv_eth_poll,
-				pp->weight);
-			if (test_bit(MV_ETH_F_STARTED_BIT, &(pp->flags)))
-				napi_enable(pp->napiGroup[group]);
-		} else {
-			if (test_bit(MV_ETH_F_STARTED_BIT, &(pp->flags)))
-				napi_disable(pp->napiGroup[group]);
-			netif_napi_del(pp->napiGroup[group]);
-			printk(KERN_INFO "pp->weight=%d in %s\n", pp->weight, __func__);
-			netif_napi_add(dev, pp->napiGroup[group], mv_eth_poll_l2fw,
-				pp->weight);
+
+		if (cmd == CMD_L2FW_DISABLE)
+			netif_napi_add(dev, pp->napiGroup[group], mv_eth_poll, pp->weight);
+		else
+			netif_napi_add(dev, pp->napiGroup[group], mv_eth_poll_l2fw, pp->weight);
+
 		if (test_bit(MV_ETH_F_STARTED_BIT, &(pp->flags)))
 			napi_enable(pp->napiGroup[group]);
 	}
-}
-}
 
+}
 
 static inline struct eth_pbuf *l2fw_swap_mac(struct eth_pbuf *pRxPktInfo)
 {
@@ -619,6 +499,7 @@ void setXorDesc(void)
 
     MV_REG_WRITE(XOR_NEXT_DESC_PTR_REG(1, XOR_CHAN(0)), eth_xor_desc_phys_addr);
 	dump_xor();
+	/* TODO mask xor intterupts*/
 }
 #endif
 
@@ -640,26 +521,69 @@ static inline int xorReady(void)
 	return 1;
 }
 
-
 void l2fw(int cmd, int rx_port, int tx_port)
 {
 	struct eth_port_l2fw *ppl2fw;
+	int max_port = CONFIG_MV_ETH_PORTS_NUM - 1;
 
-	mv_eth_ports_l2fw_num = mvCtrlEthMaxPortGet();
 	ppl2fw = mv_eth_ports_l2fw[rx_port];
-	mvOsPrintf("cmd=%d rx_port=%d tx_port=%d in %s \n",
-				cmd, rx_port, tx_port, __func__);
-	ppl2fw->txPort = tx_port;
-	ppl2fw->cmd	= cmd;
-	mv_eth_set_l2fw(cmd, rx_port, tx_port);
+
+	if ((cmd < CMD_L2FW_DISABLE) || (cmd > CMD_L2FW_LAST)) {
+		mvOsPrintf("Error: invalid command %d\n", cmd);
+		return;
+	}
+
+	if ((rx_port > max_port) || (rx_port < 0)) {
+		mvOsPrintf("Error: invalid rx port %d\n", rx_port);
+		return;
+	}
+
+	if ((tx_port > max_port) || (tx_port < 0)) {
+		mvOsPrintf("Error: invalid tx port %d\n", tx_port);
+		return;
+	}
+
+	mvOsPrintf("cmd=%d rx_port=%d tx_port=%d in %s \n", cmd, rx_port, tx_port, __func__);
+
+	mv_eth_set_l2fw(ppl2fw, cmd, rx_port, tx_port);
 }
 
-void l2fw_xor(int threshold)
+void l2fw_xor(int rx_port, int threshold)
 {
-	mvOsPrintf("setting threshold to %d in %s\n", threshold, __func__);
-	l2fw_xor_threshold = threshold;
+	int max_port = CONFIG_MV_ETH_PORTS_NUM - 1;
+
+	if (rx_port > max_port) {
+		mvOsPrintf("Error: invalid rx port %d\n", rx_port);
+		return;
+	}
+
+	mvOsPrintf("setting port %d threshold to %d in %s\n", rx_port, threshold, __func__);
+	mv_eth_ports_l2fw[rx_port]->xorThreshold = threshold;
 }
 
+void l2fw_lookupEn(int rx_port, int enable)
+{
+	int max_port = CONFIG_MV_ETH_PORTS_NUM - 1;
+
+	if (rx_port > max_port) {
+		mvOsPrintf("Error: invalid rx port %d\n", rx_port);
+		return;
+	}
+	mvOsPrintf("setting port %d lookup mode to %s in %s\n", rx_port, (enable == 1) ? "enable" : "disable", __func__);
+	mv_eth_ports_l2fw[rx_port]->lookupEn = enable;
+}
+
+void l2fw_stats(void)
+{
+	int i;
+	for (i = 0; i < CONFIG_MV_ETH_PORTS_NUM; i++) {
+		mvOsPrintf("number of errors in port[%d]=%d\n", i, mv_eth_ports_l2fw[i]->statErr);
+		mvOsPrintf("number of drops  in port[%d]=%d\n", i, mv_eth_ports_l2fw[i]->statDrop);
+	}
+#ifdef CONFIG_MV_ETH_L2SEC
+	mv_l2sec_stats();
+#endif
+}
 
 static inline MV_STATUS mv_eth_l2fw_tx(struct eth_pbuf *pkt, struct eth_port *pp, int withXor,
 									   struct neta_rx_desc *rx_desc)
@@ -667,14 +591,16 @@ static inline MV_STATUS mv_eth_l2fw_tx(struct eth_pbuf *pkt, struct eth_port *pp
 	struct neta_tx_desc *tx_desc;
 	u32 tx_cmd = 0;
 	struct tx_queue *txq_ctrl;
+	unsigned long flags = 0;
+
 	/* assigning different txq for each rx port , to avoid waiting on the
 	same txq lock when traffic on several rx ports are destined to the same
 	outgoing interface */
-	int txq = pp->txq[smp_processor_id()];
-	read_lock(&pp->rwlock);
+	int txq = pp->cpu_config[smp_processor_id()]->txq;
+
 	txq_ctrl = &pp->txq_ctrl[pp->txp * CONFIG_MV_ETH_TXQ + txq];
 
-	mv_eth_lock(txq_ctrl, pp);
+	mv_eth_lock(txq_ctrl, flags);
 
 	if (txq_ctrl->txq_count >= mv_ctrl_txdone)
 		mv_eth_txq_done(pp, txq_ctrl);
@@ -682,9 +608,9 @@ static inline MV_STATUS mv_eth_l2fw_tx(struct eth_pbuf *pkt, struct eth_port *pp
 	tx_desc = mv_eth_tx_desc_get(txq_ctrl, 1);
 	if (tx_desc == NULL) {
 
-		mv_eth_unlock(txq_ctrl, pp);
+		mv_eth_unlock(txq_ctrl, flags);
 
-		read_unlock(&pp->rwlock);
+		/*read_unlock(&pp->rwlock);*/
 		/* No resources: Drop */
 		pp->dev->stats.tx_dropped++;
 		if (withXor)
@@ -693,8 +619,13 @@ static inline MV_STATUS mv_eth_l2fw_tx(struct eth_pbuf *pkt, struct eth_port *pp
 	}
 	txq_ctrl->txq_count++;
 
+#ifdef CONFIG_MV_ETH_BM_CPU
 	tx_cmd |= NETA_TX_BM_ENABLE_MASK | NETA_TX_BM_POOL_ID_MASK(pkt->pool);
 	txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = (u32) NULL;
+#else
+	txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = (u32) pkt;
+#endif /* CONFIG_MV_ETH_BM_CPU */
+
 	mv_eth_shadow_inc_put(txq_ctrl);
 
 	tx_desc->command = tx_cmd | NETA_TX_L4_CSUM_NOT |
@@ -711,17 +642,15 @@ static inline MV_STATUS mv_eth_l2fw_tx(struct eth_pbuf *pkt, struct eth_port *pp
 		if (!xorReady()) {
 			mvOsPrintf("MV_DROPPED in %s\n", __func__);
 
-			mv_eth_unlock(txq_ctrl, pp);
+			mv_eth_unlock(txq_ctrl, flags);
 
-			read_unlock(&pp->rwlock);
+			/*read_unlock(&pp->rwlock);*/
 			return MV_DROPPED;
 		}
 	}
 	mvNetaTxqPendDescAdd(pp->port, pp->txp, txq, 1);
 
-	mv_eth_unlock(txq_ctrl, pp);
-
-	read_unlock(&pp->rwlock);
+	mv_eth_unlock(txq_ctrl, flags);
 
 	return MV_OK;
 }
@@ -808,48 +737,40 @@ static inline int mv_eth_l2fw_rx(struct eth_port *pp, int rx_todo, int rxq)
 			srcIP = (MV_U8 *)&(pIph->srcIP);
 			dstIP = (MV_U8 *)&(pIph->dstIP);
 			printk(KERN_INFO "%u.%u.%u.%u->%u.%u.%u.%u in %s\n", MV_IPQUAD(srcIP), MV_IPQUAD(dstIP), __func__);
+			printk(KERN_INFO "0x%x->0x%x in %s\n", pIph->srcIP, pIph->dstIP, __func__);
 		} else
 			printk(KERN_INFO "pIph is NULL in %s\n", __func__);
 #endif
-		if (espEnabled)
-			new_pp  = mv_eth_ports[ppl2fw->txPort];
-		else {
+
+		if (ppl2fw->lookupEn) {
 			l2fw_rule = l2fw_lookup(pIph->srcIP, pIph->dstIP);
 
 			if (!l2fw_rule) {
+
 #ifdef CONFIG_MV_ETH_L2FW_DEBUG
 				printk(KERN_INFO "l2fw_lookup() failed in %s\n", __func__);
 #endif
-				mv_eth_rxq_refill(pp, rxq, pkt, pool, rx_desc);
-				continue;
-			 }
 
-#ifdef CONFIG_MV_ETH_L2FW_DEBUG
-				printk(KERN_INFO "l2fw_lookup() is ok l2fw_rule->port=%d in %s\n", l2fw_rule->port, __func__);
-#endif
+				new_pp  = mv_eth_ports[ppl2fw->txPort];
+			} else
 				new_pp  = mv_eth_ports[l2fw_rule->port];
-			}
+		} else
+			new_pp  = mv_eth_ports[ppl2fw->txPort];
 
 		switch (ppl2fw->cmd) {
-		case TX_AS_IS:
-#ifdef CONFIG_MV_ETH_L2SEC
-					if (espEnabled) {
-						status = handleEsp(pkt, rx_desc, new_pp, pp->port);
-					}
-				else
-#endif
+		case CMD_L2FW_AS_IS:
 				status = mv_eth_l2fw_tx(pkt, new_pp, 0, rx_desc);
 				break;
 
-		case SWAP_MAC:
+		case CMD_L2FW_SWAP_MAC:
 				mvOsCacheLineInv(NULL, pkt->pBuf + pkt->offset);
 				l2fw_swap_mac(pkt);
 				mvOsCacheLineFlush(NULL, pkt->pBuf+pkt->offset);
 				status = mv_eth_l2fw_tx(pkt, new_pp, 0, rx_desc);
 				break;
 
-		case COPY_AND_SWAP:
-				if (pkt->bytes >= l2fw_xor_threshold) {
+		case CMD_L2FW_COPY_SWAP:
+				if (pkt->bytes >= ppl2fw->xorThreshold) {
 					newpkt = eth_l2fw_copy_packet_withXor(pkt);
 					if (newpkt)
 						status = mv_eth_l2fw_tx(newpkt, new_pp, 1, rx_desc);
@@ -862,21 +783,43 @@ static inline int mv_eth_l2fw_rx(struct eth_port *pp, int rx_todo, int rxq)
 						else
 							status = MV_ERROR;
 				}
-		}
+				break;
+#ifdef CONFIG_MV_ETH_L2SEC
+		case CMD_L2FW_CESA:
+				status = mv_l2sec_handle_esp(pkt, rx_desc, new_pp, pp->port);
+				break;
+#endif
+		default:
+				printk(KERN_INFO "WARNING:in %s invalid mode %d for rx port %d \n", __func__, ppl2fw->cmd, pp->port);
+				mv_eth_rxq_refill(pp, rxq, pkt, pool, rx_desc);
+		} /*of switch*/
+
 		if (status == MV_OK) {
+			if (mv_eth_pool_bm(pool)) {
+				/* BM - no refill */
 				mvOsCacheLineInv(NULL, rx_desc);
+			} else {
+				if (mv_eth_refill(pp, rxq, NULL, pool, rx_desc)) {
+					printk(KERN_ERR "%s: Linux processing - Can't refill\n", __func__);
+					pp->rxq_ctrl[rxq].missed++;
+				}
+			}
 			/* we do not need the pkt , we do not do anything with it*/
-			if  ((ppl2fw->cmd	== COPY_AND_SWAP) && !(espEnabled))
+			if  (ppl2fw->cmd == CMD_L2FW_COPY_SWAP)
 				mv_eth_pool_put(pool, pkt);
+
 			continue;
+
 		} else if (status == MV_DROPPED) {
+			ppl2fw->statDrop++;
 			mv_eth_rxq_refill(pp, rxq, pkt, pool, rx_desc);
-			if ((ppl2fw->cmd	== COPY_AND_SWAP) && !(espEnabled))
+			if (ppl2fw->cmd == CMD_L2FW_COPY_SWAP)
 				mv_eth_pool_put(pool, newpkt);
 
 			continue;
+
 		} else if (status == MV_ERROR) {
-			printk(KERN_INFO "MV_ERROR in %s\n", __func__);
+			ppl2fw->statErr++;
 			mv_eth_rxq_refill(pp, rxq, pkt, pool, rx_desc);
 		}
 
@@ -909,8 +852,12 @@ int __devinit mv_l2fw_init(void)
 			mvOsMalloc(sizeof(struct eth_port_l2fw));
 		if (!mv_eth_ports_l2fw[port])
 			goto oom1;
-		mv_eth_ports_l2fw[port]->cmd    = L2FW_DISABLE;
+		mv_eth_ports_l2fw[port]->cmd    = CMD_L2FW_LAST/*CMD_L2FW_DISABLE*/;
 		mv_eth_ports_l2fw[port]->txPort = -1;
+		mv_eth_ports_l2fw[port]->lookupEn = 0;
+		mv_eth_ports_l2fw[port]->xorThreshold = XOR_THRESHOLD_DEF;
+		mv_eth_ports_l2fw[port]->statErr = 0;
+		mv_eth_ports_l2fw[port]->statDrop = 0;
 	}
 
 	bytes = sizeof(L2FW_RULE *) * L2FW_HASH_SIZE;
@@ -927,7 +874,7 @@ int __devinit mv_l2fw_init(void)
 	mvOsPrintf("L2FW hash init %d entries, %d bytes\n", L2FW_HASH_SIZE, bytes);
 	regVal = 0;
 #ifdef CONFIG_MV_ETH_L2SEC
-	cesa_init();
+	mv_l2sec_cesa_init();
 #endif
 
 #ifdef CONFIG_MV_INCLUDE_XOR

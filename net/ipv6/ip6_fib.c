@@ -426,7 +426,7 @@ out:
 
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 static int fib6_add_node(struct fib6_walker_t *w)
 {
 	struct rt6_info *rt;
@@ -473,7 +473,7 @@ void nfp_fib6_sync(void)
 }
 EXPORT_SYMBOL(nfp_fib6_sync);
 
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 /*
@@ -729,7 +729,7 @@ static int fib6_add_rt2node(struct fib6_node *fn, struct rt6_info *rt,
 	}
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	rt->nfp = false;
 	if (rt->rt6i_flags & RTF_CACHE)	{
 		if (nfp_mgr_p->nfp_hook_fib_rule_add)
@@ -1227,13 +1227,13 @@ static void fib6_del_route(struct fib6_node *fn, struct rt6_info **rtp,
 
 	inet6_rt_notify(RTM_DELROUTE, rt, info);
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (rt->rt6i_flags & RTF_CACHE)
 		if (rt->nfp)
 			if (nfp_mgr_p->nfp_hook_fib_rule_del)
 				nfp_mgr_p->nfp_hook_fib_rule_del(AF_INET6, (u8 *)&rt->rt6i_src.addr, (u8 *)&rt->rt6i_dst.addr,
 							rt->rt6i_iifindex, rt->rt6i_dev->ifindex);
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 	rt6_release(rt);
 }
@@ -1536,14 +1536,14 @@ static int fib6_age(struct rt6_info *rt, void *arg)
 			return -1;
 		}
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_LEARN) || defined(CONFIG_MV_ETH_NFP_LEARN_MODULE)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 		if (rt->nfp) {
 			if (nfp_mgr_p->nfp_hook_fib_rule_age)
 				if (nfp_mgr_p->nfp_hook_fib_rule_age(AF_INET6, (u8 *)(&rt->rt6i_src.addr), (u8 *)(&rt->rt6i_dst.addr),
 					rt->rt6i_iifindex, rt->rt6i_dev->ifindex))
 				rt->dst.lastuse = now;
 		}
-#endif /* CONFIG_MV_ETH_NFP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 		gc_args.more++;
 	}

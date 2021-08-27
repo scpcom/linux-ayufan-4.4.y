@@ -790,7 +790,6 @@ next_page:
 				 - pg_offset;
 		}
 
-
 		bio = do_add_page_to_bio(bio, wdata->npages - i, WRITE,
 					 isect, pages[i], be,
 					 bl_end_io_write, par,

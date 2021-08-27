@@ -20,7 +20,7 @@ obj-y +=	no-block.o
 endif
 
 #SYNO
-EXTRA_CFLAGS += -I$(srctree)/crypto/ocf_20100325
+EXTRA_CFLAGS += -I$(srctree)/crypto/ocf
 
 obj-$(CONFIG_BLK_DEV_INTEGRITY) += bio-integrity.o
 obj-y				+= notify/

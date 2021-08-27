@@ -120,8 +120,8 @@ static inline void nfp_update_tuple_info(struct ipt_nfp_info *dst, struct ipt_nf
 	}
 
 	if (src->flags & IPT_NFP_F_SET_TXQ) {
-		dst->txq_map[src->dscp].txq = src->txq;
-		dst->txq_map[src->dscp].valid = 1;
+		dst->txq_map[src->dscp_txq].txq = src->txq;
+		dst->txq_map[src->dscp_txq].valid = 1;
 	}
 
 	if (src->flags & IPT_NFP_F_SET_TXQ_DEF) {

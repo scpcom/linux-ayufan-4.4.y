@@ -99,11 +99,7 @@ struct dma_pinned_list *dma_pin_iovec_pages(struct iovec *iov, size_t len)
 
 			/* pin pages down */
 			down_read(&current->mm->mmap_sem);
-#ifdef CONFIG_MV_XOR_NET_DMA
-		ret = get_netdma_pages(
-#else
 			ret = get_user_pages(
-#endif
 					current,
 					current->mm,
 					(unsigned long) iov[i].iov_base,

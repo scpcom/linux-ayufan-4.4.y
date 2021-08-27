@@ -20,6 +20,10 @@ SUBDIRS +=
 
 TARGETS=mv_shell
 
+ifeq ($(CONFIG_MV_GATEWAY),y)
+CFLAGS += -DCONFIG_MV_GATEWAY
+endif
+
 ifeq ($(CONFIG_MV_ETHERNET),y)
 CFLAGS += -DCONFIG_MV_ETHERNET
 endif
@@ -32,7 +36,11 @@ endif
 ifeq ($(CONFIG_MV_ETH_LEGACY),y)
 TARGETS+=mv_eth_tool
 CFLAGS += -DCONFIG_MV_ETH_LEGACY
+ifeq ($(CONFIG_PLAT_ORION),y)
+CFLAGS += -I$(KSRC)/arch/arm/plat-orion/mv_drivers_lsp/mv_network/mv_ethernet/
+else
 CFLAGS += -I$(KSRC)/arch/arm/plat-feroceon/mv_drivers_lsp/mv_network/mv_ethernet/
+endif
 endif
 
 ifeq ($(CONFIG_MV_CPU_PERF_CNTRS),y)
@@ -41,12 +49,16 @@ endif
 
 ifeq ($(CONFIG_MV_CESA),y)
 TARGETS += mv_cesa_tool
+ifeq ($(CONFIG_PLAT_ORION),y)
+CFLAGS  += -I$(KSRC)/arch/arm/plat-orion/mv_drivers_lsp/mv_cesa/
+else
 CFLAGS  += -I$(KSRC)/arch/arm/plat-armada/mv_drivers_lsp/mv_cesa/
 endif
+endif
 
-#ifeq ($(CONFIG_MV_INCLUDE_USB),y)
-#TARGETS += testusb
-#endif
+ifeq ($(CONFIG_MV_INCLUDE_USB),y)
+TARGETS += testusb
+endif
 
 ifeq ($(CONFIG_MV_PHONE),y)
 SUBDIRS+=voice

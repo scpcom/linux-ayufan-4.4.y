@@ -98,30 +98,9 @@ MV_STATUS mvSysPexInit(MV_U32 pexIf, MV_PEX_TYPE pexType)
 	if(status == MV_OK) {
 		halData.ctrlModel = mvCtrlModelGet();
 		halData.maxPexIf = mvCtrlPexMaxIfGet();
+		halData.ctrlFamily=mvCtrlDevFamilyIdGet(halData.ctrlModel);
 		status = mvPexInit(pexIf, pexType, &halData);
 	}
 
 	return status;
-}
-
-/*******************************************************************************
-* mvSysPexCpuIfEnable -
-*
-* DESCRIPTION:
-*       Enable PCI-E in CPU subsystem.
-*
-* INPUT:
-*       pexIf - The PCI-E Interface number to enable.
-*
-* OUTPUT:
-*       None.
-*
-* RETURN:
-*       None.
-*
-*******************************************************************************/
-MV_VOID mvSysPexCpuIfEnable(MV_U32 pexIf)
-{
-        mvCpuIfEnablePex(pexIf);
-        return;
 }

@@ -359,7 +359,7 @@ static int pppoe_device_event(struct notifier_block *this,
 	/* Only look at sockets that are using this specific device. */
 	switch (event) {
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_PPP_LEARN)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	case NETDEV_UP: {
 		struct net_device *ppp_netdev;
 		struct pppoe_net *pn;
@@ -390,7 +390,7 @@ static int pppoe_device_event(struct notifier_block *this,
 		write_unlock_bh(&pn->hash_lock);
 	}
 	break;
-#endif /* CONFIG_MV_ETH_NFP_PPP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 	case NETDEV_CHANGEADDR:
@@ -626,7 +626,7 @@ static int pppoe_release(struct socket *sock)
 		po->pppoe_dev = NULL;
 	}
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_PPP_LEARN)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (ppp_dev_name(&po->chan)) {
 		struct net_device *ppp_netdev = NULL;
 		int ppp_netdev_ifindex = 0;
@@ -1192,7 +1192,7 @@ static const struct pppox_proto pppoe_proto = {
 };
 
 #if defined(CONFIG_SYNO_ARMADA)
-#if defined(CONFIG_MV_ETH_NFP_PPP_LEARN)
+#if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void nfp_ppp_sync(void)
 {
 	int i;
@@ -1225,7 +1225,7 @@ void nfp_ppp_sync(void)
 }
 EXPORT_SYMBOL(nfp_ppp_sync);
 
-#endif /* CONFIG_MV_ETH_NFP_PPP_LEARN */
+#endif /* CONFIG_MV_ETH_NFP_HOOKS */
 #endif
 
 static __net_init int pppoe_init_net(struct net *net)

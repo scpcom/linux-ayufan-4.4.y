@@ -89,6 +89,7 @@ extern "C" {
 /*
 #define BOARD_ETH_PORT_NUM		MV_ETH_MAX_PORTS
 */
+#define BOARD_ETH_SWITCH_PORT_NUM	5
 #define	MV_BOARD_MAX_USB_IF		3
 #define MV_BOARD_MAX_MPP		9	/* number of MPP conf registers */
 #define MV_BOARD_NAME_LEN  		0x20
@@ -223,6 +224,15 @@ typedef struct _devCsInfo {
 	MV_U8 busWidth;
 } MV_DEV_CS_INFO;
 
+typedef struct _boardSwitchInfo {
+	MV_32 switchIrq;
+	MV_32 switchPort[BOARD_ETH_SWITCH_PORT_NUM];
+	MV_32 cpuPort;
+	MV_32 connectedPort[MV_ETH_MAX_PORTS];
+	MV_32 smiScanMode;
+	MV_32 quadPhyAddr;
+	MV_U32 forceLinkMask; /* Bitmask of switch ports to have force link (1Gbps) */
+} MV_BOARD_SWITCH_INFO;
 typedef struct _boardLedInfo {
 	MV_U8 activeLedsNumber;
 	MV_U8 ledsPolarity;	/* '0' or '1' to turn on led */
@@ -251,6 +261,7 @@ typedef struct _boardMacInfo {
 	MV_BOARD_MAC_SPEED boardMacSpeed;
 	MV_U8 boardEthSmiAddr;
 	MV_U16 LinkCryptPortAddr;
+	MV_U8	boardEthSmiAddr0;
 } MV_BOARD_MAC_INFO;
 
 typedef struct _boardMppInfo {
@@ -286,8 +297,6 @@ typedef struct _boardInfo {
 	MV_BOARD_MODULE_TYPE_INFO *pBoardModTypeValue;
 	MV_U8 numBoardMppConfigValue;
 	MV_BOARD_MPP_INFO *pBoardMppConfigValue;
-	MV_U8 numBoardSerdesConfigValue;
-	MV_SERDES_CFG *pBoardSerdesConfigValue;
 	MV_U32 intsGppMaskLow;
 	MV_U32 intsGppMaskMid;
 	MV_U32 intsGppMaskHigh;
@@ -316,6 +325,9 @@ typedef struct _boardInfo {
 	MV_U32 gppPolarityValMid;
 	MV_U32 gppPolarityValHigh;
 
+	/* External Switch Configuration */
+	MV_BOARD_SWITCH_INFO *pSwitchInfo;
+	MV_U32 switchInfoNum;
 	/* TDM configuration */
 	/* We hold a different configuration array for each possible slic that
 	 ** can be connected to board.
@@ -351,8 +363,11 @@ MV_BOOL mvBoardIsPortInSgmii(MV_U32 ethPortNum);
 MV_BOOL mvBoardIsPortInGmii(MV_U32 ethPortNum);
 MV_BOOL mvBoardIsPortInRgmii(MV_U32 ethPortNum);
 MV_32 mvBoardPhyAddrGet(MV_U32 ethPortNum);
-MV_32 mvBoardPhyLinkCryptPortAddrGet(MV_U32 ethPortNum);
 
+MV_32 mvBoardQuadPhyAddr0Get(MV_U32 ethPortNum);
+MV_32 mvBoardPhyLinkCryptPortAddrGet(MV_U32 ethPortNum);
+MV_32 mvBoardSwitchCpuPortGet(MV_U32 switchIdx);
+MV_32 mvBoardSmiScanModeGet(MV_U32 switchIdx);
 MV_BOOL mvBoardSpecInitGet(MV_U32 *regOff, MV_U32 *data);
 MV_U32 mvBoardTclkGet(MV_VOID);
 MV_U32 mvBoardSysClkGet(MV_VOID);
@@ -394,19 +409,13 @@ MV_U8 mvBoardCpuFreqGet(MV_VOID);
 MV_STATUS mvBoardCpuFreqSet(MV_U8 freqVal);
 MV_U8 mvBoardCpuFreqModeGet(MV_VOID);
 MV_STATUS mvBoardCpuFreqModeSet(MV_U8 freqVal);
-MV_U8 mvBoardFabFreqModeGet(MV_VOID);
 MV_STATUS mvBoardFabFreqModeSet(MV_U8 freqVal);
 MV_U8 mvBoardBootDevGet(MV_VOID);
 MV_STATUS mvBoardBootDevSet(MV_U8 val);
 MV_U8 mvBoardBootDevWidthGet(MV_VOID);
 MV_STATUS mvBoardBootDevWidthSet(MV_U8 val);
-#ifdef MV88F78X60_Z1
-MV_U8 mvBoardCpu0CoreModeGet(MV_VOID);
-MV_STATUS mvBoardCpu0CoreModeSet(MV_U8 val);
-#else
 MV_U8 mvBoardCpu0EndianessGet(MV_VOID);
 MV_STATUS mvBoardCpu0EndianessSet(MV_U8 val);
-#endif
 MV_U8 mvBoardL2SizeGet(MV_VOID);
 MV_STATUS mvBoardL2SizeSet(MV_U8 val);
 MV_U8 mvBoardCpuCoresNumGet(MV_VOID);
@@ -433,9 +442,6 @@ MV_STATUS mvBoardTwsiMuxChannelSet(MV_U8 muxChNum);
 MV_STATUS mvBoardTwsiReadByteThruMux(MV_U8 muxChNum, MV_U8 chNum, MV_TWSI_SLAVE *pTwsiSlave, MV_U8 *data);
 MV_BOARD_MAC_SPEED mvBoardMacSpeedGet(MV_U32 ethPortNum);
 MV_VOID mvBoardSerdesZ1ASupport(void);
-MV_BOOL mvBoardIsSerdesConfigurationEnabled(void);
-MV_STATUS  mvBoardSerdesConfigurationEnableSet(MV_BOOL enableSerdesconfig);
-MV_SERDES_CFG *mvBoardSerdesCfgGet(void);
 MV_BOARD_PEX_INFO *mvBoardPexInfoGet(void);
 MV_STATUS mvBoardConfIdSet(MV_U16 conf);
 MV_U16 mvBoardPexModeGet(MV_VOID);

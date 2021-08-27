@@ -1264,6 +1264,12 @@ struct ext4_sb_info {
 
 	unsigned int s_log_groups_per_flex;
 	struct flex_groups *s_flex_groups;
+#ifdef MY_ABC_HERE
+	int s_new_error_fs_event_flag;
+#endif
+#ifdef MY_DEF_HERE
+	int s_swap_create_time;
+#endif
 
 	/* workqueue for dio unwritten */
 	struct workqueue_struct *dio_unwritten_wq;
@@ -1697,7 +1703,11 @@ void ext4_get_group_no_and_offset(struct super_block *sb, ext4_fsblk_t blocknr,
 /*
  * Timeout and state flag for lazy initialization inode thread.
  */
+#ifdef MY_ABC_HERE
+#define EXT4_DEF_LI_WAIT_MULT			2
+#else
 #define EXT4_DEF_LI_WAIT_MULT			10
+#endif
 #define EXT4_DEF_LI_MAX_START_DELAY		5
 #define EXT4_LAZYINIT_QUIT			0x0001
 #define EXT4_LAZYINIT_RUNNING			0x0002
