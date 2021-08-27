@@ -747,9 +747,9 @@ static void free_profile(struct aa_profile *profile)
 
 	aa_free_file_rules(&profile->file);
 	aa_free_cap_rules(&profile->caps);
-#ifdef SYNO_APPARMOR_PATCH
+#ifdef MY_ABC_HERE
 	aa_free_net_rules(&profile->net);
-#endif /* SYNO_APPARMOR_PATCH */
+#endif /* MY_ABC_HERE */
 	aa_free_rlimit_rules(&profile->rlimits);
 
 	aa_free_sid(profile->sid);
@@ -906,6 +906,10 @@ struct aa_profile *aa_lookup_profile(struct aa_namespace *ns, const char *hname)
 	read_lock(&ns->lock);
 	profile = aa_get_profile(__lookup_profile(&ns->base, hname));
 	read_unlock(&ns->lock);
+
+	/* the unconfined profile is not in the regular profile list */
+	if (!profile && strcmp(hname, "unconfined") == 0)
+	        profile = aa_get_profile(ns->unconfined);
 
 	/* refcount released by caller */
 	return profile;
@@ -1081,7 +1085,7 @@ audit:
 	if (!old_profile && !rename_profile)
 		op = OP_PROF_LOAD;
 
-#ifdef SYNO_APPARMOR_PATCH
+#ifdef MY_ABC_HERE
 	if (error)
 		error = audit_policy(op, GFP_ATOMIC, name, info, error);
 #else
@@ -1181,7 +1185,7 @@ ssize_t aa_remove_profiles(char *fqname, size_t size)
 	}
 
 	/* don't fail removal if audit fails */
-#ifndef SYNO_APPARMOR_PATCH
+#ifndef MY_ABC_HERE
 	(void) audit_policy(OP_PROF_RM, GFP_KERNEL, name, info, error);
 #endif
 	aa_put_namespace(ns);

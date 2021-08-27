@@ -32,13 +32,6 @@ config SYNO_DISPLAY_CPUINFO
 	help
 	  Say Y to Support display CPU Infomation
 
-config SYNO_COMCERTO2K_CPU_AFFINITY
-	bool "Set default cpu affinity to core 0"
-	depends on SYNO_COMCERTO
-	default y
-	help
-		Set default CPU afiinity on core 0 for md, flush thread
-
 config SYNO_FIX_MV_CESA_RACE
 	bool "Fix Marvell's crypto driver race"
 	depends on MV_CESA
@@ -285,6 +278,15 @@ config SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
 	  read-only page before power off, so that the noise must switch to
 	  writable page first to make some trouble.
 
+config SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+	bool "Workaround for RTL8211DN occasionally has error packets or cannot TX"
+	depends on SYNO_ALPINE
+	default y
+	help
+	  Alpine models with RTL8211DN phy fail the reboot stress that has error
+	  packets or unable to TX. To workaround, we detect this situation and
+	  reset phy.
+
 config SYNO_SUPPORT_EMMC_ERASE
 	bool "Enable erase capability for Marvell sdio host"
 	depends on ARCH_ARMADA370
@@ -316,12 +318,12 @@ config SYNO_DUAL_HEAD
 	  Dual head host use STAT DOM as the synoboot device. In this model SATA
 	  controller & SAS expander exist simultaneously.
 
-config SYNO_HIGH_AVAILABILITY
-	bool "Synology High Availability"
-	depends on SYNO_BROMOLOW || SYNO_CEDARVIEW || SYNO_ALPINE || SYNO_AVOTON || SYNO_GRANTLEY
-	default y
+config SYNO_LOWER_MD_RESYNC_NICE
+	bool "Lower nice value to MD resync threads"
+	depends on SYNO_ALPINE
+	default n
 	help
-	  Check if support SHA
+	  Only alpine platform needs lower nice value now.
 
 config SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 	bool "Let kernel panic if sas reservation write conflict"

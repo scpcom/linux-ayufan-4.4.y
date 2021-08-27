@@ -696,6 +696,48 @@ static ssize_t store_rps_dev_flow_table_cnt(struct netdev_rx_queue *queue,
 	return len;
 }
 
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+static int init_rps_dev_flow_table_cnt(struct netdev_rx_queue *queue)
+{
+	int i = 0;
+	unsigned int count = 256;
+	struct rps_dev_flow_table *table, *old_table;
+	static DEFINE_SPINLOCK(init_rps_dev_flow_lock);
+
+	if (!capable(CAP_NET_ADMIN))
+		return -EPERM;
+
+	if (count > INT_MAX)
+		return -EINVAL;
+
+	count = roundup_pow_of_two(count);
+	if (count > (ULONG_MAX - sizeof(struct rps_dev_flow_table))
+			/ sizeof(struct rps_dev_flow)) {
+		/* Enforce a limit to prevent overflow */
+		return -EINVAL;
+	}
+
+	table = vmalloc(RPS_DEV_FLOW_TABLE_SIZE(count));
+	if (!table)
+		return -ENOMEM;
+
+	table->mask = count - 1;
+	for (i = 0; i < count; i++)
+		table->flows[i].cpu = RPS_NO_CPU;
+
+	spin_lock(&init_rps_dev_flow_lock);
+	old_table = rcu_dereference_protected(queue->rps_flow_table,
+			lockdep_is_held(&init_rps_dev_flow_lock));
+	rcu_assign_pointer(queue->rps_flow_table, table);
+	spin_unlock(&init_rps_dev_flow_lock);
+
+	if (old_table)
+		call_rcu(&old_table->rcu, rps_dev_flow_table_release);
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
+
 static struct rx_queue_attribute rps_cpus_attribute =
 	__ATTR(rps_cpus, S_IRUGO | S_IWUSR, show_rps_map, store_rps_map);
 
@@ -751,6 +793,9 @@ static int rx_queue_add_kobject(struct net_device *net, int index)
 		return error;
 	}
 
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+	init_rps_dev_flow_table_cnt(queue);
+#endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
 	kobject_uevent(kobj, KOBJ_ADD);
 	dev_hold(queue->dev);
 

@@ -6,8 +6,8 @@
  *
  * Maintained by:  KueiHuan Chen <khchen@synology.com>
  *
- * Copyright 2009-2013 Synology, Inc.  All rights reserved.
- * Copyright 2009-2013 Chocoyeh
+ * Copyright 2009-2015 Synology, Inc.  All rights reserved.
+ * Copyright 2009-2015 Chocoyeh
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,14 +37,14 @@
 #ifndef HW_DS1515
 #define HW_DS1515 "DS1515"
 #endif
-#ifndef HW_DS715p
-#define HW_DS715p "DS715+"
+#ifndef HW_DS715
+#define HW_DS715 "DS715"
 #endif
 #ifndef HW_DS215p
 #define HW_DS215p "DS215+"
 #endif
-#ifndef HW_DS415
-#define HW_DS415 "DS415"
+#ifndef HW_DS416
+#define HW_DS416 "DS416"
 #endif
 
 #define GPIO_UNDEF				0xFF
@@ -87,36 +87,9 @@ typedef struct __tag_SYNO_HDD_PM_GPIO {
 } SYNO_HDD_PM_GPIO;
 
 typedef struct __tag_SYNO_FAN_GPIO {
-	u8 fan_1;
-	u8 fan_2;
-	u8 fan_fail;
+	u8 fan_fail_1;
 	u8 fan_fail_2;
 } SYNO_FAN_GPIO;
-
-typedef struct __tag_SYNO_MODEL_GPIO {
-	u8 model_id_0;
-	u8 model_id_1;
-	u8 model_id_2;
-	u8 model_id_3;
-} SYNO_MODEL_GPIO;
-
-typedef struct __tag_SYNO_EXT_HDD_LED_GPIO {
-	u8 hdd1_led_0;
-	u8 hdd1_led_1;
-	u8 hdd2_led_0;
-	u8 hdd2_led_1;
-	u8 hdd3_led_0;
-	u8 hdd3_led_1;
-	u8 hdd4_led_0;
-	u8 hdd4_led_1;
-	u8 hdd5_led_0;
-	u8 hdd5_led_1;
-	u8 hdd_led_mask;
-} SYNO_EXT_HDD_LED_GPIO;
-
-typedef struct __tag_SYNO_MULTI_BAY_GPIO {
-	u8 inter_lock;
-} SYNO_MULTI_BAY_GPIO;
 
 typedef struct __tag_SYNO_SOC_HDD_LED_GPIO {
 	u8 hdd1_fail_led;
@@ -127,6 +100,14 @@ typedef struct __tag_SYNO_SOC_HDD_LED_GPIO {
 	u8 hdd6_fail_led;
 	u8 hdd7_fail_led;
 	u8 hdd8_fail_led;
+	u8 hdd1_present_led;
+	u8 hdd2_present_led;
+	u8 hdd3_present_led;
+	u8 hdd4_present_led;
+	u8 hdd5_present_led;
+	u8 hdd6_present_led;
+	u8 hdd7_present_led;
+	u8 hdd8_present_led;
 	u8 hdd1_act_led;
 	u8 hdd2_act_led;
 	u8 hdd3_act_led;
@@ -137,13 +118,6 @@ typedef struct __tag_SYNO_SOC_HDD_LED_GPIO {
 	u8 hdd8_act_led;
 } SYNO_SOC_HDD_LED_GPIO;
 
-typedef struct __tag_SYNO_RACK_GPIO {
-	u8 buzzer_mute_req;
-	u8 buzzer_mute_ack;
-	u8 rps1_on;
-	u8 rps2_on;
-} SYNO_RACK_GPIO;
-
 typedef struct __tag_SYNO_STATUS_LED_GPIO {
 	u8 alarm_led;
 	u8 power_led;
@@ -151,31 +125,13 @@ typedef struct __tag_SYNO_STATUS_LED_GPIO {
 
 typedef struct __tag_SYNO_GPIO {
 	SYNO_HDD_DETECT_GPIO    hdd_detect;
-	SYNO_EXT_HDD_LED_GPIO	ext_sata_led;
 	SYNO_SOC_HDD_LED_GPIO	soc_sata_led;
-	SYNO_MODEL_GPIO			model;
 	SYNO_FAN_GPIO			fan;
 	SYNO_HDD_PM_GPIO		hdd_pm;
-	SYNO_RACK_GPIO			rack;
-	SYNO_MULTI_BAY_GPIO		multi_bay;
 	SYNO_STATUS_LED_GPIO	status;
 }SYNO_GPIO;
 
 static SYNO_GPIO generic_gpio;
-
-unsigned int SynoModelIDGet(SYNO_GPIO *pGpio)
-{
-	if (GPIO_UNDEF != pGpio->model.model_id_3) {
-		return (((gpio_get_value(pGpio->model.model_id_0) ? 1 : 0) << 3) |
-		        ((gpio_get_value(pGpio->model.model_id_1) ? 1 : 0) << 2) |
-		        ((gpio_get_value(pGpio->model.model_id_2) ? 1 : 0) << 1) |
-		        ((gpio_get_value(pGpio->model.model_id_3) ? 1 : 0) << 0));
-	} else {
-		return (((gpio_get_value(pGpio->model.model_id_0) ? 1 : 0) << 2) |
-		        ((gpio_get_value(pGpio->model.model_id_1) ? 1 : 0) << 1) |
-		        ((gpio_get_value(pGpio->model.model_id_2) ? 1 : 0) << 0));
-	}
-}
 
 int
 SYNO_ALPINE_GPIO_PIN(int pin, int *pValue, int isWrite)
@@ -193,62 +149,6 @@ SYNO_ALPINE_GPIO_PIN(int pin, int *pValue, int isWrite)
 	ret = 0;
 END:
 	return 0;
-}
-
-void SYNO_MASK_HDD_LED(int blEnable)
-{
-	if (GPIO_UNDEF != generic_gpio.ext_sata_led.hdd_led_mask)
-		gpio_set_value(generic_gpio.ext_sata_led.hdd_led_mask, blEnable ? 1 : 0);
-}
-
-int
-SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
-{
-	int ret = -1;
-	int pin1 = 0, pin2 = 0, bit1 = 0, bit2 = 0;
-
-	bit1 = ( status >> 0 ) & 0x1;
-	bit2 = ( status >> 1 ) & 0x1;
-
-	switch (index) {
-	case 1:
-		pin1 = generic_gpio.ext_sata_led.hdd1_led_0;
-		pin2 = generic_gpio.ext_sata_led.hdd1_led_1;
-		break;
-	case 2:
-		pin1 = generic_gpio.ext_sata_led.hdd2_led_0;
-		pin2 = generic_gpio.ext_sata_led.hdd2_led_1;
-		break;
-	case 3:
-		pin1 = generic_gpio.ext_sata_led.hdd3_led_0;
-		pin2 = generic_gpio.ext_sata_led.hdd3_led_1;
-		break;
-	case 4:
-		pin1 = generic_gpio.ext_sata_led.hdd4_led_0;
-		pin2 = generic_gpio.ext_sata_led.hdd4_led_1;
-		break;
-	case 5:
-		pin1 = generic_gpio.ext_sata_led.hdd5_led_0;
-		pin2 = generic_gpio.ext_sata_led.hdd5_led_1;
-		break;
-	case 6:
-		//for esata
-		ret = 0;
-		goto END;
-	default:
-		printk("Wrong HDD number [%d]\n", index);
-		goto END;
-	}
-
-	WARN_ON(pin1 == GPIO_UNDEF);
-	WARN_ON(pin2 == GPIO_UNDEF);
-
-	gpio_set_value(pin1, bit1);
-	gpio_set_value(pin2, bit2);
-
-    ret = 0;
-END:
-    return ret;
 }
 
 int SYNO_CTRL_HDD_POWERON(int index, int value)
@@ -299,26 +199,7 @@ END:
 
 int SYNO_CTRL_FAN_PERSISTER(int index, int status, int isWrite)
 {
-	int ret = 0;
-	u8 pin = GPIO_UNDEF;
-
-	switch (index) {
-	case 1:
-		pin = generic_gpio.fan.fan_1;
-		break;
-	case 2:
-		pin = generic_gpio.fan.fan_2;
-		break;
-	default:
-		ret = -1;
-		printk("%s fan not match\n", __FUNCTION__);
-		goto END;
-	}
-
-	WARN_ON(GPIO_UNDEF == pin);
-	gpio_set_value(pin, status);
-END:
-	return ret;
+	return 0;
 }
 
 int SYNO_CTRL_FAN_STATUS_GET(int index, int *pValue)
@@ -327,8 +208,8 @@ int SYNO_CTRL_FAN_STATUS_GET(int index, int *pValue)
 
 	switch (index) {
 		case 1:
-			WARN_ON(GPIO_UNDEF == generic_gpio.fan.fan_fail);
-			*pValue = gpio_get_value(generic_gpio.fan.fan_fail);
+			WARN_ON(GPIO_UNDEF == generic_gpio.fan.fan_fail_1);
+			*pValue = gpio_get_value(generic_gpio.fan.fan_fail_1);
 			break;
 		case 2:
 			WARN_ON(GPIO_UNDEF == generic_gpio.fan.fan_fail_2);
@@ -355,40 +236,15 @@ int SYNO_CTRL_ALARM_LED_SET(int status)
 	return 0;
 }
 
-int SYNO_CTRL_BACKPLANE_STATUS_GET(int *pStatus)
-{
-	WARN_ON(GPIO_UNDEF == generic_gpio.multi_bay.inter_lock);
-
-	*pStatus = gpio_get_value(generic_gpio.multi_bay.inter_lock);
-	return 0;
-}
-
-int SYNO_CTRL_BUZZER_CLEARED_GET(int *pValue)
-{
-	int tempVal = 0;
-
-	WARN_ON(GPIO_UNDEF == generic_gpio.rack.buzzer_mute_req);
-
-	tempVal = gpio_get_value(generic_gpio.rack.buzzer_mute_req);
-	if ( tempVal ) {
-		*pValue = 0;
-	} else {
-		*pValue = 1;
-		tempVal = 1;
-	}
-
-	return 0;
-}
-
 #define ARRAY_LEN(x) (sizeof(x)/sizeof(x[0]))
 struct disk_info {
 	char *hw_version;
 	int	max_disk_id;
 };
 static struct disk_info alpine_family[] = {
-	{HW_DS715p, 2},
+	{HW_DS715, 2},
 	{HW_DS215p, 2},
-	{HW_DS415, 4}
+	{HW_DS416, 4}
 };
 
 unsigned char SYNOALPINEIsBoardNeedPowerUpHDD(u32 disk_id) {
@@ -405,11 +261,11 @@ unsigned char SYNOALPINEIsBoardNeedPowerUpHDD(u32 disk_id) {
 		return 0;
 	}
 
-	if (0 == strncmp(gszSynoHWVersion, HW_DS715p, strlen(HW_DS715p))) {
+	if (0 == strncmp(gszSynoHWVersion, HW_DS715, strlen(HW_DS715))) {
 		def_max_disk = 2;
 	} else if (0 == strncmp(gszSynoHWVersion, HW_DS215p, strlen(HW_DS215p))) {
 		def_max_disk = 2;
-	} else if (0 == strncmp(gszSynoHWVersion, HW_DS415, strlen(HW_DS415))) {
+	} else if (0 == strncmp(gszSynoHWVersion, HW_DS416, strlen(HW_DS416))) {
 		def_max_disk = 4;
 	}
 
@@ -489,39 +345,43 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 
 	WARN_ON(GPIO_UNDEF == generic_gpio.soc_sata_led.hdd1_fail_led);
 
+	if (0 == SYNO_CHECK_HDD_PRESENT(index)) {
+		status = DISK_LED_OFF;
+	}
+
 	/* assign pin info according to hdd */
 	switch (index) {
 		case 1:
 			fail_led = generic_gpio.soc_sata_led.hdd1_fail_led;
-			present_led = generic_gpio.hdd_detect.hdd1_present_detect;
+			present_led = generic_gpio.soc_sata_led.hdd1_present_led;
 			break;
 		case 2:
 			fail_led = generic_gpio.soc_sata_led.hdd2_fail_led;
-			present_led = generic_gpio.hdd_detect.hdd2_present_detect;
+			present_led = generic_gpio.soc_sata_led.hdd2_present_led;
 			break;
 		case 3:
 			fail_led = generic_gpio.soc_sata_led.hdd3_fail_led;
-			present_led = generic_gpio.hdd_detect.hdd3_present_detect;
+			present_led = generic_gpio.soc_sata_led.hdd3_present_led;
 			break;
 		case 4:
 			fail_led = generic_gpio.soc_sata_led.hdd4_fail_led;
-			present_led = generic_gpio.hdd_detect.hdd4_present_detect;
+			present_led = generic_gpio.soc_sata_led.hdd4_present_led;
 			break;
 		case 5:
 			fail_led = generic_gpio.soc_sata_led.hdd5_fail_led;
-			present_led = generic_gpio.hdd_detect.hdd5_present_detect;
+			present_led = generic_gpio.soc_sata_led.hdd5_present_led;
 			break;
 		case 6:
 			fail_led = generic_gpio.soc_sata_led.hdd6_fail_led;
-			present_led = generic_gpio.hdd_detect.hdd6_present_detect;
+			present_led = generic_gpio.soc_sata_led.hdd6_present_led;
 			break;
 		case 7:
 			fail_led = generic_gpio.soc_sata_led.hdd7_fail_led;
-			present_led = generic_gpio.hdd_detect.hdd7_present_detect;
+			present_led = generic_gpio.soc_sata_led.hdd7_present_led;
 			break;
 		case 8:
 			fail_led = generic_gpio.soc_sata_led.hdd8_fail_led;
-			present_led = generic_gpio.hdd_detect.hdd8_present_detect;
+			present_led = generic_gpio.soc_sata_led.hdd8_present_led;
 			break;
 		default:
 			printk("Wrong HDD number [%d]\n", index);
@@ -623,14 +483,10 @@ END:
 EXPORT_SYMBOL(SYNO_CTRL_HDD_ACT_NOTIFY);
 EXPORT_SYMBOL(SYNOALPINEIsBoardNeedPowerUpHDD);
 EXPORT_SYMBOL(SYNO_ALPINE_GPIO_PIN);
-EXPORT_SYMBOL(SYNO_MASK_HDD_LED);
-EXPORT_SYMBOL(SYNO_CTRL_EXT_CHIP_HDD_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_HDD_POWERON);
 EXPORT_SYMBOL(SYNO_CTRL_FAN_PERSISTER);
 EXPORT_SYMBOL(SYNO_CTRL_FAN_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_ALARM_LED_SET);
-EXPORT_SYMBOL(SYNO_CTRL_BACKPLANE_STATUS_GET);
-EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
 EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
 EXPORT_SYMBOL(SYNO_SOC_HDD_LED_SET);
@@ -653,7 +509,7 @@ Pin     In/Out    Function
 25      Out       High = HDD 6 activity
 26      Out       High = HDD 7 activity
 27      Out       High = HDD 8 activity
-30      Out       High = HDD 1 present
+29      Out       High = HDD 1 present
 31      Out       High = HDD 2 present
 32      Out       High = HDD 3 present
 33      Out       High = HDD 4 present
@@ -677,27 +533,14 @@ ALPINE_ds2015xs_GPIO_init(SYNO_GPIO *global_gpio)
 {
 	SYNO_GPIO gpio_ds2015xs = {
 		.hdd_detect = {
-			.hdd1_present_detect = 29,
-			.hdd2_present_detect = 31,
-			.hdd3_present_detect = 32,
-			.hdd4_present_detect = 33,
-			.hdd5_present_detect = 34,
-			.hdd6_present_detect = 35,
-			.hdd7_present_detect = 36,
-			.hdd8_present_detect = 37,
-		},
-		.ext_sata_led = {
-			.hdd1_led_0 = GPIO_UNDEF,
-			.hdd1_led_1 = GPIO_UNDEF,
-			.hdd2_led_0 = GPIO_UNDEF,
-			.hdd2_led_1 = GPIO_UNDEF,
-			.hdd3_led_0 = GPIO_UNDEF,
-			.hdd3_led_1 = GPIO_UNDEF,
-			.hdd4_led_0 = GPIO_UNDEF,
-			.hdd4_led_1 = GPIO_UNDEF,
-			.hdd5_led_0 = GPIO_UNDEF,
-			.hdd5_led_1 = GPIO_UNDEF,
-			.hdd_led_mask = GPIO_UNDEF,
+			.hdd1_present_detect = GPIO_UNDEF,
+			.hdd2_present_detect = GPIO_UNDEF,
+			.hdd3_present_detect = GPIO_UNDEF,
+			.hdd4_present_detect = GPIO_UNDEF,
+			.hdd5_present_detect = GPIO_UNDEF,
+			.hdd6_present_detect = GPIO_UNDEF,
+			.hdd7_present_detect = GPIO_UNDEF,
+			.hdd8_present_detect = GPIO_UNDEF,
 		},
 		.soc_sata_led = {
 			.hdd1_fail_led = 38,
@@ -708,6 +551,14 @@ ALPINE_ds2015xs_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd6_fail_led = 2,
 			.hdd7_fail_led = 3,
 			.hdd8_fail_led = 4,
+			.hdd1_present_led = 29,
+			.hdd2_present_led = 31,
+			.hdd3_present_led = 32,
+			.hdd4_present_led = 33,
+			.hdd5_present_led = 34,
+			.hdd6_present_led = 35,
+			.hdd7_present_led = 36,
+			.hdd8_present_led = 37,
 			.hdd1_act_led = 10,
 			.hdd2_act_led = 11,
 			.hdd3_act_led = 22,
@@ -717,16 +568,8 @@ ALPINE_ds2015xs_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd7_act_led = 26,
 			.hdd8_act_led = 27,
 		},
-		.model		  = {
-			.model_id_0 = 42,  // FIXME
-			.model_id_1 = 41,  // FIXME
-			.model_id_2 = 40,  // FIXME
-			.model_id_3 = GPIO_UNDEF,
-		},
 		.fan		  = {
-			.fan_1 = GPIO_UNDEF,
-			.fan_2 = GPIO_UNDEF,
-			.fan_fail = 0,
+			.fan_fail_1 = 0,
 			.fan_fail_2 = 1,
 		},
 		.hdd_pm		  = {
@@ -738,15 +581,6 @@ ALPINE_ds2015xs_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd6_pm = GPIO_UNDEF,
 			.hdd7_pm = GPIO_UNDEF,
 			.hdd8_pm = GPIO_UNDEF,
-		},
-		.rack		  = {
-			.buzzer_mute_req = GPIO_UNDEF,
-			.buzzer_mute_ack = GPIO_UNDEF,
-			.rps1_on = GPIO_UNDEF,
-			.rps2_on = GPIO_UNDEF,
-		},
-		.multi_bay	  = {
-			.inter_lock = GPIO_UNDEF,
 		},
 		.status		  = {
 			.power_led = GPIO_UNDEF,
@@ -789,27 +623,14 @@ ALPINE_ds1515_GPIO_init(SYNO_GPIO *global_gpio)
 {
 	SYNO_GPIO gpio_ds1515 = {
 		.hdd_detect = {
-			.hdd1_present_detect = 29,
-			.hdd2_present_detect = 31,
-			.hdd3_present_detect = 32,
-			.hdd4_present_detect = 33,
-			.hdd5_present_detect = 34,
+			.hdd1_present_detect = GPIO_UNDEF,
+			.hdd2_present_detect = GPIO_UNDEF,
+			.hdd3_present_detect = GPIO_UNDEF,
+			.hdd4_present_detect = GPIO_UNDEF,
+			.hdd5_present_detect = GPIO_UNDEF,
 			.hdd6_present_detect = GPIO_UNDEF,
 			.hdd7_present_detect = GPIO_UNDEF,
 			.hdd8_present_detect = GPIO_UNDEF,
-		},
-		.ext_sata_led = {
-			.hdd1_led_0 = GPIO_UNDEF,
-			.hdd1_led_1 = GPIO_UNDEF,
-			.hdd2_led_0 = GPIO_UNDEF,
-			.hdd2_led_1 = GPIO_UNDEF,
-			.hdd3_led_0 = GPIO_UNDEF,
-			.hdd3_led_1 = GPIO_UNDEF,
-			.hdd4_led_0 = GPIO_UNDEF,
-			.hdd4_led_1 = GPIO_UNDEF,
-			.hdd5_led_0 = GPIO_UNDEF,
-			.hdd5_led_1 = GPIO_UNDEF,
-			.hdd_led_mask = GPIO_UNDEF,
 		},
 		.soc_sata_led = {
 			.hdd1_fail_led = 38,
@@ -820,6 +641,14 @@ ALPINE_ds1515_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd6_fail_led = GPIO_UNDEF,
 			.hdd7_fail_led = GPIO_UNDEF,
 			.hdd8_fail_led = GPIO_UNDEF,
+			.hdd1_present_led = 29,
+			.hdd2_present_led = 31,
+			.hdd3_present_led = 32,
+			.hdd4_present_led = 33,
+			.hdd5_present_led = 34,
+			.hdd6_present_led = GPIO_UNDEF,
+			.hdd7_present_led = GPIO_UNDEF,
+			.hdd8_present_led = GPIO_UNDEF,
 			.hdd1_act_led = 10,
 			.hdd2_act_led = 11,
 			.hdd3_act_led = 22,
@@ -829,16 +658,8 @@ ALPINE_ds1515_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd7_act_led = GPIO_UNDEF,
 			.hdd8_act_led = GPIO_UNDEF,
 		},
-		.model		  = {
-			.model_id_0 = 42,  // FIXME
-			.model_id_1 = 41,  // FIXME
-			.model_id_2 = 40,  // FIXME
-			.model_id_3 = GPIO_UNDEF,
-		},
 		.fan		  = {
-			.fan_1 = GPIO_UNDEF,
-			.fan_2 = GPIO_UNDEF,
-			.fan_fail = 0,
+			.fan_fail_1 = 0,
 			.fan_fail_2 = 1,
 		},
 		.hdd_pm		  = {
@@ -851,15 +672,6 @@ ALPINE_ds1515_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd7_pm = GPIO_UNDEF,
 			.hdd8_pm = GPIO_UNDEF,
 		},
-		.rack		  = {
-			.buzzer_mute_req = GPIO_UNDEF,
-			.buzzer_mute_ack = GPIO_UNDEF,
-			.rps1_on = GPIO_UNDEF,
-			.rps2_on = GPIO_UNDEF,
-		},
-		.multi_bay	  = {
-			.inter_lock = GPIO_UNDEF,
-		},
 		.status		  = {
 			.power_led = GPIO_UNDEF,
 			.alarm_led = 18,
@@ -870,18 +682,18 @@ ALPINE_ds1515_GPIO_init(SYNO_GPIO *global_gpio)
 }
 
 /*
-DS715+/DS215+ GPIO config table
+DS715/DS215+ GPIO config table
 (High=1)
 
 Pin     In/Out    Function
  0       In       FAN 1
  2       In       HDD_PRZ_1 (Low = HDD insert; High = plug out)
- 3       In       HDD_PRZ_1 (Low = HDD insert; High = plug out)
+ 3       In       HDD_PRZ_2 (Low = HDD insert; High = plug out)
  5      Out       High = SATA LED off
 34      Out       High = LAN LED on
 19      Out       High = Enable ESATA 1 power
 22      Out       High = Enable HDD 1 power (for deep sleep)
-23      Out       High = Enable HDD 1 power (for deep sleep)
+23      Out       High = Enable HDD 2 power (for deep sleep)
 10      Out       High = HDD 1 activity LED
 11      Out       High = HDD 2 activity LED
 29      Out       High = HDD 1 present LED
@@ -896,27 +708,14 @@ ALPINE_2bay_GPIO_init(SYNO_GPIO *global_gpio)
 {
 	SYNO_GPIO gpio_2bay = {
 		.hdd_detect = {
-			.hdd1_present_detect = 29,
-			.hdd2_present_detect = 31,
+			.hdd1_present_detect = 2,
+			.hdd2_present_detect = 3,
 			.hdd3_present_detect = GPIO_UNDEF,
 			.hdd4_present_detect = GPIO_UNDEF,
 			.hdd5_present_detect = GPIO_UNDEF,
 			.hdd6_present_detect = GPIO_UNDEF,
 			.hdd7_present_detect = GPIO_UNDEF,
 			.hdd8_present_detect = GPIO_UNDEF,
-		},
-		.ext_sata_led = {
-			.hdd1_led_0 = GPIO_UNDEF,
-			.hdd1_led_1 = GPIO_UNDEF,
-			.hdd2_led_0 = GPIO_UNDEF,
-			.hdd2_led_1 = GPIO_UNDEF,
-			.hdd3_led_0 = GPIO_UNDEF,
-			.hdd3_led_1 = GPIO_UNDEF,
-			.hdd4_led_0 = GPIO_UNDEF,
-			.hdd4_led_1 = GPIO_UNDEF,
-			.hdd5_led_0 = GPIO_UNDEF,
-			.hdd5_led_1 = GPIO_UNDEF,
-			.hdd_led_mask = GPIO_UNDEF,
 		},
 		.soc_sata_led = {
 			.hdd1_fail_led = 38,
@@ -927,6 +726,14 @@ ALPINE_2bay_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd6_fail_led = GPIO_UNDEF,
 			.hdd7_fail_led = GPIO_UNDEF,
 			.hdd8_fail_led = GPIO_UNDEF,
+			.hdd1_present_led = 29,
+			.hdd2_present_led = 31,
+			.hdd3_present_led = GPIO_UNDEF,
+			.hdd4_present_led = GPIO_UNDEF,
+			.hdd5_present_led = GPIO_UNDEF,
+			.hdd6_present_led = GPIO_UNDEF,
+			.hdd7_present_led = GPIO_UNDEF,
+			.hdd8_present_led = GPIO_UNDEF,
 			.hdd1_act_led = 10,
 			.hdd2_act_led = 11,
 			.hdd3_act_led = GPIO_UNDEF,
@@ -936,16 +743,8 @@ ALPINE_2bay_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd7_act_led = GPIO_UNDEF,
 			.hdd8_act_led = GPIO_UNDEF,
 		},
-		.model		  = {
-			.model_id_0 = 42,  // FIXME
-			.model_id_1 = 41,  // FIXME
-			.model_id_2 = 40,  // FIXME
-			.model_id_3 = GPIO_UNDEF,
-		},
 		.fan		  = {
-			.fan_1 = GPIO_UNDEF,
-			.fan_2 = GPIO_UNDEF,
-			.fan_fail = 0,
+			.fan_fail_1 = 0,
 			.fan_fail_2 = GPIO_UNDEF,
 		},
 		.hdd_pm		  = {
@@ -958,15 +757,6 @@ ALPINE_2bay_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd7_pm = GPIO_UNDEF,
 			.hdd8_pm = GPIO_UNDEF,
 		},
-		.rack		  = {
-			.buzzer_mute_req = GPIO_UNDEF,
-			.buzzer_mute_ack = GPIO_UNDEF,
-			.rps1_on = GPIO_UNDEF,
-			.rps2_on = GPIO_UNDEF,
-		},
-		.multi_bay	  = {
-			.inter_lock = GPIO_UNDEF,
-		},
 		.status		  = {
 			.power_led = GPIO_UNDEF,
 			.alarm_led = GPIO_UNDEF,
@@ -974,6 +764,101 @@ ALPINE_2bay_GPIO_init(SYNO_GPIO *global_gpio)
 	};
 
 	*global_gpio = gpio_2bay;
+}
+
+/*
+DS416 GPIO config table
+(High=1)
+
+Pin     In/Out    Function
+ 0       In       FAN 1
+ 1       In       FAN 2
+ 2       In       HDD_PRZ_1 (Low = HDD insert; High = plug out)
+ 3       In       HDD_PRZ_2 (Low = HDD insert; High = plug out)
+35       In       HDD_PRZ_3 (Low = HDD insert; High = plug out)
+36       In       HDD_PRZ_4 (Low = HDD insert; High = plug out)
+ 5      Out       High = Disk LED off
+19      Out       High = Enable ESATA 1 power
+10      Out       High = HDD 1 activity
+11      Out       High = HDD 2 activity
+22      Out       High = HDD 3 activity
+23      Out       High = HDD 4 activity
+24      Out       High = Enable HDD 1 power (for deep sleep)
+25      Out       High = Enable HDD 2 power (for deep sleep)
+26      Out       High = Enable HDD 3 power (for deep sleep)
+27      Out       High = Enable HDD 4 power (for deep sleep)
+29      Out       High = HDD 1 present
+31      Out       High = HDD 2 present
+32      Out       High = HDD 3 present
+33      Out       High = HDD 4 present
+38      Out       High = HDD 1 fault
+39      Out       High = HDD 2 fault
+40      Out       High = HDD 3 fault
+41      Out       High = HDD 4 fault
+43      Out       VTT off
+*/
+
+static void
+ALPINE_ds416_GPIO_init(SYNO_GPIO *global_gpio)
+{
+	SYNO_GPIO gpio_ds416 = {
+		.hdd_detect = {
+			.hdd1_present_detect = 2,
+			.hdd2_present_detect = 3,
+			.hdd3_present_detect = 35,
+			.hdd4_present_detect = 36,
+			.hdd5_present_detect = GPIO_UNDEF,
+			.hdd6_present_detect = GPIO_UNDEF,
+			.hdd7_present_detect = GPIO_UNDEF,
+			.hdd8_present_detect = GPIO_UNDEF,
+		},
+		.soc_sata_led = {
+			.hdd1_fail_led = 38,
+			.hdd2_fail_led = 39,
+			.hdd3_fail_led = 40,
+			.hdd4_fail_led = 41,
+			.hdd5_fail_led = GPIO_UNDEF,
+			.hdd6_fail_led = GPIO_UNDEF,
+			.hdd7_fail_led = GPIO_UNDEF,
+			.hdd8_fail_led = GPIO_UNDEF,
+			.hdd1_present_led = 29,
+			.hdd2_present_led = 31,
+			.hdd3_present_led = 32,
+			.hdd4_present_led = 33,
+			.hdd5_present_led = GPIO_UNDEF,
+			.hdd6_present_led = GPIO_UNDEF,
+			.hdd7_present_led = GPIO_UNDEF,
+			.hdd8_present_led = GPIO_UNDEF,
+			.hdd1_act_led = 10,
+			.hdd2_act_led = 11,
+			.hdd3_act_led = 22,
+			.hdd4_act_led = 23,
+			.hdd5_act_led = GPIO_UNDEF,
+			.hdd6_act_led = GPIO_UNDEF,
+			.hdd7_act_led = GPIO_UNDEF,
+			.hdd8_act_led = GPIO_UNDEF,
+		},
+		.fan		  = {
+			.fan_fail_1 = 0,
+			.fan_fail_2 = 1,
+		},
+		.hdd_pm		  = {
+			.hdd1_pm = 24,
+			.hdd2_pm = 25,
+			.hdd3_pm = 26,
+			.hdd4_pm = 27,
+			.hdd5_pm = GPIO_UNDEF,
+			.hdd6_pm = GPIO_UNDEF,
+			.hdd7_pm = GPIO_UNDEF,
+			.hdd8_pm = GPIO_UNDEF,
+		},
+		.status		  = {
+			.power_led = GPIO_UNDEF,
+			.alarm_led = GPIO_UNDEF,
+		},
+	};
+
+	*global_gpio = gpio_ds416;
 }
 
 static void
@@ -989,18 +874,6 @@ ALPINE_default_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd6_present_detect = GPIO_UNDEF,
 			.hdd7_present_detect = GPIO_UNDEF,
 			.hdd8_present_detect = GPIO_UNDEF,
-		},
-		.ext_sata_led = {
-			.hdd1_led_0 = GPIO_UNDEF,
-			.hdd1_led_1 = GPIO_UNDEF,
-			.hdd2_led_0 = GPIO_UNDEF,
-			.hdd2_led_1 = GPIO_UNDEF,
-			.hdd3_led_0 = GPIO_UNDEF,
-			.hdd3_led_1 = GPIO_UNDEF,
-			.hdd4_led_0 = GPIO_UNDEF,
-			.hdd4_led_1 = GPIO_UNDEF,
-			.hdd5_led_0 = GPIO_UNDEF,
-			.hdd5_led_1 = GPIO_UNDEF,
 		},
 		.soc_sata_led = {
 			.hdd1_fail_led = GPIO_UNDEF,
@@ -1020,16 +893,8 @@ ALPINE_default_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd7_act_led = GPIO_UNDEF,
 			.hdd8_act_led = GPIO_UNDEF,
 		},
-		.model		  = {
-			.model_id_0 = GPIO_UNDEF,
-			.model_id_1 = GPIO_UNDEF,
-			.model_id_2 = GPIO_UNDEF,
-			.model_id_3 = GPIO_UNDEF,
-		},
 		.fan		  = {
-			.fan_1 = GPIO_UNDEF,
-			.fan_2 = GPIO_UNDEF,
-			.fan_fail = GPIO_UNDEF,
+			.fan_fail_1 = GPIO_UNDEF,
 			.fan_fail_2 = GPIO_UNDEF,
 		},
 		.hdd_pm		  = {
@@ -1041,15 +906,6 @@ ALPINE_default_GPIO_init(SYNO_GPIO *global_gpio)
 			.hdd6_pm = GPIO_UNDEF,
 			.hdd7_pm = GPIO_UNDEF,
 			.hdd8_pm = GPIO_UNDEF,
-		},
-		.rack		  = {
-			.buzzer_mute_req = GPIO_UNDEF,
-			.buzzer_mute_ack = GPIO_UNDEF,
-			.rps1_on = GPIO_UNDEF,
-			.rps2_on = GPIO_UNDEF,
-		},
-		.multi_bay	  = {
-			.inter_lock = GPIO_UNDEF,
 		},
 		.status		  = {
 			.power_led = GPIO_UNDEF,
@@ -1068,12 +924,15 @@ void synology_gpio_init(void)
 	} else if (0 == strncmp(gszSynoHWVersion, HW_DS1515, strlen(HW_DS1515))) {
 		ALPINE_ds1515_GPIO_init(&generic_gpio);
 		printk("Synology %s GPIO Init\n", HW_DS1515);
-	} else if (0 == strncmp(gszSynoHWVersion, HW_DS715p, strlen(HW_DS715p))) {
+	} else if (0 == strncmp(gszSynoHWVersion, HW_DS715, strlen(HW_DS715))) {
 		ALPINE_2bay_GPIO_init(&generic_gpio);
-		printk("Synology %s GPIO Init\n", HW_DS715p);
+		printk("Synology %s GPIO Init\n", HW_DS715);
 	} else if (0 == strncmp(gszSynoHWVersion, HW_DS215p, strlen(HW_DS215p))) {
 		ALPINE_2bay_GPIO_init(&generic_gpio);
 		printk("Synology %s GPIO Init\n", HW_DS215p);
+	} else if (0 == strncmp(gszSynoHWVersion, HW_DS416, strlen(HW_DS416))) {
+		ALPINE_ds416_GPIO_init(&generic_gpio);
+		printk("Synology %s GPIO Init\n", HW_DS416);
 	} else {
 		ALPINE_default_GPIO_init(&generic_gpio);
 		printk("Not supported hw version!\n");

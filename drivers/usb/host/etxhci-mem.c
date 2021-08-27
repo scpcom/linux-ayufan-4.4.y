@@ -1335,10 +1335,14 @@ static void xhci_apply_device_quirk(struct xhci_hcd * xhci,
 	struct usb_device * udev, struct usb_host_endpoint *ep)
 {
 #define XHCI_QUIRK_ONE_BURST_SIZE	(1 << 0)
+#define XHCI_QUIRK_DONOT_DOWNGRADE	(1 << 3)
 
 	static const struct usb_device_id quirk_device_ids[] = {
 		{ USB_DEVICE(0x1759, 0x5002), .driver_info = XHCI_QUIRK_ONE_BURST_SIZE },
 		{ USB_DEVICE(0x1759, 0x5000), .driver_info = XHCI_QUIRK_ONE_BURST_SIZE },
+		{ USB_DEVICE(0x1759, 0x5100), .driver_info = XHCI_QUIRK_DONOT_DOWNGRADE },
+		{ USB_DEVICE(0x054c, 0x05bf), .driver_info = XHCI_QUIRK_DONOT_DOWNGRADE },
+		{ USB_DEVICE(0x8564, 0x1000), .driver_info = XHCI_QUIRK_DONOT_DOWNGRADE },
 	};
 	struct xhci_virt_device *virt_dev;
 	int i;
@@ -1364,6 +1368,10 @@ static void xhci_apply_device_quirk(struct xhci_hcd * xhci,
 					ep_ctx->ep_info2 &= cpu_to_le32(~MAX_BURST_MASK);
 					ep_ctx->ep_info2 |= cpu_to_le32(MAX_BURST(1));
 				}
+			}
+
+			if (id->driver_info & XHCI_QUIRK_DONOT_DOWNGRADE) {
+				virt_dev->donot_downgrade = 1;
 			}
 
 			break;

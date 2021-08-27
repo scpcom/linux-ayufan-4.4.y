@@ -124,7 +124,7 @@ int del_match_busid(char *busid)
 	ret = 0;
 
 #ifdef MY_ABC_HERE
-	if (busid_table[idx].status == STUB_BUSID_OTHER)
+	if (busid_table[idx].status == STUB_BUSID_ADDED)
 		busid_table[idx].status = STUB_BUSID_OTHER;
 #endif
 

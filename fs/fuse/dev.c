@@ -755,6 +755,7 @@ static int fuse_copy_fill(struct fuse_copy_state *cs)
 	return lock_request(cs->fc, cs->req);
 }
 
+/* Do as much copy to/from userspace buffer as we can */
 static int fuse_copy_do(struct fuse_copy_state *cs, void **val, unsigned *size)
 {
 	unsigned ncpy = min(*size, cs->len);

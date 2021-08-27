@@ -2941,12 +2941,48 @@ nothing_to_do:
 	return 1;
 }
 
+#ifdef MY_ABC_HERE
+static void syno_result_tf_lba_restore(struct ata_queued_cmd *qc)
+{
+	struct ata_port *ap = qc->ap;
+	struct ata_taskfile *rtf = &qc->result_tf;
+	struct ata_taskfile *tf = &qc->tf;
+
+    /* Some SATA controller would return the LBA even if the NCQ command failed because of UNC error,
+	 * and the scsi layer would take that as a partially success (which is not, in some cases.)
+	 * We cannot guarantee the data correctness of the completed bytes because the return value and
+	 * the DMA result are various on different disks and controllers.
+	 * Since the LBA register value is not defined in the error return of a ATA_CMD_FPDMA_READ in ATA 8 standard,
+	 * we fill the LBA and device in result taskfile with the preceding setup.
+	 * Reference to "American National Standard T13/1699-D Table 136." for more information.
+     */
+	if (ATA_ERR & rtf->command &&
+		ATA_UNC & rtf->feature &&
+		ATA_TFLAG_LBA48 & tf->flags &&
+		ATA_CMD_FPDMA_READ == tf->command) {
+			rtf->lbal               = tf->lbal;
+			rtf->lbam               = tf->lbam;
+			rtf->lbah               = tf->lbah;
+			rtf->device             = tf->device;
+			rtf->hob_lbal   = tf->hob_lbal;
+			rtf->hob_lbam   = tf->hob_lbam;
+			rtf->hob_lbah   = tf->hob_lbah;
+			printk(KERN_INFO"ata%u: UNC RTF LBA Restored\n", ap->print_id);
+	}
+}
+#endif /* MY_ABC_HERE */
+
 static void ata_scsi_qc_complete(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
 	struct scsi_cmnd *cmd = qc->scsicmd;
 	u8 *cdb = cmd->cmnd;
 	int need_sense = (qc->err_mask != 0);
+
+#ifdef MY_ABC_HERE
+	/* Check and restore LBA before generating sense data if there was a media error */
+	syno_result_tf_lba_restore(qc);
+#endif /* MY_ABC_HERE */
 
 	/* For ATA pass thru (SAT) commands, generate a sense block if
 	 * user mandated it or if there's an error.  Note that if we

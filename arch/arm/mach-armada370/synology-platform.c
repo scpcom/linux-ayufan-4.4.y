@@ -16,26 +16,3 @@
 #include "ctrlEnv/mvCtrlEnvLib.h"
 #include "ctrlEnv/sys/mvCpuIf.h"
 #include "mvOs.h"
-
-unsigned long long get_cpu_time(void)
-{
-	u64 clock = sched_clock_cpu(smp_processor_id());
-	return clock;
-}
-
-int set_schedule(int policy, const struct sched_param *param) {
-	return 0;
-}
-
-unsigned long long force_cpu_idle(void)
-{
-	unsigned long long start, end;
-	start = get_cpu_time();
-	end = get_cpu_time();
-	
-	return (end-start);
-}
-
-EXPORT_SYMBOL(force_cpu_idle);
-EXPORT_SYMBOL(get_cpu_time);
-EXPORT_SYMBOL(set_schedule);

@@ -75,7 +75,7 @@ void fsstack_copy_attr_all(struct inode *dest, const struct inode *src)
 	dest->i_blkbits = src->i_blkbits;
 	dest->i_flags = src->i_flags;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	//For ecryptfs archive bit
 	dest->i_mode2 = src->i_mode2;
 #endif

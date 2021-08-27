@@ -54,7 +54,7 @@
 #ifdef MY_ABC_HERE
 #define XATTR_SYNO_CREATE_TIME "create_time"
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 #define XATTR_SYNO_ARCHIVE_BIT "archive_bit"
 #define XATTR_SYNO_ARCHIVE_BIT_NOPERM "archive_bit_noperm" //for glusterfs
 #endif

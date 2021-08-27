@@ -110,14 +110,14 @@ static struct extent_map *create_pinned_em(struct inode *inode, u64 start,
 
 static int btrfs_dirty_inode(struct inode *inode);
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(SYNO_ARCHIVE_BIT)
 static int syno_btrfs_init_attr(struct btrfs_trans_handle *trans, struct inode *inode)
 {
 	int err = -EINVAL;
 #ifdef MY_ABC_HERE
 	struct btrfs_timespec crtime;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	__le32 archive_bit;
 #endif
 
@@ -130,7 +130,7 @@ static int syno_btrfs_init_attr(struct btrfs_trans_handle *trans, struct inode *
 		goto out;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = ALL_SYNO_ARCHIVE;
 	archive_bit = cpu_to_le32(inode->i_mode2);
 	err = __btrfs_setxattr(trans, inode, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT, &archive_bit, sizeof(archive_bit), XATTR_CREATE);
@@ -165,7 +165,7 @@ out:
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 static int syno_btrfs_set_archive_bit(struct dentry *dentry, u32 archive_bit)
 {
 	int err = -EINVAL;
@@ -5248,7 +5248,7 @@ struct inode *btrfs_iget(struct super_block *s, struct btrfs_key *location,
 	if (inode->i_state & I_NEW) {
 		btrfs_read_locked_inode(inode);
 		if (!is_bad_inode(inode)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 			int retval;
 			__le32 archive_bit;
 
@@ -5257,7 +5257,7 @@ struct inode *btrfs_iget(struct super_block *s, struct btrfs_key *location,
 			unlock_new_inode(inode);
 			if (new)
 				*new = 1;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 			retval = __btrfs_getxattr(inode, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT, &archive_bit, sizeof(archive_bit));
 			if (0 < retval) {
 				inode->i_mode2 = le32_to_cpu(archive_bit);
@@ -6068,7 +6068,7 @@ static int btrfs_mknod(struct inode *dir, struct dentry *dentry,
 		goto out_unlock;
 	}
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(SYNO_ARCHIVE_BIT)
 	err = syno_btrfs_init_attr(trans, inode);
 	if (err) {
 		drop_inode = 1;
@@ -6140,7 +6140,7 @@ static int btrfs_create(struct inode *dir, struct dentry *dentry,
 	if (err)
 		goto out_unlock;
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(SYNO_ARCHIVE_BIT)
 	err = syno_btrfs_init_attr(trans, inode);
 	if (err) {
 		goto out_unlock;
@@ -6284,7 +6284,7 @@ static int btrfs_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 	if (err)
 		goto out_fail;
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(SYNO_ARCHIVE_BIT)
 	err = syno_btrfs_init_attr(trans, inode);
 	if (err) {
 		goto out_fail;
@@ -8257,7 +8257,7 @@ int btrfs_create_subvol_root(struct btrfs_trans_handle *trans,
 				&index);
 	if (IS_ERR(inode))
 		return PTR_ERR(inode);
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(SYNO_ARCHIVE_BIT)
 	err = syno_btrfs_init_attr(trans, inode);
 	if (err)
 		goto out;
@@ -8276,7 +8276,7 @@ int btrfs_create_subvol_root(struct btrfs_trans_handle *trans,
 
 	err = btrfs_update_inode(trans, new_root, inode);
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(SYNO_ARCHIVE_BIT)
 out:
 #endif
 	iput(inode);
@@ -8526,7 +8526,7 @@ int syno_btrfs_getattr(struct dentry *d, struct kstat *stat, int flags)
 		err = 0;
 	}
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	if (flags & SYNOST_ARBIT) {
 		stat->SynoMode = inode->i_mode2;
 	}
@@ -8977,7 +8977,7 @@ static int btrfs_symlink(struct inode *dir, struct dentry *dentry,
 		goto out_unlock;
 	}
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(SYNO_ARCHIVE_BIT)
 	err = syno_btrfs_init_attr(trans, inode);
 	if (err) {
 		drop_inode = 1;
@@ -9219,7 +9219,7 @@ static const struct inode_operations btrfs_dir_inode_operations = {
 #ifdef MY_ABC_HERE
 	.syno_set_crtime = syno_btrfs_set_crtime,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_set_archive_bit = syno_btrfs_set_archive_bit,
 #endif
 #ifdef MY_ABC_HERE
@@ -9252,7 +9252,7 @@ static const struct inode_operations btrfs_dir_ro_inode_operations = {
 #ifdef MY_ABC_HERE
 	.syno_set_crtime = syno_btrfs_set_crtime,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_set_archive_bit = syno_btrfs_set_archive_bit,
 #endif
 #ifdef MY_ABC_HERE
@@ -9332,7 +9332,7 @@ static const struct inode_operations btrfs_file_inode_operations = {
 #ifdef MY_ABC_HERE
 	.syno_set_crtime = syno_btrfs_set_crtime,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_set_archive_bit = syno_btrfs_set_archive_bit,
 #endif
 #ifdef MY_ABC_HERE
@@ -9357,7 +9357,7 @@ static const struct inode_operations btrfs_special_inode_operations = {
 #ifdef MY_ABC_HERE
 	.syno_set_crtime = syno_btrfs_set_crtime,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_set_archive_bit = syno_btrfs_set_archive_bit,
 #endif
 #ifdef MY_ABC_HERE
@@ -9381,7 +9381,7 @@ static const struct inode_operations btrfs_symlink_inode_operations = {
 #ifdef MY_ABC_HERE
 	.syno_set_crtime = syno_btrfs_set_crtime,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_set_archive_bit = syno_btrfs_set_archive_bit,
 #endif
 #ifdef MY_ABC_HERE

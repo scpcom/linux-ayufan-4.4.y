@@ -2558,7 +2558,11 @@ static int ext4_da_should_update_i_disksize(struct page *page,
 	for (i = 0; i < idx; i++)
 		bh = bh->b_this_page;
 
+#ifdef MY_ABC_HERE
+	if (!buffer_mapped(bh) || buffer_unwritten(bh))
+#else
 	if (!buffer_mapped(bh) || (buffer_delay(bh)) || buffer_unwritten(bh))
+#endif
 		return 0;
 	return 1;
 }
@@ -3852,7 +3856,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
 #endif
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = le16_to_cpu(raw_inode->ext4_mode2);
 #endif
 
@@ -4034,7 +4038,7 @@ static int ext4_do_update_inode(handle_t *handle,
 #else
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	raw_inode->ext4_mode2 = cpu_to_le16(inode->i_mode2); /* we'll lost upper 16 bits flags */
 #endif
 
@@ -4386,7 +4390,7 @@ int syno_ext4_getattr(struct dentry *d, struct kstat *stat, int flags)
 		stat->SynoCreateTime = inode->i_CreateTime;
 	}
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	if (flags & SYNOST_ARBIT) {
 		stat->SynoMode = inode->i_mode2;
 	}

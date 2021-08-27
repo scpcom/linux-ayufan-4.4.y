@@ -188,7 +188,8 @@
 #endif
 #endif
 
-#ifdef MY_ABC_HERE
+#define SYNO_ARCHIVE_BIT
+#ifdef SYNO_ARCHIVE_BIT
 
 #if defined (F_CLEAR_ARCHIVE) || defined (F_SETSMB_ARCHIVE) || defined (F_SETSMB_HIDDEN) || \
 	defined (F_SETSMB_SYSTEM) || defined (F_CLRSMB_ARCHIVE) || defined (F_CLRSMB_HIDDEN) || \
@@ -324,8 +325,6 @@
 #ifdef CONFIG_SYNO_AVOTON
 #define SYNO_LPC_ICH_GPIO_CTRL
 #endif
-
-#define SYNO_APPARMOR_PATCH
 
 #ifdef CONFIG_SYNO_AVOTON
 #define SYNO_SATA_PM_FIRST_PORT_DELAY

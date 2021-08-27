@@ -984,31 +984,12 @@ int xhci_downgrade_to_usb2(struct usb_hcd *hcd,
 		struct usb_device *udev)
 {
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
+	struct xhci_virt_device *virt_dev;
 	__le32 __iomem **port_array;
 	struct xhci_bus_state *bus_state;
 	unsigned long flags;
 	int max_ports, slot_id, ret = -ENODEV;
 	u32 portsc;
-
-	switch(le16_to_cpu(udev->descriptor.idVendor)) {
-	case 0x1759:
-		if (0x5100 == le16_to_cpu(udev->descriptor.idProduct))
-			goto err_done;
-		else
-			break;
-	case 0x054c:
-		if (0x05bf == le16_to_cpu(udev->descriptor.idProduct))
-			goto err_done;
-		else
-			break;
-	case 0x04c5:
-		if (0x120e == le16_to_cpu(udev->descriptor.idProduct))
-			goto err_done;
-		else
-			break;
-	default:
-		break;
-	}
 
 	if (!(udev->parent && !udev->parent->parent))
 		goto err_done;
@@ -1019,10 +1000,13 @@ int xhci_downgrade_to_usb2(struct usb_hcd *hcd,
 	if (udev->state == USB_STATE_NOTATTACHED)
 		goto err_done;
 
-	slot_id = etxhci_find_slot_id_by_port(hcd, xhci,
-					udev->portnum);
+	slot_id = udev->slot_id;
+	virt_dev = xhci->devs[slot_id];
 
 	if(!(xhci_is_mass_storage_device(xhci, slot_id)))
+		goto err_done;
+
+	if (virt_dev->donot_downgrade)
 		goto err_done;
 
 	bus_state = &xhci->bus_state[hcd_index(hcd)];

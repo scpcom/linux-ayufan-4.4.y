@@ -41,6 +41,9 @@
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
 #include <mach/comcerto-2000/pm.h>
 #endif
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+#include <linux/synobios.h>
+#endif
 
 MODULE_DESCRIPTION("PHY library");
 MODULE_AUTHOR("Andy Fleming");
@@ -187,6 +190,9 @@ static struct phy_device* phy_device_create(struct mii_bus *bus,
 	dev_set_name(&dev->dev, PHY_ID_FMT, bus->id, addr);
 
 	dev->state = PHY_DOWN;
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+	dev->is_phyerr_reset = 0;
+#endif
 
 	mutex_init(&dev->lock);
 	INIT_DELAYED_WORK(&dev->state_queue, phy_state_machine);
@@ -681,6 +687,17 @@ EXPORT_SYMBOL(genphy_restart_aneg);
 int genphy_config_aneg(struct phy_device *phydev)
 {
 	int result;
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+	int reg_val = 0;
+
+	if (syno_is_hw_version(HW_DS1515) || syno_is_hw_version(HW_DS715) || syno_is_hw_version(HW_DS215p) || syno_is_hw_version(HW_DS416)) {
+		phy_write(phydev, 31, 0x0);
+		reg_val = phy_read(phydev, MII_BMCR);
+		reg_val |= BMCR_RESET;
+		phy_write(phydev, MII_BMCR, reg_val);
+		mdelay(20);
+	}
+#endif
 
 	if (AUTONEG_ENABLE != phydev->autoneg)
 		return genphy_setup_forced(phydev);

@@ -40,6 +40,9 @@
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <asm/uaccess.h>
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+#include <linux/synobios.h>
+#endif
 
 /**
  * phy_print_status - Convenience function to print out the current phy status
@@ -769,6 +772,12 @@ void phy_state_machine(struct work_struct *work)
 			container_of(dwork, struct phy_device, state_queue);
 	int needs_aneg = 0;
 	int err = 0;
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+	struct rtnl_link_stats64 temp;
+	const struct rtnl_link_stats64 *stats = NULL;
+	int reg_val = 0;
+	unsigned long pkt_error = 0, pkt_frame = 0;
+#endif
 
 	mutex_lock(&phydev->lock);
 
@@ -892,6 +901,27 @@ void phy_state_machine(struct work_struct *work)
 			 * polling */
 			if (PHY_POLL == phydev->irq)
 				phydev->state = PHY_CHANGELINK;
+
+#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+			if (syno_is_hw_version(HW_DS1515) || syno_is_hw_version(HW_DS715) || syno_is_hw_version(HW_DS215p) || syno_is_hw_version(HW_DS416)) {
+				if (0 == phydev->is_phyerr_reset) {
+					stats = dev_get_stats(phydev->attached_dev, &temp);
+					pkt_error = stats->rx_errors;
+					pkt_frame = stats->rx_length_errors + stats->rx_over_errors +
+						stats->rx_crc_errors + stats->rx_frame_errors;
+					if (pkt_error > 100 || pkt_frame > 100) {
+						printk(KERN_ERR "Phy error! Try to reset phy for next successful connection\n");
+						phy_write(phydev, 31, 0x0);
+						reg_val = phy_read(phydev, MII_BMCR);
+						reg_val |= BMCR_RESET;
+						phy_write(phydev, MII_BMCR, reg_val);
+						mdelay(20);
+						phydev->is_phyerr_reset = 1;
+					}
+				}
+			}
+#endif
+
 			break;
 		case PHY_CHANGELINK:
 			err = phy_read_status(phydev);

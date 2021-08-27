@@ -281,6 +281,8 @@ MV_U32 mvCtrlPexMaxIfGet(MV_VOID)
 		return 2;
 	case SYNO_DS115j_ID:
 		return 1;
+	case SYNO_DS216se_ID:
+		return 1;
 	default:
 		return MV_PEX_MAX_IF;
 	}

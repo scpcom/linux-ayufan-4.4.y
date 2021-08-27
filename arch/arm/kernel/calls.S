@@ -421,7 +421,7 @@
 #else
 		CALL(sys_ni_syscall)
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 		CALL(sys_SYNOArchiveBit)	/* 403 */
 #else
 		CALL(sys_ni_syscall)

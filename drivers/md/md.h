@@ -219,6 +219,7 @@ struct mddev {
 #define MD_CHANGE_DEVS	0	/* Some device status has changed */
 #define MD_CHANGE_CLEAN 1	/* transition to or from 'clean' */
 #define MD_CHANGE_PENDING 2	/* switch from 'clean' to 'active' in progress */
+#define MD_UPDATE_SB_FLAGS (1 | 2 | 4)	/* If these are set, md_update_sb needed */
 #define MD_ARRAY_FIRST_USE 3    /* First use of array, needs initialization */
 
 	int				suspended;
@@ -432,13 +433,19 @@ struct mddev {
     unsigned char           nodev_and_crashed;     // 1 ==> nodev && crashed. deny make_request
 #endif
 #ifdef MY_ABC_HERE
-	unsigned char			auto_remap;     // 1 ==> set all rdevs to remap mode.
+#define MD_AUTO_REMAP_MODE_FORCE_OFF 0
+#define MD_AUTO_REMAP_MODE_FORCE_ON 1
+#define MD_AUTO_REMAP_MODE_ISMAXDEGRADE 2
+	unsigned char			auto_remap;
 #endif
 #ifdef MY_ABC_HERE
-	unsigned char                   force_auto_remap; // user open auto remap manually
 	void                            *syno_private;    // store lv struct for auto remap report
 	char                            lv_name[16];
 #endif
+
+#ifdef MY_ABC_HERE
+	mempool_t				*syno_mdio_mempool;
+#endif /* MY_ABC_HERE */
 
 	struct attribute_group		*to_remove;
 
@@ -515,6 +522,7 @@ struct md_personality
 	 */
 #ifdef MY_ABC_HERE
 	unsigned char (*ismaxdegrade) (struct mddev *mddev);
+	void (*syno_set_rdev_auto_remap) (struct mddev *mddev);
 #endif
 	void *(*takeover) (struct mddev *mddev);
 };
@@ -660,20 +668,6 @@ void SynoAutoRemapReport(struct mddev *mddev, sector_t sector, struct block_devi
 #endif
 #ifdef MY_ABC_HERE
 void RaidRemapModeSet(struct block_device *, unsigned char);
-
-static inline void
-RaidMemberAutoRemapSet(struct mddev *mddev)
-{
-	struct md_rdev *rdev, *tmp;
-	char b[BDEVNAME_SIZE];
-
-	/* enum all rdev and set the bdev */
-	rdev_for_each(rdev, tmp, mddev) {
-		bdevname(rdev->bdev,b);
-		RaidRemapModeSet(rdev->bdev, mddev->auto_remap);
-		printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, mddev->auto_remap);
-	}
-}
 #endif
 
 #ifdef MY_ABC_HERE

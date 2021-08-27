@@ -126,12 +126,12 @@ struct common_audit_data {
 					u32 denied;
 					uid_t ouid;
 				} fs;
-#ifdef SYNO_APPARMOR_PATCH
+#ifdef MY_ABC_HERE
 				struct {
 					int type, protocol;
 					struct sock *sk;
 				} net;
-#endif /* SYNO_APPARMOR_PATCH */
+#endif /* MY_ABC_HERE */
 			};
 		} apparmor_audit_data;
 #endif

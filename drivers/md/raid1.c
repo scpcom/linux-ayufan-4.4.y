@@ -1969,9 +1969,10 @@ static int process_checks(struct r1bio *r1_bio)
 				s = sbio->bi_io_vec[j].bv_page;
 				if (memcmp(page_address(p),
 					   page_address(s),
-					   PAGE_SIZE))
+					   PAGE_SIZE)) {
 					break;
 				}
+			}
 		} else
 			j = 0;
 		if (j >= 0)

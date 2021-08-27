@@ -811,6 +811,7 @@ struct xhci_virt_device {
 	u32				cmd_status;
 	struct list_head		cmd_list;
 	u8				port;
+	unsigned int	donot_downgrade :1;
 	unsigned int	defer_queue_bulk_td :1;
 };
 

@@ -23,6 +23,45 @@
 #include <net/net_ratelimit.h>
 
 #ifdef CONFIG_RPS
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+static int rps_sock_flow_init()
+{
+	unsigned int orig_size = 0, size = 256;
+	int i = 0;
+	struct rps_sock_flow_table *orig_sock_table, *sock_table;
+
+	orig_sock_table = rcu_dereference(rps_sock_flow_table);
+	orig_size = orig_sock_table ? orig_sock_table->mask + 1 : 0;
+
+	if (size > (1 << 30)) {
+		/* Enforce limit to prevent overflow */
+		return -EINVAL;
+	}
+
+	size = roundup_pow_of_two(size);
+	if (size != orig_size) {
+		sock_table = vmalloc(RPS_SOCK_FLOW_TABLE_SIZE(size));
+		if (!sock_table) {
+			return -ENOMEM;
+		}
+
+		sock_table->mask = size - 1;
+	} else
+		sock_table = orig_sock_table;
+
+	for (i = 0; i < size; i++)
+		sock_table->ents[i] = RPS_NO_CPU;
+
+	if (sock_table != orig_sock_table) {
+		rcu_assign_pointer(rps_sock_flow_table, sock_table);
+		synchronize_rcu();
+		vfree(orig_sock_table);
+	}
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
+
 static int rps_sock_flow_sysctl(ctl_table *table, int write,
 				void __user *buffer, size_t *lenp, loff_t *ppos)
 {
@@ -256,6 +295,12 @@ static __init int sysctl_core_init(void)
 
 	register_sysctl_paths(net_core_path, empty);
 	register_net_sysctl_rotable(net_core_path, net_core_table);
+
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+	if (0 != rps_sock_flow_init()) {
+		printk("Error! Failed to init RFS for networking!\n");
+	}
+#endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
 	return register_pernet_subsys(&sysctl_core_ops);
 }
 

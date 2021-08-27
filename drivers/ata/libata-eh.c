@@ -1817,11 +1817,13 @@ void ata_eh_analyze_ncq_error(struct ata_link *link)
 #ifdef MY_ABC_HERE
 extern unsigned char
 blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd, sector_t lba);
+
+static unsigned int
+syno_ata_do_remap(struct ata_queued_cmd *qc, u8 blLBA48);
+
 static unsigned int
 syno_ata_writes_sector(struct ata_queued_cmd *qc)
 {
-	struct ata_taskfile tf;
-	u8 buf[ATA_SECT_SIZE];
 	u8 blLBA48 = 0;
 	sector_t lba = 0;
 	struct bio* b = NULL;
@@ -1878,9 +1880,35 @@ syno_ata_writes_sector(struct ata_queued_cmd *qc)
 				__FILE__, __FUNCTION__, __LINE__);
 		}
 	}
-#endif
+#endif /* MY_ABC_HERE */
+	syno_ata_do_remap(qc, blLBA48);
+	return 0;
+}
+
+static unsigned int
+syno_ata_do_remap(struct ata_queued_cmd *qc, u8 blLBA48)
+{
+	int ret = -1;
+	unsigned int sectors = 0;
+	struct request_queue *q = NULL;
+	struct ata_taskfile tf;
+	u8 lbal = 0;
+	size_t size = 0;
+
+	if (NULL == qc || NULL == qc->scsicmd ||
+		NULL == qc->scsicmd->device ||
+		NULL == qc->scsicmd->device->request_queue) {
+		ata_dev_printk(qc->dev, KERN_ERR, "%s:%d Failed to get request_queue", __FILE__, __LINE__);
+		goto END;
+	}
+	q = qc->scsicmd->device->request_queue;
+
+	sectors = queue_physical_block_size(q) / queue_logical_block_size(q);
+	lbal = ((qc->result_tf.lbal) & (~(sectors - 1))); // move lbal to first logical block of physical block
+	size = ATA_SECT_SIZE * sectors;
 
 	tf = qc->result_tf;
+	tf.lbal = lbal;
 	tf.protocol = ATA_PROT_PIO;
 	tf.flags = (ATA_TFLAG_ISADDR | ATA_TFLAG_DEVICE | ATA_TFLAG_WRITE);
 	tf.flags |= ((blLBA48) ? ATA_TFLAG_LBA48 : 0);
@@ -1891,7 +1919,7 @@ syno_ata_writes_sector(struct ata_queued_cmd *qc)
 	tf.hob_lbam = ((blLBA48) ? tf.hob_lbam : 0);
 	tf.hob_lbal = ((blLBA48) ? tf.hob_lbal : 0);
 	tf.feature = 0;
-	tf.nsect = 1;
+	tf.nsect = sectors;
 	tf.ctl = qc->dev->link->ap->ctl;
 	tf.device &= ((blLBA48) ? 0 : 0x0f); /* don't need 4bit in device if command is LBA48 */
 	tf.device |= ATA_LBA | ATA_DEVICE_OBS; /* By ATA8-ACS */
@@ -1906,14 +1934,19 @@ syno_ata_writes_sector(struct ata_queued_cmd *qc)
 				   tf.hob_lbal, tf.hob_lbam, tf.hob_lbah,
 				   tf.device, tf.ctl, tf.flags, tf.protocol);
 
-	memset(buf, 0, sizeof(buf));
+	ret = ata_exec_internal(qc->dev, &tf, NULL, DMA_TO_DEVICE,
+							page_address(ZERO_PAGE(0)), size, 0);
 	ata_dev_printk(qc->dev, KERN_WARNING,
-			       "Insert write command result %d\n",
-				   ata_exec_internal(qc->dev, &tf, NULL, DMA_TO_DEVICE,
-									 buf, ATA_SECT_SIZE, 0));
-	return 0;
+			       "Insert write command result %d\n", ret);
+
+	if (0 != ret) {
+		goto END;
+	}
+	ret = 0;
+END:
+	return ret;
 }
-#endif
+#endif /* MY_ABC_HERE */
 
 /**
  *	ata_eh_analyze_tf - analyze taskfile of a failed qc
@@ -1955,7 +1988,12 @@ static unsigned int ata_eh_analyze_tf(struct ata_queued_cmd *qc,
 		if (err & ATA_IDNF)
 			qc->err_mask |= AC_ERR_INVALID;
 #ifdef MY_ABC_HERE
+		/* Only UNC errors need remaping, and we also make sure that
+		 * the result is reported by log page 10h for NCQ commands.
+		 * This prevents remapping with untrusted LBAs.
+		 */
 		if (!(qc->ap->pflags & ATA_PFLAG_FROZEN) &&
+			(!ata_is_ncq(qc->tf.protocol) || qc->err_mask & AC_ERR_NCQ) &&
 			err & ATA_UNC) {
 			syno_ata_writes_sector(qc);
 		}

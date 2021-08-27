@@ -35,9 +35,9 @@
 #include "include/context.h"
 #include "include/file.h"
 #include "include/ipc.h"
-#ifdef SYNO_APPARMOR_PATCH
+#ifdef MY_ABC_HERE
 #include "include/net.h"
-#endif /* SYNO_APPARMOR_PATCH */
+#endif /* MY_ABC_HERE */
 #include "include/path.h"
 #include "include/policy.h"
 #include "include/procattr.h"
@@ -627,7 +627,7 @@ static int apparmor_task_setrlimit(struct task_struct *task,
 	return error;
 }
 
-#ifdef SYNO_APPARMOR_PATCH
+#ifdef MY_ABC_HERE
 static int apparmor_socket_create(int family, int type, int protocol, int kern)
 {
 	struct aa_profile *profile;
@@ -725,7 +725,7 @@ static int apparmor_socket_shutdown(struct socket *sock, int how)
 
 	return aa_revalidate_sk(OP_SOCK_SHUTDOWN, sk);
 }
-#endif /* SYNO_APPARMOR_PATCH */
+#endif /* MY_ABC_HERE */
 
 static struct security_operations apparmor_ops = {
 	.name =				"apparmor",
@@ -758,7 +758,7 @@ static struct security_operations apparmor_ops = {
 	.getprocattr =			apparmor_getprocattr,
 	.setprocattr =			apparmor_setprocattr,
 
-#ifdef SYNO_APPARMOR_PATCH
+#ifdef MY_ABC_HERE
 	.socket_create =		apparmor_socket_create,
 	.socket_bind =			apparmor_socket_bind,
 	.socket_connect =		apparmor_socket_connect,
@@ -771,7 +771,7 @@ static struct security_operations apparmor_ops = {
 	.socket_getsockopt =		apparmor_socket_getsockopt,
 	.socket_setsockopt =		apparmor_socket_setsockopt,
 	.socket_shutdown =		apparmor_socket_shutdown,
-#endif /* SYNO_APPARMOR_PATCH */
+#endif /* MY_ABC_HERE */
 
 	.cred_alloc_blank =		apparmor_cred_alloc_blank,
 	.cred_free =			apparmor_cred_free,

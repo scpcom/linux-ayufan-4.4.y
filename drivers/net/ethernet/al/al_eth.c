@@ -221,7 +221,7 @@ static void syno_update_rtl8211dn_led(struct phy_device *phydev, int speed)
 	case SPEED_100:
 	case SPEED_10:
 		/* Green LED on only when 1000Mbps. Orange LED on only when 100Mbps */
-		phy_write(phydev, 0x1c, 0x0042);
+		phy_write(phydev, 0x1c, 0x0742);
 		break;
 	}
 

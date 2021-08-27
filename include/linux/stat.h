@@ -66,7 +66,7 @@ struct kstat {
 	u64		ino;
 	dev_t		dev;
 	umode_t		mode;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	__u32		SynoMode;
 #endif
 #ifdef MY_ABC_HERE
@@ -120,7 +120,7 @@ struct SYNOSTAT {
 #endif /* __KERNEL__ */
 #endif /* MY_ABC_HERE */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 #define S2_IARCHIVE    (1<<0)	// synology backup archive bit
 #define S2_SMB_ARCHIVE (1<<1)	// samba backup archive bit (some other windows ap)
 #define S2_SMB_HIDDEN  (1<<2)	// hidden attribute in samba

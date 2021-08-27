@@ -313,7 +313,7 @@ current_frag:
 #endif
 #endif
 
-#ifdef COFNIG_SYNO_ARMADA_V2
+#ifdef CONFIG_SYNO_ARMADA_V2
 /*
  *	skb_copy_datagram_to_kernel_iovec - Copy a datagram to a kernel iovec structure.
  *	@skb: buffer to copy

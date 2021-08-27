@@ -576,6 +576,9 @@ MV_U8 SYNOArmadaIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 	case SYNO_DS115j_ID:
 		def_max_disk = 1;
 		break;
+	case SYNO_DS216se_ID:
+		def_max_disk = 2;
+		break;
 
 	default:
 		break;
@@ -1109,6 +1112,68 @@ ARMADA_default_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 
 	*global_gpio = gpio_default;
 }
+
+static void 
+Armada_370_216se_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
+{
+	SYNO_ARMADA_GENERIC_GPIO gpio_216se = {
+		.ext_sata_led = {
+							.hdd1_led_0 = GPIO_UNDEF,
+							.hdd1_led_1 = GPIO_UNDEF,
+							.hdd2_led_0 = GPIO_UNDEF,
+							.hdd2_led_1 = GPIO_UNDEF,
+							.hdd3_led_0 = GPIO_UNDEF,
+							.hdd3_led_1 = GPIO_UNDEF,
+							.hdd4_led_0 = GPIO_UNDEF,
+							.hdd4_led_1 = GPIO_UNDEF,
+							.hdd5_led_0 = GPIO_UNDEF,
+							.hdd5_led_1 = GPIO_UNDEF,
+							.hdd_led_mask = GPIO_UNDEF,
+						},
+		.soc_sata_led = {
+							.hdd2_fail_led = 32,
+							.hdd1_fail_led = 31,
+						},
+		.model		  = {
+							.model_id_0 = 55,
+							.model_id_1 = 56,
+							.model_id_2 = 57,
+							.model_id_3 = 58,
+						},
+		.fan		  = {
+							.fan_1 = 63,
+							.fan_2 = 64,
+							.fan_3 = 65,
+							.fan_fail = 38,
+							.fan_fail_2 = GPIO_UNDEF,
+							.fan_fail_3 = GPIO_UNDEF,
+						},
+		.hdd_pm		  = {
+							.hdd1_pm = 37,
+							.hdd2_pm = 62,
+							.hdd3_pm = GPIO_UNDEF,
+							.hdd4_pm = GPIO_UNDEF,
+						},
+		.rack		  = {
+							.buzzer_mute_req = GPIO_UNDEF,
+							.buzzer_mute_ack = GPIO_UNDEF,
+							.rps1_on = GPIO_UNDEF,
+							.rps2_on = GPIO_UNDEF,
+						},
+		.multi_bay	  = {
+							.inter_lock = GPIO_UNDEF,
+						},
+		.status		  = {
+							.power_led = GPIO_UNDEF,
+							.alarm_led = GPIO_UNDEF,
+						},
+		.usb		  = {
+							.usb_power = GPIO_UNDEF,
+						},
+	};
+
+	*global_gpio = gpio_216se;
+}
 void synology_gpio_init(void)
 {
 	MV_U32 boardId = mvBoardIdGet();
@@ -1137,6 +1202,10 @@ void synology_gpio_init(void)
 	case SYNO_DS115j_ID:
 		Armada_370_115j_GPIO_init(&generic_gpio);
 		printk("Synology Armada370 DS115j GPIO Init\n");
+		break;
+	case SYNO_DS216se_ID:
+		Armada_370_216se_GPIO_init(&generic_gpio);
+		printk("Synology Armada370 DS216se GPIO Init\n");
 		break;
 
 	default:

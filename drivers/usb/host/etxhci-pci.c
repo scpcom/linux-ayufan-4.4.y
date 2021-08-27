@@ -38,7 +38,7 @@
 unsigned short xhci_vendor = 0;
 #endif
 
-static const char hcd_name[] = "etxhci_hcd_141015";
+static const char hcd_name[] = "etxhci_hcd_150119";
 
 /* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)

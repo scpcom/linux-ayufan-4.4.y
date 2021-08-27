@@ -2447,7 +2447,7 @@ static int fuse_removexattr(struct dentry *entry, const char *name)
 	return err;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 static int fuse_syno_arbit_get(struct dentry *dentry, unsigned int *pArbit)
 {
 	unsigned int arVal = 0;
@@ -2493,7 +2493,7 @@ static int fuse_syno_arbit_set(struct dentry *dentry, unsigned int arbit)
 Err:
 	return err;
 }
-#endif //MY_ABC_HERE
+#endif //SYNO_ARCHIVE_BIT
 
 #ifdef MY_ABC_HERE
 static int fuse_create_time_set(struct dentry *dentry, struct timespec *t)
@@ -2556,7 +2556,7 @@ static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int flag
 	}
 	}
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	if (flags & SYNOST_ARBIT) {
 		err = fuse_syno_arbit_get(dentry, &stat->SynoMode);
 		if (0 > err) {
@@ -2588,7 +2588,7 @@ static const struct inode_operations fuse_dir_inode_operations = {
 #ifdef MY_ABC_HERE
 	.syno_getattr	= fuse_syno_getattr,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_get_archive_bit = fuse_syno_arbit_get,
 	.syno_set_archive_bit = fuse_syno_arbit_set,
 #endif
@@ -2619,7 +2619,7 @@ static const struct inode_operations fuse_common_inode_operations = {
 #ifdef MY_ABC_HERE
 	.syno_getattr	= fuse_syno_getattr,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_get_archive_bit = fuse_syno_arbit_get,
 	.syno_set_archive_bit = fuse_syno_arbit_set,
 #endif
@@ -2641,7 +2641,7 @@ static const struct inode_operations fuse_symlink_inode_operations = {
 #ifdef MY_ABC_HERE
 	.syno_getattr	= fuse_syno_getattr,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	.syno_get_archive_bit = fuse_syno_arbit_get,
 	.syno_set_archive_bit = fuse_syno_arbit_set,
 #endif

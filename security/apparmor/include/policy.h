@@ -30,9 +30,9 @@
 #include "capability.h"
 #include "domain.h"
 #include "file.h"
-#ifdef SYNO_APPARMOR_PATCH
+#ifdef MY_ABC_HERE
 #include "net.h"
-#endif /* SYNO_APPARMOR_PATCH */
+#endif /* MY_ABC_HERE */
 #include "resource.h"
 
 extern const char *profile_mode_names[];
@@ -188,9 +188,9 @@ struct aa_profile {
 
 	struct aa_file_rules file;
 	struct aa_caps caps;
-#ifdef SYNO_APPARMOR_PATCH
+#ifdef MY_ABC_HERE
 	struct aa_net net;
-#endif /* SYNO_APPARMOR_PATCH */
+#endif /* MY_ABC_HERE */
 	struct aa_rlimit rlimits;
 };
 
