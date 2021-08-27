@@ -52,9 +52,6 @@
 #define EFI_DEBUG	1
 #define PFX 		"EFI: "
 
-int efi_enabled;
-EXPORT_SYMBOL(efi_enabled);
-
 struct efi __read_mostly efi = {
 	.mps        = EFI_INVALID_TABLE_ADDR,
 	.acpi       = EFI_INVALID_TABLE_ADDR,
@@ -73,9 +70,26 @@ struct efi_memory_map memmap;
 static struct efi efi_phys __initdata;
 static efi_system_table_t efi_systab __initdata;
 
+static inline bool efi_is_native(void)
+{
+	return IS_ENABLED(CONFIG_X86_64) == efi_enabled(EFI_64BIT);
+}
+
+unsigned long x86_efi_facility;
+
+/*
+ * Returns 1 if 'facility' is enabled, 0 otherwise.
+ */
+int efi_enabled(int facility)
+{
+	return test_bit(facility, &x86_efi_facility) != 0;
+}
+EXPORT_SYMBOL(efi_enabled);
+
+static bool disable_runtime = false;
 static int __init setup_noefi(char *arg)
 {
-	efi_enabled = 0;
+	disable_runtime = true;
 	return 0;
 }
 early_param("noefi", setup_noefi);
@@ -442,6 +456,9 @@ void __init efi_init(void)
 	int i = 0;
 	void *tmp;
 
+	if (!efi_is_native())
+		return;
+
 #ifdef CONFIG_X86_32
 	efi_phys.systab = (efi_system_table_t *)boot_params.efi_info.efi_systab;
 #else
@@ -468,6 +485,8 @@ void __init efi_init(void)
 		       "%d.%02d, expected 1.00 or greater!\n",
 		       efi.systab->hdr.revision >> 16,
 		       efi.systab->hdr.revision & 0xffff);
+
+	set_bit(EFI_SYSTEM_TABLES, &x86_efi_facility);
 
 	/*
 	 * Show what we know for posterity
@@ -572,6 +591,8 @@ void __init efi_init(void)
 
 	if (add_efi_memmap)
 		do_add_efi_memmap();
+
+	set_bit(EFI_MEMMAP, &x86_efi_facility);
 
 #ifdef CONFIG_X86_32
 	x86_platform.get_wallclock = efi_get_time;
@@ -738,6 +759,7 @@ void __init efi_enter_virtual_mode(void)
 	 *
 	 * Call EFI services through wrapper functions.
 	 */
+	efi.runtime_version = efi_systab.hdr.revision;
 	efi.get_time = virt_efi_get_time;
 	efi.set_time = virt_efi_set_time;
 	efi.get_wakeup_time = virt_efi_get_wakeup_time;
@@ -753,6 +775,7 @@ void __init efi_enter_virtual_mode(void)
 	efi.query_capsule_caps = virt_efi_query_capsule_caps;
 	if (__supported_pte_mask & _PAGE_NX)
 		runtime_code_page_mkexec();
+	clear_bit(EFI_MEMMAP, &x86_efi_facility);
 	early_iounmap(memmap.map, memmap.nr_map * memmap.desc_size);
 	memmap.map = NULL;
 	kfree(new_memmap);
@@ -765,6 +788,9 @@ u32 efi_mem_type(unsigned long phys_addr)
 {
 	efi_memory_desc_t *md;
 	void *p;
+
+	if (!efi_enabled(EFI_MEMMAP))
+		return 0;
 
 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
 		md = p;
