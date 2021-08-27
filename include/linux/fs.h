@@ -439,6 +439,7 @@ enum positive_aop_returns {
 #define AOP_FLAG_NOFS			0x0004  
 #ifdef MY_ABC_HERE
 #define AOP_FLAG_RECVFILE		0x0008
+#define AOP_FLAG_RECVFILE_ECRYPTFS_NO_TRUNCATE		0x0020
 #endif
 
 struct page;

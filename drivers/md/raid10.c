@@ -724,7 +724,7 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 #else
 	if (!blRaid10Enough(conf, NULL)) {
 #endif
-		bio_endio(bio, 0);
+		bio_endio(bio, -EIO);
 		return;
 	}
 #endif  

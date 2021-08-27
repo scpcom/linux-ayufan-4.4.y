@@ -17,6 +17,9 @@
 #ifdef MY_ABC_HERE
 #include <linux/raid/libmd-report.h>
 #endif
+#ifdef MY_ABC_HERE
+#include <linux/raid/libmd-sync-report.h>
+#endif  
 
 #define MaxSector (~(sector_t)0)
 

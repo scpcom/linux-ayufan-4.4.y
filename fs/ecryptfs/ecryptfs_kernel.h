@@ -269,6 +269,9 @@ struct ecryptfs_mount_crypt_stat {
 #ifdef MY_ABC_HERE
 #define ECRYPTFS_SYNO_ERROR_REPORT             0x10000000
 #endif
+#ifdef MY_ABC_HERE
+#define ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED    0x80000000
+#endif  
 	u32 flags;
 	struct list_head global_auth_tok_list;
 	struct mutex global_auth_tok_list_mutex;
@@ -659,5 +662,9 @@ ecryptfs_parse_tag_70_packet(char **filename, size_t *filename_size,
 			     char *data, size_t max_packet_size);
 int ecryptfs_derive_iv(char *iv, struct ecryptfs_crypt_stat *crypt_stat,
 		       loff_t offset);
+
+#ifdef MY_ABC_HERE
+loff_t upper_size_to_lower_size(struct ecryptfs_crypt_stat *crypt_stat, loff_t upper_size);
+#endif  
 
 #endif  

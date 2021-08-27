@@ -4194,7 +4194,7 @@ static void make_request(struct mddev *mddev, struct bio * bi)
 		syno_flashcache_return_error(bi);
 #else
 		 
-		bio_endio(bi, 0);
+		bio_endio(bi, -EIO);
 #endif
 		return;
 	}

@@ -268,6 +268,10 @@ out:
 static int ecryptfs_i_size_read(struct dentry *dentry, struct inode *inode)
 {
 	struct ecryptfs_crypt_stat *crypt_stat;
+#ifdef MY_ABC_HERE
+	struct ecryptfs_mount_crypt_stat *mount_crypt_stat =
+		&ecryptfs_superblock_to_private(dentry->d_sb)->mount_crypt_stat;
+#endif  
 	int rc;
 
 	rc = ecryptfs_get_lower_file(dentry, inode);
@@ -285,12 +289,19 @@ static int ecryptfs_i_size_read(struct dentry *dentry, struct inode *inode)
 		ecryptfs_set_default_sizes(crypt_stat);
 
 #ifdef MY_ABC_HERE
-	rc = ecryptfs_read_and_validate_xattr_region(dentry, inode);
-	if (rc) {
-		rc = ecryptfs_read_and_validate_header_region(inode);
+	if (mount_crypt_stat->flags & ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED) {
+		rc = ecryptfs_read_and_validate_xattr_region(dentry, inode);
+		if (rc) {
+			if (rc == -EOPNOTSUPP) {
+				printk(KERN_WARNING "%s: user xattr not supported, turn off FAST_LOOKUP", __func__);
+				mount_crypt_stat->flags &= ~ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED;
+			}
+			rc = ecryptfs_read_and_validate_header_region(inode);
+		}
+		ecryptfs_put_lower_file(inode);
 	}
-	ecryptfs_put_lower_file(inode);
-#else
+	else {
+#endif  
 	rc = ecryptfs_read_and_validate_header_region(inode);
 	ecryptfs_put_lower_file(inode);
 	if (rc) {
@@ -298,8 +309,10 @@ static int ecryptfs_i_size_read(struct dentry *dentry, struct inode *inode)
 		if (!rc)
 			crypt_stat->flags |= ECRYPTFS_METADATA_IN_XATTR;
 	}
+#ifdef MY_ABC_HERE
+	}
 #endif  
-
+	 
 	return 0;
 }
 
@@ -730,7 +743,11 @@ ecryptfs_put_link(struct dentry *dentry, struct nameidata *nd, void *ptr)
 	}
 }
 
+#ifdef MY_ABC_HERE
+loff_t
+#else
 static loff_t
+#endif  
 upper_size_to_lower_size(struct ecryptfs_crypt_stat *crypt_stat,
 			 loff_t upper_size)
 {

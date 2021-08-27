@@ -774,7 +774,7 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 #ifdef  MY_ABC_HERE
 		syno_flashcache_return_error(bio);
 #else
-		bio_endio(bio, 0);
+		bio_endio(bio, -EIO);
 #endif
 		return;
 	}

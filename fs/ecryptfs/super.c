@@ -103,7 +103,10 @@ static int ecryptfs_show_options(struct seq_file *m, struct vfsmount *mnt)
 	if (mount_crypt_stat->flags & ECRYPTFS_SYNO_ERROR_REPORT)
 		seq_printf(m, ",syno_error_report");
 #endif
-
+#ifdef MY_ABC_HERE
+	if (!(mount_crypt_stat->flags & ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED))
+		seq_printf(m, ",no_fast_lookup");
+#endif  
 	return 0;
 }
 

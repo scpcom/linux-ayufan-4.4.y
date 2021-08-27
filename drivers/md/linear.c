@@ -324,7 +324,7 @@ static void linear_make_request(struct mddev *mddev, struct bio *bio)
 #else
 	if (mddev->degraded) {
 #endif
-		bio_endio(bio, 0);
+		bio_endio(bio, -EIO);
 		return;
 	}
 #endif

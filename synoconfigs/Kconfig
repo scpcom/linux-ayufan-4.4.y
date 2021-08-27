@@ -229,4 +229,8 @@ config SYNO_SATA_PM_DEVICE_GPIO
 	depends on SATA_PMP
 	default y
 
+config SYNO_NF_NAT_WORKAROUND
+	bool "Fix BUG_ON on nf_nat_setup_info"
+	default y
+
 endmenu

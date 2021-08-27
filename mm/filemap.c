@@ -1754,6 +1754,7 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 		count -= bytes;
 		pos += bytes;
 		cBytesToReceive += bytes;
+		flags |= AOP_FLAG_RECVFILE_ECRYPTFS_NO_TRUNCATE;
 	} while (count);
 
 	msg.msg_name = NULL;

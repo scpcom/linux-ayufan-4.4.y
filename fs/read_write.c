@@ -505,8 +505,8 @@ asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, si
 
 		do {
 				ret = do_recvfile(file, sock, &pos,
-							  (nbytes_left >= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)) ?
-							   (MAX_PAGES_PER_RECVFILE * PAGE_SIZE) : nbytes_left
+							  (nbytes_left >= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE - (pos & (PAGE_CACHE_SIZE - 1)))) ?
+							   (MAX_PAGES_PER_RECVFILE * PAGE_SIZE - (pos & (PAGE_CACHE_SIZE - 1))) : nbytes_left
 							  , &cBytereceived, &cBytewritten);
 			if(ret > 0) {
 				bytes_received += ret;
