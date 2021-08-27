@@ -44,9 +44,6 @@ int tick_switch_to_oneshot(void (*handler)(struct clock_event_device *))
 	if (!dev || !(dev->features & CLOCK_EVT_FEAT_ONESHOT) ||
 		    !tick_device_is_functional(dev)) {
 
-#ifdef CONFIG_SYNO_ALPINE
-
-#endif
 		return -EINVAL;
 	}
 

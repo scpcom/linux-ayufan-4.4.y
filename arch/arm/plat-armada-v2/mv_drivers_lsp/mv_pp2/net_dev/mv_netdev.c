@@ -1506,10 +1506,6 @@ int mv_pp2_skb_recycle(struct sk_buff *skb)
 	mv_pp2_pool_refill(ppool, bm, phys_addr, (unsigned long) skb);
 	atomic_dec(&ppool->in_use);
 
-#ifdef CONFIG_MV_PP2_DEBUG_CODE
-
-#endif 
-
 	return !is_recyclable;
 }
 EXPORT_SYMBOL(mv_pp2_skb_recycle);

@@ -877,10 +877,10 @@ got:
 						       ext4_current_time(inode);
 
 #ifdef MY_ABC_HERE
-	inode->i_CreateTime = ei->i_crtime;
+	inode->i_create_time = ei->i_crtime;
 #endif
 #ifdef MY_ABC_HERE
-	inode->i_mode2 = ALL_SYNO_ARCHIVE;   
+	inode->i_archive_bit = ALL_SYNO_ARCHIVE;    
 #endif
 
 	memset(ei->i_data, 0, sizeof(ei->i_data));

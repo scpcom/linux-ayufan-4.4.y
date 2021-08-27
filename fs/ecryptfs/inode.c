@@ -578,7 +578,7 @@ out:
 static void CopySynoArchive(struct dentry *ecrypt_entry, struct dentry *lower_entry)
 {
 	if (ecrypt_entry && ecrypt_entry->d_inode && lower_entry && lower_entry->d_inode) {
-		ecrypt_entry->d_inode->i_mode2 = lower_entry->d_inode->i_mode2;
+		ecrypt_entry->d_inode->i_archive_bit = lower_entry->d_inode->i_archive_bit;
 	}
 }
 #endif
@@ -891,7 +891,7 @@ static int ecryptfs_syno_set_crtime(struct dentry *dentry, struct timespec *time
 
 	error = syno_op_set_crtime(lower_dentry, time);
 	if (!error) {
-		dentry->d_inode->i_CreateTime = *time;
+		dentry->d_inode->i_create_time = *time;
 	}
 	return error;
 }
@@ -905,7 +905,7 @@ static int ecryptfs_syno_set_archive_bit(struct dentry *dentry, unsigned int arb
 
 	error = syno_op_set_archive_bit(lower_dentry, arbit);
 	if (!error) {
-		dentry->d_inode->i_mode2 = arbit;
+		dentry->d_inode->i_archive_bit = arbit;
 	}
 	return error;
 }
@@ -1166,7 +1166,7 @@ ecryptfs_setxattr(struct dentry *dentry, const char *name, const void *value,
 #ifdef CONFIG_FS_SYNO_ACL
 	if (name && !strcmp(name, SYNO_ACL_XATTR_ACCESS)) {
 		 
-		dentry->d_inode->i_mode2 = lower_dentry->d_inode->i_mode2;
+		dentry->d_inode->i_archive_bit = lower_dentry->d_inode->i_archive_bit;
 	}
 #endif
 

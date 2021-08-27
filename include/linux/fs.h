@@ -671,10 +671,10 @@ struct inode {
 	unsigned int		i_blkbits;
 	u64			i_version;
 #ifdef MY_ABC_HERE
-	struct timespec		i_CreateTime;
+	struct timespec		i_create_time;
 #endif
 #ifdef MY_ABC_HERE
-	__u32			i_mode2;
+	__u32			i_archive_bit;
 #endif
 #ifdef MY_ABC_HERE
 	__u32			i_archive_version;
@@ -2475,12 +2475,12 @@ static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *tim
 		error = inode->i_op->syno_set_crtime(dentry, time);
 		if (-EOPNOTSUPP == error) {
 			error = 0;
-			inode->i_CreateTime = timespec_trunc(*time, inode->i_sb->s_time_gran);
+			inode->i_create_time = timespec_trunc(*time, inode->i_sb->s_time_gran);
 			inode->i_ctime = CURRENT_TIME;
 			mark_inode_dirty(inode);
 		}
 	} else {
-		inode->i_CreateTime = timespec_trunc(*time, inode->i_sb->s_time_gran);
+		inode->i_create_time = timespec_trunc(*time, inode->i_sb->s_time_gran);
 		inode->i_ctime = CURRENT_TIME;
 		mark_inode_dirty(inode);
 	}
@@ -2500,13 +2500,13 @@ static inline int syno_op_get_archive_bit(struct dentry *dentry, unsigned int *p
 		err = inode->i_op->syno_get_archive_bit(dentry, pArbit);
 		if (-EOPNOTSUPP == err) {
 			err = 0;
-			*pArbit = inode->i_mode2;
+			*pArbit = inode->i_archive_bit;
 		} else if (-ENODATA == err) {
 			err = 0;
 			*pArbit = 0;
 		}
 	} else {
-		*pArbit = inode->i_mode2;
+		*pArbit = inode->i_archive_bit;
 	}
 
 	return err;
@@ -2521,12 +2521,12 @@ static inline int syno_op_set_archive_bit_nolock(struct dentry *dentry, unsigned
 		err = inode->i_op->syno_set_archive_bit(dentry, arbit);
 		if (-EOPNOTSUPP == err) {
 			err = 0;
-			inode->i_mode2 = arbit;
+			inode->i_archive_bit = arbit;
 			inode->i_ctime = CURRENT_TIME;
 			mark_inode_dirty_sync(inode);
 		}
 	} else {
-		inode->i_mode2 = arbit;
+		inode->i_archive_bit = arbit;
 		inode->i_ctime = CURRENT_TIME;
 		mark_inode_dirty_sync(inode);
 	}
@@ -2564,7 +2564,7 @@ static inline int is_syno_arbit_enable(struct inode *inode, struct dentry * dent
 		}
 	}
 
-	if (inode->i_mode2 & arbit) {
+	if (inode->i_archive_bit & arbit) {
 		return 1;
 	}
 	return 0;

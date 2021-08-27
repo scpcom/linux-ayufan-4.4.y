@@ -219,6 +219,9 @@ int ata_tport_add(struct device *parent,
 	struct device *dev = &ap->tdev;
 
 	device_initialize(dev);
+#ifdef MY_ABC_HERE
+	dev->type = &ata_port_type;
+#endif  
 
 	dev->parent = get_device(parent);
 	dev->release = ata_tport_release;

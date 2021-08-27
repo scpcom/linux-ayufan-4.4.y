@@ -446,44 +446,6 @@ syno_gpio_read_with_sdev(struct ata_port *ap, char *buf, struct scsi_device *sde
 	return len;
 }
 
-static ssize_t
-syno_gpio_read_no_sdev(struct ata_port *ap, char *buf)
-{
-	SYNO_GPIO_TASK task;
-	struct workqueue_struct *pTaskWorkqueue = NULL;
-	ssize_t len = 0;
-
-	pTaskWorkqueue = create_singlethread_workqueue("SYNO_GPIO_READ_TASK_QUEUE");
-	if (NULL == pTaskWorkqueue) {
-		len = -ENOMEM;
-		goto END;
-	}
-	syno_gpio_task_init(&task, READ, ap);
-	queue_delayed_work(pTaskWorkqueue, &(task.work), 0);
-WAIT:
-	wait_for_completion(&task.wait);
-
-	if (task.blRetry) {
-		syno_gpio_task_reinit(&task, READ, ap);
-		queue_delayed_work(pTaskWorkqueue, &(task.work), HZ/10);
-		goto WAIT;
-	}
-
-	if (task.blIsErr) {
-		len = -EIO;
-		sprintf(buf, "%s=\"\"%s", EBOX_GPIO_KEY, "\n");
-	} else {
-		len = sprintf(buf, "%s=\"0x%x\"%s", EBOX_GPIO_KEY, task.pm_pkg.var, "\n");
-	}
-
-END:
-	if (NULL != pTaskWorkqueue) {
-		destroy_workqueue(pTaskWorkqueue);
-	}
-	return len;
-}
-
-
 static u8
 syno_gpio_write_with_sdev(struct ata_port *ap, struct scsi_device *sdev, u32 input)
 {
@@ -492,55 +454,6 @@ syno_gpio_write_with_sdev(struct ata_port *ap, struct scsi_device *sdev, u32 inp
 	pm_pkg.var = input;
 	return syno_gpio_with_scmd(ap, sdev, &pm_pkg, WRITE);
 }
-
-
-static u8
-syno_gpio_write_no_sdev(struct ata_port *ap, u32 input)
-{
-	SYNO_GPIO_TASK task;
-	struct workqueue_struct *pTaskWorkqueue = NULL;
-
-	pTaskWorkqueue = create_singlethread_workqueue("SYNO_GPIO_WRITE_TASK_QUEUE");
-	if (NULL == pTaskWorkqueue) {
-		task.blIsErr = 1;
-		goto END;
-	}
-
-	syno_gpio_task_init(&task, WRITE, ap);
-	task.pm_pkg.var = input;
-	queue_delayed_work(pTaskWorkqueue, &(task.work), 0);
-
-WAIT:
-	wait_for_completion(&task.wait);
-
-	if (task.blRetry) {
-		syno_gpio_task_reinit(&task, WRITE, ap);
-		task.pm_pkg.var = input;
-		queue_delayed_work(pTaskWorkqueue, &(task.work), HZ/10);
-		goto WAIT;
-	}
-
-END:
-	if (NULL != pTaskWorkqueue) {
-		destroy_workqueue(pTaskWorkqueue);
-	}
-	return !task.blIsErr ? 0 : 1;
-}
-
-static u8
-except_gpio_cmd(struct ata_port *ap, u32 input)
-{
-	if (syno_pm_is_3xxx(sata_pmp_gscr_vendor(ap->link.device->gscr),
-						sata_pmp_gscr_devid(ap->link.device->gscr))) {
-		if (GPIO_3XXX_CMD_POWER_CLR == input ||
-			GPIO_3XXX_CMD_POWER_CTL == input) {
-			
-			return 1;
-		}
-	}
-	return 0;
-}
-
 
 struct ata_port *SynoEunitFindMaster(struct ata_port *ap)
 {
@@ -666,12 +579,37 @@ void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag
 			goto CONTINUE_FOR;
 		}
 
-
 		if (!syno_is_synology_pm(ap)) {
 			goto CONTINUE_FOR;
 		}
 
+		if (unique != SYNO_UNIQUE(ap->PMSynoUnique)) {
+			goto CONTINUE_FOR;
+		}
 
+		if (IS_SYNOLOGY_RX4(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_DX5(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_DX513(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_DX213(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RX413(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RX415(ap->PMSynoUnique)) {
+			if (ap->host == pAp_master->host && ap->port_no == pAp_master->port_no) {
+				unsigned long flags;
+				spin_lock_irqsave(ap->lock, flags);
+				if (blset) {
+					ap->pflags |= flag;
+				} else {
+					ap->pflags &= ~flag;
+				}
+				spin_unlock_irqrestore(ap->lock, flags);
+			}
+		}
+
+		if (IS_SYNOLOGY_DXC(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RXC(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RX1214(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RX1217(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) {
 			if (ap->host == pAp_master->host) {
 				unsigned long flags;
 				spin_lock_irqsave(ap->lock, flags);
@@ -682,6 +620,7 @@ void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag
 				}
 				spin_unlock_irqrestore(ap->lock, flags);
 			}
+		}
 CONTINUE_FOR:
 		scsi_host_put(ap_host);
 		ap_host = NULL;
@@ -693,13 +632,13 @@ END:
 	}
 }
 
-
 static ssize_t
 syno_pm_gpio_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct Scsi_Host *shost = class_to_shost(dev);
 	struct ata_port *ap = ata_shost_to_port(shost);
 	struct scsi_device *sdev = NULL;
+	struct ata_device *pAtaDev = (struct ata_device *)ap->link.device;
 	ssize_t len = -EIO;
 
 	if (ap->nr_pmp_links &&
@@ -707,10 +646,10 @@ syno_pm_gpio_show(struct device *dev, struct device_attribute *attr, char *buf)
 		if (defer_gpio_cmd(ap, 0, READ)) {
 			sprintf(buf, "%s%s%s", EBOX_GPIO_KEY, "=\"\"", "\n");
 			return len;
-		} else if ((sdev = look_up_scsi_dev_from_ap(ap))) {
+		} else if (NULL != (sdev = pAtaDev->sdev)) {
 			return syno_gpio_read_with_sdev(ap, buf, sdev);
 		} else {
-			return syno_gpio_read_no_sdev(ap, buf);
+			printk("can't find pm scsi device for gpio show\n");
 		}
 	} else {
 		len = sprintf(buf, "%s%s%s", EBOX_GPIO_KEY, "=\"\"", "\n");
@@ -719,12 +658,12 @@ syno_pm_gpio_show(struct device *dev, struct device_attribute *attr, char *buf)
 	return len;
 }
 
-
 static ssize_t
 syno_pm_gpio_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count)
 {
 	struct Scsi_Host *shost = class_to_shost(dev);
 	struct ata_port *ap = ata_shost_to_port(shost);
+	struct ata_device *pAtaDev = (struct ata_device *)ap->link.device;
 	struct scsi_device *sdev = NULL;
 	 
 	ssize_t ret = -EIO;
@@ -737,10 +676,10 @@ syno_pm_gpio_store(struct device *dev, struct device_attribute *attr, const char
 		!defer_gpio_cmd(ap, input, WRITE)) {
 		u8 result = 0;
 
-		if ((sdev = look_up_scsi_dev_from_ap(ap)) && !except_gpio_cmd(ap, input)) {
+		if (NULL != (sdev = pAtaDev->sdev)) {
 			result = syno_gpio_write_with_sdev(ap, sdev, input);
 		} else {
-			result = syno_gpio_write_no_sdev(ap, input);
+			printk("can't find pm scsi device for store\n");
 		}
 
 		ret = !result ? count : -EIO;
@@ -3440,6 +3379,10 @@ static struct ata_device *ata_find_dev(struct ata_port *ap, int devno)
 	} else {
 		if (likely(devno < ap->nr_pmp_links))
 			return &ap->pmp_link[devno].device[0];
+#ifdef MY_ABC_HERE
+		else if (devno == SYNO_PM_VIRTUAL_SCSI_CHANNEL && syno_is_synology_pm(ap))
+			return &ap->link.device[0];
+#endif  
 	}
 
 	return NULL;
@@ -4033,10 +3976,13 @@ int ata_scsi_add_hosts(struct ata_host *host, struct scsi_host_template *sht)
 		shost->max_channel = 1;
 		shost->max_cmd_len = 16;
 
-		
 		shost->max_host_blocked = 1;
 
+#ifdef MY_ABC_HERE
+		rc = scsi_add_host_with_dma(ap->scsi_host, &ap->tdev, ap->host->dev);
+#else
 		rc = scsi_add_host(ap->scsi_host, ap->host->dev);
+#endif  
 		if (rc)
 			goto err_add;
 	}
@@ -4065,6 +4011,24 @@ void ata_scsi_scan_host(struct ata_port *ap, int sync)
 	char modelbuf[ATA_ID_PROD_LEN+1];
 #endif  
 
+#ifdef MY_ABC_HERE
+	struct scsi_device *pPmSdev;
+	int iPmId = 0;
+
+	if(syno_is_synology_pm(ap)) {
+		dev = (struct ata_device *)ap->link.device;
+		iPmId = dev->devno;
+		pPmSdev = __scsi_add_device(ap->scsi_host, SYNO_PM_VIRTUAL_SCSI_CHANNEL, iPmId, 0,
+				 NULL);
+
+		if (!IS_ERR(pPmSdev)) {
+			dev->sdev = pPmSdev;
+			scsi_device_put(pPmSdev);
+		} else {
+			dev->sdev = NULL;
+		}
+	}
+#endif  
  repeat:
 	ata_for_each_link(link, ap, EDGE) {
 		ata_for_each_dev(dev, link, ENABLED) {

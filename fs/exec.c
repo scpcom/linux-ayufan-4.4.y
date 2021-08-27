@@ -1075,36 +1075,50 @@ int check_unsafe_exec(struct linux_binprm *bprm)
 	return res;
 }
 
-
-int prepare_binprm(struct linux_binprm *bprm)
+static void bprm_fill_uid(struct linux_binprm *bprm)
 {
-	umode_t mode;
-	struct inode * inode = bprm->file->f_path.dentry->d_inode;
-	int retval;
-
-	mode = inode->i_mode;
-	if (bprm->file->f_op == NULL)
-		return -EACCES;
-
+	struct inode *inode;
+	unsigned int mode;
+	uid_t uid;
+	gid_t gid;
 
 	bprm->cred->euid = current_euid();
 	bprm->cred->egid = current_egid();
 
-	if (!(bprm->file->f_path.mnt->mnt_flags & MNT_NOSUID)) {
+	if (bprm->file->f_path.mnt->mnt_flags & MNT_NOSUID)
+		return;
+
+	inode = bprm->file->f_path.dentry->d_inode;
+	mode = ACCESS_ONCE(inode->i_mode);
+	if (!(mode & (S_ISUID|S_ISGID)))
+		return;
+
+	mutex_lock(&inode->i_mutex);
+
+	mode = inode->i_mode;
+	uid = inode->i_uid;
+	gid = inode->i_gid;
+	mutex_unlock(&inode->i_mutex);
 
 	if (mode & S_ISUID) {
 		bprm->per_clear |= PER_CLEAR_ON_SETID;
-			bprm->cred->euid = inode->i_uid;
+		bprm->cred->euid = uid;
 	}
 
-		
-		
 	if ((mode & (S_ISGID | S_IXGRP)) == (S_ISGID | S_IXGRP)) {
 		bprm->per_clear |= PER_CLEAR_ON_SETID;
-			bprm->cred->egid = inode->i_gid;
+		bprm->cred->egid = gid;
 	}
 }
 
+int prepare_binprm(struct linux_binprm *bprm)
+{
+	int retval;
+
+	if (bprm->file->f_op == NULL)
+		return -EACCES;
+
+	bprm_fill_uid(bprm);
 
 	retval = security_bprm_set_creds(bprm);
 	if (retval)

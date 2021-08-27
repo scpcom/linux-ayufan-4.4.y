@@ -39,17 +39,6 @@ END:
 }
 #endif
 
-#ifdef MY_ABC_HERE
-static inline unsigned char SynoIsRaidReachMaxDegrade(struct mddev *mddev)
-{
-	struct r1conf *conf = mddev->private;
-	if (mddev->degraded >= conf->raid_disks - 1) {
-		return true;
-	}
-	return false;
-}
-#endif
-
 static void * r1bio_pool_alloc(gfp_t gfp_flags, void *data)
 {
 	struct pool_info *pi = data;
@@ -271,13 +260,6 @@ static void raid1_end_read_request(struct bio *bio, int error)
 	 
 	update_head_pos(mirror, r1_bio);
 
-#ifdef MY_ABC_HERE
-	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
-		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
-		SynoAutoRemapReport(conf->mddev, r1_bio->sector, conf->mirrors[mirror].rdev->bdev);
-	}
-#endif
-
 	if (uptodate)
 #ifdef MY_ABC_HERE
 	{
@@ -301,23 +283,13 @@ static void raid1_end_read_request(struct bio *bio, int error)
 		if (r1_bio->mddev->degraded == conf->raid_disks ||
 		    (r1_bio->mddev->degraded == conf->raid_disks-1 &&
 		     !test_bit(Faulty, &conf->mirrors[mirror].rdev->flags)))
-#ifdef MY_ABC_HERE
-			
-#endif
 			uptodate = 1;
 		spin_unlock_irqrestore(&conf->device_lock, flags);
 
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 		if (!IsDeviceDisappear(conf->mirrors[mirror].rdev->bdev)) {
-#ifdef MY_ABC_HERE
-			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
 			SynoReportBadSector(bio->bi_sector, READ,
 								conf->mddev->md_minor, conf->mirrors[mirror].rdev->bdev, __FUNCTION__);
-			}
-#else
-			SynoReportBadSector(bio->bi_sector, READ,
-								conf->mddev->md_minor, conf->mirrors[mirror].rdev->bdev, __FUNCTION__);
-#endif
 			r1_bio->read_failed = 1;
 			r1_bio->orig_disk_idx = mirror;
 
@@ -1371,14 +1343,7 @@ static void end_sync_read(struct bio *bio, int error)
 
 	update_head_pos(r1_bio->read_disk, r1_bio);
 
-	
 #ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
-	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
-		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
-		SynoAutoRemapReport(conf->mddev, r1_bio->sector, conf->mirrors[mirror].rdev->bdev);
-	}
-#endif
 	if (uptodate) {
 		set_bit(R1BIO_Uptodate, &r1_bio->state);
 	}else{
@@ -2779,9 +2744,6 @@ static struct md_personality raid1_personality =
 	.check_reshape	= raid1_reshape,
 	.quiesce	= raid1_quiesce,
 	.takeover	= raid1_takeover,
-#ifdef MY_ABC_HERE
-	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
-#endif
 };
 
 static int __init raid_init(void)

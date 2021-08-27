@@ -372,7 +372,7 @@ static int fat_fill_inode(struct inode *inode, struct msdos_dir_entry *de)
 	fat_time_fat2unix(sbi, &inode->i_mtime, de->time, de->date, 0);
 	if (sbi->options.isvfat) {
 #ifdef MY_ABC_HERE
-		fat_time_fat2unix(sbi, &inode->i_CreateTime, de->ctime,
+		fat_time_fat2unix(sbi, &inode->i_create_time, de->ctime,
 				  de->cdate, de->ctime_cs);
 #else
 		fat_time_fat2unix(sbi, &inode->i_ctime, de->ctime,
@@ -620,7 +620,7 @@ retry:
 	if (sbi->options.isvfat) {
 		__le16 atime;
 #ifdef MY_ABC_HERE
-		fat_time_unix2fat(sbi, &inode->i_CreateTime, &raw_entry->ctime,
+		fat_time_unix2fat(sbi, &inode->i_create_time, &raw_entry->ctime,
 				  &raw_entry->cdate, &raw_entry->ctime_cs);
 #else
 		fat_time_unix2fat(sbi, &inode->i_ctime, &raw_entry->ctime,

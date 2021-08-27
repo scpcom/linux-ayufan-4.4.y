@@ -50,11 +50,6 @@ extern int mv_ial_ht_abort(struct scsi_cmnd *SCpnt);
 
 #define TEMP_DATA_BUFFER_LENGTH		    512
 
-
-#ifdef CONFIG_PCI_MSI
-
-#endif
-
 #ifndef MRVL_SATA_BUFF_BOUNDARY
 #define MRVL_SATA_BUFF_BOUNDARY (1 << 24)
 #endif  

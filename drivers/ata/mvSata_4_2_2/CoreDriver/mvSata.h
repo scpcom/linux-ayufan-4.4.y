@@ -791,9 +791,5 @@ MV_BOOLEAN mvSataEnableIoGranularity(MV_SATA_ADAPTER *pAdapter,
 #endif
 MV_BOOLEAN mvSata60X1B2CheckDevError(MV_SATA_ADAPTER *pAdapter,
                                        MV_U8 channelIndex);
-#ifdef __cplusplus
-
-
-#endif 
 
 #endif  

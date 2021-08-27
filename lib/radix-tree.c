@@ -311,9 +311,6 @@ static int radix_tree_extend(struct radix_tree_root *root, unsigned long index)
 				tag_set(node, tag, 0);
 		}
 
-#ifdef CONFIG_SYNO_ALPINE
-		
-#endif
 		newheight = root->height+1;
 		node->height = newheight;
 		node->count = 1;

@@ -67,7 +67,7 @@ struct kstat {
 	dev_t		dev;
 	umode_t		mode;
 #ifdef MY_ABC_HERE
-	__u32		SynoMode;
+	__u32		syno_archive_bit;
 #endif
 #ifdef MY_ABC_HERE
 	__u32		syno_archive_version;
@@ -81,7 +81,7 @@ struct kstat {
 	struct timespec	mtime;
 	struct timespec	ctime;
 #ifdef MY_ABC_HERE
-	struct timespec SynoCreateTime;
+	struct timespec syno_create_time;
 #endif
 	unsigned long	blksize;
 	unsigned long long	blocks;
@@ -92,26 +92,22 @@ struct kstat {
 #ifdef MY_ABC_HERE
 #ifdef __KERNEL__
 
-
-
-
 struct SYNOSTAT_EXTRA {
-	struct timespec creatTime;  
-	unsigned int bkpVer;  		
-	unsigned int archBit; 		
+	struct timespec create_time;   
+	unsigned int archive_version;  		 
+	unsigned int archive_bit; 		 
 };
 struct SYNOSTAT {
 	struct stat st;
 	struct SYNOSTAT_EXTRA ext;
 };
 
-
 #define SYNOST_STAT			0x00000001	 	
-#define SYNOST_ARBIT		0x00000002	
-#define SYNOST_BKPVER		0x00000004	
-#define SYNOST_CREATIME		0x00000008	
+#define SYNOST_ARCHIVE_BIT		0x00000002	 
+#define SYNOST_ARCHIVE_VER		0x00000004	 
+#define SYNOST_CREATE_TIME		0x00000008	 
 
-#define SYNOST_ALL			SYNOST_STAT|SYNOST_ARBIT|SYNOST_BKPVER|SYNOST_CREATIME
+#define SYNOST_ALL			SYNOST_STAT|SYNOST_ARCHIVE_BIT|SYNOST_ARCHIVE_VER|SYNOST_CREATE_TIME
 #define SYNOST_IS_CASELESS	0x10000000	 
 
 #endif  

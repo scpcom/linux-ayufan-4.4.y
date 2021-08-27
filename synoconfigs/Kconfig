@@ -8,365 +8,225 @@ config SYNO_LP3943_FEATURES
 	bool "Customized features of LP3943 led dirver for Synology Corp. NAS product"
 	depends on LEDS_LP3943
 	default n
-	help
-		Set to yes to enable customize features for Synology NAS product
-		Including i2c board info and led default trigger setting
 
 config SYNO_ADT7490_FEATURES
 	bool "Enhance features for adt7490 for Synology Corp. NAS product"
 	depends on SENSORS_ADT7475
 	default n
-	help
-		If you need Synology enhance features for adt7490 supports, choose yes.
-		Which will open peci supports and some other features for adt7490
 
 config SYNO_INCREASE_SIL3132_OUT_SWING
 	bool "SATA Sil3132 OUT SWING to prevent DRDY"
 	depends on SYNO_CEDARVIEW || SYNO_AVOTON
 	default y
-	help
-	  Increase SATA Sil3132 OUT SWING to prevent DRDY
 
 config SYNO_DISPLAY_CPUINFO
     bool "Support display CPU Infomation"
-	help
-	  Say Y to Support display CPU Infomation
 
 config SYNO_ARMADAXP_CPU_AFFINITY
 	bool "Set default cpu affinity to core 0"
 	depends on ARMADA_XP || ARMADA_375
 	default y
-	help
-		Set default CPU afiinity on core 0 for md, flush thread
 
 config SYNO_COMCERTO2K_CPU_AFFINITY
 	bool "Set default cpu affinity to core 0"
 	depends on SYNO_COMCERTO
 	default y
-	help
-		Set default CPU afiinity on core 0 for md, flush thread
 
 config SYNO_FIX_MV_CESA_RACE
 	bool "Fix Marvell's crypto driver race"
 	depends on MV_CESA
 	default y
-	help
-		Say Y here to fix Marvell crypto driver race condition
 
 config SYNO_FIX_OCF_CRYPTODEV_RACE
 	bool "Fix OCF's race in cryptodev interface"
 	depends on OCF_OCF
 	default y
-	help
-		Fix OCF race in cryptodev interface
 
 config SYNO_FIX_OCF_CRYPTOSOFT_RACE
 	bool "Fix OCF's race in cryptosoft interface"
 	depends on OCF_OCF
 	default y
-	help
-		Fix OCF race in cryptosoft interface
 
 config SYNO_C2K_UART
 	bool "support Synology comcerto2k UART0 features"
 	depends on SYNO_COMCERTO
 	default n
-	help
-		If you need Synology comcerto2k UART0 features supports, choose yes.
-		Which will modify UART gpio
 
 config SYNO_C2K_NET
 	bool "Apply Synology comcerto2k network modify"
 	depends on SYNO_COMCERTO
 	default n
-	help
-		If you need Synology comcerto2k network modifies, choose yes.
-		Which will modify network interface name and pfe data
 
 config SYNO_C2K_SERIAL_FIX
     bool "C2K serial workaround"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to add C2K serial workaround
 
 config SYNO_C2K_SPI_PARTITION
     bool "apply synology spi partition in c2k"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to add synology spi partition
 
 config SYNO_C2K_GPIO_READ_SHIFT
 	bool "shift the read GPIO value before returning"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to add GPIO read shift
 
 config SYNO_C2K_REBOOT_POWEROFF_BY_MICROP
 	bool "Use MicroP to implement the reboot and poweroff"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to add MicroP reboot and poweroff
 
 config SYNO_C2K_WOL_ENABLE
 	bool "Enable WOL function"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to add WOL function enable
 
 config SYNO_C2K_XOR_RWLOCK
 	bool "Ensure XOR driver read/write data is correct"
 	depends on SYNO_COMCERTO && COMCERTO_XOR
-	help
-	  Say Y to Ensure XOR driver read/write data is correct
 
 config SYNO_C2K_FIX_DWC_OTG_DEADLOCK
 	bool "Fix dwc_otg deadload issue"
 	depends on SYNO_COMCERTO && DWC_OTG
-	help
-	  Say Y to Fix dwc_otg deadload issue
 
 config SYNO_C2K_PCIE_SWITCH_FIX
 	bool "Longer nop delay for avoid PCIE switch blocking"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to enable longer nop delay
 
 config SYNO_C2K_USB_VBUS_CONTROL
 	bool "Manually enable/disable the USB vbus power via gpio"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to enable controlling of USB vbus
 
 config SYNO_C2K_DWC_OTG_URB_DEQUEUE
 	bool "Avoid NULL pointer accessing when calling dwc_otg_hcd_urb_dequeue()"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to enable this bug fixing
-	  Bug #58038,#57125,#58384 , NULL pointer accessing in dwc_otg_hcd_urb_dequeue()
-	  So we check urb->hcpriv , if it's NULL , don't go into dwc_otg_hcd_urb_dequeue()
-	  This refers from ehci_urb_dequeue() and xhci_urb_dequeue()
 
 config SYNO_C2K_DAC_TERRIBLE_SOUND
 	bool "Terrible sound when playing music with DAC on dwc otg USB2"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to enable this bug fixing
-	  Bug DSM #57520. You will hear terrible sound when playing music with DAC.
-	  Don't skip a SOF(start of frame) or it influences the sound
 
 config SYNO_C2K_HS_SPI_DMA_READ_ERROR
 	bool "RX flow control should be false(DW_ahb_dmac) , or the read will occur error"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to enable this bug fixing
-	  Bug DSM #69068. The old retry mechanism will be reverted.
 
 config SYNO_C2K_NOISE_WITH_REMOTE_DAC
 	bool "There is noise when playing music after reading hid device of synology remote"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to enable this bug fixing
-	  Bug DSM #57290. There is problem with handling interrupt packet of dwc otg driver.
-	  In dwc_otg_hcd_queue.c , changing calculations of start_split microframe number for INTR IN (split) endpoint.
 
 config SYNO_C2K_SPLICE_SB_FREEZING
 	bool "Add Comcerto2k's sb freezing of splice"
 	depends on SYNO_COMCERTO
-	help
-	  Say Y to enable this bug fixing
-	  Bug DSM #71113. WarnOn is triggered when frequently suspend volume1 and resume volume1,
-	  and transfer couple files via samba at the same time
-	  Add sb freeze mechanism at the start and end of splice write
 
 config SYNO_EFI
 	bool "Enable EFI runtime service"
 	depends on SYNO_BROMOLOW
 	default y
-	help
-	  Enable EFI runtime service for UEFI platform
 
 config SYNO_THERMAL_CTRL
 	bool "Enable Thermel control to prevent CPU overheat"
 	depends on ARCH_ARMADA370
-	help 
-		Say Y to export thermal control APIs for external kernel modules
 
 config SYNO_FIX_RESIZE_16TB_IN_32BIT
 	bool "Support on-line resize over 16TB on 32-bit platform"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  32-bit platforms with 4K page size are bounded to UINT32_MAX*4K=16TB volume size.
-	  With larger page size, it is possible to use and resize volumes larger than 16TB;
-	  but some numeric overflows must be cleaned up first by using 64-bit API.
 
 config SYNO_DM_TO_SECTOR_FIX
 	bool "Fix to_sector can't work with u64 parameter"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  Let to_sector() function be able to accept u64 parameter in 32-bit platform
 
 config SYNO_ZRAM_32KB_PAGE_SUPPORT
 	bool "Let zram feature support 32KB page"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  Enable this function to fix an issue in zsmalloc module (used by zram) to support
-	  32 KB page size
 
 config SYNO_PKMAP_NOT_ENOUGH_FIX
 	bool "Allocate low pages incase pkmap address is not enough"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  In 32-bit arm, pkmap is limited resource and if kernel wants to map high page, this page will
-	  be mapped to pkmap address and shall be unmapped ASAP. In max connection test, kernel will try
-	  to grab pages and map it to address space. Sometimes, kernel will always get high pages and 
-	  run out of pkmap address. So, limit kernel to get low pages in write-begin of file system.
 
 config SYNO_NETDMA_BUF_NOT_ENOUGH_FIX
 	bool "Allocate enough management data structure for net DMA operation"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  In APNA enhancement for net DMA, a fixed-size management data structure is used to manage
-	  io vector and related pages. For some heavy conditions, a request of data transfer of big
-	  size will be issued and it is not enough to handle. Current management data for pages is 
-	  20 and I enlarge to 128 for most cases. If it is still not enough, a BUGON will be shown
-	  and then we need to consider a more dynamic solution for such case.
 
 config SYNO_CRYPTO_ASYNC_RACE_COND_FIX
 	bool "Fix the race condition when using ANPA crypto engine"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  When a user wants to encrypt/decrypt data, he needs to prepare related data and then issue
-	  a request for hw crypto engine and wait for notification. In ANPA LSP, they use
-	  wait_for_completion_interruptiable() to wait crypto completion. In some cases, it will be 
-	  interrupted and then the use wakes up, frees management data memory. When HW finishes, an
-	  interrupt is issued and then raise a bottom half. In this bottom, it does know that management
-	  data is freed, so kernel panic occurs. Use wait_for_completion() for blocking wait. The drawback
-	  is the user must wait for the completion of encryption/decrytion of an unit of data.
 
 config SYNO_ALPINE_V2_5_3
 	bool "Apply patches from Annapurna with v2.5.3"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  This value is used to enclose codes that belong to v2.5.3 patch provide by Annapurna.
-	  This patch includes system hang fix, ANPA LM enhancement ...etc.
 
 config SYNO_FORCE_EH_FULL_RECOVER_RETRY
 	bool "Force to reset all links of a PMP while retrying EH recover"
 	default y
-    help
-	  The EH recover will not clean the flags of the rested link if an error occurred on an frozen port.
-	  This could leads to port dysfunction, so we add this fix to prevent the PMP SATA ports from improper initializing.
-	  Set to Y if you want to enable it.
 
 config SYNO_ALPINE_ADJUST_RX_EQUAL
 	bool "Add an option to turn on/off 10G rx equalization according to sys entry"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  RX equalization is used to turn best parameters for 10G transmission. Add an option to turn on/off
-	  RX equalization according to the entry in sys file system.
 
 config SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
 	bool "Adjust network interface settings for tuning performance"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  Some settings such as binding interrupt affinity may boost samba performance. This option enables them.
 
 config SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
 	bool "Adjust Alpine backplane RJ45 LED behavior"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  Adjust LED behavior so that it matches HW spec.
 
 config SYNO_ALPINE_BROKEN_PHY_WOL_WORKAROUND
 	bool "Workaround for PHY status error and cannot be woke on lan"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  When DS1515 power off, the power noise writes random value to phy,
-	  making its status invalid, and breaks the WOL function.
-	  To reduce the chance this issue occurs, we switch the PHY page to a
-	  read-only page before power off, so that the noise must switch to
-	  writable page first to make some trouble.
 
 config SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
 	bool "Workaround for RTL8211DN occasionally has error packets or cannot TX"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  Alpine models with RTL8211DN phy fail the reboot stress that has error
-	  packets or unable to TX. To workaround, we detect this situation and
-	  reset phy.
 
 config SYNO_SUPPORT_EMMC_ERASE
 	bool "Enable erase capability for Marvell sdio host"
 	depends on ARCH_ARMADA370
 	default y
-	help
-	  This config will enable erase capability for Marvell sdio host.
-	  Then we could send erase command to eMMC
 
 config SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 	bool "Enable irq lock while changing queue_depth"
 	depends on SCSI_MPT2SAS
 	default y
-	help
-	  This config ensure the queue_depth and max_queue_depth are consistent with user setting
+
 config SYNO_ALPINE_FIX_DMA_RECVFILE
 	bool "Fix issue of checksum error when using NETDMA"
 	depends on SYNO_ALPINE
 	default y
-	help
-	  When using recvfile, it expects it can receive full data (not partial). If it receives partial data, file checksum
-	  will be incorrect. In alpine, if NETDMA is enabled, sometimes tcp_recvmsg will return partial data and cause recvfile
-	  behaves incorrectly. When the DMA resource can not satify request, turn to use CPU to copy data from socket buffer.
 
 config SYNO_DUAL_HEAD
 	bool "Synology Dual Head Host"
 	depends on SYNO_BROMOLOW
 	default n
-	help
-	  Dual head host use STAT DOM as the synoboot device. In this model SATA
-	  controller & SAS expander exist simultaneously.
 
 config SYNO_LOWER_MD_RESYNC_NICE
 	bool "Lower nice value to MD resync threads"
 	depends on SYNO_ALPINE
 	default n
-	help
-	  Only alpine platform needs lower nice value now.
 
 config SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 	bool "Let kernel panic if sas reservation write conflict"
 	depends on SYNO_BROMOLOW
 	default n
-	help
-	  Check if sas reservation write conflict. If yes, kernel panic and then reboot.
 
 config SYNO_OOM_DUMP_MODULE
 	bool "Dump modules and occupied memory sizes while OOM"
 	default y
-	help
-	  <DSM> #77534
-	  Dump modules and occupied memory sizes while OOM to help debug
 
 config SYNO_ELEVATE_LOG_LEVEL
 	bool "Elevate log level of kernel log"
 	default y
-	help
-	  <DSM> #79825
-	  After applying sstrip, section tables and symbols of binaries
-	  are missing. It is hard for us to debug when segmentation
-	  faults occur. Hence, log the segmentation faults related
-	  information in /var/log/kern.log.
+
+config SYNO_SATA_PM_DEVICE_GPIO
+	bool "Synology Specific PM Device Support"
+	depends on SATA_PMP
+	default y
 
 endmenu

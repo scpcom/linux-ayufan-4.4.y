@@ -129,11 +129,11 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	inode->i_archive_version = 0;
 #endif
 #ifdef MY_ABC_HERE
-	inode->i_mode2 = 0;   
+	inode->i_archive_bit = 0;    
 #endif
 #ifdef MY_ABC_HERE
-	inode->i_CreateTime.tv_sec = 0;
-	inode->i_CreateTime.tv_nsec = 0;
+	inode->i_create_time.tv_sec = 0;
+	inode->i_create_time.tv_nsec = 0;
 #endif
 	if (security_inode_alloc(inode))
 		goto out;

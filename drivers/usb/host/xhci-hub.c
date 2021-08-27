@@ -36,10 +36,6 @@ static void xhci_common_hub_descriptor(struct xhci_hcd *xhci,
 	desc->bHubContrCurrent = 0;
 
 	desc->bNbrPorts = ports;
-#if !defined(CONFIG_SYNO_COMCERTO)
-	
-	
-#endif
 	temp = 0;
 #if defined(CONFIG_SYNO_COMCERTO)
 	 
@@ -1044,9 +1040,6 @@ int xhci_bus_suspend(struct usb_hcd *hcd)
 			t2 |= PORT_LINK_STROBE | XDEV_U3;
 			set_bit(port_index, &bus_state->bus_suspended);
 		}
-#if defined(CONFIG_SYNO_COMCERTO)
-		
-#endif
 		if (hcd->self.root_hub->do_remote_wakeup) {
 			if (t1 & PORT_CONNECT) {
 				t2 |= PORT_WKOC_E | PORT_WKDISC_E;

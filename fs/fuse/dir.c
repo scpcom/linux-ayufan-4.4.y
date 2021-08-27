@@ -1844,13 +1844,13 @@ static int fuse_syno_get_archive_bit(struct dentry *entry, unsigned int *archive
 	struct kstat stat;
 
 	if (!IS_GLUSTER_FS(inode)) {
-		*archive_bit = inode->i_mode2;
+		*archive_bit = inode->i_archive_bit;
 		return 0;
 	}
 
 	memset (&stat, 0, sizeof(stat));
-	err = fuse_syno_getattr(entry, &stat, SYNOST_ARBIT);
-	*archive_bit = stat.SynoMode;
+	err = fuse_syno_getattr(entry, &stat, SYNOST_ARCHIVE_BIT);
+	*archive_bit = stat.syno_archive_bit;
 
 	return err;
 }
@@ -1862,14 +1862,14 @@ static int fuse_syno_set_archive_bit(struct dentry *dentry, unsigned int arbit)
 	__le32 arbit_le32 = cpu_to_le32(arbit);
 
 	if (!IS_GLUSTER_FS(inode)) {
-		inode->i_mode2 = arbit;
+		inode->i_archive_bit = arbit;
 		inode->i_ctime = CURRENT_TIME;
 		mark_inode_dirty_sync(inode);
 		return 0;
 	}
 
 	err = fuse_setxattr(dentry, XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_BIT, &arbit_le32, sizeof(arbit_le32), 0);
-	inode->i_mode2 = arbit;
+	inode->i_archive_bit = arbit;
 	return err;
 }
 #endif  
@@ -1994,15 +1994,15 @@ static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int stat
 
 	if (!IS_GLUSTER_FS(dentry->d_inode)) {
 #ifdef MY_ABC_HERE
-		if (stat_flag & SYNOST_CREATIME)
-			stat->SynoCreateTime = dentry->d_inode->i_CreateTime;
+		if (stat_flag & SYNOST_CREATE_TIME)
+			stat->syno_create_time = dentry->d_inode->i_create_time;
 #endif  
 #ifdef MY_ABC_HERE
-		if (stat_flag & SYNOST_ARBIT)
-			stat->SynoMode = dentry->d_inode->i_mode2;
+		if (stat_flag & SYNOST_ARCHIVE_BIT)
+			stat->syno_archive_bit = dentry->d_inode->i_archive_bit;
 #endif  
 #ifdef MY_ABC_HERE
-		if (stat_flag & SYNOST_BKPVER)
+		if (stat_flag & SYNOST_ARCHIVE_VER)
 			 stat->syno_archive_version = dentry->d_inode->i_archive_version;
 #endif  
 		return 0;
@@ -2025,14 +2025,14 @@ static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int stat
 	if (err)
 		goto out;
 
-	if (stat_flag & SYNOST_ARBIT) {
-		stat->SynoMode = synostat->archive_bit;
+	if (stat_flag & SYNOST_ARCHIVE_BIT) {
+		stat->syno_archive_bit = synostat->archive_bit;
 	}
-	if (stat_flag & SYNOST_CREATIME) {
-		stat->SynoCreateTime.tv_sec = synostat->create_time_sec;
-		stat->SynoCreateTime.tv_nsec = synostat->create_time_nsec;
+	if (stat_flag & SYNOST_CREATE_TIME) {
+		stat->syno_create_time.tv_sec = synostat->create_time_sec;
+		stat->syno_create_time.tv_nsec = synostat->create_time_nsec;
 	}
-	if (stat_flag & SYNOST_BKPVER) {
+	if (stat_flag & SYNOST_ARCHIVE_VER) {
 		stat->syno_archive_version = synostat->archive_version;
 	}
 out:

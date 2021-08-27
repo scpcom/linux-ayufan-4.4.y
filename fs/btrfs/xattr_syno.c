@@ -23,7 +23,7 @@ static int btrfs_xattr_syno_set(struct dentry *dentry, const char *name,
 #ifdef MY_ABC_HERE
 		if (!strcmp(name, XATTR_SYNO_ARCHIVE_BIT)) {
 			const __le32 *archive_bit_le32 = value;
-			dentry->d_inode->i_mode2 = le32_to_cpu(*archive_bit_le32);
+			dentry->d_inode->i_archive_bit = le32_to_cpu(*archive_bit_le32);
 		}
 #endif  
 	}

@@ -154,10 +154,10 @@ int __always_inline syno_vfs_getattr(struct path *path, struct kstat *stat, int 
 
 		if (!is_support) {
 #ifdef MY_ABC_HERE
-			stat->SynoCreateTime = inode->i_CreateTime;
+			stat->syno_create_time = inode->i_create_time;
 #endif
 #ifdef MY_ABC_HERE
-			stat->SynoMode = inode->i_mode2;
+			stat->syno_archive_bit = inode->i_archive_bit;
 #endif
 #ifdef MY_ABC_HERE
 			stat->syno_archive_version = inode->i_archive_version;
@@ -752,22 +752,22 @@ static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct S
 			error = cp_new_stat64(pKst, &pSt64->st);
 		}
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_ARBIT) {
-			if (__put_user(pKst->SynoMode, &pSt64->ext.archBit)){
+		if (flags & SYNOST_ARCHIVE_BIT) {
+			if (__put_user(pKst->syno_archive_bit, &pSt64->ext.archive_bit)){
 				goto Out;
 			}
 		}
 #endif  
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_CREATIME) {
-			if (copy_to_user(&pSt64->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt64->ext.creatTime))){
+		if (flags & SYNOST_CREATE_TIME) {
+			if (copy_to_user(&pSt64->ext.create_time, &pKst->syno_create_time, sizeof(pSt64->ext.create_time))){
 				goto Out;
 			}
 		}
 #endif  
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_BKPVER) {
-			if (__put_user(pKst->syno_archive_version, &pSt64->ext.bkpVer)){
+		if (flags & SYNOST_ARCHIVE_VER) {
+			if (__put_user(pKst->syno_archive_version, &pSt64->ext.archive_version)){
 				goto Out;
 			}
 		}
@@ -884,22 +884,22 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 			}
 		}
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_ARBIT) {
-			if (__put_user(pKst->SynoMode, &pSt->ext.archBit)){
+		if (flags & SYNOST_ARCHIVE_BIT) {
+			if (__put_user(pKst->syno_archive_bit, &pSt->ext.archive_bit)){
 				goto Out;
 			}
 		}
 #endif  
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_CREATIME) {
-			if (copy_to_user(&pSt->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt->ext.creatTime))){
+		if (flags & SYNOST_CREATE_TIME) {
+			if (copy_to_user(&pSt->ext.create_time, &pKst->syno_create_time, sizeof(pSt->ext.create_time))){
 				goto Out;
 			}
 		}
 #endif
 #ifdef MY_ABC_HERE
-		if (flags & SYNOST_BKPVER) {
-			if (__put_user(pKst->syno_archive_version, &pSt->ext.bkpVer)){
+		if (flags & SYNOST_ARCHIVE_VER) {
+			if (__put_user(pKst->syno_archive_version, &pSt->ext.archive_version)){
 				goto Out;
 			}
 		}

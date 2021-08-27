@@ -1890,11 +1890,6 @@ static void ahci_port_intr(struct ata_port *ap)
 	}
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
-
-
-#endif
-
 irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 {
 	struct ata_host *host = dev_instance;

@@ -130,10 +130,9 @@ cifs_fattr_to_inode(struct inode *inode, struct cifs_fattr *fattr)
 	inode->i_uid = fattr->cf_uid;
 	inode->i_gid = fattr->cf_gid;
 #ifdef MY_ABC_HERE
-	inode->i_CreateTime = cifs_NTtimeToUnix(cpu_to_le64(fattr->cf_createtime));
+	inode->i_create_time = cifs_NTtimeToUnix(cpu_to_le64(fattr->cf_createtime));
 #endif
 
-	
 	if (inode->i_state & I_NEW ||
 	    !(cifs_sb->mnt_cifs_flags & CIFS_MOUNT_DYNPERM))
 		inode->i_mode = fattr->cf_mode;

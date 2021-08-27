@@ -3196,17 +3196,11 @@ static const struct ata_blacklist_entry ata_device_blacklist [] = {
 	 
 	{ "TSSTcorp CDDVDW SH-S202[HJN]", "SB0[01]",  ATA_HORKAGE_IVB, },
 
-	
 	{ "MTRON MSP-SATA*",		NULL,	ATA_HORKAGE_BRIDGE_OK, },
 
-	
 	{ "WD My Book",			NULL,	ATA_HORKAGE_1_5_GBPS, },
 	{ "Seagate FreeAgent GoFlex",	NULL,	ATA_HORKAGE_1_5_GBPS, },
 
-	
-#ifdef MY_ABC_HERE
-	
-#endif
 #ifdef MY_ABC_HERE
 	 
 	{ "Hitachi HUA723030ALA640",	NULL,	ATA_HORKAGE_1_5_GBPS, },
@@ -4008,7 +4002,11 @@ void ata_host_resume(struct ata_host *host)
 	host->dev->power.power_state = PMSG_ON;
 }
 #endif
-
+#ifdef MY_ABC_HERE
+struct device_type ata_port_type = {
+       .name = "ata_port",
+};
+#endif  
 
 void ata_dev_init(struct ata_device *dev)
 {

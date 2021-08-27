@@ -72,6 +72,9 @@ extern int giSynoHddLedEnabled;
 	}							\
 })
 
+#ifdef MY_ABC_HERE
+#define SYNO_PM_VIRTUAL_SCSI_CHANNEL 15
+#endif  
  
 #define HAVE_LIBATA_MSG 1
 

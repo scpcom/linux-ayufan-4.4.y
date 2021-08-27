@@ -111,9 +111,6 @@ struct hd_struct {
 #endif
 	atomic_t ref;
 	struct rcu_head rcu_head;
-#ifdef MY_ABC_HERE
-	unsigned auto_remap;
-#endif
 };
 
 #define GENHD_FL_REMOVABLE			1

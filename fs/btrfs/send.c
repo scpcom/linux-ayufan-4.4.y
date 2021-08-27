@@ -4444,7 +4444,15 @@ static int syno_attribute_handler(struct send_ctx *sctx)
 			goto out;
 		}
 		if (sctx->cur_inode_archive) {
-			archive_bit_le32 = cpu_to_le32(inode->i_mode2);
+			archive_bit_le32 = cpu_to_le32(inode->i_archive_bit);
+#ifdef CONFIG_BTRFS_FS_SYNO_ACL
+			if (sctx->cur_inode_archive & syno_archive_set_owner_group && !(inode->i_archive_bit & S2_SYNO_ACL_IS_OWNER_GROUP)) {
+				sctx->cur_inode_archive &= ~syno_archive_set_owner_group;
+		}
+			if (sctx->cur_inode_archive & syno_archive_set_acl && !(inode->i_archive_bit & ALL_SYNO_ACL_ARCHIVE)) {
+				sctx->cur_inode_archive &= ~syno_archive_set_acl;
+			}
+#endif  
 		}
 
 		iput(inode);

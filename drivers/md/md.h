@@ -275,16 +275,6 @@ struct mddev {
 #ifdef MY_ABC_HERE
     unsigned char           nodev_and_crashed;      
 #endif
-#ifdef MY_ABC_HERE
-#define MD_AUTO_REMAP_MODE_FORCE_OFF 0
-#define MD_AUTO_REMAP_MODE_FORCE_ON 1
-#define MD_AUTO_REMAP_MODE_ISMAXDEGRADE 2
-	unsigned char			auto_remap;
-#endif
-#ifdef MY_ABC_HERE
-	void                            *syno_private;    
-	char                            lv_name[16];
-#endif
 
 #ifdef MY_ABC_HERE
 	mempool_t				*syno_mdio_mempool;
@@ -341,10 +331,6 @@ struct md_personality
 	 
 	void (*quiesce) (struct mddev *mddev, int state);
 	 
-#ifdef MY_ABC_HERE
-	unsigned char (*ismaxdegrade) (struct mddev *mddev);
-	void (*syno_set_rdev_auto_remap) (struct mddev *mddev);
-#endif
 	void *(*takeover) (struct mddev *mddev);
 };
 
@@ -476,13 +462,6 @@ extern int md_integrity_register(struct mddev *mddev);
 extern void md_integrity_add_rdev(struct md_rdev *rdev, struct mddev *mddev);
 extern int strict_strtoul_scaled(const char *cp, unsigned long *res, int scale);
 extern void restore_bitmap_write_access(struct file *file);
-
-#ifdef MY_ABC_HERE
-void SynoAutoRemapReport(struct mddev *mddev, sector_t sector, struct block_device *bdev);
-#endif
-#ifdef MY_ABC_HERE
-void RaidRemapModeSet(struct block_device *, unsigned char);
-#endif
 
 #ifdef MY_ABC_HERE
 void SYNORaidRdevUnplug(struct mddev *mddev, struct md_rdev *rdev);

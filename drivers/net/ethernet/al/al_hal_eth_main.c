@@ -2707,9 +2707,6 @@ int al_eth_flr_rmn(int (* pci_read_config_u32)(void *handle, int where, uint32_t
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_ALPINE_A0
-
-#endif
 #define AL_HAL_ETH_MEDIA_TYPE_MASK	(AL_FIELD_MASK(3, 0))
 #define AL_HAL_ETH_MEDIA_TYPE_SHIFT	0
 #define AL_HAL_ETH_EXT_PHY_SHIFT	4
@@ -2757,9 +2754,6 @@ int al_eth_flr_rmn(int (* pci_read_config_u32)(void *handle, int where, uint32_t
 int al_eth_board_params_set(void * __iomem mac_base, struct al_eth_board_params *params){
 	uint32_t	reg = 0;
 
-#ifdef CONFIG_SYNO_ALPINE_A0
-	
-#endif
 	AL_REG_FIELD_SET(reg, AL_HAL_ETH_MEDIA_TYPE_MASK,
 			 AL_HAL_ETH_MEDIA_TYPE_SHIFT, params->media_type);
 	AL_REG_BIT_VAL_SET(reg, AL_HAL_ETH_EXT_PHY_SHIFT, params->phy_exist == AL_TRUE);

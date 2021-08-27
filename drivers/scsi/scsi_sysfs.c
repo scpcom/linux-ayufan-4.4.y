@@ -498,30 +498,6 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 		return -EINVAL;
 }
 #endif
-#ifdef MY_ABC_HERE
-extern void
-ScsiRemapModeSet(struct scsi_device *sdev, unsigned char blAutoRemap);
-static ssize_t
-sdev_show_auto_remap(struct device *dev, struct device_attribute *attr, char *buf)
-{
-	struct scsi_device *sdev;
-	sdev = to_scsi_device(dev);
-	return snprintf (buf, 20, "%d type 0x%x\n", sdev->auto_remap, sdev->type);
-}
-
-static ssize_t
-sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct scsi_device *sdev;
-	int val = 0;
-	sdev = to_scsi_device(dev);
-	sscanf (buf, "%d", &val);
-
-	ScsiRemapModeSet(sdev, val ? 1 : 0);
-	return count;
-}
-static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
-#endif
 
 #ifdef MY_ABC_HERE
  
@@ -778,9 +754,6 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_iodone_cnt.attr,
 	&dev_attr_ioerr_cnt.attr,
 	&dev_attr_modalias.attr,
-#ifdef MY_ABC_HERE
-	&dev_attr_auto_remap.attr,
-#endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_idle_time.attr,
 	&dev_attr_syno_spindown.attr,

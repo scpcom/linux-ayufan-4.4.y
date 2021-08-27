@@ -105,17 +105,17 @@ static int syno_btrfs_init_attr(struct btrfs_trans_handle *trans, struct inode *
 #endif
 
 #ifdef MY_ABC_HERE
-	inode->i_CreateTime = inode->i_mtime;
-	crtime.sec = cpu_to_le64(inode->i_CreateTime.tv_sec);
-	crtime.nsec = cpu_to_le32(inode->i_CreateTime.tv_nsec);
+	inode->i_create_time = inode->i_mtime;
+	crtime.sec = cpu_to_le64(inode->i_create_time.tv_sec);
+	crtime.nsec = cpu_to_le32(inode->i_create_time.tv_nsec);
 	err = __btrfs_setxattr(trans, inode, XATTR_SYNO_PREFIX XATTR_SYNO_CREATE_TIME, &crtime, sizeof(crtime), XATTR_CREATE);
 	if (err)
 		goto out;
 #endif
 
 #ifdef MY_ABC_HERE
-	inode->i_mode2 = ALL_SYNO_ARCHIVE;
-	archive_bit = cpu_to_le32(inode->i_mode2);
+	inode->i_archive_bit = ALL_SYNO_ARCHIVE;
+	archive_bit = cpu_to_le32(inode->i_archive_bit);
 	err = __btrfs_setxattr(trans, inode, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT, &archive_bit, sizeof(archive_bit), XATTR_CREATE);
 #endif
 out:
@@ -138,7 +138,7 @@ static int syno_btrfs_set_crtime(struct dentry *dentry, struct timespec *time)
 	crtime.nsec = cpu_to_le32(time->tv_nsec);
 	err = btrfs_setxattr(dentry, XATTR_SYNO_PREFIX XATTR_SYNO_CREATE_TIME, &crtime, sizeof(crtime), 0);
 	if (!err)
-		dentry->d_inode->i_CreateTime = *time;
+		dentry->d_inode->i_create_time = *time;
 out:
 	return err;
 }
@@ -4670,9 +4670,9 @@ struct inode *btrfs_iget(struct super_block *s, struct btrfs_key *location,
 #ifdef MY_ABC_HERE
 			retval = __btrfs_getxattr(inode, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT, &archive_bit, sizeof(archive_bit));
 			if (0 < retval) {
-				inode->i_mode2 = le32_to_cpu(archive_bit);
+				inode->i_archive_bit = le32_to_cpu(archive_bit);
 			} else {
-				inode->i_mode2 = 0;
+				inode->i_archive_bit = 0;
 			}
 #endif
 		} else {
@@ -7537,30 +7537,30 @@ int syno_btrfs_getattr(struct dentry *d, struct kstat *stat, int flags)
 	struct inode *inode = d->d_inode;
 
 #ifdef MY_ABC_HERE
-	if (flags & SYNOST_CREATIME) {
+	if (flags & SYNOST_CREATE_TIME) {
 		struct btrfs_timespec crtime;
 
 		err = __btrfs_getxattr(inode, XATTR_SYNO_PREFIX XATTR_SYNO_CREATE_TIME, &crtime, sizeof(crtime));
 		if (0 < err) {
-			inode->i_CreateTime.tv_sec = le64_to_cpu(crtime.sec);
-			inode->i_CreateTime.tv_nsec = le32_to_cpu(crtime.nsec);
+			inode->i_create_time.tv_sec = le64_to_cpu(crtime.sec);
+			inode->i_create_time.tv_nsec = le32_to_cpu(crtime.nsec);
 		} else if (-ENODATA == err) {
-			inode->i_CreateTime.tv_sec = 0;
-			inode->i_CreateTime.tv_nsec = 0;
+			inode->i_create_time.tv_sec = 0;
+			inode->i_create_time.tv_nsec = 0;
 		} else {
 			return err;
 		}
-		stat->SynoCreateTime = inode->i_CreateTime;
+		stat->syno_create_time = inode->i_create_time;
 		err = 0;
 	}
 #endif
 #ifdef MY_ABC_HERE
-	if (flags & SYNOST_ARBIT) {
-		stat->SynoMode = inode->i_mode2;
+	if (flags & SYNOST_ARCHIVE_BIT) {
+		stat->syno_archive_bit = inode->i_archive_bit;
 	}
 #endif
 #ifdef MY_ABC_HERE
-	if (flags & SYNOST_BKPVER) {
+	if (flags & SYNOST_ARCHIVE_VER) {
 		err = syno_btrfs_get_archive_ver(d, &stat->syno_archive_version);
 	}
 #endif

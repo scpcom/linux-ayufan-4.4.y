@@ -3138,16 +3138,11 @@ static void mv_eth_pnc_resume(void)
 	if (wol_ports_bmp != 0)
 		return;
 
-	
 	tcam_hw_init();
 
 	if (pnc_default_init())
 		printk(KERN_ERR "%s: Warning PNC init failed\n", __func__);
 
-	
-#if defined(MV_ETH_PNC_LB)
-	
-#endif
 }
 #endif  
 

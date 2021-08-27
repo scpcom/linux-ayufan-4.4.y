@@ -74,16 +74,9 @@ typedef int (*dm_handle_4kn_target_support_fn) (struct dm_target *ti,
 typedef void (*dm_io_hints_fn) (struct dm_target *ti,
 				struct queue_limits *limits);
 
-
 typedef int (*dm_busy_fn) (struct dm_target *ti);
 
-#ifdef MY_ABC_HERE
-typedef void (*dm_lvinfoset_fn) (struct dm_target *ti);
-typedef sector_t (*dm_lg_sector_get_fn) (sector_t sector, struct dm_target *ti);
-#endif
-
 void dm_error(const char *message);
-
 
 int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 			 sector_t start, sector_t len, void *data);
@@ -124,11 +117,6 @@ struct target_type {
 	dm_handle_4kn_target_support_fn handle_4kn_target_support;
 #endif
 	dm_io_hints_fn io_hints;
-#ifdef MY_ABC_HERE
-	dm_lvinfoset_fn lvinfoset;
-	dm_lg_sector_get_fn lg_sector_get;
-#endif
-
 
 	struct list_head list;
 };

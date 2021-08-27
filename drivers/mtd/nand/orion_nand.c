@@ -274,10 +274,6 @@ static inline int decode_rs(u_short data[nn])
 		}
 	}
 
-#ifdef DEBUG
-	
-#endif
-
 	if (deg_lambda != count) {
 		 
 		return -1;

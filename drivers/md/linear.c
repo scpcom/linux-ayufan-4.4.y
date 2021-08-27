@@ -282,13 +282,7 @@ SynoLinearEndRequest(struct bio *bio, int error)
 			syno_md_error(mddev, rdev);
 		}else{
 #ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
-			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
 			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
-			}
-#else
-			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
-#endif
 #endif
 			md_error(mddev, rdev);
 		}

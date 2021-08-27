@@ -741,10 +741,6 @@ void ___dma_single_dev_to_cpu(const void *kaddr, size_t size,
 		return;
 #endif
 
-#if !defined(CONFIG_SYNO_COMCERTO)
-	
-#endif
-
 #if defined(CONFIG_SYNO_COMCERTO)
 #if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	 
@@ -862,10 +858,6 @@ void ___dma_page_dev_to_cpu(struct page *page, unsigned long off,
 #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if ((paddr + size) <= arm_dma_zone_size)
 		return;
-#endif
-
-#if !defined(CONFIG_SYNO_COMCERTO)
-	
 #endif
 
 #if defined(CONFIG_SYNO_COMCERTO)

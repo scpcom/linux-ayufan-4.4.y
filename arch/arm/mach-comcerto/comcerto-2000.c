@@ -952,11 +952,6 @@ void __init device_init(void)
 
 	gpio_init();
 
-#ifdef CONFIG_COMCERTO_TDM_CLOCK
-	
-	
-#endif
-	
 	c2k_pm_bitmask_store(default_host_utilpe_shared_bitmask);
 
 	platform_add_devices(comcerto_common_devices, ARRAY_SIZE(comcerto_common_devices));
