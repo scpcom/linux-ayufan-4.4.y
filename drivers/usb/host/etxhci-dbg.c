@@ -589,3 +589,63 @@ void etxhci_dbg_stream_info(struct xhci_hcd *xhci,
 			i, le64_to_cpu(stream_info->stream_ctx_array[i].stream_ring));
 	}
 }
+
+
+
+
+void etxhci_print_trbs(	struct xhci_hcd *xhci,
+    struct xhci_segment *seg,
+    union xhci_trb *trb,
+    int num_trbs)
+{
+	int i;
+
+	for (i = 0; i < num_trbs; i++) {
+		if ((trb->generic.field[3] & TRB_TYPE_BITMASK) == TRB_TYPE(TRB_LINK)) {
+			printk("@%016llx %08x %08x %08x %08x\n",
+				(unsigned long long)etxhci_trb_virt_to_dma(seg, trb),
+				le32_to_cpu(trb->generic.field[0]),
+				le32_to_cpu(trb->generic.field[1]),
+				le32_to_cpu(trb->generic.field[2]),
+				le32_to_cpu(trb->generic.field[3]));
+			seg = seg->next;
+			trb = seg->trbs;
+		}
+
+		printk("@%016llx %08x %08x %08x %08x\n",
+			(unsigned long long)etxhci_trb_virt_to_dma(seg, trb),
+			le32_to_cpu(trb->generic.field[0]),
+			le32_to_cpu(trb->generic.field[1]),
+			le32_to_cpu(trb->generic.field[2]),
+			le32_to_cpu(trb->generic.field[3]));
+		trb++;
+	}
+}
+
+void etxhci_print_segment(struct xhci_hcd *xhci, struct xhci_segment *seg)
+{
+	int i;
+	union xhci_trb *trb = seg->trbs;
+
+	for (i = 0; i < TRBS_PER_SEGMENT; ++i) {
+		trb = &seg->trbs[i];
+		printk("@%016llx %08x %08x %08x %08x\n",
+			(unsigned long long)etxhci_trb_virt_to_dma(seg, trb),
+			le32_to_cpu(trb->generic.field[0]),
+			le32_to_cpu(trb->generic.field[1]),
+			le32_to_cpu(trb->generic.field[2]),
+			le32_to_cpu(trb->generic.field[3]));
+	}
+}
+
+void etxhci_print_ring(struct xhci_hcd *xhci, struct xhci_ring *ring)
+{
+	struct xhci_segment *seg;
+	struct xhci_segment *first_seg = ring->first_seg;
+
+	etxhci_print_segment(xhci, first_seg);
+	for (seg = first_seg->next; seg != first_seg; seg = seg->next) {
+		etxhci_print_segment(xhci, seg);
+	}
+}
+

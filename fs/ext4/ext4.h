@@ -1126,7 +1126,7 @@ struct ext4_super_block {
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	__le32  s_reserved[106];        /* Padding to the end of the block */
 	__le32  s_archive_version;      /* Last archived version */
-	__le32  s_syno_reserved;
+	__le32  s_archive_version_obsoleted;
 	__le32  s_syno_hash_magic;      /* Enable Htree if the magic is given */
 #else
 	__le32	s_reserved[109];        /* Padding to the end of the block */
@@ -1266,6 +1266,7 @@ struct ext4_sb_info {
 	struct flex_groups *s_flex_groups;
 #ifdef MY_ABC_HERE
 	int s_new_error_fs_event_flag;
+	char *s_mount_path;
 #endif
 #ifdef MY_DEF_HERE
 	int s_swap_create_time;
@@ -1936,6 +1937,13 @@ extern int ext4_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf);
 extern qsize_t *ext4_get_reserved_space(struct inode *inode);
 extern void ext4_da_update_reserve_space(struct inode *inode,
 					int used, int quota_claim);
+#ifdef MY_ABC_HERE
+extern int syno_ext4_getattr(struct dentry *d, struct kstat *stat, int flags);
+#endif
+#ifdef MY_ABC_HERE
+extern int syno_ext4_get_archive_ver(struct dentry *d, u32 *);
+extern int syno_ext4_set_archive_ver(struct dentry *d, u32);
+#endif
 
 /* indirect.c */
 extern int ext4_ind_map_blocks(handle_t *handle, struct inode *inode,

@@ -1285,12 +1285,17 @@ static ssize_t show_pwm_syno_control(struct device *dev, struct device_attribute
 			    char *buf)
 {
 	struct i2c_client *client = to_i2c_client(dev);
-	struct adt7475_data *data = adt7475_update_device(dev);
+	struct adt7475_data *data = i2c_get_clientdata(client);
 	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
 
 	if (!SYNO_IS_ADT7490(client)) {
 		return -EINVAL;
 	}
+	mutex_lock(&data->lock);
+	/* Read Modify Write PWM values */
+	adt7475_read_pwm(client, sattr->index);
+	mutex_unlock(&data->lock);
+
 	return sprintf(buf, "%d\n", data->pwmsynoctl[sattr->index]);
 }
 
@@ -1324,13 +1329,9 @@ static ssize_t set_pwm_syno_control(struct device *dev, struct device_attribute 
 	data->pwm[CONTROL][index] = adt7475_read(PWM_CONFIG_REG(index));
 
 	switch (inputVal) {
-		case 0:
-			valt = 1;
-			val = 0x04;	/* Run at 100% duty cycle */
-			break;
 		case 1:
 			valt = 0;
-			val = 0x03;	/* Run at full speed */
+			val = 0x03;	/* Run at maximun duty cycle (set by pwmMax) */
 			break;
 		case 2:
 			valt = 0;
@@ -1381,11 +1382,10 @@ static ssize_t set_pwm_syno_control(struct device *dev, struct device_attribute 
 			val = 0x02;	/* Source from remote2 */
 			break;
 		default:
-			mutex_unlock(&data->lock);
-			return -EINVAL;
+			valt = 0;
+			val = 0x03;	/* Run at maximun duty cycle (set by pwmMax) */
+			break;
 	}
-
-	data->pwmsynoctl[index] = inputVal;
 
 	data->pwm[CONTROL][index] &= ~0xE8;
 	data->pwm[CONTROL][index] |= (valt & 1) << 3;
@@ -2109,6 +2109,69 @@ static void adt7475_read_hystersis(struct i2c_client *client)
 #endif
 }
 
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+static unsigned int adt7490_pwmctl_read(const unsigned int pwmReg)
+{
+	unsigned int valt = pwmReg & 0x8;
+	unsigned int pwmSource = (pwmReg >> 5) & 7;
+	unsigned int ret = 1;
+
+	if (valt) {
+		switch (pwmSource) {
+			case 0x0:
+				ret = 5;
+				break;
+			case 0x1:
+				ret = 6;
+				break;
+			case 0x2:
+				ret = 7;
+				break;
+			case 0x3:
+				ret = 8;
+				break;
+			case 0x5:
+				ret = 4;
+				break;
+			case 0x7:
+				ret = 3;
+				break;
+			default:
+				ret = 0;
+				break;
+		}
+	} else {
+		switch (pwmSource) {
+			case 0x0:
+				ret = 11;
+				break;
+			case 0x1:
+				ret = 12;
+				break;
+			case 0x2:
+				ret = 13;
+				break;
+			case 0x3:
+				ret = 1;
+				break;
+			case 0x5:
+				ret = 10;
+				break;
+			case 0x6:
+				ret = 9;
+				break;
+			case 0x7:
+				ret = 2;
+				break;
+			default:
+				ret = 0;
+				break;
+		}
+	}
+	return ret;
+}
+#endif
+
 static void adt7475_read_pwm(struct i2c_client *client, int index)
 {
 	struct adt7475_data *data = i2c_get_clientdata(client);
@@ -2116,11 +2179,12 @@ static void adt7475_read_pwm(struct i2c_client *client, int index)
 
 	data->pwm[CONTROL][index] = adt7475_read(PWM_CONFIG_REG(index));
 
-
 	/* Figure out the internal value for pwmctrl and pwmchan
 	   based on the current settings */
 	v = (data->pwm[CONTROL][index] >> 5) & 7;
-
+#ifdef CONFIG_SYNO_ADT7490_FEATURES
+	data->pwmsynoctl[index] = adt7490_pwmctl_read(data->pwm[CONTROL][index]);
+#endif
 	if (v == 3)
 		data->pwmctl[index] = 0;
 	else if (v == 7)

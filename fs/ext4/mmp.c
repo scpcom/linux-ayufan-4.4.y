@@ -10,14 +10,20 @@
  * Write the MMP block using WRITE_SYNC to try to get the block on-disk
  * faster.
  */
-static int write_mmp_block(struct buffer_head *bh)
+static int write_mmp_block(struct super_block *sb, struct buffer_head *bh)
 {
+	/*
+	 * We protect against freezing so that we don't create dirty buffers
+	 * on frozen filesystem.
+	 */
+	sb_start_write(sb);
 	mark_buffer_dirty(bh);
 	lock_buffer(bh);
 	bh->b_end_io = end_buffer_write_sync;
 	get_bh(bh);
 	submit_bh(WRITE_SYNC, bh);
 	wait_on_buffer(bh);
+	sb_end_write(sb);
 	if (unlikely(!buffer_uptodate(bh)))
 		return 1;
 
@@ -122,7 +128,7 @@ static int kmmpd(void *data)
 		mmp->mmp_time = cpu_to_le64(get_seconds());
 		last_update_time = jiffies;
 
-		retval = write_mmp_block(bh);
+		retval = write_mmp_block(sb, bh);
 		/*
 		 * Don't spew too many error messages. Print one every
 		 * (s_mmp_update_interval * 60) seconds.
@@ -202,7 +208,7 @@ static int kmmpd(void *data)
 	mmp->mmp_seq = cpu_to_le32(EXT4_MMP_SEQ_CLEAN);
 	mmp->mmp_time = cpu_to_le64(get_seconds());
 
-	retval = write_mmp_block(bh);
+	retval = write_mmp_block(sb, bh);
 
 failed:
 	kfree(data);
@@ -301,7 +307,7 @@ skip:
 	seq = mmp_new_seq();
 	mmp->mmp_seq = cpu_to_le32(seq);
 
-	retval = write_mmp_block(bh);
+	retval = write_mmp_block(sb, bh);
 	if (retval)
 		goto failed;
 

@@ -948,7 +948,7 @@ static void bdi_update_bandwidth(struct backing_dev_info *bdi,
 }
 
 /*
- * After a task dirtied this many pages, balance_dirty_pages_ratelimited_nr()
+ * After a task dirtied this many pages, balance_dirty_pages_ratelimited()
  * will look to see if it needs to start dirty throttling.
  *
  * If dirty_poll_interval is too low, big NUMA machines will call the expensive
@@ -1216,10 +1216,25 @@ void set_page_dirty_balance(struct page *page, int page_mkwrite)
 
 static DEFINE_PER_CPU(int, bdp_ratelimits);
 
+/*
+ * Normal tasks are throttled by
+ *	loop {
+ *		dirty tsk->nr_dirtied_pause pages;
+ *		take a snap in balance_dirty_pages();
+ *	}
+ * However there is a worst case. If every task exit immediately when dirtied
+ * (tsk->nr_dirtied_pause - 1) pages, balance_dirty_pages() will never be
+ * called to throttle the page dirties. The solution is to save the not yet
+ * throttled page dirties in dirty_throttle_leaks on task exit and charge them
+ * randomly into the running tasks. This works well for the above worst case,
+ * as the new task will pick up and accumulate the old task's leaked dirty
+ * count and eventually get throttled.
+ */
+DEFINE_PER_CPU(int, dirty_throttle_leaks) = 0;
+
 /**
- * balance_dirty_pages_ratelimited_nr - balance dirty memory state
+ * balance_dirty_pages_ratelimited - balance dirty memory state
  * @mapping: address_space which was dirtied
- * @nr_pages_dirtied: number of pages which the caller has just dirtied
  *
  * Processes which are dirtying memory should call in here once for each page
  * which was newly dirtied.  The function will periodically check the system's
@@ -1230,8 +1245,7 @@ static DEFINE_PER_CPU(int, bdp_ratelimits);
  * limit we decrease the ratelimiting by a lot, to prevent individual processes
  * from overshooting the limit by (ratelimit_pages) each.
  */
-void balance_dirty_pages_ratelimited_nr(struct address_space *mapping,
-					unsigned long nr_pages_dirtied)
+void balance_dirty_pages_ratelimited(struct address_space *mapping)
 {
 	struct backing_dev_info *bdi = mapping->backing_dev_info;
 	int ratelimit;
@@ -1244,8 +1258,6 @@ void balance_dirty_pages_ratelimited_nr(struct address_space *mapping,
 	if (bdi->dirty_exceeded)
 		ratelimit = min(ratelimit, 32 >> (PAGE_SHIFT - 10));
 
-	current->nr_dirtied += nr_pages_dirtied;
-
 	preempt_disable();
 	/*
 	 * This prevents one CPU to accumulate too many dirtied pages without
@@ -1256,19 +1268,28 @@ void balance_dirty_pages_ratelimited_nr(struct address_space *mapping,
 	p =  &__get_cpu_var(bdp_ratelimits);
 	if (unlikely(current->nr_dirtied >= ratelimit))
 		*p = 0;
-	else {
-		*p += nr_pages_dirtied;
-		if (unlikely(*p >= ratelimit_pages)) {
+	else if (unlikely(*p >= ratelimit_pages)) {
 		*p = 0;
 		ratelimit = 0;
 	}
+	/*
+	 * Pick up the dirtied pages by the exited tasks. This avoids lots of
+	 * short-lived tasks (eg. gcc invocations in a kernel build) escaping
+	 * the dirty throttling and livelock other long-run dirtiers.
+	 */
+	p = &__get_cpu_var(dirty_throttle_leaks);
+	if (*p > 0 && current->nr_dirtied < ratelimit) {
+		unsigned long nr_pages_dirtied;
+		nr_pages_dirtied = min(*p, ratelimit - current->nr_dirtied);
+		*p -= nr_pages_dirtied;
+		current->nr_dirtied += nr_pages_dirtied;
 	}
 	preempt_enable();
 
 	if (unlikely(current->nr_dirtied >= ratelimit))
 		balance_dirty_pages(mapping, current->nr_dirtied);
 }
-EXPORT_SYMBOL(balance_dirty_pages_ratelimited_nr);
+EXPORT_SYMBOL(balance_dirty_pages_ratelimited);
 
 void throttle_vm_writeout(gfp_t gfp_mask)
 {
@@ -1743,6 +1764,8 @@ void account_page_dirtied(struct page *page, struct address_space *mapping)
 		__inc_bdi_stat(mapping->backing_dev_info, BDI_RECLAIMABLE);
 		__inc_bdi_stat(mapping->backing_dev_info, BDI_DIRTIED);
 		task_io_account_write(PAGE_CACHE_SIZE);
+		current->nr_dirtied++;
+		this_cpu_inc(bdp_ratelimits);
 	}
 }
 EXPORT_SYMBOL(account_page_dirtied);
@@ -1803,6 +1826,24 @@ int __set_page_dirty_nobuffers(struct page *page)
 EXPORT_SYMBOL(__set_page_dirty_nobuffers);
 
 /*
+ * Call this whenever redirtying a page, to de-account the dirty counters
+ * (NR_DIRTIED, BDI_DIRTIED, tsk->nr_dirtied), so that they match the written
+ * counters (NR_WRITTEN, BDI_WRITTEN) in long term. The mismatches will lead to
+ * systematic errors in balanced_dirty_ratelimit and the dirty pages position
+ * control.
+ */
+void account_page_redirty(struct page *page)
+{
+	struct address_space *mapping = page->mapping;
+	if (mapping && mapping_cap_account_dirty(mapping)) {
+		current->nr_dirtied--;
+		dec_zone_page_state(page, NR_DIRTIED);
+		dec_bdi_stat(mapping->backing_dev_info, BDI_DIRTIED);
+	}
+}
+EXPORT_SYMBOL(account_page_redirty);
+
+/*
  * When a writepage implementation decides that it doesn't want to write this
  * page for some reason, it should redirty the locked page via
  * redirty_page_for_writepage() and it should then unlock the page and return 0
@@ -1810,6 +1851,7 @@ EXPORT_SYMBOL(__set_page_dirty_nobuffers);
 int redirty_page_for_writepage(struct writeback_control *wbc, struct page *page)
 {
 	wbc->pages_skipped++;
+	account_page_redirty(page);
 	return __set_page_dirty_nobuffers(page);
 }
 EXPORT_SYMBOL(redirty_page_for_writepage);

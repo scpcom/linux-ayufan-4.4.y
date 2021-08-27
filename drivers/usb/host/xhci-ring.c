@@ -664,12 +664,18 @@ static void td_to_noop(struct xhci_hcd *xhci, struct xhci_ring *ep_ring,
 					cpu_to_le32(TRB_CYCLE);
 			cur_trb->generic.field[3] |= cpu_to_le32(
 				TRB_TYPE(TRB_TR_NOOP));
+#if defined(CONFIG_SYNO_COMCERTO)
+			xhci_dbg(xhci, "TRB to noop at offset 0x%llx\n",
+					(unsigned long long)
+					xhci_trb_virt_to_dma(cur_seg, cur_trb));
+#else
 			xhci_dbg(xhci, "Cancel TRB %p (0x%llx dma) "
 					"in seg %p (0x%llx dma)\n",
 					cur_trb,
 					(unsigned long long)xhci_trb_virt_to_dma(cur_seg, cur_trb),
 					cur_seg,
 					(unsigned long long)cur_seg->dma);
+#endif
 		}
 		if (cur_trb == cur_td->last_trb)
 			break;
@@ -809,9 +815,15 @@ static void handle_stopped_endpoint(struct xhci_hcd *xhci,
 	 */
 	list_for_each(entry, &ep->cancelled_td_list) {
 		cur_td = list_entry(entry, struct xhci_td, cancelled_td_list);
+#if defined(CONFIG_SYNO_COMCERTO)
+		xhci_dbg(xhci, "Removing canceled TD starting at 0x%llx (dma).\n",
+				(unsigned long long)xhci_trb_virt_to_dma(
+					cur_td->start_seg, cur_td->first_trb));
+#else
 		xhci_dbg(xhci, "Cancelling TD starting at %p, 0x%llx (dma).\n",
 				cur_td->first_trb,
 				(unsigned long long)xhci_trb_virt_to_dma(cur_td->start_seg, cur_td->first_trb));
+#endif
 		ep_ring = xhci_urb_to_transfer_ring(xhci, cur_td->urb);
 		if (!ep_ring) {
 			/* This shouldn't happen unless a driver is mucking
@@ -1652,7 +1664,18 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		}
 
 		if (DEV_SUPERSPEED(temp)) {
+#if defined(CONFIG_SYNO_COMCERTO)
+			xhci_dbg(xhci, "remote wake SS port %d\n", port_id);
+			/* Set a flag to say the port signaled remote wakeup,
+			 * so we can tell the difference between the end of
+			 * device and host initiated resume.
+			 */
+			bus_state->port_remote_wakeup |= 1 << faked_port_index;
+			xhci_test_and_clear_bit(xhci, port_array,
+					faked_port_index, PORT_PLC);
+#else
 			xhci_dbg(xhci, "resume SS port %d\n", port_id);
+#endif
 			xhci_set_link_state(xhci, port_array, faked_port_index,
 						XDEV_U0);
 			slot_id = xhci_find_slot_id_by_port(hcd, xhci,
@@ -1957,7 +1980,9 @@ static int process_ctrl_td(struct xhci_hcd *xhci, struct xhci_td *td,
 	ep_ctx = xhci_get_ep_ctx(xhci, xdev->out_ctx, ep_index);
 	trb_comp_code = GET_COMP_CODE(le32_to_cpu(event->transfer_len));
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	xhci_debug_trb(xhci, xhci->event_ring->dequeue);
+#endif
 	switch (trb_comp_code) {
 	case COMP_SUCCESS:
 		if (event_trb == ep_ring->dequeue) {
@@ -2283,6 +2308,18 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 	xdev = xhci->devs[slot_id];
 	if (!xdev) {
 		xhci_err(xhci, "ERROR Transfer event pointed to bad slot\n");
+#if defined(CONFIG_SYNO_COMCERTO)
+		xhci_err(xhci, "@%016llx %08x %08x %08x %08x\n",
+			 (unsigned long long) xhci_trb_virt_to_dma(
+				 xhci->event_ring->deq_seg,
+				 xhci->event_ring->dequeue),
+			 lower_32_bits(le64_to_cpu(event->buffer)),
+			 upper_32_bits(le64_to_cpu(event->buffer)),
+			 le32_to_cpu(event->transfer_len),
+			 le32_to_cpu(event->flags));
+		xhci_dbg(xhci, "Event ring:\n");
+		xhci_debug_segment(xhci, xhci->event_ring->deq_seg);
+#endif
 		return -ENODEV;
 	}
 
@@ -2296,6 +2333,18 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 	    EP_STATE_DISABLED) {
 		xhci_err(xhci, "ERROR Transfer event for disabled endpoint "
 				"or incorrect stream ring\n");
+#if defined(CONFIG_SYNO_COMCERTO)
+		xhci_err(xhci, "@%016llx %08x %08x %08x %08x\n",
+			 (unsigned long long) xhci_trb_virt_to_dma(
+				 xhci->event_ring->deq_seg,
+				 xhci->event_ring->dequeue),
+			 lower_32_bits(le64_to_cpu(event->buffer)),
+			 upper_32_bits(le64_to_cpu(event->buffer)),
+			 le32_to_cpu(event->transfer_len),
+			 le32_to_cpu(event->flags));
+		xhci_dbg(xhci, "Event ring:\n");
+		xhci_debug_segment(xhci, xhci->event_ring->deq_seg);
+#endif
 		return -ENODEV;
 	}
 
@@ -2688,7 +2737,11 @@ hw_died:
 	/* FIXME when MSI-X is supported and there are multiple vectors */
 	/* Clear the MSI-X event interrupt status */
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (hcd->irq) {
+#else
 	if (hcd->irq != -1) {
+#endif
 		u32 irq_pending;
 		/* Acknowledge the PCI interrupt */
 		irq_pending = xhci_readl(xhci, &xhci->ir_set->irq_pending);
@@ -2740,6 +2793,9 @@ hw_died:
 
 irqreturn_t xhci_msi_irq(int irq, struct usb_hcd *hcd)
 {
+#if defined(CONFIG_SYNO_COMCERTO)
+	return xhci_irq(hcd);
+#else
 	irqreturn_t ret;
 	struct xhci_hcd *xhci;
 
@@ -2751,6 +2807,7 @@ irqreturn_t xhci_msi_irq(int irq, struct usb_hcd *hcd)
 	ret = xhci_irq(hcd);
 
 	return ret;
+#endif
 }
 
 /****		Endpoint Ring Operations	****/
@@ -2867,11 +2924,13 @@ static int prepare_ring(struct xhci_hcd *xhci, struct xhci_ring *ep_ring,
 			/* Toggle the cycle bit after the last ring segment. */
 			if (last_trb_on_last_seg(xhci, ring, ring->enq_seg, next)) {
 				ring->cycle_state = (ring->cycle_state ? 0 : 1);
+#if !defined(CONFIG_SYNO_COMCERTO)
 				if (!in_interrupt()) {
 					xhci_dbg(xhci, "queue_trb: Toggle cycle "
 						"state for ring %p = %i\n",
 						ring, (unsigned int)ring->cycle_state);
 				}
+#endif
 			}
 			ring->enq_seg = ring->enq_seg->next;
 			ring->enqueue = ring->enq_seg->trbs;
@@ -2942,10 +3001,14 @@ static unsigned int count_sg_trbs_needed(struct xhci_hcd *xhci, struct urb *urb)
 	num_sgs = urb->num_mapped_sgs;
 	temp = urb->transfer_buffer_length;
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	xhci_dbg(xhci, "count sg list trbs: \n");
+#endif
 	num_trbs = 0;
 	for_each_sg(urb->sg, sg, num_sgs, i) {
+#if !defined(CONFIG_SYNO_COMCERTO)
 		unsigned int previous_total_trbs = num_trbs;
+#endif
 		unsigned int len = sg_dma_len(sg);
 
 		/* Scatter gather list entries may cross 64KB boundaries */
@@ -2960,15 +3023,18 @@ static unsigned int count_sg_trbs_needed(struct xhci_hcd *xhci, struct urb *urb)
 			num_trbs++;
 			running_total += TRB_MAX_BUFF_SIZE;
 		}
+#if !defined(CONFIG_SYNO_COMCERTO)
 		xhci_dbg(xhci, " sg #%d: dma = %#llx, len = %#x (%d), num_trbs = %d\n",
 				i, (unsigned long long)sg_dma_address(sg),
 				len, len, num_trbs - previous_total_trbs);
+#endif
 
 		len = min_t(int, len, temp);
 		temp -= len;
 		if (temp == 0)
 			break;
 	}
+#if !defined(CONFIG_SYNO_COMCERTO)
 	xhci_dbg(xhci, "\n");
 	if (!in_interrupt())
 		xhci_dbg(xhci, "ep %#x - urb len = %d, sglist used, "
@@ -2976,6 +3042,7 @@ static unsigned int count_sg_trbs_needed(struct xhci_hcd *xhci, struct urb *urb)
 				urb->ep->desc.bEndpointAddress,
 				urb->transfer_buffer_length,
 				num_trbs);
+#endif
 	return num_trbs;
 }
 
@@ -3049,7 +3116,11 @@ int xhci_queue_intr_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 				urb->dev->speed == USB_SPEED_FULL)
 			urb->interval /= 8;
 	}
+#if defined(CONFIG_SYNO_COMCERTO)
+	return xhci_queue_bulk_tx(xhci, mem_flags, urb, slot_id, ep_index);
+#else
 	return xhci_queue_bulk_tx(xhci, GFP_ATOMIC, urb, slot_id, ep_index);
+#endif
 }
 
 /*
@@ -3164,8 +3235,10 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	trb_buff_len = min_t(int, trb_buff_len, this_sg_len);
 	if (trb_buff_len > urb->transfer_buffer_length)
 		trb_buff_len = urb->transfer_buffer_length;
+#if !defined(CONFIG_SYNO_COMCERTO)
 	xhci_dbg(xhci, "First length to xfer from 1st sglist entry = %u\n",
 			trb_buff_len);
+#endif
 
 	first_trb = true;
 	/* Queue the first TRB, even if it's zero-length */
@@ -3197,11 +3270,13 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		if (usb_urb_dir_in(urb))
 			field |= TRB_ISP;
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 		xhci_dbg(xhci, " sg entry: dma = %#x, len = %#x (%d), "
 				"64KB boundary at %#x, end dma = %#x\n",
 				(unsigned int) addr, trb_buff_len, trb_buff_len,
 				(unsigned int) (addr + TRB_MAX_BUFF_SIZE) & ~(TRB_MAX_BUFF_SIZE - 1),
 				(unsigned int) addr + trb_buff_len);
+#endif
 		if (TRB_MAX_BUFF_SIZE -
 				(addr & (TRB_MAX_BUFF_SIZE - 1)) < trb_buff_len) {
 			xhci_warn(xhci, "WARN: sg dma xfer crosses 64KB boundaries!\n");
@@ -3308,6 +3383,7 @@ int xhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	}
 	/* FIXME: this doesn't deal with URB_ZERO_PACKET - need one more */
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	if (!in_interrupt())
 		xhci_dbg(xhci, "ep %#x - urb len = %#x (%d), "
 				"addr = %#llx, num_trbs = %d\n",
@@ -3316,6 +3392,7 @@ int xhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 				urb->transfer_buffer_length,
 				(unsigned long long)urb->transfer_dma,
 				num_trbs);
+#endif
 
 	ret = prepare_transfer(xhci, xhci->devs[slot_id],
 			ep_index, urb->stream_id,
@@ -3438,9 +3515,11 @@ int xhci_queue_ctrl_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	if (!urb->setup_packet)
 		return -EINVAL;
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	if (!in_interrupt())
 		xhci_dbg(xhci, "Queueing ctrl tx for slot id %d, ep %d\n",
 				slot_id, ep_index);
+#endif
 	/* 1 TRB for setup, 1 for status */
 	num_trbs = 2;
 	/*
@@ -3632,6 +3711,7 @@ static int xhci_queue_isoc_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		return -EINVAL;
 	}
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	if (!in_interrupt())
 		xhci_dbg(xhci, "ep %#x - urb len = %#x (%d),"
 				" addr = %#llx, num_tds = %d\n",
@@ -3640,6 +3720,7 @@ static int xhci_queue_isoc_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 				urb->transfer_buffer_length,
 				(unsigned long long)urb->transfer_dma,
 				num_tds);
+#endif
 
 	start_addr = (u64) urb->transfer_dma;
 	start_trb = &ep_ring->enqueue->generic;

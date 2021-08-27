@@ -87,6 +87,9 @@ int cifs_from_ucs2(char *to, const __le16 *from, int tolen, int fromlen,
 int cifs_ucs2_bytes(const __le16 *from, int maxbytes,
 		    const struct nls_table *codepage);
 int cifs_strtoUCS(__le16 *, const char *, int, const struct nls_table *);
+#ifdef MY_ABC_HERE
+int cifs_strtoUCS_NoSpecialChar(__le16 *, const char *, int, const struct nls_table *);
+#endif
 char *cifs_strndup_from_ucs(const char *src, const int maxlen,
 			    const bool is_unicode,
 			    const struct nls_table *codepage);

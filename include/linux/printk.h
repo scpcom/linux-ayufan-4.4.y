@@ -9,6 +9,32 @@
 extern const char linux_banner[];
 extern const char linux_proc_banner[];
 
+#ifdef MY_ABC_HERE
+static inline int printk_get_level(const char *buffer)
+{
+	if (buffer[0] == '\001' && buffer[1]) {
+		switch (buffer[1]) {
+		case '0' ... '7':
+		case 'd':	/* KERN_DEFAULT */
+			return buffer[1];
+		}
+	}
+	return 0;
+}
+
+static inline const char *printk_skip_level(const char *buffer)
+{
+	if (printk_get_level(buffer)) {
+		switch (buffer[1]) {
+		case '0' ... '7':
+		case 'd':	/* KERN_DEFAULT */
+			return buffer + 2;
+		}
+	}
+	return buffer;
+}
+#endif
+
 #define KERN_EMERG	"<0>"	/* system is unusable			*/
 #define KERN_ALERT	"<1>"	/* action must be taken immediately	*/
 #define KERN_CRIT	"<2>"	/* critical conditions			*/

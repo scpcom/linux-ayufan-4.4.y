@@ -106,7 +106,9 @@ extern int syno_hibernation_log_sec;
 
 #include <linux/namei.h>
 
-extern int __SYNOCaselessStat(char __user * filename, int isLink, struct kstat *stat, int *lastComponent);
+extern int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct kstat *stat, int *lastComponent, int flags);
+extern int syno_vfs_stat(const char __user *name, struct kstat *stat, int flags, int stat_flags);
+extern int syno_vfs_fstat(unsigned int fd, struct kstat *stat, int stat_flags);
 
 asmlinkage long sys32_SYNOCaselessStat(char __user * filename, struct stat64 __user *statbuf)
 {
@@ -114,7 +116,7 @@ asmlinkage long sys32_SYNOCaselessStat(char __user * filename, struct stat64 __u
 	long error = -1;
 	struct kstat stat;
 
-	error =  __SYNOCaselessStat(filename, 0, &stat, &lastComponent);
+	error =  __SYNOCaselessStat(filename, 0, &stat, &lastComponent, 0);
 	if (!error) {
 		error = cp_stat64(statbuf, &stat);
 	}
@@ -128,7 +130,7 @@ asmlinkage long sys32_SYNOCaselessLStat(char __user * filename, struct stat64 __
 	long error = -1;
 	struct kstat stat;
 
-	error =  __SYNOCaselessStat(filename, 1, &stat, &lastComponent);
+	error =  __SYNOCaselessStat(filename, 1, &stat, &lastComponent, 0);
 	if (!error) {
 		error = cp_stat64(statbuf, &stat);
 	}
@@ -197,15 +199,15 @@ Out:
 	return error;
 }
 
-static long do_SYNOStat32(char __user * filename, int isLink, unsigned int f, struct SYNOSTAT64 __user * pSt)
+static long do_SYNOStat32(char __user * filename, int nofollowLink, unsigned int flags, struct SYNOSTAT64 __user * pSt)
 {
 	long error = -EINVAL;
 	int lastComponent = 0;
 	struct kstat kst;
 
-	if (f & SYNOST_IS_CASELESS) {
+	if (flags & SYNOST_IS_CASELESS) {
 #ifdef MY_ABC_HERE
-		error = __SYNOCaselessStat(filename, isLink, &kst, &lastComponent);
+		error = __SYNOCaselessStat(filename, nofollowLink, &kst, &lastComponent, flags);
 		if (-ENOENT == error) {
 			if (__put_user(lastComponent, &pSt->ext.lastComponent)){
 				goto Out;
@@ -215,10 +217,10 @@ static long do_SYNOStat32(char __user * filename, int isLink, unsigned int f, st
 		error = -EOPNOTSUPP;
 #endif
 	} else {
-		if (isLink) {
-			error = vfs_lstat(filename, &kst);
+		if (nofollowLink) {
+			error = syno_vfs_stat(filename, &kst, 0, flags);
 		} else {
-			error = vfs_stat(filename, &kst);
+			error = syno_vfs_stat(filename, &kst, LOOKUP_FOLLOW, flags);
 #ifdef MY_ABC_HERE
 			if(syno_hibernation_log_sec > 0) {
 				syno_do_hibernation_log(filename);
@@ -231,7 +233,7 @@ static long do_SYNOStat32(char __user * filename, int isLink, unsigned int f, st
 		goto Out;
 	}
 
-	error = SYNOStatCopyToUser(&kst, f, pSt);
+	error = SYNOStatCopyToUser(&kst, flags, pSt);
 Out:
 	return error;
 }
@@ -246,7 +248,7 @@ asmlinkage long sys32_SYNOFStat(unsigned int fd, unsigned int flags, struct SYNO
 	int error;
 	struct kstat kst;
 
-	error = vfs_fstat(fd, &kst);
+	error = syno_vfs_fstat(fd, &kst, flags);
 	if (!error) {
 		error = SYNOStatCopyToUser(&kst, flags, pSt);
 	}

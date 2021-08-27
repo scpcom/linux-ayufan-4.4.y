@@ -4,7 +4,12 @@ obj-$(CONFIG_ATA)		+= libata.o
 # non-SFF interface
 obj-$(CONFIG_SATA_AHCI)		+= ahci.o libahci.o
 obj-$(CONFIG_SATA_ACARD_AHCI)	+= acard-ahci.o libahci.o
+
+# For mindspeed's platform , ahci_platform.o and libahci.o should be after sata_mv.o for disk ordering
+ifneq ($(CONFIG_SYNO_COMCERTO),y)
 obj-$(CONFIG_SATA_AHCI_PLATFORM) += ahci_platform.o libahci.o
+endif
+
 obj-$(CONFIG_SATA_FSL)		+= sata_fsl.o
 obj-$(CONFIG_SATA_INIC162X)	+= sata_inic162x.o
 obj-$(CONFIG_SCSI_MVSATA_BSP422)   += mvSata_4_2_2/
@@ -28,6 +33,12 @@ obj-$(CONFIG_SATA_SVW)		+= sata_svw.o
 obj-$(CONFIG_SATA_ULI)		+= sata_uli.o
 obj-$(CONFIG_SATA_VIA)		+= sata_via.o
 obj-$(CONFIG_SATA_VITESSE)	+= sata_vsc.o
+
+# For mindspeed's platform , ahci_platform.o and libahci.o should be after sata_mv.o for disk ordering
+# So we move them here
+ifeq ($(CONFIG_SYNO_COMCERTO),y)
+obj-$(CONFIG_SATA_AHCI_PLATFORM) += ahci_platform.o libahci.o
+endif
 
 # Synology modified, for disk ordering. sata_sil24.o sould be after sata_mv.o
 obj-$(CONFIG_SATA_SIL24)        += sata_sil24.o

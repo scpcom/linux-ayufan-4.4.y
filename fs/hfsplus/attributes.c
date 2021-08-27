@@ -13,25 +13,87 @@
 #include "hfsplus_raw.h"
 
 static struct kmem_cache *hfsplus_attr_tree_cachep;
+#ifdef MY_ABC_HERE
+static size_t hfsplus_attr_cached_size = sizeof(hfsplus_attr_entry);
+#endif
 
 int hfsplus_create_attr_tree_cache(void)
 {
+#ifdef MY_ABC_HERE
+	size_t cached_size = hfsplus_get_attr_tree_cache_size();
+#endif
 	if (hfsplus_attr_tree_cachep)
 		return -EEXIST;
 
+#ifdef MY_ABC_HERE
+	hfsplus_attr_tree_cachep =
+		kmem_cache_create("hfsplus_attr_cache",
+			cached_size, 0,
+			SLAB_HWCACHE_ALIGN, NULL);
+#else
 	hfsplus_attr_tree_cachep =
 		kmem_cache_create("hfsplus_attr_cache",
 			sizeof(hfsplus_attr_entry), 0,
 			SLAB_HWCACHE_ALIGN, NULL);
+#endif
 	if (!hfsplus_attr_tree_cachep)
 		return -ENOMEM;
 
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+void hfsplus_set_attr_tree_cache_size(size_t record_size)
+{
+	if (record_size < sizeof(hfsplus_attr_entry)) {
+		hfsplus_attr_cached_size = sizeof(hfsplus_attr_entry);
+	} else {
+		hfsplus_attr_cached_size = record_size;
+	}
+}
+
+size_t hfsplus_get_attr_tree_cache_size()
+{
+	return hfsplus_attr_cached_size;
+}
+
+int hfsplus_recreate_attr_tree_cache(size_t record_size)
+{
+	int err = -1;
+	size_t ori_cached_size = hfsplus_get_attr_tree_cache_size();
+
+	hfsplus_destroy_attr_tree_cache();
+
+	hfsplus_set_attr_tree_cache_size(record_size);
+
+	err = hfsplus_create_attr_tree_cache();
+	if (!err) {
+		err = 0;
+		goto END;
+	} else {
+		hfsplus_set_attr_tree_cache_size(ori_cached_size);
+		if (-ENOMEM != err) {
+			goto END;
+		}
+		//Try allocate Again
+		err = hfsplus_create_attr_tree_cache();
+		if (err) {
+			kmem_cache_destroy(hfsplus_attr_tree_cachep);
+			goto END;
+		}
+		err = -ENOMEM;
+	}
+END:
+	return err;
+}
+#endif
+
 void hfsplus_destroy_attr_tree_cache(void)
 {
 	kmem_cache_destroy(hfsplus_attr_tree_cachep);
+#ifdef MY_ABC_HERE
+	hfsplus_attr_tree_cachep = NULL;
+#endif
 }
 
 int hfsplus_attr_bin_cmp_key(const hfsplus_btree_key *k1,

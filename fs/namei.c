@@ -44,15 +44,10 @@
 #include "internal.h"
 
 #ifdef MY_ABC_HERE
-inline int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n);
-int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n);
-inline int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
-int SYNOUnicodeUTF16StrToUTF8Str(u_int8_t *s, const u_int16_t *pwcs, int maxlen);
+int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n);
+int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
 u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void);
 u_int16_t *DefUpcaseTable(void);
-
-static u_int16_t UTF16NameiStrBuf1[UNICODE_UTF16_BUFSIZE];
-extern spinlock_t Namei_buf_lock_1;  /* init at alloc_super() */
 
 /*
  * Sample implementation from Unicode home page.
@@ -77,7 +72,7 @@ static struct utf8_table utf8_table[] =
     {0,						       /* end of table    */}
 };
 
-inline int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
+int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
 {
 	long l;
 	int c0, c, nc;
@@ -106,40 +101,7 @@ inline int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
 	return -1;
 }
 
-int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n)
-{
-	u_int16_t *op;
-	const u_int8_t *ip;
-	int size;
-
-	op = pwcs;
-	ip = s;
-	while (n > 0 && *ip) {
-		if (*ip & 0x80) {
-			size = SYNOUnicodeUTF8ChrToUTF16Chr(op, ip, n);
-			if (size == -1) {
-				/* Ignore character and move on */
-				ip++;
-				n--;
-			} else {
-				op++;
-				ip += size;
-				n -= size;
-			}
-		} else {
-			*op++ = *ip++;
-			n--;
-		}
-	}
-	*op = 0;
-#ifdef SYNO_DEBUG_BUILD
-	if((op - pwcs) >= UNICODE_UTF16_BUFSIZE)
-		panic("SYNOUnicodeUTF8StrToUTF16Str: UTF8 string too long\n");
-#endif
-	return (op - pwcs);
-}
-
-inline int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
+int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
 {
 	long l;
 	int c, nc;
@@ -165,35 +127,6 @@ inline int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
 	}
 	return -1;
 }
-
-int SYNOUnicodeUTF16StrToUTF8Str(u_int8_t *s, const u_int16_t *pwcs, int maxlen)
-{
-	const u_int16_t *ip;
-	u_int8_t *op;
-	int size;
-
-	op = s;
-	ip = pwcs;
-	while (*ip && maxlen > 0) {
-		if (*ip > 0x7f) {
-			size = SYNOUnicodeUTF16ChrToUTF8Chr(op, *ip, maxlen);
-			if (size == -1) {
-				/* Ignore character and move on */
-				maxlen--;
-			} else {
-				op += size;
-				maxlen -= size;
-			}
-		} else {
-			*op++ = (u_int8_t) *ip;
-		}
-		ip++;
-	}
-	*op = 0;
-	return (op - s);
-}
-
-
 
 /*
  * upcase.c - Generate the full NTFS Unicode upcase table in little endian.
@@ -326,23 +259,33 @@ u_int16_t *DefUpcaseTable()
 int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable)
 {
 	u_int16_t *UpcaseTbl;
-	int clenUtf16;
-	int i;
-	int err;
-
-	spin_lock(&Namei_buf_lock_1);
+	u_int16_t wc;
+	u_int8_t *op;
+	int size;
 
 	UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
-	clenUtf16 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf1, from, clenfrom);
 
-	for(i = 0; i < clenUtf16; i++)
-		UTF16NameiStrBuf1[i] = UpcaseTbl[UTF16NameiStrBuf1[i]];
-
-	UTF16NameiStrBuf1[clenUtf16] = 0;
-	err = SYNOUnicodeUTF16StrToUTF8Str(to, UTF16NameiStrBuf1, maxlen);
-	spin_unlock(&Namei_buf_lock_1);
-	return err;
-
+	op = to;
+	while (clenfrom && maxlen) {
+		size = SYNOUnicodeUTF8ChrToUTF16Chr(&wc, from, clenfrom);
+		if (size == -1) {
+			from++;
+			clenfrom--;
+			continue;
+		} else {
+			from += size;
+			clenfrom -= size;
+		}
+		size = SYNOUnicodeUTF16ChrToUTF8Chr(op, UpcaseTbl[wc], maxlen);
+		if (size == -1) {
+			continue;
+		} else {
+			op += size;
+			maxlen -= size;
+		}
+	}
+	*op = 0;
+	return (op - to);
 }
 EXPORT_SYMBOL(SYNOUnicodeUTF8toUpper);
 
@@ -1693,12 +1636,13 @@ static inline int may_lookup(struct nameidata *nd)
 {
 #ifdef CONFIG_FS_SYNO_ACL
 	int err;
+	int is_synoacl = IS_SYNOACL_INODE(nd->inode, nd->path.dentry);
 #endif
 
 	if (nd->flags & LOOKUP_RCU) {
 #ifdef CONFIG_FS_SYNO_ACL
-		if (IS_SYNOACL(nd->inode) && (NULL != nd)) {
-			err = nd->inode->i_op->syno_exec_permission(nd->path.dentry);
+		if (is_synoacl) {
+			err = synoacl_op_exec_perm(nd->path.dentry, nd->inode);
 		} else {
 			err = inode_permission(nd->inode, MAY_EXEC|MAY_NOT_BLOCK);
 		}
@@ -1712,8 +1656,8 @@ static inline int may_lookup(struct nameidata *nd)
 	}
 
 #ifdef CONFIG_FS_SYNO_ACL
-	if (IS_SYNOACL(nd->inode) && (NULL != nd)) {
-		err = nd->inode->i_op->syno_exec_permission(nd->path.dentry);
+	if (is_synoacl) {
+		err = synoacl_op_exec_perm(nd->path.dentry, nd->inode);
 	} else {
 		err = inode_permission(nd->inode, MAY_EXEC);
 	}
@@ -2155,10 +2099,9 @@ static int path_init(int dfd, const char *name, unsigned int flags,
 				goto fput_fail;
 
 #ifdef CONFIG_FS_SYNO_ACL
-			if (IS_SYNOACL(dentry->d_inode)) {
-				if (dentry->d_inode->i_op->syno_permission(dentry, MAY_EXEC))
-					goto fput_fail;
-			}
+			if (IS_SYNOACL(dentry)) {
+				retval = synoacl_op_perm(dentry, MAY_EXEC);
+			} else 
 #endif
 			retval = inode_permission(dentry->d_inode, MAY_EXEC);
 			if (retval)
@@ -2347,8 +2290,8 @@ static struct dentry *__lookup_hash(struct qstr *name,
 	int err;
 
 #ifdef CONFIG_FS_SYNO_ACL
-	if (IS_SYNOACL(inode) && NULL != nd) {
-		err = inode->i_op->syno_exec_permission(nd->path.dentry);
+	if (IS_SYNOACL(base)) {
+		err = synoacl_op_exec_perm(base, inode);
 	} else {
 		err = inode_permission(inode, MAY_EXEC);
 	}
@@ -2594,7 +2537,7 @@ static int may_delete(struct inode *dir,struct dentry *victim,int isdir)
 	if (IS_APPEND(dir))
 		return -EPERM;
 #ifdef CONFIG_FS_SYNO_ACL
-	if (!IS_SYNOACL(dir) && check_sticky(dir, victim->d_inode)) {
+	if (!IS_SYNOACL(victim->d_parent) && check_sticky(dir, victim->d_inode)) {
 		return -EPERM;
 	}
 	if (IS_APPEND(victim->d_inode) || IS_IMMUTABLE(victim->d_inode) || IS_SWAPFILE(victim->d_inode)){
@@ -2639,8 +2582,8 @@ static inline int may_create(struct inode *dir, struct dentry *child)
 		return -ENOENT;
 
 #ifdef CONFIG_FS_SYNO_ACL
-	if (IS_SYNOACL(dir)) {
-		return dir->i_op->syno_permission(child->d_parent, (S_ISDIR(mode)?MAY_APPEND:MAY_WRITE) | MAY_EXEC);
+	if (IS_SYNOACL(child->d_parent)) {
+		return synoacl_op_perm(child->d_parent, (S_ISDIR(mode)?MAY_APPEND:MAY_WRITE) | MAY_EXEC);
 	} 
 #endif /* CONFIG_FS_SYNO_ACL */
 	return inode_permission(dir, MAY_WRITE | MAY_EXEC);
@@ -2710,6 +2653,14 @@ int vfs_create(struct inode *dir, struct dentry *dentry, umode_t mode,
 	error = dir->i_op->create(dir, dentry, mode, nd);
 	if (!error)
 		fsnotify_create(dir, dentry);
+
+#ifdef CONFIG_FS_SYNO_ACL
+	if (!error && IS_SYNOACL(dentry->d_parent)) {
+		//We assume that inode has been attached to dentry by d_instantiate().
+		synoacl_op_init(dentry);
+	}
+#endif
+
 	return error;
 }
 
@@ -2745,8 +2696,8 @@ static int may_open(struct path *path, int acc_mode, int flag)
 	}
 
 #ifdef CONFIG_FS_SYNO_ACL
-	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(dentry, acc_mode);
+	if (IS_SYNOACL(dentry)) {
+		error = synoacl_op_perm(dentry, acc_mode);
 	} else
 #endif /* CONFIG_FS_SYNO_ACL */
 	error = inode_permission(inode, acc_mode);
@@ -3299,6 +3250,14 @@ int vfs_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 	error = dir->i_op->mkdir(dir, dentry, mode);
 	if (!error)
 		fsnotify_mkdir(dir, dentry);
+
+#ifdef CONFIG_FS_SYNO_ACL
+	if (!error && IS_SYNOACL(dentry->d_parent)) {
+		//We assume that inode has been attached to dentry by d_instantiate().
+		synoacl_op_init(dentry);
+	}
+#endif
+
 	return error;
 }
 
@@ -3780,7 +3739,7 @@ static int vfs_rename_dir(struct inode *old_dir, struct dentry *old_dentry,
 	 */
 	if (new_dir != old_dir) {
 #ifdef CONFIG_FS_SYNO_ACL
-		if (!IS_SYNOACL(old_dentry->d_inode)) {
+		if (!IS_SYNOACL(old_dentry)) {
 			error = inode_permission(old_dentry->d_inode, MAY_WRITE);
 		}
 #else

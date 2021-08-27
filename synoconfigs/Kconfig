@@ -24,6 +24,13 @@ config SYNO_DISPLAY_CPUINFO
 	help
 	  Say Y to Support display CPU Infomation
 
+config SYNO_COMCERTO2K_CPU_AFFINITY
+	bool "Set default cpu affinity to core 0"
+	depends on SYNO_COMCERTO
+	default y
+	help
+		Set default CPU afiinity on core 0 for md, flush thread
+
 config SYNO_FIX_MV_CESA_RACE
 	bool "Fix Marvell's crypto driver race"
 	depends on MV_CESA
@@ -31,4 +38,103 @@ config SYNO_FIX_MV_CESA_RACE
 	help
 		Say Y here to fix Marvell crypto driver race condition
 
+config SYNO_FIX_OCF_CRYPTODEV_RACE
+	bool "Fix OCF's race in cryptodev interface"
+	depends on OCF_OCF
+	default y
+	help
+		Fix OCF race in cryptodev interface
+
+config SYNO_FIX_OCF_CRYPTOSOFT_RACE
+	bool "Fix OCF's race in cryptosoft interface"
+	depends on OCF_OCF
+	default y
+	help
+		Fix OCF race in cryptosoft interface
+
+config SYNO_C2K_UART
+	bool "support Synology comcerto2k UART0 features"
+	depends on SYNO_COMCERTO
+	default n
+	help
+		If you need Synology comcerto2k UART0 features supports, choose yes.
+		Which will modify UART gpio
+
+config SYNO_C2K_NET
+	bool "Apply Synology comcerto2k network modify"
+	depends on SYNO_COMCERTO
+	default n
+	help
+		If you need Synology comcerto2k network modifies, choose yes.
+		Which will modify network interface name and pfe data
+
+config SYNO_C2K_SERIAL_FIX
+    bool "C2K serial workaround"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to add C2K serial workaround
+
+config SYNO_C2K_SPI_PARTITION
+    bool "apply synology spi partition in c2k"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to add synology spi partition
+
+config SYNO_C2K_GPIO_READ_SHIFT
+	bool "shift the read GPIO value before returning"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to add GPIO read shift
+
+config SYNO_C2K_REBOOT_POWEROFF_BY_MICROP
+	bool "Use MicroP to implement the reboot and poweroff"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to add MicroP reboot and poweroff
+
+config SYNO_C2K_WOL_ENABLE
+	bool "Enable WOL function"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to add WOL function enable
+
+config SYNO_C2K_XOR_RWLOCK
+	bool "Ensure XOR driver read/write data is correct"
+	depends on SYNO_COMCERTO && COMCERTO_XOR
+	help
+	  Say Y to Ensure XOR driver read/write data is correct
+
+config SYNO_C2K_FIX_DWC_OTG_DEADLOCK
+	bool "Fix dwc_otg deadload issue"
+	depends on SYNO_COMCERTO && DWC_OTG
+	help
+	  Say Y to Fix dwc_otg deadload issue
+
+config SYNO_C2K_PCIE_SWITCH_FIX
+	bool "Longer nop delay for avoid PCIE switch blocking"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to enable longer nop delay
+
+config SYNO_C2K_USB_VBUS_CONTROL
+	bool "Manually enable/disable the USB vbus power via gpio"
+	depends on SYNO_COMCERTO
+	help
+	  Say Y to enable controlling of USB vbus
+
+config SYNO_EFI
+	bool "Enable EFI runtime service"
+	depends on SYNO_BROMOLOW
+	default y
+	help
+	  Enable EFI runtime service for UEFI platform
+
 endmenu
+
+config SYNO_DUAL_HEAD
+	bool "Synology Dual Head Host"
+	depends on SYNO_BROMOLOW
+	default n
+	help
+	  Dual head host use STAT DOM as the synoboot device. In this model SATA
+	  controller & SAS expander exist simultaneously.

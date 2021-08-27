@@ -37,6 +37,30 @@
 /* Clear the entropy pool and associated counters.  (Superuser only.) */
 #define RNDCLEARPOOL	_IO( 'R', 0x06 )
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_FIPS_RNG)
+
+/* Size of seed value - equal to AES blocksize */
+#define AES_BLOCK_SIZE_BYTES	16
+#define SEED_SIZE_BYTES			AES_BLOCK_SIZE_BYTES
+/* Size of AES key */
+#define KEY_SIZE_BYTES		16
+
+/* ioctl() structure used by FIPS 140-2 Tests */
+struct rand_fips_test {
+	unsigned char key[KEY_SIZE_BYTES];			/* Input */
+	unsigned char datetime[SEED_SIZE_BYTES];	/* Input */
+	unsigned char seed[SEED_SIZE_BYTES];		/* Input */
+	unsigned char result[SEED_SIZE_BYTES];		/* Output */
+};
+
+/* FIPS 140-2 RNG Variable Seed Test. (Superuser only.) */
+#define RNDFIPSVST	_IOWR('R', 0x10, struct rand_fips_test)
+
+/* FIPS 140-2 RNG Monte Carlo Test. (Superuser only.) */
+#define RNDFIPSMCT	_IOWR('R', 0x11, struct rand_fips_test)
+
+#endif /* #if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_FIPS_RNG) */
+
 struct rand_pool_info {
 	int	entropy_count;
 	int	buf_size;
@@ -64,6 +88,12 @@ extern int random_input_wait(void);
 #define HAS_RANDOM_INPUT_WAIT 1
 #endif
 
+#if defined(CONFIG_SYNO_COMCERTO)
+extern void random_input_words(__u32 *buf, size_t wordcount, int ent_count);
+extern int random_input_wait(void);
+#define HAS_RANDOM_INPUT_WAIT 1
+#endif
+
 extern void get_random_bytes(void *buf, int nbytes);
 extern void get_random_bytes_arch(void *buf, int nbytes);
 void generate_random_uuid(unsigned char uuid_out[16]);
@@ -75,10 +105,19 @@ extern const struct file_operations random_fops, urandom_fops;
 unsigned int get_random_int(void);
 unsigned long randomize_range(unsigned long start, unsigned long end, unsigned long len);
 
-u32 random32(void);
-void srandom32(u32 seed);
+u32 prandom_u32(void);
+void prandom_bytes(void *buf, int nbytes);
+void prandom_seed(u32 seed);
 
-u32 prandom32(struct rnd_state *);
+/*
+ * These macros are preserved for backward compatibility and should be
+ * removed as soon as a transition is finished.
+ */
+#define random32() prandom_u32()
+#define srandom32(seed) prandom_seed(seed)
+
+u32 prandom_u32_state(struct rnd_state *);
+void prandom_bytes_state(struct rnd_state *state, void *buf, int nbytes);
 
 /*
  * Handle minimum values for seeds
@@ -89,11 +128,11 @@ static inline u32 __seed(u32 x, u32 m)
 }
 
 /**
- * prandom32_seed - set seed for prandom32().
+ * prandom_seed_state - set seed for prandom_u32_state().
  * @state: pointer to state structure to receive the seed.
  * @seed: arbitrary 64-bit value to use as a seed.
  */
-static inline void prandom32_seed(struct rnd_state *state, u64 seed)
+static inline void prandom_seed_state(struct rnd_state *state, u64 seed)
 {
 	u32 i = (seed >> 32) ^ (seed << 10) ^ seed;
 

@@ -38,18 +38,3 @@ int kernel_execve(const char *filename,
 	: "0" (__NR_execve), "b" (filename), "c" (argv), "d" (envp) : "memory");
 	return __res;
 }
-
-#ifdef MY_ABC_HERE
-asmlinkage int sys_SYNOmmap(SYNO_MMAP_ARG __user *arg)
-{
-	int error = -EFAULT;
-	SYNO_MMAP_ARG a;
-
-	if (copy_from_user(&a, arg, sizeof(a)))
-		goto out;;
-
-	error = sys_mmap_pgoff(a.addr, a.len, a.prot, a.flags, a.fd, a.pgoff);
-out:
-	return error;
-}
-#endif

@@ -3091,7 +3091,11 @@ static int rt_fill_info(struct net *net,
 	if (rt->rt_dst != rt->rt_gateway)
 		NLA_PUT_BE32(skb, RTA_GATEWAY, rt->rt_gateway);
 
+#ifdef CONFIG_ARCH_COMCERTO
+	if (rtnetlink_put_metrics_2(skb, dst_metrics_ptr(&rt->dst), &rt->dst) < 0)
+#else
 	if (rtnetlink_put_metrics(skb, dst_metrics_ptr(&rt->dst)) < 0)
+#endif
 		goto nla_put_failure;
 
 	if (rt->rt_mark)
@@ -3576,8 +3580,14 @@ int __init ip_rt_init(void)
 	if (ip_rt_proc_init())
 		printk(KERN_ERR "Unable to create route proc files\n");
 #ifdef CONFIG_XFRM
+#ifdef MY_DEF_HERE
+	mdelay(500);
+#endif
 	xfrm_init();
 	xfrm4_init(ip_rt_max_size);
+#ifdef MY_DEF_HERE
+	mdelay(500);
+#endif
 #endif
 	rtnl_register(PF_INET, RTM_GETROUTE, inet_rtm_getroute, NULL, NULL);
 

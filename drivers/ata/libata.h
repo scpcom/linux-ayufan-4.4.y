@@ -171,11 +171,6 @@ extern void ata_eh_fastdrain_timerfn(unsigned long arg);
 extern void ata_qc_schedule_eh(struct ata_queued_cmd *qc);
 extern void ata_dev_disable(struct ata_device *dev);
 extern void ata_eh_detach_dev(struct ata_device *dev);
-#ifdef MY_ABC_HERE
-extern void sata_pmp_detach(struct ata_device *dev);
-extern void SendPwrResetEvent(struct work_struct *work);
-extern void SendPortDisEvent(struct work_struct *work);
-#endif
 extern void ata_eh_about_to_do(struct ata_link *link, struct ata_device *dev,
 			       unsigned int action);
 extern void ata_eh_done(struct ata_link *link, struct ata_device *dev,
@@ -203,6 +198,7 @@ extern int sata_pmp_scr_write(struct ata_link *link, int reg, u32 val);
 extern int sata_pmp_set_lpm(struct ata_link *link, enum ata_lpm_policy policy,
 			    unsigned hints);
 extern int sata_pmp_attach(struct ata_device *dev);
+extern int syno_libata_pmp_deepsleep_indicator_set(struct ata_port *ap, const int blCLR);
 #else /* CONFIG_SATA_PMP */
 static inline int sata_pmp_scr_read(struct ata_link *link, int reg, u32 *val)
 {

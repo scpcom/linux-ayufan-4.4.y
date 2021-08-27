@@ -276,6 +276,7 @@ struct xhci_op_regs {
 #define PORT_PLS_MASK	(0xf << 5)
 #define XDEV_U0		(0x0 << 5)
 #define XDEV_U3		(0x3 << 5)
+#define XDEV_INACTIVE	(0x6 << 5)
 #define XDEV_RESUME	(0xf << 5)
 /* true: port has power (see HCC_PPC) */
 #define PORT_POWER	(1 << 9)
@@ -610,7 +611,7 @@ struct xhci_ep_ctx {
  * 4 - TRB error
  * 5-7 - reserved
  */
-#define EP_STATE_MASK		(0xf)
+#define EP_STATE_MASK		(0x7)
 #define EP_STATE_DISABLED	0
 #define EP_STATE_RUNNING	1
 #define EP_STATE_HALTED		2
@@ -1159,6 +1160,7 @@ struct xhci_ring {
 	unsigned int		num_trbs_free;
 	unsigned int		num_trbs_free_temp;
 	enum xhci_ring_type	type;
+	bool			last_td_was_short;
 	struct radix_tree_root *trb_address_map;
 };
 
@@ -1227,8 +1229,11 @@ struct xhci_bus_state {
 	/* Port suspend arrays are indexed by the portnum of the fake roothub */
 	/* ports suspend status arrays - max 31 ports for USB2, 15 for USB3 */
 	u32			port_c_suspend;
+	u32			port_c_connection;
 	u32			suspended_ports;
 	u32			port_remote_wakeup;
+	u32			downgraded_ports;
+	u32			downgraded_open;
 	unsigned long		resume_done[USB_MAXCHILDREN];
 	/* which ports have started to resume */
 	unsigned long		resuming_ports;
@@ -1334,6 +1339,7 @@ struct xhci_hcd {
 	unsigned int		quirks;
 #define	XHCI_LINK_TRB_QUIRK	(1 << 0)
 #define XHCI_RESET_EP_QUIRK	(1 << 1)
+#define XHCI_SPURIOUS_SUCCESS	(1 << 4)
 #define XHCI_BROKEN_MSI		(1 << 6)
 #define XHCI_RESET_ON_RESUME	(1 << 7)
 #define XHCI_TRUST_TX_LENGTH	(1 << 10)
@@ -1384,16 +1390,6 @@ static inline struct usb_hcd *xhci_to_hcd(struct xhci_hcd *xhci)
 
 /* TODO: copied from ehci.h - can be refactored? */
 /* xHCI spec says all registers are little endian */
-static inline u8 xhci_readb(const struct xhci_hcd *xhci,
-		__le32 __iomem *regs)
-{
-	return readb(regs);
-}
-static inline void xhci_writeb(struct xhci_hcd *xhci,
-		const u8 val, __le32 __iomem *regs)
-{
-	writeb(val, regs);
-}
 static inline unsigned int xhci_readl(const struct xhci_hcd *xhci,
 		__le32 __iomem *regs)
 {
@@ -1403,6 +1399,31 @@ static inline void xhci_writel(struct xhci_hcd *xhci,
 		const unsigned int val, __le32 __iomem *regs)
 {
 	writel(val, regs);
+}
+static inline u8 xhci_readb(struct xhci_hcd *xhci,
+		unsigned int offset)
+{
+	struct usb_hcd *hcd = xhci_to_hcd(xhci);
+	unsigned int temp;
+
+	temp = xhci_readl(xhci, hcd->regs + (offset & 0xfffc));
+	temp = 0x0ff & (temp >> (8 * (offset & 3)));
+
+	return temp;
+}
+static inline void xhci_writeb(struct xhci_hcd *xhci,
+		unsigned int val, unsigned int offset)
+{
+	struct usb_hcd *hcd = xhci_to_hcd(xhci);
+	unsigned int mask, temp;
+
+	mask = 0x0ff;
+	temp = xhci_readl(xhci, hcd->regs + (offset & 0xfffc));
+
+	temp &= ~(mask << (8 * (offset & 3)));
+	temp |= (val & mask) << (8 * (offset & 3));
+
+	xhci_writel(xhci, temp, hcd->regs + (offset & 0xfffc));
 }
 
 /*
@@ -1458,6 +1479,12 @@ void etxhci_dbg_ep_rings(struct xhci_hcd *xhci,
 		struct xhci_virt_ep *ep);
 void etxhci_dbg_stream_info(struct xhci_hcd *xhci,
 		unsigned int ep_index, struct xhci_stream_info *stream_info);
+void etxhci_print_trbs(struct xhci_hcd *xhci,
+    struct xhci_segment *seg,
+    union xhci_trb *trb,
+    int num_trbs);
+void etxhci_print_segment(struct xhci_hcd *xhci, struct xhci_segment *seg);
+void etxhci_print_ring(struct xhci_hcd *xhci, struct xhci_ring *ring);
 
 /* xHCI memory management */
 void etxhci_mem_cleanup(struct xhci_hcd *xhci);
@@ -1562,10 +1589,13 @@ int etxhci_urb_enqueue(struct usb_hcd *hcd, struct urb *urb, gfp_t mem_flags);
 int etxhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status);
 int etxhci_add_endpoint(struct usb_hcd *hcd, struct usb_device *udev, struct usb_host_endpoint *ep);
 int etxhci_drop_endpoint(struct usb_hcd *hcd, struct usb_device *udev, struct usb_host_endpoint *ep);
+void etxhci_stop_endpoint(struct usb_hcd *hcd, struct usb_device *udev, struct usb_host_endpoint *ep);
 void etxhci_endpoint_reset(struct usb_hcd *hcd, struct usb_host_endpoint *ep);
 int etxhci_discover_or_reset_device(struct usb_hcd *hcd, struct usb_device *udev);
 int etxhci_check_bandwidth(struct usb_hcd *hcd, struct usb_device *udev);
 void etxhci_reset_bandwidth(struct usb_hcd *hcd, struct usb_device *udev);
+int etxhci_update_uas_device(struct usb_hcd *hcd, struct usb_device *udev,
+		int type);
 
 /* xHCI ring, segment, TRB, and TD functions */
 dma_addr_t etxhci_trb_virt_to_dma(struct xhci_segment *seg, union xhci_trb *trb);
@@ -1634,6 +1664,9 @@ u32 etxhci_port_state_to_neutral(u32 state);
 int etxhci_find_slot_id_by_port(struct usb_hcd *hcd, struct xhci_hcd *xhci,
 		u16 port);
 void etxhci_ring_device(struct xhci_hcd *xhci, int slot_id);
+void xhci_hub_power_port(struct usb_hcd *hcd, int port, bool onoff);
+int xhci_downgrade_to_usb2(struct usb_hcd *hcd, struct usb_device *udev);
+bool xhci_is_mass_storage_device(struct xhci_hcd *xhci, int slot_id);
 
 /* xHCI contexts */
 struct xhci_input_control_ctx *etxhci_get_input_control_ctx(struct xhci_hcd *xhci, struct xhci_container_ctx *ctx);

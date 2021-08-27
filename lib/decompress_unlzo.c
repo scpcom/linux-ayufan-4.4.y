@@ -41,6 +41,9 @@
 
 #include <linux/types.h>
 #include <linux/lzo.h>
+#if defined(CONFIG_SYNO_COMCERTO)
+#include <linux/decompress/unlzo_mm.h>
+#endif
 #include <linux/decompress/mm.h>
 
 #include <linux/compiler.h>

@@ -752,7 +752,11 @@ static inline struct kmem_cache *__find_general_cachep(size_t size,
 	 * for large kmalloc calls required.
 	 */
 #ifdef CONFIG_ZONE_DMA
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (unlikely(gfpflags & __GFP_DMA))
+#else
 	if (unlikely(gfpflags & GFP_DMA))
+#endif
 		return csizep->cs_dmacachep;
 #endif
 	return csizep->cs_cachep;
@@ -2447,7 +2451,12 @@ kmem_cache_create (const char *name, size_t size, size_t align,
 	cachep->flags = flags;
 	cachep->gfpflags = 0;
 	if (CONFIG_ZONE_DMA_FLAG && (flags & SLAB_CACHE_DMA))
+#if defined(CONFIG_SYNO_COMCERTO)
+		cachep->gfpflags |= __GFP_DMA;
+#else
 		cachep->gfpflags |= GFP_DMA;
+#endif
+
 	cachep->buffer_size = size;
 	cachep->reciprocal_buffer_size = reciprocal_value(size);
 
@@ -2793,10 +2802,19 @@ static void cache_init_objs(struct kmem_cache *cachep,
 static void kmem_flagcheck(struct kmem_cache *cachep, gfp_t flags)
 {
 	if (CONFIG_ZONE_DMA_FLAG) {
+#if defined(CONFIG_SYNO_COMCERTO)
+		if (flags & __GFP_DMA)
+			BUG_ON(!(cachep->gfpflags & __GFP_DMA));
+#else
 		if (flags & GFP_DMA)
 			BUG_ON(!(cachep->gfpflags & GFP_DMA));
+#endif
 		else
+#if defined(CONFIG_SYNO_COMCERTO)
+			BUG_ON(cachep->gfpflags & __GFP_DMA);
+#else
 			BUG_ON(cachep->gfpflags & GFP_DMA);
+#endif
 	}
 }
 

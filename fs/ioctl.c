@@ -470,191 +470,192 @@ static int file_ioctl(struct file *filp, unsigned int cmd,
 
 
 #ifdef MY_ABC_HERE
-static int ioctl_get_version(struct file *filp, unsigned int *p_ver)
+static int archive_check_capable(struct inode *inode)
 {
-	struct super_block *sb;
-
-	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
-		(!filp->f_path.dentry->d_inode->i_sb))
-		return -EPERM;
-
-	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
+	if((!S_ISDIR(inode->i_mode)) && (!S_ISREG(inode->i_mode)))
 		return -EPERM;
 	
-	sb = filp->f_path.dentry->d_inode->i_sb;
-
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
 
-	/* If a blockdevice-backed filesystem isn't specified, return. */
-	if (sb->s_bdev == NULL)
+	if (!inode->i_sb->s_op->syno_set_sb_archive_ver)
+		return -EINVAL;
+	if (!inode->i_sb->s_op->syno_get_sb_archive_ver)
 		return -EINVAL;
 
-	*p_ver = sb->s_archive_version;
 	return 0;
 }
 
-static int ioctl_set_version(struct file * filp, unsigned int version)
+static int ioctl_get_version(struct inode *inode, unsigned int *p_ver)
 {
-	struct super_block *sb;
+	int error;
+	struct super_block *sb = inode->i_sb;
 
-	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
-		(!filp->f_path.dentry->d_inode->i_sb))
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	error = sb->s_op->syno_get_sb_archive_ver(sb, p_ver);
+	return error;
+}
+
+static int ioctl_set_version(struct file *filp, unsigned int version)
+{
+	int error;
+	struct inode *inode = filp->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+	if ((UINT_MAX - 1) <= version) {
 		return -EPERM;
+	}
+	error = mnt_want_write(filp->f_vfsmnt);
+	if (error)
+		return error;
 
-	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
-		return -EPERM;
-
-	sb = filp->f_path.dentry->d_inode->i_sb;
-
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
-
-	/* If a blockdevice-backed filesystem isn't specified, return. */
-	if (sb->s_bdev == NULL)
-		return -EINVAL;
-
-	sb->s_archive_version = version;
-	return 0;
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_set_sb_archive_ver(sb, version);
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write(filp->f_vfsmnt);
+	return error;
 }
 
 static int ioctl_inc_version(struct file *filp)
 {
-	struct super_block *sb;
 	unsigned int ver;
 	int error;
+	struct inode *inode = filp->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
 
-	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
-		(!filp->f_path.dentry->d_inode->i_sb))
-		return -EPERM;
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+	error = mnt_want_write(filp->f_vfsmnt);
+	if (error)
+		return error;
 
-	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
-		return -EPERM;
-
-	sb = filp->f_path.dentry->d_inode->i_sb;
 	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_get_sb_archive_ver(sb, &ver);
+	if (error)
+		goto unlock;
 
-	error = ioctl_get_version(filp, &ver);
-	if (error) {
-		goto out;
-	}
-	if (ver+1 < ver) {
-		/* overflow */
+	// archive ver of inode = archive ver of sb + 1
+	if ((UINT_MAX - 1) <= (ver + 1)) {
 		error = -EPERM;
-		goto out;
+		goto unlock;
 	}
-	error = ioctl_set_version(filp, ver+1);
-out:
+	error = sb->s_op->syno_set_sb_archive_ver(sb, ver + 1);
+unlock:
 	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write(filp->f_vfsmnt);
 	return error;
 }
 
 static int ioctl_set_file_version(struct file *filp, unsigned int version)
 {
-	struct inode *inode = NULL;
-	unsigned int old_version;
+	struct inode *inode = filp->f_dentry->d_inode;
+	int error;
 
-	if(!filp || !filp->f_path.dentry || !filp->f_path.dentry->d_inode || 0 > version)
-		return -EPERM;
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
 
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
-	inode = filp->f_path.dentry->d_inode;
+	if (!inode->i_op->syno_set_archive_ver)
+		return -EINVAL;
 
-	old_version = inode->i_archive_version;
-	if (old_version != version) {
-		inode->i_archive_version = version;
-		if (inode->i_op->synosetxattr) {
-			struct syno_xattr_archive_version value;
-			value.v_magic = cpu_to_le16(0x2552);
-			value.v_struct_version = cpu_to_le16(1);
-			value.v_archive_version = cpu_to_le32(version);
-			inode->i_op->synosetxattr(inode, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value), 0);
-		}
-	}
+	error = mnt_want_write(filp->f_vfsmnt);
+	if (error)
+		return error;
 
-	mark_inode_dirty_sync(inode);
-	return 0;
+	error = inode->i_op->syno_set_archive_ver(filp->f_dentry, version);
+	mnt_drop_write(filp->f_vfsmnt);
+	return error;
 }
 
 #ifdef MY_ABC_HERE
-static int ioctl_get_bad_version(struct file *filp, unsigned int *p_ver)
+static int ioctl_get_bad_version(struct inode *inode, unsigned int *p_ver)
 {
-	struct super_block *sb = NULL;
+	int error;
+	struct super_block *sb = inode->i_sb;
 
-	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
-		(!filp->f_path.dentry->d_inode->i_sb))
-		return -EPERM;
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
 
-	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
-		return -EPERM;
-
-	sb = filp->f_path.dentry->d_inode->i_sb;
-
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
-
-	/* If a blockdevice-backed filesystem isn't specified, return. */
-	if (sb->s_bdev == NULL)
+	if (!sb->s_op->syno_get_sb_archive_ver1)
 		return -EINVAL;
-	*p_ver = sb->s_archive_version1;
 
-	return 0;
+	error = inode->i_sb->s_op->syno_get_sb_archive_ver1(sb, p_ver);
+	return error;
 }
 
 static int ioctl_clear_bad_version(struct file *filp)
 {
-	struct super_block *sb = NULL;
+	int error;
+	struct inode *inode = filp->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+	unsigned int ver, ver1;
 
-	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
-		(!filp->f_path.dentry->d_inode->i_sb))
-		return -EPERM;
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
 
-	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
-		return -EPERM;
-
-	sb = filp->f_path.dentry->d_inode->i_sb;
-
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
-
-	/* If a blockdevice-backed filesystem isn't specified, return. */
-	if (sb->s_bdev == NULL)
+	if (!sb->s_op->syno_get_sb_archive_ver1)
+		return -EINVAL;
+	if (!sb->s_op->syno_set_sb_archive_ver1)
 		return -EINVAL;
 
-	sb->s_archive_version = max(sb->s_archive_version, sb->s_archive_version1) + 1;
-	sb->s_archive_version1 = 0;
+	error = mnt_want_write(filp->f_vfsmnt);
+	if (error)
+		return error;
 
-	return 0;
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_get_sb_archive_ver(sb, &ver);
+	if (error)
+		goto unlock;
+
+	error = sb->s_op->syno_get_sb_archive_ver1(sb, &ver1);
+	if (error)
+		goto unlock;
+
+	error = sb->s_op->syno_set_sb_archive_ver(sb, max(ver, ver1) + 1);
+	if (error)
+		goto unlock;
+
+	error = sb->s_op->syno_set_sb_archive_ver1(sb, 0);
+unlock:
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write(filp->f_vfsmnt);
+	return error;
 }
 
 static int ioctl_set_bad_version(struct file *filp, unsigned int version)
 {
-	struct super_block *sb;
+	int error;
+	struct inode *inode = filp->f_dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
 
-	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
-		(!filp->f_path.dentry->d_inode->i_sb))
-		return -EPERM;
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
 
-	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
-		return -EPERM;
-
-	sb = filp->f_path.dentry->d_inode->i_sb;
-
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
-
-	/* If a blockdevice-backed filesystem isn't specified, return. */
-	if (sb->s_bdev == NULL)
+	if (!sb->s_op->syno_set_sb_archive_ver1)
 		return -EINVAL;
 
-	sb->s_archive_version1 = version;
+	error = mnt_want_write(filp->f_vfsmnt);
+	if (error)
+		return error;
 
-	return 0;
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_set_sb_archive_ver1(sb, version);
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write(filp->f_vfsmnt);
+	return error;
 }
-#endif
-
-#endif
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 static int ioctl_fionbio(struct file *filp, int __user *argp)
 {
@@ -787,7 +788,7 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 
 #ifdef MY_ABC_HERE
 	case FIGETVERSION:
-			error = ioctl_get_version(filp, &ver);
+		error = ioctl_get_version(inode, &ver);
 		if (!error) {
 			error = put_user(ver, (unsigned int __user *)arg) ? -EFAULT : 0;
 		}
@@ -807,7 +808,7 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 		break;
 #ifdef MY_ABC_HERE
 	case FIGETBADVERSION:
-			error = ioctl_get_bad_version(filp, &ver);
+		error = ioctl_get_bad_version(inode, &ver);
 		if (!error) {
 			error = put_user(ver, (unsigned int __user *)arg) ? -EFAULT : 0;
 		}

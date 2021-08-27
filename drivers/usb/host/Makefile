@@ -18,6 +18,10 @@ etxhci-hcd-y := etxhci.o etxhci-mem.o etxhci-pci.o
 etxhci-hcd-y += etxhci-ring.o etxhci-hub.o etxhci-dbg.o
 etxhci-hcd-y += etxhci-ejxxx.o
 
+ifneq ($(CONFIG_USB_XHCI_PLATFORM), )
+	xhci-hcd-y		+= xhci-plat.o xhci-comcerto2000.o
+endif
+
 obj-$(CONFIG_USB_WHCI_HCD)	+= whci/
 
 obj-$(CONFIG_PCI)		+= pci-quirks.o

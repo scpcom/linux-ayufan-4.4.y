@@ -272,6 +272,7 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 
 #define pmd_bad(pmd)		(pmd_val(pmd) & 2)
 
+#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
 #define copy_pmd(pmdpd,pmdps)		\
 	do {				\
 		pmdpd[0] = pmdps[0];	\
@@ -286,11 +287,36 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 		clean_pmd_entry(pmdp);	\
 	} while (0)
 
+#else
+#define copy_pmd(pmdpd,pmdps)	\
+	do {	\
+		int i;	\
+		for(i = 0; i < LINKED_PMDS; i++)	\
+			pmdpd[i] = pmdps[i];	\
+		flush_pmd_entry(pmdpd);	\
+	} while (0)
+
+#define pmd_clear(pmdp)	\
+	do {	\
+		int i;	\
+		for(i = 0; i < LINKED_PMDS; i++)	\
+			pmdp[i] = __pmd(0);	\
+		clean_pmd_entry(pmdp);	\
+	} while (0)
+
+#endif
 #endif	/* CONFIG_ARM_LPAE */
  
+#if defined(CONFIG_SYNO_COMCERTO)
+#define PMD_PAGE_ADDR_MASK		(~((1 << 10) - 1))
+#endif
 static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 {
+#if defined(CONFIG_SYNO_COMCERTO)
+	return __va((pmd_val(pmd) & PHYS_MASK & (s32)PMD_PAGE_ADDR_MASK) - PTE_HWTABLE_OFF);
+#else
 	return __va(pmd_val(pmd) & PHYS_MASK & (s32)PAGE_MASK);
+#endif
 }
 
 #define pmd_page(pmd)		pfn_to_page(__phys_to_pfn(pmd_val(pmd) & PHYS_MASK))
@@ -323,8 +349,11 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 #define pte_page(pte)		pfn_to_page(pte_pfn(pte))
 #define mk_pte(page,prot)	pfn_pte(page_to_pfn(page), prot)
 
-
+#if defined(CONFIG_SYNO_COMCERTO)
+#define pte_clear(mm,addr,ptep)	do {__sync_outer_cache(ptep, __pte(0)); set_pte_ext(ptep, __pte(0), 0); } while (0)
+#else
 #define pte_clear(mm,addr,ptep)	set_pte_ext(ptep, __pte(0), 0)
+#endif
 
 #define pte_none(pte)		(!pte_val(pte))
 #define pte_present(pte)	(pte_val(pte) & L_PTE_PRESENT)
@@ -340,8 +369,20 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 
 #if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,__pte(pte_val(pte)|(ext)))
+#elif defined(CONFIG_SYNO_COMCERTO)
+#define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte_val(pte),ext)
 #else
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte,ext)
+#endif
+
+#if defined(CONFIG_SYNO_COMCERTO)
+#if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+static inline void __sync_outer_cache(pte_t *ptep, pte_t pteval)
+{
+}
+#else
+extern void __sync_outer_cache(pte_t *ptep, pte_t pteval);
+#endif
 #endif
 #if __LINUX_ARM_ARCH__ < 6
 static inline void __sync_icache_dcache(pte_t pteval)
@@ -355,6 +396,10 @@ static inline void set_pte_at(struct mm_struct *mm, unsigned long addr,
 			      pte_t *ptep, pte_t pteval)
 {
 	unsigned long ext = 0;
+
+#if defined(CONFIG_SYNO_COMCERTO)
+	__sync_outer_cache(ptep, pteval);
+#endif
 
 	if (addr < TASK_SIZE && pte_present_user(pteval)) {
 		__sync_icache_dcache(pteval);
@@ -404,7 +449,11 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 #define __swp_entry(type,offset) ((swp_entry_t) { ((type) << __SWP_TYPE_SHIFT) | ((offset) << __SWP_OFFSET_SHIFT) })
 
 #define __pte_to_swp_entry(pte)	((swp_entry_t) { pte_val(pte) })
+#if defined(CONFIG_SYNO_COMCERTO)
+#define __swp_entry_to_pte(swp)	((pte_t) { { (swp).val } })
+#else
 #define __swp_entry_to_pte(swp)	((pte_t) { (swp).val })
+#endif
 
 /*
  * It is an error for the kernel to have more swap files than we can

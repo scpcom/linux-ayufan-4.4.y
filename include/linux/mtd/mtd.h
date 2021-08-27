@@ -61,6 +61,11 @@ struct erase_info {
 	u_long priv;
 	u_char state;
 	struct erase_info *next;
+#if defined(CONFIG_SYNO_COMCERTO)
+	u8 *erase_buf;
+	u32 erase_buf_ofs;
+	bool partial_start;
+#endif
 };
 
 struct mtd_erase_region_info {
@@ -117,6 +122,9 @@ struct nand_ecclayout {
 
 struct module;	/* only needed for owner field in mtd_info */
 
+#if defined(CONFIG_SYNO_COMCERTO)
+struct mtd_info;
+#endif
 struct mtd_info {
 	u_char type;
 	uint32_t flags;
@@ -268,6 +276,11 @@ struct mtd_info {
 	struct device dev;
 	int usecount;
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	int (*refresh_device)(struct mtd_info *mtd);
+	struct mtd_info *split;
+#endif
+
 	/* If the driver is something smart, like UBI, it may need to maintain
 	 * its own reference counting. The below functions are only for driver.
 	 * The driver may register its callbacks. These callbacks are not
@@ -323,6 +336,9 @@ extern int mtd_device_parse_register(struct mtd_info *mtd,
 			      int defnr_parts);
 #define mtd_device_register(master, parts, nr_parts)	\
 	mtd_device_parse_register(master, NULL, NULL, parts, nr_parts)
+#if defined(CONFIG_SYNO_COMCERTO)
+extern int mtd_device_refresh(struct mtd_info *master);
+#endif
 extern int mtd_device_unregister(struct mtd_info *master);
 extern struct mtd_info *get_mtd_device(struct mtd_info *mtd, int num);
 extern int __get_mtd_device(struct mtd_info *mtd);

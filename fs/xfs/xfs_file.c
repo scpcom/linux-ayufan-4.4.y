@@ -772,8 +772,11 @@ restart:
 		return error;
 	}
 
-	if (likely(!(file->f_mode & FMODE_NOCMTIME)))
-		file_update_time(file);
+	if (likely(!(file->f_mode & FMODE_NOCMTIME))) {
+		error = file_update_time(file);
+		if (error)
+			return error;
+	}
 
 	/*
 	 * If the offset is beyond the size of the file, we need to zero any

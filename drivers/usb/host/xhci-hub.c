@@ -59,10 +59,16 @@ static void xhci_common_hub_descriptor(struct xhci_hcd *xhci,
 	desc->bHubContrCurrent = 0;
 
 	desc->bNbrPorts = ports;
+#if !defined(CONFIG_SYNO_COMCERTO)
 	/* Ugh, these should be #defines, FIXME */
 	/* Using table 11-13 in USB 2.0 spec. */
+#endif
 	temp = 0;
+#if defined(CONFIG_SYNO_COMCERTO)
+	/* Bits 1:0 - support per-port power switching, or power always on */
+#else
 	/* Bits 1:0 - support port power switching, or power always on */
+#endif
 	if (HCC_PPC(xhci->hcc_params))
 		temp |= 0x0001;
 	else
@@ -88,9 +94,17 @@ static void xhci_usb2_hub_descriptor(struct usb_hcd *hcd, struct xhci_hcd *xhci,
 	ports = xhci->num_usb2_ports;
 
 	xhci_common_hub_descriptor(xhci, desc, ports);
+#if defined(CONFIG_SYNO_COMCERTO)
+	desc->bDescriptorType = USB_DT_HUB;
+#else
 	desc->bDescriptorType = 0x29;
+#endif
 	temp = 1 + (ports / 8);
+#if defined(CONFIG_SYNO_COMCERTO)
+	desc->bDescLength = USB_DT_HUB_NONVAR_SIZE + 2 * temp;
+#else
 	desc->bDescLength = 7 + 2 * temp;
+#endif
 
 	/* The Device Removable bits are reported on a byte granularity.
 	 * If the port doesn't exist within that byte, the bit is set to 0.
@@ -139,8 +153,13 @@ static void xhci_usb3_hub_descriptor(struct usb_hcd *hcd, struct xhci_hcd *xhci,
 
 	ports = xhci->num_usb3_ports;
 	xhci_common_hub_descriptor(xhci, desc, ports);
+#if defined(CONFIG_SYNO_COMCERTO)
+	desc->bDescriptorType = USB_DT_SS_HUB;
+	desc->bDescLength = USB_DT_SS_HUB_SIZE;
+#else
 	desc->bDescriptorType = 0x2a;
 	desc->bDescLength = 12;
+#endif
 
 	/* header decode latency should be zero for roothubs,
 	 * see section 4.23.5.2.
@@ -594,6 +613,9 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	int slot_id;
 	struct xhci_bus_state *bus_state;
 	u16 link_state = 0;
+#if defined(CONFIG_SYNO_COMCERTO)
+	u16 wake_mask = 0;
+#endif
 
 #ifdef MY_DEF_HERE
 	xhci_dbg(xhci, "xhci_hub_control.type:0x%x.wvalue:%d.\n", typeReq, wValue);
@@ -770,6 +792,10 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	case SetPortFeature:
 		if (wValue == USB_PORT_FEAT_LINK_STATE)
 			link_state = (wIndex & 0xff00) >> 3;
+#if defined(CONFIG_SYNO_COMCERTO)
+		if (wValue == USB_PORT_FEAT_REMOTE_WAKE_MASK)
+			wake_mask = wIndex & 0xff00;
+#endif
 		wIndex &= 0xff;
 		if (!wIndex || wIndex > max_ports)
 			goto error;
@@ -1194,6 +1220,12 @@ int xhci_bus_suspend(struct usb_hcd *hcd)
 			t2 |= PORT_LINK_STROBE | XDEV_U3;
 			set_bit(port_index, &bus_state->bus_suspended);
 		}
+#if defined(CONFIG_SYNO_COMCERTO)
+		/* USB core sets remote wake mask for USB 3.0 hubs,
+		 * including the USB 3.0 roothub, but only if CONFIG_USB_SUSPEND
+		 * is enabled, so also enable remote wake here.
+		 */
+#endif
 		if (hcd->self.root_hub->do_remote_wakeup) {
 			if (t1 & PORT_CONNECT) {
 				t2 |= PORT_WKOC_E | PORT_WKDISC_E;

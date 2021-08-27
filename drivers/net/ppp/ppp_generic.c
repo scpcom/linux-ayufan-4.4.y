@@ -59,6 +59,9 @@
 #endif
 #include <net/net_namespace.h>
 #include <net/netns/generic.h>
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#include <linux/jiffies.h>
+#endif
 
 #define PPP_VERSION	"2.4.2"
 
@@ -565,6 +568,9 @@ static long ppp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	struct ppp *ppp;
 	int err = -EFAULT, val, val2, i;
 	struct ppp_idle idle;
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+        struct ppp_idle fppidle;
+#endif
 	struct npioctl npi;
 	int unit, cflags;
 	struct slcompress *vj;
@@ -743,6 +749,29 @@ static long ppp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		}
 		err = 0;
 		break;
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+	case PPPIOCSFPPIDLE:
+		if (copy_from_user(&fppidle, argp, sizeof(fppidle)))
+			break;
+
+		ppp_xmit_lock(ppp);
+
+		if (time_after((jiffies - (fppidle.xmit_idle * HZ)) , ppp->last_xmit))
+			ppp->last_xmit = (jiffies - fppidle.xmit_idle * HZ);
+
+		ppp_xmit_unlock(ppp);
+
+		ppp_recv_lock(ppp);
+
+		if (time_after((jiffies - (fppidle.recv_idle * HZ)) , ppp->last_recv))
+			ppp->last_recv = (jiffies - fppidle.recv_idle * HZ);
+
+		ppp_recv_unlock(ppp);
+
+		err = 0;
+		break;
+#endif
 
 #ifdef CONFIG_PPP_FILTER
 	case PPPIOCSPASS:
@@ -2831,7 +2860,14 @@ ppp_connect_channel(struct channel *pch, int unit)
 	write_lock_bh(&pch->upl);
 	ret = -EINVAL;
 	if (pch->ppp)
+#if defined(CONFIG_SYNO_COMCERTO)
+	{
+		write_unlock_bh(&pch->upl);
+		goto out;
+	}
+#else
 		goto outl;
+#endif
 
 	ppp_lock(ppp);
 	if (pch->file.hdrlen > ppp->file.hdrlen)
@@ -2844,10 +2880,22 @@ ppp_connect_channel(struct channel *pch, int unit)
 	pch->ppp = ppp;
 	atomic_inc(&ppp->file.refcnt);
 	ppp_unlock(ppp);
+#if !defined(CONFIG_SYNO_COMCERTO)
 	ret = 0;
 
  outl:
+#endif
 	write_unlock_bh(&pch->upl);
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+	if ((ppp->dev) && (!ppp->closing)) {
+		rtnl_lock();
+		rtmsg_ifinfo(RTM_NEWLINK, ppp->dev, 0);
+		rtnl_unlock();
+	}
+
+	ret = 0;
+#endif
  out:
 	mutex_unlock(&pn->all_ppp_mutex);
 	return ret;
@@ -2873,6 +2921,15 @@ ppp_disconnect_channel(struct channel *pch)
 		if (--ppp->n_channels == 0)
 			wake_up_interruptible(&ppp->file.rwait);
 		ppp_unlock(ppp);
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+		if ((ppp->dev) && (!ppp->closing)) {
+			rtnl_lock();
+			rtmsg_ifinfo(RTM_NEWLINK, ppp->dev, 0);
+			rtnl_unlock();
+		}
+#endif
+
 		if (atomic_dec_and_test(&ppp->file.refcnt))
 			ppp_destroy_interface(ppp);
 		err = 0;

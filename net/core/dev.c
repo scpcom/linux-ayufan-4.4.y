@@ -204,25 +204,27 @@ int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
 	if (!szMac || !szDev)
 		goto ERR;
 
-	if (!memcmp(szDev, "eth0", 4)) {
+	// According to function __dev_get_by_name
+	// we can use strncmp & IFNAMSIZ to replace memcmp to avoid #48870
+	if (!strncmp(szDev, "eth0", IFNAMSIZ)) {
 		if (!strcmp(grgbLanMac[0], "")) {
 			err = SYNO_VENDOR_MAC_EMPTY;
 			goto ERR;
 		}
 		convert_str_to_mac(grgbLanMac[0], szMac);
-	} else if ( !memcmp(szDev, "eth1", 4) ) {
+	} else if (!strncmp(szDev, "eth1", IFNAMSIZ)) {
 		if (!strcmp(grgbLanMac[1], "")) {
 			err = SYNO_VENDOR_MAC_EMPTY;
 			goto ERR;
 		}
 		convert_str_to_mac(grgbLanMac[1], szMac);
-	} else if ( !memcmp(szDev, "eth2", 4) ) {
+	} else if (!strncmp(szDev, "eth2", IFNAMSIZ)) {
 		if (!strcmp(grgbLanMac[2], "")) {
 			err = SYNO_VENDOR_MAC_EMPTY;
 			goto ERR;
 		}
 		convert_str_to_mac(grgbLanMac[2], szMac);
-	} else if ( !memcmp(szDev, "eth3", 4) ) {
+	} else if (!strncmp(szDev, "eth3", IFNAMSIZ)) {
 		if (!strcmp(grgbLanMac[3], "")) {
 			err = SYNO_VENDOR_MAC_EMPTY;
 			goto ERR;

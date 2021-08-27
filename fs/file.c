@@ -271,6 +271,9 @@ int expand_files(struct files_struct *files, int nr)
 	/* All good, so we try */
 	return expand_fdtable(files, nr);
 }
+#if defined(CONFIG_SYNO_COMCERTO)
+EXPORT_SYMBOL_GPL(expand_files);
+#endif
 
 static int count_open_files(struct fdtable *fdt)
 {

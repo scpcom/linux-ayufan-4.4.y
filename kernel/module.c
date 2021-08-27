@@ -110,7 +110,9 @@ static LIST_HEAD(modules);
 #ifdef CONFIG_KGDB_KDB
 struct list_head *kdb_modules = &modules; /* kdb needs the list of modules */
 #endif /* CONFIG_KGDB_KDB */
-
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_CRASHLOG)
+struct list_head *crashlog_modules = &modules;
+#endif
 
 /* Block module loading/unloading? */
 int modules_disabled = 0;
@@ -2901,7 +2903,8 @@ static struct module *load_module(void __user *umod,
 	mutex_unlock(&module_mutex);
 
 	/* Module is ready to execute: parsing args may do that. */
-	err = parse_args(mod->name, mod->args, mod->kp, mod->num_kp, NULL);
+	err = parse_args(mod->name, mod->args, mod->kp, mod->num_kp,
+			 -32768, 32767, NULL);
 	if (err < 0)
 		goto unlink;
 

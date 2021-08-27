@@ -219,7 +219,7 @@ void drop_file_write_access(struct file *file)
 		return;
 	if (file_check_writeable(file) != 0)
 		return;
-	mnt_drop_write(mnt);
+	__mnt_drop_write(mnt);
 	file_release_write(file);
 }
 EXPORT_SYMBOL_GPL(drop_file_write_access);
@@ -357,6 +357,9 @@ struct file *fget_light(unsigned int fd, int *fput_needed)
 
 	return file;
 }
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL(fget_light);
+#endif
 
 struct file *fget_raw_light(unsigned int fd, int *fput_needed)
 {

@@ -21,6 +21,15 @@
 #include "hash.h"
 #include "transaction.h"
 
+static struct btrfs_dir_item *btrfs_match_dir_item_name(struct btrfs_root *root,
+			      struct btrfs_path *path,
+			      const char *name, int name_len);
+
+#ifdef MY_ABC_HERE
+extern unsigned char SYNOBtrfsGlobalBuf[UNICODE_UTF8_BUFSIZE];
+extern spinlock_t SYNOBtrfsGlobalLock;  /* init at btrfs_fill_super() */
+#endif
+
 /*
  * insert a name into a directory, doing overflow properly if there is a hash
  * collision.  data_size indicates how big the item inserted should be.  On
@@ -49,9 +58,8 @@ static struct btrfs_dir_item *insert_with_overflow(struct btrfs_trans_handle
 		di = btrfs_match_dir_item_name(root, path, name, name_len);
 		if (di)
 			return ERR_PTR(-EEXIST);
-		ret = btrfs_extend_item(trans, root, path, data_size);
-	}
-	if (ret < 0)
+		btrfs_extend_item(root, path, data_size);
+	} else if (ret < 0)
 		return ERR_PTR(ret);
 	WARN_ON(ret > 0);
 	leaf = path->nodes[0];
@@ -110,12 +118,67 @@ int btrfs_insert_xattr_item(struct btrfs_trans_handle *trans,
 	return ret;
 }
 
+#ifdef MY_ABC_HERE
+static int btrfs_insert_dir_item_caseless(struct btrfs_trans_handle *trans, struct btrfs_root *root,
+						const char *name, int name_len, struct inode *dir,
+						struct btrfs_disk_key *disk_key, u8 type)
+{
+	int ret;
+	int upperlen;
+	unsigned long name_ptr;
+	struct btrfs_path *path;
+	struct btrfs_dir_item *dir_item;
+	struct extent_buffer *leaf;
+	struct btrfs_key key;
+
+	path = btrfs_alloc_path();
+	if (!path)
+		return -ENOMEM;
+	path->leave_spinning = 1;
+
+	key.objectid = btrfs_ino(dir);
+	btrfs_set_key_type(&key, BTRFS_DIR_ITEM_CASELESS_KEY);
+
+	spin_lock(&SYNOBtrfsGlobalLock);
+	upperlen = SYNOUnicodeUTF8toUpper(SYNOBtrfsGlobalBuf, name, UNICODE_UTF8_BUFSIZE-1, name_len, NULL);
+	key.offset = btrfs_name_hash(SYNOBtrfsGlobalBuf, upperlen);
+	spin_unlock(&SYNOBtrfsGlobalLock);
+
+	dir_item = insert_with_overflow(trans, root, path, &key, (sizeof(*dir_item) + name_len),
+					name, name_len);
+	if (IS_ERR(dir_item)) {
+		ret = PTR_ERR(dir_item);
+		if (ret == -EEXIST) {
+			ret = 0;
+		}
+		goto out_release;
+	}
+
+	leaf = path->nodes[0];
+	btrfs_set_dir_item_key(leaf, dir_item, disk_key);
+	btrfs_set_dir_type(leaf, dir_item, type);
+	btrfs_set_dir_data_len(leaf, dir_item, 0);
+	btrfs_set_dir_name_len(leaf, dir_item, name_len);
+	btrfs_set_dir_transid(leaf, dir_item, trans->transid);
+	name_ptr = (unsigned long)(dir_item + 1);
+
+	write_extent_buffer(leaf, name, name_ptr, name_len);
+	btrfs_mark_buffer_dirty(leaf);
+	ret = 0;
+
+out_release:
+	btrfs_free_path(path);
+	return ret;
+}
+#endif
+
 /*
  * insert a directory item in the tree, doing all the magic for
  * both indexes. 'dir' indicates which objectid to insert it into,
  * 'location' is the key to stuff into the directory item, 'type' is the
  * type of the inode we're pointing to, and 'index' is the sequence number
  * to use for the second index (if one is created).
+ * Will return 0 or -ENOMEM
  */
 int btrfs_insert_dir_item(struct btrfs_trans_handle *trans, struct btrfs_root
 			  *root, const char *name, int name_len,
@@ -180,7 +243,11 @@ out_free:
 		return ret;
 	if (ret2)
 		return ret2;
+#ifdef MY_ABC_HERE
+	return btrfs_insert_dir_item_caseless(trans, root, name, name_len, dir, &disk_key, type);
+#else
 	return 0;
+#endif
 }
 
 /*
@@ -195,14 +262,29 @@ struct btrfs_dir_item *btrfs_lookup_dir_item(struct btrfs_trans_handle *trans,
 					     int mod)
 {
 	int ret;
+#ifdef MY_ABC_HERE
+	int upperlen = 0;
+#endif
 	struct btrfs_key key;
 	int ins_len = mod < 0 ? -1 : 0;
 	int cow = mod != 0;
 
 	key.objectid = dir;
+#ifdef MY_ABC_HERE
+	if (path->caseless_key) {
+		spin_lock(&SYNOBtrfsGlobalLock);
+		btrfs_set_key_type(&key, BTRFS_DIR_ITEM_CASELESS_KEY);
+		upperlen = SYNOUnicodeUTF8toUpper(SYNOBtrfsGlobalBuf, name, UNICODE_UTF8_BUFSIZE-1, name_len, NULL);
+		key.offset = btrfs_name_hash(SYNOBtrfsGlobalBuf, upperlen);
+		spin_unlock(&SYNOBtrfsGlobalLock);
+	} else {
+#endif
 	btrfs_set_key_type(&key, BTRFS_DIR_ITEM_KEY);
 
 	key.offset = btrfs_name_hash(name, name_len);
+#ifdef MY_ABC_HERE
+	}
+#endif
 
 	ret = btrfs_search_slot(trans, root, &key, path, ins_len, cow);
 	if (ret < 0)
@@ -211,6 +293,64 @@ struct btrfs_dir_item *btrfs_lookup_dir_item(struct btrfs_trans_handle *trans,
 		return NULL;
 
 	return btrfs_match_dir_item_name(root, path, name, name_len);
+}
+
+int btrfs_check_dir_item_collision(struct btrfs_root *root, u64 dir,
+				   const char *name, int name_len)
+{
+	int ret;
+	struct btrfs_key key;
+	struct btrfs_dir_item *di;
+	int data_size;
+	struct extent_buffer *leaf;
+	int slot;
+	struct btrfs_path *path;
+
+	path = btrfs_alloc_path();
+	if (!path)
+		return -ENOMEM;
+
+	key.objectid = dir;
+	btrfs_set_key_type(&key, BTRFS_DIR_ITEM_KEY);
+	key.offset = btrfs_name_hash(name, name_len);
+
+	ret = btrfs_search_slot(NULL, root, &key, path, 0, 0);
+
+	/* return back any errors */
+	if (ret < 0)
+		goto out;
+
+	/* nothing found, we're safe */
+	if (ret > 0) {
+		ret = 0;
+		goto out;
+	}
+
+	/* we found an item, look for our name in the item */
+	di = btrfs_match_dir_item_name(root, path, name, name_len);
+	if (di) {
+		/* our exact name was found */
+		ret = -EEXIST;
+		goto out;
+	}
+
+	/*
+	 * see if there is room in the item to insert this
+	 * name
+	 */
+	data_size = sizeof(*di) + name_len + sizeof(struct btrfs_item);
+	leaf = path->nodes[0];
+	slot = path->slots[0];
+	if (data_size + btrfs_item_size_nr(leaf, slot) +
+	    sizeof(struct btrfs_item) > BTRFS_LEAF_DATA_SIZE(root)) {
+		ret = -EOVERFLOW;
+	} else {
+		/* plenty of insertion room */
+		ret = 0;
+	}
+out:
+	btrfs_free_path(path);
+	return ret;
 }
 
 /*
@@ -320,7 +460,7 @@ struct btrfs_dir_item *btrfs_lookup_xattr(struct btrfs_trans_handle *trans,
  * this walks through all the entries in a dir item and finds one
  * for a specific name.
  */
-struct btrfs_dir_item *btrfs_match_dir_item_name(struct btrfs_root *root,
+static struct btrfs_dir_item *btrfs_match_dir_item_name(struct btrfs_root *root,
 						 struct btrfs_path *path,
 						 const char *name, int name_len)
 {
@@ -343,9 +483,19 @@ struct btrfs_dir_item *btrfs_match_dir_item_name(struct btrfs_root *root,
 			btrfs_dir_data_len(leaf, dir_item);
 		name_ptr = (unsigned long)(dir_item + 1);
 
+#ifdef MY_ABC_HERE
+		if (path->caseless_name) {
+			if (0 == memcmp_caseless_extent_buffer(leaf, name, name_ptr, name_len)) {
+				return dir_item;
+			}
+		} else {
+#endif
 		if (btrfs_dir_name_len(leaf, dir_item) == name_len &&
 		    memcmp_extent_buffer(leaf, name, name_ptr, name_len) == 0)
 			return dir_item;
+#ifdef MY_ABC_HERE
+		}
+#endif
 
 		cur += this_len;
 		dir_item = (struct btrfs_dir_item *)((char *)dir_item +
@@ -383,8 +533,7 @@ int btrfs_delete_one_dir_name(struct btrfs_trans_handle *trans,
 		start = btrfs_item_ptr_offset(leaf, path->slots[0]);
 		memmove_extent_buffer(leaf, ptr, ptr + sub_item_len,
 			item_len - (ptr + sub_item_len - start));
-		ret = btrfs_truncate_item(trans, root, path,
-					  item_len - sub_item_len, 1);
+		btrfs_truncate_item(root, path, item_len - sub_item_len, 1);
 	}
 	return ret;
 }

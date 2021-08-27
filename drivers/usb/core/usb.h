@@ -62,8 +62,6 @@ extern void usb_major_cleanup(void);
 #if defined(CONFIG_USB_ETRON_HUB)
 extern int usb_is_etron_hcd(struct usb_device *udev);
 extern void ethub_usb_kick_kethubd(struct usb_device *hdev);
-void ethub_usb_wakeup_notification(struct usb_device *hdev,
-		unsigned int portnum);
 extern int ethub_usb_remove_device(struct usb_device *udev);
 extern int ethub_usb_hub_claim_port(struct usb_device *hdev, unsigned port1, void *owner);
 extern int ethub_usb_hub_release_port(struct usb_device *hdev, unsigned port1, void *owner);
@@ -77,12 +75,21 @@ extern int ethub_usb_deauthorize_device(struct usb_device *usb_dev);
 extern int ethub_usb_authorize_device(struct usb_device *usb_dev);
 extern int ethub_usb_port_suspend(struct usb_device *udev, pm_message_t msg);
 extern int ethub_usb_port_resume(struct usb_device *udev, pm_message_t msg);
-extern int ethub_usb_remote_wakeup(struct usb_device *udev);
 extern void ethub_usb_root_hub_lost_power(struct usb_device *rhdev);
 extern void ethub_usb_ep0_reinit(struct usb_device *udev);
 extern int ethub_usb_reset_device(struct usb_device *udev);
 extern int ethub_init(void);
 extern void ethub_cleanup(void);
+
+#ifdef CONFIG_USB_SUSPEND
+extern int ethub_usb_remote_wakeup(struct usb_device *udev);
+#else
+static inline int ethub_usb_remote_wakeup(struct usb_device *udev)
+{
+	return 0;
+}
+#endif
+
 #endif
 
 #ifdef	CONFIG_PM

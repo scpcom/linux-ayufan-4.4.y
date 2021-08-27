@@ -407,11 +407,7 @@ SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
-#ifdef MY_ABC_HERE
-SYSCALL(SYNOmmap)			/* 400 */
-#else
 SYSCALL(ni_syscall)
-#endif
 SYSCALL(ni_syscall)
 #ifdef MY_ABC_HERE
 SYSCALL(SYNOUtime)             /* 402 */

@@ -317,6 +317,40 @@ static int match_no_append(struct nf_conn * conntrack,
 }
 
 /* add the new app data to the conntrack.  Return number of bytes added. */
+#if defined(CONFIG_SYNO_COMCERTO)
+static int add_datastr(char *target, int offset, char *app_data, int len)
+{
+	int length = 0, i;
+	if (!target) return 0;
+
+	/* Strip nulls. Make everything lower case (our regex lib doesn't
+	do case insensitivity).  Add it to the end of the current data. */
+ 	for(i = 0; i < maxdatalen-offset-1 && i < len; i++) {
+		if(app_data[i] != '\0') {
+			/* the kernel version of tolower mungs 'upper ascii' */
+			target[length+offset] =
+				isascii(app_data[i])? 
+					tolower(app_data[i]) : app_data[i];
+			length++;
+		}
+	}
+	target[length+offset] = '\0';
+
+	return length;
+}
+
+/* add the new app data to the conntrack.  Return number of bytes added. */
+static int add_data(struct nf_conn * master_conntrack,
+                    char * app_data, int appdatalen)
+{
+	int length;
+
+	length = add_datastr(master_conntrack->layer7.app_data, master_conntrack->layer7.app_data_len, app_data, appdatalen);
+	master_conntrack->layer7.app_data_len += length;
+
+	return length;
+}
+#else
 static int add_data(struct nf_conn * master_conntrack,
                     char * app_data, int appdatalen)
 {
@@ -347,6 +381,7 @@ static int add_data(struct nf_conn * master_conntrack,
 
 	return length;
 }
+#endif
 
 /* taken from drivers/video/modedb.c */
 static int my_atoi(const char *s)
@@ -415,7 +450,9 @@ static int layer7_write_proc(struct file* file, const char* buffer,
 }
 
 static bool
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 28)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 35)
+match(const struct sk_buff *skbin, struct xt_action_param *par)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 28)
 match(const struct sk_buff *skbin, const struct xt_match_param *par)
 #else
 match(const struct sk_buff *skbin,
@@ -441,6 +478,9 @@ match(const struct sk_buff *skbin,
 	enum ip_conntrack_info master_ctinfo, ctinfo;
 	struct nf_conn *master_conntrack, *conntrack;
 	unsigned char * app_data;
+#if defined(CONFIG_SYNO_COMCERTO)
+	unsigned char *tmp_data;
+#endif
 	unsigned int pattern_result, appdatalen;
 	regexp * comppattern;
 
@@ -468,8 +508,13 @@ match(const struct sk_buff *skbin,
 		master_conntrack = master_ct(master_conntrack);
 
 	/* if we've classified it or seen too many packets */
+#if defined(CONFIG_SYNO_COMCERTO)
+	if(!info->pkt && (total_acct_packets(master_conntrack) > num_packets ||
+	   master_conntrack->layer7.app_proto)) {
+#else
 	if(total_acct_packets(master_conntrack) > num_packets ||
 	   master_conntrack->layer7.app_proto) {
+#endif
 
 		pattern_result = match_no_append(conntrack, master_conntrack,
 						 ctinfo, master_ctinfo, info);
@@ -501,6 +546,27 @@ match(const struct sk_buff *skbin,
 
 	/* the return value gets checked later, when we're ready to use it */
 	comppattern = compile_and_cache(info->pattern, info->protocol);
+
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (info->pkt) {
+		tmp_data = kmalloc(maxdatalen, GFP_ATOMIC);
+		if(!tmp_data){
+			if (net_ratelimit())
+				printk(KERN_ERR "layer7: out of memory in match, bailing.\n");
+			return info->invert;
+		}
+
+		tmp_data[0] = '\0';
+		add_datastr(tmp_data, 0, app_data, appdatalen);
+		pattern_result = ((comppattern && regexec(comppattern, tmp_data)) ? 1 : 0);
+
+		kfree(tmp_data);
+		tmp_data = NULL;
+		spin_unlock_bh(&l7_lock);
+
+		return (pattern_result ^ info->invert);
+	}
+#endif
 
 	/* On the first packet of a connection, allocate space for app data */
 	if(total_acct_packets(master_conntrack) == 1 && !skb->cb[0] &&
@@ -578,14 +644,29 @@ match(const struct sk_buff *skbin,
 }
 
 // load nf_conntrack_ipv4
+#if defined(CONFIG_SYNO_COMCERTO)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 35)
+static int
+#else
+static bool
+#endif
+#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 28)
+#if defined(CONFIG_SYNO_COMCERTO)
+check(const struct xt_mtchk_param *par)
+#else
 static bool check(const struct xt_mtchk_param *par)
+#endif
 {
         if (nf_ct_l3proto_try_module_get(par->match->family) < 0) {
                 printk(KERN_WARNING "can't load conntrack support for "
                                     "proto=%d\n", par->match->family);
 #else
+#if defined(CONFIG_SYNO_COMCERTO)
+check(const char *tablename, const void *inf,
+#else
 static bool check(const char *tablename, const void *inf,
+#endif
 		 const struct xt_match *match, void *matchinfo,
 		 unsigned int hook_mask)
 {
@@ -593,11 +674,16 @@ static bool check(const char *tablename, const void *inf,
                 printk(KERN_WARNING "can't load conntrack support for "
                                     "proto=%d\n", match->family);
 #endif
+#if defined(CONFIG_SYNO_COMCERTO) && LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 35)
+		return -EINVAL;
+	}
+	return 0;
+#else
                 return 0;
         }
 	return 1;
+#endif
 }
-
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 28)
 	static void destroy(const struct xt_mtdtor_param *par)

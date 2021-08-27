@@ -547,7 +547,6 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 #endif
 
 #ifdef MY_ABC_HERE
-extern char gszSynoHWVersion[];
 int blIsCardReader(struct usb_device *usbdev)
 {
 	char buf[256];
@@ -573,8 +572,8 @@ int blIsCardReader(struct usb_device *usbdev)
 		}
 #endif
 #if defined(CONFIG_SYNO_ARMADA)
-		if (!strncmp(gszSynoHWVersion, HW_US3v10, strlen(HW_US3v10))) {
-			if (!strcmp(buf, "0000:00:01.0-1") || !strcmp(buf, "0000:00:01.0-4")) {
+		if (syno_is_hw_version(HW_US3v10)) {
+			if (!strcmp(buf, "0000:00:00.0-1")) {
 				return 1;
 			}
 		}

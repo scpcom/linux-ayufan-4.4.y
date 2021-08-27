@@ -297,6 +297,9 @@ struct packet_sock {
 	unsigned int		tp_loss:1;
 	unsigned int		tp_tstamp;
 	struct packet_type	prot_hook ____cacheline_aligned_in_smp;
+#if defined(CONFIG_SYNO_COMCERTO)
+	unsigned int		pkt_type;
+#endif
 };
 
 #define PACKET_FANOUT_MAX	256
@@ -1393,6 +1396,9 @@ static int packet_rcv_spkt(struct sk_buff *skb, struct net_device *dev,
 {
 	struct sock *sk;
 	struct sockaddr_pkt *spkt;
+#if defined(CONFIG_SYNO_COMCERTO)
+	struct packet_sock *po;
+#endif
 
 	/*
 	 *	When we registered the protocol we saved the socket in the data
@@ -1400,6 +1406,9 @@ static int packet_rcv_spkt(struct sk_buff *skb, struct net_device *dev,
 	 */
 
 	sk = pt->af_packet_priv;
+#if defined(CONFIG_SYNO_COMCERTO)
+	po = pkt_sk(sk);
+#endif
 
 	/*
 	 *	Yank back the headers [hope the device set this
@@ -1412,7 +1421,11 @@ static int packet_rcv_spkt(struct sk_buff *skb, struct net_device *dev,
 	 *	so that this procedure is noop.
 	 */
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (!(po->pkt_type & (1 << skb->pkt_type)))
+#else
 	if (skb->pkt_type == PACKET_LOOPBACK)
+#endif
 		goto out;
 
 	if (!net_eq(dev_net(dev), sock_net(sk)))
@@ -1604,11 +1617,17 @@ static int packet_rcv(struct sk_buff *skb, struct net_device *dev,
 	int skb_len = skb->len;
 	unsigned int snaplen, res;
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	if (skb->pkt_type == PACKET_LOOPBACK)
 		goto drop;
-
+#endif
 	sk = pt->af_packet_priv;
 	po = pkt_sk(sk);
+
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (!(po->pkt_type & (1 << skb->pkt_type)))
+		goto drop;
+#endif
 
 	if (!net_eq(dev_net(dev), sock_net(sk)))
 		goto drop;
@@ -1728,11 +1747,18 @@ static int tpacket_rcv(struct sk_buff *skb, struct net_device *dev,
 	struct timespec ts;
 	struct skb_shared_hwtstamps *shhwtstamps = skb_hwtstamps(skb);
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	if (skb->pkt_type == PACKET_LOOPBACK)
 		goto drop;
+#endif
 
 	sk = pt->af_packet_priv;
 	po = pkt_sk(sk);
+
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (!(po->pkt_type & (1 << skb->pkt_type)))
+		goto drop;
+#endif
 
 	if (!net_eq(dev_net(dev), sock_net(sk)))
 		goto drop;
@@ -2599,6 +2625,9 @@ static int packet_create(struct net *net, struct socket *sock, int protocol,
 	spin_lock_init(&po->bind_lock);
 	mutex_init(&po->pg_vec_lock);
 	po->prot_hook.func = packet_rcv;
+#if defined(CONFIG_SYNO_COMCERTO)
+	po->pkt_type = PACKET_MASK_ANY & ~(1 << PACKET_LOOPBACK);
+#endif
 
 	if (sock->type == SOCK_PACKET)
 		po->prot_hook.func = packet_rcv_spkt;
@@ -3196,6 +3225,18 @@ packet_setsockopt(struct socket *sock, int level, int optname, char __user *optv
 
 		return fanout_add(sk, val & 0xffff, val >> 16);
 	}
+#if defined(CONFIG_SYNO_COMCERTO)
+        case PACKET_RECV_TYPE:
+        {
+                unsigned int val;
+                if (optlen != sizeof(val))
+                        return -EINVAL;
+                if (copy_from_user(&val, optval, sizeof(val)))
+                        return -EFAULT;
+                po->pkt_type = val & ~PACKET_LOOPBACK;
+                return 0;
+        }
+#endif
 	default:
 		return -ENOPROTOOPT;
 	}
@@ -3266,6 +3307,15 @@ static int packet_getsockopt(struct socket *sock, int level, int optname,
 
 		data = &val;
 		break;
+#if defined(CONFIG_SYNO_COMCERTO)
+	case PACKET_RECV_TYPE:
+		if (len > sizeof(unsigned int))
+			len = sizeof(unsigned int);
+		val = po->pkt_type;
+
+		data = &val;
+		break;
+#endif
 	case PACKET_VERSION:
 		if (len > sizeof(int))
 			len = sizeof(int);

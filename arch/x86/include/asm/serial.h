@@ -49,7 +49,7 @@
     { 0, BASE_BAUD, 0x3E8, 4, STD_COM_FLAGS },  /* ttyS2 */
 #endif
 #else
-#if !defined(CONFIG_SYNO_CEDARVIEW)
+#if !defined(CONFIG_SYNO_CEDARVIEW) && !defined(CONFIG_SYNO_AVOTON)
 #define SERIAL_PORT_DFNS            \
 	/* UART CLK   PORT IRQ     FLAGS        */          \
 	{ 0, BASE_BAUD, 0x2F8, 3, STD_COM_FLAGS },  /* ttyS0 */ \

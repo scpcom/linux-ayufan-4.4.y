@@ -27,7 +27,11 @@ KBUILD_CFLAGS	+= $(call cc-option,-fno-dwarf2-cfi-asm)
 
 # Do not use arch/arm/defconfig - it's always outdated.
 # Select a platform tht is kept up-to-date
+ifeq ($(CONFIG_SYNO_COMCERTO),y)
+KBUILD_DEFCONFIG := c2krtsm_defconfig
+else
 KBUILD_DEFCONFIG := versatile_defconfig
+endif
 
 # defines filename extension depending memory management type.
 ifeq ($(CONFIG_MMU),)
@@ -140,6 +144,10 @@ machine-$(CONFIG_ARCH_AT91)		:= at91
 machine-$(CONFIG_ARCH_BCMRING)		:= bcmring
 machine-$(CONFIG_ARCH_CLPS711X)		:= clps711x
 machine-$(CONFIG_ARCH_CNS3XXX)		:= cns3xxx
+machine-$(CONFIG_ARCH_COMCERTO)         := comcerto
+ifeq ($(CONFIG_ARCH_COMCERTO),y)
+textofs-$(CONFIG_ZONE_DMA) := 0x04008000
+endif
 machine-$(CONFIG_ARCH_DAVINCI)		:= davinci
 machine-$(CONFIG_ARCH_DOVE)		:= dove
 machine-$(CONFIG_ARCH_EBSA110)		:= ebsa110

@@ -97,8 +97,12 @@ config SYNO_CEDARVIEW
 	bool "Intel-Cedarview"
 	depends on X86_64
 
-config SYNO_AMD_RICHLAND
-	bool "AMD-Richland"
+config SYNO_AVOTON
+	bool "Intel-Avoton"
+	depends on X86_64
+
+config SYNO_KVMX64
+	bool "KVM X64 Virtual machine"
 	depends on X86_64
 
 config OUTPUT_FORMAT

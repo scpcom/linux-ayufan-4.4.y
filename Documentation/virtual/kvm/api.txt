@@ -1466,6 +1466,167 @@ is supported; 2 if the processor requires all virtual machines to have
 an RMA, or 1 if the processor can use an RMA but doesn't require it,
 because it supports the Virtual RMA (VRMA) facility.
 
+4.64 KVM_NMI
+
+Capability: KVM_CAP_USER_NMI
+Architectures: x86
+Type: vcpu ioctl
+Parameters: none
+Returns: 0 on success, -1 on error
+
+Queues an NMI on the thread's vcpu.  Note this is well defined only
+when KVM_CREATE_IRQCHIP has not been called, since this is an interface
+between the virtual cpu core and virtual local APIC.  After KVM_CREATE_IRQCHIP
+has been called, this interface is completely emulated within the kernel.
+
+To use this to emulate the LINT1 input with KVM_CREATE_IRQCHIP, use the
+following algorithm:
+
+  - pause the vpcu
+  - read the local APIC's state (KVM_GET_LAPIC)
+  - check whether changing LINT1 will queue an NMI (see the LVT entry for LINT1)
+  - if so, issue KVM_NMI
+  - resume the vcpu
+
+Some guests configure the LINT1 NMI input to cause a panic, aiding in
+debugging.
+
+4.65 KVM_S390_UCAS_MAP
+
+Capability: KVM_CAP_S390_UCONTROL
+Architectures: s390
+Type: vcpu ioctl
+Parameters: struct kvm_s390_ucas_mapping (in)
+Returns: 0 in case of success
+
+The parameter is defined like this:
+	struct kvm_s390_ucas_mapping {
+		__u64 user_addr;
+		__u64 vcpu_addr;
+		__u64 length;
+	};
+
+This ioctl maps the memory at "user_addr" with the length "length" to
+the vcpu's address space starting at "vcpu_addr". All parameters need to
+be alligned by 1 megabyte.
+
+4.66 KVM_S390_UCAS_UNMAP
+
+Capability: KVM_CAP_S390_UCONTROL
+Architectures: s390
+Type: vcpu ioctl
+Parameters: struct kvm_s390_ucas_mapping (in)
+Returns: 0 in case of success
+
+The parameter is defined like this:
+	struct kvm_s390_ucas_mapping {
+		__u64 user_addr;
+		__u64 vcpu_addr;
+		__u64 length;
+	};
+
+This ioctl unmaps the memory in the vcpu's address space starting at
+"vcpu_addr" with the length "length". The field "user_addr" is ignored.
+All parameters need to be alligned by 1 megabyte.
+
+4.67 KVM_S390_VCPU_FAULT
+
+Capability: KVM_CAP_S390_UCONTROL
+Architectures: s390
+Type: vcpu ioctl
+Parameters: vcpu absolute address (in)
+Returns: 0 in case of success
+
+This call creates a page table entry on the virtual cpu's address space
+(for user controlled virtual machines) or the virtual machine's address
+space (for regular virtual machines). This only works for minor faults,
+thus it's recommended to access subject memory page via the user page
+table upfront. This is useful to handle validity intercepts for user
+controlled virtual machines to fault in the virtual cpu's lowcore pages
+prior to calling the KVM_RUN ioctl.
+
+4.68 KVM_SET_ONE_REG
+
+Capability: KVM_CAP_ONE_REG
+Architectures: all
+Type: vcpu ioctl
+Parameters: struct kvm_one_reg (in)
+Returns: 0 on success, negative value on failure
+
+struct kvm_one_reg {
+       __u64 id;
+       __u64 addr;
+};
+
+Using this ioctl, a single vcpu register can be set to a specific value
+defined by user space with the passed in struct kvm_one_reg, where id
+refers to the register identifier as described below and addr is a pointer
+to a variable with the respective size. There can be architecture agnostic
+and architecture specific registers. Each have their own range of operation
+and their own constants and width. To keep track of the implemented
+registers, find a list below:
+
+  Arch  |       Register        | Width (bits)
+        |                       |
+  PPC   | KVM_REG_PPC_HIOR      | 64
+
+4.69 KVM_GET_ONE_REG
+
+Capability: KVM_CAP_ONE_REG
+Architectures: all
+Type: vcpu ioctl
+Parameters: struct kvm_one_reg (in and out)
+Returns: 0 on success, negative value on failure
+
+This ioctl allows to receive the value of a single register implemented
+in a vcpu. The register to read is indicated by the "id" field of the
+kvm_one_reg struct passed in. On success, the register value can be found
+at the memory location pointed to by "addr".
+
+The list of registers accessible using this interface is identical to the
+list in 4.64.
+
+4.70 KVM_KVMCLOCK_CTRL
+
+Capability: KVM_CAP_KVMCLOCK_CTRL
+Architectures: Any that implement pvclocks (currently x86 only)
+Type: vcpu ioctl
+Parameters: None
+Returns: 0 on success, -1 on error
+
+This signals to the host kernel that the specified guest is being paused by
+userspace.  The host will set a flag in the pvclock structure that is checked
+from the soft lockup watchdog.  The flag is part of the pvclock structure that
+is shared between guest and host, specifically the second bit of the flags
+field of the pvclock_vcpu_time_info structure.  It will be set exclusively by
+the host and read/cleared exclusively by the guest.  The guest operation of
+checking and clearing the flag must an atomic operation so
+load-link/store-conditional, or equivalent must be used.  There are two cases
+where the guest will clear the flag: when the soft lockup watchdog timer resets
+itself or when a soft lockup is detected.  This ioctl can be called any time
+after pausing the vcpu, but before it is resumed.
+
+4.71 KVM_SIGNAL_MSI
+
+Capability: KVM_CAP_SIGNAL_MSI
+Architectures: x86
+Type: vm ioctl
+Parameters: struct kvm_msi (in)
+Returns: >0 on delivery, 0 if guest blocked the MSI, and -1 on error
+
+Directly inject a MSI message. Only valid with in-kernel irqchip that handles
+MSI messages.
+
+struct kvm_msi {
+	__u32 address_lo;
+	__u32 address_hi;
+	__u32 data;
+	__u32 flags;
+	__u8  pad[16];
+};
+
+No flags are defined so far. The corresponding field must be 0.
+
 5. The kvm_run structure
 
 Application code obtains a pointer to the kvm_run structure by

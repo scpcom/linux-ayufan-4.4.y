@@ -143,15 +143,4 @@ struct SYNOSTAT {
 #endif
 #endif
 
-#ifdef  MY_ABC_HERE
-typedef struct _tag_mmap_arg_struct {
-	unsigned long addr;
-	unsigned long len;
-	unsigned long prot;
-	unsigned long flags;
-	unsigned long fd;
-	unsigned long pgoff;
-} SYNO_MMAP_ARG;
-#endif
-
 #endif

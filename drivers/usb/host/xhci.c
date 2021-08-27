@@ -553,13 +553,21 @@ static void xhci_free_irq(struct xhci_hcd *xhci)
 	int ret;
 
 	/* return if using legacy interrupt */
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (xhci_to_hcd(xhci)->irq > 0)
+#else
 	if (xhci_to_hcd(xhci)->irq >= 0)
+#endif
 		return;
 
 	ret = xhci_free_msi(xhci);
 	if (!ret)
 		return;
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (pdev->irq > 0)
+#else
 	if (pdev->irq >= 0)
+#endif
 		free_irq(pdev->irq, xhci_to_hcd(xhci));
 
 	return;
@@ -670,7 +678,11 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 	/* unregister the legacy interrupt */
 	if (hcd->irq)
 		free_irq(hcd->irq, hcd);
+#if defined(CONFIG_SYNO_COMCERTO)
+	hcd->irq = 0;
+#else
 	hcd->irq = -1;
+#endif
 
 	ret = xhci_setup_msix(xhci);
 	if (ret)
@@ -678,7 +690,11 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 		ret = xhci_setup_msi(xhci);
 
 	if (!ret)
+#if defined(CONFIG_SYNO_COMCERTO)
+		/* hcd->irq is 0, we have MSI */
+#else
 		/* hcd->irq is -1, we have MSI */
+#endif
 		return 0;
 
 	if (!pdev->irq) {
@@ -1241,6 +1257,9 @@ static void xhci_clear_command_ring(struct xhci_hcd *xhci)
 	 */
 	ring->cycle_state = 1;
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	ring->num_trbs_free = ring->num_segs * (TRBS_PER_SEGMENT - 1) - 1;
+#endif
 	/*
 	 * Reset the hardware dequeue pointer.
 	 * Yes, this will need to be re-written after resume, but we're paranoid
@@ -1874,9 +1893,11 @@ int xhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 		goto done;
 	}
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	xhci_dbg(xhci, "Cancel URB %p\n", urb);
 	xhci_dbg(xhci, "Event ring:\n");
 	xhci_debug_ring(xhci, xhci->event_ring);
+#endif
 	ep_index = xhci_get_endpoint_index(&urb->ep->desc);
 	ep = &xhci->devs[urb->dev->slot_id]->eps[ep_index];
 	ep_ring = xhci_urb_to_transfer_ring(xhci, urb);
@@ -1885,12 +1906,29 @@ int xhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 		goto done;
 	}
 
+#if !defined(CONFIG_SYNO_COMCERTO)
 	xhci_dbg(xhci, "Endpoint ring:\n");
 	xhci_debug_ring(xhci, ep_ring);
+#endif
 
 	urb_priv = urb->hcpriv;
+#if defined(CONFIG_SYNO_COMCERTO)
+	i = urb_priv->td_cnt;
+	if (i < urb_priv->length)
+		xhci_dbg(xhci, "Cancel URB %p, dev %s, ep 0x%x, "
+				"starting at offset 0x%llx\n",
+				urb, urb->dev->devpath,
+				urb->ep->desc.bEndpointAddress,
+				(unsigned long long) xhci_trb_virt_to_dma(
+					urb_priv->td[i]->start_seg,
+					urb_priv->td[i]->first_trb));
+#endif
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	for (; i < urb_priv->length; i++) {
+#else
 	for (i = urb_priv->td_cnt; i < urb_priv->length; i++) {
+#endif
 		td = urb_priv->td[i];
 		list_add_tail(&td->cancelled_td_list, &ep->cancelled_td_list);
 	}
@@ -4184,6 +4222,41 @@ static int xhci_besl_encoding[16] = {125, 150, 200, 300, 400, 500, 1000, 2000,
 	3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
 
 /* Calculate HIRD/BESL for USB2 PORTPMSC*/
+#if defined(CONFIG_SYNO_COMCERTO)
+static int xhci_calculate_hird_besl(struct xhci_hcd *xhci,
+					struct usb_device *udev)
+{
+	int u2del, besl, besl_host;
+	int besl_device = 0;
+	u32 field;
+
+	u2del = HCS_U2_LATENCY(xhci->hcs_params3);
+	field = le32_to_cpu(udev->bos->ext_cap->bmAttributes);
+
+	if (field & USB_BESL_SUPPORT) {
+		for (besl_host = 0; besl_host < 16; besl_host++) {
+			if (xhci_besl_encoding[besl_host] >= u2del)
+				break;
+		}
+		/* Use baseline BESL value as default */
+		if (field & USB_BESL_BASELINE_VALID)
+			besl_device = USB_GET_BESL_BASELINE(field);
+		else if (field & USB_BESL_DEEP_VALID)
+			besl_device = USB_GET_BESL_DEEP(field);
+	} else {
+		if (u2del <= 50)
+			besl_host = 0;
+		else
+			besl_host = (u2del - 51) / 75 + 1;
+	}
+
+	besl = besl_host + besl_device;
+	if (besl > 15)
+		besl = 15;
+
+	return besl;
+}
+#else
 static int xhci_calculate_hird_besl(int u2del, bool use_besl)
 {
 	int hird;
@@ -4205,6 +4278,7 @@ static int xhci_calculate_hird_besl(int u2del, bool use_besl)
 
 	return hird;
 }
+#endif
 
 static int xhci_usb2_software_lpm_test(struct usb_hcd *hcd,
 					struct usb_device *udev)
@@ -4216,7 +4290,11 @@ static int xhci_usb2_software_lpm_test(struct usb_hcd *hcd,
 	u32		temp, dev_id;
 	unsigned int	port_num;
 	unsigned long	flags;
+#if defined(CONFIG_SYNO_COMCERTO)
+	int		hird;
+#else
 	int		u2del, hird;
+#endif
 	int		ret;
 
 	if (hcd->speed == HCD_USB3 || !xhci->sw_lpm_support ||
@@ -4262,11 +4340,15 @@ static int xhci_usb2_software_lpm_test(struct usb_hcd *hcd,
 	 * HIRD or BESL shoule be used. See USB2.0 LPM errata.
 	 */
 	pm_addr = port_array[port_num] + 1;
+#if defined(CONFIG_SYNO_COMCERTO)
+	hird = xhci_calculate_hird_besl(xhci, udev);
+#else
 	u2del = HCS_U2_LATENCY(xhci->hcs_params3);
 	if (le32_to_cpu(udev->bos->ext_cap->bmAttributes) & (1 << 2))
 		hird = xhci_calculate_hird_besl(u2del, 1);
 	else
 		hird = xhci_calculate_hird_besl(u2del, 0);
+#endif
 
 	temp = PORT_L1DS(udev->slot_id) | PORT_HIRD(hird);
 	xhci_writel(xhci, temp, pm_addr);
@@ -4346,7 +4428,11 @@ int xhci_set_usb2_hardware_lpm(struct usb_hcd *hcd,
 	u32		temp;
 	unsigned int	port_num;
 	unsigned long	flags;
+#if defined(CONFIG_SYNO_COMCERTO)
+	int		hird;
+#else
 	int		u2del, hird;
+#endif
 
 	if (hcd->speed == HCD_USB3 || !xhci->hw_lpm_support ||
 			!udev->lpm_capable)
@@ -4369,11 +4455,15 @@ int xhci_set_usb2_hardware_lpm(struct usb_hcd *hcd,
 	xhci_dbg(xhci, "%s port %d USB2 hardware LPM\n",
 			enable ? "enable" : "disable", port_num);
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	hird = xhci_calculate_hird_besl(xhci, udev);
+#else
 	u2del = HCS_U2_LATENCY(xhci->hcs_params3);
 	if (le32_to_cpu(udev->bos->ext_cap->bmAttributes) & (1 << 2))
 		hird = xhci_calculate_hird_besl(u2del, 1);
 	else
 		hird = xhci_calculate_hird_besl(u2del, 0);
+#endif
 
 	if (enable) {
 		temp &= ~PORT_HIRD_MASK;
@@ -4630,6 +4720,13 @@ static int __init xhci_hcd_init(void)
 		printk(KERN_DEBUG "Problem registering PCI driver.");
 		return retval;
 	}
+#if defined(CONFIG_SYNO_COMCERTO)
+	retval = xhci_register_plat();
+	if (retval < 0) {
+		printk(KERN_DEBUG "Problem registering platform driver.");
+		goto unreg_pci;
+	}
+#endif
 	/*
 	 * Check the compiler generated sizes of structures that must be laid
 	 * out in specific ways for hardware access.
@@ -4649,11 +4746,19 @@ static int __init xhci_hcd_init(void)
 	BUILD_BUG_ON(sizeof(struct xhci_run_regs) != (8+8*128)*32/8);
 	BUILD_BUG_ON(sizeof(struct xhci_doorbell_array) != 256*32/8);
 	return 0;
+#if defined(CONFIG_SYNO_COMCERTO)
+unreg_pci:
+	xhci_unregister_pci();
+	return retval;
+#endif
 }
 module_init(xhci_hcd_init);
 
 static void __exit xhci_hcd_cleanup(void)
 {
 	xhci_unregister_pci();
+#if defined(CONFIG_SYNO_COMCERTO)
+	xhci_unregister_plat();
+#endif
 }
 module_exit(xhci_hcd_cleanup);

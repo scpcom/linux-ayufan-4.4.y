@@ -921,6 +921,19 @@ do_sync_io:
 	pr_debug("%dB behind alloc failed, doing sync I/O\n", bio->bi_size);
 }
 
+#ifdef MY_ABC_HERE
+static void syno_flashcache_return_error(struct bio *bio)
+{
+	/* defined in blk_types.h */
+	if (bio_flagged(bio, BIO_MD_RETURN_ERROR)) {
+		printk(KERN_DEBUG "Get flashcache read error, return error code\n");
+		bio_endio(bio, 1);
+	} else {
+		bio_endio(bio, 0);
+	}
+}
+#endif
+
 static void make_request(struct mddev *mddev, struct bio * bio)
 {
 	struct r1conf *conf = mddev->private;
@@ -948,7 +961,12 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 	if (0 == conf->raid_disks - mddev->degraded) {
 #endif
 		/* when there are no any disk, just pass it */
+		 
+#ifdef  MY_ABC_HERE
+		syno_flashcache_return_error(bio);
+#else
 		bio_endio(bio, 0);
+#endif
 		return;
 	}
 #endif /* MY_ABC_HERE */
@@ -2313,7 +2331,10 @@ static void handle_read_error(struct r1conf *conf, struct r1bio *r1_bio)
 		md_error(mddev, conf->mirrors[r1_bio->read_disk].rdev);
 
 	bio = r1_bio->bios[r1_bio->read_disk];
+#ifdef MY_ABC_HERE
+#else
 	bdevname(bio->bi_bdev, b);
+#endif
 read_more:
 	disk = read_balance(conf, r1_bio, &max_sectors);
 	if (disk == -1) {
@@ -2325,10 +2346,17 @@ read_more:
 					(unsigned long long)r1_bio->sector);
 		}else
 #endif
+#ifdef MY_ABC_HERE
+		printk(KERN_ALERT "md/raid1:%s: unrecoverable I/O"
+		       " read error for block %llu\n",
+		       mdname(mddev), (unsigned long long)r1_bio->sector);
+		raid_end_bio_io(r1_bio);
+#else
 		printk(KERN_ALERT "md/raid1:%s: %s: unrecoverable I/O"
 		       " read error for block %llu\n",
 		       mdname(mddev), b, (unsigned long long)r1_bio->sector);
 		raid_end_bio_io(r1_bio);
+#endif
 	} else {
 		const unsigned long do_sync
 			= r1_bio->master_bio->bi_rw & REQ_SYNC;

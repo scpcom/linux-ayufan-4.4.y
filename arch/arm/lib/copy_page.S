@@ -33,6 +33,8 @@ ENTRY(copy_page)
 	PLD(	pld	[r1, #L1_CACHE_BYTES]		)
 #if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
 		ldr	r2, =COPY_COUNT
+#elif defined(CONFIG_SYNO_COMCERTO)
+		ldr	r2, =COPY_COUNT			@	1
 #else
 		mov	r2, #COPY_COUNT			@	1
 #endif

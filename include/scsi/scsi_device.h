@@ -100,9 +100,6 @@ struct scsi_device {
 #ifdef MY_ABC_HERE
 	unsigned char auto_remap;
 #endif
-#ifdef MY_ABC_HERE
-	int iResetPwrCount;  /* the count of disk power reset */
-#endif
 
 	unsigned int manufacturer;	/* Manufacturer of device, for using 
 					 * vendor-specific cmd's */
@@ -181,7 +178,7 @@ struct scsi_device {
 	unsigned long   idle;   /* scsi idle time in jiffers */
 	unsigned char	spindown;
 	unsigned char   nospindown;
-#endif
+#endif /* MY_ABC_HERE */
 
 	struct device		sdev_gendev,
 				sdev_dev;

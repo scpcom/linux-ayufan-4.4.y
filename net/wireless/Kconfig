@@ -12,10 +12,10 @@ config WEXT_PROC
 	depends on WEXT_CORE
 
 config WEXT_SPY
-	bool
+	bool "WEXT_SPY"
 
 config WEXT_PRIV
-	bool
+	bool "WEXT_PRIV"
 	default y
 
 config CFG80211
@@ -144,13 +144,13 @@ config LIB80211
 	  you want this built into your kernel.
 
 config LIB80211_CRYPT_WEP
-	tristate
+	tristate "LIB80211_CRYPT_WEP"
 
 config LIB80211_CRYPT_CCMP
-	tristate
+	tristate "LIB80211_CRYPT_CCMP"
 
 config LIB80211_CRYPT_TKIP
-	tristate
+	tristate "LIB80211_CRYPT_TKIP"
 
 config LIB80211_DEBUG
 	bool "lib80211 debugging messages"

@@ -14,7 +14,7 @@
 #define _ASMARM_PAGE_H
 
 /* PAGE_SHIFT determines the page size */
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)
+#if (defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_64K_PAGES)) || (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE))
 #define PAGE_SHIFT		16
 #else
 	#define PAGE_SHIFT		12
@@ -157,6 +157,8 @@ extern void __cpu_copy_user_highpage(struct page *to, struct page *from,
 
 #define clear_page(page)	memset((void *)(page), 0, PAGE_SIZE)
 extern void copy_page(void *to, const void *from);
+
+#define __HAVE_ARCH_GATE_AREA 1
 
 #if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
 #include <asm/pgtable-3level-types.h>

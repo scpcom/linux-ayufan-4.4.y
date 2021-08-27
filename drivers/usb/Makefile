@@ -49,6 +49,10 @@ obj-$(CONFIG_EARLY_PRINTK_DBGP)	+= early/
 obj-$(CONFIG_USB_ATM)		+= atm/
 obj-$(CONFIG_USB_SPEEDTOUCH)	+= atm/
 
+ifeq ($(CONFIG_SYNO_COMCERTO),y)
+obj-$(CONFIG_DWC_OTG)		+= dwc_otg/
+endif
+
 obj-$(CONFIG_USB_MUSB_HDRC)	+= musb/
 obj-$(CONFIG_USB_RENESAS_USBHS)	+= renesas_usbhs/
 obj-$(CONFIG_USB_OTG_UTILS)	+= otg/

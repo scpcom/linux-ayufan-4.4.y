@@ -37,6 +37,11 @@
  * Note: writeable partitions require their size and offset be
  * erasesize aligned (e.g. use MTDPART_OFS_NEXTBLK).
  */
+#if defined(CONFIG_SYNO_COMCERTO)
+struct mtd_info;
+
+struct mtd_partition;
+#endif
 
 struct mtd_partition {
 	char *name;			/* identifier string */
@@ -44,6 +49,9 @@ struct mtd_partition {
 	uint64_t offset;		/* offset within the master MTD space */
 	uint32_t mask_flags;		/* master MTD flags to mask out for this partition */
 	struct nand_ecclayout *ecclayout;	/* out of band layout for this partition (NAND only) */
+#if defined(CONFIG_SYNO_COMCERTO)
+	int (*refresh_partition)(struct mtd_info *);
+#endif
 };
 
 #define MTDPART_OFS_RETAIN	(-3)
@@ -51,8 +59,9 @@ struct mtd_partition {
 #define MTDPART_OFS_APPEND	(-1)
 #define MTDPART_SIZ_FULL	(0)
 
-
+#if !defined(CONFIG_SYNO_COMCERTO)
 struct mtd_info;
+#endif
 struct device_node;
 
 /**
@@ -80,9 +89,10 @@ struct mtd_part_parser {
 extern int register_mtd_parser(struct mtd_part_parser *parser);
 extern int deregister_mtd_parser(struct mtd_part_parser *parser);
 
-int mtd_is_partition(struct mtd_info *mtd);
+int mtd_is_partition(const struct mtd_info *mtd);
 int mtd_add_partition(struct mtd_info *master, char *name,
 		      long long offset, long long length);
 int mtd_del_partition(struct mtd_info *master, int partno);
+uint64_t mtd_get_device_size(const struct mtd_info *mtd);
 
 #endif

@@ -23,6 +23,9 @@
 #include <linux/random.h>
 #include <linux/sched.h>
 #include <linux/exportfs.h>
+#ifdef CONFIG_FS_SYNO_ACL
+#include <linux/syno_acl.h>
+#endif
 
 MODULE_AUTHOR("Miklos Szeredi <miklos@szeredi.hu>");
 MODULE_DESCRIPTION("Filesystem in Userspace");
@@ -95,6 +98,7 @@ static struct inode *fuse_alloc_inode(struct super_block *sb)
 	fi->attr_version = 0;
 	fi->writectr = 0;
 	fi->orig_ino = 0;
+	fi->state = 0;
 	INIT_LIST_HEAD(&fi->write_files);
 	INIT_LIST_HEAD(&fi->queued_writes);
 	INIT_LIST_HEAD(&fi->writepages);
@@ -200,21 +204,43 @@ void fuse_change_attributes(struct inode *inode, struct fuse_attr *attr,
 	struct fuse_conn *fc = get_fuse_conn(inode);
 	struct fuse_inode *fi = get_fuse_inode(inode);
 	loff_t oldsize;
+	struct timespec old_mtime;
 
 	spin_lock(&fc->lock);
-	if (attr_version != 0 && fi->attr_version > attr_version) {
+	if ((attr_version != 0 && fi->attr_version > attr_version) ||
+	    test_bit(FUSE_I_SIZE_UNSTABLE, &fi->state)) {
 		spin_unlock(&fc->lock);
 		return;
 	}
 
+	old_mtime = inode->i_mtime;
 	fuse_change_attributes_common(inode, attr, attr_valid);
 
 	oldsize = inode->i_size;
 	i_size_write(inode, attr->size);
 	spin_unlock(&fc->lock);
 
-	if (S_ISREG(inode->i_mode) && oldsize != attr->size) {
+	if (S_ISREG(inode->i_mode)) {
+		bool inval = false;
+
+		if (oldsize != attr->size) {
 			truncate_pagecache(inode, oldsize, attr->size);
+			inval = true;
+		} else if (fc->auto_inval_data) {
+			struct timespec new_mtime = {
+				.tv_sec = attr->mtime,
+				.tv_nsec = attr->mtimensec,
+			};
+
+			/*
+			 * Auto inval mode also checks and invalidates if mtime
+			 * has changed.
+			 */
+			if (!timespec_equal(&old_mtime, &new_mtime))
+				inval = true;
+		}
+
+		if (inval)
 			invalidate_inode_pages2(inode->i_mapping);
 	}
 }
@@ -327,6 +353,7 @@ static void fuse_send_destroy(struct fuse_conn *fc)
 		fc->destroy_req = NULL;
 		req->in.h.opcode = FUSE_DESTROY;
 		req->force = 1;
+		req->background = 0;
 		fuse_request_send(fc, req);
 		fuse_put_request(fc, req);
 	}
@@ -343,17 +370,13 @@ void fuse_conn_kill(struct fuse_conn *fc)
 	spin_lock(&fc->lock);
 	fc->connected = 0;
 	fc->blocked = 0;
+	fc->initialized = 1;
 	spin_unlock(&fc->lock);
 	/* Flush all readers on this fs */
 	kill_fasync(&fc->fasync, SIGIO, POLL_IN);
 	wake_up_all(&fc->waitq);
 	wake_up_all(&fc->blocked_waitq);
 	wake_up_all(&fc->reserved_req_waitq);
-	mutex_lock(&fuse_mutex);
-	list_del(&fc->entry);
-	fuse_ctl_remove_conn(fc);
-	mutex_unlock(&fuse_mutex);
-	fuse_bdi_destroy(fc);
 }
 EXPORT_SYMBOL_GPL(fuse_conn_kill);
 
@@ -362,7 +385,14 @@ static void fuse_put_super(struct super_block *sb)
 	struct fuse_conn *fc = get_fuse_conn_super(sb);
 
 	fuse_send_destroy(fc);
+
 	fuse_conn_kill(fc);
+	mutex_lock(&fuse_mutex);
+	list_del(&fc->entry);
+	fuse_ctl_remove_conn(fc);
+	mutex_unlock(&fuse_mutex);
+	fuse_bdi_destroy(fc);
+
 	fuse_conn_put(fc);
 }
 
@@ -388,12 +418,12 @@ static int fuse_statfs(struct dentry *dentry, struct kstatfs *buf)
 	struct fuse_statfs_out outarg;
 	int err;
 
-	if (!fuse_allow_task(fc, current)) {
+	if (!fuse_allow_current_process(fc)) {
 		buf->f_type = FUSE_SUPER_MAGIC;
 		return 0;
 	}
 
-	req = fuse_get_req(fc);
+	req = fuse_get_req_nopages(fc);
 	if (IS_ERR(req))
 		return PTR_ERR(req);
 
@@ -422,6 +452,12 @@ enum {
 	OPT_ALLOW_OTHER,
 	OPT_MAX_READ,
 	OPT_BLKSIZE,
+#ifdef CONFIG_FS_SYNO_ACL
+	OPT_SYNOACL,
+#endif
+#ifdef MY_ABC_HERE
+	OPT_SYNOMETA_XATTR,
+#endif
 	OPT_ERR
 };
 
@@ -434,10 +470,20 @@ static const match_table_t tokens = {
 	{OPT_ALLOW_OTHER,		"allow_other"},
 	{OPT_MAX_READ,			"max_read=%u"},
 	{OPT_BLKSIZE,			"blksize=%u"},
+#ifdef CONFIG_FS_SYNO_ACL
+	{OPT_SYNOACL, 			SYNO_ACL_MNT_OPT},
+#endif
+#ifdef MY_ABC_HERE
+	{OPT_SYNOMETA_XATTR, 		SYNOMETA_XATTR_MNT_OPT},
+#endif
 	{OPT_ERR,			NULL}
 };
 
+#if defined(CONFIG_FS_SYNO_ACL) || defined(MY_ABC_HERE)
+static int parse_fuse_opt(char *opt, struct super_block *sb, struct fuse_mount_data *d, int is_bdev)
+#else
 static int parse_fuse_opt(char *opt, struct fuse_mount_data *d, int is_bdev)
+#endif
 {
 	char *p;
 	memset(d, 0, sizeof(struct fuse_mount_data));
@@ -503,6 +549,16 @@ static int parse_fuse_opt(char *opt, struct fuse_mount_data *d, int is_bdev)
 			d->blksize = value;
 			break;
 
+#ifdef CONFIG_FS_SYNO_ACL
+		case OPT_SYNOACL:
+			sb->s_flags |= MS_SYNOACL;
+			break;
+#endif
+#ifdef MY_ABC_HERE
+		case OPT_SYNOMETA_XATTR:
+			sb->s_syno_opt |= SYNO_MS_META_XATTR;
+			break;
+#endif //MY_ABC_HERE
 		default:
 			return 0;
 		}
@@ -530,6 +586,14 @@ static int fuse_show_options(struct seq_file *m, struct vfsmount *mnt)
 	if (mnt->mnt_sb->s_bdev &&
 	    mnt->mnt_sb->s_blocksize != FUSE_DEFAULT_BLKSIZE)
 		seq_printf(m, ",blksize=%lu", mnt->mnt_sb->s_blocksize);
+#ifdef CONFIG_FS_SYNO_ACL
+	if (mnt->mnt_sb->s_flags & MS_SYNOACL)
+		seq_puts(m, ","SYNO_ACL_MNT_OPT);
+#endif
+#ifdef MY_ABC_HERE
+	if (mnt->mnt_sb->s_syno_opt & SYNO_MS_META_XATTR)
+		seq_puts(m, ","SYNOMETA_XATTR_MNT_OPT);
+#endif
 	return 0;
 }
 
@@ -556,7 +620,8 @@ void fuse_conn_init(struct fuse_conn *fc)
 	fc->khctr = 0;
 	fc->polled_files = RB_ROOT;
 	fc->reqctr = 0;
-	fc->blocked = 1;
+	fc->blocked = 0;
+	fc->initialized = 0;
 	fc->attr_version = 1;
 	get_random_bytes(&fc->scramble_key, sizeof(fc->scramble_key));
 }
@@ -844,6 +909,15 @@ static void process_init_reply(struct fuse_conn *fc, struct fuse_req *req)
 				fc->big_writes = 1;
 			if (arg->flags & FUSE_DONT_MASK)
 				fc->dont_mask = 1;
+			if (arg->flags & FUSE_AUTO_INVAL_DATA)
+				fc->auto_inval_data = 1;
+			if (arg->flags & FUSE_DO_READDIRPLUS) {
+				fc->do_readdirplus = 1;
+				if (arg->flags & FUSE_READDIRPLUS_AUTO)
+					fc->readdirplus_auto = 1;
+			}
+			if (arg->flags & FUSE_ASYNC_DIO)
+				fc->async_dio = 1;
 		} else {
 			ra_pages = fc->max_read / PAGE_CACHE_SIZE;
 			fc->no_lock = 1;
@@ -856,7 +930,7 @@ static void process_init_reply(struct fuse_conn *fc, struct fuse_req *req)
 		fc->max_write = max_t(unsigned, 4096, fc->max_write);
 		fc->conn_init = 1;
 	}
-	fc->blocked = 0;
+	fc->initialized = 1;
 	wake_up_all(&fc->blocked_waitq);
 }
 
@@ -869,7 +943,9 @@ static void fuse_send_init(struct fuse_conn *fc, struct fuse_req *req)
 	arg->max_readahead = fc->bdi.ra_pages * PAGE_CACHE_SIZE;
 	arg->flags |= FUSE_ASYNC_READ | FUSE_POSIX_LOCKS | FUSE_ATOMIC_O_TRUNC |
 		FUSE_EXPORT_SUPPORT | FUSE_BIG_WRITES | FUSE_DONT_MASK |
-		FUSE_FLOCK_LOCKS;
+		FUSE_SPLICE_WRITE | FUSE_SPLICE_MOVE | FUSE_SPLICE_READ |
+		FUSE_FLOCK_LOCKS | FUSE_IOCTL_DIR | FUSE_AUTO_INVAL_DATA |
+		FUSE_DO_READDIRPLUS | FUSE_READDIRPLUS_AUTO | FUSE_ASYNC_DIO;
 	req->in.h.opcode = FUSE_INIT;
 	req->in.numargs = 1;
 	req->in.args[0].size = sizeof(*arg);
@@ -949,7 +1025,11 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 
 	sb->s_flags &= ~MS_NOSEC;
 
+#if defined(CONFIG_FS_SYNO_ACL) || defined(MY_ABC_HERE)
+	if (!parse_fuse_opt((char *) data, sb, &d, is_bdev))
+#else
 	if (!parse_fuse_opt((char *) data, &d, is_bdev))
+#endif
 		goto err;
 
 	if (is_bdev) {
@@ -965,6 +1045,7 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 	sb->s_magic = FUSE_SUPER_MAGIC;
 	sb->s_op = &fuse_super_operations;
 	sb->s_maxbytes = MAX_LFS_FILESIZE;
+	sb->s_time_gran = 1;
 	sb->s_export_op = &fuse_export_operations;
 
 	file = fget(d.fd);
@@ -991,10 +1072,20 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 	sb->s_bdi = &fc->bdi;
 
 	/* Handle umasking inside the fuse code */
+#ifdef CONFIG_FS_SYNO_ACL
+	if (sb->s_flags & MS_SYNOACL) {
+		int st = SYNOACLModuleStatusGet("synoacl_vfs");
+		if (MODULE_STATE_LIVE != st) {
+			sb->s_flags &= ~MS_SYNOACL;
+			printk(KERN_ERR "synoacl module has not been loaded. Unable to mount with synoacl, vfs_mod status=%d \n", st);
+		} else
+			SYNOACLModuleGet("synoacl_vfs");
+	}
+#else
 	if (sb->s_flags & MS_POSIXACL)
 		fc->dont_mask = 1;
 	sb->s_flags |= MS_POSIXACL;
-
+#endif
 	fc->release = fuse_free_conn;
 	fc->flags = d.flags;
 	fc->user_id = d.user_id;
@@ -1017,12 +1108,13 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 	/* only now - we want root dentry with NULL ->d_op */
 	sb->s_d_op = &fuse_dentry_operations;
 
-	init_req = fuse_request_alloc();
+	init_req = fuse_request_alloc(0);
 	if (!init_req)
 		goto err_put_root;
+	init_req->background = 1;
 
 	if (is_bdev) {
-		fc->destroy_req = fuse_request_alloc();
+		fc->destroy_req = fuse_request_alloc(0);
 		if (!fc->destroy_req)
 			goto err_free_init_req;
 	}
@@ -1084,6 +1176,11 @@ static void fuse_kill_sb_anon(struct super_block *sb)
 		up_write(&fc->killsb);
 	}
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (MS_SYNOACL & sb->s_flags) {
+		SYNOACLModulePut("synoacl_vfs");
+	}
+#endif
 	kill_anon_super(sb);
 }
 
@@ -1112,6 +1209,12 @@ static void fuse_kill_sb_blk(struct super_block *sb)
 		fc->sb = NULL;
 		up_write(&fc->killsb);
 	}
+
+#ifdef CONFIG_FS_SYNO_ACL
+	if (MS_SYNOACL & sb->s_flags) {
+		SYNOACLModulePut("synoacl_vfs");
+	}
+#endif
 
 	kill_block_super(sb);
 }
@@ -1185,6 +1288,12 @@ static void fuse_fs_cleanup(void)
 {
 	unregister_filesystem(&fuse_fs_type);
 	unregister_fuseblk();
+
+	/*
+	 * Make sure all delayed rcu free inodes are flushed before we
+	 * destroy cache.
+	 */
+	rcu_barrier();
 	kmem_cache_destroy(fuse_inode_cachep);
 }
 

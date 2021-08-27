@@ -228,7 +228,9 @@ struct otp_info {
  * modes (see "struct mtd_write_req")
  */
 #define MEMWRITE		_IOWR('M', 24, struct mtd_write_req)
-
+#if defined(CONFIG_SYNO_COMCERTO)
+#define MTDREFRESH		_IO('M', 50)
+#endif
 
 /*
  * Obsolete legacy interface. Keep it in order not to break userspace

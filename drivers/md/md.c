@@ -6266,69 +6266,6 @@ void md_set_array_sectors(struct mddev *mddev, sector_t array_sectors)
 }
 EXPORT_SYMBOL(md_set_array_sectors);
 
-#ifdef MY_ABC_HERE
-/*
- * Duplicate from mdadm/mdadm-3.1.4/super1.c
- * choose an appropriate space for bitmap.
- */
-static unsigned long choose_bm_space(unsigned long long devsize)
-{
-	/* if the device is bigger than 8Gig, save 64k for bitmap usage,
-	 * if bigger than 200Gig, save 128k
-	 * NOTE: result must be multiple of 4K else bad things happen
-	 * on 4K-sector devices.
-	 */
-	if (devsize < 64*2) return 0;
-	if (devsize - 64*2 >= 200*1024*1024*2)
-		return 128*2;
-	if (devsize - 4*2 > 8*1024*1024*2)
-		return 64*2;
-	return 4*2;
-}
-
-/*
- * Examine the max device size that can used for data and aligned with
- * 64KB chunk size.
- */
-static sector_t max_avail_data_size(struct md_rdev *rdev, int minor_version)
-{
-	unsigned long long avail = 0;
-	unsigned long long devsize = i_size_read(rdev->bdev->bd_inode) / 512;
-
-	if (devsize < 24)
-		return 0;
-
-	devsize -= choose_bm_space(devsize);
-	if (minor_version > 1) {
-		if (devsize > 1024*1024*2)
-			devsize -= 1024*2;
-	}
-
-	switch(minor_version) {
-		case 0:
-			/* at end */
-			avail = ((devsize - 8*2 ) & ~(4*2-1));
-			break;
-		case 1:
-			/* at start, 4K for superblock and possible bitmap */
-			avail = devsize - 4*2;
-			break;
-		case 2:
-			/* 4k from start, 4K for superblock and possible bitmap */
-			avail = devsize - (4+4)*2;
-			break;
-		default:
-			return 0;
-	}
-
-	//aligned with 64 KB chunk
-	if (avail) {
-		avail &= ~(unsigned long long)(0x0000007fULL);
-	}
-	return (sector_t)avail;
-}
-#endif
-
 static int update_size(struct mddev *mddev, sector_t num_sectors)
 {
 	struct md_rdev *rdev;
@@ -6356,11 +6293,6 @@ static int update_size(struct mddev *mddev, sector_t num_sectors)
 	list_for_each_entry(rdev, &mddev->disks, same_set) {
 		sector_t avail = rdev->sectors;
 
-#ifdef MY_ABC_HERE
-		if (fit) {
-			avail = max_avail_data_size(rdev, mddev->minor_version);
-		}
-#endif
 		if (fit && (num_sectors == 0 || num_sectors > avail))
 			num_sectors = avail;
 		if (avail < num_sectors)
@@ -8832,7 +8764,10 @@ blDenyDisks(const struct block_device *pBDev)
 		goto END;
 	}
 	// this disk are not going to be used as system disk
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_KVMX64
+	/* CONFIG_SYNO_KVMX64 */
+	/* XXX TODO FIXME ugly hack needed to get rid for production */
+#else
 	if (!(pBDev->bd_disk->systemDisk)) {
 		goto END;
 	}

@@ -410,9 +410,13 @@ static int __init init_inodecache(void)
 	return squashfs_inode_cachep ? 0 : -ENOMEM;
 }
 
-
 static void destroy_inodecache(void)
 {
+	/*
+	 * Make sure all delayed rcu free inodes are flushed before we
+	 * destroy cache.
+	 */
+	rcu_barrier();
 	kmem_cache_destroy(squashfs_inode_cachep);
 }
 

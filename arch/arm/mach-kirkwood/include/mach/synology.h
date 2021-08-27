@@ -37,7 +37,6 @@
 #define DISK_LED_GREEN_SOLID    1
 #define DISK_LED_ORANGE_SOLID   2
 #define DISK_LED_ORANGE_BLINK   3
-#define DISK_LED_BLUE			5
 
 typedef struct __tag_SYNO_FAN_GPIO {
 	u8 fan_1;

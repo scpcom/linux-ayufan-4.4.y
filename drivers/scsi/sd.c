@@ -104,15 +104,11 @@ MODULE_ALIAS_SCSI_DEVICE(TYPE_RBC);
 #endif
 
 #ifdef MY_ABC_HERE
-extern int syno_hibernation_log_sec;
-#endif
-
-#ifdef MY_ABC_HERE
 extern int gSynoHasDynModule;
 #endif
 
-#ifdef CONFIG_SYNO_ARMADA
-extern int gSynoUSBStation;
+#ifdef CONFIG_SYNO_DUAL_HEAD
+extern int gSynoDualHead;
 #endif
 
 #ifdef MY_ABC_HERE
@@ -2605,6 +2601,37 @@ static void sd_read_app_tag_own(struct scsi_disk *sdkp, unsigned char *buffer)
 	return;
 }
 
+#if defined(MY_ABC_HERE)
+/**
+ * syno_get_ata_identity - Get ATA IDENTITY via ATA PASS-THRU command
+ * @sdev: the disk you want to get ata identity
+ * @id: ata identity result will stored in here
+ *
+ * return 0: if it's SAS disk or failed
+ *        1: success
+ */
+int
+syno_get_ata_identity(struct scsi_device *sdev, u16 *id)
+{
+	unsigned char scsi_cmd[MAX_COMMAND_SIZE] = {0};
+
+	/* ATA IDENTIFY DEVICE via ATA PASS-THRU(16)*/
+	scsi_cmd[0] = ATA_16;
+	scsi_cmd[1] = 0x08; /* PIO Data-in */
+	scsi_cmd[2] = 0x0e; /* T_DIR=1, BYT_BLOK=1, T_LENGTH=2 */
+	scsi_cmd[14] = ATA_CMD_ID_ATA;
+
+	/* if it's SAS disk, ATA PASS-THRU will fail. Return -1 */
+	if (scsi_execute_req(sdev, scsi_cmd, DMA_FROM_DEVICE,
+		id, 512, NULL, 10 * HZ, 5, NULL)) {
+		return 0;
+	}
+
+	return 1;
+}
+EXPORT_SYMBOL(syno_get_ata_identity);
+#endif
+
 /**
  * sd_read_block_limits - Query disk device for preferred I/O sizes.
  * @disk: disk to query
@@ -3034,6 +3061,12 @@ static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 	}
 
 	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type) {
+#ifdef CONFIG_SYNO_DUAL_HEAD
+		if (1 == gSynoDualHead && (!strncmp(SYNO_SATA_DOM_VENDOR, sdp->vendor, strlen(SYNO_SATA_DOM_VENDOR))
+					|| !strncmp(SYNO_SATA_DOM_MODEL, sdp->model, strlen(SYNO_SATA_DOM_MODEL)))){
+				return SYNO_DISK_SYNOBOOT;
+			}
+#endif
 		// else treat as internal disks
 		return SYNO_DISK_SATA;
 	}
@@ -3131,7 +3164,7 @@ static int sd_probe(struct device *dev)
 		sdp->idle = jiffies;
 		sdp->nospindown = 0;
 		sdp->spindown = 0;
-#endif
+#endif /* MY_ABC_HERE */
 
 		spin_lock(&sd_index_lock);
 
@@ -3162,24 +3195,7 @@ static int sd_probe(struct device *dev)
 					break;
 				}
 #endif
-
-#ifdef CONFIG_SYNO_ARMADA
-				/* The device node of internal micro SD card of USB station 3 should be fixed to sda. */
-				if (1 == gSynoHasDynModule && 1 == gSynoUSBStation) {
-					struct us_data *us = host_to_us(sdp->host);
-					struct usb_device *usbdev = us->pusb_dev;
-
-					if (0 == strcmp((&(&usbdev->dev)->kobj)->name, SYNO_INTERNAL_MICROSD_NAME)) {
-						want_idx = 0;
-					} else {
 				want_idx = SYNO_MAX_INTERNAL_DISK + 1;
-					}
-				} else {
-					want_idx = SYNO_MAX_INTERNAL_DISK + 1;
-				}
-#else /* CONFIG_SYNO_ARMADA */
-				want_idx = SYNO_MAX_INTERNAL_DISK + 1;
-#endif /* CONFIG_SYNO_ARMADA */
 				break;
 			case SYNO_DISK_SAS:
 			case SYNO_DISK_SATA:

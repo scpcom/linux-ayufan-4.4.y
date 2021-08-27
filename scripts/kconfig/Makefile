@@ -123,6 +123,11 @@ check-lxdialog  := $(srctree)/$(src)/lxdialog/check-lxdialog.sh
 # we really need to do so. (Do not call gcc as part of make mrproper)
 HOST_EXTRACFLAGS += $(shell $(CONFIG_SHELL) $(check-lxdialog) -ccflags) \
                     -DLOCALE
+ifeq ($(CONFIG_SYNO_COMCERTO),y)
+ifeq ($(shell uname -s),Darwin)
+HOST_LOADLIBES  += -lncurses
+endif
+endif
 
 # ===========================================================================
 # Shared Makefile for the various kconfig executables:

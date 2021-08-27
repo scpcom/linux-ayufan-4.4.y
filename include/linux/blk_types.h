@@ -101,6 +101,13 @@ struct bio {
 #ifdef MY_ABC_HERE
 #define BIO_AUTO_REMAP 12	/* record if auto-remap occurred */
 #endif
+#ifdef MY_ABC_HERE
+/*
+ * Currently, our RAID1 device won't return error on make_reuest() when RAID1 is crashed
+ * So we add this flag to told md layer that is should eturn error for flashcache * devices
+ */
+#define BIO_MD_RETURN_ERROR 13
+#endif
 #define bio_flagged(bio, flag)	((bio)->bi_flags & (1 << (flag)))
 
 /*

@@ -579,7 +579,11 @@ ehci_hub_status_data (struct usb_hcd *hcd, char *buf)
 	 * always set, seem to clear PORT_OCC and PORT_CSC when writing to
 	 * PORT_POWER; that's surprising, but maybe within-spec.
 	 */
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (!ignore_oc && !ehci->ignore_oc)
+#else
 	if (!ignore_oc)
+#endif
 		mask = PORT_CSC | PORT_PEC | PORT_OCC;
 	else
 		mask = PORT_CSC | PORT_PEC;
@@ -804,7 +808,11 @@ static int ehci_hub_control (
 		if (temp & PORT_PEC)
 			status |= USB_PORT_STAT_C_ENABLE << 16;
 
+#if defined(CONFIG_SYNO_COMCERTO)
+		if ((temp & PORT_OCC) && (!ignore_oc && !ehci->ignore_oc)){
+#else
 		if ((temp & PORT_OCC) && !ignore_oc){
+#endif
 			status |= USB_PORT_STAT_C_OVERCURRENT << 16;
 
 			/*
@@ -875,8 +883,22 @@ static int ehci_hub_control (
 			retval = handshake(ehci, status_reg,
 					PORT_RESET, 0, 1000);
 			if (retval != 0) {
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+				/*
+				 * Attempt to resolve HS reset error by
+				 * applying the HS detect WA
+				 */
+				if (ehci_marvell_hs_detect_wa(ehci,
+							hcd->self.busnum)) {
+					ehci_err(ehci, "port %d reset error %d\n",
+						wIndex + 1, retval);
+				}
+#else
 				ehci_err (ehci, "port %d reset error %d\n",
 					wIndex + 1, retval);
+#endif
+
 				goto error;
 			}
 
@@ -939,6 +961,15 @@ static int ehci_hub_control (
 	if (status & ~0xffff)	/* only if wPortChange is interesting */
 #endif
 		dbg_port (ehci, "GetStatus", wIndex + 1, temp);
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+		if ((temp & PORT_CONNECT) && (temp & PORT_PEC) &&
+				(temp & PORT_CSC)) {
+			if (!ehci_marvell_hs_detect_wa(ehci, hcd->self.busnum))
+				goto error;
+		}
+#endif
+
 		put_unaligned_le32(status, buf);
 		break;
 	case SetHubFeature:

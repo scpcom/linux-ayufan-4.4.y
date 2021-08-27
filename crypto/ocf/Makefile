@@ -48,6 +48,7 @@ $(_obj)-$(CONFIG_OCF_KIRKWOOD) += kirkwood$(_slash)
 $(_obj)-$(CONFIG_OCF_OCFNULL) += ocfnull$(_slash)
 $(_obj)-$(CONFIG_OCF_C7108) += c7108$(_slash)
 $(_obj)-$(CONFIG_OCF_UBSEC_SSB) += ubsec_ssb$(_slash)
+$(_obj)-$(CONFIG_OCF_M86XXX) += m86xxx$(_slash)
 
 ocf-objs := $(OCF_OBJS)
 

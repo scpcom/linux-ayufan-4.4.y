@@ -1,9 +1,10 @@
 #
 # Makefile for the linux arm-specific parts of the memory manager.
 #
-
+ifeq ($(CONFIG_SYNO_ARMADA_ARCH), y)
 ifneq ($(MACHINE),)
 include $(srctree)/$(MACHINE)/config/mvRules.mk
+endif
 endif
 
 obj-y				:= dma-mapping.o extable.o fault.o init.o \

@@ -3313,6 +3313,11 @@ int nand_scan_tail(struct mtd_info *mtd)
 		case 128:
 			chip->ecc.layout = &nand_oob_128;
 			break;
+#if defined(CONFIG_SYNO_COMCERTO)
+		case 224:
+			chip->ecc.layout = &nand_oob_128;
+			break;
+#endif
 		default:
 			pr_warn("No oob scheme defined for oobsize %d\n",
 				   mtd->oobsize);

@@ -111,6 +111,10 @@ struct backing_dev_info {
 	struct dentry *debug_dir;
 	struct dentry *debug_stats;
 #endif
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+	unsigned int cpu0_bind;
+#endif
 };
 
 int bdi_init(struct backing_dev_info *bdi);

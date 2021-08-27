@@ -2508,6 +2508,18 @@ EXPORT_SYMBOL_GPL(shmem_truncate_range);
 
 /* common code */
 
+#if defined(CONFIG_SYNO_COMCERTO)
+void shmem_set_file(struct vm_area_struct *vma, struct file *file)
+{
+	if (vma->vm_file)
+		fput(vma->vm_file);
+	vma->vm_file = file;
+	vma->vm_ops = &shmem_vm_ops;
+	vma->vm_flags |= VM_CAN_NONLINEAR;
+}
+EXPORT_SYMBOL_GPL(shmem_set_file);
+#endif
+
 /**
  * shmem_file_setup - get an unlinked file living in tmpfs
  * @name: name for dentry (to be seen in /proc/<pid>/maps
@@ -2585,11 +2597,16 @@ int shmem_zero_setup(struct vm_area_struct *vma)
 	if (IS_ERR(file))
 		return PTR_ERR(file);
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	shmem_set_file(vma, file);
+#else
 	if (vma->vm_file)
 		fput(vma->vm_file);
 	vma->vm_file = file;
 	vma->vm_ops = &shmem_vm_ops;
 	vma->vm_flags |= VM_CAN_NONLINEAR;
+#endif
+
 	return 0;
 }
 

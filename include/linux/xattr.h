@@ -47,6 +47,13 @@
 #ifdef MY_ABC_HERE
 #define XATTR_SYNO_ARCHIVE_VERSION "archive_version"
 #endif
+#ifdef MY_ABC_HERE
+#define XATTR_SYNO_CREATE_TIME "create_time"
+#endif
+#ifdef MY_ABC_HERE
+#define XATTR_SYNO_ARCHIVE_BIT "archive_bit"
+#define XATTR_SYNO_ARCHIVE_BIT_NOPERM "archive_bit_noperm" //for glusterfs
+#endif
 
 #define XATTR_SMACK_SUFFIX "SMACK64"
 #define XATTR_SMACK_IPIN "SMACK64IPIN"
@@ -85,10 +92,6 @@ struct xattr_handler {
 		   size_t size, int handler_flags);
 	int (*set)(struct dentry *dentry, const char *name, const void *buffer,
 		   size_t size, int flags, int handler_flags);
-#ifdef MY_ABC_HERE
-	int (*set_compact_syno)(struct inode *inode, const char *name, const void *buffer,
-		   size_t size, int flags, int handler_flags);
-#endif
 };
 
 #ifdef MY_ABC_HERE

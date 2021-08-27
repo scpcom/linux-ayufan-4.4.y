@@ -439,6 +439,36 @@ syno_pm_poweron_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PK
 	/* add other port multiplier here */
 }
 
+/**
+ * Init eunit deepsleep indicator
+ *
+ * @param vendor  [IN] PMP vendor
+ * @param devid   [IN] device id
+ * @param pPM_pkg [IN] Store the result. Should not be NULL.
+ * @param blCLR   [IN] clean or not
+ *
+ * return 0: not support deepsleep indicator
+ *        1: support deepsleep indicator
+ */
+static inline int
+syno_pm_deepsleep_indicator_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG, unsigned char blCLR)
+{
+	/* do not check parameters, caller should do it */
+	int iRet = 0;
+
+	memset(pPKG, 0, sizeof(*pPKG));
+	if (syno_pm_is_9705(vendor, devid)) {
+		if (blCLR) {
+			pPKG->var = GPIO_9705_PKG_INIT(1,0);
+		} else {
+			pPKG->var = GPIO_9705_PKG_INIT(1,0x80);
+		}
+		iRet = 1;
+	}
+	/* add other port multiplier here */
+	return iRet;
+}
+
 static inline void 
 syno_pm_enable_powerbtn_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG)
 {

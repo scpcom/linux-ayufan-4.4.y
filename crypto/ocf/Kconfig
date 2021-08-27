@@ -88,6 +88,12 @@ config OCF_EP80579
 	help
 	  OCF driver for the Intel EP80579 Integrated Processor Product Line.
 
+config OCF_M86XXX
+	tristate "M86XXX (HW crypto engine)"
+	depends on OCF_OCF && SYNO_COMCERTO
+	help
+	  OCF driver for the Mindspeed Comcerto2000 Processor Product Line.
+
 config OCF_CRYPTOCTEON
 	tristate "cryptocteon (HW crypto engine)"
 	depends on OCF_OCF

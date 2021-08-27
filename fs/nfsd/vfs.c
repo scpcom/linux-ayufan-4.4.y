@@ -312,7 +312,7 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 	struct dentry	*dentry;
 	struct inode	*inode;
 	int		accmode = NFSD_MAY_SATTR;
-	int		ftype = 0;
+	umode_t		ftype = 0;
 	__be32		err;
 	int		host_err;
 	int		size_change = 0;
@@ -365,8 +365,8 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 			delta = -delta;
 #ifdef CONFIG_FS_SYNO_ACL
 		if (delta < MAX_TOUCH_TIME_ERROR) {
-			if (IS_SYNOACL(inode)) {
-				if (0 > inode->i_op->syno_inode_change_ok(dentry, iap)) {
+			if (IS_SYNOACL(dentry)) {
+				if (0 > synoacl_op_inode_chg_ok(dentry, iap)) {
 					iap->ia_valid &= ~BOTH_TIME_SET;
 				}
 			} else if (0 > inode_change_ok(inode, iap)){
@@ -714,7 +714,7 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 #ifdef CONFIG_FS_SYNO_ACL
 	inode = dentry->d_inode;
 	isFSInACLMode = IS_FS_SYNOACL(inode);
-	isInodeInACLMode = IS_INODE_SYNOACL(inode) && isFSInACLMode;
+	isInodeInACLMode = IS_INODE_SYNOACL(inode, dentry) && isFSInACLMode;
 
 	if (isInodeInACLMode) {
 		if (S_ISREG(inode->i_mode))
@@ -742,7 +742,7 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 #ifdef CONFIG_FS_SYNO_ACL
 			if (isInodeInACLMode){
 				if (inode->i_op) {
-					err2 = nfserrno(inode->i_op->syno_permission(dentry, map->how));
+					err2 = nfserrno(synoacl_op_perm(dentry, map->how));
 				} else {//impossible case
 					printk(KERN_WARNING "nfsd: (%s) is in acl mode but has no operator \n", dentry->d_iname);
 					err2 = nfs_ok;
@@ -795,7 +795,7 @@ static int nfsd_open_break_lease(struct inode *inode, int access)
  * N.B. After this call fhp needs an fh_put
  */
 __be32
-nfsd_open(struct svc_rqst *rqstp, struct svc_fh *fhp, int type,
+nfsd_open(struct svc_rqst *rqstp, struct svc_fh *fhp, umode_t type,
 			int access, struct file **filp)
 {
 	struct dentry	*dentry;
@@ -2235,13 +2235,13 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 	 * with NFSv3.
 	 */
 #ifdef CONFIG_FS_SYNO_ACL
-	if (IS_SYNOACL(inode)) {
-		if ((acc & NFSD_MAY_OWNER_OVERRIDE) && is_synoacl_owner(inode))
+	if (IS_SYNOACL(dentry)) {
+		if ((acc & NFSD_MAY_OWNER_OVERRIDE) && is_synoacl_owner(dentry))
 			return 0;
 		if (acc & NFSD_MAY_SYNO_NOP) {
 			return 0;
 		}
-		err = inode->i_op->syno_permission(dentry, syno_acl_nfs_perm_switch(inode, acc));
+		err = synoacl_op_perm(dentry, syno_acl_nfs_perm_switch(inode, acc));
 	} else {
 #endif /* CONFIG_FS_SYNO_ACL */
 
@@ -2261,9 +2261,9 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 		acc == (NFSD_MAY_READ | NFSD_MAY_READ_IF_EXEC)))
 #ifdef CONFIG_FS_SYNO_ACL
 	{
-		if (IS_SYNOACL(inode))
-			err = inode->i_op->syno_permission(dentry, MAY_EXEC);
-		else {
+		if (IS_SYNOACL(dentry)){
+			err = synoacl_op_perm(dentry, MAY_EXEC);
+		} else {
 			err = inode_permission(inode, MAY_EXEC);
 		}
 	}

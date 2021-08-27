@@ -33,7 +33,7 @@
 #include "acl.h"
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-#include "synoacl_int.h"
+#include "syno_acl.h"
 #endif
 
 /*
@@ -250,7 +250,11 @@ const struct file_operations ext4_file_operations = {
 	.release	= ext4_release_file,
 	.fsync		= ext4_sync_file,
 	.splice_read	= generic_file_splice_read,
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+	.splice_write	= comcerto_file_splice_write,
+#else
 	.splice_write	= generic_file_splice_write,
+#endif
 #if defined(CONFIG_SYNO_ARMADA)
 	.splice_from_socket = generic_splice_from_socket,
 #endif
@@ -258,6 +262,13 @@ const struct file_operations ext4_file_operations = {
 };
 
 const struct inode_operations ext4_file_inode_operations = {
+#ifdef MY_ABC_HERE
+	.syno_getattr	= syno_ext4_getattr,
+#endif
+#ifdef MY_ABC_HERE
+	.syno_get_archive_ver = syno_ext4_get_archive_ver,
+	.syno_set_archive_ver = syno_ext4_set_archive_ver,
+#endif
 	.setattr	= ext4_setattr,
 	.getattr	= ext4_getattr,
 #ifdef CONFIG_EXT4_FS_XATTR
@@ -265,19 +276,13 @@ const struct inode_operations ext4_file_inode_operations = {
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
-#ifdef MY_ABC_HERE
-	.synosetxattr	= syno_generic_setxattr,
-#endif
 #endif
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-	.syno_acl_get = ext4_mod_get_syno_acl_inherit,
-	.syno_access = ext4_mod_syno_access,
-	.syno_permission = ext4_mod_syno_permission,
-	.syno_exec_permission = ext4_mod_syno_exec_permission,
-	.syno_permission_get = ext4_mod_get_syno_permission,
-	.syno_inode_change_ok = ext4_mod_syno_inode_change_ok,
-#endif
+	.syno_acl_get   = ext4_get_syno_acl,
+	.syno_acl_set	= ext4_set_syno_acl,
+#else
 	.get_acl	= ext4_get_acl,
+#endif
 	.fiemap		= ext4_fiemap,
 };
 

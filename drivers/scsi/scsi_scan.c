@@ -53,10 +53,21 @@
 #if defined(MY_ABC_HERE)
 #define SYNO_INQUIRY_TMP_LEN 32
 #define SZ_STAT_DISK_VENDOR "ATA     "
+#define SYNO_INQUIRY_VENDOR_LEN 8
+typedef struct _tag_SYNO_DISK_VENDOR {
+	const char *szName;    /* name of vendor, or NULL for list end */
+	const int iLength; /* length of vendor */
+}SYNO_DISK_VENDOR;
+
+SYNO_DISK_VENDOR gDiskVendor[] = {
+	{"OCZ", 3},
+	{NULL, 0}
+};
 #if defined(MY_ABC_HERE)
 #define SYNO_RESULT_LEN 512
 /* The IDENTIFY DEVICE command will get most 40 characters */
 #define SYNO_IDENTIFY_DEVICE_TMP_LEN 40
+extern int syno_get_ata_identity(struct scsi_device *sdev, u16 *id);
 #endif  
 #endif  
 
@@ -552,6 +563,8 @@ static void syno_standard_inquiry_string(unsigned char *szInqStr, unsigned int u
 	char szTmpStr[SYNO_INQUIRY_TMP_LEN] = {'\0'};
 	int iCharIdx;
 	int blPreIsSpace = 0, blSegmented = 0;
+	int blSpecialVendor = 0;
+	int i = 0;
 
 	if (NULL == szInqStr || 0 == uiLen) {
 		goto END;
@@ -564,6 +577,16 @@ static void syno_standard_inquiry_string(unsigned char *szInqStr, unsigned int u
 	memcpy(szRevStr, szInqStr + uiLen - 4, 4);
 	memcpy(szTmpStr, szInqStr + 8, uiLen - 4 - 8);
 
+	for (i = 0; NULL != gDiskVendor[i].szName; i++) {
+		if (!strncmp(gDiskVendor[i].szName, szTmpStr, gDiskVendor[i].iLength)) {
+			blSpecialVendor = 1;
+			break;
+		}
+	}
+
+	if (1 == blSpecialVendor) {
+		iCharIdx = gDiskVendor[i].iLength;
+	} else {
 		for (iCharIdx = 0; iCharIdx < sizeof(szTmpStr); iCharIdx++) {
 			if ('\0' == szTmpStr[iCharIdx]) {
 				break;
@@ -582,12 +605,47 @@ static void syno_standard_inquiry_string(unsigned char *szInqStr, unsigned int u
 		if (!blSegmented) {
 			goto END;
 		}
+	}
 
 	memset(szInqStr, 0, uiLen);
 
 	memcpy(szInqStr, szTmpStr, iCharIdx);
 	memcpy(szInqStr + 8, szTmpStr + iCharIdx, strlen(szTmpStr) - iCharIdx);
 	memcpy(szInqStr + (uiLen - 4), szRevStr, 4);
+END:
+	return;
+}
+
+/**
+ * syno_standard_vendor_string - refine the vendor strings of SATA disks
+ * @szInqStr: INQUIRY result string to be refined
+ * @uiLen: length of the string
+ *
+ * Description:
+ * 	The verder name is not correct in some disk. For example, the vendor name of
+ * 	"OCZ-VERTEX3 MI" is "OCZ-VERT".
+ *	This function refines the INQUIRY result of SATA disks to correctly
+ *	fill the vendor name by vendor list gDiskVendor.
+ **/
+static void syno_standard_vendor_string(unsigned char *szInqStr, unsigned int uiLen)
+{
+	int i = 0;
+
+	if (NULL == szInqStr || 0 == uiLen) {
+		goto END;
+	}
+
+	if (uiLen > SYNO_INQUIRY_VENDOR_LEN) {
+		uiLen = SYNO_INQUIRY_VENDOR_LEN;
+	}
+
+	for (i = 0; NULL != gDiskVendor[i].szName; i++) {
+		if (!strncmp(gDiskVendor[i].szName, szInqStr, gDiskVendor[i].iLength)) {
+			memset(szInqStr, 0, uiLen);
+			memcpy(szInqStr, gDiskVendor[i].szName, gDiskVendor[i].iLength);
+			break;
+		}
+	}
 END:
 	return;
 }
@@ -617,32 +675,16 @@ END:
  
 static void scsi_ata_identify_device_get_model_name(struct scsi_device *sdev, unsigned char *szInqReturn)
 {
-	unsigned char szScsiCmd[MAX_COMMAND_SIZE] = {0};
-	unsigned char szInqResult[SYNO_RESULT_LEN] = {0};
 	int i = 0;
-	int iResid;
+	int blSpecialVendor = 0;
 	int blPreIsSpace = 0;
 	int blSegmented = 0;
 	int iRes = 0;
-	struct scsi_sense_hdr sshdr;
+	u16 id[SYNO_RESULT_LEN / 2] = {0};
+	unsigned char szInqResult[SYNO_RESULT_LEN] = {0};
 
-	memset(szScsiCmd, 0, MAX_COMMAND_SIZE);
-
-	/* ATA PASS-THROUGH (16) command */
-	szScsiCmd[0] = 0x85;
-	/* PROTOCOL=PIO Data-In */
-	szScsiCmd[1] = 0x08;
-	/* T_DIR=1, BYT_BLOK=1, T_LENGTH=2 */
-	szScsiCmd[2] = 0x0e;
-	/* ATA IDENTIFY DEVICE command */
-	szScsiCmd[14] = 0xec;
-
-	iRes = scsi_execute_req(sdev, szScsiCmd, DMA_FROM_DEVICE,
-		szInqResult, SYNO_RESULT_LEN, &sshdr, HZ*10, 5,	&iResid);
-
-	if (iRes || '\0' == szInqResult[54+i]) {
-		return;
-	}
+	iRes = syno_get_ata_identity(sdev, id);
+	memcpy(szInqResult, id, SYNO_RESULT_LEN);
 
 	/* Swap string for endian problems */
 	for (i = 0; i < SYNO_RESULT_LEN - 1; i += 2)
@@ -652,6 +694,25 @@ static void scsi_ata_identify_device_get_model_name(struct scsi_device *sdev, un
 		szInqResult[i+1] = tmp;
 	}
 
+	if (!iRes || '\0' == szInqResult[54]) {
+		return;
+	}
+
+	for (i = 0; NULL != gDiskVendor[i].szName; i++) {
+		/* The disk model name start from word 27 in the buffer */
+		if (!strncmp(gDiskVendor[i].szName, &szInqResult[54], gDiskVendor[i].iLength)) {
+			blSpecialVendor = 1;
+			break;
+		}
+	}
+
+	if (1 == blSpecialVendor) {
+		if (' ' == szInqResult[54 + gDiskVendor[i].iLength] || '-' == szInqResult[54 + gDiskVendor[i].iLength]) {
+			i = gDiskVendor[i].iLength + 1;
+		} else {
+			i = gDiskVendor[i].iLength;
+		}
+	} else {
 		/* Search the end of vendor name */
 		for (i = 0; i < SYNO_IDENTIFY_DEVICE_TMP_LEN; i++) {
 			if ('\0' == szInqResult[54+i]) {
@@ -672,6 +733,7 @@ static void scsi_ata_identify_device_get_model_name(struct scsi_device *sdev, un
 		if (!blSegmented){
 			i = 0;
 		}
+	}
 
 	/* The disk model name start from word 27 in the buffer */
 	memcpy(szInqReturn, &szInqResult[54 + i], SYNO_DISK_MODEL_NUM);
@@ -797,6 +859,8 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		 */
 		if (!strncmp(&inq_result[8], SZ_STAT_DISK_VENDOR, 8)) {
 			syno_standard_inquiry_string(&inq_result[8], 28);
+		} else {
+			syno_standard_vendor_string(&inq_result[8], 8);
 		}
 #endif
 		sanitize_inquiry_string(&inq_result[8], 8);

@@ -14,6 +14,10 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
+#endif
+
 #ifdef __ARCH_WANT_SYS_UTIME
 
 /*
@@ -57,39 +61,43 @@ asmlinkage long sys_SYNOUtime(char * filename, struct timespec __user *pCtime)
 	int error;
 	struct path path;
 	struct inode *inode = NULL;
-	struct iattr newattrs;
+	struct timespec time;
 
 	if (!pCtime) {
 		return -EINVAL;
 	}
+	error = copy_from_user(&time, pCtime, sizeof(struct timespec));
+	if (error)
+		goto out;
 
 	error = user_path_at(AT_FDCWD, filename, LOOKUP_FOLLOW, &path);
 	if (error)
 		goto out;
+
+	error = mnt_want_write(path.mnt);
+	if (error)
+		goto dput_and_out;
+
 	inode = path.dentry->d_inode;
-
-	error = -EROFS;
-	if (IS_RDONLY(inode))
-		goto dput_and_out;
-
-	error = copy_from_user(&newattrs.ia_ctime, pCtime, sizeof(struct timespec));
+	if (!inode_owner_or_capable(inode)) {
+#ifdef CONFIG_FS_SYNO_ACL
+		if (IS_SYNOACL(path.dentry)) {
+			error = synoacl_op_perm(path.dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
 			if (error)
-		goto dput_and_out;
-
-	newattrs.ia_valid = ATTR_CREATE_TIME;
-	mutex_lock(&inode->i_mutex);
-	if (inode->i_op && inode->i_op->setattr)  {
-		error = inode->i_op->setattr(path.dentry, &newattrs);
+				goto drop_write;
 		} else {
-		error = inode_change_ok(inode, &newattrs);
-		if (!error) {
-			setattr_copy(inode, &newattrs);
-			mark_inode_dirty(inode);
-			error = 0;
+#endif
+		error = -EPERM;
+		goto drop_write;
+#ifdef CONFIG_FS_SYNO_ACL
 		}
+#endif
 	}
-	mutex_unlock(&inode->i_mutex);
 
+	error = syno_op_set_crtime(path.dentry, &time);
+
+drop_write:
+	mnt_drop_write(path.mnt);
 dput_and_out:
 	path_put(&path);
 out:
@@ -153,8 +161,9 @@ static int utimes_common(struct path *path, struct timespec *times)
 			goto mnt_drop_write_and_out;
 
 #ifdef CONFIG_FS_SYNO_ACL
-		if (IS_SYNOACL(inode)) {
-			if (inode->i_op->syno_permission(path->dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR)) {
+		if (IS_SYNOACL(path->dentry)) {
+			error = synoacl_op_perm(path->dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
+			if (error) {
 				goto mnt_drop_write_and_out;
 			}
 		} else

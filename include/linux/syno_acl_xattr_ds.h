@@ -15,6 +15,7 @@
 
 /* Extended attribute names */
 #define SYNO_ACL_XATTR_ACCESS	"system.syno_acl_self"
+#define SYNO_ACL_XATTR_ACCESS_NOPERM	"system.syno_acl_noperm_self"
 #define SYNO_ACL_XATTR_INHERIT	"system.syno_acl_inherit"
 #define SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY	"system.syno_acl_pseudo_inherit_only"
 

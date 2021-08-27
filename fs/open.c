@@ -35,8 +35,8 @@
 #include <linux/dnotify.h>
 #include "internal.h"
 
-#ifdef MY_ABC_HERE
-extern long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd);
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
 #endif
 
 int do_truncate(struct dentry *dentry, loff_t length, unsigned int time_attrs,
@@ -95,8 +95,8 @@ static long do_sys_truncate(const char __user *pathname, loff_t length)
 	if (error)
 		goto dput_and_out;
 #ifdef CONFIG_FS_SYNO_ACL
-	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(path.dentry, MAY_WRITE);
+	if (IS_SYNOACL(path.dentry)) {
+		error = synoacl_op_perm(path.dentry, MAY_WRITE);
 	} else
 #endif
 	error = inode_permission(inode, MAY_WRITE);
@@ -174,11 +174,13 @@ static long do_sys_ftruncate(unsigned int fd, loff_t length, int small)
 	if (IS_APPEND(inode))
 		goto out_putf;
 
+	sb_start_write(inode->i_sb);
 	error = locks_verify_truncate(inode, file, length);
 	if (!error)
 		error = security_path_truncate(&file->f_path);
 	if (!error)
 		error = do_truncate(dentry, length, ATTR_MTIME|ATTR_CTIME, file);
+	sb_end_write(inode->i_sb);
 out_putf:
 	fput(file);
 out:
@@ -275,7 +277,10 @@ int do_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 	if (!file->f_op->fallocate)
 		return -EOPNOTSUPP;
 
-	return file->f_op->fallocate(file, mode, offset, len);
+	sb_start_write(inode->i_sb);
+	ret = file->f_op->fallocate(file, mode, offset, len);
+	sb_end_write(inode->i_sb);
+	return ret;
 }
 
 SYSCALL_DEFINE(fallocate)(int fd, int mode, loff_t offset, loff_t len)
@@ -353,8 +358,8 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 			goto out_path_release;
 	}
 #ifdef CONFIG_FS_SYNO_ACL
-	if (IS_SYNOACL(inode)) {
-		res = inode->i_op->syno_access(path.dentry, mode | MAY_ACCESS);
+	if (IS_SYNOACL(path.dentry)) {
+		res = synoacl_op_access(path.dentry, mode | MAY_ACCESS);
 	} else
 #endif
 	res = inode_permission(inode, mode | MAY_ACCESS);
@@ -401,8 +406,8 @@ SYSCALL_DEFINE1(chdir, const char __user *, filename)
 
 #ifdef CONFIG_FS_SYNO_ACL
 	inode = path.dentry->d_inode;
-	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(path.dentry, MAY_EXEC);
+	if (IS_SYNOACL(path.dentry)) {
+		error = synoacl_op_perm(path.dentry, MAY_EXEC);
 	} else {
 		error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
 	}
@@ -438,8 +443,8 @@ SYSCALL_DEFINE1(fchdir, unsigned int, fd)
 		goto out_putf;
 
 #ifdef CONFIG_FS_SYNO_ACL
-	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(file->f_path.dentry, MAY_EXEC);
+	if (IS_SYNOACL(file->f_path.dentry)) {
+		error = synoacl_op_perm(file->f_path.dentry, MAY_EXEC);
 	} else
 #endif
 	error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
@@ -465,8 +470,8 @@ SYSCALL_DEFINE1(chroot, const char __user *, filename)
 
 #ifdef CONFIG_FS_SYNO_ACL
 	inode = path.dentry->d_inode;
-	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(path.dentry, MAY_EXEC);
+	if (IS_SYNOACL(path.dentry)) {
+		error = synoacl_op_perm(path.dentry, MAY_EXEC);
 	} else {
 		error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
 	}
@@ -573,39 +578,30 @@ static int chown_common(struct path *path, uid_t user, gid_t group)
 }
 
 #ifdef	MY_ABC_HERE
+extern long __SYNOArchiveSet(struct dentry *, unsigned int cmd);
+
 asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
 {
-	int isPathGet = 0;
 	struct path path;
-	struct inode * inode = NULL;
-	long error = -EINVAL;
+	long error;
+
+	if (SYNO_FCNTL_BASE > cmd || SYNO_FCNTL_LAST < cmd) {
+		printk(KERN_WARNING "Archive bit cmd:%x not implement.\n", cmd);
+		return -EINVAL;
+	}
 
 	error = user_path_at(AT_FDCWD, filename, LOOKUP_FOLLOW, &path);
 	if (error)
-		goto out;
+		return error;
 
-	isPathGet = 1;
+	error = mnt_want_write(path.mnt);
+	if (error)
+		goto out_release;
 
-	if (path.dentry && path.dentry->d_inode) {
-		inode = path.dentry->d_inode;
-	} else {
-		goto out;
-	}
-
-	if (inode->i_op && inode->i_op->set_archive) {
-		error = inode->i_op->set_archive(path.dentry, cmd);
-	} else {
 	error = __SYNOArchiveSet(path.dentry, cmd);
-	}
-	if (error) {
-		goto out;
-	}
-
-	error = 0;
-out:
-	if (isPathGet) {
+	mnt_drop_write(path.mnt);
+out_release:
 	path_put(&path);
-	}
 	return error;
 }
 #endif //MY_ABC_HERE
@@ -720,7 +716,7 @@ static inline int __get_file_write_access(struct inode *inode,
 		/*
 		 * Balanced in __fput()
 		 */
-		error = mnt_want_write(mnt);
+		error = __mnt_want_write(mnt);
 		if (error)
 			put_write_access(inode);
 	}

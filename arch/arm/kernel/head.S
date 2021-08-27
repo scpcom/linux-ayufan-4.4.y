@@ -53,9 +53,23 @@
 
 	.globl	swapper_pg_dir
 	.equ	swapper_pg_dir, KERNEL_RAM_VADDR - PG_DIR_SIZE
-
+#if defined(CONFIG_SYNO_COMCERTO)
+/*
+*	Mindspeed:
+*   Need to break the function in case text offset is too big
+*   this is the case when using zone_dma
+*	There is probably a more elegant way to to that
+*	original code:
+*	add	\rd, \phys, #TEXT_OFFSET - PG_DIR_SIZE
+*/
+#endif
 	.macro	pgtbl, rd, phys
+#if defined(CONFIG_SYNO_COMCERTO)
+	ldr	\rd, =TEXT_OFFSET - PG_DIR_SIZE
+	add	\rd, \phys, \rd
+#else
 	add	\rd, \phys, #TEXT_OFFSET - PG_DIR_SIZE
+#endif
 	.endm
 
 #ifdef CONFIG_XIP_KERNEL

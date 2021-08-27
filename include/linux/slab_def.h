@@ -151,7 +151,11 @@ static __always_inline void *kmalloc(size_t size, gfp_t flags)
 		return NULL;
 found:
 #ifdef CONFIG_ZONE_DMA
+#if defined(CONFIG_SYNO_COMCERTO)
+		if (flags & __GFP_DMA)
+#else
 		if (flags & GFP_DMA)
+#endif
 			cachep = malloc_sizes[i].cs_dmacachep;
 		else
 #endif

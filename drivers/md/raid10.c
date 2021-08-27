@@ -2457,7 +2457,10 @@ static void handle_read_error(struct mddev *mddev, struct r10bio *r10_bio)
 	rdev_dec_pending(conf->mirrors[mirror].rdev, mddev);
 
 	bio = r10_bio->devs[slot].bio;
+#ifdef MY_ABC_HERE
+#else
 	bdevname(bio->bi_bdev, b);
+#endif
 	r10_bio->devs[slot].bio =
 		mddev->ro ? IO_BLOCKED : NULL;
 read_more:
@@ -2471,11 +2474,19 @@ read_more:
 					(unsigned long long)r10_bio->sector);
 		}else
 #endif
+#ifdef MY_ABC_HERE
+		printk(KERN_ALERT "md/raid10:%s: unrecoverable I/O"
+		       " read error for block %llu\n",
+		       mdname(mddev),
+		       (unsigned long long)r10_bio->sector);
+		raid_end_bio_io(r10_bio);
+#else
 		printk(KERN_ALERT "md/raid10:%s: %s: unrecoverable I/O"
 		       " read error for block %llu\n",
 		       mdname(mddev), b,
 		       (unsigned long long)r10_bio->sector);
 		raid_end_bio_io(r10_bio);
+#endif
 		bio_put(bio);
 		return;
 	}

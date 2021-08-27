@@ -189,6 +189,10 @@ extern int gSynoFactoryUSBFastReset;
 extern int gSynoFactoryUSB3Disable;
 #endif
 
+#ifdef CONFIG_SYNO_DUAL_HEAD
+extern int gSynoDualHead;
+#endif
+
 /*
  * end_pfn only includes RAM, while max_pfn_mapped includes all e820 entries.
  * The direct mapping extends to max_pfn_mapped, so that we can directly access
@@ -851,6 +855,18 @@ static int __init early_factory_usb3_disable(char *p)
 	return 1;
 }
 __setup("syno_disable_usb3=", early_factory_usb3_disable);
+#endif
+
+#ifdef CONFIG_SYNO_DUAL_HEAD
+static int __init early_dual_head(char *p)
+{
+	gSynoDualHead = simple_strtol(p, NULL, 10);
+
+	printk("Synology Dual Head: %d\n", gSynoDualHead);
+
+	return 1;
+}
+__setup("dual_head=", early_dual_head);
 #endif
 
 /*

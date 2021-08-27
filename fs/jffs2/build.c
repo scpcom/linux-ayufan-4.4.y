@@ -114,6 +114,19 @@ static int jffs2_build_filesystem(struct jffs2_sb_info *c)
 	dbg_fsbuild("scanned flash completely\n");
 	jffs2_dbg_dump_block_lists_nolock(c);
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (c->flags & (1 << 7)) {
+		printk("%s(): unlocking the mtd device... ", __func__);
+		if (c->mtd->unlock)
+			c->mtd->unlock(c->mtd, 0, c->mtd->size);
+		printk("done.\n");
+
+		printk("%s(): erasing all blocks after the end marker... ", __func__);
+		jffs2_erase_pending_blocks(c, -1);
+		printk("done.\n");
+	}
+#endif
+
 	dbg_fsbuild("pass 1 starting\n");
 	c->flags |= JFFS2_SB_FLAG_BUILDING;
 	/* Now scan the directory tree, increasing nlink according to every dirent found. */

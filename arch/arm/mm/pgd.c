@@ -45,6 +45,8 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
 
 #if defined(CONFIG_SYNO_ARMADA_ARCH)
 	new_pgd = __pgd_alloc();
+#elif defined(CONFIG_SYNO_COMCERTO)
+	new_pgd = (pgd_t *)__get_free_pages(GFP_KERNEL, get_order(16384));
 #else
 	new_pgd = (pgd_t *)__get_free_pages(GFP_KERNEL, 2);
 #endif
@@ -115,6 +117,8 @@ no_pmd:
 no_pud:
 #if defined(CONFIG_SYNO_ARMADA_ARCH)
 	__pgd_free(new_pgd);
+#elif defined(CONFIG_SYNO_COMCERTO)
+	free_pages((unsigned long)new_pgd, get_order(16384));
 #else
 	free_pages((unsigned long)new_pgd, 2);
 #endif
@@ -175,6 +179,8 @@ no_pgd:
 	}
 #endif
 	__pgd_free(pgd_base);
+#elif defined(CONFIG_SYNO_COMCERTO)
+	free_pages((unsigned long) pgd_base, get_order(16384));
 #else
 	free_pages((unsigned long) pgd_base, 2);
 #endif

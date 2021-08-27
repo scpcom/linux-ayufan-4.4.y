@@ -469,7 +469,7 @@ void DoCMilPlus_init(struct mtd_info *mtd)
 	mtd->size = 0;
 
 	mtd->erasesize = 0;
-	mtd->writesize = 512;
+	mtd->writebufsize = mtd->writesize = 512;
 	mtd->oobsize = 16;
 	mtd->owner = THIS_MODULE;
 	mtd->erase = doc_erase;

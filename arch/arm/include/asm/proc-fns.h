@@ -70,6 +70,8 @@ extern struct processor {
 	 */
 #if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
 	void (*set_pte_ext)(pte_t *ptep, pte_t pte);
+#elif defined(CONFIG_SYNO_COMCERTO)
+	void (*set_pte_ext)(pte_t *ptep, pteval_t pte, unsigned int ext);
 #else
 	void (*set_pte_ext)(pte_t *ptep, pte_t pte, unsigned int ext);
 #endif
@@ -88,6 +90,8 @@ extern void cpu_dcache_clean_area(void *, int);
 extern void cpu_do_switch_mm(unsigned long pgd_phys, struct mm_struct *mm);
 #if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
 extern void cpu_set_pte_ext(pte_t *ptep, pte_t pte);
+#elif defined(CONFIG_SYNO_COMCERTO)
+extern void cpu_set_pte_ext(pte_t *ptep, pteval_t pte, unsigned int ext);
 #else
 extern void cpu_set_pte_ext(pte_t *ptep, pte_t pte, unsigned int ext);
 #endif

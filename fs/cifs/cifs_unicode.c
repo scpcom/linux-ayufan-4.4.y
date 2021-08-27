@@ -203,6 +203,32 @@ cifs_from_ucs2(char *to, const __le16 *from, int tolen, int fromlen,
 	return outlen;
 }
 
+#ifdef MY_ABC_HERE
+int
+cifs_strtoUCS_NoSpecialChar(__le16 *to, const char *from, int len,
+	      const struct nls_table *codepage)
+{
+	int charlen;
+	int i;
+	wchar_t wchar_to; /* needed to quiet sparse */
+
+	for (i = 0; len && *from; i++, from += charlen, len -= charlen) {
+		charlen = codepage->char2uni(from, len, &wchar_to);
+		if (charlen < 1) {
+			cERROR(1, "strtoUCS: char2uni of 0x%x returned %d",
+				*from, charlen);
+			/* A question mark */
+			wchar_to = 0x003f;
+			charlen = 1;
+		}
+		put_unaligned_le16(wchar_to, &to[i]);
+	}
+
+	put_unaligned_le16(0, &to[i]);
+	return i;
+}
+#endif
+
 /*
  * NAME:	cifs_strtoUCS()
  *
@@ -250,7 +276,7 @@ cifs_strtoUCS(__le16 *to, const char *from, int len,
 #endif
 		charlen = codepage->char2uni(from, len, &wchar_to);
 		if (charlen < 1) {
-#ifdef MY_ABC_HERE
+#ifndef MY_ABC_HERE
 			cERROR(1, "strtoUCS: char2uni of 0x%x returned %d",
 				*from, charlen);
 #endif

@@ -543,16 +543,6 @@ asmlinkage ssize_t compat_sys_mq_timedreceive(mqd_t mqdes,
 asmlinkage long compat_sys_socketcall(int call, u32 __user *args);
 asmlinkage long compat_sys_sysctl(struct compat_sysctl_args __user *args);
 
-#ifdef MY_ABC_HERE
-typedef struct compat_tag_mmap_arg_struct {
-	u32 addr;
-	u32 len;
-	u32 prot;
-	u32 flags;
-	u32 fd;
-	u32 pgoff;
-} compat_SYNO_MMAP_ARG;
-#endif
 extern ssize_t compat_rw_copy_check_uvector(int type,
 		const struct compat_iovec __user *uvector,
 		unsigned long nr_segs,

@@ -51,8 +51,11 @@
 #endif
 #include <linux/libata.h>
 #include "ahci.h"
+#if defined(CONFIG_SYNO_AVOTON)
+#include <linux/pci.h>
+#endif
 
-#ifdef CONFIG_ARCH_GEN3
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON)
 extern int SYNO_CTRL_HDD_ACT_NOTIFY(int index);
 #endif
 
@@ -114,9 +117,6 @@ static ssize_t ahci_show_host_version(struct device *dev,
 				      struct device_attribute *attr, char *buf);
 static ssize_t ahci_show_port_cmd(struct device *dev,
 				  struct device_attribute *attr, char *buf);
-#ifdef MY_ABC_HERE
-static void ahci_port_intr(struct ata_port *ap);
-#endif
 static ssize_t ahci_read_em_buffer(struct device *dev,
 				   struct device_attribute *attr, char *buf);
 static ssize_t ahci_store_em_buffer(struct device *dev,
@@ -270,9 +270,6 @@ struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef MY_ABC_HERE
-	&dev_attr_syno_port_thaw,
-#endif
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
@@ -292,10 +289,6 @@ struct device_attribute *ahci_sdev_attrs[] = {
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_disk_serial,
-#endif
-#ifdef MY_ABC_HERE
-	&dev_attr_syno_fake_error_ctrl,
-	&dev_attr_syno_pwr_reset_count,
 #endif
 #ifdef MY_DEF_HERE
 	&dev_attr_sw_locate,
@@ -339,9 +332,6 @@ struct ata_port_operations ahci_ops = {
 #endif
 	.port_start		= ahci_port_start,
 	.port_stop		= ahci_port_stop,
-#ifdef MY_ABC_HERE
-	.syno_force_intr	= ahci_port_intr,
-#endif
 };
 EXPORT_SYMBOL_GPL(ahci_ops);
 
@@ -900,6 +890,29 @@ static void ahci_power_down(struct ata_port *ap)
 }
 #endif
 
+#if defined(CONFIG_SYNO_AVOTON)
+static int syno_is_avoton_ahci(struct ata_port *ap)
+{
+	struct pci_dev *pdev = NULL;
+	int ret = 0;
+
+	if (ap != NULL) {
+		pdev = to_pci_dev(ap->dev);
+		if (pdev != NULL && pdev->vendor == 0x8086) {
+			switch (pdev->device) {
+				case 0x1f22:
+					ret = 1;
+					break;
+			default:
+					break;
+			}
+		}
+	}
+
+	return ret;
+}
+#endif
+
 static void ahci_start_port(struct ata_port *ap)
 {
 	struct ahci_port_priv *pp = ap->private_data;
@@ -932,6 +945,11 @@ static void ahci_start_port(struct ata_port *ap)
 		}
 	}
 
+#if defined(CONFIG_SYNO_AVOTON)
+	if (syno_is_avoton_ahci(ap)) {
+		ap->flags |= ATA_FLAG_SW_ACTIVITY;
+	}
+#endif
 	if (ap->flags & ATA_FLAG_SW_ACTIVITY)
 		ata_for_each_link(link, ap, EDGE)
 			ahci_init_sw_activity(link);
@@ -1102,7 +1120,7 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	 * toggle state of LED and reset timer.  If not,
 	 * turn LED to desired idle state.
 	 */
-#if defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON)
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
@@ -1151,7 +1169,7 @@ static void ahci_init_sw_activity(struct ata_link *link)
 	emp->saved_activity = emp->activity = 0;
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
 
-#ifdef CONFIG_ARCH_GEN3
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON)
 #else
 	/* check our blink policy and set flag for link if it's enabled */
 	if (emp->blink_policy)
@@ -1524,24 +1542,7 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
 	/* issue the second D2H Register FIS */
 	tf.ctl &= ~ATA_SRST;
-#ifdef MY_ABC_HERE
-	if (!(hpriv->flags & AHCI_HFLAG_YES_MV9235_FIX)) {
-#endif
 	ahci_exec_polled_cmd(ap, pmp, &tf, 0, 0, 0);
-#ifdef MY_ABC_HERE
-	} else {
-		/* 9235 may fail at 2nd D2H, so we use the same check as 1st D2H */
-		msecs = 0;
-		now = jiffies;
-		if (time_after(deadline, now))
-			msecs = jiffies_to_msecs(deadline - now);
-		if(ahci_exec_polled_cmd(ap, pmp, &tf, 0, 0, msecs)) {
-			rc = -EIO;
-			reason = "2nd FIS failed";
-			goto fail;
-		}
-	}
-#endif
 
 	/* wait for link to become ready */
 	rc = ata_wait_after_reset(link, deadline, check_ready);
@@ -1565,12 +1566,6 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
  fail:
 	ata_link_err(link, "softreset failed (%s)\n", reason);
-#ifdef MY_ABC_HERE
-	if (-EBUSY == rc) {
-		ata_link_printk(link, KERN_ERR, "SRST fail, set srst fail flag\n");
-		link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
-	}
-#endif
 	return rc;
 }
 
@@ -1889,18 +1884,7 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 		ata_ehi_push_desc(host_ehi, "interface fatal error");
 	}
 
-#ifdef MY_ABC_HERE
-	if ((irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
-			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
-			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
-		} else {
-			ap->iDetectStat = 1;
-			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
-		}
-#else
 	if (irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) {
-#endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
@@ -1949,11 +1933,7 @@ static void ahci_port_intr(struct ata_port *ap)
 		ahci_scr_write(&ap->link, SCR_ERROR, SERR_PHYRDY_CHG);
 	}
 
-#ifdef MY_ABC_HERE
-	if (unlikely(status & PORT_IRQ_ERROR) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-#else
 	if (unlikely(status & PORT_IRQ_ERROR)) {
-#endif
 		ahci_error_intr(ap, status);
 		return;
 	}
@@ -2017,6 +1997,26 @@ static void ahci_port_intr(struct ata_port *ap)
 	}
 }
 
+#if defined(CONFIG_SYNO_COMCERTO)
+/*
+*/
+
+#if defined (CONFIG_COMCERTO_AHCI_PROF)
+unsigned int ahci_time_counter[256]; // 4 ms -> 1S
+unsigned int ahci_data_counter[256]; // 4K-> 1020K
+unsigned int ahci_int_before_req;
+static struct timeval last_ahci_req;
+unsigned int init_ahci_prof = 0;
+unsigned int enable_ahci_prof = 0;
+extern struct timeval ahci_last_qc_comp[32];
+extern unsigned int ahci_last_qc_comp_flag[32];
+#endif
+
+static struct timeval time;
+
+#endif
+
+
 irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 {
 	struct ata_host *host = dev_instance;
@@ -2034,16 +2034,6 @@ irqreturn_t ahci_interrupt(int irq, void *dev_instance)
 	irq_stat = readl(mmio + HOST_IRQ_STAT);
 	if (!irq_stat)
 		return IRQ_NONE;
-
-#ifdef MY_ABC_HERE
-	if (hpriv->flags & AHCI_HFLAG_YES_MV9235_FIX) {
-		u32 port_mask[2] = {0x5, 0xa};
-		for (i = 0; i < (host->n_ports/2) ; i++) {
-			if (irq_stat & port_mask[i])
-				irq_stat |= port_mask[i];
-		}
-	}
-#endif
 
 	irq_masked = irq_stat & hpriv->port_map;
 
@@ -2094,6 +2084,33 @@ static unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 	void __iomem *port_mmio = ahci_port_base(ap);
 	struct ahci_port_priv *pp = ap->private_data;
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_AHCI_PROF)
+	struct timeval now;
+
+	if (enable_ahci_prof) {
+		do_gettimeofday(&now);
+
+		if (init_ahci_prof) {
+			int diff_time_ms;
+			diff_time_ms = ((now.tv_sec - last_ahci_req.tv_sec) * 1000) + ((now.tv_usec - last_ahci_req.tv_usec) / 1000);
+			if (diff_time_ms < 1000) {//Don't record more than 1s
+				ahci_time_counter[diff_time_ms >> 3]++;
+			}
+			else
+				ahci_time_counter[255]++;
+		}
+		else {
+			init_ahci_prof = 1;
+		}
+		last_ahci_req = now;
+
+		if (qc->nbytes < (1 << 21))
+			ahci_data_counter[(qc->nbytes >> 13) & 0xFF]++;
+		else
+			ahci_data_counter[255]++;
+	}
+#endif
+
 	/* Keep track of the currently active link.  It will be used
 	 * in completion path to determine whether NCQ phase is in
 	 * progress.
@@ -2110,6 +2127,12 @@ static unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 		writel(fbs, port_mmio + PORT_FBS);
 		pp->fbs_last_dev = qc->dev->link->pmp;
 	}
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_AHCI_PROF)
+	if (enable_ahci_prof) {
+		ahci_last_qc_comp[qc->tag] = now;
+		ahci_last_qc_comp_flag[qc->tag] = 1;
+	}
+#endif
 
 	writel(1 << qc->tag, port_mmio + PORT_CMD_ISSUE);
 
@@ -2519,7 +2542,7 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 		}
 #endif
 	}
-#ifdef CONFIG_ARCH_GEN3
+#if defined(CONFIG_ARCH_GEN3)
 	pi->flags |= ATA_FLAG_SW_ACTIVITY;
 #endif
 }

@@ -347,6 +347,9 @@ struct hc_driver {
 		 */
 	int	(*update_device)(struct usb_hcd *, struct usb_device *);
 	int	(*set_usb2_hw_lpm)(struct usb_hcd *, struct usb_device *, int);
+	int (*update_uas_device)(struct usb_hcd *, struct usb_device *, int);
+	void	(*stop_endpoint)(struct usb_hcd *, struct usb_device *,
+				struct usb_host_endpoint *);
 };
 
 extern int usb_hcd_link_urb_to_ep(struct usb_hcd *hcd, struct urb *urb);

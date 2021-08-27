@@ -23,8 +23,14 @@
 
 #include "mm.h"
 
+#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
 #if SHMLBA > 16384
 #error FIX ME
+#endif
+#else
+#if SHMLBA > PAGE_SIZE
+#error FIX ME
+#endif
 #endif
 
 #define from_address	(0xffff8000)

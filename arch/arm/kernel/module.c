@@ -97,6 +97,11 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 			       rel->r_offset, dstsec->sh_size);
 			return -ENOEXEC;
 		}
+#if defined(CONFIG_SYNO_COMCERTO)
+		if ((IS_ERR_VALUE(sym->st_value) || !sym->st_value) &&
+		    ELF_ST_BIND(sym->st_info) == STB_WEAK)
+			continue;
+#endif
 
 		loc = dstsec->sh_addr + rel->r_offset;
 

@@ -12,9 +12,10 @@ endif
 CFLAGS_REMOVE_return_address.o = -pg
 
 # Object file lists.
-
+ifeq ($(CONFIG_SYNO_ARMADA_ARCH),y)
 ifneq ($(MACHINE),)
 include $(srctree)/$(MACHINE)/config/mvRules.mk
+endif
 endif
 
 ifeq ($(CONFIG_SYNO_ARMADA_ARCH),y)

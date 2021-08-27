@@ -1770,8 +1770,35 @@ page_not_uptodate:
 }
 EXPORT_SYMBOL(filemap_fault);
 
+int filemap_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
+{
+	struct page *page = vmf->page;
+	struct inode *inode = vma->vm_file->f_path.dentry->d_inode;
+	int ret = VM_FAULT_LOCKED;
+
+	sb_start_pagefault(inode->i_sb);
+	file_update_time(vma->vm_file);
+	lock_page(page);
+	if (page->mapping != inode->i_mapping) {
+		unlock_page(page);
+		ret = VM_FAULT_NOPAGE;
+		goto out;
+	}
+	/*
+	 * We mark the page dirty already here so that when freeze is in
+	 * progress, we are guaranteed that writeback during freezing will
+	 * see the dirty page and writeprotect it again.
+	 */
+	set_page_dirty(page);
+out:
+	sb_end_pagefault(inode->i_sb);
+	return ret;
+}
+EXPORT_SYMBOL(filemap_page_mkwrite);
+
 const struct vm_operations_struct generic_file_vm_ops = {
 	.fault		= filemap_fault,
+	.page_mkwrite	= filemap_page_mkwrite,
 };
 
 /* This is used for a general mmap of a disk file */
@@ -2303,7 +2330,7 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 	*wbytes = 0;
 	pos = *ppos;
 
-	vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
+	sb_start_write(inode->i_sb);
 
 	/*
 	 * We can write back this queue in page reclaim
@@ -2315,6 +2342,14 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 		goto done1;
 	}
 
+	if (file->f_op->syno_recvfile) {
+		file_remove_suid(file);
+		file_update_time(file);
+		err = file->f_op->syno_recvfile(file, sock, ppos, count, rbytes, wbytes);
+		sb_end_write(inode->i_sb);
+		current->backing_dev_info = NULL;
+		return err;
+	}
 	/* Check address_ops functions */
 	if (!mapping->a_ops->write_begin || !mapping->a_ops->write_end) {
 		printk("write_begin() or write_end() is not implemented\n");
@@ -2439,10 +2474,11 @@ done:
 	}
 
 	if (!err) {
-		balance_dirty_pages_ratelimited_nr(mapping, cPagesAllocated);
+		balance_dirty_pages_ratelimited(mapping);
 	}
 
 done1:
+	sb_end_write(inode->i_sb);
 	current->backing_dev_info = NULL;
 	if (err) {
 		return err;
@@ -2707,8 +2743,6 @@ ssize_t __generic_file_aio_write(struct kiocb *iocb, const struct iovec *iov,
 	count = ocount;
 	pos = *ppos;
 
-	vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
-
 	/* We can write back this queue in page reclaim */
 	current->backing_dev_info = mapping->backing_dev_info;
 	written = 0;
@@ -2724,7 +2758,9 @@ ssize_t __generic_file_aio_write(struct kiocb *iocb, const struct iovec *iov,
 	if (err)
 		goto out;
 
-	file_update_time(file);
+	err = file_update_time(file);
+	if (err)
+		goto out;
 
 	/* coalesce the iovecs and go direct-to-BIO for O_DIRECT */
 	if (unlikely(file->f_flags & O_DIRECT)) {
@@ -2805,6 +2841,7 @@ ssize_t generic_file_aio_write(struct kiocb *iocb, const struct iovec *iov,
 
 	BUG_ON(iocb->ki_pos != pos);
 
+	sb_start_write(inode->i_sb);
 	mutex_lock(&inode->i_mutex);
 	blk_start_plug(&plug);
 	ret = __generic_file_aio_write(iocb, iov, nr_segs, &iocb->ki_pos);
@@ -2818,6 +2855,7 @@ ssize_t generic_file_aio_write(struct kiocb *iocb, const struct iovec *iov,
 			ret = err;
 	}
 	blk_finish_plug(&plug);
+	sb_end_write(inode->i_sb);
 	return ret;
 }
 EXPORT_SYMBOL(generic_file_aio_write);

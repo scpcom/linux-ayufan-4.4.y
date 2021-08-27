@@ -137,10 +137,19 @@ static inline void __pmd_populate(pmd_t *pmdp, phys_addr_t pte,
 				  pmdval_t prot)
 {
 	pmdval_t pmdval = (pte + PTE_HWTABLE_OFF) | prot;
+#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
 	pmdp[0] = __pmd(pmdval);
 #if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_ARM_LPAE)
 #else
 	pmdp[1] = __pmd(pmdval + 256 * sizeof(pte_t));
+#endif
+#else
+	int i, off = 0;
+	for (i = 0; i < LINKED_PMDS; i++) {
+		pmdp[i] = __pmd(pmdval + off);
+		off += 1024; // Each PMD points to a 1kB 2nd-level table
+	}
+
 #endif
 	flush_pmd_entry(pmdp);
 }

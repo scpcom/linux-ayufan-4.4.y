@@ -38,7 +38,7 @@
 unsigned short xhci_vendor = 0;
 #endif
 
-static const char hcd_name[] = "etxhci_hcd_130207";
+static const char hcd_name[] = "etxhci_hcd_130927d1";
 
 /* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
@@ -81,6 +81,7 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ188;
 
 		xhci_dbg(xhci, "Etron chip ID %02x\n", hcd->chip_id);
+		xhci->quirks |= XHCI_SPURIOUS_SUCCESS;
 		xhci->quirks |= XHCI_HUB_INFO_QUIRK;
 		xhci->quirks |= XHCI_RESET_ON_RESUME;
 		xhci_dbg(xhci, "QUIRK: Resetting on resume\n");
@@ -247,12 +248,14 @@ static const struct hc_driver xhci_pci_hc_driver = {
 	.free_streams =		etxhci_free_streams,
 	.add_endpoint =		etxhci_add_endpoint,
 	.drop_endpoint =	etxhci_drop_endpoint,
+	.stop_endpoint =	etxhci_stop_endpoint,
 	.endpoint_reset =	etxhci_endpoint_reset,
 	.check_bandwidth =	etxhci_check_bandwidth,
 	.reset_bandwidth =	etxhci_reset_bandwidth,
 	.address_device =	etxhci_address_device,
 	.update_hub_device =	etxhci_update_hub_device,
 	.reset_device =		etxhci_discover_or_reset_device,
+	.update_uas_device = etxhci_update_uas_device,
 
 	/*
 	 * scheduling support

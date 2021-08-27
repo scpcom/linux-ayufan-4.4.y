@@ -533,6 +533,9 @@ extern int usb_lock_device_for_reset(struct usb_device *udev,
 extern int usb_reset_device(struct usb_device *dev);
 extern void usb_queue_reset_device(struct usb_interface *dev);
 
+#if defined(CONFIG_SYNO_COMCERTO)
+extern struct usb_device *usb_find_device_by_name(const char *name);
+#endif
 
 /* USB autosuspend and autoresume */
 #ifdef CONFIG_USB_SUSPEND

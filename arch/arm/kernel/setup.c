@@ -125,10 +125,6 @@ extern int gSynoHasDynModule;
 extern long gSynoFlashMemorySize;
 #endif
 
-#ifdef CONFIG_SYNO_ARMADA
-extern int gSynoUSBStation;
-#endif
-
 #ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
 #endif
@@ -439,28 +435,6 @@ END:
 	return 1;
 }
 __setup("flash_size=", early_flash_memory_size);
-#endif
-
-#ifdef CONFIG_SYNO_ARMADA
-static int __init early_is_usbstation(char *p)
-{
-	int iLen = 0;
-
-	gSynoUSBStation = 0;
-
-	if ((NULL == p) || (0 == (iLen = strlen(p)))) {
-		goto END;
-	}
-
-	if ( 0 == strcmp (p, "y")) {
-		gSynoUSBStation = 1;
-		printk("Synology USB Station.\n");
-	}
-
-END:
-	return 1;
-}
-__setup("syno_usbstation=", early_is_usbstation);
 #endif
 
 #ifdef MY_ABC_HERE

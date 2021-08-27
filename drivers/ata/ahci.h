@@ -227,9 +227,6 @@ enum {
 #ifdef MY_DEF_HERE
 	AHCI_HFLAG_REPROBE		= (1 << 15),
 #endif
-#ifdef MY_ABC_HERE
-	AHCI_HFLAG_YES_MV9235_FIX	= (1 << 31), /* port0|port2 , port1|port3 */
-#endif
 
 	/* ap->flags bits */
 

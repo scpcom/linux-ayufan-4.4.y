@@ -37,6 +37,9 @@
 #define ETH_DATA_LEN	1500		/* Max. octets in payload	 */
 #define ETH_FRAME_LEN	1514		/* Max. octets in frame sans FCS */
 #define ETH_FCS_LEN	4		/* Octets in the FCS		 */
+#if defined(CONFIG_SYNO_COMCERTO)
+#define ETH_IPHLEN      2               /* EtherIP header length         */
+#endif
 
 /*
  *	These are the defined Ethernet Protocol ID's.

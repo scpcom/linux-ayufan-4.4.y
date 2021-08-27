@@ -1231,10 +1231,14 @@ union xhci_trb {
 /* Allow two commands + a link TRB, along with any reserved command TRBs */
 #define MAX_RSVD_CMD_TRBS	(TRBS_PER_SEGMENT - 3)
 #define SEGMENT_SIZE		(TRBS_PER_SEGMENT*16)
+#if defined(CONFIG_SYNO_COMCERTO)
+#define SEGMENT_SHIFT		(__ffs(SEGMENT_SIZE))
+#else
 /* SEGMENT_SHIFT should be log2(SEGMENT_SIZE).
  * Change this if you change TRBS_PER_SEGMENT!
  */
 #define SEGMENT_SHIFT		10
+#endif
 /* TRB buffer pointers can't cross 64KB boundaries */
 #define TRB_MAX_BUFF_SHIFT		16
 #define TRB_MAX_BUFF_SIZE	(1 << TRB_MAX_BUFF_SHIFT)
@@ -1377,6 +1381,9 @@ struct xhci_bus_state {
 	/* ports suspend status arrays - max 31 ports for USB2, 15 for USB3 */
 	u32			port_c_suspend;
 	u32			suspended_ports;
+#if defined(CONFIG_SYNO_COMCERTO)
+	u32			port_remote_wakeup;
+#endif
 	unsigned long		resume_done[USB_MAXCHILDREN];
 };
 
@@ -1388,7 +1395,11 @@ static inline unsigned int hcd_index(struct usb_hcd *hcd)
 		return 1;
 }
 
+#if defined(CONFIG_SYNO_COMCERTO)
+/* There is one xhci_hcd structure per controller */
+#else
 /* There is one ehci_hci structure per controller */
+#endif
 struct xhci_hcd {
 	struct usb_hcd *main_hcd;
 	struct usb_hcd *shared_hcd;
@@ -1695,6 +1706,18 @@ void xhci_unregister_pci(void);
 #else
 static inline int xhci_register_pci(void) { return 0; }
 static inline void xhci_unregister_pci(void) {}
+#endif
+
+#if defined(CONFIG_SYNO_COMCERTO) 
+#if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
+int xhci_register_plat(void);
+void xhci_unregister_plat(void);
+#else
+static inline int xhci_register_plat(void)
+{ return 0; }
+static inline void xhci_unregister_plat(void)
+{  }
+#endif
 #endif
 
 /* xHCI host controller glue */

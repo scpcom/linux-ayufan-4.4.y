@@ -5,12 +5,19 @@
 #define __NF_CONNTRACK_SIP_H__
 #ifdef __KERNEL__
 
+#if defined(CONFIG_SYNO_COMCERTO)
+#include <linux/types.h>
+#endif
+
 #define SIP_PORT	5060
 #define SIP_TIMEOUT	3600
 
 struct nf_ct_sip_master {
 	unsigned int	register_cseq;
 	unsigned int	invite_cseq;
+#if defined(CONFIG_SYNO_COMCERTO)
+	__be16		forced_dport;
+#endif
 };
 
 enum sip_expectation_classes {

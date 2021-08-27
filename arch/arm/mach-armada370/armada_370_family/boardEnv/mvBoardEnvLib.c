@@ -2616,6 +2616,7 @@ MV_BOARD_PEX_INFO *mvBoardPexInfoGet(void)
 	case SYNO_US3_ID:
 	case SYNO_RS214_ID:
 	case SYNO_DS214se_ID:
+	case SYNO_DS414slim_ID:
 #endif
 		return &BOARD_INFO(boardId)->boardPexInfo;
 		break;

@@ -695,12 +695,6 @@ __SYSCALL(__NR_process_vm_readv, sys_process_vm_readv)
 __SYSCALL(__NR_process_vm_writev, sys_process_vm_writev)
 
 #ifdef MY_ABC_HERE
-#define __NR_SYNOmmap                           400
-#define SYNOmmap(x)                             syscall(__NR_SYNOmmap, x)
-__SYSCALL(__NR_SYNOmmap, sys_SYNOmmap)
-#endif
-
-#ifdef MY_ABC_HERE
 #define __NR_SYNOUtime                          402
 #define SYNOUtime(arg1, arg2)                   syscall(__NR_SYNOUtime, arg1, arg2)
 __SYSCALL(__NR_SYNOUtime, sys_SYNOUtime)
@@ -720,7 +714,7 @@ __SYSCALL(__NR_recvfile, sys_recvfile)
 
 #ifdef MY_ABC_HERE
 #define __NR_SYNOMTDAlloc                       405
-#define SYNOMTDAlloc(x)				syscall(__NR_SYNOMTDAlloc, x)
+#define SYNOMTDAlloc(arg1)                      syscall(__NR_SYNOMTDAlloc, arg1)
 #endif
 
 #ifdef MY_ABC_HERE

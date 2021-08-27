@@ -149,6 +149,9 @@ struct ehci_hcd {			/* one per controller */
 	unsigned		use_dummy_qh:1;	/* AMD Frame List table quirk*/
 	unsigned		has_synopsys_hc_bug:1; /* Synopsys HC */
 	unsigned		frame_index_bug:1; /* MosChip (AKA NetMos) */
+#if defined(CONFIG_SYNO_COMCERTO)
+	unsigned		ignore_oc:1;
+#endif
 
 	/* required for usb32 quirk */
 	#define OHCI_CTRL_HCFS          (3 << 6)
@@ -689,6 +692,10 @@ static inline void set_ohci_hcfs(struct ehci_hcd *ehci, int operational)
 #else
 static inline void set_ohci_hcfs(struct ehci_hcd *ehci, int operational)
 { }
+#endif
+
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+extern int ehci_marvell_hs_detect_wa(struct ehci_hcd *ehci, int busnum);
 #endif
 
 /*-------------------------------------------------------------------------*/

@@ -66,3 +66,4 @@ ifeq ($(CONFIG_MV_INCLUDE_SPI),y)
 	obj-$(CONFIG_MV_INCLUDE_SPI) += ../../../$(MACHINE)/flashmap.o
 endif
 endif
+obj-$(CONFIG_MTD_COMCERTO_NOR)  += comcerto-nor.o

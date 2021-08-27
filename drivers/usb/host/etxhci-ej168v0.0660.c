@@ -91,9 +91,10 @@ static struct table_item mmio_items_v00660[] = {
 
 void xhci_init_ej168_v00660(struct xhci_hcd *xhci)
 {
-	int i;
+	int i, error_flag = 0;
 	struct usb_hcd *hcd = xhci_to_hcd(xhci);
 	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
+	u8 reg8 = 0;
 
 	for (i = 0; i < CFG_S1_ITEMS_V00660; i++) {
 		pci_write_config_byte(pdev, cfg_s1_items_v00660[i].offset,
@@ -110,7 +111,24 @@ void xhci_init_ej168_v00660(struct xhci_hcd *xhci)
 
 	for (i = 0; i < MMIO_ITEMS_V00660; i++) {
 		xhci_writeb(xhci, mmio_items_v00660[i].value,
-			hcd->regs + mmio_items_v00660[i].offset);
+			mmio_items_v00660[i].offset);
+	}
+
+	for (i = 0; i < MMIO_ITEMS_V00660; i++) {
+		if ((0x1811 != mmio_items_v00660[i].offset) && (0 == error_flag)) {
+			reg8 = xhci_readb(xhci, mmio_items_v00660[i].offset);
+			if (reg8 != (u8)mmio_items_v00660[i].value)
+				error_flag = 1;
 		}
 	}
 
+	if (error_flag) {
+		for (i = 0; i < MMIO_ITEMS_V00660; i++) {
+			if (0x1811 != mmio_items_v00660[i].offset) {
+				reg8 = xhci_readb(xhci, mmio_items_v00660[i].offset);
+				xhci_err(xhci, "%s - @%04x %02x\n",
+					__func__, mmio_items_v00660[i].offset, reg8);
+			}
+		}
+	}
+}

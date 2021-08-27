@@ -54,6 +54,11 @@ config USB_XHCI_HCD
 	  To compile this driver as a module, choose M here: the
 	  module will be called xhci-hcd.
 
+config USB_XHCI_PLATFORM
+        tristate
+        depends on USB_XHCI_HCD && SYNO_COMCERTO
+	default y 
+
 config USB_XHCI_HCD_DEBUGGING
 	bool "Debugging for the xHCI host controller"
 	depends on USB_XHCI_HCD
@@ -639,3 +644,22 @@ config SYNO_XHCI_RING_EXPANSION
 	bool  "Enable SYNO_XHCI_RING_EXPANSION patch"
 	depends on USB && PCI
 	default n
+
+config USB_MARVELL_ERRATA_FE_9049667
+	bool "Marvell High speed detection WA"
+	depends on (ARCH_ARMADA370 || ARCH_ARMADA_XP) && USB
+	default n
+	help
+	  In a370 and axp USB UTMI PHY there is an errata which causes
+	  errors in detection of high speed devices. For certain devices
+	  with low pull up values the USB MAC doesnt detect the end of the
+	  device chirp K signal and therefore remains stuck in reset
+	  state.
+	  The workaround solves this issue by modifying the UTMI PHY
+	  squelch threshold once a high speed port reset error is detected.
+	  Modifying the squelch level enables the MAC to detect the end of
+	  device chirp K signal and to come out of reset. Once the MAC
+	  comes out of reset a consecutive reset attempt is made by the
+	  USB stack. That reset attempt succeeds due to the updated squelch
+	  level. Since the optimal squelch level is device dependant the WA
+	  toggles between 2 verfied squelch levels 0xA and 0xE.

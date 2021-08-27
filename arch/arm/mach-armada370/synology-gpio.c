@@ -43,15 +43,10 @@
 #define DISK_LED_ORANGE_SOLID	2
 #define DISK_LED_ORANGE_BLINK	3
 #define DISK_LED_GREEN_BLINK    4
-#define DISK_LED_BLUE			5
 
 #define SYNO_LED_OFF		0
 #define SYNO_LED_ON			1
 #define SYNO_LED_BLINKING	2
-
-#ifdef  MY_ABC_HERE
-extern char gszSynoHWVersion[];
-#endif
 
 typedef struct __tag_SYNO_ARMADA_HDD_PM_GPIO {
 	u8 hdd1_pm;
@@ -87,6 +82,7 @@ typedef struct __tag_SYNO_ARMADA_EXT_HDD_LED_GPIO {
 	u8 hdd4_led_1;
 	u8 hdd5_led_0;
 	u8 hdd5_led_1;
+	u8 hdd_led_mask;
 } SYNO_ARMADA_EXT_HDD_LED_GPIO;
 
 typedef struct __tag_SYNO_ARMADA_MULTI_BAY_GPIO {
@@ -110,6 +106,10 @@ typedef struct __tag_SYNO_ARMADA_STATUS_LED_GPIO {
 	u8 power_led;
 } SYNO_ARMADA_STATUS_LED_GPIO;
 
+typedef struct __tag_SYNO_ARMADA_USB_GPIO {
+	u8 usb_power;
+} SYNO_ARMADA_USB_GPIO;
+
 typedef struct __tag_SYNO_ARMADA_GENERIC_GPIO {
 	SYNO_ARMADA_EXT_HDD_LED_GPIO	ext_sata_led;
 	SYNO_ARMADA_SOC_HDD_LED_GPIO	soc_sata_led;
@@ -119,6 +119,7 @@ typedef struct __tag_SYNO_ARMADA_GENERIC_GPIO {
 	SYNO_ARMADA_RACK_GPIO			rack;
 	SYNO_ARMADA_MULTI_BAY_GPIO		multi_bay;
 	SYNO_ARMADA_STATUS_LED_GPIO		status;
+	SYNO_ARMADA_USB_GPIO			usb;
 }SYNO_ARMADA_GENERIC_GPIO;
 
 static SYNO_ARMADA_GENERIC_GPIO generic_gpio;
@@ -188,8 +189,14 @@ MV_STATUS SYNOMppCtrlRegWrite(MV_U32 mppPin, MV_U32 mppVal)
 	return MV_OK;
 }
 
+void SYNO_ENABLE_HDD_LED(int blEnable)
+{
+	if (GPIO_UNDEF != generic_gpio.ext_sata_led.hdd_led_mask)
+		gpio_set_value(generic_gpio.ext_sata_led.hdd_led_mask, blEnable ? 0 : 1);
+}
+
 int
-SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
+SYNO_SOC_HDD_LED_SET(int index, int status)
 {
 	int ret = -1;
 	int mpp_pin;
@@ -199,7 +206,7 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	int active = 0; //note: led is low active
 
 #ifdef MY_ABC_HERE
-	if (0 == strcmp(gszSynoHWVersion, "RS214v10-j")) {
+	if (syno_is_hw_version(HW_RS214v10)) {
 		// RS214 led is high active
 		active = 1;
 	}
@@ -244,10 +251,15 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 		gpio_set_value(fail_led, active);
 	}
 	else if ( DISK_LED_GREEN_SOLID == status ||
-			  DISK_LED_OFF == status ||
-			  DISK_LED_BLUE == status)
+			  DISK_LED_GREEN_BLINK == status )
 	{
 		SYNOMppCtrlRegWrite(mpp_pin, mode_sata_present);  // change MPP to sata present mode
+		gpio_set_value(fail_led, !active);
+	}
+	else if (DISK_LED_OFF == status)
+	{
+		SYNOMppCtrlRegWrite(mpp_pin, mode_gpio);
+		gpio_set_value(mpp_pin, !active);
 		gpio_set_value(fail_led, !active);
 	}
 	else
@@ -338,7 +350,6 @@ SYNO_CTRL_USB_HDD_LED_SET(int status)
 		blink2 = 0;
 		break;
 	case DISK_LED_GREEN_SOLID:
-	case DISK_LED_BLUE:
 		bit1 = 0;
 		bit2 = 1;
 		blink1 = 0;
@@ -557,6 +568,9 @@ MV_U8 SYNOArmadaIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 	case SYNO_DS214se_ID:
 		def_max_disk = 2;
 		break;
+	case SYNO_DS414slim_ID:
+		def_max_disk = 0;
+		break;
 
 	default:
 		break;
@@ -568,7 +582,7 @@ MV_U8 SYNOArmadaIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 	if (table) {
 		int i;
 		for (i = 0; i < table_cnt; i++) {
-			if (0 == strcmp(table[i].hw_version, gszSynoHWVersion)) {
+			if (syno_is_hw_version(table[i].hw_version)) {
 				if (disk_id <= table[i].max_disk_id) {
 					ret = 1;
 				}
@@ -590,10 +604,17 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 	return 1;
 }
 
+void SYNO_ENABLE_USB_POWER(int blEnable)
+{
+	if (GPIO_UNDEF != generic_gpio.usb.usb_power)
+		gpio_set_value(generic_gpio.usb.usb_power, blEnable ? 0 : 1);
+}
+
 EXPORT_SYMBOL(SYNOArmadaIsBoardNeedPowerUpHDD);
 EXPORT_SYMBOL(SYNO_ARMADA_GPIO_PIN);
 EXPORT_SYMBOL(SYNO_ARMADA_GPIO_BLINK);
-EXPORT_SYMBOL(SYNO_CTRL_INTERNAL_HDD_LED_SET);
+EXPORT_SYMBOL(SYNO_ENABLE_HDD_LED);
+EXPORT_SYMBOL(SYNO_SOC_HDD_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_EXT_CHIP_HDD_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_USB_HDD_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_POWER_LED_SET);
@@ -604,6 +625,7 @@ EXPORT_SYMBOL(SYNO_CTRL_ALARM_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_BACKPLANE_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
 EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
+EXPORT_SYMBOL(SYNO_ENABLE_USB_POWER);
 
 /*
  Pin 		Mode	Signal select and definition	Input/output	Pull-up/pull-down
@@ -647,6 +669,7 @@ Armada_370_213j_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.hdd4_led_1 = GPIO_UNDEF,
 							.hdd5_led_0 = GPIO_UNDEF,
 							.hdd5_led_1 = GPIO_UNDEF,
+							.hdd_led_mask = GPIO_UNDEF,
 						},
 		.soc_sata_led = {
 							.hdd2_fail_led = 32,
@@ -685,9 +708,26 @@ Armada_370_213j_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
+		.usb		  = {
+							.usb_power = GPIO_UNDEF,
+						},
 	};
 
 	*global_gpio = gpio_213j;
+}
+
+extern void (*syno_power_off_indicator)(void);
+static void us3_power_off(void)
+{
+	/* since US3 has no microP to power off,
+	 * we need an indicator for system halt */
+	printk("Set US3 shutdown indicator\n");
+	/* set power green off */
+	gpio_set_value(42, 1);
+	SYNO_ARMADA_GPIO_BLINK(42, 0);
+	/* set power orange on */
+	gpio_set_value(43, 0);
+	SYNO_ARMADA_GPIO_BLINK(43, 0);
 }
 
 static void
@@ -705,6 +745,7 @@ Armada_370_us3_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.hdd4_led_1 = GPIO_UNDEF,
 							.hdd5_led_0 = GPIO_UNDEF,
 							.hdd5_led_1 = GPIO_UNDEF,
+							.hdd_led_mask = GPIO_UNDEF,
 						},
 		.soc_sata_led = {
 							.hdd2_fail_led = GPIO_UNDEF,
@@ -743,9 +784,15 @@ Armada_370_us3_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
+		.usb		  = {
+							.usb_power = GPIO_UNDEF,
+						},
 	};
 
 	*global_gpio = gpio_us3;
+
+	/* customize power off indicator */
+	syno_power_off_indicator = us3_power_off;
 }
 
 static void
@@ -763,6 +810,7 @@ Armada_370_rs214_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.hdd4_led_1 = GPIO_UNDEF,
 							.hdd5_led_0 = GPIO_UNDEF,
 							.hdd5_led_1 = GPIO_UNDEF,
+							.hdd_led_mask = GPIO_UNDEF,
 						},
 		.soc_sata_led = {
 							.hdd2_fail_led = 32,
@@ -801,6 +849,9 @@ Armada_370_rs214_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
+		.usb		  = {
+							.usb_power = GPIO_UNDEF,
+						},
 	};
 
 	*global_gpio = gpio_rs214;
@@ -821,6 +872,7 @@ Armada_370_214se_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.hdd4_led_1 = GPIO_UNDEF,
 							.hdd5_led_0 = GPIO_UNDEF,
 							.hdd5_led_1 = GPIO_UNDEF,
+							.hdd_led_mask = GPIO_UNDEF,
 						},
 		.soc_sata_led = {
 							.hdd2_fail_led = 32,
@@ -859,9 +911,74 @@ Armada_370_214se_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
+		.usb		  = {
+							.usb_power = GPIO_UNDEF,
+						},
 	};
 
 	*global_gpio = gpio_214se;
+}
+
+static void 
+Armada_370_414slim_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
+{
+	SYNO_ARMADA_GENERIC_GPIO gpio_414slim = {
+		.ext_sata_led = {
+							.hdd1_led_0 = GPIO_UNDEF,
+							.hdd1_led_1 = GPIO_UNDEF,
+							.hdd2_led_0 = GPIO_UNDEF,
+							.hdd2_led_1 = GPIO_UNDEF,
+							.hdd3_led_0 = GPIO_UNDEF,
+							.hdd3_led_1 = GPIO_UNDEF,
+							.hdd4_led_0 = GPIO_UNDEF,
+							.hdd4_led_1 = GPIO_UNDEF,
+							.hdd5_led_0 = GPIO_UNDEF,
+							.hdd5_led_1 = GPIO_UNDEF,
+							.hdd_led_mask = 39,
+						},
+		.soc_sata_led = {
+							.hdd2_fail_led = GPIO_UNDEF,
+							.hdd1_fail_led = GPIO_UNDEF,
+						},
+		.model		  = {
+							.model_id_0 = 55,
+							.model_id_1 = 56,
+							.model_id_2 = 57,
+							.model_id_3 = 58,
+						},
+		.fan		  = {
+							.fan_1 = 65,
+							.fan_2 = 64,
+							.fan_3 = 63,
+							.fan_fail = 38,
+							.fan_fail_2 = GPIO_UNDEF,
+							.fan_fail_3 = GPIO_UNDEF,
+						},
+		.hdd_pm		  = {
+							.hdd1_pm = GPIO_UNDEF,
+							.hdd2_pm = GPIO_UNDEF,
+							.hdd3_pm = GPIO_UNDEF,
+							.hdd4_pm = GPIO_UNDEF,
+						},
+		.rack		  = {
+							.buzzer_mute_req = GPIO_UNDEF,
+							.buzzer_mute_ack = GPIO_UNDEF,
+							.rps1_on = GPIO_UNDEF,
+							.rps2_on = GPIO_UNDEF,
+						},
+		.multi_bay	  = {
+							.inter_lock = GPIO_UNDEF,
+						},
+		.status		  = {
+							.power_led = GPIO_UNDEF,
+							.alarm_led = GPIO_UNDEF,
+						},
+		.usb		  = {
+							.usb_power = 44,
+						},
+	};
+
+	*global_gpio = gpio_414slim;
 }
 static void
 ARMADA_default_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
@@ -878,6 +995,7 @@ ARMADA_default_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.hdd4_led_1 = GPIO_UNDEF,
 							.hdd5_led_0 = GPIO_UNDEF,
 							.hdd5_led_1 = GPIO_UNDEF,
+							.hdd_led_mask = GPIO_UNDEF,
 						},
 		.soc_sata_led = {
 							.hdd2_fail_led = GPIO_UNDEF,
@@ -916,6 +1034,9 @@ ARMADA_default_GPIO_init(SYNO_ARMADA_GENERIC_GPIO *global_gpio)
 							.power_led = GPIO_UNDEF,
 							.alarm_led = GPIO_UNDEF,
 						},
+		.usb		  = {
+							.usb_power = GPIO_UNDEF,
+						},
 	};
 
 	*global_gpio = gpio_default;
@@ -940,6 +1061,10 @@ void synology_gpio_init(void)
 	case SYNO_DS214se_ID:
 		Armada_370_214se_GPIO_init(&generic_gpio);
 		printk("Synology Armada370 DS214se GPIO Init\n");
+		break;
+	case SYNO_DS414slim_ID:
+		Armada_370_414slim_GPIO_init(&generic_gpio);
+		printk("Synology Armada370 DS414slim GPIO Init\n");
 		break;
 
 	default:

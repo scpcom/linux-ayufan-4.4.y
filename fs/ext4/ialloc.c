@@ -1075,9 +1075,6 @@ got:
 #ifdef MY_ABC_HERE
 	inode->i_mode2 = ALL_SYNO_ARCHIVE;   /* set archive bit on creation */
 #endif
-#ifdef MY_ABC_HERE
-	inode->i_archive_version = inode->i_sb->s_archive_version;
-#endif
 
 	memset(ei->i_data, 0, sizeof(ei->i_data));
 	ei->i_dir_start_lookup = 0;

@@ -532,6 +532,9 @@ int etxhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	u16 link_state = 0;
 	u16 wake_mask = 0;
 
+#ifndef MY_ABC_HERE
+printk("%s - %04x %04x %04x %04x\n", __func__, typeReq, wValue, wIndex, wLength);
+#endif
 	max_ports = xhci_get_ports(hcd, &port_array);
 	bus_state = &xhci->bus_state[hcd_index(hcd)];
 
@@ -669,6 +672,8 @@ int etxhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		}
 		if (bus_state->port_c_suspend & (1 << wIndex))
 			status |= 1 << USB_PORT_FEAT_C_SUSPEND;
+		if (bus_state->port_c_connection & (1 << wIndex))
+			status |= USB_PORT_STAT_C_CONNECTION << 16;
 		xhci_dbg(xhci, "Get port status returned 0x%x\n", status);
 		put_unaligned(cpu_to_le32(status), (__le32 *) buf);
 		break;
@@ -856,11 +861,19 @@ int etxhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			}
 			etxhci_ring_device(xhci, slot_id);
 			break;
+		case USB_PORT_FEAT_C_CONNECTION:
+			if (bus_state->port_c_connection & (1 << wIndex)) {
+				bus_state->port_c_connection &= ~(1 << wIndex);
+				bus_state->resume_done[wIndex] = 0;
+ 			} else {
+				xhci_clear_port_change_bit(xhci, wValue, wIndex,
+						port_array[wIndex], temp);
+ 			}
+			break;
 		case USB_PORT_FEAT_C_SUSPEND:
 			bus_state->port_c_suspend &= ~(1 << wIndex);
 		case USB_PORT_FEAT_C_RESET:
 		case USB_PORT_FEAT_C_BH_PORT_RESET:
-		case USB_PORT_FEAT_C_CONNECTION:
 		case USB_PORT_FEAT_C_OVER_CURRENT:
 		case USB_PORT_FEAT_C_ENABLE:
 		case USB_PORT_FEAT_C_PORT_LINK_STATE:
@@ -928,6 +941,7 @@ int etxhci_hub_status_data(struct usb_hcd *hcd, char *buf)
 			break;
 		}
 		if ((temp & mask) != 0 ||
+			(bus_state->port_c_connection & 1 << i) ||
 			(bus_state->port_c_suspend & 1 << i) ||
 			(bus_state->resume_done[i] && time_after_eq(
 			    jiffies, bus_state->resume_done[i]))) {
@@ -937,6 +951,105 @@ int etxhci_hub_status_data(struct usb_hcd *hcd, char *buf)
 	}
 	spin_unlock_irqrestore(&xhci->lock, flags);
 	return status ? retval : 0;
+}
+
+void xhci_hub_power_port(struct usb_hcd *hcd,
+		int port, bool onoff)
+{
+	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
+	__le32 __iomem **port_array;
+	int max_ports;
+	u32 temp;
+
+	max_ports = xhci_get_ports(hcd, &port_array);
+
+	if (!port || port > max_ports)
+		return;
+
+	port--;
+	temp = xhci_readl(xhci, port_array[port]);
+	if (temp == 0xffffffff)
+		return;
+
+	temp = etxhci_port_state_to_neutral(temp);
+	if (onoff)
+		temp |= PORT_POWER;
+	else
+		temp &= ~PORT_POWER;
+
+	xhci_writel(xhci, temp, port_array[port]);
+	temp = xhci_readl(xhci, port_array[port]);
+	xhci_dbg(xhci, "power %s port, actual port %p status  = 0x%x\n",
+			(onoff) ? "on" : "off", port_array[port], temp);
+}
+
+int xhci_downgrade_to_usb2(struct usb_hcd *hcd,
+		struct usb_device *udev)
+{
+	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
+	__le32 __iomem **port_array;
+	struct xhci_bus_state *bus_state;
+	unsigned long flags;
+	int max_ports, slot_id, ret = -ENODEV;
+	u32 portsc;
+
+	if (!(udev->parent && !udev->parent->parent))
+		goto err_done;
+
+	if (udev->speed != USB_SPEED_SUPER)
+		goto err_done;
+
+	if (udev->state == USB_STATE_NOTATTACHED)
+		goto err_done;
+
+	slot_id = etxhci_find_slot_id_by_port(hcd, xhci,
+					udev->portnum);
+
+	if(!(xhci_is_mass_storage_device(xhci, slot_id)))
+		goto err_done;
+
+	bus_state = &xhci->bus_state[hcd_index(hcd)];
+	max_ports = xhci_get_ports(hcd, &port_array);
+	if (udev->portnum > max_ports)
+		goto err_done;
+
+	if (udev->descriptor.idVendor == cpu_to_le16(0x1759) &&
+		udev->descriptor.idProduct == cpu_to_le16(0x5100))
+		goto err_done;
+
+	spin_lock_irqsave(&xhci->lock, flags);
+
+	portsc = xhci_readl(xhci, port_array[udev->portnum - 1]);
+	if (portsc == 0xffffffff) {
+		spin_unlock_irqrestore(&xhci->lock, flags);
+		goto err_done;
+	}
+
+	if (!(portsc & 0x080) &&
+		(bus_state->downgraded_ports & (1 << (udev->portnum - 1)))) {
+		xhci_hub_power_port(hcd, udev->portnum, false);
+		xhci_hub_power_port(hcd->shared_hcd, udev->portnum, false);
+
+		spin_unlock_irqrestore(&xhci->lock, flags);
+
+		msleep(500);
+
+		spin_lock_irqsave(&xhci->lock, flags);
+		xhci_hub_power_port(hcd->shared_hcd, udev->portnum, true);
+		bus_state->port_c_connection |= 1 << (udev->portnum - 1);
+		ret = 0;
+
+		spin_unlock_irqrestore(&xhci->lock, flags);
+		msleep(500);
+		usb_hcd_poll_rh_status(hcd);
+
+		spin_lock_irqsave(&xhci->lock, flags);
+	}
+
+	spin_unlock_irqrestore(&xhci->lock, flags);
+
+err_done:
+	return ret;
 }
 
 #ifdef CONFIG_PM

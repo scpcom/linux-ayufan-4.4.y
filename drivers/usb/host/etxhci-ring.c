@@ -69,6 +69,7 @@
  
 #include <linux/scatterlist.h>
 #include <linux/slab.h>
+#include <linux/dma-mapping.h>
 #include "etxhci.h"
 
 static int handle_cmd_in_cmd_wait_list(struct xhci_hcd *xhci,
@@ -594,8 +595,13 @@ void etxhci_find_new_dequeue_state(struct xhci_hcd *xhci,
 	    (trb->field[3] & cpu_to_le32(LINK_TOGGLE)))
 		state->new_cycle_state ^= 0x1;
 	next_trb(xhci, ep_ring, &state->new_deq_seg, &state->new_deq_ptr);
-	if (last_trb(xhci, ep_ring, state->new_deq_seg, state->new_deq_ptr))
+	if (last_trb(xhci, ep_ring, state->new_deq_seg, state->new_deq_ptr)) {
+		trb = &state->new_deq_ptr->generic;
+		if (TRB_TYPE_LINK_LE32(trb->field[3]) &&
+			(trb->field[3] & cpu_to_le32(LINK_TOGGLE)))
+			state->new_cycle_state ^= 0x1;
 		next_trb(xhci, ep_ring, &state->new_deq_seg, &state->new_deq_ptr);
+	}
 
 	/*
 	 * If there is only one segment in a ring, find_trb_seg()'s while loop
@@ -762,24 +768,29 @@ static void handle_stopped_endpoint(struct xhci_hcd *xhci,
 	struct xhci_td *last_unlinked_td;
 
 	struct xhci_dequeue_state deq_state;
-
-	if (unlikely(TRB_TO_SUSPEND_PORT(
-			     le32_to_cpu(xhci->cmd_ring->dequeue->generic.field[3])))) {
-		slot_id = TRB_TO_SLOT_ID(
-			le32_to_cpu(xhci->cmd_ring->dequeue->generic.field[3]));
+#ifndef MY_ABC_HERE
+printk("%s\n", __func__);
+#endif
+	slot_id = TRB_TO_SLOT_ID(le32_to_cpu(trb->generic.field[3]));
 	virt_dev = xhci->devs[slot_id];
-		if (virt_dev)
-			handle_cmd_in_cmd_wait_list(xhci, virt_dev,
-				event);
-		else
+	if (!virt_dev) {
 		xhci_warn(xhci, "Stop endpoint command "
 			"completion for disabled slot %u\n",
 			slot_id);
 		return;
 	}
 
+	if (TRB_TO_SUSPEND_PORT(le32_to_cpu(trb->generic.field[3]))) {
+		handle_cmd_in_cmd_wait_list(xhci, virt_dev, event);
+		return;
+	}
+
+	if (!list_empty(&virt_dev->cmd_list) &&
+		handle_cmd_in_cmd_wait_list(xhci, virt_dev, event)) {
+		return;
+	}
+
 	memset(&deq_state, 0, sizeof(deq_state));
-	slot_id = TRB_TO_SLOT_ID(le32_to_cpu(trb->generic.field[3]));
 	ep_index = TRB_TO_EP_INDEX(le32_to_cpu(trb->generic.field[3]));
 	ep = &xhci->devs[slot_id]->eps[ep_index];
 
@@ -1185,6 +1196,9 @@ static void handle_reset_ep_completion(struct xhci_hcd *xhci,
 static void xhci_complete_cmd_in_cmd_wait_list(struct xhci_hcd *xhci,
 		struct xhci_command *command, u32 status)
 {
+#ifndef MY_ABC_HERE
+printk("%s\n", __func__);
+#endif
 	command->status = status;
 	list_del(&command->cmd_list);
 	if (command->completion)
@@ -1203,6 +1217,9 @@ static int handle_cmd_in_cmd_wait_list(struct xhci_hcd *xhci,
 {
 	struct xhci_command *command;
 
+#ifndef MY_ABC_HERE
+printk("%s\n", __func__);
+#endif
 	if (list_empty(&virt_dev->cmd_list))
 		return 0;
 
@@ -1236,6 +1253,17 @@ static void xhci_cmd_to_noop(struct xhci_hcd *xhci, struct xhci_cd *cur_cd)
 	/* find the current segment of command ring */
 	cur_seg = find_trb_seg(xhci->cmd_ring->first_seg,
 			xhci->cmd_ring->dequeue, &cycle_state);
+
+	if (!cur_seg) {
+		xhci_warn(xhci, "Command ring mismatch, dequeue = %p %llx (dma)\n",
+				xhci->cmd_ring->dequeue,
+				(unsigned long long)
+				etxhci_trb_virt_to_dma(xhci->cmd_ring->deq_seg,
+					xhci->cmd_ring->dequeue));
+		etxhci_debug_ring(xhci, xhci->cmd_ring);
+		etxhci_dbg_ring_ptrs(xhci, xhci->cmd_ring);
+		return;
+	}
 
 	/* find the command trb matched by cd from command ring */
 	for (cmd_trb = xhci->cmd_ring->dequeue;
@@ -1488,6 +1516,65 @@ bandwidth_change:
 	inc_deq(xhci, xhci->cmd_ring);
 }
 
+bool xhci_is_mass_storage_device(struct xhci_hcd *xhci,
+		int slot_id)
+{
+	int i;
+	struct xhci_virt_device *virt_dev;
+	struct usb_device *udev;
+	struct usb_interface_cache *intfc;
+	struct usb_host_interface *alts;
+	bool status = false;
+
+	virt_dev = xhci->devs[slot_id];
+	if (!virt_dev || !virt_dev->udev)
+		goto err_done;
+
+	udev = virt_dev->udev;
+	if (!(udev->parent && !udev->parent->parent))
+		goto err_done;
+
+	if (!udev->config)
+		goto err_done;
+
+	intfc = udev->config[0].intf_cache[0];
+	for (i = 0; i < intfc->num_altsetting; i++) {
+		alts = &intfc->altsetting[i];
+		if (alts->desc.bInterfaceClass == USB_CLASS_MASS_STORAGE) {
+			status = true;
+			break;
+		}
+	}
+
+err_done:
+	return status;
+}
+
+static void xhci_giveback_error_urb(struct xhci_hcd *xhci,
+		int slot_id)
+{
+	struct xhci_virt_device *virt_dev;
+	int i;
+
+	virt_dev = xhci->devs[slot_id];
+	for (i = LAST_EP_INDEX; i > 0; i--) {
+		struct xhci_virt_ep *ep = &virt_dev->eps[i];
+		struct xhci_ring *ring = ep->ring;
+		if (!ring)
+			continue;
+
+		if (!list_empty(&ring->td_list)) {
+			struct xhci_td *cur_td = list_first_entry(&ring->td_list,
+				struct xhci_td,
+				td_list);
+			list_del_init(&cur_td->td_list);
+			if (!list_empty(&cur_td->cancelled_td_list))
+				list_del_init(&cur_td->cancelled_td_list);
+			xhci_giveback_urb_in_irq(xhci, cur_td, -EPROTO, "killed");
+		}
+	}
+}
+
 /* @port_id: the one-based port ID from the hardware (indexed from array of all
  * port registers -- USB 3.0 and USB 2.0).
  *
@@ -1551,7 +1638,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 {
 	struct usb_hcd *hcd;
 	u32 port_id;
-	u32 temp, temp1;
+	u32 temp, temp1, mask;
 	int max_ports;
 	int slot_id;
 	unsigned int faked_port_index;
@@ -1615,6 +1702,9 @@ static void handle_port_status(struct xhci_hcd *xhci,
 			port_id);
 
 	temp = xhci_readl(xhci, port_array[faked_port_index]);
+#ifndef MY_ABC_HERE
+printk("%s - port %p status %08x\n", __func__, port_array[faked_port_index], temp);
+#endif
 	if (hcd->state == HC_STATE_SUSPENDED) {
 		xhci_dbg(xhci, "resume root hub\n");
 		usb_hcd_resume_root_hub(hcd);
@@ -1654,6 +1744,40 @@ static void handle_port_status(struct xhci_hcd *xhci,
 				  bus_state->resume_done[faked_port_index]);
 			/* Do the rest in GetPortStatus */
 		}
+	} else if ((temp & PORT_PLC) && (temp & PORT_PLS_MASK) == XDEV_INACTIVE) {
+		slot_id = etxhci_find_slot_id_by_port(hcd, xhci,
+			faked_port_index + 1);
+		if (xhci_is_mass_storage_device(xhci, slot_id)) {
+			bogus_port_status = true;
+			temp = etxhci_port_state_to_neutral(temp);
+			temp |= (PORT_WR | PORT_PLC | PORT_CSC);
+			xhci_writel(xhci, temp, port_array[faked_port_index]);
+			goto cleanup;
+		}
+	}
+
+	if (temp & PORT_WRC) {
+		slot_id = etxhci_find_slot_id_by_port(hcd, xhci,
+			faked_port_index + 1);
+		if (xhci_is_mass_storage_device(xhci, slot_id)) {
+			bogus_port_status = true;
+			temp1 = etxhci_port_state_to_neutral(temp);
+			temp1 |= (PORT_WRC | PORT_RC | PORT_PLC | PORT_CSC);
+			xhci_writel(xhci, temp1, port_array[faked_port_index]);
+			mask = PORT_PE | PORT_CONNECT;
+			if ((temp & mask) == mask) {
+				bus_state->port_c_connection &= ~(1 << faked_port_index);
+				bus_state->resume_done[faked_port_index] = 0;
+				xhci_giveback_error_urb(xhci, slot_id);
+			} else {
+				bus_state->port_c_connection |= 1 << faked_port_index;
+				bus_state->resume_done[faked_port_index] = jiffies +
+					msecs_to_jiffies(5000);
+				mod_timer(&hcd->rh_timer,
+					bus_state->resume_done[faked_port_index]);
+			}
+			goto cleanup;
+		}
 	}
 
 	if ((temp & PORT_PLC) && (temp & PORT_PLS_MASK) == XDEV_U0 &&
@@ -1670,7 +1794,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 				faked_port_index + 1);
 		if (slot_id && xhci->devs[slot_id])
 			etxhci_ring_device(xhci, slot_id);
-		if (bus_state->port_remote_wakeup && (1 << faked_port_index)) {
+		if (bus_state->port_remote_wakeup & (1 << faked_port_index)) {
 			bus_state->port_remote_wakeup &=
 				~(1 << faked_port_index);
 			etxhci_test_and_clear_bit(xhci, port_array,
@@ -1682,9 +1806,16 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		}
 	}
 
-	if (hcd->speed != HCD_USB3)
+	if (hcd->speed != HCD_USB3) {
+		bus_state = &xhci->bus_state[hcd_index(hcd->shared_hcd)];
+		if ((bus_state->downgraded_open & (1 << faked_port_index))) {
+			xhci_hub_power_port(hcd->shared_hcd, faked_port_index + 1, true);
+			bus_state->downgraded_ports &= ~(1 << faked_port_index);
+			bus_state->downgraded_open &= ~(1 << faked_port_index);
+		}
 		etxhci_test_and_clear_bit(xhci, port_array, faked_port_index,
 					PORT_PLC);
+	}
 
 cleanup:
 	/* Update event ring dequeue pointer before dropping the lock */
@@ -2475,6 +2606,16 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		if (!event_seg) {
 			if (!ep->skip ||
 			    !usb_endpoint_xfer_isoc(&td->urb->ep->desc)) {
+				/* Some host controllers give a spurious
+				 * successful event after a short transfer.
+				 * Ignore it.
+				 */
+				if ((xhci->quirks & XHCI_SPURIOUS_SUCCESS) && 
+						ep_ring->last_td_was_short) {
+					ep_ring->last_td_was_short = false;
+					ret = 0;
+					goto cleanup;
+				}
 				/* HC is busted, give up! */
 				xhci_err(xhci,
 					"ERROR Transfer event TRB DMA ptr not "
@@ -2485,6 +2626,10 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 			ret = skip_isoc_td(xhci, td, event, ep, &status);
 			goto cleanup;
 		}
+		if (trb_comp_code == COMP_SHORT_TX)
+			ep_ring->last_td_was_short = true;
+		else
+			ep_ring->last_td_was_short = false;
 
 		if (ep->skip) {
 			xhci_dbg(xhci, "Found td. Clear skip flag.\n");
@@ -2539,6 +2684,8 @@ cleanup:
 				(trb_comp_code != COMP_STALL &&
 					trb_comp_code != COMP_BABBLE))
 				etxhci_urb_free_priv(xhci, urb_priv);
+			else
+				kfree(urb_priv);
 
 			usb_hcd_unlink_urb_from_ep(bus_to_hcd(urb->dev->bus), urb);
 			if ((urb->actual_length != urb->transfer_buffer_length &&
@@ -2597,6 +2744,15 @@ static int xhci_handle_event(struct xhci_hcd *xhci)
 		return 0;
 	}
 
+#ifndef MY_ABC_HERE
+if (((le32_to_cpu(event->generic.field[3]) & TRB_TYPE_BITMASK) == TRB_TYPE(TRB_COMPLETION)) ||
+	((GET_COMP_CODE(le32_to_cpu(event->generic.field[2])) != COMP_SUCCESS) &&
+	(GET_COMP_CODE(le32_to_cpu(event->generic.field[2])) != COMP_SHORT_TX))) {
+	printk("%s\n", __func__);
+	etxhci_print_trbs(xhci, xhci->event_ring->deq_seg, xhci->event_ring->dequeue, 1);
+}
+#endif
+
 	/*
 	 * Barrier between reading the TRB_CYCLE (valid) flag above and any
 	 * speculative reads of the event's flags/data below.
@@ -2623,6 +2779,15 @@ static int xhci_handle_event(struct xhci_hcd *xhci)
 		break;
 	default:
 		xhci->error_bitmask |= 1 << 3;
+		xhci_err(xhci, "Unknown event TRB:\n");
+		xhci_err(xhci, "@%016llx %08x %08x %08x %08x\n",
+			 (unsigned long long) etxhci_trb_virt_to_dma(xhci->event_ring->deq_seg, event),
+			 le32_to_cpu(event->generic.field[0]),
+			 le32_to_cpu(event->generic.field[1]),
+			 le32_to_cpu(event->generic.field[2]),
+			 le32_to_cpu(event->generic.field[3]));
+		xhci_dbg(xhci, "Event ring:\n");
+		etxhci_debug_segment(xhci, xhci->event_ring->deq_seg);
 	}
 	/* Any of the above functions may drop and re-acquire the lock, so check
 	 * to make sure a watchdog timer didn't mark the host as non-responsive.
@@ -2742,33 +2907,22 @@ hw_died:
 
 irqreturn_t etxhci_msi_irq(int irq, struct usb_hcd *hcd)
 {
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(3,2,0))
 	irqreturn_t ret;
 	unsigned long flags;
 
-	local_irq_save(flags);
-
-	ret = etxhci_irq(hcd);
-
-	local_irq_restore(flags);
-	return ret;
-#else
-	irqreturn_t ret;
-	struct xhci_hcd *xhci;
-	unsigned long flags;
-
-	local_irq_save(flags);
-
-	xhci = hcd_to_xhci(hcd);
+#ifdef HCD_FLAG_SAW_IRQ
+	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
 	set_bit(HCD_FLAG_SAW_IRQ, &hcd->flags);
 	if (xhci->shared_hcd)
 		set_bit(HCD_FLAG_SAW_IRQ, &xhci->shared_hcd->flags);
+#endif
+
+	local_irq_save(flags);
 
 	ret = etxhci_irq(hcd);
 
 	local_irq_restore(flags);
 	return ret;
-#endif
 }
 
 /****		Endpoint Ring Operations	****/
@@ -2997,6 +3151,24 @@ static void check_trb_math(struct urb *urb, int num_trbs, int running_total)
 				urb->transfer_buffer_length);
 }
 
+static void requeue_first_trb(struct xhci_hcd *xhci, int slot_id,
+		unsigned int ep_index, unsigned int stream_id,
+		struct xhci_generic_trb *start_trb,
+		struct xhci_generic_trb *temp_trb)
+{
+	/*
+	 * Pass all the TRBs to the hardware at once and make sure this write
+	 * isn't reordered.
+	 */
+	wmb();
+	start_trb->field[0] = temp_trb->field[0];
+	start_trb->field[1] = temp_trb->field[1];
+	start_trb->field[2] = temp_trb->field[2];
+	start_trb->field[3] = temp_trb->field[3];
+
+	etxhci_ring_ep_doorbell(xhci, slot_id, ep_index, stream_id);
+}
+
 static void giveback_first_trb(struct xhci_hcd *xhci, int slot_id,
 		unsigned int ep_index, unsigned int stream_id, int start_cycle,
 		struct xhci_generic_trb *start_trb)
@@ -3070,11 +3242,11 @@ static u32 xhci_td_remainder(unsigned int remainder)
 }
 
 /*
- * For xHCI 1.0 host controllers, TD size is the number of packets remaining in
- * the TD (*not* including this TRB).
+ * For xHCI 1.0 host controllers, TD size is the number of max packet sized
+ * packets remaining in the TD (*not* including this TRB).
  *
  * Total TD packet count = total_packet_count =
- *     roundup(TD size in bytes / wMaxPacketSize)
+ *     DIV_ROUND_UP(TD size in bytes / wMaxPacketSize)
  *
  * Packets transferred up to and including this TRB = packets_transferred =
  *     rounddown(total bytes transferred including this TRB / wMaxPacketSize)
@@ -3082,25 +3254,27 @@ static u32 xhci_td_remainder(unsigned int remainder)
  * TD size = total_packet_count - packets_transferred
  *
  * It must fit in bits 21:17, so it can't be bigger than 31.
+ * The last TRB in a TD must have the TD size set to zero.
  */
-
 static u32 xhci_v1_0_td_remainder(int running_total, int trb_buff_len,
-		unsigned int total_packet_count, struct urb *urb)
+		unsigned int total_packet_count, struct urb *urb,
+		unsigned int num_trbs_left)
 {
 	int packets_transferred;
-	u32 remainder;
 
 	/* One TRB with a zero-length data packet. */
-	if (running_total == 0 && trb_buff_len == 0)
+	if (num_trbs_left == 0 || (running_total == 0 && trb_buff_len == 0))
 		return 0;
 
 	/* All the TRB queueing functions don't count the current TRB in
 	 * running_total.
 	 */
 	packets_transferred = (running_total + trb_buff_len) /
-		usb_endpoint_maxp(&urb->ep->desc);
-	remainder = total_packet_count - packets_transferred;
-	return (remainder > 31) ? 31 << 17 : remainder << 17;
+		GET_MAX_PACKET(usb_endpoint_maxp(&urb->ep->desc));
+
+	if ((total_packet_count - packets_transferred) > 31)
+		return 31 << 17;
+	return (total_packet_count - packets_transferred) << 17;
 }
 
 static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
@@ -3119,7 +3293,7 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	bool more_trbs_coming;
 
 	struct xhci_generic_trb *start_trb;
-	int start_cycle;
+	struct xhci_generic_trb temp_trb;
 
 	ep_ring = xhci_urb_to_transfer_ring(xhci, urb);
 	if (!ep_ring)
@@ -3149,7 +3323,6 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	 * state may change as we enqueue the other TRBs, so save it too.
 	 */
 	start_trb = &ep_ring->enqueue->generic;
-	start_cycle = ep_ring->cycle_state;
 
 	running_total = 0;
 	/*
@@ -3176,12 +3349,6 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		u32 length_field = 0;
 		u32 remainder = 0;
 
-		/* Don't change the cycle bit of the first TRB until later */
-		if (first_trb) {
-			first_trb = false;
-			if (start_cycle == 0)
-				field |= 0x1;
-		} else
 		field |= ep_ring->cycle_state;
 
 		/* Chain all the TRBs together; clear the chain bit in the last
@@ -3208,15 +3375,9 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		}
 
 		/* Set the TRB length, TD size, and interrupter fields. */
-		if (xhci->hci_version < 0x100) {
-			remainder = xhci_td_remainder(
-					urb->transfer_buffer_length -
-					running_total);
-		} else {
-			if (num_trbs > 1)
 				remainder = xhci_v1_0_td_remainder(running_total,
-						trb_buff_len, total_packet_count, urb);
-		}
+				trb_buff_len, total_packet_count, urb,
+				num_trbs - 1);
 		length_field = TRB_LEN(trb_buff_len) |
 			remainder |
 			TRB_INTR_TARGET(0);
@@ -3225,11 +3386,20 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 			more_trbs_coming = true;
 		else
 			more_trbs_coming = false;
+		if (first_trb) {
+			first_trb = false;
+			temp_trb.field[0] = cpu_to_le32(lower_32_bits(addr));
+			temp_trb.field[1] = cpu_to_le32(upper_32_bits(addr));
+			temp_trb.field[2] = cpu_to_le32(length_field);
+			temp_trb.field[3] = cpu_to_le32(field | TRB_TYPE(TRB_NORMAL));
+			inc_enq(xhci, ep_ring, more_trbs_coming);
+		} else {
 			queue_trb(xhci, ep_ring, more_trbs_coming,
 					lower_32_bits(addr),
 					upper_32_bits(addr),
 					length_field,
 					field | TRB_TYPE(TRB_NORMAL));
+		}
 		--num_trbs;
 		running_total += trb_buff_len;
 
@@ -3257,8 +3427,8 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	} while (running_total < urb->transfer_buffer_length);
 
 	check_trb_math(urb, num_trbs, running_total);
-	giveback_first_trb(xhci, slot_id, ep_index, urb->stream_id,
-			start_cycle, start_trb);
+	requeue_first_trb(xhci, slot_id, ep_index, urb->stream_id,
+			start_trb, &temp_trb);
 	return 0;
 }
 
@@ -3271,9 +3441,9 @@ int etxhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	struct xhci_td *td;
 	int num_trbs;
 	struct xhci_generic_trb *start_trb;
+	struct xhci_generic_trb temp_trb;
 	bool first_trb;
 	bool more_trbs_coming;
-	int start_cycle;
 	u32 field, length_field;
 
 	int running_total, trb_buff_len, ret;
@@ -3320,7 +3490,6 @@ int etxhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	 * state may change as we enqueue the other TRBs, so save it too.
 	 */
 	start_trb = &ep_ring->enqueue->generic;
-	start_cycle = ep_ring->cycle_state;
 
 	running_total = 0;
 	total_packet_count = DIV_ROUND_UP(urb->transfer_buffer_length,
@@ -3339,12 +3508,6 @@ int etxhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		u32 remainder = 0;
 		field = 0;
 
-		/* Don't change the cycle bit of the first TRB until later */
-		if (first_trb) {
-			first_trb = false;
-			if (start_cycle == 0)
-				field |= 0x1;
-		} else
 		field |= ep_ring->cycle_state;
 
 		/* Chain all the TRBs together; clear the chain bit in the last
@@ -3363,15 +3526,9 @@ int etxhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 			field |= TRB_ISP;
 
 		/* Set the TRB length, TD size, and interrupter fields. */
-		if (xhci->hci_version < 0x100) {
-			remainder = xhci_td_remainder(
-					urb->transfer_buffer_length -
-					running_total);
-		} else {
-			if (num_trbs > 1)
 				remainder = xhci_v1_0_td_remainder(running_total,
-						trb_buff_len, total_packet_count, urb);
-		}
+				trb_buff_len, total_packet_count, urb,
+				num_trbs - 1);
 		length_field = TRB_LEN(trb_buff_len) |
 			remainder |
 			TRB_INTR_TARGET(0);
@@ -3380,11 +3537,20 @@ int etxhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 			more_trbs_coming = true;
 		else
 			more_trbs_coming = false;
+		if (first_trb) {
+			first_trb = false;
+			temp_trb.field[0] = cpu_to_le32(lower_32_bits(addr));
+			temp_trb.field[1] = cpu_to_le32(upper_32_bits(addr));
+			temp_trb.field[2] = cpu_to_le32(length_field);
+			temp_trb.field[3] = cpu_to_le32(field | TRB_TYPE(TRB_NORMAL));
+			inc_enq(xhci, ep_ring, more_trbs_coming);
+		} else {
 			queue_trb(xhci, ep_ring, more_trbs_coming,
 					lower_32_bits(addr),
 					upper_32_bits(addr),
 					length_field,
 					field | TRB_TYPE(TRB_NORMAL));
+		}
 		--num_trbs;
 		running_total += trb_buff_len;
 
@@ -3396,8 +3562,8 @@ int etxhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 	} while (running_total < urb->transfer_buffer_length);
 
 	check_trb_math(urb, num_trbs, running_total);
-	giveback_first_trb(xhci, slot_id, ep_index, urb->stream_id,
-			start_cycle, start_trb);
+	requeue_first_trb(xhci, slot_id, ep_index, urb->stream_id,
+			start_trb, &temp_trb);
 	return 0;
 }
 
@@ -3634,7 +3800,8 @@ static int xhci_queue_isoc_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		td_len = urb->iso_frame_desc[i].length;
 		td_remain_len = td_len;
 		total_packet_count = DIV_ROUND_UP(td_len,
-				usb_endpoint_maxp(&urb->ep->desc));
+				GET_MAX_PACKET(
+					usb_endpoint_maxp(&urb->ep->desc)));
 		/* A zero-length transfer still involves at least one packet. */
 		if (total_packet_count == 0)
 			total_packet_count++;
@@ -3656,9 +3823,11 @@ static int xhci_queue_isoc_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		td = urb_priv->td[i];
 		for (j = 0; j < trbs_per_td; j++) {
 			u32 remainder = 0;
-			field = TRB_TBC(burst_count) | TRB_TLBPC(residue);
+			field = 0;
 
 			if (first_trb) {
+				field = TRB_TBC(burst_count) |
+					TRB_TLBPC(residue);
 				/* Queue the isoc TRB */
 				field |= TRB_TYPE(TRB_ISOC);
 				/* Assume URB_ISO_ASAP is set */
@@ -3704,15 +3873,10 @@ static int xhci_queue_isoc_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 				trb_buff_len = td_remain_len;
 
 			/* Set the TRB length, TD size, & interrupter fields. */
-			if (xhci->hci_version < 0x100) {
-				remainder = xhci_td_remainder(
-						td_len - running_total);
-			} else {
-				if (j < trbs_per_td - 1)
 					remainder = xhci_v1_0_td_remainder(
 							running_total, trb_buff_len,
-							total_packet_count, urb);
-			}
+					total_packet_count, urb,
+					(trbs_per_td - j - 1));
 			length_field = TRB_LEN(trb_buff_len) |
 				remainder |
 				TRB_INTR_TARGET(0);
@@ -3849,9 +4013,16 @@ int etxhci_queue_isoc_tx_prepare(struct xhci_hcd *xhci, gfp_t mem_flags,
 static int queue_command(struct xhci_hcd *xhci, u32 field1, u32 field2,
 		u32 field3, u32 field4, bool command_must_succeed)
 {
+#ifndef MY_ABC_HERE
+union xhci_trb *dbg_trb;
+struct xhci_segment *dbg_seg;
+#endif
 	int reserved_trbs = xhci->cmd_ring_reserved_trbs;
 	int ret;
 
+#ifndef MY_ABC_HERE
+printk("%s\n", __func__);
+#endif
 	if (!command_must_succeed)
 		reserved_trbs++;
 
@@ -3864,8 +4035,17 @@ static int queue_command(struct xhci_hcd *xhci, u32 field1, u32 field2,
 					"unfailable commands failed.\n");
 		return ret;
 	}
+
+#ifndef MY_ABC_HERE
+dbg_trb = xhci->cmd_ring->enqueue;
+dbg_seg = xhci->cmd_ring->enq_seg;
+#endif
+
 	queue_trb(xhci, xhci->cmd_ring, false, field1, field2, field3,
 			field4 | xhci->cmd_ring->cycle_state);
+#ifndef MY_ABC_HERE
+etxhci_print_trbs(xhci, dbg_seg, dbg_trb, 1);
+#endif
 	return 0;
 }
 

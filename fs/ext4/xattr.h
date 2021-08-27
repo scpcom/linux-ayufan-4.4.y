@@ -30,6 +30,9 @@
 #ifdef MY_ABC_HERE
 #define EXT4_XATTR_INDEX_SYNO	8
 #endif
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+#define EXT4_XATTR_INDEX_SYNO_ACL_ACCESS_NOPERM	9
+#endif
 
 struct ext4_xattr_header {
 	__le32	h_magic;	/* magic number for identification */
@@ -75,7 +78,8 @@ struct ext4_xattr_entry {
 # ifdef CONFIG_EXT4_FS_XATTR
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-extern struct xattr_handler ext4_xattr_synoacl_access_handler;
+extern const struct xattr_handler ext4_xattr_synoacl_access_handler;
+extern const struct xattr_handler ext4_xattr_synoacl_noperm_access_handler;
 #endif
 #ifdef MY_ABC_HERE
 extern struct xattr_handler ext4_xattr_syno_handler;

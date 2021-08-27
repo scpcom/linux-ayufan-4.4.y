@@ -64,10 +64,6 @@
 #include "xattr.h"
 #include "acl.h"
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-#include <linux/export.h>
-#endif
-
 #define BHDR(bh) ((struct ext4_xattr_header *)((bh)->b_data))
 #define ENTRY(ptr) ((struct ext4_xattr_entry *)(ptr))
 #define BFIRST(bh) ENTRY(BHDR(bh)+1)
@@ -108,6 +104,7 @@ static const struct xattr_handler *ext4_xattr_handler_map[] = {
 	[EXT4_XATTR_INDEX_USER]		     = &ext4_xattr_user_handler,
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
 	[EXT4_XATTR_INDEX_SYNO_ACL_ACCESS]  = &ext4_xattr_synoacl_access_handler,
+	[EXT4_XATTR_INDEX_SYNO_ACL_ACCESS_NOPERM]  = &ext4_xattr_synoacl_noperm_access_handler,
 #elif defined(CONFIG_EXT4_FS_POSIX_ACL)
 	[EXT4_XATTR_INDEX_POSIX_ACL_ACCESS]  = &ext4_xattr_acl_access_handler,
 	[EXT4_XATTR_INDEX_POSIX_ACL_DEFAULT] = &ext4_xattr_acl_default_handler,
@@ -126,6 +123,7 @@ const struct xattr_handler *ext4_xattr_handlers[] = {
 	&ext4_xattr_trusted_handler,
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
 	&ext4_xattr_synoacl_access_handler,
+	&ext4_xattr_synoacl_noperm_access_handler,
 #elif defined(CONFIG_EXT4_FS_POSIX_ACL)
 	&ext4_xattr_acl_access_handler,
 	&ext4_xattr_acl_default_handler,
@@ -340,9 +338,6 @@ ext4_xattr_get(struct inode *inode, int name_index, const char *name,
 	up_read(&EXT4_I(inode)->xattr_sem);
 	return error;
 }
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-EXPORT_SYMBOL(ext4_xattr_get);
-#endif
 
 static int
 ext4_xattr_list_entries(struct dentry *dentry, struct ext4_xattr_entry *entry,
@@ -1092,9 +1087,6 @@ cleanup:
 	up_write(&EXT4_I(inode)->xattr_sem);
 	return error;
 }
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-EXPORT_SYMBOL(ext4_xattr_set_handle);
-#endif
 
 /*
  * ext4_xattr_set()
@@ -1667,23 +1659,11 @@ static int ext4_xattr_syno_set(struct dentry *dentry, const char *name,
 			      value, size, flags);
 }
 
-static int ext4_xattr_syno_set_compact(struct inode *inode, const char *name,
-			  const void *value, size_t size, int flags, int handler_flags)
-{
-	if (strcmp(name, "") == 0){
-		return -EINVAL;
-	}
-
-	return ext4_xattr_set(inode, EXT4_XATTR_INDEX_SYNO, name,
-			      value, size, flags);
-}
-
 struct xattr_handler ext4_xattr_syno_handler = {
 	.prefix	= XATTR_SYNO_PREFIX,
 	.list	= ext4_xattr_syno_list,
 	.get	= ext4_xattr_syno_get,
 	.set	= ext4_xattr_syno_set,
-	.set_compact_syno	= ext4_xattr_syno_set_compact,
 };
 
 #endif

@@ -63,6 +63,10 @@
 extern int syno_hibernation_log_sec;
 #endif
 
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
+#endif
+
 int compat_log = 1;
 
 int compat_printk(const char *fmt, ...)
@@ -1858,91 +1862,57 @@ asmlinkage long compat_sys_SYNOUtime(char __user * filename, struct compat_times
 	int error;
 	struct path path;
 	struct inode *inode = NULL;
-	struct iattr newattrs;
 	compat_time_t tv_sec;
 	s32 tv_nsec;
+	struct timespec crtime;
 
 	if (!pCtime) {
 		return -EINVAL;
 	}
+	error = get_user(tv_sec, &pCtime->tv_sec);
+	if (error)
+		goto out;
+	error = get_user(tv_nsec, &pCtime->tv_nsec);
+	if (error)
+		goto out;
+
+	crtime.tv_sec = tv_sec;
+	crtime.tv_nsec = tv_nsec;
 
 	error = user_path_at(AT_FDCWD, filename, LOOKUP_FOLLOW, &path);
 	if (error)
 		goto out;
-	inode = path.dentry->d_inode;
 
-	error = -EROFS;
-	if (IS_RDONLY(inode))
-		goto dput_and_out;
-
-	error = get_user(tv_sec, &pCtime->tv_sec);
+	error = mnt_want_write(path.mnt);
 	if (error)
 		goto dput_and_out;
-	error = get_user(tv_nsec, &pCtime->tv_nsec);
+
+	inode = path.dentry->d_inode;
+	if (!inode_owner_or_capable(inode)) {
+#ifdef CONFIG_FS_SYNO_ACL
+		if (IS_SYNOACL(path.dentry)) {
+			error = synoacl_op_perm(path.dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
 			if (error) 
-		goto dput_and_out;
-
-	newattrs.ia_ctime.tv_sec = tv_sec;
-	newattrs.ia_ctime.tv_nsec = tv_nsec;
-	newattrs.ia_valid = ATTR_CREATE_TIME;
-	mutex_lock(&inode->i_mutex);
-	if (inode->i_op && inode->i_op->setattr)  {
-		error = inode->i_op->setattr(path.dentry, &newattrs);
+				goto drop_write;
 		} else {
-		error = inode_change_ok(inode, &newattrs);
-		if (!error)
-			setattr_copy(inode, &newattrs);
-			mark_inode_dirty(inode);
-			error = 0;
+#endif
+			error = -EPERM;
+			goto drop_write;
+#ifdef CONFIG_FS_SYNO_ACL
+		}
+#endif
 	}
-	mutex_unlock(&inode->i_mutex);
 
+	error = syno_op_set_crtime(path.dentry, &crtime);
+
+drop_write:
+	mnt_drop_write(path.mnt);
 dput_and_out:
 	path_put(&path);
 out:
 	return error;
 }
 #endif
-
-#ifdef MY_ABC_HERE
-asmlinkage long compat_sys_SYNOmmap(compat_SYNO_MMAP_ARG __user *arg)
-{
-	long error = -EFAULT;
-	SYNO_MMAP_ARG arg64;
-	mm_segment_t oldfs = get_fs();
-
-	if (!arg) {
-		return -EFAULT;
-	}
-
-	if (unlikely(get_user(arg64.addr, &arg->addr)) ||
-		unlikely(get_user(arg64.len, &arg->len)) ||
-		unlikely(get_user(arg64.prot, &arg->prot)) ||
-		unlikely(get_user(arg64.flags, &arg->flags)) ||
-		unlikely(get_user(arg64.fd, &arg->fd)) ||
-		unlikely(get_user(arg64.pgoff, &arg->pgoff))) {
-		return -EFAULT;
-	}
-
-	set_fs(KERNEL_DS);
-	error = sys_mmap((unsigned long)arg64.addr, (unsigned long)arg64.len,
-					 (unsigned long)arg64.prot, (unsigned long)arg64.flags,
-					 (unsigned long)arg64.fd, (unsigned long)(arg64.pgoff << PAGE_SHIFT));
-	set_fs(oldfs);
-
-	if (unlikely(put_user((u32)arg64.addr, &arg->addr)) ||
-		unlikely(put_user((u32)arg64.len, &arg->len)) ||
-		unlikely(put_user((u32)arg64.prot, &arg->prot)) ||
-		unlikely(put_user((u32)arg64.flags, &arg->flags)) ||
-		unlikely(put_user((u32)arg64.fd, &arg->fd)) ||
-		unlikely(put_user((u32)arg64.pgoff, &arg->pgoff))) {
-		return -EFAULT;
-	}
-
-	return error;
-}
-#endif
-
 
 #ifdef CONFIG_FHANDLE
 /*

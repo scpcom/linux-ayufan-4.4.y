@@ -83,7 +83,6 @@
 
 #if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
 #include <linux/synobios.h>
-extern char gszSynoHWVersion[];
 #endif
 
 #ifdef CONFIG_IPV6_PRIVACY
@@ -1124,9 +1123,15 @@ out:
 	return ret;
 }
 
+#if defined(CONFIG_SYNO_COMCERTO)
+static int __ipv6_dev_get_saddr(struct net *net, struct net_device *dst_dev,
+		       const struct in6_addr *daddr, unsigned int prefs,
+		       struct in6_addr *saddr)
+#else
 int ipv6_dev_get_saddr(struct net *net, struct net_device *dst_dev,
 		       const struct in6_addr *daddr, unsigned int prefs,
 		       struct in6_addr *saddr)
+#endif
 {
 	struct ipv6_saddr_score scores[2],
 				*score = &scores[0], *hiscore = &scores[1];
@@ -1249,7 +1254,9 @@ try_nextdev:
 	in6_ifa_put(hiscore->ifa);
 	return 0;
 }
+#if !defined(CONFIG_SYNO_COMCERTO)
 EXPORT_SYMBOL(ipv6_dev_get_saddr);
+#endif
 
 int ipv6_get_lladdr(struct net_device *dev, struct in6_addr *addr,
 		    unsigned char banned_flags)
@@ -1835,9 +1842,9 @@ static struct inet6_dev *addrconf_add_dev(struct net_device *dev)
 #if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
 void SYNO_IPV6_ready_timer_workaround(__u32 *valid_lft, __u32 *prefered_lft)
 {
-	if(!strncmp(gszSynoHWVersion, HW_DS110p, strlen(HW_DS110p)) ||
-		!strncmp(gszSynoHWVersion, HW_DS210p, strlen(HW_DS210p)) ||
-		!strncmp(gszSynoHWVersion, HW_DS410, strlen(HW_DS410))) {
+	if(syno_is_hw_version(HW_DS110p) ||
+	   syno_is_hw_version(HW_DS210p) ||
+	   syno_is_hw_version(HW_DS410)) {
 		*valid_lft -= (*valid_lft)/400;
 		*prefered_lft -= (*prefered_lft)/400;
 	}
@@ -4847,6 +4854,11 @@ int __init addrconf_init(void)
 
 	ipv6_addr_label_rtnl_register();
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	BUG_ON(ipv6_dev_get_saddr_hook != NULL);
+	rcu_assign_pointer(ipv6_dev_get_saddr_hook, __ipv6_dev_get_saddr);
+#endif
+
 	return 0;
 errout:
 	rtnl_af_unregister(&inet6_ops);
@@ -4864,6 +4876,11 @@ void addrconf_cleanup(void)
 {
 	struct net_device *dev;
 	int i;
+
+#if defined(CONFIG_SYNO_COMCERTO)
+	rcu_assign_pointer(ipv6_dev_get_saddr_hook, NULL);
+	synchronize_rcu();
+#endif
 
 	unregister_netdevice_notifier(&ipv6_dev_notf);
 	unregister_pernet_subsys(&addrconf_ops);

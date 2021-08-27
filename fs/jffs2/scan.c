@@ -25,6 +25,10 @@
 
 #define DEFAULT_EMPTY_SCAN_SIZE 256
 
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_MTD_NAND_COMCERTO)
+#define BIT_FLIP_TOLERENCE	7
+#endif
+
 #define noisy_printk(noise, args...) do { \
 	if (*(noise)) { \
 		printk(KERN_NOTICE args); \
@@ -66,6 +70,17 @@ static inline uint32_t EMPTY_SCAN_SIZE(uint32_t sector_size) {
 	else
 		return DEFAULT_EMPTY_SCAN_SIZE;
 }
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_MTD_NAND_COMCERTO)
+static inline uint32_t count_zero_bits( uint32_t value) {
+	uint32_t num_zeros = 0;
+	size_t i;
+	for (i = 0; i < sizeof value; ++i, value >>= 1) {
+		if ((value & 1) == 0)
+			++num_zeros;
+	}
+}
+#endif
 
 static int file_dirty(struct jffs2_sb_info *c, struct jffs2_eraseblock *jeb)
 {
@@ -150,8 +165,16 @@ int jffs2_scan_medium(struct jffs2_sb_info *c)
 		/* reset summary info for next eraseblock scan */
 		jffs2_sum_reset_collected(s);
 
+#if defined(CONFIG_SYNO_COMCERTO)
+		if (c->flags & (1 << 7))
+			ret = BLK_STATE_ALLFF;
+		else
+			ret = jffs2_scan_eraseblock(c, jeb, buf_size?flashbuf:(flashbuf+jeb->offset),
+							buf_size, s);
+#else
 		ret = jffs2_scan_eraseblock(c, jeb, buf_size?flashbuf:(flashbuf+jeb->offset),
 						buf_size, s);
+#endif
 
 		if (ret < 0)
 			goto out;
@@ -551,6 +574,19 @@ static int jffs2_scan_eraseblock (struct jffs2_sb_info *c, struct jffs2_eraseblo
 			return err;
 	}
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	if ((buf[0] == 0xde) &&
+		(buf[1] == 0xad) &&
+		(buf[2] == 0xc0) &&
+		(buf[3] == 0xde)) {
+		/* end of filesystem. erase everything after this point */
+		printk("%s(): End of filesystem marker found at 0x%x\n", __func__, jeb->offset);
+		c->flags |= (1 << 7);
+
+		return BLK_STATE_ALLFF;
+	}
+#endif
+
 	/* We temporarily use 'ofs' as a pointer into the buffer/jeb */
 	ofs = 0;
 	max_ofs = EMPTY_SCAN_SIZE(c->sector_size);
@@ -577,6 +613,34 @@ static int jffs2_scan_eraseblock (struct jffs2_sb_info *c, struct jffs2_eraseblo
 		else
 			return BLK_STATE_ALLFF;	/* OK to erase if all blocks are like this */
 	}
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_MTD_NAND_COMCERTO)
+	else if (cleanmarkerfound) {
+			ofs = 0;
+			uint32_t num_zeros = 0;
+			while((ofs < max_ofs) && (num_zeros < BIT_FLIP_TOLERENCE)) {
+				if (!(*(uint32_t *)(&buf[ofs]) == 0xFFFFFFFF))
+					num_zeros = count_zero_bits(*(uint32_t *)(&buf[ofs]));
+				ofs += 4;
+			}
+#ifdef CONFIG_JFFS2_FS_WRITEBUFFER
+		if ((num_zeros < BIT_FLIP_TOLERENCE) && jffs2_cleanmarker_oob(c)) {
+			/* scan oob, take care of cleanmarker */
+			int ret = jffs2_check_oob_empty(c, jeb, cleanmarkerfound);
+			D2(printk(KERN_NOTICE "jffs2_check_oob_empty returned %d\n",ret));
+			switch (ret) {
+			case 0:		return cleanmarkerfound ? BLK_STATE_CLEANMARKER : BLK_STATE_ALLFF;
+			case 1: 	return BLK_STATE_ALLDIRTY;
+			default: 	return ret;
+			}
+		} else {
+			return BLK_STATE_ALLDIRTY;
+		}
+#endif
+
+	}
+#endif
+
 	if (ofs) {
 		D1(printk(KERN_DEBUG "Free space at %08x ends at %08x\n", jeb->offset,
 			  jeb->offset + ofs));

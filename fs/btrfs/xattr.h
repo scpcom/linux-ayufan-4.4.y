@@ -26,6 +26,10 @@
 
 extern const struct xattr_handler btrfs_xattr_acl_access_handler;
 extern const struct xattr_handler btrfs_xattr_acl_default_handler;
+#ifdef CONFIG_BTRFS_FS_SYNO_ACL
+extern const struct xattr_handler btrfs_xattr_synoacl_access_handler;
+extern const struct xattr_handler btrfs_xattr_synoacl_noperm_access_handler;
+#endif
 extern const struct xattr_handler *btrfs_xattr_handlers[];
 
 extern ssize_t __btrfs_getxattr(struct inode *inode, const char *name,

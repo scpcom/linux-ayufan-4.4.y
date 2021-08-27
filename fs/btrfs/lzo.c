@@ -31,8 +31,8 @@
 
 struct workspace {
 	void *mem;
-	void *buf;	/* where compressed data goes */
-	void *cbuf;	/* where decompressed data goes */
+	void *buf;	/* where decompressed data goes */
+	void *cbuf;	/* where compressed data goes */
 	struct list_head list;
 };
 
@@ -207,8 +207,10 @@ static int lzo_compress_pages(struct list_head *ws,
 		}
 
 		/* we're making it bigger, give up */
-		if (tot_in > 8192 && tot_in < tot_out)
+		if (tot_in > 8192 && tot_in < tot_out) {
+			ret = -1;
 			goto out;
+		}
 
 		/* we're all done */
 		if (tot_in >= len)
@@ -411,9 +413,9 @@ static int lzo_decompress(struct list_head *ws, unsigned char *data_in,
 
 	bytes = min_t(unsigned long, destlen, out_len - start_byte);
 
-	kaddr = kmap_atomic(dest_page, KM_USER0);
+	kaddr = kmap_atomic(dest_page);
 	memcpy(kaddr, workspace->buf + start_byte, bytes);
-	kunmap_atomic(kaddr, KM_USER0);
+	kunmap_atomic(kaddr);
 out:
 	return ret;
 }

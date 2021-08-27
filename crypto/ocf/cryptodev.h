@@ -64,6 +64,9 @@
 #ifndef _CRYPTO_CRYPTO_H_
 #define _CRYPTO_CRYPTO_H_
 
+#if  defined(CONFIG_OCF_M86XXX_MODULE) && (defined(__KERNEL__) || !defined(__GLIBC__) || (__GLIBC__ < 2))
+#include <linux/in.h>
+#endif
 /* Some initial values */
 #define CRYPTO_DRIVERS_INITIAL	4
 #define CRYPTO_SW_SESSIONS	32
@@ -160,7 +163,20 @@
 #define CRYPTO_SHA2_512			24
 #define CRYPTO_RIPEMD160		25
 #define	CRYPTO_LZS_COMP			26
+#if defined(CONFIG_OCF_M86XXX_MODULE)
+#define CRYPTO_ESP_RFC2406 		27
+//#define CRYPTO_ESP_RFC2406_TRANSPORT 20
+#define CRYPTO_ESP_RFC4303  		28
+#define CRYPTO_ESP4_RFC4303  		28
+#define CRYPTO_ESP6_RFC4303  		29
+#define CRYPTO_AH			30
+#define CRYPTO_AH4			30
+#define CRYPTO_AH6			31
+#define CRYPTO_SHA2_HMAC		32 /*TODO is it a duplicate entry*/
+#define CRYPTO_ALGORITHM_MAX		32 /* Keep updated - see below */
+#else
 #define CRYPTO_ALGORITHM_MAX	26 /* Keep updated - see above */
+#endif
 
 /* Algorithm flags */
 #define CRYPTO_ALG_FLAG_SUPPORTED	0x01 /* Algorithm is supported */
@@ -312,13 +328,60 @@ struct cryptostats {
 /* Standard initialization structure beginning */
 struct cryptoini {
 	int		cri_alg;	/* Algorithm to use */
+#if defined(CONFIG_OCF_M86XXX_MODULE)
+	int		cri_flags;
+	union {
+		struct {
+			int		cri_mlen;	/* Number of bytes we want from the
+					   entire hash. 0 means all. */
+			int			cri_klen;	/* Key length, in bits */
+			caddr_t		cri_key;	/* key to use */
+			u_int8_t	cri_iv[EALG_MAX_BLOCK_LEN];	/* IV to use */
+		} cri_alg;
+		struct {
+			u_int32_t basealg;
+			struct sockaddr_in tun_source;
+			struct sockaddr_in tun_destination;
+			int tun_df_mode;
+			int tun_ds_mode;
+		 	int tun_ttl_value;
+		 	int tun_replay_windowsize;
+		 	int spivalue ;
+		 	int replayinit;  /* set to 0 to disable replay on receive */
+		 	u_int64_t time_hard_lifetime;
+		 	u_int64_t time_soft_lifetime;
+		 	u_int64_t byte_hard_lifetime;
+		 	u_int64_t byte_soft_lifetime;
+		} cri_pack;	
+	} u;
+#else
 	int		cri_klen;	/* Key length, in bits */
 	int		cri_mlen;	/* Number of bytes we want from the
 					   entire hash. 0 means all. */
 	caddr_t		cri_key;	/* key to use */
 	u_int8_t	cri_iv[EALG_MAX_BLOCK_LEN];	/* IV to use */
+#endif
 	struct cryptoini *cri_next;
 };
+#if defined(CONFIG_OCF_M86XXX_MODULE)
+#define cri_mlen		u.cri_alg.cri_mlen
+#define cri_klen		u.cri_alg.cri_klen
+#define cri_key			u.cri_alg.cri_key
+#define cri_iv			u.cri_alg.cri_iv
+#define crip_basealg			u.cri_pack.basealg
+#define crip_tun_source 		u.cri_pack.tun_source
+#define crip_tun_destination	u.cri_pack.tun_destination
+#define crip_tun_df_mode		u.cri_pack.tun_df_mode
+#define crip_tun_ds_mode	u.cri_pack.tun_ds_mode
+#define crip_tun_ttl_value	u.cri_pack.tun_ttl_value
+#define crip_tun_replay_windowsize u.cri_pack.tun_replay_windowsize
+#define crip_spivalue 		u.cri_pack.spivalue
+#define crip_replayinit		u.cri_pack.replayinit
+#define crip_time_hard_lifetime 	 u.cri_pack.time_hard_lifetime
+#define crip_time_soft_lifetime 	 u.cri_pack.time_soft_lifetime
+#define crip_byte_hard_lifetime 	 u.cri_pack.byte_hard_lifetime
+#define crip_byte_soft_lifetime 	 u.cri_pack.byte_soft_lifetime
+#endif
 
 /* Describe boundaries of a single crypto operation */
 struct cryptodesc {
@@ -380,6 +443,37 @@ struct cryptop {
 
 	int (*crp_callback)(struct cryptop *); /* Callback function */
 };
+#if defined(CONFIG_OCF_M86XXX_MODULE)
+enum crypto_packet_return_code {
+		CRYPTO_OK=0,
+		CRYPTO_SOFT_TTL = 2,
+ 		CRYPTO_HARD_TTL,
+ 		CRYPTO_SA_INACTIVE,
+ 		CRYPTO_REPLAY,
+ 		CRYPTO_ICV_FAIL,
+ 		CRYPTO_SEQ_ROLL,
+ 		CRYPTO_MEM_ERROR,
+ 		CRYPTO_VERS_ERROR,
+ 		CRYPTO_PROT_ERROR,
+ 		CRYPTO_PYLD_ERROR,
+ 		CRYPTO_PAD_ERROR 
+};
+
+enum crypto_accel_type {
+                  CRYPTO_PACKET  =0x2,    /* OR together desired bits */
+                  CRYPTO_HARDWARE=0x1,
+                  CRYPTO_SOFTWARE=0x0
+};
+
+enum crypto_flags {
+                  CRYPTO_ENCRYPT=0x1, 	// same for encap (OCF l2)
+                  CRYPTO_DECRYPT=0x2,		// same for decap (OCF l2)
+                  CRYPTO_MAC_GEN=0x4,
+                  CRYPTO_MAC_CHECK=0x08,
+                  CRYPTO_COMPRESS_SMALLER=0x10,
+                  CRYPTO_COMPRESS_BIGGER=0x20
+};
+#endif
 
 #define CRYPTO_BUF_CONTIG	0x0
 #define CRYPTO_BUF_IOV		0x1

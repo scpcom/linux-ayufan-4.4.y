@@ -46,15 +46,10 @@
 #define DISK_LED_ORANGE_SOLID	2
 #define DISK_LED_ORANGE_BLINK	3
 #define DISK_LED_GREEN_BLINK    4
-#define DISK_LED_BLUE			5
 
 #define SYNO_LED_OFF		0
 #define SYNO_LED_ON		1
 #define SYNO_LED_BLINKING	2
-
-#ifdef  MY_ABC_HERE
-extern char gszSynoHWVersion[];
-#endif
 
 #define SYNO_DS214p_GPP_SCHEDULE_ON		8
 #define SYNO_DS214p_GPP_HDD1_PWR_EN		9
@@ -189,8 +184,7 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	if ( DISK_LED_OFF == status ) {
 		fail_led = 1;
 		act_led = 1;
-	} else if ( DISK_LED_GREEN_SOLID == status ||
-				DISK_LED_BLUE == status) {
+	} else if ( DISK_LED_GREEN_SOLID == status ) {
 		fail_led = 1;
 		act_led = 0;
 	} else if ( DISK_LED_ORANGE_SOLID == status ||
@@ -353,11 +347,11 @@ u8 SYNOEvansportIsBoardNeedPowerUpHDD(u32 disk_id) {
 	u8 ret = 0;
 
 #ifdef  MY_ABC_HERE
-	if ( 0 == strncmp(gszSynoHWVersion, HW_DS214p, strlen(HW_DS214p)) ) {
+	if (syno_is_hw_version(HW_DS214play)) {
 		if (2 >= disk_id ) {
 			ret = 1;
 		}
-	} else if ( 0 == strncmp(gszSynoHWVersion, HW_DS114p, strlen(HW_DS114p)) ) {
+	} else if (syno_is_hw_version(HW_DS114p)) {
 		if (1 >= disk_id ) {
 			ret = 1;
 		}
@@ -649,10 +643,10 @@ EVANSPORT_default_GPIO_init(SYNO_EVANSPORT_GENERIC_GPIO *global_gpio)
 void synology_gpio_init(void)
 {
 #ifdef  MY_ABC_HERE
-	if ( 0 == strncmp(gszSynoHWVersion, HW_DS214play, strlen(HW_DS214play)) ) {
+	if (syno_is_hw_version(HW_DS214play)) {
 		EVANSPORT_214p_GPIO_init(&generic_gpio);
 		printk("Synology Evansport 2 bay GPIO Init\n");
-	} else if ( 0 == strncmp(gszSynoHWVersion, HW_DS114p, strlen(HW_DS114p)) ) {
+	} else if (syno_is_hw_version(HW_DS114p)) {
 		EVANSPORT_114p_GPIO_init(&generic_gpio);
 		printk("Synology Evansport 1 bay GPIO Init\n");
 	} else {

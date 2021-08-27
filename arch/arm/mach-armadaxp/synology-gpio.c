@@ -43,15 +43,10 @@
 #define DISK_LED_ORANGE_SOLID	2
 #define DISK_LED_ORANGE_BLINK	3
 #define DISK_LED_GREEN_BLINK    4
-#define DISK_LED_BLUE			5
 
 #define SYNO_LED_OFF		0
 #define SYNO_LED_ON		1
 #define SYNO_LED_BLINKING	2
-
-#ifdef  MY_ABC_HERE
-extern char gszSynoHWVersion[];
-#endif
 
 typedef struct __tag_SYNO_HDD_DETECT_GPIO {
 	u8 hdd1_present_detect;
@@ -258,8 +253,7 @@ SYNO_SOC_HDD_LED_SET(int index, int status)
 		gpio_set_value(mpp_pin, !active);
 		gpio_set_value(fail_led, active);
 	}
-	else if ( DISK_LED_GREEN_SOLID == status ||
-			  DISK_LED_BLUE == status)
+	else if ( DISK_LED_GREEN_SOLID == status )
 	{
 		SYNOMppCtrlRegWrite(mpp_pin, mode_sata_present);  // change MPP to sata present mode
 		gpio_set_value(fail_led, !active);
@@ -358,7 +352,6 @@ SYNO_CTRL_USB_HDD_LED_SET(int status)
 		blink2 = 0;
 		break;
 	case DISK_LED_GREEN_SOLID:
-	case DISK_LED_BLUE:
 		bit1 = 0;
 		bit2 = 1;
 		blink1 = 0;
@@ -605,7 +598,7 @@ static inline int MAX_DISK(struct disk_cnt *tbl)
 {
 	int i=0;
 	while (tbl[i].hw_version) {
-		if (0 == strcmp(tbl[i].hw_version, gszSynoHWVersion))
+		if (syno_is_hw_version(tbl[i].hw_version))
 			return tbl[i].max_disk_id;
 		i++;
 	}

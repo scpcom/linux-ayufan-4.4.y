@@ -13,7 +13,11 @@
 /* Maximum address we can use for the control code buffer */
 #define KEXEC_CONTROL_MEMORY_LIMIT (-1UL)
 
+#if defined(CONFIG_SYNO_COMCERTO)
+#define KEXEC_CONTROL_PAGE_SIZE	(PAGE_SIZE)
+#else
 #define KEXEC_CONTROL_PAGE_SIZE	4096
+#endif
 
 #define KEXEC_ARCH KEXEC_ARCH_ARM
 

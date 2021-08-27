@@ -239,39 +239,6 @@ int fsync_bdev(struct block_device *bdev)
 }
 EXPORT_SYMBOL(fsync_bdev);
 
-#ifdef MY_ABC_HERE
-int sync_wait_fs_sync(struct super_block *sb)
-{
-	int retry = 0;
-	do {
-		int cnt;
-		struct inode *tmp;
-
-		/* fail-safe protection*/
-		if (retry++ > SYNO_EXT4_SYNC_DALLOC_RETRY) {
-			printk(KERN_ERR"freeze_bdev retry sync more than %d times\n", retry);
-			break;
-		}
-
-		cnt = 0;
-		list_for_each_entry(tmp, &(sb->s_bdi->wb.b_dirty), i_wb_list) {
-			if (tmp->i_sb == sb) {
-				cnt++;
-			}
-		}
-		if (0 == cnt) {
-			break;
-		}
-
-		printk(KERN_DEBUG"freeze_bdev still has %d dirty inode, sync again\n", cnt);
-		sync_filesystem(sb);
-	} while (1);
-
-	return 0;
-}
-EXPORT_SYMBOL(sync_wait_fs_sync);
-#endif
-
 /**
  * freeze_bdev  --  lock a filesystem and force it into a consistent state
  * @bdev:	blockdevice to lock

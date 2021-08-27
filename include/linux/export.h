@@ -48,7 +48,28 @@ extern struct module __this_module;
 #define __CRC_SYMBOL(sym, sec)
 #endif
 
+#if defined(CONFIG_SYNO_COMCERTO)
+#ifdef MODULE
+#define __EXPORT_SUFFIX(sym)
+#else
+#define __EXPORT_SUFFIX(sym) "+" #sym
+#endif
+#endif
+
 /* For every exported symbol, place a struct in the __ksymtab section */
+#if defined(CONFIG_SYNO_COMCERTO)
+#define __EXPORT_SYMBOL(sym, sec)				\
+	extern typeof(sym) sym;					\
+	__CRC_SYMBOL(sym, sec)					\
+	static const char __kstrtab_##sym[]			\
+	__attribute__((section("__ksymtab_strings"		\
+	  __EXPORT_SUFFIX(sym)), aligned(1)))			\
+	= MODULE_SYMBOL_PREFIX #sym;				\
+	static const struct kernel_symbol __ksymtab_##sym	\
+	__used							\
+	__attribute__((section("___ksymtab" sec "+" #sym), unused))	\
+	= { (unsigned long)&sym, __kstrtab_##sym }
+#else
 #define __EXPORT_SYMBOL(sym, sec)				\
 	extern typeof(sym) sym;					\
 	__CRC_SYMBOL(sym, sec)					\
@@ -59,6 +80,7 @@ extern struct module __this_module;
 	__used							\
 	__attribute__((section("___ksymtab" sec "+" #sym), unused))	\
 	= { (unsigned long)&sym, __kstrtab_##sym }
+#endif
 
 #define EXPORT_SYMBOL(sym)					\
 	__EXPORT_SYMBOL(sym, "")

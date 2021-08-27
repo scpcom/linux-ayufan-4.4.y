@@ -764,7 +764,11 @@ static int ehci_run (struct usb_hcd *hcd)
 		"USB %x.%x started, EHCI %x.%02x%s\n",
 		((ehci->sbrn & 0xf0)>>4), (ehci->sbrn & 0x0f),
 		temp >> 8, temp & 0xff,
+#if defined(CONFIG_SYNO_COMCERTO)
+		(ignore_oc || ehci->ignore_oc) ? ", overcurrent ignored" : "");
+#else
 		ignore_oc ? ", overcurrent ignored" : "");
+#endif
 
 	ehci_writel(ehci, INTR_MASK,
 		    &ehci->regs->intr_enable); /* Turn On Interrupts */

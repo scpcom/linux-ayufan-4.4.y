@@ -42,6 +42,110 @@
 
 static int ehci_marvell_setup(struct usb_hcd *hcd);
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+/* In a370 and axp USB UTMI PHY there is an errata which causes
+ * error in detection of high speed devices. For certain devices
+ * with low pull up values the USB MAC doesnt detect the end of the
+ * device chirp K signal and therefore remains stuck in reset
+ * state.
+ * The workaround solves this issue by modifying the UTMI PHY
+ * squelch threshold once a high speed port reset error is detected.
+ * Modifying the squelch level enables the MAC to detect the end of
+ * device chirp K signal and to come out of reset. Once the MAC
+ * comes out of reset a consecutive reset attempt is made by the USB stack.
+ * This reset attempt succeeds due to the updated squelch level.
+
+ * Since the optimal squelch level is device dependant the WA
+ * toggles between 2 verfied squelch levels 0xA and 0xE.*/
+ 
+#define MAX_EHCI_PORTS		3
+#define PHY_RX_CTRL_REG_OFFSET(x) (0x708 + (0x40 * (x)))
+#define SQUELCH_TH_OFFSET	4
+#define SQUELCH_TH_MASK		0xF
+
+static int hs_wa_applied[MAX_EHCI_PORTS] = {0};
+
+static void ehci_marvell_toggle_squelch(struct ehci_hcd *ehci, int busnum)
+{
+	u32 __iomem *phy_rx_ctrl_reg;
+	u32 val, squelch_th;
+
+	phy_rx_ctrl_reg = (u32 __iomem *)(((u8 __iomem *)ehci->regs)
+			+ PHY_RX_CTRL_REG_OFFSET(busnum - 1));
+
+	val = ehci_readl(ehci, phy_rx_ctrl_reg);
+
+	squelch_th = (val >> SQUELCH_TH_OFFSET) & SQUELCH_TH_MASK;
+	if (squelch_th == 0xA)
+		squelch_th = 0xE;
+	else
+		squelch_th = 0xA;
+
+	val &= ~(SQUELCH_TH_MASK << SQUELCH_TH_OFFSET);
+	val |= (squelch_th & SQUELCH_TH_MASK) << SQUELCH_TH_OFFSET;
+
+	ehci_writel(ehci, val, phy_rx_ctrl_reg);
+}
+
+void ehci_marvell_hs_detect_wa_done(struct usb_device *udev)
+{
+	struct usb_hcd *hcd = bus_to_hcd(udev->bus);
+	struct ehci_hcd	*ehci = hcd_to_ehci(hcd);
+	int busnum = hcd->self.busnum;
+
+	if (hs_wa_applied[busnum])
+		ehci_marvell_toggle_squelch(ehci, busnum);
+
+	hs_wa_applied[busnum] = 0;
+}
+
+extern void (*gpfn_ehci_marvell_hs_detect_wa_done)(struct usb_device *udev);
+
+int ehci_marvell_hs_detect_wa(struct ehci_hcd *ehci, int busnum)
+{
+	u32 __iomem *portsc_reg;
+	u32 val = 0;
+	u32 timeout;
+	if (NULL == gpfn_ehci_marvell_hs_detect_wa_done) {
+		gpfn_ehci_marvell_hs_detect_wa_done = &ehci_marvell_hs_detect_wa_done;
+	}
+
+	/* Apply the WA only once in a reset cycle */
+	if (hs_wa_applied[busnum]++)
+		return 1;
+
+	ehci_marvell_toggle_squelch(ehci, busnum);
+
+	/*
+	 * After the squelch value is replaced we need to
+	 * wait upto 3ms for the MAC to leave reset state.
+	 */
+	portsc_reg = &ehci->regs->port_status[0];
+	timeout = 30;
+	while (timeout--) {
+		udelay(100);
+		val = ehci_readl(ehci, portsc_reg);
+		if ((val & PORT_RESET) == 0)
+			break;
+	}
+
+	/* Return error If the MAC doesn't come out of reset */
+	if (val & PORT_RESET)
+		return 1;
+
+	/*
+	 * Clear Connect Status Change, Port Enable, and Port Enable Change.
+	 * This returns the port status to pre-reset state and allows for
+	 * succesfull consecutive reset.
+	 */
+	val = ehci_readl(ehci, portsc_reg);
+	val = val  & (~PORT_PE);
+	val = (val  & (~PORT_RWC_BITS)) | PORT_CSC | PORT_PEC;
+	ehci_writel(ehci, val, portsc_reg);
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_ARMADA_ARCH && CONFIG_USB_MARVELL_ERRATA_FE_9049667 */
 
 void 	ehci_marvell_port_status_changed(struct ehci_hcd *ehci)
 {

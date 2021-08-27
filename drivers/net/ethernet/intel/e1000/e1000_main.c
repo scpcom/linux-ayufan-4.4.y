@@ -239,6 +239,46 @@ struct net_device *e1000_get_hw_dev(struct e1000_hw *hw)
 	return adapter->netdev;
 }
 
+#ifdef MY_ABC_HERE
+void e1000_syno_led_switch(int iEnable)
+{
+#ifdef CONFIG_ARCH_GEN3
+	struct net_device *dev = NULL;
+	struct e1000_adapter *adapter = NULL;
+	struct e1000_hw *hw = NULL;
+	u16 uiActLedCtrl = 0, uiLinkLedCtrl = 0;
+
+	dev = first_net_device(&init_net);
+	adapter = netdev_priv(dev);
+	hw = &adapter->hw;
+	/* The structure retured by first_net_device()
+	* does not contain the value of mac_type, this
+	* makes wrong opertaion to r/w phy regs.
+	* So we assign the value for Evansport's nic  here.
+	*/
+	hw->mac_type = e1000_ce4100;
+
+	e1000_write_phy_reg(hw, 31, 0x0007);
+	e1000_write_phy_reg(hw, 30, 0x002C);
+	e1000_read_phy_reg(hw, 26, &uiActLedCtrl);
+	e1000_read_phy_reg(hw, 28, &uiLinkLedCtrl);
+
+	if (iEnable) {
+		uiActLedCtrl |= 0x0040;
+		uiLinkLedCtrl |= 0x0700;
+	} else {
+		uiActLedCtrl &= 0xFFBF;
+		uiLinkLedCtrl &= 0xF8FF;
+	}
+
+	e1000_write_phy_reg(hw, 26, uiActLedCtrl);
+	e1000_write_phy_reg(hw, 28, uiLinkLedCtrl);
+	e1000_write_phy_reg(hw, 31, 0x0000);
+#endif
+}
+EXPORT_SYMBOL(e1000_syno_led_switch);
+#endif /*MY_ABC_HERE*/
+
 /**
  * e1000_init_module - Driver Registration Routine
  *
@@ -4842,9 +4882,21 @@ static int __e1000_shutdown(struct pci_dev *pdev, bool *enable_wake)
 
 			/* Enable WoL for selected modes */
 			e1000_write_phy_reg(hw, 31, 0x0007);
+#ifdef MY_DEF_HERE
+			udelay(10);
+#endif
 			e1000_write_phy_reg(hw, 30, 0x006d);
+#ifdef MY_DEF_HERE
+			udelay(10);
+#endif
 			e1000_write_phy_reg(hw, 22, 0x9fff);
+#ifdef MY_DEF_HERE
+			udelay(10);
+#endif
 			e1000_write_phy_reg(hw, 21, (u16) phy_wol);
+#ifdef MY_DEF_HERE
+			udelay(10);
+#endif
 
 			/* Disable GMII/RGMII pad for power saving */
 			/* FIXME: for the S5 -> S0 wake to work, the BIOS

@@ -403,6 +403,10 @@ struct hfsplus_attr_extents {
  * 
  * !!! XNU kernel use the following define.
  * inline structure is outdated & been replaced.
+ *
+ * If hfsplus_attr_data size is small,
+ * hfsplus_attr_tree_cachep will try to alloc more space.
+ *
  */
 struct hfsplus_attr_data {
 	__be32 record_type;

@@ -67,7 +67,7 @@ static struct dentry *btrfs_get_dentry(struct super_block *sb, u64 objectid,
 				       u64 root_objectid, u32 generation,
 				       int check_generation)
 {
-	struct btrfs_fs_info *fs_info = btrfs_sb(sb)->fs_info;
+	struct btrfs_fs_info *fs_info = btrfs_sb(sb);
 	struct btrfs_root *root;
 	struct inode *inode;
 	struct btrfs_key key;
@@ -86,11 +86,6 @@ static struct dentry *btrfs_get_dentry(struct super_block *sb, u64 objectid,
 	root = btrfs_read_fs_root_no_name(fs_info, &key);
 	if (IS_ERR(root)) {
 		err = PTR_ERR(root);
-		goto fail;
-	}
-
-	if (btrfs_root_refs(&root->root_item) == 0) {
-		err = -ENOENT;
 		goto fail;
 	}
 
@@ -193,7 +188,7 @@ static struct dentry *btrfs_get_parent(struct dentry *child)
 	if (ret < 0)
 		goto fail;
 
-	BUG_ON(ret == 0);
+	BUG_ON(ret == 0); /* Key with offset of -1 found */
 	if (path->slots[0] == 0) {
 		ret = -ENOENT;
 		goto fail;

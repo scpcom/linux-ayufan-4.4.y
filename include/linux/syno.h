@@ -37,6 +37,12 @@
 #endif
 
 #if 0
+#define SYNO_SATA_DOM_VENDOR	"SATADOM "
+#define SYNO_SATA_DOM_MODEL	"WD5002ABYS-01B1B0"
+#define SYNO_DUALHEAD_SYSTEM_DEVICE_PATH  "/dev/synoboot4"
+#endif
+
+#if 0
 #ifdef MY_DEF_HERE
 #define SYNO_MAX_SWITCHABLE_NET_DEVICE 8
 #define SYNO_NET_DEVICE_ENCODING_LENGTH 6
@@ -62,7 +68,7 @@
 #define SYNO_MD_CHUNK_SIZE 65536
 #define SYNO_FIX_MD_RESIZE_BUSY_LOOP 5
 #if	defined(MY_ABC_HERE) || defined(SYNO_BADSECTOR_TEST)
-#if 0
+#if 0 && (0)
 #define SYNO_MAX_INTERNAL_DISK 19
 #else
 #define SYNO_MAX_INTERNAL_DISK	15
@@ -111,25 +117,29 @@
 
 #endif
 
-#define F_CLEAR_ARCHIVE     513
-#define F_SETSMB_ARCHIVE    514
-#define F_SETSMB_HIDDEN     515
-#define F_SETSMB_SYSTEM     516
-#define F_CLRSMB_ARCHIVE    517
-#define F_CLRSMB_HIDDEN     518
-#define F_CLRSMB_SYSTEM     519
-#define F_CLEAR_S3_ARCHIVE  520
+#define SYNO_FCNTL_BASE             513
+#define F_CLEAR_ARCHIVE             (SYNO_FCNTL_BASE + 0)
+#define F_SETSMB_ARCHIVE            (SYNO_FCNTL_BASE + 1)
+#define F_SETSMB_HIDDEN             (SYNO_FCNTL_BASE + 2)
+#define F_SETSMB_SYSTEM             (SYNO_FCNTL_BASE + 3)
+#define F_CLRSMB_ARCHIVE            (SYNO_FCNTL_BASE + 4)
+#define F_CLRSMB_HIDDEN             (SYNO_FCNTL_BASE + 5)
+#define F_CLRSMB_SYSTEM             (SYNO_FCNTL_BASE + 6)
+#define F_CLEAR_S3_ARCHIVE          (SYNO_FCNTL_BASE + 7)
 #ifdef MY_ABC_HERE
-#define F_CLRSMB_READONLY   		521
-#define F_SETSMB_READONLY   		522
-#define F_CLRACL_INHERIT    		523
-#define F_SETACL_INHERIT    		524
-#define F_CLRACL_HAS_ACL   			525
-#define F_SETACL_HAS_ACL   			526
-#define F_CLRACL_SUPPORT   			527
-#define F_SETACL_SUPPORT   			528
-#define F_CLRACL_OWNER_IS_GROUP   	529
-#define F_SETACL_OWNER_IS_GROUP   	530
+#define F_CLRSMB_READONLY           (SYNO_FCNTL_BASE + 8)
+#define F_SETSMB_READONLY           (SYNO_FCNTL_BASE + 9)
+#define F_CLRACL_INHERIT            (SYNO_FCNTL_BASE + 10)
+#define F_SETACL_INHERIT            (SYNO_FCNTL_BASE + 11)
+#define F_CLRACL_HAS_ACL            (SYNO_FCNTL_BASE + 12)
+#define F_SETACL_HAS_ACL            (SYNO_FCNTL_BASE + 13)
+#define F_CLRACL_SUPPORT            (SYNO_FCNTL_BASE + 14)
+#define F_SETACL_SUPPORT            (SYNO_FCNTL_BASE + 15)
+#define F_CLRACL_OWNER_IS_GROUP     (SYNO_FCNTL_BASE + 16)
+#define F_SETACL_OWNER_IS_GROUP     (SYNO_FCNTL_BASE + 17)
+#define SYNO_FCNTL_LAST             F_SETACL_OWNER_IS_GROUP
+#else
+#define SYNO_FCNTL_LAST             F_CLEAR_S3_ARCHIVE
 #endif
 
 #else
@@ -141,7 +151,6 @@
 #define SYNO_SMB_PSTRING_LEN 1024
 #endif
 
-#define SYNO_EXT4_SYNC_DALLOC_RETRY  100
 #ifdef MY_ABC_HERE
 #define MAX_CHANNEL_RETRY       2
 #define CHANNEL_RETRY_INTERVAL  (3*HZ)
@@ -182,6 +191,10 @@
 
 #endif
 
+#endif
+
+#if 1 && defined(MY_ABC_HERE)
+#define SYNO_GLUSTER_FS
 #endif
 
 #endif

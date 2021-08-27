@@ -20,6 +20,9 @@
 
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
+#if defined(CONFIG_SYNO_COMCERTO)
+#include <linux/platform_device.h>
+#endif
 
 struct map_info;
 struct platform_device;

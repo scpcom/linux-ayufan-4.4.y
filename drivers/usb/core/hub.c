@@ -2370,62 +2370,25 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		if ((portstatus & USB_PORT_STAT_RESET))
 			goto delay;
 
-		/*
-		 * Some buggy devices require a warm reset to be issued even
-		 * when the port appears not to be connected.
-		 */
-		if (!warm) {
-			/*
-			 * Some buggy devices can cause an NEC host controller
-			 * to transition to the "Error" state after a hot port
-			 * reset.  This will show up as the port state in
-			 * "Inactive", and the port may also report a
-			 * disconnect.  Forcing a warm port reset seems to make
-			 * the device work.
-			 *
-			 * See https://bugzilla.kernel.org/show_bug.cgi?id=41752
-			 */
-			if (hub_port_warm_reset_required(hub, portstatus)) {
-				int ret;
+		if (hub_port_warm_reset_required(hub, portstatus))
+			return -ENOTCONN;
 
-				if ((portchange & USB_PORT_STAT_C_CONNECTION))
-					clear_port_feature(hub->hdev, port1,
-							USB_PORT_FEAT_C_CONNECTION);
-				if (portchange & USB_PORT_STAT_C_LINK_STATE)
-					clear_port_feature(hub->hdev, port1,
-							USB_PORT_FEAT_C_PORT_LINK_STATE);
-				if (portchange & USB_PORT_STAT_C_RESET)
-					clear_port_feature(hub->hdev, port1,
-							USB_PORT_FEAT_C_RESET);
-				dev_dbg(hub->intfdev, "hot reset failed, warm reset port %d\n",
-						port1);
-				ret = hub_port_reset(hub, port1,
-						udev, HUB_BH_RESET_TIME,
-						true);
-				if ((portchange & USB_PORT_STAT_C_CONNECTION))
-					clear_port_feature(hub->hdev, port1,
-							USB_PORT_FEAT_C_CONNECTION);
-				return ret;
-		}
-#ifdef MY_DEF_HERE
-			if (portchange & (USB_PORT_STAT_C_CONNECTION | USB_PORT_STAT_C_ENABLE))
-			{
-				hub_port_debounce(hub, port1);
-				ret = hub_port_status(hub, port1, &portstatus, &portchange);
-				if (ret < 0)
-					return ret;
-			}
-#else
 		/* Device went away? */
 		if (!(portstatus & USB_PORT_STAT_CONNECTION))
 			return -ENOTCONN;
 
-			/* bomb out completely if the connection bounced */
-			if ((portchange & USB_PORT_STAT_C_CONNECTION))
+		/* bomb out completely if the connection bounced.  A USB 3.0
+		 * connection may bounce if multiple warm resets were issued,
+		 * but the device may have successfully re-connected. Ignore it.
+		 */
+		if (!hub_is_superspeed(hub->hdev) &&
+				(portchange & USB_PORT_STAT_C_CONNECTION))
 			return -ENOTCONN;
-#endif
 
 		if ((portstatus & USB_PORT_STAT_ENABLE)) {
+			if (!udev)
+				return 0;
+
 			if (hub_is_wusb(hub))
 				udev->speed = USB_SPEED_WIRELESS;
 			else if (hub_is_superspeed(hub->hdev))
@@ -2436,14 +2399,6 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 				udev->speed = USB_SPEED_LOW;
 			else
 				udev->speed = USB_SPEED_FULL;
-			return 0;
-		}
-		} else {
-			if (!(portstatus & USB_PORT_STAT_CONNECTION) ||
-					hub_port_warm_reset_required(hub,
-						portstatus))
-				return -ENOTCONN;
-
 			return 0;
 		}
 
@@ -2467,21 +2422,20 @@ delay:
 			return -ENOTCONN;
 #endif
 
-
 	return -EBUSY;
 }
 
 static void hub_port_finish_reset(struct usb_hub *hub, int port1,
-			struct usb_device *udev, int *status, bool warm)
+			struct usb_device *udev, int *status)
 {
 	switch (*status) {
 	case 0:
-		if (!warm) {
-			struct usb_hcd *hcd;
 		/* TRSTRCY = 10 ms; plus some extra */
 		msleep(10 + 40);
+		if (udev) {
+			struct usb_hcd *hcd = bus_to_hcd(udev->bus);
+
 			update_devnum(udev, 0);
-			hcd = bus_to_hcd(udev->bus);
 			/* The xHC may think the device is already reset,
 			 * so ignore the status.
 			 */
@@ -2493,14 +2447,15 @@ static void hub_port_finish_reset(struct usb_hub *hub, int port1,
 	case -ENODEV:
 		clear_port_feature(hub->hdev,
 				port1, USB_PORT_FEAT_C_RESET);
-		/* FIXME need disconnect() for NOTATTACHED device */
 		if (hub_is_superspeed(hub->hdev)) {
 			clear_port_feature(hub->hdev, port1,
 					USB_PORT_FEAT_C_BH_PORT_RESET);
 			clear_port_feature(hub->hdev, port1,
 					USB_PORT_FEAT_C_PORT_LINK_STATE);
+			clear_port_feature(hub->hdev, port1,
+					USB_PORT_FEAT_C_CONNECTION);
 		}
-		if (!warm)
+		if (udev)
 			usb_set_device_state(udev, *status
 					? USB_STATE_NOTATTACHED
 					: USB_STATE_DEFAULT);
@@ -2508,23 +2463,39 @@ static void hub_port_finish_reset(struct usb_hub *hub, int port1,
 	}
 }
 
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+extern void (*gpfn_ehci_marvell_hs_detect_wa_done)(struct usb_device *);
+#endif
+
 /* Handle port reset and port warm(BH) reset (for USB3 protocol ports) */
 static int hub_port_reset(struct usb_hub *hub, int port1,
 			struct usb_device *udev, unsigned int delay, bool warm)
 {
 	int i, status;
+	u16 portchange, portstatus;
 
-	if (!warm) {
-		/* Block EHCI CF initialization during the port reset.
-		 * Some companion controllers don't like it when they mix.
-		 */
-		down_read(&ehci_cf_port_reset_rwsem);
-	} else {
 	if (!hub_is_superspeed(hub->hdev)) {
+		if (warm) {
 			dev_err(hub->intfdev, "only USB3 hub support "
 						"warm reset\n");
 			return -EINVAL;
 		}
+		/* Block EHCI CF initialization during the port reset.
+		 * Some companion controllers don't like it when they mix.
+		 */
+		down_read(&ehci_cf_port_reset_rwsem);
+	} else if (!warm) {
+		/*
+		 * If the caller hasn't explicitly requested a warm reset,
+		 * double check and see if one is needed.
+		 */
+		status = hub_port_status(hub, port1,
+					&portstatus, &portchange);
+		if (status < 0)
+			goto done;
+
+		if (hub_port_warm_reset_required(hub, portstatus))
+			warm = true;
 	}
 
 	/* Reset the port */
@@ -2545,10 +2516,33 @@ static int hub_port_reset(struct usb_hub *hub, int port1,
 						status);
 		}
 
-		/* return on disconnect or reset */
+		/* Check for disconnect or reset */
 		if (status == 0 || status == -ENOTCONN || status == -ENODEV) {
-			hub_port_finish_reset(hub, port1, udev, &status, warm);
+			hub_port_finish_reset(hub, port1, udev, &status);
+
+			if (!hub_is_superspeed(hub->hdev))
 				goto done;
+
+			/*
+			 * If a USB 3.0 device migrates from reset to an error
+			 * state, re-issue the warm reset.
+			 */
+			if (hub_port_status(hub, port1,
+					&portstatus, &portchange) < 0)
+				goto done;
+
+			if (!hub_port_warm_reset_required(hub, portstatus))
+				goto done;
+
+			/*
+			 * If the port is in SS.Inactive or Compliance Mode, the
+			 * hot or warm reset failed.  Try another warm reset.
+			 */
+			if (!warm) {
+				dev_dbg(hub->intfdev, "hot reset failed, warm reset port %d\n",
+						port1);
+				warm = true;
+			}
 		}
 
 		dev_dbg (hub->intfdev,
@@ -2562,8 +2556,13 @@ static int hub_port_reset(struct usb_hub *hub, int port1,
 		port1);
 
 done:
-	if (!warm)
+	if (!hub_is_superspeed(hub->hdev))
 		up_read(&ehci_cf_port_reset_rwsem);
+#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+	if (NULL != gpfn_ehci_marvell_hs_detect_wa_done) {
+		gpfn_ehci_marvell_hs_detect_wa_done(hub->hdev);
+	}
+#endif
 
 	return status;
 }
@@ -3214,11 +3213,15 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	return retval;
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 enum XHCI_SPECIAL_RESET_MODE xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
 EXPORT_SYMBOL_GPL(xhci_special_reset);
 #define SPECIAL_RESET_RETRY 20 // times
+#if defined(CONFIG_SYNO_COMCERTO)
+#define IS_XHCI(hub) (!strcmp(hub->hdev->bus->controller->driver->name, "xhci-hcd"))
+#else
 #define IS_XHCI(hub) (!strcmp(hub->hdev->bus->controller->driver->name, "xhci_hcd"))
+#endif //CONFIG_SYNO_COMCERTO
 #endif
 
 /* Reset device, (re)assign address, get device descriptor.
@@ -3243,7 +3246,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	enum usb_device_speed	oldspeed = udev->speed;
 	const char		*speed;
 	int			devnum = udev->devnum;
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 #ifdef MY_DEF_HERE
 	bool reset_for_addr_err = true;
 #endif
@@ -3274,13 +3277,13 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 
 	mutex_lock(&usb_address0_mutex);
 
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 port_init_retry:
 #endif
 
 	/* Reset the device; full speed may morph to high speed */
 	/* FIXME a USB 2.0 device may morph into SuperSpeed on reset. */
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	// special reset for xhci port only during reboot only
 	if (!IS_XHCI(hub) ||
 			(XHCI_SPECIAL_RESET_RUN!= xhci_special_reset)) {
@@ -3293,7 +3296,7 @@ port_init_retry:
 		for (xhci_retry = 0; xhci_retry < SPECIAL_RESET_RETRY; xhci_retry++) {
 			retval = hub_port_reset(hub, port1, udev, delay, false);
 			dev_dbg(&udev->dev, "hub_port_reset2. %dth. speed:%d. ret:%d.\n", xhci_retry, udev->speed, retval);
-			if (udev->speed !=USB_SPEED_HIGH || retval < 0) { // USB 2.0 device may morph into SuperSpeed
+			if (udev->speed == USB_SPEED_SUPER || retval < 0) { // USB 2.0 device may morph into SuperSpeed
 				break;
 			}
 		}
@@ -3550,18 +3553,16 @@ port_init_retry:
 		goto fail;
 	}
 
-#ifdef MY_DEF_HERE
-		dev_dbg(&udev->dev, "vid:0x%x.pid:0x%x.\n", le16_to_cpu(udev->descriptor.idVendor), le16_to_cpu(udev->descriptor.idProduct));
-		dev_dbg(&udev->dev, "bcdUSB:0x%x.\n", le16_to_cpu(udev->descriptor.bcdUSB));
-		// check bcdUSB or pid/vid if we need to do special reset to morph the speed to super
-		//if (0x??? == le16_to_cpu(udev->descriptor.idProduct) && 0x??? == le16_to_cpu(udev->descriptor.idVendor)) {
-		if (0x0210 <= le16_to_cpu(udev->descriptor.bcdUSB)) { // Innostor's bcdUSB is 0x210 if it's speed is high, 0x300 if it's speed is super
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+		//A USB2 device's bcdUSB must be equal or less than 0x0200
+		//A USB3 device's bcdUSB should be 0x0300. But if speed downgrade happens , its value could be 0x0210 or higher
+		if (0x0210 <= le16_to_cpu(udev->descriptor.bcdUSB)) {
 			if (IS_XHCI(hub) &&
-					udev->speed != USB_SPEED_SUPER &&
-					(XHCI_SPECIAL_RESET_PAUSE == xhci_special_reset) &&
+				USB_SPEED_SUPER != udev->speed &&
+				XHCI_SPECIAL_RESET_PAUSE == xhci_special_reset &&
 				NULL == hub->hdev->parent) { //skip special reset for device which is behind a external hub
 				hub_port_disable(hub, port1, 0);
-				update_devnum(udev, devnum); /* for disconnect processing */
+				update_devnum(udev, devnum); //for disconnect processing
 				oldspeed = USB_SPEED_UNKNOWN;
 				xhci_special_reset = XHCI_SPECIAL_RESET_RUN;
 				dev_err(&udev->dev, "Special reset for xhci.\n");
@@ -4131,12 +4132,21 @@ static void hub_events(void)
 			 */
 			if (hub_port_warm_reset_required(hub, portstatus)) {
 				int status;
+				struct usb_device *udev =
+					hub->hdev->children[i - 1];
 
 				dev_dbg(hub_dev, "warm reset port %d\n", i);
-				status = hub_port_reset(hub, i, NULL,
-						HUB_BH_RESET_TIME, true);
+				if (!udev) {
+					status = hub_port_reset(hub, i,
+							NULL, HUB_BH_RESET_TIME,
+							true);
 					if (status < 0)
 						hub_port_disable(hub, i, 1);
+				} else {
+					usb_lock_device(udev);
+					status = usb_reset_device(udev);
+					usb_unlock_device(udev);
+				}
 				connect_change = 0;
 			}
 

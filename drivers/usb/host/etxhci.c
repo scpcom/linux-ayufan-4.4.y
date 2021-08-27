@@ -187,6 +187,9 @@ int etxhci_reset(struct xhci_hcd *xhci)
 		xhci->bus_state[i].port_c_suspend = 0;
 		xhci->bus_state[i].suspended_ports = 0;
 		xhci->bus_state[i].resuming_ports = 0;
+		xhci->bus_state[i].port_c_connection = 0;
+		xhci->bus_state[i].downgraded_ports = 0;
+		xhci->bus_state[i].downgraded_open = 0;
 	}
 
 	return ret;
@@ -819,7 +822,7 @@ int etxhci_suspend(struct xhci_hcd *xhci)
 	command &= ~CMD_RUN;
 	xhci_writel(xhci, command, &xhci->op_regs->command);
 	if (handshake(xhci, &xhci->op_regs->status,
-		      STS_HALT, STS_HALT, 100*100)) {
+		      STS_HALT, STS_HALT, XHCI_MAX_HALT_USEC)) {
 		xhci_warn(xhci, "WARN: xHC CMD_RUN timeout\n");
 		spin_unlock_irq(&xhci->lock);
 		return -ETIMEDOUT;
@@ -1650,6 +1653,70 @@ int etxhci_add_endpoint(struct usb_hcd *hcd, struct usb_device *udev,
 	return 0;
 }
 
+void etxhci_stop_endpoint(struct usb_hcd *hcd, struct usb_device *udev,
+		struct usb_host_endpoint *ep)
+{
+	struct xhci_hcd *xhci;
+	struct xhci_virt_device *virt_dev;
+	struct xhci_ep_ctx *ep_ctx;
+	struct xhci_command *cmd;
+	unsigned int ep_index;
+	unsigned long flags;
+	int ret, timeleft;
+
+#ifndef MY_ABC_HERE
+printk("%s\n", __func__);
+#endif
+	ret = xhci_check_args(hcd, udev, ep, 1, true, __func__);
+	if (ret < 0)
+		return;
+
+	xhci = hcd_to_xhci(hcd);
+	virt_dev = xhci->devs[udev->slot_id];
+	ep_index = etxhci_get_endpoint_index(&ep->desc);
+	ep_ctx = etxhci_get_ep_ctx(xhci, virt_dev->out_ctx, ep_index);
+	if ((ep_ctx->ep_info & cpu_to_le32(EP_STATE_MASK)) != cpu_to_le32(EP_STATE_RUNNING)) {
+		xhci_dbg(xhci, "xHCI %s called with non-running ep %p\n",
+				__func__, ep);
+		return;
+	}
+
+	cmd = etxhci_alloc_command(xhci, false, true, GFP_NOIO);
+	if (!cmd) {
+		xhci_dbg(xhci, "Couldn't allocate command structure.\n");
+		return;
+	}
+
+	spin_lock_irqsave(&xhci->lock, flags);
+	cmd->command_trb = xhci->cmd_ring->enqueue;
+	if (TRB_TYPE_LINK_LE32(cmd->command_trb->link.control)) {
+		cmd->command_trb = xhci->cmd_ring->enq_seg->next->trbs;
+	}
+	list_add_tail(&cmd->cmd_list, &virt_dev->cmd_list);
+	etxhci_queue_stop_endpoint(xhci, udev->slot_id, ep_index, 0);
+	etxhci_ring_cmd_db(xhci);
+	spin_unlock_irqrestore(&xhci->lock, flags);
+
+	/* Wait for last stop endpoint command to finish */
+	timeleft = wait_for_completion_interruptible_timeout(
+			cmd->completion,
+			USB_CTRL_SET_TIMEOUT);
+	if (timeleft <= 0) {
+		xhci_warn(xhci, "%s while waiting for stop endpoint command\n",
+				timeleft == 0 ? "Timeout" : "Signal");
+		spin_lock_irqsave(&xhci->lock, flags);
+		/* The timeout might have raced with the event ring handler, so
+		 * only delete from the list if the item isn't poisoned.
+		 */
+		if (cmd->cmd_list.next != LIST_POISON1) {
+			list_del(&cmd->cmd_list);
+		}
+		spin_unlock_irqrestore(&xhci->lock, flags);
+	}
+
+	etxhci_free_command(xhci, cmd);
+}
+
 static void xhci_zero_in_ctx(struct xhci_hcd *xhci, struct xhci_virt_device *virt_dev)
 {
 	struct xhci_input_control_ctx *ctrl_ctx;
@@ -1945,6 +2012,12 @@ int etxhci_check_bandwidth(struct usb_hcd *hcd, struct usb_device *udev)
 	if (xhci->xhc_state & XHCI_STATE_DYING)
 		return -ENODEV;
 
+#ifndef MY_ABC_HERE
+	ret = xhci_downgrade_to_usb2(hcd, udev);
+	if (!ret)
+		return -ENODEV;
+#endif
+
 	xhci_dbg(xhci, "%s called for udev %p\n", __func__, udev);
 	virt_dev = xhci->devs[udev->slot_id];
 
@@ -2107,6 +2180,118 @@ void etxhci_cleanup_stalled_ring(struct xhci_hcd *xhci,
 	}
 }
 
+static void etxhci_prev_endpoint_reset(struct usb_hcd *hcd,
+		struct usb_host_endpoint *ep)
+{
+	struct xhci_hcd *xhci;
+	struct usb_device *udev;
+	unsigned int ep_index;
+	unsigned int last_ctx = 0;
+	struct xhci_ep_ctx *out_ep_ctx;
+	struct xhci_ep_ctx *tmp_ep_ctx;
+	struct xhci_ep_ctx *in_ep_ctx;
+	struct xhci_container_ctx *in_ctx, *out_ctx;
+	struct xhci_input_control_ctx *ctrl_ctx;
+	struct xhci_slot_ctx *out_slot_ctx, *in_slot_ctx;
+	u32 cur_add_flags, drop_flag, add_flag;
+	int i, ret = 0;
+
+	xhci = hcd_to_xhci(hcd);
+	udev = (struct usb_device *) ep->hcpriv;
+	
+	if (!ep->hcpriv)
+		return;
+	
+	ep_index = etxhci_get_endpoint_index(&ep->desc);
+	in_ctx = xhci->devs[udev->slot_id]->in_ctx;
+	out_ctx = xhci->devs[udev->slot_id]->out_ctx;
+	
+	out_ep_ctx = etxhci_get_ep_ctx(xhci, out_ctx, ep_index);
+	in_ep_ctx = etxhci_get_ep_ctx(xhci, in_ctx, ep_index);
+
+	out_slot_ctx = etxhci_get_slot_ctx(xhci, out_ctx);
+	in_slot_ctx = etxhci_get_slot_ctx(xhci, in_ctx);
+
+	ctrl_ctx = etxhci_get_input_control_ctx(xhci, in_ctx);
+
+	if ((EP_STATE_RUNNING == (le32_to_cpu(out_ep_ctx->ep_info) & EP_STATE_MASK)) &&
+			(USB_SPEED_SUPER != udev->speed) &&
+			(SLOT_STATE_CONFIGURED == GET_SLOT_STATE(le32_to_cpu(out_slot_ctx->dev_state)))) {
+
+		drop_flag = etxhci_get_endpoint_flag_from_index(ep_index);
+		add_flag = 0;
+
+		etxhci_slot_copy(xhci, in_ctx, out_ctx);
+		etxhci_endpoint_copy(xhci, in_ctx, out_ctx, ep_index);
+
+		ctrl_ctx->drop_flags |= cpu_to_le32(drop_flag);
+		ctrl_ctx->add_flags &= cpu_to_le32(add_flag);
+
+		cur_add_flags = 2;
+		for (i = 1; i < 31; i++) {
+			tmp_ep_ctx = etxhci_get_ep_ctx(xhci, out_ctx, i);
+			if ((tmp_ep_ctx->ep_info & cpu_to_le32(EP_STATE_MASK)) != cpu_to_le32(EP_STATE_DISABLED) &&
+				!(le32_to_cpu(ctrl_ctx->add_flags) & etxhci_get_endpoint_flag_from_index(i)) &&
+				!(le32_to_cpu(ctrl_ctx->drop_flags) & etxhci_get_endpoint_flag_from_index(i)))
+				cur_add_flags |= etxhci_get_endpoint_flag_from_index(i);
+		}
+
+		last_ctx = etxhci_last_valid_endpoint(le32_to_cpu(ctrl_ctx->add_flags) | cur_add_flags);
+		/* Update the last valid endpoint context, if we deleted the last one */
+		in_slot_ctx->dev_info &= cpu_to_le32(~LAST_CTX_MASK);
+		in_slot_ctx->dev_info |= cpu_to_le32(LAST_CTX(last_ctx));
+
+		xhci_dbg(xhci, "drop ep 0x%x, slot id %d, drop flag = %#x, add flag = %#x, new in slot info = %#x\n",
+				(unsigned int) ep->desc.bEndpointAddress,
+				udev->slot_id,
+				(unsigned int) drop_flag,
+				(unsigned int) add_flag,
+				(unsigned int) in_slot_ctx->dev_info);
+
+		ret = xhci_configure_endpoint(xhci, udev, NULL,
+			false, false);
+		if (ret)
+			xhci_warn(xhci, "%s - ret %d\n", __func__,ret);
+
+		drop_flag = 0;
+		add_flag = etxhci_get_endpoint_flag_from_index(ep_index);
+
+		ctrl_ctx->drop_flags &= cpu_to_le32(drop_flag);
+		ctrl_ctx->add_flags |= cpu_to_le32(add_flag);
+
+		cur_add_flags = 2;
+		for (i = 1; i < 31; i++) {
+			tmp_ep_ctx = etxhci_get_ep_ctx(xhci, out_ctx, i);
+			if ((tmp_ep_ctx->ep_info & cpu_to_le32(EP_STATE_MASK)) != cpu_to_le32(EP_STATE_DISABLED) &&
+				!(le32_to_cpu(ctrl_ctx->add_flags) & etxhci_get_endpoint_flag_from_index(i)) &&
+				!(le32_to_cpu(ctrl_ctx->drop_flags) & etxhci_get_endpoint_flag_from_index(i)))
+				cur_add_flags |= etxhci_get_endpoint_flag_from_index(i);
+		}
+
+		last_ctx = etxhci_last_valid_endpoint(le32_to_cpu(ctrl_ctx->add_flags) | cur_add_flags );
+		/* Update the last valid endpoint context, if we deleted the last one */
+		in_slot_ctx->dev_info &= cpu_to_le32(~LAST_CTX_MASK);
+		in_slot_ctx->dev_info |= cpu_to_le32(LAST_CTX(last_ctx));
+
+		ep->hcpriv = udev;
+
+		xhci_dbg(xhci, "add ep 0x%x, slot id %d, drop flag = %#x, add flag = %#x, new in slot info = %#x\n",
+				(unsigned int) ep->desc.bEndpointAddress,
+				udev->slot_id,
+				(unsigned int) drop_flag,
+				(unsigned int) add_flag,
+				(unsigned int) in_slot_ctx->dev_info);
+
+		ret = xhci_configure_endpoint(xhci, udev, NULL,
+			false, false);
+		if (ret)
+			xhci_warn(xhci, "%s - ret %d\n", __func__,ret);
+
+	}
+
+	return ;
+}
+
 /* Deal with stalled endpoints.  The core should have sent the control message
  * to clear the halt condition.  However, we need to make the xHCI hardware
  * reset its sequence number, since a device will expect a sequence number of
@@ -2133,6 +2318,7 @@ void etxhci_endpoint_reset(struct usb_hcd *hcd,
 	ep_index = etxhci_get_endpoint_index(&ep->desc);
 	virt_ep = &xhci->devs[udev->slot_id]->eps[ep_index];
 	if (!virt_ep->stopped_td) {
+		etxhci_prev_endpoint_reset(hcd, ep);
 		xhci_dbg(xhci, "Endpoint 0x%x not halted, refusing to reset.\n",
 				ep->desc.bEndpointAddress);
 		return;
@@ -2343,14 +2529,14 @@ int etxhci_alloc_streams(struct usb_hcd *hcd, struct usb_device *udev,
 		unsigned int num_streams, gfp_t mem_flags)
 {
 	int i, ret;
-	struct xhci_hcd *xhci;
+	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
 	struct xhci_virt_device *vdev;
 	struct xhci_command *config_cmd;
 	struct xhci_slot_ctx *slot_ctx;
 	unsigned int ep_index;
 	unsigned int num_stream_ctxs;
 	unsigned long flags;
-	u32 changed_ep_bitmask = 0, temp;
+	u32 changed_ep_bitmask = 0;
 
 	if (!eps)
 		return -EINVAL;
@@ -2359,7 +2545,6 @@ int etxhci_alloc_streams(struct usb_hcd *hcd, struct usb_device *udev,
 	 * stream 0 that is reserved for xHCI usage.
 	 */
 	num_streams += 1;
-	xhci = hcd_to_xhci(hcd);
 	xhci_dbg(xhci, "Driver wants %u stream IDs (including stream 0).\n",
 			num_streams);
 
@@ -2462,15 +2647,6 @@ int etxhci_alloc_streams(struct usb_hcd *hcd, struct usb_device *udev,
 		vdev->eps[ep_index].ep_state |= EP_HAS_STREAMS;
 	}
 	etxhci_free_command(xhci, config_cmd);
-
-	if (!xhci->hcc_params1 || ((xhci->hcc_params1 & 0xff) == 0x30)) {
-		temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40c0);
-		temp = (temp & 0xffffff00) | 0x00;
-		xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40c0);
-		temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40cc);
-		temp = (temp & 0xffffff00) | 0xc2;
-		xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40cc);
-	}
 	spin_unlock_irqrestore(&xhci->lock, flags);
 
 	/* Subtract 1 for stream 0, which drivers can't use */
@@ -2509,7 +2685,7 @@ int etxhci_free_streams(struct usb_hcd *hcd, struct usb_device *udev,
 	struct xhci_command *command;
 	unsigned int ep_index;
 	unsigned long flags;
-	u32 changed_ep_bitmask, temp;
+	u32 changed_ep_bitmask;
 
 	xhci = hcd_to_xhci(hcd);
 	vdev = xhci->devs[udev->slot_id];
@@ -2568,15 +2744,6 @@ int etxhci_free_streams(struct usb_hcd *hcd, struct usb_device *udev,
 		 */
 		vdev->eps[ep_index].ep_state &= ~EP_GETTING_NO_STREAMS;
 		vdev->eps[ep_index].ep_state &= ~EP_HAS_STREAMS;
-	}
-
-	if (!xhci->hcc_params1 || ((xhci->hcc_params1 & 0xff) == 0x30)) {
-		temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40c0);
-		temp = (temp & 0xffffff00) | 0x0e;
-		xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40c0);
-		temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40cc);
-		temp = (temp & 0xffffff00) | 0xc0;
-		xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40cc);
 	}
 	spin_unlock_irqrestore(&xhci->lock, flags);
 
@@ -2755,6 +2922,36 @@ command_cleanup:
 	return ret;
 }
 
+static void etxhci_pre_free_dev(struct usb_hcd *hcd, struct usb_device *udev)
+{
+	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
+	struct xhci_bus_state *bus_state;
+	__le32 __iomem **port_array;
+	unsigned long flags;
+	u32 temp;
+
+	spin_lock_irqsave(&xhci->lock, flags);
+
+	port_array = xhci->usb2_ports;
+	temp = xhci_readl(xhci, port_array[udev->portnum - 1]);
+	bus_state = &xhci->bus_state[hcd_index(hcd->shared_hcd)];
+
+	if (hcd->speed != HCD_USB3) {
+		if (bus_state->downgraded_ports & (1 << (udev->portnum - 1))) {
+			if (!(temp & PORT_CONNECT)) {
+				xhci_hub_power_port(hcd->shared_hcd, udev->portnum, true);
+				bus_state->downgraded_ports &= ~(1 << (udev->portnum - 1));
+			}
+			bus_state->downgraded_open |= 1 << (udev->portnum - 1);
+		}
+	}
+
+	if (bus_state->downgraded_ports & (1 << (udev->portnum - 1)))
+		bus_state->downgraded_ports &= ~(1 << (udev->portnum - 1));
+
+	spin_unlock_irqrestore(&xhci->lock, flags);
+}
+
 /*
  * At this point, the struct usb_device is about to go away, the device has
  * disconnected, and all traffic has been stopped and the endpoints have been
@@ -2776,6 +2973,10 @@ void etxhci_free_dev(struct usb_hcd *hcd, struct usb_device *udev)
 		return;
 
 	virt_dev = xhci->devs[udev->slot_id];
+
+#ifndef MY_ABC_HERE
+	etxhci_pre_free_dev(hcd, udev);
+#endif
 
 	/* Stop any wayward timer functions (which may grab the lock) */
 	for (i = 0; i < 31; ++i) {
@@ -2864,6 +3065,39 @@ int etxhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	return 1;
 }
 
+static void etxhci_post_address_device(struct usb_hcd *hcd, struct usb_device *udev)
+{
+	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
+	__le32 __iomem **port_array;
+	struct xhci_bus_state *bus_state;
+	unsigned long flags;
+	u32 ecount;
+
+	spin_lock_irqsave(&xhci->lock, flags);
+
+	if (!(udev->parent && !udev->parent->parent))
+		goto err_done;
+
+	if (udev->speed != USB_SPEED_SUPER)
+		goto err_done;
+
+	if (udev->state == USB_STATE_NOTATTACHED)
+		goto err_done;
+
+	bus_state = &xhci->bus_state[hcd_index(hcd)];
+	port_array = xhci->usb3_ports;
+
+	ecount = xhci_readl(xhci, port_array[udev->portnum - 1] + 2);
+
+	if (ecount == 0xffffffff)
+		goto err_done;
+
+	if ((ecount & 0xffff) > 0)
+		bus_state->downgraded_ports |= 1 << (udev->portnum - 1);
+
+err_done:
+	spin_unlock_irqrestore(&xhci->lock, flags);
+}
 /*
  * Issue an Address Device command (which will issue a SetAddress request to
  * the device).
@@ -3002,7 +3236,7 @@ int etxhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 	xhci_zero_in_ctx(xhci, virt_dev);
 
 	xhci_dbg(xhci, "Internal device address = %d\n", virt_dev->address);
-
+	etxhci_post_address_device(hcd, udev);
 	return 0;
 }
 
@@ -3147,11 +3381,17 @@ int etxhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 		return 0;
 	}
 
-	get_quirks(dev, xhci);
-
 	xhci->cap_regs = hcd->regs;
 	xhci->op_regs = hcd->regs +
 		HC_LENGTH(xhci_readl(xhci, &xhci->cap_regs->hc_capbase));
+
+	/* Make sure the HC is halted. */
+	retval = etxhci_halt(xhci);
+	if (retval)
+		goto error;
+
+	get_quirks(dev, xhci);
+
 	xhci->run_regs = hcd->regs +
 		(xhci_readl(xhci, &xhci->cap_regs->run_regs_off) & RTSOFF_MASK);
 	/* Cache read-only capability registers */
@@ -3162,11 +3402,6 @@ int etxhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 	xhci->hci_version = HC_VERSION(xhci->hcc_params);
 	xhci->hcc_params = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
 	etxhci_print_registers(xhci);
-
-	/* Make sure the HC is halted. */
-	retval = etxhci_halt(xhci);
-	if (retval)
-		goto error;
 
 	xhci_dbg(xhci, "Resetting HCD\n");
 	/* Reset the internal HC memory state and registers. */
@@ -3193,6 +3428,80 @@ int etxhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 error:
 	kfree(xhci);
 	return retval;
+}
+
+int etxhci_update_uas_device(struct usb_hcd *hcd, struct usb_device *udev,
+		int type)
+{
+	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
+	unsigned long flags;
+	u32 temp;
+
+#define UAS_PROBE	0
+#define UAS_DISCONNECT	1
+#define UAS_PREV_RESET	2
+#define UAS_POST_RESET	3
+
+	spin_lock_irqsave(&xhci->lock, flags);
+	switch (type) {
+	case UAS_PROBE:
+		if (!xhci->hcc_params1 || ((xhci->hcc_params1 & 0xff) == 0x30)) {
+			temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40c0);
+			temp = (temp & 0xffffff00) | 0x00;
+			xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40c0);
+			temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40cc);
+			temp = (temp & 0xffffff00) | 0xc2;
+			xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40cc);
+		} 
+		break;
+	case UAS_DISCONNECT:
+		if (!xhci->hcc_params1 || ((xhci->hcc_params1 & 0xff) == 0x30)) {
+			temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40c0);
+			temp = (temp & 0xffffff00) | 0x0e;
+			xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40c0);
+			temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40cc);
+			temp = (temp & 0xffffff00) | 0xc0;
+			xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40cc);
+		}
+		break;
+	case UAS_PREV_RESET:		
+		if (!xhci->hcc_params1 || ((xhci->hcc_params1 & 0xff) == 0x30)) {
+			temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x4060);
+			temp |= 0x01;
+			xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x4060);
+		}
+
+		if (!xhci->hcc_params1 || ((xhci->hcc_params1 & 0xff) == 0x40)) {
+			temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x4210);
+			temp |= 0x01;
+			xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x4210);
+			temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x4250);
+			temp |= 0x01;
+			xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x4250);
+		}
+		break;
+	case UAS_POST_RESET:
+		if (!xhci->hcc_params1 || ((xhci->hcc_params1 & 0xff) == 0x30)) {
+			temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x4060);
+			temp &= ~0x01;
+			xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x4060);
+		}
+
+		if (!xhci->hcc_params1 || ((xhci->hcc_params1 & 0xff) == 0x40)) {
+			temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x4210);
+			temp &= ~0x01;
+			xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x4210);
+			temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x4250);
+			temp &= ~0x01;
+			xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x4250);
+		}
+		break;
+	default:
+		break;
+	}
+	spin_unlock_irqrestore(&xhci->lock, flags);
+
+	return 0;
 }
 
 MODULE_DESCRIPTION(DRIVER_DESC);

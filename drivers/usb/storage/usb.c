@@ -61,6 +61,8 @@
 #include <linux/kthread.h>
 #include <linux/mutex.h>
 #include <linux/utsname.h>
+#include <linux/usb.h>
+#include <linux/usb/hcd.h>
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
@@ -88,12 +90,6 @@ MODULE_PARM_DESC(delay_use, "seconds to delay before using a new device");
 static char quirks[128];
 module_param_string(quirks, quirks, sizeof(quirks), S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(quirks, "supplemental list of device IDs and their quirks");
-
-#if defined(CONFIG_USB_UAS) || defined(CONFIG_USB_UAS_MODULE)
-static unsigned int uas_check = 1;
-module_param(uas_check, uint, S_IRUGO | S_IWUSR);
-MODULE_PARM_DESC(uas_check, "check whether new device supports UAS protocol");
-#endif
 
 /*
  * The entries in this table correspond, line for line,
@@ -1057,18 +1053,11 @@ EXPORT_SYMBOL_GPL(usb_stor_disconnect);
 #if defined(CONFIG_USB_UAS) || defined(CONFIG_USB_UAS_MODULE)
 static int is_uas_device(struct usb_interface *intf)
 {
-	int i;
+	struct usb_device *udev = interface_to_usbdev(intf);
 
-	for (i = 0; i < intf->num_altsetting; i++) {
-		struct usb_host_interface *alt = &intf->altsetting[i];
+#define USB_QUIRK_UAS_MODE		0x80000000
 
-		if (alt->desc.bInterfaceClass == USB_CLASS_MASS_STORAGE &&
-			alt->desc.bInterfaceSubClass == USB_SC_SCSI &&
-			alt->desc.bInterfaceProtocol == USB_PR_UAS)
-			return 0;
-	}
-
-	return -ENODEV;
+	return !!(udev->quirks & USB_QUIRK_UAS_MODE);
 }
 #endif
 
@@ -1080,7 +1069,7 @@ static int storage_probe(struct usb_interface *intf,
 	int result;
 
 #if defined(CONFIG_USB_UAS) || defined(CONFIG_USB_UAS_MODULE)
-	if (uas_check && !is_uas_device(intf))
+	if (is_uas_device(intf))
 		return -ENODEV;
 #endif
 

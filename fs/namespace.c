@@ -46,6 +46,14 @@
 extern int gSynoHasDynModule;
 #endif
 
+#ifdef MY_ABC_HERE
+extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
+#endif
+
+#ifdef CONFIG_SYNO_DUAL_HEAD
+extern int gSynoDualHead;
+#endif
+
 static int event;
 static DEFINE_IDA(mnt_id_ida);
 static DEFINE_IDA(mnt_group_ida);
@@ -319,36 +327,34 @@ static unsigned int mnt_get_writers(struct vfsmount *mnt)
 }
 
 /*
- * Most r/o checks on a fs are for operations that take
- * discrete amounts of time, like a write() or unlink().
- * We must keep track of when those operations start
- * (for permission checks) and when they end, so that
- * we can determine when writes are able to occur to
- * a filesystem.
+ * Most r/o & frozen checks on a fs are for operations that take discrete
+ * amounts of time, like a write() or unlink().  We must keep track of when
+ * those operations start (for permission checks) and when they end, so that we
+ * can determine when writes are able to occur to a filesystem.
  */
 /**
- * mnt_want_write - get write access to a mount
- * @mnt: the mount on which to take a write
+ * __mnt_want_write - get write access to a mount without freeze protection
+ * @m: the mount on which to take a write
  *
- * This tells the low-level filesystem that a write is
- * about to be performed to it, and makes sure that
- * writes are allowed before returning success.  When
- * the write operation is finished, mnt_drop_write()
- * must be called.  This is effectively a refcount.
+ * This tells the low-level filesystem that a write is about to be performed to
+ * it, and makes sure that writes are allowed (mnt it read-write) before
+ * returning success. This operation does not protect against filesystem being
+ * frozen. When the write operation is finished, __mnt_drop_write() must be
+ * called. This is effectively a refcount.
  */
-int mnt_want_write(struct vfsmount *mnt)
+int __mnt_want_write(struct vfsmount *m)
 {
 	int ret = 0;
 
 	preempt_disable();
-	mnt_inc_writers(mnt);
+	mnt_inc_writers(m);
 	/*
 	 * The store to mnt_inc_writers must be visible before we pass
 	 * MNT_WRITE_HOLD loop below, so that the slowpath can see our
 	 * incremented count after it has set MNT_WRITE_HOLD.
 	 */
 	smp_mb();
-	while (mnt->mnt_flags & MNT_WRITE_HOLD)
+	while (m->mnt_flags & MNT_WRITE_HOLD)
 		cpu_relax();
 	/*
 	 * After the slowpath clears MNT_WRITE_HOLD, mnt_is_readonly will
@@ -356,13 +362,34 @@ int mnt_want_write(struct vfsmount *mnt)
 	 * MNT_WRITE_HOLD is cleared.
 	 */
 	smp_rmb();
-	if (__mnt_is_readonly(mnt)) {
-		mnt_dec_writers(mnt);
+	if (__mnt_is_readonly(m)) {
+		mnt_dec_writers(m);
 		ret = -EROFS;
 		goto out;
 	}
 out:
 	preempt_enable();
+
+	return ret;
+}
+
+/**
+ * mnt_want_write - get write access to a mount
+ * @m: the mount on which to take a write
+ *
+ * This tells the low-level filesystem that a write is about to be performed to
+ * it, and makes sure that writes are allowed (mount is read-write, filesystem
+ * is not frozen) before returning success.  When the write operation is
+ * finished, mnt_drop_write() must be called.  This is effectively a refcount.
+ */
+int mnt_want_write(struct vfsmount *m)
+{
+	int ret;
+
+	sb_start_write(m->mnt_sb);
+	ret = __mnt_want_write(m);
+	if (ret)
+		sb_end_write(m->mnt_sb);
 	return ret;
 }
 EXPORT_SYMBOL_GPL(mnt_want_write);
@@ -392,6 +419,23 @@ int mnt_clone_write(struct vfsmount *mnt)
 EXPORT_SYMBOL_GPL(mnt_clone_write);
 
 /**
+ * __mnt_want_write_file - get write access to a file's mount
+ * @file: the file who's mount on which to take a write
+ *
+ * This is like __mnt_want_write, but it takes a file and can
+ * do some optimisations if the file is open for write already
+ */
+int __mnt_want_write_file(struct file *file)
+{
+	struct inode *inode = file->f_dentry->d_inode;
+
+	if (!(file->f_mode & FMODE_WRITE) || special_file(inode->i_mode))
+		return __mnt_want_write(file->f_path.mnt);
+	else
+		return mnt_clone_write(file->f_path.mnt);
+}
+
+/**
  * mnt_want_write_file - get write access to a file's mount
  * @file: the file who's mount on which to take a write
  *
@@ -400,29 +444,50 @@ EXPORT_SYMBOL_GPL(mnt_clone_write);
  */
 int mnt_want_write_file(struct file *file)
 {
-	struct inode *inode = file->f_dentry->d_inode;
-	if (!(file->f_mode & FMODE_WRITE) || special_file(inode->i_mode))
-		return mnt_want_write(file->f_path.mnt);
-	else
-		return mnt_clone_write(file->f_path.mnt);
+	int ret;
+
+	sb_start_write(file->f_path.mnt->mnt_sb);
+	ret = __mnt_want_write_file(file);
+	if (ret)
+		sb_end_write(file->f_path.mnt->mnt_sb);
+	return ret;
 }
 EXPORT_SYMBOL_GPL(mnt_want_write_file);
 
 /**
- * mnt_drop_write - give up write access to a mount
+ * __mnt_drop_write - give up write access to a mount
  * @mnt: the mount on which to give up write access
  *
  * Tells the low-level filesystem that we are done
  * performing writes to it.  Must be matched with
- * mnt_want_write() call above.
+ * __mnt_want_write() call above.
  */
-void mnt_drop_write(struct vfsmount *mnt)
+void __mnt_drop_write(struct vfsmount *mnt)
 {
 	preempt_disable();
 	mnt_dec_writers(mnt);
 	preempt_enable();
 }
+
+/**
+ * mnt_drop_write - give up write access to a mount
+ * @mnt: the mount on which to give up write access
+ *
+ * Tells the low-level filesystem that we are done performing writes to it and
+ * also allows filesystem to be frozen again.  Must be matched with
+ * mnt_want_write() call above.
+ */
+void mnt_drop_write(struct vfsmount *mnt)
+{
+	__mnt_drop_write(mnt);
+	sb_end_write(mnt->mnt_sb);
+}
 EXPORT_SYMBOL_GPL(mnt_drop_write);
+
+void __mnt_drop_write_file(struct file *file)
+{
+	__mnt_drop_write(file->f_path.mnt);
+}
 
 void mnt_drop_write_file(struct file *file)
 {
@@ -2045,6 +2110,13 @@ static int do_new_mount(struct path *path, char *type, int flags,
 		return PTR_ERR(mnt);
 
 	err = do_add_mount(mnt, path, mnt_flags);
+#ifdef MY_ABC_HERE
+	if (!strcmp(type, "ext4")) {
+		char buf[SYNO_EXT4_MOUNT_PATH_LEN] = {'\0'};
+		ext4_fill_mount_path(mnt->mnt_sb, d_path(path, buf, sizeof(buf)));
+	}
+#endif
+
 	if (err)
 		mntput(mnt);
 	return err;
@@ -2311,6 +2383,9 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 	if ( 0 == gSynoInstallFlag &&
 			NULL != dev_name &&
 			strstr(dev_name, SYNO_USB_FLASH_DEVICE_PATH) &&
+#ifdef CONFIG_SYNO_DUAL_HEAD
+			!(1 == gSynoDualHead && strstr(dev_name, SYNO_DUALHEAD_SYSTEM_DEVICE_PATH)) &&
+#endif
 			gSynoHasDynModule) {
 		return -EINVAL;
 	}

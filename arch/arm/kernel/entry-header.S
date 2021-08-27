@@ -111,11 +111,17 @@
 	movs	pc, lr				@ return & move spsr_svc into cpsr
 	.endm
 
+#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
 	.macro	get_thread_info, rd
 	mov	\rd, sp, lsr #13
 	mov	\rd, \rd, lsl #13
 	.endm
-
+#else
+	.macro	get_thread_info, rd
+	mov	\rd, sp, lsr #16
+	mov	\rd, \rd, lsl #16
+	.endm
+#endif
 	@
 	@ 32-bit wide "mov pc, reg"
 	@
@@ -151,11 +157,18 @@
 	movs	pc, lr				@ return & move spsr_svc into cpsr
 	.endm
 
+#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
 	.macro	get_thread_info, rd
 	mov	\rd, sp
 	lsr	\rd, \rd, #13
 	mov	\rd, \rd, lsl #13
 	.endm
+#else
+	.macro	get_thread_info, rd
+	mov	\rd, sp, lsr #16
+	mov	\rd, \rd, lsl #16
+	.endm
+#endif
 
 	@
 	@ 32-bit wide "mov pc, reg"

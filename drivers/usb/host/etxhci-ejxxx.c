@@ -38,9 +38,19 @@ void xhci_init_ejxxx(struct xhci_hcd *xhci)
 		reg32 = xhci_readl(xhci, hcd->regs + 0x40c0);
 		reg32 = (reg32 & 0xffff00ff) | 0x0100;
 		xhci_writel(xhci, reg32, hcd->regs + 0x40c0);
+		reg32 = xhci_readl(xhci, hcd->regs + 0x40d4);
+		reg32 = (reg32 & 0xfffffffe) | 0x01;
+		xhci_writel(xhci, reg32, hcd->regs + 0x40d4);
 		break;
 	case 0x40:
 		xhci_init_ej188_v00100900(xhci);
+
+		reg32 = xhci_readl(xhci, hcd->regs + 0x4294);
+		reg32 = (reg32 & 0xfffffffe) | 0x01;
+		xhci_writel(xhci, reg32, hcd->regs + 0x4294);
+		reg32 = xhci_readl(xhci, hcd->regs + 0x42d4);
+		reg32 = (reg32 & 0xfffffffe) | 0x01;
+		xhci_writel(xhci, reg32, hcd->regs + 0x42d4);
 		break;
 	default:
 		break;

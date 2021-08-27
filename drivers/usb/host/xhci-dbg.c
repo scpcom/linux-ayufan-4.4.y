@@ -122,7 +122,11 @@ static void xhci_print_command_reg(struct xhci_hcd *xhci)
 	xhci_dbg(xhci, "  Event Interrupts %s\n",
 			(temp & CMD_EIE) ? "enabled " : "disabled");
 	xhci_dbg(xhci, "  Host System Error Interrupts %s\n",
+#if defined(CONFIG_SYNO_COMCERTO)
+			(temp & CMD_HSEIE) ? "enabled " : "disabled");
+#else
 			(temp & CMD_EIE) ? "enabled " : "disabled");
+#endif
 	xhci_dbg(xhci, "  HC has %sfinished light reset\n",
 			(temp & CMD_LRESET) ? "not " : "");
 }

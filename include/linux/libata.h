@@ -105,13 +105,6 @@ extern int giSynoHddLedEnabled;
 	}							\
 })
 
-#ifdef MY_ABC_HERE
-#define SYNO_ERROR_ALWAYS 999
-#define SYNO_ERROR_TILL_TO_FORCE 998
-#define SYNO_ERROR_TILL_TO_DEEP 997
-#define SYNO_ERROR_MAX 950
-#endif
-
 /* NEW: debug levels */
 #define HAVE_LIBATA_MSG 1
 
@@ -192,12 +185,6 @@ enum {
 	ATA_DFLAG_DETACH	= (1 << 24),
 	ATA_DFLAG_DETACHED	= (1 << 25),
 
-#ifdef MY_ABC_HERE
-	ATA_SYNO_DFLAG_PMP_DETACH	= (1 << 0), /* forece device detach */
-	ATA_SYNO_DFLAG_DISABLE	= (1 << 1), /* forece device detach */
-	ATA_SYNO_DFLAG_DETACH	= (1 << 2), /* forece device detach */
-#endif
-
 	ATA_DEV_UNKNOWN		= 0,	/* unknown device */
 	ATA_DEV_ATA		= 1,	/* ATA device */
 	ATA_DEV_ATA_UNSUP	= 2,	/* ATA device (unsupported) */
@@ -245,18 +232,7 @@ enum {
 					      * led */
 	ATA_FLAG_NO_DIPM	= (1 << 23), /* host not happy with DIPM */
 
-#ifdef MY_ABC_HERE
-	/* if after reset, still have the following fail, we must try force detect */
-	ATA_SYNO_FLAG_SRST_FAIL	= (1 << 0), /* still have SRST fail */
-	ATA_SYNO_FLAG_COMRESET_FAIL	= (1 << 1), /* still COMRESET fail */
-	ATA_SYNO_FLAG_REVALID_FAIL	= (1 << 2), /* still revalid fail */
-	ATA_SYNO_FLAG_GSCR_FAIL	= (1 << 3), /* still read gscr fail */
-	ATA_SYNO_FLAG_FORCE_INTR	= (1 << 4), /* force fake plugged interrupt */
-	ATA_SYNO_FLAG_FORCE_RETRY	= (1 << 5), /* force eh retries */
-#endif
-
 	/* bits 24:31 of ap->flags are reserved for LLD specific flags */
-
 
 	/* struct ata_port pflags */
 	ATA_PFLAG_EH_PENDING	= (1 << 0), /* EH pending */
@@ -531,6 +507,9 @@ enum {
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	SYNO_STATUS_GPIO_CTRL		= 1 << 2,
 #endif
+#ifdef MY_ABC_HERE
+	SYNO_STATUS_IS_MV9235		= 1 << 3,
+#endif
 };
 
 enum ata_xfer_mask {
@@ -715,9 +694,6 @@ struct ata_device {
 	unsigned int		devno;		/* 0 or 1 */
 	unsigned int		horkage;	/* List of broken features */
 	unsigned long		flags;		/* ATA_DFLAG_xxx */
-#ifdef MY_ABC_HERE
-	unsigned long		ulSflags;		/* ATA_SYNO_DFLAG_xxx */
-#endif
 	struct scsi_device	*sdev;		/* attached SCSI device */
 	void			*private_data;
 #ifdef CONFIG_ATA_ACPI
@@ -732,9 +708,8 @@ struct ata_device {
 	int			  iCheckPwr;
 
 	/* bit definitions */
-	#define CHKPOWER_CHECKING 0
-	#define CHKPOWER_FIRST_CMD 1
-	#define CHKPOWER_FIRST_WAIT 2
+	#define CHKPOWER_FIRST_CMD 0x0
+	#define CHKPOWER_FIRST_WAIT 0x1
 #endif
 	struct device		tdev;
 	/* n_sector is CLEAR_BEGIN, read comment above CLEAR_BEGIN */
@@ -831,9 +806,6 @@ struct ata_link {
 	u32			sactive;	/* active NCQ commands */
 
 	unsigned int		flags;		/* ATA_LFLAG_xxx */
-#ifdef MY_ABC_HERE
-	unsigned int		uiSflags;		/* ATA_SYNO_FLAG_xxx, the same as ata_port */
-#endif
 	u32			saved_scontrol;	/* SControl on probe */
 	unsigned int		hw_sata_spd_limit;
 	unsigned int		sata_spd_limit;
@@ -848,7 +820,7 @@ struct ata_link {
 	struct ata_device	device[ATA_MAX_DEVICES];
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || \
-	defined(SYNO_SATA_PM_DEVICE_GPIO)
+	defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(MY_ABC_HERE)
 	unsigned int	uiStsFlags; /* SYNO_STATUS_xxx */
 #endif
 };
@@ -870,15 +842,6 @@ struct ata_port {
 	unsigned long		flags;	/* ATA_FLAG_xxx */
 	/* Flags that change dynamically, protected by ap->lock */
 	unsigned int		pflags; /* ATA_PFLAG_xxx */
-#ifdef MY_ABC_HERE
-	/* SYNO flags */
-	unsigned int		uiSflags; /* ATA_SYNO_FLAG_xxx */
-	int iFakeError;		/* fake errors */
-	int iDetectStat;	/* detect plugged/un-plugged status at eh complete
-						   to prevent port freeze issue */
-	struct work_struct	SendPwrResetEventTask;
-	struct work_struct	SendPortDisEventTask;
-#endif
 	unsigned int		print_id; /* user visible unique port ID */
 	unsigned int		port_no; /* 0 based port no. inside the host */
 
@@ -1065,9 +1028,6 @@ struct ata_port_operations {
 	void (*phy_reset)(struct ata_port *ap);
 	void (*eng_timeout)(struct ata_port *ap);
 
-#ifdef MY_ABC_HERE
-	void (*syno_force_intr)(struct ata_port *ap);
-#endif
 	/*
 	 * ->inherits must be the last field and all the preceding
 	 * fields must be pointers.
@@ -1105,11 +1065,6 @@ struct ata_timing {
 extern struct device_attribute dev_attr_syno_manutil_power_disable;
 extern struct device_attribute dev_attr_syno_pm_gpio;
 extern struct device_attribute dev_attr_syno_pm_info;
-#ifdef MY_ABC_HERE
-extern struct device_attribute dev_attr_syno_port_thaw;
-extern struct device_attribute dev_attr_syno_fake_error_ctrl;
-extern struct device_attribute dev_attr_syno_pwr_reset_count;
-#endif
 #endif
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_wcache;
@@ -1119,9 +1074,6 @@ extern struct device_attribute dev_attr_syno_disk_serial;
 #endif
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_diskname_trans;
-#endif
-#ifdef MY_ABC_HERE
-extern unsigned int uiCheckPortLinksFlags(struct ata_port *pAp);
 #endif
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_sata_disk_led_ctrl;
@@ -1405,7 +1357,7 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 
 #ifdef MY_ABC_HERE
 #define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
-			(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
+			(ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
 			 ATA_CMD_READ_EXT == qc->tf.command || ATA_CMD_PIO_READ == qc->tf.command || ATA_CMD_PIO_READ_EXT == qc->tf.command || \
 			 ATA_CMD_READ_MULTI == qc->tf.command || ATA_CMD_READ_MULTI_EXT == qc->tf.command))
 #endif

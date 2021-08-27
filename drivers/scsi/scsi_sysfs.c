@@ -586,7 +586,25 @@ END:
 	return iRet;
 }
 
-static DEVICE_ATTR(syno_idle_time, S_IRUGO, sdev_show_syno_idle_time, NULL);
+static ssize_t
+sdev_store_syno_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	unsigned long idletime;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	sscanf(buf, "%lu", &idletime);
+	// idletime = (jiffies - sdev->idle) / HZ + 1
+	sdev->idle = jiffies - (idletime -1) * HZ;
+
+END:
+	return count;
+}
+
+static DEVICE_ATTR(syno_idle_time, S_IRUGO | S_IWUSR, sdev_show_syno_idle_time, sdev_store_syno_idle_time);
 
 static ssize_t
 sdev_show_syno_spindown(struct device *dev, struct device_attribute *attr, char *buf)

@@ -538,7 +538,7 @@ struct ext3_super_block {
 #if defined(MY_ABC_HERE) || defined (MY_ABC_HERE)
 	__u32	s_reserved[159];	/* Padding to the end of the block */
 	__le32	s_archive_version;	/* Last archived version */
-	__le32	s_syno_reserved;
+	__le32	s_archive_version_obsoleted;
 	__le32  s_syno_hash_magic;	/* Enable Htree if the magic is given */
 #else
 	__u32   s_reserved[162];        /* Padding to the end of the block */
@@ -939,6 +939,13 @@ extern void ext3_get_inode_flags(struct ext3_inode_info *);
 extern void ext3_set_aops(struct inode *inode);
 extern int ext3_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 		       u64 start, u64 len);
+#ifdef MY_ABC_HERE
+extern int syno_ext3_getattr(struct dentry *d, struct kstat *stat, int flags);
+#endif
+#ifdef MY_ABC_HERE
+extern int syno_ext3_get_archive_ver(struct dentry *, u32 *);
+extern int syno_ext3_set_archive_ver(struct dentry *, u32);
+#endif
 
 /* ioctl.c */
 extern long ext3_ioctl(struct file *, unsigned int, unsigned long);

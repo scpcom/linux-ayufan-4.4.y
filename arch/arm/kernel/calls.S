@@ -414,11 +414,7 @@
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-#ifdef MY_ABC_HERE
-		CALL(sys_SYNOmmap)  		/* 400 */
-#else
 		CALL(sys_ni_syscall)
-#endif
 		CALL(sys_ni_syscall)
 #ifdef MY_ABC_HERE
 		CALL(sys_SYNOUtime)	/* 402 */

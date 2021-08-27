@@ -429,7 +429,7 @@ MV_BOARD_INFO rd88F6710Info = {
  
 MV_BOARD_MAC_INFO synods213jInfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x1},
+	{BOARD_MAC_SPEED_AUTO, 0x1, 0, 0},
 };
 
 MV_BOARD_MODULE_TYPE_INFO synods213jInfoBoardModTypeInfo[] = {
@@ -519,14 +519,13 @@ MV_BOARD_INFO synods213jInfo = {
 	.norFlashWriteParams	= 0
 };
 
-
 /***********************/
 /* SYNO DS214se BOARD   */
 /***********************/
 	 
 MV_BOARD_MAC_INFO synods214seInfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x1},
+	{BOARD_MAC_SPEED_AUTO, 0x1, 0, 0},
 };
 
 MV_BOARD_MODULE_TYPE_INFO synods214seInfoBoardModTypeInfo[] = {
@@ -616,18 +615,18 @@ MV_BOARD_INFO synods214seInfo = {
 	.norFlashWriteParams	= 0
 };
 
-
 /***********************/
 /*   SYNO US3 BOARD    */
 /***********************/
 MV_BOARD_MAC_INFO synous3InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x1},
+	{BOARD_MAC_SPEED_AUTO, 0x1, 0 ,0},
+	{BOARD_MAC_SPEED_AUTO, 0x0, 0 ,0},
 };
 
 MV_BOARD_MODULE_TYPE_INFO synous3InfoBoardModTypeInfo[] = {
 	{
-		.boardMppGrp1Mod	= MV_BOARD_AUTO,
+		.boardMppGrp1Mod	= MV_BOARD_RGMII1 | MV_BOARD_RGMII0,
 		.boardMppGrp2Mod	= MV_BOARD_AUTO
 	}
 };
@@ -717,8 +716,8 @@ MV_BOARD_INFO synous3Info = {
 /**********************/
 MV_BOARD_MAC_INFO synors214InfoBoardMacInfo[] = {
 	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
-	{BOARD_MAC_SPEED_AUTO, 0x1},
-	{BOARD_MAC_SPEED_AUTO, 0x0},
+	{BOARD_MAC_SPEED_AUTO, 0x1, 0, 0},
+	{BOARD_MAC_SPEED_AUTO, 0x0, 0, 0},
 };
 
 MV_BOARD_MODULE_TYPE_INFO synors214InfoBoardModTypeInfo[] = {
@@ -807,6 +806,104 @@ MV_BOARD_INFO synors214Info = {
 	.norFlashReadParams		= 0,
 	.norFlashWriteParams	= 0
 };
+
+/***********************/
+/* SYNO DS414slim BOARD   */
+/***********************/
+	 
+MV_BOARD_MAC_INFO synods414slimInfoBoardMacInfo[] = {
+	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	{BOARD_MAC_SPEED_AUTO, 0x1, 0, 0},
+	{BOARD_MAC_SPEED_AUTO, 0x0, 0, 0},
+};
+
+MV_BOARD_MODULE_TYPE_INFO synods414slimInfoBoardModTypeInfo[] = {
+	{
+		.boardMppGrp1Mod	= MV_BOARD_RGMII0|MV_BOARD_RGMII1,
+		.boardMppGrp2Mod	= MV_BOARD_AUTO
+	}
+};
+
+MV_DEV_CS_INFO synods414slimInfoBoardDeCsInfo[] = {
+	/*{deviceCS, params, devType, devWidth, busWidth }*/
+#if defined(MV_INCLUDE_SPI)
+	{SPI_CS0, N_A, BOARD_DEV_SPI_FLASH, 8, 8}, /* SPI DEV */
+#endif
+#if defined(MV_INCLUDE_NOR)
+	{DEV_BOOCS, N_A, BOARD_DEV_NOR_FLASH, 16, 16} /* NOR DEV */
+#endif
+};
+
+MV_BOARD_MPP_INFO synods414slimInfoBoardMppConfigValue[] = {
+	{ {
+		SYNO_DS414slim_MPP0_7,
+		SYNO_DS414slim_MPP8_15,
+		SYNO_DS414slim_MPP16_23,
+		SYNO_DS414slim_MPP24_31,
+		SYNO_DS414slim_MPP32_39,
+		SYNO_DS414slim_MPP40_47,
+		SYNO_DS414slim_MPP48_55,
+		SYNO_DS414slim_MPP56_63,
+		SYNO_DS414slim_MPP64_67,
+	} }
+};
+
+MV_BOARD_TDM_INFO	synods414slimTdm880[]	= { {0} };
+
+MV_BOARD_TDM_SPI_INFO synods414slimTdmSpiInfo[] = { {1} };
+
+MV_BOARD_INFO synods414slimInfo = {
+	.boardName				= "SYNO-DS414slim",
+	.enableModuleScan 			= MV_FALSE,
+	.numBoardMppTypeValue		= ARRSZ(synods414slimInfoBoardModTypeInfo),
+	.pBoardModTypeValue			= synods414slimInfoBoardModTypeInfo,
+	.numBoardMppConfigValue		= ARRSZ(synods414slimInfoBoardMppConfigValue),
+	.pBoardMppConfigValue		= synods414slimInfoBoardMppConfigValue,
+	.intsGppMaskLow				= 0,
+	.intsGppMaskMid				= 0,
+	.intsGppMaskHigh			= 0,
+	.numBoardDeviceIf			= ARRSZ(synods414slimInfoBoardDeCsInfo),
+	.pDevCsInfo					= synods414slimInfoBoardDeCsInfo,
+	.numBoardTwsiDev			= 0,
+	.pBoardTwsiDev				= NULL,
+	.numBoardMacInfo			= ARRSZ(synods414slimInfoBoardMacInfo),
+	.pBoardMacInfo				= synods414slimInfoBoardMacInfo,
+	.numBoardGppInfo			= 0,
+	.pBoardGppInfo				= NULL,
+	.activeLedsNumber			= 0,
+	.pLedGppPin					= NULL,
+	.ledsPolarity				= 0,
+
+	/* PMU Power */
+	.pmuPwrUpPolarity			= 0,
+	.pmuPwrUpDelay				= 16000,
+
+	/* GPP values */
+	.gppOutEnValLow			= SYNO_DS414slim_GPP_OUT_ENA_LOW,
+	.gppOutEnValMid			= SYNO_DS414slim_GPP_OUT_ENA_MID,
+	.gppOutEnValHigh		= SYNO_DS414slim_GPP_OUT_ENA_HIGH,
+	.gppOutValLow			= SYNO_DS414slim_GPP_OUT_VAL_LOW,
+	.gppOutValMid			= SYNO_DS414slim_GPP_OUT_VAL_MID,
+	.gppOutValHigh			= SYNO_DS414slim_GPP_OUT_VAL_HIGH,
+	.gppPolarityValLow		= SYNO_DS414slim_GPP_POL_LOW,
+	.gppPolarityValMid		= SYNO_DS414slim_GPP_POL_MID,
+	.gppPolarityValHigh		= SYNO_DS414slim_GPP_POL_HIGH,
+
+	/* External Switch Configuration */
+	.pSwitchInfo = NULL,
+	.switchInfoNum = 0,
+
+	/* TDM configuration */
+	.numBoardTdmInfo		= {1},
+	.pBoardTdmInt2CsInfo		= {synods414slimTdm880},
+	.boardTdmInfoIndex		= 0,
+	.pBoardTdmSpiInfo 		= synods414slimTdmSpiInfo,
+
+	/* NOR init params */
+	.norFlashReadParams		= 0,
+	.norFlashWriteParams	= 0
+};
+
 #endif /* CONFIG_SYNO_ARMADA_ARCH */
 
 MV_BOARD_INFO *boardInfoTbl[] = {
@@ -831,5 +928,6 @@ MV_BOARD_INFO *boardInfoTbl[] = {
 	,&synous3Info
 	,&synors214Info
 	,&synods214seInfo
+	,&synods414slimInfo
 #endif
 };

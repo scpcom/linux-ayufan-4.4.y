@@ -23,7 +23,11 @@ ipv6-$(CONFIG_SYN_COOKIES) += syncookies.o
 ipv6-objs += $(ipv6-y)
 
 obj-$(CONFIG_INET6_AH) += ah6.o
+ifeq ($(CONFIG_SYNO_COMCERTO),y)
+obj-$(CONFIG_INET6_IPSEC_OFFLOAD) += esp6.o
+else
 obj-$(CONFIG_INET6_ESP) += esp6.o
+endif
 obj-$(CONFIG_INET6_IPCOMP) += ipcomp6.o
 obj-$(CONFIG_INET6_XFRM_TUNNEL) += xfrm6_tunnel.o
 obj-$(CONFIG_INET6_TUNNEL) += tunnel6.o
@@ -36,7 +40,13 @@ obj-$(CONFIG_NETFILTER)	+= netfilter/
 
 obj-$(CONFIG_IPV6_SIT) += sit.o
 obj-$(CONFIG_IPV6_TUNNEL) += ip6_tunnel.o
+ifeq ($(CONFIG_SYNO_COMCERTO),y)
+obj-$(CONFIG_IPV6_ETHERIP) += ethipip6.o
+endif
 
 obj-y += addrconf_core.o exthdrs_core.o
 
 obj-$(subst m,y,$(CONFIG_IPV6)) += inet6_hashtables.o
+ifeq ($(CONFIG_SYNO_COMCERTO),y)
+obj-$(subst m,y,$(CONFIG_IPV6)) += inet6_stubs.o
+endif

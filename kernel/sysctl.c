@@ -238,11 +238,6 @@ EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 
 #endif
 
-#ifdef CONFIG_SYNO_ARMADA
-long gSynoUSBStation= 0;
-EXPORT_SYMBOL(gSynoUSBStation);
-#endif
-
 #ifdef CONFIG_SYNO_DISPLAY_CPUINFO
 unsigned int gSynoCPUInfoCore = 0;
 EXPORT_SYMBOL(gSynoCPUInfoCore);
@@ -258,6 +253,11 @@ EXPORT_SYMBOL(gSynoFactoryUSBFastReset);
 #ifdef MY_ABC_HERE
 int gSynoFactoryUSB3Disable = 0;
 EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
+#endif
+
+#ifdef CONFIG_SYNO_DUAL_HEAD
+int gSynoDualHead = 0;
+EXPORT_SYMBOL(gSynoDualHead);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -1348,15 +1348,6 @@ static struct ctl_table kern_table[] = {
 		.maxlen		= sizeof (int),
 		.mode		= 0444,
 		.proc_handler	= &proc_dointvec,
-	},
-#endif
-#ifdef CONFIG_SYNO_ARMADA
-	{
-		.procname		= "syno_usbstation",
-		.data			= &gSynoUSBStation,
-		.maxlen 			= sizeof (int),
-		.mode			= 0444,
-		.proc_handler		= &proc_dointvec,
 	},
 #endif
 #ifdef CONFIG_SYNO_DISPLAY_CPUINFO

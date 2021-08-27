@@ -180,11 +180,59 @@ static int ecryptfs_show_options(struct seq_file *m, struct vfsmount *mnt)
 		seq_printf(m, ",ecryptfs_unlink_sigs");
 	if (mount_crypt_stat->flags & ECRYPTFS_GLOBAL_MOUNT_AUTH_TOK_ONLY)
 		seq_printf(m, ",ecryptfs_mount_auth_tok_only");
+#ifdef MY_ABC_HERE
+	if (mount_crypt_stat->flags & ECRYPTFS_SYNO_ERROR_REPORT)
+		seq_printf(m, ",syno_error_report");
+#endif
 
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static int ecryptfs_get_sb_archive_ver(struct super_block *sb, u32 *archive_ver)
+{
+	struct super_block *lower_sb = ecryptfs_superblock_to_lower(sb);
+	if (!lower_sb->s_op->syno_get_sb_archive_ver)
+		return -EINVAL;
+	return lower_sb->s_op->syno_get_sb_archive_ver(lower_sb, archive_ver);
+}
+
+static int ecryptfs_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
+{
+	struct super_block *lower_sb = ecryptfs_superblock_to_lower(sb);
+	if (!lower_sb->s_op->syno_set_sb_archive_ver)
+		return -EINVAL;
+	return lower_sb->s_op->syno_set_sb_archive_ver(lower_sb, archive_ver);
+}
+
+#ifdef MY_ABC_HERE
+static int ecryptfs_get_sb_archive_ver1(struct super_block *sb, u32 *archive_ver)
+{
+	struct super_block *lower_sb = ecryptfs_superblock_to_lower(sb);
+	if (!lower_sb->s_op->syno_get_sb_archive_ver1)
+		return -EINVAL;
+	return lower_sb->s_op->syno_get_sb_archive_ver1(lower_sb, archive_ver);
+}
+
+static int ecryptfs_set_sb_archive_ver1(struct super_block *sb, u32 archive_ver)
+{
+	struct super_block *lower_sb = ecryptfs_superblock_to_lower(sb);
+	if (!lower_sb->s_op->syno_set_sb_archive_ver1)
+		return -EINVAL;
+	return lower_sb->s_op->syno_set_sb_archive_ver1(lower_sb, archive_ver);
+}
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
+
 const struct super_operations ecryptfs_sops = {
+#ifdef MY_ABC_HERE
+	.syno_get_sb_archive_ver = ecryptfs_get_sb_archive_ver,
+	.syno_set_sb_archive_ver = ecryptfs_set_sb_archive_ver,
+#ifdef MY_ABC_HERE
+	.syno_get_sb_archive_ver1 = ecryptfs_get_sb_archive_ver1,
+	.syno_set_sb_archive_ver1 = ecryptfs_set_sb_archive_ver1,
+#endif
+#endif
 	.alloc_inode = ecryptfs_alloc_inode,
 	.destroy_inode = ecryptfs_destroy_inode,
 	.drop_inode = generic_delete_inode,

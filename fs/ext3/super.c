@@ -98,13 +98,6 @@ handle_t *ext3_journal_start_sb(struct super_block *sb, int nblocks)
 	if (sb->s_flags & MS_RDONLY)
 		return ERR_PTR(-EROFS);
 
-#ifdef MY_ABC_HERE
-	/* strengthen freezing fs as ext4 */
-	if (!journal_current_handle()) {
-		vfs_check_frozen(sb, SB_FREEZE_TRANS);
-	}
-#endif
-
 	/* Special case here: if the journal has aborted behind our
 	 * backs (eg. EIO in the commit thread), then we still need to
 	 * take the FS itself readonly cleanly. */
@@ -571,6 +564,11 @@ static int init_inodecache(void)
 
 static void destroy_inodecache(void)
 {
+	/*
+	 * Make sure all delayed rcu free inodes are flushed before we
+	 * destroy cache.
+	 */
+	rcu_barrier();
 	kmem_cache_destroy(ext3_inode_cachep);
 }
 
@@ -785,6 +783,42 @@ static int bdev_try_to_free_page(struct super_block *sb, struct page *page,
 	return try_to_free_buffers(page);
 }
 
+#ifdef MY_ABC_HERE
+static int syno_ext3_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
+{
+	struct ext3_super_block *es = EXT3_SB(sb)->s_es;
+	handle_t *handle;
+	int err, err2;
+
+	sb->s_archive_version = archive_ver;
+	es->s_archive_version = cpu_to_le32(sb->s_archive_version);
+
+	handle = ext3_journal_start_sb(sb, 1);
+	if (IS_ERR(handle)) {
+		err = PTR_ERR(handle);
+		goto exit;
+	}
+	err = ext3_journal_get_write_access(handle, EXT3_SB(sb)->s_sbh);
+	if (err) {
+		goto exit_journal;
+	}
+	err = ext3_journal_dirty_metadata(handle, EXT3_SB(sb)->s_sbh);
+exit_journal:
+	err2 = ext3_journal_stop(handle);
+	if (!err) {
+		err = err2;
+	}
+exit:
+	return err;
+}
+
+static int syno_ext3_get_sb_archive_ver(struct super_block *sb, u32 *archive_ver)
+{
+	*archive_ver = sb->s_archive_version;
+	return 0;
+}
+#endif
+
 #ifdef CONFIG_QUOTA
 #define QTYPE2NAME(t) ((t)==USRQUOTA?"user":"group")
 #define QTYPE2MOPT(on, t) ((t)==USRQUOTA?((on)##USRJQUOTA):((on)##GRPJQUOTA))
@@ -824,6 +858,10 @@ static const struct quotactl_ops ext3_qctl_operations = {
 #endif
 
 static const struct super_operations ext3_sops = {
+#ifdef MY_ABC_HERE
+	.syno_set_sb_archive_ver = syno_ext3_set_sb_archive_ver,
+	.syno_get_sb_archive_ver = syno_ext3_get_sb_archive_ver,
+#endif
 	.alloc_inode	= ext3_alloc_inode,
 	.destroy_inode	= ext3_destroy_inode,
 	.write_inode	= ext3_write_inode,
@@ -2482,9 +2520,6 @@ static int ext3_commit_super(struct super_block *sb,
 		es->s_wtime = cpu_to_le32(get_seconds());
 	es->s_free_blocks_count = cpu_to_le32(ext3_count_free_blocks(sb));
 	es->s_free_inodes_count = cpu_to_le32(ext3_count_free_inodes(sb));
-#ifdef MY_ABC_HERE
-	es->s_archive_version = cpu_to_le32(sb->s_archive_version);
-#endif
 	BUFFER_TRACE(sbh, "marking dirty");
 	mark_buffer_dirty(sbh);
 	if (sync) {

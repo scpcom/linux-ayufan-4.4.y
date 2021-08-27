@@ -178,8 +178,12 @@ enum {
 
 	MV_GEN_I_FLAGS		= MV_COMMON_FLAGS | ATA_FLAG_NO_ATAPI,
 
+#ifdef CONFIG_SYNO_COMCERTO
+	MV_GEN_II_FLAGS     = MV_COMMON_FLAGS | ATA_FLAG_PMP | ATA_FLAG_ACPI_SATA,
+#else
 	MV_GEN_II_FLAGS		= MV_COMMON_FLAGS | ATA_FLAG_NCQ |
 				  ATA_FLAG_PMP | ATA_FLAG_ACPI_SATA,
+#endif
 
 	MV_GEN_IIE_FLAGS	= MV_GEN_II_FLAGS | ATA_FLAG_AN,
 
@@ -660,10 +664,6 @@ static u8   mv_bmdma_status(struct ata_port *ap);
 static u8 mv_sff_check_status(struct ata_port *ap);
 
 #ifdef MY_ABC_HERE
-static void mv_err_intr(struct ata_port *ap);
-#endif
-
-#ifdef MY_ABC_HERE
 static ssize_t
 syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count);
 DEVICE_ATTR(syno_phy_ctl, S_IWUGO, NULL, syno_mv_phy_ctl_store);
@@ -676,9 +676,6 @@ static struct device_attribute *sata_mv_shost_attrs[] = {
 	&dev_attr_syno_pm_info,
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_phy_ctl,
-#endif
-#ifdef MY_ABC_HERE
-	&dev_attr_syno_port_thaw,
 #endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
@@ -762,11 +759,6 @@ static struct ata_port_operations mv6_ops = {
 	.bmdma_start		= mv_bmdma_start,
 	.bmdma_stop		= mv_bmdma_stop,
 	.bmdma_status		= mv_bmdma_status,
-
-#ifdef MY_ABC_HERE
-	.syno_force_intr	= mv_err_intr,
-#endif
-
 	.port_start		= mv_port_start,
 	.port_stop		= mv_port_stop,
 };
@@ -2470,11 +2462,6 @@ static unsigned int mv_qc_issue(struct ata_queued_cmd *qc)
 		if (IS_GEN_II(hpriv))
 			return mv_qc_issue_fis(qc);
 	}
-#ifdef MY_ABC_HERE
-	if (NULL == qc->scsicmd && ATA_CMD_CHK_POWER == qc->tf.command) {
-		qc->tf.flags |= ATA_TFLAG_DIRECT;
-	}
-#endif
 	return ata_bmdma_qc_issue(qc);
 }
 
@@ -2771,19 +2758,7 @@ static void mv_err_intr(struct ata_port *ap)
 		action |= ATA_EH_RESET;
 		ata_ehi_push_desc(ehi, "parity error");
 	}
-#ifdef MY_ABC_HERE
-	if ((edma_err_cause & (EDMA_ERR_DEV_DCON | EDMA_ERR_DEV_CON)) ||
-		(ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
-			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
-			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
-		} else {
-			ap->iDetectStat = 1;
-			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
-		}
-#else
 	if (edma_err_cause & (EDMA_ERR_DEV_DCON | EDMA_ERR_DEV_CON)) {
-#endif
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
@@ -3689,6 +3664,45 @@ static void syno_mv_phy_ctl(void __iomem *port_mmio, u8 blShutdown)
 }
 
 #ifdef MY_ABC_HERE
+int syno_sata_mv_gpio_read(const unsigned short hostnum)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	void __iomem *host_mmio = NULL;
+	u32 gpio_value = 0;
+	int led_idx;
+	int ret = -1;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	if (NULL == (host_mmio = mv_host_base(ap->host))) {
+		goto END;
+	}
+
+	led_idx = ap->print_id - ap->host->ports[0]->print_id;
+
+	gpio_value = readl(host_mmio + GPIO_CTL_DATA);
+
+	if (gpio_value & (1 << led_idx)) {
+		ret = 1;
+	} else {
+		ret = 0;
+	}
+
+END:
+	if (NULL != shost) {
+		scsi_host_put(shost);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_sata_mv_gpio_read);
+
 /*FIXME - Too brutal and directly, should separate into levels*/
 void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
 {
@@ -3703,12 +3717,10 @@ void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
 	}
 
 	if(NULL == (ap = ata_shost_to_port(shost))) {
-		scsi_host_put(shost);
 		goto END;
 	}
 
 	if(NULL == (host_mmio = mv_host_base(ap->host))) {
-		scsi_host_put(shost);
 		goto END;
 	}
 	
@@ -3723,9 +3735,11 @@ void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
 	}
 
 	writel(gpio_value, host_mmio + GPIO_CTL_DATA);
-	scsi_host_put(shost);
 
 END:
+	if (NULL != shost) {
+		scsi_host_put(shost);
+	}
 	return;
 }
 EXPORT_SYMBOL(syno_sata_mv_gpio_write);

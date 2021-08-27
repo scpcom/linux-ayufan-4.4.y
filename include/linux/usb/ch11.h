@@ -114,7 +114,7 @@ struct usb_port_status {
 #define USB_PORT_STAT_TEST_MODE         0x8000
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 enum XHCI_SPECIAL_RESET_MODE{
 	XHCI_SPECIAL_RESET_PAUSE = 0, // enable and pause
 	XHCI_SPECIAL_RESET_RUN, // enable and run
@@ -217,6 +217,17 @@ struct usb_hub_status {
 #define USB_DT_SS_HUB			(USB_TYPE_CLASS | 0x0a)
 #define USB_DT_HUB_NONVAR_SIZE		7
 #define USB_DT_SS_HUB_SIZE              12
+
+/*
+ * Hub Device descriptor
+ * USB Hub class device protocols
+ */
+
+#define USB_HUB_PR_FS		0 /* Full speed hub */
+#define USB_HUB_PR_HS_NO_TT	0 /* Hi-speed hub without TT */
+#define USB_HUB_PR_HS_SINGLE_TT	1 /* Hi-speed hub with single TT */
+#define USB_HUB_PR_HS_MULTI_TT	2 /* Hi-speed hub with multiple TT */
+#define USB_HUB_PR_SS		3 /* Super speed hub */
 
 struct usb_hub_descriptor {
 	__u8  bDescLength;

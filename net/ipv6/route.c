@@ -2461,8 +2461,11 @@ static int rt6_fill_node(struct net *net,
 		ipv6_addr_copy(&saddr_buf, &rt->rt6i_prefsrc.addr);
 		NLA_PUT(skb, RTA_PREFSRC, 16, &saddr_buf);
 	}
-
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+	if (rtnetlink_put_metrics_2(skb, dst_metrics_ptr(&rt->dst), &rt->dst) < 0)
+#else
 	if (rtnetlink_put_metrics(skb, dst_metrics_ptr(&rt->dst)) < 0)
+#endif
 		goto nla_put_failure;
 
 	rcu_read_lock();
@@ -2524,6 +2527,9 @@ static int inet6_rtm_getroute(struct sk_buff *in_skb, struct nlmsghdr* nlh, void
 	struct rtmsg *rtm;
 	struct flowi6 fl6;
 	int err, iif = 0;
+#if defined(CONFIG_SYNO_COMCERTO)
+	int flags = 0;
+#endif
 
 	err = nlmsg_parse(nlh, sizeof(*rtm), tb, RTA_MAX, rtm_ipv6_policy);
 	if (err < 0)
@@ -2552,6 +2558,11 @@ static int inet6_rtm_getroute(struct sk_buff *in_skb, struct nlmsghdr* nlh, void
 	if (tb[RTA_OIF])
 		fl6.flowi6_oif = nla_get_u32(tb[RTA_OIF]);
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (tb[RTA_MARK])
+		fl6.flowi6_mark = nla_get_u32(tb[RTA_MARK]);
+#endif
+
 	if (iif) {
 		struct net_device *dev;
 		dev = __dev_get_by_index(net, iif);
@@ -2559,6 +2570,16 @@ static int inet6_rtm_getroute(struct sk_buff *in_skb, struct nlmsghdr* nlh, void
 			err = -ENODEV;
 			goto errout;
 		}
+
+#if defined(CONFIG_SYNO_COMCERTO)
+		fl6.flowi6_iif = iif;
+
+		if (!ipv6_addr_any(&fl6.saddr))
+			flags |= RT6_LOOKUP_F_HAS_SADDR;
+
+		if (rt6_need_strict(&fl6.daddr) && dev->type != ARPHRD_PIMREG)
+			flags |= RT6_LOOKUP_F_IFACE;
+#endif
 	}
 
 	skb = alloc_skb(NLMSG_GOODSIZE, GFP_KERNEL);
@@ -2573,6 +2594,11 @@ static int inet6_rtm_getroute(struct sk_buff *in_skb, struct nlmsghdr* nlh, void
 	skb_reset_mac_header(skb);
 	skb_reserve(skb, MAX_HEADER + sizeof(struct ipv6hdr));
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (iif)
+		rt = (struct rt6_info*) fib6_rule_lookup(net, &fl6, flags, ip6_pol_route_input);
+	else
+#endif
 	rt = (struct rt6_info*) ip6_route_output(net, NULL, &fl6);
 	skb_dst_set(skb, &rt->dst);
 

@@ -363,11 +363,6 @@
 #define __NR_process_vm_writev	348
 
 #ifdef MY_ABC_HERE
-#define __NR_SYNOmmap		400
-#define SYNOmmap(x)		syscall(__NR_SYNOmmap, x)
-#endif
-
-#ifdef MY_ABC_HERE
 #define __NR_SYNOUtime                          402
 #define SYNOUtime(arg1, arg2)                   syscall(__NR_SYNOUtime, arg1, arg2)
 #endif
@@ -384,7 +379,7 @@
 
 #ifdef MY_ABC_HERE
 #define __NR_SYNOMTDAlloc                       405
-#define SYNOMTDAlloc(x)				syscall(__NR_SYNOMTDAlloc, x)
+#define SYNOMTDAlloc(arg1)                      syscall(__NR_SYNOMTDAlloc, arg1)
 #endif
 
 #ifdef MY_ABC_HERE

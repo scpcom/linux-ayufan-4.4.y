@@ -17,7 +17,9 @@
 #include <asm/unwind.h>
 
 #include "entry-header.S"
-
+#if defined(CONFIG_SYNO_COMCERTO)
+#include <asm/page.h>
+#endif
 
 	.align	5
 /*
@@ -586,6 +588,9 @@ ENDPROC(sys_fstatfs64_wrapper)
  */
 sys_mmap2:
 #if PAGE_SHIFT > 12
+#if defined(CONFIG_SYNO_COMCERTO)
+#define PGOFF_MASK ((1 << (PAGE_SHIFT - 12)) - 1)
+#endif
 		tst	r5, #PGOFF_MASK
 		moveq	r5, r5, lsr #PAGE_SHIFT - 12
 		streq	r5, [sp, #4]

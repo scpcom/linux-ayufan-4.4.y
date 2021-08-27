@@ -84,3 +84,14 @@ static inline int wakeup_sysfs_add(struct device *dev) { return 0; }
 static inline void wakeup_sysfs_remove(struct device *dev) {}
 
 #endif
+
+/* Added for SYSFS support to handle from Device power management from 
+ * user space. Manual PM  configuration.
+ */
+
+#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_PM_SYSFS_MANUAL)
+
+extern int dpm_manual_suspend_start(struct device * , pm_message_t );
+extern void dpm_manual_resume_start(struct device * , pm_message_t);
+
+#endif /* CONFIG_SYNO_COMCERTO && CONFIG_PM_SYSFS_MANUAL */

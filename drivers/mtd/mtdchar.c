@@ -1188,6 +1188,14 @@ static int mtd_ioctl(struct file *file, u_int cmd, u_long arg)
 		break;
 	}
 
+#if defined(CONFIG_SYNO_COMCERTO)
+	case MTDREFRESH:
+	{
+		ret = mtd_device_refresh(mtd);
+		break;
+	}
+#endif
+
 	default:
 		ret = -ENOTTY;
 	}

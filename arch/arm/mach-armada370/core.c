@@ -135,9 +135,6 @@ MV_U16 mvMtu[CONFIG_MV_ETH_PORTS_NUM] = {0};
 
 struct mbus_dram_target_info armadaxp_mbus_dram_info;
 
-/* USB Station */
-extern int gSynoUSBStation;
-
 /*********************************************************************************/
 /**************                 Early Printk Support                **************/
 /*********************************************************************************/
@@ -1220,6 +1217,7 @@ extern void syno_mv_net_shutdown();
 #define SOFTWARE_REBOOT                 0x43
 extern void synology_gpio_init(void);
 
+void (*syno_power_off_indicator)(void) = NULL;
 static void synology_power_off(void)
 {
 #ifdef MY_ABC_HERE
@@ -1227,20 +1225,18 @@ static void synology_power_off(void)
 	syno_mv_net_shutdown();
 #endif
 
-	if (!gSynoUSBStation) {
 	writel(SET8N1, UART1_REG(LCR));
 	writel(SOFTWARE_SHUTDOWN, UART1_REG(TX));
+
+	if (syno_power_off_indicator) {
+		syno_power_off_indicator();
 	}
 }
 
 static void synology_restart(char mode, const char *cmd)
 {
-	if (gSynoUSBStation) {
-		mvBoardReset();
-	} else {
 	writel(SET8N1, UART1_REG(LCR));
 	writel(SOFTWARE_REBOOT, UART1_REG(TX));
-	}
 
 	/* Calls original reset function for models those do not use uP
 	* I.e. USB Station. */

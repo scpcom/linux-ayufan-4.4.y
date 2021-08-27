@@ -651,6 +651,9 @@ ecryptfs_write_tag_70_packet(char *dest, size_t *remaining_bytes,
 		printk(KERN_ERR "%s: Error attempting to find auth tok for "
 		       "fnek sig [%s]; rc = [%d]\n", __func__,
 		       mount_crypt_stat->global_default_fnek_sig, rc);
+#ifdef MY_ABC_HERE
+		mount_crypt_stat->flags |= ECRYPTFS_SYNO_ERROR_REPORT;
+#endif
 		goto out;
 	}
 	rc = ecryptfs_get_tfm_and_mutex_for_cipher_name(
@@ -1001,6 +1004,9 @@ ecryptfs_parse_tag_70_packet(char **filename, size_t *filename_size,
 		printk(KERN_ERR "%s: Error attempting to find auth tok for "
 		       "fnek sig [%s]; rc = [%d]\n", __func__, s->fnek_sig_hex,
 		       rc);
+#ifdef MY_ABC_HERE
+		mount_crypt_stat->flags |= ECRYPTFS_SYNO_ERROR_REPORT;
+#endif
 		goto out;
 	}
 	rc = ecryptfs_get_tfm_and_mutex_for_cipher_name(&s->desc.tfm,

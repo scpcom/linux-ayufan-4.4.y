@@ -48,7 +48,7 @@
 #include "acl.h"
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-#include "synoacl_int.h"
+#include "syno_acl.h"
 #endif
 
 #include <trace/events/ext4.h>
@@ -1957,12 +1957,6 @@ retry:
 	if (err == -ENOSPC && ext4_should_retry_alloc(dir->i_sb, &retries))
 		goto retry;
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (!err && IS_SYNOACL(dir)) {
-		ext4_mod_init_syno_acl(inode, dentry);
-	}
-#endif
-
 	return err;
 }
 
@@ -2084,11 +2078,6 @@ out_stop:
 	if (err == -ENOSPC && ext4_should_retry_alloc(dir->i_sb, &retries))
 		goto retry;
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (!err && IS_SYNOACL(dir)) {
-		ext4_mod_init_syno_acl(inode, dentry);
-	}
-#endif
 	return err;
 }
 
@@ -2524,7 +2513,7 @@ retry:
 			err = PTR_ERR(handle);
 			goto err_drop_inode;
 		}
-		inc_nlink(inode);
+		set_nlink(inode, 1);
 		err = ext4_orphan_del(handle, inode);
 		if (err) {
 			ext4_journal_stop(handle);
@@ -2783,13 +2772,7 @@ end_rename:
 	ext4_journal_stop(handle);
 	if (retval == 0 && force_da_alloc)
 		ext4_alloc_da_blocks(old_inode);
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (0 == retval) {
-		if (IS_SYNOACL(old_dir) != IS_SYNOACL(new_dir)) {
-			ext4_mod_rename_syno_acl(old_inode, new_dir);
-		}
-	}
-#endif
+
 	return retval;
 }
 
@@ -2797,6 +2780,13 @@ end_rename:
  * directories can handle most operations...
  */
 const struct inode_operations ext4_dir_inode_operations = {
+#ifdef MY_ABC_HERE
+	.syno_getattr	= syno_ext4_getattr,
+#endif
+#ifdef MY_ABC_HERE
+	.syno_get_archive_ver = syno_ext4_get_archive_ver,
+	.syno_set_archive_ver = syno_ext4_set_archive_ver,
+#endif
 	.create		= ext4_create,
 	.lookup		= ext4_lookup,
 	.link		= ext4_link,
@@ -2812,18 +2802,10 @@ const struct inode_operations ext4_dir_inode_operations = {
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
-#ifdef MY_ABC_HERE
-	.synosetxattr	= syno_generic_setxattr,
-#endif
 #endif
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-	.getattr	= ext4_mod_dir_getattr,
-	.syno_acl_get = ext4_mod_get_syno_acl_inherit,
-	.syno_access	= ext4_mod_syno_access,
-	.syno_permission = ext4_mod_syno_permission,
-	.syno_exec_permission = ext4_mod_syno_exec_permission,
-	.syno_permission_get = ext4_mod_get_syno_permission,
-	.syno_inode_change_ok = ext4_mod_syno_inode_change_ok,
+	.syno_acl_get   = ext4_get_syno_acl,
+	.syno_acl_set	= ext4_set_syno_acl,
 #else
 	.get_acl	= ext4_get_acl,
 #endif
@@ -2831,6 +2813,13 @@ const struct inode_operations ext4_dir_inode_operations = {
 };
 
 const struct inode_operations ext4_special_inode_operations = {
+#ifdef MY_ABC_HERE
+	.syno_getattr	= syno_ext4_getattr,
+#endif
+#ifdef MY_ABC_HERE
+	.syno_get_archive_ver = syno_ext4_get_archive_ver,
+	.syno_set_archive_ver = syno_ext4_set_archive_ver,
+#endif
 	.setattr	= ext4_setattr,
 #ifdef CONFIG_EXT4_FS_XATTR
 	.setxattr	= generic_setxattr,
@@ -2838,5 +2827,7 @@ const struct inode_operations ext4_special_inode_operations = {
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
 #endif
+#ifndef CONFIG_EXT4_FS_SYNO_ACL
 	.get_acl	= ext4_get_acl,
+#endif
 };

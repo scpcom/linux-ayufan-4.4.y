@@ -52,6 +52,7 @@ int gfs2_trans_begin(struct gfs2_sbd *sdp, unsigned int blocks,
 						   sizeof(u64));
 	INIT_LIST_HEAD(&tr->tr_list_buf);
 
+	sb_start_intwrite(sdp->sd_vfs);
 	gfs2_holder_init(sdp->sd_trans_gl, LM_ST_SHARED, 0, &tr->tr_t_gh);
 
 	error = gfs2_glock_nq(&tr->tr_t_gh);
@@ -70,6 +71,7 @@ fail_gunlock:
 	gfs2_glock_dq(&tr->tr_t_gh);
 
 fail_holder_uninit:
+	sb_end_intwrite(sdp->sd_vfs);
 	gfs2_holder_uninit(&tr->tr_t_gh);
 	kfree(tr);
 
@@ -107,6 +109,7 @@ void gfs2_trans_end(struct gfs2_sbd *sdp)
 			gfs2_holder_uninit(&tr->tr_t_gh);
 			kfree(tr);
 		}
+		sb_end_intwrite(sdp->sd_vfs);
 		return;
 	}
 
@@ -130,6 +133,7 @@ void gfs2_trans_end(struct gfs2_sbd *sdp)
 
 	if (sdp->sd_vfs->s_flags & MS_SYNCHRONOUS)
 		gfs2_log_flush(sdp, NULL);
+	sb_end_intwrite(sdp->sd_vfs);
 }
 
 /**

@@ -43,6 +43,9 @@ static const struct compress_format {
 	{ {037, 0236}, "gzip", gunzip },
 	{ {0x42, 0x5a}, "bzip2", bunzip2 },
 	{ {0x5d, 0x00}, "lzma", unlzma },
+#if defined(CONFIG_SYNO_COMCERTO)
+	{ {0x6d, 0x00}, "lzma-openwrt", unlzma },
+#endif
 	{ {0xfd, 0x37}, "xz", unxz },
 	{ {0x89, 0x4c}, "lzo", unlzo },
 	{ {0, 0}, NULL, NULL }

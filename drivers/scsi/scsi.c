@@ -59,7 +59,7 @@
 #include <linux/mutex.h>
 #if defined(MY_ABC_HERE)
 #include <linux/ata.h>
-#endif
+#endif /* MY_ABC_HERE */
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
@@ -692,7 +692,7 @@ void syno_disk_hiternation_cmd_printk(struct scsi_device *sdp, struct scsi_cmnd 
 		}
 	}
 }
-#endif
+#endif /* MY_ABC_HERE */
 
 
 /**

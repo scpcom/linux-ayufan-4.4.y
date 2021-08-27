@@ -46,7 +46,11 @@ int br_dev_queue_push_xmit(struct sk_buff *skb)
 {
 	/* ip_fragment doesn't copy the MAC header */
 	if (nf_bridge_maybe_copy_header(skb) ||
+#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+	    (packet_length(skb) > skb->dev->mtu && !skb_is_gso(skb) && (!skb->ipsec_offload))) {
+#else
 	    (packet_length(skb) > skb->dev->mtu && !skb_is_gso(skb))) {
+#endif
 		kfree_skb(skb);
 	} else {
 		skb_push(skb, ETH_HLEN);
@@ -113,7 +117,11 @@ void br_deliver(const struct net_bridge_port *to, struct sk_buff *skb)
 /* called with rcu_read_lock */
 void br_forward(const struct net_bridge_port *to, struct sk_buff *skb, struct sk_buff *skb0)
 {
+#if defined(CONFIG_SYNO_COMCERTO)
+	if (should_deliver(to, skb) && !(to->flags & BR_ISOLATE_MODE)) {
+#else
 	if (should_deliver(to, skb)) {
+#endif
 		if (skb0)
 			deliver_clone(to, skb, __br_forward);
 		else
@@ -165,10 +173,18 @@ out:
 }
 
 /* called under bridge lock */
+#if defined(CONFIG_SYNO_COMCERTO)
+static void br_flood(struct net_bridge *br, struct sk_buff *skb,
+		     struct sk_buff *skb0,
+		     void (*__packet_hook)(const struct net_bridge_port *p,
+					   struct sk_buff *skb),
+		     bool forward)
+#else
 static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 		     struct sk_buff *skb0,
 		     void (*__packet_hook)(const struct net_bridge_port *p,
 					   struct sk_buff *skb))
+#endif
 {
 	struct net_bridge_port *p;
 	struct net_bridge_port *prev;
@@ -176,6 +192,11 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 	prev = NULL;
 
 	list_for_each_entry_rcu(p, &br->port_list, list) {
+#if defined(CONFIG_SYNO_COMCERTO)
+		if (forward && (p->flags & BR_ISOLATE_MODE))
+			continue;
+#endif
+
 		prev = maybe_deliver(prev, p, skb, __packet_hook);
 		if (IS_ERR(prev))
 			goto out;
@@ -195,18 +216,25 @@ out:
 		kfree_skb(skb);
 }
 
-
 /* called with rcu_read_lock */
 void br_flood_deliver(struct net_bridge *br, struct sk_buff *skb)
 {
+#if defined(CONFIG_SYNO_COMCERTO)
+	br_flood(br, skb, NULL, __br_deliver, false);
+#else
 	br_flood(br, skb, NULL, __br_deliver);
+#endif
 }
 
 /* called under bridge lock */
 void br_flood_forward(struct net_bridge *br, struct sk_buff *skb,
 		      struct sk_buff *skb2)
 {
+#if defined(CONFIG_SYNO_COMCERTO)
+	br_flood(br, skb, skb2, __br_forward, true);
+#else
 	br_flood(br, skb, skb2, __br_forward);
+#endif
 }
 
 #ifdef CONFIG_BRIDGE_IGMP_SNOOPING

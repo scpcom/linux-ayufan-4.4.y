@@ -280,6 +280,9 @@ static device_method_t swcr_methods = {
 	DEVMETHOD(cryptodev_process,	swcr_process),
 };
 
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+static DEFINE_SPINLOCK(syno_softcrypto_lock);
+#endif
 #define debug swcr_debug
 int swcr_debug = 0;
 module_param(swcr_debug, int, 0644);
@@ -346,6 +349,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	int error;
 	char *algo;
 	int mode;
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+	unsigned long flags;
+#endif
 
 	dprintk("%s()\n", __FUNCTION__);
 	if (sid == NULL || cri == NULL) {
@@ -353,6 +359,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 		return EINVAL;
 	}
 
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+	spin_lock_irqsave(&syno_softcrypto_lock, flags);
+#endif
 	if (swcr_sessions) {
 		for (i = 1; i < swcr_sesnum; i++)
 			if (swcr_sessions[i] == NULL)
@@ -374,6 +383,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 				swcr_sesnum = 0;
 			else
 				swcr_sesnum /= 2;
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+			spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 			dprintk("%s,%d: ENOBUFS\n", __FILE__, __LINE__);
 			return ENOBUFS;
 		}
@@ -396,6 +408,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 	*swd = (struct swcr_data *) kmalloc(sizeof(struct swcr_data),
 										SLAB_ATOMIC);
 	if (*swd == NULL) {
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+		spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 			swcr_freesession(NULL, i);
 			dprintk("%s,%d: ENOBUFS\n", __FILE__, __LINE__);
 			return ENOBUFS;
@@ -404,6 +419,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 
 		if (cri->cri_alg < 0 ||
 				cri->cri_alg>=sizeof(crypto_details)/sizeof(crypto_details[0])){
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+			spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 			printk("cryptosoft: Unknown algorithm 0x%x\n", cri->cri_alg);
 			swcr_freesession(NULL, i);
 			return EINVAL;
@@ -411,6 +429,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 
 		algo = crypto_details[cri->cri_alg].alg_name;
 		if (!algo || !*algo) {
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+			spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 			printk("cryptosoft: Unsupported algorithm 0x%x\n", cri->cri_alg);
 			swcr_freesession(NULL, i);
 			return EINVAL;
@@ -449,6 +470,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			}
 			if (!(*swd)->sw_tfm || IS_ERR((*swd)->sw_tfm)) {
 				int err;
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+				spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 				dprintk("cryptosoft: crypto_alloc_blkcipher failed(%s, 0x%x)\n",
 						algo,mode);
 				err = IS_ERR((*swd)->sw_tfm) ? -(PTR_ERR((*swd)->sw_tfm)) : EINVAL;
@@ -483,6 +507,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 								cri->cri_key, (cri->cri_klen + 7) / 8);
 			}
 			if (error) {
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+				spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 				printk("cryptosoft: setkey failed %d (crt_flags=0x%x)\n", error,
 						(*swd)->sw_tfm->crt_flags);
 				swcr_freesession(NULL, i);
@@ -505,6 +532,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			}
 
 			if (!(*swd)->sw_tfm) {
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+				spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 				dprintk("cryptosoft: crypto_alloc_hash failed(%s,0x%x)\n",
 						algo, mode);
 				swcr_freesession(NULL, i);
@@ -515,6 +545,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			(*swd)->u.hmac.sw_key = (char *)kmalloc((*swd)->u.hmac.sw_klen,
 					SLAB_ATOMIC);
 			if ((*swd)->u.hmac.sw_key == NULL) {
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+				spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 				swcr_freesession(NULL, i);
 				dprintk("%s,%d: ENOBUFS\n", __FILE__, __LINE__);
 				return ENOBUFS;
@@ -533,6 +566,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			(*swd)->sw_tfm = crypto_comp_tfm(
 					crypto_alloc_comp(algo, 0, CRYPTO_ALG_ASYNC));
 			if (!(*swd)->sw_tfm) {
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+				spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 				dprintk("cryptosoft: crypto_alloc_comp failed(%s,0x%x)\n",
 						algo, mode);
 				swcr_freesession(NULL, i);
@@ -540,11 +576,17 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			}
 			(*swd)->u.sw_comp_buf = kmalloc(CRYPTO_MAX_DATA_LEN, SLAB_ATOMIC);
 			if ((*swd)->u.sw_comp_buf == NULL) {
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+				spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 				swcr_freesession(NULL, i);
 				dprintk("%s,%d: ENOBUFS\n", __FILE__, __LINE__);
 				return ENOBUFS;
 			}
 		} else {
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+			spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 			printk("cryptosoft: Unhandled sw_type %d\n", (*swd)->sw_type);
 			swcr_freesession(NULL, i);
 			return EINVAL;
@@ -553,6 +595,9 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 		cri = cri->cri_next;
 		swd = &((*swd)->sw_next);
 	}
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+	spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 	return 0;
 }
 
@@ -564,6 +609,9 @@ swcr_freesession(device_t dev, u_int64_t tid)
 {
 	struct swcr_data *swd;
 	u_int32_t sid = CRYPTO_SESID2LID(tid);
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+	unsigned long flags;
+#endif
 
 	dprintk("%s()\n", __FUNCTION__);
 	if (sid > swcr_sesnum || swcr_sessions == NULL ||
@@ -576,6 +624,9 @@ swcr_freesession(device_t dev, u_int64_t tid)
 	if (sid == 0)
 		return(0);
 
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+	spin_lock_irqsave(&syno_softcrypto_lock, flags);
+#endif
 	while ((swd = swcr_sessions[sid]) != NULL) {
 		swcr_sessions[sid] = swd->sw_next;
 		if (swd->sw_tfm) {
@@ -619,6 +670,9 @@ swcr_freesession(device_t dev, u_int64_t tid)
 		}
 		kfree(swd);
 	}
+#if defined(CONFIG_SYNO_FIX_OCF_CRYPTOSOFT_RACE)
+	spin_unlock_irqrestore(&syno_softcrypto_lock, flags);
+#endif
 	return 0;
 }
 

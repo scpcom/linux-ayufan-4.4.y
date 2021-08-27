@@ -55,6 +55,33 @@
 #define LOAD_OFFSET 0
 #endif
 
+#if defined(CONFIG_SYNO_COMCERTO)
+#ifndef SYMTAB_KEEP_STR
+#define SYMTAB_KEEP_STR *(__ksymtab_strings+*)
+#define SYMTAB_DISCARD_STR
+#else
+#define SYMTAB_DISCARD_STR *(__ksymtab_strings+*)
+#endif
+
+#ifndef SYMTAB_KEEP
+#define SYMTAB_KEEP *(SORT(___ksymtab+*))
+#define SYMTAB_DISCARD
+#else
+#define SYMTAB_DISCARD *(SORT(___ksymtab+*))
+#endif
+
+#ifndef SYMTAB_KEEP_GPL
+#define SYMTAB_KEEP_GPL *(SORT(___ksymtab_gpl+*))
+#define SYMTAB_DISCARD_GPL
+#else
+#define SYMTAB_DISCARD_GPL *(SORT(___ksymtab_gpl+*))
+#endif
+#else /* !defined(CONFIG_SYNO_COMCERTO) */
+#define SYMTAB_KEEP_STR *(__ksymtab_strings+*)
+#define SYMTAB_KEEP *(SORT(___ksymtab+*))
+#define SYMTAB_KEEP_GPL *(SORT(___ksymtab_gpl+*))
+#endif
+
 #ifndef SYMBOL_PREFIX
 #define VMLINUX_SYMBOL(sym) sym
 #else
@@ -277,14 +304,14 @@
 	/* Kernel symbol table: Normal symbols */			\
 	__ksymtab         : AT(ADDR(__ksymtab) - LOAD_OFFSET) {		\
 		VMLINUX_SYMBOL(__start___ksymtab) = .;			\
-		*(SORT(___ksymtab+*))					\
+		SYMTAB_KEEP						\
 		VMLINUX_SYMBOL(__stop___ksymtab) = .;			\
 	}								\
 									\
 	/* Kernel symbol table: GPL-only symbols */			\
 	__ksymtab_gpl     : AT(ADDR(__ksymtab_gpl) - LOAD_OFFSET) {	\
 		VMLINUX_SYMBOL(__start___ksymtab_gpl) = .;		\
-		*(SORT(___ksymtab_gpl+*))				\
+		SYMTAB_KEEP_GPL						\
 		VMLINUX_SYMBOL(__stop___ksymtab_gpl) = .;		\
 	}								\
 									\
@@ -346,7 +373,7 @@
 									\
 	/* Kernel symbol table: strings */				\
         __ksymtab_strings : AT(ADDR(__ksymtab_strings) - LOAD_OFFSET) {	\
-		*(__ksymtab_strings)					\
+		SYMTAB_KEEP_STR						\
 	}								\
 									\
 	/* __*init sections */						\
@@ -616,30 +643,23 @@
 		*(.init.setup)						\
 		VMLINUX_SYMBOL(__setup_end) = .;
 
-#define INITCALLS							\
-	*(.initcallearly.init)						\
-	VMLINUX_SYMBOL(__early_initcall_end) = .;			\
-  	*(.initcall0.init)						\
-  	*(.initcall0s.init)						\
-  	*(.initcall1.init)						\
-  	*(.initcall1s.init)						\
-  	*(.initcall2.init)						\
-  	*(.initcall2s.init)						\
-  	*(.initcall3.init)						\
-  	*(.initcall3s.init)						\
-  	*(.initcall4.init)						\
-  	*(.initcall4s.init)						\
-  	*(.initcall5.init)						\
-  	*(.initcall5s.init)						\
-	*(.initcallrootfs.init)						\
-  	*(.initcall6.init)						\
-  	*(.initcall6s.init)						\
-  	*(.initcall7.init)						\
-  	*(.initcall7s.init)
+#define INIT_CALLS_LEVEL(level)						\
+		VMLINUX_SYMBOL(__initcall##level##_start) = .;		\
+		*(.initcall##level##.init)				\
+		*(.initcall##level##s.init)				\
 
 #define INIT_CALLS							\
 		VMLINUX_SYMBOL(__initcall_start) = .;			\
-		INITCALLS						\
+		*(.initcallearly.init)					\
+		INIT_CALLS_LEVEL(0)					\
+		INIT_CALLS_LEVEL(1)					\
+		INIT_CALLS_LEVEL(2)					\
+		INIT_CALLS_LEVEL(3)					\
+		INIT_CALLS_LEVEL(4)					\
+		INIT_CALLS_LEVEL(5)					\
+		INIT_CALLS_LEVEL(rootfs)				\
+		INIT_CALLS_LEVEL(6)					\
+		INIT_CALLS_LEVEL(7)					\
 		VMLINUX_SYMBOL(__initcall_end) = .;
 
 #define CON_INITCALL							\
@@ -672,6 +692,19 @@
  * section definitions so that such archs put those in earlier section
  * definitions.
  */
+#if defined(CONFIG_SYNO_COMCERTO)
+#define DISCARDS							\
+	/DISCARD/ : {							\
+	EXIT_TEXT							\
+	EXIT_DATA							\
+	EXIT_CALL							\
+	SYMTAB_DISCARD							\
+	SYMTAB_DISCARD_GPL						\
+	SYMTAB_DISCARD_STR						\
+	*(.discard)							\
+	*(.discard.*)							\
+	}
+#else
 #define DISCARDS							\
 	/DISCARD/ : {							\
 	EXIT_TEXT							\
@@ -680,6 +713,7 @@
 	*(.discard)							\
 	*(.discard.*)							\
 	}
+#endif
 
 /**
  * PERCPU_INPUT - the percpu input sections

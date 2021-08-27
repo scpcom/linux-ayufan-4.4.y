@@ -45,6 +45,10 @@ enum ctattr_type {
 	CTA_ZONE,
 	CTA_SECCTX,
 	CTA_TIMESTAMP,
+#if defined(CONFIG_SYNO_COMCERTO)
+	CTA_COMCERTO_FP_ORIG,
+	CTA_COMCERTO_FP_REPLY,
+#endif
 	__CTA_MAX
 };
 #define CTA_MAX (__CTA_MAX - 1)
@@ -191,5 +195,16 @@ enum ctattr_secctx {
 	__CTA_SECCTX_MAX
 };
 #define CTA_SECCTX_MAX (__CTA_SECCTX_MAX - 1)
+
+#if defined(CONFIG_SYNO_COMCERTO)
+enum ctattr_comcerto_fp {
+	CTA_COMCERTO_FP_UNSPEC,
+	CTA_COMCERTO_FP_MARK,
+	CTA_COMCERTO_FP_IFINDEX,
+	CTA_COMCERTO_FP_IIF,
+	__CTA_COMCERTO_FP_MAX
+};
+#define CTA_COMCERTO_FP_MAX (__CTA_COMCERTO_FP_MAX - 1)
+#endif
 
 #endif /* _IPCONNTRACK_NETLINK_H */

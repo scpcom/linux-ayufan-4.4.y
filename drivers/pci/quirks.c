@@ -601,12 +601,12 @@ static u32 *writable_pin = NULL;
 static u32 SynoGpioCount = 0;
 
 #if defined(CONFIG_SYNO_CEDARVIEW)
-static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 29, 30, 31, 32, 33, 34, 35, 36, 37, 45, 46, 47, 49, 55, 57};
+static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 29, 30, 31, 32, 33, 34, 35, 36, 37, 42, 43, 45, 46, 47, 49, 55, 57};
 #else
 static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 46, 47, 49, 55, 57};
 #endif
 static u32 c206_writable_pin[] = {0, 5, 16, 20, 21, 22, 34, 38, 48, 52, 54, 69, 70, 71};
-static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 29, 30, 32, 33, 34, 35, 36, 37, 58, 62, 64, 75};
+static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36, 37, 45};
 
 u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
 {

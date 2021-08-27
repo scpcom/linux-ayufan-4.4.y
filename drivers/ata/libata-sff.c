@@ -1475,9 +1475,6 @@ fsm_start:
 unsigned int ata_sff_qc_issue(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
-#ifdef MY_ABC_HERE
-	u8 status;
-#endif
 	struct ata_link *link = qc->dev->link;
 
 	/* Use polling pio if the LLD doesn't handle
@@ -1498,31 +1495,7 @@ unsigned int ata_sff_qc_issue(struct ata_queued_cmd *qc)
 		ata_tf_to_host(ap, &qc->tf);
 		ap->hsm_task_state = HSM_ST_LAST;
 
-#ifdef MY_ABC_HERE
-		/* copy from ata_pio_task() to send chkpwr cmd directly to prevent work queue timeout issue
-		 * Now we only find sata_mv have timeout issue, so we only on ATA_TFLAG_DIRECT in sata_mv */
-		if (ATA_TFLAG_DIRECT & qc->tf.flags) {
-			DBGMESG("ata%u: try to use directly issue cmd 0x%x\n", ap->print_id, qc->tf.command);
-			qc->tf.flags &= ~ATA_TFLAG_DIRECT;
-			status = ata_sff_busy_wait(ap, ATA_BUSY, 5);
-			if (status & ATA_BUSY) {
-				mdelay(2);
-				status = ata_sff_busy_wait(ap, ATA_BUSY, 10);
-				if (status & ATA_BUSY) {
-					/*if the status is still BUSY, we use original way ata_pio_queue_task() */
-					ata_sff_queue_pio_task(link, 0);
-					DBGMESG("ata%u: directly issue cmd 0x%x fail, using queue_task\n", ap->print_id, qc->tf.command);
-				} else {
-					ata_sff_hsm_move(ap, qc, status, 0);
-				}
-			} else {
-				ata_sff_hsm_move(ap, qc, status, 0);
-			}
-		}
-		else if (qc->tf.flags & ATA_TFLAG_POLLING)
-#else
 		if (qc->tf.flags & ATA_TFLAG_POLLING)
-#endif
 			ata_sff_queue_pio_task(link, 0);
 
 		break;
@@ -2152,23 +2125,8 @@ int ata_sff_softreset(struct ata_link *link, unsigned int *classes,
 	DPRINTK("about to softreset, devmask=%x\n", devmask);
 	rc = ata_bus_softreset(ap, devmask, deadline);
 	/* if link is occupied, -ENODEV too is an error */
-#ifdef MY_ABC_HERE
-	if (0 < ap->iFakeError) {
-		ata_link_printk(link, KERN_ERR, "generate fake SRST, Fake count %d\n", ap->iFakeError);
-		if (SYNO_ERROR_MAX > ap->iFakeError) {
-			--(ap->iFakeError);
-		}
-		rc = -EBUSY;
-	}
-#endif
 	if (rc && (rc != -ENODEV || sata_scr_valid(link))) {
 		ata_link_err(link, "SRST failed (errno=%d)\n", rc);
-#ifdef MY_ABC_HERE
-		if (-EBUSY == rc) {
-			ata_link_printk(link, KERN_ERR, "SRST fail, set srst fail flag\n");
-			link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
-		}
-#endif
 		return rc;
 	}
 

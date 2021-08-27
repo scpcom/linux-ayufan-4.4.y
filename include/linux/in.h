@@ -44,6 +44,9 @@ enum {
   IPPROTO_ESP = 50,            /* Encapsulation Security Payload protocol */
   IPPROTO_AH = 51,             /* Authentication Header protocol       */
   IPPROTO_BEETPH = 94,	       /* IP option pseudo header for BEET */
+#if defined(CONFIG_SYNO_COMCERTO)
+  IPPROTO_ETHERIP = 97,        /* IP option for EtherIP tunnel (rfc 3378) */
+#endif
   IPPROTO_PIM    = 103,		/* Protocol Independent Multicast	*/
 
   IPPROTO_COMP   = 108,                /* Compression Header protocol */

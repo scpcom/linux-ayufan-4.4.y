@@ -21,8 +21,6 @@ static struct sysdev_class_attribute *cpu_sysdev_class_attrs[];
 
 #if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 #include <linux/synobios.h>
-
-extern char gszSynoHWVersion[];
 #endif
 
 struct sysdev_class cpu_sysdev_class = {
@@ -49,7 +47,7 @@ static ssize_t __ref store_online(struct sys_device *dev, struct sysdev_attribut
 	ssize_t ret;
 
 #ifdef MY_DEF_HERE
-	if(!strncmp(gszSynoHWVersion, HW_DS712pv20, strlen(HW_DS712pv20))) {
+	if(syno_is_hw_version(HW_DS712pv20)) {
 		if( 1 == cpu->sysdev.id || 3 == cpu->sysdev.id ) {
 			printk(KERN_ERR "This model does not allow changing the specified cpu state.\n");
 			ret = count;
