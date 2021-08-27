@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	linux/kernel/softirq.c
  *
@@ -202,7 +205,12 @@ EXPORT_SYMBOL(local_bh_enable_ip);
  * we want to handle softirqs as soon as possible, but they
  * should not be able to lock up the box.
  */
+#ifdef CONFIG_MV_REAL_TIME
+#define MAX_SOFTIRQ_RESTART 2
+extern int mv_task_has_rt_policy(struct task_struct *p);
+#else
 #define MAX_SOFTIRQ_RESTART 10
+#endif
 
 asmlinkage void __do_softirq(void)
 {
@@ -217,6 +225,10 @@ asmlinkage void __do_softirq(void)
 	__local_bh_disable((unsigned long)__builtin_return_address(0),
 				SOFTIRQ_OFFSET);
 	lockdep_softirq_enter();
+#ifdef CONFIG_MV_REAL_TIME
+	if (mv_task_has_rt_policy(current))
+		goto out;
+#endif /* CONFIG_MV_REAL_TIME */
 
 	cpu = smp_processor_id();
 restart:
@@ -258,6 +270,9 @@ restart:
 	if (pending && --max_restart)
 		goto restart;
 
+#ifdef CONFIG_MV_REAL_TIME
+out:
+#endif
 	if (pending)
 		wakeup_softirqd();
 

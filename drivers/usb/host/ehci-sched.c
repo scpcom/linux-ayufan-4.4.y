@@ -236,7 +236,11 @@ static inline unsigned char tt_start_uframe(struct ehci_hcd *ehci, __hc32 mask)
 }
 
 static const unsigned char
+#ifdef CONFIG_ARCH_FEROCEON
+max_tt_usecs[] = { 125, 125, 125, 125, 125, 125, 125, 100 };
+#else
 max_tt_usecs[] = { 125, 125, 125, 125, 125, 125, 30, 0 };
+#endif
 
 /* carryover low/fullspeed bandwidth that crosses uframe boundries */
 static inline void carryover_tt_bandwidth(unsigned short tt_usecs[8])
@@ -307,9 +311,11 @@ periodic_tt_usecs (
 
 	carryover_tt_bandwidth(tt_usecs);
 
+#ifndef CONFIG_ARCH_FEROCEON
 	if (max_tt_usecs[7] < tt_usecs[7])
 		ehci_err(ehci, "frame %d tt sched overrun: %d usecs\n",
 			frame, tt_usecs[7] - max_tt_usecs[7]);
+#endif
 }
 
 /*
@@ -748,8 +754,16 @@ static int check_period (
 	} else {
 		do {
 			claimed = periodic_usecs (ehci, frame, uframe);
+#ifdef CONFIG_ARCH_FEROCEON
+			if (claimed > usecs) {
+				ehci_dbg(ehci, "check_period FAILED: claimed=%d"
+					 ", usecs=%d\n", claimed, usecs);
+				return 0;
+			}
+#else
 			if (claimed > usecs)
 				return 0;
+#endif
 		} while ((frame += period) < ehci->periodic_size);
 	}
 
@@ -771,8 +785,16 @@ static int check_intr_schedule (
 	if (qh->c_usecs && uframe >= 6)		/* FSTN territory? */
 		goto done;
 
+#ifdef CONFIG_ARCH_FEROCEON
+	if (!check_period(ehci, frame, uframe, qh->period, qh->usecs)) {
+		ehci_dbg(ehci, "check_intr_schedule: usecs=%d FAILED\n",
+			 qh->usecs);
+		goto done;
+	}
+#else
 	if (!check_period (ehci, frame, uframe, qh->period, qh->usecs))
 		goto done;
+#endif
 	if (!qh->c_usecs) {
 		retval = 0;
 		*c_maskp = 0;
@@ -780,22 +802,46 @@ static int check_intr_schedule (
 	}
 
 #ifdef CONFIG_USB_EHCI_TT_NEWSCHED
+#ifdef CONFIG_ARCH_FEROCEON
+	if (tt_available(ehci, qh->period, qh->dev, frame, uframe+2,
+#else
 	if (tt_available (ehci, qh->period, qh->dev, frame, uframe,
+#endif
 				qh->tt_usecs)) {
 		unsigned i;
 
 		/* TODO : this may need FSTN for SSPLIT in uframe 5. */
+#ifdef CONFIG_ARCH_FEROCEON
+		for (i = uframe+2; i < 8 && i < uframe+5; i++)
+#else
 		for (i=uframe+1; i<8 && i<uframe+4; i++)
+#endif
 			if (!check_period (ehci, frame, i,
+#ifdef CONFIG_ARCH_FEROCEON
+					   qh->period, qh->c_usecs)){
+				ehci_dbg(ehci, "check_intr_schedule: FAILED - "
+					 "frame=%d, uframe=%d, i=%d\n",
+					 frame, uframe, i);
+#else
 						qh->period, qh->c_usecs))
+#endif
 				goto done;
+#ifdef CONFIG_ARCH_FEROCEON
+			} else
+#else
 			else
+#endif
 				mask |= 1 << i;
 
 		retval = 0;
 
 		*c_maskp = cpu_to_hc32(ehci, mask << 8);
+#ifdef CONFIG_ARCH_FEROCEON
+	} else
+		ehci_dbg(ehci, "check_intr_schedule: tt_available FAILED\n");
+#else
 	}
+#endif
 #else
 	/* Make sure this tt's buffer is also available for CSPLITs.
 	 * We pessimize a bit; probably the typical full speed case
@@ -829,7 +875,11 @@ static int qh_schedule(struct ehci_hcd *ehci, struct ehci_qh *qh)
 {
 	int		status;
 	unsigned	uframe;
+#ifdef CONFIG_ARCH_FEROCEON
+	__hc32		c_mask, s_mask = 0;
+#else
 	__hc32		c_mask;
+#endif
 	unsigned	frame;		/* 0..(qh->period - 1), or NO_FRAME */
 	struct ehci_qh_hw	*hw = qh->hw;
 
@@ -867,10 +917,25 @@ static int qh_schedule(struct ehci_hcd *ehci, struct ehci_qh *qh)
 				}
 			}
 
+#ifdef CONFIG_ARCH_FEROCEON
+			s_mask = (1 << uframe);
+#endif
+
 		/* qh->period == 0 means every uframe */
 		} else {
+#ifdef CONFIG_ARCH_FEROCEON
+			uframe = 0;
+#endif
 			frame = 0;
 			status = check_intr_schedule (ehci, 0, 0, qh, &c_mask);
+
+#ifdef CONFIG_ARCH_FEROCEON
+			/* set s_mask */
+			while(uframe < 8) {
+				s_mask |= (1 << uframe);
+				uframe += qh->u_period;
+			}
+#endif
 		}
 		if (status)
 			goto done;
@@ -878,9 +943,13 @@ static int qh_schedule(struct ehci_hcd *ehci, struct ehci_qh *qh)
 
 		/* reset S-frame and (maybe) C-frame masks */
 		hw->hw_info2 &= cpu_to_hc32(ehci, ~(QH_CMASK | QH_SMASK));
+#ifdef CONFIG_ARCH_FEROCEON
+		hw->hw_info2 |= cpu_to_hc32(ehci, s_mask);
+#else
 		hw->hw_info2 |= qh->period
 			? cpu_to_hc32(ehci, 1 << uframe)
 			: cpu_to_hc32(ehci, QH_SMASK);
+#endif
 		hw->hw_info2 |= c_mask;
 	} else
 		ehci_dbg (ehci, "reused qh %p schedule\n", qh);
@@ -924,8 +993,16 @@ static int intr_submit (
 		goto done;
 	}
 	if (qh->qh_state == QH_STATE_IDLE) {
+#ifdef CONFIG_ARCH_FEROCEON
+		if ((status = qh_schedule(ehci, qh)) != 0) {
+			ehci_err(ehci, "intr_submit - qh_schedule FAILED: "
+				 "status=%d\n", status);
+			goto done;
+		}
+#else
 		if ((status = qh_schedule (ehci, qh)) != 0)
 			goto done;
+#endif
 	}
 
 	/* then queue the urb's tds to the qh */
@@ -1820,11 +1897,19 @@ static int itd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	/* Get iso_stream head */
 	stream = iso_stream_find (ehci, urb);
 	if (unlikely (stream == NULL)) {
+#ifdef CONFIG_ARCH_FEROCEON
+		ehci_err(ehci, "can't get iso stream\n");
+#else
 		ehci_dbg (ehci, "can't get iso stream\n");
+#endif
 		return -ENOMEM;
 	}
 	if (unlikely (urb->interval != stream->interval)) {
+#ifdef CONFIG_ARCH_FEROCEON
+		ehci_err(ehci, "can't change iso interval %d --> %d\n",
+#else
 		ehci_dbg (ehci, "can't change iso interval %d --> %d\n",
+#endif
 			stream->interval, urb->interval);
 		goto done;
 	}
@@ -1843,7 +1928,11 @@ static int itd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	/* allocate ITDs w/o locking anything */
 	status = itd_urb_transaction (stream, ehci, urb, mem_flags);
 	if (unlikely (status < 0)) {
+#ifdef CONFIG_ARCH_FEROCEON
+		ehci_err(ehci, "can't init itds\n");
+#else
 		ehci_dbg (ehci, "can't init itds\n");
+#endif
 		goto done;
 	}
 
@@ -1859,8 +1948,15 @@ static int itd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	status = iso_stream_schedule(ehci, urb, stream);
 	if (likely (status == 0))
 		itd_link_urb (ehci, urb, ehci->periodic_size << 3, stream);
+#ifdef CONFIG_ARCH_FEROCEON
+	else {
+		ehci_err(ehci, "itd_submit: can't schedule iso stream\n");
+		usb_hcd_unlink_urb_from_ep(ehci_to_hcd(ehci), urb);
+	}
+#else
 	else
 		usb_hcd_unlink_urb_from_ep(ehci_to_hcd(ehci), urb);
+#endif
 done_not_linked:
 	spin_unlock_irqrestore (&ehci->lock, flags);
 
@@ -1888,8 +1984,13 @@ sitd_sched_init(
 	unsigned	i;
 	dma_addr_t	dma = urb->transfer_dma;
 
+#ifdef CONFIG_ARCH_FEROCEON
+	/* how many uframes are needed for these transfers */
+	iso_sched->span = urb->number_of_packets * stream->interval * 8;
+#else
 	/* how many frames are needed for these transfers */
 	iso_sched->span = urb->number_of_packets * stream->interval;
+#endif
 
 	/* figure out per-frame sitd fields that we'll need later
 	 * when we fit new sitds into the schedule.
@@ -2215,11 +2316,19 @@ static int sitd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	/* Get iso_stream head */
 	stream = iso_stream_find (ehci, urb);
 	if (stream == NULL) {
+#ifdef CONFIG_ARCH_FEROCEON
+		ehci_err(ehci, "can't get iso stream\n");
+#else
 		ehci_dbg (ehci, "can't get iso stream\n");
+#endif
 		return -ENOMEM;
 	}
 	if (urb->interval != stream->interval) {
+#ifdef CONFIG_ARCH_FEROCEON
+		ehci_err(ehci, "can't change iso interval %d --> %d\n",
+#else
 		ehci_dbg (ehci, "can't change iso interval %d --> %d\n",
+#endif
 			stream->interval, urb->interval);
 		goto done;
 	}
@@ -2236,7 +2345,11 @@ static int sitd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	/* allocate SITDs */
 	status = sitd_urb_transaction (stream, ehci, urb, mem_flags);
 	if (status < 0) {
+#ifdef CONFIG_ARCH_FEROCEON
+		ehci_err(ehci, "can't init sitds\n");
+#else
 		ehci_dbg (ehci, "can't init sitds\n");
+#endif
 		goto done;
 	}
 
@@ -2252,8 +2365,15 @@ static int sitd_submit (struct ehci_hcd *ehci, struct urb *urb,
 	status = iso_stream_schedule(ehci, urb, stream);
 	if (status == 0)
 		sitd_link_urb (ehci, urb, ehci->periodic_size << 3, stream);
+#ifdef CONFIG_ARCH_FEROCEON
+	else {
+		ehci_err(ehci, "sitd_submit: can't schedule iso stream\n");
+		usb_hcd_unlink_urb_from_ep(ehci_to_hcd(ehci), urb);
+	}
+#else
 	else
 		usb_hcd_unlink_urb_from_ep(ehci_to_hcd(ehci), urb);
+#endif
 done_not_linked:
 	spin_unlock_irqrestore (&ehci->lock, flags);
 
@@ -2369,7 +2489,11 @@ restart:
 				 * No need to check for activity unless the
 				 * frame is current.
 				 */
+#ifdef CONFIG_ARCH_FEROCEON
+				if ((frame == clock_frame) && live) {
+#else
 				if (frame == clock_frame && live) {
+#endif
 					rmb();
 					for (uf = 0; uf < 8; uf++) {
 						if (q.itd->hw_transaction[uf] &
@@ -2441,17 +2565,32 @@ restart:
 				q = *q_p;
 				break;
 			default:
+#ifdef CONFIG_ARCH_FEROCEON
+				ehci_dbg(ehci, "corrupt type %d frame %d shadow"
+					 " %p\n",
+					 type, frame, q.ptr);
+#else
 				dbg ("corrupt type %d frame %d shadow %p",
 					type, frame, q.ptr);
+#endif
 				// BUG ();
 				q.ptr = NULL;
 			}
 
 			/* assume completion callbacks modify the queue */
 			if (unlikely (modified)) {
+#ifdef CONFIG_ARCH_FEROCEON
+				if (likely(ehci->periodic_sched > 0)) {
+//					restarted = 1;
+					goto restart;
+				}
+				/* maybe we can short-circuit this scan! */
+				/*disable_periodic(ehci);*/
+#else
 				if (likely(ehci->periodic_sched > 0))
 					goto restart;
 				/* short-circuit this scan */
+#endif
 				now_uframe = clock;
 				break;
 			}

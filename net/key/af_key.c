@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * net/key/af_key.c	An implementation of PF_KEYv2 sockets.
  *

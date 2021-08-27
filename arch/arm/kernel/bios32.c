@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/bios32.c
  *
@@ -12,7 +15,9 @@
 #include <linux/init.h>
 #include <linux/io.h>
 
-#include <asm/mach-types.h>
+#ifdef CONFIG_ARCH_FEROCEON
+#include <asm-arm/mach-types.h>
+#endif
 #include <asm/mach/pci.h>
 
 static int debug_pci;

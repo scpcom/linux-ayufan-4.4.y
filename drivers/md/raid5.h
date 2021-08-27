@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _RAID5_H
 #define _RAID5_H
 
@@ -206,6 +209,9 @@ struct stripe_head {
 	short			ddf_layout;/* use DDF ordering to calculate Q */
 	unsigned long		state;		/* state flags */
 	atomic_t		count;	      /* nr of active thread/requests */
+#ifdef MY_ABC_HERE
+	spinlock_t		lock;
+#endif
 	int			bm_seq;	/* sequence number for bitmap flushes */
 	int			disks;		/* disks in stripe */
 	enum check_states	check_state;
@@ -289,7 +295,9 @@ struct stripe_head_state {
  * Stripe state
  */
 enum {
+#ifndef MY_ABC_HERE
 	STRIPE_ACTIVE,
+#endif
 	STRIPE_HANDLE,
 	STRIPE_SYNC_REQUESTED,
 	STRIPE_SYNCING,
@@ -307,6 +315,10 @@ enum {
 	STRIPE_COMPUTE_RUN,
 	STRIPE_OPS_REQ_PENDING,
 };
+
+#ifdef MY_ABC_HERE
+#define STRIPE_NORETRY		17
+#endif
 
 /*
  * Operation request flags

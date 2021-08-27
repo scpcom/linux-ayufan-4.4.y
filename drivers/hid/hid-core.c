@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  HID support for Linux
  *
@@ -1168,8 +1171,10 @@ static const struct hid_device_id *hid_match_id(struct hid_device *hdev,
 }
 
 static const struct hid_device_id hid_hiddev_list[] = {
+#ifndef MY_ABC_HERE
 	{ HID_USB_DEVICE(USB_VENDOR_ID_MGE, USB_DEVICE_ID_MGE_UPS) },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_MGE, USB_DEVICE_ID_MGE_UPS1) },
+#endif
 	{ }
 };
 
@@ -1914,6 +1919,82 @@ static const struct hid_device_id hid_ignore_list[] = {
 	{ HID_USB_DEVICE(USB_VENDOR_ID_WISEGROUP, USB_DEVICE_ID_1_PHIDGETSERVO_20) },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_WISEGROUP, USB_DEVICE_ID_8_8_4_IF_KIT) },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_YEALINK, USB_DEVICE_ID_YEALINK_P1K_P4K_B2K) },
+#ifdef MY_ABC_HERE
+// Generate from /synosrc/ds.base/source/nut-2.6/synoconf/./gen_id_list.sh
+	{ HID_USB_DEVICE(0x0001, 0x0000) },
+	{ HID_USB_DEVICE(0x03f0, 0x1f01) },
+	{ HID_USB_DEVICE(0x03f0, 0x1f02) },
+	{ HID_USB_DEVICE(0x03f0, 0x1f06) },
+	{ HID_USB_DEVICE(0x03f0, 0x1f08) },
+	{ HID_USB_DEVICE(0x03f0, 0x1f09) },
+	{ HID_USB_DEVICE(0x03f0, 0x1f0a) },
+	{ HID_USB_DEVICE(0x03f0, 0x1fe0) },
+	{ HID_USB_DEVICE(0x03f0, 0x1fe1) },
+	{ HID_USB_DEVICE(0x0463, 0x0001) },
+	{ HID_USB_DEVICE(0x0463, 0xffff) },
+	{ HID_USB_DEVICE(0x047c, 0xffff) },
+	{ HID_USB_DEVICE(0x050d, 0x0375) },
+	{ HID_USB_DEVICE(0x050d, 0x0551) },
+	{ HID_USB_DEVICE(0x050d, 0x0750) },
+	{ HID_USB_DEVICE(0x050d, 0x0751) },
+	{ HID_USB_DEVICE(0x050d, 0x0900) },
+	{ HID_USB_DEVICE(0x050d, 0x0910) },
+	{ HID_USB_DEVICE(0x050d, 0x0912) },
+	{ HID_USB_DEVICE(0x050d, 0x0980) },
+	{ HID_USB_DEVICE(0x050d, 0x1100) },
+	{ HID_USB_DEVICE(0x051d, 0x0002) },
+	{ HID_USB_DEVICE(0x051d, 0x0003) },
+	{ HID_USB_DEVICE(0x0592, 0x0002) },
+	{ HID_USB_DEVICE(0x05b8, 0x0000) },
+	{ HID_USB_DEVICE(0x0665, 0x5161) },
+	{ HID_USB_DEVICE(0x06da, 0x0002) },
+	{ HID_USB_DEVICE(0x06da, 0x0003) },
+	{ HID_USB_DEVICE(0x06da, 0xffff) },
+	{ HID_USB_DEVICE(0x075d, 0x0300) },
+	{ HID_USB_DEVICE(0x0764, 0x0005) },
+	{ HID_USB_DEVICE(0x0764, 0x0501) },
+	{ HID_USB_DEVICE(0x0764, 0x0601) },
+	{ HID_USB_DEVICE(0x0925, 0x1234) },
+	{ HID_USB_DEVICE(0x09ae, 0x0001) },
+	{ HID_USB_DEVICE(0x09ae, 0x1003) },
+	{ HID_USB_DEVICE(0x09ae, 0x1007) },
+	{ HID_USB_DEVICE(0x09ae, 0x1008) },
+	{ HID_USB_DEVICE(0x09ae, 0x1009) },
+	{ HID_USB_DEVICE(0x09ae, 0x1010) },
+	{ HID_USB_DEVICE(0x09ae, 0x2005) },
+	{ HID_USB_DEVICE(0x09ae, 0x2007) },
+	{ HID_USB_DEVICE(0x09ae, 0x2008) },
+	{ HID_USB_DEVICE(0x09ae, 0x2009) },
+	{ HID_USB_DEVICE(0x09ae, 0x2010) },
+	{ HID_USB_DEVICE(0x09ae, 0x2011) },
+	{ HID_USB_DEVICE(0x09ae, 0x2012) },
+	{ HID_USB_DEVICE(0x09ae, 0x2013) },
+	{ HID_USB_DEVICE(0x09ae, 0x2014) },
+	{ HID_USB_DEVICE(0x09ae, 0x3008) },
+	{ HID_USB_DEVICE(0x09ae, 0x3009) },
+	{ HID_USB_DEVICE(0x09ae, 0x3010) },
+	{ HID_USB_DEVICE(0x09ae, 0x3011) },
+	{ HID_USB_DEVICE(0x09ae, 0x3012) },
+	{ HID_USB_DEVICE(0x09ae, 0x3013) },
+	{ HID_USB_DEVICE(0x09ae, 0x3014) },
+	{ HID_USB_DEVICE(0x09ae, 0x3015) },
+	{ HID_USB_DEVICE(0x09ae, 0x4001) },
+	{ HID_USB_DEVICE(0x09ae, 0x4002) },
+	{ HID_USB_DEVICE(0x09ae, 0x4003) },
+	{ HID_USB_DEVICE(0x09ae, 0x4004) },
+	{ HID_USB_DEVICE(0x09ae, 0x4005) },
+	{ HID_USB_DEVICE(0x09ae, 0x4006) },
+	{ HID_USB_DEVICE(0x09ae, 0x4007) },
+	{ HID_USB_DEVICE(0x09ae, 0x4008) },
+	{ HID_USB_DEVICE(0x0d9f, 0x00a2) },
+	{ HID_USB_DEVICE(0x0d9f, 0x00a3) },
+	{ HID_USB_DEVICE(0x0d9f, 0x00a4) },
+	{ HID_USB_DEVICE(0x0d9f, 0x00a5) },
+	{ HID_USB_DEVICE(0x0d9f, 0x00a6) },
+	{ HID_USB_DEVICE(0x0f03, 0x0001) },
+	{ HID_USB_DEVICE(0x10af, 0x0001) },
+	{ HID_USB_DEVICE(0xffff, 0x0000) },
+#endif
 	{ }
 };
 

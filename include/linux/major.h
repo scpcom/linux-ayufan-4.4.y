@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_MAJOR_H
 #define _LINUX_MAJOR_H
 
@@ -171,7 +174,15 @@
 
 #define VIOTAPE_MAJOR		230
 
+#ifdef CONFIG_ARCH_FEROCEON
+#define MV_TS_MAJOR		231	/* Marvell Transport Stream driver */
+#endif
+
 #define BLOCK_EXT_MAJOR		259
 #define SCSI_OSD_MAJOR		260	/* open-osd's OSD scsi device */
 
+#ifdef MY_ABC_HERE
+#define SCSI_DISK_MAJOR(M) ((M) == SCSI_DISK0_MAJOR || \
+	((M) >= SCSI_DISK1_MAJOR && (M) <= SCSI_DISK15_MAJOR))
+#endif
 #endif

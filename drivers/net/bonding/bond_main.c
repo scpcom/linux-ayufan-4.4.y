@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * originally based on the dummy device.
  *
@@ -510,6 +513,20 @@ static void bond_del_vlans_from_slave(struct bonding *bond,
 }
 
 /*------------------------------- Link status -------------------------------*/
+
+#ifdef MY_ABC_HERE
+static void default_operstate(struct net_device *dev)
+{
+	if (!netif_carrier_ok(dev)) {
+		dev->operstate = (dev->ifindex != dev->iflink ?
+			IF_OPER_LOWERLAYERDOWN : IF_OPER_DOWN);
+	} else if (netif_dormant(dev)) {
+		dev->operstate = IF_OPER_DORMANT;
+	} else {
+		dev->operstate = IF_OPER_UP;
+	}
+}
+#endif
 
 /*
  * Set the carrier state for the master according to the state of its
@@ -1589,9 +1606,32 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	/* If this is the first slave, then we need to set the master's hardware
 	 * address to be the same as the slave's. */
 	if (is_zero_ether_addr(bond->dev->dev_addr))
+#ifdef MY_ABC_HERE
+		{
+			unsigned char szMac[MAX_ADDR_LEN];
+			memset(szMac, 0, sizeof(szMac));
+
+			if (syno_get_dev_vendor_mac(slave_dev->name, szMac)){
+				printk("%s:%s(%d) dev:[%s] get vendor mac fail\n",
+						__FILE__, __FUNCTION__, __LINE__, slave_dev->name);
+				/*
+				 *  Cannot get SYNO's vendor mac, possibly because
+				 *  	- mac not written to onboard flash, or
+				 *  	- this eth is on addon card rather than on mainboard.
+				 *  	Fallback to perm_hwaddr.
+				 */
 		memcpy(bond->dev->dev_addr, slave_dev->dev_addr,
 		       slave_dev->addr_len);
-
+			} else {
+				/* Normal case: set to syno vendor mac */
+				memcpy(bond->dev->dev_addr, szMac,
+					ETH_ALEN);
+			}
+		}
+#else
+		memcpy(bond->dev->dev_addr, slave_dev->dev_addr,
+		       slave_dev->addr_len);
+#endif
 
 	new_slave = kzalloc(sizeof(struct slave), GFP_KERNEL);
 	if (!new_slave) {
@@ -1618,7 +1658,29 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	 * that need it, and for restoring it upon release, and then
 	 * set it to the master's address
 	 */
+#ifdef MY_ABC_HERE
+	{
+		unsigned char szMac[MAX_ADDR_LEN];
+		memset(szMac, 0, sizeof(szMac));
+
+		if (syno_get_dev_vendor_mac(slave_dev->name, szMac)){
+			printk("%s:%s(%d) dev:[%s] get vendor mac fail\n", 
+					__FILE__, __FUNCTION__, __LINE__, slave_dev->name);
+			/* 
+			 * Cannot get SYNO's vendor mac, possibly because
+			 *	- mac not written to onboard flash, or
+			 *	- this eth is on addon card rather than on mainboard.
+			 *	Fallback to perm_hwaddr.
+			 */
 	memcpy(new_slave->perm_hwaddr, slave_dev->dev_addr, ETH_ALEN);
+		} else {
+			/* Normal case: set to syno vendor mac */
+			memcpy(new_slave->perm_hwaddr, szMac, ETH_ALEN);
+		}
+	}
+#else
+	memcpy(new_slave->perm_hwaddr, slave_dev->dev_addr, ETH_ALEN);
+#endif
 
 	if (!bond->params.fail_over_mac) {
 		/*
@@ -1812,6 +1874,9 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	write_unlock_bh(&bond->curr_slave_lock);
 
 	bond_set_carrier(bond);
+#ifdef MY_ABC_HERE
+	default_operstate(bond->dev);
+#endif
 
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	slave_dev->npinfo = bond_netpoll_info(bond);
@@ -4254,7 +4319,56 @@ static void bond_ethtool_get_drvinfo(struct net_device *bond_dev,
 	snprintf(drvinfo->fw_version, 32, "%d", BOND_ABI_VERSION);
 }
 
+#ifdef MY_ABC_HERE
+static int bond_ethtool_get_settings(struct net_device *bond_dev,
+				    struct ethtool_cmd *cmd)
+{
+	struct bonding *bond = netdev_priv(bond_dev);
+	struct net_device *slave_dev = NULL;
+	struct slave *slave;
+	int i = 0;
+	int err = -1;
+	int res = 1;
+
+	read_lock(&bond->lock);
+
+	if (!BOND_IS_OK(bond)) {
+		err = -EOPNOTSUPP;
+		goto out;
+	}
+
+	bond_for_each_slave(bond, slave, i) {
+		if (!(IS_UP(slave->dev) &&
+		    (slave->link == BOND_LINK_UP))) {
+			continue;
+		}
+
+		if (!(bond->curr_active_slave && (0 == strcmp(slave->dev->name, bond->curr_active_slave->dev->name)))) {
+			continue;
+		}
+
+		slave_dev = slave->dev;
+		if (!slave_dev->ethtool_ops || !slave_dev->ethtool_ops->get_settings) {
+			continue;
+		}
+
+		res = slave_dev->ethtool_ops->get_settings(slave_dev, cmd);
+		if (res < 0) {
+			continue;
+		}
+		break;
+	}
+	err = 0;
+out:
+	read_unlock(&bond->lock);
+	return err;
+}
+#endif
+
 static const struct ethtool_ops bond_ethtool_ops = {
+#ifdef MY_ABC_HERE
+	.get_settings		= bond_ethtool_get_settings,
+#endif
 	.get_drvinfo		= bond_ethtool_get_drvinfo,
 	.get_link		= ethtool_op_get_link,
 };

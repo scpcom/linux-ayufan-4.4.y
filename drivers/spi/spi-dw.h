@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef DW_SPI_HEADER_H
 #define DW_SPI_HEADER_H
 

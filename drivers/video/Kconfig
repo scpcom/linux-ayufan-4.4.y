@@ -33,6 +33,14 @@ config VIDEO_OUTPUT_CONTROL
 	  This framework adds support for low-level control of the video 
 	  output switch.
 
+config DOVE_GPU_MEM_SIZE
+	int "DOVE GPU memory size (MB)"
+	depends on DOVE_GPU
+	default 128
+	help
+	  Set the memory size to be reserved for GPU usage. The value should be
+	  between 64 and 128.
+
 menuconfig FB
 	tristate "Support for frame buffer devices"
 	---help---
@@ -2379,6 +2387,8 @@ config FB_BROADSHEET
 	  controller. The release name for this device was Epson S1D13521
 	  and could also have been called by other names when coupled with
 	  a bridge adapter.
+
+source "drivers/video/marvell/Kconfig"
 
 config FB_JZ4740
 	tristate "JZ4740 LCD framebuffer support"

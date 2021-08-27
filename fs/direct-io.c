@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * fs/direct-io.c
  *
@@ -35,6 +38,9 @@
 #include <linux/buffer_head.h>
 #include <linux/rwsem.h>
 #include <linux/uio.h>
+#ifdef CONFIG_ARCH_FEROCEON
+#include <linux/swap.h>
+#endif
 #include <linux/atomic.h>
 
 /*
@@ -196,6 +202,34 @@ static inline unsigned dio_pages_present(struct dio_submit *sdio)
 	return sdio->tail - sdio->head;
 }
 
+#ifdef CONFIG_ARCH_FEROCEON
+/*
+ * Get kernel pages.
+ */
+static int get_ker_pages(struct task_struct *tsk, struct mm_struct *mm,
+                unsigned long start, int len, int write, int force,
+                struct page **pages, struct vm_area_struct **vmas)
+{
+        int i = 0;
+
+        do {
+                if (pages) {
+                        pages[i] = virt_to_page(start);
+
+                        if (!pfn_valid(page_to_pfn(pages[i]))) {
+                                return i;
+                        }
+			get_page(pages[i]);
+                }
+                i++;
+                start += PAGE_SIZE;
+                len--;
+        } while(len );
+
+        return i;
+}
+#endif
+
 /*
  * Go grab and pin some userspace pages.   Typically we'll get 64 at a time.
  */
@@ -205,11 +239,33 @@ static inline int dio_refill_pages(struct dio *dio, struct dio_submit *sdio)
 	int nr_pages;
 
 	nr_pages = min(sdio->total_pages - sdio->curr_page, DIO_PAGES);
+
+#ifdef CONFIG_ARCH_FEROCEON
+        /* If the page is a kernel page then we must give it a special treat. */
+        if ( virt_addr_valid(dio->curr_user_address) )
+        {
+                down_read(&init_mm.mmap_sem);
+                ret = get_ker_pages(
+                        current,                        /* Task for fault acounting */
+                        &init_mm,                       /* whose pages? */
+                        dio->curr_user_address,         /* Where from? */
+                        nr_pages,                       /* How many pages? */
+                        dio->rw == READ,                /* Write to memory? */
+                        0,                              /* force (?) */
+                        &dio->pages[0],
+                        NULL);                          /* vmas */
+                up_read(&init_mm.mmap_sem);
+
+        } else {
+#endif
 	ret = get_user_pages_fast(
 		sdio->curr_user_address,		/* Where from? */
 		nr_pages,			/* How many pages? */
 		dio->rw == READ,		/* Write to memory? */
 		&dio->pages[0]);		/* Put results here */
+#ifdef CONFIG_ARCH_FEROCEON
+	}
+#endif
 
 	if (ret < 0 && sdio->blocks_available && (dio->rw & WRITE)) {
 		struct page *page = ZERO_PAGE(0);

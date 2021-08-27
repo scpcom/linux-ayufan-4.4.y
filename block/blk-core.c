@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 1991, 1992 Linus Torvalds
  * Copyright (C) 1994,      Karl Keyte: Added support for disk statistics
@@ -149,6 +152,14 @@ EXPORT_SYMBOL(blk_rq_init);
 static void req_bio_endio(struct request *rq, struct bio *bio,
 			  unsigned int nbytes, int error)
 {
+#ifdef MY_ABC_HERE
+	if (rq->cmd_flags & REQ_AUTO_REMAP){
+		set_bit(BIO_AUTO_REMAP, &bio->bi_flags);
+		rq->cmd_flags &= ~REQ_AUTO_REMAP;
+		printk("%s:%s(%d) set bio BIO_AUTO_REMAP bit on\n",
+			__FILE__, __FUNCTION__, __LINE__);
+	}
+#endif
 	if (error)
 		clear_bit(BIO_UPTODATE, &bio->bi_flags);
 	else if (!test_bit(BIO_UPTODATE, &bio->bi_flags))
@@ -1396,7 +1407,11 @@ get_rq:
 	} else {
 		spin_lock_irq(q->queue_lock);
 		add_acct_request(q, req, where);
+#ifdef SYNO_REMOVE_PLUG_INTERFACE
+		blk_delay_queue(q, msecs_to_jiffies(3));
+#else
 		__blk_run_queue(q);
+#endif
 out_unlock:
 		spin_unlock_irq(q->queue_lock);
 	}
@@ -1426,6 +1441,9 @@ static void handle_bad_sector(struct bio *bio)
 {
 	char b[BDEVNAME_SIZE];
 
+#ifdef MY_ABC_HERE
+	if (printk_ratelimit()) {
+#endif
 	printk(KERN_INFO "attempt to access beyond end of device\n");
 	printk(KERN_INFO "%s: rw=%ld, want=%Lu, limit=%Lu\n",
 			bdevname(bio->bi_bdev, b),
@@ -1433,6 +1451,9 @@ static void handle_bad_sector(struct bio *bio)
 			(unsigned long long)bio->bi_sector + bio_sectors(bio),
 			(long long)(i_size_read(bio->bi_bdev->bd_inode) >> 9));
 
+#ifdef MY_ABC_HERE
+	}
+#endif
 	set_bit(BIO_EOF, &bio->bi_flags);
 }
 

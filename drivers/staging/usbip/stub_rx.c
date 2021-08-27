@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -586,7 +589,10 @@ static void stub_rx_pdu(struct usbip_device *ud)
 	case USBIP_CMD_UNLINK:
 		stub_recv_cmd_unlink(sdev, &pdu);
 		break;
-
+#ifdef MY_ABC_HERE
+    case USBIP_RESET_DEV:
+        printk("reset device\n");
+#endif
 	case USBIP_CMD_SUBMIT:
 		stub_recv_cmd_submit(sdev, &pdu);
 		break;

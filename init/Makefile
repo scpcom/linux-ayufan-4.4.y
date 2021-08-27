@@ -13,7 +13,11 @@ obj-$(CONFIG_GENERIC_CALIBRATE_DELAY) += calibrate.o
 mounts-y			:= do_mounts.o
 mounts-$(CONFIG_BLK_DEV_RAM)	+= do_mounts_rd.o
 mounts-$(CONFIG_BLK_DEV_INITRD)	+= do_mounts_initrd.o
+ifeq ($(CONFIG_SYNO_MODULES_MD_AND_RAID1),y)
+mounts-y                        += do_mounts_md.o
+else
 mounts-$(CONFIG_BLK_DEV_MD)	+= do_mounts_md.o
+endif
 
 # dependencies on generated files need to be listed explicitly
 $(obj)/version.o: include/generated/compile.h

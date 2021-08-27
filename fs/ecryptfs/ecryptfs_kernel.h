@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * eCryptfs: Linux filesystem encryption layer
  * Kernel declarations.
@@ -38,6 +41,10 @@
 #include <linux/nsproxy.h>
 #include <linux/backing-dev.h>
 #include <linux/ecryptfs.h>
+
+#ifdef MY_DEF_HERE
+#include <cryptodev.h>
+#endif
 
 #define ECRYPTFS_DEFAULT_IV_BYTES 16
 #define ECRYPTFS_DEFAULT_EXTENT_SIZE 4096
@@ -181,6 +188,15 @@ struct ecryptfs_filename {
 	char dentry_name[ECRYPTFS_ENCRYPTED_DENTRY_NAME_LEN + 1];
 };
 
+#ifdef MY_ABC_HERE
+struct ecryptfs_request {
+	struct ablkcipher_request *req;
+	struct completion complete;
+	struct ecryptfs_crypt_stat *crypt_stat;
+	int error;
+};
+#endif
+
 /**
  * This is the primary struct associated with each encrypted file.
  *
@@ -211,7 +227,15 @@ struct ecryptfs_crypt_stat {
 	size_t extent_shift;
 	unsigned int extent_mask;
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat;
+#ifdef MY_DEF_HERE
+	struct cryptoini cr_dm; /* OCF session */
+#else
+#ifdef MY_ABC_HERE
+	struct crypto_ablkcipher *tfm;
+#else
 	struct crypto_blkcipher *tfm;
+#endif
+#endif
 	struct crypto_hash *hash_tfm; /* Crypto context for generating
 				       * the initialization vectors */
 	unsigned char cipher[ECRYPTFS_MAX_CIPHER_NAME_SIZE];

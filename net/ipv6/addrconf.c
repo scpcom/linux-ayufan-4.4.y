@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	IPv6 Address [auto]configuration
  *	Linux INET6 implementation
@@ -77,6 +80,11 @@
 #include <net/pkt_sched.h>
 #include <linux/if_tunnel.h>
 #include <linux/rtnetlink.h>
+
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#include <linux/synobios.h>
+extern char gszSynoHWVersion[];
+#endif
 
 #ifdef CONFIG_IPV6_PRIVACY
 #include <linux/random.h>
@@ -196,7 +204,11 @@ static struct ipv6_devconf ipv6_devconf __read_mostly = {
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
 	.disable_ipv6		= 0,
+#ifdef MY_ABC_HERE
+	.accept_dad     = 2,
+#else
 	.accept_dad		= 1,
+#endif
 };
 
 static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
@@ -230,7 +242,11 @@ static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
 	.disable_ipv6		= 0,
+#ifdef MY_ABC_HERE
+    .accept_dad     = 2,
+#else
 	.accept_dad		= 1,
+#endif
 };
 
 /* IPv6 Wildcard Address and Loopback Address defined by RFC2553 */
@@ -1813,6 +1829,22 @@ static struct inet6_dev *addrconf_add_dev(struct net_device *dev)
 	return idev;
 }
 
+/**
+ * Dsc: because of DS110p & DS210p face problem of timer delay, which will cause both machine can't pass IPv6 ready logo phase 2
+ *		we work around here to avoid timer trouble. but if timer problem is fixed, this code must be removed
+ */
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+void SYNO_IPV6_ready_timer_workaround(__u32 *valid_lft, __u32 *prefered_lft)
+{
+	if(!strncmp(gszSynoHWVersion, HW_DS110p, strlen(HW_DS110p)) ||
+		!strncmp(gszSynoHWVersion, HW_DS210p, strlen(HW_DS210p)) ||
+		!strncmp(gszSynoHWVersion, HW_DS410, strlen(HW_DS410))) {
+		*valid_lft -= (*valid_lft)/400;
+		*prefered_lft -= (*prefered_lft)/400;
+	}
+}
+#endif
+
 void addrconf_prefix_rcv(struct net_device *dev, u8 *opt, int len)
 {
 	struct prefix_info *pinfo;
@@ -1840,6 +1872,10 @@ void addrconf_prefix_rcv(struct net_device *dev, u8 *opt, int len)
 
 	valid_lft = ntohl(pinfo->valid);
 	prefered_lft = ntohl(pinfo->prefered);
+
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+	SYNO_IPV6_ready_timer_workaround(&valid_lft, &prefered_lft);
+#endif
 
 	if (prefered_lft > valid_lft) {
 		if (net_ratelimit())
@@ -2019,6 +2055,9 @@ ok:
 					if (valid_lft < prefered_lft)
 						prefered_lft = valid_lft;
 					update_lft = 1;
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+				SYNO_IPV6_ready_timer_workaround(&valid_lft, &prefered_lft);
+#endif
 				}
 			}
 

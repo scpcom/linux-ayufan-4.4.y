@@ -141,6 +141,16 @@
 #define TSI108_TIMER_VECTOR_PRI		0x00008
 #define TSI108_TIMER_DESTINATION	0x0000c
 
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+/*
+ *
+ * Message registers
+ */
+#define MPIC_MSI_BASE                   0x01600
+#define MPIC_MSI_STRIDE                 0x10
+#define MPIC_MSI_MSIRN_CNT              8
+#endif
+
 /*
  * Per-Processor registers
  */
@@ -296,6 +306,9 @@ struct mpic
 	/* The various ioremap'ed bases */
 	struct mpic_reg_bank	gregs;
 	struct mpic_reg_bank	tmregs;
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+	struct mpic_reg_bank    msgregs;
+#endif
 	struct mpic_reg_bank	cpuregs[MPIC_MAX_CPUS];
 	struct mpic_reg_bank	isus[MPIC_MAX_ISU];
 

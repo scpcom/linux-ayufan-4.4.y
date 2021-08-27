@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Process version 3 NFS requests.
  *
@@ -540,7 +543,15 @@ nfsd3_proc_fsinfo(struct svc_rqst * rqstp, struct nfsd_fhandle    *argp,
 				SVCFH_fmt(&argp->fh));
 
 	resp->f_rtmax  = max_blocksize;
+#ifdef MY_ABC_HERE
+	if (IPPROTO_UDP == rqstp->rq_prot) {
+		resp->f_rtpref = 8192;
+	} else {
+		resp->f_rtpref = NFSSVC_MAXBLKSIZE;
+	}
+#else
 	resp->f_rtpref = max_blocksize;
+#endif /* MY_ABC_HERE */
 	resp->f_rtmult = PAGE_SIZE;
 	resp->f_wtmax  = max_blocksize;
 	resp->f_wtpref = max_blocksize;

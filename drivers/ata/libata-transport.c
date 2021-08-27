@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright 2008 ioogle, Inc.  All rights reserved.
  *	Released under GPL v2.

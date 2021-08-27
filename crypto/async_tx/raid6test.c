@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * asynchronous raid6 recovery self test
  * Copyright (c) 2009, Intel Corporation.

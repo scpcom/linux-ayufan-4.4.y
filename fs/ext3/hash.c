@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext3/hash.c
  *
@@ -123,6 +126,10 @@ static void str2hashbuf_unsigned(const char *msg, int len, __u32 *buf, int num)
 		*buf++ = pad;
 }
 
+#ifdef MY_ABC_HERE
+static unsigned char UTF8Ext3HashStrBuf[UNICODE_UTF8_BUFSIZE];
+extern spinlock_t Ext3Hash_buf_lock;  /* init at ext3_fill_super() */
+#endif
 /*
  * Returns the hash of a filename.  If len is 0 and name is NULL, then
  * this function can be used to test whether or not a hash version is
@@ -145,6 +152,20 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	__u32		in[8], buf[4];
 	void		(*str2hashbuf)(const char *, int, __u32 *, int) =
 				str2hashbuf_signed;
+#ifdef MY_ABC_HERE
+	const char	*szUpperName;
+	int upperlen;
+
+	spin_lock(&Ext3Hash_buf_lock);
+
+	szUpperName = name;
+	upperlen = len;
+
+	if (name && (len > 0)) {
+		upperlen = SYNOUnicodeUTF8toUpper(UTF8Ext3HashStrBuf, name, UNICODE_UTF8_BUFSIZE-1 , len, NULL);
+		szUpperName = UTF8Ext3HashStrBuf;
+	}
+#endif
 
 	/* Initialize the default seed for the hash checksum functions */
 	buf[0] = 0x67452301;
@@ -164,14 +185,31 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 
 	switch (hinfo->hash_version) {
 	case DX_HASH_LEGACY_UNSIGNED:
+#ifdef MY_ABC_HERE
+		hash = dx_hack_hash_unsigned(szUpperName, upperlen);
+#else
 		hash = dx_hack_hash_unsigned(name, len);
+#endif
 		break;
 	case DX_HASH_LEGACY:
+#ifdef MY_ABC_HERE
+		hash = dx_hack_hash_signed(szUpperName, upperlen);
+#else
 		hash = dx_hack_hash_signed(name, len);
+#endif
 		break;
 	case DX_HASH_HALF_MD4_UNSIGNED:
 		str2hashbuf = str2hashbuf_unsigned;
 	case DX_HASH_HALF_MD4:
+#ifdef MY_ABC_HERE
+		p = szUpperName;
+		while (upperlen > 0) {
+			(*str2hashbuf)(p, upperlen, in, 8);
+			half_md4_transform(buf, in);
+			upperlen -= 32;
+			p += 32;
+		}
+#else
 		p = name;
 		while (len > 0) {
 			(*str2hashbuf)(p, len, in, 8);
@@ -179,12 +217,22 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 			len -= 32;
 			p += 32;
 		}
+#endif
 		minor_hash = buf[2];
 		hash = buf[1];
 		break;
 	case DX_HASH_TEA_UNSIGNED:
 		str2hashbuf = str2hashbuf_unsigned;
 	case DX_HASH_TEA:
+#ifdef MY_ABC_HERE
+		p = szUpperName;
+		while (upperlen > 0) {
+			(*str2hashbuf)(p, upperlen, in, 4);
+			TEA_transform(buf, in);
+			upperlen -= 16;
+			p += 16;
+		}
+#else
 		p = name;
 		while (len > 0) {
 			(*str2hashbuf)(p, len, in, 4);
@@ -192,11 +240,15 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 			len -= 16;
 			p += 16;
 		}
+#endif
 		hash = buf[0];
 		minor_hash = buf[1];
 		break;
 	default:
 		hinfo->hash = 0;
+#ifdef MY_ABC_HERE
+		spin_unlock(&Ext3Hash_buf_lock);
+#endif
 		return -1;
 	}
 	hash = hash & ~1;
@@ -204,5 +256,8 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 		hash = (EXT3_HTREE_EOF-1) << 1;
 	hinfo->hash = hash;
 	hinfo->minor_hash = minor_hash;
+#ifdef MY_ABC_HERE
+	spin_unlock(&Ext3Hash_buf_lock);
+#endif
 	return 0;
 }

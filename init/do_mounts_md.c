@@ -15,10 +15,17 @@
 
 #ifdef CONFIG_MD_AUTODETECT
 static int __initdata raid_noautodetect;
+#elif defined(MY_DEF_HERE)
+static int __initdata raid_noautodetect=0;
 #else
 static int __initdata raid_noautodetect=1;
 #endif
 static int __initdata raid_autopart;
+
+#ifdef MY_DEF_HERE
+#include <linux/export.h>
+int *SYNOMdpMajor = NULL;
+#endif
 
 static struct {
 	int minor;
@@ -132,7 +139,15 @@ static void __init md_setup_drive(void)
 
 		sprintf(name, "/dev/md%s%d", partitioned?"_d":"", minor);
 		if (partitioned)
+#ifdef MY_DEF_HERE
+			if (SYNOMdpMajor != NULL) {
+				dev = MKDEV(*SYNOMdpMajor, minor << MdpMinorShift);
+			} else {
+				WARN_ON(1);
+			}
+#else
 			dev = MKDEV(mdp_major, minor << MdpMinorShift);
+#endif
 		else
 			dev = MKDEV(MD_MAJOR, minor);
 		create_dev(name, dev);
@@ -300,3 +315,7 @@ void __init md_run_setup(void)
 		autodetect_raid();
 	md_setup_drive();
 }
+#ifdef MY_DEF_HERE
+EXPORT_SYMBOL(SYNOMdpMajor);
+EXPORT_SYMBOL(md_run_setup);
+#endif

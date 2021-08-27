@@ -29,6 +29,11 @@ header-y += sockios.h
 header-y += spu_info.h
 header-y += stat.h
 header-y += statfs.h
+
+header-y += asm-compat.h
+header-y += kdump.h
+header-y += page_32.h
+header-y += socket.h
 header-y += termbits.h
 header-y += termios.h
 header-y += types.h

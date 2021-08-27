@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/pm.h>
 
 /* Functions local to drivers/usb/core/ */

@@ -469,6 +469,17 @@ static const struct driver_info wwan_info = {
 	.manage_power =	cdc_manage_power,
 };
 
+#ifdef MY_ABC_HERE
+static const struct driver_info	syno_yota_wimax_cdc_info = {
+	.description =	SYNO_YOTAWIMAX_DESC,
+	.flags =	FLAG_ETHER,
+	// .check_connect = cdc_check_connect,
+	.bind =		usbnet_cdc_bind,
+	.unbind =	usbnet_cdc_unbind,
+	.status =	usbnet_cdc_status,
+};
+#endif
+
 /*-------------------------------------------------------------------------*/
 
 #define HUAWEI_VENDOR_ID	0x12D1
@@ -588,6 +599,26 @@ static const struct usb_device_id	products [] = {
  * NOTE:  this match must come AFTER entries blacklisting devices
  * because of bugs/quirks in a given product (like Zaurus, above).
  */
+#ifdef MY_ABC_HERE
+{
+	.match_flags			= USB_DEVICE_ID_MATCH_DEVICE | USB_DEVICE_ID_MATCH_INT_INFO,
+	.idVendor               = 0x1076,
+	.idProduct              = 0x7708,
+	.bInterfaceClass = USB_CLASS_COMM,
+	.bInterfaceSubClass = USB_CDC_SUBCLASS_ETHERNET,
+	.bInterfaceProtocol = USB_CDC_PROTO_NONE,
+	.driver_info = (unsigned long) &syno_yota_wimax_cdc_info,
+}, 
+{
+	.match_flags			= USB_DEVICE_ID_MATCH_DEVICE | USB_DEVICE_ID_MATCH_INT_INFO,
+	.idVendor               = 0x525,
+	.idProduct              = 0xa4a2,
+	.bInterfaceClass = USB_CLASS_COMM,
+	.bInterfaceSubClass = USB_CDC_SUBCLASS_ETHERNET,
+	.bInterfaceProtocol = USB_CDC_PROTO_NONE,
+	.driver_info = (unsigned long) &syno_yota_wimax_cdc_info,
+}, 
+#endif
 {
 	USB_INTERFACE_INFO(USB_CLASS_COMM, USB_CDC_SUBCLASS_ETHERNET,
 			USB_CDC_PROTO_NONE),

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/buffer.c
  *
@@ -1150,7 +1153,15 @@ __getblk_slow(struct block_device *bdev, sector_t block, int size)
  */
 void mark_buffer_dirty(struct buffer_head *bh)
 {
+#ifdef MY_ABC_HERE
+	static int SynoWarnings = 0;
+	if (!buffer_uptodate(bh) && !SynoWarnings) {
+		SynoWarnings = 1;
+		printk("%s: Buffer head isn't up to date\n", __FUNCTION__);
+	}
+#else
 	WARN_ON_ONCE(!buffer_uptodate(bh));
+#endif
 
 	/*
 	 * Very *carefully* optimize the it-is-already-dirty case.

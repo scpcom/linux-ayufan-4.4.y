@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -17,6 +20,10 @@
  */
 #ifndef _TCP_H
 #define _TCP_H
+
+#ifdef MY_ABC_HERE
+#undef TCP_DEBUG
+#endif
 
 #define FASTRETRANS_DEBUG 1
 

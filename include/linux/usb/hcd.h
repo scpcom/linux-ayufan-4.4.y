@@ -511,7 +511,11 @@ extern void usb_ep0_reinit(struct usb_device *);
  * Generic bandwidth allocation constants/support
  */
 #define FRAME_TIME_USECS	1000L
+#ifdef CONFIG_MV_INCLUDE_USB
+#define BitTime(bytecount) (9 * 8 * bytecount / 8) /* with integer truncation */
+#else
 #define BitTime(bytecount) (7 * 8 * bytecount / 6) /* with integer truncation */
+#endif
 		/* Trying not to use worst-case bit-stuffing
 		 * of (7/6 * 8 * bytecount) = 9.33 * bytecount */
 		/* bytecount = data payload byte count */

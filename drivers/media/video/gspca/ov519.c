@@ -2172,6 +2172,9 @@ static void reg_w(struct sd *sd, u16 index, u16 value)
 			USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
 			0, index,
 			sd->gspca_dev.usb_buf, 1, 500);
+#ifdef CONFIG_ARCH_FEROCEON
+	msleep(1);
+#endif
 leave:
 	if (ret < 0) {
 		pr_err("reg_w %02x failed %d\n", index, ret);
@@ -2217,6 +2220,10 @@ static int reg_r(struct sd *sd, u16 index)
 		sd->gspca_dev.usb_err = ret;
 	}
 
+#ifdef CONFIG_ARCH_FEROCEON
+	msleep(1);
+#endif
+
 	return ret;
 }
 
@@ -2242,6 +2249,9 @@ static int reg_r8(struct sd *sd,
 		sd->gspca_dev.usb_err = ret;
 	}
 
+#ifdef CONFIG_ARCH_FEROCEON
+	msleep(1);
+#endif
 	return ret;
 }
 
@@ -2674,6 +2684,9 @@ static int init_ov_sensor(struct sd *sd, u8 slave)
 		if (i2c_r(sd, 0x00) < 0)
 			return -1;
 	}
+#ifdef CONFIG_ARCH_FEROCEON
+    PDEBUG(D_PROBE, "init_ov_sensor failed after %d attempt(s)", i);
+#endif
 	return -1;
 }
 

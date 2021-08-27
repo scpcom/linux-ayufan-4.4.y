@@ -162,9 +162,11 @@ static inline void forget_all_cached_acls(struct inode *inode)
 
 static inline void cache_no_acl(struct inode *inode)
 {
+#ifndef CONFIG_FS_SYNO_ACL
 #ifdef CONFIG_FS_POSIX_ACL
 	inode->i_acl = NULL;
 	inode->i_default_acl = NULL;
+#endif
 #endif
 }
 

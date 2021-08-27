@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* ip_conntrack proc compat - based on ip_conntrack_standalone.c
  *
  * (C) 1999-2001 Paul `Rusty' Russell

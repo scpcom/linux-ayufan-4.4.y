@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Generic pidhash and scalable, time-bounded PID allocator
  *
@@ -428,6 +431,9 @@ struct task_struct *find_task_by_vpid(pid_t vnr)
 {
 	return find_task_by_pid_ns(vnr, current->nsproxy->pid_ns);
 }
+#ifdef CONFIG_SYNO_USE_OCF_LINUX
+EXPORT_SYMBOL(find_task_by_vpid);
+#endif
 
 struct pid *get_task_pid(struct task_struct *task, enum pid_type type)
 {

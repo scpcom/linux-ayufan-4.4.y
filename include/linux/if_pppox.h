@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /***************************************************************************
  * Linux PPP over X - Generic PPP transport layer sockets
  * Linux PPP over Ethernet (PPPoE) Socket Implementation (RFC 2516) 
@@ -16,9 +19,9 @@
 #ifndef __LINUX_IF_PPPOX_H
 #define __LINUX_IF_PPPOX_H
 
-
 #include <linux/types.h>
 #include <asm/byteorder.h>
+#include <linux/syno.h>
 
 #include <linux/socket.h>
 #include <linux/if_ether.h>
@@ -83,6 +86,7 @@ struct sockaddr_pppol2tp {
 	struct pppol2tp_addr pppol2tp;
 } __attribute__((packed));
 
+#ifndef MY_ABC_HERE 
 /* The L2TPv3 protocol changes tunnel and session ids from 16 to 32
  * bits. So we need a different sockaddr structure.
  */
@@ -91,6 +95,7 @@ struct sockaddr_pppol2tpv3 {
 	unsigned int    sa_protocol;    /* protocol identifier */
 	struct pppol2tpv3_addr pppol2tp;
 } __attribute__((packed));
+#endif
 
 /*********************************************************************
  *

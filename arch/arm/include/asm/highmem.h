@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASM_HIGHMEM_H
 #define _ASM_HIGHMEM_H
 

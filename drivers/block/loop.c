@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/block/loop.c
  *
@@ -966,11 +969,18 @@ loop_init_xfer(struct loop_device *lo, struct loop_func_table *xfer,
 	return err;
 }
 
+#ifdef MY_ABC_HERE
+static int loop_clr_fd(struct loop_device *lo, struct block_device *bdev)
+#else
 static int loop_clr_fd(struct loop_device *lo)
+#endif
 {
 	struct file *filp = lo->lo_backing_file;
 	gfp_t gfp = lo->old_gfp_mask;
+#ifdef MY_ABC_HERE
+#else
 	struct block_device *bdev = lo->lo_device;
+#endif
 
 	if (lo->lo_state != Lo_bound)
 		return -ENXIO;
@@ -1288,7 +1298,11 @@ static int lo_ioctl(struct block_device *bdev, fmode_t mode,
 		break;
 	case LOOP_CLR_FD:
 		/* loop_clr_fd would have unlocked lo_ctl_mutex on success */
+#ifdef MY_ABC_HERE
+		err = loop_clr_fd(lo, bdev);
+#else
 		err = loop_clr_fd(lo);
+#endif
 		if (!err)
 			goto out_unlocked;
 		break;
@@ -1514,7 +1528,11 @@ static int lo_release(struct gendisk *disk, fmode_t mode)
 		 * In autoclear mode, stop the loop thread
 		 * and remove configuration after last close.
 		 */
+#ifdef MY_ABC_HERE
+		err = loop_clr_fd(lo, lo->lo_device);
+#else
 		err = loop_clr_fd(lo);
+#endif
 		if (!err)
 			goto out_unlocked;
 	} else {

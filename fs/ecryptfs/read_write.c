@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * eCryptfs: Linux filesystem encryption layer
  *
@@ -39,6 +42,7 @@
 int ecryptfs_write_lower(struct inode *ecryptfs_inode, char *data,
 			 loff_t offset, size_t size)
 {
+	struct ecryptfs_inode_info *inode_info;
 	struct file *lower_file;
 	mm_segment_t fs_save;
 	ssize_t rc;
@@ -46,10 +50,13 @@ int ecryptfs_write_lower(struct inode *ecryptfs_inode, char *data,
 	lower_file = ecryptfs_inode_to_private(ecryptfs_inode)->lower_file;
 	if (!lower_file)
 		return -EIO;
+	inode_info = ecryptfs_inode_to_private(ecryptfs_inode);
+	mutex_lock(&inode_info->lower_file_mutex);
 	fs_save = get_fs();
 	set_fs(get_ds());
 	rc = vfs_write(lower_file, data, size, &offset);
 	set_fs(fs_save);
+	mutex_unlock(&inode_info->lower_file_mutex);
 	mark_inode_dirty_sync(ecryptfs_inode);
 	return rc;
 }
@@ -235,6 +242,7 @@ out:
 int ecryptfs_read_lower(char *data, loff_t offset, size_t size,
 			struct inode *ecryptfs_inode)
 {
+	struct ecryptfs_inode_info *inode_info;
 	struct file *lower_file;
 	mm_segment_t fs_save;
 	ssize_t rc;
@@ -242,10 +250,13 @@ int ecryptfs_read_lower(char *data, loff_t offset, size_t size,
 	lower_file = ecryptfs_inode_to_private(ecryptfs_inode)->lower_file;
 	if (!lower_file)
 		return -EIO;
+	inode_info = ecryptfs_inode_to_private(ecryptfs_inode);
+	mutex_lock(&inode_info->lower_file_mutex);
 	fs_save = get_fs();
 	set_fs(get_ds());
 	rc = vfs_read(lower_file, data, size, &offset);
 	set_fs(fs_save);
+	mutex_unlock(&inode_info->lower_file_mutex);
 	return rc;
 }
 

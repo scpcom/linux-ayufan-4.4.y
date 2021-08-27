@@ -1030,7 +1030,11 @@ iscsi_alloc_session(struct Scsi_Host *shost, struct iscsi_transport *transport,
 		return NULL;
 
 	session->transport = transport;
+#ifdef SYNO_OPEN_ISCSI_PING_TIMEOUT
+	session->recovery_tmo = 10;
+#else
 	session->recovery_tmo = 120;
+#endif
 	session->state = ISCSI_SESSION_FREE;
 	INIT_DELAYED_WORK(&session->recovery_work, session_recovery_timedout);
 	INIT_LIST_HEAD(&session->sess_list);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* handling of writes to regular files and writing back to the server
  *
  * Copyright (C) 2007 Red Hat, Inc. All Rights Reserved.

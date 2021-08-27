@@ -33,6 +33,9 @@
 #include <asm/machdep.h>
 #include <sysdev/fsl_soc.h>
 #include <sysdev/fsl_pci.h>
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+#include <asm/fsl_errata.h>
+#endif
 
 static int fsl_pcie_bus_fixup, is_mpc83xx_pci;
 
@@ -272,6 +275,25 @@ static void __init setup_pci_atmu(struct pci_controller *hose,
 		pr_info("%s: DMA window size is 0x%llx\n", name,
 			(u64)hose->dma_window_size);
 	}
+
+#ifdef CONFIG_SYNO_MPC85XX_COMMON 
+	/* fix for ERRATA PIC 7 */
+	if (MPC8548_ERRATA(2, 1)) {
+		/*
+		 * In RC mode, the PEXIWBAR[1-3] registers reside outside of the
+		 * type 1 header; PEXIWBAR0 is the only inbound BAR that resides
+		 * in the Type 1 header (at offset 0x10).
+		 */
+		/* config PEXIWBAR0 to some memory region unused by PCI Express */
+		early_write_config_dword(hose, hose->first_busno, 0, 0x10, 0x80000000);
+		/* Setup inbound translation Memory Window @ 2G */
+		pci->piw[1].pitar = 0x00800000;
+		/* Setup inbound PCIE Memory Window @ 2G */
+		pci->piw[1].piwbar = 0x00080000;
+		/* Enable, No prefetch, Local Memory, No snoop, 1 MB window */
+		pci->piw[1].piwar = 0xC0F44013;
+	}
+#endif
 
 	iounmap(pci);
 }

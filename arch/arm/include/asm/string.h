@@ -13,6 +13,13 @@ extern char * strrchr(const char * s, int c);
 extern char * strchr(const char * s, int c);
 
 #define __HAVE_ARCH_MEMCPY
+
+#ifdef CONFIG_ARCH_FEROCEON
+#if defined(CONFIG_MV_XOR_MEMCOPY) || defined(CONFIG_MV_IDMA_MEMCOPY)
+ extern void * asm_memcpy(void *, const void*, __kernel_size_t);
+#endif
+#endif /*CONFIG_ARCH_FEROCEON*/
+
 extern void * memcpy(void *, const void *, __kernel_size_t);
 
 #define __HAVE_ARCH_MEMMOVE

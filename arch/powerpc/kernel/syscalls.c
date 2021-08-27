@@ -76,6 +76,21 @@ unsigned long sys_mmap(unsigned long addr, size_t len,
 	return do_mmap2(addr, len, prot, flags, fd, offset, PAGE_SHIFT);
 }
 
+#ifdef MY_ABC_HERE
+unsigned long sys_SYNOmmap(SYNO_MMAP_ARG __user *arg)
+{
+	int error = -EFAULT;
+	SYNO_MMAP_ARG a;
+
+	if (copy_from_user(&a, arg, sizeof(a)))
+		goto out;;
+
+	error = do_mmap2(a.addr, a.len, a.prot, a.flags, a.fd, a.pgoff, PAGE_SHIFT-12);
+out:
+	return error;
+}
+#endif
+
 #ifdef CONFIG_PPC32
 /*
  * Due to some executables calling the wrong select we sometimes

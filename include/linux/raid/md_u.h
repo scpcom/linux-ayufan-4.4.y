@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
    md_u.h : user <=> kernel API between Linux raidtools and RAID drivers
           Copyright (C) 1998 Ingo Molnar
@@ -63,6 +66,17 @@
 #define STOP_ARRAY		_IO (MD_MAJOR, 0x32)
 #define STOP_ARRAY_RO		_IO (MD_MAJOR, 0x33)
 #define RESTART_ARRAY_RW	_IO (MD_MAJOR, 0x34)
+
+#ifdef MY_ABC_HERE
+#define GET_SYNC_STATUS    _IOR(MD_MAJOR, 0x60, MD_SYNC_STATUS)
+#define GET_ARRAY_STATUS    _IOR(MD_MAJOR, 0x61, int)
+
+typedef struct __tag_MD_SYNC_STATUS {
+	unsigned long long inSync;     // 1 --> in sync, 0, not in sync
+	unsigned long long finishSectors;
+	unsigned long long totalSectors;
+} MD_SYNC_STATUS;
+#endif /* MY_ABC_HERE */
 
 /* 63 partitions with the alternate major number (mdp) */
 #define MdpMinorShift 6

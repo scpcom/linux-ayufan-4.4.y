@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This header file contains public constants and structures used by
  * the scsi code for linux.
@@ -9,7 +12,19 @@
 #define _SCSI_SCSI_H
 
 #include <linux/types.h>
+#ifdef __KERNEL__
 #include <linux/scatterlist.h>
+#endif
+
+#if 1 /* SYNO */
+/**
+ * XXX Define u8 type for user-space apps as workaround.
+ * Install kernel header is not work for this case
+ */
+#ifndef __KERNEL__
+typedef unsigned char u8;
+#endif
+#endif /* SYNO */
 
 struct scsi_cmnd;
 
@@ -560,5 +575,20 @@ static inline __u32 scsi_to_u32(__u8 *ptr)
 {
 	return (ptr[0]<<24) + (ptr[1]<<16) + (ptr[2]<<8) + ptr[3];
 }
+#ifdef SYNO_BADSECTOR_TEST
+#define SCSI_IOCTL_SET_BADSECTORS    0x5400
+
+typedef struct _tag_SdBadSectors {
+	unsigned int     rgSectors[101];
+	unsigned short     rgEnableSector[101];
+	unsigned short     uiEnable;   // 0-->disable, 1-->enable for read
+} SDBADSECTORS, *PSDBADSECTORS;
+#define EN_BAD_SECTOR_READ      0x01
+#define EN_BAD_SECTOR_WRITE     0x02
+
+extern SDBADSECTORS grgSdBadSectors[SYNO_MAX_INTERNAL_DISK];
+extern int gBadSectorTest;
+#define SynoGetInternalDiskSeq(szBdevName) (szBdevName[2] - 'a')
+#endif
 
 #endif /* _SCSI_SCSI_H */

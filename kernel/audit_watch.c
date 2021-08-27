@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* audit_watch.c -- watching inodes
  *
  * Copyright 2003-2009 Red Hat, Inc.

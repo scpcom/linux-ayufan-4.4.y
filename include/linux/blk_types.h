@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Block data types and constants.  Directly include this file only to
  * break include dependency loop.
@@ -95,6 +98,9 @@ struct bio {
 #define BIO_FS_INTEGRITY 9	/* fs owns integrity data, not block layer */
 #define BIO_QUIET	10	/* Make BIO Quiet */
 #define BIO_MAPPED_INTEGRITY 11/* integrity metadata has been remapped */
+#ifdef MY_ABC_HERE
+#define BIO_AUTO_REMAP 12	/* record if auto-remap occurred */
+#endif
 #define bio_flagged(bio, flag)	((bio)->bi_flags & (1 << (flag)))
 
 /*
@@ -151,6 +157,9 @@ enum rq_flag_bits {
 	__REQ_IO_STAT,		/* account I/O stat */
 	__REQ_MIXED_MERGE,	/* merge of different types, fail separately */
 	__REQ_NR_BITS,		/* stops here */
+#ifdef MY_ABC_HERE
+	__REQ_AUTO_REMAP,       /* auto remap occurred */
+#endif
 };
 
 #define REQ_WRITE		(1 << __REQ_WRITE)
@@ -191,5 +200,8 @@ enum rq_flag_bits {
 #define REQ_IO_STAT		(1 << __REQ_IO_STAT)
 #define REQ_MIXED_MERGE		(1 << __REQ_MIXED_MERGE)
 #define REQ_SECURE		(1 << __REQ_SECURE)
+#ifdef MY_ABC_HERE
+#define REQ_AUTO_REMAP 		(1 << __REQ_AUTO_REMAP)
+#endif
 
 #endif /* __LINUX_BLK_TYPES_H */

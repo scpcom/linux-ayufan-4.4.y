@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  fs/partitions/msdos.c
  *
@@ -473,8 +476,12 @@ int msdos_partition(struct parsed_partitions *state)
 				put_dev_sector(sect);
 				return 1;
 			} else {
+#ifndef MY_ABC_HERE
 				put_dev_sector(sect);
 				return 0;
+#else
+				printk(KERN_WARNING " Boot indicator is [%x] instead of 0x00 or 0x80. Skip!!\n ", p->boot_ind);
+#endif
 			}
 		}
 	}

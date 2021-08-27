@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/msdos/namei.c
  *
@@ -600,6 +603,9 @@ error_inode:
 		fat_fs_error(new_dir->i_sb,
 			     "%s: Filesystem corrupted (i_pos %lld)",
 			     __func__, sinfo.i_pos);
+#ifdef MY_ABC_HERE
+		err = -ECORRUPT;
+#endif
 	}
 	goto out;
 }

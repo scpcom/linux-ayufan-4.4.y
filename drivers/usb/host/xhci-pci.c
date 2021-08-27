@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver PCI Bus Glue.
  *
@@ -30,8 +33,12 @@
 #define PCI_VENDOR_ID_FRESCO_LOGIC	0x1b73
 #define PCI_DEVICE_ID_FRESCO_LOGIC_PDK	0x1000
 
+#ifndef MY_ABC_HERE // move to pci_id.h
 #define PCI_VENDOR_ID_ETRON		0x1b6f
 #define PCI_DEVICE_ID_ASROCK_P67	0x7023
+#else
+unsigned short xhci_vendor = 0;
+#endif
 
 static const char hcd_name[] = "xhci_hcd";
 
@@ -90,8 +97,16 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		xhci->limit_active_eps = 64;
 		xhci->quirks |= XHCI_SW_BW_CHECKING;
 	}
+
+#ifdef MY_ABC_HERE
+	xhci_vendor = pdev->vendor;
+#endif
+
 	if (pdev->vendor == PCI_VENDOR_ID_ETRON &&
 			pdev->device == PCI_DEVICE_ID_ASROCK_P67) {
+#ifdef MY_ABC_HERE
+		xhci_err(xhci, "Etron chip found.\n");
+#endif
 		xhci->quirks |= XHCI_RESET_ON_RESUME;
 		xhci_dbg(xhci, "QUIRK: Resetting on resume\n");
 	}

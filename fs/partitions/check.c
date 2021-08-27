@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  fs/partitions/check.c
  *
@@ -41,6 +44,28 @@
 
 #ifdef CONFIG_BLK_DEV_MD
 extern void md_autodetect_dev(dev_t dev);
+#elif defined(MY_DEF_HERE)
+LIST_HEAD(SYNOAllDetectedDevices);
+EXPORT_SYMBOL(SYNOAllDetectedDevices);
+struct detected_devices_node {
+	struct list_head list;
+	dev_t dev;
+};
+
+/*This function is the same as the md_autodetect_dev function in the md module*/
+void SYNOMdAutodetectDev(dev_t dev)
+{
+	struct detected_devices_node *node_detected_dev;
+
+	node_detected_dev = kzalloc(sizeof(*node_detected_dev), GFP_KERNEL);
+	if (node_detected_dev) {
+		node_detected_dev->dev = dev;
+		list_add_tail(&node_detected_dev->list, &SYNOAllDetectedDevices);
+	} else {
+		printk(KERN_CRIT "md: md_autodetect_dev: kzalloc failed"
+			", skipping dev(%d,%d)\n", MAJOR(dev), MINOR(dev));
+	}
+}
 #endif
 
 int warn_no_part = 1; /*This is ugly: should make genhd removable media aware*/
@@ -294,6 +319,31 @@ ssize_t part_inflight_show(struct device *dev,
 		atomic_read(&p->in_flight[1]));
 }
 
+#ifdef MY_ABC_HERE
+extern void
+PartitionRemapModeSet(struct gendisk *gd,
+							struct hd_struct *phd,
+							unsigned char blAutoRemap);
+ssize_t part_auto_remap_show(struct device *dev,
+			struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", dev_to_part(dev)->auto_remap);
+}
+
+ssize_t part_auto_remap_store(struct device *dev,
+			struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	unsigned val = 0;
+	struct hd_struct *p = dev_to_part(dev);
+	struct gendisk *disk = part_to_disk(p);
+
+	sscanf(buf, "%d", &val);
+	PartitionRemapModeSet(disk, p, val ? 1 : 0);
+	return count;
+}
+#endif
+
 #ifdef CONFIG_FAIL_MAKE_REQUEST
 ssize_t part_fail_show(struct device *dev,
 		       struct device_attribute *attr, char *buf)
@@ -330,6 +380,9 @@ static DEVICE_ATTR(inflight, S_IRUGO, part_inflight_show, NULL);
 static struct device_attribute dev_attr_fail =
 	__ATTR(make-it-fail, S_IRUGO|S_IWUSR, part_fail_show, part_fail_store);
 #endif
+#ifdef MY_ABC_HERE
+	static DEVICE_ATTR(auto_remap, S_IRUGO|S_IWUSR, part_auto_remap_show, part_auto_remap_store);
+#endif
 
 static struct attribute *part_attrs[] = {
 	&dev_attr_partition.attr,
@@ -342,6 +395,9 @@ static struct attribute *part_attrs[] = {
 	&dev_attr_inflight.attr,
 #ifdef CONFIG_FAIL_MAKE_REQUEST
 	&dev_attr_fail.attr,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_auto_remap.attr,
 #endif
 	NULL
 };
@@ -504,6 +560,10 @@ struct hd_struct *add_partition(struct gendisk *disk, int partno,
 	if (!dev_get_uevent_suppress(ddev))
 		kobject_uevent(&pdev->kobj, KOBJ_ADD);
 
+#ifdef MY_ABC_HERE
+	PartitionRemapModeSet(disk, p, 0);
+#endif
+
 	hd_ref_init(p);
 	return p;
 
@@ -539,17 +599,11 @@ static bool disk_unlock_native_capacity(struct gendisk *disk)
 	}
 }
 
-int rescan_partitions(struct gendisk *disk, struct block_device *bdev)
+static int drop_partitions(struct gendisk *disk, struct block_device *bdev)
 {
-	struct parsed_partitions *state = NULL;
 	struct disk_part_iter piter;
 	struct hd_struct *part;
-	int p, highest, res;
-rescan:
-	if (state && !IS_ERR(state)) {
-		kfree(state);
-		state = NULL;
-	}
+	int res;
 
 	if (bdev->bd_part_count)
 		return -EBUSY;
@@ -561,6 +615,24 @@ rescan:
 	while ((part = disk_part_iter_next(&piter)))
 		delete_partition(disk, part->partno);
 	disk_part_iter_exit(&piter);
+
+	return 0;
+}
+
+int rescan_partitions(struct gendisk *disk, struct block_device *bdev)
+{
+	struct parsed_partitions *state = NULL;
+	struct hd_struct *part;
+	int p, highest, res;
+rescan:
+	if (state && !IS_ERR(state)) {
+		kfree(state);
+		state = NULL;
+	}
+
+	res = drop_partitions(disk, bdev);
+	if (res)
+		return res;
 
 	if (disk->fops->revalidate_disk)
 		disk->fops->revalidate_disk(disk);
@@ -659,9 +731,33 @@ rescan:
 #ifdef CONFIG_BLK_DEV_MD
 		if (state->parts[p].flags & ADDPART_FLAG_RAID)
 			md_autodetect_dev(part_to_dev(part)->devt);
+#elif defined(MY_DEF_HERE)
+		if (state->parts[p].flags & ADDPART_FLAG_RAID) {
+			SYNOMdAutodetectDev(part_to_dev(part)->devt);
+		}
 #endif
 	}
 	kfree(state);
+	return 0;
+}
+
+int invalidate_partitions(struct gendisk *disk, struct block_device *bdev)
+{
+	int res;
+
+	if (!bdev->bd_invalidated)
+		return 0;
+
+	res = drop_partitions(disk, bdev);
+	if (res)
+		return res;
+
+	set_capacity(disk, 0);
+	check_disk_size_change(disk, bdev);
+	bdev->bd_invalidated = 0;
+	/* tell userspace that the media / partition table may have changed */
+	kobject_uevent(&disk_to_dev(disk)->kobj, KOBJ_CHANGE);
+
 	return 0;
 }
 

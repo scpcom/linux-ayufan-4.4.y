@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext4/dir.c
  *
@@ -90,20 +93,27 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 	else
 		return 0;
 
-	if (filp)
+	if (filp) {
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit())
+#endif
 		ext4_error_file(filp, function, line, bh ? bh->b_blocknr : 0,
 				"bad entry in directory: %s - offset=%u(%u), "
 				"inode=%u, rec_len=%d, name_len=%d",
 				error_msg, (unsigned) (offset%bh->b_size),
 				offset, le32_to_cpu(de->inode),
 				rlen, de->name_len);
-	else
+	} else {
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit())
+#endif
 		ext4_error_inode(dir, function, line, bh ? bh->b_blocknr : 0,
 				"bad entry in directory: %s - offset=%u(%u), "
 				"inode=%u, rec_len=%d, name_len=%d",
 				error_msg, (unsigned) (offset%bh->b_size),
 				offset, le32_to_cpu(de->inode),
 				rlen, de->name_len);
+	}
 
 	return 1;
 }
@@ -123,8 +133,13 @@ static int ext4_readdir(struct file *filp,
 
 	sb = inode->i_sb;
 
+#ifdef MY_ABC_HERE
+	if ((EXT4_SB(inode->i_sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) &&
+		!EXT4_HAS_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_COMPAT_DIR_INDEX) &&
+#else
 	if (EXT4_HAS_COMPAT_FEATURE(inode->i_sb,
 				    EXT4_FEATURE_COMPAT_DIR_INDEX) &&
+#endif
 	    ((ext4_test_inode_flag(inode, EXT4_INODE_INDEX)) ||
 	     ((inode->i_size >> sb->s_blocksize_bits) == 1))) {
 		err = ext4_dx_readdir(filp, dirent, filldir);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/include/linux/hfsplus_fs.h
  *
@@ -23,6 +26,10 @@
 #define DBG_SUPER	0x00000010
 #define DBG_EXTENT	0x00000020
 #define DBG_BITMAP	0x00000040
+
+#ifdef MY_ABC_HERE
+#define DBG_XATTR	0x01000000
+#endif
 
 #if 0
 #define DBG_MASK	(DBG_EXTENT|DBG_INODE|DBG_BNODE_MOD)
@@ -220,6 +227,9 @@ struct hfsplus_inode_info {
 #define HFSPLUS_I_CAT_DIRTY	1	/* has changes in the catalog tree */
 #define HFSPLUS_I_EXT_DIRTY	2	/* has changes in the extent tree */
 #define HFSPLUS_I_ALLOC_DIRTY	3	/* has changes in the allocation file */
+#ifdef MY_ABC_HERE
+#define HFSPLUS_I_ATTR_DIRTY	4	/* has changes in the attribute file */
+#endif
 
 #define HFSPLUS_IS_RSRC(inode) \
 	test_bit(HFSPLUS_I_RSRC, &HFSPLUS_I(inode)->flags)
@@ -366,6 +376,12 @@ int hfs_brec_find(struct hfs_find_data *);
 int hfs_brec_read(struct hfs_find_data *, void *, int);
 int hfs_brec_goto(struct hfs_find_data *, int);
 
+#ifdef MY_ABC_HERE
+int __hfsplus_brec_find_first(struct hfs_bnode *, struct hfs_find_data *);
+int hfsplus_brec_find_first(struct hfs_find_data *);
+int hfsplus_attr_cmp_key(const hfsplus_btree_key *, const hfsplus_btree_key *);
+int hfsplus_rmxattr(struct dentry *, const char *);
+#endif
 /* catalog.c */
 int hfsplus_cat_case_cmp_key(const hfsplus_btree_key *,
 		const hfsplus_btree_key *);
@@ -437,6 +453,10 @@ int hfsplus_strcmp(const struct hfsplus_unistr *,
 		const struct hfsplus_unistr *);
 int hfsplus_uni2asc(struct super_block *,
 		const struct hfsplus_unistr *, char *, int *);
+#ifdef MY_ABC_HERE
+int hfsplus_asc2uni_ex(struct super_block *,
+		struct hfsplus_unistr *, const char *, int, int);
+#endif
 int hfsplus_asc2uni(struct super_block *,
 		struct hfsplus_unistr *, const char *, int);
 int hfsplus_hash_dentry(const struct dentry *dentry,

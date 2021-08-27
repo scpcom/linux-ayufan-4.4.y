@@ -1,6 +1,8 @@
 #
 # Makefile for the Linux 2.6 eCryptfs
 #
+#SYNO
+EXTRA_CFLAGS += -I$(srctree)/crypto/ocf_20100325
 
 obj-$(CONFIG_ECRYPT_FS) += ecryptfs.o
 

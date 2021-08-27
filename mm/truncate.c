@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/truncate.c - code for taking down pages from address_spaces
  *
@@ -578,6 +581,21 @@ void truncate_setsize(struct inode *inode, loff_t newsize)
 	truncate_pagecache(inode, oldsize, newsize);
 }
 EXPORT_SYMBOL(truncate_setsize);
+
+#ifdef MY_ABC_HERE
+void ecryptfs_truncate_setsize(struct inode *inode, loff_t newsize)
+{
+	loff_t oldsize;
+
+	oldsize = inode->i_size;
+	i_size_write(inode, newsize);
+
+	if (oldsize > newsize) {
+		truncate_pagecache(inode, oldsize, newsize);
+	}
+}
+EXPORT_SYMBOL(ecryptfs_truncate_setsize);
+#endif
 
 /**
  * vmtruncate - unmap mappings "freed" by truncate() syscall

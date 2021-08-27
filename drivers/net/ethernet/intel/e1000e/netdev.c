@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 
   Intel PRO/1000 Linux driver
@@ -139,6 +142,35 @@ static const struct e1000_reg_info e1000_reg_info_tbl[] = {
 	/* List Terminator */
 	{}
 };
+
+#ifdef MY_ABC_HERE
+void e1000e_syno_led_switch(int iEnable)
+{
+	struct net_device *dev = NULL;
+	struct e1000_adapter *adapter = NULL;
+	struct e1000_hw *hw = NULL;
+	u32 ledctlValue;
+
+	for_each_netdev(&init_net, dev) {
+		adapter = netdev_priv(dev);
+		hw = &adapter->hw;
+
+		if (hw->mac.type == e1000_82574) {
+
+			ledctlValue = er32(LEDCTL);
+
+			if (iEnable) {
+				ew32(LEDCTL, hw->mac.ledctl_default);
+			} else {
+				hw->mac.ledctl_default = ledctlValue;
+				ledctlValue |= 0x000F0F0F; //turn off the 3 leds
+				ew32(LEDCTL, ledctlValue);
+			}
+		}
+	}
+}
+EXPORT_SYMBOL(e1000e_syno_led_switch);
+#endif /*MY_ABC_HERE*/
 
 /*
  * e1000_regdump - register printout routine

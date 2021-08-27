@@ -43,6 +43,10 @@
 #include <asm/mpic.h>
 #include <asm/i8259.h>
 
+#ifdef CONFIG_SYNO_MPC854X
+#include <asm/fsl_errata.h>
+#endif
+
 #include <sysdev/fsl_soc.h>
 #include <sysdev/fsl_pci.h>
 
@@ -109,6 +113,27 @@ static void mpc85xx_cds_restart(char *cmd)
 static void __init mpc85xx_cds_pci_irq_fixup(struct pci_dev *dev)
 {
 	u_char c;
+
+#ifdef CONFIG_SYNO_MPC854X
+	/*
+	 * set PBFR(PCI Bus Function Register)[10] = 1, to
+	 * disable the combining of crossing cacheline
+	 * boundary requests into one burst transaction.
+	 * fix ERRATA PCI 5
+	 */
+	if (MPC8548_ERRATA(2, 1)) {
+		unsigned short temp;
+		if (dev->vendor == PCI_VENDOR_ID_MOTOROLA ||
+			dev->vendor == PCI_VENDOR_ID_FREESCALE) {
+			if (dev->device == 0x0012 || dev->device == 0x0013) {
+				pci_read_config_word(dev, 0x44, &temp);
+				temp |= 1 << 10;
+				pci_write_config_word(dev, 0x44, temp);
+			}
+		}
+	}
+#endif
+
 	if (dev->vendor == PCI_VENDOR_ID_VIA) {
 		switch (dev->device) {
 		case PCI_DEVICE_ID_VIA_82C586_1:
@@ -284,9 +309,32 @@ static void __init mpc85xx_cds_setup_arch(void)
 		ppc_md.progress(buf, 0);
 	}
 
+#ifdef CONFIG_SYNO_MPC854X
+	if (MPC8548_ERRATA(2, 0)) {             
+		uint __iomem *tmp_eebpcr;
+		tmp_eebpcr = ioremap(get_immrbase() + 0x1010, 0x4);
+
+		/*
+		 * CPU2 errata workaround: A core hang possible while executing
+		 * a msync instruction and a snoopable transaction from an I/O
+		 * master tagged to make quick forward progress is present.
+		 * Fixed in silicon rev 2.1.
+		 */             
+		setbits32(tmp_eebpcr, 1 << 16);
+		iounmap(tmp_eebpcr);
+
+		tmp_eebpcr = ioremap(get_immrbase() + 0x1010, 0x4);
+		printk("Apply CPU 2 errata, bpcr: 0x%08x\n", in_be32(tmp_eebpcr));
+		iounmap(tmp_eebpcr);
+	}
+#endif
+
 #ifdef CONFIG_PCI
 	for_each_node_by_type(np, "pci") {
 		if (of_device_is_compatible(np, "fsl,mpc8540-pci") ||
+#ifdef CONFIG_SYNO_MPC854X
+			of_device_is_compatible(np, "fsl,mpc8548-pci") ||
+#endif
 		    of_device_is_compatible(np, "fsl,mpc8548-pcie")) {
 			struct resource rsrc;
 			of_address_to_resource(np, 0, &rsrc);
@@ -299,6 +347,29 @@ static void __init mpc85xx_cds_setup_arch(void)
 
 	ppc_md.pci_irq_fixup = mpc85xx_cds_pci_irq_fixup;
 	ppc_md.pci_exclude_device = mpc85xx_exclude_device;
+
+#ifdef CONFIG_SYNO_MPC854X
+	/* fix PCI/PCI-X erroneous error detection. ERRATA PCI 6 */
+	if (MPC8548_ERRATA(2, 0)) {
+		struct ccsr_pci __iomem *tmp;
+
+		/* deal PCI1 */
+		tmp = ioremap(get_immrbase() + 0x8000, 0x1000);
+		/* Set ERR_CAP_DR[27] and ERR_CAP_DR[28] to disable OWMSV, ORMSV error capture */
+		setbits32(&tmp->pex_err_dr, 3 << 3);
+		/* clear ERR_EN[27] and ERR_EN[28] to disable OWMSV, ORMSV error reporting */
+		clrbits32(&tmp->pex_err_en, 3 << 3); 
+		iounmap(tmp);
+
+		/* deal PCI2 */
+		tmp = ioremap(get_immrbase() + 0x9000, 0x1000);
+		/* Set ERR_CAP_DR[27] and ERR_CAP_DR[28] to disable OWMSV, ORMSV error capture */
+		setbits32(&tmp->pex_err_dr, 3 << 3);
+		/* clear ERR_EN[27] and ERR_EN[28] to disable OWMSV, ORMSV error reporting */
+		clrbits32(&tmp->pex_err_en, 3 << 3); 
+		iounmap(tmp);
+	}
+#endif
 #endif
 }
 

@@ -23,6 +23,10 @@
 #include <linux/jiffies.h>
 #include <asm/xor.h>
 
+#ifdef CONFIG_MV_XOR_MEMXOR
+#include <plat/xor.h>
+#endif
+
 /* The xor routines to use.  */
 static struct xor_block_template *active_template;
 
@@ -30,6 +34,13 @@ void
 xor_blocks(unsigned int src_count, unsigned int bytes, void *dest, void **srcs)
 {
 	unsigned long *p1, *p2, *p3, *p4;
+
+#ifdef CONFIG_MV_XOR_MEMXOR
+	if ((bytes >= CONFIG_MV_XOR_MEMXOR_THRESHOLD) && (src_count < 8)) {
+		if (!xor_memxor(src_count, bytes, dest, srcs))
+			return;
+	}
+#endif
 
 	p1 = (unsigned long *) srcs[0];
 	if (src_count == 1) {

@@ -130,6 +130,12 @@ config MACH_T5325
 	  Say 'Y' here if you want your kernel to support the
 	  HP t5325 Thin Client.
 
+config MACH_SYNOLOGY_6281
+	bool "Synology 6281 series NAS"
+	help
+	  Say 'Y' here if you want your kernel to support the
+	  Synology 6281 sereis NAS devices.
+
 endmenu
 
 endif

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001, 2002 Sistina Software (UK) Limited.
  * Copyright (C) 2004-2008 Red Hat, Inc. All rights reserved.
@@ -7,6 +10,9 @@
 
 #include "dm.h"
 #include "dm-uevent.h"
+#ifdef MY_ABC_HERE
+#include "md.h"
+#endif
 
 #include <linux/init.h>
 #include <linux/module.h>
@@ -41,6 +47,12 @@ EXPORT_SYMBOL(dm_ratelimit_state);
  */
 #define DM_COOKIE_ENV_VAR_NAME "DM_COOKIE"
 #define DM_COOKIE_LENGTH 24
+#ifdef MY_ABC_HERE
+void SynoMDWakeUpDevices(void *md);
+#ifdef MY_ABC_HERE
+extern int SynoDebugFlag;
+#endif
+#endif
 
 static const char *_name = DM_NAME;
 
@@ -49,6 +61,11 @@ static unsigned int _major = 0;
 
 static DEFINE_IDR(_minor_idr);
 
+#ifdef MY_ABC_HERE
+extern sector_t (*funcSYNOLvLgSectorCount)(void *private, sector_t sector);
+sector_t SynoLvLgSectorCount(void *, sector_t);
+#endif
+ 
 static DEFINE_SPINLOCK(_minor_lock);
 /*
  * For bio-based dm.
@@ -197,6 +214,16 @@ struct mapped_device {
 
 	/* zero-length flush that will be cloned and submitted to targets */
 	struct bio flush_bio;
+#ifdef MY_ABC_HERE
+	/* to record whether this LV is in active or not */
+	int blActive;
+
+	/* lock for Active attr. */
+	spinlock_t	ActLock;
+
+	/* the last time received request */
+	unsigned long ulLastReq;
+#endif
 };
 
 /*
@@ -309,6 +336,10 @@ static int __init dm_init(void)
 		if (r)
 			goto bad;
 	}
+
+#ifdef MY_ABC_HERE
+	funcSYNOLvLgSectorCount = SynoLvLgSectorCount;
+#endif
 
 	return 0;
 
@@ -985,6 +1016,20 @@ static sector_t max_io_len(sector_t sector, struct dm_target *ti)
 	return len;
 }
 
+#ifdef MY_ABC_HERE
+sector_t SynoLvLgSectorCount(void *private, sector_t sector)
+{
+	struct dm_target *ti = (struct dm_target *)private;
+
+	if (ti && ti->type->lg_sector_get) {
+		return ti->type->lg_sector_get(sector, ti);
+	}
+
+	return 0;
+}
+EXPORT_SYMBOL(SynoLvLgSectorCount);
+#endif
+
 static void __map_bio(struct dm_target *ti, struct bio *clone,
 		      struct dm_target_io *tio)
 {
@@ -1437,6 +1482,40 @@ static int dm_request_based(struct mapped_device *md)
 static void dm_request(struct request_queue *q, struct bio *bio)
 {
 	struct mapped_device *md = q->queuedata;
+#ifdef MY_ABC_HERE
+	struct dm_dev_internal *dd = NULL;
+	struct dm_table *map = NULL;
+	char b[BDEVNAME_SIZE] = {'\0'};
+	unsigned char blActive = 0;
+
+	/* we only check when after the last request 7s */
+	if (time_after(jiffies, md->ulLastReq + CHECKINTERVAL)) {
+		spin_lock(&md->ActLock);
+		blActive = md->blActive;
+		md->blActive = 1;
+		spin_unlock(&md->ActLock);
+
+		map = dm_get_live_table(md);
+		if (map && !blActive) {
+			list_for_each_entry (dd, dm_table_get_devices(map), list) {
+
+				if (dd && dd->dm_dev.bdev && NULL != strstr(bdevname(dd->dm_dev.bdev, b), "md")) {
+					if (0 < SynoDebugFlag) {
+						printk("dm request get [%s], push down wakeup no work\n",
+								bdevname(dd->dm_dev.bdev, b));
+					}
+					if (dd->dm_dev.bdev->bd_disk && dd->dm_dev.bdev->bd_disk->private_data) {
+						SynoMDWakeUpDevices(dd->dm_dev.bdev->bd_disk->private_data);
+					}
+				}
+			}
+		}
+		dm_table_put(map);
+	}
+
+	/* update the last request time */
+	md->ulLastReq = jiffies;
+#endif
 
 	if (dm_request_based(md))
 		blk_queue_bio(q, bio);
@@ -1894,6 +1973,11 @@ static struct mapped_device *alloc_dev(int minor)
 	spin_unlock(&_minor_lock);
 
 	BUG_ON(old_md != MINOR_ALLOCED);
+#ifdef MY_ABC_HERE
+	spin_lock_init(&md->ActLock);
+	md->blActive = 0;
+	md->ulLastReq = jiffies;
+#endif
 
 	return md;
 
@@ -2689,6 +2773,58 @@ int dm_suspended(struct dm_target *ti)
 	return dm_suspended_md(dm_table_get_md(ti->table));
 }
 EXPORT_SYMBOL_GPL(dm_suspended);
+
+#ifdef MY_ABC_HERE
+int dm_active_get(struct mapped_device *md)
+{
+	unsigned char blActive = 0;
+
+	spin_lock(&md->ActLock);
+	blActive = md->blActive;
+	spin_unlock(&md->ActLock);
+
+	return blActive;
+}
+
+int dm_active_set(struct mapped_device *md, int value)
+{
+	struct dm_table *map = NULL;
+	struct dm_dev_internal *dd = NULL;
+	char b[BDEVNAME_SIZE] = {'\0'};
+	int iNeedWake = 0;
+
+	spin_lock(&md->ActLock);
+	if (!(md->blActive) && value) {
+		iNeedWake = 1;
+	}
+	md->blActive = value;
+	spin_unlock(&md->ActLock);
+
+	map = dm_get_live_table(md);
+	if (map) {
+		list_for_each_entry (dd, dm_table_get_devices(map), list) {
+			if (dd && dd->dm_dev.bdev && NULL != strstr(bdevname(dd->dm_dev.bdev, b), "md")) {
+				if (0 < SynoDebugFlag) {
+					printk("dm active set [%s], value %d iNeedWake %d\n",
+							bdevname(dd->dm_dev.bdev, b), value, iNeedWake);
+				}
+				if (dd->dm_dev.bdev->bd_disk && dd->dm_dev.bdev->bd_disk->private_data) {
+					struct mddev *mddev = dd->dm_dev.bdev->bd_disk->private_data;
+					if (iNeedWake) {
+						SynoMDWakeUpDevices(mddev);
+					}
+					spin_lock(&mddev->ActLock);
+					mddev->blActive = value;
+					spin_unlock(&mddev->ActLock);
+				}
+			}
+		}
+	}
+	dm_table_put(map);
+
+	return 0;
+}
+#endif
 
 int dm_noflush_suspending(struct dm_target *ti)
 {

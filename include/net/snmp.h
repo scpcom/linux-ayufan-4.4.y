@@ -125,6 +125,20 @@ struct linux_xfrm_mib {
 #define DECLARE_SNMP_STAT(type, name)	\
 	extern __typeof__(type) __percpu *name[SNMP_ARRAY_SZ]
 
+#ifdef CONFIG_MV_LINUX_COUNTERS_DISABLE
+
+#define SNMP_INC_STATS_BH(mib, field)
+#define SNMP_INC_STATS_USER(mib, field)
+#define SNMP_INC_STATS(mib, field)
+#define SNMP_DEC_STATS(mib, field)
+#define SNMP_ADD_STATS(mib, field, addend)
+#define SNMP_ADD_STATS_BH(mib, field, addend)
+#define SNMP_ADD_STATS_USER(mib, field, addend)
+#define SNMP_UPD_PO_STATS(mib, basefield, addend)
+#define SNMP_UPD_PO_STATS_BH(mib, basefield, addend)
+
+#else
+
 #define SNMP_INC_STATS_BH(mib, field)	\
 			__this_cpu_inc(mib[0]->mibs[field])
 
@@ -163,6 +177,7 @@ struct linux_xfrm_mib {
 		__this_cpu_add(mib[0]->mibs[basefield##OCTETS], addend);	\
 	} while (0)
 
+#endif /* CONFIG_MV_LINUX_COUNTERS_DISABLE */
 
 #if BITS_PER_LONG==32
 

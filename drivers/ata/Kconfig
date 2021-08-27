@@ -223,6 +223,7 @@ config SATA_MV
 
 	  If unsure, say N.
 
+source "drivers/ata/mvSata_4_2_2/Kconfig"
 config SATA_NV
 	tristate "NVIDIA SATA support"
 	depends on PCI

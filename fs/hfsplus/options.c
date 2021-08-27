@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/options.c
  *
@@ -49,9 +52,13 @@ void hfsplus_fill_defaults(struct hfsplus_sb_info *opts)
 {
 	if (!opts)
 		return;
-
+#ifdef MY_ABC_HERE
+	opts->creator = 0;
+	opts->type = 0;
+#else
 	opts->creator = HFSPLUS_DEF_CR_TYPE;
 	opts->type = HFSPLUS_DEF_CR_TYPE;
+#endif
 	opts->umask = current_umask();
 	opts->uid = current_uid();
 	opts->gid = current_gid();

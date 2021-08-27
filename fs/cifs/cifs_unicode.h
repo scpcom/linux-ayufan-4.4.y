@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * cifs_unicode:  Unicode kernel case support
  *
@@ -51,6 +54,9 @@
 #define UNI_LESSTHAN    (__u16) ('<' + 0xF000)
 #define UNI_PIPE        (__u16) ('|' + 0xF000)
 #define UNI_SLASH       (__u16) ('\\' + 0xF000)
+#ifdef SYNO_CIFS_SPECIAL_CHAR_CONVER
+#define UNI_DQUOT       (__u16) ('"' + 0xF000)
+#endif
 
 /* Just define what we want from uniupr.h.  We don't want to define the tables
  * in each source file.

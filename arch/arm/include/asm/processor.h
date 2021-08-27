@@ -103,7 +103,7 @@ extern int kernel_thread(int (*fn)(void *), void *arg, unsigned long flags);
 /*
  * Prefetching support - only ARMv5.
  */
-#if __LINUX_ARM_ARCH__ >= 5
+#if __LINUX_ARM_ARCH__ >= 5 && defined(CONFIG_USE_DSP)
 
 #define ARCH_HAS_PREFETCH
 static inline void prefetch(const void *ptr)

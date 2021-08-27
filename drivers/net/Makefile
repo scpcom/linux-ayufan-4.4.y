@@ -2,6 +2,8 @@
 # Makefile for the Linux network device drivers.
 #
 
+obj-$(CONFIG_MV_INCLUDE_GIG_ETH) += ../../arch/arm/plat-feroceon/mv_drivers_lsp/mv_network/mv_ethernet/
+obj-$(CONFIG_SK98LIN) += sk98lin/
 #
 # Networking Core Drivers
 #

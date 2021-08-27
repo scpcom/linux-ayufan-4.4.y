@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * sysctl.c: General linux system control interface
  *
@@ -86,6 +89,148 @@
 
 
 #if defined(CONFIG_SYSCTL)
+
+#ifdef MY_ABC_HERE
+int SynoDebugFlag = 0;
+EXPORT_SYMBOL(SynoDebugFlag);
+
+int syno_temperature_debug=0;
+EXPORT_SYMBOL(syno_temperature_debug);
+
+int syno_hibernation_log_sec=0;
+EXPORT_SYMBOL(syno_hibernation_log_sec);
+
+int giSynoAtaDebug=0;
+EXPORT_SYMBOL(giSynoAtaDebug);
+#endif
+
+#ifdef MY_ABC_HERE
+char gszSynoHWVersion[16];
+EXPORT_SYMBOL(gszSynoHWVersion);
+#endif
+
+#ifdef MY_ABC_HERE
+int gSynoRaidSyncFlag = 0;
+EXPORT_SYMBOL(gSynoRaidSyncFlag);
+#endif
+
+#ifdef MY_ABC_HERE
+long g_internal_hd_num = -1;
+long syno_boot_hd_count = 0;
+EXPORT_SYMBOL(g_internal_hd_num);
+#endif
+
+#ifdef MY_ABC_HERE
+long unsigned int guiWakeupDisksNum = 1;
+EXPORT_SYMBOL(guiWakeupDisksNum);
+/* The default spinup time interval is 7000ms. if want modify the interval, you
+ * can modify this value. ex. assign 14 to it means 500ms (7000/14) */
+int giDenoOfTimeInterval = 1;
+EXPORT_SYMBOL(giDenoOfTimeInterval);
+#endif
+
+#ifdef MY_ABC_HERE
+long g_internal_netif_num = -1;
+EXPORT_SYMBOL(g_internal_netif_num);
+#endif
+
+#ifdef SYNO_SAS_DISK_NAME
+long g_is_sas_model = 0;
+EXPORT_SYMBOL(g_is_sas_model);
+#endif
+
+#ifdef MY_ABC_HERE
+long g_ahci_switch = 1;
+EXPORT_SYMBOL(g_ahci_switch);
+#endif
+
+#ifdef MY_ABC_HERE
+long g_sata_led_special = 0;
+EXPORT_SYMBOL(g_sata_led_special);
+#endif
+
+#ifdef MY_ABC_HERE
+long g_hdd_hotplug = 0;
+EXPORT_SYMBOL(g_hdd_hotplug);
+#endif
+
+#ifdef MY_ABC_HERE
+int gSynoInstallFlag = 0;
+EXPORT_SYMBOL(gSynoInstallFlag);
+#endif
+
+#ifdef MY_ABC_HERE
+#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
+int gSynoHasDynModule = 1;
+#else
+int gSynoHasDynModule = 0;
+#endif
+EXPORT_SYMBOL(gSynoHasDynModule);
+#endif /*MY_ABC_HERE*/
+
+#ifdef MY_DEF_HERE
+long gSynoFlashMemorySize = 0;
+EXPORT_SYMBOL(gSynoFlashMemorySize);
+#endif
+
+#ifdef MY_ABC_HERE
+char gszSataPortMap[8] = {0};
+EXPORT_SYMBOL(gszSataPortMap);
+
+unsigned int gSynoSataHostCnt = 0;
+EXPORT_SYMBOL(gSynoSataHostCnt);
+#endif
+
+#ifdef MY_ABC_HERE
+char gszDiskIdxMap[16] = {0};
+EXPORT_SYMBOL(gszDiskIdxMap);
+#endif
+
+#ifdef MY_ABC_HERE
+char giDiskSeqReverse[8] = {0};
+EXPORT_SYMBOL(giDiskSeqReverse);
+#endif
+
+#ifdef MY_ABC_HERE
+unsigned char grgbLanMac[4][16];
+EXPORT_SYMBOL(grgbLanMac);
+#endif
+
+#ifdef MY_ABC_HERE
+unsigned int gSwitchDev = 0;
+char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
+EXPORT_SYMBOL(gSwitchDev);
+EXPORT_SYMBOL(gDevPCIName);
+#endif
+
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+int giSynoHddLedEnabled = 1;
+EXPORT_SYMBOL(giSynoHddLedEnabled);
+#endif
+
+#ifdef MY_ABC_HERE
+char gszSerialNum[12];
+EXPORT_SYMBOL(gszSerialNum);
+char gszCustomSerialNum[32];
+EXPORT_SYMBOL(gszCustomSerialNum);
+#endif
+
+#ifdef MY_DEF_HERE
+long g_esata_7042 = -1;
+EXPORT_SYMBOL(g_esata_7042);
+#endif
+
+#if (defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(MY_ABC_HERE))
+#include <linux/synosata.h>
+int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
+EXPORT_SYMBOL(funcSYNOGetHwCapability);
+
+#ifdef MY_DEF_HERE
+EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
+EXPORT_SYMBOL(funcSynoEunitPowerctlType);
+#endif
+
+#endif
 
 /* External variables not in a header file. */
 extern int sysctl_overcommit_memory;
@@ -993,6 +1138,174 @@ static struct ctl_table kern_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
+	},
+#endif
+/*
+ * NOTE: do not add new entries to this table unless you have read
+ * Documentation/sysctl/ctl_unnumbered.txt
+ */
+#ifdef MY_ABC_HERE
+	{
+		.procname       = "syno_debug_flag",
+		.data           = &SynoDebugFlag,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+	{
+		.procname       = "syno_temperature_debug",
+		.data           = &syno_temperature_debug,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+	{
+		.procname       = "syno_hibernation_log_sec",
+		.data           = &syno_hibernation_log_sec,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+	{
+		.procname       = "syno_ata_debug",
+		.data           = &giSynoAtaDebug,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname		= "syno_hw_version",
+		.data			= gszSynoHWVersion,
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname		= "syno_internal_hd_num",
+		.data			= &g_internal_hd_num,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname		= "syno_disks_group",
+		.data			= &guiWakeupDisksNum,
+		.maxlen			= sizeof (unsigned int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+	{
+		.procname		= "syno_deno_of_spinup_time",
+		.data			= &giDenoOfTimeInterval,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname		= "syno_internal_netif_num",
+		.data			= &g_internal_netif_num,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef SYNO_SAS_DISK_NAME
+	{
+		.procname		= "syno_is_sas_model",
+		.data			= &g_is_sas_model,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname       = "syno_raid_sync_flag",
+		.data           = &gSynoRaidSyncFlag,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname		= "syno_mac_address1",
+		.data			= &grgbLanMac[0],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+	},
+	{
+		.procname		= "syno_mac_address2",
+		.data			= &grgbLanMac[1],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+	},
+	{
+		.procname		= "syno_mac_address3",
+		.data			= &grgbLanMac[2],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+	},
+	{
+		.procname		= "syno_mac_address4",
+		.data			= &grgbLanMac[3],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname		= "syno_serial",
+		.data			= &gszSerialNum,
+		.maxlen			= 12,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+	},
+	{
+		.procname		= "syno_custom_serial",
+		.data			= &gszCustomSerialNum,
+		.maxlen			= 32,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname       = "syno_install_flag",
+		.data           = &gSynoInstallFlag,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.procname		= "syno_dyn_module",
+		.data			= &gSynoHasDynModule,
+		.maxlen			= sizeof (int),
+		.mode			= 0444,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef MY_DEF_HERE
+	{
+		.procname	= "syno_flash_mem_size",
+		.data		= &gSynoFlashMemorySize,
+		.maxlen		= sizeof (int),
+		.mode		= 0444,
+		.proc_handler	= &proc_dointvec,
 	},
 #endif
 	{ }

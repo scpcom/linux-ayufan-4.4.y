@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/jbd2/transaction.c
  *
@@ -517,12 +520,13 @@ void jbd2_journal_lock_updates(journal_t *journal)
 			break;
 
 		spin_lock(&transaction->t_handle_lock);
-		if (!atomic_read(&transaction->t_updates)) {
-			spin_unlock(&transaction->t_handle_lock);
-			break;
-		}
 		prepare_to_wait(&journal->j_wait_updates, &wait,
 				TASK_UNINTERRUPTIBLE);
+		if (!atomic_read(&transaction->t_updates)) {
+			spin_unlock(&transaction->t_handle_lock);
+			finish_wait(&journal->j_wait_updates, &wait);
+			break;
+		}
 		spin_unlock(&transaction->t_handle_lock);
 		write_unlock(&journal->j_state_lock);
 		schedule();
@@ -1090,7 +1094,14 @@ int jbd2_journal_dirty_metadata(handle_t *handle, struct buffer_head *bh)
 		 * once a transaction -bzzz
 		 */
 		jh->b_modified = 1;
+#ifdef MY_ABC_HERE
+		if (0 >= handle->h_buffer_credits) {
+			printk("handle->h_buffer_credits not enough (%d).\n", handle->h_buffer_credits);
+			goto out_unlock_bh;
+		}
+#else
 		J_ASSERT_JH(jh, handle->h_buffer_credits > 0);
+#endif
 		handle->h_buffer_credits--;
 	}
 

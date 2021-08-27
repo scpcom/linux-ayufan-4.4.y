@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/setup.c
  *
@@ -59,8 +62,58 @@
 #include "atags.h"
 #include "tcm.h"
 
+#ifdef  MY_ABC_HERE
+extern char gszSynoHWVersion[];
+#endif
+
+#ifdef  MY_ABC_HERE
+extern long g_internal_hd_num;
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_internal_netif_num;
+long g_egiga = 1;
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_hdd_hotplug;
+#endif
+
+#ifdef MY_ABC_HERE
+extern unsigned char grgbLanMac[4][16];
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszSerialNum[12];
+extern char gszCustomSerialNum[32];
+#endif
+
+#ifdef MY_DEF_HERE
+extern long g_esata_7042;
+#endif
 #ifndef MEM_SIZE
 #define MEM_SIZE	(16*1024*1024)
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszDiskIdxMap[16];
+#endif
+
+#ifdef MY_ABC_HERE
+extern char giDiskSeqReverse[8];
+#endif
+
+#ifdef MY_ABC_HERE
+extern unsigned int gSwitchDev;
+extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
+#endif
+
+#ifdef MY_ABC_HERE
+extern int gSynoHasDynModule;
+#endif
+
+#ifdef MY_DEF_HERE
+extern long gSynoFlashMemorySize;
 #endif
 
 #if defined(CONFIG_FPE_NWFPE) || defined(CONFIG_FPE_FASTFPE)
@@ -73,6 +126,268 @@ static int __init fpe_setup(char *line)
 }
 
 __setup("fpe=", fpe_setup);
+#endif
+
+
+
+#ifdef MY_ABC_HERE
+static int __init early_hw_version(char *p)
+{
+	char *szPtr;
+
+	snprintf(gszSynoHWVersion, 16, "%s", p);
+
+	szPtr = gszSynoHWVersion;
+	while ((*szPtr != ' ') && (*szPtr != '\t') && (*szPtr != '\0')) {
+		szPtr++;
+	}
+	*szPtr = 0;
+	strcat(gszSynoHWVersion, "-j");
+
+	printk("Synology Hareware Version: %s\n", gszSynoHWVersion);
+
+	return 1;
+}
+__setup("syno_hw_version=", early_hw_version);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_internal_hd_num(char *p)
+{
+	g_internal_hd_num = simple_strtol(p, NULL, 10);
+
+	printk("Internal HD num: %d\n", (int)g_internal_hd_num);
+
+	return 1;
+}
+__setup("ihd_num=", early_internal_hd_num);
+#endif
+
+#ifdef  MY_ABC_HERE
+static int __init early_internal_netif_num(char *p)
+{
+	g_internal_netif_num = simple_strtol(p, NULL, 10);
+
+	if ( g_internal_netif_num >= 0 ) {
+		printk("Internal netif num: %d\n", (int)g_internal_netif_num);
+	}
+
+	return 1;
+}
+__setup("netif_num=", early_internal_netif_num);
+
+static void __init early_egiga(char *p)
+{
+	g_egiga = simple_strtol(p, NULL, 10);
+
+	if ( g_egiga == 0 ) {
+		printk("egiga port is disabled\n");
+	}
+}
+__setup("egiga=", early_egiga);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_hdd_hotplug(char *p)
+{
+	g_hdd_hotplug = simple_strtol(p, NULL, 10);
+
+	if ( g_hdd_hotplug > 0 ) {
+		printk("Support HDD Hotplug.\n");
+	}
+
+	return 1;
+}
+__setup("HddHotplug=", early_hdd_hotplug);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_mac1(char *p)
+{
+	snprintf(grgbLanMac[0], sizeof(grgbLanMac[0]), "%s", p);
+
+	printk("Mac1: %s\n", grgbLanMac[0]);
+
+	return 1;
+}
+__setup("mac1=", early_mac1);
+
+static int __init early_mac2(char *p)
+{
+	snprintf(grgbLanMac[1], sizeof(grgbLanMac[1]), "%s", p);
+
+	printk("Mac2: %s\n", grgbLanMac[1]);
+
+	return 1;
+}
+__setup("mac2=", early_mac2);
+
+static int __init early_mac3(char *p)
+{
+	snprintf(grgbLanMac[2], sizeof(grgbLanMac[2]), "%s", p);
+
+	printk("Mac3: %s\n", grgbLanMac[2]);
+
+	return 1;
+}
+__setup("mac3=", early_mac3);
+
+static int __init early_mac4(char *p)
+{
+	snprintf(grgbLanMac[3], sizeof(grgbLanMac[3]), "%s", p);
+
+	printk("Mac4: %s\n", grgbLanMac[3]);
+
+	return 1;
+}
+__setup("mac4=", early_mac4);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_netif_seq(char *p)
+{
+	int len;
+	int netDevCount;
+
+	// no net device switch required
+	if ((NULL == p) || (0 == (len = strlen(p)))) {
+		return 1;
+	}
+
+	/**
+	 *	We change the way that we represent the net device name is due to a truth that
+	 *	when a PCIE extension card is plugged in, the pcie name will change
+	 *	So we give up the pci-name as our matching condition, we use NIC up sequence instead.
+	 *	Because the NIC layout is fixed on our board, we the NIC up sequence won't change.
+	 *	And according to this sequence, we assign the device name to NIC
+	 *
+	 *	Following codes are designed to compatible with bromolow/x64 which has already been produced.
+	 *	Based on the truth that our bromolow/x64 has at least 2 internal lan so far (2011/5/24)
+	 *	And 2 internal lan needs netif_seq whose length is 12
+	 *	So we judge that if netif_seq is less than 12, then it should be new version of netif_seq
+	 *	2411+ has 2 internal lans now so we use 12 as our boundary condition
+	 */
+	if (len <= SYNO_MAX_SWITCHABLE_NET_DEVICE) {
+		netDevCount = len;
+		for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
+			gDevPCIName[gSwitchDev][0] = *p++;
+		}
+		return 1;
+	}
+
+	netDevCount = len/SYNO_NET_DEVICE_ENCODING_LENGTH;
+	if (0 == netDevCount) {
+		return 1;
+	}
+
+	for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
+		// the format of netif_seq string is device seq (1 character) + device pci name (last 5 characters only)
+		memcpy(gDevPCIName[gSwitchDev], p, SYNO_NET_DEVICE_ENCODING_LENGTH);
+		p += SYNO_NET_DEVICE_ENCODING_LENGTH;
+	}
+	return 1;
+}
+
+__setup("netif_seq=",early_netif_seq);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_sn(char *p)
+{
+        snprintf(gszSerialNum, sizeof(gszSerialNum), "%s", p);
+        printk("Serial Number: %s\n", gszSerialNum);
+        return 1;
+}
+__setup("sn=", early_sn);
+
+static int __init early_custom_sn(char *p)
+{
+        snprintf(gszCustomSerialNum, sizeof(gszCustomSerialNum), "%s", p);
+        printk("Custom Serial Number: %s\n", gszCustomSerialNum);
+        return 1;
+}
+__setup("custom_sn=", early_custom_sn);
+#endif
+
+#ifdef MY_DEF_HERE
+static int __init early_esata_7042(char *p)
+{
+	g_esata_7042 = simple_strtol(p, NULL, 10);
+
+	printk("Esata chip use 7042: %d\n", (int)g_esata_7042);
+
+	return 1;
+}
+__setup("esata_7042=", early_esata_7042);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_disk_idx_map(char *p)
+{
+	snprintf(gszDiskIdxMap, sizeof(gszDiskIdxMap), "%s", p);
+
+	if('\0' != gszDiskIdxMap[0]) {
+		printk("Disk Index Map: %s\n", gszDiskIdxMap);
+	}
+
+	return 1;
+}
+__setup("DiskIdxMap=", early_disk_idx_map);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_disk_seq_reserve(char *p)
+{
+	snprintf(giDiskSeqReverse, sizeof(giDiskSeqReverse), "%s", p);
+
+	if('\0' != giDiskSeqReverse[0]) {
+		printk("Disk Sequence Reverse: %s\n", giDiskSeqReverse);
+	}
+
+	return 1;
+}
+__setup("DiskSeqReverse=", early_disk_seq_reserve);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_is_dyn_module(char *p)
+{
+	int iLen = 0;
+
+	gSynoHasDynModule = 0;
+	
+	if ((NULL == p) || (0 == (iLen = strlen(p)))) {
+		goto END;
+	}
+
+	if ( 0 == strcmp (p, "y")) {
+		gSynoHasDynModule = 1;
+		printk("Synology Dynamic Module support.\n");
+	}
+
+END:
+	return 1;
+}
+__setup("syno_dyn_module=", early_is_dyn_module);
+#endif
+
+#ifdef MY_DEF_HERE
+static int __init early_flash_memory_size(char *p)
+{
+	int iLen = 0;
+
+	if ((NULL == p) || (0 == (iLen = strlen(p)))) {
+		gSynoFlashMemorySize = 4;
+	} else {
+		gSynoFlashMemorySize = simple_strtol(p, NULL, 10);
+	}
+
+	printk("Flash Memory Size: %d MB\n", (int)gSynoFlashMemorySize);
+
+END:
+	return 1;
+}
+__setup("flash_size=", early_flash_memory_size);
 #endif
 
 extern void paging_init(struct machine_desc *desc);
@@ -504,6 +819,9 @@ int __init arm_add_memory(phys_addr_t start, unsigned long size)
 	 * Ensure that start/size are aligned to a page boundary.
 	 * Size is appropriately rounded down, start is rounded up.
 	 */
+#ifdef CONFIG_ARCH_FEROCEON
+       if(size != 0) /* overcome bug in U-Boot */
+#endif
 	size -= start & ~PAGE_MASK;
 	bank->start = PAGE_ALIGN(start);
 	bank->size  = size & PAGE_MASK;
@@ -926,6 +1244,12 @@ void __init setup_arch(char **cmdline_p)
 	arm_memblock_init(&meminfo, mdesc);
 
 	paging_init(mdesc);
+#ifdef CONFIG_DEBUG_LL
+	{
+		extern int ll_debug;
+		ll_debug=1;
+	}
+#endif
 	request_standard_resources(mdesc);
 
 	unflatten_device_tree();

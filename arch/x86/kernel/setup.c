@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (C) 1995  Linus Torvalds
  *
@@ -114,6 +117,60 @@
 #include <asm/mce.h>
 #include <asm/alternative.h>
 #include <asm/prom.h>
+
+#ifdef  MY_ABC_HERE
+extern char gszSynoHWVersion[];
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_internal_hd_num;
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_internal_netif_num;
+#endif
+
+#ifdef SYNO_SAS_DISK_NAME
+extern long g_is_sas_model;
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_ahci_switch;
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_sata_led_special;
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_hdd_hotplug;
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszSataPortMap[8];
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszDiskIdxMap[16];
+#endif
+
+#ifdef MY_ABC_HERE
+extern char giDiskSeqReverse[8];
+#endif
+
+#ifdef MY_ABC_HERE
+extern unsigned char grgbLanMac[4][16];
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszSerialNum[12];
+extern char gszCustomSerialNum[32];
+#endif
+
+#ifdef MY_ABC_HERE
+extern unsigned int gSwitchDev;
+extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
+#endif
 
 /*
  * end_pfn only includes RAM, while max_pfn_mapped includes all e820 entries.
@@ -503,6 +560,259 @@ static void __init memblock_x86_reserve_range_setup_data(void)
 		early_iounmap(data, sizeof(*data));
 	}
 }
+
+#ifdef MY_ABC_HERE
+static int __init early_hw_version(char *p)
+{
+	char *szPtr;
+
+	snprintf(gszSynoHWVersion, 16, "%s", p);
+
+	szPtr = gszSynoHWVersion;
+	while ((*szPtr != ' ') && (*szPtr != '\t') && (*szPtr != '\0')) {
+		szPtr++;
+	}
+	*szPtr = 0;
+	strcat(gszSynoHWVersion, "-j");
+
+	printk("Synology Hareware Version: %s\n", gszSynoHWVersion);
+
+	return 1;
+}
+__setup("syno_hw_version=", early_hw_version);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_internal_hd_num(char *p)
+{
+	g_internal_hd_num = simple_strtol(p, NULL, 10);
+
+	printk("Internal HD num: %d\n", (int)g_internal_hd_num);
+
+    return 1;
+}
+__setup("ihd_num=", early_internal_hd_num);
+#endif
+
+#ifdef  MY_ABC_HERE
+static int __init early_internal_netif_num(char *p)
+{
+	g_internal_netif_num = simple_strtol(p, NULL, 10);
+
+	if ( g_internal_netif_num >= 0 ) {
+		printk("Internal netif num: %d\n", (int)g_internal_netif_num);
+	}
+
+	return 1;
+}
+__setup("netif_num=", early_internal_netif_num);
+#endif
+
+#ifdef SYNO_SAS_DISK_NAME
+static int __init early_SASmodel(char *p)
+{
+	g_is_sas_model = simple_strtol(p, NULL, 10);
+
+	if ( 1 == g_is_sas_model) {
+		printk("SAS model: %d\n", (int)g_is_sas_model);
+	}
+
+	return 1;
+}
+__setup("SASmodel=", early_SASmodel);
+#endif
+
+#ifdef  MY_ABC_HERE
+static int __init early_ahci_switch(char *p)
+{
+        g_ahci_switch = simple_strtol(p, NULL, 10);
+
+        if ( g_ahci_switch >= 0 ) {
+                printk("AHCI: %d\n", (int)g_ahci_switch);
+        }
+
+        return 1;
+}
+__setup("ahci=", early_ahci_switch);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_sataled_special(char *p)
+{
+	g_sata_led_special = simple_strtol(p, NULL, 10);
+
+	if ( g_sata_led_special >= 0 ) {
+		printk("Special Sata LEDs.\n");
+	}
+
+	return 1;
+}
+__setup("SataLedSpecial=", early_sataled_special);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_hdd_hotplug(char *p)
+{
+	g_hdd_hotplug = simple_strtol(p, NULL, 10);
+
+	if ( g_hdd_hotplug > 0 ) {
+		printk("Support HDD Hotplug.\n");
+	}
+
+	return 1;
+}
+__setup("HddHotplug=", early_hdd_hotplug);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_sataport_map(char *p)
+{
+	snprintf(gszSataPortMap, sizeof(gszSataPortMap), "%s", p);
+
+	if(0 != gszSataPortMap[0]) {
+		printk("Sata Port Map: %s\n", gszSataPortMap);
+	}
+
+	return 1;
+}
+__setup("SataPortMap=", early_sataport_map);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_disk_idx_map(char *p)
+{
+	snprintf(gszDiskIdxMap, sizeof(gszDiskIdxMap), "%s", p);
+
+	if('\0' != gszDiskIdxMap[0]) {
+		printk("Disk Index Map: %s\n", gszDiskIdxMap);
+	}
+
+	return 1;
+}
+__setup("DiskIdxMap=", early_disk_idx_map);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_disk_seq_reserve(char *p)
+{
+	snprintf(giDiskSeqReverse, sizeof(giDiskSeqReverse), "%s", p);
+
+	if('\0' != giDiskSeqReverse[0]) {
+		printk("Disk Sequence Reverse: %s\n", giDiskSeqReverse);
+	}
+
+	return 1;
+}
+__setup("DiskSeqReverse=", early_disk_seq_reserve);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_mac1(char *p)
+{
+	snprintf(grgbLanMac[0], sizeof(grgbLanMac[0]), "%s", p);
+
+	printk("Mac1: %s\n", grgbLanMac[0]);
+
+	return 1;
+}
+__setup("mac1=", early_mac1);
+
+static int __init early_mac2(char *p)
+{
+	snprintf(grgbLanMac[1], sizeof(grgbLanMac[1]), "%s", p);
+
+	printk("Mac2: %s\n", grgbLanMac[1]);
+
+	return 1;
+}
+__setup("mac2=", early_mac2);
+
+static int __init early_mac3(char *p)
+{
+	snprintf(grgbLanMac[2], sizeof(grgbLanMac[2]), "%s", p);
+
+	printk("Mac3: %s\n", grgbLanMac[2]);
+
+	return 1;
+}
+__setup("mac3=", early_mac3);
+
+static int __init early_mac4(char *p)
+{
+	snprintf(grgbLanMac[3], sizeof(grgbLanMac[3]), "%s", p);
+
+	printk("Mac4: %s\n", grgbLanMac[3]);
+
+	return 1;
+}
+__setup("mac4=", early_mac4);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_netif_seq(char *p)
+{
+	int len;
+	int netDevCount;
+
+	// no net device switch required
+	if ((NULL == p) || (0 == (len = strlen(p)))) {
+        return 1;
+}
+
+	/**
+	 *	We change the way that we represent the net device name is due to a truth that
+	 *	when a PCIE extension card is plugged in, the pcie name will change
+	 *	So we give up the pci-name as our matching condition, we use NIC up sequence instead.
+	 *	Because the NIC layout is fixed on our board, we the NIC up sequence won't change.
+	 *	And according to this sequence, we assign the device name to NIC
+	 *
+	 *	Following codes are designed to compatible with bromolow/x64 which has already been produced.
+	 *	Based on the truth that our bromolow/x64 has at least 2 internal lan so far (2011/5/24)
+	 *	And 2 internal lan needs netif_seq whose length is 12
+	 *	So we judge that if netif_seq is less than 12, then it should be new version of netif_seq
+	 *	2411+ has 2 internal lans now so we use 12 as our boundary condition
+	 */
+	if (len <= SYNO_MAX_SWITCHABLE_NET_DEVICE) {
+		netDevCount = len;
+		for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
+			gDevPCIName[gSwitchDev][0] = *p++;
+		}
+        return 1;
+}
+
+	netDevCount = len/SYNO_NET_DEVICE_ENCODING_LENGTH;
+	if (0 == netDevCount) {
+		return 1;
+	}
+
+	for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
+		// the format of netif_seq string is device seq (1 character) + device pci name (last 5 characters only)
+		memcpy(gDevPCIName[gSwitchDev], p, SYNO_NET_DEVICE_ENCODING_LENGTH);
+		p += SYNO_NET_DEVICE_ENCODING_LENGTH;
+	}
+	return 1;
+}
+
+__setup("netif_seq=",early_netif_seq);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_sn(char *p)
+{
+        snprintf(gszSerialNum, sizeof(gszSerialNum), "%s", p);
+        printk("Serial Number: %s\n", gszSerialNum);
+        return 1;
+}
+__setup("sn=", early_sn);
+
+static int __init early_custom_sn(char *p)
+{
+        snprintf(gszCustomSerialNum, sizeof(gszCustomSerialNum), "%s", p);
+        printk("Custom Serial Number: %s\n", gszCustomSerialNum);
+	return 1;
+}
+__setup("custom_sn=", early_custom_sn);
+#endif
 
 /*
  * --------- Crashkernel reservation ------------------------------

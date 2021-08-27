@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  libata-eh.c - libata error handling
  *
@@ -73,8 +76,12 @@ enum {
 
 	ATA_EH_CMD_DFL_TIMEOUT		=  5000,
 
+#ifdef MY_ABC_HERE
+	ATA_EH_RESET_COOL_DOWN		=  2000,
+#else
 	/* always put at least this amount of time between resets */
 	ATA_EH_RESET_COOL_DOWN		=  5000,
+#endif
 
 	/* Waiting in ->prereset can never be reliable.  It's
 	 * sometimes nice to wait there but it can't be depended upon;
@@ -90,6 +97,16 @@ enum {
 	ATA_EH_PROBE_TRIAL_INTERVAL	= 60000,	/* 1 min */
 	ATA_EH_PROBE_TRIALS		= 2,
 };
+
+#ifdef MY_ABC_HERE
+extern unsigned int guiWakeupDisksNum;
+#endif
+
+
+#ifdef MY_ABC_HERE
+extern int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int);
+extern int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int);
+#endif
 
 /* The following table determines how we sequence resets.  Each entry
  * represents timeout for that try.  The first try can be soft or
@@ -573,6 +590,50 @@ static void ata_eh_unload(struct ata_port *ap)
 	spin_unlock_irqrestore(ap->lock, flags);
 }
 
+#ifdef MY_ABC_HERE
+void SendPwrResetEvent(struct work_struct *work)
+{
+	if (funcSYNOSendDiskResetPwrEvent) {
+		funcSYNOSendDiskResetPwrEvent(0, 0);
+	}
+
+	return;
+}
+
+void SendPortDisEvent(struct work_struct *work)
+{
+	if (funcSYNOSendDiskPortDisEvent) {
+		funcSYNOSendDiskPortDisEvent(0, 0);
+	}
+
+	return;
+}
+
+static int iSynoCountPwrReset(const struct ata_device *dev, int iSet)
+{
+	int iRet = -1;
+	struct scsi_device *sdev = NULL;
+
+	if (!dev) {
+		goto END;
+	}
+
+	sdev = dev->sdev;
+	if (!sdev) {
+		goto END;
+	}
+
+	if (iSet) {
+		sdev->iResetPwrCount += iSet;
+	} else {
+		sdev->iResetPwrCount = 0;
+	}
+
+END:
+	return iRet;
+}
+#endif
+
 /**
  *	ata_scsi_error - SCSI layer error handler callback
  *	@host: SCSI host on which error occurred
@@ -718,11 +779,103 @@ EXPORT_SYMBOL(ata_scsi_cmd_error_handler);
 void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 {
 	unsigned long flags;
+#ifdef MY_ABC_HERE
+	int iDetectTries = ATA_EH_PMP_TRIES;
+	int iForceDetect = 0;
+	unsigned int uiStatStart = 0x0;
+	unsigned int uiStatEnd = 0x0;
+#endif
+
+#ifdef MY_ABC_HERE
+	if (ap->iDetectStat) {
+		struct ata_link *link = NULL;
+		struct ata_device *dev = NULL;
+		int i = 0;
+		ata_for_each_link(link, ap, EDGE) {
+			ata_for_each_dev(dev, link, ALL) {
+				if(!(dev->ulSflags)) {
+					uiStatStart |= (ata_dev_enabled(dev)) << i;
+				}
+				++i;
+			}
+		}
+		DBGMESG("ata%u: detect stat 0x%x", ap->print_id, uiStatStart);
+	}
+#endif
+
+#ifdef MY_ABC_HERE
+	if (ap->iDetectStat) {
+		struct ata_link *link = NULL;
+		struct ata_device *dev = NULL;
+		int i = 0;
+		ata_for_each_link(link, ap, EDGE) {
+			ata_for_each_dev(dev, link, ALL) {
+				uiStatStart |= (ata_dev_enabled(dev)) << i;
+				++i;
+			}
+		}
+		DBGMESG("ata%u: detect stat 0x%x", ap->print_id, uiStatStart);
+	}
+#endif
+
+#ifdef MY_ABC_HERE
+	if (0 < guiWakeupDisksNum && 1 == ap->nr_active_links) {
+		struct ata_queued_cmd *qc_insert = NULL;
+		int tag = 0;
+		spin_lock_irqsave(ap->lock, flags);
+		for (tag = 0; tag < ATA_MAX_QUEUE; tag++) {
+			struct ata_queued_cmd *qc = __ata_qc_from_tag(ap, tag);
+
+			if (qc->flags & ATA_QCFLAG_ACTIVE && NULL == qc->scsicmd && !ata_tag_internal(qc->tag) &&
+				(ATA_CMD_VERIFY == qc->tf.command || ATA_CMD_CHK_POWER == qc->tf.command)) {
+				qc_insert = qc;
+			}
+		}
+		if (qc_insert && (qc_insert->flags & ATA_QCFLAG_ACTIVE)) {
+			/* If our insert verify,chkpwr cmd still exist and jiffies not longer than WAKEINTERVAL,
+			 * we must wait it complete to prevent HSM violation error */
+			while((qc_insert && NULL == qc_insert->scsicmd && (qc_insert->flags & ATA_QCFLAG_ACTIVE) &&
+				   (ATA_CMD_VERIFY == qc_insert->tf.command || ATA_CMD_CHK_POWER == qc_insert->tf.command)) &&
+				  time_before(jiffies, qc_insert->dev->ulLastCmd + WAKEINTERVAL)) {
+				spin_unlock_irqrestore(ap->lock, flags);
+				schedule_timeout_uninterruptible(HZ);
+				spin_lock_irqsave(ap->lock, flags);
+			}
+			if(qc_insert && NULL == qc_insert->scsicmd && (qc_insert->flags & ATA_QCFLAG_ACTIVE) &&
+			   (ATA_CMD_VERIFY == qc_insert->tf.command || ATA_CMD_CHK_POWER == qc_insert->tf.command)) {
+				DBGMESG("port %d insert cmd 0x%x still alive, flush and complete it\n",
+						ap->print_id, qc_insert->tf.command);
+				spin_unlock_irqrestore(ap->lock, flags);
+				ata_sff_flush_pio_task(ap);
+				spin_lock_irqsave(ap->lock, flags);
+				if(qc_insert->flags & ATA_QCFLAG_ACTIVE) {
+					qc_insert->flags |= ATA_QCFLAG_FAILED;
+					__ata_qc_complete(qc_insert);
+				}
+
+			}
+		}
+		spin_unlock_irqrestore(ap->lock, flags);
+	}
+#endif
+
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+	spin_lock_irqsave(ap->lock, flags);
+	while(ap->pflags & ATA_PFLAG_PMP_PMCTL) {
+		spin_unlock_irqrestore(ap->lock, flags);
+		schedule_timeout_uninterruptible(HZ);
+		spin_lock_irqsave(ap->lock, flags);
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+#endif
 
 	/* invoke error handler */
 	if (ap->ops->error_handler) {
 		struct ata_link *link;
 
+#ifdef MY_ABC_HERE
+acquire_repeat:
+#endif
 		/* acquire EH ownership */
 		ata_eh_acquire(ap);
  repeat:
@@ -809,13 +962,167 @@ void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 
 	scsi_eh_flush_done_q(&ap->eh_done_q);
 
+#ifdef MY_ABC_HERE
+	if (ap->iDetectStat) {
+		if (!(ap->pflags & ATA_PFLAG_FROZEN)) {
+			ap->iDetectStat = 0;
+			spin_lock_irqsave(ap->lock, flags);
+			if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_RETRY) {
+				DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_RETRY\n", ap->print_id);
+				ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_RETRY;
+			}
+			spin_unlock_irqrestore(ap->lock, flags);
+		} else {
+			struct ata_link *link = NULL;
+			struct ata_device *dev = NULL;
+			int i = 0;
+
+			ata_for_each_link(link, ap, EDGE) {
+				ata_for_each_dev(dev, link, ALL) {
+					if(!(dev->ulSflags)) {
+						uiStatEnd |= (ata_dev_enabled(dev)) << i;
+					}
+					++i;
+				}
+			}
+			spin_lock_irqsave(ap->lock, flags);
+			if (uiStatStart == uiStatEnd) {
+				/* We received plugged/un-plugged events, but the status is still the same.
+				 * No device plugged/un-plugged but it frozen, we think it's a abnormal status */
+				ata_port_printk(ap, KERN_ERR, "detect abnormal stat 0x%x\n", uiStatEnd);
+				ap->uiSflags |= ATA_SYNO_FLAG_FORCE_RETRY;
+			} else {
+				ata_port_printk(ap, KERN_ERR, "didn't detect abnormal stat, but port frozen \n");
+				ap->iDetectStat = 0;
+				if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_RETRY) {
+					ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_RETRY;
+				}
+			}
+			spin_unlock_irqrestore(ap->lock, flags);
+		}
+	}
+
+	spin_lock_irqsave(ap->lock, flags);
+	if (ap->uiSflags) {
+		iForceDetect = 1;
+		ap->eh_tries = 1; /* FIXME: set eh_tries to 1 to prevent it retry recursively */
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+
+	if (iForceDetect) {
+		iForceDetect = 0;
+		if (SYNO_ERROR_TILL_TO_FORCE == ap->iFakeError) {
+			DBGMESG("port %d unset Fake Error\n", ap->print_id);
+			ap->iFakeError = 0;
+		}
+		if (0 < iDetectTries) {
+			ata_port_printk(ap, KERN_ERR, "do detect tries %d\n", iDetectTries);
+			if (ap->ops->syno_force_intr) {
+				/* set force bit to force it occur fake sw plugged */
+				spin_lock_irqsave(ap->lock, flags);
+				ap->uiSflags |= ATA_SYNO_FLAG_FORCE_INTR;
+				spin_unlock_irqrestore(ap->lock, flags);
+				ap->ops->syno_force_intr(ap);
+			}
+			--iDetectTries;
+			goto acquire_repeat;
+		}
+	}
+	spin_lock_irqsave(ap->lock, flags);
+	if (!ap->uiSflags) {
+		/* FIXME: I can't find another properly place to clear them.
+		 * So I clear them here when EH complete and no error flags */
+		struct ata_link *link = NULL;
+		struct ata_device *dev = NULL;
+		/* if no our error flag, clear dev flags */
+		ata_for_each_link(link, ap, EDGE) {
+			ata_for_each_dev(dev, link, ALL) {
+				dev->ulSflags = 0;
+			}
+		}
+	} else {
+		struct ata_link *link = NULL;
+		struct ata_device *dev = NULL;
+
+		/* clear port error flags */
+		DBGMESG("ata%u: detect error flags 0x%x\n", ap->print_id, ap->uiSflags);
+		ap->uiSflags = 0;
+
+		/* if had on our action flag, we must take action now. Some action may cause deadlock (ex.detach),
+		 * so we must unlock now. */
+		spin_unlock_irqrestore(ap->lock, flags);
+		ata_for_each_link(link, ap, EDGE) {
+			link->uiSflags = 0;
+			ata_for_each_dev(dev, link, ALL) {
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+				if (dev->ulSflags & ATA_SYNO_DFLAG_PMP_DETACH) {
+					ata_dev_printk(dev, KERN_WARNING,
+							"force pmp detach\n");
+					sata_pmp_detach(dev);
+				}
+#endif
+				if (dev->ulSflags & ATA_SYNO_DFLAG_DETACH) {
+					ata_dev_printk(dev, KERN_WARNING,
+							"force dev detach\n");
+					ata_eh_detach_dev(dev);
+				}
+				if (dev->ulSflags & ATA_SYNO_DFLAG_DISABLE) {
+					ata_dev_printk(dev, KERN_WARNING,
+							"force dev disable\n");
+					ata_dev_disable(dev);
+				}
+				dev->ulSflags = 0;
+			}
+		}
+		spin_lock_irqsave(ap->lock, flags);
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+	if (ap->pflags & ATA_PFLAG_FROZEN) {
+		ata_port_printk(ap, KERN_ERR, "send port disabled event\n");
+		/* send event */
+		schedule_work(&(ap->SendPortDisEventTask));
+	}
+#endif /* MY_ABC_HERE */
+
+
 	/* clean up */
 	spin_lock_irqsave(ap->lock, flags);
 
 	if (ap->pflags & ATA_PFLAG_LOADING)
 		ap->pflags &= ~ATA_PFLAG_LOADING;
+#ifdef MY_DEF_HERE
+	else if (ap->pflags & ATA_PFLAG_SCSI_HOTPLUG) {
+		if (!(ap->pflags & ATA_PFLAG_SYNC_SCSI_DEVICE)) {
+			schedule_delayed_work(&ap->hotplug_task, 0);
+		} else {
+			ap->pflags &= ~(ATA_PFLAG_SYNC_SCSI_DEVICE);
+		}
+		if (ap->pflags & ATA_PFLAG_FROZEN) {
+			ata_port_printk(ap, KERN_ERR, "thaw port to prevent it can't detect new disks\n");
+			ata_eh_thaw_port(ap);
+		}
+	}
+#else
 	else if (ap->pflags & ATA_PFLAG_SCSI_HOTPLUG)
 		schedule_delayed_work(&ap->hotplug_task, 0);
+#endif
+#ifdef MY_ABC_HERE
+	else if (ap->pflags & ATA_PFLAG_PMP_DISCONNECT ||
+			 ap->pflags & ATA_PFLAG_PMP_CONNECT) {
+		/* Clear unused PMP event when no ATA_PFLAG_SCSI_HOTPLUG */
+#if defined(MY_ABC_HERE)
+		schedule_delayed_work(&ap->hotplug_task, 0);
+#else
+		ap->pflags &= ~ATA_PFLAG_PMP_DISCONNECT;
+		ap->pflags &= ~ATA_PFLAG_PMP_CONNECT;
+#endif //MY_ABC_HERE
+	}
+#endif
+#ifdef MY_ABC_HERE
+	if (ap->pflags & ATA_PFLAG_SYNO_BOOT_PROBE) {
+		ap->pflags &= ~ATA_PFLAG_SYNO_BOOT_PROBE;
+	}
+#endif
 
 	if (ap->pflags & ATA_PFLAG_RECOVERED)
 		ata_port_info(ap, "EH complete\n");
@@ -1311,6 +1618,17 @@ void ata_dev_disable(struct ata_device *dev)
 	if (!ata_dev_enabled(dev))
 		return;
 
+#ifdef MY_ABC_HERE
+	if ((dev->link->uiSflags || (dev->link->ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL))
+		&& ata_dev_enabled(dev)) {
+		ata_dev_printk(dev, KERN_WARNING,
+					   "still have recovery flags 0x%x, don't disabled it\n", dev->link->uiSflags);
+		dev->ulSflags |= ATA_SYNO_DFLAG_DISABLE;
+		return;
+	}
+	dev->ulSflags &= ~ATA_SYNO_DFLAG_DISABLE;
+#endif
+
 	if (ata_msg_drv(dev->link->ap))
 		ata_dev_warn(dev, "disabled\n");
 	ata_acpi_on_disable(dev);
@@ -1338,6 +1656,17 @@ void ata_eh_detach_dev(struct ata_device *dev)
 	struct ata_port *ap = link->ap;
 	struct ata_eh_context *ehc = &link->eh_context;
 	unsigned long flags;
+
+#ifdef MY_ABC_HERE
+	if ((dev->link->uiSflags || (dev->link->ap->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL))
+		&& ata_dev_enabled(dev)) {
+		ata_dev_printk(dev, KERN_WARNING,
+					   "still have recovery flags 0x%x, don't detach it\n", dev->link->uiSflags);
+		dev->ulSflags |= ATA_SYNO_DFLAG_DETACH;
+		return;
+	}
+	dev->ulSflags &= ~ATA_SYNO_DFLAG_DETACH;
+#endif
 
 	ata_dev_disable(dev);
 
@@ -1737,6 +2066,96 @@ void ata_eh_analyze_ncq_error(struct ata_link *link)
 	ehc->i.err_mask &= ~AC_ERR_DEV;
 }
 
+#ifdef MY_ABC_HERE
+extern unsigned char
+blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd, sector_t lba);
+static unsigned int
+syno_ata_writes_sector(struct ata_queued_cmd *qc)
+{
+	struct ata_taskfile tf;
+	u8 buf[ATA_SECT_SIZE];
+	u8 blLBA48 = 0;
+	sector_t lba = 0;
+
+	/* if the lba can represent as lba28. we use 28.
+	 * Otherwise we use lba48.
+	 */
+	blLBA48 = (qc->tf.flags & ATA_TFLAG_LBA48) ? 1 : 0;
+
+	lba =   (qc->result_tf.lbal & 0xff) |
+			((sector_t)qc->result_tf.lbam << 8) |
+			((sector_t)qc->result_tf.lbah << 16);
+	if (blLBA48) {
+		lba |=  ((sector_t)qc->result_tf.hob_lbal << 24) |
+				((sector_t)qc->result_tf.hob_lbam << 32) |
+				((sector_t)qc->result_tf.hob_lbah << 40);
+	} else {
+		lba |= (((sector_t)qc->result_tf.device & 0x0f) << 24);
+	}
+
+	ata_dev_printk(qc->dev, KERN_ERR, "%s unc at %llu\n",
+				   (qc->tf.flags & ATA_TFLAG_WRITE) ? "write" : "read",
+				   (unsigned long long)lba);
+
+	if (!(qc->tf.flags & ATA_TFLAG_WRITE) &&
+		!blSectorNeedAutoRemap(qc->scsicmd, lba)) {
+		return 0;
+	}
+
+#ifdef MY_ABC_HERE
+	// only report auto-remap in read
+	if (!(qc->tf.flags & ATA_TFLAG_WRITE)) {
+		if (qc->scsicmd) {
+			if (qc->scsicmd->request) {
+				qc->scsicmd->request->cmd_flags |= REQ_AUTO_REMAP;
+				printk("%s:%s(%d) set request cmd_flags REQ_AUTO_REMAP on\n",
+							__FILE__, __FUNCTION__, __LINE__);
+			} else {
+				printk("%s:%s(%d) cannot trace request from scsi_cmd\n",
+					__FILE__, __FUNCTION__, __LINE__);
+			}
+		} else {
+			printk("%s:%s(%d) cannot trace scsicmd from ata_queued_cmd\n",
+				__FILE__, __FUNCTION__, __LINE__);
+		}
+	}
+#endif
+
+	tf = qc->result_tf;
+	tf.protocol = ATA_PROT_PIO;
+	tf.flags = (ATA_TFLAG_ISADDR | ATA_TFLAG_DEVICE | ATA_TFLAG_WRITE);
+	tf.flags |= ((blLBA48) ? ATA_TFLAG_LBA48 : 0);
+	tf.command = ((blLBA48) ? ATA_CMD_PIO_WRITE_EXT : ATA_CMD_PIO_WRITE);
+	tf.hob_feature = 0;
+	tf.hob_nsect = 0; /* We only need one sector */
+	tf.hob_lbah = ((blLBA48) ? tf.hob_lbah : 0);
+	tf.hob_lbam = ((blLBA48) ? tf.hob_lbam : 0);
+	tf.hob_lbal = ((blLBA48) ? tf.hob_lbal : 0);
+	tf.feature = 0;
+	tf.nsect = 1;
+	tf.ctl = qc->dev->link->ap->ctl;
+	tf.device &= ((blLBA48) ? 0 : 0x0f); /* don't need 4bit in device if command is LBA48 */
+	tf.device |= ATA_LBA | ATA_DEVICE_OBS; /* By ATA8-ACS */
+	tf.device = (qc->dev->devno ?
+					tf.device | ATA_DEV1 : tf.device & ~ATA_DEV1); /* enforce correct master/slave bit(for IDE) */
+
+	ata_dev_printk(qc->dev, KERN_ERR,
+				   "insert remap command %02x/%02x:%02x:%02x:%02x:%02x/%02x:%02x:%02x:%02x:%02x/%02x ctl %02x flag %lu proto %02x\n",
+				   tf.command, tf.feature, tf.nsect,
+				   tf.lbal, tf.lbam, tf.lbah,
+				   tf.hob_feature, tf.hob_nsect,
+				   tf.hob_lbal, tf.hob_lbam, tf.hob_lbah,
+				   tf.device, tf.ctl, tf.flags, tf.protocol);
+
+	memset(buf, 0, sizeof(buf));
+	ata_dev_printk(qc->dev, KERN_WARNING,
+			       "Insert write command result %d\n",
+				   ata_exec_internal(qc->dev, &tf, NULL, DMA_TO_DEVICE,
+									 buf, ATA_SECT_SIZE, 0));
+	return 0;
+}
+#endif
+
 /**
  *	ata_eh_analyze_tf - analyze taskfile of a failed qc
  *	@qc: qc to analyze
@@ -1776,6 +2195,12 @@ static unsigned int ata_eh_analyze_tf(struct ata_queued_cmd *qc,
 			qc->err_mask |= AC_ERR_MEDIA;
 		if (err & ATA_IDNF)
 			qc->err_mask |= AC_ERR_INVALID;
+#ifdef MY_ABC_HERE
+		if (!(qc->ap->pflags & ATA_PFLAG_FROZEN) &&
+			err & ATA_UNC) {
+			syno_ata_writes_sector(qc);
+		}
+#endif
 		break;
 
 	case ATA_DEV_ATAPI:
@@ -2163,6 +2588,13 @@ static void ata_eh_link_autopsy(struct ata_link *link)
 			eflags |= ATA_EFLAG_DUBIOUS_XFER;
 		ehc->i.action |= ata_eh_speed_down(dev, eflags, all_err_mask);
 	}
+#ifdef MY_ABC_HERE
+	if (ap->nr_pmp_links &&
+		ehc->i.serror & SERR_PHYRDY_CHG &&
+		ehc->i.serror & SERR_COMM_WAKE) {
+		ap->link.eh_context.i.action |= ATA_EH_HARDRESET;
+	}
+#endif
 
 	DPRINTK("EXIT\n");
 }
@@ -2875,6 +3307,19 @@ int ata_eh_reset(struct ata_link *link, int classify,
 	ap->pflags &= ~ATA_PFLAG_RESETTING;
 	spin_unlock_irqrestore(ap->lock, flags);
 
+#ifdef MY_ABC_HERE
+	spin_lock_irqsave(ap->lock, flags);
+	if (!rc && link->uiSflags) {
+		/* GSCR is pmp fail flag, we shouldn't clear it here */
+		if (link->uiSflags & ATA_SYNO_FLAG_GSCR_FAIL) {
+			link->uiSflags = ATA_SYNO_FLAG_GSCR_FAIL;
+		} else {
+			ata_link_printk(link, KERN_ERR, "link reset sucessfully clear error flags\n");
+			link->uiSflags = 0;
+		}
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+#endif
 	return rc;
 
  fail:
@@ -3126,6 +3571,12 @@ static int ata_eh_revalidate_and_attach(struct ata_link *link,
 		ehc->i.flags |= ATA_EHI_SETMODE;
 	}
 
+#ifdef MY_ABC_HERE
+	if (ap->uiSflags & ATA_SYNO_FLAG_REVALID_FAIL) {
+		DBGMESG("port %d revalid sucessfully , clear revalid fail flag\n", ap->print_id);
+		ap->uiSflags &= ~ATA_SYNO_FLAG_REVALID_FAIL;
+	}
+#endif
 	return 0;
 
  err:
@@ -3270,7 +3721,11 @@ static int ata_eh_maybe_retry_flush(struct ata_device *dev)
 		return 0;
 
 	/* if the device failed it, it should be reported to upper layers */
+#ifdef MY_ABC_HERE 
+	if ((qc->err_mask & AC_ERR_DEV) && ATA_DEV_UNKNOWN == dev->class)
+#else
 	if (qc->err_mask & AC_ERR_DEV)
+#endif
 		return 0;
 
 	/* flush failed for some other reason, give it another shot */
@@ -3500,7 +3955,8 @@ static int ata_count_probe_trials_cb(struct ata_ering_entry *ent, void *void_arg
 	u64 now = get_jiffies_64();
 	int *trials = void_arg;
 
-	if (ent->timestamp < now - min(now, interval))
+	if ((ent->eflags & ATA_EFLAG_OLD_ER) ||
+	    (ent->timestamp < now - min(now, interval)))
 		return -1;
 
 	(*trials)++;
@@ -3591,6 +4047,12 @@ static int ata_eh_handle_dev_fail(struct ata_device *dev, int err)
 		/* detach if offline */
 		if (ata_phys_link_offline(ata_dev_phys_link(dev)))
 			ata_eh_detach_dev(dev);
+#ifdef MY_ABC_HERE
+		else if(-EIO == err) {
+			ata_dev_printk(dev, KERN_WARNING,"handle -EIO dev fail, detach this dev\n");
+			ata_eh_detach_dev(dev);
+		}
+#endif
 
 		/* schedule probe if necessary */
 		if (ata_eh_schedule_probe(dev)) {
@@ -3693,17 +4155,42 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 			ehc->classes[dev->devno] = ATA_DEV_UNKNOWN;
 	}
 
+#ifdef MY_ABC_HERE
+	if (ap->nr_pmp_links &&
+		ap->pflags & ATA_PFLAG_SYNO_BOOT_PROBE) {
+		ata_port_printk(ap, KERN_INFO, "Apply Synology fast PMP boot\n");
+		ata_for_each_link(link, ap, EDGE) {
+			int class = 0;
+			if (ap->ops->pmp_hardreset)
+				ap->ops->pmp_hardreset(link, &class, 0);
+		}
+	}
+#endif
 	/* reset */
 	ata_for_each_link(link, ap, EDGE) {
 		struct ata_eh_context *ehc = &link->eh_context;
 
+#ifdef MY_ABC_HERE
+		if (0 >= ap->iFakeError && !(ehc->i.action & ATA_EH_RESET))
+#else
 		if (!(ehc->i.action & ATA_EH_RESET))
+#endif
 			continue;
 
 		rc = ata_eh_reset(link, ata_link_nr_vacant(link),
 				  prereset, softreset, hardreset, postreset);
 		if (rc) {
 			ata_link_err(link, "reset failed, giving up\n");
+#ifdef MY_ABC_HERE
+			if (link->uiSflags) {
+				ata_for_each_dev(dev, link, ALL) {
+					if (ATA_DEV_ATA == dev->class) {
+						dev->ulSflags |= ATA_SYNO_DFLAG_DETACH;
+						ata_dev_printk(dev, KERN_ERR, "detect reset link fail, set detach flag\n");
+					}
+				}
+			}
+#endif
 			goto out;
 		}
 	}
@@ -3775,7 +4262,16 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 
 		/* if PMP got attached, return, pmp EH will take care of it */
 		if (link->device->class == ATA_DEV_PMP) {
+#ifdef MY_ABC_HERE
+			if (ehc->i.action & ATA_EH_SYNO_PWON) {
+				ehc->i.action = 0;
+				ehc->i.action |= ATA_EH_HARDRESET;
+			}else {
 			ehc->i.action = 0;
+			}
+#else
+			ehc->i.action = 0;
+#endif
 			return 0;
 		}
 
@@ -3817,6 +4313,23 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 				goto rest_fail;
 		}
 
+#ifdef MY_ABC_HERE
+		if (ehc->i.action & ATA_EH_WCACHE_DISABLE) {
+			ata_for_each_dev(dev, link, ALL) {
+				unsigned int err_mask = 0;
+				if (dev->class != ATA_DEV_ATA || !(dev->flags & ATA_DFLAG_NO_WCACHE))
+					continue;
+
+				ata_dev_printk(dev, KERN_ERR, "Disable disk write cache in EH");
+				err_mask = ata_dev_set_feature(dev, SETFEATURES_WC_OFF, 0);
+				if (err_mask)
+					ata_dev_printk(dev, KERN_ERR,
+						"failed to dsiable write cache "
+						"(err_mask=0x%x)\n", err_mask);
+			}
+		}
+#endif
+
 		/* this link is okay now */
 		ehc->i.flags = 0;
 		continue;
@@ -3843,6 +4356,13 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 	if (rc && r_failed_link)
 		*r_failed_link = link;
 
+#ifdef MY_ABC_HERE
+	/* if not pmp, set link flags to ata port flags for ata port error handling.
+	 * pmp handler will handle pmp case by itself */
+	if (!ap->nr_pmp_links) {
+		ap->uiSflags = uiCheckPortLinksFlags(ap);
+	}
+#endif
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;
 }

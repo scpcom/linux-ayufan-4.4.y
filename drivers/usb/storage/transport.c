@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Driver for USB Mass Storage compliant devices
  *
  * Current development and maintenance by:
@@ -1051,6 +1054,44 @@ int usb_stor_Bulk_max_lun(struct us_data *us)
 	return 0;
 }
 
+#ifdef MY_DEF_HERE
+int extra_delay = 1;
+module_param(extra_delay, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
+static inline void delay_for_JM(struct us_data *us)
+{
+	u32 id_vendor = le16_to_cpu(us->pusb_dev->descriptor.idVendor);
+	u32 id_product = le16_to_cpu(us->pusb_dev->descriptor.idProduct);
+
+	if (!extra_delay) return;
+
+	switch (id_vendor) {
+		case 0x152d: // Jmicron
+			if (USB_SPEED_SUPER == us->pusb_dev->speed) {
+				if (id_product == 0x0539) {
+					udelay(300);
+				}
+				udelay(500);
+			} else {
+				udelay(100);
+			}
+			break;
+		case 0x04e8: // Samsung
+		case 0x059f: // Lacie
+		case 0x07ab: // Freecom
+		case 0x059b: //Iomega
+		case 0x4971: //SimpleTech
+		case 0x1955: // Icybox
+			if (USB_SPEED_SUPER != us->pusb_dev->speed) {
+				udelay(100);
+			}
+			break;
+		default:
+			break;
+	}
+}
+#endif
+
 int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 {
 	struct bulk_cb_wrap *bcb = (struct bulk_cb_wrap *) us->iobuf;
@@ -1090,6 +1131,9 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 			bcb->Length);
 	result = usb_stor_bulk_transfer_buf(us, us->send_bulk_pipe,
 				bcb, cbwlen, NULL);
+#ifdef MY_DEF_HERE
+	delay_for_JM(us);
+#endif
 	US_DEBUGP("Bulk command transfer result=%d\n", result);
 	if (result != USB_STOR_XFER_GOOD)
 		return USB_STOR_TRANSPORT_ERROR;
@@ -1107,6 +1151,9 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		unsigned int pipe = srb->sc_data_direction == DMA_FROM_DEVICE ? 
 				us->recv_bulk_pipe : us->send_bulk_pipe;
 		result = usb_stor_bulk_srb(us, pipe, srb);
+#ifdef MY_DEF_HERE
+		delay_for_JM(us);
+#endif
 		US_DEBUGP("Bulk data transfer result 0x%x\n", result);
 		if (result == USB_STOR_XFER_ERROR)
 			return USB_STOR_TRANSPORT_ERROR;
@@ -1129,6 +1176,9 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 	US_DEBUGP("Attempting to get CSW...\n");
 	result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
+#ifdef MY_DEF_HERE
+	delay_for_JM(us);
+#endif
 
 	/* Some broken devices add unnecessary zero-length packets to the
 	 * end of their data transfers.  Such packets show up as 0-length
@@ -1138,6 +1188,9 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		US_DEBUGP("Received 0-length CSW; retrying...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
+#ifdef MY_DEF_HERE
+	delay_for_JM(us);
+#endif
 	}
 
 	/* did the attempt to read the CSW fail? */
@@ -1147,6 +1200,9 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		US_DEBUGP("Attempting to get CSW (2nd try)...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, NULL);
+#ifdef MY_DEF_HERE
+	delay_for_JM(us);
+#endif
 	}
 
 	/* if we still have a failure at this point, we're in trouble */
@@ -1203,6 +1259,10 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 			                                       (int) residue));
 		}
 	}
+
+#ifdef MY_DEF_HERE
+	delay_for_JM(us);
+#endif
 
 	/* based on the status code, we report good or bad */
 	switch (bcs->Status) {

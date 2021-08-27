@@ -53,8 +53,8 @@ config MPC85xx_DS
 	bool "Freescale MPC85xx DS"
 	select PPC_I8259
 	select DEFAULT_UIMAGE
-	select FSL_ULI1575 if PCI
-	select SWIOTLB
+	#select FSL_ULI1575 if PCI
+	#select SWIOTLB
 	help
 	  This option enables support for the MPC85xx DS (MPC8544 DS) board
 
@@ -67,15 +67,27 @@ config MPC85xx_RDB
 	help
 	  This option enables support for the MPC85xx RDB (P2020 RDB) board
 
+config SYNO_MPC854X
+	bool
+	default y if MPC85xx_CDS
+
 config P1010_RDB
 	bool "Freescale P1010RDB"
 	select DEFAULT_UIMAGE
 	help
 	  This option enables support for the MPC85xx RDB (P1010 RDB) board
-
 	  P1010RDB contains P1010Si, which provides CPU performance up to 800
 	  MHz and 1600 DMIPS, additional functionality and faster interfaces
 	  (DDR3/3L, SATA II, and PCI  Express).
+
+config SYNO_MPC8533
+	bool
+	default y if MPC85xx_DS
+	select ASYNC_TX_ENABLE_CHANNEL_SWITCH
+
+config SYNO_MPC85XX_COMMON
+	bool
+	default y if SYNO_MPC854X || SYNO_MPC8533
 
 config P1022_DS
 	bool "Freescale P1022 DS"

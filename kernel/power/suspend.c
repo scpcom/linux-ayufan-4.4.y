@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * kernel/power/suspend.c - Suspend to RAM and standby functionality.
  *

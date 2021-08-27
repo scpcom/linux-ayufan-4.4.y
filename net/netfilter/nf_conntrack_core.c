@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Connection state tracking for netfilter.  This is separated from,
    but required by, the NAT layer; it can also be used by an iptables
    extension. */
@@ -46,6 +49,13 @@
 #include <net/netfilter/nf_conntrack_timestamp.h>
 #include <net/netfilter/nf_nat.h>
 #include <net/netfilter/nf_nat_core.h>
+
+#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
+extern int fp_disable_flag;
+extern int fp_nat_db_init(u32 db_size);
+extern int fp_nat_info_delete(u32 src_ip, u32 dst_ip, u16 src_port, u16 dst_port, u8 proto);
+extern int fp_is_nat_confirmed(u32 src_ip, u32 dst_ip, u16 src_port, u16 dst_port, u8 proto);
+#endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
 
 #define NF_CONNTRACK_VERSION	"0.5.0"
 
@@ -288,6 +298,45 @@ static void death_by_timeout(unsigned long ul_conntrack)
 	tstamp = nf_conn_tstamp_find(ct);
 	if (tstamp && tstamp->stop == 0)
 		tstamp->stop = ktime_to_ns(ktime_get_real());
+
+#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
+	if(!fp_disable_flag)
+	{
+		int confirmed_org, confirmed_reply;
+
+		confirmed_org = fp_is_nat_confirmed(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3.ip,
+				ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3.ip,
+				ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u.all,
+				ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.all,
+				ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum);
+
+		confirmed_reply = fp_is_nat_confirmed(ct->tuplehash[IP_CT_DIR_REPLY].tuple.src.u3.ip,
+				ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u3.ip,
+				ct->tuplehash[IP_CT_DIR_REPLY].tuple.src.u.all,
+				ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u.all,
+				ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.protonum);
+
+	if (confirmed_org || confirmed_reply) {
+			/* arbitrary value, but larger than CONFIG_MV_ETH_NFP_AGING_TIMER */
+			ct->timeout.expires = jiffies + ((CONFIG_MV_ETH_NFP_AGING_TIMER * 2) * HZ);
+		add_timer(&ct->timeout);
+		return;
+	}
+		else {
+			fp_nat_info_delete(	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3.ip,
+						ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3.ip,
+						ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u.all,
+						ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.all,
+						ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum);
+
+			fp_nat_info_delete(	ct->tuplehash[IP_CT_DIR_REPLY].tuple.src.u3.ip,
+						ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u3.ip,
+						ct->tuplehash[IP_CT_DIR_REPLY].tuple.src.u.all,
+						ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u.all,
+						ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.protonum);
+	}
+	}
+#endif /* CONFIG_MV_ETH_NFP_NAT_SUPPORT */
 
 	if (!test_bit(IPS_DYING_BIT, &ct->status) &&
 	    unlikely(nf_conntrack_event(IPCT_DESTROY, ct) < 0)) {
@@ -1579,6 +1628,11 @@ int nf_conntrack_init(struct net *net)
 		/* Howto get NAT offsets */
 		RCU_INIT_POINTER(nf_ct_nat_offset, NULL);
 	}
+
+#ifdef CONFIG_MV_ETH_NFP_NAT_SUPPORT
+	fp_nat_db_init(2*nf_conntrack_htable_size);
+#endif
+
 	return 0;
 
 out_net:

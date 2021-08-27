@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/mm/oom_kill.c
  * 
@@ -301,9 +304,15 @@ static enum oom_constraint constrained_alloc(struct zonelist *zonelist,
  *
  * (not docbooked, we don't want this one cluttering up the manual)
  */
+#ifdef MY_ABC_HERE
+static struct task_struct *select_bad_process(unsigned int *ppoints,
+		 unsigned long totalpages, struct mem_cgroup *mem,
+		 const nodemask_t *nodemask, u8 blChooseWhiteList)
+#else
 static struct task_struct *select_bad_process(unsigned int *ppoints,
 		unsigned long totalpages, struct mem_cgroup *mem,
 		const nodemask_t *nodemask)
+#endif
 {
 	struct task_struct *g, *p;
 	struct task_struct *chosen = NULL;
@@ -357,6 +366,30 @@ static struct task_struct *select_bad_process(unsigned int *ppoints,
 					return ERR_PTR(-1UL);
 			}
 		}
+
+#ifdef MY_ABC_HERE
+		/** These are the most important processes in DS. We should
+		 *  nerver kill it until the last.
+		 */
+		if (!strcasecmp(p->comm, "httpd") ||
+			!strcasecmp(p->comm, "hotplugd") ||
+			!strcasecmp(p->comm, "scemd") ||
+			!strcasecmp(p->comm, "postgres") ||
+			!strcasecmp(p->comm, "findhostd") ||
+			!strcasecmp(p->comm, "syslogd") ||
+			!strcasecmp(p->comm, "klogd")) {
+			if (blChooseWhiteList) {
+				if (!strcasecmp(p->comm, "scemd")) {
+					printk("Still skip kill [%s] because it is a important process in DS\n", p->comm);
+					continue;
+				}
+			} else {
+				if (strcasecmp(p->comm, "httpd") || strcasecmp(p->parent->comm, "httpd")) {
+					continue;
+				}
+			}
+		}
+#endif
 
 		points = oom_badness(p, mem, nodemask, totalpages);
 		if (points > *ppoints) {
@@ -751,10 +784,22 @@ void out_of_memory(struct zonelist *zonelist, gfp_t gfp_mask,
 	}
 
 retry:
+#ifdef MY_ABC_HERE
+	p = select_bad_process(&points, totalpages, NULL, mpol_mask, 0);
+#else
 	p = select_bad_process(&points, totalpages, NULL, mpol_mask);
+#endif
 	if (PTR_ERR(p) == -1UL)
 		goto out;
 
+#ifdef MY_ABC_HERE
+	/**
+	 * Choose the white list. But left scemd
+	 */
+	if (!p) {
+		p = select_bad_process(&points, totalpages, NULL, mpol_mask, 1);
+	}
+#endif
 	/* Found nothing?!?! Either we hang forever, or we panic. */
 	if (!p) {
 		dump_header(NULL, gfp_mask, order, NULL, mpol_mask);

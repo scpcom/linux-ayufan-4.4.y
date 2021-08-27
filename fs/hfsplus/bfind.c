@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/bfind.c
  *
@@ -222,3 +225,145 @@ out:
 	fd->bnode = bnode;
 	return res;
 }
+
+#ifdef MY_ABC_HERE
+static int hfsplus_brec_check_prev_node_rec(struct hfs_bnode *bnode, hfsplus_btree_key *search_key)
+{
+	int res = 0;
+	u16 off, len, keylen;
+	struct hfs_bnode *p_bnode;
+	hfsplus_btree_key key;
+
+	p_bnode = hfs_bnode_find(bnode->tree, bnode->prev);
+	if (IS_ERR(p_bnode)) {
+		return 0;
+	}
+
+	len = hfs_brec_lenoff(p_bnode, p_bnode->num_recs - 1, &off);
+	keylen = hfs_brec_keylen(p_bnode, p_bnode->num_recs - 1);
+	if (keylen == 0)
+		goto out;
+	hfs_bnode_read(p_bnode, &key, off, keylen);
+	if (!bnode->tree->keycmp(&key, search_key)) {
+		res = 1;
+	}
+
+out:
+	hfs_bnode_put(p_bnode);
+	return res;
+}
+
+// copy from __hfsplus_brec_find, 
+// the only difference is it would traverse to the last matched and most left record.
+int __hfsplus_brec_find_first(struct hfs_bnode *bnode, struct hfs_find_data *fd)
+{
+	int cmpval;
+	u16 off, len, keylen;
+	int rec;
+	int b, e;
+	int res;
+
+	b = 0;
+	e = bnode->num_recs - 1;
+	res = -ENOENT;
+	do {
+		rec = (e + b) / 2;
+		len = hfs_brec_lenoff(bnode, rec, &off);
+		keylen = hfs_brec_keylen(bnode, rec);
+		if (keylen == 0) {
+			res = -EINVAL;
+			goto fail;
+		}
+		hfs_bnode_read(bnode, fd->key, off, keylen);
+		cmpval = bnode->tree->keycmp(fd->key, fd->search_key);
+		if (!cmpval) {
+			e = rec;
+			if (0 != fd->search_key->attr.name.length || b == e) {
+				res = 0;
+				goto done;
+			}
+		} else if (cmpval < 0)
+			b = rec + 1;
+		else
+			e = rec - 1;
+	} while (b <= e);
+	if (rec != e && e >= 0) {
+		len = hfs_brec_lenoff(bnode, e, &off);
+		keylen = hfs_brec_keylen(bnode, e);
+		if (keylen == 0) {
+			res = -EINVAL;
+			goto fail;
+		}
+		hfs_bnode_read(bnode, fd->key, off, keylen);
+	}
+done:
+	fd->record = e;
+	fd->keyoffset = off;
+	fd->keylength = keylen;
+	fd->entryoffset = off + keylen;
+	fd->entrylength = len - keylen;
+fail:
+	return res;
+}
+// copy from hfsplus_brec_find()
+int hfsplus_brec_find_first(struct hfs_find_data *fd)
+{
+	struct hfs_btree *tree;
+	struct hfs_bnode *bnode;
+	u32 nidx, parent;
+	__be32 data;
+	int height, res;
+
+	tree = fd->tree;
+	if (fd->bnode)
+		hfs_bnode_put(fd->bnode);
+	fd->bnode = NULL;
+	nidx = tree->root;
+	if (!nidx)
+		return -ENOENT;
+	height = tree->depth;
+	res = 0;
+	parent = 0;
+	for (;;) {
+		bnode = hfs_bnode_find(tree, nidx);
+		if (IS_ERR(bnode)) {
+			res = PTR_ERR(bnode);
+			bnode = NULL;
+			break;
+		}
+		if (bnode->height != height)
+			goto invalid;
+		if (bnode->type != (--height ? HFS_NODE_INDEX : HFS_NODE_LEAF))
+			goto invalid;
+		bnode->parent = parent;
+		res = __hfsplus_brec_find_first(bnode, fd);
+
+		if (fd->record == 0 &&
+			hfsplus_brec_check_prev_node_rec(bnode, fd->search_key)) {
+			++height;
+			nidx = bnode->prev;
+			hfs_bnode_put(bnode);
+			continue;
+		}
+		if (!height)
+			break;
+		if (fd->record < 0)
+			goto release;
+
+		parent = nidx;
+		hfs_bnode_read(bnode, &data, fd->entryoffset, 4);
+		nidx = be32_to_cpu(data);
+		hfs_bnode_put(bnode);
+	}
+	fd->bnode = bnode;
+	return res;
+
+invalid:
+	printk(KERN_ERR "hfs: inconsistency in B*Tree (%d,%d,%d,%u,%u)\n",
+		height, bnode->height, bnode->type, nidx, parent);
+	res = -EIO;
+release:
+	hfs_bnode_put(bnode);
+	return res;
+}
+#endif

@@ -32,3 +32,6 @@ header-y += termios.h
 header-y += types.h
 header-y += ucontext.h
 header-y += unistd.h
+
+header-y += getorder.h
+header-y += memory_model.h

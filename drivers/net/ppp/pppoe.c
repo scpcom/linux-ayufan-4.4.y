@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /** -*- linux-c -*- ***********************************************************
  * Linux PPP over Ethernet (PPPoX/PPPoE) Sockets
  *
@@ -84,6 +87,13 @@
 #include <net/sock.h>
 
 #include <asm/uaccess.h>
+
+#ifdef CONFIG_MV_ETH_NFP_PPP
+extern int fp_ppp_db_init(void);
+extern int fp_ppp_info_set(u32 if_ppp, u32 if_eth, u16 sid, u8 *mac, u32 channel);
+extern int fp_ppp_info_del(u32 channel);
+extern int fp_ppp_db_clear(void);
+#endif
 
 #define PPPOE_HASH_BITS 4
 #define PPPOE_HASH_SIZE (1 << PPPOE_HASH_BITS)
@@ -575,6 +585,9 @@ static int pppoe_release(struct socket *sock)
 	}
 
 	po = pppox_sk(sk);
+#ifdef CONFIG_MV_ETH_NFP_PPP
+	fp_ppp_info_del(&po->chan);
+#endif
 
 	if (sk->sk_state & (PPPOX_CONNECTED | PPPOX_BOUND)) {
 		dev_put(po->pppoe_dev);
@@ -693,6 +706,9 @@ static int pppoe_connect(struct socket *sock, struct sockaddr *uservaddr,
 		}
 
 		sk->sk_state = PPPOX_CONNECTED;
+#ifdef CONFIG_MV_ETH_NFP_PPP
+		fp_ppp_info_set(0, dev->ifindex, sp->sa_addr.pppoe.sid, po->pppoe_pa.remote, &po->chan);
+#endif
 	}
 
 	po->num = sp->sa_addr.pppoe.sid;
@@ -1149,6 +1165,9 @@ static __net_init int pppoe_init_net(struct net *net)
 
 static __net_exit void pppoe_exit_net(struct net *net)
 {
+#ifdef CONFIG_MV_ETH_NFP_PPP
+	fp_ppp_db_clear();
+#endif
 	proc_net_remove(net, "pppoe");
 }
 
@@ -1179,6 +1198,9 @@ static int __init pppoe_init(void)
 	dev_add_pack(&pppoed_ptype);
 	register_netdevice_notifier(&pppoe_notifier);
 
+#ifdef CONFIG_MV_ETH_NFP_PPP
+	fp_ppp_db_init();
+#endif
 	return 0;
 
 out_unregister_pppoe_proto:

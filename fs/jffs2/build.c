@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * JFFS2 -- Journalling Flash File System, Version 2.
  *

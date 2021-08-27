@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* CPU control.
  * (C) 2001, 2002, 2003, 2004 Rusty Russell
  *
@@ -15,6 +18,9 @@
 #include <linux/stop_machine.h>
 #include <linux/mutex.h>
 #include <linux/gfp.h>
+#ifdef MY_ABC_HERE
+#include <linux/delay.h>
+#endif
 #include <linux/suspend.h>
 
 #ifdef CONFIG_SMP
@@ -257,6 +263,10 @@ static int __ref _cpu_down(unsigned int cpu, int tasks_frozen)
 
 	/* This actually kills the CPU. */
 	__cpu_die(cpu);
+
+#ifdef MY_ABC_HERE 
+	msleep(500);
+#endif
 
 	/* CPU is completely dead: tell everyone.  Too late to complain. */
 	cpu_notify_nofail(CPU_DEAD | mod, hcpu);

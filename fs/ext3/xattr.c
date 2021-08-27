@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/ext3/xattr.c
  *
@@ -114,6 +117,9 @@ static const struct xattr_handler *ext3_xattr_handler_map[] = {
 #ifdef CONFIG_EXT3_FS_SECURITY
 	[EXT3_XATTR_INDEX_SECURITY]	     = &ext3_xattr_security_handler,
 #endif
+#ifdef MY_ABC_HERE
+	[EXT3_XATTR_INDEX_SYNO]  = &ext3_xattr_syno_handler
+#endif
 };
 
 const struct xattr_handler *ext3_xattr_handlers[] = {
@@ -125,6 +131,9 @@ const struct xattr_handler *ext3_xattr_handlers[] = {
 #endif
 #ifdef CONFIG_EXT3_FS_SECURITY
 	&ext3_xattr_security_handler,
+#endif
+#ifdef MY_ABC_HERE
+	&ext3_xattr_syno_handler,
 #endif
 	NULL
 };
@@ -1334,3 +1343,47 @@ exit_ext3_xattr(void)
 		mb_cache_destroy(ext3_xattr_cache);
 	ext3_xattr_cache = NULL;
 }
+
+#ifdef MY_ABC_HERE
+static size_t
+ext3_xattr_syno_list(struct dentry *dentry, char *list, size_t list_size,
+		     const char *name, size_t name_len, int handler_flags)
+{
+	const size_t prefix_len = XATTR_SYNO_PREFIX_LEN;
+	const size_t total_len = prefix_len + name_len + 1;
+
+	if (list && total_len <= list_size) {
+		memcpy(list, XATTR_SYNO_PREFIX, prefix_len);
+		memcpy(list+prefix_len, name, name_len);
+		list[prefix_len + name_len] = '\0';
+	}
+	return total_len;
+}
+
+static int ext3_xattr_syno_get(struct dentry *dentry, const char *name,
+			  void *buffer, size_t size, int handler_flags)
+{
+	if (strcmp(name, "") == 0)
+		return -EINVAL;
+
+	return ext3_xattr_get(dentry->d_inode, EXT3_XATTR_INDEX_SYNO, name, buffer, size);
+}
+
+static int ext3_xattr_syno_set(struct dentry *dentry, const char *name,
+			  const void *value, size_t size, int flags, int handler_flags)
+{
+	if (strcmp(name, "") == 0){
+		return -EINVAL;
+	}
+
+	return ext3_xattr_set(dentry->d_inode, EXT3_XATTR_INDEX_SYNO, name,
+			      value, size, flags);
+}
+
+struct xattr_handler ext3_xattr_syno_handler = {
+	.prefix	= XATTR_SYNO_PREFIX,
+	.list	= ext3_xattr_syno_list,
+	.get	= ext3_xattr_syno_get,
+	.set	= ext3_xattr_syno_set,
+};
+#endif

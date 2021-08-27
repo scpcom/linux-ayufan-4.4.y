@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_STAT_H
 #define _LINUX_STAT_H
 
@@ -63,6 +66,12 @@ struct kstat {
 	u64		ino;
 	dev_t		dev;
 	umode_t		mode;
+#ifdef MY_ABC_HERE
+	__u32		SynoMode;
+#endif
+#ifdef MY_ABC_HERE
+	__u32		syno_archive_version;
+#endif
 	unsigned int	nlink;
 	uid_t		uid;
 	gid_t		gid;
@@ -71,10 +80,41 @@ struct kstat {
 	struct timespec  atime;
 	struct timespec	mtime;
 	struct timespec	ctime;
+#ifdef MY_ABC_HERE
+	struct timespec SynoCreateTime;
+#endif
 	unsigned long	blksize;
 	unsigned long long	blocks;
 };
 
+#endif
+
+#ifdef MY_ABC_HERE
+#define S2_IARCHIVE    (1<<0)	// synology backup archive bit
+#define S2_SMB_ARCHIVE (1<<1)	// samba backup archive bit (some other windows ap)
+#define S2_SMB_HIDDEN  (1<<2)	// hidden attribute in samba
+#define S2_SMB_SYSTEM  (1<<3)	// system attribute in samba
+#define S3_IARCHIVE    (1<<4)	// synology S3 backup archive bit (amazon ap)
+#if defined(MY_ABC_HERE) || defined(CONFIG_FS_SYNO_ACL)
+#define S2_SMB_READONLY    					(1<<5)	// Read-Only attribute of samba
+#define S2_SYNO_ACL_INHERIT				    (1<<6)	// inherited from parent
+#define S2_SYNO_ACL_IS_OWNER_GROUP			(1<<7)	// owner tag of SYNO ACL
+#define S2_SYNO_ACL_EXIST					(1<<8)	// is there SYNO ACL
+#define S2_SYNO_ACL_SUPPORT  				(1<<9)	// is support ACL
+#define ALL_SYNO_ACL_ARCHIVE	(S2_SMB_READONLY|S2_SYNO_ACL_INHERIT|S2_SYNO_ACL_IS_OWNER_GROUP|S2_SYNO_ACL_EXIST|S2_SYNO_ACL_SUPPORT)
+#endif
+#define ALL_SYNO_ARCHIVE (S2_IARCHIVE|S2_SMB_ARCHIVE|S3_IARCHIVE)	// All backup archive bit, if there is new one, it should be added here.
+#endif
+
+#ifdef  MY_ABC_HERE
+typedef struct _tag_mmap_arg_struct {
+	unsigned long addr;
+	unsigned long len;
+	unsigned long prot;
+	unsigned long flags;
+	unsigned long fd;
+	unsigned long pgoff;
+} SYNO_MMAP_ARG;
 #endif
 
 #endif

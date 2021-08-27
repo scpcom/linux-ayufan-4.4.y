@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* (C) 1999-2001 Paul `Rusty' Russell
  * (C) 2002-2004 Netfilter Core Team <coreteam@netfilter.org>
  *
@@ -992,11 +995,14 @@ static int tcp_packet(struct nf_conn *ct,
 		break;
 	}
 
+#ifndef CONFIG_MV_ETH_NFP_PPP
+	/* BK: PPPoE NFP breaks ordering */
 	if (!tcp_in_window(ct, &ct->proto.tcp, dir, index,
 			   skb, dataoff, th, pf)) {
 		spin_unlock_bh(&ct->lock);
 		return -NF_ACCEPT;
 	}
+#endif
      in_window:
 	/* From now on we have got in-window packets */
 	ct->proto.tcp.last_index = index;

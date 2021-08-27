@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/pm_qos.h>
 
 #ifdef CONFIG_PM_RUNTIME

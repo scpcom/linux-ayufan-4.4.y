@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright © 1999-2010 David Woodhouse <dwmw2@infradead.org>
  *
@@ -36,6 +39,9 @@
 #include <linux/mtd/map.h>
 
 #include <asm/uaccess.h>
+#ifdef MY_ABC_HERE
+#include <linux/semaphore.h>
+#endif /* MY_ABC_HERE */
 
 #define MTD_INODE_FS_MAGIC 0x11307854
 static DEFINE_MUTEX(mtd_mutex);
@@ -166,6 +172,13 @@ static int mtd_close(struct inode *inode, struct file *file)
 	return 0;
 } /* mtd_close */
 
+/* FIXME: This _really_ needs to die. In 2.5, we should lock the
+   userspace buffer down and use it directly with readv/writev.
+*/
+#ifdef MY_ABC_HERE
+#define MAX_KMALLOC_SIZE 0x10000
+#endif
+
 /* Back in June 2001, dwmw2 wrote:
  *
  *   FIXME: This _really_ needs to die. In 2.5, we should lock the
@@ -267,12 +280,99 @@ static ssize_t mtd_read(struct file *file, char __user *buf, size_t count,loff_t
 	return total_retlen;
 } /* mtd_read */
 
+#ifdef MY_ABC_HERE
+#define MYDEBUG
+#ifdef MYDEBUG
+#define DBGMSG(x...) printk(KERN_NOTICE x);
+#else
+#define DBGMSG(x...) /* */
+#endif
+
+typedef enum _tag_BOOL
+{
+    FALSE =0,
+    TRUE = 1,
+} BOOL;
+
+char *kbuf;
+int write_kbuf_len;
+struct semaphore write_kbuf_sem;
+
+/**
+ * This function accuire or release buffer for mtd driver to write flash.
+ * The updater should call SYNOMTDAlloc() before doing system upgrade,
+ * and this buffer should not be released before upgrade finished.
+ * Otherwise, if the buffer is malloc-ed and released within a dd write,
+ * the kernel may malloc failed somehow.
+ * 
+ * @author cnliu
+ * @param blMalloc A boolean variable to indicate malloc or release.  
+           <ul><li>TRUE: To malloc buffer for mtd driver to write 
+ *          before doing mtd_write()
+ *                 <li>FALSE: After mtd_write(), we need to free buffer for 
+ *          mtd driver.
+ *                 </ul>
+ * 
+ * @return Upon successful malloc, SYNOMTDAlloc() return 0.  Otherwise
+ *         -ENOMEM is returned.
+ * @example <PRE>
+ * if (SYNOMTDAlloc(TRUE) == 0)
+ * {
+ *      system("dd if=zImage of=/dev/mtd1 bs=128k");
+ *      SYNOMTDAlloc(FALSE);
+ * }
+ * </PRE>
+ * 
+ * @see init_mtdchar
+ * @see lnxsdk/main/updater.c
+ * @see mtd_write
+ * @see write_kbuf_sem
+ */
+int sys_SYNOMTDAlloc(BOOL blMalloc)
+{
+    int retval = 0;
+
+    down(&write_kbuf_sem);
+    if (blMalloc)
+    {
+        if (write_kbuf_len)
+        {
+            goto End;
+        }
+
+        write_kbuf_len = MAX_KMALLOC_SIZE;
+        kbuf = kmalloc(write_kbuf_len, GFP_KERNEL);
+        if (!kbuf) {
+            DBGMSG("%s:%d(%s) malloc fail write_kbuf_len=[%d], kbuf=[%p]\n", __FILE__, __LINE__, __func__, write_kbuf_len, kbuf);
+            write_kbuf_len = 0x0;
+            retval = -ENOMEM;
+        }
+    }
+    else
+    {
+        if (!write_kbuf_len)
+        {
+            goto End;
+        }
+        write_kbuf_len = 0x0;
+        kfree(kbuf);
+        kbuf = NULL;
+    }
+End:
+    up(&write_kbuf_sem);
+    return retval;
+} /* sys_SYNOMTDAlloc() */
+#endif /* MY_ABC_HERE */
+
+
 static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count,loff_t *ppos)
 {
 	struct mtd_file_info *mfi = file->private_data;
 	struct mtd_info *mtd = mfi->mtd;
+#ifndef MY_ABC_HERE
 	size_t size = count;
 	char *kbuf;
+#endif
 	size_t retlen;
 	size_t total_retlen=0;
 	int ret=0;
@@ -289,15 +389,37 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 	if (!count)
 		return 0;
 
+#ifdef MY_ABC_HERE
+	if (!write_kbuf_len) {
+		ret = sys_SYNOMTDAlloc(TRUE);
+		if ( ret != 0 )
+		{
+			return ret;
+		}
+	}
+	down(&write_kbuf_sem);
+#else
 	kbuf = mtd_kmalloc_up_to(mtd, &size);
 	if (!kbuf)
 		return -ENOMEM;
+#endif
 
 	while (count) {
+#ifdef MY_ABC_HERE
+		if (count > MAX_KMALLOC_SIZE)
+			len = MAX_KMALLOC_SIZE;
+		else
+			len = count;
+#else
 		len = min_t(size_t, count, size);
+#endif
 
 		if (copy_from_user(kbuf, buf, len)) {
+#ifdef MY_ABC_HERE
+			up(&write_kbuf_sem);
+#else /* !MY_ABC_HERE */
 			kfree(kbuf);
+#endif
 			return -EFAULT;
 		}
 
@@ -338,12 +460,20 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 			buf += retlen;
 		}
 		else {
+#ifdef MY_ABC_HERE
+			up(&write_kbuf_sem);
+#else /* !MY_ABC_HERE */
 			kfree(kbuf);
+#endif
 			return ret;
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	up(&write_kbuf_sem);
+#else /* !MY_ABC_HERE */
 	kfree(kbuf);
+#endif
 	return total_retlen;
 } /* mtd_write */
 
@@ -960,6 +1090,41 @@ static int mtd_ioctl(struct file *file, u_int cmd, u_long arg)
 	}
 #endif
 
+#ifdef  MY_ABC_HERE
+	case MEMMODIFYPARTINFO:
+	{
+		unsigned long adrs[2];
+
+		if (copy_from_user(adrs, (void *)arg, 2* sizeof(unsigned long)))
+			return -EFAULT;
+
+		ret = SYNOMTDModifyPartInfo(mtd, adrs[0], adrs[1]); /* adrs[0] is offset, adrs[1] is the length */
+
+		break;
+	}
+
+	case MEMMODIFYFISINFO:
+	{
+		struct SYNO_MTD_FIS_INFO SynoMtdFisInfo;
+
+		if (strcmp(mtd->name, "FIS directory")) { // cannot apply on other flash partitions
+			return -EOPNOTSUPP;
+		}
+
+		if (copy_from_user(&SynoMtdFisInfo, (struct SYNO_MTD_FIS_INFO *)arg, sizeof(struct SYNO_MTD_FIS_INFO))) {
+			return -EFAULT;
+		}
+
+		if (!SynoMtdFisInfo.name[0]) { // sanity check
+			return -EFAULT;
+		}
+
+		ret = SYNOMTDModifyFisInfo(mtd, SynoMtdFisInfo);
+
+		break;
+	}
+#endif /* MY_ABC_HERE */
+
 	/* This ioctl is being deprecated - it truncates the ECC layout */
 	case ECCGETLAYOUT:
 	{
@@ -1257,6 +1422,14 @@ static int __init init_mtdchar(void)
 		goto err_unregister_filesystem;
 	}
 	register_mtd_user(&mtdchar_notifier);
+
+
+#ifdef MY_ABC_HERE
+	/* XXX
+	 * Allocate and buffer and init spinlock.
+	 */
+	sema_init(&write_kbuf_sem, 1);
+#endif /* MY_ABC_HERE */
 
 	return ret;
 

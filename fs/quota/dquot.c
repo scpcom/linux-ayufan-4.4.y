@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Implementation of the diskquota system for the LINUX operating system. QUOTA
  * is implemented using the BSD system call interface as the means of
@@ -617,6 +620,13 @@ int dquot_quota_sync(struct super_block *sb, int type, int wait)
 			if (!test_bit(DQ_ACTIVE_B, &dquot->dq_flags)) {
 				clear_dquot_dirty(dquot);
 				continue;
+#ifdef MY_ABC_HERE
+			/* To avoid busy loop here, when filesystem is readonly, just remove it. */
+			} else if (sb->s_flags & MS_RDONLY) {
+				printk("%s (%d) Read only filesystem. Just skip quota sync.\n", __FILE__, __LINE__);
+				clear_dquot_dirty(dquot);
+				continue;
+#endif
 			}
 			/* Now we have active dquot from which someone is
  			 * holding reference so we can safely just increase
@@ -764,8 +774,18 @@ we_slept:
 	clear_dquot_dirty(dquot);
 	if (test_bit(DQ_ACTIVE_B, &dquot->dq_flags)) {
 		spin_unlock(&dq_list_lock);
+#ifdef  MY_ABC_HERE
+		ret = dquot->dq_sb->dq_op->release_dquot(dquot);
+		if (ret == -EROFS) {
+			printk("%s (%d) Read only filesystem. Skip retry...\n", __FILE__, __LINE__);
+			spin_lock(&dq_list_lock);
+		} else {
+			goto we_slept;
+		}
+#else
 		dquot->dq_sb->dq_op->release_dquot(dquot);
 		goto we_slept;
+#endif
 	}
 	atomic_dec(&dquot->dq_count);
 #ifdef CONFIG_QUOTA_DEBUG

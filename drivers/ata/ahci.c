@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  ahci.c - AHCI SATA support
  *
@@ -45,11 +48,24 @@
 #include <linux/gfp.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
+#ifdef MY_ABC_HERE
+#include <scsi/scsi.h>
+#include <scsi/scsi_host.h>
+#include <scsi/scsi_cmnd.h>
+#include <scsi/scsi_eh.h>
+#include <scsi/scsi_device.h>
+#include <scsi/scsi_tcq.h>
+#include <scsi/scsi_transport.h>
+#endif
 #include <linux/libata.h>
 #include "ahci.h"
 
 #define DRV_NAME	"ahci"
 #define DRV_VERSION	"3.0"
+
+#ifdef MY_ABC_HERE
+extern long g_ahci_switch;
+#endif
 
 enum {
 	AHCI_PCI_BAR		= 5,
@@ -92,6 +108,39 @@ static struct scsi_host_template ahci_sht = {
 	AHCI_SHT("ahci"),
 };
 
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+static int
+sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
+{
+	struct ata_link *link = qc->dev->link;
+	struct ata_port *ap = link->ap;
+
+	if (ap->excl_link == NULL || ap->excl_link == link) {
+		if (ap->nr_active_links == 0 || ata_link_active(link)) {
+			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+			return ata_std_qc_defer(qc);
+		}
+
+		ap->excl_link = link;
+	} else {
+		/* preempt when no any command in the queue*/
+		if (!ap->nr_active_links) {
+			ap->excl_link = link;
+			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+			return ata_std_qc_defer(qc);
+		}
+	}
+
+	return ATA_DEFER_PORT;
+}
+
+static struct ata_port_operations ahci_pmp_ops = {
+	.inherits		= &ahci_ops,
+
+	.qc_defer		= sata_syno_ahci_defer_cmd,
+};
+#endif
+
 static struct ata_port_operations ahci_vt8251_ops = {
 	.inherits		= &ahci_ops,
 	.hardreset		= ahci_vt8251_hardreset,
@@ -127,7 +176,11 @@ static const struct ata_port_info ahci_port_info[] = {
 		.flags		= AHCI_FLAG_COMMON,
 		.pio_mask	= ATA_PIO4,
 		.udma_mask	= ATA_UDMA6,
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+		.port_ops	= &ahci_pmp_ops,
+#else
 		.port_ops	= &ahci_ops,
+#endif
 	},
 	[board_ahci_yes_fbs] =
 	{
@@ -378,6 +431,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	/* Marvell */
 	{ PCI_VDEVICE(MARVELL, 0x6145), board_ahci_mv },	/* 6145 */
 	{ PCI_VDEVICE(MARVELL, 0x6121), board_ahci_mv },	/* 6121 */
+	{ PCI_VDEVICE(MARVELL, 0x9125), board_ahci },		/* 9125 */
 	{ PCI_DEVICE(0x1b4b, 0x9123),
 	  .class = PCI_CLASS_STORAGE_SATA_AHCI,
 	  .class_mask = 0xffffff,
@@ -1017,6 +1071,11 @@ static inline void ahci_gtf_filter_workaround(struct ata_host *host)
 {}
 #endif
 
+#ifdef MY_DEF_HERE
+extern void ata_port_wait_eh(struct ata_port *ap);
+extern void ata_scsi_scan_host(struct ata_port *ap, int sync);
+#endif
+
 static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
 	unsigned int board_id = ent->driver_data;
@@ -1029,6 +1088,12 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	VPRINTK("ENTER\n");
 
+#ifdef MY_ABC_HERE
+	if(0 == g_ahci_switch) {
+		printk("AHCI is disabled.\n");
+		return 0;
+	}
+#endif
 	WARN_ON((int)ATA_MAX_QUEUE > AHCI_MAX_CMDS);
 
 	ata_print_version_once(&pdev->dev, DRV_VERSION);
@@ -1154,7 +1219,15 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 * determining the maximum port number requires looking at
 	 * both CAP.NP and port_map.
 	 */
+#ifdef MY_ABC_HERE
+	if(gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
+		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
+	}else{
+#endif
 	n_ports = max(ahci_nr_ports(hpriv->cap), fls(hpriv->port_map));
+#ifdef MY_ABC_HERE
+	}
+#endif
 
 	host = ata_host_alloc_pinfo(&pdev->dev, ppi, n_ports);
 	if (!host)
@@ -1205,8 +1278,66 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	ahci_pci_print_info(host);
 
 	pci_set_master(pdev);
+#ifdef MY_DEF_HERE
+	/* Only wait for JMiron in 6281 platform */
+	if (pdev->vendor != PCI_VENDOR_ID_JMICRON) {
+		rc = ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,
+							   &ahci_sht);
+		goto END;
+	}
+
+	/* flag ap before probe */
+	for (i = 0; i < host->n_ports; i++) {
+		struct ata_port *ap = host->ports[i];
+		unsigned long flags;
+
+		spin_lock_irqsave(ap->lock, flags);
+		ap->pflags |= ATA_PFLAG_SYNC_SCSI_DEVICE;
+		spin_unlock_irqrestore(ap->lock, flags);
+	}
+
+	rc = ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,
+				 &ahci_sht);
+
+	/**
+	 * Handle magic interrupt in 6281. All port should not have EH
+	 * and ata_aux_wq after successfuly probe, so it is safe to
+	 * flush and wait for those ports.
+     */
+	for (i = 0; i < host->n_ports; i++) {
+		struct ata_port *ap = host->ports[i];
+		unsigned long flags;
+		int blScanHost = 0;
+
+		if (!ata_link_online(&ap->link)) {
+			/* Wait for the magic interrupt. */
+			msleep(2000);
+		}
+
+		/* Wait ATA layer EH */
+		ata_port_wait_eh(ap);
+
+		spin_lock_irqsave(ap->lock, flags);
+		if (!(ap->pflags & ATA_PFLAG_SYNC_SCSI_DEVICE)) {
+			/* There really has hotplug */
+			blScanHost = 1;
+		} else {
+			/* There is no any device hotplug */
+			ap->pflags &= ~ATA_PFLAG_SYNC_SCSI_DEVICE;
+		}
+		spin_unlock_irqrestore(ap->lock, flags);
+
+		if (blScanHost) {
+			ata_scsi_scan_host(ap, 1);
+		}
+	}
+
+END:
+	return rc;
+#else
 	return ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,
 				 &ahci_sht);
+#endif
 }
 
 static int __init ahci_init(void)

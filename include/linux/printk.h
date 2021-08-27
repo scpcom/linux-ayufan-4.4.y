@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __KERNEL_PRINTK__
 #define __KERNEL_PRINTK__
 

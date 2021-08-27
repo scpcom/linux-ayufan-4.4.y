@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	SUCS NET3:
  *
@@ -375,6 +378,107 @@ fault:
 	return -EFAULT;
 }
 EXPORT_SYMBOL(skb_copy_datagram_iovec);
+
+#ifdef MY_ABC_HERE
+/**
+ *	skb_copy_datagram_iovec - Copy a datagram to an iovec.
+ *	@skb: buffer to copy
+ *	@offset: offset in the buffer to start copying from
+ *	@to: io vector to copy to
+ *	@len: amount of data to copy from buffer to iovec
+ *
+ *	Note: the iovec is modified during the copy.
+ */
+int skb_copy_datagram_iovec1(const struct sk_buff *skb, int offset,
+			    struct iovec *to, int len)
+{
+	int start = skb_headlen(skb);
+	int i, copy = start - offset;
+	struct sk_buff *frag_iter;
+
+	trace_skb_copy_datagram_iovec(skb, len);
+
+	/* Copy header. */
+	if (copy > 0) {
+		if (copy > len)
+			copy = len;
+#if 1
+		memcpy_tokerneliovec(to, skb->data + offset, copy);
+#else
+		if (memcpy_toiovec(to, skb->data + offset, copy))
+			goto fault;
+#endif
+		if ((len -= copy) == 0)
+			return 0;
+		offset += copy;
+	}
+
+	/* Copy paged appendix. Hmm... why does this look so complicated? */
+	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
+		int end;
+		const skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
+
+		WARN_ON(start > offset + len);
+
+		end = start + skb_frag_size(frag);
+		if ((copy = end - offset) > 0) {
+#if 0
+			int err;
+#endif
+			u8  *vaddr;
+			struct page *page = skb_frag_page(frag);
+
+			if (copy > len)
+				copy = len;
+			vaddr = kmap(page);
+#if 1
+			memcpy_tokerneliovec(to, vaddr + frag->page_offset +
+#else
+			err = memcpy_toiovec(to, vaddr + frag->page_offset +
+#endif
+					     offset - start, copy);
+			kunmap(page);
+#if 0
+			if (err)
+				goto fault;
+#endif
+			if (!(len -= copy))
+				return 0;
+			offset += copy;
+		}
+		start = end;
+	}
+
+	skb_walk_frags(skb, frag_iter) {
+		int end;
+
+		WARN_ON(start > offset + len);
+
+		end = start + frag_iter->len;
+		if ((copy = end - offset) > 0) {
+			if (copy > len)
+				copy = len;
+#if 1
+			if (skb_copy_datagram_iovec1(frag_iter,
+#else
+			if (skb_copy_datagram_iovec(frag_iter,
+#endif
+						    offset - start,
+						    to, copy))
+				goto fault;
+			if ((len -= copy) == 0)
+				return 0;
+			offset += copy;
+		}
+		start = end;
+	}
+	if (!len)
+		return 0;
+
+fault:
+	return -EFAULT;
+}
+#endif
 
 /**
  *	skb_copy_datagram_const_iovec - Copy a datagram to an iovec.

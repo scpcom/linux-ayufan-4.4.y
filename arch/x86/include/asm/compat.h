@@ -217,4 +217,28 @@ static inline int is_compat_task(void)
 	return current_thread_info()->status & TS_COMPAT;
 }
 
+#ifdef MY_ABC_HERE
+#ifndef st_SynoCreateTime
+#define st_SynoCreateTime st_ctime_nsec
+#endif
+#endif
+
+#ifdef MY_ABC_HERE
+#ifndef st_SynoMode
+#define st_SynoMode st_atime_nsec
+#endif
+#endif
+
+#ifdef MY_ABC_HERE
+#ifndef st_SynoUnicodeStat
+#define st_SynoUnicodeStat st_mtime_nsec
+#endif
+#endif
+
+#ifdef MY_ABC_HERE
+#ifndef st_syno_achv_ver
+#define st_syno_achv_ver st_mtime_nsec
+#endif
+#endif
+
 #endif /* _ASM_X86_COMPAT_H */

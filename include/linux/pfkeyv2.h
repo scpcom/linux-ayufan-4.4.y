@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* PF_KEY user interface, this is defined by rfc2367 so
  * do not make arbitrary modifications or else this header
  * file will not be compliant.

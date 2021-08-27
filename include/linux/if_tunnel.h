@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _IF_TUNNEL_H_
 #define _IF_TUNNEL_H_
 

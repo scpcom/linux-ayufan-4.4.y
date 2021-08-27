@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifdef CONFIG_MMU
 
 /* the upper-most page table pointer */

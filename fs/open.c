@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/open.c
  *
@@ -30,8 +33,11 @@
 #include <linux/fs_struct.h>
 #include <linux/ima.h>
 #include <linux/dnotify.h>
-
 #include "internal.h"
+
+#ifdef MY_ABC_HERE
+extern long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd);
+#endif
 
 int do_truncate(struct dentry *dentry, loff_t length, unsigned int time_attrs,
 	struct file *filp)
@@ -88,7 +94,11 @@ static long do_sys_truncate(const char __user *pathname, loff_t length)
 	error = mnt_want_write(path.mnt);
 	if (error)
 		goto dput_and_out;
-
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_SYNOACL(inode)) {
+		error = inode->i_op->syno_permission(path.dentry, MAY_WRITE);
+	} else
+#endif
 	error = inode_permission(inode, MAY_WRITE);
 	if (error)
 		goto mnt_drop_write_and_out;
@@ -282,6 +292,9 @@ SYSCALL_DEFINE(fallocate)(int fd, int mode, loff_t offset, loff_t len)
 
 	return error;
 }
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL(do_fallocate);
+#endif
 
 #ifdef CONFIG_HAVE_SYSCALL_WRAPPERS
 asmlinkage long SyS_fallocate(long fd, long mode, loff_t offset, loff_t len)
@@ -340,7 +353,11 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 		if (path.mnt->mnt_flags & MNT_NOEXEC)
 			goto out_path_release;
 	}
-
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_SYNOACL(inode)) {
+		res = inode->i_op->syno_access(path.dentry, mode | MAY_ACCESS);
+	} else
+#endif
 	res = inode_permission(inode, mode | MAY_ACCESS);
 	/* SuS v2 requires we report a read only fs too */
 	if (res || !(mode & S_IWOTH) || special_file(inode->i_mode))
@@ -375,12 +392,24 @@ SYSCALL_DEFINE1(chdir, const char __user *, filename)
 {
 	struct path path;
 	int error;
+#ifdef CONFIG_FS_SYNO_ACL
+	struct inode *inode;
+#endif
 
 	error = user_path_dir(filename, &path);
 	if (error)
 		goto out;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	inode = path.dentry->d_inode;
+	if (IS_SYNOACL(inode)) {
+		error = inode->i_op->syno_permission(path.dentry, MAY_EXEC | MAY_CHDIR);
+	} else {
+		error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
+	}
+#else
 	error = inode_permission(path.dentry->d_inode, MAY_EXEC | MAY_CHDIR);
+#endif
 	if (error)
 		goto dput_and_out;
 
@@ -409,6 +438,11 @@ SYSCALL_DEFINE1(fchdir, unsigned int, fd)
 	if (!S_ISDIR(inode->i_mode))
 		goto out_putf;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_SYNOACL(inode)) {
+		error = inode->i_op->syno_permission(file->f_path.dentry, MAY_EXEC | MAY_CHDIR);
+	} else
+#endif
 	error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
 	if (!error)
 		set_fs_pwd(current->fs, &file->f_path);
@@ -422,12 +456,23 @@ SYSCALL_DEFINE1(chroot, const char __user *, filename)
 {
 	struct path path;
 	int error;
-
+#ifdef CONFIG_FS_SYNO_ACL
+	struct inode *inode;
+#endif
 	error = user_path_dir(filename, &path);
 	if (error)
 		goto out;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	inode = path.dentry->d_inode;
+	if (IS_SYNOACL(inode)) {
+		error = inode->i_op->syno_permission(path.dentry, MAY_EXEC | MAY_CHDIR);
+	} else {
+		error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
+	}
+#else
 	error = inode_permission(path.dentry->d_inode, MAY_EXEC | MAY_CHDIR);
+#endif
 	if (error)
 		goto dput_and_out;
 
@@ -526,6 +571,44 @@ static int chown_common(struct path *path, uid_t user, gid_t group)
 
 	return error;
 }
+
+#ifdef	MY_ABC_HERE
+asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
+{
+	int isPathGet = 0;
+	struct path path;
+	struct inode * inode = NULL;
+	long error = -EINVAL;
+
+	error = user_path_at(AT_FDCWD, filename, LOOKUP_FOLLOW, &path);
+	if (error)
+		goto out;
+
+	isPathGet = 1;
+
+	if (path.dentry && path.dentry->d_inode) {
+		inode = path.dentry->d_inode;
+	} else {
+		goto out;
+	}
+
+	if (inode->i_op && inode->i_op->set_archive) {
+		error = inode->i_op->set_archive(path.dentry, cmd);
+	} else {
+	error = __SYNOArchiveSet(path.dentry, cmd);
+	}
+	if (error) {
+		goto out;
+	}
+
+	error = 0;
+out:
+	if (isPathGet) {
+	path_put(&path);
+	}
+	return error;
+}
+#endif //MY_ABC_HERE
 
 SYSCALL_DEFINE3(chown, const char __user *, filename, uid_t, user, gid_t, group)
 {
@@ -994,12 +1077,22 @@ long do_sys_open(int dfd, const char __user *filename, int flags, int mode)
 	return fd;
 }
 
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+extern int syno_hibernation_log_sec;
+#endif
 SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, int, mode)
 {
 	long ret;
 
 	if (force_o_largefile())
 		flags |= O_LARGEFILE;
+
+#ifdef MY_ABC_HERE
+	if(syno_hibernation_log_sec > 0) {
+		syno_do_hibernation_log(filename);
+	}
+#endif
 
 	ret = do_sys_open(AT_FDCWD, filename, flags, mode);
 	/* avoid REGPARM breakage on x86: */

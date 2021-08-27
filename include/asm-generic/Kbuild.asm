@@ -43,3 +43,4 @@ header-y += termbits.h
 header-y += termios.h
 header-y += types.h
 header-y += unistd.h
+header-y += page.h

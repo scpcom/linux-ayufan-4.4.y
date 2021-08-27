@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __EXTENTMAP__
 #define __EXTENTMAP__
 

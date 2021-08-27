@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/inode.c
  *
@@ -334,6 +337,14 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 	if (test_and_clear_bit(HFSPLUS_I_CAT_DIRTY, &hip->flags))
 		error = filemap_write_and_wait(sbi->cat_tree->inode->i_mapping);
 
+#ifdef MY_ABC_HERE
+	if (test_and_clear_bit(HFSPLUS_I_ATTR_DIRTY, &hip->flags)) {
+		error2 = filemap_write_and_wait(sbi->attr_tree->inode->i_mapping);
+		if (!error)
+			error = error2;
+	}
+#endif
+
 	if (test_and_clear_bit(HFSPLUS_I_EXT_DIRTY, &hip->flags)) {
 		error2 =
 			filemap_write_and_wait(sbi->ext_tree->inode->i_mapping);
@@ -362,6 +373,9 @@ static const struct inode_operations hfsplus_file_inode_operations = {
 	.setxattr	= hfsplus_setxattr,
 	.getxattr	= hfsplus_getxattr,
 	.listxattr	= hfsplus_listxattr,
+#ifdef MY_ABC_HERE
+	.removexattr= hfsplus_rmxattr,
+#endif
 };
 
 static const struct file_operations hfsplus_file_operations = {

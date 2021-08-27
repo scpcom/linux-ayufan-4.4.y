@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_NF_NAT_H
 #define _LINUX_NF_NAT_H
 

@@ -98,6 +98,21 @@ struct hfs_btree *hfs_btree_open(struct super_block *sb, u32 id)
 			set_bit(HFSPLUS_SB_CASEFOLD, &HFSPLUS_SB(sb)->flags);
 		}
 		break;
+#ifdef MY_ABC_HERE
+	case HFSPLUS_ATTR_CNID:
+		if (tree->max_key_len != HFSPLUS_ATTR_KEYLEN_MAX) {
+			printk(KERN_ERR "hfs: invalid attribute max_key_len %d\n",
+				tree->max_key_len);
+			goto fail_page;
+		}
+		if (!(tree->attributes & HFS_TREE_VARIDXKEYS)) {
+			printk(KERN_ERR "hfs: invalid attribute btree flag\n");
+			goto fail_page;
+		}
+
+		tree->keycmp = hfsplus_attr_cmp_key;
+		break;
+#endif
 	default:
 		printk(KERN_ERR "hfs: unknown B*Tree requested\n");
 		goto fail_page;

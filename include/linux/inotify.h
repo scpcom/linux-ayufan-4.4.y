@@ -7,8 +7,10 @@
 #ifndef _LINUX_INOTIFY_H
 #define _LINUX_INOTIFY_H
 
+#if !defined(SYNO_PPC_853X) && !defined(SYNO_PPC_854X) && !defined(SYNO_X86)
 /* For O_CLOEXEC and O_NONBLOCK */
 #include <linux/fcntl.h>
+#endif
 #include <linux/types.h>
 
 /*

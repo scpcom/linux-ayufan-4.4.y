@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  History:
  *  Started: Aug 9 by Lawrence Foard (entropy@world.std.com),

@@ -16,7 +16,11 @@ struct pci_root_info {
 	int busnum;
 };
 
+#ifdef MY_ABC_HERE
+static bool pci_use_crs = false;
+#else
 static bool pci_use_crs = true;
+#endif
 
 static int __init set_use_crs(const struct dmi_system_id *id)
 {

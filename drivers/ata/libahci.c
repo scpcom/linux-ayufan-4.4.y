@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  libahci.c - Common AHCI SATA low-level routines
  *
@@ -43,8 +46,15 @@
 #include <linux/device.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
+#ifdef MY_ABC_HERE
+#include <scsi/scsi_device.h>
+#endif
 #include <linux/libata.h>
 #include "ahci.h"
+
+#ifdef MY_ABC_HERE
+extern unsigned int ata_print_id;
+#endif /* MY_ABC_HERE */
 
 static int ahci_skip_host_reset;
 int ahci_ignore_sss;
@@ -106,6 +116,9 @@ static ssize_t ahci_show_host_version(struct device *dev,
 				      struct device_attribute *attr, char *buf);
 static ssize_t ahci_show_port_cmd(struct device *dev,
 				  struct device_attribute *attr, char *buf);
+#ifdef MY_ABC_HERE
+static void ahci_port_intr(struct ata_port *ap);
+#endif
 static ssize_t ahci_read_em_buffer(struct device *dev,
 				   struct device_attribute *attr, char *buf);
 static ssize_t ahci_store_em_buffer(struct device *dev,
@@ -118,6 +131,131 @@ static DEVICE_ATTR(ahci_host_caps, S_IRUGO, ahci_show_host_caps, NULL);
 static DEVICE_ATTR(ahci_host_cap2, S_IRUGO, ahci_show_host_cap2, NULL);
 static DEVICE_ATTR(ahci_host_version, S_IRUGO, ahci_show_host_version, NULL);
 static DEVICE_ATTR(ahci_port_cmd, S_IRUGO, ahci_show_port_cmd, NULL);
+
+#ifdef MY_ABC_HERE
+static ssize_t
+ata_ahci_locate_show(struct device *dev, struct device_attribute *attr,
+		char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *atadev = ata_scsi_find_dev(ap, sdev);
+	struct ahci_port_priv *pp = ap->private_data;
+	struct ahci_em_priv *emp = &pp->em_priv[atadev->link->pmp];
+
+	return sprintf(buf, "%ld\n", emp->locate);
+}
+
+static void ahci_sw_locate_set(struct ata_link *link, u8 blEnable);
+
+static ssize_t
+ata_ahci_locate_store(struct device *dev, struct device_attribute *attr,
+	const char *buf, size_t count)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *atadev = ata_scsi_find_dev(ap, sdev);
+	int val;
+
+	if (ap->flags & ATA_FLAG_SW_LOCATE) {
+		val = simple_strtoul(buf, NULL, 0);
+		switch (val) {
+		case 0: 
+		case 1:
+			ahci_sw_locate_set(atadev->link, val);
+			return count;
+		default:
+			return -EIO;
+		}
+	}
+	return -EINVAL;
+}
+DEVICE_ATTR(sw_locate, S_IWUSR | S_IRUGO, ata_ahci_locate_show, ata_ahci_locate_store);
+
+static ssize_t
+ata_ahci_fault_show(struct device *dev, struct device_attribute *attr,
+		char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *atadev = ata_scsi_find_dev(ap, sdev);
+	struct ahci_port_priv *pp = ap->private_data;
+	struct ahci_em_priv *emp = &pp->em_priv[atadev->link->pmp];
+
+	return sprintf(buf, "%ld\n", emp->fault);
+}
+
+static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable);
+
+#ifdef MY_ABC_HERE
+void sata_syno_ahci_diskled_set(int iDiskNo, int iPresent, int iFault)
+{
+	struct ata_port *pAp = NULL;
+	struct ata_device *pAtaDev = NULL;
+	struct Scsi_Host *pScsiHost = NULL;
+	struct ata_link *pAtaLink = NULL;
+
+	if (NULL == (pScsiHost = scsi_host_lookup(iDiskNo - 1))) {
+			goto END;
+	}
+
+	//get port from SCSI host
+	pAp = ata_shost_to_port(pScsiHost);
+	if (!pAp) {
+		goto RELEASESRC;
+	}
+
+	//get rid of pmp ports
+	if (pAp->nr_pmp_links) {
+		goto RELEASESRC;
+	}
+
+#ifdef MY_ABC_HERE
+	iPresent &= giSynoHddLedEnabled;
+	iFault &= giSynoHddLedEnabled;
+#endif
+	//for each devices of each links in port ap
+	ata_for_each_link(pAtaLink, pAp, EDGE) {
+		ata_for_each_dev(pAtaDev, pAtaLink, ALL) {
+			//set disk LED
+			ahci_sw_locate_set(pAtaDev->link, iPresent);
+			ahci_sw_fault_set(pAtaDev->link, iFault);
+		}
+	}
+
+RELEASESRC:
+	scsi_host_put(pScsiHost);
+END:
+	return;
+}
+EXPORT_SYMBOL(sata_syno_ahci_diskled_set);
+#endif /* MY_ABC_HERE */
+
+static ssize_t
+ata_ahci_fault_store(struct device *dev, struct device_attribute *attr,
+	const char *buf, size_t count)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *atadev = ata_scsi_find_dev(ap, sdev);
+	int val;
+
+	if (ap->flags & ATA_FLAG_SW_FAULT) {
+		val = simple_strtoul(buf, NULL, 0);
+		switch (val) {
+		case 0: 
+		case 1:
+			ahci_sw_fault_set(atadev->link, val);
+			return count;
+		default:
+			return -EIO;
+		}
+	}
+	return -EINVAL;
+}
+DEVICE_ATTR(sw_fault, S_IWUSR | S_IRUGO, ata_ahci_fault_show, ata_ahci_fault_store);
+#endif //MY_ABC_HERE
+
 static DEVICE_ATTR(em_buffer, S_IWUSR | S_IRUGO,
 		   ahci_read_em_buffer, ahci_store_em_buffer);
 static DEVICE_ATTR(em_message_supported, S_IRUGO, ahci_show_em_supported, NULL);
@@ -132,6 +270,17 @@ struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_ahci_port_cmd,
 	&dev_attr_em_buffer,
 	&dev_attr_em_message_supported,
+#ifdef SYNO_SATA_PM_DEVICE_GPIO
+	&dev_attr_syno_manutil_power_disable,
+	&dev_attr_syno_pm_gpio,
+	&dev_attr_syno_pm_info,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_port_thaw,
+#endif
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_diskname_trans,
+#endif
 	NULL
 };
 EXPORT_SYMBOL_GPL(ahci_shost_attrs);
@@ -139,6 +288,20 @@ EXPORT_SYMBOL_GPL(ahci_shost_attrs);
 struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_activity,
 	&dev_attr_unload_heads,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_wcache,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_disk_serial,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_fake_error_ctrl,
+	&dev_attr_syno_pwr_reset_count,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_sw_locate,
+	&dev_attr_sw_fault,
+#endif
 	NULL
 };
 EXPORT_SYMBOL_GPL(ahci_sdev_attrs);
@@ -177,6 +340,9 @@ struct ata_port_operations ahci_ops = {
 #endif
 	.port_start		= ahci_port_start,
 	.port_stop		= ahci_port_stop,
+#ifdef MY_ABC_HERE
+	.syno_force_intr	= ahci_port_intr,
+#endif
 };
 EXPORT_SYMBOL_GPL(ahci_ops);
 
@@ -848,6 +1014,11 @@ static void ahci_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+	if (!giSynoHddLedEnabled) {
+		return;
+	}
+#endif
 	if (!(link->flags & ATA_LFLAG_SW_ACTIVITY))
 		return;
 
@@ -855,6 +1026,65 @@ static void ahci_sw_activity(struct ata_link *link)
 	if (!timer_pending(&emp->timer))
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(10));
 }
+
+#ifdef MY_ABC_HERE 
+static void ahci_sw_locate_set(struct ata_link *link, u8 blEnable)
+{
+	struct ata_port *ap = link->ap;
+	struct ahci_port_priv *pp = ap->private_data;
+	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
+	unsigned long led_message = emp->led_state;
+	unsigned long flags;
+
+	led_message &= EM_MSG_LED_VALUE;
+
+	led_message |= ap->port_no | (link->pmp << 8);
+
+	emp->locate= blEnable;
+
+	spin_lock_irqsave(ap->lock, flags);
+	if (emp->saved_locate == emp->locate) {
+		spin_unlock_irqrestore(ap->lock, flags);
+		goto END;
+	}
+	emp->saved_locate = emp->locate;
+	led_message &= ~(EM_MSG_LOCATE_LED_MASK);
+	led_message |= (emp->locate << 19);
+	spin_unlock_irqrestore(ap->lock, flags);
+	ahci_transmit_led_message(ap, led_message, 4);
+	mdelay(10);
+END:
+	return;
+}
+
+static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable)
+{
+	struct ata_port *ap = link->ap;
+	struct ahci_port_priv *pp = ap->private_data;
+	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
+	unsigned long led_message = emp->led_state;
+	unsigned long flags;
+
+	led_message &= EM_MSG_LED_VALUE;
+
+	led_message |= ap->port_no | (link->pmp << 8);
+
+	emp->fault= blEnable;
+
+	spin_lock_irqsave(ap->lock, flags);
+	if (emp->saved_fault == emp->fault) {
+		spin_unlock_irqrestore(ap->lock, flags);
+		goto END;
+	}
+	emp->saved_fault = emp->fault;
+	led_message &= ~(EM_MSG_FAULT_LED_MASK);
+	led_message |= (emp->fault << 22);
+	spin_unlock_irqrestore(ap->lock, flags);
+	ahci_transmit_led_message(ap, led_message, 4);
+END:
+	return;
+}
+#endif //MY_ABC_HERE
 
 static void ahci_sw_activity_blink(unsigned long arg)
 {
@@ -1304,6 +1534,12 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
  fail:
 	ata_link_err(link, "softreset failed (%s)\n", reason);
+#ifdef MY_ABC_HERE
+	if (-EBUSY == rc) {
+		ata_link_printk(link, KERN_ERR, "SRST fail, set srst fail flag\n");
+		link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
+	}
+#endif
 	return rc;
 }
 
@@ -1618,7 +1854,21 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 		ata_ehi_push_desc(host_ehi, "interface fatal error");
 	}
 
+#ifdef MY_ABC_HERE
+	if ((irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
+		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
+			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
+			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
+		} else {
+			ap->iDetectStat = 1;
+			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
+		}
+#else
 	if (irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) {
+#endif
+#ifdef MY_ABC_HERE
+		syno_ata_info_print(ap);
+#endif
 		ata_ehi_hotplugged(host_ehi);
 		ata_ehi_push_desc(host_ehi, "%s",
 			irq_stat & PORT_IRQ_CONNECT ?
@@ -1659,7 +1909,11 @@ static void ahci_port_intr(struct ata_port *ap)
 		ahci_scr_write(&ap->link, SCR_ERROR, SERR_PHYRDY_CHG);
 	}
 
+#ifdef MY_ABC_HERE
+	if (unlikely(status & PORT_IRQ_ERROR) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
+#else
 	if (unlikely(status & PORT_IRQ_ERROR)) {
+#endif
 		ahci_error_intr(ap, status);
 		return;
 	}
@@ -2209,6 +2463,12 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 		pi->flags |= ATA_FLAG_EM;
 		if (!(em_ctl & EM_CTL_ALHD))
 			pi->flags |= ATA_FLAG_SW_ACTIVITY;
+#ifdef MY_ABC_HERE 
+		if (em_ctl & EM_CTL_LED) {
+			pi->flags |= ATA_FLAG_SW_LOCATE;
+			pi->flags |= ATA_FLAG_SW_FAULT;
+		}
+#endif
 	}
 }
 EXPORT_SYMBOL_GPL(ahci_set_em_messages);

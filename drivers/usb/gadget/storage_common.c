@@ -305,6 +305,9 @@ struct fsg_buffhd {
 #else
 	void				*buf;
 #endif
+#ifdef CONFIG_USB_GADGET_MRVL
+	dma_addr_t			dma;
+#endif
 	enum fsg_buffer_state		state;
 	struct fsg_buffhd		*next;
 
@@ -318,6 +321,15 @@ struct fsg_buffhd {
 	struct usb_request		*inreq;
 	int				inreq_busy;
 	struct usb_request		*outreq;
+#ifdef CONFIG_USB_GADGET_MRVL
+	volatile int			outreq_busy;
+
+	/* added to support async wr */
+	struct file			*file;
+	unsigned int			amount;
+	loff_t				file_offset;
+	struct fsg_buffhd		*next_to_wr;
+#endif
 	int				outreq_busy;
 };
 
@@ -680,6 +692,11 @@ static int fsg_lun_open(struct fsg_lun *curlun, const char *filename)
 	/* R/W if we can, R/O if we must */
 	ro = curlun->initially_ro;
 	if (!ro) {
+#ifdef CONFIG_USB_GADGET_MRVL
+		if (mod_data.use_directio)
+			filp = filp_open(filename, O_RDWR | O_LARGEFILE | O_DIRECT, 0);
+		else
+#endif
 		filp = filp_open(filename, O_RDWR | O_LARGEFILE, 0);
 		if (PTR_ERR(filp) == -EROFS || PTR_ERR(filp) == -EACCES)
 			ro = 1;
@@ -780,9 +797,22 @@ static void fsg_lun_close(struct fsg_lun *curlun)
 static int fsg_lun_fsync_sub(struct fsg_lun *curlun)
 {
 	struct file	*filp = curlun->filp;
+#ifdef CONFIG_USB_GADGET_MRVL
+	int 		rc;
+	struct fsg_dev	*fsg = the_fsg;
+#endif
 
 	if (curlun->ro || !filp)
 		return 0;
+#ifdef CONFIG_USB_GADGET_MRVL
+	if(mod_data.use_wr_thread) {
+		/* wait for write to complete */
+		while(fsg->num_wr_buf != 0) {
+			if ((rc = sleep_thread(fsg)) != 0)
+				return rc;
+		}
+	}
+#endif
 	return vfs_fsync(filp, 1);
 }
 

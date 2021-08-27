@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * For boards with physically mapped flash and using
  * drivers/mtd/maps/physmap.c mapping driver.

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xfrm6_policy.c: based on xfrm4_policy.c
  *

@@ -411,6 +411,9 @@ int security_path_rmdir(struct path *dir, struct dentry *dentry)
 		return 0;
 	return security_ops->path_rmdir(dir, dentry);
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(security_path_rmdir);
+#endif /* SYNO_AUFS */
 
 int security_path_unlink(struct path *dir, struct dentry *dentry)
 {
@@ -427,6 +430,9 @@ int security_path_symlink(struct path *dir, struct dentry *dentry,
 		return 0;
 	return security_ops->path_symlink(dir, dentry, old_name);
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(security_path_symlink);
+#endif /* SYNO_AUFS */
 
 int security_path_link(struct dentry *old_dentry, struct path *new_dir,
 		       struct dentry *new_dentry)
@@ -435,6 +441,9 @@ int security_path_link(struct dentry *old_dentry, struct path *new_dir,
 		return 0;
 	return security_ops->path_link(old_dentry, new_dir, new_dentry);
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(security_path_link);
+#endif /* SYNO_AUFS */
 
 int security_path_rename(struct path *old_dir, struct dentry *old_dentry,
 			 struct path *new_dir, struct dentry *new_dentry)
@@ -473,6 +482,9 @@ int security_path_chroot(struct path *path)
 {
 	return security_ops->path_chroot(path);
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(security_path_truncate);
+#endif /* SYNO_AUFS */
 #endif
 
 int security_inode_create(struct inode *dir, struct dentry *dentry, int mode)
@@ -544,6 +556,9 @@ int security_inode_readlink(struct dentry *dentry)
 		return 0;
 	return security_ops->inode_readlink(dentry);
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(security_inode_readlink);
+#endif /* SYNO_AUFS */
 
 int security_inode_follow_link(struct dentry *dentry, struct nameidata *nd)
 {
@@ -558,6 +573,9 @@ int security_inode_permission(struct inode *inode, int mask)
 		return 0;
 	return security_ops->inode_permission(inode, mask);
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(security_inode_permission);
+#endif /* SYNO_AUFS */
 
 int security_inode_setattr(struct dentry *dentry, struct iattr *attr)
 {
@@ -673,6 +691,9 @@ int security_file_permission(struct file *file, int mask)
 
 	return fsnotify_perm(file, mask);
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(security_file_permission);
+#endif /* SYNO_AUFS */
 
 int security_file_alloc(struct file *file)
 {
@@ -700,6 +721,9 @@ int security_file_mmap(struct file *file, unsigned long reqprot,
 		return ret;
 	return ima_file_mmap(file, prot);
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(security_file_mmap);
+#endif /* SYNO_AUFS */
 
 int security_file_mprotect(struct vm_area_struct *vma, unsigned long reqprot,
 			    unsigned long prot)

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* bounce buffer handling for block devices
  *
  * - Split from highmem.c

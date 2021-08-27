@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001 Sistina Software (UK) Limited.
  * Copyright (C) 2004-2008 Red Hat, Inc. All rights reserved.
@@ -826,6 +829,12 @@ int dm_table_add_target(struct dm_table *t, const char *type,
 	if (!tgt->num_discard_requests && tgt->discards_supported)
 		DMWARN("%s: %s: ignoring discards_supported because num_discard_requests is zero.",
 		       dm_device_name(t->md), type);
+
+#ifdef MY_ABC_HERE
+	if (tgt->type->lvinfoset){
+		tgt->type->lvinfoset(tgt);
+	}
+#endif
 
 	return 0;
 

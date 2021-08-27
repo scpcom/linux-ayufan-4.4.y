@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * offload engine driver for the Marvell XOR engine
  * Copyright (C) 2007, 2008, Marvell International Ltd.

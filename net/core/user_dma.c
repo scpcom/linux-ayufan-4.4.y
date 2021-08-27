@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright(c) 2004 - 2006 Intel Corporation. All rights reserved.
  * Portions based on net/core/datagram.c and copyrighted by their authors.

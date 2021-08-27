@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext3/ialloc.c
  *
@@ -176,6 +179,62 @@ error_return:
 	brelse(bitmap_bh);
 	ext3_std_error(sb, fatal);
 }
+
+#ifdef MY_ABC_HERE
+/*
+ * There are two policies for allocating an inode.  If the new inode is
+ * a directory, then a forward search is made for a block group with both
+ * free space and a low directory-to-inode ratio; if that fails, then of
+ * the groups with above-average free space, that group with the fewest
+ * directories already is chosen.
+ *
+ * For other inodes, search forward from the parent directory\'s block
+ * group to find a free inode.
+ */
+static int find_group_dir(struct super_block *sb, struct inode *parent)
+{
+	int ngroups = EXT3_SB(sb)->s_groups_count;
+	unsigned int freei, avefreei;
+	struct ext3_group_desc *desc, *best_desc = NULL;
+	int group, best_group = -1;
+
+	freei = percpu_counter_read_positive(&EXT3_SB(sb)->s_freeinodes_counter);
+	avefreei = freei / ngroups;
+
+	for (group = 0; group < ngroups; group++) {
+		desc = ext3_get_group_desc (sb, group, NULL);
+		if (!desc || !desc->bg_free_inodes_count)
+			continue;
+		if (le16_to_cpu(desc->bg_free_inodes_count) < avefreei)
+			continue;
+		if (!best_desc ||
+		    (le16_to_cpu(desc->bg_free_blocks_count) >
+		     le16_to_cpu(best_desc->bg_free_blocks_count))) {
+			best_group = group;
+			best_desc = desc;
+		}
+	}
+#ifdef MY_ABC_HERE
+	if (-1 != best_group) {
+		goto FOUND_GROUP;
+	}
+	/*
+	 * The free-inodes counter is approximate, and for really small
+	 * filesystems the above test can fail to find any blockgroups
+	 */
+	for (group = 0; group < ngroups; group++) {
+		desc = ext3_get_group_desc (sb, group, NULL);
+		if (!desc || !desc->bg_free_inodes_count)
+			continue;
+		best_group = group;
+		goto FOUND_GROUP;
+	}
+
+FOUND_GROUP:
+#endif
+	return best_group;
+}
+#endif
 
 /*
  * Orlov's allocator for directories.
@@ -400,8 +459,17 @@ struct inode *ext3_new_inode(handle_t *handle, struct inode * dir,
 
 	sbi = EXT3_SB(sb);
 	es = sbi->s_es;
+#ifdef MY_ABC_HERE
+	if (S_ISDIR(mode)) {
+		if (test_opt (sb, OLDALLOC))
+			group = find_group_dir(sb, dir);
+		else
+			group = find_group_orlov(sb, dir);
+	}
+#else
 	if (S_ISDIR(mode))
 		group = find_group_orlov(sb, dir);
+#endif
 	else
 		group = find_group_other(sb, dir);
 
@@ -503,6 +571,15 @@ got:
 	/* This is the optimal IO size (for stat), not the fs block size */
 	inode->i_blocks = 0;
 	inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME_SEC;
+#ifdef MY_ABC_HERE
+	inode->i_CreateTime = CURRENT_TIME_SEC;
+#endif
+#ifdef MY_ABC_HERE
+	inode->i_mode2 = ALL_SYNO_ARCHIVE;   /* set archive bit on creation */
+#endif
+#ifdef MY_ABC_HERE
+	inode->i_archive_version = inode->i_sb->s_archive_version;
+#endif
 
 	memset(ei->i_data, 0, sizeof(ei->i_data));
 	ei->i_dir_start_lookup = 0;

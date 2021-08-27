@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* ld script to make ARM Linux kernel
  * taken from the i386 version by Russell King
  * Written by Martin Mares <mj@atrey.karlin.mff.cuni.cz>
@@ -87,6 +90,11 @@ SECTIONS
 			__exception_text_start = .;
 			*(.exception.text)
 			__exception_text_end = .;
+#ifdef CONFIG_ARCH_FEROCEON
+/* Then all the functions that are "hot" in profiles, to group them onto the same hugetlb entry */
+#include "functionlist"
+ /* Then the rest */
+#endif
 			IRQENTRY_TEXT
 			TEXT_TEXT
 			SCHED_TEXT

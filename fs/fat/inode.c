@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fat/inode.c
  *
@@ -77,7 +80,11 @@ static inline int __fat_get_block(struct inode *inode, sector_t iblock,
 	if (iblock != MSDOS_I(inode)->mmu_private >> sb->s_blocksize_bits) {
 		fat_fs_error(sb, "corrupted file size (i_pos %lld, %lld)",
 			MSDOS_I(inode)->i_pos, MSDOS_I(inode)->mmu_private);
+#ifdef MY_ABC_HERE
+		return -ECORRUPT;
+#else
 		return -EIO;
+#endif
 	}
 
 	offset = (unsigned long)iblock & (sbi->sec_per_clus - 1);
@@ -161,6 +168,14 @@ static int fat_write_begin(struct file *file, struct address_space *mapping,
 	err = cont_write_begin(file, mapping, pos, len, flags,
 				pagep, fsdata, fat_get_block,
 				&MSDOS_I(mapping->host)->mmu_private);
+#ifdef MY_ABC_HERE
+	if (err >= 0 && (flags & AOP_FLAG_RECVFILE)) {
+		if (pos+len > mapping->host->i_size) {
+			i_size_write(mapping->host, pos+len);
+			mark_inode_dirty(mapping->host);
+		}
+	} else
+#endif
 	if (err < 0)
 		fat_write_failed(mapping, pos + len);
 	return err;
@@ -624,7 +639,11 @@ retry:
 	if (!bh) {
 		fat_msg(sb, KERN_ERR, "unable to read inode block "
 		       "for updating (i_pos %lld)", i_pos);
+#ifdef MY_ABC_HERE
+		return -ECORRUPT;
+#else
 		return -EIO;
+#endif
 	}
 	spin_lock(&sbi->inode_hash_lock);
 	if (i_pos != MSDOS_I(inode)->i_pos) {
@@ -898,7 +917,11 @@ enum {
 	Opt_charset, Opt_shortname_lower, Opt_shortname_win95,
 	Opt_shortname_winnt, Opt_shortname_mixed, Opt_utf8_no, Opt_utf8_yes,
 	Opt_uni_xl_no, Opt_uni_xl_yes, Opt_nonumtail_no, Opt_nonumtail_yes,
+#ifdef MY_ABC_HERE
+	Opt_obsolate, Opt_flush, Opt_noflush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
+#else
 	Opt_obsolate, Opt_flush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
+#endif
 	Opt_err_panic, Opt_err_ro, Opt_discard, Opt_err,
 };
 
@@ -923,6 +946,9 @@ static const match_table_t fat_tokens = {
 	{Opt_debug, "debug"},
 	{Opt_immutable, "sys_immutable"},
 	{Opt_flush, "flush"},
+#ifdef MY_ABC_HERE
+	{Opt_noflush, "noflush"},
+#endif
 	{Opt_tz_utc, "tz=UTC"},
 	{Opt_err_cont, "errors=continue"},
 	{Opt_err_panic, "errors=panic"},
@@ -1009,6 +1035,9 @@ static int parse_options(struct super_block *sb, char *options, int is_vfat,
 	opts->usefree = opts->nocase = 0;
 	opts->tz_utc = 0;
 	opts->errors = FAT_ERRORS_RO;
+#ifdef MY_ABC_HERE
+	opts->flush = 1;
+#endif
 	*debug = 0;
 
 	if (!options)
@@ -1098,6 +1127,11 @@ static int parse_options(struct super_block *sb, char *options, int is_vfat,
 		case Opt_flush:
 			opts->flush = 1;
 			break;
+#ifdef MY_ABC_HERE
+		case Opt_noflush:
+			opts->flush = 0;
+			break;
+#endif
 		case Opt_tz_utc:
 			opts->tz_utc = 1;
 			break;
@@ -1471,17 +1505,39 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 	sprintf(buf, "cp%d", sbi->options.codepage);
 	sbi->nls_disk = load_nls(buf);
 	if (!sbi->nls_disk) {
+#ifdef MY_ABC_HERE
+		if(!silent) {
+			fat_msg(sb, KERN_ERR, "FAT: nls_disk load default table\n");
+		}
+		sbi->nls_disk = load_nls_default();
+		if (!sbi->nls_disk){
+			fat_msg(sb, KERN_ERR, "FAT: nls_disk load default failed\n");
+			goto out_fail;
+		}
+#else
 		fat_msg(sb, KERN_ERR, "codepage %s not found", buf);
 		goto out_fail;
+#endif
 	}
 
 	/* FIXME: utf8 is using iocharset for upper/lower conversion */
 	if (sbi->options.isvfat) {
 		sbi->nls_io = load_nls(sbi->options.iocharset);
 		if (!sbi->nls_io) {
+#ifdef MY_ABC_HERE
+			if(!silent) {
+				fat_msg(sb, KERN_ERR, "FAT: nls_io load default table\n");
+			}
+			sbi->nls_io = load_nls_default();
+			if (!sbi->nls_io){
+				fat_msg(sb, KERN_ERR, "FAT: nls_io load default failed\n");
+				goto out_fail;
+			}
+#else
 			fat_msg(sb, KERN_ERR, "IO charset %s not found",
 			       sbi->options.iocharset);
 			goto out_fail;
+#endif
 		}
 	}
 

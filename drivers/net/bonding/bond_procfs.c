@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/proc_fs.h>
 #include <linux/export.h>
 #include <net/net_namespace.h>
@@ -147,6 +150,10 @@ static void bond_info_show_master(struct seq_file *seq)
 			seq_printf(seq, "\tPartner Mac Address: %pM\n",
 				   ad_info.partner_system);
 		}
+#ifdef MY_ABC_HERE
+	} else if (bond->params.mode == BOND_MODE_ALB) {
+		bond_alb_info_show(seq);
+#endif
 	}
 }
 
@@ -156,6 +163,11 @@ static void bond_info_show_slave(struct seq_file *seq,
 	struct bonding *bond = seq->private;
 
 	seq_printf(seq, "\nSlave Interface: %s\n", slave->dev->name);
+#ifdef MY_ABC_HERE
+	seq_printf(seq, "Speed: %d\n", slave->speed);
+	seq_printf(seq, "Duplex: %s\n",
+		   (slave->duplex == DUPLEX_FULL) ? "full" : "half");
+#endif
 	seq_printf(seq, "MII Status: %s\n",
 		   (slave->link == BOND_LINK_UP) ?  "up" : "down");
 	if (slave->speed == SPEED_UNKNOWN)

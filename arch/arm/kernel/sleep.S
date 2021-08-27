@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/linkage.h>
 #include <linux/threads.h>
 #include <asm/asm-offsets.h>

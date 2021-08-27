@@ -1,4 +1,5 @@
 config WIRELESS_EXT
+	default y
 	bool
 
 config WEXT_CORE
@@ -15,6 +16,7 @@ config WEXT_SPY
 
 config WEXT_PRIV
 	bool
+	default y
 
 config CFG80211
 	tristate "cfg80211 - wireless configuration API"

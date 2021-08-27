@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	Routines having to do with the 'struct sk_buff' memory handlers.
  *
@@ -357,6 +360,15 @@ static void skb_release_data(struct sk_buff *skb)
 
 		kfree(skb->head);
 	}
+#ifdef CONFIG_ARCH_FEROCEON
+#ifdef CONFIG_NET_SKB_RECYCLE
+/* Workaround for the cases when recycle callback was not called */
+	if (skb->hw_cookie) {
+		skb->skb_recycle(skb, 1);
+	}
+	skb->skb_recycle = NULL;
+#endif /* CONFIG_NET_SKB_RECYCLE */	
+#endif /* CONFIG_ARCH_FEROCEON */
 }
 
 /*
@@ -439,6 +451,13 @@ static void skb_release_all(struct sk_buff *skb)
 
 void __kfree_skb(struct sk_buff *skb)
 {
+#if defined(CONFIG_MV_ETHERNET) && defined(CONFIG_ARCH_FEROCEON)
+#ifdef CONFIG_NET_SKB_RECYCLE
+	if (skb->skb_recycle && !skb->skb_recycle(skb, 0))
+		return;
+#endif /* CONFIG_NET_SKB_RECYCLE */
+#endif
+ 
 	skb_release_all(skb);
 	kfree_skbmem(skb);
 }
@@ -594,6 +613,14 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	n->cloned = 1;
 	n->nohdr = 0;
 	n->destructor = NULL;
+
+#if defined(CONFIG_MV_ETHERNET) && defined(CONFIG_ARCH_FEROCEON)
+#ifdef CONFIG_NET_SKB_RECYCLE
+	n->skb_recycle = NULL;
+	n->hw_cookie = NULL;
+#endif /* CONFIG_NET_SKB_RECYCLE */
+#endif
+
 	C(tail);
 	C(end);
 	C(head);

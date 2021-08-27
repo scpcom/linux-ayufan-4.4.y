@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/namespace.c
  *
@@ -38,6 +41,10 @@
 
 #define HASH_SHIFT ilog2(PAGE_SIZE / sizeof(struct list_head))
 #define HASH_SIZE (1UL << HASH_SHIFT)
+
+#ifdef MY_ABC_HERE
+extern int gSynoHasDynModule;
+#endif
 
 static int event;
 static DEFINE_IDA(mnt_id_ida);
@@ -954,6 +961,9 @@ static int show_sb_opts(struct seq_file *m, struct super_block *sb)
 		{ MS_SYNCHRONOUS, ",sync" },
 		{ MS_DIRSYNC, ",dirsync" },
 		{ MS_MANDLOCK, ",mand" },
+#ifdef MY_ABC_HERE
+		{ MS_CORRUPT, ",corrupt" },
+#endif
 		{ 0, NULL }
 	};
 	const struct proc_fs_info *fs_infop;
@@ -2289,6 +2299,15 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 	struct path path;
 	int retval = 0;
 	int mnt_flags = 0;
+#if defined(MY_ABC_HERE)
+	extern int gSynoInstallFlag;
+	if ( 0 == gSynoInstallFlag &&
+			NULL != dev_name &&
+			strstr(dev_name, SYNO_USB_FLASH_DEVICE_PATH) &&
+			gSynoHasDynModule) {
+		return -EINVAL;
+	}
+#endif
 
 	/* Discard magic */
 	if ((flags & MS_MGC_MSK) == MS_MGC_VAL)

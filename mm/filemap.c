@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	linux/mm/filemap.c
  *
@@ -42,6 +45,11 @@
 #include <linux/buffer_head.h> /* for try_to_free_buffers */
 
 #include <asm/mman.h>
+
+#ifdef MY_ABC_HERE
+#include <linux/tcp.h>
+#include <net/tcp.h>
+#endif /* MY_ABC_HERE */
 
 /*
  * Shared mappings implemented 30.11.1994. It's not fully working yet,
@@ -2258,6 +2266,187 @@ int pagecache_write_end(struct file *file, struct address_space *mapping,
 	return aops->write_end(file, mapping, pos, len, copied, page, fsdata);
 }
 EXPORT_SYMBOL(pagecache_write_end);
+
+#ifdef MY_ABC_HERE
+int
+do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
+			size_t count, size_t * rbytes, size_t * wbytes)
+{
+	struct address_space *mapping = file->f_mapping;
+	struct inode   *inode = mapping->host;
+	loff_t          pos;
+	struct page    *page;
+	ssize_t         err = 0;
+	unsigned        bytes;
+
+	unsigned        bytes_received = 0;
+	struct kvec     iov[MAX_PAGES_PER_RECVFILE + 1];
+	struct page    *rgPageList[MAX_PAGES_PER_RECVFILE + 1];
+
+	int             cPagesAllocated;
+
+	loff_t          rgPos[MAX_PAGES_PER_RECVFILE + 1];
+	unsigned        rgBytes[MAX_PAGES_PER_RECVFILE + 1];
+	void           *fsdata[MAX_PAGES_PER_RECVFILE + 1];
+	long            write_begin_ret = 0, write_end_ret = 0, kernel_recvmsg_ret = 0;
+
+	long            rcvtimeo;
+	struct msghdr   msg;
+	size_t          cBytesToReceive = 0;
+	int             crgPagePtr = 0;
+
+	*rbytes = 0;
+	*wbytes = 0;
+	pos = *ppos;
+
+	vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
+
+	/*
+	 * We can write back this queue in page reclaim
+	 */
+	current->backing_dev_info = mapping->backing_dev_info;
+
+	err = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
+	if (err != 0 || count == 0) {
+		goto done1;
+	}
+
+	/* Check address_ops functions */
+	if (!mapping->a_ops->write_begin || !mapping->a_ops->write_end) {
+		printk("write_begin() or write_end() is not implemented\n");
+		goto done1;
+	}
+	file_remove_suid(file);
+	file_update_time(file);
+
+	cPagesAllocated = 0;
+	do {
+		pgoff_t         offset;
+		char           *kaddr;
+
+		/*
+		 * Try to find the page in the cache. If it isn't there,
+		 * allocate a free page.
+		 */
+		offset = (pos & (PAGE_CACHE_SIZE - 1));	/* Within page */
+		bytes = min_t(unsigned int, PAGE_CACHE_SIZE - offset, count);
+
+		page = NULL;
+		write_begin_ret =
+			mapping->a_ops->write_begin(
+					file, mapping, pos, bytes, AOP_FLAG_UNINTERRUPTIBLE|AOP_FLAG_RECVFILE,
+					&page, &fsdata[cPagesAllocated]);
+		if (write_begin_ret) {
+			err = write_begin_ret;
+			goto done;
+		}
+
+		/* Bookkeep info about this allocated page */
+		kaddr = kmap(page);
+		rgPageList[cPagesAllocated] = page;
+		rgPos[cPagesAllocated] = pos;
+		rgBytes[cPagesAllocated] = bytes;
+		iov[cPagesAllocated].iov_base = kaddr + offset;
+		iov[cPagesAllocated].iov_len = bytes;
+		cPagesAllocated++;
+
+		if (cPagesAllocated > MAX_PAGES_PER_RECVFILE + 1) {
+			panic("allocate %d pages in do_recvfile()\n",
+					cPagesAllocated);
+		}
+
+		count -= bytes;
+		pos += bytes;
+		cBytesToReceive += bytes;
+	} while (count);
+
+	/*
+	 * IOV is ready, receive the date from socket now
+	 */
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+	msg.msg_iov = (struct iovec *) &iov[0];
+	msg.msg_iovlen = cPagesAllocated;
+	msg.msg_control = NULL;
+	msg.msg_controllen = 0;
+	msg.msg_flags = MSG_KERNSPACE;
+	rcvtimeo = sock->sk->sk_rcvtimeo;
+	sock->sk->sk_rcvtimeo = 64 * HZ;
+
+	kernel_recvmsg_ret = kernel_recvmsg(
+			sock, &msg, &iov[0], cPagesAllocated, cBytesToReceive,
+			MSG_WAITALL | MSG_NOCATCHSIGNAL);
+
+	sock->sk->sk_rcvtimeo = rcvtimeo;
+
+	if (kernel_recvmsg_ret >= 0) {
+		bytes_received = kernel_recvmsg_ret;
+		if (kernel_recvmsg_ret != cBytesToReceive) {
+			err = -EPIPE;
+		}
+		/*
+		 * else the normal path:
+		 * err remains 0 here,
+		 * bytes_received is set and matches desired length.
+		 *
+		 */
+	} else {
+		err = kernel_recvmsg_ret;
+	}
+	if (err) {
+#ifdef SYNO_DEBUG_BUILD
+		printk("do_recvfile: bytes_received %d , count = %d, err = %d\n",
+				bytes_received, count, err);
+#endif
+	}
+
+done:
+	*ppos = pos;
+
+	crgPagePtr = 0;
+
+		while (crgPagePtr < cPagesAllocated) {
+			page = rgPageList[crgPagePtr];
+
+			kunmap(page);
+			write_end_ret = mapping->a_ops->write_end(
+					file, mapping, rgPos[crgPagePtr],
+					rgBytes[crgPagePtr], rgBytes[crgPagePtr],
+					page, fsdata[crgPagePtr]);
+			/* Keep error code if write_end() failed for some reason */
+			if (0 > write_end_ret) {
+				if (0 < kernel_recvmsg_ret) {
+					bytes_received -= rgBytes[crgPagePtr];
+				}
+				if (!err) {
+					err = write_end_ret;
+				}
+			}
+			cond_resched();
+			crgPagePtr++;
+		}
+
+	if (0 < bytes_received) {
+		*rbytes = kernel_recvmsg_ret;
+		*wbytes = bytes_received;
+	} else {
+		*rbytes = kernel_recvmsg_ret;
+		*wbytes = 0;
+	}
+
+	if (!err) {
+		balance_dirty_pages_ratelimited_nr(mapping, cPagesAllocated);
+	}
+
+done1:
+	current->backing_dev_info = NULL;
+	if (err) {
+		return err;
+	} else {
+		return bytes_received;
+	}
+}
+#endif
 
 ssize_t
 generic_file_direct_write(struct kiocb *iocb, const struct iovec *iov,

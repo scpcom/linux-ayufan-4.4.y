@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This file holds Hub protocol constants and data structures that are
  * defined in chapter 11 (Hub Specification) of the USB 2.0 specification.
@@ -103,6 +106,17 @@ struct usb_port_status {
 #define USB_PORT_STAT_TEST              0x0800
 #define USB_PORT_STAT_INDICATOR         0x1000
 /* bits 13 to 15 are reserved */
+#ifdef MY_DEF_HERE
+#define USB_PORT_STAT_TEST_MODE         0x8000
+#endif
+
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+enum XHCI_SPECIAL_RESET_MODE{
+	XHCI_SPECIAL_RESET_PAUSE = 0, // enable and pause
+	XHCI_SPECIAL_RESET_RUN, // enable and run
+	XHCI_SPECIAL_RESET_DISABLE, // for disable_usb3
+};
+#endif
 
 /*
  * Additions to wPortStatus bit field from USB 3.0

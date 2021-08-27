@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   File: fs/ext4/xattr.h
 
@@ -21,6 +24,12 @@
 #define EXT4_XATTR_INDEX_TRUSTED		4
 #define	EXT4_XATTR_INDEX_LUSTRE			5
 #define EXT4_XATTR_INDEX_SECURITY	        6
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+#define EXT4_XATTR_INDEX_SYNO_ACL_ACCESS	7
+#endif
+#ifdef MY_ABC_HERE
+#define EXT4_XATTR_INDEX_SYNO	8
+#endif
 
 struct ext4_xattr_header {
 	__le32	h_magic;	/* magic number for identification */
@@ -65,6 +74,12 @@ struct ext4_xattr_entry {
 
 # ifdef CONFIG_EXT4_FS_XATTR
 
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+extern struct xattr_handler ext4_xattr_synoacl_access_handler;
+#endif
+#ifdef MY_ABC_HERE
+extern struct xattr_handler ext4_xattr_syno_handler;
+#endif
 extern const struct xattr_handler ext4_xattr_user_handler;
 extern const struct xattr_handler ext4_xattr_trusted_handler;
 extern const struct xattr_handler ext4_xattr_acl_access_handler;

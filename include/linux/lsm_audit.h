@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Common LSM logging functions
  * Heavily borrowed from selinux/avc.h

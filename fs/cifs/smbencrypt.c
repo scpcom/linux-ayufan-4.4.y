@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
    Unix SMB/Netbios implementation.
    Version 1.9.

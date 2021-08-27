@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * UHCI HCD (Host Controller Driver) PCI Bus Glue.
  *
@@ -156,6 +159,14 @@ static int uhci_pci_init(struct usb_hcd *hcd)
 static void uhci_shutdown(struct pci_dev *pdev)
 {
 	struct usb_hcd *hcd = pci_get_drvdata(pdev);
+
+#ifdef MY_ABC_HERE
+		if (hcd->irq >= 0) {
+			//disable_irq(hcd->irq);
+			free_irq(hcd->irq, hcd);
+			hcd->irq = -1;
+		}
+#endif
 
 	uhci_hc_died(hcd_to_uhci(hcd));
 }

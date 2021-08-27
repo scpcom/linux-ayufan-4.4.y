@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __LINUX_DCACHE_H
 #define __LINUX_DCACHE_H
 
@@ -204,6 +207,14 @@ struct dentry_operations {
 #define DCACHE_CANT_MOUNT	0x0100
 #define DCACHE_GENOCIDE		0x0200
 #define DCACHE_SHRINK_LIST	0x0400
+
+#ifdef MY_ABC_HERE
+#define DCACHE_CASELESS_COMPARE 0x0100000 /* Do caseless compare */
+#endif
+
+#ifdef MY_ABC_HERE
+#define DCACHE_ECRYPTFS_DECRYPT 0x0200000
+#endif
 
 #define DCACHE_NFSFS_RENAMED	0x1000
      /* this dentry has been "silly renamed" and has to be deleted on the last

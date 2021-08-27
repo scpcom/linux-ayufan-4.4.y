@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  sata_sil.c - Silicon Image SATA
  *
@@ -126,7 +129,10 @@ static void sil_bmdma_start(struct ata_queued_cmd *qc);
 static void sil_bmdma_stop(struct ata_queued_cmd *qc);
 static void sil_freeze(struct ata_port *ap);
 static void sil_thaw(struct ata_port *ap);
-
+#ifdef MY_ABC_HERE
+static bool syno_ata_sff_qc_fill_rtf(struct ata_queued_cmd *qc);
+static void syno_ata_sff_drain_fifo(struct ata_queued_cmd *qc);
+#endif
 
 static const struct pci_device_id sil_pci_tbl[] = {
 	{ PCI_VDEVICE(CMD, 0x3112), sil_3112 },
@@ -191,6 +197,10 @@ static struct ata_port_operations sil_ops = {
 	.qc_prep		= sil_qc_prep,
 	.freeze			= sil_freeze,
 	.thaw			= sil_thaw,
+#ifdef MY_ABC_HERE
+	.qc_fill_rtf		= syno_ata_sff_qc_fill_rtf,
+	.sff_drain_fifo		= syno_ata_sff_drain_fifo,
+#endif
 	.scr_read		= sil_scr_read,
 	.scr_write		= sil_scr_write,
 };
@@ -452,6 +462,9 @@ static void sil_host_intr(struct ata_port *ap, u32 bmdma2)
 		 */
 		if (serror & SERR_PHYRDY_CHG) {
 			ap->link.eh_info.serror |= serror;
+#ifdef MY_ABC_HERE
+			syno_ata_info_print(ap);
+#endif
 			goto freeze;
 		}
 
@@ -595,6 +608,64 @@ static void sil_thaw(struct ata_port *ap)
 	writel(tmp, mmio_base + SIL_SYSCFG);
 }
 
+#ifdef MY_ABC_HERE
+/**
+ *	syno_ata_sff_qc_fill_rtf - fill result TF using ->sff_tf_read
+ *	3512 has a hw issue that when the device is not in the port,
+ *	we should not read status from that port. It will result a hang
+ *	issue.
+ *
+ *	@qc: qc to fill result TF for
+ *
+ *	@qc is finished and result TF needs to be filled.  Fill it
+ *	using ->sff_tf_read.
+ *
+ *	LOCKING:
+ *	spin_lock_irqsave(host lock)
+ *
+ *	RETURNS:
+ *	true indicating that result TF is successfully filled.
+ */
+static bool syno_ata_sff_qc_fill_rtf(struct ata_queued_cmd *qc)
+{
+	struct ata_device *dev = qc->dev;
+	struct ata_eh_context *ehc = &dev->link->eh_context;
+
+	if(!unlikely(qc->flags & ATA_QCFLAG_FAILED) || !(ehc->i.serror & SERR_PHYRDY_CHG) || ata_tag_internal(qc->tag)) {
+		return ata_sff_qc_fill_rtf(qc);
+	}
+	return true;
+}
+
+/**
+ *	syno_ata_sff_drain_fifo - Stock FIFO drain logic for SFF controllers
+ *	3512 has a hw issue that when the device is not in the port,
+ *	we should not read status from that port. It will result a hang
+ *	issue.
+ *	@qc: command
+ *
+ *	Drain the FIFO and device of any stuck data following a command
+ *	failing to complete. In some cases this is neccessary before a
+ *	reset will recover the device.
+ *
+ */
+static void syno_ata_sff_drain_fifo(struct ata_queued_cmd *qc)
+{
+	struct ata_device *dev = NULL;
+	struct ata_eh_context *ehc = NULL;
+
+	/* We only need to flush incoming data when a command was running */
+	if (qc == NULL || qc->dma_dir == DMA_TO_DEVICE)
+		return;
+	dev = qc->dev;
+	ehc = &dev->link->eh_context;
+
+	if(!unlikely(qc->flags & ATA_QCFLAG_FAILED) || !(ehc->i.serror & SERR_PHYRDY_CHG) || ata_tag_internal(qc->tag)) {
+		ata_sff_drain_fifo(qc);
+	}
+}
+#endif
+
 /**
  *	sil_dev_config - Apply device/host-specific errata fixups
  *	@dev: Device to be examined
@@ -702,6 +773,27 @@ static void sil_init_controller(struct ata_host *host)
 			writel(tmp | SIL_INTR_STEERING,
 			       mmio_base + sil_port[2].bmdma);
 	}
+
+#ifdef	MY_ABC_HERE
+	/* raise tx output swing voltage to maximum for DS2.0 bug 2308. */
+	/* accroding final datasheet in
+	*	http://www.siliconimage.com/docs/SiI-DS-0102-D.pdf
+	*  we should set 19 and 13 bit to 1, let it to 800mA
+	*  old datasheet have some error in it's bits diagram
+	*  so we change 0x00084000 to 0x00082000
+	*/
+	/*
+	* although it no longer happend in linux 2.6.24. but we still raise tx output
+	* swing voltage to maximun.
+	* Commiter: KH
+    */
+	/*
+	* porting this define in to linux kernel 2.6.32.
+	* Commiter: EricChang
+	*/
+	writel(readl(mmio_base + 0x144) | 0x00082000, mmio_base + 0x144);
+#endif
+
 }
 
 static bool sil_broken_system_poweroff(struct pci_dev *pdev)
@@ -798,6 +890,9 @@ static int sil_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	sil_init_controller(host);
 
 	pci_set_master(pdev);
+#ifdef MY_ABC_HERE
+	host->flags |= ATA_HOST_LLD_SPINUP_DELAY;
+#endif
 	return ata_host_activate(host, pdev->irq, sil_interrupt, IRQF_SHARED,
 				 &sil_sht);
 }

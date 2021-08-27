@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/super.c
  *
@@ -37,6 +40,15 @@
 
 LIST_HEAD(super_blocks);
 DEFINE_SPINLOCK(sb_lock);
+
+#ifdef MY_ABC_HERE
+spinlock_t Namei_buf_lock_1;  /* lock for UTF16NameiStrBuf1[] in fs/namei.c */
+spinlock_t Namei_buf_lock_2;  /* lock for UTF16NameiStrBuf2[] in fs/namei.c */
+spinlock_t Dcache_buf_lock;  /* lock for UTF8DcacheDStrBuf[] in fs/dcache.c */
+static int lock_1_init = 0;
+static int lock_2_init = 0;
+static int Dcache_lock_init = 0;
+#endif
 
 /*
  * One thing we have to be careful of with a per-sb shrinker is that we don't
@@ -178,6 +190,24 @@ static struct super_block *alloc_super(struct file_system_type *type)
 		s->s_maxbytes = MAX_NON_LFS;
 		s->s_op = &default_op;
 		s->s_time_gran = 1000000000;
+#ifdef MY_ABC_HERE
+		mutex_init(&s->s_archive_mutex);
+		s->s_archive_version = 0;
+#endif
+#ifdef MY_ABC_HERE
+		if (!lock_1_init) {
+			spin_lock_init(&Namei_buf_lock_1);
+			lock_1_init=1;
+		}
+		if (!lock_2_init) {
+			spin_lock_init(&Namei_buf_lock_2);
+			lock_2_init=1;
+		}
+		if (!Dcache_lock_init) {
+			spin_lock_init(&Dcache_buf_lock);
+			Dcache_lock_init=1;
+		}
+#endif
 		s->cleancache_poolid = -1;
 
 		s->s_shrink.seeks = DEFAULT_SEEKS;
@@ -232,6 +262,40 @@ void put_super(struct super_block *sb)
 	spin_unlock(&sb_lock);
 }
 
+#ifdef MY_ABC_HERE
+/** 
+ * Modified from deactivate_locked_super() 
+ *  
+ *  deactivate_read_locked_super	-	drop an active reference
+ *  to superblock
+ *	@s: superblock to deactivate
+ *
+ *	This is a read-lock variation of deactivate_locked_super
+ */
+void deactivate_read_locked_super(struct super_block *s)
+{
+	struct file_system_type *fs = s->s_type;
+	if (atomic_dec_and_test(&s->s_active)) {
+		cleancache_flush_fs(s);
+		down_write(&s->s_umount);
+		fs->kill_sb(s);
+
+		/* caches are now gone, we can safely kill the shrinker now */
+		unregister_shrinker(&s->s_shrink);
+
+		/*
+		 * We need to call rcu_barrier so all the delayed rcu free
+		 * inodes are flushed before we release the fs module.
+		 */
+		rcu_barrier();
+		put_filesystem(fs);
+		put_super(s);
+	} else {
+		up_read(&s->s_umount);
+	}
+}
+EXPORT_SYMBOL(deactivate_read_locked_super);
+#endif
 
 /**
  *	deactivate_locked_super	-	drop an active reference to superblock
@@ -1136,6 +1200,9 @@ out:
 int freeze_super(struct super_block *sb)
 {
 	int ret;
+#ifdef MY_ABC_HERE
+extern int sync_wait_fs_sync(struct super_block *sb);
+#endif
 
 	atomic_inc(&sb->s_active);
 	down_write(&sb->s_umount);
@@ -1155,6 +1222,9 @@ int freeze_super(struct super_block *sb)
 	smp_wmb();
 
 	sync_filesystem(sb);
+#ifdef MY_ABC_HERE
+	sync_wait_fs_sync(sb);
+#endif
 
 	sb->s_frozen = SB_FREEZE_TRANS;
 	smp_wmb();
@@ -1185,7 +1255,11 @@ int thaw_super(struct super_block *sb)
 {
 	int error;
 
+#ifdef MY_ABC_HERE
+	down_read(&sb->s_umount);
+#else
 	down_write(&sb->s_umount);
+#endif
 	if (sb->s_frozen == SB_UNFROZEN) {
 		up_write(&sb->s_umount);
 		return -EINVAL;
@@ -1209,7 +1283,11 @@ out:
 	sb->s_frozen = SB_UNFROZEN;
 	smp_wmb();
 	wake_up(&sb->s_wait_unfrozen);
+#ifdef MY_ABC_HERE
+	deactivate_read_locked_super(sb);
+#else
 	deactivate_locked_super(sb);
+#endif
 
 	return 0;
 }

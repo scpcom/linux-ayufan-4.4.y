@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mm/cache-l2x0.c - L210/L220 cache controller support
  *

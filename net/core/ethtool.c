@@ -1384,7 +1384,7 @@ static int ethtool_phys_id(struct net_device *dev, void __user *useraddr)
 	static bool busy;
 	int rc;
 
-	if (!dev->ethtool_ops->set_phys_id)
+	if (!dev->ethtool_ops->set_phys_id && !dev->ethtool_ops->phys_id)
 		return -EOPNOTSUPP;
 
 	if (busy)
@@ -1392,6 +1392,10 @@ static int ethtool_phys_id(struct net_device *dev, void __user *useraddr)
 
 	if (copy_from_user(&id, useraddr, sizeof(id)))
 		return -EFAULT;
+
+	if (!dev->ethtool_ops->set_phys_id)
+		/* Do it the old way */
+		return dev->ethtool_ops->phys_id(dev, id.data);
 
 	rc = dev->ethtool_ops->set_phys_id(dev, ETHTOOL_ID_ACTIVE);
 	if (rc < 0)

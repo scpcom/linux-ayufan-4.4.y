@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * sys_ia32.c: Conversion between 32bit and 64bit native syscalls. Based on
  *             sys_sparc32
@@ -84,16 +87,90 @@ static int cp_stat64(struct stat64 __user *ubuf, struct kstat *stat)
 	    __put_user(huge_encode_dev(stat->rdev), &ubuf->st_rdev) ||
 	    __put_user(stat->size, &ubuf->st_size) ||
 	    __put_user(stat->atime.tv_sec, &ubuf->st_atime) ||
+#ifdef MY_ABC_HERE
+	    __put_user(stat->SynoMode, &ubuf->st_SynoMode) ||
+#else
 	    __put_user(stat->atime.tv_nsec, &ubuf->st_atime_nsec) ||
+#endif
 	    __put_user(stat->mtime.tv_sec, &ubuf->st_mtime) ||
+#ifdef MY_ABC_HERE
+	    __put_user(stat->syno_archive_version, &ubuf->st_mtime_nsec) ||
+#else
 	    __put_user(stat->mtime.tv_nsec, &ubuf->st_mtime_nsec) ||
+#endif
 	    __put_user(stat->ctime.tv_sec, &ubuf->st_ctime) ||
+#ifdef MY_ABC_HERE
+	    __put_user (stat->SynoCreateTime.tv_sec, &ubuf->st_SynoCreateTime) ||
+#else
 	    __put_user(stat->ctime.tv_nsec, &ubuf->st_ctime_nsec) ||
+#endif
 	    __put_user(stat->blksize, &ubuf->st_blksize) ||
 	    __put_user(stat->blocks, &ubuf->st_blocks))
 		return -EFAULT;
 	return 0;
 }
+
+#ifdef MY_ABC_HERE
+
+#include <linux/namei.h>
+
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+extern int syno_hibernation_log_sec;
+#endif
+
+extern int __SYNOCaselessStat(char __user * filename, struct kstat *stat, unsigned flags, int *lastComponent);
+
+asmlinkage long sys32_SYNOCaselessStat(char __user * filename, struct stat64 __user *statbuf)
+{
+	int lastComponent = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, &stat, LOOKUP_FOLLOW|LOOKUP_CASELESS_COMPARE, &lastComponent);
+	if (!error) {
+#ifdef MY_ABC_HERE
+		if(syno_hibernation_log_sec > 0) {
+			syno_do_hibernation_log(filename);
+		}
+#endif
+		error = cp_stat64(statbuf, &stat);
+	} else if(error == -ENOENT) {
+		struct stat64 tmp;
+
+		memset(&tmp, 0, sizeof(tmp));
+		tmp.st_SynoUnicodeStat = lastComponent;
+		error = copy_to_user(statbuf, &tmp, sizeof(tmp)) ? -EFAULT : error;
+	}
+
+	return error;
+}
+
+asmlinkage long sys32_SYNOCaselessLStat(char __user * filename, struct stat64 __user *statbuf)
+{
+	int lastComponent = 0;
+	long error = -1;
+	struct kstat stat;
+
+	error = __SYNOCaselessStat(filename, &stat, LOOKUP_CASELESS_COMPARE, &lastComponent);
+	if (!error) {
+#ifdef MY_ABC_HERE
+			if(syno_hibernation_log_sec > 0) {
+				syno_do_hibernation_log(filename);
+			}
+#endif
+		error = cp_stat64(statbuf, &stat);
+	} else if(error == -ENOENT) {
+		struct stat64 tmp;
+
+		memset(&tmp, 0, sizeof(tmp));
+		tmp.st_SynoUnicodeStat = lastComponent;
+		error = copy_to_user(statbuf, &tmp, sizeof(tmp)) ? -EFAULT : error;
+}
+
+	return error;
+}
+#endif
 
 asmlinkage long sys32_stat64(const char __user *filename,
 			     struct stat64 __user *statbuf)

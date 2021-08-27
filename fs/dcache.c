@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * fs/dcache.c
  *
@@ -1177,6 +1180,10 @@ void shrink_dcache_parent(struct dentry * parent)
 }
 EXPORT_SYMBOL(shrink_dcache_parent);
 
+#ifdef MY_ABC_HERE
+static unsigned char UTF8DcacheDStrBuf[UNICODE_UTF8_BUFSIZE];
+extern spinlock_t Dcache_buf_lock;
+#endif
 /**
  * __d_alloc	-	allocate a dcache entry
  * @sb: filesystem it will belong to
@@ -1191,13 +1198,32 @@ struct dentry *__d_alloc(struct super_block *sb, const struct qstr *name)
 {
 	struct dentry *dentry;
 	char *dname;
+#ifdef MY_ABC_HERE
+	int upperlen;
+#endif
 
 	dentry = kmem_cache_alloc(dentry_cache, GFP_KERNEL);
 	if (!dentry)
 		return NULL;
 
+#ifdef MY_ABC_HERE
+	/* We will replace qstr.name to real name in real_lookup,
+	 * so we should get enough space when malloc.
+	 * We assume the length of uppercase name is the longest.
+	*/
+	spin_lock(&Dcache_buf_lock);
+	upperlen = SYNOUnicodeUTF8toUpper(UTF8DcacheDStrBuf, name->name,
+									  UNICODE_UTF8_BUFSIZE - 1 , name->len, NULL);
+	spin_unlock(&Dcache_buf_lock);
+	if (upperlen < name->len) {
+		upperlen = name->len;
+	}
+	if (upperlen > DNAME_INLINE_LEN-1) {
+		dname = kmalloc(upperlen + 1, GFP_KERNEL);
+#else
 	if (name->len > DNAME_INLINE_LEN-1) {
 		dname = kmalloc(name->len + 1, GFP_KERNEL);
+#endif
 		if (!dname) {
 			kmem_cache_free(dentry_cache, dentry); 
 			return NULL;
@@ -1701,6 +1727,9 @@ struct dentry *__d_lookup_rcu(struct dentry *parent, struct qstr *name,
 	struct hlist_bl_head *b = d_hash(parent, hash);
 	struct hlist_bl_node *node;
 	struct dentry *dentry;
+#ifdef MY_ABC_HERE
+	struct dentry *found = NULL;
+#endif
 
 	/*
 	 * Note: There is significant duplication with __d_lookup_rcu which is
@@ -1753,6 +1782,24 @@ seqretry:
 						dentry, i,
 						tlen, tname, name))
 				continue;
+#ifdef MY_ABC_HERE
+			/* In caseless case, we should backup first dentry which be founded.
+			 * We backup it to "found". If all inode of founded dentries is NULL,
+			 * we can return it.
+			*/
+			if (DCACHE_CASELESS_COMPARE & parent->d_flags){
+				if (!i) {
+					/* inode is null means file not in disk.
+					 * we return the dentry and don't do real_lookup.
+					*/
+					if (!found) {
+						*inode = NULL;
+						found = dentry;
+					}
+					continue;
+				}
+			}
+#endif
 		} else {
 			if (dentry_cmp(tname, tlen, str, len))
 				continue;
@@ -1766,7 +1813,11 @@ seqretry:
 		*inode = i;
 		return dentry;
 	}
+#ifdef MY_ABC_HERE
+	return found;
+#else
 	return NULL;
+#endif
 }
 
 /**
@@ -1819,6 +1870,9 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 	struct hlist_bl_node *node;
 	struct dentry *found = NULL;
 	struct dentry *dentry;
+#ifdef MY_ABC_HERE
+	int lockFound = 0;
+#endif
 
 	/*
 	 * Note: There is significant duplication with __d_lookup_rcu which is
@@ -1866,10 +1920,41 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 						dentry, dentry->d_inode,
 						tlen, tname, name))
 				goto next;
+#ifdef MY_ABC_HERE
+			/* In caseless case, we should backup first dentry which be founded.
+			 * We backup it to "found". If all inode of founded dentries is NULL,
+			 * we can return it.
+			*/
+			if (DCACHE_CASELESS_COMPARE & parent->d_flags){
+				if (!dentry->d_inode) {
+					/* inode is null means file not in disk.
+					 * we return the dentry and don't do real_lookup.
+					*/
+					if (!found) {
+						dentry->d_count++;
+						found = dentry;
+						lockFound = 1;
+						/* Continue here, so "found" is still locked.
+						* We will unlocked it before return or before replace "found".
+						*/
+						continue;
+					}
+					goto next;
+				}
+			}
+#endif
 		} else {
 			if (dentry_cmp(tname, tlen, str, len))
 				goto next;
 		}
+#ifdef MY_ABC_HERE
+		// make sure "found" is unlocked
+		if (lockFound) {
+			found->d_count--;
+			spin_unlock(&found->d_lock);
+			lockFound = 0;
+		}
+#endif
 
 		dentry->d_count++;
 		found = dentry;
@@ -1878,6 +1963,12 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 next:
 		spin_unlock(&dentry->d_lock);
  	}
+#ifdef MY_ABC_HERE
+	// make sure "found" is unlocked
+	if (lockFound) {
+		spin_unlock(&found->d_lock);
+	}
+#endif
  	rcu_read_unlock();
 
  	return found;

@@ -56,6 +56,9 @@ modules.builtin
 !.gitignore
 !.mailmap
 
+#ignore CVS control file
+CVS
+
 #
 # Generated include files
 #
@@ -82,5 +85,6 @@ GSYMS
 GTAGS
 
 *.orig
+*.rej
 *~
 \#*#

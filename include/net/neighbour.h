@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _NET_NEIGHBOUR_H
 #define _NET_NEIGHBOUR_H
 

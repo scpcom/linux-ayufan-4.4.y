@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * LZO decompressor for the Linux kernel. Code borrowed from the lzo
  * implementation by Markus Franz Xaver Johannes Oberhumer.

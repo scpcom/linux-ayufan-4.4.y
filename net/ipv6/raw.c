@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	RAW sockets for IPv6
  *	Linux INET6 implementation
@@ -274,6 +277,21 @@ static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 				sk->sk_bound_dev_if = addr->sin6_scope_id;
 			}
 
+#ifdef MY_ABC_HERE
+			if (!sk->sk_bound_dev_if) {
+				for_each_netdev(sock_net(sk), dev) {
+					if(dev && (dev->flags & IFF_UP) && !(dev->flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+						dev_hold(dev);
+						break;
+					}
+				}
+				if(!dev) {
+					err = -ENODEV;
+					goto out_unlock;
+				}
+				sk->sk_bound_dev_if = dev->ifindex;
+			}
+#else
 			/* Binding to link-local address requires an interface */
 			if (!sk->sk_bound_dev_if)
 				goto out_unlock;
@@ -283,6 +301,7 @@ static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 						   sk->sk_bound_dev_if);
 			if (!dev)
 				goto out_unlock;
+#endif
 		}
 
 		/* ipv4 addr of the socket is invalid.  Only the

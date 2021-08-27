@@ -39,6 +39,9 @@
 #include <asm/machdep.h>
 #include <asm/mpic.h>
 #include <asm/smp.h>
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+#include <asm/fsl_errata.h>
+#endif
 
 #include "mpic.h"
 
@@ -1282,6 +1285,19 @@ struct mpic * __init mpic_alloc(struct device_node *node,
 		mpic_write(mpic->gregs, MPIC_INFO(GREG_GLOBAL_CONF_0),
 			   mpic_read(mpic->gregs, MPIC_INFO(GREG_GLOBAL_CONF_0))
 			   | MPIC_GREG_GCONF_MCK);
+
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+	/*
+	 * EPIC soft reset not clearing MSIRn registers correctly. Software fix
+	 * fix ERRATA PIC 4
+	 */
+	if (MPC8548_ERRATA(2, 1)) {
+		mpic_map(mpic, node, paddr, &mpic->msgregs, MPIC_INFO(MSI_BASE), 0x100);
+		for (i = 0; i < MPIC_INFO(MSI_MSIRN_CNT); i++) {
+			mpic_read(mpic->msgregs, i * MPIC_INFO(MSI_STRIDE));
+		}
+	}
+#endif
 
 	/*
 	 * Read feature register.  For non-ISU MPICs, num sources as well. On

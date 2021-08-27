@@ -1,5 +1,12 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASM_POWERPC_UNISTD_H_
 #define _ASM_POWERPC_UNISTD_H_
+
+#if 1 //SYNO
+#include <linux/syno.h>
+#endif
 
 /*
  * This file contains the system call numbers.
@@ -376,9 +383,79 @@
 #define __NR_process_vm_readv	351
 #define __NR_process_vm_writev	352
 
+#ifdef MY_ABC_HERE
+#define __NR_SYNOmmap				400
+#define SYNOmmap(x)					syscall(__NR_SYNOmmap, x)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOMTDAlloc			405
+#define SYNOMTDAlloc(x)				syscall(__NR_SYNOMTDAlloc, x)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOUtime				402
+#define SYNOUtime(arg1, arg2)			syscall(__NR_SYNOUtime, arg1, arg2)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOArchiveBit			403
+#define SYNOArchiveBit(arg1, arg2)		syscall(__NR_SYNOArchiveBit, arg1, arg2)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_recvfile				404
+#define recvfile(arg1,arg2,arg3,arg4,arg5)	syscall(__NR_recvfile,arg1,arg2,arg3,arg4,arg5)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOCaselessStat64			406
+#define __NR_SYNOCaselessLStat64			407
+#define __NR_SYNOCaselessStat			408
+#define __NR_SYNOCaselessLStat			409
+
+#if !defined(__KERNEL__)
+/* direct SYNOCaselessStat to stat64 in 32-bit platform
+ * 64-bits arch has no stat64 support */
+#include <bits/wordsize.h>
+#if __WORDSIZE == 64
+#define SYNOCaselessStat(arg1,arg2)                         syscall(__NR_SYNOCaselessStat , arg1,arg2)
+#define SYNOCaselessLStat(arg1,arg2)                         syscall(__NR_SYNOCaselessLStat , arg1,arg2)
+#elif (_FILE_OFFSET_BITS == 64)
+#define SYNOCaselessStat(arg1,arg2)                         syscall(__NR_SYNOCaselessStat64 , arg1,arg2)
+#define SYNOCaselessLStat(arg1,arg2)                         syscall(__NR_SYNOCaselessLStat64 , arg1,arg2)
+#endif
+/* define stat64 interface for compatibility
+   These should be removed after AP modification */
+#define SYNOCaselessStat64(arg1,arg2)                         syscall(__NR_SYNOCaselessStat64 , arg1,arg2)
+#define SYNOCaselessLStat64(arg1,arg2)                         syscall(__NR_SYNOCaselessLStat64 , arg1,arg2)
+#endif
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOEcryptName                 410
+#define __NR_SYNODecryptName                411
+#define SYNOEcryptName(arg1, arg2)          syscall(__NR_SYNOEcryptName, arg1, arg2)
+#define SYNODecryptName(arg1, arg2, arg3)         syscall(__NR_SYNODecryptName, arg1, arg2, arg3)
+#endif
+
+#ifdef MY_ABC_HERE
+#define __NR_SYNOACLCheckPerm               412
+#define SYNOACLSysCheckPerm(arg1, arg2)            syscall(__NR_SYNOACLCheckPerm, arg1, arg2)
+#define __NR_SYNOACLIsSupport               413
+#define SYNOACLSysIsSupport(arg1, arg2, arg3)            syscall(__NR_SYNOACLIsSupport, arg1, arg2, arg3)
+#define __NR_SYNOACLGetPerm               414
+#define SYNOACLSysGetPerm(arg1, arg2)            syscall(__NR_SYNOACLGetPerm, arg1, arg2)
+#endif /* MY_ABC_HERE */
+
 #ifdef __KERNEL__
 
+#ifdef MY_ABC_HERE 
+/* must match arch/powerpc/include/asm/systbl.h */
+#define __NR_syscalls		450
+#else
 #define __NR_syscalls		353
+#endif
 
 #define __NR__exit __NR_exit
 #define NR_syscalls	__NR_syscalls

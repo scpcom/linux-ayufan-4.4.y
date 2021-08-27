@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Driver core for serial ports
  *
@@ -1293,6 +1296,11 @@ static void uart_close(struct tty_struct *tty, struct file *filp)
 		spin_unlock_irqrestore(&port->lock, flags);
 		return;
 	}
+
+#ifdef MY_ABC_HERE
+	if (0 == strcmp(tty->name, "ttyS1"))
+		return;
+#endif
 
 	/*
 	 * Now we wait for the transmit buffer to clear; and we notify

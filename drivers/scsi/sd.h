@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _SCSI_DISK_H
 #define _SCSI_DISK_H
 
@@ -11,7 +14,11 @@
 /*
  * Time out in seconds for disks and Magneto-opticals (which are slower).
  */
+#ifdef MY_ABC_HERE
+#define SD_TIMEOUT		(60 * HZ)
+#else
 #define SD_TIMEOUT		(30 * HZ)
+#endif
 #define SD_MOD_TIMEOUT		(75 * HZ)
 #define SD_FLUSH_TIMEOUT	(60 * HZ)
 
@@ -46,6 +53,20 @@ enum {
 	SD_LBP_DISABLE,		/* Discard disabled due to failed cmd */
 };
 
+#ifdef MY_ABC_HERE
+// FIXME: we need share kernel devices type with user space,
+// so this enum must sync with libsynosdk/lib/fs/fs.h DISK_PORT_TYPE
+typedef enum __syno_disk_type {
+	SYNO_DISK_UNKNOWN = 0,
+	SYNO_DISK_SATA,
+	SYNO_DISK_USB,
+	SYNO_DISK_SYNOBOOT,
+	SYNO_DISK_ISCSI,
+	SYNO_DISK_SAS,
+	SYNO_DISK_END, // end of enum
+}SYNO_DISK_TYPE;
+#endif
+
 struct scsi_disk {
 	struct scsi_driver *driver;	/* always &sd_template */
 	struct scsi_device *device;
@@ -58,6 +79,12 @@ struct scsi_disk {
 	u32		unmap_granularity;
 	u32		unmap_alignment;
 	u32		index;
+#ifdef MY_ABC_HERE
+	SYNO_DISK_TYPE	synodisktype;
+#endif
+#ifdef SYNO_SAS_DISK_NAME
+	u32		synoindex;
+#endif
 	unsigned int	physical_block_size;
 	u8		media_present;
 	u8		write_prot;

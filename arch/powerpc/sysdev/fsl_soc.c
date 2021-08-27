@@ -41,6 +41,9 @@
 #include <sysdev/fsl_soc.h>
 #include <mm/mmu_decl.h>
 #include <asm/cpm2.h>
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+#include <asm/fsl_errata.h>
+#endif
 #include <asm/fsl_hcalls.h>	/* For the Freescale hypervisor */
 
 extern void init_fcc_ioports(struct fs_platform_info*);
@@ -237,6 +240,47 @@ static int __init setup_rstcr(void)
 }
 
 arch_initcall(setup_rstcr);
+
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+static int __init fsl_sec2_of_init(void)
+{
+	struct device_node *np;
+	unsigned int i;
+	struct platform_device *sec2_dev;
+	int ret;
+
+	printk(KERN_DEBUG "fsl_sec2_of_init: start\n");
+	for (np = NULL, i = 0;
+		 (np = of_find_compatible_node(np, "crypto", "talitos")) != NULL;
+		 i++) {
+		struct resource r[2];
+
+		memset(&r, 0, sizeof(r));
+
+		ret = of_address_to_resource(np, 0, &r[0]);
+		if (ret) {
+			printk(KERN_DEBUG "fsl_sec2_of_init: address");
+			goto err;
+		}
+		r[1].start = irq_of_parse_and_map(np, 0);
+		r[1].end = irq_of_parse_and_map(np, 0);
+		r[1].flags = IORESOURCE_IRQ;
+
+		sec2_dev = platform_device_register_simple("fsl-sec2", i, r, 2);
+		if (IS_ERR(sec2_dev)) {
+			ret = PTR_ERR(sec2_dev);
+			printk(KERN_DEBUG "fsl_sec2_of_init: register");
+			goto err;
+		}
+	}
+	return 0;
+err:
+	printk(KERN_DEBUG " error: %d\n", ret);
+	return ret;
+}
+#endif
+
+arch_initcall(fsl_sec2_of_init);
 
 void fsl_rstcr_restart(char *cmd)
 {

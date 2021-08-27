@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

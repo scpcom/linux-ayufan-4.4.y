@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Read-Copy Update mechanism for mutual exclusion
  *
@@ -210,7 +213,11 @@ module_param(blimit, int, 0);
 module_param(qhimark, int, 0);
 module_param(qlowmark, int, 0);
 
+#ifdef MY_ABC_HERE
+int rcu_cpu_stall_suppress __read_mostly = 1;
+#else
 int rcu_cpu_stall_suppress __read_mostly;
+#endif
 module_param(rcu_cpu_stall_suppress, int, 0644);
 
 static void force_quiescent_state(struct rcu_state *rsp, int relaxed);
@@ -530,7 +537,9 @@ static int rcu_implicit_dynticks_qs(struct rcu_data *rdp)
 
 #endif /* #else #ifdef CONFIG_NO_HZ */
 
+#ifndef MY_ABC_HERE
 int rcu_cpu_stall_suppress __read_mostly;
+#endif
 
 static void record_gp_stall_check_time(struct rcu_state *rsp)
 {

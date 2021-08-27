@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Parse RedBoot-style Flash Image System (FIS) tables and
  * produce a Linux partition array to match.
@@ -28,6 +31,9 @@
 
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
+#ifdef MY_ABC_HERE
+#include <linux/sched.h>
+#endif
 #include <linux/module.h>
 
 struct fis_image_desc {
@@ -206,11 +212,22 @@ static int parse_redboot_partitions(struct mtd_info *master,
 		/* I'm sure the JFFS2 code has done me permanent damage.
 		 * I now think the following is _normal_
 		 */
+#ifdef MY_ABC_HERE
+		if (i == 0) {
+			fl = new_fl;
+			tmp_fl = fl;
+		} else {
+			tmp_fl->next = new_fl;
+			tmp_fl = new_fl;
+		}
+		new_fl->next = NULL;
+#else /* !MY_ABC_HERE */
 		prev = &fl;
 		while(*prev && (*prev)->img->flash_base < new_fl->img->flash_base)
 			prev = &(*prev)->next;
 		new_fl->next = *prev;
 		*prev = new_fl;
+#endif /* MY_ABC_HERE */
 
 		nrparts++;
 	}
@@ -309,6 +326,114 @@ static void __exit redboot_parser_exit(void)
 {
 	deregister_mtd_parser(&redboot_parser);
 }
+
+#ifdef MY_ABC_HERE
+static void mtd_erase_callback_in_redboot (struct erase_info *instr)
+{
+	wake_up((wait_queue_head_t *)instr->priv);
+}
+
+int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdFisInfo)
+{
+	struct fis_image_desc *buf;
+	int ret, i;
+	size_t retlen;
+
+	buf = kmalloc(PAGE_SIZE, GFP_KERNEL);
+
+	if (!buf) {
+		return -ENOMEM;
+	}
+
+	/* Read the start of the last erase block */
+	ret = mtd->read(mtd, 0, PAGE_SIZE, &retlen, (void *)buf);
+
+	if (ret)
+		goto out;
+
+	if (retlen != PAGE_SIZE) {
+		ret = -EIO;
+		goto out;
+	}
+
+	for (i = 0; i < PAGE_SIZE / sizeof(struct fis_image_desc); i++) {
+		if (buf[i].name[0] == 0xff) { /* reach the end of FIS directory */
+			ret = -ENOENT; /* not found */
+			break;
+		}
+
+		if (0 == strcmp(buf[i].name, SynoMtdFisInfo.name)) { /* match */
+			int lockret, eraseret;
+			struct erase_info einfo;
+
+			buf[i].flash_base = SynoMtdFisInfo.offset;
+			buf[i].size = SynoMtdFisInfo.size;
+			buf[i].data_length = SynoMtdFisInfo.data_length;
+			lockret = mtd->unlock(mtd, 0, mtd->erasesize);
+			if (lockret) {
+				printk(KERN_NOTICE "Failed to unlock [%s], error [%d]\n", mtd->name, lockret*(-1));
+			}
+			/* erase something... */
+			{
+				wait_queue_head_t waitq;
+				DECLARE_WAITQUEUE(wait, current);
+
+				init_waitqueue_head(&waitq);
+
+				memset (&einfo, 0, sizeof(struct erase_info));
+				einfo.addr = 0;
+				einfo.len = mtd->erasesize;
+				einfo.mtd = mtd;
+				einfo.callback = mtd_erase_callback_in_redboot;
+				einfo.priv = (unsigned long)&waitq;
+
+				eraseret = mtd->erase(mtd, &einfo);
+				if (!eraseret) {
+					set_current_state(TASK_UNINTERRUPTIBLE);
+					add_wait_queue(&waitq, &wait);
+					if (einfo.state != MTD_ERASE_DONE &&
+						einfo.state != MTD_ERASE_FAILED)
+						schedule();
+					remove_wait_queue(&waitq, &wait);
+					set_current_state(TASK_RUNNING);
+
+					eraseret = (einfo.state == MTD_ERASE_FAILED)?-EIO:0;
+				}
+			}
+			if (eraseret) {
+				ret = eraseret;
+				printk(KERN_NOTICE "Failed to erase [%s], error [%d]\n", mtd->name, eraseret*(-1));
+			}
+			else {
+				/*ret = mtd->write(mtd, sizeof(struct fis_image_desc)*i, 
+				sizeof(struct fis_image_desc), &retlen, &buf[i]);*/
+				ret = mtd->write(mtd, 0, PAGE_SIZE, &retlen, (const u_char*)buf);
+				if (ret) {
+					printk(KERN_NOTICE "Failed to write [%s], error [%d]\n", mtd->name, ret*(-1));
+				}
+			}
+			lockret = mtd->lock(mtd, 0, mtd->erasesize);
+			if (lockret) {
+				printk(KERN_NOTICE "Failed to lock [%s], error [%d]\n", mtd->name, lockret*(-1));
+			}
+			if (ret) {
+				goto out;
+			}
+
+			/*if (retlen != sizeof(struct fis_image_desc)) {*/
+			if (retlen != PAGE_SIZE) {
+				ret = -EIO;
+				goto out;
+			}
+			break;
+		}
+	} /* for */
+
+out:
+	kfree(buf);
+	return ret;
+}
+#endif /* MY_ABC_HERE */
 
 module_init(redboot_parser_init);
 module_exit(redboot_parser_exit);

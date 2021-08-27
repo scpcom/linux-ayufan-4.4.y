@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext3/super.c
  *
@@ -72,6 +75,14 @@ static int ext3_statfs (struct dentry * dentry, struct kstatfs * buf);
 static int ext3_unfreeze(struct super_block *sb);
 static int ext3_freeze(struct super_block *sb);
 
+#ifdef MY_ABC_HERE
+extern struct dentry_operations ext3_dentry_operations;
+
+spinlock_t Ext3Namei_buf_lock;  /* lock for UTF8Ext3NameiStrBuf[] in fs/ext3/namei.c */
+spinlock_t Ext3Hash_buf_lock;   /* lock for UTF8Ext3HashStrBuf[] in fs/ext3/namei.c */
+static int Ext3Namei_lock_init = 0;
+static int Ext3Hash_lock_init = 0;
+#endif
 /*
  * Wrappers for journal_start/end.
  *
@@ -86,6 +97,13 @@ handle_t *ext3_journal_start_sb(struct super_block *sb, int nblocks)
 
 	if (sb->s_flags & MS_RDONLY)
 		return ERR_PTR(-EROFS);
+
+#ifdef MY_ABC_HERE
+	/* strengthen freezing fs as ext4 */
+	if (!journal_current_handle()) {
+		vfs_check_frozen(sb, SB_FREEZE_TRANS);
+	}
+#endif
 
 	/* Special case here: if the journal has aborted behind our
 	 * backs (eg. EIO in the commit thread), then we still need to
@@ -606,6 +624,9 @@ static char *data_mode_string(unsigned long mode)
 	return "unknown";
 }
 
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+extern int SynoDebugFlag;
+#endif
 /*
  * Show an option if
  *  - it's set to a non-default value OR
@@ -652,6 +673,18 @@ static int ext3_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",nouid32");
 	if (test_opt(sb, DEBUG))
 		seq_puts(seq, ",debug");
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+	if(SynoDebugFlag) {
+		if (test_opt(sb, OLDALLOC)) {
+			seq_puts(seq, ",oldalloc");
+		}
+	}
+#endif
+#else
+	if (test_opt(sb, OLDALLOC))
+		seq_puts(seq, ",oldalloc");
+#endif
 #ifdef CONFIG_EXT3_FS_XATTR
 	if (test_opt(sb, XATTR_USER))
 		seq_puts(seq, ",user_xattr");
@@ -1047,12 +1080,20 @@ static int parse_options (char *options, struct super_block *sb,
 			set_opt (sbi->s_mount_opt, DEBUG);
 			break;
 		case Opt_oldalloc:
+#ifdef MY_ABC_HERE
+			set_opt (sbi->s_mount_opt, OLDALLOC);
+#else
 			ext3_msg(sb, KERN_WARNING,
 				"Ignoring deprecated oldalloc option");
+#endif
 			break;
 		case Opt_orlov:
+#ifdef MY_ABC_HERE
+			clear_opt (sbi->s_mount_opt, OLDALLOC);
+#else
 			ext3_msg(sb, KERN_WARNING,
 				"Ignoring deprecated orlov option");
+#endif
 			break;
 #ifdef CONFIG_EXT3_FS_XATTR
 		case Opt_user_xattr:
@@ -1329,6 +1370,7 @@ static int ext3_setup_super(struct super_block *sb, struct ext3_super_block *es,
 	}
 	if (read_only)
 		return res;
+#ifndef MY_ABC_HERE
 	if (!(sbi->s_mount_state & EXT3_VALID_FS))
 		ext3_msg(sb, KERN_WARNING,
 			"warning: mounting unchecked fs, "
@@ -1349,6 +1391,7 @@ static int ext3_setup_super(struct super_block *sb, struct ext3_super_block *es,
 		ext3_msg(sb, KERN_WARNING,
 			"warning: checktime reached, "
 			"running e2fsck is recommended");
+#endif
 #if 0
 		/* @@@ We _will_ want to clear the valid bit if we find
                    inconsistencies, to force a fsck at reboot.  But for
@@ -2047,6 +2090,9 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		ext3_msg(sb, KERN_ERR, "error: corrupt root inode, run e2fsck");
 		goto failed_mount3;
 	}
+#ifdef MY_ABC_HERE
+	sb->s_d_op = &ext3_dentry_operations;
+#endif
 	sb->s_root = d_alloc_root(root);
 	if (!sb->s_root) {
 		ext3_msg(sb, KERN_ERR, "error: get root dentry failed");
@@ -2055,6 +2101,13 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		goto failed_mount3;
 	}
 
+#ifdef MY_ABC_HERE
+	// root is mounted, attach our dentry operations
+	sb->s_root->d_op = &ext3_dentry_operations;
+#endif
+#ifdef MY_ABC_HERE
+	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
+#endif
 	ext3_setup_super (sb, es, sb->s_flags & MS_RDONLY);
 
 	EXT3_SB(sb)->s_mount_state |= EXT3_ORPHAN_FS;
@@ -2067,6 +2120,16 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_JOURNAL_DATA ? "journal":
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_ORDERED_DATA ? "ordered":
 		"writeback");
+#ifdef MY_ABC_HERE
+	if (!Ext3Namei_lock_init) {
+		spin_lock_init(&Ext3Namei_buf_lock);
+		Ext3Namei_lock_init=1;
+	}
+	if (!Ext3Hash_lock_init) {
+		spin_lock_init(&Ext3Hash_buf_lock);
+		Ext3Hash_lock_init=1;
+	}
+#endif
 
 	return 0;
 
@@ -2424,6 +2487,9 @@ static int ext3_commit_super(struct super_block *sb,
 		es->s_wtime = cpu_to_le32(get_seconds());
 	es->s_free_blocks_count = cpu_to_le32(ext3_count_free_blocks(sb));
 	es->s_free_inodes_count = cpu_to_le32(ext3_count_free_inodes(sb));
+#ifdef MY_ABC_HERE
+	es->s_archive_version = cpu_to_le32(sb->s_archive_version);
+#endif
 	BUFFER_TRACE(sbh, "marking dirty");
 	mark_buffer_dirty(sbh);
 	if (sync) {

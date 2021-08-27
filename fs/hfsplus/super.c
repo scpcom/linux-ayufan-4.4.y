@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/super.c
  *
@@ -118,6 +121,7 @@ static int hfsplus_system_write_inode(struct inode *inode)
 	case HFSPLUS_ATTR_CNID:
 		fork = &vhdr->attr_file;
 		tree = sbi->attr_tree;
+		break;
 	default:
 		return -EIO;
 	}
@@ -187,6 +191,11 @@ int hfsplus_sync_fs(struct super_block *sb, int wait)
 	error2 = filemap_write_and_wait(sbi->ext_tree->inode->i_mapping);
 	if (!error)
 		error = error2;
+#ifdef MY_ABC_HERE
+	error2 = filemap_write_and_wait(sbi->attr_tree->inode->i_mapping);
+		if (!error)
+			error = error2;
+#endif
 	error2 = filemap_write_and_wait(sbi->alloc_file->i_mapping);
 	if (!error)
 		error = error2;
@@ -255,6 +264,9 @@ static void hfsplus_put_super(struct super_block *sb)
 
 	hfs_btree_close(sbi->cat_tree);
 	hfs_btree_close(sbi->ext_tree);
+#ifdef MY_ABC_HERE
+	hfs_btree_close(sbi->attr_tree);
+#endif
 	iput(sbi->alloc_file);
 	iput(sbi->hidden_dir);
 	kfree(sbi->s_vhdr_buf);
@@ -448,12 +460,23 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		printk(KERN_ERR "hfs: failed to load catalog file\n");
 		goto out_close_ext_tree;
 	}
+#ifdef MY_ABC_HERE
+		sbi->attr_tree = hfs_btree_open(sb, HFSPLUS_ATTR_CNID);
+		if (!sbi->attr_tree) {
+		printk(KERN_ERR "hfs: failed to load attribute file\n");
+			goto out_close_cat_tree;
+		}
+#endif
 
 	inode = hfsplus_iget(sb, HFSPLUS_ALLOC_CNID);
 	if (IS_ERR(inode)) {
 		printk(KERN_ERR "hfs: failed to load allocation file\n");
 		err = PTR_ERR(inode);
+#ifdef MY_ABC_HERE
+		goto out_close_attr_tree;
+#else
 		goto out_close_cat_tree;
+#endif
 	}
 	sbi->alloc_file = inode;
 
@@ -525,6 +548,10 @@ out_put_root:
 	iput(root);
 out_put_alloc_file:
 	iput(sbi->alloc_file);
+#ifdef MY_ABC_HERE
+out_close_attr_tree:
+	hfs_btree_close(sbi->attr_tree);
+#endif
 out_close_cat_tree:
 	hfs_btree_close(sbi->cat_tree);
 out_close_ext_tree:

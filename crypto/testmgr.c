@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Algorithm testing framework and tests.
  *
@@ -2561,6 +2564,10 @@ int alg_test(const char *driver, const char *alg, u32 type, u32 mask)
 	int i;
 	int j;
 	int rc;
+
+#ifdef MY_ABC_HERE
+	goto notest;
+#endif
 
 	if ((type & CRYPTO_ALG_TYPE_MASK) == CRYPTO_ALG_TYPE_CIPHER) {
 		char nalg[CRYPTO_MAX_ALG_NAME];

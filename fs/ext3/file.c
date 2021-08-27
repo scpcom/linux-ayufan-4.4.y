@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext3/file.c
  *
@@ -77,6 +80,9 @@ const struct inode_operations ext3_file_inode_operations = {
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext3_listxattr,
 	.removexattr	= generic_removexattr,
+#endif
+#ifdef MY_ABC_HERE
+	.synosetxattr	= syno_generic_setxattr,
 #endif
 	.get_acl	= ext3_get_acl,
 	.fiemap		= ext3_fiemap,

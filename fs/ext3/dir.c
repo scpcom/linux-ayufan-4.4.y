@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext3/dir.c
  *
@@ -82,6 +85,9 @@ int ext3_check_dir_entry (const char * function, struct inode * dir,
 		error_msg = "inode out of bounds";
 
 	if (unlikely(error_msg != NULL))
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit())
+#endif
 		ext3_error (dir->i_sb, function,
 			"bad entry in directory #%lu: %s - "
 			"offset=%lu, inode=%lu, rec_len=%d, name_len=%d",
@@ -107,8 +113,13 @@ static int ext3_readdir(struct file * filp,
 
 	sb = inode->i_sb;
 
+#ifdef MY_ABC_HERE
+	if ((EXT3_SB(inode->i_sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) &&
+		!EXT3_HAS_COMPAT_FEATURE(inode->i_sb, EXT3_FEATURE_COMPAT_DIR_INDEX) &&
+#else
 	if (EXT3_HAS_COMPAT_FEATURE(inode->i_sb,
 				    EXT3_FEATURE_COMPAT_DIR_INDEX) &&
+#endif
 	    ((EXT3_I(inode)->i_flags & EXT3_INDEX_FL) ||
 	     ((inode->i_size >> sb->s_blocksize_bits) == 1))) {
 		err = ext3_dx_readdir(filp, dirent, filldir);

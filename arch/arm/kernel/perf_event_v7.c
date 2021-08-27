@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ARMv7 Cortex-A8 and Cortex-A9 Performance Events handling code.
  *

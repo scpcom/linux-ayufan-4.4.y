@@ -111,4 +111,28 @@ struct __old_kernel_stat {
 #endif
 };
 
+#ifdef MY_ABC_HERE
+#ifndef st_SynoCreateTime
+#define st_SynoCreateTime st_ctime_nsec
+#endif
+#endif
+
+#ifdef MY_ABC_HERE
+#ifndef st_SynoMode
+#define st_SynoMode st_atime_nsec
+#endif
+#endif
+
+#ifdef MY_ABC_HERE
+#ifndef st_syno_achv_ver
+#define st_syno_achv_ver st_mtime_nsec
+#endif
+#endif
+
+#ifdef MY_ABC_HERE
+#ifndef st_SynoUnicodeStat
+#define st_SynoUnicodeStat st_mtime_nsec
+#endif
+#endif
+
 #endif /* _ASM_X86_STAT_H */

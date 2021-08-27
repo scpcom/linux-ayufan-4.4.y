@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/base/core.c - core driver model code (device registration, etc)
  *
@@ -210,12 +213,53 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 				add_uevent_var(env, "DEVMODE=%#o", mode & 0777);
 		}
 	}
+#ifdef MY_ABC_HERE
+	/* host with dev->devt 0, if we want to get hotplug of CABLE_CONNECT/CABLE_DISCONNECT
+	 * we must add DEVNAME in env to pass it to hotplug.
+	 **/
+	else {
+		add_uevent_var(env, "DEVNAME=%s", dev_name(dev));
+	}
+#endif
 
 	if (dev->type && dev->type->name)
 		add_uevent_var(env, "DEVTYPE=%s", dev->type->name);
 
 	if (dev->driver)
 		add_uevent_var(env, "DRIVER=%s", dev->driver->name);
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#ifdef CONFIG_SYSFS_DEPRECATED
+	if (dev->class) {
+		struct device *parent = dev->parent;
+
+		/* find first bus device in parent chain */
+		while (parent && !parent->bus)
+			parent = parent->parent;
+		if (parent && parent->bus) {
+			const char *path;
+
+			path = kobject_get_path(&parent->kobj, GFP_KERNEL);
+			if (path) {
+				add_uevent_var(env, "PHYSDEVPATH=%s", path);
+				kfree(path);
+			}
+
+			add_uevent_var(env, "PHYSDEVBUS=%s", parent->bus->name);
+
+			if (parent->driver)
+				add_uevent_var(env, "PHYSDEVDRIVER=%s",
+								 parent->driver->name);
+		}
+	} else if (dev->bus) {
+		add_uevent_var(env, "PHYSDEVBUS=%s", dev->bus->name);
+
+		if (dev->driver)
+			add_uevent_var(env, "PHYSDEVDRIVER=%s",
+							 dev->driver->name);
+	}
+#endif //#ifdef CONFIG_SYSFS_DEPRECATED
+#endif //#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 
 	/* have the bus specific function add its stuff */
 	if (dev->bus && dev->bus->uevent) {

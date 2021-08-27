@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/calls.S
  *
@@ -387,6 +390,84 @@
 /* 375 */	CALL(sys_setns)
 		CALL(sys_process_vm_readv)
 		CALL(sys_process_vm_writev)
+#ifdef MY_ABC_HERE
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+/* 380 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+/* 385 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+/* 390 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+/* 395 */	CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOmmap)  		/* 400 */
+#else
+		CALL(sys_ni_syscall)
+#endif
+		CALL(sys_ni_syscall)
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOUtime)	/* 402 */
+#else
+		CALL(sys_ni_syscall)
+#endif
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOArchiveBit)	/* 403 */
+#else
+		CALL(sys_ni_syscall)
+#endif
+#ifdef MY_ABC_HERE
+		CALL(sys_recvfile)	/* 404 */
+#else
+		CALL(sys_ni_syscall)
+#endif
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOMTDAlloc)  	/* 405 */
+#else
+		CALL(sys_ni_syscall)
+#endif
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOCaselessStat64)	/* 406 */
+		CALL(sys_SYNOCaselessLStat64)	/* 407 */
+		CALL(sys_SYNOCaselessStat)	/* 408 */
+		CALL(sys_SYNOCaselessLStat)	/* 409 */
+#else
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#endif
+#ifdef MY_ABC_HERE
+		CALL(sys_SYNOEcryptName) /* 410 */
+		CALL(sys_SYNODecryptName) /* 411 */
+#else
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#endif
+#endif
+#ifdef CONFIG_FS_SYNO_ACL
+		CALL(sys_SYNOACLCheckPerm)	/* 412 */
+		CALL(sys_SYNOACLIsSupport)	/* 413 */
+		CALL(sys_SYNOACLGetPerm)	/* 414 */
+#else
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#endif
+		CALL(sys_ni_syscall)
 #ifndef syscalls_counted
 .equ syscalls_padding, ((NR_syscalls + 3) & ~3) - NR_syscalls
 #define syscalls_counted

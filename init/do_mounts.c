@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/module.h>
 #include <linux/sched.h>
 #include <linux/ctype.h>
@@ -26,7 +29,11 @@
 int __initdata rd_doload;	/* 1 = load RAM disk, 0 = don't load */
 
 int root_mountflags = MS_RDONLY | MS_SILENT;
+#ifdef MY_DEF_HERE
+char * __initdata root_device_name;
+#else
 static char * __initdata root_device_name;
+#endif
 static char __initdata saved_root_name[64];
 static int root_wait;
 
@@ -350,10 +357,46 @@ void __init mount_block_root(char *name, int flags)
 	const char *b = name;
 #endif
 
+#ifdef MY_ABC_HERE
+	char *mnt_opts = NULL;
+	size_t len;
+
+	/*
+	 * To enable "barrier" of the root device.
+         * (ex. in the bootargs "root=/dev/md0")
+         *
+	 * Because initrd(/dev/root.old) calls this function also,
+         * not to add "barrier=1" when being called by initrd.
+	 */
+	if (!strcmp(name, "/dev/root")) {
+		if (root_mount_data) {
+			len = 1 + strlen(root_mount_data);
+			len += strlen("barrier=1,");
+			mnt_opts = kmalloc(len, GFP_KERNEL);
+			if (mnt_opts) {
+				strcpy(mnt_opts, "barrier=1,");
+				strcat(mnt_opts, root_mount_data);
+			}
+		} else {
+			len = 1 + strlen("barrier=1");
+			mnt_opts = kmalloc(len, GFP_KERNEL);
+			if (mnt_opts) {
+				strcpy(mnt_opts, "barrier=1");
+			}
+		}
+	} else {
+		mnt_opts = root_mount_data;
+	}
+#endif
+
 	get_fs_names(fs_names);
 retry:
 	for (p = fs_names; *p; p += strlen(p)+1) {
+#ifdef MY_ABC_HERE
+		int err = do_mount_root(name, p, flags, mnt_opts);
+#else
 		int err = do_mount_root(name, p, flags, root_mount_data);
+#endif
 		switch (err) {
 			case 0:
 				goto out;
@@ -394,6 +437,9 @@ retry:
 #endif
 	panic("VFS: Unable to mount root fs on %s", b);
 out:
+#ifdef MY_ABC_HERE
+	kfree(mnt_opts);
+#endif
 	putname(fs_names);
 }
  
@@ -518,7 +564,9 @@ void __init prepare_namespace(void)
 	 */
 	wait_for_device_probe();
 
+#if !defined(MY_DEF_HERE)
 	md_run_setup();
+#endif
 
 	if (saved_root_name[0]) {
 		root_device_name = saved_root_name;

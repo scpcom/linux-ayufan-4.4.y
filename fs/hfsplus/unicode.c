@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/unicode.c
  *
@@ -252,8 +255,20 @@ out:
  * Convert one or more ASCII characters into a single unicode character.
  * Returns the number of ASCII characters corresponding to the unicode char.
  */
+#ifdef MY_ABC_HERE
+static inline int asc2unichar_ex(struct super_block *sb, const char *astr, int len,
+			      wchar_t *uc, int convert);
 static inline int asc2unichar(struct super_block *sb, const char *astr, int len,
 			      wchar_t *uc)
+{
+	return asc2unichar_ex(sb, astr, len, uc, 1);
+}
+static inline int asc2unichar_ex(struct super_block *sb, const char *astr, int len,
+			      wchar_t *uc, int convert)
+#else
+static inline int asc2unichar(struct super_block *sb, const char *astr, int len,
+			      wchar_t *uc)
+#endif
 {
 	int size = HFSPLUS_SB(sb)->nls->char2uni(astr, len, uc);
 	if (size <= 0) {
@@ -265,7 +280,12 @@ static inline int asc2unichar(struct super_block *sb, const char *astr, int len,
 		*uc = 0;
 		break;
 	case ':':
+#ifdef MY_ABC_HERE
+		if (convert)
 		*uc = '/';
+#else
+		*uc = '/';
+#endif
 		break;
 	}
 	return size;
@@ -294,9 +314,19 @@ static inline u16 *decompose_unichar(wchar_t uc, int *size)
 		return NULL;
 	return hfsplus_decompose_table + (off / 4);
 }
+#ifdef MY_ABC_HERE
+inline int hfsplus_asc2uni(struct super_block *sb, struct hfsplus_unistr *ustr,
+		    const char *astr, int len)
+{
+	return hfsplus_asc2uni_ex(sb, ustr, astr, len, 1);
+}
 
+int hfsplus_asc2uni_ex(struct super_block *sb, struct hfsplus_unistr *ustr,
+		    const char *astr, int len, int convert)
+#else
 int hfsplus_asc2uni(struct super_block *sb, struct hfsplus_unistr *ustr,
 		    const char *astr, int len)
+#endif
 {
 	int size, dsize, decompose;
 	u16 *dstr, outlen = 0;
@@ -304,7 +334,11 @@ int hfsplus_asc2uni(struct super_block *sb, struct hfsplus_unistr *ustr,
 
 	decompose = !test_bit(HFSPLUS_SB_NODECOMPOSE, &HFSPLUS_SB(sb)->flags);
 	while (outlen < HFSPLUS_MAX_STRLEN && len > 0) {
+#ifdef MY_ABC_HERE
+		size = asc2unichar_ex(sb, astr, len, &c, convert);
+#else
 		size = asc2unichar(sb, astr, len, &c);
+#endif
 
 		if (decompose)
 			dstr = decompose_unichar(c, &dsize);

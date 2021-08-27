@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2005-2009 MontaVista Software, Inc.
  * Copyright 2008      Freescale Semiconductor, Inc.
@@ -514,6 +517,10 @@ static struct ehci_fsl *hcd_to_ehci_fsl(struct usb_hcd *hcd)
 static int ehci_fsl_drv_suspend(struct device *dev)
 {
 	struct usb_hcd *hcd = dev_get_drvdata(dev);
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	ehci_stop(hcd);
+	ehci_shutdown(hcd);
+#else
 	struct ehci_fsl *ehci_fsl = hcd_to_ehci_fsl(hcd);
 	void __iomem *non_ehci = hcd->regs;
 
@@ -528,12 +535,17 @@ static int ehci_fsl_drv_suspend(struct device *dev)
 		return 0;
 
 	ehci_fsl->usb_ctrl = in_be32(non_ehci + FSL_SOC_USB_CTRL);
+#endif
 	return 0;
 }
 
 static int ehci_fsl_drv_resume(struct device *dev)
 {
 	struct usb_hcd *hcd = dev_get_drvdata(dev);
+#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	ehci_fsl_setup(hcd);
+	ehci_run(hcd);
+#else
 	struct ehci_fsl *ehci_fsl = hcd_to_ehci_fsl(hcd);
 	struct ehci_hcd *ehci = hcd_to_ehci(hcd);
 	void __iomem *non_ehci = hcd->regs;
@@ -554,6 +566,7 @@ static int ehci_fsl_drv_resume(struct device *dev)
 
 	ehci_reset(ehci);
 	ehci_fsl_reinit(ehci);
+#endif
 
 	return 0;
 }

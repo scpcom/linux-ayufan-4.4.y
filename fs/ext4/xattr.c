@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/ext4/xattr.c
  *
@@ -61,6 +64,10 @@
 #include "xattr.h"
 #include "acl.h"
 
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+#include <linux/export.h>
+#endif
+
 #define BHDR(bh) ((struct ext4_xattr_header *)((bh)->b_data))
 #define ENTRY(ptr) ((struct ext4_xattr_entry *)(ptr))
 #define BFIRST(bh) ENTRY(BHDR(bh)+1)
@@ -99,7 +106,9 @@ static struct mb_cache *ext4_xattr_cache;
 
 static const struct xattr_handler *ext4_xattr_handler_map[] = {
 	[EXT4_XATTR_INDEX_USER]		     = &ext4_xattr_user_handler,
-#ifdef CONFIG_EXT4_FS_POSIX_ACL
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+	[EXT4_XATTR_INDEX_SYNO_ACL_ACCESS]  = &ext4_xattr_synoacl_access_handler,
+#elif defined(CONFIG_EXT4_FS_POSIX_ACL)
 	[EXT4_XATTR_INDEX_POSIX_ACL_ACCESS]  = &ext4_xattr_acl_access_handler,
 	[EXT4_XATTR_INDEX_POSIX_ACL_DEFAULT] = &ext4_xattr_acl_default_handler,
 #endif
@@ -107,17 +116,25 @@ static const struct xattr_handler *ext4_xattr_handler_map[] = {
 #ifdef CONFIG_EXT4_FS_SECURITY
 	[EXT4_XATTR_INDEX_SECURITY]	     = &ext4_xattr_security_handler,
 #endif
+#ifdef MY_ABC_HERE
+	[EXT4_XATTR_INDEX_SYNO]  = &ext4_xattr_syno_handler
+#endif
 };
 
 const struct xattr_handler *ext4_xattr_handlers[] = {
 	&ext4_xattr_user_handler,
 	&ext4_xattr_trusted_handler,
-#ifdef CONFIG_EXT4_FS_POSIX_ACL
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+	&ext4_xattr_synoacl_access_handler,
+#elif defined(CONFIG_EXT4_FS_POSIX_ACL)
 	&ext4_xattr_acl_access_handler,
 	&ext4_xattr_acl_default_handler,
 #endif
 #ifdef CONFIG_EXT4_FS_SECURITY
 	&ext4_xattr_security_handler,
+#endif
+#ifdef MY_ABC_HERE
+	&ext4_xattr_syno_handler,
 #endif
 	NULL
 };
@@ -323,6 +340,9 @@ ext4_xattr_get(struct inode *inode, int name_index, const char *name,
 	up_read(&EXT4_I(inode)->xattr_sem);
 	return error;
 }
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+EXPORT_SYMBOL(ext4_xattr_get);
+#endif
 
 static int
 ext4_xattr_list_entries(struct dentry *dentry, struct ext4_xattr_entry *entry,
@@ -487,18 +507,19 @@ ext4_xattr_release_block(handle_t *handle, struct inode *inode,
 		ext4_free_blocks(handle, inode, bh, 0, 1,
 				 EXT4_FREE_BLOCKS_METADATA |
 				 EXT4_FREE_BLOCKS_FORGET);
+		unlock_buffer(bh);
 	} else {
 		le32_add_cpu(&BHDR(bh)->h_refcount, -1);
+		if (ce)
+			mb_cache_entry_release(ce);
+		unlock_buffer(bh);
 		error = ext4_handle_dirty_metadata(handle, inode, bh);
 		if (IS_SYNC(inode))
 			ext4_handle_sync(handle);
 		dquot_free_block(inode, 1);
 		ea_bdebug(bh, "refcount now=%d; releasing",
 			  le32_to_cpu(BHDR(bh)->h_refcount));
-		if (ce)
-			mb_cache_entry_release(ce);
 	}
-	unlock_buffer(bh);
 out:
 	ext4_std_error(inode->i_sb, error);
 	return;
@@ -1069,6 +1090,9 @@ cleanup:
 	up_write(&EXT4_I(inode)->xattr_sem);
 	return error;
 }
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+EXPORT_SYMBOL(ext4_xattr_set_handle);
+#endif
 
 /*
  * ext4_xattr_set()
@@ -1605,3 +1629,49 @@ ext4_exit_xattr(void)
 		mb_cache_destroy(ext4_xattr_cache);
 	ext4_xattr_cache = NULL;
 }
+
+#ifdef MY_ABC_HERE
+
+static size_t
+ext4_xattr_syno_list(struct dentry *dentry, char *list, size_t list_size,
+		     const char *name, size_t name_len, int handler_flags)
+{
+	const size_t prefix_len = XATTR_SYNO_PREFIX_LEN;
+	const size_t total_len = prefix_len + name_len + 1;
+
+	if (list && total_len <= list_size) {
+		memcpy(list, XATTR_SYNO_PREFIX, prefix_len);
+		memcpy(list+prefix_len, name, name_len);
+		list[prefix_len + name_len] = '\0';
+	}
+	return total_len;
+}
+
+static int ext4_xattr_syno_get(struct dentry *dentry, const char *name,
+			  void *buffer, size_t size, int handler_flags)
+{
+	if (strcmp(name, "") == 0)
+		return -EINVAL;
+
+	return ext4_xattr_get(dentry->d_inode, EXT4_XATTR_INDEX_SYNO, name, buffer, size);
+}
+
+static int ext4_xattr_syno_set(struct dentry *dentry, const char *name,
+			  const void *value, size_t size, int flags, int handler_flags)
+{
+	if (strcmp(name, "") == 0){
+		return -EINVAL;
+	}
+
+	return ext4_xattr_set(dentry->d_inode, EXT4_XATTR_INDEX_SYNO, name,
+			      value, size, flags);
+}
+
+struct xattr_handler ext4_xattr_syno_handler = {
+	.prefix	= XATTR_SYNO_PREFIX,
+	.list	= ext4_xattr_syno_list,
+	.get	= ext4_xattr_syno_get,
+	.set	= ext4_xattr_syno_set,
+};
+
+#endif

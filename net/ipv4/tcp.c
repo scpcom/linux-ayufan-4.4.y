@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -276,6 +279,10 @@
 
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
+
+#ifdef MY_ABC_HERE
+#include <linux/pci.h>
+#endif /* MY_ABC_HERE */
 
 int sysctl_tcp_fin_timeout __read_mostly = TCP_FIN_TIMEOUT;
 
@@ -1460,6 +1467,31 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	do {
 		u32 offset;
 
+#ifdef MY_ABC_HERE
+        if(flags &  MSG_NOCATCHSIGNAL) {
+			/* Original when we have recvfile(), we remove the following
+			 * sygnal_pending(). But it would cause system hang when smbd
+			 * is receive file and user "kill -9" it. So I copy the
+			 * code back. But in order to keep track, I did not remove
+			 * our define.
+			 */
+			if (signal_pending(current)) {
+				if (sigismember(&current->pending.signal, SIGQUIT) ||
+					sigismember(&current->pending.signal, SIGABRT) ||
+					sigismember(&current->pending.signal, SIGKILL) ||
+					sigismember(&current->pending.signal, SIGTERM) ||
+					sigismember(&current->pending.signal, SIGSTOP) ) {
+
+					printk("%s (%d) Avoiding recvfile() hangs.\n", __FILE__, __LINE__);
+					if (copied)
+						break;
+					copied = timeo ? sock_intr_errno(timeo) : -EAGAIN;
+					break;
+				}
+			}
+        }
+        else
+#endif /* MY_ABC_HERE */
 		/* Are we at urgent data? Stop if we have read anything or have SIGURG pending. */
 		if (tp->urg_data && tp->urg_seq == *seq) {
 			if (copied)
@@ -1511,6 +1543,11 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 				break;
 
 			if (sk->sk_err) {
+#ifdef MY_ABC_HERE
+				if ( (msg->msg_flags & MSG_KERNSPACE) &&
+					ECONNRESET == sk->sk_err )
+					printk("connection reset by peer.\n");
+#endif
 				copied = sock_error(sk);
 				break;
 			}

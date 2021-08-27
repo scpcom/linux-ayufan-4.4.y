@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for the Synopsys DesignWare DMA Controller (aka DMACA on
  * AVR32 systems.)

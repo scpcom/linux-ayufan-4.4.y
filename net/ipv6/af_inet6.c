@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	PF_INET6 socket protocol family
  *	Linux INET6 implementation
@@ -330,6 +333,21 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 					sk->sk_bound_dev_if = addr->sin6_scope_id;
 				}
 
+#ifdef MY_ABC_HERE
+				if (!sk->sk_bound_dev_if) {
+					for_each_netdev(net, dev) {
+						if(dev && (dev->flags & IFF_UP) && !(dev->flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+							dev_hold(dev);
+							break;
+						}
+					}
+					if (!dev) {
+						err = -ENODEV;
+						goto out_unlock;
+					}
+					sk->sk_bound_dev_if = dev->ifindex;
+				}
+#else
 				/* Binding to link-local address requires an interface */
 				if (!sk->sk_bound_dev_if) {
 					err = -EINVAL;
@@ -340,6 +358,7 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 					err = -ENODEV;
 					goto out_unlock;
 				}
+#endif
 			}
 
 			/* ipv4 addr of the socket is invalid.  Only the

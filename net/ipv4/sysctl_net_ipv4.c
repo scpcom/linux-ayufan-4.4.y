@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * sysctl_net_ipv4.c: sysctl interface to net IPV4 subsystem.
  *

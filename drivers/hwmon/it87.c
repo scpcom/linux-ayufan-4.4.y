@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  it87.c - Part of lm_sensors, Linux kernel modules for hardware
  *           monitoring.
@@ -17,6 +20,7 @@
  *            IT8720F  Super I/O chip w/LPC interface
  *            IT8721F  Super I/O chip w/LPC interface
  *            IT8726F  Super I/O chip w/LPC interface
+ *            IT8728F  Super I/O chip w/LPC interface
  *            IT8758E  Super I/O chip w/LPC interface
  *            Sis950   A clone of the IT8705F
  *
@@ -58,7 +62,7 @@
 
 #define DRVNAME "it87"
 
-enum chips { it87, it8712, it8716, it8718, it8720, it8721 };
+enum chips { it87, it8712, it8716, it8718, it8720, it8721, it8728 };
 
 static unsigned short force_id;
 module_param(force_id, ushort, 0);
@@ -135,6 +139,7 @@ static inline void superio_exit(void)
 #define IT8720F_DEVID 0x8720
 #define IT8721F_DEVID 0x8721
 #define IT8726F_DEVID 0x8726
+#define IT8728F_DEVID 0x8728
 #define IT87_ACT_REG  0x30
 #define IT87_BASE_REG 0x60
 
@@ -278,7 +283,7 @@ static u8 in_to_reg(const struct it87_data *data, int nr, long val)
 {
 	long lsb;
 
-	if (data->type == it8721) {
+	if (data->type == it8721 || data->type == it8728) {
 		if (data->in_scaled & (1 << nr))
 			lsb = 24;
 		else
@@ -292,7 +297,7 @@ static u8 in_to_reg(const struct it87_data *data, int nr, long val)
 
 static int in_from_reg(const struct it87_data *data, int nr, int val)
 {
-	if (data->type == it8721) {
+	if (data->type == it8721 || data->type == it8728) {
 		if (data->in_scaled & (1 << nr))
 			return val * 24;
 		else
@@ -329,7 +334,7 @@ static inline u16 FAN16_TO_REG(long rpm)
 
 static u8 pwm_to_reg(const struct it87_data *data, long val)
 {
-	if (data->type == it8721)
+	if (data->type == it8721 || data->type == it8728)
 		return val;
 	else
 		return val >> 1;
@@ -337,7 +342,7 @@ static u8 pwm_to_reg(const struct it87_data *data, long val)
 
 static int pwm_from_reg(const struct it87_data *data, u8 reg)
 {
-	if (data->type == it8721)
+	if (data->type == it8721 || data->type == it8728)
 		return reg;
 	else
 		return (reg & 0x7f) << 1;
@@ -374,7 +379,8 @@ static inline int has_16bit_fans(const struct it87_data *data)
 	    || data->type == it8716
 	    || data->type == it8718
 	    || data->type == it8720
-	    || data->type == it8721;
+	    || data->type == it8721
+		|| data->type == it8728;
 }
 
 static inline int has_old_autopwm(const struct it87_data *data)
@@ -842,7 +848,7 @@ static ssize_t set_pwm_enable(struct device *dev,
 				 data->fan_main_ctrl);
 	} else {
 		if (val == 1)				/* Manual mode */
-			data->pwm_ctrl[nr] = data->type == it8721 ?
+			data->pwm_ctrl[nr] = (data->type == it8721 || data->type == it8728) ?
 					     data->pwm_temp_map[nr] :
 					     data->pwm_duty[nr];
 		else					/* Automatic mode */
@@ -870,7 +876,7 @@ static ssize_t set_pwm(struct device *dev, struct device_attribute *attr,
 		return -EINVAL;
 
 	mutex_lock(&data->update_lock);
-	if (data->type == it8721) {
+	if (data->type == it8721 || data->type == it8728) {
 		/* If we are in automatic mode, the PWM duty cycle register
 		 * is read-only so we can't write the value */
 		if (data->pwm_ctrl[nr] & 0x80) {
@@ -1311,7 +1317,7 @@ static ssize_t show_label(struct device *dev, struct device_attribute *attr,
 	struct it87_data *data = dev_get_drvdata(dev);
 	int nr = to_sensor_dev_attr(attr)->index;
 
-	return sprintf(buf, "%s\n", data->type == it8721 ? labels_it8721[nr]
+	return sprintf(buf, "%s\n", (data->type == it8721 || data->type == it8728) ? labels_it8721[nr]
 							 : labels[nr]);
 }
 static SENSOR_DEVICE_ATTR(in3_label, S_IRUGO, show_label, NULL, 0);
@@ -1605,6 +1611,9 @@ static int __init it87_find(unsigned short *address,
 	case IT8721F_DEVID:
 		sio_data->type = it8721;
 		break;
+	case IT8728F_DEVID:
+		sio_data->type = it8728;
+		break;
 	case 0xffff:	/* No device at all */
 		goto exit;
 	default:
@@ -1770,6 +1779,7 @@ static int __devinit it87_probe(struct platform_device *pdev)
 		"it8718",
 		"it8720",
 		"it8721",
+		"it8728",
 	};
 
 	res = platform_get_resource(pdev, IORESOURCE_IO, 0);
@@ -1807,7 +1817,7 @@ static int __devinit it87_probe(struct platform_device *pdev)
 	enable_pwm_interface = it87_check_pwm(dev);
 
 	/* Starting with IT8721F, we handle scaling of internal voltages */
-	if (data->type == it8721) {
+	if (data->type == it8721 || data->type == it8728) {
 		if (sio_data->internal & (1 << 0))
 			data->in_scaled |= (1 << 3);	/* in3 is AVCC */
 		if (sio_data->internal & (1 << 1))
@@ -2093,7 +2103,7 @@ static void __devinit it87_init_device(struct platform_device *pdev)
 static void it87_update_pwm_ctrl(struct it87_data *data, int nr)
 {
 	data->pwm_ctrl[nr] = it87_read_value(data, IT87_REG_PWM(nr));
-	if (data->type == it8721) {
+	if (data->type == it8721 || data->type == it8728) {
 		data->pwm_temp_map[nr] = data->pwm_ctrl[nr] & 0x03;
 		data->pwm_duty[nr] = it87_read_value(data,
 						     IT87_REG_PWM_DUTY(nr));
@@ -2285,6 +2295,145 @@ static void __exit sm_it87_exit(void)
 	platform_driver_unregister(&it87_driver);
 }
 
+#ifdef MY_ABC_HERE
+int syno_sys_temperature(int *Temperature)
+{
+    unsigned short address;
+    resource_size_t res_start;
+    
+    superio_enter();
+    superio_inw(DEVID);
+
+    superio_select(PME);
+    if (!(superio_inb(IT87_ACT_REG) & 0x01)) {
+        printk("it87: Device not activated, skipping\n");
+        return -1;
+    }
+    
+    address = superio_inw(IT87_BASE_REG) & ~(IT87_EXTENT - 1);
+    if (address == 0) {
+        printk("it87: Base address not set, skipping\n");
+        return -1;
+    }
+    res_start = address + IT87_EC_OFFSET;
+    
+    outb_p(IT87_REG_TEMP(0), res_start + IT87_ADDR_REG_OFFSET);
+    *Temperature = inb_p(res_start + IT87_DATA_REG_OFFSET)<<1;
+    
+    superio_exit();
+    
+    return 0;
+}
+EXPORT_SYMBOL(syno_sys_temperature);
+#endif
+
+#ifdef MY_ABC_HERE
+struct writable_pin {
+    u32         pin;
+    u32         en_reg;
+    u32         en_bit;
+    u32         gpio_set;
+    u32         gpio_bit;
+    u32         gpio_val;
+};
+static struct writable_pin writable_pin_setting[] =
+{
+    {32, 0x27, 2, 2/*set 3*/, 2, 0},
+    {33, 0x27, 3, 2/*set 3*/, 3, 0},
+    {11, 0x25, 1, 0/*set 1*/, 1, 0}
+};
+
+u32 syno_superio_gpio_pin(int pin, int *pValue, int isWrite)
+{
+    int ret = -1;
+    int i = 0, j = 0;
+    u16 gpiobase, addr_lvl, val_lvl;
+    u8 addr_use_select, addr_io_select;
+    u8 val_en, val_use_select, val_io_select;
+    u8 tmpVal = 0;
+    
+    superio_enter();
+    superio_inw(DEVID);
+    
+    //check if device is alive
+    superio_select(PME);
+    if (!(superio_inb(IT87_ACT_REG) & 0x01)) {
+        printk("it87: Device not activated, skipping\n");
+        goto END;
+    }
+    
+    superio_select(GPIO);
+    gpiobase = superio_inw(0x62);
+    if (gpiobase == 0) {
+        printk("it87: GPIO base address not set, skipping\n");
+        goto END;
+    }
+    
+    //check protected pin
+    for ( i = 0; i < sizeof(writable_pin_setting)/sizeof(writable_pin_setting[0]); i++) {
+        if (pin == writable_pin_setting[i].pin) {
+            break;
+        }
+    }
+    if ( i == sizeof(writable_pin_setting)/sizeof(writable_pin_setting[0]) ) {
+        printk("pin %d is protected by superio driver.\n", pin);
+        goto END;
+    }
+    
+    //enable gpio pin
+    val_en = superio_inb(writable_pin_setting[i].en_reg);
+    tmpVal = 1 << writable_pin_setting[i].en_bit;
+    val_en |= tmpVal;
+    outb(val_en, writable_pin_setting[i].en_reg);
+    
+    if ( 1 == isWrite ) {
+        //change use select to GPIO
+        addr_use_select = writable_pin_setting[i].gpio_set + 0xc0;
+        val_use_select = superio_inb(addr_use_select);
+        tmpVal = 1 << writable_pin_setting[i].gpio_bit;
+        val_use_select |= tmpVal;
+        outb(val_use_select, addr_use_select);
+    
+        //change I/O select to output
+        addr_io_select = writable_pin_setting[i].gpio_set + 0xc8;
+        val_io_select = superio_inb(addr_io_select);
+        tmpVal = 1 << writable_pin_setting[i].gpio_bit;
+        val_io_select |= tmpVal;
+        outb(val_io_select, addr_io_select);
+    
+        //output value
+        addr_lvl = writable_pin_setting[i].gpio_set + gpiobase;
+        val_lvl = 0;
+        for ( j = 0; j < sizeof(writable_pin_setting)/sizeof(writable_pin_setting[0]); j++) {
+            if (writable_pin_setting[i].gpio_set == writable_pin_setting[j].gpio_set) {
+                if (writable_pin_setting[j].gpio_val == 1) {
+                    val_lvl |= (1<<writable_pin_setting[j].gpio_bit);
+                }
+            }
+        }
+        if ( 1 == *pValue ) {
+            tmpVal = 1 << writable_pin_setting[i].gpio_bit;
+            val_lvl |= tmpVal;
+            outw(val_lvl, addr_lvl);
+            writable_pin_setting[i].gpio_val = 1;
+        } else {
+            tmpVal = ~(1 << writable_pin_setting[i].gpio_bit);
+            val_lvl &= tmpVal;
+            outw(val_lvl, addr_lvl);
+            writable_pin_setting[i].gpio_val = 0;
+        }
+    } else {
+        *pValue = writable_pin_setting[i].gpio_val;
+    }
+    
+    ret = 0;
+    END:
+    superio_exit();
+    
+    return ret;
+}
+EXPORT_SYMBOL(syno_superio_gpio_pin);
+#endif
 
 MODULE_AUTHOR("Chris Gauthron, "
 	      "Jean Delvare <khali@linux-fr.org>");

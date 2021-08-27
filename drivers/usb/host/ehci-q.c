@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001-2004 by David Brownell
  *
@@ -832,6 +835,9 @@ qh_make (
 			qh->gap_uf = 0;
 
 			qh->period = urb->interval >> 3;
+#ifdef CONFIG_ARCH_FEROCEON
+			qh->u_period = urb->interval;
+#else
 			if (qh->period == 0 && urb->interval != 1) {
 				/* NOTE interval 2 or 4 uframes could work.
 				 * But interval 1 scheduling is simpler, and
@@ -842,6 +848,7 @@ qh_make (
 				qh->period = ehci->periodic_size;
 				urb->interval = qh->period << 3;
 			}
+#endif
 		} else {
 			int		think_time;
 
@@ -863,6 +870,9 @@ qh_make (
 					usb_calc_bus_time (urb->dev->speed,
 					is_input, 0, max_packet (maxp)));
 			qh->period = urb->interval;
+#ifdef CONFIG_ARCH_FEROCEON
+			qh->u_period = (unsigned short)~0;
+#endif
 			if (qh->period > ehci->periodic_size) {
 				qh->period = ehci->periodic_size;
 				urb->interval = qh->period;

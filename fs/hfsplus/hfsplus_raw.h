@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/include/linux/hfsplus_raw.h
  *
@@ -58,6 +61,13 @@ struct hfsplus_unistr {
 	hfsplus_unichr unicode[255];
 } __packed;
 
+#ifdef MY_ABC_HERE
+#define HFSPLUS_XATTR_MAX_NAMELEN 127
+struct hfsplus_uni_attr_str {
+	__be16 length;
+	hfsplus_unichr unicode[HFSPLUS_XATTR_MAX_NAMELEN];
+} __packed;
+#endif
 #define HFSPLUS_MAX_STRLEN 255
 
 /* POSIX permissions */
@@ -226,12 +236,26 @@ struct DInfo {
 } __packed;
 
 struct DXInfo {
+#ifdef MY_ABC_HERE
+	__be32 point;
+	__be32 date_added;
+	__be16 extended_flags;
+	__be16 reserved2;
+	__be32 reserved3;
+#else
 	struct hfsp_point frScroll;
 	__be32 frOpenChain;
 	__be16 frUnused;
 	__be16 frComment;
 	__be32 frPutAway;
+#endif
 } __packed;
+
+#ifdef MY_ABC_HERE
+// bit mask for frFlags/fdFlags of folder/file
+#define HFS_HAS_ATTR_BIT  0x00002 // object has extended attributes
+#define HFS_HAS_ATTR_MASK 0x00004
+#endif
 
 /* HFS+ folder data (part of an hfsplus_cat_entry) */
 struct hfsplus_cat_folder {
@@ -261,10 +285,18 @@ struct FInfo {
 } __packed;
 
 struct FXInfo {
+#ifdef MY_ABC_HERE
+	__be32 reserved1;
+	__be32 date_added;
+	__be16 extended_flags;
+	__be16 reserved2;
+	__be32 reserved3;
+#else
 	__be16 fdIconID;
 	u8 fdUnused[8];
 	__be16 fdComment;
 	__be32 fdPutAway;
+#endif
 } __packed;
 
 /* HFS+ file data (part of a cat_entry) */
@@ -316,6 +348,73 @@ typedef union {
 #define HFSPLUS_FOLDER_THREAD  0x0003
 #define HFSPLUS_FILE_THREAD    0x0004
 
+#ifdef MY_ABC_HERE
+// ====== HFS+ attribute file section =======
+/* HFS+ attribute entry key */
+struct hfsplus_attr_key { // HFSPlusAttrKey
+	__be16 key_len;
+	__be16 pad;
+	hfsplus_cnid file_id;
+	__be32 start_block;
+	struct hfsplus_uni_attr_str name; //name.length = 0
+} __packed;
+
+#define HFSPLUS_ATTR_KEYLEN_MAX	(sizeof(struct hfsplus_attr_key) - sizeof(u16))
+#define HFSPLUS_ATTR_KEYLEN_MIN	(HFSPLUS_ATTR_KEYLEN_MAX - sizeof(hfsplus_unichr)*HFSPLUS_XATTR_MAX_NAMELEN)
+
+/*                                                                                                                                                                                            
+    These are the types of records in the attribute B-tree.  The values were                                                                                                                  
+    chosen so that they wouldn't conflict with the catalog record types.                                                                                                                      
+*/                                                                                                                                                                                            
+#define kHFSPlusAttrData   	 	0x0010   /* attributes whose data fits in a b-tree node */ 
+#define kHFSPlusAttrForkData    0x0020   /* extent based attributes (data lives in extents) */ 
+#define kHFSPlusAttrExtents 	0x0030   /* overflow extents for large attributes */
+
+/*
+ * Atrributes B-tree Data Record
+ *
+ * For small attributes, whose entire value is stored
+ * within a single B-tree record.
+ */
+struct hfsplus_attr_data {
+	__be32 type;
+	__be32 reserved[2];
+	__be32 attr_size;
+	__u8 attr_data[2];
+} __packed;
+
+/*
+ * 	HFSPlusAttrForkData
+ * 	For larger attributes, whose value is stored in allocation blocks.
+ * 	If the attribute has more than 8 extents, there will be additional
+ * 	records (of type HFSPlusAttrExtents) for this attribute.
+ */
+struct hfsplus_attr_forkdata {
+	__be32 type;
+	__be32 reserved;
+	struct hfsplus_fork_raw the_fork;
+} __packed;
+
+/*
+  	HFSPlusAttrExtents
+  	This record contains information about overflow extents for large,
+  	fragmented attributes.
+*/
+struct hfsplus_attr_extents {
+	__be32 type;
+	__be32 reserved;
+	hfsplus_extent_rec extents;
+} __packed;
+
+/* A data record in the attribute tree */
+typedef union {
+	__be32 type;
+	struct hfsplus_attr_data		data;
+	struct hfsplus_attr_forkdata	forkdata;
+	struct hfsplus_attr_extents extents;
+} __packed hfsplus_attr_entry;
+#endif
+
 /* HFS+ extents tree key */
 struct hfsplus_ext_key {
 	__be16 key_len;
@@ -331,6 +430,9 @@ struct hfsplus_ext_key {
 typedef union {
 	__be16 key_len;
 	struct hfsplus_cat_key cat;
+#ifdef MY_ABC_HERE
+	struct hfsplus_attr_key attr;
+#endif
 	struct hfsplus_ext_key ext;
 } __packed hfsplus_btree_key;
 

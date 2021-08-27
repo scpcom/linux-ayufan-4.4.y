@@ -906,6 +906,16 @@ int hidinput_connect(struct hid_device *hid, unsigned int force)
 	struct input_dev *input_dev;
 	int i, j, k;
 
+#ifdef CONFIG_MV_INCLUDE_USB
+	/**
+	 * To Check: On 6281 platform, hid-core fail to handle hid-input disconnect action
+	 *           when device is usb speaker. Because 6281 will not support usb input
+	 *           device (remote controller is of hid-dev), we reject all hid-input 
+	 *           registration here on 6281 platform.
+	 */
+	return -1;
+#endif
+
 	INIT_LIST_HEAD(&hid->inputs);
 
 	if (!force) {

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * proc/fs/generic.c --- generic routines for the proc-fs
  *

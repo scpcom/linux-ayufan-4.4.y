@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_FS_NOTIFY_H
 #define _LINUX_FS_NOTIFY_H
 
@@ -14,6 +17,55 @@
 #include <linux/fsnotify_backend.h>
 #include <linux/audit.h>
 #include <linux/slab.h>
+
+#ifdef MY_ABC_HERE
+#include <linux/xattr.h>
+#endif
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+static inline void SYNO_ArchiveModify(struct dentry* dentry)
+{
+#ifdef MY_ABC_HERE
+	int old_version;
+	int new_version;
+#endif
+	struct inode *TargetInode = dentry->d_inode;
+
+	int markDirty = 0;
+	if (NULL == TargetInode) {
+		return;
+	}
+	if (S_ISCHR(TargetInode->i_mode) || S_ISBLK(TargetInode->i_mode) ||
+		S_ISFIFO(TargetInode->i_mode) || S_ISSOCK(TargetInode->i_mode)) {
+		return;
+	}
+#ifdef MY_ABC_HERE
+	mutex_lock(&TargetInode->i_syno_mutex);
+	TargetInode->i_mode2 |= ALL_SYNO_ARCHIVE;
+	mutex_unlock(&TargetInode->i_syno_mutex);
+	markDirty = 1;
+#endif
+#ifdef MY_ABC_HERE
+	old_version = TargetInode->i_archive_version;
+	new_version = TargetInode->i_sb->s_archive_version + 1;
+	if (old_version != new_version) {
+		TargetInode->i_archive_version = new_version;
+		if (TargetInode->i_op->synosetxattr) {
+			struct syno_xattr_archive_version value;
+			value.v_magic = cpu_to_le16(0x2552);
+			value.v_struct_version = cpu_to_le16(1);
+			value.v_archive_version = cpu_to_le32(new_version);
+			TargetInode->i_op->synosetxattr(dentry, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value), 0);
+		}
+		markDirty = 1;
+	}
+#endif
+
+	if(markDirty) {
+	mark_inode_dirty_sync(TargetInode);
+}
+}
+#endif
 
 /*
  * fsnotify_d_instantiate - instantiate a dentry for inode
@@ -99,15 +151,29 @@ static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 		old_dir_mask |= FS_ISDIR;
 		new_dir_mask |= FS_ISDIR;
 	}
-
 	fsnotify(old_dir, old_dir_mask, old_dir, FSNOTIFY_EVENT_INODE, old_name, fs_cookie);
 	fsnotify(new_dir, new_dir_mask, new_dir, FSNOTIFY_EVENT_INODE, new_name, fs_cookie);
 
-	if (target)
-		fsnotify_link_count(target);
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	SYNO_ArchiveModify(moved);
+	if (old_dir != new_dir) {
+		SYNO_ArchiveModify(moved);
+	}
+#endif
 
-	if (source)
+	if (target) {
+		fsnotify_link_count(target);
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+		SYNO_ArchiveModify(moved);
+#endif
+	}
+
+	if (source) {
 		fsnotify(source, FS_MOVE_SELF, moved->d_inode, FSNOTIFY_EVENT_INODE, NULL, 0);
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+		SYNO_ArchiveModify(moved);
+#endif
+	}
 	audit_inode_child(moved, new_dir);
 }
 
@@ -137,6 +203,10 @@ static inline void fsnotify_nameremove(struct dentry *dentry, int isdir)
 	if (isdir)
 		mask |= FS_ISDIR;
 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	SYNO_ArchiveModify(dentry);
+#endif
+
 	fsnotify_parent(NULL, dentry, mask);
 }
 
@@ -155,6 +225,11 @@ static inline void fsnotify_inoderemove(struct inode *inode)
 static inline void fsnotify_create(struct inode *inode, struct dentry *dentry)
 {
 	audit_inode_child(dentry, inode);
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	SYNO_ArchiveModify(dentry);
+	SYNO_ArchiveModify(dentry->d_parent);
+#endif
 
 	fsnotify(inode, FS_CREATE, dentry->d_inode, FSNOTIFY_EVENT_INODE, dentry->d_name.name, 0);
 }
@@ -181,6 +256,11 @@ static inline void fsnotify_mkdir(struct inode *inode, struct dentry *dentry)
 	struct inode *d_inode = dentry->d_inode;
 
 	audit_inode_child(dentry, inode);
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	SYNO_ArchiveModify(dentry);
+	SYNO_ArchiveModify(dentry->d_parent);
+#endif
 
 	fsnotify(inode, mask, d_inode, FSNOTIFY_EVENT_INODE, dentry->d_name.name, 0);
 }
@@ -216,6 +296,9 @@ static inline void fsnotify_modify(struct file *file)
 		mask |= FS_ISDIR;
 
 	if (!(file->f_mode & FMODE_NONOTIFY)) {
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+		SYNO_ArchiveModify(path->dentry);
+#endif
 		fsnotify_parent(path, NULL, mask);
 		fsnotify(inode, mask, path, FSNOTIFY_EVENT_PATH, NULL, 0);
 	}
@@ -267,6 +350,9 @@ static inline void fsnotify_xattr(struct dentry *dentry)
 	if (S_ISDIR(inode->i_mode))
 		mask |= FS_ISDIR;
 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	SYNO_ArchiveModify(dentry);
+#endif
 	fsnotify_parent(NULL, dentry, mask);
 	fsnotify(inode, mask, inode, FSNOTIFY_EVENT_INODE, NULL, 0);
 }
@@ -285,7 +371,14 @@ static inline void fsnotify_change(struct dentry *dentry, unsigned int ia_valid)
 	if (ia_valid & ATTR_GID)
 		mask |= FS_ATTRIB;
 	if (ia_valid & ATTR_SIZE)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	{
 		mask |= FS_MODIFY;
+		SYNO_ArchiveModify(dentry);
+	}
+#else
+		mask |= FS_MODIFY;
+#endif
 
 	/* both times implies a utime(s) call */
 	if ((ia_valid & (ATTR_ATIME | ATTR_MTIME)) == (ATTR_ATIME | ATTR_MTIME))

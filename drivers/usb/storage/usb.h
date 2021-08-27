@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Driver for USB Mass Storage compliant devices
  * Main Header File
  *
@@ -156,6 +159,9 @@ struct us_data {
 	extra_data_destructor	extra_destructor;/* extra data destructor   */
 #ifdef CONFIG_PM
 	pm_hook			suspend_resume_hook;
+#endif
+#ifdef MY_ABC_HERE
+       u8 is_ata_disk;
 #endif
 
 	/* hacks for READ CAPACITY bug handling */

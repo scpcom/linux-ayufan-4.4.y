@@ -176,6 +176,9 @@ int ima_file_mmap(struct file *file, unsigned long prot)
 					 MAY_EXEC, FILE_MMAP);
 	return 0;
 }
+#ifdef CONFIG_AUFS_FS
+EXPORT_SYMBOL(ima_file_mmap);
+#endif /* SYNO_AUFS */
 
 /**
  * ima_bprm_check - based on policy, collect/store measurement.

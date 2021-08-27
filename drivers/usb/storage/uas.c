@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * USB Attached SCSI
  * Note that this is not the same as the USB Mass Storage driver

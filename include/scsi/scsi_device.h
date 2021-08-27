@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _SCSI_SCSI_DEVICE_H
 #define _SCSI_SCSI_DEVICE_H
 
@@ -7,8 +10,14 @@
 #include <linux/workqueue.h>
 #include <linux/blkdev.h>
 #include <scsi/scsi.h>
+#ifdef CONFIG_ARCH_FEROCEON
+#include <linux/timer.h>
+#endif
 #include <linux/atomic.h>
 
+#ifdef CONFIG_MV_SCATTERED_SPINUP
+#include <scsi/scsi_spinup.h>
+#endif
 struct request_queue;
 struct scsi_cmnd;
 struct scsi_lun;
@@ -91,6 +100,15 @@ struct scsi_device {
 	unsigned long last_queue_ramp_up;	/* last queue ramp up time */
 
 	unsigned int id, lun, channel;
+#ifdef MY_ABC_HERE
+	char syno_disk_name[BDEVNAME_SIZE];		/* name of major driver */
+#endif
+#ifdef MY_ABC_HERE
+	unsigned char auto_remap;
+#endif
+#ifdef MY_ABC_HERE
+	int iResetPwrCount;  /* the count of disk power reset */
+#endif
 
 	unsigned int manufacturer;	/* Manufacturer of device, for using 
 					 * vendor-specific cmd's */
@@ -165,6 +183,13 @@ struct scsi_device {
 	atomic_t iodone_cnt;
 	atomic_t ioerr_cnt;
 
+#ifdef MY_ABC_HERE
+	unsigned long   idle;   /* scsi idle time in jiffers */
+	unsigned long   idle_original; /* updated when get scsi idle time(SD_IOCTL_IDLE) */
+	unsigned char	spindown;
+	unsigned char   nospindown;
+#endif
+
 	struct device		sdev_gendev,
 				sdev_dev;
 
@@ -173,6 +198,14 @@ struct scsi_device {
 
 	struct scsi_dh_data	*scsi_dh_data;
 	enum scsi_device_state sdev_state;
+
+#ifdef CONFIG_MV_SCATTERED_SPINUP
+	enum scsi_device_power_state sdev_power_state;  /*Used to save the disk current power state*/
+	struct timer_list spinup_timeout;	/* Used to time out the spinup process when done. */
+	unsigned int standby_timeout_secs;
+	struct timer_list standby_timeout;	/* Used to time out the standby timeout command. */
+#endif
+
 	unsigned long		sdev_data[0];
 } __attribute__((aligned(sizeof(unsigned long))));
 

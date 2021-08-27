@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * 25-Jul-1998 Major changes to allow for ip chain table
  *

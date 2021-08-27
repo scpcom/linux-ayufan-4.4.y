@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xfrm6_input.c: based on net/ipv4/xfrm4_input.c
  *

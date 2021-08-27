@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * syscalls.h - Linux syscall interfaces (non-arch-specific)
  *
@@ -826,8 +829,20 @@ asmlinkage long sys_fanotify_mark(int fanotify_fd, unsigned int flags,
 				  const char  __user *pathname);
 asmlinkage long sys_syncfs(int fd);
 
+#ifdef CONFIG_IA32_EMULATION
+#ifdef MY_ABC_HERE
+asmlinkage long sys_mmap(unsigned long addr, unsigned long len, unsigned long prot,
+						 unsigned long flags, unsigned long fd, unsigned long off);
+#endif
+#endif
+
 int kernel_execve(const char *filename, const char *const argv[], const char *const envp[]);
 
+#ifdef CONFIG_IA32_EMULATION
+#ifdef MY_ABC_HERE
+asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, size_t *rwbytes);
+#endif
+#endif
 
 asmlinkage long sys_perf_event_open(
 		struct perf_event_attr __user *attr_uptr,

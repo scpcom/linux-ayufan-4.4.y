@@ -755,6 +755,14 @@ load_up_spe:
 	oris	r5,r5,MSR_SPE@h
 	mtmsr	r5			/* enable use of SPE now */
 	isync
+#ifdef CONFIG_SYNO_MPC85XX_COMMON 
+	/**
+	 * Note: Without this segment, system will fail to call fork() after
+	 *       OOM killer being invoked.
+	 */
+    li      r5,(SPEFSCR_FINVE | SPEFSCR_FDBZE | SPEFSCR_FUNFE | SPEFSCR_FOVFE)
+    mtspr   SPRN_SPEFSCR,r5
+#endif
 /*
  * For SMP, we don't do lazy SPE switching because it just gets too
  * horrendously complex, especially when a task switches from one CPU

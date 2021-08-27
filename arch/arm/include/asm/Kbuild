@@ -1,7 +1,9 @@
 include include/asm-generic/Kbuild.asm
 
 header-y += hwcap.h
-
+unifdef-y += page-nommu.h
+unifdef-y += memory.h
+unifdef-y += sizes.h
 generic-y += auxvec.h
 generic-y += bitsperlong.h
 generic-y += cputime.h

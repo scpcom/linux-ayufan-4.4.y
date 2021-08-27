@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Common EFI (Extensible Firmware Interface) support functions
  * Based on Extensible Firmware Interface Specification version 1.0
@@ -574,6 +577,11 @@ void __init efi_init(void)
 #ifdef CONFIG_X86_32
 	x86_platform.get_wallclock = efi_get_time;
 	x86_platform.set_wallclock = efi_set_rtc_mmss;
+#endif
+
+#ifdef MY_DEF_HERE
+	/* Setup for EFI runtime service */
+	reboot_type = BOOT_EFI;
 #endif
 
 #if EFI_DEBUG

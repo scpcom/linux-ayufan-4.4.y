@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext3/inode.c
  *
@@ -1255,9 +1258,21 @@ static int ext3_write_begin(struct file *file, struct address_space *mapping,
 	struct page *page;
 	pgoff_t index;
 	unsigned from, to;
+#ifdef MY_ABC_HERE
+	// Add for mark_inode_dirty.
+	int needed_blocks;
+
+	if (flags & AOP_FLAG_RECVFILE) {
+		needed_blocks = ext3_writepage_trans_blocks(inode) + MAX_PAGES_PER_RECVFILE;
+	} else {
+		needed_blocks = ext3_writepage_trans_blocks(inode) + 1;
+	}
+#endif
+#ifndef MY_ABC_HERE
 	/* Reserve one block more for addition to orphan list in case
 	 * we allocate blocks but write fails for some reason */
 	int needed_blocks = ext3_writepage_trans_blocks(inode) + 1;
+#endif
 
 	trace_ext3_write_begin(inode, pos, len, flags);
 
@@ -1266,18 +1281,30 @@ static int ext3_write_begin(struct file *file, struct address_space *mapping,
 	to = from + len;
 
 retry:
+#ifndef MY_ABC_HERE
 	page = grab_cache_page_write_begin(mapping, index, flags);
 	if (!page)
 		return -ENOMEM;
 	*pagep = page;
+#endif
 
 	handle = ext3_journal_start(inode, needed_blocks);
 	if (IS_ERR(handle)) {
+#ifndef MY_ABC_HERE
 		unlock_page(page);
 		page_cache_release(page);
+#endif
 		ret = PTR_ERR(handle);
 		goto out;
 	}
+#ifdef MY_ABC_HERE
+	flags |= AOP_FLAG_NOFS;
+	page = grab_cache_page_write_begin(mapping, index, flags);
+	if (!page)
+		return -ENOMEM;
+	*pagep = page;
+#endif
+
 	ret = __block_write_begin(page, pos, len, ext3_get_block);
 	if (ret)
 		goto write_begin_failed;
@@ -1297,8 +1324,10 @@ write_begin_failed:
 		 * finishes. Do this only if ext3_can_truncate() agrees so
 		 * that orphan processing code is happy.
 		 */
+#ifndef MY_ABC_HERE
 		if (pos + len > inode->i_size && ext3_can_truncate(inode))
 			ext3_orphan_add(handle, inode);
+#endif
 		ext3_journal_stop(handle);
 		unlock_page(page);
 		page_cache_release(page);
@@ -1307,6 +1336,15 @@ write_begin_failed:
 	}
 	if (ret == -ENOSPC && ext3_should_retry_alloc(inode->i_sb, &retries))
 		goto retry;
+#ifdef MY_ABC_HERE
+	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
+		if (pos + len > inode->i_size) {
+			// Don't need i_size_write because we hold i_mutex.
+			inode->i_size = pos + len;
+			ext3_mark_inode_dirty(handle, inode);
+		}
+	}
+#endif
 out:
 	return ret;
 }
@@ -2891,6 +2929,11 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	struct ext3_inode_info *ei;
 	struct buffer_head *bh;
 	struct inode *inode;
+#ifdef MY_ABC_HERE
+	struct syno_xattr_archive_version value;
+	int retval;
+#endif
+
 	journal_t *journal = EXT3_SB(sb)->s_journal;
 	transaction_t *transaction;
 	long ret;
@@ -2923,6 +2966,13 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	inode->i_ctime.tv_sec = (signed)le32_to_cpu(raw_inode->i_ctime);
 	inode->i_mtime.tv_sec = (signed)le32_to_cpu(raw_inode->i_mtime);
 	inode->i_atime.tv_nsec = inode->i_ctime.tv_nsec = inode->i_mtime.tv_nsec = 0;
+#ifdef MY_ABC_HERE
+	inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->ext3_CreateTime);
+	inode->i_CreateTime.tv_nsec = 0;
+#endif
+#ifdef MY_ABC_HERE
+	inode->i_mode2 = le32_to_cpu(raw_inode->ext3_mode2);
+#endif
 
 	ei->i_state_flags = 0;
 	ei->i_dir_start_lookup = 0;
@@ -3049,6 +3099,14 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	}
 	brelse (iloc.bh);
 	ext3_set_inode_flags(inode);
+#ifdef MY_ABC_HERE
+	retval = ext3_xattr_get(inode, EXT3_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value));
+	if(retval>0) {
+		inode->i_archive_version = le32_to_cpu(value.v_archive_version);
+	} else {
+		inode->i_archive_version = 0;
+	}
+#endif
 	unlock_new_inode(inode);
 	return inode;
 
@@ -3120,6 +3178,12 @@ again:
 	raw_inode->i_faddr = cpu_to_le32(ei->i_faddr);
 	raw_inode->i_frag = ei->i_frag_no;
 	raw_inode->i_fsize = ei->i_frag_size;
+#endif
+#ifdef MY_ABC_HERE
+	raw_inode->ext3_CreateTime = cpu_to_le32(inode->i_CreateTime.tv_sec);
+#endif
+#ifdef MY_ABC_HERE
+	raw_inode->ext3_mode2 = cpu_to_le32(inode->i_mode2);
 #endif
 	raw_inode->i_file_acl = cpu_to_le32(ei->i_file_acl);
 	if (!S_ISREG(inode->i_mode)) {

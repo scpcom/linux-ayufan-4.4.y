@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/compiler.h>
 #include <linux/file.h>
 #include <linux/fs.h>
@@ -38,6 +41,60 @@ SYSCALL_DEFINE2(utime, char __user *, filename, struct utimbuf __user *, times)
 	return do_utimes(AT_FDCWD, filename, times ? tv : NULL, 0);
 }
 
+#endif
+
+#ifdef MY_ABC_HERE
+/**
+ * sys_SYNOUtime() is used to update create time.
+ *
+ * @param	filename	The file to be changed create time.
+ * 			times	Create time should be stored in 
+ *				actime field.
+ * @return	0	success
+ *			!0	error
+ */
+asmlinkage long sys_SYNOUtime(char * filename, struct utimbuf * times)
+{
+	int error;
+	struct path path;
+	struct inode *inode = NULL;
+	struct iattr newattrs;
+
+	error = user_path_at(AT_FDCWD, filename, LOOKUP_FOLLOW, &path);
+	if (error)
+		goto out;
+	inode = path.dentry->d_inode;
+
+	error = -EROFS;
+	if (IS_RDONLY(inode))
+		goto dput_and_out;
+
+	if (times) {
+		error = get_user(newattrs.ia_ctime.tv_sec, &times->actime);
+		newattrs.ia_ctime.tv_nsec = 0;
+			if (error)
+		goto dput_and_out;
+
+	newattrs.ia_valid = ATTR_CREATE_TIME;
+	mutex_lock(&inode->i_mutex);
+	if (inode->i_op && inode->i_op->setattr)  {
+		error = inode->i_op->setattr(path.dentry, &newattrs);
+		} else {
+		error = inode_change_ok(inode, &newattrs);
+		if (!error) {
+			setattr_copy(inode, &newattrs);
+			mark_inode_dirty(inode);
+			error = 0;
+		}
+	}
+	mutex_unlock(&inode->i_mutex);
+	}
+
+dput_and_out:
+	path_put(&path);
+out:
+	return error;
+}
 #endif
 
 static bool nsec_valid(long nsec)
@@ -95,6 +152,13 @@ static int utimes_common(struct path *path, struct timespec *times)
                 if (IS_IMMUTABLE(inode))
 			goto mnt_drop_write_and_out;
 
+#ifdef CONFIG_FS_SYNO_ACL
+		if (IS_SYNOACL(inode)) {
+			if (inode->i_op->syno_permission(path->dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR)) {
+				goto mnt_drop_write_and_out;
+			}
+		} else
+#endif
 		if (!inode_owner_or_capable(inode)) {
 			error = inode_permission(inode, MAY_WRITE);
 			if (error)

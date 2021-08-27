@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Enhanced Host Controller Interface (EHCI) driver for USB.
  *
@@ -255,6 +258,11 @@ static void tdi_reset (struct ehci_hcd *ehci)
 	reg_ptr = (u32 __iomem *)(((u8 __iomem *)ehci->regs) + USBMODE);
 	tmp = ehci_readl(ehci, reg_ptr);
 	tmp |= USBMODE_CM_HC;
+
+#ifdef CONFIG_ARCH_FEROCEON
+	tmp |= (1 << 4); //disable USB streamin
+#endif
+
 	/* The default byte access to MMR space is LE after
 	 * controller reset. Set the required endian mode
 	 * for transfer buffers to match the host microprocessor
@@ -1252,6 +1260,16 @@ MODULE_LICENSE ("GPL");
 #ifdef CONFIG_PLAT_ORION
 #include "ehci-orion.c"
 #define	PLATFORM_DRIVER		ehci_orion_driver
+#endif
+
+#if defined(CONFIG_ARCH_FEROCEON) || defined(CONFIG_MARVELL)
+#ifdef SYNO_6281_SOC_USE_OPENSOURCE_USB
+#include "ehci-orion.c"
+#define	PLATFORM_DRIVER		ehci_orion_driver
+#else
+#include "ehci_marvell.c"
+#define	PLATFORM_DRIVER		ehci_marvell_driver
+#endif
 #endif
 
 #ifdef CONFIG_ARCH_IXP4XX

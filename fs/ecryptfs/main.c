@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * eCryptfs: Linux filesystem encryption layer
  *
@@ -524,6 +527,11 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
 		ecryptfs_printk(KERN_WARNING, "kern_path() failed\n");
 		goto out1;
 	}
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_FS_SYNOACL(path.dentry->d_inode)) {
+		s->s_flags |= MS_SYNOACL;
+	}
+#endif
 	if (path.dentry->d_sb->s_type == &ecryptfs_fs_type) {
 		rc = -EINVAL;
 		printk(KERN_ERR "Mount on filesystem of type "

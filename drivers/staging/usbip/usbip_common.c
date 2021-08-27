@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -620,6 +623,15 @@ void usbip_header_correct_endian(struct usbip_header *pdu, int send)
 	case USBIP_RET_UNLINK:
 		correct_endian_ret_unlink(&pdu->u.ret_unlink, send);
 		break;
+#ifdef MY_ABC_HERE
+        case USBIP_RESET_DEV:
+        if(send) {
+            correct_endian_ret_submit(&pdu->u.ret_submit, send);
+        } else {
+            correct_endian_cmd_submit(&pdu->u.cmd_submit, send);
+        }
+        break;
+#endif
 	default:
 		/* NOT REACHED */
 		pr_err("unknown command\n");
@@ -765,7 +777,7 @@ int usbip_pad_iso(struct usbip_device *ud, struct urb *urb)
 {
 	int np = urb->number_of_packets;
 	int i;
-	int ret;
+	int ret=0;
 	int actualoffset = urb->actual_length;
 
 	if (!usb_pipeisoc(urb->pipe))

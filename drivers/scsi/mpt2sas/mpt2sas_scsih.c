@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Scsi Host Layer for MPT (Message Passing Technology) based controllers
  *
@@ -613,6 +616,10 @@ _scsih_sas_device_add(struct MPT2SAS_ADAPTER *ioc,
 	     sas_device->sas_address_parent)) {
 		_scsih_sas_device_remove(ioc, sas_device);
 		} else if (!sas_device->starget) {
+		/* When asyn scanning is enabled, its not possible to remove
+		 * devices while scanning is turned on due to an oops in
+		 * scsi_sysfs_add_sdev()->add_device()->sysfs_addrm_start()
+		 */
 			if (!ioc->is_driver_loading)
 				mpt2sas_transport_port_remove(ioc,
 				sas_device->sas_address,
@@ -1449,7 +1456,7 @@ _scsih_slave_destroy(struct scsi_device *sdev)
 		spin_lock_irqsave(&ioc->sas_device_lock, flags);
 		sas_device = mpt2sas_scsih_sas_device_find_by_sas_address(ioc,
 		   sas_target_priv_data->sas_address);
-		if (sas_device)
+		if (sas_device && !sas_target_priv_data->num_luns)
 			sas_device->starget = NULL;
 		spin_unlock_irqrestore(&ioc->sas_device_lock, flags);
 	}
@@ -4485,6 +4492,8 @@ _scsih_io_done(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index, u32 reply)
 			scmd->result = DID_TRANSPORT_DISRUPTED << 16;
 			goto out;
 		}
+		scmd->result = DID_SOFT_ERROR << 16;
+		break;
 	case MPI2_IOCSTATUS_SCSI_TASK_TERMINATED:
 	case MPI2_IOCSTATUS_SCSI_EXT_TERMINATED:
 		scmd->result = DID_RESET << 16;
@@ -7424,6 +7433,9 @@ static struct scsi_host_template scsih_driver_template = {
 	.use_clustering			= ENABLE_CLUSTERING,
 	.shost_attrs			= mpt2sas_host_attrs,
 	.sdev_attrs			= mpt2sas_dev_attrs,
+#ifdef MY_ABC_HERE
+	.syno_port_type		= SYNO_PORT_TYPE_SAS,
+#endif
 };
 
 /**
@@ -7443,6 +7455,9 @@ _scsih_expander_node_remove(struct MPT2SAS_ADAPTER *ioc,
 {
 	struct _sas_port *mpt2sas_port, *next;
 
+#ifdef MY_DEF_HERE
+	msleep(100);
+#endif
 	/* remove sibling ports attached to this expander */
 	list_for_each_entry_safe(mpt2sas_port, next,
 	   &sas_expander->sas_port_list, port_list) {
@@ -7929,6 +7944,7 @@ _scsih_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	ioc->tm_tr_volume_cb_idx = tm_tr_volume_cb_idx;
 	ioc->tm_sas_control_cb_idx = tm_sas_control_cb_idx;
 	ioc->logging_level = logging_level;
+	ioc->schedule_dead_ioc_flush_running_cmds = &_scsih_flush_running_cmds;
 	/* misc semaphores and spin locks */
 	mutex_init(&ioc->reset_in_progress_mutex);
 	spin_lock_init(&ioc->ioc_reset_in_progress_lock);

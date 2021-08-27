@@ -256,6 +256,8 @@ config NLATTR
 config GENERIC_ATOMIC64
        bool
 
+source "lib/synolib/Kconfig"
+
 config LRU_CACHE
 	tristate
 

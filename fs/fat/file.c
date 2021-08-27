@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fat/file.c
  *
@@ -265,7 +268,11 @@ static int fat_free(struct inode *inode, int skip)
 			fat_fs_error(sb,
 				     "%s: invalid cluster chain (i_pos %lld)",
 				     __func__, MSDOS_I(inode)->i_pos);
+#ifdef MY_ABC_HERE
+			ret = -ECORRUPT;
+#else
 			ret = -EIO;
+#endif
 		} else if (ret > 0) {
 			err = fat_ent_write(inode, &fatent, FAT_ENT_EOF, wait);
 			if (err)

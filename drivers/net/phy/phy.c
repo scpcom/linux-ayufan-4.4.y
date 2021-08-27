@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/net/phy/phy.c
  *
@@ -800,6 +803,9 @@ void phy_state_machine(struct work_struct *work)
 			 * negotiation for now */
 			if (!phydev->link) {
 				phydev->state = PHY_NOLINK;
+#ifdef MY_DEF_HERE
+				phydev->speed = 0;
+#endif
 				netif_carrier_off(phydev->attached_dev);
 				phydev->adjust_link(phydev->attached_dev);
 				break;
@@ -821,6 +827,18 @@ void phy_state_machine(struct work_struct *work)
 				int idx;
 
 				needs_aneg = 1;
+#ifdef MY_DEF_HERE
+				/* Fix bug #4712, #4713:
+				 * if network cable is not plugged in, system
+				 * will try slower speed to detect link. However, we
+				 * should set link status to "off" and speed to "0" when
+				 * autoneg state is timeout to let upper application to
+				 * know "link is not available"
+				 */
+				phydev->speed = 0;
+				netif_carrier_off(phydev->attached_dev);
+				phydev->link_timeout = PHY_FORCE_TIMEOUT;
+#else
 				/* If we have the magic_aneg bit,
 				 * we try again */
 				if (phydev->drv->flags & PHY_HAS_MAGICANEG)
@@ -842,6 +860,7 @@ void phy_state_machine(struct work_struct *work)
 						DUPLEX_FULL ==
 						phydev->duplex ?
 						"FULL" : "HALF");
+#endif
 			}
 			break;
 		case PHY_NOLINK:
@@ -890,6 +909,9 @@ void phy_state_machine(struct work_struct *work)
 				phydev->state = PHY_RUNNING;
 				netif_carrier_on(phydev->attached_dev);
 			} else {
+#ifdef MY_DEF_HERE
+				phydev->speed = 0;
+#endif
 				phydev->state = PHY_NOLINK;
 				netif_carrier_off(phydev->attached_dev);
 			}

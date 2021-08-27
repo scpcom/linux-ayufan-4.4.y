@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/cifs_unicode.c
  *
@@ -300,6 +303,11 @@ cifsConvertToUCS(__le16 *target, const char *source, int srclen,
 		case '|':
 			dst_char = cpu_to_le16(UNI_PIPE);
 			break;
+#ifdef SYNO_CIFS_SPECIAL_CHAR_CONVER
+		case '"':
+			dst_char = cpu_to_le16(UNI_DQUOT);
+			break;
+#endif
 		/*
 		 * FIXME: We can not handle remapping backslash (UNI_SLASH)
 		 * until all the calls to build_path_from_dentry are modified,

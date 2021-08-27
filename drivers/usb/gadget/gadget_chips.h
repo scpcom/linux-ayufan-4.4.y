@@ -15,6 +15,12 @@
 #ifndef __GADGET_CHIPS_H
 #define __GADGET_CHIPS_H
 
+#ifdef CONFIG_USB_GADGET_MRVL
+#define gadget_is_mrvl(g)    !strcmp("mv_udc", (g)->name)
+#else
+#define gadget_is_mrvl(g)    0
+#endif
+
 /*
  * NOTICE: the entries below are alphabetical and should be kept
  * that way.
@@ -92,6 +98,10 @@ static inline int usb_gadget_controller_number(struct usb_gadget *gadget)
 		return 0x18;
 	else if (gadget_is_fsl_usb2(gadget))
 		return 0x19;
+#ifdef CONFIG_USB_GADGET_MRVL
+	else if (gadget_is_mrvl(gadget))
+		return 0x1a;
+#endif
 	else if (gadget_is_amd5536udc(gadget))
 		return 0x20;
 	else if (gadget_is_m66592(gadget))

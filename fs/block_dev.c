@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/block_dev.c
  *
@@ -231,6 +234,39 @@ int fsync_bdev(struct block_device *bdev)
 	return sync_blockdev(bdev);
 }
 EXPORT_SYMBOL(fsync_bdev);
+
+#ifdef MY_ABC_HERE
+int sync_wait_fs_sync(struct super_block *sb)
+{
+	int retry = 0;
+	do {
+		int cnt;
+		struct inode *tmp;
+
+		/* fail-safe protection*/
+		if (retry++ > SYNO_EXT4_SYNC_DALLOC_RETRY) {
+			printk(KERN_ERR"freeze_bdev retry sync more than %d times\n", retry);
+			break;
+		}
+
+		cnt = 0;
+		list_for_each_entry(tmp, &(sb->s_bdi->wb.b_dirty), i_wb_list) {
+			if (tmp->i_sb == sb) {
+				cnt++;
+			}
+		}
+		if (0 == cnt) {
+			break;
+		}
+
+		printk(KERN_DEBUG"freeze_bdev still has %d dirty inode, sync again\n", cnt);
+		sync_filesystem(sb);
+	} while (1);
+
+	return 0;
+}
+EXPORT_SYMBOL(sync_wait_fs_sync);
+#endif
 
 /**
  * freeze_bdev  --  lock a filesystem and force it into a consistent state
@@ -1022,9 +1058,17 @@ int revalidate_disk(struct gendisk *disk)
 	if (!bdev)
 		return ret;
 
+#ifdef MY_ABC_HERE
+	mutex_lock(&bdev->bd_inode->i_mutex);
+#else
 	mutex_lock(&bdev->bd_mutex);
+#endif
 	check_disk_size_change(disk, bdev);
+#ifdef MY_ABC_HERE
+	mutex_unlock(&bdev->bd_inode->i_mutex);
+#else
 	mutex_unlock(&bdev->bd_mutex);
+#endif
 	bdput(bdev);
 	return ret;
 }
@@ -1159,8 +1203,12 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
 			 * The latter is necessary to prevent ghost
 			 * partitions on a removed medium.
 			 */
-			if (bdev->bd_invalidated && (!ret || ret == -ENOMEDIUM))
+			if (bdev->bd_invalidated) {
+				if (!ret)
 				rescan_partitions(disk, bdev);
+				else if (ret == -ENOMEDIUM)
+					invalidate_partitions(disk, bdev);
+			}
 			if (ret)
 				goto out_clear;
 		} else {
@@ -1190,8 +1238,12 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
 			if (bdev->bd_disk->fops->open)
 				ret = bdev->bd_disk->fops->open(bdev, mode);
 			/* the same as first opener case, read comment there */
-			if (bdev->bd_invalidated && (!ret || ret == -ENOMEDIUM))
+			if (bdev->bd_invalidated) {
+				if (!ret)
 				rescan_partitions(bdev->bd_disk, bdev);
+				else if (ret == -ENOMEDIUM)
+					invalidate_partitions(bdev->bd_disk, bdev);
+			}
 			if (ret)
 				goto out_unlock_bdev;
 		}

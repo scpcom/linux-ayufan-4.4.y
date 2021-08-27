@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* IPv4 specific functions of netfilter core */
 #include <linux/kernel.h>
 #include <linux/netfilter.h>

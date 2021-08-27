@@ -317,6 +317,13 @@ int nfsd_create_serv(void)
 		return 0;
 	}
 	if (nfsd_max_blksize == 0) {
+#if defined(SYNO_NFSD_WRITE_SIZE_MIN)
+		/* Directly set to 128KB to
+		 * - optimize for x86 gigabit performance
+		 * - workaround 64KB request of stubborn VMWare NFS client
+		 */
+		nfsd_max_blksize = SYNO_NFSD_WRITE_SIZE_MIN;
+#else
 		/* choose a suitable default */
 		struct sysinfo i;
 		si_meminfo(&i);
@@ -331,6 +338,7 @@ int nfsd_create_serv(void)
 		while (nfsd_max_blksize > i.totalram &&
 		       nfsd_max_blksize >= 8*1024*2)
 			nfsd_max_blksize /= 2;
+#endif
 	}
 	nfsd_reset_versions();
 

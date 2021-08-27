@@ -113,8 +113,34 @@ void machine_shutdown(void)
 		ppc_md.machine_shutdown();
 }
 
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+#define UART2_DCR       0x4611
+#define UART2_TX        0x4600
+#define UART2_LCR       0x4603
+
+#define ENABLE_DUART            0x01
+#define SET8N1                  0x3
+#define SOFTWARE_SHUTDOWN       0x31
+#define SOFTWARE_REBOOT         0x43
+#endif
+
 void machine_restart(char *cmd)
 {
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+	extern phys_addr_t get_immrbase(void);
+	phys_addr_t immr_base = -1;
+	unsigned char *ptr = NULL;
+
+	immr_base = get_immrbase();
+	if ( immr_base != -1 ) {
+		ptr = (unsigned char *)(immr_base + UART2_LCR);   // LCR
+		*ptr = SET8N1;
+		ptr = (unsigned char *)(immr_base + UART2_TX);   // TX
+		*ptr = SOFTWARE_REBOOT;
+	} else {
+		printk("HW Settings Error: Failed to get immr_base\n");
+	}
+#else
 	machine_shutdown();
 	if (ppc_md.restart)
 		ppc_md.restart(cmd);
@@ -124,10 +150,26 @@ void machine_restart(char *cmd)
 	printk(KERN_EMERG "System Halted, OK to turn off power\n");
 	local_irq_disable();
 	while (1) ;
+#endif
 }
 
 void machine_power_off(void)
 {
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+	extern phys_addr_t get_immrbase(void);
+	phys_addr_t immr_base = -1;
+	unsigned char *ptr = NULL;
+
+	immr_base = get_immrbase();
+	if ( immr_base != -1 ) {
+		ptr = (unsigned char *)(immr_base + UART2_LCR);   // LCR
+		*ptr = SET8N1;
+		ptr = (unsigned char *)(immr_base + UART2_TX);   // TX
+		*ptr = SOFTWARE_SHUTDOWN;
+	} else {
+		printk("HW Settings Error: Failed to get immr_base\n");
+	}
+#else
 	machine_shutdown();
 	if (ppc_md.power_off)
 		ppc_md.power_off();
@@ -137,6 +179,7 @@ void machine_power_off(void)
 	printk(KERN_EMERG "System Halted, OK to turn off power\n");
 	local_irq_disable();
 	while (1) ;
+#endif
 }
 /* Used by the G5 thermal driver */
 EXPORT_SYMBOL_GPL(machine_power_off);

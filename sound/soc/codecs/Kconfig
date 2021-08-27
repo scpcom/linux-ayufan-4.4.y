@@ -196,6 +196,11 @@ config SND_SOC_CX20442
 config SND_SOC_JZ4740_CODEC
 	tristate
 
+# Cirrus Logic CS42L51 Codec
+config SND_SOC_CS42L51
+       tristate
+       depends on SND_SOC
+
 config SND_SOC_L3
        tristate
 

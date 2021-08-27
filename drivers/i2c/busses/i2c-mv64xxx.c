@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for the i2c controller on the Marvell line of host bridges
  * (e.g, gt642[46]0, mv643[46]0, mv644[46]0, and Orion SoC family).

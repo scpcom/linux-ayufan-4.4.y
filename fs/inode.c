@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * (C) 1997 Linus Torvalds
  * (C) 1999 Andrea Arcangeli <andrea@suse.de> (dynamic inode allocation)
@@ -58,6 +61,10 @@
  * iunique_lock
  *   inode_hash_lock
  */
+
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
+#endif
 
 static unsigned int i_hash_mask __read_mostly;
 static unsigned int i_hash_shift __read_mostly;
@@ -160,6 +167,12 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	inode->i_rdev = 0;
 	inode->dirtied_when = 0;
 
+#ifdef MY_ABC_HERE
+	inode->i_archive_version = 0;
+#endif
+#ifdef MY_ABC_HERE
+	inode->i_mode2 = 0;   /* set archive bit on creation */
+#endif
 	if (security_inode_alloc(inode))
 		goto out;
 	spin_lock_init(&inode->i_lock);
@@ -167,6 +180,10 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 
 	mutex_init(&inode->i_mutex);
 	lockdep_set_class(&inode->i_mutex, &sb->s_type->i_mutex_key);
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	mutex_init(&inode->i_syno_mutex);
+	lockdep_set_class(&inode->i_syno_mutex, &sb->s_type->i_syno_mutex_key);
+#endif
 
 	atomic_set(&inode->i_dio_count, 0);
 
@@ -191,7 +208,9 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	}
 	inode->i_private = NULL;
 	inode->i_mapping = mapping;
-#ifdef CONFIG_FS_POSIX_ACL
+#ifdef CONFIG_FS_SYNO_ACL
+	inode->i_syno_acl = ACL_NOT_CACHED;
+#elif defined(CONFIG_FS_POSIX_ACL)
 	inode->i_acl = inode->i_default_acl = ACL_NOT_CACHED;
 #endif
 
@@ -241,7 +260,10 @@ void __destroy_inode(struct inode *inode)
 	BUG_ON(inode_has_buffers(inode));
 	security_inode_free(inode);
 	fsnotify_inode_delete(inode);
-#ifdef CONFIG_FS_POSIX_ACL
+#ifdef CONFIG_FS_SYNO_ACL
+	if (inode->i_syno_acl && inode->i_syno_acl != ACL_NOT_CACHED)
+		synoacl_mod_release(inode->i_syno_acl);
+#elif defined(CONFIG_FS_POSIX_ACL)
 	if (inode->i_acl && inode->i_acl != ACL_NOT_CACHED)
 		posix_acl_release(inode->i_acl);
 	if (inode->i_default_acl && inode->i_default_acl != ACL_NOT_CACHED)
@@ -881,7 +903,13 @@ void unlock_new_inode(struct inode *inode)
 {
 	lockdep_annotate_inode_mutex_key(inode);
 	spin_lock(&inode->i_lock);
+#ifdef MY_ABC_HERE
+	if (!(inode->i_state & I_NEW)) {
+		printk(KERN_ERR "EXT4: inode->i_state is not I_NEW. File system should be remount read-only.\n");
+	}
+#else
 	WARN_ON(!(inode->i_state & I_NEW));
+#endif
 	inode->i_state &= ~I_NEW;
 	wake_up_bit(&inode->i_state, __I_NEW);
 	spin_unlock(&inode->i_lock);

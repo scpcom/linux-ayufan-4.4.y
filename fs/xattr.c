@@ -22,6 +22,9 @@
 #include <asm/uaccess.h>
 
 
+#ifdef CONFIG_FS_SYNO_ACL
+#include <linux/syno_acl_xattr_ds.h>
+#endif
 /*
  * Check permissions for extended attribute access.  This is a bit complicated
  * because different namespaces have very different rules.
@@ -238,7 +241,27 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 	error = security_inode_getxattr(dentry, name);
 	if (error)
 		return error;
+#ifdef CONFIG_FS_SYNO_ACL
+	if (name && (!strcmp(name, SYNO_ACL_XATTR_INHERIT) || !strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY))) {
+		int error = 0;
+		int cmd = SYNO_ACL_INHERITED;
 
+		if (!strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
+			if (!IS_SYNOACL(inode)) {
+				return -EOPNOTSUPP;
+			}
+			cmd = SYNO_ACL_INHERITED;
+		} else if (!strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY)) {
+			//We should return possible inherited ACL even file is in linux mode.
+			cmd = SYNO_ACL_PSEUDO_INHERIT_ONLY;
+		}
+		error = inode->i_op->syno_permission(dentry, MAY_READ_PERMISSION);
+		if (error) {
+			return error;
+		}
+		return inode->i_op->syno_acl_get(dentry, cmd, value, size);
+	}
+#endif //CONFIG_FS_SYNO_ACL
 	if (!strncmp(name, XATTR_SECURITY_PREFIX,
 				XATTR_SECURITY_PREFIX_LEN)) {
 		const char *suffix = name + XATTR_SECURITY_PREFIX_LEN;
@@ -684,6 +707,19 @@ generic_getxattr(struct dentry *dentry, const char *name, void *buffer, size_t s
 {
 	const struct xattr_handler *handler;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (name && !strcmp(name, SYNO_ACL_XATTR_ACCESS)) {
+		int error = 0;
+
+		if (!IS_SYNOACL(dentry->d_inode)) {
+			return -EOPNOTSUPP;
+		}
+		error = dentry->d_inode->i_op->syno_permission(dentry, MAY_READ_PERMISSION);
+		if (error) {
+			return error;
+		}
+	}
+#endif
 	handler = xattr_resolve_name(dentry->d_sb->s_xattr, &name);
 	if (!handler)
 		return -EOPNOTSUPP;
@@ -731,6 +767,20 @@ generic_setxattr(struct dentry *dentry, const char *name, const void *value, siz
 
 	if (size == 0)
 		value = "";  /* empty EA, do not remove */
+
+#ifdef CONFIG_FS_SYNO_ACL
+	if (strcmp_prefix(name, SYNO_ACL_XATTR_ACCESS)) {
+		int error = -1;
+
+		if (!IS_FS_SYNOACL(dentry->d_inode)) {
+			return -EOPNOTSUPP;
+		}
+		error = dentry->d_inode->i_op->syno_permission(dentry, MAY_WRITE_PERMISSION);
+		if (error) {
+			return error;
+		}
+	}
+#endif
 	handler = xattr_resolve_name(dentry->d_sb->s_xattr, &name);
 	if (!handler)
 		return -EOPNOTSUPP;
@@ -746,6 +796,19 @@ generic_removexattr(struct dentry *dentry, const char *name)
 {
 	const struct xattr_handler *handler;
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (strcmp_prefix(name, SYNO_ACL_XATTR_ACCESS)) {
+		int error = -1;
+
+		if (!IS_FS_SYNOACL(dentry->d_inode)) {
+			return -EOPNOTSUPP;
+		}
+		error = dentry->d_inode->i_op->syno_permission(dentry, MAY_WRITE_PERMISSION);
+		if (error) {
+			return error;
+		}
+	}
+#endif
 	handler = xattr_resolve_name(dentry->d_sb->s_xattr, &name);
 	if (!handler)
 		return -EOPNOTSUPP;
@@ -757,3 +820,26 @@ EXPORT_SYMBOL(generic_getxattr);
 EXPORT_SYMBOL(generic_listxattr);
 EXPORT_SYMBOL(generic_setxattr);
 EXPORT_SYMBOL(generic_removexattr);
+
+#ifdef MY_ABC_HERE
+/*
+ * Find the handler for the prefix and dispatch its set() operation.
+ */
+int
+syno_generic_setxattr(struct dentry *dentry, const char *name, const void *value, size_t size, int flags)
+{
+	const struct xattr_handler *handler;
+
+	if (size == 0)
+		value = "";  /* empty EA, do not remove */
+
+	handler = xattr_resolve_name(dentry->d_sb->s_xattr, &name);
+	if (!handler)
+		return -EOPNOTSUPP;
+
+	return handler->set(dentry, name, value, size, 0, handler->flags);
+}
+
+EXPORT_SYMBOL(syno_generic_setxattr);
+
+#endif

@@ -64,6 +64,9 @@ header-y += atmmpc.h
 header-y += atmppp.h
 header-y += atmsap.h
 header-y += atmsvc.h
+# SYNO
+header-y += aufs_type.h
+# SYNO
 header-y += audit.h
 header-y += auto_fs.h
 header-y += auto_fs4.h
@@ -396,6 +399,13 @@ header-y += wait.h
 header-y += wanrouter.h
 header-y += watchdog.h
 header-y += wimax.h
+
+header-y += syno.h
+header-y += syno_user.h
+header-y += synosata.h
+header-y += syno_debug.h
+header-y += synobios.h
+header-y += syno_acl_xattr_ds.h
 header-y += wireless.h
 header-y += x25.h
 header-y += xattr.h

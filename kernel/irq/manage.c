@@ -166,6 +166,7 @@ int __irq_set_affinity_locked(struct irq_data *data, const struct cpumask *mask)
 		kref_get(&desc->affinity_notify->kref);
 		schedule_work(&desc->affinity_notify->work);
 	}
+	irq_compat_set_affinity(desc);
 	irqd_set(data, IRQD_AFFINITY_SET);
 
 	return ret;
@@ -296,8 +297,10 @@ setup_affinity(unsigned int irq, struct irq_desc *desc, struct cpumask *mask)
 		if (cpumask_intersects(desc->irq_data.affinity,
 				       cpu_online_mask))
 			set = desc->irq_data.affinity;
-		else
+		else {
+			irq_compat_clr_affinity(desc);
 			irqd_clear(&desc->irq_data, IRQD_AFFINITY_SET);
+	}
 	}
 
 	cpumask_and(mask, cpu_online_mask, set);
@@ -590,6 +593,8 @@ int __irq_set_trigger(struct irq_desc *desc, unsigned int irq,
 			irqd_set(&desc->irq_data, IRQD_LEVEL);
 		}
 
+		if (chip != desc->irq_data.chip)
+			irq_chip_set_defaults(desc->irq_data.chip);
 		ret = 0;
 		break;
 	default:
@@ -797,6 +802,7 @@ static int irq_thread(void *data)
 			 * but AFAICT IRQS_PENDING should be fine as it
 			 * retriggers the interrupt itself --- tglx
 			 */
+			irq_compat_set_pending(desc);
 			desc->istate |= IRQS_PENDING;
 			raw_spin_unlock_irq(&desc->lock);
 		} else {
@@ -1035,6 +1041,8 @@ __setup_irq(unsigned int irq, struct irq_desc *desc, struct irqaction *new)
 	}
 
 	if (!shared) {
+		irq_chip_set_defaults(desc->irq_data.chip);
+
 		init_waitqueue_head(&desc->wait_for_threads);
 
 		/* Setup the type (level, edge polarity) if configured: */

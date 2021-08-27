@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This header is used to share core functionality between the
  * standalone connection tracking module, and the compatibility layer's use

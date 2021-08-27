@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * devices.c
  * (C) Copyright 1999 Randy Dunlap.
@@ -476,6 +479,83 @@ static char *usb_dump_string(char *start, char *end,
 
 #endif /* PROC_EXTRA */
 
+#ifdef MY_ABC_HERE
+int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
+{
+	char buf[256];
+
+	if(usbdev && usbdev->bus) {
+		memset(buf, 0, sizeof(buf));
+		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath);
+#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
+#if defined(CONFIG_SYNO_CEDARVIEW)
+		if(!strcmp(buf,"0000:00:1d.7-2")) {
+			return 1;
+		}
+#else
+		if(!strcmp(buf,"0000:00:1d.7-3") || !strcmp(buf,"0000:00:1d.1-1")) {
+			return 1;
+		}
+#endif /*CONFIG_SYNO_CEDARVIEW*/
+#endif /*CONFIG_SYNO_X86 || CONFIG_SYNO_X64*/
+#ifdef CONFIG_SYNO_MV88F5x8x
+		if(0 == strcmp(buf,"ehci_marvell.4523-1.1")) {
+			return 1;
+		}
+#endif
+#ifdef CONFIG_SYNO_MV88F6281
+		if(0 == strcmp(buf,"ehci_marvell.70059-1.3")) {
+			return 1;
+		}
+#endif
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(SYNO_6281_SOC_USE_OPENSOURCE_USB)
+		if(!strcmp(buf,"orion-ehci.0-1.3")) {
+			return 1;
+		}
+#endif
+#ifdef CONFIG_SYNO_MPC824X
+		if(!strcmp(buf,"0000:00:0e.1-1") || !strcmp(buf,"0000:00:0e.2-2")) {
+			return 1;
+		}
+#endif
+#ifdef CONFIG_SYNO_MPC8533
+		if(!strcmp(buf,"0000:00:0e.0-1") || !strcmp(buf,"0000:00:0e.1-1")) {
+			return 1;
+		}
+#endif
+#if defined(CONFIG_SYNO_QORIQ)
+		if(!strcmp(buf,"fsl-ehci.0-1.2")) {
+			return 1;
+		}
+#endif
+	}
+	return 0;
+}
+#endif
+
+#ifdef MY_ABC_HERE
+int blIsCardReader(struct usb_device *usbdev)
+{
+	char buf[256];
+
+	if(usbdev && usbdev->bus) {
+		memset(buf, 0, sizeof(buf));
+		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath);
+#if defined(CONFIG_MACH_SYNOLOGY_6282) && !defined(CONFIG_SYNO_MV88F6281_USBSTATION)
+		if(!strcmp(buf,"orion-ehci.0-1.4")) {
+			return 1;
+		}
+#endif
+#if defined(CONFIG_SYNO_QORIQ)
+		if(!strcmp(buf,"fsl-ehci.0-1.3")) {
+			return 1;
+		}
+#endif
+	}
+	return 0;
+}
+#endif
+
 /*****************************************************************/
 
 /* This is a recursive function. Parameters:
@@ -529,10 +609,30 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 	default:
 		speed = "??";
 	}
+#ifdef MY_ABC_HERE
+	if(blIsUSBDeviceAtFrontPort(usbdev))
+		data_end = pages_start + sprintf(pages_start, format_topo,
+			   bus->busnum, level, parent_devnum,
+			   USBCOPY_PORT_LOCATION, count, usbdev->devnum,
+			   speed, usbdev->maxchild);
+#ifdef MY_ABC_HERE
+	else if(blIsCardReader(usbdev))
+		data_end = pages_start + sprintf(pages_start, format_topo,
+			   bus->busnum, level, parent_devnum,
+			   SDCOPY_PORT_LOCATION, count, usbdev->devnum,
+			   speed, usbdev->maxchild);
+#endif
+	else
 	data_end = pages_start + sprintf(pages_start, format_topo,
 			bus->busnum, level, parent_devnum,
 			index, count, usbdev->devnum,
 			speed, usbdev->maxchild);
+#else
+	data_end = pages_start + sprintf(pages_start, format_topo,
+			bus->busnum, level, parent_devnum,
+			index, count, usbdev->devnum,
+			speed, usbdev->maxchild);
+#endif
 	/*
 	 * level = topology-tier level;
 	 * parent_devnum = parent device number;
@@ -594,9 +694,24 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 
 		if (childdev) {
 			usb_lock_device(childdev);
+#ifdef MY_ABC_HERE
+			if(blIsUSBDeviceAtFrontPort(usbdev))
+				ret = usb_device_dump(buffer, nbytes, skip_bytes, file_offset, childdev,
+									  bus, level + 1, USBCOPY_PORT_LOCATION, ++cnt);
+#ifdef MY_ABC_HERE
+			else if(blIsCardReader(usbdev))
+				ret = usb_device_dump(buffer, nbytes, skip_bytes, file_offset, childdev,
+									  bus, level + 1, SDCOPY_PORT_LOCATION, ++cnt);
+#endif
+			else
+				ret = usb_device_dump(buffer, nbytes, skip_bytes,
+									  file_offset, childdev, bus,
+									  level + 1, chix, ++cnt);
+#else
 			ret = usb_device_dump(buffer, nbytes, skip_bytes,
 					      file_offset, childdev, bus,
 					      level + 1, chix, ++cnt);
+#endif
 			usb_unlock_device(childdev);
 			if (ret == -EFAULT)
 				return total_written;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Connection state tracking for netfilter.  This is separated from,
  * but required by, the (future) NAT layer; it can also be used by an iptables
@@ -321,6 +324,13 @@ extern unsigned int nf_conntrack_max;
 extern unsigned int nf_conntrack_hash_rnd;
 void init_nf_conntrack_hash_rnd(void);
 
+#ifdef CONFIG_MV_LINUX_COUNTERS_DISABLE
+
+#define NF_CT_STAT_INC(net, count)
+#define NF_CT_STAT_INC_ATOMIC(net, count)
+
+#else
+
 #define NF_CT_STAT_INC(net, count)	\
 	__this_cpu_inc((net)->ct.stat->count)
 #define NF_CT_STAT_INC_ATOMIC(net, count)		\
@@ -329,6 +339,8 @@ do {							\
 	__this_cpu_inc((net)->ct.stat->count);		\
 	local_bh_enable();				\
 } while (0)
+
+#endif /* CONFIG_MV_LINUX_COUNTERS_DISABLE */
 
 #define MODULE_ALIAS_NFCT_HELPER(helper) \
         MODULE_ALIAS("nfct-helper-" helper)

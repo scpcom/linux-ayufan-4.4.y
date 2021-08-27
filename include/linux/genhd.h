@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_GENHD_H
 #define _LINUX_GENHD_H
 
@@ -117,6 +120,9 @@ struct hd_struct {
 #endif
 	atomic_t ref;
 	struct rcu_head rcu_head;
+#ifdef MY_ABC_HERE
+	unsigned auto_remap;
+#endif
 };
 
 #define GENHD_FL_REMOVABLE			1
@@ -191,6 +197,9 @@ struct gendisk {
 	struct blk_integrity *integrity;
 #endif
 	int node_id;
+#ifdef MY_ABC_HERE
+	int systemDisk;
+#endif
 };
 
 static inline struct gendisk *part_to_disk(struct hd_struct *part)
@@ -596,6 +605,7 @@ extern char *disk_name (struct gendisk *hd, int partno, char *buf);
 
 extern int disk_expand_part_tbl(struct gendisk *disk, int target);
 extern int rescan_partitions(struct gendisk *disk, struct block_device *bdev);
+extern int invalidate_partitions(struct gendisk *disk, struct block_device *bdev);
 extern struct hd_struct * __must_check add_partition(struct gendisk *disk,
 						     int partno, sector_t start,
 						     sector_t len, int flags,

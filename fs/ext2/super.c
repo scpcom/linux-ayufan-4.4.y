@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext2/super.c
  *
@@ -593,6 +596,7 @@ static int ext2_setup_super (struct super_block * sb,
 	}
 	if (read_only)
 		return res;
+#ifndef MY_ABC_HERE
 	if (!(sbi->s_mount_state & EXT2_VALID_FS))
 		ext2_msg(sb, KERN_WARNING,
 			"warning: mounting unchecked fs, "
@@ -613,6 +617,7 @@ static int ext2_setup_super (struct super_block * sb,
 		ext2_msg(sb, KERN_WARNING,
 			"warning: checktime reached, "
 			"running e2fsck is recommended");
+#endif
 	if (!le16_to_cpu(es->s_max_mnt_count))
 		es->s_max_mnt_count = cpu_to_le16(EXT2_DFL_MAX_MNT_COUNT);
 	le16_add_cpu(&es->s_mnt_count, 1);
