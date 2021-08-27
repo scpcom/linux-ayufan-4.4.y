@@ -452,7 +452,7 @@
 #endif  
 
 #endif  
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 #define __NR_SYNONotifyInit				(__NR_SYSCALL_BASE+422)
 #define SYNONotifyInit(arg1)				syscall(__NR_SYNONotifyInit, arg1)
 #define __NR_SYNONotifyAddWatch			(__NR_SYSCALL_BASE+423)

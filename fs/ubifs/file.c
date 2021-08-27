@@ -2,14 +2,11 @@
 #define MY_ABC_HERE
 #endif
  
-
-
-
 #include "ubifs.h"
 #include <linux/mount.h>
 #include <linux/namei.h>
 #include <linux/slab.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/buffer_head.h>
 #endif
 
@@ -64,7 +61,7 @@ static int do_readpage(struct page *page)
 	struct inode *inode = page->mapping->host;
 	loff_t i_size = i_size_read(inode);
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	dbg_gen("ino %lu, pg %llu, i_size %lld, flags %#lx",
 		inode->i_ino, (unsigned long long)page->index, i_size, page->flags);
 #else
@@ -125,7 +122,7 @@ static int do_readpage(struct page *page)
 			dbg_gen("hole");
 			goto out_free;
 		}
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		ubifs_err("cannot read page %llu of inode %lu, error %d",
 			  (unsigned long long)page->index, inode->i_ino, err);
 #else
@@ -357,7 +354,7 @@ static int ubifs_write_end(struct file *file, struct address_space *mapping,
 	loff_t end_pos = pos + len;
 	int appending = !!(end_pos > inode->i_size);
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	dbg_gen("ino %lu, pos %llu, pg %llu, len %u, copied %d, i_size %lld",
 		inode->i_ino, pos, (unsigned long long)page->index, len, copied, inode->i_size);
 #else
@@ -407,7 +404,7 @@ static int populate_page(struct ubifs_info *c, struct page *page,
 	void *addr, *zaddr;
 	pgoff_t end_index;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	dbg_gen("ino %lu, pg %llu, i_size %lld, flags %#lx",
 		inode->i_ino, (unsigned long long)page->index, i_size, page->flags);
 #else
@@ -690,7 +687,7 @@ static int do_writepage(struct page *page, int len)
 	}
 	if (err) {
 		SetPageError(page);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		ubifs_err("cannot write page %llu of inode %lu, error %d",
 			  (unsigned long long)page->index, inode->i_ino, err);
 #else
@@ -725,7 +722,7 @@ static int ubifs_writepage(struct page *page, struct writeback_control *wbc)
 	int err, len = i_size & (PAGE_CACHE_SIZE - 1);
 	void *kaddr;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	dbg_gen("ino %lu, pg %llu, pg flags %#lx",
 		inode->i_ino, (unsigned long long)page->index, page->flags);
 #else
@@ -1055,7 +1052,7 @@ static int ubifs_set_page_dirty(struct page *page)
 
 static int ubifs_releasepage(struct page *page, gfp_t unused_gfp_flags)
 {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	WARN_ONCE(1, "%s:%d: Avoiding original UBIFS page release\n",
 		__FILE__, __LINE__);
 	return 0;
@@ -1081,7 +1078,7 @@ static int ubifs_vm_page_mkwrite(struct vm_area_struct *vma,
 	struct ubifs_budget_req req = { .new_page = 1 };
 	int err, update_time;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	dbg_gen("ino %lu, pg %llu, i_size %lld", inode->i_ino, (unsigned long long)page->index,
 		i_size_read(inode));
 #else

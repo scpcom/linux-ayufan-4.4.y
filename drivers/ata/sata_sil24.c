@@ -14,14 +14,14 @@
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
 #include <linux/libata.h>
-#ifdef CONFIG_SYNO_LEDS_TRIGGER
+#ifdef MY_DEF_HERE
 #include <linux/leds.h>
 #endif  
 
 #define DRV_NAME	"sata_sil24"
 #define DRV_VERSION	"1.1"
 
-#ifdef CONFIG_SYNO_LEDS_TRIGGER
+#ifdef MY_DEF_HERE
 extern void syno_ledtrig_active_set(int iLedNum);
 extern int *gpGreenLedMap;
 #endif  
@@ -925,7 +925,7 @@ static void sil24_pmp_attach(struct ata_port *ap)
 			"disabling NCQ support due to sil24-mv4140 quirk\n");
 		ap->flags &= ~ATA_FLAG_NCQ;
 	}
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 	if (syno_is_hw_version(HW_DS415p)) {
 		ap->flags &= ~ATA_FLAG_NCQ;
 	}
@@ -1190,11 +1190,10 @@ static void sil3132_sw_activity_blink(unsigned long arg)
 	struct sil3132_em_priv *emp = &pp->em_st;
 	unsigned long flags;
 
-	
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
-#ifdef CONFIG_SYNO_LEDS_TRIGGER
+#ifdef MY_DEF_HERE
 		if(NULL == gpGreenLedMap){
 			goto END;
 		}
@@ -1304,7 +1303,7 @@ static void sil24_init_controller(struct ata_host *host)
 				dev_err(host->dev,
 					"failed to clear port RST\n");
 		}
-#ifdef CONFIG_SYNO_INCREASE_SIL3132_OUT_SWING
+#ifdef MY_DEF_HERE
 		tmp = readl(port + PORT_PHY_CFG);
 		tmp &= ~0x1f;
 		if (syno_is_hw_version(HW_DS1815p)) {

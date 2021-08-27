@@ -48,7 +48,7 @@ extern int syno_get_ata_identity(struct scsi_device *sdev, u16 *id);
 #endif  
 #endif  
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 extern int ss_stats[128];
 #endif
 #ifdef MY_ABC_HERE
@@ -180,8 +180,7 @@ static void scsi_unlock_floptical(struct scsi_device *sdev,
 			 SCSI_TIMEOUT, 3, NULL);
 }
 
-
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 static int ss_id = 0;
 #endif
 static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
@@ -211,7 +210,7 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 	sdev->channel = starget->channel;
 	sdev->sdev_state = SDEV_CREATED;
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_MV_STAGGERED_SPINUP
 	if ((sdev->host->hostt->support_staggered_spinup == 1) &&  
 	    scsi_spinup_enabled()) {

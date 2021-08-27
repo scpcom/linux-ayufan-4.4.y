@@ -29,7 +29,7 @@
 #define NETLINK_ECRYPTFS	19
 #define NETLINK_RDMA		20
 #define NETLINK_CRYPTO		21	 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define NETLINK_FF              30
 #define NETLINK_VOP             31
 #define NETLINK_KEY             32

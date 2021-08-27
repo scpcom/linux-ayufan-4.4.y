@@ -88,7 +88,7 @@ static void skb_under_panic(struct sk_buff *skb, int sz, void *here)
 	BUG();
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 struct netdev_alloc_cache {
         struct page_frag        frag;
          
@@ -184,7 +184,7 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	skb->mac_header = ~0U;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
 	skb->mspd_data = NULL;
 	skb->mspd_len = 0;
 #endif
@@ -214,7 +214,7 @@ nodata:
 }
 EXPORT_SYMBOL(__alloc_skb);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
  
 struct sk_buff *__alloc_skb_header(unsigned int size, void *data, gfp_t gfp_mask,
 			    int fclone, int node)
@@ -250,7 +250,7 @@ struct sk_buff *__alloc_skb_header(unsigned int size, void *data, gfp_t gfp_mask
 	skb->mac_header = ~0U;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
 	skb->mspd_data = NULL;
 	skb->mspd_len = 0;
 #endif
@@ -334,7 +334,7 @@ static void skb_clone_fraglist(struct sk_buff *skb)
 		skb_get(list);
 }
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 static inline void skb_release_data(struct sk_buff *skb)
 #else
 static void skb_release_data(struct sk_buff *skb)
@@ -345,7 +345,7 @@ static void skb_release_data(struct sk_buff *skb)
 			       &skb_shinfo(skb)->dataref)) {
 		if (skb_shinfo(skb)->nr_frags) {
 			int i;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			int nr_frags = skb_shinfo(skb)->nr_frags;
 
 			if(nr_frags > 1) {
@@ -386,14 +386,14 @@ static void skb_release_data(struct sk_buff *skb)
 
 		kfree(skb->head);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
 		if (skb->mspd_data) {
 			kfree(skb->mspd_data);
 			skb->mspd_data = NULL;
 		}
 #endif
 	}
-#if defined(CONFIG_SYNO_ARMADA) 
+#if defined(MY_DEF_HERE) 
 #ifdef CONFIG_NET_SKB_RECYCLE
  
 	if (skb->hw_cookie) {
@@ -404,7 +404,7 @@ static void skb_release_data(struct sk_buff *skb)
 #endif  	
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	 
 	if (skb->skb_recycle) {
@@ -416,8 +416,7 @@ static void skb_release_data(struct sk_buff *skb)
 #endif  
 }
 
-
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 static inline void kfree_skbmem(struct sk_buff *skb)
 #else
 static void kfree_skbmem(struct sk_buff *skb)
@@ -449,7 +448,7 @@ static void kfree_skbmem(struct sk_buff *skb)
 	}
 }
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 static inline void skb_release_head_state(struct sk_buff *skb)
 #else
 static void skb_release_head_state(struct sk_buff *skb)
@@ -464,7 +463,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 		skb->destructor(skb);
 	}
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if(skb->nfct) 
 		nf_conntrack_put(skb->nfct);
 #else
@@ -472,7 +471,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 #endif
 #endif
 #ifdef NET_SKBUFF_NF_DEFRAG_NEEDED
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if(skb->nfct_reasm) 
 		nf_conntrack_put_reasm(skb->nfct_reasm);
 #else
@@ -491,8 +490,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 #endif
 }
 
-
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 static inline void skb_release_all(struct sk_buff *skb)
 #else
 static void skb_release_all(struct sk_buff *skb)
@@ -502,11 +500,9 @@ static void skb_release_all(struct sk_buff *skb)
 	skb_release_data(skb);
 }
 
-
-
 void __kfree_skb(struct sk_buff *skb)
 {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	if (skb->skb_recycle && !skb->skb_recycle(skb))
 		return;
@@ -544,12 +540,11 @@ void consume_skb(struct sk_buff *skb)
 }
 EXPORT_SYMBOL(consume_skb);
 
-
 void skb_recycle(struct sk_buff *skb)
 {
 	struct skb_shared_info *shinfo;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
 	WARN_ON(skb->mspd_len);
 #endif
 	skb_release_head_state(skb);
@@ -588,7 +583,7 @@ static void __copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 #ifdef CONFIG_XFRM
 	new->sp			= secpath_get(old->sp);
 #endif
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
         new->ipsec_offload      = old->ipsec_offload;
 #endif
 	memcpy(new->cb, old->cb, sizeof(old->cb));
@@ -620,12 +615,11 @@ static void __copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	skb_copy_secmark(new, old);
 }
 
-
 static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 {
 #define C(x) n->x = skb->x
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
 	if (skb->mspd_data) {
 		if (skb->mspd_len) {
 			int ofst = skb->len - skb->mspd_len;
@@ -655,14 +649,14 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	n->nohdr = 0;
 	n->destructor = NULL;
 
-#if defined(CONFIG_SYNO_ARMADA) 
+#if defined(MY_DEF_HERE) 
 #ifdef CONFIG_NET_SKB_RECYCLE
 	n->skb_recycle = NULL;
 	n->hw_cookie = NULL;
 #endif  
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	n->skb_recycle = NULL;
 	n->hw_cookie = 0;
@@ -676,7 +670,7 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	C(truesize);
 	atomic_set(&n->users, 1);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
 	WARN_ON(skb->mspd_data);
 	C(mspd_data);
 	C(mspd_len);
@@ -799,7 +793,7 @@ struct sk_buff *skb_copy(const struct sk_buff *skb, gfp_t gfp_mask)
 	if (!n)
 		return NULL;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
 	if (skb->mspd_data) {
 		if (skb->mspd_len) {
 			int ofst = skb->len - skb->mspd_len;
@@ -829,14 +823,12 @@ struct sk_buff *skb_copy(const struct sk_buff *skb, gfp_t gfp_mask)
 }
 EXPORT_SYMBOL(skb_copy);
 
-
-
 struct sk_buff *pskb_copy(struct sk_buff *skb, gfp_t gfp_mask)
 {
 	unsigned int size = skb_end_pointer(skb) - skb->head;
 	struct sk_buff *n = alloc_skb(size, gfp_mask);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
 	WARN_ON(skb->mspd_len);
 #endif
 
@@ -929,7 +921,7 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 
 	if (fastpath) {
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_NET_SKB_RECYCLE
 		 
 		if (skb->hw_cookie) {

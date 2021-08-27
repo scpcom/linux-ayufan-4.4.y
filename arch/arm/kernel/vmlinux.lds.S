@@ -7,7 +7,7 @@
  */
 
 #include <asm-generic/vmlinux.lds.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <asm/cache.h>
 #endif
 #include <asm/thread_info.h>
@@ -94,7 +94,7 @@ SECTIONS
 			*(.exception.text)
 			__exception_text_end = .;
 			IRQENTRY_TEXT
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_FUNC_REORDER
 #include "functionlist"
 #endif
@@ -185,7 +185,7 @@ SECTIONS
 	}
 #endif
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SMP
 	PERCPU_SECTION(L1_CACHE_BYTES)
 #endif
@@ -222,7 +222,7 @@ SECTIONS
 #endif
 
 		NOSAVE_DATA
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		CACHELINE_ALIGNED_DATA(L1_CACHE_BYTES)
 		READ_MOSTLY_DATA(L1_CACHE_BYTES)
 #else

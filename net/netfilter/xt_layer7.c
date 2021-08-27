@@ -282,8 +282,7 @@ static int match_no_append(struct nf_conn * conntrack,
 	}
 }
 
-
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static int add_datastr(char *target, int offset, char *app_data, int len)
 {
 	int length = 0, i;
@@ -430,7 +429,7 @@ match(const struct sk_buff *skbin,
 	enum ip_conntrack_info master_ctinfo, ctinfo;
 	struct nf_conn *master_conntrack, *conntrack;
 	unsigned char * app_data;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	unsigned char *tmp_data;
 #endif
 	unsigned int pattern_result, appdatalen;
@@ -451,12 +450,10 @@ match(const struct sk_buff *skbin,
 		return info->invert;
 	}
 
-	
 	while (master_ct(master_conntrack) != NULL)
 		master_conntrack = master_ct(master_conntrack);
 
-	
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if(!info->pkt && (total_acct_packets(master_conntrack) > num_packets ||
 	   master_conntrack->layer7.app_proto)) {
 #else
@@ -486,10 +483,9 @@ match(const struct sk_buff *skbin,
 	app_data = skb->data + app_data_offset(skb);
 	appdatalen = skb_tail_pointer(skb) - app_data;
 
-	
 	comppattern = compile_and_cache(info->pattern, info->protocol);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (info->pkt) {
 		tmp_data = kmalloc(maxdatalen, GFP_ATOMIC);
 		if(!tmp_data){
@@ -572,15 +568,13 @@ match(const struct sk_buff *skbin,
 		pattern_result = 1;
 	}
 
-	
 	skb->cb[0] = 1;
 
 	spin_unlock_bh(&l7_lock);
 	return (pattern_result ^ info->invert);
 }
 
-
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 35)
 static int
 #else
@@ -588,7 +582,7 @@ static bool
 #endif
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 28)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 check(const struct xt_mtchk_param *par)
 #else
 static bool check(const struct xt_mtchk_param *par)
@@ -598,7 +592,7 @@ static bool check(const struct xt_mtchk_param *par)
                 printk(KERN_WARNING "can't load conntrack support for "
                                     "proto=%d\n", par->match->family);
 #else
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 check(const char *tablename, const void *inf,
 #else
 static bool check(const char *tablename, const void *inf,
@@ -610,7 +604,7 @@ static bool check(const char *tablename, const void *inf,
                 printk(KERN_WARNING "can't load conntrack support for "
                                     "proto=%d\n", match->family);
 #endif
-#if defined(CONFIG_SYNO_COMCERTO) && LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 35)
+#if defined(MY_ABC_HERE) && LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 35)
 		return -EINVAL;
 	}
 	return 0;

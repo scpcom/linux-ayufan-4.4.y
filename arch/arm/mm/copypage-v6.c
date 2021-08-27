@@ -15,7 +15,7 @@
 
 #include "mm.h"
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
 #if SHMLBA > 16384
 #error FIX ME
 #endif
@@ -49,10 +49,9 @@ static void v6_clear_user_highpage_nonaliasing(struct page *page, unsigned long 
 	kunmap_atomic(kaddr, KM_USER0);
 }
 
-
 static void discard_old_kernel_data(void *kto)
 {
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
 	unsigned long flags;
 
 	raw_local_irq_save(flags);
@@ -63,7 +62,7 @@ static void discard_old_kernel_data(void *kto)
 	   : "r" (kto),
 	     "r" ((unsigned long)kto + PAGE_SIZE - L1_CACHE_BYTES)
 	   : "cc");
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_4611)
 	raw_local_irq_restore(flags);
 #endif
 }

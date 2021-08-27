@@ -24,7 +24,7 @@
 #include <linux/nsproxy.h>
 #include <linux/rculist_nulls.h>
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 #include <linux/mv_nfp.h>
 #endif
@@ -42,7 +42,7 @@
 #include <net/netfilter/nf_conntrack_timestamp.h>
 #include <net/netfilter/nf_nat.h>
 #include <net/netfilter/nf_nat_core.h>
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <linux/netfilter/ipt_NFP.h>
 #endif
 
@@ -201,7 +201,7 @@ destroy_conntrack(struct nf_conntrack *nfct)
 	 
 	nf_ct_remove_expectations(ct);
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
 	if (ct->layer7.app_proto)
 		kfree(ct->layer7.app_proto);
@@ -210,7 +210,7 @@ destroy_conntrack(struct nf_conntrack *nfct)
 #endif
 #endif
 
-	#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE))
+	#if defined(MY_ABC_HERE) && (defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE))
 	if(ct->layer7.app_proto)
 		kfree(ct->layer7.app_proto);
 	if(ct->layer7.app_data)
@@ -291,11 +291,11 @@ static void death_by_timeout(unsigned long ul_conntrack)
 {
 	struct nf_conn *ct = (void *)ul_conntrack;
 	struct nf_conn_tstamp *tstamp;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 	struct nf_conntrack_l4proto *l4proto;
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	struct nf_conntrack_tuple *t0 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
 	struct nf_conntrack_tuple *t1 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
@@ -384,7 +384,7 @@ static void death_by_timeout(unsigned long ul_conntrack)
 	if (tstamp && tstamp->stop == 0)
 		tstamp->stop = ktime_to_ns(ktime_get_real());
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 	l4proto = __nf_ct_l4proto_find(nf_ct_l3num(ct), nf_ct_protonum(ct));
 
 	if (test_bit(IPS_DYING_BIT, &ct->status) ||
@@ -668,7 +668,7 @@ static noinline int early_drop(struct net *net, unsigned int hash)
 	if (!ct)
 		return dropped;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 	clear_bit(IPS_PERMANENT_BIT, &ct->status);
 	 
 	if (del_timer_sync(&ct->timeout)) {
@@ -676,14 +676,14 @@ static noinline int early_drop(struct net *net, unsigned int hash)
 	if (del_timer(&ct->timeout)) {
 #endif
 		death_by_timeout((unsigned long)ct);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		 
 		if (test_bit(IPS_DYING_BIT, &ct->status)) {
 #endif
 		dropped = 1;
 		NF_CT_STAT_INC_ATOMIC(net, early_drop);
 	}
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	}
 #endif
 	nf_ct_put(ct);
@@ -757,7 +757,7 @@ __nf_conntrack_alloc(struct net *net, u16 zone,
 	}
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.nfp = false;
 	ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.ifindex = -1;
@@ -795,7 +795,7 @@ void nf_conntrack_free(struct nf_conn *ct)
 {
 	struct net *net = nf_ct_net(ct);
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.info)
 		kfree(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.info);
@@ -1137,7 +1137,7 @@ bool __nf_ct_kill_acct(struct nf_conn *ct,
 		}
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 	clear_bit(IPS_PERMANENT_BIT, &ct->status);
 	 
 	if (del_timer_sync(&ct->timeout)) {
@@ -1257,8 +1257,7 @@ void nf_ct_iterate_cleanup(struct net *net,
 
 	while ((ct = get_next_corpse(net, iter, data, &bucket)) != NULL) {
 		 
-
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 		clear_bit(IPS_PERMANENT_BIT, &ct->status);
 		 
 		if (del_timer_sync(&ct->timeout))
@@ -1418,7 +1417,7 @@ void *nf_ct_alloc_hashtable(unsigned int *sizep, int nulls)
 }
 EXPORT_SYMBOL_GPL(nf_ct_alloc_hashtable);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_COMCERTO_FP
 int nf_conntrack_set_dpi_allow_report(struct sk_buff *skb)
 {
@@ -1518,7 +1517,7 @@ void nf_ct_untracked_status_or(unsigned long bits)
 }
 EXPORT_SYMBOL_GPL(nf_ct_untracked_status_or);
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void nfp_ct_sync(int family)
 {

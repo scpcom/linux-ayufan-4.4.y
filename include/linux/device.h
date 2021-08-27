@@ -399,7 +399,7 @@ struct device {
 	void	(*release)(struct device *dev);
 };
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_ACPI
 #define ACPI_HANDLE(dev)        ((dev)->acpi_node.handle)
 #define ACPI_HANDLE_SET(dev, _handle_)  (dev)->acpi_node.handle = (_handle_)

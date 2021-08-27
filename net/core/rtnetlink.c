@@ -510,7 +510,7 @@ nla_put_failure:
 	return -EMSGSIZE;
 }
 EXPORT_SYMBOL(rtnetlink_put_metrics);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 int rtnetlink_put_metrics_2(struct sk_buff *skb, u32 *metrics, struct dst_entry *dst)
 {
 	struct nlattr *mx;
@@ -1850,7 +1850,7 @@ static int rtnl_dump_all(struct sk_buff *skb, struct netlink_callback *cb)
 	return skb->len;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 void __rtmsg_ifinfo(int type, struct net_device *dev, unsigned change, gfp_t flags)
 #else
 void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
@@ -1861,7 +1861,7 @@ void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
 	int err = -ENOBUFS;
 	size_t if_info_size;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	skb = nlmsg_new((if_info_size = if_nlmsg_size(dev, 0)), flags);
 #else
 	skb = nlmsg_new((if_info_size = if_nlmsg_size(dev, 0)), GFP_KERNEL);
@@ -1876,7 +1876,7 @@ void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change)
 		kfree_skb(skb);
 		goto errout;
 	}
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	rtnl_notify(skb, net, 0, RTNLGRP_LINK, NULL, flags);
 #else
 	rtnl_notify(skb, net, 0, RTNLGRP_LINK, NULL, GFP_KERNEL);
@@ -1886,7 +1886,7 @@ errout:
 	if (err < 0)
 		rtnl_set_sk_err(net, RTNLGRP_LINK, err);
 }
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #if defined(CONFIG_ARCH_COMCERTO)
 EXPORT_SYMBOL(__rtmsg_ifinfo);
 #endif

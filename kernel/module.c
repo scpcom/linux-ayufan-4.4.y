@@ -69,9 +69,7 @@
 			 PFN_DOWN((unsigned long)BASE) + 1)	\
 		: (0UL))
 
-
 #define INIT_OFFSET_MASK (1UL << (BITS_PER_LONG-1))
-
 
 DEFINE_MUTEX(module_mutex);
 EXPORT_SYMBOL_GPL(module_mutex);
@@ -79,7 +77,7 @@ static LIST_HEAD(modules);
 #ifdef CONFIG_KGDB_KDB
 struct list_head *kdb_modules = &modules;  
 #endif  
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_CRASHLOG)
+#if defined(MY_ABC_HERE) && defined(CONFIG_CRASHLOG)
 struct list_head *crashlog_modules = &modules;
 #endif
 
@@ -3169,7 +3167,7 @@ void module_layout(struct module *mod,
 EXPORT_SYMBOL(module_layout);
 #endif
 
-#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+#ifdef MY_ABC_HERE
 void syno_dump_modules(void)
 {
 	struct module *mod;

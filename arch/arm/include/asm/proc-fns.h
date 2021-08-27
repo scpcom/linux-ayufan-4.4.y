@@ -28,17 +28,15 @@ extern struct processor {
 	 
 	int (*_do_idle)(void);
 	 
-	
 	void (*dcache_clean_area)(void *addr, int size);
 
-	
 	void (*switch_mm)(unsigned long pgd_phys, struct mm_struct *mm);
 	 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
 	void (*set_pte_ext)(pte_t *ptep, pte_t pte);
-#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
+#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
 	void (*set_pte_ext)(pte_t *ptep, pte_t pte);
-#elif defined(CONFIG_SYNO_COMCERTO)
+#elif defined(MY_ABC_HERE)
 	void (*set_pte_ext)(pte_t *ptep, pteval_t pte, unsigned int ext);
 #else
 	void (*set_pte_ext)(pte_t *ptep, pte_t pte, unsigned int ext);
@@ -55,11 +53,11 @@ extern void cpu_proc_fin(void);
 extern int cpu_do_idle(void);
 extern void cpu_dcache_clean_area(void *, int);
 extern void cpu_do_switch_mm(unsigned long pgd_phys, struct mm_struct *mm);
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
 extern void cpu_set_pte_ext(pte_t *ptep, pte_t pte);
-#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
+#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
 extern void cpu_set_pte_ext(pte_t *ptep, pte_t pte);
-#elif defined(CONFIG_SYNO_COMCERTO)
+#elif defined(MY_ABC_HERE)
 extern void cpu_set_pte_ext(pte_t *ptep, pteval_t pte, unsigned int ext);
 extern void cpu_uncache_pte_ext(pte_t *ptep);
 #else
@@ -76,7 +74,7 @@ extern void cpu_do_resume(void *);
 #define cpu_do_idle			processor._do_idle
 #define cpu_dcache_clean_area		processor.dcache_clean_area
 #define cpu_set_pte_ext			processor.set_pte_ext
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define cpu_uncache_pte_ext		processor.uncache_pte_ext
 #endif
 #define cpu_do_switch_mm		processor.switch_mm
@@ -91,7 +89,7 @@ extern void cpu_resume(void);
 
 #ifdef CONFIG_MMU
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SMP)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SMP)
 
 #define cpu_switch_mm(pgd,mm)	\
 	({						\
@@ -107,7 +105,7 @@ extern void cpu_resume(void);
 
 #endif
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
 #define cpu_get_pgd()  \
        ({                                              \
                unsigned long pg, pg2;                  \

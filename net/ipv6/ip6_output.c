@@ -43,7 +43,7 @@ int __ip6_local_out(struct sk_buff *skb)
 		len = 0;
 	ipv6_hdr(skb)->payload_len = htons(len);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_INET6_IPSEC_OFFLOAD)
+#if defined(MY_ABC_HERE) && defined(CONFIG_INET6_IPSEC_OFFLOAD)
 	if(skb->ipsec_offload)
 	{	
 		dst_output(skb);	

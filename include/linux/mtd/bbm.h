@@ -55,10 +55,9 @@ struct nand_bbt_descr {
  
 #define NAND_BBT_NO_OOB		0x00040000
 
-
 #define NAND_BBT_DYNAMICSTRUCT	0x80000000
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
  
 #define NAND_BBT_SCANMVCUSTOM	0x10000000
 #endif

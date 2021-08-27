@@ -19,7 +19,7 @@
  
 unsigned int __init scu_get_core_count(void __iomem *scu_base)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	unsigned int ncores = readl_relaxed(scu_base + SCU_CONFIG);
 #else
 	unsigned int ncores = __raw_readl(scu_base + SCU_CONFIG);
@@ -28,7 +28,7 @@ unsigned int __init scu_get_core_count(void __iomem *scu_base)
 }
 #endif
 
-#if defined(CONFIG_SMP) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) 
+#if defined(CONFIG_SMP) || defined(MY_DEF_HERE) 
  
 void scu_enable(void __iomem *scu_base)
 {
@@ -37,13 +37,13 @@ void scu_enable(void __iomem *scu_base)
 #ifdef CONFIG_ARM_ERRATA_764369
 	 
 	if ((read_cpuid(CPUID_ID) & 0xff0ffff0) == 0x410fc090) {
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 		scu_ctrl = readl_relaxed(scu_base + 0x30);
 #else
 		scu_ctrl = __raw_readl(scu_base + 0x30);
 #endif
 		if (!(scu_ctrl & 1))
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 			writel_relaxed(scu_ctrl | 0x1, scu_base + 0x30);
 #else
 			__raw_writel(scu_ctrl | 0x1, scu_base + 0x30);
@@ -51,7 +51,7 @@ void scu_enable(void __iomem *scu_base)
 	}
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	scu_ctrl = readl_relaxed(scu_base + SCU_CTRL);
 #else
 	scu_ctrl = __raw_readl(scu_base + SCU_CTRL);
@@ -60,13 +60,13 @@ void scu_enable(void __iomem *scu_base)
 	if (scu_ctrl & 1)
 		return;
 
-#if (defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_SCU_SPECULATIVE_LINE_FILLS)) || \
-     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_SCU_SPECULATIVE_LINEFILLS_ENABLE))
+#if (defined(MY_ABC_HERE) && defined(CONFIG_SCU_SPECULATIVE_LINE_FILLS)) || \
+     (defined(MY_DEF_HERE) && defined(CONFIG_SCU_SPECULATIVE_LINEFILLS_ENABLE))
 	scu_ctrl |= (1 << 3);
 #endif
 
 	scu_ctrl |= 1;
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	writel_relaxed(scu_ctrl, scu_base + SCU_CTRL);
 #else
 	__raw_writel(scu_ctrl, scu_base + SCU_CTRL);

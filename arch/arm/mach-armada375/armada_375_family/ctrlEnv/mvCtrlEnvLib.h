@@ -207,7 +207,7 @@ MV_STATUS mvCtrlBoardConfigGet(MV_U8 *tempVal);
 MV_U32 mvCtrlSocUnitInfoNumGet(MV_UNIT_ID unit);
 MV_STATUS mvCtrlEnvInit(MV_VOID);
 MV_U32    mvCtrlMppRegGet(MV_U32 mppGroup);
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 MV_32 mvCtrlGetJuncTemp(MV_VOID);
 #else
 MV_U32 mvCtrlGetJuncTemp(MV_VOID);

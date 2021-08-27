@@ -330,7 +330,7 @@ ENTRY(v6_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(v6_dma_unmap_area)
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	.globl	v6_flush_kern_cache_louis
 	.equ	v6_flush_kern_cache_louis, v6_flush_kern_cache_all
 #endif

@@ -17,14 +17,14 @@
 #include <scsi/scsi_device.h>
 #endif
 #include <linux/libata.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include "libata.h"
 #endif
 #include "ahci.h"
-#if defined(CONFIG_SYNO_AVOTON) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <linux/pci.h>
 #endif
-#ifdef CONFIG_SYNO_LEDS_TRIGGER
+#ifdef MY_DEF_HERE
 #include <linux/leds.h>
 #endif  
 
@@ -32,7 +32,7 @@
 extern int SYNO_CTRL_HDD_ACT_NOTIFY(int index);
 #endif
 
-#ifdef CONFIG_SYNO_LEDS_TRIGGER
+#ifdef MY_DEF_HERE
 extern void syno_ledtrig_active_set(int iLedNum);
 extern int *gpGreenLedMap;
 #endif  
@@ -302,7 +302,7 @@ struct ata_port_operations ahci_ops = {
 	.em_store		= ahci_led_store,
 	.sw_activity_show	= ahci_activity_show,
 	.sw_activity_store	= ahci_activity_store,
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	.transmit_led_message	= ahci_transmit_led_message,
 #endif
 #ifdef CONFIG_PM
@@ -798,14 +798,13 @@ static void ahci_power_down(struct ata_port *ap)
 	scontrol &= ~0xf;
 	writel(scontrol, port_mmio + PORT_SCR_CTL);
 
-	
 	cmd = readl(port_mmio + PORT_CMD) & ~PORT_CMD_ICC_MASK;
 	cmd &= ~PORT_CMD_SPIN_UP;
 	writel(cmd, port_mmio + PORT_CMD);
 }
 #endif
 
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 static int syno_is_avoton_ahci(struct ata_port *ap)
 {
 	struct pci_dev *pdev = NULL;
@@ -855,10 +854,10 @@ int syno_is_alpine_internal_ahci(struct ata_port *ap)
 }
 #endif
 
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(CONFIG_SYNO_ALPINE)
+#if defined(CONFIG_ARCH_GEN3) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 static void syno_sw_activity(struct ata_port *ap)
 {
-#ifdef CONFIG_SYNO_LEDS_TRIGGER
+#ifdef MY_DEF_HERE
 		if(NULL == gpGreenLedMap){
 			return;
 		}
@@ -885,9 +884,8 @@ static void ahci_start_port(struct ata_port *ap)
 		ata_for_each_link(link, ap, EDGE) {
 			emp = &pp->em_priv[link->pmp];
 
-			
 			for (i = 0; i < EM_MAX_RETRY; i++) {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 				rc = ap->ops->transmit_led_message(ap,
 							       emp->led_state,
 							       4);
@@ -904,7 +902,7 @@ static void ahci_start_port(struct ata_port *ap)
 		}
 	}
 
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 	if (syno_is_avoton_ahci(ap)) {
 		ap->flags |= ATA_FLAG_SW_ACTIVITY;
 	}
@@ -1058,7 +1056,7 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 	unsigned long led_message = emp->led_state;
-#if !defined(CONFIG_ARCH_GEN3) && !defined(CONFIG_SYNO_AVOTON)
+#if !defined(CONFIG_ARCH_GEN3) && !defined(MY_DEF_HERE)
 	u32 activity_led_state;
 #endif
 	unsigned long flags;
@@ -1066,8 +1064,7 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	led_message &= EM_MSG_LED_VALUE;
 	led_message |= ap->port_no | (link->pmp << 8);
 
-	
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(SYNO_ALPINE_SW_SATA_LED)
+#if defined(CONFIG_ARCH_GEN3) || defined(MY_DEF_HERE) || defined(SYNO_ALPINE_SW_SATA_LED)
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
@@ -1089,27 +1086,25 @@ static void ahci_sw_activity_blink(unsigned long arg)
 		else
 			activity_led_state = 1;
 
-		
 		led_message &= ~EM_MSG_LED_VALUE_ACTIVITY;
 
-		
 		led_message |= (activity_led_state << 16);
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(100));
 	} else {
 		 
 		led_message &= ~EM_MSG_LED_VALUE_ACTIVITY;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		if ((ata_phys_link_online(link)) || (emp->blink_policy == BLINK_OFF))
 #else
 		if (emp->blink_policy == BLINK_OFF)
 #endif
 			led_message |= (1 << 16);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(500));
 #endif
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	ap->ops->transmit_led_message(ap, led_message, 4);
 #else
 	ahci_transmit_led_message(ap, led_message, 4);
@@ -1123,14 +1118,13 @@ static void ahci_init_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
-	
 	emp->saved_activity = emp->activity = 0;
-#if defined(CONFIG_SYNO_ALPINE) && !defined(SYNO_ALPINE_SW_SATA_LED)
+#if defined(MY_DEF_HERE) && !defined(SYNO_ALPINE_SW_SATA_LED)
 	emp->blink_policy = BLINK_ON;
 #endif
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
 
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(SYNO_ALPINE_SW_SATA_LED)
+#if defined(CONFIG_ARCH_GEN3) || defined(MY_DEF_HERE) || defined(SYNO_ALPINE_SW_SATA_LED)
 #else
 	 
 	if (emp->blink_policy)
@@ -1227,11 +1221,10 @@ static ssize_t ahci_led_store(struct ata_port *ap, const char *buf,
 	else
 		return -EINVAL;
 
-	
 	if (emp->blink_policy)
 		state &= ~EM_MSG_LED_VALUE_ACTIVITY;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	return ap->ops->transmit_led_message(ap, state, size);
 #else
 	return ahci_transmit_led_message(ap, state, size);
@@ -1250,10 +1243,9 @@ static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
 		 
 		link->flags &= ~(ATA_LFLAG_SW_ACTIVITY);
 
-		
 		port_led_state &= EM_MSG_LED_VALUE_OFF;
 		port_led_state |= (ap->port_no | (link->pmp << 8));
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		ap->ops->transmit_led_message(ap, port_led_state, 4);
 #else
 		ahci_transmit_led_message(ap, port_led_state, 4);
@@ -1265,7 +1257,7 @@ static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
 			port_led_state &= EM_MSG_LED_VALUE_OFF;
 			port_led_state |= (ap->port_no | (link->pmp << 8));
 			port_led_state |= EM_MSG_LED_VALUE_ON;  
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			ap->ops->transmit_led_message(ap, port_led_state, 4);
 #else
 			ahci_transmit_led_message(ap, port_led_state, 4);
@@ -1960,7 +1952,7 @@ static unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 		pp->fbs_last_dev = qc->dev->link->pmp;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_AHCI_PROF)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_AHCI_PROF)
 	if (enable_ahci_prof) {
 		struct ahci_port_stats *stats = &ahci_port_stats[ap->port_no];
 		struct timeval now;

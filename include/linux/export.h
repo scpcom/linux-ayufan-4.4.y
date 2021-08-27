@@ -38,7 +38,7 @@ extern struct module __this_module;
 #define __CRC_SYMBOL(sym, sec)
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #ifdef MODULE
 #define __EXPORT_SUFFIX(sym)
 #else
@@ -46,8 +46,7 @@ extern struct module __this_module;
 #endif
 #endif
 
-
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define __EXPORT_SYMBOL(sym, sec)				\
 	extern typeof(sym) sym;					\
 	__CRC_SYMBOL(sym, sec)					\

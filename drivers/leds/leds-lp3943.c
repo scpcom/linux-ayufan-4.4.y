@@ -9,7 +9,7 @@
 #include <linux/leds.h>
 #include <linux/workqueue.h>
 #include <linux/leds-lp3943.h>
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 #include <linux/spinlock.h>
 #endif  
 
@@ -65,7 +65,7 @@ struct lp3943 {
 	int num_leds;
 };
 
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 static struct i2c_client *gpClient = NULL;
 static DEFINE_MUTEX(ModeLock);
 
@@ -286,7 +286,7 @@ static int lp3943_update_bits(struct lp3943 *lp, u8 reg, u8 mask, u8 data)
 	int ret;
 	u8 tmp;
 
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
  
 	mutex_lock(&ModeLock);
 	ret = lp3943_read_byte(lp, reg, &tmp);
@@ -391,7 +391,7 @@ static int lp3943_update_brightness(struct lp3943_led *led)
 
 	for (i = 0 ; i < node->num_channels ; i++) {
 		channel = node->channel + i;
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 		 
 		switch (led->brightness){
 		case 0:
@@ -410,7 +410,7 @@ static int lp3943_update_brightness(struct lp3943_led *led)
 		ret = lp3943_update_selector(lp, mode, *channel);
 		if (ret)
 			return ret;
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 		if (mode == LP3943_LED_OFF || mode == LP3943_LED_ON)
 			continue;
 #else  
@@ -471,7 +471,7 @@ static int lp3943_leds_register(struct lp3943 *lp,
 			goto err_dev;
 		}
 
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 		INIT_WORK(&lp->led[i].brtwork, lp3943_brightness_work);
 #endif  
 		lp->led[i].id = i;
@@ -479,7 +479,7 @@ static int lp3943_leds_register(struct lp3943 *lp,
 		lp->led[i].cdev.name = node->name;
 		lp->led[i].cdev.max_brightness = MAX_BRIGHTNESS;
 		lp->led[i].cdev.brightness_set = lp3943_brightness_set;
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 		lp->led[i].cdev.default_trigger = node->default_trigger;
 #endif  
 
@@ -489,7 +489,7 @@ static int lp3943_leds_register(struct lp3943 *lp,
 					i, lp->num_leds, ret);
 			goto err_dev;
 		}
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
  
 #else
 		INIT_WORK(&lp->led[i].brtwork, lp3943_brightness_work);
@@ -599,7 +599,7 @@ static struct i2c_driver lp3943_driver = {
 
 static int __init lp3943_init(void)
 {
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 	int iErr = -1;
 	struct i2c_adapter *pAdapter = NULL;
 	 
@@ -629,7 +629,7 @@ module_init(lp3943_init);
 
 static void __exit lp3943_exit(void)
 {
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 	i2c_unregister_device(gpClient);
 #endif  
 	i2c_del_driver(&lp3943_driver);

@@ -4,8 +4,7 @@
 #ifndef _ARCH_ARM_GPIO_H
 #define _ARCH_ARM_GPIO_H
 
-
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_NEED_MACH_GPIO_H
 #include <mach/gpio.h>
 #endif

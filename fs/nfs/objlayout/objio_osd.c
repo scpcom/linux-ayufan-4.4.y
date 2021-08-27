@@ -422,7 +422,7 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 
 	if (offset >= i_size) {
 		*uptodate = true;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		dprintk("%s: g_zero_page index=0x%llx\n", __func__, (unsigned long long)index);
 #else
 		dprintk("%s: g_zero_page index=0x%lx\n", __func__, index);
@@ -435,7 +435,7 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 		page = find_or_create_page(wdata->inode->i_mapping,
 						index, GFP_NOFS);
 		if (unlikely(!page)) {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			dprintk("%s: grab_cache_page Failed index=0x%llx\n",
 				__func__, (unsigned long long)index);
 #else
@@ -450,7 +450,7 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 		*uptodate = true;
 	else
 		*uptodate = PageUptodate(page);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	dprintk("%s: index=0x%llx uptodate=%d\n", __func__, (unsigned long long)index, *uptodate);
 #else
 	dprintk("%s: index=0x%lx uptodate=%d\n", __func__, index, *uptodate);

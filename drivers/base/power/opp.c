@@ -152,12 +152,11 @@ struct opp *opp_find_freq_ceil(struct device *dev, unsigned long *freq)
 	return opp;
 }
 
-
 struct opp *opp_find_freq_floor(struct device *dev, unsigned long *freq)
 {
 	struct device_opp *dev_opp;
 	struct opp *temp_opp, *opp = ERR_PTR(-ENODEV);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	int c = 0;
 #endif
 
@@ -171,13 +170,13 @@ struct opp *opp_find_freq_floor(struct device *dev, unsigned long *freq)
 		return opp;
 
 	list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		++c;
 #endif
 		if (temp_opp->available) {
 			 
 			if (temp_opp->rate > *freq)
-#if defined(CONFIG_SYNO_COMCERTO)	
+#if defined(MY_ABC_HERE)	
 			{
 				if (c == 1)
 					opp = temp_opp;

@@ -112,7 +112,7 @@ _decode_session6(struct sk_buff *skb, struct flowi *fl, int reverse)
 {
 	struct flowi6 *fl6 = &fl->u.ip6;
 	int onlyproto = 0;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 #ifdef NET_SKBUFF_NF_DEFRAG_NEEDED
 	struct sk_buff *whole_skb = (skb->nfct_reasm) ? skb->nfct_reasm : skb;
@@ -126,7 +126,7 @@ _decode_session6(struct sk_buff *skb, struct flowi *fl, int reverse)
 	const struct ipv6hdr *hdr = ipv6_hdr(skb);
 #endif
 	struct ipv6_opt_hdr *exthdr;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	const unsigned char *nh = skb_network_header(whole_skb);
 	u8 nexthdr = nh[IP6CB(whole_skb)->nhoff];
 #else
@@ -140,7 +140,7 @@ _decode_session6(struct sk_buff *skb, struct flowi *fl, int reverse)
 	ipv6_addr_copy(&fl6->daddr, reverse ? &hdr->saddr : &hdr->daddr);
 	ipv6_addr_copy(&fl6->saddr, reverse ? &hdr->daddr : &hdr->saddr);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	while (nh + offset + 1 < whole_skb->data ||
 		pskb_may_pull(whole_skb, nh + offset + 1 - whole_skb->data)) {
 		nh = skb_network_header(whole_skb);
@@ -167,7 +167,7 @@ _decode_session6(struct sk_buff *skb, struct flowi *fl, int reverse)
 		case IPPROTO_TCP:
 		case IPPROTO_SCTP:
 		case IPPROTO_DCCP:
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 			if (!onlyproto && (nh + offset + 4 < whole_skb->data ||
 			pskb_may_pull(whole_skb, nh + offset + 4 - whole_skb->data))) {
 #else

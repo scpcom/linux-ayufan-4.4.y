@@ -749,7 +749,7 @@ __SYSCALL(__NR_SYNOFStat, sys_SYNOFStat)
 __SYSCALL(__NR_SYNOLStat, sys_SYNOLStat)
 #endif  
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 #define __NR_SYNONotifyInit                     422
 #define SYNONotifyInit(arg1)                    syscall(__NR_SYNONotifyInit, arg1)
 __SYSCALL(__NR_SYNONotifyInit, sys_SYNONotifyInit)

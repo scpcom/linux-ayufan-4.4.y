@@ -69,14 +69,13 @@
 #define MVFR0_A_SIMD_BIT	(0)
 #define MVFR0_A_SIMD_MASK	(0xf << MVFR0_A_SIMD_BIT)
 
-
 #define VFPOPDESC_LENGTH_BIT	(9)
 #define VFPOPDESC_LENGTH_MASK	(0x07 << VFPOPDESC_LENGTH_BIT)
 #define VFPOPDESC_UNUSED_BIT	(24)
 #define VFPOPDESC_UNUSED_MASK	(0xFF << VFPOPDESC_UNUSED_BIT)
 #define VFPOPDESC_OPDESC_MASK	(~(VFPOPDESC_LENGTH_MASK | VFPOPDESC_UNUSED_MASK))
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifndef __ASSEMBLY__
 extern void vfp_save(void);
 extern void vfp_restore(void);

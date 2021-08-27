@@ -324,15 +324,11 @@ MV_BOARD_INFO rd88F6710Info = {
 	.pBoardTdmInt2CsInfo		= {rd88F6710Tdm880, rd88F6710Tdm792, rd88F6710Tdm3215},
 	.boardTdmInfoIndex		= -1,
 
-	
 	.norFlashReadParams		= RD_88F6710_BOARD_NOR_READ_PARAMS,
 	.norFlashWriteParams	= RD_88F6710_BOARD_NOR_WRITE_PARAMS
 };
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
-
-
-
+#if defined(MY_DEF_HERE)
  
 MV_BOARD_MAC_INFO synods213jInfoBoardMacInfo[] = {
 	 
@@ -951,7 +947,7 @@ MV_BOARD_INFO *boardInfoTbl[] = {
 	&db88f6710Info,
 	&db88f6710pcacInfo,
 	&rd88F6710Info
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(MY_DEF_HERE)
 	,NULL  
 	,NULL
 	,NULL

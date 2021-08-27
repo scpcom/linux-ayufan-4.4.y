@@ -96,8 +96,7 @@ void store_cpu_topology(unsigned int cpuid)
 		cpu_topology[cpuid].socket_id, mpidr);
 }
 
-
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 void __init init_cpu_topology(void)
 #else
 void init_cpu_topology(void)

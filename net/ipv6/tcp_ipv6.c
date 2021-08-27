@@ -1616,7 +1616,7 @@ process:
 	if (!sock_owned_by_user(sk)) {
 #ifdef CONFIG_NET_DMA
 		struct tcp_sock *tp = tcp_sk(sk);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
 			tp->ucopy.dma_chan = net_dma_find_channel();
 #else

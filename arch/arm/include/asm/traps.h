@@ -49,7 +49,7 @@ static inline int in_exception_text(unsigned long ptr)
 	return in ? : __in_irqentry_text(ptr);
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 extern void __init early_trap_init(void *);
 #else
 extern void __init early_trap_init(void);

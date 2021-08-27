@@ -346,7 +346,7 @@ static inline int ahci_nr_ports(u32 cap)
 	return (cap & 0x1f) + 1;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined (CONFIG_COMCERTO_AHCI_PROF)
+#if defined(MY_ABC_HERE) && defined (CONFIG_COMCERTO_AHCI_PROF)
 
 #define MAX_AHCI_PORTS		4
 #define MAX_AHCI_SLOTS		32

@@ -1201,11 +1201,11 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 				vma_tmp = rb_entry(rb_node,
 						struct vm_area_struct, vm_rb);
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
-     (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
+#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE)) || \
+     (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
 				 
 				if ((vma_tmp->vm_end - 1) >= addr) {
-#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_64KB)
+#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_64KB)
 	 
 				if ((vma_tmp->vm_end - 1) >= addr) {
 					WARN(!(vma_tmp->vm_end),
@@ -1456,7 +1456,7 @@ static void unmap_region(struct mm_struct *mm,
 	update_hiwater_rss(mm);
 	unmap_vmas(&tlb, vma, start, end, &nr_accounted, NULL);
 	vm_unacct_memory(nr_accounted);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	free_pgtables(&tlb, vma, prev ? prev->vm_end : FIRST_USER_ADDRESS,
 				 next ? next->vm_start : mm->task_size);
 #elif defined(CONFIG_SYNO_ALPINE_FIX_USB_HANG)
@@ -1771,11 +1771,10 @@ void exit_mmap(struct mm_struct *mm)
 	flush_cache_mm(mm);
 	tlb_gather_mmu(&tlb, mm, 1);
 	 
-	
 	end = unmap_vmas(&tlb, vma, 0, -1, &nr_accounted, NULL);
 	vm_unacct_memory(nr_accounted);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	free_pgtables(&tlb, vma, FIRST_USER_ADDRESS, mm->task_size);
 #elif defined(CONFIG_SYNO_ALPINE_FIX_USB_HANG)
 	free_pgtables(&tlb, vma, FIRST_USER_ADDRESS, USER_PGTABLES_CEILING);

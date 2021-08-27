@@ -142,7 +142,7 @@ void usb_detect_quirks(struct usb_device *udev)
 		dev_dbg(&udev->dev, "USB quirks for this device: %x\n",
 			udev->quirks);
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	 
 #ifdef CONFIG_PM
 	udev->quirks = USB_QUIRK_RESET_RESUME;

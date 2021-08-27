@@ -9,7 +9,7 @@
 
 #include <asm/io.h>
 #include "m86xxx_utils.h"
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include "../ocf-compat.h"
 #else
 #include "ocf-compat.h"

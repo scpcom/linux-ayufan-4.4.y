@@ -24,7 +24,7 @@
 #define SIOCADD6RD      (SIOCDEVPRIVATE + 9)
 #define SIOCDEL6RD      (SIOCDEVPRIVATE + 10)
 #define SIOCCHG6RD      (SIOCDEVPRIVATE + 11)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define SIOCGET4RD      (SIOCDEVPRIVATE + 12)  
 #define SIOCADD4RD      (SIOCDEVPRIVATE + 13) 
 #define SIOCDEL4RD      (SIOCDEVPRIVATE + 14)
@@ -70,7 +70,7 @@ struct ip_tunnel_6rd {
 	__u16			relay_prefixlen;
 };
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
   
 struct ip6_tnl_4rd {
        __be32                  prefix;

@@ -79,7 +79,7 @@ int ip_xfrm_me_harder(struct sk_buff *skb)
 	if (IPCB(skb)->flags & IPSKB_XFRM_TRANSFORMED)
 		return 0;
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	 
 	if(skb->ipsec_offload)
 	{

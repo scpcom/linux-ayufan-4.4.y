@@ -32,7 +32,7 @@ MV_VOID mvRtcTimeGet(MV_RTC_TIME *time);
 
 MV_VOID mvRtcAlarmSet(MV_RTC_TIME *time);
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 MV_VOID SYNOmvRtcExtAlarmSet(MV_U32 time);
 MV_VOID SYNOmvRtcExtAlarmClean(void);
 #endif

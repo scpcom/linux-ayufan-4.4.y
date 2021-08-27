@@ -61,7 +61,7 @@ enum {
 extern unsigned int guiWakeupDisksNum;
 #endif
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 extern int syno_is_alpine_internal_ahci(struct ata_port *);
 #endif
 
@@ -2648,7 +2648,7 @@ static int ata_eh_schedule_probe(struct ata_device *dev)
 static int ata_eh_handle_dev_fail(struct ata_device *dev, int err)
 {
 	struct ata_eh_context *ehc = &dev->link->eh_context;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	struct ata_link *link = NULL;
 #endif
 
@@ -2666,7 +2666,7 @@ static int ata_eh_handle_dev_fail(struct ata_device *dev, int err)
 		if (ehc->tries[dev->devno] == 1) {
 			 
 #ifdef CONFIG_SYNO_SATA_LINKSPEED_WORKAROUND
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			link = ata_dev_phys_link(dev);
 			 
 			if (link && link->ap && syno_is_alpine_internal_ahci(link->ap)) {
@@ -2745,7 +2745,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 	bool blResetDone = 0;
 	int iResetTimes = 0;
 #endif
-#ifdef CONFIG_SYNO_FORCE_EH_FULL_RECOVER_RETRY
+#ifdef MY_ABC_HERE
 	bool blCleanFlags = 0;
 #endif  
 
@@ -2826,7 +2826,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 #ifdef MY_DEF_HERE
 		 
 		iResetTimes = EUNIT_DROP_SPEED_RETRY;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		 
 		ap->isFirstAttach = 1;
 #endif
@@ -2855,7 +2855,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 #endif
 		if (rc) {
 			ata_link_err(link, "reset failed, giving up\n");
-#ifdef CONFIG_SYNO_FORCE_EH_FULL_RECOVER_RETRY
+#ifdef MY_ABC_HERE
 			if (sata_pmp_attached(ap)){
 				blCleanFlags = 1;
 			}
@@ -3002,7 +3002,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 
 		if (ap->pflags & ATA_PFLAG_FROZEN) {
 			 
-#ifdef CONFIG_SYNO_FORCE_EH_FULL_RECOVER_RETRY
+#ifdef MY_ABC_HERE
 			if (sata_pmp_attached(ap)){
 				blCleanFlags = 1;
 				goto out;
@@ -3022,7 +3022,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 	if (rc && r_failed_link)
 		*r_failed_link = link;
 
-#ifdef CONFIG_SYNO_FORCE_EH_FULL_RECOVER_RETRY
+#ifdef MY_ABC_HERE
 	if (blCleanFlags){
 		ata_for_each_link(link, ap, PMP_FIRST){
 			struct ata_eh_context *ehc = &link->eh_context;

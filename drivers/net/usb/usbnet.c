@@ -18,7 +18,7 @@
 
 #define DRIVER_VERSION		"22-Aug-2005"
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
  
 #define C2K_USBNET_SKB_HEADROOM_FAST_PATH 64
 #endif
@@ -263,7 +263,7 @@ static int rx_submit (struct usbnet *dev, struct urb *urb, gfp_t flags)
 	unsigned long		lockflags;
 	size_t			size = dev->rx_urb_size;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
      
 	if ((skb = alloc_skb (size + C2K_USBNET_SKB_HEADROOM_FAST_PATH, flags)) == NULL) {
 #else
@@ -274,7 +274,7 @@ static int rx_submit (struct usbnet *dev, struct urb *urb, gfp_t flags)
 		usb_free_urb (urb);
 		return -ENOMEM;
 	}
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	skb_reserve (skb, C2K_USBNET_SKB_HEADROOM_FAST_PATH);
 #else
 	skb_reserve (skb, NET_IP_ALIGN);

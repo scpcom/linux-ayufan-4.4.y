@@ -36,16 +36,12 @@ extern "C" {
 #define     MV_SFLASH_DEFAULT_WREN_OPCD         0x06	 
 #define     MV_SFLASH_NO_SPECIFIC_OPCD          0x00
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #define GD_SFLASH_STATUS_REG_WEL_MASK			0x2
 #endif
  
-
-
-
-
 #define     MV_M25PXXX_ST_MANF_ID               0x20
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #define     MV_M25P80_DEVICE_ID                 0x2014
 #define     MV_M25P80_MAX_SPI_FREQ              20000000     
 #define     MV_M25P80_MAX_FAST_SPI_FREQ         50000000     
@@ -59,7 +55,7 @@ extern "C" {
 #define     MV_M25P32_FAST_READ_DUMMY_BYTES     1
 #define	    MV_M25P32_ADDR_CYC_CNT	        3
 #define     MV_M25P64_DEVICE_ID                 0x2017
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #define     MV_NU25P64_DEVICE_ID                 0xBA17
 #endif
 #define     MV_M25P64_MAX_SPI_FREQ              20000000     
@@ -117,13 +113,8 @@ extern "C" {
 #define     MV_M25P_STATUS_BP_1_OF_2            (0x06 << MV_SFLASH_STATUS_REG_WP_OFFSET)
 #define     MV_M25P_STATUS_BP_ALL               (0x07 << MV_SFLASH_STATUS_REG_WP_OFFSET)
 
-
-
-
-
-
 #define     MV_MXIC_MANF_ID                     0xC2
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #define     MV_MX25L8006E_DEVICE_ID              0x2014
 #define     MV_MX25L8006E_MAX_SPI_FREQ           20000000     
 #define     MV_MX25L8006E_MAX_FAST_SPI_FREQ      86000000     
@@ -152,18 +143,17 @@ extern "C" {
 #define	MV_MX25L257_ADDR_CYC_CNT	    4
 #define     MV_MXIC_DP_EXIT_DELAY               30           
 
-
 #define     MV_MX25L1605_SECTOR_SIZE            0x10000  
 #define     MV_MX25L3205_SECTOR_SIZE            0x10000  
 #define     MV_MX25L6405_SECTOR_SIZE            0x10000  
 #define     MV_MX25L257_SECTOR_SIZE        	0x10000  
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #define     MV_MX25L8006E_SECTOR_SIZE           0x1000  
 #endif
 #define     MV_MX25L1605_SECTOR_NUMBER          32
 #define     MV_MX25L3205_SECTOR_NUMBER          64
 #define     MV_MX25L6405_SECTOR_NUMBER          128
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #define     MV_MX25L8006E_SECTOR_NUMBER         256
 #endif
 #define     MV_MX25L257_SECTOR_NUMBER 		512
@@ -239,7 +229,7 @@ extern "C" {
 #define     	MV_S25FL_STATUS_BP_1_OF_2           	(0x07 << MV_SFLASH_STATUS_REG_WP_OFFSET)
 #define     	MV_S25FL_STATUS_BP_ALL              	(0x0F << MV_SFLASH_STATUS_REG_WP_OFFSET)
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 
 #define		GD_GD25Q_WREN_CMND_OPCD				0x06
 #define		GD_GD25Q_WRDI_CMND_OPCD				0x04

@@ -83,7 +83,7 @@ out:
 }
 #endif
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
  
 static inline struct vfsmount *get_vfsmount_by_sb(struct super_block *sb)
 {
@@ -190,14 +190,12 @@ static inline void fsnotify_d_move(struct dentry *dentry)
 	__fsnotify_update_dcache_flags(dentry);
 }
 
-
 static inline void fsnotify_link_count(struct inode *inode)
 {
 	fsnotify(inode, FS_ATTRIB, inode, FSNOTIFY_EVENT_INODE, NULL, 0);
 }
 
-
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 				 const unsigned char *old_name,
 				 int isdir, struct inode *target, struct dentry *moved, char *old_full_name, char *new_full_name)
@@ -213,7 +211,7 @@ static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 	__u32 new_dir_mask = (FS_EVENT_ON_CHILD | FS_MOVED_TO);
 	const unsigned char *new_name = moved->d_name.name;
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	struct path path;
 	memset (&path, 0, sizeof(struct path));
 #endif
@@ -225,9 +223,7 @@ static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 		new_dir_mask |= FS_ISDIR;
 	}
 
-#ifdef CONFIG_SYNO_NOTIFY
-	
-
+#ifdef MY_ABC_HERE
 	 
 	path.mnt = get_vfsmount_by_sb(old_dir->i_sb);
 	if(path.mnt){
@@ -285,7 +281,7 @@ static inline void fsnotify_nameremove(struct dentry *dentry, int isdir)
 	SYNO_ArchiveModify(dentry->d_parent->d_inode, 0);
 #endif
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	SYNONotify(dentry, mask);
 #endif
 
@@ -306,20 +302,19 @@ static inline void fsnotify_create(struct inode *inode, struct dentry *dentry)
 	SYNO_ArchiveModify(dentry->d_inode, 0);
 #endif
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	SYNONotify(dentry, FS_CREATE);
 #endif
 
 	fsnotify(inode, FS_CREATE, dentry->d_inode, FSNOTIFY_EVENT_INODE, dentry->d_name.name, 0);
 }
 
-
 static inline void fsnotify_link(struct inode *dir, struct inode *inode, struct dentry *new_dentry)
 {
 	fsnotify_link_count(inode);
 	audit_inode_child(new_dentry, dir);
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	SYNONotify(new_dentry, FS_CREATE);
 #endif
 	fsnotify(dir, FS_CREATE, inode, FSNOTIFY_EVENT_INODE, new_dentry->d_name.name, 0);
@@ -336,7 +331,7 @@ static inline void fsnotify_mkdir(struct inode *inode, struct dentry *dentry)
 	SYNO_ArchiveModify(d_inode, 0);
 #endif
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	SYNONotify(dentry, mask);
 #endif
 	fsnotify(inode, mask, d_inode, FSNOTIFY_EVENT_INODE, dentry->d_name.name, 0);
@@ -417,7 +412,7 @@ static inline void fsnotify_xattr(struct dentry *dentry)
 #endif
 	fsnotify_parent(NULL, dentry, mask);
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	SYNONotify(dentry, mask);
 #endif
 
@@ -458,7 +453,7 @@ static inline void fsnotify_change(struct dentry *dentry, unsigned int ia_valid)
 			mask |= FS_ISDIR;
 
 		fsnotify_parent(NULL, dentry, mask);
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	SYNONotify(dentry, mask);
 #endif
 		fsnotify(inode, mask, inode, FSNOTIFY_EVENT_INODE, NULL, 0);

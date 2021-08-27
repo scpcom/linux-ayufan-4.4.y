@@ -661,7 +661,7 @@ static int urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 
 	DWC_SPINLOCK_IRQSAVE(dwc_otg_hcd->lock, &flags);
 
-#ifdef CONFIG_SYNO_C2K_DWC_OTG_URB_DEQUEUE
+#ifdef MY_ABC_HERE
 	if (!urb->hcpriv){
 		DWC_SPINUNLOCK_IRQRESTORE(dwc_otg_hcd->lock, flags);
 		goto No_hcpriv;
@@ -674,7 +674,7 @@ static int urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 	urb->hcpriv = NULL;
 	DWC_SPINUNLOCK_IRQRESTORE(dwc_otg_hcd->lock, flags);
 
-#ifdef CONFIG_SYNO_C2K_DWC_OTG_URB_DEQUEUE
+#ifdef MY_ABC_HERE
 No_hcpriv:
 #endif
 

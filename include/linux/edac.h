@@ -119,8 +119,7 @@ enum edac_type {
 #define EDAC_FLAG_S8ECD8ED	BIT(EDAC_S8ECD8ED)
 #define EDAC_FLAG_S16ECD16ED	BIT(EDAC_S16ECD16ED)
 
-
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 enum scrub_type {
 	SCRUB_UNKNOWN		= BIT(0),  
 	SCRUB_NONE		= BIT(1),  

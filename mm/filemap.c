@@ -1118,9 +1118,8 @@ static void do_sync_mmap_readahead(struct vm_area_struct *vma,
 	if (ra->mmap_miss > MMAP_LOTSAMISS)
 		return;
 
-	
 	ra_pages = max_sane_readahead(ra->ra_pages);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_LFS_ON_32CPU
 	ra->start = max_t(long long, 0, offset - ra_pages / 2);
 #else
@@ -1769,7 +1768,7 @@ do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,
 
 	kernel_recvmsg_ret = kernel_recvmsg(
 			sock, &msg, &iov[0], cPagesAllocated, cBytesToReceive,
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			MSG_WAITALL | MSG_NOCATCHSIGNAL | MSG_KERNSPACE);
 #else
 			MSG_WAITALL | MSG_NOCATCHSIGNAL);
@@ -1911,7 +1910,7 @@ struct page *grab_cache_page_write_begin(struct address_space *mapping,
 	if (flags & AOP_FLAG_NOFS)
 		gfp_notmask = __GFP_FS;
 
-#ifdef CONFIG_SYNO_PKMAP_NOT_ENOUGH_FIX
+#ifdef MY_DEF_HERE
 	 
 	gfp_notmask |= __GFP_HIGHMEM;
 #endif

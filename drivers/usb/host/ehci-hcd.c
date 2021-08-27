@@ -179,7 +179,7 @@ static void tdi_reset (struct ehci_hcd *ehci)
 	reg_ptr = (u32 __iomem *)(((u8 __iomem *)ehci->regs) + USBMODE);
 	tmp = ehci_readl(ehci, reg_ptr);
 	tmp |= USBMODE_CM_HC;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	 
 	tmp |= (1 << 4);
 #endif
@@ -554,7 +554,7 @@ static int ehci_run (struct usb_hcd *hcd)
 		"USB %x.%x started, EHCI %x.%02x%s\n",
 		((ehci->sbrn & 0xf0)>>4), (ehci->sbrn & 0x0f),
 		temp >> 8, temp & 0xff,
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		(ignore_oc || ehci->ignore_oc) ? ", overcurrent ignored" : "");
 #else
 		ignore_oc ? ", overcurrent ignored" : "");
@@ -976,7 +976,7 @@ MODULE_LICENSE ("GPL");
 #define	PLATFORM_DRIVER		ehci_orion_driver
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_PLAT_ARMADA
 #include "ehci_marvell.c"
 #define	PLATFORM_DRIVER		ehci_marvell_driver

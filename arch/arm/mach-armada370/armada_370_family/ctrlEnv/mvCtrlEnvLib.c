@@ -111,7 +111,7 @@ MV_U32 mvCtrlMppRegGet(MV_U32 mppGroup)
  
 MV_U32 mvCtrlPexMaxIfGet(MV_VOID)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(MY_DEF_HERE)
 	MV_U32 boardId = mvBoardIdGet();
 
 	switch (boardId) {

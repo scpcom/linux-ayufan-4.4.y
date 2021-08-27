@@ -9,7 +9,7 @@
 #include <asm/glue-proc.h>
 #include <asm/system.h>
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 /* 
  * IRAM Location to restore the banked registers
  */
@@ -66,12 +66,12 @@ ENDPROC(cpu_suspend_abort)
 	.align	5
 ENTRY(cpu_resume_mmu)
 	ldr	r3, =cpu_resume_after_mmu
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	instr_sync
 #endif
 	mcr	p15, 0, r0, c1, c0, 0	@ turn on MMU, I-cache, etc
 	mrc	p15, 0, r0, c0, c0, 0	@ read id reg
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	instr_sync
 #endif
 	mov	r0, r0
@@ -81,7 +81,7 @@ ENDPROC(cpu_resume_mmu)
 cpu_resume_after_mmu:
 	bl	cpu_init		@ restore the und/abt/irq banked regs
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	/* 
 	 * This code is added to restore the banked registers
 	 * This restore has to be kept here as it has to happen 
@@ -134,7 +134,7 @@ cpu_resume_after_mmu:
 	ldmfd	sp!, {r4 - r11, pc}
 ENDPROC(cpu_resume_after_mmu)
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 scratchpad_cpu_context_loc_dbg:
         .word   SCRATCHPAD_CPU_CONTEXT_LOC_DBG
 #endif

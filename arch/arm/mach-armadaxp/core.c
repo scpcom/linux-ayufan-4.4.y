@@ -567,7 +567,7 @@ static struct resource aurora_uart1_resources[] = {
 
 static struct platform_device aurora_uart1 = {
 	.name			= "serial8250",
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_DEF_HERE
 	.id			= 1,
 #else
 	.id			= 0,
@@ -1399,11 +1399,10 @@ void axp_db_restore(void)
 	for (port = 0; port < maxPorts; port++)
 		mvEthPhyInit(port, MV_FALSE);
 
-	
 	axp_timer_resume();
 }
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_DEF_HERE
 #ifdef MY_ABC_HERE
 extern void syno_mv_net_shutdown();
 #endif
@@ -1440,11 +1439,9 @@ static void __init axp_db_init(void)
 		mvUnitMapSetAllMine();
 #endif
 
-	
 	cpu_fabric_common_init();
 
-	
-#ifndef CONFIG_SYNO_ARMADA_ARCH
+#ifndef MY_DEF_HERE
 	 
 #if defined(CONFIG_ARMADA_XP_REV_A0) || defined(CONFIG_ARMADA_XP_REV_B0)
 	gBoardId = DB_88F78XX0_BP_REV2_ID;
@@ -1481,7 +1478,7 @@ static void __init axp_db_init(void)
 #else
 	serial_initialize(CONFIG_MV_UART_PORT);
 #endif
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_DEF_HERE
 	serial_initialize(1);
 #endif
 
@@ -1548,7 +1545,7 @@ static void __init axp_db_init(void)
 	}
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(MY_DEF_HERE)
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
 	synology_gpio_init();

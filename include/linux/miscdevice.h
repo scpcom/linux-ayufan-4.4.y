@@ -16,13 +16,13 @@
 #define APOLLO_MOUSE_MINOR	7
 #define PC110PAD_MINOR		9
  
-#if defined(CONFIG_SYNO_USE_OCF_LINUX) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 #define CRYPTODEV_MINOR		70	 
 #endif
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 #define CRYPTODEV_MINOR		70	 
 #endif
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define CESADEV_MINOR		71	 
 #define BTNSDEV_MINOR  		72	 
 #define SLICDEV_MINOR		73	 

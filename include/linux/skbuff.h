@@ -22,7 +22,7 @@
 #include <linux/hrtimer.h>
 #include <linux/dma-mapping.h>
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_NET_SKB_HEADROOM)
 # define NET_SKB_PAD  CONFIG_NET_SKB_HEADROOM
 #endif
@@ -239,18 +239,18 @@ struct sk_buff {
 	kmemcheck_bitfield_end(flags1);
 	__be16			protocol;
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	__u32			ipsec_offload;
 #endif
 	void			(*destructor)(struct sk_buff *skb);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	int				(*skb_recycle) (struct sk_buff *skb);
 	void			*hw_cookie;
 #endif  
 #endif  
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_NET_SKB_RECYCLE
 	int			(*skb_recycle) (struct sk_buff *skb);
 	__u32			hw_cookie;
@@ -308,7 +308,7 @@ struct sk_buff {
 	sk_buff_data_t		end;
 	unsigned char		*head,
 				*data;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_CUSTOM_SKB_LAYOUT)
 	unsigned char 		*mspd_data;
 	__u32 			mspd_len;
 	__u32 			mspd_ofst;
@@ -352,7 +352,7 @@ static inline struct rtable *skb_rtable(const struct sk_buff *skb)
 	return (struct rtable *)skb_dst(skb);
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #define NETDEV_FRAG_PAGE_MAX_ORDER get_order(32768)
 #define NETDEV_FRAG_PAGE_MAX_SIZE  (PAGE_SIZE << NETDEV_FRAG_PAGE_MAX_ORDER)
 #define NETDEV_PAGECNT_MAX_BIAS    NETDEV_FRAG_PAGE_MAX_SIZE
@@ -377,7 +377,7 @@ static inline struct sk_buff *alloc_skb_fclone(unsigned int size,
 	return __alloc_skb(size, priority, 1, NUMA_NO_NODE);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 extern struct sk_buff *__alloc_skb_header(unsigned int size, void* data, gfp_t gfp_mask,
 			    int fclone, int node);
 static inline struct sk_buff *alloc_skb_header(unsigned int size, 
@@ -1374,13 +1374,13 @@ extern int	       skb_copy_datagram_iovec1(const struct sk_buff *from,
 					       int size);
 #endif
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 extern int		skb_copy_datagram_to_kernel_iovec(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 extern int	       skb_copy_datagram_to_kernel_iovec(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);
@@ -1759,7 +1759,7 @@ static inline bool skb_is_recycleable(const struct sk_buff *skb, int skb_size)
 	if (skb_end_pointer(skb) - skb->head < skb_size)
 		return false;
 
-#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_NET_SKB_RECYCLE)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_NET_SKB_RECYCLE)
 	if (skb_shared(skb) || skb_cloned(skb) || skb_has_frag_list(skb))
 #else
 	if (skb_shared(skb) || skb_cloned(skb))

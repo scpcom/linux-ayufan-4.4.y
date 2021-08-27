@@ -831,12 +831,11 @@ union xhci_trb {
 #define NEC_FW_MINOR(p)		(((p) >> 0) & 0xff)
 #define NEC_FW_MAJOR(p)		(((p) >> 8) & 0xff)
 
-
 #define TRBS_PER_SEGMENT	64
  
 #define MAX_RSVD_CMD_TRBS	(TRBS_PER_SEGMENT - 3)
 #define SEGMENT_SIZE		(TRBS_PER_SEGMENT*16)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define SEGMENT_SHIFT		(__ffs(SEGMENT_SIZE))
 #else
  
@@ -967,11 +966,9 @@ struct xhci_bus_state {
 	unsigned long		bus_suspended;
 	unsigned long		next_statechange;
 
-	
-	
 	u32			port_c_suspend;
 	u32			suspended_ports;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	u32			port_remote_wakeup;
 #endif
 	unsigned long		resume_done[USB_MAXCHILDREN];
@@ -985,7 +982,7 @@ static inline unsigned int hcd_index(struct usb_hcd *hcd)
 		return 1;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 #else
  
@@ -1271,7 +1268,7 @@ static inline int xhci_register_pci(void) { return 0; }
 static inline void xhci_unregister_pci(void) {}
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
 int xhci_register_plat(void);
 void xhci_unregister_plat(void);

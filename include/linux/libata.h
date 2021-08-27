@@ -894,7 +894,7 @@ struct ata_port_operations {
 	ssize_t (*sw_activity_show)(struct ata_device *dev, char *buf);
 	ssize_t (*sw_activity_store)(struct ata_device *dev,
 				     enum sw_activity val);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	ssize_t (*transmit_led_message)(struct ata_port *ap, u32 state,
 					ssize_t size);
 #endif

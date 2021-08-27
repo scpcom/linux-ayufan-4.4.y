@@ -43,7 +43,7 @@
 #include <mach/comcerto-2000/clock.h>
 #include <mach/comcerto-2000/pm.h>
 #include <mach/gpio.h>
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/synobios.h>
 #endif
 
@@ -51,7 +51,7 @@
 extern char gszSynoHWVersion[];
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/module.h>
 #endif
 
@@ -171,8 +171,7 @@ void __init device_irq_init(void)
 	gic_init(0, SGI_IRQ(1), (void *)COMCERTO_GIC_DIST_VADDR, (void *)COMCERTO_GIC_CPU_VADDR);
 }
 
-
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 extern void synology_gpio_init(void);
 #endif
 
@@ -188,7 +187,7 @@ static __init void gpio_init(void)
 	c2k_gpio_pin_stat.c2k_gpio_pins_0_31 |= UART0_GPIO_PIN;  
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	synology_gpio_init();
 #else
 	 
@@ -505,7 +504,7 @@ static struct plat_serial8250_port comcerto_uart_data[] = {
                 .mapbase        = COMCERTO_AXI_UART1_BASE,
 		.membase	= (void *)COMCERTO_AXI_UART1_VADDR,
                 .irq            = IRQ_UART1,
-#ifdef CONFIG_SYNO_C2K_SERIAL_FIX
+#ifdef MY_ABC_HERE
 			.flags          = UPF_FIXED_TYPE | UPF_SKIP_TEST | UPF_BOOT_AUTOCONF,
 			.private_data	= (void *) (COMCERTO_AXI_UART1_VADDR | 0x7C),
 			.iotype         = UPIO_DWAPB,
@@ -524,7 +523,7 @@ static struct plat_serial8250_port comcerto_uart_data[] = {
                 .mapbase        = COMCERTO_AXI_UART0_BASE,
                 .membase        = (void *)COMCERTO_AXI_UART0_VADDR,
                 .irq            = IRQ_UART0,
-#ifdef CONFIG_SYNO_C2K_SERIAL_FIX
+#ifdef MY_ABC_HERE
 			.flags          = UPF_FIXED_TYPE | UPF_SKIP_TEST | UPF_BOOT_AUTOCONF,
 			.private_data	= (void *) (COMCERTO_AXI_UART0_VADDR | 0x7C),
 			.iotype         = UPIO_DWAPB,
@@ -763,7 +762,7 @@ static int __init get_usb3_clk_mode(char *str)
 }
 
 __setup("usb3_internal_clk=", get_usb3_clk_mode);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 EXPORT_SYMBOL(usb3_clk_internal);
 #endif
 
@@ -833,10 +832,9 @@ void __init mac_addr_init(struct comcerto_pfe_platform_data * comcerto_pfe_data_
 {
 	u8 gem_port_id;
 
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 	int num = NUM_GEMAC_SUPPORT;
 
-	
 	if(0 == strncmp(gszSynoHWVersion, HW_DS414jv10, strlen(HW_DS414jv10)) || 0 == strncmp(gszSynoHWVersion, HW_DS415jv10, strlen(HW_DS415jv10))) {
 		num = 1;
 	}

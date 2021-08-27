@@ -36,7 +36,7 @@ struct sg_io_hdr;
 struct bsg_job;
 
 #define BLKDEV_MIN_RQ	4
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #define BLKDEV_MAX_RQ	1024	 
 #else
 #define BLKDEV_MAX_RQ	128	 
@@ -739,7 +739,7 @@ extern void blk_queue_io_min(struct request_queue *q, unsigned int min);
 extern void blk_limits_io_opt(struct queue_limits *limits, unsigned int opt);
 extern void blk_queue_io_opt(struct request_queue *q, unsigned int opt);
 extern void blk_set_default_limits(struct queue_limits *lim);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 extern void blk_set_stacking_limits(struct queue_limits *lim);
 #endif
 extern int blk_stack_limits(struct queue_limits *t, struct queue_limits *b,

@@ -33,7 +33,7 @@ int br_dev_queue_push_xmit(struct sk_buff *skb)
 {
 	 
 	if (nf_bridge_maybe_copy_header(skb) ||
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	    (packet_length(skb) > skb->dev->mtu && !skb_is_gso(skb) && (!skb->ipsec_offload))) {
 #else
 	    (packet_length(skb) > skb->dev->mtu && !skb_is_gso(skb))) {
@@ -100,10 +100,9 @@ void br_deliver(const struct net_bridge_port *to, struct sk_buff *skb)
 	kfree_skb(skb);
 }
 
-
 void br_forward(const struct net_bridge_port *to, struct sk_buff *skb, struct sk_buff *skb0)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (should_deliver(to, skb) && !(to->flags & BR_ISOLATE_MODE)) {
 #else
 	if (should_deliver(to, skb)) {
@@ -158,8 +157,7 @@ out:
 	return p;
 }
 
-
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 		     struct sk_buff *skb0,
 		     void (*__packet_hook)(const struct net_bridge_port *p,
@@ -178,7 +176,7 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 	prev = NULL;
 
 	list_for_each_entry_rcu(p, &br->port_list, list) {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		if (forward && (p->flags & BR_ISOLATE_MODE))
 			continue;
 #endif
@@ -202,21 +200,19 @@ out:
 		kfree_skb(skb);
 }
 
-
 void br_flood_deliver(struct net_bridge *br, struct sk_buff *skb)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	br_flood(br, skb, NULL, __br_deliver, false);
 #else
 	br_flood(br, skb, NULL, __br_deliver);
 #endif
 }
 
-
 void br_flood_forward(struct net_bridge *br, struct sk_buff *skb,
 		      struct sk_buff *skb2)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	br_flood(br, skb, skb2, __br_forward, true);
 #else
 	br_flood(br, skb, skb2, __br_forward);

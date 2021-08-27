@@ -13,7 +13,7 @@ struct hw_pci {
 	int		domain;
 #endif
 	struct list_head buses;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	void	**private_data;
 #endif
 	int		nr_controllers;
@@ -40,7 +40,7 @@ struct pci_sys_data {
 					 
 	int		(*map_irq)(const struct pci_dev *, u8, u8);
 	struct hw_pci	*hw;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	int		mv_controller_num;
 #endif
 	void		*private_data;	 

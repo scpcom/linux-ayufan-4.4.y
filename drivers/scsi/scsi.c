@@ -31,7 +31,7 @@
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_tcq.h>
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_MV_STAGGERED_SPINUP
 #include <scsi/scsi_spinup.h>
 #endif
@@ -637,13 +637,13 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 	return rtn;
 }
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 int ss_stats[128];
 #endif
  
 static void scsi_done(struct scsi_cmnd *cmd)
 {
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
         unsigned long flags = 0;
 
 #ifdef CONFIG_MV_STAGGERED_SPINUP
@@ -998,7 +998,7 @@ MODULE_LICENSE("GPL");
 module_param(scsi_logging_level, int, S_IRUGO|S_IWUSR);
 MODULE_PARM_DESC(scsi_logging_level, "a bit mask of logging levels");
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 struct proc_dir_entry *ss_info;
 
 int ss_info_read(char *buffer, char **buffer_location, off_t offset, int buffer_length, int *zero, void *ptr)
@@ -1022,7 +1022,7 @@ static int __init init_scsi(void)
 {
 	int error;
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_MV_STAGGERED_SPINUP
          
         error = scsi_spinup_init();

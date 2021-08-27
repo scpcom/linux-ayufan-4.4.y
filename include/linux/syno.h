@@ -16,11 +16,11 @@
 #define SYNO_HAVE_GCC_VERSION(a,b) (__GNUC__ > (a) || (__GNUC__ == (a) && __GNUC_MINOR__ >= (b)))
 #define SYNO_HAVE_GLIBC_VERSION(a,b) ( __GLIBC__ > (a) || (__GLIBC__ == (a) && __GLIBC_MINOR__ >= (b)))
 
-#if defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE)
 #define SYNO_X86_AUTO_POWER_ON
 #endif
 
-#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
 
 #ifdef MY_DEF_HERE
 #define SYNO_EVANSPORT_TTYS1_PORT	0x2F8
@@ -36,7 +36,7 @@
 #define SYNO_USB_FLASH_DEVICE_NAME  "synoboot"
 #define SYNO_USB_FLASH_DEVICE_PATH  "/dev/synoboot"
  
-#if defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE)
 #define IS_SYNO_USBBOOT_ID_VENDOR(VENDOR) (0xF400 == (VENDOR) || 0xF401 == (VENDOR))
 #define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT) || 0xF401 == (PRODUCT))
 #else
@@ -46,11 +46,11 @@
  
 #endif  
 
-#if defined(CONFIG_SYNO_X64) && !defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 #define SYNO_PCH_GPIO_CTRL
 #endif
 
-#if defined(CONFIG_SYNO_DUAL_HEAD)
+#if defined(MY_DEF_HERE)
 #define SYNO_SATA_DOM_VENDOR_SAMPLE_RUN_2	"SATADOM "
 #define SYNO_SATA_DOM_MODEL_SAMPLE_RUN_2	"D150SH"
 #define SYNO_SATA_DOM_VENDOR	"SATADOM-"
@@ -63,7 +63,7 @@
 
 #define SYNO_MAC_MAX_V2 8
 
-#if defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64) || defined(CONFIG_ARCH_FEROCEON)
+#if defined(CONFIG_SYNO_MPC854X) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_ARCH_FEROCEON)
 
 #ifdef MY_DEF_HERE
 #define SYNO_MAX_SWITCHABLE_NET_DEVICE 8
@@ -95,7 +95,7 @@
 
 #if	defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
  
-#if defined(CONFIG_SYNO_X64) && defined(CONFIG_SYNO_BROMOLOW)
+#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
 #define SYNO_MAX_INTERNAL_DISK 19
 #else
 #define SYNO_MAX_INTERNAL_DISK	15
@@ -103,11 +103,11 @@
 
 #endif
 
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 #else  
 #endif  
 
-#if defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_QORIQ)
+#if defined(CONFIG_SYNO_MPC8533) || defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 #ifdef MY_DEF_HERE
 #define SYNO_CREATE_TIME_SWAP_VERSION 3719
@@ -194,13 +194,13 @@
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)     
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
  
 #define SYNO_INTERNAL_MICROSD_NAME "4-4"
 #endif  
 #endif
 
-#if defined(CONFIG_SYNO_BROMOLOW)
+#if defined(MY_DEF_HERE)
  
 #define SYNO_SAS_MPT2_HOTPLUG_PHY
 
@@ -230,22 +230,22 @@
 
 #endif  
 
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 #define SYNO_LPC_ICH_GPIO_CTRL
 #endif
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #define SYNO_ALPINE_TEMP_FIXME_PATCH
 #define SYNO_ALPINE_ARCH
 #define SYNO_ALPINE_SUPPORT_WOL
 #define SYNO_ALPINE_SW_SATA_LED
 #endif
 
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 #define SYNO_SATA_PM_FIRST_PORT_DELAY
 #endif
 
-#if defined(MY_ABC_HERE) && defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
 #define SYNO_EUNIT_DEADLOCK_FIX
 #endif  
 

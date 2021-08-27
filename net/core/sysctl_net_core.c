@@ -17,7 +17,7 @@
 #include <net/net_ratelimit.h>
 
 #ifdef CONFIG_RPS
-#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+#ifdef MY_DEF_HERE
 static int rps_sock_flow_init()
 {
 	unsigned int orig_size = 0, size = 256;
@@ -290,7 +290,7 @@ static __init int sysctl_core_init(void)
 	register_sysctl_paths(net_core_path, empty);
 	register_net_sysctl_rotable(net_core_path, net_core_table);
 
-#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+#ifdef MY_DEF_HERE
 	if (0 != rps_sock_flow_init()) {
 		printk("Error! Failed to init RFS for networking!\n");
 	}

@@ -388,7 +388,7 @@ armpmu_reserve_hardware(struct arm_pmu *armpmu)
 		}
 
 		err = request_irq(irq, handle_irq,
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 				IRQF_NOBALANCING | IRQF_SHARED,
 				"armpmu", handle_irq);
 #else
@@ -545,11 +545,10 @@ int __init armpmu_register(struct arm_pmu *armpmu, char *name, int type)
 	return perf_pmu_register(&armpmu->pmu, name, type);
 }
 
-
 #include "perf_event_xscale.c"
 #include "perf_event_v6.c"
 #include "perf_event_v7.c"
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include "perf_event_pj4b.c"
 #endif
 
@@ -658,7 +657,7 @@ init_hw_perf_events(void)
 			cpu_pmu = xscale2pmu_init();
 			break;
 		}
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARCH_ARMADA_XP)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARCH_ARMADA_XP)
 	 
 	} else if (0x56 == implementor) {
 		part_number = (cpuid >> 4) & 0xFFF;

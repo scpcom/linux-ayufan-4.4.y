@@ -32,7 +32,7 @@ extern void kunmap_high(struct page *page);
 #error "The sum of features in your kernel config cannot be supported together"
 #endif
 #endif
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #if __LINUX_ARM_ARCH__ >= 7
 #undef ARCH_NEEDS_KMAP_HIGH_GET
 #endif

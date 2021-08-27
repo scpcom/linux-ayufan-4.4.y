@@ -475,7 +475,7 @@
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 #endif /* MY_ABC_HERE */
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 		CALL(sys_SYNONotifyInit) /* 422 */
 		CALL(sys_SYNONotifyAddWatch) /* 423 */
 		CALL(sys_SYNONotifyRemoveWatch) /* 424 */
@@ -487,7 +487,7 @@
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-#endif /* CONFIG_SYNO_NOTIFY */
+#endif /* MY_ABC_HERE */
 #ifdef MY_ABC_HERE
 		CALL(sys_SYNOArchiveOverwrite) /* 427 */
 #else

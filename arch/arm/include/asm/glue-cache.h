@@ -119,7 +119,7 @@
 #ifndef MULTI_CACHE
 #define __cpuc_flush_icache_all		__glue(_CACHE,_flush_icache_all)
 #define __cpuc_flush_kern_all		__glue(_CACHE,_flush_kern_cache_all)
-#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define __cpuc_flush_kern_louis		__glue(_CACHE,_flush_kern_cache_louis)
 #endif
 #define __cpuc_flush_user_all		__glue(_CACHE,_flush_user_cache_all)

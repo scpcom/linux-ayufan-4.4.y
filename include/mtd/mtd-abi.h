@@ -165,9 +165,8 @@ struct otp_info {
 #define MEMISLOCKED     _IOR('M', 28, struct erase_info_user)
 #endif  
 
-
 #define MEMWRITE		_IOWR('M', 24, struct mtd_write_req)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define MTDREFRESH		_IO('M', 50)
 #endif
 
@@ -192,7 +191,7 @@ struct nand_oobfree {
  
 struct nand_ecclayout_user {
 	__u32 eccbytes;
-#if (defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)) && defined(CONFIG_MTD_NAND_NFC)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_MTD_NAND_NFC)
 	__u32 eccpos[128];
 #else
 	__u32 eccpos[MTD_MAX_ECCPOS_ENTRIES];

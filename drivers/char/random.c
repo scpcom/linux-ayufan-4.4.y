@@ -433,7 +433,7 @@ void add_disk_randomness(struct gendisk *disk)
 }
 #endif
 
-#ifdef CONFIG_SYNO_USE_OCF_LINUX
+#ifdef MY_ABC_HERE
  
 void random_input_words(__u32 *buf, size_t wordcount, int ent_count)
 {

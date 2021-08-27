@@ -435,7 +435,7 @@ static void check_cpu_stall(struct rcu_state *rsp, struct rcu_data *rdp)
 	js = ACCESS_ONCE(rsp->jiffies_stall);
 	rnp = rdp->mynode;
 
-#if defined(CONFIG_SYNO_ARMADA_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (rcu_gp_in_progress(rsp) &&
 	    (ACCESS_ONCE(rnp->qsmask) & rdp->grpmask) && ULONG_CMP_GE(j, js)) {
 #else

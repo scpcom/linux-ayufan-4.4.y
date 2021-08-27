@@ -30,13 +30,13 @@ static int c2k_is_gpio_rsvd(unsigned offset)
 static int c2k_gpio_get(struct gpio_chip *chip, unsigned offset)
 {
 	if (offset < 32)
-#if defined(CONFIG_SYNO_C2K_GPIO_READ_SHIFT)
+#if defined(MY_ABC_HERE)
 		return (__raw_readl(COMCERTO_GPIO_INPUT_REG) & (0x1 << offset)) >> offset;
 #else
 		return __raw_readl(COMCERTO_GPIO_INPUT_REG) & (0x1 << offset);
 #endif
 	else if (offset < 64)
-#if defined(CONFIG_SYNO_C2K_GPIO_READ_SHIFT)
+#if defined(MY_ABC_HERE)
 		return (__raw_readl(COMCERTO_GPIO_63_32_PIN_INPUT) & (0x1 << (offset - 32))) >> (offset - 32);
 #else
 		return __raw_readl(COMCERTO_GPIO_63_32_PIN_INPUT) & (0x1 << (offset - 32));

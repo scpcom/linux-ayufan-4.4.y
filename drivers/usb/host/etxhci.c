@@ -2836,7 +2836,7 @@ int etxhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 {
 	struct xhci_hcd		*xhci;
 	struct device		*dev = hcd->self.controller;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	int			retval = -ENOMEM;
 #else
 	int			retval;
@@ -2860,7 +2860,7 @@ int etxhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 		 
 		xhci = hcd_to_xhci(hcd);
 		temp = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		if (HCC_64BIT_ADDR(temp) &&
 				!dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64))) {
 			xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
@@ -2912,7 +2912,7 @@ int etxhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 	xhci_dbg(xhci, "Reset complete\n");
 
 	temp = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	if (HCC_64BIT_ADDR(temp) &&
 			!dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64))) {
 		xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");

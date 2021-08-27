@@ -736,7 +736,7 @@ got_group:
 #define MAX_U32_IN_U64 ((u64)(~0U))
 #endif
 	if (MAX_U32_IN_U64 < (u64)group*EXT4_INODES_PER_GROUP(sb)) {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 		u64 max_group =	div64_u64((MAX_U32_IN_U64+1), EXT4_INODES_PER_GROUP(sb));
 		group = mod_u64_rem64(group, max_group);
 #else

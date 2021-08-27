@@ -37,11 +37,10 @@
 #include <asm/localtimer.h>
 #include <asm/smp_plat.h>
 
-
 struct secondary_data secondary_data;
 
 enum ipi_msg_type {
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	IPI_WAKE = 0,
 #endif
 	IPI_TIMER = 2,
@@ -220,12 +219,11 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	struct mm_struct *mm = &init_mm;
 	unsigned int cpu;
 
-	
 	cpu_switch_mm(mm->pgd, mm);
 	enter_lazy_tlb(mm, current);
 	local_flush_tlb_all();
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_MACH_ARMADA_XP_FPGA
 	unsigned int cpurev;
 
@@ -234,13 +232,12 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 #endif
 #endif
 
-	
 	cpu = smp_processor_id();
 	atomic_inc(&mm->mm_count);
 	current->active_mm = mm;
 	cpumask_set_cpu(cpu, mm_cpumask(mm));
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_MACH_ARMADA_XP_FPGA)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_MACH_ARMADA_XP_FPGA)
         printk("CPU%u: FPGA Booted secondary processor (ID 0x%04x)\n", cpu, (cpurev & 0xFFFF));
 #else
 	printk("CPU%u: Booted secondary processor\n", cpu);
@@ -265,10 +262,9 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	while (!cpu_active(cpu))
 		cpu_relax();
 
-	
 	local_irq_enable();
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_MSP)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_MSP)
 	local_fiq_enable();
 #endif   
 
@@ -311,17 +307,15 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
 		 
 		percpu_timer_setup();
 
-		
 		init_cpu_present(&cpu_possible_map);
 
-		
 		platform_smp_prepare_cpus(max_cpus);
 	}
 }
 
 static void (*smp_cross_call)(const struct cpumask *, unsigned int);
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 void arch_send_wakeup_ipi_mask(const struct cpumask *mask)
 {
 	smp_cross_call(mask, 0);
@@ -377,10 +371,9 @@ u64 smp_irq_stat_cpu(unsigned int cpu)
 	return sum;
 }
 
-
 static DEFINE_PER_CPU(struct clock_event_device, percpu_clockevent);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_ARCH_ARMADA_XP) && defined(CONFIG_PERF_EVENTS)
 void show_local_pmu_irqs(struct seq_file *p, int prec)
 {
@@ -487,7 +480,7 @@ void handle_IPI(int ipinr, struct pt_regs *regs)
 		__inc_irq_stat(cpu, ipi_irqs[ipinr - IPI_TIMER]);
 
 	switch (ipinr) {
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	case IPI_WAKE:
 		break;
 #endif

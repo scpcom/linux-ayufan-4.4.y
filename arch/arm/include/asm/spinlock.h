@@ -88,7 +88,7 @@ static inline void arch_spin_lock(arch_spinlock_t *lock)
 	__asm__ __volatile__(
 "1:	ldrex	%0, [%1]\n"
 "	teq	%0, #0\n"
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
 #else
 	WFE("ne")
 #endif
@@ -107,7 +107,7 @@ static inline int arch_spin_trylock(arch_spinlock_t *lock)
 {
 	unsigned long tmp;
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	unsigned long strex_fail = 0;
 
 	do {
@@ -152,19 +152,17 @@ static inline void arch_spin_unlock(arch_spinlock_t *lock)
 		dsb_sev();
 }
 
-
-
 static inline void arch_write_lock(arch_rwlock_t *rw)
 {
 	unsigned long tmp;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	do{
 #endif
 	__asm__ __volatile__(
 "1:	ldrex	%0, [%1]\n"
 "	teq	%0, #0\n"
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
 #else
 	WFE("ne")
 #endif
@@ -175,7 +173,7 @@ static inline void arch_write_lock(arch_rwlock_t *rw)
 	: "r" (&rw->lock), "r" (0x80000000)
 	: "cc");
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	} while (tmp && atomic_backoff_delay());
 #endif
 	smp_mb();
@@ -197,7 +195,7 @@ static inline int arch_write_trylock(arch_rwlock_t *rw)
 		smp_mb();
 		return 1;
 	} else {
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 		atomic_backoff_delay();
 #endif
 		return 0;
@@ -227,7 +225,7 @@ static inline void arch_read_lock(arch_rwlock_t *rw)
 "1:	ldrex	%0, [%2]\n"
 "	adds	%0, %0, #1\n"
 "	strexpl	%1, %0, [%2]\n"
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_BTS61)
 #else
 	WFE("mi")
 #endif

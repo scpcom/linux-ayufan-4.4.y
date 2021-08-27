@@ -159,7 +159,7 @@ ENTRY(cpu_pj4bv7_switch_mm)
 	mov	pc, lr
 ENDPROC(cpu_pj4bv7_switch_mm)
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 #if defined CONFIG_SHEEVA_ERRATA_ARM_CPU_6043 ||	\
 	defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6124) ||	\
 	defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6076)
@@ -173,7 +173,7 @@ ENDPROC(cpu_pj4bv7_switch_mm)
 #endif
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 /*
  *	cpu_pj4bv7_set_pte_ext(ptep, pte)
  *
@@ -323,7 +323,7 @@ str	r1, [r0]			@ linux version
 	mov	pc, lr
 ENDPROC(cpu_pj4bv7_set_pte_ext)
 
-#else // !CONFIG_SYNO_ARMADA_ARCH_V2
+#else // !MY_DEF_HERE
 
 /*
  *	cpu_pj4bv7_set_pte_ext(ptep, pte)
@@ -422,7 +422,7 @@ str	r1, [r0]			@ linux version
 #endif
 	mov	pc, lr
 ENDPROC(cpu_pj4bv7_set_pte_ext)
-#endif // CONFIG_SYNO_ARMADA_ARCH_V2
+#endif // MY_DEF_HERE
 
 cpu_pj4bv7_name:
 	.ascii	"Marvell PJ4Bv7 Processor\0"
@@ -572,7 +572,7 @@ __pj4bv7_setup:
 /* DSMP A0/B0 */
 	/* Auxiliary Debug Modes Control 1 Register */
 	mrc        p15, 1, r0, c15, c1, 1                         /* Read */
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(MY_DEF_HERE)
 	orr        r0, r0, #0x00020                                /* BIT5 STREX backoff_disable--> '1' enable the back off of STREX instr */
 #endif
 	orr	   r0, r0, #0x00100                                /* BIT8 Internal Parity Handling Disable--> '1' Disable Internal Parity Handling */

@@ -20,7 +20,7 @@
 #include <linux/cpumask.h>
 #include <linux/mutex.h>
 #include <net/flow.h>
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 #include <net/xfrm.h>
 #endif
 #include <linux/atomic.h>
@@ -37,7 +37,7 @@ struct flow_cache_entry {
 	u32				genid;
 	struct flowi			key;
 	struct flow_cache_object	*object;
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	u8				flags;
 	#define FLOW_CACHE_FLAG_IPSEC_OFFLOAD 0x01
 #endif
@@ -49,7 +49,7 @@ struct flow_cache_percpu {
 	u32				hash_rnd;
 	int				hash_rnd_recalc;
 	struct tasklet_struct		flush_tasklet;
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	struct tasklet_struct		flowcache_rem_tasklet;
 #endif
 };
@@ -69,7 +69,7 @@ struct flow_cache {
 	struct timer_list		rnd_timer;
 };
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 struct flow_remove_info {
 	struct flow_cache		*cache;
 	struct flowi			*key;
@@ -90,7 +90,7 @@ static LIST_HEAD(flow_cache_gc_list);
 #define flow_cache_hash_size(cache)	(1 << (cache)->hash_shift)
 #define FLOW_HASH_RND_PERIOD		(10 * 60 * HZ)
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 extern int ipsec_nlkey_flow_remove(struct flowi *fl, u16 family, u16 dir);
 #endif
 
@@ -132,7 +132,7 @@ static void flow_cache_gc_task(struct work_struct *work)
 	list_splice_tail_init(&flow_cache_gc_list, &gc_list);
 	spin_unlock_bh(&flow_cache_gc_lock);
 
-#if defined(CONFIG_SYNO_COMCERTO) 
+#if defined(MY_ABC_HERE) 
 	list_for_each_entry_safe(fce, n, &gc_list, u.gc_list) {
 #if defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD)
 		 
@@ -143,7 +143,7 @@ static void flow_cache_gc_task(struct work_struct *work)
 	list_for_each_entry_safe(fce, n, &gc_list, u.gc_list)
 #endif
 		flow_entry_kill(fce);
-#if defined(CONFIG_SYNO_COMCERTO) 
+#if defined(MY_ABC_HERE) 
 	}
 #endif
 }
@@ -235,7 +235,7 @@ static int flow_key_compare(const struct flowi *key1, const struct flowi *key2,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 struct flow_cache_object *
 flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
 			u8 *new_flow, flow_resolve_t resolver, void *ctx)
@@ -253,7 +253,7 @@ flow_cache_lookup(struct net *net, const struct flowi *key, u16 family, u8 dir,
 	size_t keysize;
 	unsigned int hash;
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	if (new_flow)
 		*new_flow = 0;
 #endif
@@ -321,13 +321,13 @@ nocache:
 	flo = resolver(net, key, family, dir, flo, ctx);
 	if (fle) {
 		fle->genid = atomic_read(&flow_cache_genid);
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 		if (!IS_ERR(flo)) {
 #else
 		if (!IS_ERR(flo))
 #endif
 			fle->object = flo;
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 			if (new_flow) {
 				*new_flow = 1;
 				fle->flags |= FLOW_CACHE_FLAG_IPSEC_OFFLOAD;
@@ -408,7 +408,7 @@ void flow_cache_flush(void)
 	put_online_cpus();
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 static void flow_cache_remove_per_cpu(void *data)
 {
 	struct flow_remove_info* info = data;

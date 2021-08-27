@@ -309,7 +309,7 @@ ENTRY(arm946_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(arm946_dma_unmap_area)
 
-#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	.globl	arm946_flush_kern_cache_louis
 	.equ	arm946_flush_kern_cache_louis, arm946_flush_kern_cache_all
 #endif

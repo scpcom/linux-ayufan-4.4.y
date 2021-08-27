@@ -16,7 +16,7 @@
 #include <linux/amba/bus.h>
 #include <linux/amba/pl061.h>
 #include <linux/slab.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/of.h>
 #endif
 
@@ -30,7 +30,7 @@
 #define GPIOIC  0x41C
 
 #define PL061_GPIO_NR				8
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #define PL061_GPIO_IRQ_BITMAP_SIZE 64
 #endif
 
@@ -219,7 +219,7 @@ static int pl061_probe(struct amba_device *dev, const struct amba_id *id)
 	struct pl061_gpio *chip;
 	struct list_head *chip_list;
 	int ret, irq, i;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	static DECLARE_BITMAP(init_irq, PL061_GPIO_IRQ_BITMAP_SIZE);
 #else
 	static DECLARE_BITMAP(init_irq, NR_IRQS);
@@ -234,7 +234,7 @@ static int pl061_probe(struct amba_device *dev, const struct amba_id *id)
 		chip->gc.base = pdata->gpio_base;
 		chip->irq_base = pdata->irq_base;
 	} else if (dev->dev.of_node) {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		const void *ptr;
 		unsigned int baseidx = -1;  
 

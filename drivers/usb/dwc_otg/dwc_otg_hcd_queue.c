@@ -7,16 +7,14 @@
 #include "dwc_otg_hcd.h"
 #include "dwc_otg_regs.h"
 
-
 void dwc_otg_hcd_qh_free(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 {
 	dwc_otg_qtd_t *qtd, *qtd_tmp;
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+#if defined(MY_ABC_HERE)
 	dwc_irqflags_t flags;
 #endif
 
-	
-#if !defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+#if !defined(MY_ABC_HERE)
 	DWC_SPINLOCK(hcd->lock);
 #endif
 	DWC_CIRCLEQ_FOREACH_SAFE(qtd, qtd_tmp, &qh->qtd_list, qtd_list_entry) {
@@ -24,40 +22,40 @@ void dwc_otg_hcd_qh_free(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh)
 		dwc_otg_hcd_qtd_free(qtd);
 	}
 
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+#if defined(MY_ABC_HERE)
 	DWC_SPINLOCK_IRQSAVE(hcd->lock, &flags);
 #endif
 	if (hcd->core_if->dma_desc_enable) {
 		dwc_otg_hcd_qh_free_ddma(hcd, qh);
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+#if defined(MY_ABC_HERE)
 		DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
 #endif
 	} else if (qh->dw_align_buf) {
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+#if defined(MY_ABC_HERE)
 		DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
 #endif
 		uint32_t buf_size;
 		if (qh->ep_type == UE_ISOCHRONOUS) {
 			buf_size = 4096;
 		} else {
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+#if defined(MY_ABC_HERE)
 			DWC_SPINLOCK_IRQSAVE(hcd->lock, &flags);
 #endif
 			buf_size = hcd->core_if->core_params->max_transfer_size;
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+#if defined(MY_ABC_HERE)
 			DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
 #endif
 		}
 		DWC_DMA_FREE(buf_size, qh->dw_align_buf, qh->dw_align_buf_dma);
 	}
-#if defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+#if defined(MY_ABC_HERE)
 	else {
 		DWC_SPINUNLOCK_IRQRESTORE(hcd->lock, flags);
 	}
 #endif
 
 	DWC_FREE(qh);
-#if !defined(CONFIG_SYNO_C2K_FIX_DWC_OTG_DEADLOCK)
+#if !defined(MY_ABC_HERE)
 	DWC_SPINUNLOCK(hcd->lock);
 #endif
 	return;
@@ -172,7 +170,7 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 				  qh->ep_is_in, (qh->ep_type == UE_ISOCHRONOUS),
 				  bytecount);
 		 
-#if defined(CONFIG_SYNO_C2K_NOISE_WITH_REMOTE_DAC)
+#if defined(MY_ABC_HERE)
 		hcd->frame_number = dwc_otg_hcd_get_frame_number(hcd);
 #endif
 		qh->sched_frame = dwc_frame_num_inc(hcd->frame_number,
@@ -191,7 +189,7 @@ void qh_init(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh, dwc_otg_hcd_urb_t * urb)
 		     (dev_speed == USB_SPEED_FULL))) {
 			qh->interval *= 8;
 			qh->sched_frame |= 0x7;
-#if defined(CONFIG_SYNO_C2K_NOISE_WITH_REMOTE_DAC)
+#if defined(MY_ABC_HERE)
 			if ((qh->ep_type == UE_INTERRUPT) && qh->ep_is_in && qh->do_split) {
 				qh->sched_frame = dwc_frame_num_inc(qh->sched_frame, 2);
 			}
@@ -479,7 +477,7 @@ void dwc_otg_hcd_qh_deactivate(dwc_otg_hcd_t * hcd, dwc_otg_qh_t * qh,
 					qh->sched_frame = frame_number;
 				}
 				qh->sched_frame |= 0x7;
-#if defined(CONFIG_SYNO_C2K_NOISE_WITH_REMOTE_DAC)
+#if defined(MY_ABC_HERE)
 				if ((qh->ep_type == UE_INTERRUPT) && qh->ep_is_in && qh->do_split) {
 					qh->sched_frame = dwc_frame_num_inc(qh->sched_frame, 2);
 				}

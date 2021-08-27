@@ -2,11 +2,10 @@
 #define MY_ABC_HERE
 #endif
  
-
 #include <linux/mm.h>
 #include <linux/gfp.h>
 #include <linux/highmem.h>
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <linux/slab.h>
 #endif
 
@@ -16,7 +15,7 @@
 
 #include "mm.h"
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_ARM_LPAE
 #define __pgd_alloc()	kmalloc(PTRS_PER_PGD * sizeof(pgd_t), GFP_KERNEL)
 #define __pgd_free(pgd)	kfree(pgd)
@@ -33,9 +32,9 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
 	pmd_t *new_pmd, *init_pmd;
 	pte_t *new_pte, *init_pte;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	new_pgd = __pgd_alloc();
-#elif defined(CONFIG_SYNO_COMCERTO)
+#elif defined(MY_ABC_HERE)
 	new_pgd = (pgd_t *)__get_free_pages(GFP_KERNEL, get_order(16384));
 #else
 	new_pgd = (pgd_t *)__get_free_pages(GFP_KERNEL, 2);
@@ -45,14 +44,13 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
 
 	memset(new_pgd, 0, USER_PTRS_PER_PGD * sizeof(pgd_t));
 
-	
 	init_pgd = pgd_offset_k(0);
 	memcpy(new_pgd + USER_PTRS_PER_PGD, init_pgd + USER_PTRS_PER_PGD,
 		       (PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
 
 	clean_dcache_area(new_pgd, PTRS_PER_PGD * sizeof(pgd_t));
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)) && defined(CONFIG_ARM_LPAE)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
 	 
 	new_pud = pud_alloc(mm, new_pgd + pgd_index(MODULES_VADDR),
 			    MODULES_VADDR);
@@ -93,9 +91,9 @@ no_pte:
 no_pmd:
 	pud_free(mm, new_pud);
 no_pud:
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	__pgd_free(new_pgd);
-#elif defined(CONFIG_SYNO_COMCERTO)
+#elif defined(MY_ABC_HERE)
 	free_pages((unsigned long)new_pgd, get_order(16384));
 #else
 	free_pages((unsigned long)new_pgd, 2);
@@ -136,7 +134,7 @@ no_pud:
 	pgd_clear(pgd);
 	pud_free(mm, pud);
 no_pgd:
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_ARM_LPAE
 	 
 	for (pgd = pgd_base; pgd < pgd_base + PTRS_PER_PGD; pgd++) {
@@ -155,7 +153,7 @@ no_pgd:
 	}
 #endif
 	__pgd_free(pgd_base);
-#elif defined(CONFIG_SYNO_COMCERTO)
+#elif defined(MY_ABC_HERE)
 	free_pages((unsigned long) pgd_base, get_order(16384));
 #else
 	free_pages((unsigned long) pgd_base, 2);

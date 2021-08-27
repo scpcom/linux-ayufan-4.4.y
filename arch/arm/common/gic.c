@@ -23,7 +23,7 @@
 #include <asm/mach/irq.h>
 #include <asm/hardware/gic.h>
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <mach/sema.h>
 #endif
 
@@ -63,28 +63,27 @@ static inline unsigned int gic_irq(struct irq_data *d)
 	return d->hwirq;
 }
 
-
 static void gic_mask_irq(struct irq_data *d)
 {
 	u32 mask = 1 << (gic_irq(d) % 32);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	unsigned long flags;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if ((gic_irq(d) == 87) || (gic_irq(d) == 66) || (gic_irq(d) == 33)) {
 		return;
 	}
 #endif
 
 	raw_spin_lock(&irq_controller_lock);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	flags = msp_lock_frqsave();
 #endif
 	writel_relaxed(mask, gic_dist_base(d) + GIC_DIST_ENABLE_CLEAR + (gic_irq(d) / 32) * 4);
 	if (gic_arch_extn.irq_mask)
 		gic_arch_extn.irq_mask(d);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	msp_unlock_frqrestore(flags);
 #endif
 	raw_spin_unlock(&irq_controller_lock);
@@ -93,24 +92,24 @@ static void gic_mask_irq(struct irq_data *d)
 static void gic_unmask_irq(struct irq_data *d)
 {
 	u32 mask = 1 << (gic_irq(d) % 32);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	unsigned long flags;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if ((gic_irq(d) == 87) || (gic_irq(d) == 66) || (gic_irq(d) == 33)) {
 		return;
 	}
 #endif
 
 	raw_spin_lock(&irq_controller_lock);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	flags = msp_lock_frqsave();
 #endif
 	if (gic_arch_extn.irq_unmask)
 		gic_arch_extn.irq_unmask(d);
 	writel_relaxed(mask, gic_dist_base(d) + GIC_DIST_ENABLE_SET + (gic_irq(d) / 32) * 4);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	msp_unlock_frqrestore(flags);
 #endif
 	raw_spin_unlock(&irq_controller_lock);
@@ -119,16 +118,16 @@ static void gic_unmask_irq(struct irq_data *d)
 static void gic_eoi_irq(struct irq_data *d)
 {
 	if (gic_arch_extn.irq_eoi) {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		unsigned long flags;
 #endif
 
 		raw_spin_lock(&irq_controller_lock);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		flags = msp_lock_frqsave();
 #endif
 		gic_arch_extn.irq_eoi(d);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		msp_unlock_frqrestore(flags);
 #endif
 		raw_spin_unlock(&irq_controller_lock);
@@ -304,11 +303,10 @@ static void __init gic_dist_init(struct gic_chip_data *gic)
 	for (i = 32; i < gic_irqs; i += 4)
 		writel_relaxed(0xa0a0a0a0, base + GIC_DIST_PRI + i * 4 / 4);
 
-	
 	for (i = 32; i < gic_irqs; i += 32)
 		writel_relaxed(0xffffffff, base + GIC_DIST_ENABLE_CLEAR + i * 4 / 32);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_MSP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_MSP)
 	 
 	for (i = 32; i < gic_irqs; i += 32)
 		writel_relaxed(0xffffffff, base + GIC_DIST_SECURITY_BIT + i * 4 / 32);
@@ -328,7 +326,7 @@ static void __init gic_dist_init(struct gic_chip_data *gic)
 		irq_set_chip_data(irq, gic);
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_MSP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_MSP)
 	 
 	writel_relaxed(3, base + GIC_DIST_CTRL);
 #else   
@@ -345,24 +343,22 @@ static void __cpuinit gic_cpu_init(struct gic_chip_data *gic)
 	writel_relaxed(0xffff0000, dist_base + GIC_DIST_ENABLE_CLEAR);
 	writel_relaxed(0x0000ffff, dist_base + GIC_DIST_ENABLE_SET);
 
-	
 	for (i = 0; i < 32; i += 4)
 		writel_relaxed(0xa0a0a0a0, dist_base + GIC_DIST_PRI + i * 4 / 4);
 
 	writel_relaxed(0xf0, base + GIC_CPU_PRIMASK);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_MSP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_MSP)
 	 
 	writel_relaxed(0xffffffff, dist_base + GIC_DIST_SECURITY_BIT);
 
-	
 	writel_relaxed(0xf, base + GIC_CPU_CTRL);
 #else   
 	writel_relaxed(1, base + GIC_CPU_CTRL);
 #endif  
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_MSP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_MSP)
 
 static void __cpuinit gic_cpu_init_irq_only(struct gic_chip_data *gic)
 {
@@ -508,7 +504,7 @@ static void gic_cpu_restore(unsigned int gic_nr)
 	writel_relaxed(1, cpu_base + GIC_CPU_CTRL);
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static void gic_cpu_mask(unsigned int gic_nr)
 {
 	void __iomem *cpu_base;
@@ -548,7 +544,7 @@ static int gic_notifier(struct notifier_block *self, unsigned long cmd,	void *v)
 		}
 	}
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	 
 	if (cmd == CPU_PM_ENTER)
 	{
@@ -662,7 +658,7 @@ void __cpuinit gic_secondary_init(unsigned int gic_nr)
 {
 	BUG_ON(gic_nr >= MAX_GIC_NR);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_MSP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_MSP)
 	 
 	gic_cpu_init_irq_only(&gic_data[gic_nr]);
 #else   
@@ -679,12 +675,9 @@ void gic_raise_softirq(const struct cpumask *mask, unsigned int irq)
 	for_each_cpu(cpu, mask)
 		map |= 1 << cpu_logical_map(cpu);
 
-	
 	dsb();
 
-	
-
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_MSP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_MSP)
 #define GIC_SGI_SATT (1 << 15)
 	 
 	writel_relaxed(map << 16 | GIC_SGI_SATT | irq, gic_data[0].dist_base + GIC_DIST_SOFTINT);

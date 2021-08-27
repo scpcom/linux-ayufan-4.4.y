@@ -531,7 +531,7 @@ static int shift_arg_pages(struct vm_area_struct *vma, unsigned long shift)
 	if (new_end > old_start) {
 		 
 		free_pgd_range(&tlb, new_end, old_end, new_end,
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 			vma->vm_next ? vma->vm_next->vm_start : mm->task_size);
 #elif defined(CONFIG_SYNO_ALPINE_FIX_USB_HANG)
 			vma->vm_next ? vma->vm_next->vm_start : USER_PGTABLES_CEILING);
@@ -541,7 +541,7 @@ static int shift_arg_pages(struct vm_area_struct *vma, unsigned long shift)
 	} else {
 		 
 		free_pgd_range(&tlb, old_start, old_end, new_end,
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 			vma->vm_next ? vma->vm_next->vm_start : mm->task_size);
 #elif defined(CONFIG_SYNO_ALPINE_FIX_USB_HANG)
 			vma->vm_next ? vma->vm_next->vm_start : USER_PGTABLES_CEILING);

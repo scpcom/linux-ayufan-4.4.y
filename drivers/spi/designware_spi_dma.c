@@ -275,7 +275,7 @@ static int spi_dma_transfer(struct designware_spi *dws, int cs_change)
 		rxconf.dst_maxburst = DMA_CTL_DEST_MSIZE;
 		rxconf.dst_addr_width = 0;
 		rxconf.src_addr_width = 0;
-#if defined(CONFIG_SYNO_C2K_HS_SPI_DMA_READ_ERROR)
+#if defined(MY_ABC_HERE)
 		rxconf.device_fc = false;
 #else
 		rxconf.device_fc = true;

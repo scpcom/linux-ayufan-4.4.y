@@ -765,7 +765,7 @@ int follow_up(struct path *path)
 	return 1;
 }
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
  
 int syno_fetch_mountpoint_fullpath(struct vfsmount *mnt, size_t buf_len, char *mnt_full_path)
 {
@@ -3225,7 +3225,7 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	int is_dir = S_ISDIR(old_dentry->d_inode->i_mode);
 	const unsigned char *old_name;
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	char *tmp_old_full = NULL;
 	char *tmp_new_full = NULL;
 	char *tmp_old_buff = NULL;
@@ -3252,7 +3252,7 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	if (!old_dir->i_op->rename)
 		return -EPERM;
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	tmp_old_buff = kmalloc(PATH_MAX, GFP_NOFS);
 	tmp_new_buff = kmalloc(PATH_MAX, GFP_NOFS);
 	tmp_old_full = dentry_path_raw(old_dentry, tmp_old_buff, PATH_MAX-1);
@@ -3265,7 +3265,7 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	else
 		error = vfs_rename_other(old_dir,old_dentry,new_dir,new_dentry);
 	if (!error)
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 		fsnotify_move(old_dir, new_dir, old_name, is_dir,
 			      new_dentry->d_inode, old_dentry, tmp_old_full, tmp_new_full);
 #else
@@ -3274,7 +3274,7 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 #endif
 	fsnotify_oldname_free(old_name);
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	kfree(tmp_old_buff);
 	kfree(tmp_new_buff);
 #endif
@@ -3519,7 +3519,7 @@ EXPORT_SYMBOL(user_path_at);
 EXPORT_SYMBOL(follow_down_one);
 EXPORT_SYMBOL(follow_down);
 EXPORT_SYMBOL(follow_up);
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(syno_fetch_mountpoint_fullpath);
 #endif
 EXPORT_SYMBOL(get_write_access);  

@@ -273,7 +273,7 @@ extern acpi_status acpi_pci_osc_control_set(acpi_handle handle,
 					     u32 *mask, u32 req);
 extern void acpi_early_init(void);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define ACPI_PTR(_ptr)  (_ptr)
 #endif
 
@@ -320,7 +320,7 @@ static inline int acpi_table_parse(char *id,
 	return -1;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define ACPI_PTR(_ptr)  (NULL)
 #endif
 

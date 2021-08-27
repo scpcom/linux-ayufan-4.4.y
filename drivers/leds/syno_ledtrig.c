@@ -9,7 +9,7 @@
 #include <linux/delay.h>
 #include <linux/timer.h>
 
-#ifdef CONFIG_SYNO_LEDS_TRIGGER
+#ifdef MY_DEF_HERE
 
 typedef struct _tag_SYNO_LED_TRIGGER_TIMER {
 	struct timer_list Timer;

@@ -3496,7 +3496,7 @@ static struct cipher_testvec aes_cbc_dec_tv_template[] = {
 	},
 };
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #define HMAC_SHA384_AES_CBC_ENC_TEST_VECTORS 7
 
 static struct aead_testvec hmac_sha384_aes_cbc_enc_tv_template[] = {

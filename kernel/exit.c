@@ -395,7 +395,7 @@ struct files_struct *get_files_struct(struct task_struct *task)
 
 	return files;
 }
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 EXPORT_SYMBOL_GPL(get_files_struct);
 #endif
 
@@ -414,7 +414,7 @@ void put_files_struct(struct files_struct *files)
 		rcu_read_unlock();
 	}
 }
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 EXPORT_SYMBOL_GPL(put_files_struct);
 #endif
 

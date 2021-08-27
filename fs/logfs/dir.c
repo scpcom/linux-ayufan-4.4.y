@@ -278,7 +278,7 @@ static struct dentry *logfs_lookup(struct inode *dir, struct dentry *dentry,
 
 	inode = logfs_iget(dir->i_sb, ino);
 	if (IS_ERR(inode))
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		printk(KERN_ERR"LogFS: Cannot read inode #%llx for dentry (%lx, %llx)n",
 				ino, dir->i_ino, (unsigned long long)index);
 #else

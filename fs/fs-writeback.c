@@ -18,7 +18,7 @@
 #include <linux/tracepoint.h>
 #include "internal.h"
 
-#if defined(CONFIG_SYNO_ARMADAXP_CPU_AFFINITY) || defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 #include <linux/syno_affinity.h>
 #endif
 
@@ -650,13 +650,12 @@ long wb_do_writeback(struct bdi_writeback *wb, int force_wait)
 	return wrote;
 }
 
-
 int bdi_writeback_thread(void *data)
 {
 	struct bdi_writeback *wb = data;
 	struct backing_dev_info *bdi = wb->bdi;
 	long pages_written;
-#if defined(CONFIG_SYNO_ARMADAXP_CPU_AFFINITY) || defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	SYNOSetTaskAffinity(current, 0);
 #endif
 

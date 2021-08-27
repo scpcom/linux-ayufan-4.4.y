@@ -328,20 +328,20 @@ DECLARE_EVENT_CLASS(btrfs__writepage,
 				 BTRFS_I(inode)->root->root_key.objectid;
 	),
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	TP_printk("root = %llu(%s), ino = %lu, page_index = %llu, "
 #else
 	TP_printk("root = %llu(%s), ino = %lu, page_index = %lu, "
 #endif
 		  "nr_to_write = %ld, pages_skipped = %ld, range_start = %llu, "
 		  "range_end = %llu, for_kupdate = %d, "
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		  "for_reclaim = %d, range_cyclic = %d, writeback_index = %llu",
 #else
 		  "for_reclaim = %d, range_cyclic = %d, writeback_index = %lu",
 #endif
 		  show_root_type(__entry->root_objectid),
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		  (unsigned long)__entry->ino, (unsigned long long)__entry->index,
 #else
 		  (unsigned long)__entry->ino, __entry->index,
@@ -350,7 +350,7 @@ DECLARE_EVENT_CLASS(btrfs__writepage,
 		  __entry->range_start, __entry->range_end,
 		  __entry->for_kupdate,
 		  __entry->for_reclaim, __entry->range_cyclic,
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		  (unsigned long long)__entry->writeback_index)
 #else
 		  (unsigned long)__entry->writeback_index)

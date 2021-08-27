@@ -596,7 +596,7 @@ fill_invalid_ext:
 			}
 			 
 			index = isect >> PAGE_CACHE_SECTOR_SHIFT;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			dprintk("%s zero %dth page: index %llu isect %llu\n",
 				__func__, npg_zero, (unsigned long long)index,
 				(unsigned long long)isect);

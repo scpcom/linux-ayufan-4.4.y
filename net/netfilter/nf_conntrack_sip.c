@@ -1249,18 +1249,18 @@ static int process_sip_request(struct sk_buff *skb, unsigned int dataoff,
 {
 	enum ip_conntrack_info ctinfo;
 	struct nf_conn *ct = nf_ct_get(skb, &ctinfo);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct nf_conn_help *help = nfct_help(ct);
 	enum ip_conntrack_dir dir = CTINFO2DIR(ctinfo);
 #endif
 	unsigned int matchoff, matchlen;
 	unsigned int cseq, i;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	union nf_inet_addr addr;
 	__be16 port;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	if (ct_sip_parse_header_uri(ct, *dptr, NULL, *datalen,
 				    SIP_HDR_VIA_UDP, NULL, &matchoff,

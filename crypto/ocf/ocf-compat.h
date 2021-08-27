@@ -192,8 +192,7 @@ typedef irqreturn_t (*irq_handler_t)(int irq, void *arg, struct pt_regs *regs);
 #endif
 #endif
 
-
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #undef dprintk
 #endif
 

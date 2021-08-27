@@ -113,7 +113,7 @@ struct pppol2tp_ioc_stats {
 #define PPPIOCATTCHAN	_IOW('t', 56, int)	 
 #define PPPIOCGCHAN	_IOR('t', 55, int)	 
 #define PPPIOCGL2TPSTATS _IOR('t', 54, struct pppol2tp_ioc_stats)
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 #define PPPIOCSFPPIDLE	_IOW('t', 53, struct ppp_idle)	 
 #endif
 

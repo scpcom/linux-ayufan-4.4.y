@@ -90,7 +90,7 @@ struct dw_spi_dma_ops {
 struct dw_spi {
 	struct spi_master	*master;
 	struct spi_device	*cur_dev;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct clk		*clk_spi;
 #endif
 	struct device		*parent_dev;
@@ -135,7 +135,7 @@ struct dw_spi {
 	u32			dma_width;
 	int			cs_change;
 	irqreturn_t		(*transfer_handler)(struct dw_spi *dws);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	void			(*cs_control)(struct dw_spi *dws, u32 command);
 						 
 #else
@@ -192,7 +192,7 @@ static inline void spi_set_clk(struct dw_spi *dws, u16 div)
 
 static inline void spi_chip_sel(struct dw_spi *dws, u16 cs)
 {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	if (cs >= dws->num_cs)
 		return;
 
@@ -225,12 +225,11 @@ static inline void spi_umask_intr(struct dw_spi *dws, u32 mask)
 	dw_writel(dws, DW_SPI_IMR, new_mask);
 }
 
-
 struct dw_spi_chip {
 	u8 poll_mode;	 
 	u8 type;	 
 	u8 enable_dma;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	void (*cs_control)(struct dw_spi *dws, u32 command);
 #else
 	void (*cs_control)(u32 command);

@@ -937,7 +937,7 @@ DECLARE_EVENT_CLASS(xfs_page_class,
 		__entry->delalloc = delalloc;
 		__entry->unwritten = unwritten;
 	),
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	TP_printk("dev %d:%d ino 0x%llx pgoff 0x%llx size 0x%llx offset %lx "
 #else
 	TP_printk("dev %d:%d ino 0x%llx pgoff 0x%lx size 0x%llx offset %lx "
@@ -949,7 +949,7 @@ DECLARE_EVENT_CLASS(xfs_page_class,
 		  __entry->size,
 		  __entry->offset,
 		  __entry->delalloc,
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		  __entry->unwritten)
 #else
 		  __entry->unwritten)

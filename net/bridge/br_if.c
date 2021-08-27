@@ -13,7 +13,7 @@
 #include <linux/rtnetlink.h>
 #include <linux/if_ether.h>
 #include <linux/slab.h>
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 #include <linux/mv_nfp.h>
 #endif
@@ -145,7 +145,7 @@ void br_dev_delete(struct net_device *dev, struct list_head *head)
 
 	list_for_each_entry_safe(p, n, &br->port_list, list) {
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (nfp_mgr_p->nfp_hook_br_port_del)
 		nfp_mgr_p->nfp_hook_br_port_del(br->dev->ifindex, p->dev->ifindex);
@@ -157,7 +157,7 @@ void br_dev_delete(struct net_device *dev, struct list_head *head)
 
 	del_timer_sync(&br->gc_timer);
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (nfp_mgr_p->nfp_hook_br_del)
 		nfp_mgr_p->nfp_hook_br_del(br->dev->ifindex);
@@ -406,7 +406,7 @@ int br_del_if(struct net_bridge *br, struct net_device *dev)
 	if (!p || p->br != br)
 		return -EINVAL;
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (nfp_mgr_p->nfp_hook_br_port_del)
 		nfp_mgr_p->nfp_hook_br_port_del(br->dev->ifindex, p->dev->ifindex);

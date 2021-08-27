@@ -182,13 +182,12 @@ extern void usbfs_conn_disc_event(void);
 extern int usb_devio_init(void);
 extern void usb_devio_cleanup(void);
 
-
 extern void usb_notify_add_device(struct usb_device *udev);
 extern void usb_notify_remove_device(struct usb_device *udev);
 extern void usb_notify_add_bus(struct usb_bus *ubus);
 extern void usb_notify_remove_bus(struct usb_bus *ubus);
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_USB_MARVELL_ERRATA_FE_9049667
 extern void ehci_marvell_hs_detect_wa_done(struct usb_device *udev);
 #endif

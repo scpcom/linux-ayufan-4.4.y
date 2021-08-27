@@ -83,9 +83,8 @@ static inline bool dev_xmit_complete(int rc)
 
 #ifdef  __KERNEL__
  
-
 #if defined(CONFIG_WLAN) || defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
-# if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_MAC80211_MESH)
+# if defined(MY_ABC_HERE) || defined(CONFIG_MAC80211_MESH)
 #  define LL_MAX_HEADER 128
 # else
 #  define LL_MAX_HEADER 96
@@ -598,7 +597,7 @@ struct net_device {
 	 
 	u32			vlan_features;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 	 
 	struct net_device 	*wifi_offload_dev;
 #endif
@@ -1104,7 +1103,7 @@ extern int		dev_open(struct net_device *dev);
 extern int		dev_close(struct net_device *dev);
 extern void		dev_disable_lro(struct net_device *dev);
 extern int		dev_queue_xmit(struct sk_buff *skb);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 extern int 		original_dev_queue_xmit(struct sk_buff *skb);
 #endif
 extern int		register_netdevice(struct net_device *dev);
@@ -1438,16 +1437,14 @@ static inline int netif_copy_real_num_queues(struct net_device *to_dev,
 #endif
 }
 
-
 extern void dev_kfree_skb_irq(struct sk_buff *skb);
-
 
 extern void dev_kfree_skb_any(struct sk_buff *skb);
 
 extern int		netif_rx(struct sk_buff *skb);
 extern int		netif_rx_ni(struct sk_buff *skb);
 extern int		netif_receive_skb(struct sk_buff *skb);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 extern int              capture_receive_skb(struct sk_buff *skb);
 #endif
 extern gro_result_t	dev_gro_receive(struct napi_struct *napi,

@@ -14,10 +14,9 @@ static pgd_t *suspend_pgd;
 extern int __cpu_suspend(unsigned long, int (*)(unsigned long));
 extern void cpu_resume_mmu(void);
 
-
 void __cpu_suspend_save(u32 *ptr, u32 ptrsz, u32 sp, u32 *save_ptr)
 {
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	u32 *ctx = ptr;
 #else	
 	*save_ptr = virt_to_phys(ptr);
@@ -29,10 +28,9 @@ void __cpu_suspend_save(u32 *ptr, u32 ptrsz, u32 sp, u32 *save_ptr)
 
 	cpu_do_suspend(ptr);
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 flush_cache_louis();
 
-	
 	__cpuc_flush_dcache_area(ctx, ptrsz);
 	__cpuc_flush_dcache_area(save_ptr, sizeof(*save_ptr));
 #else

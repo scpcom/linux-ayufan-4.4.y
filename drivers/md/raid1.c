@@ -509,7 +509,7 @@ static int read_balance(struct r1conf *conf, struct r1bio *r1_bio, int *max_sect
 			best_good_sectors = sectors;
 
 		dist = abs(this_sector - conf->mirrors[disk].head_position);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		 
 		if (dist == 0) {
 			best_disk = disk;
@@ -523,7 +523,7 @@ static int read_balance(struct r1conf *conf, struct r1bio *r1_bio, int *max_sect
 #endif
 		if (choose_first
 		     
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		    || conf->next_seq_sect == this_sector) {
 #else
 		    || conf->next_seq_sect == this_sector

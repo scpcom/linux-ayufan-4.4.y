@@ -58,7 +58,7 @@ int __ip_local_out(struct sk_buff *skb)
 	iph->tot_len = htons(skb->len);
 	ip_send_check(iph);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_INET_IPSEC_OFFLOAD)
+#if defined(MY_ABC_HERE) && defined(CONFIG_INET_IPSEC_OFFLOAD)
 	if(skb->ipsec_offload)
 	{	
 		dst_output(skb);	
@@ -199,7 +199,7 @@ static int ip_finish_output(struct sk_buff *skb)
 	}
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_INET_IPSEC_OFFLOAD)
+#if defined(MY_ABC_HERE) && defined(CONFIG_INET_IPSEC_OFFLOAD)
 	if ((skb->ipsec_offload == 0) &&
 		skb->len > ip_skb_dst_mtu(skb) && !skb_is_gso(skb))
 #else

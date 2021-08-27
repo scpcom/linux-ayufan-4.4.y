@@ -64,7 +64,7 @@ int mv_usb_resume(int dev)
 
 	return status;
 }
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_DEF_HERE
 #include <linux/export.h>
 EXPORT_SYMBOL(mv_usb_resume);
 #endif

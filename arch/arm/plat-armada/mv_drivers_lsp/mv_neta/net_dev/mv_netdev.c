@@ -2617,7 +2617,7 @@ void mv_eth_link_event(struct eth_port *pp, int print)
 	}
 
 	if (print) {
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_DEF_HERE
 		 
 		if (dev)
 			printk(KERN_INFO ":%s: ", dev->name);

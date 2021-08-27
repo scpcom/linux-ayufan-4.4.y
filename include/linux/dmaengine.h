@@ -10,7 +10,7 @@
 #include <linux/dma-direction.h>
 #include <linux/scatterlist.h>
 #include <linux/bitmap.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/types.h>
 #endif
 #include <asm/page.h>
@@ -43,7 +43,7 @@ enum dma_transaction_type {
 	DMA_CYCLIC,
 };
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 enum dma_transfer_direction {
         DMA_MEM_TO_MEM,
@@ -95,11 +95,10 @@ struct dma_chan_percpu {
 	unsigned long bytes_transferred;
 };
 
-
 struct dma_chan {
 	struct dma_device *device;
 	dma_cookie_t cookie;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	dma_cookie_t completed_cookie;
 #endif
 
@@ -136,7 +135,7 @@ struct dma_slave_config {
 	enum dma_slave_buswidth dst_addr_width;
 	u32 src_maxburst;
 	u32 dst_maxburst;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	bool device_fc;
 	unsigned int slave_id;
 #endif
@@ -311,7 +310,7 @@ static inline int dmaengine_slave_config(struct dma_chan *chan,
 			(unsigned long)config);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static inline bool is_slave_direction(enum dma_transfer_direction direction)
 {
         return (direction == DMA_MEM_TO_DEV) || (direction == DMA_DEV_TO_MEM);
@@ -478,7 +477,7 @@ dma_cookie_t dma_async_memcpy_buf_to_pg(struct dma_chan *chan,
 dma_cookie_t dma_async_memcpy_pg_to_pg(struct dma_chan *chan,
 	struct page *dest_pg, unsigned int dest_off, struct page *src_pg,
 	unsigned int src_off, size_t len);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 dma_cookie_t dma_async_memcpy_sg_to_sg(struct dma_chan *chan,
 	struct scatterlist *dst_sg, unsigned int dst_nents,
 	struct scatterlist *src_sg, unsigned int src_nents);
@@ -618,13 +617,11 @@ static inline void dma_release_channel(struct dma_chan *chan)
 }
 #endif
 
-
-
 int dma_async_device_register(struct dma_device *device);
 void dma_async_device_unregister(struct dma_device *device);
 void dma_run_dependencies(struct dma_async_tx_descriptor *tx);
 struct dma_chan *dma_find_channel(enum dma_transaction_type tx_type);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 struct dma_chan *net_dma_find_channel(void);
 #endif
 #define dma_request_channel(mask, x, y) __dma_request_channel(&(mask), x, y)
@@ -636,25 +633,25 @@ struct dma_page_list {
 };
 
 struct dma_pinned_list {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	int kernel;
 #endif
 	int nr_iovecs;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	int nr_pages;
 	struct sg_table	*sgts;
 #endif
 	struct dma_page_list page_list[0];
 };
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 struct tcp_sock;
 int dma_pin_iovec_pages(struct tcp_sock *tp, struct iovec *iov, size_t len);
 #else
 struct dma_pinned_list *dma_pin_iovec_pages(struct iovec *iov, size_t len);
 #endif
 void dma_unpin_iovec_pages(struct dma_pinned_list* pinned_list);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 void dma_free_iovec_data(struct tcp_sock *tp);
 
 int dma_memcpy_fill_sg_from_iovec(struct dma_chan *chan, struct iovec *iov,
@@ -662,7 +659,7 @@ int dma_memcpy_fill_sg_from_iovec(struct dma_chan *chan, struct iovec *iov,
 	unsigned int offset,size_t len);
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_SPLICE_NET_DMA_SUPPORT
 struct dma_pinned_list *dma_pin_kernel_iovec_pages(struct iovec *iov, size_t len);
 void dma_unpin_kernel_iovec_pages(struct dma_pinned_list* pinned_list);

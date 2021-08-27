@@ -235,14 +235,13 @@ int afs_write_end(struct file *file, struct address_space *mapping,
 	return copied;
 }
 
-
 static void afs_kill_pages(struct afs_vnode *vnode, bool error,
 			   pgoff_t first, pgoff_t last)
 {
 	struct pagevec pv;
 	unsigned count, loop;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	_enter("{%x:%u},%llx-%llx",
 	       vnode->fid.vid, vnode->fid.vnode, (unsigned long long)first, (unsigned long long)last);
 #else
@@ -253,7 +252,7 @@ static void afs_kill_pages(struct afs_vnode *vnode, bool error,
 	pagevec_init(&pv, 0);
 
 	do {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		_debug("kill %llx-%llx", (unsigned long long)first, (unsigned long long)last);
 #else
 		_debug("kill %lx-%lx", first, last);

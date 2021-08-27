@@ -156,7 +156,7 @@ MV_STATUS mvGppAtomicValueSet(MV_U32 gpionumber)
         return MV_OK;
 }
 
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
  
 #include <linux/export.h>
 EXPORT_SYMBOL(mvGppPolarityGet);

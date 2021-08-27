@@ -239,7 +239,7 @@ struct uart_port {
 #define UPIO_AU			(4)			 
 #define UPIO_TSI		(5)			 
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 #define UPIO_DWAPB		(6)
 #define UPIO_DWAPB32		(7)
 #endif

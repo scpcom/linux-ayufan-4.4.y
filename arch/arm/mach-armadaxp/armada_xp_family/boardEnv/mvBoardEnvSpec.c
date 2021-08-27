@@ -1191,13 +1191,7 @@ MV_BOARD_INFO rd78460customerInfo = {
 	.norFlashWriteParams		= RD_78460_CUSTOMER_BOARD_NOR_WRITE_PARAMS
 };
  
-
-#ifdef CONFIG_SYNO_ARMADA_ARCH
-
-
-
-
-
+#ifdef MY_DEF_HERE
  
 MV_BOARD_MAC_INFO Syno78230AxpBoardMacInfo[] = {
 	 
@@ -1445,7 +1439,7 @@ MV_BOARD_INFO *boardInfoTbl[] = {
 	&rd78460ServerRev2Info,
 	&rd78460gpInfo,
 	&rd78460customerInfo
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_DEF_HERE
 	,NULL
 	,NULL
 	,NULL

@@ -328,10 +328,9 @@ extern struct ratelimit_state dm_ratelimit_state;
 #define dm_array_too_big(fixed, obj, num) \
 	((num) > (UINT_MAX - (fixed)) / (obj))
 
-
 #define dm_target_offset(ti, sector) ((sector) - (ti)->begin)
 
-#ifdef CONFIG_SYNO_DM_TO_SECTOR_FIX
+#ifdef MY_DEF_HERE
 static inline sector_t to_sector(unsigned long long n)
 #else
 static inline sector_t to_sector(unsigned long n)

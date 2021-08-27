@@ -2452,11 +2452,10 @@ static void ext4_mb_collect_stats(struct ext4_allocation_context *ac)
 		trace_ext4_mballoc_prealloc(ac);
 }
 
-
 static void ext4_discard_allocated_blocks(struct ext4_allocation_context *ac)
 {
 	struct ext4_prealloc_space *pa = ac->ac_pa;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	struct ext4_buddy e4b;
 	int err;
 

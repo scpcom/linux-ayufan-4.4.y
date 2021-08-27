@@ -509,9 +509,8 @@ static inline struct kmem_cache *__find_general_cachep(size_t size,
 	while (size > csizep->cs_size)
 		csizep++;
 
-	
 #ifdef CONFIG_ZONE_DMA
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (unlikely(gfpflags & __GFP_DMA))
 #else
 	if (unlikely(gfpflags & GFP_DMA))
@@ -1845,7 +1844,7 @@ kmem_cache_create (const char *name, size_t size, size_t align,
 	cachep->flags = flags;
 	cachep->gfpflags = 0;
 	if (CONFIG_ZONE_DMA_FLAG && (flags & SLAB_CACHE_DMA))
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		cachep->gfpflags |= __GFP_DMA;
 #else
 		cachep->gfpflags |= GFP_DMA;
@@ -2130,7 +2129,7 @@ static void cache_init_objs(struct kmem_cache *cachep,
 static void kmem_flagcheck(struct kmem_cache *cachep, gfp_t flags)
 {
 	if (CONFIG_ZONE_DMA_FLAG) {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		if (flags & __GFP_DMA)
 			BUG_ON(!(cachep->gfpflags & __GFP_DMA));
 #else
@@ -2138,7 +2137,7 @@ static void kmem_flagcheck(struct kmem_cache *cachep, gfp_t flags)
 			BUG_ON(!(cachep->gfpflags & GFP_DMA));
 #endif
 		else
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 			BUG_ON(cachep->gfpflags & __GFP_DMA);
 #else
 			BUG_ON(cachep->gfpflags & GFP_DMA);

@@ -734,7 +734,7 @@ static int ethipip6_tnl_xmit2(struct sk_buff *skb,
         } else {
 		dst = ip6_route_output(net, NULL, &fl->u.ip6);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		if(dst->error)
 			goto tx_err_link_failure;
 		dst = xfrm_lookup(net, dst, fl, NULL, 0);
@@ -796,7 +796,7 @@ static int ethipip6_tnl_xmit2(struct sk_buff *skb,
 	skb_dst_set(skb, dst_clone(dst));
 
 	skb->transport_header = skb->network_header;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	IP6CB(skb)->nhoff = offsetof(struct ipv6hdr, nexthdr);
 #endif
 
@@ -813,14 +813,13 @@ static int ethipip6_tnl_xmit2(struct sk_buff *skb,
 	ipv6h = ipv6_hdr(skb);
 	*(__be32*)ipv6h = fl->u.ip6.flowlabel | htonl(0x60000000);
 	 
-	
 	ipv6h->hop_limit = t->parms.hop_limit;
 	ipv6h->nexthdr = proto;
 	ipv6_addr_copy(&ipv6h->saddr, &fl->u.ip6.saddr);
 	ipv6_addr_copy(&ipv6h->daddr, &fl->u.ip6.daddr);
 	nf_reset(skb);
 	pkt_len = skb->len;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	skb->local_df = 1;
 #endif
 	err = ip6_local_out(skb);
@@ -975,7 +974,7 @@ static void ethipip6_tnl_link_config(struct ip6_tnl *t)
 	struct net_device *dev = t->dev;
 	struct ip6_tnl_parm *p = &t->parms;
 	struct flowi *fl = &t->fl;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct net_device *ldev = NULL;
 	struct net *net = dev_net(t->dev);
 #endif
@@ -1005,7 +1004,7 @@ static void ethipip6_tnl_link_config(struct ip6_tnl *t)
 
 	dev->iflink = p->link;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	rcu_read_lock();
 	if (p->link)

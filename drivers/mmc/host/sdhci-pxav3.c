@@ -14,7 +14,7 @@
 #include <linux/slab.h>
 #include <linux/delay.h>
 #include <linux/module.h>
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #include <linux/mbus.h>
 #endif
 #include "sdhci.h"
@@ -37,7 +37,7 @@
 #define SDCE_MISC_INT		(1<<2)
 #define SDCE_MISC_INT_EN	(1<<1)
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
  
 #define SDHCI_WINDOW_CTRL(i)	(0x80 + ((i) << 3))
 #define SDHCI_WINDOW_BASE(i)	(0x84 + ((i) << 3))
@@ -209,7 +209,7 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
 	pltfm_host = sdhci_priv(host);
 	pltfm_host->priv = pxa;
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	if (pdata->dram != NULL) {
 		ret = mv_conf_mbus_windows(pdev, pdata->dram);
 		if (ret < 0)

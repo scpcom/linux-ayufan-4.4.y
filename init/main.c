@@ -725,9 +725,8 @@ static int __init kernel_init(void * unused)
 
 	do_basic_setup();
 
-	
 	if (sys_open((const char __user *) "/dev/console", O_RDWR, 0) < 0)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		printk(KERN_WARNING "Please be patient, while OpenWrt loads ...\n");
 #else
 		printk(KERN_WARNING "Warning: unable to open an initial console.\n");

@@ -72,11 +72,10 @@ struct ipt_ip {
 	__u8 invflags;
 };
 
-
 #define IPT_F_FRAG		0x01	 
 #define IPT_F_GOTO		0x02	 
 #define IPT_F_MASK		0x03	 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define IPT_F_NO_DEF_MATCH	0x80	 
 #endif
 

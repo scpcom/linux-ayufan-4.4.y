@@ -17,7 +17,7 @@
 #include <linux/init.h>
 #include <asm/assembler.h>
 #include <asm/unwind.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <asm/page.h>
 #endif
 
@@ -37,7 +37,7 @@ ENTRY(v7_flush_icache_all)
 	ALT_UP(mcr	p15, 0, r0, c7, c5, 0)		@ I+BTB cache invalidate
 	mov	pc, lr
 ENDPROC(v7_flush_icache_all)
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  /*
  *     v7_flush_dcache_louis()
  *
@@ -143,7 +143,7 @@ ENTRY(v7_flush_kern_cache_all)
  THUMB(	ldmfd	sp!, {r4-r7, r9-r11, lr}	)
 	mov	pc, lr
 ENDPROC(v7_flush_kern_cache_all)
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  /*
  *     v7_flush_kern_cache_louis(void)
  *
@@ -255,10 +255,10 @@ ENTRY(v7_coherent_user_range)
  * isn't mapped, just try the next page.
  */
 9001:
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARM_ERRATA_775420)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARM_ERRATA_775420)
 	dsb
 #endif
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
 	mov	r12, r12, lsr #12
 	mov	r12, r12, lsl #12
 	add	r12, r12, #4096

@@ -13,7 +13,7 @@
 #include <asm/smp_plat.h>
 #include <asm/system.h>
 #include <asm/tlbflush.h>
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <asm/smp_plat.h>
 #endif
 
@@ -201,7 +201,7 @@ static void __flush_dcache_aliases(struct address_space *mapping, struct page *p
 	flush_dcache_mmap_unlock(mapping);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if defined(MY_ABC_HERE) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 
 void __sync_outer_cache(pte_t *ptep, pte_t pteval)
 {
@@ -267,7 +267,7 @@ void flush_dcache_page(struct page *page)
 		else if (mapping)
 			__flush_icache_all();
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if defined(MY_ABC_HERE) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 		sync_outer_cache(page);
 #endif
 		set_bit(PG_dcache_clean, &page->flags);
@@ -275,7 +275,7 @@ void flush_dcache_page(struct page *page)
 }
 EXPORT_SYMBOL(flush_dcache_page);
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
  
 void flush_kernel_dcache_page(struct page *page)
 {

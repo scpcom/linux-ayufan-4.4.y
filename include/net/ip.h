@@ -357,7 +357,7 @@ enum ip_defrag_users {
 	IP_DEFRAG_VS_FWD,
 	IP_DEFRAG_AF_PACKET,
 	IP_DEFRAG_MACVLAN,
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	IP_DEFRAG_IP6_TNL_4RD  
 #endif
 };

@@ -9,7 +9,7 @@
 
 #include <linux/compiler.h>
 #include <asm/fpstate.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <asm/page.h>
 
 #if (PAGE_SHIFT > 12)
@@ -20,7 +20,7 @@
 
 #define THREAD_SIZE		(PAGE_SIZE << THREAD_SIZE_ORDER)
 #else
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
 #define THREAD_SIZE_ORDER	1
 #define THREAD_SIZE		8192
 #else

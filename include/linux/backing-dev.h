@@ -97,7 +97,7 @@ struct backing_dev_info {
 	struct dentry *debug_stats;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	unsigned int cpu0_bind;
 #endif
 };

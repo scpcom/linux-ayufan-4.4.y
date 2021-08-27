@@ -19,7 +19,7 @@
 #include <linux/io.h>
 #include <linux/mtd/partitions.h>
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 static char nand_name[128];
 #endif
@@ -2241,15 +2241,13 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 
 	chip->cmdfunc(mtd, NAND_CMD_READID, 0x00, -1);
 
-	
-
 	for (i = 0; i < 8; i++)
 		id_data[i] = chip->read_byte(mtd);
 
 	if (!type->name)
 		return ERR_PTR(-ENODEV);
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (!mtd->name){
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 		sprintf(nand_name, "%s%s", type->name,
@@ -2264,7 +2262,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 #endif
 
 	chip->chipsize = (uint64_t)type->chipsize << 20;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 	chip->chipsize *= chip->num_devs;
 	if(chip->num_devs > 1)
@@ -2312,7 +2310,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 		} else {
 			 
 			mtd->writesize = 1024 << (extid & 0x03);
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 			mtd->writesize *= chip->num_devs;
 #endif
@@ -2324,7 +2322,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 			extid >>= 2;
 			 
 			mtd->erasesize = (64 * 1024) << (extid & 0x03);
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 			mtd->erasesize *= chip->num_devs;
 #endif
@@ -2332,7 +2330,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 			extid >>= 2;
 			 
 			busw = (extid & 0x01) ? NAND_BUSWIDTH_16 : 0;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 			if(chip->num_devs > 1)
 				busw = NAND_BUSWIDTH_16;
@@ -2344,7 +2342,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 		mtd->erasesize = type->erasesize;
 		mtd->writesize = type->pagesize;
 		mtd->oobsize = mtd->writesize / 32;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_MTD_NAND_NFC_MLC_SUPPORT
 		 
 		if (chip->oobsize_ovrd)
@@ -2352,7 +2350,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 #endif
 #endif
 		busw = type->options & NAND_BUSWIDTH_16;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_MTD_NAND_NFC_GANG_SUPPORT
 		mtd->erasesize *= chip->num_devs;
 		mtd->writesize *= chip->num_devs;
@@ -2507,7 +2505,7 @@ int nand_scan_tail(struct mtd_info *mtd)
 		case 128:
 			chip->ecc.layout = &nand_oob_128;
 			break;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		case 224:
 			chip->ecc.layout = &nand_oob_128;
 			break;

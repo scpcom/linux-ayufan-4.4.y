@@ -1208,7 +1208,7 @@ static void pcie_write_mrrs(struct pci_dev *dev)
 			"with pci=pcie_bus_safe.\n");
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 int pcie_bus_configure_set(struct pci_dev *dev, void *data)
 #else
 static int pcie_bus_configure_set(struct pci_dev *dev, void *data)

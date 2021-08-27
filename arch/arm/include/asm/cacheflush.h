@@ -14,16 +14,13 @@
 
 #define CACHE_COLOUR(vaddr)	((vaddr & (SHMLBA - 1)) >> PAGE_SHIFT)
 
-
 #define PG_dcache_clean PG_arch_1
-
-
 
 struct cpu_cache_fns {
 	void (*flush_icache_all)(void);
 	void (*flush_kern_all)(void);
 
-#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	void (*flush_kern_louis)(void);
 #endif
 	void (*flush_user_all)(void);
@@ -39,14 +36,13 @@ struct cpu_cache_fns {
 	void (*dma_flush_range)(const void *, const void *);
 };
 
-
 #ifdef MULTI_CACHE
 
 extern struct cpu_cache_fns cpu_cache;
 
 #define __cpuc_flush_icache_all		cpu_cache.flush_icache_all
 #define __cpuc_flush_kern_all		cpu_cache.flush_kern_all
-#if defined( CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined( MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define __cpuc_flush_kern_louis		cpu_cache.flush_kern_louis
 #endif
 #define __cpuc_flush_user_all		cpu_cache.flush_user_all
@@ -63,7 +59,7 @@ extern struct cpu_cache_fns cpu_cache;
 
 extern void __cpuc_flush_icache_all(void);
 extern void __cpuc_flush_kern_all(void);
-#if defined CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined MY_DEF_HERE) || defined(MY_DEF_HERE)
 extern void __cpuc_flush_kern_louis(void);
 #endif
 extern void __cpuc_flush_user_all(void);
@@ -112,12 +108,12 @@ static inline void __flush_icache_all(void)
 	dsb();
 #endif
 }
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 #define flush_cache_louis()		__cpuc_flush_kern_louis()
 #endif
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
  
 #define flush_cache_louis()		__cpuc_flush_kern_louis()
 #endif
@@ -133,7 +129,7 @@ static inline void vivt_flush_cache_mm(struct mm_struct *mm)
 static inline void
 vivt_flush_cache_range(struct vm_area_struct *vma, unsigned long start, unsigned long end)
 {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	struct mm_struct *mm = vma->vm_mm;
 
 	if (!mm || cpumask_test_cpu(smp_processor_id(), mm_cpumask(mm)))
@@ -147,7 +143,7 @@ vivt_flush_cache_range(struct vm_area_struct *vma, unsigned long start, unsigned
 static inline void
 vivt_flush_cache_page(struct vm_area_struct *vma, unsigned long user_addr, unsigned long pfn)
 {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	struct mm_struct *mm = vma->vm_mm;
 
 	if (!mm || cpumask_test_cpu(smp_processor_id(), mm_cpumask(mm))) {
@@ -156,7 +152,7 @@ vivt_flush_cache_page(struct vm_area_struct *vma, unsigned long user_addr, unsig
 #endif
 		unsigned long addr = user_addr & PAGE_MASK;
 		__cpuc_flush_user_range(addr, addr + PAGE_SIZE, vma->vm_flags);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	}
 #else
 	}
@@ -178,8 +174,7 @@ extern void flush_cache_page(struct vm_area_struct *vma, unsigned long user_addr
 
 #define flush_cache_dup_mm(mm) flush_cache_mm(mm)
 
-
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define local_flush_cache_user_range(start,end) \
  	__cpuc_coherent_user_range((start) & PAGE_MASK, PAGE_ALIGN(end))
  
@@ -193,11 +188,9 @@ extern void flush_cache_user_range(unsigned long start, unsigned long end);
 	__cpuc_coherent_user_range((start) & PAGE_MASK, PAGE_ALIGN(end))
 #endif
 
-
 #define flush_icache_range(s,e)		__cpuc_coherent_kern_range(s,e)
 
-
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && (defined (CONFIG_CACHE_AURORA_L2) && defined (CONFIG_AURORA_L2_OUTER) && !defined (CONFIG_AURORA_L2_PT_WALK))
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && (defined (CONFIG_CACHE_AURORA_L2) && defined (CONFIG_AURORA_L2_OUTER) && !defined (CONFIG_AURORA_L2_PT_WALK))
  
 extern void aurora_l2_flush_range(unsigned long start, unsigned long end);
 #define clean_dcache_area(start,size)	do {cpu_dcache_clean_area(start, size);	\
@@ -231,7 +224,7 @@ static inline void flush_anon_page(struct vm_area_struct *vma,
 }
 
 #define ARCH_HAS_FLUSH_KERNEL_DCACHE_PAGE
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 extern void flush_kernel_dcache_page(struct page *);
 #else
 static inline void flush_kernel_dcache_page(struct page *page)

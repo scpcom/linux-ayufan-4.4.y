@@ -7,7 +7,7 @@
 #include <linux/of_pci.h>
 #include <asm/prom.h>
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static inline int __of_pci_pci_compare(struct device_node *node,
 				       unsigned int data)
 {
@@ -54,7 +54,7 @@ struct device_node *of_pci_find_child_device(struct device_node *parent,
 }
 EXPORT_SYMBOL_GPL(of_pci_find_child_device);
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 int of_pci_get_devfn(struct device_node *np)
 {

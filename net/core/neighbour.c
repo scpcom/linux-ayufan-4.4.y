@@ -24,7 +24,7 @@
 #include <linux/string.h>
 #include <linux/log2.h>
 
-#if defined(CONFIG_SYNO_ARMADA) || (defined(CONFIG_SYNO_ARMADA_V2) && defined(CONFIG_MV_ETH_NFP_HOOKS)) 
+#if defined(MY_DEF_HERE) || (defined(MY_DEF_HERE) && defined(CONFIG_MV_ETH_NFP_HOOKS)) 
 #include <linux/mv_nfp.h>
 #endif
 #define NEIGH_DEBUG 1
@@ -636,7 +636,7 @@ void neigh_destroy(struct neighbour *neigh)
 	if (neigh_del_timer(neigh))
 		printk(KERN_WARNING "Impossible event.\n");
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
        if (neigh->nfp) {
 		if (nfp_mgr_p->nfp_hook_arp_delete)
@@ -666,10 +666,9 @@ static void neigh_suspect(struct neighbour *neigh)
 	neigh->output = neigh->ops->output;
 }
 
-
 static void neigh_connect(struct neighbour *neigh)
 {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	neigh->nfp = false;
 	if (nfp_mgr_p->nfp_hook_arp_add)
@@ -725,7 +724,7 @@ static void neigh_periodic_work(struct work_struct *work)
 			if (time_before(n->used, n->confirmed))
 				n->used = n->confirmed;
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 			if ((atomic_read(&n->refcnt) == 1) && (state != NUD_FAILED) &&
 				time_after(jiffies, n->used + n->parms->gc_staletime)) {
@@ -782,7 +781,7 @@ static void neigh_invalidate(struct neighbour *neigh)
 	struct sk_buff *skb;
 
 	NEIGH_CACHE_STAT_INC(neigh->tbl, res_failed);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_DEF_HERE)
 	NEIGH_PRINTK2("neigh %p is failed.\n", neigh);
 #else
 	NEIGH_PRINTK2("0x%8lx: neigh %p is failed in %s.\n", jiffies, neigh, __func__);
@@ -830,7 +829,7 @@ static void neigh_timer_handler(unsigned long arg)
 	if (state & NUD_REACHABLE) {
 		if (time_before_eq(now,
 				   neigh->confirmed + neigh->parms->reachable_time)) {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 			NEIGH_PRINTK2("0x%8lx: neigh %p is still alive in %s.\n", now, neigh, __func__);
 #else
 			NEIGH_PRINTK2("neigh %p is still alive.\n", neigh);
@@ -838,7 +837,7 @@ static void neigh_timer_handler(unsigned long arg)
 			next = neigh->confirmed + neigh->parms->reachable_time;
 		} else if (time_before_eq(now,
 					  neigh->used + neigh->parms->delay_probe_time)) {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 			NEIGH_PRINTK2("0x%8lx: neigh %p is delayed in %s.\n", now, neigh, __func__);
 #else
 			NEIGH_PRINTK2("neigh %p is delayed.\n", neigh);
@@ -848,7 +847,7 @@ static void neigh_timer_handler(unsigned long arg)
 			neigh_suspect(neigh);
 			next = now + neigh->parms->delay_probe_time;
 		} else {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 			NEIGH_PRINTK2("0x%8lx: neigh %p is suspected in %s.\n", now, neigh, __func__);
 #else
 			NEIGH_PRINTK2("neigh %p is suspected.\n", neigh);
@@ -868,7 +867,7 @@ static void neigh_timer_handler(unsigned long arg)
 			notify = 1;
 			next = neigh->confirmed + neigh->parms->reachable_time;
 		} else {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 			NEIGH_PRINTK2("0x%8lx: neigh %p is probed in %s.\n", now, neigh, __func__);
 #else
 			NEIGH_PRINTK2("neigh %p is probed.\n", neigh);
@@ -939,7 +938,7 @@ int __neigh_event_send(struct neighbour *neigh, struct sk_buff *skb)
 			return 1;
 		}
 	} else if (neigh->nud_state & NUD_STALE) {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 		NEIGH_PRINTK2("0x%8lx: neigh %p ref=%d is delayed in %s.\n",
 				now, neigh, atomic_read(&neigh->refcnt), __func__);
 #else
@@ -1076,7 +1075,7 @@ int neigh_update(struct neighbour *neigh, const u8 *lladdr, u8 new,
 						 neigh->parms->reachable_time :
 						 0)));
 		neigh->nud_state = new;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 		if ((old & (NUD_STALE | NUD_DELAY | NUD_PROBE)) && (new & NUD_REACHABLE))
 			notify = 1;
 #endif
@@ -2780,7 +2779,7 @@ EXPORT_SYMBOL(neigh_sysctl_unregister);
 
 #endif	 
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void neigh_sync(int family)
 {

@@ -18,12 +18,12 @@
 #include <net/net_namespace.h>
 #include <net/netns/generic.h>
 #include <net/xfrm.h>
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <net/netlink.h>
 #endif
 
 #include <net/sock.h>
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <net/ip6_route.h>
 
 #if defined(CONFIG_INET_IPSEC_OFFLOAD)|| defined(CONFIG_INET6_IPSEC_OFFLOAD)
@@ -950,7 +950,7 @@ static struct sk_buff *__pfkey_xfrm_state2msg(const struct xfrm_state *x,
 		sa->sadb_sa_flags |= SADB_SAFLAGS_DECAP_DSCP;
 	if (x->props.flags & XFRM_STATE_NOPMTUDISC)
 		sa->sadb_sa_flags |= SADB_SAFLAGS_NOPMTUDISC;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (x->props.flags & XFRM_STATE_ESN)
 		sa->sadb_sa_flags |= SADB_SAFLAGS_ESN;
 #endif
@@ -1196,7 +1196,7 @@ static struct xfrm_state * pfkey_msg2xfrm_state(struct net *net,
 		x->props.flags |= XFRM_STATE_DECAP_DSCP;
 	if (sa->sadb_sa_flags & SADB_SAFLAGS_NOPMTUDISC)
 		x->props.flags |= XFRM_STATE_NOPMTUDISC;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (sa->sadb_sa_flags & SADB_SAFLAGS_ESN)
 		x->props.flags |= XFRM_STATE_ESN;
 #endif
@@ -3051,7 +3051,7 @@ static int pfkey_send_notify(struct xfrm_state *x, const struct km_event *c)
 	if (atomic_read(&net_pfkey->socks_nr) == 0)
 		return 0;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(NLKEY_SUPPORT)
+#if defined(MY_ABC_HERE) && defined(NLKEY_SUPPORT)
 	 
 	ipsec_nlkey_send(net, x, c);
 #endif
@@ -3805,7 +3805,7 @@ static struct xfrm_mgr pfkeyv2_mgr =
 	.migrate	= pfkey_send_migrate,
 };
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(NLKEY_SUPPORT)
+#if defined(MY_ABC_HERE) && defined(NLKEY_SUPPORT)
 extern struct xfrm_state *xfrm_state_lookup_byhandle(struct net *net, u16 handle);
 
 static unsigned short ipsec_sacode_to_nlkeycode(unsigned short sa_code)
@@ -4288,7 +4288,7 @@ int ipsec_nlkey_flow(u16 xfrm_nr, u16 *xfrm_handle, const struct flowi *fl, u16 
 }
 EXPORT_SYMBOL(ipsec_nlkey_flow);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 int ipsec_nlkey_flow_remove(struct flowi *fl, u16 family, u16 dir)
 {
 	struct sk_buff *skb;
@@ -4377,7 +4377,7 @@ static void __exit ipsec_pfkey_exit(void)
 	unregister_pernet_subsys(&pfkey_net_ops);
 	proto_unregister(&key_proto);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(NLKEY_SUPPORT)
+#if defined(MY_ABC_HERE) && defined(NLKEY_SUPPORT)
 	 
 	sock_release(nlkey_socket->sk_socket);
 #endif
@@ -4400,7 +4400,7 @@ static int __init ipsec_pfkey_init(void)
 	if (err != 0)
 		goto out_sock_unregister;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(NLKEY_SUPPORT)
+#if defined(MY_ABC_HERE) && defined(NLKEY_SUPPORT)
 	 
 	ipsec_nlkey_init();
 #endif

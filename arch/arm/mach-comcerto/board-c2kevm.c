@@ -28,7 +28,7 @@ extern char gszSynoHWVersion[];
 #include <asm/mach-types.h>
 #include <asm/io.h>
 
-#ifdef CONFIG_SYNO_C2K_SPI_PARTITION
+#ifdef MY_ABC_HERE
 #include <linux/spi/flash.h>
 #else
 #include <asm/mach/flash.h>
@@ -48,15 +48,15 @@ extern char gszSynoHWVersion[];
 #include <asm/hardware/gic.h>
 #include <asm/mach/time.h>
 #include <mach/gpio.h>
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 #include <linux/synobios.h>
 #endif
 
-#ifdef CONFIG_SYNO_C2K_REBOOT_POWEROFF_BY_MICROP
+#ifdef MY_ABC_HERE
 #include <linux/serial_reg.h>
 #endif
 
-#ifdef CONFIG_SYNO_C2K_WOL_ENABLE
+#ifdef MY_ABC_HERE
 #include <linux/module.h>
 #endif
 
@@ -280,7 +280,7 @@ static struct spi_flash_platform_data comcerto_spi_flash_data = {
 	.resource = m25p80_flash_resource,
 };
 
-#ifdef CONFIG_SYNO_C2K_SPI_PARTITION
+#ifdef MY_ABC_HERE
 struct mtd_partition syno_c2k_16m_spi[] = {
     {
         .name       = "RedBoot",
@@ -696,7 +696,7 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
 		.phy_flags = GEMAC_PHY_RGMII_ADD_DELAY,
 		.bus_id = 0,
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 		.phy_id = 1,
 #else
 		.phy_id = 4,
@@ -710,7 +710,7 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.device_flags = CONFIG_COMCERTO_GEMAC,
 		.mii_config = CONFIG_COMCERTO_USE_RGMII,
 		.gemac_mode = GEMAC_SW_CONF | GEMAC_SW_FULL_DUPLEX | GEMAC_SW_SPEED_1G,
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 		.phy_flags = GEMAC_PHY_RGMII_ADD_DELAY,
 		.bus_id = 0,
 		.phy_id = 2,
@@ -731,10 +731,9 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 		.mac_addr = (u8[])GEM2_MAC,
 	},
 
-	
 	.comcerto_mdio_pdata[0] = {
 		.enabled = 1,
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 		.phy_mask = 0xFFFFFFE0,
 #else
 		.phy_mask = 0xFFFFFFEF,
@@ -746,7 +745,7 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata = {
 	},
 };
 
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 static struct comcerto_pfe_platform_data comcerto_pfe_pdata_ds215air = {
 	.comcerto_eth_pdata[0] = {
 		.name = GEM0_ITF_NAME,
@@ -792,11 +791,11 @@ static struct comcerto_pfe_platform_data comcerto_pfe_pdata_ds215air = {
 #endif
 static u64 comcerto_pfe_dma_mask = DMA_BIT_MASK(32);
 
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 #define SYNO_PFE_NAME "pfe"
 #endif
 static struct platform_device comcerto_pfe_device = {
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 	.name		= SYNO_PFE_NAME,
 #else
 	.name		= "pfe",
@@ -869,12 +868,12 @@ static void __init platform_irq_init(void)
 	device_irq_init();
 }
 
-#ifdef CONFIG_SYNO_C2K_WOL_ENABLE
+#ifdef MY_ABC_HERE
 int (*gpfnSynoWOLSet)(void) = NULL;
 EXPORT_SYMBOL(gpfnSynoWOLSet);
 #endif
 
-#ifdef CONFIG_SYNO_C2K_REBOOT_POWEROFF_BY_MICROP
+#ifdef MY_ABC_HERE
 #define UART0_REG(x)		(COMCERTO_AXI_UART0_VADDR + ((UART_##x) << 2))
 #define SET8N1				0x3
 #define SOFTWARE_SHUTDOWN	0x31
@@ -882,7 +881,7 @@ EXPORT_SYMBOL(gpfnSynoWOLSet);
 
 static void synology_power_off(void)
 {
-#ifdef CONFIG_SYNO_C2K_WOL_ENABLE
+#ifdef MY_ABC_HERE
 	if(gpfnSynoWOLSet) {
 		if(-1 == gpfnSynoWOLSet()) {
 			printk("\nSet syno pfe wake on lan fail!\n");
@@ -902,14 +901,14 @@ static void synology_restart(char mode, const char *cmd)
 
 static void __init platform_init(void)
 {
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 	int i = 0;
 #endif
 	device_init();
 	board_gpio_init();
 
 #if defined(CONFIG_SPI_MSPD_LOW_SPEED) || defined(CONFIG_SPI_MSPD_HIGH_SPEED)
-#ifdef CONFIG_SYNO_C2K_SPI_PARTITION
+#ifdef MY_ABC_HERE
 	if(0 == strncmp(gszSynoHWVersion, HW_DS215airv10, strlen(HW_DS215airv10))) {
 		spi_register_board_info(synology_spi_16m_info, ARRAY_SIZE(synology_spi_16m_info));
 	} else {
@@ -919,7 +918,7 @@ static void __init platform_init(void)
 	spi_register_board_info(comcerto_spi_board_info, ARRAY_SIZE(comcerto_spi_board_info));
 #endif
 #endif
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 	if(0 == strncmp(gszSynoHWVersion, HW_DS215airv10, strlen(HW_DS215airv10))) {
 		mac_addr_init(&comcerto_pfe_pdata_ds215air);
 
@@ -940,7 +939,7 @@ static void __init platform_init(void)
 	platform_add_devices(comcerto_devices, ARRAY_SIZE(comcerto_devices));
 #endif
 
-#ifdef CONFIG_SYNO_C2K_REBOOT_POWEROFF_BY_MICROP
+#ifdef MY_ABC_HERE
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
 #endif

@@ -93,7 +93,7 @@ extern void			addrconf_join_solict(struct net_device *dev,
 extern void			addrconf_leave_solict(struct inet6_dev *idev,
 					const struct in6_addr *addr);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 extern int			(*ipv6_dev_get_saddr_hook)(struct net *net,
 						struct net_device *dev,
 						const struct in6_addr *daddr,

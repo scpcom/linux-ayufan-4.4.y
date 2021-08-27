@@ -11,7 +11,7 @@
 #include <linux/skbuff.h>
 #include <linux/inetdevice.h>
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/syno.h>
 #endif
 
@@ -278,7 +278,7 @@ struct al_eth_adapter {
 
 	bool			an_en;	 
 	bool			lt_en;	 
-#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
+#ifdef MY_DEF_HERE
 	bool			rx_eq_en;
 #endif
 

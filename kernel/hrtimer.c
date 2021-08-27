@@ -496,7 +496,7 @@ static int hrtimer_switch_to_hres(void)
 
 	if (tick_init_highres()) {
 		local_irq_restore(flags);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 #else
 		printk(KERN_WARNING "Could not switch to high resolution "

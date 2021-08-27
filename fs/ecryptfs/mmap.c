@@ -30,7 +30,7 @@ static int ecryptfs_writepage(struct page *page, struct writeback_control *wbc)
 #ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -EIO != rc && -ENOSPC != rc)
 #endif
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		ecryptfs_printk(KERN_WARNING, "Error encrypting "
 				"page (upper index [0x%.16llx])\n", (unsigned long long)page->index);
 #else
@@ -169,7 +169,7 @@ out:
 		ClearPageUptodate(page);
 	else
 		SetPageUptodate(page);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	ecryptfs_printk(KERN_DEBUG, "Unlocking page with index = [0x%.16llx]\n",
 			(unsigned long long)page->index);
 #else
@@ -261,7 +261,7 @@ static int ecryptfs_write_begin(struct file *file,
 			} else {
 				rc = ecryptfs_decrypt_page(page);
 				if (rc) {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 					printk(KERN_ERR "%s: Error decrypting "
 					       "page at index [%lld]; "
 					       "rc = [%d]\n",
@@ -399,7 +399,7 @@ static int ecryptfs_write_end(struct file *file,
 		&ecryptfs_inode_to_private(ecryptfs_inode)->crypt_stat;
 	int rc;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	ecryptfs_printk(KERN_DEBUG, "Calling fill_zeros_to_end_of_page"
 			"(page w/ index = [0x%.16llx], to = [%d])\n", (unsigned long long)index, to);
 #else
@@ -419,7 +419,7 @@ static int ecryptfs_write_end(struct file *file,
 	 
 	rc = fill_zeros_to_end_of_page(page, to);
 	if (rc) {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		ecryptfs_printk(KERN_WARNING, "Error attempting to fill "
 			"zeros in page with index = [0x%.16llxlx]\n", (unsigned long long)index); 
 #else
@@ -433,7 +433,7 @@ static int ecryptfs_write_end(struct file *file,
 #ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -EIO != rc && -ENOSPC != rc)
 #endif
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
 				"index [0x%.16llx])\n", (unsigned long long)index);
 #else

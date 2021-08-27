@@ -2,19 +2,18 @@
 #define MY_ABC_HERE
 #endif
  
-
 #ifndef _LINUX_RADIX_TREE_H
 #define _LINUX_RADIX_TREE_H
 
 #include <linux/preempt.h>
 #include <linux/types.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/bug.h>
 #endif
 #include <linux/kernel.h>
 #include <linux/rcupdate.h>
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 #ifdef CONFIG_LFS_ON_32CPU
 #define rdx_t	unsigned long long
@@ -30,7 +29,7 @@
 #define RADIX_TREE_EXCEPTIONAL_ENTRY	2
 #define RADIX_TREE_EXCEPTIONAL_SHIFT	2
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 #else
 #define radix_tree_indirect_to_ptr(ptr) \
@@ -94,14 +93,13 @@ static inline int radix_tree_exception(void *arg)
 		(RADIX_TREE_INDIRECT_PTR | RADIX_TREE_EXCEPTIONAL_ENTRY));
 }
 
-
 static inline void radix_tree_replace_slot(void **pslot, void *item)
 {
 	BUG_ON(radix_tree_is_indirect_ptr(item));
 	rcu_assign_pointer(*pslot, item);
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 int radix_tree_insert(struct radix_tree_root *, rdx_t, void *);
 void *radix_tree_lookup(struct radix_tree_root *, rdx_t);
 void **radix_tree_lookup_slot(struct radix_tree_root *, rdx_t);
@@ -134,7 +132,7 @@ unsigned long radix_tree_prev_hole(struct radix_tree_root *root,
 #endif
 int radix_tree_preload(gfp_t gfp_mask);
 void radix_tree_init(void);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 void *radix_tree_tag_set(struct radix_tree_root *root,
 			rdx_t index, unsigned int tag);
 void *radix_tree_tag_clear(struct radix_tree_root *root,
@@ -174,7 +172,7 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 		unsigned int fromtag, unsigned int totag);
 #endif
 int radix_tree_tagged(struct radix_tree_root *root, unsigned int tag);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 rdx_t radix_tree_locate_item(struct radix_tree_root *root, void *item);
 #else
 unsigned long radix_tree_locate_item(struct radix_tree_root *root, void *item);
@@ -184,7 +182,7 @@ static inline void radix_tree_preload_end(void)
 {
 	preempt_enable();
 }
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 struct radix_tree_iter {
 	rdx_t	index;

@@ -10,7 +10,7 @@
 #include <linux/spi/spi.h>
 #include <linux/scatterlist.h>
 #include <linux/module.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/of.h>
 #endif
 
@@ -28,7 +28,7 @@ static int __devinit dw_spi_mmio_probe(struct platform_device *pdev)
 	struct dw_spi_mmio *dwsmmio;
 	struct dw_spi *dws;
 	struct resource *mem, *ioarea;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	int ret, num_cs, bus_num;
 #else
 	int ret;
@@ -78,7 +78,7 @@ static int __devinit dw_spi_mmio_probe(struct platform_device *pdev)
 	}
 	clk_enable(dwsmmio->clk);
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	ret = of_property_read_u32(pdev->dev.of_node, "bus-num", &bus_num);
 	if (ret < 0)
 		dws->bus_num = 0;
@@ -143,7 +143,7 @@ static int __devexit dw_spi_mmio_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static struct of_device_id dw_spi_mmio_of_match[] = {
 		{ .compatible = "snps,dw-spi-mmio", },
 		{  }
@@ -156,7 +156,7 @@ static struct platform_driver dw_spi_mmio_driver = {
 	.driver		= {
 		.name	= DRIVER_NAME,
 		.owner	= THIS_MODULE,
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		.of_match_table = dw_spi_mmio_of_match,
 #endif
 	},

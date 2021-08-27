@@ -1536,7 +1536,7 @@ retry:
 		pgoff_t next = 0, tofind;
 		struct page **pages;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		tofind = min((pgoff_t)((cifs_sb->wsize / PAGE_CACHE_SIZE) - 1),
 				end - index) + 1;
 #else

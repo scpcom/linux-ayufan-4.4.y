@@ -211,12 +211,9 @@
 #define DRAM_BUF_REG13  0x60a04  
 #define DRAM_BUF_REG14  0x60b00  
 
-
-
 #define DRAM_BUF_REG_DV 0
 
-
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_DEF_HERE
 #define SDRAM_CS0_BASE  0x00000000
 #define SDRAM_CS0_SIZE  _128M
 
@@ -242,11 +239,10 @@
 #define PEX0_IO_BASE 0xf2000000
 #define PEX0_IO_SIZE _1M
 
-
 #define NFLASH_CS_BASE 0xfa000000
 #define NFLASH_CS_SIZE _2M
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_DEF_HERE
 #define SPI_CS_BASE 0xf8000000
 #define SPI_CS_SIZE _4M
 #else

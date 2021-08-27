@@ -65,7 +65,7 @@ static void raid6_dual_recov(int disks, size_t bytes, int faila, int failb, stru
 	if (failb == disks-1) {
 		if (faila == disks-2) {
 			 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			init_async_submit(&submit, ASYNC_TX_FENCE, NULL, NULL, NULL, addr_conv);
 #else
 			init_async_submit(&submit, 0, NULL, NULL, NULL, addr_conv);
@@ -77,14 +77,13 @@ static void raid6_dual_recov(int disks, size_t bytes, int faila, int failb, stru
 			int count = 0;
 			int i;
 
-			
 			for (i = disks; i-- ; ) {
 				if (i == faila || i == failb)
 					continue;
 				blocks[count++] = ptrs[i];
 			}
 			dest = ptrs[faila];
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			init_async_submit(&submit, ASYNC_TX_FENCE | ASYNC_TX_XOR_ZERO_DST, NULL,
 					  NULL, NULL, addr_conv);
 #else
@@ -93,7 +92,7 @@ static void raid6_dual_recov(int disks, size_t bytes, int faila, int failb, stru
 #endif
 			tx = async_xor(dest, blocks, 0, count, bytes, &submit);
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			init_async_submit(&submit, ASYNC_TX_FENCE, tx, NULL, NULL, addr_conv);
 #else
 			init_async_submit(&submit, 0, tx, NULL, NULL, addr_conv);
@@ -103,7 +102,7 @@ static void raid6_dual_recov(int disks, size_t bytes, int faila, int failb, stru
 	} else {
 		if (failb == disks-2) {
 			 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			init_async_submit(&submit, ASYNC_TX_FENCE, NULL, NULL, NULL, addr_conv);
 #else
 			init_async_submit(&submit, 0, NULL, NULL, NULL, addr_conv);
@@ -111,7 +110,7 @@ static void raid6_dual_recov(int disks, size_t bytes, int faila, int failb, stru
 			tx = async_raid6_datap_recov(disks, bytes, faila, ptrs, &submit);
 		} else {
 			 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			init_async_submit(&submit, ASYNC_TX_FENCE, NULL, NULL, NULL, addr_conv);
 #else
 			init_async_submit(&submit, 0, NULL, NULL, NULL, addr_conv);

@@ -853,8 +853,7 @@ static int __init arch_hw_breakpoint_init(void)
 				max_watchpoint_len);
 	}
 
-	
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	hook_fault_code(FAULT_CODE_DEBUG, hw_breakpoint_pending, SIGTRAP,
 			TRAP_HWBKPT, "watchpoint debug exception");
 	hook_ifault_code(FAULT_CODE_DEBUG, hw_breakpoint_pending, SIGTRAP,
@@ -866,11 +865,10 @@ static int __init arch_hw_breakpoint_init(void)
 			"breakpoint debug exception");
 #endif
 
-	
 	register_cpu_notifier(&dbg_reset_nb);
 	return 0;
 }
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #else
 arch_initcall(arch_hw_breakpoint_init);
 #endif

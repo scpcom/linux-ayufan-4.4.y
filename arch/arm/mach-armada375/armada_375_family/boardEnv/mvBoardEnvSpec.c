@@ -10,10 +10,7 @@
 
 #define ARRSZ(x)                (sizeof(x) / sizeof(x[0]))
 
-
-
-
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 
 MV_BOARD_MAC_INFO syno_ds215j_BoardMacInfo[] = {
 	 
@@ -433,9 +430,8 @@ MV_BOARD_INFO db88f6720_board_info = {
 	.configAutoDetect		= MV_TRUE
 };
 
-
 MV_BOARD_INFO *marvellBoardInfoTbl[] = {
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	&syno_ds215j_info,
 	&syno_ds115_info,
 #else

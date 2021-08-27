@@ -237,7 +237,7 @@ static int marvell_of_reg_init(struct phy_device *phydev)
 
 static int m88e1121_config_aneg(struct phy_device *phydev)
 {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	int err, oldpage, mscr, val;
 #else
 	int err, oldpage, mscr;
@@ -285,7 +285,7 @@ static int m88e1121_config_aneg(struct phy_device *phydev)
 	oldpage = phy_read(phydev, MII_MARVELL_PHY_PAGE);
 
 	phy_write(phydev, MII_MARVELL_PHY_PAGE, MII_88E1121_PHY_LED_PAGE);
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	 
 	val = phy_read(phydev, MII_88E1121_PHY_LED_CTRL);
 	val &= ~0xfff;

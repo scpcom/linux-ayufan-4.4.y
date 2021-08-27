@@ -464,7 +464,7 @@ int udpv6_queue_rcv_skb(struct sock * sk, struct sk_buff *skb)
 	if (!xfrm6_policy_check(sk, XFRM_POLICY_IN, skb))
 		goto drop;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	if ( up->encap_type ) {
 		 
@@ -1150,7 +1150,7 @@ void udpv6_destroy_sock(struct sock *sk)
 	inet6_destroy_sock(sk);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 int udp6_lib_setsockopt(struct sock *sk, int level, int optname,
 		       char __user *optval, unsigned int optlen,
@@ -1228,12 +1228,11 @@ int udp6_lib_setsockopt(struct sock *sk, int level, int optname,
 EXPORT_SYMBOL(udp6_lib_setsockopt);
 #endif
 
-
 int udpv6_setsockopt(struct sock *sk, int level, int optname,
 		     char __user *optval, unsigned int optlen)
 {
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		return udp6_lib_setsockopt(sk, level, optname, optval, optlen,
 					  udp_v6_push_pending_frames);
 #else
@@ -1248,7 +1247,7 @@ int compat_udpv6_setsockopt(struct sock *sk, int level, int optname,
 			    char __user *optval, unsigned int optlen)
 {
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		return udp6_lib_setsockopt(sk, level, optname, optval, optlen,
 					  udp_v6_push_pending_frames);
 #else

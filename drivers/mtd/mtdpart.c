@@ -10,7 +10,7 @@
 #include <linux/kmod.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/root_dev.h>
 #include <linux/magic.h>
 #endif
@@ -35,7 +35,7 @@ extern char gszCustomSerialNum[];
 
 #include "mtdcore.h"
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define MTD_ERASE_PARTIAL	0x8000  
 #endif
 
@@ -49,9 +49,8 @@ struct mtd_part {
 	struct list_head list;
 };
 
-
 #define PART(x)  ((struct mtd_part *)(x))
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define IS_PART(mtd) (mtd->read == part_read)
 #endif
 
@@ -251,7 +250,7 @@ static int part_erase(struct mtd_info *mtd, struct erase_info *instr)
 	if (instr->addr >= mtd->size)
 		return -EINVAL;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	instr->partial_start = false;
 	if (mtd->flags & MTD_ERASE_PARTIAL) {
 		size_t readlen = 0;
@@ -302,7 +301,7 @@ static int part_erase(struct mtd_info *mtd, struct erase_info *instr)
 		if (instr->fail_addr != MTD_FAIL_ADDR_UNKNOWN)
 			instr->fail_addr -= part->offset;
 		instr->addr -= part->offset;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		if (mtd->flags & MTD_ERASE_PARTIAL)
 			kfree(instr->erase_buf);
 #endif
@@ -314,11 +313,11 @@ void mtd_erase_callback(struct erase_info *instr)
 {
 	if (instr->mtd->erase == part_erase) {
 		struct mtd_part *part = PART(instr->mtd);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		size_t wrlen = 0;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		if (instr->mtd->flags & MTD_ERASE_PARTIAL) {
 			if (instr->partial_start) {
 				part->master->write(part->master,
@@ -593,7 +592,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	if ((slave->mtd.flags & MTD_WRITEABLE) &&
 	    mtd_mod_by_eb(slave->offset, &slave->mtd)) {
 		 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		slave->mtd.flags |= MTD_ERASE_PARTIAL;
 		if (((u32) slave->mtd.size) > master->erasesize)
 			slave->mtd.flags &= ~MTD_WRITEABLE;
@@ -607,7 +606,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 #endif
 	}
 	if ((slave->mtd.flags & MTD_WRITEABLE) &&
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	    mtd_mod_by_eb(slave->offset + slave->mtd.size, &slave->mtd)) {
 		slave->mtd.flags |= MTD_ERASE_PARTIAL;
 
@@ -622,7 +621,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 			part->name);
 #endif
 	}
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if ((slave->mtd.flags & (MTD_ERASE_PARTIAL|MTD_WRITEABLE)) == MTD_ERASE_PARTIAL)
 		printk(KERN_WARNING"mtd: partition \"%s\" must either start or end on erase block boundary or be smaller than an erase block -- forcing read-only\n",
 				part->name);
@@ -856,7 +855,7 @@ int mtd_del_partition(struct mtd_info *master, int partno)
 }
 EXPORT_SYMBOL_GPL(mtd_del_partition);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_MTD_ROOTFS_SPLIT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_MTD_ROOTFS_SPLIT)
 #define ROOTFS_SPLIT_NAME "rootfs_data"
 #define ROOTFS_REMOVED_NAME "<removed>"
 
@@ -1009,7 +1008,7 @@ int add_mtd_partitions(struct mtd_info *master,
 	struct mtd_part *slave;
 	uint64_t cur_offset = 0;
 	int i;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_MTD_ROOTFS_SPLIT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_MTD_ROOTFS_SPLIT)
 	int ret;
 #endif
 
@@ -1026,7 +1025,7 @@ int add_mtd_partitions(struct mtd_info *master,
 
 		add_mtd_device(&slave->mtd);
 
-#if defined(CONFIG_SYNO_COMCERTO) 
+#if defined(MY_ABC_HERE) 
 		if (!strcmp(parts[i].name, "rootfs")) {
 #ifdef CONFIG_MTD_ROOTFS_ROOT_DEV
 			if (ROOT_DEV == 0) {
@@ -1047,7 +1046,7 @@ int add_mtd_partitions(struct mtd_info *master,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 int mtd_device_refresh(struct mtd_info *mtd)
 {
 	int ret = 0;
@@ -1116,9 +1115,8 @@ int deregister_mtd_parser(struct mtd_part_parser *p)
 }
 EXPORT_SYMBOL_GPL(deregister_mtd_parser);
 
-
 static const char *default_mtd_part_types[] = {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	"RedBoot",
 #endif
 	"cmdlinepart",

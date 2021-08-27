@@ -9,7 +9,7 @@
 #include "mvRtcReg.h"
 #include "mvRtc.h"
 
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
 MV_VOID SYNOmvRtcExtAlarmSet(MV_U32 time)
 {
 	SYNOmvRtcExtAlarmClean();
@@ -111,15 +111,13 @@ MV_VOID mvRtcTimeGet(MV_RTC_TIME *mvTime)
 	return;
 }
 
-
 MV_VOID mvRtcInit(MV_VOID)
 {
 	return;
 }
 
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
 #include <linux/module.h>
-
 
 EXPORT_SYMBOL(mvRtcTimeSet);
 EXPORT_SYMBOL(mvRtcTimeGet);

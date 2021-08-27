@@ -7,15 +7,13 @@
 
 #include <linux/types.h>
 
-
-
 #define ETH_ALEN	6		 
 #define ETH_HLEN	14		 
 #define ETH_ZLEN	60		 
 #define ETH_DATA_LEN	1500		 
 #define ETH_FRAME_LEN	1514		 
 #define ETH_FCS_LEN	4		 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define ETH_IPHLEN      2                
 #endif
 

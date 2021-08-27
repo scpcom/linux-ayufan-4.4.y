@@ -509,14 +509,13 @@ static const struct rpc_call_ops nfs_read_full_ops = {
 	.rpc_release = nfs_readpage_release_full,
 };
 
-
 int nfs_readpage(struct file *file, struct page *page)
 {
 	struct nfs_open_context *ctx;
 	struct inode *inode = page->mapping->host;
 	int		error;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	dprintk("NFS: nfs_readpage (%p %ld@%llu)\n",
 		page, PAGE_CACHE_SIZE, (unsigned long long)page->index);
 #else

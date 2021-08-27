@@ -626,7 +626,7 @@ static void do_signal(struct pt_regs *regs, int syscall)
 			}
 		}
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 #else
 		 
@@ -636,7 +636,7 @@ static void do_signal(struct pt_regs *regs, int syscall)
 		}
 #endif
 	}
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	 
 	if (test_and_clear_thread_flag(TIF_RESTORE_SIGMASK))
 		set_current_blocked(&current->saved_sigmask);

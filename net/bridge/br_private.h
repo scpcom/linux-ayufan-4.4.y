@@ -65,7 +65,7 @@ struct net_bridge_fdb_entry
 	unsigned char			is_local;
 	unsigned char			is_static;
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	bool 			nfp;
 #endif  
@@ -130,7 +130,7 @@ struct net_bridge_port
 
 	unsigned long 			flags;
 #define BR_HAIRPIN_MODE		0x00000001
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define BR_ISOLATE_MODE		0x00000002
 #endif
 
@@ -352,7 +352,7 @@ extern int br_fdb_insert(struct net_bridge *br,
 extern void br_fdb_update(struct net_bridge *br,
 			  struct net_bridge_port *source,
 			  const unsigned char *addr);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 	extern void br_fdb_register_can_expire_cb(int(*cb)(unsigned char *mac_addr, struct net_device *dev)); 
 	extern void br_fdb_deregister_can_expire_cb(void);
 #endif 

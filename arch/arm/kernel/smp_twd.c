@@ -32,7 +32,7 @@ static void twd_set_mode(enum clock_event_mode mode,
 		 
 		ctrl = TWD_TIMER_CONTROL_ENABLE | TWD_TIMER_CONTROL_IT_ENABLE
 			| TWD_TIMER_CONTROL_PERIODIC;
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 		writel_relaxed(twd_timer_rate / HZ, twd_base + TWD_TIMER_LOAD);
 #else
 		__raw_writel(twd_timer_rate / HZ, twd_base + TWD_TIMER_LOAD);
@@ -48,7 +48,7 @@ static void twd_set_mode(enum clock_event_mode mode,
 		ctrl = 0;
 	}
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	writel_relaxed(ctrl, twd_base + TWD_TIMER_CONTROL);
 #else
 	__raw_writel(ctrl, twd_base + TWD_TIMER_CONTROL);
@@ -58,7 +58,7 @@ static void twd_set_mode(enum clock_event_mode mode,
 static int twd_set_next_event(unsigned long evt,
 			struct clock_event_device *unused)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	unsigned long ctrl = readl_relaxed(twd_base + TWD_TIMER_CONTROL);
 #else
 	unsigned long ctrl = __raw_readl(twd_base + TWD_TIMER_CONTROL);
@@ -66,7 +66,7 @@ static int twd_set_next_event(unsigned long evt,
 
 	ctrl |= TWD_TIMER_CONTROL_ENABLE;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	writel_relaxed(evt, twd_base + TWD_TIMER_COUNTER);
 	writel_relaxed(ctrl, twd_base + TWD_TIMER_CONTROL);
 #else
@@ -77,10 +77,9 @@ static int twd_set_next_event(unsigned long evt,
 	return 0;
 }
 
-
 int twd_timer_ack(void)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	if (readl_relaxed(twd_base + TWD_TIMER_INTSTAT)) {
 		writel_relaxed(1, twd_base + TWD_TIMER_INTSTAT);
 #else
@@ -112,18 +111,15 @@ static void __cpuinit twd_calibrate_rate(void)
 		while (get_jiffies_64() < waitjiffies)
 			udelay(10);
 
-		
 		waitjiffies += 5;
 
-				 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 		writel_relaxed(0x1, twd_base + TWD_TIMER_CONTROL);
 #else
 		__raw_writel(0x1, twd_base + TWD_TIMER_CONTROL);
 #endif
 
-				 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 		writel_relaxed(0xFFFFFFFFU, twd_base + TWD_TIMER_COUNTER);
 #else
 		__raw_writel(0xFFFFFFFFU, twd_base + TWD_TIMER_COUNTER);
@@ -132,7 +128,7 @@ static void __cpuinit twd_calibrate_rate(void)
 		while (get_jiffies_64() < waitjiffies)
 			udelay(10);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 		count = readl_relaxed(twd_base + TWD_TIMER_COUNTER);
 #else
 		count = __raw_readl(twd_base + TWD_TIMER_COUNTER);
@@ -181,7 +177,7 @@ void __cpuinit twd_timer_setup(struct clock_event_device *clk)
 
 	twd_calibrate_rate();
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	writel_relaxed(0, twd_base + TWD_TIMER_CONTROL);
 #endif
 

@@ -193,12 +193,12 @@ const struct file_operations ext4_file_operations = {
 	.release	= ext4_release_file,
 	.fsync		= ext4_sync_file,
 	.splice_read	= generic_file_splice_read,
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 	.splice_write	= comcerto_file_splice_write,
 #else
 	.splice_write	= generic_file_splice_write,
 #endif
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	.splice_from_socket = generic_splice_from_socket,
 #endif
 	.fallocate	= ext4_fallocate,

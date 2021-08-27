@@ -218,12 +218,11 @@ static u32 vfp_emulate_instruction(u32 inst, u32 fpscr, struct pt_regs *regs)
 	return exceptions & ~VFP_NAN_FLAG;
 }
 
-
 void VFP_bounce(u32 trigger, u32 fpexc, struct pt_regs *regs)
 {
 	u32 fpscr, orig_fpscr, fpsid, exceptions;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	 
 	if (regs->ARM_cpsr & PSR_T_BIT)
 		regs->ARM_pc += 2;
@@ -385,7 +384,7 @@ static int vfp_hotplug(struct notifier_block *b, unsigned long action,
 	return NOTIFY_OK;
 }
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_CPU_PM
 void vfp_save(void)
 {
@@ -396,7 +395,7 @@ void vfp_save(void)
 }
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)  || (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_CPU_PM))
+#if defined(MY_DEF_HERE)  || (defined(MY_DEF_HERE) && defined(CONFIG_CPU_PM))
 void vfp_restore(void)
 {
         if (VFP_arch)

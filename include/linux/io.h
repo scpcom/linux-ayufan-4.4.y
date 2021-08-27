@@ -47,7 +47,7 @@ void __iomem *devm_ioremap(struct device *dev, resource_size_t offset,
 void __iomem *devm_ioremap_nocache(struct device *dev, resource_size_t offset,
 				    unsigned long size);
 void devm_iounmap(struct device *dev, void __iomem *addr);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 void __iomem *devm_ioremap_resource(struct device *dev, struct resource *res);
 #endif
 int check_signature(const volatile void __iomem *io_addr,

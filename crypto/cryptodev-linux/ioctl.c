@@ -18,7 +18,7 @@
 #include "zc.h"
 #include "version.h"
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/miscdevice.h>
 #endif
 

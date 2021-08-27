@@ -2338,9 +2338,7 @@ int vmtruncate_range(struct inode *inode, loff_t lstart, loff_t lend)
 
 #endif  
 
-
-
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 void shmem_set_file(struct vm_area_struct *vma, struct file *file)
 {
 	if (vma->vm_file)
@@ -2419,7 +2417,7 @@ int shmem_zero_setup(struct vm_area_struct *vma)
 	if (IS_ERR(file))
 		return PTR_ERR(file);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	shmem_set_file(vma, file);
 #else
 	if (vma->vm_file)

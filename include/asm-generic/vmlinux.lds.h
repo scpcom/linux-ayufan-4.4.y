@@ -2,13 +2,11 @@
 #define MY_ABC_HERE
 #endif
  
-
-
 #ifndef LOAD_OFFSET
 #define LOAD_OFFSET 0
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #ifndef SYMTAB_KEEP_STR
 #define SYMTAB_KEEP_STR *(__ksymtab_strings+*)
 #define SYMTAB_DISCARD_STR
@@ -594,8 +592,7 @@
 #define INIT_RAM_FS
 #endif
 
-
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define DISCARDS							\
 	/DISCARD/ : {							\
 	EXIT_TEXT							\

@@ -1350,7 +1350,7 @@ MV_U32 mvEthPhyAddGet(MV_U32 ethPortNum)
        return ethphyHalData.phyAddr[ethPortNum];
 }
 
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
  
 #include <linux/export.h>
 EXPORT_SYMBOL(mvEthPhyRegRead);

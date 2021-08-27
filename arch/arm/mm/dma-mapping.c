@@ -21,17 +21,17 @@
 #include <asm/mach/arch.h>
 
 #include "mm.h"
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_UNCACHED_DMA)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_UNCACHED_DMA)
 #include <linux/hugetlb.h>
 #include <asm/pgalloc.h>
 #include <asm/mach/map.h>
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 extern unsigned long arm_dma_zone_size;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_UNCACHED_DMA)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_UNCACHED_DMA)
 static pgd_t *shadow_pg_dir;
 static u16 *shadow_pmd_count;
 
@@ -208,7 +208,7 @@ static int __init consistent_init(void)
 	pte_t *pte;
 	int i = 0;
 	unsigned long base = consistent_base;
-#if defined(CONFIG_SYNO_COMCERTO)	
+#if defined(MY_ABC_HERE)	
 	unsigned long num_ptes = (CONSISTENT_END - base + PMD_SIZE -1) >> PMD_SHIFT;
 #else
 	unsigned long num_ptes = (CONSISTENT_END - base) >> PMD_SHIFT;
@@ -238,7 +238,7 @@ static int __init consistent_init(void)
 			ret = -ENOMEM;
 			break;
 		}
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
 		WARN_ON(!pmd_none(*pmd));
 #endif
 		pte = pte_alloc_kernel(pmd, base);
@@ -249,7 +249,7 @@ static int __init consistent_init(void)
 		}
 
 		consistent_pte[i++] = pte;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		base = (base + PMD_SIZE) & PMD_MASK;
 	} while ((base-1) < (CONSISTENT_END - 1));
 #else
@@ -476,7 +476,7 @@ void dma_free_coherent(struct device *dev, size_t size, void *cpu_addr, dma_addr
 }
 EXPORT_SYMBOL(dma_free_coherent);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_UNCACHED_DMA)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_UNCACHED_DMA)
 static inline void shadow_pmd_inc(const void *kaddr, int incr)
 {
 	unsigned long flags;
@@ -502,7 +502,7 @@ static inline void copy_pmd_fast(pmd_t *pmdpd, pmd_t *pmdps)
 static inline void __dmac_map_area(const void *kaddr, size_t size,
 	int dir)
 {
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_UNCACHED_DMA)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_UNCACHED_DMA)
 	pmd_t *pmd, *shadow_pmd;
 	pte_t *pte;
 	const void *kaddr_page;
@@ -570,7 +570,7 @@ static inline void __dmac_map_area(const void *kaddr, size_t size,
 	dmac_map_area(kaddr, size, dir);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static inline void __dmac_unmap_area(const void *kaddr, size_t size,
 	int dir)
 {
@@ -685,11 +685,10 @@ static inline void __dmac_unmap_area(const void *kaddr, size_t size,
 }
 #endif
 
-
 void ___dma_single_cpu_to_dev(const void *kaddr, size_t size,
 	enum dma_data_direction dir)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	unsigned long paddr = __pa(kaddr);
 #else
 	unsigned long paddr;
@@ -697,7 +696,7 @@ void ___dma_single_cpu_to_dev(const void *kaddr, size_t size,
 
 	BUG_ON(!virt_addr_valid(kaddr) || !virt_addr_valid(kaddr + size - 1));
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if ((paddr + size) <= arm_dma_zone_size) {
 		if (dir != DMA_FROM_DEVICE)
 			wmb();
@@ -706,17 +705,17 @@ void ___dma_single_cpu_to_dev(const void *kaddr, size_t size,
 	}
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	__dmac_map_area(kaddr, size, dir);
 #else
 	dmac_map_area(kaddr, size, dir);
 #endif
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	paddr = __pa(kaddr);
 #endif
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	if (dir == DMA_FROM_DEVICE) {
 		outer_inv_range(paddr, paddr + size);
 	} else {
@@ -730,18 +729,18 @@ EXPORT_SYMBOL(___dma_single_cpu_to_dev);
 void ___dma_single_dev_to_cpu(const void *kaddr, size_t size,
 	enum dma_data_direction dir)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	unsigned long paddr = __pa(kaddr);
 #endif
 
 	BUG_ON(!virt_addr_valid(kaddr) || !virt_addr_valid(kaddr + size - 1));
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if ((paddr + size) <= arm_dma_zone_size)
 		return;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	 
 	if (dir != DMA_TO_DEVICE) {
@@ -814,13 +813,13 @@ static void dma_cache_maint_page(struct page *page, unsigned long offset,
 void ___dma_page_cpu_to_dev(struct page *page, unsigned long off,
 	size_t size, enum dma_data_direction dir)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	unsigned long paddr = page_to_phys(page) + off;
 #else
 	unsigned long paddr;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if ((paddr + size) <= arm_dma_zone_size) {
 		if (dir != DMA_FROM_DEVICE)
 			wmb();
@@ -829,17 +828,17 @@ void ___dma_page_cpu_to_dev(struct page *page, unsigned long off,
 	}
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	dma_cache_maint_page(page, off, size, dir, __dmac_map_area);
 #else
 	dma_cache_maint_page(page, off, size, dir, dmac_map_area);
 #endif
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	paddr = page_to_phys(page) + off;
 #endif
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	if (dir == DMA_FROM_DEVICE) {
 		outer_inv_range(paddr, paddr + size);
 	} else {
@@ -855,12 +854,12 @@ void ___dma_page_dev_to_cpu(struct page *page, unsigned long off,
 {
 	unsigned long paddr = page_to_phys(page) + off;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if ((paddr + size) <= arm_dma_zone_size)
 		return;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	 
 	if (dir != DMA_TO_DEVICE) {

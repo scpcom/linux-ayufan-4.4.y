@@ -967,8 +967,7 @@ int device_pm_wait_for_dev(struct device *subordinate, struct device *dev)
 }
 EXPORT_SYMBOL_GPL(device_pm_wait_for_dev);
 
-#if defined(CONFIG_SYNO_COMCERTO)
-
+#if defined(MY_ABC_HERE)
  
 #ifdef CONFIG_PM_SYSFS_MANUAL
 

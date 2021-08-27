@@ -79,7 +79,7 @@ struct xfrm_state {
 	struct hlist_node	bysrc;
 	struct hlist_node	byspi;
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	struct hlist_node 	byh;
 	u16			handle;
 #endif
@@ -149,12 +149,10 @@ struct xfrm_state {
 	struct xfrm_mode	*inner_mode_iaf;
 	struct xfrm_mode	*outer_mode;
 
-	
 	struct xfrm_sec_ctx	*security;
 
-	
 	void			*data;
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	  
 	int	dir;
 	int	offloaded;	
@@ -177,7 +175,7 @@ enum {
 	XFRM_STATE_DEAD
 };
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 enum {
 	 XFRM_STATE_DIR_UNKNOWN,
 	 XFRM_STATE_DIR_IN,
@@ -238,7 +236,7 @@ struct xfrm_policy_afinfo {
 
 extern int xfrm_policy_register_afinfo(struct xfrm_policy_afinfo *afinfo);
 extern int xfrm_policy_unregister_afinfo(struct xfrm_policy_afinfo *afinfo);
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 extern struct xfrm_policy_afinfo *xfrm_policy_get_afinfo(unsigned short family);
 #endif
 extern void km_policy_notify(struct xfrm_policy *xp, int dir, const struct km_event *c);
@@ -813,7 +811,7 @@ struct sec_path {
 	struct xfrm_state	*xvec[XFRM_MAX_DEPTH];
 };
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 struct xfrm_input_shared
 {
 	struct sk_buff 		*skb;
@@ -1348,7 +1346,7 @@ extern int xfrm4_tunnel_register(struct xfrm_tunnel *handler, unsigned short fam
 extern int xfrm4_tunnel_deregister(struct xfrm_tunnel *handler, unsigned short family);
 extern int xfrm6_extract_header(struct sk_buff *skb);
 extern int xfrm6_extract_input(struct xfrm_state *x, struct sk_buff *skb);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 extern int xfrm6_rcv_encap(struct sk_buff *skb, int nexthdr, __be32 spi,
 			   int encap_type);
@@ -1372,7 +1370,7 @@ extern int xfrm6_find_1stfragopt(struct xfrm_state *x, struct sk_buff *skb,
 
 #ifdef CONFIG_XFRM
 extern int xfrm4_udp_encap_rcv(struct sock *sk, struct sk_buff *skb);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 extern int xfrm6_udp_encap_rcv(struct sock *sk, struct sk_buff *skb);
 #endif
 extern int xfrm_user_policy(struct sock *sk, int optname, u8 __user *optval, int optlen);
@@ -1381,7 +1379,7 @@ static inline int xfrm_user_policy(struct sock *sk, int optname, u8 __user *optv
 {
  	return -ENOPROTOOPT;
 } 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 static inline int xfrm6_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
 {

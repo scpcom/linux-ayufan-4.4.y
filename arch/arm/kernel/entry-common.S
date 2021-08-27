@@ -17,7 +17,7 @@
 #include <asm/unwind.h>
 
 #include "entry-header.S"
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <asm/page.h>
 #endif
 
@@ -582,14 +582,14 @@ sys_fstatfs64_wrapper:
 		b	sys_fstatfs64
 ENDPROC(sys_fstatfs64_wrapper)
 
-#ifndef CONFIG_SYNO_ALPINE
+#ifndef MY_DEF_HERE
 /*
  * Note: off_4k (r5) is always units of 4K.  If we can't do the requested
  * offset, we return EINVAL.
  */
 #endif
 sys_mmap2:
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		str	r5, [sp, #4]
 #if (PAGE_SHIFT > 12)
 		b	sys_arm_mmap_4koff
@@ -598,7 +598,7 @@ sys_mmap2:
 #endif
 #else
 #if PAGE_SHIFT > 12
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define PGOFF_MASK ((1 << (PAGE_SHIFT - 12)) - 1)
 #endif
 		tst	r5, #PGOFF_MASK
@@ -611,7 +611,7 @@ sys_mmap2:
 		str	r5, [sp, #4]
 		b	sys_mmap_pgoff
 #endif
-#endif //end of CONFIG_SYNO_ALPINE
+#endif //end of MY_DEF_HERE
 ENDPROC(sys_mmap2)
 
 #ifdef CONFIG_OABI_COMPAT

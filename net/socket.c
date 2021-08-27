@@ -1415,7 +1415,7 @@ SYSCALL_DEFINE6(recvfrom, int, fd, void __user *, ubuf, size_t, size,
 	msg.msg_controllen = 0;
 	msg.msg_iovlen = 1;
 	msg.msg_iov = &iov;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	msg.msg_flags = 0;
 #endif
 	iov.iov_len = size;

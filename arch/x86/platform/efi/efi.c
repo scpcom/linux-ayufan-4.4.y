@@ -50,14 +50,13 @@ static inline bool efi_is_native(void)
 
 unsigned long x86_efi_facility;
 
-
 int efi_enabled(int facility)
 {
 	return test_bit(facility, &x86_efi_facility) != 0;
 }
 EXPORT_SYMBOL(efi_enabled);
 
-#ifdef CONFIG_SYNO_EFI
+#ifdef MY_DEF_HERE
 static bool disable_runtime = true;
 static int __init setup_withefi(char *arg)
 {

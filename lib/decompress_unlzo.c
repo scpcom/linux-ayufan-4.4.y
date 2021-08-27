@@ -10,7 +10,7 @@
 
 #include <linux/types.h>
 #include <linux/lzo.h>
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/decompress/unlzo_mm.h>
 #endif
 #include <linux/decompress/mm.h>

@@ -41,16 +41,14 @@ struct rtable {
 	int			rt_oif;
 	__u32			rt_mark;
 
-	
 	__be32			rt_gateway;
 
-	
 	__be32			rt_spec_dst;  
 	u32			rt_peer_genid;
 	struct inet_peer	*peer;  
 	struct fib_info		*fi;  
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	bool 			nfp;
 #endif  

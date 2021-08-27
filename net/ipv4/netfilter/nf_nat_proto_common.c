@@ -77,7 +77,7 @@ void nf_nat_proto_unique_tuple(struct nf_conntrack_tuple *tuple,
 	else
 		off = *rover;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         
        if ((range->flags & IP_NAT_RANGE_4RD_NAPT) && (maniptype == IP_NAT_MANIP_SRC)){
                __be16 fix_port;
@@ -193,7 +193,7 @@ void nf_nat_proto_unique_tuple(struct nf_conntrack_tuple *tuple,
 			*rover = off;
 		return;
 	}
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
        }
 #endif
 	return;

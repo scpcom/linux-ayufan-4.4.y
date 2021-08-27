@@ -1017,15 +1017,14 @@ MV_BOOL mvCtrlDDRECC(MV_VOID)
 	return (reg & (0x1 << REG_SDRAM_CONFIG_ECC_OFFS)) ? MV_TRUE : MV_FALSE;
 }
 
-
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 MV_32 mvCtrlGetJuncTemp(MV_VOID)
 #else
 MV_U32 mvCtrlGetJuncTemp(MV_VOID)
 #endif
 {
 	MV_32 reg = 0;
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	 
 	static MV_32 reg_last = 249;
 #endif
@@ -1052,7 +1051,7 @@ MV_U32 mvCtrlGetJuncTemp(MV_VOID)
 	reg = MV_REG_READ(TSEN_STATUS_REG);
 	reg = (reg & TSEN_STATUS_TEMP_OUT_MASK) >> TSEN_STATUS_TEMP_OUT_OFFSET;
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	if (0 == reg)
 		reg = reg_last;
 	else

@@ -79,9 +79,7 @@ static inline void wakeup_sysfs_remove(struct device *dev) {}
 
 #endif
 
-
-
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_PM_SYSFS_MANUAL)
+#if defined(MY_ABC_HERE) && defined(CONFIG_PM_SYSFS_MANUAL)
 
 extern int dpm_manual_suspend_start(struct device * , pm_message_t );
 extern void dpm_manual_resume_start(struct device * , pm_message_t);

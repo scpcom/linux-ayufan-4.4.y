@@ -52,7 +52,7 @@ MV_VOID mvBoardEnvInit(MV_VOID)
 	mvBoardSet(mvBoardIdGet());
 	MV_U32 syncCtrl = 0;
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	 
 #else
 	nandDev = boardGetDevCSNum(0, BOARD_DEV_NAND_FLASH);

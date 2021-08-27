@@ -72,7 +72,7 @@ struct csession {
 struct fcrypt {
 	struct list_head	csessions;
 	int		sesn;
-#ifdef CONFIG_SYNO_FIX_OCF_CRYPTODEV_RACE
+#ifdef MY_ABC_HERE
 	spinlock_t	syno_ses_lock;
 #endif
 };
@@ -91,7 +91,7 @@ static	int cryptodev_find(struct crypt_find_op *);
 static int cryptodev_cb(void *);
 static int cryptodev_open(struct inode *inode, struct file *filp);
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
  
 static spinlock_t	cryptodev_drivers_lock;
 static int		cryptodev_drivers_locked;		 
@@ -505,7 +505,7 @@ csefind(struct fcrypt *fcr, u_int ses)
 	struct csession *cse;
 
 	dprintk("%s()\n", __FUNCTION__);
-#ifdef CONFIG_SYNO_FIX_OCF_CRYPTODEV_RACE
+#ifdef MY_ABC_HERE
 	spin_lock(&fcr->syno_ses_lock);
 	list_for_each_entry(cse, &fcr->csessions, list) {
 		if (cse->ses == ses) {
@@ -528,7 +528,7 @@ csedelete(struct fcrypt *fcr, struct csession *cse_del)
 	struct csession *cse;
 
 	dprintk("%s()\n", __FUNCTION__);
-#ifdef CONFIG_SYNO_FIX_OCF_CRYPTODEV_RACE
+#ifdef MY_ABC_HERE
 	spin_lock(&fcr->syno_ses_lock);
 	list_for_each_entry(cse, &fcr->csessions, list) {
 		if (cse == cse_del) {
@@ -553,12 +553,12 @@ static struct csession *
 cseadd(struct fcrypt *fcr, struct csession *cse)
 {
 	dprintk("%s()\n", __FUNCTION__);
-#ifdef CONFIG_SYNO_FIX_OCF_CRYPTODEV_RACE
+#ifdef MY_ABC_HERE
 	spin_lock(&fcr->syno_ses_lock);
 #endif
 	list_add_tail(&cse->list, &fcr->csessions);
 	cse->ses = fcr->sesn++;
-#ifdef CONFIG_SYNO_FIX_OCF_CRYPTODEV_RACE
+#ifdef MY_ABC_HERE
 	spin_unlock(&fcr->syno_ses_lock);
 #endif
 	return (cse);
@@ -625,7 +625,7 @@ cryptodev_ioctl(
 	u_int32_t ses = 0;
 	int feat, fd, error = 0, crid;
 	mm_segment_t fs;
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	unsigned long d_flags;
 #endif
 
@@ -826,13 +826,13 @@ cryptodev_ioctl(
 			 
 			crid = CRYPTOCAP_F_HARDWARE | CRYPTOCAP_F_SOFTWARE;
 		}
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 		CRYPTODEV_DRIVER_LOCK();
 #endif
 		error = crypto_newsession(&sid, (info.blocksize ? &crie : &cria), crid);
 		if (error) {
 			dprintk("%s(%s) - newsession %d\n",__FUNCTION__,CIOCGSESSSTR,error);
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 			CRYPTODEV_DRIVER_UNLOCK();
 #endif
 			goto bail;
@@ -843,7 +843,7 @@ cryptodev_ioctl(
 			crypto_freesession(sid);
 			error = EINVAL;
 			dprintk("%s(%s) - csecreate failed\n", __FUNCTION__, CIOCGSESSSTR);
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 			CRYPTODEV_DRIVER_UNLOCK();
 #endif
 			goto bail;
@@ -854,7 +854,7 @@ cryptodev_ioctl(
 			 
 			sop.crid = CRYPTO_SESID2HID(cse->sid);
 		}
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 			CRYPTODEV_DRIVER_UNLOCK();
 #endif
 
@@ -875,21 +875,21 @@ bail:
 	case CIOCFSESSION:
 		dprintk("%s(CIOCFSESSION)\n", __FUNCTION__);
 		get_user(ses, (uint32_t*)arg);
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 		CRYPTODEV_DRIVER_LOCK();
 #endif
 		cse = csefind(fcr, ses);
 		if (cse == NULL) {
 			error = EINVAL;
 			dprintk("%s(CIOCFSESSION) - Fail %d\n", __FUNCTION__, error);
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 			CRYPTODEV_DRIVER_UNLOCK();
 #endif
 			break;
 		}
 		csedelete(fcr, cse);
 		error = csefree(cse);
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 			CRYPTODEV_DRIVER_UNLOCK();
 #endif
 		break;
@@ -900,19 +900,19 @@ bail:
 			error = EFAULT;
 			goto bail;
 		}
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 			CRYPTODEV_DRIVER_LOCK();
 #endif
 		cse = csefind(fcr, cop.ses);
 		if (cse == NULL) {
 			error = EINVAL;
 			dprintk("%s(CIOCCRYPT) - Fail %d\n", __FUNCTION__, error);
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 			CRYPTODEV_DRIVER_UNLOCK();
 #endif
 			break;
 		}
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 		CRYPTODEV_DRIVER_UNLOCK();
 #endif
 		error = cryptodev_op(cse, &cop);
@@ -1009,7 +1009,7 @@ cryptodev_open(struct inode *inode, struct file *filp)
 	memset(fcr, 0, sizeof(*fcr));
 
 	INIT_LIST_HEAD(&fcr->csessions);
-#ifdef CONFIG_SYNO_FIX_OCF_CRYPTODEV_RACE
+#ifdef MY_ABC_HERE
 	spin_lock_init(&fcr->syno_ses_lock);
 #endif
 	filp->private_data = fcr;
@@ -1021,7 +1021,7 @@ cryptodev_release(struct inode *inode, struct file *filp)
 {
 	struct fcrypt *fcr = filp->private_data;
 	struct csession *cse, *tmp;
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	unsigned long d_flags;
 #endif
 
@@ -1031,7 +1031,7 @@ cryptodev_release(struct inode *inode, struct file *filp)
 		return(0);
 	}
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	CRYPTODEV_DRIVER_LOCK();
 #endif
 	list_for_each_entry_safe(cse, tmp, &fcr->csessions, list) {
@@ -1039,7 +1039,7 @@ cryptodev_release(struct inode *inode, struct file *filp)
 		(void)csefree(cse);
 	}
 	filp->private_data = NULL;
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	CRYPTODEV_DRIVER_UNLOCK();
 #endif
 	kfree(fcr);

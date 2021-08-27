@@ -13,14 +13,10 @@
 #define MV_BOARD_DIMM1_I2C_ADDR_TYPE            ADDR7_BIT
 #define MV_BOARD_DIMM_I2C_CHANNEL               0x0
 
-
-
 #ifndef MV_ASMLANGUAGE
  
-
-
 #define CUTOMER_BOARD_ID_BASE                   0x0
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 #define SYNO_DS215j_ID			        (CUTOMER_BOARD_ID_BASE)
 #define SYNO_DS115_ID				(CUTOMER_BOARD_ID_BASE + 1)
 #define MV_MAX_CUSTOMER_BOARD_ID		(CUTOMER_BOARD_ID_BASE + 2)
@@ -48,10 +44,7 @@
 #define GROUP1_DEFAULT_MPP8_15_I2C		0x22000022	 
 #define GROUP1_DEFAULT_MPP56_63_I2C		0x01144422	 
 
-
-
-
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 #define SYNO_DS215j_MPP0_7               0x00020022  	 
 #define SYNO_DS215j_MPP8_15              0x22000022  	 
 #define SYNO_DS215j_MPP16_23             0x00000022  	 
@@ -116,10 +109,7 @@
 #define A375_CUSTOMER_BOARD_0_GPP_POL_HIGH         0x0
 #endif
 
-
-
-
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 #else
 #endif
 #define DB_88F6720_MPP0_7		0x00020020	 

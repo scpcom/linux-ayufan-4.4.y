@@ -18,13 +18,13 @@
 #include <asm/assembler.h>
 #include <asm/errno.h>
 #include <asm/domain.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <asm/page.h>
 #endif
 
 		.text
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 //do nothing
 #else
 #define PAGE_SHIFT 12

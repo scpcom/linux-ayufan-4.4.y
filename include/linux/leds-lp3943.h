@@ -31,14 +31,13 @@ enum lp3943_led_channel {
 	LP3943_LED15,
 };
 
-
 struct lp3943_led_node {
 	char *name;
 	enum lp3943_led_mode mode;
 	u8 prescale;
 	enum lp3943_led_channel *channel;
 	int num_channels;
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 	char *default_trigger;
 #endif  
 };

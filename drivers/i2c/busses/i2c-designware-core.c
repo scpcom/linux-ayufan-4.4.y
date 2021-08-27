@@ -295,23 +295,22 @@ i2c_dw_xfer_msg(struct dw_i2c_dev *dev)
 		rx_limit = dev->rx_fifo_depth - dw_readl(dev, DW_IC_RXFLR);
 
 		while (buf_len > 0 && tx_limit > 0 && rx_limit > 0) {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			u32 cmd = 0;
 
-			
 			if (dev->msg_write_idx == dev->msgs_num - 1 &&
 			    buf_len == 1)
 				cmd |= BIT(9);
 #endif
 			if (msgs[dev->msg_write_idx].flags & I2C_M_RD) {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 				dw_writel(dev, cmd | 0x100, DW_IC_DATA_CMD);
 #else
 				dw_writel(dev, 0x100, DW_IC_DATA_CMD);
 #endif
 				rx_limit--;
 			} else
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 				dw_writel(dev, cmd | *buf++, DW_IC_DATA_CMD);
 #else
 				dw_writel(dev, *buf++, DW_IC_DATA_CMD);

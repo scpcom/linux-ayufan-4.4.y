@@ -23,7 +23,7 @@ struct netns_xfrm {
 	struct hlist_head	*state_bydst;
 	struct hlist_head	*state_bysrc;
 	struct hlist_head	*state_byspi;
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	struct hlist_head	*state_byh;
 #endif
 	unsigned int		state_hmask;

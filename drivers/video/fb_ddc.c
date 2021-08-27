@@ -51,7 +51,7 @@ unsigned char *fb_ddc_read(struct i2c_adapter *adapter)
 	unsigned char *edid = NULL;
 	int i, j;
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (!algo_data) {
 		 
 		for (i = 0; i < 3; i++) {

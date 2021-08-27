@@ -11,7 +11,7 @@ struct xt_layer7_info {
     char protocol[MAX_PROTOCOL_LEN];
     char pattern[MAX_PATTERN_LEN];
     u_int8_t invert;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
     u_int8_t pkt;
 #endif
 };

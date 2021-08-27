@@ -2,26 +2,24 @@
 #define MY_ABC_HERE
 #endif
  
-
-
 #include <linux/dma-mapping.h>
 #include <linux/interrupt.h>
 #include <linux/module.h>
 #include <linux/highmem.h>
 #include <linux/delay.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/version.h>
 #endif
 #include <linux/slab.h>
 #include <linux/spi/spi.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/gpio.h>
 #endif
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/clk.h>
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_C2K_DEVFREQ_DW)
+#if defined(MY_ABC_HERE) && defined(CONFIG_C2K_DEVFREQ_DW)
 	#include <linux/c2k-devfreq.h>
 	#include <linux/devfreq.h>
 #endif
@@ -59,14 +57,14 @@ struct chip_data {
 	u8 bits_per_word;
 	u16 clk_div;		 
 	u32 speed_hz;		 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	void (*cs_control)(struct dw_spi *dws, u32 command);
 #else
 	void (*cs_control)(u32 command);
 #endif
 };
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_C2K_DEVFREQ_DW)
+#if defined(MY_ABC_HERE) && defined(CONFIG_C2K_DEVFREQ_DW)
 static devfreq_counters dc;
 
 static int set_spi_freq(struct c2k_devfreq_data *data, unsigned long *freq)
@@ -314,7 +312,7 @@ static void giveback(struct dw_spi *dws)
 					struct spi_transfer,
 					transfer_list);
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	if (!last_transfer->cs_change && dws->cs_control &&
 			msg->spi->chip_select == 0)
 		dws->cs_control(dws, MRST_SPI_DEASSERT);
@@ -426,7 +424,7 @@ static void pump_transfers(unsigned long data)
 	u32 speed = 0;
 	u32 cr0 = 0;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_C2K_DEVFREQ_DW)
+#if defined(MY_ABC_HERE) && defined(CONFIG_C2K_DEVFREQ_DW)
 	devfreq_func_start(&dc);
 #endif
 
@@ -472,7 +470,7 @@ static void pump_transfers(unsigned long data)
 		cs_change = 1;
 
 	cr0 = chip->cr0;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	 
 	if (message->state == START_STATE)
 		spi_chip_sel(dws, spi->chip_select);
@@ -519,7 +517,7 @@ static void pump_transfers(unsigned long data)
 	}
 	message->state = RUNNING_STATE;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 #else
 	 
@@ -554,7 +552,7 @@ static void pump_transfers(unsigned long data)
 			dw_writew(dws, DW_SPI_CTRL0, cr0);
 
 		spi_set_clk(dws, clk_div ? clk_div : chip->clk_div);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 #else
 		spi_chip_sel(dws, spi->chip_select);
@@ -577,7 +575,7 @@ static void pump_transfers(unsigned long data)
 	if (chip->poll_mode)
 		poll_transfer(dws);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_C2K_DEVFREQ_DW)
+#if defined(MY_ABC_HERE) && defined(CONFIG_C2K_DEVFREQ_DW)
 	devfreq_func_end(&dc);
 #endif
 
@@ -621,12 +619,11 @@ static void pump_messages(struct work_struct *work)
 	spin_unlock_irqrestore(&dws->lock, flags);
 }
 
-
 static int dw_spi_transfer(struct spi_device *spi, struct spi_message *msg)
 {
 	struct dw_spi *dws = spi_master_get_devdata(spi->master);
 	unsigned long flags;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_C2K_DEVFREQ_DW)
+#if defined(MY_ABC_HERE) && defined(CONFIG_C2K_DEVFREQ_DW)
 	devfreq_func_start(&dc);
 #endif
 
@@ -657,13 +654,13 @@ static int dw_spi_transfer(struct spi_device *spi, struct spi_message *msg)
 	}
 
 	spin_unlock_irqrestore(&dws->lock, flags);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_C2K_DEVFREQ_DW)
+#if defined(MY_ABC_HERE) && defined(CONFIG_C2K_DEVFREQ_DW)
 	devfreq_func_end(&dc);
 #endif
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static int dw_spi_gpio_cs_control_setup(int gpio)
 {
 	int status;
@@ -690,7 +687,7 @@ static int dw_spi_setup(struct spi_device *spi)
 {
 	struct dw_spi_chip *chip_info = NULL;
 	struct chip_data *chip;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	int status;
 #endif
 
@@ -718,7 +715,7 @@ static int dw_spi_setup(struct spi_device *spi)
 
 		chip->enable_dma = chip_info->enable_dma;
 	}
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
  	else if (spi->master->cs_gpios) {
 		 
@@ -861,7 +858,7 @@ static void spi_hw_init(struct dw_spi *dws)
 	}
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_C2K_DEVFREQ_DW)
+#if defined(MY_ABC_HERE) && defined(CONFIG_C2K_DEVFREQ_DW)
 #define	SPI_MAXFREQ_MHZ	2000000
 #define	SPI_MINFREQ_MHZ	1000000
 #define	POLLING_MS	1000
@@ -913,7 +910,7 @@ int __devinit dw_spi_add_host(struct dw_spi *dws)
 		goto exit;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO) 
+#if defined(MY_ABC_HERE) 
 	clk_enable(dws->clk_spi);
 #endif
 
@@ -938,7 +935,7 @@ int __devinit dw_spi_add_host(struct dw_spi *dws)
 	master->cleanup = dw_spi_cleanup;
 	master->setup = dw_spi_setup;
 	master->transfer = dw_spi_transfer;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	master->dev.of_node = dws->parent_dev->of_node;
 #endif
 
@@ -972,7 +969,7 @@ int __devinit dw_spi_add_host(struct dw_spi *dws)
 
 	mrst_spi_debugfs_init(dws);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_C2K_DEVFREQ_DW)
+#if defined(MY_ABC_HERE) && defined(CONFIG_C2K_DEVFREQ_DW)
 	init_spi_devfreq_data(dws);
 
 	ret = c2k_driver_devfreq(&master->dev, &devfreq_spi_data);
@@ -989,7 +986,7 @@ err_diable_hw:
 	spi_enable_chip(dws, 0);
 	free_irq(dws->irq, dws);
 err_free_master:
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	clk_disable(dws->clk_spi);
 #endif
 	spi_master_put(master);
@@ -1014,15 +1011,14 @@ void __devexit dw_spi_remove_host(struct dw_spi *dws)
 	if (dws->dma_ops && dws->dma_ops->dma_exit)
 		dws->dma_ops->dma_exit(dws);
 	spi_enable_chip(dws, 0);
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	 
 	spi_set_clk(dws, 0);
 #endif
 	free_irq(dws->irq, dws);
 
-	
 	spi_unregister_master(dws->master);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	clk_disable(dws->clk_spi);
 #endif
@@ -1037,7 +1033,7 @@ int dw_spi_suspend_host(struct dw_spi *dws)
 	if (ret)
 		return ret;
 	spi_enable_chip(dws, 0);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	clk_disable(dws->clk_spi);
 #else
 	spi_set_clk(dws, 0);
@@ -1051,7 +1047,7 @@ int dw_spi_resume_host(struct dw_spi *dws)
 {
 	int ret;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	clk_enable(dws->clk_spi);
 #endif
 	spi_hw_init(dws);

@@ -30,8 +30,8 @@
 
 #include "mm.h"
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)) || \
-     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE))
+#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)) || \
+     (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE))
 #define FREEAREA_ROUND_START(addr)	((((unsigned long)addr) + ((PAGE_SIZE) - 1)) & (~((PAGE_SIZE) - 1)))
 #define FREEAREA_ROUND_END(addr)	(((unsigned long)addr) & (~((PAGE_SIZE) - 1)))
 #else
@@ -206,8 +206,7 @@ static void __init arm_bootmem_init(unsigned long start_pfn,
 unsigned long arm_dma_zone_size __read_mostly;
 EXPORT_SYMBOL(arm_dma_zone_size);
 
-
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 phys_addr_t arm_dma_limit;
 #else
 u32 arm_dma_limit;
@@ -261,7 +260,7 @@ static void __init arm_bootmem_free(unsigned long min, unsigned long max_low,
 	if (arm_dma_zone_size) {
 		arm_adjust_dma_zone(zone_size, zhole_size,
 			arm_dma_zone_size >> PAGE_SHIFT);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 		arm_dma_limit = 0xffffffff;
 #else
 		arm_dma_limit = PHYS_OFFSET + arm_dma_zone_size - 1;
@@ -282,7 +281,7 @@ EXPORT_SYMBOL(pfn_valid);
 #endif
 
 #ifndef CONFIG_SPARSEMEM
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static void __init arm_memory_present(void)
 #else
 static void arm_memory_present(void)
@@ -290,7 +289,7 @@ static void arm_memory_present(void)
 {
 }
 #else
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static void __init arm_memory_present(void)
 #else
 static void arm_memory_present(void)
@@ -375,14 +374,13 @@ void __init bootmem_init(void)
 
 	high_memory = __va(((phys_addr_t)max_low << PAGE_SHIFT) - 1) + 1;
 
-	
 	max_low_pfn = max_low - PHYS_PFN_OFFSET;
 	max_pfn = max_high - PHYS_PFN_OFFSET;
 }
 
 static inline int free_area(unsigned long pfn, unsigned long end, char *s)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	unsigned int pages = 0, size = ((end > pfn) ? ((end - pfn) << (PAGE_SHIFT - 10)) : 0);
 #else
 	unsigned int pages = 0, size = (end - pfn) << (PAGE_SHIFT - 10);
@@ -390,13 +388,13 @@ static inline int free_area(unsigned long pfn, unsigned long end, char *s)
 
 	for (; pfn < end; pfn++) {
 		struct page *page = pfn_to_page(pfn);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if defined(MY_ABC_HERE) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 		unsigned long phys = page_to_phys(page);
 #endif
 		ClearPageReserved(page);
 		init_page_count(page);
 		__free_page(page);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if defined(MY_ABC_HERE) && defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 		outer_flush_range(phys, phys + PAGE_SIZE);
 #endif
 		pages++;
@@ -645,10 +643,10 @@ void free_initmem(void)
 				    "TCM link");
 #endif
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	poison_init_mem(__init_begin, __init_end - __init_begin);
 	if (!machine_is_integrator() && !machine_is_cintegrator())
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 		totalram_pages += free_area(__phys_to_pfn(__pa(FREEAREA_ROUND_START(__init_begin))),
 					    __phys_to_pfn(__pa(FREEAREA_ROUND_END(__init_end))),
 					    "init");
@@ -666,7 +664,7 @@ static int keep_initrd;
 
 void free_initrd_mem(unsigned long start, unsigned long end)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	start = FREEAREA_ROUND_START(start);
 	end = FREEAREA_ROUND_END(end);
 #endif

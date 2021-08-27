@@ -223,7 +223,7 @@ static ssize_t max_ratio_store(struct device *dev,
 }
 BDI_SHOW(max_ratio, bdi->max_ratio)
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 static ssize_t cpu0_bind_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -254,7 +254,7 @@ static struct device_attribute bdi_dev_attrs[] = {
 	__ATTR_RW(read_ahead_kb),
 	__ATTR_RW(min_ratio),
 	__ATTR_RW(max_ratio),
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	__ATTR_RW(cpu0_bind),
 #endif
 	__ATTR_NULL,
@@ -442,7 +442,7 @@ static int bdi_forker_thread(void *ptr)
 				writeback_inodes_wb(&bdi->wb, 1024,
 						    WB_REASON_FORKER_THREAD);
 			} else {
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 				if (bdi->cpu0_bind)
 					kthread_bind(task, 0);
 #endif

@@ -35,7 +35,7 @@ static const char *kobject_actions[] = {
 	[KOBJ_OFFLINE] =	"offline",
 };
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 u64 uevent_next_seqnum(void)
 {
 	u64 seq;
@@ -319,7 +319,7 @@ int add_uevent_var(struct kobj_uevent_env *env, const char *format, ...)
 }
 EXPORT_SYMBOL_GPL(add_uevent_var);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #if defined(CONFIG_NET)
 int broadcast_uevent(struct sk_buff *skb, __u32 pid, __u32 group,
 		     gfp_t allocation)

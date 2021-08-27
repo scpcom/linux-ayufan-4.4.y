@@ -463,7 +463,7 @@ SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)			  
 SYSCALL(ni_syscall)			  
 #endif  
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 SYSCALL(SYNONotifyInit)  
 SYSCALL(SYNONotifyAddWatch)  
 SYSCALL(SYNONotifyRemoveWatch)  

@@ -129,7 +129,7 @@ static ssize_t fscaps_show(struct kobject *kobj,
 }
 KERNEL_ATTR_RO(fscaps);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #if defined(CONFIG_COMCERTO_MDMA_PROF)
 extern unsigned int mdma_time_counter[256];  
 extern unsigned int mdma_reqtime_counter[256];  
@@ -644,13 +644,13 @@ static struct attribute * kernel_attrs[] = {
 	&kexec_crash_size_attr.attr,
 	&vmcoreinfo_attr.attr,
 #endif
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_MDMA_PROF)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_MDMA_PROF)
 	&comcerto_mdma_prof_enable_attr.attr,
 	&comcerto_mdma_timing_attr.attr,
 	&comcerto_mdma_reqtiming_attr.attr,
 	&comcerto_mdma_data_attr.attr,
 #endif
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_SPLICE_PROF)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_SPLICE_PROF)
 	&comcerto_splice_prof_enable_attr.attr,
 	&comcerto_splicew_timing_attr.attr,
 	&comcerto_splicew_reqtiming_attr.attr,
@@ -660,7 +660,7 @@ static struct attribute * kernel_attrs[] = {
 	&comcerto_splicer_data_attr.attr,
 	&comcerto_splicer_tcp_rsock_attr.attr,
 #endif
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_AHCI_PROF)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_AHCI_PROF)
 	&comcerto_ahci_prof_enable_attr.attr,
 	&comcerto_ahci_timing_attr.attr,
 	&comcerto_ahci_data_attr.attr,

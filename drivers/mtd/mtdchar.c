@@ -1075,7 +1075,7 @@ static int mtd_ioctl(struct file *file, u_int cmd, u_long arg)
 		break;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	case MTDREFRESH:
 	{
 		ret = mtd_device_refresh(mtd);

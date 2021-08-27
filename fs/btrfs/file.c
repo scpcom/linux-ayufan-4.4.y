@@ -18,7 +18,7 @@
 #include <linux/slab.h>
 #include <linux/btrfs.h>
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 #include <linux/socket.h>
 #include <net/sock.h>
 #include <linux/net.h>
@@ -2248,7 +2248,7 @@ out_reserve_fail:
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 					loff_t __user *ppos, size_t count)
 {
@@ -2286,7 +2286,7 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 		!(iov = kmalloc(num_pages * sizeof(*iov), GFP_KERNEL)))
 		ERROR_OUT;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	wait_event(inode->i_sb->s_writers.wait_unfrozen,
 			inode->i_sb->s_writers.frozen == SB_UNFROZEN);
 #else
@@ -2303,7 +2303,7 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 	if ((err = file_remove_suid(file)))
 		ERROR_OUT;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (root->fs_info->fs_state & BTRFS_SUPER_FLAG_ERROR) {
 #else
 	if ((err = btrfs_update_time(file))) 
@@ -2312,14 +2312,14 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 		ERROR_OUT;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if ((err = file_update_time(file)))
 #else
 	if ((err = btrfs_update_time(file)))
 #endif
 		ERROR_OUT;
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	BTRFS_I(inode)->sequence++;
 #endif
 	if (start_pos > i_size_read(inode) &&
@@ -2330,7 +2330,7 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 					num_pages << PAGE_CACHE_SHIFT)))
 		goto out_free;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if ((err = prepare_pages(inode, pages, num_pages,
 					pos, 
 					count, false))) {
@@ -2403,13 +2403,13 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 	btrfs_drop_pages(pages, num_pages);
 	cond_resched();
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	balance_dirty_pages_ratelimited(inode->i_mapping);
 #else
 	balance_dirty_pages_ratelimited_nr(inode->i_mapping, dirty_pages);
 #endif
 	if (dirty_pages < (root->leafsize >> PAGE_CACHE_SHIFT) + 1)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		btrfs_btree_balance_dirty(root);
 #else
 		btrfs_btree_balance_dirty(root, 1);
@@ -2546,7 +2546,7 @@ const struct file_operations btrfs_file_operations = {
 	.write		= do_sync_write,
 	.aio_read       = generic_file_aio_read,
 	.splice_read	= generic_file_splice_read,
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 	.splice_from_socket	= btrfs_splice_from_socket,
 #endif
 	.aio_write	= btrfs_file_aio_write,

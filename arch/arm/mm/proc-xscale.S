@@ -410,7 +410,7 @@ ENTRY(xscale_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(xscale_dma_unmap_area)
 
-#iF DEFINED(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#iF DEFINED(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	.globl	xscale_flush_kern_cache_louis
 	.equ	xscale_flush_kern_cache_louis, xscale_flush_kern_cache_all
 #endif
@@ -443,7 +443,7 @@ ENDPROC(xscale_dma_unmap_area)
 	a0_alias flush_icache_all
 	a0_alias flush_user_cache_all
 	a0_alias flush_kern_cache_all
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	a0_alias flush_kern_cache_louis
 #endif
 	a0_alias flush_user_cache_range

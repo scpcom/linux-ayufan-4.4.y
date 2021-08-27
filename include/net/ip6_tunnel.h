@@ -19,7 +19,7 @@ struct ip6_tnl {
 	struct flowi fl;	 
 	struct dst_entry *dst_cache;     
 	u32 dst_cookie;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_INET6_IPSEC_OFFLOAD)
+#if defined(MY_ABC_HERE) && defined(CONFIG_INET6_IPSEC_OFFLOAD)
 	u32 genid;
        struct ip6_tnl_4rd_parm ip4rd;   
 #endif

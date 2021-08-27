@@ -79,7 +79,7 @@ static inline struct m25p *mtd_to_m25p(struct mtd_info *mtd)
 	return container_of(mtd, struct m25p, mtd);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 int m25p80_write_then_read(struct spi_device *spi,
 		const void *txbuf, unsigned n_tx,
 		void *rxbuf, unsigned n_rx)
@@ -123,18 +123,13 @@ int m25p80_write_then_read(struct spi_device *spi,
 }
 #endif
 
-
-
-
-
-
 static int read_sr(struct m25p *flash)
 {
 	ssize_t retval;
 	u8 code = OPCODE_RDSR;
 	u8 val;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	retval = m25p80_write_then_read(flash->spi, &code, 1, &val, 1);
 #else
 	retval = spi_write_then_read(flash->spi, &code, 1, &val, 1);
@@ -157,24 +152,22 @@ static int write_sr(struct m25p *flash, u8 val)
 	return spi_write(flash->spi, flash->command, 2);
 }
 
-
 static inline int write_enable(struct m25p *flash)
 {
 	u8	code = OPCODE_WREN;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	return m25p80_write_then_read(flash->spi, &code, 1, NULL, 0);
 #else
 	return spi_write_then_read(flash->spi, &code, 1, NULL, 0);
 #endif
 }
 
-
 static inline int write_disable(struct m25p *flash)
 {
 	u8	code = OPCODE_WRDI;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	return m25p80_write_then_read(flash->spi, &code, 1, NULL, 0);
 #else
 	return spi_write_then_read(flash->spi, &code, 1, NULL, 0);
@@ -258,10 +251,9 @@ static int m25p_cmdsz(struct m25p *flash)
 	return 1 + flash->addr_width;
 }
 
-
 static int erase_sector(struct m25p *flash, u32 offset)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	pr_debug("%s: %s %dKiB at 0x%08x cmdsz %d\n", dev_name(&flash->spi->dev),
 			__func__, flash->mtd.erasesize / 1024, offset, m25p_cmdsz(flash));
 #else
@@ -331,8 +323,7 @@ static int m25p80_erase(struct mtd_info *mtd, struct erase_info *instr)
 	return 0;
 }
 
-
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 	size_t *retlen, u_char *buf)
 {
@@ -515,8 +506,7 @@ static int m25p80_read(struct mtd_info *mtd, loff_t from, size_t len,
 }
 #endif
 
-
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 static int m25p80_write(struct mtd_info *mtd, loff_t to, size_t len,
 	size_t *retlen, const u_char *buf)
 {
@@ -802,9 +792,8 @@ struct flash_info {
 		.flags = M25P_NO_ERASE,					\
 	})
 
-
 static const struct spi_device_id m25p_ids[] = {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	 
 	{ "spi_flash_jedec_detection", INFO(0xD373C7, 0, 0, 0, 0) },
 #endif
@@ -838,12 +827,12 @@ static const struct spi_device_id m25p_ids[] = {
 	{ "mx25l6405d",  INFO(0xc22017, 0, 64 * 1024, 128, 0) },
 	{ "mx25l12805d", INFO(0xc22018, 0, 64 * 1024, 256, 0) },
 	{ "mx25l12855e", INFO(0xc22618, 0, 64 * 1024, 256, 0) },
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	{ "mx25u12835f", INFO(0xc22538, 0, 64 * 1024, 256, 0) },
 #endif
 	{ "mx25l25635e", INFO(0xc22019, 0, 64 * 1024, 512, 0) },
 	{ "mx25l25655e", INFO(0xc22619, 0, 64 * 1024, 512, 0) },
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	{ "mx25u6435f",	 INFO(0xc22537, 0, 64 * 1024, 128, 0) },
 #endif
 
@@ -933,8 +922,7 @@ static const struct spi_device_id *__devinit jedec_probe(struct spi_device *spi)
 	u16                     ext_jedec;
 	struct flash_info	*info;
 
-	
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	tmp = m25p80_write_then_read(spi, &code, 1, id, 5);
 #else
 	tmp = spi_write_then_read(spi, &code, 1, id, 5);
@@ -973,7 +961,7 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	unsigned			i;
 	struct mtd_part_parser_data	ppdata;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	memset(&ppdata, 0x00, sizeof(ppdata));
 #endif
 

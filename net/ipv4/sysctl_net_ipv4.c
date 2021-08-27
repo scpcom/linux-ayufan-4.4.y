@@ -637,7 +637,7 @@ static struct ctl_table ipv4_table[] = {
 		.mode           = 0644,
 		.proc_handler   = proc_dointvec
 	},
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	{
 		.procname       = "tcp_default_delack_segs",
 		.data           = &sysctl_tcp_default_delack_segs,

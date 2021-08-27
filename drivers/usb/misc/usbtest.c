@@ -37,13 +37,12 @@ struct usbtest_info {
 	int			alt;
 };
 
-
 struct usbtest_dev {
 	struct usb_interface	*intf;
 	struct usbtest_info	*info;
 	int			in_pipe;
 	int			out_pipe;
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	struct usb_endpoint_descriptor	*in_desc, *out_desc;
 #endif
 	int			in_iso_pipe;
@@ -60,8 +59,7 @@ static struct usb_device *testdev_to_usbdev(struct usbtest_dev *test)
 	return interface_to_usbdev(test->intf);
 }
 
-
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 #define UNLINK_RATE     1    
 #else
 #define	INTERRUPT_RATE		1	 
@@ -89,14 +87,13 @@ get_endpoints(struct usbtest_dev *dev, struct usb_interface *intf)
 		iso_in = iso_out = NULL;
 		alt = intf->altsetting + tmp;
 
-		
 		for (ep = 0; ep < alt->desc.bNumEndpoints; ep++) {
 			struct usb_host_endpoint	*e;
 
 			e = alt->endpoint + ep;
 			switch (e->desc.bmAttributes) {
 			case USB_ENDPOINT_XFER_BULK:
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 			case USB_ENDPOINT_XFER_INT:
 #endif
 				break;
@@ -140,7 +137,7 @@ found:
 	}
 
 	if (in) {
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
         if(in->desc.bmAttributes == USB_ENDPOINT_XFER_INT) {
 			dev->in_pipe = usb_rcvintpipe (udev,
 				in->desc.bEndpointAddress & USB_ENDPOINT_NUMBER_MASK);
@@ -187,7 +184,7 @@ static void simple_callback(struct urb *urb)
 static struct urb *usbtest_alloc_urb(
 	struct usb_device	*udev,
 	int			pipe,
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	struct usb_endpoint_descriptor *desc,
 #endif
 	unsigned long		bytes,
@@ -196,7 +193,7 @@ static struct urb *usbtest_alloc_urb(
 {
 	struct urb		*urb;
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	if (bytes < 0)
 		return NULL;
 #endif
@@ -205,7 +202,7 @@ static struct urb *usbtest_alloc_urb(
 		return urb;
 	usb_fill_bulk_urb(urb, udev, pipe, NULL, bytes, simple_callback, NULL);
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	if(desc != NULL) {
 		if( (udev->speed == USB_SPEED_HIGH) ||
 			((desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_ISOC))
@@ -249,12 +246,12 @@ static struct urb *usbtest_alloc_urb(
 static struct urb *simple_alloc_urb(
 	struct usb_device	*udev,
 	int			pipe,
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	struct usb_endpoint_descriptor *desc,
 #endif
 	unsigned long		bytes)
 {
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	return usbtest_alloc_urb(udev, pipe, desc, bytes, URB_NO_TRANSFER_DMA_MAP, 0);
 #else
 	return usbtest_alloc_urb(udev, pipe, bytes, URB_NO_TRANSFER_DMA_MAP, 0);
@@ -344,7 +341,7 @@ static void simple_free_urb(struct urb *urb)
 {
 	unsigned long offset = buffer_offset(urb->transfer_buffer);
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	if (urb != NULL) {
 		if ((urb->transfer_buffer != NULL) && (urb->transfer_buffer_length > 0)) {
 #endif
@@ -356,7 +353,7 @@ static void simple_free_urb(struct urb *urb)
 			urb->transfer_dma - offset);
 	else
 		kfree(urb->transfer_buffer - offset);
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 		}
 		usb_free_urb(urb);
 	}
@@ -441,7 +438,7 @@ alloc_sglist(int nents, int max, int vary)
 	if (!sg)
 		return NULL;
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	memset(sg, 0, nents * sizeof *sg);
 #endif
 	sg_init_table(sg, nents);
@@ -483,7 +480,7 @@ static int perform_sglist(
 	struct usbtest_dev	*tdev,
 	unsigned		iterations,
 	int			pipe,
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	struct usb_endpoint_descriptor *desc,
 #endif
 	struct usb_sg_request	*req,
@@ -495,7 +492,7 @@ static int perform_sglist(
 	int			retval = 0;
 
 	while (retval == 0 && iterations-- > 0) {
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 		if(desc != NULL) {
 			if( (udev->speed == USB_SPEED_HIGH) ||
 				((desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_ISOC))
@@ -982,7 +979,7 @@ test_ctrl_queue(struct usbtest_dev *dev, struct usbtest_param *param)
 			goto cleanup;
 		}
 		req.wLength = cpu_to_le16(len);
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 		urb [i] = u = simple_alloc_urb (udev, pipe, NULL, len);
 #else
 		urb[i] = u = simple_alloc_urb(udev, pipe, len);
@@ -1044,7 +1041,7 @@ static void unlink1_callback(struct urb *urb)
 	}
 }
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 static int unlink1 (struct usbtest_dev *dev, int pipe,
                     struct usb_endpoint_descriptor *desc, int size, int async)
 #else
@@ -1056,7 +1053,7 @@ static int unlink1(struct usbtest_dev *dev, int pipe, int size, int async)
 	int			retval = 0;
 
 	init_completion(&completion);
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	urb = simple_alloc_urb (testdev_to_usbdev (dev), pipe, desc, size);
 #else
 	urb = simple_alloc_urb(testdev_to_usbdev(dev), pipe, size);
@@ -1066,15 +1063,13 @@ static int unlink1(struct usbtest_dev *dev, int pipe, int size, int async)
 	urb->context = &completion;
 	urb->complete = unlink1_callback;
 
-	
 	retval = usb_submit_urb(urb, GFP_KERNEL);
 	if (retval != 0) {
 		dev_err(&dev->intf->dev, "submit fail %d\n", retval);
 		return retval;
 	}
 
-	
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	msleep (jiffies % (2 * UNLINK_RATE));
 #else
 	msleep(jiffies % (2 * INTERRUPT_RATE));
@@ -1115,7 +1110,7 @@ static int unlink1(struct usbtest_dev *dev, int pipe, int size, int async)
 				0 : retval - 2000;
 }
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 static int unlink_simple (struct usbtest_dev *dev, int pipe,
 						struct usb_endpoint_descriptor *desc, int len)
 #else
@@ -1124,8 +1119,7 @@ static int unlink_simple(struct usbtest_dev *dev, int pipe, int len)
 {
 	int			retval = 0;
 
-	
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	retval = unlink1 (dev, pipe, desc, len, 1);
 	if (!retval)
 		retval = unlink1 (dev, pipe, desc, len, 0);
@@ -1316,7 +1310,7 @@ static int halt_simple(struct usbtest_dev *dev)
 	struct urb		*urb;
 	struct usb_device	*udev = testdev_to_usbdev(dev);
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	if (udev->speed == USB_SPEED_SUPER)
 		urb = simple_alloc_urb(udev, 0, NULL, 1024);
 	else
@@ -1552,7 +1546,7 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 	unsigned long		packets = 0;
 	int			status = 0;
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	struct urb		*urbs[50];   
 
 	if (param->sglen > 50)
@@ -1605,7 +1599,7 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 				goto fail;
 			}
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 #else
 			simple_free_urb(urbs[i]);
 			urbs[i] = NULL;
@@ -1619,7 +1613,7 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 
 	wait_for_completion(&context.done);
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 #else
 	for (i = 0; i < param->sglen; i++) {
 		if (urbs[i])
@@ -1633,7 +1627,7 @@ test_iso_queue(struct usbtest_dev *dev, struct usbtest_param *param,
 		status = -EACCES;
 	else if (context.errors > context.packet_count / 10)
 		status = -EIO;
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 #else
 	return status;
 #endif
@@ -1656,7 +1650,7 @@ static int test_unaligned_bulk(
 {
 	int retval;
 	struct urb *urb = usbtest_alloc_urb(
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 		testdev_to_usbdev(tdev), pipe, NULL, length, transfer_flags, 1);
 #else
 		testdev_to_usbdev(tdev), pipe, length, transfer_flags, 1);
@@ -1719,14 +1713,13 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		retval = 0;
 		break;
 
-	
 	case 1:
 		if (dev->out_pipe == 0)
 			break;
 		dev_info(&intf->dev,
 				"TEST 1:  write %d bytes %u times\n",
 				param->length, param->iterations);
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 		urb = simple_alloc_urb (udev, dev->out_pipe, dev->out_desc, param->length);
 #else
 		urb = simple_alloc_urb(udev, dev->out_pipe, param->length);
@@ -1745,7 +1738,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 2:  read %d bytes %u times\n",
 				param->length, param->iterations);
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 		urb = simple_alloc_urb (udev, dev->in_pipe, dev->in_desc, param->length);
 #else
 		urb = simple_alloc_urb(udev, dev->in_pipe, param->length);
@@ -1764,7 +1757,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 3:  write/%d 0..%d bytes %u times\n",
 				param->vary, param->length, param->iterations);
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 		urb = simple_alloc_urb (udev, dev->out_pipe, dev->out_desc, param->length);
 #else
 		urb = simple_alloc_urb(udev, dev->out_pipe, param->length);
@@ -1784,7 +1777,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev,
 				"TEST 4:  read/%d 0..%d bytes %u times\n",
 				param->vary, param->length, param->iterations);
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 		urb = simple_alloc_urb (udev, dev->in_pipe, dev->in_desc, param->length);
 #else
 		urb = simple_alloc_urb(udev, dev->in_pipe, param->length);
@@ -1813,7 +1806,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		 
 		retval = perform_sglist(dev, param->iterations, dev->out_pipe,
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 				dev->out_desc, &req, sg, param->sglen);
 #else
 				&req, sg, param->sglen);
@@ -1835,7 +1828,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		 
 		retval = perform_sglist(dev, param->iterations, dev->in_pipe,
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 				dev->in_desc, &req, sg, param->sglen);
 #else
 				&req, sg, param->sglen);
@@ -1856,7 +1849,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		 
 		retval = perform_sglist(dev, param->iterations, dev->out_pipe,
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 				dev->out_desc, &req, sg, param->sglen);
 #else
 				&req, sg, param->sglen);
@@ -1877,7 +1870,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		}
 		 
 		retval = perform_sglist(dev, param->iterations, dev->in_pipe,
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 				dev->in_desc, &req, sg, param->sglen);
 #else
 				&req, sg, param->sglen);
@@ -1915,7 +1908,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev, "TEST 11:  unlink %d reads of %d\n",
 				param->iterations, param->length);
 		for (i = param->iterations; retval == 0 && i--;  )
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 			retval = unlink_simple (dev, dev->in_pipe, dev->in_desc,
 #else
 			retval = unlink_simple(dev, dev->in_pipe,
@@ -1932,7 +1925,7 @@ usbtest_ioctl(struct usb_interface *intf, unsigned int code, void *buf)
 		dev_info(&intf->dev, "TEST 12:  unlink %d writes of %d\n",
 				param->iterations, param->length);
 		for (i = param->iterations; retval == 0 && i--;  )
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 			retval = unlink_simple (dev, dev->out_pipe, dev->out_desc,
 #else
 			retval = unlink_simple(dev, dev->out_pipe,
@@ -2194,7 +2187,7 @@ usbtest_probe(struct usb_interface *intf, const struct usb_device_id *id)
 							info->ep_out);
 		}
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
         if (dev->in_pipe) {
             if(usb_pipeint(dev->in_pipe)) {
                 rtest = " intr-in";

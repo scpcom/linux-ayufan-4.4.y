@@ -38,7 +38,7 @@ struct erase_info {
 	u_long priv;
 	u_char state;
 	struct erase_info *next;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	u8 *erase_buf;
 	u32 erase_buf_ofs;
 	bool partial_start;
@@ -75,7 +75,7 @@ struct nand_ecclayout {
 
 struct module;	 
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 struct mtd_info;
 #endif
 struct mtd_info {
@@ -163,7 +163,7 @@ struct mtd_info {
 	struct device dev;
 	int usecount;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	int (*refresh_device)(struct mtd_info *mtd);
 	struct mtd_info *split;
 #endif
@@ -217,7 +217,7 @@ extern int mtd_device_parse_register(struct mtd_info *mtd,
 			      int defnr_parts);
 #define mtd_device_register(master, parts, nr_parts)	\
 	mtd_device_parse_register(master, NULL, NULL, parts, nr_parts)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 extern int mtd_device_refresh(struct mtd_info *master);
 #endif
 extern int mtd_device_unregister(struct mtd_info *master);

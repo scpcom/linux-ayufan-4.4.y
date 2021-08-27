@@ -2,7 +2,7 @@
 #define MY_ABC_HERE
 #endif
  
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 
 #include <linux/platform_device.h>
 #include <linux/gpio.h>

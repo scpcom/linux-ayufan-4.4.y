@@ -266,7 +266,7 @@ static MV_SFLASH_DEVICE_PARAMS sflash[] = {
 	    MV_MX25L257_FAST_READ_DUMMY_BYTES,
 	    MV_MX25L257_ADDR_CYC_CNT
     }
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
      
     ,{
      MV_M25P_WREN_CMND_OPCD,
@@ -341,7 +341,7 @@ static MV_SFLASH_DEVICE_PARAMS sflash[] = {
      MV_M25P80_MAX_FAST_SPI_FREQ,
      MV_M25P80_FAST_READ_DUMMY_BYTES
     }
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
     
     ,{
      GD_GD25Q_WREN_CMND_OPCD,
@@ -969,7 +969,7 @@ MV_STATUS mvSFlashWpRegionSet(MV_SFLASH_INFO *pFlinfo, MV_SFLASH_WP_REGION wpReg
 	    DB(mvOsPrintf("%s WARNING: Invaild parameter WP region!\n", __func__);)
 	    return MV_BAD_PARAM;
 	}
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
     } else if (pFlinfo->manufacturerId == GD_GD25Q_MANF_ID) {
 		switch (wpRegion) {
 			case MV_WP_NONE:
@@ -1012,9 +1012,8 @@ MV_STATUS mvSFlashWpRegionSet(MV_SFLASH_INFO *pFlinfo, MV_SFLASH_WP_REGION wpReg
 	return MV_BAD_PARAM;
     }
 
-    
     wpMask |= MV_SFLASH_STATUS_REG_SRWD_MASK;
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
 	 
 	if (pFlinfo->manufacturerId == GD_GD25Q_MANF_ID)
 		wpMask |= GD_SFLASH_STATUS_REG_WEL_MASK;
@@ -1161,7 +1160,7 @@ MV_STATUS mvSFlashWpRegionGet(MV_SFLASH_INFO *pFlinfo, MV_SFLASH_WP_REGION *pWpR
 	    DB(mvOsPrintf("%s WARNING: Unidentified WP region in h/w!\n", __func__);)
 	    return MV_BAD_VALUE;
 	}
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
     } else if (pFlinfo->manufacturerId == GD_GD25Q_MANF_ID) {
 		switch ((reg & GD_GD25Q_STATUS_REG_WP_MASK)) {
 			case MV_WP_NONE :

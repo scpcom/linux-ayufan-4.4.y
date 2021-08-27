@@ -149,7 +149,7 @@ EXPORT_SYMBOL(gSynoInstallFlag);
 #endif
 
 #ifdef MY_ABC_HERE
-#if defined(CONFIG_SYNO_X64) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
 int gSynoHasDynModule = 1;
 #else
 int gSynoHasDynModule = 0;
@@ -223,7 +223,7 @@ EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 
 #endif
 
-#ifdef CONFIG_SYNO_DISPLAY_CPUINFO
+#ifdef MY_ABC_HERE
 unsigned int gSynoCPUInfoCore = 0;
 EXPORT_SYMBOL(gSynoCPUInfoCore);
 char gSynoCPUInfoClock[16];
@@ -240,7 +240,7 @@ int gSynoFactoryUSB3Disable = 0;
 EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
 #endif
 
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 int gSynoDualHead = 0;
 EXPORT_SYMBOL(gSynoDualHead);
 unsigned char gszSynoDualHeadPrivateIP[9][32];
@@ -249,7 +249,7 @@ static int iSynoMacIFCount = 9;
 static int iSynoDualheadIPValueLen = 32;
 #endif
 
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#ifdef MY_DEF_HERE
 int gSynoSASWriteConflictPanic = 0;
 EXPORT_SYMBOL(gSynoSASWriteConflictPanic);
 #endif
@@ -1281,7 +1281,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 	{
 		.procname       = "syno_dual_head_private_ip",
 		.data           = &gszSynoDualHeadPrivateIP,
@@ -1399,7 +1399,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef CONFIG_SYNO_DISPLAY_CPUINFO
+#ifdef MY_ABC_HERE
         {
             .procname       = "syno_CPU_info_core",
             .data           = &gSynoCPUInfoCore,
@@ -3143,7 +3143,7 @@ int proc_do_large_bitmap(struct ctl_table *table, int write,
 	}
 }
 
-#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_DUAL_HEAD)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
  
 int SynoProcDoStringVec(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp, loff_t *ppos)
@@ -3157,7 +3157,7 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 	char stBuf[512] = {'\0'};
 	char *pBuf = stBuf;
 	int iArrayIndex = 0;
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 	int iOffset = 0;
 	char *p = NULL;
 	char c = -1;
@@ -3170,7 +3170,7 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 
 	if (write) {
 		 
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 		for (iArrayIndex = 0; iArrayIndex < *pArraySize; iArrayIndex++) {
 			if (0 == c) {
 				pStr = ((char *)table->data) + iArrayIndex * (*pEntrySize);
@@ -3289,7 +3289,7 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
     return -ENOSYS;
 }
 
-#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_DUAL_HEAD)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 int SynoProcDoStringVec(struct ctl_table *table, int write,
 			void __user *buffer, size_t *lenp, loff_t *ppos)
 {

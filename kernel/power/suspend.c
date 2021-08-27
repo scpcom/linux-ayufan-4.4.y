@@ -137,8 +137,7 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 	arch_suspend_disable_irqs();
 	BUG_ON(!irqs_disabled());
 
-#if defined(CONFIG_SYNO_COMCERTO)
-	
+#if defined(MY_ABC_HERE)
 	 
 	error = 0;
 #else
@@ -150,7 +149,7 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 			error = suspend_ops->enter(state);
 			events_check_enabled = false;
 		}
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 		syscore_resume();
 #endif
 	}

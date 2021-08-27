@@ -227,7 +227,7 @@ static inline struct rt6_info *ip6_dst_alloc(struct dst_ops *ops,
 		memset(&rt->rt6i_table, 0,
 			sizeof(*rt) - sizeof(struct dst_entry));
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	rt->nfp = false;
 #endif  
@@ -788,7 +788,7 @@ restart:
 
 	dst_hold(&rt->dst);
 	if (nrt) {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 			if ((rt->rt6i_flags & RTF_CACHE)) {
 				ipv6_addr_copy(&rt->rt6i_src.addr, &fl6->saddr);
@@ -2267,7 +2267,7 @@ static int rt6_fill_node(struct net *net,
 		ipv6_addr_copy(&saddr_buf, &rt->rt6i_prefsrc.addr);
 		NLA_PUT(skb, RTA_PREFSRC, 16, &saddr_buf);
 	}
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 	if (rtnetlink_put_metrics_2(skb, dst_metrics_ptr(&rt->dst), &rt->dst) < 0)
 #else
 	if (rtnetlink_put_metrics(skb, dst_metrics_ptr(&rt->dst)) < 0)
@@ -2333,7 +2333,7 @@ static int inet6_rtm_getroute(struct sk_buff *in_skb, struct nlmsghdr* nlh, void
 	struct rtmsg *rtm;
 	struct flowi6 fl6;
 	int err, iif = 0;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	int flags = 0;
 #endif
 
@@ -2364,7 +2364,7 @@ static int inet6_rtm_getroute(struct sk_buff *in_skb, struct nlmsghdr* nlh, void
 	if (tb[RTA_OIF])
 		fl6.flowi6_oif = nla_get_u32(tb[RTA_OIF]);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (tb[RTA_MARK])
 		fl6.flowi6_mark = nla_get_u32(tb[RTA_MARK]);
 #endif
@@ -2377,7 +2377,7 @@ static int inet6_rtm_getroute(struct sk_buff *in_skb, struct nlmsghdr* nlh, void
 			goto errout;
 		}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		fl6.flowi6_iif = iif;
 
 		if (!ipv6_addr_any(&fl6.saddr))
@@ -2394,11 +2394,10 @@ static int inet6_rtm_getroute(struct sk_buff *in_skb, struct nlmsghdr* nlh, void
 		goto errout;
 	}
 
-	
 	skb_reset_mac_header(skb);
 	skb_reserve(skb, MAX_HEADER + sizeof(struct ipv6hdr));
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (iif)
 		rt = (struct rt6_info*) fib6_rule_lookup(net, &fl6, flags, ip6_pol_route_input);
 	else

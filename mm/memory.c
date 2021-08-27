@@ -559,7 +559,7 @@ static void print_bad_pte(struct vm_area_struct *vma, unsigned long addr,
 		(long long)pte_val(pte), (long long)pmd_val(*pmd));
 	if (page)
 		dump_page(page);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	printk(KERN_ALERT
 		"addr:%p vm_flags:%08lx anon_vma:%p mapping:%p index:%llx\n",
 		(void *)addr, vma->vm_flags, vma->anon_vma, mapping, (unsigned long long)index);
@@ -1099,7 +1099,7 @@ unsigned long zap_page_range(struct vm_area_struct *vma, unsigned long address,
 	tlb_finish_mmu(&tlb, address, end);
 	return end;
 }
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 EXPORT_SYMBOL_GPL(zap_page_range);
 #endif
 
@@ -2294,7 +2294,7 @@ static inline int check_stack_guard_page(struct vm_area_struct *vma, unsigned lo
 	}
 	return 0;
 }
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 EXPORT_SYMBOL_GPL(vmtruncate_range);
 #endif
 

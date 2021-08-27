@@ -2,7 +2,7 @@
 #define MY_ABC_HERE
 #endif
  
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(MY_DEF_HERE)
 
 #include <linux/gpio.h>
 #include <linux/synobios.h>

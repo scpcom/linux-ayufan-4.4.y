@@ -11,7 +11,7 @@
 #include <linux/swap.h>
 #include <linux/writeback.h>
 #include <linux/buffer_head.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/export.h>
 #endif
 #include <linux/module.h>
@@ -20,10 +20,10 @@
 #include <linux/security.h>
 #include <linux/gfp.h>
 #include <linux/socket.h>
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/time.h>
 #endif
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <net/sock.h>
 #include <linux/net.h>
 #include <linux/socket.h>
@@ -34,7 +34,7 @@ static struct common_mempool  * rcv_pool = NULL;
 static struct common_mempool  * kvec_pool = NULL;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <net/sock.h>
 #include <linux/net.h>
 #include <linux/genalloc.h>
@@ -288,8 +288,7 @@ __generic_file_splice_read(struct file *in, loff_t *ppos,
 	req_pages = (len + loff + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
 	nr_pages = min(req_pages, spd.nr_pages_max);
 
-	
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_SPLICE_READ_NOCONTIG)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_SPLICE_READ_NOCONTIG)
 	spd.nr_pages = find_get_pages(mapping, index, nr_pages, spd.pages);
 #else
 	spd.nr_pages = find_get_pages_contig(mapping, index, nr_pages, spd.pages);
@@ -425,7 +424,7 @@ ssize_t generic_file_splice_read(struct file *in, loff_t *ppos,
 		len = left;
 
 	ret = __generic_file_splice_read(in, ppos, pipe, len, flags);
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (ret > 0)
 		*ppos += ret;
 #else
@@ -577,13 +576,12 @@ err:
 }
 EXPORT_SYMBOL(default_file_splice_read);
 
-
 static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 			    struct pipe_buffer *buf, struct splice_desc *sd)
 {
 	struct file *file = sd->u.file;
 	loff_t pos = sd->pos;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	int ret, more;
 
 	ret = buf->ops->confirm(pipe, buf);
@@ -708,7 +706,7 @@ int splice_from_pipe_feed(struct pipe_inode_info *pipe, struct splice_desc *sd,
 }
 EXPORT_SYMBOL(splice_from_pipe_feed);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 #if !defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
 #define MSPD_SPLICE_NUM_DMA		100
 #else
@@ -1166,12 +1164,12 @@ generic_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 		mutex_lock_nested(&inode->i_mutex, I_MUTEX_CHILD);
 		ret = file_remove_suid(out);
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 		if (!ret)
 			ret = splice_from_pipe_feed(pipe, &sd, pipe_to_file);
 #else
 		if (!ret) {
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_DEF_HERE)
 #else
 			ret = file_update_time(out);
 #endif  
@@ -1205,7 +1203,7 @@ generic_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 
 EXPORT_SYMBOL(generic_file_splice_write);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_SPLICE_PROF)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_SPLICE_PROF)
 unsigned int splicew_time_counter[256];
 unsigned int splicew_reqtime_counter[256];
 unsigned int splicew_data_counter[256];
@@ -1213,7 +1211,7 @@ static struct timeval last_splicew;
 unsigned int init_splicew_prof = 0;
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 ssize_t
 comcerto_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 			  loff_t *ppos, size_t len, unsigned int flags)
@@ -1232,7 +1230,7 @@ comcerto_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 	int diff_time_ms;
 #endif
 
-#if defined(CONFIG_SYNO_C2K_SPLICE_SB_FREEZING)
+#if defined(MY_ABC_HERE)
 	sb_start_write(inode->i_sb);
 #endif
 
@@ -1290,7 +1288,7 @@ comcerto_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 			ret = err;
 		else
 			*ppos += ret;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		balance_dirty_pages_ratelimited(mapping);
 #else
 		balance_dirty_pages_ratelimited_nr(mapping, nr_pages);
@@ -1316,7 +1314,7 @@ comcerto_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 	}
 #endif
 
-#if defined(CONFIG_SYNO_C2K_SPLICE_SB_FREEZING)
+#if defined(MY_ABC_HERE)
 	sb_end_write(inode->i_sb);
 #endif
 	return ret;
@@ -1381,7 +1379,7 @@ static long do_splice_from(struct pipe_inode_info *pipe, struct file *out,
 	if (unlikely(ret < 0))
 		return ret;
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	splice_write = out->f_op->splice_write;
 	if (!splice_write)
 #else
@@ -1418,7 +1416,7 @@ static long do_splice_to(struct file *in, loff_t *ppos,
 	if (unlikely(ret < 0))
 		return ret;
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 	splice_read = in->f_op->splice_read;
 	if (!splice_read)
 #else
@@ -1618,7 +1616,7 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 	return -EINVAL;
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <net/sock.h>
 struct RECV_FILE_CONTROL_BLOCK
 {
@@ -1764,8 +1762,7 @@ done:
 }
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
-
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
  
 typedef struct common_mempool common_mempool_t;
 void* common_mempool_alloc(common_mempool_t* pool);
@@ -2398,39 +2395,39 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		int, fd_out, loff_t __user *, off_out,
 		size_t, len, unsigned int, flags)
 {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	int error;
-#elif defined(CONFIG_SYNO_COMCERTO)
+#elif defined(MY_ABC_HERE)
 	int error = -EBADF;
 #else
 	long error;
 #endif
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct file *in, *out = NULL;
 #else
 	struct file *in, *out;
 #endif
 	int fput_in, fput_out;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)  || defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)  || defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	struct socket *sock = NULL;
 #endif
 
 	if (unlikely(!len))
 		return 0;
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	error = -EBADF;
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	sock = sockfd_lookup(fd_in, (int *)&error);
 #else
 	sock = sockfd_lookup(fd_in, &error);
 #endif
 	if (sock) {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		if(!sock->sk) {
 			BUG();
 			goto done;
@@ -2445,7 +2442,7 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		if (out) {
 			if (!(out->f_mode & FMODE_WRITE))
 				goto done;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			error = do_splice_from_socket(out, sock, off_out,len);
 #else
 			if (!out->f_op->splice_from_socket)
@@ -2460,7 +2457,7 @@ done:
 		return error;
 	}
 #endif
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (!(out = fget_light(fd_out, &fput_out)))
 		return -EBADF;
 
@@ -2508,20 +2505,18 @@ out:
 	return error;
 }
 
-
 static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	int ret = 0;
 #else
 	int ret;
 #endif
 
-	
 	if (pipe->nrbufs)
 		return 0;
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	ret = 0;
 #endif
 	pipe_lock(pipe);
@@ -2546,20 +2541,18 @@ static int ipipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 	return ret;
 }
 
-
 static int opipe_prep(struct pipe_inode_info *pipe, unsigned int flags)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	int ret = 0;
 #else
 	int ret;
 #endif
 
-	
 	if (pipe->nrbufs < pipe->buffers)
 		return 0;
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	ret = 0;
 #endif
 	pipe_lock(pipe);
@@ -2770,7 +2763,7 @@ SYSCALL_DEFINE4(tee, int, fdin, int, fdout, size_t, len, unsigned int, flags)
 	return error;
 }
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 static int __init init_splice_pools(void)
 {
 	unsigned int rcv_pool_size= sizeof(struct recvfile_ctl_blk) * MAX_PAGES_PER_RECVFILE;

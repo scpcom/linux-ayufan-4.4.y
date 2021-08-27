@@ -130,8 +130,7 @@ void local_bh_enable_ip(unsigned long ip)
 }
 EXPORT_SYMBOL(local_bh_enable_ip);
 
-
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 #define MAX_SOFTIRQ_RESTART 2
 #else
 #define MAX_SOFTIRQ_RESTART 10

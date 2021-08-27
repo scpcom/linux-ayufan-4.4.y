@@ -38,7 +38,7 @@ MODULE_PARM_DESC(autosuspend, "default autosuspend delay");
 #define usb_autosuspend_delay		0
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(MY_DEF_HERE)
 void (*gpfn_ehci_marvell_hs_detect_wa_done)(struct usb_device *) = NULL;
 EXPORT_SYMBOL(gpfn_ehci_marvell_hs_detect_wa_done);
 #endif
@@ -450,7 +450,7 @@ int __usb_get_extra_descriptor(char *buffer, unsigned size,
 }
 EXPORT_SYMBOL_GPL(__usb_get_extra_descriptor);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static struct usb_device *match_device_name(struct usb_device *dev,
 					    const char *name)
 {

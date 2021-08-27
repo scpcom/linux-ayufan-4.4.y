@@ -10,15 +10,13 @@
 #include <linux/jiffies.h>
 #include "power.h"
 
-
-
 static const char enabled[] = "enabled";
 static const char disabled[] = "disabled";
 
 const char power_group_name[] = "power";
 EXPORT_SYMBOL_GPL(power_group_name);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_PM_SYSFS_MANUAL)
+#if defined(MY_ABC_HERE) && defined(CONFIG_PM_SYSFS_MANUAL)
 static ssize_t state_show(struct device * dev, struct device_attribute *attr, char * buf)
 {
 	if (dev->power.power_state.event == PM_EVENT_SUSPEND)  
@@ -396,7 +394,7 @@ static DEVICE_ATTR(async, 0644, async_show, async_store);
 #endif  
 
 static struct attribute *power_attrs[] = {
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_PM_SYSFS_MANUAL)
+#if defined(MY_ABC_HERE) && defined(CONFIG_PM_SYSFS_MANUAL)
 	 &dev_attr_state.attr,
 #endif
 #ifdef CONFIG_PM_ADVANCED_DEBUG

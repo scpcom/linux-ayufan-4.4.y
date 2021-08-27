@@ -106,7 +106,7 @@ static int axptemp_init_sensor(void)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_DEF_HERE
 static int axptemp_read_temp(void)
 #else
 int axptemp_read_temp(void)
@@ -117,10 +117,9 @@ int axptemp_read_temp(void)
 	reg = readl(INTER_REGS_BASE | TSEN_STATUS_REG);
 	reg = (reg & TSEN_STATUS_TEMP_OUT_MASK) >> TSEN_STATUS_TEMP_OUT_OFFSET;
  
-
 	return ARMADAXP_TSEN_RAW2TEMP(reg);
 }
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(axptemp_read_temp);
 #endif
 

@@ -37,7 +37,7 @@
     { 0, BASE_BAUD, 0x3E8, 4, STD_COM_FLAGS },   
 #endif
 #else
-#if !defined(CONFIG_SYNO_CEDARVIEW) && !defined(CONFIG_SYNO_AVOTON)
+#if !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 #define SERIAL_PORT_DFNS            \
 	           \
 	{ 0, BASE_BAUD, 0x2F8, 3, STD_COM_FLAGS },    \

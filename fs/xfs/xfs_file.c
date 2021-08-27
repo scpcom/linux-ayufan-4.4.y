@@ -390,7 +390,7 @@ xfs_file_splice_write(
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 STATIC ssize_t
 xfs_file_splice_from_socket(
        struct file     *file,
@@ -940,7 +940,7 @@ const struct file_operations xfs_file_operations = {
 	.aio_write	= xfs_file_aio_write,
 	.splice_read	= xfs_file_splice_read,
 	.splice_write	= xfs_file_splice_write,
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	.splice_from_socket = xfs_file_splice_from_socket,
 #endif
 	.unlocked_ioctl	= xfs_file_ioctl,

@@ -784,7 +784,7 @@ static void hub_activate(struct usb_hub *hub, enum hub_activation_type type)
 					USB_PORT_FEAT_C_PORT_LINK_STATE);
 		}
 
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 		if (portchange & USB_PORT_STAT_C_RESET) {
 			need_debounce_delay = true;
 			clear_port_feature(hub->hdev, port1,
@@ -2103,7 +2103,7 @@ static void hub_port_finish_reset(struct usb_hub *hub, int port1,
 	}
 }
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if defined(MY_DEF_HERE) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 extern void (*gpfn_ehci_marvell_hs_detect_wa_done)(struct usb_device *);
 #endif
 
@@ -2182,13 +2182,13 @@ static int hub_port_reset(struct usb_hub *hub, int port1,
 done:
 	if (!hub_is_superspeed(hub->hdev))
 		up_read(&ehci_cf_port_reset_rwsem);
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if defined(MY_DEF_HERE) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 	if (NULL != gpfn_ehci_marvell_hs_detect_wa_done) {
 		gpfn_ehci_marvell_hs_detect_wa_done(hub->hdev);
 	}
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) &&  defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if defined(MY_DEF_HERE) &&  defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 	ehci_marvell_hs_detect_wa_done(hub->hdev);
 #endif
 
@@ -2668,7 +2668,7 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 enum XHCI_SPECIAL_RESET_MODE xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
 EXPORT_SYMBOL_GPL(xhci_special_reset);
 #define SPECIAL_RESET_RETRY 20  
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define IS_XHCI(hub) (!strcmp(hub->hdev->bus->controller->driver->name, "xhci-hcd"))
 #else
 #define IS_XHCI(hub) (!strcmp(hub->hdev->bus->controller->driver->name, "xhci_hcd"))

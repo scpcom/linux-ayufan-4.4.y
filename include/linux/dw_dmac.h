@@ -2,13 +2,12 @@
 #define MY_ABC_HERE
 #endif
  
-
 #ifndef DW_DMAC_H
 #define DW_DMAC_H
 
 #include <linux/dmaengine.h>
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 struct dw_dma_slave {
 	struct device		*dma_dev;
@@ -28,7 +27,7 @@ struct dw_dma_platform_data {
 #define CHAN_PRIORITY_ASCENDING		0	 
 #define CHAN_PRIORITY_DESCENDING	1	 
 	unsigned char	chan_priority;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	unsigned short	block_size;
 	unsigned char	nr_masters;
 	unsigned char	data_width[4];
@@ -53,7 +52,7 @@ enum dw_dma_msize {
 	DW_DMA_MSIZE_256,
 };
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
  
 enum dw_dma_fc {
 	DW_DMA_FC_D_M2M,
@@ -107,7 +106,7 @@ struct dw_cyclic_desc {
 
 struct dw_cyclic_desc *dw_dma_cyclic_prep(struct dma_chan *chan,
 		dma_addr_t buf_addr, size_t buf_len, size_t period_len,
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		enum dma_transfer_direction direction);
 #else
 		enum dma_data_direction direction);

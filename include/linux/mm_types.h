@@ -151,11 +151,9 @@ struct vm_area_struct {
 	struct list_head anon_vma_chain;  
 	struct anon_vma *anon_vma;	 
 
-	
 	const struct vm_operations_struct *vm_ops;
 
-	
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	pgoff_t vm_pgoff;		 
 #else
 	unsigned long vm_pgoff;		 

@@ -207,7 +207,7 @@ int of_pci_address_to_resource(struct device_node *dev, int bar,
 	return __of_address_to_resource(dev, addrp, size, flags, r);
 }
 EXPORT_SYMBOL_GPL(of_pci_address_to_resource);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
 						struct device_node *node)
 {

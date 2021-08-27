@@ -338,7 +338,7 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 	unsigned int i;
 	unsigned int rate;
 	unsigned int ratio;
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	unsigned int speed;
 #endif
 	struct cs42l51_ratios *ratios = NULL;
@@ -358,11 +358,10 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 		break;
 	}
 
-	
 	rate = params_rate(params);      
 	ratio = cs42l51->mclk / rate;     
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	if (rate < 12500)
 		speed = (1 << CS42L51_QSM_MODE) | (1 << CS42L51_SSM_MODE);
 	else if (rate < 25000)
@@ -374,7 +373,7 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 #endif
 
 	for (i = 0; i < nr_ratios; i++) {
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 		if (((1 << ratios[i].speed_mode) & speed) == 0)
 			continue;
 #endif

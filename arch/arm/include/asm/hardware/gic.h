@@ -17,7 +17,7 @@
 
 #define GIC_DIST_CTRL			0x000
 #define GIC_DIST_CTR			0x004
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define GIC_DIST_SECURITY_BIT		0x080
 #endif
 #define GIC_DIST_ENABLE_SET		0x100

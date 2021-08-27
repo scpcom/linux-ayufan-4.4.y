@@ -155,7 +155,7 @@ static struct device_attribute dev_attr_link_training_enable = {
 	.store = al_eth_store_link_training_enable,
 };
 
-#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
+#ifdef MY_DEF_HERE
 static ssize_t al_eth_store_rx_equal_enable(struct device *dev,
 					      struct device_attribute *attr,
 					      const char *buf, size_t len)
@@ -454,7 +454,7 @@ int al_eth_sysfs_init(
 	if (device_create_file(dev, &dev_attr_link_training_enable))
 		dev_info(dev, "failed to create link_training_enable sysfs entry");
 
-#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
+#ifdef MY_DEF_HERE
 	if (device_create_file(dev, &dev_attr_rx_equal_enable))
 		dev_info(dev, "failed to create rx_equal_enable sysfs entry");
 #endif
@@ -519,7 +519,7 @@ void al_eth_sysfs_terminate(
 	device_remove_file(dev, &dev_attr_max_rx_buff_alloc_size);
 #ifdef CONFIG_SYNO_ALPINE_A0
 	device_remove_file(dev, &dev_attr_link_training_enable);
-#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
+#ifdef MY_DEF_HERE
 	device_remove_file(dev, &dev_attr_rx_equal_enable);
 #endif
 	device_remove_file(dev, &dev_attr_force_1000_base_x);

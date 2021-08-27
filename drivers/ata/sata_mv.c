@@ -101,14 +101,13 @@ enum {
 	 
 	MV_PORT_MASK		= (MV_PORTS_PER_HC - 1),    
 
-	
 	MV_FLAG_DUAL_HC		= (1 << 30),   
 
 	MV_COMMON_FLAGS		= ATA_FLAG_SATA | ATA_FLAG_PIO_POLLING,
 
 	MV_GEN_I_FLAGS		= MV_COMMON_FLAGS | ATA_FLAG_NO_ATAPI,
 
-#ifdef CONFIG_SYNO_COMCERTO
+#ifdef MY_ABC_HERE
 	MV_GEN_II_FLAGS     = MV_COMMON_FLAGS | ATA_FLAG_PMP | ATA_FLAG_ACPI_SATA,
 #else
 	MV_GEN_II_FLAGS		= MV_COMMON_FLAGS | ATA_FLAG_NCQ |
@@ -589,7 +588,7 @@ static struct scsi_host_template mv5_sht = {
 #ifdef MY_ABC_HERE
 	.syno_index_get         = syno_libata_index_get,
 #endif
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	.support_staggered_spinup = 1,
 #endif
 };
@@ -602,7 +601,7 @@ static struct scsi_host_template mv6_sht = {
 #ifdef MY_ABC_HERE
 	.shost_attrs		= sata_mv_shost_attrs,
 #endif
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	.support_staggered_spinup = 1,
 #endif
 };
@@ -2285,11 +2284,10 @@ static void mv_process_crpb_entries(struct ata_port *ap, struct mv_port_priv *pp
 	u32 done_mask = 0;
 	int ncq_enabled = (pp->pp_flags & MV_PP_FLAG_NCQ_EN);
 
-	
 	in_index = (readl(port_mmio + EDMA_RSP_Q_IN_PTR)
 			>> EDMA_RSP_Q_PTR_SHIFT) & MV_MAX_Q_DEPTH_MASK;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	dma_io_sync();
 #endif
 	 

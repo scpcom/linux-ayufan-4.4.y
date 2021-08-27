@@ -155,7 +155,7 @@ struct ucred {
 #define AF_CAIF		37	 
 #define AF_ALG		38	 
 #define AF_NFC		39	 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define AF_COMA		40	 
 #define AF_MAX		41	 
 #else
@@ -202,7 +202,7 @@ struct ucred {
 #define PF_CAIF		AF_CAIF
 #define PF_ALG		AF_ALG
 #define PF_NFC		AF_NFC
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define PF_COMA		AF_COMA
 #endif
 #define PF_MAX		AF_MAX
@@ -228,11 +228,11 @@ struct ucred {
 #define MSG_MORE	0x8000	 
 #define MSG_WAITFORONE	0x10000	 
 #define MSG_SENDPAGE_NOTLAST 0x20000  
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 #define MSG_KERNSPACE   0x40000
 #define MSG_NOCATCHSIG	0x80000
 #endif
-#if defined(CONFIG_SYNO_ARMADA_V2) 
+#if defined(MY_DEF_HERE) 
 #define MSG_KERNSPACE	0x40000
 #define MSG_NOCATCHSIG	0x80000
 #endif
@@ -307,11 +307,11 @@ extern int memcpy_toiovecend(const struct iovec *v, unsigned char *kdata,
 			     int offset, int len);
 extern int move_addr_to_kernel(void __user *uaddr, int ulen, struct sockaddr *kaddr);
 extern int put_cmsg(struct msghdr*, int level, int type, int len, void *data);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 extern void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len);
 #endif
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 extern void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len);
 #endif
 

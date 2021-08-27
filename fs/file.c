@@ -204,10 +204,9 @@ int expand_files(struct files_struct *files, int nr)
 	if (nr >= sysctl_nr_open)
 		return -EMFILE;
 
-	
 	return expand_fdtable(files, nr);
 }
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 EXPORT_SYMBOL_GPL(expand_files);
 #endif
 

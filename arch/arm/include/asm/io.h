@@ -61,7 +61,7 @@ static inline void __iomem *__typesafe_io(unsigned long addr)
 #define __iormb()		do { } while (0)
 #define __iowmb()		do { } while (0)
 #endif
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #define PCI_IO_VIRT_BASE        0xfee00000
 
 struct resource;

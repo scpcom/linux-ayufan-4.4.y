@@ -58,7 +58,7 @@ MV_VOID mvBoardEnvInit(MV_VOID)
 		return;
 	}
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(MY_DEF_HERE)
 #else
  
 	norDev = boardGetDevCSNum(0, BOARD_DEV_NOR_FLASH);
@@ -1440,7 +1440,7 @@ MV_BOARD_PEX_INFO *mvBoardPexInfoGet(void)
 	case DB_88F6710_BP_ID:
 	case DB_88F6710_PCAC_ID:
 	case RD_88F6710_ID:
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(MY_DEF_HERE)
 	case SYNO_DS213j_ID:
 	case SYNO_US3_ID:
 	case SYNO_RS214_ID:

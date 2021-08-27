@@ -85,7 +85,7 @@ struct proc_dir_entry *proc_create_data(const char *name, mode_t mode,
 				const struct file_operations *proc_fops,
 				void *data);
 extern void remove_proc_entry(const char *name, struct proc_dir_entry *parent);
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 extern int remove_proc_subtree(const char *name, struct proc_dir_entry *parent);
 #endif
 
@@ -168,7 +168,7 @@ static inline struct proc_dir_entry *proc_create_data(const char *name,
 	return NULL;
 }
 #define remove_proc_entry(name, parent) do {} while (0)
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 #define remove_proc_subtree(name, parent) do {} while (0)
 #endif
 

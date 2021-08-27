@@ -3862,7 +3862,7 @@ int can_nice(const struct task_struct *p, const int nice)
 	return (nice_rlim <= task_rlimit(p, RLIMIT_NICE) ||
 		capable(CAP_SYS_NICE));
 }
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 EXPORT_SYMBOL_GPL(can_nice);
 #endif
 

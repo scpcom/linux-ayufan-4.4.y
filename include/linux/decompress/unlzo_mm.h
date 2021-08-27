@@ -4,7 +4,7 @@
 #ifndef UNLZO_MM_H
 #define UNLZO_MM_H
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #ifdef STATIC
 #define INIT
 #else

@@ -10,7 +10,7 @@
 typedef u32 pteval_t;
 typedef u32 pmdval_t;
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
 #undef STRICT_MM_TYPECHECKS
 #else
 #define STRICT_MM_TYPECHECKS	1
@@ -18,7 +18,7 @@ typedef u32 pmdval_t;
 
 #ifdef STRICT_MM_TYPECHECKS
  
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
 typedef struct { pteval_t pte; } pte_t;
 typedef struct { pmdval_t pmd; } pmd_t;
 typedef struct { pmdval_t pgd[2]; } pgd_t;

@@ -65,7 +65,7 @@
 
 #define REG_TEMP_OFFSET_BASE	0x70
 
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 #define REG_CONFIG1				0x40	 
 #define REG_PECI0				0x33	 
 #define REG_PECI1_BASE			0x1A	 
@@ -108,13 +108,11 @@
 #define CONFIG5_TEMPOFFSET	0x02
 #define CONFIG5_VIDGPIO		0x10	 
 
-
-
 #define ADT7475_VOLTAGE_COUNT	5	 
 #define ADT7475_TEMP_COUNT	3
 #define ADT7475_TACH_COUNT	4
 #define ADT7475_PWM_COUNT	3
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 #define ADT7490_PECI_COUNT	4	 
 #define SYNO_IS_ADT7490(client) !strcmp(client->name, "adt7490")
 #endif
@@ -133,7 +131,7 @@
 #define VOLTAGE_MIN_REG(idx) (REG_VOLTAGE_MIN_BASE + ((idx) * 2))
 #define VOLTAGE_MAX_REG(idx) (REG_VOLTAGE_MAX_BASE + ((idx) * 2))
 
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 #define PECI_REG(idx) (idx == 0 ? REG_PECI0:REG_PECI1_BASE + (idx-1))	 
 #define PECI_OFFSET_REG(idx) (REG_PECI_OFFSET_BASE + (idx))
 #endif
@@ -184,7 +182,7 @@ struct adt7475_data {
 
 	u8 vid;
 	u8 vrm;
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 	u8 pwmsynoctl[4];
 	u16 peci[7][4];	 
 	u8 peci_range[4];
@@ -455,7 +453,7 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *attr,
 		val = SENSORS_LIMIT(val, temp - 15000, temp);
 		val = (temp - val) / 1000;
 
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 		if (sattr->index != 1) {
 			data->temp[HYSTERSIS][sattr->index] &= 0x0F;
 			data->temp[HYSTERSIS][sattr->index] |= (val & 0xF) << 4;
@@ -858,8 +856,7 @@ static ssize_t set_pwm_at_crit(struct device *dev,
 	return count;
 }
 
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
-
+#ifdef MY_DEF_HERE
 
 static ssize_t set_peci(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
@@ -1493,7 +1490,7 @@ static SENSOR_DEVICE_ATTR_2(pwm3_auto_point1_pwm, S_IRUGO | S_IWUSR, show_pwm,
 			    set_pwm, MIN, 2);
 static SENSOR_DEVICE_ATTR_2(pwm3_auto_point2_pwm, S_IRUGO | S_IWUSR, show_pwm,
 			    set_pwm, MAX, 2);
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 static SENSOR_DEVICE_ATTR_2(peci0_input, S_IRUGO, show_peci, NULL, INPUT, 0);
 static SENSOR_DEVICE_ATTR_2(peci0_auto_point1_temp, S_IRUGO | S_IWUSR,
 			    show_peci, set_peci, AUTOMIN, 0);
@@ -1640,7 +1637,7 @@ static struct attribute *adt7475_attrs[] = {
 	&sensor_dev_attr_pwm3_auto_channels_temp.dev_attr.attr,
 	&sensor_dev_attr_pwm3_auto_point1_pwm.dev_attr.attr,
 	&sensor_dev_attr_pwm3_auto_point2_pwm.dev_attr.attr,
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 	&sensor_dev_attr_peci0_input.dev_attr.attr,
 	&sensor_dev_attr_peci0_auto_point1_temp.dev_attr.attr,
 	&sensor_dev_attr_peci0_auto_point2_temp.dev_attr.attr,
@@ -1826,7 +1823,7 @@ static int adt7475_probe(struct i2c_client *client,
 	struct adt7475_data *data;
 	int i, ret = 0, revision;
 	u8 config2, config3;
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 	u8 config1, configPECI;
 #endif
 
@@ -1853,7 +1850,7 @@ static int adt7475_probe(struct i2c_client *client,
 		revision = adt7475_read(REG_DEVID2) & 0x07;
 	}
 
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 	if (SYNO_IS_ADT7490(client)) {
 		config1 = adt7475_read(REG_CONFIG1);
 		 
@@ -2017,7 +2014,7 @@ static void adt7475_read_hystersis(struct i2c_client *client)
 	data->temp[HYSTERSIS][0] = (u16) adt7475_read(REG_REMOTE1_HYSTERSIS);
 	data->temp[HYSTERSIS][1] = data->temp[HYSTERSIS][0];
 	data->temp[HYSTERSIS][2] = (u16) adt7475_read(REG_REMOTE2_HYSTERSIS);
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 	data->peci[HYSTERSIS][0] = (u16) adt7475_read(REG_REMOTE2_HYSTERSIS);
 	data->peci[HYSTERSIS][1] = (u16) adt7475_read(REG_REMOTE2_HYSTERSIS);
 	data->peci[HYSTERSIS][2] = (u16) adt7475_read(REG_REMOTE2_HYSTERSIS);
@@ -2025,7 +2022,7 @@ static void adt7475_read_hystersis(struct i2c_client *client)
 #endif
 }
 
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 static unsigned int adt7490_pwmctl_read(const unsigned int pwmReg)
 {
 	unsigned int valt = pwmReg & 0x8;
@@ -2095,9 +2092,8 @@ static void adt7475_read_pwm(struct i2c_client *client, int index)
 
 	data->pwm[CONTROL][index] = adt7475_read(PWM_CONFIG_REG(index));
 
-	
 	v = (data->pwm[CONTROL][index] >> 5) & 7;
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 	data->pwmsynoctl[index] = adt7490_pwmctl_read(data->pwm[CONTROL][index]);
 #endif
 	if (v == 3)
@@ -2175,7 +2171,7 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 				((ext >> 4) & 3);
 		}
 
-#ifdef CONFIG_SYNO_ADT7490_FEATURES
+#ifdef MY_DEF_HERE
 		if (SYNO_IS_ADT7490(client)) {
 			for (i = 0; i < ADT7490_PECI_COUNT; i++) {
 				 

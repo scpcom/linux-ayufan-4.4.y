@@ -386,7 +386,7 @@ static int setfl(int fd, struct file * filp, unsigned long arg)
  out:
 	return error;
 }
-#ifdef CONFIG_SYNO_USE_OCF_LINUX
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(sys_dup);
 #endif
 

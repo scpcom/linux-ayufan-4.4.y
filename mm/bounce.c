@@ -14,7 +14,7 @@
 #include <linux/hash.h>
 #include <linux/highmem.h>
 #include <linux/bootmem.h>
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <linux/proc_fs.h>
 #endif
 #include <asm/tlbflush.h>
@@ -24,12 +24,12 @@
 #define POOL_SIZE	64
 #define ISA_POOL_SIZE	16
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #undef BOUNCE_STATS
 #endif
 
 static mempool_t *page_pool, *isa_page_pool;
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 struct proc_dir_entry *bounce_stats_proc;
 
 #ifdef BOUNCE_STATS
@@ -74,7 +74,7 @@ static __init int init_emergency_pool(void)
 	BUG_ON(!page_pool);
 	printk("highmem bounce pool size: %d pages\n", POOL_SIZE);
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(BOUNCE_STATS)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(BOUNCE_STATS)
 	 
 	bounce_stats_proc = create_proc_entry("bounce_stats", 0666, NULL);
 	bounce_stats_proc->read_proc = bounce_stats_read;
@@ -233,11 +233,10 @@ static void __blk_queue_bounce(struct request_queue *q, struct bio **bio_orig,
 		}
 	}
 
-	
 	if (!bio)
 		return;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	STATS(bounced);
 #endif
 	trace_block_bio_bounce(q, *bio_orig);
@@ -278,11 +277,10 @@ void blk_queue_bounce(struct request_queue *q, struct bio **bio_orig)
 {
 	mempool_t *pool;
 
-	
 	if (!bio_has_data(*bio_orig))
 		return;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	STATS(calls);
 #endif
 

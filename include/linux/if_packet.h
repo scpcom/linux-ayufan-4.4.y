@@ -30,7 +30,7 @@ struct sockaddr_ll {
  
 #define PACKET_LOOPBACK		5		 
 #define PACKET_FASTROUTE	6		 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define PACKET_MASK_ANY		0xffffffff	 
 #endif
 
@@ -52,7 +52,7 @@ struct sockaddr_ll {
 #define PACKET_TX_TIMESTAMP		16
 #define PACKET_TIMESTAMP		17
 #define PACKET_FANOUT			18
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define PACKET_RECV_TYPE		19
 #endif
 

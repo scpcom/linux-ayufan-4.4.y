@@ -92,14 +92,11 @@ void arm_machine_restart(char mode, const char *cmd)
 	local_irq_disable();
 	local_fiq_disable();
 
-	
 	setup_mm_for_reboot(mode);
 
-	
 	flush_cache_all();
 
-	
-#if !defined(CONFIG_SYNO_ARMADA_ARCH_V2) || (!defined(CONFIG_ARCH_ARMADA375) && !defined(CONFIG_ARCH_ARMADA38X))
+#if !defined(MY_DEF_HERE) || (!defined(CONFIG_ARCH_ARMADA375) && !defined(CONFIG_ARCH_ARMADA38X))
 	 
 	cpu_proc_fin();
 #endif
@@ -168,8 +165,7 @@ void cpu_idle(void)
 					pm_idle();
 				start_critical_timings();
 				 
-#ifdef CONFIG_SYNO_ALPINE
-				
+#ifdef MY_DEF_HERE
 				 
 #else
 				WARN_ON(irqs_disabled());

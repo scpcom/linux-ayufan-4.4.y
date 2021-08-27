@@ -18,10 +18,9 @@
 #include <asm/mach/map.h>
 #include "mm.h"
 
-
 #define VM_ARM_SECTION_MAPPING	0x80000000
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PCI
 int pci_ioremap_io(unsigned int offset, phys_addr_t phys_addr)
 {
@@ -56,7 +55,7 @@ void __check_kvm_seq(struct mm_struct *mm)
 	} while (seq != init_mm.context.kvm_seq);
 }
 
-#if !defined(CONFIG_SMP) && (!defined(CONFIG_SYNO_ALPINE) || (defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_ARM_LPAE)))
+#if !defined(CONFIG_SMP) && (!defined(MY_DEF_HERE) || (defined(MY_DEF_HERE) && !defined(CONFIG_ARM_LPAE)))
  
 static void unmap_area_sections(unsigned long virt, unsigned long size)
 {
@@ -157,7 +156,7 @@ void __iomem * __arm_ioremap_pfn_caller(unsigned long pfn,
 	unsigned long addr;
  	struct vm_struct * area;
 
-#if (defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_ARM_LPAE)) || !defined(CONFIG_SYNO_ALPINE)
+#if (defined(MY_DEF_HERE) && !defined(CONFIG_ARM_LPAE)) || !defined(MY_DEF_HERE)
 	 
 	if (pfn >= 0x100000 && (__pfn_to_phys(pfn) & ~SUPERSECTION_MASK))
 		return NULL;
@@ -177,7 +176,7 @@ void __iomem * __arm_ioremap_pfn_caller(unsigned long pfn,
  		return NULL;
  	addr = (unsigned long)area->addr;
 
-#if !defined(CONFIG_SMP) && ((defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_ARM_LPAE)) || !defined(CONFIG_SYNO_ALPINE))
+#if !defined(CONFIG_SMP) && ((defined(MY_DEF_HERE) && !defined(CONFIG_ARM_LPAE)) || !defined(MY_DEF_HERE))
 	if (DOMAIN_IO == 0 &&
 	    (((cpu_architecture() >= CPU_ARCH_ARMv6) && (get_cr() & CR_XP)) ||
 	       cpu_is_xsc3()) && pfn >= 0x100000 &&
@@ -250,10 +249,9 @@ __arm_ioremap_exec(unsigned long phys_addr, size_t size, bool cached)
 void __iounmap(volatile void __iomem *io_addr)
 {
 	void *addr = (void *)(PAGE_MASK & (unsigned long)io_addr);
-#if !defined(CONFIG_SMP) && ((defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_ARM_LPAE)) || !defined(CONFIG_SYNO_ALPINE))
+#if !defined(CONFIG_SMP) && ((defined(MY_DEF_HERE) && !defined(CONFIG_ARM_LPAE)) || !defined(MY_DEF_HERE))
 	struct vm_struct **p, *tmp;
 
-	
 	write_lock(&vmlist_lock);
 	for (p = &vmlist ; (tmp = *p) ; p = &tmp->next) {
 		if ((tmp->flags & VM_IOREMAP) && (tmp->addr == addr)) {

@@ -19,12 +19,10 @@ struct module;
 struct cpuidle_device;
 struct cpuidle_driver;
 
-
-
 struct cpuidle_state_usage {
 	void		*driver_data;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	unsigned long long	disable;
 #endif
 	unsigned long long	usage;
@@ -37,7 +35,7 @@ struct cpuidle_state {
 
 	unsigned int	flags;
 	unsigned int	exit_latency;  
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	int		power_usage;  
 #else
 	unsigned int	power_usage;  

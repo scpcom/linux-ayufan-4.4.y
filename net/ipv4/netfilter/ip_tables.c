@@ -69,7 +69,7 @@ ip_packet_match(const struct iphdr *ip,
 
 #define FWINV(bool, invflg) ((bool) ^ !!(ipinfo->invflags & (invflg)))
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (ipinfo->flags & IPT_F_NO_DEF_MATCH)
 		return true;
 
@@ -130,7 +130,7 @@ ip_packet_match(const struct iphdr *ip,
 	return true;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static void
 ip_checkdefault(struct ipt_ip *ip)
 {
@@ -300,7 +300,7 @@ struct ipt_entry *ipt_next_entry(const struct ipt_entry *entry)
 	return (void *)entry + entry->next_offset;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static bool
 ipt_handle_default_rule(struct ipt_entry *e, unsigned int *verdict)
 {
@@ -348,12 +348,11 @@ ipt_do_table(struct sk_buff *skb,
 	struct xt_action_param acpar;
 	unsigned int addend;
 
-	
 	ip = ip_hdr(skb);
 	indev = in ? in->name : nulldevname;
 	outdev = out ? out->name : nulldevname;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	IP_NF_ASSERT(table->valid_hooks & (1 << hook));
 	local_bh_disable();
 	addend = xt_write_recseq_begin();
@@ -381,7 +380,7 @@ ipt_do_table(struct sk_buff *skb,
 	acpar.family  = NFPROTO_IPV4;
 	acpar.hooknum = hook;
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	IP_NF_ASSERT(table->valid_hooks & (1 << hook));
 	local_bh_disable();
 	addend = xt_write_recseq_begin();
@@ -612,7 +611,7 @@ static void cleanup_match(struct xt_entry_match *m, struct net *net)
 }
 
 static int
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 check_entry(struct ipt_entry *e, const char *name)
 #else
 check_entry(const struct ipt_entry *e, const char *name)
@@ -625,7 +624,7 @@ check_entry(const struct ipt_entry *e, const char *name)
 		return -EINVAL;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	ip_checkdefault(&e->ip);
 #endif
 
@@ -979,7 +978,7 @@ copy_entries_to_user(unsigned int total_size,
 	const struct xt_table_info *private = table->private;
 	int ret = 0;
 	const void *loc_cpu_entry;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	u8 flags;
 #endif
 
@@ -1007,7 +1006,7 @@ copy_entries_to_user(unsigned int total_size,
 			goto free_counters;
 		}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		flags = e->ip.flags & IPT_F_MASK;
 		if (copy_to_user(userptr + off
 				 + offsetof(struct ipt_entry, ip.flags),

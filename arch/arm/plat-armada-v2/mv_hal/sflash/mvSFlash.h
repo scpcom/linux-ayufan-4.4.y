@@ -14,14 +14,13 @@ extern "C" {
 #define MV_SFLASH_PAGE_ALLIGN_MASK(pgSz)    (pgSz-1)
 #define MV_ARRAY_SIZE(a)                    ((sizeof(a)) / (sizeof(a[0])))
 
-
 #define MV_INVALID_DEVICE_NUMBER            0xFFFFFFFF
  
 #define MV_SFLASH_BASIC_SPI_FREQ            10000000
  
 typedef enum {
 	MV_WP_NONE,              
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	MV_WP_UPR_1OF256,        
 #endif
 	MV_WP_UPR_1OF128,        

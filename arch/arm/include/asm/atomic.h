@@ -13,13 +13,12 @@
 
 #ifdef __KERNEL__
 
-
 #define atomic_read(v)	(*(volatile int *)&(v)->counter)
 #define atomic_set(v,i)	(((v)->counter) = (i))
 
 #if __LINUX_ARM_ARCH__ >= 6
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 
 int comcerto_atomic_add(int i, atomic_t *v);
 int comcerto_atomic_cmpxchg(atomic_t *v, int old, int new);
@@ -39,13 +38,12 @@ static inline bool is_dma_zone_virtual_address(void *addr)
 
 #endif
 
-
 static inline void atomic_add(int i, atomic_t *v)
 {
 	unsigned long tmp;
 	int result;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if (unlikely(is_dma_zone_virtual_address(v))) {
 		comcerto_atomic_add(i, v);
 		return;
@@ -68,7 +66,7 @@ static inline int atomic_add_return(int i, atomic_t *v)
 	unsigned long tmp;
 	int result;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if (unlikely(is_dma_zone_virtual_address(v)))
 		return comcerto_atomic_add(i, v);
 #endif
@@ -95,7 +93,7 @@ static inline void atomic_sub(int i, atomic_t *v)
 	unsigned long tmp;
 	int result;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if (unlikely(is_dma_zone_virtual_address(v))) {
 		comcerto_atomic_add(-i, v);
 		return;
@@ -118,7 +116,7 @@ static inline int atomic_sub_return(int i, atomic_t *v)
 	unsigned long tmp;
 	int result;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if (unlikely(is_dma_zone_virtual_address(v)))
 		return comcerto_atomic_add(-i, v);
 #endif
@@ -144,7 +142,7 @@ static inline int atomic_cmpxchg(atomic_t *ptr, int old, int new)
 {
 	unsigned long oldval, res;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if (unlikely(is_dma_zone_virtual_address(ptr)))
 		return comcerto_atomic_cmpxchg(ptr, old, new);
 #endif
@@ -171,7 +169,7 @@ static inline void atomic_clear_mask(unsigned long mask, unsigned long *addr)
 {
 	unsigned long tmp, tmp2;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	if (unlikely(is_dma_zone_virtual_address(addr))) {
 		atomic_clear_mask(mask, addr);
 		return;

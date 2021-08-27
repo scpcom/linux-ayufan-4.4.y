@@ -17,11 +17,10 @@ extern "C" {
 #define MV_ARM_SOC
 #define SOC_NAME_PREFIX                         "MV88F"
 
-
 #define MV_DRAM_REGS_OFFSET                     (0x0)
 #define MV_AURORA_L2_REGS_OFFSET                (0x8000)
 #define MV_RTC_REGS_OFFSET                      (0x10300)
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #define MV_RTC_EXTERNAL_ALARM_OFFSET			(0x10320)
 #endif
 #define MV_DEV_BUS_REGS_OFFSET                  (0x10400)

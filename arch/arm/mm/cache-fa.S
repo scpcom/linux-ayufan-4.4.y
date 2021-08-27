@@ -243,7 +243,7 @@ ENTRY(fa_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(fa_dma_unmap_area)
 
-#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	.globl	fa_flush_kern_cache_louis
 	.equ	fa_flush_kern_cache_louis, fa_flush_kern_cache_all
 #endif

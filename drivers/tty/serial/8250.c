@@ -37,7 +37,7 @@
 #include "suncore.h"
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 #include <linux/clk.h>
 #include <mach/reset.h>
 static struct clk *uart_clk;      
@@ -396,7 +396,7 @@ static unsigned int mem_serial_in(struct uart_port *p, int offset)
 	return readb(p->membase + offset);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 void serial8250_clear_and_reinit_fifos(struct uart_8250_port *p);
 
 void dw8250_force_idle(struct uart_port *p)
@@ -410,7 +410,7 @@ void dw8250_force_idle(struct uart_port *p)
 
 static void mem_serial_out(struct uart_port *p, int offset, int value)
 {
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	int offset1 = map_8250_out_reg(p, offset) << p->regshift;
 	writeb(value, p->membase + offset1);
 
@@ -454,7 +454,7 @@ static void au_serial_out(struct uart_port *p, int offset, int value)
 	__raw_writel(value, p->membase + offset);
 }
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
  
 static inline void dwapb_save_out_value(struct uart_port *p, int offset,
                                        int value)
@@ -476,7 +476,7 @@ static void dwapb_serial_out(struct uart_port *p, int offset, int value)
 {
        int save_offset = offset;
        offset = map_8250_out_reg(p, offset) << p->regshift;
-#if defined(CONFIG_PLAT_ARMADA)  || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(CONFIG_PLAT_ARMADA)  || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
         
        if ((((readb(p->membase + 0xC) & 0x80) &&
             ((save_offset == UART_DLL) || (save_offset == UART_DLM) ||
@@ -525,7 +525,7 @@ static void set_io_from_upio(struct uart_port *p)
 		break;
 
 	case UPIO_RM9000:
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 		p->serial_in = mem_serial_in;
 		p->serial_out = dwapb_serial_out;
 		break;
@@ -653,7 +653,7 @@ static void serial8250_clear_fifos(struct uart_8250_port *p)
 	}
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 void serial8250_clear_and_reinit_fifos(struct uart_8250_port *p)
 {
          unsigned char fcr;
@@ -969,7 +969,7 @@ static void autoconfig_16550a(struct uart_8250_port *up)
 			 
 			DEBUG_AUTOCONF("Xscale ");
 			up->port.type = PORT_XSCALE;
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 			up->capabilities |= UART_CAP_UUE;
 #else
 			up->capabilities |= UART_CAP_UUE | UART_CAP_RTOIE;
@@ -1535,14 +1535,14 @@ static irqreturn_t serial8250_interrupt(int irq, void *dev_id)
 	do {
 		struct uart_8250_port *up;
 		struct uart_port *port;
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 		unsigned int iir;
 #endif
 
 		up = list_entry(l, struct uart_8250_port, list);
 		port = &up->port;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_C2K_SERIAL_FIX)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 		iir = serial_in(up, UART_IIR);
 		if (!(iir & UART_IIR_NO_INT)) {
 			serial8250_handle_port(up);
@@ -1555,7 +1555,7 @@ static irqreturn_t serial8250_interrupt(int irq, void *dev_id)
                          
                         unsigned int status;
                         status = *(volatile u32 *)up->port.private_data;
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 			 
 #else			
                         serial_out(up, UART_LCR, up->lcr);
@@ -2145,8 +2145,7 @@ serial8250_do_set_termios(struct uart_port *port, struct ktermios *termios,
 		}
 	}
 
-	
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	up->mcr &= ~UART_MCR_AFE;
         if (termios->c_cflag & CRTSCTS)
                up->mcr |= UART_MCR_AFE;
@@ -2781,20 +2780,17 @@ void serial8250_resume_port(int line)
 	uart_resume_port(&serial8250_reg, &up->port);
 }
 
-
 static int __devinit serial8250_probe(struct platform_device *dev)
 {
 	struct plat_serial8250_port *p = dev->dev.platform_data;
 	struct uart_port port;
 	int ret, i, irqflag = 0;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	unsigned long uart_rate;
 
-	
 	c2000_block_reset(COMPONENT_AXI_FAST_UART,0);
 
-		
 	uart_clk = clk_get(NULL,"DUS");
 	
 	if (IS_ERR(uart_clk)) {
@@ -2821,7 +2817,7 @@ static int __devinit serial8250_probe(struct platform_device *dev)
 		port.membase		= p->membase;
 		port.irq		= p->irq;
 		port.irqflags		= p->irqflags;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 		port.uartclk		= uart_rate;     
 #else	
 		port.uartclk		= p->uartclk;
@@ -2861,19 +2857,18 @@ static int __devexit serial8250_remove(struct platform_device *dev)
 		if (up->port.dev == &dev->dev)
 			serial8250_unregister_port(i);
 	}
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	 
 	clk_disable(uart_clk);	
 	clk_put(uart_clk);
 
-	
 	c2000_block_reset(COMPONENT_AXI_FAST_UART,1);
 #endif
 
 	return 0;
 }
 
-#if !defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_PM)
+#if !defined(MY_ABC_HERE) || defined(CONFIG_PM)
 static int serial8250_suspend(struct platform_device *dev, pm_message_t state)
 {
 	int i;
@@ -2885,7 +2880,7 @@ static int serial8250_suspend(struct platform_device *dev, pm_message_t state)
 			uart_suspend_port(&serial8250_reg, &up->port);
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	 
 	clk_disable(uart_clk);
 #endif
@@ -2897,7 +2892,7 @@ static int serial8250_resume(struct platform_device *dev)
 {
 	int i;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	 
 	if (clk_enable(uart_clk)){
                 pr_err("%s: Unable to enable FAST-UART clock: \n",__func__);
@@ -2919,7 +2914,7 @@ static int serial8250_resume(struct platform_device *dev)
 static struct platform_driver serial8250_isa_driver = {
 	.probe		= serial8250_probe,
 	.remove		= __devexit_p(serial8250_remove),
-#if !defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_PM)
+#if !defined(MY_ABC_HERE) || defined(CONFIG_PM)
 	.suspend	= serial8250_suspend,
 	.resume		= serial8250_resume,
 #endif

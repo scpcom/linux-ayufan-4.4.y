@@ -9,7 +9,7 @@
 #include <linux/in.h>
 #endif
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OF
 #include "../../arch/arm/mach-mvebu/include/mach/mvTypes.h"
 #include "../../drivers/crypto/mvebu_cesa/mvSysCesaConfig.h"
@@ -340,7 +340,7 @@ struct cryptop {
 #define CRYPTO_F_CBIFSYNC	0x0040	 
 
 	caddr_t		crp_buf;	 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	caddr_t		crp_out_buf;	 
 #endif
 	caddr_t		crp_opaque;	 

@@ -119,7 +119,7 @@ ENTRY(cpu_feroceon_reset)
  *
  * Called with IRQs disabled
  */
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_JTAG_DEBUG
 support_wait_for_interrupt_address:
         .word   support_wait_for_interrupt
@@ -128,7 +128,7 @@ support_wait_for_interrupt_address:
 
 	.align	5
 ENTRY(cpu_feroceon_do_idle)
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_JTAG_DEBUG
         ldr     r0, support_wait_for_interrupt_address
         ldr     r0, [r0]
@@ -137,16 +137,16 @@ ENTRY(cpu_feroceon_do_idle)
 #endif
 #endif
 	mov	r0, #0
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	mrc	p15, 0, r1, c1, c0, 0		@ Read control register
 #endif
 	mcr	p15, 0, r0, c7, c10, 4		@ Drain write buffer
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	bic	r2, r1, #1 << 12
 	mcr	p15, 0, r2, c1, c0, 0		@ Disable I cache
 #endif
 	mcr	p15, 0, r0, c7, c0, 4		@ Wait for interrupt
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	mcr	p15, 0, r1, c1, c0, 0		@ Restore ICache enable
 1:
 #endif
@@ -440,7 +440,7 @@ ENTRY(feroceon_dma_unmap_area)
 	mov	pc, lr
 ENDPROC(feroceon_dma_unmap_area)
 
-#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	.globl	feroceon_flush_kern_cache_louis
 	.equ	feroceon_flush_kern_cache_louis, feroceon_flush_kern_cache_all
 #endif
@@ -460,7 +460,7 @@ ENDPROC(feroceon_dma_unmap_area)
 	range_alias flush_icache_all
 	range_alias flush_user_cache_all
 	range_alias flush_kern_cache_all
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) 
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) 
 	range_alias flush_kern_cache_louis
 #endif
 	range_alias flush_user_cache_range

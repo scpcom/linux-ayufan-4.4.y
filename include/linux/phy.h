@@ -166,7 +166,7 @@ struct phy_device {
 
 	void (*adjust_state)(struct net_device *dev);
 
-#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+#ifdef MY_DEF_HERE
 	int is_phyerr_reset;
 #endif
 };

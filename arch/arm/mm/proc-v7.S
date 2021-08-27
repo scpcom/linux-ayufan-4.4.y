@@ -22,7 +22,7 @@
 
 #include "proc-macros.S"
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_ARM_LPAE
 #include "proc-v7-3level.S"
 #else
@@ -57,7 +57,7 @@ ENTRY(cpu_v7_proc_fin)
 	mrc	p15, 0, r0, c1, c0, 0		@ ctrl register
 	bic	r0, r0, #0x1000			@ ...i............
 	bic	r0, r0, #0x0006			@ .............ca.
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	mcr	p15, 0, r0, c1, c0, 0		@ disable caches
 #endif
 	mov	pc, lr
@@ -109,7 +109,7 @@ ENTRY(cpu_v7_dcache_clean_area)
 #endif
 	mov	pc, lr
 ENDPROC(cpu_v7_dcache_clean_area)
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 //do nothing
 #else
 
@@ -132,7 +132,7 @@ ENTRY(cpu_v7_switch_mm)
 #ifdef CONFIG_ARM_ERRATA_430973
 	mcr	p15, 0, r2, c7, c5, 6		@ flush BTAC/BTB
 #endif
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	mrc	p15, 0, r2, c2, c0, 1		@ load TTB 1
 	mcr	p15, 0, r2, c2, c0, 0		@ into TTB 0
 #else
@@ -149,7 +149,7 @@ ENTRY(cpu_v7_switch_mm)
 #endif
 	mcr	p15, 0, r1, c13, c0, 1		@ set context ID
 	isb
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	mcr	p15, 0, r0, c2, c0, 0		@ set TTB 0
 	isb
 #endif
@@ -171,7 +171,7 @@ ENTRY(cpu_v7_set_pte_ext)
 #ifdef CONFIG_MMU
 	str	r1, [r0]			@ linux version
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	/* Calc HW PTE Entry Offset */
 #ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
 #ifdef CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT
@@ -199,15 +199,15 @@ ENTRY(cpu_v7_set_pte_ext)
 	bic     r0, r0, #0x400
 	orr	r0, r0, r3
 #endif /* CONFIG_MV_LARGE_PAGE_SUPPORT */
-#endif // CONFIG_SYNO_ARMADA_ARCH_V2	
+#endif // MY_DEF_HERE	
 	bic	r3, r1, #0x000003f0
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
+#if defined(MY_DEF_HERE) && defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
 	bic	r3, r3, #0x00000F000
 #endif
 	bic	r3, r3, #PTE_TYPE_MASK
 	orr	r3, r3, r2
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if defined(MY_DEF_HERE) && defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
 	orr	r3, r3, #PTE_EXT_AP0 | 1
 #else
 	orr	r3, r3, #PTE_EXT_AP0 | 2
@@ -238,11 +238,11 @@ ENTRY(cpu_v7_set_pte_ext)
 	tstne	r1, #L_PTE_PRESENT
 	moveq	r3, #0
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
  ARM(	str	r3, [r0, #2048]! )
  THUMB(	add	r0, r0, #2048 )
  THUMB(	str	r3, [r0] )
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
+#if defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
 #ifdef CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT
        @ Need to duplicate the entry 16 times because of overlapping in PTE index bits.
        str     r3, [r0, #4]
@@ -327,9 +327,9 @@ ENTRY(cpu_v7_set_pte_ext)
 #endif
 	mov	pc, lr
 ENDPROC(cpu_v7_set_pte_ext)
-#endif // end of CONFIG_SYNO_ALPINE
+#endif // end of MY_DEF_HERE
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 /* Make the memory uncached, but keep Linux settings as is so memory may be
  * reset to original attributes later on.
  */
@@ -367,7 +367,7 @@ ENDPROC(cpu_v7_uncache_pte_ext)
 	string	cpu_v7_name, "ARMv7 Processor"
 	.align
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 //do nothing
 #else
 	/*
@@ -400,11 +400,11 @@ ENDPROC(cpu_v7_uncache_pte_ext)
 	 */
 .equ	PRRR,	0xff0a81a8
 .equ	NMRR,	0x40e040e0
-#endif // end of not CONFIG_SYNO_ALPINE
+#endif // end of not MY_DEF_HERE
 
 /* Suspend/resume support: derived from arch/arm/mach-s5pv210/sleep.S */
 .globl	cpu_v7_suspend_size
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 .equ	cpu_v7_suspend_size, 4 * 8
 #else
 .equ	cpu_v7_suspend_size, 4 * 7
@@ -417,13 +417,13 @@ ENTRY(cpu_v7_do_suspend)
 	stmia	r0!, {r4 - r5}
 	mrc	p15, 0, r6, c3, c0, 0	@ Domain ID
 	mrc	p15, 0, r7, c2, c0, 1	@ TTB 1
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	mrc	p15, 0, r11, c2, c0, 2	@ TTB control register
 #endif
 	mrc	p15, 0, r8, c1, c0, 0	@ Control register
 	mrc	p15, 0, r9, c1, c0, 1	@ Auxiliary control register
 	mrc	p15, 0, r10, c1, c0, 2	@ Co-processor access control
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	stmia	r0, {r6 - r11}
 #else
 	stmia	r0, {r6 - r10}
@@ -439,13 +439,13 @@ ENTRY(cpu_v7_do_resume)
 	ldmia	r0!, {r4 - r5}
 	mcr	p15, 0, r4, c13, c0, 0	@ FCSE/PID
 	mcr	p15, 0, r5, c13, c0, 3	@ User r/o thread ID
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	ldmia	r0, {r6 - r11}
 #else
 	ldmia	r0, {r6 - r10}
 #endif
 	mcr	p15, 0, r6, c3, c0, 0	@ Domain ID
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #if !defined(CONFIG_ARM_LPAE)
 	ALT_SMP(orr	r1, r1, #TTB_FLAGS_SMP)
 	ALT_UP(orr	r1, r1, #TTB_FLAGS_UP)
@@ -456,10 +456,10 @@ ENTRY(cpu_v7_do_resume)
 #endif
 	mcr	p15, 0, r1, c2, c0, 0	@ TTB 0
 	mcr	p15, 0, r7, c2, c0, 1	@ TTB 1
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_HW_KERNEL_PAGETABLE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_HW_KERNEL_PAGETABLE)
 	mov ip, #1						@ set TTBRCR.N to 1, so that addresses above 2GB will use TTB1
 #endif
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	mcr	p15, 0, r11, c2, c0, 2	@ TTB control register
 #else
 	mcr	p15, 0, ip, c2, c0, 2	@ TTB control register
@@ -493,17 +493,17 @@ ENDPROC(cpu_v7_do_resume)
  *	- cache type register is implemented
  */
 __v7_ca5mp_setup:
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	mov	r10, #(1 << 0)			@ TLB ops broadcasting
 	b	1f
 #endif
 
 __v7_ca9mp_setup:
 	mov	r10, #(1 << 0)			@ TLB ops broadcasting
-#if defined(CONFIG_SYNO_COMCERTO) && !defined(CONFIG_CPU_SPECULATIVE_ACCESS_DISABLED)
+#if defined(MY_ABC_HERE) && !defined(CONFIG_CPU_SPECULATIVE_ACCESS_DISABLED)
 	orr	r10, #(3 << 1)			@ L1 data prefetch, L2 prefetch hints enable
 #endif
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_CPU_L1_CACHE_PREF_ENABLE)
+#if defined(MY_DEF_HERE) && defined(CONFIG_CPU_L1_CACHE_PREF_ENABLE)
 	orr	r10, r10, #(1 << 2)
 #endif
 	b	1f
@@ -511,7 +511,7 @@ __v7_ca9mp_setup:
 __v7_ca15mp_setup:
 	mov	r10, #0
 1:
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_ARM_UNIPROCESSOR_IOCC
 	mrc	p15, 0, r0, c1, c0, 1
 #elif defined(CONFIG_SMP)
@@ -532,7 +532,7 @@ __v7_ca15mp_setup:
 	orreq	r0, r0, #(1 << 6)		@ Enable SMP/nAMP mode
 	orreq	r0, r0, r10			@ Enable CPU-specific SMP bits
 	mcreq	p15, 0, r0, c1, c0, 1
-#elif defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined (CONFIG_AURORA_IO_CACHE_COHERENCY)
+#elif defined(MY_DEF_HERE) && defined (CONFIG_AURORA_IO_CACHE_COHERENCY)
 	mrc	p15, 0, r0, c1, c0, 1
 	mov	r0, #(1 << 6)
 	mov	r10, #(1 << 0)
@@ -625,10 +625,10 @@ __v7_setup:
 
 #ifdef CONFIG_MMU
 	mcr	p15, 0, r10, c8, c7, 0		@ invalidate I + D TLBs
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_HW_KERNEL_PAGETABLE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_HW_KERNEL_PAGETABLE)
 	mov r10, #1						@ set TTBRCR.N to 1, so that addresses above 2GB will use TTB1
 #endif
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	v7_ttb_setup r10, r4, r8, r5		@ TTBCR, TTBRx setup
 #else
 	mcr	p15, 0, r10, c2, c0, 2		@ TTB control register
@@ -674,7 +674,7 @@ __v7_setup:
 	mov	pc, lr				@ return to head.S:__ret
 ENDPROC(__v7_setup)
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	.align	2
 #else
 	/*   AT
@@ -708,7 +708,7 @@ __v7_setup_stack:
 	 * Standard v7 proc info content
 	 */
 .macro __v7_proc initfunc, mm_mmuflags = 0, io_mmuflags = 0, hwcaps = 0
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	ALT_SMP(.long	PMD_TYPE_SECT | PMD_SECT_AP_WRITE | PMD_SECT_AP_READ | \
 			PMD_SECT_AF | PMD_FLAGS_SMP | \mm_mmuflags)
 	ALT_UP(.long	PMD_TYPE_SECT | PMD_SECT_AP_WRITE | PMD_SECT_AP_READ | \
@@ -735,7 +735,7 @@ __v7_setup_stack:
 	.long	v7_cache_fns
 .endm
 
-#if (defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_ARM_LPAE)) || !defined(CONFIG_SYNO_ALPINE)
+#if (defined(MY_DEF_HERE) && !defined(CONFIG_ARM_LPAE)) || !defined(MY_DEF_HERE)
 	/*
 	 * ARM Ltd. Cortex A5 processor.
 	 */

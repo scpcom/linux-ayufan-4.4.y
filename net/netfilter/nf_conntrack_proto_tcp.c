@@ -25,7 +25,7 @@
 #include <net/netfilter/ipv4/nf_conntrack_ipv4.h>
 #include <net/netfilter/ipv6/nf_conntrack_ipv6.h>
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 static int nf_ct_tcp_no_window_check __read_mostly = 1;
 #endif
@@ -335,7 +335,7 @@ static bool tcp_in_window(const struct nf_conn *ct,
 	s16 receiver_offset;
 	bool res;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (nf_ct_tcp_no_window_check)
 		return true;
 #endif
@@ -702,7 +702,7 @@ static int tcp_packet(struct nf_conn *ct,
 		break;
 	}
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	 
 	{
@@ -1027,7 +1027,7 @@ static struct ctl_table tcp_sysctl_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
 	},
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	{
 		.procname       = "nf_conntrack_tcp_no_window_check",
 		.data           = &nf_ct_tcp_no_window_check,

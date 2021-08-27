@@ -63,7 +63,7 @@
 #include "ca9x2.h"
 #include "core.h"
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 extern void synology_gpio_init(void);
 #endif
 
@@ -388,7 +388,7 @@ static struct resource uart1_resources[] = {
 
 static struct platform_device uart1 = {
 	.name			= "serial8250",
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	.id 		= 1,
 #else
 	.id 		= 0,
@@ -651,7 +651,7 @@ static struct platform_device mv_pp2_ge3_plat = {
 
 static void __init eth_init(void)
 {
-#if !defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if !defined(MY_DEF_HERE)
 	if ((mvBoardIsEthConnected(0) == MV_TRUE) && (mvCtrlPwrClckGet(ETH_GIG_UNIT_ID, 0)))
 		mv_pp2_giga_pdev_register(&mv_pp2_ge0_plat);
 #endif
@@ -1180,7 +1180,7 @@ void __a375_iounmap(void __iomem *addr)
 }
 EXPORT_SYMBOL(__a375_iounmap);
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 #ifdef MY_ABC_HERE
 extern void syno_mv_net_shutdown();
 #endif
@@ -1232,7 +1232,7 @@ static void __init a375_board_init(void)
 	elf_hwcap &= ~HWCAP_JAVA;
 
 	serial_initialize(0);
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	serial_initialize(1);
 #endif
 
@@ -1254,7 +1254,7 @@ static void __init a375_board_init(void)
 	a375_gpio_init();
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
 	synology_gpio_init();

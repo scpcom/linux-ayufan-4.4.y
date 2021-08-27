@@ -1423,7 +1423,7 @@ static int alg_test_hash(const struct alg_test_desc *desc, const char *driver,
 static int alg_test_crc32c(const struct alg_test_desc *desc,
 			   const char *driver, u32 type, u32 mask)
 {
-#if (defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_CRYPTO_DEV_AL_AHASH_CRC)) || !defined(CONFIG_SYNO_ALPINE)
+#if (defined(MY_DEF_HERE) && !defined(CONFIG_CRYPTO_DEV_AL_AHASH_CRC)) || !defined(MY_DEF_HERE)
 	struct crypto_shash *tfm;
 	u32 val;
 #endif
@@ -1433,7 +1433,7 @@ static int alg_test_crc32c(const struct alg_test_desc *desc,
 	if (err)
 		goto out;
 
-#if (defined(CONFIG_SYNO_ALPINE) && !defined(CONFIG_CRYPTO_DEV_AL_AHASH_CRC)) || !defined(CONFIG_SYNO_ALPINE)
+#if (defined(MY_DEF_HERE) && !defined(CONFIG_CRYPTO_DEV_AL_AHASH_CRC)) || !defined(MY_DEF_HERE)
 	tfm = crypto_alloc_shash(driver, type, mask);
 	if (IS_ERR(tfm)) {
 		printk(KERN_ERR "alg: crc32c: Failed to load transform for %s: "
@@ -1539,7 +1539,7 @@ static const struct alg_test_desc alg_test_descs[] = {
 				.count = 0
 			}
 		}
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	}, {
 		.alg = "authenc(hmac(sha384),cbc(aes))",
 		.test = alg_test_aead,

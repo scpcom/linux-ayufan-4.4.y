@@ -2,12 +2,10 @@
 #define MY_ABC_HERE
 #endif
  
-
-
 #ifndef _PXA_SDHCI_H_
 #define _PXA_SDHCI_H_
 
-#if defined(CONFIG_SYNO_ARMADA) || || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || || defined(MY_DEF_HERE)
 #include <linux/mbus.h>
 #endif
 
@@ -28,7 +26,7 @@ struct sdhci_pxa_platdata {
 	unsigned int	host_caps;
 	unsigned int	quirks;
 	unsigned int	pm_caps;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	struct		mbus_dram_target_info *dram;
 #endif
 };

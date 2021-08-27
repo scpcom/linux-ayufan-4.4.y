@@ -1294,7 +1294,7 @@ zonelist_scan:
 			!cpuset_zone_allowed_softwall(zone, gfp_mask))
 				continue;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 		if (!(gfp_mask & __GFP_DMA) && (zone_idx(zone) == ZONE_DMA))
 			continue;
 #endif
@@ -4495,7 +4495,7 @@ static void dump_page_flags(unsigned long flags)
 
 void dump_page(struct page *page)
 {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	printk(KERN_ALERT
 	       "page:%p count:%d mapcount:%d mapping:%p index:%#llx\n",
 		page, atomic_read(&page->_count), page_mapcount(page),

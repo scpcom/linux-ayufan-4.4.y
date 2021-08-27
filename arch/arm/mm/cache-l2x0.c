@@ -106,8 +106,8 @@ static inline void l2x0_flush_line(unsigned long addr)
 }
 #endif
 
-#if !defined(CONFIG_SYNO_ARMADA_ARCH_V2) || \
-      (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_OUTER_CACHE_SYNC))
+#if !defined(MY_DEF_HERE) || \
+      (defined(MY_DEF_HERE) && defined(CONFIG_OUTER_CACHE_SYNC))
 static void l2x0_cache_sync(void)
 {
 	unsigned long flags;
@@ -284,7 +284,7 @@ static void l2x0_unlock(__u32 cache_id)
 		lockregs = 1;
 
 	for (i = 0; i < lockregs; i++) {
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 		writel_relaxed(0x0, l2x0_base + L2X0_LOCKDOWN_WAY_D_BASE +
 			       i * L2X0_LOCKDOWN_STRIDE);
 #endif
@@ -298,7 +298,7 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 	__u32 aux;
 	__u32 cache_id;
 	__u32 way_size = 0;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	__u32 prefetch = 0;
 #endif
 	int ways;
@@ -326,7 +326,7 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 #endif
 		outer_cache.set_debug = pl310_set_debug;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		prefetch = readl_relaxed(l2x0_base + L2X0_PREFETCH_CTRL);
 
 #ifdef CONFIG_PL310_DOUBLE_LINE_FILL
@@ -360,14 +360,13 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 		 
 		l2x0_unlock(cache_id);
 
-		
 		writel_relaxed(aux, l2x0_base + L2X0_AUX_CTRL);
 
 		l2x0_saved_regs.aux_ctrl = aux;
 
 		l2x0_inv_all();
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PL310_CACHE_PREF_ENABLE
 	 
 	writel_relaxed(0x58800000, l2x0_base + L2X0_PREFETCH_CTRL);
@@ -380,8 +379,8 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 	outer_cache.inv_range = l2x0_inv_range;
 	outer_cache.clean_range = l2x0_clean_range;
 	outer_cache.flush_range = l2x0_flush_range;
-#if !defined(CONFIG_SYNO_ARMADA_ARCH_V2) || \
-      (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_OUTER_CACHE_SYNC))
+#if !defined(MY_DEF_HERE) || \
+      (defined(MY_DEF_HERE) && defined(CONFIG_OUTER_CACHE_SYNC))
 	outer_cache.sync = l2x0_cache_sync;
 #endif
 	outer_cache.flush_all = l2x0_flush_all;
@@ -389,7 +388,7 @@ void __init l2x0_init(void __iomem *base, __u32 aux_val, __u32 aux_mask)
 	outer_cache.disable = l2x0_disable;
 
 	printk(KERN_INFO "%s cache controller enabled\n", type);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	printk(KERN_INFO "l2x0: %d ways, CACHE_ID 0x%08x, AUX_CTRL 0x%08x, PREFETCH_CTRL 0x%08x, Cache size: %d B\n",
 			ways, cache_id, aux, prefetch, l2x0_size);
 #else

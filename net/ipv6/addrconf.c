@@ -995,7 +995,7 @@ out:
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static int __ipv6_dev_get_saddr(struct net *net, struct net_device *dst_dev,
 		       const struct in6_addr *daddr, unsigned int prefs,
 		       struct in6_addr *saddr)
@@ -1096,7 +1096,7 @@ try_nextdev:
 	in6_ifa_put(hiscore->ifa);
 	return 0;
 }
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 EXPORT_SYMBOL(ipv6_dev_get_saddr);
 #endif
 
@@ -4445,7 +4445,7 @@ int __init addrconf_init(void)
 
 	ipv6_addr_label_rtnl_register();
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	BUG_ON(ipv6_dev_get_saddr_hook != NULL);
 	rcu_assign_pointer(ipv6_dev_get_saddr_hook, __ipv6_dev_get_saddr);
 #endif
@@ -4468,7 +4468,7 @@ void addrconf_cleanup(void)
 	struct net_device *dev;
 	int i;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	rcu_assign_pointer(ipv6_dev_get_saddr_hook, NULL);
 	synchronize_rcu();
 #endif

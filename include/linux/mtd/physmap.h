@@ -2,14 +2,12 @@
 #define MY_ABC_HERE
 #endif
  
-
-
 #ifndef __LINUX_MTD_PHYSMAP__
 #define __LINUX_MTD_PHYSMAP__
 
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/platform_device.h>
 #endif
 

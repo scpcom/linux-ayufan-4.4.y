@@ -3012,7 +3012,7 @@ void mv_pp2_link_event(struct eth_port *pp, int print)
 
 	if (print) {
 		if (dev)
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 			printk(KERN_INFO "%s: ", dev->name);
 		else
 			printk(KERN_INFO "%s: ", "none");
@@ -3944,11 +3944,10 @@ static int mv_pp2_eth_probe(struct platform_device *pdev)
 		 
 		mvGmacPortDisable(port);
 
-		
 		phyAddr = plat_data->phy_addr;
 		if (phyAddr != -1) {
 			mvGmacPhyAddrSet(port, phyAddr);
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #else
 			mvEthPhyReset(phyAddr, 1000);
 #endif

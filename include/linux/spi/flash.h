@@ -4,7 +4,7 @@
 #ifndef LINUX_SPI_FLASH_H
 #define LINUX_SPI_FLASH_H
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/ioport.h>
 #endif
 
@@ -25,7 +25,7 @@ struct flash_platform_data {
 
 	char		*type;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	u32             num_resources;
 	struct resource * resource;
 #endif

@@ -2,20 +2,17 @@
 #define MY_ABC_HERE
 #endif
  
-
-
-
 #ifndef LINUX_MV_NETA_H
 #define LINUX_MV_NETA_H
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(MY_DEF_HERE)
 struct netaSmpGroupStruct {
 	MV_U32 portMask;
 	MV_U32 cpuMask;
 };
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 #define MV_NETA_PORT_NAME	"mv_neta_port"
 struct mv_neta_pdata {
 	 
@@ -29,9 +26,8 @@ struct mv_neta_pdata {
 	unsigned int  cpu_mask;
 	int           mtu;
 
-	
 	int      phy_addr;
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	 
 	int      tx_csum_limit;
 #endif
@@ -41,11 +37,10 @@ struct mv_neta_pdata {
 	int      speed;
 	int      duplex;
 
-	
 	int      lb_enable;
 	int      is_sgmii;
 	int      is_rgmii;
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	 
 	int      irq;
 #endif

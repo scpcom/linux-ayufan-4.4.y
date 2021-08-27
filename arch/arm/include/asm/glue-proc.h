@@ -235,7 +235,7 @@
 # endif
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_CPU_SHEEVA_PJ4B_V6
 # ifdef CPU_NAME
 #  undef  MULTI_CPU
@@ -263,7 +263,7 @@
 #define cpu_dcache_clean_area		__glue(CPU_NAME,_dcache_clean_area)
 #define cpu_do_switch_mm		__glue(CPU_NAME,_switch_mm)
 #define cpu_set_pte_ext			__glue(CPU_NAME,_set_pte_ext)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define cpu_uncache_pte_ext		__glue(CPU_NAME,_uncache_pte_ext)
 #endif
 #define cpu_suspend_size		__glue(CPU_NAME,_suspend_size)

@@ -88,14 +88,13 @@ static int dnotify_handle_event(struct fsnotify_group *group,
 	return 0;
 }
 
-
 static bool dnotify_should_send_event(struct fsnotify_group *group,
 				      struct inode *inode,
 				      struct fsnotify_mark *inode_mark,
 				      struct fsnotify_mark *vfsmount_mark,
 				      __u32 mask, void *data, int data_type)
 {
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	if (data_type == FSNOTIFY_EVENT_SYNO)
 		return false;
 #endif

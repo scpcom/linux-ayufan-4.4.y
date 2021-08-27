@@ -148,7 +148,7 @@
 #define ALT_UP_B(label) b label
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
  
 	.macro	instr_sync
 #if __LINUX_ARM_ARCH__ >= 7
@@ -159,7 +159,7 @@
 	.endm
 #endif
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 	.macro	instr_sync
 #if __LINUX_ARM_ARCH__ >= 7
@@ -169,19 +169,18 @@
 #endif
 	.endm
 #endif
-
 
 	.macro	smp_dmb mode
 #ifdef CONFIG_SMP
 #if __LINUX_ARM_ARCH__ >= 7
 	.ifeqs "\mode","arm"
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
 	ALT_SMP(dsb)
 #else
 	ALT_SMP(dmb)
 #endif
 	.else
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_SHEEVA_ERRATA_ARM_CPU_6075)
 	ALT_SMP(W(dsb))
 #else
 	ALT_SMP(W(dmb))

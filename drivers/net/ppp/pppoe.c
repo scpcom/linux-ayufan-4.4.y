@@ -22,12 +22,12 @@
 #include <linux/file.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <linux/if_arp.h>
 #endif
 
 #include <linux/nsproxy.h>
-#if defined(CONFIG_SYNO_ARMADA) || (defined(CONFIG_SYNO_ARMADA_V2) && defined(CONFIG_MV_ETH_NFP_HOOKS))
+#if defined(MY_DEF_HERE) || (defined(MY_DEF_HERE) && defined(CONFIG_MV_ETH_NFP_HOOKS))
 #include <linux/mv_nfp.h>
 #endif
 
@@ -252,9 +252,8 @@ static int pppoe_device_event(struct notifier_block *this,
 {
 	struct net_device *dev = (struct net_device *)ptr;
 
-	
 	switch (event) {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	case NETDEV_UP: {
 		struct net_device *ppp_netdev;
@@ -482,7 +481,7 @@ static int pppoe_release(struct socket *sock)
 		dev_put(po->pppoe_dev);
 		po->pppoe_dev = NULL;
 	}
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	if (ppp_dev_name(&po->chan)) {
 		struct net_device *ppp_netdev = NULL;
@@ -759,7 +758,7 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 	if (total_len > (dev->mtu + dev->hard_header_len))
 		goto end;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	skb = sock_wmalloc(sk, total_len + dev->hard_header_len + 32 + NET_SKB_PAD,
 			   0, GFP_KERNEL);
 #else
@@ -771,8 +770,7 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 		goto end;
 	}
 
-	
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	skb_reserve(skb, dev->hard_header_len + NET_SKB_PAD);
 #else
 	skb_reserve(skb, dev->hard_header_len);
@@ -836,7 +834,7 @@ static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb)
 
 	skb->protocol = cpu_to_be16(ETH_P_PPP_SES);
 	skb->dev = dev;
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	if((skb->ipsec_offload == 1) && (!skb->sp))
 	{
 		  dev_hard_header(skb, dev, ETH_P_PPP_SES,
@@ -900,12 +898,12 @@ static int pppoe_seq_show(struct seq_file *seq, void *v)
 {
 	struct pppox_sock *po;
 	char *dev_name;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 	char *ppp_name;
 #endif
 
 	if (v == SEQ_START_TOKEN) {
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 		seq_puts(seq, "Id       Address              Device  PPPDevice\n");
 #else
 		seq_puts(seq, "Id       Address              Device\n");
@@ -916,7 +914,7 @@ static int pppoe_seq_show(struct seq_file *seq, void *v)
 	po = v;
 	dev_name = po->pppoe_pa.dev;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 	ppp_name = ppp_dev_name(&po->chan);
 	if (!ppp_name)
 		goto out;
@@ -1043,7 +1041,7 @@ static const struct pppox_proto pppoe_proto = {
 	.owner	= THIS_MODULE,
 };
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 void nfp_ppp_sync(void)
 {

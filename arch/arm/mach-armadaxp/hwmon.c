@@ -110,14 +110,13 @@ static int axptemp_init_sensor(void)
 	writel(ARMADAXP_OVERHEAT_DELAY, (INTER_REGS_BASE | PMU_TM_OVRHEAT_DLY_REG));
 	writel(ARMADAXP_OVERCOOL_DELAY, (INTER_REGS_BASE | PMU_TM_COOLING_DLY_REG));
 
-	
 	writel(0, (INTER_REGS_BASE | PMU_INT_CAUSE_REG));
 	writel((PMU_INT_OVRHEAT_MASK | PMU_INT_COOLING_MASK), (INTER_REGS_BASE | PMU_INT_MASK_REG));
 
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_DEF_HERE
 int axptemp_read_temp(void)
 #else
 static int axptemp_read_temp(void)
@@ -129,7 +128,7 @@ static int axptemp_read_temp(void)
 	reg = (reg & TSEN_STATUS_TEMP_OUT_MASK) >> TSEN_STATUS_TEMP_OUT_OFFSET;
 	return ARMADAXP_TSEN_RAW2TEMP(reg);
 }
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(axptemp_read_temp);
 #endif
 

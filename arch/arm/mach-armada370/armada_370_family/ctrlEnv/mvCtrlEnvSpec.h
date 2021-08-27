@@ -16,11 +16,10 @@ extern "C" {
 #define MV_ARM_SOC
 #define SOC_NAME_PREFIX				"MV88F"
 
-
 #define MV_DRAM_REGS_OFFSET			(0x0)
 #define MV_AURORA_L2_REGS_OFFSET		(0x8000)
 #define MV_RTC_REGS_OFFSET			(0x10300)
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
 #define MV_RTC_EXTERNAL_ALARM_OFFSET			(0x10320)
 #endif
 #define MV_DEV_BUS_REGS_OFFSET			(0x10400)
@@ -131,13 +130,12 @@ extern "C" {
 #define MV_CESA_VERSION				3  
 #define MV_CESA_SRAM_SIZE			(2 * 1024)
 
-
 #define MV_ETH_VERSION 				4  
 #define MV_NETA_VERSION				1  
 #define MV_ETH_MAX_PORTS			2
 #define MV_ETH_MAX_RXQ				8
 #define MV_ETH_MAX_TXQ				8
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_DEF_HERE)
 #define MV_ETH_TX_CSUM_MAX_SIZE 		1800
 #else
 #define MV_ETH_TX_CSUM_MAX_SIZE 		2048

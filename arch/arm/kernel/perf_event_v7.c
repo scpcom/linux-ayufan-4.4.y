@@ -499,7 +499,7 @@ static const unsigned armv7_a5_perf_cache_map[PERF_COUNT_HW_CACHE_MAX]
 			[C(RESULT_MISS)]	= CACHE_OP_UNSUPPORTED,
 		},
 	},
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	[C(NODE)] = {
 		[C(OP_READ)] = {
 			[C(RESULT_ACCESS)]	= CACHE_OP_UNSUPPORTED,
@@ -641,7 +641,7 @@ static const unsigned armv7_a15_perf_cache_map[PERF_COUNT_HW_CACHE_MAX]
 			[C(RESULT_MISS)]	= CACHE_OP_UNSUPPORTED,
 		},
 	},
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	[C(NODE)] = {
 		[C(OP_READ)] = {
 			[C(RESULT_ACCESS)]	= CACHE_OP_UNSUPPORTED,

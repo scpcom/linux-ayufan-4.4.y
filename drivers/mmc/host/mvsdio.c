@@ -699,7 +699,7 @@ static int __init mvsd_probe(struct platform_device *pdev)
 
 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
 	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ |
-#ifdef CONFIG_SYNO_SUPPORT_EMMC_ERASE
+#ifdef MY_DEF_HERE
 		    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED | MMC_CAP_ERASE;
 #else
 		    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;

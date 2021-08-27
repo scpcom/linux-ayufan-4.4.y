@@ -13,7 +13,7 @@
 #include <linux/mfd/core.h>
 #include <linux/mfd/lpc_ich.h>
 
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 #include <linux/synobios.h>
 #endif
 
@@ -111,7 +111,7 @@ enum lpc_chipsets {
 	LPC_DH89XXCC,	 
 	LPC_PPT,	 
 	LPC_LPT,	 
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 	LPC_AVN,	 
 #endif
 };
@@ -332,7 +332,7 @@ struct lpc_ich_info lpc_chipset_info[] __devinitdata = {
 	[LPC_LPT] = {
 		.name = "Lynx Point",
 	},
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 	[LPC_AVN] = {
 		.name = "Avoton SoC",
 	},
@@ -504,7 +504,7 @@ static DEFINE_PCI_DEVICE_TABLE(lpc_ich_ids) = {
 	{ PCI_VDEVICE(INTEL, 0x8c5d), LPC_LPT},
 	{ PCI_VDEVICE(INTEL, 0x8c5e), LPC_LPT},
 	{ PCI_VDEVICE(INTEL, 0x8c5f), LPC_LPT},
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 	{ PCI_VDEVICE(INTEL, 0x1f38), LPC_AVN},
 	{ PCI_VDEVICE(INTEL, 0x1f39), LPC_AVN},
 	{ PCI_VDEVICE(INTEL, 0x1f3a), LPC_AVN},
@@ -558,7 +558,7 @@ static u32 gpiobase = 0;
 static u32 *writable_pin = NULL;
 static u32 SynoGpioCount = 0;
 
-#if defined(CONFIG_SYNO_CEDARVIEW)
+#if defined(MY_DEF_HERE)
 static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 29, 30, 31, 32, 33, 34, 35, 36, 37, 42, 43, 45, 46, 47, 49, 55, 57};
 #else
 static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 46, 47, 49, 55, 57};
@@ -567,7 +567,7 @@ static u32 c206_writable_pin[] = {0, 5, 16, 20, 21, 22, 34, 35, 38, 48, 52, 54, 
 static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36, 37, 45};
 static u32 avoton_writable_pin[] = {10, 15, 16, 17, 49, 50, 53, 54};
 
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
  
 static u32 coreWellGpio = 0;
 static u32 susWellGpio = 0;
@@ -575,7 +575,7 @@ static u32 avoton_corewell_gpioin_pin = 0x18041831;
 static u32 avoton_suswell_gpioin_pin = 0xC181114;
 #endif
 
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
  
 #define GPIO_MAX_PIN 63
 #else
@@ -591,7 +591,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     int i = 0;
     u32 addr_use_select, addr_io_select, addr_lvl;
 	u32 val_lvl;
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 	u32 *pVal_lvl = NULL;
 	u32 gpioin_pin = 0;
 #else
@@ -624,7 +624,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     if (mppPin < 32) {
         addr_use_select = gpiobase + 0x00;
         addr_io_select = gpiobase + 0x04;
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 		addr_lvl = gpiobase + 0x08;
 		pVal_lvl = &coreWellGpio;
 		gpioin_pin = avoton_corewell_gpioin_pin;
@@ -634,7 +634,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     } else if (mppPin < 64) {
         addr_use_select = gpiobase + 0x30;
         addr_io_select = gpiobase + 0x34;
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 		addr_lvl = gpiobase + 0x88;
 		pVal_lvl = &susWellGpio;
 		gpioin_pin = avoton_suswell_gpioin_pin;
@@ -649,7 +649,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
         mppPin %= 32;
 	}
  
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 	if (0 == isWrite) {
          
 		if ((1 << mppPin) & gpioin_pin) {
@@ -777,7 +777,7 @@ gpe0_done:
 #ifdef SYNO_LPC_ICH_GPIO_CTRL
 	gpiobase = base_addr;
 	syno_gpio_init(dev);
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 	 
 	if (syno_is_hw_version(HW_DS415p)) {
 		susWellGpio = 0x640000;

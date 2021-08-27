@@ -19,7 +19,7 @@ static struct xhci_segment *xhci_segment_alloc(struct xhci_hcd *xhci,
 	seg = kzalloc(sizeof *seg, flags);
 	if (!seg)
 		return NULL;
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	xhci_dbg(xhci, "Allocating priv segment structure at %p\n", seg);
 #endif
 
@@ -28,7 +28,7 @@ static struct xhci_segment *xhci_segment_alloc(struct xhci_hcd *xhci,
 		kfree(seg);
 		return NULL;
 	}
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	xhci_dbg(xhci, "// Allocating segment at %p (virtual) 0x%llx (DMA)\n",
 			seg->trbs, (unsigned long long)dma);
 #endif
@@ -48,14 +48,14 @@ static struct xhci_segment *xhci_segment_alloc(struct xhci_hcd *xhci,
 static void xhci_segment_free(struct xhci_hcd *xhci, struct xhci_segment *seg)
 {
 	if (seg->trbs) {
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 		xhci_dbg(xhci, "Freeing DMA segment at %p (virtual) 0x%llx (DMA)\n",
 				seg->trbs, (unsigned long long)seg->dma);
 #endif
 		dma_pool_free(xhci->segment_pool, seg->trbs, seg->dma);
 		seg->trbs = NULL;
 	}
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	xhci_dbg(xhci, "Freeing priv segment structure at %p\n", seg);
 #endif
 	kfree(seg);
@@ -91,14 +91,13 @@ static void xhci_link_segments(struct xhci_hcd *xhci, struct xhci_segment *prev,
 		val &= ~TRB_TYPE_BITMASK;
 		val |= TRB_TYPE(TRB_LINK);
 		 
-		
 		if (xhci_link_trb_quirk(xhci) ||
 				(type == TYPE_ISOC &&
 				 (xhci->quirks & XHCI_AMD_0x96_HOST)))
 			val |= TRB_CHAIN;
 		prev->trbs[TRBS_PER_SEGMENT-1].link.control = cpu_to_le32(val);
 	}
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	xhci_dbg(xhci, "Linking segment 0x%llx to segment 0x%llx (DMA)\n",
 			(unsigned long long)prev->dma,
 			(unsigned long long)next->dma);
@@ -202,7 +201,7 @@ static struct xhci_ring *xhci_ring_alloc(struct xhci_hcd *xhci,
 	int ret;
 
 	ring = kzalloc(sizeof *(ring), flags);
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	xhci_dbg(xhci, "Allocating ring at %p\n", ring);
 #endif
 	if (!ring)
@@ -1962,7 +1961,7 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	unsigned int	val, val2;
 	u64		val_64;
 	struct xhci_segment	*seg;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	u32 page_size, temp;
 #else
 	u32 page_size;
@@ -2115,7 +2114,7 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 
 	INIT_LIST_HEAD(&xhci->lpm_failed_devs);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	temp = xhci_readl(xhci, &xhci->op_regs->dev_notification);
 	temp &= ~DEV_NOTE_MASK;

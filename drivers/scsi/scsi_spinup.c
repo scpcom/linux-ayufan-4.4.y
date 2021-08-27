@@ -18,7 +18,7 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 extern int ss_stats[128];
 #endif
 
@@ -173,7 +173,7 @@ void standby_times_out(struct scsi_device *sdev)
 {
 	unsigned long flags = 0;
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	 
 	sdev->sdev_power_state = SDEV_PW_STANDBY_TIMEOUT_PASSED;
 	ss_stats[sdev->ss_id] = sdev->sdev_power_state;
@@ -274,7 +274,7 @@ int scsi_spinup_device(struct scsi_cmnd *cmd)
 		case SDEV_PW_STANDBY:
 		case SDEV_PW_STANDBY_TIMEOUT_PASSED:
 			cmd->device->sdev_power_state = SDEV_PW_WAIT_FOR_SPIN_UP;
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 			ss_stats[cmd->device->ss_id] = cmd->device->sdev_power_state;
 #endif
 			 
@@ -285,7 +285,7 @@ int scsi_spinup_device(struct scsi_cmnd *cmd)
 				return 1;
 			}
 			cmd->device->sdev_power_state = SDEV_PW_SPINNING_UP;
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 			ss_stats[cmd->device->ss_id] = cmd->device->sdev_power_state;
 #endif
 			 
@@ -324,11 +324,10 @@ int scsi_spinup_device_dequeue_next(void)
 		ptr = spinup_list.next;
 		entry = list_entry(ptr, struct spinup_node, list);
  
-
 		if (scsi_spinup_down())
 		{
 			entry->sdev->sdev_power_state = SDEV_PW_SPINNING_UP;
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 			ss_stats[entry->sdev->ss_id] = entry->sdev->sdev_power_state;
 #endif
 			spinup_add_timer(entry->sdev, scsi_spinup_get_timeout(), spinup_times_out);

@@ -111,9 +111,9 @@
 	movs	pc, lr				@ return & move spsr_svc into cpsr
 	.endm
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
 	.macro	get_thread_info, rd
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	mov	\rd, sp, lsr #(PAGE_SHIFT + THREAD_SIZE_ORDER)
 	mov	\rd, \rd, lsl #(PAGE_SHIFT + THREAD_SIZE_ORDER)
 #else
@@ -162,7 +162,7 @@
 	movs	pc, lr				@ return & move spsr_svc into cpsr
 	.endm
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
 	.macro	get_thread_info, rd
 	mov	\rd, sp
 	lsr	\rd, \rd, #13

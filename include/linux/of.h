@@ -54,7 +54,7 @@ struct device_node {
 #endif
 };
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define MAX_PHANDLE_ARGS 8
 struct of_phandle_args {
         struct device_node *np;
@@ -324,7 +324,7 @@ static inline int of_machine_is_compatible(const char *compat)
 #define of_match_node(_matches, _node)	NULL
 #endif  
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 static inline bool of_property_read_bool(const struct device_node *np,
 										const char *propname)

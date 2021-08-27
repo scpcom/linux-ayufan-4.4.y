@@ -18,7 +18,7 @@
 #include <linux/uaccess.h>
 
 #include <linux/slab.h>
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #include <linux/printk.h>
 #endif
 
@@ -100,13 +100,12 @@ int kernel_execve(const char *filename,
 }
 EXPORT_SYMBOL(kernel_execve);
 
-
 asmlinkage long sys_arm_fadvise64_64(int fd, int advice,
 				     loff_t offset, loff_t len)
 {
 	return sys_fadvise64_64(fd, offset, len, advice);
 }
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #if (PAGE_SHIFT > 12)
 	 
 asmlinkage unsigned long sys_arm_mmap_4koff(unsigned long addr,

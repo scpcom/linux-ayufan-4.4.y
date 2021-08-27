@@ -2,14 +2,11 @@
 #define MY_ABC_HERE
 #endif
  
-
 #ifndef _ASM_PGTABLE_2LEVEL_H
 #define _ASM_PGTABLE_2LEVEL_H
 
-
-
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
-#ifdef CONFIG_SYNO_ARMADA_ARCH
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_MV_SUPPORT_64KB_PAGE_SIZE
 #define PTRS_PER_PTE           32       
 #define PTE_HWTABLE_PTRS       (512)
@@ -17,7 +14,7 @@
 #define PTRS_PER_PTE           512
 #define PTE_HWTABLE_PTRS       (PTRS_PER_PTE)
 #endif  
-#elif defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#elif defined(MY_DEF_HERE)
 #ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
 #define PTRS_PER_PTE           (512 >> (PAGE_SHIFT-12))
 #define PTE_HWTABLE_PTRS       (512)
@@ -32,13 +29,13 @@
 #define PTRS_PER_PMD		1
 #define PTRS_PER_PGD		2048
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) 
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) 
 #define PTE_HWTABLE_OFF                (512 * sizeof(pte_t))
 #define PTE_HWTABLE_SIZE       (PTE_HWTABLE_PTRS * sizeof(u32))
 #else
 #define PTE_HWTABLE_PTRS	(PTRS_PER_PTE)
 #define PTE_HWTABLE_OFF		(PTE_HWTABLE_PTRS * sizeof(pte_t))
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #define PTE_HWTABLE_SIZE	(PTE_HWTABLE_PTRS * sizeof(u32))
 #define PTE_HWTABLE_MASK	(~((PTE_HWTABLE_SIZE*2)-1))
 #else
@@ -99,9 +96,8 @@
 #define L_PTE_MT_DEV_WC		(_AT(pteval_t, 0x09) << 2)	 
 #define L_PTE_MT_DEV_CACHED	(_AT(pteval_t, 0x0b) << 2)	 
 #define L_PTE_MT_MASK		(_AT(pteval_t, 0x0f) << 2)
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifndef __ASSEMBLY__
-
 
 #define pud_none(pud)		(0)
 #define pud_bad(pud)		(0)

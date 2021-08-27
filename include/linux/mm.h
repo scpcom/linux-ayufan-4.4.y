@@ -183,16 +183,13 @@ struct inode;
 #include <linux/page-flags.h>
 #include <linux/huge_mm.h>
 
-
-
-
 static inline int put_page_testzero(struct page *page)
 {
 	VM_BUG_ON(atomic_read(&page->_count) == 0);
 	return atomic_dec_and_test(&page->_count);
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static inline int put_page_n_testzero(struct page *page, unsigned int c)
 {
 	VM_BUG_ON(atomic_read(&page->_count) < c);
@@ -335,7 +332,7 @@ static inline void __ClearPageBuddy(struct page *page)
 }
 
 void put_page(struct page *page);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 void put_page_n(struct page *page, unsigned int c);
 #endif
 void put_pages_list(struct list_head *pages);
@@ -613,7 +610,7 @@ extern bool skip_free_areas_node(unsigned int flags, int nid);
 
 int shmem_lock(struct file *file, int lock, struct user_struct *user);
 struct file *shmem_file_setup(const char *name, loff_t size, unsigned long flags);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 void shmem_set_file(struct vm_area_struct *vma, struct file *file);
 #endif
 int shmem_zero_setup(struct vm_area_struct *);
@@ -1112,11 +1109,10 @@ extern int filemap_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf
 int write_one_page(struct page *page, int wait);
 void task_dirty_inc(struct task_struct *tsk);
 
-
 #ifdef MY_ABC_HERE
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define VM_MAX_READAHEAD        192      
-#elif defined(CONFIG_SYNO_MV88F6281)
+#elif defined(MY_DEF_HERE)
 #define VM_MAX_READAHEAD        2048      
 #elif defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_MPC8533)
 #define VM_MAX_READAHEAD        256      

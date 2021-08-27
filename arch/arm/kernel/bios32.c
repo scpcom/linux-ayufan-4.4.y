@@ -370,7 +370,7 @@ static void __init pcibios_init_hw(struct hw_pci *hw)
 		sys->domain  = hw->domain;
 #endif
 		sys->hw      = hw;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		sys->private_data = *hw->private_data;
 #endif
 		sys->busnr   = busnr;

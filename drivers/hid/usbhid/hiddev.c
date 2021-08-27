@@ -290,7 +290,7 @@ static ssize_t hiddev_read(struct file * file, char __user * buffer, size_t coun
 	int event_size;
 	int retval;
 
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	 
 	udelay(50);
 #endif

@@ -21,12 +21,12 @@
 #include <asm/highmem.h>
 #include <asm/traps.h>
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)) || \
-     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM))
+#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)) || \
+     (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM))
 #include <asm/fixmap.h>
 #endif
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #if defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
 #include <asm/fixmap.h>
 #endif
@@ -107,7 +107,7 @@ static int __init early_cachepolicy(char *p)
 	}
 	if (i == ARRAY_SIZE(cache_policies))
 		printk(KERN_ERR "ERROR: unknown or unsupported cache policy\n");
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && (defined (CONFIG_CPU_SHEEVA_PJ4B_V6) || defined(CONFIG_CPU_SHEEVA_PJ4B_V7))
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && (defined (CONFIG_CPU_SHEEVA_PJ4B_V6) || defined(CONFIG_CPU_SHEEVA_PJ4B_V7))
 #else
 	 
 	if (cpu_architecture() >= CPU_ARCH_ARMv6) {
@@ -139,8 +139,8 @@ static int __init early_nowrite(char *__unused)
 }
 early_param("nowb", early_nowrite);
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
-#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
  
 #else
 static int __init early_ecc(char *p)
@@ -222,8 +222,8 @@ static struct mem_type mem_types[] = {
 		.prot_sect = PMD_TYPE_SECT | PMD_SECT_XN,
 		.domain    = DOMAIN_KERNEL,
 	},
-#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
-#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
+#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
  
 #else
 	[MT_MINICLEAN] = {
@@ -280,7 +280,7 @@ static struct mem_type mem_types[] = {
 				PMD_SECT_UNCACHED | PMD_SECT_XN,
 		.domain    = DOMAIN_KERNEL,
 	},
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	[MT_MSP] = {
 		.prot_pte  = PROT_PTE_DEVICE | L_PTE_MT_DEV_CACHED | L_PTE_XN,
 		.prot_l1   = PMD_TYPE_TABLE,
@@ -324,7 +324,7 @@ static void __init build_mem_type_table(void)
 			cachepolicy = CPOLICY_WRITEBACK;
 		ecc_mask = 0;
 	}
-#if (defined(CONFIG_SYNO_ARMADA_ARCH)|| defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && (defined(CONFIG_SMP) || defined (CONFIG_AURORA_IO_CACHE_COHERENCY))
+#if (defined(MY_DEF_HERE)|| defined(MY_DEF_HERE)) && (defined(CONFIG_SMP) || defined (CONFIG_AURORA_IO_CACHE_COHERENCY))
 #else
 	if (is_smp())
 #endif
@@ -380,11 +380,10 @@ static void __init build_mem_type_table(void)
 		mem_types[MT_DEVICE_WC].prot_sect |= PMD_SECT_BUFFERABLE;
 	}
 
-	
 	cp = &cache_policies[cachepolicy];
 	vecs_pgprot = kern_pgprot = user_pgprot = cp->pte;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 #else
 	 
@@ -400,8 +399,8 @@ static void __init build_mem_type_table(void)
 	}
 	 
 	if (cpu_arch >= CPU_ARCH_ARMv6 && (cr & CR_XP)) {
-#if (defined(CONFIG_SYNO_ARMADA_ARCH)|| defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
-#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
+#if (defined(MY_DEF_HERE)|| defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
  
 #else
 		 
@@ -410,18 +409,18 @@ static void __init build_mem_type_table(void)
 		mem_types[MT_CACHECLEAN].prot_sect |= PMD_SECT_APX|PMD_SECT_AP_WRITE;
 #endif
 
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 #ifndef CONFIG_ARM_UNIPROCESSOR_IOCC
 		if (is_smp()) {
 #else
 		{
 #endif
 #else
-#if defined(CONFIG_SYNO_ARMADA_ARCH) && (defined(CONFIG_SMP) || defined (CONFIG_SHEEVA_ERRATA_ARM_CPU_5114) || \
+#if defined(MY_DEF_HERE) && (defined(CONFIG_SMP) || defined (CONFIG_SHEEVA_ERRATA_ARM_CPU_5114) || \
 										(defined (CONFIG_ARCH_ARMADA_XP) && defined (CONFIG_AURORA_IO_CACHE_COHERENCY)))
 		{
 
-#elif defined(CONFIG_SYNO_ARMADA_ARCH_V2) && \
+#elif defined(MY_DEF_HERE) && \
         (defined(CONFIG_SMP) || defined (CONFIG_SHEEVA_ERRATA_ARM_CPU_5114) || \
 	(!defined (CONFIG_ARCH_ARMADA370) && defined (CONFIG_AURORA_IO_CACHE_COHERENCY)))
 		{	
@@ -458,7 +457,7 @@ static void __init build_mem_type_table(void)
 		mem_types[MT_MEMORY_NONCACHED].prot_sect |= PMD_SECT_BUFFERABLE;
 	}
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH)|| defined(CONFIG_SYNO_ARMADA_ARCH_V2) )&& defined(CONFIG_ARM_LPAE)
+#if (defined(MY_DEF_HERE)|| defined(MY_DEF_HERE) )&& defined(CONFIG_ARM_LPAE)
 	 
 	for (i = 0; i < ARRAY_SIZE(mem_types); i++) {
 		mem_types[i].prot_pte |= PTE_EXT_AF;
@@ -466,7 +465,7 @@ static void __init build_mem_type_table(void)
 	}
 	kern_pgprot |= PTE_EXT_AF;
 	vecs_pgprot |= PTE_EXT_AF;
-#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
+#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
 	 
 	for (i = 0; i < ARRAY_SIZE(mem_types); i++) {
 		mem_types[i].prot_pte |= PTE_EXT_AF;
@@ -542,10 +541,10 @@ static void __init *early_alloc(unsigned long sz)
 static pte_t * __init early_pte_alloc(pmd_t *pmd, unsigned long addr, unsigned long prot)
 {
 	if (pmd_none(*pmd)) {
-#if (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)) || \
-     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE))
+#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)) || \
+     (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE))
 		pte_t *pte = early_alloc(PAGE_SIZE);
-#elif defined(CONFIG_SYNO_ALPINE)
+#elif defined(MY_DEF_HERE)
 		pte_t *pte = early_alloc(max_t(size_t,
 					PTE_HWTABLE_OFF + PTE_HWTABLE_SIZE,
 					PAGE_SIZE));
@@ -569,7 +568,7 @@ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
 	} while (pte++, addr += PAGE_SIZE, addr != end);
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static void __init map_init_section(pmd_t *pmd, unsigned long addr,
 			unsigned long end, phys_addr_t phys,
 			const struct mem_type *type)
@@ -619,11 +618,10 @@ static void __init alloc_init_section(pud_t *pud, unsigned long addr,
 {
 	pmd_t *pmd = pmd_offset(pud, addr);
 
-	
 	if (((addr | end | phys) & ~SECTION_MASK) == 0) {
 		pmd_t *p = pmd;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		pmd += (addr & (~PGDIR_MASK)) >> SECTION_SHIFT;
 #else
 		if (addr & SECTION_SIZE)
@@ -643,7 +641,7 @@ static void __init alloc_init_section(pud_t *pud, unsigned long addr,
 }
 #endif  
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
 	unsigned long end, unsigned long phys, const struct mem_type *type)
 #else
@@ -656,7 +654,7 @@ static void alloc_init_pud(pgd_t *pgd, unsigned long addr, unsigned long end,
 
 	do {
 		next = pud_addr_end(addr, end);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		alloc_init_pmd(pud, addr, next, phys, type);
 #else
 		alloc_init_section(pud, addr, next, phys, type);
@@ -665,8 +663,8 @@ static void alloc_init_pud(pgd_t *pgd, unsigned long addr, unsigned long end,
 	} while (pud++, addr = next, addr != end);
 }
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2))&& defined(CONFIG_ARM_LPAE)
-#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE))&& defined(CONFIG_ARM_LPAE)
+#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
  
 #else
 static void __init create_36bit_mapping(struct map_desc *md,
@@ -743,8 +741,8 @@ static void __init create_mapping(struct map_desc *md)
 
 	type = &mem_types[md->type];
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH)||defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_ARM_LPAE)
-#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
+#if (defined(MY_DEF_HERE)||defined(MY_DEF_HERE)) && defined(CONFIG_ARM_LPAE)
+#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
  
 #else
 	 
@@ -785,7 +783,7 @@ void __init iotable_init(struct map_desc *io_desc, int nr)
 		create_mapping(io_desc + i);
 }
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_FB_DOVE)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_FB_DOVE)
 static void*  __initdata vmalloc_min = (void *)(VMALLOC_END - SZ_128M - SZ_32M);
 #else
 static void * __initdata vmalloc_min = (void *)(VMALLOC_END - SZ_128M);
@@ -824,13 +822,13 @@ void __init sanity_check_meminfo(void)
 		struct membank *bank = &meminfo.bank[j];
 		*bank = meminfo.bank[i];
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		if (bank->start > ULONG_MAX)
 			highmem = 1;
 #endif
 
 #ifdef CONFIG_HIGHMEM
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 		if (bank->start > ULONG_MAX ||
 		    __va(bank->start) >= vmalloc_min ||
 #else
@@ -841,8 +839,7 @@ void __init sanity_check_meminfo(void)
 
 		bank->highmem = highmem;
 
-		
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 		if (!highmem && __va(bank->start) < vmalloc_min &&
 #else
 		if (__va(bank->start) < vmalloc_min &&
@@ -883,8 +880,7 @@ void __init sanity_check_meminfo(void)
 			continue;
 		}
 
-		
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		if (__va(bank->start + bank->size - 1) >= vmalloc_min ||
 		    __va(bank->start + bank->size - 1) <= __va(bank->start)) {
 #else
@@ -898,7 +894,7 @@ void __init sanity_check_meminfo(void)
 			       (unsigned long long)bank->start + bank->size - 1,
 			       (unsigned long long)bank->start + newsize - 1);
 			bank->size = newsize;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		}
 #else
 		}
@@ -910,7 +906,7 @@ void __init sanity_check_meminfo(void)
 		j++;
 	}
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_v2)) && defined(ARCH_PLAT_ARMADA)
+#if (defined(MY_DEF_HERE) || defined(CONFIG_SYNO_ARMADA_ARCH_v2)) && defined(ARCH_PLAT_ARMADA)
 #else
 #ifdef CONFIG_HIGHMEM
 	if (highmem) {
@@ -952,13 +948,12 @@ static inline void prepare_page_table(void)
 	if (end >= lowmem_limit)
 		end = lowmem_limit;
 
-	
 	for (addr = __phys_to_virt(end);
 	     addr < VMALLOC_END; addr += PMD_SIZE)
 		pmd_clear(pmd_off_k(addr));
 }
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_ARM_LPAE
  
 #define SWAPPER_PG_DIR_SIZE	(PAGE_SIZE + \
@@ -980,7 +975,7 @@ void __init arm_mm_memblock_reserve(void)
 	memblock_reserve(PHYS_OFFSET, __pa(swapper_pg_dir) - PHYS_OFFSET);
 #endif
 }
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #if defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
  
 static void __init prepare_highmem_tables(void)
@@ -996,15 +991,14 @@ static void __init prepare_highmem_tables(void)
 		map.type = MT_MEMORY;
 		create_mapping(&map);
 
-		
 		set_fix_pte(addr,__pte(0));
 	}
 }
 #endif  
 #endif
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)) || \
-     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM))
+#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)) || \
+     (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM))
  
 static void __init map_highmem_pages(void)
 {
@@ -1027,17 +1021,15 @@ static void __init map_highmem_pages(void)
 }
 #endif
 
-
 static void __init devicemaps_init(struct machine_desc *mdesc)
 {
 	struct map_desc map;
 	unsigned long addr;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	void *vectors;
 #endif
 
-	
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	vectors = early_alloc(PAGE_SIZE);
 
 	early_trap_init(vectors);
@@ -1071,8 +1063,7 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 	create_mapping(&map);
 #endif
 
-	
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	map.pfn = __phys_to_pfn(virt_to_phys(vectors));
 #else
 	map.pfn = __phys_to_pfn(virt_to_phys(vectors_page));
@@ -1088,10 +1079,10 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 		create_mapping(&map);
 	}
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH_V2) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)) || \
-     (defined(CONFIG_SYNO_ARMADA_ARCH) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM))
+#if (defined(MY_DEF_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)) || \
+     (defined(MY_DEF_HERE) && defined(CONFIG_MV_SUPPORT_64KB_PAGE_SIZE) && defined(CONFIG_HIGHMEM))
 	map_highmem_pages();
-#elif defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+#elif defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
 	prepare_highmem_tables();
 #else
  
@@ -1115,7 +1106,7 @@ static void __init kmap_init(void)
 static void __init map_lowmem(void)
 {
 	struct memblock_region *reg;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 	extern unsigned long arm_dma_zone_size;
 	phys_addr_t length_ncnb = arm_dma_zone_size, length_ncnb_now = 0;
 #endif
@@ -1129,7 +1120,7 @@ static void __init map_lowmem(void)
 			end = lowmem_limit;
 		if (start >= end)
 			break;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_ZONE_DMA_NCNB)
 		if (length_ncnb > 0)
 		{
 			length_ncnb_now = min(length_ncnb, end - start);

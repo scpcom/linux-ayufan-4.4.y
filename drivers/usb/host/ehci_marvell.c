@@ -22,8 +22,7 @@
 
 static int ehci_marvell_setup(struct usb_hcd *hcd);
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
-
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
  
 #define MAX_EHCI_PORTS		3
 #define PHY_RX_CTRL_REG_OFFSET(x) (0x708 + (0x40 * (x)))
@@ -66,7 +65,7 @@ void ehci_marvell_hs_detect_wa_done(struct usb_device *udev)
 	hs_wa_applied[busnum] = 0;
 }
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 #else
 extern void (*gpfn_ehci_marvell_hs_detect_wa_done)(struct usb_device *udev);
 #endif
@@ -77,7 +76,7 @@ int ehci_marvell_hs_detect_wa(struct ehci_hcd *ehci, int busnum)
 	u32 val = 0;
 	u32 timeout;
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 #else
 	if (NULL == gpfn_ehci_marvell_hs_detect_wa_done) {
 		gpfn_ehci_marvell_hs_detect_wa_done = &ehci_marvell_hs_detect_wa_done;

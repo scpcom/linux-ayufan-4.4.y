@@ -13,7 +13,7 @@
 # define HZ		100
 #endif
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_COMCERTO_64K_PAGES)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_COMCERTO_64K_PAGES)
 #define EXEC_PAGESIZE	4096
 #else
 #define EXEC_PAGESIZE	65536

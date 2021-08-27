@@ -247,7 +247,7 @@ out:
 }
 EXPORT_SYMBOL_GPL(fsnotify);
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 int SYNOFsnotify(__u32 mask, void *data, int data_is,
 	     const unsigned char *file_name, u32 cookie)
 {

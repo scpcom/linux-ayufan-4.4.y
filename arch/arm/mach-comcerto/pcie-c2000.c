@@ -245,7 +245,7 @@ static void comcerto_dbi_write_reg(struct pcie_port *pp, int where, int size,
 static inline void nop_delay(void)
 {
         int k;
-#if defined(CONFIG_SYNO_C2K_PCIE_SWITCH_FIX)
+#if defined(MY_ABC_HERE)
         for(k = 0 ; k < 2000; k++)
 #else
         for(k = 0 ; k < 1000; k++)

@@ -27,7 +27,7 @@ enum {
   IPPROTO_ESP = 50,             
   IPPROTO_AH = 51,              
   IPPROTO_BEETPH = 94,	        
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
   IPPROTO_ETHERIP = 97,         
 #endif
   IPPROTO_PIM    = 103,		 

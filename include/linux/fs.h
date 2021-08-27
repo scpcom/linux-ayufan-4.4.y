@@ -321,7 +321,7 @@ struct inodes_stat_t {
 #define SYNC_FILE_RANGE_WRITE		2
 #define SYNC_FILE_RANGE_WAIT_AFTER	4
 
-#if defined(CONFIG_SYNO_ARMADA_V2) && !defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_ABC_HERE)
 #define MAX_PAGES_PER_RECVFILE		64
 #endif
 
@@ -366,7 +366,7 @@ struct kstatfs;
 struct vm_area_struct;
 struct vfsmount;
 struct cred;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2) || (defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE))
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || (defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE))
 struct socket;
 #endif
 
@@ -1322,15 +1322,12 @@ struct super_block {
 #define IS_GLUSTER_FS_SB(sb) (sb->s_subtype && !strcmp(SZ_FS_GLUSTER, sb->s_subtype))
 #endif
 
-
 extern void prune_icache_sb(struct super_block *sb, int nr_to_scan);
 extern void prune_dcache_sb(struct super_block *sb, int nr_to_scan);
 
 extern struct timespec current_fs_time(struct super_block *sb);
 
-
-
-#if defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE)
 #define vfs_check_frozen(sb, level) \
 	wait_event((sb)->s_wait_unfrozen, ((sb)->s_frozen < (level)))
 #endif
@@ -1445,11 +1442,11 @@ struct file_operations {
 	int (*flock) (struct file *, int, struct file_lock *);
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int);
 	ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 	ssize_t (*splice_from_socket)(struct file *file, struct socket *sock,
 				     loff_t __user *ppos, size_t count);
 #endif
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	ssize_t (*splice_from_socket)(struct file *, struct socket *,
 				     loff_t __user *ppos, size_t count);
 #endif
@@ -2184,14 +2181,13 @@ extern ssize_t blkdev_aio_write(struct kiocb *iocb, const struct iovec *iov,
 extern int blkdev_fsync(struct file *filp, loff_t start, loff_t end,
 			int datasync);
 
-
 extern ssize_t generic_file_splice_read(struct file *, loff_t *,
 		struct pipe_inode_info *, size_t, unsigned int);
 extern ssize_t default_file_splice_read(struct file *, loff_t *,
 		struct pipe_inode_info *, size_t, unsigned int);
 extern ssize_t generic_file_splice_write(struct pipe_inode_info *,
 		struct file *, loff_t *, size_t, unsigned int);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
 extern ssize_t comcerto_file_splice_write(struct pipe_inode_info *,
 		struct file *, loff_t *, size_t, unsigned int);
 #endif
@@ -2199,7 +2195,7 @@ extern ssize_t generic_splice_sendpage(struct pipe_inode_info *pipe,
 		struct file *out, loff_t *, size_t len, unsigned int flags);
 extern long do_splice_direct(struct file *in, loff_t *ppos, struct file *out,
 		size_t len, unsigned int flags);
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 extern ssize_t generic_splice_from_socket(struct file *file, struct socket *sock,
 				     loff_t __user *ppos, size_t count);
 #endif

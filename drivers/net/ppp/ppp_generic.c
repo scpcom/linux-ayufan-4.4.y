@@ -31,12 +31,12 @@
 #include <linux/atomic.h>
 
 #include <linux/nsproxy.h>
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <linux/mv_nfp.h>
 #endif
 #include <net/net_namespace.h>
 #include <net/netns/generic.h>
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 #include <linux/jiffies.h>
 #endif
 
@@ -466,7 +466,7 @@ static long ppp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	struct ppp *ppp;
 	int err = -EFAULT, val, val2, i;
 	struct ppp_idle idle;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
         struct ppp_idle fppidle;
 #endif
 	struct npioctl npi;
@@ -638,7 +638,7 @@ static long ppp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		err = 0;
 		break;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 	case PPPIOCSFPPIDLE:
 		if (copy_from_user(&fppidle, argp, sizeof(fppidle)))
 			break;
@@ -2471,7 +2471,7 @@ ppp_connect_channel(struct channel *pch, int unit)
 	write_lock_bh(&pch->upl);
 	ret = -EINVAL;
 	if (pch->ppp)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	{
 		write_unlock_bh(&pch->upl);
 		goto out;
@@ -2491,14 +2491,14 @@ ppp_connect_channel(struct channel *pch, int unit)
 	pch->ppp = ppp;
 	atomic_inc(&ppp->file.refcnt);
 	ppp_unlock(ppp);
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	ret = 0;
 
  outl:
 #endif
 	write_unlock_bh(&pch->upl);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 #if 0
 #if defined(CONFIG_COMCERTO_FP)
@@ -2534,7 +2534,7 @@ ppp_disconnect_channel(struct channel *pch)
 			wake_up_interruptible(&ppp->file.rwait);
 		ppp_unlock(ppp);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 #if 0
 #if defined(CONFIG_COMCERTO_FP)

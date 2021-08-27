@@ -97,7 +97,7 @@ extern int follow_down_one(struct path *);
 extern int follow_down(struct path *);
 extern int follow_up(struct path *);
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 extern int syno_fetch_mountpoint_fullpath(struct vfsmount *, size_t, char *);
 #endif
 

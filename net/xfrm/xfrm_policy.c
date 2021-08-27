@@ -35,12 +35,12 @@ static struct xfrm_policy_afinfo *xfrm_policy_afinfo[NPROTO];
 
 static struct kmem_cache *xfrm_dst_cache __read_mostly;
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 extern int ipsec_nlkey_flow(u16 xfrm_nr, u16 *xfrm_handle,
                 const struct flowi *fl, u16 family, u16 dir);
 #endif
 
-#if !defined(CONFIG_SYNO_COMCERTO) || (!defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if !defined(MY_ABC_HERE) || (!defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD))
 static struct xfrm_policy_afinfo *xfrm_policy_get_afinfo(unsigned short family);
 #endif
 
@@ -90,7 +90,7 @@ int xfrm_selector_match(const struct xfrm_selector *sel, const struct flowi *fl,
 	return 0;
 }
 
-#if !defined(CONFIG_SYNO_COMCERTO) || (!defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if !defined(MY_ABC_HERE) || (!defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD))
 static inline 
 #endif
 struct dst_entry *__xfrm_dst_lookup(struct net *net, int tos,
@@ -111,11 +111,11 @@ struct dst_entry *__xfrm_dst_lookup(struct net *net, int tos,
 
 	return dst;
 }
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 EXPORT_SYMBOL(__xfrm_dst_lookup);
 #endif
 
-#if !defined(CONFIG_SYNO_COMCERTO) || (!defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if !defined(MY_ABC_HERE) || (!defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD))
 static inline 
 #endif
 struct dst_entry *xfrm_dst_lookup(struct xfrm_state *x, int tos,
@@ -148,7 +148,7 @@ struct dst_entry *xfrm_dst_lookup(struct xfrm_state *x, int tos,
 
 	return dst;
 }
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 EXPORT_SYMBOL(xfrm_dst_lookup);
 #endif
 
@@ -1244,9 +1244,7 @@ xfrm_tmpl_resolve(struct xfrm_policy **pols, int npols, const struct flowi *fl,
 
 }
 
-
-
-#if !defined(CONFIG_SYNO_COMCERTO) || (!defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if !defined(MY_ABC_HERE) || (!defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD))
 static inline 
 #endif
 int xfrm_get_tos(const struct flowi *fl, int family)
@@ -1263,7 +1261,7 @@ int xfrm_get_tos(const struct flowi *fl, int family)
 
 	return tos;
 }
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 EXPORT_SYMBOL(xfrm_get_tos);
 #endif
 
@@ -1442,7 +1440,7 @@ static struct dst_entry *xfrm_bundle_create(struct xfrm_policy *policy,
 		xdst->route = dst;
 		dst_copy_metrics(dst1, dst);
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 		if ((xfrm[i]->props.mode != XFRM_MODE_TRANSPORT) &&
 			(!xfrm[i]->offloaded)) {
 #else
@@ -1757,7 +1755,7 @@ struct dst_entry *xfrm_lookup(struct net *net, struct dst_entry *dst_orig,
 	u16 family = dst_orig->ops->family;
 	u8 dir = policy_to_flow_dir(XFRM_POLICY_OUT);
 	int i, err, num_pols, num_xfrms = 0, drop_pols = 0;
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	u8 new_flow = 0;
 #endif
 
@@ -1810,7 +1808,7 @@ restart:
 		    !net->xfrm.policy_count[XFRM_POLICY_OUT])
 			goto nopol;
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 		flo = flow_cache_lookup(net, fl, family, dir, &new_flow,
 					xfrm_bundle_lookup, dst_orig);
 #else
@@ -1891,7 +1889,7 @@ no_transform:
 		dst = dst_orig;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	if (new_flow) {
 		struct dst_entry *dst1 = dst;
 		struct xfrm_state *x; 
@@ -2026,7 +2024,7 @@ int __xfrm_policy_check(struct sock *sk, int dir, struct sk_buff *skb,
 	int xfrm_nr;
 	int pi;
 	int reverse;
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 	u8 new_flow = 0;
 #endif
 	struct flowi fl;
@@ -2068,7 +2066,7 @@ int __xfrm_policy_check(struct sock *sk, int dir, struct sk_buff *skb,
 	if (!pol) {
 		struct flow_cache_object *flo;
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 		flo = flow_cache_lookup(net, &fl, family, fl_dir, &new_flow,
 					xfrm_policy_lookup, NULL);
 #else
@@ -2162,7 +2160,7 @@ int __xfrm_policy_check(struct sock *sk, int dir, struct sk_buff *skb,
 			goto reject;
 		}
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 		if (new_flow) {
 			struct xfrm_state *x;
 			u16	xfrm_handle[XFRM_POLICY_TYPE_MAX];
@@ -2488,7 +2486,7 @@ static void __net_init xfrm_dst_ops_init(struct net *net)
 	read_unlock_bh(&xfrm_policy_afinfo_lock);
 }
 
-#if !defined(CONFIG_SYNO_COMCERTO) || (!defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if !defined(MY_ABC_HERE) || (!defined(CONFIG_INET_IPSEC_OFFLOAD) && !defined(CONFIG_INET6_IPSEC_OFFLOAD))
 static 
 #endif
 struct xfrm_policy_afinfo *xfrm_policy_get_afinfo(unsigned short family)
@@ -2502,7 +2500,7 @@ struct xfrm_policy_afinfo *xfrm_policy_get_afinfo(unsigned short family)
 		read_unlock(&xfrm_policy_afinfo_lock);
 	return afinfo;
 }
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_INET_IPSEC_OFFLOAD) || defined(CONFIG_INET6_IPSEC_OFFLOAD))
 EXPORT_SYMBOL(xfrm_policy_get_afinfo);
 #endif
 

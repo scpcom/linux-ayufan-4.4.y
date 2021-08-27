@@ -74,7 +74,7 @@ MODULE_ALIAS_SCSI_DEVICE(TYPE_RBC);
 extern int gSynoHasDynModule;
 #endif
 
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 extern int gSynoDualHead;
 #endif
 
@@ -2559,7 +2559,7 @@ OUT:
 static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 {
 	struct scsi_device *sdp = to_scsi_device(dev);
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 	bool blIsSynoboot = false;
 #endif  
 
@@ -2591,7 +2591,7 @@ static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 	}
 
 	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type) {
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 		if (1 == gSynoDualHead) {
 			if (!strncmp(SYNO_SATA_DOM_VENDOR, sdp->vendor, strlen(SYNO_SATA_DOM_VENDOR))
 				&& !strncmp(SYNO_SATA_DOM_MODEL, sdp->model, strlen(SYNO_SATA_DOM_MODEL))) {

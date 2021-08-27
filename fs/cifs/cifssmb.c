@@ -1383,10 +1383,9 @@ cifs_readv_receive(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 	remaining = data_len;
 	rdata->nr_iov = 1;
 
-	
 	eof = CIFS_I(rdata->mapping->host)->server_eof;
 	eof_index = eof ? (eof - 1) >> PAGE_CACHE_SHIFT : 0;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	cFYI(1, "eof=%llu eof_index=%llu", eof, (unsigned long long)eof_index);
 #else
 	cFYI(1, "eof=%llu eof_index=%lu", eof, eof_index);
@@ -1398,7 +1397,7 @@ cifs_readv_receive(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 			 
 			rdata->iov[rdata->nr_iov].iov_base = kmap(page);
 			rdata->iov[rdata->nr_iov].iov_len = PAGE_CACHE_SIZE;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			cFYI(1, "%u: idx=%llu iov_base=%p iov_len=%zu",
 				rdata->nr_iov, (unsigned long long)page->index,
 				rdata->iov[rdata->nr_iov].iov_base,
@@ -1416,7 +1415,7 @@ cifs_readv_receive(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 			 
 			rdata->iov[rdata->nr_iov].iov_base = kmap(page);
 			rdata->iov[rdata->nr_iov].iov_len = remaining;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			cFYI(1, "%u: idx=%llu iov_base=%p iov_len=%zu",
 				rdata->nr_iov, (unsigned long long)page->index,
 				rdata->iov[rdata->nr_iov].iov_base,

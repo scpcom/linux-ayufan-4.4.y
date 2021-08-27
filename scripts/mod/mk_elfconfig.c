@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(__APPLE__)
+#if !defined(MY_ABC_HERE) || !defined(__APPLE__)
 #include <elf.h>
 #else
 #include "../../../../../tools/sstrip/include/elf.h"

@@ -140,14 +140,12 @@ EXPORT_SYMBOL(mvSFlashPowerSaveExit);
 EXPORT_SYMBOL(mvSFlashModelGet);
 #endif
 
-
 #ifdef CONFIG_MV_INCLUDE_INTEG_SATA
 #include <sata/CoreDriver/mvSata.h>
 EXPORT_SYMBOL(mvSataWinInit);
 #endif
 
-
-#if (defined (CONFIG_MV_XOR_MEMCOPY) || defined (CONFIG_MV_IDMA_MEMCOPY)) && !defined(CONFIG_SYNO_ARMADA_ARCH)
+#if (defined (CONFIG_MV_XOR_MEMCOPY) || defined (CONFIG_MV_IDMA_MEMCOPY)) && !defined(MY_DEF_HERE)
 EXPORT_SYMBOL(asm_memcpy);
 #endif
 

@@ -59,14 +59,13 @@ static inline dma_addr_t virt_to_dma(struct device *dev, void *addr)
 }
 #endif
 
-
 static inline void __dma_single_cpu_to_dev(const void *kaddr, size_t size,
 	enum dma_data_direction dir)
 {
 	extern void ___dma_single_cpu_to_dev(const void *, size_t,
 		enum dma_data_direction);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (!arch_is_coherent() && size > 0)
 #else
 	if (!arch_is_coherent())
@@ -80,13 +79,13 @@ static inline void __dma_single_dev_to_cpu(const void *kaddr, size_t size,
 	extern void ___dma_single_dev_to_cpu(const void *, size_t,
 		enum dma_data_direction);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (!arch_is_coherent() && size > 0)
 #else
 	if (!arch_is_coherent())
 #endif
 		___dma_single_dev_to_cpu(kaddr, size, dir);
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	else if (dir != DMA_TO_DEVICE)
 		dma_io_sync();
 #endif
@@ -98,7 +97,7 @@ static inline void __dma_page_cpu_to_dev(struct page *page, unsigned long off,
 	extern void ___dma_page_cpu_to_dev(struct page *, unsigned long,
 		size_t, enum dma_data_direction);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (!arch_is_coherent() && size > 0)
 #else
 	if (!arch_is_coherent())
@@ -112,13 +111,13 @@ static inline void __dma_page_dev_to_cpu(struct page *page, unsigned long off,
 	extern void ___dma_page_dev_to_cpu(struct page *, unsigned long,
 		size_t, enum dma_data_direction);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (!arch_is_coherent() && size > 0)
 #else
 	if (!arch_is_coherent())
 #endif
 		___dma_page_dev_to_cpu(page, off, size, dir);
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	else if (dir != DMA_TO_DEVICE)
 		dma_io_sync();
 #endif

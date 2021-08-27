@@ -21,7 +21,7 @@
 #include <linux/route.h>
 #include <linux/rtnetlink.h>
 #include <linux/netfilter_ipv6.h>
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/netfilter/nf_conntrack_proto_gre.h>
 #endif
 #include <linux/slab.h>
@@ -61,7 +61,7 @@ MODULE_ALIAS_NETDEV("ip6tnl0");
 		     (addr)->s6_addr32[2] ^ (addr)->s6_addr32[3]) & \
 		    (HASH_SIZE - 1))
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define for_each_ip6_tunnel_rcu(start) \
 	for (t = rcu_dereference(start); t; t = rcu_dereference(t->next))
 #endif
@@ -106,9 +106,7 @@ static struct net_device_stats *ip6_get_stats(struct net_device *dev)
 	return &dev->stats;
 }
 
-
-
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static struct kmem_cache *mr_kmem __read_mostly;
 int mr_kmem_alloced = 0;
 
@@ -662,9 +660,7 @@ static inline void ip6_tnl_dst_store(struct ip6_tnl *t, struct dst_entry *dst)
 	t->dst_cache = dst;
 }
 
-
-
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 #define for_each_ip6_tunnel_rcu(start) \
 	for (t = rcu_dereference(start); t; t = rcu_dereference(t->next))
 #endif
@@ -672,7 +668,7 @@ static inline void ip6_tnl_dst_store(struct ip6_tnl *t, struct dst_entry *dst)
 static struct ip6_tnl *
 ip6_tnl_lookup(struct net *net, const struct in6_addr *remote, const struct in6_addr *local)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 #else
 	unsigned int h0 = HASH(remote);
@@ -681,7 +677,7 @@ ip6_tnl_lookup(struct net *net, const struct in6_addr *remote, const struct in6_
 	struct ip6_tnl *t;
 	struct ip6_tnl_net *ip6n = net_generic(net, ip6_tnl_net_id);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	for_each_ip6_tunnel_rcu(ip6n->tnls_r_l[h1]) {
 #else
 	for_each_ip6_tunnel_rcu(ip6n->tnls_r_l[h0 ^ h1]) {
@@ -690,7 +686,7 @@ ip6_tnl_lookup(struct net *net, const struct in6_addr *remote, const struct in6_
 		    ipv6_addr_equal(remote, &t->parms.raddr) &&
 		    (t->dev->flags & IFF_UP))
 			return t;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
                 if (t->ip4rd.prefix &&
                    ipv6_addr_equal(local, &t->parms.laddr) &&
                  
@@ -705,25 +701,23 @@ ip6_tnl_lookup(struct net *net, const struct in6_addr *remote, const struct in6_
 	return NULL;
 }
 
-
-
 static struct ip6_tnl __rcu **
 ip6_tnl_bucket(struct ip6_tnl_net *ip6n, const struct ip6_tnl_parm *p)
 {
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	const struct in6_addr *remote = &p->raddr;
 #endif
 	const struct in6_addr *local = &p->laddr;
 	unsigned h = 0;
 	int prio = 0;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (!ipv6_addr_any(local)) {        
 #else
 	if (!ipv6_addr_any(remote) || !ipv6_addr_any(local)) {
 #endif
 		prio = 1;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		h = HASH(local);	
 #else
 		h = HASH(remote) ^ HASH(local);
@@ -793,7 +787,7 @@ static struct ip6_tnl *ip6_tnl_create(struct net *net, struct ip6_tnl_parm *p)
 
 	strcpy(t->parms.name, dev->name);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	rwlock_init(&t->ip4rd.map_lock);
 	INIT_LIST_HEAD(&t->ip4rd.map_list); 
 #endif
@@ -1215,7 +1209,7 @@ static int ip6_tnl_rcv(struct sk_buff *skb, __u16 protocol,
 		__skb_tunnel_rx(skb, t->dev);
 
 		dscp_ecn_decapsulate(t, ipv6h, skb);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
                 if (ip6_tnl_4rd_rcv_helper(skb, t)) {
                         rcu_read_unlock();
                         goto discard;
@@ -1321,7 +1315,7 @@ static int ip6_tnl_xmit2(struct sk_buff *skb,
 	u8 proto;
 	int err = -1;
 	int pkt_len;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	__u8 hop_limit;    
 #endif
 
@@ -1360,7 +1354,7 @@ static int ip6_tnl_xmit2(struct sk_buff *skb,
 		mtu = IPV6_MIN_MTU;
 	if (skb_dst(skb))
 		skb_dst(skb)->ops->update_pmtu(skb_dst(skb), mtu);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         if (!t->ip4rd.prefix) {     
 #endif
 	if (skb->len > mtu) {
@@ -1368,7 +1362,7 @@ static int ip6_tnl_xmit2(struct sk_buff *skb,
 		err = -EMSGSIZE;
 		goto tx_err_dst_release;
 	}
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         }                        
 
 	if (t->ip4rd.prefix) {
@@ -1415,7 +1409,7 @@ static int ip6_tnl_xmit2(struct sk_buff *skb,
 	*(__be32*)ipv6h = fl6->flowlabel | htonl(0x60000000);
 	dsfield = INET_ECN_encapsulate(0, dsfield);
 	ipv6_change_dsfield(ipv6h, ~INET_ECN_MASK, dsfield);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	ipv6h->hop_limit = hop_limit;
 #else
 	ipv6h->hop_limit = t->parms.hop_limit;
@@ -1476,7 +1470,7 @@ ip4ip6_tnl_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (t->parms.flags & IP6_TNL_F_USE_ORIG_FWMARK)
 		fl6.flowi6_mark = skb->mark;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         if (t->ip4rd.prefix && ip6_tnl_4rd_xmit_helper(skb, &fl6, t))
                 return -1;
 #endif
@@ -1552,7 +1546,7 @@ ip6_tnl_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	switch (skb->protocol) {
 	case htons(ETH_P_IP):
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
                 if (t->ip4rd.prefix && ip_defrag(skb, IP_DEFRAG_IP6_TNL_4RD))
                         return NETDEV_TX_OK;
 #endif
@@ -1595,7 +1589,7 @@ static void ip6_tnl_set_cap(struct ip6_tnl *t)
 			p->flags |= IP6_TNL_F_CAP_RCV;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         if (t->ip4rd.prefix) {
                 p->flags |= IP6_TNL_F_CAP_XMIT;
                 p->flags |= IP6_TNL_F_CAP_RCV;
@@ -1668,7 +1662,7 @@ ip6_tnl_change(struct ip6_tnl *t, struct ip6_tnl_parm *p)
 	t->parms.flowinfo = p->flowinfo;
 	t->parms.link = p->link;
 	t->parms.proto = p->proto;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         ip6_tnl_4rd_update_parms(t);        
 #endif
 	ip6_tnl_dst_reset(t);
@@ -1684,7 +1678,7 @@ ip6_tnl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	struct ip6_tnl *t = NULL;
 	struct net *net = dev_net(dev);
 	struct ip6_tnl_net *ip6n = net_generic(net, ip6_tnl_net_id);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         struct ip6_tnl_4rd ip4rd, *ip4rdp;  
         struct ip6_tnl_4rd_map_rule *mr;   
 #endif
@@ -1761,7 +1755,7 @@ ip6_tnl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		err = 0;
 		unregister_netdevice(dev);
 		break;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	case SIOCADD4RD:
 	case SIOCDEL4RD:
 		err = -EPERM;
@@ -1870,7 +1864,7 @@ ip6_tnl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	default:
 		err = -EINVAL;
 	}
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 done:
 #endif
 	return err;
@@ -2035,11 +2029,9 @@ static struct pernet_operations ip6_tnl_net_ops = {
 	.size = sizeof(struct ip6_tnl_net),
 };
 
-
-
 static int __init ip6_tunnel_init(void)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         int err = 0;                
  
         mr_kmem = kmem_cache_create("ip6_tnl_4rd_map_rule",
@@ -2056,7 +2048,7 @@ static int __init ip6_tunnel_init(void)
 
 	err = register_pernet_device(&ip6_tnl_net_ops);
 	if (err < 0)
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		goto out_kmem;
 #else
 		goto out_pernet;
@@ -2074,7 +2066,7 @@ static int __init ip6_tunnel_init(void)
 		goto out_ip6ip6;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         err =__rtnl_register(PF_UNSPEC, RTM_GET4RD, NULL , inet6_dump4rd_mrule, NULL);
         if(err < 0)
                 goto out_ip6ip6;
@@ -2086,7 +2078,7 @@ out_ip6ip6:
 	xfrm6_tunnel_deregister(&ip4ip6_handler, AF_INET);
 out_ip4ip6:
 	unregister_pernet_device(&ip6_tnl_net_ops);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 out_kmem:
 	kmem_cache_destroy(mr_kmem);
 #endif
@@ -2102,13 +2094,13 @@ static void __exit ip6_tunnel_cleanup(void)
 	if (xfrm6_tunnel_deregister(&ip6ip6_handler, AF_INET6))
 		printk(KERN_INFO "ip6_tunnel close: can't deregister ip6ip6\n");
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         kmem_cache_destroy(mr_kmem);     
 #endif
  
 	unregister_pernet_device(&ip6_tnl_net_ops);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
         rtnl_unregister(PF_UNSPEC, RTM_GET4RD);
 #endif
  

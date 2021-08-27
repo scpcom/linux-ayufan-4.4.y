@@ -130,9 +130,8 @@ typedef unsigned long sector_t;
 typedef unsigned long blkcnt_t;
 #endif
 
-
 #ifndef pgoff_t
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_LFS_ON_32CPU
 #define pgoff_t unsigned long long
 #define PGOFF_MAX	ULLONG_MAX

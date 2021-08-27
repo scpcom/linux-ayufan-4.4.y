@@ -65,7 +65,7 @@ extern s64 div64_s64(s64 dividend, s64 divisor);
 #endif
 
 #ifdef MY_ABC_HERE
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2) || defined(CONFIG_SYNO_COMCERTO) || (defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || (defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)) || defined(MY_DEF_HERE)
 static inline u64 mod_u64_rem64(u64 dividend, u64 divisor)
 {
         if (dividend < divisor) {
@@ -76,7 +76,7 @@ static inline u64 mod_u64_rem64(u64 dividend, u64 divisor)
 
         return dividend - (div64_u64(dividend, divisor) * divisor);
 }
-#elif !(defined(CONFIG_SYNO_MV88F6281) || defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_QORIQ))
+#elif !(defined(MY_DEF_HERE) || defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_MPC854X) || defined(MY_DEF_HERE))
 #error "WARNING: possible lack of rem64 ksymbol"
 #endif
 #endif

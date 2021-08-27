@@ -40,7 +40,7 @@ int sysctl_tcp_thin_dupack __read_mostly;
 
 int sysctl_tcp_moderate_rcvbuf __read_mostly = 1;
 int sysctl_tcp_abc __read_mostly;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 int sysctl_tcp_default_delack_segs __read_mostly = 1;
 #endif
 
@@ -3927,13 +3927,11 @@ static inline void tcp_data_snd_check(struct sock *sk)
 	tcp_check_space(sk);
 }
 
-
 static void __tcp_ack_snd_check(struct sock *sk, int ofo_possible)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 
-	    
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	if (((tp->rcv_nxt - tp->rcv_wup) > (inet_csk(sk)->icsk_ack.rcv_mss * sysctl_tcp_default_delack_segs) &&
 #else
 	if (((tp->rcv_nxt - tp->rcv_wup) > inet_csk(sk)->icsk_ack.rcv_mss &&
@@ -4076,7 +4074,7 @@ static int tcp_dma_try_early_copy(struct sock *sk, struct sk_buff *skb,
 	if (tp->ucopy.wakeup)
 		return 0;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
 		tp->ucopy.dma_chan = net_dma_find_channel();
 #else
@@ -4213,7 +4211,7 @@ int tcp_rcv_established(struct sock *sk, struct sk_buff *skb,
 
 			if (tp->copied_seq == tp->rcv_nxt &&
 			    len - tcp_header_len <= tp->ucopy.len) {
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
  
 #elif defined(CONFIG_NET_DMA)
 				if (tp->ucopy.task == current &&

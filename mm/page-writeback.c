@@ -883,7 +883,7 @@ int write_cache_pages(struct address_space *mapping,
 			cycled = 1;
 		else
 			cycled = 0;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		end = PGOFF_MAX;
 #else
 		end = -1;

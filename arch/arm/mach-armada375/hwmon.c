@@ -122,13 +122,12 @@ static int a375_temp_read_temp(void)
 
 	} while (!(reg & TSEN_STATUS_TEMP_VALID_MASK));
 
-	
 	reg = reg & TSEN_STATUS_TEMP_OUT_MASK;
 	
 	return A375_TSEN_RAW2TEMP(reg);
 }
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 extern unsigned int mvCtrlGetJuncTemp(void);
 int axptemp_read_temp(void)
 {

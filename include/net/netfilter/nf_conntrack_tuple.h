@@ -48,14 +48,12 @@ struct nf_conntrack_tuple {
 			} gre;
 		} u;
 
-		
 		u_int8_t protonum;
 
-		
 		u_int8_t dir;
 	} dst;
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP_HOOKS)
 	 
 	bool nfp;

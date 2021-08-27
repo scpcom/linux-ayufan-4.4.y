@@ -45,7 +45,7 @@ enum ctattr_type {
 	CTA_ZONE,
 	CTA_SECCTX,
 	CTA_TIMESTAMP,
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	CTA_COMCERTO_FP_ORIG,
 	CTA_COMCERTO_FP_REPLY,
 #endif
@@ -196,7 +196,7 @@ enum ctattr_secctx {
 };
 #define CTA_SECCTX_MAX (__CTA_SECCTX_MAX - 1)
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 enum ctattr_comcerto_fp {
 	CTA_COMCERTO_FP_UNSPEC,
 	CTA_COMCERTO_FP_MARK,

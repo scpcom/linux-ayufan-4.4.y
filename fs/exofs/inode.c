@@ -526,7 +526,7 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 			*uptodate = true;
 		else
 			*uptodate = PageUptodate(page);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		EXOFS_DBGMSG("index=0x%llx uptodate=%d\n", _LLU(index), *uptodate);
 #else
 		EXOFS_DBGMSG("index=0x%lx uptodate=%d\n", index, *uptodate);

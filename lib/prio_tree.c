@@ -2,13 +2,11 @@
 #define MY_ABC_HERE
 #endif
  
-
-
 #include <linux/init.h>
 #include <linux/mm.h>
 #include <linux/prio_tree.h>
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_LFS_ON_32CPU
 #define PRIO_TREE_0   0ULL
 #define PRIO_TREE_1   1ULL
@@ -20,15 +18,12 @@
 #endif
 #endif
  
-
-
-
 #define RADIX_INDEX(vma)  ((vma)->vm_pgoff)
 #define VMA_SIZE(vma)	  (((vma)->vm_end - (vma)->vm_start) >> PAGE_SHIFT)
  
 #define HEAP_INDEX(vma)	  ((vma)->vm_pgoff + (VMA_SIZE(vma) - 1))
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static void get_index(const struct prio_tree_root *root,
     const struct prio_tree_node *node,
     prio_tree_t *radix, prio_tree_t *heap)
@@ -51,7 +46,7 @@ static void get_index(const struct prio_tree_root *root,
 	}
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static prio_tree_t index_bits_to_maxindex[PRIO_TREE_BITS_PER_KEY];
 #else
 static unsigned long index_bits_to_maxindex[BITS_PER_LONG];
@@ -61,7 +56,7 @@ void __init prio_tree_init(void)
 {
 	unsigned int i;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	for (i = 0; i < ARRAY_SIZE(index_bits_to_maxindex) - 1; i++)
 		index_bits_to_maxindex[i] = (PRIO_TREE_1 << (i + 1)) - 1;
 	index_bits_to_maxindex[ARRAY_SIZE(index_bits_to_maxindex) - 1] = ~PRIO_TREE_0;
@@ -72,8 +67,7 @@ void __init prio_tree_init(void)
 #endif
 }
 
-
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static inline prio_tree_t prio_tree_maxindex(unsigned int bits)
 #else
 static inline unsigned long prio_tree_maxindex(unsigned int bits)
@@ -82,8 +76,7 @@ static inline unsigned long prio_tree_maxindex(unsigned int bits)
 	return index_bits_to_maxindex[bits - 1];
 }
 
-
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static struct prio_tree_node *prio_tree_expand(struct prio_tree_root *root,
 		struct prio_tree_node *node, prio_tree_t max_heap_index)
 #else
@@ -165,12 +158,11 @@ struct prio_tree_node *prio_tree_replace(struct prio_tree_root *root,
 	return old;
 }
 
-
 struct prio_tree_node *prio_tree_insert(struct prio_tree_root *root,
 		struct prio_tree_node *node)
 {
 	struct prio_tree_node *cur, *res = node;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	prio_tree_t radix_index, heap_index;
 	prio_tree_t r_index, h_index, index, mask;
 #else
@@ -186,7 +178,7 @@ struct prio_tree_node *prio_tree_insert(struct prio_tree_root *root,
 		return prio_tree_expand(root, node, heap_index);
 
 	cur = root->prio_tree_node;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	mask = PRIO_TREE_1 << (root->index_bits - 1);
 #else
 	mask = 1UL << (root->index_bits - 1);
@@ -238,7 +230,7 @@ struct prio_tree_node *prio_tree_insert(struct prio_tree_root *root,
 		mask >>= 1;
 
 		if (!mask) {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			mask = PRIO_TREE_1 << (PRIO_TREE_BITS_PER_KEY - 1);
 #else
 			mask = 1UL << (BITS_PER_LONG - 1);
@@ -251,11 +243,10 @@ struct prio_tree_node *prio_tree_insert(struct prio_tree_root *root,
 	return NULL;
 }
 
-
 void prio_tree_remove(struct prio_tree_root *root, struct prio_tree_node *node)
 {
 	struct prio_tree_node *cur;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	prio_tree_t r_index, h_index_right, h_index_left;
 #else
 	unsigned long r_index, h_index_right, h_index_left;
@@ -299,9 +290,7 @@ void prio_tree_remove(struct prio_tree_root *root, struct prio_tree_node *node)
 		cur = prio_tree_replace(root, cur->parent, cur);
 }
 
-
-
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static struct prio_tree_node *prio_tree_left(struct prio_tree_iter *iter,
 		prio_tree_t *r_index, prio_tree_t *h_index)
 #else
@@ -325,14 +314,14 @@ static struct prio_tree_node *prio_tree_left(struct prio_tree_iter *iter,
 				BUG_ON(!prio_tree_left_empty(iter->cur));
 				BUG_ON(!prio_tree_right_empty(iter->cur));
 				iter->size_level++;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 				iter->mask = PRIO_TREE_KEY_MAX_VALUE;
 #else
 				iter->mask = ULONG_MAX;
 #endif
 			} else {
 				iter->size_level = 1;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 				iter->mask = PRIO_TREE_1 << (PRIO_TREE_BITS_PER_KEY - 1);
 #else
 				iter->mask = 1UL << (BITS_PER_LONG - 1);
@@ -345,7 +334,7 @@ static struct prio_tree_node *prio_tree_left(struct prio_tree_iter *iter,
 	return NULL;
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static struct prio_tree_node *prio_tree_right(struct prio_tree_iter *iter,
 		prio_tree_t *r_index, prio_tree_t *h_index)
 #else
@@ -353,7 +342,7 @@ static struct prio_tree_node *prio_tree_right(struct prio_tree_iter *iter,
 		unsigned long *r_index, unsigned long *h_index)
 #endif
 {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	prio_tree_t value;
 #else
 	unsigned long value;
@@ -384,14 +373,14 @@ static struct prio_tree_node *prio_tree_right(struct prio_tree_iter *iter,
 				BUG_ON(!prio_tree_left_empty(iter->cur));
 				BUG_ON(!prio_tree_right_empty(iter->cur));
 				iter->size_level++;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 				iter->mask = PRIO_TREE_KEY_MAX_VALUE;
 #else
 				iter->mask = ULONG_MAX;
 #endif
 			} else {
 				iter->size_level = 1;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 				iter->mask = PRIO_TREE_1 << (PRIO_TREE_BITS_PER_KEY - 1);
 #else
 				iter->mask = 1UL << (BITS_PER_LONG - 1);
@@ -407,7 +396,7 @@ static struct prio_tree_node *prio_tree_right(struct prio_tree_iter *iter,
 static struct prio_tree_node *prio_tree_parent(struct prio_tree_iter *iter)
 {
 	iter->cur = iter->cur->parent;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	if (iter->mask == PRIO_TREE_KEY_MAX_VALUE)
 		iter->mask = PRIO_TREE_1;
 #else
@@ -415,7 +404,7 @@ static struct prio_tree_node *prio_tree_parent(struct prio_tree_iter *iter)
 		iter->mask = 1UL;
 #endif
 	else if (iter->size_level == 1)
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		iter->mask = PRIO_TREE_1;
 #else
 		iter->mask = 1UL;
@@ -429,7 +418,7 @@ static struct prio_tree_node *prio_tree_parent(struct prio_tree_iter *iter)
 	return iter->cur;
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 static inline int overlap(struct prio_tree_iter *iter,
 		prio_tree_t r_index, prio_tree_t h_index)
 #else
@@ -440,11 +429,10 @@ static inline int overlap(struct prio_tree_iter *iter,
 	return iter->h_index >= r_index && iter->r_index <= h_index;
 }
 
-
 static struct prio_tree_node *prio_tree_first(struct prio_tree_iter *iter)
 {
 	struct prio_tree_root *root;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	prio_tree_t r_index, h_index;
 #else
 	unsigned long r_index, h_index;
@@ -461,7 +449,7 @@ static struct prio_tree_node *prio_tree_first(struct prio_tree_iter *iter)
 	if (iter->r_index > h_index)
 		return NULL;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	iter->mask = PRIO_TREE_1 << (root->index_bits - 1);
 #else
 	iter->mask = 1UL << (root->index_bits - 1);
@@ -483,10 +471,9 @@ static struct prio_tree_node *prio_tree_first(struct prio_tree_iter *iter)
 	return NULL;
 }
 
-
 struct prio_tree_node *prio_tree_next(struct prio_tree_iter *iter)
 {
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	prio_tree_t r_index, h_index;
 #else
 	unsigned long r_index, h_index;

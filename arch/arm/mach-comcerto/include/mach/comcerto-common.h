@@ -74,9 +74,8 @@
 #define GEMAC_NO_PHY			(1 << 0)		 
 #define GEMAC_PHY_RGMII_ADD_DELAY	(1 << 1)
 
-
 #define GEM0_ITF_NAME "eth0"
-#if defined(CONFIG_SYNO_C2K_NET)
+#if defined(MY_ABC_HERE)
 #define GEM1_ITF_NAME "eth1"
 #else
 #define GEM1_ITF_NAME "eth2"

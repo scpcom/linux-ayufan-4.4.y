@@ -107,7 +107,7 @@ static void esp_output_done(struct crypto_async_request *base, int err)
 	kfree(ESP_SKB_CB(skb)->tmp);
 	xfrm_output_resume(skb, err);
 }
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static void udp_v6_send_check(struct sk_buff *skb)
 {
 	struct ipv6hdr *ipv6h=ipv6_hdr(skb);
@@ -128,7 +128,7 @@ static int esp6_output(struct xfrm_state *x, struct sk_buff *skb)
 {
 	int err;
 	struct ip_esp_hdr *esph;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct udphdr *uh=NULL;
 #endif
 	struct crypto_aead *aead;
@@ -214,8 +214,7 @@ static int esp6_output(struct xfrm_state *x, struct sk_buff *skb)
 	esph = ip_esp_hdr(skb);
 	*skb_mac_header(skb) = IPPROTO_ESP;
 
-#if defined(CONFIG_SYNO_COMCERTO)
-	
+#if defined(MY_ABC_HERE)
 	 
 	if (x->encap) {
 		struct xfrm_encap_tmpl *encap = x->encap;
@@ -279,7 +278,7 @@ static int esp6_output(struct xfrm_state *x, struct sk_buff *skb)
 	if (err == -EBUSY)
 		err = NET_XMIT_DROP;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	if (x->encap) {
 		udp_v6_send_check(skb);
@@ -295,7 +294,7 @@ error:
 
 static int esp_input_done2(struct sk_buff *skb, int err)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct ipv6hdr *ipv6h;
 #endif
 	struct xfrm_state *x = xfrm_input_state(skb);
@@ -324,8 +323,7 @@ static int esp_input_done2(struct sk_buff *skb, int err)
 		goto out;
 	}
 
-	
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	ipv6h = ipv6_hdr(skb);
 	if (x->encap) {
@@ -627,7 +625,7 @@ static int esp6_init_state(struct xfrm_state *x)
 	u32 align;
 	int err;
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	if (x->encap)
 		return -EINVAL;
 #endif
@@ -667,7 +665,7 @@ static int esp6_init_state(struct xfrm_state *x)
 		goto error;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	if (x->encap) {
 		struct xfrm_encap_tmpl *encap = x->encap;

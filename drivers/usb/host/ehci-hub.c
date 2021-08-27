@@ -454,8 +454,7 @@ ehci_hub_status_data (struct usb_hcd *hcd, char *buf)
 		retval++;
 	}
 
-	
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (!ignore_oc && !ehci->ignore_oc)
 #else
 	if (!ignore_oc)
@@ -646,13 +645,12 @@ static int ehci_hub_control (
 		status = 0;
 		temp = ehci_readl(ehci, status_reg);
 
-		
 		if (temp & PORT_CSC)
 			status |= USB_PORT_STAT_C_CONNECTION << 16;
 		if (temp & PORT_PEC)
 			status |= USB_PORT_STAT_C_ENABLE << 16;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		if ((temp & PORT_OCC) && (!ignore_oc && !ehci->ignore_oc)){
 #else
 		if ((temp & PORT_OCC) && !ignore_oc){
@@ -713,7 +711,7 @@ static int ehci_hub_control (
 					PORT_RESET, 0, 1000);
 			if (retval != 0) {
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 				 
 				if (ehci_marvell_hs_detect_wa(ehci,
 							hcd->self.busnum)) {
@@ -779,7 +777,7 @@ static int ehci_hub_control (
 #endif
 		dbg_port (ehci, "GetStatus", wIndex + 1, temp);
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_USB_MARVELL_ERRATA_FE_9049667)
 		if ((temp & PORT_CONNECT) && (temp & PORT_PEC) &&
 				(temp & PORT_CSC)) {
 			if (!ehci_marvell_hs_detect_wa(ehci, hcd->self.busnum))

@@ -40,7 +40,7 @@ struct comcerto_sw_xor_desc {
 	size_t len;
 	dma_addr_t dma_dest;
 	dma_addr_t dma_src[XOR_MAX_SRC_CNT];
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	int submited;
 #endif
 };
@@ -228,18 +228,18 @@ static int comcerto_xor_rb_full(void)
 
 void comcerto_xor_request_wait(void)
 {
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	unsigned long flags;
 #endif
 	DEFINE_WAIT(wait);
 
 	prepare_to_wait(&comcerto_xor_wait_queue, &wait, TASK_UNINTERRUPTIBLE);
 
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	spin_lock_irqsave(&mdma_lock, flags);
 #endif
 	comcerto_xor_sleeping++;
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	spin_unlock_irqrestore(&mdma_lock, flags);
 #endif
 
@@ -251,11 +251,11 @@ void comcerto_xor_request_wait(void)
 	}
 
 	finish_wait(&comcerto_xor_wait_queue, &wait);
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	spin_lock_irqsave(&mdma_lock, flags);
 #endif
 	comcerto_xor_sleeping--;
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	spin_unlock_irqrestore(&mdma_lock, flags);
 #endif
 }
@@ -306,16 +306,16 @@ static void comcerto_xor_cleanup(void)
 			if(xor_rd_idx%16)
 				printk("%s: xor_rd_idx %d not multiple of 16\n",__func__, xor_rd_idx);
 #endif
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 			spin_lock_bh(&comcerto_xor_ch.lock);
 #endif
 			idx = xor_sw_rd_idx;
 			tx = &sw_xor_desc[idx].async_tx;
 			sw_desc = &sw_xor_desc[idx];
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 			spin_unlock_bh(&comcerto_xor_ch.lock);
 #endif
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 			if (0 == sw_desc->submited) {
 				tasklet_schedule(&comcerto_xor_ch.irq_tasklet);
 				goto END;
@@ -327,7 +327,7 @@ static void comcerto_xor_cleanup(void)
 			}
 			dma_unmap_page(NULL, sw_desc->dma_dest, sw_desc->len, DMA_BIDIRECTIONAL);
 
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 			spin_lock_bh(&comcerto_xor_ch.lock);
 #endif
 			comcerto_xor_ch.completed_cookie = tx->cookie;
@@ -336,12 +336,12 @@ static void comcerto_xor_cleanup(void)
 				tx->callback(tx->callback_param);
 				tx->callback = NULL;
 			}
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 			else
 				printk("No Callback\n");
 #endif
 
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 			spin_unlock_bh(&comcerto_xor_ch.lock);
 #endif
 
@@ -354,11 +354,11 @@ static void comcerto_xor_cleanup(void)
 			}
 			spin_unlock_irqrestore(&mdma_lock, flags);
 
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 			spin_lock_bh(&comcerto_xor_ch.lock);
 #endif
 			xor_sw_rd_idx = (xor_sw_rd_idx + 1) % XOR_SW_FDESC_COUNT;
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 			spin_unlock_bh(&comcerto_xor_ch.lock);
 #endif
 		}
@@ -369,7 +369,7 @@ static void comcerto_xor_cleanup(void)
 			printk("%s: cleanup_count %d not multiple of 16\n",__func__, cleanup_count);
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 END:
 	return;
 #endif
@@ -397,11 +397,11 @@ static void comcerto_xor_timer_fnc(unsigned long data)
 
 	comcerto_xor_tasklet(0);
 
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	spin_lock_irqsave(&mdma_lock, flags);
 #endif
 	mod_timer(&comcerto_xor_timer, jiffies + COMPLETION_TIMEOUT);
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	spin_unlock_irqrestore(&mdma_lock, flags);
 #endif
 
@@ -434,7 +434,7 @@ static dma_cookie_t comcerto_xor_tx_submit(struct dma_async_tx_descriptor *tx)
 
 	struct dma_chan *c = tx->chan;
 	dma_cookie_t cookie;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct comcerto_sw_xor_desc *sw_desc = txd_to_comcerto_desc(tx);
 #endif
 
@@ -451,7 +451,7 @@ static dma_cookie_t comcerto_xor_tx_submit(struct dma_async_tx_descriptor *tx)
 
 	comcerto_xor_set_desc(xor_sw_wr_prev_idx, xor_wr_idx);
 	xor_sw_wr_prev_idx = (xor_sw_wr_prev_idx + 1) % XOR_SW_FDESC_COUNT ;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	sw_desc->submited = 1;
 #endif
 	comcerto_dma_process();
@@ -484,7 +484,7 @@ comcerto_xor_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *sr
 	desc_idx = xor_sw_wr_idx;
 	xor_sw_wr_idx = (xor_sw_wr_idx + 1) % XOR_SW_FDESC_COUNT ;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	sw_xor_desc[desc_idx].submited = 0;
 #endif
 	sw_xor_desc[desc_idx].async_tx.flags = xor_flags;
@@ -867,7 +867,7 @@ static void comcerto_dma_setup(void)
 
 void comcerto_dma_start(void)
 {
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	unsigned long flags;
 
 	spin_lock_irqsave(&mdma_lock, flags);
@@ -879,12 +879,11 @@ void comcerto_dma_start(void)
 	mdma_in_desc->fstatus0 = 0;
 	mdma_in_desc->fstatus1 = 0;
 
-	
 	mdma_out_desc->next_desc = 0;
 	mdma_out_desc->fcontrol = 0;
 	mdma_out_desc->fstatus0 = 0;
 	mdma_out_desc->fstatus1 = 0;
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	spin_unlock_irqrestore(&mdma_lock, flags);
 #endif
 
@@ -903,7 +902,7 @@ EXPORT_SYMBOL(comcerto_dma_start);
 
 void comcerto_dma_wait(void)
 {
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	unsigned long flags;
 
 #endif
@@ -911,7 +910,7 @@ void comcerto_dma_wait(void)
 
 	prepare_to_wait(&mdma_done_queue, &wait, TASK_UNINTERRUPTIBLE);
 
-#if defined(CONFIG_SYNO_C2K_XOR_RWLOCK)
+#if defined(MY_ABC_HERE)
 	spin_lock_irqsave(&mdma_lock, flags);
 	if (!mdma_done) {
 		spin_unlock_irqrestore(&mdma_lock, flags);

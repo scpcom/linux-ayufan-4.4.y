@@ -98,7 +98,7 @@ extern void brioctl_set(int (*ioctl_hook)(struct net *, unsigned int, void __use
 typedef int br_should_route_hook_t(struct sk_buff *skb);
 extern br_should_route_hook_t __rcu *br_should_route_hook;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 struct brevent_fdb_update{
 	char * mac_addr;
 	struct net_device * dev;

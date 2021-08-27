@@ -1010,7 +1010,7 @@ out:
 	return ret;
 }
 
-#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+#ifdef MY_ABC_HERE
  
 void btrfs_qgroup_query(struct btrfs_fs_info *fs_info, u64 qgroupid,
                         struct btrfs_ioctl_qgroup_query_args *qqa)

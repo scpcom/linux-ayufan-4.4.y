@@ -675,14 +675,14 @@ void pde_put(struct proc_dir_entry *pde)
 	if (atomic_dec_and_test(&pde->count))
 		free_proc_entry(pde);
 }
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 static void entry_rundown(struct proc_dir_entry *de)
 #else
  
 void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 #endif
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 #else
 	struct proc_dir_entry **p;
 	struct proc_dir_entry *de = NULL;
@@ -739,9 +739,8 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 		spin_lock(&de->pde_unload_lock);
 	}
 	spin_unlock(&de->pde_unload_lock);
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 }
-
 
 void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 {
@@ -784,7 +783,7 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 }
 EXPORT_SYMBOL(remove_proc_entry);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 int remove_proc_subtree(const char *name, struct proc_dir_entry *parent)
 {
 	struct proc_dir_entry **p;

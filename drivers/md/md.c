@@ -65,7 +65,7 @@ DEFINE_SPINLOCK(MdListLock);
 static void autostart_arrays(int part);
 #endif
 
-#if defined(CONFIG_SYNO_ARMADAXP_CPU_AFFINITY) || defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 #include <linux/syno_affinity.h>
 #endif
 
@@ -4440,7 +4440,7 @@ static int md_alloc(dev_t dev, char *name)
 	mddev->queue->queuedata = mddev;
 
 	blk_queue_make_request(mddev->queue, md_make_request);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	blk_set_stacking_limits(&mddev->queue->limits);
 #endif
 
@@ -6199,7 +6199,7 @@ static const struct block_device_operations md_fops =
 static int md_thread(void * arg)
 {
 	struct md_thread *thread = arg;
-#if defined(CONFIG_SYNO_ARMADAXP_CPU_AFFINITY) || defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	SYNOSetTaskAffinity(current, 0);
 #endif
 
@@ -6763,7 +6763,7 @@ void md_do_sync(struct md_thread *thread)
 
 #ifdef MY_ABC_HERE
 	 
-#ifdef CONFIG_SYNO_LOWER_MD_RESYNC_NICE
+#ifdef MY_DEF_HERE
 	set_user_nice(current, 10);
 #endif
 #endif

@@ -7,7 +7,7 @@
 #include <linux/errno.h>
 #include <linux/of.h>
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 struct of_pci_range_iter {
 	const __be32 *range, *end;
 	int np, pna;
@@ -50,7 +50,7 @@ static inline unsigned long pci_address_to_pio(phys_addr_t addr) { return -1; }
 #endif
 
 #ifdef CONFIG_PCI
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 extern struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
 						struct device_node *node);
 #endif
@@ -59,7 +59,7 @@ extern const __be32 *of_get_pci_address(struct device_node *dev, int bar_no,
 extern int of_pci_address_to_resource(struct device_node *dev, int bar,
 				      struct resource *r);
 #else  
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
 						struct device_node *node)
 {

@@ -23,10 +23,10 @@
 #include <asm/irq.h>
 #include <asm/uaccess.h>
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 #include <mach/comcerto-2000/pm.h>
 #endif
-#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+#ifdef MY_DEF_HERE
 #include <linux/synobios.h>
 #endif
 
@@ -157,7 +157,7 @@ static struct phy_device* phy_device_create(struct mii_bus *bus,
 	dev_set_name(&dev->dev, PHY_ID_FMT, bus->id, addr);
 
 	dev->state = PHY_DOWN;
-#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+#ifdef MY_DEF_HERE
 	dev->is_phyerr_reset = 0;
 #endif
 
@@ -493,11 +493,10 @@ int genphy_restart_aneg(struct phy_device *phydev)
 }
 EXPORT_SYMBOL(genphy_restart_aneg);
 
-
 int genphy_config_aneg(struct phy_device *phydev)
 {
 	int result;
-#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+#ifdef MY_DEF_HERE
 	int reg_val = 0;
 
 	if (syno_is_hw_version(HW_DS1515) || syno_is_hw_version(HW_DS715) || syno_is_hw_version(HW_DS215p) || syno_is_hw_version(HW_DS416)) {
@@ -653,7 +652,7 @@ int genphy_read_status(struct phy_device *phydev)
 }
 EXPORT_SYMBOL(genphy_read_status);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 struct phy_device *gSynoPhydev = NULL;
 #endif
 static int genphy_config_init(struct phy_device *phydev)
@@ -696,14 +695,14 @@ static int genphy_config_init(struct phy_device *phydev)
 
 	phydev->supported = features;
 	phydev->advertising = features;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	gSynoPhydev = phydev;
 #endif
 
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 void syno_genphy_ledcontrol(const int iEnable)
 {
 	static u16 normalACT = 0;
@@ -741,7 +740,7 @@ EXPORT_SYMBOL(syno_genphy_ledcontrol);
 int genphy_suspend(struct phy_device *phydev)
 {
 	int value;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	 
 	if ( !(host_utilpe_shared_pmu_bitmask & WOL_IRQ )){
 		 
@@ -762,7 +761,7 @@ EXPORT_SYMBOL(genphy_suspend);
 int genphy_resume(struct phy_device *phydev)
 {
 	int value;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	 
 	if ( !(host_utilpe_shared_pmu_bitmask & WOL_IRQ )){
 		 

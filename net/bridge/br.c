@@ -91,9 +91,8 @@ static void __exit br_deinit(void)
 	br_fdb_fini();
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 static ATOMIC_NOTIFIER_HEAD(brevent_notif_chain);
-
 
 int register_brevent_notifier(struct notifier_block *nb)
 {

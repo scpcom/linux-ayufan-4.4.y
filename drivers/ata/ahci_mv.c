@@ -20,7 +20,7 @@
 #define AHCI_WINDOW_BASE(win)	(0x64 + ((win)<<4))
 #define AHCI_WINDOW_SIZE(win)	(0x68 + ((win)<<4))
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #define VENDOR_SPECIFIC_0_ADDR  0xa0
 #define VENDOR_SPECIFIC_0_DATA  0xa4
 #endif
@@ -145,13 +145,11 @@ static int ahci_mv_probe(struct platform_device *pdev)
 		if (ap->flags & ATA_FLAG_EM)
 			ap->em_message_type = hpriv->em_msg_type;
 
-		
 		if (!(hpriv->port_map & (1 << i)))
 			ap->ops = &ata_dummy_port_ops;
 	}
 
-#ifdef CONFIG_SYNO_ARMADA_V2
-	
+#ifdef MY_DEF_HERE
 	 
 	writel(0x4, hpriv->mmio + VENDOR_SPECIFIC_0_ADDR);
 	writel(0x80, hpriv->mmio + VENDOR_SPECIFIC_0_DATA);

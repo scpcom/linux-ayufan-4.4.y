@@ -62,14 +62,13 @@ void blk_queue_lld_busy(struct request_queue *q, lld_busy_fn *fn)
 }
 EXPORT_SYMBOL_GPL(blk_queue_lld_busy);
 
-
 void blk_set_default_limits(struct queue_limits *lim)
 {
 	lim->max_segments = BLK_MAX_SEGMENTS;
 	lim->max_integrity_segments = 0;
 	lim->seg_boundary_mask = BLK_SEG_BOUNDARY_MASK;
 	lim->max_segment_size = BLK_MAX_SEGMENT_SIZE;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	lim->max_sectors = lim->max_hw_sectors = BLK_SAFE_MAX_SECTORS;
 #else
 	lim->max_sectors = BLK_DEF_MAX_SECTORS;
@@ -79,7 +78,7 @@ void blk_set_default_limits(struct queue_limits *lim)
 	lim->discard_granularity = 0;
 	lim->discard_alignment = 0;
 	lim->discard_misaligned = 0;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	lim->discard_zeroes_data = 0;
 #else
 	lim->discard_zeroes_data = 1;
@@ -92,7 +91,7 @@ void blk_set_default_limits(struct queue_limits *lim)
 	lim->cluster = 1;
 }
 EXPORT_SYMBOL(blk_set_default_limits);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 void blk_set_stacking_limits(struct queue_limits *lim)
 {
@@ -118,7 +117,7 @@ void blk_queue_make_request(struct request_queue *q, make_request_fn *mfn)
 	q->nr_batching = BLK_BATCH_REQ;
 
 	blk_set_default_limits(&q->limits);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 #else
 	blk_queue_max_hw_sectors(q, BLK_SAFE_MAX_SECTORS);

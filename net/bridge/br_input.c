@@ -52,7 +52,7 @@ int br_handle_frame_finish(struct sk_buff *skb)
 	    br_multicast_rcv(br, p, skb))
 		goto drop;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if ((p->state == BR_STATE_LEARNING) && skb->protocol != htons(ETH_P_PAE))
 #else
 	if (p->state == BR_STATE_LEARNING)
@@ -61,7 +61,7 @@ int br_handle_frame_finish(struct sk_buff *skb)
 
 	BR_INPUT_SKB_CB(skb)->brdev = br->dev;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 	skb->cb[4] = 0;
 #endif
 
@@ -72,7 +72,7 @@ int br_handle_frame_finish(struct sk_buff *skb)
 
 	dst = NULL;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (skb->protocol == htons(ETH_P_PAE)) {
 		skb2 = skb;
 		 
@@ -95,7 +95,7 @@ int br_handle_frame_finish(struct sk_buff *skb)
 			skb2 = skb;
 
 		br->dev->stats.multicast++;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	} else if ((p->flags & BR_ISOLATE_MODE) ||
 		   ((dst = __br_fdb_get(br, dest)) && dst->is_local)) {
 #else
@@ -109,7 +109,7 @@ int br_handle_frame_finish(struct sk_buff *skb)
 	if (skb) {
 		if (dst) {
 			dst->used = jiffies;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 			 
 			skb->cb[4] = 1;
 #endif

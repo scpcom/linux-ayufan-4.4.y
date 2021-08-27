@@ -3006,7 +3006,7 @@ static const struct vm_operations_struct snd_pcm_vm_ops_data_fault = {
 
 #ifndef ARCH_HAS_DMA_MMAP_COHERENT
  
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_AURORA_IO_CACHE_COHERENCY)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_AURORA_IO_CACHE_COHERENCY)
 #else
 #ifdef CONFIG_ARM
 #define ARCH_HAS_DMA_MMAP_COHERENT

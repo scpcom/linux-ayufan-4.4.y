@@ -4,7 +4,7 @@
 #ifndef __CRASHLOG_H
 #define __CRASHLOG_H
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_CRASHLOG
 void __init crashlog_init_mem(struct bootmem_data *bdata);
 #else

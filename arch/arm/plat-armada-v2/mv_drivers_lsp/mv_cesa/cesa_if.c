@@ -158,7 +158,7 @@ MV_STATUS mvCesaIfAction(MV_CESA_COMMAND *pCmd)
 
 	return status;
 }
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mvCesaIfAction);
 #endif
 
@@ -246,12 +246,11 @@ out:
 
 	spin_unlock(&cesaIsrLock);
 
-	
 	spin_unlock_irqrestore(&chanLock[chan], flags);
 
 	return status;
 }
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mvCesaIfReadyGet);
 #endif
 
@@ -318,7 +317,7 @@ MV_STATUS mvCesaIfFinish(void)
 
 	return mvCesaFinish();
 }
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mvCesaIfFinish);
 #endif
 
@@ -326,7 +325,7 @@ MV_STATUS mvCesaIfSessionOpen(MV_CESA_OPEN_SESSION *pSession, short *pSid)
 {
 	return mvCesaSessionOpen(pSession, pSid);
 }
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mvCesaIfSessionOpen);
 #endif
 
@@ -334,7 +333,7 @@ MV_STATUS mvCesaIfSessionClose(short sid)
 {
 	return mvCesaSessionClose(sid);
 }
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mvCesaIfSessionClose);
 #endif
 

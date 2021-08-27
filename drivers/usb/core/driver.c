@@ -1039,9 +1039,8 @@ int usb_resume(struct device *dev, pm_message_t msg)
 			do_unbind_rebind(udev, DO_REBIND);
 		status = 0;
 
-	
 	} else {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 		 
 		usb_detect_quirks(udev);
 #endif

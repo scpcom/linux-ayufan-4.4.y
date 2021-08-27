@@ -373,12 +373,11 @@ static int xhci_start(struct xhci_hcd *xhci)
 	return ret;
 }
 
-
 int xhci_reset(struct xhci_hcd *xhci)
 {
 	u32 command;
 	u32 state;
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	int ret, i;
 #else
 	int ret;
@@ -413,7 +412,7 @@ int xhci_reset(struct xhci_hcd *xhci)
 
 	xhci_dbg(xhci, "Wait for controller to be ready for doorbell rings\n");
 	 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 	ret = handshake(xhci, &xhci->op_regs->status,
 			STS_CNR, 0, 10 * 1000 * 1000);
 
@@ -466,14 +465,12 @@ static int xhci_setup_msi(struct xhci_hcd *xhci)
 	return ret;
 }
 
-
 static void xhci_free_irq(struct xhci_hcd *xhci)
 {
 	struct pci_dev *pdev = to_pci_dev(xhci_to_hcd(xhci)->self.controller);
 	int ret;
 
-	
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	if (xhci_to_hcd(xhci)->irq > 0)
 #else
 	if (xhci_to_hcd(xhci)->irq >= 0)
@@ -483,7 +480,7 @@ static void xhci_free_irq(struct xhci_hcd *xhci)
 	ret = xhci_free_msi(xhci);
 	if (!ret)
 		return;
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	if (pdev->irq > 0)
 #else
 	if (pdev->irq >= 0)
@@ -580,10 +577,9 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 	if (xhci->quirks & XHCI_BROKEN_MSI)
 		return 0;
 
-	
 	if (hcd->irq)
 		free_irq(hcd->irq, hcd);
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	hcd->irq = 0;
 #else
 	hcd->irq = -1;
@@ -595,7 +591,7 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 		ret = xhci_setup_msi(xhci);
 
 	if (!ret)
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 		 
 #else
 		 
@@ -1089,7 +1085,7 @@ static void xhci_clear_command_ring(struct xhci_hcd *xhci)
 	 
 	ring->cycle_state = 1;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	ring->num_trbs_free = ring->num_segs * (TRBS_PER_SEGMENT - 1) - 1;
 #endif
 	 
@@ -1578,7 +1574,7 @@ int xhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 		goto done;
 	}
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	xhci_dbg(xhci, "Cancel URB %p\n", urb);
 	xhci_dbg(xhci, "Event ring:\n");
 	xhci_debug_ring(xhci, xhci->event_ring);
@@ -1591,13 +1587,13 @@ int xhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 		goto done;
 	}
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	xhci_dbg(xhci, "Endpoint ring:\n");
 	xhci_debug_ring(xhci, ep_ring);
 #endif
 
 	urb_priv = urb->hcpriv;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	i = urb_priv->td_cnt;
 	if (i < urb_priv->length)
 		xhci_dbg(xhci, "Cancel URB %p, dev %s, ep 0x%x, "
@@ -1609,7 +1605,7 @@ int xhci_urb_dequeue(struct usb_hcd *hcd, struct urb *urb, int status)
 					urb_priv->td[i]->first_trb));
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	for (; i < urb_priv->length; i++) {
 #else
 	for (i = urb_priv->td_cnt; i < urb_priv->length; i++) {
@@ -3478,12 +3474,10 @@ int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 
 #ifdef CONFIG_USB_SUSPEND
 
-
 static int xhci_besl_encoding[16] = {125, 150, 200, 300, 400, 500, 1000, 2000,
 	3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
 
-
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static int xhci_calculate_hird_besl(struct xhci_hcd *xhci,
 					struct usb_device *udev)
 {
@@ -3551,7 +3545,7 @@ static int xhci_usb2_software_lpm_test(struct usb_hcd *hcd,
 	u32		temp, dev_id;
 	unsigned int	port_num;
 	unsigned long	flags;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	int		hird;
 #else
 	int		u2del, hird;
@@ -3586,11 +3580,10 @@ static int xhci_usb2_software_lpm_test(struct usb_hcd *hcd,
 		goto finish;
 	}
 
-	
 	xhci_dbg(xhci, "test port %d software LPM\n", port_num);
 	 
 	pm_addr = port_array[port_num] + 1;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	hird = xhci_calculate_hird_besl(xhci, udev);
 #else
 	u2del = HCS_U2_LATENCY(xhci->hcs_params3);
@@ -3672,7 +3665,7 @@ int xhci_set_usb2_hardware_lpm(struct usb_hcd *hcd,
 	u32		temp;
 	unsigned int	port_num;
 	unsigned long	flags;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	int		hird;
 #else
 	int		u2del, hird;
@@ -3699,7 +3692,7 @@ int xhci_set_usb2_hardware_lpm(struct usb_hcd *hcd,
 	xhci_dbg(xhci, "%s port %d USB2 hardware LPM\n",
 			enable ? "enable" : "disable", port_num);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	hird = xhci_calculate_hird_besl(xhci, udev);
 #else
 	u2del = HCS_U2_LATENCY(xhci->hcs_params3);
@@ -3852,7 +3845,7 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 {
 	struct xhci_hcd		*xhci;
 	struct device		*dev = hcd->self.controller;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	int			retval = -ENOMEM;
 #else
 	int			retval;
@@ -3876,7 +3869,7 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 		 
 		xhci = hcd_to_xhci(hcd);
 		temp = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		if (HCC_64BIT_ADDR(temp) &&
 				!dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64))) {
 			xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
@@ -3925,7 +3918,7 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 	xhci_dbg(xhci, "Reset complete\n");
 
 	temp = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	if (HCC_64BIT_ADDR(temp) &&
 			!dma_set_mask(hcd->self.controller, DMA_BIT_MASK(64))) {
 		xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
@@ -3969,7 +3962,7 @@ static int __init xhci_hcd_init(void)
 		printk(KERN_DEBUG "Problem registering PCI driver.");
 		return retval;
 	}
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	retval = xhci_register_plat();
 	if (retval < 0) {
 		printk(KERN_DEBUG "Problem registering platform driver.");
@@ -3990,7 +3983,7 @@ static int __init xhci_hcd_init(void)
 	BUILD_BUG_ON(sizeof(struct xhci_run_regs) != (8+8*128)*32/8);
 	BUILD_BUG_ON(sizeof(struct xhci_doorbell_array) != 256*32/8);
 	return 0;
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 unreg_pci:
 	xhci_unregister_pci();
 	return retval;
@@ -4001,7 +3994,7 @@ module_init(xhci_hcd_init);
 static void __exit xhci_hcd_cleanup(void)
 {
 	xhci_unregister_pci();
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	xhci_unregister_plat();
 #endif
 }

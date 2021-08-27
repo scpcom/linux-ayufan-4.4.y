@@ -367,7 +367,7 @@ struct btrfs_ioctl_qgroup_create_args {
 	__u64 qgroupid;
 };
 
-#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+#ifdef MY_ABC_HERE
 struct btrfs_ioctl_qgroup_query_args {
 	 
 	__u64 rfer;
@@ -598,7 +598,7 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 				   struct btrfs_ioctl_subvol_info_args)
 #endif  
 
-#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+#ifdef MY_ABC_HERE
 #define BTRFS_IOC_QGROUP_QUERY _IOR(BTRFS_IOCTL_MAGIC, 253, \
                                     struct btrfs_ioctl_qgroup_query_args)
 #endif

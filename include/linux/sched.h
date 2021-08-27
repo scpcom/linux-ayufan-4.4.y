@@ -522,7 +522,7 @@ struct user_struct {
 	atomic_t inotify_watches;  
 	atomic_t inotify_devs;	 
 #endif
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	atomic_t synotify_instances;
 #endif
 #ifdef CONFIG_FANOTIFY

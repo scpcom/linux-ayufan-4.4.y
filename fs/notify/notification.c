@@ -50,7 +50,7 @@ void fsnotify_put_event(struct fsnotify_event *event)
 	if (atomic_dec_and_test(&event->refcnt)) {
 		pr_debug("%s: event=%p\n", __func__, event);
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 		if (event->data_type == FSNOTIFY_EVENT_PATH || event->data_type == FSNOTIFY_EVENT_SYNO)
 #else
 		if (event->data_type == FSNOTIFY_EVENT_PATH)
@@ -60,7 +60,7 @@ void fsnotify_put_event(struct fsnotify_event *event)
 		BUG_ON(!list_empty(&event->private_data_list));
 
 		kfree(event->file_name);
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 		kfree(event->full_name);
 #endif
 		put_pid(event->tgid);
@@ -96,7 +96,7 @@ struct fsnotify_event_private_data *fsnotify_remove_priv_from_event(struct fsnot
 	return priv;
 }
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
  
 static void formalize_full_path(const char *mnt_name, const char *base_name, char *full_path){
 	if (mnt_name[0] == '/'){
@@ -222,7 +222,7 @@ alloc_holder:
 	group->q_len++;
 	holder->event = event;
 
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	 
 	if (event->data_type == FSNOTIFY_EVENT_SYNO || event->data_type == FSNOTIFY_EVENT_PATH)
 	{
@@ -368,7 +368,7 @@ struct fsnotify_event *fsnotify_clone_event(struct fsnotify_event *old_event)
 			return NULL;
 		}
 	}
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	if (event->full_name_len) {
 		event->full_name = kstrdup(old_event->full_name, GFP_KERNEL);
 		if (!event->full_name) {
@@ -378,7 +378,7 @@ struct fsnotify_event *fsnotify_clone_event(struct fsnotify_event *old_event)
 	}
 #endif
 	event->tgid = get_pid(old_event->tgid);
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	if (event->data_type == FSNOTIFY_EVENT_PATH || event->data_type == FSNOTIFY_EVENT_SYNO)
 #else
 	if (event->data_type == FSNOTIFY_EVENT_PATH)
@@ -418,7 +418,7 @@ struct fsnotify_event *fsnotify_create_event(struct inode *to_tell, __u32 mask, 
 	event->data_type = data_type;
 
 	switch (data_type) {
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	case FSNOTIFY_EVENT_SYNO:
 #endif
 	case FSNOTIFY_EVENT_PATH: {

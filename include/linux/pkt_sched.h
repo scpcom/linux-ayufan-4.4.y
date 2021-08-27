@@ -119,10 +119,7 @@ struct tc_sfq_xstats {
 	__s32		allot;
 };
 
-
-
-#if defined(CONFIG_SYNO_COMCERTO)
-
+#if defined(MY_ABC_HERE)
  
 enum
 {

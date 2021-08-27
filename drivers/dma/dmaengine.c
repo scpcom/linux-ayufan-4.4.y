@@ -17,7 +17,7 @@
 #include <linux/rculist.h>
 #include <linux/idr.h>
 #include <linux/slab.h>
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <linux/pagemap.h>
 #endif
 
@@ -25,7 +25,7 @@ static DEFINE_MUTEX(dma_list_mutex);
 static DEFINE_IDR(dma_idr);
 static LIST_HEAD(dma_device_list);
 static long dmaengine_ref_count;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 static struct page *temp_page = NULL;
 #endif
 
@@ -242,14 +242,13 @@ static int __init dma_channel_table_init(void)
 }
 arch_initcall(dma_channel_table_init);
 
-
 struct dma_chan *dma_find_channel(enum dma_transaction_type tx_type)
 {
 	return this_cpu_read(channel_table[tx_type]->chan);
 }
 EXPORT_SYMBOL(dma_find_channel);
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 struct dma_chan *net_dma_find_channel(void)
 {
@@ -729,7 +728,7 @@ dma_async_memcpy_buf_to_buf(struct dma_chan *chan, void *dest,
 }
 EXPORT_SYMBOL(dma_async_memcpy_buf_to_buf);
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define DMA_ENGINE_MIN_OP_SIZE 128
 #endif
 
@@ -743,7 +742,7 @@ dma_async_memcpy_buf_to_pg(struct dma_chan *chan, struct page *page,
 	dma_cookie_t cookie;
 	unsigned long flags;
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (!page) {
 		printk(KERN_ERR "%s page %x\n", __FUNCTION__, (void*)page);
 		return -EFAULT;
@@ -808,7 +807,7 @@ dma_async_memcpy_pg_to_pg(struct dma_chan *chan, struct page *dest_pg,
 	dma_cookie_t cookie;
 	unsigned long flags;
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (!dest_pg || !src_pg) {
 		printk(KERN_ERR "%s dest_pg %x src_pg %x\n", __FUNCTION__, (void*)dest_pg, (void*)src_pg);
 		return -EFAULT;
@@ -861,7 +860,7 @@ dma_async_memcpy_pg_to_pg(struct dma_chan *chan, struct page *dest_pg,
 	return cookie;
 }
 EXPORT_SYMBOL(dma_async_memcpy_pg_to_pg);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 dma_cookie_t
 dma_async_memcpy_sg_to_sg(struct dma_chan *chan,
@@ -968,7 +967,7 @@ EXPORT_SYMBOL_GPL(dma_run_dependencies);
 
 static int __init dma_bus_init(void)
 {
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	temp_page = alloc_pages(GFP_KERNEL, 0);
 	if (!temp_page)
                 BUG();

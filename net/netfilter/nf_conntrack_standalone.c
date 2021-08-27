@@ -217,7 +217,7 @@ static int ct_seq_show(struct seq_file *s, void *v)
 		if (seq_printf(s, "[ASSURED] "))
 			goto release;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 	if (test_bit(IPS_PERMANENT_BIT, &ct->status))
 		if (seq_printf(s, "[PERMANENT] "))
 			goto release;
@@ -239,7 +239,7 @@ static int ct_seq_show(struct seq_file *s, void *v)
 	if (ct_show_delta_time(s, ct))
 		goto release;
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
 	if(ct->layer7.app_proto &&
            seq_printf(s, "l7proto=%s ", ct->layer7.app_proto))
@@ -260,7 +260,7 @@ static int ct_seq_show(struct seq_file *s, void *v)
 #endif  
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && (defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE))
+#if defined(MY_ABC_HERE) && (defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE))
 	if(ct->layer7.app_proto &&
            seq_printf(s, "l7proto=%s ", ct->layer7.app_proto))
 		return -ENOSPC;

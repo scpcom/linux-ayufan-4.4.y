@@ -2,15 +2,12 @@
 #define MY_ABC_HERE
 #endif
  
-
-
 #ifndef MTD_PARTITIONS_H
 #define MTD_PARTITIONS_H
 
 #include <linux/types.h>
 
-
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 struct mtd_info;
 
 struct mtd_partition;
@@ -22,7 +19,7 @@ struct mtd_partition {
 	uint64_t offset;		 
 	uint32_t mask_flags;		 
 	struct nand_ecclayout *ecclayout;	 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	int (*refresh_partition)(struct mtd_info *);
 #endif
 };
@@ -32,7 +29,7 @@ struct mtd_partition {
 #define MTDPART_OFS_APPEND	(-1)
 #define MTDPART_SIZ_FULL	(0)
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 struct mtd_info;
 #endif
 struct device_node;

@@ -15,14 +15,14 @@
 
 ENTRY(a375_smp_cpu1_enable_code_start)
 a375_smp_cpu1_enable_code_start:
-#if defined(CONFIG_BE8_ON_LE) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(CONFIG_BE8_ON_LE) && defined(MY_DEF_HERE)
 	setend	be
 	ldr	r0, [pc, #8]
 #else
 	ldr	r0, [pc, #4]
 #endif
 	ldr	r1, [r0]
-#if defined(CONFIG_BE8_ON_LE) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(CONFIG_BE8_ON_LE) && defined(MY_DEF_HERE)
 	rev r1, r1
 #endif
 	mov	pc, r1
@@ -79,7 +79,7 @@ ENDPROC(v7_invalidate_l1)
  * until we're ready for them to initialise.
  */
 ENTRY(a375_secondary_startup)
-#if defined(CONFIG_BE8_ON_LE) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(CONFIG_BE8_ON_LE) && defined(MY_DEF_HERE)
 	setend	be
 #endif
 	bl      v7_invalidate_l1

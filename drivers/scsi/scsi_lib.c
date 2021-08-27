@@ -27,7 +27,7 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_MV_STAGGERED_SPINUP
 #include <scsi/scsi_spinup.h>
 #endif
@@ -37,7 +37,7 @@ extern int ss_stats[128];
 #define SG_MEMPOOL_NR		ARRAY_SIZE(scsi_sg_pools)
 #define SG_MEMPOOL_SIZE		2
 
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
 #endif
 
@@ -557,7 +557,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 			sense_deferred = scsi_sense_is_deferred(&sshdr);
 	}
 
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#ifdef MY_DEF_HERE
 	 
 	if (1 == gSynoSASWriteConflictPanic) {
 		if (unlikely(RESERVATION_CONFLICT == status_byte(cmd->result) && COMMAND_COMPLETE == msg_byte(cmd->result) &&
@@ -1324,7 +1324,7 @@ static void scsi_request_fn(struct request_queue *q)
 		}
 		spin_lock(shost->host_lock);
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_MV_STAGGERED_SPINUP
 		if ((cmd->device->host->hostt->support_staggered_spinup == 1) &&  
 		    scsi_spinup_enabled())         

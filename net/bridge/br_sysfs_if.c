@@ -140,7 +140,7 @@ static int store_hairpin_mode(struct net_bridge_port *p, unsigned long v)
 static BRPORT_ATTR(hairpin_mode, S_IRUGO | S_IWUSR,
 		   show_hairpin_mode, store_hairpin_mode);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static ssize_t show_isolate_mode(struct net_bridge_port *p, char *buf)
 {
 	int isolate_mode = (p->flags & BR_ISOLATE_MODE) ? 1 : 0;
@@ -190,7 +190,7 @@ static struct brport_attribute *brport_attrs[] = {
 	&brport_attr_hold_timer,
 	&brport_attr_flush,
 	&brport_attr_hairpin_mode,
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	&brport_attr_isolate_mode,
 #endif
 #ifdef CONFIG_BRIDGE_IGMP_SNOOPING

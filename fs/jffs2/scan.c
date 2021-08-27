@@ -15,7 +15,7 @@
 
 #define DEFAULT_EMPTY_SCAN_SIZE 256
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_MTD_NAND_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_MTD_NAND_COMCERTO)
 #define BIT_FLIP_TOLERENCE	7
 #endif
 
@@ -57,7 +57,7 @@ static inline uint32_t EMPTY_SCAN_SIZE(uint32_t sector_size) {
 		return DEFAULT_EMPTY_SCAN_SIZE;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_MTD_NAND_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_MTD_NAND_COMCERTO)
 static inline uint32_t count_zero_bits( uint32_t value) {
 	uint32_t num_zeros = 0;
 	size_t i;
@@ -146,10 +146,9 @@ int jffs2_scan_medium(struct jffs2_sb_info *c)
 
 		cond_resched();
 
-		
 		jffs2_sum_reset_collected(s);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		if (c->flags & (1 << 7))
 			ret = BLK_STATE_ALLFF;
 		else
@@ -524,7 +523,7 @@ static int jffs2_scan_eraseblock (struct jffs2_sb_info *c, struct jffs2_eraseblo
 			return err;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if ((buf[0] == 0xde) &&
 		(buf[1] == 0xad) &&
 		(buf[2] == 0xc0) &&
@@ -563,7 +562,7 @@ static int jffs2_scan_eraseblock (struct jffs2_sb_info *c, struct jffs2_eraseblo
 			return BLK_STATE_ALLFF;	 
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_MTD_NAND_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_MTD_NAND_COMCERTO)
 	else if (cleanmarkerfound) {
 			ofs = 0;
 			uint32_t num_zeros = 0;

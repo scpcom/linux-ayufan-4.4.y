@@ -12,7 +12,7 @@
 
 typedef struct {
 	unsigned int __softirq_pending;
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	unsigned int local_pmu_irqs;
 #endif
 #ifdef CONFIG_SMP

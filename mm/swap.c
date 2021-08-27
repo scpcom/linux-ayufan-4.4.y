@@ -118,7 +118,7 @@ void put_page(struct page *page)
 }
 EXPORT_SYMBOL(put_page);
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 void put_page_n(struct page *page, unsigned int c)
 {
 	if (c == 1) {

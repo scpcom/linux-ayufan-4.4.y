@@ -99,12 +99,11 @@ pci_bus_alloc_resource(struct pci_bus *bus, struct resource *res,
 	return ret;
 }
 
-
 int pci_bus_add_device(struct pci_dev *dev)
 {
 	int retval;
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	pci_fixup_device(pci_fixup_final, dev);
 #endif  
 	retval = device_add(&dev->dev);

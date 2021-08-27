@@ -295,7 +295,7 @@ int __init xhci_register_pci(void)
 	return pci_register_driver(&xhci_pci_driver);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 void xhci_unregister_pci(void)
 #else
 void __exit xhci_unregister_pci(void)

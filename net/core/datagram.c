@@ -83,8 +83,7 @@ out_noerr:
 	goto out;
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
-
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_IMPROVED_SPLICE)
  
 #if defined(CONFIG_COMCERTO_SPLICE_USE_MDMA)
 int skb_copy_datagram_to_kernel_iovec_soft(const struct sk_buff *skb, int offset,
@@ -253,7 +252,7 @@ current_frag:
 #endif
 #endif
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
  
 int skb_copy_datagram_to_kernel_iovec(const struct sk_buff *skb, int offset,
 				      struct iovec *to, int len)

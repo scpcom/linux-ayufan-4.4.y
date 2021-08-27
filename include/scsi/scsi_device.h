@@ -165,7 +165,7 @@ struct scsi_device {
 	struct scsi_dh_data	*scsi_dh_data;
 	enum scsi_device_state sdev_state;
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_MV_STAGGERED_SPINUP
 	int ss_id;
         enum scsi_device_power_state sdev_power_state;   

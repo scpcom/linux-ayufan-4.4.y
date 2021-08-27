@@ -77,9 +77,8 @@ static inline void l2_inv_all(void)
 	__asm__("mcr p15, 1, %0, c15, c11, 0" : : "r" (0));
 }
 
-
 #define CACHE_LINE_SIZE		32
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define MAX_RANGE_SIZE		PAGE_SIZE
 #else
 #define MAX_RANGE_SIZE		1024
@@ -87,7 +86,7 @@ static inline void l2_inv_all(void)
 
 static int l2_wt_override;
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 static inline unsigned long calc_range_end(unsigned long start, unsigned long end)
 #else
 static unsigned long calc_range_end(unsigned long start, unsigned long end)
@@ -269,7 +268,7 @@ void __init feroceon_l2_init(int __l2_wt_override)
 	outer_cache.clean_range = feroceon_l2_clean_range;
 	outer_cache.flush_range = feroceon_l2_flush_range;
 
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	outer_cache.inv_all = l2_inv_all;
 #endif
 	enable_l2();

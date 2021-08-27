@@ -11,17 +11,17 @@
 #include <linux/platform_device.h>
 #include <linux/libata.h>
 #include <linux/ahci_platform.h>
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/clk.h>
 #include <mach/reset.h>
 #include <mach/comcerto-2000/pm.h>
 #endif
 #include "ahci.h"
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <mach/serdes-c2000.h>
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
  
 static struct clk *sata_oob_clk;  
 static struct clk *sata_pmu_clk;  
@@ -69,7 +69,7 @@ static struct scsi_host_template ahci_platform_sht = {
 	AHCI_SHT("ahci_platform"),
 };
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_PM)
+#if defined(MY_ABC_HERE) && defined(CONFIG_PM)
 static int ahci_platform_suspend(struct platform_device *pdev, pm_message_t state)
 {
         struct ata_host *host = platform_get_drvdata(pdev);
@@ -150,8 +150,7 @@ static int __init ahci_probe(struct platform_device *pdev)
 	int n_ports;
 	int i;
 	int rc;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
-	
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	 
 	sata_clk = clk_get(NULL,"sata");
 	 
@@ -281,11 +280,10 @@ static int __init ahci_probe(struct platform_device *pdev)
 		ata_port_desc(ap, "mmio %pR", mem);
 		ata_port_desc(ap, "port 0x%x", 0x100 + ap->port_no * 0x80);
 
-		
 		if (ap->flags & ATA_FLAG_EM)
 			ap->em_message_type = hpriv->em_msg_type;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 		 
 		writel(0x41, ahci_port_base(ap) + 0x70);
 #endif
@@ -323,7 +321,7 @@ static int __devexit ahci_remove(struct platform_device *pdev)
 
 	if (pdata && pdata->exit)
 		pdata->exit(dev);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	 
 	clk_disable(sata_clk);
 	clk_put(sata_clk);
@@ -356,7 +354,7 @@ MODULE_DEVICE_TABLE(of, ahci_of_match);
 
 static struct platform_driver ahci_driver = {
 	.remove  = __devexit_p(ahci_remove),
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_PM)
+#if defined(MY_ABC_HERE) && defined(CONFIG_PM)
 	.suspend = ahci_platform_suspend,
 	.resume  = ahci_platform_resume,
 #endif

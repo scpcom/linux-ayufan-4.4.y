@@ -37,7 +37,7 @@
 #define IFF_DORMANT	0x20000		 
 
 #define IFF_ECHO	0x40000		 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 #define IFF_WIFI_OFLD 	0x80000		 
 #endif
 

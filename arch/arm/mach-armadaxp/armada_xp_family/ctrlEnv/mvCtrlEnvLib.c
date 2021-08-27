@@ -430,10 +430,9 @@ MV_U32 mvCtrlTdmUnitIrqGet(MV_VOID)
 
 #endif  
 
-
 MV_U16 mvCtrlModelGet(MV_VOID)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH)
+#if defined(MY_DEF_HERE)
 	MV_U32 model = MV_78230_DEV_ID;
 #else
 	MV_U32 devId;

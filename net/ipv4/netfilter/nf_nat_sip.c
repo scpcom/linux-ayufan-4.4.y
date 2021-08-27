@@ -63,7 +63,7 @@ static int map_addr(struct sk_buff *skb, unsigned int dataoff,
 	enum ip_conntrack_info ctinfo;
 	struct nf_conn *ct = nf_ct_get(skb, &ctinfo);
 	enum ip_conntrack_dir dir = CTINFO2DIR(ctinfo);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct nf_conn_help *help = nfct_help(ct);
 #endif
 	char buffer[sizeof("nnn.nnn.nnn.nnn:nnnnn")];
@@ -78,7 +78,7 @@ static int map_addr(struct sk_buff *skb, unsigned int dataoff,
 	} else if (ct->tuplehash[dir].tuple.dst.u3.ip == addr->ip &&
 		   ct->tuplehash[dir].tuple.dst.u.udp.port == port) {
 		newaddr = ct->tuplehash[!dir].tuple.src.u3.ip;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		newport = help->help.ct_sip_info.forced_dport ? :
 			  ct->tuplehash[!dir].tuple.src.u.udp.port;
 #else
@@ -119,7 +119,7 @@ static unsigned int ip_nat_sip(struct sk_buff *skb, unsigned int dataoff,
 	enum ip_conntrack_info ctinfo;
 	struct nf_conn *ct = nf_ct_get(skb, &ctinfo);
 	enum ip_conntrack_dir dir = CTINFO2DIR(ctinfo);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct nf_conn_help *help = nfct_help(ct);
 #endif
 	unsigned int coff, matchoff, matchlen;
@@ -221,7 +221,7 @@ next:
 	    !map_sip_addr(skb, dataoff, dptr, datalen, SIP_HDR_TO))
 		return NF_DROP;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	if (dir == IP_CT_DIR_REPLY && help->help.ct_sip_info.forced_dport) {
 		struct udphdr *uh;
@@ -283,25 +283,23 @@ static unsigned int ip_nat_sip_expect(struct sk_buff *skb, unsigned int dataoff,
 	enum ip_conntrack_info ctinfo;
 	struct nf_conn *ct = nf_ct_get(skb, &ctinfo);
 	enum ip_conntrack_dir dir = CTINFO2DIR(ctinfo);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct nf_conn_help *help = nfct_help(ct);
 #endif
 	__be32 newip;
 	u_int16_t port;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	__be16 srcport;
 #endif
 	char buffer[sizeof("nnn.nnn.nnn.nnn:nnnnn")];
 	unsigned buflen;
 
-	
 	if (ct->tuplehash[dir].tuple.src.u3.ip == ct->tuplehash[!dir].tuple.dst.u3.ip)
 		newip = exp->tuple.dst.u3.ip;
 	else
 		newip = ct->tuplehash[!dir].tuple.dst.u3.ip;
 
-	
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	srcport = help->help.ct_sip_info.forced_dport ? :
 		  ct->tuplehash[dir].tuple.src.u.udp.port;
 	if (exp->tuple.dst.u.udp.port == srcport)

@@ -11,12 +11,10 @@ extern "C" {
 
 #include "mvSysRtcConfig.h"
 
-
 #define RTC_TIME_REG				(MV_RTC_REGS_BASE + 0)
 
-
 #define RTC_DATE_REG				(MV_RTC_REGS_BASE + 4)
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_DEF_HERE
 #define RTC_EXT_ALARM_CTRL_REG				(MV_RTC_EXTERNAL_ALARM_OFFSET + 0)
 #define RTC_EXT_ALARM_CONFIG_REG				(MV_RTC_EXTERNAL_ALARM_OFFSET + 4)
 #endif

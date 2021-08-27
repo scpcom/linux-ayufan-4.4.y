@@ -24,7 +24,7 @@ int sysctl_oom_kill_allocating_task;
 int sysctl_oom_dump_tasks = 1;
 static DEFINE_SPINLOCK(zone_scan_lock);
 
-#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+#ifdef MY_ABC_HERE
 extern void syno_dump_modules(void);
 #endif  
 
@@ -243,13 +243,12 @@ static struct task_struct *select_bad_process(unsigned int *ppoints,
 	return chosen;
 }
 
-
 static void dump_tasks(const struct mem_cgroup *mem, const nodemask_t *nodemask)
 {
 	struct task_struct *p;
 	struct task_struct *task;
 
-#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+#ifdef MY_ABC_HERE
 	pr_warning("[ pid ]   uid  tgid total_vm      rss cpu oom_adj oom_score_adj name\n");
 #else
 	pr_info("[ pid ]   uid  tgid total_vm      rss cpu oom_adj oom_score_adj name\n");
@@ -264,7 +263,7 @@ static void dump_tasks(const struct mem_cgroup *mem, const nodemask_t *nodemask)
 			continue;
 		}
 
-#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+#ifdef MY_ABC_HERE
 		pr_warning("[%5d] %5d %5d %8lu %8lu %3u     %3d         %5d %s\n",
 #else
 		pr_info("[%5d] %5d %5d %8lu %8lu %3u     %3d         %5d %s\n",
@@ -292,7 +291,7 @@ static void dump_header(struct task_struct *p, gfp_t gfp_mask, int order,
 	show_mem(SHOW_MEM_FILTER_NODES);
 	if (sysctl_oom_dump_tasks)
 		dump_tasks(mem, nodemask);
-#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+#ifdef MY_ABC_HERE
         syno_dump_modules();
 #endif  
 }

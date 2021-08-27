@@ -33,7 +33,7 @@ struct ip6_tnl_parm {
 	struct in6_addr raddr;	 
 };
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 struct ip6_4rd_map_msg {
        __u32 reset;
        __u32 ifindex;

@@ -72,7 +72,7 @@
 #define ARPHRD_PHONET_PIPE 821		 
 #define ARPHRD_CAIF	822		 
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #define ARPHRD_IPV6_IPV6_TUNNEL   ARPHRD_ETHER 
 #endif
 

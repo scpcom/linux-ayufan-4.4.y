@@ -14,7 +14,7 @@ int xfrm6_extract_input(struct xfrm_state *x, struct sk_buff *skb)
 	return xfrm6_extract_header(skb);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 int xfrm6_rcv_encap(struct sk_buff *skb, int nexthdr, __be32 spi,
 		    int encap_type)
 {
@@ -50,7 +50,7 @@ int xfrm6_transport_finish(struct sk_buff *skb, int async)
 		ip6_rcv_finish);
 	return -1;
 }
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
  
 int xfrm6_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
 {

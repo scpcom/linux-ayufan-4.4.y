@@ -288,7 +288,7 @@ nla_put_failure:
 #define ctnetlink_dump_secctx(a, b) (0)
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #if defined(CONFIG_COMCERTO_FP)
 static int
 ctnetlink_dump_comcerto_fp(struct sk_buff *skb, const struct nf_conn *ct)
@@ -461,7 +461,7 @@ ctnetlink_fill_info(struct sk_buff *skb, u32 pid, u32 seq,
 	    ctnetlink_dump_helpinfo(skb, ct) < 0 ||
 	    ctnetlink_dump_mark(skb, ct) < 0 ||
 	    ctnetlink_dump_secctx(skb, ct) < 0 ||
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	    ctnetlink_dump_comcerto_fp(skb, ct) < 0 ||
 #endif
 	    ctnetlink_dump_id(skb, ct) < 0 ||
@@ -555,7 +555,7 @@ ctnetlink_nlmsg_size(const struct nf_conn *ct)
 	       + nla_total_size(0)  
 	       + nla_total_size(NF_CT_HELPER_NAME_LEN)  
 	       + ctnetlink_secctx_size(ct)
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 	       + 2 * nla_total_size(0)  
 	       + 2 * nla_total_size(sizeof(uint32_t))  
 	       + 2 * nla_total_size(sizeof(uint32_t))  
@@ -637,7 +637,7 @@ ctnetlink_conntrack_event(unsigned int events, struct nf_ct_event *item)
 	if (nf_ct_zone(ct))
 		NLA_PUT_BE16(skb, CTA_ZONE, htons(nf_ct_zone(ct)));
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (ctnetlink_dump_comcerto_fp(skb, ct) < 0)
 		goto nla_put_failure;
 #endif
@@ -1105,11 +1105,10 @@ ctnetlink_change_status(struct nf_conn *ct, const struct nlattr * const cda[])
 		 
 		return -EBUSY;
 
-	
 	ct->status |= status & ~(IPS_NAT_DONE_MASK | IPS_NAT_MASK);
 	return 0;
 }
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
  
 static int
 ctnetlink_change_permanent(struct nf_conn *ct, const struct nlattr * const cda[])
@@ -1592,13 +1591,11 @@ ctnetlink_new_conntrack(struct sock *ctnl, struct sk_buff *skb,
 		return err;
 	}
 	 
-
-	
 	err = -EEXIST;
 	if (!(nlh->nlmsg_flags & NLM_F_EXCL)) {
 		struct nf_conn *ct = nf_ct_tuplehash_to_ctrack(h);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_FP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_FP)
 		 
 		err = ctnetlink_change_permanent(ct, cda);
 		if ((err == 0) || (err == -ENOENT))

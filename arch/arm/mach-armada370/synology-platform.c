@@ -16,7 +16,7 @@
 #include "ctrlEnv/sys/mvCpuIf.h"
 #include "mvOs.h"
 
-#ifdef CONFIG_SYNO_THERMAL_CTRL
+#ifdef MY_DEF_HERE
 unsigned long long get_cpu_time(void)
 {
 	int cpu = smp_processor_id();

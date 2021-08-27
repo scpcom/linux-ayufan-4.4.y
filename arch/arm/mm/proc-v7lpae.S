@@ -138,7 +138,7 @@ ENTRY(cpu_v7_set_pte_ext)
 #ifdef CONFIG_MMU
 	tst	r2, #L_PTE_PRESENT
 	beq	1f
-#ifdef CONFIG_SYNO_ARMADA_ARCH_V2
+#ifdef MY_DEF_HERE
 	tst     r3, #1 << (57 - 32)             @ L_PTE_NONE
 	bicne   r2, #L_PTE_VALID
 	bne     1f

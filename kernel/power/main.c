@@ -9,7 +9,7 @@
 #include <linux/workqueue.h>
 #include <linux/debugfs.h>
 #include <linux/seq_file.h>
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <mach/comcerto-2000/pm.h>
 #endif
 
@@ -295,7 +295,7 @@ static ssize_t state_store(struct kobject *kobj, struct kobj_attribute *attr,
 
 power_attr(state);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 static ssize_t bitmask_show(struct kobject *kobj, struct kobj_attribute *attr,
 			char *buf)
 {
@@ -388,7 +388,7 @@ power_attr(pm_trace_dev_match);
 
 static struct attribute * g[] = {
 	&state_attr.attr,
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_M86XXX)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_M86XXX)
 	&bitmask_attr.attr,
 #endif
 #ifdef CONFIG_PM_TRACE

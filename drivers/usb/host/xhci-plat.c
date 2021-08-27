@@ -2,15 +2,13 @@
 #define MY_ABC_HERE
 #endif
  
-
-
 #include <linux/platform_device.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 
 #include "xhci.h"
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include "xhci-comcerto2000.h"
 #endif
 
@@ -53,13 +51,11 @@ static const struct hc_driver xhci_plat_xhci_driver = {
 	.update_hub_device =	xhci_update_hub_device,
 	.reset_device =		xhci_discover_or_reset_device,
 
-	
 	.get_frame_number =	xhci_get_frame,
 
-	
 	.hub_control =		xhci_hub_control,
 	.hub_status_data =	xhci_hub_status_data,
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_PM)
+#if defined(MY_ABC_HERE) && defined(CONFIG_PM)
 	.bus_suspend =		comcerto_xhci_bus_suspend,
 	.bus_resume =		comcerto_xhci_bus_resume,
 #endif
@@ -79,7 +75,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	if (usb_disabled())
 		return -ENODEV;
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	comcerto_start_xhci();
 #endif
@@ -108,7 +104,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		goto put_hcd;
 	}
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 	hcd->regs = ioremap_nocache(hcd->rsrc_start, hcd->rsrc_len);
 #else
 	hcd->regs = ioremap(hcd->rsrc_start, hcd->rsrc_len);
@@ -119,7 +115,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		goto release_mem_region;
 	}
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE)
 #else
 #if 1
 	writel(readl(hcd->regs + 0xc200) & 0x7FFFFFFF, hcd->regs + 0xc200);
@@ -127,7 +123,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	writel(0x5Dc11000, hcd->regs + 0xc110);
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_SYNO_C2K_USB_VBUS_CONTROL)
+#if defined(MY_ABC_HERE) && defined(CONFIG_SYNO_C2K_USB_VBUS_CONTROL)
 	 
 	writel((readl(COMCERTO_GPIO_OUTPUT_REG) | (0x1 << 15)), COMCERTO_GPIO_OUTPUT_REG);
 #endif
@@ -184,7 +180,7 @@ static int xhci_plat_remove(struct platform_device *dev)
 	iounmap(hcd->regs);
 	usb_put_hcd(hcd);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	comcerto_stop_xhci();
 #endif

@@ -5,7 +5,7 @@
 #define __NF_CONNTRACK_SIP_H__
 #ifdef __KERNEL__
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #include <linux/types.h>
 #endif
 
@@ -15,7 +15,7 @@
 struct nf_ct_sip_master {
 	unsigned int	register_cseq;
 	unsigned int	invite_cseq;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	__be16		forced_dport;
 #endif
 };

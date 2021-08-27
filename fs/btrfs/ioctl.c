@@ -4223,7 +4223,7 @@ drop_write:
 	return ret;
 }
 
-#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+#ifdef MY_ABC_HERE
 static long btrfs_ioctl_qgroup_query(struct file *file, void __user *arg)
 {
 	struct btrfs_root *root = BTRFS_I(fdentry(file)->d_inode)->root;
@@ -4932,7 +4932,7 @@ long btrfs_ioctl(struct file *file, unsigned int
 		return btrfs_ioctl_quota_rescan_status(file, argp);
 	case BTRFS_IOC_QUOTA_RESCAN_WAIT:
 		return btrfs_ioctl_quota_rescan_wait(file, argp);
-#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+#ifdef MY_ABC_HERE
 	case BTRFS_IOC_QGROUP_QUERY:
 		return btrfs_ioctl_qgroup_query(file, argp);
 #endif

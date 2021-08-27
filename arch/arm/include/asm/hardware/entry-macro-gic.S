@@ -14,7 +14,7 @@
 #include <asm/hardware/gic.h>
 
 #ifndef HAVE_GET_IRQNR_PREAMBLE
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	.macro	get_irqnr_preamble, base, pending_intr, tmp
 #else
 	.macro	get_irqnr_preamble, base, tmp
@@ -39,13 +39,13 @@
  * valid range for an IRQ (30-1020 inclusive).
  */
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	.macro  get_irqnr_and_base, irqnr, irqstat, base, pending_intr, tmp
 #else
 	.macro  get_irqnr_and_base, irqnr, irqstat, base, tmp
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_MSP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_MSP)
 	ldr     \irqstat, [\base, #GIC_CPU_HIGHPRI]
 	bic     \irqnr, \irqstat, #0x1c00
 	cmp     \irqnr, #33
@@ -59,20 +59,20 @@
 	beq 1002f
 
 1001:
-#endif /* CONFIG_SYNO_COMCERTO && CONFIG_COMCERTO_MSP */
+#endif /* MY_ABC_HERE && CONFIG_COMCERTO_MSP */
 
 	ldr     \irqstat, [\base, #GIC_CPU_INTACK]
-#if defined(CONFIG_BE8_ON_LE) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(CONFIG_BE8_ON_LE) && defined(MY_DEF_HERE)
 	rev	\irqstat, \irqstat
 #endif
 	/* bits 12-10 = src CPU, 9-0 = int # */
 
-#if !defined(CONFIG_SYNO_COMCERTO)
+#if !defined(MY_ABC_HERE)
 	ldr	\tmp, =1021
 #endif
 	bic     \irqnr, \irqstat, #0x1c00
 	
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_COMCERTO_MSP
 	cmp     \irqnr, #33
 	streq	\irqstat, [\base, #GIC_CPU_EOI]
@@ -102,9 +102,9 @@
 	cmpne	\irqnr, \tmp
 	cmpcs	\irqnr, \irqnr
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_COMCERTO_MSP)
+#if defined(MY_ABC_HERE) && defined(CONFIG_COMCERTO_MSP)
 1002:
-#endif /* CONFIG_SYNO_COMCERTO && CONFIG_COMCERTO_MSP */
+#endif /* MY_ABC_HERE && CONFIG_COMCERTO_MSP */
 
 	.endm
 
@@ -118,7 +118,7 @@
 	.macro test_for_ipi, irqnr, irqstat, base, tmp
 	bic	\irqnr, \irqstat, #0x1c00
 	cmp	\irqnr, #16
-#if defined(CONFIG_BE8_ON_LE) && defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(CONFIG_BE8_ON_LE) && defined(MY_DEF_HERE)
 	rev	\tmp, \irqstat
 	strcc	\tmp, [\base, #GIC_CPU_EOI]
 #else

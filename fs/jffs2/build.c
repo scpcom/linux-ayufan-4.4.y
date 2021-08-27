@@ -92,7 +92,7 @@ static int jffs2_build_filesystem(struct jffs2_sb_info *c)
 	dbg_fsbuild("scanned flash completely\n");
 	jffs2_dbg_dump_block_lists_nolock(c);
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if (c->flags & (1 << 7)) {
 		printk("%s(): unlocking the mtd device... ", __func__);
 		if (c->mtd->unlock)

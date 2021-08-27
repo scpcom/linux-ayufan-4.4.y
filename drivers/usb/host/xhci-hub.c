@@ -37,7 +37,7 @@ static void xhci_common_hub_descriptor(struct xhci_hcd *xhci,
 
 	desc->bNbrPorts = ports;
 	temp = 0;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 #else
 	 
@@ -64,13 +64,13 @@ static void xhci_usb2_hub_descriptor(struct usb_hcd *hcd, struct xhci_hcd *xhci,
 	ports = xhci->num_usb2_ports;
 
 	xhci_common_hub_descriptor(xhci, desc, ports);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	desc->bDescriptorType = USB_DT_HUB;
 #else
 	desc->bDescriptorType = 0x29;
 #endif
 	temp = 1 + (ports / 8);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	desc->bDescLength = USB_DT_HUB_NONVAR_SIZE + 2 * temp;
 #else
 	desc->bDescLength = 7 + 2 * temp;
@@ -105,7 +105,7 @@ static void xhci_usb3_hub_descriptor(struct usb_hcd *hcd, struct xhci_hcd *xhci,
 
 	ports = xhci->num_usb3_ports;
 	xhci_common_hub_descriptor(xhci, desc, ports);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	desc->bDescriptorType = USB_DT_SS_HUB;
 	desc->bDescLength = USB_DT_SS_HUB_SIZE;
 #else
@@ -473,7 +473,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	int slot_id;
 	struct xhci_bus_state *bus_state;
 	u16 link_state = 0;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	u16 wake_mask = 0;
 #endif
 
@@ -640,7 +640,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	case SetPortFeature:
 		if (wValue == USB_PORT_FEAT_LINK_STATE)
 			link_state = (wIndex & 0xff00) >> 3;
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 		if (wValue == USB_PORT_FEAT_REMOTE_WAKE_MASK)
 			wake_mask = wIndex & 0xff00;
 #endif

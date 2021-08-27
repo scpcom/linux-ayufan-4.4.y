@@ -51,7 +51,7 @@ struct scsi_host_template {
 	struct module *module;
 	const char *name;
 
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
          
         unsigned char support_staggered_spinup;
 #endif

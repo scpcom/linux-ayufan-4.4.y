@@ -869,7 +869,7 @@ void __init dump_machine_table(void)
 		 ;
 }
 
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 int __init arm_add_memory(phys_addr_t start, phys_addr_t size)
 #else
 int __init arm_add_memory(phys_addr_t start, unsigned long size)
@@ -883,10 +883,9 @@ int __init arm_add_memory(phys_addr_t start, unsigned long size)
 		return -EINVAL;
 	}
 
-	
 	size -= start & ~PAGE_MASK;
 	bank->start = PAGE_ALIGN(start);
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 #ifndef CONFIG_ARM_LPAE
 	if (bank->start + size < bank->start) {
 		printk(KERN_CRIT "Truncating memory at 0x%08llx to fit in "
@@ -908,11 +907,10 @@ int __init arm_add_memory(phys_addr_t start, unsigned long size)
 	return 0;
 }
 
-
 static int __init early_mem(char *p)
 {
 	static int usermem __initdata = 0;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 	phys_addr_t size;
 #else
 	unsigned long size;
@@ -992,10 +990,9 @@ static void __init request_standard_resources(struct machine_desc *mdesc)
 		request_resource(&ioport_resource, &lp2);
 }
 
-
 static int __init parse_tag_core(const struct tag *tag)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (read_tag(tag->hdr.size) > 2) {
 	if ((read_tag(tag->u.core.flags) & 1) == 0)		
 		root_mountflags &= ~MS_RDONLY;
@@ -1015,7 +1012,7 @@ __tagtable(ATAG_CORE, parse_tag_core);
 
 static int __init parse_tag_mem32(const struct tag *tag)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	return arm_add_memory(read_tag(tag->u.mem.start), read_tag(tag->u.mem.size));
 #else
 	return arm_add_memory(tag->u.mem.start, tag->u.mem.size);
@@ -1024,7 +1021,7 @@ static int __init parse_tag_mem32(const struct tag *tag)
 
 __tagtable(ATAG_MEM, parse_tag_mem32);
 
-#if (defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)) && defined(CONFIG_PHYS_ADDR_T_64BIT)
+#if (defined(MY_DEF_HERE) || defined(MY_DEF_HERE)) && defined(CONFIG_PHYS_ADDR_T_64BIT)
 static int __init parse_tag_mem64(const struct tag *tag)
 {
 #ifdef CONFIG_ARM_LPAE
@@ -1100,7 +1097,7 @@ __tagtable(ATAG_SERIAL, parse_tag_serialnr);
 
 static int __init parse_tag_revision(const struct tag *tag)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	system_rev = read_tag(tag->u.revision.rev);
 #else
 	system_rev = tag->u.revision.rev;
@@ -1127,14 +1124,13 @@ static int __init parse_tag_cmdline(const struct tag *tag)
 
 __tagtable(ATAG_CMDLINE, parse_tag_cmdline);
 
-
 static int __init parse_tag(const struct tag *tag)
 {
 	extern struct tagtable __tagtable_begin, __tagtable_end;
 	struct tagtable *t;
 
 	for (t = &__tagtable_begin; t < &__tagtable_end; t++)
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 		if ((read_tag(tag->hdr.tag) == t->tag)) {
 #else
 		if (tag->hdr.tag == t->tag) {
@@ -1146,16 +1142,15 @@ static int __init parse_tag(const struct tag *tag)
 	return t < &__tagtable_end;
 }
 
-
 static void __init parse_tags(const struct tag *t)
 {
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	for (; read_tag(t->hdr.size); t = tag_next(t))
 #else
 	for (; t->hdr.size; t = tag_next(t))
 #endif
 		if (!parse_tag(t))
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 			early_printk(KERN_WARNING
 #else
 			printk(KERN_WARNING
@@ -1264,7 +1259,7 @@ static struct machine_desc * __init setup_machine_tags(unsigned int nr)
 
 #if defined(CONFIG_DEPRECATED_PARAM_STRUCT)
 	 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 if (read_tag(tags->hdr.tag) != ATAG_CORE)
 #else
 	if (tags->hdr.tag != ATAG_CORE)
@@ -1272,7 +1267,7 @@ if (read_tag(tags->hdr.tag) != ATAG_CORE)
 		convert_to_tag_list(tags);
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (read_tag(tags->hdr.tag) != ATAG_CORE) {
 #else
 	if (tags->hdr.tag != ATAG_CORE) {
@@ -1287,7 +1282,7 @@ if (read_tag(tags->hdr.tag) != ATAG_CORE)
 	if (mdesc->fixup)
 		mdesc->fixup(tags, &from, &meminfo);
 
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (read_tag(tags->hdr.tag) == ATAG_CORE) {
 #else
 	if (tags->hdr.tag == ATAG_CORE) {
@@ -1366,7 +1361,7 @@ void __init setup_arch(char **cmdline_p)
 	conswitchp = &dummy_con;
 #endif
 #endif
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
  
 #else
 	early_trap_init();

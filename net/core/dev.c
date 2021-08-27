@@ -83,7 +83,7 @@ void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
 EXPORT_SYMBOL(funcSynoNicLedCtrl);
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP)
 #include <linux/mv_nfp.h>
 #endif  
@@ -1885,10 +1885,9 @@ static inline int __dev_xmit_skb(struct sk_buff *skb, struct Qdisc *q,
 static DEFINE_PER_CPU(int, xmit_recursion);
 #define RECURSION_LIMIT 10
 
-
 int dev_queue_xmit(struct sk_buff *skb)
 {
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 	if (skb->dev->flags & IFF_WIFI_OFLD)
 		skb->dev = skb->dev->wifi_offload_dev;
 
@@ -1960,7 +1959,7 @@ out:
 }
 EXPORT_SYMBOL(dev_queue_xmit);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 EXPORT_SYMBOL(original_dev_queue_xmit);
 #endif
 
@@ -2520,7 +2519,7 @@ void netdev_rx_handler_unregister(struct net_device *dev)
 }
 EXPORT_SYMBOL_GPL(netdev_rx_handler_unregister);
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_MV_ETH_NFP_EXT
 static struct sk_buff *handle_nfp_extrcv(struct sk_buff *skb, struct net_device *dev)
 {
@@ -2586,7 +2585,7 @@ another_round:
 	}
 #endif
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_MV_ETH_NFP_EXT
 	skb = handle_nfp_extrcv(skb, orig_dev);
 	if (!skb)
@@ -2704,7 +2703,7 @@ int netif_receive_skb(struct sk_buff *skb)
 }
 EXPORT_SYMBOL(netif_receive_skb);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_ARCH_COMCERTO)
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARCH_COMCERTO)
 int capture_receive_skb(struct sk_buff *skb)
 {
         struct net_device *null_or_orig = NULL;
@@ -5387,7 +5386,7 @@ static int __init net_dev_init(void)
 	dev_mcast_init();
 	rc = 0;
 
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ARMADA_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if defined(CONFIG_MV_ETH_NFP)
 	nfp_core_ops_init();
 #endif  

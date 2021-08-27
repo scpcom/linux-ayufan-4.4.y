@@ -22,7 +22,7 @@ static unsigned int fp_netfilter_pre_routing(int family, unsigned int hooknum, s
 		goto done;
 
 	protonum = nf_ct_protonum(ct);
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	if ((protonum != IPPROTO_TCP) && (protonum != IPPROTO_UDP) && (protonum != IPPROTO_IPIP))
 #else
 	if ((protonum != IPPROTO_TCP) && (protonum != IPPROTO_UDP))
@@ -39,7 +39,7 @@ static unsigned int fp_netfilter_pre_routing(int family, unsigned int hooknum, s
 
 	if (fp_info->mark && (fp_info->mark != skb->mark))
 		if (printk_ratelimit())
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 			printk(KERN_DEBUG "ct: mark changed %x, %x\n", fp_info->mark, skb->mark);
 #else
 			printk(KERN_INFO "ct: mark changed %x, %x\n", fp_info->mark, skb->mark);
@@ -47,7 +47,7 @@ static unsigned int fp_netfilter_pre_routing(int family, unsigned int hooknum, s
 
 	if (fp_info->ifindex && (fp_info->ifindex != skb->dev->ifindex))
 		if (printk_ratelimit())
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 			printk(KERN_DEBUG "ct: ifindex changed %d, %d\n", fp_info->ifindex, skb->dev->ifindex);
 #else
 			printk(KERN_INFO "ct: ifindex changed %d, %d\n", fp_info->ifindex, skb->dev->ifindex);
@@ -55,7 +55,7 @@ static unsigned int fp_netfilter_pre_routing(int family, unsigned int hooknum, s
 
 	if (fp_info->iif && (fp_info->iif != skb->skb_iif))
 		if (printk_ratelimit())
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 			printk(KERN_DEBUG "ct: iif changed %d, %d\n", fp_info->iif, skb->skb_iif);
 #else
 			printk(KERN_INFO "ct: iif changed %d, %d\n", fp_info->iif, skb->skb_iif);

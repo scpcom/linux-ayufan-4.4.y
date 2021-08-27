@@ -167,11 +167,11 @@ extern int gSynoFactoryUSBFastReset;
 extern int gSynoFactoryUSB3Disable;
 #endif
 
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 extern int gSynoDualHead;
 #endif
 
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
 #endif
 
@@ -852,11 +852,11 @@ static int __init early_factory_usb3_disable(char *p)
 __setup("syno_disable_usb3=", early_factory_usb3_disable);
 #endif
 
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 static int __init early_dual_head(char *p)
 {
 	gSynoDualHead = simple_strtol(p, NULL, 10);
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#ifdef MY_DEF_HERE
 	gSynoSASWriteConflictPanic = gSynoDualHead;
 #endif
 
@@ -867,7 +867,7 @@ static int __init early_dual_head(char *p)
 __setup("dual_head=", early_dual_head);
 #endif
 
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#ifdef MY_DEF_HERE
 static int __init early_sas_reservation_write_conflict(char *p)
 {
 	gSynoSASWriteConflictPanic = simple_strtol(p, NULL, 10);

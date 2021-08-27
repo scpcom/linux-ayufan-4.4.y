@@ -33,7 +33,7 @@ char *op_name_from_perf_id(void)
 		return "arm/armv7";
 	case ARM_PERF_PMU_ID_CA9:
 		return "arm/armv7-ca9";
-#if defined(CONFIG_SYNO_ARMADA_ARCH) || defined(CONFIG_SYNO_ARMADA_ARCH_V2)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	case MRVL_PERF_PMU_ID_PJ4B:
 		return "arm/mrvl_pj4b";
 #endif

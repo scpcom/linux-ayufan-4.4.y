@@ -162,7 +162,7 @@ static struct al_serdes_adv_tx_params da_tx_params = {
 
 static struct al_serdes_adv_rx_params da_rx_params = {
 	.override		= AL_TRUE,
-#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
+#ifdef MY_DEF_HERE
 	 
 	.dcgain			= 0x7,
 	.dfe_3db_freq		= 0x7,

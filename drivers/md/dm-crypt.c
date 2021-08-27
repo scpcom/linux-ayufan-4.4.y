@@ -25,7 +25,7 @@
 
 #include <linux/device-mapper.h>
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 #undef DM_DEBUG
 #ifdef DM_DEBUG
 #define dmprintk printk
@@ -131,7 +131,7 @@ struct crypt_config {
 	sector_t iv_offset;
 	unsigned int iv_size;
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 	struct cryptoini	cr_dm;	 
 	uint64_t	ocf_cryptoid;	 
 #endif
@@ -231,26 +231,24 @@ static int crypt_iv_essiv_wipe(struct crypt_config *cc)
 	return err;
 }
 
-
 static struct crypto_cipher *setup_essiv_cpu(struct crypt_config *cc,
 					     struct dm_target *ti,
 					     u8 *salt, unsigned saltsize)
 {
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	struct crypto_cipher *essiv_tfm=NULL;
 #else
 	struct crypto_cipher *essiv_tfm;
 #endif
 	int err;
 
-	
 	essiv_tfm = crypto_alloc_cipher(cc->cipher, 0, CRYPTO_ALG_ASYNC);
 	if (IS_ERR(essiv_tfm)) {
 		ti->error = "Error allocating crypto tfm for ESSIV";
 		return essiv_tfm;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 	if (crypto_cipher_blocksize(essiv_tfm) != cc->iv_size) {
 #else
 	if (crypto_cipher_blocksize(essiv_tfm) !=
@@ -357,7 +355,7 @@ static int crypt_iv_essiv_gen(struct crypt_config *cc, u8 *iv,
 	return 0;
 }
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_OCF_DM_CRYPT)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_OCF_DM_CRYPT)
 static int crypt_iv_benbi_ctr(struct crypt_config *cc, struct dm_target *ti,
 			      const char *opts)
 {
@@ -565,7 +563,7 @@ static struct crypt_iv_operations crypt_iv_essiv_ops = {
 	.generator = crypt_iv_essiv_gen
 };
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_OCF_DM_CRYPT)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_OCF_DM_CRYPT)
 static struct crypt_iv_operations crypt_iv_benbi_ops = {
 	.ctr	   = crypt_iv_benbi_ctr,
 	.dtr	   = crypt_iv_benbi_dtr,
@@ -620,7 +618,7 @@ static u8 *iv_of_dmreq(struct crypt_config *cc,
 		crypto_ablkcipher_alignmask(any_tfm(cc)) + 1);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 static void kcryptd_crypt_read_done(struct dm_crypt_io *io);
 static void crypt_alloc_req(struct crypt_config *cc,
 			    struct convert_context *ctx);
@@ -945,14 +943,14 @@ static void crypt_alloc_req(struct crypt_config *cc,
 			    struct convert_context *ctx)
 {
 	struct crypt_cpu *this_cc = this_crypt_config(cc);
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_OCF_DM_CRYPT)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_OCF_DM_CRYPT)
 	unsigned key_index = ctx->sector & (cc->tfms_count - 1);
 #endif
 
 	if (!this_cc->req)
 		this_cc->req = mempool_alloc(cc->req_pool, GFP_NOIO);
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_OCF_DM_CRYPT)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_OCF_DM_CRYPT)
 	ablkcipher_request_set_tfm(this_cc->req, this_cc->tfms[key_index]);
 	ablkcipher_request_set_callback(this_cc->req,
 	    CRYPTO_TFM_REQ_MAY_BACKLOG | CRYPTO_TFM_REQ_MAY_SLEEP,
@@ -1248,7 +1246,7 @@ static void kcryptd_crypt_write_convert(struct dm_crypt_io *io)
 		sector += bio_sectors(clone);
 
 		crypt_inc_pending(io);
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 		r = ocf_crypt_convert(cc, &io->ctx, io);
 
 		if(r < 0) {
@@ -1314,7 +1312,7 @@ static void kcryptd_crypt_read_convert(struct dm_crypt_io *io)
 	crypt_convert_init(cc, &io->ctx, io->base_bio, io->base_bio,
 			   io->sector);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 	r = ocf_crypt_convert(cc, &io->ctx, io);
 	if(r < 0) {
 		printk("\n%s() ocf_crypt_convert failed\n",__FUNCTION__);
@@ -1478,7 +1476,7 @@ static int crypt_set_key(struct crypt_config *cc, char *key)
 
 	set_bit(DM_CRYPT_KEY_VALID, &cc->flags);
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 	r = 0;
 #else
 	r = crypt_setkey_allcpus(cc);
@@ -1496,7 +1494,7 @@ static int crypt_wipe_key(struct crypt_config *cc)
 	clear_bit(DM_CRYPT_KEY_VALID, &cc->flags);
 	memset(&cc->key, 0, cc->key_size * sizeof(u8));
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 	return 0;
 #else
 	return crypt_setkey_allcpus(cc);
@@ -1524,11 +1522,11 @@ static void crypt_dtr(struct dm_target *ti)
 			cpu_cc = per_cpu_ptr(cc->cpu, cpu);
 			if (cpu_cc->req)
 				mempool_free(cpu_cc->req, cc->req_pool);
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_OCF_DM_CRYPT)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_OCF_DM_CRYPT)
 			crypt_free_tfms(cc, cpu);
 #endif
 		}
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 	if(cc->ocf_cryptoid)
 		crypto_freesession(cc->ocf_cryptoid);
 #endif
@@ -1564,7 +1562,7 @@ static int crypt_ctr_cipher(struct dm_target *ti,
 	struct crypt_config *cc = ti->private;
 	char *tmp, *cipher, *chainmode, *ivmode, *ivopts, *keycount;
 	char *cipher_api = NULL;
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 	int ret = -EINVAL;
 #else
 	int cpu, ret = -EINVAL;
@@ -1632,7 +1630,7 @@ static int crypt_ctr_cipher(struct dm_target *ti,
 		goto bad_mem;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_ABC_HERE)
 	 
 	ret = crypt_set_key(cc, key);
 		if (ret < 0) {
@@ -1720,7 +1718,7 @@ static int crypt_ctr_cipher(struct dm_target *ti,
 		cc->iv_gen_ops = &crypt_iv_plain64_ops;
 	else if (strcmp(ivmode, "essiv") == 0)
 		cc->iv_gen_ops = &crypt_iv_essiv_ops;
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_OCF_DM_CRYPT)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_OCF_DM_CRYPT)
 	else if (strcmp(ivmode, "benbi") == 0)
 		cc->iv_gen_ops = &crypt_iv_benbi_ops;
 #endif
@@ -1737,7 +1735,7 @@ static int crypt_ctr_cipher(struct dm_target *ti,
 		goto bad;
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 	switch (cc->cr_dm.cri_alg) {
 		case CRYPTO_AES_CBC:
 			cc->iv_size = 16;
@@ -1756,7 +1754,7 @@ static int crypt_ctr_cipher(struct dm_target *ti,
 		}
 	}
 
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_OCF_DM_CRYPT)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_OCF_DM_CRYPT)
 	 
 	if (cc->iv_gen_ops && cc->iv_gen_ops->init) {
 		ret = cc->iv_gen_ops->init(cc);
@@ -1817,7 +1815,7 @@ static int crypt_ctr(struct dm_target *ti, unsigned int argc, char **argv)
 	}
 
 	cc->dmreq_start = sizeof(struct ablkcipher_request);
-#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_OCF_DM_CRYPT)
+#if !defined(MY_ABC_HERE) || !defined(CONFIG_OCF_DM_CRYPT)
 	cc->dmreq_start += crypto_ablkcipher_reqsize(any_tfm(cc));
 	cc->dmreq_start = ALIGN(cc->dmreq_start, crypto_tfm_ctx_alignment());
 	cc->dmreq_start += crypto_ablkcipher_alignmask(any_tfm(cc)) &
@@ -2091,7 +2089,7 @@ static int __init dm_crypt_init(void)
 		kmem_cache_destroy(_crypt_io_pool);
 	}
 
-#if defined(CONFIG_SYNO_COMCERTO) && defined(CONFIG_OCF_DM_CRYPT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OCF_DM_CRYPT)
 	printk("dm_crypt using the OCF for crypto acceleration.\n");
 #endif
 

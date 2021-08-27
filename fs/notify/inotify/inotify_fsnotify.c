@@ -119,7 +119,7 @@ static bool inotify_should_send_event(struct fsnotify_group *group, struct inode
 				      struct fsnotify_mark *vfsmount_mark,
 				      __u32 mask, void *data, int data_type)
 {
-#ifdef CONFIG_SYNO_NOTIFY
+#ifdef MY_ABC_HERE
 	if (data_type == FSNOTIFY_EVENT_SYNO)
 		return false;
 #endif

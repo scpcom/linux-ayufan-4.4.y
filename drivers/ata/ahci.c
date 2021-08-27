@@ -246,7 +246,7 @@ static const struct ata_port_info ahci_port_info[] = {
 		.flags		= AHCI_FLAG_COMMON,
 		.pio_mask	= ATA_PIO4,
 		.udma_mask	= ATA_UDMA6,
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 		.port_ops	= &ahci_pmp_ops,
 #else  
 		.port_ops	= &ahci_ops,
@@ -473,7 +473,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(0x1b4b, 0x91a3),
 	  .driver_data = board_ahci_yes_fbs },
-#if  defined(MY_ABC_HERE) || defined(CONFIG_SYNO_ALPINE)
+#if  defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	{ PCI_DEVICE(0x1b4b, 0x9235),
 	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(0x1b4b, 0x9215),

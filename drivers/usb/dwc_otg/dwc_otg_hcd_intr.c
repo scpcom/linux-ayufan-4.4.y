@@ -687,9 +687,8 @@ cleanup:
 		break;
 	}
 
-	
     intr_mask.d32 = DWC_READ_REG32(&hcd->core_if->core_global_regs->gintmsk);
-#if defined(CONFIG_SYNO_C2K_DAC_TERRIBLE_SOUND)
+#if defined(MY_ABC_HERE)
     if (!intr_mask.b.sofintr || (intr_mask.b.sofintr && (hc->ep_type != DWC_OTG_EP_TYPE_BULK))) {
 #else
     if (!intr_mask.b.sofintr) {
