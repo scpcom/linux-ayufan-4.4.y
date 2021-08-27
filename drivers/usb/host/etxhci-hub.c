@@ -1024,6 +1024,7 @@ int xhci_downgrade_to_usb2(struct usb_hcd *hcd,
 
 	if (!(portsc & 0x080) &&
 		(bus_state->downgraded_ports & (1 << (udev->portnum - 1)))) {
+		xhci_err(xhci, "Force downgrade to USB2 from USB3 due to link error count\n");
 		xhci_hub_power_port(hcd, udev->portnum, false);
 		xhci_hub_power_port(hcd->shared_hcd, udev->portnum, false);
 

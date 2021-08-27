@@ -3751,6 +3751,8 @@ void btrfs_free_reserved_data_space(struct inode *inode, u64 bytes)
 	spin_unlock(&data_sinfo->lock);
 }
 
+#ifdef MY_ABC_HERE
+#else
 static void force_metadata_allocation(struct btrfs_fs_info *info)
 {
 	struct list_head *head = &info->space_info;
@@ -3763,6 +3765,7 @@ static void force_metadata_allocation(struct btrfs_fs_info *info)
 	}
 	rcu_read_unlock();
 }
+#endif
 
 static inline u64 calc_global_rsv_need_space(struct btrfs_block_rsv *global)
 {
@@ -3852,6 +3855,19 @@ static void check_system_chunk(struct btrfs_trans_handle *trans,
 	}
 }
 
+#ifdef MY_ABC_HERE
+static void check_metadata_chunk(struct btrfs_trans_handle *trans,
+			       struct btrfs_root *root, u64 data_total_bytes)
+{
+	struct btrfs_fs_info *fs_info = root->fs_info;
+	struct btrfs_space_info *space_info = __find_space_info(fs_info, BTRFS_BLOCK_GROUP_METADATA);
+
+	// we have get chunk_mutex and only want total_bytes, needn't info->lock.
+	if (data_total_bytes > (space_info->total_bytes)*(fs_info->metadata_ratio))
+		btrfs_alloc_chunk(trans, root, btrfs_get_alloc_profile(root, 0));
+}
+#endif /* MY_ABC_HERE */
+
 static int do_chunk_alloc(struct btrfs_trans_handle *trans,
 			  struct btrfs_root *extent_root, u64 flags, int force)
 {
@@ -3925,10 +3941,14 @@ again:
 	 * FS as well.
 	 */
 	if (flags & BTRFS_BLOCK_GROUP_DATA && fs_info->metadata_ratio) {
+#ifdef MY_ABC_HERE
+		check_metadata_chunk(trans, extent_root, space_info->total_bytes);
+#else
 		fs_info->data_chunk_allocations++;
 		if (!(fs_info->data_chunk_allocations %
 		      fs_info->metadata_ratio))
 			force_metadata_allocation(fs_info);
+#endif
 	}
 
 	/*

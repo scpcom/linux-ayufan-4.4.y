@@ -2381,6 +2381,10 @@ int open_ctree(struct super_block *sb,
 	mutex_init(&fs_info->dev_replace.lock_management_lock);
 	mutex_init(&fs_info->dev_replace.lock);
 
+#ifdef MY_ABC_HERE
+	fs_info->metadata_ratio = 50;
+#endif
+
 	spin_lock_init(&fs_info->qgroup_lock);
 	mutex_init(&fs_info->qgroup_ioctl_lock);
 	fs_info->qgroup_tree = RB_ROOT;
@@ -2469,7 +2473,12 @@ int open_ctree(struct super_block *sb,
 	 * In the long term, we'll store the compression type in the super
 	 * block, and it'll be used for per file compression control.
 	 */
+
+#ifdef MY_ABC_HERE
+	fs_info->compress_type = BTRFS_COMPRESS_DEFAULT;
+#else
 	fs_info->compress_type = BTRFS_COMPRESS_ZLIB;
+#endif
 
 	ret = btrfs_parse_options(tree_root, options);
 	if (ret) {

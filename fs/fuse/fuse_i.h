@@ -26,6 +26,24 @@
 #include <linux/poll.h>
 #include <linux/workqueue.h>
 
+#ifdef MY_ABC_HERE
+#define SYNO_FUSE_ENTRY_NAME_LEN 255
+#define FUSE_SYNOSTAT_SIZE (SYNO_FUSE_ENTRY_NAME_LEN + 1 + sizeof(struct fuse_synostat))
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+#define XATTR_SYNO_ARCHIVE_VERSION_GLUSTER "archive_version_gluster"
+#define XATTR_SYNO_ARCHIVE_VERSION_VOLUME_GLUSTER "archive_version_volume_gluster"
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+// GlusterFS create time xattr format, for 32/64bit packing compatibility
+struct syno_gf_xattr_crtime {
+	__le64 sec;
+	__le32 nsec;
+} __attribute__ ((__packed__));
+#endif /* MY_ABC_HERE */
+
 /** Max number of pages that can be used in a single read request */
 #define FUSE_MAX_PAGES_PER_REQ 256
 
@@ -51,8 +69,6 @@
 #define SYNOMETA_XATTR_MNT_OPT "synometa_xattr"
 #endif
 
-//#define SYNO_FUSE_DEBUG 0
-
 /** Number of page pointers embedded in fuse_req */
 #define FUSE_REQ_INLINE_PAGES 1
 
@@ -71,25 +87,6 @@ struct fuse_forget_link {
 	struct fuse_forget_one forget_one;
 	struct fuse_forget_link *next;
 };
-
-#define SYNO_FUSE_PROFILE 0
-#ifdef MY_ABC_HERE
-typedef struct {
-	void *value;
-	ssize_t size;
-	u64 expired_time;
-} syno_xattr_cache_node;
-
-#define IS_FUSE_SYNOACL_CACHED(pFuse_inode, index) ((0 != pFuse_inode->synoacl_cache_table[index].size))
-#define IS_FUSE_SYNOACL_SIZE_CACHED(pFuse_inode, index) ((0 != pFuse_inode->synoacl_cache_table[index].size))
-#define IS_FUSE_SYNOACL_ATTR_CACHED(pFuse_inode, index) (pFuse_inode->synoacl_cache_table[index].value)
-#define IS_SYNO_ACL_XATTR_ACCESS_NOPERM(name) (!strcmp(name, SYNO_ACL_XATTR_ACCESS_NOPERM))
-#define IS_SYNO_ACL_XATTR_ACCESS(name) (!strcmp(name, SYNO_ACL_XATTR_ACCESS))
-#define IS_SYNO_ARCHIVE_BIT_NOPERM(name) (!strcmp(name, XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_BIT_NOPERM))
-
-#define SYNO_ACL_CACHE_TABLE_LEN 2
-
-#endif // MY_ABC_HERE
 
 /** FUSE inode */
 struct fuse_inode {
@@ -137,10 +134,6 @@ struct fuse_inode {
 
 	/** Miscellaneous bits describing inode state */
 	unsigned long state;
-
-#ifdef MY_ABC_HERE
-	syno_xattr_cache_node synoacl_cache_table[SYNO_ACL_CACHE_TABLE_LEN];
-#endif
 };
 
 /** FUSE inode state bits */
@@ -660,8 +653,14 @@ struct inode *fuse_iget(struct super_block *sb, u64 nodeid,
 			int generation, struct fuse_attr *attr,
 			u64 attr_valid, u64 attr_version);
 
+#ifdef MY_ABC_HERE
+int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
+		     struct fuse_entry_out *outarg, struct inode **inode,
+		     struct fuse_synostat *synostat, int syno_stat_flags);
+#else
 int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 		     struct fuse_entry_out *outarg, struct inode **inode);
+#endif /* MY_ABC_HERE */
 
 /**
  * Send FORGET command
@@ -679,16 +678,6 @@ void fuse_force_forget(struct file *file, u64 nodeid);
  */
 void fuse_read_fill(struct fuse_req *req, struct file *file,
 		    loff_t pos, size_t count, int opcode);
-
-#ifdef MY_ABC_HERE
-/*
- * args[0]: syno.archive_bit_noperm
- * args[1]: system.syno_acl_noperm_self
- * args[2]: readdir response buffer (szie: 1 page)
- */
-void syno_fuse_read_fill(struct fuse_req *req, struct file *file, loff_t pos,
-		    size_t count, int opcode);
-#endif
 
 /**
  * Send OPEN or OPENDIR request
@@ -915,36 +904,12 @@ void fuse_write_update_size(struct inode *inode, loff_t pos);
 int fuse_do_setattr(struct inode *inode, struct iattr *attr,
 		    struct file *file);
 
-#ifdef SYNO_FUSE_KERNEL_MINOR_VERSION
-inline static u32
-syno_fuse_get_minor(struct fuse_conn *pFc)
-{
-	uint32_t minor = 0;
+#ifdef MY_ABC_HERE
+ssize_t fuse_getxattr(struct dentry *entry, const char *name,
+			     void *value, size_t size);
 
-	if (NULL == pFc) {
-		goto END;
-	}
-
-	minor = pFc->minor / SYNO_FUSE_KERNEL_MINOR_SHIFT;
-END:
-	return minor;
-}
-
-inline static int
-syno_is_fuse_version_compatible(struct fuse_conn *pFc)
-{
-	int blIsCompatible = 0;
-
-	if (NULL == pFc) {
-		goto END;
-	}
-
-	if (SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION == syno_fuse_get_minor(pFc)) {
-		blIsCompatible = 1;
-	}
-END:
-	return blIsCompatible;
-}
-#endif // SYNO_FUSE_KERNEL_MINOR_VERSION
+int fuse_setxattr(struct dentry *entry, const char *name,
+			 const void *value, size_t size, int flags);
+#endif /* MY_ABC_HERE */
 
 #endif /* _FS_FUSE_I_H */

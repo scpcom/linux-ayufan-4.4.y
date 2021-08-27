@@ -64,6 +64,10 @@ struct bio {
 
 	atomic_t		bi_cnt;		/* pin count */
 
+#ifdef MY_ABC_HERE
+	struct page	*bv_page_trim;
+#endif
+
 	struct bio_vec		*bi_io_vec;	/* the actual vec list */
 
 	bio_end_io_t		*bi_end_io;
@@ -164,6 +168,12 @@ enum rq_flag_bits {
 	__REQ_IO_STAT,		/* account I/O stat */
 	__REQ_MIXED_MERGE,	/* merge of different types, fail separately */
 	__REQ_NR_BITS,		/* stops here */
+#ifdef MY_ABC_HERE
+/* Note that __REQ_FIRST_BIO_IN_DISCARD is the LAST bit!! No more bit is allowed.
+ * If you have to add new bit, please enlarge the parameter type.
+ */
+	__REQ_FIRST_BIO_IN_DISCARD, /* indicate first bio in discard command */
+#endif
 };
 
 #define REQ_WRITE		(1 << __REQ_WRITE)
@@ -208,5 +218,8 @@ enum rq_flag_bits {
 #define REQ_IO_STAT		(1 << __REQ_IO_STAT)
 #define REQ_MIXED_MERGE		(1 << __REQ_MIXED_MERGE)
 #define REQ_SECURE		(1 << __REQ_SECURE)
+#ifdef MY_ABC_HERE
+#define REQ_FIRST_BIO_IN_DISCARD	(1 << __REQ_FIRST_BIO_IN_DISCARD)
+#endif
 
 #endif /* __LINUX_BLK_TYPES_H */

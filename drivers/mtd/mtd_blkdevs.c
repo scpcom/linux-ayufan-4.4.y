@@ -447,6 +447,9 @@ int add_mtd_blktrans_dev(struct mtd_blktrans_dev *new)
 
 	gd->queue = new->rq;
 
+#ifdef CONFIG_ARCH_GEN3
+	sema_init(&new->thread_sem, 1);
+#endif
 	/* Create processing thread */
 	/* TODO: workqueue ? */
 	new->thread = kthread_run(mtd_blktrans_thread, new,
@@ -455,9 +458,6 @@ int add_mtd_blktrans_dev(struct mtd_blktrans_dev *new)
 		ret = PTR_ERR(new->thread);
 		goto error4;
 	}
-#ifdef CONFIG_ARCH_GEN3	
-	sema_init(&new->thread_sem, 1);
-#endif
 	gd->driverfs_dev = &new->mtd->dev;
 
 	if (new->readonly)

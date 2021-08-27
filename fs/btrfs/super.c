@@ -1703,6 +1703,9 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	int bits = dentry->d_sb->s_blocksize_bits;
 	__be32 *fsid = (__be32 *)fs_info->fsid;
 	int ret;
+#ifdef MY_ABC_HERE
+	u64 total_metadata = 0;
+#endif
 
 	/* holding chunk_muext to avoid allocating new chunks */
 	mutex_lock(&fs_info->chunk_mutex);
@@ -1713,6 +1716,11 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 			total_free_data -=
 				btrfs_account_ro_block_groups_free_space(found);
 		}
+#ifdef MY_ABC_HERE
+		if (found->flags & BTRFS_BLOCK_GROUP_METADATA) {
+			total_metadata += found->disk_total;
+		}
+#endif
 
 		total_used += found->disk_used;
 	}
@@ -1730,6 +1738,21 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 		return ret;
 	}
 	buf->f_bavail += total_free_data;
+#ifdef MY_ABC_HERE
+	if (fs_info->metadata_ratio) {
+		u64 reserved_for_metadata = btrfs_super_total_bytes(disk_super);
+
+		do_div(reserved_for_metadata, fs_info->metadata_ratio);
+		if (fs_info->avail_metadata_alloc_bits & BTRFS_BLOCK_GROUP_DUP)
+			reserved_for_metadata *= 2;
+		if (total_metadata < reserved_for_metadata) {
+			if ((reserved_for_metadata-total_metadata) < buf->f_bavail)
+				buf->f_bavail -= reserved_for_metadata-total_metadata;
+			else
+				buf->f_bavail = 0;
+		}
+	}
+#endif
 	buf->f_bavail = buf->f_bavail >> bits;
 	mutex_unlock(&fs_info->chunk_mutex);
 

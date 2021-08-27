@@ -914,7 +914,7 @@ ia32_sys_call_table:
 #else
 	.quad sys_ni_syscall
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	.quad sys_SYNOArchiveBit	/* 403 */
 #else
 	.quad sys_ni_syscall

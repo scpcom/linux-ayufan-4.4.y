@@ -110,11 +110,11 @@ struct usb_port_status {
 #define USB_PORT_STAT_TEST              0x0800
 #define USB_PORT_STAT_INDICATOR         0x1000
 /* bits 13 to 15 are reserved */
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_DEF_HERE
 #define USB_PORT_STAT_TEST_MODE         0x8000
 #endif
 
-#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 enum XHCI_SPECIAL_RESET_MODE{
 	XHCI_SPECIAL_RESET_PAUSE = 0, // enable and pause
 	XHCI_SPECIAL_RESET_RUN, // enable and run

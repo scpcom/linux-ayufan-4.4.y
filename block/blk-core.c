@@ -1165,7 +1165,12 @@ void blk_add_request_payload(struct request *rq, struct page *page,
 {
 	struct bio *bio = rq->bio;
 
+#ifdef MY_ABC_HERE
+	bio->bv_page_trim = page;
+	bio->bi_rw |= REQ_FIRST_BIO_IN_DISCARD;
+#else
 	bio->bi_io_vec->bv_page = page;
+#endif
 	bio->bi_io_vec->bv_offset = 0;
 	bio->bi_io_vec->bv_len = len;
 
@@ -1175,7 +1180,11 @@ void blk_add_request_payload(struct request *rq, struct page *page,
 
 	rq->__data_len = rq->resid_len = len;
 	rq->nr_phys_segments = 1;
+#ifdef MY_ABC_HERE
+	rq->buffer = page_address(bio->bv_page_trim) + bio_offset(bio);
+#else
 	rq->buffer = bio_data(bio);
+#endif
 }
 EXPORT_SYMBOL_GPL(blk_add_request_payload);
 

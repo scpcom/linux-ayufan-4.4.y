@@ -854,7 +854,7 @@ static int proc_control(struct dev_state *ps, void __user *arg)
 		snoop_urb(dev, NULL, pipe, max(i, 0), min(i, 0), COMPLETE, NULL, 0);
 	}
 	free_page((unsigned long)tbuf);
-#ifndef SYNO_USB_UPS_COMP_ENHANCE 
+#ifndef MY_DEF_HERE 
 	if (i < 0 && i != -EPIPE) {
 		dev_printk(KERN_DEBUG, &dev->dev, "usbfs: USBDEVFS_CONTROL "
 			   "failed cmd %s rqt %u rq %u len %u ret %d\n",

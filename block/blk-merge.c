@@ -165,7 +165,16 @@ new_segment:
 				sg = sg_next(sg);
 			}
 
+#ifdef MY_ABC_HERE
+			if (iter.bio->bi_rw & REQ_FIRST_BIO_IN_DISCARD) {
+				sg_set_page(sg, iter.bio->bv_page_trim, nbytes, bvec->bv_offset);
+				iter.bio->bi_rw &= ~REQ_FIRST_BIO_IN_DISCARD;
+			} else {
 				sg_set_page(sg, bvec->bv_page, nbytes, bvec->bv_offset);
+			}
+#else
+			sg_set_page(sg, bvec->bv_page, nbytes, bvec->bv_offset);
+#endif
 			nsegs++;
 		}
 		bvprv = bvec;

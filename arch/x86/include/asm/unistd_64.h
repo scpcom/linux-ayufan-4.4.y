@@ -700,7 +700,7 @@ __SYSCALL(__NR_process_vm_writev, sys_process_vm_writev)
 __SYSCALL(__NR_SYNOUtime, sys_SYNOUtime)
 #endif
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #define __NR_SYNOArchiveBit                     403
 #define SYNOArchiveBit(arg1, arg2)              syscall(__NR_SYNOArchiveBit, arg1, arg2)
 __SYSCALL(__NR_SYNOArchiveBit, sys_SYNOArchiveBit)

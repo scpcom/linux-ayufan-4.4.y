@@ -2802,7 +2802,11 @@ static void free_log_tree(struct btrfs_trans_handle *trans,
 
 	ret = walk_log_tree(trans, log, &wc);
 	/* I don't think this can happen but just in case */
+#ifdef MY_ABC_HERE
+	if (ret && trans)
+#else
 	if (ret)
+#endif
 		btrfs_abort_transaction(trans, log, ret);
 
 	while (1) {

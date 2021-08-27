@@ -54,8 +54,8 @@ int apparmor_initialized __initdata;
  */
 static void apparmor_cred_free(struct cred *cred)
 {
-	aa_free_task_context(cred->security);
-	cred->security = NULL;
+	aa_free_task_context(cred_cxt(cred));
+	cred_cxt(cred) = NULL;
 }
 
 /*
@@ -68,7 +68,7 @@ static int apparmor_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 	if (!cxt)
 		return -ENOMEM;
 
-	cred->security = cxt;
+	cred_cxt(cred) = cxt;
 	return 0;
 }
 
@@ -83,8 +83,8 @@ static int apparmor_cred_prepare(struct cred *new, const struct cred *old,
 	if (!cxt)
 		return -ENOMEM;
 
-	aa_dup_task_context(cxt, old->security);
-	new->security = cxt;
+	aa_dup_task_context(cxt, cred_cxt(old));
+	cred_cxt(new) = cxt;
 	return 0;
 }
 
@@ -93,8 +93,8 @@ static int apparmor_cred_prepare(struct cred *new, const struct cred *old,
  */
 static void apparmor_cred_transfer(struct cred *new, const struct cred *old)
 {
-	const struct aa_task_cxt *old_cxt = old->security;
-	struct aa_task_cxt *new_cxt = new->security;
+	const struct aa_task_cxt *old_cxt = cred_cxt(old);
+	struct aa_task_cxt *new_cxt = cred_cxt(new);
 
 	aa_dup_task_context(new_cxt, old_cxt);
 }
@@ -127,7 +127,11 @@ static int apparmor_capget(struct task_struct *target, kernel_cap_t *effective,
 
 	rcu_read_lock();
 	cred = __task_cred(target);
+#ifdef MY_ABC_HERE
+	profile = aa_get_newest_cred_profile(cred);
+#else
 	profile = aa_cred_profile(cred);
+#endif
 
 	*effective = cred->cap_effective;
 	*inheritable = cred->cap_inheritable;
@@ -138,6 +142,9 @@ static int apparmor_capget(struct task_struct *target, kernel_cap_t *effective,
 		*permitted = cap_intersect(*permitted, profile->caps.allow);
 	}
 	rcu_read_unlock();
+#ifdef MY_ABC_HERE
+	aa_put_profile(profile);
+#endif
 
 	return 0;
 }
@@ -149,9 +156,16 @@ static int apparmor_capable(struct task_struct *task, const struct cred *cred,
 	/* cap_capable returns 0 on success, else -EPERM */
 	int error = cap_capable(task, cred, ns, cap, audit);
 	if (!error) {
+#ifdef MY_ABC_HERE
+		profile = aa_get_newest_cred_profile(cred);
+#else
 		profile = aa_cred_profile(cred);
+#endif
 		if (!unconfined(profile))
 			error = aa_capable(task, profile, cap, audit);
+#ifdef MY_ABC_HERE
+		aa_put_profile(profile);
+#endif
 	}
 	return error;
 }
@@ -171,9 +185,16 @@ static int common_perm(int op, struct path *path, u32 mask,
 	struct aa_profile *profile;
 	int error = 0;
 
+#ifdef MY_ABC_HERE
+	profile = __aa_get_current_profile();
+#else
 	profile = __aa_current_profile();
+#endif
 	if (!unconfined(profile))
 		error = aa_path_perm(op, profile, path, 0, mask, cond);
+#ifdef MY_ABC_HERE
+	__aa_put_current_profile(profile);
+#endif
 
 	return error;
 }
@@ -380,7 +401,7 @@ static int apparmor_inode_getattr(struct vfsmount *mnt, struct dentry *dentry)
 				      AA_MAY_META_READ);
 }
 
-static int apparmor_dentry_open(struct file *file, const struct cred *cred)
+static int apparmor_file_open(struct file *file, const struct cred *cred)
 {
 	struct aa_file_cxt *fcxt = file->f_security;
 	struct aa_profile *profile;
@@ -399,7 +420,11 @@ static int apparmor_dentry_open(struct file *file, const struct cred *cred)
 		return 0;
 	}
 
+#ifdef MY_ABC_HERE
+	profile = aa_get_newest_cred_profile(cred);
+#else
 	profile = aa_cred_profile(cred);
+#endif
 	if (!unconfined(profile)) {
 		struct inode *inode = file->f_path.dentry->d_inode;
 		struct path_cond cond = { inode->i_uid, inode->i_mode };
@@ -409,6 +434,9 @@ static int apparmor_dentry_open(struct file *file, const struct cred *cred)
 		/* todo cache full allowed permissions set and state */
 		fcxt->allow = aa_map_file_to_perms(file);
 	}
+#ifdef MY_ABC_HERE
+	aa_put_profile(profile);
+#endif
 
 	return error;
 }
@@ -433,16 +461,28 @@ static void apparmor_file_free_security(struct file *file)
 static int common_file_perm(int op, struct file *file, u32 mask)
 {
 	struct aa_file_cxt *fcxt = file->f_security;
+#ifdef MY_ABC_HERE
+	struct aa_profile *profile, *fprofile = aa_get_newest_cred_profile(file->f_cred);
+#else
 	struct aa_profile *profile, *fprofile = aa_cred_profile(file->f_cred);
+#endif
 	int error = 0;
 
 	BUG_ON(!fprofile);
 
 	if (!file->f_path.mnt ||
 	    !mediated_filesystem(file->f_path.dentry->d_inode))
+#ifdef MY_ABC_HERE
+		goto out;
+#else
 		return 0;
+#endif
 
+#ifdef MY_ABC_HERE
+	profile = __aa_get_current_profile();
+#else
 	profile = __aa_current_profile();
+#endif
 
 	/* revalidate access, if task is unconfined, or the cached cred
 	 * doesn't match or if the request is for more permissions than
@@ -454,6 +494,11 @@ static int common_file_perm(int op, struct file *file, u32 mask)
 	if (!unconfined(profile) && !unconfined(fprofile) &&
 	    ((fprofile != profile) || (mask & ~fcxt->allow)))
 		error = aa_file_perm(op, profile, file, mask);
+#ifdef MY_ABC_HERE
+	__aa_put_current_profile(profile);
+out:
+	aa_put_profile(fprofile);
+#endif
 
 	return error;
 }
@@ -476,7 +521,6 @@ static int apparmor_file_lock(struct file *file, unsigned int cmd)
 static int common_mmap(int op, struct file *file, unsigned long prot,
 		       unsigned long flags)
 {
-	struct dentry *dentry;
 	int mask = 0;
 
 	if (!file || !file->f_security)
@@ -493,7 +537,6 @@ static int common_mmap(int op, struct file *file, unsigned long prot,
 	if (prot & PROT_EXEC)
 		mask |= AA_EXEC_MMAP;
 
-	dentry = file->f_path.dentry;
 	return common_file_perm(op, file, mask);
 }
 
@@ -522,24 +565,24 @@ static int apparmor_getprocattr(struct task_struct *task, char *name,
 				char **value)
 {
 	int error = -ENOENT;
-	struct aa_profile *profile;
 	/* released below */
 	const struct cred *cred = get_task_cred(task);
-	struct aa_task_cxt *cxt = cred->security;
-	profile = aa_cred_profile(cred);
+	struct aa_task_cxt *cxt = cred_cxt(cred);
+	struct aa_profile *profile = NULL;
 
 	if (strcmp(name, "current") == 0)
-		error = aa_getprocattr(aa_newest_version(cxt->profile),
-				       value);
+		profile = aa_get_newest_profile(cxt->profile);
 	else if (strcmp(name, "prev") == 0  && cxt->previous)
-		error = aa_getprocattr(aa_newest_version(cxt->previous),
-				       value);
+		profile = aa_get_newest_profile(cxt->previous);
 	else if (strcmp(name, "exec") == 0 && cxt->onexec)
-		error = aa_getprocattr(aa_newest_version(cxt->onexec),
-				       value);
+		profile = aa_get_newest_profile(cxt->onexec);
 	else
 		error = -EINVAL;
 
+	if (profile)
+		error = aa_getprocattr(profile, value);
+
+	aa_put_profile(profile);
 	put_cred(cred);
 
 	return error;
@@ -618,11 +661,18 @@ static int apparmor_setprocattr(struct task_struct *task, char *name,
 static int apparmor_task_setrlimit(struct task_struct *task,
 		unsigned int resource, struct rlimit *new_rlim)
 {
+#ifdef MY_ABC_HERE
+	struct aa_profile *profile = __aa_get_current_profile();
+#else
 	struct aa_profile *profile = __aa_current_profile();
+#endif
 	int error = 0;
 
 	if (!unconfined(profile))
 		error = aa_task_setrlimit(profile, task, resource, new_rlim);
+#ifdef MY_ABC_HERE
+	__aa_put_current_profile(profile);
+#endif
 
 	return error;
 }
@@ -745,9 +795,9 @@ static struct security_operations apparmor_ops = {
 	.path_chmod =			apparmor_path_chmod,
 	.path_chown =			apparmor_path_chown,
 	.path_truncate =		apparmor_path_truncate,
-	.dentry_open =			apparmor_dentry_open,
 	.inode_getattr =                apparmor_inode_getattr,
 
+	.file_open =			apparmor_file_open,
 	.file_permission =		apparmor_file_permission,
 	.file_alloc_security =		apparmor_file_alloc_security,
 	.file_free_security =		apparmor_file_free_security,
@@ -969,7 +1019,7 @@ static int param_get_mode(char *buffer, struct kernel_param *kp)
 	if (!apparmor_enabled)
 		return -EINVAL;
 
-	return sprintf(buffer, "%s", profile_mode_names[aa_g_profile_mode]);
+	return sprintf(buffer, "%s", aa_profile_mode_names[aa_g_profile_mode]);
 }
 
 static int param_set_mode(const char *val, struct kernel_param *kp)
@@ -984,8 +1034,8 @@ static int param_set_mode(const char *val, struct kernel_param *kp)
 	if (!val)
 		return -EINVAL;
 
-	for (i = 0; i < APPARMOR_NAMES_MAX_INDEX; i++) {
-		if (strcmp(val, profile_mode_names[i]) == 0) {
+	for (i = 0; i < APPARMOR_MODE_NAMES_MAX_INDEX; i++) {
+		if (strcmp(val, aa_profile_mode_names[i]) == 0) {
 			aa_g_profile_mode = i;
 			return 0;
 		}
@@ -1013,7 +1063,7 @@ static int __init set_init_cxt(void)
 		return -ENOMEM;
 
 	cxt->profile = aa_get_profile(root_ns->unconfined);
-	cred->security = cxt;
+	cred_cxt(cred) = cxt;
 
 	return 0;
 }
@@ -1042,6 +1092,9 @@ static int __init apparmor_init(void)
 
 	error = register_security(&apparmor_ops);
 	if (error) {
+		struct cred *cred = (struct cred *)current->real_cred;
+		aa_free_task_context(cred_cxt(cred));
+		cred_cxt(cred) = NULL;
 		AA_ERROR("Unable to register AppArmor\n");
 		goto set_init_cxt_out;
 	}

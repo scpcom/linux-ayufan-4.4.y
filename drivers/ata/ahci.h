@@ -50,12 +50,12 @@
 #define EM_MSG_LED_VALUE_ACTIVITY     0x00070000
 #define EM_MSG_LED_VALUE_OFF          0xfff80000
 #define EM_MSG_LED_VALUE_ON           0x00010000
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 #define EM_MSG_LOCATE_LED_MASK        0x00380000
 #define EM_MSG_FAULT_LED_MASK         0x01c00000
 #endif
 
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 enum{
 	ATA_FLAG_SW_LOCATE      = (1 << 24), /* driver supports sw locate led */
 	ATA_FLAG_SW_FAULT       = (1 << 25), /* driver supports sw fault led */
@@ -224,7 +224,7 @@ enum {
 	AHCI_HFLAG_NO_SNTF		= (1 << 12), /* no sntf */
 	AHCI_HFLAG_NO_FPDMA_AA		= (1 << 13), /* no FPDMA AA */
 	AHCI_HFLAG_YES_FBS		= (1 << 14), /* force FBS cap on */
-#ifdef SYNO_LIBATA_JMB_BEHAVIOR
+#ifdef MY_DEF_HERE
 	AHCI_HFLAG_REPROBE		= (1 << 15),
 #endif
 #ifdef MY_ABC_HERE
@@ -282,7 +282,7 @@ struct ahci_em_priv {
 	unsigned long saved_activity;
 	unsigned long activity;
 	unsigned long led_state;
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 	unsigned long saved_locate;
 	unsigned long locate;
 	unsigned long saved_fault;
@@ -340,7 +340,7 @@ extern struct device_attribute *ahci_sdev_attrs[];
 extern struct ata_port_operations ahci_ops;
 extern struct ata_port_operations ahci_pmp_retry_srst_ops;
 
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 extern struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 					    const struct scsi_device *scsidev);
 #endif

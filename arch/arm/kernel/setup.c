@@ -121,7 +121,7 @@ extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING
 extern int gSynoHasDynModule;
 #endif
 
-#ifdef SYNO_FLASH_MEMORY_SIZE
+#ifdef MY_DEF_HERE
 extern long gSynoFlashMemorySize;
 #endif
 
@@ -448,7 +448,7 @@ END:
 __setup("syno_dyn_module=", early_is_dyn_module);
 #endif
 
-#ifdef SYNO_FLASH_MEMORY_SIZE
+#ifdef MY_DEF_HERE
 static int __init early_flash_memory_size(char *p)
 {
 	int iLen = 0;

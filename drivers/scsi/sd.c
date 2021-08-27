@@ -1156,7 +1156,11 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 		SCpnt->cmnd[29] = (unsigned char) (this_count >> 16) & 0xff;
 		SCpnt->cmnd[30] = (unsigned char) (this_count >> 8) & 0xff;
 		SCpnt->cmnd[31] = (unsigned char) this_count & 0xff;
+#ifdef MY_ABC_HERE
+	} else if (sdp->use_16_for_rw) {
+#else
 	} else if (block > 0xffffffff) {
+#endif /* MY_ABC_HERE */
 		SCpnt->cmnd[0] += READ_16 - READ_6;
 		SCpnt->cmnd[1] = protect | ((rq->cmd_flags & REQ_FUA) ? 0x8 : 0);
 		SCpnt->cmnd[2] = sizeof(block) > 4 ? (unsigned char) (block >> 56) & 0xff : 0;
@@ -2309,6 +2313,10 @@ got_data:
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	sdp->use_16_for_rw = (sdkp->capacity > 0xffffffff);
+#endif /* MY_ABC_HERE */
+
 	/* Rescale capacity to 512-byte units */
 	if (sector_size == 4096)
 		sdkp->capacity <<= 3;
@@ -2601,7 +2609,7 @@ static void sd_read_app_tag_own(struct scsi_disk *sdkp, unsigned char *buffer)
 	return;
 }
 
-#if defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 /**
  * syno_get_ata_identity - Get ATA IDENTITY via ATA PASS-THRU command
  * @sdev: the disk you want to get ata identity
@@ -2669,6 +2677,27 @@ static void sd_read_block_limits(struct scsi_disk *sdkp)
 			sdkp->max_unmap_blocks = lba_count;
 
 		sdkp->unmap_granularity = get_unaligned_be32(&buffer[28]);
+
+#if defined(MY_ABC_HERE) && defined(SYNO_SAS_DISK_NAME)
+	/*
+	 * Correct TRIM granularity read from Block Limits VPD
+	 *
+	 * When using SATA SSD on SAS model, the TRIM granularity value
+	 * is larger than our md chunk size. This causes raid0 / raid10
+	 * can't do TRIM. So we correct the value here for SAS model.
+	 *
+	 * What we do is exactly the same as what ata layer does. Refer
+	 * to ata_scsiop_inq_b0 in drivers/ata/libata-scsi.c for more
+	 * details. Also, the behavior should always keep consistent with
+	 * ata_scsiop_inq_b0.
+	 */
+	if (1 == g_is_sas_model && (SYNO_MD_CHUNK_SIZE >> 9) < sdkp->unmap_granularity) {
+		u16 id[ATA_ID_WORDS] = {0};
+		if (syno_get_ata_identity(sdkp->device, id) && ata_id_has_trim(id)) {
+			sdkp->unmap_granularity = 1;
+		}
+	}
+#endif
 
 		if (buffer[32] & 0x80)
 			sdkp->unmap_alignment =

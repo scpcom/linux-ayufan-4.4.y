@@ -120,6 +120,11 @@ EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif
 
 #ifdef MY_ABC_HERE
+DECLARE_RWSEM(s_reshape_mount_key);
+EXPORT_SYMBOL(s_reshape_mount_key);
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
 long g_internal_hd_num = -1;
 long syno_boot_hd_count = 0;
 EXPORT_SYMBOL(g_internal_hd_num);
@@ -173,7 +178,7 @@ int gSynoHasDynModule = 0;
 EXPORT_SYMBOL(gSynoHasDynModule);
 #endif /*MY_ABC_HERE*/
 
-#ifdef SYNO_FLASH_MEMORY_SIZE
+#ifdef MY_DEF_HERE
 long gSynoFlashMemorySize = 0;
 EXPORT_SYMBOL(gSynoFlashMemorySize);
 #endif
@@ -210,7 +215,7 @@ EXPORT_SYMBOL(gSwitchDev);
 EXPORT_SYMBOL(gDevPCIName);
 #endif
 
-#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
 #endif
@@ -310,10 +315,8 @@ int (*syno_test_list)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_test_list);
 #endif /* MY_ABC_HERE */
 
-#ifdef SYNO_ATA_SHUTDOWN_FIX
 int gSynoSystemShutdown = 0;
 EXPORT_SYMBOL(gSynoSystemShutdown);
-#endif /* SYNO_ATA_SHUTDOWN_FIX */
 
 /* External variables not in a header file. */
 extern int sysctl_overcommit_memory;
@@ -1422,7 +1425,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef SYNO_FLASH_MEMORY_SIZE
+#ifdef MY_DEF_HERE
 	{
 		.procname	= "syno_flash_mem_size",
 		.data		= &gSynoFlashMemorySize,

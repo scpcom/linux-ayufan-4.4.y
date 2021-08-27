@@ -91,8 +91,7 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 		}
 		path_put(&root);
 		connected = 0;
-	}
-
+	} else
 		res = d_absolute_path(path, buf, buflen);
 
 	*name = res;

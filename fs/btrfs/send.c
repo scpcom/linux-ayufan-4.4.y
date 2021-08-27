@@ -82,13 +82,13 @@ struct clone_root {
 #define SEND_CTX_MAX_NAME_CACHE_SIZE 128
 #define SEND_CTX_NAME_CACHE_CLEAN_SIZE (SEND_CTX_MAX_NAME_CACHE_SIZE * 2)
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 enum syno_archive{
 	syno_archive_set = 0x1,
 	syno_archive_set_owner_group = 0x1 << 1,
 	syno_archive_set_acl = 0x1 << 2,
 };
-#endif /* SYNO_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
 struct send_ctx {
 	struct file *send_filp;
@@ -123,9 +123,9 @@ struct send_ctx {
 	u64 cur_inode_mode;
 	u64 cur_inode_rdev;
 	u64 cur_inode_last_extent;
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	u32 cur_inode_archive;
-#endif /* SYNO_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
 	u64 send_progress;
 
@@ -4012,7 +4012,7 @@ static int __process_new_xattr(int num, struct btrfs_key *di_key,
 	struct fs_path *p;
 	posix_acl_xattr_header dummy_acl;
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	/*
 	 * chmod and chown will clear archive bit acl-related bits and acl entries, so
 	 * we handle these at inode-finishing step to avoid losing syno archive bit and 
@@ -4022,7 +4022,7 @@ static int __process_new_xattr(int num, struct btrfs_key *di_key,
 		sctx->cur_inode_archive = syno_archive_set;
 		return 0;
 	}
-#endif /* SYNO_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
 	p = fs_path_alloc();
 	if (!p)
@@ -4984,7 +4984,7 @@ out:
 	return ret;
 }
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 /*
  *Handle syno archive bit and syno acl here
  */
@@ -5038,7 +5038,7 @@ out:
 	fs_path_free(p);
 	return ret;
 }
-#endif /* SYNO_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
 static int finish_inode_if_needed(struct send_ctx *sctx, int at_end)
 {
@@ -5136,11 +5136,11 @@ static int finish_inode_if_needed(struct send_ctx *sctx, int at_end)
 			goto out;
 	}
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	ret = syno_attribute_handler(sctx);
 	if (ret < 0)
 		goto out;
-#endif /* SYNO_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 	/*
 	 * If other directory inodes depended on our current directory
 	 * inode's move/rename, now do their move/rename operations.
@@ -5179,9 +5179,9 @@ static int changed_inode(struct send_ctx *sctx,
 	sctx->cur_ino = key->objectid;
 	sctx->cur_inode_new_gen = 0;
 	sctx->cur_inode_last_extent = (u64)-1;
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	sctx->cur_inode_archive = 0;
-#endif /* SYNO_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * Set send_progress to current inode. This will tell all get_cur_xxx

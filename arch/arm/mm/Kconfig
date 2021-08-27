@@ -1556,7 +1556,7 @@ config CACHE_PL310
 
 config L2X0_INSTRUCTION_ONLY
 	bool "Use L2 cache for instructions only"
-	depends on CACHE_PL310 && (SYNO_COMCERTO || ARCH_ARMADA375)
+	depends on CACHE_PL310 && SYNO_COMCERTO
 	default n
 
 config PL310_EXCLUSIVE_CACHE

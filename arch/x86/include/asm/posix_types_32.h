@@ -1,7 +1,7 @@
 //SYNO , user space toolchain use __ARCH_I386_POSIX_TYPES_H and _ASM_X86_64_POSIX_TYPES_H , so we need to compatable with them
 #if !defined(_ASM_X86_POSIX_TYPES_32_H) && !defined(__ARCH_I386_POSIX_TYPES_H)
 #define _ASM_X86_POSIX_TYPES_32_H
-#if defined(SYNO_X64) || defined(SYNO_X86)
+#if defined(SYNOPLAT_F_X86_64) || defined(SYNOPLAT_F_I686)
 #ifndef __KERNEL__
 #define __ARCH_I386_POSIX_TYPES_H
 #endif

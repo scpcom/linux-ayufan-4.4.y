@@ -246,6 +246,9 @@ static int btrfs_ioctl_setflags(struct file *file, void __user *arg)
 	u64 ip_oldflags;
 	unsigned int i_oldflags;
 	umode_t mode;
+#ifdef MY_ABC_HERE
+	int compress_type = BTRFS_COMPRESS_DEFAULT;
+#endif
 
 	if (!inode_owner_or_capable(inode))
 		return -EPERM;
@@ -346,11 +349,20 @@ static int btrfs_ioctl_setflags(struct file *file, void __user *arg)
 
 		ip->flags |= BTRFS_INODE_COMPRESS;
 		ip->flags &= ~BTRFS_INODE_NOCOMPRESS;
+#ifdef MY_ABC_HERE
+		if (root->fs_info->compress_type != BTRFS_COMPRESS_NONE)
+			compress_type = root->fs_info->compress_type;
 
+		if (compress_type == BTRFS_COMPRESS_ZLIB)
+			comp = "zlib";
+		else
+			comp = "lzo";
+#else
 		if (root->fs_info->compress_type == BTRFS_COMPRESS_LZO)
 			comp = "lzo";
 		else
 			comp = "zlib";
+#endif
 		ret = btrfs_set_prop(inode, "btrfs.compression",
 				     comp, strlen(comp), 0);
 		if (ret)
@@ -1285,7 +1297,11 @@ int btrfs_defrag_file(struct inode *inode, struct file *file,
 	unsigned long ra_index = 0;
 	int ret;
 	int defrag_count = 0;
+#ifdef MY_ABC_HERE
+	int compress_type = BTRFS_COMPRESS_DEFAULT;
+#else
 	int compress_type = BTRFS_COMPRESS_ZLIB;
+#endif
 	int extent_thresh = range->extent_thresh;
 	unsigned long max_cluster = (256 * 1024) >> PAGE_CACHE_SHIFT;
 	unsigned long cluster = max_cluster;
@@ -3386,6 +3402,12 @@ static noinline long btrfs_ioctl_clone(struct file *file, unsigned long srcfd,
 #endif /* MY_ABC_HERE */
 		goto out_fput;
 
+#ifdef MY_ABC_HERE
+	if ((BTRFS_I(src)->flags & BTRFS_INODE_COMPRESS) !=
+		(BTRFS_I(inode)->flags & BTRFS_INODE_COMPRESS))
+		goto out_fput;
+#endif /* MY_ABC_HERE */
+
 	ret = -EISDIR;
 	if (S_ISDIR(src->i_mode) || S_ISDIR(inode->i_mode))
 		goto out_fput;
@@ -5041,6 +5063,89 @@ static long btrfs_ioctl_subvol_getinfo(struct file *file,
 }
 #endif /* MY_ABC_HERE */
 
+#ifdef MY_ABC_HERE
+static long btrfs_ioctl_compr_ctl(struct file *file, void __user *arg)
+{
+	struct inode *inode = file_inode(file);
+	struct btrfs_ioctl_compr_ctl_args compr_args;
+	struct extent_map *em;
+	u64 len;
+	u64 compressed_size = 0;
+	u64 size = 0;
+	u64 pre_start;
+	u64 pre_compr_size = 0;
+	u64 pre_len = 0;
+	u64 offset = 0;
+	compr_args.flags = 0;
+
+	if (S_ISDIR(inode->i_mode))
+		return -EISDIR;
+
+	if (copy_from_user(&compr_args, arg, sizeof(compr_args)))
+		return -EFAULT;
+
+	if (compr_args.flags & BTRFS_COMPR_CTL_SET)
+		return -EOPNOTSUPP;
+
+	mutex_lock(&inode->i_mutex);
+
+	if (BTRFS_I(inode)->force_compress == BTRFS_COMPRESS_ZLIB
+		|| BTRFS_I(inode)->force_compress == BTRFS_COMPRESS_LZO)
+		compr_args.flags |= BTRFS_COMPR_CTL_COMPR_FL;
+
+	offset = 0;
+	len = inode->i_size;
+	pre_start = offset;
+
+	/*
+	 * do any pending delalloc/csum calc on inode, one way or
+	 * another, and lock file content
+	 */
+	btrfs_wait_ordered_range(inode, offset, len);
+
+	lock_extent(&BTRFS_I(inode)->io_tree, 0, len);
+
+	while (offset < len) {
+		em = btrfs_get_extent(inode, NULL, 0, offset, 1, 0);
+		if (IS_ERR_OR_NULL(em))
+			goto error;
+		if (em->block_len != (u64)-1) {
+			compressed_size += em->block_len;
+			size += ALIGN(em->len, inode->i_sb->s_blocksize);
+			if (pre_start == em->start) {
+				compressed_size -= pre_compr_size;
+				size -= ALIGN(pre_len, inode->i_sb->s_blocksize);
+				offset -= pre_len;
+			}
+			pre_start = em->start;
+			pre_compr_size = em->block_len;
+			pre_len = em->len;
+		} else if (em->block_start == EXTENT_MAP_INLINE) {
+			compressed_size += ALIGN(em->len, inode->i_sb->s_blocksize);
+			size += ALIGN(em->len, inode->i_sb->s_blocksize);
+		}
+		offset += em->len;
+		free_extent_map(em);
+	}
+	unlock_extent(&BTRFS_I(inode)->io_tree, 0, len);
+	mutex_unlock(&inode->i_mutex);
+
+	compr_args.size = size;
+	compr_args.compressed_size = compressed_size;
+
+	if (copy_to_user(arg, &compr_args, sizeof(compr_args)))
+		return -EFAULT;
+
+	return 0;
+
+error:
+	unlock_extent(&BTRFS_I(inode)->io_tree, 0, len);
+	mutex_unlock(&inode->i_mutex);
+
+	return -EIO;
+}
+#endif /* MY_ABC_HERE */
+
 long btrfs_ioctl(struct file *file, unsigned int
 		cmd, unsigned long arg)
 {
@@ -5177,6 +5282,10 @@ long btrfs_ioctl(struct file *file, unsigned int
 		return btrfs_ioctl_get_features(file, argp);
 	case BTRFS_IOC_SET_FEATURES:
 		return btrfs_ioctl_set_features(file, argp);
+#ifdef MY_ABC_HERE
+	case BTRFS_IOC_COMPR_CTL:
+		return btrfs_ioctl_compr_ctl(file, argp);
+#endif
 	}
 
 	return -ENOTTY;

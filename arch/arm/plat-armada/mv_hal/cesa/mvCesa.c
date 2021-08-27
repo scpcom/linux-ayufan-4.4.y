@@ -489,6 +489,9 @@ MV_STATUS mvCesaFinish(void)
 	/* Free SA database */
 	if (pCesaSAD != NULL) {
 		for (sid = 0; sid < cesaMaxSA; sid++) {
+#ifdef MY_ABC_HERE
+			if (pCesaSAD[sid] != NULL) {
+#endif
 				/* Free SRAM SA structure */
 				mvOsIoCachedFree(cesaOsHandle, pCesaSAD[sid]->sramSABuffSize,
 						 pCesaSAD[sid]->sramSAPhysAddr,
@@ -496,8 +499,10 @@ MV_STATUS mvCesaFinish(void)
 				/* Free SA structure */
 				mvOsFree(pCesaSAD[sid]);
 				pCesaSAD[sid] = NULL;	
+#ifdef MY_ABC_HERE
+			}
+#endif
 		}
-
 		cesaMaxSA = 0;
 	}
 

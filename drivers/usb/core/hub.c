@@ -84,12 +84,22 @@ struct usb_hub {
 	struct delayed_work	leds;
 	struct delayed_work	init_work;
 	void			**port_owners;
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 	int				syno_hub_eh;
 #endif
+
+#ifdef MY_ABC_HERE
+	struct timer_list	ups_discon_flt_timer;
+	int			ups_discon_flt_port;
+	unsigned long		ups_discon_flt_last; /* last filtered time */
+#define SYNO_UPS_DISCON_FLT_STATUS_NONE			0
+#define SYNO_UPS_DISCON_FLT_STATUS_DEFERRED		1
+#define SYNO_UPS_DISCON_FLT_STATUS_TIMEOUT		2
+	unsigned int		ups_discon_flt_status;
+#endif /* MY_ABC_HERE */
 };
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 static int hub_port_debounce(struct usb_hub *hub, int port1);
 #endif
 
@@ -182,7 +192,7 @@ static inline char *portspeed(struct usb_hub *hub, int portstatus)
 }
 
 /* Note that hdev or one of its children must be locked! */
-#ifndef SYNO_USB_STOR_COMP_ENHANCE
+#ifndef MY_DEF_HERE
 static struct usb_hub *hdev_to_hub(struct usb_device *hdev)
 #else
 struct usb_hub *hdev_to_hub(struct usb_device *hdev)
@@ -192,7 +202,7 @@ struct usb_hub *hdev_to_hub(struct usb_device *hdev)
 		return NULL;
 	return usb_get_intfdata(hdev->actconfig->interface[0]);
 }
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(hdev_to_hub);
 #endif
 
@@ -408,7 +418,7 @@ static int hub_port_status(struct usb_hub *hub, int port1,
 	return ret;
 }
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 void syno_clear_hub_eh(struct usb_hub *hub)
 {
 	if (!hub)
@@ -1399,6 +1409,9 @@ static void hub_disconnect(struct usb_interface *intf)
 		usb_autopm_put_interface_no_suspend(intf);
 	}
 	hub->disconnected = 1;
+#ifdef MY_ABC_HERE
+	del_timer_sync(&hub->ups_discon_flt_timer);
+#endif /* MY_ABC_HERE */
 	spin_unlock_irq(&hub_event_lock);
 
 	/* Disconnect all children and quiesce the hub */
@@ -1419,6 +1432,42 @@ static void hub_disconnect(struct usb_interface *intf)
 
 	kref_put(&hub->kref, hub_release);
 }
+
+#ifdef MY_ABC_HERE
+int syno_usb_quirks_init(struct usb_device *udev) {
+#define SYNO_USB_VID_PID(vid, pid) \
+	(vid == le16_to_cpu(udev->descriptor.idVendor) && \
+	 pid == le16_to_cpu(udev->descriptor.idProduct))
+	if (SYNO_USB_VID_PID(0x04b8, 0x0007) /* EPSON C1100 */) {
+		udev->syno_usb_quirks |= SYNO_USB_QUIRKS_HC_MORE_TRANSACTION_TRIES;
+	}
+#undef SYNO_USB_VID_PID
+	return 0;
+}
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+static bool is_quirk_ups(struct usb_device *udev)
+{
+	return 0x0764 == le16_to_cpu(udev->descriptor.idVendor) ||
+		(0x0463 == le16_to_cpu(udev->descriptor.idVendor) &&
+		0xffff == le16_to_cpu(udev->descriptor.idProduct)) ||
+		(0x0665 == le16_to_cpu(udev->descriptor.idVendor) &&
+		0x5161 == le16_to_cpu(udev->descriptor.idProduct)) ||
+		(0x051d == le16_to_cpu(udev->descriptor.idVendor) &&
+		0x0002 == le16_to_cpu(udev->descriptor.idProduct));
+}
+
+static void ups_discon_flt_work(unsigned long arg)
+{
+	struct usb_hub *hub = (struct usb_hub *) arg;
+
+	set_bit(hub->ups_discon_flt_port, hub->change_bits);
+	hub->ups_discon_flt_status = SYNO_UPS_DISCON_FLT_STATUS_TIMEOUT;
+	kick_khubd(hub);
+}
+
+#endif /* MY_ABC_HERE */
 
 static int hub_probe(struct usb_interface *intf, const struct usb_device_id *id)
 {
@@ -1498,6 +1547,14 @@ descriptor_error:
 
 	if (hdev->speed == USB_SPEED_HIGH)
 		highspeed_hubs++;
+
+#ifdef MY_ABC_HERE
+	init_timer(&hub->ups_discon_flt_timer);
+	hub->ups_discon_flt_timer.data = (unsigned long) hub;
+	hub->ups_discon_flt_timer.function = ups_discon_flt_work;
+	hub->ups_discon_flt_last = jiffies - 16 * HZ;
+	hub->ups_discon_flt_status = SYNO_UPS_DISCON_FLT_STATUS_NONE;
+#endif /* MY_ABC_HERE */
 
 	if (hub_configure(hub, endpoint) >= 0)
 		return 0;
@@ -2391,7 +2448,17 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		 */
 		if (!hub_is_superspeed(hub->hdev) &&
 				(portchange & USB_PORT_STAT_C_CONNECTION))
+		{
+#ifdef MY_ABC_HERE
+			clear_port_feature(hub->hdev, port1,
+				USB_PORT_FEAT_C_CONNECTION);
+			if (portchange & USB_PORT_STAT_C_ENABLE)
+				clear_port_feature(hub->hdev, port1,
+					USB_PORT_FEAT_C_ENABLE);
+			return -EPROTO;
+#endif /* MY_ABC_HERE */
 			return -ENOTCONN;
+		}
 
 		if ((portstatus & USB_PORT_STAT_ENABLE)) {
 			if (!udev)
@@ -2420,7 +2487,7 @@ delay:
 			port1, warm ? "warm " : "", delay);
 	}
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 		/* Device went away? */
 		if (!(portstatus & USB_PORT_STAT_CONNECTION))
 			return -ENOTCONN;
@@ -3225,7 +3292,7 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	return retval;
 }
 
-#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 enum XHCI_SPECIAL_RESET_MODE xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
 EXPORT_SYMBOL_GPL(xhci_special_reset);
 #define SPECIAL_RESET_RETRY 20 // times
@@ -3258,8 +3325,8 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	enum usb_device_speed	oldspeed = udev->speed;
 	const char		*speed;
 	int			devnum = udev->devnum;
-#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE)
-#ifdef SYNO_USB3_RESET_FOR_ADDR_ERR
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#ifdef MY_DEF_HERE
 	bool reset_for_addr_err = true;
 #endif
 	int xhci_retry = 0;
@@ -3289,13 +3356,13 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 
 	mutex_lock(&usb_address0_mutex);
 
-#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 port_init_retry:
 #endif
 
 	/* Reset the device; full speed may morph to high speed */
 	/* FIXME a USB 2.0 device may morph into SuperSpeed on reset. */
-#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	// special reset for xhci port only during reboot only
 	if (!IS_XHCI(hub) ||
 			(XHCI_SPECIAL_RESET_RUN!= xhci_special_reset)) {
@@ -3477,7 +3544,7 @@ port_init_retry:
 					"device not accepting address %d, error %d\n",
 					devnum, retval);
 
-#ifdef SYNO_USB3_RESET_FOR_ADDR_ERR
+#ifdef MY_DEF_HERE
 				if ((reset_for_addr_err == true) && (oldspeed == USB_SPEED_SUPER)) {
 					oldspeed = USB_SPEED_UNKNOWN;
 					reset_for_addr_err = false;
@@ -3565,7 +3632,11 @@ port_init_retry:
 		goto fail;
 	}
 
-#if defined(SYNO_USB3_SPECIAL_RESET) || defined(MY_ABC_HERE)
+#ifdef MY_ABC_HERE
+	syno_usb_quirks_init(udev);
+#endif /* MY_ABC_HERE */
+
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 		//A USB2 device's bcdUSB must be equal or less than 0x0200
 		//A USB3 device's bcdUSB should be 0x0300. But if speed downgrade happens , its value could be 0x0210 or higher
 		if (0x0210 <= le16_to_cpu(udev->descriptor.bcdUSB)) {
@@ -3710,7 +3781,7 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 	/* Try to resuscitate an existing device */
 	udev = hdev->children[port1-1];
 
-#ifdef SYNO_USB_UPS_COMP_ENHANCE 
+#ifdef MY_DEF_HERE 
 	if ((portstatus == USB_PORT_STAT_POWER) && udev &&
 		(portchange & USB_PORT_STAT_C_CONNECTION)) {
 		//USB_VENDOR_ID_CYBERPOWER
@@ -3748,8 +3819,65 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 	}
 
 	/* Disconnect any existing devices under this port */
-	if (udev)
+	if (udev) {
+#ifdef MY_ABC_HERE
+		/* Defer disconnect for UPS devices */
+		if (is_quirk_ups(udev)) {
+			if (portstatus & USB_PORT_STAT_CONNECTION) {
+				/* for the case that the device is connected again after
+				 * disconnected, cancel the disconnection and reset it.
+				 */
+				int ret;
+
+				del_timer_sync(&hub->ups_discon_flt_timer);
+				hub->ups_discon_flt_status =
+					SYNO_UPS_DISCON_FLT_STATUS_NONE;
+				hub->ups_discon_flt_last = jiffies;
+				hub_port_debounce(hub, port1);
+				ret = usb_reset_and_verify_device(udev);
+				if (0 > ret) {
+					hub_port_status(hub, port1, &portstatus, &portchange);
+					dev_err(hub_dev, "deferred disconnect failed, "
+							"on port %d reset (ret: %d), status: %04x, "
+							"change: %04x\n", port1, ret, portstatus,
+							portchange);
+				} else
+					return;
+			} else if (portchange & USB_PORT_STAT_C_CONNECTION) {
+				/* for the case that the device is disconnected, defer it. */
+				if (0x0665 == le16_to_cpu(udev->descriptor.idVendor) &&
+					0x5161 == le16_to_cpu(udev->descriptor.idProduct) &&
+					time_after(hub->ups_discon_flt_last + 15 * HZ, jiffies))
+					/* For the buggy UPS which disconnects very frequently
+					 * before a UPS driver (usually in userspace) links the UPS.
+					 * Because the condition that the buggy UPS isn't stable
+					 * initally and UPS driver can't also link it before the
+					 * driver stops trying, so we should actually disconnect and
+					 * re-connect to notify and restart the UPS driver.
+					 */
+					;
+				else {
+					if (!timer_pending(&hub->ups_discon_flt_timer)) {
+						hub->ups_discon_flt_status =
+							SYNO_UPS_DISCON_FLT_STATUS_DEFERRED;
+						hub->ups_discon_flt_port = port1;
+						hub->ups_discon_flt_timer.expires = jiffies + 3 * HZ;
+						add_timer(&hub->ups_discon_flt_timer);
+					}
+					return;
+				}
+			} else {
+				/* for the case that defer disconnection timeout, disconnect it
+				 * actually.
+				 */
+				del_timer_sync(&hub->ups_discon_flt_timer);
+				hub->ups_discon_flt_status =
+					SYNO_UPS_DISCON_FLT_STATUS_NONE;
+			}
+		}
+#endif /* MY_ABC_HERE */
 		usb_disconnect(&hdev->children[port1-1]);
+	}
 	clear_bit(port1, hub->change_bits);
 
 	/* We can forget about a "removed" device when there's a physical
@@ -3935,6 +4063,9 @@ static void hub_events(void)
 	u16 portchange;
 	int i, ret;
 	int connect_change;
+#ifdef MY_ABC_HERE
+	int ups_discon_flt;
+#endif /* MY_ABC_HERE */
 
 	/*
 	 *  We restart the list every time to avoid a deadlock with
@@ -3944,7 +4075,7 @@ static void hub_events(void)
 	 */
 	while (1) {
 
-#ifdef SYNO_USB3_DEBUG
+#ifdef MY_DEF_HERE
 		dbg("hub_events!\n");
 #endif
 
@@ -3962,7 +4093,7 @@ static void hub_events(void)
 		kref_get(&hub->kref);
 		spin_unlock_irq(&hub_event_lock);
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 		if ( syno_get_hub_eh(hub) ) {
 			printk(KERN_ERR "hub is performing EH\n");
 			msleep(100);
@@ -4020,8 +4151,55 @@ static void hub_events(void)
 			hub->error = 0;
 		}
 
+#ifdef MY_ABC_HERE
+		ups_discon_flt = 0;
+
+		/* Serialize hub events among a deferred disconnection of a UPS and
+		 * others within the same instance of hub, by deferring hub events to
+		 * behind the deferred disconnection of a UPS.
+		 */
+		if (SYNO_UPS_DISCON_FLT_STATUS_NONE != hub->ups_discon_flt_status) {
+			connect_change = 0;
+			i = hub->ups_discon_flt_port;
+
+			/* for the case of ups_discon_flt_timer timeout */
+			connect_change = test_bit(i, hub->change_bits);
+
+			ret = hub_port_status(hub, i,
+					&portstatus, &portchange);
+
+			/* for the case of re-connection of a UPS */
+			if (0 >= ret &&
+				portchange & USB_PORT_STAT_C_CONNECTION)
+				connect_change = 1;
+
+			if (connect_change)
+				/* we must ensure that the target port of UPS-disconnect filter
+				 * (i.e. ups_discon_flt_port) can be dealt with before others by
+				 * the following for-loop.
+				 */
+				ups_discon_flt = 1;
+			else
+				/* all hub events coming from the ports that are not the target
+				 * of UPS-disconnect filter (i.e. ups_discon_flt_port) will be
+				 * discarded (or pending, actually) if there is a pending UPS-
+				 * disconnection within the same instance of hub. Because a
+				 * pending UPS-disconnection must generate a hub event, so the
+				 * discarded ones will be also dealt with by the following for-
+				 * loop later.
+				 */
+				goto loop_disconnected;
+		}
+#endif /* MY_ABC_HERE */
+
 		/* deal with port status changes */
+#ifdef MY_ABC_HERE
+		for (i = ups_discon_flt? hub->ups_discon_flt_port: 1;
+			 i <= hub->descriptor->bNbrPorts;
+			 i = ups_discon_flt? 1: i + 1, ups_discon_flt = 0) {
+#else
 		for (i = 1; i <= hub->descriptor->bNbrPorts; i++) {
+#endif /* MY_ABC_HERE */
 			if (test_bit(i, hub->busy_bits))
 				continue;
 			connect_change = test_bit(i, hub->change_bits);
@@ -4034,7 +4212,7 @@ static void hub_events(void)
 			if (ret < 0)
 				continue;
 
-#ifdef SYNO_USB3_DEBUG
+#ifdef MY_DEF_HERE
 			dev_dbg (hub_dev, "status:0x%x.change:0x%x.\n", portstatus, portchange);
 #endif
 
@@ -4062,11 +4240,23 @@ static void hub_events(void)
 				if (!(portstatus & USB_PORT_STAT_ENABLE)
 				    && !connect_change
 				    && hdev->children[i-1]) {
+#ifdef MY_ABC_HERE
+					struct usb_device *udev;
+#endif /* MY_ABC_HERE */
 						dev_err (hub_dev,
 						"port %i "
 					    "disabled by hub (EMI?), "
 					    "re-enabling...\n",
 						i);
+#ifdef MY_ABC_HERE
+					ret = 1;
+					udev = hdev->children[i-1];
+					/* re-enable for UPS's EMI without disconnect */
+					if (is_quirk_ups(udev))
+						ret = usb_reset_and_verify_device(udev);
+
+					if (ret)
+#endif /* MY_ABC_HERE */
 					connect_change = 1;
 				}
 			}
@@ -4589,12 +4779,12 @@ int usb_reset_device(struct usb_device *udev)
 		}
 	}
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 	dev_err(&udev->dev, "lock for hub EH\n");
 	syno_set_hub_eh(hdev_to_hub(udev->parent));
 #endif
 	ret = usb_reset_and_verify_device(udev);
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 	syno_clear_hub_eh(hdev_to_hub(udev->parent));
 	dev_err(&udev->dev, "unlock for hub EH\n");
 #endif

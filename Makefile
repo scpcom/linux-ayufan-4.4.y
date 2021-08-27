@@ -409,10 +409,13 @@ export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn --exc
 
 # ===========================================================================
 # Rules shared between *config targets and build targets
-
 # Basic helpers built in scripts/
 PHONY += scripts_basic
+
 scripts_basic:
+ifeq ($(CONFIG_SYNO_ARMADA_ARCH_COMM),)
+	./syno_check_env.sh
+endif
 	$(Q)$(MAKE) $(build)=scripts/basic
 	$(Q)rm -f .tmp_quiet_recordmcount
 
@@ -572,9 +575,9 @@ endif
 else
 ifdef CONFIG_SYNO_COMCERTO
 ifdef CONFIG_COMCERTO_CC_OPTIMIZE_O3
-KBUILD_CFLAGS	+= -O3 -fno-reorder-blocks -fno-tree-ch -fno-caller-saves
+KBUILD_CFLAGS	+= -O3
 else
-KBUILD_CFLAGS	+= -O2 -fno-reorder-blocks -fno-tree-ch -fno-caller-saves
+KBUILD_CFLAGS	+= -O2
 endif
 else
 KBUILD_CFLAGS	+= -O2

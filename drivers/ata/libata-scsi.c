@@ -75,9 +75,9 @@ static unsigned long gulLastWake = 0;
 DEFINE_SPINLOCK(SYNOLastWakeLock);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EUNIT_DEADLOCK_FIX
 DEFINE_SPINLOCK(SYNOEUnitLock);
-#endif /* MY_DEF_HERE */
+#endif /* SYNO_EUNIT_DEADLOCK_FIX */
 
 #ifdef MY_ABC_HERE
 extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
@@ -94,7 +94,7 @@ typedef unsigned int (*ata_xlat_func_t)(struct ata_queued_cmd *qc);
 
 static struct ata_device *__ata_scsi_find_dev(struct ata_port *ap,
 					const struct scsi_device *scsidev);
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 					    const struct scsi_device *scsidev);
 #else
@@ -655,9 +655,9 @@ struct ata_port *SynoEunitFindMaster(struct ata_port *ap)
 	struct ata_port *pAp_master = NULL;
 	int i = 0;
 	int unique = 0;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EUNIT_DEADLOCK_FIX
 	unsigned long flags;
-#endif /* MY_DEF_HERE */
+#endif /* SYNO_EUNIT_DEADLOCK_FIX */
 	if (!syno_is_synology_pm(ap)) {
 		goto END;
 	}
@@ -670,7 +670,7 @@ struct ata_port *SynoEunitFindMaster(struct ata_port *ap)
 
 	unique = SYNO_UNIQUE(ap->PMSynoUnique);
 	for (i = 1; i < ata_print_id; i++) {
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EUNIT_DEADLOCK_FIX
 		spin_lock_irqsave(&SYNOEUnitLock, flags);
 		pMaster_host = scsi_host_lookup(i - 1);
 		spin_unlock_irqrestore(&SYNOEUnitLock, flags);
@@ -681,7 +681,7 @@ struct ata_port *SynoEunitFindMaster(struct ata_port *ap)
 		if (NULL == (pMaster_host = scsi_host_lookup(i - 1))) {
 			continue;
 		}
-#endif /* MY_DEF_HERE */
+#endif /* SYNO_EUNIT_DEADLOCK_FIX */
 
 		if (NULL == (pAp_master = ata_shost_to_port(pMaster_host))) {
 			goto CONTINUE_FOR;
@@ -733,6 +733,8 @@ syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn)
 
 	DBGMESG("disk %d do pm control blPowerOn %d\n", ap->print_id, blPowerOn);
 	if (!ap->nr_pmp_links) {
+	}
+	else {
 		if (!syno_is_synology_pm(ap)) {
 			goto END;
 		}
@@ -748,6 +750,66 @@ syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn)
 
 END:
 	return iRet;
+}
+
+void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag)
+{
+	struct Scsi_Host *ap_host = NULL;
+	struct ata_port *ap = NULL;
+	int i = 0;
+	int unique = 0;
+#ifdef SYNO_EUNIT_DEADLOCK_FIX
+	unsigned long flags;
+#endif /* SYNO_EUNIT_DEADLOCK_FIX */
+
+	if (!syno_is_synology_pm(pAp_master)) {
+		goto END;
+	}
+
+	unique = SYNO_UNIQUE(pAp_master->PMSynoUnique);
+	for (i = 1; i < ata_print_id; i++) {
+#ifdef SYNO_EUNIT_DEADLOCK_FIX
+		spin_lock_irqsave(&SYNOEUnitLock, flags);
+		ap_host = scsi_host_lookup(i - 1);
+		spin_unlock_irqrestore(&SYNOEUnitLock, flags);
+		if (NULL == ap_host) {
+			continue;
+		}
+#else /* SYNO_EUNIT_DEADLOCK_FIX */
+		if (NULL == (ap_host = scsi_host_lookup(i - 1))) {
+			continue;
+		}
+#endif /* SYNO_EUNIT_DEADLOCK_FIX */
+
+		if (NULL == (ap = ata_shost_to_port(ap_host))) {
+			goto CONTINUE_FOR;
+		}
+
+		/* Step 0. This port must be a eunit */
+		if (!syno_is_synology_pm(ap)) {
+			goto CONTINUE_FOR;
+		}
+
+		/* Step 2. with the same ata host */
+			if (ap->host == pAp_master->host) {
+				unsigned long flags;
+				spin_lock_irqsave(ap->lock, flags);
+				if (blset) {
+					ap->pflags |= flag;
+				} else {
+					ap->pflags &= ~flag;
+				}
+				spin_unlock_irqrestore(ap->lock, flags);
+			}
+CONTINUE_FOR:
+		scsi_host_put(ap_host);
+		ap_host = NULL;
+		ap = NULL;
+	}
+END:
+	if (NULL != ap_host) {
+		scsi_host_put(ap_host);
+	}
 }
 
 /*
@@ -4298,7 +4360,7 @@ static struct ata_device *__ata_scsi_find_dev(struct ata_port *ap,
  *	RETURNS:
  *	Associated ATA device, or %NULL if not found.
  */
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 struct ata_device *
 ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
 #else
@@ -4313,7 +4375,7 @@ ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
 
 	return dev;
 }
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(ata_scsi_find_dev);
 #endif
 
@@ -5723,57 +5785,6 @@ int syno_libata_diskno_to_scsihostno(int iDiskNo)
 }
 EXPORT_SYMBOL(syno_libata_diskno_to_scsihostno);
 
-int syno_libata_disk_map_table_gen(int *iDiskMapTable)
-{
-	int iAtaHostCount = 0;
-	int iScsiHostIdx;
-	int iAtaHostIdx;
-	int iDiskIdx;
-	struct Scsi_Host *pScsiHost = NULL;
-	struct ata_port *pAp = NULL;
-	int iErr = -1;
-
-	if(NULL == iDiskMapTable) {
-		goto END;
-	}
-
-	for(iScsiHostIdx = 0; iAtaHostCount < (ata_print_id - 1); iScsiHostIdx++) {
-		if (NULL == (pScsiHost = scsi_host_lookup(iScsiHostIdx))) {
-			continue;
-		}
-
-		if (SYNO_PORT_TYPE_SAS == pScsiHost->hostt->syno_port_type) {
-			continue;
-		}
-		iAtaHostCount++;
-
-		pAp = ata_shost_to_port(pScsiHost);
-		if(!pAp) {
-			scsi_host_put(pScsiHost);
-			continue;
-		}
-
-		iAtaHostIdx = syno_libata_index_get_by_map(pAp->host);
-
-		if( 0 > iAtaHostIdx ) {
-			scsi_host_put(pScsiHost);
-			goto END;
-		}
-
-		iDiskIdx = pAp->print_id - pAp->host->ports[0]->print_id + iAtaHostIdx;
-
-		iDiskMapTable[iDiskIdx] = iScsiHostIdx;
-
-		scsi_host_put(pScsiHost);
-
-	}
-
-        iErr = 0;
-END:
-        return iErr;
-}
-EXPORT_SYMBOL(syno_libata_disk_map_table_gen);
-
 /* Provide a simple way to remap data port sequence in boot cmdline
  * Not apply to port multiplier
  * ex:
@@ -5789,6 +5800,7 @@ EXPORT_SYMBOL(syno_libata_disk_map_table_gen);
 #define SATA_REMAP_MAX  32
 #define SATA_REMAP_NOT_INIT 0xff
 static u8 syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
+static int use_sata_remap = 0;
 
 static int get_remap_idx(int origin_idx)
 {
@@ -5844,6 +5856,7 @@ static int __init early_sata_remap(char *p)
 
 	printk(KERN_INFO "SYNO: sata remap initialized\n");
 
+	use_sata_remap = 1;
 	return 0;
 
 FMT_ERR:
@@ -5854,6 +5867,85 @@ FMT_ERR:
 }
 
 __setup("sata_remap=", early_sata_remap);
+
+int syno_disk_map_table_gen_from_disk_idx_map (int *iDiskMapTable)
+{
+	int iAtaHostCount = 0;
+	int iScsiHostIdx;
+	int iAtaHostIdx;
+	int iDiskIdx;
+	struct Scsi_Host *pScsiHost = NULL;
+	struct ata_port *pAp = NULL;
+	int iErr = -1;
+
+	for(iScsiHostIdx = 0; iAtaHostCount < (ata_print_id - 1); iScsiHostIdx++) {
+		if (NULL == (pScsiHost = scsi_host_lookup(iScsiHostIdx))) {
+			continue;
+		}
+
+		if (SYNO_PORT_TYPE_SAS == pScsiHost->hostt->syno_port_type) {
+			continue;
+		}
+		iAtaHostCount++;
+
+		pAp = ata_shost_to_port(pScsiHost);
+		if(!pAp) {
+			scsi_host_put(pScsiHost);
+			continue;
+		}
+
+		iAtaHostIdx = syno_libata_index_get_by_map(pAp->host);
+
+		if( 0 > iAtaHostIdx ) {
+			scsi_host_put(pScsiHost);
+			goto END;
+		}
+
+		iDiskIdx = pAp->print_id - pAp->host->ports[0]->print_id + iAtaHostIdx;
+
+		iDiskMapTable[iDiskIdx] = iScsiHostIdx;
+
+		scsi_host_put(pScsiHost);
+	}
+
+	iErr = 0;
+END:
+
+	return iErr;
+}
+
+int syno_disk_map_table_gen_from_sata_remap (int *iDiskMapTable)
+{
+	int iAtaHostCount = 0;
+	int iDiskIdx;
+
+	while (iAtaHostCount < (ata_print_id - 1)) {
+		iDiskIdx = get_remap_idx(iAtaHostCount);
+		iDiskMapTable[iDiskIdx] = iAtaHostCount;
+		iAtaHostCount++;
+	}
+
+	return 0;
+}
+
+int syno_libata_disk_map_table_gen(int *iDiskMapTable)
+{
+	int iErr = -1;
+
+	if(NULL == iDiskMapTable) {
+		goto END;
+	}
+
+	if (0 < strlen(gszDiskIdxMap)) {
+		iErr = syno_disk_map_table_gen_from_disk_idx_map(iDiskMapTable);
+	} else if (1 == use_sata_remap) {
+		iErr = syno_disk_map_table_gen_from_sata_remap(iDiskMapTable);
+	}
+
+END:
+	return iErr;
+}
+EXPORT_SYMBOL(syno_libata_disk_map_table_gen);
 
 int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun)
 {

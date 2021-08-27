@@ -149,6 +149,9 @@ int ecryptfs_privileged_open(struct file **lower_file,
 	dget(lower_dentry);
 	mntget(lower_mnt);
 	flags |= IS_RDONLY(lower_dentry->d_inode) ? O_RDONLY : O_RDWR;
+#ifdef MY_ABC_HERE
+	lower_dentry->d_inode->i_opflags |= IOP_ECRYPTFS_LOWER_INIT;
+#endif
 	(*lower_file) = dentry_open(lower_dentry, lower_mnt, flags, cred);
 	if (!IS_ERR(*lower_file))
 		goto out;

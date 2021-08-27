@@ -4219,7 +4219,7 @@ no_journal:
 		Ext4Hash_lock_init=1;
 	}
 #endif
-#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
+#ifdef MY_DEF_HERE
 	{
 		char szDsmVersion[8] = {'\0'};
 		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);

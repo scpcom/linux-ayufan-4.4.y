@@ -600,7 +600,11 @@ static void ops_run_io(struct stripe_head *sh, struct stripe_head_state *s)
 			atomic_inc(&sh->count);
 			bi->bi_sector = sh->sector + rdev->data_offset;
 			bi->bi_flags = 1 << BIO_UPTODATE;
+#ifdef MY_ABC_HERE
+			bi->bi_vcnt = bi->bi_rw & REQ_DISCARD ? 0 : 1;
+#else
 			bi->bi_vcnt = 1;
+#endif
 			bi->bi_max_vecs = 1;
 			bi->bi_idx = 0;
 			bi->bi_io_vec = &sh->dev[i].vec;
@@ -4571,6 +4575,22 @@ static void make_discard_request(struct mddev *mddev, struct bio *bi)
 		/* Skip discard while reshape is happening */
 		return;
 
+#ifdef MY_ABC_HERE
+	/**
+	 * In order to avoid logical_sector being smaller than bi_sector, which
+	 * results in trimming some areas that contain data, add a STRIPE_SECTORS
+	 * to bi_sector if it is not aligned.
+	 */
+	if (bi->bi_sector & ((sector_t)STRIPE_SECTORS-1)) {
+		bi->bi_sector += STRIPE_SECTORS;
+		if (bi->bi_size > STRIPE_SIZE) {
+			bi->bi_size -= STRIPE_SIZE;
+		} else {
+			bi->bi_size = 0;
+		}
+	}
+#endif
+
 	logical_sector = bi->bi_sector & ~((sector_t)STRIPE_SECTORS-1);
 	last_sector = bi->bi_sector + (bi->bi_size>>9);
 
@@ -4601,13 +4621,21 @@ static void make_discard_request(struct mddev *mddev, struct bio *bi)
 			goto again;
 		}
 		clear_bit(R5_Overlap, &sh->dev[sh->pd_idx].flags);
+#ifdef MY_ABC_HERE
 		spin_lock_irq(&sh->lock);
+#else
+		spin_lock_irq(&sh->stripe_lock);
+#endif
 		for (d = 0; d < conf->raid_disks; d++) {
 			if (d == sh->pd_idx || d == sh->qd_idx)
 				continue;
 			if (sh->dev[d].towrite || sh->dev[d].toread) {
 				set_bit(R5_Overlap, &sh->dev[d].flags);
+#ifdef MY_ABC_HERE
 				spin_unlock_irq(&sh->lock);
+#else
+				spin_unlock_irq(&sh->stripe_lock);
+#endif
 				release_stripe(sh);
 				schedule();
 				goto again;
@@ -4622,7 +4650,11 @@ static void make_discard_request(struct mddev *mddev, struct bio *bi)
 			set_bit(R5_OVERWRITE, &sh->dev[d].flags);
 			raid5_inc_bi_active_stripes(bi);
 		}
+#ifdef MY_ABC_HERE
 		spin_unlock_irq(&sh->lock);
+#else
+		spin_unlock_irq(&sh->stripe_lock);
+#endif
 		if (conf->mddev->bitmap) {
 			for (d = 0;
 			     d < conf->raid_disks - conf->max_degraded;
@@ -4639,7 +4671,11 @@ static void make_discard_request(struct mddev *mddev, struct bio *bi)
 		clear_bit(STRIPE_DELAYED, &sh->state);
 		if (!test_and_set_bit(STRIPE_PREREAD_ACTIVE, &sh->state))
 			atomic_inc(&conf->preread_active_stripes);
+#ifdef MY_ABC_HERE
 		release_stripe(sh);
+#else
+		release_stripe_plug(mddev, sh);
+#endif
 	}
 
 	remaining = raid5_dec_bi_active_stripes(bi);
@@ -6292,6 +6328,10 @@ static int raid5_start_reshape(struct mddev *mddev)
 		return -EINVAL;
 	}
 
+#ifdef MY_ABC_HERE
+	mddev_suspend(mddev);
+#endif
+
 	atomic_set(&conf->reshape_stripes, 0);
 	spin_lock_irq(&conf->device_lock);
 	conf->previous_raid_disks = conf->raid_disks;
@@ -6308,12 +6348,15 @@ static int raid5_start_reshape(struct mddev *mddev)
 	conf->generation++;
 	spin_unlock_irq(&conf->device_lock);
 
+#ifdef MY_ABC_HERE
+#else /* This part is cherry-pick from open source */
 	/* Now make sure any requests that proceeded on the assumption
 	 * the reshape wasn't running - like Discard or Read - have
 	 * completed.
 	 */
 	mddev_suspend(mddev);
 	mddev_resume(mddev);
+#endif
 
 	/* Add some new drives, as many as will fit.
 	 * We know there are enough to make the newly sized array work.
@@ -6362,6 +6405,9 @@ static int raid5_start_reshape(struct mddev *mddev)
 	clear_bit(MD_RECOVERY_CHECK, &mddev->recovery);
 	set_bit(MD_RECOVERY_RESHAPE, &mddev->recovery);
 	set_bit(MD_RECOVERY_RUNNING, &mddev->recovery);
+#ifdef MY_ABC_HERE
+	mddev_resume(mddev);
+#endif
 	mddev->sync_thread = md_register_thread(md_do_sync, mddev,
 						"reshape");
 	if (!mddev->sync_thread) {

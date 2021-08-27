@@ -26,6 +26,9 @@
 #ifdef CONFIG_FS_SYNO_ACL
 #include <linux/syno_acl.h>
 #endif
+#ifdef MY_ABC_HERE
+#include <linux/xattr.h>
+#endif /* MY_ABC_HERE */
 
 MODULE_AUTHOR("Miklos Szeredi <miklos@szeredi.hu>");
 MODULE_DESCRIPTION("Filesystem in Userspace");
@@ -52,56 +55,6 @@ __MODULE_PARM_TYPE(max_user_congthresh, "uint");
 MODULE_PARM_DESC(max_user_congthresh,
  "Global limit for the maximum congestion threshold an "
  "unprivileged user can set");
-
-#ifdef MY_ABC_HERE
-
-#define DEFAULT_XATTR_EXPIRED_TIME 10000
-unsigned long syno_fuse_xattr_expired_time;
-unsigned long syno_fuse_xattr_expired_time_seconds;
-unsigned long syno_fuse_xattr_expired_time_milliseconds;
-static int set_expired_time(const char *val, struct kernel_param *kp);
-module_param_call(syno_fuse_xattr_expired_time, set_expired_time, param_get_ulong, &syno_fuse_xattr_expired_time, 0644);
-__MODULE_PARM_TYPE(syno_fuse_xattr_expired_time, "ulong");
-MODULE_PARM_DESC(syno_fuse_xattr_expired_time,
- "Global limit for the extended attribute cache expired time"
- " (unit: millisecond)");
-
-#if SYNO_FUSE_PROFILE
-unsigned long syno_fuse_xattr_profile_schedule_count;
-static int set_profile_schedule_count(const char *val, struct kernel_param *kp)
-{
-	int rv;
-
-	rv = param_set_ulong(val, kp);
-	if (rv)
-		return rv;
-
-	return 0;
-}
-module_param_call(syno_fuse_xattr_profile_schedule_count, set_profile_schedule_count, param_get_ulong, &syno_fuse_xattr_profile_schedule_count, 0644);
-__MODULE_PARM_TYPE(syno_fuse_xattr_profile_schedule_count, "ulong");
-MODULE_PARM_DESC(syno_fuse_xattr_profile_schedule_count,
- "PROFILE schedule count"
- " (unit: number)");
-
-unsigned long syno_fuse_xattr_profile_time;
-static int set_profile_time(const char *val, struct kernel_param *kp)
-{
-	int rv;
-
-	rv = param_set_ulong(val, kp);
-	if (rv)
-		return rv;
-
-	return 0;
-}
-module_param_call(syno_fuse_xattr_profile_time, set_profile_time, param_get_ulong, &syno_fuse_xattr_profile_time, 0644);
-__MODULE_PARM_TYPE(syno_fuse_xattr_profile_time, "ulong");
-MODULE_PARM_DESC(syno_fuse_xattr_profile_time,
- "PROFILE time"
- " (unit: microsecond)");
-#endif // SYNO_FUSE_PROFILE
-#endif // MY_ABC_HERE
 
 #define FUSE_SUPER_MAGIC 0x65735546
 
@@ -132,27 +85,6 @@ struct fuse_forget_link *fuse_alloc_forget(void)
 	return kzalloc(sizeof(struct fuse_forget_link), GFP_KERNEL);
 }
 
-#ifdef MY_ABC_HERE
-static void syno_fuse_reset_acl_cache_table(struct fuse_inode *fi)
-{
-	int i = 0;
-	if (!fi) {
-		goto END;
-	}
-
-	for (i = 0;i < SYNO_ACL_CACHE_TABLE_LEN; ++i) {
-		if (!fi->synoacl_cache_table[i].value) {
-			kfree(fi->synoacl_cache_table[i].value);
-		}
-		fi->synoacl_cache_table[i].value = NULL;
-		fi->synoacl_cache_table[i].size = 0;
-		fi->synoacl_cache_table[i].expired_time = 0;
-	}
-END:
-	return;
-}
-#endif
-
 static struct inode *fuse_alloc_inode(struct super_block *sb)
 {
 	struct inode *inode;
@@ -170,11 +102,6 @@ static struct inode *fuse_alloc_inode(struct super_block *sb)
 	fi->writectr = 0;
 	fi->orig_ino = 0;
 	fi->state = 0;
-
-#ifdef MY_ABC_HERE
-	syno_fuse_reset_acl_cache_table(fi);
-#endif
-
 	INIT_LIST_HEAD(&fi->write_files);
 	INIT_LIST_HEAD(&fi->queued_writes);
 	INIT_LIST_HEAD(&fi->writepages);
@@ -200,9 +127,6 @@ static void fuse_destroy_inode(struct inode *inode)
 	BUG_ON(!list_empty(&fi->write_files));
 	BUG_ON(!list_empty(&fi->queued_writes));
 	kfree(fi->forget);
-#ifdef MY_ABC_HERE
-	syno_fuse_reset_acl_cache_table(fi);
-#endif
 	call_rcu(&inode->i_rcu, fuse_i_callback);
 }
 
@@ -676,6 +600,52 @@ static int fuse_show_options(struct seq_file *m, struct vfsmount *mnt)
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static int fuse_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_version)
+{
+	int err = 0;
+	struct syno_xattr_archive_version value;
+	struct dentry *root = sb->s_root;
+
+	if (!IS_GLUSTER_FS_SB(sb)) {
+		return -EOPNOTSUPP;
+	}
+
+	value.v_magic = cpu_to_le16(0x2552);
+	value.v_struct_version = cpu_to_le16(1);
+	value.v_archive_version = cpu_to_le32(archive_version);
+
+	err = fuse_setxattr(root, XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_VERSION_VOLUME_GLUSTER, &value, sizeof(value), 0);
+
+	return err;
+}
+
+static int fuse_syno_get_sb_archive_ver(struct super_block *sb, u32 *version)
+{
+	int err = 0;
+	struct syno_xattr_archive_version value;
+	struct dentry *root = sb->s_root;
+
+	if (!IS_GLUSTER_FS_SB(sb)) {
+		return -EOPNOTSUPP;
+	}
+
+	memset(&value, 0, sizeof(value));
+	err = fuse_getxattr(root, XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_VERSION_VOLUME_GLUSTER, &value, sizeof(value));
+	if (0 < err) {
+		*version = le32_to_cpu(value.v_archive_version);
+		err = 0;
+	} else {
+		if (-ENODATA == err) {
+			err = 0;
+		}
+		*version = 0;
+	}
+
+	return err;
+}
+#endif /* MY_ABC_HERE */
+
 void fuse_conn_init(struct fuse_conn *fc)
 {
 	memset(fc, 0, sizeof(*fc));
@@ -761,8 +731,13 @@ static struct dentry *fuse_get_dentry(struct super_block *sb,
 
 		name.len = 1;
 		name.name = ".";
+#ifdef MY_ABC_HERE
+		err = fuse_lookup_name(sb, handle->nodeid, &name, &outarg,
+				       &inode, NULL, 0);
+#else
 		err = fuse_lookup_name(sb, handle->nodeid, &name, &outarg,
 				       &inode);
+#endif /* MY_ABC_HERE */
 		if (err && err != -ENOENT)
 			goto out_err;
 		if (err || !inode) {
@@ -871,8 +846,13 @@ static struct dentry *fuse_get_parent(struct dentry *child)
 
 	name.len = 2;
 	name.name = "..";
+#ifdef MY_ABC_HERE
+	err = fuse_lookup_name(child_inode->i_sb, get_node_id(child_inode),
+			       &name, &outarg, &inode, NULL, 0);
+#else
 	err = fuse_lookup_name(child_inode->i_sb, get_node_id(child_inode),
 			       &name, &outarg, &inode);
+#endif /* MY_ABC_HERE */
 	if (err) {
 		if (err == -ENOENT)
 			return ERR_PTR(-ESTALE);
@@ -903,6 +883,10 @@ static const struct super_operations fuse_super_operations = {
 	.umount_begin	= fuse_umount_begin,
 	.statfs		= fuse_statfs,
 	.show_options	= fuse_show_options,
+#ifdef MY_ABC_HERE
+	.syno_set_sb_archive_ver = fuse_syno_set_sb_archive_ver,
+	.syno_get_sb_archive_ver = fuse_syno_get_sb_archive_ver,
+#endif /* MY_ABC_HERE */
 };
 
 static void sanitize_global_limit(unsigned *limit)
@@ -927,29 +911,6 @@ static int set_global_limit(const char *val, struct kernel_param *kp)
 
 	return 0;
 }
-
-#ifdef MY_ABC_HERE
-static void sanitize_expired_time(unsigned long *expired_time)
-{
-	syno_fuse_xattr_expired_time_seconds = *expired_time;
-#define THOUSANDTH_TO_ONE 1000
-	syno_fuse_xattr_expired_time_milliseconds = do_div(syno_fuse_xattr_expired_time_seconds, THOUSANDTH_TO_ONE);
-	//printk("seconds: [%lu] milliseconds: [%lu]\n", syno_fuse_xattr_expired_time_seconds, syno_fuse_xattr_expired_time_milliseconds);
-}
-
-static int set_expired_time(const char *val, struct kernel_param *kp)
-{
-	int rv;
-
-	rv = param_set_ulong(val, kp);
-	if (rv)
-		return rv;
-
-	sanitize_expired_time((unsigned long *)kp->arg);
-
-	return 0;
-}
-#endif // MY_ABC_HERE
 
 static void process_init_limits(struct fuse_conn *fc, struct fuse_init_out *arg)
 {
@@ -1047,9 +1008,6 @@ static void fuse_send_init(struct fuse_conn *fc, struct fuse_req *req)
 		FUSE_EXPORT_SUPPORT | FUSE_BIG_WRITES | FUSE_DONT_MASK |
 		FUSE_SPLICE_WRITE | FUSE_SPLICE_MOVE | FUSE_SPLICE_READ |
 		FUSE_FLOCK_LOCKS | FUSE_IOCTL_DIR | FUSE_AUTO_INVAL_DATA |
-#ifdef SYNO_FUSE_KERNEL_MINOR_VERSION
-		SYNO_FUSE_ACL_CACHE |
-#endif
 		FUSE_DO_READDIRPLUS | FUSE_READDIRPLUS_AUTO | FUSE_ASYNC_DIO;
 	req->in.h.opcode = FUSE_INIT;
 	req->in.numargs = 1;
@@ -1440,11 +1398,7 @@ static int __init fuse_init(void)
 	int res;
 
 	printk(KERN_INFO "fuse init (API version %i.%i)\n",
-#ifdef SYNO_FUSE_KERNEL_MINOR_VERSION
-	       FUSE_KERNEL_VERSION, SYNO_FUSE_KERNEL_MINOR_VERSION);
-#else
 	       FUSE_KERNEL_VERSION, FUSE_KERNEL_MINOR_VERSION);
-#endif
 
 	INIT_LIST_HEAD(&fuse_conn_list);
 	res = fuse_fs_init();
@@ -1465,11 +1419,6 @@ static int __init fuse_init(void)
 
 	sanitize_global_limit(&max_user_bgreq);
 	sanitize_global_limit(&max_user_congthresh);
-
-#ifdef MY_ABC_HERE
-	syno_fuse_xattr_expired_time = DEFAULT_XATTR_EXPIRED_TIME;
-	sanitize_expired_time(&syno_fuse_xattr_expired_time);
-#endif
 
 	return 0;
 

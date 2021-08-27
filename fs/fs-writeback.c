@@ -32,6 +32,10 @@
 #include <linux/tracepoint.h>
 #include "internal.h"
 
+#if defined(CONFIG_SYNO_ARMADAXP_CPU_AFFINITY) || defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
+#include <linux/syno_affinity.h>
+#endif
+
 #ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_level;
@@ -934,6 +938,9 @@ int bdi_writeback_thread(void *data)
 	struct bdi_writeback *wb = data;
 	struct backing_dev_info *bdi = wb->bdi;
 	long pages_written;
+#if defined(CONFIG_SYNO_ARMADAXP_CPU_AFFINITY) || defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
+	SYNOSetTaskAffinity(current, 0);
+#endif
 
 	current->flags |= PF_SWAPWRITE;
 	set_freezable();

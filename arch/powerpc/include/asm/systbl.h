@@ -414,7 +414,7 @@ SYSCALL(SYNOUtime)             /* 402 */
 #else
 SYSCALL(ni_syscall)
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 SYSCALL(SYNOArchiveBit)        /* 403 */
 #else
 SYSCALL(ni_syscall)

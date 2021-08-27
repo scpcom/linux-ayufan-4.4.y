@@ -160,9 +160,6 @@ extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
 #endif
 
-int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
-EXPORT_SYMBOL(funcSYNODeepSleepEvent);
-
 /* param_buf is thrown away after initialization, disallow read */
 module_param_string(force, ata_force_param_buf, sizeof(ata_force_param_buf), 0);
 MODULE_PARM_DESC(force, "Force ATA configurations including cable type, link speed and transfer mode (see Documentation/kernel-parameters.txt for details)");
@@ -7413,6 +7410,9 @@ EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
 #ifdef MY_ABC_HERE
 EXPORT_SYMBOL_GPL(ata_dev_set_feature);
 #endif
+
+int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODeepSleepEvent);
 
 int (*funcSYNODiskPowerShortBreakReport)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNODiskPowerShortBreakReport);

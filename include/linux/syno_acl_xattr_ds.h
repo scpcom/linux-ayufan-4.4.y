@@ -18,6 +18,7 @@
 #define SYNO_ACL_XATTR_ACCESS_NOPERM	"system.syno_acl_noperm_self"
 #define SYNO_ACL_XATTR_INHERIT	"system.syno_acl_inherit"
 #define SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY	"system.syno_acl_pseudo_inherit_only"
+#define SYNO_ACL_XATTR_PERM "system.syno_acl_perm" // For glusterfs to get perm through syscall
 
 /* MAC EA Exttend attribute names */
 #define SYNO_XATTR_EA_PREFIX "user.syno."

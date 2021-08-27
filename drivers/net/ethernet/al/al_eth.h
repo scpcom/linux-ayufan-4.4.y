@@ -301,7 +301,7 @@ struct al_eth_adapter {
 
 	struct delayed_work	link_status_task;
 	uint32_t		link_poll_interval; /* task interval in mSec */
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ALPINE_SUPPORT_WOL
 	uint32_t		wol_opts;
 #endif
 

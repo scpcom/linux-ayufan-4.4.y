@@ -79,6 +79,9 @@ MV_CPU_CNTRS_EVENT	*event5 = NULL;
 
 unsigned int ext_switch_port_mask = 0;
 
+/* The counter for fail times of rx_refill */
+static int rx_refill_failed_count = 0;
+
 #ifdef MY_ABC_HERE
 extern MV_U32 syno_wol_support(struct eth_port *pp);
 #endif
@@ -1577,7 +1580,7 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq)
 {
 	struct net_device *dev;
 	MV_NETA_RXQ_CTRL *rx_ctrl = pp->rxq_ctrl[rxq].q;
-	int rx_done, rx_filled, err;
+	int rx_done, err;
 	struct neta_rx_desc *rx_desc;
 	u32 rx_status;
 	int rx_bytes;
@@ -1593,7 +1596,6 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq)
 		rx_todo = rx_done;
 
 	rx_done = 0;
-	rx_filled = 0;
 
 	/* Fairness NAPI loop */
 	while (rx_done < rx_todo) {
@@ -1607,7 +1609,6 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq)
 #endif /* CONFIG_MV_ETH_RX_DESC_PREFETCH */
 
 		rx_done++;
-		rx_filled++;
 
 #if defined(MV_CPU_BE)
 		mvNetaRxqDescSwap(rx_desc);
@@ -1684,9 +1685,11 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq)
 				/* Refill processing */
 				err = mv_eth_refill(pp, rxq, pkt, pool, rx_desc);
 				if (err) {
-					printk(KERN_ERR "Linux processing - Can't refill\n");
+					rx_refill_failed_count++;
+					if (rx_refill_failed_count % 100 == 1) {
+						printk(KERN_ERR "Linux processing - Can't refill #%d\n", rx_refill_failed_count);
+					}
 					pp->rxq_ctrl[rxq].missed++;
-					rx_filled--;
 				}
 				continue;
 			}
@@ -1704,7 +1707,6 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq)
 			if (status == MV_OK)
 				continue;
 			if (status == MV_FAIL) {
-				rx_filled--;
 				continue;
 			}
 			/* MV_TERMINATE - packet returned to slow path */
@@ -1732,6 +1734,19 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq)
 		}
 #endif /* CONFIG_NET_SKB_RECYCLE */
 
+		/* Refill processing: */
+		err = mv_eth_refill(pp, rxq, pkt, pool, rx_desc);
+		if (err) {
+			rx_refill_failed_count++;
+			if (rx_refill_failed_count % 100 == 1) {
+				printk(KERN_ERR "Linux processing - Can't refill #%d\n", rx_refill_failed_count);
+			}
+			pp->rxq_ctrl[rxq].missed++;
+			mv_eth_add_cleanup_timer(pp->cpu_config[smp_processor_id()]);
+			mv_eth_rx_error(pp, rx_desc);
+			continue;
+		}
+
 		if (skb)
 			mv_eth_rx_csum(pp, rx_desc, skb);
 
@@ -1750,20 +1765,11 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq)
 			rx_status = netif_receive_skb(skb);
 			STAT_DBG((rx_status == 0) ? 0 : pp->stats.rx_drop_sw++);
 		}
-
-		/* Refill processing: */
-		err = mv_eth_refill(pp, rxq, pkt, pool, rx_desc);
-		if (err) {
-			printk(KERN_ERR "Linux processing - Can't refill\n");
-			pp->rxq_ctrl[rxq].missed++;
-			mv_eth_add_cleanup_timer(pp->cpu_config[smp_processor_id()]);
-			rx_filled--;
-		}
 	}
 
 	/* Update RxQ management counters */
 	mvOsCacheIoSync();
-	mvNetaRxqDescNumUpdate(pp->port, rxq, rx_done, rx_filled);
+	mvNetaRxqDescNumUpdate(pp->port, rxq, rx_done, rx_done);
 
 	return rx_done;
 }

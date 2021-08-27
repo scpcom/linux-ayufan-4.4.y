@@ -4084,8 +4084,18 @@ static int __btrfs_alloc_chunk(struct btrfs_trans_handle *trans,
 	ncopies = btrfs_raid_array[index].ncopies;
 
 	if (type & BTRFS_BLOCK_GROUP_DATA) {
+#ifdef MY_ABC_HERE
+		if (info->super_copy->total_bytes > 1024ULL * 1024 * 1024 * 1024) {
+			max_stripe_size = 10ULL * 1024 * 1024 * 1024;
+			max_chunk_size = 2 * max_stripe_size;
+		} else {
 			max_stripe_size = 1024 * 1024 * 1024;
 			max_chunk_size = 10 * max_stripe_size;
+		}
+#else
+		max_stripe_size = 1024 * 1024 * 1024;
+		max_chunk_size = 10 * max_stripe_size;
+#endif
 	} else if (type & BTRFS_BLOCK_GROUP_METADATA) {
 		/* for larger filesystems, use larger metadata chunks */
 		if (fs_devices->total_rw_bytes > 50ULL * 1024 * 1024 * 1024)

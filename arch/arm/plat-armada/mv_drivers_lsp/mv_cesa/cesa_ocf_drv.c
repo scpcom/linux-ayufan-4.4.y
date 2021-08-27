@@ -1248,8 +1248,11 @@ cesa_ocf_exit(void)
 	kfree(cesa_ocf_pool);
 
 	for(chan = 0; chan < MV_CESA_CHANNELS; chan++) {
+#ifdef MY_ABC_HERE
+		free_irq(CESA_IRQ(chan), &chan_id[chan]);
+#else
 		free_irq(CESA_IRQ(chan), NULL);
-	
+#endif
 		/* mask and clear Int */
 		MV_REG_WRITE( MV_CESA_ISR_MASK_REG(chan), 0);
 		MV_REG_WRITE( MV_CESA_ISR_CAUSE_REG(chan), 0);

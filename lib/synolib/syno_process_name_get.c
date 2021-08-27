@@ -12,6 +12,7 @@
 #include <linux/namei.h>
 #include <linux/hardirq.h>
 #include <linux/security.h>
+#include <linux/uaccess.h>
 #include <asm/page.h>
 
 #ifdef MY_ABC_HERE
@@ -135,14 +136,24 @@ EXPORT_SYMBOL(syno_do_hibernation_inode_log);
  *
  * @param szFileName	[IN] The file name that is operated in FS system call
  */
-void syno_do_hibernation_filename_log(const char __user *szFileName)
+void syno_do_hibernation_filename_log(const char __user *szUserFileName)
 {
 	struct kstatfs Statfs;
 	struct path FilePath;
 	int iIno = 0;
+	char szFileName[MSG_SIZE];
 
-    if (NULL == szFileName) {
+	if (NULL == szUserFileName) {
 		goto END;
+	}
+
+	if (copy_from_user(szFileName, szUserFileName, MSG_SIZE)) {
+		goto END;
+	}
+	if (MSG_SIZE > strlen(szFileName)) {
+		strncpy(szFileName, szFileName, strlen(szFileName));
+	} else {
+		szFileName[MSG_SIZE-1] = '\0';
 	}
 
 	/* Get filepath  */
@@ -267,6 +278,7 @@ static void SynoHibernationLogForm(const int iIno ,const char __user *szFileName
 	/* These logs are only shown in higher log level */
 	if (3 > syno_hibernation_log_level) {
 		if (strstr(szFileName, "/usr/syno/lib") == szFileName || //loading share libraries are not likely to affect disk hibernation.
+			strstr(szFileName, "/usr/lib") == szFileName ||
 			strstr(szFileName, "/lib") == szFileName ||
 			strstr(szCurrent, "syslog-ng") != NULL ||
 			strstr(szCurrent, "swapper") != NULL || // the following message are not useful in most cases
@@ -307,9 +319,6 @@ static void SynoHibernationLogForm(const int iIno ,const char __user *szFileName
 
 	iErr = 0;
 END:
-    if (0 > iErr) {
-		printk(KERN_DEBUG"[Hibernation debug error]: Fail on hibernation log forming\n");
-    }
 	return;
 }
 

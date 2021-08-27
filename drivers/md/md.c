@@ -80,6 +80,10 @@ extern int SynoDebugFlag;
 #endif
 
 #ifdef MY_ABC_HERE
+extern struct rw_semaphore s_reshape_mount_key;
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
 EXPORT_SYMBOL(SYNORaidRdevUnplug);
 int SYNORaidDiskUnplug(char *szArgDiskName);
@@ -94,6 +98,10 @@ DEFINE_SPINLOCK(MdListLock);
 static void autostart_arrays(int part);
 #endif
 
+#if defined(CONFIG_SYNO_ARMADAXP_CPU_AFFINITY) || defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
+#include <linux/syno_affinity.h>
+#endif
+
 /* pers_list is a list of registered personalities protected
  * by pers_lock.
  * pers_lock does extra service to protect accesses to
@@ -103,7 +111,9 @@ static LIST_HEAD(pers_list);
 static DEFINE_SPINLOCK(pers_lock);
 
 static void md_print_devices(void);
+#ifdef MY_ABC_HERE
 static void md_update_sb(struct mddev * mddev, int force_change);
+#endif /* MY_ABC_HERE */
 
 static DECLARE_WAIT_QUEUE_HEAD(resync_wait);
 static struct workqueue_struct *md_wq;
@@ -484,10 +494,11 @@ static void md_make_request(struct request_queue *q, struct bio *bio)
  */
 void mddev_suspend(struct mddev *mddev)
 {
-	sector_t ori_suspend_lo, ori_suspend_hi;
 	BUG_ON(mddev->suspended);
 	mddev->suspended = 1;
 	synchronize_rcu();
+#ifdef MY_ABC_HERE
+	sector_t ori_suspend_lo, ori_suspend_hi;
 	ori_suspend_lo = mddev->suspend_lo;
 	ori_suspend_hi = mddev->suspend_hi;
 	mddev->suspend_lo = 0;
@@ -506,6 +517,9 @@ void mddev_suspend(struct mddev *mddev)
 
 	mddev->suspend_lo = ori_suspend_lo;
 	mddev->suspend_hi = ori_suspend_hi;
+#else /* MY_ABC_HERE */
+	wait_event(mddev->sb_wait, atomic_read(&mddev->active_io) == 0);
+#endif /* MY_ABC_HERE */
 	mddev->pers->quiesce(mddev, 1);
 
 	del_timer_sync(&mddev->safemode_timer);
@@ -5298,6 +5312,11 @@ int md_run(struct mddev *mddev)
 #ifdef MY_ABC_HERE
 	mddev->nodev_and_crashed = 0;
 #endif
+#ifdef MY_ABC_HERE
+	if (0 == strcmp("md0", mdname(mddev)) || 0 == strcmp("md1", mdname(mddev))) {
+		mddev->parallel_resync = 1;
+	}
+#endif /* MY_ABC_HERE */
 
 	if (start_readonly && mddev->ro == 0)
 		mddev->ro = 2; /* read-only, but switch on first write */
@@ -6977,6 +6996,9 @@ static const struct block_device_operations md_fops =
 static int md_thread(void * arg)
 {
 	struct md_thread *thread = arg;
+#if defined(CONFIG_SYNO_ARMADAXP_CPU_AFFINITY) || defined(CONFIG_SYNO_COMCERTO2K_CPU_AFFINITY)
+	SYNOSetTaskAffinity(current, 0);
+#endif
 
 	/*
 	 * md_thread is a 'system-thread', it's priority should be very
@@ -7740,7 +7762,11 @@ void md_do_sync(struct md_thread *thread)
 		rcu_read_unlock();
 	}
 
+#ifdef MY_ABC_HERE
+	printk(KERN_WARNING "md: %s of RAID array %s\n", desc, mdname(mddev));
+#else
 	printk(KERN_INFO "md: %s of RAID array %s\n", desc, mdname(mddev));
+#endif
 	printk(KERN_INFO "md: minimum _guaranteed_  speed:"
 		" %d KB/sec/disk.\n", speed_min(mddev));
 	printk(KERN_INFO "md: using maximum available idle IO bandwidth "
@@ -7879,7 +7905,15 @@ void md_do_sync(struct md_thread *thread)
 		}
 #endif
 	}
+#ifdef MY_ABC_HERE
+	if (test_bit(MD_RECOVERY_INTR, &mddev->recovery)) {
+		printk(KERN_WARNING "md: %s: %s stop due to MD_RECOVERY_INTR set.\n", mdname(mddev), desc);
+	} else {
+		printk(KERN_WARNING "md: %s: %s done.\n",mdname(mddev), desc);
+	}
+#else /* MY_ABC_HERE */
 	printk(KERN_INFO "md: %s: %s done.\n",mdname(mddev), desc);
+#endif /* MY_ABC_HERE */
 	/*
 	 * this also signals 'finished resyncing' to md_stop
 	 */
@@ -7939,8 +7973,12 @@ void md_do_sync(struct md_thread *thread)
 	/*
 	 * got a signal, exit.
 	 */
+#ifdef MY_ABC_HERE
+	printk(KERN_WARNING "md: md_do_sync() got signal ... exiting\n");
+#else /* MY_ABC_HERE */
 	printk(KERN_INFO
 	       "md: md_do_sync() got signal ... exiting\n");
+#endif /* MY_ABC_HERE */
 	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	goto out;
 
@@ -8077,12 +8115,17 @@ static void reap_sync_thread(struct mddev *mddev)
  */
 void md_check_recovery(struct mddev *mddev)
 {
-	if (mddev->suspended) {
+	if (mddev->suspended)
+#ifdef MY_ABC_HERE
+	{
 		if (mddev->flags & MD_UPDATE_SB_FLAGS) {
 			wake_up(&mddev->sb_wait);
 		}
 		return;
 	}
+#else /* MY_ABC_HERE */
+		return
+#endif /* MY_ABC_HERE */
 
 	if (mddev->bitmap)
 		bitmap_daemon_work(mddev);
@@ -8159,7 +8202,15 @@ void md_check_recovery(struct mddev *mddev)
 			goto unlock;
 		}
 		if (mddev->sync_thread) {
+#ifdef MY_ABC_HERE
+			if (0 == down_write_trylock(&s_reshape_mount_key)) {
+				goto unlock;
+			}
 			reap_sync_thread(mddev);
+			up_write(&s_reshape_mount_key);
+#else /* MY_ABC_HERE */
+			reap_sync_thread(mddev);
+#endif /* MY_ABC_HERE */
 			goto unlock;
 		}
 		/* Set RUNNING before clearing NEEDED to avoid

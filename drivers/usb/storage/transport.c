@@ -606,6 +606,16 @@ void usb_stor_invoke_transport(struct scsi_cmnd *srb, struct us_data *us)
 	int need_auto_sense;
 	int result;
 
+#ifdef MY_ABC_HERE
+	if (SYNCHRONIZE_CACHE == srb->cmnd[0] &&
+		0x0984 == le16_to_cpu(us->pusb_dev->descriptor.idVendor) &&
+		0x1403 == le16_to_cpu(us->pusb_dev->descriptor.idProduct)) {
+		srb->result = SAM_STAT_GOOD;
+		msleep(3000);
+		return;
+	}
+#endif /* MY_ABC_HERE */
+
 	/* send the command to the transport layer */
 	scsi_set_resid(srb, 0);
 	result = us->transport(srb, us);

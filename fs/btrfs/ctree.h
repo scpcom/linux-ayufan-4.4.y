@@ -715,6 +715,9 @@ enum btrfs_compression_type {
 	BTRFS_COMPRESS_LZO   = 2,
 	BTRFS_COMPRESS_TYPES = 2,
 	BTRFS_COMPRESS_LAST  = 3,
+#ifdef MY_ABC_HERE
+	BTRFS_COMPRESS_DEFAULT = 2,
+#endif
 };
 
 struct btrfs_inode_item {
@@ -1619,7 +1622,10 @@ struct btrfs_fs_info {
 	struct btrfs_balance_control *balance_ctl;
 	wait_queue_head_t balance_wait_q;
 
+#ifdef MY_ABC_HERE
+#else
 	unsigned data_chunk_allocations;
+#endif
 	unsigned metadata_ratio;
 
 	void *bdev_holder;

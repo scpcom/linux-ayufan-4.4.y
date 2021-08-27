@@ -697,10 +697,17 @@ show_signal_msg(struct pt_regs *regs, unsigned long error_code,
 	if (!printk_ratelimit())
 		return;
 
+#ifdef CONFIG_SYNO_ELEVATE_LOG_LEVEL
+	printk("%s%s[%d]: segfault at %lx ip %p sp %p error %lx",
+		task_pid_nr(tsk) > 1 ? KERN_WARNING : KERN_EMERG,
+		tsk->comm, task_pid_nr(tsk), address,
+		(void *)regs->ip, (void *)regs->sp, error_code);
+#else
 	printk("%s%s[%d]: segfault at %lx ip %p sp %p error %lx",
 		task_pid_nr(tsk) > 1 ? KERN_INFO : KERN_EMERG,
 		tsk->comm, task_pid_nr(tsk), address,
 		(void *)regs->ip, (void *)regs->sp, error_code);
+#endif /*CONFIG_SYNO_ELEVATE_LOG_LEVEL*/
 
 	print_vma_addr(KERN_CONT " in ", regs->ip);
 

@@ -385,12 +385,27 @@ qh_completions (struct ehci_hcd *ehci, struct ehci_qh *qh)
 			 */
 			if ((token & QTD_STS_HALT) != 0) {
 
+#ifdef MY_ABC_HERE
+				struct usb_device *udev = urb->dev;
+				int more_xact_tries = 0;
+
+				if (udev &&
+					(udev->syno_usb_quirks &
+					 SYNO_USB_QUIRKS_HC_MORE_TRANSACTION_TRIES)) {
+					more_xact_tries = 500;
+				}
+#endif /* MY_ABC_HERE */
+
 				/* retry transaction errors until we
 				 * reach the software xacterr limit
 				 */
 				if ((token & QTD_STS_XACT) &&
 						QTD_CERR(token) == 0 &&
+#ifdef MY_ABC_HERE
+						++qh->xacterrs < QH_XACTERR_MAX + more_xact_tries &&
+#else
 						++qh->xacterrs < QH_XACTERR_MAX &&
+#endif /* MY_ABC_HERE */
 						!urb->unlinked) {
 					ehci_dbg(ehci,
 	"detected XactErr len %zu/%zu retry %d\n",
@@ -409,6 +424,11 @@ qh_completions (struct ehci_hcd *ehci, struct ehci_qh *qh)
 					wmb();
 					hw->hw_token = cpu_to_hc32(ehci,
 							token);
+#ifdef MY_ABC_HERE
+					if (qh->xacterrs >= QH_XACTERR_MAX)
+						mdelay(1);
+#endif /* MY_ABC_HERE */
+
 					goto retry_xacterr;
 				}
 				stopped = 1;

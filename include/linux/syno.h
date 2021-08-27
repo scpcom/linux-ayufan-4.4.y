@@ -16,20 +16,8 @@
 #define SYNO_HAVE_GCC_VERSION(a,b) (__GNUC__ > (a) || (__GNUC__ == (a) && __GNUC_MINOR__ >= (b)))
 #define SYNO_HAVE_GLIBC_VERSION(a,b) ( __GLIBC__ > (a) || (__GLIBC__ == (a) && __GLIBC_MINOR__ >= (b)))
 
-#if defined(CONFIG_SYNO_X64) && defined(CONFIG_SYNO_CEDARVIEW)
-#define SYNO_CEDARVIEW_USE_EFI_REBOOT
-#endif
-
 #if defined(CONFIG_SYNO_X64)
 #define SYNO_X86_AUTO_POWER_ON
-#endif
-
-#if defined(CONFIG_SYNO_X64)
-#define SYNO_PINEVIEW_SYSTEMP
-#endif
-
-#if defined(CONFIG_SYNO_X64)
-#define SYNO_PINEVIEW_SUPERIO_RW
 #endif
 
 #if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
@@ -62,10 +50,6 @@
 #define SYNO_PCH_GPIO_CTRL
 #endif
 
-#if defined(CONFIG_ARCH_FEROCEON) && defined(CONFIG_SATA_MV)
-#define SYNO_6281_SOC_USE_OPENSOURCE_SATA
-#endif
-
 #if defined(CONFIG_SYNO_DUAL_HEAD)
 #define SYNO_SATA_DOM_VENDOR_SAMPLE_RUN_2	"SATADOM "
 #define SYNO_SATA_DOM_MODEL_SAMPLE_RUN_2	"D150SH"
@@ -78,10 +62,6 @@
 #endif
 
 #define SYNO_MAC_MAX_V2 8
-
-#ifdef CONFIG_SYNO_MV88F6281
-#define SYNO_FLASH_MEMORY_SIZE
-#endif
 
 #if defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64) || defined(CONFIG_ARCH_FEROCEON)
 
@@ -99,49 +79,10 @@
 #define SYNO_6281_MTU_WA
 #endif
 
-#if defined(CONFIG_PPC_85xx)
-#define SYNO_IPV6_110p_IPV6_READY
-#endif
-
 #define USBCOPY_PORT_LOCATION 99
 
 #ifdef MY_ABC_HERE
 #define SDCOPY_PORT_LOCATION 98
-#endif
-#if 0
- 
-#define SYNO_USB_STOR_COMP_ENHANCE
-#endif
-
-#if 0
- 
-#define SYNO_USB_UPS_COMP_ENHANCE
-#endif
-
-#if 0
- 
-#define SYNO_USB3_TIMEOUT
-#endif
-#if 0
-#define SYNO_USB3_RESET_RETRY
-#define SYNO_USB3_STALL_WAIT
-#endif
- 
-#if 0
- 
-#define SYNO_USB3_DEBUG
-
-#define SYNO_USB3_ERR_MONITOR
-#endif
-
-#if 0
- 
-#define SYNO_USB3_SPECIAL_RESET
-#endif
-
-#if 0
- 
-#define SYNO_USB3_RESET_FOR_ADDR_ERR
 #endif
 
 #ifdef MY_ABC_HERE
@@ -151,15 +92,6 @@
 #define SYNO_MD_CHUNK_SIZE 65536
 
 #define SYNO_FIX_MD_RESIZE_BUSY_LOOP 5
-
-#if defined(CONFIG_SYNO_X64)
- 
-#define SYNO_ATA_AHCI_LED_MSG
-#endif
-
-#ifdef CONFIG_SYNO_X64
-#define SYNO_ENLARGE_RX_NOISE_TRRESHOLD
-#endif
 
 #if	defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
  
@@ -175,21 +107,15 @@
 #else  
 #endif  
 
-#ifdef CONFIG_SYNO_MV88F6281
-#define SYNO_LIBATA_JMB_BEHAVIOR
-#endif
-
 #if defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_QORIQ)
 #ifdef MY_ABC_HERE
-#define SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
-#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
+#ifdef MY_DEF_HERE
 #define SYNO_CREATE_TIME_SWAP_VERSION 3719
 #endif
 #endif
 #endif
 
-#define SYNO_ARCHIVE_BIT
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 
 #if defined (F_CLEAR_ARCHIVE) || defined (F_SETSMB_ARCHIVE) || defined (F_SETSMB_HIDDEN) || \
 	defined (F_SETSMB_SYSTEM) || defined (F_CLRSMB_ARCHIVE) || defined (F_CLRSMB_HIDDEN) || \
@@ -245,14 +171,6 @@
 #define SYNO_SLOW_DOWN_UEVENT
 #endif
 
-#if defined(CONFIG_SYNO_MV88F6281) && !defined(CONFIG_SYNO_MV88F6281_USBSTATION)
-#define SYNO_CPUFREQ_ADJUST
-#endif
-
-#if defined(CONFIG_SYNO_X64)
-#define SYNO_LIMIT_CPU_CORES
-#endif
-
 #ifdef MY_ABC_HERE
 #define MAX_CHANNEL_RETRY       2
 #define CHANNEL_RETRY_INTERVAL  (3*HZ)
@@ -271,10 +189,6 @@
 #define SYNO_NFSD_UDP_DEF_PACKET_SIZE 8192
 #endif
 
-#if defined(CONFIG_SYNO_X64) || defined(SYNO_X64)
-#define SYNO_ECC_NOTIFICATION
-#endif
-
 #ifdef MY_ABC_HERE
 #define SYNO_SATA_DEVICE_PREFIX	   "sd"
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"
@@ -286,15 +200,9 @@
 #endif  
 #endif
 
-#if defined(CONFIG_SYNO_MV88F6281) || defined(SYNO_MARVELL_88F6180) || defined(SYNO_MARVELL_88F6281)
-#define SYNO_ARM_GENERIC_ATOMIC64
-#endif
-
 #if defined(CONFIG_SYNO_BROMOLOW)
  
 #define SYNO_SAS_MPT2_HOTPLUG_PHY
-
-#define SYNO_SAS_LINK_HOTPLUG_UEVENT
 
 #define SYNO_SAS_RECOVER_REMOVED_ENCS
 
@@ -326,8 +234,19 @@
 #define SYNO_LPC_ICH_GPIO_CTRL
 #endif
 
+#ifdef CONFIG_SYNO_ALPINE
+#define SYNO_ALPINE_TEMP_FIXME_PATCH
+#define SYNO_ALPINE_ARCH
+#define SYNO_ALPINE_SUPPORT_WOL
+#define SYNO_ALPINE_SW_SATA_LED
+#endif
+
 #ifdef CONFIG_SYNO_AVOTON
 #define SYNO_SATA_PM_FIRST_PORT_DELAY
 #endif
+
+#if defined(MY_ABC_HERE) && defined(CONFIG_SYNO_ALPINE)
+#define SYNO_EUNIT_DEADLOCK_FIX
+#endif  
 
 #endif  

@@ -11,15 +11,10 @@
 #define NEED_INODE_ACL_SUPPORT 0x0004
 #define NEED_FS_ACL_SUPPORT 0x0008
 
-#define SYNOACL_XATTR_CHGNAME(name) \
-	if (!strcmp(name, SYNO_ACL_XATTR_ACCESS)) { \
-		name = SYNO_ACL_XATTR_ACCESS_NOPERM; \
-	}
-
 struct synoacl_syscall_operations {
-	int (*get_perm) (const char *szPath, int __user *pOutPerm);
-	int (*is_acl_support) (const char *szPath, int fd, int tag);
-	int (*check_perm) (const char *szPath, int mask);
+	int (*get_perm) (struct dentry *dentry, int *allow_out);
+	int (*is_acl_support) (struct dentry *dentry, int tag);
+	int (*check_perm) (struct dentry *dentry, int mask);
 };
 
 struct synoacl_vfs_operations {
@@ -27,7 +22,7 @@ struct synoacl_vfs_operations {
 	int (*syno_acl_may_delete) (struct dentry *, struct inode *, int);
 	int (*syno_acl_setattr_post) (struct dentry *dentry, struct iattr *);
 	int (*syno_inode_change_ok) (struct dentry *d, struct iattr *attr);
-	int (*syno_acl_access) (struct dentry *d, int mask);
+	int (*syno_acl_access) (struct dentry *d, int mask, int syno_acl_access);
 	void (*syno_acl_to_mode) (struct dentry *d, struct kstat *stat);
 	int (*syno_acl_exec_permission) (struct dentry *d);
 	int (*syno_acl_permission)(struct dentry *d, int mask);
@@ -40,7 +35,7 @@ int synoacl_mod_may_delete(struct dentry *, struct inode *);
 int synoacl_mod_setattr_post(struct dentry *, struct iattr *);
 int synoacl_mod_init_acl(struct dentry *, struct inode *);
 int synoacl_mod_inode_change_ok(struct dentry *, struct iattr *);
-int synoacl_mod_access(struct dentry *, int);
+int synoacl_mod_access(struct dentry *, int, int);
 void synoacl_mod_to_mode(struct dentry *, struct kstat *);
 int synoacl_mod_exec_permission(struct dentry *);
 int synoacl_mod_permission(struct dentry *, int);
@@ -67,14 +62,14 @@ static inline int synoacl_op_exec_perm(struct dentry * dentry, struct inode * in
 	return synoacl_mod_exec_permission(dentry);
 }
 
-static inline int synoacl_op_access(struct dentry * dentry, int mode)
+static inline int synoacl_op_access(struct dentry * dentry, int mode, int syno_acl_access)
 {
 	struct inode *inode = dentry->d_inode;
 
 	if (inode->i_op->syno_acl_access) {
-		return inode->i_op->syno_acl_access(dentry, mode);
+		return inode->i_op->syno_acl_access(dentry, mode, syno_acl_access);
 	}
-	return synoacl_mod_access(dentry, mode);
+	return synoacl_mod_access(dentry, mode, syno_acl_access);
 }
 
 static inline int synoacl_op_may_delete(struct dentry *victim, struct inode *dir)

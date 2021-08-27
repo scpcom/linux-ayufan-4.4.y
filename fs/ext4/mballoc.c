@@ -5025,9 +5025,11 @@ ext4_trim_all_free(struct super_block *sb, ext4_group_t group,
 
 	ext4_lock_group(sb, group);
 
+#ifndef MY_ABC_HERE
 	if (EXT4_MB_GRP_WAS_TRIMMED(e4b.bd_info) &&
 	    minblocks >= atomic_read(&EXT4_SB(sb)->s_last_trim_minblks))
 		goto out;
+#endif
 
 	start = (e4b.bd_info->bb_first_free > start) ?
 		e4b.bd_info->bb_first_free : start;

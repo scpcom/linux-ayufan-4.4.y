@@ -69,7 +69,7 @@
 #define VENDOR_ID_PENTAX	0x0a17
 #define VENDOR_ID_MOTOROLA	0x22b8
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 extern struct usb_hub *hdev_to_hub(struct usb_device *hdev);
 extern int syno_get_hub_eh(struct usb_hub *hub);
 #endif
@@ -235,6 +235,12 @@ static int slave_configure(struct scsi_device *sdev)
 		 * revision level down to 2.  The only devices that would be
 		 * affected are those with sparse LUNs. */
 		if (sdev->scsi_level > SCSI_2)
+#ifdef MY_ABC_HERE
+			if (0x13fe == le16_to_cpu(us->pusb_dev->descriptor.idVendor) &&
+			  0x5200 == le16_to_cpu(us->pusb_dev->descriptor.idProduct))
+				printk(KERN_INFO " skip adjusting scsi_level of Phison flash\n");
+			else
+#endif /* MY_ABC_HERE */
 			sdev->sdev_target->scsi_level =
 					sdev->scsi_level = SCSI_2;
 
@@ -332,7 +338,7 @@ static DEF_SCSI_QCMD(queuecommand)
  * Error handling functions
  ***********************************************************************/
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 static void wait_for_hub_EH(struct us_data *us)
 {
 	struct usb_device *udev = us->pusb_dev;
@@ -351,7 +357,7 @@ static int command_abort(struct scsi_cmnd *srb)
 
 	US_DEBUGP("%s called\n", __func__);
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 	wait_for_hub_EH(us);
 #endif
 
@@ -392,7 +398,7 @@ static int device_reset(struct scsi_cmnd *srb)
 
 	US_DEBUGP("%s called\n", __func__);
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 	wait_for_hub_EH(us);
 #endif
 
@@ -410,7 +416,7 @@ static int bus_reset(struct scsi_cmnd *srb)
 	struct us_data *us = host_to_us(srb->device->host);
 	int result;
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 	wait_for_hub_EH(us);
 #endif
 
@@ -427,7 +433,7 @@ void usb_stor_report_device_reset(struct us_data *us)
 	int i;
 	struct Scsi_Host *host = us_to_host(us);
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 	wait_for_hub_EH(us);
 #endif
 
@@ -445,7 +451,7 @@ void usb_stor_report_bus_reset(struct us_data *us)
 {
 	struct Scsi_Host *host = us_to_host(us);
 
-#ifdef SYNO_USB_STOR_COMP_ENHANCE
+#ifdef MY_DEF_HERE
 	wait_for_hub_EH(us);
 #endif
 

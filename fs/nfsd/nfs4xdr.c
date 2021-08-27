@@ -2040,6 +2040,10 @@ nfsd4_encode_fattr(struct svc_fh *fhp, struct svc_export *exp,
 	err = vfs_getattr(exp->ex_path.mnt, dentry, &stat);
 	if (err)
 		goto out_nfserr;
+#ifdef CONFIG_FS_SYNO_ACL
+	else if (IS_SYNOACL(dentry) && current_fsuid() == 0)
+		stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
 	if ((bmval0 & (FATTR4_WORD0_FILES_FREE | FATTR4_WORD0_FILES_TOTAL |
 			FATTR4_WORD0_MAXNAME)) ||
 	    (bmval1 & (FATTR4_WORD1_SPACE_AVAIL | FATTR4_WORD1_SPACE_FREE |
@@ -2414,6 +2418,10 @@ out_acl:
 					break;
 			}
 			err = vfs_getattr(path.mnt, path.dentry, &stat);
+#ifdef CONFIG_FS_SYNO_ACL
+			if (!err && IS_SYNOACL(path.dentry) && current_fsuid() == 0)
+				stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
 			path_put(&path);
 			if (err)
 				goto out_nfserr;

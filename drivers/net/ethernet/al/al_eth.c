@@ -4115,7 +4115,7 @@ static int al_eth_set_eee(struct net_device *netdev,
 }
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ALPINE_SUPPORT_WOL
 #define MAC_ADDR_LEN      (6)
 
 void syno_alpine_wol_set_wrapper(unsigned int device)
@@ -4214,7 +4214,7 @@ static const struct ethtool_ops al_eth_ethtool_ops = {
 	.get_drvinfo		= al_eth_get_drvinfo,
 /*	.get_regs_len		= al_eth_get_regs_len,*/
 /*	.get_regs		= al_eth_get_regs,*/
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ALPINE_SUPPORT_WOL
 	.get_wol		= al_eth_get_wol,
 	.set_wol		= al_eth_set_wol,
 #endif

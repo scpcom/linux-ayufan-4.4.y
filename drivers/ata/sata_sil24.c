@@ -390,73 +390,11 @@ static const struct pci_device_id sil24_pci_tbl[] = {
 	{ } /* terminate list */
 };
 
-#ifdef SYNO_ATA_SHUTDOWN_FIX
-#ifdef CONFIG_SYNO_X64
-extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
-extern int grgPwrCtlPin[];
-static int syno_pulldown_eunit_gpio(struct ata_port *ap)
-{
-	int iRet = -1;
-	int iValue = 0;
-	int iPin = -1;
-
-	/* Due to EUnit is edge trigger, we have to pull the GPIO PIN to low before EUnit poweroff */
-	if (!(iPin = grgPwrCtlPin[ap->print_id])) { /* get pwrctl GPIO pin */
-		goto END;
-	}
-	iValue = 0;
-	if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
-		goto END;
-	}
-	mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
-
-	iRet = 0;
-END:
-	return iRet;
-}
-#endif /* CONFIG_SYNO_X64 */
-
-extern int gSynoSystemShutdown;
-
-void sil24_pci_shutdown(struct pci_dev *pdev){
-	int i;
-	struct ata_host *host = dev_get_drvdata(&pdev->dev);
-	struct Scsi_Host *shost;
-
-	if(NULL == host){
-		goto END;
-	}
-
-	// gSynoSystemShutdown = 1 means the host is going to poweroff
-	if (1 == gSynoSystemShutdown) {
-		for (i = 0; i < host->n_ports; i++) {
-			shost = host->ports[i]->scsi_host;
-			if (shost->hostt->syno_host_poweroff_task) {
-				shost->hostt->syno_host_poweroff_task(shost);
-			}
-#ifdef CONFIG_SYNO_X64
-			syno_pulldown_eunit_gpio(host->ports[i]);
-#endif /* CONFIG_SYNO_X64 */
-		}
-	}
-
-	if (pdev->irq >= 0) {
-		free_irq(pdev->irq, host);
-		pdev->irq = -1;
-	}
-END:
-	return;
-}
-#endif /* SYNO_ATA_SHUTDOWN_FIX */
-
 static struct pci_driver sil24_pci_driver = {
 	.name			= DRV_NAME,
 	.id_table		= sil24_pci_tbl,
 	.probe			= sil24_init_one,
 	.remove			= ata_pci_remove_one,
-#ifdef SYNO_ATA_SHUTDOWN_FIX
-	.shutdown		= sil24_pci_shutdown,
-#endif
 #ifdef CONFIG_PM
 	.suspend		= ata_pci_device_suspend,
 	.resume			= sil24_pci_device_resume,

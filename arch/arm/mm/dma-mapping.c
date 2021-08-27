@@ -637,7 +637,7 @@ static inline void __dmac_map_area(const void *kaddr, size_t size,
 	dmac_map_area(kaddr, size, dir);
 }
 
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_ARMADA_375)
+#if defined(CONFIG_SYNO_COMCERTO)
 static inline void __dmac_unmap_area(const void *kaddr, size_t size,
 	int dir)
 {
@@ -788,7 +788,7 @@ void ___dma_single_cpu_to_dev(const void *kaddr, size_t size,
 	paddr = __pa(kaddr);
 #endif
 
-#if !(defined(CONFIG_ARMADA_375) || defined(CONFIG_SYNO_COMCERTO)) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	if (dir == DMA_FROM_DEVICE) {
 		outer_inv_range(paddr, paddr + size);
 	} else {
@@ -817,7 +817,7 @@ void ___dma_single_dev_to_cpu(const void *kaddr, size_t size,
 	/* FIXME: non-speculating: not required */
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_ARMADA_375)
+#if defined(CONFIG_SYNO_COMCERTO)
 #if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	/* don't bother invalidating if DMA to device */
 	if (dir != DMA_TO_DEVICE) {
@@ -921,7 +921,7 @@ void ___dma_page_cpu_to_dev(struct page *page, unsigned long off,
 	paddr = page_to_phys(page) + off;
 #endif
 
-#if !(defined(CONFIG_ARMADA_375) || defined(CONFIG_SYNO_COMCERTO)) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
+#if !defined(CONFIG_SYNO_COMCERTO) || !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	if (dir == DMA_FROM_DEVICE) {
 		outer_inv_range(paddr, paddr + size);
 	} else {
@@ -946,7 +946,7 @@ void ___dma_page_dev_to_cpu(struct page *page, unsigned long off,
 	/* FIXME: non-speculating: not required */
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_ARMADA_375)
+#if defined(CONFIG_SYNO_COMCERTO)
 #if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 	/* don't bother invalidating if DMA to device */
 	if (dir != DMA_TO_DEVICE) {

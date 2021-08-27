@@ -48,7 +48,7 @@
 #include <linux/gfp.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 #include <scsi/scsi.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
@@ -686,73 +686,11 @@ END:
 EXPORT_SYMBOL(syno_mv_9235_disk_led_set);
 #endif /* MY_ABC_HERE*/
 
-#ifdef SYNO_ATA_SHUTDOWN_FIX
-#ifdef CONFIG_SYNO_X64
-extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
-extern int grgPwrCtlPin[];
-
-static int syno_pulldown_eunit_gpio(struct ata_port *ap)
-{
-	int iRet = -1;
-	int iValue = 0;
-	int iPin = -1;
-
-	/* Due to EUnit is edge trigger, we have to pull the GPIO PIN to low before EUnit poweroff */
-	if (!(iPin = grgPwrCtlPin[ap->print_id])) { /* get pwrctl GPIO pin */
-		goto END;
-	}
-	iValue = 0;
-	if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
-		goto END;
-	}
-	mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
-
-	iRet = 0;
-END:
-	return iRet;
-}
-#endif /* CONFIG_SYNO_X64 */
-
-extern int gSynoSystemShutdown;
-void ahci_pci_shutdown(struct pci_dev *pdev){
-	int i;
-	struct ata_host *host = dev_get_drvdata(&pdev->dev);
-	struct Scsi_Host *shost;
-
-	if(NULL == host){
-		 goto END;
-	}
-
-	// gSynoSystemShutdown = 1 means the host is going to poweroff
-	if (1 == gSynoSystemShutdown) {
-		for (i = 0; i < host->n_ports; i++) {
-			shost = host->ports[i]->scsi_host;
-			if (shost->hostt->syno_host_poweroff_task) {
-				shost->hostt->syno_host_poweroff_task(shost);
-			}
-#ifdef CONFIG_SYNO_X64
-			syno_pulldown_eunit_gpio(host->ports[i]);
-#endif /* CONFIG_SYNO_X64 */
-		}
-	}
-
-	if (pdev->irq >= 0) {
-		free_irq(pdev->irq, host);
-		pdev->irq = -1;
-	}
-END:
-	return;
-}
-#endif
-
 static struct pci_driver ahci_pci_driver = {
 	.name			= DRV_NAME,
 	.id_table		= ahci_pci_tbl,
 	.probe			= ahci_init_one,
 	.remove			= ata_pci_remove_one,
-#ifdef SYNO_ATA_SHUTDOWN_FIX
-	.shutdown		= ahci_pci_shutdown,
-#endif
 #ifdef CONFIG_PM
 	.suspend		= ahci_pci_device_suspend,
 	.resume			= ahci_pci_device_resume,
@@ -1370,7 +1308,7 @@ static inline void ahci_gtf_filter_workaround(struct ata_host *host)
 {}
 #endif
 
-#ifdef SYNO_LIBATA_JMB_BEHAVIOR
+#ifdef MY_DEF_HERE
 extern void ata_port_wait_eh(struct ata_port *ap);
 extern void ata_scsi_scan_host(struct ata_port *ap, int sync);
 #endif
@@ -1599,7 +1537,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		syno_mv_9235_gpio_active_init(host);
 	}
 #endif /* MY_ABC_HERE */
-#ifdef SYNO_LIBATA_JMB_BEHAVIOR
+#ifdef MY_DEF_HERE
 	/* Only wait for JMiron in 6281 platform */
 	if (pdev->vendor != PCI_VENDOR_ID_JMICRON) {
 		rc = ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,

@@ -1875,8 +1875,26 @@ static int fix_sync_read_error(struct r1bio *r1_bio)
 				if (!rdev || test_bit(Faulty, &rdev->flags))
 					continue;
 				if (!rdev_set_badblocks(rdev, sect, s, 0))
+#ifdef MY_ABC_HERE
+				{
+#ifdef MY_ABC_HERE
+					if (test_bit(In_sync, &rdev->flags) && !test_bit(DiskError, &rdev->flags)) {
+						printk(KERN_ERR "md/raid1:%s: mard disk error on %s due to unrecoverable sync read error\n", mdname(mddev), bdevname(rdev->bdev, b));
+						set_bit(DiskError, &rdev->flags);
+						set_bit(MD_CHANGE_DEVS, &mddev->flags);
+					} else
+#endif /* MY_ABC_HERE */
+					if (!test_bit(Faulty, &rdev->flags) && !test_bit(In_sync, &rdev->flags)) {
+						printk(KERN_ERR "md/raid1:%s: remove %s from raid due to unrecoverable sync read error\n", mdname(mddev), bdevname(rdev->bdev, b));
+						SYNORaidRdevUnplug(mddev, rdev);
+					}
+					mddev->recovery_disabled = 1;
 					abort = 1;
 				}
+#else /* MY_ABC_HERE */
+					abort = 1;
+#endif /* MY_ABC_HERE */
+			}
 			if (abort) {
 				conf->recovery_disabled =
 					mddev->recovery_disabled;

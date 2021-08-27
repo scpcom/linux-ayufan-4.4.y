@@ -65,17 +65,14 @@ static int may_change_ptraced_domain(struct task_struct *task,
 				     struct aa_profile *to_profile)
 {
 	struct task_struct *tracer;
-	const struct cred *cred = NULL;
 	struct aa_profile *tracerp = NULL;
 	int error = 0;
 
 	rcu_read_lock();
 	tracer = ptrace_parent(task);
-	if (tracer) {
+	if (tracer)
 		/* released below */
-		cred = get_task_cred(tracer);
-		tracerp = aa_cred_profile(cred);
-	}
+		tracerp = aa_get_task_profile(tracer);
 
 	/* not ptraced */
 	if (!tracer || unconfined(tracerp))
@@ -85,8 +82,7 @@ static int may_change_ptraced_domain(struct task_struct *task,
 
 out:
 	rcu_read_unlock();
-	if (cred)
-		put_cred(cred);
+	aa_put_profile(tracerp);
 
 	return error;
 }
@@ -151,7 +147,7 @@ static struct aa_profile *__attach_match(const char *name,
 	int len = 0;
 	struct aa_profile *profile, *candidate = NULL;
 
-	list_for_each_entry(profile, head, base.list) {
+	list_for_each_entry_rcu(profile, head, base.list) {
 		if (profile->flags & PFLAG_NULL)
 			continue;
 		if (profile->xmatch && profile->xmatch_len > len) {
@@ -184,9 +180,9 @@ static struct aa_profile *find_attach(struct aa_namespace *ns,
 {
 	struct aa_profile *profile;
 
-	read_lock(&ns->lock);
+	rcu_read_lock();
 	profile = aa_get_profile(__attach_match(name, list));
-	read_unlock(&ns->lock);
+	rcu_read_unlock();
 
 	return profile;
 }
@@ -363,10 +359,10 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 	if (bprm->cred_prepared)
 		return 0;
 
-	cxt = bprm->cred->security;
+	cxt = cred_cxt(bprm->cred);
 	BUG_ON(!cxt);
 
-	profile = aa_get_profile(aa_newest_version(cxt->profile));
+	profile = aa_get_newest_profile(cxt->profile);
 	/*
 	 * get the namespace from the replacement profile as replacement
 	 * can change the namespace
@@ -378,8 +374,8 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 	error = aa_get_name(&bprm->file->f_path, profile->path_flags, &buffer,
 			    &name);
 	if (error) {
-		if (profile->flags &
-		    (PFLAG_IX_ON_NAME_ERROR | PFLAG_UNCONFINED))
+		if (unconfined(profile) ||
+		    (profile->flags & PFLAG_IX_ON_NAME_ERROR))
 			error = 0;
 		info = "Exec failed name resolution";
 		name = bprm->filename;
@@ -420,7 +416,7 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 
 		if (!(cp.allow & AA_MAY_ONEXEC))
 			goto audit;
-		new_profile = aa_get_profile(aa_newest_version(cxt->onexec));
+		new_profile = aa_get_newest_profile(cxt->onexec);
 		goto apply;
 	}
 
@@ -437,11 +433,13 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 				new_profile = aa_get_profile(profile);
 				goto x_clear;
 			} else if (perms.xindex & AA_X_UNCONFINED) {
-				new_profile = aa_get_profile(ns->unconfined);
+				new_profile = aa_get_newest_profile(ns->unconfined);
 				info = "ux fallback";
 			} else {
 				error = -ENOENT;
 				info = "profile not found";
+				/* remove MAY_EXEC to audit as failure */
+				perms.allow &= ~MAY_EXEC;
 			}
 		}
 	} else if (COMPLAIN_MODE(profile)) {
@@ -503,11 +501,7 @@ x_clear:
 	cxt->profile = new_profile;
 
 	/* clear out all temporary/transitional state from the context */
-	aa_put_profile(cxt->previous);
-	aa_put_profile(cxt->onexec);
-	cxt->previous = NULL;
-	cxt->onexec = NULL;
-	cxt->token = 0;
+	aa_clear_task_cxt_trans(cxt);
 
 audit:
 	error = aa_audit_file(profile, &perms, GFP_KERNEL, OP_EXEC, MAY_EXEC,
@@ -546,7 +540,7 @@ int apparmor_bprm_secureexec(struct linux_binprm *bprm)
 void apparmor_bprm_committing_creds(struct linux_binprm *bprm)
 {
 	struct aa_profile *profile = __aa_current_profile();
-	struct aa_task_cxt *new_cxt = bprm->cred->security;
+	struct aa_task_cxt *new_cxt = cred_cxt(bprm->cred);
 
 	/* bail out if unconfined or not changing profile */
 	if ((new_cxt->profile == profile) ||
@@ -615,8 +609,12 @@ int aa_change_hat(const char *hats[], int count, u64 token, bool permtest)
 
 	/* released below */
 	cred = get_current_cred();
-	cxt = cred->security;
+	cxt = cred_cxt(cred);
+#ifdef MY_ABC_HERE
+	profile = aa_get_newest_cred_profile(cred);
+#else
 	profile = aa_cred_profile(cred);
+#endif
 	previous_profile = cxt->previous;
 
 	if (unconfined(profile)) {
@@ -628,7 +626,10 @@ int aa_change_hat(const char *hats[], int count, u64 token, bool permtest)
 	if (count) {
 		/* attempting to change into a new hat or switch to a sibling */
 		struct aa_profile *root;
-		root = PROFILE_IS_HAT(profile) ? profile->parent : profile;
+		if (PROFILE_IS_HAT(profile))
+			root = aa_get_profile_rcu(&profile->parent);
+		else
+			root = aa_get_profile(profile);
 
 		/* find first matching hat */
 		for (i = 0; i < count && !hat; i++)
@@ -640,6 +641,7 @@ int aa_change_hat(const char *hats[], int count, u64 token, bool permtest)
 					error = -ECHILD;
 				else
 					error = -ENOENT;
+				aa_put_profile(root);
 				goto out;
 			}
 
@@ -654,6 +656,7 @@ int aa_change_hat(const char *hats[], int count, u64 token, bool permtest)
 
 			/* freed below */
 			name = new_compound_name(root->base.hname, hats[0]);
+			aa_put_profile(root);
 			target = name;
 			/* released below */
 			hat = aa_new_null_profile(profile, 1);
@@ -663,6 +666,7 @@ int aa_change_hat(const char *hats[], int count, u64 token, bool permtest)
 				goto audit;
 			}
 		} else {
+			aa_put_profile(root);
 			target = hat->base.hname;
 			if (!PROFILE_IS_HAT(hat)) {
 				info = "target not hat";
@@ -706,6 +710,9 @@ audit:
 
 out:
 	aa_put_profile(hat);
+#ifdef MY_ABC_HERE
+	aa_put_profile(profile);
+#endif
 	kfree(name);
 	put_cred(cred);
 
@@ -731,7 +738,6 @@ int aa_change_profile(const char *ns_name, const char *hname, bool onexec,
 		      bool permtest)
 {
 	const struct cred *cred;
-	struct aa_task_cxt *cxt;
 	struct aa_profile *profile, *target = NULL;
 	struct aa_namespace *ns = NULL;
 	struct file_perms perms = {};
@@ -751,8 +757,11 @@ int aa_change_profile(const char *ns_name, const char *hname, bool onexec,
 	}
 
 	cred = get_current_cred();
-	cxt = cred->security;
+#ifdef MY_ABC_HERE
+	profile = aa_get_newest_cred_profile(cred);
+#else
 	profile = aa_cred_profile(cred);
+#endif
 
 	if (ns_name) {
 		/* released below */
@@ -821,6 +830,9 @@ audit:
 
 	aa_put_namespace(ns);
 	aa_put_profile(target);
+#ifdef MY_ABC_HERE
+	aa_put_profile(profile);
+#endif
 	put_cred(cred);
 
 	return error;

@@ -32,6 +32,20 @@ config SYNO_DISPLAY_CPUINFO
 	help
 	  Say Y to Support display CPU Infomation
 
+config SYNO_ARMADAXP_CPU_AFFINITY
+	bool "Set default cpu affinity to core 0"
+	depends on ARMADA_XP || ARMADA_375
+	default y
+	help
+		Set default CPU afiinity on core 0 for md, flush thread
+
+config SYNO_COMCERTO2K_CPU_AFFINITY
+	bool "Set default cpu affinity to core 0"
+	depends on SYNO_COMCERTO
+	default y
+	help
+		Set default CPU afiinity on core 0 for md, flush thread
+
 config SYNO_FIX_MV_CESA_RACE
 	bool "Fix Marvell's crypto driver race"
 	depends on MV_CESA
@@ -170,6 +184,12 @@ config SYNO_EFI
 	default y
 	help
 	  Enable EFI runtime service for UEFI platform
+
+config SYNO_THERMAL_CTRL
+	bool "Enable Thermel control to prevent CPU overheat"
+	depends on ARCH_ARMADA370
+	help 
+		Say Y to export thermal control APIs for external kernel modules
 
 config SYNO_FIX_RESIZE_16TB_IN_32BIT
 	bool "Support on-line resize over 16TB on 32-bit platform"
@@ -331,5 +351,22 @@ config SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 	default n
 	help
 	  Check if sas reservation write conflict. If yes, kernel panic and then reboot.
+
+config SYNO_OOM_DUMP_MODULE
+	bool "Dump modules and occupied memory sizes while OOM"
+	default y
+	help
+	  <DSM> #77534
+	  Dump modules and occupied memory sizes while OOM to help debug
+
+config SYNO_ELEVATE_LOG_LEVEL
+	bool "Elevate log level of kernel log"
+	default y
+	help
+	  <DSM> #79825
+	  After applying sstrip, section tables and symbols of binaries
+	  are missing. It is hard for us to debug when segmentation
+	  faults occur. Hence, log the segmentation faults related
+	  information in /var/log/kern.log.
 
 endmenu

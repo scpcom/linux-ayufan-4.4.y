@@ -397,7 +397,7 @@ static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte,ext)
 #endif
 
-#if defined(CONFIG_SYNO_COMCERTO) || defined(CONFIG_ARCH_ARMADA375)
+#if defined(CONFIG_SYNO_COMCERTO)
 #if !defined(CONFIG_L2X0_INSTRUCTION_ONLY)
 static inline void __sync_outer_cache(pte_t *ptep, pte_t pteval)
 {

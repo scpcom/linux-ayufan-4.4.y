@@ -3843,7 +3843,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	EXT4_INODE_GET_XTIME(i_atime, inode, raw_inode);
 	EXT4_EINODE_GET_XTIME(i_crtime, ei, raw_inode);
 #ifdef MY_ABC_HERE
-#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
+#ifdef MY_DEF_HERE
 	if (EXT4_SB(sb)->s_swap_create_time) {
 		inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
 		inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
@@ -3856,7 +3856,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
 #endif
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	inode->i_mode2 = le16_to_cpu(raw_inode->ext4_mode2);
 #endif
 
@@ -4023,7 +4023,7 @@ static int ext4_do_update_inode(handle_t *handle,
 	EXT4_INODE_SET_XTIME(i_mtime, inode, raw_inode);
 	EXT4_INODE_SET_XTIME(i_atime, inode, raw_inode);
 #ifdef MY_ABC_HERE
-#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
+#ifdef MY_DEF_HERE
 	if (EXT4_SB(inode->i_sb)->s_swap_create_time) {
 		raw_inode->i_crtime = cpu_to_le32(inode->i_CreateTime.tv_sec);
 		raw_inode->i_crtime_extra = cpu_to_le32(inode->i_CreateTime.tv_nsec);
@@ -4038,7 +4038,7 @@ static int ext4_do_update_inode(handle_t *handle,
 #else
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	raw_inode->ext4_mode2 = cpu_to_le16(inode->i_mode2); /* we'll lost upper 16 bits flags */
 #endif
 
@@ -4390,7 +4390,7 @@ int syno_ext4_getattr(struct dentry *d, struct kstat *stat, int flags)
 		stat->SynoCreateTime = inode->i_CreateTime;
 	}
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARBIT) {
 		stat->SynoMode = inode->i_mode2;
 	}

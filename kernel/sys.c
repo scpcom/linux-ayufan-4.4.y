@@ -378,18 +378,12 @@ void kernel_restart(char *cmd)
 }
 EXPORT_SYMBOL_GPL(kernel_restart);
 
-#ifdef SYNO_ATA_SHUTDOWN_FIX
-extern int gSynoSystemShutdown;
-#endif /* CONFIG_SYNO_ATA_SHUTDOWN_FIX */
 static void kernel_shutdown_prepare(enum system_states state)
 {
 	blocking_notifier_call_chain(&reboot_notifier_list,
 		(state == SYSTEM_HALT)?SYS_HALT:SYS_POWER_OFF, NULL);
 	system_state = state;
 	usermodehelper_disable();
-#ifdef SYNO_ATA_SHUTDOWN_FIX
-	gSynoSystemShutdown = 1;
-#endif /* SYNO_ATA_SHUTDOWN_FIX */
 	device_shutdown();
 }
 /**

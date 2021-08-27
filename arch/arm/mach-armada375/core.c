@@ -1241,13 +1241,6 @@ static void __init a375_init_l2x0_cache(void)
 	void __iomem *l2x0_base =
 	    (void __iomem *)(INTER_REGS_VIRT_BASE + MV_CA9X2_L2CC_OFFSET);
 	l2x0_init(l2x0_base, 0x00400000, 0xfe0fffff);
-#ifdef CONFIG_L2X0_INSTRUCTION_ONLY
-	int i;
-	for (i = 0; i < 8; i++)
-		writel_relaxed(0xffff, l2x0_base + L2X0_LOCKDOWN_WAY_D_BASE + i * L2X0_LOCKDOWN_STRIDE);
-
-	outer_flush_all();
-#endif
 #endif
 }
 

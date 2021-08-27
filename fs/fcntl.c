@@ -31,7 +31,7 @@
 #ifdef CONFIG_FS_SYNO_ACL
 #include "synoacl_int.h"
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 
 #define ACL_MASK_NONE 0
 
@@ -154,6 +154,11 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 		if (err) {
 			goto unlock;
 		}
+	} else if (inode->i_op->syno_bypass_is_synoacl) {
+		err = inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EPERM);
+		if (err) {
+			goto unlock;
+		}
 	} else {
 		if (!inode_owner_or_capable(inode)) {
 			err = -EPERM;
@@ -161,7 +166,12 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 		}
 	}
 	if (ALL_SYNO_ACL_ARCHIVE & flags) {
-		if (!IS_FS_SYNOACL(inode)) {
+		if (inode->i_op->syno_bypass_is_synoacl) {
+			err = inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
+			if (err) {
+				goto unlock;
+			}
+		} else if (!IS_FS_SYNOACL(inode)) {
 			err = -EOPNOTSUPP;
 			goto unlock;
 		}
@@ -231,7 +241,7 @@ unlock:
 	return err;
 }
 EXPORT_SYMBOL(__SYNOArchiveSet);
-#endif /* SYNO_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
 void set_close_on_exec(unsigned int fd, int flag)
 {
@@ -631,7 +641,7 @@ static long do_fcntl(int fd, unsigned int cmd, unsigned long arg,
 	case F_GETPIPE_SZ:
 		err = pipe_fcntl(filp, cmd, arg);
 		break;
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	case SYNO_FCNTL_BASE ... SYNO_FCNTL_LAST:
 		err = mnt_want_write(filp->f_path.mnt);
 		if (err)

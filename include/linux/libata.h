@@ -85,7 +85,7 @@ extern int giSynoAtaDebug;
 	if (0 < giSynoAtaDebug) printk(x)
 #endif
 
-#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 extern int giSynoHddLedEnabled;
 #endif
 
@@ -252,7 +252,7 @@ enum {
 
 	ATA_PFLAG_PIO32		= (1 << 20),  /* 32bit PIO */
 	ATA_PFLAG_PIO32CHANGE	= (1 << 21),  /* 32bit PIO can be turned on/off */
-#ifdef SYNO_LIBATA_JMB_BEHAVIOR
+#ifdef MY_DEF_HERE
 	ATA_PFLAG_SYNC_SCSI_DEVICE = (1 << 22),
 #endif
 #ifdef MY_ABC_HERE
@@ -266,7 +266,7 @@ enum {
 	ATA_PFLAG_SYNO_BOOT_PROBE = (1 << 31),
 	/* TODO: PFLAG are exhausted, shouldn't add any more.
 	 * If OSS add any more PFLAG, we should refine SYNO PFLAG.
-	 * ex. ATA_PFLAG_SYNO_DS_WAKING, ATA_PFLAG_SYNO_DS_PWROFF and
+	 * ex. ATA_PFLAG_SYNO_DS_WAKING and
 	 * may removed, it's added for some workaround*/
 #endif
 
@@ -1339,6 +1339,7 @@ extern unsigned int syno_pm_gpio_output_enable(struct ata_link *link);
 extern int syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo);
 extern unsigned int syno_sata_pmp_is_rp(struct ata_port *ap);
 extern struct ata_port *SynoEunitFindMaster(struct ata_port *ap);
+extern void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag);
 int syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn);
 #endif /* MY_ABC_HERE */
 

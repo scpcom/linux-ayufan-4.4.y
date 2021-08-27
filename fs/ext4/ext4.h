@@ -781,7 +781,7 @@ do {									       \
 
 #endif /* defined(__KERNEL__) || defined(__linux__) */
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #define ext4_mode2			i_pad1
 #endif
 
@@ -1265,7 +1265,7 @@ struct ext4_sb_info {
 	int s_new_error_fs_event_flag;
 	char *s_mount_path;
 #endif
-#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
+#ifdef MY_DEF_HERE
 	int s_swap_create_time;
 #endif
 

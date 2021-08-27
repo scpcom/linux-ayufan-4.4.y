@@ -9,6 +9,9 @@
 #include "cache.h"
 #include "xdr.h"
 #include "vfs.h"
+#ifdef CONFIG_FS_SYNO_ACL
+#include <linux/sched.h>
+#endif
 
 typedef struct svc_rqst	svc_rqst;
 typedef struct svc_buf	svc_buf;
@@ -24,18 +27,42 @@ nfsd_proc_null(struct svc_rqst *rqstp, void *argp, void *resp)
 static __be32
 nfsd_return_attrs(__be32 err, struct nfsd_attrstat *resp)
 {
+#ifdef CONFIG_FS_SYNO_ACL
+	int ret;
+#endif
 	if (err) return err;
+#ifdef CONFIG_FS_SYNO_ACL
+	ret = vfs_getattr(resp->fh.fh_export->ex_path.mnt,
+				    resp->fh.fh_dentry,
+				    &resp->stat);
+	if (!ret && IS_SYNOACL(resp->fh.fh_dentry) && current_fsuid() == 0)
+		resp->stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+	return nfserrno(ret);
+#else
 	return nfserrno(vfs_getattr(resp->fh.fh_export->ex_path.mnt,
 				    resp->fh.fh_dentry,
 				    &resp->stat));
+#endif
 }
 static __be32
 nfsd_return_dirop(__be32 err, struct nfsd_diropres *resp)
 {
+#ifdef CONFIG_FS_SYNO_ACL
+	int ret;
+#endif
 	if (err) return err;
+#ifdef CONFIG_FS_SYNO_ACL
+	ret = vfs_getattr(resp->fh.fh_export->ex_path.mnt,
+				    resp->fh.fh_dentry,
+				    &resp->stat);
+	if (!ret && IS_SYNOACL(resp->fh.fh_dentry) && current_fsuid() == 0)
+		resp->stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+	return nfserrno(ret);
+#else
 	return nfserrno(vfs_getattr(resp->fh.fh_export->ex_path.mnt,
 				    resp->fh.fh_dentry,
 				    &resp->stat));
+#endif
 }
 /*
  * Get a file's attributes
@@ -92,7 +119,10 @@ nfsd_proc_lookup(struct svc_rqst *rqstp, struct nfsd_diropargs *argp,
 				 &resp->fh);
 
 	fh_put(&argp->fh);
-	return nfsd_return_dirop(nfserr, resp);
+
+	nfserr = nfsd_return_dirop(nfserr, resp);
+
+	return nfserr;
 }
 
 /*
@@ -123,6 +153,9 @@ nfsd_proc_read(struct svc_rqst *rqstp, struct nfsd_readargs *argp,
 				       struct nfsd_readres  *resp)
 {
 	__be32	nfserr;
+#ifdef CONFIG_FS_SYNO_ACL
+	int ret;
+#endif
 
 	dprintk("nfsd: READ    %s %d bytes at %d\n",
 		SVCFH_fmt(&argp->fh),
@@ -149,9 +182,18 @@ nfsd_proc_read(struct svc_rqst *rqstp, struct nfsd_readargs *argp,
 				  &resp->count);
 
 	if (nfserr) return nfserr;
+#ifdef CONFIG_FS_SYNO_ACL
+	ret = vfs_getattr(resp->fh.fh_export->ex_path.mnt,
+				    resp->fh.fh_dentry,
+				    &resp->stat);
+	if (!ret && IS_SYNOACL(resp->fh.fh_dentry) && current_fsuid() == 0)
+		resp->stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+	return nfserrno(ret);
+#else
 	return nfserrno(vfs_getattr(resp->fh.fh_export->ex_path.mnt,
 				    resp->fh.fh_dentry,
 				    &resp->stat));
+#endif
 }
 
 /*
@@ -520,7 +562,7 @@ struct nfsd_void { int dummy; };
 #define FH 8		/* filehandle */
 #define	AT 18		/* attributes */
 
-static struct svc_procedure		nfsd_procedures2[18] = {
+static struct svc_procedure		nfsd_procedures2[32] = {
 	[NFSPROC_NULL] = {
 		.pc_func = (svc_procfunc) nfsd_proc_null,
 		.pc_decode = (kxdrproc_t) nfssvc_decode_void,
@@ -691,7 +733,7 @@ static struct svc_procedure		nfsd_procedures2[18] = {
 
 struct svc_version	nfsd_version2 = {
 		.vs_vers	= 2,
-		.vs_nproc	= 18,
+		.vs_nproc	= 32,
 		.vs_proc	= nfsd_procedures2,
 		.vs_dispatch	= nfsd_dispatch,
 		.vs_xdrsize	= NFS2_SVC_XDRSIZE,

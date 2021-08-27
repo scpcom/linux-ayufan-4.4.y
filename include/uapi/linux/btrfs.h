@@ -529,6 +529,19 @@ struct btrfs_ioctl_send_args {
 	__u64 reserved[4];		/* in */
 };
 
+#ifdef MY_ABC_HERE
+/* flags for the compression ioctl */
+#define BTRFS_COMPR_CTL_SET			0x1
+#define BTRFS_COMPR_CTL_COMPR_FL	0x2
+
+struct btrfs_ioctl_compr_ctl_args {
+	__u64	flags;				/* in/out */
+	__u64	size;				/* out */
+	__u64	compressed_size;	/* out */
+	__u64	reserved[1];
+};
+#endif /* MY_ABC_HERE */
+
 /* Error codes as returned by the kernel */
 enum btrfs_err_code {
 	notused,
@@ -669,6 +682,12 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 				   struct btrfs_ioctl_feature_flags[2])
 #define BTRFS_IOC_GET_SUPPORTED_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
 				   struct btrfs_ioctl_feature_flags[3])
+
+#ifdef MY_ABC_HERE
+#define BTRFS_IOC_COMPR_CTL _IOR(BTRFS_IOCTL_MAGIC, 248, \
+									struct btrfs_ioctl_compr_ctl_args)
+#endif /* MY_ABC_HERE */
+
 #ifdef MY_ABC_HERE
 #define BTRFS_IOC_SUBVOL_GETINFO _IOR(BTRFS_IOCTL_MAGIC, 249, \
 				   struct btrfs_ioctl_subvol_info_args)

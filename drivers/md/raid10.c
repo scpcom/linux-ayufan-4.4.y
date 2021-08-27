@@ -2111,6 +2111,10 @@ static void fix_recovery_read_error(struct r10bio *r10_bio)
 			if (rdev != conf->mirrors[dw].rdev) {
 				/* need bad block on destination too */
 				struct md_rdev *rdev2 = conf->mirrors[dw].rdev;
+#ifdef MY_ABC_HERE
+				char b1[BDEVNAME_SIZE];
+				char b2[BDEVNAME_SIZE];
+#endif /* MY_ABC_HERE */
 				addr = r10_bio->devs[1].addr + sect;
 				ok = rdev_set_badblocks(rdev2, addr, s, 0);
 				if (!ok) {
@@ -2119,6 +2123,10 @@ static void fix_recovery_read_error(struct r10bio *r10_bio)
 					       "md/raid10:%s: recovery aborted"
 					       " due to read error\n",
 					       mdname(mddev));
+#ifdef MY_ABC_HERE
+					printk("md/raid10:%s: Failed to sync from %s to %s\n", mdname(mddev), bdevname(rdev->bdev, b1), bdevname(rdev2->bdev, b2));
+					md_error(mddev, rdev);
+#endif /* MY_ABC_HERE */
 
 					conf->mirrors[dw].recovery_disabled
 						= mddev->recovery_disabled;

@@ -615,7 +615,7 @@ void __init efi_init(void)
 	x86_platform.set_wallclock = efi_set_rtc_mmss;
 #endif
 
-#ifdef SYNO_CEDARVIEW_USE_EFI_REBOOT
+#ifdef MY_DEF_HERE
 	/* Setup for EFI runtime service */
 	reboot_type = BOOT_EFI;
 #endif

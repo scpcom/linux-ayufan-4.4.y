@@ -212,7 +212,11 @@ extern "C" {
 #define MV_ETH_MAX_PORTS			2
 #define MV_ETH_MAX_RXQ				8
 #define MV_ETH_MAX_TXQ				8
+#if defined(CONFIG_SYNO_ARMADA)
+#define MV_ETH_TX_CSUM_MAX_SIZE 		1800
+#else
 #define MV_ETH_TX_CSUM_MAX_SIZE 		2048
+#endif /* CONFIG_SYNO_ARMADA */
 
 /* IPv6 parsing support for Legacy parser */
 #define MV_ETH_LEGACY_PARSER_IPV6

@@ -2016,6 +2016,7 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 		 
 last_component:
 #ifdef MY_ABC_HERE
+		if (caselessFlag)
 			nd->flags |= LOOKUP_TO_LASTCOMPONENT;
 #endif
 		nd->last = this;
@@ -2411,7 +2412,7 @@ struct dentry *lookup_one_len(const char *name, struct dentry *base, int len)
 
 #ifdef MY_ABC_HERE
 int syno_user_path_at(int dfd, const char __user *name, unsigned flags,
-		 struct path *path, char **real_filename, int *real_filename_len, int *lastComponent)
+		 struct path *path, char **real_filename, int *real_filename_len)
 {
 	struct nameidata nd;
 	char *tmp = getname(name);
@@ -2428,9 +2429,6 @@ int syno_user_path_at(int dfd, const char __user *name, unsigned flags,
 		if (!err) {
 			*path = nd.path;
 			*real_filename_len = nd.real_filename_len;
-			if (nd.flags & LOOKUP_TO_LASTCOMPONENT) {
-				*lastComponent = 1;
-			}
 		}
 	}
 	return err;

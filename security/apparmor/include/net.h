@@ -20,6 +20,10 @@
 
 #include <net/sock.h>
 
+#ifdef MY_ABC_HERE
+#include "apparmorfs.h"
+#endif
+
 /* struct aa_net - network confinement data
  * @allowed: basic network families permissions
  * @audit_network: which network permissions to force audit
@@ -30,6 +34,10 @@ struct aa_net {
 	u16 audit[AF_MAX];
 	u16 quiet[AF_MAX];
 };
+
+#ifdef MY_ABC_HERE
+extern struct aa_fs_entry aa_fs_entry_network[];
+#endif
 
 extern int aa_net_perm(int op, struct aa_profile *profile, u16 family,
 		       int type, int protocol, struct sock *sk);

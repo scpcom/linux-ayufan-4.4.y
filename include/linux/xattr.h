@@ -54,9 +54,8 @@
 #ifdef MY_ABC_HERE
 #define XATTR_SYNO_CREATE_TIME "create_time"
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_ARCHIVE_BIT "archive_bit"
-#define XATTR_SYNO_ARCHIVE_BIT_NOPERM "archive_bit_noperm" //for glusterfs
 #endif
 
 #define XATTR_SMACK_SUFFIX "SMACK64"
@@ -103,7 +102,7 @@ struct syno_xattr_archive_version {
 	__le16	v_magic;
 	__le16	v_struct_version;
 	__le32	v_archive_version;
-};
+} __attribute__ ((__packed__));
 #endif
 
 struct xattr {

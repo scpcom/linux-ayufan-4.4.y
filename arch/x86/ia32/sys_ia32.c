@@ -167,13 +167,13 @@ static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct S
 		}
 	}
 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARBIT) {
 		if (__put_user(pKst->SynoMode, &pSt->ext.archBit)){
 			goto Out;
 		}
 	}
-#endif /* SYNO_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
 #ifdef MY_ABC_HERE
 	if (flags & SYNOST_BKPVER) {

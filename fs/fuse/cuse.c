@@ -439,11 +439,7 @@ static int cuse_send_init(struct cuse_conn *cc)
 
 	arg = &req->misc.cuse_init_in;
 	arg->major = FUSE_KERNEL_VERSION;
-#ifdef SYNO_FUSE_KERNEL_MINOR_VERSION
-	arg->minor = SYNO_FUSE_KERNEL_MINOR_VERSION;
-#else
 	arg->minor = FUSE_KERNEL_MINOR_VERSION;
-#endif
 	arg->flags |= CUSE_UNRESTRICTED_IOCTL;
 	req->in.h.opcode = CUSE_INIT;
 	req->in.numargs = 1;

@@ -103,15 +103,6 @@
 /** Minor version number of this interface */
 #define FUSE_KERNEL_MINOR_VERSION 22
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-#define SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION 10
-#endif
-
-#ifdef SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION
-#define SYNO_FUSE_KERNEL_MINOR_SHIFT 1000
-#define SYNO_FUSE_KERNEL_MINOR_VERSION  (SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION * SYNO_FUSE_KERNEL_MINOR_SHIFT) + FUSE_KERNEL_MINOR_VERSION
-#endif // SYNO_FUSE_INTERFACE_COMPATIBLE_MINOR_VERSION
-
 /** The node ID of the root inode */
 #define FUSE_ROOT_ID 1
 
@@ -136,6 +127,17 @@ struct fuse_attr {
 	__u32	blksize;
 	__u32	padding;
 };
+
+#ifdef MY_ABC_HERE
+struct fuse_synostat {
+	uint64_t	create_time_sec;
+	uint32_t	create_time_nsec;
+	uint32_t	archive_version;
+	uint32_t	archive_bit;
+	uint32_t	name_len;
+	char		name[0];
+};
+#endif /* MY_ABC_HERE */
 
 struct fuse_kstatfs {
 	__u64	blocks;
@@ -219,9 +221,6 @@ struct fuse_file_lock {
 #define FUSE_READDIRPLUS_AUTO	(1 << 14)
 #define FUSE_ASYNC_DIO		(1 << 15)
 
-#ifdef SYNO_FUSE_KERNEL_MINOR_VERSION
-#define SYNO_FUSE_ACL_CACHE	(1 << 31)
-#endif
 /**
  * CUSE INIT request/reply flags
  *
@@ -529,7 +528,11 @@ struct fuse_lk_out {
 
 struct fuse_access_in {
 	__u32	mask;
+#ifdef MY_ABC_HERE
+	__u32	syno_acl_access;
+#else
 	__u32	padding;
+#endif /* MY_ABC_HERE */
 };
 
 struct fuse_init_in {
@@ -653,17 +656,6 @@ struct fuse_dirent {
 	__u32	type;
 	char name[];
 };
-
-#ifdef MY_ABC_HERE
-struct syno_fuse_acl_data {
-	__u32 len;
-	char value[];
-};
-
-#define SYNO_FUSE_ACL_VALUE_OFFSET offsetof(struct syno_fuse_acl_data, value)
-
-#define SYNO_FUSE_ACL_CACHE_SIZE 8192
-#endif // MY_ABC_HERE
 
 #define FUSE_NAME_OFFSET offsetof(struct fuse_dirent, name)
 #define FUSE_DIRENT_ALIGN(x) (((x) + sizeof(__u64) - 1) & ~(sizeof(__u64) - 1))

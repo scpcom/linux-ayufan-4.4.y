@@ -498,33 +498,6 @@ void fuse_read_fill(struct fuse_req *req, struct file *file, loff_t pos,
 	req->out.args[0].size = count;
 }
 
-#ifdef MY_ABC_HERE
-/*
- * args[0]: syno.archive_bit_noperm
- * args[1]: system.syno_acl_noperm_self
- * args[2]: readdir response buffer (szie: 1 page)
- */
-void syno_fuse_read_fill(struct fuse_req *req, struct file *file, loff_t pos,
-		    size_t count, int opcode)
-{
-	struct fuse_read_in *inarg = &req->misc.read.in;
-	struct fuse_file *ff = file->private_data;
-
-	inarg->fh = ff->fh;
-	inarg->offset = pos;
-	inarg->size = count;
-	inarg->flags = file->f_flags;
-	req->in.h.opcode = opcode;
-	req->in.h.nodeid = ff->nodeid;
-	req->in.numargs = 1;
-	req->in.args[0].size = sizeof(struct fuse_read_in);
-	req->in.args[0].value = inarg;
-	req->out.argvar = 1;
-	req->out.numargs = 3;
-	req->out.args[2].size = count;
-}
-#endif
-
 static void fuse_release_user_pages(struct fuse_req *req, int write)
 {
 	unsigned i;
@@ -2583,6 +2556,10 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 	int err;
 	bool lock_inode = !(mode & FALLOC_FL_KEEP_SIZE) ||
 			   (mode & FALLOC_FL_PUNCH_HOLE);
+#ifdef MY_ABC_HERE
+	loff_t first_page, last_page;
+	loff_t first_page_offset, last_page_offset;
+#endif /* MY_ABC_HERE */
 
 	if (fc->no_fallocate)
 		return -EOPNOTSUPP;
@@ -2629,8 +2606,23 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 	if (!(mode & FALLOC_FL_KEEP_SIZE))
 		fuse_write_update_size(inode, offset + length);
 
+#ifdef MY_ABC_HERE
+	if (mode & FALLOC_FL_PUNCH_HOLE) {
+		first_page = (offset) >> PAGE_CACHE_SHIFT;
+		last_page = (offset + length - 1) >> PAGE_CACHE_SHIFT;
+
+		first_page_offset = first_page << PAGE_CACHE_SHIFT;
+		last_page_offset = last_page << PAGE_CACHE_SHIFT;
+
+		/* Now release the pages */
+		if (last_page_offset > first_page_offset) {
+			truncate_pagecache_range(inode, first_page_offset, last_page_offset + PAGE_CACHE_SIZE - 1);
+		}
+	}
+#else
 	if (mode & FALLOC_FL_PUNCH_HOLE)
 		truncate_pagecache_range(inode, offset, offset + length - 1);
+#endif /* MY_ABC_HERE */
 
 	fuse_invalidate_attr(inode);
 

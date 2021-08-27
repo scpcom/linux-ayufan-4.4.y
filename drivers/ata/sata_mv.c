@@ -3467,7 +3467,7 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	 * Achieves better receiver noise performance than the h/w default:
 	 */
 	m3 = readl(port_mmio + PHY_MODE3);
-#ifdef SYNO_ENLARGE_RX_NOISE_TRRESHOLD
+#ifdef MY_DEF_HERE
 	m3 = (m3 & 0x03) | (0x5555601 << 5);
 	m3 |= 0x0c;
 #else
@@ -4279,7 +4279,7 @@ static void mv_conf_mbus_windows(struct mv_host_priv *hpriv,
 	}
 }
 
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
+#ifdef MY_DEF_HERE
 extern int mvSataWinInit(void);
 #endif
 /**
@@ -4348,7 +4348,7 @@ static int mv_platform_probe(struct platform_device *pdev)
 	 */
 	if (mv_platform_data->dram != NULL)
 		mv_conf_mbus_windows(hpriv, mv_platform_data->dram);
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
+#ifdef MY_DEF_HERE
 	else
 		mvSataWinInit();
 #endif
@@ -4447,94 +4447,6 @@ static int mv_platform_resume(struct platform_device *pdev)
 #define mv_platform_resume NULL
 #endif
 
-#ifdef SYNO_ATA_SHUTDOWN_FIX
-#ifdef CONFIG_SYNO_X64
-extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
-extern int grgPwrCtlPin[];
-static int syno_pulldown_eunit_gpio(struct ata_port *ap)
-{
-	int iRet = -1;
-	int iValue = 0;
-	int iPin = -1;
-
-	/* Due to EUnit is edge trigger, we have to pull the GPIO PIN to low before EUnit poweroff */
-	if (!(iPin = grgPwrCtlPin[ap->print_id])) { /* get pwrctl GPIO pin */
-		goto END;
-	}
-	iValue = 0;
-	if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
-		goto END;
-	}
-	mdelay(1000); /* HW say should delay >1.38ms and suggest 1s when trigger edge (0->1) */
-
-	iRet = 0;
-END:
-	return iRet;
-}
-#endif /* CONFIG_SYNO_X64 */
-
-extern int gSynoSystemShutdown;
-
-void mv_platform_shutdown(struct platform_device *pdev) {
-	int i = 0;
-	struct ata_host *host = platform_get_drvdata(pdev);
-	struct Scsi_Host *shost = NULL;
-	int irq = -1;
-
-	if (NULL == host) {
-		goto END;
-	}
-	// gSynoSystemShutdown = 1 means the host is going to poweroff
-	if (1 == gSynoSystemShutdown) {
-		for (i = 0; i < host->n_ports; i++) {
-			shost = host->ports[i]->scsi_host;
-			if (shost->hostt->syno_host_poweroff_task) {
-				shost->hostt->syno_host_poweroff_task(shost);
-			}
-#ifdef CONFIG_SYNO_X64
-			syno_pulldown_eunit_gpio(host->ports[i]);
-#endif /* CONFIG_SYNO_X64 */
-		}
-	}
-
-	irq = platform_get_irq(pdev, 0);
-	if (0 < irq) {
-		free_irq(irq, host);
-	}
-END:
-	return;
-}
-
-void mv_pci_shutdown(struct pci_dev *pdev){
-	int i;
-	struct ata_host *host = dev_get_drvdata(&pdev->dev);
-	struct Scsi_Host *shost;
-
-	if(NULL == host){
-		goto END;
-	}
-	// gSynoSystemShutdown = 1 means the host is going to poweroff
-	if (1 == gSynoSystemShutdown) {
-		for (i = 0; i < host->n_ports; i++) {
-			shost = host->ports[i]->scsi_host;
-			if (shost->hostt->syno_host_poweroff_task) {
-				shost->hostt->syno_host_poweroff_task(shost);
-			}
-#ifdef CONFIG_SYNO_X64
-			syno_pulldown_eunit_gpio(host->ports[i]);
-#endif /* CONFIG_SYNO_X64 */
-		}
-	}
-
-	if (pdev->irq >= 0) {
-		free_irq(pdev->irq, host);
-		pdev->irq = -1;
-	}
-END:
-	return;
-}
-#endif
-
 static struct platform_driver mv_platform_driver = {
 	.probe			= mv_platform_probe,
 	.remove			= __devexit_p(mv_platform_remove),
@@ -4544,9 +4456,6 @@ static struct platform_driver mv_platform_driver = {
 				   .name = DRV_NAME,
 				   .owner = THIS_MODULE,
 				  },
-#ifdef SYNO_ATA_SHUTDOWN_FIX
-	.shutdown		= mv_platform_shutdown,
-#endif
 };
 
 #ifdef CONFIG_PCI
@@ -4561,9 +4470,6 @@ static struct pci_driver mv_pci_driver = {
 	.id_table		= mv_pci_tbl,
 	.probe			= mv_pci_init_one,
 	.remove			= ata_pci_remove_one,
-#ifdef SYNO_ATA_SHUTDOWN_FIX
-	.shutdown		= mv_pci_shutdown,
-#endif
 #ifdef CONFIG_PM
 	.suspend		= ata_pci_device_suspend,
 	.resume			= mv_pci_device_resume,

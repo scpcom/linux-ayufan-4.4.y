@@ -515,7 +515,7 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
-#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(SYNO_6281_SOC_USE_OPENSOURCE_USB)
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(MY_DEF_HERE)
 		if(!strcmp(buf,"orion-ehci.0-1.3")) {
 			return 1;
 		}

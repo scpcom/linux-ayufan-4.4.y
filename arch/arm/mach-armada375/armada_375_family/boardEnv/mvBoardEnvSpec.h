@@ -123,14 +123,14 @@
 #define SYNO_DS215j_MPP16_23             0x00000022  	/* UART, TDM*/
 #define SYNO_DS215j_MPP24_31             0x00000000  	/* SDIO, SPI1*/
 #define SYNO_DS215j_MPP32_39             0x04400000  	/* SPI1, External SMI */
-#define SYNO_DS215j_MPP40_47             0x00002044  	/* UART1, GE0, SATA0 LED */
+#define SYNO_DS215j_MPP40_47             0x00000044  	/* UART1, GE0, SATA0 LED */
 #define SYNO_DS215j_MPP48_55             0x00010000  	/*GE0*/
 #define SYNO_DS215j_MPP56_63             0x00000100  	/* GE0 , LED_MATRIX, GPIO */
-#define SYNO_DS215j_MPP64_67             0x00000010   	/* LED_MATRIX, SATA1 LED*/
+#define SYNO_DS215j_MPP64_67             0x00000000   	/* LED_MATRIX, SATA1 LED*/
 
 #define SYNO_DS215j_GPP_OUT_ENA_LOW      (~(BIT18|BIT19|BIT20|BIT24|BIT25|BIT26))
-#define SYNO_DS215j_GPP_OUT_ENA_MID      (~(BIT22|BIT23))
-#define SYNO_DS215j_GPP_OUT_ENA_HIGH     (~(0x0))
+#define SYNO_DS215j_GPP_OUT_ENA_MID      (~(BIT11|BIT22|BIT23))
+#define SYNO_DS215j_GPP_OUT_ENA_HIGH     (~(BIT1))
 #define SYNO_DS215j_GPP_OUT_VAL_LOW      (BIT24|BIT25|BIT26)
 #define SYNO_DS215j_GPP_OUT_VAL_MID      0x0		/* SATA Power output enable */
 #define SYNO_DS215j_GPP_OUT_VAL_HIGH     0x0

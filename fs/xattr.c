@@ -47,7 +47,13 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 	 * Need to use synoacl_check_xattr_perm to check permission
 	 */
 	if (!strcmp(name, SYNO_ACL_XATTR_ACCESS)) {
-		if (MAY_WRITE == mask || MAY_WRITE_PERMISSION == mask) {
+		if (inode->i_op->syno_bypass_is_synoacl) {
+			/*
+			 * GlusterFS returns false for [IS|HAS]_SYNOACL, but ACL
+			 * attribute could be checked and got from GlusterFS xlator.
+			 */
+			return inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
+		} else if (MAY_WRITE == mask || MAY_WRITE_PERMISSION == mask) {
 			return synoacl_check_xattr_perm(name, dentry, MAY_WRITE_PERMISSION);
 		} else if (MAY_READ == mask || MAY_READ_PERMISSION == mask) {
 			return synoacl_check_xattr_perm(name, dentry, MAY_READ_PERMISSION);
@@ -63,12 +69,25 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 	 */
 	if (MAY_READ == mask) {
 		if (!strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
-			if (!IS_SYNOACL(dentry)) {
+			if (inode->i_op->syno_bypass_is_synoacl) {
+				/*
+				 * GlusterFS returns false for [IS|HAS]_SYNOACL, but ACL
+				 * attribute could be checked and got from GlusterFS xlator.
+				 */
+				return inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
+			} else if (!IS_SYNOACL(dentry)) {
 				return -EOPNOTSUPP;
 			}
 			return synoacl_op_perm(dentry, MAY_READ_PERMISSION);
 		}
 		if (!strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY)) {
+			if (inode->i_op->syno_bypass_is_synoacl) {
+				/*
+				 * GlusterFS returns false for [IS|HAS]_SYNOACL, but ACL
+				 * attribute could be checked and got from GlusterFS xlator.
+				 */
+				return inode->i_op->syno_bypass_is_synoacl(dentry, 0, -EOPNOTSUPP);
+			}
 			return synoacl_op_perm(dentry, MAY_READ_PERMISSION);
 		}
 	}

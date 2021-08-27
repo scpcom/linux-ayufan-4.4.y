@@ -23,6 +23,13 @@
 
 #include "af_names.h"
 
+#ifdef MY_ABC_HERE
+struct aa_fs_entry aa_fs_entry_network[] = {
+	AA_FS_FILE_STRING("af_mask", AA_FS_AF_MASK),
+	{ }
+};
+#endif
+
 static const char *sock_type_names[] = {
 	"unknown(0)",
 	"stream",

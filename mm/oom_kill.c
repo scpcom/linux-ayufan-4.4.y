@@ -42,6 +42,10 @@ int sysctl_oom_kill_allocating_task;
 int sysctl_oom_dump_tasks = 1;
 static DEFINE_SPINLOCK(zone_scan_lock);
 
+#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+extern void syno_dump_modules(void);
+#endif /* CONFIG_SYNO_OOM_DUMP_MODULE */
+
 /*
  * compare_swap_oom_score_adj() - compare and swap current's oom_score_adj
  * @old_val: old oom_score_adj for compare
@@ -389,7 +393,11 @@ static void dump_tasks(const struct mem_cgroup *mem, const nodemask_t *nodemask)
 	struct task_struct *p;
 	struct task_struct *task;
 
+#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+	pr_warning("[ pid ]   uid  tgid total_vm      rss cpu oom_adj oom_score_adj name\n");
+#else
 	pr_info("[ pid ]   uid  tgid total_vm      rss cpu oom_adj oom_score_adj name\n");
+#endif /* CONFIG_SYNO_OOM_DUMP_MODULE */
 	for_each_process(p) {
 		if (oom_unkillable_task(p, mem, nodemask))
 			continue;
@@ -404,7 +412,11 @@ static void dump_tasks(const struct mem_cgroup *mem, const nodemask_t *nodemask)
 			continue;
 		}
 
+#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+		pr_warning("[%5d] %5d %5d %8lu %8lu %3u     %3d         %5d %s\n",
+#else
 		pr_info("[%5d] %5d %5d %8lu %8lu %3u     %3d         %5d %s\n",
+#endif /* CONFIG_SYNO_OOM_DUMP_MODULE */
 			task->pid, task_uid(task), task->tgid,
 			task->mm->total_vm, get_mm_rss(task->mm),
 			task_cpu(task), task->signal->oom_adj,
@@ -428,6 +440,9 @@ static void dump_header(struct task_struct *p, gfp_t gfp_mask, int order,
 	show_mem(SHOW_MEM_FILTER_NODES);
 	if (sysctl_oom_dump_tasks)
 		dump_tasks(mem, nodemask);
+#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+        syno_dump_modules();
+#endif /* CONFIG_SYNO_OOM_DUMP_MODULE */
 }
 
 #define K(x) ((x) << (PAGE_SHIFT-10))

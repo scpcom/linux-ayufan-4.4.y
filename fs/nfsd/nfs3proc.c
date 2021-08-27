@@ -14,6 +14,9 @@
 #include "cache.h"
 #include "xdr3.h"
 #include "vfs.h"
+#ifdef CONFIG_FS_SYNO_ACL
+#include <linux/sched.h>
+#endif
 
 #define NFSDDBG_FACILITY		NFSDDBG_PROC
 
@@ -68,6 +71,10 @@ nfsd3_proc_getattr(struct svc_rqst *rqstp, struct nfsd_fhandle  *argp,
 
 	err = vfs_getattr(resp->fh.fh_export->ex_path.mnt,
 			  resp->fh.fh_dentry, &resp->stat);
+#ifdef CONFIG_FS_SYNO_ACL
+	if (!err && IS_SYNOACL(resp->fh.fh_dentry) && current_fsuid() == 0)
+		resp->stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
 	nfserr = nfserrno(err);
 
 	RETURN_STATUS(nfserr);

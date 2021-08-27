@@ -4407,20 +4407,10 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 #endif
 
 #ifdef MY_ABC_HERE
-	if (test_bit(EXTENT_BUFFER_DIRTY, &eb->bflags)) {
-		printk("start_idx:%lu io_pages:%u flags:%x, eb_ref:%u, write_locks:%u, read_locks:%u\n",
-		      start_idx, atomic_read(&eb->io_pages),
-		      eb->bflags, atomic_read(&eb->refs),
-		      atomic_read(&eb->write_locks),
-		      atomic_read(&eb->read_locks));
-		printk("blocking_writers:%u, blocking_readers:%u\n spinning_readers:%u, spinning_writers:%u\n",
-		      atomic_read(&eb->blocking_writers),
-		      atomic_read(&eb->blocking_readers),
-		      atomic_read(&eb->spinning_readers),
-		      atomic_read(&eb->spinning_writers));
-		clear_extent_buffer_dirty(eb);
+	if (unlikely(extent_buffer_under_io(eb))) {
+		smp_mb();
+		BUG_ON(extent_buffer_under_io(eb));
 	}
-	BUG_ON(atomic_read(&eb->io_pages) || test_bit(EXTENT_BUFFER_WRITEBACK, &eb->bflags));
 #else
 	BUG_ON(extent_buffer_under_io(eb));
 #endif
@@ -4450,8 +4440,16 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 			if (PagePrivate(page) &&
 			    page->private == (unsigned long)eb) {
 				BUG_ON(test_bit(EXTENT_BUFFER_DIRTY, &eb->bflags));
+#ifdef MY_ABC_HERE
+				if (PageDirty(page) || PageWriteback(page)) {
+					smp_mb();
 					BUG_ON(PageDirty(page));
 					BUG_ON(PageWriteback(page));
+				}
+#else
+				BUG_ON(PageDirty(page));
+				BUG_ON(PageWriteback(page));
+#endif
 				/*
 				 * We need to make sure we haven't be attached
 				 * to a new eb.

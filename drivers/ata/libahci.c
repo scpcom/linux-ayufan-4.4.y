@@ -46,7 +46,7 @@
 #include <linux/device.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 #include <scsi/scsi_device.h>
 #endif
 #include <linux/libata.h>
@@ -61,7 +61,7 @@
 #include <linux/leds.h>
 #endif /* CONFIG_SYNO_LEDS_TRIGGER */
 
-#if defined(CONFIG_ARCH_GEN3) || defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_GEN3) || defined(SYNO_ALPINE_SW_SATA_LED)
 extern int SYNO_CTRL_HDD_ACT_NOTIFY(int index);
 #endif
 
@@ -141,7 +141,7 @@ static DEVICE_ATTR(ahci_host_cap2, S_IRUGO, ahci_show_host_cap2, NULL);
 static DEVICE_ATTR(ahci_host_version, S_IRUGO, ahci_show_host_version, NULL);
 static DEVICE_ATTR(ahci_port_cmd, S_IRUGO, ahci_show_port_cmd, NULL);
 
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 static ssize_t
 ata_ahci_locate_show(struct device *dev, struct device_attribute *attr,
 		char *buf)
@@ -261,7 +261,7 @@ ata_ahci_fault_store(struct device *dev, struct device_attribute *attr,
 	return -EINVAL;
 }
 DEVICE_ATTR(sw_fault, S_IWUSR | S_IRUGO, ata_ahci_fault_show, ata_ahci_fault_store);
-#endif //SYNO_ATA_AHCI_LED_MSG
+#endif //MY_DEF_HERE
 
 static DEVICE_ATTR(em_buffer, S_IWUSR | S_IRUGO,
 		   ahci_read_em_buffer, ahci_store_em_buffer);
@@ -301,7 +301,7 @@ struct device_attribute *ahci_sdev_attrs[] = {
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_disk_serial,
 #endif
-#ifdef SYNO_ATA_AHCI_LED_MSG
+#ifdef MY_DEF_HERE
 	&dev_attr_sw_locate,
 	&dev_attr_sw_fault,
 #endif
@@ -931,7 +931,7 @@ END:
 	return ret;
 }
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(SYNO_ALPINE_SW_SATA_LED)
 int syno_is_alpine_internal_ahci(struct ata_port *ap)
 {
 	struct pci_dev *pdev = NULL;
@@ -1010,7 +1010,7 @@ static void ahci_start_port(struct ata_port *ap)
 	if (syno_is_avoton_ahci(ap)) {
 		ap->flags |= ATA_FLAG_SW_ACTIVITY;
 	}
-#elif defined(MY_DEF_HERE)
+#elif defined(SYNO_ALPINE_SW_SATA_LED)
 	if (syno_is_alpine_internal_ahci(ap)) {
 		ap->flags |= ATA_FLAG_SW_ACTIVITY;
 	}
@@ -1096,7 +1096,7 @@ static void ahci_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
-#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	if (!giSynoHddLedEnabled) {
 		return;
 	}
@@ -1109,7 +1109,7 @@ static void ahci_sw_activity(struct ata_link *link)
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(10));
 }
 
-#ifdef SYNO_ATA_AHCI_LED_MSG 
+#ifdef MY_DEF_HERE 
 static void ahci_sw_locate_set(struct ata_link *link, u8 blEnable)
 {
 	struct ata_port *ap = link->ap;
@@ -1167,7 +1167,7 @@ static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable)
 END:
 	return;
 }
-#endif //SYNO_ATA_AHCI_LED_MSG
+#endif //MY_DEF_HERE
 
 static void ahci_sw_activity_blink(unsigned long arg)
 {
@@ -1188,7 +1188,7 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	 * toggle state of LED and reset timer.  If not,
 	 * turn LED to desired idle state.
 	 */
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(SYNO_ALPINE_SW_SATA_LED)
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
@@ -1246,12 +1246,12 @@ static void ahci_init_sw_activity(struct ata_link *link)
 
 	/* init activity stats, setup timer */
 	emp->saved_activity = emp->activity = 0;
-#if defined(CONFIG_SYNO_ALPINE) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_ALPINE) && !defined(SYNO_ALPINE_SW_SATA_LED)
 	emp->blink_policy = BLINK_ON;
 #endif
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
 
-#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_GEN3) || defined(CONFIG_SYNO_AVOTON) || defined(SYNO_ALPINE_SW_SATA_LED)
 #else
 	/* check our blink policy and set flag for link if it's enabled */
 	if (emp->blink_policy)
@@ -2650,7 +2650,7 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 		pi->flags |= ATA_FLAG_EM;
 		if (!(em_ctl & EM_CTL_ALHD))
 			pi->flags |= ATA_FLAG_SW_ACTIVITY;
-#ifdef SYNO_ATA_AHCI_LED_MSG 
+#ifdef MY_DEF_HERE 
 		if (em_ctl & EM_CTL_LED) {
 			pi->flags |= ATA_FLAG_SW_LOCATE;
 			pi->flags |= ATA_FLAG_SW_FAULT;
