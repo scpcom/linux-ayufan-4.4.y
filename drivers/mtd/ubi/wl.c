@@ -414,14 +414,14 @@ retry:
 
 	switch (dtype) {
 	case UBI_LONGTERM:
-		/*
+	/*
 		 * For long term data we pick a physical eraseblock with high
 		 * erase counter. But the highest erase counter we can pick is
 		 * bounded by the the lowest erase counter plus
 		 * %WL_FREE_MAX_DIFF.
-		 */
+ */
 		e = find_wl_entry(&ubi->free, WL_FREE_MAX_DIFF);
-		break;
+			break;
 	case UBI_UNKNOWN:
 		/*
 		 * For unknown data we pick a physical eraseblock with medium
@@ -438,12 +438,12 @@ retry:
 					struct ubi_wl_entry, u.rb);
 		else
 			e = find_wl_entry(&ubi->free, WL_FREE_MAX_DIFF/2);
-		break;
+			break;
 	case UBI_SHORTTERM:
 		/*
 		 * For short term data we pick a physical eraseblock with the
 		 * lowest erase counter as we expect it will be erased soon.
-		 */
+ */
 		e = rb_entry(rb_first(&ubi->free), struct ubi_wl_entry, u.rb);
 		break;
 	default:
@@ -455,14 +455,14 @@ retry:
 	/*
 	 * Move the physical eraseblock to the protection queue where it will
 	 * be protected from being moved for some time.
-	 */
+ */
 	rb_erase(&e->u.rb, &ubi->free);
 	dbg_wl("PEB %d EC %d", e->pnum, e->ec);
 	prot_queue_add(ubi, e);
 	spin_unlock(&ubi->wl_lock);
 
 	err = ubi_dbg_check_all_ff(ubi, e->pnum, ubi->vid_hdr_aloffset,
-				   ubi->peb_size - ubi->vid_hdr_aloffset);
+				    ubi->peb_size - ubi->vid_hdr_aloffset);
 	if (err) {
 		ubi_err("new PEB %d does not contain all 0xFF bytes", e->pnum);
 		return err;
@@ -991,7 +991,7 @@ static int ensure_wear_leveling(struct ubi_device *ubi)
 	}
 
 	wrk->func = &wear_leveling_worker;
-	schedule_ubi_work(ubi, wrk);
+		schedule_ubi_work(ubi, wrk);
 	return err;
 
 out_cancel:
@@ -1092,10 +1092,10 @@ static int erase_worker(struct ubi_device *ubi, struct ubi_work *wl_wrk,
 	}
 
 	if (ubi->beb_rsvd_pebs == 0) {
-		spin_unlock(&ubi->volumes_lock);
+			spin_unlock(&ubi->volumes_lock);
 		ubi_err("no reserved physical eraseblocks");
-		goto out_ro;
-	}
+			goto out_ro;
+		}
 	spin_unlock(&ubi->volumes_lock);
 
 	ubi_msg("mark PEB %d as bad", pnum);
@@ -1104,7 +1104,7 @@ static int erase_worker(struct ubi_device *ubi, struct ubi_work *wl_wrk,
 		goto out_ro;
 
 	spin_lock(&ubi->volumes_lock);
-	ubi->beb_rsvd_pebs -= 1;
+		ubi->beb_rsvd_pebs -= 1;
 	ubi->bad_peb_count += 1;
 	ubi->good_peb_count -= 1;
 	ubi_calculate_reserved(ubi);
@@ -1290,8 +1290,8 @@ int ubi_wl_flush(struct ubi_device *ubi)
 	while (ubi->works_count) {
 		err = do_work(ubi);
 		if (err)
-			return err;
-	}
+					return err;
+				}
 
 	/*
 	 * Make sure all the works which have been done in parallel are
@@ -1308,8 +1308,8 @@ int ubi_wl_flush(struct ubi_device *ubi)
 		dbg_wl("flush more (%d pending works)", ubi->works_count);
 		err = do_work(ubi);
 		if (err)
-			return err;
-	}
+	return err;
+}
 
 	return 0;
 }
@@ -1646,7 +1646,7 @@ static int paranoid_check_in_wl_tree(const struct ubi_device *ubi,
  * This function returns zero if @e is in @ubi->pq and %-EINVAL if it is not.
  */
 static int paranoid_check_in_pq(const struct ubi_device *ubi,
-				struct ubi_wl_entry *e)
+			    struct ubi_wl_entry *e)
 {
 	struct ubi_wl_entry *p;
 	int i;

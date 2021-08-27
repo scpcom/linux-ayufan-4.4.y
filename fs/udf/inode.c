@@ -68,7 +68,6 @@ static void udf_update_extents(struct inode *,
 			       struct extent_position *);
 static int udf_get_block(struct inode *, sector_t, struct buffer_head *, int);
 
-
 void udf_evict_inode(struct inode *inode)
 {
 	struct udf_inode_info *iinfo = UDF_I(inode);
@@ -1234,8 +1233,8 @@ static void __udf_read_inode(struct inode *inode)
 					memcpy(&iinfo->i_location,
 						&loc,
 						sizeof(struct kernel_lb_addr));
-					brelse(bh);
-					brelse(ibh);
+				brelse(bh);
+				brelse(ibh);
 					brelse(nbh);
 					__udf_read_inode(inode);
 					return;

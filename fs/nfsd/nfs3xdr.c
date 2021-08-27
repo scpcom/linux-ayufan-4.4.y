@@ -5,13 +5,12 @@
  *
  * 2003-08-09 Jamie Lokier: Use htonl() for nanoseconds, not htons()!
  */
-
+ 
 #include <linux/namei.h>
 #include "xdr3.h"
 #include "auth.h"
 
 #define NFSDDBG_FACILITY		NFSDDBG_XDR
-
 
 /*
  * Mapping of S_IF* types to NFS file types
@@ -923,7 +922,7 @@ encode_entry(struct readdir_cd *ccd, const char *name, int namlen,
 
 	if ((caddr_t)(cd->buffer + elen) < (curr_page_addr + PAGE_SIZE)) {
 		/* encode entry in current page */
-
+		 
 		p = encode_entry_baggage(cd, p, name, namlen, ino);
 
 		if (plus)

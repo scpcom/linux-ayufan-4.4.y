@@ -311,7 +311,6 @@ static const struct usb_device_id id_table[] = {
 };
 MODULE_DEVICE_TABLE(usb, id_table);
 
-
 struct sierra_port_private {
 	spinlock_t lock;	/* lock the structure */
 	int outstanding_urbs;	/* number of out urbs in flight */
@@ -815,27 +814,27 @@ static void sierra_close(struct usb_serial_port *port)
 		mutex_lock(&serial->disc_mutex);
 		if (!serial->disconnected) {
 			serial->interface->needs_remote_wakeup = 0;
-			/* odd error handling due to pm counters */
-			if (!usb_autopm_get_interface(serial->interface))
-				sierra_send_setup(port);
-			else
-				usb_autopm_get_interface_no_resume(serial->interface);
-				
+	/* odd error handling due to pm counters */
+	if (!usb_autopm_get_interface(serial->interface))
+		sierra_send_setup(port);
+	else
+		usb_autopm_get_interface_no_resume(serial->interface);
+
 		}
 		mutex_unlock(&serial->disc_mutex);
-		spin_lock_irq(&intfdata->susp_lock);
-		portdata->opened = 0;
-		spin_unlock_irq(&intfdata->susp_lock);
+	spin_lock_irq(&intfdata->susp_lock);
+	portdata->opened = 0;
+	spin_unlock_irq(&intfdata->susp_lock);
 
 
 		/* Stop reading urbs */
-		sierra_stop_rx_urbs(port);
+	sierra_stop_rx_urbs(port);
 		/* .. and release them */
-		for (i = 0; i < portdata->num_in_urbs; i++) {
-			sierra_release_urb(portdata->in_urbs[i]);
-			portdata->in_urbs[i] = NULL;
-		}
+	for (i = 0; i < portdata->num_in_urbs; i++) {
+		sierra_release_urb(portdata->in_urbs[i]);
+		portdata->in_urbs[i] = NULL;
 	}
+}
 }
 
 static int sierra_open(struct tty_struct *tty, struct usb_serial_port *port)
@@ -855,7 +854,6 @@ static int sierra_open(struct tty_struct *tty, struct usb_serial_port *port)
 	/* Set some sane defaults */
 	portdata->rts_state = 1;
 	portdata->dtr_state = 1;
-
 
 	endpoint = port->bulk_in_endpointAddress;
 	for (i = 0; i < portdata->num_in_urbs; i++) {
@@ -886,7 +884,7 @@ static int sierra_open(struct tty_struct *tty, struct usb_serial_port *port)
 	usb_autopm_put_interface(serial->interface);
 
 	return 0;
-}
+	}
 
 
 static void sierra_dtr_rts(struct usb_serial_port *port, int on)
@@ -1134,7 +1132,6 @@ static int __init sierra_init(void)
 	retval = usb_serial_register(&sierra_device);
 	if (retval)
 		goto failed_device_register;
-
 
 	retval = usb_register(&sierra_driver);
 	if (retval)
