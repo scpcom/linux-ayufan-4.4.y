@@ -2971,6 +2971,32 @@ static void raid10_quiesce(struct mddev *mddev, int state)
 	}
 }
 
+static int raid10_resize(struct mddev *mddev, sector_t sectors)
+{
+	 
+	struct r10conf *conf = mddev->private;
+	sector_t oldsize, size;
+
+	if (conf->far_copies > 1 && !conf->far_offset)
+		return -EINVAL;
+
+	oldsize = raid10_size(mddev, 0, 0);
+	size = raid10_size(mddev, sectors, 0);
+	md_set_array_sectors(mddev, size);
+	if (mddev->array_sectors > size)
+		return -EINVAL;
+	set_capacity(mddev->gendisk, mddev->array_sectors);
+	revalidate_disk(mddev->gendisk);
+	if (sectors > mddev->dev_sectors &&
+	    mddev->recovery_cp > oldsize) {
+		mddev->recovery_cp = oldsize;
+		set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
+	}
+	mddev->dev_sectors = sectors;
+	mddev->resync_max_sectors = size;
+	return 0;
+}
+
 static void *raid10_takeover_raid0(struct mddev *mddev)
 {
 	struct md_rdev *rdev;
@@ -3045,6 +3071,7 @@ static struct md_personality raid10_personality =
 	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
 	.syno_set_rdev_auto_remap = SynoSetRdevAutoRemap,
 #endif
+	.resize		= raid10_resize,
 	.takeover	= raid10_takeover,
 };
 

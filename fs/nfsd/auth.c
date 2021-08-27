@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* Copyright (C) 1995, 1996 Olaf Kirch <okir@monad.swb.de> */
 
 #include <linux/sched.h>
@@ -45,54 +42,18 @@ int nfsd_setuser(struct svc_rqst *rqstp, struct svc_export *exp)
 	if (flags & NFSEXP_ALLSQUASH) {
 		new->fsuid = exp->ex_anon_uid;
 		new->fsgid = exp->ex_anon_gid;
-#ifdef MY_ABC_HERE
-		/*
-		 * When squash root/all to admin, the ex_anon_uid and ex_anon_gid are 1024/100 (admin/users).
-		 * However, the rw permission of shared folder is only for administrators group. So the
-		 * administrators group id (101) should be added to the cred for the share permission.
-		 * Since there is no easy way in kernel to know which groups a user belongs to, here we simply
-		 * assume that the admin is always in administrators group.
-		 *
-		 * Note: directly squash to 1024/101 may cause the new created file has owner group
-		 * "administrators". We don't want this behavior.
-		 */
-		if (exp->ex_anon_uid == (uid_t) 1024) {
-			gi = groups_alloc(1);
-			if (!gi)
-				goto oom;
-			GROUP_AT(gi, 0) = (gid_t) 101;
-		} else {
-			gi = groups_alloc(0);
-			if (!gi)
-				goto oom;
-		}
-#else
 		gi = groups_alloc(0);
 		if (!gi)
 			goto oom;
-#endif /* MY_ABC_HERE */
 	} else if (flags & NFSEXP_ROOTSQUASH) {
 		if (!new->fsuid)
 			new->fsuid = exp->ex_anon_uid;
 		if (!new->fsgid)
 			new->fsgid = exp->ex_anon_gid;
 
-#ifdef MY_ABC_HERE
-		if (exp->ex_anon_uid == (uid_t) 1024) {
-			gi = groups_alloc(rqgi->ngroups+1);
-			if (!gi)
-				goto oom;
-			GROUP_AT(gi, rqgi->ngroups) = (gid_t) 101;
-		} else {
-			gi = groups_alloc(rqgi->ngroups);
-			if (!gi)
-				goto oom;
-		}
-#else
 		gi = groups_alloc(rqgi->ngroups);
 		if (!gi)
 			goto oom;
-#endif /* MY_ABC_HERE */
 
 		for (i = 0; i < rqgi->ngroups; i++) {
 			if (!GROUP_AT(rqgi, i))

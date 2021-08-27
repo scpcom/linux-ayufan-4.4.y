@@ -1536,7 +1536,7 @@ static int change_mount_flags(struct vfsmount *mnt, int ms_flags)
 }
 
 #ifdef MY_ABC_HERE
-static struct syno_mnt_options {
+struct syno_mnt_options {
 	long relatime_period;
 };
 

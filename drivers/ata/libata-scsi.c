@@ -2518,14 +2518,17 @@ OUT:
 	ata_qc_free(qc);
 }
 
-static int SynoIssueRead(struct ata_device *dev)
+static int SynoIssueWakeUpCmd(struct ata_device *dev)
 {
 	struct ata_queued_cmd *qc;
 	struct ata_port *ap = dev->link->ap;
 	struct scatterlist *psg = NULL;
 	int rc;
 	u16 *buf = (void *)dev->link->ap->sector_buf;
+#if defined(MY_ABC_HERE)
+#else  
 	u64 block;
+#endif  
 
 	if (test_and_set_bit(CHKPOWER_FIRST_WAIT, &(dev->ulSpinupState))) {
 		printk("%s: there is already read cmd processing print_id %d link->pmp %d\n",
@@ -2545,6 +2548,14 @@ static int SynoIssueRead(struct ata_device *dev)
 	psg = kmalloc(ATA_SECT_SIZE, GFP_ATOMIC); 
 	sg_init_one(psg, buf, ATA_SECT_SIZE);
 	ata_sg_init(qc, psg, 1);
+#if defined(MY_ABC_HERE)
+	 
+	qc->tf.command = ATA_CMD_IDLEIMMEDIATE;
+	qc->tf.flags |= ATA_TFLAG_DEVICE | ATA_TFLAG_ISADDR;
+	qc->tf.protocol = ATA_PROT_NODATA;
+	qc->flags |= ATA_QCFLAG_RESULT_TF;
+	qc->dma_dir = DMA_NONE;
+#else  
 	qc->flags |= ATA_QCFLAG_IO;
 	qc->nbytes = ATA_SECT_SIZE;
 	qc->dma_dir = DMA_FROM_DEVICE;
@@ -2553,7 +2564,7 @@ static int SynoIssueRead(struct ata_device *dev)
 		ata_link_printk(dev->link, KERN_ERR, "ata_build_rw_tf out of range\n");
 		goto ERR_MEM;
 	}
-
+#endif  
 	qc->complete_fn = ata_qc_complete_read;
 
 	if (ap->ops->qc_defer) {
@@ -2664,7 +2675,7 @@ PASS_ONCE:
 ISSUE_READ:
 	dev->iCheckPwr = 0;
 	dev->ulSpinupState = 0;
-	return SynoIssueRead(dev);
+	return SynoIssueWakeUpCmd(dev);
 WAIT:
 	return SCSI_MLQUEUE_HOST_BUSY;
 }

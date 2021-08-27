@@ -27,11 +27,7 @@ int sysctl_tcp_app_win __read_mostly = 31;
 int sysctl_tcp_adv_win_scale __read_mostly = 1;
 EXPORT_SYMBOL(sysctl_tcp_adv_win_scale);
 
-#ifdef MY_ABC_HERE
 int sysctl_tcp_challenge_ack_limit = 1000;
-#else
-int sysctl_tcp_challenge_ack_limit = 100;
-#endif  
 
 int sysctl_tcp_stdurg __read_mostly;
 int sysctl_tcp_rfc1337 __read_mostly;
@@ -2807,31 +2803,20 @@ static void tcp_send_challenge_ack(struct sock *sk)
 	 
 	static u32 challenge_timestamp;
 	static unsigned int challenge_count;
-#ifdef MY_ABC_HERE
-	u32 count;
-#endif  
-	u32 now = jiffies / HZ;
+	u32 count, now = jiffies / HZ;
 
 	if (now != challenge_timestamp) {
-#ifdef MY_ABC_HERE
 		u32 half = (sysctl_tcp_challenge_ack_limit + 1) >> 1;
 
-#endif  
 		challenge_timestamp = now;
-#ifdef MY_ABC_HERE
-		WRITE_ONCE(challenge_count, half +
-			   prandom_u32_max(sysctl_tcp_challenge_ack_limit));
-#else
-		challenge_count = 0;
-#endif  
+		ACCESS_ONCE(challenge_count) =
+			half + (u32)(
+			((u64) random32() * sysctl_tcp_challenge_ack_limit)
+			>> 32);
 	}
-#ifdef MY_ABC_HERE
-	count = READ_ONCE(challenge_count);
+	count = ACCESS_ONCE(challenge_count);
 	if (count > 0) {
-		WRITE_ONCE(challenge_count, count - 1);
-#else
-	if (++challenge_count <= sysctl_tcp_challenge_ack_limit) {
-#endif  
+		ACCESS_ONCE(challenge_count) = count - 1;
 		NET_INC_STATS_BH(sock_net(sk), LINUX_MIB_TCPCHALLENGEACK);
 		tcp_send_ack(sk);
 	}

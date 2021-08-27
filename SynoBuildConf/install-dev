@@ -44,6 +44,7 @@ ModFS=" \
 	${KernelDir}/lib/zlib_deflate/zlib_deflate.ko \
 	${KernelDir}/lib/libcrc32c.ko \
 	${KernelDir}/fs/hfsplus/hfsplus.ko \
+	${KernelDir}/drivers/md/dm-flakey.ko \
 	"
 ModEncFS=" \
 	${KernelDir}/fs/ecryptfs/ecryptfs.ko \
