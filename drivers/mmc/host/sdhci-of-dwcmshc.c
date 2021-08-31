@@ -60,6 +60,9 @@
 
 #define DLL_RXCLK_NO_INVERTER		BIT(29)
 
+#define DWCMSHC_EMMC_RST_N		BIT(2)
+#define DWCMSHC_EMMC_RST_N_OE		BIT(3)
+
 #define DWCMSHC_CARD_IS_EMMC		BIT(0)
 #define DWCMSHC_ENHANCED_STROBE		BIT(8)
 
@@ -326,6 +329,23 @@ static void rockchip_sdhci_reset(struct sdhci_host *host, u8 mask)
 	sdhci_reset(host, mask);
 }
 
+static void dwcmshc_rk_hw_reset(struct sdhci_host *host)
+{
+	u32 reg;
+
+	reg = sdhci_readl(host, DWCMSHC_EMMC_CONTROL);
+	reg |= DWCMSHC_EMMC_RST_N_OE;
+	reg &= ~DWCMSHC_EMMC_RST_N;
+	sdhci_writel(host, reg, DWCMSHC_EMMC_CONTROL);
+	udelay(20);
+
+	reg |= DWCMSHC_EMMC_RST_N;
+	sdhci_writel(host, reg, DWCMSHC_EMMC_CONTROL);
+	udelay(300);
+	return;
+}
+
+
 static const struct sdhci_ops sdhci_dwcmshc_ops = {
 	.set_clock		= sdhci_set_clock,
 	.set_bus_width		= sdhci_set_bus_width,
@@ -342,6 +362,7 @@ static const struct sdhci_ops sdhci_dwcmshc_rk_ops = {
 	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
 	.reset			= rockchip_sdhci_reset,
 	.adma_write_desc	= dwcmshc_adma_write_desc,
+	.hw_reset		= dwcmshc_rk_hw_reset,
 };
 
 static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
