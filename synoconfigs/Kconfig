@@ -1,0 +1,45 @@
+# For a description of the syntax of this configuration file,
+# see Documentation/kbuild/kconfig-language.txt.
+#
+
+config SYNO_QORIQ
+	bool "Synology P1022 porting define"
+	depends on P1022_DS
+	default y
+	help
+	  Say Y here to enable Freescale QorIQ porting codes.
+
+config SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+	bool "Fix wake from deepsleep fail issue"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to let wake up from deepsleep will wait for hw reset.
+
+config SYNO_QORIQ_EN_DEEP_WAKE_PIN
+	bool "Let deepsleep can wakeup by GPIO pin"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to let deepsleep can wakeup by GPIO pin
+
+config SYNO_QORIQ_ESPI_PM
+	bool "support for pm in espi device"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to support espi pm
+
+config SYNO_QORIQ_WOL_SPECIFY_PATTERN
+	bool "support for wake up from user specify pattern"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to support user specify wake up pattern
+
+config SYNO_QORIQ_PHY_LED_SET
+	bool "support PHY LED behavior control"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to support PHY LED behavior control

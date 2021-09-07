@@ -1,0 +1,43 @@
+#
+# Boardnet configuration
+#
+
+menu "MPC85xx PCI agent mode driver"
+	depends on NETDEVICES && MPC85xx && PCI && m
+
+config CARDNET
+	tristate "Cardnet driver support"
+	---help---
+	  cardnet driver is a simulating ethernet driver for MPC85xx
+	  board when it acts as Agent/EP device.
+	  If MPC85xx board acts as PCI Agent/EP and want to communicate with
+	  the Host/RC through PCI interface, enable this cardnet driver and there
+	  will be an ethernet device named cethx in the system. Corporating with
+	  another ethernet device named bethx in the Host/RC system, the Host/RC and
+	  Agent/EP can send package to each other.
+
+config PCI_EP_N
+	int "Default PCI port configured as Agent/EP"
+	default "3"
+	depends on CARDNET
+	help
+	  The default pci port which configured as Agent/EP.
+
+endmenu
+
+menu "MPC85xx board PCI demo driver"
+	depends on NETDEVICES && MPC85xx && PCI && m
+
+config BOARDNET
+	tristate "Boardnet driver support"
+	---help---
+	  Boardnet driver is a simulate ethernet driver for MPC85xx board
+	  when it act as PCI host/RC.
+	  If MPC85xx board acts as PCI Host/RC and want to communicate
+	  with another MPC85xx board(act as Agent/EP) through PCI interface,
+	  enable this boardnet driver and there will be an ethernet device named
+	  bethx in the system. Corporating with another ethernet device named
+	  cethx in the Agent/EP system,the Host/RC and Agent/EP can send package
+	  to each other.
+
+endmenu
