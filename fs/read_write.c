@@ -689,7 +689,7 @@ asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, si
 	}
 	mutex_unlock(&inode->i_mutex);
 
-	if(rwbytes) {
+	if(0 > ret && rwbytes) {
 #ifdef CONFIG_IA32_EMULATION
 		rwbytes[0]=bytes_received;
 		rwbytes[1]=bytes_written;

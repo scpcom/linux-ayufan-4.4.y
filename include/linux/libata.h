@@ -90,6 +90,8 @@ extern int giSynoHddLedEnabled;
 
 #ifdef MY_ABC_HERE
 #define WAKEINTERVAL (7UL*HZ)
+/* WD suggest 30s */
+#define ISSUEREADTIMEOUT (30UL*HZ)
 #endif
 
 #ifdef MY_ABC_HERE
@@ -705,7 +707,6 @@ struct ata_device {
 	unsigned long ulLastCmd;
 	unsigned long ulSpinupState;
 	int			  iCheckPwr;
-	struct work_struct	SendWakeEventTask;
 
 	/* bit definitions */
 	#define CHKPOWER_CHECKING 0
@@ -1355,7 +1356,9 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 
 #ifdef MY_ABC_HERE
 #define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
-			(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_FPDMA_READ == qc->tf.command))
+			(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
+			 ATA_CMD_READ_EXT == qc->tf.command || ATA_CMD_PIO_READ == qc->tf.command || ATA_CMD_PIO_READ_EXT == qc->tf.command || \
+			 ATA_CMD_READ_MULTI == qc->tf.command || ATA_CMD_READ_MULTI_EXT == qc->tf.command))
 #endif
 
 /*

@@ -45,9 +45,6 @@ struct sd_softc {
 static struct sd_softc scSynoBios;
 static SYNO_SYS_STATUS *pgSysStatus = NULL;
 
-#ifdef MY_ABC_HERE
-extern int (*funcSYNOSendHibernationEvent)(unsigned int type, unsigned int diskno);
-#endif
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 extern int (*funcSYNOGetHwCapability)(CAPABILITY *);
 #endif
@@ -105,23 +102,6 @@ static int synobios_record_raid_event(unsigned int type, unsigned int raidno, un
 	event.data3 = diskno + 1;   // scemd record disk1,2,3,4, 
 								// raid driver use disk0,1,2,3
 	event.data4 = sector;	
-
-	ret = synobios_record_event_new(&scSynoBios, &event);
-
-	return ret;
-}
-#endif
-
-#ifdef MY_ABC_HERE
-static int synobios_record_hibernation_event(unsigned int type, unsigned int diskno)
-{
-	int ret;
-	SYNOBIOSEVENT   event;
-
-	event.event = SYNO_EVENT_HIBERNATION;
-	event.data1 = type;
-	event.data2 = diskno;
-	event.data3 = event.data4 = 0;
 
 	ret = synobios_record_event_new(&scSynoBios, &event);
 
@@ -772,9 +752,6 @@ int synobios_init(void)
 #ifdef MY_ABC_HERE
 	funcSYNOSendRaidEvent = synobios_record_raid_event;
 #endif
-#ifdef MY_ABC_HERE
-	funcSYNOSendHibernationEvent = synobios_record_hibernation_event;
-#endif
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	funcSYNOGetHwCapability = GetHwCapability;
 #endif
@@ -796,9 +773,6 @@ void synobios_cleanup(void)
 {
 #ifdef MY_ABC_HERE
 	funcSYNOSendRaidEvent = NULL;
-#endif
-#ifdef MY_ABC_HERE
-	funcSYNOSendHibernationEvent = NULL;
 #endif
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	funcSYNOGetHwCapability = NULL;

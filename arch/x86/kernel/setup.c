@@ -336,7 +336,6 @@ void * __init extend_brk(size_t size, size_t align)
 	return ret;
 }
 
-
 #ifdef CONFIG_X86_64
 static void __init init_gbpages(void)
 {

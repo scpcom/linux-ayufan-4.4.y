@@ -89,24 +89,24 @@ static int interval;
 #define CYPRESS_BUF_SIZE	1024
 #define CYPRESS_CLOSING_WAIT	(30*HZ)
 
-static struct usb_device_id id_table_earthmate [] = {
+static const struct usb_device_id id_table_earthmate[] = {
 	{ USB_DEVICE(VENDOR_ID_DELORME, PRODUCT_ID_EARTHMATEUSB) },
 	{ USB_DEVICE(VENDOR_ID_DELORME, PRODUCT_ID_EARTHMATEUSB_LT20) },
 	{ }						/* Terminating entry */
 };
 
-static struct usb_device_id id_table_cyphidcomrs232 [] = {
+static const struct usb_device_id id_table_cyphidcomrs232[] = {
 	{ USB_DEVICE(VENDOR_ID_CYPRESS, PRODUCT_ID_CYPHIDCOM) },
 	{ USB_DEVICE(VENDOR_ID_POWERCOM, PRODUCT_ID_UPS) },
 	{ }						/* Terminating entry */
 };
 
-static struct usb_device_id id_table_nokiaca42v2 [] = {
+static const struct usb_device_id id_table_nokiaca42v2[] = {
 	{ USB_DEVICE(VENDOR_ID_DAZZLE, PRODUCT_ID_CA42) },
 	{ }						/* Terminating entry */
 };
 
-static struct usb_device_id id_table_combined [] = {
+static const struct usb_device_id id_table_combined[] = {
 	{ USB_DEVICE(VENDOR_ID_DELORME, PRODUCT_ID_EARTHMATEUSB) },
 	{ USB_DEVICE(VENDOR_ID_DELORME, PRODUCT_ID_EARTHMATEUSB_LT20) },
 	{ USB_DEVICE(VENDOR_ID_CYPRESS, PRODUCT_ID_CYPHIDCOM) },
@@ -179,7 +179,7 @@ static int  cypress_write(struct tty_struct *tty, struct usb_serial_port *port,
 			const unsigned char *buf, int count);
 static void cypress_send(struct usb_serial_port *port);
 static int  cypress_write_room(struct tty_struct *tty);
-static int  cypress_ioctl(struct tty_struct *tty, struct file *file,
+static int  cypress_ioctl(struct tty_struct *tty,
 			unsigned int cmd, unsigned long arg);
 static void cypress_set_termios(struct tty_struct *tty,
 			struct usb_serial_port *port, struct ktermios *old);
@@ -936,7 +936,7 @@ static int cypress_tiocmset(struct tty_struct *tty, struct file *file,
 }
 
 
-static int cypress_ioctl(struct tty_struct *tty, struct file *file,
+static int cypress_ioctl(struct tty_struct *tty,
 					unsigned int cmd, unsigned long arg)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -1307,13 +1307,9 @@ static void cypress_read_int_callback(struct urb *urb)
 		spin_unlock_irqrestore(&priv->lock, flags);
 
 	/* process read if there is data other than line status */
-	if (tty && (bytes > i)) {
-		bytes = tty_buffer_request_room(tty, bytes);
-		for (; i < bytes ; ++i) {
-			dbg("pushing byte number %d - %d - %c", i, data[i],
-					data[i]);
-			tty_insert_flip_char(tty, data[i], tty_flag);
-		}
+	if (tty && bytes > i) {
+		tty_insert_flip_string_fixed_flag(tty, data + i,
+				bytes - i, tty_flag);
 		tty_flip_buffer_push(tty);
 	}
 
@@ -1325,9 +1321,9 @@ static void cypress_read_int_callback(struct urb *urb)
 continue_read:
 	tty_kref_put(tty);
 
-	/* Continue trying to always read... unless the port has closed. */
+	/* Continue trying to always read */
 
-	if (port->port.count > 0 && priv->comm_is_ok) {
+	if (priv->comm_is_ok) {
 		usb_fill_int_urb(port->interrupt_in_urb, port->serial->dev,
 				usb_rcvintpipe(port->serial->dev,
 					port->interrupt_in_endpointAddress),
@@ -1336,15 +1332,13 @@ continue_read:
 				cypress_read_int_callback, port,
 				priv->read_urb_interval);
 		result = usb_submit_urb(port->interrupt_in_urb, GFP_ATOMIC);
-		if (result) {
+		if (result && result != -EPERM) {
 			dev_err(&urb->dev->dev, "%s - failed resubmitting "
 					"read urb, error %d\n", __func__,
 					result);
 			cypress_set_dead(port);
 		}
 	}
-
-	return;
 } /* cypress_read_int_callback */
 
 

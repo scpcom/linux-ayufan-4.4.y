@@ -42,20 +42,15 @@
 #define ACC_MODE(x) ("\000\004\002\006"[(x)&O_ACCMODE])
 
 #ifdef MY_ABC_HERE
-int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n);
+inline int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n);
 int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n);
-int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
+inline int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
 int SYNOUnicodeUTF16StrToUTF8Str(u_int8_t *s, const u_int16_t *pwcs, int maxlen);
 u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void);
-int SYNOUnicodeUTF16Strcmp(u_int16_t *utf16str1,u_int16_t *utf16str2, int len,u_int16_t *upcasetable);
 u_int16_t *DefUpcaseTable(void);
-void SYNOUnicodeTblAdd(u_int16_t *UpcaseTbl);
-u_int16_t *SYNOUnicodeTblGet(char *szLocaleName);
 
 static u_int16_t UTF16NameiStrBuf1[UNICODE_UTF16_BUFSIZE];
-static u_int16_t UTF16NameiStrBuf2[UNICODE_UTF16_BUFSIZE];
 extern spinlock_t Namei_buf_lock_1;  /* init at alloc_super() */
-extern spinlock_t Namei_buf_lock_2;  /* init at alloc_super() */
 
 /*
  * Sample implementation from Unicode home page.
@@ -80,7 +75,7 @@ static struct utf8_table utf8_table[] =
     {0,						       /* end of table    */}
 };
 
-int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
+inline int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
 {
 	long l;
 	int c0, c, nc;
@@ -117,7 +112,7 @@ int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n)
 
 	op = pwcs;
 	ip = s;
-	while (*ip && n > 0) {
+	while (n > 0 && *ip) {
 		if (*ip & 0x80) {
 			size = SYNOUnicodeUTF8ChrToUTF16Chr(op, ip, n);
 			if (size == -1) {
@@ -131,18 +126,18 @@ int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n)
 			}
 		} else {
 			*op++ = *ip++;
-            n--;
+			n--;
 		}
 	}
-    *op = 0;
+	*op = 0;
 #ifdef SYNO_DEBUG_BUILD
-    if((op - pwcs) >= UNICODE_UTF16_BUFSIZE)
-        panic("SYNOUnicodeUTF8StrToUTF16Str: UTF8 string too long\n");
+	if((op - pwcs) >= UNICODE_UTF16_BUFSIZE)
+		panic("SYNOUnicodeUTF8StrToUTF16Str: UTF8 string too long\n");
 #endif
 	return (op - pwcs);
 }
 
-int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
+inline int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
 {
 	long l;
 	int c, nc;
@@ -192,9 +187,11 @@ int SYNOUnicodeUTF16StrToUTF8Str(u_int8_t *s, const u_int16_t *pwcs, int maxlen)
 		}
 		ip++;
 	}
-    *op = 0;
+	*op = 0;
 	return (op - s);
 }
+
+
 
 /*
  * upcase.c - Generate the full NTFS Unicode upcase table in little endian.
@@ -314,14 +311,6 @@ u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void)
 	return uc;
 }
 
-int SYNOUnicodeUTF16Strcmp(u_int16_t *utf16str1,u_int16_t *utf16str2, int len,u_int16_t *upcasetable)
-{
-    int i;
-    for (i = 0; i < len; i++)
-        if(upcasetable[utf16str1[i]] != upcasetable[utf16str2[i]])
-            return -1;
-    return 0;
-}
 
 static u_int16_t *UpcaseTable = NULL;
 
@@ -343,45 +332,51 @@ int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int cl
 	spin_lock(&Namei_buf_lock_1);
 
 	UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
-    clenUtf16 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf1, from, clenfrom);
+	clenUtf16 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf1, from, clenfrom);
 
 	for(i = 0; i < clenUtf16; i++)
-        UTF16NameiStrBuf1[i] = UpcaseTbl[UTF16NameiStrBuf1[i]];
+		UTF16NameiStrBuf1[i] = UpcaseTbl[UTF16NameiStrBuf1[i]];
 
-    UTF16NameiStrBuf1[clenUtf16] = 0;
+	UTF16NameiStrBuf1[clenUtf16] = 0;
 	err = SYNOUnicodeUTF16StrToUTF8Str(to, UTF16NameiStrBuf1, maxlen);
-    spin_unlock(&Namei_buf_lock_1);
-
+	spin_unlock(&Namei_buf_lock_1);
 	return err;
+
 }
 EXPORT_SYMBOL(SYNOUnicodeUTF8toUpper);
 
 int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int clenUtf8Str1, int clenUtf8Str2, u_int16_t *upcasetable)
 {
-    int clenUtf16Str1,clenUtf16Str2;
-    u_int16_t *UpcaseTbl;
-	int err;
+        u_int16_t *UpcaseTbl;
+        u_int16_t wc1, wc2;
+        int size1, size2;
+        int result = -1;
 
-    spin_lock(&Namei_buf_lock_1);
-    spin_lock(&Namei_buf_lock_2);
+        UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
 
-    UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
+        while (clenUtf8Str1 && clenUtf8Str2) {
+                size1 = SYNOUnicodeUTF8ChrToUTF16Chr(&wc1, utf8str1, clenUtf8Str1);
+                size2 = SYNOUnicodeUTF8ChrToUTF16Chr(&wc2, utf8str2, clenUtf8Str2);
 
-    clenUtf16Str1 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf1, utf8str1, clenUtf8Str1);
-    clenUtf16Str2 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf2, utf8str2, clenUtf8Str2);
-
-    if(clenUtf16Str1 != clenUtf16Str2)
-        err = -1;
-    else
-        err = SYNOUnicodeUTF16Strcmp((u_int16_t *)UTF16NameiStrBuf1
-                                      ,(u_int16_t *)UTF16NameiStrBuf2
-                                      ,clenUtf16Str1
-                                      ,UpcaseTbl);
-
-    spin_unlock(&Namei_buf_lock_1);
-    spin_unlock(&Namei_buf_lock_2);
-
-	return err;
+                if (size1 != -1 && size2 != -1) {
+                        if (UpcaseTbl[wc1] != UpcaseTbl[wc2])
+                                goto END;
+                } else if (size1 == -1 && size2 == -1) {
+                        if (*utf8str1 != *utf8str2)
+                                goto END;
+                        size1 = size2 = 1;
+                } else {
+                        goto END;
+                }
+                utf8str1 += size1;
+                clenUtf8Str1 -= size1;
+                utf8str2 += size2;
+                clenUtf8Str2 -= size2;
+        }
+	if (clenUtf8Str1 == 0 && clenUtf8Str2 == 0)
+		result = 0;
+END:
+        return result;
 }
 EXPORT_SYMBOL(SYNOUnicodeUTF8Strcmp);
 
@@ -1190,6 +1185,7 @@ static int do_lookup(struct nameidata *nd, struct qstr *name,
 
 		/* Don't create child dentry for a dead directory. */
 		if (IS_DEADDIR(dir)) {
+			dentry = ERR_PTR(-ENOENT);
 			goto fail;
 		}
 
@@ -1203,12 +1199,13 @@ static int do_lookup(struct nameidata *nd, struct qstr *name,
 			goto fail;
 		}
 		result = dir->i_op->lookup(dir, new_dentry, nd);
-		if (result)
-			dput(new_dentry);
-		else
-			result = new_dentry;
-		dentry = result;
 		mutex_unlock(&dir->i_mutex);
+		if (result) {
+			dput(new_dentry);
+			dentry = result;
+			goto fail;
+		}
+		dentry = new_dentry;
 	}
 #endif
 done:

@@ -58,7 +58,7 @@
 #define OTI6858_AUTHOR "Tomasz Michal Lukaszewski <FIXME@FIXME>"
 #define OTI6858_VERSION "0.1"
 
-static struct usb_device_id id_table [] = {
+static const struct usb_device_id id_table[] = {
 	{ USB_DEVICE(OTI6858_VENDOR_ID, OTI6858_PRODUCT_ID) },
 	{ }
 };
@@ -146,7 +146,7 @@ static void oti6858_close(struct usb_serial_port *port);
 static void oti6858_set_termios(struct tty_struct *tty,
 			struct usb_serial_port *port, struct ktermios *old);
 static void oti6858_init_termios(struct tty_struct *tty);
-static int oti6858_ioctl(struct tty_struct *tty, struct file *file,
+static int oti6858_ioctl(struct tty_struct *tty,
 			unsigned int cmd, unsigned long arg);
 static void oti6858_read_int_callback(struct urb *urb);
 static void oti6858_read_bulk_callback(struct urb *urb);
@@ -578,9 +578,6 @@ static int oti6858_open(struct tty_struct *tty, struct usb_serial_port *port)
 	usb_clear_halt(serial->dev, port->write_urb->pipe);
 	usb_clear_halt(serial->dev, port->read_urb->pipe);
 
-	if (port->port.count != 1)
-		return 0;
-
 	buf = kmalloc(OTI6858_CTRL_PKT_SIZE, GFP_KERNEL);
 	if (buf == NULL) {
 		dev_err(&port->dev, "%s(): out of memory!\n", __func__);
@@ -759,7 +756,7 @@ static int wait_modem_info(struct usb_serial_port *port, unsigned int arg)
 	return 0;
 }
 
-static int oti6858_ioctl(struct tty_struct *tty, struct file *file,
+static int oti6858_ioctl(struct tty_struct *tty,
 			unsigned int cmd, unsigned long arg)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -927,10 +924,6 @@ static void oti6858_read_bulk_callback(struct urb *urb)
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 	if (status != 0) {
-		if (!port->port.count) {
-			dbg("%s(): port is closed, exiting", __func__);
-			return;
-		}
 		/*
 		if (status == -EPROTO) {
 			* PL2303 mysteriously fails with -EPROTO reschedule
@@ -954,14 +947,12 @@ static void oti6858_read_bulk_callback(struct urb *urb)
 	}
 	tty_kref_put(tty);
 
-	/* schedule the interrupt urb if we are still open */
-	if (port->port.count != 0) {
-		port->interrupt_in_urb->dev = port->serial->dev;
-		result = usb_submit_urb(port->interrupt_in_urb, GFP_ATOMIC);
-		if (result != 0) {
-			dev_err(&port->dev, "%s(): usb_submit_urb() failed,"
-					" error %d\n", __func__, result);
-		}
+	/* schedule the interrupt urb */
+	port->interrupt_in_urb->dev = port->serial->dev;
+	result = usb_submit_urb(port->interrupt_in_urb, GFP_ATOMIC);
+	if (result != 0 && result != -EPERM) {
+		dev_err(&port->dev, "%s(): usb_submit_urb() failed,"
+				" error %d\n", __func__, result);
 	}
 }
 

@@ -50,7 +50,7 @@ struct pl2303_buf {
 	char		*buf_put;
 };
 
-static struct usb_device_id id_table [] = {
+static const struct usb_device_id id_table[] = {
 	{ USB_DEVICE(PL2303_VENDOR_ID, PL2303_PRODUCT_ID) },
 	{ USB_DEVICE(PL2303_VENDOR_ID, PL2303_PRODUCT_ID_RSAQ2) },
 	{ USB_DEVICE(PL2303_VENDOR_ID, PL2303_PRODUCT_ID_DCU11) },
@@ -892,7 +892,7 @@ static int wait_modem_info(struct usb_serial_port *port, unsigned int arg)
 	return 0;
 }
 
-static int pl2303_ioctl(struct tty_struct *tty, struct file *file,
+static int pl2303_ioctl(struct tty_struct *tty,
 			unsigned int cmd, unsigned long arg)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -1042,7 +1042,6 @@ static void pl2303_push_data(struct tty_struct *tty,
 		tty_flag = TTY_FRAME;
 	dbg("%s - tty_flag = %d", __func__, tty_flag);
 
-	tty_buffer_request_room(tty, urb->actual_length + 1);
 	/* overrun is special, not associated with a char */
 	if (line_status & UART_OVERRUN_ERROR)
 		tty_insert_flip_char(tty, 0, TTY_OVERRUN);
@@ -1072,10 +1071,6 @@ static void pl2303_read_bulk_callback(struct urb *urb)
 
 	if (status) {
 		dbg("%s - urb status = %d", __func__, status);
-		if (!port->port.count) {
-			dbg("%s - port is closed, exiting.", __func__);
-			return;
-		}
 		if (status == -EPROTO) {
 			/* PL2303 mysteriously fails with -EPROTO reschedule
 			 * the read */
@@ -1108,15 +1103,11 @@ static void pl2303_read_bulk_callback(struct urb *urb)
 	}
 	tty_kref_put(tty);
 	/* Schedule the next read _if_ we are still open */
-	if (port->port.count) {
-		urb->dev = port->serial->dev;
-		result = usb_submit_urb(urb, GFP_ATOMIC);
-		if (result)
-			dev_err(&urb->dev->dev, "%s - failed resubmitting"
-				" read urb, error %d\n", __func__, result);
-	}
-
-	return;
+	urb->dev = port->serial->dev;
+	result = usb_submit_urb(urb, GFP_ATOMIC);
+	if (result && result != -EPERM)
+		dev_err(&urb->dev->dev, "%s - failed resubmitting"
+			" read urb, error %d\n", __func__, result);
 }
 
 static void pl2303_write_bulk_callback(struct urb *urb)

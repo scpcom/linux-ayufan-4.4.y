@@ -102,6 +102,14 @@ extern int gSynoHasDynModule;
 extern long gSynoFlashMemorySize;
 #endif
 
+#ifdef MY_ABC_HERE
+extern int gSynoFactoryUSBFastReset;
+#endif
+
+#ifdef MY_ABC_HERE
+extern int gSynoFactoryUSB3Disable;
+#endif
+
 #if defined(CONFIG_FPE_NWFPE) || defined(CONFIG_FPE_FASTFPE)
 char fpe_type[8];
 
@@ -374,6 +382,30 @@ END:
 	return 1;
 }
 __setup("flash_size=", early_flash_memory_size);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_factory_usb_fast_reset(char *p)
+{
+	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
+
+	printk("Factory USB Fast Reset: %d\n", (int)gSynoFactoryUSBFastReset);
+
+	return 1;
+}
+__setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_factory_usb3_disable(char *p)
+{
+	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);
+
+	printk("Factory USB3 Disable: %d\n", (int)gSynoFactoryUSB3Disable);
+
+	return 1;
+}
+__setup("syno_disable_usb3=", early_factory_usb3_disable);
 #endif
 
 extern void paging_init(struct machine_desc *desc);

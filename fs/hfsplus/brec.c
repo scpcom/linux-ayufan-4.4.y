@@ -140,7 +140,7 @@ skip:
 
 		/* get index key */
 		hfs_bnode_read_key(new_node, fd->search_key, 14);
-		__hfs_brec_find(fd->bnode, fd);
+		__hfs_brec_find(fd->bnode, fd, hfs_find_rec_by_key);
 
 		hfs_bnode_put(new_node);
 		new_node = NULL;
@@ -188,7 +188,7 @@ again:
 		hfs_bnode_put(node);
 		node = fd->bnode = parent;
 
-		__hfs_brec_find(node, fd);
+		__hfs_brec_find(node, fd, hfs_find_rec_by_key);
 		goto again;
 	}
 	hfs_bnode_write_u16(node, offsetof(struct hfs_bnode_desc, num_recs), node->num_recs);
@@ -340,7 +340,7 @@ again:
 	parent = hfs_bnode_find(tree, node->parent);
 	if (IS_ERR(parent))
 		return PTR_ERR(parent);
-	__hfs_brec_find(parent, fd);
+	__hfs_brec_find(parent, fd, hfs_find_rec_by_key);
 	hfs_bnode_dump(parent);
 	rec = fd->record;
 
@@ -398,7 +398,7 @@ skip:
 		hfs_bnode_read_key(new_node, fd->search_key, 14);
 		cnid = cpu_to_be32(new_node->this);
 
-		__hfs_brec_find(fd->bnode, fd);
+		__hfs_brec_find(fd->bnode, fd, hfs_find_rec_by_key);
 		hfs_brec_insert(fd, &cnid, sizeof(cnid));
 		hfs_bnode_put(fd->bnode);
 		hfs_bnode_put(new_node);

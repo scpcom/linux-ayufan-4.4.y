@@ -60,7 +60,6 @@
 
 #ifdef MY_ABC_HERE
 #include <linux/list.h>
-extern int (*funcSYNOSendHibernationEvent)(unsigned int, unsigned int);
 extern unsigned int guiWakeupDisksNum;
 extern int giDenoOfTimeInterval;
 static unsigned long CurPendingListSleep = 0;
@@ -2896,22 +2895,6 @@ static int ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd,
 			      void (*done)(struct scsi_cmnd *),
 			      ata_xlat_func_t xlat_func);
 
-void SynoSendWakeEvent(struct work_struct *work)
-{
-	struct ata_device *dev = container_of(work, struct ata_device, SendWakeEventTask);
-
-	if (!dev) {
-		printk("can't get ata device\n");
-		goto END;
-	}
-
-	if (funcSYNOSendHibernationEvent) {
-		funcSYNOSendHibernationEvent(DISK_WAKE_UP, dev->link->ap->scsi_host->host_no+1);
-	}
-
-END:
-	return;
-}
 /**
  * completion function used for in-the-middle chk_power 
  * command to reissue pending command
@@ -2939,9 +2922,6 @@ void ata_qc_complete_chkpower(struct ata_queued_cmd *qc)
 END:
 	if (blSpinDown) {
 		DBGMESG("disk %d is sleeping, need wakeup it\n", qc->ap->print_id);
-		if (g_internal_hd_num && funcSYNOSendHibernationEvent) {
-			schedule_work(&(qc->dev->SendWakeEventTask));
-		}
 		set_bit(CHKPOWER_FIRST_CMD, &(qc->dev->ulSpinupState));
 		set_bit(qc->dev->link->ap->print_id, &CurPendingListSleep);
 	}
@@ -3158,7 +3138,7 @@ static int syno_ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd
 	if (!(scsicmd[0] == ATA_16 && scsicmd[14] == ATA_CMD_CHK_POWER)) {
 
 		/* we need insert read as the first cmd to wakeup disk */
-		if (test_bit(CHKPOWER_FIRST_CMD, &(dev->ulSpinupState))) {
+		if (dev->iCheckPwr || test_bit(CHKPOWER_FIRST_CMD, &(dev->ulSpinupState))) {
 			/* check if this port need wait other disks wakeup */
 			spin_lock(&SYNOLastWakeLock);
 			if (gulLastWake &&	time_after(jiffies, gulLastWake + WAKEINTERVAL)) {
@@ -3184,6 +3164,11 @@ static int syno_ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd
 			spin_unlock(&SYNOLastWakeLock);
 
 			if (!iNeedWait) {
+				if (dev->iCheckPwr) {
+					set_bit(ap->print_id, &CurPendingListSleep);
+					clear_bit(ap->print_id, &CurPendingListWaking);
+					dev->ulSpinupState = 0;
+				}
 				goto ISSUE_READ;
 			} else {
 				/* These msg will appear very much, so we mark it.
@@ -3213,7 +3198,7 @@ static int syno_ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd
 		 * 2. some disks may go hibernation by itself, so if this disk is idle for a while we
 		 *    must check it
 		 **/
-		if (dev->iCheckPwr || time_after(jiffies, dev->ulLastCmd + (ata_print_id * WAKEINTERVAL))) {
+		if (time_after(jiffies, dev->ulLastCmd + (ata_print_id * WAKEINTERVAL))) {
 			DBGMESG("disk %d go CHKPOWER,clear Waking/Sleep bit, scsicmd[0] 0x%x scsicmd[14] 0x%x\n",
 					ap->print_id, scsicmd[0], scsicmd[14]);
 			clear_bit(ap->print_id, &CurPendingListWaking);
@@ -3442,7 +3427,7 @@ static unsigned int ata_scsiop_inq_std(struct ata_scsi_args *args, u8 *rbuf)
 		95 - 4
 	};
 
-#ifdef CONFIG_SYNO_INQUIRY_STANDARD
+#ifdef MY_ABC_HERE
 	unsigned char szIdBuf[ATA_ID_PROD_LEN+1] = {0x00};
 	int idxStr, idxModelStr;
 	char bHasSpace = 0;
@@ -3454,7 +3439,7 @@ static unsigned int ata_scsiop_inq_std(struct ata_scsi_args *args, u8 *rbuf)
 		hdr[1] |= (1 << 7);
 
 	memcpy(rbuf, hdr, sizeof(hdr));
-#ifdef CONFIG_SYNO_INQUIRY_STANDARD
+#ifdef MY_ABC_HERE
 	ata_id_c_string(args->id, szIdBuf, ATA_ID_PROD, ATA_ID_PROD_LEN+1);
 
 	for(idxStr=0; idxStr<ATA_ID_PROD_LEN; idxStr++) {
@@ -4629,6 +4614,11 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 			rc = ata_scsi_translate(dev, scmd, done, xlat_func);
 		} else {
 			if (test_bit(CHKPOWER_FIRST_WAIT, &(dev->ulSpinupState))) {
+				if (time_after(jiffies, dev->ulLastCmd + ISSUEREADTIMEOUT)) {
+					DBGMESG("ata%u: checking issue READ timeout\n", dev->link->ap->print_id);
+					WARN_ON(1 != dev->link->ap->nr_active_links);
+					ata_port_schedule_eh(dev->link->ap);
+				}
 				goto RETRY;
 			}
 			if (test_bit(CHKPOWER_CHECKING, &(dev->ulSpinupState))) {
@@ -4636,9 +4626,6 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 					DBGMESG("ata%u: checking timeout\n", dev->link->ap->print_id);
 					WARN_ON(1 != dev->link->ap->nr_active_links);
 					ata_port_schedule_eh(dev->link->ap);
-					if (test_and_clear_bit(CHKPOWER_CHECKING, &(dev->ulSpinupState))) {
-						DBGMESG("ata%u schedule eh clear CHKPOWER_CHECKING\n", dev->link->ap->print_id);
-					}
 				}
 				goto RETRY;
 			}

@@ -134,7 +134,7 @@ struct edgeport_serial {
 
 
 /* Devices that this driver supports */
-static struct usb_device_id edgeport_1port_id_table [] = {
+static const struct usb_device_id edgeport_1port_id_table[] = {
 	{ USB_DEVICE(USB_VENDOR_ID_ION, ION_DEVICE_ID_TI_EDGEPORT_1) },
 	{ USB_DEVICE(USB_VENDOR_ID_ION, ION_DEVICE_ID_TI_TI3410_EDGEPORT_1) },
 	{ USB_DEVICE(USB_VENDOR_ID_ION, ION_DEVICE_ID_TI_TI3410_EDGEPORT_1I) },
@@ -154,7 +154,7 @@ static struct usb_device_id edgeport_1port_id_table [] = {
 	{ }
 };
 
-static struct usb_device_id edgeport_2port_id_table [] = {
+static const struct usb_device_id edgeport_2port_id_table[] = {
 	{ USB_DEVICE(USB_VENDOR_ID_ION, ION_DEVICE_ID_TI_EDGEPORT_2) },
 	{ USB_DEVICE(USB_VENDOR_ID_ION, ION_DEVICE_ID_TI_EDGEPORT_2C) },
 	{ USB_DEVICE(USB_VENDOR_ID_ION, ION_DEVICE_ID_TI_EDGEPORT_2I) },
@@ -177,7 +177,7 @@ static struct usb_device_id edgeport_2port_id_table [] = {
 };
 
 /* Devices that this driver supports */
-static struct usb_device_id id_table_combined [] = {
+static const struct usb_device_id id_table_combined[] = {
 	{ USB_DEVICE(USB_VENDOR_ID_ION, ION_DEVICE_ID_TI_EDGEPORT_1) },
 	{ USB_DEVICE(USB_VENDOR_ID_ION, ION_DEVICE_ID_TI_TI3410_EDGEPORT_1) },
 	{ USB_DEVICE(USB_VENDOR_ID_ION, ION_DEVICE_ID_TI_TI3410_EDGEPORT_1I) },
@@ -1564,8 +1564,6 @@ static void handle_new_msr(struct edgeport_port *edge_port, __u8 msr)
 		}
 	}
 	tty_kref_put(tty);
-
-	return;
 }
 
 static void handle_new_lsr(struct edgeport_port *edge_port, int lsr_data,
@@ -1686,7 +1684,7 @@ static void edge_interrupt_callback(struct urb *urb)
 	case TIUMP_INTERRUPT_CODE_MSR:	/* MSR */
 		/* Copy MSR from UMP */
 		msr = data[1];
-		dbg("%s - ===== Port %u MSR Status = %02x ======\n",
+		dbg("%s - ===== Port %u MSR Status = %02x ======",
 		     __func__, port_number, msr);
 		handle_new_msr(edge_port, msr);
 		break;
@@ -1790,7 +1788,6 @@ static void edge_tty_recv(struct device *dev, struct tty_struct *tty,
 {
 	int queued;
 
-	tty_buffer_request_room(tty, length);
 	queued = tty_insert_flip_string(tty, data, length);
 	if (queued < length)
 		dev_err(dev, "%s - dropping data, %d bytes lost\n",
@@ -2421,7 +2418,6 @@ static void change_port_settings(struct tty_struct *tty,
 		dbg("%s - error %d when trying to write config to device",
 		     __func__, status);
 	kfree(config);
-	return;
 }
 
 static void edge_set_termios(struct tty_struct *tty,
@@ -2442,7 +2438,6 @@ static void edge_set_termios(struct tty_struct *tty,
 		return;
 	/* change the port settings to the new ones specified */
 	change_port_settings(tty, edge_port, old_termios);
-	return;
 }
 
 static int edge_tiocmset(struct tty_struct *tty, struct file *file,
@@ -2532,7 +2527,7 @@ static int get_serial_info(struct edgeport_port *edge_port,
 	return 0;
 }
 
-static int edge_ioctl(struct tty_struct *tty, struct file *file,
+static int edge_ioctl(struct tty_struct *tty,
 					unsigned int cmd, unsigned long arg)
 {
 	struct usb_serial_port *port = tty->driver_data;

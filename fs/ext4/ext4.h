@@ -1117,6 +1117,12 @@ struct ext4_sb_info {
 	unsigned int s_log_groups_per_flex;
 	struct flex_groups *s_flex_groups;
 
+#ifdef MY_ABC_HERE
+	int s_new_error_fs_event_flag;
+#endif
+#ifdef MY_DEF_HERE
+	int s_swap_create_time;
+#endif
 	/* workqueue for dio unwritten */
 	struct workqueue_struct *dio_unwritten_wq;
 };

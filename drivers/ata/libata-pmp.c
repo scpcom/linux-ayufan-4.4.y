@@ -1000,6 +1000,23 @@ int sata_pmp_attach(struct ata_device *dev)
 				link->sata_spd_limit = target_limit;
 			}
 		}
+	/*For DS412+, qoriq, 6282 with DX513, the link should be limited to 1.5G*/
+	} else if (IS_SYNOLOGY_DX513(ap->PMSynoUnique) &&
+			(0 == strncmp(gszSynoHWVersion, HW_DS412p, strlen(HW_DS412p)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS112 , strlen(HW_DS112)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS112pv10, strlen(HW_DS112pv10)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS413, strlen(HW_DS413)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS212pv10, strlen(HW_DS212pv10)) ||
+			 0 == strncmp(gszSynoHWVersion, HW_DS212pv20, strlen(HW_DS212pv20)))) {
+		target = 1;
+		target_limit = (1 << target) - 1;
+
+		if(link->sata_spd_limit != target_limit) {
+			ata_dev_printk(dev, KERN_ERR,
+					"DX513 workaround, limit the speed to 1.5 GBPS\n");
+
+			link->sata_spd_limit = target_limit;
+		}
 	}
 #endif	
 #endif

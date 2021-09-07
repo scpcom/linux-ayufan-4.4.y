@@ -368,9 +368,45 @@ void ext4_journal_abort_handle(const char *caller, const char *err_fn,
  * that error until we've noted it down and cleared it.
  */
 
+#ifdef MY_ABC_HERE
+int (*funcSYNOSendErrorFsEvent)(const unsigned char*, const unsigned int) = NULL;
+static void SynoAutoErrorFsReport(const unsigned char* szDsmVersion, const unsigned int iErrorCount)
+{
+	if (NULL == funcSYNOSendErrorFsEvent) {
+		printk(KERN_ERR "EXT4-fs error: Can't reference to function 'funcSYNOSendErrorFsEvent', DSM(%s), error count(%d)\n", szDsmVersion, iErrorCount);
+		return;
+	}
+
+	funcSYNOSendErrorFsEvent(szDsmVersion, iErrorCount);
+}
+
+static void SYNOExt4GetDSMVersion(const unsigned char* szVersionName, char* szDsmVersion) {
+	int i = 0;
+
+	/*
+	 * get DSM version from szVersionName.
+	 * eg. get 3202 from "1.42.6-3032"
+	 */
+	for (i = 0; i < strlen(szVersionName); i++) {
+		if ('-' == szVersionName[i]) {
+			break;
+		}
+	}
+
+	if (i < strlen(szVersionName)) {
+		strncpy(szDsmVersion, &szVersionName[i+1], strlen(szVersionName) - i - 1);
+	}
+}
+EXPORT_SYMBOL(funcSYNOSendErrorFsEvent);
+#endif
+
 static void ext4_handle_error(struct super_block *sb)
 {
 	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
+#ifdef MY_ABC_HERE
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+	char szDsmVersion[8] = {'\0'};
+#endif
 
 	EXT4_SB(sb)->s_mount_state |= EXT4_ERROR_FS;
 	es->s_state |= cpu_to_le16(EXT4_ERROR_FS);
@@ -393,6 +429,19 @@ static void ext4_handle_error(struct super_block *sb)
 	if (test_opt(sb, ERRORS_PANIC))
 		panic("EXT4-fs (device %s): panic forced after error\n",
 			sb->s_id);
+
+#ifdef MY_ABC_HERE
+	/* We don't need to care system FS */
+	if ((0 != strcmp(es->s_last_mounted, "/"))
+			&& (0 == sbi->s_new_error_fs_event_flag)
+			&& (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC))) {
+		sbi->s_new_error_fs_event_flag = 1;
+		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);
+		if ('\0' != szDsmVersion[0]) {
+			SynoAutoErrorFsReport(szDsmVersion , 0);
+		}
+	}
+#endif
 }
 
 void ext4_error(struct super_block *sb, const char *function,
@@ -2254,6 +2303,32 @@ static int parse_strtoul(const char *buf,
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static ssize_t syno_fs_error_new_event_flag_show(struct ext4_attr *a,
+				       struct ext4_sb_info *sbi, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", sbi->s_new_error_fs_event_flag);
+}
+
+static ssize_t syno_fs_error_new_event_flag_store(struct ext4_attr *a,
+				       struct ext4_sb_info *sbi, const char *buf, size_t count)
+{
+	int t = (int) simple_strtol(buf, NULL, 0);
+
+	if (!(1 == t || 0 == t)) {
+		return -EINVAL;
+	}
+	sbi->s_new_error_fs_event_flag = t;
+	return count;
+}
+
+static ssize_t syno_fs_error_mounted_show(struct ext4_attr *a,
+				       struct ext4_sb_info *sbi, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%s\n", sbi->s_es->s_last_mounted);
+}
+#endif
+
 static ssize_t delayed_allocation_blocks_show(struct ext4_attr *a,
 					      struct ext4_sb_info *sbi,
 					      char *buf)
@@ -2339,6 +2414,10 @@ static struct ext4_attr ext4_attr_##name = __ATTR(name, mode, show, store)
 EXT4_RO_ATTR(delayed_allocation_blocks);
 EXT4_RO_ATTR(session_write_kbytes);
 EXT4_RO_ATTR(lifetime_write_kbytes);
+#ifdef MY_ABC_HERE
+EXT4_RW_ATTR(syno_fs_error_new_event_flag);
+EXT4_RO_ATTR(syno_fs_error_mounted);
+#endif
 EXT4_ATTR_OFFSET(inode_readahead_blks, 0644, sbi_ui_show,
 		 inode_readahead_blks_store, s_inode_readahead_blks);
 EXT4_RW_ATTR_SBI_UI(inode_goal, s_inode_goal);
@@ -2363,6 +2442,10 @@ static struct attribute *ext4_attrs[] = {
 	ATTR_LIST(mb_stream_req),
 	ATTR_LIST(mb_group_prealloc),
 	ATTR_LIST(max_writeback_mb_bump),
+#ifdef MY_ABC_HERE
+	ATTR_LIST(syno_fs_error_new_event_flag),
+	ATTR_LIST(syno_fs_error_mounted),
+#endif
 	NULL,
 };
 
@@ -3154,6 +3237,17 @@ no_journal:
 	if (!Ext4Hash_lock_init) {
 		spin_lock_init(&Ext4Hash_buf_lock);
 		Ext4Hash_lock_init=1;
+	}
+#endif
+#ifdef MY_DEF_HERE
+	{
+		char szDsmVersion[8] = {'\0'};
+		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);
+		if ('\0' == szDsmVersion[0] || SYNO_CREATE_TIME_SWAP_VERSION < simple_strtoul(szDsmVersion, NULL, 10)) {
+			sbi->s_swap_create_time = 1;
+		} else {
+			sbi->s_swap_create_time = 0;
+		}
 	}
 #endif
 	lock_kernel();

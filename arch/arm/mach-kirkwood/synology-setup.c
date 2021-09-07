@@ -356,7 +356,8 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	//note: hd led is active low
 	if ( DISK_LED_OFF == status ) {
 		fail_led = 1;
-	} else if ( DISK_LED_GREEN_SOLID == status ) {
+	} else if ( DISK_LED_GREEN_SOLID == status ||
+				DISK_LED_BLUE == status) {
 		fail_led = 1;
 	} else if ( DISK_LED_ORANGE_SOLID == status ||
 		DISK_LED_ORANGE_BLINK == status ) {

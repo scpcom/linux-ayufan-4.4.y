@@ -390,6 +390,7 @@ struct cifsInodeInfo {
 	bool delete_pending:1;		/* DELETE_ON_CLOSE is set */
 	u64  server_eof;		/* current file size on server */
 	u64  uniqueid;			/* server inode number */
+	u64  createtime;                /* creation time on server */
 	struct inode vfs_inode;
 };
 
@@ -506,6 +507,7 @@ struct cifs_fattr {
 	u64		cf_uniqueid;
 	u64		cf_eof;
 	u64		cf_bytes;
+	u64             cf_createtime;
 	uid_t		cf_uid;
 	gid_t		cf_gid;
 	umode_t		cf_mode;
@@ -718,6 +720,9 @@ GLOBAL_EXTERN unsigned int extended_security;	/* if on, session setup sent
 				with more secure ntlmssp2 challenge/resp */
 GLOBAL_EXTERN unsigned int sign_CIFS_PDUs;  /* enable smb packet signing */
 GLOBAL_EXTERN unsigned int linuxExtEnabled;/*enable Linux/Unix CIFS extensions*/
+#ifdef MY_ABC_HERE
+GLOBAL_EXTERN unsigned int SynoPosixSemanticsEnabled;/*enable POSIX SEMANTICS*/
+#endif
 GLOBAL_EXTERN unsigned int CIFSMaxBufSize;  /* max size not including hdr */
 GLOBAL_EXTERN unsigned int cifs_min_rcv;    /* min size of big ntwrk buf pool */
 GLOBAL_EXTERN unsigned int cifs_min_small;  /* min size of small buf pool */

@@ -970,5 +970,20 @@ ia32_sys_call_table:
     .quad sys_ni_syscall
     .quad sys_ni_syscall
 #endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
+    .quad sys_ni_syscall
+    .quad sys_ni_syscall
+    .quad sys_ni_syscall
+    .quad sys_ni_syscall
+    .quad sys_ni_syscall
+    .quad sys_SYNOArchiveOverwrite	/* 427 */
+#else
+    .quad sys_ni_syscall
+    .quad sys_ni_syscall
+    .quad sys_ni_syscall
+    .quad sys_ni_syscall
+    .quad sys_ni_syscall
+    .quad sys_ni_syscall
+#endif
 #endif
 ia32_syscall_end:

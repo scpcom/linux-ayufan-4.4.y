@@ -216,7 +216,7 @@ static void edge_unthrottle(struct tty_struct *tty);
 static void edge_set_termios(struct tty_struct *tty,
 					struct usb_serial_port *port,
 					struct ktermios *old_termios);
-static int  edge_ioctl(struct tty_struct *tty, struct file *file,
+static int  edge_ioctl(struct tty_struct *tty,
 					unsigned int cmd, unsigned long arg);
 static void edge_break(struct tty_struct *tty, int break_state);
 static int  edge_tiocmget(struct tty_struct *tty, struct file *file);
@@ -1501,8 +1501,6 @@ static void edge_throttle(struct tty_struct *tty)
 		if (status != 0)
 			return;
 	}
-
-	return;
 }
 
 
@@ -1691,7 +1689,7 @@ static int get_serial_info(struct edgeport_port *edge_port,
  * SerialIoctl
  *	this function handles any ioctl calls to the driver
  *****************************************************************************/
-static int edge_ioctl(struct tty_struct *tty, struct file *file,
+static int edge_ioctl(struct tty_struct *tty,
 					unsigned int cmd, unsigned long arg)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -1806,8 +1804,6 @@ static void edge_break(struct tty_struct *tty, int break_state)
 			dbg("%s - error sending break set/clear command.",
 				__func__);
 	}
-
-	return;
 }
 
 
@@ -2007,7 +2003,7 @@ static void process_rcvd_status(struct edgeport_serial *edge_serial,
 			return;
 
 		case IOSP_EXT_STATUS_RX_CHECK_RSP:
-			dbg("%s ========== Port %u CHECK_RSP Sequence = %02x =============\n", __func__, edge_serial->rxPort, byte3);
+			dbg("%s ========== Port %u CHECK_RSP Sequence = %02x =============", __func__, edge_serial->rxPort, byte3);
 			/* Port->RxCheckRsp = true; */
 			return;
 		}
@@ -2075,10 +2071,9 @@ static void process_rcvd_status(struct edgeport_serial *edge_serial,
 		break;
 
 	default:
-		dbg("%s - Unrecognized IOSP status code %u\n", __func__, code);
+		dbg("%s - Unrecognized IOSP status code %u", __func__, code);
 		break;
 	}
-	return;
 }
 
 
@@ -2091,18 +2086,13 @@ static void edge_tty_recv(struct device *dev, struct tty_struct *tty,
 {
 	int cnt;
 
-	do {
-		cnt = tty_buffer_request_room(tty, length);
-		if (cnt < length) {
-			dev_err(dev, "%s - dropping data, %d bytes lost\n",
-					__func__, length - cnt);
-			if (cnt == 0)
-				break;
-		}
-		tty_insert_flip_string(tty, data, cnt);
-		data += cnt;
-		length -= cnt;
-	} while (length > 0);
+	cnt = tty_insert_flip_string(tty, data, length);
+	if (cnt < length) {
+		dev_err(dev, "%s - dropping data, %d bytes lost\n",
+				__func__, length - cnt);
+	}
+	data += cnt;
+	length -= cnt;
 
 	tty_flip_buffer_push(tty);
 }
@@ -2136,8 +2126,6 @@ static void handle_new_msr(struct edgeport_port *edge_port, __u8 newMsr)
 
 	/* Save the new modem status */
 	edge_port->shadowMSR = newMsr & 0xf0;
-
-	return;
 }
 
 
@@ -2184,8 +2172,6 @@ static void handle_new_lsr(struct edgeport_port *edge_port, __u8 lsrData,
 		icount->parity++;
 	if (newLsr & LSR_FRM_ERR)
 		icount->frame++;
-
-	return;
 }
 
 
@@ -2530,7 +2516,7 @@ static int calc_baud_rate_divisor(int baudrate, int *divisor)
 
 		*divisor = custom;
 
-		dbg("%s - Baud %d = %d\n", __func__, baudrate, custom);
+		dbg("%s - Baud %d = %d", __func__, baudrate, custom);
 		return 0;
 	}
 
@@ -2761,7 +2747,6 @@ static void change_port_settings(struct tty_struct *tty,
 		baud = tty_termios_baud_rate(old_termios);
 		tty_encode_baud_rate(tty, baud, baud);
 	}
-	return;
 }
 
 
@@ -2915,7 +2900,7 @@ static void load_application_firmware(struct edgeport_serial *edge_serial)
 			break;
 
 		case EDGE_DOWNLOAD_FILE_NONE:
-			dbg     ("No download file specified, skipping download\n");
+			dbg("No download file specified, skipping download");
 			return;
 
 		default:
@@ -2963,7 +2948,6 @@ static void load_application_firmware(struct edgeport_serial *edge_serial)
 				    0x40, 0x4000, 0x0001, NULL, 0, 3000);
 
 	release_firmware(fw);
-	return;
 }
 
 

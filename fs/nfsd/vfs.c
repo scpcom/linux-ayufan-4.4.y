@@ -56,6 +56,7 @@
 #endif /* CONFIG_NFSD_V4 */
 #include <linux/jhash.h>
 #include <linux/ima.h>
+#include "vfs.h"
 
 #include <asm/uaccess.h>
 
@@ -92,12 +93,6 @@ struct raparm_hbucket {
 #define RAPARM_HASH_MASK	(RAPARM_HASH_SIZE-1)
 static struct raparm_hbucket	raparm_hash[RAPARM_HASH_SIZE];
 
-static inline int
-nfsd_v4client(struct svc_rqst *rq)
-{
-    return rq->rq_prog == NFS_PROGRAM && rq->rq_vers == 4;
-}
-
 /* 
  * Called from nfsd_lookup and encode_dirent. Check if we have crossed 
  * a mount point.
@@ -119,8 +114,16 @@ nfsd_cross_mnt(struct svc_rqst *rqstp, struct dentry **dpp,
 
 	exp2 = rqst_exp_get_by_name(rqstp, &path);
 	if (IS_ERR(exp2)) {
-		if (PTR_ERR(exp2) != -ENOENT)
-			err = PTR_ERR(exp2);
+		err = PTR_ERR(exp2);
+		/*
+		 * We normally allow NFS clients to continue
+		 * "underneath" a mountpoint that is not exported.
+		 * The exception is V4ROOT, where no traversal is ever
+		 * allowed without an explicit export of the new
+		 * directory.
+		 */
+		if (err == -ENOENT && !(exp->ex_flags & NFSEXP_V4ROOT))
+			err = 0;
 		path_put(&path);
 		goto out;
 	}
@@ -142,6 +145,53 @@ nfsd_cross_mnt(struct svc_rqst *rqstp, struct dentry **dpp,
 	exp_put(exp2);
 out:
 	return err;
+}
+
+static void follow_to_parent(struct path *path)
+{
+	struct dentry *dp;
+
+	while (path->dentry == path->mnt->mnt_root && follow_up(path))
+		;
+	dp = dget_parent(path->dentry);
+	dput(path->dentry);
+	path->dentry = dp;
+}
+
+static int nfsd_lookup_parent(struct svc_rqst *rqstp, struct dentry *dparent, struct svc_export **exp, struct dentry **dentryp)
+{
+	struct svc_export *exp2;
+	struct path path = {.mnt = mntget((*exp)->ex_path.mnt),
+			    .dentry = dget(dparent)};
+
+	follow_to_parent(&path);
+
+	exp2 = rqst_exp_parent(rqstp, &path);
+	if (PTR_ERR(exp2) == -ENOENT) {
+		*dentryp = dget(dparent);
+	} else if (IS_ERR(exp2)) {
+		path_put(&path);
+		return PTR_ERR(exp2);
+	} else {
+		*dentryp = dget(path.dentry);
+		exp_put(*exp);
+		*exp = exp2;
+	}
+	path_put(&path);
+	return 0;
+}
+
+/*
+ * For nfsd purposes, we treat V4ROOT exports as though there was an
+ * export at *every* directory.
+ */
+int nfsd_mountpoint(struct dentry *dentry, struct svc_export *exp)
+{
+	if (d_mountpoint(dentry))
+		return 1;
+	if (!(exp->ex_flags & NFSEXP_V4ROOT))
+		return 0;
+	return dentry->d_inode != NULL;
 }
 
 __be32
@@ -176,31 +226,9 @@ nfsd_lookup_dentry(struct svc_rqst *rqstp, struct svc_fh *fhp,
 			dentry = dget(dparent); /* .. == . just like at / */
 		else {
 			/* checking mountpoint crossing is very different when stepping up */
-			struct svc_export *exp2 = NULL;
-			struct dentry *dp;
-			struct path path = {.mnt = mntget(exp->ex_path.mnt),
-					    .dentry = dget(dparent)};
-
-			while (path.dentry == path.mnt->mnt_root &&
-			       follow_up(&path))
-				;
-			dp = dget_parent(path.dentry);
-			dput(path.dentry);
-			path.dentry = dp;
-
-			exp2 = rqst_exp_parent(rqstp, &path);
-			if (PTR_ERR(exp2) == -ENOENT) {
-				dentry = dget(dparent);
-			} else if (IS_ERR(exp2)) {
-				host_err = PTR_ERR(exp2);
-				path_put(&path);
+			host_err = nfsd_lookup_parent(rqstp, dparent, &exp, &dentry);
+			if (host_err)
 				goto out_nfserr;
-			} else {
-				dentry = dget(path.dentry);
-				exp_put(exp);
-				exp = exp2;
-			}
-			path_put(&path);
 		}
 	} else {
 		fh_lock(fhp);
@@ -211,7 +239,7 @@ nfsd_lookup_dentry(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		/*
 		 * check if we have crossed a mount point ...
 		 */
-		if (d_mountpoint(dentry)) {
+		if (nfsd_mountpoint(dentry, exp)) {
 			if ((host_err = nfsd_cross_mnt(rqstp, &dentry, &exp))) {
 				dput(dentry);
 				goto out_nfserr;

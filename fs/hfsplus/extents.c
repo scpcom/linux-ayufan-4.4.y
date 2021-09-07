@@ -89,7 +89,7 @@ static void __hfsplus_ext_write_extent(struct inode *inode, struct hfs_find_data
 
 	hfsplus_ext_build_key(fd->search_key, inode->i_ino, HFSPLUS_I(inode).cached_start,
 			      HFSPLUS_IS_RSRC(inode) ?  HFSPLUS_TYPE_RSRC : HFSPLUS_TYPE_DATA);
-	res = hfs_brec_find(fd);
+	res = hfs_brec_find(fd, hfs_find_rec_by_key);
 	if (HFSPLUS_I(inode).flags & HFSPLUS_FLG_EXT_NEW) {
 		if (res != -ENOENT)
 			return;
@@ -122,7 +122,7 @@ static inline int __hfsplus_ext_read_extent(struct hfs_find_data *fd,
 
 	hfsplus_ext_build_key(fd->search_key, cnid, block, type);
 	fd->key->ext.cnid = 0;
-	res = hfs_brec_find(fd);
+	res = hfs_brec_find(fd, hfs_find_rec_by_key);
 	if (res && res != -ENOENT)
 		return res;
 	if (fd->key->ext.cnid != fd->search_key->ext.cnid ||

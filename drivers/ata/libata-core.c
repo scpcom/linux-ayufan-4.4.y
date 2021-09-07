@@ -137,8 +137,8 @@ extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 #ifdef CONFIG_SYNO_QORIQ
 extern unsigned char SYNOQorIQIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
+extern int SYNO_CHECK_HDD_PRESENT(int index);
 #endif
-
 
 /* param_buf is thrown away after initialization, disallow read */
 module_param_string(force, ata_force_param_buf, sizeof(ata_force_param_buf), 0);
@@ -2599,6 +2599,23 @@ int ata_dev_configure(struct ata_device *dev)
 				dev->horkage |= ATA_HORKAGE_1_5_GBPS;
 			}
 
+		/*For DS412+, qoriq, 6282 with DX513, the link should be limited to 1.5G*/
+		} else if (IS_SYNOLOGY_DX513(ap->PMSynoUnique) &&
+				(0 == strncmp(gszSynoHWVersion, HW_DS412p, strlen(HW_DS412p)) ||
+				 0 == strncmp(gszSynoHWVersion, HW_DS112 , strlen(HW_DS112)) ||
+				 0 == strncmp(gszSynoHWVersion, HW_DS112pv10, strlen(HW_DS112pv10)) ||
+				 0 == strncmp(gszSynoHWVersion, HW_DS413, strlen(HW_DS413)) ||
+				 0 == strncmp(gszSynoHWVersion, HW_DS212pv10, strlen(HW_DS212pv10)) ||
+				 0 == strncmp(gszSynoHWVersion, HW_DS212pv20, strlen(HW_DS212pv20)))) {
+			if (!(dev->horkage & ATA_HORKAGE_1_5_GBPS)) {
+				ata_dev_printk(dev, KERN_ERR,
+						"DX513 workaround, limit the speed to 1.5 GBPS\n");
+
+				dev->horkage |= ATA_HORKAGE_1_5_GBPS;
+				//we set the host sata speed to 1.5G
+				sata_down_spd_limit(&ap->link, 0x1);
+				sata_set_spd(&ap->link);
+			}
 		}
 	}
 #endif
@@ -5388,7 +5405,7 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 			fill_result_tf(qc);
 
 #if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
-			if (IS_SYNO_PMP_CMD(tf) || IS_SYNO_SPINUP_CMD(qc))
+			if ((IS_SYNO_PMP_CMD(tf) && NULL == qc->scsicmd) || IS_SYNO_SPINUP_CMD(qc))
 				__ata_qc_complete(qc);
 			else if (!ata_tag_internal(qc->tag))
 #else
@@ -5965,7 +5982,6 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 		dev->ulSpinupState = 0;
 		dev->ulLastCmd = 0;
 		dev->iCheckPwr = 0;
-		INIT_WORK(&dev->SendWakeEventTask, SynoSendWakeEvent);
 #endif
 		ata_dev_init(dev);
 	}
@@ -6492,12 +6508,14 @@ static void DelayForHWCtl(struct ata_port *pAp)
 
 #ifdef CONFIG_SYNO_QORIQ
 	if(SYNOQorIQIsBoardNeedPowerUpHDD(pAp->print_id)) {
+		if (0 == SYNO_CHECK_HDD_PRESENT(pAp->print_id)) {
+			goto END;
+		}
 		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		SleepForLatency();
 		iIsDoLatency = 1;
 	}
 #endif
-
 
 	if (!(pAp->host->flags & ATA_HOST_LLD_SPINUP_DELAY)) {
 #if defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_MPC854X)
@@ -7488,10 +7506,6 @@ EXPORT_SYMBOL_GPL(ata_cable_80wire);
 EXPORT_SYMBOL_GPL(ata_cable_unknown);
 EXPORT_SYMBOL_GPL(ata_cable_ignore);
 EXPORT_SYMBOL_GPL(ata_cable_sata);
-#ifdef MY_ABC_HERE
-int (*funcSYNOSendHibernationEvent)(unsigned int, unsigned int) = NULL;
-EXPORT_SYMBOL(funcSYNOSendHibernationEvent);
-#endif /* MY_ABC_HERE */
 
 #ifdef MY_ABC_HERE
 int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int) = NULL;

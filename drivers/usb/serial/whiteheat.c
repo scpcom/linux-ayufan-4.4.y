@@ -111,17 +111,17 @@ static int debug;
    separate ID tables, and then a third table that combines them
    just for the purpose of exporting the autoloading information.
 */
-static struct usb_device_id id_table_std [] = {
+static const struct usb_device_id id_table_std[] = {
 	{ USB_DEVICE(CONNECT_TECH_VENDOR_ID, CONNECT_TECH_WHITE_HEAT_ID) },
 	{ }						/* Terminating entry */
 };
 
-static struct usb_device_id id_table_prerenumeration [] = {
+static const struct usb_device_id id_table_prerenumeration[] = {
 	{ USB_DEVICE(CONNECT_TECH_VENDOR_ID, CONNECT_TECH_FAKE_WHITE_HEAT_ID) },
 	{ }						/* Terminating entry */
 };
 
-static struct usb_device_id id_table_combined [] = {
+static const struct usb_device_id id_table_combined[] = {
 	{ USB_DEVICE(CONNECT_TECH_VENDOR_ID, CONNECT_TECH_WHITE_HEAT_ID) },
 	{ USB_DEVICE(CONNECT_TECH_VENDOR_ID, CONNECT_TECH_FAKE_WHITE_HEAT_ID) },
 	{ }						/* Terminating entry */
@@ -152,7 +152,7 @@ static int  whiteheat_write(struct tty_struct *tty,
 			struct usb_serial_port *port,
 			const unsigned char *buf, int count);
 static int  whiteheat_write_room(struct tty_struct *tty);
-static int  whiteheat_ioctl(struct tty_struct *tty, struct file *file,
+static int  whiteheat_ioctl(struct tty_struct *tty,
 			unsigned int cmd, unsigned long arg);
 static void whiteheat_set_termios(struct tty_struct *tty,
 			struct usb_serial_port *port, struct ktermios *old);
@@ -655,8 +655,6 @@ static void whiteheat_release(struct usb_serial *serial)
 		}
 		kfree(info);
 	}
-
-	return;
 }
 
 static int whiteheat_open(struct tty_struct *tty, struct usb_serial_port *port)
@@ -876,7 +874,7 @@ static int whiteheat_tiocmset(struct tty_struct *tty, struct file *file,
 }
 
 
-static int whiteheat_ioctl(struct tty_struct *tty, struct file *file,
+static int whiteheat_ioctl(struct tty_struct *tty,
 					unsigned int cmd, unsigned long arg)
 {
 	struct usb_serial_port *port = tty->driver_data;
@@ -955,8 +953,6 @@ static void whiteheat_throttle(struct tty_struct *tty)
 	spin_lock_irq(&info->lock);
 	info->flags |= THROTTLED;
 	spin_unlock_irq(&info->lock);
-
-	return;
 }
 
 
@@ -975,8 +971,6 @@ static void whiteheat_unthrottle(struct tty_struct *tty)
 
 	if (actually_throttled)
 		rx_data_softint(&info->rx_work);
-
-	return;
 }
 
 

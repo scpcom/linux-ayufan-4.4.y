@@ -469,6 +469,11 @@
 #define __NR_SYNOFStat64             (__NR_SYSCALL_BASE+420)
 #define __NR_SYNOLStat64              (__NR_SYSCALL_BASE+421)
 
+#ifdef MY_ABC_HERE
+#define __NR_SYNOArchiveOverwrite           (__NR_SYSCALL_BASE+427)
+#define SYNOArchiveOverwrite(arg1,arg2)     syscall(__NR_SYNOArchiveOverwrite,arg1,arg2)
+#endif
+
 #if !defined(__KERNEL__)
 /* direct SYNOStat to stat64 in 32-bit platform
  * 64-bits arch has no stat64 support */

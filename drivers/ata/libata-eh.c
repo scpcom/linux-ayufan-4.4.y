@@ -928,7 +928,6 @@ void ata_scsi_error(struct Scsi_Host *host)
 	/* clean up */
 	spin_lock_irqsave(ap->lock, flags);
 
-
 	if (ap->pflags & ATA_PFLAG_LOADING)
 		ap->pflags &= ~ATA_PFLAG_LOADING;
 #ifdef MY_ABC_HERE
@@ -1015,9 +1014,21 @@ static int ata_eh_nr_in_flight(struct ata_port *ap)
 	int nr = 0;
 
 	/* count only non-internal commands */
+#if defined(MY_ABC_HERE) && defined(SYNO_SATA_PM_DEVICE_GPIO)
+	for (tag = 0; tag < ATA_MAX_QUEUE - 1; tag++) {
+		struct ata_queued_cmd *qc = ata_qc_from_tag(ap, tag);
+		struct ata_taskfile *tf = &qc->tf;
+
+		if (ata_qc_from_tag(ap, tag) && !((IS_SYNO_PMP_CMD(tf) && NULL == qc->scsicmd) || IS_SYNO_SPINUP_CMD(qc)))
+#else
 	for (tag = 0; tag < ATA_MAX_QUEUE - 1; tag++)
 		if (ata_qc_from_tag(ap, tag))
+#endif
 			nr++;
+
+#if defined(MY_ABC_HERE) && defined(SYNO_SATA_PM_DEVICE_GPIO)
+	}
+#endif
 
 	return nr;
 }
@@ -1039,6 +1050,9 @@ void ata_eh_fastdrain_timerfn(unsigned long arg)
 	if (cnt == ap->fastdrain_cnt) {
 		unsigned int tag;
 
+#if defined(MY_ABC_HERE)
+		ata_port_printk(ap, KERN_ERR, "All qcs time out, freeze the port\n");
+#endif
 		/* No progress during the last interval, tag all
 		 * in-flight qcs as timed out and freeze the port.
 		 */
@@ -3343,6 +3357,10 @@ static int ata_eh_revalidate_and_attach(struct ata_link *link,
 				 * thaw and ignore the device.
 				 */
 				ata_eh_thaw_port(ap);
+#ifdef MY_ABC_HERE
+				ata_link_printk(link, KERN_ERR, "Issued IDENTIFY to non-existent device ?!\n");
+				goto err;
+#endif
 				break;
 			default:
 				goto err;

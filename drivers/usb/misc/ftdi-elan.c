@@ -45,6 +45,7 @@
 #include <linux/module.h>
 #include <linux/kref.h>
 #include <linux/mutex.h>
+#include <linux/smp_lock.h>
 #include <asm/uaccess.h>
 #include <linux/usb.h>
 #include <linux/workqueue.h>
@@ -456,7 +457,6 @@ static void ftdi_elan_cancel_targets(struct usb_ftdi *ftdi)
 static void ftdi_elan_kick_command_queue(struct usb_ftdi *ftdi)
 {
         ftdi_command_queue_work(ftdi, 0);
-        return;
 }
 
 static void ftdi_elan_command_work(struct work_struct *work)
@@ -483,7 +483,6 @@ static void ftdi_elan_command_work(struct work_struct *work)
 static void ftdi_elan_kick_respond_queue(struct usb_ftdi *ftdi)
 {
         ftdi_respond_queue_work(ftdi, 0);
-        return;
 }
 
 static void ftdi_elan_respond_work(struct work_struct *work)
@@ -623,22 +622,30 @@ static void ftdi_elan_status_work(struct work_struct *work)
 */
 static int ftdi_elan_open(struct inode *inode, struct file *file)
 {
-        int subminor = iminor(inode);
-        struct usb_interface *interface = usb_find_interface(&ftdi_elan_driver,
-                subminor);
+	int subminor;
+	struct usb_interface *interface;
+
+	lock_kernel();
+        subminor = iminor(inode);
+        interface = usb_find_interface(&ftdi_elan_driver, subminor);
+
         if (!interface) {
+		unlock_kernel();
                 printk(KERN_ERR "can't find device for minor %d\n", subminor);
                 return -ENODEV;
         } else {
                 struct usb_ftdi *ftdi = usb_get_intfdata(interface);
                 if (!ftdi) {
+			unlock_kernel();
                         return -ENODEV;
                 } else {
                         if (down_interruptible(&ftdi->sw_lock)) {
+				unlock_kernel();
                                 return -EINTR;
                         } else {
                                 ftdi_elan_get_kref(ftdi);
                                 file->private_data = ftdi;
+				unlock_kernel();
                                 return 0;
                         }
                 }

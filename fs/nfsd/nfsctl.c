@@ -55,6 +55,7 @@ enum {
 	NFSD_Getfd,
 	NFSD_Getfs,
 	NFSD_List,
+	NFSD_Export_features,
 	NFSD_Fh,
 	NFSD_FO_UnlockIP,
 	NFSD_FO_UnlockFS,
@@ -71,6 +72,9 @@ enum {
 #ifdef CONFIG_NFSD_V4
 	NFSD_Leasetime,
 	NFSD_RecoveryDir,
+#endif
+#ifdef MY_ABC_HERE
+	NFSD_UDP_Size,
 #endif
 };
 
@@ -96,6 +100,9 @@ static ssize_t write_maxblksize(struct file *file, char *buf, size_t size);
 static ssize_t write_leasetime(struct file *file, char *buf, size_t size);
 static ssize_t write_recoverydir(struct file *file, char *buf, size_t size);
 #endif
+#ifdef MY_ABC_HERE
+static ssize_t write_udp_size(struct file *file, char *buf, size_t size);
+#endif
 
 static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 	[NFSD_Svc] = write_svc,
@@ -116,6 +123,9 @@ static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 #ifdef CONFIG_NFSD_V4
 	[NFSD_Leasetime] = write_leasetime,
 	[NFSD_RecoveryDir] = write_recoverydir,
+#endif
+#ifdef MY_ABC_HERE
+	[NFSD_UDP_Size] = write_udp_size,
 #endif
 };
 
@@ -171,6 +181,24 @@ static const struct file_operations exports_operations = {
 	.llseek		= seq_lseek,
 	.release	= seq_release,
 	.owner		= THIS_MODULE,
+};
+
+static int export_features_show(struct seq_file *m, void *v)
+{
+	seq_printf(m, "0x%x 0x%x\n", NFSEXP_ALLFLAGS, NFSEXP_SECINFO_FLAGS);
+	return 0;
+}
+
+static int export_features_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, export_features_show, NULL);
+}
+
+static struct file_operations export_features_operations = {
+	.open		= export_features_open,
+	.read		= seq_read,
+	.llseek		= seq_lseek,
+	.release	= single_release,
 };
 
 extern int nfsd_pool_stats_open(struct inode *inode, struct file *file);
@@ -784,6 +812,45 @@ out_free:
 	return rv;
 }
 
+#ifdef MY_ABC_HERE
+u32 nfs_udp_f_rtpref;
+u32 nfs_udp_f_wtpref;
+
+static ssize_t write_udp_size(struct file *file, char *buf, size_t size)
+{
+	int err = 0;
+	u32 preferReadSize = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+	u32 preferWriteSize = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+
+	if (0 == size) {
+		goto End;
+	}
+
+	// use sscanf to get read and write size
+	if (2 != sscanf(buf, "%u %u", &preferReadSize, &preferWriteSize)) {
+		err = -EINVAL;
+		goto End;
+	}
+
+	// make sure the packet size is on the range we want
+	if (SYNO_NFSD_UDP_MIN_PACKET_SIZE > preferReadSize || SYNO_NFSD_UDP_MAX_PACKET_SIZE < preferReadSize ||
+		SYNO_NFSD_UDP_MIN_PACKET_SIZE > preferWriteSize || SYNO_NFSD_UDP_MAX_PACKET_SIZE < preferWriteSize) {
+		err = -EINVAL;
+		goto End;
+	}
+
+	nfs_udp_f_rtpref = preferReadSize;
+	nfs_udp_f_wtpref = preferWriteSize;
+
+End:
+	if (err) {
+		return err;
+	} else {
+		return scnprintf(buf, SIMPLE_TRANSACTION_LIMIT, "rsize=%d,wsize=%d\n", nfs_udp_f_rtpref, nfs_udp_f_wtpref);
+	}
+}
+#endif
+
 static ssize_t __write_versions(struct file *file, char *buf, size_t size)
 {
 	char *mesg = buf;
@@ -995,6 +1062,7 @@ static ssize_t __write_ports_delfd(char *buf)
 static ssize_t __write_ports_addxprt(char *buf)
 {
 	char transport[16];
+	struct svc_xprt *xprt;
 	int port, err;
 
 	if (sscanf(buf, "%15s %4u", transport, &port) != 2)
@@ -1009,13 +1077,24 @@ static ssize_t __write_ports_addxprt(char *buf)
 
 	err = svc_create_xprt(nfsd_serv, transport,
 				PF_INET, port, SVC_SOCK_ANONYMOUS);
-	if (err < 0) {
-		/* Give a reasonable perror msg for bad transport string */
-		if (err == -ENOENT)
-			err = -EPROTONOSUPPORT;
-		return err;
-	}
+	if (err < 0)
+		goto out_err;
+
+	err = svc_create_xprt(nfsd_serv, transport,
+				PF_INET6, port, SVC_SOCK_ANONYMOUS);
+	if (err < 0 && err != -EAFNOSUPPORT)
+		goto out_close;
 	return 0;
+out_close:
+	xprt = svc_find_xprt(nfsd_serv, transport, PF_INET, port);
+	if (xprt != NULL) {
+		svc_close_xprt(xprt);
+		svc_xprt_put(xprt);
+	}
+out_err:
+	/* Decrease the count, but don't shut down the service */
+	nfsd_serv->sv_nrthreads--;
+	return err;
 }
 
 /*
@@ -1330,6 +1409,8 @@ static int nfsd_fill_super(struct super_block * sb, void * data, int silent)
 		[NFSD_Getfd] = {".getfd", &transaction_ops, S_IWUSR|S_IRUSR},
 		[NFSD_Getfs] = {".getfs", &transaction_ops, S_IWUSR|S_IRUSR},
 		[NFSD_List] = {"exports", &exports_operations, S_IRUGO},
+		[NFSD_Export_features] = {"export_features",
+					&export_features_operations, S_IRUGO},
 		[NFSD_FO_UnlockIP] = {"unlock_ip",
 					&transaction_ops, S_IWUSR|S_IRUSR},
 		[NFSD_FO_UnlockFS] = {"unlock_filesystem",
@@ -1345,6 +1426,9 @@ static int nfsd_fill_super(struct super_block * sb, void * data, int silent)
 		[NFSD_Leasetime] = {"nfsv4leasetime", &transaction_ops, S_IWUSR|S_IRUSR},
 		[NFSD_RecoveryDir] = {"nfsv4recoverydir", &transaction_ops, S_IWUSR|S_IRUSR},
 #endif
+#ifdef MY_ABC_HERE
+		[NFSD_UDP_Size] = {"udppacketsize", &transaction_ops, S_IWUSR|S_IRUGO},
+#endif /* MY_ABC_HERE */
 		/* last one */ {""}
 	};
 	return simple_fill_super(sb, 0x6e667364, nfsd_files);
@@ -1387,6 +1471,12 @@ static int __init init_nfsd(void)
 {
 	int retval;
 	printk(KERN_INFO "Installing knfsd (copyright (C) 1996 okir@monad.swb.de).\n");
+
+#ifdef MY_ABC_HERE
+	/*initial default udp packet size*/
+	nfs_udp_f_rtpref = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+	nfs_udp_f_wtpref = SYNO_NFSD_UDP_DEF_PACKET_SIZE;
+#endif /*MY_ABC_HERE*/
 
 	retval = nfs4_state_init(); /* nfs4 locking state */
 	if (retval)

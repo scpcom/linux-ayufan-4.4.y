@@ -187,6 +187,10 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 			//We should return possible inherited ACL even file is in linux mode.
 			cmd = SYNO_ACL_PSEUDO_INHERIT_ONLY;
 		}
+
+		if (!inode->i_op->syno_permission || !inode->i_op->syno_acl_get) {
+			return -EOPNOTSUPP;
+		}
 		error = inode->i_op->syno_permission(dentry, MAY_READ_PERMISSION);
 		if (error) {
 			return error;
@@ -702,7 +706,7 @@ generic_setxattr(struct dentry *dentry, const char *name, const void *value, siz
 	if (strcmp_prefix(name, SYNO_ACL_XATTR_ACCESS)) {
 		int error = -1;
 
-		if (!IS_FS_SYNOACL(inode)) {
+		if (!IS_FS_SYNOACL(inode) || !inode->i_op->syno_permission) {
 			return -EOPNOTSUPP;
 		}
 		error = inode->i_op->syno_permission(dentry, MAY_WRITE_PERMISSION);
@@ -733,7 +737,7 @@ generic_removexattr(struct dentry *dentry, const char *name)
 	if (strcmp_prefix(name, SYNO_ACL_XATTR_ACCESS)) {
 		int error = -1;
 
-		if (!IS_FS_SYNOACL(inode)) {
+		if (!IS_FS_SYNOACL(inode) || !inode->i_op->syno_permission) {
 			return -EOPNOTSUPP;
 		}
 		error = inode->i_op->syno_permission(dentry, MAY_WRITE_PERMISSION);

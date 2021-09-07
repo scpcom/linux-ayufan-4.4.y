@@ -646,7 +646,7 @@ static int sata_fsl_port_start(struct ata_port *ap)
 	VPRINTK("HControl = 0x%x\n", ioread32(hcr_base + HCONTROL));
 	VPRINTK("CHBA  = 0x%x\n", ioread32(hcr_base + CHBA));
 
-#ifdef CONFIG_MPC8315_DS
+#if defined MY_ABC_HERE || defined CONFIG_MPC8315_DS
 	/*
 	 * Workaround for 8315DS board 3gbps link-up issue,
 	 * currently limit SATA port to GEN1 speed
@@ -711,10 +711,6 @@ static unsigned int sata_fsl_dev_classify(struct ata_port *ap)
 	return ata_dev_classify(&tf);
 }
 
-#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
-static unsigned int softreset_class = 0;
-#endif
-
 static int sata_fsl_hardreset(struct ata_link *link, unsigned int *class,
 					unsigned long deadline)
 {
@@ -726,13 +722,6 @@ static int sata_fsl_hardreset(struct ata_link *link, unsigned int *class,
 	unsigned long start_jiffies;
 
 	DPRINTK("in xx_hardreset\n");
-
-#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
-	if (&ap->link == link && link->flags & ATA_LFLAG_NO_SRST) {
-		link->flags &= ~ATA_LFLAG_NO_SRST;
-		softreset_class = 0;
-	}
-#endif
 
 try_offline_again:
 	/*
@@ -824,11 +813,6 @@ try_offline_again:
 				jiffies_to_msecs(jiffies - start_jiffies));
 		*class = sata_fsl_dev_classify(ap);
 
-#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
-		if (link == &ap->link && ATA_DEV_ATA == softreset_class) {
-			link->flags |= ATA_LFLAG_NO_SRST;
-		}
-#endif
 		return 0;
 	}
 
@@ -926,7 +910,11 @@ static int sata_fsl_softreset(struct ata_link *link, unsigned int *class,
 	 * using ATA signature D2H register FIS to the host controller.
 	 */
 
+#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
+	sata_fsl_setup_cmd_hdr_entry(pp, 0, SRST_CMD | CMD_DESC_RES | CMD_DESC_SNOOP_ENABLE,
+#else
 	sata_fsl_setup_cmd_hdr_entry(pp, 0, CMD_DESC_RES | CMD_DESC_SNOOP_ENABLE,
+#endif
 				      0, 0, 5);
 
 	tf.ctl &= ~ATA_SRST;	/* 2nd H2D Ctl. register FIS */
@@ -937,6 +925,20 @@ static int sata_fsl_softreset(struct ata_link *link, unsigned int *class,
 	iowrite32(1, CQ + hcr_base);
 	msleep(150);		/* ?? */
 
+#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
+	ata_port_printk(ap, KERN_INFO,
+				"CEVA Clearing SRST\n");
+
+	temp = ata_wait_register(CQ + hcr_base, 0x1, 0x1, 1, 500000);
+	if (temp & 0x1) {
+		ata_port_printk(ap, KERN_WARNING, "ATA_SRST issue failed\n");
+	}
+
+	ata_port_printk(ap, KERN_INFO,
+				"Command Queue after clearing %d\n", ioread32(hcr_base + CQ));
+	ata_port_printk(ap, KERN_INFO,
+				"Command Complete after clearing %d\n", ioread32(hcr_base + CC));
+#endif
 	/*
 	 * The above command would have signalled an interrupt on command
 	 * complete, which needs special handling, by clearing the Nth
@@ -958,11 +960,6 @@ static int sata_fsl_softreset(struct ata_link *link, unsigned int *class,
 		 */
 
 		*class = sata_fsl_dev_classify(ap);
-#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
-		if (&ap->link == link) {
-			softreset_class = *class;
-		}
-#endif
 
 		DPRINTK("class = %d\n", *class);
 		VPRINTK("ccreg = 0x%x\n", ioread32(hcr_base + CC));
@@ -1527,7 +1524,13 @@ static int sata_fsl_resume(struct of_device *op)
 	iowrite32(pp->cmdslot_paddr & 0xffffffff, hcr_base + CHBA);
 
 #ifdef CONFIG_SYNO_QORIQ
+#ifdef CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
 	temp = ioread32(hcr_base + HCONTROL);
+#else
+	temp = ioread32(hcr_base + HCONTROL)
+		| HCONTROL_ONLINE_PHY_RST
+		| HCONTROL_SNOOP_ENABLE;
+#endif // CONFIG_SYNO_QORIQ_FSL_SATA_NRESET
 	iowrite32(temp | 0x80000700, hcr_base+HCONTROL);
 #endif
 

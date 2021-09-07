@@ -26,6 +26,7 @@
 #include <linux/uaccess.h>
 #include <linux/kref.h>
 #include <linux/mutex.h>
+#include <linux/smp_lock.h>
 #include <linux/usb.h>
 #include <linux/usb/tmc.h>
 
@@ -48,7 +49,7 @@
  */
 #define USBTMC_MAX_READS_TO_CLEAR_BULK_IN	100
 
-static struct usb_device_id usbtmc_devices[] = {
+static const struct usb_device_id usbtmc_devices[] = {
 	{ USB_INTERFACE_INFO(USB_CLASS_APP_SPEC, 3, 0), },
 	{ USB_INTERFACE_INFO(USB_CLASS_APP_SPEC, 3, 1), },
 	{ 0, } /* terminating entry */
@@ -113,6 +114,7 @@ static int usbtmc_open(struct inode *inode, struct file *filp)
 	struct usbtmc_device_data *data;
 	int retval = 0;
 
+	lock_kernel();
 	intf = usb_find_interface(&usbtmc_driver, iminor(inode));
 	if (!intf) {
 		printk(KERN_ERR KBUILD_MODNAME
@@ -128,6 +130,7 @@ static int usbtmc_open(struct inode *inode, struct file *filp)
 	filp->private_data = data;
 
 exit:
+	unlock_kernel();
 	return retval;
 }
 

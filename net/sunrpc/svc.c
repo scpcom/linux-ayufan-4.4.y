@@ -883,6 +883,11 @@ int svc_register(const struct svc_serv *serv, const int family,
 			if (progp->pg_vers[i]->vs_hidden)
 				continue;
 
+#ifdef MY_ABC_HERE
+			if (NFS_PROGRAM == progp->pg_prog && 4 == i && IPPROTO_UDP == proto) {
+				continue;
+			}
+#endif
 			error = __svc_register(progp->pg_name, progp->pg_prog,
 						i, family, proto, port);
 			if (error < 0)

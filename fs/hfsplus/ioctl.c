@@ -92,6 +92,7 @@ setflags_out:
 	}
 }
 
+#ifndef MY_ABC_HERE
 int hfsplus_setxattr(struct dentry *dentry, const char *name,
 		     const void *value, size_t size, int flags)
 {
@@ -196,3 +197,4 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 
 	return HFSPLUS_ATTRLIST_SIZE;
 }
+#endif

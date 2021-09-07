@@ -46,13 +46,13 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-#if defined(SYNO_INQUIRY_STANDARD) || defined(CONFIG_SYNO_INQUIRY_USE_ATA_COMMAND)
+#if defined(MY_ABC_HERE)
 #define SYNO_INQUIRY_TMP_LEN 32
-#define SYNO_RESULT_LEN 256
-#define SYNO_INQUIRY_LEN 36
 #define SZ_STAT_DISK_VENDOR "ATA     "
-#ifdef SYNO_SAS_DISK_NAME
-extern int g_is_sas_model;
+#if defined(MY_ABC_HERE)
+#define SYNO_RESULT_LEN 512
+/* The IDENTIFY DEVICE command will get most 40 characters */
+#define SYNO_IDENTIFY_DEVICE_TMP_LEN 40
 #endif
 #endif
 
@@ -258,7 +258,10 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 		goto out;
 
 	sdev->vendor = scsi_null_device_strs;
+#ifdef MY_ABC_HERE
+#else
 	sdev->model = scsi_null_device_strs;
+#endif
 	sdev->rev = scsi_null_device_strs;
 	sdev->host = shost;
 	sdev->id = starget->id;
@@ -560,7 +563,7 @@ static void sanitize_inquiry_string(unsigned char *s, int len)
 	}
 }
 
-#ifdef SYNO_INQUIRY_STANDARD
+#ifdef MY_ABC_HERE
 /**
  * ssyno_standard_inquiry_strin - refine the vendor and model strings of SATA disks 
  * @szInqStr: INQUIRY result string to be refined
@@ -583,14 +586,6 @@ static void syno_standard_inquiry_string(unsigned char *szInqStr, unsigned int u
 	int blPreIsSpace = 0, blSegmented = 0;
 
 	if (NULL == szInqStr || 0 == uiLen) {
-		goto END;
-	}
-
-	/*
-	 * Only transfering the strings that vendor is ATA.
-	 * vendor set as "ATA" means the disk is a SATA disk
-	 */
-	if (strncmp(szInqStr, SZ_STAT_DISK_VENDOR, 8)) {
 		goto END;
 	}
 
@@ -630,7 +625,7 @@ END:
 }
 #endif
 
-#ifdef CONFIG_SYNO_INQUIRY_USE_ATA_COMMAND
+#ifdef MY_ABC_HERE
 /**
  * Description:
  * 	The result of SCSI INQUIRY from a SATA disk might set vendor as "ATA"
@@ -649,15 +644,12 @@ END:
  * @param
  * 	sdev[IN]: send ATA command to the SCSI device
  * 	szInqReturn[OUT]: INQUIRY result string to be refined
- * 	iInqLen[IN]: length of the query command
- * 	iLen[IN]: length of the string
  *
  **/
-void scsi_ata_identify_device(struct scsi_device *sdev, unsigned char *szInqReturn, const int iInqLen, const int iLen)
+static void scsi_ata_identify_device_get_model_name(struct scsi_device *sdev, unsigned char *szInqReturn)
 {
 	unsigned char szScsiCmd[MAX_COMMAND_SIZE] = {0};
 	unsigned char szInqResult[SYNO_RESULT_LEN] = {0};
-	char szTmpResult[SYNO_INQUIRY_TMP_LEN] = {'\0'};
 	int i = 0;
 	int iResid;
 	int blPreIsSpace = 0;
@@ -677,7 +669,11 @@ void scsi_ata_identify_device(struct scsi_device *sdev, unsigned char *szInqRetu
 	szScsiCmd[14] = 0xec;
 
 	iRes = scsi_execute_req(sdev, szScsiCmd, DMA_FROM_DEVICE,
-		szInqResult, iInqLen, &sshdr, HZ*10, 5, &iResid);
+		szInqResult, SYNO_RESULT_LEN, &sshdr, HZ*10, 5, &iResid);
+
+	if (iRes || '\0' == szInqResult[54+i]) {
+		return;
+	}
 
 	/* Swap string for endian problems */
 	for (i = 0; i < SYNO_RESULT_LEN - 1; i += 2)
@@ -688,37 +684,29 @@ void scsi_ata_identify_device(struct scsi_device *sdev, unsigned char *szInqRetu
 	}
 
 	/* Search the end of vendor name */
-	for (i = 0; i < SYNO_INQUIRY_TMP_LEN; i++) {
+	for (i = 0; i < SYNO_IDENTIFY_DEVICE_TMP_LEN; i++) {
 		if ('\0' == szInqResult[54+i]) {
 			break;
 		}
 
 		if (' ' == szInqResult[54+i]) {
 			if(1 == blPreIsSpace){
-				goto END;
+				break;
 			}
 			blPreIsSpace = 1;
 		} else if (blPreIsSpace) {
-			blSegmented =1;
+			blSegmented = 1;
 			break;
 		}
 	}
 
 	if (!blSegmented){
-		goto END;
+		i = 0;
 	}
 
-	/* Copy vendor name form word 27 */
-	memcpy(szTmpResult, &szInqResult[54], i);
-	/* Copy model data after the vendor name */
-	memcpy(&szTmpResult[8], &szInqResult[54 + i], 16);
-	/* Copy firmware revision from word 23*/
-	memcpy(&szTmpResult[iLen - 4], &szInqResult[46], 4);
+	/* The disk model name start from word 27 in the buffer */
+	memcpy(szInqReturn, &szInqResult[54 + i], SYNO_DISK_MODEL_NUM);
 
-	memset(szInqReturn, 0, iLen);
-	memcpy(szInqReturn, szTmpResult, iLen);
-
-END:
 	return;
 }
 #endif
@@ -807,16 +795,14 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	}
 
 	if (result == 0) {
-#if defined(CONFIG_SYNO_INQUIRY_USE_ATA_COMMAND) && defined(SYNO_SAS_DISK_NAME)
-		if( 1 == g_is_sas_model &&
-				SYNO_INQUIRY_LEN <= try_inquiry_len &&
-				!strncmp(SZ_STAT_DISK_VENDOR, &inq_result[8], 8)){
-			scsi_ata_identify_device(sdev, &inq_result[8], try_inquiry_len, 28);
+#ifdef MY_ABC_HERE
+		/*
+		 * Only transfering the strings that vendor is ATA.
+		 * vendor set as "ATA" means the disk is a SATA disk
+		 */
+		if (!strncmp(&inq_result[8], SZ_STAT_DISK_VENDOR, 8)) {
+			syno_standard_inquiry_string(&inq_result[8], 28);
 		}
-#endif
-
-#ifdef SYNO_INQUIRY_STANDARD
-		syno_standard_inquiry_string(&inq_result[8], 28);
 #endif
 		sanitize_inquiry_string(&inq_result[8], 8);
 		sanitize_inquiry_string(&inq_result[16], 16);
@@ -943,6 +929,9 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		int *bflags, int async)
 {
 	int ret;
+#ifdef MY_ABC_HERE
+	unsigned char szDiskModel[SYNO_DISK_MODEL_NUM + 4] = {'\0'};
+#endif
 
 	/*
 	 * XXX do not save the inquiry, since it can change underneath us,
@@ -971,7 +960,30 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		return SCSI_SCAN_NO_RESPONSE;
 
 	sdev->vendor = (char *) (sdev->inquiry + 8);
+#ifdef MY_ABC_HERE
+	if(!(SYNO_PORT_TYPE_USB == sdev->host->hostt->syno_port_type)) {
+		scsi_ata_identify_device_get_model_name(sdev, (unsigned char *)&szDiskModel);
+	}
+
+	if(0 != strlen(szDiskModel)) {
+		sdev->model = kmemdup(szDiskModel, SYNO_DISK_MODEL_NUM, GFP_ATOMIC);
+	} else {
+		/*
+		 * Can't get disk model name by using ATA IDENTIFY DEVICE command.
+		 * eg. SAS disk, Enclosure ...
+		 * So we copy disk model name from INQUIRY result.
+		 */
+		memset (szDiskModel, ' ', SYNO_DISK_MODEL_NUM);
+		memcpy(szDiskModel, (char *) (sdev->inquiry + 16), 16);
+		sdev->model = kmemdup(szDiskModel, SYNO_DISK_MODEL_NUM, GFP_ATOMIC);
+	}
+	if (sdev->model == NULL)
+		return SCSI_SCAN_NO_RESPONSE;
+
+	sanitize_inquiry_string((unsigned char *) sdev->model, SYNO_DISK_MODEL_NUM);
+#else
 	sdev->model = (char *) (sdev->inquiry + 16);
+#endif
 	sdev->rev = (char *) (sdev->inquiry + 32);
 
 	if (*bflags & BLIST_ISROM) {
@@ -1042,7 +1054,11 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	if (inq_result[7] & 0x10)
 		sdev->sdtr = 1;
 
+#ifdef MY_ABC_HERE
+	sdev_printk(KERN_NOTICE, sdev, "%s %.8s %."SYNO_DISK_MODEL_LEN"s %.4s PQ: %d "
+#else
 	sdev_printk(KERN_NOTICE, sdev, "%s %.8s %.16s %.4s PQ: %d "
+#endif
 			"ANSI: %d%s\n", scsi_device_type(sdev->type),
 			sdev->vendor, sdev->model, sdev->rev,
 			sdev->inq_periph_qual, inq_result[2] & 0x07,

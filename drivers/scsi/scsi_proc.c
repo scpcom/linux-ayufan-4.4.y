@@ -206,7 +206,11 @@ static int proc_print_scsidevice(struct device *dev, void *data)
 	}
 
 	seq_printf(s, " Model: ");
+#ifdef MY_ABC_HERE
+	for (i = 0; i < SYNO_DISK_MODEL_NUM; i++) {
+#else
 	for (i = 0; i < 16; i++) {
+#endif
 		if (sdev->model[i] >= 0x20)
 			seq_printf(s, "%c", sdev->model[i]);
 		else

@@ -54,6 +54,7 @@
 #define DISK_LED_ORANGE_SOLID	2
 #define DISK_LED_ORANGE_BLINK	3
 #define DISK_LED_GREEN_BLINK    4
+#define DISK_LED_BLUE			5
 
 #define SYNO_LED_OFF		0
 #define SYNO_LED_ON			1
@@ -218,7 +219,8 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	//note: hd led is active low
 	if ( DISK_LED_OFF == status ) {
 		fail_led = 1;
-	} else if ( DISK_LED_GREEN_SOLID == status ) {
+	} else if ( DISK_LED_GREEN_SOLID == status ||
+				DISK_LED_BLUE == status) {
 		fail_led = 1;
 	} else if ( DISK_LED_ORANGE_SOLID == status ||
 		DISK_LED_ORANGE_BLINK == status ) {
@@ -322,6 +324,7 @@ SYNO_CTRL_USB_HDD_LED_SET(int status)
 		blink2 = 0;
 		break;
 	case DISK_LED_GREEN_SOLID:
+	case DISK_LED_BLUE:
 		bit1 = 0;
 		bit2 = 1;
 		blink1 = 0;

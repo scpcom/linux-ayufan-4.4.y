@@ -913,10 +913,6 @@ static struct shrinker dcache_shrinker = {
 	.seeks = DEFAULT_SEEKS,
 };
 
-#ifdef MY_ABC_HERE
-static unsigned char UTF8DcacheDStrBuf[UNICODE_UTF8_BUFSIZE];
-extern spinlock_t Dcache_buf_lock;
-#endif
 
 /**
  * d_alloc	-	allocate a dcache entry
@@ -932,37 +928,13 @@ struct dentry *d_alloc(struct dentry * parent, const struct qstr *name)
 {
 	struct dentry *dentry;
 	char *dname;
-#ifdef MY_ABC_HERE
-	int upperlen;
-#endif
 
 	dentry = kmem_cache_alloc(dentry_cache, GFP_KERNEL);
 	if (!dentry)
 		return NULL;
 
-#ifdef MY_ABC_HERE
-	/* We will replace qstr.name to real name in real_lookup,
-	 * so we should get enough space when malloc.
-	 * We assume the length of uppercase name is the longest.
-	*/
-	if (parent && (DCACHE_CASELESS_COMPARE & parent->d_flags)) {
-		spin_lock(&Dcache_buf_lock);
-		upperlen = SYNOUnicodeUTF8toUpper(UTF8DcacheDStrBuf, name->name,
-										  UNICODE_UTF8_BUFSIZE - 1 , name->len, NULL);
-		spin_unlock(&Dcache_buf_lock);
-		if (upperlen < name->len) {
-			upperlen = name->len;
-		}
-	}else{
-		upperlen = name->len;
-	}
-
-	if (upperlen > DNAME_INLINE_LEN-1) {
-		dname = kmalloc(upperlen + 1, GFP_KERNEL);
-#else
 	if (name->len > DNAME_INLINE_LEN-1) {
 		dname = kmalloc(name->len + 1, GFP_KERNEL);
-#endif
 		if (!dname) {
 			kmem_cache_free(dentry_cache, dentry); 
 			return NULL;

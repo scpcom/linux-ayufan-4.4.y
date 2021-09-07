@@ -60,6 +60,9 @@ unsigned int oplockEnabled = 1;
 unsigned int experimEnabled = 0;
 unsigned int linuxExtEnabled = 1;
 unsigned int lookupCacheEnabled = 1;
+#ifdef MY_ABC_HERE
+unsigned int SynoPosixSemanticsEnabled = 1;
+#endif
 unsigned int multiuser_mount = 0;
 unsigned int extended_security = CIFSSEC_DEF;
 /* unsigned int ntlmv2_support = 0; */
@@ -314,6 +317,8 @@ cifs_alloc_inode(struct super_block *sb)
 	cifs_inode->delete_pending = false;
 	cifs_inode->vfs_inode.i_blkbits = 14;  /* 2**14 = CIFS_MAX_MSGSIZE */
 	cifs_inode->server_eof = 0;
+	cifs_inode->uniqueid = 0;
+	cifs_inode->createtime = 0;
 
 	/* Can not set i_flags here - they get immediately overwritten
 	   to zero by the VFS */

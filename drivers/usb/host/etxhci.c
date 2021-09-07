@@ -394,14 +394,12 @@ static void xhci_event_ring_work(unsigned long arg)
 #endif
 
 #ifdef MY_ABC_HERE
-int disable_usb3 = 0;
-module_param(disable_usb3, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+extern int gSynoFactoryUSBFastReset;
+extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
 #endif
 
 #ifdef MY_ABC_HERE
-static int usb_fast_reset = 0;
-module_param(usb_fast_reset, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
+extern int gSynoFactoryUSB3Disable;
 #endif
 
 /*
@@ -509,13 +507,13 @@ legacy_irq:
 	xhci_dbg(xhci, "Finished xhci_run\n");
 
 #ifdef MY_ABC_HERE
-	if (disable_usb3) {
+	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
 #endif
 
 #ifdef MY_ABC_HERE
-	if (usb_fast_reset) {
+	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
 	}
@@ -565,7 +563,7 @@ void etxhci_stop(struct usb_hcd *hcd)
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
 #ifdef MY_ABC_HERE
-	if (usb_fast_reset) {
+	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
 	}

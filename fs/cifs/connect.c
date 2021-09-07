@@ -1252,6 +1252,9 @@ cifs_parse_mount_options(char *options, const char *devname,
 			vol->no_linux_ext = 1;
 		} else if ((strnicmp(data, "nocase", 6) == 0) ||
 			   (strnicmp(data, "ignorecase", 10)  == 0)) {
+#ifdef MY_ABC_HERE
+			SynoPosixSemanticsEnabled = 0;
+#endif
 			vol->nocase = 1;
 		} else if (strnicmp(data, "brl", 3) == 0) {
 			vol->nobrl =  0;

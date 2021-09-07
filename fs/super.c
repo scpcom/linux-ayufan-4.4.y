@@ -46,11 +46,7 @@ DEFINE_SPINLOCK(sb_lock);
 
 #ifdef MY_ABC_HERE
 spinlock_t Namei_buf_lock_1;  /* lock for UTF16NameiStrBuf1[] in fs/namei.c */
-spinlock_t Namei_buf_lock_2;  /* lock for UTF16NameiStrBuf2[] in fs/namei.c */
-spinlock_t Dcache_buf_lock;  /* lock for UTF8DcacheDStrBuf[] in fs/dcache.c */
 static int lock_1_init = 0;
-static int lock_2_init = 0;
-static int Dcache_lock_init = 0;
 #endif
 
 /**
@@ -122,15 +118,8 @@ static struct super_block *alloc_super(struct file_system_type *type)
 			spin_lock_init(&Namei_buf_lock_1);
 			lock_1_init=1;
 		}
-		if (!lock_2_init) {
-			spin_lock_init(&Namei_buf_lock_2);
-			lock_2_init=1;
-		}
-		if (!Dcache_lock_init) {
-			spin_lock_init(&Dcache_buf_lock);
-			Dcache_lock_init=1;
-		}
 #endif
+
 	}
 out:
 	return s;

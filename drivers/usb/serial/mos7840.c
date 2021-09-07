@@ -180,7 +180,7 @@
 #define URB_TRANSFER_BUFFER_SIZE        32	/* URB Size  */
 
 
-static struct usb_device_id moschip_port_id_table[] = {
+static const struct usb_device_id moschip_port_id_table[] = {
 	{USB_DEVICE(USB_VENDOR_ID_MOSCHIP, MOSCHIP_DEVICE_ID_7840)},
 	{USB_DEVICE(USB_VENDOR_ID_MOSCHIP, MOSCHIP_DEVICE_ID_7820)},
 	{USB_DEVICE(USB_VENDOR_ID_BANDB, BANDB_DEVICE_ID_USO9ML2_2)},
@@ -196,7 +196,7 @@ static struct usb_device_id moschip_port_id_table[] = {
 	{}			/* terminating entry */
 };
 
-static __devinitdata struct usb_device_id moschip_id_table_combined[] = {
+static const struct usb_device_id moschip_id_table_combined[] __devinitconst = {
 	{USB_DEVICE(USB_VENDOR_ID_MOSCHIP, MOSCHIP_DEVICE_ID_7840)},
 	{USB_DEVICE(USB_VENDOR_ID_MOSCHIP, MOSCHIP_DEVICE_ID_7820)},
 	{USB_DEVICE(USB_VENDOR_ID_BANDB, BANDB_DEVICE_ID_USO9ML2_2)},
@@ -747,7 +747,6 @@ static void mos7840_bulk_in_callback(struct urb *urb)
 	if (urb->actual_length) {
 		tty = tty_port_tty_get(&mos7840_port->port->port);
 		if (tty) {
-			tty_buffer_request_room(tty, urb->actual_length);
 			tty_insert_flip_string(tty, data, urb->actual_length);
 			dbg(" %s ", data);
 			tty_flip_buffer_push(tty);
@@ -1341,8 +1340,6 @@ static void mos7840_break(struct tty_struct *tty, int break_state)
 	    mos7840_port->shadowLCR);
 	mos7840_set_uart_reg(port, LINE_CONTROL_REGISTER,
 			     mos7840_port->shadowLCR);
-
-	return;
 }
 
 /*****************************************************************************
@@ -1573,8 +1570,6 @@ static void mos7840_throttle(struct tty_struct *tty)
 		if (status < 0)
 			return;
 	}
-
-	return;
 }
 
 /*****************************************************************************
@@ -2049,8 +2044,6 @@ static void mos7840_change_port_settings(struct tty_struct *tty,
 	mos7840_port->delta_msr_cond = 1;
 	dbg("mos7840_change_port_settings mos7840_port->shadowLCR is End %x",
 	    mos7840_port->shadowLCR);
-
-	return;
 }
 
 /*****************************************************************************
@@ -2119,7 +2112,6 @@ static void mos7840_set_termios(struct tty_struct *tty,
 			mos7840_port->read_urb_busy = false;
 		}
 	}
-	return;
 }
 
 /*****************************************************************************
@@ -2188,7 +2180,7 @@ static int mos7840_get_serial_info(struct moschip_port *mos7840_port,
  *	this function handles any ioctl calls to the driver
  *****************************************************************************/
 
-static int mos7840_ioctl(struct tty_struct *tty, struct file *file,
+static int mos7840_ioctl(struct tty_struct *tty,
 			 unsigned int cmd, unsigned long arg)
 {
 	struct usb_serial_port *port = tty->driver_data;

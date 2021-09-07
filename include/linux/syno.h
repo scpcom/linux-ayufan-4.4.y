@@ -69,6 +69,16 @@
 #define SYNO_SATA_PM_DEVICE_GPIO
 #endif
 
+#if 0
+#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+#define SYNO_CREATE_TIME_SWAP_VERSION 3719
+#endif
+
+#endif
+
+#endif
+
 #ifdef MY_ABC_HERE
 #if defined (F_CLEAR_ARCHIVE) || defined (F_SETSMB_ARCHIVE) || defined (F_SETSMB_HIDDEN) || \
 	defined (F_SETSMB_SYSTEM) || defined (F_CLRSMB_ARCHIVE) || defined (F_CLRSMB_HIDDEN) || \
@@ -122,6 +132,12 @@
 #include <linux/syno_debug.h>
 #define SYNO_NFSD_WRITE_SIZE_MIN 131072
 #define SYNO_EXT4_SYNC_DALLOC_RETRY  100
+#ifdef MY_ABC_HERE
+#define SYNO_NFSD_UDP_MAX_PACKET_SIZE 32768
+#define SYNO_NFSD_UDP_MIN_PACKET_SIZE 4096
+#define SYNO_NFSD_UDP_DEF_PACKET_SIZE 8192
+#endif
+
 #ifdef MY_ABC_HERE
 #define SYNO_SATA_DEVICE_PREFIX	   "sd"
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"

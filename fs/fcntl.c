@@ -78,6 +78,84 @@ static struct syno_archive_map rgSynoAr[] = {
 #endif //CONFIG_FS_SYNO_ACL
 };
 
+struct syno_archive_permission_mapping {
+	unsigned int sAr;	//syno archive
+	int permission;
+};
+static struct syno_archive_permission_mapping rgSynoArPermission[] = {
+#ifdef CONFIG_FS_SYNO_ACL
+	/* General archive */
+	{S2_IARCHIVE, MAY_WRITE_ATTR},
+	{S2_SMB_ARCHIVE, MAY_WRITE_ATTR},
+	{S2_SMB_HIDDEN, MAY_WRITE_ATTR},
+	{S2_SMB_SYSTEM, MAY_WRITE_ATTR},
+
+	/* ACL archive */
+	{S2_SMB_READONLY, MAY_WRITE_ATTR},
+	{S2_SYNO_ACL_IS_OWNER_GROUP, MAY_GET_OWNER_SHIP},
+	{S2_SYNO_ACL_INHERIT, MAY_WRITE_PERMISSION},
+	{S2_SYNO_ACL_EXIST, MAY_WRITE_PERMISSION},
+	{S2_SYNO_ACL_SUPPORT, MAY_WRITE_PERMISSION},
+#endif //CONFIG_FS_SYNO_ACL
+	{0, -1}
+};
+
+#ifdef MY_ABC_HERE
+long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
+{
+	struct inode *inode = dentry->d_inode;
+	int markInodeDirty = 0;
+	int permissionCheck = 0;
+	int i = 0;
+
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_FS_SYNOACL(inode) && IS_INODE_SYNOACL(inode)) {
+		for (i = 0; -1 != rgSynoArPermission[i].permission; i++) {
+			if ((inode->i_mode2 & rgSynoArPermission[i].sAr) == (flags & rgSynoArPermission[i].sAr)) {
+				continue;
+			}
+			permissionCheck |= rgSynoArPermission[i].permission;
+		}
+		if (inode->i_op && inode->i_op->syno_permission(dentry, permissionCheck)) {
+			return -EPERM;
+		}
+	} else {
+		if (!is_owner_or_cap(inode)) {
+			return -EPERM;
+		}
+	}
+	if (ALL_SYNO_ACL_ARCHIVE & flags) {
+		if (!IS_FS_SYNOACL(inode)) {
+			return -EOPNOTSUPP;
+		}
+		// S2_SYNO_ACL_SUPPORT should be set if you want to set ACL archive bit.
+		if (!(S2_SYNO_ACL_SUPPORT & flags)) {
+			return -EINVAL;
+		}
+	}
+#else
+	if (!is_owner_or_cap(inode)) {
+		return -EPERM;
+	}
+#endif
+	if ((~ALL_ARCHIVE_BIT) & flags) {
+		return -EINVAL;
+	}
+	mutex_lock(&inode->i_syno_mutex);
+	if (flags != inode->i_mode2) {
+		inode->i_mode2 = flags;
+		markInodeDirty = 1;
+	}
+	mutex_unlock(&inode->i_syno_mutex);
+	if (markInodeDirty) {
+		mark_inode_dirty_sync(inode);
+	}
+
+	return 0;
+}
+EXPORT_SYMBOL(__SYNOArchiveOverwrite);
+#endif
+
 long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd)
 {
 	int i = 0;

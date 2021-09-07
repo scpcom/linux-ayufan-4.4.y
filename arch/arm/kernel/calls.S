@@ -519,6 +519,22 @@
         CALL(sys_ni_syscall)
 #endif /* MY_ABC_HERE */
 
+#ifdef MY_ABC_HERE
+        CALL(sys_ni_syscall)
+        CALL(sys_ni_syscall)
+        CALL(sys_ni_syscall)
+        CALL(sys_ni_syscall)
+        CALL(sys_ni_syscall)
+        CALL(sys_SYNOArchiveOverwrite)      /* 427 */
+#else
+        CALL(sys_ni_syscall)
+        CALL(sys_ni_syscall)
+        CALL(sys_ni_syscall)
+        CALL(sys_ni_syscall)
+        CALL(sys_ni_syscall)
+        CALL(sys_ni_syscall)
+#endif
+
 #ifndef syscalls_counted
 .equ syscalls_padding, ((NR_syscalls + 3) & ~3) - NR_syscalls
 #define syscalls_counted

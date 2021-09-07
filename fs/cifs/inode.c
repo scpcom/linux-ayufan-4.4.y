@@ -92,6 +92,9 @@ cifs_fattr_to_inode(struct inode *inode, struct cifs_fattr *fattr)
 	inode->i_nlink = fattr->cf_nlink;
 	inode->i_uid = fattr->cf_uid;
 	inode->i_gid = fattr->cf_gid;
+#ifdef MY_ABC_HERE
+	inode->i_CreateTime = cifs_NTtimeToUnix(cpu_to_le64(fattr->cf_createtime));
+#endif
 
 	/* if dynperm is set, don't clobber existing mode */
 	if (inode->i_state & I_NEW ||
@@ -412,6 +415,7 @@ cifs_all_info_to_fattr(struct cifs_fattr *fattr, FILE_ALL_INFO *info,
 
 	fattr->cf_eof = le64_to_cpu(info->EndOfFile);
 	fattr->cf_bytes = le64_to_cpu(info->AllocationSize);
+	fattr->cf_createtime = le64_to_cpu(info->CreationTime);
 
 	if (fattr->cf_cifsattrs & ATTR_DIRECTORY) {
 		fattr->cf_mode = S_IFDIR | cifs_sb->mnt_dir_mode;
@@ -610,6 +614,10 @@ cifs_find_inode(struct inode *inode, void *opaque)
 	if (CIFS_I(inode)->uniqueid != fattr->cf_uniqueid)
 		return 0;
 
+	/* use createtime like an i_generation field */
+	if (CIFS_I(inode)->createtime != fattr->cf_createtime)
+		return 0;
+
 	return 1;
 }
 
@@ -619,6 +627,7 @@ cifs_init_inode(struct inode *inode, void *opaque)
 	struct cifs_fattr *fattr = (struct cifs_fattr *) opaque;
 
 	CIFS_I(inode)->uniqueid = fattr->cf_uniqueid;
+	CIFS_I(inode)->createtime = fattr->cf_createtime;
 	return 0;
 }
 

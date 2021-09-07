@@ -44,20 +44,6 @@ config SYNO_SAS_ENCLOSURE_ID_CTRL
 	help
 	  Say Y here to to enum enclosure id control interface in sysfs
 
-config SYNO_INQUIRY_USE_ATA_COMMAND
-	bool "Using ATA command to obtain STAT disk vendor and model name"
-	depends on SYNO_BROMOLOW
-	default y
-	help
-	  Using ATA command to obtain STAT disk complete information
-
-config SYNO_INQUIRY_STANDARD
-	bool "Correct the vendor and model information showed in /proc/scsi/scsi"
-	depends on SYNO_BROMOLOW
-	default y
-	help
-	  Correct the vendor and model information showed in /proc/scsi/scsi
-
 config SYNO_NET_INIT_OPERATION
 	bool "fix the default eth0 status when booting without link"
 	depends on SYNO_QORIQ
@@ -73,3 +59,7 @@ config SYNO_MPC8533_TIMEBASE_FREQ
     help
         Overwrite default timebase frequency
 
+config SYNO_DISPLAY_CPUINFO
+    bool "Support display CPU Infomation"
+	help
+	  Say Y to Support display CPU Infomation

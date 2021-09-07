@@ -478,7 +478,11 @@ SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)			/* 425 */
 SYSCALL(ni_syscall)
+#ifdef MY_ABC_HERE
+SYSCALL(SYNOArchiveOverwrite)        /* 427 */
+#else
 SYSCALL(ni_syscall)
+#endif
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)			/* 430 */

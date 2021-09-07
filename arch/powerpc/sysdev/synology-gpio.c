@@ -39,6 +39,7 @@
 #define DISK_LED_ORANGE_SOLID	2
 #define DISK_LED_ORANGE_BLINK	3
 #define DISK_LED_GREEN_BLINK    4
+#define DISK_LED_BLUE			5
 
 #define SYNO_LED_OFF		0
 #define SYNO_LED_ON			1
@@ -164,7 +165,8 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	//note: hd led is active low
 	if ( DISK_LED_OFF == status ) {
 		fail_led = 1;
-	} else if ( DISK_LED_GREEN_SOLID == status ) {
+	} else if ( DISK_LED_GREEN_SOLID == status ||
+				DISK_LED_BLUE == status) {
 		fail_led = 1;
 	} else if ( DISK_LED_ORANGE_SOLID == status ||
 		DISK_LED_ORANGE_BLINK == status ) {
@@ -203,6 +205,7 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 			break;
 		case DISK_LED_GREEN_BLINK:
 		case DISK_LED_GREEN_SOLID:
+		case DISK_LED_BLUE:
 			bit1 = 0;
 			bit2 = 1;
 			break;
@@ -397,6 +400,43 @@ END:
 	return 0;
 }
 
+/* SYNO_CHECK_HDD_PRESENT
+ * Check HDD present for QorIQ
+ * input : index - disk index, 1-based.
+ * output: 0 - HDD not present, 1 - HDD present.
+ */
+int SYNO_CHECK_HDD_PRESENT(int index)
+{
+	int iPrzVal = 1; /*defult is persent*/
+
+	switch (index) {
+		case 1:
+			if (GPIO_UNDEF != generic_gpio.hdd_pm.hdd1_present) {
+				iPrzVal = !gpio_get_value(generic_gpio.hdd_pm.hdd1_present);
+			}
+			break;
+		case 2:
+			if (GPIO_UNDEF != generic_gpio.hdd_pm.hdd2_present) {
+				iPrzVal = !gpio_get_value(generic_gpio.hdd_pm.hdd2_present);
+			}
+			break;
+		case 3:
+			if (GPIO_UNDEF != generic_gpio.hdd_pm.hdd3_present) {
+				iPrzVal = !gpio_get_value(generic_gpio.hdd_pm.hdd3_present);
+			}
+			break;
+		case 4:
+			if (GPIO_UNDEF != generic_gpio.hdd_pm.hdd4_present) {
+				iPrzVal = !gpio_get_value(generic_gpio.hdd_pm.hdd4_present);
+			}
+			break;
+		default:
+			break;
+	}
+
+	return iPrzVal;
+}
+
 
 EXPORT_SYMBOL(SYNO_QORIQ_GPIO_PIN);
 EXPORT_SYMBOL(SYNOQorIQDiskLed);
@@ -409,6 +449,7 @@ EXPORT_SYMBOL(SYNO_CTRL_FAN_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_ALARM_LED_SET);
 EXPORT_SYMBOL(SYNO_CTRL_BACKPLANE_STATUS_GET);
 EXPORT_SYMBOL(SYNO_CTRL_BUZZER_CLEARED_GET);
+EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
 
 static void 
 QORIQ_813_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
@@ -576,8 +617,8 @@ QORIQ_213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 							.hdd2_pm = 25,
 							.hdd3_pm = GPIO_UNDEF,
 							.hdd4_pm = GPIO_UNDEF,
-							.hdd1_present = GPIO_UNDEF,
-							.hdd2_present = GPIO_UNDEF,
+							.hdd1_present = 71,
+							.hdd2_present = 29,
 							.hdd3_present = GPIO_UNDEF,
 							.hdd4_present = GPIO_UNDEF,
 						},

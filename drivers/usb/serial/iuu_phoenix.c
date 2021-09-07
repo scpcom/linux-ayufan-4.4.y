@@ -43,7 +43,7 @@ static int debug;
 #define DRIVER_VERSION "v0.11"
 #define DRIVER_DESC "Infinity USB Unlimited Phoenix driver"
 
-static struct usb_device_id id_table[] = {
+static const struct usb_device_id id_table[] = {
 	{USB_DEVICE(IUU_USB_VENDOR_ID, IUU_USB_PRODUCT_ID)},
 	{}			/* Terminating entry */
 };
@@ -801,7 +801,6 @@ static void read_rxcmd_callback(struct urb *urb)
 			  iuu_uart_read_callback, port);
 	result = usb_submit_urb(port->read_urb, GFP_ATOMIC);
 	dbg("%s - submit result = %d", __func__, result);
-	return;
 }
 
 static int iuu_uart_on(struct usb_serial_port *port)

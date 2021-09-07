@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.32.12
-# Wed Sep 12 17:25:16 2012
+# Fri May  3 20:00:48 2013
 #
 CONFIG_64BIT=y
 # CONFIG_X86_32 is not set
@@ -153,9 +153,7 @@ CONFIG_HAVE_DMA_API_DEBUG=y
 # GCOV-based kernel profiling
 #
 CONFIG_SLOW_WORK=y
-# CONFIG_SYNO_SAS_LOSE_PROTECT is not set
 # CONFIG_SYNO_SAS_ENCLOSURE_ID_CTRL is not set
-CONFIG_SYNO_INQUIRY_USE_ATA_COMMAND=y
 # CONFIG_HAVE_GENERIC_DMA_COHERENT is not set
 CONFIG_SLABINFO=y
 CONFIG_RT_MUTEXES=y
@@ -1586,6 +1584,7 @@ CONFIG_USB_DEVICE_CLASS=y
 #
 # USB Host Controller Drivers
 #
+# CONFIG_USB_ETRON_HCD is not set
 # CONFIG_USB_C67X00_HCD is not set
 CONFIG_USB_XHCI_HCD=m
 # CONFIG_USB_XHCI_HCD_DEBUGGING is not set
@@ -1602,6 +1601,7 @@ CONFIG_USB_UHCI_HCD=m
 # CONFIG_USB_R8A66597_HCD is not set
 # CONFIG_USB_WHCI_HCD is not set
 # CONFIG_USB_HWA_HCD is not set
+# CONFIG_SYNO_XHCI_RING_EXPANSION is not set
 
 #
 # Enable Host or Gadget support to see Inventra options
@@ -2015,7 +2015,7 @@ CONFIG_PARTITION_ADVANCED=y
 # CONFIG_OSF_PARTITION is not set
 # CONFIG_AMIGA_PARTITION is not set
 # CONFIG_ATARI_PARTITION is not set
-# CONFIG_MAC_PARTITION is not set
+CONFIG_MAC_PARTITION=y
 CONFIG_MSDOS_PARTITION=y
 # CONFIG_BSD_DISKLABEL is not set
 # CONFIG_MINIX_SUBPARTITION is not set

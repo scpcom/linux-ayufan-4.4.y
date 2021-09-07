@@ -207,6 +207,22 @@ EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 
 #endif
 
+#ifdef CONFIG_SYNO_DISPLAY_CPUINFO
+unsigned int gSynoCPUInfoCore = 0;
+EXPORT_SYMBOL(gSynoCPUInfoCore);
+char gSynoCPUInfoClock[16];
+EXPORT_SYMBOL(gSynoCPUInfoClock);
+#endif
+
+#ifdef MY_ABC_HERE
+int gSynoFactoryUSBFastReset = 0;
+EXPORT_SYMBOL(gSynoFactoryUSBFastReset);
+#endif
+
+#ifdef MY_ABC_HERE
+int gSynoFactoryUSB3Disable = 0;
+EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
+#endif
 
 /* External variables not in a header file. */
 extern int C_A_D;
@@ -1368,6 +1384,40 @@ static struct ctl_table kern_table[] = {
 		.mode		= 0444,
 		.proc_handler	= &proc_dointvec,
 	},
+#endif
+#ifdef CONFIG_SYNO_DISPLAY_CPUINFO
+        {
+            .procname       = "syno_CPU_info_core",
+            .data           = &gSynoCPUInfoCore,
+            .maxlen         = sizeof (unsigned int),
+            .mode           = 0644,
+            .proc_handler   = &proc_dointvec,
+        },
+        {
+            .procname       = "syno_CPU_info_clock",
+            .data           = &gSynoCPUInfoClock,
+            .maxlen         = 16,
+            .mode           = 0644,
+            .proc_handler   = &proc_dostring,
+        },
+#endif
+#ifdef MY_ABC_HERE
+		{
+			.procname       = "syno_usb_fast_reset",
+			.data           = &gSynoFactoryUSBFastReset,
+			.maxlen         = sizeof (int),
+			.mode           = 0444,
+			.proc_handler   = &proc_dointvec,
+		},
+#endif
+#ifdef MY_ABC_HERE
+		{
+			.procname       = "syno_disable_usb3",
+			.data           = &gSynoFactoryUSB3Disable,
+			.maxlen         = sizeof (int),
+			.mode           = 0444,
+			.proc_handler   = &proc_dointvec,
+		},
 #endif
 	{ .ctl_name = 0 }
 };

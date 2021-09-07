@@ -231,6 +231,9 @@ static void hfsplus_put_super(struct super_block *sb)
 
 	hfs_btree_close(HFSPLUS_SB(sb).cat_tree);
 	hfs_btree_close(HFSPLUS_SB(sb).ext_tree);
+#ifdef MY_ABC_HERE
+	hfs_btree_close(HFSPLUS_SB(sb).attr_tree);
+#endif
 	iput(HFSPLUS_SB(sb).alloc_file);
 	iput(HFSPLUS_SB(sb).hidden_dir);
 	brelse(HFSPLUS_SB(sb).s_vhbh);
@@ -405,6 +408,13 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		printk(KERN_ERR "hfs: failed to load catalog file\n");
 		goto cleanup;
 	}
+#ifdef MY_ABC_HERE
+	HFSPLUS_SB(sb).attr_tree = hfs_btree_open(sb, HFSPLUS_ATTR_CNID);
+	if (!HFSPLUS_SB(sb).attr_tree) {
+		printk(KERN_ERR "hfs: failed to load catalog file\n");
+		goto cleanup;
+	}
+#endif
 
 	inode = hfsplus_iget(sb, HFSPLUS_ALLOC_CNID);
 	if (IS_ERR(inode)) {
@@ -531,9 +541,20 @@ static int __init init_hfsplus_fs(void)
 		hfsplus_init_once);
 	if (!hfsplus_inode_cachep)
 		return -ENOMEM;
+	err = hfsplus_create_attr_tree_cache();
+	if (err)
+		goto destroy_inode_cache;
 	err = register_filesystem(&hfsplus_fs_type);
 	if (err)
-		kmem_cache_destroy(hfsplus_inode_cachep);
+		goto destroy_attr_tree_cache;
+	return 0;
+
+destroy_attr_tree_cache:
+	hfsplus_destroy_attr_tree_cache();
+
+destroy_inode_cache:
+	kmem_cache_destroy(hfsplus_inode_cachep);
+
 	return err;
 }
 

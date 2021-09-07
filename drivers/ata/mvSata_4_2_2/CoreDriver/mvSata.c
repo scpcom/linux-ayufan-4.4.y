@@ -84,7 +84,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/synosata.h>
 #include <linux/synobios.h>
 extern int syno_mv_scsi_host_no_get(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex);
-extern int (*funcSYNOSendHibernationEvent)(unsigned int, unsigned int);
 #define WAKEINTERVAL (7UL*HZ)
 static LIST_HEAD(PendingList);
 static unsigned long int g_jiffies_lastwake;
@@ -3010,15 +3009,6 @@ static void completePIOCommand(MV_SATA_CHANNEL *pSataChannel,
 					if (test_and_set_bit(CHKPOWER_WAKING, 
 								&(pSataChannel->chkpower_flags))) {
 						printk("%s: ALREADY WAKING!?\n", __func__);
-					}
-
-					if(funcSYNOSendHibernationEvent) {
-						funcSYNOSendHibernationEvent(DISK_WAKE_UP, 
-							syno_mv_scsi_host_no_get(pSataChannel->mvSataAdapter, 
-								pSataChannel->channelNumber)+1
-						);
-					}else{
-						printk("funcSYNOSendHibernationEvent is NULL!!\n");
 					}
 
 					/* check if we can execute command directly */

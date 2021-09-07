@@ -1243,6 +1243,7 @@ static struct usb_driver driver = {
 	.id_table	= usb_ids,
 	.probe		= probe,
 	.disconnect	= disconnect,
+	.disable_hub_initiated_lpm = 1,
 };
 
 struct workqueue_struct *zd_workqueue;

@@ -126,29 +126,30 @@ ipv4_connected:
 		if (!sk->sk_bound_dev_if && (addr_type & IPV6_ADDR_MULTICAST))
 			sk->sk_bound_dev_if = np->mcast_oif;
 
-#ifdef MY_ABC_HERE
 		if (!sk->sk_bound_dev_if) {
+		}
+		/* Connect to link-local address requires an interface */
+		if (!sk->sk_bound_dev_if) {
+#ifdef MY_ABC_HERE
+			unsigned flags;
 			struct net_device *dev = NULL;
 			for_each_netdev(sock_net(sk), dev) {
-				if(dev && (dev->flags & IFF_UP) && !(dev->flags & (IFF_LOOPBACK | IFF_SLAVE))) {
-					dev_hold(dev);
+				flags = dev_get_flags(dev);
+				if((flags & IFF_RUNNING) && 
+				 !(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+					sk->sk_bound_dev_if = dev->ifindex;
 					break;
 				}
 			}
-			if(!dev) {
-				err = -ENODEV;
+			if(!sk->sk_bound_dev_if) {
+				err = -EINVAL;
 				goto out;
 			}
-			sk->sk_bound_dev_if = dev->ifindex;
-			dev_put(dev);
-		}
 #else
-		/* Connect to link-local address requires an interface */
-		if (!sk->sk_bound_dev_if) {
 			err = -EINVAL;
 			goto out;
-		}
 #endif
+		}
 	}
 
 	ipv6_addr_copy(&np->daddr, daddr);

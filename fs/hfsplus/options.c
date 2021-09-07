@@ -185,5 +185,9 @@ int hfsplus_show_options(struct seq_file *seq, struct vfsmount *mnt)
 		seq_printf(seq, ",nls=%s", sbi->nls->charset);
 	if (sbi->flags & HFSPLUS_SB_NODECOMPOSE)
 		seq_printf(seq, ",nodecompose");
+#ifdef MY_ABC_HERE
+	if (test_bit(HFSPLUS_SB_CASEFOLD, &sbi->flags))
+		seq_printf(seq, ",caseless");
+#endif
 	return 0;
 }

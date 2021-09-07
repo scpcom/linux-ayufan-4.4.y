@@ -126,7 +126,7 @@ struct usb_port_status {
 enum XHCI_SPECIAL_RESET_MODE{
 	XHCI_SPECIAL_RESET_PAUSE = 0, // enable and pause
 	XHCI_SPECIAL_RESET_RUN, // enable and run
-	XHCI_SPECIAL_RESET_DISABLE, // for disable_usb3
+	XHCI_SPECIAL_RESET_DISABLE, // for syno_disable_usb3
 };
 #endif
 

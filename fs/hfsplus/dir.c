@@ -15,6 +15,7 @@
 
 #include "hfsplus_fs.h"
 #include "hfsplus_raw.h"
+#include "xattr.h"
 
 #ifdef MY_ABC_HERE
 extern struct mutex syno_hfsplus_global_mutex;
@@ -41,6 +42,14 @@ static struct dentry *hfsplus_lookup(struct inode *dir, struct dentry *dentry,
 
 #ifdef MY_ABC_HERE
 	mutex_lock(&syno_hfsplus_global_mutex);
+#endif
+#ifdef MY_ABC_HERE
+	if (dentry->d_name.len > NAME_MAX) {
+#ifdef MY_ABC_HERE
+		mutex_unlock(&syno_hfsplus_global_mutex);
+#endif
+		return ERR_PTR(-ENAMETOOLONG);
+	}
 #endif
 	sb = dir->i_sb;
 
@@ -156,7 +165,7 @@ static int hfsplus_readdir(struct file *filp, void *dirent, filldir_t filldir)
 	}
 	hfs_find_init(HFSPLUS_SB(sb).cat_tree, &fd);
 	hfsplus_cat_build_key(sb, fd.search_key, inode->i_ino, NULL);
-	err = hfs_brec_find(&fd);
+	err = hfs_brec_find(&fd, hfs_find_rec_by_key);
 	if (err)
 		goto out;
 
@@ -662,6 +671,15 @@ const struct inode_operations hfsplus_dir_inode_operations = {
 	.symlink	= hfsplus_symlink,
 	.mknod		= hfsplus_mknod,
 	.rename		= hfsplus_rename,
+#ifdef MY_ABC_HERE
+	.setxattr		= hfsplus_syno_setxattr,
+	.getxattr		= hfsplus_syno_getxattr,
+#else
+	.setxattr		= hfsplus_setxattr,
+	.getxattr		= hfsplus_getxattr,
+#endif
+	.listxattr		= hfsplus_listxattr,
+	.removexattr		= hfsplus_removexattr,
 };
 
 const struct file_operations hfsplus_dir_operations = {

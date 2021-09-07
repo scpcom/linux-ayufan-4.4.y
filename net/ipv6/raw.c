@@ -272,29 +272,30 @@ static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 
 #ifdef MY_ABC_HERE
 			if (!sk->sk_bound_dev_if) {
+				unsigned flags;
 				for_each_netdev(sock_net(sk), dev) {
-					if(dev && (dev->flags & IFF_UP) && !(dev->flags & (IFF_LOOPBACK | IFF_SLAVE))) {
-						dev_hold(dev);
+					flags = dev_get_flags(dev);
+					if((flags & IFF_RUNNING) && 
+					 !(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+						sk->sk_bound_dev_if = dev->ifindex;
 						break;
 					}
 				}
-				if(!dev) {
-					err = -ENODEV;
+				if(!sk->sk_bound_dev_if) {
 					goto out;
 				}
-				sk->sk_bound_dev_if = dev->ifindex;
 			}
 #else
 			/* Binding to link-local address requires an interface */
 			if (!sk->sk_bound_dev_if)
 				goto out;
+#endif
 
 			dev = dev_get_by_index(sock_net(sk), sk->sk_bound_dev_if);
 			if (!dev) {
 				err = -ENODEV;
 				goto out;
 			}
-#endif
 		}
 
 		/* ipv4 addr of the socket is invalid.  Only the

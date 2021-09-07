@@ -22,6 +22,7 @@
 #define DBG_SUPER	0x00000010
 #define DBG_EXTENT	0x00000020
 #define DBG_BITMAP	0x00000040
+#define DBG_ATTR_MOD	0x00000080
 
 //#define DBG_MASK	(DBG_EXTENT|DBG_INODE|DBG_BNODE_MOD)
 //#define DBG_MASK	(DBG_BNODE_MOD|DBG_CAT_MOD|DBG_INODE)
@@ -30,6 +31,18 @@
 
 #define dprint(flg, fmt, args...) \
 	if (flg & DBG_MASK) printk(fmt , ## args)
+
+#define hfs_dbg(flg, fmt, ...)					\
+do {								\
+	if (DBG_##flg & DBG_MASK)				\
+		printk(KERN_DEBUG pr_fmt(fmt), ##__VA_ARGS__);	\
+} while (0)
+
+#define hfs_dbg_cont(flg, fmt, ...)				\
+do {								\
+	if (DBG_##flg & DBG_MASK)				\
+		pr_cont(fmt, ##__VA_ARGS__);			\
+} while (0)
 
 /* Runtime config options */
 #define HFSPLUS_DEF_CR_TYPE    0x3F3F3F3F  /* '????' */
@@ -184,6 +197,12 @@ struct hfsplus_inode_info {
 #define HFSPLUS_FLG_EXT_DIRTY	0x0002
 #define HFSPLUS_FLG_EXT_NEW	0x0004
 
+#define HFSPLUS_I_RSRC		0	/* represents a resource fork */
+#define HFSPLUS_I_CAT_DIRTY	1	/* has changes in the catalog tree */
+#define HFSPLUS_I_EXT_DIRTY	2	/* has changes in the extent tree */
+#define HFSPLUS_I_ALLOC_DIRTY	3	/* has changes in the allocation file */
+#define HFSPLUS_I_ATTR_DIRTY	4	/* has changes in the attributes tree */
+
 #define HFSPLUS_IS_DATA(inode)   (!(HFSPLUS_I(inode).flags & HFSPLUS_FLG_RSRC))
 #define HFSPLUS_IS_RSRC(inode)   (HFSPLUS_I(inode).flags & HFSPLUS_FLG_RSRC)
 
@@ -212,6 +231,9 @@ struct hfsplus_readdir_data {
 #define hfs_bmap_alloc hfsplus_bmap_alloc
 #define hfs_bmap_free hfsplus_bmap_free
 #define hfs_bnode_read hfsplus_bnode_read
+#ifdef MY_ABC_HERE
+#define hfs_bnode_read_u32 hfsplus_bnode_read_u32
+#endif
 #define hfs_bnode_read_u16 hfsplus_bnode_read_u16
 #define hfs_bnode_read_u8 hfsplus_bnode_read_u8
 #define hfs_bnode_read_key hfsplus_bnode_read_key
@@ -235,7 +257,7 @@ struct hfsplus_readdir_data {
 #define hfs_brec_remove hfsplus_brec_remove
 #define hfs_find_init hfsplus_find_init
 #define hfs_find_exit hfsplus_find_exit
-#define __hfs_brec_find __hplusfs_brec_find
+#define __hfs_brec_find __hfsplus_brec_find
 #define hfs_brec_find hfsplus_brec_find
 #define hfs_brec_read hfsplus_brec_read
 #define hfs_brec_goto hfsplus_brec_goto
@@ -253,8 +275,36 @@ struct hfsplus_readdir_data {
 
 
 /*
+ * hfs+-specific ioctl for making the filesystem bootable
+ */
+#define HFSPLUS_IOC_BLESS _IO('h', 0x80)
+
+typedef int (*search_strategy_t)(struct hfs_bnode *,
+				struct hfs_find_data *,
+				int *, int *, int *);
+
+/*
  * Functions in any *.c used in other files
  */
+
+/* attributes.c */
+int hfsplus_create_attr_tree_cache(void);
+void hfsplus_destroy_attr_tree_cache(void);
+hfsplus_attr_entry *hfsplus_alloc_attr_entry(void);
+void hfsplus_destroy_attr_entry(hfsplus_attr_entry *entry_p);
+int hfsplus_attr_bin_cmp_key(const hfsplus_btree_key *,
+		const hfsplus_btree_key *);
+int hfsplus_attr_build_key(struct super_block *, hfsplus_btree_key *,
+			u32, const char *);
+void hfsplus_attr_build_key_uni(hfsplus_btree_key *key,
+					u32 cnid,
+					struct hfsplus_attr_unistr *name);
+int hfsplus_find_attr(struct super_block *, u32,
+			const char *, struct hfs_find_data *);
+int hfsplus_attr_exists(struct inode *inode, const char *name);
+int hfsplus_create_attr(struct inode *, const char *, const void *, size_t);
+int hfsplus_delete_attr(struct inode *, const char *);
+int hfsplus_delete_all_attrs(struct inode *dir, u32 cnid);
 
 /* bitmap.c */
 int hfsplus_block_allocate(struct super_block *, u32, u32, u32 *);
@@ -269,6 +319,7 @@ void hfs_bmap_free(struct hfs_bnode *);
 
 /* bnode.c */
 void hfs_bnode_read(struct hfs_bnode *, void *, int, int);
+u32 hfs_bnode_read_u32(struct hfs_bnode *, int);
 u16 hfs_bnode_read_u16(struct hfs_bnode *, int);
 u8 hfs_bnode_read_u8(struct hfs_bnode *, int);
 void hfs_bnode_read_key(struct hfs_bnode *, void *, int);
@@ -297,8 +348,15 @@ int hfs_brec_remove(struct hfs_find_data *);
 /* bfind.c */
 int hfs_find_init(struct hfs_btree *, struct hfs_find_data *);
 void hfs_find_exit(struct hfs_find_data *);
-int __hfs_brec_find(struct hfs_bnode *, struct hfs_find_data *);
-int hfs_brec_find(struct hfs_find_data *);
+int hfs_find_1st_rec_by_cnid(struct hfs_bnode *,
+				struct hfs_find_data *,
+				int *, int *, int *);
+int hfs_find_rec_by_key(struct hfs_bnode *,
+				struct hfs_find_data *,
+				int *, int *, int *);
+int __hfs_brec_find(struct hfs_bnode *, struct hfs_find_data *,
+				search_strategy_t);
+int hfs_brec_find(struct hfs_find_data *, search_strategy_t);
 int hfs_brec_read(struct hfs_find_data *, void *, int);
 int hfs_brec_goto(struct hfs_find_data *, int);
 
@@ -339,11 +397,6 @@ void hfsplus_delete_inode(struct inode *);
 /* ioctl.c */
 int hfsplus_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 		  unsigned long arg);
-int hfsplus_setxattr(struct dentry *dentry, const char *name,
-		     const void *value, size_t size, int flags);
-ssize_t hfsplus_getxattr(struct dentry *dentry, const char *name,
-			 void *value, size_t size);
-ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size);
 
 /* options.c */
 int hfsplus_parse_options(char *, struct hfsplus_sb_info *);
@@ -365,6 +418,12 @@ int hfsplus_uni2asc(struct super_block *, const struct hfsplus_unistr *, char *,
 int hfsplus_asc2uni(struct super_block *, struct hfsplus_unistr *, const char *, int);
 int hfsplus_hash_dentry(struct dentry *dentry, struct qstr *str);
 int hfsplus_compare_dentry(struct dentry *dentry, struct qstr *s1, struct qstr *s2);
+#ifdef MY_ABC_HERE
+int hfsplus_attr_uni2asc(struct super_block *,
+		const struct hfsplus_unistr *, char *, int *);
+int hfsplus_attr_asc2uni(struct super_block *,
+		struct hfsplus_unistr *, int, const char *, int);
+#endif
 
 /* wrapper.c */
 int hfsplus_read_wrapper(struct super_block *);
@@ -384,6 +443,12 @@ static inline struct hfsplus_inode_info *HFSPLUS_I(struct inode *inode)
 */
 #define HFSPLUS_SB(super)	(*(struct hfsplus_sb_info *)(super)->s_fs_info)
 #define HFSPLUS_I(inode)	(*list_entry(inode, struct hfsplus_inode_info, vfs_inode))
+static inline void hfsplus_mark_inode_dirty(struct inode *inode,
+		unsigned int flag)
+{
+	set_bit(flag, &HFSPLUS_I(inode).flags);
+	mark_inode_dirty(inode);
+}
 
 #if 1
 #define hfsplus_kmap(p)		({ struct page *__p = (p); kmap(__p); })

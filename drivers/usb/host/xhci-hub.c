@@ -137,7 +137,7 @@ static u32 xhci_port_state_to_neutral(u32 state)
 #ifdef MY_ABC_HERE
 #include <linux/pci.h>
 
-extern int disable_usb3;
+extern int gSynoFactoryUSB3Disable;
 extern unsigned short xhci_vendor;
 
 // NEC
@@ -271,7 +271,7 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 	}
 
 #ifdef MY_ABC_HERE
-	if (disable_usb3) {
+	if (1 == gSynoFactoryUSB3Disable) {
 		goto skip_check_power;
 	}
 #endif
@@ -446,11 +446,11 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 */
 #ifdef MY_ABC_HERE
 			xhci_dbg(xhci, "set port power. usb%d.\n", wIndex);
-			if (1 == disable_usb3 && IS_USB3(wIndex))
+			if (1 == gSynoFactoryUSB3Disable && IS_USB3(wIndex))
 				xhci_writel(xhci, temp & ~PORT_POWER, addr);
 			else {
 				// set power on usb3 port before usb2 port
-				if((0 == disable_usb3) && IS_USB2(wIndex) && !(temp_map & PORT_POWER)) {
+				if((0 == gSynoFactoryUSB3Disable) && IS_USB2(wIndex) && !(temp_map & PORT_POWER)) {
 					xhci_writel(xhci, temp_map | PORT_POWER, addr_map);
 					temp_map = xhci_readl(xhci, addr_map);
 					mdelay(100);

@@ -1054,6 +1054,7 @@ static struct usb_driver p54u_driver = {
 	.reset_resume = p54u_resume,
 #endif /* CONFIG_PM */
 	.soft_unbind = 1,
+	.disable_hub_initiated_lpm = 1,
 };
 
 static int __init p54u_init(void)
