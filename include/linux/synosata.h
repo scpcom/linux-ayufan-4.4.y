@@ -20,7 +20,7 @@
 *  0 : do not spinup delay
 * >0 : The number that we would delay
 */
-#if defined(MY_ABC_HERE) && defined(__KERNEL__)
+#if defined(SYNO_INTERNAL_HD_NUM) && defined(__KERNEL__)
 extern long g_internal_hd_num;
 extern long syno_boot_hd_count;
 
@@ -72,7 +72,7 @@ static inline void SleepForHW(int iDisk, int iIsDoLatency)
 	}
 	syno_boot_hd_count++;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_INTERNAL_HD_NUM */
 
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 #include <linux/fs.h>
@@ -370,7 +370,7 @@ END:
 	return ret;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EUNIT_POWERCTL_PIN
 extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
 #endif
 extern char gszSynoHWVersion[16];
@@ -379,7 +379,7 @@ is_ebox_support(void)
 {
 	unsigned char ret = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EUNIT_POWERCTL_PIN
 	if (funcSynoEunitPowerctlType) {
 		if (EUNIT_NOT_SUPPORT == funcSynoEunitPowerctlType()) {
 			goto END;
@@ -393,14 +393,14 @@ is_ebox_support(void)
 	 */
 
 	ret = 1;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EUNIT_POWERCTL_PIN
 END:
 #endif
 	return ret;
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SSD_DETECT
 
 /* 
  *back porting from linux 2.6.28. add SYNO prefix in order to not mixed with libata
@@ -483,9 +483,9 @@ syno_ata_id_is_ssd(const unsigned short *id)
 END:
 	return res;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_SATA_SSD_DETECT */
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_LIBATA_PMP_UEVENT) || defined(SYNO_MV_PMP_UEVENT)
 #define SZK_PMP_UEVENT "SYNO_PMP_EVENT"
 #define SZV_PMP_CONNECT "CABLE_CONNECT"
 #define SZV_PMP_DISCONNECT "CABLE_DISCONNECT"

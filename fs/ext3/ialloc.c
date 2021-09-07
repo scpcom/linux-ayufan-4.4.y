@@ -220,7 +220,7 @@ static int find_group_dir(struct super_block *sb, struct inode *parent)
 			best_desc = desc;
 		}
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_GET_AVAILABLE_GROUP
 	if (-1 != best_group) {
 		goto FOUND_GROUP;
 	}
@@ -571,13 +571,13 @@ got:
 	/* This is the optimal IO size (for stat), not the fs block size */
 	inode->i_blocks = 0;
 	inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME_SEC;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	inode->i_CreateTime = CURRENT_TIME_SEC;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = ALL_SYNO_ARCHIVE;   /* set archive bit on creation */
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	inode->i_archive_version = inode->i_sb->s_archive_version;
 #endif
 

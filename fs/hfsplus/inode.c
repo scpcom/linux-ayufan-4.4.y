@@ -17,7 +17,7 @@
 #include "hfsplus_fs.h"
 #include "hfsplus_raw.h"
 #include "xattr.h"
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
 extern struct mutex syno_hfsplus_global_mutex;
 #endif
 
@@ -158,7 +158,7 @@ static struct dentry *hfsplus_file_lookup(struct inode *dir, struct dentry *dent
 		goto out;
 
 	inode = HFSPLUS_I(dir).rsrc_inode;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_HFSPLUS_INODE_COUNT_WRONG
 	if (inode) {
 		atomic_inc(&inode->i_count);
 		goto out;

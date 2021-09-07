@@ -23,7 +23,7 @@ struct nameidata {
 	int		last_type;
 	unsigned	depth;
 	char *saved_names[MAX_NESTED_LINKS + 1];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	unsigned char *real_filename;
 	unsigned int real_filename_len;
 #endif
@@ -61,14 +61,14 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 #define LOOKUP_EXCL		0x0400
 #define LOOKUP_RENAME_TARGET	0x0800
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 /* this namei has done to the last component */
 #define LOOKUP_TO_LASTCOMPONENT 0x1000
 #define LOOKUP_CASELESS_COMPARE 0x2000
 #endif
 
 extern int user_path_at(int, const char __user *, unsigned, struct path *);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 extern int syno_user_path_at(int, const char __user *, unsigned, struct path *, char **, int *, int *);
 #endif
 

@@ -208,7 +208,7 @@ void exit_creds(struct task_struct *tsk)
 		put_cred(cred);
 	}
 }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_GET_TASK_CRED
 /**
  * get_task_cred - Get another task's objective credentials
  * @task: The task to query

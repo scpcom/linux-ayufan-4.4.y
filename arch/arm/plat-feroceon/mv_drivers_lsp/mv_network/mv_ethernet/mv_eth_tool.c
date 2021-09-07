@@ -58,7 +58,7 @@ disclaimer.
 
 extern spinlock_t          mii_lock;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 static void syno_get_wol(struct net_device *dev, struct ethtool_wolinfo *wol);
 static int syno_set_wol(struct net_device *dev, struct ethtool_wolinfo *wol);
 #endif
@@ -93,7 +93,7 @@ const struct ethtool_ops mv_eth_tool_ops = {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
 	.get_perm_addr		= ethtool_op_get_perm_addr,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 	.get_wol	= syno_get_wol,
 	.set_wol	= syno_set_wol,
 #endif
@@ -1063,7 +1063,7 @@ void mv_eth_tool_get_ethtool_stats(struct net_device *netdev,
 	}
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 MV_U32 syno_wol_support(mv_eth_priv *priv)
 {
 	if (MV_PHY_ID_131X == priv->phy_chip) {

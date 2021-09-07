@@ -18,7 +18,7 @@
 #include <linux/ioport.h>
 #include "mapping.h"
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
 #include <linux/raid/libmd-report.h>
 #endif
 
@@ -48,7 +48,7 @@ static SYNO_SYS_STATUS *pgSysStatus = NULL;
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 extern int (*funcSYNOGetHwCapability)(CAPABILITY *);
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_EBOX_REFRESH
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
 
@@ -90,7 +90,7 @@ static int synobios_record_shutdown_event(unsigned int type, SYNO_SHUTDOWN_LOG s
 	return ret;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
 static int synobios_record_raid_event(unsigned int type, unsigned int raidno, unsigned int diskno, unsigned int sector)
 {
 	int ret;
@@ -109,7 +109,7 @@ static int synobios_record_raid_event(unsigned int type, unsigned int raidno, un
 }
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_EBOX_REFRESH
 static int synobios_record_ebox_refresh_event(int portIndex)
 {
 	int ret = 0;
@@ -559,7 +559,7 @@ static int synobios_ioctl (struct inode *inode, struct file *filp,
 		}
     case SYNOIO_SET_UART2:
 		{
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TTYS_WRITE
 			extern int syno_ttys_write(const int index, const char* szBuf);
 			char *cmd = (char *)arg;
 			char szBuf[16];
@@ -749,13 +749,13 @@ int synobios_init(void)
 	pgSysStatus->power_fail |= SIGNATURE_POWER_FAIL;
 	pgSysStatus->ebox_fan_fail |= SIGNATURE_EBOX_FAN_FAIL;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
 	funcSYNOSendRaidEvent = synobios_record_raid_event;
 #endif
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	funcSYNOGetHwCapability = GetHwCapability;
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_EBOX_REFRESH
 	funcSYNOSendEboxRefreshEvent = synobios_record_ebox_refresh_event;
 #endif
 
@@ -771,13 +771,13 @@ int synobios_init(void)
 
 void synobios_cleanup(void)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
 	funcSYNOSendRaidEvent = NULL;
 #endif
 #ifdef SYNO_SATA_PM_DEVICE_GPIO
 	funcSYNOGetHwCapability = NULL;
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SATA_EBOX_REFRESH
 	funcSYNOSendEboxRefreshEvent = NULL;
 #endif
 

@@ -9,9 +9,9 @@
 #include <linux/limits.h>
 #include <linux/ioctl.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 #include <linux/net.h>
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 
 /*
  * It's silly to have NR_OPEN bigger than NR_FILE, but you can change
@@ -238,7 +238,7 @@ struct inodes_stat_t {
 #ifdef SYNO_FORCE_UNMOUNT
 #define MS_UNMOUNT_WAIT	(1<<28)	/* force unmount in process */
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FAT_ERR_HANDLE
 #define MS_CORRUPT	(1<<29)	/* filesystem corrupt */
 #endif
 #define MS_ACTIVE	(1<<30)
@@ -367,7 +367,7 @@ struct inodes_stat_t {
 #define FIGETBSZ   _IO(0x00,2)	/* get the block size used for bmap */
 #define FIFREEZE	_IOWR('X', 119, int)	/* Freeze */
 #define FITHAW		_IOWR('X', 120, int)	/* Thaw */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 #define FIGETVERSION	_IOWR('x', 121, unsigned int)	/* get syno archive version */
 #define FISETVERSION	_IOWR('x', 122, unsigned int)	/* set syno archive version */
 #define FIINCVERSION	_IO('x', 123)	/* increase syno archive version by 1 */
@@ -564,7 +564,7 @@ enum positive_aop_returns {
 #define AOP_FLAG_NOFS			0x0004 /* used by filesystem to direct
 						* helper code (eg buffer layer)
 						* to clear GFP_FS from alloc */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 #define AOP_FLAG_RECVFILE		0x0008
 #endif
 
@@ -654,7 +654,7 @@ struct address_space_operations {
 				loff_t pos, unsigned len, unsigned copied,
 				struct page *page, void *fsdata);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	/*
 	 * ext3 requires that a successful prepare_write() call be followed
 	 * by a commit_write() call - they must be balanced
@@ -818,13 +818,13 @@ struct inode {
 	struct timespec		i_atime;
 	struct timespec		i_mtime;
 	struct timespec		i_ctime;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	struct timespec		i_CreateTime;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	__u32			i_mode2;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	__u32			i_archive_version;
 #endif
 	blkcnt_t		i_blocks;
@@ -833,7 +833,7 @@ struct inode {
 	umode_t			i_mode;
 	spinlock_t		i_lock;	/* i_blocks, i_bytes, maybe i_size */
 	struct mutex		i_mutex;
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
 	struct mutex		i_syno_mutex;	/* i_CreateTime, i_mode2 */
 #endif
 	struct rw_semaphore	i_alloc_sem;
@@ -1551,7 +1551,7 @@ struct super_block {
 	 * generic_show_options()
 	 */
 	char *s_options;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	/* We've not sure s_frozen is capable of out intention, thus we
 	 * create another to flag frozen stat. Awful... */
 	struct mutex s_archive_mutex;  /* protect frozen state, also version */
@@ -1714,7 +1714,7 @@ struct getbmapx;
 struct inode_operations {
 	int (*create) (struct inode *,struct dentry *,int, struct nameidata *);
 	struct dentry * (*lookup) (struct inode *,struct dentry *, struct nameidata *);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	struct dentry * (*lookup_case) (struct inode *,struct dentry *, struct nameidata *);
 #endif
 	int (*link) (struct dentry *,struct inode *,struct dentry *);
@@ -1744,13 +1744,13 @@ struct inode_operations {
 	int (*syno_acl_init)(struct dentry *, struct inode *);
 	void (*syno_acl_to_mode)(struct dentry *, struct kstat *);
 #endif /* CONFIG_FS_SYNO_ACL */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	int (*syno_set_archive_bit)(struct dentry *, unsigned int);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	int (*syno_set_crtime)(struct dentry *, struct timespec *);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	int (*syno_get_archive_ver)(struct dentry *, u32 *);
 	int (*syno_set_archive_ver)(struct dentry *, u32);
 #endif
@@ -1787,7 +1787,7 @@ extern ssize_t vfs_writev(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
 
 struct super_operations {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	int (*syno_get_sb_archive_ver)(struct super_block *sb, u32 *version);
 	int (*syno_set_sb_archive_ver)(struct super_block *sb, u32 version);
 #endif
@@ -1988,7 +1988,7 @@ struct file_system_type {
 
 	struct lock_class_key i_lock_key;
 	struct lock_class_key i_mutex_key;
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
 	struct lock_class_key i_syno_mutex_key;
 #endif
 	struct lock_class_key i_mutex_dir_key;
@@ -2015,7 +2015,7 @@ void kill_block_super(struct super_block *sb);
 void kill_anon_super(struct super_block *sb);
 void kill_litter_super(struct super_block *sb);
 void deactivate_super(struct super_block *sb);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_READ_LOCK_IN_THAW_BDEV
 void deactivate_read_locked_super(struct super_block *s);
 #endif
 void deactivate_locked_super(struct super_block *sb);
@@ -2455,7 +2455,7 @@ extern int file_send_actor(read_descriptor_t * desc, struct page **page, unsigne
 extern int file_read_actor(read_descriptor_t * desc, struct page *page, unsigned long offset, unsigned long size);
 #endif
 int generic_write_checks(struct file *file, loff_t *pos, size_t *count, int isblk);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 #define MAX_PAGES_PER_RECVFILE 16
 extern int do_recvfile(struct file *file, struct socket *sock, loff_t *ppos, size_t count, size_t *rbytes , size_t *wbytes);
 #endif
@@ -2738,16 +2738,16 @@ int proc_nr_files(struct ctl_table *table, int write,
 
 int __init get_filesystem_list(char *buf);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 #define UTF16_UPCASE_TABLE_SIZE 	0x10000		/* 64k chars */
 #define UNICODE_UTF16_BUFSIZE		4096		/* should be safe enough for namei */
 #define UNICODE_UTF8_BUFSIZE		8192
 
 int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int clenUtf8Str1, int clenUtf8Str2, u_int16_t *upcasetable);
 int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable);
-#endif /*MY_ABC_HERE */
+#endif /*SYNO_KERNEL_UNICODE */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *time)
 {
 	int error = 0;
@@ -2767,7 +2767,7 @@ static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *tim
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 static inline int syno_op_get_archive_bit(struct dentry *dentry, unsigned int *pArbit)
 {
 	*pArbit = dentry->d_inode->i_mode2;
@@ -2800,9 +2800,9 @@ static inline int syno_op_set_archive_bit(struct dentry *dentry, unsigned int ar
 	return err;
 }
 
-#endif //MY_ABC_HERE
+#endif //SYNO_ARCHIVE_BIT
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 #define SYNO_EXT4_MOUNT_PATH_LEN 128
 #endif
 

@@ -497,7 +497,7 @@ int iscsi_prepare_cmds_for_realligance(iscsi_conn_t *conn)
 		cmd->deferred_i_state = cmd->i_state;
 		cmd->i_state = ISTATE_IN_CONNECTION_RECOVERY;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 		if (cmd->data_direction == DMA_TO_DEVICE)
 			iscsi_stop_dataout_timer(cmd);
 #else

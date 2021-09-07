@@ -370,7 +370,7 @@ static int rlb_arp_recv(struct sk_buff *skb, struct net_device *bond_dev, struct
 		goto out;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_BOND_FIX_NONLINEAR_SKB
 	if (!pskb_may_pull(skb, sizeof(struct lacpdu)))
 		goto out;
 
@@ -1784,7 +1784,7 @@ void bond_alb_clear_vlan(struct bonding *bond, unsigned short vlan_id)
 	}
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_BOND
 void bond_alb_info_show(struct seq_file *seq)
 {
 	struct bonding *bond = seq->private;

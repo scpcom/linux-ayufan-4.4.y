@@ -208,7 +208,7 @@ static void udf_bitmap_free_blocks(struct super_block *sb,
 					((char *)bh->b_data)[(bit + i) >> 3]);
 			} else {
 				if (inode)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 					dquot_free_block(inode, 1);
 #else
 					vfs_dq_free_block(inode, 1);
@@ -264,7 +264,7 @@ static int udf_bitmap_prealloc_blocks(struct super_block *sb,
 		while (bit < (sb->s_blocksize << 3) && block_count > 0) {
 			if (!udf_test_bit(bit, bh->b_data))
 				goto out;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 			else if (dquot_prealloc_block(inode, 1))
 #else
 			else if (vfs_dq_prealloc_block(inode, 1))
@@ -272,7 +272,7 @@ static int udf_bitmap_prealloc_blocks(struct super_block *sb,
 				goto out;
 			else if (!udf_clear_bit(bit, bh->b_data)) {
 				udf_debug("bit already cleared for block %d\n", bit);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 				dquot_free_block(inode, 1);
 #else
 				vfs_dq_free_block(inode, 1);
@@ -402,7 +402,7 @@ got_block:
 	/*
 	 * Check quota for allocation of this block.
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	if (inode) {
 		int ret = dquot_alloc_block(inode, 1);
 
@@ -473,7 +473,7 @@ static void udf_table_free_blocks(struct super_block *sb,
 	/* We do this up front - There are some error conditions that
 	   could occure, but.. oh well */
 	if (inode)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_block(inode, count);
 #else
 		vfs_dq_free_block(inode, count);
@@ -722,7 +722,7 @@ static int udf_table_prealloc_blocks(struct super_block *sb,
 		epos.offset -= adsize;
 
 		alloc_count = (elen >> sb->s_blocksize_bits);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		if (inode && dquot_prealloc_block(inode,
 #else
 		if (inode && vfs_dq_prealloc_block(inode,
@@ -829,7 +829,7 @@ static int udf_table_new_block(struct super_block *sb,
 	newblock = goal_eloc.logicalBlockNum;
 	goal_eloc.logicalBlockNum++;
 	goal_elen -= sb->s_blocksize;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	if (inode) {
 		*err = dquot_alloc_block(inode, 1);
 		if (*err) {

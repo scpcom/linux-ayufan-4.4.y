@@ -103,7 +103,7 @@ static int add_match_busid(char *busid)
 	return -1;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_USBIP
 int del_match_busid(char *busid)
 #else
 static int del_match_busid(char *busid)

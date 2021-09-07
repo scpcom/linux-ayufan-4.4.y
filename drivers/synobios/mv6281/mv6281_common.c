@@ -12,7 +12,7 @@
 #include "../i2c/i2c-mv.h"
 #include "../rtc/rtc.h"
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 extern char gszSerialNum[];
 #endif
 
@@ -64,7 +64,7 @@ int GetBrand(void)
 	int Brand = -1;
 
 	//YMXX[Z]SSSSS
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 	if ( gszSerialNum[4] == 'M' ) {
 		Brand = BRAND_LOGITEC;
 	} else if ( gszSerialNum[4] == 'U' ) {

@@ -3,7 +3,7 @@
 #define __SYNOBIOS_OEM_H_
 
 #include <linux/syno.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HW_VERSION
 #include <linux/string.h>
 extern char gszSynoHWVersion[];
 #endif
@@ -176,11 +176,11 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_SHUTDOWN_LOG			0x2200
 #define SYNO_EVENT_EBOX_REFRESH      0x2300
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_ECC_NOTIFICATION
 #define SYNO_EVENT_ECC_NOTIFICATION		0x2400
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 #define SYNO_EVENT_RAID_REMAP_RECORD 0x2500
 #define SYNO_EVENT_LV_REMAP_RECORD 0x2600
 #endif
@@ -188,19 +188,19 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_DISK_PWR_RESET 0x2700
 #define SYNO_EVENT_DISK_PORT_DISABLED 0x2800
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 #define SYNO_EVENT_ERROR_FS 0x2900
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_ERROR_REPORT
 #define SYNO_EVENT_SATA_ERROR_REPORT 0x2a00
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 #define SYNO_EVENT_WAKE_FROM_DEEP_SLEEP 0x2b00
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_ERROR_REPORT
 #define SYNO_EVENT_DISK_RETRY_REPORT 0x2c00
 #endif
 
@@ -1570,7 +1570,7 @@ struct synobios_ops {
 
 
 PRODUCT_MODEL synobios_getmodel(void);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HW_VERSION
 static inline int syno_is_hw_version(const char *hw_version)
 {
 	if (NULL == hw_version) {

@@ -51,9 +51,9 @@
 #define IXGBE_DEV_ID_82599_KX4           0x10F7
 #define IXGBE_DEV_ID_82599_KX4_MEZZ      0x1514
 #define IXGBE_DEV_ID_82599_KR            0x1517
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IXGBE_SUPPORT_T2
 #define IXGBE_DEV_ID_82599_T3_LOM        0x151C
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_IXGBE_SUPPORT_T2 */
 #define IXGBE_DEV_ID_82599_CX4           0x10F9
 #define IXGBE_DEV_ID_82599_SFP           0x10FB
 #define IXGBE_DEV_ID_82599_XAUI_LOM      0x10FC
@@ -2395,9 +2395,9 @@ struct ixgbe_phy_operations {
 	s32 (*write_i2c_byte)(struct ixgbe_hw *, u8, u8, u8);
 	s32 (*read_i2c_eeprom)(struct ixgbe_hw *, u8 , u8 *);
 	s32 (*write_i2c_eeprom)(struct ixgbe_hw *, u8, u8);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IXGBE_SUPPORT_T2
 	s32 (*check_overtemp)(struct ixgbe_hw *);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_IXGBE_SUPPORT_T2 */
 };
 
 struct ixgbe_eeprom_info {
@@ -2439,9 +2439,9 @@ struct ixgbe_phy_info {
 	bool                            reset_disable;
 	ixgbe_autoneg_advertised        autoneg_advertised;
 	bool                            multispeed_fiber;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IXGBE_SUPPORT_T2
 	bool                            reset_if_overtemp;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_IXGBE_SUPPORT_T2 */
 };
 
 struct ixgbe_hw {
@@ -2494,10 +2494,10 @@ struct ixgbe_info {
 #define IXGBE_ERR_SFP_NO_INIT_SEQ_PRESENT       -21
 #define IXGBE_ERR_FDIR_REINIT_FAILED            -23
 #define IXGBE_ERR_EEPROM_VERSION                -24
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IXGBE_SUPPORT_T2
 #define IXGBE_ERR_NO_SPACE                      -25
 #define IXGBE_ERR_OVERTEMP                      -26
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_IXGBE_SUPPORT_T2 */
 #define IXGBE_NOT_IMPLEMENTED                   0x7FFFFFFF
 
 #endif /* _IXGBE_TYPE_H_ */

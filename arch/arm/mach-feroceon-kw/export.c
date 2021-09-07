@@ -58,7 +58,7 @@ EXPORT_SYMBOL(mvCpuIfTargetWinGet);
 EXPORT_SYMBOL(mvMacStrToHex);
 EXPORT_SYMBOL(mvBoardTclkGet);
 EXPORT_SYMBOL(mvBoardMacSpeedGet);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MPPCTL_REG_W
 EXPORT_SYMBOL(SYNOMppCtrlRegWrite);
 #endif
 

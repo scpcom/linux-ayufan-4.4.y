@@ -141,7 +141,7 @@ extAlloc(struct inode *ip, s64 xlen, s64 pno, xad_t * xp, bool abnr)
 	}
 
 	/* Allocate blocks to quota. */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	rc = dquot_alloc_block(ip, nxlen);
 	if (rc) {
 #else
@@ -149,7 +149,7 @@ extAlloc(struct inode *ip, s64 xlen, s64 pno, xad_t * xp, bool abnr)
 #endif
 		dbFree(ip, nxaddr, (s64) nxlen);
 		mutex_unlock(&JFS_IP(ip)->commit_mutex);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		return rc;
 #else
 		return -EDQUOT;
@@ -173,7 +173,7 @@ extAlloc(struct inode *ip, s64 xlen, s64 pno, xad_t * xp, bool abnr)
 	 */
 	if (rc) {
 		dbFree(ip, nxaddr, nxlen);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_block(ip, nxlen);
 #else
 		vfs_dq_free_block(ip, nxlen);
@@ -269,7 +269,7 @@ int extRealloc(struct inode *ip, s64 nxlen, xad_t * xp, bool abnr)
 		goto exit;
 
 	/* Allocat blocks to quota. */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	rc = dquot_alloc_block(ip, nxlen);
 	if (rc) {
 #else
@@ -277,7 +277,7 @@ int extRealloc(struct inode *ip, s64 nxlen, xad_t * xp, bool abnr)
 #endif
 		dbFree(ip, nxaddr, (s64) nxlen);
 		mutex_unlock(&JFS_IP(ip)->commit_mutex);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		return rc;
 #else
 		return -EDQUOT;
@@ -319,7 +319,7 @@ int extRealloc(struct inode *ip, s64 nxlen, xad_t * xp, bool abnr)
 		/* extend the extent */
 		if ((rc = xtExtend(0, ip, xoff + xlen, (int) nextend, 0))) {
 			dbFree(ip, xaddr + xlen, delta);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 			dquot_free_block(ip, nxlen);
 #else
 			vfs_dq_free_block(ip, nxlen);
@@ -334,7 +334,7 @@ int extRealloc(struct inode *ip, s64 nxlen, xad_t * xp, bool abnr)
 		 */
 		if ((rc = xtTailgate(0, ip, xoff, (int) ntail, nxaddr, 0))) {
 			dbFree(ip, nxaddr, nxlen);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 			dquot_free_block(ip, nxlen);
 #else
 			vfs_dq_free_block(ip, nxlen);

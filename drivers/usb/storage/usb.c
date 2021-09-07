@@ -890,7 +890,7 @@ static int usb_stor_scan_thread(void * __us)
 	complete_and_exit(&us->scanning_done, 0);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DISK_HIBERNATION
 extern int (*SynoUSBDeviceIsSATA)(void *);
 
 int SynoIsSATADisk(void *hostdata)
@@ -995,7 +995,7 @@ int usb_stor_probe2(struct us_data *us)
 		goto BadDevice;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DISK_HIBERNATION
 	/*
 	 * if it is a flash disk, us->pusb_dev->product will looks like "USB Mass Storage Device"
 	 * if it is a SATA disk, us->pusb_dev->product will looks like "USB to Serial-ATA bridge"
@@ -1129,7 +1129,7 @@ static int __init usb_stor_init(void)
 		usb_usual_set_present(USB_US_TYPE_STOR);
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DISK_HIBERNATION
        SynoUSBDeviceIsSATA = SynoIsSATADisk;
 #endif
 
@@ -1149,7 +1149,7 @@ static void __exit usb_stor_exit(void)
 
 	usb_usual_clear_present(USB_US_TYPE_STOR);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DISK_HIBERNATION
        SynoUSBDeviceIsSATA = NULL;
 #endif
 }

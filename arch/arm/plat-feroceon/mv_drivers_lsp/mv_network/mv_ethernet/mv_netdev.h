@@ -76,7 +76,7 @@ disclaimer.
 #include "mv_eth_tool.h"
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 #define MV_PHY_ID_131X 0x01410e90
 #endif
 
@@ -308,7 +308,7 @@ typedef struct _mv_eth_priv
     MV_U32	rx_coal_usec;
     MV_U32	tx_coal_usec;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 	MV_U32	phy_chip;
 	MV_U32  wol;
 #endif

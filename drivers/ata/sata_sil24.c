@@ -358,7 +358,7 @@ static int sil24_pci_device_resume(struct pci_dev *pdev);
 static int sil24_port_resume(struct ata_port *ap);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 static inline void sil24_host_intr(struct ata_port *ap);
 #endif
 
@@ -390,10 +390,10 @@ static struct device_attribute *sil24_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	&dev_attr_syno_port_thaw,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TRANS_HOST_TO_DISK
 	&dev_attr_syno_diskname_trans,
 #endif
 	NULL
@@ -437,7 +437,7 @@ static struct ata_port_operations sil24_ops = {
 #ifdef CONFIG_PM
 	.port_resume		= sil24_port_resume,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	.syno_force_intr	= sil24_host_intr,
 #endif
 };
@@ -679,7 +679,7 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 	struct ata_taskfile tf;
 	const char *reason;
 	int rc;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SIL3132_HD_DETECT
 	int retry_count = 0;
 #endif
 
@@ -695,13 +695,13 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 	if (time_after(deadline, jiffies))
 		timeout_msec = jiffies_to_msecs(deadline - jiffies);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SIL3132_HD_DETECT
 retry:
 #endif
 	ata_tf_init(link->device, &tf);	/* doesn't really matter */
 	rc = sil24_exec_polled_cmd(ap, pmp, &tf, 0, PRB_CTRL_SRST,
 				   timeout_msec);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	if (0 < ap->iFakeError) {
 		ata_link_printk(link, KERN_ERR, "generate fake softreset error, Fake count %d\n", ap->iFakeError);
 		if (SYNO_ERROR_MAX > ap->iFakeError) {
@@ -714,7 +714,7 @@ retry:
 		reason = "timeout";
 		goto err;
 	} else if (rc) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SIL3132_HD_DETECT
 		/* retry once. And we don't retry port multiplier itself */
 		if (retry_count < 1 && 0xf != link->pmp) {
 			sata_std_hardreset(link, class, deadline+HZ);
@@ -740,7 +740,7 @@ retry:
 
  err:
 	ata_link_printk(link, KERN_ERR, "softreset failed (%s)\n", reason);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	ata_link_printk(link, KERN_ERR, "softreset failed, set srst fail flag\n");
 	link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
 #endif
@@ -780,7 +780,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 		did_port_rst = 1;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SIL3132_HITACHI_WORKAROUND
 	sil24_scr_read(link, SCR_STATUS, &tmp);
 	if (0x1 == tmp) {
 		/* No IPM, speed negotiate and phy is not well communicated.  */
@@ -1081,7 +1081,7 @@ static void sil24_error_intr(struct ata_port *ap)
 		sata_async_notification(ap);
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	if ((irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) ||
 		(ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
 		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
@@ -1094,10 +1094,10 @@ static void sil24_error_intr(struct ata_port *ap)
 #else
 	if (irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) {
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_INFO
 		syno_ata_info_print(ap);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ATA_FAST_PROBE
 		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 #endif
 		ata_ehi_hotplugged(ehi);
@@ -1218,7 +1218,7 @@ static inline void sil24_host_intr(struct ata_port *ap)
 
 	slot_stat = readl(port + PORT_SLOT_STAT);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	if (unlikely(slot_stat & HOST_SSTAT_ATTN) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
 #else
 	if (unlikely(slot_stat & HOST_SSTAT_ATTN)) {
@@ -1367,7 +1367,7 @@ static void sil24_init_controller(struct ata_host *host)
 
 		/* configure port */
 		sil24_config_port(ap);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_SIL3132_ABRT_WORKAROUND
 		mdelay(1000);
 #endif
 	}

@@ -93,7 +93,7 @@ struct raparm_hbucket {
 #define RAPARM_HASH_MASK	(RAPARM_HASH_SIZE-1)
 static struct raparm_hbucket	raparm_hash[RAPARM_HASH_SIZE];
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UNIX_PRI
 extern u32 bl_unix_pri_enable;
 #endif
 

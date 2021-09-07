@@ -160,7 +160,7 @@ cifs_dir_info_to_fattr(struct cifs_fattr *fattr, FILE_DIRECTORY_INFO *info,
 	fattr->cf_mtime = cifs_NTtimeToUnix(info->LastWriteTime);
 
 	cifs_fill_common_info(fattr, cifs_sb);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CIFS_INIT_NLINK
 	fattr->cf_nlink = 1;
 #endif
 }

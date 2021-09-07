@@ -108,7 +108,7 @@
 
 #define ERFKILL		132	/* Operation not possible due to RF-kill */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FAT_ERR_HANDLE
 #define	ECORRUPT	140	/* corrupt file */
 #endif
 

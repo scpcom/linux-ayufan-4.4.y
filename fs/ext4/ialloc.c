@@ -329,7 +329,7 @@ static int find_group_dir(struct super_block *sb, struct inode *parent,
 			ret = 0;
 		}
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_GET_AVAILABLE_GROUP
 	if (0 == ret) {
 		goto FOUND_GROUP;
 	}
@@ -1014,13 +1014,13 @@ got:
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ei->i_crtime =
 						       ext4_current_time(inode);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	inode->i_CreateTime = ei->i_crtime;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = ALL_SYNO_ARCHIVE;   /* set archive bit on creation */
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	inode->i_archive_version = inode->i_sb->s_archive_version;
 #endif
 

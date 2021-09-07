@@ -277,7 +277,7 @@ static ssize_t bonding_store_slaves(struct device *d,
 		   the master's hardware address to be the same as the
 		   slave's. */
 		if (is_zero_ether_addr(bond->dev->dev_addr))
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 		{
 			unsigned char szMac[MAX_ADDR_LEN];
 			memset(szMac, 0, sizeof(szMac));

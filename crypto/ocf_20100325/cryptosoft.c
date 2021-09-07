@@ -565,7 +565,7 @@ static void swcr_process_callback(struct crypto_async_request *creq, int err)
 			return;
 		dprintk("%s() fail %d\n", __FUNCTION__, -err);
 		req->crp->crp_etype = -err;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_OCF_MEMORY_LEAK
 		switch (req->sw->sw_type & SW_TYPE_ALG_AMASK) {
 		case SW_TYPE_AHMAC:
 		case SW_TYPE_AHASH:
@@ -857,7 +857,7 @@ static void swcr_process_req(struct swcr_req *req)
 		case 0:
 			dprintk("crypto OP %s %d\n", ret ? "failed" : "success", ret);
 			crp->crp_etype = ret;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_OCF_MEMORY_LEAK
 			ablkcipher_request_free(req->crypto_req);
 #endif
 			goto done;

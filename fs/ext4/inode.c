@@ -38,7 +38,7 @@
 #include <linux/uio.h>
 #include <linux/bio.h>
 #include <linux/workqueue.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 #include <linux/xattr.h>
 #endif
 
@@ -1103,7 +1103,7 @@ void ext4_da_update_reserve_space(struct inode *inode,
 {
 	struct ext4_sb_info *sbi = EXT4_SB(inode->i_sb);
 	struct ext4_inode_info *ei = EXT4_I(inode);
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	int mdb_free = 0, allocated_meta_blocks = 0;
 #endif
 
@@ -1119,18 +1119,18 @@ void ext4_da_update_reserve_space(struct inode *inode,
 
 	/* Update per-inode reservations */
 	ei->i_reserved_data_blocks -= used;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	used += ei->i_allocated_meta_blocks;
 #endif
 	ei->i_reserved_meta_blocks -= ei->i_allocated_meta_blocks;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	percpu_counter_sub(&sbi->s_dirtyblocks_counter,
 			   used + ei->i_allocated_meta_blocks);
 #else
 	allocated_meta_blocks = ei->i_allocated_meta_blocks;
 #endif
 	ei->i_allocated_meta_blocks = 0;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	percpu_counter_sub(&sbi->s_dirtyblocks_counter, used);
 #endif
 
@@ -1140,7 +1140,7 @@ void ext4_da_update_reserve_space(struct inode *inode,
 		 * only when we have written all of the delayed
 		 * allocation blocks.
 		 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		percpu_counter_sub(&sbi->s_dirtyblocks_counter,
 				   ei->i_reserved_meta_blocks);
 #else
@@ -1148,13 +1148,13 @@ void ext4_da_update_reserve_space(struct inode *inode,
 #endif
 		ei->i_reserved_meta_blocks = 0;
 		ei->i_da_metadata_calc_len = 0;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 		percpu_counter_sub(&sbi->s_dirtyblocks_counter, mdb_free);
 #endif
 	}
 	spin_unlock(&EXT4_I(inode)->i_block_reservation_lock);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	/* Update quota subsystem for data blocks */
 	if (quota_claim)
 		dquot_claim_block(inode, used);
@@ -1172,7 +1172,7 @@ void ext4_da_update_reserve_space(struct inode *inode,
 		 * allocated. So on delayed allocated writeback we should
 		 * not re-claim the quota for fallocated blocks.
 		 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_release_reservation_block(inode, used);
 #else
 		if (allocated_meta_blocks)
@@ -1619,7 +1619,7 @@ static int ext4_write_begin(struct file *file, struct address_space *mapping,
 	unsigned from, to;
 
 	trace_ext4_write_begin(inode, pos, len, flags);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	// Add for mark_inode_dirty.
 	if (flags & AOP_FLAG_RECVFILE) {
 		needed_blocks = ext4_writepage_trans_blocks(inode) + MAX_PAGES_PER_RECVFILE;
@@ -1627,7 +1627,7 @@ static int ext4_write_begin(struct file *file, struct address_space *mapping,
 		needed_blocks = ext4_writepage_trans_blocks(inode) + 1;
 	}
 #endif
-#ifndef MY_ABC_HERE
+#ifndef SYNO_REDUCE_ADD_INODE_ORPHAN_TWICE
 	/*
 	 * Reserve one block more for addition to orphan list in case
 	 * we allocate blocks but write fails for some reason
@@ -1676,7 +1676,7 @@ retry:
 		 * Add inode to orphan list in case we crash before
 		 * truncate finishes
 		 */
-#ifndef MY_ABC_HERE
+#ifndef SYNO_REDUCE_ADD_INODE_ORPHAN_TWICE
 		if (pos + len > inode->i_size && ext4_can_truncate(inode))
 			ext4_orphan_add(handle, inode);
 #endif
@@ -1684,7 +1684,7 @@ retry:
 		ext4_journal_stop(handle);
 		if (pos + len > inode->i_size) {
 			ext4_truncate_failed_write(inode);
-#ifndef MY_ABC_HERE
+#ifndef SYNO_REDUCE_ADD_INODE_ORPHAN_TWICE
 			/*
 			 * If truncate failed early the inode might
 			 * still be on the orphan list; we need to
@@ -1699,7 +1699,7 @@ retry:
 
 	if (ret == -ENOSPC && ext4_should_retry_alloc(inode->i_sb, &retries))
 		goto retry;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
 		if (pos + len > inode->i_size) {
 			// Don't need i_size_write because we hold i_mutex.
@@ -1930,7 +1930,7 @@ static int ext4_da_reserve_space(struct inode *inode, sector_t lblock)
 	int retries = 0;
 	struct ext4_sb_info *sbi = EXT4_SB(inode->i_sb);
 	struct ext4_inode_info *ei = EXT4_I(inode);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	unsigned long md_needed;
 	int ret;
 #else
@@ -1944,7 +1944,7 @@ static int ext4_da_reserve_space(struct inode *inode, sector_t lblock)
 	 */
 repeat:
 	spin_lock(&ei->i_block_reservation_lock);  
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	md_reserved = ei->i_reserved_meta_blocks;
 #endif
 	md_needed = ext4_calc_metadata_amount(inode, lblock);
@@ -1955,7 +1955,7 @@ repeat:
 	 * us from metadata over-estimation, though we may go over by
 	 * a small amount in the end.  Here we just reserve for data.
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	ret = dquot_reserve_block(inode, 1);
 	if (ret)
 		return ret;
@@ -1964,12 +1964,12 @@ repeat:
 	 * We do still charge estimated metadata to the sb though;
 	 * we cannot afford to run out of free blocks.
 	 */
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	if (vfs_dq_reserve_block(inode, md_needed + 1))
 		return -EDQUOT;
 #endif
 	if (ext4_claim_free_blocks(sbi, md_needed + 1)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_release_reservation_block(inode, 1);
 #else
 		vfs_dq_release_reservation_block(inode, md_needed + 1);
@@ -2020,7 +2020,7 @@ static void ext4_da_release_space(struct inode *inode, int to_free)
 		 * only when we have written all of the delayed
 		 * allocation blocks.
 		 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		percpu_counter_sub(&sbi->s_dirtyblocks_counter,
 				   ei->i_reserved_meta_blocks);
 #else
@@ -2035,7 +2035,7 @@ static void ext4_da_release_space(struct inode *inode, int to_free)
 
 	spin_unlock(&EXT4_I(inode)->i_block_reservation_lock);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	dquot_release_reservation_block(inode, to_free);
 #else
 	vfs_dq_release_reservation_block(inode, to_free);
@@ -2748,7 +2748,7 @@ static int __ext4_journalled_writepage(struct page *page,
 	 * references to buffers so we are safe */
 	unlock_page(page);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
  	/* We may need to call ext4_journal_start_sb_sync() here to
 	   avoid freezing deadlock, but we can't make sure... */
 #endif
@@ -2930,7 +2930,7 @@ static int ext4_da_writepages_trans_blocks(struct inode *inode)
 	return ext4_chunk_trans_blocks(inode, max_blocks);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 handle_t *ext4_journal_start_sb_sync(struct super_block *sb, int nblocks);
 #endif
 static int ext4_da_writepages(struct address_space *mapping,
@@ -3042,7 +3042,7 @@ retry:
 		needed_blocks = ext4_da_writepages_trans_blocks(inode);
 
 		/* start a new transaction*/
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 		handle = ext4_journal_start_sb_sync(inode->i_sb, needed_blocks);
 #else
 		handle = ext4_journal_start(inode, needed_blocks);
@@ -3185,7 +3185,7 @@ static int ext4_da_write_begin(struct file *file, struct address_space *mapping,
 			       loff_t pos, unsigned len, unsigned flags,
 			       struct page **pagep, void **fsdata)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	int ret, retries = 0;
 #else
 	int ret, retries = 0, quota_retries = 0;
@@ -3214,7 +3214,7 @@ retry:
 	 * to journalling the i_disksize update if writes to the end
 	 * of file which has an already mapped buffer.
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	if (flags & AOP_FLAG_RECVFILE) {
 		handle = ext4_journal_start(inode, MAX_PAGES_PER_RECVFILE);
 	} else {
@@ -3258,7 +3258,7 @@ retry:
 	if (ret == -ENOSPC && ext4_should_retry_alloc(inode->i_sb, &retries))
 		goto retry;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	if ((ret == -EDQUOT) &&
 		EXT4_I(inode)->i_reserved_meta_blocks &&
 		(quota_retries++ < 3)) {
@@ -3275,7 +3275,7 @@ retry:
 		goto retry;
 	}
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
 		if (pos + len > inode->i_size) {
 			// Don't need i_size_write because we hold i_mutex.
@@ -4981,7 +4981,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	journal_t *journal = EXT4_SB(sb)->s_journal;
 	long ret;
 	int block;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	struct syno_xattr_archive_version value;
 	int retval;
 #endif
@@ -5100,8 +5100,8 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	EXT4_INODE_GET_XTIME(i_mtime, inode, raw_inode);
 	EXT4_INODE_GET_XTIME(i_atime, inode, raw_inode);
 	EXT4_EINODE_GET_XTIME(i_crtime, ei, raw_inode);
-#ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	if (EXT4_SB(sb)->s_swap_create_time) {
 		inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
 		inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
@@ -5114,7 +5114,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	inode->i_CreateTime.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
 #endif
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = le16_to_cpu(raw_inode->ext4_mode2);
 #endif
 
@@ -5182,7 +5182,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	}
 	brelse(iloc.bh);
 	ext4_set_inode_flags(inode);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	retval = ext4_xattr_get(inode, EXT4_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value));
 	if(retval>0) {
 		inode->i_archive_version = le32_to_cpu(value.v_archive_version);
@@ -5290,8 +5290,8 @@ static int ext4_do_update_inode(handle_t *handle,
 	EXT4_INODE_SET_XTIME(i_ctime, inode, raw_inode);
 	EXT4_INODE_SET_XTIME(i_mtime, inode, raw_inode);
 	EXT4_INODE_SET_XTIME(i_atime, inode, raw_inode);
-#ifdef MY_ABC_HERE
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	if (EXT4_SB(inode->i_sb)->s_swap_create_time) {
 		raw_inode->i_crtime = cpu_to_le32(inode->i_CreateTime.tv_sec);
 		raw_inode->i_crtime_extra = cpu_to_le32(inode->i_CreateTime.tv_nsec);
@@ -5306,7 +5306,7 @@ static int ext4_do_update_inode(handle_t *handle,
 #else
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	raw_inode->ext4_mode2 = cpu_to_le16(inode->i_mode2); /* we'll lost upper 16 bits flags */
 #endif
 
@@ -5634,7 +5634,7 @@ static int ext4_indirect_trans_blocks(struct inode *inode, int nrblocks,
 	return indirects;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 int syno_ext4_set_archive_ver(struct dentry *dentry, u32 version)
 {
 	struct inode *inode = dentry->d_inode;

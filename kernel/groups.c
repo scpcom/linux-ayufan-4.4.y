@@ -143,7 +143,7 @@ int groups_search(const struct group_info *group_info, gid_t grp)
 	right = group_info->ngroups;
 	while (left < right) {
 		unsigned int mid = (left+right)/2;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_GROUP_COMPARE
 		gid_t grg_tmp = GROUP_AT(group_info, mid);
 		if (grp > grg_tmp) {
 			left = mid + 1;

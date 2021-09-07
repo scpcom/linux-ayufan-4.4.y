@@ -101,7 +101,7 @@ typedef void (*dm_io_hints_fn) (struct dm_target *ti,
  */
 typedef int (*dm_busy_fn) (struct dm_target *ti);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 typedef void (*dm_lvinfoset_fn) (struct dm_target *ti);
 typedef sector_t (*dm_lg_sector_get_fn) (sector_t sector, struct dm_target *ti);
 #endif
@@ -160,7 +160,7 @@ struct target_type {
 	dm_busy_fn busy;
 	dm_iterate_devices_fn iterate_devices;
 	dm_io_hints_fn io_hints;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 	dm_lvinfoset_fn lvinfoset;
 	dm_lg_sector_get_fn lg_sector_get;
 #endif
@@ -229,7 +229,7 @@ void *dm_get_mdptr(struct mapped_device *md);
  */
 int dm_suspend(struct mapped_device *md, unsigned suspend_flags);
 int dm_resume(struct mapped_device *md);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FAST_VOLUME_WAKEUP
 int dm_active_get(struct mapped_device *md);
 int dm_active_set(struct mapped_device *md, int value);
 #endif

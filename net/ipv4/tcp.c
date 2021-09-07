@@ -278,9 +278,9 @@
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 #include <linux/pci.h>
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 
 #ifdef CONFIG_SYNO_PLX_PORTING
 #include <mach/oxnas_net.h>
@@ -1512,7 +1512,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	do {
 		u32 offset;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
         if(flags &  MSG_NOCATCHSIGNAL) {
 			/* Original when we have recvfile(), we remove the following
 			 * sygnal_pending(). But it would cause system hang when smbd
@@ -1536,7 +1536,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 			}
         }
         else
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 		/* Are we at urgent data? Stop if we have read anything or have SIGURG pending. */
 		if (tp->urg_data && tp->urg_seq == *seq) {
 			if (copied)
@@ -1600,7 +1600,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 				break;
 
 			if (sk->sk_err) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 				if ( (msg->msg_flags & MSG_KERNSPACE) &&
 					ECONNRESET == sk->sk_err )
 					printk("connection reset by peer.\n");
@@ -1774,11 +1774,11 @@ do_prequeue:
 			} else
 #endif
 			{
-#if defined(MY_ABC_HERE) && !defined(CONFIG_SYNO_QORIQ)
+#if defined(SYNO_RECVFILE) && !defined(CONFIG_SYNO_QORIQ)
 				if(msg->msg_flags & MSG_KERNSPACE)
 					err = skb_copy_datagram_iovec1(skb, offset, msg->msg_iov, used);
 				else
-#endif /* MY_ABC_HERE && !CONFIG_SYNO_QORIQ */
+#endif /* SYNO_RECVFILE && !CONFIG_SYNO_QORIQ */
 				err = skb_copy_datagram_iovec(skb, offset,
 						msg->msg_iov, used);
 				if (err) {

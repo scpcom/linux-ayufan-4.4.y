@@ -905,7 +905,7 @@ static int mtd_ioctl(struct inode *inode, struct file *file,
 	}
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef  SYNO_MTD_INFO
 	case MEMMODIFYPARTINFO:
 	{
 		unsigned long adrs[2];
@@ -938,7 +938,7 @@ static int mtd_ioctl(struct inode *inode, struct file *file,
 
 		break;
 	}
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MTD_INFO */
 
 	case ECCGETLAYOUT:
 	{

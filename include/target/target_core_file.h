@@ -32,7 +32,7 @@
 #define TARGET_CORE_FILE_H
 
 #include <linux/syno.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LARGE_FILEIO
 #   define SYNO_LIO_MAX_NR_FILES    64
 #   define SYNO_LIO_FILE_IDX_WIDTH  3
 #   define SYNO_LIO_FILE_SIZE_SHIFT 40     /* 1T = 2^40 */
@@ -156,7 +156,7 @@ typedef struct fd_dev_s {
 	u32		fd_table_count;
 	u32		fd_queue_depth;
 	unsigned long long fd_dev_size;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LARGE_FILEIO
 	int     nr_file;
 	struct file *fd_files[SYNO_LIO_MAX_NR_FILES];
 #else

@@ -234,7 +234,7 @@ int nobh_write_end(struct file *, struct address_space *,
 int nobh_truncate_page(struct address_space *, loff_t, get_block_t *);
 int nobh_writepage(struct page *page, get_block_t *get_block,
                         struct writeback_control *wbc);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 int cont_prepare_write(struct page*, unsigned, unsigned, get_block_t*,
                                loff_t *);
 int nobh_prepare_write(struct page*, unsigned, unsigned, get_block_t*);

@@ -95,7 +95,7 @@ struct r1bio_s {
 
 	struct list_head	retry_list;
 	struct bitmap_update	*bitmap_update;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
 	unsigned int read_failed;
 	int orig_disk_idx;
 #endif

@@ -162,7 +162,7 @@ static inline sector_t get_dev_size(struct block_device *bdev)
 static inline chunk_t sector_to_chunk(struct dm_exception_store *store,
 				      sector_t sector)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DM_SECTOR_TO_CHUNK_FIX
 	return sector >> store->chunk_shift;
 #else
 	return (sector & ~store->chunk_mask) >> store->chunk_shift;

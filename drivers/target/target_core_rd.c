@@ -72,7 +72,7 @@ int rd_attach_hba(se_hba_t *hba, u32 host_id)
 	hba->transport = (hba->type == RAMDISK_DR) ?
 			&rd_dr_template : &rd_mcp_template;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "CORE_HBA[%d] - TCM Ramdisk HBA Driver %s on"
 		" Generic Target Core Stack %s\n", hba->hba_id,
 		RD_HBA_VERSION, TARGET_CORE_MOD_VERSION);
@@ -100,7 +100,7 @@ int rd_detach_hba(se_hba_t *hba)
 
 	rd_host = (rd_host_t *) hba->hba_ptr;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "CORE_HBA[%d] - Detached Ramdisk HBA: %u from"
 		" Generic Target Core\n", hba->hba_id, rd_host->rd_host_id);
 #endif
@@ -142,7 +142,7 @@ void rd_release_device_space(rd_dev_t *rd_dev)
 		kfree(sg);
 	}
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "CORE_RD[%u] - Released device space for Ramdisk"
 		" Device ID: %u, pages %u in %u tables total bytes %lu\n",
 		rd_dev->rd_host->rd_host_id, rd_dev->rd_dev_id, page_count,
@@ -223,7 +223,7 @@ static int rd_build_device_space(rd_dev_t *rd_dev)
 		total_sg_needed -= sg_per_table;
 	}
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "CORE_RD[%u] - Built Ramdisk Device ID: %u space of"
 		" %u pages in %u tables\n", rd_dev->rd_host->rd_host_id,
 		rd_dev->rd_dev_id, rd_dev->rd_page_count,
@@ -293,7 +293,7 @@ static se_device_t *rd_create_virtdevice(
 	rd_dev->rd_dev_id = rd_host->rd_host_dev_id_count++;
 	rd_dev->rd_queue_depth = dev->queue_depth;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "CORE_RD[%u] - Added TCM %s Ramdisk Device ID: %u of"
 		" %u pages in %u tables, %lu total bytes\n",
 		rd_host->rd_host_id, (!rd_dev->rd_direct) ? "MEMCPY" :
@@ -331,7 +331,7 @@ se_device_t *rd_MEMCPY_create_virtdevice(
  */
 int rd_activate_device(se_device_t *dev)
 {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	rd_dev_t *rd_dev = (rd_dev_t *) dev->dev_ptr;
 	rd_host_t *rd_host = rd_dev->rd_host;
 
@@ -349,7 +349,7 @@ int rd_activate_device(se_device_t *dev)
  */
 void rd_deactivate_device(se_device_t *dev)
 {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	rd_dev_t *rd_dev = (rd_dev_t *) dev->dev_ptr;
 	rd_host_t *rd_host = rd_dev->rd_host;
 
@@ -1155,7 +1155,7 @@ ssize_t rd_set_configfs_dev_params(
 				break;
 			}
 			rd_dev->rd_page_count = (u32)rd_pages;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 			printk(KERN_INFO "RAMDISK: Referencing Page"
 				" Count: %u\n", rd_dev->rd_page_count);
 #endif

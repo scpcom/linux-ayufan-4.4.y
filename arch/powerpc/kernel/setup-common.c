@@ -169,14 +169,14 @@ void machine_power_off(void)
 
 #define UART2_TX  0x0
 #define UART2_LCR 0x3
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 	extern void SynoQorIQWOLSet(void);
 #endif
 	extern phys_addr_t get_immrbase(void);
 
 	u32 __iomem *pUP = ioremap((get_immrbase() + UART2_BASE), 0x10);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 	SynoQorIQWOLSet();
 #endif
 	if (pUP) {

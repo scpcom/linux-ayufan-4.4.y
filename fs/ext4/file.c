@@ -253,7 +253,7 @@ const struct file_operations ext4_file_operations = {
 };
 
 const struct inode_operations ext4_file_inode_operations = {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	.syno_get_archive_ver = syno_ext4_get_archive_ver,
 	.syno_set_archive_ver = syno_ext4_set_archive_ver,
 #endif

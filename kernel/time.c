@@ -170,7 +170,7 @@ int do_sys_settimeofday(struct timespec *tv, struct timezone *tz)
 		update_vsyscall_tz();
 		if (firsttime) {
 			firsttime = 0;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_KERNEL_UTC_TIME
 			if (!tv)
 				warp_clock();
 #endif

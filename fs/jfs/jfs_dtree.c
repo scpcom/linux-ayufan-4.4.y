@@ -381,14 +381,14 @@ static u32 add_index(tid_t tid, struct inode *ip, s64 bn, int slot)
 		 * It's time to move the inline table to an external
 		 * page and begin to build the xtree
 		 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		if (dquot_alloc_block(ip, sbi->nbperpage))
 #else
 		if (vfs_dq_alloc_block(ip, sbi->nbperpage))
 #endif
 			goto clean_up;
 		if (dbAlloc(ip, 0, sbi->nbperpage, &xaddr)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 			dquot_free_block(ip, sbi->nbperpage);
 #else
 			vfs_dq_free_block(ip, sbi->nbperpage);
@@ -416,7 +416,7 @@ static u32 add_index(tid_t tid, struct inode *ip, s64 bn, int slot)
 			memcpy(&jfs_ip->i_dirtable, temp_table,
 			       sizeof (temp_table));
 			dbFree(ip, xaddr, sbi->nbperpage);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 			dquot_free_block(ip, sbi->nbperpage);
 #else
 			vfs_dq_free_block(ip, sbi->nbperpage);
@@ -1039,7 +1039,7 @@ static int dtSplitUp(tid_t tid,
 			n = xlen;
 
 		/* Allocate blocks to quota. */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		rc = dquot_alloc_block(ip, n);
 		if (rc) {
 #else
@@ -1325,7 +1325,7 @@ static int dtSplitUp(tid_t tid,
 
 	/* Rollback quota allocation */
 	if (rc && quota_allocation)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_block(ip, quota_allocation);
 #else
 		vfs_dq_free_block(ip, quota_allocation);
@@ -1390,14 +1390,14 @@ static int dtSplitPage(tid_t tid, struct inode *ip, struct dtsplit * split,
 		return -EIO;
 
 	/* Allocate blocks to quota. */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	rc = dquot_alloc_block(ip, lengthPXD(pxd));
 	if (rc) {
 #else
 	if (vfs_dq_alloc_block(ip, lengthPXD(pxd))) {
 #endif
 		release_metapage(rmp);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		return rc;
 #else
 		return -EDQUOT;
@@ -1922,7 +1922,7 @@ static int dtSplitRoot(tid_t tid,
 	struct dt_lock *dtlck;
 	struct tlock *tlck;
 	struct lv *lv;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	int rc;
 #endif
 
@@ -1949,14 +1949,14 @@ static int dtSplitRoot(tid_t tid,
 	rp = rmp->data;
 
 	/* Allocate blocks to quota. */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	rc = dquot_alloc_block(ip, lengthPXD(pxd));
 	if (rc) {
 #else
 	if (vfs_dq_alloc_block(ip, lengthPXD(pxd))) {
 #endif
 		release_metapage(rmp);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		return rc;
 #else
 		return -EDQUOT;
@@ -2329,7 +2329,7 @@ static int dtDeleteUp(tid_t tid, struct inode *ip,
 	xlen = lengthPXD(&fp->header.self);
 
 	/* Free quota allocation. */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	dquot_free_block(ip, xlen);
 #else
 	vfs_dq_free_block(ip, xlen);
@@ -2409,7 +2409,7 @@ static int dtDeleteUp(tid_t tid, struct inode *ip,
 				xlen = lengthPXD(&p->header.self);
 
 				/* Free quota allocation */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 				dquot_free_block(ip, xlen);
 #else
 				vfs_dq_free_block(ip, xlen);

@@ -7,7 +7,7 @@ struct vfsmount;
 struct path {
 	struct vfsmount *mnt;
 	struct dentry *dentry;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 	int mounted;
 #endif
 };

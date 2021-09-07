@@ -795,7 +795,7 @@ static int chown_common(struct dentry * dentry, uid_t user, gid_t group)
 	return error;
 }
 
-#ifdef	MY_ABC_HERE
+#ifdef	SYNO_ARCHIVE_BIT
 extern long __SYNOArchiveSet(struct dentry *, unsigned int cmd);
 
 asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
@@ -816,7 +816,7 @@ asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
 	path_put(&path);
 	return error;
 }
-#endif //MY_ABC_HERE
+#endif //SYNO_ARCHIVE_BIT
 
 SYSCALL_DEFINE3(chown, const char __user *, filename, uid_t, user, gid_t, group)
 {
@@ -1190,7 +1190,7 @@ long do_sys_open(int dfd, const char __user *filename, int flags, int mode)
 	return fd;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 #include <linux/synolib.h>
 extern int syno_hibernation_log_sec;
 #endif
@@ -1201,7 +1201,7 @@ SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, int, mode)
 	if (force_o_largefile())
 		flags |= O_LARGEFILE;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 	if(syno_hibernation_log_sec > 0) {
 		syno_do_hibernation_log(filename);
 	}

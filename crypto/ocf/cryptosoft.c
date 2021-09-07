@@ -67,7 +67,7 @@ struct {
 #define SW_TYPE_COMP		4
 #define SW_TYPE_BLKCIPHER	5
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 struct ocf_request {
     struct ablkcipher_request *req;
     struct completion complete;
@@ -226,7 +226,7 @@ module_param(swcr_debug, int, 0644);
 MODULE_PARM_DESC(swcr_debug, "Enable debug");
 
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 static void ocf_async_done(struct crypto_async_request *async_req,
                                 int error)
 {
@@ -365,7 +365,7 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 			dprintk("%s crypto_alloc_blkcipher(%s, 0x%x)\n", __FUNCTION__,
 					algo, mode);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 			(*swd)->sw_tfm = crypto_ablkcipher_tfm(
 								crypto_alloc_ablkcipher(algo, 0, 0));
 #else
@@ -390,7 +390,7 @@ swcr_newsession(device_t dev, u_int32_t *sid, struct cryptoini *cri)
 				}
 				dprintk("\n");
 			}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 			error = crypto_ablkcipher_setkey(
 							(struct crypto_ablkcipher *)((*swd)->sw_tfm), cri->cri_key,
 							(cri->cri_klen + 7) / 8);
@@ -658,21 +658,21 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 		case SW_TYPE_BLKCIPHER: {
 			unsigned char iv[EALG_MAX_BLOCK_LEN];
 			unsigned char *ivp = iv;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 			struct ocf_request ocf_req = {0};
 #endif
 
 			int ivsize = 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 				crypto_ablkcipher_ivsize((struct crypto_ablkcipher *)(sw->sw_tfm));
 #else
 				crypto_blkcipher_ivsize(crypto_blkcipher_cast(sw->sw_tfm));
 #endif
-#ifndef MY_ABC_HERE
+#ifndef SYNO_OCF_USE_LINUX_CRYPTOAPI
 			struct blkcipher_desc desc;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 			if (sg_len < crypto_ablkcipher_blocksize((struct crypto_ablkcipher *)sw->sw_tfm)) {
 #else
 			if (sg_len < crypto_blkcipher_blocksize(
@@ -680,7 +680,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 #endif
 				crp->crp_etype = EINVAL;
 				dprintk("%s,%d: EINVAL len %d < %d\n", __FILE__, __LINE__,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 						sg_len, crypto_ablkcipher_blocksize((struct crypto_ablkcipher *)sw->sw_tfm));
 #else
 						sg_len, crypto_blkcipher_blocksize(
@@ -705,7 +705,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 								crd->crd_key[i] & 0xff);
 					dprintk("\n");
 				}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 				error = crypto_ablkcipher_setkey((struct crypto_ablkcipher *)sw->sw_tfm, crd->crd_key,
 							(crd->crd_klen + 7) / 8);
 #else
@@ -720,7 +720,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 				}
 			}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 			init_completion(&ocf_req.complete);
 
 			if (NULL == (ocf_req.req = kmalloc(sizeof(struct ablkcipher_request), GFP_KERNEL))) {
@@ -752,7 +752,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 					crypto_copyback(crp->crp_flags, crp->crp_buf,
 							crd->crd_inject, ivsize, (caddr_t)ivp);
 				}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 				ablkcipher_request_set_crypt(ocf_req.req, sg, sg, sg_len, ivp);
 				ocf_async_wait(&ocf_req, crypto_ablkcipher_encrypt(ocf_req.req));
 #else
@@ -768,7 +768,7 @@ swcr_process(device_t dev, struct cryptop *crp, int hint)
 					crypto_copydata(crp->crp_flags, crp->crp_buf,
 							crd->crd_inject, ivsize, (caddr_t)ivp);
 				}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 				ablkcipher_request_set_crypt(ocf_req.req, sg, sg, sg_len, ivp);
 				ocf_async_wait(&ocf_req,
 							   crypto_ablkcipher_decrypt(ocf_req.req));
@@ -975,7 +975,7 @@ cryptosoft_init(void)
 				}
 				break;
 			case SW_TYPE_BLKCIPHER:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_OCF_USE_LINUX_CRYPTOAPI
 				if (crypto_has_ablkcipher(algo, 0, 0))
 #else
 				if (crypto_has_blkcipher(algo, 0, CRYPTO_ALG_ASYNC))

@@ -67,12 +67,12 @@
 #define VENDOR_ID_PENTAX	0x0a17
 #define VENDOR_ID_MOTOROLA	0x22b8
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 extern struct usb_hub *hdev_to_hub(struct usb_device *hdev);
 extern int syno_get_hub_eh(struct usb_hub *hub);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 extern int gSynoHasDynModule;
 #endif
 /***********************************************************************
@@ -319,7 +319,7 @@ static int queuecommand(struct scsi_cmnd *srb,
  * Error handling functions
  ***********************************************************************/
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 static void wait_for_hub_EH(struct us_data *us)
 {
 	struct usb_device *udev = us->pusb_dev;
@@ -338,7 +338,7 @@ static int command_abort(struct scsi_cmnd *srb)
 
 	US_DEBUGP("%s called\n", __func__);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	wait_for_hub_EH(us);
 #endif
 
@@ -379,7 +379,7 @@ static int device_reset(struct scsi_cmnd *srb)
 
 	US_DEBUGP("%s called\n", __func__);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	wait_for_hub_EH(us);
 #endif
 
@@ -397,7 +397,7 @@ static int bus_reset(struct scsi_cmnd *srb)
 	struct us_data *us = host_to_us(srb->device->host);
 	int result;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	wait_for_hub_EH(us);
 #endif
 
@@ -415,7 +415,7 @@ void usb_stor_report_device_reset(struct us_data *us)
 	int i;
 	struct Scsi_Host *host = us_to_host(us);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	wait_for_hub_EH(us);
 #endif
 
@@ -433,7 +433,7 @@ void usb_stor_report_bus_reset(struct us_data *us)
 {
 	struct Scsi_Host *host = us_to_host(us);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	wait_for_hub_EH(us);
 #endif
 
@@ -544,7 +544,7 @@ static ssize_t store_max_sectors(struct device *dev, struct device_attribute *at
 static DEVICE_ATTR(max_sectors, S_IRUGO | S_IWUSR, show_max_sectors,
 		store_max_sectors);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HAS_SDCARDREADER
 extern int blIsCardReader(struct usb_device *usbdev);
 static ssize_t show_syno_cardreader(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -563,13 +563,13 @@ static DEVICE_ATTR(syno_cardreader, S_IRUGO | S_IWUSR, show_syno_cardreader, NUL
 
 static struct device_attribute *sysfs_device_attr_list[] = {
 		&dev_attr_max_sectors,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HAS_SDCARDREADER
 	&dev_attr_syno_cardreader,
 #endif
 		NULL,
 		};
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 int syno_usb_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun)
 {
     int index = 0;
@@ -577,7 +577,7 @@ int syno_usb_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun)
     struct usb_device *usbdev = us->pusb_dev;
     
     if(usbdev && usbdev->bus) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 		if (IS_SYNO_USBBOOT_ID_VENDOR(le16_to_cpu(usbdev->descriptor.idVendor)) &&
 			IS_SYNO_USBBOOT_ID_PRODUCT(le16_to_cpu(usbdev->descriptor.idProduct)) &&
 			gSynoHasDynModule) {
@@ -587,7 +587,7 @@ int syno_usb_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun)
         }
 #else
         index = SYNO_MAX_INTERNAL_DISK+1;
-#endif /*MY_ABC_HERE*/
+#endif /*SYNO_USB_FLASH_BOOT*/
     }
     
     return index;
@@ -643,10 +643,10 @@ struct scsi_host_template usb_stor_host_template = {
 	/* sysfs device attributes */
 	.sdev_attrs =			sysfs_device_attr_list,
 
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_USB_FLASH_BOOT)
 	.syno_index_get =		syno_usb_index_get,
 #endif
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_DISK_HIBERNATION) || defined(SYNO_FIXED_DISK_NAME)
 	.syno_port_type         = SYNO_PORT_TYPE_USB,
 #endif
 

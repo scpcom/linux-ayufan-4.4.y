@@ -2028,7 +2028,7 @@ static inline u32 dev_ethtool_get_flags(struct net_device *dev)
 	return dev->ethtool_ops->get_flags(dev);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 extern int syno_get_dev_vendor_mac(const char *szDev, char *szMac);
 #endif
 

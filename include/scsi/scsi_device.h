@@ -94,13 +94,13 @@ struct scsi_device {
 					   could all be from the same event. */
 
 	unsigned int id, lun, channel;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	char syno_disk_name[BDEVNAME_SIZE];		/* name of major driver */
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
 	unsigned char auto_remap;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	int iResetPwrCount;  /* the count of disk power reset */
 #endif
 
@@ -175,11 +175,11 @@ struct scsi_device {
 	atomic_t iodone_cnt;
 	atomic_t ioerr_cnt;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DISK_HIBERNATION
 	unsigned long   idle;   /* scsi idle time in jiffers */
 	unsigned char   spindown;
 	unsigned char   nospindown;
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_DISK_HIBERNATION */
 
 	struct device		sdev_gendev,
 				sdev_dev;
@@ -299,7 +299,7 @@ static inline struct scsi_target *scsi_target(struct scsi_device *sdev)
 #define starget_printk(prefix, starget, fmt, a...)	\
 	dev_printk(prefix, &(starget)->dev, fmt, ##a)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
 #define SYNO_DISK_MODEL_LEN "24"
 #endif
 

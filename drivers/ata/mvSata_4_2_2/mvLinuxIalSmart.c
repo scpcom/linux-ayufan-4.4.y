@@ -94,7 +94,7 @@ SmartCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
                          MV_U32 timeStamp,
                          MV_STORAGE_DEVICE_REGISTERS *registerStruct);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_MODIFY
 void swap_buf_le16_bsp422(u16 *buf, unsigned int buf_words)
 #else
 void swap_buf_le16(u16 *buf, unsigned int buf_words)
@@ -143,9 +143,9 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_IDLE &&
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_IDLE_IMMEDIATE &&
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_STANDBY_IMMEDIATE &&
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_CHECK_HDD_POWER
         buff[SMART_BUF_COMMAND_OFFSET] != MV_ATA_COMMAND_CHECK_POWER &&
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MV_CHECK_HDD_POWER */
          buff[SMART_BUF_COMMAND_OFFSET] != WIN_SMART))
     {
         mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG_ERROR, "invalid SMART command received");
@@ -178,7 +178,7 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
         buff[SMART_BUF_LBAHIGH_OFFSET] = 0;
         buff[SMART_BUF_FEATURES_OFFSET] = 0;
     }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_CHECK_HDD_POWER
 	else  if (buff[SMART_BUF_COMMAND_OFFSET] == MV_ATA_COMMAND_CHECK_POWER)
 	{
 		 mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "SMART command: CHECK_POWER command received\n");
@@ -191,7 +191,7 @@ MV_SCSI_COMMAND_STATUS_TYPE  mvScsiAtaSendSmartCommand(IN  MV_SATA_ADAPTER* pSat
 		buff[SMART_BUF_FEATURES_OFFSET] = 0;
 		buff[SMART_BUF_SECTORCOUNT_OFFSET] = 0;
 	}
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MV_CHECK_HDD_POWER */
     else  if (buff[SMART_BUF_COMMAND_OFFSET] == MV_ATA_COMMAND_IDLE)
     {
          mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "SMART command: IDLE command received, sector count = %d.\n",
@@ -324,7 +324,7 @@ static void SmartFillReturnBuffer(IN MV_U8* buff,
 {
 
     /*For PIO non-data return registers' values*/
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_CHECK_HDD_POWER
 	if ((buff[SMART_BUF_COMMAND_OFFSET] == MV_ATA_COMMAND_CHECK_POWER) ||
 		(buff[SMART_BUF_COMMAND_OFFSET] == WIN_SMART &&
 		buff[SMART_BUF_FEATURES_OFFSET] != SMART_READ_VALUES &&
@@ -356,7 +356,7 @@ static void SmartFillReturnBuffer(IN MV_U8* buff,
     }
     else
     {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_MODIFY
 	 swap_buf_le16_bsp422((u16 *) (buff + 6), ATA_SECTOR_SIZE/2);
 #else
          swap_buf_le16((u16 *) (buff + 6), ATA_SECTOR_SIZE/2);
@@ -408,7 +408,7 @@ SmartCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
 	    {
 		    struct scatterlist *sg;
 		    MV_U8*		pBuffer;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_MODIFY_32
 		    sg = (struct scatterlist *)SCpnt->sdb.table.sgl;
 #else
 		    sg = (struct scatterlist *)SCpnt->request_buffer;
@@ -416,7 +416,7 @@ SmartCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
 		    
 		    mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "SMART PIO command needs kmap for Data-in buffer\n");
 		    
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MV_MODIFY
 		    pBuffer = kmap_atomic(sg_page(sg), KM_IRQ0) + sg->offset;
 #else
 		    pBuffer = kmap_atomic(sg->page, KM_IRQ0) + sg->offset;

@@ -188,7 +188,7 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 				add_uevent_var(env, "DEVMODE=%#o", mode & 0777);
 		}
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIBATA_PMP_UEVENT
 	/* host with dev->devt 0, if we want to get hotplug of CABLE_CONNECT/CABLE_DISCONNECT
 	 * we must add DEVNAME in env to pass it to hotplug.
 	 **/

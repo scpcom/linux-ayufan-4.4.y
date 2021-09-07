@@ -32,7 +32,7 @@ void fat_fs_error(struct super_block *s, const char *fmt, ...)
 	va_end(args);
 	printk("\n");
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FAT_ERR_HANDLE
 	s->s_flags |= MS_CORRUPT;
 #endif
 	if (opts->errors == FAT_ERRORS_PANIC)

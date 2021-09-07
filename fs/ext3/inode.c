@@ -1180,7 +1180,7 @@ static int ext3_write_begin(struct file *file, struct address_space *mapping,
 	struct page *page;
 	pgoff_t index;
 	unsigned from, to;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	// Add for mark_inode_dirty.
 	int needed_blocks;
 
@@ -1190,7 +1190,7 @@ static int ext3_write_begin(struct file *file, struct address_space *mapping,
 		needed_blocks = ext3_writepage_trans_blocks(inode) + 1;
 	}
 #endif
-#ifndef MY_ABC_HERE
+#ifndef SYNO_REDUCE_ADD_INODE_ORPHAN_TWICE
 	/* Reserve one block more for addition to orphan list in case
 	 * we allocate blocks but write fails for some reason */
 	int needed_blocks = ext3_writepage_trans_blocks(inode) + 1;
@@ -1201,7 +1201,7 @@ static int ext3_write_begin(struct file *file, struct address_space *mapping,
 	to = from + len;
 
 retry:
-#ifndef MY_ABC_HERE
+#ifndef SYNO_CHANGE_EXT3_PAGE_LOCK_ORDER
 	page = grab_cache_page_write_begin(mapping, index, flags);
 	if (!page)
 		return -ENOMEM;
@@ -1210,7 +1210,7 @@ retry:
 
 	handle = ext3_journal_start(inode, needed_blocks);
 	if (IS_ERR(handle)) {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_CHANGE_EXT3_PAGE_LOCK_ORDER
 		unlock_page(page);
 		page_cache_release(page);
 #endif
@@ -1218,7 +1218,7 @@ retry:
 		goto out;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CHANGE_EXT3_PAGE_LOCK_ORDER
 	/*
 	    Avoid grab_cache_page_write_begin() to flush dirty inodes of other file system to hit J_ASSERT(handle->h_transaction->t_journal == journal) in journal_start().
 	*/	
@@ -1251,7 +1251,7 @@ write_begin_failed:
 		 * finishes. Do this only if ext3_can_truncate() agrees so
 		 * that orphan processing code is happy.
 		 */
-#ifndef MY_ABC_HERE
+#ifndef SYNO_REDUCE_ADD_INODE_ORPHAN_TWICE
 		if (pos + len > inode->i_size && ext3_can_truncate(inode))
 			ext3_orphan_add(handle, inode);
 #endif
@@ -1263,7 +1263,7 @@ write_begin_failed:
 	}
 	if (ret == -ENOSPC && ext3_should_retry_alloc(inode->i_sb, &retries))
 		goto retry;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
 		if (pos + len > inode->i_size) {
 			// Don't need i_size_write because we hold i_mutex.
@@ -1567,7 +1567,7 @@ static int buffer_unmapped(handle_t *handle, struct buffer_head *bh)
  * AKPM2: if all the page's buffers are mapped to disk and !data=journal,
  * we don't need to open a transaction here.
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 handle_t *ext3_journal_start_sb_sync(struct super_block *sb, int nblocks);
 #endif
 static int ext3_ordered_writepage(struct page *page,
@@ -1601,7 +1601,7 @@ static int ext3_ordered_writepage(struct page *page,
 			return block_write_full_page(page, NULL, wbc);
 		}
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 	handle = ext3_journal_start_sb_sync(inode->i_sb, ext3_writepage_trans_blocks(inode));
 #else
 	handle = ext3_journal_start(inode, ext3_writepage_trans_blocks(inode));
@@ -1668,7 +1668,7 @@ static int ext3_writeback_writepage(struct page *page,
 		}
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 	handle = ext3_journal_start_sb_sync(inode->i_sb, ext3_writepage_trans_blocks(inode));
 #else
 	handle = ext3_journal_start(inode, ext3_writepage_trans_blocks(inode));
@@ -1705,7 +1705,7 @@ static int ext3_journalled_writepage(struct page *page,
 	if (ext3_journal_current_handle())
 		goto no_write;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 	handle = ext3_journal_start_sb_sync(inode->i_sb, ext3_writepage_trans_blocks(inode));
 #else
 	handle = ext3_journal_start(inode, ext3_writepage_trans_blocks(inode));
@@ -1898,7 +1898,7 @@ static int ext3_journalled_set_page_dirty(struct page *page)
 	return __set_page_dirty_nobuffers(page);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 /* For commit_write() in data=journal mode */
 static int commit_write_fn(handle_t *handle, struct buffer_head *bh)
 {
@@ -2044,7 +2044,7 @@ static const struct address_space_operations ext3_ordered_aops = {
 	.sync_page		= block_sync_page,
 	.write_begin		= ext3_write_begin,
 	.write_end		= ext3_ordered_write_end,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	.prepare_write  = ext3_prepare_write,
 	.commit_write   = ext3_ordered_commit_write,
 #endif
@@ -2064,7 +2064,7 @@ static const struct address_space_operations ext3_writeback_aops = {
 	.sync_page		= block_sync_page,
 	.write_begin		= ext3_write_begin,
 	.write_end		= ext3_writeback_write_end,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	.prepare_write  = ext3_prepare_write,
 	.commit_write   = ext3_writeback_commit_write,
 #endif
@@ -2084,7 +2084,7 @@ static const struct address_space_operations ext3_journalled_aops = {
 	.sync_page		= block_sync_page,
 	.write_begin		= ext3_write_begin,
 	.write_end		= ext3_journalled_write_end,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 	.prepare_write  = ext3_prepare_write,
 	.commit_write   = ext3_journalled_commit_write,
 #endif
@@ -2982,7 +2982,7 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	struct ext3_inode_info *ei;
 	struct buffer_head *bh;
 	struct inode *inode;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	struct syno_xattr_archive_version value;
 	int retval;
 #endif
@@ -3019,11 +3019,11 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	inode->i_ctime.tv_sec = (signed)le32_to_cpu(raw_inode->i_ctime);
 	inode->i_mtime.tv_sec = (signed)le32_to_cpu(raw_inode->i_mtime);
 	inode->i_atime.tv_nsec = inode->i_ctime.tv_nsec = inode->i_mtime.tv_nsec = 0;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	inode->i_CreateTime.tv_sec = (signed)le32_to_cpu(raw_inode->ext3_CreateTime);
 	inode->i_CreateTime.tv_nsec = 0;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = le32_to_cpu(raw_inode->ext3_mode2);
 #endif
 
@@ -3152,7 +3152,7 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	}
 	brelse (iloc.bh);
 	ext3_set_inode_flags(inode);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	retval = ext3_xattr_get(inode, EXT3_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value));
 	if(retval>0) {
 		inode->i_archive_version = le32_to_cpu(value.v_archive_version);
@@ -3232,10 +3232,10 @@ again:
 	raw_inode->i_frag = ei->i_frag_no;
 	raw_inode->i_fsize = ei->i_frag_size;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	raw_inode->ext3_CreateTime = cpu_to_le32(inode->i_CreateTime.tv_sec);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	raw_inode->ext3_mode2 = cpu_to_le32(inode->i_mode2);
 #endif
 	raw_inode->i_file_acl = cpu_to_le32(ei->i_file_acl);
@@ -3439,7 +3439,7 @@ err_out:
 }
 
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 int syno_ext3_set_archive_ver(struct dentry *dentry, u32 version)
 {
 	struct inode *inode = dentry->d_inode;

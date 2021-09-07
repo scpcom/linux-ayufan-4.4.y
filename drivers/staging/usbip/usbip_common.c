@@ -643,7 +643,7 @@ EXPORT_SYMBOL_GPL(sockfd_to_socket);
 /* there may be more cases to tweak the flags. */
 static unsigned int tweak_transfer_flags(unsigned int flags)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_USBIP
 	flags &= ~URB_NO_TRANSFER_DMA_MAP;
 #else
 	flags &= ~(URB_NO_TRANSFER_DMA_MAP|URB_NO_SETUP_DMA_MAP);
@@ -817,7 +817,7 @@ void usbip_header_correct_endian(struct usbip_header *pdu, int send)
 	case USBIP_RET_UNLINK:
 		correct_endian_ret_unlink(&pdu->u.ret_unlink, send);
 		break;
-#ifdef MY_ABC_HERE	
+#ifdef SYNO_USB_USBIP	
 	case USBIP_RESET_DEV:					
 		if(send) {
 			correct_endian_ret_submit(&pdu->u.ret_submit, send);
@@ -989,7 +989,7 @@ int usbip_recv_xbuff(struct usbip_device *ud, struct urb *urb)
 }
 EXPORT_SYMBOL_GPL(usbip_recv_xbuff);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_USBIP
 /** 
  * Shutdown connection and set device available. 
 */

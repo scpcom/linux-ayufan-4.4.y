@@ -49,7 +49,7 @@
 #define NAMEI_RA_SIZE        (NAMEI_RA_CHUNKS * NAMEI_RA_BLOCKS)
 #define NAMEI_RA_INDEX(c,b)  (((c) * NAMEI_RA_BLOCKS) + (b))
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 #define DNAME_INLINE_LEN (sizeof(struct dentry)-offsetof(struct dentry,d_iname))
 
 static unsigned char UTF8Ext3NameiStrBuf[UNICODE_UTF8_BUFSIZE];
@@ -222,7 +222,7 @@ static int ext3_htree_next_block(struct inode *dir, __u32 hash,
 				 struct dx_frame *frame,
 				 struct dx_frame *frames,
 				 __u32 *start_hash);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
 			struct qstr *entry, struct ext3_dir_entry_2 **res_dir,
 			int *err, unsigned int caseless);
@@ -833,7 +833,7 @@ static void dx_insert_block(struct dx_frame *frame, u32 hash, u32 block)
 
 static void ext3_update_dx_flag(struct inode *inode)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	if (EXT3_SB(inode->i_sb)->s_es->s_syno_hash_magic != cpu_to_le32(SYNO_HASH_MAGIC))
 #else
 	if (!EXT3_HAS_COMPAT_FEATURE(inode->i_sb,
@@ -848,7 +848,7 @@ static void ext3_update_dx_flag(struct inode *inode)
  * `len <= EXT3_NAME_LEN' is guaranteed by caller.
  * `de != NULL' is guaranteed by caller.
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 static inline int ext3_match (int len, const char * const name,
 			      struct ext3_dir_entry_2 * de, int caseless)
 {
@@ -880,7 +880,7 @@ static inline int ext3_match (int len, const char * const name,
 /*
  * Returns 0 if not found, -1 on failure, and 1 on success
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 static inline int search_dirblock(struct buffer_head * bh,
 				  struct inode *dir,
 				  struct qstr *child,
@@ -899,7 +899,7 @@ static inline int search_dirblock(struct buffer_head * bh,
 	int de_len;
 	const char *name = child->name;
 	int namelen = child->len;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 	char *new_dname = NULL;
 	const char *ext_dname = NULL;
 #endif
@@ -911,7 +911,7 @@ static inline int search_dirblock(struct buffer_head * bh,
 		/* do minimal checking `by hand' */
 
 		if ((char *) de + namelen <= dlimit &&
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 			ext3_match (namelen, name, de, caseless)) {
 #else
 		    ext3_match (namelen, name, de)) {
@@ -921,7 +921,7 @@ static inline int search_dirblock(struct buffer_head * bh,
 						  dir, de, bh, offset))
 				return -1;
 			*res_dir = de;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 			/* If we do caseless lookup after dentry queue of parent be cleared,
 			* file name may async between dentry queue and disk.
 			* So we should make sure it is the real name before dentry be added to queue.
@@ -978,7 +978,7 @@ static inline int search_dirblock(struct buffer_head * bh,
  * The returned buffer_head has ->b_count elevated.  The caller is expected
  * to brelse() it when appropriate.
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 static struct buffer_head *ext3_find_entry(struct inode *dir,
 					struct qstr *entry,
 					struct ext3_dir_entry_2 **res_dir, int caseless)
@@ -1006,7 +1006,7 @@ static struct buffer_head *ext3_find_entry(struct inode *dir,
 	if (namelen > EXT3_NAME_LEN)
 		return NULL;
 	if (is_dx(dir)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 		bh = ext3_dx_find_entry(dir, entry, res_dir, &err, caseless);
 #else
 		bh = ext3_dx_find_entry(dir, entry, res_dir, &err);
@@ -1061,7 +1061,7 @@ restart:
 			brelse(bh);
 			goto next;
 		}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 		i = search_dirblock(bh, dir, entry,
 			    block << EXT3_BLOCK_SIZE_BITS(sb), res_dir, caseless);
 #else
@@ -1100,7 +1100,7 @@ cleanup_and_exit:
 	return ret;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
 			struct qstr *entry, struct ext3_dir_entry_2 **res_dir,
 			int *err, unsigned int caseless)
@@ -1150,14 +1150,14 @@ static struct buffer_head * ext3_dx_find_entry(struct inode *dir,
 				goto errout;
 			}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 			if (ext3_match(namelen, name, de, caseless)) {
 #else
 			if (ext3_match(namelen, name, de)) {
 #endif
 				*res_dir = de;
 				dx_release(frames);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 				/* If we do caseless lookup after dentry queue of parent be cleared,
 				* file name may async between dentry queue and disk.
 				* So we should make sure it is the real name before dentry be added to queue.
@@ -1193,7 +1193,7 @@ errout:
 	return NULL;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 /* this part should be sync with include/linux/namei.h */
 enum { MAX_NESTED_LINKS = 8 };
 
@@ -1225,7 +1225,7 @@ static struct dentry *ext3_lookup(struct inode * dir, struct dentry *dentry, str
 	struct inode * inode;
 	struct ext3_dir_entry_2 * de;
 	struct buffer_head * bh;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	int caseless = 0;
 
 	if (nd && (nd->flags & LOOKUP_CASELESS_COMPARE)) {
@@ -1236,7 +1236,7 @@ static struct dentry *ext3_lookup(struct inode * dir, struct dentry *dentry, str
 	if (dentry->d_name.len > EXT3_NAME_LEN)
 		return ERR_PTR(-ENAMETOOLONG);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	bh = ext3_find_entry(dir, &dentry->d_name, &de, caseless);
 #else
 	bh = ext3_find_entry(dir, &dentry->d_name, &de);
@@ -1262,13 +1262,13 @@ static struct dentry *ext3_lookup(struct inode * dir, struct dentry *dentry, str
 			}
 		}
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	dentry->d_op = &ext3_dentry_operations;
 #endif
 	return d_splice_alias(inode, dentry);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 static struct dentry *ext3_lookup_case(struct inode * dir, struct dentry *dentry, struct nameidata *nd)
 {
 	struct inode * inode;
@@ -1312,7 +1312,7 @@ struct dentry *ext3_get_parent(struct dentry *child)
 	struct ext3_dir_entry_2 * de;
 	struct buffer_head *bh;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	bh = ext3_find_entry(child->d_inode, &dotdot, &de, 1);
 #else
 	bh = ext3_find_entry(child->d_inode, &dotdot, &de);
@@ -1528,7 +1528,7 @@ static int add_dirent_to_buf(handle_t *handle, struct dentry *dentry,
 				brelse (bh);
 				return -EIO;
 			}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 			if (ext3_match (namelen, name, de, 0)) {
 #else
 			if (ext3_match (namelen, name, de)) {
@@ -1729,7 +1729,7 @@ static int ext3_add_entry (handle_t *handle, struct dentry *dentry,
 			return retval;
 
 		if (blocks == 1 && !dx_fallback &&
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 			(EXT3_SB(sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) &&
 			!EXT3_HAS_COMPAT_FEATURE(sb, EXT3_FEATURE_COMPAT_DIR_INDEX))
 #else
@@ -2320,7 +2320,7 @@ static int ext3_rmdir (struct inode * dir, struct dentry *dentry)
 		return PTR_ERR(handle);
 
 	retval = -ENOENT;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	bh = ext3_find_entry(dir, &dentry->d_name, &de, 0);
 #else
 	bh = ext3_find_entry(dir, &dentry->d_name, &de);
@@ -2386,7 +2386,7 @@ static int ext3_unlink(struct inode * dir, struct dentry *dentry)
 		handle->h_sync = 1;
 
 	retval = -ENOENT;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	bh = ext3_find_entry(dir, &dentry->d_name, &de, 0);
 #else
 	bh = ext3_find_entry(dir, &dentry->d_name, &de);
@@ -2555,7 +2555,7 @@ static int ext3_rename (struct inode * old_dir, struct dentry *old_dentry,
 	if (IS_DIRSYNC(old_dir) || IS_DIRSYNC(new_dir))
 		handle->h_sync = 1;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	old_bh = ext3_find_entry(old_dir, &old_dentry->d_name, &old_de, 0);
 #else
 	old_bh = ext3_find_entry(old_dir, &old_dentry->d_name, &old_de);
@@ -2572,7 +2572,7 @@ static int ext3_rename (struct inode * old_dir, struct dentry *old_dentry,
 		goto end_rename;
 
 	new_inode = new_dentry->d_inode;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	new_bh = ext3_find_entry(new_dir, &new_dentry->d_name, &new_de, 0);
 #else
 	new_bh = ext3_find_entry(new_dir, &new_dentry->d_name, &new_de);
@@ -2642,7 +2642,7 @@ static int ext3_rename (struct inode * old_dir, struct dentry *old_dentry,
 		struct buffer_head *old_bh2;
 		struct ext3_dir_entry_2 *old_de2;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 		old_bh2 = ext3_find_entry(old_dir, &old_dentry->d_name,
 					  &old_de2, 0);
 #else
@@ -2706,13 +2706,13 @@ end_rename:
  * directories can handle most operations...
  */
 const struct inode_operations ext3_dir_inode_operations = {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	.syno_get_archive_ver = syno_ext3_get_archive_ver,
 	.syno_set_archive_ver = syno_ext3_set_archive_ver,
 #endif
 	.create		= ext3_create,
 	.lookup		= ext3_lookup,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	.lookup_case	= ext3_lookup_case,
 #endif
 	.link		= ext3_link,
@@ -2733,7 +2733,7 @@ const struct inode_operations ext3_dir_inode_operations = {
 };
 
 const struct inode_operations ext3_special_inode_operations = {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	.syno_get_archive_ver = syno_ext3_get_archive_ver,
 	.syno_set_archive_ver = syno_ext3_set_archive_ver,
 #endif

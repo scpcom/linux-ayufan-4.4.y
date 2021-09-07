@@ -76,7 +76,7 @@ int iblock_attach_hba(se_hba_t *hba, u32 host_id)
 	hba->hba_ptr = (void *) ib_host;
 	hba->transport = &iblock_template;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "CORE_HBA[%d] - TCM iBlock HBA Driver %s on"
 		" Generic Target Core Stack %s\n", hba->hba_id,
 		IBLOCK_VERSION, TARGET_CORE_MOD_VERSION);
@@ -103,7 +103,7 @@ int iblock_detach_hba(se_hba_t *hba)
 	}
 	ib_host = (iblock_hba_t *) hba->hba_ptr;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "CORE_HBA[%d] - Detached iBlock HBA: %u from Generic"
 		" Target Core\n", hba->hba_id, ib_host->iblock_host_id);
 #endif
@@ -120,13 +120,13 @@ int iblock_claim_phydevice(se_hba_t *hba, se_device_t *dev)
 	struct block_device *bd;
 
 	if (dev->dev_flags & DF_READ_ONLY) {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "IBLOCK: Using previously claimed %p Major:"
 			"Minor" " - %d:%d\n", ib_dev->ibd_bd, ib_dev->ibd_major,
 			ib_dev->ibd_minor);
 #endif
 	} else {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "IBLOCK: Claiming %p Major:Minor - %d:%d\n",
 			ib_dev, ib_dev->ibd_major, ib_dev->ibd_minor);
 #endif
@@ -148,13 +148,13 @@ static int __iblock_release_phydevice(iblock_dev_t *ib_dev, int ro)
 		return 0;
 
 	if (ro == 1) {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "IBLOCK: Calling blkdev_put() for Major:Minor"
 			" - %d:%d\n", ib_dev->ibd_major, ib_dev->ibd_minor);
 #endif
 		blkdev_put((struct block_device *)ib_dev->ibd_bd, FMODE_READ);
 	} else {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "IBLOCK: Releasing Major:Minor - %d:%d\n",
 			ib_dev->ibd_major, ib_dev->ibd_minor);
 #endif
@@ -190,7 +190,7 @@ void *iblock_allocate_virtdevice(se_hba_t *hba, const char *name)
 	}
 	ib_dev->ibd_host = ib_host;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO  "IBLOCK: Allocated ib_dev for %s\n", name);
 #endif
 
@@ -222,7 +222,7 @@ se_device_t *iblock_create_virtdevice(
 	 * have set ib_dev->ibd_[major,minor]
 	 */
 	if (ib_dev->ibd_bd) {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO  "IBLOCK: Claiming struct block_device: %p\n",
 			 ib_dev->ibd_bd);
 #endif
@@ -239,7 +239,7 @@ se_device_t *iblock_create_virtdevice(
 		}
 		dev_flags = DF_CLAIMED_BLOCKDEV;
 	} else {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO  "IBLOCK: Claiming %p Major:Minor - %d:%d\n",
 			ib_dev, ib_dev->ibd_major, ib_dev->ibd_minor);
 #endif
@@ -310,7 +310,7 @@ failed:
  */
 int iblock_activate_device(se_device_t *dev)
 {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	iblock_dev_t *ib_dev = (iblock_dev_t *) dev->dev_ptr;
 	iblock_hba_t *ib_hba = ib_dev->ibd_host;
 
@@ -328,7 +328,7 @@ int iblock_activate_device(se_device_t *dev)
  */
 void iblock_deactivate_device(se_device_t *dev)
 {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	iblock_dev_t *ib_dev = (iblock_dev_t *) dev->dev_ptr;
 	iblock_hba_t *ib_hba = ib_dev->ibd_host;
 
@@ -559,7 +559,7 @@ static int iblock_emulate_scsi_cdb(se_task_t *task)
 	case SYNCHRONIZE_CACHE:
 	case TEST_UNIT_READY:
 	case VERIFY:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_VERIFY_16
 	case VERIFY_16:
 #endif
 	case WRITE_FILEMARKS:
@@ -596,7 +596,7 @@ int iblock_do_task(se_task_t *task)
 		DEBUG_IBLOCK("Calling submit_bio() task: %p bio: %p"
 			" bio->bi_sector: %llu\n", task, bio, bio->bi_sector);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 		submit_bio(
 			(TASK_CMD(task)->data_direction == DMA_TO_DEVICE),
 			bio);
@@ -661,7 +661,7 @@ ssize_t iblock_set_configfs_dev_params(se_hba_t *hba,
 			ptr = strstrip(ptr);
 			ret = snprintf(ib_dev->ibd_udev_path, SE_UDEV_PATH_LEN,
 				"%s", ptr);
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 			printk(KERN_INFO "IBLOCK: Referencing UDEV path: %s\n",
 					ib_dev->ibd_udev_path);
 #endif
@@ -679,7 +679,7 @@ ssize_t iblock_set_configfs_dev_params(se_hba_t *hba,
 				break;
 			}
 			ib_dev->ibd_major = (int)major;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 			printk(KERN_INFO "IBLOCK: Referencing Major: %d\n",
 					ib_dev->ibd_major);
 #endif
@@ -697,7 +697,7 @@ ssize_t iblock_set_configfs_dev_params(se_hba_t *hba,
 				break;
 			}
 			ib_dev->ibd_minor = (int)minor;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 			printk(KERN_INFO "IBLOCK: Referencing Minor: %d\n",
 					ib_dev->ibd_minor);
 #endif

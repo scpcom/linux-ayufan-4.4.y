@@ -1950,7 +1950,7 @@ int core_setup_alua(se_device_t *dev, int force_pt)
 	    !(DEV_ATTRIB(dev)->emulate_alua)) || force_pt) {
 		alua->alua_type = SPC_ALUA_PASSTHROUGH;
 		alua->alua_state_check = &core_alua_state_check_nop;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "%s: Using SPC_ALUA_PASSTHROUGH, no ALUA"
 			" emulation\n", TRANSPORT(dev)->name);
 #endif
@@ -1961,7 +1961,7 @@ int core_setup_alua(se_device_t *dev, int force_pt)
 	 * use emulated ALUA.
 	 */
 	if (TRANSPORT(dev)->get_device_rev(dev) >= SCSI_3) {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "%s: Enabling ALUA Emulation for SPC-3"
 			" device\n", TRANSPORT(dev)->name);
 #endif
@@ -1980,7 +1980,7 @@ int core_setup_alua(se_device_t *dev, int force_pt)
 				se_global->default_lu_gp);
 		spin_unlock(&lu_gp_mem->lu_gp_mem_lock);
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "%s: Adding to default ALUA LU Group:"
 			" core/alua/lu_gps/default_lu_gp\n",
 			TRANSPORT(dev)->name);

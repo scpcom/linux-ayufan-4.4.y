@@ -311,7 +311,7 @@ struct r6_state {
 #define	STRIPE_COMPUTE_RUN	15
 #define	STRIPE_OPS_REQ_PENDING	16
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS_DISKERROR
 #define STRIPE_NORETRY		17
 #endif
 

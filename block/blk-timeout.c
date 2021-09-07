@@ -153,7 +153,7 @@ void blk_abort_request(struct request *req)
 }
 EXPORT_SYMBOL_GPL(blk_abort_request);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 unsigned int blk_timeout_factory = 0;
 EXPORT_SYMBOL(blk_timeout_factory);
 #endif
@@ -184,7 +184,7 @@ void blk_add_timer(struct request *req)
 	if (!req->timeout)
 		req->timeout = q->rq_timeout;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 	if (blk_timeout_factory) {
 		req->timeout = 3 * HZ;
 	}

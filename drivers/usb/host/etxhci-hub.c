@@ -143,7 +143,7 @@ u32 etxhci_port_state_to_neutral(u32 state)
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 #include <linux/pci.h>
 
 extern int gSynoFactoryUSB3Disable;
@@ -569,7 +569,7 @@ int etxhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 			xhci_dbg(xhci, "set port power. usb%d.\n", wIndex);
 			if (1 == gSynoFactoryUSB3Disable && IS_USB3(wIndex))
 				xhci_writel(xhci, temp & ~PORT_POWER, addr);

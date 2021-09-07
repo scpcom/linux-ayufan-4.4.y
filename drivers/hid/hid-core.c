@@ -1151,7 +1151,7 @@ static const struct hid_device_id *hid_match_id(struct hid_device *hdev,
 }
 
 static const struct hid_device_id hid_hiddev_list[] = {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_USB_UPS
 	{ HID_USB_DEVICE(USB_VENDOR_ID_MGE, USB_DEVICE_ID_MGE_UPS) },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_MGE, USB_DEVICE_ID_MGE_UPS1) },
 #endif
@@ -1670,7 +1670,7 @@ static const struct hid_device_id hid_ignore_list[] = {
 	{ HID_USB_DEVICE(USB_VENDOR_ID_WISEGROUP, USB_DEVICE_ID_1_PHIDGETSERVO_20) },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_WISEGROUP, USB_DEVICE_ID_8_8_4_IF_KIT) },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_YEALINK, USB_DEVICE_ID_YEALINK_P1K_P4K_B2K) },
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_UPS
 // Generate from /synosrc/ds.base/source/nut-2.6/synoconf/./gen_id_list.sh
 	{ HID_USB_DEVICE(0x0001, 0x0000) },
 	{ HID_USB_DEVICE(0x03f0, 0x1f01) },

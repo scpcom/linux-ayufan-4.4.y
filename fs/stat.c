@@ -22,7 +22,7 @@
 #include "synoacl_int.h"
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 #include <linux/synolib.h>
 extern int SynoDebugFlag;
 extern int syno_hibernation_log_sec;
@@ -37,10 +37,10 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 	stat->dev = inode->i_sb->s_dev;
 	stat->ino = inode->i_ino;
 	stat->mode = inode->i_mode;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	stat->SynoMode = inode->i_mode2;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	stat->syno_archive_version = inode->i_archive_version;
 #endif
 	stat->nlink = inode->i_nlink;
@@ -50,11 +50,11 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 	stat->atime = inode->i_atime;
 	stat->mtime = inode->i_mtime;
 	stat->ctime = inode->i_ctime;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	stat->SynoCreateTime = inode->i_CreateTime;
 #endif
 	stat->size = i_size_read(inode);
-#ifndef MY_DEF_HERE
+#ifndef SYNO_FAST_RW_FIX
 #ifdef CONFIG_OXNAS_FAST_WRITES
 	{
 		loff_t tent_size = i_tent_size_read(inode);
@@ -199,7 +199,7 @@ SYSCALL_DEFINE2(stat, char __user *, filename, struct __old_kernel_stat __user *
 	int error;
 
 	error = vfs_stat(filename, &stat);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 	if(syno_hibernation_log_sec > 0) {
 		syno_do_hibernation_log(filename);
 	}
@@ -295,7 +295,7 @@ SYSCALL_DEFINE2(newstat, char __user *, filename, struct stat __user *, statbuf)
 	return cp_new_stat(&stat, statbuf);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
 SYSCALL_DEFINE2(SYNOArchiveOverwrite, unsigned int, fd, unsigned int, flags)
 {
 	int ret = -EBADF;
@@ -314,7 +314,7 @@ SYSCALL_DEFINE2(SYNOArchiveOverwrite, unsigned int, fd, unsigned int, flags)
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
 #include "../fs/ecryptfs/ecryptfs_kernel.h"
 int (*fecryptfs_decode_and_decrypt_filename)(char **plaintext_name,
                                         size_t *plaintext_name_size,
@@ -515,7 +515,7 @@ SYSCALL_DEFINE3(readlink, const char __user *, path, char __user *, buf,
 	return sys_readlinkat(AT_FDCWD, path, buf, bufsiz);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 /* This stat is used by caseless protocol.
  * The filename will be convert to real filename and return to user space.
  * In caller, the length of filename must equal or be larger than SYNO_SMB_PSTRING_LEN.
@@ -533,7 +533,7 @@ int __SYNOCaselessStat(char __user * filename, int isLink, struct kstat *stat, i
 		return -ENOMEM;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 	if (SynoDebugFlag) {
 		printk("%s(%d) orig name:[%s] len:[%u]\n", __FUNCTION__, __LINE__, filename, (unsigned int)strlen(filename));
 	}
@@ -550,21 +550,21 @@ int __SYNOCaselessStat(char __user * filename, int isLink, struct kstat *stat, i
 		path_put(&path);
 		if (real_filename_len) {
 			error = copy_to_user(filename, real_filename, real_filename_len) ? -EFAULT : error;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 			if (SynoDebugFlag) {
 				printk("%s(%d) convert name:[%s]\n",__FUNCTION__,__LINE__,filename);
 			}
 #endif
 		}
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 	if (error && SynoDebugFlag) {
 		printk("%s(%d) convert name:[%s], error:[%d]\n",__FUNCTION__,__LINE__,filename, error);
 	}
 #endif
 
 	kfree(real_filename);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 	if(!isLink && syno_hibernation_log_sec > 0) {
 		syno_do_hibernation_log(filename);
 	}
@@ -620,7 +620,7 @@ SYSCALL_DEFINE2(stat64, char __user *, filename, struct stat64 __user *, statbuf
 	struct kstat stat;
 	int error = vfs_stat(filename, &stat);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 	if(syno_hibernation_log_sec > 0) {
 		syno_do_hibernation_log(filename);
 	}
@@ -665,7 +665,7 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, char __user *, filename,
 	return cp_new_stat64(&stat, statbuf);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 struct SYNOSTAT64 {
 	struct stat64 st;
 	struct SYNOSTAT_EXTRA ext;
@@ -679,54 +679,54 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 		if (flags & SYNOST_STAT) {
 			error = cp_new_stat64(pKst, &pSt64->st);
 		}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 		if (flags & SYNOST_ARBIT) {
 			if (__put_user(pKst->SynoMode, &pSt64->ext.archBit)){
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
+#endif /* SYNO_ARCHIVE_BIT */
+#ifdef SYNO_CREATE_TIME
 		if (flags & SYNOST_CREATIME) {
 			if (copy_to_user(&pSt64->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt64->ext.creatTime))){
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
+#endif /* SYNO_CREATE_TIME */
+#ifdef SYNO_ARCHIVE_VERSION
 		if (flags & SYNOST_BKPVER) {
 			if (__put_user(pKst->syno_archive_version, &pSt64->ext.bkpVer)){
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_ARCHIVE_VERSION */
 	} else if (pSt) {
 		if (flags & SYNOST_STAT) {
 			if(0 != (error = cp_new_stat(pKst, &pSt->st))){
 				goto Out;
 			}
 		}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 		if (flags & SYNOST_ARBIT) {
 			if (__put_user(pKst->SynoMode, &pSt->ext.archBit)){
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
+#endif /* SYNO_ARCHIVE_BIT */
+#ifdef SYNO_CREATE_TIME
 		if (flags & SYNOST_CREATIME) {
 			if (copy_to_user(&pSt->ext.creatTime, &pKst->SynoCreateTime, sizeof(pSt->ext.creatTime))){
 				goto Out;
 			}
 		}
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 		if (flags & SYNOST_BKPVER) {
 			if (__put_user(pKst->syno_archive_version, &pSt->ext.bkpVer)){
 				goto Out;
 			}
 		}
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_ARCHIVE_VERSION */
 	} else {
 		error = -EINVAL;
 		goto Out;
@@ -744,7 +744,7 @@ static int do_SYNOStat(char __user * filename, int isLink, int f, struct SYNOSTA
 	struct kstat kst;
 
 	if (f & SYNOST_IS_CASELESS) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 		error = __SYNOCaselessStat(filename, isLink, &kst, &lastComponent);
 		if (-ENOENT == error) {
 			if (pSt) {
@@ -765,7 +765,7 @@ static int do_SYNOStat(char __user * filename, int isLink, int f, struct SYNOSTA
 			error = vfs_lstat(filename, &kst);
 		} else {
 			error = vfs_stat(filename, &kst);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 			if(syno_hibernation_log_sec > 0) {
 				syno_do_hibernation_log(filename);
 			}
@@ -820,9 +820,9 @@ SYSCALL_DEFINE3(SYNOLStat64, char __user *, filename, unsigned int, flags, struc
 {
 	return do_SYNOStat(filename, 1, flags, NULL, pSt);
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_STAT */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 
 asmlinkage long sys_SYNOCaselessStat(char __user * filename, struct stat __user *statbuf)
 {

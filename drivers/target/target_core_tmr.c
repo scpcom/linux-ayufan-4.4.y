@@ -167,7 +167,7 @@ int core_tmr_lun_reset(
 			continue;
 		spin_unlock(&dev->se_tmr_lock);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_TMR_EXCEPTION_PATCH
 		spin_lock_irqsave(&T_TASK(cmd)->t_state_lock, flags);
 		if (!(atomic_read(&T_TASK(cmd)->t_transport_active))) {
 			spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
@@ -184,7 +184,7 @@ int core_tmr_lun_reset(
 			" Response: 0x%02x, t_state: %d\n",
 			(preempt_and_abort_list) ? "Preempt" : "", tmr_p,
 			tmr_p->function, tmr_p->response, cmd->t_state);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_TMR_EXCEPTION_PATCH
 		spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
 #endif
 
@@ -383,7 +383,7 @@ int core_tmr_lun_reset(
 			" %d t_fe_count: %d\n", (preempt_and_abort_list) ?
 			"Preempt" : "", cmd, state,
 			atomic_read(&T_TASK(cmd)->t_fe_count));
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LUN_RESET
 		/*
 		 * http://risingtidesystems.com/git/?p=lio-core-backports.git;
 		 * a=commitdiff;h=3a30457076987c89598486aa9c651340ff940472

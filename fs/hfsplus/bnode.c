@@ -39,7 +39,7 @@ void hfs_bnode_read(struct hfs_bnode *node, void *buf, int off, int len)
 	}
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_EA
 u32 hfs_bnode_read_u32(struct hfs_bnode *node, int off)
 {
 	__be32 data;

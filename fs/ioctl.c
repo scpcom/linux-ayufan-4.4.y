@@ -465,7 +465,7 @@ static int file_ioctl(struct file *filp, unsigned int cmd,
 }
 
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 static int archive_check_capable(struct inode *inode)
 {
 	if ((!S_ISDIR(inode->i_mode)) && (!S_ISREG(inode->i_mode)))
@@ -633,7 +633,7 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 {
 	int error = 0;
 	int __user *argp = (int __user *)arg;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	unsigned int ver = 0;
 #endif
 
@@ -684,7 +684,7 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 		return put_user(inode->i_sb->s_blocksize, p);
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	case FIGETVERSION:
 		error = ioctl_get_version(filp->f_path.dentry->d_inode, &ver);
 		if (!error) {

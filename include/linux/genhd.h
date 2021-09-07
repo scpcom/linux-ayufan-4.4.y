@@ -105,7 +105,7 @@ struct hd_struct {
 	struct disk_stats dkstats;
 #endif
 	struct rcu_head rcu_head;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
 	unsigned auto_remap;
 #endif
 };
@@ -170,7 +170,7 @@ struct gendisk {
 	struct blk_integrity *integrity;
 #endif
 	int node_id;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 	int systemDisk;
 #endif
 };

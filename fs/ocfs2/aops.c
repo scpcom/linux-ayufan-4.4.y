@@ -1790,7 +1790,7 @@ int ocfs2_write_begin_nolock(struct address_space *mapping,
 
 	wc->w_handle = handle;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	if (clusters_to_alloc) {
 		ret = dquot_alloc_space_nodirty(inode,
 			ocfs2_clusters_to_bytes(osb->sb, clusters_to_alloc));
@@ -1843,7 +1843,7 @@ success:
 	return 0;
 out_quota:
 	if (clusters_to_alloc)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_space(inode,
 #else
 		vfs_dq_free_space(inode,

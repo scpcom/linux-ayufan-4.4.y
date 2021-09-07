@@ -35,7 +35,7 @@
 #include <linux/hid.h>
 #include <linux/hiddev.h>
 #include <linux/compat.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STATIC_HIDDEV_MINOR
 #include <linux/string.h>
 #endif
 #include "usbhid.h"
@@ -885,7 +885,7 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 	struct hiddev *hiddev;
 	struct usbhid_device *usbhid = hid->driver_data;
 	int retval;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STATIC_HIDDEV_MINOR
 #define UPS_USAGE                               0x840004
 #define POWER_USAGE                             0x840020        /* wrong, but needed for MGE */
 	int minor_offset = 8;
@@ -961,7 +961,7 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 	/* when lock_kernel() usage is fixed in usb_open(),
 	 * we could also fix it here */
 	lock_kernel();
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STATIC_HIDDEV_MINOR
 	retval = usb_register_dev1(usbhid->intf, &hiddev_class, minor_offset);
 #else
 	retval = usb_register_dev(usbhid->intf, &hiddev_class);

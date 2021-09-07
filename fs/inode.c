@@ -193,10 +193,10 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	inode->i_rdev = 0;
 	inode->dirtied_when = 0;
 	
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	inode->i_archive_version = 0;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	inode->i_mode2 = 0;   /* set archive bit on creation */
 #endif
 	if (security_inode_alloc(inode))
@@ -211,7 +211,7 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 
 	mutex_init(&inode->i_mutex);
 	lockdep_set_class(&inode->i_mutex, &sb->s_type->i_mutex_key);
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_CREATE_TIME) || defined(SYNO_ARCHIVE_BIT)
 	mutex_init(&inode->i_syno_mutex);
 	lockdep_set_class(&inode->i_syno_mutex, &sb->s_type->i_syno_mutex_key);
 #endif

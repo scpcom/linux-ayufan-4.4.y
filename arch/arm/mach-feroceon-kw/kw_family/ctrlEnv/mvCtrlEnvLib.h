@@ -114,7 +114,7 @@ typedef enum _mvAccessRights
 	MAX_ACC_RIGHTS
 }MV_ACCESS_RIGHTS;
 
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_MPPCTL_REG_W)
 MV_STATUS SYNOMppCtrlRegWrite(MV_U32 mppPin, MV_U32 mppVal);
 #endif
 

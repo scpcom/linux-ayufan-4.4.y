@@ -44,7 +44,7 @@ SYSCALL_DEFINE2(utime, char __user *, filename, struct utimbuf __user *, times)
 
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 /**
  * sys_SYNOUtime() is used to update create time.
  *

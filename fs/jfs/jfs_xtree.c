@@ -585,14 +585,14 @@ int xtInsert(tid_t tid,		/* transaction id */
 			hint = addressXAD(xad) + lengthXAD(xad) - 1;
 		} else
 			hint = 0;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		if ((rc = dquot_alloc_block(ip, xlen)))
 #else
 		if ((rc = vfs_dq_alloc_block(ip, xlen)))
 #endif
 			goto out;
 		if ((rc = dbAlloc(ip, hint, (s64) xlen, &xaddr))) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 			dquot_free_block(ip, xlen);
 #else
 			vfs_dq_free_block(ip, xlen);
@@ -625,7 +625,7 @@ int xtInsert(tid_t tid,		/* transaction id */
 			/* undo data extent allocation */
 			if (*xaddrp == 0) {
 				dbFree(ip, xaddr, (s64) xlen);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 				dquot_free_block(ip, xlen);
 #else
 				vfs_dq_free_block(ip, xlen);
@@ -997,7 +997,7 @@ xtSplitPage(tid_t tid, struct inode *ip,
 	rbn = addressPXD(pxd);
 
 	/* Allocate blocks to quota. */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	rc = dquot_alloc_block(ip, lengthPXD(pxd));
 	if (rc) {
 #else
@@ -1212,7 +1212,7 @@ xtSplitPage(tid_t tid, struct inode *ip,
 
 	/* Rollback quota allocation. */
 	if (quota_allocation)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_block(ip, quota_allocation);
 #else
 		vfs_dq_free_block(ip, quota_allocation);
@@ -1256,7 +1256,7 @@ xtSplitRoot(tid_t tid,
 	struct pxdlist *pxdlist;
 	struct tlock *tlck;
 	struct xtlock *xtlck;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	int rc;
 #endif
 
@@ -1276,14 +1276,14 @@ xtSplitRoot(tid_t tid,
 		return -EIO;
 
 	/* Allocate blocks to quota. */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	rc = dquot_alloc_block(ip, lengthPXD(pxd));
 	if (rc) {
 #else
 	if (vfs_dq_alloc_block(ip, lengthPXD(pxd))) {
 #endif
 		release_metapage(rmp);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		return rc;
 #else
 		return -EDQUOT;
@@ -3713,7 +3713,7 @@ s64 xtTruncate(tid_t tid, struct inode *ip, s64 newsize, int flag)
 		ip->i_size = newsize;
 
 	/* update quota allocation to reflect freed blocks */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	dquot_free_block(ip, nfreed);
 #else
 	vfs_dq_free_block(ip, nfreed);

@@ -25,7 +25,7 @@ ssize_t hfsplus_getxattr(struct dentry *dentry, const char *name,
 
 ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
 int hfsplus_syno_setxattr(struct dentry *dentry, const char *name, const void *value, size_t size, int flags);
 ssize_t hfsplus_syno_getxattr(struct dentry *dentry, const char *name, void *buffer, size_t size);
 #endif

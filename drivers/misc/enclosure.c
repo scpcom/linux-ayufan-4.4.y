@@ -27,7 +27,7 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/mutex.h>
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(SYNO_FIXED_DISK_NAME)
 #include <scsi/scsi_device.h>
 #endif
 
@@ -290,7 +290,7 @@ enclosure_component_register(struct enclosure_device *edev,
 	if (err)
 		ERR_PTR(err);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_DISK_LED_CONTROL
 	/* in driver/scsi/ses.c ses_set_locate function, it will overwrite component's original status,
 	 * so we don't need to clear faulty status here */
 	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == ecomp->type && edev->cb->set_locate) {
@@ -320,7 +320,7 @@ int enclosure_add_device(struct enclosure_device *edev, int component,
 			 struct device *dev)
 {
 	struct enclosure_component *cdev;
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(SYNO_FIXED_DISK_NAME)
 	struct scsi_device *scsi_dev;
 	struct scsi_device *scsi_enc;
 #endif
@@ -338,14 +338,14 @@ int enclosure_add_device(struct enclosure_device *edev, int component,
 
 	put_device(cdev->dev);
 	cdev->dev = get_device(dev);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_DISK_LED_CONTROL
 	/* in driver/scsi/ses.c ses_set_locate function, it will overwrite component's original status,
 	 * so we don't need to clear faulty status here */
 	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type && edev->cb->set_locate) {
 		edev->cb->set_locate(edev, cdev, 1);
 	}
 #endif
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(SYNO_FIXED_DISK_NAME)
 	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
 		scsi_dev = to_scsi_device(dev);
 		scsi_enc = to_scsi_device(edev->edev.parent);
@@ -369,7 +369,7 @@ EXPORT_SYMBOL_GPL(enclosure_add_device);
 int enclosure_remove_device(struct enclosure_device *edev, struct device *dev)
 {
 	struct enclosure_component *cdev;
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(SYNO_FIXED_DISK_NAME)
 	struct scsi_device *scsi_dev;
 	struct scsi_device *scsi_enc;
 #endif
@@ -381,14 +381,14 @@ int enclosure_remove_device(struct enclosure_device *edev, struct device *dev)
 	for (i = 0; i < edev->components; i++) {
 		cdev = &edev->component[i];
 		if (cdev->dev == dev) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SAS_DISK_LED_CONTROL
 			/* in driver/scsi/ses.c ses_set_locate function, it will overwrite component's original status,
 			 * so we don't need to clear faulty status here */
 			if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type && edev->cb->set_locate) {
 				edev->cb->set_locate(edev, cdev, 0);
 			}
 #endif
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(SYNO_FIXED_DISK_NAME)
 			if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
 				scsi_dev = to_scsi_device(dev);
 				scsi_enc = to_scsi_device(edev->edev.parent);

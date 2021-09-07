@@ -4,7 +4,7 @@
 #include <linux/jiffies.h>
 #include <asm/page.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 
 #define PS_BUF_LEN 32
 extern int syno_hibernation_log_sec;
@@ -140,4 +140,4 @@ END:
 	}
 	return res;
 }
-#endif //MY_ABC_HERE
+#endif //SYNO_DEBUG_FLAG

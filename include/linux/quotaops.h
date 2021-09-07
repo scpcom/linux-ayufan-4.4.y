@@ -9,7 +9,7 @@
 
 #include <linux/fs.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 #define DQUOT_SPACE_WARN	0x1
 #define DQUOT_SPACE_RESERVE	0x2
 #define DQUOT_SPACE_NOFAIL	0x4
@@ -46,7 +46,7 @@ int dquot_scan_active(struct super_block *sb,
 struct dquot *dquot_alloc(struct super_block *sb, int type);
 void dquot_destroy(struct dquot *dquot);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 int __dquot_alloc_space(struct inode *inode, qsize_t number, int flags);
 void __dquot_free_space(struct inode *inode, qsize_t number, int flags);
 #else
@@ -54,7 +54,7 @@ int dquot_alloc_space(struct inode *inode, qsize_t number, int prealloc);
 int dquot_alloc_inode(const struct inode *inode, qsize_t number);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 int dquot_alloc_inode(const struct inode *inode, qsize_t number);
 #else
 int dquot_reserve_space(struct inode *inode, qsize_t number, int prealloc);
@@ -62,7 +62,7 @@ int dquot_claim_space(struct inode *inode, qsize_t number);
 void dquot_release_reserved_space(struct inode *inode, qsize_t number);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 int dquot_claim_space_nodirty(struct inode *inode, qsize_t number);
 #else
 int dquot_free_space(struct inode *inode, qsize_t number);
@@ -172,7 +172,7 @@ static inline void vfs_dq_init(struct inode *inode)
 		inode->i_sb->dq_op->initialize(inode, -1);
 }
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 /* The following allocation/freeing/transfer functions *must* be called inside
  * a transaction (deadlocks possible otherwise) */
 static inline int vfs_dq_prealloc_space_nodirty(struct inode *inode, qsize_t nr)
@@ -238,7 +238,7 @@ static inline int vfs_dq_alloc_inode(struct inode *inode)
 	return 0;
 }
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 /*
  * Convert in-memory reserved quotas to real consumed quotas
  */
@@ -386,7 +386,7 @@ static inline int vfs_dq_transfer(struct inode *inode, struct iattr *iattr)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 static inline int __dquot_alloc_space(struct inode *inode, qsize_t number,
 		int flags)
 {
@@ -463,7 +463,7 @@ static inline void vfs_dq_free_space(struct inode *inode, qsize_t nr)
 #endif
 #endif /* CONFIG_QUOTA */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 static inline int dquot_alloc_space_nodirty(struct inode *inode, qsize_t nr)
 {
 	return __dquot_alloc_space(inode, nr, DQUOT_SPACE_WARN);

@@ -28,7 +28,7 @@
 #define TARGET_CORE_PLUGIN_H
 
 #define PLUGIN_TYPE_TRANSPORT	0
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 #define PLUGIN_TYPE_OBJ		1
 #endif
 

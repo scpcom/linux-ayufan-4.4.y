@@ -60,7 +60,7 @@ unsigned int oplockEnabled = 1;
 unsigned int experimEnabled = 0;
 unsigned int linuxExtEnabled = 1;
 unsigned int lookupCacheEnabled = 1;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CASELESS_CIFS_MOUNT
 unsigned int SynoPosixSemanticsEnabled = 1;
 #endif
 unsigned int multiuser_mount = 0;

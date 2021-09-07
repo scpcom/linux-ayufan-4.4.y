@@ -396,17 +396,17 @@
 #define __NR_rt_tgsigqueueinfo		(__NR_SYSCALL_BASE+363)
 #define __NR_perf_event_open		(__NR_SYSCALL_BASE+364)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 #define __NR_SYNOUtime                          (__NR_SYSCALL_BASE+402)
 #define SYNOUtime(arg1, arg2)                   syscall(__NR_SYNOUtime, arg1, arg2)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 #define __NR_SYNOArchiveBit                     (__NR_SYSCALL_BASE+403)
 #define SYNOArchiveBit(arg1, arg2)              syscall(__NR_SYNOArchiveBit, arg1, arg2)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 #define __NR_recvfile                           (__NR_SYSCALL_BASE+404)
 #define recvfile(arg1,arg2,arg3,arg4,arg5)      syscall(__NR_recvfile,arg1,arg2,arg3,arg4,arg5)
 #endif
@@ -416,7 +416,7 @@
 #define SYNOMTDAlloc(x)         syscall(__NR_SYNOMTDAlloc, x)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE_STAT
 #define __NR_SYNOCaselessStat64			(__NR_SYSCALL_BASE+406)
 #define __NR_SYNOCaselessLStat64			(__NR_SYSCALL_BASE+407)
 #define __NR_SYNOCaselessStat			(__NR_SYSCALL_BASE+408)
@@ -438,16 +438,16 @@
 #define SYNOCaselessStat64(arg1,arg2)                         syscall(__NR_SYNOCaselessStat64 , arg1,arg2)
 #define SYNOCaselessLStat64(arg1,arg2)                         syscall(__NR_SYNOCaselessLStat64 , arg1,arg2)
 #endif
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_UNICODE_STAT */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
 #define __NR_SYNOEcryptName                 (__NR_SYSCALL_BASE+410)
 #define __NR_SYNODecryptName                (__NR_SYSCALL_BASE+411)
 #define SYNOEcryptName(arg1, arg2)          syscall(__NR_SYNOEcryptName, arg1, arg2)
 #define SYNODecryptName(arg1, arg2, arg3)         syscall(__NR_SYNODecryptName, arg1, arg2, arg3)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_SYNO_ACL
 #define __NR_SYNOACLCheckPerm               (__NR_SYSCALL_BASE+412)
 #define SYNOACLSysCheckPerm(arg1, arg2)            syscall(__NR_SYNOACLCheckPerm, arg1, arg2)
 #define __NR_SYNOACLIsSupport               (__NR_SYSCALL_BASE+413)
@@ -456,7 +456,7 @@
 #define SYNOACLSysGetPerm(arg1, arg2)            syscall(__NR_SYNOACLGetPerm, arg1, arg2)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_STAT
 #define __NR_SYNOStat              (__NR_SYSCALL_BASE+416)
 #define __NR_SYNOFStat              (__NR_SYSCALL_BASE+417)
 #define __NR_SYNOLStat              (__NR_SYSCALL_BASE+418)
@@ -464,7 +464,7 @@
 #define __NR_SYNOFStat64             (__NR_SYSCALL_BASE+420)
 #define __NR_SYNOLStat64              (__NR_SYSCALL_BASE+421)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
 #define __NR_SYNOArchiveOverwrite           (__NR_SYSCALL_BASE+427)
 #define SYNOArchiveOverwrite(arg1,arg2)     syscall(__NR_SYNOArchiveOverwrite,arg1,arg2)
 #endif
@@ -484,7 +484,7 @@
 #endif
 #endif /* __KERNEL__ */
 
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_STAT */
 
 /*
  * The following SWIs are ARM private.

@@ -34,7 +34,7 @@
 #include <linux/crc-itu-t.h>
 #include <linux/exportfs.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UDF_CASELESS
 static inline int udf_match(int len1, const char *name1, int len2,
 			    const char *name2, int iCaseless)
 
@@ -47,7 +47,7 @@ static inline int udf_match(int len1, const char *name1, int len2,
 	if (len1 != len2)
 		return 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UDF_CASELESS
 	if (iCaseless) {
 		return !strncasecmp(name1, name2, len1);
 	}
@@ -252,7 +252,7 @@ static struct fileIdentDesc *udf_find_entry(struct inode *dir,
 			continue;
 
 		flen = udf_get_filename(dir->i_sb, nameptr, fname, lfi);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UDF_CASELESS
 		if (flen && udf_match(flen, fname, child->len, child->name,
 					UDF_QUERY_FLAG(dir->i_sb, SYNO_UDF_FLAG_FORCE_CASELESS))) {
 			goto out_ok;

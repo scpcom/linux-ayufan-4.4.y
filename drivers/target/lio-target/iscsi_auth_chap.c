@@ -127,7 +127,7 @@ static iscsi_chap_t *chap_server_open(
 
 	if (!(auth->naf_flags & NAF_USERID_SET) ||
 	    !(auth->naf_flags & NAF_PASSWORD_SET)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_ERR "iSCSI - CHAP user or password not set for Initiator ACL\n");
 #else
 		printk(KERN_ERR "CHAP user or password not set for"
@@ -258,7 +258,7 @@ int chap_server_compute_md5(
 	}
 
 	if (memcmp(chap_n, auth->userid, strlen(auth->userid)) != 0) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_ERR "iSCSI - CHAP_N values do not match!\n");
 #else
 		printk(KERN_ERR "CHAP_N values do not match!\n");
@@ -313,7 +313,7 @@ int chap_server_compute_md5(
 		goto out;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_CHAP_CHALLENGE_LENGTH
 	sg_init_one(&sg, (void *)chap->challenge, CHAP_CHALLENGE_LENGTH);
 	ret = crypto_hash_update(&desc, &sg, CHAP_CHALLENGE_LENGTH);
 #else

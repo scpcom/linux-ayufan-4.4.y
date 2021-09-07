@@ -683,7 +683,7 @@ do {									       \
 
 #endif /* defined(__KERNEL__) || defined(__linux__) */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 #define ext4_mode2			i_pad1
 #endif
 
@@ -969,7 +969,7 @@ struct ext4_super_block {
 	__u8	s_reserved_char_pad2;
 	__le16  s_reserved_pad;
 	__le64	s_kbytes_written;	/* nr of lifetime kilobytes written */
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_KERNEL_UNICODE) || defined(SYNO_ARCHIVE_VERSION)
 	__u32	s_reserved[157];	/* Padding to the end of the block */
 	__le32	s_archive_version;	/* Last archived version */
 	__le32	s_archive_version_obsoleted;
@@ -1114,11 +1114,11 @@ struct ext4_sb_info {
 	unsigned int s_log_groups_per_flex;
 	struct flex_groups *s_flex_groups;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 	int s_new_error_fs_event_flag;
 	char *s_mount_path;
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	int s_swap_create_time;
 #endif
 	/* workqueue for dio unwritten */
@@ -1360,7 +1360,7 @@ struct ext4_dir_entry_2 {
  * Hash Tree Directory indexing
  * (c) Daniel Phillips, 2001
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 #define SYNO_HASH_MAGIC	0x01856E96      // 25521814
 #define is_dx(dir) ((EXT4_SB(dir->i_sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) && \
 					!(EXT4_HAS_COMPAT_FEATURE(dir->i_sb, \
@@ -1477,7 +1477,7 @@ extern ext4_fsblk_t ext4_new_meta_blocks(handle_t *handle, struct inode *inode,
 			ext4_fsblk_t goal, unsigned long *count, int *errp);
 extern int ext4_claim_free_blocks(struct ext4_sb_info *sbi, s64 nblocks);
 extern int ext4_has_free_blocks(struct ext4_sb_info *sbi, s64 nblocks);
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 extern void ext4_free_blocks(handle_t *handle, struct inode *inode,
                              ext4_fsblk_t block, unsigned long count, int metadata);
 #endif
@@ -1539,7 +1539,7 @@ extern int ext4_mb_reserve_blocks(struct super_block *, int);
 extern void ext4_discard_preallocations(struct inode *);
 extern int __init init_ext4_mballoc(void);
 extern void exit_ext4_mballoc(void);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 extern void ext4_free_blocks(handle_t *handle, struct inode *inode,
 			     ext4_fsblk_t block, unsigned long count,
 			     int metadata);
@@ -1590,7 +1590,7 @@ extern int flush_aio_dio_completed_IO(struct inode *inode);
 extern void ext4_da_update_reserve_space(struct inode *inode,
 					int used, int quota_claim);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 extern int syno_ext4_get_archive_ver(struct dentry *d, u32 *);
 extern int syno_ext4_set_archive_ver(struct dentry *d, u32);
 #endif

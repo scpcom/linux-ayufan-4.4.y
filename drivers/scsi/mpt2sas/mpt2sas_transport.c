@@ -1044,7 +1044,7 @@ mpt2sas_transport_update_links(struct MPT2SAS_ADAPTER *ioc,
 		    mpt2sas_phy, mpt2sas_phy->remote_identify.sas_address);
 #endif
 	} else
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SAS_MPT2_HOTPLUG_PHY
 	{
 		mpt2sas_phy->attached_handle = (u16)0;
 		memset(&mpt2sas_phy->remote_identify, 0 , sizeof(struct

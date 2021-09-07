@@ -7,7 +7,7 @@
 #include "../i2c/i2c-mv.h"
 #include "mv6281_common.h"
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HW_VERSION
 #include <linux/synobios.h>
 #endif
 
@@ -27,7 +27,7 @@ InitModuleType(struct synobios_ops *ops)
 
 	switch (model) {
 	case MODEL_DS210j:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HW_VERSION
 		if (syno_is_hw_version(HW_DS210jv20)) {
 			pType = &type_210jv2;
 		} else if (syno_is_hw_version(HW_DS210jv30)) {

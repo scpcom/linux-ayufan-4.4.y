@@ -64,7 +64,7 @@
 
 #include <target/target_core_fabric_ops.h>
 #include <target/target_core_configfs.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_FORCE_LOGOUT
 #include <target/target_core_base.h>
 #endif
 
@@ -74,7 +74,7 @@
 
 #undef ISCSI_TARGET_UTIL_C
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_FORCE_LOGOUT
 void iscsi_sess_force_logout(struct iscsi_session_s* sess)
 {
 	iscsi_conn_t* conn = NULL;
@@ -384,7 +384,7 @@ iscsi_cmd_t *iscsi_allocate_se_cmd_for_tmr(
 	if (!(cmd))
 		return NULL;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	cmd->data_direction = DMA_NONE;
 #else
 	cmd->data_direction = SE_DIRECTION_NONE;
@@ -412,7 +412,7 @@ iscsi_cmd_t *iscsi_allocate_se_cmd_for_tmr(
 			SESS(conn)->se_sess, 0, DMA_NONE,
 			TASK_ATTR_SIMPLE, &cmd->sense_buffer[0]);
 #else
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	cmd->se_cmd = transport_alloc_se_cmd(
 				&lio_target_fabric_configfs->tf_ops,
 				SESS(conn)->se_sess, (void *)cmd, 0,
@@ -461,7 +461,7 @@ int iscsi_decide_list_to_build(
 	    SESS_OPS(sess)->DataPDUInOrder)
 		return 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	if (cmd->data_direction == DMA_NONE)
 		return 0;
 #else
@@ -472,7 +472,7 @@ int iscsi_decide_list_to_build(
 	na = iscsi_tpg_get_node_attrib(sess);
 	memset(&bl, 0, sizeof(iscsi_build_list_t));
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	if (cmd->data_direction == DMA_FROM_DEVICE) {
 #else
 	if (cmd->data_direction == ISCSI_READ) {
@@ -887,7 +887,7 @@ void iscsi_add_cmd_to_immediate_queue(
 {
 	iscsi_queue_req_t *qr;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REQUEST_QUEUE_DESTROY
 	if( TARG_CONN_STATE_CLEANUP_WAIT == conn->conn_state ) {
 		return;
 	}
@@ -980,7 +980,7 @@ void iscsi_add_cmd_to_response_queue(
 {
 	iscsi_queue_req_t *qr;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REQUEST_QUEUE_DESTROY
 	if( TARG_CONN_STATE_CLEANUP_WAIT == conn->conn_state ) {
 		return;
 	}
@@ -1463,7 +1463,7 @@ static const char *iscsi_ntop4(
  * author:
  *	Paul Vixie, 1996.
  */
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_PRINTABLE_IPV6
 const char *iscsi_ntop6(const unsigned char *src, char *dst, size_t size)
 {
 	/*
@@ -1568,7 +1568,7 @@ const char *iscsi_ntop6(const unsigned char *src, char *dst, size_t size)
 	 * to use pointer overlays.  All the world's not a VAX.
 	 */
 	char tmp[sizeof ("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")], *tp;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 	// reduce compile-time warning messages
 	struct { int base, len; } best = {0, 0}, cur = {0, 0};
 #else

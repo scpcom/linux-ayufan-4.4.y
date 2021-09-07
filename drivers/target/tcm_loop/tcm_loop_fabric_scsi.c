@@ -326,7 +326,7 @@ static int tcm_loop_queuecommand(
 	tl_tpg = &tl_hba->tl_hba_tpgs[sc->device->id];
 	se_tpg = tl_tpg->tl_se_tpg;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	if (sc->sc_data_direction == DMA_TO_DEVICE)
 		data_direction = DMA_TO_DEVICE;
 	else if (sc->sc_data_direction == DMA_FROM_DEVICE)

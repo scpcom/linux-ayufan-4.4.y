@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* Copyright (c) 2008 Synology Inc. All rights reserved. */
 
 #ifndef __SYNO_H_
@@ -350,7 +347,7 @@
  * Dsc: Malloc before mtd write.
  * Dep: SYNO_SYSTEM_CALL
  */
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_SYSTEM_CALL)
 #define SYNO_MTD_ALLOC
 #endif
 
@@ -512,10 +509,10 @@
 #if defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64) || defined(CONFIG_ARCH_FEROCEON)
 #define SYNO_SWITCH_NET_DEVICE_NAME
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SWITCH_NET_DEVICE_NAME
 #define SYNO_MAX_SWITCHABLE_NET_DEVICE 8
 #define SYNO_NET_DEVICE_ENCODING_LENGTH 6
-#endif  /* MY_ABC_HERE */
+#endif  /* SYNO_SWITCH_NET_DEVICE_NAME */
 #endif
 
 /**
@@ -627,7 +624,7 @@
  */
 #define SYNO_HAS_SDCARDREADER
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HAS_SDCARDREADER
 #define SYNO_SD_COPY
 #define SDCOPY_PORT_LOCATION 98
 #endif
@@ -725,7 +722,7 @@
  * Dsc: Wake up all md/lv which are in the same volume to speed up the responce time.
  */
 #define SYNO_FAST_VOLUME_WAKEUP
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FAST_VOLUME_WAKEUP
 #define CHECKINTERVAL (7UL*HZ)
 #endif
 
@@ -813,7 +810,7 @@
  * Dsc: Assemble linear raid while we extend the hot_remove_disk
  * IN : md.c
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_DEVICE_NOTIFY
 #define SYNO_RAID_LINEAR_ASM
 #endif
 
@@ -956,7 +953,7 @@
  *      drivers/ata/libata-scsi.c, include/linux/libata.h, drivers/ata/libata-eh.c, drivers/ata/sata_mv.c,
  *      drivers/ata/libata-sff.c, kernel/sysctl.c
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_HD_NUM
 #define SYNO_SPINUP_DELAY
 #endif
 
@@ -982,7 +979,7 @@
  *      through scemd and synobios 
  * IN : synobios.c
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
 #define SYNO_AUTO_REMAP_REPORT
 #endif
 
@@ -994,7 +991,7 @@
  *      create a new raid5. But some disk really need this.
  * IN : raid5.c
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
 #define SYNO_RAID5_BS_REWRITE
 #endif
 
@@ -1021,7 +1018,7 @@
  */
 #define SYNO_FIXED_DISK_NAME
 
-#if	defined(MY_ABC_HERE) || defined(SYNO_BADSECTOR_TEST)
+#if	defined(SYNO_FIXED_DISK_NAME) || defined(SYNO_BADSECTOR_TEST)
 /**
  * Maximum SCSI internal disk. We will reserve device name for
  * internal disks.
@@ -1096,7 +1093,7 @@
  *      ata.h, libata-pmp.c, mvSata/mvIALCommonUtils.c,
  *      mvSata/mvIALCommon.c, mvSata/mvIALCommon.h, drivers/ata/libata-sff.c
  */
-#if defined(CONFIG_SATA_PMP) && defined(MY_ABC_HERE)
+#if defined(CONFIG_SATA_PMP) && defined(SYNO_INTERNAL_HD_NUM)
 #define SYNO_SATA_PM_DEVICE_GPIO
 #endif
 
@@ -1197,7 +1194,7 @@
 /* Fix: DSM #49789
  * Dsc: define the retry times in sata compatibility mechanism.
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 #define SYNO_SATA_RETRY_TIMES 1
 #endif
 
@@ -1319,7 +1316,7 @@
  * Fix: DSM #49926
  * Dsc: export disk sata error to user space through synobios and scemd
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 #define SYNO_SATA_ERROR_REPORT
 #endif
 
@@ -1465,7 +1462,7 @@
  */
 
 #define SYNO_XATTR
-#ifdef MY_ABC_HERE
+#ifdef SYNO_XATTR
 /**
  * Dsc: Add syno archive version for backup. Each inode and 
  * superblock all keep a version info. Once a file or directory 
@@ -1602,9 +1599,9 @@
  *      This define should be removed if powerpc/qoriq (behind SYNO_CREATE_TIME_SWAP_VERSION) not support.
  */
 #if defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_QORIQ)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 #define SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 #define SYNO_CREATE_TIME_SWAP_VERSION 3719
 #endif
 #endif
@@ -1616,7 +1613,7 @@
  *      samba.
  */
 #define SYNO_ARCHIVE_BIT
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 
 /**
  * Fix: DSM #44005
@@ -1639,14 +1636,14 @@
 #error "Samba archive bit redefine."
 #endif
 
-#if defined(MY_ABC_HERE) || defined(CONFIG_FS_SYNO_ACL)
+#if defined(SYNO_FS_SYNO_ACL) || defined(CONFIG_FS_SYNO_ACL)
 #if defined (F_CLRSMB_READONLY) || defined (F_SETSMB_READONLY) || \
 	defined (F_CLRACL_INHERIT)  || defined (F_SETACL_INHERIT)  || \
 	defined (F_CLRACL_OWNER_IS_GROUP) || defined (F_SETACL_OWNER_IS_GROUP)  || \
 	defined (F_SETACL_SUPPORT) || defined (F_SETACL_SUPPORT)
 #error "ACL archive bit redefine."
 #endif /* ACL archive bit redefine. */
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_FS_SYNO_ACL */
 
 #define SYNO_FCNTL_BASE             513
 #define F_CLEAR_ARCHIVE             (SYNO_FCNTL_BASE + 0)
@@ -1658,7 +1655,7 @@
 #define F_CLRSMB_SYSTEM             (SYNO_FCNTL_BASE + 6)
 #define F_CLEAR_S3_ARCHIVE          (SYNO_FCNTL_BASE + 7)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FS_SYNO_ACL
 #define F_CLRSMB_READONLY           (SYNO_FCNTL_BASE + 8)
 #define F_SETSMB_READONLY           (SYNO_FCNTL_BASE + 9)
 #define F_CLRACL_INHERIT            (SYNO_FCNTL_BASE + 10)
@@ -1672,16 +1669,16 @@
 #define SYNO_FCNTL_LAST             F_SETACL_OWNER_IS_GROUP
 #else
 #define SYNO_FCNTL_LAST             F_CLEAR_S3_ARCHIVE
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_FS_SYNO_ACL */
 
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_ARCHIVE_BIT */
 /**
  * Dsc: Let ext3 file system be case-insensitive.
  *      This modify should sync with Samba and e2fsprogs.
  */
 #define SYNO_KERNEL_UNICODE
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
+#ifdef SYNO_SYSTEM_CALL
 #define SYNO_UNICODE_STAT
 #endif
 /* It's max path string len of smb. we should sync it with smb.*/
@@ -1698,7 +1695,7 @@
  * Dsc: recvfile syscall
  *      This modify should sync with samba
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SYSTEM_CALL
 #define SYNO_RECVFILE
 #endif
 
@@ -1780,7 +1777,7 @@
  * Dsc: convert blkcipher to ablkcipher , let ecrpytfs can use
  *      both hardware accelerate and software.
  */
-#ifndef MY_ABC_HERE
+#ifndef SYNO_ECRYPTFS_OCF
 #define SYNO_ECRYPTFS_WITH_ABLKCIPHER
 #endif
 
@@ -1877,7 +1874,7 @@
  *
  *      [PATCH] tcm: Remove legacy se_obj_lun_type_t API interface
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 #define SYNO_LIO_REMOVE_OBJLUN_PATCH
 #endif
 
@@ -1886,7 +1883,7 @@
  *      [PATCH] tcm: Convert SE_DIRECTION_* to use enum dma_data_direction
  *      [PATCH] lio-target: Convert ISCSI_* data_direction macros to enum dma_data_direction
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 #define SYNO_LIO_DMA_DIRECTION_PATCH
 #endif
 
@@ -1899,7 +1896,7 @@
  *      [PATCH] target: remove never changing indirections in se_cmd
  *      [PATCH] target: remove transport_generic_map_buffers_to_tasks
  */
-#ifdef MY_ABC_HERE 
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH 
 /* #define SYNO_LIO_TRANSPORT_PATCHES */
 #endif
 
@@ -1976,7 +1973,7 @@
 /**
  * Dsc: Force read-only when failed to write data
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_FORCE_LOGOUT
 #define SYNO_LIO_FORCE_READ_ONLY
 #endif
 
@@ -2097,7 +2094,7 @@
  */
 #define SYNO_SATA_MV_EH
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_MV_EH
 #define MAX_CHANNEL_RETRY       2
 #define CHANNEL_RETRY_INTERVAL  (3*HZ)
 
@@ -2297,7 +2294,7 @@
 * Dsc: Provide a interface for user to set the udp packet size they want
 */
 #define SYNO_NFSD_UDP_PACKET
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFSD_UDP_PACKET
 #define SYNO_NFSD_UDP_MAX_PACKET_SIZE 32768
 #define SYNO_NFSD_UDP_MIN_PACKET_SIZE 4096
 #define SYNO_NFSD_UDP_DEF_PACKET_SIZE 8192
@@ -2355,7 +2352,7 @@
  * Fix: DSM #23148
  * Dsc: Make iSCSI device nodes to have prefix "ids"
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 #define SYNO_ISCSI_DEVICE
 #define SYNO_SATA_DEVICE_PREFIX	   "sd"
 #define SYNO_ISCSI_DEVICE_PREFIX   "isd"
@@ -2410,14 +2407,14 @@
  * Dsc: The SAS model will not be named as fixed position as before, e.g. sda -> disk1, sdb -> disk2.
  * SAS disk name will be named as sas1, sas2, sas3..., but the disk name is no longer mapping to any disk position
  */
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_FIXED_DISK_NAME)
 #define SYNO_SAS_DISK_NAME
 #endif
 
 #if defined(SYNO_SAS_DISK_NAME)
 #define SYNO_SAS_USB_DEVICE_PREFIX		"usb"
 #define SYNO_SAS_DEVICE_PREFIX			"sas"
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ISCSI_DEVICE
 #define SYNO_SAS_ISCSI_DEVICE_PREFIX	"iscsi"
 #endif
 #endif /* SYNO_SAS_DISK_NAME */

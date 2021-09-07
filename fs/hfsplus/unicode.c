@@ -118,7 +118,7 @@ static u16 *hfsplus_compose_lookup(u16 *p, u16 cc)
 	return NULL;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_EA
 static int hfsplus_uni2asc_ex(struct super_block *sb,
 		const struct hfsplus_unistr *ustr,
 		char *astr, int *len_p, int convert);
@@ -200,7 +200,7 @@ int hfsplus_uni2asc(struct super_block *sb, const struct hfsplus_unistr *ustr, c
 				c0 = 0x2400;
 				break;
 			case '/':
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_EA
 				if (convert)
 #endif
 				c0 = ':';
@@ -267,7 +267,7 @@ out:
  * Convert one or more ASCII characters into a single unicode character.
  * Returns the number of ASCII characters corresponding to the unicode char.
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_EA
 static inline int asc2unichar_ex(struct super_block *sb, const char *astr, int len,
 			      wchar_t *uc, int convert);
 static inline int asc2unichar(struct super_block *sb, const char *astr, int len,
@@ -292,7 +292,7 @@ static inline int asc2unichar(struct super_block *sb, const char *astr, int len,
 		*uc = 0;
 		break;
 	case ':':
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_EA
 		if (convert)
 #endif
 		*uc = '/';
@@ -325,7 +325,7 @@ static inline u16 *decompose_unichar(wchar_t uc, int *size)
 	return hfsplus_decompose_table + (off / 4);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_EA
 static int hfsplus_asc2uni_ex(struct super_block *sb,
 		    struct hfsplus_unistr *ustr, int max_unistr_len,
 		    const char *astr, int len, int convert);
@@ -355,7 +355,7 @@ int hfsplus_asc2uni(struct super_block *sb, struct hfsplus_unistr *ustr,
 
 	decompose = !(HFSPLUS_SB(sb).flags & HFSPLUS_SB_NODECOMPOSE);
 	while (outlen < HFSPLUS_MAX_STRLEN && len > 0) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_EA
 		size = asc2unichar_ex(sb, astr, len, &c, convert);
 #else
 		size = asc2unichar(sb, astr, len, &c);

@@ -891,7 +891,7 @@ asmlinkage long sys_xfsbackup(int sock_in_fd, int file_out_fd, loff_t __user *co
 int kernel_execve(const char *filename, char *const argv[], char *const envp[]);
 
 #ifdef CONFIG_IA32_EMULATION
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, size_t *rwbytes);
 #endif
 #endif

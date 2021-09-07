@@ -1262,7 +1262,7 @@ int reiserfs_delete_item(struct reiserfs_transaction_handle *th,
 		       "reiserquota delete_item(): freeing %u, id=%u type=%c",
 		       quota_cut_bytes, inode->i_uid, head2type(&s_ih));
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	dquot_free_space_nodirty(inode, quota_cut_bytes);
 #else
 	vfs_dq_free_space_nodirty(inode, quota_cut_bytes);
@@ -1350,7 +1350,7 @@ void reiserfs_delete_solid_item(struct reiserfs_transaction_handle *th,
 					       quota_cut_bytes, inode->i_uid,
 					       key2type(key));
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 				dquot_free_space_nodirty(inode,
 #else
 				vfs_dq_free_space_nodirty(inode,
@@ -1704,7 +1704,7 @@ int reiserfs_cut_from_item(struct reiserfs_transaction_handle *th,
 		       "reiserquota cut_from_item(): freeing %u id=%u type=%c",
 		       quota_cut_bytes, inode->i_uid, '?');
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	dquot_free_space_nodirty(inode, quota_cut_bytes);
 #else
 	vfs_dq_free_space_nodirty(inode, quota_cut_bytes);
@@ -1943,14 +1943,14 @@ int reiserfs_paste_into_item(struct reiserfs_transaction_handle *th, struct tree
 		       key2type(&(key->on_disk_key)));
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	retval = dquot_alloc_space_nodirty(inode, pasted_size);
 	if (retval) {
 #else
 	if (vfs_dq_alloc_space_nodirty(inode, pasted_size)) {
 #endif
 		pathrelse(search_path);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		return retval;
 #else
 		return -EDQUOT;
@@ -2008,7 +2008,7 @@ int reiserfs_paste_into_item(struct reiserfs_transaction_handle *th, struct tree
 		       pasted_size, inode->i_uid,
 		       key2type(&(key->on_disk_key)));
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	dquot_free_space_nodirty(inode, pasted_size);
 #else
 	vfs_dq_free_space_nodirty(inode, pasted_size);
@@ -2050,14 +2050,14 @@ int reiserfs_insert_item(struct reiserfs_transaction_handle *th,
 #endif
 		/* We can't dirty inode here. It would be immediately written but
 		 * appropriate stat item isn't inserted yet... */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		retval = dquot_alloc_space_nodirty(inode, quota_bytes);
 		if (retval) {
 #else
 		if (vfs_dq_alloc_space_nodirty(inode, quota_bytes)) {
 #endif
 			pathrelse(path);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 			return retval;
 #else
 			return -EDQUOT;
@@ -2110,7 +2110,7 @@ int reiserfs_insert_item(struct reiserfs_transaction_handle *th,
 		       quota_bytes, inode->i_uid, head2type(ih));
 #endif
 	if (inode)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_space_nodirty(inode, quota_bytes);
 #else
 		vfs_dq_free_space_nodirty(inode, quota_bytes);

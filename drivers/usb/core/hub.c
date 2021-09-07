@@ -82,12 +82,12 @@ struct usb_hub {
 	struct delayed_work	leds;
 	struct delayed_work	init_work;
 	void			**port_owners;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	int				syno_hub_eh;
 #endif
 };
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 static int hub_port_debounce(struct usb_hub *hub, int port1);
 #endif
 
@@ -103,7 +103,7 @@ static LIST_HEAD(hub_event_list);	/* List of hubs needing servicing */
 /* Wakes up khubd */
 static DECLARE_WAIT_QUEUE_HEAD(khubd_wait);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_SHUTDOWN_FIX
 struct task_struct *khubd_task = NULL;
 #else
 static struct task_struct *khubd_task;
@@ -176,7 +176,7 @@ static inline char *portspeed(int portstatus)
 }
 
 /* Note that hdev or one of its children must be locked! */
-#ifndef MY_ABC_HERE
+#ifndef SYNO_USB_STOR_COMP_ENHANCE
 static struct usb_hub *hdev_to_hub(struct usb_device *hdev)
 #else
 struct usb_hub *hdev_to_hub(struct usb_device *hdev)
@@ -186,7 +186,7 @@ struct usb_hub *hdev_to_hub(struct usb_device *hdev)
 		return NULL;
 	return usb_get_intfdata(hdev->actconfig->interface[0]);
 }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 EXPORT_SYMBOL(hdev_to_hub);
 #endif
 
@@ -392,7 +392,7 @@ static int hub_port_status(struct usb_hub *hub, int port1,
 	return ret;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 void syno_clear_hub_eh(struct usb_hub *hub)
 {
 	if (!hub)
@@ -1877,7 +1877,7 @@ fail:
 	return err;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_SERIAL_FIX
 /* Return 1 if found the same serial in other usb device. Otherwizs, return 0. */
 static int device_serial_match(struct usb_device *dev, struct usb_device *udev_search)
 {
@@ -1902,7 +1902,7 @@ static int device_serial_match(struct usb_device *dev, struct usb_device *udev_s
 	}
 	return match;
 }
-#endif /* MY_ABC_HERE*/
+#endif /* SYNO_USB_SERIAL_FIX*/
 
 /**
  * usb_new_device - perform initial device setup (usbcore-internal)
@@ -1954,7 +1954,7 @@ int usb_new_device(struct usb_device *udev)
 	udev->dev.devt = MKDEV(USB_DEVICE_MAJOR,
 			(((udev->bus->busnum-1) * 128) + (udev->devnum-1)));
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_SERIAL_FIX
 #define SERIAL_LEN 33
 	/* Make a fake serial number from product name */
 	if ( NULL == udev->product ) {
@@ -2166,12 +2166,12 @@ static unsigned hub_is_wusb(struct usb_hub *hub)
 #define HUB_ROOT_RESET_TIME	50	/* times are in msec */
 #define HUB_SHORT_RESET_TIME	10
 #define HUB_LONG_RESET_TIME	200
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HUB_RESET_TIMEOUT
 #define HUB_RESET_TIMEOUT	3000
 #else
 #define HUB_RESET_TIMEOUT   500
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_RESET_WAIT
 // wait device reset, some devices are slow, then set address will fail
 // ex. WD passport, Fujitsu, HP.
 #define HUB_XHCI_ROOT_RESET_TIME	1000
@@ -2195,7 +2195,7 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		if (ret < 0)
 			return ret;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 		if (portchange & (USB_PORT_STAT_C_CONNECTION | USB_PORT_STAT_C_ENABLE))
 		{
 			hub_port_debounce(hub, port1);
@@ -2218,7 +2218,7 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		    (portstatus & USB_PORT_STAT_ENABLE)) {
 			if (hub_is_wusb(hub))
 				udev->speed = USB_SPEED_WIRELESS;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 			else if ((hub->hdev->parent == NULL) &&
 				(portstatus & (1 << USB_PORT_FEAT_SUPERSPEED)))
 				udev->speed = USB_SPEED_SUPER;
@@ -2242,7 +2242,7 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 			port1, delay);
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	/* Device went away? */
 	if (!(portstatus & USB_PORT_STAT_CONNECTION))
 		return -ENOTCONN;
@@ -2324,7 +2324,7 @@ static int hub_port_reset(struct usb_hub *hub, int port1,
 	return status;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 //NEC
 //#define IS_USB2(x) (x == 3 || x == 4) // index from 1 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
 //#define IS_USB3(x) (x == 1 || x == 2) // index from 1 // HCS_MAX_PORTS(xhci->hcs_params1) = 4
@@ -2354,7 +2354,7 @@ static bool inline IS_USB2(unsigned int x)
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_BACKPORT
 /* Warm reset a USB3 protocol port */
 static int hub_port_warm_reset(struct usb_hub *hub, int port)
 {
@@ -2374,7 +2374,7 @@ static int hub_port_warm_reset(struct usb_hub *hub, int port)
 		return ret;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_RESET_WAIT
 	// this sleep is waiting for status change to clear (reset/bh_reset/link_state),
 	// but sometimes it will take longer time to change the status,
 	// so prolong the waiting time.
@@ -2956,7 +2956,7 @@ EXPORT_SYMBOL_GPL(usb_ep0_reinit);
 #define usb_sndaddr0pipe()	(PIPE_CONTROL << 30)
 #define usb_rcvaddr0pipe()	((PIPE_CONTROL << 30) | USB_DIR_IN)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_EXTRA_TIMEOUT_FOR_SET_ADDR
 static int hub_set_address(struct usb_device *udev, int devnum, unsigned int extra_timeout_base)
 #else
 static int hub_set_address(struct usb_device *udev, int devnum)
@@ -2980,7 +2980,7 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	} else {
 		retval = usb_control_msg(udev, usb_sndaddr0pipe(),
 				USB_REQ_SET_ADDRESS, 0, devnum, 0,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_EXTRA_TIMEOUT_FOR_SET_ADDR
 				NULL, 0, USB_CTRL_SET_TIMEOUT * (extra_timeout_base + 1));
 #else
 				NULL, 0, USB_CTRL_SET_TIMEOUT);
@@ -2995,7 +2995,7 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	return retval;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 enum XHCI_SPECIAL_RESET_MODE xhci_special_reset = XHCI_SPECIAL_RESET_PAUSE;
 EXPORT_SYMBOL_GPL(xhci_special_reset);
 #define SPECIAL_RESET_RETRY 20 // times
@@ -3023,8 +3023,8 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	enum usb_device_speed	oldspeed = udev->speed;
 	char 			*speed, *type;
 	int			devnum = udev->devnum;
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
+#ifdef SYNO_USB3_RESET_FOR_ADDR_ERR
 	bool reset_for_addr_err = true;
 	int special_reset_retry_count = 0;
 #endif
@@ -3039,7 +3039,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	 * (from USB 2.0 spec, section 7.1.7.5)
 	 */
 	if (!hdev->parent) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_RESET_WAIT
 		if (IS_XHCI(hub))
 			delay = HUB_XHCI_ROOT_RESET_TIME;
 		else
@@ -3056,7 +3056,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 
 	mutex_lock(&usb_address0_mutex);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 port_init_retry:
 #endif
 
@@ -3066,7 +3066,7 @@ port_init_retry:
 	} else {
 		/* Reset the device; full speed may morph to high speed */
 		/* FIXME a USB 2.0 device may morph into SuperSpeed on reset. */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 		// special reset for xhci port only during reboot only
 		if (!IS_XHCI(hub) ||
 				(XHCI_SPECIAL_RESET_RUN != xhci_special_reset)) {
@@ -3243,7 +3243,7 @@ port_init_retry:
  		 */
 		if (udev->wusb == 0) {
 			for (j = 0; j < SET_ADDRESS_TRIES; ++j) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_EXTRA_TIMEOUT_FOR_SET_ADDR
 				retval = hub_set_address(udev, devnum, j);
 #else
 				retval = hub_set_address(udev, devnum);
@@ -3257,7 +3257,7 @@ port_init_retry:
 					"device not accepting address %d, error %d\n",
 					devnum, retval);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_RESET_FOR_ADDR_ERR
 				if ((reset_for_addr_err == true) && (oldspeed == USB_SPEED_SUPER)) {
 					oldspeed = USB_SPEED_UNKNOWN;
 					reset_for_addr_err = false;
@@ -3329,7 +3329,7 @@ port_init_retry:
 		goto fail;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 	dev_dbg(&udev->dev, "vid:0x%x.pid:0x%x.\n", le16_to_cpu(udev->descriptor.idVendor), le16_to_cpu(udev->descriptor.idProduct));
 	dev_dbg(&udev->dev, "bcdUSB:0x%x.\n", le16_to_cpu(udev->descriptor.bcdUSB));
 	// check bcdUSB or pid/vid if we need to do special reset to morph the speed to super
@@ -3467,7 +3467,7 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 	/* Try to resuscitate an existing device */
 	udev = hdev->children[port1-1];
 
-#ifdef MY_ABC_HERE 
+#ifdef SYNO_USB_UPS_COMP_ENHANCE 
 	if ((portstatus == USB_PORT_STAT_POWER) && udev &&
 		(portchange & USB_PORT_STAT_C_CONNECTION)) {
 		//USB_VENDOR_ID_CYBERPOWER
@@ -3525,7 +3525,7 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 	/* Return now if debouncing failed or nothing is connected */
 	if (!(portstatus & USB_PORT_STAT_CONNECTION)) {
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_BACKPORT
 	/* maybe switch power back on (e.g. root hub was reset) */
 	if ((wHubCharacteristics & HUB_CHAR_LPSM) < 2
 			&& !port_is_power_on(hub, portstatus, port1))
@@ -3717,7 +3717,7 @@ static void hub_events(void)
 	 */
 	while (1) {
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_DEBUG
 		dbg("hub_events!\n");
 #endif
 
@@ -3735,7 +3735,7 @@ static void hub_events(void)
 		kref_get(&hub->kref);
 		spin_unlock_irq(&hub_event_lock);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 		if ( syno_get_hub_eh(hub) ) {
 			printk(KERN_ERR "hub is performing EH\n");
 			msleep(100);
@@ -3807,7 +3807,7 @@ static void hub_events(void)
 			if (ret < 0)
 				continue;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_DEBUG
 			dev_dbg (hub_dev, "status:0x%x.change:0x%x.\n", portstatus, portchange);
 #endif
 
@@ -3886,7 +3886,7 @@ static void hub_events(void)
 					USB_PORT_FEAT_C_RESET);
 			}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_BACKPORT
 			if ((portchange & USB_PORT_STAT_C_BH_RESET) &&
 					IS_XHCI(hub) && IS_USB3(i)) {
 				dev_dbg(hub_dev,
@@ -4017,7 +4017,7 @@ int usb_hub_init(void)
 	if (!IS_ERR(khubd_task))
 		return 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_SHUTDOWN_FIX
 	khubd_task = NULL;
 #endif
 	/* Fall through if kernel_thread failed */
@@ -4029,7 +4029,7 @@ int usb_hub_init(void)
 
 void usb_hub_cleanup(void)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_SHUTDOWN_FIX
 	if (khubd_task != NULL) {
 		kthread_stop(khubd_task);
 		khubd_task = NULL;
@@ -4105,7 +4105,7 @@ static int descriptors_changed(struct usb_device *udev,
 		}
 	}
 
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_USB_SERIAL_FIX)
 	//For bug #48602 , when calling usb_reset_device ,
 	//don't compare the serial number if the serial number is empty.
 	//Because the original serial number is empty , and the old one is random-generated by us.
@@ -4124,7 +4124,7 @@ static int descriptors_changed(struct usb_device *udev,
 			changed = 1;
 		}
 	}
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_USB_SERIAL_FIX)
 	}
 #endif
 
@@ -4354,12 +4354,12 @@ int usb_reset_device(struct usb_device *udev)
 		}
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	dev_err(&udev->dev, "lock for hub EH\n");
 	syno_set_hub_eh(hdev_to_hub(udev->parent));
 #endif
 	ret = usb_reset_and_verify_device(udev);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_COMP_ENHANCE
 	syno_clear_hub_eh(hdev_to_hub(udev->parent));
 	dev_err(&udev->dev, "unlock for hub EH\n");
 #endif

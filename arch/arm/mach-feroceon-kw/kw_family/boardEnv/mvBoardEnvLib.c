@@ -637,7 +637,7 @@ MV_U32  mvBoardSysClkGet(MV_VOID)
 	return MV_BOARD_DEFAULT_SYSCLK;
 #endif
 }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CPUFREQ_ADJUST
 EXPORT_SYMBOL(mvBoardSysClkGet);
 #endif
 

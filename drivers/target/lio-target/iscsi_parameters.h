@@ -110,7 +110,7 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define INITIAL_MAXCONNECTIONS			"1"
 #endif
 #define INITIAL_SENDTARGETS			ALL
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_VENDOR_ID
 #define INITIAL_TARGETNAME			"SYNO.Target"
 #define INITIAL_INITIATORNAME			"SYNO.Initiator"
 #define INITIAL_TARGETALIAS			"Synology Target"

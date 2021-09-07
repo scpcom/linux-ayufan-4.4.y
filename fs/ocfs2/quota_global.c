@@ -853,11 +853,11 @@ static void ocfs2_destroy_dquot(struct dquot *dquot)
 const struct dquot_operations ocfs2_quota_operations = {
 	.initialize	= dquot_initialize,
 	.drop		= dquot_drop,
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	.alloc_space	= dquot_alloc_space,
 #endif
 	.alloc_inode	= dquot_alloc_inode,
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	.free_space		= dquot_free_space,
 #endif
 	.free_inode	= dquot_free_inode,

@@ -1777,7 +1777,7 @@ extern unsigned int    datagram_poll(struct file *file, struct socket *sock,
 extern int	       skb_copy_datagram_iovec(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 extern int	       skb_copy_datagram_iovec1(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);

@@ -123,7 +123,7 @@ static void str2hashbuf_unsigned(const char *msg, int len, __u32 *buf, int num)
 		*buf++ = pad;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 static unsigned char UTF8Ext3HashStrBuf[UNICODE_UTF8_BUFSIZE];
 extern spinlock_t Ext3Hash_buf_lock;  /* init at ext3_fill_super() */
 #endif
@@ -149,7 +149,7 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	__u32		in[8], buf[4];
 	void		(*str2hashbuf)(const char *, int, __u32 *, int) =
 				str2hashbuf_signed;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	const char	*szUpperName;
 	int upperlen;
 
@@ -182,14 +182,14 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 
 	switch (hinfo->hash_version) {
 	case DX_HASH_LEGACY_UNSIGNED:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 		hash = dx_hack_hash_unsigned(szUpperName, upperlen);
 #else
 		hash = dx_hack_hash_unsigned(name, len);
 #endif
 		break;
 	case DX_HASH_LEGACY:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 		hash = dx_hack_hash_signed(szUpperName, upperlen);
 #else
 		hash = dx_hack_hash_signed(name, len);
@@ -198,7 +198,7 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	case DX_HASH_HALF_MD4_UNSIGNED:
 		str2hashbuf = str2hashbuf_unsigned;
 	case DX_HASH_HALF_MD4:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 		p = szUpperName;
 		while (upperlen > 0) {
 			(*str2hashbuf)(p, upperlen, in, 8);
@@ -221,7 +221,7 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	case DX_HASH_TEA_UNSIGNED:
 		str2hashbuf = str2hashbuf_unsigned;
 	case DX_HASH_TEA:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 		p = szUpperName;
 		while (upperlen > 0) {
 			(*str2hashbuf)(p, upperlen, in, 4);
@@ -243,7 +243,7 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 		break;
 	default:
 		hinfo->hash = 0;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 		spin_unlock(&Ext3Hash_buf_lock);
 #endif
 		return -1;
@@ -253,7 +253,7 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 		hash = (EXT3_HTREE_EOF-1) << 1;
 	hinfo->hash = hash;
 	hinfo->minor_hash = minor_hash;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	spin_unlock(&Ext3Hash_buf_lock);
 #endif
 	return 0;

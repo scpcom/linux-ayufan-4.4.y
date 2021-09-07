@@ -79,7 +79,7 @@
 #include <linux/clockchips.h>
 #include <linux/clocksource.h>
 
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_HW_VERSION)
 #include <linux/synobios.h>
 #endif
 

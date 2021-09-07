@@ -60,7 +60,7 @@ MV_CPU_CNTRS_EVENT* rxfill_event = NULL;
 #include <linux/inetdevice.h>
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 extern MV_U32 syno_wol_support(mv_eth_priv *priv);
 #endif
 
@@ -110,7 +110,7 @@ static int mv_eth_probe(struct platform_device *pdev)
 }
 
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 extern int mv_eth_tool_read_phy_reg(int phy_addr, u16 page, u16 reg, u16 *val);
 #endif
 static struct platform_driver mv_eth_driver = {
@@ -1985,7 +1985,7 @@ int __init mv_eth_priv_init(mv_eth_priv *priv, int port)
 {
     int         txq, i;
     MV_PKT_INFO *pkt_info;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 	MV_U16		phy_id_0, phy_id_1;
 #endif
 
@@ -2115,7 +2115,7 @@ int __init mv_eth_priv_init(mv_eth_priv *priv, int port)
     priv->tx_coal_usec = ETH_TX_COAL;
     priv->rx_coal_usec = ETH_RX_COAL;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 	priv->wol = 0;
 	if (mv_eth_tool_read_phy_reg(priv->phy_id, 0, MII_PHYSID1, &phy_id_0) ||
 		mv_eth_tool_read_phy_reg(priv->phy_id, 0, MII_PHYSID2, &phy_id_1)) {
@@ -2948,7 +2948,7 @@ struct net_device* __init mv_netdev_init(mv_eth_priv *priv, int mtu, u8* mac)
     else {
 	printk("    o %s, ifindex = %d, GbE port = %d\n",dev->name, dev->ifindex, priv->port);
     }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 	printk("    o %s, phy chipid = %x, Support WOL = %d\n",dev->name, priv->phy_chip, syno_wol_support(priv));
 #endif
     return dev;
@@ -3448,13 +3448,13 @@ void print_skb(struct sk_buff* skb)
     printk("\n");
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_MV_WOL_WITH_UP
 void syno_mv_net_shutdown()
 {
 	int i = 0, j = 0;
 	MV_U16 macTmp[3];
 	MV_U16 phyTmp;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 	extern long g_egiga;
 	if ( 0 == g_egiga ) {
 		return;
@@ -3540,7 +3540,7 @@ static int __init mv_eth_init_module( void )
 #endif
     
     printk( "Loading Marvell Ethernet Driver:\n");
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 	extern long g_egiga;
 		if ( 0 == g_egiga ) {
 		printk("internal netif is disabled\n");

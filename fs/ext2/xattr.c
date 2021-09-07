@@ -640,7 +640,7 @@ ext2_xattr_set2(struct inode *inode, struct buffer_head *old_bh,
 				/* The old block is released after updating
 				   the inode.  */
 				ea_bdebug(new_bh, "reusing block");
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 				error = dquot_alloc_block(inode, 1);
 				if (error) {
 #else
@@ -703,7 +703,7 @@ ext2_xattr_set2(struct inode *inode, struct buffer_head *old_bh,
 		 * as if nothing happened and cleanup the unused block */
 		if (error && error != -ENOSPC) {
 			if (new_bh && new_bh != old_bh)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 				dquot_free_block(inode, 1);
 #else
 				vfs_dq_free_block(inode, 1);
@@ -739,7 +739,7 @@ ext2_xattr_set2(struct inode *inode, struct buffer_head *old_bh,
 			le32_add_cpu(&HDR(old_bh)->h_refcount, -1);
 			if (ce)
 				mb_cache_entry_release(ce);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 			dquot_free_block(inode, 1);
 #else
 			vfs_dq_free_block(inode, 1);
@@ -806,7 +806,7 @@ ext2_xattr_delete_inode(struct inode *inode)
 		mark_buffer_dirty(bh);
 		if (IS_SYNC(inode))
 			sync_dirty_buffer(bh);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_block(inode, 1);
 #else
 		vfs_dq_free_block(inode, 1);

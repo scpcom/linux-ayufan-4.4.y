@@ -69,7 +69,7 @@ static int ext4_unfreeze(struct super_block *sb);
 static void ext4_write_super(struct super_block *sb);
 static int ext4_freeze(struct super_block *sb);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 extern struct dentry_operations ext4_dentry_operations;
 
 spinlock_t Ext4Namei_buf_lock;  /* lock for UTF8Ext4NameiStrBuf[] in fs/ext4/namei.c */
@@ -235,7 +235,7 @@ handle_t *ext4_journal_start_sb(struct super_block *sb, int nblocks)
 	if (sb->s_flags & MS_RDONLY)
 		return ERR_PTR(-EROFS);
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(SYNO_AVOID_FREEZE_DEADLOCK) || defined(SYNO_EXT4_AVOID_FREEZE_RACING_DEADLOCK)
 	/* ext4 has no check of SB_FREEZE_WRITE. which mean it rely on fs
 	   blocking of write action. Other action such as inode delete will
 	   passby barrier in freeze_bdev(). We just add a workaround to
@@ -261,7 +261,7 @@ handle_t *ext4_journal_start_sb(struct super_block *sb, int nblocks)
 	return ext4_get_nojournal();
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 handle_t *ext4_journal_start_sb_sync(struct super_block *sb, int nblocks)
 {
 	journal_t *journal;
@@ -358,7 +358,7 @@ void ext4_journal_abort_handle(const char *caller, const char *err_fn,
  * that error until we've noted it down and cleared it.
  */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 int (*funcSYNOSendErrorFsEvent)(const unsigned char*, const unsigned int) = NULL;
 static void SynoAutoErrorFsReport(const unsigned char* szDsmVersion, const unsigned int iErrorCount)
 {
@@ -393,7 +393,7 @@ EXPORT_SYMBOL(funcSYNOSendErrorFsEvent);
 static void ext4_handle_error(struct super_block *sb)
 {
 	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
 	char szDsmVersion[8] = {'\0'};
 #endif
@@ -420,7 +420,7 @@ static void ext4_handle_error(struct super_block *sb)
 		panic("EXT4-fs (device %s): panic forced after error\n",
 			sb->s_id);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 	/* We don't need to care system FS */
 	if ((0 != strcmp(es->s_last_mounted, "/"))
 			&& (0 == sbi->s_new_error_fs_event_flag)
@@ -743,7 +743,7 @@ static void ext4_put_super(struct super_block *sb)
 	for (i = 0; i < MAXQUOTAS; i++)
 		kfree(sbi->s_qf_names[i]);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 	if (sbi->s_mount_path) {
 		kfree(sbi->s_mount_path);
 	}
@@ -897,7 +897,7 @@ static inline void ext4_show_quota_options(struct seq_file *seq,
 #endif
 }
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_DEBUG_FLAG) && defined(SYNO_HIDE_OLDALLOC)
 extern int SynoDebugFlag;
 #endif
 /*
@@ -946,8 +946,8 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",nouid32");
 	if (test_opt(sb, DEBUG) && !(def_mount_opts & EXT4_DEFM_DEBUG))
 		seq_puts(seq, ",debug");
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HIDE_OLDALLOC
+#ifdef SYNO_DEBUG_FLAG
 	if(SynoDebugFlag) {
 		if (test_opt(sb, OLDALLOC)) {
 			seq_puts(seq, ",oldalloc");
@@ -1110,7 +1110,7 @@ static int bdev_try_to_free_page(struct super_block *sb, struct page *page,
 	return try_to_free_buffers(page);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 static int syno_ext4_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
 {
 	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
@@ -1171,7 +1171,7 @@ static ssize_t ext4_quota_write(struct super_block *sb, int type,
 static const struct dquot_operations ext4_quota_operations = {
 	.initialize	= dquot_initialize,
 	.drop		= dquot_drop,
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	.alloc_space    = dquot_alloc_space,
 	.reserve_space  = dquot_reserve_space,
 	.claim_space    = dquot_claim_space,
@@ -1181,7 +1181,7 @@ static const struct dquot_operations ext4_quota_operations = {
 	.get_reserved_space = ext4_get_reserved_space,
 #endif
 	.alloc_inode	= dquot_alloc_inode,
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
     .free_space     = dquot_free_space,
 #endif
 	.free_inode	= dquot_free_inode,
@@ -1207,7 +1207,7 @@ static const struct quotactl_ops ext4_qctl_operations = {
 #endif
 
 static const struct super_operations ext4_sops = {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	.syno_get_sb_archive_ver = syno_ext4_get_sb_archive_ver,
 	.syno_set_sb_archive_ver = syno_ext4_set_sb_archive_ver,
 #endif
@@ -1232,7 +1232,7 @@ static const struct super_operations ext4_sops = {
 };
 
 static const struct super_operations ext4_nojournal_sops = {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	.syno_get_sb_archive_ver = syno_ext4_get_sb_archive_ver,
 	.syno_set_sb_archive_ver = syno_ext4_set_sb_archive_ver,
 #endif
@@ -1268,7 +1268,7 @@ enum {
 	Opt_auto_da_alloc, Opt_noauto_da_alloc, Opt_noload, Opt_nobh, Opt_bh,
 	Opt_commit, Opt_min_batch_time, Opt_max_batch_time,
 	Opt_journal_update, Opt_journal_dev,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_DEFAULT_JOURNAL_CHECKSUM
 	Opt_journal_checksum, Opt_nojournal_checksum, Opt_journal_async_commit,
 #else
 	Opt_journal_checksum, Opt_journal_async_commit,
@@ -1316,7 +1316,7 @@ static const match_table_t tokens = {
 	{Opt_journal_update, "journal=update"},
 	{Opt_journal_dev, "journal_dev=%u"},
 	{Opt_journal_checksum, "journal_checksum"},
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_DEFAULT_JOURNAL_CHECKSUM
 	{Opt_nojournal_checksum, "nojournal_checksum"},
 #endif
 	{Opt_journal_async_commit, "journal_async_commit"},
@@ -1396,7 +1396,7 @@ static int parse_options(char *options, struct super_block *sb,
 	char *qname;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_DEFAULT_JOURNAL_CHECKSUM
 	set_opt(sbi->s_mount_opt, JOURNAL_CHECKSUM);
 #endif
 	if (!options)
@@ -1514,7 +1514,7 @@ static int parse_options(char *options, struct super_block *sb,
 		case Opt_journal_checksum:
 			set_opt(sbi->s_mount_opt, JOURNAL_CHECKSUM);
 			break;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_DEFAULT_JOURNAL_CHECKSUM
 		case Opt_nojournal_checksum:
 			clear_opt(sbi->s_mount_opt, JOURNAL_CHECKSUM);
 			break;
@@ -1844,7 +1844,7 @@ static int ext4_setup_super(struct super_block *sb, struct ext4_super_block *es,
 	}
 	if (read_only)
 		return res;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_REMOVE_CHECKTIME_WARNING
 	if (!(sbi->s_mount_state & EXT4_VALID_FS))
 		ext4_msg(sb, KERN_WARNING, "warning: mounting unchecked fs, "
 			 "running e2fsck is recommended");
@@ -2335,7 +2335,7 @@ static int parse_strtoul(const char *buf,
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 static ssize_t syno_fs_error_new_event_flag_show(struct ext4_attr *a,
 				       struct ext4_sb_info *sbi, char *buf)
 {
@@ -2446,7 +2446,7 @@ static struct ext4_attr ext4_attr_##name = __ATTR(name, mode, show, store)
 EXT4_RO_ATTR(delayed_allocation_blocks);
 EXT4_RO_ATTR(session_write_kbytes);
 EXT4_RO_ATTR(lifetime_write_kbytes);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 EXT4_RW_ATTR(syno_fs_error_new_event_flag);
 EXT4_RO_ATTR(syno_fs_error_mounted);
 #endif
@@ -2474,7 +2474,7 @@ static struct attribute *ext4_attrs[] = {
 	ATTR_LIST(mb_stream_req),
 	ATTR_LIST(mb_group_prealloc),
 	ATTR_LIST(max_writeback_mb_bump),
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 	ATTR_LIST(syno_fs_error_new_event_flag),
 	ATTR_LIST(syno_fs_error_mounted),
 #endif
@@ -2686,7 +2686,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	sbi->s_min_batch_time = EXT4_DEF_MIN_BATCH_TIME;
 	sbi->s_max_batch_time = EXT4_DEF_MAX_BATCH_TIME;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IGNORE_MNT_OPT
 	clear_opt(sbi->s_mount_opt, BARRIER);
 #else
 	set_opt(sbi->s_mount_opt, BARRIER);
@@ -3105,11 +3105,11 @@ no_journal:
 		goto failed_mount4;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	// root is mounted, attach our dentry operations
 	sb->s_root->d_op = &ext4_dentry_operations;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
 #endif
 	ext4_setup_super(sb, es, sb->s_flags & MS_RDONLY);
@@ -3189,7 +3189,7 @@ no_journal:
 		descr = "out journal";
 
 	ext4_msg(sb, KERN_INFO, "mounted filesystem with%s", descr);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	if (!Ext4Namei_lock_init) {
 		spin_lock_init(&Ext4Namei_buf_lock);
 		Ext4Namei_lock_init=1;
@@ -3199,7 +3199,7 @@ no_journal:
 		Ext4Hash_lock_init=1;
 	}
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CREATE_TIME_BIG_ENDIAN_SWAP
 	{
 		char szDsmVersion[8] = {'\0'};
 		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);
@@ -3655,7 +3655,7 @@ int ext4_force_commit(struct super_block *sb)
 
 	journal = EXT4_SB(sb)->s_journal;
 	if (journal) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 		/* This is for syncing file system and should not
 		   be blocked by SB_FREEZE_WRITE */
 		vfs_check_frozen(sb, SB_FREEZE_TRANS);
@@ -4000,7 +4000,7 @@ static int ext4_write_dquot(struct dquot *dquot)
 	struct inode *inode;
 
 	inode = dquot_to_inode(dquot);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 	handle = ext4_journal_start_sb_sync(inode->i_sb,
 					EXT4_QUOTA_TRANS_BLOCKS(dquot->dq_sb));
 #else
@@ -4069,7 +4069,7 @@ static int ext4_write_info(struct super_block *sb, int type)
 	handle_t *handle;
 
 	/* Data block + inode block */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 	handle = ext4_journal_start_sb_sync(sb->s_root->d_inode->i_sb, 2);
 #else
 	handle = ext4_journal_start(sb->s_root->d_inode, 2);
@@ -4267,7 +4267,7 @@ static int ext4_get_sb(struct file_system_type *fs_type, int flags,
 	return get_sb_bdev(fs_type, flags, dev_name, data, ext4_fill_super,mnt);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_ERROR_FS_REPORT
 void ext4_fill_mount_path(struct super_block *sb, char *szPath)
 {
 	struct ext4_sb_info *sbi = EXT4_SB(sb);

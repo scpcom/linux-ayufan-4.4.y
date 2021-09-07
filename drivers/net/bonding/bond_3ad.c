@@ -2451,7 +2451,7 @@ int bond_3ad_lacpdu_recv(struct sk_buff *skb, struct net_device *dev, struct pac
 	if (!(dev->flags & IFF_MASTER))
 		goto out;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NET_BOND_FIX_NONLINEAR_SKB
 	if (!pskb_may_pull(skb, sizeof(struct lacpdu)))
 		goto out;
 

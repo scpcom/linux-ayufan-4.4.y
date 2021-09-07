@@ -2475,9 +2475,9 @@ static struct ixgbe_phy_operations phy_ops_82599 = {
 	.write_i2c_byte         = &ixgbe_write_i2c_byte_generic,
 	.read_i2c_eeprom        = &ixgbe_read_i2c_eeprom_generic,
 	.write_i2c_eeprom       = &ixgbe_write_i2c_eeprom_generic,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IXGBE_SUPPORT_T2
 	.check_overtemp         = &ixgbe_tn_check_overtemp,
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_IXGBE_SUPPORT_T2 */
 };
 
 struct ixgbe_info ixgbe_82599_info = {

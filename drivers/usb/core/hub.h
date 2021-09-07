@@ -69,7 +69,7 @@
 #define USB_PORT_FEAT_INDICATOR         22
 #define USB_PORT_FEAT_C_PORT_L1         23
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_BACKPORT
 #define USB_PORT_FEAT_C_PORT_LINK_STATE	25
 #define USB_PORT_FEAT_C_PORT_CONFIG_ERROR 26
 #define USB_PORT_FEAT_PORT_REMOTE_WAKE_MASK 27
@@ -118,11 +118,11 @@ struct usb_port_status {
 #define USB_PORT_STAT_TEST              0x0800
 #define USB_PORT_STAT_INDICATOR         0x1000
 /* bits 13 to 15 are reserved */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 #define USB_PORT_STAT_TEST_MODE         0x8000
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 enum XHCI_SPECIAL_RESET_MODE{
 	XHCI_SPECIAL_RESET_PAUSE = 0, // enable and pause
 	XHCI_SPECIAL_RESET_RUN, // enable and run
@@ -130,7 +130,7 @@ enum XHCI_SPECIAL_RESET_MODE{
 };
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_BACKPORT
 /*
  * Additions to wPortStatus bit field from USB 3.0
  * See USB 3.0 spec Table 10-10
@@ -176,7 +176,7 @@ enum XHCI_SPECIAL_RESET_MODE{
 #define USB_PORT_STAT_C_RESET		0x0010
 #define USB_PORT_STAT_C_L1		0x0020
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_BACKPORT
 /*
  * USB 3.0 wPortChange bit fields
  * See USB 3.0 spec Table 10-11

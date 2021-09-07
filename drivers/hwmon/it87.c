@@ -1621,7 +1621,7 @@ static void __exit sm_it87_exit(void)
 	platform_driver_unregister(&it87_driver);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_PINEVIEW_SYSTEMP
 int syno_sys_temperature(int *Temperature)
 {
     unsigned short address;
@@ -1653,7 +1653,7 @@ int syno_sys_temperature(int *Temperature)
 EXPORT_SYMBOL(syno_sys_temperature);
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_PINEVIEW_SUPERIO_RW
 struct writable_pin {
     u32         pin;
     u32         en_reg;

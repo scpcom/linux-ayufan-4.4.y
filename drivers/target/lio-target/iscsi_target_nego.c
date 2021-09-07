@@ -168,7 +168,7 @@ static int iscsi_target_check_first_request(
 
 	list_for_each_entry(param, &conn->param_list->param_list, p_list) {
 		if (!strncmp(param->name, SESSIONTYPE, 11)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DEFAULT_SESSITON_TYPE
 			if (IS_PSTATE_ACCEPTOR(param))
 #else
 			if (!IS_PSTATE_ACCEPTOR(param)) {
@@ -415,13 +415,13 @@ static int iscsi_target_do_authentication(
 			AUTH_SERVER);
 	switch (authret) {
 	case 0:
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "Received OK response"
 		" from LIO Authentication, continuing.\n");
 #endif
 		break;
 	case 1:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_ERR "iSCSI - Single CHAP security negotiation completed sucessfully.");
 #else
 		printk(KERN_INFO "iSCSI security negotiation"
@@ -436,7 +436,7 @@ static int iscsi_target_do_authentication(
 		return iscsi_target_check_for_existing_instances(
 				conn, login);
 	case 2:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_ERR "iSCSI - Single CHAP security negotiation failed.");
 #else
 		printk(KERN_ERR "Security negotiation"
@@ -446,7 +446,7 @@ static int iscsi_target_do_authentication(
 				STAT_DETAIL_NOT_AUTH);
 		return -1;
 	default:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_ERR "iSCSI - Received unknown error %d from LIO Authentication", authret);
 #else
 		printk(KERN_ERR "Received unknown error %d from LIO"
@@ -624,7 +624,7 @@ static int iscsi_target_do_login(iscsi_conn_t *conn, iscsi_login_t *login)
 		case 0:
 			login_rsp->flags |= (0 & CSG);
 			if (iscsi_target_handle_csg_zero(conn, login) < 0)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_CHAP_FAILED
 			{
 				iscsi_tx_login_rsp(conn, STAT_CLASS_INITIATOR,
 						STAT_DETAIL_NOT_AUTH);
@@ -637,7 +637,7 @@ static int iscsi_target_do_login(iscsi_conn_t *conn, iscsi_login_t *login)
 		case 1:
 			login_rsp->flags |= CSG1;
 			if (iscsi_target_handle_csg_one(conn, login) < 0)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_CHAP_FAILED
 			{
 				iscsi_tx_login_rsp(conn, STAT_CLASS_INITIATOR,
 						STAT_DETAIL_NOT_AUTH);
@@ -775,7 +775,7 @@ static int iscsi_target_locate_portal(
 		if (!login->leading_connection)
 			goto get_target;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DEFAULT_SESSITON_TYPE
 		s_buf = NORMAL;
 #else
 		printk(KERN_ERR "SessionType key not received"
@@ -827,13 +827,13 @@ get_target:
 	 */
 	tiqn = core_get_tiqn_for_login(t_buf);
 	if (!(tiqn)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_ERR "iSCSI - Unable to locate Target IQN: %s in Storage Node\n", t_buf);
 #else
 		printk(KERN_ERR "Unable to locate Target IQN: %s in"
 			" Storage Node\n", t_buf);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_INITIATOR_RELOGIN_WORKAROUND
 		//FIXME. take care if send right message to initiator.
 		iscsi_tx_login_rsp(conn, STAT_CLASS_INITIATOR,
 				STAT_DETAIL_NOT_FOUND);
@@ -844,7 +844,7 @@ get_target:
 		ret = -1;
 		goto out;
 	}
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "Located Storage Object: %s\n", tiqn->tiqn);
 #endif
 
@@ -853,14 +853,14 @@ get_target:
 	 */
 	conn->tpg = core_get_tpg_from_np(tiqn, np);
 	if (!(conn->tpg)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_ERR "iSCSI - Unable to locate Target Portal Group on %s\n", tiqn->tiqn);
 #else
 		printk(KERN_ERR "Unable to locate Target Portal Group"
 				" on %s\n", tiqn->tiqn);
 #endif
 		core_put_tiqn_for_login(tiqn);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_INITIATOR_RELOGIN_WORKAROUND
 		//FIXME. take care if send right message to initiator.
 		iscsi_tx_login_rsp(conn, STAT_CLASS_INITIATOR,
 				STAT_DETAIL_NOT_FOUND);
@@ -871,7 +871,7 @@ get_target:
 		ret = -1;
 		goto out;
 	}
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "Located Portal Group Object: %hu\n", conn->tpg->tpgt);
 #endif
 
@@ -969,7 +969,7 @@ iscsi_login_t *iscsi_target_init_negotiation(
 	 * 	Locates Target Portal from NP -> Target IQN
 	 */
 	if (iscsi_target_locate_portal(np, conn, login) < 0) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_ERR "iSCSI - Login negotiation failed.\n");
 #else
 		printk(KERN_ERR "iSCSI Login negotiation failed.\n");

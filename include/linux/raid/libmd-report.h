@@ -2,7 +2,7 @@
 #ifndef _LIBMD_REPORT_H
 #define _LIBMD_REPORT_H
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
 
 extern int (*funcSYNOSendRaidEvent)(unsigned int type, unsigned int raidno,
 									unsigned int diskno, unsigned int sector);
@@ -13,9 +13,9 @@ void SynoReportBadSector(sector_t sector, unsigned long rw,
 void SynoReportCorrectBadSector(sector_t sector, int md_minor, 
 								struct block_device *bdev, const char *szFuncName);
 
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RAID_SECTOR_STATUS_REPORT */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 extern int (*funcSYNOSendAutoRemapLVMEvent)(const char*, unsigned long long, unsigned int);
 extern int (*funcSYNOSendAutoRemapRaidEvent)(unsigned int, unsigned long long, unsigned int);
 #endif

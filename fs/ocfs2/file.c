@@ -629,7 +629,7 @@ restart_all:
 	}
 
 restarted_transaction:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	status = dquot_alloc_space_nodirty(inode,
 			ocfs2_clusters_to_bytes(osb->sb, clusters_to_add));
 	if (status) {
@@ -680,7 +680,7 @@ restarted_transaction:
 	clusters_to_add -= (OCFS2_I(inode)->ip_clusters - prev_clusters);
 	spin_unlock(&OCFS2_I(inode)->ip_lock);
 	/* Release unused quota reservation */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	dquot_free_space(inode,
 #else
 	vfs_dq_free_space(inode,
@@ -720,7 +720,7 @@ restarted_transaction:
 
 leave:
 	if (status < 0 && did_quota)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_space(inode,
 #else
 		vfs_dq_free_space(inode,

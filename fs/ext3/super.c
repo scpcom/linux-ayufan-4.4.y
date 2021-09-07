@@ -69,7 +69,7 @@ static int ext3_statfs (struct dentry * dentry, struct kstatfs * buf);
 static int ext3_unfreeze(struct super_block *sb);
 static int ext3_freeze(struct super_block *sb);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 extern struct dentry_operations ext3_dentry_operations;
 
 spinlock_t Ext3Namei_buf_lock;  /* lock for UTF8Ext3NameiStrBuf[] in fs/ext3/namei.c */
@@ -92,7 +92,7 @@ handle_t *ext3_journal_start_sb(struct super_block *sb, int nblocks)
 	if (sb->s_flags & MS_RDONLY)
 		return ERR_PTR(-EROFS);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 	/* strengthen freezing fs as ext4 */
 	if (!journal_current_handle()) {
 		vfs_check_frozen(sb, SB_FREEZE_WRITE);
@@ -112,7 +112,7 @@ handle_t *ext3_journal_start_sb(struct super_block *sb, int nblocks)
 	return journal_start(journal, nblocks);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 /* copy from ext3_journal_start_sb() */
 handle_t *ext3_journal_start_sb_sync(struct super_block *sb, int nblocks)
 {
@@ -604,7 +604,7 @@ static char *data_mode_string(unsigned long mode)
 	return "unknown";
 }
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_DEBUG_FLAG) && defined(SYNO_HIDE_OLDALLOC)
 extern int SynoDebugFlag;
 #endif
 /*
@@ -653,8 +653,8 @@ static int ext3_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",nouid32");
 	if (test_opt(sb, DEBUG))
 		seq_puts(seq, ",debug");
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HIDE_OLDALLOC
+#ifdef SYNO_DEBUG_FLAG
 	if(SynoDebugFlag) {
 		if (test_opt(sb, OLDALLOC)) {
 			seq_puts(seq, ",oldalloc");
@@ -764,7 +764,7 @@ static int bdev_try_to_free_page(struct super_block *sb, struct page *page,
 	return try_to_free_buffers(page);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 static int syno_ext3_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
 {
 	struct ext3_super_block *es = EXT3_SB(sb)->s_es;
@@ -820,11 +820,11 @@ static ssize_t ext3_quota_write(struct super_block *sb, int type,
 static const struct dquot_operations ext3_quota_operations = {
 	.initialize	= dquot_initialize,
 	.drop		= dquot_drop,
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	.alloc_space    = dquot_alloc_space,
 #endif
 	.alloc_inode	= dquot_alloc_inode,
-#ifndef MY_ABC_HERE
+#ifndef SYNO_DQUOT_UPGRADE
 	.free_space     = dquot_free_space,
 #endif
 	.free_inode	= dquot_free_inode,
@@ -850,7 +850,7 @@ static const struct quotactl_ops ext3_qctl_operations = {
 #endif
 
 static const struct super_operations ext3_sops = {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	.syno_get_sb_archive_ver = syno_ext3_get_sb_archive_ver,
 	.syno_set_sb_archive_ver = syno_ext3_set_sb_archive_ver,
 #endif
@@ -1358,7 +1358,7 @@ static int ext3_setup_super(struct super_block *sb, struct ext3_super_block *es,
 	}
 	if (read_only)
 		return res;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_REMOVE_CHECKTIME_WARNING
 	if (!(sbi->s_mount_state & EXT3_VALID_FS))
 		printk (KERN_WARNING "EXT3-fs warning: mounting unchecked fs, "
 			"running e2fsck is recommended\n");
@@ -2078,11 +2078,11 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		goto failed_mount4;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	// root is mounted, attach our dentry operations
 	sb->s_root->d_op = &ext3_dentry_operations;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
 #endif
 	ext3_setup_super (sb, es, sb->s_flags & MS_RDONLY);
@@ -2104,7 +2104,7 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_JOURNAL_DATA ? "journal":
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_ORDERED_DATA ? "ordered":
 		"writeback");
-#ifdef MY_ABC_HERE
+#ifdef SYNO_KERNEL_UNICODE
 	if (!Ext3Namei_lock_init) {
 		spin_lock_init(&Ext3Namei_buf_lock);
 		Ext3Namei_lock_init=1;
@@ -2844,7 +2844,7 @@ static int ext3_write_dquot(struct dquot *dquot)
 	struct inode *inode;
 
 	inode = dquot_to_inode(dquot);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 	handle = ext3_journal_start_sb_sync(inode->i_sb,
 					EXT3_QUOTA_TRANS_BLOCKS(dquot->dq_sb));
 #else
@@ -2913,7 +2913,7 @@ static int ext3_write_info(struct super_block *sb, int type)
 	handle_t *handle;
 
 	/* Data block + inode block */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AVOID_FREEZE_DEADLOCK
 	handle = ext3_journal_start_sb_sync(sb->s_root->d_inode->i_sb, 2);
 #else
 	handle = ext3_journal_start(sb->s_root->d_inode, 2);

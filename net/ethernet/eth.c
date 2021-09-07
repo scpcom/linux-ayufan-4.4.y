@@ -286,7 +286,7 @@ int eth_mac_addr(struct net_device *dev, void *p)
 {
 	struct sockaddr *addr = p;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_MAC_ADDRESS
 	if (netif_running(dev))
 		return -EBUSY;
 #endif

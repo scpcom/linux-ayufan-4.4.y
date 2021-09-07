@@ -193,7 +193,7 @@ static int ecryptfs_show_options(struct seq_file *m, struct vfsmount *mnt)
 		seq_printf(m, ",ecryptfs_encrypted_view");
 	if (mount_crypt_stat->flags & ECRYPTFS_UNLINK_SIGS)
 		seq_printf(m, ",ecryptfs_unlink_sigs");
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_REPORT_ERROR
 	if (mount_crypt_stat->flags & ECRYPTFS_SYNO_ERROR_REPORT)
 		seq_printf(m, ",syno_error_report");
 #endif
@@ -201,7 +201,7 @@ static int ecryptfs_show_options(struct seq_file *m, struct vfsmount *mnt)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 static int ecryptfs_get_sb_archive_ver(struct super_block *sb, u32 *archive_ver)
 {
 	struct super_block *lower_sb = ecryptfs_superblock_to_lower(sb);
@@ -217,10 +217,10 @@ static int ecryptfs_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
 		return -EINVAL;
 	return lower_sb->s_op->syno_set_sb_archive_ver(lower_sb, archive_ver);
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_ARCHIVE_VERSION */
 
 const struct super_operations ecryptfs_sops = {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	.syno_get_sb_archive_ver = ecryptfs_get_sb_archive_ver,
 	.syno_set_sb_archive_ver = ecryptfs_set_sb_archive_ver,
 #endif

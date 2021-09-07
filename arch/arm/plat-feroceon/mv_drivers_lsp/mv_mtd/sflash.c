@@ -91,13 +91,13 @@ static struct mtd_chip_driver sflash_chipdrv = {
 	.module		= THIS_MODULE
 };
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 extern int gSynoHasDynModule;
 #endif
 
 static struct mtd_info *sflash_probe(struct map_info *map)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
        if (gSynoHasDynModule) {
                return NULL;
        }

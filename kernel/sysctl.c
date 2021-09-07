@@ -64,7 +64,7 @@ static int deprecated_sysctl_warning(struct __sysctl_args *args);
 
 #if defined(CONFIG_SYSCTL)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 int SynoDebugFlag = 0;
 EXPORT_SYMBOL(SynoDebugFlag);
 
@@ -78,28 +78,28 @@ int giSynoAtaDebug=0;
 EXPORT_SYMBOL(giSynoAtaDebug);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HW_VERSION
 char gszSynoHWVersion[16];
 EXPORT_SYMBOL(gszSynoHWVersion);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef  SYNO_RAID_STATUS
 int gSynoRaidSyncFlag = 0;
 EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_HD_NUM
 long g_internal_hd_num = -1;
 long syno_boot_hd_count = 0;
 EXPORT_SYMBOL(g_internal_hd_num);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HDD_HOTPLUG
 long g_hdd_hotplug = 0;
 EXPORT_SYMBOL(g_hdd_hotplug);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 long unsigned int guiWakeupDisksNum = 1;
 EXPORT_SYMBOL(guiWakeupDisksNum);
 /* The default spinup time interval is 7000ms. if want modify the interval, you
@@ -108,7 +108,7 @@ int giDenoOfTimeInterval = 1;
 EXPORT_SYMBOL(giDenoOfTimeInterval);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 long g_internal_netif_num = -1;
 EXPORT_SYMBOL(g_internal_netif_num);
 #endif
@@ -118,36 +118,36 @@ long g_is_sas_model = 0;
 EXPORT_SYMBOL(g_is_sas_model);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AHCI_SWITCH
 long g_ahci_switch = 1;
 EXPORT_SYMBOL(g_ahci_switch);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_LED_SPECIAL
 long g_sata_led_special = 0;
 EXPORT_SYMBOL(g_sata_led_special);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INSTALL_FLAG
 int gSynoInstallFlag = 0;
 EXPORT_SYMBOL(gSynoInstallFlag);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 #if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
 int gSynoHasDynModule = 1;
 #else
 int gSynoHasDynModule = 0;
 #endif
 EXPORT_SYMBOL(gSynoHasDynModule);
-#endif /*MY_ABC_HERE*/
+#endif /*SYNO_USB_FLASH_BOOT*/
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FLASH_MEMORY_SIZE
 long gSynoFlashMemorySize = 0;
 EXPORT_SYMBOL(gSynoFlashMemorySize);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_PORT_MAP
 char gszSataPortMap[8] = {0};
 EXPORT_SYMBOL(gszSataPortMap);
 
@@ -155,17 +155,17 @@ unsigned int gSynoSataHostCnt = 0;
 EXPORT_SYMBOL(gSynoSataHostCnt);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIXED_DISK_NAME
 char gszDiskIdxMap[16] = {0};
 EXPORT_SYMBOL(gszDiskIdxMap);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_DISK_SEQ_REVERSE
 char giDiskSeqReverse[8] = {0};
 EXPORT_SYMBOL(giDiskSeqReverse);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 unsigned char grgbLanMac[4][16];
 EXPORT_SYMBOL(grgbLanMac);
 #endif
@@ -177,7 +177,7 @@ EXPORT_SYMBOL(g_default_gateway_mac_addr_h);
 EXPORT_SYMBOL(g_default_gateway_mac_addr_l);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SWITCH_NET_DEVICE_NAME
 unsigned int gSwitchDev = 0;
 char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 EXPORT_SYMBOL(gSwitchDev);
@@ -185,29 +185,29 @@ EXPORT_SYMBOL(gDevPCIName);
 #endif
 
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(SYNO_ATA_AHCI_LED_SWITCH)
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 char gszSerialNum[32];
 EXPORT_SYMBOL(gszSerialNum);
 char gszCustomSerialNum[32];
 EXPORT_SYMBOL(gszCustomSerialNum);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ESATA_7042
 long g_esata_7042 = -1;
 EXPORT_SYMBOL(g_esata_7042);
 #endif
 
-#if (defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(MY_ABC_HERE))
+#if (defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(SYNO_HAS_SDCARDREADER))
 #include <linux/synosata.h>
 int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
 EXPORT_SYMBOL(funcSYNOGetHwCapability);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_EUNIT_POWERCTL_PIN
 EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
 EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 #endif
@@ -224,12 +224,12 @@ char gSynoCPUInfoClock[16];
 EXPORT_SYMBOL(gSynoCPUInfoClock);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 int gSynoFactoryUSBFastReset = 0;
 EXPORT_SYMBOL(gSynoFactoryUSBFastReset);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 int gSynoFactoryUSB3Disable = 0;
 EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
 #endif
@@ -1206,7 +1206,7 @@ static struct ctl_table kern_table[] = {
  * NOTE: do not add new entries to this table unless you have read
  * Documentation/sysctl/ctl_unnumbered.txt
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 	{
 		.ctl_name       = CTL_UNNUMBERED,
 		.procname       = "syno_debug_flag",
@@ -1240,7 +1240,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = &proc_dointvec,
 	},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HW_VERSION
 	{
 		.ctl_name		= CTL_UNNUMBERED,
 		.procname		= "syno_hw_version",
@@ -1251,7 +1251,7 @@ static struct ctl_table kern_table[] = {
 		.strategy		= &sysctl_string,
 	},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_HD_NUM
 	{
 		.ctl_name		= CTL_UNNUMBERED,
 		.procname		= "syno_internal_hd_num",
@@ -1261,7 +1261,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 	{
 		.ctl_name		= CTL_UNNUMBERED,
 		.procname		= "syno_disks_group",
@@ -1279,7 +1279,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 	{
 		.ctl_name		= CTL_UNNUMBERED,
 		.procname		= "syno_internal_netif_num",
@@ -1299,7 +1299,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RAID_STATUS
 	{
 		.ctl_name       = CTL_UNNUMBERED,
 		.procname       = "syno_raid_sync_flag",
@@ -1309,7 +1309,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = &proc_dointvec,
 	},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 	{
 		.ctl_name		= CTL_UNNUMBERED,
 		.procname		= "syno_mac_address1",
@@ -1365,7 +1365,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = &proc_dointvec,
 	},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 	{
 		.ctl_name		= CTL_UNNUMBERED,
 		.procname		= "syno_serial",
@@ -1385,7 +1385,7 @@ static struct ctl_table kern_table[] = {
 		.strategy		= &sysctl_string,
 	},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INSTALL_FLAG
 	{
 		.ctl_name       = CTL_UNNUMBERED,
 		.procname       = "syno_install_flag",
@@ -1395,7 +1395,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = &proc_dointvec,
 	},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_FLASH_BOOT
 	{
 		.procname	= "syno_dyn_module",
 		.data		= &gSynoHasDynModule,
@@ -1404,7 +1404,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FLASH_MEMORY_SIZE
 	{
 		.procname	= "syno_flash_mem_size",
 		.data		= &gSynoFlashMemorySize,
@@ -1429,7 +1429,7 @@ static struct ctl_table kern_table[] = {
             .proc_handler   = &proc_dostring,
         },
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 		{
 			.procname       = "syno_usb_fast_reset",
 			.data           = &gSynoFactoryUSBFastReset,
@@ -1438,7 +1438,7 @@ static struct ctl_table kern_table[] = {
 			.proc_handler   = &proc_dointvec,
 		},
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 		{
 			.procname       = "syno_disable_usb3",
 			.data           = &gSynoFactoryUSB3Disable,

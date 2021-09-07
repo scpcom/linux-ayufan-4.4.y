@@ -19,7 +19,7 @@
 #define STD_COM4_FLAGS ASYNC_BOOT_AUTOCONF
 #endif
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(SYNO_X86_TTY_CONSOLE_OUTPUT) || defined(SYNO_X86_MICROP_CTRL)
 
 #if !defined(CONFIG_SYNO_CEDARVIEW)
 #define SERIAL_PORT_DFNS            \

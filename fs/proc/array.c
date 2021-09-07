@@ -173,7 +173,7 @@ static inline void task_state(struct seq_file *m, struct pid_namespace *ns,
 		if (tracer)
 			tpid = task_pid_nr_ns(tracer, ns);
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_GET_TASK_CRED
 	cred = get_task_cred(p);
 #else
 	cred = get_cred((struct cred *) __task_cred(p));

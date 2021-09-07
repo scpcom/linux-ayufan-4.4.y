@@ -683,7 +683,7 @@ static size_t fuse_send_write(struct fuse_req *req, struct file *file,
 	return req->misc.write.out.size;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 /* copy from linux-2.6.23 */
 static int fuse_prepare_write(struct file *file, struct page *page,
                  unsigned offset, unsigned to)
@@ -2063,7 +2063,7 @@ static const struct file_operations fuse_direct_io_file_operations = {
 
 static const struct address_space_operations fuse_file_aops  = {
 	.readpage	= fuse_readpage,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
     .prepare_write  = fuse_prepare_write,
     .commit_write   = fuse_commit_write,
 #endif

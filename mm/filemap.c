@@ -50,10 +50,10 @@
 
 #include <asm/mman.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 #include <linux/tcp.h>
 #include <net/tcp.h>
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 
 
 /*
@@ -2376,7 +2376,7 @@ int pagecache_write_end(struct file *file, struct address_space *mapping,
 }
 EXPORT_SYMBOL(pagecache_write_end);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 #ifdef SYNO_OLD_RECVFILE
 int
 do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,

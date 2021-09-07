@@ -250,7 +250,7 @@ static int __ref _cpu_down(unsigned int cpu, int tasks_frozen)
 	/* This actually kills the CPU. */
 	__cpu_die(cpu);
 
-#ifdef MY_DEF_HERE 
+#ifdef SYNO_HIBERNATE_TO_DISK 
 	msleep(500);
 #endif
 

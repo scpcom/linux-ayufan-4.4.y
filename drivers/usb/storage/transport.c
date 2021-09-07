@@ -1019,7 +1019,7 @@ int usb_stor_Bulk_max_lun(struct us_data *us)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 int extra_delay = 0;
 module_param(extra_delay, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 int extra_delay_time = 0;
@@ -1107,7 +1107,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 			bcb->Length);
 	result = usb_stor_bulk_transfer_buf(us, us->send_bulk_pipe,
 				bcb, cbwlen, NULL);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 	delay_for_JM(us);
 #endif
 	US_DEBUGP("Bulk command transfer result=%d\n", result);
@@ -1127,7 +1127,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		unsigned int pipe = srb->sc_data_direction == DMA_FROM_DEVICE ? 
 				us->recv_bulk_pipe : us->send_bulk_pipe;
 		result = usb_stor_bulk_srb(us, pipe, srb);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 		delay_for_JM(us);
 #endif
 		US_DEBUGP("Bulk data transfer result 0x%x\n", result);
@@ -1152,7 +1152,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 	US_DEBUGP("Attempting to get CSW...\n");
 	result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 	delay_for_JM(us);
 #endif
 
@@ -1164,7 +1164,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		US_DEBUGP("Received 0-length CSW; retrying...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 	delay_for_JM(us);
 #endif
 	}
@@ -1176,7 +1176,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		US_DEBUGP("Attempting to get CSW (2nd try)...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, NULL);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 	delay_for_JM(us);
 #endif
 	}
@@ -1236,7 +1236,7 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		}
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_STOR_EXTRA_DELAY
 	delay_for_JM(us);
 #endif
 

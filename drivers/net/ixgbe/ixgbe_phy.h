@@ -77,10 +77,10 @@
 #define IXGBE_I2C_T_SU_STO  4
 #define IXGBE_I2C_T_BUF     5
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IXGBE_SUPPORT_T2
 #define IXGBE_TN_LASI_STATUS_REG        0x9005
 #define IXGBE_TN_LASI_STATUS_TEMP_ALARM 0x0008
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_IXGBE_SUPPORT_T2 */
 
 s32 ixgbe_init_phy_ops_generic(struct ixgbe_hw *hw);
 s32 ixgbe_identify_phy_generic(struct ixgbe_hw *hw);
@@ -107,9 +107,9 @@ s32 ixgbe_identify_sfp_module_generic(struct ixgbe_hw *hw);
 s32 ixgbe_get_sfp_init_sequence_offsets(struct ixgbe_hw *hw,
                                         u16 *list_offset,
                                         u16 *data_offset);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IXGBE_SUPPORT_T2
 s32 ixgbe_tn_check_overtemp(struct ixgbe_hw *hw);
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_IXGBE_SUPPORT_T2 */
 s32 ixgbe_read_i2c_byte_generic(struct ixgbe_hw *hw, u8 byte_offset,
                                 u8 dev_addr, u8 *data);
 s32 ixgbe_write_i2c_byte_generic(struct ixgbe_hw *hw, u8 byte_offset,

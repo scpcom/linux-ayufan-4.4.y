@@ -208,7 +208,7 @@ static async_cookie_t __async_schedule(async_func_ptr *ptr, void *data, struct l
 	return newcookie;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SPINUP_DELAY
 static void __syno_async_schedule_enabled_set(int iValue)
 {
 	async_enabled = iValue;

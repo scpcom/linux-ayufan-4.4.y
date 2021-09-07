@@ -18,7 +18,7 @@
 
 unsigned int __machine_arch_type;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 #define _LINUX_STRING_H_
 #endif
 
@@ -26,7 +26,7 @@ unsigned int __machine_arch_type;
 #include <linux/types.h>	/* for size_t */
 #include <linux/stddef.h>	/* for NULL */
 #include <asm/string.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 #include <linux/linkage.h>
 
 #include <asm/unaligned.h>
@@ -199,12 +199,12 @@ static inline __ptr_t memcpy(__ptr_t __dest, __const __ptr_t __src,
 /*
  * gzip delarations
  */
-#ifndef MY_ABC_HERE
+#ifndef SYNO_ARM_LZMA_BACKPORT
 #define OF(args)  args
 #endif
 #define STATIC static
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_ARM_LZMA_BACKPORT
 typedef unsigned char  uch;
 typedef unsigned short ush;
 typedef unsigned long  ulg;
@@ -248,7 +248,7 @@ static unsigned outcnt;		/* bytes in output buffer */
 #  define Tracecv(c,x)
 #endif
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_ARM_LZMA_BACKPORT
 static int  fill_inbuf(void);
 static void flush_window(void);
 #endif
@@ -257,7 +257,7 @@ static void error(char *m);
 extern char input_data[];
 extern char input_data_end[];
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 static unsigned char *output_data;
 static unsigned long output_ptr;
 #else
@@ -271,7 +271,7 @@ static void error(char *m);
 
 static void putstr(const char *);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 static unsigned long free_mem_ptr;
 static unsigned long free_mem_end_ptr;
 #else
@@ -286,7 +286,7 @@ static ulg free_mem_end_ptr;
 
 #define ARCH_HAS_DECOMP_WDOG
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 #ifdef CONFIG_KERNEL_GZIP
 #include "../../../../lib/decompress_inflate.c"
 #endif
@@ -356,7 +356,7 @@ static void error(char *x)
 	while(1);	/* Halt */
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 asmlinkage void __div0(void)
 {
         error("Attempting division by 0!");
@@ -365,7 +365,7 @@ asmlinkage void __div0(void)
 
 #ifndef STANDALONE_DEBUG
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 unsigned long
 decompress_kernel(unsigned long output_start, unsigned long free_mem_ptr_p,
                 unsigned long free_mem_ptr_end_p,
@@ -376,7 +376,7 @@ decompress_kernel(ulg output_start, ulg free_mem_ptr_p, ulg free_mem_ptr_end_p,
 		  int arch_id)
 #endif
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 	unsigned char *tmp;
 
 	output_data             = (unsigned char *)output_start;
@@ -389,7 +389,7 @@ decompress_kernel(ulg output_start, ulg free_mem_ptr_p, ulg free_mem_ptr_end_p,
 
 	arch_decomp_setup();
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 	tmp = (unsigned char *) (((unsigned long)input_data_end) - 4);
 	output_ptr = get_unaligned_le32(tmp);
 #else
@@ -397,7 +397,7 @@ decompress_kernel(ulg output_start, ulg free_mem_ptr_p, ulg free_mem_ptr_end_p,
 #endif
 
 	putstr("Uncompressing Linux...");
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 	decompress(input_data, input_data_end - input_data,
 				NULL, NULL, output_data, NULL, error);
 #else
@@ -415,14 +415,14 @@ int main()
 {
 	output_data = output_buffer;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_ARM_LZMA_BACKPORT
 	makecrc();
 #endif
 	putstr("Uncompressing Linux...");
-#ifndef MY_ABC_HERE
+#ifndef SYNO_ARM_LZMA_BACKPORT
 	gunzip();
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_LZMA_BACKPORT
 	decompress(input_data, input_data_end - input_data,
 					NULL, NULL, output_data, NULL, error);
 #endif

@@ -495,7 +495,7 @@ void ext3_free_blocks_sb(handle_t *handle, struct super_block *sb,
 	if (block < le32_to_cpu(es->s_first_data_block) ||
 	    block + count < block ||
 	    block + count > le32_to_cpu(es->s_blocks_count)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 		if (printk_ratelimit())
 #endif
 		ext3_error (sb, "ext3_free_blocks",
@@ -679,7 +679,7 @@ void ext3_free_blocks(handle_t *handle, struct inode *inode,
 	}
 	ext3_free_blocks_sb(handle, sb, block, count, &dquot_freed_blocks);
 	if (dquot_freed_blocks)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_block(inode, dquot_freed_blocks);
 #else
 		vfs_dq_free_block(inode, dquot_freed_blocks);
@@ -1509,7 +1509,7 @@ ext3_fsblk_t ext3_new_blocks(handle_t *handle, struct inode *inode,
 	/*
 	 * Check quota for allocation of this block.
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	err = dquot_alloc_block(inode, num);
 	if (err) {
 		*errp = err;
@@ -1594,7 +1594,7 @@ retry_alloc:
 		if (!gdp)
 			goto io_error;
 		free_blocks = le16_to_cpu(gdp->bg_free_blocks_count);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_EXT3_VOLUME_FULL_OOM
 		/*
 		 * skip this group (and avoid loading bitmap) if there
 		 * are no free blocks
@@ -1660,7 +1660,7 @@ allocated:
 		      EXT3_SB(sb)->s_itb_per_group) ||
 	    in_range(ret_block + num - 1, le32_to_cpu(gdp->bg_inode_table),
 		      EXT3_SB(sb)->s_itb_per_group)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
 		if (printk_ratelimit())
 #endif
 		ext3_error(sb, "ext3_new_block",
@@ -1737,7 +1737,7 @@ allocated:
 
 	*errp = 0;
 	brelse(bitmap_bh);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	dquot_free_block(inode, *count-num);
 #else
 	vfs_dq_free_block(inode, *count-num);
@@ -1756,7 +1756,7 @@ out:
 	 * Undo the block allocation
 	 */
 	if (!performed_allocation)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_block(inode, *count);
 #else
 		vfs_dq_free_block(inode, *count);

@@ -36,7 +36,7 @@
 #include <linux/slab.h>
 #include <linux/spinlock.h>
 #include <linux/smp_lock.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_FORCE_READ_ONLY
 #include <linux/statfs.h>
 #endif
 #include <scsi/scsi.h>
@@ -70,7 +70,7 @@ int fd_attach_hba(se_hba_t *hba, u32 host_id)
 	hba->hba_ptr = (void *) fd_host;
 	hba->transport = &fileio_template;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "CORE_HBA[%d] - TCM FILEIO HBA Driver %s on Generic"
 		" Target Core Stack %s\n", hba->hba_id, FD_VERSION,
 		TARGET_CORE_MOD_VERSION);
@@ -97,7 +97,7 @@ int fd_detach_hba(se_hba_t *hba)
 	}
 	fd_host = (fd_host_t *) hba->hba_ptr;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "CORE_HBA[%d] - Detached FILEIO HBA: %u from Generic"
 		" Target Core\n", hba->hba_id, fd_host->fd_host_id);
 #endif
@@ -170,7 +170,7 @@ void *fd_allocate_virtdevice(se_hba_t *hba, const char *name)
 
 	fd_dev->fd_host = fd_host;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "FILEIO: Allocated fd_dev for %p\n", name);
 #endif
 
@@ -196,7 +196,7 @@ se_device_t *fd_create_virtdevice(
 	struct inode *inode = NULL;
 	int dev_flags = 0, flags;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LARGE_FILEIO
 	size_t i = 0;
 	for( i = 0; i < SYNO_LIO_MAX_NR_FILES; ++i ) {
 		fd_dev->fd_files[i] = NULL;
@@ -212,7 +212,7 @@ se_device_t *fd_create_virtdevice(
 			fd_dev->fd_dev_name, IS_ERR(dev_p));
 		goto fail;
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LARGE_FILEIO
 	flags = O_RDWR | O_LARGEFILE;
 #else
 #if 0
@@ -238,7 +238,7 @@ se_device_t *fd_create_virtdevice(
 		printk(KERN_ERR "filp_open(%s) failed\n", dev_p);
 		goto fail;
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LARGE_FILEIO
 	fd_dev->fd_files[0] = file;
 	fd_dev->nr_file = 1;
 #else
@@ -296,7 +296,7 @@ se_device_t *fd_create_virtdevice(
 				bdev_logical_block_size(bd)),
 			bdev_logical_block_size(bd));
 	} else {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LARGE_FILEIO
 		/*
 		 * 1. Create additional files if fd_dev->fd_files[0] is created
 		 *    successfully and not block device.
@@ -363,7 +363,7 @@ se_device_t *fd_create_virtdevice(
 	fd_dev->fd_dev_id = fd_host->fd_host_dev_id_count++;
 	fd_dev->fd_queue_depth = dev->queue_depth;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "CORE_FILE[%u] - Added TCM FILEIO Device ID: %u at %s,"
 		" %llu total bytes\n", fd_host->fd_host_id, fd_dev->fd_dev_id,
 			fd_dev->fd_dev_name, fd_dev->fd_dev_size);
@@ -373,7 +373,7 @@ se_device_t *fd_create_virtdevice(
 	putname(dev_p);
 	return dev;
 fail:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LARGE_FILEIO
 	for( i = 0; i < SYNO_LIO_MAX_NR_FILES; ++i ) {
 		if( fd_dev->fd_files[i] ) {
 			filp_close(fd_dev->fd_files[i], NULL);
@@ -401,7 +401,7 @@ fail:
  */
 int fd_activate_device(se_device_t *dev)
 {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	fd_dev_t *fd_dev = (fd_dev_t *) dev->dev_ptr;
 	fd_host_t *fd_host = fd_dev->fd_host;
 
@@ -419,7 +419,7 @@ int fd_activate_device(se_device_t *dev)
  */
 void fd_deactivate_device(se_device_t *dev)
 {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	fd_dev_t *fd_dev = (fd_dev_t *) dev->dev_ptr;
 	fd_host_t *fd_host = fd_dev->fd_host;
 
@@ -439,7 +439,7 @@ void fd_free_device(void *p)
 {
 	fd_dev_t *fd_dev = (fd_dev_t *) p;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LARGE_FILEIO
 	size_t i = 0;
 	for( i = 0; i < SYNO_LIO_MAX_NR_FILES; ++i ) {
 		if( fd_dev->fd_files[i] ) {
@@ -501,7 +501,7 @@ int fd_emulate_inquiry(se_task_t *task)
 	memset(prod, 0, 64);
 	memset(se_location, 0, 128);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_VENDOR_ID
 	sprintf(prod, "iSCSI Storage");
 #else
 	sprintf(prod, "FILEIO");
@@ -601,7 +601,7 @@ static int fd_emulate_scsi_cdb(se_task_t *task)
 	case SYNCHRONIZE_CACHE:
 	case TEST_UNIT_READY:
 	case VERIFY:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_VERIFY_16
 	case VERIFY_16:
 #endif
 	case WRITE_FILEMARKS:
@@ -665,7 +665,7 @@ static inline int fd_seek(
 
 static int fd_do_readv(fd_request_t *req, se_task_t *task)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LARGE_FILEIO
 	int ret = -1;
 	size_t i = 0;
 	struct file* fd = req->fd_dev->fd_files[0];
@@ -837,7 +837,7 @@ static int fd_do_sendfile(fd_request_t *req, se_task_t *task)
 
 static int fd_do_writev(fd_request_t *req, se_task_t *task)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_LARGE_FILEIO
 	int ret = -1;
 	size_t i = 0;
 	struct file* fd = req->fd_dev->fd_files[0];
@@ -870,7 +870,7 @@ static int fd_do_writev(fd_request_t *req, se_task_t *task)
 		}
 	} else {
 		/* for regular file */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_FORCE_READ_ONLY
 		struct kstatfs statfs;
 		struct inode* inode = NULL;
 #endif
@@ -879,7 +879,7 @@ static int fd_do_writev(fd_request_t *req, se_task_t *task)
 
 		for( i = 0; i < req->fd_sg_count; ++i ) {
 			fd = req->fd_dev->fd_files[SYNO_LIO_FILE_IDX(pos)];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_FORCE_READ_ONLY
 			inode = fd->f_dentry->d_inode;
 			spin_lock(&inode->i_lock);
 			if( vfs_statfs(fd->f_dentry, &statfs) ) {
@@ -910,7 +910,7 @@ static int fd_do_writev(fd_request_t *req, se_task_t *task)
 				printk(KERN_ERR "I/O error: vfs_write() returned %d != %d "
 						"(pos: %llu, idx: %llu, fd_pos: %llu)\n",
 						ret, sg[i].length, pos, SYNO_LIO_FILE_IDX(pos), fd_pos);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_FORCE_READ_ONLY
 				if( -EROFS == ret ) {
 					printk(KERN_ERR "iSCSI - Failed to write data. Filesystem is read only.\n");
 					se_deve_force_readonly(task->task_se_cmd->se_deve);
@@ -1033,7 +1033,7 @@ ssize_t fd_set_configfs_dev_params(
 			ptr = strstrip(ptr);
 			snprintf(fd_dev->fd_dev_name, FD_MAX_DEV_NAME,
 					"%s", ptr);
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 			printk(KERN_INFO "FILEIO: Referencing Path: %s\n",
 					fd_dev->fd_dev_name);
 #endif
@@ -1049,7 +1049,7 @@ ssize_t fd_set_configfs_dev_params(
 						" fd_dev_size=\n");
 				continue;
 			}
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 			printk(KERN_INFO "FILEIO: Referencing Size: %llu"
 					" bytes\n", fd_dev->fd_dev_size);
 #endif

@@ -1182,7 +1182,7 @@ MODULE_LICENSE ("GPL");
 #endif
 
 #if defined(CONFIG_ARCH_FEROCEON) || defined(CONFIG_MARVELL)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_6281_SOC_USE_OPENSOURCE_USB
 #include "ehci-orion.c"
 #define	PLATFORM_DRIVER		ehci_orion_driver
 #else

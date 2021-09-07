@@ -256,7 +256,7 @@ static int __devinit coretemp_probe(struct platform_device *pdev)
 
 	data->id = pdev->id;
 	data->name = "coretemp";
-#ifdef MY_DEF_HERE
+#ifdef SYNO_PINEVIEW_CORETEMP
 	/* if the cpu temp can't read, syno_cpu_temperature() still return this value, 
 	 * so we must set a valid value(default 20 degree C) when init*/
 	data->temp = 20 * 1000;
@@ -297,7 +297,7 @@ static int __devinit coretemp_probe(struct platform_device *pdev)
 
 	if ((c->x86_model > 0xe) && (c->x86_model != 0x1c)) {
 		err = rdmsr_safe_on_cpu(data->id, 0x1a2, &eax, &edx);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CEDARVIEW_CORETEMP
 		if (!err) {
 #else
 		if (err) {
@@ -470,10 +470,10 @@ static int __init coretemp_init(void)
 		    !((c->x86_model == 0xe) || (c->x86_model == 0xf) ||
 			(c->x86_model == 0x16) || (c->x86_model == 0x17) ||
 			(c->x86_model == 0x1a) || (c->x86_model == 0x1c) ||
-#ifdef MY_DEF_HERE
+#ifdef SYNO_BROMOLOW_CORETEMP
 			(c->x86_model == 0x2a) ||
 #endif
-#ifdef MY_DEF_HERE
+#ifdef SYNO_CEDARVIEW_CORETEMP
 			(c->x86_model == 0x36) ||
 #endif
 			(c->x86_model == 0x1e))) {
@@ -530,7 +530,7 @@ static void __exit coretemp_exit(void)
 	platform_driver_unregister(&coretemp_driver);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_PINEVIEW_CORETEMP
 #include <linux/synobios.h>
 int syno_cpu_temperature(struct _SynoCpuTemp *pCpuTemp)
 {

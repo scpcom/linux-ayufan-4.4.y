@@ -112,11 +112,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	#define DB(x)
 #endif	
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 extern long g_internal_netif_num;
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MPPCTL_REG_W
 MV_STATUS SYNOMppCtrlRegWrite(MV_U32 mppPin, MV_U32 mppVal)
 {
 	MV_U32 origVal;
@@ -460,7 +460,7 @@ MV_U32 mvCtrlEthMaxPortGet(MV_VOID)
 {
 	MV_U32 devId;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 	if (g_internal_netif_num >= 0) {
 		return g_internal_netif_num;
 	}else{
@@ -1473,7 +1473,7 @@ MV_VOID   mvCtrlPwrSaveOn(MV_VOID)
 			     : "r" (old)
 			     : "memory");
 }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CPUFREQ_ADJUST
 EXPORT_SYMBOL(mvCtrlPwrSaveOn);
 #endif
 
@@ -1512,7 +1512,7 @@ MV_VOID   mvCtrlPwrSaveOff(MV_VOID)
 			     : "r" (old)
 			     : "memory");
 }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CPUFREQ_ADJUST
 EXPORT_SYMBOL(mvCtrlPwrSaveOff);
 #endif
 

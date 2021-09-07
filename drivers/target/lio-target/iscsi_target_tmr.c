@@ -486,7 +486,7 @@ static int iscsi_task_reassign_complete_scsi_cmnd(
 	}
 
 	switch (cmd->data_direction) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	case DMA_TO_DEVICE:
 		return iscsi_task_reassign_complete_write(cmd, tmr_req);
 	case DMA_FROM_DEVICE:
@@ -920,7 +920,7 @@ int iscsi_check_task_reassign_expdatasn(
 	if (se_cmd->se_cmd_flags & SCF_SENT_CHECK_CONDITION)
 		return 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	if (ref_cmd->data_direction == DMA_NONE)
 		return 0;
 #else
@@ -935,7 +935,7 @@ int iscsi_check_task_reassign_expdatasn(
 	 * Also check that the Initiator is not re-requesting DataIN that has
 	 * already been acknowledged with a DataAck SNACK.
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	if (ref_cmd->data_direction == DMA_FROM_DEVICE) {
 #else
 	if (ref_cmd->data_direction == ISCSI_READ) {
@@ -965,7 +965,7 @@ int iscsi_check_task_reassign_expdatasn(
 	 *
 	 * Do the magic in iscsi_task_reassign_prepare_write().
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	if (ref_cmd->data_direction == DMA_TO_DEVICE) {
 #else
 	if (ref_cmd->data_direction == ISCSI_WRITE) {

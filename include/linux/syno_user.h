@@ -25,11 +25,11 @@
 /**
  * Dsc: This modify should sync with samba
  */
-#ifndef MY_ABC_HERE
+#ifndef SYNO_UNICODE
 #define SYNO_UNICODE
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_UNICODE
 #define SYNO_MAXPATH    4095
 #define SYNO_MAXNAME    491
 #endif

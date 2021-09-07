@@ -18,17 +18,17 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
 #include <linux/mtd/compatmac.h>
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 #include <linux/rtnetlink.h>
 #include <linux/netdevice.h>
 #include <linux/if_arp.h>
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 extern unsigned char grgbLanMac[4][16];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 extern char gszSerialNum[];
 extern char gszCustomSerialNum[];
 #define SYNO_SN_TAG "SN="
@@ -517,7 +517,7 @@ out_register:
 	/* register our partition */
 	add_mtd_device(&slave->mtd);
 
-#if defined(MY_ABC_HERE) 
+#if defined(SYNO_MAC_ADDRESS) 
 	if ((memcmp(part->name, "vender", 7)==0) ||
 		(memcmp(part->name, "vendor", 7)==0)) {
 			int gVenderMacNumber = 0;
@@ -530,7 +530,7 @@ out_register:
 			char rgbLanMac[4][6];
 
 			part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 			x = 0;
 			gVenderMacNumber = 0;
 			for (n = 0; n<4; n++) {
@@ -561,7 +561,7 @@ out_register:
 			}
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 			char szSerialBuffer[32];
 			char *ptr;
 			char szSerial[32];
@@ -752,7 +752,7 @@ int parse_mtd_partitions(struct mtd_info *master, const char **types,
 }
 EXPORT_SYMBOL_GPL(parse_mtd_partitions);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MTD_INFO
 int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length)
 {
 	struct mtd_part *part = PART(mtd);
@@ -776,4 +776,4 @@ int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned l
 
 	return 0;
 }
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_MTD_INFO */

@@ -1846,7 +1846,7 @@ free_interfaces:
 		intfc = cp->intf_cache[i];
 		intf->altsetting = intfc->altsetting;
 		intf->num_altsetting = intfc->num_altsetting;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_USB_DAC_DESCRIPTOR_FIX
 		intf->intf_assoc = find_iad(dev, cp, i);
 #endif
 		kref_get(&intfc->ref);
@@ -1861,7 +1861,7 @@ free_interfaces:
 		if (!alt)
 			alt = &intf->altsetting[0];
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_DAC_DESCRIPTOR_FIX
 		intf->intf_assoc =
 			find_iad(dev, cp, alt->desc.bInterfaceNumber);
 #endif

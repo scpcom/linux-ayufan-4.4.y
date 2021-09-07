@@ -480,7 +480,7 @@ static int complete_accumulated_write(oxnas_file_context_t * file_context)
 		temp_offset = net_rx_context->data_ref[net_rx_context->fill_frag_list_idx].start_offset;
 		
 #ifdef DEBUG
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
 		printk (KERN_INFO "\n Acc write - Filename %s, inode - %p[%lu], file - %p offset - %lld count - %lld - idx - %d\n",
                             acc_fp->f_path.dentry->d_name.name, acc_fp->inode, acc_fp->inode->i_ino, acc_fp, temp_offset, temp_count,
                             net_rx_context->fill_frag_list_idx);
@@ -712,7 +712,7 @@ static int init_write_file_context(
 	struct kmem_cache           *frag_cache;
 
 #ifdef DEBUG
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
 	printk(KERN_INFO "Fast Write - Init inode:%p[%lu]- File - %p - write context - %p\n", inode, inode->i_ino, fp, fp->fast_write_context);
 #else
 	printk(KERN_INFO "Fast Write - Init - File - %p - write context - %p\n", fp, fp->fast_write_context);
@@ -1332,7 +1332,7 @@ static int oxnas_do_disk_flush(
 	BUG_ON (!inode->writer_file_context);
 
 #ifdef DEBUG
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
  	printk("fast - write Inode %p, file %p, name %s\n", inode, inode->i_ino, fp, fp->f_path.dentry->d_name.name);
 #else
 	printk("fast - write Inode %p, file %p, name %s\n", inode, fp, fp->f_path.dentry->d_name.name);
@@ -1775,7 +1775,7 @@ int oxnas_do_direct_disk_write(
 	struct inode 				*inode = fp->inode;
 
 #ifdef DEBUG
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
 	printk("ENTERING fastwrite Inode %p[%lu], file %p, name %s \n", inode, inode->i_ino, fp, fp->f_path.dentry->d_name.name);
 #else
 	printk("ENTERING fastwrite Inode %p, file %p, name %s \n", inode, fp, fp->f_path.dentry->d_name.name);
@@ -1803,7 +1803,7 @@ int oxnas_do_direct_disk_write(
 	
 	if (!fp->fast_write_context) { /* first write - need to initialise */
 #ifdef DEBUG
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
 		printk("Init fastwrite Inode %p[%lu], file %p, name %s\n", inode, inode->i_ino, fp, fp->f_path.dentry->d_name.name);
 #else
 		printk("Init fastwrite Inode %p, file %p, name %s\n", inode, fp, fp->f_path.dentry->d_name.name);
@@ -1824,7 +1824,7 @@ int oxnas_do_direct_disk_write(
 	}
 
 #ifdef DEBUG
-#ifdef MY_DEF_HERE	
+#ifdef SYNO_FAST_RW_FIX	
  	printk("fast - write Inode %p[%lu], file %p, name %s\n", inode, inode->i_ino, fp, fp->f_path.dentry->d_name.name);
 #else
 	printk("fast - write Inode %p, file %p, name %s\n", inode, fp, fp->f_path.dentry->d_name.name);

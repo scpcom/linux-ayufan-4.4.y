@@ -85,7 +85,7 @@ void ufs_free_fragments(struct inode *inode, u64 fragment, unsigned count)
 				   "bit already cleared for fragment %u", i);
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	dquot_free_block(inode, count);
 #else
 	vfs_dq_free_block(inode, count);
@@ -199,7 +199,7 @@ do_more:
 		ubh_setblock(UCPI_UBH(ucpi), ucpi->c_freeoff, blkno);
 		if ((UFS_SB(sb)->s_flags & UFS_CG_MASK) == UFS_CG_44BSD)
 			ufs_clusteracct (sb, ucpi, blkno, 1);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_block(inode, uspi->s_fpb);
 #else
 		vfs_dq_free_block(inode, uspi->s_fpb);
@@ -519,7 +519,7 @@ static u64 ufs_add_fragments(struct inode *inode, u64 fragment,
 	struct ufs_cg_private_info * ucpi;
 	struct ufs_cylinder_group * ucg;
 	unsigned cgno, fragno, fragoff, count, fragsize, i;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	int ret;
 #endif
 	
@@ -567,7 +567,7 @@ static u64 ufs_add_fragments(struct inode *inode, u64 fragment,
 		fs32_add(sb, &ucg->cg_frsum[fragsize - count], 1);
 	for (i = oldcount; i < newcount; i++)
 		ubh_clrbit (UCPI_UBH(ucpi), ucpi->c_freeoff, fragno + i);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	ret = dquot_alloc_block(inode, count);
 	if (ret) {
 		*err = ret;
@@ -613,7 +613,7 @@ static u64 ufs_alloc_fragments(struct inode *inode, unsigned cgno,
 	struct ufs_cylinder_group * ucg;
 	unsigned oldcg, i, j, k, allocsize;
 	u64 result;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	int ret;
 #endif
 	
@@ -684,7 +684,7 @@ cg_found:
 		for (i = count; i < uspi->s_fpb; i++)
 			ubh_setbit (UCPI_UBH(ucpi), ucpi->c_freeoff, goal + i);
 		i = uspi->s_fpb - count;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_block(inode, i);
 #else
 		vfs_dq_free_block(inode, i);
@@ -700,7 +700,7 @@ cg_found:
 	result = ufs_bitmap_search (sb, ucpi, goal, allocsize);
 	if (result == INVBLOCK)
 		return 0;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	ret = dquot_alloc_block(inode, count);
 	if (ret) {
 		*err = ret;
@@ -744,7 +744,7 @@ static u64 ufs_alloccg_block(struct inode *inode,
 	struct ufs_super_block_first * usb1;
 	struct ufs_cylinder_group * ucg;
 	u64 result, blkno;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	int ret;
 #endif
 
@@ -780,7 +780,7 @@ gotit:
 	ubh_clrblock (UCPI_UBH(ucpi), ucpi->c_freeoff, blkno);
 	if ((UFS_SB(sb)->s_flags & UFS_CG_MASK) == UFS_CG_44BSD)
 		ufs_clusteracct (sb, ucpi, blkno, -1);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 	ret = dquot_alloc_block(inode, uspi->s_fpb);
 	if (ret) {
 		*err = ret;

@@ -1163,7 +1163,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			 */
 			qc = ata_qc_from_tag(ap, qc->tag);
 			if (qc) {
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_SPINUP_DELAY)
 				if (IS_SYNO_SPINUP_CMD(qc)) {
 					ap->ops->sff_irq_on(ap);
 					/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
@@ -1198,7 +1198,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 
 			spin_unlock_irqrestore(ap->lock, flags);
 		} else {
-#if defined(MY_ABC_HERE)
+#if defined(SYNO_SPINUP_DELAY)
 			if (IS_SYNO_SPINUP_CMD(qc)) {
 				/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
 				if (qc->err_mask || 
@@ -1253,13 +1253,13 @@ int ata_sff_hsm_move(struct ata_port *ap, struct ata_queued_cmd *qc,
 		     u8 status, int in_wq)
 {
 	struct ata_eh_info *ehi = &ap->link.eh_info;
-#if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+#if defined(SYNO_SPINUP_DELAY) || defined(SYNO_SATA_PM_DEVICE_GPIO)
 	struct ata_taskfile *tf = &qc->tf;
 #endif
 	unsigned long flags = 0;
 	int poll_next;
 
-#if defined(MY_ABC_HERE) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+#if defined(SYNO_SPINUP_DELAY) || defined(SYNO_SATA_PM_DEVICE_GPIO)
 	/* if our ATA_CMD_FPDMA_READ or ATA_CMD_CHK_POWER command timeout,
 	 * it will be flushed (ATA_QCFLAG_ACTIVE = 0).
 	 * But it still in workqueue, so we should be ignore it when called by ata_pio_task
@@ -2235,7 +2235,7 @@ int ata_sff_softreset(struct ata_link *link, unsigned int *classes,
 	DPRINTK("about to softreset, devmask=%x\n", devmask);
 	rc = ata_bus_softreset(ap, devmask, deadline);
 	/* if link is occupied, -ENODEV too is an error */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	if (0 < ap->iFakeError) {
 		ata_link_printk(link, KERN_ERR, "generate fake SRST, Fake count %d\n", ap->iFakeError);
 		if (SYNO_ERROR_MAX > ap->iFakeError) {
@@ -2246,7 +2246,7 @@ int ata_sff_softreset(struct ata_link *link, unsigned int *classes,
 #endif
 	if (rc && (rc != -ENODEV || sata_scr_valid(link))) {
 		ata_link_printk(link, KERN_ERR, "SRST failed (errno=%d)\n", rc);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 		if (-EBUSY == rc) {
 			ata_link_printk(link, KERN_ERR, "SRST fail, set srst fail flag\n");
 			link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;

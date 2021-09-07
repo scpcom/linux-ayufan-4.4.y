@@ -187,18 +187,18 @@
 #define SYNO_MODEL_RS408	0x02    
 #define SYNO_MODEL_DS408	0x01
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 extern char gszSerialNum[];
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HW_VERSION
 #endif
 
 static int Uninitialize(void);
 
 static int GetBrand(void)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SERIAL
 	int Brand = -1;
 
 	//YMXX[Z]SSSSS
@@ -630,7 +630,7 @@ static int SetFanStatus(FAN_STATUS status, FAN_SPEED speed)
 	case MODEL_DS209p:
 		break;
 	case MODEL_DS409p:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HW_VERSION
 		if (syno_is_hw_version(HW_DS409pv20)) {
 			res = SetFanSpeedValue3bits(status, speed, FanStatusMapping409pv20);
 			goto END;

@@ -47,7 +47,7 @@
 
 #undef TARGET_CORE_SEOBJ_C
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 #define MAKE_OBJ_TYPE(type, op1, op2)			\
 void type##_obj_##op1##_count(struct se_obj_s *obj)	\
 {							\
@@ -139,7 +139,7 @@ int dev_obj_export(void *p, se_portal_group_t *tpg, se_lun_t *lun)
 		return -1;
 
 	lun->se_dev = dev;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	se_dev_start(p);
 
 	atomic_inc(&dev->dev_export_obj.obj_access_count);
@@ -171,7 +171,7 @@ void dev_obj_unexport(void *p, se_portal_group_t *tpg, se_lun_t *lun)
 	}
 	spin_unlock(&lun->lun_sep_lock);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	atomic_dec(&dev->dev_export_obj.obj_access_count);
 #else
 	DEV_OBJ_API(dev)->dec_count(&dev->dev_export_obj);
@@ -180,7 +180,7 @@ void dev_obj_unexport(void *p, se_portal_group_t *tpg, se_lun_t *lun)
 	core_release_port(dev, port);
 	spin_unlock(&dev->se_port_lock);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	se_dev_stop(p);
 #else
 	DEV_OBJ_API(dev)->deactivate(p);
@@ -188,7 +188,7 @@ void dev_obj_unexport(void *p, se_portal_group_t *tpg, se_lun_t *lun)
 	lun->se_dev = NULL;
 }
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 int dev_obj_transport_setup_cmd(void *p, se_cmd_t *cmd)
 {
 	transport_device_setup_cmd(cmd);
@@ -251,7 +251,7 @@ int dev_obj_max_sectors(void *p)
 		return DEV_ATTRIB(dev)->max_sectors;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 unsigned long long dev_obj_end_lba(void *p)
 {
 	se_device_t *dev  = (se_device_t *)p;
@@ -349,7 +349,7 @@ map_func_t dev_obj_get_map_SG(void *p, int rw)
 {
 	se_device_t *dev  = (se_device_t *)p;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	return (rw == DMA_TO_DEVICE) ? dev->transport->spc->write_SG :
 		dev->transport->spc->read_SG;
 #else
@@ -362,7 +362,7 @@ map_func_t dev_obj_get_map_non_SG(void *p, int rw)
 {
 	se_device_t *dev  = (se_device_t *)p;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	return (rw == DMA_TO_DEVICE) ? dev->transport->spc->write_non_SG :
 		dev->transport->spc->read_non_SG;
 #else
@@ -378,7 +378,7 @@ map_func_t dev_obj_get_map_none(void *p)
 	return dev->transport->spc->none;
 }
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 void *dev_obj_get_transport_req(void *p, se_task_t *task)
 {
 	se_device_t *dev  = (se_device_t *)p;
@@ -441,7 +441,7 @@ int dev_obj_check_shutdown(void *p)
 	return ret;
 }
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 void dev_obj_signal_shutdown(void *p)
 {
 	se_device_t *dev  = (se_device_t *)p;

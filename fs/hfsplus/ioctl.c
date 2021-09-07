@@ -92,7 +92,7 @@ setflags_out:
 	}
 }
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_HFSPLUS_EA
 int hfsplus_setxattr(struct dentry *dentry, const char *name,
 		     const void *value, size_t size, int flags)
 {

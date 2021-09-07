@@ -2118,7 +2118,7 @@ ext4_ext_rm_leaf(handle_t *handle, struct inode *inode,
 	struct ext4_extent *ex;
 
 	/* the header must be checked already in ext4_ext_remove_space() */
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
 	ext_debug("truncate inode [%lu] since %u in leaf\n", inode->i_ino, start);
 #else
 	ext_debug("truncate since %u in leaf\n", start);
@@ -2266,7 +2266,7 @@ static int ext4_ext_remove_space(struct inode *inode, ext4_lblk_t start)
 	handle_t *handle;
 	int i, err;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
 	ext_debug("truncate inode [%lu] since %u\n", inode->i_ino, start);
 #else
 	ext_debug("truncate since %u\n", start);
@@ -2536,7 +2536,7 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 						struct inode *inode,
 						struct ext4_ext_path *path,
 						ext4_lblk_t iblock,
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 						unsigned int max_blocks,
 						int zeroout_flag)
 #else
@@ -2576,7 +2576,7 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 	orig_ex.ee_block = ex->ee_block;
 	orig_ex.ee_len   = cpu_to_le16(ee_len);
 	ext4_ext_store_pblock(&orig_ex, ext_pblock(ex));
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
  	if(!zeroout_flag) {
  		/* check whether the extent is inited and if so, return the end of the
  		 * inited extent - start block as the allocated extent so that the next
@@ -2602,13 +2602,13 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 		goto out;
 	/* If extent has less than 2*EXT4_EXT_ZERO_LEN zerout directly */
 	if (ee_len <= 2*EXT4_EXT_ZERO_LEN && may_zeroout) {
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 		if(zeroout_flag) {
 #endif
 		err =  ext4_ext_zeroout(inode, &orig_ex);
 		if (err)
 			goto fix_extent_len;
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 		}
 #endif
 		/* update the extent length and mark as initialized */
@@ -2659,13 +2659,13 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 			err = ext4_ext_insert_extent(handle, inode, path,
 							ex3, 0);
 			if (err == -ENOSPC) {
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 				if(zeroout_flag) {
 #endif
 				err =  ext4_ext_zeroout(inode, &orig_ex);
 				if (err)
 					goto fix_extent_len;
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 				}
 #endif
 				ex->ee_block = orig_ex.ee_block;
@@ -2678,7 +2678,7 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 			} else if (err)
 				goto fix_extent_len;
 
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 			if(zeroout_flag) {
 #endif
 			/*
@@ -2713,7 +2713,7 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 				ext4_ext_dirty(handle, inode, path + depth);
 				return err;
 			}
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 			}
 #endif
 
@@ -2727,13 +2727,13 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 		ext4_ext_mark_uninitialized(ex3);
 		err = ext4_ext_insert_extent(handle, inode, path, ex3, 0);
 		if (err == -ENOSPC && may_zeroout) {
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
  		if(zeroout_flag) {
 #endif
 			err =  ext4_ext_zeroout(inode, &orig_ex);
 			if (err)
 				goto fix_extent_len;
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 		}
 #endif
 			/* update the extent length and mark as initialized */
@@ -2784,13 +2784,13 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 		 */
 		if (le16_to_cpu(orig_ex.ee_len) <= EXT4_EXT_ZERO_LEN &&
 			iblock != ee_block && may_zeroout) {
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
  		if(zeroout_flag) {
 #endif
 			err =  ext4_ext_zeroout(inode, &orig_ex);
 			if (err)
 				goto fix_extent_len;
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 		}
 #endif
 			/* update the extent length and mark as initialized */
@@ -2859,13 +2859,13 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 insert:
 	err = ext4_ext_insert_extent(handle, inode, path, &newex, 0);
 	if (err == -ENOSPC && may_zeroout) {
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 		if(zeroout_flag) {
 #endif
 		err =  ext4_ext_zeroout(inode, &orig_ex);
 		if (err)
 			goto fix_extent_len;
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 		}
 #endif
 		/* update the extent length and mark as initialized */
@@ -3216,7 +3216,7 @@ ext4_ext_handle_uninitialized_extents(handle_t *handle, struct inode *inode,
 	}
 
 	/* buffered write, writepage time, convert*/
-#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(SYNO_FAST_RW_FIX)
 	ret = ext4_ext_convert_to_initialized(handle, inode,
 						path, iblock,
 						max_blocks, 1);
@@ -3453,7 +3453,7 @@ int ext4_ext_get_blocks(handle_t *handle, struct inode *inode,
 	newblock = ext4_mb_new_blocks(handle, &ar, &err);
 	if (!newblock)
 		goto out2;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
 	ext_debug("inode %llu allocate new block: goal %llu, found %llu/%u\n",
 		  inode->i_ino, ar.goal, newblock, allocated);
 #else
@@ -3660,7 +3660,7 @@ int ext4_preallocate(
 	loff_t		 offset,
 	loff_t		 len)
 {
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
 	//printk("ext4_preallocate() filp %p, inode %p[%lu], offset %lld, len %lld\n", filp, filp->f_path.dentry->d_inode, filp->f_path.dentry->d_inode->i_ino, offset, len);
 	return ext4_fallocate(filp->f_path.dentry->d_inode, 0, offset, len);
 #else
@@ -3674,7 +3674,7 @@ int ext4_unpreallocate(
 	loff_t		 offset,
 	loff_t		 len)
 {
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
     //printk("ext4_unpreallocate() filp %p, inode %p[%lu], offset %lld, len %lld\n", filp, filp->f_path.dentry->d_inode, filp->f_path.dentry->d_inode->i_ino, offset, len);
 #else
 //printk("ext4_unpreallocate() filp %p, inode %p, offset %lld, len %lld\n", filp, filp->f_path.dentry->d_inode, offset, len);
@@ -3725,7 +3725,7 @@ int ext4_resetpreallocate(
 		}
 
 		/* find extent for this block */
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
 		ret = ext4_ext_convert_to_initialized(handle, inode,
 												path, startblock,
 												num_of_blocks);
@@ -4103,7 +4103,7 @@ int ext4_getbmapx(struct inode *inode, struct getbmapx *bmx)
 
 	fileinfo.fi_extents_start = kzalloc(sizeof(struct fiemap_extent) * (fileinfo.fi_extents_max), GFP_KERNEL);
 	if (!fileinfo.fi_extents_start) {
-#ifdef MY_DEF_HERE
+#ifdef SYNO_FAST_RW_FIX
 	printk (KERN_INFO "ext4_getbmapx - no memory, filemap_extent size:[%lu] extents_max:[%lu]\n", sizeof(struct fiemap_extent), fileinfo.fi_extents_max);
 #else
 	printk (KERN_INFO "ext4_getbmapx - no memory\n");

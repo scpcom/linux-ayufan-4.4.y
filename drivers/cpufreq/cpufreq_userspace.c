@@ -197,7 +197,7 @@ struct cpufreq_governor cpufreq_gov_userspace = {
 	.show_setspeed	= show_speed,
 	.owner		= THIS_MODULE,
 };
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CPUFREQ_ADJUST
 EXPORT_SYMBOL(cpufreq_gov_userspace);
 #endif
 

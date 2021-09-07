@@ -579,7 +579,7 @@ static int ext2_setup_super (struct super_block * sb,
 	}
 	if (read_only)
 		return res;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_REMOVE_CHECKTIME_WARNING
 	if (!(sbi->s_mount_state & EXT2_VALID_FS))
 		printk ("EXT2-fs warning: mounting unchecked fs, "
 			"running e2fsck is recommended\n");

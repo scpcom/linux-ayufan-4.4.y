@@ -342,7 +342,7 @@ void stub_tx_loop(struct usbip_task *ut)
 			break;
 		}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_USBIP
 		if (syno_usbip_event_happened(ud))
 #else
 		if (usbip_event_happened(ud))

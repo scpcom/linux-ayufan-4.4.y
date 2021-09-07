@@ -213,7 +213,7 @@ static int transport_processing_thread(void *);
 #ifdef SYNO_LIO_TRANSPORT_PATCHES
 static int transport_new_cmd_obj(struct se_cmd_s *cmd,
 		struct se_transform_info_s *ti, void *obj_ptr, int post_execute);
-#elif defined(MY_ABC_HERE)
+#elif defined(SYNO_LIO_REMOVE_OBJLUN_PATCH)
 int transport_new_cmd_obj(struct se_cmd_s *cmd,
 		struct se_transform_info_s *ti, void *obj_ptr, int post_execute);
 #endif
@@ -656,7 +656,7 @@ void __transport_register_session(
 	}
 	list_add_tail(&se_sess->sess_list, &se_tpg->tpg_sess_list);
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "TARGET_CORE[%s]: Registered fabric_sess_ptr: %p\n",
 		TPG_TFO(se_tpg)->get_fabric_name(), se_sess->fabric_sess_ptr);
 #endif
@@ -752,7 +752,7 @@ void transport_deregister_session(se_session_t *se_sess)
 
 	transport_free_session(se_sess);
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "TARGET_CORE[%s]: Deregistered fabric_sess\n",
 		TPG_TFO(se_tpg)->get_fabric_name());
 #endif
@@ -958,7 +958,7 @@ static void transport_lun_remove_cmd(se_cmd_t *cmd)
 	if (cmd->se_cmd_flags & SCF_CMD_PASSTHROUGH)
 		return;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 	spin_lock_irqsave(&T_TASK(cmd)->t_state_lock, flags);
 	if (!(atomic_read(&T_TASK(cmd)->transport_dev_active))) {
 		spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
@@ -986,7 +986,7 @@ check_lun:
 
 void transport_cmd_finish_abort(se_cmd_t *cmd, int remove)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	transport_remove_cmd_from_queue(cmd, SE_DEV(cmd)->dev_queue_obj);
 #else
 	transport_remove_cmd_from_queue(cmd,
@@ -1006,7 +1006,7 @@ void transport_cmd_finish_abort(se_cmd_t *cmd, int remove)
 
 void transport_cmd_finish_abort_tmr(se_cmd_t *cmd)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	transport_remove_cmd_from_queue(cmd, SE_DEV(cmd)->dev_queue_obj);
 #else
 	transport_remove_cmd_from_queue(cmd,
@@ -1507,7 +1507,7 @@ EXPORT_SYMBOL(transport_check_device_tcq);
 
 unsigned char *transport_dump_cmd_direction(se_cmd_t *cmd)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	switch (cmd->data_direction) {
 	case DMA_NONE:
 		return "NONE";
@@ -1593,7 +1593,7 @@ void transport_dump_dev_info(
 	*bl += sprintf(b + *bl, "ANSI SCSI revision: %02x  ",
 		TRANSPORT(dev)->get_device_rev(dev));
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	if (DEV_T10_WWN(dev)) {
 		t10_wwn_t *wwn = DEV_T10_WWN(dev);
 #else
@@ -1607,7 +1607,7 @@ void transport_dump_dev_info(
 	}
 	*bl += sprintf(b + *bl, "%s", "DIRECT");
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	if (atomic_read(&dev->dev_access_obj.obj_access_count))
 		*bl += sprintf(b + *bl, "  ACCESSED\n");
 	else if (atomic_read(&dev->dev_export_obj.obj_access_count))
@@ -1698,7 +1698,7 @@ static int transport_dev_write_pending_nop(se_task_t *task)
 }
 
 static int transport_get_inquiry(
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	se_obj_lun_type_t *obj_api,
 #endif
 	t10_wwn_t *wwn,
@@ -1714,10 +1714,10 @@ static int transport_get_inquiry(
 	cdb[3] = (INQUIRY_LEN >> 8) & 0xff;
 	cdb[4] = (INQUIRY_LEN & 0xff);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	cmd = transport_allocate_passthrough(&cdb[0],  DMA_FROM_DEVICE,
 			0, NULL, 0, INQUIRY_LEN, obj_ptr);
-#elif defined(MY_ABC_HERE)
+#elif defined(SYNO_LIO_REMOVE_OBJLUN_PATCH)
 	cmd = transport_allocate_passthrough(&cdb[0],  SE_DIRECTION_READ,
 			0, NULL, 0, INQUIRY_LEN, obj_ptr);
 #else
@@ -1744,7 +1744,7 @@ static int transport_get_inquiry(
 	memcpy((void *)&wwn->revision[0], (void *)&buf[32],
 			sizeof(wwn->revision));
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk("  Vendor: ");
 	for (i = 8; i < 16; i++)
 		if (buf[i] >= 0x20 && i < buf[4] + 5)
@@ -1771,7 +1771,7 @@ static int transport_get_inquiry(
 
 	i = buf[0] & 0x1f;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk("  Type:   %s ", scsi_device_type(i));
 	printk("                 ANSI SCSI revision: %02x",
 				buf[2] & 0x07);
@@ -1786,7 +1786,7 @@ static int transport_get_inquiry(
 }
 
 static int transport_get_inquiry_vpd_serial(
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	se_obj_lun_type_t *obj_api,
 #endif
 	t10_wwn_t *wwn,
@@ -1803,10 +1803,10 @@ static int transport_get_inquiry_vpd_serial(
 	cdb[3] = (INQUIRY_VPD_SERIAL_LEN >> 8) & 0xff;
 	cdb[4] = (INQUIRY_VPD_SERIAL_LEN & 0xff);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	cmd = transport_allocate_passthrough(&cdb[0], DMA_FROM_DEVICE,
 			0, NULL, 0, INQUIRY_VPD_SERIAL_LEN, obj_ptr);
-#elif defined(MY_ABC_HERE)
+#elif defined(SYNO_LIO_REMOVE_OBJLUN_PATCH)
 	cmd = transport_allocate_passthrough(&cdb[0], SE_DIRECTION_READ,
 			0, NULL, 0, INQUIRY_VPD_SERIAL_LEN, obj_ptr);
 #else
@@ -1823,7 +1823,7 @@ static int transport_get_inquiry_vpd_serial(
 
 	buf = (unsigned char *)T_TASK(cmd)->t_task_buf;
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "T10 VPD Unit Serial Number: %s\n", &buf[4]);
 #endif
 	snprintf(&wwn->unit_serial[0], INQUIRY_VPD_SERIAL_LEN, "%s", &buf[4]);
@@ -1883,7 +1883,7 @@ void transport_dump_vpd_proto_id(
 
 	if (p_buf)
 		strncpy(p_buf, buf, p_buf_len);
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	else
 		printk(KERN_INFO "%s", buf);
 #endif
@@ -1932,7 +1932,7 @@ int transport_dump_vpd_assoc(
 
 	if (p_buf)
 		strncpy(p_buf, buf, p_buf_len);
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	else
 		printk("%s", buf);
 #endif
@@ -1990,7 +1990,7 @@ int transport_dump_vpd_ident_type(
 
 	if (p_buf)
 		strncpy(p_buf, buf, p_buf_len);
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	else
 		printk("%s", buf);
 #endif
@@ -2041,7 +2041,7 @@ int transport_dump_vpd_ident(
 
 	if (p_buf)
 		strncpy(p_buf, buf, p_buf_len);
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	else
 		printk("%s", buf);
 #endif
@@ -2085,7 +2085,7 @@ int transport_set_vpd_ident(t10_vpd_t *vpd, unsigned char *page_83)
 }
 
 static int transport_get_inquiry_vpd_device_ident(
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	se_obj_lun_type_t *obj_api,
 #endif
 	t10_wwn_t *wwn,
@@ -2104,11 +2104,11 @@ static int transport_get_inquiry_vpd_device_ident(
 	cdb[3] = (INQUIRY_VPD_DEVICE_IDENTIFIER_LEN >> 8) & 0xff;
 	cdb[4] = (INQUIRY_VPD_DEVICE_IDENTIFIER_LEN & 0xff);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	cmd = transport_allocate_passthrough(&cdb[0], DMA_FROM_DEVICE,
 			0, NULL, 0, INQUIRY_VPD_DEVICE_IDENTIFIER_LEN,
 			obj_ptr);
-#elif defined(MY_ABC_HERE)
+#elif defined(SYNO_LIO_REMOVE_OBJLUN_PATCH)
 	cmd = transport_allocate_passthrough(&cdb[0], SE_DIRECTION_READ,
 			0, NULL, 0, INQUIRY_VPD_DEVICE_IDENTIFIER_LEN,
 			obj_ptr);
@@ -2127,7 +2127,7 @@ static int transport_get_inquiry_vpd_device_ident(
 
 	buf = (unsigned char *)T_TASK(cmd)->t_task_buf;
 	page_len = (buf[2] << 8) | buf[3];
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk("T10 VPD Page Length: %d\n", page_len);
 #endif
 
@@ -2140,7 +2140,7 @@ static int transport_get_inquiry_vpd_device_ident(
 					" length zero!\n");
 			break;
 		}
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "T10 VPD Identifer Length: %d\n", ident_len);
 #endif
 
@@ -2182,7 +2182,7 @@ int transport_rescan_evpd_device_ident(
 	se_device_t *dev)
 {
 	se_release_vpd_for_dev(dev);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	transport_get_inquiry_vpd_device_ident(DEV_T10_WWN(dev), (void *)dev);
 #else
 	transport_get_inquiry_vpd_device_ident(DEV_OBJ_API(dev),
@@ -2201,10 +2201,10 @@ static int transport_get_read_capacity(se_device_t *dev)
 	memset(cdb, 0, SCSI_CDB_SIZE);
 	cdb[0] = 0x25; /* READ_CAPACITY */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	cmd = transport_allocate_passthrough(&cdb[0], DMA_FROM_DEVICE,
 			0, NULL, 0, READ_CAP_LEN, (void *)dev);
-#elif defined(MY_ABC_HERE)
+#elif defined(SYNO_LIO_REMOVE_OBJLUN_PATCH)
 	cmd = transport_allocate_passthrough(&cdb[0], SE_DIRECTION_READ,
 			0, NULL, 0, READ_CAP_LEN, (void *)dev);
 #else
@@ -2231,7 +2231,7 @@ static int transport_get_read_capacity(se_device_t *dev)
 		return 0;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "iSCSI - READ_CAPACITY returned 0xFFFFFFFF, issuing"
 			" SAI_READ_CAPACITY_16\n");
 #else
@@ -2244,10 +2244,10 @@ static int transport_get_read_capacity(se_device_t *dev)
 	cdb[1] = 0x10; /* SAI_READ_CAPACITY_16 */
 	cdb[13] = 12;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	cmd = transport_allocate_passthrough(&cdb[0], DMA_FROM_DEVICE,
 			0, NULL, 0, 12, (void *)dev);
-#elif defined(MY_ABC_HERE)
+#elif defined(SYNO_LIO_REMOVE_OBJLUN_PATCH)
 	cmd = transport_allocate_passthrough(&cdb[0], SE_DIRECTION_READ,
 			0, NULL, 0, 12, (void *)dev);
 #else
@@ -2383,7 +2383,7 @@ se_device_t *transport_add_device_to_core_hba(
 	hba->dev_count++;
 	spin_unlock(&hba->device_lock);
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	/*
 	 * Get this se_device_t's API from the device object plugin.
 	 */
@@ -2414,7 +2414,7 @@ se_device_t *transport_add_device_to_core_hba(
 	if (transport_generic_activate_device(dev) < 0)
 		goto out;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	ret = transport_get_inquiry(DEV_T10_WWN(dev), (void *)dev);
 #else
 	ret = transport_get_inquiry(DEV_OBJ_API(dev),
@@ -2426,7 +2426,7 @@ se_device_t *transport_add_device_to_core_hba(
 	 * Locate VPD WWN Information used for various purposes within
 	 * the Storage Engine.
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	if (!(transport_get_inquiry_vpd_serial(DEV_T10_WWN(dev),
 			(void *)dev))) {
 		/*
@@ -2715,7 +2715,7 @@ static inline void transport_generic_prepare_cdb(
  *	1 on unsupported request sector count.
  */
 static inline int transport_check_device_cdb_sector_count(
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	se_obj_lun_type_t *se_obj_api,
 #endif
 	void *se_obj_ptr,
@@ -2723,7 +2723,7 @@ static inline int transport_check_device_cdb_sector_count(
 {
 	u32 max_sectors;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	max_sectors = dev_obj_max_sectors(se_obj_ptr);
 #else
 	max_sectors = se_obj_api->max_sectors(se_obj_ptr);
@@ -2743,7 +2743,7 @@ static inline int transport_check_device_cdb_sector_count(
  *
  *
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 static se_task_t *transport_generic_get_task(
 	se_transform_info_t *ti,
 	se_cmd_t *cmd,
@@ -2757,7 +2757,7 @@ static se_task_t *transport_generic_get_task(
 #endif
 {
 	se_task_t *task;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	struct se_device_s *dev = SE_DEV(cmd);
 #endif
 	unsigned long flags;
@@ -2774,7 +2774,7 @@ static se_task_t *transport_generic_get_task(
 	init_completion(&task->task_stop_comp);
 	task->task_no = T_TASK(cmd)->t_task_no++;
 	task->task_se_cmd = cmd;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	task->se_dev = dev;
 
 	DEBUG_SO("se_obj_ptr: %p\n", se_obj_ptr);
@@ -2811,7 +2811,7 @@ static se_task_t *transport_generic_get_task(
 	return task;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 static inline int transport_generic_obj_start(
 	se_transform_info_t *ti,
 	void *p,
@@ -2858,7 +2858,7 @@ static int transport_process_control_sg_transform(
 	unsigned char *cdb;
 	se_task_t *task;
 	se_mem_t *se_mem, *se_mem_lout = NULL;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	struct se_device_s *dev = SE_DEV(cmd);
 #endif
 	int ret;
@@ -2881,7 +2881,7 @@ static int transport_process_control_sg_transform(
 				cmd->data_direction);
 
 	cdb = TRANSPORT(dev)->get_cdb(task);
-#elif defined(MY_ABC_HERE)
+#elif defined(SYNO_LIO_REMOVE_OBJLUN_PATCH)
 	task = cmd->transport_get_task(ti, cmd, ti->se_obj_ptr);
 	if (!(task))
 		return -1;
@@ -2910,7 +2910,7 @@ static int transport_process_control_sg_transform(
 	atomic_inc(&T_TASK(cmd)->t_fe_count);
 	atomic_inc(&T_TASK(cmd)->t_se_count);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	ret = dev_obj_do_se_mem_map(ti->se_obj_ptr, task,
 			T_TASK(cmd)->t_mem_list, NULL, se_mem, &se_mem_lout,
 			&se_mem_cnt, &task_offset);
@@ -2948,7 +2948,7 @@ static int transport_process_control_nonsg_transform(
 			cmd->data_direction);
 
 	cdb = TRANSPORT(dev)->get_cdb(task);
-#elif defined(MY_ABC_HERE)
+#elif defined(SYNO_LIO_REMOVE_OBJLUN_PATCH)
 	struct se_device_s *dev = SE_DEV(cmd);
 	unsigned char *cdb;
 	se_task_t *task;
@@ -3009,7 +3009,7 @@ static int transport_process_non_data_transform(
 	task->transport_map_task = dev_obj_get_map_none(ti->se_obj_ptr);
 
 	cdb = TRANSPORT(dev)->get_cdb(task);
-#elif defined(MY_ABC_HERE)
+#elif defined(SYNO_LIO_REMOVE_OBJLUN_PATCH)
 	struct se_device_s *dev = SE_DEV(cmd);
 	unsigned char *cdb;
 	se_task_t *task;
@@ -3072,7 +3072,7 @@ se_cmd_t *__transport_alloc_se_cmd(
 #endif
 	int gfp_type = (in_interrupt()) ? GFP_ATOMIC : GFP_KERNEL;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	if (data_direction == DMA_BIDIRECTIONAL) {
 		printk(KERN_ERR "SCSI BiDirectional mode not supported yet\n");
 		return ERR_PTR(-ENOSYS);
@@ -3140,7 +3140,7 @@ se_cmd_t *__transport_alloc_se_cmd(
 	init_completion(&T_TASK(cmd)->t_transport_passthrough_comp);
 	init_completion(&T_TASK(cmd)->t_transport_passthrough_wcomp);
 	spin_lock_init(&T_TASK(cmd)->t_state_lock);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 	atomic_set(&T_TASK(cmd)->transport_dev_active, 1);
 #endif
 
@@ -3283,7 +3283,7 @@ int transport_generic_allocate_tasks(
 	 */
 	cmd->transport_wait_for_tasks = &transport_generic_wait_for_tasks;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	transport_device_setup_cmd(cmd);
 #else
 	CMD_ORIG_OBJ_API(cmd)->transport_setup_cmd(cmd->se_orig_obj_ptr, cmd);
@@ -3472,7 +3472,7 @@ int transport_generic_handle_tmr(
 	 * This is needed for early exceptions.
 	 */
 	cmd->transport_wait_for_tasks = &transport_generic_wait_for_tasks;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	transport_device_setup_cmd(cmd);
 #else
 	CMD_ORIG_OBJ_API(cmd)->transport_setup_cmd(cmd->se_orig_obj_ptr, cmd);
@@ -3491,7 +3491,7 @@ EXPORT_SYMBOL(transport_generic_handle_tmr);
  *
  *
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 int transport_stop_tasks_for_cmd(se_cmd_t *cmd)
 #else
 void transport_stop_tasks_for_cmd(se_cmd_t *cmd)
@@ -3499,7 +3499,7 @@ void transport_stop_tasks_for_cmd(se_cmd_t *cmd)
 {
 	se_task_t *task, *task_tmp;
 	unsigned long flags;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 	int ret = 0;
 #endif
 
@@ -3553,7 +3553,7 @@ void transport_stop_tasks_for_cmd(se_cmd_t *cmd)
 			atomic_set(&task->task_stop, 0);
 		} else {
 			DEBUG_TS("task_no[%d] - Did nothing\n", task->task_no);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 			ret++;
 #endif
 		}
@@ -3562,7 +3562,7 @@ void transport_stop_tasks_for_cmd(se_cmd_t *cmd)
 	}
 	spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 	return ret;
 #endif
 }
@@ -3590,7 +3590,7 @@ void transport_generic_request_failure(
 	DEBUG_GRF("-----[ Storage Engine Exception for cmd: %p ITT: 0x%08x"
 		" CDB: 0x%02x\n", cmd, CMD_TFO(cmd)->get_task_tag(cmd),
 		T_TASK(cmd)->t_task_cdb[0]);
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	DEBUG_GRF("-----[ se_obj_api: %p se_obj_ptr: %p\n", cmd->se_obj_api,
 		cmd->se_obj_ptr);
 	DEBUG_GRF("-----[ se_orig_obj_api: %p se_orig_obj_ptr: %p\n",
@@ -4350,7 +4350,7 @@ EXPORT_SYMBOL(transport_get_default_task_timeout);
  */
 void transport_start_task_timer(se_task_t *task)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	struct se_device_s *dev = task->se_obj_ptr;
 #endif
 	int timeout;
@@ -4360,7 +4360,7 @@ void transport_start_task_timer(se_task_t *task)
 	/*
 	 * If the task_timeout is disabled, exit now.
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	timeout = DEV_ATTRIB(dev)->task_timeout;
 #else
 	timeout = task->se_obj_api->get_task_timeout(task->se_obj_ptr);
@@ -4540,7 +4540,7 @@ int transport_execute_tasks(se_cmd_t *cmd)
 	int add_tasks;
 
 	if (!(cmd->se_cmd_flags & SCF_SE_DISABLE_ONLINE_CHECK)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		if (dev_obj_check_online(cmd->se_orig_obj_ptr) != 0) {
 #else
 		if (CMD_ORIG_OBJ_API(cmd)->check_online(
@@ -4570,7 +4570,7 @@ int transport_execute_tasks(se_cmd_t *cmd)
 		 * (if enabled) in __transport_add_task_to_execute_queue() and
 		 * transport_add_task_check_sam_attr().
 		 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		transport_add_tasks_from_cmd(cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->add_tasks(cmd->se_orig_obj_ptr, cmd);
@@ -4581,7 +4581,7 @@ int transport_execute_tasks(se_cmd_t *cmd)
 	 * storage object.
 	 */
 execute_tasks:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	__transport_execute_tasks(SE_DEV(cmd));
 #else
 	CMD_ORIG_OBJ_API(cmd)->execute_tasks(cmd->se_orig_obj_ptr);
@@ -4821,7 +4821,7 @@ static inline u32 transport_get_size(
 	unsigned char *cdb,
 	se_cmd_t *cmd)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	struct se_device_s *dev = SE_DEV(cmd);
 
 	if (TRANSPORT(dev)->get_device_type(dev) == TYPE_TAPE) {
@@ -4957,7 +4957,7 @@ after_tpgs:
 			return 0;
 		}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_VENDOR_ID
 		snprintf((unsigned char *)&buf[8], 5, "SYNO");
 #else
 		snprintf((unsigned char *)&buf[8], 8, "LIO-ORG");
@@ -5124,7 +5124,7 @@ check_t10_vend_desc:
 		buf[off] = 0x2; /* ASCII */
 		buf[off+1] = 0x1; /* T10 Vendor ID */
 		buf[off+2] = 0x0;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_VENDOR_ID
 		memcpy((unsigned char *)&buf[off+4], "SYNO", 5);
 #else
 		memcpy((unsigned char *)&buf[off+4], "LIO-ORG", 8);
@@ -5502,7 +5502,7 @@ int transport_generic_emulate_modesense(
 #endif
 		break;
 	default:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_ERR "iSCSI - Got Unknown Mode Page: 0x%02x\n", cdb[2] & 0x3f);
 #else
 		printk(KERN_ERR "Got Unknown Mode Page: 0x%02x\n",
@@ -5757,7 +5757,7 @@ static int transport_generic_cmd_sequencer(
 		if (sector_ret)
 			return 4;
 		size = transport_get_size(sectors, cdb, cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -5774,7 +5774,7 @@ static int transport_generic_cmd_sequencer(
 		if (sector_ret)
 			return 4;
 		size = transport_get_size(sectors, cdb, cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -5791,7 +5791,7 @@ static int transport_generic_cmd_sequencer(
 		if (sector_ret)
 			return 4;
 		size = transport_get_size(sectors, cdb, cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -5808,7 +5808,7 @@ static int transport_generic_cmd_sequencer(
 		if (sector_ret)
 			return 4;
 		size = transport_get_size(sectors, cdb, cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -5825,7 +5825,7 @@ static int transport_generic_cmd_sequencer(
 		if (sector_ret)
 			return 4;
 		size = transport_get_size(sectors, cdb, cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -5842,7 +5842,7 @@ static int transport_generic_cmd_sequencer(
 		if (sector_ret)
 			return 4;
 		size = transport_get_size(sectors, cdb, cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -5859,7 +5859,7 @@ static int transport_generic_cmd_sequencer(
 		if (sector_ret)
 			return 4;
 		size = transport_get_size(sectors, cdb, cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -5876,7 +5876,7 @@ static int transport_generic_cmd_sequencer(
 		if (sector_ret)
 			return 4;
 		size = transport_get_size(sectors, cdb, cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -5907,7 +5907,7 @@ static int transport_generic_cmd_sequencer(
 			/* GPCMD_SEND_KEY from multi media commands */
 			size = (cdb[8] << 8) + cdb[9];
 		}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -5920,7 +5920,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = cdb[4];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -5933,7 +5933,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = (cdb[7] << 8) + cdb[8];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -5946,7 +5946,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = cdb[4];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -5963,7 +5963,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = (cdb[7] << 8) + cdb[8];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -5976,7 +5976,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = READ_BLOCK_LEN;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -5992,7 +5992,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = (cdb[7] << 8) + cdb[8];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -6010,7 +6010,7 @@ static int transport_generic_cmd_sequencer(
 			 SPC3_PERSISTENT_RESERVATIONS) ?
 			&core_scsi3_emulate_pr : NULL;
 		size = (cdb[7] << 8) + cdb[8];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6024,7 +6024,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = (cdb[8] << 8) + cdb[9];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_SG(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_SG(cmd->se_orig_obj_ptr, cmd);
@@ -6037,7 +6037,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = READ_POSITION_LEN;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6068,7 +6068,7 @@ static int transport_generic_cmd_sequencer(
 			/* GPCMD_REPORT_KEY from multi media commands */
 			size = (cdb[8] << 8) + cdb[9];
 		}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6081,7 +6081,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = (cdb[3] << 8) + cdb[4];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6100,7 +6100,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = (cdb[6] << 16) + (cdb[7] << 8) + cdb[8];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6113,7 +6113,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = READ_CAP_LEN;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6128,7 +6128,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = (cdb[6] << 24) | (cdb[7] << 16) | (cdb[8] << 8) | cdb[9];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6148,7 +6148,7 @@ static int transport_generic_cmd_sequencer(
 #endif
 		size = (cdb[10] << 24) | (cdb[11] << 16) |
 		       (cdb[12] << 8) | cdb[13];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6161,7 +6161,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = (cdb[10] << 8) | cdb[11];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6175,7 +6175,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = (cdb[3] << 8) | cdb[4];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6191,7 +6191,7 @@ static int transport_generic_cmd_sequencer(
 #endif
 		sectors = (cdb[6] << 16) + (cdb[7] << 8) + cdb[8];
 		size = (2336 * sectors);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6205,7 +6205,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = cdb[8];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6218,7 +6218,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = cdb[4];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6231,7 +6231,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = 65536 * cdb[7] + 256 * cdb[8] + cdb[9];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6244,7 +6244,7 @@ static int transport_generic_cmd_sequencer(
 		SET_GENERIC_TRANSPORT_FUNCTIONS(cmd);
 #endif
 		size = (cdb[6] << 16) + (cdb[7] << 8) + cdb[8];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6318,7 +6318,7 @@ static int transport_generic_cmd_sequencer(
 	case SYNCHRONIZE_CACHE:
 	case TEST_UNIT_READY:
 	case VERIFY:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_VERIFY_16
 	case VERIFY_16:
 #endif
 	case WRITE_FILEMARKS:
@@ -6338,7 +6338,7 @@ static int transport_generic_cmd_sequencer(
 		cmd->transport_emulate_cdb =
 				&transport_core_report_lun_response;
 		size = (cdb[6] << 24) | (cdb[7] << 16) | (cdb[8] << 8) | cdb[9];
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		dev_obj_get_mem_buf(cmd->se_orig_obj_ptr, cmd);
 #else
 		CMD_ORIG_OBJ_API(cmd)->get_mem_buf(cmd->se_orig_obj_ptr, cmd);
@@ -6369,7 +6369,7 @@ static int transport_generic_cmd_sequencer(
 
 		cmd->cmd_spdtl = size;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 		if (cmd->data_direction == DMA_TO_DEVICE) {
 			printk(KERN_ERR "Rejecting underflow/overflow"
 					" WRITE data or BIDI data\n");
@@ -6421,7 +6421,7 @@ static inline se_cmd_t *transport_alloc_passthrough_cmd(
 #endif
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 static inline void transport_release_tasks(se_cmd_t *);
 #endif
 
@@ -6432,7 +6432,7 @@ se_cmd_t *transport_allocate_passthrough(
 	void *mem,
 	u32 se_mem_num,
 	u32 length,
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	se_obj_lun_type_t *obj_api,
 #endif
 	void *type_ptr)
@@ -6454,7 +6454,7 @@ se_cmd_t *transport_allocate_passthrough(
 	}
 
 	spin_lock_init(&cmd->se_lun->lun_sep_lock);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	SE_LUN(cmd)->lun_type_ptr = type_ptr;
 #else
 	SE_LUN(cmd)->lun_type = obj_api->se_obj_type;
@@ -6470,7 +6470,7 @@ se_cmd_t *transport_allocate_passthrough(
 	/*
 	 * Double check that the passed object is currently accepting CDBs
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	if (dev_obj_check_online(type_ptr) != 0) {
 		DEBUG_SO("dev_obj_check_online() failed!\n");
 		goto fail;
@@ -6494,7 +6494,7 @@ se_cmd_t *transport_allocate_passthrough(
 	ti.ti_dev = SE_LUN(cmd)->se_dev;
 	ti.ti_se_cmd = cmd;
 	ti.se_obj_ptr = type_ptr;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	DEBUG_SO("ti.se_obj_ptr: %p\n", ti.se_obj_ptr);
 #else
 	ti.se_obj_api = SE_LUN(cmd)->lun_obj_api;
@@ -6545,7 +6545,7 @@ se_cmd_t *transport_allocate_passthrough(
 #endif
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	if (transport_get_sectors(cmd, type_ptr) < 0)
 		goto fail;
 
@@ -6590,7 +6590,7 @@ void transport_passthrough_release(
 int transport_passthrough_complete(
 	se_cmd_t *cmd)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	if (dev_obj_check_shutdown(cmd->se_orig_obj_ptr) != 0)
 		return -2;
 #else
@@ -6686,7 +6686,7 @@ int transport_generic_passthrough_async(
 		void *callback_arg, int complete_status),
 	void *callback_arg)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	int write = (cmd->data_direction == DMA_TO_DEVICE);
 #else
 	int write = (cmd->data_direction == SE_DIRECTION_WRITE);
@@ -6777,7 +6777,7 @@ void transport_complete_task_attr(se_cmd_t *cmd)
 			T_TASK(cmd_p)->t_task_cdb[0],
 			cmd_p->sam_task_attr, cmd_p->se_ordered_id);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		transport_add_tasks_from_cmd(cmd_p);
 #else
 		CMD_ORIG_OBJ_API(cmd_p)->add_tasks(
@@ -6839,7 +6839,7 @@ void transport_generic_complete_ok(se_cmd_t *cmd)
 	}
 
 	switch (cmd->data_direction) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	case DMA_FROM_DEVICE:
 #else
 	case SE_DIRECTION_READ:
@@ -6854,7 +6854,7 @@ void transport_generic_complete_ok(se_cmd_t *cmd)
 #endif
 		CMD_TFO(cmd)->queue_data_in(cmd);
 		break;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	case DMA_TO_DEVICE:
 #else
 	case SE_DIRECTION_WRITE:
@@ -6868,7 +6868,7 @@ void transport_generic_complete_ok(se_cmd_t *cmd)
 		spin_unlock(&cmd->se_lun->lun_sep_lock);
 #endif
 		/* Fall through for SE_DIRECTION_WRITE */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	case DMA_NONE:
 #else
 	case SE_DIRECTION_NONE:
@@ -6900,7 +6900,7 @@ void transport_free_dev_tasks(se_cmd_t *cmd)
 		kfree(task->task_sg);
 
 		spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_FREE_DEV_TASKS_CHECK
 		if (task->se_dev && TRANSPORT(task->se_dev))
 #else
 		if (task->se_dev)
@@ -6960,7 +6960,7 @@ static inline void transport_free_pages(se_cmd_t *cmd)
 	T_TASK(cmd)->t_task_se_num = 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 static inline void transport_release_tasks(se_cmd_t *cmd)
 {
 	transport_free_dev_tasks(cmd);
@@ -7023,7 +7023,7 @@ void transport_release_fe_cmd(se_cmd_t *cmd)
 		return;
 
 	spin_lock_irqsave(&T_TASK(cmd)->t_state_lock, flags);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 	if (!(atomic_read(&T_TASK(cmd)->transport_dev_active))) {
 		spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
 		goto free_pages;
@@ -7034,7 +7034,7 @@ void transport_release_fe_cmd(se_cmd_t *cmd)
 	spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
 
 	transport_release_tasks(cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 free_pages:
 #endif
 	transport_free_pages(cmd);
@@ -7075,7 +7075,7 @@ int transport_generic_remove(
 	}
 
 	spin_lock_irqsave(&T_TASK(cmd)->t_state_lock, flags);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 	if (!(atomic_read(&T_TASK(cmd)->transport_dev_active))) {
 		spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
 		goto free_pages;
@@ -7086,7 +7086,7 @@ int transport_generic_remove(
 	spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
 
 	transport_release_tasks(cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 free_pages:
 #endif
 	transport_free_pages(cmd);
@@ -7114,7 +7114,7 @@ int transport_generic_map_mem_to_cmd(
 	void *mem,
 	u32 se_mem_num)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_MEM_SGL_MAPPING_PATCH
 	u32 se_mem_cnt_out = 0;
 #else
 	u32 se_mem_cnt_out = 0, se_mem_task_off = 0;
@@ -7149,7 +7149,7 @@ int transport_generic_map_mem_to_cmd(
 		if (!(T_TASK(cmd)->t_mem_list))
 			return -1;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_MEM_SGL_MAPPING_PATCH
 		ret = transport_map_sg_to_mem(cmd,
 			T_TASK(cmd)->t_mem_list, mem, &se_mem_cnt_out);
 #else
@@ -7266,7 +7266,7 @@ int transport_generic_do_transform(se_cmd_t *cmd, se_transform_info_t *ti)
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 int transport_get_sectors(
 	se_cmd_t *cmd,
 	void *obj_ptr)
@@ -7335,7 +7335,7 @@ static
 int transport_new_cmd_obj(
 	se_cmd_t *cmd,
 	se_transform_info_t *ti,
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	se_obj_lun_type_t *obj_api,
 #endif
 	void *obj_ptr,
@@ -7343,7 +7343,7 @@ int transport_new_cmd_obj(
 {
 	u32 task_cdbs = 0, task_offset = 0;
 	se_mem_t *se_mem_out = NULL;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	struct se_device_s *dev = SE_DEV(cmd);
 #endif
 
@@ -7352,7 +7352,7 @@ int transport_new_cmd_obj(
 		T_TASK(cmd)->t_task_cdbs++;
 	} else {
 		ti->ti_set_counts = 1;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		ti->ti_dev = dev;
 
 		task_cdbs = transport_generic_get_cdb_count(cmd, ti, obj_ptr,
@@ -7376,7 +7376,7 @@ int transport_new_cmd_obj(
 		cmd->transport_cdb_transform =
 				&transport_process_data_sg_transform;
 #if 0
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		printk(KERN_INFO "data_length: %u, LBA: %llu t_task_sectors:"
 			" %u, t_task_cdbs: %u\n", obj_ptr, cmd->data_length,
 			T_TASK(cmd)->t_task_lba, T_TASK(cmd)->t_task_sectors,
@@ -7491,7 +7491,7 @@ out:
 	return -1;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_MEM_SGL_MAPPING_PATCH
 extern u32 transport_calc_sg_num(
 	se_task_t *task,
 	se_mem_t *in_se_mem,
@@ -7638,7 +7638,7 @@ extern u32 transport_calc_sg_num(
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 static inline int transport_set_task_sectors_disk(
 	se_task_t *task,
 	void *obj_ptr,
@@ -7691,7 +7691,7 @@ static inline int transport_set_task_sectors_disk(
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 static inline int transport_set_task_sectors_non_disk(
 	se_task_t *task,
 	void *obj_ptr,
@@ -7726,7 +7726,7 @@ static inline int transport_set_task_sectors_non_disk(
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 static inline int transport_set_task_sectors(
 	se_task_t *task,
 	void *obj_ptr,
@@ -7759,7 +7759,7 @@ static inline int transport_set_task_sectors(
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_MEM_SGL_MAPPING_PATCH
 int transport_map_sg_to_mem(
 	se_cmd_t *cmd,
 	struct list_head *se_mem_list,
@@ -7893,7 +7893,7 @@ next:
 }
 #endif
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_MEM_SGL_MAPPING_PATCH
 int transport_map_mem_to_mem(
 	se_task_t *task,
 	struct list_head *se_mem_list,
@@ -7995,7 +7995,7 @@ next:
  *
  *
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_MEM_SGL_MAPPING_PATCH
 int transport_map_mem_to_sg(
 	se_task_t *task,
 	struct list_head *se_mem_list,
@@ -8201,7 +8201,7 @@ next:
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 u32 transport_generic_get_cdb_count(
 	se_cmd_t *cmd,
 	se_transform_info_t *ti,
@@ -8316,7 +8316,7 @@ u32 transport_generic_get_cdb_count(
 out:
 	return 0;
 }
-// END of MY_ABC_HERE
+// END of SYNO_LIO_REMOVE_OBJLUN_PATCH
 
 
 #else
@@ -8475,7 +8475,7 @@ int transport_generic_new_cmd(se_cmd_t *cmd)
 	memset((void *)&ti, 0, sizeof(se_transform_info_t));
 	ti.ti_se_cmd = cmd;
 	ti.se_obj_ptr = SE_LUN(cmd)->lun_type_ptr;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	ti.se_obj_api = SE_LUN(cmd)->lun_obj_api;
 #endif
 
@@ -8495,7 +8495,7 @@ int transport_generic_new_cmd(se_cmd_t *cmd)
 				goto failure;
 		}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 		ret = transport_get_sectors(cmd, SE_LUN(cmd)->lun_type_ptr);
 		if (ret < 0)
 			goto failure;
@@ -8575,7 +8575,7 @@ int transport_generic_new_cmd(se_cmd_t *cmd)
 	 * data has arrived. (ie: It gets handled by the transport processing
 	 * thread a second time)
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	if (cmd->data_direction == DMA_TO_DEVICE) {
 		transport_add_tasks_to_state_queue(cmd);
 		return transport_generic_write_pending(cmd);
@@ -8807,7 +8807,7 @@ static void transport_nop_wait_for_tasks(
 int transport_lun_wait_for_tasks(se_cmd_t *cmd, se_lun_t *lun)
 {
 	unsigned long flags;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 	int ret;
 #endif
 	/*
@@ -8820,23 +8820,23 @@ int transport_lun_wait_for_tasks(se_cmd_t *cmd, se_lun_t *lun)
 		DEBUG_TRANSPORT_S("ConfigFS ITT[0x%08x] - t_transport_stop =="
 			" TRUE, skipping\n", CMD_TFO(cmd)->get_task_tag(cmd));
 		spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 		transport_cmd_check_stop(cmd, 1, 0);
 #endif
 		return -1;
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 	atomic_set(&T_TASK(cmd)->transport_lun_fe_stop, 1);
 #endif
 	spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	wake_up_interruptible(&SE_DEV(cmd)->dev_queue_obj->thread_wq);
 #else
 	CMD_ORIG_OBJ_API(cmd)->notify_obj(cmd->se_orig_obj_ptr);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 	ret = transport_stop_tasks_for_cmd(cmd);
 	DEBUG_TRANSPORT_S("ConfigFS: cmd: %p t_task_cdbs: %d stop tasks ret:"
 			" %d\n", cmd, T_TASK(cmd)->t_task_cdbs, ret);
@@ -8847,7 +8847,7 @@ int transport_lun_wait_for_tasks(se_cmd_t *cmd, se_lun_t *lun)
 		DEBUG_TRANSPORT_S("ConfigFS: ITT[0x%08x] - stopped cmd....\n",
 				CMD_TFO(cmd)->get_task_tag(cmd));
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	transport_remove_cmd_from_queue(cmd, SE_DEV(cmd)->dev_queue_obj);
 #else
 	transport_remove_cmd_from_queue(cmd,
@@ -8876,7 +8876,7 @@ EXPORT_SYMBOL(transport_lun_wait_for_tasks);
 #define DEBUG_CLEAR_L(x...)
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 static void __transport_clear_lun_from_sessions(se_lun_t *lun)
 {
 	se_cmd_t *cmd = NULL;
@@ -9122,7 +9122,7 @@ static void transport_generic_wait_for_tasks(
 {
 	unsigned long flags;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_TMR_EXCEPTION_PATCH
 	if (!(cmd->se_cmd_flags & SCF_SE_LUN_CMD) && !(cmd->se_tmr_req))
 		return;
 #else
@@ -9139,7 +9139,7 @@ static void transport_generic_wait_for_tasks(
 	 * has completed its operation on the se_cmd_t.
 	 */
 	if (atomic_read(&T_TASK(cmd)->transport_lun_stop)) {
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 		atomic_set(&T_TASK(cmd)->transport_lun_fe_stop, 1);
 #endif
 
@@ -9159,7 +9159,7 @@ static void transport_generic_wait_for_tasks(
 		wait_for_completion(&T_TASK(cmd)->transport_lun_fe_stop_comp);
 		spin_lock_irqsave(&T_TASK(cmd)->t_state_lock, flags);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 		transport_all_task_dev_remove_state(cmd);
 #endif
 		/*
@@ -9172,7 +9172,7 @@ static void transport_generic_wait_for_tasks(
 			"stop_comp); for ITT: 0x%08x\n",
 			CMD_TFO(cmd)->get_task_tag(cmd));
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
 		atomic_set(&T_TASK(cmd)->transport_lun_fe_stop, 0);
 #endif
 		atomic_set(&T_TASK(cmd)->transport_lun_stop, 0);
@@ -9190,7 +9190,7 @@ static void transport_generic_wait_for_tasks(
 
 	spin_unlock_irqrestore(&T_TASK(cmd)->t_state_lock, flags);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	wake_up_interruptible(&SE_DEV(cmd)->dev_queue_obj->thread_wq);
 #else
 	CMD_ORIG_OBJ_API(cmd)->notify_obj(cmd->se_orig_obj_ptr);
@@ -9435,7 +9435,7 @@ EXPORT_SYMBOL(transport_check_aborted_status);
 
 void transport_send_task_abort(se_cmd_t *cmd)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_SCF_CMD_PASSTHROUGH_PATCH
 	if (cmd->se_cmd_flags & SCF_CMD_PASSTHROUGH)
 		return;
 #else
@@ -9448,7 +9448,7 @@ void transport_send_task_abort(se_cmd_t *cmd)
 	 * response.  This response with TASK_ABORTED status will be
 	 * queued back to fabric module by transport_check_aborted_status().
 	 */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 	if ((cmd->data_direction == DMA_TO_DEVICE) ||
 	    (cmd->data_direction == DMA_BIDIRECTIONAL)) {
 #else
@@ -9519,7 +9519,7 @@ int transport_generic_do_tmr(se_cmd_t *cmd)
 	cmd->t_state = TRANSPORT_ISTATE_PROCESSING;
 	CMD_TFO(cmd)->queue_tm_rsp(cmd);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_TMR_EXCEPTION_PATCH
 	transport_cmd_check_stop(cmd, 2, 0);
 #endif
 	return 0;
@@ -9632,7 +9632,7 @@ static void transport_processing_shutdown(se_device_t *dev)
 				transport_send_check_condition_and_sense(
 					cmd, LOGICAL_UNIT_COMMUNICATION_FAILURE,
 					0);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 				transport_remove_cmd_from_queue(cmd,
 						SE_DEV(cmd)->dev_queue_obj);
 #else
@@ -9648,7 +9648,7 @@ static void transport_processing_shutdown(se_device_t *dev)
 				spin_unlock_irqrestore(
 					&T_TASK(cmd)->t_state_lock, flags);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 				transport_remove_cmd_from_queue(cmd,
 						SE_DEV(cmd)->dev_queue_obj);
 #else
@@ -9676,7 +9676,7 @@ static void transport_processing_shutdown(se_device_t *dev)
 				&T_TASK(cmd)->t_state_lock, flags);
 			transport_send_check_condition_and_sense(cmd,
 				LOGICAL_UNIT_COMMUNICATION_FAILURE, 0);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 			transport_remove_cmd_from_queue(cmd,
 					SE_DEV(cmd)->dev_queue_obj);
 #else
@@ -9692,7 +9692,7 @@ static void transport_processing_shutdown(se_device_t *dev)
 			spin_unlock_irqrestore(
 				&T_TASK(cmd)->t_state_lock, flags);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
 			transport_remove_cmd_from_queue(cmd,
 					SE_DEV(cmd)->dev_queue_obj);
 #else
@@ -9796,7 +9796,7 @@ get_cmd:
 			ret = transport_generic_new_cmd(cmd);
 			if (ret < 0) {
 				cmd->transport_error_status = ret;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 				transport_generic_request_failure(cmd, NULL,
 					0, (cmd->data_direction !=
 					 DMA_TO_DEVICE));

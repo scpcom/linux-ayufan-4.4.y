@@ -428,7 +428,7 @@ int hibernation_restore(int platform_mode)
 	return error;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_X86_AUTO_POWER_ON
 void syno_schedule_power_on_prepare(void)
 {
     if (!hibernation_ops)
@@ -637,7 +637,7 @@ int hibernate(void)
  *
  */
 
-#ifdef MY_DEF_HERE
+#ifdef  SYNO_HIBERNATE_TO_DISK
 int software_resume(void)
 #else
 static int software_resume(void)
@@ -759,7 +759,7 @@ close_finish:
 	goto Finish;
 }
 
-#ifndef MY_DEF_HERE
+#ifndef SYNO_HIBERNATE_TO_DISK
 late_initcall(software_resume);
 
 #endif

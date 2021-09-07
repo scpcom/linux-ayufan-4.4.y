@@ -575,7 +575,7 @@ int vmtruncate(struct inode *inode, loff_t offset)
 }
 EXPORT_SYMBOL(vmtruncate);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
 /* Copied from vmtruncate() */
 int ecryptfs_vmtruncate(struct inode *inode, loff_t offset)
 {

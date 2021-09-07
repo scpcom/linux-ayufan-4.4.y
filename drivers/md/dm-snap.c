@@ -870,7 +870,7 @@ static void pending_complete(struct dm_snap_pending_exception *pe, int success)
 	struct bio *origin_bios = NULL;
 	struct bio *snapshot_bios = NULL;
 	int error = 0;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SNAPSHOT_AVOID_TRACK_DEADLOCK
 	chunk_t wait_chunk;
 
 	memset(&wait_chunk, 0, sizeof(chunk_t));
@@ -900,7 +900,7 @@ static void pending_complete(struct dm_snap_pending_exception *pe, int success)
 		goto out;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SNAPSHOT_AVOID_TRACK_DEADLOCK
 	/* move conflicting read check after releasing snapshot->lock
 	   thus it would not block mapping bios */
 	wait_chunk = pe->e.old_chunk;
@@ -932,7 +932,7 @@ static void pending_complete(struct dm_snap_pending_exception *pe, int success)
 	else
 		flush_bios(snapshot_bios);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SNAPSHOT_AVOID_TRACK_DEADLOCK
 	/* move here to avoid race condition */
 	if (!error)
 		while (__chunk_is_tracked(s, wait_chunk))

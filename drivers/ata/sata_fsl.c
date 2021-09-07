@@ -574,7 +574,7 @@ static void sata_fsl_pmp_attach(struct ata_port *ap)
 
 	temp = ioread32(hcr_base + HCONTROL);
 	iowrite32((temp | HCONTROL_PMP_ATTACHED), hcr_base + HCONTROL);
-#if defined MY_ABC_HERE
+#if defined SYNO_QORIQ_ESATA_LIMIT
 	if(ap->nr_pmp_links) {
 		if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) || IS_SYNOLOGY_DX513(ap->PMSynoUnique)) {
 			struct device *dev = ap->host->dev;
@@ -984,7 +984,7 @@ static int sata_fsl_softreset(struct ata_link *link, unsigned int *class,
 	return 0;
 
 err:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	ata_link_printk(link, KERN_ERR, "softreset failed, set srst fail flag\n");
 	link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
 #endif
@@ -1054,7 +1054,7 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 		sata_async_notification(ap);
 
 	/* Handle PHYRDY change notification */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	if ((hstatus & INT_ON_PHYRDY_CHG) ||
 		(ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
 		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
@@ -1067,10 +1067,10 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 #else
 	if (hstatus & INT_ON_PHYRDY_CHG) {
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_INFO
 		syno_ata_info_print(ap);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ATA_FAST_PROBE
 		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 #endif
 		DPRINTK("SATA FSL: PHYRDY change indication\n");
@@ -1172,7 +1172,7 @@ static void sata_fsl_host_intr(struct ata_port *ap)
 		sata_fsl_error_intr(ap);
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	if (unlikely(hstatus & INT_ON_ERROR) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
 #else
 	if (unlikely(hstatus & INT_ON_ERROR)) {
@@ -1329,10 +1329,10 @@ static struct device_attribute *fsl_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	&dev_attr_syno_port_thaw,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_TRANS_HOST_TO_DISK
 	&dev_attr_syno_diskname_trans,
 #endif
 	NULL
@@ -1405,7 +1405,7 @@ static struct ata_port_operations sata_fsl_ops = {
 
 	.pmp_attach = sata_fsl_pmp_attach,
 	.pmp_detach = sata_fsl_pmp_detach,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 	.syno_force_intr	= sata_fsl_host_intr,
 #endif
 };
@@ -1549,7 +1549,7 @@ static int sata_fsl_resume(struct of_device *op)
 	iowrite32(temp | 0x80000700, hcr_base+HCONTROL);
 #endif
 
-#if defined MY_ABC_HERE
+#if defined SYNO_QORIQ_ESATA_LIMIT
 	if(ap->nr_pmp_links) {
 		if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) || IS_SYNOLOGY_DX513(ap->PMSynoUnique)) {
 			sata_fsl_scr_read(&ap->link, SCR_CONTROL, &temp);

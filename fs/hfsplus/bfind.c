@@ -96,7 +96,7 @@ int hfs_find_rec_by_key(struct hfs_bnode *bnode,
 }
 
 /* Find the record in bnode that best matches key (not greater than...)*/
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HFSPLUS_EA
 int __hfs_brec_find(struct hfs_bnode *bnode, struct hfs_find_data *fd,
 					search_strategy_t rec_found)
 {

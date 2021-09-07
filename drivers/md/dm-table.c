@@ -771,7 +771,7 @@ int dm_table_add_target(struct dm_table *t, const char *type,
 
 	t->highs[t->num_targets++] = tgt->begin + tgt->len - 1;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_AUTO_REMAP_REPORT
 	if (tgt->type->lvinfoset){
 		tgt->type->lvinfoset(tgt);
 	}

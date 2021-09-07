@@ -57,7 +57,7 @@
 #include <asm/system.h>
 #include <linux/list.h>
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_MTU_WA
 #define ETH_CSUM_MAX_BYTE_COUNT 1600
 #endif
 
@@ -302,7 +302,7 @@ struct mv643xx_eth_shared_private {
 static int mv643xx_eth_open(struct net_device *dev);
 static int mv643xx_eth_stop(struct net_device *dev);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 static int g_netif_count = 0;
 extern long g_internal_netif_num;
 #endif
@@ -435,7 +435,7 @@ struct mv643xx_eth_private {
 };
 
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_MTU_WA
 /* Tailgate and Kirwood have only 2K TX FIFO, so disable NETIF_F_IP_CSUM when mtu bigger than 1600 */
 static void mv_set_features(struct net_device *dev)
 {
@@ -976,7 +976,7 @@ static int txq_reclaim(struct tx_queue *txq, int budget, int force)
 			skb = __skb_dequeue(&txq->tx_skb);
 
 		if (cmd_sts & ERROR_SUMMARY) {
-#ifndef MY_DEF_HERE
+#ifndef SYNO_6281_MTU_WA
 			dev_printk(KERN_INFO, &mp->dev->dev, "tx error\n");
 #endif
 			mp->dev->stats.tx_errors++;
@@ -2491,7 +2491,7 @@ static int mv643xx_eth_change_mtu(struct net_device *dev, int new_mtu)
 	if (!netif_running(dev))
 		return 0;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_MTU_WA
 	mv_set_features(dev);
 #endif
 
@@ -2508,7 +2508,7 @@ static int mv643xx_eth_change_mtu(struct net_device *dev, int new_mtu)
 			   "MTU change\n");
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_MTU_WA
 	/* phy reset is slower let it is easy to loop in scemd. So we sleep 3 sec. */
 	msleep(3000);
 #endif
@@ -2627,7 +2627,7 @@ static int mv643xx_eth_shared_probe(struct platform_device *pdev)
 	struct resource *res;
 	int ret;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_INTERNAL_NETIF_NUM
 	g_netif_count++;
 	if ( g_internal_netif_num >= 0 &&
 		 g_netif_count > g_internal_netif_num )
@@ -2969,7 +2969,7 @@ static int mv643xx_eth_probe(struct platform_device *pdev)
 	dev->watchdog_timeo = 2 * HZ;
 	dev->base_addr = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_6281_MTU_WA
 	mv_set_features(dev);
 #else
 	dev->features = NETIF_F_SG | NETIF_F_IP_CSUM;

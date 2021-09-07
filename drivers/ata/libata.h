@@ -31,7 +31,7 @@
 #define DRV_NAME	"libata"
 #define DRV_VERSION	"3.00"	/* must be exactly four chars */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_WCACHE_DISABLE
 struct ata_blacklist_entry {
 	const char *model_num;
 	const char *model_rev;
@@ -158,9 +158,9 @@ extern void ata_scsi_scan_host(struct ata_port *ap, int sync);
 extern int ata_scsi_offline_dev(struct ata_device *dev);
 extern void ata_scsi_media_change_notify(struct ata_device *dev);
 extern void ata_scsi_hotplug(struct work_struct *work);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_PMP_HOTPLUG_TASK
 extern void ata_syno_pmp_hotplug(struct work_struct *work);
-#endif //MY_ABC_HERE
+#endif //SYNO_PMP_HOTPLUG_TASK
 extern void ata_schedule_scsi_eh(struct Scsi_Host *shost);
 extern void ata_scsi_dev_rescan(struct work_struct *work);
 extern int ata_bus_probe(struct ata_port *ap);
@@ -175,11 +175,11 @@ extern void ata_eh_fastdrain_timerfn(unsigned long arg);
 extern void ata_qc_schedule_eh(struct ata_queued_cmd *qc);
 extern void ata_dev_disable(struct ata_device *dev);
 extern void ata_eh_detach_dev(struct ata_device *dev);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_COMPATIBILITY
 extern void sata_pmp_detach(struct ata_device *dev);
 extern void SendPwrResetEvent(struct work_struct *work);
 extern void SendPortDisEvent(struct work_struct *work);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SATA_ERROR_REPORT
 extern void SendSataErrEvent(struct work_struct *work);
 extern void SendDiskRetryEvent(struct work_struct *work);
 #endif

@@ -1337,7 +1337,7 @@ found:
 			fat_fs_error(sb, "Odd directory size");
 			dir->i_size = (dir->i_size + sbi->cluster_size - 1)
 				& ~((loff_t)sbi->cluster_size - 1);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FAT_ERR_HANDLE
 			err = -ECORRUPT;
 #endif
 		}

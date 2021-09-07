@@ -1716,7 +1716,7 @@ static int ocfs2_symlink(struct inode *dir,
 		u32 offset = 0;
 
 		inode->i_op = &ocfs2_symlink_inode_operations;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		status = dquot_alloc_space_nodirty(inode,
 		    ocfs2_clusters_to_bytes(osb->sb, 1));
 		if (status) {
@@ -1794,7 +1794,7 @@ static int ocfs2_symlink(struct inode *dir,
 	d_instantiate(dentry, inode);
 bail:
 	if (status < 0 && did_quota)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DQUOT_UPGRADE
 		dquot_free_space_nodirty(inode,
 #else
 		vfs_dq_free_space_nodirty(inode,

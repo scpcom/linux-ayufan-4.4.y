@@ -212,7 +212,7 @@ int fsync_bdev(struct block_device *bdev)
 }
 EXPORT_SYMBOL(fsync_bdev);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_SYNC_DALLOC
 static int sync_wait_fs_sync(struct super_block *sb)
 {
 	int retry = 0;
@@ -288,7 +288,7 @@ struct super_block *freeze_bdev(struct block_device *bdev)
 
 	sync_filesystem(sb);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_EXT4_SYNC_DALLOC
 	sync_wait_fs_sync(sb);
 #endif
 
@@ -341,7 +341,7 @@ int thaw_bdev(struct block_device *bdev, struct super_block *sb)
 		goto out_unlock;
 
 	BUG_ON(sb->s_bdev != bdev);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_READ_LOCK_IN_THAW_BDEV
 	down_read(&sb->s_umount);
 #else
 	down_write(&sb->s_umount);
@@ -366,7 +366,7 @@ out_unfrozen:
 	smp_wmb();
 	wake_up(&sb->s_wait_unfrozen);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_READ_LOCK_IN_THAW_BDEV
 	if (sb)
 		deactivate_read_locked_super(sb);
 #else
@@ -1147,7 +1147,7 @@ int revalidate_disk(struct gendisk *disk)
 	if (!bdev)
 		return ret;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLKDEV_MUTEX_LOCK
 	mutex_lock(&bdev->bd_inode->i_mutex);
 #else
 	mutex_lock(&bdev->bd_mutex);
@@ -1156,7 +1156,7 @@ int revalidate_disk(struct gendisk *disk)
 #ifdef SYNO_MD_FIX_PAGE_CACHE_INVALIDATED
 	bdev->bd_invalidated = 0;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_BLKDEV_MUTEX_LOCK
 	mutex_unlock(&bdev->bd_inode->i_mutex);
 #else
 	mutex_unlock(&bdev->bd_mutex);

@@ -9,7 +9,7 @@
 #include <linux/module.h>
 
 
-#ifdef MY_ABC_HERE
+#ifdef  SYNO_DEBUG_FLAG
 extern int syno_temperature_debug;
 #endif
 
@@ -54,11 +54,11 @@ struct workqueue_struct *SynoCreateWorkqueue(const char *name);
 void SynoDestroyWorkqueue(struct workqueue_struct *wq);
 #endif /* CONFIG_SYNO_CROND */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_DEBUG_FLAG
 void syno_do_hibernation_log(const char __user *filename);
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_SCSI_DEVICE_INDEX
 #include <linux/fs.h>
 int SynoSCSIGetDeviceIndex(struct block_device *bdev); 
 #endif

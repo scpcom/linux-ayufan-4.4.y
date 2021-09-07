@@ -13,7 +13,7 @@
 
 #include "base.h"
 
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_LIMIT_CPU_CORES) && defined(SYNO_HW_VERSION)
 #include <linux/synobios.h>
 #endif
 
@@ -39,7 +39,7 @@ static ssize_t __ref store_online(struct sys_device *dev, struct sysdev_attribut
 	struct cpu *cpu = container_of(dev, struct cpu, sysdev);
 	ssize_t ret;
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LIMIT_CPU_CORES
 	if(syno_is_hw_version(HW_DS712pv20)) {
 			if( 1 == cpu->sysdev.id || 3 == cpu->sysdev.id ) {
 				printk(KERN_ERR "This model does not allow changing the specified cpu state.\n");
@@ -65,7 +65,7 @@ static ssize_t __ref store_online(struct sys_device *dev, struct sysdev_attribut
 
 	if (ret >= 0)
 		ret = count;
-#ifdef MY_DEF_HERE
+#ifdef SYNO_LIMIT_CPU_CORES
 END:
 #endif
 	return ret;

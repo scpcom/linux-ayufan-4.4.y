@@ -16,7 +16,7 @@
 #include <linux/module.h>
 #include <asm/atomic.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARM_GENERIC_ATOMIC64
 #include <asm-generic/atomic64.h>
 #endif
 

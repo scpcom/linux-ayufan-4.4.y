@@ -130,7 +130,7 @@
 
 #include "net-sysfs.h"
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SWITCH_NET_DEVICE_NAME) && defined(SYNO_HW_VERSION)
 #include <linux/synobios.h>
 #include <linux/pci.h>
 extern unsigned int gSwitchDev;
@@ -143,7 +143,7 @@ extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING
 /* This should be increased if a protocol with a bigger head is added. */
 #define GRO_MAX_HEAD (MAX_HEADER + 128)
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_MAC_ADDRESS
 static unsigned int str_to_hex( char ch )
 {
 	if( (ch >= '0') && (ch <= '9') )
@@ -5102,7 +5102,7 @@ EXPORT_SYMBOL_GPL(init_dummy_netdev);
 int register_netdev(struct net_device *dev)
 {
 	int err;
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SWITCH_NET_DEVICE_NAME) && defined(SYNO_HW_VERSION)
 	// we assume internal lans are comming up before extension lans
 	static int netdevCnt = 0;
 #endif
@@ -5117,7 +5117,7 @@ int register_netdev(struct net_device *dev)
 		err = dev_alloc_name(dev, dev->name);
 		if (err < 0)
 			goto out;
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#if defined(SYNO_SWITCH_NET_DEVICE_NAME) && defined(SYNO_HW_VERSION)
 		if (syno_is_hw_version(HW_DS508) ||
 			syno_is_hw_version(HW_DS1010p) ||
 			syno_is_hw_version(HW_DS1511p)) {

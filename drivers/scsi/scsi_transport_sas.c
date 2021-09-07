@@ -38,7 +38,7 @@
 #include <scsi/scsi_transport.h>
 #include <scsi/scsi_transport_sas.h>
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SAS_LINK_HOTPLUG_UEVENT
 #include <scsi/synoscsi.h>
 #endif
 
@@ -961,7 +961,7 @@ int scsi_is_sas_port(const struct device *dev)
 }
 EXPORT_SYMBOL(scsi_is_sas_port);
 
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SAS_LINK_HOTPLUG_UEVENT
 static void syno_sas_link_uevent(struct sas_port *port, struct sas_phy *phy, const char *szEventType)
 {
 	char *envp[5];
@@ -1032,7 +1032,7 @@ void sas_port_add_phy(struct sas_port *port, struct sas_phy *phy)
 		port->num_phys++;
 	}
 	mutex_unlock(&port->phy_list_mutex);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SAS_LINK_HOTPLUG_UEVENT
 	syno_sas_link_uevent(port, phy, SZV_SAS_PHY_ADD);
 #endif
 }
@@ -1053,7 +1053,7 @@ void sas_port_delete_phy(struct sas_port *port, struct sas_phy *phy)
 	list_del_init(&phy->port_siblings);
 	port->num_phys--;
 	mutex_unlock(&port->phy_list_mutex);
-#ifdef MY_DEF_HERE
+#ifdef SYNO_SAS_LINK_HOTPLUG_UEVENT
 	syno_sas_link_uevent(port, phy, SZV_SAS_PHY_REMOVE);
 #endif
 }

@@ -563,7 +563,7 @@ static void uhci_shutdown(struct pci_dev *pdev)
 {
 	struct usb_hcd *hcd = (struct usb_hcd *) pci_get_drvdata(pdev);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_SHUTDOWN_FIX
 	if (hcd->irq >= 0) {
 		//disable_irq(hcd->irq);
 		free_irq(hcd->irq, hcd);

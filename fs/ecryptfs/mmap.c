@@ -396,7 +396,7 @@ static int ecryptfs_write_inode_size_to_header(struct inode *ecryptfs_inode)
 	rc = ecryptfs_write_lower(ecryptfs_inode, file_size_virt, 0,
 				  sizeof(u64));
 	kfree(file_size_virt);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
 	if (-EDQUOT == rc)
 		return rc;  // skip error msg
 #endif
@@ -516,7 +516,7 @@ static int ecryptfs_write_end(struct file *file,
 	}
 	rc = ecryptfs_encrypt_page(page);
 	if (rc) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
 		if (-EDQUOT != rc)
 #endif
 		ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
@@ -554,7 +554,7 @@ static sector_t ecryptfs_bmap(struct address_space *mapping, sector_t block)
 	return rc;
 }
 
-#if defined(MY_ABC_HERE) && defined(SYNO_OLD_RECVFILE)
+#if defined(SYNO_RECVFILE) && defined(SYNO_OLD_RECVFILE)
 /**
  * ecryptfs_prepare_write
  * @file: The eCryptfs file
@@ -694,7 +694,7 @@ static int ecryptfs_commit_write(struct file *file, struct page *page,
 	}
 	rc = ecryptfs_encrypt_page(page);
 	if (rc) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
 		if (-EDQUOT != rc)
 #endif
 		ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
@@ -719,7 +719,7 @@ out:
 const struct address_space_operations ecryptfs_aops = {
 	.writepage = ecryptfs_writepage,
 	.readpage = ecryptfs_readpage,
-#if defined(MY_ABC_HERE) && defined(SYNO_OLD_RECVFILE)
+#if defined(SYNO_RECVFILE) && defined(SYNO_OLD_RECVFILE)
 	.prepare_write = ecryptfs_prepare_write,
 	.commit_write = ecryptfs_commit_write,
 #endif

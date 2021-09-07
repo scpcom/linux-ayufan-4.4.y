@@ -883,7 +883,7 @@ int svc_register(const struct svc_serv *serv, const int family,
 			if (progp->pg_vers[i]->vs_hidden)
 				continue;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_NFS4_DISABLE_UDP
 			if (NFS_PROGRAM == progp->pg_prog && 4 == i && IPPROTO_UDP == proto) {
 				continue;
 			}
@@ -958,7 +958,7 @@ static void svc_unregister(const struct svc_serv *serv)
 /*
  * Printk the given error with the address of the client that caused it.
  */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RPC_NON_SVC_PRINTK
 static int __attribute__ ((format (printf, 2, 3))) svc_printk(struct svc_rqst *rqstp, const char *fmt, ...) {}
 #else
 static int

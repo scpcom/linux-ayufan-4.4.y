@@ -147,7 +147,7 @@ int core_scsi2_reservation_release(se_cmd_t *cmd)
 		dev->dev_res_bin_isid = 0;
 		dev->dev_flags &= ~DF_SPC2_RESERVATIONS_WITH_ISID;
 	}
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "SCSI-2 Released reservation for %s LUN: %u ->"
 		" MAPPED LUN: %u for %s\n", TPG_TFO(tpg)->get_fabric_name(),
 		SE_LUN(cmd)->unpacked_lun, cmd->se_deve->mapped_lun,
@@ -200,7 +200,7 @@ int core_scsi2_reservation_reserve(se_cmd_t *cmd)
 		dev->dev_res_bin_isid = sess->sess_bin_isid;
 		dev->dev_flags |= DF_SPC2_RESERVATIONS_WITH_ISID;
 	}
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "SCSI-2 Reserved %s LUN: %u -> MAPPED LUN: %u"
 		" for %s\n", TPG_TFO(tpg)->get_fabric_name(),
 		SE_LUN(cmd)->unpacked_lun, cmd->se_deve->mapped_lun,
@@ -505,7 +505,7 @@ static int core_scsi3_pr_seq_non_holder(
 	 * WRITE_EXCLUSIVE_* reservation.
 	 */
 	if ((we) && !(registered_nexus)) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
 		if ((cmd->data_direction == DMA_TO_DEVICE) ||
 		    (cmd->data_direction == DMA_BIDIRECTIONAL)) {
 #else
@@ -1492,7 +1492,7 @@ static int core_scsi3_decode_spec_i_port(
 	se_port_t *tmp_port;
 	se_portal_group_t *dest_tpg = NULL, *tmp_tpg;
 	se_session_t *se_sess = SE_SESS(cmd);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 	// reduce compile-time warnning messages
 	se_node_acl_t *dest_node_acl = NULL;
 #else
@@ -1509,7 +1509,7 @@ static int core_scsi3_decode_spec_i_port(
 	char *iport_ptr = NULL, dest_iport[64], i_buf[PR_REG_ISID_ID_LEN];
 	u32 tpdl, tid_len = 0;
 	int ret, dest_local_nexus, prf_isid;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_REDUCE_MESSAGE
 	// reduce compile-time warnning messages
 	u32 dest_rtpi = 0;
 #else
@@ -4243,7 +4243,7 @@ int core_setup_reservations(se_device_t *dev, int force_pt)
 		rest->res_type = SPC_PASSTHROUGH;
 		rest->t10_reservation_check = &core_pt_reservation_check;
 		rest->t10_seq_non_holder = &core_pt_seq_non_holder;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "%s: Using SPC_PASSTHROUGH, no reservation"
 			" emulation\n", TRANSPORT(dev)->name);
 #endif
@@ -4257,7 +4257,7 @@ int core_setup_reservations(se_device_t *dev, int force_pt)
 		rest->res_type = SPC3_PERSISTENT_RESERVATIONS;
 		rest->t10_reservation_check = &core_scsi3_pr_reservation_check;
 		rest->t10_seq_non_holder = &core_scsi3_pr_seq_non_holder;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "%s: Using SPC3_PERSISTENT_RESERVATIONS"
 			" emulation\n", TRANSPORT(dev)->name);
 #endif
@@ -4266,7 +4266,7 @@ int core_setup_reservations(se_device_t *dev, int force_pt)
 		rest->t10_reservation_check = &core_scsi2_reservation_check;
 		rest->t10_seq_non_holder =
 				&core_scsi2_reservation_seq_non_holder;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 		printk(KERN_INFO "%s: Using SPC2_RESERVATIONS emulation\n",
 			TRANSPORT(dev)->name);
 #endif

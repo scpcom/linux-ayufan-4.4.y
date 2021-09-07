@@ -128,7 +128,7 @@ MV_U32 mvCpuPclkGet(MV_VOID)
 	return MV_DEFAULT_PCLK
 #endif
 }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CPUFREQ_ADJUST
 EXPORT_SYMBOL(mvCpuPclkGet);
 #endif
 

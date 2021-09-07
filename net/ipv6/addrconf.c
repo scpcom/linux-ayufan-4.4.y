@@ -77,7 +77,7 @@
 #include <linux/if_tunnel.h>
 #include <linux/rtnetlink.h>
 
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#if defined(SYNO_HW_VERSION) && defined(SYNO_IPV6_110p_IPV6_READY)
 #include <linux/synobios.h>
 #endif
 
@@ -192,7 +192,7 @@ static struct ipv6_devconf ipv6_devconf __read_mostly = {
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
 	.disable_ipv6		= 0,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IPV6_RFC_4862
 	.accept_dad     = 2,
 #else
 	.accept_dad		= 1,
@@ -230,7 +230,7 @@ static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
 	.disable_ipv6		= 0,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_IPV6_RFC_4862
     .accept_dad     = 2,
 #else
 	.accept_dad		= 1,
@@ -1767,7 +1767,7 @@ static struct inet6_dev *addrconf_add_dev(struct net_device *dev)
  * Dsc: because of DS110p & DS210p face problem of timer delay, which will cause both machine can't pass IPv6 ready logo phase 2
  *		we work around here to avoid timer trouble. but if timer problem is fixed, this code must be removed
  */
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#if defined(SYNO_HW_VERSION) && defined(SYNO_IPV6_110p_IPV6_READY)
 void SYNO_IPV6_ready_timer_workaround(__u32 *valid_lft, __u32 *prefered_lft)
 {
 	if(syno_is_hw_version(HW_DS110p) ||
@@ -1807,7 +1807,7 @@ void addrconf_prefix_rcv(struct net_device *dev, u8 *opt, int len)
 	valid_lft = ntohl(pinfo->valid);
 	prefered_lft = ntohl(pinfo->prefered);
 
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#if defined(SYNO_HW_VERSION) && defined(SYNO_IPV6_110p_IPV6_READY)
 	SYNO_IPV6_ready_timer_workaround(&valid_lft, &prefered_lft);
 #endif
 
@@ -1986,7 +1986,7 @@ ok:
 					if (valid_lft < prefered_lft)
 						prefered_lft = valid_lft;
 					update_lft = 1;
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#if defined(SYNO_HW_VERSION) && defined(SYNO_IPV6_110p_IPV6_READY)
 				SYNO_IPV6_ready_timer_workaround(&valid_lft, &prefered_lft);
 #endif
 				}

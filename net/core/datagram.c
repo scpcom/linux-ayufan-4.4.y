@@ -361,7 +361,7 @@ fault:
 	return -EFAULT;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 /**
  *	skb_copy_datagram_iovec - Copy a datagram to an iovec.
  *	@skb: buffer to copy

@@ -6,7 +6,7 @@
 struct se_cmd_s;
 struct se_unmap_sg_s;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_FORCE_LOGOUT
 struct se_node_acl_s;
 struct iscsi_session_s;
 extern void iscsi_sess_force_logout(struct iscsi_session_s*);

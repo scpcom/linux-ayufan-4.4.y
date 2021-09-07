@@ -51,7 +51,7 @@ void plugin_load_all_classes(void)
 	plugin_register_class(PLUGIN_TYPE_TRANSPORT, "TRANSPORT", MAX_PLUGINS);
 	transport_load_plugins();
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
 	/*
 	 * Setup Storage Engine Object Plugins
 	 */
@@ -128,7 +128,7 @@ int plugin_register_class(
 		p->plugin_class = pc;
 	}
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "SE_PC[%u] - Registered Plugin Class: %s\n",
 			pc->plugin_class, pc->plugin_class_name);
 #endif
@@ -269,7 +269,7 @@ struct se_plugin_s *plugin_register(
 	p->plugin_type = plugin_loc;
 	snprintf(p->plugin_name, MAX_PLUGIN_NAME, "%s", plugin_name);
 
-#ifndef MY_ABC_HERE
+#ifndef SYNO_LIO_REDUCE_MESSAGE
 	printk(KERN_INFO "PLUGIN_%s[%u] - %s registered\n",
 			pc->plugin_class_name, plugin_loc, plugin_name);
 #endif

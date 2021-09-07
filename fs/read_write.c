@@ -593,7 +593,7 @@ printk("write() File %p denying due to FAST mode\n", file);
 	return ret;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_RECVFILE
 
 asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, size_t *rwbytes)
 {
@@ -720,7 +720,7 @@ out:
 	return ret;
 }
 
-#endif /* MY_ABC_HERE */
+#endif /* SYNO_RECVFILE */
 
 SYSCALL_DEFINE(pread64)(unsigned int fd, char __user *buf,
 			size_t count, loff_t pos)

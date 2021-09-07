@@ -568,7 +568,7 @@ static int checkintf(struct dev_state *ps, unsigned int ifnum)
 		return -EINVAL;
 	if (test_bit(ifnum, &ps->ifclaimed))
 		return 0;
-#ifndef MY_ABC_HERE
+#ifndef SYNO_USB_UPS
 	/* if not yet claimed, claim it for the driver */
 	dev_warn(&ps->dev->dev, "usbfs: process %d (%s) did not claim "
 		 "interface %u before use\n", task_pid_nr(current),
@@ -812,7 +812,7 @@ static int proc_control(struct dev_state *ps, void __user *arg)
 		snoop_urb(dev, NULL, pipe, max(i, 0), min(i, 0), COMPLETE);
 	}
 	free_page((unsigned long)tbuf);
-#ifndef MY_ABC_HERE 
+#ifndef SYNO_USB_UPS_COMP_ENHANCE 
 	if (i < 0 && i != -EPIPE) {
 		dev_printk(KERN_DEBUG, &dev->dev, "usbfs: USBDEVFS_CONTROL "
 			   "failed cmd %s rqt %u rq %u len %u ret %d\n",

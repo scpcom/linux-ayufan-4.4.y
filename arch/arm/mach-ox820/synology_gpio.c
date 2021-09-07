@@ -28,7 +28,7 @@
 
 static DEFINE_MUTEX(ox820_gpio_lock);
 
-#ifdef MY_ABC_HERE
+#ifdef  SYNO_HW_VERSION
 #include <linux/synobios.h>
 #endif
 

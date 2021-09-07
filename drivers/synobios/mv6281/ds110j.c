@@ -18,7 +18,7 @@ InitModuleType(struct synobios_ops *ops)
 
 	switch (model) {
 	case MODEL_DS110j:
-#ifdef MY_ABC_HERE
+#ifdef SYNO_HW_VERSION
 		if (syno_is_hw_version(HW_DS110jv20)) {
 			pType = &type_110jv2;
 		} else if (syno_is_hw_version(HW_DS110jv30)) {

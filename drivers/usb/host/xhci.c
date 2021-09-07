@@ -36,7 +36,7 @@ static int link_quirk;
 module_param(link_quirk, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(link_quirk, "Don't clear the chain bit on a link TRB");
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 #include <linux/kthread.h>
 #include <linux/pci.h>
 
@@ -46,7 +46,7 @@ static struct usb_hcd *xhci_task_hcd = NULL; // one hcd for both usb2 and usb3
 //check every 5s, take action if 2 successive error(10s).
 #define BOUNCE_TIME 10 // seconds
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 extern enum XHCI_SPECIAL_RESET_MODE xhci_special_reset; // from hub.c
 extern unsigned short xhci_vendor;
 
@@ -139,7 +139,7 @@ static int xhci_thread(void *__unused)
 		port_num[PORT_USB2_3] = XHCI_PORT_NUM;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 	for (k = 0; k < SKIP_SPECIAL_RESET_BEFORE; k++) {
 		if (kthread_should_stop()) {
 			printk(KERN_INFO "xhci_thread. exit!\n");
@@ -261,7 +261,7 @@ static int xhci_thread(void *__unused)
 							bounce[j][i-1] &= ~STATUS_MON_CEC; // clear
 						}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_SPECIAL_RESET
 						// connection with cc/reset/bl change  (should be cleared but not)
 						if ((status & USB_PORT_STAT_C_RESET << 16) && 
 								(status & USB_PORT_STAT_C_BH_RESET << 16) && 
@@ -445,7 +445,7 @@ int xhci_reset(struct xhci_hcd *xhci)
 
 	state = xhci_readl(xhci, &xhci->op_regs->status);
 	if ((state & STS_HALT) == 0) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_RESET_RETRY
 		xhci_warn(xhci, "Host controller not halted, try halt again.\n");
 		msleep(1000);
 		xhci_halt(xhci);
@@ -468,7 +468,7 @@ int xhci_reset(struct xhci_hcd *xhci)
 	/* XXX: Why does EHCI set this here?  Shouldn't other code do this? */
 	xhci_to_hcd(xhci)->state = HC_STATE_HALT;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_RESET_WAIT
 	return handshake(xhci, &xhci->op_regs->command, CMD_RESET, 0, 1000 * 1000);
 #else
 	return handshake(xhci, &xhci->op_regs->command, CMD_RESET, 0, 250 * 1000);
@@ -663,12 +663,12 @@ void xhci_event_ring_work(unsigned long arg)
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 extern int gSynoFactoryUSBFastReset;
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 extern int gSynoFactoryUSB3Disable;
 #endif
 
@@ -770,21 +770,21 @@ int xhci_run(struct usb_hcd *hcd)
 
 	xhci_dbg(xhci, "Finished xhci_run\n");
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB3_DISABLE
 	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
 	}
 #endif
 
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef SYNO_FACTORY_USB3_DISABLE
 	xhci_task_hcd = hcd;
 	if(1 == gSynoFactoryUSB3Disable) {
 		xhci_special_reset = XHCI_SPECIAL_RESET_DISABLE;
@@ -817,7 +817,7 @@ void xhci_stop(struct usb_hcd *hcd)
 	u32 temp;
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 	if (xhci_task) {
 		kthread_stop(xhci_task);
 		xhci_task = NULL;
@@ -853,7 +853,7 @@ void xhci_stop(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FACTORY_USB_FAST_RESET
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
@@ -873,7 +873,7 @@ void xhci_shutdown(struct usb_hcd *hcd)
 {
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_ERR_MONITOR
 	if (xhci_task) {
 		kthread_stop(xhci_task);
 		xhci_task = NULL;
@@ -1680,7 +1680,7 @@ static int xhci_configure_endpoint(struct xhci_hcd *xhci,
 	/* Wait for the configure endpoint command to complete */
 	timeleft = wait_for_completion_interruptible_timeout(
 			cmd_completion,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_TIMEOUT
 			USB_CTRL_SET_TIMEOUT/5);
 #else
 			USB_CTRL_SET_TIMEOUT);
@@ -1916,7 +1916,7 @@ void xhci_endpoint_reset(struct usb_hcd *hcd,
 		return;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_STALL_WAIT
 			//some hd will start slowly and there are many reset to queue,
 			//guess the ring will overflow and cause panic
 			msleep(3000);
@@ -2426,7 +2426,7 @@ int xhci_discover_or_reset_device(struct usb_hcd *hcd, struct usb_device *udev)
 	/* Wait for the Reset Device command to finish */
 	timeleft = wait_for_completion_interruptible_timeout(
 			reset_device_cmd->completion,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_TIMEOUT
 			USB_CTRL_SET_TIMEOUT/5);
 #else
 			USB_CTRL_SET_TIMEOUT);
@@ -2546,7 +2546,7 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	int timeleft;
 	int ret;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_RESET_WAIT
 	msleep(1000); // wait device ready
 #endif
 
@@ -2562,7 +2562,7 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 
 	/* XXX: how much time for xHC slot assignment? */
 	timeleft = wait_for_completion_interruptible_timeout(&xhci->addr_dev,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_TIMEOUT
 			USB_CTRL_SET_TIMEOUT/5);
 #else
 			USB_CTRL_SET_TIMEOUT);
@@ -2654,7 +2654,7 @@ int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 
 	/* ctrl tx can take up to 5 sec; XXX: need more time for xHC? */
 	timeleft = wait_for_completion_interruptible_timeout(&xhci->addr_dev,
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB3_TIMEOUT
 			USB_CTRL_SET_TIMEOUT/5);
 #else
 			USB_CTRL_SET_TIMEOUT);

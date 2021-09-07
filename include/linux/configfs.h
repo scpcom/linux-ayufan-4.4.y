@@ -44,7 +44,7 @@
 
 #include <asm/atomic.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_LIO_CONFIGFS_WORKAROUND
 #define CONFIGFS_ITEM_NAME_LEN	256
 #else
 #define CONFIGFS_ITEM_NAME_LEN	20

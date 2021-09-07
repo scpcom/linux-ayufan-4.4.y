@@ -783,14 +783,14 @@ static void fuse_fillattr(struct inode *inode, struct fuse_attr *attr,
 	stat->size = attr->size;
 	stat->blocks = attr->blocks;
 	stat->blksize = (1 << inode->i_blkbits);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_BIT
 	stat->SynoMode = 0;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_ARCHIVE_VERSION
 	/* we don't support syno archive version in fuse by now */
 	stat->syno_archive_version = 0;
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_CREATE_TIME
 	stat->SynoCreateTime.tv_sec = 0;
 	stat->SynoCreateTime.tv_nsec = 0;
 #endif
