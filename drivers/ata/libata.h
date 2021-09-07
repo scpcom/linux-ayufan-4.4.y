@@ -184,9 +184,6 @@ extern void SendSataErrEvent(struct work_struct *work);
 extern void SendDiskRetryEvent(struct work_struct *work);
 #endif
 #endif
-#ifdef SYNO_SATA_IRQ_OFF
-extern void SendDsleepWakeEvent(struct work_struct *work);
-#endif
 extern void ata_eh_about_to_do(struct ata_link *link, struct ata_device *dev,
 			       unsigned int action);
 extern void ata_eh_done(struct ata_link *link, struct ata_device *dev,

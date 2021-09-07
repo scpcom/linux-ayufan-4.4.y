@@ -4251,7 +4251,7 @@ static int usb_reset_and_verify_device(struct usb_device *udev)
 			usb_enable_interface(udev, intf, true);
 			ret = 0;
 		} else {
-#ifdef SYNO_USB_BACKPORT_BY_ETRON
+#ifdef CONFIG_USB_ETRON_HUB
 			/* Let the bandwidth allocation function know that this
 			 * device has been reset, and it will have to use
 			 * alternate setting 0 as the current alternate setting.
@@ -4272,7 +4272,7 @@ static int usb_reset_and_verify_device(struct usb_device *udev)
 #endif
 			ret = usb_set_interface(udev, desc->bInterfaceNumber,
 					desc->bAlternateSetting);
-#ifdef SYNO_USB_BACKPORT_BY_ETRON
+#ifdef CONFIG_USB_ETRON_HUB
 			intf->resetting_device = 0;
 #endif
 		}

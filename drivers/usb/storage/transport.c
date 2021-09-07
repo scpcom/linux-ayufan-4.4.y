@@ -1020,15 +1020,26 @@ int usb_stor_Bulk_max_lun(struct us_data *us)
 }
 
 #ifdef MY_ABC_HERE
-int extra_delay = 1;
+int extra_delay = 0;
 module_param(extra_delay, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+int extra_delay_time = 0;
+module_param(extra_delay_time, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 static inline void delay_for_JM(struct us_data *us)
 {
 	u32 id_vendor = le16_to_cpu(us->pusb_dev->descriptor.idVendor);
 	u32 id_product = le16_to_cpu(us->pusb_dev->descriptor.idProduct);
 
-	if (!extra_delay) return;
+	//0 : no delay
+	//1 : for customized
+	//others : for original delay mechanism(just for Jmicron, Samsung, Lacie, Freecom, Iomega, SimpleTech, Icybox)
+	if (likely(extra_delay == 0))
+		return;
+
+	if (1 == extra_delay) {
+		udelay(extra_delay_time);
+		return;
+	}
 
 	switch (id_vendor) {
 		case 0x152d: // Jmicron

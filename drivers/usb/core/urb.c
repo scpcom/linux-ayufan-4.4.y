@@ -445,7 +445,7 @@ int usb_submit_urb(struct urb *urb, gfp_t mem_flags)
 			if (urb->interval > (1 << 15))
 				return -EINVAL;
 			max = 1 << 15;
-#ifdef SYNO_USB_BACKPORT_BY_ETRON
+#ifdef CONFIG_USB_ETRON_HUB
 			break;
 #endif
 		case USB_SPEED_HIGH:	/* units are microframes */

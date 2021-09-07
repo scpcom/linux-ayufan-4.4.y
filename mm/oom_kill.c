@@ -224,13 +224,8 @@ static inline enum oom_constraint constrained_alloc(struct zonelist *zonelist,
  *
  * (not docbooked, we don't want this one cluttering up the manual)
  */
-#ifdef MY_ABC_HERE
-static struct task_struct *select_bad_process(unsigned long *ppoints,
-						struct mem_cgroup *mem, u8 blChooseWhiteList)
-#else
 static struct task_struct *select_bad_process(unsigned long *ppoints,
 						struct mem_cgroup *mem)
-#endif
 {
 	struct task_struct *p;
 	struct task_struct *chosen = NULL;
@@ -282,30 +277,6 @@ static struct task_struct *select_bad_process(unsigned long *ppoints,
 			chosen = p;
 			*ppoints = ULONG_MAX;
 		}
-
-#ifdef MY_ABC_HERE
-		/** These are the most important processes in DS. We should
-		 *  nerver kill it until the last.
-		 */
-		if (!strcasecmp(p->comm, "httpd") ||
-			!strcasecmp(p->comm, "hotplugd") ||
-			!strcasecmp(p->comm, "scemd") ||
-			!strcasecmp(p->comm, "postgres") ||
-			!strcasecmp(p->comm, "findhostd") ||
-			!strcasecmp(p->comm, "syslogd") ||
-			!strcasecmp(p->comm, "klogd")) {
-			if (blChooseWhiteList) {
-				if (!strcasecmp(p->comm, "scemd")) {
-					printk("Still skip kill [%s] because it is a important process in DS\n", p->comm);
-					continue;
-				}
-			} else {
-				if (strcasecmp(p->comm, "httpd") || strcasecmp(p->parent->comm, "httpd")) {
-					continue;
-				}
-			}
-		}
-#endif
 
 		if (p->signal->oom_adj == OOM_DISABLE)
 			continue;
@@ -595,23 +566,10 @@ retry:
 	 * Rambo mode: Shoot down a process and hope it solves whatever
 	 * issues we may have.
 	 */
-#ifdef MY_ABC_HERE
-	p = select_bad_process(&points, NULL, 0);
-#else
 	p = select_bad_process(&points, NULL);
-#endif
 
 	if (PTR_ERR(p) == -1UL)
 		return;
-
-#ifdef MY_ABC_HERE
-		/**
-		 * Choose the white list. But left scemd
-		 */
-		if (!p) {
-			p = select_bad_process(&points, NULL, 1);
-		}
-#endif
 
 	/* Found nothing?!?! Either we hang forever, or we panic. */
 	if (!p) {

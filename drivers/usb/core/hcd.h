@@ -95,7 +95,7 @@ struct usb_hcd {
 #define HCD_FLAG_SAW_IRQ	0x00000002
 
 	unsigned		rh_registered:1;/* is root hub registered? */
-#ifdef SYNO_USB_BACKPORT_BY_ETRON
+#ifdef CONFIG_USB_ETRON_HUB
 	unsigned        msix_enabled:1; /* driver has MSI-X enabled? */
 #endif
 
@@ -430,7 +430,7 @@ extern void usb_destroy_configuration(struct usb_device *dev);
 
 /*-------------------------------------------------------------------------*/
 
-#ifdef SYNO_USB_BACKPORT_BY_ETRON
+#ifdef CONFIG_USB_ETRON_HUB
 /* class requests from USB 3.0 hub spec, table 10-5 */
 #define SetHubDepth     (0x3000 | HUB_SET_DEPTH)
 #define GetPortErrorCount   (0x8000 | HUB_GET_PORT_ERR_COUNT)

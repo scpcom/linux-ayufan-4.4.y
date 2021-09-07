@@ -959,6 +959,12 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",oldalloc");
 #endif
 #ifdef CONFIG_EXT4_FS_XATTR
+#ifdef SYNO_EXT4_MOUNT_XATTR_USER
+	if (test_opt(sb, XATTR_USER)) 
+		seq_puts(seq, ",user_xattr");
+	if (!test_opt(sb, XATTR_USER)) 
+		seq_puts(seq, ",nouser_xattr");
+#else
 	if (test_opt(sb, XATTR_USER) &&
 		!(def_mount_opts & EXT4_DEFM_XATTR_USER))
 		seq_puts(seq, ",user_xattr");
@@ -967,8 +973,9 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 		seq_puts(seq, ",nouser_xattr");
 	}
 #endif
+#endif
 
-#ifdef CONFIG_EXT4_FS_POSIX_ACL
+#if defined(CONFIG_EXT4_FS_POSIX_ACL)
 	if (test_opt(sb, POSIX_ACL) && !(def_mount_opts & EXT4_DEFM_ACL))
 		seq_puts(seq, ",acl");
 	if (!test_opt(sb, POSIX_ACL) && (def_mount_opts & EXT4_DEFM_ACL))
@@ -2648,8 +2655,12 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	if (def_mount_opts & EXT4_DEFM_UID16)
 		set_opt(sbi->s_mount_opt, NO_UID32);
 #ifdef CONFIG_EXT4_FS_XATTR
+#ifdef SYNO_EXT4_MOUNT_XATTR_USER
+	set_opt(sbi->s_mount_opt, XATTR_USER);
+#else
 	if (def_mount_opts & EXT4_DEFM_XATTR_USER)
 		set_opt(sbi->s_mount_opt, XATTR_USER);
+#endif
 #endif
 #ifdef CONFIG_EXT4_FS_POSIX_ACL
 	if (def_mount_opts & EXT4_DEFM_ACL)

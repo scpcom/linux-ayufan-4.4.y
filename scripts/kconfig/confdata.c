@@ -15,6 +15,7 @@
 #define LKC_DIRECT_LINK
 #include "lkc.h"
 
+#define SYNO_EXPORT_CONFIG
 static void conf_warning(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)));
 
@@ -672,6 +673,18 @@ out:
 	return res;
 }
 
+#ifdef SYNO_EXPORT_CONFIG
+static int syno_autoconf_check(const char *name) 
+{
+	int ret; 
+	
+	if (strncmp(name, "SYNO", 4) == 0)
+		return 1;
+	if (strcmp(name, "FS_SYNO_ACL") == 0)
+		return 1;
+	return 0;
+}
+#endif
 int conf_write_autoconf(void)
 {
 	struct symbol *sym;
@@ -680,7 +693,10 @@ int conf_write_autoconf(void)
 	FILE *out, *out_h;
 	time_t now;
 	int i, l;
-
+#ifdef SYNO_EXPORT_CONFIG
+	FILE *syno_h;
+	int syno_write_string = 0;
+#endif
 	sym_clear_all_valid();
 
 	file_write_dep("include/config/auto.conf.cmd");
@@ -697,6 +713,15 @@ int conf_write_autoconf(void)
 		fclose(out);
 		return 1;
 	}
+
+#ifdef SYNO_EXPORT_CONFIG
+	syno_h = fopen(".tmpsynoconfig.h", "w");
+	if (!syno_h) {
+		fclose(out);
+		fclose(out_h);
+		return 1;
+	}
+#endif
 
 	sym = sym_lookup("KERNELVERSION", 0);
 	sym_calc_value(sym);
@@ -715,6 +740,17 @@ int conf_write_autoconf(void)
 		       "#define AUTOCONF_INCLUDED\n",
 		       sym_get_string_value(sym), ctime(&now));
 
+#ifdef SYNO_EXPORT_CONFIG
+	fprintf(syno_h, "/*\n"
+		        " * Automatically generated C config: don't edit\n"
+		        " * Linux kernel version: %s\n"
+		        " * %s"
+		        " */\n"
+		        "#ifndef __SYNO_AUTOCONF_H__\n"
+		        "#define __SYNO_AUTOCONF_H__\n",
+		        sym_get_string_value(sym), ctime(&now));
+#endif
+
 	for_all_symbols(i, sym) {
 		sym_calc_value(sym);
 		if (!(sym->flags & SYMBOL_WRITE) || !sym->name)
@@ -728,10 +764,20 @@ int conf_write_autoconf(void)
 			case mod:
 				fprintf(out, "CONFIG_%s=m\n", sym->name);
 				fprintf(out_h, "#define CONFIG_%s_MODULE 1\n", sym->name);
+#ifdef SYNO_EXPORT_CONFIG
+				if (syno_autoconf_check(sym->name)) {
+					fprintf(syno_h, "#define CONFIG_%s_MODULE 1\n", sym->name);
+				}
+#endif
 				break;
 			case yes:
 				fprintf(out, "CONFIG_%s=y\n", sym->name);
 				fprintf(out_h, "#define CONFIG_%s 1\n", sym->name);
+#ifdef SYNO_EXPORT_CONFIG
+				if (syno_autoconf_check(sym->name)) {
+					fprintf(syno_h, "#define CONFIG_%s 1\n", sym->name);
+				}
+#endif
 				break;
 			}
 			break;
@@ -739,33 +785,66 @@ int conf_write_autoconf(void)
 			str = sym_get_string_value(sym);
 			fprintf(out, "CONFIG_%s=\"", sym->name);
 			fprintf(out_h, "#define CONFIG_%s \"", sym->name);
+#ifdef SYNO_EXPORT_CONFIG
+			syno_write_string = 0;
+			if (syno_autoconf_check(sym->name)) {
+				syno_write_string = 1;
+				fprintf(syno_h, "#define CONFIG_%s \"", sym->name);
+			}
+#endif
+
 			while (1) {
 				l = strcspn(str, "\"\\");
 				if (l) {
 					fwrite(str, l, 1, out);
 					fwrite(str, l, 1, out_h);
+#ifdef SYNO_EXPORT_CONFIG
+					if (syno_write_string) {
+						fwrite(str, l, 1, syno_h);
+					}
+#endif
 					str += l;
 				}
 				if (!*str)
 					break;
 				fprintf(out, "\\%c", *str);
 				fprintf(out_h, "\\%c", *str);
+#ifdef SYNO_EXPORT_CONFIG
+				if (syno_write_string) {
+					fprintf(syno_h, "\\%c", *str);
+				}
+#endif
 				str++;
 			}
 			fputs("\"\n", out);
 			fputs("\"\n", out_h);
+#ifdef SYNO_EXPORT_CONFIG
+			if (syno_write_string) {
+				fputs("\"\n", syno_h);
+			}
+#endif
 			break;
 		case S_HEX:
 			str = sym_get_string_value(sym);
 			if (str[0] != '0' || (str[1] != 'x' && str[1] != 'X')) {
 				fprintf(out, "CONFIG_%s=%s\n", sym->name, str);
 				fprintf(out_h, "#define CONFIG_%s 0x%s\n", sym->name, str);
+#ifdef SYNO_EXPORT_CONFIG
+				if (syno_autoconf_check(sym->name)) {
+					fprintf(syno_h, "#define CONFIG_%s 0x%s\n", sym->name, str);
+				}
+#endif
 				break;
 			}
 		case S_INT:
 			str = sym_get_string_value(sym);
 			fprintf(out, "CONFIG_%s=%s\n", sym->name, str);
 			fprintf(out_h, "#define CONFIG_%s %s\n", sym->name, str);
+#ifdef SYNO_EXPORT_CONFIG
+			if (syno_autoconf_check(sym->name)) {
+				fprintf(syno_h, "#define CONFIG_%s %s\n", sym->name, str);
+			}
+#endif
 			break;
 		default:
 			break;
@@ -773,7 +852,12 @@ int conf_write_autoconf(void)
 	}
 	fclose(out);
 	fclose(out_h);
-
+#ifdef SYNO_EXPORT_CONFIG
+	fprintf(syno_h, "#endif /* __SYNO_AUTOCONF_H__ */\n");
+	fclose(syno_h);
+	if (rename(".tmpsynoconfig.h", "include/linux/syno_autoconf.h"))
+		return 1;
+#endif
 	name = getenv("KCONFIG_AUTOHEADER");
 	if (!name)
 		name = "include/linux/autoconf.h";

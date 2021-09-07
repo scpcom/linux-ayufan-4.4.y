@@ -57,6 +57,8 @@ typedef struct _tag_SYNO_DISK_VENDOR {
 
 SYNO_DISK_VENDOR gDiskVendor[] = {
 	{"OCZ", 3},
+	{"Crucial", 7},
+	{"Micron", 6},
 	{NULL, 0}
 };
 #if defined(MY_ABC_HERE)
@@ -738,7 +740,9 @@ static void scsi_ata_identify_device_get_model_name(struct scsi_device *sdev, un
 	}
 
 	if (1 == blSpecialVendor) {
-		if (' ' == szInqResult[54 + gDiskVendor[i].iLength] || '-' == szInqResult[54 + gDiskVendor[i].iLength]) {
+		if (' ' == szInqResult[54 + gDiskVendor[i].iLength] ||
+				'-' == szInqResult[54 + gDiskVendor[i].iLength] ||
+				'_' == szInqResult[54 + gDiskVendor[i].iLength]) {
 			i = gDiskVendor[i].iLength + 1;
 		} else {
 			i = gDiskVendor[i].iLength;

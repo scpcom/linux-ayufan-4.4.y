@@ -1153,6 +1153,9 @@ int revalidate_disk(struct gendisk *disk)
 	mutex_lock(&bdev->bd_mutex);
 #endif
 	check_disk_size_change(disk, bdev);
+#ifdef SYNO_MD_FIX_PAGE_CACHE_INVALIDATED
+	bdev->bd_invalidated = 0;
+#endif
 #ifdef MY_ABC_HERE
 	mutex_unlock(&bdev->bd_inode->i_mutex);
 #else

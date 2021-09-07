@@ -30,7 +30,7 @@ struct mtd_oob_buf64 {
 	__u64 usr_ptr;
 };
 
-#ifdef  MY_ABC_HERE
+#ifdef MY_ABC_HERE
 struct SYNO_MTD_FIS_INFO {
 	unsigned char name[16]; // Null terminated name
 	u_int32_t offset;

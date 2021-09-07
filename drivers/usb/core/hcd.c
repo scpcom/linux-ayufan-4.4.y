@@ -1706,7 +1706,7 @@ int usb_hcd_alloc_bandwidth(struct usb_device *udev,
 		}
 	}
 	if (cur_alt && new_alt) {
-#ifdef SYNO_USB_BACKPORT_BY_ETRON
+#ifdef CONFIG_USB_ETRON_HUB
 		struct usb_interface *iface = usb_ifnum_to_if(udev,
 				cur_alt->desc.bInterfaceNumber);
 
@@ -1987,7 +1987,7 @@ irqreturn_t usb_hcd_irq (int irq, void *__hcd)
 	local_irq_restore(flags);
 	return rc;
 }
-#ifdef SYNO_USB_BACKPORT_BY_ETRON
+#ifdef CONFIG_USB_ETRON_HUB
 EXPORT_SYMBOL_GPL(usb_hcd_irq);
 #endif
 

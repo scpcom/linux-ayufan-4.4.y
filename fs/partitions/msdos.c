@@ -33,12 +33,20 @@
 
 #define SYS_IND(p)	get_unaligned(&p->sys_ind)
 
+#ifdef CONFIG_SYNO_MV88F6281
+static sector_t nr_sects(struct partition *p)
+#else
 static inline sector_t nr_sects(struct partition *p)
+#endif
 {
 	return (sector_t)get_unaligned_le32(&p->nr_sects);
 }
 
+#ifdef CONFIG_SYNO_MV88F6281
+static sector_t start_sect(struct partition *p)
+#else
 static inline sector_t start_sect(struct partition *p)
+#endif
 {
 	return (sector_t)get_unaligned_le32(&p->start_sect);
 }

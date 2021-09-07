@@ -77,6 +77,11 @@ config SYNO_QORIQ_GIANFAR_DROP_CACHE
 	bool "Drop cache before gianfar device start up"
 	depends on SYNO_QORIQ
 
+config SYNO_213AIR_KERNEL_PANIC_WORK_AROUND
+	bool "213 air xcopy work around"
+	depends on SYNO_MV88F6281 && XFRM
+	default y
+
 config SYNO_DISPLAY_CPUINFO
     bool "Support display CPU Infomation"
 	help

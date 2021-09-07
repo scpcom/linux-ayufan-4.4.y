@@ -34,7 +34,7 @@ config FS_SYNO_ACL
 # Synology ACL utility routines (for now, only ext4)
 # ACL depends on SYNO_ARCHIVE_BIT
 	bool
-	default n
+	default y
 
 
 config FS_POSIX_ACL

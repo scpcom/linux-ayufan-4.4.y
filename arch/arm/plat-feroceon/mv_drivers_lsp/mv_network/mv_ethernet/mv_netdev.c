@@ -181,6 +181,27 @@ static void eth_print_link_status( struct net_device *dev )
     u32         port_status;
 
     port_status = MV_REG_READ( ETH_PORT_STATUS_REG( port ) );
+	/* change log level to avoid writing to syslog,
+	 * which will stop hibernation
+	 */
+#if CONFIG_SYNO_MV88F6281
+    if(port_status & ETH_LINK_UP_MASK)
+    {
+	    printk( KERN_INFO "%s: link up", dev->name );
+
+        /* check port status register */
+        printk(KERN_CONT ", %s",(port_status & ETH_FULL_DUPLEX_MASK) ? "full duplex" : "half duplex" );
+
+        if( port_status & ETH_GMII_SPEED_1000_MASK )
+	        printk(KERN_CONT ", speed 1 Gbps" );
+        else
+            printk(KERN_CONT ", %s", (port_status & ETH_MII_SPEED_100_MASK) ? "speed 100 Mbps" : "speed 10 Mbps" );
+	    printk(KERN_CONT "\n" );
+    }
+    else {
+	    printk( KERN_INFO "%s: link down\n", dev->name );
+    }
+#else
     if(port_status & ETH_LINK_UP_MASK)
     {
 	    printk( KERN_NOTICE "%s: link up", dev->name );
@@ -197,6 +218,7 @@ static void eth_print_link_status( struct net_device *dev )
     else {
 	    printk( KERN_NOTICE "%s: link down\n", dev->name );
     }
+#endif
 }
 
 static int eth_get_config(u32 netdev, MV_U8* mac_addr)

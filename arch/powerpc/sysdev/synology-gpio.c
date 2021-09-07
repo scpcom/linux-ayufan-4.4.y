@@ -251,6 +251,10 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 	WARN_ON(pin1 == GPIO_UNDEF);
 	WARN_ON(pin2 == GPIO_UNDEF);
 
+	if (pin1 == GPIO_UNDEF || pin2 == GPIO_UNDEF) {
+		goto END;
+	}
+
 	gpio_set_value(pin1, bit1);
 	gpio_set_value(pin2, bit2);
 

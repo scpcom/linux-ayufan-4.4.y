@@ -7411,7 +7411,6 @@ void syno_ata_info_print(struct ata_port *ap)
 EXPORT_SYMBOL(syno_ata_info_print);
 #endif
 
-
 /*
  * libata is essentially a library of internal helper functions for
  * low-level ATA host controller drivers.  As such, the API/ABI is

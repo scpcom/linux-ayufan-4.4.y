@@ -48,7 +48,7 @@
 #include "tcm.h"
 
 
-#ifdef  MY_ABC_HERE
+#ifdef MY_ABC_HERE
 extern char gszSynoHWVersion[];
 #endif
 
@@ -157,7 +157,7 @@ static int __init early_internal_hd_num(char *p)
 __setup("ihd_num=", early_internal_hd_num);
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef MY_ABC_HERE
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);

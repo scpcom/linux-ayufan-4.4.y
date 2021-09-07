@@ -1969,7 +1969,13 @@ static ssize_t n_tty_write(struct tty_struct *tty, struct file *file,
 				tty->ops->flush_chars(tty);
 		} else {
 			while (nr > 0) {
+#ifdef SYNO_CVE_2014_0196
+				mutex_lock(&tty->output_lock);
+#endif /* SYNO_CVE_2014_0196 */
 				c = tty->ops->write(tty, b, nr);
+#ifdef SYNO_CVE_2014_0196
+				mutex_unlock(&tty->output_lock);
+#endif /* SYNO_CVE_2014_0196 */
 				if (c < 0) {
 					retval = c;
 					goto break_out;

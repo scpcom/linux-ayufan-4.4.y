@@ -111,7 +111,7 @@
 #endif
 #include <asm/mce.h>
 
-#ifdef  MY_ABC_HERE
+#ifdef MY_ABC_HERE
 #include  <linux/synobios.h>
 #endif
 
@@ -568,7 +568,7 @@ static int __init early_internal_hd_num(char *p)
 __setup("ihd_num=", early_internal_hd_num);
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef MY_ABC_HERE
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);
@@ -596,7 +596,7 @@ static int __init early_SASmodel(char *p)
 __setup("SASmodel=", early_SASmodel);
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef MY_ABC_HERE
 static int __init early_ahci_switch(char *p)
 {
         g_ahci_switch = simple_strtol(p, NULL, 10);

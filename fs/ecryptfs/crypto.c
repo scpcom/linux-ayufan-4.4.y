@@ -364,13 +364,12 @@ static int ecryptfs_async_init(struct ecryptfs_request *ecryptfs_req,
 	init_completion(&(ecryptfs_req->complete));
 	ecryptfs_req->crypt_stat = crypt_stat;
 
-	if (NULL == (ecryptfs_req->req = kmalloc(sizeof(struct ablkcipher_request), GFP_KERNEL))) {
+	if (NULL == (ecryptfs_req->req = ablkcipher_request_alloc(crypt_stat->tfm, GFP_NOFS))) {
 		WARN_ON(1);
 		rc = -EINVAL;
 		goto out;
 	}
 
-	ablkcipher_request_set_tfm(ecryptfs_req->req, crypt_stat->tfm);
 	ablkcipher_request_set_callback(ecryptfs_req->req, CRYPTO_TFM_REQ_MAY_BACKLOG |
 					CRYPTO_TFM_REQ_MAY_SLEEP,
 					ecryptfs_async_done,
@@ -401,7 +400,7 @@ static void ecryptfs_async_wait(struct ecryptfs_request *ecryptfs_req,
 		break;
 	}
 
-	kfree(ecryptfs_req->req);
+	ablkcipher_request_free(ecryptfs_req->req);
 	ecryptfs_req->req = NULL;
 }
 #endif
@@ -578,14 +577,15 @@ static int encrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 				  crypt_stat->key_size);
 	}
 
+	/* Consider doing this once, when the file is opened */
+	mutex_lock(&crypt_stat->cs_tfm_mutex);
 #ifdef MY_DEF_HERE
 	rc = ecryptfs_async_init(&ecryptfs_req, crypt_stat);
 	if (rc) {
+		mutex_unlock(&crypt_stat->cs_tfm_mutex);
 		goto out;
 	}
 #endif
-	/* Consider doing this once, when the file is opened */
-	mutex_lock(&crypt_stat->cs_tfm_mutex);
 	if (!(crypt_stat->flags & ECRYPTFS_KEY_SET)) {
 #ifdef MY_DEF_HERE
 		rc = crypto_ablkcipher_setkey(crypt_stat->tfm, crypt_stat->key,
@@ -1070,15 +1070,16 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 #endif
 	int rc = 0;
 
-#ifdef MY_DEF_HERE
-	rc = ecryptfs_async_init(&ecryptfs_req, crypt_stat);
-	if (rc) {
-		goto out;
-	}
-#endif
 
 	/* Consider doing this once, when the file is opened */
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
+#ifdef MY_DEF_HERE
+	rc = ecryptfs_async_init(&ecryptfs_req, crypt_stat);
+	if (rc) {
+		mutex_unlock(&crypt_stat->cs_tfm_mutex);
+		goto out;
+	}
+#endif
 #ifdef MY_DEF_HERE
 	if (!(crypt_stat->flags & ECRYPTFS_KEY_SET)) {
 		rc = crypto_ablkcipher_setkey(crypt_stat->tfm, crypt_stat->key,

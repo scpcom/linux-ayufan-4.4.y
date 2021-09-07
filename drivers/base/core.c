@@ -23,6 +23,9 @@
 #include <linux/semaphore.h>
 #include <linux/mutex.h>
 #include <linux/async.h>
+#ifdef SYNO_LNX2_6_32_SHUTDOWN_FIX
+#include <linux/pm_runtime.h>
+#endif /* SYNO_LNX2_6_32_SHUTDOWN_FIX */
 
 #include "base.h"
 #include "power/power.h"
@@ -200,7 +203,7 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 	if (dev->driver)
 		add_uevent_var(env, "DRIVER=%s", dev->driver->name);
 
-#ifdef CONFIG_SYSFS_DEPRECATED
+#if defined(CONFIG_SYSFS_DEPRECATED) || defined(SYNO_DEPRECATED_UEVENT_ENV)
 	if (dev->class) {
 		struct device *parent = dev->parent;
 
@@ -1735,11 +1738,67 @@ out:
 }
 EXPORT_SYMBOL_GPL(device_move);
 
+#ifdef SYNO_LNX2_6_32_SHUTDOWN_FIX
+/**
+ * These codes are copied from linux-3.x.
+ *
+ * The orignal device_shutdown in linux-2.6.32 is unsafe.
+ * If scsi device is removed while device_shutdown processing,
+ * list_for_each_entry_safe_reverse may become a infinite loop.
+ */
+void syno_device_shutdown(void)
+{
+	struct device *dev;
+
+	spin_lock(&devices_kset->list_lock);
+	/*
+	 * Walk the devices list backward, shutting down each in turn.
+	 * Beware that device unplug events may also start pulling
+	 * devices offline, even as the system is shutting down.
+	 */
+	while (!list_empty(&devices_kset->list)) {
+		dev = list_entry(devices_kset->list.prev, struct device,
+				kobj.entry);
+		get_device(dev);
+		/*
+		 * Make sure the device is off the kset list, in the
+		 * event that dev->*->shutdown() doesn't remove it.
+		 */
+		list_del_init(&dev->kobj.entry);
+		spin_unlock(&devices_kset->list_lock);
+
+		/* Don't allow any more runtime suspends */
+		pm_runtime_get_noresume(dev);
+		pm_runtime_barrier(dev);
+
+		if (dev->bus && dev->bus->shutdown) {
+			dev_dbg(dev, "shutdown\n");
+			dev->bus->shutdown(dev);
+		} else if (dev->driver && dev->driver->shutdown) {
+			dev_dbg(dev, "shutdown\n");
+			dev->driver->shutdown(dev);
+		}
+		put_device(dev);
+
+		spin_lock(&devices_kset->list_lock);
+	}
+	spin_unlock(&devices_kset->list_lock);
+
+	kobject_put(sysfs_dev_char_kobj);
+	kobject_put(sysfs_dev_block_kobj);
+	kobject_put(dev_kobj);
+	async_synchronize_full();
+}
+#endif /* SYNO_LNX2_6_32_SHUTDOWN_FIX */
+
 /**
  * device_shutdown - call ->shutdown() on each device to shutdown.
  */
 void device_shutdown(void)
 {
+#ifdef SYNO_LNX2_6_32_SHUTDOWN_FIX
+	syno_device_shutdown();
+#else
 	struct device *dev, *devn;
 
 	list_for_each_entry_safe_reverse(dev, devn, &devices_kset->list,
@@ -1756,4 +1815,5 @@ void device_shutdown(void)
 	kobject_put(sysfs_dev_block_kobj);
 	kobject_put(dev_kobj);
 	async_synchronize_full();
+#endif /* SYNO_LNX2_6_32_SHUTDOWN_FIX */
 }

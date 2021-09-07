@@ -2,9 +2,10 @@
 
 USB_USBMODEM_MAP="./usb.usbmodem.table"
 USB_USBMODEM_ERROR_FILE="./usb.usbmodem.error"
-USBMODEM_DRIVER_LIST="option qmi_wwan"
+USBMODEM_DRIVER_LIST="option qmi_wwan sierra"
 USBMODEM_OPTION_DIR="drivers/usb/serial/option.c"
-USBMODEM_QMI_WWAN_DIR="drivers/net/usb/qmi_wwan.c"
+USBMODEM_CDC_ACM_DIR="drivers/usb/class/cdc-acm.c"
+USBMODEM_SIERRA_DIR="drivers/usb/serial/sierra.c"
 
 DEVICE_KEY="USB_DEVICE("
 VENDOR_INTERFACE_INFO_KEY="USB_VENDOR_AND_INTERFACE_INFO("
@@ -136,8 +137,11 @@ create_driver_entry() { #$1: driver-name
 		option)
 			TABLE_SEARCH=${USBMODEM_OPTION_DIR}
 			;;
-		qmi_wwan)
-			TABLE_SEARCH=${USBMODEM_QMI_WWAN_DIR}
+		cdc-acm)
+			TABLE_SEARCH=${USBMODEM_CDC_ACM_DIR}
+			;;
+		sierra)
+			TABLE_SEARCH=${USBMODEM_SIERRA_DIR}
 			;;
 		*)
 			;;
@@ -164,6 +168,13 @@ create_usb_usbmodem_table() { #$1: driver list
 	for driver in ${driver_list}; do
 		create_driver_entry "${driver}"
 	done
+
+	# some device has to match vid pid sub proto class
+	# but we only care about vid pid
+	# thus the grep will cause duplicate lines
+	uniq ${USB_USBMODEM_MAP} > ${USB_USBMODEM_MAP}.tmp
+	mv ${USB_USBMODEM_MAP}.tmp ${USB_USBMODEM_MAP}
+	rm ${USB_USBMODEM_MAP}.tmp
 }
 
 case $1 in

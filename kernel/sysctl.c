@@ -83,7 +83,7 @@ char gszSynoHWVersion[16];
 EXPORT_SYMBOL(gszSynoHWVersion);
 #endif
 
-#ifdef  MY_ABC_HERE
+#ifdef MY_ABC_HERE
 int gSynoRaidSyncFlag = 0;
 EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif

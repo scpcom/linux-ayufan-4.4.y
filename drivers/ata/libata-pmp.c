@@ -353,7 +353,8 @@ syno_pm_is_synology_3xxx(const struct ata_port *ap)
 		!IS_SYNOLOGY_DX513(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_DXC(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_RXC(ap->PMSynoUnique) &&
-		!IS_SYNOLOGY_DX213(ap->PMSynoUnique)) {
+		!IS_SYNOLOGY_DX213(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_RX415(ap->PMSynoUnique)) {
 		goto END;
 	}
 

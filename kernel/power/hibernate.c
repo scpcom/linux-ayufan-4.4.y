@@ -637,7 +637,7 @@ int hibernate(void)
  *
  */
 
-#ifdef  MY_DEF_HERE
+#ifdef MY_DEF_HERE
 int software_resume(void)
 #else
 static int software_resume(void)

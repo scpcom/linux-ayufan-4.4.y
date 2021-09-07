@@ -1356,15 +1356,7 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 		// can rename the link if it knows better.
 		if ((dev->driver_info->flags & FLAG_ETHER) != 0
 				&& (net->dev_addr [0] & 0x02) == 0)
-#ifdef MY_ABC_HERE
-			if(0 == strcmp(info->description, SYNO_YOTAWIMAX_DESC)) {
-				strcpy (net->name, SYNO_YOTAWIMAX_ETHERNET_NAME"%d");
-			} else {
-				strcpy (net->name, "eth%d");
-			}
-#else
 			strcpy (net->name, "eth%d");
-#endif
 		/* WLAN devices should always be named "wlan%d" */
 		if ((dev->driver_info->flags & FLAG_WLAN) != 0)
 			strcpy(net->name, "wlan%d");

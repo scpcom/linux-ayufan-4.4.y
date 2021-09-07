@@ -265,7 +265,7 @@ static int hcd_pci_suspend(struct device *dev)
 			return retval;
 	}
 
-#ifdef SYNO_USB_BACKPORT_BY_ETRON
+#ifdef CONFIG_USB_ETRON_HUB
 	/* If MSI-X is enabled, the driver will have synchronized all vectors
 	 * in pci_suspend(). If MSI or legacy PCI is enabled, that will be
 	 * synchronized here.

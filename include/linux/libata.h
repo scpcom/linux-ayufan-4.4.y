@@ -1352,8 +1352,6 @@ extern struct ata_port *SynoEunitFindMaster(struct ata_port *ap);
 int syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn);
 #endif /* SYNO_SATA_PM_DEVICE_GPIO */
 
-
-
 #ifdef MY_ABC_HERE
 extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun);
 #endif

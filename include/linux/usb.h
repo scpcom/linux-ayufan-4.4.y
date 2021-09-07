@@ -179,7 +179,7 @@ struct usb_interface {
 	unsigned needs_altsetting0:1;	/* switch to altsetting 0 is pending */
 	unsigned needs_binding:1;	/* needs delayed unbind/rebind */
 	unsigned reset_running:1;
-#ifdef SYNO_USB_BACKPORT_BY_ETRON
+#ifdef CONFIG_USB_ETRON_HUB
 	unsigned resetting_device:1;    /* true: bandwidth alloc after reset */
 #endif
 
@@ -1381,7 +1381,7 @@ static inline void usb_fill_int_urb(struct urb *urb,
 	urb->transfer_buffer_length = buffer_length;
 	urb->complete = complete_fn;
 	urb->context = context;
-#ifdef SYNO_USB_BACKPORT_BY_ETRON
+#ifdef CONFIG_USB_ETRON_HUB
 	if (dev->speed == USB_SPEED_HIGH || dev->speed == USB_SPEED_SUPER)
 #else
 	if (dev->speed == USB_SPEED_HIGH)

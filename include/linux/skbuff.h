@@ -326,6 +326,9 @@ struct sk_buff {
 	struct net_device	*dev;
 
 	unsigned long		_skb_dst;
+#if defined(CONFIG_SYNO_213AIR_KERNEL_PANIC_WORK_AROUND)
+	int			_syno_kernel_panic_work_around;
+#endif
 #ifdef CONFIG_XFRM
 	struct	sec_path	*sp;
 #endif

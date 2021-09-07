@@ -171,7 +171,13 @@ int dm_exception_store_set_chunk_size(struct dm_exception_store *store,
 		return -EINVAL;
 	}
 
+	// DSM #62671 - for Time Backup to support 4K HDD.
+	// Although this bug can be fixed by changing the attribute of the dmsetup caller in Time Backup,
+	// we do not want to release another version of Time Backup. So we workaround here.
 	/* Validate the chunk size against the device block size */
+	if (4 == chunk_size) {
+		chunk_size = 8;
+	}
 	if (chunk_size % (bdev_logical_block_size(store->cow->bdev) >> 9)) {
 		*error = "Chunk size is not a multiple of device blocksize";
 		return -EINVAL;

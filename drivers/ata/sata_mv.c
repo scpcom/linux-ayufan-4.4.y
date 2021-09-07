@@ -3385,7 +3385,7 @@ static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 #else
 		writel(0x00000060, mmio + GPIO_PORT_CTL);
 #endif
-#ifdef  MY_ABC_HERE
+#ifdef MY_ABC_HERE
 	}
 #endif
 }

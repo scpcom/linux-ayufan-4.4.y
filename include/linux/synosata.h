@@ -350,7 +350,7 @@ syno_support_disk_num(unsigned short vendor,
 	unsigned int ret = 0;
 
 	if (syno_pm_is_3xxx(vendor, devid)) {
-		if (IS_SYNOLOGY_RX4(syno_uniq)) {
+		if (IS_SYNOLOGY_RX4(syno_uniq) || IS_SYNOLOGY_RX415(syno_uniq)) {
 			ret = 4;
 		} else if (IS_SYNOLOGY_DX5(syno_uniq) || IS_SYNOLOGY_DX513(syno_uniq)) {
 			ret = 5;

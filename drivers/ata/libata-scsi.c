@@ -47,6 +47,7 @@
 #include <linux/hdreg.h>
 #include <linux/uaccess.h>
 #include <linux/suspend.h>
+#include <asm/unaligned.h>
 
 #include "libata.h"
 
@@ -75,8 +76,6 @@ DEFINE_SPINLOCK(SYNOLastWakeLock);
 #ifdef MY_ABC_HERE
 extern int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
 #endif
-
-#define SECTOR_SIZE		512
 
 #ifdef MY_DEF_HERE
 extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
@@ -1064,6 +1063,14 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 					EBOX_INFO_UNIQUE_DX213,
 					EBOX_INFO_EMID_KEY,
 					ap->PMSynoEMID);
+		}else if(IS_SYNOLOGY_RX415(ap->PMSynoUnique)) {
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"%d\"\n",
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_RX415,
+					EBOX_INFO_EMID_KEY,
+					ap->PMSynoEMID);
 		}else {
 			snprintf(szTmp,
 					BDEVNAME_SIZE,
@@ -1602,7 +1609,7 @@ int ata_cmd_ioctl(struct scsi_device *scsidev, void __user *arg)
 	memset(scsi_cmd, 0, sizeof(scsi_cmd));
 
 	if (args[3]) {
-		argsize = SECTOR_SIZE * args[3];
+		argsize = ATA_SECT_SIZE * args[3];
 		argbuf = kmalloc(argsize, GFP_KERNEL);
 		if (argbuf == NULL) {
 			rc = -ENOMEM;
@@ -2310,8 +2317,9 @@ static int ata_scsi_dev_config(struct scsi_device *sdev,
 		blk_queue_dma_drain(q, atapi_drain_needed, buf, ATAPI_MAX_DRAIN);
 	} else {
 		/* ATA devices must be sector aligned */
+		sdev->sector_size = ata_id_logical_sector_size(dev->id);
 		blk_queue_update_dma_alignment(sdev->request_queue,
-					       ATA_SECT_SIZE - 1);
+					       sdev->sector_size - 1);
 		sdev->manage_start_stop = 1;
 	}
 
@@ -2326,6 +2334,7 @@ static int ata_scsi_dev_config(struct scsi_device *sdev,
 		scsi_adjust_queue_depth(sdev, MSG_SIMPLE_TAG, depth);
 	}
 
+	dev->sdev = sdev;
 	return 0;
 }
 
@@ -2851,7 +2860,7 @@ static unsigned int ata_scsi_rw_xlat(struct ata_queued_cmd *qc)
 		goto nothing_to_do;
 
 	qc->flags |= ATA_QCFLAG_IO;
-	qc->nbytes = n_block * ATA_SECT_SIZE;
+	qc->nbytes = n_block * scmd->device->sector_size;
 
 	rc = ata_build_rw_tf(&qc->tf, qc->dev, block, n_block, tf_flags,
 			     qc->tag);
@@ -2985,7 +2994,7 @@ static int SynoIssueRead(struct ata_device *dev)
 	}
 
 	/* copy from ata_scsi_rw_xlat(..) and ata_exec_internal(..) */
-	psg = kmalloc(ATA_SECT_SIZE, GFP_KERNEL);//will free in complete function
+	psg = kmalloc(ATA_SECT_SIZE, GFP_ATOMIC);//will free in complete function
 	sg_init_one(psg, buf, ATA_SECT_SIZE);
 	ata_sg_init(qc, psg, 1);
 	qc->flags |= ATA_QCFLAG_IO;
@@ -3415,6 +3424,7 @@ static unsigned int ata_scsiop_inq_00(struct ata_scsi_args *args, u8 *rbuf)
 		0x80,	/* page 0x80, unit serial no page */
 		0x83,	/* page 0x83, device ident page */
 		0x89,	/* page 0x89, ata info page */
+		0xb0,	/* page 0xb0, block limits page */
 		0xb1,	/* page 0xb1, block device characteristics page */
 	};
 
@@ -3533,6 +3543,38 @@ static unsigned int ata_scsiop_inq_89(struct ata_scsi_args *args, u8 *rbuf)
 	rbuf[56] = ATA_CMD_ID_ATA;
 
 	memcpy(&rbuf[60], &args->id[0], 512);
+	return 0;
+}
+
+static unsigned int ata_scsiop_inq_b0(struct ata_scsi_args *args, u8 *rbuf)
+{
+	u16 min_io_sectors;
+
+	rbuf[1] = 0xb0;
+	rbuf[3] = 0x3c;		/* required VPD size with unmap support */
+
+	/*
+	 * Optimal transfer length granularity.
+	 *
+	 * This is always one physical block, but for disks with a smaller
+	 * logical than physical sector size we need to figure out what the
+	 * latter is.
+	 */
+	min_io_sectors = 1 << ata_id_log2_per_physical_sector(args->id);
+	put_unaligned_be16(min_io_sectors, &rbuf[6]);
+
+	/*
+	 * Optimal unmap granularity.
+	 *
+	 * The ATA spec doesn't even know about a granularity or alignment
+	 * for the TRIM command.  We can leave away most of the unmap related
+	 * VPD page entries, but we have specifify a granularity to signal
+	 * that we support some form of unmap - in thise case via WRITE SAME
+	 * with the unmap bit set.
+	 */
+	if (ata_id_has_trim(args->id))
+		put_unaligned_be32(1, &rbuf[28]);
+
 	return 0;
 }
 
@@ -3775,21 +3817,13 @@ static unsigned int ata_scsiop_read_cap(struct ata_scsi_args *args, u8 *rbuf)
 {
 	struct ata_device *dev = args->dev;
 	u64 last_lba = dev->n_sectors - 1; /* LBA of the last block */
-	u8 log_per_phys = 0;
-	u16 lowest_aligned = 0;
-	u16 word_106 = dev->id[106];
-	u16 word_209 = dev->id[209];
+	u32 sector_size; /* physical sector size in bytes */
+	u8 log2_per_phys;
+	u16 lowest_aligned;
 
-	if ((word_106 & 0xc000) == 0x4000) {
-		/* Number and offset of logical sectors per physical sector */
-		if (word_106 & (1 << 13))
-			log_per_phys = word_106 & 0xf;
-		if ((word_209 & 0xc000) == 0x4000) {
-			u16 first = dev->id[209] & 0x3fff;
-			if (first > 0)
-				lowest_aligned = (1 << log_per_phys) - first;
-		}
-	}
+	sector_size = ata_id_logical_sector_size(dev->id);
+	log2_per_phys = ata_id_log2_per_physical_sector(dev->id);
+	lowest_aligned = ata_id_logical_sector_offset(dev->id, log2_per_phys);
 
 	VPRINTK("ENTER\n");
 
@@ -3804,8 +3838,10 @@ static unsigned int ata_scsiop_read_cap(struct ata_scsi_args *args, u8 *rbuf)
 		rbuf[3] = last_lba;
 
 		/* sector size */
-		rbuf[6] = ATA_SECT_SIZE >> 8;
-		rbuf[7] = ATA_SECT_SIZE & 0xff;
+		rbuf[4] = sector_size >> (8 * 3);
+		rbuf[5] = sector_size >> (8 * 2);
+		rbuf[6] = sector_size >> (8 * 1);
+		rbuf[7] = sector_size;
 	} else {
 		/* sector count, 64-bit */
 		rbuf[0] = last_lba >> (8 * 7);
@@ -3818,13 +3854,18 @@ static unsigned int ata_scsiop_read_cap(struct ata_scsi_args *args, u8 *rbuf)
 		rbuf[7] = last_lba;
 
 		/* sector size */
-		rbuf[10] = ATA_SECT_SIZE >> 8;
-		rbuf[11] = ATA_SECT_SIZE & 0xff;
+		rbuf[ 8] = sector_size >> (8 * 3);
+		rbuf[ 9] = sector_size >> (8 * 2);
+		rbuf[10] = sector_size >> (8 * 1);
+		rbuf[11] = sector_size;
 
 		rbuf[12] = 0;
-		rbuf[13] = log_per_phys;
+		rbuf[13] = log2_per_phys;
 		rbuf[14] = (lowest_aligned >> 8) & 0x3f;
 		rbuf[15] = lowest_aligned;
+
+		if (ata_id_has_trim(args->id))
+			rbuf[14] |= 0x80;
 	}
 
 	return 0;
@@ -4280,9 +4321,8 @@ static unsigned int ata_scsi_pass_thru(struct ata_queued_cmd *qc)
 	tf->device = dev->devno ?
 		tf->device | ATA_DEV1 : tf->device & ~ATA_DEV1;
 
-	/* READ/WRITE LONG use a non-standard sect_size */
-	qc->sect_size = ATA_SECT_SIZE;
 	switch (tf->command) {
+	/* READ/WRITE LONG use a non-standard sect_size */
 	case ATA_CMD_READ_LONG:
 	case ATA_CMD_READ_LONG_ONCE:
 	case ATA_CMD_WRITE_LONG:
@@ -4290,6 +4330,45 @@ static unsigned int ata_scsi_pass_thru(struct ata_queued_cmd *qc)
 		if (tf->protocol != ATA_PROT_PIO || tf->nsect != 1)
 			goto invalid_fld;
 		qc->sect_size = scsi_bufflen(scmd);
+		break;
+
+	/* commands using reported Logical Block size (e.g. 512 or 4K) */
+	case ATA_CMD_CFA_WRITE_NE:
+	case ATA_CMD_CFA_TRANS_SECT:
+	case ATA_CMD_CFA_WRITE_MULT_NE:
+	/* XXX: case ATA_CMD_CFA_WRITE_SECTORS_WITHOUT_ERASE: */
+	case ATA_CMD_READ:
+	case ATA_CMD_READ_EXT:
+	case ATA_CMD_READ_QUEUED:
+	/* XXX: case ATA_CMD_READ_QUEUED_EXT: */
+	case ATA_CMD_FPDMA_READ:
+	case ATA_CMD_READ_MULTI:
+	case ATA_CMD_READ_MULTI_EXT:
+	case ATA_CMD_PIO_READ:
+	case ATA_CMD_PIO_READ_EXT:
+	case ATA_CMD_READ_STREAM_DMA_EXT:
+	case ATA_CMD_READ_STREAM_EXT:
+	case ATA_CMD_VERIFY:
+	case ATA_CMD_VERIFY_EXT:
+	case ATA_CMD_WRITE:
+	case ATA_CMD_WRITE_EXT:
+	case ATA_CMD_WRITE_FUA_EXT:
+	case ATA_CMD_WRITE_QUEUED:
+	case ATA_CMD_WRITE_QUEUED_FUA_EXT:
+	case ATA_CMD_FPDMA_WRITE:
+	case ATA_CMD_WRITE_MULTI:
+	case ATA_CMD_WRITE_MULTI_EXT:
+	case ATA_CMD_WRITE_MULTI_FUA_EXT:
+	case ATA_CMD_PIO_WRITE:
+	case ATA_CMD_PIO_WRITE_EXT:
+	case ATA_CMD_WRITE_STREAM_DMA_EXT:
+	case ATA_CMD_WRITE_STREAM_EXT:
+		qc->sect_size = scmd->device->sector_size;
+		break;
+
+	/* Everything else uses 512 byte "sectors" */
+	default:
+		qc->sect_size = ATA_SECT_SIZE;
 	}
 
 	/*
@@ -4394,6 +4473,58 @@ static unsigned int ata_scsi_pass_thru(struct ata_queued_cmd *qc)
 #endif
 }
 
+static unsigned int ata_scsi_write_same_xlat(struct ata_queued_cmd *qc)
+{
+	struct ata_taskfile *tf = &qc->tf;
+	struct scsi_cmnd *scmd = qc->scsicmd;
+	struct ata_device *dev = qc->dev;
+	const u8 *cdb = scmd->cmnd;
+	u64 block;
+	u32 n_block;
+	u32 size;
+	void *buf;
+
+	/* we may not issue DMA commands if no DMA mode is set */
+	if (unlikely(!dev->dma_mode))
+		goto invalid_fld;
+
+	if (unlikely(scmd->cmd_len < 16))
+		goto invalid_fld;
+	scsi_16_lba_len(cdb, &block, &n_block);
+
+	/* for now we only support WRITE SAME with the unmap bit set */
+	if (unlikely(!(cdb[1] & 0x8)))
+		goto invalid_fld;
+
+	/*
+	 * WRITE SAME always has a sector sized buffer as payload, this
+	 * should never be a multiple entry S/G list.
+	 */
+	if (!scsi_sg_count(scmd))
+		goto invalid_fld;
+
+	buf = page_address(sg_page(scsi_sglist(scmd)));
+	size = ata_set_lba_range_entries(buf, 512 / 8, block, n_block);
+
+	tf->protocol = ATA_PROT_DMA;
+	tf->hob_feature = 0;
+	tf->feature = ATA_DSM_TRIM;
+	tf->hob_nsect = (size / 512) >> 8;
+	tf->nsect = size / 512;
+	tf->command = ATA_CMD_DSM;
+	tf->flags |= ATA_TFLAG_ISADDR | ATA_TFLAG_DEVICE | ATA_TFLAG_LBA48 |
+		     ATA_TFLAG_WRITE;
+
+	ata_qc_set_pc_nbytes(qc);
+
+	return 0;
+
+ invalid_fld:
+	ata_scsi_set_sense(scmd, ILLEGAL_REQUEST, 0x24, 0x00);
+	/* "Invalid field in cdb" */
+	return 1;
+}
+
 /**
  *	ata_get_xlat_func - check if SCSI to ATA translation is possible
  *	@dev: ATA device
@@ -4417,6 +4548,9 @@ static inline ata_xlat_func_t ata_get_xlat_func(struct ata_device *dev, u8 cmd)
 	case WRITE_10:
 	case WRITE_16:
 		return ata_scsi_rw_xlat;
+
+	case 0x93 /*WRITE_SAME_16*/:
+		return ata_scsi_write_same_xlat;
 
 	case SYNCHRONIZE_CACHE:
 		if (ata_try_flush_cache(dev))
@@ -4497,7 +4631,7 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 	}
 
 	if (xlat_func)
-/* As you see if MY_ABC_HERE is not ported, this is not work */
+/* As you see if SYNO_INTERNAL_HD_NUM is not ported, this is not work */
 #if defined(MY_ABC_HERE)
 	{
 #ifdef MY_ABC_HERE
@@ -4649,6 +4783,9 @@ void ata_scsi_simulate(struct ata_device *dev, struct scsi_cmnd *cmd,
 			break;
 		case 0x89:
 			ata_scsi_rbuf_fill(&args, ata_scsiop_inq_89);
+			break;
+		case 0xb0:
+			ata_scsi_rbuf_fill(&args, ata_scsiop_inq_b0);
 			break;
 		case 0xb1:
 			ata_scsi_rbuf_fill(&args, ata_scsiop_inq_b1);
@@ -4809,6 +4946,8 @@ void ata_scsi_scan_host(struct ata_port *ap, int sync)
 			if (!IS_ERR(sdev)) {
 				dev->sdev = sdev;
 				scsi_device_put(sdev);
+			} else {
+				dev->sdev = NULL;
 			}
 		}
 	}
@@ -5537,5 +5676,4 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 	return index;
 }
 #endif
-
 

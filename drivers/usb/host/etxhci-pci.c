@@ -29,7 +29,7 @@
 #define PCI_DEVICE_ID_ETRON_EJ168	0x7023
 #define PCI_DEVICE_ID_ETRON_EJ188	0x7052
 
-#ifdef SYNO_FIX_IN_ETRON
+#ifdef MY_ABC_HERE
 extern unsigned short xhci_vendor;
 #endif
 
@@ -101,7 +101,7 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	xhci->hcc_params = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
 	etxhci_print_registers(xhci);
 
-#ifdef SYNO_FIX_IN_ETRON
+#ifdef MY_ABC_HERE
 	xhci_vendor = pdev->vendor;
 #endif
 

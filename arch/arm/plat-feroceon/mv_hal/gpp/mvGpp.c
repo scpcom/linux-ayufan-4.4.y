@@ -116,6 +116,7 @@ MV_STATUS mvGppTypeSet(MV_U32 group, MV_U32 mask, MV_U32 value)
 	return MV_OK;
 
 }
+EXPORT_SYMBOL(mvGppTypeSet);
 
 /*******************************************************************************
 * mvGppBlinkEn - Set a GPP (IN) Pin list to blink every ~100ms

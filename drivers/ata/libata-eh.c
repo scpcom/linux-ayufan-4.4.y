@@ -887,15 +887,12 @@ void ata_scsi_error(struct Scsi_Host *host)
 			DBGMESG("port %d unset Fake Error\n", ap->print_id);
 			ap->iFakeError = 0;
 		}
-#ifdef SYNO_SATA_IRQ_OFF
-		if (SYNO_SATA_RETRY_TIMES == iDetectTries &&
-				SYNO_SATA_RETRY_TIMES == iDeepTries) {
-#else
+#ifdef MY_ABC_HERE
 		if (SYNO_SATA_RETRY_TIMES == iDetectTries) {
-#endif
 			/* First time the port enter our retry mechanism */
 			schedule_work(&(ap->SendDiskRetryEventTask));
 		}
+#endif
 		if (0 < iDetectTries) {
 			ata_port_printk(ap, KERN_ERR, "do detect tries %d\n", iDetectTries);
 			if (ap->ops->syno_force_intr) {
