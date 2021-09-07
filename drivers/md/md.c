@@ -611,6 +611,30 @@ void SYNOSwapSuperblock0(mdp_super_t *sb)
 }
 #endif
 
+#ifdef MY_ABC_HERE
+static void super_written_retry(struct bio *rbio, int error)
+{
+	unsigned long flags;
+	struct bio *bio = rbio->bi_private;
+	mdk_rdev_t *rdev = bio->bi_private;
+	mddev_t *mddev = rdev->mddev;
+	if (!test_bit(BIO_UPTODATE, &rbio->bi_flags) &&
+		-EIO == error) {
+			printk("md: super_written_retry for error=%d \n", error);
+			spin_lock_irqsave(&mddev->write_lock, flags);
+			bio->bi_next = mddev->biolist;
+			mddev->biolist = bio;
+			spin_unlock_irqrestore(&mddev->write_lock, flags);
+			wake_up(&mddev->sb_wait);
+			bio_put(rbio);
+	} else {
+			bio_put(bio);
+			rbio->bi_private = rdev;
+			super_written(rbio, error);
+	}
+}
+#endif  
+
 void md_super_write(mddev_t *mddev, mdk_rdev_t *rdev,
 		   sector_t sector, int size, struct page *page)
 {
@@ -626,6 +650,22 @@ void md_super_write(mddev_t *mddev, mdk_rdev_t *rdev,
 	bio->bi_rw = rw;
 
 	atomic_inc(&mddev->pending_writes);
+#ifdef MY_ABC_HERE
+	 
+	struct bio *rbio;
+	rbio = bio_clone(bio, GFP_NOIO);
+	if (NULL != rbio) {
+		rbio->bi_private = bio;
+		rbio->bi_end_io = super_written_retry;
+		submit_bio(rw, rbio);
+	} else if (!test_bit(BarriersNotsupp, &rdev->flags)) {
+		rw |= (1<<BIO_RW_BARRIER);
+		rbio->bi_private = bio;
+		rbio->bi_end_io = super_written_barrier;
+		submit_bio(rw, rbio);
+	} else
+		submit_bio(rw, bio);
+#else
 	if (!test_bit(BarriersNotsupp, &rdev->flags)) {
 		struct bio *rbio;
 		rw |= (1<<BIO_RW_BARRIER);
@@ -635,6 +675,7 @@ void md_super_write(mddev_t *mddev, mdk_rdev_t *rdev,
 		submit_bio(rw, rbio);
 	} else
 		submit_bio(rw, bio);
+#endif  
 }
 
 void md_super_wait(mddev_t *mddev)

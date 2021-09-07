@@ -138,3 +138,7 @@ config SYNO_NF_NAT_WORKAROUND
 	bool "Fix BUG_ON on nf_nat_setup_info"
 	default y
 
+config SYNO_MD_SB_RETRY
+	bool "Add an one-time retry for EIO error when updating superblock"
+	default y
+

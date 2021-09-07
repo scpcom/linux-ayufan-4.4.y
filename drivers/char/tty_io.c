@@ -1919,11 +1919,7 @@ void initialize_tty_struct(struct tty_struct *tty,
 
 int tty_put_char(struct tty_struct *tty, unsigned char ch)
 {
-#ifdef MY_ABC_HERE
-	if (tty->ops->put_char && 0 != strcmp(tty->name, "ttyS1")) { 
-#else
 	if (tty->ops->put_char) { 
-#endif
 		return tty->ops->put_char(tty, ch);
 	}
 	return tty->ops->write(tty, &ch, 1);
@@ -1933,9 +1929,16 @@ EXPORT_SYMBOL_GPL(tty_put_char);
 #ifdef MY_ABC_HERE
 int syno_ttys_write(const int index, const char* szBuf)
 {
-    size_t i = 0;
     struct tty_driver *drv = NULL;
     struct tty_struct *tty = NULL;
+#ifdef MY_DEF_HERE
+    char *szX86Buf = NULL;
+    size_t cbX86Buf = strlen(szBuf) + 2;
+
+    szX86Buf = kmalloc(cbX86Buf, GFP_KERNEL);
+    if(!szX86Buf)
+        return -ENOMEM;
+#endif  
 
     list_for_each_entry(drv, &tty_drivers, tty_drivers) {
         if ( strcmp(drv->name, "ttyS") ) {
@@ -1948,13 +1951,20 @@ int syno_ttys_write(const int index, const char* szBuf)
             continue;
         }
         tty = drv->ttys[index];
+
 #ifdef MY_DEF_HERE
-        tty_put_char(tty, '-');
-#endif
-        for( i = 0; i < strlen(szBuf); ++i ) {
-            tty_put_char(tty, szBuf[i]);
-        }
+        memset(szX86Buf, 0, cbX86Buf);
+        snprintf(szX86Buf, cbX86Buf, "%c%s", '-', szBuf);
+
+        tty->ops->write(tty, szX86Buf, strlen(szX86Buf));
+#else  
+        tty->ops->write(tty, szBuf, strlen(szBuf));
+#endif  
     }
+
+#ifdef MY_DEF_HERE
+    kfree(szX86Buf);
+#endif
 
     return 0;
 }

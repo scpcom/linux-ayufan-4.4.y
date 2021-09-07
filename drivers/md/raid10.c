@@ -2248,6 +2248,32 @@ static void raid10_quiesce(mddev_t *mddev, int state)
 	}
 }
 
+static int raid10_resize(mddev_t *mddev, sector_t sectors)
+{
+	 
+	conf_t *conf = mddev->private;
+	sector_t oldsize, size;
+
+	if (conf->far_copies > 1 && !conf->far_offset)
+		return -EINVAL;
+
+	oldsize = raid10_size(mddev, 0, 0);
+	size = raid10_size(mddev, sectors, 0);
+	md_set_array_sectors(mddev, size);
+	if (mddev->array_sectors > size)
+		return -EINVAL;
+	set_capacity(mddev->gendisk, mddev->array_sectors);
+	revalidate_disk(mddev->gendisk);
+	if (sectors > mddev->dev_sectors &&
+	    mddev->recovery_cp > oldsize) {
+		mddev->recovery_cp = oldsize;
+		set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
+	}
+	mddev->dev_sectors = sectors;
+	mddev->resync_max_sectors = size;
+	return 0;
+}
+
 static struct mdk_personality raid10_personality =
 {
 	.name		= "raid10",
@@ -2272,6 +2298,7 @@ static struct mdk_personality raid10_personality =
 #ifdef MY_ABC_HERE
 	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
 #endif
+	.resize		= raid10_resize,
 };
 
 static int __init raid_init(void)
