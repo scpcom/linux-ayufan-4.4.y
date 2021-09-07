@@ -1,0 +1,105 @@
+#!/bin/bash
+# Copyright (c) 2000-2016 Synology Inc. All rights reserved.
+
+# ========================================================================
+# To specify which platform depends on this kernel,
+# please edit the section [platform kernel] in config/project.depends
+# ========================================================================
+
+export ARCH=${ARCH}
+CC=`echo ${CC} | awk -F" " '{print $1}'`
+export CROSS_COMPILE=${ToolChainPrefix} CC="${CC}"
+KERNEL_CC="${CC}"
+
+case ${MakeClean} in
+	[Yy][Ee][Ss])
+		[ -f Makefile ] && make distclean
+		;;
+esac
+
+case ${CleanOnly} in
+	[Yy][Ee][Ss])
+		return
+		;;
+esac
+
+# Version Infomation
+LNXVERSION="${KernelDir}/.version"
+if [ -f ${VERSION_FILE} ]; then
+	expr $(GetDSMBuildNumber) - 1 > ${LNXVERSION}
+fi
+
+
+case "$BUILD_TARGET" in
+	MARVELL_88F6281)
+		rm -f ${KernelDir}/arch/arm/boot/zImage
+		rm -f ${KernelDir}/arch/arm/boot/uImage
+		rm -f ${ImageDir}/modules/*
+
+		cp -f synoconfigs/88f6281 .config
+		mkdir -p include/linux/modules
+		make oldconfig
+
+		echo "=====Build Synology Linux kernel 2.6 ====="
+		make ${MAKE_FLAGS} uImage CC=${KERNEL_CC}
+
+		echo "=====Build Synology Linux kernel 2.6 Modules ====="
+		make ${MAKE_FLAGS} modules CC=${KERNEL_CC}
+
+		if [ ! -f "${KernelDir}/arch/arm/boot/uImage" ]; then
+			echo "Error! ${KernelDir}/arch/arm/boot/uImage does not exist!"
+			exit 1;
+		fi
+
+		./scripts/syno_gen_usbmodem_table.sh create-table
+		;;
+	PPC_853X)
+		rm -f ${KernelDir}/arch/ppc/boot/images/uImage
+		rm -f ${KernelDir}/arch/ppc/boot/images/zImage
+		rm -f ${ImageDir}/modules/*
+
+		cp -f synoconfigs/ppc8533 .config
+		mkdir -p include/linux/modules
+		make oldconfig
+
+		echo "=====Build Synology Linux kernel 2.6 ====="
+		make ${MAKE_FLAGS} uImage CC=${KERNEL_CC}
+
+		echo "=====Build Synology Linux kernel 2.6 Modules ====="
+		make ${MAKE_FLAGS} modules CC=${KERNEL_CC}
+
+		if [ ! -f "${KernelDir}/arch/powerpc/boot/uImage" ]; then
+		echo "Error! ${KernelDir}/arch/powerpc/boot/uImage does not exist!"
+		exit 1;
+		fi
+
+		./scripts/syno_gen_usbmodem_table.sh create-table
+		;;
+	PPC_QORIQ)
+		rm -f ${KernelDir}/arch/ppc/boot/images/uImage
+		rm -f ${KernelDir}/arch/ppc/boot/images/zImage
+		rm -f ${ImageDir}/modules/*
+
+		cp -f synoconfigs/ppcQorIQ .config
+		mkdir -p include/linux/modules
+		make oldconfig
+
+		echo "=====Build Synology Linux kernel 2.6 ====="
+		make ${MAKE_FLAGS} uImage CC=${KERNEL_CC} KCFLAGS="-Wno-unused-but-set-variable"
+
+		echo "=====Build Synology Linux kernel 2.6 Modules ====="
+		make ${MAKE_FLAGS} modules CC=${KERNEL_CC} KCFLAGS="-Wno-unused-but-set-variable"
+		#cp -f ${KernelDir}/drivers/crypto/talitos_qoriq.ko ${KernelDir}/drivers/crypto/talitos.ko
+
+		if [ ! -f "${KernelDir}/arch/powerpc/boot/uImage" ]; then
+		echo "Error! ${KernelDir}/arch/powerpc/boot/uImage does not exist!"
+		exit 1;
+		fi
+
+		./scripts/syno_gen_usbmodem_table.sh create-table
+		;;
+	*)
+		SkipThisProject
+		return
+		;;
+esac

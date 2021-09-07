@@ -1,0 +1,12 @@
+#!/bin/bash
+
+. ${ScriptsDir}/include/exports
+
+if [ "linux-2.6.32" != "${SYNO_KERNEL_VERSION}" ]; then
+       SkipThisProject
+       return
+fi
+
+cryptodev_module="`find . -name cryptodev.ko`"
+
+[ -e "${cryptodev_module}" ] && install -Dm 755 "${cryptodev_module}" ${TmpInstDir}/lib/modules/cryptodev.ko
