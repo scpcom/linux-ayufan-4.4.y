@@ -1,8 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-
-
+ 
 #include "dm.h"
 
 #include <linux/module.h>
@@ -23,16 +19,13 @@
 #define KEYS_PER_NODE (NODE_SIZE / sizeof(sector_t))
 #define CHILDREN_PER_NODE (KEYS_PER_NODE + 1)
 
-
-
 struct dm_table {
 	struct mapped_device *md;
 	atomic_t holders;
 	unsigned type;
 
-	
 	unsigned int depth;
-	unsigned int counts[MAX_DEPTH];	
+	unsigned int counts[MAX_DEPTH];	 
 	sector_t *index[MAX_DEPTH];
 
 	unsigned int num_targets;
@@ -40,19 +33,15 @@ struct dm_table {
 	sector_t *highs;
 	struct dm_target *targets;
 
-	
 	fmode_t mode;
 
-	
 	struct list_head devices;
 
-	
 	void (*event_fn)(void *);
 	void *event_context;
 
 	struct dm_md_mempools *mempools;
 };
-
 
 static unsigned int int_log(unsigned int n, unsigned int base)
 {
@@ -66,19 +55,16 @@ static unsigned int int_log(unsigned int n, unsigned int base)
 	return result;
 }
 
-
 static inline unsigned int get_child(unsigned int n, unsigned int k)
 {
 	return (n * CHILDREN_PER_NODE) + k;
 }
-
 
 static inline sector_t *get_node(struct dm_table *t,
 				 unsigned int l, unsigned int n)
 {
 	return t->index[l] + (n * KEYS_PER_NODE);
 }
-
 
 static sector_t high(struct dm_table *t, unsigned int l, unsigned int n)
 {
@@ -90,7 +76,6 @@ static sector_t high(struct dm_table *t, unsigned int l, unsigned int n)
 
 	return get_node(t, l, n)[KEYS_PER_NODE - 1];
 }
-
 
 static int setup_btree_index(unsigned int l, struct dm_table *t)
 {
@@ -112,7 +97,6 @@ void *dm_vcalloc(unsigned long nmemb, unsigned long elem_size)
 	unsigned long size;
 	void *addr;
 
-	
 	if (nmemb > (ULONG_MAX / elem_size))
 		return NULL;
 
@@ -124,14 +108,12 @@ void *dm_vcalloc(unsigned long nmemb, unsigned long elem_size)
 	return addr;
 }
 
-
 static int alloc_targets(struct dm_table *t, unsigned int num)
 {
 	sector_t *n_highs;
 	struct dm_target *n_targets;
 	int n = t->num_targets;
 
-	
 	n_highs = (sector_t *) dm_vcalloc(num + 1, sizeof(struct dm_target) +
 					  sizeof(sector_t));
 	if (!n_highs)
@@ -203,11 +185,9 @@ void dm_table_destroy(struct dm_table *t)
 		msleep(1);
 	smp_mb();
 
-	
 	if (t->depth >= 2)
 		vfree(t->index[t->depth - 2]);
 
-	
 	for (i = 0; i < t->num_targets; i++) {
 		struct dm_target *tgt = t->targets + i;
 
@@ -219,7 +199,6 @@ void dm_table_destroy(struct dm_table *t)
 
 	vfree(t->highs);
 
-	
 	if (t->devices.next != &t->devices)
 		free_devices(&t->devices);
 
@@ -242,7 +221,6 @@ void dm_table_put(struct dm_table *t)
 	atomic_dec(&t->holders);
 }
 
-
 static inline int check_space(struct dm_table *t)
 {
 	if (t->num_targets >= t->num_allocated)
@@ -250,7 +228,6 @@ static inline int check_space(struct dm_table *t)
 
 	return 0;
 }
-
 
 static struct dm_dev_internal *find_device(struct list_head *l, dev_t dev)
 {
@@ -262,7 +239,6 @@ static struct dm_dev_internal *find_device(struct list_head *l, dev_t dev)
 
 	return NULL;
 }
-
 
 static int open_dev(struct dm_dev_internal *d, dev_t dev,
 		    struct mapped_device *md)
@@ -285,7 +261,6 @@ static int open_dev(struct dm_dev_internal *d, dev_t dev,
 	return r;
 }
 
-
 static void close_dev(struct dm_dev_internal *d, struct mapped_device *md)
 {
 	if (!d->dm_dev.bdev)
@@ -295,7 +270,6 @@ static void close_dev(struct dm_dev_internal *d, struct mapped_device *md)
 	blkdev_put(d->dm_dev.bdev, d->dm_dev.mode);
 	d->dm_dev.bdev = NULL;
 }
-
 
 static int device_area_is_invalid(struct dm_target *ti, struct dm_dev *dev,
 				  sector_t start, sector_t len, void *data)
@@ -345,7 +319,6 @@ static int device_area_is_invalid(struct dm_target *ti, struct dm_dev *dev,
 	return 0;
 }
 
-
 static int upgrade_mode(struct dm_dev_internal *dd, fmode_t new_mode,
 			struct mapped_device *md)
 {
@@ -367,7 +340,6 @@ static int upgrade_mode(struct dm_dev_internal *dd, fmode_t new_mode,
 	return 0;
 }
 
-
 static int __table_get_device(struct dm_table *t, struct dm_target *ti,
 			      const char *path, sector_t start, sector_t len,
 			      fmode_t mode, struct dm_dev **result)
@@ -380,12 +352,12 @@ static int __table_get_device(struct dm_table *t, struct dm_target *ti,
 	BUG_ON(!t);
 
 	if (sscanf(path, "%u:%u", &major, &minor) == 2) {
-		
+		 
 		dev = MKDEV(major, minor);
 		if (MAJOR(dev) != major || MINOR(dev) != minor)
 			return -EOVERFLOW;
 	} else {
-		
+		 
 		struct block_device *bdev = lookup_bdev(path);
 
 		if (IS_ERR(bdev))
@@ -424,7 +396,6 @@ static int __table_get_device(struct dm_table *t, struct dm_target *ti,
 	return 0;
 }
 
-
 #define min_not_zero(l, r) (l == 0) ? r : ((r == 0) ? l : min(l, r))
 
 int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
@@ -451,8 +422,6 @@ int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 		       q->limits.alignment_offset,
 		       (unsigned long long) start << SECTOR_SHIFT);
 
-	
-
 	if (q->merge_bvec_fn && !ti->type->merge)
 		limits->max_sectors =
 			min_not_zero(limits->max_sectors,
@@ -468,7 +437,6 @@ int dm_get_device(struct dm_target *ti, const char *path, sector_t start,
 				  start, len, mode, result);
 }
 
-
 void dm_put_device(struct dm_target *ti, struct dm_dev *d)
 {
 	struct dm_dev_internal *dd = container_of(d, struct dm_dev_internal,
@@ -481,7 +449,6 @@ void dm_put_device(struct dm_target *ti, struct dm_dev *d)
 	}
 }
 
-
 static int adjoin(struct dm_table *table, struct dm_target *ti)
 {
 	struct dm_target *prev;
@@ -492,7 +459,6 @@ static int adjoin(struct dm_table *table, struct dm_target *ti)
 	prev = &table->targets[table->num_targets - 1];
 	return (ti->begin == (prev->begin + prev->len));
 }
-
 
 static char **realloc_argv(unsigned *array_size, char **old_argv)
 {
@@ -509,7 +475,6 @@ static char **realloc_argv(unsigned *array_size, char **old_argv)
 	kfree(old_argv);
 	return argv;
 }
-
 
 int dm_split_args(int *argc, char ***argvp, char *input)
 {
@@ -530,17 +495,15 @@ int dm_split_args(int *argc, char ***argvp, char *input)
 	while (1) {
 		start = end;
 
-		
 		while (*start && isspace(*start))
 			start++;
 
 		if (!*start)
-			break;	
+			break;	 
 
-		
 		end = out = start;
 		while (*end) {
-			
+			 
 			if (*end == '\\' && *(end + 1)) {
 				*out++ = *(end + 1);
 				end += 2;
@@ -548,23 +511,20 @@ int dm_split_args(int *argc, char ***argvp, char *input)
 			}
 
 			if (isspace(*end))
-				break;	
+				break;	 
 
 			*out++ = *end++;
 		}
 
-		
 		if ((*argc + 1) > array_size) {
 			argv = realloc_argv(&array_size, argv);
 			if (!argv)
 				return -ENOMEM;
 		}
 
-		
 		if (*end)
 			end++;
 
-		
 		*out = '\0';
 		argv[*argc] = start;
 		(*argc)++;
@@ -574,40 +534,34 @@ int dm_split_args(int *argc, char ***argvp, char *input)
 	return 0;
 }
 
-
 static int validate_hardware_logical_block_alignment(struct dm_table *table,
 						 struct queue_limits *limits)
 {
-	
+	 
 	unsigned short device_logical_block_size_sects =
 		limits->logical_block_size >> SECTOR_SHIFT;
 
-	
 	unsigned short next_target_start = 0;
 
-	
 	unsigned short remaining = 0;
 
 	struct dm_target *uninitialized_var(ti);
 	struct queue_limits ti_limits;
 	unsigned i = 0;
 
-	
 	while (i < dm_table_get_num_targets(table)) {
 		ti = dm_table_get_target(table, i++);
 
 		blk_set_default_limits(&ti_limits);
 
-		
 		if (ti->type->iterate_devices)
 			ti->type->iterate_devices(ti, dm_set_device_limits,
 						  &ti_limits);
 
-		
 		if (remaining < ti->len &&
 		    remaining & ((ti_limits.logical_block_size >>
 				  SECTOR_SHIFT) - 1))
-			break;	
+			break;	 
 
 		next_target_start =
 		    (unsigned short) ((next_target_start + ti->len) &
@@ -659,7 +613,6 @@ int dm_table_add_target(struct dm_table *t, const char *type,
 	tgt->len = len;
 	tgt->error = "Unknown error";
 
-	
 	if (!adjoin(t, tgt)) {
 		tgt->error = "Gap in table";
 		r = -EINVAL;
@@ -678,12 +631,6 @@ int dm_table_add_target(struct dm_table *t, const char *type,
 		goto bad;
 
 	t->highs[t->num_targets++] = tgt->begin + tgt->len - 1;
-
-#ifdef MY_ABC_HERE
-	if (tgt->type->lvinfoset){
-		tgt->type->lvinfoset(tgt);
-	}
-#endif
 
 	return 0;
 
@@ -716,14 +663,13 @@ int dm_table_set_type(struct dm_table *t)
 	}
 
 	if (bio_based) {
-		
+		 
 		t->type = DM_TYPE_BIO_BASED;
 		return 0;
 	}
 
-	BUG_ON(!request_based); 
+	BUG_ON(!request_based);  
 
-	
 	devices = dm_table_get_devices(t);
 	list_for_each_entry(dd, devices, list) {
 		if (!blk_queue_stackable(bdev_get_queue(dd->dm_dev.bdev))) {
@@ -733,7 +679,6 @@ int dm_table_set_type(struct dm_table *t)
 		}
 	}
 
-	
 	if (t->num_targets > 1) {
 		DMWARN("Request-based dm doesn't support multiple targets yet");
 		return -EINVAL;
@@ -787,7 +732,6 @@ static int setup_indexes(struct dm_table *t)
 	unsigned int total = 0;
 	sector_t *indexes;
 
-	
 	for (i = t->depth - 2; i >= 0; i--) {
 		t->counts[i] = dm_div_up(t->counts[i + 1], CHILDREN_PER_NODE);
 		total += t->counts[i];
@@ -797,7 +741,6 @@ static int setup_indexes(struct dm_table *t)
 	if (!indexes)
 		return -ENOMEM;
 
-	
 	for (i = t->depth - 2; i >= 0; i--) {
 		t->index[i] = indexes;
 		indexes += (KEYS_PER_NODE * t->counts[i]);
@@ -807,17 +750,14 @@ static int setup_indexes(struct dm_table *t)
 	return 0;
 }
 
-
 int dm_table_complete(struct dm_table *t)
 {
 	int r = 0;
 	unsigned int leaf_nodes;
 
-	
 	leaf_nodes = dm_div_up(t->num_targets, KEYS_PER_NODE);
 	t->depth = 1 + int_log(leaf_nodes, CHILDREN_PER_NODE);
 
-	
 	t->counts[t->depth - 1] = leaf_nodes;
 	t->index[t->depth - 1] = t->highs;
 
@@ -839,7 +779,7 @@ void dm_table_event_callback(struct dm_table *t,
 
 void dm_table_event(struct dm_table *t)
 {
-	
+	 
 	BUG_ON(in_interrupt());
 
 	mutex_lock(&_event_lock);
@@ -861,7 +801,6 @@ struct dm_target *dm_table_get_target(struct dm_table *t, unsigned int index)
 	return t->targets + index;
 }
 
-
 struct dm_target *dm_table_find_target(struct dm_table *t, sector_t sector)
 {
 	unsigned int l, n = 0, k = 0;
@@ -878,7 +817,6 @@ struct dm_target *dm_table_find_target(struct dm_table *t, sector_t sector)
 
 	return &t->targets[(KEYS_PER_NODE * n) + k];
 }
-
 
 int dm_calculate_queue_limits(struct dm_table *table,
 			      struct queue_limits *limits)
@@ -897,21 +835,18 @@ int dm_calculate_queue_limits(struct dm_table *table,
 		if (!ti->type->iterate_devices)
 			goto combine_limits;
 
-		
 		ti->type->iterate_devices(ti, dm_set_device_limits,
 					  &ti_limits);
 
-		
 		if (ti->type->io_hints)
 			ti->type->io_hints(ti, &ti_limits);
 
-		
 		if (ti->type->iterate_devices(ti, device_area_is_invalid,
 					      &ti_limits))
 			return -EINVAL;
 
 combine_limits:
-		
+		 
 		if (blk_stack_limits(limits, &ti_limits, 0) < 0)
 			DMWARN("%s: adding target device "
 			       "(start sect %llu len %llu) "
@@ -923,7 +858,6 @@ combine_limits:
 
 	return validate_hardware_logical_block_alignment(table, limits);
 }
-
 
 static void dm_table_set_integrity(struct dm_table *t)
 {
@@ -963,7 +897,7 @@ no_integrity:
 void dm_table_set_restrictions(struct dm_table *t, struct request_queue *q,
 			       struct queue_limits *limits)
 {
-	
+	 
 	q->limits = *limits;
 
 	if (limits->no_cluster)
@@ -973,7 +907,6 @@ void dm_table_set_restrictions(struct dm_table *t, struct request_queue *q,
 
 	dm_table_set_integrity(t);
 
-	
 	smp_mb();
 	if (dm_table_request_based(t))
 		queue_flag_set_unlocked(QUEUE_FLAG_STACKABLE, q);

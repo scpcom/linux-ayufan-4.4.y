@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
+ 
 #ifndef _SOCK_H
 #define _SOCK_H
 
@@ -13,7 +13,7 @@
 #include <linux/module.h>
 #include <linux/lockdep.h>
 #include <linux/netdevice.h>
-#include <linux/skbuff.h>	
+#include <linux/skbuff.h>	 
 #include <linux/mm.h>
 #include <linux/security.h>
 
@@ -25,33 +25,23 @@
 #include <net/dst.h>
 #include <net/checksum.h>
 
-
-
-
 #define SOCK_DEBUGGING
 #ifdef SOCK_DEBUGGING
 #define SOCK_DEBUG(sk, msg...) do { if ((sk) && sock_flag((sk), SOCK_DBG)) \
 					printk(KERN_DEBUG msg); } while (0)
 #else
-
+ 
 static void inline int __attribute__ ((format (printf, 2, 3)))
 SOCK_DEBUG(struct sock *sk, const char *msg, ...)
 {
 }
 #endif
 
-#ifdef CONFIG_SYNO_PLX_PORTING
-
-
-
-#endif
-
-
 typedef struct {
 	spinlock_t		slock;
 	int			owned;
 	wait_queue_head_t	wq;
-	
+	 
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
 	struct lockdep_map dep_map;
 #endif
@@ -61,9 +51,8 @@ struct sock;
 struct proto;
 struct net;
 
-
 struct sock_common {
-	
+	 
 	union {
 		struct hlist_node	skc_node;
 		struct hlist_nulls_node skc_nulls_node;
@@ -82,9 +71,8 @@ struct sock_common {
 #endif
 };
 
-
 struct sock {
-	
+	 
 	struct sock_common	__sk_common;
 #define sk_node			__sk_common.skc_node
 #define sk_nulls_node		__sk_common.skc_nulls_node
@@ -108,7 +96,7 @@ struct sock {
 	kmemcheck_bitfield_end(flags);
 	int			sk_rcvbuf;
 	socket_lock_t		sk_lock;
-	
+	 
 	struct {
 		struct sk_buff *head;
 		struct sk_buff *tail;
@@ -174,7 +162,7 @@ struct sock {
 	void			*sk_security;
 #endif
 	__u32			sk_mark;
-	
+	 
 	void			(*sk_state_change)(struct sock *sk);
 	void			(*sk_data_ready)(struct sock *sk, int bytes);
 	void			(*sk_write_space)(struct sock *sk);
@@ -183,7 +171,6 @@ struct sock {
 						  struct sk_buff *skb);  
 	void                    (*sk_destruct)(struct sock *sk);
 };
-
 
 static inline struct sock *__sk_head(const struct hlist_head *head)
 {
@@ -254,13 +241,10 @@ static __inline__ int __sk_del_node_init(struct sock *sk)
 	return 0;
 }
 
-
-
 static inline void sock_hold(struct sock *sk)
 {
 	atomic_inc(&sk->sk_refcnt);
 }
-
 
 static inline void __sock_put(struct sock *sk)
 {
@@ -272,7 +256,7 @@ static __inline__ int sk_del_node_init(struct sock *sk)
 	int rc = __sk_del_node_init(sk);
 
 	if (rc) {
-		
+		 
 		WARN_ON(atomic_read(&sk->sk_refcnt) == 1);
 		__sock_put(sk);
 	}
@@ -293,7 +277,7 @@ static __inline__ int sk_nulls_del_node_init_rcu(struct sock *sk)
 	int rc = __sk_nulls_del_node_init_rcu(sk);
 
 	if (rc) {
-		
+		 
 		WARN_ON(atomic_read(&sk->sk_refcnt) == 1);
 		__sock_put(sk);
 	}
@@ -353,7 +337,6 @@ static __inline__ void sk_add_bind_node(struct sock *sk,
 #define sk_for_each_bound(__sk, node, list) \
 	hlist_for_each_entry(__sk, node, list, sk_bind_node)
 
-
 enum sock_flags {
 	SOCK_DEAD,
 	SOCK_DONE,
@@ -364,19 +347,19 @@ enum sock_flags {
 	SOCK_BROADCAST,
 	SOCK_TIMESTAMP,
 	SOCK_ZAPPED,
-	SOCK_USE_WRITE_QUEUE, 
-	SOCK_DBG, 
-	SOCK_RCVTSTAMP, 
-	SOCK_RCVTSTAMPNS, 
-	SOCK_LOCALROUTE, 
-	SOCK_QUEUE_SHRUNK, 
-	SOCK_TIMESTAMPING_TX_HARDWARE,  
-	SOCK_TIMESTAMPING_TX_SOFTWARE,  
-	SOCK_TIMESTAMPING_RX_HARDWARE,  
-	SOCK_TIMESTAMPING_RX_SOFTWARE,  
-	SOCK_TIMESTAMPING_SOFTWARE,     
-	SOCK_TIMESTAMPING_RAW_HARDWARE, 
-	SOCK_TIMESTAMPING_SYS_HARDWARE, 
+	SOCK_USE_WRITE_QUEUE,  
+	SOCK_DBG,  
+	SOCK_RCVTSTAMP,  
+	SOCK_RCVTSTAMPNS,  
+	SOCK_LOCALROUTE,  
+	SOCK_QUEUE_SHRUNK,  
+	SOCK_TIMESTAMPING_TX_HARDWARE,   
+	SOCK_TIMESTAMPING_TX_SOFTWARE,   
+	SOCK_TIMESTAMPING_RX_HARDWARE,   
+	SOCK_TIMESTAMPING_RX_SOFTWARE,   
+	SOCK_TIMESTAMPING_SOFTWARE,      
+	SOCK_TIMESTAMPING_RAW_HARDWARE,  
+	SOCK_TIMESTAMPING_SYS_HARDWARE,  
 #ifdef CONFIG_SYNO_PLX_PORTING
 	SOCK_ZCC,
 #endif
@@ -417,7 +400,6 @@ static inline int sk_acceptq_is_full(struct sock *sk)
 	return sk->sk_ack_backlog > sk->sk_max_ack_backlog;
 }
 
-
 static inline int sk_stream_min_wspace(struct sock *sk)
 {
 	return sk->sk_wmem_queued >> 1;
@@ -434,7 +416,6 @@ static inline int sk_stream_memory_free(struct sock *sk)
 {
 	return sk->sk_wmem_queued < sk->sk_sndbuf;
 }
-
 
 static inline void sk_add_backlog(struct sock *sk, struct sk_buff *skb)
 {
@@ -476,7 +457,6 @@ struct request_sock_ops;
 struct timewait_sock_ops;
 struct inet_hashinfo;
 struct raw_hashinfo;
-
 
 struct proto {
 	void			(*close)(struct sock *sk, 
@@ -527,21 +507,18 @@ struct proto {
 	int			(*backlog_rcv) (struct sock *sk, 
 						struct sk_buff *skb);
 
-	
 	void			(*hash)(struct sock *sk);
 	void			(*unhash)(struct sock *sk);
 	int			(*get_port)(struct sock *sk, unsigned short snum);
 
-	
 #ifdef CONFIG_PROC_FS
 	unsigned int		inuse_idx;
 #endif
 
-	
 	void			(*enter_memory_pressure)(struct sock *sk);
-	atomic_t		*memory_allocated;	
-	struct percpu_counter	*sockets_allocated;	
-	
+	atomic_t		*memory_allocated;	 
+	struct percpu_counter	*sockets_allocated;	 
+	 
 	int			*memory_pressure;
 	int			*sysctl_mem;
 	int			*sysctl_wmem;
@@ -595,14 +572,14 @@ static inline void sk_refcnt_debug_release(const struct sock *sk)
 		printk(KERN_DEBUG "Destruction of the %s socket %p delayed, refcnt=%d\n",
 		       sk->sk_prot->name, sk, atomic_read(&sk->sk_refcnt));
 }
-#else 
+#else  
 #define sk_refcnt_debug_inc(sk) do { } while (0)
 #define sk_refcnt_debug_dec(sk) do { } while (0)
 #define sk_refcnt_debug_release(sk) do { } while (0)
-#endif 
+#endif  
 
 #ifdef CONFIG_PROC_FS
-
+ 
 extern void sock_prot_inuse_add(struct net *net, struct proto *prot, int inc);
 extern int sock_prot_inuse_get(struct net *net, struct proto *proto);
 #else
@@ -612,16 +589,13 @@ static void inline sock_prot_inuse_add(struct net *net, struct proto *prot,
 }
 #endif
 
-
 static inline void __sk_prot_rehash(struct sock *sk)
 {
 	sk->sk_prot->unhash(sk);
 	sk->sk_prot->hash(sk);
 }
 
-
 #define SOCK_DESTROY_TIME (10*HZ)
-
 
 #define PROT_SOCK	1024
 
@@ -633,7 +607,6 @@ static inline void __sk_prot_rehash(struct sock *sk)
 #define SOCK_RCVBUF_LOCK	2
 #define SOCK_BINDADDR_LOCK	4
 #define SOCK_BINDPORT_LOCK	8
-
 
 struct sock_iocb {
 	struct list_head	list;
@@ -672,7 +645,6 @@ static inline struct inode *SOCK_INODE(struct socket *socket)
 	return &container_of(socket, struct socket_alloc, socket)->vfs_inode;
 }
 
-
 extern int __sk_mem_schedule(struct sock *sk, int size, int kind);
 extern void __sk_mem_reclaim(struct sock *sk);
 
@@ -688,7 +660,7 @@ static inline int sk_mem_pages(int amt)
 
 static inline int sk_has_account(struct sock *sk)
 {
-	
+	 
 	return !!sk->sk_prot->memory_allocated;
 }
 
@@ -746,9 +718,7 @@ static inline void sk_wmem_free_skb(struct sock *sk, struct sk_buff *skb)
 	__kfree_skb(skb);
 }
 
-
 #define sock_owned_by_user(sk)	((sk)->sk_lock.owned)
-
 
 #ifdef CONFIG_SYNO_PLX_PORTING
 #define sock_lock_init_class_and_name(sk, sname, skey, name, key) 	\
@@ -775,9 +745,6 @@ do {									\
 	lockdep_init_map(&(sk)->sk_lock.dep_map, (name), (key), 0);	\
 } while (0)
 #endif
-#ifdef CONFIG_SYNO_PLX_PORTING
-
-#endif
 
 extern void lock_sock_nested(struct sock *sk, int subclass);
 
@@ -787,7 +754,6 @@ static inline void lock_sock(struct sock *sk)
 }
 
 extern void release_sock(struct sock *sk);
-
 
 #ifdef CONFIG_SYNO_PLX_PORTING
 #define bh_lock_wsock(_sk) do { \
@@ -802,37 +768,11 @@ extern void release_sock(struct sock *sk);
 		} while (unlikely(!spin_trylock(&(_sk)->sk_lock.slock))); \
 	} \
 } while(0)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
 #define bh_lock_wsock_nested(_sk) bh_lock_wsock(_sk)
-
-
-
-
-
+ 
 #define bh_unlock_wsock(_sk) spin_unlock(&(_sk)->sk_lock.slock)
-
-
-
-
-
-
-
+ 
 #define wspin_lock_bh(_lock) do { \
 	if (unlikely(!spin_trylock_bh((_lock)))) { \
 		unsigned long end = jiffies + HZ; \
@@ -845,38 +785,13 @@ extern void release_sock(struct sock *sk);
 		} while (unlikely(!spin_trylock_bh((_lock)))); \
 	} \
 } while(0)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
 #define wspin_unlock_bh(_lock) spin_unlock_bh((_lock))
-
-
-
-
-
+ 
 #define wspin_unlock(_lock) spin_unlock((_lock))
-
-
-
-
-
+ 
 #define wspin_trylock(_lock) spin_trylock((_lock))
-
-
-
-
+ 
 #else
 #define bh_lock_sock(__sk)	spin_lock(&((__sk)->sk_lock.slock))
 #define bh_lock_sock_nested(__sk) \
@@ -923,7 +838,6 @@ extern void *sock_kmalloc(struct sock *sk, int size,
 extern void sock_kfree_s(struct sock *sk, void *mem, int size);
 extern void sk_send_sigurg(struct sock *sk);
 
-
 extern int                      sock_no_bind(struct socket *, 
 					     struct sockaddr *, int);
 extern int                      sock_no_connect(struct socket *,
@@ -956,7 +870,6 @@ extern ssize_t			sock_no_sendpage(struct socket *sock,
 						int offset, size_t size, 
 						int flags);
 
-
 extern int sock_common_getsockopt(struct socket *sock, int level, int optname,
 				  char __user *optval, int __user *optlen);
 extern int sock_common_recvmsg(struct kiocb *iocb, struct socket *sock,
@@ -970,12 +883,7 @@ extern int compat_sock_common_setsockopt(struct socket *sock, int level,
 
 extern void sk_common_release(struct sock *sk);
 
-
- 
-
 extern void sock_init_data(struct socket *sock, struct sock *sk);
-
-
 
 static inline void sk_filter_release(struct sk_filter *fp)
 {
@@ -997,9 +905,6 @@ static inline void sk_filter_charge(struct sock *sk, struct sk_filter *fp)
 	atomic_add(sk_filter_len(fp), &sk->sk_omem_alloc);
 }
 
-
-
-
 static inline void sock_put(struct sock *sk)
 {
 	if (atomic_dec_and_test(&sk->sk_refcnt))
@@ -1013,7 +918,6 @@ static inline void sk_set_socket(struct sock *sk, struct socket *sock)
 {
 	sk->sk_socket = sock;
 }
-
 
 static inline void sock_orphan(struct sock *sk)
 {
@@ -1126,51 +1030,44 @@ static inline int skb_copy_to_page(struct sock *sk, char __user *from,
 	return 0;
 }
 
-
 static inline int sk_wmem_alloc_get(const struct sock *sk)
 {
 	return atomic_read(&sk->sk_wmem_alloc) - 1;
 }
-
 
 static inline int sk_rmem_alloc_get(const struct sock *sk)
 {
 	return atomic_read(&sk->sk_rmem_alloc);
 }
 
-
 static inline int sk_has_allocations(const struct sock *sk)
 {
 	return sk_wmem_alloc_get(sk) || sk_rmem_alloc_get(sk);
 }
 
-
 static inline int sk_has_sleeper(struct sock *sk)
 {
-	
+	 
 	smp_mb__after_lock();
 	return sk->sk_sleep && waitqueue_active(sk->sk_sleep);
 }
-
 
 static inline void sock_poll_wait(struct file *filp,
 		wait_queue_head_t *wait_address, poll_table *p)
 {
 	if (p && wait_address) {
 		poll_wait(filp, wait_address, p);
-		
+		 
 		smp_mb();
 	}
 }
-
-
 
 static inline void skb_set_owner_w(struct sk_buff *skb, struct sock *sk)
 {
 	skb_orphan(skb);
 	skb->sk = sk;
 	skb->destructor = sock_wfree;
-	
+	 
 	atomic_add(skb->truesize, &sk->sk_wmem_alloc);
 }
 
@@ -1192,7 +1089,7 @@ extern int sock_queue_rcv_skb(struct sock *sk, struct sk_buff *skb);
 
 static inline int sock_queue_err_skb(struct sock *sk, struct sk_buff *skb)
 {
-	
+	 
 	if (atomic_read(&sk->sk_rmem_alloc) + skb->truesize >=
 	    (unsigned)sk->sk_rcvbuf)
 		return -ENOMEM;
@@ -1203,8 +1100,6 @@ static inline int sock_queue_err_skb(struct sock *sk, struct sk_buff *skb)
 	return 0;
 }
 
-
- 
 static inline int sock_error(struct sock *sk)
 {
 	int err;
@@ -1257,7 +1152,6 @@ static inline struct page *sk_stream_alloc_page(struct sock *sk)
 	return page;
 }
 
-
 static inline int sock_writeable(const struct sock *sk) 
 {
 	return atomic_read(&sk->sk_wmem_alloc) < (sk->sk_sndbuf >> 1);
@@ -1283,7 +1177,6 @@ static inline int sock_rcvlowat(const struct sock *sk, int waitall, int len)
 	return (waitall ? len : min_t(int, sk->sk_rcvlowat, len)) ? : 1;
 }
 
-
 static inline int sock_intr_errno(long timeo)
 {
 	return timeo == MAX_SCHEDULE_TIMEOUT ? -ERESTARTSYS : -EINTR;
@@ -1298,7 +1191,6 @@ sock_recv_timestamp(struct msghdr *msg, struct sock *sk, struct sk_buff *skb)
 	ktime_t kt = skb->tstamp;
 	struct skb_shared_hwtstamps *hwtstamps = skb_hwtstamps(skb);
 
-	
 	if (sock_flag(sk, SOCK_RCVTSTAMP) ||
 	    sock_flag(sk, SOCK_TIMESTAMPING_RX_SOFTWARE) ||
 	    (kt.tv64 && sock_flag(sk, SOCK_TIMESTAMPING_SOFTWARE)) ||
@@ -1311,11 +1203,9 @@ sock_recv_timestamp(struct msghdr *msg, struct sock *sk, struct sk_buff *skb)
 		sk->sk_stamp = kt;
 }
 
-
 extern int sock_tx_timestamp(struct msghdr *msg,
 			     struct sock *sk,
 			     union skb_shared_tx *shtx);
-
 
 #ifdef CONFIG_NET_DMA
 static inline void sk_eat_skb(struct sock *sk, struct sk_buff *skb, int copied_early)
@@ -1352,7 +1242,6 @@ void sock_net_set(struct sock *sk, struct net *net)
 #endif
 }
 
-
 static inline void sk_change_net(struct sock *sk, struct net *net)
 {
 	put_net(sock_net(sk));
@@ -1375,7 +1264,6 @@ extern void sock_enable_timestamp(struct sock *sk, int flag);
 extern int sock_get_timestamp(struct sock *, struct timeval __user *);
 extern int sock_get_timestampns(struct sock *, struct timespec __user *);
 
-
 extern int net_msg_warn;
 #define NETDEBUG(fmt, args...) \
 	do { if (net_msg_warn) printk(fmt,##args); } while (0)
@@ -1393,4 +1281,4 @@ extern int sysctl_optmem_max;
 extern __u32 sysctl_wmem_default;
 extern __u32 sysctl_rmem_default;
 
-#endif	
+#endif	 

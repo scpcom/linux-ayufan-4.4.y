@@ -1,8 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #ifndef _MD_MD_H
 #define _MD_MD_H
 
@@ -42,16 +41,15 @@ typedef struct _tag_SYNO_WAKEUP_DEVICE_WORK{
 } SYNO_WAKEUP_DEVICE_WORK;
 #endif
 
-
 struct mdk_rdev_s
 {
-	struct list_head same_set;	
+	struct list_head same_set;	 
 
-	sector_t sectors;		
-	mddev_t *mddev;			
-	int last_events;		
+	sector_t sectors;		 
+	mddev_t *mddev;			 
+	int last_events;		 
 
-	struct block_device *bdev;	
+	struct block_device *bdev;	 
 
 	struct page	*sb_page;
 #ifdef MY_ABC_HERE
@@ -59,41 +57,39 @@ struct mdk_rdev_s
 #endif
 	int		sb_loaded;
 	__u64		sb_events;
-	sector_t	data_offset;	
-	sector_t 	sb_start;	
-	int		sb_size;	
-	int		preferred_minor;	
+	sector_t	data_offset;	 
+	sector_t 	sb_start;	 
+	int		sb_size;	 
+	int		preferred_minor;	 
 
 	struct kobject	kobj;
 
-	
-
 	unsigned long	flags;
-#define	Faulty		1		
-#define	In_sync		2		
-#define	WriteMostly	4		
-#define	BarriersNotsupp	5		
-#define	AllReserved	6		
-#define	AutoDetected	7		
-#define Blocked		8		
-#define StateChanged	9		
+#define	Faulty		1		 
+#define	In_sync		2		 
+#define	WriteMostly	4		 
+#define	BarriersNotsupp	5		 
+#define	AllReserved	6		 
+#define	AutoDetected	7		 
+#define Blocked		8		 
+#define StateChanged	9		 
 #ifdef MY_ABC_HERE
-#define DiskError	10		
-#endif 
+#define DiskError	10		 
+#endif  
 
 	wait_queue_head_t blocked_wait;
 
-	int desc_nr;			
-	int raid_disk;			
-	int saved_raid_disk;		
-	sector_t	recovery_offset;
+	int desc_nr;			 
+	int raid_disk;			 
+	int saved_raid_disk;		 
+	sector_t	recovery_offset; 
 
-	atomic_t	nr_pending;	
-	atomic_t	read_errors;	
-	atomic_t	corrected_errors; 
-	struct work_struct del_work;	
+	atomic_t	nr_pending;	 
+	atomic_t	read_errors;	 
+	atomic_t	corrected_errors;  
+	struct work_struct del_work;	 
 
-	struct sysfs_dirent *sysfs_state; 
+	struct sysfs_dirent *sysfs_state;  
 };
 
 struct mddev_s
@@ -104,9 +100,9 @@ struct mddev_s
 	int				md_minor;
 	struct list_head 		disks;
 	unsigned long			flags;
-#define MD_CHANGE_DEVS	0	
-#define MD_CHANGE_CLEAN 1	
-#define MD_CHANGE_PENDING 2	
+#define MD_CHANGE_DEVS	0	 
+#define MD_CHANGE_CLEAN 1	 
+#define MD_CHANGE_PENDING 2	 
 
 	int				suspended;
 	atomic_t			active_io;
@@ -119,56 +115,52 @@ struct mddev_s
 #define	UNTIL_IOCTL	1
 #define	UNTIL_STOP	2
 
-	
 	int				major_version,
 					minor_version,
 					patch_version;
 	int				persistent;
-	int 				external;	
-	char				metadata_type[17]; 
+	int 				external;	 
+	char				metadata_type[17];  
 	int				chunk_sectors;
 	time_t				ctime, utime;
 	int				level, layout;
 	char				clevel[16];
 	int				raid_disks;
 	int				max_disks;
-	sector_t			dev_sectors; 	
-	sector_t			array_sectors; 
-	int				external_size; 
+	sector_t			dev_sectors; 	 
+	sector_t			array_sectors;  
+	int				external_size;  
 	__u64				events;
 
 	char				uuid[16];
 
-	
 	sector_t			reshape_position;
 	int				delta_disks, new_level, new_layout;
 	int				new_chunk_sectors;
 
-	struct mdk_thread_s		*thread;	
-	struct mdk_thread_s		*sync_thread;	
-	sector_t			curr_resync;	
-	
+	struct mdk_thread_s		*thread;	 
+	struct mdk_thread_s		*sync_thread;	 
+	sector_t			curr_resync;	 
+	 
 	sector_t			curr_resync_completed;
-	unsigned long			resync_mark;	
-	sector_t			resync_mark_cnt;
-	sector_t			curr_mark_cnt; 
+	unsigned long			resync_mark;	 
+	sector_t			resync_mark_cnt; 
+	sector_t			curr_mark_cnt;  
 
-	sector_t			resync_max_sectors; 
+	sector_t			resync_max_sectors;  
 
-	sector_t			resync_mismatches; 
+	sector_t			resync_mismatches;  
 
-	
 	sector_t			suspend_lo;
 	sector_t			suspend_hi;
-	
+	 
 	int				sync_speed_min;
 	int				sync_speed_max;
 
-	
 	int				parallel_resync;
 
 	int				ok_start_degraded;
-	
+	 
 #define	MD_RECOVERY_RUNNING	0
 #define	MD_RECOVERY_SYNC	1
 #define	MD_RECOVERY_RECOVER	2
@@ -181,66 +173,58 @@ struct mddev_s
 #define	MD_RECOVERY_FROZEN	9
 
 	unsigned long			recovery;
-	int				recovery_disabled; 
+	int				recovery_disabled;  
 
-	int				in_sync;	
-	
+	int				in_sync;	 
+	 
 	struct mutex			open_mutex;
 	struct mutex			reconfig_mutex;
-	atomic_t			active;		
-	atomic_t			openers;	
+	atomic_t			active;		 
+	atomic_t			openers;	 
 
-	int				changed;	
-	int				degraded;	
-	int				barriers_work;	
-	struct bio			*biolist; 	
+	int				changed;	 
+	int				degraded;	 
+	int				barriers_work;	 
+	struct bio			*biolist; 	 
 
-	atomic_t			recovery_active; 
+	atomic_t			recovery_active;  
 	wait_queue_head_t		recovery_wait;
 	sector_t			recovery_cp;
-	sector_t			resync_min;	
-	sector_t			resync_max;	
+	sector_t			resync_min;	 
+	sector_t			resync_max;	 
 
-	struct sysfs_dirent		*sysfs_state;	
-	struct sysfs_dirent		*sysfs_action;  
+	struct sysfs_dirent		*sysfs_state;	 
+	struct sysfs_dirent		*sysfs_action;   
 
-	struct work_struct del_work;	
+	struct work_struct del_work;	 
 
 	spinlock_t			write_lock;
-	wait_queue_head_t		sb_wait;	
-	atomic_t			pending_writes;	
+	wait_queue_head_t		sb_wait;	 
+	atomic_t			pending_writes;	 
 
-	unsigned int			safemode;	 
+	unsigned int			safemode;	  
 	unsigned int			safemode_delay;
 	struct timer_list		safemode_timer;
 	atomic_t			writes_pending; 
-	struct request_queue		*queue;	
+	struct request_queue		*queue;	 
 
-	atomic_t                        write_behind; 
-	unsigned int                    max_write_behind; 
+	atomic_t                        write_behind;  
+	unsigned int                    max_write_behind;  
 
-	struct bitmap                   *bitmap; 
-	struct file			*bitmap_file; 
-	long				bitmap_offset; 
-	long				default_bitmap_offset; 
+	struct bitmap                   *bitmap;  
+	struct file			*bitmap_file;  
+	long				bitmap_offset;  
+	long				default_bitmap_offset;  
 	struct mutex			bitmap_mutex;
 
 	struct list_head		all_mddevs;
 #ifdef MY_ABC_HERE
-	unsigned char			blActive;  
-	spinlock_t				ActLock;   
-	unsigned long			ulLastReq; 
+	unsigned char			blActive;   
+	spinlock_t				ActLock;    
+	unsigned long			ulLastReq;  
 #endif
 #ifdef MY_ABC_HERE
-    unsigned char           nodev_and_crashed;     
-#endif
-#ifdef MY_ABC_HERE
-	unsigned char			auto_remap;     
-#endif
-#ifdef MY_ABC_HERE
-	unsigned char			force_auto_remap; 
-	void				*syno_private;	  
-	char				lv_name[16];
+    unsigned char           nodev_and_crashed;      
 #endif
 #ifdef MY_ABC_HERE
 	mempool_t			*syno_mdio_mempool;
@@ -272,12 +256,12 @@ struct mdk_personality
 	int (*run)(mddev_t *mddev);
 	int (*stop)(mddev_t *mddev);
 	void (*status)(struct seq_file *seq, mddev_t *mddev);
-	
+	 
 	void (*error_handler)(mddev_t *mddev, mdk_rdev_t *rdev);
 #ifdef MY_ABC_HERE
-	
+	 
 	void (*syno_error_handler)(mddev_t *mddev, mdk_rdev_t *rdev);
-#endif 
+#endif  
 	int (*hot_add_disk) (mddev_t *mddev, mdk_rdev_t *rdev);
 	int (*hot_remove_disk) (mddev_t *mddev, int number);
 	int (*spare_active) (mddev_t *mddev);
@@ -287,13 +271,10 @@ struct mdk_personality
 	int (*check_reshape) (mddev_t *mddev);
 	int (*start_reshape) (mddev_t *mddev);
 	void (*finish_reshape) (mddev_t *mddev);
-	
+	 
 	void (*quiesce) (mddev_t *mddev, int state);
-	
+	 
 	void *(*takeover) (mddev_t *mddev);
-#ifdef MY_ABC_HERE
-	unsigned char (*ismaxdegrade) (mddev_t *mddev);
-#endif
 };
 
 struct md_sysfs_entry {
@@ -307,10 +288,8 @@ static inline char * mdname (mddev_t * mddev)
 	return mddev->gendisk ? mddev->gendisk->disk_name : "mdX";
 }
 
-
 #define rdev_for_each_list(rdev, tmp, head)				\
 	list_for_each_entry_safe(rdev, tmp, head, same_set)
-
 
 #define rdev_for_each(rdev, tmp, mddev)				\
 	list_for_each_entry_safe(rdev, tmp, &((mddev)->disks), same_set)
@@ -395,29 +374,6 @@ extern int md_integrity_register(mddev_t *mddev);
 void md_integrity_add_rdev(mdk_rdev_t *rdev, mddev_t *mddev);
 
 #ifdef MY_ABC_HERE
-void SynoAutoRemapReport(mddev_t *mddev, sector_t sector, struct block_device *bdev);
-#endif
-
-#ifdef MY_ABC_HERE
 void SYNORaidRdevUnplug(mddev_t *mddev, mdk_rdev_t *rdev);
 #endif
-
-#ifdef MY_ABC_HERE
-void RaidRemapModeSet(struct block_device *, unsigned char);
-
-static inline void
-RaidMemberAutoRemapSet(mddev_t *mddev)
-{
-	mdk_rdev_t *rdev, *tmp;
-	char b[BDEVNAME_SIZE];
-
-	
-	rdev_for_each(rdev, tmp, mddev) {
-		bdevname(rdev->bdev,b);
-		RaidRemapModeSet(rdev->bdev, mddev->auto_remap);
-		printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, mddev->auto_remap);
-	}
-}
-#endif
-
-#endif 
+#endif  

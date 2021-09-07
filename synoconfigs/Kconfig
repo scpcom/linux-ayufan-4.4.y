@@ -6,148 +6,103 @@ config SYNO_QORIQ
 	bool "Synology P1022 porting define"
 	depends on P1022_DS
 	default y
-	help
-	  Say Y here to enable Freescale QorIQ porting codes.
 
 config SYNO_QORIQ_FSL_SATA_NRESET
 	bool "Increasing eSATA compatibility on QorIQ eSATA"
 	depends on SYNO_QORIQ
 	default y
-	help
-		Say Y here to disable software reset for ATA_DEV_ATA class
 
 config SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
 	bool "Fix wake from deepsleep fail issue"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to let wake up from deepsleep will wait for hw reset.
 
 config SYNO_QORIQ_EN_DEEP_WAKE_PIN
 	bool "Let deepsleep can wakeup by GPIO pin"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to let deepsleep can wakeup by GPIO pin
 
 config SYNO_QORIQ_ESPI_PM
 	bool "support for pm in espi device"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to support espi pm
 
 config SYNO_QORIQ_WOL_SPECIFY_PATTERN
 	bool "support for wake up from user specify pattern"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to support user specify wake up pattern
 
 config SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
 	bool "support for ignoring default gateway's ARP packet, which will wake up the machine"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to support ignoring default gateway's ARP packet.
 
 config SYNO_QORIQ_PHY_LED_SET
 	bool "support PHY LED behavior control"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to support PHY LED behavior control
 
 config SYNO_QORIQ_FIX_DISK_WAKE_BEFORE_DEEPSLEEP
 	bool "Fix disk will wakeup before deepsleep"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to let disk don't wakeup before deepsleep
 
 config SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
 	bool "Disable /proc/kmsg to prevent disk wakeup before system deepsleep, see bug <DSM> #55224"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to disable /proc/kmsg to prevent disk wakeup before system deepsleep, see bug <DSM> #55224
 
 config SYNO_QORIQ_TALITOS_PM_SUPPORT
 	bool "let talitos could support power management"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to support PM in talitos
 
 config SYNO_QORIQ_FIX_SKB_RECYCLE
 	bool "enhance gianfar's skb recycle"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to enhance gianfar's skb recycle
 
 config SYNO_QORIQ_FIX_OCF_RACE
 	bool "fix ocf race"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to fix cryptosoft race condition
 
 config SYNO_QORIQ_NO_DISABLE_NON_BOOT_CPU
 	bool "fix cannot poweroff DS with iSCSI enabled"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to fix this issue. Please not port this to new kernel
 
 config SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
 	bool "fix resume failed when wakeup from deepsleep"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to reset pci device until it resume succeed
 
 config SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
 	bool "fix resume failed when wakeup from deepsleep"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to reset pci device until it resume succeed
 
 config SYNO_QORIQ_TX_RESTART_HANG_FIX
 	bool "fix tx queue restart hang fix"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  <DSM> #73941
 
 config SYNO_SAS_ENCLOSURE_ID_CTRL
-	bool "This mechanism will help kernel to enum enclosure id control interface in sysfs"
-	depends on SCSI_ENCLOSURE && ENCLOSURE_SERVICES
-	default n
-	help
-	  Say Y here to to enum enclosure id control interface in sysfs
 
 config SYNO_NET_INIT_OPERATION
 	bool "fix the default eth0 status when booting without link"
 	depends on SYNO_QORIQ
 	default y
-	help
-	  Say Y here to fix this issue. Please not port this to new kernel
 
 config SYNO_IGNORE_NETBIOS_BROADCAST
 	default y
 	bool "Export syno_ignore_netbios_broadcast to /proc"
 	depends on GIANFAR && SYNO_QORIQ
-	help
-	  Selecting this option enables wake by NetBIOS broadcast
 
 config SYNO_MPC8533_TIMEBASE_FREQ
     int "PPC853x Timebase frequency"
     depends on SYNO_MPC8533
     default 0
-    help
-        Overwrite default timebase frequency
 
 config SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
 	bool "Choose this to bind irq/kthread on specified cpu"
@@ -158,8 +113,6 @@ config SYNO_QORIQ_DEFAULT_CPU_AFFINITY
 	depends on SYNO_QORIQ
 	depends on SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
 	default 0
-	help
-	  Specifing a cpu core to bind kernel thread
 
 config SYNO_QORIQ_GIANFAR_DROP_CACHE
 	bool "Drop cache before gianfar device start up"
@@ -172,5 +125,4 @@ config SYNO_213AIR_KERNEL_PANIC_WORK_AROUND
 
 config SYNO_DISPLAY_CPUINFO
     bool "Support display CPU Infomation"
-	help
-	  Say Y to Support display CPU Infomation
+

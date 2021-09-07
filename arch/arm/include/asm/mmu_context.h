@@ -1,4 +1,4 @@
-
+ 
 #ifndef __ASM_ARM_MMU_CONTEXT_H
 #define __ASM_ARM_MMU_CONTEXT_H
 
@@ -12,7 +12,6 @@
 void __check_kvm_seq(struct mm_struct *mm);
 
 #ifdef CONFIG_CPU_HAS_ASID
-
 
 #define ASID_BITS		8
 #define ASID_MASK		((~0) << ASID_BITS)
@@ -30,9 +29,6 @@ void __new_context(struct mm_struct *mm);
 
 static inline void check_context(struct mm_struct *mm)
 {
-#ifdef CONFIG_SYNO_PLX_PORTING
-	
-#endif
 	if (unlikely((mm->context.id ^ cpu_last_asid) >> ASID_BITS))
 		__new_context(mm);
 
@@ -58,12 +54,10 @@ static inline void check_context(struct mm_struct *mm)
 
 #define destroy_context(mm)		do { } while(0)
 
-
 static inline void
 enter_lazy_tlb(struct mm_struct *mm, struct task_struct *tsk)
 {
 }
-
 
 static inline void
 switch_mm(struct mm_struct *prev, struct mm_struct *next,
@@ -73,7 +67,7 @@ switch_mm(struct mm_struct *prev, struct mm_struct *next,
 	unsigned int cpu = smp_processor_id();
 
 #ifdef CONFIG_SMP
-	
+	 
 	if (!cpumask_empty(mm_cpumask(next)) &&
 	    !cpumask_test_cpu(cpu, mm_cpumask(next)))
 		__flush_icache_all();

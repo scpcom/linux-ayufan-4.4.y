@@ -1,7 +1,4 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-
+ 
 #ifndef __LINUX_BIO_H
 #define __LINUX_BIO_H
 
@@ -25,7 +22,6 @@
 #define BIO_MAX_SIZE		(BIO_MAX_PAGES << PAGE_CACHE_SHIFT)
 #define BIO_MAX_SECTORS		(BIO_MAX_SIZE >> 9)
 
-
 struct bio_vec {
 	struct page	*bv_page;
 	unsigned int	bv_len;
@@ -38,65 +34,56 @@ struct bio_integrity_payload;
 typedef void (bio_end_io_t) (struct bio *, int);
 typedef void (bio_destructor_t) (struct bio *);
 
-
 struct bio {
-	sector_t		bi_sector;	
-	struct bio		*bi_next;	
+	sector_t		bi_sector;	 
+	struct bio		*bi_next;	 
 	struct block_device	*bi_bdev;
-	unsigned long		bi_flags;	
-	unsigned long		bi_rw;		
+	unsigned long		bi_flags;	 
+	unsigned long		bi_rw;		 
 
-	unsigned short		bi_vcnt;	
-	unsigned short		bi_idx;		
+	unsigned short		bi_vcnt;	 
+	unsigned short		bi_idx;		 
 
-	
 	unsigned int		bi_phys_segments;
 
-	unsigned int		bi_size;	
+	unsigned int		bi_size;	 
 
-	
 	unsigned int		bi_seg_front_size;
 	unsigned int		bi_seg_back_size;
 
-	unsigned int		bi_max_vecs;	
+	unsigned int		bi_max_vecs;	 
 
-	unsigned int		bi_comp_cpu;	
+	unsigned int		bi_comp_cpu;	 
 
-	atomic_t		bi_cnt;		
+	atomic_t		bi_cnt;		 
 
-	struct bio_vec		*bi_io_vec;	
+	struct bio_vec		*bi_io_vec;	 
 
 	bio_end_io_t		*bi_end_io;
 
 	void			*bi_private;
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
-	struct bio_integrity_payload *bi_integrity;  
+	struct bio_integrity_payload *bi_integrity;   
 #endif
 
-	bio_destructor_t	*bi_destructor;	
+	bio_destructor_t	*bi_destructor;	 
 
-	
 	struct bio_vec		bi_inline_vecs[0];
 };
 
-
-#define BIO_UPTODATE	0	
-#define BIO_RW_BLOCK	1	
-#define BIO_EOF		2	
-#define BIO_SEG_VALID	3	
-#define BIO_CLONED	4	
-#define BIO_BOUNCED	5	
-#define BIO_USER_MAPPED 6	
-#define BIO_EOPNOTSUPP	7	
-#define BIO_CPU_AFFINE	8	
-#define BIO_NULL_MAPPED 9	
-#define BIO_FS_INTEGRITY 10	
-#define BIO_QUIET	11	
-#ifdef MY_ABC_HERE
-#define BIO_AUTO_REMAP	12	
-#endif
+#define BIO_UPTODATE	0	 
+#define BIO_RW_BLOCK	1	 
+#define BIO_EOF		2	 
+#define BIO_SEG_VALID	3	 
+#define BIO_CLONED	4	 
+#define BIO_BOUNCED	5	 
+#define BIO_USER_MAPPED 6	 
+#define BIO_EOPNOTSUPP	7	 
+#define BIO_CPU_AFFINE	8	 
+#define BIO_NULL_MAPPED 9	 
+#define BIO_FS_INTEGRITY 10	 
+#define BIO_QUIET	11	 
 #define bio_flagged(bio, flag)	((bio)->bi_flags & (1 << (flag)))
-
 
 #define BIO_POOL_BITS		(4)
 #define BIO_POOL_NONE		((1UL << BIO_POOL_BITS) - 1)
@@ -104,13 +91,12 @@ struct bio {
 #define BIO_POOL_MASK		(1UL << BIO_POOL_OFFSET)
 #define BIO_POOL_IDX(bio)	((bio)->bi_flags >> BIO_POOL_OFFSET)	
 
-
 enum bio_rw_flags {
 	BIO_RW,
 	BIO_RW_FAILFAST_DEV,
 	BIO_RW_FAILFAST_TRANSPORT,
 	BIO_RW_FAILFAST_DRIVER,
-	
+	 
 	BIO_RW_AHEAD,
 	BIO_RW_BARRIER,
 	BIO_RW_SYNCIO,
@@ -120,14 +106,12 @@ enum bio_rw_flags {
 	BIO_RW_NOIDLE,
 };
 
-
 #define BIO_RW_RQ_MASK		0xf
 
 static inline bool bio_rw_flagged(struct bio *bio, enum bio_rw_flags flag)
 {
 	return (bio->bi_rw & (1 << flag)) != 0;
 }
-
 
 #define BIO_PRIO_SHIFT	(8 * sizeof(unsigned long) - IOPRIO_BITS)
 #define bio_prio(bio)	((bio)->bi_rw >> BIO_PRIO_SHIFT)
@@ -138,7 +122,6 @@ static inline bool bio_rw_flagged(struct bio *bio, enum bio_rw_flags flag)
 	(bio)->bi_rw &= ((1UL << BIO_PRIO_SHIFT) - 1);		\
 	(bio)->bi_rw |= ((unsigned long) (prio) << BIO_PRIO_SHIFT);	\
 } while (0)
-
 
 #define bio_iovec_idx(bio, idx)	(&((bio)->bi_io_vec[(idx)]))
 #define bio_iovec(bio)		bio_iovec_idx((bio), (bio)->bi_idx)
@@ -152,7 +135,7 @@ static inline unsigned int bio_cur_bytes(struct bio *bio)
 {
 	if (bio->bi_vcnt)
 		return bio_iovec(bio)->bv_len;
-	else 
+	else  
 		return bio->bi_size;
 }
 
@@ -169,10 +152,8 @@ static inline int bio_has_allocated_vec(struct bio *bio)
 	return bio->bi_io_vec && bio->bi_io_vec != bio->bi_inline_vecs;
 }
 
-
 #define bio_to_phys(bio)	(page_to_phys(bio_page((bio))) + (unsigned long) bio_offset((bio)))
 #define bvec_to_phys(bv)	(page_to_phys((bv)->bv_page) + (unsigned long) (bv)->bv_offset)
-
 
 #define __bio_kmap_atomic(bio, idx, kmtype)				\
 	(kmap_atomic(bio_iovec_idx((bio), (idx))->bv_page, kmtype) +	\
@@ -180,15 +161,11 @@ static inline int bio_has_allocated_vec(struct bio *bio)
 
 #define __bio_kunmap_atomic(addr, kmtype) kunmap_atomic(addr, kmtype)
 
-
-
 #define __BVEC_END(bio)		bio_iovec_idx((bio), (bio)->bi_vcnt - 1)
 #define __BVEC_START(bio)	bio_iovec_idx((bio), (bio)->bi_idx)
 
-
 #define __BIOVEC_PHYS_MERGEABLE(vec1, vec2)	\
 	((bvec_to_phys((vec1)) + (vec1)->bv_len) == bvec_to_phys((vec2)))
-
 
 #ifndef BIOVEC_PHYS_MERGEABLE
 #define BIOVEC_PHYS_MERGEABLE(vec1, vec2)	\
@@ -204,7 +181,6 @@ static inline int bio_has_allocated_vec(struct bio *bio)
 
 #define bio_io_error(bio) bio_endio((bio), -EIO)
 
-
 #define __bio_for_each_segment(bvl, bio, i, start_idx)			\
 	for (bvl = bio_iovec_idx((bio), (start_idx)), i = (start_idx);	\
 	     i < (bio)->bi_vcnt;					\
@@ -213,30 +189,28 @@ static inline int bio_has_allocated_vec(struct bio *bio)
 #define bio_for_each_segment(bvl, bio, i)				\
 	__bio_for_each_segment(bvl, bio, i, (bio)->bi_idx)
 
-
 #define bio_get(bio)	atomic_inc(&(bio)->bi_cnt)
 
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
-
+ 
 struct bio_integrity_payload {
-	struct bio		*bip_bio;	
+	struct bio		*bip_bio;	 
 
-	sector_t		bip_sector;	
+	sector_t		bip_sector;	 
 
-	void			*bip_buf;	
-	bio_end_io_t		*bip_end_io;	
+	void			*bip_buf;	 
+	bio_end_io_t		*bip_end_io;	 
 
 	unsigned int		bip_size;
 
-	unsigned short		bip_slab;	
-	unsigned short		bip_vcnt;	
-	unsigned short		bip_idx;	
+	unsigned short		bip_slab;	 
+	unsigned short		bip_vcnt;	 
+	unsigned short		bip_idx;	 
 
-	struct work_struct	bip_work;	
-	struct bio_vec		bip_vec[0];	
+	struct work_struct	bip_work;	 
+	struct bio_vec		bip_vec[0];	 
 };
-#endif 
-
+#endif  
 
 struct bio_pair {
 	struct bio			bio1, bio2;
@@ -299,12 +273,10 @@ extern struct bio_vec *bvec_alloc_bs(gfp_t, int, unsigned long *, struct bio_set
 extern void bvec_free_bs(struct bio_set *, struct bio_vec *, unsigned int);
 extern unsigned int bvec_nr_vecs(unsigned short idx);
 
-
 static inline void bio_set_completion_cpu(struct bio *bio, unsigned int cpu)
 {
 	bio->bi_comp_cpu = cpu;
 }
-
 
 #define BIO_POOL_SIZE 2
 #define BIOVEC_NR_POOLS 6
@@ -330,17 +302,15 @@ struct biovec_slab {
 extern struct bio_set *fs_bio_set;
 extern struct biovec_slab bvec_slabs[BIOVEC_NR_POOLS] __read_mostly;
 
-
 #define BIO_SPLIT_ENTRIES 2
 
 #ifdef CONFIG_HIGHMEM
-
+ 
 static __always_inline char *bvec_kmap_irq(struct bio_vec *bvec,
 		unsigned long *flags)
 {
 	unsigned long addr;
 
-	
 	local_irq_save(*flags);
 	addr = (unsigned long) kmap_atomic(bvec->bv_page, KM_BIO_SRC_IRQ);
 
@@ -374,12 +344,10 @@ static inline char *__bio_kmap_irq(struct bio *bio, unsigned short idx,
 	__bio_kmap_irq((bio), (bio)->bi_idx, (flags))
 #define bio_kunmap_irq(buf,flags)	__bio_kunmap_irq(buf, flags)
 
-
 static inline int bio_has_data(struct bio *bio)
 {
 	return bio && bio->bi_io_vec != NULL;
 }
-
 
 struct bio_list {
 	struct bio *head;
@@ -520,7 +488,7 @@ extern int bioset_integrity_create(struct bio_set *, int);
 extern void bioset_integrity_free(struct bio_set *);
 extern void bio_integrity_init(void);
 
-#else 
+#else  
 
 #define bio_integrity(a)		(0)
 #define bioset_integrity_create(a, b)	(0)
@@ -537,7 +505,7 @@ extern void bio_integrity_init(void);
 #define bio_integrity_get_tag(a, b, c)	do { } while (0)
 #define bio_integrity_init(a)		do { } while (0)
 
-#endif 
+#endif  
 
-#endif 
-#endif 
+#endif  
+#endif  

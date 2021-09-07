@@ -1,8 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #ifndef _LINUX_DEVICE_MAPPER_H
 #define _LINUX_DEVICE_MAPPER_H
 
@@ -23,19 +22,15 @@ union map_info {
 	unsigned flush_request;
 };
 
-
 typedef int (*dm_ctr_fn) (struct dm_target *target,
 			  unsigned int argc, char **argv);
 
-
 typedef void (*dm_dtr_fn) (struct dm_target *ti);
-
 
 typedef int (*dm_map_fn) (struct dm_target *ti, struct bio *bio,
 			  union map_info *map_context);
 typedef int (*dm_map_request_fn) (struct dm_target *ti, struct request *clone,
 				  union map_info *map_context);
-
 
 typedef int (*dm_endio_fn) (struct dm_target *ti,
 			    struct bio *bio, int error,
@@ -73,16 +68,9 @@ typedef int (*dm_iterate_devices_fn) (struct dm_target *ti,
 typedef void (*dm_io_hints_fn) (struct dm_target *ti,
 				struct queue_limits *limits);
 
-
 typedef int (*dm_busy_fn) (struct dm_target *ti);
 
-#ifdef MY_ABC_HERE
-typedef void (*dm_lvinfoset_fn) (struct dm_target *ti);
-typedef sector_t (*dm_lg_sector_get_fn) (sector_t sector, struct dm_target *ti);
-#endif
-
 void dm_error(const char *message);
-
 
 int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 			 sector_t start, sector_t len, void *data);
@@ -93,14 +81,9 @@ struct dm_dev {
 	char name[16];
 };
 
-
 int dm_get_device(struct dm_target *ti, const char *path, sector_t start,
 		  sector_t len, fmode_t mode, struct dm_dev **result);
 void dm_put_device(struct dm_target *ti, struct dm_dev *d);
-
-
-
-
 
 struct target_type {
 	uint64_t features;
@@ -125,12 +108,7 @@ struct target_type {
 	dm_busy_fn busy;
 	dm_iterate_devices_fn iterate_devices;
 	dm_io_hints_fn io_hints;
-#ifdef MY_ABC_HERE
-	dm_lvinfoset_fn lvinfoset;
-	dm_lg_sector_get_fn lg_sector_get;
-#endif
 
-	
 	struct list_head list;
 };
 
@@ -138,41 +116,30 @@ struct dm_target {
 	struct dm_table *table;
 	struct target_type *type;
 
-	
 	sector_t begin;
 	sector_t len;
 
-	
 	sector_t split_io;
 
-	
 	unsigned num_flush_requests;
 
-	
 	void *private;
 
-	
 	char *error;
 };
 
 int dm_register_target(struct target_type *t);
 void dm_unregister_target(struct target_type *t);
 
-
-
-
 #define DM_ANY_MINOR (-1)
 int dm_create(int minor, struct mapped_device **md);
-
 
 struct mapped_device *dm_get_md(dev_t dev);
 void dm_get(struct mapped_device *md);
 void dm_put(struct mapped_device *md);
 
-
 void dm_set_mdptr(struct mapped_device *md, void *ptr);
 void *dm_get_mdptr(struct mapped_device *md);
-
 
 int dm_suspend(struct mapped_device *md, unsigned suspend_flags);
 int dm_resume(struct mapped_device *md);
@@ -181,12 +148,10 @@ int dm_active_get(struct mapped_device *md);
 int dm_active_set(struct mapped_device *md, int value);
 #endif
 
-
 uint32_t dm_get_event_nr(struct mapped_device *md);
 int dm_wait_event(struct mapped_device *md, int event_nr);
 uint32_t dm_next_uevent_seq(struct mapped_device *md);
 void dm_uevent_add(struct mapped_device *md, struct list_head *elist);
-
 
 const char *dm_device_name(struct mapped_device *md);
 int dm_copy_name_and_uuid(struct mapped_device *md, char *name, char *uuid);
@@ -196,46 +161,33 @@ int dm_noflush_suspending(struct dm_target *ti);
 union map_info *dm_get_mapinfo(struct bio *bio);
 union map_info *dm_get_rq_mapinfo(struct request *rq);
 
-
 int dm_get_geometry(struct mapped_device *md, struct hd_geometry *geo);
 int dm_set_geometry(struct mapped_device *md, struct hd_geometry *geo);
-
-
-
 
 int dm_table_create(struct dm_table **result, fmode_t mode,
 		    unsigned num_targets, struct mapped_device *md);
 
-
 int dm_table_add_target(struct dm_table *t, const char *type,
 			sector_t start, sector_t len, char *params);
 
-
 int dm_table_complete(struct dm_table *t);
 
-
 void dm_table_unplug_all(struct dm_table *t);
-
 
 struct dm_table *dm_get_table(struct mapped_device *md);
 void dm_table_get(struct dm_table *t);
 void dm_table_put(struct dm_table *t);
-
 
 sector_t dm_table_get_size(struct dm_table *t);
 unsigned int dm_table_get_num_targets(struct dm_table *t);
 fmode_t dm_table_get_mode(struct dm_table *t);
 struct mapped_device *dm_table_get_md(struct dm_table *t);
 
-
 void dm_table_event(struct dm_table *t);
-
 
 int dm_swap_table(struct mapped_device *md, struct dm_table *t);
 
-
 void *dm_vcalloc(unsigned long nmemb, unsigned long elem_size);
-
 
 #define DM_NAME "device-mapper"
 
@@ -288,15 +240,12 @@ void *dm_vcalloc(unsigned long nmemb, unsigned long elem_size);
 
 #define SECTOR_SHIFT 9
 
-
 #define DM_ENDIO_INCOMPLETE	1
 #define DM_ENDIO_REQUEUE	2
-
 
 #define DM_MAPIO_SUBMITTED	0
 #define DM_MAPIO_REMAPPED	1
 #define DM_MAPIO_REQUEUE	DM_ENDIO_REQUEUE
-
 
 #define dm_div_up(n, sz) (((n) + (sz) - 1) / (sz))
 
@@ -307,7 +256,6 @@ void *dm_vcalloc(unsigned long nmemb, unsigned long elem_size);
 	_r; \
 } \
 )
-
 
 #define dm_round_up(n, sz) (dm_div_up((n), (sz)) * (sz))
 
@@ -324,10 +272,9 @@ static inline unsigned long to_bytes(sector_t n)
 	return (n << SECTOR_SHIFT);
 }
 
-
 void dm_dispatch_request(struct request *rq);
 void dm_requeue_unmapped_request(struct request *rq);
 void dm_kill_unmapped_request(struct request *rq, int error);
 int dm_underlying_device_busy(struct request_queue *q);
 
-#endif	
+#endif	 

@@ -1,15 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #ifndef __INCmvIALCommonh
 #define __INCmvIALCommonh
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
-
+#endif  
 
 #include "mvSata.h"
 #include "mvStorageDev.h"
@@ -18,15 +16,11 @@ extern "C" {
 #include <linux/synosata.h>
 #endif
 
-
-
-
 #define MV_IAL_ASYNC_TIMER_PERIOD       500
 #define MV_IAL_SRST_TIMEOUT             31000
 #define MV_IAL_WAIT_FOR_RDY_TIMEOUT     10000
-
-
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+ 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #define syno_eh_printk(pMvSataAdapter, channel, fmt, args...) \
         printk("mvSata[%d %d]: "fmt".\n", pMvSataAdapter->adapterId, channel, ##args)
 #endif
@@ -67,11 +61,11 @@ typedef struct mvDrivesInfo
 typedef enum mvPortState
 {
     MV_PORT_NOT_INITIALIZED,
-    MV_PORT_WAIT_FOR_RDY, 
+    MV_PORT_WAIT_FOR_RDY,  
     MV_PORT_ISSUE_SRST,
     MV_PORT_IN_SRST,
     MV_PORT_INIT_DEVICE,
-    MV_PORT_DONE, 
+    MV_PORT_DONE,  
     MV_PORT_FAILED
 } MV_PORT_STATE;
 
@@ -105,7 +99,6 @@ typedef struct mvIALCommonAdapterExtension
     MV_CHANNEL_STATE  channelState[MV_SATA_CHANNELS_NUM];
     MV_IAL_COMMON_CHANNEL_EXTENSION IALChannelExt[MV_SATA_CHANNELS_NUM];
 } MV_IAL_COMMON_ADAPTER_EXTENSION;
-
 
 MV_BOOLEAN mvAdapterStartInitialization(MV_SATA_ADAPTER* pSataAdapter,
                                         MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
@@ -169,8 +162,6 @@ MV_BOOLEAN mvRemoveFromSCSICommandQueue(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                         MV_U8 channelIndex,
                                         MV_SATA_SCSI_CMD_BLOCK *pScb);
 
-
-
 MV_BOOLEAN IALConfigQueuingMode(MV_SATA_ADAPTER *pSataAdapter,
                                 MV_U8 channelIndex,
                                 MV_EDMA_MODE mode,
@@ -197,6 +188,6 @@ MV_BOOLEAN IALBusChangeNotifyEx(MV_SATA_ADAPTER *pSataAdapter,
 
 #ifdef __cplusplus
 }
-#endif 
+#endif  
 
-#endif 
+#endif  

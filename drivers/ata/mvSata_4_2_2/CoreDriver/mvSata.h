@@ -1,21 +1,17 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #ifndef __INCmvSatah
 #define __INCmvSatah
 #ifdef __cplusplus
-extern "C" 
-#endif 
-
+extern "C"  
+#endif  
 
 #include "mvOsS.h"
 #include "mvRegs.h"
 
-
 #define MV_CORE_DRIVER_LOG_ID                   0
-
 
 #define MV_SATA_VENDOR_ID                       0x11AB
 #define MV_SATA_DEVICE_ID_5080                  0x5080
@@ -26,18 +22,18 @@ extern "C"
 #define MV_SATA_DEVICE_ID_6081                  0x6081
 #define MV_SATA_DEVICE_ID_6042                  0x6042
 #define MV_SATA_DEVICE_ID_7042                  0x7042
-#define MV_SATA_DEVICE_ID_5182                  0x5182 
-#define MV_SATA_DEVICE_ID_5082                  0x5082 
-#define MV_SATA_DEVICE_ID_6082                  0x6082 
-#define MV_SATA_DEVICE_ID_6490                  0x6490 
+#define MV_SATA_DEVICE_ID_5182                  0x5182  
+#define MV_SATA_DEVICE_ID_5082                  0x5082  
+#define MV_SATA_DEVICE_ID_6082                  0x6082  
+#define MV_SATA_DEVICE_ID_6490                  0x6490  
 
-#define MV_SATA_DEVICE_ID_78XX0                 0x7800 
-#define MV_SATA_DEVICE_ID_78100                 0x7810 
-#define MV_SATA_DEVICE_ID_78200                 0x7820 
+#define MV_SATA_DEVICE_ID_78XX0                 0x7800  
+#define MV_SATA_DEVICE_ID_78100                 0x7810  
+#define MV_SATA_DEVICE_ID_78200                 0x7820  
 
-#define MV_SATA_DEVICE_ID_6281                 0x6281 
-#define MV_SATA_DEVICE_ID_6192                 0x6192 
-#define MV_SATA_DEVICE_ID_6190                 0x6190 
+#define MV_SATA_DEVICE_ID_6281                 0x6281  
+#define MV_SATA_DEVICE_ID_6192                 0x6192  
+#define MV_SATA_DEVICE_ID_6190                 0x6190  
 
 #define MV_SATA_CHANNELS_NUM                    8
 #define MV_SATA_UNITS_NUM                       2
@@ -54,9 +50,8 @@ extern "C"
 #define MV_SATA_PM_MAX_PORTS                    15
 #define MV_SATA_PM_CONTROL_PORT                 15
 
-#define MV_EDMA_QUEUE_LENGTH                    32  
+#define MV_EDMA_QUEUE_LENGTH                    32   
 #define MV_EDMA_GEN2E_QUEUE_LENGTH              128
-
 
 #ifndef MV_SATA_OVERRIDE_SW_QUEUE_SIZE
     #define MV_SATA_SW_QUEUE_SIZE                   (MV_EDMA_QUEUE_LENGTH -1)
@@ -93,25 +88,24 @@ extern "C"
 #define MV_EDMA_QUEUE_MASK                      0x1F
 #define MV_EDMA_REQUEST_ENTRY_SIZE              32
 #define MV_EDMA_RESPONSE_ENTRY_SIZE             8
-#define MV_EDMA_REQUEST_QUEUE_SIZE              1024 
-#define MV_EDMA_RESPONSE_QUEUE_SIZE             256  
+#define MV_EDMA_REQUEST_QUEUE_SIZE              1024  
+#define MV_EDMA_RESPONSE_QUEUE_SIZE             256   
 
 #define MV_EDMA_GEN2E_QUEUE_MASK                      0x7F
-#define MV_EDMA_GEN2E_REQUEST_QUEUE_SIZE              4096 
-#define MV_EDMA_GEN2E_RESPONSE_QUEUE_SIZE             1024  
+#define MV_EDMA_GEN2E_REQUEST_QUEUE_SIZE              4096  
+#define MV_EDMA_GEN2E_RESPONSE_QUEUE_SIZE             1024   
 
-#define MV_EDMA_PRD_ENTRY_SIZE                  16      
+#define MV_EDMA_PRD_ENTRY_SIZE                  16       
 #define MV_EDMA_PRD_NO_SNOOP_FLAG               MV_BIT0
 #define MV_EDMA_PRD_EOT_FLAG                    MV_BIT15
 
-#define MV_ATA_IDENTIFY_DEV_DATA_LENGTH         256 
+#define MV_ATA_IDENTIFY_DEV_DATA_LENGTH         256  
 #define MV_ATA_MODEL_NUMBER_LEN                 40
 #define ATA_SECTOR_SIZE                         512
 #define ATA_SECTOR_SIZE_IN_WORDS                256
 
-#define MV_SATA_COMM_INIT_DELAY                 1000 
-#define MV_SATA_COMM_INIT_WAIT_DELAY            20000 
-
+#define MV_SATA_COMM_INIT_DELAY                 1000  
+#define MV_SATA_COMM_INIT_WAIT_DELAY            20000  
 
 #ifdef MV_SATA_C2C_COMM
     #define MV_SATA_REGISTER_HOST_2_DEVICE_FIS         0x00000034
@@ -124,7 +118,6 @@ extern "C"
     #define MV_IOG_QUEUE_SIZE           0x40
     #define MV_IOG_INVALID_COMMAND_ID   MV_IOG_QUEUE_SIZE
 #endif
-
 
 typedef enum mvUdmaType
 {
@@ -351,9 +344,9 @@ typedef struct mvPacketCommandParams
     MV_U32      buffer_len;
     MV_U32      transfered_data;
     MV_U8       cdb_len;
-    MV_U16_PTR  cdb_buffer; 
-    MV_U8       flags;
-                      
+    MV_U16_PTR  cdb_buffer;  
+    MV_U8       flags; 
+                       
     MV_U32      prdLowAddr;
     MV_U32      prdHighAddr;
     mvSataCommandCompletionCallBack_t callBack;
@@ -362,18 +355,15 @@ typedef struct mvPacketCommandParams
 
 #ifdef MY_ABC_HERE
 
-
 #define SYNO_PM_REQ_SUCCESS 0x0
 #define SYNO_PM_REQ_FAIL 0x1
 
-
 #define SYNO_PM_CMD_TIMEOUT 0x0
-
 
 typedef struct _tag_SynoTaskFile {
     MV_U8    errorRegister;
-    MV_U16   featuresRegister;
-    MV_U8    commandRegister;
+    MV_U16   featuresRegister; 
+    MV_U8    commandRegister; 
     MV_U16   sectorCountRegister;
     MV_U16   lbaLowRegister;
     MV_U16   lbaMidRegister;
@@ -406,11 +396,10 @@ typedef struct mvQueueCommandInfo
 #endif
 } MV_QUEUE_COMMAND_INFO;
 
-
 typedef struct mvQueuedCommandEntry
 {
     MV_BOOLEAN   isFreeEntry;
-    
+     
     MV_U8        hostTag;
     MV_U8        deviceTag;
     MV_BOOLEAN   isCommandInEdma:1;
@@ -437,13 +426,12 @@ typedef enum mvErrorHandlingState
 typedef struct
 {
     MV_ERROR_HANDLING_STATE state;
-    MV_U16                      PortsWithErrors;
+    MV_U16                      PortsWithErrors; 
     MV_U8                       CurrPort;
     MV_QUEUED_COMMAND_ENTRY     *pReadLogExtEntry;
     MV_U16_PTR                  ReadLogExtBuffer;
     MV_BOOLEAN                  useVendorUniqGen2WA;
 }MV_ERROR_HANDLING_INFO;
-
 
 #define MV_SATA_TAGS_PER_POOL                   32
 #ifdef MV_SATA_SUPPORT_GEN2E_128_QUEUE_LEN
@@ -469,15 +457,14 @@ struct _mvChannelTags
 
 typedef enum mvHostInterfase
 {
-    MV_HOST_IF_INTEGRATED,   
+    MV_HOST_IF_INTEGRATED,    
     MV_HOST_IF_PEX,
-    MV_HOST_IF_PCI 
+    MV_HOST_IF_PCI  
 }MV_HOST_IF;
-
 
 typedef struct mvSataChannel
 {
-    
+     
     MV_U8                       channelNumber;
     struct mvDmaRequestQueueEntry  *requestQueue;
     struct mvDmaResponseQueueEntry *responseQueue;
@@ -485,10 +472,9 @@ typedef struct mvSataChannel
     MV_U32                      requestQueuePciLowAddress;
     MV_U32                      responseQueuePciHiAddress;
     MV_U32                      responseQueuePciLowAddress;
-    
-    
+     
     MV_U8                       DRQDataBlockSize;
-    
+     
     struct mvSataAdapter        *mvSataAdapter;
     MV_OS_SEMAPHORE             semaphore;
     MV_U32                      eDmaRegsOffset;
@@ -512,13 +498,13 @@ typedef struct mvSataChannel
     MV_U8                       rspOutPtr;
     MV_U8       		EDMAQueuePtrMask;
     MV_U32	                EDMARequestInpMask;
-    
+     
     MV_BOOLEAN                  PMSupported;
     MV_SATA_DEVICE_TYPE         deviceType;
     MV_BOOLEAN  		FBSEnabled;
     MV_BOOLEAN                  use128Entries;
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-    
+     
     MV_SATA_DEVICE_TYPE         oldDeviceType;
 #endif
 #ifdef MY_ABC_HERE
@@ -528,17 +514,16 @@ typedef struct mvSataChannel
 #endif
 #ifdef MV_SATA_C2C_COMM
 
-    
     MV_BOOLEAN                  C2CmodeEnabled;
     MV_SATA_C2C_MODE            C2CMode;
     C2CCallBack_t               C2CCallback;
 #endif
     MV_U8                       recoveredErrorsCounter;
-    
+     
     MV_ERROR_HANDLING_INFO  ErrorHandlingInfo;
 #ifdef MY_ABC_HERE
 	unsigned long chkpower_flags;
-	
+	 
 	#define CHKPOWER_CHECKING 0
 	#define CHKPOWER_WAKING 1
 	#define CHKPOWER_BLOCKING 2
@@ -547,44 +532,37 @@ typedef struct mvSataChannel
 	MV_QUEUE_COMMAND_INFO		OrigCmd;
 	struct timer_list	rstimer;
 	struct list_head	pendinglh;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
-	unsigned long  ssd_list;  
+	unsigned long  ssd_list;   
 #endif
 } MV_SATA_CHANNEL;
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 typedef struct _tag_SYNO_EH {
-    
+     
     MV_U32 flags;
 
-    
     MV_U8 channel;
 
-    
     MV_U8 retry_count;
 
-    
     struct mvSataAdapter *pSataAdapter;
 
-    
     MV_VOID_PTR pIalExt;
 
-    
     MV_VOID_PTR pataScsiAdapterExt;
 
-    
     struct delayed_work work;
 }SYNO_EH;
 
 enum {
-    
+     
     EH_DISCONNECT_TRIGGER = (1 << 0),
     EH_UNRECOVER_TRIGGER  = (1 << 1),
     EH_CONNECT_TRIGGER    = (1 << 2),
 
-    
     EH_PROCESSING            = (1 << 5),
     EH_SCSI_DONE_NEEDED      = (1 << 6),
     EH_CONNECT_AGAIN         = (1 << 7),
@@ -592,13 +570,11 @@ enum {
     EH_HW_COM_ERROR          = (1 << 8),
 #endif
 
-    
     EH_LINK_DISK             = (1 << 20),
     EH_LINK_PMP              = (1 << 21),
 
 #ifdef MY_ABC_HERE
-    
-    
+     
     SYNO_PROBE_RETRY = (1 << 0),
     SYNO_PROBE_LIMIT_TO_15 = (1 << 1),
 #endif
@@ -607,7 +583,7 @@ enum {
 
 typedef struct mvSataAdapter
 {
-    
+     
     MV_U32            adapterId;
     MV_VOID_PTR       IALData;
     MV_U8             pciConfigRevisionId;
@@ -623,14 +599,13 @@ typedef struct mvSataAdapter
     MV_U32            pciSerrMask;
     MV_U32            pciInterruptMask;
 
-    
     MV_SATA_GEN       sataAdapterGeneration;
-    MV_BOOLEAN        staggaredSpinup[MV_SATA_CHANNELS_NUM]; 
-    MV_BOOLEAN        limitInterfaceSpeed[MV_SATA_CHANNELS_NUM]; 
-    MV_SATA_IF_SPEED  ifSpeed[MV_SATA_CHANNELS_NUM];  
+    MV_BOOLEAN        staggaredSpinup[MV_SATA_CHANNELS_NUM];  
+    MV_BOOLEAN        limitInterfaceSpeed[MV_SATA_CHANNELS_NUM];  
+    MV_SATA_IF_SPEED  ifSpeed[MV_SATA_CHANNELS_NUM];   
     MV_SATA_IF_POWER_STATE ifPowerState[MV_SATA_CHANNELS_NUM];
-    MV_U8             numberOfChannels;
-    MV_U8             numberOfUnits;
+    MV_U8             numberOfChannels; 
+    MV_U8             numberOfUnits; 
     MV_U8             portsPerUnit;
     MV_OS_SEMAPHORE   semaphore;
     MV_U32            mainMask;
@@ -662,7 +637,6 @@ typedef struct mvSataAdapter
 #endif
 } MV_SATA_ADAPTER;
 
-
 typedef struct mvSataEdmaPRDEntry
 {
     volatile MV_U32 lowBaseAddr;
@@ -672,9 +646,6 @@ typedef struct mvSataEdmaPRDEntry
     volatile MV_U32 reserved;
 }MV_SATA_EDMA_PRD_ENTRY;
 
-
-
-
 MV_BOOLEAN mvSataInitAdapter(MV_SATA_ADAPTER *pAdapter);
 
 MV_BOOLEAN mvSataShutdownAdapter(MV_SATA_ADAPTER *pAdapter);
@@ -683,7 +654,6 @@ MV_U32  mvSataReadReg(MV_SATA_ADAPTER *pAdapter, MV_U32 regOffset);
 
 MV_VOID mvSataWriteReg(MV_SATA_ADAPTER *pAdapter, MV_U32 regOffset,
                        MV_U32 regValue);
-
 
 MV_BOOLEAN mvSataConfigureChannel(MV_SATA_ADAPTER *pAdapter,
                                   MV_U8 channelIndex);
@@ -737,7 +707,7 @@ MV_BOOLEAN mvSataChannelPhyPowerOn(MV_SATA_ADAPTER *pAdapter,
 
 MV_BOOLEAN mvSataChannelFarLoopbackDiagnostic(MV_SATA_ADAPTER *pAdapter,
                                               MV_U8 channelIndex);
-
+ 
 MV_QUEUE_COMMAND_RESULT mvSataQueueCommand(MV_SATA_ADAPTER *pAdapter,
                                            MV_U8 channelIndex,
                                            MV_QUEUE_COMMAND_INFO *pCommandParams);
@@ -747,7 +717,6 @@ MV_VOID SynoSataPMGPIOQueueCommandTimeout(MV_SATA_ADAPTER *pAdapter,
                                           MV_U8 channelIndex,
                                           MV_QUEUE_COMMAND_INFO *pCommandInfo);
 #endif
-
 
 MV_BOOLEAN mvSataInterruptServiceRoutine(MV_SATA_ADAPTER *pAdapter);
 
@@ -759,7 +728,6 @@ MV_BOOLEAN mvSataCheckPendingInterrupt(MV_SATA_ADAPTER *pAdapter);
 
 MV_BOOLEAN mvSataSetInterruptsScheme(MV_SATA_ADAPTER *pAdapter,
                                      MV_SATA_INTERRUPT_SCHEME interruptScheme);
-
 
 MV_BOOLEAN mvSataEnableStaggeredSpinUpAll (MV_SATA_ADAPTER *pAdapter);
 
@@ -786,11 +754,9 @@ MV_BOOLEAN mvSataGetInterfacePowerState (MV_SATA_ADAPTER *pAdapter,
                                          MV_U8 channelIndex,
                                          MV_SATA_IF_POWER_STATE *ifPowerState);
 
-
 MV_BOOLEAN mvSataEventNotify(MV_SATA_ADAPTER *, MV_EVENT_TYPE ,
                              MV_U32, MV_U32);
 #ifdef MV_SATA_C2C_COMM
-
 
 MV_BOOLEAN mvSataC2CInit (MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex,
                           MV_SATA_C2C_MODE mvSataC2CMode,
@@ -825,9 +791,5 @@ MV_BOOLEAN mvSataEnableIoGranularity(MV_SATA_ADAPTER *pAdapter,
 #endif
 MV_BOOLEAN mvSata60X1B2CheckDevError(MV_SATA_ADAPTER *pAdapter,
                                        MV_U8 channelIndex);
-#ifdef __cplusplus
 
-
-#endif 
-
-#endif 
+#endif  

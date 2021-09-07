@@ -1,8 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #ifndef __INCmvLinuxIalHth
 #define __INCmvLinuxIalHth
 
@@ -35,9 +34,7 @@
 
 #include <linux/blkdev.h>
 #include <linux/spinlock.h>
-
-
-
+ 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 extern int mv_ial_ht_detect (Scsi_Host_Template *);
 #else
@@ -53,14 +50,9 @@ extern int mv_ial_ht_abort(struct scsi_cmnd *SCpnt);
 
 #define TEMP_DATA_BUFFER_LENGTH		    512
 
-
-#ifdef CONFIG_PCI_MSI
-
-#endif
-
 #ifndef MRVL_SATA_BUFF_BOUNDARY
 #define MRVL_SATA_BUFF_BOUNDARY (1 << 24)
-#endif 
+#endif  
 
 #define MRVL_SATA_BOUNDARY_MASK (MRVL_SATA_BUFF_BOUNDARY - 1)
 
@@ -88,88 +80,83 @@ extern struct class_device_attribute *mvSata_shost_attrs[];
 #define SynoMvSata                                                          \
 {                                                                           \
     module:     THIS_MODULE,\
-    proc_name:          "mvSata",                        \
-    proc_info:          mv_ial_ht_proc_info,       \
+    proc_name:          "mvSata",                         \
+    proc_info:          mv_ial_ht_proc_info,        \
     slave_configure:    mv_ial_ht_slave_configure,\
-    name:               "Marvell SCSI to SATA adapter",             \
-    release:            mv_ial_ht_release,                    \
-    queuecommand:       mv_ial_ht_queuecommand,          \
-    bios_param:         NULL    ,     \
-    eh_device_reset_handler: NULL,                   \
+    name:               "Marvell SCSI to SATA adapter",              \
+    release:            mv_ial_ht_release,                     \
+    queuecommand:       mv_ial_ht_queuecommand,           \
+    bios_param:         NULL     ,      \
+    eh_device_reset_handler: NULL ,                   \
     eh_bus_reset_handler: mv_ial_ht_bus_reset,                              \
     eh_abort_handler:   mv_ial_ht_abort,                                    \
-    can_queue:          MV_SATA_SW_QUEUE_SIZE,                \
-    this_id:            MV_SATA_PM_MAX_PORTS,                             \
-    sg_tablesize:       64,                                 \
+    can_queue:          MV_SATA_SW_QUEUE_SIZE,                 \
+    this_id:            MV_SATA_PM_MAX_PORTS,                              \
+    sg_tablesize:       64,                                  \
     max_sectors:        256,                                                \
-    cmd_per_lun:        MV_SATA_SW_QUEUE_SIZE,                \
-    unchecked_isa_dma:  0,                              \
-    emulated:           1,                       \
+    cmd_per_lun:        MV_SATA_SW_QUEUE_SIZE,                 \
+    unchecked_isa_dma:  0,                               \
+    emulated:           1,                        \
     SYNO_INDEX_GET                                                          \
     SYNO_SHUTDOWN_PORT                                                      \
     shost_attrs:        mvSata_shost_attrs,                                 \
-    use_clustering:     ENABLE_CLUSTERING                 \
+    use_clustering:     ENABLE_CLUSTERING                  \
 }
 #endif
 #define mvSata                                                          \
 {                                                                           \
     module:     THIS_MODULE,\
-    proc_name:          "mvSata",                        \
-    proc_info:          mv_ial_ht_proc_info,       \
+    proc_name:          "mvSata",                         \
+    proc_info:          mv_ial_ht_proc_info,        \
     slave_configure:    mv_ial_ht_slave_configure,\
-    name:               "Marvell SCSI to SATA adapter",             \
-    release:            mv_ial_ht_release,                    \
-    queuecommand:       mv_ial_ht_queuecommand,          \
-    bios_param:         NULL    ,     \
-    eh_device_reset_handler: NULL,                   \
+    name:               "Marvell SCSI to SATA adapter",              \
+    release:            mv_ial_ht_release,                     \
+    queuecommand:       mv_ial_ht_queuecommand,           \
+    bios_param:         NULL     ,      \
+    eh_device_reset_handler: NULL ,                   \
     eh_bus_reset_handler: mv_ial_ht_bus_reset,                              \
     eh_abort_handler:   mv_ial_ht_abort,                                    \
-    can_queue:          MV_SATA_SW_QUEUE_SIZE,                \
-    this_id:            MV_SATA_PM_MAX_PORTS,                             \
-    sg_tablesize:       64,                                 \
+    can_queue:          MV_SATA_SW_QUEUE_SIZE,                 \
+    this_id:            MV_SATA_PM_MAX_PORTS,                              \
+    sg_tablesize:       64,                                  \
     max_sectors:        256,                                                \
-    cmd_per_lun:        MV_SATA_SW_QUEUE_SIZE,                \
-    unchecked_isa_dma:  0,                              \
-    emulated:           1,                       \
-    use_clustering:     ENABLE_CLUSTERING                 \
+    cmd_per_lun:        MV_SATA_SW_QUEUE_SIZE,                 \
+    unchecked_isa_dma:  0,                               \
+    emulated:           1,                        \
+    use_clustering:     ENABLE_CLUSTERING                  \
 }
 #else
 #define mvSata                                                          \
 {                                                                           \
-    proc_name:          "mvSata",                        \
-    proc_info:          mv_ial_ht_proc_info24,     \
+    proc_name:          "mvSata",                         \
+    proc_info:          mv_ial_ht_proc_info24,      \
     select_queue_depths: NULL,              \
-    name:               "Marvell SCSI to SATA adapter",             \
-    detect:             mv_ial_ht_detect,                      \
-    release:            mv_ial_ht_release,                    \
-    command:            NULL,                                 \
-    queuecommand:       mv_ial_ht_queuecommand,          \
-    bios_param:         NULL    ,     \
-    eh_device_reset_handler: NULL,                   \
+    name:               "Marvell SCSI to SATA adapter",              \
+    detect:             mv_ial_ht_detect,                       \
+    release:            mv_ial_ht_release,                     \
+    command:            NULL,                                  \
+    queuecommand:       mv_ial_ht_queuecommand,           \
+    bios_param:         NULL     ,      \
+    eh_device_reset_handler: NULL ,                   \
     eh_bus_reset_handler: mv_ial_ht_bus_reset,                              \
     eh_abort_handler:   mv_ial_ht_abort,                                    \
-    can_queue:          MV_SATA_SW_QUEUE_SIZE,                              \
-    this_id:            MV_SATA_PM_MAX_PORTS,                                 \
-    sg_tablesize:       64,                                 \
+    can_queue:          MV_SATA_SW_QUEUE_SIZE,                               \
+    this_id:            MV_SATA_PM_MAX_PORTS,                                  \
+    sg_tablesize:       64,                                  \
     max_sectors:        256,                                                \
-    cmd_per_lun:        MV_SATA_SW_QUEUE_SIZE,                \
-    unchecked_isa_dma:  0,                              \
-    emulated:           1,                       \
+    cmd_per_lun:        MV_SATA_SW_QUEUE_SIZE,                 \
+    unchecked_isa_dma:  0,                               \
+    emulated:           1,                        \
     use_new_eh_code:    1,                                                  \
-    highmem_io:         1,                           \
-    use_clustering:     ENABLE_CLUSTERING                 \
+    highmem_io:         1,                            \
+    use_clustering:     ENABLE_CLUSTERING                  \
 }
 #endif
 
 #define MV_IAL_HT_SACOALT_DEFAULT   4
 #define MV_IAL_HT_SAITMTH_DEFAULT   (150 * 50)
 
-
-
-
-
 struct IALHost;
-
 
 typedef struct IALAdapter
 {
@@ -178,7 +165,7 @@ typedef struct IALAdapter
     int                 maxHosts;
     struct IALHost      *host[MV_SATA_CHANNELS_NUM];
     struct pci_dev      *pcidev;
-    u8                  rev_id; 
+    u8                  rev_id;  
     u8                  *requestsArrayBaseAddr;
     u8                  *requestsArrayBaseAlignedAddr;
     dma_addr_t          requestsArrayBaseDmaAddr;
@@ -217,9 +204,6 @@ typedef struct IALHost
     MV_BOOLEAN  hostBlocked;
 } IAL_HOST_T;
 
-
-
-
 struct mv_comp_info
 {
     struct scsi_cmnd           *SCpnt;
@@ -235,10 +219,6 @@ struct mv_comp_info
     struct scsi_cmnd           *next_done;
 };
 
-
-
-
-
 #define pci64_map_single(d,c,s,dir) pci_map_single((d),(c),(s),(dir))
 #define pci64_map_sg(d,s,n,dir) pci_map_sg((d),(s),(n),(dir))
 #define pci64_unmap_single(d,a,s,dir) pci_unmap_single((d),(a),(s),(dir))
@@ -250,8 +230,8 @@ struct mv_comp_info
 #else
 #define pci64_dma_hi32(a) 0
 #define pci64_dma_lo32(a) (a)
-#endif  
+#endif   
 #define sg_dma64_address(s) sg_dma_address(s)
 #define sg_dma64_len(s) sg_dma_len(s)
 
-#endif 
+#endif  

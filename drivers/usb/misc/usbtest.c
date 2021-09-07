@@ -10,43 +10,29 @@
 
 #include <linux/usb.h>
 
-
-
-
-
 struct usbtest_param {
-	
-	unsigned		test_num;	
+	 
+	unsigned		test_num;	 
 	unsigned		iterations;
 	unsigned		length;
 	unsigned		vary;
 	unsigned		sglen;
 
-	
 	struct timeval		duration;
 };
 #define USBTEST_REQUEST	_IOWR('U', 100, struct usbtest_param)
 
-
-
-#define	GENERIC		
-
-
-
-
-
-
+#define	GENERIC		 
 
 struct usbtest_info {
 	const char		*name;
-	u8			ep_in;		
-	u8			ep_out;		
+	u8			ep_in;		 
+	u8			ep_out;		 
 	unsigned		autoconf : 1;
 	unsigned		ctrl_out : 1;
-	unsigned		iso : 1;	
+	unsigned		iso : 1;	 
 	int			alt;
 };
-
 
 struct usbtest_dev {
 	struct usb_interface	*intf;
@@ -70,19 +56,16 @@ static struct usb_device *testdev_to_usbdev (struct usbtest_dev *test)
 	return interface_to_usbdev (test->intf);
 }
 
-
 #ifdef CONFIG_MV_INCLUDE_USB
-#define UNLINK_RATE     1   
+#define UNLINK_RATE     1    
 #else
-#define	INTERRUPT_RATE		1	
+#define	INTERRUPT_RATE		1	 
 #endif
 
 #define ERROR(tdev, fmt, args...) \
 	dev_err(&(tdev)->intf->dev , fmt , ## args)
 #define WARNING(tdev, fmt, args...) \
 	dev_warn(&(tdev)->intf->dev , fmt , ## args)
-
-
 
 static int
 get_endpoints (struct usbtest_dev *dev, struct usb_interface *intf)
@@ -100,7 +83,6 @@ get_endpoints (struct usbtest_dev *dev, struct usb_interface *intf)
 		iso_in = iso_out = NULL;
 		alt = intf->altsetting + tmp;
 
-		
 		for (ep = 0; ep < alt->desc.bNumEndpoints; ep++) {
 			struct usb_host_endpoint	*e;
 
@@ -114,7 +96,7 @@ get_endpoints (struct usbtest_dev *dev, struct usb_interface *intf)
 			case USB_ENDPOINT_XFER_ISOC:
 				if (dev->info->iso)
 					goto try_iso;
-				
+				 
 			default:
 				continue;
 			}
@@ -188,10 +170,6 @@ found:
 	return 0;
 }
 
-
-
-
-
 static void simple_callback (struct urb *urb)
 {
 	complete(urb->context);
@@ -250,11 +228,11 @@ static inline void simple_fill_buf (struct urb *urb)
 
 	switch (pattern) {
 	default:
-		
+		 
 	case 0:
 		memset (buf, 0, len);
 		break;
-	case 1:			
+	case 1:			 
 		for (i = 0; i < len; i++)
 			*buf++ = (u8) (i % 63);
 		break;
@@ -270,20 +248,20 @@ static inline int simple_check_buf(struct usbtest_dev *tdev, struct urb *urb)
 
 	for (i = 0; i < len; i++, buf++) {
 		switch (pattern) {
-		
+		 
 		case 0:
 			expected = 0;
 			break;
 #ifdef CONFIG_MV_INCLUDE_USB
-		
-		case 1:			
+		 
+		case 1:			 
 #else
-		
-		case 1:			
+		 
+		case 1:			 
 #endif
 			expected = i % 63;
 			break;
-		
+		 
 		default:
 			expected = !*buf;
 			break;
@@ -334,7 +312,6 @@ static int simple_io (
 		if ((retval = usb_submit_urb (urb, GFP_KERNEL)) != 0)
 			break;
 
-		
 		wait_for_completion (&completion);
 		retval = urb->status;
 		urb->dev = udev;
@@ -351,7 +328,6 @@ static int simple_io (
 			urb->transfer_buffer_length = len;
 		}
 
-		
 	}
 	urb->transfer_buffer_length = max;
 
@@ -361,10 +337,6 @@ static int simple_io (
 				label, iterations, retval, expected);
 	return retval;
 }
-
-
-
-
 
 static void free_sglist (struct scatterlist *sg, int nents)
 {
@@ -405,12 +377,11 @@ alloc_sglist (int nents, int max, int vary)
 			return NULL;
 		}
 
-		
 		sg_set_buf(&sg[i], buf, size);
 
 		switch (pattern) {
 		case 0:
-			
+			 
 			break;
 		case 1:
 			for (j = 0; j < size; j++)
@@ -472,13 +443,7 @@ static int perform_sglist (
 		usb_sg_wait (req);
 		retval = req->status;
 
-		
-
-		
 	}
-
-	
-	
 
 	if (retval)
 		ERROR(tdev, "perform_sglist failed, "
@@ -486,10 +451,6 @@ static int perform_sglist (
 				iterations, retval);
 	return retval;
 }
-
-
-
-
 
 static unsigned realworld = 1;
 module_param (realworld, uint, 0);
@@ -510,7 +471,7 @@ static int get_altsetting (struct usbtest_dev *dev)
 		return dev->buf [0];
 	case 0:
 		retval = -ERANGE;
-		
+		 
 	default:
 		return retval;
 	}
@@ -545,12 +506,12 @@ static int is_good_config(struct usbtest_dev *tdev, int len)
 			ERROR(tdev, "bogus config descriptor length\n");
 			return 0;
 		}
-		
+		 
 		if (!realworld && !(config->bmAttributes & 0x80)) {
 			ERROR(tdev, "high bit of config attributes not set\n");
 			return 0;
 		}
-		if (config->bmAttributes & 0x1f) {	
+		if (config->bmAttributes & 0x1f) {	 
 			ERROR(tdev, "reserved config bits set\n");
 			return 0;
 		}
@@ -559,14 +520,13 @@ static int is_good_config(struct usbtest_dev *tdev, int len)
 		return 0;
 	}
 
-	if (le16_to_cpu(config->wTotalLength) == len)		
+	if (le16_to_cpu(config->wTotalLength) == len)		 
 		return 1;
-	if (le16_to_cpu(config->wTotalLength) >= TBUF_SIZE)		
+	if (le16_to_cpu(config->wTotalLength) >= TBUF_SIZE)		 
 		return 1;
 	ERROR(tdev, "bogus config descriptor read size\n");
 	return 0;
 }
-
 
 static int ch9_postconfig (struct usbtest_dev *dev)
 {
@@ -574,10 +534,8 @@ static int ch9_postconfig (struct usbtest_dev *dev)
 	struct usb_device	*udev = interface_to_usbdev (iface);
 	int			i, alt, retval;
 
-	
 	for (i = 0; i < iface->num_altsetting; i++) {
 
-		
 		alt = iface->altsetting [i].desc.bAlternateSetting;
 		if (alt < 0 || alt >= iface->num_altsetting) {
 			dev_err(&iface->dev,
@@ -585,11 +543,9 @@ static int ch9_postconfig (struct usbtest_dev *dev)
 					i, alt);
 		}
 
-		
 		if (realworld && iface->num_altsetting == 1)
 			continue;
 
-		
 		retval = set_altsetting (dev, alt);
 		if (retval) {
 			dev_err(&iface->dev, "can't set_interface = %d, %d\n",
@@ -597,7 +553,6 @@ static int ch9_postconfig (struct usbtest_dev *dev)
 			return retval;
 		}
 
-		
 		retval = get_altsetting (dev);
 		if (retval != alt) {
 			dev_err(&iface->dev, "get alt should be %d, was %d\n",
@@ -607,11 +562,9 @@ static int ch9_postconfig (struct usbtest_dev *dev)
 
 	}
 
-	
 	if (!realworld || udev->descriptor.bNumConfigurations != 1) {
 		int	expected = udev->actconfig->desc.bConfigurationValue;
 
-		
 		retval = usb_control_msg (udev, usb_rcvctrlpipe (udev, 0),
 				USB_REQ_GET_CONFIGURATION,
 				USB_DIR_IN | USB_RECIP_DEVICE,
@@ -623,7 +576,6 @@ static int ch9_postconfig (struct usbtest_dev *dev)
 		}
 	}
 
-	
 	retval = usb_get_descriptor (udev, USB_DT_DEVICE, 0,
 			dev->buf, sizeof udev->descriptor);
 	if (retval != sizeof udev->descriptor) {
@@ -631,7 +583,6 @@ static int ch9_postconfig (struct usbtest_dev *dev)
 		return (retval < 0) ? retval : -EDOM;
 	}
 
-	
 	for (i = 0; i < udev->descriptor.bNumConfigurations; i++) {
 		retval = usb_get_descriptor (udev, USB_DT_CONFIG, i,
 				dev->buf, TBUF_SIZE);
@@ -642,15 +593,11 @@ static int ch9_postconfig (struct usbtest_dev *dev)
 			return (retval < 0) ? retval : -EDOM;
 		}
 
-		
-		
 	}
 
-	
 	if (le16_to_cpu(udev->descriptor.bcdUSB) == 0x0200) {
 		struct usb_qualifier_descriptor		*d = NULL;
 
-		
 		retval = usb_get_descriptor (udev,
 				USB_DT_DEVICE_QUALIFIER, 0, dev->buf,
 				sizeof (struct usb_qualifier_descriptor));
@@ -661,14 +608,13 @@ static int ch9_postconfig (struct usbtest_dev *dev)
 						retval);
 				return (retval < 0) ? retval : -EDOM;
 			}
-			
+			 
 		} else if (retval != sizeof (struct usb_qualifier_descriptor)) {
 			dev_err(&iface->dev, "dev qualifier --> %d\n", retval);
 			return (retval < 0) ? retval : -EDOM;
 		} else
 			d = (struct usb_qualifier_descriptor *) dev->buf;
 
-		
 		if (d) {
 			unsigned max = d->bNumConfigurations;
 			for (i = 0; i < max; i++) {
@@ -684,17 +630,12 @@ static int ch9_postconfig (struct usbtest_dev *dev)
 			}
 		}
 	}
-	
-
-	
+	 
 	retval = usb_get_status (udev, USB_RECIP_DEVICE, 0, dev->buf);
 	if (retval != 2) {
 		dev_err(&iface->dev, "get dev status --> %d\n", retval);
 		return (retval < 0) ? retval : -EDOM;
 	}
-
-	
-	
 
 	retval = usb_get_status (udev, USB_RECIP_INTERFACE,
 			iface->altsetting [0].desc.bInterfaceNumber, dev->buf);
@@ -702,14 +643,9 @@ static int ch9_postconfig (struct usbtest_dev *dev)
 		dev_err(&iface->dev, "get interface status --> %d\n", retval);
 		return (retval < 0) ? retval : -EDOM;
 	}
-	
-
+	 
 	return 0;
 }
-
-
-
-
 
 struct ctrl_ctx {
 	spinlock_t		lock;
@@ -723,7 +659,7 @@ struct ctrl_ctx {
 	int			last;
 };
 
-#define NUM_SUBCASES	15		
+#define NUM_SUBCASES	15		 
 
 struct subcase {
 	struct usb_ctrlrequest	setup;
@@ -745,7 +681,6 @@ static void ctrl_complete (struct urb *urb)
 	ctx->count--;
 	ctx->pending--;
 
-	
 	if (subcase->number > 0) {
 		if ((subcase->number - ctx->last) != 1) {
 			ERROR(ctx->dev,
@@ -758,19 +693,16 @@ static void ctrl_complete (struct urb *urb)
 	}
 	ctx->last = subcase->number;
 
-	
 	if (status == subcase->expected)
 		status = 0;
 
-	
 	else if (status != -ECONNRESET) {
 
-		
 		if (subcase->expected > 0 && (
-			  ((status == -subcase->expected	
-			   || status == 0))))			
+			  ((status == -subcase->expected	 
+			   || status == 0))))			 
 			status = 0;
-		
+		 
 		else if (subcase->number == 12 && status == -EPIPE)
 			status = 0;
 		else
@@ -778,7 +710,6 @@ static void ctrl_complete (struct urb *urb)
 					subcase->number, status);
 	}
 
-	
 	if (status) {
 error:
 		if (ctx->status == 0) {
@@ -792,9 +723,6 @@ error:
 					urb->actual_length,
 					urb->transfer_buffer_length);
 
-			
-
-			
 			for (i = 1; i < ctx->param->sglen; i++) {
 				struct urb	*u = ctx->urb [
 						(i + subcase->number)
@@ -819,7 +747,6 @@ error:
 		}
 	}
 
-	
 	if ((status == 0) && (ctx->pending < ctx->count)) {
 		if ((status = usb_submit_urb (urb, GFP_ATOMIC)) != 0) {
 			ERROR(ctx->dev,
@@ -831,7 +758,6 @@ error:
 	} else
 		urb->dev = NULL;
 
-	
 	if (ctx->pending == 0)
 		complete (&ctx->complete);
 	spin_unlock (&ctx->lock);
@@ -854,7 +780,6 @@ test_ctrl_queue (struct usbtest_dev *dev, struct usbtest_param *param)
 	context.param = param;
 	context.last = -1;
 
-	
 	urb = kcalloc(param->sglen, sizeof(struct urb *), GFP_KERNEL);
 	if (!urb)
 		return -ENOMEM;
@@ -865,104 +790,100 @@ test_ctrl_queue (struct usbtest_dev *dev, struct usbtest_param *param)
 		struct usb_ctrlrequest	req;
 		struct subcase		*reqp;
 
-		
 		int			expected = 0;
 
-		
 		memset (&req, 0, sizeof req);
 		req.bRequest = USB_REQ_GET_DESCRIPTOR;
 		req.bRequestType = USB_DIR_IN|USB_RECIP_DEVICE;
 
 		switch (i % NUM_SUBCASES) {
-		case 0:		
+		case 0:		 
 			req.wValue = cpu_to_le16 (USB_DT_DEVICE << 8);
 			len = sizeof (struct usb_device_descriptor);
 			break;
-		case 1:		
+		case 1:		 
 			req.wValue = cpu_to_le16 ((USB_DT_CONFIG << 8) | 0);
 			len = sizeof (struct usb_config_descriptor);
 			break;
-		case 2:		
+		case 2:		 
 			req.bRequest = USB_REQ_GET_INTERFACE;
 			req.bRequestType = USB_DIR_IN|USB_RECIP_INTERFACE;
-			
+			 
 			len = 1;
 			expected = EPIPE;
 			break;
-		case 3:		
+		case 3:		 
 			req.bRequest = USB_REQ_GET_STATUS;
 			req.bRequestType = USB_DIR_IN|USB_RECIP_INTERFACE;
-			
+			 
 			len = 2;
 			break;
-		case 4:		
+		case 4:		 
 			req.bRequest = USB_REQ_GET_STATUS;
 			req.bRequestType = USB_DIR_IN|USB_RECIP_DEVICE;
 			len = 2;
 			break;
-		case 5:		
+		case 5:		 
 			req.wValue = cpu_to_le16 (USB_DT_DEVICE_QUALIFIER << 8);
 			len = sizeof (struct usb_qualifier_descriptor);
 			if (udev->speed != USB_SPEED_HIGH)
 				expected = EPIPE;
 			break;
-		case 6:		
+		case 6:		 
 			req.wValue = cpu_to_le16 ((USB_DT_CONFIG << 8) | 0);
 			len = sizeof (struct usb_config_descriptor);
 			len += sizeof (struct usb_interface_descriptor);
 			break;
-		case 7:		
+		case 7:		 
 			req.wValue = cpu_to_le16 (USB_DT_INTERFACE << 8);
-			
+			 
 			len = sizeof (struct usb_interface_descriptor);
 			expected = -EPIPE;
 			break;
-		
-		
-		case 8:		
+		 
+		case 8:		 
 			req.bRequest = USB_REQ_CLEAR_FEATURE;
 			req.bRequestType = USB_RECIP_ENDPOINT;
-			
-			
+			 
 			len = 0;
 			pipe = usb_sndctrlpipe (udev, 0);
 			expected = EPIPE;
 			break;
-		case 9:		
+		case 9:		 
 			req.bRequest = USB_REQ_GET_STATUS;
 			req.bRequestType = USB_DIR_IN|USB_RECIP_ENDPOINT;
-			
+			 
 			len = 2;
 			break;
-		case 10:	
+		case 10:	 
 			req.wValue = cpu_to_le16 ((USB_DT_CONFIG << 8) | 0);
 			len = 1024;
 			expected = -EREMOTEIO;
 			break;
-		
-		case 11:	
+		 
+		case 11:	 
 			req.wValue = cpu_to_le16 (USB_DT_ENDPOINT << 8);
-			
+			 
 			len = sizeof (struct usb_interface_descriptor);
 			expected = EPIPE;
 			break;
-		
-		case 12:	
+		 
+		case 12:	 
 			req.wValue = cpu_to_le16 (USB_DT_STRING << 8);
-			
+			 
 			len = sizeof (struct usb_interface_descriptor);
-			
-			expected = EREMOTEIO;	
+			 
+			expected = EREMOTEIO;	 
 			break;
-		case 13:	
+		case 13:	 
 			req.wValue = cpu_to_le16 ((USB_DT_CONFIG << 8) | 0);
-			
+			 
 			len = 1024 - udev->descriptor.bMaxPacketSize0;
 			expected = -EREMOTEIO;
 			break;
-		case 14:	
+		case 14:	 
 			req.wValue = cpu_to_le16 ((USB_DT_DEVICE << 8) | 0);
-			
+			 
 			len = udev->descriptor.bMaxPacketSize0;
 			switch (len) {
 			case 8:		len = 24; break;
@@ -1001,7 +922,6 @@ test_ctrl_queue (struct usbtest_dev *dev, struct usbtest_param *param)
 #endif
 	}
 
-	
 	context.urb = urb;
 	spin_lock_irq (&context.lock);
 	for (i = 0; i < param->sglen; i++) {
@@ -1016,9 +936,6 @@ test_ctrl_queue (struct usbtest_dev *dev, struct usbtest_param *param)
 	}
 	spin_unlock_irq (&context.lock);
 
-	
-
-	
 	if (context.pending > 0)
 		wait_for_completion (&context.complete);
 
@@ -1038,13 +955,10 @@ cleanup:
 }
 #undef NUM_SUBCASES
 
-
-
 static void unlink1_callback (struct urb *urb)
 {
 	int	status = urb->status;
 
-	
 	if (!status)
 		status = usb_submit_urb (urb, GFP_ATOMIC);
 	if (status) {
@@ -1075,13 +989,11 @@ static int unlink1 (struct usbtest_dev *dev, int pipe, int size, int async)
 	urb->context = &completion;
 	urb->complete = unlink1_callback;
 
-	
 	if ((retval = usb_submit_urb (urb, GFP_KERNEL)) != 0) {
 		dev_err(&dev->intf->dev, "submit fail %d\n", retval);
 		return retval;
 	}
 
-	
 #ifdef CONFIG_MV_INCLUDE_USB
 	msleep (jiffies % (2 * UNLINK_RATE));
 #else
@@ -1094,7 +1006,7 @@ static int unlink1 (struct usbtest_dev *dev, int pipe, int size, int async)
 			switch (retval) {
 			case -EBUSY:
 			case -EIDRM:
-				
+				 
 				ERROR(dev, "unlink retry\n");
 				continue;
 			case 0:
@@ -1132,7 +1044,6 @@ static int unlink_simple (struct usbtest_dev *dev, int pipe, int len)
 {
 	int			retval = 0;
 
-	
 #ifdef CONFIG_MV_INCLUDE_USB
 	retval = unlink1 (dev, pipe, desc, len, 1);
 #else
@@ -1147,14 +1058,11 @@ static int unlink_simple (struct usbtest_dev *dev, int pipe, int len)
 	return retval;
 }
 
-
-
 static int verify_not_halted(struct usbtest_dev *tdev, int ep, struct urb *urb)
 {
 	int	retval;
 	u16	status;
 
-	
 	retval = usb_get_status (urb->dev, USB_RECIP_ENDPOINT, ep, &status);
 	if (retval < 0) {
 		ERROR(tdev, "ep %02x couldn't get no-halt status, %d\n",
@@ -1176,7 +1084,6 @@ static int verify_halted(struct usbtest_dev *tdev, int ep, struct urb *urb)
 	int	retval;
 	u16	status;
 
-	
 	retval = usb_get_status (urb->dev, USB_RECIP_ENDPOINT, ep, &status);
 	if (retval < 0) {
 		ERROR(tdev, "ep %02x couldn't get halt status, %d\n",
@@ -1201,12 +1108,10 @@ static int test_halt(struct usbtest_dev *tdev, int ep, struct urb *urb)
 {
 	int	retval;
 
-	
 	retval = verify_not_halted(tdev, ep, urb);
 	if (retval < 0)
 		return retval;
 
-	
 	retval = usb_control_msg (urb->dev, usb_sndctrlpipe (urb->dev, 0),
 			USB_REQ_SET_FEATURE, USB_RECIP_ENDPOINT,
 			USB_ENDPOINT_HALT, ep,
@@ -1219,7 +1124,6 @@ static int test_halt(struct usbtest_dev *tdev, int ep, struct urb *urb)
 	if (retval < 0)
 		return retval;
 
-	
 	retval = usb_clear_halt (urb->dev, urb->pipe);
 	if (retval < 0) {
 		ERROR(tdev, "ep %02x couldn't clear halt, %d\n", ep, retval);
@@ -1228,8 +1132,6 @@ static int test_halt(struct usbtest_dev *tdev, int ep, struct urb *urb)
 	retval = verify_not_halted(tdev, ep, urb);
 	if (retval < 0)
 		return retval;
-
-	
 
 	return 0;
 }
@@ -1270,9 +1172,6 @@ done:
 	return retval;
 }
 
-
-
-
 static int ctrl_out (struct usbtest_dev *dev,
 		unsigned count, unsigned length, unsigned vary)
 {
@@ -1293,9 +1192,8 @@ static int ctrl_out (struct usbtest_dev *dev,
 	len = length;
 	retval = 0;
 
-	
 	for (i = 0; i < count; i++) {
-		
+		 
 		for (j = 0; j < len; j++)
 			buf [j] = i + j;
 		retval = usb_control_msg (udev, usb_sndctrlpipe (udev,0),
@@ -1311,7 +1209,6 @@ static int ctrl_out (struct usbtest_dev *dev,
 			break;
 		}
 
-		
 		retval = usb_control_msg (udev, usb_rcvctrlpipe (udev,0),
 				0x5c, USB_DIR_IN|USB_TYPE_VENDOR,
 				0, 0, buf, len, USB_CTRL_GET_TIMEOUT);
@@ -1325,7 +1222,6 @@ static int ctrl_out (struct usbtest_dev *dev,
 			break;
 		}
 
-		
 		for (j = 0; j < len; j++) {
 			if (buf [j] != (u8) (i + j)) {
 				ERROR(dev, "ctrl_out, byte %d is %d not %d\n",
@@ -1341,7 +1237,6 @@ static int ctrl_out (struct usbtest_dev *dev,
 
 		len += vary;
 
-		
 		if (len > length)
 			len = realworld ? 1 : 0;
 	}
@@ -1353,10 +1248,6 @@ static int ctrl_out (struct usbtest_dev *dev,
 	kfree (buf);
 	return retval;
 }
-
-
-
-
 
 struct iso_context {
 	unsigned		count;
@@ -1392,15 +1283,15 @@ static void iso_callback (struct urb *urb)
 			dev_err(&ctx->dev->intf->dev,
 					"iso resubmit err %d\n",
 					status);
-			
-		case -ENODEV:			
-		case -ESHUTDOWN:		
+			 
+		case -ENODEV:			 
+		case -ESHUTDOWN:		 
 			ctx->submit_error = 1;
 			break;
 		}
 	}
 #ifdef CONFIG_MV_INCLUDE_USB
-	
+	 
 #else
 	simple_free_urb (urb);
 #endif
@@ -1449,7 +1340,7 @@ static struct urb *iso_alloc_urb (
 	}
 	memset (urb->transfer_buffer, 0, bytes);
 	for (i = 0; i < packets; i++) {
-		
+		 
 		urb->iso_frame_desc[i].length = min ((unsigned) bytes, maxp);
 		bytes -= urb->iso_frame_desc[i].length;
 
@@ -1457,7 +1348,7 @@ static struct urb *iso_alloc_urb (
 	}
 
 	urb->complete = iso_callback;
-	
+	 
 	urb->interval = 1 << (desc->bInterval - 1);
 	urb->transfer_flags = URB_ISO_ASAP | URB_NO_TRANSFER_DMA_MAP;
 	return urb;
@@ -1473,9 +1364,9 @@ test_iso_queue (struct usbtest_dev *dev, struct usbtest_param *param,
 	unsigned long		packets = 0;
 	int			status = 0;
 #ifdef CONFIG_MV_INCLUDE_USB
-	struct urb		*urbs[50];	
+	struct urb		*urbs[50];	 
 #else
-	struct urb		*urbs[10];	
+	struct urb		*urbs[10];	 
 #endif
 
 #ifdef CONFIG_MV_INCLUDE_USB
@@ -1518,9 +1409,6 @@ test_iso_queue (struct usbtest_dev *dev, struct usbtest_param *param,
 
 	spin_lock_irq (&context.lock);
 	for (i = 0; i < param->sglen; i++) {
-#ifdef CONFIG_MV_INCLUDE_USB
-		
-#endif
 		++context.pending;
 		status = usb_submit_urb (urbs [i], GFP_ATOMIC);
 		if (status < 0) {
@@ -1531,7 +1419,7 @@ test_iso_queue (struct usbtest_dev *dev, struct usbtest_param *param,
 			}
 
 #ifdef CONFIG_MV_INCLUDE_USB
-			
+			 
 #else
 			simple_free_urb (urbs [i]);
 #endif
@@ -1544,7 +1432,6 @@ test_iso_queue (struct usbtest_dev *dev, struct usbtest_param *param,
 
 	wait_for_completion (&context.done);
 
-	
 	if (status != 0)
 		;
 	else if (context.submit_error)
@@ -1563,10 +1450,6 @@ fail:
 	return status;
 }
 
-
-
-
-
 static int
 usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 {
@@ -1580,8 +1463,6 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 	struct timeval		start;
 	unsigned		i;
 
-	
-
 	if (code != USBTEST_REQUEST)
 		return -EOPNOTSUPP;
 
@@ -1591,13 +1472,11 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 	if (mutex_lock_interruptible(&dev->lock))
 		return -ERESTARTSYS;
 
-	
 	if (!intf->is_active) {
 		mutex_unlock(&dev->lock);
 		return -EHOSTUNREACH;
 	}
 
-	
 	if (dev->info->alt >= 0) {
 		int	res;
 
@@ -1615,7 +1494,6 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 		}
 	}
 
-	
 	do_gettimeofday (&start);
 	switch (param->test_num) {
 
@@ -1624,7 +1502,6 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 		retval = 0;
 		break;
 
-	
 	case 1:
 		if (dev->out_pipe == 0)
 			break;
@@ -1640,7 +1517,7 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 			retval = -ENOMEM;
 			break;
 		}
-		
+		 
 		retval = simple_io(dev, urb, param->iterations, 0, 0, "test1");
 		simple_free_urb (urb);
 		break;
@@ -1659,7 +1536,7 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 			retval = -ENOMEM;
 			break;
 		}
-		
+		 
 		retval = simple_io(dev, urb, param->iterations, 0, 0, "test2");
 		simple_free_urb (urb);
 		break;
@@ -1678,7 +1555,7 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 			retval = -ENOMEM;
 			break;
 		}
-		
+		 
 		retval = simple_io(dev, urb, param->iterations, param->vary,
 					0, "test3");
 		simple_free_urb (urb);
@@ -1698,13 +1575,12 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 			retval = -ENOMEM;
 			break;
 		}
-		
+		 
 		retval = simple_io(dev, urb, param->iterations, param->vary,
 					0, "test4");
 		simple_free_urb (urb);
 		break;
 
-	
 	case 5:
 		if (dev->out_pipe == 0 || param->sglen == 0)
 			break;
@@ -1717,7 +1593,7 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 			retval = -ENOMEM;
 			break;
 		}
-		
+		 
 		retval = perform_sglist(dev, param->iterations, dev->out_pipe,
 #ifdef CONFIG_MV_INCLUDE_USB
 				dev->out_desc, &req, sg, param->sglen);
@@ -1739,7 +1615,7 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 			retval = -ENOMEM;
 			break;
 		}
-		
+		 
 		retval = perform_sglist(dev, param->iterations, dev->in_pipe,
 #ifdef CONFIG_MV_INCLUDE_USB
 				dev->in_desc, &req, sg, param->sglen);
@@ -1760,7 +1636,7 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 			retval = -ENOMEM;
 			break;
 		}
-		
+		 
 		retval = perform_sglist(dev, param->iterations, dev->out_pipe,
 #ifdef CONFIG_MV_INCLUDE_USB
 				dev->out_desc, &req, sg, param->sglen);
@@ -1781,7 +1657,7 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 			retval = -ENOMEM;
 			break;
 		}
-		
+		 
 		retval = perform_sglist(dev, param->iterations, dev->in_pipe,
 #ifdef CONFIG_MV_INCLUDE_USB
 				dev->in_desc, &req, sg, param->sglen);
@@ -1791,20 +1667,18 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 		free_sglist (sg, param->sglen);
 		break;
 
-	
 	case 9:
 		retval = 0;
 		dev_info(&intf->dev,
 			"TEST 9:  ch9 (subset) control tests, %d times\n",
 				param->iterations);
-		for (i = param->iterations; retval == 0 && i--; )
+		for (i = param->iterations; retval == 0 && i--;  )
 			retval = ch9_postconfig (dev);
 		if (retval)
 			dev_err(&intf->dev, "ch9 subset failed, "
 					"iterations left %d\n", i);
 		break;
 
-	
 	case 10:
 		if (param->sglen == 0)
 			break;
@@ -1816,14 +1690,13 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 		retval = test_ctrl_queue (dev, param);
 		break;
 
-	
 	case 11:
 		if (dev->in_pipe == 0 || !param->length)
 			break;
 		retval = 0;
 		dev_info(&intf->dev, "TEST 11:  unlink %d reads of %d\n",
 				param->iterations, param->length);
-		for (i = param->iterations; retval == 0 && i--; )
+		for (i = param->iterations; retval == 0 && i--;  )
 #ifdef CONFIG_MV_INCLUDE_USB
 			retval = unlink_simple (dev, dev->in_pipe, dev->in_desc,
 #else
@@ -1840,7 +1713,7 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 		retval = 0;
 		dev_info(&intf->dev, "TEST 12:  unlink %d writes of %d\n",
 				param->iterations, param->length);
-		for (i = param->iterations; retval == 0 && i--; )
+		for (i = param->iterations; retval == 0 && i--;  )
 #ifdef CONFIG_MV_INCLUDE_USB
 			retval = unlink_simple (dev, dev->out_pipe, dev->out_desc,
 #else
@@ -1852,21 +1725,19 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 				"iterations left %d\n", retval, i);
 		break;
 
-	
 	case 13:
 		if (dev->out_pipe == 0 && dev->in_pipe == 0)
 			break;
 		retval = 0;
 		dev_info(&intf->dev, "TEST 13:  set/clear %d halts\n",
 				param->iterations);
-		for (i = param->iterations; retval == 0 && i--; )
+		for (i = param->iterations; retval == 0 && i--;  )
 			retval = halt_simple (dev);
 
 		if (retval)
 			ERROR(dev, "halts failed, iterations left %d\n", i);
 		break;
 
-	
 	case 14:
 		if (!dev->info->ctrl_out)
 			break;
@@ -1878,7 +1749,6 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 				param->length, param->vary);
 		break;
 
-	
 	case 15:
 		if (dev->out_iso_pipe == 0 || param->sglen == 0)
 			break;
@@ -1886,12 +1756,11 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 			"TEST 15:  write %d iso, %d entries of %d bytes\n",
 				param->iterations,
 				param->sglen, param->length);
-		
+		 
 		retval = test_iso_queue (dev, param,
 				dev->out_iso_pipe, dev->iso_out);
 		break;
 
-	
 	case 16:
 		if (dev->in_iso_pipe == 0 || param->sglen == 0)
 			break;
@@ -1899,14 +1768,10 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 			"TEST 16:  read %d iso, %d entries of %d bytes\n",
 				param->iterations,
 				param->sglen, param->length);
-		
+		 
 		retval = test_iso_queue (dev, param,
 				dev->in_iso_pipe, dev->iso_in);
 		break;
-
-	
-
-	
 
 	}
 	do_gettimeofday (&param->duration);
@@ -1919,8 +1784,6 @@ usbtest_ioctl (struct usb_interface *intf, unsigned int code, void *buf)
 	mutex_unlock(&dev->lock);
 	return retval;
 }
-
-
 
 static unsigned force_interrupt = 0;
 module_param (force_interrupt, uint, 0);
@@ -1948,9 +1811,9 @@ usbtest_probe (struct usb_interface *intf, const struct usb_device_id *id)
 	udev = interface_to_usbdev (intf);
 
 #ifdef	GENERIC
-	
+	 
 	if (id->match_flags == 0) {
-		
+		 
 		if (!vendor || le16_to_cpu(udev->descriptor.idVendor) != (u16)vendor)
 			return -ENODEV;
 		if (product && le16_to_cpu(udev->descriptor.idProduct) != (u16)product)
@@ -1971,13 +1834,11 @@ usbtest_probe (struct usb_interface *intf, const struct usb_device_id *id)
 
 	dev->intf = intf;
 
-	
 	if ((dev->buf = kmalloc (TBUF_SIZE, GFP_KERNEL)) == NULL) {
 		kfree (dev);
 		return -ENOMEM;
 	}
 
-	
 	rtest = wtest = "";
 	irtest = iwtest = "";
 	if (force_interrupt || udev->speed == USB_SPEED_LOW) {
@@ -1999,7 +1860,7 @@ usbtest_probe (struct usb_interface *intf, const struct usb_device_id *id)
 						status);
 				return status;
 			}
-			
+			 
 		} else {
 			if (info->ep_in)
 				dev->in_pipe = usb_rcvbulkpipe (udev,
@@ -2073,16 +1934,12 @@ static void usbtest_disconnect (struct usb_interface *intf)
 	kfree (dev);
 }
 
-
-
-
 static struct usbtest_info ez1_info = {
 	.name		= "EZ-USB device",
 	.ep_in		= 2,
 	.ep_out		= 2,
 	.alt		= 1,
 };
-
 
 static struct usbtest_info ez2_info = {
 	.name		= "FX2 device",
@@ -2091,17 +1948,15 @@ static struct usbtest_info ez2_info = {
 	.alt		= 1,
 };
 
-
 static struct usbtest_info fw_info = {
 	.name		= "usb test device",
 	.ep_in		= 2,
 	.ep_out		= 2,
 	.alt		= 1,
-	.autoconf	= 1,		
+	.autoconf	= 1,		 
 	.ctrl_out	= 1,
-	.iso		= 1,		
+	.iso		= 1,		 
 };
-
 
 static struct usbtest_info gz_info = {
 	.name		= "Linux gadget zero",
@@ -2124,7 +1979,7 @@ static struct usbtest_info um2_info = {
 };
 
 #ifdef IBOT2
-
+ 
 static struct usbtest_info ibot2_info = {
 	.name		= "iBOT2 webcam",
 	.ep_in		= 2,
@@ -2133,7 +1988,7 @@ static struct usbtest_info ibot2_info = {
 #endif
 
 #ifdef GENERIC
-
+ 
 static struct usbtest_info generic_info = {
 	.name		= "Generic USB device",
 	.alt		= -1,
@@ -2142,77 +1997,59 @@ static struct usbtest_info generic_info = {
 
 static struct usb_device_id id_table [] = {
 
-	
-
-	
 #ifdef CONFIG_SYNO_PLX_PORTING
-	
+	 
 	{ USB_DEVICE (0x0547, 0x2131),
 		.driver_info = (unsigned long) &ez1_info,
 		},
 #endif
 
-	
 	{ USB_DEVICE (0x0547, 0x2235),
 		.driver_info = (unsigned long) &ez1_info,
 		},
 
-	
 	{ USB_DEVICE (0x0547, 0x0080),
 		.driver_info = (unsigned long) &ez1_info,
 		},
 
-	
 	{ USB_DEVICE (0x04b4, 0x8613),
 		.driver_info = (unsigned long) &ez2_info,
 		},
 
-	
 	{ USB_DEVICE (0xfff0, 0xfff0),
 		.driver_info = (unsigned long) &fw_info,
 		},
 
-	
 	{ USB_DEVICE (0x0525, 0xa4a0),
 		.driver_info = (unsigned long) &gz_info,
 		},
 
-	
 	{ USB_DEVICE (0x0525, 0xa4a4),
 		.driver_info = (unsigned long) &um_info,
 		},
 
-	
 	{ USB_DEVICE (0x0525, 0xa4a3),
 		.driver_info = (unsigned long) &um2_info,
 		},
 
 #ifdef KEYSPAN_19Qi
-	
-	
+	 
 	{ USB_DEVICE (0x06cd, 0x010b),
 		.driver_info = (unsigned long) &ez1_info,
 		},
 #endif
 
-	
-
 #ifdef IBOT2
-	
-	
+	 
 	{ USB_DEVICE (0x0b62, 0x0059),
 		.driver_info = (unsigned long) &ibot2_info,
 		},
 #endif
 
-	
-
 #ifdef GENERIC
-	
+	 
 	{ .driver_info = (unsigned long) &generic_info, },
 #endif
-
-	
 
 	{ }
 };
@@ -2227,8 +2064,6 @@ static struct usb_driver usbtest_driver = {
 	.suspend =	usbtest_suspend,
 	.resume =	usbtest_resume,
 };
-
-
 
 static int __init usbtest_init (void)
 {

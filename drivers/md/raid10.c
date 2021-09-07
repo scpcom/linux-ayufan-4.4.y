@@ -1,17 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #include <linux/delay.h>
 #include <linux/blkdev.h>
 #include <linux/seq_file.h>
 #include "md.h"
 #include "raid10.h"
 #include "bitmap.h"
-
-
-
 
 #define	NR_RAID10_BIOS 256
 
@@ -39,7 +35,7 @@ IsDiskErrorSet(mddev_t *mddev)
 END:
 	return res;
 }
-#endif 
+#endif  
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 static int blRaid10Enough(conf_t *conf,mdk_rdev_t *rdev);
@@ -51,7 +47,6 @@ static void * r10bio_pool_alloc(gfp_t gfp_flags, void *data)
 	r10bio_t *r10_bio;
 	int size = offsetof(struct r10bio_s, devs[conf->copies]);
 
-	
 	r10_bio = kzalloc(size, gfp_flags);
 	if (!r10_bio && conf->mddev)
 		unplug_slaves(conf->mddev);
@@ -64,14 +59,12 @@ static void r10bio_pool_free(void *r10_bio, void *data)
 	kfree(r10_bio);
 }
 
-
 #define RESYNC_BLOCK_SIZE (64*1024)
 #define RESYNC_PAGES ((RESYNC_BLOCK_SIZE + PAGE_SIZE-1) / PAGE_SIZE)
-
+ 
 #define RESYNC_WINDOW (1024*1024)
-
+ 
 #define RESYNC_DEPTH (32*1024*1024/RESYNC_BLOCK_SIZE)
-
 
 static void * r10buf_pool_alloc(gfp_t gfp_flags, void *data)
 {
@@ -89,18 +82,17 @@ static void * r10buf_pool_alloc(gfp_t gfp_flags, void *data)
 	}
 
 	if (test_bit(MD_RECOVERY_SYNC, &conf->mddev->recovery))
-		nalloc = conf->copies; 
+		nalloc = conf->copies;  
 	else
-		nalloc = 2; 
+		nalloc = 2;  
 
-	
 	for (j = nalloc ; j-- ; ) {
 		bio = bio_alloc(gfp_flags, RESYNC_PAGES);
 		if (!bio)
 			goto out_free_bio;
 		r10_bio->devs[j].bio = bio;
 	}
-	
+	 
 	for (j = 0 ; j < nalloc; j++) {
 		bio = r10_bio->devs[j].bio;
 		for (i = 0; i < RESYNC_PAGES; i++) {
@@ -164,7 +156,6 @@ static void free_r10bio(r10bio_t *r10_bio)
 {
 	conf_t *conf = r10_bio->mddev->private;
 
-	
 	allow_barrier(conf);
 
 	put_all_bios(conf, r10_bio);
@@ -191,12 +182,10 @@ static void reschedule_retry(r10bio_t *r10_bio)
 	conf->nr_queued ++;
 	spin_unlock_irqrestore(&conf->device_lock, flags);
 
-	
 	wake_up(&conf->wait_barrier);
 
 	md_wakeup_thread(mddev->thread);
 }
-
 
 static void raid_end_bio_io(r10bio_t *r10_bio)
 {
@@ -206,7 +195,6 @@ static void raid_end_bio_io(r10bio_t *r10_bio)
 		test_bit(R10BIO_Uptodate, &r10_bio->state) ? 0 : -EIO);
 	free_r10bio(r10_bio);
 }
-
 
 static inline void update_head_pos(int slot, r10bio_t *r10_bio)
 {
@@ -225,18 +213,18 @@ static void raid10_end_read_request(struct bio *bio, int error)
 
 	slot = r10_bio->read_slot;
 	dev = r10_bio->devs[slot].devnum;
-	
+	 
 	update_head_pos(slot, r10_bio);
 
 	if (uptodate) {
-		
+		 
 		set_bit(R10BIO_Uptodate, &r10_bio->state);
 		raid_end_bio_io(r10_bio);
 	} else {
-		
+		 
 		char b[BDEVNAME_SIZE];
 #ifdef MY_ABC_HERE
-		
+		 
 		if (IsDeviceDisappear(conf->mirrors[dev].rdev->bdev)) {
 			syno_md_error(r10_bio->mddev, conf->mirrors[dev].rdev);
 		}else{
@@ -251,7 +239,7 @@ static void raid10_end_read_request(struct bio *bio, int error)
 			       bdevname(conf->mirrors[dev].rdev->bdev,b), (unsigned long long)r10_bio->sector);
 
 #ifdef MY_ABC_HERE
-		
+		 
 		if (test_and_clear_bit(R10BIO_FIX_READ_ERROR, &r10_bio->state) &&
 			!blRaid10Enough(conf, conf->mirrors[dev].rdev)) {
 			md_error(r10_bio->mddev, conf->mirrors[dev].rdev);
@@ -277,7 +265,6 @@ static void raid10_end_write_request(struct bio *bio, int error)
 			break;
 	dev = r10_bio->devs[slot].devnum;
 
-	
 	if (!uptodate) {
 #ifdef MY_ABC_HERE
 		if (IsDeviceDisappear(conf->mirrors[dev].rdev->bdev)) {
@@ -292,17 +279,16 @@ static void raid10_end_write_request(struct bio *bio, int error)
 #else
 		md_error(r10_bio->mddev, conf->mirrors[dev].rdev);
 #endif
-		
+		 
 		set_bit(R10BIO_Degraded, &r10_bio->state);
 	} else
-		
+		 
 		set_bit(R10BIO_Uptodate, &r10_bio->state);
 
 	update_head_pos(slot, r10_bio);
 
-	
 	if (atomic_dec_and_test(&r10_bio->remaining)) {
-		
+		 
 		bitmap_endwrite(r10_bio->mddev->bitmap, r10_bio->sector,
 				r10_bio->sectors,
 				!test_bit(R10BIO_Degraded, &r10_bio->state),
@@ -314,8 +300,6 @@ static void raid10_end_write_request(struct bio *bio, int error)
 	rdev_dec_pending(conf->mirrors[dev].rdev, conf->mddev);
 }
 
-
-
 static void raid10_find_phys(conf_t *conf, r10bio_t *r10bio)
 {
 	int n,f;
@@ -326,7 +310,6 @@ static void raid10_find_phys(conf_t *conf, r10bio_t *r10bio)
 
 	int slot = 0;
 
-	
 	chunk = r10bio->sector >> conf->chunk_shift;
 	sector = r10bio->sector & conf->chunk_mask;
 
@@ -338,7 +321,6 @@ static void raid10_find_phys(conf_t *conf, r10bio_t *r10bio)
 
 	sector += stripe << conf->chunk_shift;
 
-	
 	for (n=0; n < conf->near_copies; n++) {
 		int d = dev;
 		sector_t s = sector;
@@ -391,7 +373,6 @@ static sector_t raid10_find_virt(conf_t *conf, sector_t sector, int dev)
 	return (vchunk << conf->chunk_shift) + offset;
 }
 
-
 static int raid10_mergeable_bvec(struct request_queue *q,
 				 struct bvec_merge_data *bvm,
 				 struct bio_vec *biovec)
@@ -403,15 +384,12 @@ static int raid10_mergeable_bvec(struct request_queue *q,
 	unsigned int bio_sectors = bvm->bi_size >> 9;
 
 	max =  (chunk_sectors - ((sector & (chunk_sectors - 1)) + bio_sectors)) << 9;
-	if (max < 0) max = 0; 
+	if (max < 0) max = 0;  
 	if (max <= biovec->bv_len && bio_sectors == 0)
 		return biovec->bv_len;
 	else
 		return max;
 }
-
-
-
 
 static int read_balance(conf_t *conf, r10bio_t *r10_bio)
 {
@@ -423,10 +401,10 @@ static int read_balance(conf_t *conf, r10bio_t *r10_bio)
 
 	raid10_find_phys(conf, r10_bio);
 	rcu_read_lock();
-	
+	 
 	if (conf->mddev->recovery_cp < MaxSector
 	    && (this_sector + sectors >= conf->next_resync)) {
-		
+		 
 		slot = 0;
 		disk = r10_bio->devs[slot].devnum;
 
@@ -444,7 +422,6 @@ static int read_balance(conf_t *conf, r10bio_t *r10_bio)
 		goto rb_out;
 	}
 
-	
 	slot = 0;
 	disk = r10_bio->devs[slot].devnum;
 	while ((rdev=rcu_dereference(conf->mirrors[disk].rdev)) == NULL ||
@@ -461,8 +438,6 @@ static int read_balance(conf_t *conf, r10bio_t *r10_bio)
 	current_distance = abs(r10_bio->devs[slot].addr -
 			       conf->mirrors[disk].head_position);
 
-	
-
 	for (nslot = slot; nslot < conf->copies; nslot++) {
 		int ndisk = r10_bio->devs[nslot].devnum;
 
@@ -471,14 +446,12 @@ static int read_balance(conf_t *conf, r10bio_t *r10_bio)
 		    !test_bit(In_sync, &rdev->flags))
 			continue;
 
-		
 		if (conf->near_copies > 1 && !atomic_read(&rdev->nr_pending)) {
 			disk = ndisk;
 			slot = nslot;
 			break;
 		}
 
-		
 		if (conf->far_copies > 1)
 			new_distance = r10_bio->devs[nslot].addr;
 		else
@@ -493,8 +466,7 @@ static int read_balance(conf_t *conf, r10bio_t *r10_bio)
 
 rb_out:
 	r10_bio->read_slot = slot;
-
-
+ 
 	if (disk >= 0 && (rdev=rcu_dereference(conf->mirrors[disk].rdev))!= NULL)
 		atomic_inc(&conf->mirrors[disk].rdev->nr_pending);
 	else
@@ -558,7 +530,7 @@ static int raid10_congested(void *data, int bits)
 
 static int flush_pending_writes(conf_t *conf)
 {
-	
+	 
 	int rv = 0;
 
 	spin_lock_irq(&conf->device_lock);
@@ -568,10 +540,10 @@ static int flush_pending_writes(conf_t *conf)
 		bio = bio_list_get(&conf->pending_bio_list);
 		blk_remove_plug(conf->mddev->queue);
 		spin_unlock_irq(&conf->device_lock);
-		
+		 
 		bitmap_unplug(conf->mddev->bitmap);
 
-		while (bio) { 
+		while (bio) {  
 			struct bio *next = bio->bi_next;
 			bio->bi_next = NULL;
 			generic_make_request(bio);
@@ -582,22 +554,18 @@ static int flush_pending_writes(conf_t *conf)
 		spin_unlock_irq(&conf->device_lock);
 	return rv;
 }
-
-
+ 
 static void raise_barrier(conf_t *conf, int force)
 {
 	BUG_ON(force && !conf->barrier);
 	spin_lock_irq(&conf->resync_lock);
 
-	
 	wait_event_lock_irq(conf->wait_barrier, force || !conf->nr_waiting,
 			    conf->resync_lock,
 			    raid10_unplug(conf->mddev->queue));
 
-	
 	conf->barrier++;
 
-	
 	wait_event_lock_irq(conf->wait_barrier,
 			    !conf->nr_pending && conf->barrier < RESYNC_DEPTH,
 			    conf->resync_lock,
@@ -640,7 +608,7 @@ static void allow_barrier(conf_t *conf)
 
 static void freeze_array(conf_t *conf)
 {
-	
+	 
 	spin_lock_irq(&conf->resync_lock);
 	conf->barrier++;
 	conf->nr_waiting++;
@@ -654,7 +622,7 @@ static void freeze_array(conf_t *conf)
 
 static void unfreeze_array(conf_t *conf)
 {
-	
+	 
 	spin_lock_irq(&conf->resync_lock);
 	conf->barrier--;
 	conf->nr_waiting--;
@@ -692,18 +660,17 @@ static int make_request(struct request_queue *q, struct bio * bio)
 		bio_endio(bio, 0);
 		return 0;
 	}
-#endif 
+#endif  
 
-	
 	if (unlikely( (bio->bi_sector & conf->chunk_mask) + (bio->bi_size >> 9)
 		      > chunk_sects &&
 		    conf->near_copies < conf->raid_disks)) {
 		struct bio_pair *bp;
-		
+		 
 		if (bio->bi_vcnt != 1 ||
 		    bio->bi_idx != 0)
 			goto bad_map;
-		
+		 
 		bp = bio_split(bio,
 			       chunk_sects - (bio->bi_sector & (chunk_sects - 1)) );
 		if (make_request(q, &bp->bio1))
@@ -724,7 +691,6 @@ static int make_request(struct request_queue *q, struct bio * bio)
 
 	md_write_start(mddev, bio);
 
-	
 	wait_barrier(conf);
 
 	cpu = part_stat_lock();
@@ -743,7 +709,7 @@ static int make_request(struct request_queue *q, struct bio * bio)
 	r10_bio->state = 0;
 
 	if (rw == READ) {
-		
+		 
 		int disk = read_balance(conf, r10_bio);
 		int slot = r10_bio->read_slot;
 		if (disk < 0) {
@@ -767,8 +733,6 @@ static int make_request(struct request_queue *q, struct bio * bio)
 		return 0;
 	}
 
-	
-	
 	raid10_find_phys(conf, r10_bio);
  retry_write:
 	blocked_rdev = NULL;
@@ -792,7 +756,7 @@ static int make_request(struct request_queue *q, struct bio * bio)
 	rcu_read_unlock();
 
 	if (unlikely(blocked_rdev)) {
-		
+		 
 		int j;
 		int d;
 
@@ -831,7 +795,7 @@ static int make_request(struct request_queue *q, struct bio * bio)
 	}
 
 	if (unlikely(!atomic_read(&r10_bio->remaining))) {
-		
+		 
 		md_write_end(mddev);
 #ifdef MY_ABC_HERE
 		bio_endio(bio, 0);
@@ -848,7 +812,6 @@ static int make_request(struct request_queue *q, struct bio * bio)
 	blk_plug_device(mddev->queue);
 	spin_unlock_irqrestore(&conf->device_lock, flags);
 
-	
 	wake_up(&conf->wait_barrier);
 
 	if (do_sync)
@@ -888,49 +851,6 @@ static void status(struct seq_file *seq, mddev_t *mddev)
 }
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-#ifdef MY_ABC_HERE
-static inline unsigned char SynoIsRaidReachMaxDegrade(mddev_t *mddev)
-{
-	conf_t *conf = mddev->private;
-	int first = 0;
-	int first_orig = first;
-	int blStandardRaid10 = 0;
-	int ret = 0;
-
-	
-	if (1 < conf->near_copies && !(conf->raid_disks % conf->near_copies)) {
-		blStandardRaid10 = 1;
-	}
-
-	do {
-		int n = conf->copies;
-		int cnt = 0;
-
-		while (n--) {
-			if (conf->mirrors[first].rdev &&
-				!test_bit(Faulty, &conf->mirrors[first].rdev->flags)&&
-				test_bit(In_sync, &conf->mirrors[first].rdev->flags)) {
-				cnt++;
-			}
-			first = (first+1) % conf->raid_disks;
-		}
-
-		if (cnt <= 1) {
-			ret = 1;
-			goto END;
-		}
-
-		if (!blStandardRaid10) {
-			first_orig = (first_orig+1) % conf->raid_disks;
-			first = first_orig;
-		}
-	} while (first != 0);
-
-END:
-	return ret;
-}
-#endif
-
 static int
 blRaid10Enough(conf_t *conf,
 			   mdk_rdev_t *rdev)
@@ -940,7 +860,6 @@ blRaid10Enough(conf_t *conf,
 	int blStandardRaid10 = 0;
 	int ret = 0;
 
-	
 	if (1 < conf->near_copies && !(conf->raid_disks % conf->near_copies)) {
 		blStandardRaid10 = 1;
 	}
@@ -974,7 +893,7 @@ blRaid10Enough(conf_t *conf,
 END:
 	return ret;
 }
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 static void
@@ -1001,7 +920,7 @@ syno_error_common(mddev_t *mddev,
 #endif
 		set_bit(Faulty, &rdev->flags);
 		spin_unlock_irqrestore(&conf->device_lock, flags);
-		
+		 
 		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	} else
 		set_bit(Faulty, &rdev->flags);
@@ -1019,7 +938,6 @@ syno_error_for_hotplug(mddev_t *mddev,
 	conf_t *conf = mddev->private;
 	mdk_rdev_t *rdev_tmp;
 
-	
 	if (test_bit(In_sync, &rdev->flags)
 	    && blRaid10Enough(conf, NULL) &&
 		!blRaid10Enough(conf, rdev)) {
@@ -1037,7 +955,6 @@ syno_error_for_hotplug(mddev_t *mddev,
 	syno_error_common(mddev, rdev);
 }
 
-
 static
 void syno_error_for_internal(mddev_t *mddev,
 							 mdk_rdev_t *rdev)
@@ -1050,13 +967,13 @@ void syno_error_for_internal(mddev_t *mddev,
 	    && blRaid10Enough(conf, NULL) &&
 		!blRaid10Enough(conf, rdev)){
 #ifdef MY_ABC_HERE
-			
+			 
 			if (!test_bit(DiskError, &rdev->flags)) {
 				set_bit(DiskError, &rdev->flags);
 				set_bit(MD_CHANGE_DEVS, &mddev->flags);
 			}
-#endif 
-			
+#endif  
+			 
 			list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
 				if(!test_bit(Faulty, &rdev_tmp->flags) &&
 				   !test_bit(In_sync, &rdev_tmp->flags) &&
@@ -1068,31 +985,29 @@ void syno_error_for_internal(mddev_t *mddev,
 				}
 			}
 
-			
 			return;
 	}
 
 	syno_error_common(mddev, rdev);
 }
 
-#else 
+#else  
 
 static void error(mddev_t *mddev, mdk_rdev_t *rdev)
 {
 	char b[BDEVNAME_SIZE];
 	conf_t *conf = mddev->private;
 
-	
 	if (test_bit(In_sync, &rdev->flags)
 	    && conf->raid_disks-mddev->degraded == 1)
-		
+		 
 		return;
 	if (test_and_clear_bit(In_sync, &rdev->flags)) {
 		unsigned long flags;
 		spin_lock_irqsave(&conf->device_lock, flags);
 		mddev->degraded++;
 		spin_unlock_irqrestore(&conf->device_lock, flags);
-		
+		 
 		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	}
 	set_bit(Faulty, &rdev->flags);
@@ -1101,7 +1016,7 @@ static void error(mddev_t *mddev, mdk_rdev_t *rdev)
 		"raid10: Operation continuing on %d devices.\n",
 		bdevname(rdev->bdev,b), conf->raid_disks - mddev->degraded);
 }
-#endif 
+#endif  
 
 static void print_conf(conf_t *conf)
 {
@@ -1136,7 +1051,6 @@ static void close_sync(conf_t *conf)
 	conf->r10buf_pool = NULL;
 }
 
-
 static int enough(conf_t *conf)
 {
 	int first = 0;
@@ -1167,7 +1081,6 @@ static int raid10_spare_active(mddev_t *mddev)
 	}
 #endif
 
-	
 	for (i = 0; i < conf->raid_disks; i++) {
 		tmp = conf->mirrors + i;
 		if (tmp->rdev
@@ -1204,7 +1117,7 @@ static int raid10_add_disk(mddev_t *mddev, mdk_rdev_t *rdev)
 #endif
 
 	if (mddev->recovery_cp < MaxSector)
-		
+		 
 		return -EBUSY;
 	if (!enough(conf))
 		return -EINVAL;
@@ -1223,7 +1136,7 @@ static int raid10_add_disk(mddev_t *mddev, mdk_rdev_t *rdev)
 
 			disk_stack_limits(mddev->gendisk, rdev->bdev,
 					  rdev->data_offset << 9);
-			
+			 
 			if (rdev->bdev->bd_disk->queue->merge_bvec_fn) {
 				blk_queue_max_phys_segments(mddev->queue, 1);
 				blk_queue_segment_boundary(mddev->queue,
@@ -1259,7 +1172,7 @@ static int raid10_remove_disk(mddev_t *mddev, int number)
 			err = -EBUSY;
 			goto abort;
 		}
-		
+		 
 		if (!test_bit(Faulty, &rdev->flags) &&
 		    enough(conf)) {
 			err = -EBUSY;
@@ -1268,7 +1181,7 @@ static int raid10_remove_disk(mddev_t *mddev, int number)
 		p->rdev = NULL;
 		synchronize_rcu();
 		if (atomic_read(&rdev->nr_pending)) {
-			
+			 
 			err = -EBUSY;
 			p->rdev = rdev;
 			goto abort;
@@ -1320,11 +1233,10 @@ static void end_sync_read(struct bio *bio, int error)
 #endif
 	}
 
-	
 	rdev_dec_pending(conf->mirrors[d].rdev, conf->mddev);
 	if (test_bit(R10BIO_IsRecover, &r10_bio->state) ||
 	    atomic_dec_and_test(&r10_bio->remaining)) {
-		
+		 
 		reschedule_retry(r10_bio);
 	}
 }
@@ -1349,12 +1261,12 @@ static void end_sync_write(struct bio *bio, int error)
 		}else{
 #ifdef MY_ABC_HERE
 			if (-EIO == error) {
-				
+				 
 				SynoReportBadSector(bio->bi_sector, WRITE,
 									conf->mddev->md_minor, conf->mirrors[d].rdev->bdev, __FUNCTION__);
 				md_error(mddev, conf->mirrors[d].rdev);
 			} else if (-EEXIST == error) {
-				
+				 
 			} else {
 				;
 			}
@@ -1371,7 +1283,7 @@ static void end_sync_write(struct bio *bio, int error)
 	rdev_dec_pending(conf->mirrors[d].rdev, mddev);
 	while (atomic_dec_and_test(&r10_bio->remaining)) {
 		if (r10_bio->master_bio == NULL) {
-			
+			 
 			sector_t s = r10_bio->sectors;
 			put_buf(r10_bio);
 			md_done_sync(mddev, s, 1);
@@ -1384,8 +1296,6 @@ static void end_sync_write(struct bio *bio, int error)
 	}
 }
 
-
-
 static void sync_request_write(mddev_t *mddev, r10bio_t *r10_bio)
 {
 	conf_t *conf = mddev->private;
@@ -1394,7 +1304,6 @@ static void sync_request_write(mddev_t *mddev, r10bio_t *r10_bio)
 
 	atomic_set(&r10_bio->remaining, 1);
 
-	
 	for (i=0; i<conf->copies; i++)
 		if (test_bit(BIO_UPTODATE, &r10_bio->devs[i].bio->bi_flags))
 			break;
@@ -1405,7 +1314,6 @@ static void sync_request_write(mddev_t *mddev, r10bio_t *r10_bio)
 	first = i;
 	fbio = r10_bio->devs[i].bio;
 
-	
 	for (i=0 ; i < conf->copies ; i++) {
 		int  j, d;
 		int vcnt = r10_bio->sectors >> (PAGE_SHIFT-9);
@@ -1417,7 +1325,7 @@ static void sync_request_write(mddev_t *mddev, r10bio_t *r10_bio)
 		if (i == first)
 			continue;
 		if (test_bit(BIO_UPTODATE, &r10_bio->devs[i].bio->bi_flags)) {
-			
+			 
 			for (j = 0; j < vcnt; j++)
 				if (memcmp(page_address(fbio->bi_io_vec[j].bv_page),
 					   page_address(tbio->bi_io_vec[j].bv_page),
@@ -1428,9 +1336,9 @@ static void sync_request_write(mddev_t *mddev, r10bio_t *r10_bio)
 			mddev->resync_mismatches += r10_bio->sectors;
 		}
 		if (test_bit(MD_RECOVERY_CHECK, &mddev->recovery))
-			
+			 
 			continue;
-		
+		 
 		tbio->bi_vcnt = vcnt;
 		tbio->bi_size = r10_bio->sectors << 9;
 		tbio->bi_idx = 0;
@@ -1469,15 +1377,12 @@ done:
 	}
 }
 
-
-
 static void recovery_request_write(mddev_t *mddev, r10bio_t *r10_bio)
 {
 	conf_t *conf = mddev->private;
 	int i, d;
 	struct bio *bio, *wbio;
 
-	
 	bio = r10_bio->devs[0].bio;
 	wbio = r10_bio->devs[1].bio;
 	for (i=0; i < wbio->bi_vcnt; i++) {
@@ -1493,18 +1398,16 @@ static void recovery_request_write(mddev_t *mddev, r10bio_t *r10_bio)
 		generic_make_request(wbio);
 	else
 #ifdef MY_ABC_HERE
-		
+		 
 		bio_endio(wbio, -EEXIST);
 #else
 		bio_endio(wbio, -EIO);
 #endif
 }
 
-
-
 static void fix_read_error(conf_t *conf, mddev_t *mddev, r10bio_t *r10_bio)
 {
-	int sect = 0; 
+	int sect = 0;  
 	int sectors = r10_bio->sectors;
 	mdk_rdev_t*rdev;
 	while(sectors) {
@@ -1541,14 +1444,14 @@ static void fix_read_error(conf_t *conf, mddev_t *mddev, r10bio_t *r10_bio)
 		rcu_read_unlock();
 
 		if (!success) {
-			
+			 
 			int dn = r10_bio->devs[r10_bio->read_slot].devnum;
 			md_error(mddev, conf->mirrors[dn].rdev);
 			break;
 		}
 
 		start = sl;
-		
+		 
 		rcu_read_lock();
 		while (sl != r10_bio->read_slot) {
 			int d;
@@ -1567,7 +1470,7 @@ static void fix_read_error(conf_t *conf, mddev_t *mddev, r10bio_t *r10_bio)
 						 sect + rdev->data_offset,
 						 s<<9, conf->tmppage, WRITE)
 				    == 0)
-					
+					 
 					md_error(mddev, rdev);
 				rdev_dec_pending(rdev, mddev);
 				rcu_read_lock();
@@ -1590,7 +1493,7 @@ static void fix_read_error(conf_t *conf, mddev_t *mddev, r10bio_t *r10_bio)
 						 r10_bio->devs[sl].addr +
 						 sect + rdev->data_offset,
 						 s<<9, conf->tmppage, READ) == 0)
-					
+					 
 					md_error(mddev, rdev);
 				else
 					printk(KERN_INFO
@@ -1649,7 +1552,7 @@ static void raid10d(mddev_t *mddev)
 			unplug = 1;
 		} else {
 			int mirror;
-			
+			 
 			if (mddev->ro == 0) {
 				freeze_array(conf);
 				fix_read_error(conf, mddev, r10_bio);
@@ -1663,7 +1566,7 @@ static void raid10d(mddev_t *mddev)
 			if (mirror == -1) {
 #ifdef MY_ABC_HERE
 				if (mddev->nodev_and_crashed) {
-					
+					 
 					printk(KERN_ALERT "raid10: no bdev: unrecoverable I/O"
 						   " read error for block %llu\n",
 						   (unsigned long long)r10_bio->sector);
@@ -1725,8 +1628,6 @@ static int init_resync(conf_t *conf)
 	return 0;
 }
 
-
-
 static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, int go_faster)
 {
 	conf_t *conf = mddev->private;
@@ -1760,14 +1661,14 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 #endif
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-	
+	 
 	if (blStopSync) {
 		*skipped = 1;
 		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
-		
+		 
 		mddev->recovery_cp = MaxSector;
 	}
-#endif 
+#endif  
 
  skipped:
 	max_sector = mddev->dev_sectors;
@@ -1778,8 +1679,8 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 #else
 	if (sector_nr >= max_sector) {
 #endif
-		
-		if (mddev->curr_resync < max_sector) { 
+		 
+		if (mddev->curr_resync < max_sector) {  
 			if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery))
 				bitmap_end_sync(mddev->bitmap, mddev->curr_resync,
 						&sync_blocks, 1);
@@ -1789,7 +1690,7 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 				bitmap_end_sync(mddev->bitmap, sect,
 						&sync_blocks, 1);
 			}
-		} else 
+		} else  
 			conf->fullsync = 0;
 
 		bitmap_close_sync(mddev->bitmap);
@@ -1798,28 +1699,24 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 		return sectors_skipped;
 	}
 	if (chunks_skipped >= conf->raid_disks) {
-		
+		 
 		*skipped = 1;
 		return (max_sector - sector_nr) + sectors_skipped;
 	}
 
 	if (max_sector > mddev->resync_max)
-		max_sector = mddev->resync_max; 
+		max_sector = mddev->resync_max;  
 
-	
 	if (conf->near_copies < conf->raid_disks &&
 	    max_sector > (sector_nr | conf->chunk_mask))
 		max_sector = (sector_nr | conf->chunk_mask) + 1;
-	
+	 
 	if (!go_faster && conf->nr_waiting)
 		msleep_interruptible(1000);
 
-	
-	
-
 	max_sync = RESYNC_PAGES << (PAGE_SHIFT-9);
 	if (!test_bit(MD_RECOVERY_SYNC, &mddev->recovery)) {
-		
+		 
 		int j, k;
 		r10_bio = NULL;
 
@@ -1827,18 +1724,18 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 			if (conf->mirrors[i].rdev &&
 			    !test_bit(In_sync, &conf->mirrors[i].rdev->flags)) {
 				int still_degraded = 0;
-				
+				 
 				r10bio_t *rb2 = r10_bio;
 				sector_t sect = raid10_find_virt(conf, sector_nr, i);
 				int must_sync;
-				
+				 
 				must_sync = bitmap_start_sync(mddev->bitmap, sect,
 							      &sync_blocks, 1);
 				if (sync_blocks < max_sync)
 					max_sync = sync_blocks;
 				if (!must_sync &&
 				    !conf->fullsync) {
-					
+					 
 					chunks_skipped = -1;
 					continue;
 				}
@@ -1856,7 +1753,6 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 
 				raid10_find_phys(conf, r10_bio);
 
-				
 				for (j=0; j<conf->raid_disks; j++)
 					if (conf->mirrors[j].rdev == NULL ||
 					    test_bit(Faulty, &conf->mirrors[j].rdev->flags)) {
@@ -1871,7 +1767,7 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 					int d = r10_bio->devs[j].devnum;
 					if (conf->mirrors[d].rdev &&
 					    test_bit(In_sync, &conf->mirrors[d].rdev->flags)) {
-						
+						 
 						bio = r10_bio->devs[0].bio;
 						bio->bi_next = biolist;
 						biolist = bio;
@@ -1883,8 +1779,7 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 						bio->bi_bdev = conf->mirrors[d].rdev->bdev;
 						atomic_inc(&conf->mirrors[d].rdev->nr_pending);
 						atomic_inc(&r10_bio->remaining);
-						
-
+						 
 						for (k=0; k<conf->copies; k++)
 							if (r10_bio->devs[k].devnum == i)
 								break;
@@ -1906,7 +1801,7 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 					}
 				}
 				if (j == conf->copies) {
-					
+					 
 					put_buf(r10_bio);
 					if (rb2)
 						atomic_dec(&rb2->remaining);
@@ -1928,7 +1823,7 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 			goto giveup;
 		}
 	} else {
-		
+		 
 		int count = 0;
 
 		bitmap_cond_end_sync(mddev->bitmap, sector_nr);
@@ -1936,7 +1831,7 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 		if (!bitmap_start_sync(mddev->bitmap, sector_nr,
 				       &sync_blocks, mddev->degraded) &&
 		    !conf->fullsync && !test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery)) {
-			
+			 
 			*skipped = 1;
 			return sync_blocks + sectors_skipped;
 		}
@@ -2013,11 +1908,11 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 		for (bio= biolist ; bio ; bio=bio->bi_next) {
 			page = bio->bi_io_vec[bio->bi_vcnt].bv_page;
 			if (bio_add_page(bio, page, len, 0) == 0) {
-				
+				 
 				struct bio *bio2;
 				bio->bi_io_vec[bio->bi_vcnt].bv_page = page;
 				for (bio2 = biolist; bio2 && bio2 != bio; bio2 = bio2->bi_next) {
-					
+					 
 					bio2->bi_vcnt--;
 					bio2->bi_size -= len;
 					bio2->bi_flags &= ~(1<< BIO_SEG_VALID);
@@ -2047,12 +1942,12 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 	}
 
 	if (sectors_skipped)
-		
+		 
 		md_done_sync(mddev, sectors_skipped, 1);
 
 	return sectors_skipped + nr_sectors;
  giveup:
-	
+	 
 	if (sector_nr + max_sync < max_sector)
 		max_sector = sector_nr + max_sync;
 
@@ -2106,7 +2001,7 @@ static int run(mddev_t *mddev)
 		       mdname(mddev), mddev->layout);
 		goto out;
 	}
-	
+	 
 	conf = kzalloc(sizeof(conf_t), GFP_KERNEL);
 	mddev->private = conf;
 	if (!conf) {
@@ -2137,11 +2032,9 @@ static int run(mddev_t *mddev)
 	sector_div(size, fc);
 	size = size * conf->raid_disks;
 	sector_div(size, nc);
-	
-	
+	 
 	stride = size * conf->copies;
 
-	
 	stride += conf->raid_disks - 1;
 	sector_div(stride, conf->raid_disks);
 	mddev->dev_sectors = stride << conf->chunk_shift;
@@ -2182,7 +2075,7 @@ static int run(mddev_t *mddev)
 		disk->rdev = rdev;
 		disk_stack_limits(mddev->gendisk, rdev->bdev,
 				  rdev->data_offset << 9);
-		
+		 
 		if (rdev->bdev->bd_disk->queue->merge_bvec_fn) {
 			blk_queue_max_phys_segments(mddev->queue, 1);
 			blk_queue_segment_boundary(mddev->queue,
@@ -2196,9 +2089,8 @@ static int run(mddev_t *mddev)
 	spin_lock_init(&conf->resync_lock);
 	init_waitqueue_head(&conf->wait_barrier);
 
-	
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-	
+	 
 	if (!blRaid10Enough(conf, NULL)) {
 #else
 	if (!enough(conf)) {
@@ -2243,7 +2135,7 @@ static int run(mddev_t *mddev)
 		"raid10: raid set %s active with %d out of %d devices\n",
 		mdname(mddev), mddev->raid_disks - mddev->degraded,
 		mddev->raid_disks);
-	
+	 
 	md_set_array_sectors(mddev, raid10_size(mddev, 0, 0));
 	mddev->resync_max_sectors = raid10_size(mddev, 0, 0);
 
@@ -2251,7 +2143,6 @@ static int run(mddev_t *mddev)
 	mddev->queue->backing_dev_info.congested_fn = raid10_congested;
 	mddev->queue->backing_dev_info.congested_data = mddev;
 
-	
 	{
 		int stripe = conf->raid_disks *
 			((mddev->chunk_sectors << 9) / PAGE_SIZE);
@@ -2285,7 +2176,7 @@ static int stop(mddev_t *mddev)
 
 	md_unregister_thread(mddev->thread);
 	mddev->thread = NULL;
-	blk_sync_queue(mddev->queue); 
+	blk_sync_queue(mddev->queue);  
 	if (conf->r10bio_pool)
 		mempool_destroy(conf->r10bio_pool);
 	kfree(conf->mirrors);
@@ -2336,9 +2227,6 @@ static struct mdk_personality raid10_personality =
 	.sync_request	= sync_request,
 	.quiesce	= raid10_quiesce,
 	.size		= raid10_size,
-#ifdef MY_ABC_HERE
-	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
-#endif
 };
 
 static int __init raid_init(void)
@@ -2354,6 +2242,6 @@ static void raid_exit(void)
 module_init(raid_init);
 module_exit(raid_exit);
 MODULE_LICENSE("GPL");
-MODULE_ALIAS("md-personality-9"); 
+MODULE_ALIAS("md-personality-9");  
 MODULE_ALIAS("md-raid10");
 MODULE_ALIAS("md-level-10");

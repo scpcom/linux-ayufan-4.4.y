@@ -32,20 +32,19 @@ struct scsi_mode_data {
 	__u8	longlba:1;
 };
 
-
 enum scsi_device_state {
-	SDEV_CREATED = 1,	
-	SDEV_RUNNING,		
-	SDEV_CANCEL,		
-	SDEV_DEL,		
-	SDEV_QUIESCE,		
-	SDEV_OFFLINE,		
-	SDEV_BLOCK,		
-	SDEV_CREATED_BLOCK,	
+	SDEV_CREATED = 1,	 
+	SDEV_RUNNING,		 
+	SDEV_CANCEL,		 
+	SDEV_DEL,		 
+	SDEV_QUIESCE,		 
+	SDEV_OFFLINE,		 
+	SDEV_BLOCK,		 
+	SDEV_CREATED_BLOCK,	 
 };
 
 enum scsi_device_event {
-	SDEV_EVT_MEDIA_CHANGE	= 1,	
+	SDEV_EVT_MEDIA_CHANGE	= 1,	 
 
 	SDEV_EVT_LAST		= SDEV_EVT_MEDIA_CHANGE,
 	SDEV_EVT_MAXBITS	= SDEV_EVT_LAST + 1
@@ -55,92 +54,86 @@ struct scsi_event {
 	enum scsi_device_event	evt_type;
 	struct list_head	node;
 
-	
 };
 
 struct scsi_device {
 	struct Scsi_Host *host;
 	struct request_queue *request_queue;
 
-	
-	struct list_head    siblings;   
-	struct list_head    same_target_siblings; 
+	struct list_head    siblings;    
+	struct list_head    same_target_siblings;  
 
-	
-	unsigned int device_busy;	
+	unsigned int device_busy;	 
 	spinlock_t list_lock;
-	struct list_head cmd_list;	
+	struct list_head cmd_list;	 
 	struct list_head starved_entry;
-	struct scsi_cmnd *current_cmnd;	
-	unsigned short queue_depth;	
-	unsigned short last_queue_full_depth; 
-	unsigned short last_queue_full_count; 
-	unsigned long last_queue_full_time;
+	struct scsi_cmnd *current_cmnd;	 
+	unsigned short queue_depth;	 
+	unsigned short last_queue_full_depth;  
+	unsigned short last_queue_full_count;  
+	unsigned long last_queue_full_time; 
 
 	unsigned int id, lun, channel;
 #ifdef MY_ABC_HERE
-	char syno_disk_name[BDEVNAME_SIZE];		
+	char syno_disk_name[BDEVNAME_SIZE];		 
 #endif
-#ifdef MY_ABC_HERE
-	unsigned char auto_remap;
-#endif
-	unsigned int manufacturer;	
-	unsigned sector_size;	
+	unsigned int manufacturer;	 
+	unsigned sector_size;	 
 
-	void *hostdata;		
+	void *hostdata;		 
 	char type;
 	char scsi_level;
-	char inq_periph_qual;		
-	unsigned char inquiry_len;	
-	unsigned char * inquiry;	
-	const char * vendor;		
-	const char * model;		
-	const char * rev;		
-	unsigned char current_tag;	
-	struct scsi_target      *sdev_target;   
+	char inq_periph_qual;	 	
+	unsigned char inquiry_len;	 
+	unsigned char * inquiry;	 
+	const char * vendor;		 
+	const char * model;		 
+	const char * rev;		 
+	unsigned char current_tag;	 
+	struct scsi_target      *sdev_target;    
 
-	unsigned int	sdev_bflags; 
+	unsigned int	sdev_bflags;  
 	unsigned writeable:1;
 	unsigned removable:1;
-	unsigned changed:1;	
-	unsigned busy:1;	
-	unsigned lockable:1;	
-	unsigned locked:1;      
-	unsigned borken:1;	
-	unsigned disconnect:1;	
-	unsigned soft_reset:1;	
-	unsigned sdtr:1;	
-	unsigned wdtr:1;	
-	unsigned ppr:1;		
-	unsigned tagged_supported:1;	
-	unsigned simple_tags:1;	
-	unsigned ordered_tags:1;
-	unsigned was_reset:1;	
-	unsigned expecting_cc_ua:1; 
-	unsigned use_10_for_rw:1; 
-	unsigned use_10_for_ms:1; 
-	unsigned skip_ms_page_8:1;	
-	unsigned skip_ms_page_3f:1;	
-	unsigned use_192_bytes_for_3f:1; 
-	unsigned no_start_on_add:1;	
-	unsigned allow_restart:1; 
-	unsigned manage_start_stop:1;	
-	unsigned start_stop_pwr_cond:1;	
-	unsigned no_uld_attach:1; 
+	unsigned changed:1;	 
+	unsigned busy:1;	 
+	unsigned lockable:1;	 
+	unsigned locked:1;       
+	unsigned borken:1;	 
+	unsigned disconnect:1;	 
+	unsigned soft_reset:1;	 
+	unsigned sdtr:1;	 
+	unsigned wdtr:1;	 
+	unsigned ppr:1;		 
+	unsigned tagged_supported:1;	 
+	unsigned simple_tags:1;	 
+	unsigned ordered_tags:1; 
+	unsigned was_reset:1;	 
+	unsigned expecting_cc_ua:1;  
+	unsigned use_10_for_rw:1;  
+	unsigned use_10_for_ms:1;  
+	unsigned skip_ms_page_8:1;	 
+	unsigned skip_ms_page_3f:1;	 
+	unsigned use_192_bytes_for_3f:1;  
+	unsigned no_start_on_add:1;	 
+	unsigned allow_restart:1;  
+	unsigned manage_start_stop:1;	 
+	unsigned start_stop_pwr_cond:1;	 
+	unsigned no_uld_attach:1;  
 	unsigned select_no_atn:1;
-	unsigned fix_capacity:1;	
-	unsigned guess_capacity:1;	
-	unsigned retry_hwerror:1;	
-	unsigned last_sector_bug:1;	
-	unsigned is_visible:1;	
+	unsigned fix_capacity:1;	 
+	unsigned guess_capacity:1;	 
+	unsigned retry_hwerror:1;	 
+	unsigned last_sector_bug:1;	 
+	unsigned is_visible:1;	 
 
-	DECLARE_BITMAP(supported_events, SDEV_EVT_MAXBITS); 
-	struct list_head event_list;	
+	DECLARE_BITMAP(supported_events, SDEV_EVT_MAXBITS);  
+	struct list_head event_list;	 
 	struct work_struct event_work;
 
-	unsigned int device_blocked;	
+	unsigned int device_blocked;	 
 
-	unsigned int max_device_blocked; 
+	unsigned int max_device_blocked;  
 #define SCSI_DEFAULT_DEVICE_BLOCKED	3
 
 	atomic_t iorequest_cnt;
@@ -148,24 +141,24 @@ struct scsi_device {
 	atomic_t ioerr_cnt;
 
 #ifdef MY_ABC_HERE
-	unsigned long   idle;   
+	unsigned long   idle;    
 	unsigned char   spindown;
 	unsigned char   nospindown;
-#endif 
+#endif  
 
 	struct device		sdev_gendev,
 				sdev_dev;
 
-	struct execute_work	ew; 
+	struct execute_work	ew;  
 
 	struct scsi_dh_data	*scsi_dh_data;
 	enum scsi_device_state sdev_state;
 
 #ifdef CONFIG_MV_SCATTERED_SPINUP
-	enum scsi_device_power_state sdev_power_state;  
-	struct timer_list spinup_timeout;	
+	enum scsi_device_power_state sdev_power_state;   
+	struct timer_list spinup_timeout;	 
 	unsigned int standby_timeout_secs;
-	struct timer_list standby_timeout;	
+	struct timer_list standby_timeout;	 
 #endif
 
 	unsigned long		sdev_data[0];
@@ -177,10 +170,9 @@ struct scsi_dh_devlist {
 };
 
 struct scsi_device_handler {
-	
-	struct list_head list; 
+	 
+	struct list_head list;  
 
-	
 	struct module *module;
 	const char *name;
 	const struct scsi_dh_devlist *devlist;
@@ -221,22 +213,20 @@ enum scsi_target_state {
 	STARGET_DEL,
 };
 
-
 struct scsi_target {
 	struct scsi_device	*starget_sdev_user;
 	struct list_head	siblings;
 	struct list_head	devices;
 	struct device		dev;
-	unsigned int		reap_ref; 
+	unsigned int		reap_ref;  
 	unsigned int		channel;
-	unsigned int		id; 
-	unsigned int		create:1; 
-	unsigned int		single_lun:1;	
-	unsigned int		pdt_1f_for_no_lun;	
-						
-	
+	unsigned int		id;  
+	unsigned int		create:1;  
+	unsigned int		single_lun:1;	 
+	unsigned int		pdt_1f_for_no_lun;	 
+						 
 	unsigned int		target_busy;
-	
+	 
 	unsigned int		can_queue;
 	unsigned int		target_blocked;
 	unsigned int		max_target_blocked;
@@ -245,9 +235,9 @@ struct scsi_target {
 	char			scsi_level;
 	struct execute_work	ew;
 	enum scsi_target_state	state;
-	void 			*hostdata; 
-	unsigned long		starget_data[0]; 
-	
+	void 			*hostdata;  
+	unsigned long		starget_data[0];  
+	 
 } __attribute__((aligned(sizeof(unsigned long))));
 
 #define to_scsi_target(d)	container_of(d, struct scsi_target, dev)
@@ -289,16 +279,13 @@ extern void __starget_for_each_device(struct scsi_target *, void *,
 				      void (*fn)(struct scsi_device *,
 						 void *));
 
-
 extern struct scsi_device *__scsi_iterate_devices(struct Scsi_Host *,
 						  struct scsi_device *);
-
 
 #define shost_for_each_device(sdev, shost) \
 	for ((sdev) = __scsi_iterate_devices((shost), NULL); \
 	     (sdev); \
 	     (sdev) = __scsi_iterate_devices((shost), (sdev)))
-
 
 #define __shost_for_each_device(sdev, shost) \
 	list_for_each_entry((sdev), &((shost)->__devices), siblings)
@@ -369,7 +356,6 @@ static inline unsigned int sdev_id(struct scsi_device *sdev)
 #define scmd_id(scmd) sdev_id((scmd)->device)
 #define scmd_channel(scmd) sdev_channel((scmd)->device)
 
-
 static inline int scsi_device_online(struct scsi_device *sdev)
 {
 	return (sdev->sdev_state != SDEV_OFFLINE &&
@@ -385,7 +371,6 @@ static inline int scsi_device_created(struct scsi_device *sdev)
 	return sdev->sdev_state == SDEV_CREATED ||
 		sdev->sdev_state == SDEV_CREATED_BLOCK;
 }
-
 
 static inline int scsi_device_sync(struct scsi_device *sdev)
 {
@@ -431,4 +416,4 @@ static inline int scsi_device_protection(struct scsi_device *sdev)
 	MODULE_ALIAS("scsi:t-" __stringify(type) "*")
 #define SCSI_DEVICE_MODALIAS_FMT "scsi:t-0x%02x"
 
-#endif 
+#endif  

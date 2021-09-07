@@ -1,8 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/fs.h>
@@ -32,10 +31,10 @@
 extern void md_autodetect_dev(dev_t dev);
 #endif
 
-int warn_no_part = 1; 
+int warn_no_part = 1;  
 
 static int (*check_part[])(struct parsed_partitions *, struct block_device *) = {
-	
+	 
 #ifdef CONFIG_ACORN_PARTITION_ICS
 	adfspart_check_ICS,
 #endif
@@ -46,7 +45,6 @@ static int (*check_part[])(struct parsed_partitions *, struct block_device *) = 
 	adfspart_check_EESOX,
 #endif
 
-	
 #ifdef CONFIG_ACORN_PARTITION_CUMANA
 	adfspart_check_CUMANA,
 #endif
@@ -55,13 +53,13 @@ static int (*check_part[])(struct parsed_partitions *, struct block_device *) = 
 #endif
 
 #ifdef CONFIG_EFI_PARTITION
-	efi_partition,		
+	efi_partition,		 
 #endif
 #ifdef CONFIG_SGI_PARTITION
 	sgi_partition,
 #endif
 #ifdef CONFIG_LDM_PARTITION
-	ldm_partition,		
+	ldm_partition,		 
 #endif
 #ifdef CONFIG_MSDOS_PARTITION
 	msdos_partition,
@@ -96,8 +94,6 @@ static int (*check_part[])(struct parsed_partitions *, struct block_device *) = 
 	NULL
 };
  
-
-
 char *disk_name(struct gendisk *hd, int partno, char *buf)
 {
 	if (!partno)
@@ -122,7 +118,6 @@ const char *bdevname(struct block_device *bdev, char *buf)
 }
 
 EXPORT_SYMBOL(bdevname);
-
 
 const char *__bdevname(dev_t dev, char *buffer)
 {
@@ -154,7 +149,7 @@ check_partition(struct gendisk *hd, struct block_device *bdev)
 		memset(&state->parts, 0, sizeof(state->parts));
 		res = check_part[i++](state, bdev);
 		if (res < 0) {
-			
+			 
 			err = res;
 			res = 0;
 		}
@@ -163,7 +158,7 @@ check_partition(struct gendisk *hd, struct block_device *bdev)
 	if (res > 0)
 		return state;
 	if (err)
-	
+	 
 		res = err;
 	if (!res)
 		printk(" unknown partition table\n");
@@ -238,31 +233,6 @@ ssize_t part_inflight_show(struct device *dev,
 	return sprintf(buf, "%8u %8u\n", p->in_flight[0], p->in_flight[1]);
 }
 
-#ifdef MY_ABC_HERE
-extern void
-PartitionRemapModeSet(struct gendisk *gd,
-							struct hd_struct *phd,
-							unsigned char blAutoRemap);
-ssize_t part_auto_remap_show(struct device *dev,
-			struct device_attribute *attr, char *buf)
-{
-	return sprintf(buf, "%d\n", dev_to_part(dev)->auto_remap);
-}
-
-ssize_t part_auto_remap_store(struct device *dev,
-			struct device_attribute *attr,
-			const char *buf, size_t count)
-{
-	unsigned val = 0;
-	struct hd_struct *p = dev_to_part(dev);
-	struct gendisk *disk = part_to_disk(p);
-
-	sscanf(buf, "%d", &val);
-	PartitionRemapModeSet(disk, p, val ? 1 : 0);
-	return count;
-}
-#endif
-
 #ifdef CONFIG_FAIL_MAKE_REQUEST
 ssize_t part_fail_show(struct device *dev,
 		       struct device_attribute *attr, char *buf)
@@ -296,9 +266,6 @@ static DEVICE_ATTR(inflight, S_IRUGO, part_inflight_show, NULL);
 static struct device_attribute dev_attr_fail =
 	__ATTR(make-it-fail, S_IRUGO|S_IWUSR, part_fail_show, part_fail_store);
 #endif
-#ifdef MY_ABC_HERE
-	static DEVICE_ATTR(auto_remap, S_IRUGO|S_IWUSR, part_auto_remap_show, part_auto_remap_store);
-#endif
 
 static struct attribute *part_attrs[] = {
 	&dev_attr_partition.attr,
@@ -309,9 +276,6 @@ static struct attribute *part_attrs[] = {
 	&dev_attr_inflight.attr,
 #ifdef CONFIG_FAIL_MAKE_REQUEST
 	&dev_attr_fail.attr,
-#endif
-#ifdef MY_ABC_HERE
-	&dev_attr_auto_remap.attr,
 #endif
 	NULL
 };
@@ -431,7 +395,6 @@ struct hd_struct *add_partition(struct gendisk *disk, int partno,
 		goto out_free_stats;
 	pdev->devt = devt;
 
-	
 	dev_set_uevent_suppress(pdev, 1);
 	err = device_add(pdev);
 	if (err)
@@ -449,17 +412,11 @@ struct hd_struct *add_partition(struct gendisk *disk, int partno,
 			goto out_del;
 	}
 
-	
 	INIT_RCU_HEAD(&p->rcu_head);
 	rcu_assign_pointer(ptbl->part[partno], p);
 
-	
 	if (!dev_get_uevent_suppress(ddev))
 		kobject_uevent(&pdev->kobj, KOBJ_ADD);
-
-#ifdef MY_ABC_HERE
-	PartitionRemapModeSet(disk, p, 0);
-#endif
 
 	return p;
 
@@ -477,7 +434,6 @@ out_put:
 	return ERR_PTR(err);
 }
 
-
 void register_disk(struct gendisk *disk)
 {
 	struct device *ddev = disk_to_dev(disk);
@@ -490,7 +446,6 @@ void register_disk(struct gendisk *disk)
 
 	dev_set_name(ddev, "%s", disk->disk_name);
 
-	
 	dev_set_uevent_suppress(ddev, 1);
 
 	if (device_add(ddev))
@@ -506,11 +461,9 @@ void register_disk(struct gendisk *disk)
 	disk->part0.holder_dir = kobject_create_and_add("holders", &ddev->kobj);
 	disk->slave_dir = kobject_create_and_add("slaves", &ddev->kobj);
 
-	
 	if (!disk_partitionable(disk))
 		goto exit;
 
-	
 	if (!get_capacity(disk))
 		goto exit;
 
@@ -525,11 +478,10 @@ void register_disk(struct gendisk *disk)
 	blkdev_put(bdev, FMODE_READ);
 
 exit:
-	
+	 
 	dev_set_uevent_suppress(ddev, 0);
 	kobject_uevent(&ddev->kobj, KOBJ_ADD);
 
-	
 	disk_part_iter_init(&piter, disk, 0);
 	while ((part = disk_part_iter_next(&piter)))
 		kobject_uevent(&part_to_dev(part)->kobj, KOBJ_ADD);
@@ -560,20 +512,17 @@ int rescan_partitions(struct gendisk *disk, struct block_device *bdev)
 	bdev->bd_invalidated = 0;
 	if (!get_capacity(disk) || !(state = check_partition(disk, bdev)))
 		return 0;
-	if (IS_ERR(state))	
+	if (IS_ERR(state))	 
 		return -EIO;
 
-	
 	kobject_uevent(&disk_to_dev(disk)->kobj, KOBJ_CHANGE);
 
-	
 	for (p = 1, highest = 0; p < state->limit; p++)
 		if (state->parts[p].size)
 			highest = p;
 
 	disk_expand_part_tbl(disk, highest);
 
-	
 	for (p = 1; p < state->limit; p++) {
 		sector_t size, from;
 try_scan:
@@ -609,7 +558,7 @@ try_scan:
 				}
 				goto try_scan;
 			} else {
-				
+				 
 				printk(KERN_CONT "limited to end of disk\n");
 				size = get_capacity(disk) - from;
 			}
@@ -656,7 +605,6 @@ void del_gendisk(struct gendisk *disk)
 	struct disk_part_iter piter;
 	struct hd_struct *part;
 
-	
 	disk_part_iter_init(&piter, disk,
 			     DISK_PITER_INCL_EMPTY | DISK_PITER_REVERSE);
 	while ((part = disk_part_iter_next(&piter))) {

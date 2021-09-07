@@ -1,8 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/blkdev.h>
@@ -81,7 +80,7 @@ static int check_set(unsigned int *val, char *src)
 	if (strncmp(src, "-", 20) == 0) {
 		*val = SCAN_WILD_CARD;
 	} else {
-		
+		 
 		*val = simple_strtoul(src, &last, 0);
 		if (*last != '\0')
 			return 1;
@@ -111,7 +110,6 @@ static int scsi_scan(struct Scsi_Host *shost, const char *str)
 	return res;
 }
 
-
 #define shost_show_function(name, field, format_string)			\
 static ssize_t								\
 show_##name (struct device *dev, struct device_attribute *attr, 	\
@@ -121,15 +119,12 @@ show_##name (struct device *dev, struct device_attribute *attr, 	\
 	return snprintf (buf, 20, format_string, shost->field);		\
 }
 
-
 #define shost_rd_attr2(name, field, format_string)			\
 	shost_show_function(name, field, format_string)			\
 static DEVICE_ATTR(name, S_IRUGO, show_##name, NULL);
 
 #define shost_rd_attr(field, format_string) \
 shost_rd_attr2(field, field, format_string)
-
-
 
 static ssize_t
 store_scan(struct device *dev, struct device_attribute *attr,
@@ -181,7 +176,6 @@ show_shost_state(struct device *dev, struct device_attribute *attr, char *buf)
 	return snprintf(buf, 20, "%s\n", name);
 }
 
-
 struct device_attribute dev_attr_hstate =
 	__ATTR(state, S_IRUGO | S_IWUSR, show_shost_state, store_shost_state);
 
@@ -209,7 +203,7 @@ show_shost_supported_mode(struct device *dev, struct device_attribute *attr,
 	unsigned int supported_mode = shost->hostt->supported_mode;
 
 	if (supported_mode == MODE_UNKNOWN)
-		
+		 
 		supported_mode = MODE_INITIATOR;
 
 	return show_shost_mode(supported_mode, buf);
@@ -327,9 +321,9 @@ static void scsi_device_dev_release_usercontext(struct work_struct *work)
 
 	if (sdev->request_queue) {
 		sdev->request_queue->queuedata = NULL;
-		
+		 
 		scsi_free_queue(sdev->request_queue);
-		
+		 
 		sdev->request_queue = NULL;
 	}
 
@@ -356,7 +350,6 @@ static struct class sdev_class = {
 	.name		= "scsi_device",
 	.dev_release	= scsi_device_cls_release,
 };
-
 
 static int scsi_bus_match(struct device *dev, struct device_driver *gendrv)
 {
@@ -458,7 +451,6 @@ void scsi_sysfs_unregister(void)
 	bus_unregister(&scsi_bus_type);
 }
 
-
 #ifdef MY_ABC_HERE
 #define sdev_show_function(field, format_string)				\
 static ssize_t								\
@@ -483,11 +475,9 @@ sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
 
 #endif
 
-
 #define sdev_rd_attr(field, format_string)				\
 	sdev_show_function(field, format_string)			\
 static DEVICE_ATTR(field, S_IRUGO, sdev_show_##field, NULL);
-
 
 #define sdev_rw_attr(field, format_string)				\
 	sdev_show_function(field, format_string)				\
@@ -503,9 +493,8 @@ sdev_store_##field (struct device *dev, struct device_attribute *attr,	\
 }									\
 static DEVICE_ATTR(field, S_IRUGO | S_IWUSR, sdev_show_##field, sdev_store_##field);
 
-
 #if 0
-
+ 
 #define sdev_rw_attr_bit(field)						\
 	sdev_show_function(field, "%d\n")					\
 									\
@@ -525,7 +514,6 @@ sdev_store_##field (struct device *dev, struct device_attribute *attr,	\
 }									\
 static DEVICE_ATTR(field, S_IRUGO | S_IWUSR, sdev_show_##field, sdev_store_##field);
 
-
 static int scsi_sdev_check_buf_bit(const char *buf)
 {
 	if ((buf[1] == '\0') || ((buf[1] == '\n') && (buf[2] == '\0'))) {
@@ -539,33 +527,9 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 		return -EINVAL;
 }
 #endif
-#ifdef MY_ABC_HERE
-extern void
-ScsiRemapModeSet(struct scsi_device *sdev, unsigned char blAutoRemap);
-static ssize_t
-sdev_show_auto_remap(struct device *dev, struct device_attribute *attr, char *buf)
-{
-	struct scsi_device *sdev;
-	sdev = to_scsi_device(dev);
-	return snprintf (buf, 20, "%d type 0x%x\n", sdev->auto_remap, sdev->type);
-}
-
-static ssize_t
-sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct scsi_device *sdev;
-	int val = 0;
-	sdev = to_scsi_device(dev);
-	sscanf (buf, "%d", &val);
-
-	ScsiRemapModeSet(sdev, val ? 1 : 0);
-	return count;
-}
-static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
-#endif
 
 #ifdef MY_ABC_HERE
-
+ 
 static ssize_t
 sdev_show_syno_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -593,7 +557,7 @@ sdev_store_syno_idle_time(struct device *dev, struct device_attribute *attr, con
 	}
 
 	sscanf(buf, "%lu", &idletime);
-	
+	 
 	sdev->idle = jiffies - (idletime -1) * HZ;
 
 END:
@@ -602,7 +566,6 @@ END:
 
 static DEVICE_ATTR(syno_idle_time, S_IRUGO | S_IWUSR, sdev_show_syno_idle_time, sdev_store_syno_idle_time);
 #endif
-
 
 sdev_rd_attr (device_blocked, "%d\n");
 sdev_rd_attr (queue_depth, "%d\n");
@@ -615,7 +578,6 @@ sdev_rd_attr (model, "%."SYNO_DISK_MODEL_LEN"s\n");
 sdev_rd_attr (model, "%.16s\n");
 #endif
 sdev_rd_attr (rev, "%.4s\n");
-
 
 static ssize_t
 sdev_show_timeout (struct device *dev, struct device_attribute *attr, char *buf)
@@ -658,7 +620,6 @@ sdev_store_delete(struct device *dev, struct device_attribute *attr,
 {
 	int rc;
 
-	
 	rc = device_schedule_callback(dev, sdev_store_delete_callback);
 	if (rc)
 		count = rc;
@@ -788,7 +749,6 @@ sdev_store_evt_##name(struct device *dev, struct device_attribute *attr,\
 
 DECLARE_EVT(media_change, MEDIA_CHANGE)
 
-
 static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_device_blocked.attr,
 	&dev_attr_type.attr,
@@ -805,9 +765,6 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_iodone_cnt.attr,
 	&dev_attr_ioerr_cnt.attr,
 	&dev_attr_modalias.attr,
-#ifdef MY_ABC_HERE
-	&dev_attr_auto_remap.attr,
-#endif
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_idle_time.attr,
 	&dev_attr_syno_spindown.attr,
@@ -906,7 +863,6 @@ static struct device_attribute sdev_attr_queue_type_rw =
 	__ATTR(queue_type, S_IRUGO | S_IWUSR, show_queue_type_field,
 	       sdev_store_queue_type_rw);
 
-
 int scsi_sysfs_add_sdev(struct scsi_device *sdev)
 {
 	int error, i;
@@ -935,7 +891,6 @@ int scsi_sysfs_add_sdev(struct scsi_device *sdev)
 	transport_add_device(&sdev->sdev_gendev);
 	sdev->is_visible = 1;
 
-	
 	if (sdev->host->hostt->change_queue_depth)
 		error = device_create_file(&sdev->sdev_gendev, &sdev_attr_queue_depth_rw);
 	else
@@ -953,11 +908,10 @@ int scsi_sysfs_add_sdev(struct scsi_device *sdev)
 	error = bsg_register_queue(rq, &sdev->sdev_gendev, NULL, NULL);
 
 	if (error)
-		
+		 
 		sdev_printk(KERN_INFO, sdev,
 			    "Failed to register bsg queue, errno=%d\n", error);
 
-	
 	if (sdev->host->hostt->sdev_attrs) {
 		for (i = 0; sdev->host->hostt->sdev_attrs[i]; i++) {
 			error = device_create_file(&sdev->sdev_gendev,
@@ -983,11 +937,11 @@ void __scsi_remove_device(struct scsi_device *sdev)
 #ifdef CONFIG_MV_SCATTERED_SPINUP
 		if (scsi_spinup_enabled()) {
 			if (sdev->standby_timeout_secs > 0) {
-				
+				 
 				standby_delete_timer(sdev);
 			}
 			if (sdev->spinup_timeout.function) {
-				
+				 
 				spinup_delete_timer(sdev);
 				scsi_spinup_up();
 			}
@@ -1013,8 +967,7 @@ void __scsi_remove_device(struct scsi_device *sdev)
 #ifdef MY_ABC_HERE
 int (*funcSYNORaidDiskUnplug)(char *szDiskName) = NULL;
 EXPORT_SYMBOL(funcSYNORaidDiskUnplug);
-#endif 
-
+#endif  
 
 void scsi_remove_device(struct scsi_device *sdev)
 {
@@ -1027,7 +980,7 @@ void scsi_remove_device(struct scsi_device *sdev)
 	if (funcSYNORaidDiskUnplug) {
 		funcSYNORaidDiskUnplug(sdev->syno_disk_name);
 	}
-#endif  
+#endif   
 }
 EXPORT_SYMBOL(scsi_remove_device);
 
@@ -1061,7 +1014,6 @@ static int __remove_child (struct device * dev, void * data)
 	return 0;
 }
 
-
 void scsi_remove_target(struct device *dev)
 {
 	struct device *rdev;
@@ -1093,12 +1045,10 @@ int scsi_register_interface(struct class_interface *intf)
 }
 EXPORT_SYMBOL(scsi_register_interface);
 
-
 int scsi_sysfs_add_host(struct Scsi_Host *shost)
 {
 	int error, i;
 
-	
 	if (shost->hostt->shost_attrs) {
 		for (i = 0; shost->hostt->shost_attrs[i]; i++) {
 			error = device_create_file(&shost->shost_dev,
@@ -1149,6 +1099,5 @@ int scsi_is_sdev_device(const struct device *dev)
 	return dev->type == &scsi_dev_type;
 }
 EXPORT_SYMBOL(scsi_is_sdev_device);
-
 
 struct scsi_transport_template blank_transport_template = { { { {NULL, }, }, }, };
