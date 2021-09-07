@@ -1,4 +1,4 @@
-/* $Id: divert_procfs.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: divert_procfs.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * Filesystem handling for the diversion supplementary services.
  *

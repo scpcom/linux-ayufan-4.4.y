@@ -3,7 +3,7 @@
  * Name:    skfops.c
  * Project: Gigabit Ethernet Adapters, Common Modules
  * Version: $Revision: 1.1 $
- * Date:    $Date: 2010/04/15 15:13:30 $
+ * Date:    $Date: 2010-04-15 15:13:30 $
  * Purpose: Kernel mode file read functions.
  *
  ******************************************************************************/
@@ -40,7 +40,7 @@
 */
 #if (defined(DEBUG) || ((!defined(LINT)) && (!defined(SK_SLIM))))
 static const char SysKonnectFileId[] =
-"$Header: /cvs/projects/linux-2.6.32/drivers/net/sk98lin/skfops.c,v 1.1 2010/04/15 15:13:30 khchen Exp $" ;
+"$Header: /synosrc.old/cvs_root/projects/linux-2.6.32/drivers/net/sk98lin/skfops.c,v 1.1 2010-04-15 15:13:30 khchen Exp $" ;
 #endif
 
 #include "h/sktypes.h"

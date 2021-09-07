@@ -1,4 +1,4 @@
-/* $Id: kcapi.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: kcapi.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  * 
  * Kernel CAPI 2.0 Module
  * 
@@ -35,7 +35,7 @@
 #endif
 #include <linux/mutex.h>
 
-static char *revision = "$Revision: 1.1.1.1 $";
+static char *revision = "$Revision: 1.1 $";
 
 /* ------------------------------------------------------------- */
 

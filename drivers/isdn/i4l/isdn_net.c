@@ -1,4 +1,4 @@
-/* $Id: isdn_net.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: isdn_net.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * Linux ISDN subsystem, network interfaces and related functions (linklevel).
  *
@@ -182,7 +182,7 @@ static netdev_tx_t isdn_net_start_xmit(struct sk_buff *,
 static void isdn_net_ciscohdlck_connected(isdn_net_local *lp);
 static void isdn_net_ciscohdlck_disconnected(isdn_net_local *lp);
 
-char *isdn_net_revision = "$Revision: 1.1.1.1 $";
+char *isdn_net_revision = "$Revision: 1.1 $";
 
  /*
   * Code for raw-networking over ISDN

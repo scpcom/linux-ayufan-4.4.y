@@ -10,7 +10,7 @@
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * $Id: enc28j60.c,v 1.1.1.1 2010/04/15 12:27:53 khchen Exp $
+ * $Id: enc28j60.c,v 1.1 2010-04-15 12:27:53 khchen Exp $
  */
 
 #include <linux/module.h>

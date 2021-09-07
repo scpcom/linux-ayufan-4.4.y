@@ -3,7 +3,7 @@
  * Name:	skgepnmi.h
  * Project:	Gigabit Ethernet Adapters, PNMI-Module
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:31 $
+ * Date:	$Date: 2010-04-15 15:13:31 $
  * Purpose:	Defines for Private Network Management Interface
  *
  ****************************************************************************/

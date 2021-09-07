@@ -1,4 +1,4 @@
-/* $Id: avm_cs.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: avm_cs.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * A PCMCIA client driver for AVM B1/M1/M2
  *

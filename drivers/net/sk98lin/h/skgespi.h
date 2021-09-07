@@ -3,7 +3,7 @@
  * Name:	skspi.h
  * Project:	Flash Programmer, Manufacturing and Diagnostic Tools
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:31 $
+ * Date:	$Date: 2010-04-15 15:13:31 $
  * Purpose:	Contains SPI-Flash EEPROM specific definitions and constants
  *
  ******************************************************************************/

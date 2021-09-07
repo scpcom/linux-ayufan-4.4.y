@@ -11,8 +11,8 @@
  *  2 of the License, or (at your option) any later version.
  *   
  *  $Log: pc300_tty.c,v $
- *  Revision 1.1.1.1  2010/04/15 12:27:54  khchen
- *  log message
+ *  Revision 1.1  2010-04-15 12:27:54  khchen
+ *  Initial revision
  *
  *  Revision 3.7  2002/03/07 14:17:09  henrique
  *  License data fixed

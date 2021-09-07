@@ -31,7 +31,7 @@
 #ifdef CONFIG_ARCH_FEROCEON
  * Version:       $Revision: 1.2 $
  *
- * $Id: telephony.h,v 1.2 2010/04/15 15:13:36 khchen Exp $
+ * $Id: telephony.h,v 1.2 2010-04-15 15:13:36 khchen Exp $
  *
 #endif
  *****************************************************************************/

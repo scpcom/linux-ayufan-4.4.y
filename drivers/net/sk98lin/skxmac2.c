@@ -3,7 +3,7 @@
  * Name:	skxmac2.c
  * Project:	Gigabit Ethernet Adapters, Common Modules
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:31 $
+ * Date:	$Date: 2010-04-15 15:13:31 $
  * Purpose:	Contains functions to initialize the MACs and PHYs
  *
  ******************************************************************************/
@@ -38,7 +38,7 @@ typedef struct s_PhyHack {
 
 #if (defined(DEBUG) || ((!defined(LINT)) && (!defined(SK_SLIM))))
 static const char SysKonnectFileId[] =
-	"@(#) $Id: skxmac2.c,v 1.1 2010/04/15 15:13:31 khchen Exp $ (C) Marvell.";
+	"@(#) $Id: skxmac2.c,v 1.1 2010-04-15 15:13:31 khchen Exp $ (C) Marvell.";
 #endif
 
 #ifdef GENESIS

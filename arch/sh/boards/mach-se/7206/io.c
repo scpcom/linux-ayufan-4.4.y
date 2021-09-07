@@ -1,4 +1,4 @@
-/* $Id: io.c,v 1.1.1.1 2010/04/15 12:28:04 khchen Exp $
+/* $Id: io.c,v 1.1 2010-04-15 12:28:04 khchen Exp $
  *
  * linux/arch/sh/boards/se/7206/io.c
  *

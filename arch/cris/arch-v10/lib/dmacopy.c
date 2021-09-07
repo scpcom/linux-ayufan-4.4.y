@@ -1,4 +1,4 @@
-/* $Id: dmacopy.c,v 1.1.1.1 2010/04/15 12:28:02 khchen Exp $ 
+/* $Id: dmacopy.c,v 1.1 2010-04-15 12:28:02 khchen Exp $ 
  *
  * memcpy for large blocks, using memory-memory DMA channels 6 and 7 in Etrax
  */

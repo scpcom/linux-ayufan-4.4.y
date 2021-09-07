@@ -2,7 +2,7 @@
  * Permedia2 framebuffer driver definitions.
  * Copyright (c) 1998-2000 Ilario Nardinocchi (nardinoc@CS.UniBO.IT)
  * --------------------------------------------------------------------------
- * $Id: permedia2.h,v 1.1.1.1 2010/04/15 12:28:22 khchen Exp $
+ * $Id: permedia2.h,v 1.1 2010-04-15 12:28:22 khchen Exp $
  * --------------------------------------------------------------------------
  * This file is subject to the terms and conditions of the GNU General Public
  * License.  See the file COPYING in the main directory of this archive

@@ -1,4 +1,4 @@
-/* $Id: b1pcmcia.h,v 1.1.1.1 2010/04/15 12:28:23 khchen Exp $
+/* $Id: b1pcmcia.h,v 1.1 2010-04-15 12:28:23 khchen Exp $
  *
  * Exported functions of module b1pcmcia to be called by
  * avm_cs card services module.

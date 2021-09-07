@@ -1,4 +1,4 @@
-/* $Id: bkm_a4t.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: bkm_a4t.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * low level stuff for T-Berkom A4T
  *
@@ -20,7 +20,7 @@
 #include <linux/pci.h>
 #include "bkm_ax.h"
 
-static const char *bkm_a4t_revision = "$Revision: 1.1.1.1 $";
+static const char *bkm_a4t_revision = "$Revision: 1.1 $";
 
 
 static inline u_char

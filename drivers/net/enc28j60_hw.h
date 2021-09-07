@@ -1,7 +1,7 @@
 /*
  * enc28j60_hw.h: EDTP FrameThrower style enc28j60 registers
  *
- * $Id: enc28j60_hw.h,v 1.1.1.1 2010/04/15 12:27:53 khchen Exp $
+ * $Id: enc28j60_hw.h,v 1.1 2010-04-15 12:27:53 khchen Exp $
  */
 
 #ifndef _ENC28J60_HW_H

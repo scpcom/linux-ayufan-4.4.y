@@ -1,4 +1,4 @@
-/* $Date: 2010/04/15 12:27:53 $ $RCSfile: mv88e1xxx.c,v $ $Revision: 1.1.1.1 $ */
+/* $Date: 2010-04-15 12:27:53 $ $RCSfile: mv88e1xxx.c,v $ $Revision: 1.1 $ */
 #include "common.h"
 #include "mv88e1xxx.h"
 #include "cphy.h"

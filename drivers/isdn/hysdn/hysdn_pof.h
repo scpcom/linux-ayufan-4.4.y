@@ -1,4 +1,4 @@
-/* $Id: hysdn_pof.h,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: hysdn_pof.h,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * Linux driver for HYSDN cards, definitions used for handling pof-files.
  *

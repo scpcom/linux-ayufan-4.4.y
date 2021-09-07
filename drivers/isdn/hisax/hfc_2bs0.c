@@ -1,4 +1,4 @@
-/* $Id: hfc_2bs0.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: hfc_2bs0.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * specific routines for CCD's HFC 2BS0
  *

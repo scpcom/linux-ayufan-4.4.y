@@ -10,7 +10,7 @@
  *              be here without 3C505 technical reference provided by
  *              3Com.
  *
- * $Id: 3c505.c,v 1.1.1.1 2010/04/15 12:27:52 khchen Exp $
+ * $Id: 3c505.c,v 1.1 2010-04-15 12:27:52 khchen Exp $
  *
  * Authors:     Linux 3c505 device driver by
  *                      Craig Southeren, <craigs@ineluki.apana.org.au>

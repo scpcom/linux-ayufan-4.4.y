@@ -1,4 +1,4 @@
-/* $Id: ipac.h,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: ipac.h,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * IPAC specific defines
  *

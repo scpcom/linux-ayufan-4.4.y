@@ -3,7 +3,7 @@
  * Name:	skgepnmi.c
  * Project:	Gigabit Ethernet Adapters, PNMI-Module
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:30 $
+ * Date:	$Date: 2010-04-15 15:13:30 $
  * Purpose:	Private Network Management Interface
  *
  ****************************************************************************/
@@ -26,7 +26,7 @@
 
 #if (defined(DEBUG) || ((!defined(LINT)) && (!defined(SK_SLIM))))
 static const char SysKonnectFileId[] =
-	"@(#) $Id: skgepnmi.c,v 1.1 2010/04/15 15:13:30 khchen Exp $ (C) Marvell.";
+	"@(#) $Id: skgepnmi.c,v 1.1 2010-04-15 15:13:30 khchen Exp $ (C) Marvell.";
 #endif
 
 #include "h/skdrv1st.h"

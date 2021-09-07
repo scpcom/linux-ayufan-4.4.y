@@ -36,7 +36,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGES.
  *
- * $Id: aic7xxx_osm_pci.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+ * $Id: aic7xxx_osm_pci.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  */
 
 #include "aic7xxx_osm.h"

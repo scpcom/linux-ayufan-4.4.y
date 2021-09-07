@@ -73,7 +73,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *      $Id: aic7xxx_old.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+ *      $Id: aic7xxx_old.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *---------------------------------------------------------------------------
  *
  *  Thanks also go to (in alphabetical order) the following:
@@ -93,7 +93,7 @@
  *
  *  Daniel M. Eischen, deischen@iworks.InterWorks.org, 1/23/97
  *
- *  $Id: aic7xxx_old.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+ *  $Id: aic7xxx_old.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *-M*************************************************************************/
 
 /*+M**************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: teles0.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: teles0.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * low level stuff for Teles Memory IO isdn cards
  *
@@ -21,7 +21,7 @@
 #include "isac.h"
 #include "hscx.h"
 
-static const char *teles0_revision = "$Revision: 1.1.1.1 $";
+static const char *teles0_revision = "$Revision: 1.1 $";
 
 #define TELES_IOMEM_SIZE	0x400
 #define byteout(addr,val) outb(val,addr)

@@ -84,7 +84,7 @@
    Nov 2001
    added support for ethtool (jgarzik)
 
-   $Header: /cvs/projects/linux-2.6.32/drivers/net/3c523.c,v 1.1.1.1 2010/04/15 12:27:53 khchen Exp $
+   $Header: /synosrc.old/cvs_root/projects/linux-2.6.32/drivers/net/3c523.c,v 1.1 2010-04-15 12:27:53 khchen Exp $
  */
 
 #define DRV_NAME		"3c523"

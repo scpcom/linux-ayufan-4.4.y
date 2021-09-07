@@ -1,4 +1,4 @@
-/* $Id: cache.h,v 1.1.1.1 2010/04/15 12:28:05 khchen Exp $
+/* $Id: cache.h,v 1.1 2010-04-15 12:28:05 khchen Exp $
  *
  * include/asm-sh/cache.h
  *

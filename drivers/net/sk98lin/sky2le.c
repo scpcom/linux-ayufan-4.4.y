@@ -3,7 +3,7 @@
  *	Name:		sky2le.c
  *	Project:	Gigabit Ethernet Adapters, Common Modules
  *	Version:	$Revision: 1.1 $
- *	Date:		$Date: 2010/04/15 15:13:31 $
+ *	Date:		$Date: 2010-04-15 15:13:31 $
  *	Purpose: 	Functions for handling List Element Tables
  *
  *****************************************************************************/
@@ -45,7 +45,7 @@
 
 #if (defined(DEBUG) || ((!defined(LINT)) && (!defined(SK_SLIM))))
 static const char SysKonnectFileId[] =
-	"@(#) $Id: sky2le.c,v 1.1 2010/04/15 15:13:31 khchen Exp $ (C) Marvell.";
+	"@(#) $Id: sky2le.c,v 1.1 2010-04-15 15:13:31 khchen Exp $ (C) Marvell.";
 #endif /* DEBUG || (!LINT && !SK_SLIM) */
 
 /* function prototypes *******************************************************/

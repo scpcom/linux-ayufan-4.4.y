@@ -13,11 +13,11 @@
  * General Public License for more details.
  *
  *
- * $Id: aha152x.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+ * $Id: aha152x.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * $Log: aha152x.c,v $
- * Revision 1.1.1.1  2010/04/15 12:27:50  khchen
- * log message
+ * Revision 1.1  2010-04-15 12:27:50  khchen
+ * Initial revision
  *
  * Revision 2.7  2004/01/24 11:42:59  fischer
  * - gather code that is not used by PCMCIA at the end

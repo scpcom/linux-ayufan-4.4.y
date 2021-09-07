@@ -7,7 +7,7 @@
 
   */
 
-/* $Id: nsp_io.h,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $ */
+/* $Id: nsp_io.h,v 1.1 2010-04-15 12:27:50 khchen Exp $ */
 
 #ifndef __NSP_IO_H__
 #define __NSP_IO_H__

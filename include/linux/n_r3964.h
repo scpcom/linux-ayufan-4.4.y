@@ -13,8 +13,8 @@
  * L. Haag
  *
  * $Log: n_r3964.h,v $
- * Revision 1.1.1.1  2010/04/15 12:28:23  khchen
- * log message
+ * Revision 1.1  2010-04-15 12:28:23  khchen
+ * Initial revision
  *
  * Revision 1.4  2005/12/21 19:54:24  Kurt Huwig <kurt huwig de>
  * Fixed HZ usage on 2.6 kernels

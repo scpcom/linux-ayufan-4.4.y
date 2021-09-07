@@ -1,5 +1,5 @@
 /*
- * $Id: synclinkmp.c,v 1.1.1.1 2010/04/15 12:27:55 khchen Exp $
+ * $Id: synclinkmp.c,v 1.1 2010-04-15 12:27:55 khchen Exp $
  *
  * Device driver for Microgate SyncLink Multiport
  * high speed multiprotocol serial adapter.
@@ -477,7 +477,7 @@ module_param(debug_level, int, 0);
 module_param_array(maxframe, int, NULL, 0);
 
 static char *driver_name = "SyncLink MultiPort driver";
-static char *driver_version = "$Revision: 1.1.1.1 $";
+static char *driver_version = "$Revision: 1.1 $";
 
 static int synclinkmp_init_one(struct pci_dev *dev,const struct pci_device_id *ent);
 static void synclinkmp_remove_one(struct pci_dev *dev);

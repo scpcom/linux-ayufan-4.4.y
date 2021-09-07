@@ -1,4 +1,4 @@
-/* $Id: isdn_x25iface.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: isdn_x25iface.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * Linux ISDN subsystem, X.25 related functions
  *

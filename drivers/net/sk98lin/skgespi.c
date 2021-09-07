@@ -3,7 +3,7 @@
  * Name:	skspi.c
  * Project:	Flash Programmer, Manufacturing and Diagnostic Tools
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:30 $
+ * Date:	$Date: 2010-04-15 15:13:30 $
  * Purpose:	Contains SPI-Flash EEPROM specific functions
  *
  ******************************************************************************/
@@ -31,7 +31,7 @@
  ******************************************************************************/
 
 static const char SysKonnectFileId[] =
-	"@(#) $Id: skgespi.c,v 1.1 2010/04/15 15:13:30 khchen Exp $ (C) Marvell.";
+	"@(#) $Id: skgespi.c,v 1.1 2010-04-15 15:13:30 khchen Exp $ (C) Marvell.";
 
 /*
 #include <stdio.h>

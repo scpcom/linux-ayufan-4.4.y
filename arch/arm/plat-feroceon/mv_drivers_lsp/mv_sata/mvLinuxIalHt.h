@@ -94,7 +94,7 @@ extern int mv_ial_ht_ioctl(struct scsi_device *, int, void __user *);
 /*#define MV_SUPPORT_MSI*/
 #endif
 
-
+/* Set the MRVL_SATA_BUFF_BOUNDARY to SATA minimal window size (according to CS) */
 #ifndef MRVL_SATA_BUFF_BOUNDARY
 #define MRVL_SATA_BUFF_BOUNDARY (1 << 24)
 #endif /* MRVL_SATA_BUFF_BOUNDARY */

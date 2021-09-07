@@ -3,7 +3,7 @@
  * Name:	sktwsi.h
  * Project:	Gigabit Ethernet Adapters, TWSI-Module
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:31 $
+ * Date:	$Date: 2010-04-15 15:13:31 $
  * Purpose:	Defines to access Voltage and Temperature Sensor
  *
  ******************************************************************************/

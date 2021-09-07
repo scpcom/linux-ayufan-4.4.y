@@ -1,5 +1,5 @@
 /*
- *  acpi_osl.c - OS-dependent functions ($Revision: 1.1.1.1 $)
+ *  acpi_osl.c - OS-dependent functions ($Revision: 1.1 $)
  *
  *  Copyright (C) 2000       Andrew Henroid
  *  Copyright (C) 2001, 2002 Andy Grover <andrew.grover@intel.com>

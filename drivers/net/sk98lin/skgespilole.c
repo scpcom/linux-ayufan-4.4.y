@@ -3,7 +3,7 @@
  * Name:	skspilole.c
  * Project:	Flash Programmer, Manufacturing and Diagnostic Tools
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:30 $
+ * Date:	$Date: 2010-04-15 15:13:30 $
  * Purpose:	Contains Low Level Functions for the integration of the skspi.c module
  *
  ******************************************************************************/
@@ -31,7 +31,7 @@
  ******************************************************************************/
 
 static const char SysKonnectFileId[] =
-	"@(#) $Id: skgespilole.c,v 1.1 2010/04/15 15:13:30 khchen Exp $ (C) Marvell.";
+	"@(#) $Id: skgespilole.c,v 1.1 2010-04-15 15:13:30 khchen Exp $ (C) Marvell.";
 
 #include "h/skdrv1st.h"
 #include "h/skdrv2nd.h"

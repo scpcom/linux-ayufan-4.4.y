@@ -1,4 +1,4 @@
-/* $Id: t1pci.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: t1pci.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  * 
  * Module for AVM T1 PCI-card.
  * 
@@ -29,7 +29,7 @@
 #undef CONFIG_T1PCI_POLLDEBUG
 
 /* ------------------------------------------------------------- */
-static char *revision = "$Revision: 1.1.1.1 $";
+static char *revision = "$Revision: 1.1 $";
 /* ------------------------------------------------------------- */
 
 static struct pci_device_id t1pci_pci_tbl[] = {

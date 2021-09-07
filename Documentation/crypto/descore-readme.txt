@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 Author's address: how@isl.stanford.edu
 
-$Id: descore-readme.txt,v 1.1.1.1 2010/04/15 12:28:21 khchen Exp $
+$Id: descore-readme.txt,v 1.1 2010-04-15 12:28:21 khchen Exp $
 
 
 ==>> To compile after untarring/unsharring, just `make' <<==

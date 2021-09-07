@@ -1,4 +1,4 @@
-/* $Id: diddfunc.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: diddfunc.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * DIDD Interface module for Eicon active cards.
  * 

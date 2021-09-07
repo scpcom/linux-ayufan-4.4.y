@@ -26,7 +26,7 @@
  *
  *  Dean W. Gehnert, deang@teleport.com, 05/01/96
  *
- *  $Id: aic7xxx_proc.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+ *  $Id: aic7xxx_proc.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *-M*************************************************************************/
 
 

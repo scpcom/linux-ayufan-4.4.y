@@ -1,4 +1,4 @@
-/* $Id: callc.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: callc.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * Author       Karsten Keil
  * Copyright    by Karsten Keil      <keil@isdn4linux.de>
@@ -21,7 +21,7 @@
 #include "hisax.h"
 #include <linux/isdn/capicmd.h>
 
-const char *lli_revision = "$Revision: 1.1.1.1 $";
+const char *lli_revision = "$Revision: 1.1 $";
 
 extern struct IsdnCard cards[];
 

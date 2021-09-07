@@ -1,4 +1,4 @@
-/* $Date: 2010/04/15 12:27:53 $ $RCSfile: vsc7326_reg.h,v $ $Revision: 1.1.1.1 $ */
+/* $Date: 2010-04-15 12:27:53 $ $RCSfile: vsc7326_reg.h,v $ $Revision: 1.1 $ */
 #ifndef _VSC7321_REG_H_
 #define _VSC7321_REG_H_
 

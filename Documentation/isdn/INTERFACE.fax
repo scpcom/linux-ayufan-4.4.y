@@ -1,4 +1,4 @@
-$Id: INTERFACE.fax,v 1.1.1.1 2010/04/15 12:28:20 khchen Exp $
+$Id: INTERFACE.fax,v 1.1 2010-04-15 12:28:20 khchen Exp $
 
 
 Description of the fax-subinterface between linklevel and hardwarelevel of 

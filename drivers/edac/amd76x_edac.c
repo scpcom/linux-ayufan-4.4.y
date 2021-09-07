@@ -8,7 +8,7 @@
  * Based on work by Dan Hollis <goemon at anime dot net> and others.
  *	http://www.anime.net/~goemon/linux-ecc/
  *
- * $Id: amd76x_edac.c,v 1.1.1.1 2010/04/15 12:28:01 khchen Exp $
+ * $Id: amd76x_edac.c,v 1.1 2010-04-15 12:28:01 khchen Exp $
  *
  */
 

@@ -29,7 +29,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: cam.h,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+ * $Id: cam.h,v 1.1 2010-04-15 12:27:50 khchen Exp $
  */
 
 #ifndef _AIC7XXX_CAM_H

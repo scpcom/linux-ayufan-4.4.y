@@ -3,7 +3,7 @@
  * Name:	sktwsi.c
  * Project:	Gigabit Ethernet Adapters, TWSI-Module
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:31 $
+ * Date:	$Date: 2010-04-15 15:13:31 $
  * Purpose:	Functions to access Voltage and Temperature Sensor
  *
  ******************************************************************************/
@@ -28,7 +28,7 @@
  */
 #if (defined(DEBUG) || ((!defined(LINT)) && (!defined(SK_SLIM))))
 static const char SysKonnectFileId[] =
-	"@(#) $Id: sktwsi.c,v 1.1 2010/04/15 15:13:31 khchen Exp $ (C) Marvell.";
+	"@(#) $Id: sktwsi.c,v 1.1 2010-04-15 15:13:31 khchen Exp $ (C) Marvell.";
 #endif
 
 #include "h/skdrv1st.h"		/* Driver Specific Definitions */

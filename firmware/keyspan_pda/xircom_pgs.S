@@ -1,4 +1,4 @@
-/*  $Id: xircom_pgs.S,v 1.1.1.1 2010/04/15 12:27:49 khchen Exp $
+/*  $Id: xircom_pgs.S,v 1.1 2010-04-15 12:27:49 khchen Exp $
  * 
  *  Firmware for the Keyspan PDA Serial Adapter, a USB serial port based on
  *  the EzUSB microcontroller.

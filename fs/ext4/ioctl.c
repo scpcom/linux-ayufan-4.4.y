@@ -204,7 +204,6 @@ setversion_out:
 
 		if (!capable(CAP_SYS_RESOURCE))
 			return -EPERM;
-
 		if (get_user(n_blocks_count, (__u32 __user *)arg))
 			return -EFAULT;
 

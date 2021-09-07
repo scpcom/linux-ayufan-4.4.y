@@ -1,4 +1,4 @@
-/* $Id: aha1542.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: aha1542.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *  linux/kernel/aha1542.c
  *
  *  Copyright (C) 1992  Tommy Thorn
@@ -76,7 +76,7 @@ static void BAD_SG_DMA(Scsi_Cmnd * SCpnt,
 #endif
 
 /*
-   static const char RCSid[] = "$Header: /cvs/projects/linux-2.6.32/drivers/scsi/aha1542.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $";
+   static const char RCSid[] = "$Header: /synosrc.old/cvs_root/projects/linux-2.6.32/drivers/scsi/aha1542.c,v 1.1 2010-04-15 12:27:50 khchen Exp $";
  */
 
 /* The adaptec can be configured for quite a number of addresses, but

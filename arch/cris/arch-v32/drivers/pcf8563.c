@@ -38,7 +38,7 @@
 #define PCF8563_MAJOR	121	/* Local major number. */
 #define DEVICE_NAME	"rtc"	/* Name which is registered in /proc/devices. */
 #define PCF8563_NAME	"PCF8563"
-#define DRIVER_VERSION	"$Revision: 1.1.1.1 $"
+#define DRIVER_VERSION	"$Revision: 1.1 $"
 
 /* Two simple wrapper macros, saves a few keystrokes. */
 #define rtc_read(x) i2c_readreg(RTC_I2C_READ, x)

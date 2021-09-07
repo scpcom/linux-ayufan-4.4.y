@@ -3,7 +3,7 @@
  * Name:	skvpd.c
  * Project:	Gigabit Ethernet Adapters, VPD-Module
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:31 $
+ * Date:	$Date: 2010-04-15 15:13:31 $
  * Purpose:	Shared software to read and write VPD
  *
  ******************************************************************************/
@@ -27,7 +27,7 @@
 	Please refer skvpd.txt for information how to include this module
  */
 static const char SysKonnectFileId[] =
-	"@(#) $Id: skvpd.c,v 1.1 2010/04/15 15:13:31 khchen Exp $ (C) Marvell.";
+	"@(#) $Id: skvpd.c,v 1.1 2010-04-15 15:13:31 khchen Exp $ (C) Marvell.";
 
 #include "h/skdrv1st.h"
 #include "h/sktypes.h"

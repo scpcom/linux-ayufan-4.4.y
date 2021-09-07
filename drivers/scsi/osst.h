@@ -1,5 +1,5 @@
 /*
- *	$Header: /cvs/projects/linux-2.6.32/drivers/scsi/osst.h,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+ *	$Header: /synosrc.old/cvs_root/projects/linux-2.6.32/drivers/scsi/osst.h,v 1.1 2010-04-15 12:27:50 khchen Exp $
  */
 
 #include <asm/byteorder.h>

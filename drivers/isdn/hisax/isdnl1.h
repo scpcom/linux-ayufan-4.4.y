@@ -1,4 +1,4 @@
-/* $Id: isdnl1.h,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: isdnl1.h,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * Layer 1 defines
  *

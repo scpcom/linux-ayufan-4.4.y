@@ -1075,7 +1075,7 @@ static void macb_get_drvinfo(struct net_device *dev,
 	struct macb *bp = netdev_priv(dev);
 
 	strcpy(info->driver, bp->pdev->dev.driver->name);
-	strcpy(info->version, "$Revision: 1.1.1.1 $");
+	strcpy(info->version, "$Revision: 1.1 $");
 	strcpy(info->bus_info, dev_name(&bp->pdev->dev));
 }
 

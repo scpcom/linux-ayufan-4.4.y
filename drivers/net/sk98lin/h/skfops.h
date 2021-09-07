@@ -4,7 +4,7 @@
  * Name:    skfops.c
  * Project: Gigabit Ethernet Adapters, Common Modules
  * Version: $Revision: 1.1 $
- * Date:    $Date: 2010/04/15 15:13:31 $
+ * Date:    $Date: 2010-04-15 15:13:31 $
  * Purpose: Kernel mode file read functions.
  *
  ******************************************************************************/

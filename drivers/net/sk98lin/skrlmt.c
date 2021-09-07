@@ -3,7 +3,7 @@
  * Name:	skrlmt.c
  * Project:	GEnesis, PCI Gigabit Ethernet Adapter
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:30 $
+ * Date:	$Date: 2010-04-15 15:13:30 $
  * Purpose:	Manage links on SK-NET Adapters, esp. redundant ones.
  *
  ******************************************************************************/
@@ -41,7 +41,7 @@
 
 #ifndef	lint
 static const char SysKonnectFileId[] =
-	"@(#) $Id: skrlmt.c,v 1.1 2010/04/15 15:13:30 khchen Exp $ (C) Marvell.";
+	"@(#) $Id: skrlmt.c,v 1.1 2010-04-15 15:13:30 khchen Exp $ (C) Marvell.";
 #endif	/* !defined(lint) */
 
 #define __SKRLMT_C

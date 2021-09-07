@@ -3,7 +3,7 @@
  * Name:	skgehwt.c
  * Project:	Gigabit Ethernet Adapters, Event Scheduler Module
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:30 $
+ * Date:	$Date: 2010-04-15 15:13:30 $
  * Purpose:	Hardware Timer
  *
  ******************************************************************************/
@@ -29,7 +29,7 @@
  */
 #if (defined(DEBUG) || ((!defined(LINT)) && (!defined(SK_SLIM))))
 static const char SysKonnectFileId[] =
-	"@(#) $Id: skgehwt.c,v 1.1 2010/04/15 15:13:30 khchen Exp $ (C) Marvell.";
+	"@(#) $Id: skgehwt.c,v 1.1 2010-04-15 15:13:30 khchen Exp $ (C) Marvell.";
 #endif
 
 #include "h/skdrv1st.h"		/* Driver Specific Definitions */

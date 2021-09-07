@@ -1,6 +1,6 @@
 /* drivers/char/ser_a2232.h */
 
-/* $Id: ser_a2232.h,v 1.1.1.1 2010/04/15 12:27:55 khchen Exp $ */
+/* $Id: ser_a2232.h,v 1.1 2010-04-15 12:27:55 khchen Exp $ */
 
 /* Linux serial driver for the Amiga A2232 board */
 

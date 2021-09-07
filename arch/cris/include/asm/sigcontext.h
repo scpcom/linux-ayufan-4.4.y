@@ -1,4 +1,4 @@
-/* $Id: sigcontext.h,v 1.1.1.1 2010/04/15 12:28:03 khchen Exp $ */
+/* $Id: sigcontext.h,v 1.1 2010-04-15 12:28:03 khchen Exp $ */
 
 #ifndef _ASM_CRIS_SIGCONTEXT_H
 #define _ASM_CRIS_SIGCONTEXT_H

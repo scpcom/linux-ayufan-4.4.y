@@ -1,5 +1,5 @@
 /*
- * $Id: hw_settings.S,v 1.1.1.1 2010/04/15 12:28:02 khchen Exp $
+ * $Id: hw_settings.S,v 1.1 2010-04-15 12:28:02 khchen Exp $
  * 
  * This table is used by some tools to extract hardware parameters.
  * The table should be included in the kernel and the decompressor.

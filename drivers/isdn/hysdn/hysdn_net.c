@@ -1,4 +1,4 @@
-/* $Id: hysdn_net.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: hysdn_net.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * Linux driver for HYSDN cards, net (ethernet type) handling routines.
  *
@@ -27,7 +27,7 @@ unsigned int hynet_enable = 0xffffffff;
 module_param(hynet_enable, uint, 0);
 
 /* store the actual version for log reporting */
-char *hysdn_net_revision = "$Revision: 1.1.1.1 $";
+char *hysdn_net_revision = "$Revision: 1.1 $";
 
 #define MAX_SKB_BUFFERS 20	/* number of buffers for keeping TX-data */
 

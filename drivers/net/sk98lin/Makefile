@@ -3,7 +3,7 @@
 # Name:         skge.c
 # Project:      GEnesis, PCI Gigabit Ethernet Adapter
 # Version:      $Revision: 1.1 $
-# Date:         $Date: 2010/04/15 15:13:30 $
+# Date:         $Date: 2010-04-15 15:13:30 $
 # Purpose:      The main driver source module
 #
 #******************************************************************************
@@ -35,11 +35,11 @@
 # History:
 #
 #	$Log: Makefile,v $
-#	Revision 1.1  2010/04/15 15:13:30  khchen
+#	Revision 1.1  2010-04-15 15:13:30  khchen
 #	DSM 2.2 #14220 kernel porting to 2.6.32
-#	
+#
 #	  6281, 853x, 854x, x86, x64 upgrade to 2.6.32
-#	
+#
 #	 Makefile                                                                             |   33
 #	 arch/arm/Kconfig                                                                     |   85
 #	 arch/arm/Makefile                                                                    |   38
@@ -1731,7 +1731,7 @@
 #	 tools/tsutool/Makefile                                                               |   34
 #	 tools/tsutool/mv_tsu_tool.c                                                          |  706
 #	 1690 files changed, 796316 insertions(+), 108 deletions(-)
-#	
+#
 #	Revision 1.1.4.3  2006/12/14 15:23:13  mlindner
 #	Add: Enable Yukon Extreme. Define SK_EXTREME enabled
 #	

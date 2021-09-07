@@ -1,7 +1,7 @@
 /*
  * hfc_usb.c
  *
- * $Id: hfc_usb.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+ * $Id: hfc_usb.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * modular HiSax ISDN driver for Colognechip HFC-S USB chip
  *
@@ -44,7 +44,7 @@
 #include "hfc_usb.h"
 
 static const char *hfcusb_revision =
-    "$Revision: 1.1.1.1 $ $Date: 2010/04/15 12:27:50 $ ";
+    "$Revision: 1.1 $ $Date: 2010-04-15 12:27:50 $ ";
 
 /* Hisax debug support
 *  debug flags defined in hfc_usb.h as HFCUSB_DBG_[*]

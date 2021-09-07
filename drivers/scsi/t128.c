@@ -104,8 +104,8 @@
  
 /*
  * $Log: t128.c,v $
- * Revision 1.1.1.1  2010/04/15 12:27:50  khchen
- * log message
+ * Revision 1.1  2010-04-15 12:27:50  khchen
+ * Initial revision
  *
  */
 

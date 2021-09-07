@@ -3,7 +3,7 @@
  * Name:	skgesirq.c
  * Project:	Gigabit Ethernet Adapters, Common Modules
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:30 $
+ * Date:	$Date: 2010-04-15 15:13:30 $
  * Purpose:	Special IRQ module
  *
  ******************************************************************************/
@@ -58,7 +58,7 @@
 
 #if (defined(DEBUG) || ((!defined(LINT)) && (!defined(SK_SLIM))))
 static const char SysKonnectFileId[] =
-	"@(#) $Id: skgesirq.c,v 1.1 2010/04/15 15:13:30 khchen Exp $ (C) Marvell.";
+	"@(#) $Id: skgesirq.c,v 1.1 2010-04-15 15:13:30 khchen Exp $ (C) Marvell.";
 #endif
 
 /* local function prototypes */

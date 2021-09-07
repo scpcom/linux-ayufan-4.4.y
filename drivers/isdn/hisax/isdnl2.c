@@ -1,4 +1,4 @@
-/* $Id: isdnl2.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: isdnl2.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * Author       Karsten Keil
  *              based on the teles driver from Jan den Ouden
@@ -19,7 +19,7 @@
 #include "hisax.h"
 #include "isdnl2.h"
 
-const char *l2_revision = "$Revision: 1.1.1.1 $";
+const char *l2_revision = "$Revision: 1.1 $";
 
 static void l2m_debug(struct FsmInst *fi, char *fmt, ...);
 

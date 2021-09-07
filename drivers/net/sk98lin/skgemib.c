@@ -3,7 +3,7 @@
  * Name:	skgemib.c
  * Project:	Gigabit Ethernet Adapters, PNMI-Module
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:30 $
+ * Date:	$Date: 2010-04-15 15:13:30 $
  * Purpose:	Private Network Management Interface Management Database
  *
  ****************************************************************************/

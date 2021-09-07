@@ -1,5 +1,5 @@
 /*
- * $Id: kernelcapi.h,v 1.1.1.1 2010/04/15 12:28:23 khchen Exp $
+ * $Id: kernelcapi.h,v 1.1 2010-04-15 12:28:23 khchen Exp $
  * 
  * Kernel CAPI 2.0 Interface for Linux
  * 

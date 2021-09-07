@@ -1,4 +1,4 @@
-/* $Id: divamnt.c,v 1.1.1.1 2010/04/15 12:27:50 khchen Exp $
+/* $Id: divamnt.c,v 1.1 2010-04-15 12:27:50 khchen Exp $
  *
  * Driver for Eicon DIVA Server ISDN cards.
  * Maint module
@@ -22,7 +22,7 @@
 #include "divasync.h"
 #include "debug_if.h"
 
-static char *main_revision = "$Revision: 1.1.1.1 $";
+static char *main_revision = "$Revision: 1.1 $";
 
 static int major;
 

@@ -4,7 +4,7 @@
  * Name:    skgeasfconv.h
  * Project: asf/ipmi
  * Version: $Revision: 1.1 $
- * Date:    $Date: 2010/04/15 15:13:31 $
+ * Date:    $Date: 2010-04-15 15:13:31 $
  * Purpose: asf/ipmi interface in windows driver
  *
  ******************************************************************************/

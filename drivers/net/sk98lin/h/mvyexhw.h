@@ -3,7 +3,7 @@
  * Name:	mvyexhw.h
  * Project:	Yukon Extreme, Common Modules
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:31 $
+ * Date:	$Date: 2010-04-15 15:13:31 $
  * Purpose:	Defines and Macros for the Yukon Extreme Gigabit Ethernet Adapters
  *
  ******************************************************************************/

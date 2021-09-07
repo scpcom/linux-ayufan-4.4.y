@@ -3,7 +3,7 @@
  * Name:	skaddr.h
  * Project:	Gigabit Ethernet Adapters, ADDR-Modul
  * Version:	$Revision: 1.1 $
- * Date:	$Date: 2010/04/15 15:13:31 $
+ * Date:	$Date: 2010-04-15 15:13:31 $
  * Purpose:	Header file for Address Management (MC, UC, Prom).
  *
  ******************************************************************************/
