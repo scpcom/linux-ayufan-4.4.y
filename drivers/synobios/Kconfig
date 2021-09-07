@@ -1,0 +1,92 @@
+#
+# Synology Hardware Monitor Module configuration
+#
+
+menu "Synology Hardware Monitor Module (synobios)"
+
+config SYNOBIOS_PPC85XX
+	tristate "Synobios for SYNO_854X and SYNO_853X (FreeScale MPC85XX)"
+	depends on SYNO_MPC85XX_COMMON
+	help
+	  Synology SYNO_854X and SYNO_853X synobios
+
+menuconfig  SYNOBIOS_6281
+	tristate "Synology 6281 based synobios"
+	depends on MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+	help
+		synology based 6281 synobios
+
+if SYNOBIOS_6281
+
+config SYNOBIOS_109_MV
+    tristate "Synobios for DS109 (Marvell 88F6281)"
+    depends on MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+	default m if MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    help
+      Synology DS109 synobios
+
+config SYNOBIOS_209_MV
+    tristate "Synobios for DS209 (Marvell 88F6281)"
+    depends on MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    default m if MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    help
+      Synology DS209 synobios
+
+config SYNOBIOS_409slim_MV
+    tristate "Synobios for DS409slim (Marvell 88F6281)"
+    depends on MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    default m if MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    help
+      Synology DS409slim synobios
+
+config SYNOBIOS_409_MV
+    tristate "Synobios for DS409 (Marvell 88F6281)"
+    depends on MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    default m if MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    help
+      Synology DS409 synobios
+
+config SYNOBIOS_RS409_MV
+    tristate "Synobios for RS409 (Marvell 88F6281)"
+    depends on MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    default m if MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    help
+      Synology RS409 synobios
+
+config SYNOBIOS_110j_MV
+	tristate "Synobios for DS110j (Marvell 88F6281)"
+	depends on MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+	default m if MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+	help
+	  Synology DS110j synobios
+
+config SYNOBIOS_210j_MV
+	tristate "Synobios for DS210j (Marvell 88F6281)"
+	depends on MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+	default m if MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+	help
+	  Synology DS210j synobios
+
+config SYNOBIOS_110_MV
+    tristate "Synobios for DS110 (Marvell 88F6281)"
+    depends on MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    default m if MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+    help
+      Synology DS110 synobios
+
+config SYNOBIOS_410j_MV
+	tristate "Synobios for DS410j (Marvell 88F6281)"
+	depends on MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+	default m if MACH_SYNOLOGY_6281 || SYNO_MV88F6281
+	help
+	  Synology DS410j synobios
+endif
+
+config SYNOBIOS_pineview_X86
+        tristate "Synobios for RS810+/DS410+/DS710+/DS1010+ (Pineview)"
+        depends on SYNO_X86 || SYNO_X64
+        default m if SYNO_X86 || SYNO_X64
+        help
+          Synology RS810+/DS410+/DS710+/DS1010+ synobios
+
+endmenu
