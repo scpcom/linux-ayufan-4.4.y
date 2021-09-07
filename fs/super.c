@@ -44,6 +44,15 @@
 LIST_HEAD(super_blocks);
 DEFINE_SPINLOCK(sb_lock);
 
+#ifdef MY_ABC_HERE
+spinlock_t Namei_buf_lock_1;  /* lock for UTF16NameiStrBuf1[] in fs/namei.c */
+spinlock_t Namei_buf_lock_2;  /* lock for UTF16NameiStrBuf2[] in fs/namei.c */
+spinlock_t Dcache_buf_lock;  /* lock for UTF8DcacheDStrBuf[] in fs/dcache.c */
+static int lock_1_init = 0;
+static int lock_2_init = 0;
+static int Dcache_lock_init = 0;
+#endif
+
 /**
  *	alloc_super	-	create new superblock
  *	@type:	filesystem type superblock should belong to
@@ -104,6 +113,24 @@ static struct super_block *alloc_super(struct file_system_type *type)
 		s->s_qcop = sb_quotactl_ops;
 		s->s_op = &default_op;
 		s->s_time_gran = 1000000000;
+#ifdef MY_ABC_HERE
+		mutex_init(&s->s_archive_mutex);
+		s->s_archive_version = 0;
+#endif
+#ifdef MY_ABC_HERE
+		if (!lock_1_init) {
+			spin_lock_init(&Namei_buf_lock_1);
+			lock_1_init=1;
+		}
+		if (!lock_2_init) {
+			spin_lock_init(&Namei_buf_lock_2);
+			lock_2_init=1;
+		}
+		if (!Dcache_lock_init) {
+			spin_lock_init(&Dcache_buf_lock);
+			Dcache_lock_init=1;
+		}
+#endif
 	}
 out:
 	return s;
@@ -200,6 +227,34 @@ void deactivate_super(struct super_block *s)
 }
 
 EXPORT_SYMBOL(deactivate_super);
+
+#ifdef MY_ABC_HERE
+/** 
+ * Modified from deactivate_locked_super() 
+ *  
+ *  deactivate_read_locked_super	-	drop an active reference
+ *  to superblock
+ *	@s: superblock to deactivate
+ *
+ *	This is a read-lock variation of deactivate_locked_super
+ */
+void deactivate_read_locked_super(struct super_block *s)
+{
+	struct file_system_type *fs = s->s_type;
+	if (atomic_dec_and_lock(&s->s_active, &sb_lock)) {
+		s->s_count -= S_BIAS-1;
+		spin_unlock(&sb_lock);
+		vfs_dq_off(s, 0);
+		down_write(&s->s_umount);
+		fs->kill_sb(s);
+		put_filesystem(fs);
+		put_super(s);
+	} else {
+		up_read(&s->s_umount);
+	}
+}
+EXPORT_SYMBOL(deactivate_read_locked_super);
+#endif
 
 /**
  *	deactivate_locked_super	-	drop an active reference to superblock

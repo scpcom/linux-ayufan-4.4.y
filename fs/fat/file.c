@@ -319,6 +319,19 @@ static int fat_sanitize_mode(const struct msdos_sb_info *sbi,
 
 	perm = *mode_ptr & ~(S_IFMT | mask);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	/* fat does not support usual permissions so if changing to writeable
+         * user all must follow.
+	*/
+	if ( (perm & S_IWUGO) != (inode->i_mode & S_IWUGO))
+	{ /* Propagate the user w bit to all */
+		if (perm & S_IWUSR)
+			perm |= S_IWUGO;
+		else 
+			perm &= ~S_IWUGO;
+	}
+#endif
+
 	/*
 	 * Of the r and x bits, all (subject to umask) must be present. Of the
 	 * w bits, either all (subject to umask) or none must be present.

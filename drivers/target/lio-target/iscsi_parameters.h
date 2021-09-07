@@ -104,7 +104,7 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define INITIAL_AUTHMETHOD			CHAP
 #define INITIAL_HEADERDIGEST			"CRC32C,None"
 #define INITIAL_DATADIGEST			"CRC32C,None"
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_LIO
 #define INITIAL_MAXCONNECTIONS			"2"
 #else
 #define INITIAL_MAXCONNECTIONS			"1"
@@ -114,7 +114,7 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define INITIAL_TARGETNAME			"SYNO.Target"
 #define INITIAL_INITIATORNAME			"SYNO.Initiator"
 #define INITIAL_TARGETALIAS			"Synology Target"
-#define INITIAL_INITIATORALIAS			"SYnology Initiator"
+#define INITIAL_INITIATORALIAS			"Synology Initiator"
 #else
 #define INITIAL_TARGETNAME			"LIO.Target"
 #define INITIAL_INITIATORNAME			"LIO.Initiator"

@@ -52,6 +52,11 @@ u_int16_t *DefUpcaseTable(void);
 void SYNOUnicodeTblAdd(u_int16_t *UpcaseTbl);
 u_int16_t *SYNOUnicodeTblGet(char *szLocaleName);
 
+static u_int16_t UTF16NameiStrBuf1[UNICODE_UTF16_BUFSIZE];
+static u_int16_t UTF16NameiStrBuf2[UNICODE_UTF16_BUFSIZE];
+extern spinlock_t Namei_buf_lock_1;  /* init at alloc_super() */
+extern spinlock_t Namei_buf_lock_2;  /* init at alloc_super() */
+
 /*
  * Sample implementation from Unicode home page.
  * http://www.stonehand.com/unicode/standard/fss-utf.html
@@ -328,88 +333,37 @@ u_int16_t *DefUpcaseTable()
     return UpcaseTable;
 }
 
-static inline int synotoupper(int x)
-{
-	if ((64 < x && 91 > x) || (96 < x && 123 > x))
-		x = x & ~0x20;
-	return x;
-}
-static inline int SYNOAsciiToUpper(u_int8_t *to, const u_int8_t *from, int clenfrom)
-{
-	int n = clenfrom;
-	u_int8_t *op;
-	const u_int8_t *ip;
-
-	op = to;
-	ip = from;
-	while (*ip && *ip != '\\' && n > 0) {
-		if (*ip & 0x80 ) {
-			return 1;
-		}
-		*op++ = synotoupper(*ip++);
-		n--;
-	}
-	*op = 0;
-
-	return 0;
-}
-
-static inline int SYNOUnicodeUTF8toUpper(u_int8_t *to, const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable)
+int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable)
 {
 	u_int16_t *UpcaseTbl;
 	int clenUtf16;
 	int i;
 	int err;
-	u_int16_t *UTF16NameiStrBuf;
 
-	/* We could enhance unicode to upper performance here. Transform char by char, 
-	not all copied to array. It will reduce kmemalloc and memcpy time. */
-	UTF16NameiStrBuf = kmalloc(PATH_MAX, GFP_KERNEL);
-	if (!UTF16NameiStrBuf) {
-		return -ENOMEM;
-	}
+	spin_lock(&Namei_buf_lock_1);
 
 	UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
-	clenUtf16 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf, from, clenfrom);
+    clenUtf16 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf1, from, clenfrom);
 
 	for(i = 0; i < clenUtf16; i++)
-		UTF16NameiStrBuf[i] = UpcaseTbl[UTF16NameiStrBuf[i]];
-	
-	UTF16NameiStrBuf[clenUtf16] = 0;
-	err = SYNOUnicodeUTF16StrToUTF8Str(to, UTF16NameiStrBuf, maxlen);
-	kfree(UTF16NameiStrBuf);
+        UTF16NameiStrBuf1[i] = UpcaseTbl[UTF16NameiStrBuf1[i]];
+
+    UTF16NameiStrBuf1[clenUtf16] = 0;
+	err = SYNOUnicodeUTF16StrToUTF8Str(to, UTF16NameiStrBuf1, maxlen);
+    spin_unlock(&Namei_buf_lock_1);
 
 	return err;
 }
-
-int SYNOToUpper(u_int8_t *to, const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable)
-{
-	if (SYNOAsciiToUpper(to, from, clenfrom)) {
-		return SYNOUnicodeUTF8toUpper(to, from, maxlen, clenfrom, upcasetable);
-	}
-	return clenfrom;
-}
-EXPORT_SYMBOL(SYNOToUpper);
+EXPORT_SYMBOL(SYNOUnicodeUTF8toUpper);
 
 int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int clenUtf8Str1, int clenUtf8Str2, u_int16_t *upcasetable)
 {
     int clenUtf16Str1,clenUtf16Str2;
     u_int16_t *UpcaseTbl;
 	int err;
-	u_int16_t *UTF16NameiStrBuf1;
-	u_int16_t *UTF16NameiStrBuf2;
 
-	/* We could enhance unicode to upper performance here. Transform char by char, 
-	not all copied to array. It will reduce kmemalloc and memcpy time. */
-	UTF16NameiStrBuf1 = kmalloc(PATH_MAX, GFP_KERNEL);
-	if (!UTF16NameiStrBuf1) {
-		return -ENOMEM;
-	}
-	UTF16NameiStrBuf2 = kmalloc(PATH_MAX, GFP_KERNEL);
-	if (!UTF16NameiStrBuf2) {
-		kfree(UTF16NameiStrBuf1);
-		return -ENOMEM;
-	}
+    spin_lock(&Namei_buf_lock_1);
+    spin_lock(&Namei_buf_lock_2);
 
     UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
 
@@ -423,8 +377,9 @@ int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int 
                                       ,(u_int16_t *)UTF16NameiStrBuf2
                                       ,clenUtf16Str1
                                       ,UpcaseTbl);
-	kfree(UTF16NameiStrBuf1);
-	kfree(UTF16NameiStrBuf2);
+
+    spin_unlock(&Namei_buf_lock_1);
+    spin_unlock(&Namei_buf_lock_2);
 
 	return err;
 }
@@ -1906,7 +1861,7 @@ out:
  * needs parent already locked. Doesn't follow mounts.
  * SMP-safe.
  */
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_LIO
 extern struct dentry *lookup_hash(struct nameidata *nd)
 #else
 #ifdef CONFIG_AUFS_FS
@@ -3831,9 +3786,9 @@ EXPORT_SYMBOL(get_write_access); /* binfmt_aout */
 EXPORT_SYMBOL(getname);
 EXPORT_SYMBOL(lock_rename);
 EXPORT_SYMBOL(lookup_one_len);
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_LIO
 EXPORT_SYMBOL(lookup_hash);
-#else /* !MY_ABC_HERE */
+#else /* !CONFIG_SYNO_LIO */
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(lookup_hash);
 #endif /* SYNO_AUFS */

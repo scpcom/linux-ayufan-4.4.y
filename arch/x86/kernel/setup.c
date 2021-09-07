@@ -124,12 +124,33 @@ extern long g_internal_netif_num;
 #endif
 
 #ifdef MY_ABC_HERE
-extern unsigned char grgbLanMac[2][16];
+extern long g_ahci_switch;
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_sata_led_special;
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszSataPortMap[8];
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszDiskIdxMap[16];
+#endif
+
+#ifdef MY_ABC_HERE
+extern unsigned char grgbLanMac[4][16];
 #endif
 
 #ifdef MY_ABC_HERE
 extern char gszSerialNum[12];
 extern char gszCustomSerialNum[32];
+#endif
+
+#ifdef MY_DEF_HERE
+extern unsigned int gSwitchDev;
+extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
 /*
@@ -549,6 +570,62 @@ static int __init early_internal_netif_num(char *p)
 __setup("netif_num=", early_internal_netif_num);
 #endif
 
+#ifdef  MY_ABC_HERE
+static int __init early_ahci_switch(char *p)
+{
+        g_ahci_switch = simple_strtol(p, NULL, 10);
+
+        if ( g_ahci_switch >= 0 ) {
+                printk("AHCI: %d\n", (int)g_ahci_switch);
+        }
+
+        return 1;
+}
+__setup("ahci=", early_ahci_switch);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_sataled_special(char *p)
+{
+	g_sata_led_special = simple_strtol(p, NULL, 10);
+
+	if ( g_sata_led_special >= 0 ) {
+		printk("Special Sata LEDs.\n");
+	}
+
+	return 1;
+}
+__setup("SataLedSpecial=", early_sataled_special);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_sataport_map(char *p)
+{
+	snprintf(gszSataPortMap, sizeof(gszSataPortMap), "%s", p);
+
+	if(0 != gszSataPortMap[0]) {
+		printk("Sata Port Map: %s\n", gszSataPortMap);
+	}
+
+	return 1;
+}
+__setup("SataPortMap=", early_sataport_map);
+#endif
+
+#ifdef MY_ABC_HERE
+static int __init early_disk_idx_map(char *p)
+{
+	snprintf(gszDiskIdxMap, sizeof(gszDiskIdxMap), "%s", p);
+
+	if('\0' != gszDiskIdxMap[0]) {
+		printk("Disk Index Map: %s\n", gszDiskIdxMap);
+	}
+
+	return 1;
+}
+__setup("DiskIdxMap=", early_disk_idx_map);
+#endif
+
 #ifdef MY_ABC_HERE
 static int __init early_mac1(char *p)
 {
@@ -569,6 +646,53 @@ static int __init early_mac2(char *p)
 	return 1;
 }
 __setup("mac2=", early_mac2);
+
+static int __init early_mac3(char *p)
+{
+	snprintf(grgbLanMac[2], sizeof(grgbLanMac[2]), "%s", p);
+
+	printk("Mac3: %s\n", grgbLanMac[2]);
+
+	return 1;
+}
+__setup("mac3=", early_mac3);
+
+static int __init early_mac4(char *p)
+{
+	snprintf(grgbLanMac[3], sizeof(grgbLanMac[3]), "%s", p);
+
+	printk("Mac4: %s\n", grgbLanMac[3]);
+
+	return 1;
+}
+__setup("mac4=", early_mac4);
+#endif
+
+#ifdef MY_DEF_HERE
+static int __init early_netif_seq(char *p)
+{
+	int len;
+	int netDevCount;
+
+	// no net device switch required
+	if ((NULL == p) || (0 == (len = strlen(p)))) {
+		return 1;
+	}
+
+	netDevCount = len/SYNO_NET_DEVICE_ENCODING_LENGTH;
+	if (0 == netDevCount) {
+		return 1;
+	}
+
+	for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
+		// the format of netif_seq string is device seq (1 character) + device pci name (last 5 characters only)
+		memcpy(gDevPCIName[gSwitchDev], p, SYNO_NET_DEVICE_ENCODING_LENGTH);
+		p += SYNO_NET_DEVICE_ENCODING_LENGTH;
+	}
+	return 1;
+}
+
+__setup("netif_seq=",early_netif_seq);
 #endif
 
 #ifdef MY_ABC_HERE

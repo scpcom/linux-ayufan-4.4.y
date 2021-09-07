@@ -230,7 +230,7 @@ struct configfs_item_operations {
 	ssize_t	(*show_attribute)(struct config_item *, struct configfs_attribute *,char *);
 	ssize_t	(*store_attribute)(struct config_item *,struct configfs_attribute *,const char *, size_t);
 	int (*allow_link)(struct config_item *src, struct config_item *target);
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_LIO
 	int (*check_link)(struct config_item *src, struct config_item *target);
 #endif
 	int (*drop_link)(struct config_item *src, struct config_item *target);

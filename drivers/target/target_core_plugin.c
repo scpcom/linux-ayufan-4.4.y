@@ -51,11 +51,13 @@ void plugin_load_all_classes(void)
 	plugin_register_class(PLUGIN_TYPE_TRANSPORT, "TRANSPORT", MAX_PLUGINS);
 	transport_load_plugins();
 
+#ifndef MY_ABC_HERE
 	/*
 	 * Setup Storage Engine Object Plugins
 	 */
 	plugin_register_class(PLUGIN_TYPE_OBJ, "OBJ", MAX_PLUGINS);
 	se_obj_load_plugins();
+#endif
 }
 EXPORT_SYMBOL(plugin_load_all_classes);
 
@@ -126,8 +128,10 @@ int plugin_register_class(
 		p->plugin_class = pc;
 	}
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "SE_PC[%u] - Registered Plugin Class: %s\n",
 			pc->plugin_class, pc->plugin_class_name);
+#endif
 
 	return 0;
 }
@@ -265,8 +269,10 @@ struct se_plugin_s *plugin_register(
 	p->plugin_type = plugin_loc;
 	snprintf(p->plugin_name, MAX_PLUGIN_NAME, "%s", plugin_name);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "PLUGIN_%s[%u] - %s registered\n",
 			pc->plugin_class_name, plugin_loc, plugin_name);
+#endif
 	spin_unlock(&pc->plugin_lock);
 
 	if (*plugin_init != NULL) {

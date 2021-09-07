@@ -79,12 +79,12 @@ struct usb_hub {
 	struct delayed_work	leds;
 	struct delayed_work	init_work;
 	void			**port_owners;
-#ifdef CONFIG_SYNO_MV88F6281 
+#ifdef MY_ABC_HERE
 	int				syno_hub_eh;
 #endif
 };
 
-#ifdef CONFIG_SYNO_MV88F6281 
+#ifdef MY_ABC_HERE
 static int hub_port_debounce(struct usb_hub *hub, int port1);
 #endif
 
@@ -169,12 +169,19 @@ static inline char *portspeed(int portstatus)
 }
 
 /* Note that hdev or one of its children must be locked! */
+#ifndef MY_ABC_HERE
 static struct usb_hub *hdev_to_hub(struct usb_device *hdev)
+#else
+struct usb_hub *hdev_to_hub(struct usb_device *hdev)
+#endif
 {
 	if (!hdev || !hdev->actconfig)
 		return NULL;
 	return usb_get_intfdata(hdev->actconfig->interface[0]);
 }
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL(hdev_to_hub);
+#endif
 
 /* USB 2.0 spec Section 11.24.4.5 */
 static int get_hub_descriptor(struct usb_device *hdev, void *data, int size)
@@ -376,7 +383,7 @@ static int hub_port_status(struct usb_hub *hub, int port1,
 	return ret;
 }
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 void syno_clear_hub_eh(struct usb_hub *hub)
 {
 	if (!hub)
@@ -410,6 +417,7 @@ int syno_get_hub_eh(struct usb_hub *hub)
 
 	return eh; 
 }
+EXPORT_SYMBOL(syno_get_hub_eh);
 #endif
 
 static void kick_khubd(struct usb_hub *hub)
@@ -2070,7 +2078,7 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 		if (ret < 0)
 			return ret;
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 		if (portchange & (USB_PORT_STAT_C_CONNECTION | USB_PORT_STAT_C_ENABLE))
 		{
 			hub_port_debounce(hub, port1);
@@ -3099,6 +3107,18 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 
 	/* Try to resuscitate an existing device */
 	udev = hdev->children[port1-1];
+
+#ifdef MY_ABC_HERE 
+	if ((portstatus == USB_PORT_STAT_POWER) && udev &&
+		(portchange & USB_PORT_STAT_C_CONNECTION)) {
+		//USB_VENDOR_ID_CYBERPOWER
+		if (le16_to_cpu(udev->descriptor.idVendor) == 0x0764) {
+			clear_bit(port1, hub->change_bits);
+			return;
+		}
+	}
+#endif
+
 	if ((portstatus & USB_PORT_STAT_CONNECTION) && udev &&
 			udev->state != USB_STATE_NOTATTACHED) {
 		usb_lock_device(udev);
@@ -3340,7 +3360,7 @@ static void hub_events(void)
 		kref_get(&hub->kref);
 		spin_unlock_irq(&hub_event_lock);
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 		if ( syno_get_hub_eh(hub) ) {
 			printk("hub is performing EH\n");
 			msleep(100);
@@ -3858,12 +3878,12 @@ int usb_reset_device(struct usb_device *udev)
 		}
 	}
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	printk("lock for hub EH\n");
 	syno_set_hub_eh(hdev_to_hub(udev->parent));
 #endif
 	ret = usb_reset_and_verify_device(udev);
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	syno_clear_hub_eh(hdev_to_hub(udev->parent));
 	printk("unlock for hub EH\n");
 #endif

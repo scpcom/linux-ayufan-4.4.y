@@ -1507,6 +1507,7 @@ MV_32 mvBoardTdmSpiModeGet(MV_VOID)
 		case RD_88F6192A_ID:
 		case DB_88F6192A_BP_ID:
 		case DB_88F6282A_BP_ID:
+		case RD_88F6282A_ID:
 #ifdef CONFIG_SYNO_MV88F6281
 		case SYNO_DS409_ID:
 		case SYNO_DS109_ID:
@@ -1515,6 +1516,8 @@ MV_32 mvBoardTdmSpiModeGet(MV_VOID)
 		case SYNO_DS011_ID:
 		case SYNO_DS411slim_ID:
 		case SYNO_RS_6282_ID:
+		case SYNO_DS411_ID:
+		case SYNO_DS212_ID:
 #endif
 			 return DUAL_CHIP_SELECT_MODE;
 		default:
@@ -2149,6 +2152,8 @@ MV_U32 mvBoardIdGet(MV_VOID)
 		tmpBoardId = DB_88F6280A_BP_ID;
 		#elif defined(RD_88F6281A)
 		tmpBoardId = RD_88F6281A_ID;
+		#elif defined(RD_88F6282A)
+		tmpBoardId = RD_88F6282A_ID;
 		#elif defined(DB_88F6192A)
 		tmpBoardId = DB_88F6192A_BP_ID;
 		#elif defined(DB_88F6190A)
@@ -2175,7 +2180,7 @@ MV_U32 mvBoardIdGet(MV_VOID)
 	case 0x14: // slim
 	case 0x15: // 1,2 bay
 		gBoardId = DB_88F6281A_BP_ID;
-	case 0x17: // 6282 reserve
+	case 0x17: case 0x18: case 0x19:  // 6282 reserve
 		gBoardId = DB_88F6282A_BP_ID;
 		break;
 	default:
@@ -2351,6 +2356,7 @@ MV_32 mvBoardSlicGpioPinGet(MV_U32 slicNum)
 	case DB_88F6281A_BP_ID:
 	case DB_88F6282A_BP_ID:
 	case RD_88F6281A_ID:
+	case RD_88F6282A_ID:
 #ifdef CONFIG_SYNO_MV88F6281
 	case SYNO_DS409_ID:
 	case SYNO_DS109_ID:
@@ -2359,6 +2365,8 @@ MV_32 mvBoardSlicGpioPinGet(MV_U32 slicNum)
 	case SYNO_DS011_ID:
 	case SYNO_DS411slim_ID:
 	case SYNO_RS_6282_ID:
+	case SYNO_DS411_ID:
+	case SYNO_DS212_ID:
 #endif
 	default:
 		return MV_ERROR;
@@ -2456,6 +2464,9 @@ MV_STATUS mvBoardHDDPowerControl(MV_BOOL mode)
 	if(mvBoardIdGet() != RD_88F6281A_ID)
         return MV_ERROR;
 
+	if(mvBoardIdGet() != RD_88F6282A_ID)
+        return MV_ERROR;
+
 	/* TWSI init */    	
 	slave.type = ADDR7_BIT;
 	slave.address = 0;
@@ -2518,6 +2529,9 @@ MV_STATUS mvBoardSDioWPControl(MV_BOOL mode)
 	MV_TWSI_ADDR slave;
 	
 	if(mvBoardIdGet() != RD_88F6281A_ID)
+        return MV_ERROR;
+
+	if(mvBoardIdGet() != RD_88F6282A_ID)
         return MV_ERROR;
 
 	/* TWSI init */    	

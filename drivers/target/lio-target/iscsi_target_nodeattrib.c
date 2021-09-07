@@ -50,7 +50,12 @@
 static inline char *iscsi_na_get_initiatorname(
 	iscsi_node_acl_t *nacl)
 {
+#ifdef MY_ABC_HERE
+	// reduce compile-time warning messages
+	se_node_acl_t *se_nacl = nacl->se_node_acl;	
+#else
 	se_node_acl_t *se_nacl = &nacl->se_node_acl;	
+#endif
 
 	return &se_nacl->initiatorname[0];
 }

@@ -62,6 +62,10 @@ obj-$(CONFIG_MTD_RBTX4939)	+= rbtx4939-flash.o
 obj-$(CONFIG_MTD_VMU)		+= vmu-flash.o
 obj-$(CONFIG_MTD_GPIO_ADDR)	+= gpio-addr-flash.o
 obj-$(CONFIG_SYNO_MTD_PHYMAPS) += synomap.o
+
+ifeq ($(CONFIG_ARCH_FEROCEON),y)
+obj-$(CONFIG_MTD)      		+= flashmap.o
+endif
 ifeq ($(CONFIG_ARCH_FEROCEON_ORION),y)
 	include $(srctree)/arch/arm/mach-feroceon-orion/config/mvRules.mk
 	flashmap-objs = ../../../arch/arm/mach-feroceon-orion/flashmap.o

@@ -36,6 +36,9 @@
 #include <linux/slab.h>
 #include <linux/spinlock.h>
 #include <linux/smp_lock.h>
+#ifdef MY_ABC_HERE
+#include <linux/statfs.h>
+#endif
 #include <scsi/scsi.h>
 #include <scsi/scsi_host.h>
 
@@ -67,6 +70,7 @@ int fd_attach_hba(se_hba_t *hba, u32 host_id)
 	hba->hba_ptr = (void *) fd_host;
 	hba->transport = &fileio_template;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_HBA[%d] - TCM FILEIO HBA Driver %s on Generic"
 		" Target Core Stack %s\n", hba->hba_id, FD_VERSION,
 		TARGET_CORE_MOD_VERSION);
@@ -74,6 +78,7 @@ int fd_attach_hba(se_hba_t *hba, u32 host_id)
 		" Target Core with TCQ Depth: %d MaxSectors: %u\n",
 		hba->hba_id, fd_host->fd_host_id,
 		atomic_read(&hba->max_queue_depth), FD_MAX_SECTORS);
+#endif
 
 	return 0;
 }
@@ -92,8 +97,10 @@ int fd_detach_hba(se_hba_t *hba)
 	}
 	fd_host = (fd_host_t *) hba->hba_ptr;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_HBA[%d] - Detached FILEIO HBA: %u from Generic"
 		" Target Core\n", hba->hba_id, fd_host->fd_host_id);
+#endif
 
 	kfree(fd_host);
 	hba->hba_ptr = NULL;
@@ -118,11 +125,7 @@ int fd_claim_phydevice(se_hba_t *hba, se_device_t *dev)
 			fd_dev, fd_dev->fd_major, fd_dev->fd_minor);
 
 		bd = linux_blockdevice_claim(fd_dev->fd_major,
-#ifdef MY_ABC_HERE
-				fd_dev->fd_minor, (void *)fd_dev, 1);
-#else
 				fd_dev->fd_minor, (void *)fd_dev);
-#endif
 		if (!(bd))
 			return -1;
 
@@ -272,11 +275,7 @@ se_device_t *fd_create_virtdevice(
 			fd_dev, fd_dev->fd_major, fd_dev->fd_minor);
 
 		bd = linux_blockdevice_claim(fd_dev->fd_major, fd_dev->fd_minor,
-#ifdef MY_ABC_HERE
-					fd_dev, 1);
-#else
 					fd_dev);
-#endif
 		if (!(bd)) {
 			printk(KERN_ERR "FILEIO: Unable to claim"
 				" struct block_device\n");
@@ -314,7 +313,7 @@ se_device_t *fd_create_virtdevice(
 
 				snprintf(dev_p + path_length - SYNO_LIO_FILE_IDX_WIDTH, 
 						SYNO_LIO_FILE_IDX_WIDTH + 1, 
-						"%0*d", SYNO_LIO_FILE_IDX_WIDTH, idx);
+						"%0*d", SYNO_LIO_FILE_IDX_WIDTH, (int)idx);
 
 				old_fs = get_fs();
 				set_fs(get_ds());
@@ -364,9 +363,11 @@ se_device_t *fd_create_virtdevice(
 	fd_dev->fd_dev_id = fd_host->fd_host_dev_id_count++;
 	fd_dev->fd_queue_depth = dev->queue_depth;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_FILE[%u] - Added TCM FILEIO Device ID: %u at %s,"
 		" %llu total bytes\n", fd_host->fd_host_id, fd_dev->fd_dev_id,
 			fd_dev->fd_dev_name, fd_dev->fd_dev_size);
+#endif
 
 	iput(inode);
 	putname(dev_p);
@@ -400,10 +401,10 @@ fail:
  */
 int fd_activate_device(se_device_t *dev)
 {
+#ifndef MY_ABC_HERE
 	fd_dev_t *fd_dev = (fd_dev_t *) dev->dev_ptr;
 	fd_host_t *fd_host = fd_dev->fd_host;
 
-#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_FILE[%u] - Activating Device with TCQ: %d at"
 		" FILEIO Device ID: %d\n", fd_host->fd_host_id,
 		fd_dev->fd_queue_depth, fd_dev->fd_dev_id);
@@ -418,10 +419,10 @@ int fd_activate_device(se_device_t *dev)
  */
 void fd_deactivate_device(se_device_t *dev)
 {
+#ifndef MY_ABC_HERE
 	fd_dev_t *fd_dev = (fd_dev_t *) dev->dev_ptr;
 	fd_host_t *fd_host = fd_dev->fd_host;
 
-#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_FILE[%u] - Deactivating Device with TCQ: %d at"
 		" FILEIO Device ID: %d\n", fd_host->fd_host_id,
 		fd_dev->fd_queue_depth, fd_dev->fd_dev_id);
@@ -600,6 +601,9 @@ static int fd_emulate_scsi_cdb(se_task_t *task)
 	case SYNCHRONIZE_CACHE:
 	case TEST_UNIT_READY:
 	case VERIFY:
+#ifdef MY_ABC_HERE
+	case VERIFY_16:
+#endif
 	case WRITE_FILEMARKS:
 	case RESERVE:
 	case RESERVE_10:
@@ -866,11 +870,40 @@ static int fd_do_writev(fd_request_t *req, se_task_t *task)
 		}
 	} else {
 		/* for regular file */
+#ifdef MY_ABC_HERE
+		struct kstatfs statfs;
+		struct inode* inode = NULL;
+#endif
 		loff_t pos = req->fd_lba * DEV_ATTRIB(task->se_dev)->block_size;
 		loff_t fd_pos = 0;
 
 		for( i = 0; i < req->fd_sg_count; ++i ) {
 			fd = req->fd_dev->fd_files[SYNO_LIO_FILE_IDX(pos)];
+#ifdef MY_ABC_HERE
+			inode = fd->f_dentry->d_inode;
+			spin_lock(&inode->i_lock);
+			if( vfs_statfs(fd->f_dentry, &statfs) ) {
+				WARN_ON(1);
+			} else if( inode->i_blocks * 512 + inode->i_bytes < inode->i_size &&
+			           209715200 > statfs.f_bfree * statfs.f_bsize )
+			           /* (i_blocks * 512 + i_bytes) represent the amount of allocated disk space */
+			{
+				struct se_dev_entry_s* deve = task->task_se_cmd->se_deve;
+
+				spin_unlock(&inode->i_lock);
+				spin_lock_bh(&deve->se_lun_acl->se_lun_nacl->device_list_lock);
+				if( !(deve->lun_flags & TRANSPORT_LUNFLAGS_PRE_READ_ONLY) &&
+				    !(deve->lun_flags & TRANSPORT_LUNFLAGS_READ_ONLY) ) {
+					printk(KERN_ERR "iSCSI - Failed to write data. Data volume is full.\n");
+					deve->lun_flags |= TRANSPORT_LUNFLAGS_PRE_READ_ONLY;
+				}
+				spin_unlock_bh(&deve->se_lun_acl->se_lun_nacl->device_list_lock);
+
+				goto END;
+			}
+			spin_unlock(&inode->i_lock);
+#endif
+
 			fd_pos = SYNO_LIO_FILE_POS(pos);
 
 			old_fs = get_fs();
@@ -880,7 +913,7 @@ static int fd_do_writev(fd_request_t *req, se_task_t *task)
 
 			pos += fd_pos - SYNO_LIO_FILE_POS(pos);
 
-			if( 0 > ret || ret != sg[i].length ) {
+			if( (0 > ret || ret != sg[i].length) && printk_ratelimit() ) {
 				printk(KERN_ERR "I/O error: vfs_write() returned %d != %d "
 						"(pos: %llu, idx: %llu, fd_pos: %llu)\n",
 						ret, sg[i].length, pos, SYNO_LIO_FILE_IDX(pos), fd_pos);

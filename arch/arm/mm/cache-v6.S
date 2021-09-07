@@ -159,15 +159,29 @@ ENDPROC(v6_coherent_user_range)
 ENDPROC(v6_coherent_kern_range)
 
 /*
+#ifdef CONFIG_SYNO_PLX_PORTING
+ *	v6_flush_kern_dcache_area(void *addr, size_t size)
+#else
  *	v6_flush_kern_dcache_page(kaddr)
+#endif
  *
  *	Ensure that the data held in the page kaddr is written back
  *	to the page in question.
  *
+#ifdef CONFIG_SYNO_PLX_PORTING
+ *	- addr	- kernel address
+ *	- size	- region size
+#else
  *	- kaddr   - kernel address (guaranteed to be page aligned)
+#endif
  */
+#ifdef CONFIG_SYNO_PLX_PORTING
+ENTRY(v6_flush_kern_dcache_area)
+	add	r1, r0, r1
+#else
 ENTRY(v6_flush_kern_dcache_page)
 	add	r1, r0, #PAGE_SZ
+#endif
 1:
 #ifdef HARVARD_CACHE
 	mcr	p15, 0, r0, c7, c14, 1		@ clean & invalidate D line
@@ -271,7 +285,11 @@ ENTRY(v6_cache_fns)
 	.long	v6_flush_user_cache_range
 	.long	v6_coherent_kern_range
 	.long	v6_coherent_user_range
+#ifdef CONFIG_SYNO_PLX_PORTING
+	.long	v6_flush_kern_dcache_area
+#else
 	.long	v6_flush_kern_dcache_page
+#endif
 	.long	v6_dma_inv_range
 	.long	v6_dma_clean_range
 	.long	v6_dma_flush_range

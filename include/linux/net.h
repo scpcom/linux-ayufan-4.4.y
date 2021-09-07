@@ -194,6 +194,10 @@ struct proto_ops {
 				      struct vm_area_struct * vma);
 	ssize_t		(*sendpage)  (struct socket *sock, struct page *page,
 				      int offset, size_t size, int flags);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	ssize_t		(*sendpages)  (struct socket *sock, struct page **page,
+				      int offset, size_t size, int flags);
+#endif
 	ssize_t 	(*splice_read)(struct socket *sock,  loff_t *ppos,
 				       struct pipe_inode_info *pipe, size_t len, unsigned int flags);
 };

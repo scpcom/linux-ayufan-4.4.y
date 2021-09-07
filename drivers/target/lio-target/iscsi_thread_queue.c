@@ -168,8 +168,10 @@ extern int iscsi_allocate_thread_sets(u32 thread_pair_count, int role)
 		allocated_thread_pair_count++;
 	}
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Spawned %d thread set(s) (%d total threads).\n",
 		allocated_thread_pair_count, allocated_thread_pair_count * 2);
+#endif
 	return allocated_thread_pair_count;
 }
 
@@ -205,9 +207,11 @@ extern void iscsi_deallocate_thread_sets(int role)
 		kfree(ts);
 	}
 
+#ifndef MY_ABC_HERE
 	if (released_count)
 		printk(KERN_INFO "Stopped %d thread set(s) (%d total threads)."
 			"\n", released_count, released_count * 2);
+#endif
 }
 
 /*	iscsi_deallocate_extra_thread_sets():
@@ -248,10 +252,12 @@ static void iscsi_deallocate_extra_thread_sets(int role)
 		kfree(ts);
 	}
 
+#ifndef MY_ABC_HERE
 	if (released_count) {
 		printk(KERN_INFO "Stopped %d thread set(s) (%d total threads)."
 			"\n", released_count, released_count * 2);
 	}
+#endif
 }
 
 /*	iscsi_activate_thread_set():

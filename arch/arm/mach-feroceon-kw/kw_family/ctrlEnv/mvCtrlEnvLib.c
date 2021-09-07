@@ -122,14 +122,18 @@ MV_STATUS SYNOMppCtrlRegWrite(MV_U32 mppPin, MV_U32 mppVal)
 	MV_U32 origVal;
 	MV_U32 mppGroup;
 
+	/*there are 49 mpp pins only*/
 	if(49 < mppPin)
 		return -EINVAL;
-
+		
+		/*get the group the pin belongs to, for addressing*/
+		/*32 gits per register, 4 bits per pin, 8 pins in a group*/
 		mppGroup = mppPin / 8;
 		mppVal &= 0x0F;
 
 		origVal = MV_REG_READ(mvCtrlMppRegGet(mppGroup));
 
+		/*get the corresponding bits*/
 		origVal &= ~(0xF << ((mppPin % 8)*4));
 		origVal |= (mppVal << ((mppPin % 8)*4));
 
@@ -138,7 +142,6 @@ MV_STATUS SYNOMppCtrlRegWrite(MV_U32 mppPin, MV_U32 mppVal)
 		return MV_OK;
 }
 #endif
-
 /*******************************************************************************
 * mvCtrlEnvInit - Initialize Marvell controller environment.
 *
@@ -259,6 +262,8 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
 		(boardId == SYNO_DS211_ID) ||
 		(boardId == SYNO_DS411slim_ID) ||
 		(boardId == SYNO_RS_6282_ID) ||
+		(boardId == SYNO_DS411_ID)||
+		(boardId == SYNO_DS212_ID)||
 #endif
 		(boardId == DB_88F6180A_BP_ID))
 		mvBoardMppMuxSet();
@@ -274,6 +279,7 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
     	{
     		if ((mppGroupType == MV_BOARD_OTHER) ||
     			(boardId == RD_88F6281A_ID) ||
+    			(boardId == RD_88F6282A_ID) ||
     			(boardId == RD_88F6192A_ID) ||
                 (boardId == RD_88F6190A_ID) ||
                 (boardId == RD_88F6281A_PCAC_ID) ||
@@ -309,6 +315,7 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
 	{
 		if ((mppGroupType == MV_BOARD_OTHER) ||
 			(boardId == RD_88F6281A_ID) ||
+			(boardId == RD_88F6282A_ID) ||
             (boardId == RD_88F6281A_PCAC_ID) ||
             (boardId == SHEEVA_PLUG_ID))
 			mppVal = mvBoardMppGet(mppGroup);
@@ -337,6 +344,8 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
 	   mvBoardIdGet() == SYNO_DS211_ID ||
 	   mvBoardIdGet() == SYNO_DS411slim_ID ||
 	   mvBoardIdGet() == SYNO_RS_6282_ID ||
+	   mvBoardIdGet() == SYNO_DS411_ID ||
+	   mvBoardIdGet() == SYNO_DS212_ID ||
 #endif
        mvBoardIdGet() == DB_88F6190A_BP_ID || mvBoardIdGet() == DB_88F6180A_BP_ID ||
        mvBoardIdGet() == DB_88F6280A_BP_ID)
@@ -955,6 +964,11 @@ MV_STATUS mvCtrlModelRevNameGet(char *pNameBuff)
         case MV_6282_A0_ID:
                 mvOsSPrintf (pNameBuff, "%s",MV_6282_A0_NAME); 
                 break;
+#ifdef CONFIG_SYNO_MV88F6281
+        case MV_6282_A1_ID:
+                mvOsSPrintf (pNameBuff, "%s",MV_6282_A1_NAME); 
+                break;
+#endif
         default:
                 mvCtrlNameGet(pNameBuff);
                 break;

@@ -231,6 +231,17 @@ int do_truncate(struct dentry *dentry, loff_t length, unsigned int time_attrs,
 EXPORT_SYMBOL(do_truncate);
 #endif /* SYNO_AUFS */
 
+#ifdef CONFIG_OXNAS_FAST_WRITES
+	extern void flush_writes(struct inode *inode);
+	extern void writer_remap_file(struct inode *inode);
+#else // CONFIG_OXNAS_FAST_WRITES
+
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+	extern void incoherent_sendfile_remap_file(struct inode *inode);
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+
+#endif // CONFIG_OXNAS_FAST_WRITES
+
 static long do_sys_truncate(const char __user *pathname, loff_t length)
 {
 	struct path path;
@@ -288,7 +299,30 @@ static long do_sys_truncate(const char __user *pathname, loff_t length)
 		error = security_path_truncate(&path, length, 0);
 	if (!error) {
 		vfs_dq_init(inode);
+
+#ifdef CONFIG_OXNAS_FAST_WRITES
+		/* flush any pending writes */
+		flush_writes(inode);
+#endif // CONFIG_OXNAS_FAST_WRITES
+
 		error = do_truncate(path.dentry, length, 0, NULL);
+
+#ifdef CONFIG_OXNAS_FAST_WRITES
+		/* call writer function to reread file map and also make
+		 * reader to reread file map
+		 */
+		if (likely(!error) ) {
+			writer_remap_file(inode);
+		}
+#else // CONFIG_OXNAS_FAST_WRITES
+
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+		if (likely(!error) && inode->filemap_info.map) {
+printk("do_sys_truncate() Inode %p re-mapping filemap %p\n", inode, inode->filemap_info.map);
+			incoherent_sendfile_remap_file(inode);
+		}
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+#endif // CONFIG_OXNAS_FAST_WRITES
 	}
 
 put_write_and_out:
@@ -344,8 +378,36 @@ static long do_sys_ftruncate(unsigned int fd, loff_t length, int small)
 	if (!error)
 		error = security_path_truncate(&file->f_path, length,
 					       ATTR_MTIME|ATTR_CTIME);
+
+#ifndef CONFIG_SYNO_PLX_PORTING
 	if (!error)
 		error = do_truncate(dentry, length, ATTR_MTIME|ATTR_CTIME, file);
+#else
+	if (!error) {
+#ifdef CONFIG_OXNAS_FAST_WRITES                                                                       
+		/* flush any pending writes */                                                         
+		flush_writes(inode);                                                                   
+#endif // CONFIG_OXNAS_FAST_WRITES
+		error = do_truncate(dentry, length, ATTR_MTIME|ATTR_CTIME, file);
+
+#ifdef CONFIG_OXNAS_FAST_WRITES
+		/* call writer function to reread file map and also make
+		 * reader to reread file map
+		 */
+		if (likely(!error) && file->inode ) {
+			writer_remap_file(file->inode);
+		}
+#else // CONFIG_OXNAS_FAST_WRITES
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+		if (likely(!error) && file->inode && file->inode->filemap_info.map) {
+printk("do_sys_ftruncate() File %p, inode %p re-mapping filemap\n", file, file->inode);
+			incoherent_sendfile_remap_file(file->inode);
+		}
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+#endif // CONFIG_OXNAS_FAST_WRITES
+	}
+#endif
+
 out_putf:
 	fput(file);
 out:
@@ -886,6 +948,10 @@ static inline int __get_file_write_access(struct inode *inode,
 	return error;
 }
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+#include <mach/fast_open_filter.h>
+#endif
+
 static struct file *__dentry_open(struct dentry *dentry, struct vfsmount *mnt,
 					int flags, struct file *f,
 					int (*open)(struct inode *, struct file *),
@@ -938,6 +1004,13 @@ static struct file *__dentry_open(struct dentry *dentry, struct vfsmount *mnt,
 			f = ERR_PTR(-EINVAL);
 		}
 	}
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (fast_open_filter(f, inode)) {
+		fput(f);
+		f = ERR_PTR(-EINVAL);
+	}
+#endif
 
 	return f;
 

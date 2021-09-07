@@ -140,6 +140,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SHEEVA_PLUG_ID			    (BOARD_ID_BASE+0x9)
 #define DB_88F6280A_BP_ID		    (BOARD_ID_BASE+0xA)
 #define DB_88F6282A_BP_ID		    (BOARD_ID_BASE+0xB)
+#define RD_88F6282A_ID		   		(BOARD_ID_BASE+0xC)
 #ifdef CONFIG_SYNO_MV88F6281
 #define SYNO_DS409_ID				(BOARD_ID_BASE+0x13)
 #define SYNO_DS409slim_ID			(BOARD_ID_BASE+0x14)
@@ -148,9 +149,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SYNO_DS211_ID				(BOARD_ID_BASE+0x17)
 #define SYNO_DS411slim_ID			(BOARD_ID_BASE+0x18)
 #define SYNO_RS_6282_ID				(BOARD_ID_BASE+0x19)
-#define MV_MAX_BOARD_ID				(BOARD_ID_BASE+0x1A)
+#define SYNO_DS411_ID				(BOARD_ID_BASE+0x1A)
+#define SYNO_DS212_ID				(BOARD_ID_BASE+0x1B)
+#define MV_MAX_BOARD_ID				(BOARD_ID_BASE+0x1C)
 #else
-#define MV_MAX_BOARD_ID 			(DB_88F6282A_BP_ID + 1)
+#define MV_MAX_BOARD_ID 			(RD_88F6282A_ID + 1)
 #endif
 
 /* DB-88F6281A-BP */
@@ -196,6 +199,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DB_88F6282A_OE_VAL_LOW                   0x0
 #define DB_88F6282A_OE_VAL_HIGH                  0x0
 
+/* RD-88F6282 */
+#define RD_88F6282A_MPP0_7                   	0x21111111
+#define RD_88F6282A_MPP8_15                   	0x433B2211
+#define RD_88F6282A_MPP16_23                   	0x33331104
+#define RD_88F6282A_MPP24_31                   	0x33023333
+#define RD_88F6282A_MPP32_39                   	0x40000033
+#define RD_88F6282A_MPP40_47                   	0x22224444
+#define RD_88F6282A_MPP48_55                   	0x00000002
+#define RD_88F6282A_OE_LOW                       ~(BIT17)
+#define RD_88F6282A_OE_HIGH                      ~(BIT2 | BIT3 | BIT4)
+#define RD_88F6282A_OE_VAL_LOW                   BIT17
+#define RD_88F6282A_OE_VAL_HIGH                  (BIT2|BIT3|BIT4)
 
 /* RD-88F6281A */
 #if defined(MV_NAND)

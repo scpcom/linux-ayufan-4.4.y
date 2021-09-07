@@ -31,6 +31,17 @@
 #define DRV_NAME	"libata"
 #define DRV_VERSION	"3.00"	/* must be exactly four chars */
 
+#ifdef MY_ABC_HERE
+struct ata_blacklist_entry {
+	const char *model_num;
+	const char *model_rev;
+	unsigned long horkage;
+};
+
+extern struct ata_blacklist_entry ata_device_blacklist [];
+extern int strn_pattern_cmp(const char *patt, const char *name, int wildchar);
+#endif
+
 struct ata_scsi_args {
 	struct ata_device	*dev;
 	u16			*id;

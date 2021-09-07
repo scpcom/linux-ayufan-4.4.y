@@ -534,6 +534,26 @@ int dovefb_check_var(struct fb_var_screeninfo *var, struct fb_info *fi)
 	    (var->bits_per_pixel >> 3) > dfli->fb_size)
 		return -EINVAL;
 
+#ifdef CONFIG_DOVEFB_FORCE_EDID_RES
+	if ((dfli->type == DOVEFB_GFX_PLANE) && (dfli->info->edid_en)) {
+		int mode_valid = 0;
+
+		if (!mode_valid && fi->monspecs.gtf && 
+		    !fb_get_mode(FB_MAXTIMINGS, 0, var, fi))
+			mode_valid = 1;
+
+		if (!mode_valid && fi->monspecs.modedb_len) {
+			const struct fb_videomode *mode;
+
+			mode = fb_find_best_mode(var, &fi->modelist);
+			if (mode) {
+				fb_videomode_to_var(var, mode);
+				mode_valid = 1;
+			}
+		}
+	}
+#endif
+
 	return 0;
 }
 
@@ -799,18 +819,29 @@ static int dovefb_init_layer(struct platform_device *pdev,
 	 * Allocate framebuffer memory.
 	 */
 	dfli->fb_size = PAGE_ALIGN(DEFAULT_FB_SIZE*4);
+
+	dfli->fb_start = NULL;
+	dfli->fb_start_dma = 0;
+	if ((dmi->fb_mem_size[type]) && (dmi->fb_mem_size[type] >= dfli->fb_size)) {
+		dfli->new_addr = 0;
+		dfli->mem_status = 1;
+		dfli->fb_start_dma = (dma_addr_t)dmi->fb_mem[type];
+#ifdef CONFIG_CACHE_FEROCEON_L2_WRITETHROUGH
+		dfli->fb_start = (void *)ioremap_cached((unsigned long)dfli->fb_start_dma, dfli->fb_size);
+#else
+		dfli->fb_start = (void *)ioremap_wc((unsigned long)dfli->fb_start_dma, dfli->fb_size);
+#endif
+	}
 #ifdef USING_SAME_BUFF
 	if ((gfx_fb_start == 0) || (vid_fb_start == 0) ) {
 #endif
-//#ifdef CONFIG_ARCH_DOVE
-#if 0
+#ifdef CONFIG_ARCH_DOVE
+		if (!dfli->fb_start || !dfli->fb_start_dma)
 	dfli->fb_start = dma_alloc_writecombine(dfli->dev, dfli->fb_size,
 						&dfli->fb_start_dma,
 						GFP_KERNEL);
-	if (!dfli->fb_start || !dfli->fb_start_dma) {
-#else
-	{
 #endif
+		if (!dfli->fb_start || !dfli->fb_start_dma) {
 		dfli->new_addr = 0;
 		dfli->mem_status = 1;
 		dfli->fb_start = (void *)__get_free_pages(GFP_DMA | GFP_KERNEL,

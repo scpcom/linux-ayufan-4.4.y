@@ -1180,8 +1180,20 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 #endif
 					ap->ops->sff_irq_on(ap);
 					ata_qc_complete(qc);
+#ifdef MY_ABC_HERE
+				} else {
+					if (NULL == qc->scsicmd) {
+						DBGMESG("disk %d:its our insert cmd,don't freeze. cmd 0x%x tag %d feature 0x%x\n",
+								qc->ap->print_id, qc->tf.command, qc->tag, qc->tf.feature);
+						__ata_qc_complete(qc);
+					} else {
+						ata_port_freeze(ap);
+					}
+				}
+#else
 				} else
 					ata_port_freeze(ap);
+#endif
 			}
 
 			spin_unlock_irqrestore(ap->lock, flags);
@@ -1201,8 +1213,20 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			if (likely(!(qc->err_mask & AC_ERR_HSM)))
 #endif
 				ata_qc_complete(qc);
+#ifdef MY_ABC_HERE
+			else {
+				if (NULL == qc->scsicmd) {
+					DBGMESG("disk %d:its our insert cmd,don't freeze. cmd 0x%x tag %d feature 0x%x\n",
+							qc->ap->print_id, qc->tf.command, qc->tag, qc->tf.feature);
+					__ata_qc_complete(qc);
+				} else {
+					ata_port_freeze(ap);
+				}
+			}
+#else
 			else
 				ata_port_freeze(ap);
+#endif
 		}
 	} else {
 		if (in_wq) {
@@ -1232,6 +1256,8 @@ int ata_sff_hsm_move(struct ata_port *ap, struct ata_queued_cmd *qc,
 	unsigned long flags = 0;
 	int poll_next;
 
+	/* FIXME: when RX1211 have 12 disks, it may WARN_ON_ONCE. But it still work fine. 
+	 * So we temporarily remove it */
 	WARN_ON_ONCE((qc->flags & ATA_QCFLAG_ACTIVE) == 0);
 
 	/* Make sure ata_sff_qc_issue() does not throw things

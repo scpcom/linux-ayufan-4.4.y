@@ -503,6 +503,11 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
+#ifdef CONFIG_SYNO_PLX_PORTING
+		if(!strcmp(buf,"usb-1.3")) {
+			return 1;
+		}
+#endif
 	}
 	return 0;
 }

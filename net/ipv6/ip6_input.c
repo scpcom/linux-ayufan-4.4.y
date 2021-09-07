@@ -175,6 +175,10 @@ resubmit:
 	idev = ip6_dst_idev(skb_dst(skb));
 	if (!pskb_pull(skb, skb_transport_offset(skb)))
 		goto discard;
+#ifdef CONFIG_SYNO_PLX_PORTING
+skb->ip_header_len = skb_transport_offset(skb);
+#endif
+
 	nhoff = IP6CB(skb)->nhoff;
 	nexthdr = skb_network_header(skb)[nhoff];
 

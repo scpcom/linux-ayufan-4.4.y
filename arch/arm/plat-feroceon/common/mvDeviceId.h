@@ -151,6 +151,10 @@ extern "C" {
 #define MV_6282_A0_ID               ((MV_6282_DEV_ID << 16) | MV_6282_A0_REV)
 #define MV_6282_A0_NAME             "88F6282 A0"
 
+#define MV_6282_A1_REV              0x1
+#define MV_6282_A1_ID               ((MV_6282_DEV_ID << 16) | MV_6282_A1_REV)
+#define MV_6282_A1_NAME             "88F6282 A1"
+
 #define MV_6280_A1_REV         		0x3
 #define MV_6280_A1_ID          		((MV_6280_DEV_ID << 16) | MV_6280_A1_REV)
 #define MV_6280_A1_NAME         	"88F6280 A1"

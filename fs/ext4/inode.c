@@ -38,6 +38,9 @@
 #include <linux/uio.h>
 #include <linux/bio.h>
 #include <linux/workqueue.h>
+#ifdef MY_ABC_HERE
+#include <linux/xattr.h>
+#endif
 
 #include "ext4_jbd2.h"
 #include "xattr.h"
@@ -1625,7 +1628,7 @@ static int ext4_write_begin(struct file *file, struct address_space *mapping,
 	if (flags & AOP_FLAG_RECVFILE) {
 		needed_blocks = ext4_writepage_trans_blocks(inode) + MAX_PAGES_PER_RECVFILE;
 	} else {
-	needed_blocks = ext4_writepage_trans_blocks(inode) + 1;
+		needed_blocks = ext4_writepage_trans_blocks(inode) + 1;
 	}
 #endif
 #ifndef MY_ABC_HERE
@@ -2749,6 +2752,10 @@ static int __ext4_journalled_writepage(struct page *page,
 	 * references to buffers so we are safe */
 	unlock_page(page);
 
+#ifdef MY_ABC_HERE
+ 	/* We may need to call ext4_journal_start_sb_sync() here to
+	   avoid freezing deadlock, but we can't make sure... */
+#endif
 	handle = ext4_journal_start(inode, ext4_writepage_trans_blocks(inode));
 	if (IS_ERR(handle)) {
 		ret = PTR_ERR(handle);
@@ -2927,6 +2934,9 @@ static int ext4_da_writepages_trans_blocks(struct inode *inode)
 	return ext4_chunk_trans_blocks(inode, max_blocks);
 }
 
+#ifdef MY_ABC_HERE
+handle_t *ext4_journal_start_sb_sync(struct super_block *sb, int nblocks);
+#endif
 static int ext4_da_writepages(struct address_space *mapping,
 			      struct writeback_control *wbc)
 {
@@ -3036,7 +3046,11 @@ retry:
 		needed_blocks = ext4_da_writepages_trans_blocks(inode);
 
 		/* start a new transaction*/
+#ifdef MY_ABC_HERE
+		handle = ext4_journal_start_sb_sync(inode->i_sb, needed_blocks);
+#else
 		handle = ext4_journal_start(inode, needed_blocks);
+#endif
 		if (IS_ERR(handle)) {
 			ret = PTR_ERR(handle);
 			ext4_msg(inode->i_sb, KERN_CRIT, "%s: jbd2_start: "
@@ -4971,6 +4985,10 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	journal_t *journal = EXT4_SB(sb)->s_journal;
 	long ret;
 	int block;
+#ifdef MY_ABC_HERE
+	struct syno_xattr_archive_version value;
+	int retval;
+#endif
 
 	inode = iget_locked(sb, ino);
 	if (!inode)
@@ -5158,6 +5176,14 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	}
 	brelse(iloc.bh);
 	ext4_set_inode_flags(inode);
+#ifdef MY_ABC_HERE
+	retval = ext4_xattr_get(inode, EXT4_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value));
+	if(retval>0) {
+		inode->i_archive_version = le32_to_cpu(value.v_archive_version);
+	} else {
+		inode->i_archive_version = 0;
+	}
+#endif
 	unlock_new_inode(inode);
 	return inode;
 

@@ -186,16 +186,33 @@ ENDPROC(v7_coherent_kern_range)
 ENDPROC(v7_coherent_user_range)
 
 /*
+#ifdef CONFIG_SYNO_PLX_PORTING
+ *	v7_flush_kern_dcache_area(void *addr, size_t size)
+#else
  *	v7_flush_kern_dcache_page(kaddr)
+#endif
  *
  *	Ensure that the data held in the page kaddr is written back
  *	to the page in question.
  *
+#ifdef CONFIG_SYNO_PLX_PORTING
+ *	- addr	- kernel address
+ *	- size	- region size
+#else
  *	- kaddr   - kernel address (guaranteed to be page aligned)
+#endif
  */
+#ifdef CONFIG_SYNO_PLX_PORTING
+ENTRY(v7_flush_kern_dcache_area)
+#else
 ENTRY(v7_flush_kern_dcache_page)
+#endif
 	dcache_line_size r2, r3
+#ifdef CONFIG_SYNO_PLX_PORTING
+	add	r1, r0, r1
+#else
 	add	r1, r0, #PAGE_SZ
+#endif
 1:
 	mcr	p15, 0, r0, c7, c14, 1		@ clean & invalidate D line / unified line
 	add	r0, r0, r2
@@ -203,7 +220,11 @@ ENTRY(v7_flush_kern_dcache_page)
 	blo	1b
 	dsb
 	mov	pc, lr
+#ifdef CONFIG_SYNO_PLX_PORTING
+ENDPROC(v7_flush_kern_dcache_area)
+#else
 ENDPROC(v7_flush_kern_dcache_page)
+#endif
 
 /*
  *	v7_dma_inv_range(start,end)
@@ -279,7 +300,11 @@ ENTRY(v7_cache_fns)
 	.long	v7_flush_user_cache_range
 	.long	v7_coherent_kern_range
 	.long	v7_coherent_user_range
+#ifdef CONFIG_SYNO_PLX_PORTING
+	.long	v7_flush_kern_dcache_area
+#else
 	.long	v7_flush_kern_dcache_page
+#endif
 	.long	v7_dma_inv_range
 	.long	v7_dma_clean_range
 	.long	v7_dma_flush_range

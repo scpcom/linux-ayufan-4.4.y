@@ -1395,11 +1395,7 @@ nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 			nfsd_check_ignore_resizing(iap);
 		break;
 	case S_IFDIR:
-#ifdef CONFIG_FS_SYNO_ACL
-		host_err = vfs_mkdir(dirp, dchild, iap->ia_mode | S_FORCE_CHMOD);
-#else
 		host_err = vfs_mkdir(dirp, dchild, iap->ia_mode);
-#endif
 		break;
 	case S_IFCHR:
 	case S_IFBLK:

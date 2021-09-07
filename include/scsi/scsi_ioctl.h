@@ -7,6 +7,14 @@
 #define SCSI_IOCTL_SYNC 4			/* Request synchronous parameters */
 #define SCSI_IOCTL_START_UNIT 5
 #define SCSI_IOCTL_STOP_UNIT 6
+
+#ifdef MY_ABC_HERE
+/* kernel alos defined other scsi ioctl in scsi.h. If you want add new scsi ioctl,
+ * you must check scsi.h. too */
+#define SD_IOCTL_IDLE 4746
+#define SD_IOCTL_SUPPORT_SLEEP 4747
+#endif
+
 /* The door lock/unlock constants are compatible with Sun constants for
    the cdrom */
 #define SCSI_IOCTL_DOORLOCK 0x5380		/* lock the eject mechanism */

@@ -94,7 +94,7 @@ SmartCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
                          MV_U32 timeStamp,
                          MV_STORAGE_DEVICE_REGISTERS *registerStruct);
 
-void swap_buf_le16(u16 *buf, unsigned int buf_words)
+static void swap_buf_le16(u16 *buf, unsigned int buf_words)
 {
 #ifdef __BIG_ENDIAN
      unsigned int i;

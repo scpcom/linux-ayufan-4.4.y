@@ -326,12 +326,21 @@ static int tcm_loop_queuecommand(
 	tl_tpg = &tl_hba->tl_hba_tpgs[sc->device->id];
 	se_tpg = tl_tpg->tl_se_tpg;
 
+#ifdef MY_ABC_HERE
+	if (sc->sc_data_direction == DMA_TO_DEVICE)
+		data_direction = DMA_TO_DEVICE;
+	else if (sc->sc_data_direction == DMA_FROM_DEVICE)
+		data_direction = DMA_FROM_DEVICE;
+	else if (sc->sc_data_direction == DMA_NONE)
+		data_direction = DMA_NONE;
+#else
 	if (sc->sc_data_direction == DMA_TO_DEVICE)
 		data_direction = SE_DIRECTION_WRITE;
 	else if (sc->sc_data_direction == DMA_FROM_DEVICE)
 		data_direction = SE_DIRECTION_READ;
 	else if (sc->sc_data_direction == DMA_NONE)
 		data_direction = SE_DIRECTION_NONE;
+#endif
 	else {
 		spin_lock_irq(sc->device->host->host_lock);
 		printk(KERN_ERR "Unsupported sc->sc_data_direction: %d\n",

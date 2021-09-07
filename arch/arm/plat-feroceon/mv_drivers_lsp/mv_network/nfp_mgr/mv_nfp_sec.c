@@ -100,7 +100,7 @@ INLINE void  nfp_sec_pkt_info_free(MV_PKT_INFO* pPktInfo)
 	mvEthRxDoneTest(pBuf, CONFIG_NET_SKB_HEADROOM);
 */	
 	/* Return to the NFP pool */
-	mvStackPush(src_priv->fpRxPool, (MV_U32)pPktInfo);
+	mvStackPush(src_priv->rxPool, (MV_U32)pPktInfo);
 }
 
 /* TDB - move to h file */
@@ -616,7 +616,7 @@ static void nfp_sec_init_rule(void)
 	nfp_sec_add_rule(MV_NFP_SEC_RULE_DB_OUT, 0x65060000, sa_wan, da_peer_wan,
 					0x0101a8c0, /* left/sip 192.168.1.1 */
 					0x25d2050A, /* right/dip 10.5.210.37 */
-					1,          /* egress ifindex 1=eth0, 4=ppp0 */
+					2,          /* egress ifindex 1=eth0, 4=ppp0 */
 					0x0a010101,	/* left sub */
 					0x0a020202);/* right sub */
 #else

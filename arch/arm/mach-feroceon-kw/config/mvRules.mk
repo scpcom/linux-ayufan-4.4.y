@@ -95,7 +95,7 @@ KW_FAM_PATH      = -I$(LSP_PATH_I)/$(KW_FAM_DIR)
 QD_PATH          = -I$(PLAT_PATH_I)/$(HAL_QD_DIR)/Include  -I$(PLAT_PATH_I)/$(HAL_QD_DIR)/Include/h/msApi 	\
                    -I$(PLAT_PATH_I)/$(HAL_QD_DIR)/Include/h/driver -I$(PLAT_PATH_I)/$(HAL_QD_DIR)/Include/h/platform
                      
-COMMON_PATH   	 = -I$(PLAT_PATH_I)/$(COMMON_DIR)
+COMMON_PATH   	 = -I$(PLAT_PATH_I)/$(COMMON_DIR) -I$(srctree)
  
 OSSERV_PATH      = -I$(PLAT_PATH_I)/$(OSSERV_DIR)
 LSP_PATH         = -I$(LSP_PATH_I)/$(LSP_DIR)

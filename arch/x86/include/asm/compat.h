@@ -233,4 +233,10 @@ static inline int is_compat_task(void)
 #endif
 #endif
 
+#ifdef MY_ABC_HERE
+#ifndef st_syno_achv_ver
+#define st_syno_achv_ver st_mtime_nsec
+#endif
+#endif
+
 #endif /* _ASM_X86_COMPAT_H */

@@ -218,7 +218,11 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	shinfo->ip6_frag_id = 0;
 	shinfo->tx_flags.flags = 0;
 	skb_frag_list_init(skb);
+
+    /* removing this memset improves performance */
+#if !defined (CONFIG_ARCH_FEROCEON) || !defined (CONFIG_MV_ETHERNET)
 	memset(&shinfo->hwtstamps, 0, sizeof(shinfo->hwtstamps));
+#endif
 
 	if (fclone) {
 		struct sk_buff *child = skb + 1;
@@ -352,6 +356,15 @@ static void skb_release_data(struct sk_buff *skb)
 
 		kfree(skb->head);
 	}
+#ifdef CONFIG_ARCH_FEROCEON
+#ifdef CONFIG_NET_SKB_RECYCLE
+	/* Workaround for the cases when recycle callback was not called */
+	if (skb->hw_cookie) {
+		skb->skb_recycle(skb, 1);
+	}
+	skb->skb_recycle = NULL;
+#endif /* CONFIG_NET_SKB_RECYCLE */	
+#endif /* CONFIG_ARCH_FEROCEON */
 }
 
 /*
@@ -434,7 +447,7 @@ void __kfree_skb(struct sk_buff *skb)
 {
 #if defined(CONFIG_MV_ETHERNET) && defined(CONFIG_ARCH_FEROCEON)
 #ifdef CONFIG_NET_SKB_RECYCLE
-	if (skb->skb_recycle && !skb->skb_recycle(skb))
+	if (skb->skb_recycle && !skb->skb_recycle(skb, 0))
 		return;
 #endif /* CONFIG_NET_SKB_RECYCLE */
 #endif
@@ -507,7 +520,11 @@ int skb_recycle_check(struct sk_buff *skb, int skb_size)
 	if (skb_end_pointer(skb) - skb->head < skb_size)
 		return 0;
 
+#ifdef CONFIG_ARCH_FEROCEON
+	if (skb_shared(skb) || skb_cloned(skb) || skb_has_frags(skb))
+#else
 	if (skb_shared(skb) || skb_cloned(skb))
+#endif /* CONFIG_ARCH_FEROCEON */
 		return 0;
 
 	skb_release_head_state(skb);
@@ -520,12 +537,13 @@ int skb_recycle_check(struct sk_buff *skb, int skb_size)
 	shinfo->ip6_frag_id = 0;
 	shinfo->tx_flags.flags = 0;
 	skb_frag_list_init(skb);
+	
+	/* removing this memset improves performance */
+#if !defined (CONFIG_ARCH_FEROCEON) || !defined (CONFIG_MV_ETHERNET)
 	memset(&shinfo->hwtstamps, 0, sizeof(shinfo->hwtstamps));
+#endif
 
 	memset(skb, 0, offsetof(struct sk_buff, tail));
-#if defined(CONFIG_MV_ETHERNET) && defined(CONFIG_ARCH_FEROCEON)
-	skb->truesize = (skb->end - skb->head) + sizeof(struct sk_buff);
-#endif
 	skb->data = skb->head + NET_SKB_PAD;
 	skb_reset_tail_pointer(skb);
 
@@ -588,6 +606,10 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	C(len);
 	C(data_len);
 	C(mac_len);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	C(ip_header_len);
+	C(tcp_header_len);
+#endif
 	n->hdr_len = skb->nohdr ? skb_headroom(skb) : skb->hdr_len;
 	n->cloned = 1;
 	n->nohdr = 0;

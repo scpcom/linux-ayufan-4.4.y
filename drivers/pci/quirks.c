@@ -514,8 +514,12 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_ESB_1,		qui
 
 #ifdef MY_DEF_HERE
 static u32 gpiobase = 0;
-static u32 writable_pin[] = {16, 18, 20, 32, 33, 34, 49, 55, 57};
-u32 syno_ich9_lpc_gpio_pin(int pin, int *pValue, int isWrite)
+static u32 *writable_pin = NULL;
+
+static u32 ich9_writable_pin[] = {1, 6, 7, 16, 17, 18, 20, 30, 32, 33, 34, 49, 55, 57, 0};
+static u32 c206_writable_pin[] = {5, 0};
+
+u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
 {
     int ret = -1;
     int i = 0;
@@ -525,20 +529,21 @@ u32 syno_ich9_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     u32 tmpVal;
     
     if ( 0 == gpiobase ||
-         ( pin < 0 || pin >= 64 ) ||
+         ( pin < 0 || pin >= 96 ) ||
          NULL == pValue )
     {
-        printk("parameter error.\n");
+        printk("parameter error. gpiobase=%08X, pin=%d, pValue=%p\n", gpiobase, pin, pValue);
         goto END;
     }
     
     if ( 1 == isWrite ) {
-        for ( i = 0; i < sizeof(writable_pin)/sizeof(u32); i++) {
-            if (pin == writable_pin[i]) {
+		while( 0 != writable_pin[i] ) {
+            if ( pin == writable_pin[i] ) {
                 break;
             }
+			i++;
         }
-        if ( i == sizeof(writable_pin)/sizeof(u32) ) {
+        if ( 0 == writable_pin[i] ) {
             printk("pin %d is protected by driver.\n", pin);
             goto END;
         }
@@ -548,12 +553,17 @@ u32 syno_ich9_lpc_gpio_pin(int pin, int *pValue, int isWrite)
         addr_use_select = gpiobase + 0x00;
         addr_io_select = gpiobase + 0x04;
         addr_lvl = gpiobase + 0x0c;
-    } else {
+    } else if ( mppPin < 64 ) {
         addr_use_select = gpiobase + 0x30;
         addr_io_select = gpiobase + 0x34;
         addr_lvl = gpiobase + 0x38;
         mppPin %= 32;
-    }
+    } else {
+        addr_use_select = gpiobase + 0x40;
+        addr_io_select = gpiobase + 0x44;
+        addr_lvl = gpiobase + 0x48;
+        mppPin %= 32;
+	}
     
     if ( 1 == isWrite ) {
         //change use select to GPIO
@@ -596,7 +606,7 @@ u32 syno_ich9_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     END:
     return ret;
 }
-EXPORT_SYMBOL(syno_ich9_lpc_gpio_pin);
+EXPORT_SYMBOL(syno_pch_lpc_gpio_pin);
 #endif
 
 static void __devinit ich6_lpc_acpi_gpio(struct pci_dev *dev)
@@ -610,7 +620,12 @@ static void __devinit ich6_lpc_acpi_gpio(struct pci_dev *dev)
 	quirk_io_region(dev, region, 64, PCI_BRIDGE_RESOURCES+1, "ICH6 GPIO");
 
 #ifdef MY_DEF_HERE
-    gpiobase = region & 0x0000FF80;
+	gpiobase = region & 0x0000FF80;
+	if (PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_C206 == dev->device) {
+		writable_pin = c206_writable_pin;
+	} else {
+		writable_pin = ich9_writable_pin;
+	}
 #endif
 }
 
@@ -702,6 +717,10 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_ICH9_4, quirk_
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_ICH9_7, quirk_ich7_lpc);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_ICH9_8, quirk_ich7_lpc);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,   PCI_DEVICE_ID_INTEL_ICH10_1, quirk_ich7_lpc);
+#ifdef MY_DEF_HERE
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,   PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_C206, quirk_ich7_lpc);
+#endif
+
 
 /*
  * VIA ACPI: One IO region pointed to by longword at

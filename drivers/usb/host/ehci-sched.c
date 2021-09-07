@@ -1495,7 +1495,11 @@ iso_stream_schedule (
 		goto fail;
 	}
 
-	if ((stream->depth + sched->span) > mod) {
+#ifdef CONFIG_ARCH_FEROCEON
+	if ((stream->depth + sched->span) >= mod) {
+#else
+    if ((stream->depth + sched->span) > mod) {		
+#endif
 #ifdef CONFIG_MV_INCLUDE_USB
 		ehci_dbg(ehci, "request %p would overflow ((%d + %d) > %d)\n",
 #else
@@ -1540,7 +1544,11 @@ iso_stream_schedule (
 			status = -EFBIG;
 			goto fail;
 		}
+#ifdef CONFIG_ARCH_FEROCEON
+		stream->next_uframe = start % mod;
+#else
 		stream->next_uframe = start;
+#endif
 		goto ready;
 	}
 
@@ -1965,8 +1973,13 @@ sitd_sched_init(
 	unsigned	i;
 	dma_addr_t	dma = urb->transfer_dma;
 
+#ifdef CONFIG_ARCH_FEROCEON
+	/* how many uframes are needed for these transfers */
+	iso_sched->span = urb->number_of_packets * stream->interval * 8;
+#else
 	/* how many frames are needed for these transfers */
 	iso_sched->span = urb->number_of_packets * stream->interval;
+#endif
 
 	/* figure out per-frame sitd fields that we'll need later
 	 * when we fit new sitds into the schedule.

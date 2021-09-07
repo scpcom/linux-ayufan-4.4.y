@@ -43,6 +43,10 @@ extern void iscsi_tpg_dump_params(iscsi_portal_group_t *);
 extern int iscsi_tpg_add_portal_group(iscsi_tiqn_t *, iscsi_portal_group_t *);
 extern int iscsi_tpg_del_portal_group(iscsi_tiqn_t *, iscsi_portal_group_t *,
 			int);
+#ifdef MY_ABC_HERE
+extern void iscsi_tpg_active_portal_group(iscsi_portal_group_t*);
+extern void iscsi_tpg_deactive_portal_group(iscsi_portal_group_t*);
+#endif
 extern int iscsi_tpg_enable_portal_group(iscsi_portal_group_t *);
 extern int iscsi_tpg_disable_portal_group(iscsi_portal_group_t *, int);
 extern iscsi_node_acl_t *iscsi_tpg_add_initiator_node_acl(

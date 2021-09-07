@@ -96,13 +96,8 @@ out:
 	return n;
 }
 
-#ifdef CONFIG_ARCH_FEROCEON
-unsigned long
-___copy_to_user(void __user *to, const void *from, unsigned long n)
-#else
 unsigned long
 __copy_to_user(void __user *to, const void *from, unsigned long n)
-#endif
 {
 	/*
 	 * This test is stubbed out of the main function above to keep
@@ -112,11 +107,7 @@ __copy_to_user(void __user *to, const void *from, unsigned long n)
 	 * as well making this test almost invisible.
 	 */
 	if (n < 64)
-#ifdef CONFIG_ARCH_FEROCEON
-		return __arch_copy_to_user(to, from, n);
-#else
 		return __copy_to_user_std(to, from, n);
-#endif
 	return __copy_to_user_memcpy(to, from, n);
 }
 

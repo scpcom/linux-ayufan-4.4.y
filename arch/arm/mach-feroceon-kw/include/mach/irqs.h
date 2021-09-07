@@ -59,7 +59,18 @@
 #define MV_PCI0_MASK_REG		0x41910
 #define MV_PCI_MASK_REG(pciIf)		(0x41910 + ((pciIf) * 0x4000))
 
+#define MV_PCI_IRQ_CAUSE_REG(pciIf)	(0x41900 + ((IRQ_PEX_ERR(pciIf)-IRQ_PEX_ERR(0)) * 0x4000))
+
 #define MV_PCI_MASK_ABCD		(BIT24 | BIT25 | BIT26 | BIT27 )
+
+/* Description for bit from PCI Express Interrupt Mask Register 
+BIT3 - Erroneous Write Attempt to Internal Register
+BIT4 - Hit Default Window Error
+BIT6 and BIT7 -Rx and Tx RAM Parity Error
+BIT9 and BIT10 - Non Fatal and Fatal Error Detected
+BIT14 - Flow Control Protocol Error
+BIT23 - Link Failure Indication */
+#define MV_PCI_MASK_ERR			(BIT3 | BIT4 | BIT6 | BIT7 | BIT9 | BIT10 | BIT14 | BIT23)
 
 #define GPP_IRQ_TYPE_LEVEL		0
 #define GPP_IRQ_TYPE_CHANGE_LEVEL	1
@@ -83,6 +94,8 @@
 #define IRQ_PEX0_INT			9
 #define IRQ_PEX1_INT			10
 #define IRQ_PEX0_ERR			44
+#define IRQ_PEX1_ERR			45
+#define IRQ_PEX_ERR(pciIf)		((pciIf == 0) ? IRQ_PEX0_ERR : IRQ_PEX1_ERR)
 
 #define ETH_PORT_IRQ_NUM(x)		((x == 0) ? 11 : 15)
 #define IRQ_ETH_ERR(x)			((x == 0) ? 46 : 47)	    
@@ -104,7 +117,7 @@
 
 # define SDIO_IRQ_NUM			28
 
-#define IRQ_TWSI			29
+#define IRQ_TWSI(x)			((x) ? 32 : 29)
 #define IRQ_AVB				30
 
 #define TDM_IRQ_INT			31
@@ -186,5 +199,4 @@
 #define BRIDGE_INT_CAUSE_REG	0x20110
 #define BRIDGE_INT_MASK_REG    	0x20114
 #define TIMER_BIT_MASK(x)	(1<<(x+1))
-
-
+#define IRQ_SOFT_RESET_BUTTON	IRQ_GPP_29

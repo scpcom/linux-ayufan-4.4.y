@@ -64,11 +64,6 @@ MV_CPU_CNTRS_EVENT* rxfill_event = NULL;
 extern MV_U32 syno_wol_support(mv_eth_priv *priv);
 #endif
 
-#ifdef MY_ABC_HERE
-#include <linux/synobios.h>
-extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
-#endif
-
 static int __init mv_eth_init_module( void );
 static void __exit mv_eth_exit_module( void );
 module_init( mv_eth_init_module );
@@ -394,11 +389,14 @@ static inline void mv_eth_skb_recycle_reset(struct sk_buff *skb)
 }
 #endif /* LINUX_VERSION_CODE < 2.6.24 */
 
-static int mv_eth_skb_recycle(struct sk_buff *skb)
+static int mv_eth_skb_recycle(struct sk_buff *skb, int reject)
 {
     MV_PKT_INFO *pkt = (MV_PKT_INFO*)skb->hw_cookie;
     mv_eth_priv *priv = mv_eth_ports[(int)pkt->ownerId];
     unsigned long flags = 0;
+
+    if (reject)
+	goto out;
 
     if (unlikely(mvStackIsFull(priv->rxPool))) {
 	ETH_STAT_DBG(priv->eth_stat.skb_recycle_full++);
@@ -408,6 +406,7 @@ static int mv_eth_skb_recycle(struct sk_buff *skb)
     printk("mv_eth_skb_recycle: skb=%p, pkt=%p, priv=%p\n", skb, pkt, priv);
     print_skb(skb);
 */
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
     if (mv_eth_skb_check(skb, priv->rx_buf_size)) {
         mv_eth_skb_recycle_reset(skb);
@@ -427,6 +426,8 @@ static int mv_eth_skb_recycle(struct sk_buff *skb)
 
 out:
 	ETH_STAT_DBG(priv->eth_stat.skb_recycle_rej++);
+	mv_eth_pkt_info_free(pkt);
+	skb->hw_cookie = NULL;
 	return 1;
 }
 #endif
@@ -784,23 +785,15 @@ static void eth_check_link_status(struct net_device *dev)
 
             mvEthPortUp(priv->hal_priv);
             netif_carrier_on(dev);
-            netif_wake_queue(dev);            
-#ifdef MY_ABC_HERE
-			if (funcSYNOSendNetLinkEvent) {
-				funcSYNOSendNetLinkEvent(NET_LINK, dev->ifindex);
-			}
-#endif
+            netif_wake_queue(dev);  
+		priv->flags |= MV_ETH_F_LINK_UP;
         }
     	else
         {
-            netif_carrier_off( dev );
-            netif_stop_queue( dev );
-            mv_eth_down_internals( dev );
-#ifdef MY_ABC_HERE
-			if (funcSYNOSendNetLinkEvent) {
-				funcSYNOSendNetLinkEvent(NET_NOLINK, dev->ifindex);
-			}
-#endif
+            netif_carrier_off(dev);
+            netif_stop_queue(dev);
+		priv->flags &= ~MV_ETH_F_LINK_UP;
+            mv_eth_down_internals(dev);
         }
 
         spin_unlock(priv->lock);
@@ -925,8 +918,6 @@ static INLINE int eth_rx(struct net_device *dev, unsigned int work_to_do, int qu
             /* no more rx packets ready */
             break;
         }
-        /* MV_CPU_CNTRS_STOP(hal_rx_event); */
-        /* MV_CPU_CNTRS_SHOW(hal_rx_event); */
 
 	rx_status = pPktInfo->status;
         fragIP = pPktInfo->fragIP;
@@ -1015,24 +1006,25 @@ static INLINE int eth_rx(struct net_device *dev, unsigned int work_to_do, int qu
                         }
 			        mvEthPortRxDone( priv->hal_priv, queue, pPktInfo );
 			        continue;
-		}
-                out_priv->tx_count[txq]++;
-                out_dev->stats.tx_packets++;
-                out_dev->stats.tx_bytes += pPktInfo->pFrags->dataSize;
-                ETH_STAT_DBG( out_priv->eth_stat.tx_hal_ok[txq]++);
+		    }
+                    out_priv->tx_count[txq]++;
+                    out_dev->stats.tx_packets++;
+                    out_dev->stats.tx_bytes += pPktInfo->pFrags->dataSize;
+                    ETH_STAT_DBG( out_priv->eth_stat.tx_hal_ok[txq]++);
 
-                spin_unlock(out_priv->lock);
+                    spin_unlock(out_priv->lock);
 
-                /* refill RX queue */
-                pPktInfo = eth_pkt_info_get(priv);
-		if (pPktInfo != NULL)
-                    mvEthPortRxDone( priv->hal_priv, queue, pPktInfo );
-		else
-		    priv->skb_alloc_fail_cnt++;
+                   /* refill RX queue */
+                   pPktInfo = eth_pkt_info_get(priv);
+		   if (pPktInfo != NULL)
+                       mvEthPortRxDone( priv->hal_priv, queue, pPktInfo );
+		   else
+		       priv->skb_alloc_fail_cnt++;
 
-                continue;
-	    }
+                   continue;
+	        }
 
+            }
 #ifdef CONFIG_MV_ETH_NFP_SEC
 		/* NFP will make sure to complete the packet processing */
 		if( out_if_index == MV_NFP_STOLEN)
@@ -1062,13 +1054,17 @@ static INLINE int eth_rx(struct net_device *dev, unsigned int work_to_do, int qu
 			continue;
 		}
 #endif /* CONFIG_MV_ETH_NFP_SEC */
-            }
 	}
 #endif /* CONFIG_MV_ETH_NFP */
 
 	/* skip on 2B Marvell-header */
 	skb_reserve(skb, ETH_MV_HEADER_SIZE);
-	skb_put(skb, pPktInfo->pFrags->dataSize - ETH_MV_HEADER_SIZE);
+
+    /* update skb->tail and skb->len manually to avoid calling skb_put and save a few cycles: */
+	skb->tail += pPktInfo->pFrags->dataSize - ETH_MV_HEADER_SIZE;
+	skb->len  += pPktInfo->pFrags->dataSize - ETH_MV_HEADER_SIZE;
+	/* skb_put(skb, pPktInfo->pFrags->dataSize - ETH_MV_HEADER_SIZE); */
+
 
         if(out_dev != NULL)
         {
@@ -1175,6 +1171,9 @@ static INLINE int eth_rx(struct net_device *dev, unsigned int work_to_do, int qu
 	    else
 #endif /* ETH_LRO */
             {
+                /* MV_CPU_CNTRS_STOP(hal_rx_event); */
+                /* MV_CPU_CNTRS_SHOW(hal_rx_event); */
+
                 /* MV_CPU_CNTRS_START(routing_event); */
                 status = netif_receive_skb(skb);
                 /* MV_CPU_CNTRS_STOP(routing_event); */
@@ -1183,6 +1182,9 @@ static INLINE int eth_rx(struct net_device *dev, unsigned int work_to_do, int qu
             ETH_STAT_DBG( if(status) (priv->eth_stat.rx_netif_drop++) );
         }
         /* Rx Refill */
+
+        /* MV_CPU_CNTRS_START(rxfill_event); */
+
         if(pPktInfo == NULL)
         {
             pPktInfo = eth_pkt_info_get(priv);
@@ -1208,6 +1210,9 @@ static INLINE int eth_rx(struct net_device *dev, unsigned int work_to_do, int qu
         }
         else
             priv->skb_alloc_fail_cnt++;
+
+        /* MV_CPU_CNTRS_STOP(rxfill_event); */
+        /* MV_CPU_CNTRS_SHOW(rxfill_event); */
     }
 
     ETH_STAT_DBG( priv->eth_stat.rx_dist[work_done]++); 
@@ -1647,6 +1652,45 @@ void    mv_netdev_set_features(struct net_device *dev)
 #endif /* ETH_INCLUDE_UFO */
 }
 
+
+static int mv_force_port_link_speed_fc(mv_eth_priv *priv, MV_ETH_PORT_SPEED port_speed, int en_force)
+{
+	if (en_force) {
+		if (mvEthForceLinkModeSet(priv->hal_priv, 1, 0)) {
+			printk(KERN_ERR "mvEthForceLinkModeSet failed\n");
+			return -EIO;
+		}
+		if (mvEthSpeedDuplexSet(priv->hal_priv, port_speed, MV_ETH_DUPLEX_FULL)) {
+			printk(KERN_ERR "mvEthSpeedDuplexSet failed\n");
+			return -EIO;
+		}
+		if (mvEthFlowCtrlSet(priv->hal_priv, MV_ETH_FC_ENABLE)) {
+			printk(KERN_ERR "mvEthFlowCtrlSet failed\n");
+			return -EIO;
+		}
+
+		priv->flags |= MV_ETH_F_FORCED_LINK;
+	}
+	else {
+		if (mvEthForceLinkModeSet(priv->hal_priv, 0, 0)) {
+			printk(KERN_ERR "mvEthForceLinkModeSet failed\n");
+			return -EIO;
+		}
+		if (mvEthSpeedDuplexSet(priv->hal_priv, MV_ETH_SPEED_AN, MV_ETH_DUPLEX_AN)) {
+			printk(KERN_ERR "mvEthSpeedDuplexSet failed\n");
+			return -EIO;
+		}
+		if (mvEthFlowCtrlSet(priv->hal_priv, MV_ETH_FC_AN_ADV_SYM)) {
+			printk(KERN_ERR "mvEthFlowCtrlSet failed\n");
+			return -EIO;
+		}
+
+		priv->flags &= ~MV_ETH_F_FORCED_LINK;
+	}
+	return 0;
+}
+
+
 /*********************************************************** 
  * mv_eth_start_internals --                                *
  *   fill rx buffers. start rx/tx activity. set coalesing. *
@@ -1656,9 +1700,10 @@ int     mv_eth_start_internals(mv_eth_priv *priv, int mtu)
 {
     unsigned long   flags;
     unsigned int    status;
-    int             count, num, rxq;    
+    int             count, num, rxq, err = 0;
+    MV_BOARD_MAC_SPEED mac_speed;
 
-    spin_lock_irqsave( priv->lock, flags); 
+    spin_lock_irqsave(priv->lock, flags); 
 
     /* 32(extra for cache prefetch) + 8 to align on 8B */
     priv->rx_buf_size = MV_RX_BUF_SIZE(mtu) + CPU_D_CACHE_LINE_SIZE  + 8;
@@ -1676,12 +1721,38 @@ int     mv_eth_start_internals(mv_eth_priv *priv, int mtu)
         mv_eth_rxq_fill(priv, rxq, mv_eth_rxq_desc[rxq]);
     }
 
+    /* force link, speed and duplex if necessary (e.g. Switch is connected) based on board information */
+    mac_speed = mvBoardMacSpeedGet(priv->port);
+    switch (mac_speed) {
+	case BOARD_MAC_SPEED_10M:
+	    err = mv_force_port_link_speed_fc(priv, MV_ETH_SPEED_10, 1);
+	    if (err)
+		goto out;
+	    break;
+	case BOARD_MAC_SPEED_100M:
+	    err = mv_force_port_link_speed_fc(priv, MV_ETH_SPEED_100, 1);
+	    if (err)
+		goto out;
+	    break;
+	case BOARD_MAC_SPEED_1000M:
+	    err = mv_force_port_link_speed_fc(priv, MV_ETH_SPEED_1000, 1);
+	    if (err)
+		goto out;
+	    break;
+	case BOARD_MAC_SPEED_AUTO:
+	default:
+	    /* do nothing */
+	    break;
+    }
+
     /* start the hal - rx/tx activity */
-    status = mvEthPortEnable( priv->hal_priv );
+    status = mvEthPortEnable(priv->hal_priv);
+    if (status == MV_OK)
+        priv->flags |= MV_ETH_F_LINK_UP;
     if( (status != MV_OK) && (status != MV_NOT_READY)) {
         printk( KERN_ERR "GbE port %d: ethPortEnable failed\n", priv->port);
         spin_unlock_irqrestore( priv->lock, flags);
-      return -1;
+        return -1;
     }
 
     /* set tx/rx coalescing mechanism */
@@ -1693,9 +1764,9 @@ int     mv_eth_start_internals(mv_eth_priv *priv, int mtu)
     mvEthRxCoalSet( priv->hal_priv, ETH_RX_COAL );
 #endif /* CONFIG_MV_ETH_TOOL */
 
-    spin_unlock_irqrestore( priv->lock, flags);
-
-    return 0;
+out:
+    spin_unlock_irqrestore(priv->lock, flags);
+    return err;
 }
 
 /*********************************************************** 
@@ -1845,7 +1916,7 @@ static void mv_netdev_timer_callback( unsigned long data )
 
     spin_unlock(priv->lock);
 
-    if(priv->timer_flag)
+    if (priv->flags & MV_ETH_F_TIMER)
     {
         priv->timer.expires = jiffies + ((HZ*CONFIG_MV_ETH_TIMER_PERIOD)/1000); /*ms*/
         add_timer( &priv->timer );
@@ -1970,7 +2041,7 @@ int __init mv_eth_priv_init(mv_eth_priv *priv, int port)
     memset( &priv->timer, 0, sizeof(struct timer_list) );
     priv->timer.function = mv_netdev_timer_callback;
     init_timer(&priv->timer);
-    priv->timer_flag = 0;
+    priv->flags = 0;
     priv->skb_alloc_fail_cnt = 0;
 
 #ifdef ETH_LRO
@@ -2037,7 +2108,12 @@ int __init mv_eth_priv_init(mv_eth_priv *priv, int port)
 		printk("Synology Warning: Get PHY ID Error!\n");
 		priv->phy_chip = 0;
 	} else {
-		priv->phy_chip = (phy_id_0 & 0xffff) << 16 | (phy_id_1 & 0xffff);
+		/* For 131X series phy */
+		if (MV_PHY_ID_131X == (phy_id_0 & 0xffff) << 16 | (phy_id_1 & 0xfff0)) {
+			priv->phy_chip = (phy_id_0 & 0xffff) << 16 | (phy_id_1 & 0xfff0);
+		} else {
+			priv->phy_chip = (phy_id_0 & 0xffff) << 16 | (phy_id_1 & 0xffff);
+		}
 	}
 #endif
 
@@ -3336,6 +3412,7 @@ void syno_mv_net_shutdown()
 {
 	int i = 0, j = 0;
 	MV_U16 macTmp[3];
+	MV_U16 phyTmp;
 #ifdef MY_ABC_HERE
 	extern long g_egiga;
 	if ( 0 == g_egiga ) {
@@ -3354,7 +3431,7 @@ void syno_mv_net_shutdown()
 			continue;
 		}
 
-		if (MV_PHY_ID_1310 == Priv->phy_chip) {
+		if (MV_PHY_ID_131X == Priv->phy_chip) {
 			/* Step 1: clear interrupt no matter enable or disable */
 			mvEthPhyRegWrite(Priv->phy_id, 0x16, 0x11);
 			mvEthPhyRegWrite(Priv->phy_id, 0x10, 0x1500);
@@ -3367,9 +3444,11 @@ void syno_mv_net_shutdown()
 				}
 
 				mvEthPhyRegWrite(Priv->phy_id, 0x16, 0x0);
-				mvEthPhyRegWrite(Priv->phy_id, 0x12, 0x80);
+				mvEthPhyRegRead(Priv->phy_id, 0x12, &phyTmp);
+				mvEthPhyRegWrite(Priv->phy_id, 0x12, phyTmp | 0x80);
 				mvEthPhyRegWrite(Priv->phy_id, 0x16, 0x3);
-				mvEthPhyRegWrite(Priv->phy_id, 0x12, 0x4985);
+				mvEthPhyRegRead(Priv->phy_id,0x12,  &phyTmp); 
+				mvEthPhyRegWrite(Priv->phy_id, 0x12, (phyTmp & 0x7fff) | 0x4880);
 				mvEthPhyRegWrite(Priv->phy_id, 0x16, 0x11);
 				mvEthPhyRegWrite(Priv->phy_id, 0x17, macTmp[2]);
 				mvEthPhyRegWrite(Priv->phy_id, 0x18, macTmp[1]);

@@ -333,6 +333,9 @@ EXPORT_SYMBOL_GPL(drop_file_write_access);
 /* __fput is called from task context when aio completion releases the last
  * last use of a struct file *.  Do not use otherwise.
  */
+#ifdef CONFIG_SYNO_PLX_PORTING
+#include <mach/fast_open_filter.h>
+#endif
 void __fput(struct file *file)
 {
 	struct dentry *dentry = file->f_path.dentry;
@@ -347,6 +350,10 @@ void __fput(struct file *file)
 		file_free(file);
 		return;
 	}
+#endif
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+ 	fast_close_filter(file);
 #endif
 
 	might_sleep();

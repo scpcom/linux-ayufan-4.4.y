@@ -71,11 +71,6 @@
 #define DRV_NAME	"sata_mv"
 #define DRV_VERSION	"1.28"
 
-#ifdef MY_ABC_HERE
-//#define DBGMESG(x...)	printk(x)
-#define DBGMESG(x...)
-#endif
-
 /*
  * module options
  */
@@ -136,6 +131,9 @@ enum {
 	FLASH_CTL		= 0x1046c,
 	GPIO_PORT_CTL		= 0x104f0,
 	RESET_CFG		= 0x180d8,
+#ifdef MY_ABC_HERE
+	GPIO_CTL_DATA		= 0x1809c,
+#endif
 
 	MV_PCI_REG_SZ		= MV_MAJOR_REG_AREA_SZ,
 	MV_SATAHC_REG_SZ	= MV_MAJOR_REG_AREA_SZ,
@@ -2607,41 +2605,6 @@ static void mv_unexpected_intr(struct ata_port *ap, int edma_was_enabled)
 	ata_port_freeze(ap);
 }
 
-#ifdef MY_ABC_HERE
-/* copy from mv BSP mvSata.c _establishSataComm(..) */
-static void syno_mv_irq_missing_workaround(struct ata_port *ap)
-{
-	u32 scontrol;
-	u32 edma_irr_mask_reg;
-	void __iomem *port_mmio = mv_ap_base(ap);
-
-	DBGMESG("do mv missing workaround, re-enable interrupts, clear error\n");
-	/* read interrupt error register, if it is mask, we should mask it again */
-	edma_irr_mask_reg = readl(port_mmio + EDMA_ERR_IRQ_MASK);
-	/* mask Edma Interrupts */
-	writelfl(0, port_mmio + EDMA_ERR_IRQ_MASK);
-	/* MV sata(ex. 7042) shouldn't set SPD(bit 7:4 in SControl Register) to any speed negotiation,
-	 * this will cause IRQ can't receive */
-	sata_scr_read(&ap->link, SCR_CONTROL, &scontrol);
-	scontrol = (scontrol & ~0x0f0);
-	sata_scr_write(&ap->link, SCR_CONTROL, scontrol);
-	/*clear SError */
-	sata_scr_write(&ap->link, SCR_ERROR, 0xFFFFFFFF);
-	/* clear FIS_INTERRUPT_CAUSE_REG */
-	writelfl(0, port_mmio + FIS_IRQ_CAUSE);
-	/* clear ERROR_CAUSE_REG */
-	writelfl(0, port_mmio + EDMA_ERR_IRQ_CAUSE);
-	/* Unmask EDMA self disable (bit 7), mask errors that cause self disable */
-	writelfl(0xFDDFF198, port_mmio + EDMA_ERR_IRQ_MASK);
-	if(!edma_irr_mask_reg) {
-		/*if interrupt error register is mask before, we must mast it for not broken original framework */
-		DBGMESG("restore interrupt error register to mask\n");
-		writelfl(0, port_mmio + EDMA_ERR_IRQ_MASK);
-	}
-	mdelay(1);
-}
-#endif
-
 /**
  *      mv_err_intr - Handle error interrupts on the port
  *      @ap: ATA channel to manipulate
@@ -2679,11 +2642,6 @@ static void mv_err_intr(struct ata_port *ap)
 		writelfl(~fis_cause, port_mmio + FIS_IRQ_CAUSE);
 	}
 	writelfl(~edma_err_cause, port_mmio + EDMA_ERR_IRQ_CAUSE);
-#ifdef MY_ABC_HERE
-	if( edma_err_cause & EDMA_ERR_DEV_DCON || edma_err_cause & EDMA_ERR_DEV_CON) {
-		syno_mv_irq_missing_workaround(ap);
-	}
-#endif
 
 	if (edma_err_cause & EDMA_ERR_DEV) {
 		/*
@@ -3366,19 +3324,28 @@ static void mv6_read_preamp(struct mv_host_priv *hpriv, int idx,
 static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 {
 #ifdef	MY_ABC_HERE
-	/* In order to make LED static when disk present and blinking when
-	 * disk active, we have to set the offset 0x104F0 bit 0-1 to 0x00 and
-	 * bit 2-3 to 1.
-	 * See data sheet page 282 (Table 232: GPIO port control register)
-	 * EugeneHsu:
-	 * These Disk LEDs controlled by 7042 are connected to this address
-	 * "MV_FLASH_GPIO_PORT_CONTROL_OFFSET", and those controlled by 6281
-	 * are not connected to this address. Thus the settings are for 7042 only.
-	 */
-	DBGMESG("set mv led");
-	writel(0x0000007C, mmio + GPIO_PORT_CTL);
+	if(0 != g_sata_led_special) {
+		writel(0x00000050, mmio + GPIO_PORT_CTL);
+		writel(0x00000000, mmio + GPIO_CTL_DATA);
+	}else{
+#endif
+#ifdef	MY_ABC_HERE
+		/* In order to make LED static when disk present and blinking when
+		 * disk active, we have to set the offset 0x104F0 bit 0-1 to 0x00 and
+		 * bit 2-3 to 1.
+		 * See data sheet page 282 (Table 232: GPIO port control register)
+		 * EugeneHsu:
+		 * These Disk LEDs controlled by 7042 are connected to this address
+		 * "MV_FLASH_GPIO_PORT_CONTROL_OFFSET", and those controlled by 6281
+		 * are not connected to this address. Thus the settings are for 7042 only.
+		 */
+		DBGMESG("set mv led");
+		writel(0x0000007C, mmio + GPIO_PORT_CTL);
 #else
-	writel(0x00000060, mmio + GPIO_PORT_CTL);
+		writel(0x00000060, mmio + GPIO_PORT_CTL);
+#endif
+#ifdef  MY_ABC_HERE
+	}
 #endif
 }
 
@@ -3414,7 +3381,12 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	 * Achieves better receiver noise performance than the h/w default:
 	 */
 	m3 = readl(port_mmio + PHY_MODE3);
+#ifdef MY_DEF_HERE
+	m3 = (m3 & 0x03) | (0x5555601 << 5);
+	m3 |= 0x0c;
+#else
 	m3 = (m3 & 0x1f) | (0x5555601 << 5);
+#endif
 
 	/* Guideline 88F5182 (GL# SATA-S11) */
 	if (IS_SOC(hpriv))
@@ -3611,6 +3583,49 @@ static void syno_mv_phy_ctl(void __iomem *port_mmio, u8 blShutdown)
 	writelfl(ifcfg, port_mmio + SATA_IFCFG);
 }
 
+#ifdef MY_ABC_HERE
+/*FIXME - Too brutal and directly, should separate into levels*/
+void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	void __iomem *host_mmio = NULL;
+	u32 gpio_value = 0;
+	int led_idx;
+	
+	if(NULL == shost) {
+		goto END;
+	}
+
+	if(NULL == (ap = ata_shost_to_port(shost))) {
+		scsi_host_put(shost);
+		goto END;
+	}
+
+	if(NULL == (host_mmio = mv_host_base(ap->host))) {
+		scsi_host_put(shost);
+		goto END;
+	}
+
+	led_idx = ap->print_id - ap->host->ports[0]->print_id;
+
+	gpio_value = readl(host_mmio + GPIO_CTL_DATA);
+
+	if(blFaulty) {
+		gpio_value |= (1 << led_idx);
+	}else {
+		gpio_value &= ~(1 << led_idx);
+	}
+
+	writel(gpio_value, host_mmio + GPIO_CTL_DATA);
+	scsi_host_put(shost);
+
+END:
+	return;
+}
+EXPORT_SYMBOL(syno_sata_mv_gpio_write);
+#endif
+
 static ssize_t
 syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count)
 {
@@ -3710,9 +3725,6 @@ static int mv_hardreset(struct ata_link *link, unsigned int *class,
 	struct ata_port *ap = link->ap;
 	struct mv_host_priv *hpriv = ap->host->private_data;
 	struct mv_port_priv *pp = ap->private_data;
-#ifdef MY_ABC_HERE
-	struct ata_link *host_link = &link->ap->link;
-#endif
 	void __iomem *mmio = hpriv->base;
 	int rc, attempts = 0, extra = 0;
 	u32 sstatus;
@@ -3723,12 +3735,6 @@ static int mv_hardreset(struct ata_link *link, unsigned int *class,
 	pp->pp_flags &=
 	  ~(MV_PP_FLAG_FBS_EN | MV_PP_FLAG_NCQ_EN | MV_PP_FLAG_FAKE_ATA_BUSY);
 
-#ifdef MY_ABC_HERE
-	/* set this two value will cause sata_set_spd_needed(..) function return false, so speed will not be negotiated  */
-	DBGMESG("Do Fix MV IRQ MISSING Workaround, don't negotiate speed to 1.5G\n");
-	link->sata_spd_limit = 0;
-	host_link->sata_spd = 0;
-#endif
 
 	/* Workaround for errata FEr SATA#10 (part 2) */
 	do {
@@ -4368,7 +4374,15 @@ static int mv_pci_init_one(struct pci_dev *pdev,
 		dev_printk(KERN_INFO, &pdev->dev, "version " DRV_VERSION "\n");
 
 	/* allocate host */
-	n_ports = mv_get_hc_count(ppi[0]->flags) * MV_PORTS_PER_HC;
+#ifdef MY_ABC_HERE
+	if(gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
+		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
+	}else{
+#endif
+		n_ports = mv_get_hc_count(ppi[0]->flags) * MV_PORTS_PER_HC;
+#ifdef MY_ABC_HERE
+	}
+#endif
 
 	host = ata_host_alloc_pinfo(&pdev->dev, ppi, n_ports);
 	hpriv = devm_kzalloc(&pdev->dev, sizeof(*hpriv), GFP_KERNEL);

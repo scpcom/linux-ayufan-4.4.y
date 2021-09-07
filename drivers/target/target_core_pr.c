@@ -501,8 +501,13 @@ static int core_scsi3_pr_seq_non_holder(
 	 * WRITE_EXCLUSIVE_* reservation.
 	 */
 	if ((we) && !(registered_nexus)) {
+#ifdef MY_ABC_HERE
+		if ((cmd->data_direction == DMA_TO_DEVICE) ||
+		    (cmd->data_direction == DMA_BIDIRECTIONAL)) {
+#else
 		if ((cmd->data_direction == SE_DIRECTION_WRITE) ||
 		    (cmd->data_direction == SE_DIRECTION_BIDI)) {
+#endif
 			/*
 			 * Conflict for write exclusive
 			 */
@@ -1483,7 +1488,12 @@ static int core_scsi3_decode_spec_i_port(
 	se_port_t *tmp_port;
 	se_portal_group_t *dest_tpg = NULL, *tmp_tpg;
 	se_session_t *se_sess = SE_SESS(cmd);
+#ifdef MY_ABC_HERE
+	// reduce compile-time warnning messages
+	se_node_acl_t *dest_node_acl = NULL;
+#else
 	se_node_acl_t *dest_node_acl;
+#endif
 	se_dev_entry_t *dest_se_deve = NULL, *local_se_deve;
 	t10_pr_registration_t *dest_pr_reg, *local_pr_reg, *pr_reg_e;
 	t10_pr_registration_t *pr_reg_tmp, *pr_reg_tmp_safe;
@@ -1495,7 +1505,12 @@ static int core_scsi3_decode_spec_i_port(
 	char *iport_ptr = NULL, dest_iport[64], i_buf[PR_REG_ISID_ID_LEN];
 	u32 tpdl, tid_len = 0;
 	int ret, dest_local_nexus, prf_isid;
+#ifdef MY_ABC_HERE
+	// reduce compile-time warnning messages
+	u32 dest_rtpi = 0;
+#else
 	u32 dest_rtpi;
+#endif
 
 	memset(dest_iport, 0, 64);
 	INIT_LIST_HEAD(&tid_dest_list);
@@ -3870,6 +3885,7 @@ static int core_scsi3_pri_read_keys(se_cmd_t *cmd)
 		buf[off++] = ((pr_reg->pr_res_key >> 8) & 0xff);
 		buf[off++] = (pr_reg->pr_res_key & 0xff);
 
+		/* Assertion 19.x PERSISTENT RESERVE IN */
 		add_len += 8;
 	}
 	spin_unlock(&T10_RES(su_dev)->registration_lock);
@@ -4050,6 +4066,7 @@ static int core_scsi3_pri_read_full_status(se_cmd_t *cmd)
 		se_nacl = pr_reg->pr_reg_nacl;
 		se_tpg = pr_reg->pr_reg_nacl->se_tpg;
 		add_desc_len = 0;
+
 		/*
 		 * Determine expected length of $FABRIC_MOD specific
 		 * TransportID full status descriptor..
@@ -4118,6 +4135,7 @@ static int core_scsi3_pri_read_full_status(se_cmd_t *cmd)
 		 */
 		desc_len = TPG_TFO(se_tpg)->tpg_get_pr_transport_id(se_tpg,
 				se_nacl, pr_reg, &format_code, &buf[off+4]);
+
 		/*
 		 * Set the ADDITIONAL DESCRIPTOR LENGTH
 		 */
@@ -4221,8 +4239,10 @@ int core_setup_reservations(se_device_t *dev, int force_pt)
 		rest->res_type = SPC_PASSTHROUGH;
 		rest->t10_reservation_check = &core_pt_reservation_check;
 		rest->t10_seq_non_holder = &core_pt_seq_non_holder;
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "%s: Using SPC_PASSTHROUGH, no reservation"
 			" emulation\n", TRANSPORT(dev)->name);
+#endif
 		return 0;
 	}
 	/*
@@ -4242,8 +4262,10 @@ int core_setup_reservations(se_device_t *dev, int force_pt)
 		rest->t10_reservation_check = &core_scsi2_reservation_check;
 		rest->t10_seq_non_holder =
 				&core_scsi2_reservation_seq_non_holder;
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "%s: Using SPC2_RESERVATIONS emulation\n",
 			TRANSPORT(dev)->name);
+#endif
 	}
 
 	return 0;

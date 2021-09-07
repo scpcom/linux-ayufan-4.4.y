@@ -47,11 +47,7 @@
 #define PS_TIMEOUT_OTHER	(500*HZ)
 
 extern se_global_t *se_global;
-#ifdef MY_ABC_HERE
-extern struct block_device *linux_blockdevice_claim(int, int, void *, int);
-#else
 extern struct block_device *linux_blockdevice_claim(int, int, void *);
-#endif
 extern int linux_blockdevice_release(int, int, struct block_device *);
 extern int linux_blockdevice_check(int, int);
 

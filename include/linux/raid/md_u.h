@@ -69,7 +69,7 @@
 #define GET_ARRAY_STATUS    _IOR(MD_MAJOR, 0x61, int)
 
 typedef struct __tag_MD_SYNC_STATUS {
-	int inSync __attribute__ ((aligned (8)));     // 1 --> in sync, 0, not in sync
+	unsigned long long inSync;     // 1 --> in sync, 0, not in sync
 	unsigned long long finishSectors;
 	unsigned long long totalSectors;
 } MD_SYNC_STATUS;

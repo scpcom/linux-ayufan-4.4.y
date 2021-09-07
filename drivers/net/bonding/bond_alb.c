@@ -370,6 +370,11 @@ static int rlb_arp_recv(struct sk_buff *skb, struct net_device *bond_dev, struct
 		goto out;
 	}
 
+#ifdef MY_ABC_HERE
+	if (!pskb_may_pull(skb, sizeof(struct lacpdu)))
+		goto out;
+
+#endif
 	if (skb->len < sizeof(struct arp_pkt)) {
 		pr_debug("Packet is too small to be an ARP\n");
 		goto out;

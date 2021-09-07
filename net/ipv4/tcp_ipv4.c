@@ -360,7 +360,11 @@ void tcp_v4_err(struct sk_buff *icmp_skb, u32 info)
 		return;
 	}
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock(sk);
+#else
 	bh_lock_sock(sk);
+#endif
 	/* If too many ICMPs get dropped on busy
 	 * servers this needs to be solved differently.
 	 */
@@ -509,7 +513,11 @@ void tcp_v4_err(struct sk_buff *icmp_skb, u32 info)
 	}
 
 out:
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 	sock_put(sk);
 }
 
@@ -1448,7 +1456,11 @@ static struct sock *tcp_v4_hnd_req(struct sock *sk, struct sk_buff *skb)
 
 	if (nsk) {
 		if (nsk->sk_state != TCP_TIME_WAIT) {
+#ifdef CONFIG_SYNO_PLX_PORTING
+			bh_lock_wsock(nsk);
+#else
 			bh_lock_sock(nsk);
+#endif
 			return nsk;
 		}
 		inet_twsk_put(inet_twsk(nsk));
@@ -1584,6 +1596,9 @@ int tcp_v4_rcv(struct sk_buff *skb)
 		goto bad_packet;
 	if (!pskb_may_pull(skb, th->doff * 4))
 		goto discard_it;
+#ifdef CONFIG_SYNO_PLX_PORTING
+skb->tcp_header_len = th->doff*4;
+#endif
 
 	/* An explanation is required here, I think.
 	 * Packet length and doff are validated by header prediction,
@@ -1619,7 +1634,11 @@ process:
 
 	skb->dev = NULL;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock_nested(sk);
+#else
 	bh_lock_sock_nested(sk);
+#endif
 	ret = 0;
 	if (!sock_owned_by_user(sk)) {
 #ifdef CONFIG_NET_DMA
@@ -1636,7 +1655,11 @@ process:
 		}
 	} else
 		sk_add_backlog(sk, skb);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 
 	sock_put(sk);
 

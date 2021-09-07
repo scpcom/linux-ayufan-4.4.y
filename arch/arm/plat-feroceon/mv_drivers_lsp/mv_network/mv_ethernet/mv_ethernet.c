@@ -125,7 +125,7 @@ static int mv_eth_restart_autoneg( int port )
  *   set hw defaults. fill rx buffers. restart phy link    *
  *   auto neg. set device link flags. report status.       *
  ***********************************************************/
-int mv_eth_start( struct net_device *dev ) 
+int mv_eth_start(struct net_device *dev)
 {
     mv_eth_priv *priv = MV_ETH_PRIV(dev);
     int             err;
@@ -146,40 +146,42 @@ int mv_eth_start( struct net_device *dev )
 #endif
 
     /* fill rx buffers, start rx/tx activity, set coalescing */
-    if( mv_eth_start_internals( priv, dev->mtu) != 0 ) {
-        printk( KERN_ERR "%s: start internals failed\n", dev->name );
+    if (mv_eth_start_internals( priv, dev->mtu) != 0) {
+        printk(KERN_ERR "%s: start internals failed\n", dev->name);
         goto error;
     }
 
+    if (priv->flags & MV_ETH_F_FORCED_LINK) {
+        netif_carrier_on(dev);
+        netif_wake_queue(dev);
+    }
+    else {
 #ifdef CONFIG_MV_ETH_TOOL
-    if ((err = mv_eth_tool_restore_settings(dev)) != 0) 
-    {
-        printk( KERN_ERR "%s: mv_eth_tool_restore_settings failed %d\n",
-                          dev->name, err );
-        goto error;
-    }
-    if (priv->autoneg_cfg == AUTONEG_DISABLE) 
-    {
-        if ( MV_REG_READ(ETH_PORT_STATUS_REG( priv->port )) & ETH_LINK_UP_MASK ) 
-	{
-	    netif_carrier_on( dev );
-	    netif_wake_queue( dev );
+        if ((err = mv_eth_tool_restore_settings(dev)) != 0) {
+            printk(KERN_ERR "%s: mv_eth_tool_restore_settings failed %d\n", dev->name, err);
+            goto error;
         }
-    }
+        if (priv->autoneg_cfg == AUTONEG_DISABLE) {
+            if (priv->flags & MV_ETH_F_LINK_UP) {
+	        netif_carrier_on(dev);
+	        netif_wake_queue(dev);
+            }
+        }
 #else
-    mv_eth_restart_autoneg(priv->port);
-#endif /* #ifdef CONFIG_MV_ETH_TOOL */
+        mv_eth_restart_autoneg(priv->port);
+#endif /* CONFIG_MV_ETH_TOOL */
+    }
 
-    if(priv->timer_flag == 0)
+    if (!(priv->flags & MV_ETH_F_TIMER))
     {
-        priv->timer.expires = jiffies + ((HZ*CONFIG_MV_ETH_TIMER_PERIOD)/1000); /*ms*/
-        add_timer( &priv->timer );
-        priv->timer_flag = 1;
+        priv->timer.expires = jiffies + ((HZ*CONFIG_MV_ETH_TIMER_PERIOD) / 1000); /* ms */
+        add_timer(&priv->timer);
+        priv->flags |= MV_ETH_F_TIMER;
     }
 
     /* connect to port interrupt line */
-    if( request_irq( dev->irq, mv_eth_interrupt_handler,
-        (IRQF_DISABLED | IRQF_SAMPLE_RANDOM), "mv_ethernet", priv) ) {
+    if (request_irq(dev->irq, mv_eth_interrupt_handler,
+        (IRQF_DISABLED | IRQF_SAMPLE_RANDOM), "mv_ethernet", priv)) {
         printk( KERN_ERR "cannot assign irq%d to %s port%d\n", dev->irq, dev->name, priv->port );
         dev->irq = 0;
     	goto error;
@@ -189,16 +191,11 @@ int mv_eth_start( struct net_device *dev )
 
     ETH_DBG( ETH_DBG_LOAD, ("%s: start ok\n", dev->name) );
 
-    printk( KERN_NOTICE "%s: started\n", dev->name );
+    printk(KERN_NOTICE "%s: started\n", dev->name);
 
     return 0;
 
  error:
-
-    if( dev->irq != 0 )
-    {
-        free_irq( dev->irq, priv );
-    }
 
     printk( KERN_ERR "%s: start failed\n", dev->name );
     return -1;

@@ -482,4 +482,10 @@ config MTD_NAND_W90P910
 	  This enables the driver for the NAND Flash on evaluation board based
 	  on w90p910.
 
+config MTD_NAND_OX820
+	tristate "Support for NAND on 820 test board"
+	depends on MTD_NAND
+	help
+	  Enables support for NAND Flash chips wired onto 820 test board
+
 endif # MTD_NAND

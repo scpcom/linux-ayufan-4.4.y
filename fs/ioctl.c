@@ -122,8 +122,17 @@ int fiemap_fill_next_extent(struct fiemap_extent_info *fieinfo, u64 logical,
 	extent.fe_flags = flags;
 
 	dest += fieinfo->fi_extents_mapped;
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if(fieinfo->fi_flags & FIEMAP_KERNEL_READ) {
+		memcpy(dest, &extent, sizeof(extent));
+	} else {
+#endif
 	if (copy_to_user(dest, &extent, sizeof(extent)))
 		return -EFAULT;
+#ifdef CONFIG_SYNO_PLX_PORTING
+	}
+#endif
 
 	fieinfo->fi_extents_mapped++;
 	if (fieinfo->fi_extents_mapped == fieinfo->fi_extents_max)
@@ -455,6 +464,88 @@ static int file_ioctl(struct file *filp, unsigned int cmd,
 	return vfs_ioctl(filp, cmd, arg);
 }
 
+
+#ifdef MY_ABC_HERE
+static int ioctl_get_version(struct file *filp, unsigned int *p_ver)
+{
+	struct super_block *sb;
+
+	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
+		(!filp->f_path.dentry->d_inode->i_sb))
+		return -EPERM;
+
+	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
+		return -EPERM;
+	
+	sb = filp->f_path.dentry->d_inode->i_sb;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+
+	/* If a blockdevice-backed filesystem isn't specified, return. */
+	if (sb->s_bdev == NULL)
+		return -EINVAL;
+
+	*p_ver = sb->s_archive_version;
+	return 0;
+}
+
+static int ioctl_set_version(struct file * filp, unsigned int version)
+{
+	struct super_block *sb;
+
+	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
+		(!filp->f_path.dentry->d_inode->i_sb))
+		return -EPERM;
+
+	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
+		return -EPERM;
+
+	sb = filp->f_path.dentry->d_inode->i_sb;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+
+	/* If a blockdevice-backed filesystem isn't specified, return. */
+	if (sb->s_bdev == NULL)
+		return -EINVAL;
+
+	sb->s_archive_version = version;
+	return 0;
+}
+
+static int ioctl_inc_version(struct file *filp)
+{
+	struct super_block *sb;
+	unsigned int ver;
+	int error;
+	
+	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
+		(!filp->f_path.dentry->d_inode->i_sb))
+		return -EPERM;
+
+	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
+		return -EPERM;
+
+	sb = filp->f_path.dentry->d_inode->i_sb;
+	mutex_lock(&sb->s_archive_mutex);
+
+	error = ioctl_get_version(filp, &ver);
+	if (error) {
+		goto out;
+	}
+	if (ver+1 < ver) {
+		/* overflow */
+		error = -EPERM;
+		goto out;
+	}
+	error = ioctl_set_version(filp, ver+1);
+out:
+	mutex_unlock(&sb->s_archive_mutex);
+	return error;
+}
+#endif
+
 static int ioctl_fionbio(struct file *filp, int __user *argp)
 {
 	unsigned int flag;
@@ -549,6 +640,9 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 {
 	int error = 0;
 	int __user *argp = (int __user *)arg;
+#ifdef MY_ABC_HERE
+	unsigned int ver = 0;
+#endif
 
 	switch (cmd) {
 	case FIOCLEX:
@@ -596,6 +690,23 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 		int __user *p = (int __user *)arg;
 		return put_user(inode->i_sb->s_blocksize, p);
 	}
+
+#ifdef MY_ABC_HERE
+		case FIGETVERSION:
+			error = ioctl_get_version(filp, &ver);
+			if (!error) {
+				error = put_user(ver, (unsigned int __user *)arg) ? -EFAULT : 0;
+			}
+			break;
+		case FISETVERSION:
+			if ((error = get_user(ver, (unsigned int __user *)arg)) != 0)
+				break;
+			error = ioctl_set_version(filp, ver);
+			break;
+		case FIINCVERSION:
+			error = ioctl_inc_version(filp);
+			break;
+#endif
 
 	default:
 		if (S_ISREG(filp->f_path.dentry->d_inode->i_mode))

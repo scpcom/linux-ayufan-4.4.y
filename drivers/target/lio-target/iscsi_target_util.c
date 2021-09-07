@@ -64,12 +64,40 @@
 
 #include <target/target_core_fabric_ops.h>
 #include <target/target_core_configfs.h>
+#ifdef MY_ABC_HERE
+#include <target/target_core_base.h>
+#endif
 
 #ifdef DEBUG_ERL
 #include <iscsi_target_debugerl.h>
 #endif /* DEBUG_ERL */
 
 #undef ISCSI_TARGET_UTIL_C
+
+#ifdef MY_ABC_HERE
+void iscsi_sess_force_logout(struct iscsi_session_s* sess)
+{
+	iscsi_conn_t* conn = NULL;
+
+	spin_lock(&sess->conn_lock);
+	list_for_each_entry(conn, &sess->sess_conn_list, conn_list) {
+		iscsi_send_async_msg(conn, 0, ASYNC_EVENT_REQUEST_LOGOUT, 0);
+	}
+	spin_unlock(&sess->conn_lock);
+}
+
+void iscsi_acl_force_logout(struct se_node_acl_s* acl)
+{
+	se_session_t* se_sess = NULL;
+	iscsi_session_t* sess = NULL;
+
+	spin_lock_bh(&acl->nacl_sess_lock);
+	if( (se_sess = acl->nacl_sess) && (sess = (iscsi_session_t *)se_sess->fabric_sess_ptr) ) {
+		iscsi_sess_force_logout(sess);
+	}
+	spin_unlock_bh(&acl->nacl_sess_lock);
+}
+#endif
 
 /*	iscsi_attach_cmd_to_queue():
  *
@@ -283,6 +311,9 @@ iscsi_cmd_t *iscsi_allocate_se_cmd(
 	int iscsi_task_attr)
 {
 	iscsi_cmd_t *cmd;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	struct se_cmd_s *se_cmd;
+#endif
 	int sam_task_attr;
 
 	cmd = iscsi_allocate_cmd(conn);
@@ -308,6 +339,18 @@ iscsi_cmd_t *iscsi_allocate_se_cmd(
 			" TASK_ATTR_SIMPLE\n", iscsi_task_attr);
 		sam_task_attr = TASK_ATTR_SIMPLE;
 	}
+
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	se_cmd = &cmd->se_cmd;
+	/*
+	 * Initialize struct se_cmd descriptor from target_core_mod infrastructure
+	 */
+	transport_init_se_cmd(se_cmd, &lio_target_fabric_configfs->tf_ops,
+			SESS(conn)->se_sess, data_length, data_direction,
+			sam_task_attr, &cmd->sense_buffer[0]);
+
+	return cmd;
+#else
 	/*
 	 * Use struct target_fabric_configfs->tf_ops for
 	 * lio_target_fabric_configfs
@@ -323,6 +366,7 @@ iscsi_cmd_t *iscsi_allocate_se_cmd(
 out:
 	iscsi_release_cmd_to_pool(cmd);
 	return NULL;
+#endif
 }
 
 /*	iscsi_allocate_tmr_req():
@@ -340,7 +384,11 @@ iscsi_cmd_t *iscsi_allocate_se_cmd_for_tmr(
 	if (!(cmd))
 		return NULL;
 
+#ifdef MY_ABC_HERE
+	cmd->data_direction = DMA_NONE;
+#else
 	cmd->data_direction = SE_DIRECTION_NONE;
+#endif
 
 	cmd->tmr_req = kzalloc(sizeof(iscsi_tmr_req_t), GFP_KERNEL);
 	if (!(cmd->tmr_req)) {
@@ -355,14 +403,31 @@ iscsi_cmd_t *iscsi_allocate_se_cmd_for_tmr(
 	if (function == TASK_REASSIGN)
 		return cmd;
 
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	se_cmd = &cmd->se_cmd;
+	/*
+	 * Initialize struct se_cmd descriptor from target_core_mod infrastructure
+	 */
+	transport_init_se_cmd(se_cmd, &lio_target_fabric_configfs->tf_ops,
+			SESS(conn)->se_sess, 0, DMA_NONE,
+			TASK_ATTR_SIMPLE, &cmd->sense_buffer[0]);
+#else
+#ifdef MY_ABC_HERE
+	cmd->se_cmd = transport_alloc_se_cmd(
+				&lio_target_fabric_configfs->tf_ops,
+				SESS(conn)->se_sess, (void *)cmd, 0,
+				DMA_NONE, TASK_ATTR_SIMPLE);
+#else
 	cmd->se_cmd = transport_alloc_se_cmd(
 				&lio_target_fabric_configfs->tf_ops,
 				SESS(conn)->se_sess, (void *)cmd, 0,
 				SE_DIRECTION_NONE, TASK_ATTR_SIMPLE);
+#endif
 	if (!(cmd->se_cmd))
 		goto out;
 
 	se_cmd = cmd->se_cmd;
+#endif
 
 	se_cmd->se_tmr_req = core_tmr_alloc_req(se_cmd,
 				(void *)cmd->tmr_req, function);
@@ -396,13 +461,22 @@ int iscsi_decide_list_to_build(
 	    SESS_OPS(sess)->DataPDUInOrder)
 		return 0;
 
+#ifdef MY_ABC_HERE
+	if (cmd->data_direction == DMA_NONE)
+		return 0;
+#else
 	if (cmd->data_direction == ISCSI_NONE)
 		return 0;
+#endif
 
 	na = iscsi_tpg_get_node_attrib(sess);
 	memset(&bl, 0, sizeof(iscsi_build_list_t));
 
+#ifdef MY_ABC_HERE
+	if (cmd->data_direction == DMA_FROM_DEVICE) {
+#else
 	if (cmd->data_direction == ISCSI_READ) {
+#endif
 		bl.data_direction = ISCSI_PDU_READ;
 		bl.type = PDULIST_NORMAL;
 		if (na->random_datain_pdu_offsets)
@@ -813,6 +887,12 @@ void iscsi_add_cmd_to_immediate_queue(
 {
 	iscsi_queue_req_t *qr;
 
+#ifdef MY_ABC_HERE
+	if( TARG_CONN_STATE_CLEANUP_WAIT == conn->conn_state ) {
+		return;
+	}
+#endif
+
 	qr = kmem_cache_zalloc(lio_qr_cache, GFP_ATOMIC);
 	if (!(qr)) {
 		printk(KERN_ERR "Unable to allocate memory for"
@@ -899,6 +979,12 @@ void iscsi_add_cmd_to_response_queue(
 	u8 state)
 {
 	iscsi_queue_req_t *qr;
+
+#ifdef MY_ABC_HERE
+	if( TARG_CONN_STATE_CLEANUP_WAIT == conn->conn_state ) {
+		return;
+	}
+#endif
 
 	qr = kmem_cache_zalloc(lio_qr_cache, GFP_ATOMIC);
 	if (!(qr)) {
@@ -1036,7 +1122,13 @@ void iscsi_release_cmd_direct(iscsi_cmd_t *cmd)
 
 void lio_release_cmd_direct(se_cmd_t *se_cmd)
 {
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	struct iscsi_cmd_s *cmd = container_of(se_cmd, struct iscsi_cmd_s, se_cmd);
+
+	return iscsi_release_cmd_direct(cmd);
+#else
 	iscsi_release_cmd_direct((iscsi_cmd_t *)se_cmd->se_fabric_cmd_ptr);
+#endif
 }
 
 /*	__iscsi_release_cmd_to_pool():
@@ -1080,7 +1172,13 @@ void iscsi_release_cmd_to_pool(iscsi_cmd_t *cmd)
 
 void lio_release_cmd_to_pool(se_cmd_t *se_cmd)
 {
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	struct iscsi_cmd_s *cmd = container_of(se_cmd, struct iscsi_cmd_s, se_cmd);
+
+	iscsi_release_cmd_to_pool(cmd);
+#else
 	iscsi_release_cmd_to_pool((iscsi_cmd_t *)se_cmd->se_fabric_cmd_ptr);
+#endif
 }
 
 /*	iscsi_pack_lun():
@@ -1470,7 +1568,12 @@ const char *iscsi_ntop6(const unsigned char *src, char *dst, size_t size)
 	 * to use pointer overlays.  All the world's not a VAX.
 	 */
 	char tmp[sizeof ("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")], *tp;
+#ifdef MY_ABC_HERE
+	// reduce compile-time warning messages
+	struct { int base, len; } best = {0, 0}, cur = {0, 0};
+#else
 	struct { int base, len; } best, cur;
+#endif
 	unsigned int words[8];
 	int i;
 

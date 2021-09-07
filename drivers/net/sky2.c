@@ -43,11 +43,6 @@
 
 #include <asm/irq.h>
 
-#ifdef MY_ABC_HERE
-#include <linux/synobios.h>
-extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
-#endif
-
 #if defined(CONFIG_VLAN_8021Q) || defined(CONFIG_VLAN_8021Q_MODULE)
 #define SKY2_VLAN_TAG_USED 1
 #endif
@@ -1964,11 +1959,6 @@ static void sky2_link_up(struct sky2_port *sky2)
 	gm_phy_write(hw, port, PHY_MARV_INT_MASK, PHY_M_DEF_MSK);
 
 	netif_carrier_on(sky2->netdev);
-#ifdef MY_ABC_HERE
-	if (funcSYNOSendNetLinkEvent) {
-		funcSYNOSendNetLinkEvent(NET_LINK, sky2->netdev->ifindex);
-	}
-#endif
 
 	mod_timer(&hw->watchdog_timer, jiffies + 1);
 
@@ -1997,11 +1987,6 @@ static void sky2_link_down(struct sky2_port *sky2)
 	gma_write16(hw, port, GM_GP_CTRL, reg);
 
 	netif_carrier_off(sky2->netdev);
-#ifdef MY_ABC_HERE
-	if (funcSYNOSendNetLinkEvent) {
-		funcSYNOSendNetLinkEvent(NET_NOLINK, sky2->netdev->ifindex);
-	}
-#endif
 
 	/* Turn on link LED */
 	sky2_write8(hw, SK_REG(port, LNK_LED_REG), LINKLED_OFF);

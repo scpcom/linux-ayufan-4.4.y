@@ -54,6 +54,9 @@
 #define PYX_TRANSPORT_TASK_TIMEOUT		-10
 #define PYX_TRANSPORT_RESERVATION_CONFLICT	-11
 #define PYX_TRANSPORT_ILLEGAL_REQUEST		-12
+#ifdef MY_ABC_HERE
+#define PYX_TRANSPORT_PRE_WRITE_PROTECTED	-99
+#endif
 
 #ifndef SAM_STAT_RESERVATION_CONFLICT
 #define SAM_STAT_RESERVATION_CONFLICT		0x18
@@ -144,8 +147,12 @@ extern void transport_task_dev_remove_state(struct se_task_s *,
 						struct se_device_s *);
 extern void transport_cmd_finish_abort(struct se_cmd_s *, int);
 extern void transport_cmd_finish_abort_tmr(struct se_cmd_s *);
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+extern int transport_add_cmd_to_queue(struct se_cmd_s *, u8);
+#else
 extern int transport_add_cmd_to_queue(struct se_cmd_s *,
 					struct se_queue_obj_s *, u8);
+#endif
 extern struct se_queue_req_s *__transport_get_qr_from_queue(
 					struct se_queue_obj_s *);
 extern void transport_remove_cmd_from_queue(struct se_cmd_s *,
@@ -156,8 +163,10 @@ extern void transport_add_task_to_execute_queue(struct se_task_s *,
 						struct se_task_s *,
 						struct se_device_s *);
 extern void transport_add_tasks_from_cmd(struct se_cmd_s *);
+#ifndef SYNO_LIO_TRANSPORT_PATCHES
 extern struct se_task_s *transport_get_task_from_execute_queue(
 						struct se_device_s *);
+#endif
 extern se_queue_req_t *transport_get_qr_from_queue(struct se_queue_obj_s *);
 extern int transport_check_device_tcq(se_device_t *, u32, u32);
 unsigned char *transport_dump_cmd_direction(struct se_cmd_s *);
@@ -183,20 +192,32 @@ extern int transport_generic_claim_phydevice(se_device_t *);
 extern void transport_generic_release_phydevice(se_device_t *, int);
 extern void transport_generic_free_device(se_device_t *);
 extern int transport_generic_allocate_iovecs(struct se_cmd_s *);
+#ifndef MY_ABC_HERE
 extern int transport_generic_obj_start(struct se_transform_info_s *,
 					struct se_obj_lun_type_s *, void *,
 					unsigned long long);
+#endif
 extern void transport_device_setup_cmd(se_cmd_t *);
 extern int transport_check_alloc_task_attr(se_cmd_t *);
 extern se_cmd_t *transport_alloc_se_cmd(struct target_core_fabric_ops *,
 					struct se_session_s *, void *,
 					u32, int, int);
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+extern void transport_init_se_cmd(struct se_cmd_s *,
+					struct target_core_fabric_ops *,
+					struct se_session_s *, u32, int, int,
+					unsigned char *);
+#endif
 extern void transport_free_se_cmd(struct se_cmd_s *);
 extern int transport_generic_allocate_tasks(se_cmd_t *, unsigned char *);
 extern int transport_generic_handle_cdb(se_cmd_t *);
 extern int transport_generic_handle_data(se_cmd_t *);
 extern int transport_generic_handle_tmr(se_cmd_t *);
+#ifdef MY_ABC_HERE
+extern int transport_stop_tasks_for_cmd(struct se_cmd_s *);
+#else
 extern void transport_stop_tasks_for_cmd(struct se_cmd_s *);
+#endif
 extern void transport_generic_request_failure(se_cmd_t *, se_device_t *,
 						int, int);
 extern void transport_direct_request_timeout(se_cmd_t *);
@@ -224,10 +245,15 @@ extern int transport_generic_emulate_modesense(struct se_cmd_s *,
 extern int transport_generic_emulate_request_sense(struct se_cmd_s *,
 						   unsigned char *);
 extern int transport_get_sense_data(struct se_cmd_s *);
+#ifdef MY_ABC_HERE
+extern se_cmd_t *transport_allocate_passthrough(unsigned char *, int, u32,
+						void *, u32, u32, void *);
+#else
 extern se_cmd_t *transport_allocate_passthrough(unsigned char *, int, u32,
 						void *, u32, u32,
 						struct se_obj_lun_type_s *,
 						void *);
+#endif
 extern void transport_passthrough_release(se_cmd_t *);
 extern int transport_passthrough_complete(se_cmd_t *);
 extern void transport_memcpy_write_contig(se_cmd_t *, struct scatterlist *,
@@ -242,12 +268,18 @@ extern int transport_generic_passthrough(se_cmd_t *);
 extern void transport_complete_task_attr(se_cmd_t *);
 extern void transport_generic_complete_ok(se_cmd_t *);
 extern void transport_free_dev_tasks(se_cmd_t *);
+#ifndef MY_ABC_HERE
 extern void transport_release_tasks(se_cmd_t *);
+#endif
 extern void transport_release_fe_cmd(se_cmd_t *);
 extern int transport_generic_remove(se_cmd_t *, int, int);
 extern int transport_generic_map_mem_to_cmd(se_cmd_t *cmd, void *, u32);
 extern int transport_lun_wait_for_tasks(se_cmd_t *, se_lun_t *);
+#ifdef MY_ABC_HERE
+extern int transport_clear_lun_from_sessions(se_lun_t *);
+#else
 extern void transport_clear_lun_from_sessions(se_lun_t *);
+#endif
 extern int transport_check_aborted_status(se_cmd_t *, int);
 extern int transport_get_sense_codes(se_cmd_t *, u8 *, u8 *);
 extern int transport_set_sense_codes(se_cmd_t *, u8, u8);
@@ -256,13 +288,19 @@ extern void transport_send_task_abort(struct se_cmd_s *);
 extern void transport_release_cmd_to_pool(se_cmd_t *);
 extern void transport_generic_free_cmd(se_cmd_t *, int, int, int);
 extern void transport_generic_wait_for_cmds(se_cmd_t *, int);
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
 extern int transport_generic_do_transform(struct se_cmd_s *,
 					struct se_transform_info_s *);
+#endif
+#ifdef MY_ABC_HERE
+extern int transport_get_sectors(struct se_cmd_s *, void *);
+#else
 extern int transport_get_sectors(struct se_cmd_s *, struct se_obj_lun_type_s *,
 					void *);
 extern int transport_new_cmd_obj(struct se_cmd_s *,
 				struct se_transform_info_s *,
 				struct se_obj_lun_type_s *, void *, int);
+#endif
 extern unsigned char *transport_get_vaddr(struct se_mem_s *);
 extern struct list_head *transport_init_se_mem_list(void);
 extern void transport_free_se_mem_list(struct list_head *);
@@ -275,21 +313,35 @@ extern int transport_map_sg_to_mem(struct se_cmd_s *, struct list_head *,
 extern int transport_map_sg_to_mem(struct se_cmd_s *, struct list_head *,
 					void *, u32 *, u32 *);
 #endif
+#ifndef MY_ABC_HERE
 extern int transport_map_mem_to_mem(struct se_task_s *, struct list_head *,
 					void *, struct se_mem_s *,
 					struct se_mem_s **, u32 *, u32 *);
+#endif
 extern int transport_map_mem_to_sg(struct se_task_s *, struct list_head *,
 					void *, struct se_mem_s *,
 					struct se_mem_s **, u32 *, u32 *);
+#ifdef MY_ABC_HERE
+extern u32 transport_generic_get_cdb_count(struct se_cmd_s *,
+					struct se_transform_info_s *,
+					void *, unsigned long long, u32,
+					struct se_mem_s *, struct se_mem_s **,
+					u32 *);
+#else
 extern u32 transport_generic_get_cdb_count(struct se_cmd_s *,
 					struct se_transform_info_s *,
 					struct se_obj_lun_type_s *, void *,
 					unsigned long long, u32,
 					struct se_mem_s *, struct se_mem_s **,
 					u32 *);
+#endif
 extern int transport_generic_new_cmd(se_cmd_t *);
 extern void transport_generic_process_write(se_cmd_t *);
 extern int transport_generic_do_tmr(se_cmd_t *);
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+extern int transport_generic_set_iovec_ptrs(struct se_map_sg_s *map_sg,
+		struct se_unmap_sg_s *unmap_sg);
+#endif
 
 /*
  * Each se_transport_task_t can have N number of possible se_task_t's

@@ -359,7 +359,11 @@ static void tcp_v6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 		return;
 	}
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock(sk);
+#else
 	bh_lock_sock(sk);
+#endif
 	if (sock_owned_by_user(sk))
 		NET_INC_STATS_BH(net, LINUX_MIB_LOCKDROPPEDICMPS);
 
@@ -472,7 +476,11 @@ static void tcp_v6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 		sk->sk_err_soft = err;
 
 out:
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 	sock_put(sk);
 }
 
@@ -1157,7 +1165,11 @@ static struct sock *tcp_v6_hnd_req(struct sock *sk,struct sk_buff *skb)
 
 	if (nsk) {
 		if (nsk->sk_state != TCP_TIME_WAIT) {
+#ifdef CONFIG_SYNO_PLX_PORTING
+			bh_lock_wsock(nsk);
+#else
 			bh_lock_sock(nsk);
+#endif
 			return nsk;
 		}
 		inet_twsk_put(inet_twsk(nsk));
@@ -1658,6 +1670,9 @@ static int tcp_v6_rcv(struct sk_buff *skb)
 		goto bad_packet;
 	if (!pskb_may_pull(skb, th->doff*4))
 		goto discard_it;
+#ifdef CONFIG_SYNO_PLX_PORTING
+skb->tcp_header_len = th->doff*4;
+#endif
 
 	if (!skb_csum_unnecessary(skb) && tcp_v6_checksum_init(skb))
 		goto bad_packet;
@@ -1687,7 +1702,11 @@ process:
 
 	skb->dev = NULL;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock_nested(sk);
+#else
 	bh_lock_sock_nested(sk);
+#endif
 	ret = 0;
 	if (!sock_owned_by_user(sk)) {
 #ifdef CONFIG_NET_DMA
@@ -1704,7 +1723,11 @@ process:
 		}
 	} else
 		sk_add_backlog(sk, skb);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 
 	sock_put(sk);
 	return ret ? -1 : 0;

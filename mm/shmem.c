@@ -1727,7 +1727,11 @@ static void do_shmem_file_read(struct file *filp, loff_t *ppos, read_descriptor_
 		 * "pos" here (the actor routine has to update the user buffer
 		 * pointers and the remaining count).
 		 */
+#ifdef CONFIG_SYNO_PLX_PORTING
+		ret = actor(desc, &page, offset, nr);
+#else
 		ret = actor(desc, page, offset, nr);
+#endif
 		offset += ret;
 		index += offset >> PAGE_CACHE_SHIFT;
 		offset &= ~PAGE_CACHE_MASK;

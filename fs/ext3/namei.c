@@ -50,6 +50,9 @@
 #define NAMEI_RA_INDEX(c,b)  (((c) * NAMEI_RA_BLOCKS) + (b))
 
 #ifdef MY_ABC_HERE
+static unsigned char UTF8Ext3NameiStrBuf[UNICODE_UTF8_BUFSIZE];
+extern spinlock_t Ext3Namei_buf_lock;  /* init at ext3_fill_super() */
+
 unsigned int ext3_strhash(const unsigned char *name, unsigned int len)
 {
 	unsigned long hash = init_name_hash();
@@ -63,15 +66,15 @@ unsigned int ext3_strhash(const unsigned char *name, unsigned int len)
 static int ext3_dentry_hash(struct dentry *dentry, struct qstr *this)
 {
 	unsigned int upperlen;
-	unsigned char *UTF8Ext3NameiStrBuf;
 
-	UTF8Ext3NameiStrBuf = kmalloc(PATH_MAX, GFP_KERNEL);
-	if (!UTF8Ext3NameiStrBuf) {
-		return -ENOMEM;
-	}
-	upperlen = SYNOToUpper(UTF8Ext3NameiStrBuf,this->name, PATH_MAX, this->len, NULL);
+	spin_lock(&Ext3Namei_buf_lock);
+
+	upperlen = SYNOUnicodeUTF8toUpper(UTF8Ext3NameiStrBuf,this->name,
+									  UNICODE_UTF8_BUFSIZE - 1 , this->len, NULL);
+
 	this->hash = ext3_strhash(UTF8Ext3NameiStrBuf, upperlen);
-	kfree(UTF8Ext3NameiStrBuf);
+
+	spin_unlock(&Ext3Namei_buf_lock);
 
 	return 0;
 }
@@ -2693,6 +2696,9 @@ const struct inode_operations ext3_dir_inode_operations = {
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext3_listxattr,
 	.removexattr	= generic_removexattr,
+#endif
+#ifdef MY_ABC_HERE
+	.synosetxattr	= syno_generic_setxattr,
 #endif
 	.check_acl	= ext3_check_acl,
 };

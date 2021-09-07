@@ -68,6 +68,12 @@ struct stat {
 #endif
 
 #ifdef MY_ABC_HERE
+#ifndef st_syno_achv_ver
+#define st_syno_achv_ver st_mtime_nsec
+#endif
+#endif
+
+#ifdef MY_ABC_HERE
 #ifndef st_SynoUnicodeStat
 #define st_SynoUnicodeStat st_mtime_nsec
 #endif

@@ -881,7 +881,11 @@ static int scsi_lu_seq_show(struct seq_file *seq, void *v)
 
 	seq_printf(seq, " %u %s %s %llu %u %u %u %u %u %u\n",
 		/* scsiLuPeripheralType */
+#ifdef MY_ABC_HERE
+		   TRANSPORT(dev)->get_device_type(dev),
+#else
 		   dev->dev_obj_api->get_device_type((void *)dev),
+#endif
 		   (dev->dev_status == TRANSPORT_DEVICE_ACTIVATED) ?
 		"available" : "notavailable", /* scsiLuStatus */
 		"exposed", 	/* scsiLuState */

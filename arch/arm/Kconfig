@@ -727,6 +727,19 @@ config ARCH_BCMRING
 	help
 	  Support for Broadcom's BCMRing platform.
 
+config ARCH_OXNAS
+	bool "Oxford Semiconductor 810 NAS SoC"
+	help
+		This enables support for Oxsemi 810 NAS SoC
+
+config ARCH_OX820
+	bool "Oxford Semiconductor 815/820/825 NAS SoC"
+	select ARM_GIC
+	select GENERIC_CLOCKEVENTS
+	select LOCAL_TIMERS
+	help
+		This enables support for Oxsemi 815/820/825 NAS SoC
+
 endchoice
 
 if ARCH_FEROCEON_ORION || ARCH_FEROCEON_KW || ARCH_FEROCEON_MV78XX0
@@ -840,6 +853,12 @@ source "arch/arm/mach-w90x900/Kconfig"
 
 source "arch/arm/mach-bcmring/Kconfig"
 
+source "arch/arm/mach-oxnas/Kconfig"
+
+source "arch/arm/mach-ox820/Kconfig"
+
+source "arch/arm/plat-oxnas/Kconfig"
+
 # Definitions to make life easier
 config ARCH_ACORN
 	bool
@@ -932,8 +951,10 @@ source "arch/arm/common/Kconfig"
 
 config FORCE_MAX_ZONEORDER
 	int
-	depends on SA1111
-	default "9"
+		
+	depends on SA1111 || ARCH_FEROCEON_KW
+    default "9" if SA1111
+    default "19" if ARCH_FEROCEON_KW
 
 menu "Bus support"
 
@@ -959,7 +980,7 @@ config ISA_DMA_API
 	bool
 
 config PCI
-	bool "PCI support" if ARCH_INTEGRATOR_AP || ARCH_VERSATILE_PB || ARCH_IXP4XX || ARCH_KS8695 || MACH_ARMCORE || ARCH_FEROCEON
+	bool "PCI support" if ARCH_INTEGRATOR_AP || ARCH_VERSATILE_PB || ARCH_IXP4XX || ARCH_KS8695 || MACH_ARMCORE || ARCH_FEROCEON || ARCH_OXNAS || ARCH_OX820
 	help
 	  Find out whether you have a PCI motherboard. PCI is the name of a
 	  bus system, i.e. the way the CPU talks to the other stuff inside
@@ -994,10 +1015,11 @@ source "kernel/time/Kconfig"
 config SMP
 	bool "Symmetric Multi-Processing (EXPERIMENTAL)"
 	depends on EXPERIMENTAL && (REALVIEW_EB_ARM11MP || REALVIEW_EB_A9MP ||\
-		 MACH_REALVIEW_PB11MP || MACH_REALVIEW_PBX || ARCH_OMAP4)
+		 MACH_REALVIEW_PB11MP || MACH_REALVIEW_PBX || ARCH_OMAP4 || ARCH_OX820)
 	depends on GENERIC_CLOCKEVENTS
 	select USE_GENERIC_SMP_HELPERS
-	select HAVE_ARM_SCU if (ARCH_REALVIEW || ARCH_OMAP4)
+	select HAVE_ARM_SCU if (ARCH_REALVIEW || ARCH_OMAP4 || ARCH_OX820)
+	select GENERIC_TIME if ARCH_OX820
 	help
 	  This enables support for systems with more than one CPU. If you have
 	  a system with only one CPU, like most personal computers, say N. If
@@ -1022,8 +1044,9 @@ config HAVE_ARM_SCU
 	  This option enables support for the ARM system coherency unit
 
 config HAVE_ARM_TWD
-	bool
-	depends on SMP
+	bool "Support for ARM timer/watchodog unit"
+	depends on SMP || ARCH_OX820
+	default y if ARCH_OX820
 	help
 	  This options enables support for the ARM timer and watchdog unit
 
@@ -1066,9 +1089,9 @@ config HOTPLUG_CPU
 config LOCAL_TIMERS
 	bool "Use local timer interrupts"
 	depends on SMP && (REALVIEW_EB_ARM11MP || MACH_REALVIEW_PB11MP || \
-		REALVIEW_EB_A9MP || MACH_REALVIEW_PBX || ARCH_OMAP4)
+		REALVIEW_EB_A9MP || MACH_REALVIEW_PBX || ARCH_OMAP4 || ARCH_OX820)
 	default y
-	select HAVE_ARM_TWD if (ARCH_REALVIEW || ARCH_OMAP4)
+	select HAVE_ARM_TWD if (ARCH_REALVIEW || ARCH_OMAP4 || ARCH_OX820)
 	help
 	  Enable support for local timers on SMP platforms, rather then the
 	  legacy IPI broadcast method.  Local timers allows the system
@@ -1252,6 +1275,7 @@ config ALIGNMENT_TRAP
 	  here, which has a severe performance impact. This is necessary for
 	  correct operation of some network protocols. With an IP-only
 	  configuration it is safe to say N, otherwise say Y.
+
 config COPY_USER_MEMCPY
 	bool "Use kernel mem{cpy,set}() for {copy_to,clear}_user()"
 	depends on !CONFIG_CPU_32v3

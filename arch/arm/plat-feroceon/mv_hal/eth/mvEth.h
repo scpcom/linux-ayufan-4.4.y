@@ -220,6 +220,9 @@ MV_STATUS   mvEthTosToRxqSet(void* pPortHandle, int tos, int rxq);
 int         mvEthTosToRxqGet(void* pPortHandle, int tos);
 
 /* Speed, Duplex, FlowControl routines */
+MV_STATUS mvEthForceLinkModeSet(void* pPortHandle, MV_BOOL force_link_up, 
+						   MV_BOOL force_link_down);
+
 MV_STATUS   mvEthSpeedDuplexSet(void* pPortHandle, MV_ETH_PORT_SPEED speed, 
                                                    MV_ETH_PORT_DUPLEX duplex);
 

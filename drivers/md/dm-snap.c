@@ -872,6 +872,8 @@ static void pending_complete(struct dm_snap_pending_exception *pe, int success)
 	int error = 0;
 #ifdef MY_ABC_HERE
 	chunk_t wait_chunk;
+
+	memset(&wait_chunk, 0, sizeof(chunk_t));
 #endif
 
 	if (!success) {

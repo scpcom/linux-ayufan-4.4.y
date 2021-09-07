@@ -425,11 +425,13 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 	if (rq->cmd_type == REQ_TYPE_BLOCK_PC) {
 		ret = scsi_setup_blk_pc_cmnd(sdp, rq);
 #ifdef MY_ABC_HERE
-	SCpnt = rq->special;
-	if(NULL != SCpnt && NULL != SCpnt->cmnd){
-		if(START_STOP == SCpnt->cmnd[0] && 0 == SCpnt->cmnd[4]) {
-			if(PORT_TYPE_SATA != sdp->host->hostt->syno_port_type) {
-				sdp->spindown = 1;
+	if(BLKPREP_OK == ret) {
+		SCpnt = rq->special;
+		if(NULL != SCpnt && NULL != SCpnt->cmnd){
+			if(START_STOP == SCpnt->cmnd[0] && 0 == SCpnt->cmnd[4]) {
+				if(PORT_TYPE_SATA != sdp->host->hostt->syno_port_type) {
+					sdp->spindown = 1;
+				}
 			}
 		}
 	}
@@ -474,26 +476,28 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 	}
 	/* usb device case  */
 	if (sdp->spindown) {
-		char szBuf[128];
-		struct mm_struct *mm;
-		int len;
-		if (current) {
-			mm = current->mm;
-			if (mm) {
-				len = mm->arg_end - mm->arg_start;
-				memset(szBuf, 0, sizeof(szBuf));
-				memcpy(szBuf, (unsigned char *)mm->arg_start, len);
-				printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid=%d, name=%s\n",
-					   __FILE__, __LINE__, __FUNCTION__,
-					   disk->disk_name, current->pid, szBuf);
+		if(syno_hibernation_log_sec > 0) {
+			char szBuf[128];
+			struct mm_struct *mm;
+			int len;
+			if (current) {
+				mm = current->mm;
+				if (mm) {
+					len = mm->arg_end - mm->arg_start;
+					memset(szBuf, 0, sizeof(szBuf));
+					memcpy(szBuf, (unsigned char *)mm->arg_start, len);
+					printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid=%d, name=%s\n",
+						   __FILE__, __LINE__, __FUNCTION__,
+						   disk->disk_name, current->pid, szBuf);
+				} else {
+					printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid = %d, current->mm = NULL\n",
+						   __FILE__, __LINE__, __FUNCTION__,
+						   disk->disk_name, current->pid);
+				}
 			} else {
-				printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid = %d, current->mm = NULL\n",
-					   __FILE__, __LINE__, __FUNCTION__,
-					   disk->disk_name, current->pid);
+				printk(KERN_WARNING"%s[%d]:%s(), current = NULL\n",
+					   __FILE__, __LINE__, __FUNCTION__);
 			}
-		} else {
-			printk(KERN_WARNING"%s[%d]:%s(), current = NULL\n",
-				   __FILE__, __LINE__, __FUNCTION__);
 		}
 		sdp->spindown = 0;
 	}

@@ -79,6 +79,12 @@ SOCK_DEBUG(struct sock *sk, const char *msg, ...)
 }
 #endif
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+//typedef struct {
+//	spinlock_t lock;
+//} wspinlock_t;
+#endif
+
 /* This is the per-socket lock.  The spinlock provides a synchronization
  * between user contexts and software interrupt processing, whereas the
  * mini-semaphore synchronizes multiple users amongst themselves.
@@ -504,6 +510,9 @@ enum sock_flags {
 	SOCK_TIMESTAMPING_SOFTWARE,     /* %SOF_TIMESTAMPING_SOFTWARE */
 	SOCK_TIMESTAMPING_RAW_HARDWARE, /* %SOF_TIMESTAMPING_RAW_HARDWARE */
 	SOCK_TIMESTAMPING_SYS_HARDWARE, /* %SOF_TIMESTAMPING_SYS_HARDWARE */
+#ifdef CONFIG_SYNO_PLX_PORTING
+	SOCK_ZCC,
+#endif
 };
 
 static inline void sock_copy_flags(struct sock *nsk, struct sock *osk)
@@ -646,6 +655,10 @@ struct proto {
 					int *addr_len);
 	int			(*sendpage)(struct sock *sk, struct page *page,
 					int offset, size_t size, int flags);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	int			(*sendpages)(struct sock *sk, struct page **page,
+					int offset, size_t size, int flags);
+#endif
 	int			(*bind)(struct sock *sk, 
 					struct sockaddr *uaddr, int addr_len);
 
@@ -904,6 +917,19 @@ static inline void sk_wmem_free_skb(struct sock *sk, struct sk_buff *skb)
  * Mark both the sk_lock and the sk_lock.slock as a
  * per-address-family lock class.
  */
+#ifdef CONFIG_SYNO_PLX_PORTING
+#define sock_lock_init_class_and_name(sk, sname, skey, name, key) 	\
+do {									\
+	sk->sk_lock.owned = 0;						\
+	init_waitqueue_head(&sk->sk_lock.wq);				\
+	spin_lock_init(&(sk)->sk_lock.slock);				\
+	debug_check_no_locks_freed((void *)&(sk)->sk_lock,		\
+			sizeof((sk)->sk_lock));				\
+	lockdep_set_class_and_name(&(sk)->sk_lock.slock.lock,		\
+		       	(skey), (sname));				\
+	lockdep_init_map(&(sk)->sk_lock.dep_map, (name), (key), 0);	\
+} while (0)
+#else
 #define sock_lock_init_class_and_name(sk, sname, skey, name, key) 	\
 do {									\
 	sk->sk_lock.owned = 0;						\
@@ -915,6 +941,20 @@ do {									\
 		       	(skey), (sname));				\
 	lockdep_init_map(&(sk)->sk_lock.dep_map, (name), (key), 0);	\
 } while (0)
+#endif
+#ifdef CONFIG_SYNO_PLX_PORTING
+/*#define sock_lock_init_class_and_name(sk, sname, skey, name, key) 	\
+do {									\
+	sk->sk_lock.owned = 0;						\
+	init_waitqueue_head(&sk->sk_lock.wq);				\
+	spin_lock_init(&(sk)->sk_lock.slock.lock);				\
+	debug_check_no_locks_freed((void *)&(sk)->sk_lock,		\
+			sizeof((sk)->sk_lock));				\
+	lockdep_set_class_and_name(&(sk)->sk_lock.slock.lock,		\
+		       	(skey), (sname));				\
+	lockdep_init_map(&(sk)->sk_lock.dep_map, (name), (key), 0);	\
+} while (0)*/
+#endif
 
 extern void lock_sock_nested(struct sock *sk, int subclass);
 
@@ -926,11 +966,101 @@ static inline void lock_sock(struct sock *sk)
 extern void release_sock(struct sock *sk);
 
 /* BH context may only use the following locking interface. */
+#ifdef CONFIG_SYNO_PLX_PORTING
+#define bh_lock_wsock(_sk) do { \
+	if (unlikely(!spin_trylock(&(_sk)->sk_lock.slock))) { \
+		unsigned long end = jiffies + HZ; \
+		do { \
+			if (time_after(jiffies, end)) { \
+				printk(KERN_WARNING "bh_lock_wsock() A second has elapsed " \
+					"while waiting for spinlock\n"); \
+				end = jiffies + HZ; \
+			} \
+		} while (unlikely(!spin_trylock(&(_sk)->sk_lock.slock))); \
+	} \
+} while(0)
+//static inline void bh_lock_wsock(struct sock *sk)
+//{
+//	wspinlock_t *wlock = &sk->sk_lock.slock;
+//
+//	if (unlikely(!spin_trylock(&wlock->lock))) {
+//		unsigned long end = jiffies + HZ;
+//
+//		do {
+//			if (time_after(jiffies, end)) {
+//				printk(KERN_WARNING "bh_lock_wsock() A second has elapsed "
+//					"while waiting for spinlock\n");
+//				end = jiffies + HZ;
+//			}
+//		} while (unlikely(!spin_trylock(&wlock->lock)));
+//	}
+//}
+
+#define bh_lock_wsock_nested(_sk) bh_lock_wsock(_sk)
+//static inline void bh_lock_wsock_nested(struct sock *sk)
+//{
+//	bh_lock_wsock(sk);
+//}
+
+#define bh_unlock_wsock(_sk) spin_unlock(&(_sk)->sk_lock.slock)
+//static inline void bh_unlock_wsock(struct sock *sk)
+//{
+//	wspinlock_t *wlock = &sk->sk_lock.slock;
+//
+//	spin_unlock(&wlock->lock);
+//}
+
+#define wspin_lock_bh(_lock) do { \
+	if (unlikely(!spin_trylock_bh((_lock)))) { \
+		unsigned long end = jiffies + HZ; \
+		do { \
+			if (time_after(jiffies, end)) { \
+				printk(KERN_WARNING "wspin_lock_bh() A second has elapsed " \
+					"while waiting for spinlock\n"); \
+				end = jiffies + HZ; \
+			} \
+		} while (unlikely(!spin_trylock_bh((_lock)))); \
+	} \
+} while(0)
+//static inline void wspin_lock_bh(wspinlock_t *wlock)
+//{
+//	if (unlikely(!spin_trylock_bh(&wlock->lock))) {
+//		unsigned long end = jiffies + HZ;
+//
+//		do {
+//			if (time_after(jiffies, end)) {
+//				printk(KERN_WARNING "wspin_lock_bh() A second has elapsed "
+//					"while waiting for spinlock\n");
+//				end = jiffies + HZ;
+//			}
+//		} while (unlikely(!spin_trylock_bh(&wlock->lock)));
+//	}
+//}
+
+#define wspin_unlock_bh(_lock) spin_unlock_bh((_lock))
+//static inline void wspin_unlock_bh(wspinlock_t *wlock)
+//{
+//	spin_unlock_bh(&wlock->lock);
+//}
+
+#define wspin_unlock(_lock) spin_unlock((_lock))
+//static inline void wspin_unlock(wspinlock_t *wlock)
+//{
+//	spin_unlock(&wlock->lock);
+//}
+
+#define wspin_trylock(_lock) spin_trylock((_lock))
+//static inline int wspin_trylock(wspinlock_t *wlock)
+//{
+//	return spin_trylock(&wlock->lock);
+//}
+#else
 #define bh_lock_sock(__sk)	spin_lock(&((__sk)->sk_lock.slock))
 #define bh_lock_sock_nested(__sk) \
 				spin_lock_nested(&((__sk)->sk_lock.slock), \
 				SINGLE_DEPTH_NESTING)
 #define bh_unlock_sock(__sk)	spin_unlock(&((__sk)->sk_lock.slock))
+#endif
 
 extern struct sock		*sk_alloc(struct net *net, int family,
 					  gfp_t priority,

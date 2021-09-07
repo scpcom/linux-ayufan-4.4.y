@@ -108,6 +108,13 @@ enum pageflags {
 #ifdef CONFIG_MEMORY_FAILURE
 	PG_hwpoison,		/* hardware poisoned page. Don't touch */
 #endif
+#ifdef CONFIG_SMP_LAZY_DCACHE_FLUSH
+    PG_dcache_cpu,
+    PG_dcache_cpu_1,
+#endif // CONFIG_SMP_LAZY_DCACHE_FLUSH
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+	PG_incoherent_sendfile,	/* Page in use by fast reads cache */
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
 	__NR_PAGEFLAGS,
 
 	/* Filesystems */
@@ -216,6 +223,14 @@ __PAGEFLAG(SlobFree, slob_free)
 
 __PAGEFLAG(SlubFrozen, slub_frozen)
 __PAGEFLAG(SlubDebug, slub_debug)
+
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+/*
+ * Flag marking page as in use for incoherent sendfile - does not need to have
+ * atomic access functions
+ */
+__PAGEFLAG(IncoherentSendfile, incoherent_sendfile)
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
 
 /*
  * Private page markings that may be used by the filesystem that owns the page

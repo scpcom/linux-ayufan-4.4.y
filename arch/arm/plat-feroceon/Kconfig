@@ -5,10 +5,6 @@ menu "Feroceon SoC options"
 
 #since the Kconfig parser dispatch all source commands, we call the machines Kconfigs from here and
 #not vice versa because otherwise the plat-feroceon Kconfig will be dispatched twice.     
-if ARCH_FEROCEON_ORION
-source "arch/arm/mach-feroceon-orion/Kconfig"
-endif
-
 if ARCH_FEROCEON_KW
 source "arch/arm/mach-feroceon-kw/Kconfig"
 endif

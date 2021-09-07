@@ -5,6 +5,29 @@
 #include <linux/kernel.h>
 #include <linux/synobios.h>
 
+/* TODO: Because user space also need this define, so we define them here. 
+ * But userspace didn't have a common define like MY_ABC_HERE include
+ * kernel space. So we can't define it inside some define */
+#define EBOX_GPIO_KEY			"gpio"
+#define EBOX_INFO_DEV_LIST_KEY	"syno_device_list"
+#define EBOX_INFO_VENDOR_KEY	"vendorid"
+#define EBOX_INFO_DEVICE_KEY	"deviceid"
+#define EBOX_INFO_ERROR_HANDLE	"error_handle"
+#define EBOX_INFO_UNIQUE_KEY	"Unique"
+#define EBOX_INFO_EMID_KEY		"EMID"
+#define EBOX_INFO_SATAHOST_KEY	"sata_host"
+#define EBOX_INFO_PORTNO_KEY	"port_no"
+#define EBOX_INFO_DEEP_SLEEP	"deepsleep_support"
+#define EBOX_INFO_IRQ_OFF		"irq_off"
+#define EBOX_INFO_UNIQUE_RX410	"RX410"
+#define EBOX_INFO_UNIQUE_DX510	"DX510"
+#define EBOX_INFO_UNIQUE_RX4	"RX4"
+#define EBOX_INFO_UNIQUE_DX5	"DX5"
+#define EBOX_INFO_UNIQUE_RXC	"RX1211"
+#define EBOX_INFO_UNIQUE_DXC	"DX1211"
+#define EBOX_INFO_UNIQUE_RXCRP	"RX1211rp"
+#define EBOX_INFO_UNIQUE_DX212	"DX212"
+
 /*
 * We use g_internal_hd_num this variable pass from uboot for determine whether wake up in sequence.
 * because if we need power in sequence at booting, 
@@ -29,7 +52,7 @@ static inline void SleepForLatency(void)
 {
 	if ( ( g_internal_hd_num < 0 ) || /* not specified in boot command line */
 		 syno_boot_hd_count < g_internal_hd_num ) {
-		mdelay(1000);
+		mdelay(3000);
 	}
 }
 
@@ -58,7 +81,11 @@ static inline void SleepForHDAdditional(void)
 #define GPIO_3726_CMD_POWER_CTL 0x40
 #define GPIO_3726_CMD_POWER_CLR 0x00
 
+#define GPIO_3726_CMD_HDD_POWER_ON	0
+#define GPIO_3726_CMD_HDD_POWER_OFF	(1 << 14)
+
 #define GPI_3726_PSU_OFF(x)		(0x2&x)
+#define GPI_3726_HDD_PWR_OFF(x)		(0x10&x)
 
 /**
  * Copy from scsi. Used in both marvell and libata
@@ -183,8 +210,8 @@ SIMG3726_gpio_encode(SYNO_PM_PKG *pPM_pkg, int rw)
 #define GPIO_3726_BIT19(GPO)	((1<<11)&GPO)<<8
 #define GPIO_3726_BIT20(GPO)	((1<<12)&GPO)<<8
 #define GPIO_3726_BIT21(GPO)	((1<<13)&GPO)<<8
-#define GPIO_3726_BIT30(GPO)	((1<<14)&GPO)<<8
-#define GPIO_3726_BIT31(GPO)	((1<<15)&GPO)<<8
+#define GPIO_3726_BIT30(GPO)	((1<<14)&GPO)<<16
+#define GPIO_3726_BIT31(GPO)	((1<<15)&GPO)<<16
 
 	if (rw) {
 		pPM_pkg->var = 
@@ -213,6 +240,19 @@ syno_pm_is_3726(unsigned short vendor, unsigned short devid)
 	return (vendor == 0x1095 && devid == 0x3726);
 }
 
+static inline void
+syno_pm_systemstate_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG)
+{
+	/* do not check parameters, caller should do it */
+
+	memset(pPKG, 0, sizeof(*pPKG));
+	if (syno_pm_is_3726(vendor, devid)) {
+		pPKG->var = 0x200;
+	}
+
+	/* add other port multiplier here */
+}
+
 static inline void 
 syno_pm_unique_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG)
 {
@@ -221,6 +261,36 @@ syno_pm_unique_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG
 	memset(pPKG, 0, sizeof(*pPKG));
 	if (syno_pm_is_3726(vendor, devid)) {
 		pPKG->var = 0x100;
+	}
+
+	/* add other port multiplier here */
+}
+
+static inline void 
+syno_pm_raidledstate_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG)
+{
+	/* do not check parameters, caller should do it */
+
+	memset(pPKG, 0, sizeof(*pPKG));
+	if (syno_pm_is_3726(vendor, devid)) {
+		pPKG->var = 0x280;
+	}
+
+	/* add other port multiplier here */
+}
+
+static inline void 
+syno_pm_hddpoweron_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG, unsigned char blPowerOn)
+{
+	/* do not check parameters, caller should do it */
+
+	memset(pPKG, 0, sizeof(*pPKG));
+	if (syno_pm_is_3726(vendor, devid)) {
+		if (blPowerOn) {
+			pPKG->var = GPIO_3726_CMD_HDD_POWER_ON;
+		} else {
+			pPKG->var = GPIO_3726_CMD_HDD_POWER_OFF;
+		}		
 	}
 
 	/* add other port multiplier here */
@@ -266,9 +336,37 @@ END:
 	return ret;
 }
 
+static inline unsigned char
+syno_pm_is_hdd_pwron(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG)
+{
+	unsigned char ret = 0;
+
+	if (!pPKG) {
+		goto END;
+	}
+
+	if (syno_pm_is_3726(vendor, devid)) {
+		if (GPI_3726_HDD_PWR_OFF(pPKG->var)) {
+			goto END;
+		}
+	}
+
+	/* add other port multiplier here */
+
+	/* the same port multiplier would not goto other condition block */
+	ret = 1;
+END:
+	return ret;
+}
+
 #define SYNO_UNIQUE(x)		(x>>2)
 #define IS_SYNOLOGY_RX4(x) (SYNO_UNIQUE(x) == 0x15 || SYNO_UNIQUE(x) == 0xd)
+#define IS_SYNOLOGY_RX410(x) (SYNO_UNIQUE(x) == 0xd)
 #define IS_SYNOLOGY_DX5(x) (SYNO_UNIQUE(x) == 0xa || SYNO_UNIQUE(x) == 0x1a)
+#define IS_SYNOLOGY_DX510(x) (SYNO_UNIQUE(x) == 0x1a)
+#define IS_SYNOLOGY_DXC(x) (SYNO_UNIQUE(x) == 0x13)
+#define IS_SYNOLOGY_RXC(x) (SYNO_UNIQUE(x) == 0xb)
+#define IS_SYNOLOGY_DX212(x) (SYNO_UNIQUE(x) == 0x7)
 static inline unsigned int
 syno_support_disk_num(unsigned short vendor, 
 					  unsigned short devid, 
@@ -281,6 +379,10 @@ syno_support_disk_num(unsigned short vendor,
 			ret = 4;
 		} else if (IS_SYNOLOGY_DX5(syno_uniq)) {
 			ret = 5;
+		} else if (IS_SYNOLOGY_DXC(syno_uniq) || IS_SYNOLOGY_RXC(syno_uniq)) {
+			ret = 3;
+		} else if (IS_SYNOLOGY_DX212(syno_uniq)) {
+			ret = 2;
 		} else {
 			printk("%s not RX4 or DX5", __FUNCTION__);
 			ret = 5;

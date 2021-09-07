@@ -491,24 +491,32 @@ int __syno_host_power_ctl_work(struct device *dev, void *data)
 {
 	struct Scsi_Host *shost = NULL;
 
-	if(!dev) {
-		return 0;
+	if (!dev) {
+		goto END;
 	}
 	shost = scsi_host_get(class_to_shost(dev));
-	if(shost->hostt->syno_host_power_ctl) {
+	if (NULL == shost) {
+		goto END;
+	}
+
+	/* should this call deep sleep to on IRQ off flag? */
+	if (shost->hostt->syno_host_power_ctl) {
 		shost->hostt->syno_host_power_ctl(shost, 0);
 	}
+
 	scsi_host_put(shost);
+
+END:
 	return 0;
 }
 
 void
-scsi_host_poweroff_all()
+scsi_host_poweroff_all(void)
 {
 	class_for_each_device(&shost_class, NULL, NULL, __syno_host_power_ctl_work);
 }
 EXPORT_SYMBOL(scsi_host_poweroff_all);
-#endif
+#endif /* MY_ABC_HERE */
 
 /**
  * scsi_host_get - inc a Scsi_Host ref count

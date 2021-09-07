@@ -3308,7 +3308,10 @@ syno_mvSata_is_synology_3726(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt,
     }
 
     if (!IS_SYNOLOGY_RX4(pIALExt->pSataAdapter->sataChannel[channelIndex]->PMSynoUnique) &&
-        !IS_SYNOLOGY_DX5(pIALExt->pSataAdapter->sataChannel[channelIndex]->PMSynoUnique)) {
+	!IS_SYNOLOGY_DX5(pIALExt->pSataAdapter->sataChannel[channelIndex]->PMSynoUnique) &&
+	!IS_SYNOLOGY_DXC(pIALExt->pSataAdapter->sataChannel[channelIndex]->PMSynoUnique) &&
+	!IS_SYNOLOGY_RXC(pIALExt->pSataAdapter->sataChannel[channelIndex]->PMSynoUnique) &&
+        !IS_SYNOLOGY_DX212(pIALExt->pSataAdapter->sataChannel[channelIndex]->PMSynoUnique)) {
         goto END;
     }
      

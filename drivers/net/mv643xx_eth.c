@@ -57,11 +57,6 @@
 #include <asm/system.h>
 #include <linux/list.h>
 
-#ifdef MY_ABC_HERE
-#include <linux/synobios.h>
-extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
-#endif
-
 #ifdef MY_DEF_HERE
 #define ETH_CSUM_MAX_BYTE_COUNT 1600
 #endif
@@ -2117,11 +2112,6 @@ static void handle_link_event(struct mv643xx_eth_private *mp)
 			printk(KERN_INFO "%s: link down\n", dev->name);
 
 			netif_carrier_off(dev);
-#ifdef MY_ABC_HERE
-			if (funcSYNOSendNetLinkEvent) {
-				funcSYNOSendNetLinkEvent(NET_NOLINK, dev->ifindex);
-			}
-#endif
 
 			for (i = 0; i < mp->txq_count; i++) {
 				struct tx_queue *txq = mp->txq + i;
@@ -2155,17 +2145,8 @@ static void handle_link_event(struct mv643xx_eth_private *mp)
 			 speed, duplex ? "full" : "half",
 			 fc ? "en" : "dis");
 
-#ifdef MY_ABC_HERE
-	if (!netif_carrier_ok(dev)) {
-		netif_carrier_on(dev);
-		if (funcSYNOSendNetLinkEvent) {
-			funcSYNOSendNetLinkEvent(NET_LINK, dev->ifindex);
-		}
-	}
-#else
 	if (!netif_carrier_ok(dev))
 		netif_carrier_on(dev);
-#endif
 }
 
 static int mv643xx_eth_poll(struct napi_struct *napi, int budget)

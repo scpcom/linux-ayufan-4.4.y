@@ -449,7 +449,11 @@ static inline int iscsi_handle_recovery_datain(
 {
 	iscsi_conn_t *conn = CONN(cmd);
 	iscsi_datain_req_t *dr;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	se_cmd_t *se_cmd = &cmd->se_cmd;
+#else
 	se_cmd_t *se_cmd = cmd->se_cmd;
+#endif
 
 	if (!(atomic_read(&T_TASK(se_cmd)->t_transport_complete))) {
 		printk(KERN_ERR "Ignoring ITT: 0x%08x Data SNACK\n",
@@ -525,11 +529,19 @@ int iscsi_handle_recovery_datain_or_r2t(
 	 * FIXME: This will not work for bidi commands.
 	 */
 	switch (cmd->data_direction) {
+#ifdef MY_ABC_HERE
+	case DMA_TO_DEVICE:
+		return iscsi_handle_r2t_snack(cmd, buf, begrun, runlength);
+	case DMA_FROM_DEVICE:
+		return iscsi_handle_recovery_datain(cmd, buf, begrun,
+				runlength);
+#else
 	case ISCSI_WRITE:
 		return iscsi_handle_r2t_snack(cmd, buf, begrun, runlength);
 	case ISCSI_READ:
 		return iscsi_handle_recovery_datain(cmd, buf, begrun,
 				runlength);
+#endif
 	default:
 		printk(KERN_ERR "Unknown cmd->data_direction: 0x%02x\n",
 				cmd->data_direction);
@@ -997,7 +1009,11 @@ int iscsi_execute_ooo_cmdsns(iscsi_session_t *sess)
  */
 int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 {
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	se_cmd_t *se_cmd = &cmd->se_cmd;
+#else
 	se_cmd_t *se_cmd = cmd->se_cmd;
+#endif
 	int lr = 0;
 
 	spin_lock_bh(&cmd->istate_lock);
@@ -1045,8 +1061,13 @@ int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 		if (cmd->immediate_data) {
 			if (cmd->cmd_flags & ICF_GOT_LAST_DATAOUT) {
 				spin_unlock_bh(&cmd->istate_lock);
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+				return transport_generic_handle_data(
+						&cmd->se_cmd);
+#else
 				return transport_generic_handle_data(
 						cmd->se_cmd);
+#endif
 			}
 			spin_unlock_bh(&cmd->istate_lock);
 
@@ -1071,8 +1092,13 @@ int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 		 */
 		spin_unlock_bh(&cmd->istate_lock);
 
+#ifdef MY_ABC_HERE
+		if ((cmd->data_direction == DMA_TO_DEVICE) &&
+		    !(cmd->cmd_flags & ICF_NON_IMMEDIATE_UNSOLICITED_DATA)) {
+#else
 		if ((cmd->data_direction == ISCSI_WRITE) &&
 		    !(cmd->cmd_flags & ICF_NON_IMMEDIATE_UNSOLICITED_DATA)) {
+#endif
 			/*
 			 * Send the delayed TASK_ABORTED status for WRITEs if
 			 * no more nsolicitied data is expected.
@@ -1085,7 +1111,11 @@ int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 			iscsi_start_dataout_timer(cmd, CONN(cmd));
 			spin_unlock_bh(&cmd->dataout_timeout_lock);
 		}
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+		return transport_generic_handle_cdb(&cmd->se_cmd);
+#else
 		return transport_generic_handle_cdb(cmd->se_cmd);
+#endif
 
 	case ISCSI_INIT_NOP_OUT:
 	case ISCSI_INIT_TEXT_CMND:

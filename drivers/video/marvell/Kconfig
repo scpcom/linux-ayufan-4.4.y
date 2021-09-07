@@ -43,6 +43,12 @@ config FB_DOVE_CLCD_EDID
 	---help---
 	Enable reading the EDID information of the screen. Default is N.
 
+config DOVEFB_FORCE_EDID_RES
+	bool "Change resolution to match EDID info"
+	depends on FB_DOVE_CLCD_EDID
+	---help---
+	Perform a check on configured resolutions to match screen's EDID information.
+
 config FB_DOVE_DCON
 	tristate "Marvell DOVE DCON support"
 	depends on ARM && FB_DOVE
@@ -112,6 +118,14 @@ config FB_DOVE_CLCD_SCLK_VALUE
 	setting. Change this if you know how to set it.
 
 endmenu
+
+config FB_DOVE_OPTIMIZED_FB_MEM_ALLOC
+	bool "Use performance optimized memory allocations"
+	depends on FB_DOVE
+	default false
+	---help---
+	Enable performance optimized memory allocations for LCD frame-buffers.
+	This option will reserve the last DRAM Chip-Select for LCD usage.
 
 config FB_DOVE_CLCD_DEFAULT_OPTION
 	string "Default Dove FB kernel parameter"

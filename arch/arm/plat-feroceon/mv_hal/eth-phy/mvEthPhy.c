@@ -697,6 +697,36 @@ MV_VOID		mvEthE1116PhyBasicInit(MV_U32 ethPortNum)
 
 
 /*******************************************************************************
+* mvEthE1310PhyBasicInit - 
+*
+* DESCRIPTION:
+*	Do a basic Init to the Phy , including reset
+*       
+* INPUT:
+*       ethPortNum - Ethernet port number
+*
+* OUTPUT:
+*       None.
+*
+* RETURN:   None
+*
+*******************************************************************************/
+MV_VOID		mvEthE1310PhyBasicInit(MV_U32 ethPortNum)
+{
+	MV_U16 reg;
+
+	/* Set phy address */
+	MV_REG_WRITE(ETH_PHY_ADDR_REG(ethPortNum), mvBoardPhyAddrGet(ethPortNum));
+
+	/* Leds link and activity*/
+	mvEthPhyRegWrite(mvBoardPhyAddrGet(ethPortNum),22,0x3);
+	mvEthPhyRegRead(mvBoardPhyAddrGet(ethPortNum),16,&reg);
+	reg &= ~0xf;
+	reg |= 0x11;
+	mvEthPhyRegWrite(mvBoardPhyAddrGet(ethPortNum),16,reg);
+	mvEthPhyRegWrite(mvBoardPhyAddrGet(ethPortNum),22,0x0);
+}
+/*******************************************************************************
 * mvEthE3016PhyBasicInit - 
 *
 * DESCRIPTION:

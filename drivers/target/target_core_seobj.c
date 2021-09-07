@@ -47,6 +47,7 @@
 
 #undef TARGET_CORE_SEOBJ_C
 
+#ifndef MY_ABC_HERE
 #define MAKE_OBJ_TYPE(type, op1, op2)			\
 void type##_obj_##op1##_count(struct se_obj_s *obj)	\
 {							\
@@ -126,6 +127,7 @@ void dev_put_obj(void *p)
 
 	core_put_hba(dev->se_hba);
 }
+#endif
 
 int dev_obj_export(void *p, se_portal_group_t *tpg, se_lun_t *lun)
 {
@@ -137,6 +139,11 @@ int dev_obj_export(void *p, se_portal_group_t *tpg, se_lun_t *lun)
 		return -1;
 
 	lun->se_dev = dev;
+#ifdef MY_ABC_HERE
+	se_dev_start(p);
+
+	atomic_inc(&dev->dev_export_obj.obj_access_count);
+#else
 	if (DEV_OBJ_API(dev)->activate(p) < 0) {
 		lun->se_dev = NULL;
 		kfree(port);
@@ -144,6 +151,7 @@ int dev_obj_export(void *p, se_portal_group_t *tpg, se_lun_t *lun)
 	}
 
 	DEV_OBJ_API(dev)->inc_count(&dev->dev_export_obj);
+#endif
 
 	core_export_port(dev, tpg, port, lun);
 	return 0;
@@ -163,15 +171,24 @@ void dev_obj_unexport(void *p, se_portal_group_t *tpg, se_lun_t *lun)
 	}
 	spin_unlock(&lun->lun_sep_lock);
 
+#ifdef MY_ABC_HERE
+	atomic_dec(&dev->dev_export_obj.obj_access_count);
+#else
 	DEV_OBJ_API(dev)->dec_count(&dev->dev_export_obj);
+#endif
 
 	core_release_port(dev, port);
 	spin_unlock(&dev->se_port_lock);
 
+#ifdef MY_ABC_HERE
+	se_dev_stop(p);
+#else
 	DEV_OBJ_API(dev)->deactivate(p);
+#endif
 	lun->se_dev = NULL;
 }
 
+#ifndef MY_ABC_HERE
 int dev_obj_transport_setup_cmd(void *p, se_cmd_t *cmd)
 {
 	transport_device_setup_cmd(cmd);
@@ -219,6 +236,7 @@ int dev_obj_blocksize(void *p)
 
 	return DEV_ATTRIB(dev)->block_size;
 }
+#endif
 
 int dev_obj_max_sectors(void *p)
 {
@@ -233,6 +251,14 @@ int dev_obj_max_sectors(void *p)
 		return DEV_ATTRIB(dev)->max_sectors;
 }
 
+#ifdef MY_ABC_HERE
+unsigned long long dev_obj_end_lba(void *p)
+{
+	se_device_t *dev  = (se_device_t *)p;
+
+	return dev->dev_sectors_total + 1;
+}
+#else
 unsigned long long dev_obj_end_lba(void *p, int zero_lba)
 {
 	se_device_t *dev  = (se_device_t *)p;
@@ -251,6 +277,7 @@ unsigned long long dev_obj_total_sectors(void *p)
 
 	return  dev->dev_sectors_total + 1;
 }
+#endif
 
 int dev_obj_do_se_mem_map(
 	void *p,
@@ -322,16 +349,26 @@ map_func_t dev_obj_get_map_SG(void *p, int rw)
 {
 	se_device_t *dev  = (se_device_t *)p;
 
+#ifdef MY_ABC_HERE
+	return (rw == DMA_TO_DEVICE) ? dev->transport->spc->write_SG :
+		dev->transport->spc->read_SG;
+#else
 	return (rw == SE_DIRECTION_WRITE) ? dev->transport->spc->write_SG :
 		dev->transport->spc->read_SG;
+#endif
 }
 
 map_func_t dev_obj_get_map_non_SG(void *p, int rw)
 {
 	se_device_t *dev  = (se_device_t *)p;
 
+#ifdef MY_ABC_HERE
+	return (rw == DMA_TO_DEVICE) ? dev->transport->spc->write_non_SG :
+		dev->transport->spc->read_non_SG;
+#else
 	return (rw == SE_DIRECTION_WRITE) ? dev->transport->spc->write_non_SG :
 		dev->transport->spc->read_non_SG;
+#endif
 }
 
 map_func_t dev_obj_get_map_none(void *p)
@@ -341,6 +378,7 @@ map_func_t dev_obj_get_map_none(void *p)
 	return dev->transport->spc->none;
 }
 
+#ifndef MY_ABC_HERE
 void *dev_obj_get_transport_req(void *p, se_task_t *task)
 {
 	se_device_t *dev  = (se_device_t *)p;
@@ -376,6 +414,7 @@ void dev_obj_notify_obj(void *p)
 
 	wake_up_interruptible(&dev->dev_queue_obj->thread_wq);
 }
+#endif
 
 int dev_obj_check_online(void *p)
 {
@@ -402,6 +441,7 @@ int dev_obj_check_shutdown(void *p)
 	return ret;
 }
 
+#ifndef MY_ABC_HERE
 void dev_obj_signal_shutdown(void *p)
 {
 	se_device_t *dev  = (se_device_t *)p;
@@ -677,3 +717,4 @@ int se_obj_load_plugins(void)
 
 	return ret;
 }
+#endif

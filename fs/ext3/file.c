@@ -78,6 +78,9 @@ const struct inode_operations ext3_file_inode_operations = {
 	.listxattr	= ext3_listxattr,
 	.removexattr	= generic_removexattr,
 #endif
+#ifdef MY_ABC_HERE
+	.synosetxattr	= syno_generic_setxattr,
+#endif
 	.check_acl	= ext3_check_acl,
 	.fiemap		= ext3_fiemap,
 };

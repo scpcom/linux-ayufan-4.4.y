@@ -4533,6 +4533,11 @@ tcp_collapse(struct sock *sk, struct sk_buff_head *list,
 	struct sk_buff *skb, *n;
 	bool end_of_skbs;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+//printk(KERN_WARNING "tcp_collapse() Forcing to do nothing\n");
+return;
+#endif
+
 	/* First, check that queue is collapsible and find
 	 * the point where collapsing can be useful. */
 	skb = head;
@@ -4637,6 +4642,11 @@ static void tcp_collapse_ofo_queue(struct sock *sk)
 	struct sk_buff *skb = skb_peek(&tp->out_of_order_queue);
 	struct sk_buff *head;
 	u32 start, end;
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+//printk(KERN_WARNING "tcp_collapse_ofo_queue() Forcing to do nothing\n");
+return;
+#endif
 
 	if (skb == NULL)
 		return;

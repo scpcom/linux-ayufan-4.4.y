@@ -387,13 +387,8 @@ do {									\
 
 
 #ifdef CONFIG_MMU
-#ifdef CONFIG_ARCH_FEROCEON
-extern unsigned long __must_check __arch_copy_from_user(void *to, const void __user *from, unsigned long n);
-extern unsigned long __must_check __arch_copy_to_user(void __user *to, const void *from, unsigned long n);
-#else
 extern unsigned long __must_check __copy_from_user(void *to, const void __user *from, unsigned long n);
 extern unsigned long __must_check __copy_to_user(void __user *to, const void *from, unsigned long n);
-#endif
 extern unsigned long __must_check __copy_to_user_std(void __user *to, const void *from, unsigned long n);
 extern unsigned long __must_check __clear_user(void __user *addr, unsigned long n);
 extern unsigned long __must_check __clear_user_std(void __user *addr, unsigned long n);
@@ -406,6 +401,7 @@ extern unsigned long __must_check __clear_user_std(void __user *addr, unsigned l
 extern unsigned long __must_check __strncpy_from_user(char *to, const char __user *from, unsigned long count);
 extern unsigned long __must_check __strnlen_user(const char __user *s, long n);
 
+#if 0
 #ifdef CONFIG_ARCH_FEROCEON
 /*
  * Hardware assistance
@@ -420,12 +416,8 @@ extern unsigned long xor_copy_to_user(unsigned long to, unsigned long from, unsi
 extern unsigned long dma_copy_from_user(void *to, const void __user *from, unsigned long n);
 extern unsigned long dma_copy_to_user(void __user *to, const void *from, unsigned long n);
 #endif
-#if defined(CONFIG_COPY_USER_MEMCPY) || defined(CONFIG_UACCESS_WITH_MEMCPY)
-extern unsigned long ___copy_to_user(void __user *to, const void *from, unsigned long n);
-#endif
 
-
-static inline unsigned long __copy_from_user(void *to, const void __user *from, unsigned long n)
+static inline unsigned long __arch_copy_from_user(void *to, const void __user *from, unsigned long n)
 {
 #ifdef CONFIG_MV_IDMA_COPYUSER
 	if (n > CONFIG_MV_IDMA_COPYUSER_THRESHOLD)
@@ -444,6 +436,7 @@ static inline unsigned long __copy_from_user(void *to, const void __user *from, 
 
 	return __arch_copy_from_user(to, from, n);
 }
+#endif /*CONFIG_ARCH_FEROCEON*/
 #endif
 
 static inline unsigned long __must_check copy_from_user(void *to, const void __user *from, unsigned long n)
@@ -455,8 +448,9 @@ static inline unsigned long __must_check copy_from_user(void *to, const void __u
 	return n;
 }
 
+#if 0
 #ifdef CONFIG_ARCH_FEROCEON
-static inline unsigned long __copy_to_user(void __user *to, const void *from, unsigned long n)
+static inline unsigned long __arch_copy_to_user(void __user *to, const void *from, unsigned long n)
 {
 #ifdef CONFIG_MV_IDMA_COPYUSER
 	if (n > CONFIG_MV_IDMA_COPYUSER_THRESHOLD)
@@ -471,13 +465,13 @@ static inline unsigned long __copy_to_user(void __user *to, const void *from, un
 #error "Kernel version >= 2,6,26 does not support xor_copy_to_user"
 #endif
 #endif
-
 #if defined(CONFIG_COPY_USER_MEMCPY) || defined(CONFIG_UACCESS_WITH_MEMCPY)
 	return ___copy_to_user(to, from, n);
 #else
-	return __arch_copy_to_user(to, from, n);
+    return __arch_copy_to_user(to, from, n);
 #endif
 }
+#endif /*CONFIG_ARCH_FEROCEON*/
 #endif
 
 static inline unsigned long __must_check copy_to_user(void __user *to, const void *from, unsigned long n)

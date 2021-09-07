@@ -25,7 +25,7 @@
 #endif
 
 #ifdef MY_ABC_HERE
-extern unsigned char grgbLanMac[2][16];
+extern unsigned char grgbLanMac[4][16];
 #endif
 
 #ifdef MY_ABC_HERE
@@ -524,13 +524,13 @@ out_register:
 			int i, n, x;
 			unsigned int Sum;
 			u_char ucSum;
-			char rgbLanMac[2][6];
+			char rgbLanMac[4][6];
 
 			part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
 #ifdef MY_ABC_HERE
 			x = 0;
 			gVenderMacNumber = 0;
-			for (n = 0; n<2; n++) {
+			for (n = 0; n<4; n++) {
 				for (Sum=0,ucSum=0,i=0; i<6; i++) {
 					Sum+=rgbszBuf[i+x];
 					ucSum+=rgbszBuf[i+x];
@@ -699,6 +699,14 @@ EXPORT_SYMBOL_GPL(parse_mtd_partitions);
 int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length)
 {
 	struct mtd_part *part = PART(mtd);
+
+#ifndef CONFIG_MTD_PHYSMAP_COMPAT
+#ifdef CONFIG_SYNO_MTD_PHYSMAP_START
+	offset -= CONFIG_SYNO_MTD_PHYSMAP_START;
+#else
+#error you should add CONFIG_SYNO_MTD_PHYSMAP_START in your config
+#endif
+#endif
 
 	part->offset = offset;
 	part->offset &= part->master->size-1;

@@ -465,6 +465,9 @@ static int __init coretemp_init(void)
 		    !((c->x86_model == 0xe) || (c->x86_model == 0xf) ||
 			(c->x86_model == 0x16) || (c->x86_model == 0x17) ||
 			(c->x86_model == 0x1a) || (c->x86_model == 0x1c) ||
+#ifdef MY_DEF_HERE
+			(c->x86_model == 0x2a) ||
+#endif
 			(c->x86_model == 0x1e))) {
 
 			/* supported CPU not found, but report the unknown

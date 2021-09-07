@@ -120,13 +120,6 @@ EXPORT_SYMBOL(copy_page);
 
 EXPORT_SYMBOL(__copy_from_user);
 EXPORT_SYMBOL(__copy_to_user);
-#ifdef CONFIG_UACCESS_WITH_MEMCPY
-EXPORT_SYMBOL(___copy_to_user);
-#endif
-#ifdef CONFIG_ARCH_FEROCEON
-EXPORT_SYMBOL(__arch_copy_from_user);
-EXPORT_SYMBOL(__arch_copy_to_user);
-#endif
 EXPORT_SYMBOL(__clear_user);
 
 EXPORT_SYMBOL(__get_user_1);

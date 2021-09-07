@@ -544,8 +544,10 @@ struct ext3_super_block {
 	__u8	s_log_groups_per_flex;  /* FLEX_BG group size */
 	__u8	s_reserved_char_pad2;
 	__le16  s_reserved_pad;
-#ifdef MY_ABC_HERE
-	__u32	s_reserved[161];	/* Padding to the end of the block */
+#if defined(MY_ABC_HERE) || defined (MY_ABC_HERE)
+	__u32	s_reserved[159];	/* Padding to the end of the block */
+	__le32	s_archive_version;	/* Last archived version */
+	__le32	s_syno_reserved;
 	__le32  s_syno_hash_magic;	/* Enable Htree if the magic is given */
 #else
 	__u32   s_reserved[162];        /* Padding to the end of the block */

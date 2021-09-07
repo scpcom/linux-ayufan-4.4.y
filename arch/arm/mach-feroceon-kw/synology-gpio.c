@@ -32,6 +32,7 @@
 #define SYNO_KW_DS111 0x1
 #define SYNO_KW_DS411 0x2
 #define SYNO_KW_DS211P 0x3
+#define SYNO_KW_DS212 0x5 
 #define SYNO_KW_RS411 0x8
 
 #define GPIO_UNDEF				0xFF
@@ -129,6 +130,7 @@ unsigned int Syno6282ModelIDGet(SYNO_KW_GENERIC_GPIO *pGpio)
 	 * 0x2 DS411
 	 * 0x3 DS211p
 	 * 0x4 DS411Slim
+	 * 0x5 DS212
 	 * 0x8 RS411
 	 */
 	return  (((gpio_get_value(pGpio->model.model_id_0) ? 1 : 0) << 3) | 
@@ -366,6 +368,10 @@ int SYNO_CTRL_HDD_POWERON(int index, int value)
 	int ret = -1;
 
 	switch (index) {
+	case 1:
+		WARN_ON(GPIO_UNDEF == generic_gpio.hdd_pm.hdd1_pm);
+		gpio_set_value(generic_gpio.hdd_pm.hdd1_pm, value);
+		break;
 	case 2:
 		WARN_ON(GPIO_UNDEF == generic_gpio.hdd_pm.hdd2_pm);
 		gpio_set_value(generic_gpio.hdd_pm.hdd2_pm, value);
@@ -487,12 +493,16 @@ MV_U8 SYNOKirkwoodIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 		if (2 == disk_id)
 			ret = 1;
 		break;
+	case SYNO_DS212_ID:
+			ret = 1;
+		break;
 	case SYNO_DS211_ID:
 		if (2 == disk_id &&
 			SYNO_KW_DS111 != Syno6282ModelIDGet(&generic_gpio))
 			ret = 1;
 		break;
-	case SYNO_DS411slim_ID:
+	case SYNO_DS411slim_ID: 
+	case SYNO_DS411_ID:
 		if ( 2 <= disk_id && SYNO_KW_DS411 == Syno6282ModelIDGet(&generic_gpio))
 			ret = 1;
 		break;
@@ -612,6 +622,12 @@ KW_6282_211_GPIO_init(SYNO_KW_GENERIC_GPIO *global_gpio)
 		gpio_211.fan.fan_2 = GPIO_UNDEF;
 		gpio_211.fan.fan_3 = GPIO_UNDEF;
 		printk("Apply DS 211+ GPIO\n");
+	} else if (SYNO_KW_DS212 == Syno6282ModelIDGet(&gpio_211)) {
+		gpio_211.fan.fan_1 = GPIO_UNDEF;
+		gpio_211.fan.fan_2 = GPIO_UNDEF;
+		gpio_211.fan.fan_3 = GPIO_UNDEF;
+		gpio_211.hdd_pm.hdd1_pm =30 ,
+		printk("Apply DS 212 GPIO\n");
 	}
 
 	*global_gpio = gpio_211;
@@ -1179,15 +1195,15 @@ void synology_gpio_init(void)
 		break;
 	case SYNO_DS411slim_ID:
 		KW_6282_DS_4BAY_GPIO_init(&generic_gpio);
-		if (SYNO_KW_DS411 == Syno6282ModelIDGet(&generic_gpio)) {
-			printk("Synology 6282 DS411 GPIO Init\n");
-		} else {
-			printk("Synology 6282 slim GPIO Init\n");
-		}
+		printk("Synology 6282 DS411slim GPIO Init\n");
 		break;
 	case SYNO_RS_6282_ID:
 		KW_6282_RS411_GPIO_init(&generic_gpio);
 		printk("Synology 6282 RS411 GPIO Init\n");
+		break;
+	case SYNO_DS411_ID:
+		KW_6282_DS_4BAY_GPIO_init(&generic_gpio);
+		printk("Synology 6282 DS411 GPIO Init\n");
 		break;
 	case SYNO_DS409slim_ID:
 		printk("Synology 6281 slim GPIO Init\n");
@@ -1200,6 +1216,10 @@ void synology_gpio_init(void)
 	case SYNO_DS011_ID:
 		printk("Synology 6180 GPIO Init\n");
 		KW_6180_011_GPIO_init(&generic_gpio);
+		break;
+	case SYNO_DS212_ID:
+		KW_6282_211_GPIO_init(&generic_gpio);
+		printk("Synology 6282 1, 2 bay GPIO Init\n");
 		break;
 	default:
 		printk("%s BoardID not match\n", __FUNCTION__);

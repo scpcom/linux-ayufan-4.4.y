@@ -23,6 +23,10 @@
 #include <linux/workqueue.h>
 #include <linux/bitops.h>
 #include <asm/types.h>
+#ifdef MY_ABC_HERE
+#include <linux/synobios.h>
+extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
+#endif
 
 
 enum lw_bits {
@@ -180,10 +184,24 @@ static void __linkwatch_run_queue(int urgent_only)
 
 		rfc2863_policy(dev);
 		if (dev->flags & IFF_UP) {
+#ifdef MY_ABC_HERE
+			if (netif_carrier_ok(dev)) {
+				if (funcSYNOSendNetLinkEvent) {
+					funcSYNOSendNetLinkEvent(NET_LINK, dev->ifindex);
+				}
+				dev_activate(dev);
+			} else {
+				if (funcSYNOSendNetLinkEvent) {
+					funcSYNOSendNetLinkEvent(NET_NOLINK, dev->ifindex);
+				}
+				dev_deactivate(dev);
+			}
+#else
 			if (netif_carrier_ok(dev))
 				dev_activate(dev);
 			else
 				dev_deactivate(dev);
+#endif
 
 			netdev_state_change(dev);
 		}

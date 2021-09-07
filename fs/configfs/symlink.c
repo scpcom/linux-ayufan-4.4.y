@@ -202,7 +202,7 @@ int configfs_unlink(struct inode *dir, struct dentry *dentry)
 	parent_item = configfs_get_config_item(dentry->d_parent);
 	type = parent_item->ci_type;
 
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_LIO
 	/*
 	 * See if the underlying struct config_item has dependent
 	 * symlinks, and should return -EPERM here.

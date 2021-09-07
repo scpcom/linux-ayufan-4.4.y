@@ -223,7 +223,11 @@ static void tdi_reset (struct ehci_hcd *ehci)
 	u32 __iomem	*reg_ptr;
 	u32		tmp;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	reg_ptr = (u32 __iomem *)&ehci->regs->usbmode;
+#else
 	reg_ptr = (u32 __iomem *)(((u8 __iomem *)ehci->regs) + USBMODE);
+#endif
 	tmp = ehci_readl(ehci, reg_ptr);
 	tmp |= USBMODE_CM_HC;
 
@@ -238,6 +242,27 @@ static void tdi_reset (struct ehci_hcd *ehci)
 	if (ehci_big_endian_mmio(ehci))
 		tmp |= USBMODE_BE;
 	ehci_writel(ehci, tmp, reg_ptr);
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+#if defined(CONFIG_ARCH_OXNAS) || defined(CONFIG_ARCH_OX820)
+	reg_ptr = (u32 __iomem *)&ehci->regs->txfilltuning;
+	tmp = ehci_readl(ehci, reg_ptr);
+	tmp &= ~0x00ff0000;
+#ifndef CONFIG_ARCH_OX820
+	tmp |= 0x003f0000; /* set burst pre load count to 0x3f (63 * 4 bytes)  */
+	tmp |= 0x16; /* set sheduler overhead to 127 * 1.267us (HS) or 127 * 6.33us (FS/LS)*/
+#else
+	tmp |= 0x003f0000; /* set burst pre load count to 0x40 (63 * 4 bytes)  */
+	tmp |= 0x16; /* set sheduler overhead to 22 * 1.267us (HS) or 22 * 6.33us (FS/LS)*/
+#endif
+	ehci_writel(ehci, tmp, reg_ptr);
+
+	reg_ptr = (u32 __iomem *)&ehci->regs->txttfilltuning;
+	tmp = readl (reg_ptr);
+	tmp |= 0x2; /* set sheduler overhead to 2 * 6.333us */
+	writel (tmp, reg_ptr);
+#endif // CONFIG_ARCH_OXNAS || CONFIG_ARCH_OX820
+#endif
 }
 
 /* reset a non-running (STS_HALT == 1) controller */
@@ -268,8 +293,22 @@ static int ehci_reset (struct ehci_hcd *ehci)
 	if (retval)
 		return retval;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (ehci->is_tdi_rh_tt)
+		tdi_reset(ehci); /* set TDI EHCI internal registers */
+#if defined(CONFIG_ARCH_OXNAS)
+	command=readl(&ehci->regs->port_status[1]);
+	command |=0xc0000000; /* force use of serial PHY on 1st full speed port */
+	writel(command,&ehci->regs->port_status[1]); 
+
+	command=readl(&ehci->regs->port_status[2]);
+	command |=0xc0000000; /* force use of serial PHY on 2nd full speed port */
+	writel(command,&ehci->regs->port_status[2]); 
+#endif // CONFIG_ARCH_OXNAS 
+#else
 	if (ehci_is_TDI(ehci))
 		tdi_reset (ehci);
+#endif
 
 	if (ehci->debug)
 		dbgp_external_startup();
@@ -1101,9 +1140,21 @@ MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_AUTHOR (DRIVER_AUTHOR);
 MODULE_LICENSE ("GPL");
 
+#ifndef CONFIG_SYNO_PLX_PORTING
 #ifdef CONFIG_PCI
 #include "ehci-pci.c"
 #define	PCI_DRIVER		ehci_pci_driver
+#endif
+#else
+#if defined(CONFIG_ARCH_OXNAS) || defined(CONFIG_ARCH_OX820)
+#include "ehci-oxnas.c"
+#define	PLATFORM_DRIVER		ehci_hcd_oxnas_driver
+#else // CONFIG_ARCH_OXNAS || CONFIG_ARCH_OX820
+#ifdef CONFIG_PCI
+#include "ehci-pci.c"
+#define	PCI_DRIVER		ehci_pci_driver
+#endif // CONFIG_PCI
+#endif // CONFIG_ARCH_OXNAS || CONFIG_ARCH_OX820
 #endif
 
 #ifdef CONFIG_USB_EHCI_FSL

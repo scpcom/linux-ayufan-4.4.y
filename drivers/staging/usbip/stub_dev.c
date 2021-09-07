@@ -303,7 +303,7 @@ static void stub_shutdown_connection(struct usbip_device *ud)
 
 #ifdef MY_ABC_HERE
 	stub_syno_device_cleanup_urb(ud);
-	if (del_match_busid(dev_name(sdev->interface->dev.parent)) < 0) {
+	if (del_match_busid((char *)dev_name(sdev->interface->dev.parent)) < 0) {
 		usbip_udbg("del busid(%s) failed", dev_name(sdev->interface->dev.parent));
 	}
 #else
@@ -575,6 +575,10 @@ static int stub_probe(struct usb_interface *interface,
 	if (err) {
 		dev_err(&interface->dev, "create sysfs files for %s\n",
 			udev_busid);
+#ifdef MY_ABC_HERE
+		usb_set_intfdata(interface, NULL);        
+		stub_device_free(sdev);
+#endif
 		return err;
 	}
 

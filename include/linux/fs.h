@@ -365,6 +365,11 @@ struct inodes_stat_t {
 #define FIGETBSZ   _IO(0x00,2)	/* get the block size used for bmap */
 #define FIFREEZE	_IOWR('X', 119, int)	/* Freeze */
 #define FITHAW		_IOWR('X', 120, int)	/* Thaw */
+#ifdef MY_ABC_HERE
+#define FIGETVERSION	_IOWR('x', 121, unsigned int)	/* get syno archive version */
+#define FISETVERSION	_IOWR('x', 122, unsigned int)	/* set syno archive version */
+#define FIINCVERSION	_IO('x', 123)	/* increase syno archive version by 1 */
+#endif
 
 #define	FS_IOC_GETFLAGS			_IOR('f', 1, long)
 #define	FS_IOC_SETFLAGS			_IOW('f', 2, long)
@@ -622,7 +627,11 @@ typedef struct {
 	int error;
 } read_descriptor_t;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+typedef int (*read_actor_t)(read_descriptor_t *, struct page **,
+#else
 typedef int (*read_actor_t)(read_descriptor_t *, struct page *,
+#endif
 		unsigned long, unsigned long);
 
 struct address_space_operations {
@@ -784,6 +793,9 @@ static inline int mapping_writably_mapped(struct address_space *mapping)
 struct posix_acl;
 #define ACL_NOT_CACHED ((void *)(-1))
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+#include <mach/filemap_info.h>
+#endif
 struct inode {
 	struct hlist_node	i_hash;
 	struct list_head	i_list;		/* backing dev IO list */
@@ -808,6 +820,9 @@ struct inode {
 #endif
 #ifdef MY_ABC_HERE
 	__u32			i_mode2;
+#endif
+#ifdef MY_ABC_HERE
+	__u32			i_archive_version;
 #endif
 	blkcnt_t		i_blocks;
 	unsigned int		i_blkbits;
@@ -863,6 +878,43 @@ struct inode {
 	struct posix_acl	*i_default_acl;
 #endif
 	void			*i_private; /* fs or device private pointer */
+#ifdef CONFIG_SYNO_PLX_PORTING
+	int 			space_reserve:1;
+
+#ifdef CONFIG_OXNAS_FAST_OPEN_FILTER
+	spinlock_t fast_lock;
+	int        normal_open_count;
+#endif // CONFIG_OXNAS_FAST_OPEN_FILTER
+
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+	int			          fast_open_count;
+	struct list_head      fast_files;
+	rwlock_t              fast_files_lock;
+	oxnas_filemap_info_t  filemap_info;
+	wait_queue_head_t     fallback_wait_queue;
+	int                   fast_reads_in_progress_count;
+	wait_queue_head_t     filemap_wait_queue;
+	int                   fallback_in_progress:1,
+#ifdef CONFIG_OXNAS_FAST_WRITES
+                          writer_filemap_locked:1,
+                          writer_filemap_dirty:1,
+#endif //CONFIG_OXNAS_FAST_WRITES
+						  filemap_locked:1,
+						  filemap_update_pending:1;
+#ifdef CONFIG_OXNAS_FAST_WRITES
+	int                   fast_writes_in_progress_count;
+	int 				  write_error;
+	oxnas_filemap_info_t  writer_filemap_info;
+	void 				 *writer_file_context;
+	void                 *filemap_locker_uid;
+	loff_t 				  i_tent_size;
+#endif //CONFIG_OXNAS_FAST_WRITES
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+
+#ifdef CONFIG_OXNAS_BACKUP
+	int	backup_open_count;
+#endif // CONFIG_OXNAS_BACKUP
+#endif 
 };
 
 /*
@@ -1025,6 +1077,24 @@ struct file {
 #ifdef CONFIG_DEBUG_WRITECOUNT
 	unsigned long f_mnt_write_state;
 #endif
+
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+	struct inode     *inode;
+	struct list_head  fast_head;
+	void             *fast_context;
+#ifdef CONFIG_OXNAS_FAST_WRITES
+	void             *fast_write_context;
+#endif //CONFIG_OXNAS_FAST_WRITES
+#else // CONFIG_OXNAS_FAST_READS_AND_WRITES
+#ifdef CONFIG_OXNAS_BACKUP
+	struct inode     *inode;
+#endif // CONFIG_OXNAS_BACKUP
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+
+#ifdef CONFIG_OXNAS_BACKUP
+	void             *backup_context;
+#endif //CONFIG_OXNAS_BACKUP
+
 };
 #ifdef MY_ABC_HERE
 static inline int blSynostate(int flag, struct file *f)
@@ -1475,6 +1545,12 @@ struct super_block {
 	 * generic_show_options()
 	 */
 	char *s_options;
+#ifdef MY_ABC_HERE
+	/* We've not sure s_frozen is capable of out intention, thus we
+	 * create another to flag frozen stat. Awful... */
+	struct mutex s_archive_mutex;  /* protect frozen state, also version */
+	u32		s_archive_version;
+#endif
 };
 
 extern struct timespec current_fs_time(struct super_block *sb);
@@ -1554,6 +1630,13 @@ int fiemap_check_flags(struct fiemap_extent_info *fieinfo, u32 fs_flags);
 #define DT_SOCK		12
 #define DT_WHT		14
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+#define OSYNC_METADATA (1<<0)
+#define OSYNC_DATA (1<<1)
+#define OSYNC_INODE (1<<2)
+int generic_osync_inode(struct inode *, struct address_space *, int);
+#endif
+
 /*
  * This is the "filldir" function type, used by readdir() to let
  * the kernel specify what kind of dirent layout it wants to have.
@@ -1581,6 +1664,9 @@ struct file_operations {
 	ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);
 	ssize_t (*aio_read) (struct kiocb *, const struct iovec *, unsigned long, loff_t);
 	ssize_t (*aio_write) (struct kiocb *, const struct iovec *, unsigned long, loff_t);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	ssize_t (*aio_direct_netrx_write) (struct kiocb *, void* callback, void *sock);
+#endif
 	int (*readdir) (struct file *, void *, filldir_t);
 	unsigned int (*poll) (struct file *, struct poll_table_struct *);
 	int (*ioctl) (struct inode *, struct file *, unsigned int, unsigned long);
@@ -1594,14 +1680,30 @@ struct file_operations {
 	int (*aio_fsync) (struct kiocb *, int datasync);
 	int (*fasync) (int, struct file *, int);
 	int (*lock) (struct file *, int, struct file_lock *);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	ssize_t (*sendfile) (struct file *, loff_t *, size_t, read_actor_t, void *);
+	ssize_t (*incoherent_sendfile) (struct file *, loff_t *, size_t, read_actor_t, void *);
+#endif
 	ssize_t (*sendpage) (struct file *, struct page *, int, size_t, loff_t *, int);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	ssize_t (*sendpages) (struct file *, struct page **, int, size_t, loff_t *, int);
+#endif
 	unsigned long (*get_unmapped_area)(struct file *, unsigned long, unsigned long, unsigned long, unsigned long);
 	int (*check_flags)(int);
 	int (*flock) (struct file *, int, struct file_lock *);
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int);
 	ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int);
 	int (*setlease)(struct file *, long, struct file_lock **);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	int (*preallocate)(struct file *, loff_t, loff_t);
+	int (*unpreallocate)(struct file *, loff_t, loff_t);
+	int (*resetpreallocate)(struct file *, loff_t, loff_t);
+#endif
 };
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+struct getbmapx;
+#endif
 
 struct inode_operations {
 	int (*create) (struct inode *,struct dentry *,int, struct nameidata *);
@@ -1640,11 +1742,19 @@ struct inode_operations {
 	ssize_t (*getxattr) (struct dentry *, const char *, void *, size_t);
 	ssize_t (*listxattr) (struct dentry *, char *, size_t);
 	int (*removexattr) (struct dentry *, const char *);
+#ifdef MY_ABC_HERE
+	int (*synosetxattr) (struct inode *, const char *,const void *,size_t,int);
+#endif
 	void (*truncate_range)(struct inode *, loff_t, loff_t);
 	long (*fallocate)(struct inode *inode, int mode, loff_t offset,
 			  loff_t len);
 	int (*fiemap)(struct inode *, struct fiemap_extent_info *, u64 start,
 		      u64 len);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	int (*get_extents)(struct inode *inode, loff_t size);
+	int (*getbmapx)(struct inode *inode, struct getbmapx *bmx);
+	int (*setsize)(struct inode *, loff_t);
+#endif
 };
 
 struct seq_file;
@@ -1886,6 +1996,9 @@ void kill_block_super(struct super_block *sb);
 void kill_anon_super(struct super_block *sb);
 void kill_litter_super(struct super_block *sb);
 void deactivate_super(struct super_block *sb);
+#ifdef MY_ABC_HERE
+void deactivate_read_locked_super(struct super_block *s);
+#endif
 void deactivate_locked_super(struct super_block *sb);
 int set_anon_super(struct super_block *s, void *data);
 struct super_block *sget(struct file_system_type *type,
@@ -2316,7 +2429,12 @@ extern int sb_min_blocksize(struct super_block *, int);
 
 extern int generic_file_mmap(struct file *, struct vm_area_struct *);
 extern int generic_file_readonly_mmap(struct file *, struct vm_area_struct *);
+#ifdef CONFIG_SYNO_PLX_PORTING
+extern int file_read_actor(read_descriptor_t * desc, struct page **page, unsigned long offset, unsigned long size);
+extern int file_send_actor(read_descriptor_t * desc, struct page **page, unsigned long offset, unsigned long size);
+#else
 extern int file_read_actor(read_descriptor_t * desc, struct page *page, unsigned long offset, unsigned long size);
+#endif
 int generic_write_checks(struct file *file, loff_t *pos, size_t *count, int isblk);
 #ifdef MY_ABC_HERE
 #define MAX_PAGES_PER_RECVFILE 16
@@ -2332,6 +2450,10 @@ extern ssize_t generic_file_buffered_write(struct kiocb *, const struct iovec *,
 		unsigned long, loff_t, loff_t *, size_t, ssize_t);
 extern ssize_t do_sync_read(struct file *filp, char __user *buf, size_t len, loff_t *ppos);
 extern ssize_t do_sync_write(struct file *filp, const char __user *buf, size_t len, loff_t *ppos);
+#ifdef CONFIG_SYNO_PLX_PORTING
+extern ssize_t generic_file_sendfile(struct file *, loff_t *, size_t, read_actor_t, void *);
+extern ssize_t generic_file_incoherent_sendfile(struct file *, loff_t *, size_t, read_actor_t, void *);
+#endif
 extern int generic_segment_checks(const struct iovec *iov,
 		unsigned long *nr_segs, size_t *count, int access_flags);
 
@@ -2603,7 +2725,7 @@ int __init get_filesystem_list(char *buf);
 #define UNICODE_UTF8_BUFSIZE		8192
 
 int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int clenUtf8Str1, int clenUtf8Str2, u_int16_t *upcasetable);
-int SYNOToUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable);
+int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable);
 #endif /*MY_ABC_HERE */
 
 #endif /* __KERNEL__ */

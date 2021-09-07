@@ -117,17 +117,34 @@ ENTRY(v4wt_coherent_user_range)
 	mov	pc, lr
 
 /*
+#ifdef CONFIG_SYNO_PLX_PORTING
+ *	flush_kern_dcache_area(void *addr, size_t size)
+#else
  *	flush_kern_dcache_page(void *page)
+#endif
  *
  *	Ensure no D cache aliasing occurs, either with itself or
  *	the I cache
  *
+#ifdef CONFIG_SYNO_PLX_PORTING
+ *	- addr	- kernel address
+ *	- size	- region size
+#else
  *	- addr	- page aligned address
+#endif
  */
+#ifdef CONFIG_SYNO_PLX_PORTING
+ENTRY(v4wt_flush_kern_dcache_area)
+#else
 ENTRY(v4wt_flush_kern_dcache_page)
+#endif
 	mov	r2, #0
 	mcr	p15, 0, r2, c7, c5, 0		@ invalidate I cache
+#ifdef CONFIG_SYNO_PLX_PORTING
+	add	r1, r0, r1
+#else
 	add	r1, r0, #PAGE_SZ
+#endif
 	/* fallthrough */
 
 /*
@@ -180,7 +197,11 @@ ENTRY(v4wt_cache_fns)
 	.long	v4wt_flush_user_cache_range
 	.long	v4wt_coherent_kern_range
 	.long	v4wt_coherent_user_range
+#ifdef CONFIG_SYNO_PLX_PORTING
+	.long	v4wt_flush_kern_dcache_area
+#else
 	.long	v4wt_flush_kern_dcache_page
+#endif
 	.long	v4wt_dma_inv_range
 	.long	v4wt_dma_clean_range
 	.long	v4wt_dma_flush_range

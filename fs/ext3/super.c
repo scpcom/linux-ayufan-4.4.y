@@ -71,6 +71,11 @@ static int ext3_freeze(struct super_block *sb);
 
 #ifdef MY_ABC_HERE
 extern struct dentry_operations ext3_dentry_operations;
+
+spinlock_t Ext3Namei_buf_lock;  /* lock for UTF8Ext3NameiStrBuf[] in fs/ext3/namei.c */
+spinlock_t Ext3Hash_buf_lock;   /* lock for UTF8Ext3HashStrBuf[] in fs/ext3/namei.c */
+static int Ext3Namei_lock_init = 0;
+static int Ext3Hash_lock_init = 0;
 #endif
 /*
  * Wrappers for journal_start/end.
@@ -87,6 +92,13 @@ handle_t *ext3_journal_start_sb(struct super_block *sb, int nblocks)
 	if (sb->s_flags & MS_RDONLY)
 		return ERR_PTR(-EROFS);
 
+#ifdef MY_ABC_HERE
+	/* strengthen freezing fs as ext4 */
+	if (!journal_current_handle()) {
+		vfs_check_frozen(sb, SB_FREEZE_WRITE);
+	}
+#endif
+
 	/* Special case here: if the journal has aborted behind our
 	 * backs (eg. EIO in the commit thread), then we still need to
 	 * take the FS itself readonly cleanly. */
@@ -99,6 +111,37 @@ handle_t *ext3_journal_start_sb(struct super_block *sb, int nblocks)
 
 	return journal_start(journal, nblocks);
 }
+
+#ifdef MY_ABC_HERE
+/* copy from ext3_journal_start_sb() */
+handle_t *ext3_journal_start_sb_sync(struct super_block *sb, int nblocks)
+{
+	journal_t *journal;
+
+	if (sb->s_flags & MS_RDONLY)
+		return ERR_PTR(-EROFS);
+
+#if 1 // different part comparing to ext3_journal_start_sb()
+	/* used in sync_filesystem, in which should only be blocked
+	   by SB_FREEZE_TRANS, not SB_FREEZE_WRITE */
+	if (!journal_current_handle()) {
+		vfs_check_frozen(sb, SB_FREEZE_TRANS);
+	}
+#endif
+
+	/* Special case here: if the journal has aborted behind our
+	 * backs (eg. EIO in the commit thread), then we still need to
+	 * take the FS itself readonly cleanly. */
+	journal = EXT3_SB(sb)->s_journal;
+	if (is_journal_aborted(journal)) {
+		ext3_abort(sb, __func__,
+			   "Detected aborted journal");
+		return ERR_PTR(-EROFS);
+	}
+
+	return journal_start(journal, nblocks);
+}
+#endif
 
 /*
  * The only special thing we need to do here is to make sure that all
@@ -1999,6 +2042,9 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 	// root is mounted, attach our dentry operations
 	sb->s_root->d_op = &ext3_dentry_operations;
 #endif
+#ifdef MY_ABC_HERE
+	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
+#endif
 	ext3_setup_super (sb, es, sb->s_flags & MS_RDONLY);
 	/*
 	 * akpm: core read_super() calls in here with the superblock locked.
@@ -2018,6 +2064,16 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_JOURNAL_DATA ? "journal":
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_ORDERED_DATA ? "ordered":
 		"writeback");
+#ifdef MY_ABC_HERE
+	if (!Ext3Namei_lock_init) {
+		spin_lock_init(&Ext3Namei_buf_lock);
+		Ext3Namei_lock_init=1;
+	}
+	if (!Ext3Hash_lock_init) {
+		spin_lock_init(&Ext3Hash_buf_lock);
+		Ext3Hash_lock_init=1;
+	}
+#endif
 	lock_kernel();
 	return 0;
 
@@ -2362,6 +2418,9 @@ static int ext3_commit_super(struct super_block *sb,
 		es->s_wtime = cpu_to_le32(get_seconds());
 	es->s_free_blocks_count = cpu_to_le32(ext3_count_free_blocks(sb));
 	es->s_free_inodes_count = cpu_to_le32(ext3_count_free_inodes(sb));
+#ifdef MY_ABC_HERE
+	es->s_archive_version = cpu_to_le32(sb->s_archive_version);
+#endif
 	BUFFER_TRACE(sbh, "marking dirty");
 	mark_buffer_dirty(sbh);
 	if (sync)
@@ -2748,8 +2807,13 @@ static int ext3_write_dquot(struct dquot *dquot)
 	struct inode *inode;
 
 	inode = dquot_to_inode(dquot);
+#ifdef MY_ABC_HERE
+	handle = ext3_journal_start_sb_sync(inode->i_sb,
+					EXT3_QUOTA_TRANS_BLOCKS(dquot->dq_sb));
+#else
 	handle = ext3_journal_start(inode,
 					EXT3_QUOTA_TRANS_BLOCKS(dquot->dq_sb));
+#endif
 	if (IS_ERR(handle))
 		return PTR_ERR(handle);
 	ret = dquot_commit(dquot);
@@ -2812,7 +2876,11 @@ static int ext3_write_info(struct super_block *sb, int type)
 	handle_t *handle;
 
 	/* Data block + inode block */
+#ifdef MY_ABC_HERE
+	handle = ext3_journal_start_sb_sync(sb->s_root->d_inode->i_sb, 2);
+#else
 	handle = ext3_journal_start(sb->s_root->d_inode, 2);
+#endif
 	if (IS_ERR(handle))
 		return PTR_ERR(handle);
 	ret = dquot_commit_info(sb, type);

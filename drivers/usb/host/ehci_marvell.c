@@ -99,6 +99,7 @@ static const struct hc_driver ehci_marvell_hc_driver = {
         .urb_enqueue = ehci_urb_enqueue,
         .urb_dequeue = ehci_urb_dequeue,
         .endpoint_disable = ehci_endpoint_disable,
+		.endpoint_reset = ehci_endpoint_reset,
 
         /*
          * scheduling support
@@ -112,6 +113,7 @@ static const struct hc_driver ehci_marvell_hc_driver = {
         .hub_control = ehci_hub_control,
         .bus_suspend = ehci_bus_suspend,
         .bus_resume = ehci_bus_resume,
+		.clear_tt_buffer_complete = ehci_clear_tt_buffer_complete,
 };
 
 static int ehci_marvell_setup(struct usb_hcd *hcd)

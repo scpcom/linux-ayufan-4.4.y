@@ -285,8 +285,18 @@ static ssize_t bonding_store_slaves(struct device *d,
 			if (syno_get_dev_vendor_mac(dev->name, szMac)){
 				printk("%s:%s(%d) dev:[%s] get vendor mac fail\n", 
 						__FILE__, __FUNCTION__, __LINE__, dev->name);
+				/* 
+				 * Cannot get SYNO's vendor mac, possibly because
+				 *	- mac not written to onboard flash, or
+				 *	- this eth is on addon card rather than on mainboard.
+				 *	Fallback to perm_hwaddr.
+				 */
+				memcpy(bond->dev->dev_addr, dev->dev_addr,
+						dev->addr_len);
+			} else {
+				/* Normal case: set to syno vendor mac */
+				memcpy(bond->dev->dev_addr, szMac, dev->addr_len);
 			}
-			memcpy(bond->dev->dev_addr, szMac, dev->addr_len);
 		}
 #else
 			memcpy(bond->dev->dev_addr, dev->dev_addr,

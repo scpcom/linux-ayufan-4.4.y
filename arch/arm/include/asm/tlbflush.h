@@ -350,7 +350,13 @@ static inline void local_flush_tlb_mm(struct mm_struct *mm)
 	if (tlb_flag(TLB_WB))
 		dsb();
 
+#if defined(CONFIG_SYNO_PLX_PORTING) && defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
+#define syno_ox_get_cpu()       ({ preempt_disable(); hard_smp_processor_id(); })
+#define syno_ox_put_cpu()       preempt_enable()
+	if (cpumask_test_cpu(syno_ox_get_cpu(), mm_cpumask(mm))) {
+#else // defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
 	if (cpumask_test_cpu(get_cpu(), mm_cpumask(mm))) {
+#endif // defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
 		if (tlb_flag(TLB_V3_FULL))
 			asm("mcr p15, 0, %0, c6, c0, 0" : : "r" (zero) : "cc");
 		if (tlb_flag(TLB_V4_U_FULL))
@@ -360,7 +366,11 @@ static inline void local_flush_tlb_mm(struct mm_struct *mm)
 		if (tlb_flag(TLB_V4_I_FULL))
 			asm("mcr p15, 0, %0, c8, c5, 0" : : "r" (zero) : "cc");
 	}
+#if defined(CONFIG_SYNO_PLX_PORTING) && defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
+	syno_ox_put_cpu();
+#else
 	put_cpu();
+#endif
 
 	if (tlb_flag(TLB_V6_U_ASID))
 		asm("mcr p15, 0, %0, c8, c7, 2" : : "r" (asid) : "cc");
@@ -389,7 +399,11 @@ local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 	if (tlb_flag(TLB_WB))
 		dsb();
 
+#if defined(CONFIG_SYNO_PLX_PORTING) && defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
+	if (cpumask_test_cpu(hard_smp_processor_id(), mm_cpumask(vma->vm_mm))) {
+#else // defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
 	if (cpumask_test_cpu(smp_processor_id(), mm_cpumask(vma->vm_mm))) {
+#endif
 		if (tlb_flag(TLB_V3_PAGE))
 			asm("mcr p15, 0, %0, c6, c0, 0" : : "r" (uaddr) : "cc");
 		if (tlb_flag(TLB_V4_U_PAGE))
@@ -525,11 +539,32 @@ extern void flush_tlb_kernel_range(unsigned long start, unsigned long end);
 #endif
 
 /*
+#ifdef CONFIG_SYNO_PLX_PORTING
+ * If PG_dcache_clean is not set for the page, we need to ensure that any
+#else
  * if PG_dcache_dirty is set for the page, we need to ensure that any
+#endif
+#ifdef CONFIG_SYNO_PLX_PORTING
  * cache entries for the kernels virtual memory range are written
+ * back to the page. On SMP systems, the cache coherency is handled in the
+ * set_pte_at() function.
+#else
  * back to the page.
+#endif
  */
+#ifdef CONFIG_SYNO_PLX_PORTING
+#ifndef CONFIG_SMP
+extern void update_mmu_cache(struct vm_area_struct *vma, unsigned long addr,
+ 	pte_t pte);
+#else
+static inline void update_mmu_cache(struct vm_area_struct *vma,
+				    unsigned long addr, pte_t pte)
+{
+}
+#endif
+#else
 extern void update_mmu_cache(struct vm_area_struct *vma, unsigned long addr, pte_t pte);
+#endif
 
 #endif
 

@@ -22,6 +22,9 @@
 #include <linux/seq_file.h>
 #include "md.h"
 #include "raid0.h"
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#include "hwraid.h"
+#endif
 
 static void raid0_unplug(struct request_queue *q)
 {
@@ -303,9 +306,24 @@ static int create_strip_zones(mddev_t *mddev)
 		goto abort;
 	}
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+    if (hwraid0_compatible(mddev, conf)) {
+	    /* switch to hardware raid */
+	    err = hwraid0_assemble(mddev, conf);
+	    if (err) {
+	        goto abort;
+	    }
+	} else
+#endif /* CONFIG_SATA_OX820_DIRECT_HWRAID */	    
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	{
+#endif
 	blk_queue_io_min(mddev->queue, mddev->chunk_sectors << 9);
 	blk_queue_io_opt(mddev->queue,
 			 (mddev->chunk_sectors << 9) * mddev->raid_disks);
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+    }
+#endif
 
 	printk(KERN_INFO "raid0: done.\n");
 	mddev->private = conf;
@@ -431,7 +449,18 @@ static int raid0_stop(mddev_t *mddev)
 {
 	raid0_conf_t *conf = mddev->private;
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	if (mddev->hw_raid) {
+	    hwraid0_stop(mddev, conf);
+	} else
+#endif	    
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	{
+#endif
 	blk_sync_queue(mddev->queue); /* the unplug fn references 'conf'*/
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	}
+#endif
 	kfree(conf->strip_zone);
 	kfree(conf->devlist);
 	kfree(conf);
@@ -445,7 +474,7 @@ static int raid0_stop(mddev_t *mddev)
  * We can use this for bad sector report and device error
  * handing. Prevent umount panic from file system
  *
- * @author \$Author: ckya $
+ * @author \$Author: khchen $
  * @version \$Revision: 1.1
  *
  * @param bio    Should not be NULL. Passing from block layer
@@ -755,7 +784,7 @@ END:
  * We let it look like other raid type.
  * Set it faulty could let SDK know it's status
  *
- * @author \$Author: ckya $
+ * @author \$Author: khchen $
  * @version \$Revision: 1.1  *
  *
  * @param mddev  Should not be NULL. passing from md.c
@@ -798,7 +827,7 @@ END:
  * other raid type. Let it become read only (scemd would remount
  * if it find DiskError)
  *
- * @author \$Author: ckya $
+ * @author \$Author: khchen $
  * @version \$Revision: 1.1  *
  *
  * @param mddev  Should not be NULL. passing from md.c

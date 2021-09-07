@@ -123,6 +123,11 @@ static void str2hashbuf_unsigned(const char *msg, int len, __u32 *buf, int num)
 		*buf++ = pad;
 }
 
+#ifdef MY_ABC_HERE
+static unsigned char UTF8Ext4HashStrBuf[UNICODE_UTF8_BUFSIZE];
+extern spinlock_t Ext4Hash_buf_lock;  /* init at ext4_fill_super() */
+#endif
+
 /*
  * Returns the hash of a filename.  If len is 0 and name is NULL, then
  * this function can be used to test whether or not a hash version is
@@ -148,18 +153,16 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 #ifdef MY_ABC_HERE
 	const char	*szUpperName;
 	int upperlen;
-	int upperNameFree = 0;
+
+	spin_lock(&Ext4Hash_buf_lock);
 
 	szUpperName = name;
 	upperlen = len;
 
 	if (name && (len > 0)) {
-		szUpperName = kmalloc(PATH_MAX, GFP_KERNEL);
-		if (!szUpperName) {
-			return -ENOMEM;
-		}
-		upperNameFree = 1;
-		upperlen = SYNOToUpper(szUpperName, name, PATH_MAX - 1 , len, NULL);
+		upperlen = SYNOUnicodeUTF8toUpper(UTF8Ext4HashStrBuf, name,
+										  UNICODE_UTF8_BUFSIZE - 1 , len, NULL);
+		szUpperName = UTF8Ext4HashStrBuf;
 	}
 #endif
 
@@ -243,9 +246,7 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	default:
 		hinfo->hash = 0;
 #ifdef MY_ABC_HERE
-		if (upperNameFree) {
-			kfree(szUpperName);
-		}
+		spin_unlock(&Ext4Hash_buf_lock);
 #endif
 		return -1;
 	}
@@ -255,10 +256,7 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	hinfo->hash = hash;
 	hinfo->minor_hash = minor_hash;
 #ifdef MY_ABC_HERE
-	if (upperNameFree) {
-		kfree(szUpperName);
-	}
+	spin_unlock(&Ext4Hash_buf_lock);
 #endif
-
 	return 0;
 }

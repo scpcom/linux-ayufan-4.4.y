@@ -55,6 +55,10 @@ extern long g_internal_hd_num;
 extern long g_internal_netif_num;
 #endif
 
+#ifdef MY_ABC_HERE
+extern char gszDiskIdxMap[16];
+#endif
+
 #define DBG(fmt...)
 
 extern void bootx_init(unsigned long r4, unsigned long phys);
@@ -238,6 +242,21 @@ static int __init early_internal_netif_num(char *p)
 }
 __setup("netif_num=", early_internal_netif_num);
 #endif
+
+#ifdef MY_ABC_HERE
+static int __init early_disk_idx_map(char *p)
+{
+	snprintf(gszDiskIdxMap, sizeof(gszDiskIdxMap), "%s", p);
+
+	if('\0' != gszDiskIdxMap[0]) {
+		printk("Disk Index Map: %s\n", gszDiskIdxMap);
+	}
+
+	return 1;
+}
+__setup("DiskIdxMap=", early_disk_idx_map);
+#endif
+
 
 /* Checks "l3cr=xxxx" command-line option */
 int __init ppc_setup_l3cr(char *str)

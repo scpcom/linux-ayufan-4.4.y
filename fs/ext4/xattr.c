@@ -109,6 +109,9 @@ static struct xattr_handler *ext4_xattr_handler_map[] = {
 #ifdef CONFIG_EXT4_FS_SECURITY
 	[EXT4_XATTR_INDEX_SECURITY]	     = &ext4_xattr_security_handler,
 #endif
+#ifdef MY_ABC_HERE
+	[EXT4_XATTR_INDEX_SYNO]  = &ext4_xattr_syno_handler
+#endif
 };
 
 struct xattr_handler *ext4_xattr_handlers[] = {
@@ -122,6 +125,9 @@ struct xattr_handler *ext4_xattr_handlers[] = {
 #endif
 #ifdef CONFIG_EXT4_FS_SECURITY
 	&ext4_xattr_security_handler,
+#endif
+#ifdef MY_ABC_HERE
+	&ext4_xattr_syno_handler,
 #endif
 	NULL
 };
@@ -1629,3 +1635,49 @@ exit_ext4_xattr(void)
 		mb_cache_destroy(ext4_xattr_cache);
 	ext4_xattr_cache = NULL;
 }
+
+#ifdef MY_ABC_HERE
+
+static size_t
+ext4_xattr_syno_list(struct inode *inode, char *list, size_t list_size,
+		     const char *name, size_t name_len)
+{
+	const size_t prefix_len = XATTR_SYNO_PREFIX_LEN;
+	const size_t total_len = prefix_len + name_len + 1;
+
+	if (list && total_len <= list_size) {
+		memcpy(list, XATTR_SYNO_PREFIX, prefix_len);
+		memcpy(list+prefix_len, name, name_len);
+		list[prefix_len + name_len] = '\0';
+	}
+	return total_len;
+}
+
+static int ext4_xattr_syno_get(struct inode *inode, const char *name,
+			  void *buffer, size_t size)
+{
+	if (strcmp(name, "") == 0)
+		return -EINVAL;
+
+	return ext4_xattr_get(inode, EXT4_XATTR_INDEX_SYNO, name, buffer, size);
+}
+
+static int ext4_xattr_syno_set(struct inode *inode, const char *name,
+			  const void *value, size_t size, int flags)
+{
+	if (strcmp(name, "") == 0){
+		return -EINVAL;
+	}
+
+	return ext4_xattr_set(inode, EXT4_XATTR_INDEX_SYNO, name,
+			      value, size, flags);
+}
+
+struct xattr_handler ext4_xattr_syno_handler = {
+	.prefix	= XATTR_SYNO_PREFIX,
+	.list	= ext4_xattr_syno_list,
+	.get	= ext4_xattr_syno_get,
+	.set	= ext4_xattr_syno_set,
+};
+
+#endif

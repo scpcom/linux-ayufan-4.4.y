@@ -51,6 +51,14 @@
 #ifndef O_CLOEXEC
 #define O_CLOEXEC	02000000	/* set close_on_exec */
 #endif
+#ifdef CONFIG_SYNO_PLX_PORTING
+#ifndef O_FAST
+#define O_FAST		04000000	
+#endif
+#ifndef O_BKP
+#define O_BKP 		010000000
+#endif
+#endif
 #ifndef O_NDELAY
 #define O_NDELAY	O_NONBLOCK
 #endif

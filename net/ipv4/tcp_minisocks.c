@@ -705,7 +705,11 @@ int tcp_child_process(struct sock *parent, struct sock *child,
 		sk_add_backlog(child, skb);
 	}
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(child);
+#else
 	bh_unlock_sock(child);
+#endif
 	sock_put(child);
 	return ret;
 }

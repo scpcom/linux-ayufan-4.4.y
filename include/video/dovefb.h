@@ -309,7 +309,7 @@ struct shm_private_info {
 #include <linux/interrupt.h>
 
 enum dovefb_type {
-	DOVEFB_GFX_PLANE,
+	DOVEFB_GFX_PLANE = 0,
 	DOVEFB_OVLY_PLANE
 };
 
@@ -394,6 +394,12 @@ struct dovefb_mach_info {
 
 	/* LCD reference clock value.	*/
 	unsigned int	lcd_ref_clk;
+
+	/* KW
+	** FrameBuffer memory.
+	*/
+	void		*fb_mem[2];
+	unsigned int	fb_mem_size[2];
 
 	/*
 	 * Pix_fmt

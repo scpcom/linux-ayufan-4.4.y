@@ -1950,8 +1950,10 @@ int core_setup_alua(se_device_t *dev, int force_pt)
 	    !(DEV_ATTRIB(dev)->emulate_alua)) || force_pt) {
 		alua->alua_type = SPC_ALUA_PASSTHROUGH;
 		alua->alua_state_check = &core_alua_state_check_nop;
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "%s: Using SPC_ALUA_PASSTHROUGH, no ALUA"
 			" emulation\n", TRANSPORT(dev)->name);
+#endif
 		return 0;
 	}
 	/*

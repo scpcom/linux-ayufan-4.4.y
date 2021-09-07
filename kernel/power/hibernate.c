@@ -432,7 +432,7 @@ int hibernation_restore(int platform_mode)
 void syno_schedule_power_on_prepare(void)
 {
     if (!hibernation_ops)
-        return -ENOSYS;
+        return;
 
     hibernation_ops->begin();
     hibernation_ops->end();

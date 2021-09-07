@@ -6,6 +6,13 @@
 struct se_cmd_s;
 struct se_unmap_sg_s;
 
+#ifdef MY_ABC_HERE
+struct se_node_acl_s;
+struct iscsi_session_s;
+extern void iscsi_sess_force_logout(struct iscsi_session_s*);
+extern void iscsi_acl_force_logout(struct se_node_acl_s*);
+#endif
+
 extern void iscsi_attach_cmd_to_queue(iscsi_conn_t *, iscsi_cmd_t *);
 extern void iscsi_remove_cmd_from_conn_list(iscsi_cmd_t *, iscsi_conn_t *);
 extern void iscsi_ack_from_expstatsn(iscsi_conn_t *, __u32);

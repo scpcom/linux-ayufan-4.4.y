@@ -136,7 +136,7 @@ static inline void l2_inv_all(void)
 
 static int l2_wt_override;
 
-static unsigned long calc_range_end(unsigned long start, unsigned long end)
+static inline unsigned long calc_range_end(unsigned long start, unsigned long end)
 {
 	unsigned long range_end;
 

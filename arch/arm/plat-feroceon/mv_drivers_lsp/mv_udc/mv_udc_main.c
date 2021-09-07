@@ -921,13 +921,12 @@ static void mv_usb_work_struct_routine(struct work_struct *ignored)
 		retval = kobject_uevent(&mv_usb_device.kobj, KOBJ_REMOVE);
 		mvOsPrintf("Usb device disconnected\n");
 	}
-	
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 	/* on error */
 	if(retval != 0)
 	{
 		mvOsPrintf("ERROR: %d, kobject_uevent() failed\n",retval);
 	}
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 	return retval;
 #endif
 }

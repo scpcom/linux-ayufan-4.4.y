@@ -59,16 +59,19 @@ static int wait_for_vsync(struct dovefb_layer_info *dfli);
 static void dovefb_set_defaults(struct dovefb_layer_info *dfli);
 
 static void set_lcd_clock_dividers(struct dovefb_layer_info *dfli, u32 f_in, 
-		u32 m_div, u32 n_div, u32 lcd_div, u32 is_half_div)
+		u32 m_div, u32 n_div, u32 full_div, u32 is_half_div)
 {
 	u32 k;
 	u64 f_vco;
 	u32 reg;
+	u32 pll_vco;
 
 	/* Calculate K according to Fvco. */
 	f_vco = f_in * n_div;
 	do_div(f_vco, m_div);
+	do_div(f_vco, 1000000);
 
+	/* K is calculated according to (f_in * N / M). */
 	if((f_vco >= 600) && (f_vco <= 2400))
 		k = 1;
 	else if((f_vco >= 300) && (f_vco < 600))
@@ -77,8 +80,28 @@ static void set_lcd_clock_dividers(struct dovefb_layer_info *dfli, u32 f_in,
 		k = 4;
 	else if((f_vco >= 75) && (f_vco < 150))
 		k = 8;
-	else if((f_vco >= 37) && (f_vco < 75))
+	else if(/*(f_vco >= 37) &&*/ (f_vco < 75))
 		k = 16;
+
+	pll_vco = f_vco; //f_in * n_div;
+	if(/*(pll_vco >= 600) &&*/ (pll_vco <= 720))
+		pll_vco = 1;
+	else if((pll_vco > 720) && (pll_vco <= 840))
+		pll_vco = 2;
+	else if((pll_vco > 840) && (pll_vco <= 960))
+		pll_vco = 3;
+	else if((pll_vco > 960) && (pll_vco <= 1080))
+		pll_vco = 4;
+	else if((pll_vco > 1080) && (pll_vco <= 1200))
+		pll_vco = 5;
+	else if((pll_vco > 1200) && (pll_vco <= 1320))
+		pll_vco = 6;
+	else
+		pll_vco = 7;
+
+
+	printk(KERN_INFO "N = %d, M = %d, K = %d, full_div = %d, half = %d, pll_vco = %d.\n",
+			n_div, m_div, k, full_div, is_half_div, pll_vco);
 
 	/* Clear SMPN */
 	reg = readl(dfli->reg_base + LCD_CLK_CFG1_REG);
@@ -95,10 +118,18 @@ static void set_lcd_clock_dividers(struct dovefb_layer_info *dfli, u32 f_in,
 	/* Set N, M, K */
 	reg = readl(dfli->reg_base + LCD_CLK_CFG0_REG);
 	reg &= ~(LCD_PLL_NDIV_MASK | LCD_PLL_MDIV_MASK | LCD_PLL_KDIV_MASK);
-	reg |= LCD_PLL_NDIV(n_div);
-	reg |= LCD_PLL_MDIV(m_div);
+	reg |= LCD_PLL_NDIV(n_div - 1);
+	reg |= LCD_PLL_MDIV(m_div - 1);
 	reg |= LCD_PLL_KDIV(k);
+	reg |= (pll_vco << 13);
 	writel(reg, dfli->reg_base + LCD_CLK_CFG0_REG);
+
+	/* Set half divider */
+	reg = readl(dfli->reg_base + LCD_CLK_CFG1_REG);
+	reg &= ~(LCD_FULL_DIV_MASK | LCD_HALF_DIV_MASK);
+	reg |= LCD_FULL_DIV(full_div);
+	reg |= LCD_HALF_DIV(is_half_div);
+	writel(reg, dfli->reg_base + LCD_CLK_CFG1_REG);
 
 	/* Clear PLL Power Down */
 	reg = readl(dfli->reg_base + LCD_CLK_CFG0_REG);
@@ -107,14 +138,7 @@ static void set_lcd_clock_dividers(struct dovefb_layer_info *dfli, u32 f_in,
 	writel(reg, dfli->reg_base + LCD_CLK_CFG0_REG);
 
 	/* Wait 0.5mSec */
-	mdelay(1);
-
-	/* Set half divider */
-	reg = readl(dfli->reg_base + LCD_CLK_CFG1_REG);
-	reg &= ~(LCD_FULL_DIV_MASK | LCD_HALF_DIV_MASK);
-	reg |= LCD_FULL_DIV(lcd_div);
-	reg |= LCD_HALF_DIV(is_half_div);
-	writel(reg, dfli->reg_base + LCD_CLK_CFG1_REG);
+	mdelay(10);
 
 	/* Set SMPN */
 	reg = readl(dfli->reg_base + LCD_CLK_CFG1_REG);
@@ -136,12 +160,12 @@ static inline u64 calc_diff(u64 a, u64 b)
 
 /*
 ** Calculate the best PLL parameters to get the closest output frequency.
-** out_freq = (Fin * N / M);
+** out_freq = (Fin * N / M) / X;
 **  OR
 ** out_freq = (Fin * N / M) / (X + 0.5)
 */
 static void calc_best_clock_div(u32 tar_freq, u32 f_in, u32 *m_div,
-		u32 *n_div, u32 *x_div, u32 *is_half_div)
+		u32 *n_div, u32 *x_div, u32 *is_half_div, u32 *lcd_div)
 {
 	u64 best_rem = 0xFFFFFFFFFFFFFFFFll;
 	u32 best_m = 0;
@@ -152,14 +176,19 @@ static void calc_best_clock_div(u32 tar_freq, u32 f_in, u32 *m_div,
 	u64 temp;
 	u32 n, m, x;
 	int override = 0; 	/* Used to mark special cases where the LCD */
+	u32 n_max;
+
+	n_max = 2400000000ul / f_in;
 
 	/* Look for the best N & M values assuming that we will NOT use the
 	** HALF divider.
 	*/
-	for (n = 1; n < 288; n++) {
-		for(m = 1; m < 72; m++) {
+	for (n = 24; n < n_max; n++) {
+		for(m = 1; m < 4; m++) {
+			for(x = 1; x < 64; x++) {
 			temp = (u64)f_in * (u64)n;
 			do_div(temp, m);
+				do_div(temp, x);
 			/* Fin * N / M Must be < 1500MHz */
 			if(temp > 1500000000)
 				continue;
@@ -169,18 +198,20 @@ static void calc_best_clock_div(u32 tar_freq, u32 f_in, u32 *m_div,
 				best_rem = rem;
 				best_m = m;
 				best_n = n;
+					best_x = x;
 			}
 			if ((best_rem == 0) && (override == 0))
 				break;
 		}
+	}
 	}
 
 	/* Look for the best N & M values assuming that we will use the
 	** HALF divider.
 	*/
 	if (best_rem != 0) {
-		for (n = 1; n < 288; n++) {
-			for(m = 1; m < 72; m++) {
+		for (n = 24; n < n_max; n++) {
+			for(m = 1; m < 4; m++) {
 				/* Half div can be between 5.5 & 31.5 */
 				for (x = 55; x <= 315; x += 10) {
 					temp = (u64)f_in * (u64)n * 10;
@@ -210,6 +241,7 @@ static void calc_best_clock_div(u32 tar_freq, u32 f_in, u32 *m_div,
 	*m_div = best_m;
 	*n_div = best_n;
 	*x_div = best_x;
+	*lcd_div = 1;
 
 	return;
 }
@@ -236,11 +268,12 @@ static void set_clock_divider(struct dovefb_layer_info *dfli,
 	u64 div_result;
 	u32 x = 0, x_bk;
 	struct dovefb_info *info = dfli->info;
-	u32 lcd_div;
+	u32 full_div;
 	struct dovefb_mach_info *dmi = dfli->dev->platform_data;
 	u32 m_div;
 	u32 n_div;
 	u32 is_half_div;
+	u32 lcd_div;
 
 	/*
 	 * Notice: The field pixclock is used by linux fb
@@ -275,16 +308,17 @@ static void set_clock_divider(struct dovefb_layer_info *dfli,
 	needed_pixclk = (u32)div_result;
 
 	calc_best_clock_div(needed_pixclk, dmi->lcd_ref_clk, &m_div, &n_div,
-			&lcd_div, &is_half_div);
-	printk(KERN_INFO "pix_clock = %d, M = %d, N = %d, X = %d, H = %d.\n",
-			needed_pixclk, m_div, n_div, lcd_div, is_half_div);
+			&full_div, &is_half_div, &lcd_div);
 
-	set_lcd_clock_dividers(dfli, dmi->lcd_ref_clk, m_div, n_div, lcd_div, is_half_div);
+	printk(KERN_INFO "needed_pixclk = %d.\n", needed_pixclk);
+	set_lcd_clock_dividers(dfli, dmi->lcd_ref_clk, m_div, n_div, full_div, is_half_div);
 
 	/*
 	 * Set setting to reg.
 	 */
 	x_bk = readl(dfli->reg_base + LCD_CFG_SCLK_DIV);
+	x &= ~0xFFFF;
+	x |= 0x80000000;
 	x |= lcd_div;
 
 	if (x != x_bk)
@@ -358,6 +392,8 @@ static void set_dma_control1(struct dovefb_layer_info *dfli, int sync)
 	 */
 	if (!(sync & FB_SYNC_VERT_HIGH_ACT))
 		x |= 0x08000000;
+
+	x &= ~(0x300000);
 
 	if (x != x_bk)
 		writel(x, dfli->reg_base + LCD_SPU_DMA_CTRL1);
@@ -1043,6 +1079,8 @@ static int dovefb_fill_edid(struct fb_info *fi,
 
 static void dovefb_set_defaults(struct dovefb_layer_info *dfli)
 {
+	u32 reg;
+
 	writel(0x80000001, dfli->reg_base + LCD_CFG_SCLK_DIV);
 	writel(0x00000000, dfli->reg_base + LCD_SPU_BLANKCOLOR);
 	/* known h/w issue. The bit [18:19] might
@@ -1056,6 +1094,9 @@ static void dovefb_set_defaults(struct dovefb_layer_info *dfli)
 	writel(CFG_CSB_256x32(0x1)|CFG_CSB_256x24(0x1)|CFG_CSB_256x8(0x1),
 		dfli->reg_base + LCD_SPU_SRAM_PARA1);
 	writel(0x2032FF81, dfli->reg_base + LCD_SPU_DMA_CTRL1);
+	reg = readl(dfli->reg_base + LCD_GENERAL_CFG);
+	reg &= ~(1 << 8);
+	writel(reg, dfli->reg_base + LCD_GENERAL_CFG);
 	return;
 }
 

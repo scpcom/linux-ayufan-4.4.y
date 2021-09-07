@@ -32,14 +32,14 @@
 
 #include <linux/in.h>
 #include <linux/configfs.h>
+#ifdef MY_ABC_HERE
+#include <linux/dma-mapping.h>
+#endif
 #include <net/sock.h>
 #include <net/tcp.h>
 #ifdef SNMP_SUPPORT
 #include <target/target_core_mib.h>
 #endif /* SNMP_SUPPORT */
-#ifdef MY_ABC_HERE
-#include <linux/rbtree.h>
-#endif
 
 #define TARGET_CORE_MOD_VERSION		"v3.4.0"
 #define SHUTDOWN_SIGS	(sigmask(SIGKILL)|sigmask(SIGINT)|sigmask(SIGABRT))
@@ -98,11 +98,13 @@
 #define INQUIRY_VPD_SERIAL_LEN			254
 #define INQUIRY_VPD_DEVICE_IDENTIFIER_LEN	254
 
+#ifndef MY_ABC_HERE
 /* se_cmd_t->data_direction */
 #define SE_DIRECTION_NONE			0
 #define SE_DIRECTION_READ			1
 #define SE_DIRECTION_WRITE			2
 #define SE_DIRECTION_BIDI			3
+#endif
 
 /* se_hba_t->hba_flags */
 #define HBA_FLAGS_INTERNAL_USE			0x00000001
@@ -196,6 +198,9 @@
 #define TRANSPORT_LUNFLAGS_INITIATOR_ACCESS	0x00000001
 #define TRANSPORT_LUNFLAGS_READ_ONLY		0x00000002
 #define TRANSPORT_LUNFLAGS_READ_WRITE		0x00000004
+#ifdef MY_ABC_HERE
+#define TRANSPORT_LUNFLAGS_PRE_READ_ONLY	0x00008000
+#endif
 
 /* se_device_t->dev_status */
 #define TRANSPORT_DEVICE_ACTIVATED		0x01
@@ -402,9 +407,13 @@ typedef struct t10_reservation_template_s {
 
 typedef struct se_queue_req_s {
 	int			state;
+#ifndef MY_ABC_HERE
 	void			*queue_se_obj_ptr;
+#endif
 	void			*cmd;
+#ifndef MY_ABC_HERE
 	struct se_obj_lun_type_s *queue_se_obj_api;
+#endif
 	struct list_head	qr_list;
 } ____cacheline_aligned se_queue_req_t;
 
@@ -439,6 +448,9 @@ typedef struct se_transport_task_s {
 	atomic_t		t_transport_sent;
 	atomic_t		t_transport_stop;
 	atomic_t		t_transport_timeout;
+#ifdef MY_ABC_HERE
+	atomic_t		transport_dev_active;
+#endif
 	atomic_t		transport_lun_active;
 	atomic_t		transport_lun_fe_stop;
 	atomic_t		transport_lun_stop;
@@ -450,8 +462,8 @@ typedef struct se_transport_task_s {
 	struct completion	transport_lun_stop_comp;
 	void			*t_task_buf;
 	void			*t_task_pt_buf;
-	struct list_head	t_task_list;
 	struct list_head	*t_mem_list;
+	struct list_head	t_task_list;
 } ____cacheline_aligned se_transport_task_t;
 
 typedef struct se_task_s {
@@ -479,8 +491,12 @@ typedef struct se_task_s {
 	atomic_t	task_state_active;
 	struct timer_list	task_timer;
 	int (*transport_map_task)(struct se_task_s *, u32);
+#ifdef MY_ABC_HERE
+	struct se_device_s *se_obj_ptr;
+#else
 	void *se_obj_ptr;
 	struct se_obj_lun_type_s *se_obj_api;
+#endif
 	struct list_head t_list;
 	struct list_head t_execute_list;
 	struct list_head t_state_list;
@@ -495,10 +511,15 @@ typedef struct se_transform_info_s {
 	unsigned long long	ti_lba;
 	struct se_cmd_s *ti_se_cmd;
 	struct se_device_s *ti_dev;
+#ifdef MY_ABC_HERE
+	struct se_device_s *se_obj_ptr;
+	struct se_device_s *ti_obj_ptr;
+#else
 	void *se_obj_ptr;
 	void *ti_obj_ptr;
 	struct se_obj_lun_type_s *se_obj_api;
 	struct se_obj_lun_type_s *ti_obj_api;
+#endif
 } ____cacheline_aligned se_transform_info_t;
 
 typedef struct se_offset_map_s {
@@ -546,7 +567,12 @@ typedef struct se_cmd_s {
 	u16			scsi_sense_length;
 	/* Delay for ALUA Active/NonOptimized state access in milliseconds */
 	int			alua_nonop_delay;
+#ifdef MY_ABC_HERE
+	/* See include/linux/dma-mapping.h */
+	enum dma_data_direction data_direction;
+#else
 	int			data_direction;
+#endif
 	/* For SAM Task Attribute */
 	int			sam_task_attr;
 	/* Transport protocol dependent state */
@@ -579,35 +605,58 @@ typedef struct se_cmd_s {
 	struct list_head	se_lun_list;
 	struct se_device_s      *se_dev;
 	struct se_dev_entry_s   *se_deve;
+#ifdef MY_ABC_HERE
+	struct se_device_s      *se_obj_ptr;
+	struct se_device_s      *se_orig_obj_ptr;
+#endif
 	struct se_lun_s		*se_lun;
+#ifndef MY_ABC_HERE
 	struct se_obj_lun_type_s *se_obj_api;
 	void			*se_obj_ptr;
 	struct se_obj_lun_type_s *se_orig_obj_api;
 	void			*se_orig_obj_ptr;
+#endif
 	void			*se_fabric_cmd_ptr;
 	struct se_session_s	*se_sess;
 	struct se_tmr_req_s	*se_tmr_req;
 	struct se_transport_task_s *t_task;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	struct se_transport_task_s t_task_backstore;
+#endif
 	struct target_core_fabric_ops *se_tfo;
+#ifndef SYNO_LIO_TRANSPORT_PATCHES
 	int (*transport_add_cmd_to_queue)(struct se_cmd_s *, u8);
+#endif
 	int (*transport_allocate_resources)(struct se_cmd_s *, u32, u32);
 	int (*transport_cdb_transform)(struct se_cmd_s *,
 					struct se_transform_info_s *);
+#ifndef SYNO_LIO_TRANSPORT_PATCHES
 	int (*transport_do_transform)(struct se_cmd_s *,
 					struct se_transform_info_s *);
+#endif
 	int (*transport_emulate_cdb)(struct se_cmd_s *);
 	void (*transport_free_resources)(struct se_cmd_s *);
 	u32 (*transport_get_lba)(unsigned char *);
 	unsigned long long (*transport_get_long_lba)(unsigned char *);
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+#elif defined(MY_ABC_HERE)
+	struct se_task_s *(*transport_get_task)(struct se_transform_info_s *,
+					struct se_cmd_s *, void *);
+#else
 	struct se_task_s *(*transport_get_task)(struct se_transform_info_s *,
 					struct se_cmd_s *, void *,
 					struct se_obj_lun_type_s *);
+#endif
+#ifndef SYNO_LIO_TRANSPORT_PATCHES
 	int (*transport_map_buffers_to_tasks)(struct se_cmd_s *);
+#endif
 	void (*transport_map_SG_segments)(struct se_unmap_sg_s *);
 	void (*transport_passthrough_done)(struct se_cmd_s *);
 	void (*transport_unmap_SG_segments)(struct se_unmap_sg_s *);
+#ifndef SYNO_LIO_TRANSPORT_PATCHES
 	int (*transport_set_iovec_ptrs)(struct se_map_sg_s *,
 					struct se_unmap_sg_s *);
+#endif
 	void (*transport_split_cdb)(unsigned long long, u32 *, unsigned char *);
 	void (*transport_wait_for_tasks)(struct se_cmd_s *, int, int);
 	void (*callback)(struct se_cmd_s *cmd, void *callback_arg,
@@ -616,9 +665,11 @@ typedef struct se_cmd_s {
 } ____cacheline_aligned se_cmd_t;
 
 #define T_TASK(cmd)     ((se_transport_task_t *)(cmd->t_task))
+#ifndef MY_ABC_HERE
 #define CMD_OBJ_API(cmd) ((struct se_obj_lun_type_s *)(cmd->se_obj_api))
 #define CMD_ORIG_OBJ_API(cmd) ((struct se_obj_lun_type_s *)	\
 				(cmd->se_orig_obj_api))
+#endif
 #define CMD_TFO(cmd) ((struct target_core_fabric_ops *)cmd->se_tfo)
 
 typedef struct se_tmr_req_s {
@@ -686,7 +737,9 @@ typedef struct se_session_s {
 
 struct se_device_s;
 struct se_transform_info_s;
+#ifndef MY_ABC_HERE
 struct se_obj_lun_type_s;
+#endif
 struct scatterlist;
 
 typedef struct se_lun_acl_s {
@@ -830,7 +883,9 @@ typedef struct se_device_s {
 	struct se_obj_s		dev_obj;
 	struct se_obj_s		dev_access_obj;
 	struct se_obj_s		dev_export_obj;
+#ifndef MY_ABC_HERE
 	struct se_obj_s		dev_feature_obj;
+#endif
 	se_queue_obj_t		*dev_queue_obj;
 	se_queue_obj_t		*dev_status_queue_obj;
 	spinlock_t		delayed_cmd_lock;
@@ -844,11 +899,6 @@ typedef struct se_device_s {
 	spinlock_t		dev_status_thr_lock;
 	spinlock_t		se_port_lock;
 	spinlock_t		se_tmr_lock;
-#ifdef MY_ABC_HERE
-	atomic_t		nr_bios;
-	spinlock_t		task_interval_lock;
-	struct rb_root		task_interval_tree;
-#endif 
 	/* Used for legacy SPC-2 reservationsa */
 	struct se_node_acl_s	*dev_reserved_node_acl;
 	/* Used for ALUA Logical Unit Group membership */
@@ -865,7 +915,9 @@ typedef struct se_device_s {
 	int (*write_pending)(struct se_task_s *);
 	void (*dev_generate_cdb)(unsigned long long, u32 *,
 					unsigned char *, int);
+#ifndef MY_ABC_HERE
 	struct se_obj_lun_type_s *dev_obj_api;
+#endif
 	struct list_head	delayed_cmd_list;
 	struct list_head	ordered_cmd_list;
 	struct list_head	execute_task_list;
@@ -886,7 +938,9 @@ typedef struct se_device_s {
 #define ISCSI_DEV(cmd)		SE_DEV(cmd)
 #define DEV_ATTRIB(dev)		(&(dev)->se_sub_dev->se_dev_attrib)
 #define DEV_T10_WWN(dev)	(&(dev)->se_sub_dev->t10_wwn)
+#ifndef MY_ABC_HERE
 #define DEV_OBJ_API(dev)	((struct se_obj_lun_type_s *)(dev)->dev_obj_api)
+#endif
 
 typedef struct se_hba_s {
 	/* Type of disk transport used for HBA. */
@@ -931,18 +985,25 @@ typedef struct se_lun_s {
 	spinlock_t		lun_acl_lock;
 	spinlock_t		lun_cmd_lock;
 	spinlock_t		lun_sep_lock;
+#ifdef MY_ABC_HERE
+	struct completion	lun_shutdown_comp;
+#endif
 	struct list_head	lun_cmd_list;
 	struct list_head	lun_acl_list;
 	se_device_t		*se_dev;
 	void			*lun_type_ptr;
 	struct config_group	lun_group;
+#ifndef MY_ABC_HERE
 	struct se_obj_lun_type_s *lun_obj_api;
+#endif
 	struct se_port_s	*lun_sep;
 } ____cacheline_aligned se_lun_t;
 
 #define SE_LUN(c)		((se_lun_t *)(c)->se_lun)
 #define ISCSI_LUN(c)		SE_LUN(c)
+#ifndef MY_ABC_HERE
 #define LUN_OBJ_API(lun)	((struct se_obj_lun_type_s *)(lun)->lun_obj_api)
+#endif
 
 typedef struct se_port_s {
 	/* RELATIVE TARGET PORT IDENTIFER */

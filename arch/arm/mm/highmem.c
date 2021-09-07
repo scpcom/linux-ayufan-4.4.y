@@ -79,7 +79,11 @@ void kunmap_atomic(void *kvaddr, enum km_type type)
 	unsigned int idx = type + KM_TYPE_NR * smp_processor_id();
 
 	if (kvaddr >= (void *)FIXADDR_START) {
+#ifdef CONFIG_SYNO_PLX_PORTING
+		__cpuc_flush_dcache_area((void *)vaddr, PAGE_SIZE);
+#else
 		__cpuc_flush_dcache_page((void *)vaddr);
+#endif
 #ifdef CONFIG_DEBUG_HIGHMEM
 		BUG_ON(vaddr != __fix_to_virt(FIX_KMAP_BEGIN + idx));
 		set_pte_ext(TOP_PTE(vaddr), __pte(0), 0);

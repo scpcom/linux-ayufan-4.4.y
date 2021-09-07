@@ -40,8 +40,15 @@ struct fiemap {
 
 #define FIEMAP_FLAG_SYNC	0x00000001 /* sync file data before map */
 #define FIEMAP_FLAG_XATTR	0x00000002 /* map extended attribute tree */
+#ifdef CONFIG_SYNO_PLX_PORTING
+#define FIEMAP_KERNEL_READ  0x00000004 /* filemap is read from within kernel */
+#endif
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+#define FIEMAP_FLAGS_COMPAT	(FIEMAP_FLAG_SYNC | FIEMAP_FLAG_XATTR | FIEMAP_KERNEL_READ)
+#else
 #define FIEMAP_FLAGS_COMPAT	(FIEMAP_FLAG_SYNC | FIEMAP_FLAG_XATTR)
+#endif
 
 #define FIEMAP_EXTENT_LAST		0x00000001 /* Last extent in file. */
 #define FIEMAP_EXTENT_UNKNOWN		0x00000002 /* Data location unknown. */

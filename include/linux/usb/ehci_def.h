@@ -92,14 +92,30 @@ struct ehci_regs {
 	/* ASYNCLISTADDR: offset 0x18 */
 	u32		async_next;	/* address of next async queue head */
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	u32 ttctrl;
+	u32 burstsize;
+	u32 txfilltuning;
+	u32 txttfilltuning;
+	u32 reserved_1;
+	u32 ulpi_viewport;
+	u32 reserved_2;
+	u32 endpknack;
+	u32 endptnalek;
+#else
 	u32		reserved [9];
+#endif
 
 	/* CONFIGFLAG: offset 0x40 */
 	u32		configured_flag;
 #define FLAG_CF		(1<<0)		/* true: we'll support "high speed" */
 
 	/* PORTSC: offset 0x44 */
+#ifdef CONFIG_SYNO_PLX_PORTING
+	u32		port_status [8];	/* up to N_PORTS, max 8 */
+#else
 	u32		port_status [0];	/* up to N_PORTS */
+#endif
 /* 31:23 reserved */
 #define PORT_WKOC_E	(1<<22)		/* wake on overcurrent (enable) */
 #define PORT_WKDISC_E	(1<<21)		/* wake on disconnect (enable) */
@@ -125,6 +141,16 @@ struct ehci_regs {
 #define PORT_CSC	(1<<1)		/* connect status change */
 #define PORT_CONNECT	(1<<0)		/* device connected */
 #define PORT_RWC_BITS   (PORT_CSC | PORT_PEC | PORT_OCC)
+#ifdef CONFIG_SYNO_PLX_PORTING
+ 	u32 otgsc;
+ 	u32 usbmode;
+ 	u32 endptsetupstack;
+ 	u32 endptprime;
+ 	u32 endptflush;
+ 	u32 endptstat;
+ 	u32 endptcomplete;
+ 	u32 endptctrl[8];
+#endif
 } __attribute__ ((packed));
 
 #define USBMODE		0x68		/* USB Device mode */

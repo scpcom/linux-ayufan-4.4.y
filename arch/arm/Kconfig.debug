@@ -7,7 +7,7 @@ source "lib/Kconfig.debug"
 # traces, you can get a slightly smaller kernel by setting this option to
 # n, but then RMK will have to kill you ;).
 config FRAME_POINTER
-	bool
+	bool "Frame pointer present"
 	depends on !THUMB2_KERNEL
 	default y if !ARM_UNWIND
 	help

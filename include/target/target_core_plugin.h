@@ -28,7 +28,9 @@
 #define TARGET_CORE_PLUGIN_H
 
 #define PLUGIN_TYPE_TRANSPORT	0
+#ifndef MY_ABC_HERE
 #define PLUGIN_TYPE_OBJ		1
+#endif
 
 #define MAX_PLUGINS		32
 #define MAX_PLUGIN_CLASSES	16

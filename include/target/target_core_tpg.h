@@ -58,8 +58,17 @@ extern se_portal_group_t *core_tpg_register(struct target_core_fabric_ops *,
 					void *, int);
 extern int core_tpg_deregister(struct se_portal_group_s *);
 extern se_lun_t *core_tpg_pre_addlun(se_portal_group_t *, u32);
+#ifdef MY_ABC_HERE
+extern int core_tpg_post_addlun(se_portal_group_t *, se_lun_t *, int, u32,
+				void *);
+#else
 extern int core_tpg_post_addlun(se_portal_group_t *, se_lun_t *, int, u32,
 				void *, struct se_obj_lun_type_s *);
+#endif
+#ifdef MY_ABC_HERE
+extern void core_tpg_shutdown_lun(struct se_portal_group_s *,
+				struct se_lun_s *);
+#endif
 extern se_lun_t *core_tpg_pre_dellun(se_portal_group_t *, u32, int, int *);
 extern int core_tpg_post_dellun(se_portal_group_t *, se_lun_t *);
 

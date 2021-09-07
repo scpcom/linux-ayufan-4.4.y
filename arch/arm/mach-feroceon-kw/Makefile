@@ -51,12 +51,13 @@ QD_OBJS		= $(HAL_QD_DIR)/src/driver/gtDrvConfig.o $(HAL_QD_DIR)/src/driver/gtDrv
 
 LSP_OBJS        = $(LSP_DIR)/core.o $(LSP_DIR)/irq.o $(LSP_DIR)/time.o  	\
                   $(LSP_DIR)/leds.o $(LSP_DIR)/sysmap.o  	\
-		  $(LSP_DIR)/export.o $(LSP_DIR)/clcd.o
-#		  $(LSP_DIR)/export.o $(LSP_DIR)/btns_device.o
+		  		  $(LSP_DIR)/export.o #$(LSP_DIR)/btns_device.o
 
+obj-y   			+=  feroceon.o
+obj-$(CONFIG_FB_DOVE_CLCD)	+= clcd.o
+ 
 LSP_OBJS += $(LSP_DIR)/synology-gpio.o
 
-obj-y   				:=  feroceon.o
 feroceon-objs  				:=$(LSP_OBJS) $(COMMON_OBJS) $(OSSERVICES_OBJS) $(HAL_OBJS) 	\
 					  $(KW_FAM_OBJS)
 
@@ -106,3 +107,7 @@ feroceon-$(CONFIG_MV_GATEWAY) 		+= $(QD_OBJS)
 feroceon-$(CONFIG_MV_DBG_TRACE) 	+= $(LSP_DIR)/dbg-trace.o
 obj-$(CONFIG_CPU_FREQ_FEROCEON_KW) += $(LSP_DIR)/cpufreq.o
 feroceon-$(CONFIG_CPU_IDLE)		+= $(LSP_DIR)/cpuidle.o
+feroceon-$(CONFIG_SENSORS_FEROCEON_KW)	+= hwmon.o
+
+# Power Management
+feroceon-$(CONFIG_PM) 			+= $(LSP_DIR)/pm.o

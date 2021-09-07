@@ -22,6 +22,10 @@
 #define	EXT3_XATTR_INDEX_LUSTRE			5
 #define EXT3_XATTR_INDEX_SECURITY	        6
 
+#ifdef MY_ABC_HERE
+#define EXT3_XATTR_INDEX_SYNO	8
+#endif
+
 struct ext3_xattr_header {
 	__le32	h_magic;	/* magic number for identification */
 	__le32	h_refcount;	/* reference count */
@@ -63,6 +67,9 @@ extern struct xattr_handler ext3_xattr_trusted_handler;
 extern struct xattr_handler ext3_xattr_acl_access_handler;
 extern struct xattr_handler ext3_xattr_acl_default_handler;
 extern struct xattr_handler ext3_xattr_security_handler;
+#ifdef MY_ABC_HERE
+extern struct xattr_handler ext3_xattr_syno_handler;
+#endif
 
 extern ssize_t ext3_listxattr(struct dentry *, char *, size_t);
 

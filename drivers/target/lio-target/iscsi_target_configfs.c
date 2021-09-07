@@ -322,8 +322,10 @@ static struct config_group *lio_target_call_addnptotpg(
 	if (!(tpg))
 		return ERR_PTR(-EINVAL);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: REGISTER -> %s TPGT: %hu"
 		" PORTAL: %s\n", config_item_name(tiqn_ci), tpg->tpgt, name);
+#endif
 
 	/*
 	 * Assume ISCSI_TCP by default.  Other network portals for other
@@ -347,7 +349,9 @@ static struct config_group *lio_target_call_addnptotpg(
 	config_group_init_type_name(&tpg_np->tpg_np_group, name,
 			&lio_target_portal_cit);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: addnptotpg done!\n");
+#endif
 
 	iscsi_put_tpg(tpg);
 	return &tpg_np->tpg_np_group;
@@ -389,9 +393,11 @@ static void lio_target_call_delnpfromtpg(
 	if (!(tpg))
 		return;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: DEREGISTER -> %s TPGT: %hu"
 		" PORTAL: %s\n", config_item_name(tiqn_ci), tpg->tpgt,
 		config_item_name(item));
+#endif
 
 	config_item_put(item);
 
@@ -399,7 +405,9 @@ static void lio_target_call_delnpfromtpg(
 	if (ret < 0)
 		goto out;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: delnpfromtpg done!\n");
+#endif
 out:
 	iscsi_put_tpg(tpg);
 }
@@ -740,8 +748,10 @@ static void lio_target_lun_drop_item(
 {
 	iscsi_portal_group_t *tpg;
 	iscsi_tiqn_t *tiqn;
+#ifndef MY_ABC_HERE
 	se_lun_t *lun = container_of(to_config_group(item),
 				se_lun_t, lun_group);
+#endif
 	struct config_item *lun_ci, *tpg_ci, *tiqn_ci;
 
 	lun_ci = &group->cg_item;
@@ -1336,6 +1346,12 @@ static ssize_t lacl_store_attrib_write_protect(
 		lacl->initiatorname, lacl->mapped_lun, (op) ? "ON" : "OFF");
 #endif
 
+#ifdef MY_ABC_HERE
+	if( lacl && lacl->se_lun_nacl ) {
+		iscsi_acl_force_logout(lacl->se_lun_nacl);
+	}
+#endif
+
 	return count;
 }
 
@@ -1676,10 +1692,12 @@ static ssize_t lio_target_initiator_nacl_cmdsn_window_store(
 	ret = iscsi_tpg_set_initiator_node_queue_depth(tpg,
 				config_item_name(acl_ci), cmdsn_depth, 1);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: %s/%s Set CmdSN Window: %u for"
 		"InitiatorName: %s\n", config_item_name(tiqn_ci),
 		config_item_name(tpg_ci), cmdsn_depth,
 		config_item_name(acl_ci));
+#endif
 
 	iscsi_put_tpg(tpg);
 	return (!ret) ? count : (ssize_t)ret;
@@ -2223,7 +2241,7 @@ static struct config_item_type lio_target_tpg_param_cit = {
 
 /* Start items for lio_target_tpg_cit */
 
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_LIO
 static ssize_t lio_target_show_tpg_conn(void* p, char* page)
 {
 	ssize_t len = 0;
@@ -2303,6 +2321,33 @@ static struct lio_target_configfs_attribute lio_target_attr_tpg_sess = {
 		    .ca_mode = S_IRUGO | S_IWUSR },
 	.show	= lio_target_show_tpg_sess,
 	.store	= lio_target_store_tpg_sess,
+};
+#endif
+
+#ifdef MY_ABC_HERE
+static ssize_t lio_target_store_tpg_logout(void *p, const char *page, size_t count)
+{
+	iscsi_portal_group_t* tpg = (iscsi_portal_group_t*)p;
+	se_portal_group_t* se_tpg = NULL;
+	se_node_acl_t* acl = NULL;
+
+	if( tpg && (se_tpg = SE_TPG(tpg)) ) {
+		spin_lock_bh(&se_tpg->acl_node_lock);
+		list_for_each_entry(acl, &se_tpg->acl_node_list, acl_list) {
+			iscsi_acl_force_logout(acl);
+		}
+		spin_unlock_bh(&se_tpg->acl_node_lock);
+	}
+
+	return count;
+}
+
+static struct lio_target_configfs_attribute lio_target_attr_tpg_logout = {
+	.attr	= { .ca_owner = THIS_MODULE,
+		    .ca_name = "ForceLogout",
+		    .ca_mode = S_IWUSR },
+	.show	= NULL,
+	.store	= lio_target_store_tpg_logout,
 };
 #endif
 
@@ -2404,11 +2449,14 @@ static struct lio_target_configfs_attribute lio_target_attr_tpg_enable = {
 static struct configfs_attribute *lio_target_tpg_attrs[] = {
 	&lio_target_attr_tpg_control.attr,
 	&lio_target_attr_tpg_enable.attr,
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_LIO
 	&lio_target_attr_tpg_conn.attr,
 #endif
 #ifdef MY_ABC_HERE
-        &lio_target_attr_tpg_sess.attr,
+	&lio_target_attr_tpg_sess.attr,
+#endif
+#ifdef MY_ABC_HERE
+	&lio_target_attr_tpg_logout.attr,
 #endif
 	NULL,
 };
@@ -2499,8 +2547,10 @@ static struct config_group *lio_target_tiqn_addtpg(
 			" pointer\n");
 		return NULL;
 	}
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "lio_target_tiqn_addtpg() parent name: %s\n",
 			config_item_name(tiqn_ci));
+#endif
 	tiqn = container_of(to_config_group(tiqn_ci), iscsi_tiqn_t, tiqn_group);
 	if (!(tiqn)) {
 		printk(KERN_ERR "Unable to locate iscsi_tiqn_t\n");
@@ -2561,10 +2611,14 @@ static struct config_group *lio_target_tiqn_addtpg(
 	if (ret != 0)
 		goto out;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: REGISTER -> %s\n", tiqn->tiqn);
+#endif
 	config_group_init_type_name(tpg_cg, name, &lio_target_tpg_cit);
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: REGISTER -> Allocated TPG: %s\n",
 			tpg_cg->cg_item.ci_name);
+#endif
 
 	return tpg_cg;
 out:
@@ -2588,8 +2642,10 @@ static void lio_target_tiqn_deltpg(
 	int i;
 	unsigned short int tpgt;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: DEREGISTER -> %s\n",
 			config_item_name(item));
+#endif
 	tiqn_ci = &group->cg_item;
 	if (!(tiqn_ci)) {
 		printk(KERN_ERR "Unable to locate group_cg_item\n");
@@ -2617,10 +2673,12 @@ static void lio_target_tiqn_deltpg(
 		return;
 	tpg = (iscsi_portal_group_t *)se_tpg->se_tpg_fabric_ptr;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "lio_target_tiqn_deltpg() got container_of: TPGT:"
 			" %hu\n", tpg->tpgt);
 	printk(KERN_INFO "LIO_Target_ConfigFS: DEREGISTER -> calling"
 			" config_item_put()\n");
+#endif
 	/*
 	 * Release the default groups the fabric module is using for
 	 * se_portal_group_t->tpg_group.
@@ -2636,7 +2694,9 @@ static void lio_target_tiqn_deltpg(
 	/*
 	 * iscsi_tpg_del_portal_group() assumes force=1
 	 */
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: DEREGISTER -> Releasing TPG\n");
+#endif
 	iscsi_tpg_del_portal_group(tiqn, tpg, 1);
 }
 
@@ -2683,17 +2743,23 @@ static struct config_group *lio_target_call_coreaddtiqn(
 	iscsi_tiqn_t *tiqn;
 	int ret = 0;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "lio_target_call_coreaddtiqn(): name: %s\n", name);
+#endif
 
 	tiqn = core_add_tiqn((unsigned char *)name, &ret);
 	if (!(tiqn))
 		return NULL;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: REGISTER -> %s\n", tiqn->tiqn);
+#endif
 	config_group_init_type_name(&tiqn->tiqn_group, tiqn->tiqn,
 			&lio_target_tiqn_cit);
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: REGISTER -> Allocated Node: %s\n",
 			tiqn->tiqn_group.cg_item.ci_name);
+#endif
 
 	return &tiqn->tiqn_group;
 }
@@ -2705,13 +2771,17 @@ static void lio_target_call_coredeltiqn(
 	iscsi_tiqn_t *tiqn = container_of(to_config_group(item),
 				iscsi_tiqn_t, tiqn_group);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: DEREGISTER -> %s\n",
 			config_item_name(item));
 	printk(KERN_INFO "LIO_Target_ConfigFS: DEREGISTER -> calling"
 			" config_item_put()\n");
+#endif
 	config_item_put(item);
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_Target_ConfigFS: DEREGISTER -> Releasing"
 			" core_del_tiqn()\n");
+#endif
 	core_del_tiqn(tiqn);
 }
 
@@ -2955,8 +3025,10 @@ int iscsi_target_register_configfs(void)
 	}
 
 	lio_target_fabric_configfs = fabric;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_TARGET[0] - Set fabric ->"
 			" lio_target_fabric_configfs\n");
+#endif
 	return 0;
 }
 
@@ -2968,6 +3040,8 @@ void iscsi_target_deregister_configfs(void)
 
 	target_fabric_configfs_deregister(lio_target_fabric_configfs);
 	lio_target_fabric_configfs = NULL;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "LIO_TARGET[0] - Cleared"
 				" lio_target_fabric_configfs\n");
+#endif
 }

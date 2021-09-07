@@ -168,6 +168,9 @@ static int iscsi_target_check_first_request(
 
 	list_for_each_entry(param, &conn->param_list->param_list, p_list) {
 		if (!strncmp(param->name, SESSIONTYPE, 11)) {
+#ifdef MY_ABC_HERE
+			if (IS_PSTATE_ACCEPTOR(param))
+#else
 			if (!IS_PSTATE_ACCEPTOR(param)) {
 				printk(KERN_ERR "SessionType key not received"
 					" in first login request.\n");
@@ -175,6 +178,7 @@ static int iscsi_target_check_first_request(
 					STAT_DETAIL_MISSING_PARAMETER);
 				return -1;
 			}
+#endif
 			if (!(strncmp(param->value, DISCOVERY, 9)))
 				return 0;
 		}
@@ -411,12 +415,18 @@ static int iscsi_target_do_authentication(
 			AUTH_SERVER);
 	switch (authret) {
 	case 0:
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "Received OK response"
 		" from LIO Authentication, continuing.\n");
+#endif
 		break;
 	case 1:
+#ifdef MY_ABC_HERE
+		printk(KERN_ERR "iSCSI - Single CHAP security negotiation completed sucessfully.");
+#else
 		printk(KERN_INFO "iSCSI security negotiation"
 			" completed sucessfully.\n");
+#endif
 		login->auth_complete = 1;
 		if ((login_req->flags & NSG1) &&
 		    (login_req->flags & T_BIT)) {
@@ -426,14 +436,22 @@ static int iscsi_target_do_authentication(
 		return iscsi_target_check_for_existing_instances(
 				conn, login);
 	case 2:
+#ifdef MY_ABC_HERE
+		printk(KERN_ERR "iSCSI - Single CHAP security negotiation failed.");
+#else
 		printk(KERN_ERR "Security negotiation"
 			" failed.\n");
+#endif
 		iscsi_tx_login_rsp(conn, STAT_CLASS_INITIATOR,
 				STAT_DETAIL_NOT_AUTH);
 		return -1;
 	default:
+#ifdef MY_ABC_HERE
+		printk(KERN_ERR "iSCSI - Received unknown error %d from LIO Authentication", authret);
+#else
 		printk(KERN_ERR "Received unknown error %d from LIO"
 				" Authentication\n", authret);
+#endif
 		iscsi_tx_login_rsp(conn, STAT_CLASS_TARGET,
 				STAT_DETAIL_TARG_ERROR);
 		return -1;
@@ -757,12 +775,16 @@ static int iscsi_target_locate_portal(
 		if (!login->leading_connection)
 			goto get_target;
 
+#ifdef MY_ABC_HERE
+		s_buf = NORMAL;
+#else
 		printk(KERN_ERR "SessionType key not received"
 			" in first login request.\n");
 		iscsi_tx_login_rsp(conn, STAT_CLASS_INITIATOR,
 			STAT_DETAIL_MISSING_PARAMETER);
 		ret = -1;
 		goto out;
+#endif
 	}
 
 	/*
@@ -805,8 +827,12 @@ get_target:
 	 */
 	tiqn = core_get_tiqn_for_login(t_buf);
 	if (!(tiqn)) {
+#ifdef MY_ABC_HERE
+		printk(KERN_ERR "iSCSI - Unable to locate Target IQN: %s in Storage Node\n", t_buf);
+#else
 		printk(KERN_ERR "Unable to locate Target IQN: %s in"
 			" Storage Node\n", t_buf);
+#endif
 #ifdef MY_ABC_HERE
 		//FIXME. take care if send right message to initiator.
 		iscsi_tx_login_rsp(conn, STAT_CLASS_INITIATOR,
@@ -818,15 +844,21 @@ get_target:
 		ret = -1;
 		goto out;
 	}
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Located Storage Object: %s\n", tiqn->tiqn);
+#endif
 
 	/*
 	 * Locate Target Portal Group from Storage Node.
 	 */
 	conn->tpg = core_get_tpg_from_np(tiqn, np);
 	if (!(conn->tpg)) {
+#ifdef MY_ABC_HERE
+		printk(KERN_ERR "iSCSI - Unable to locate Target Portal Group on %s\n", tiqn->tiqn);
+#else
 		printk(KERN_ERR "Unable to locate Target Portal Group"
 				" on %s\n", tiqn->tiqn);
+#endif
 		core_put_tiqn_for_login(tiqn);
 #ifdef MY_ABC_HERE
 		//FIXME. take care if send right message to initiator.
@@ -839,7 +871,9 @@ get_target:
 		ret = -1;
 		goto out;
 	}
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Located Portal Group Object: %hu\n", conn->tpg->tpgt);
+#endif
 
 	/*
 	 * Serialize access across the iscsi_portal_group_t to
@@ -935,7 +969,11 @@ iscsi_login_t *iscsi_target_init_negotiation(
 	 * 	Locates Target Portal from NP -> Target IQN
 	 */
 	if (iscsi_target_locate_portal(np, conn, login) < 0) {
+#ifdef MY_ABC_HERE
+		printk(KERN_ERR "iSCSI - Login negotiation failed.\n");
+#else
 		printk(KERN_ERR "iSCSI Login negotiation failed.\n");
+#endif
 		goto out;
 	}
 

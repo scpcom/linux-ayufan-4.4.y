@@ -30,6 +30,10 @@
 
 #define MaxSector (~(sector_t)0)
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+struct raidset_s; 
+#endif
+
 typedef struct mddev_s mddev_t;
 typedef struct mdk_rdev_s mdk_rdev_t;
 
@@ -313,8 +317,8 @@ struct mddev_s
 #ifdef MY_ABC_HERE
 	unsigned char			auto_remap;     // 1 ==> set all rdevs to remap mode.
 #endif
-#ifdef MY_ABC_HERE
-	unsigned char			bl_raid5_enhance_disabled; // default: 0
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+ 	struct raidset_s* hw_raid;
 #endif
 };
 

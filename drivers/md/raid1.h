@@ -73,6 +73,9 @@ typedef struct r1_private_data_s conf_t;
 struct r1bio_s {
 	atomic_t		remaining; /* 'have we finished' count,
 					    * used from IRQ handlers
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+					            * includes behind_remaining
+#endif
 					    */
 	atomic_t		behind_remaining; /* number of write-behind ios remaining
 						 * in this BehindIO request
@@ -126,5 +129,12 @@ struct r1bio_s {
  * Record that bi_end_io was called with this flag...
  */
 #define	R1BIO_Returned 6
+
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+void raid1_raise_barrier(conf_t *conf);
+void raid1_lower_barrier(conf_t *conf);
+void raid1_wait_barrier(conf_t *conf);
+void raid1_allow_barrier(conf_t *conf);
+#endif
 
 #endif

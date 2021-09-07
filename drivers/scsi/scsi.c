@@ -746,7 +746,7 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 			sg = (struct scatterlist *)cmd->sdb.table.sgl;
 			pBuffer = kmap_atomic(sg_page(sg), KM_USER0) + sg->offset;
 		} else {
-			pBuffer = cmd->sdb.table.sgl;
+			pBuffer = (char *)cmd->sdb.table.sgl;
 		}
 
 		/* set disk to standby command */

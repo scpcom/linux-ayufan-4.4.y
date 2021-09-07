@@ -540,7 +540,7 @@ static void super_written_barrier(struct bio *bio, int error)
 	}
 }
 
-#ifdef SYNO_RAID_USE_BE_SB
+#if defined(SYNO_RAID_USE_BE_SB) || defined(MY_ABC_HERE)
 void SYNOSwapSuperblock0(mdp_super_t *sb)
 {
 	int i;
@@ -657,7 +657,7 @@ EXPORT_SYMBOL_GPL(sync_page_io);
 static int read_disk_sb(mdk_rdev_t * rdev, int size)
 {
 	char b[BDEVNAME_SIZE];
-#ifdef SYNO_RAID_USE_BE_SB
+#if defined(MY_ABC_HERE) || defined(SYNO_RAID_USE_BE_SB)
 	mdp_super_t *sb;
 #endif
 	if (!rdev->sb_page) {
@@ -671,10 +671,12 @@ static int read_disk_sb(mdk_rdev_t * rdev, int size)
 	if (!sync_page_io(rdev->bdev, rdev->sb_start, size, rdev->sb_page, READ))
 		goto fail;
 
-#ifdef SYNO_RAID_USE_BE_SB
+#if defined(MY_ABC_HERE) || defined(SYNO_RAID_USE_BE_SB)
 	sb = (mdp_super_t*)page_address(rdev->sb_page);
 	if (sb->major_version == 0) {
-		SYNOSwapSuperblock0(sb);
+		if (sb->md_magic != MD_SB_MAGIC) {
+			SYNOSwapSuperblock0(sb);
+		}
 	}
 #endif
 	rdev->sb_loaded = 1;
@@ -4674,6 +4676,9 @@ out:
 	err = 0;
 	blk_integrity_unregister(disk);
 	md_new_event(mddev);
+#ifdef MY_ABC_HERE
+	if (mddev->sysfs_state)
+#endif
 	sysfs_notify_dirent(mddev->sysfs_state);
 	return err;
 }
@@ -4702,6 +4707,9 @@ static void autorun_array(mddev_t *mddev)
 	}
 }
 
+#if defined(MY_DEF_HERE) && defined(CONFIG_PM_SLEEP) 
+	extern int software_resume(void);
+#endif
 /*
  * lets try to run arrays based on all disks that have arrived
  * until now. (those are in pending_raid_disks)
@@ -4831,7 +4839,6 @@ static void autorun_devices(int part)
 	printk(KERN_INFO "md: ... autorun DONE.\n");
 
 #if defined(MY_DEF_HERE) && defined(CONFIG_PM_SLEEP) 
-	extern int software_resume(void);
 	software_resume();
 #endif
 }
@@ -7828,21 +7835,6 @@ SynoUpdateSBTask(struct work_struct *work)
 END:
 	kfree(update_sb);
 }
-#endif
-
-#ifdef MY_ABC_HERE
-void SynoDisableRaid5Enhance(dev_t dev)
-{
-	mddev_t* mddev = mddev_find(dev);
-
-	if( !mddev ) {
-		printk(KERN_ERR "failed to get md device");
-	} else {
-		mddev->bl_raid5_enhance_disabled = 1;
-		mddev_put(mddev);
-	}
-}
-EXPORT_SYMBOL(SynoDisableRaid5Enhance);
 #endif
 
 EXPORT_SYMBOL(register_md_personality);

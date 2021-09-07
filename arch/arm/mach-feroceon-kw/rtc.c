@@ -147,7 +147,6 @@ static int mv_rtc_init(void)
         			time.minutes, time.seconds);
 	do_settimeofday(&tv);	
 	set_rtc = mv_set_rtc;
-#warning "mv_rtc_init() - Check device param"
 	rtc_device_register("kw-rtc", dev, &rtc_ops, THIS_MODULE);
 	printk("RTC registered\n");
 

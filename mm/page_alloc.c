@@ -262,10 +262,25 @@ static void bad_page(struct page *page)
 
 	printk(KERN_ALERT "BUG: Bad page state in process %s  pfn:%05lx\n",
 		current->comm, page_to_pfn(page));
+#ifndef CONFIG_SYNO_PLX_PORTING
 	printk(KERN_ALERT
 		"page:%p flags:%p count:%d mapcount:%d mapping:%p index:%lx\n",
 		page, (void *)page->flags, page_count(page),
 		page_mapcount(page), page->mapping, page->index);
+#else
+	printk(KERN_ALERT
+		"page:%p flags:%p count:%d mapcount:%d mapping:%p index:%lx"
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+		", incoherent %d"
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+		"\n",
+		page, (void *)page->flags, page_count(page),
+		page_mapcount(page), page->mapping, page->index
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+		,PageIncoherentSendfile(page)
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
+		);
+#endif
 
 	dump_stack();
 out:
@@ -504,6 +519,9 @@ static void free_page_mlock(struct page *page) { }
 static inline int free_pages_check(struct page *page)
 {
 	if (unlikely(page_mapcount(page) |
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+		PageIncoherentSendfile(page) |
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
 		(page->mapping != NULL)  |
 		(atomic_read(&page->_count) != 0) |
 		(page->flags & PAGE_FLAGS_CHECK_AT_FREE))) {
@@ -676,6 +694,9 @@ static inline void expand(struct zone *zone, struct page *page,
 static inline int check_new_page(struct page *page)
 {
 	if (unlikely(page_mapcount(page) |
+#ifdef CONFIG_OXNAS_FAST_READS_AND_WRITES
+		PageIncoherentSendfile(page) |
+#endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
 		(page->mapping != NULL)  |
 		(atomic_read(&page->_count) != 0)  |
 		(page->flags & PAGE_FLAGS_CHECK_AT_PREP))) {
@@ -1904,6 +1925,7 @@ rebalance:
 	}
 
 nopage:
+#ifndef MY_ABC_HERE
 	if (!(gfp_mask & __GFP_NOWARN) && printk_ratelimit()) {
 		printk(KERN_WARNING "%s: page allocation failure."
 			" order:%d, mode:0x%x\n",
@@ -1911,6 +1933,7 @@ nopage:
 		dump_stack();
 		show_mem();
 	}
+#endif
 	return page;
 got_pg:
 	if (kmemcheck_enabled)

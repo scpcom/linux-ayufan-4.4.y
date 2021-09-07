@@ -42,11 +42,6 @@
 #include <linux/mii.h>
 #include <asm/irq.h>
 
-#ifdef MY_ABC_HERE
-#include <linux/synobios.h>
-extern int (*funcSYNOSendNetLinkEvent)(unsigned int type, unsigned int ifaceno);
-#endif
-
 #include "skge.h"
 
 #define DRV_NAME		"skge"
@@ -1080,11 +1075,6 @@ static void skge_link_up(struct skge_port *skge)
 		    LED_BLK_OFF|LED_SYNC_OFF|LED_ON);
 
 	netif_carrier_on(skge->netdev);
-#ifdef MY_ABC_HERE
-	if (funcSYNOSendNetLinkEvent) {
-		funcSYNOSendNetLinkEvent(NET_LINK, skge->netdev->ifindex);
-	}
-#endif
 	netif_wake_queue(skge->netdev);
 
 	if (netif_msg_link(skge)) {
@@ -1100,11 +1090,6 @@ static void skge_link_down(struct skge_port *skge)
 {
 	skge_write8(skge->hw, SK_REG(skge->port, LNK_LED_REG), LED_OFF);
 	netif_carrier_off(skge->netdev);
-#ifdef MY_ABC_HERE
-	if (funcSYNOSendNetLinkEvent) {
-		funcSYNOSendNetLinkEvent(NET_NOLINK, skge->netdev->ifindex);
-	}
-#endif
 	netif_stop_queue(skge->netdev);
 
 	if (netif_msg_link(skge))
@@ -2589,6 +2574,10 @@ static int skge_up(struct net_device *dev)
 	if (!is_valid_ether_addr(dev->dev_addr))
 		return -EINVAL;
 
+#ifdef MY_ABC_HERE
+	netif_carrier_off(dev);
+#endif /* MY_ABC_HERE */
+
 	if (netif_msg_ifup(skge))
 		printk(KERN_INFO PFX "%s: enabling interface\n", dev->name);
 
@@ -3904,9 +3893,11 @@ static struct net_device *skge_devinit(struct skge_hw *hw, int port,
 	memcpy(dev->perm_addr, dev->dev_addr, dev->addr_len);
 #endif
 
+#ifndef MY_ABC_HERE
 	/* device is off until link detection */
 	netif_carrier_off(dev);
 	netif_stop_queue(dev);
+#endif /* !MY_ABC_HERE */
 
 	return dev;
 }

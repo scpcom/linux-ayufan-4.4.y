@@ -27,13 +27,32 @@
 #ifndef TARGET_CORE_SEOBJ_H
 #define TARGET_CORE_SEOBJ_H
 
+#ifndef MY_ABC_HERE
 extern struct se_obj_lun_type_s *se_obj_get_api(u32);
 extern int se_obj_load_plugins(void);
 
 #define DEV_OBJ_VERSION		"v3.0"
+#endif
 
 typedef int (*map_func_t)(struct se_task_s *, u32);
 
+#ifdef MY_ABC_HERE
+extern int dev_obj_export(void *, se_portal_group_t *, se_lun_t *);
+extern void dev_obj_unexport(void *, se_portal_group_t *, se_lun_t *);
+extern int dev_obj_max_sectors(void *);
+extern unsigned long long dev_obj_end_lba(void *);
+extern int dev_obj_do_se_mem_map(void *, se_task_t *, struct list_head *,
+		void *, struct se_mem_s *, struct se_mem_s **,
+		u32 *, u32 *);
+extern int dev_obj_get_mem_buf(void *, se_cmd_t *);
+extern int dev_obj_get_mem_SG(void *, se_cmd_t *);
+extern map_func_t dev_obj_get_map_SG(void *, int);
+extern map_func_t dev_obj_get_map_non_SG(void *, int);
+extern map_func_t dev_obj_get_map_none(void *);
+extern int dev_obj_check_online(void *);
+extern int dev_obj_check_shutdown(void *);
+
+#else
 typedef struct se_obj_lun_type_s {
 	int	se_obj_type;
 	struct se_plugin_s *obj_plugin;
@@ -110,5 +129,6 @@ typedef struct se_obj_lun_type_s {
  * object template for se_device_t storage objects
  */
 extern se_obj_lun_type_t dev_obj_template;
+#endif
 
 #endif /* TARGET_CORE_SEOBJ_H */

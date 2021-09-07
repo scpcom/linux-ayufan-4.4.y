@@ -151,6 +151,8 @@
 #define     CFG_ALPHA_V(v)			(v)
 #define     CFG_ALPHA_V_MASK			0x000000FF
 
+#define LCD_GENERAL_CFG				0x013C
+
 /* SPI Read Data Register */
 #define LCD_SPU_SPI_RXDATA			0x0140
 
@@ -636,13 +638,13 @@
 /* KW specific registers. */
 #define LCD_CLK_CFG0_REG		0xF0A0
 #define LCD_PLL_NDIV_MASK		(0x1FF << 4)
-#define LCD_PLL_NDIV(x)			(x << 4)
+#define LCD_PLL_NDIV(x)			((x) << 4)
 #define LCD_PLL_MDIV_MASK		(0x1FF << 17)
-#define LCD_PLL_MDIV(x)			(x << 17)
+#define LCD_PLL_MDIV(x)			((x) << 17)
 #define LCD_PLL_KDIV_MASK		(0x3 << 26)
-#define LCD_PLL_KDIV(x)			(x << 26)
+#define LCD_PLL_KDIV(x)			((x) << 26)
 #define LCD_PLL_PWR_DOWN_MASK		(1 << 31)
-#define LCD_PLL_PWR_DOWN(en)		(1 << 31)
+#define LCD_PLL_PWR_DOWN(en)		((en) << 31)
 
 
 #define LCD_CLK_CFG1_REG		0xF0A4

@@ -467,20 +467,36 @@ static int __udp6_lib_mcast_deliver(struct net *net, struct sk_buff *skb,
 					uh->source, saddr, dif))) {
 		struct sk_buff *buff = skb_clone(skb, GFP_ATOMIC);
 		if (buff) {
+#ifdef CONFIG_SYNO_PLX_PORTING
+			bh_lock_wsock(sk2);
+#else
 			bh_lock_sock(sk2);
+#endif
 			if (!sock_owned_by_user(sk2))
 				udpv6_queue_rcv_skb(sk2, buff);
 			else
 				sk_add_backlog(sk2, buff);
+#ifdef CONFIG_SYNO_PLX_PORTING
+			bh_unlock_wsock(sk2);
+#else
 			bh_unlock_sock(sk2);
+#endif
 		}
 	}
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock(sk);
+#else
 	bh_lock_sock(sk);
+#endif
 	if (!sock_owned_by_user(sk))
 		udpv6_queue_rcv_skb(sk, skb);
 	else
 		sk_add_backlog(sk, skb);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 out:
 	spin_unlock(&hslot->lock);
 	return 0;
@@ -595,12 +611,20 @@ int __udp6_lib_rcv(struct sk_buff *skb, struct udp_table *udptable,
 
 	/* deliver */
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock(sk);
+#else
 	bh_lock_sock(sk);
+#endif
 	if (!sock_owned_by_user(sk))
 		udpv6_queue_rcv_skb(sk, skb);
 	else
 		sk_add_backlog(sk, skb);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 	sock_put(sk);
 	return 0;
 

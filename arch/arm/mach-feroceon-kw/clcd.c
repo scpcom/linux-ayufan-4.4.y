@@ -16,6 +16,7 @@
 #include <linux/sysdev.h>
 #include <linux/amba/bus.h>
 #include <linux/amba/kmi.h>
+#include <linux/mm.h>
 
 //#include <asm/hardware.h>
 #include <linux/io.h>
@@ -38,7 +39,7 @@
 #include "gpp/mvGppRegs.h"
 #include <ctrlEnv/mvCtrlEnvRegs.h>
 
-static unsigned int lcd0_enable;
+unsigned int lcd0_enable;
 module_param(lcd0_enable, uint, 0);
 MODULE_PARM_DESC(lcd0_enable, "set to 1 to enable LCD0 output.");
 
@@ -58,7 +59,7 @@ MODULE_PARM_DESC(lcd0_enable, "set to 1 to enable LCD0 output.");
 	#define	LCD1_BASE_PHY_ADDR		(DOVE_LCD2_PHYS_BASE)
 	#define	DCON_BASE_PHY_ADDR		(DOVE_LCD_DCON_PHYS_BASE)
 #elif defined(CONFIG_ARCH_FEROCEON_KW)
-	#define	LCD_BASE_PHY_ADDR		(0xC0000)
+	#define	LCD_BASE_PHY_ADDR		(INTER_REGS_BASE | 0xC0000)
 #else
 	#ifdef CONFIG_ARCH_TAHOE_AXI
 	#define LCD_BASE_PHY_ADDR		0x1C010000
@@ -397,7 +398,7 @@ static struct fb_videomode video_modes[] = {
 static struct resource lcd0_vid_res[] = {
 	[0] = {
 		.start	= LCD_BASE_PHY_ADDR,
-		.end	= LCD_BASE_PHY_ADDR+0x1C8,
+		.end	= LCD_BASE_PHY_ADDR+0x10000,
 		.flags	= IORESOURCE_MEM,
 	},
 	[1] = {
@@ -411,7 +412,7 @@ static struct resource lcd0_vid_res[] = {
 static struct resource lcd0_res[] = {
 	[0] = {
 		.start	= LCD_BASE_PHY_ADDR,
-		.end	= LCD_BASE_PHY_ADDR+0x1C8,
+		.end	= LCD_BASE_PHY_ADDR+0x10000,
 		.flags	= IORESOURCE_MEM,
 	},
 	[1] = {
@@ -463,6 +464,26 @@ static struct platform_device backlight_platform_device = {
 
 #endif /* CONFIG_FB_DOVE_DCON */
 
+/*****************************************************************************
+ * I2C buses - adc, hdmi
+ ****************************************************************************/
+static struct i2c_board_info __initdata i2c_adi9889[] = {
+	{
+		I2C_BOARD_INFO("adi9889_i2c", 0x3D),
+	},
+	{
+		I2C_BOARD_INFO("adi9889_edid_i2c", 0x3F),
+	},
+};
+
+static struct i2c_board_info __initdata i2c_ths8200[] = {
+	{
+		I2C_BOARD_INFO("ths8200_i2c", 0x21),
+	},
+};
+
+
+
 int clcd_platform_init(struct dovefb_mach_info *lcd0_dmi_data,
 		       struct dovefb_mach_info *lcd0_vid_dmi_data,
 		       struct dovebl_platform_data *backlight_data)
@@ -470,6 +491,8 @@ int clcd_platform_init(struct dovefb_mach_info *lcd0_dmi_data,
 	u32 total_x, total_y, i;
 	u64 div_result;
 
+	if (lcd0_enable != 1)
+		return 0;
 	for (i = 0; i < ARRAY_SIZE(video_modes); i++) {
 		total_x = video_modes[i].xres + video_modes[i].hsync_len +
 			video_modes[i].left_margin +
@@ -512,6 +535,8 @@ int clcd_platform_init(struct dovefb_mach_info *lcd0_dmi_data,
 		platform_device_register(&backlight_platform_device);
 	}
 #endif
+	i2c_register_board_info(0, i2c_adi9889, ARRAY_SIZE(i2c_adi9889));
+	i2c_register_board_info(0, i2c_ths8200, ARRAY_SIZE(i2c_ths8200));
 
 	return 0;
 }

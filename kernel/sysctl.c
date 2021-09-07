@@ -73,6 +73,9 @@ EXPORT_SYMBOL(syno_temperature_debug);
 
 int syno_hibernation_log_sec=0;
 EXPORT_SYMBOL(syno_hibernation_log_sec);
+
+int giSynoAtaDebug=0;
+EXPORT_SYMBOL(giSynoAtaDebug);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -96,14 +99,44 @@ long g_internal_netif_num = -1;
 EXPORT_SYMBOL(g_internal_netif_num);
 #endif
 
+#ifdef MY_ABC_HERE
+long g_ahci_switch = 1;
+EXPORT_SYMBOL(g_ahci_switch);
+#endif
+
+#ifdef MY_ABC_HERE
+long g_sata_led_special = 0;
+EXPORT_SYMBOL(g_sata_led_special);
+#endif
+
 #ifdef MY_DEF_HERE
 int gSynoInstallFlag = 0;
 EXPORT_SYMBOL(gSynoInstallFlag);
 #endif
 
 #ifdef MY_ABC_HERE
-unsigned char grgbLanMac[2][16];
+char gszSataPortMap[8] = {0};
+EXPORT_SYMBOL(gszSataPortMap);
+
+unsigned int gSynoSataHostCnt = 0;
+EXPORT_SYMBOL(gSynoSataHostCnt);
+#endif
+
+#ifdef MY_ABC_HERE
+char gszDiskIdxMap[16] = {0};
+EXPORT_SYMBOL(gszDiskIdxMap);
+#endif
+
+#ifdef MY_ABC_HERE
+unsigned char grgbLanMac[4][16];
 EXPORT_SYMBOL(grgbLanMac);
+#endif
+
+#ifdef MY_DEF_HERE
+unsigned int gSwitchDev = 0;
+char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
+EXPORT_SYMBOL(gSwitchDev);
+EXPORT_SYMBOL(gDevPCIName);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -1121,6 +1154,14 @@ static struct ctl_table kern_table[] = {
 		.mode           = 0644,
 		.proc_handler   = &proc_dointvec,
 	},
+	{
+		.ctl_name       = CTL_UNNUMBERED,
+		.procname       = "syno_ata_debug",
+		.data           = &giSynoAtaDebug,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
 #endif
 #ifdef MY_ABC_HERE
 	{
@@ -1145,12 +1186,60 @@ static struct ctl_table kern_table[] = {
 #endif
 #ifdef MY_ABC_HERE
 	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_internal_netif_num",
+		.data			= &g_internal_netif_num,
+		.maxlen			= sizeof (int),
+		.mode			= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
 		.ctl_name       = CTL_UNNUMBERED,
 		.procname       = "syno_raid_sync_flag",
 		.data           = &gSynoRaidSyncFlag,
 		.maxlen         = sizeof (int),
 		.mode           = 0644,
 		.proc_handler   = &proc_dointvec,
+	},
+#endif
+#ifdef MY_ABC_HERE
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_mac_address1",
+		.data			= &grgbLanMac[0],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+		.strategy		= &sysctl_string,
+	},
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_mac_address2",
+		.data			= &grgbLanMac[1],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+		.strategy		= &sysctl_string,
+	},
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_mac_address3",
+		.data			= &grgbLanMac[2],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+		.strategy		= &sysctl_string,
+	},
+	{
+		.ctl_name		= CTL_UNNUMBERED,
+		.procname		= "syno_mac_address4",
+		.data			= &grgbLanMac[3],
+		.maxlen			= 16,
+		.mode			= 0444,
+		.proc_handler	= &proc_dostring,
+		.strategy		= &sysctl_string,
 	},
 #endif
 #ifdef MY_ABC_HERE

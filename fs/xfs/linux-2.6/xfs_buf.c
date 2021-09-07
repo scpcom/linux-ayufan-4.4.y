@@ -336,7 +336,11 @@ xfs_buf_free(
 
 	ASSERT(list_empty(&bp->b_hash_list));
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (bp->b_flags & (_XBF_PAGE_CACHE)) {
+#else
 	if (bp->b_flags & (_XBF_PAGE_CACHE|_XBF_PAGES)) {
+#endif
 		uint		i;
 
 		if ((bp->b_flags & XBF_MAPPED) && (bp->b_page_count > 1))
@@ -350,6 +354,16 @@ xfs_buf_free(
 			page_cache_release(page);
 		}
 		_xfs_buf_free_pages(bp);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	} else if (bp->b_flags & _XBF_KMEM_ALLOC) {
+		 /*
+		  * XXX(hch): bp->b_count_desired might be incorrect (see
+		  * xfs_buf_associate_memory for details), but fortunately
+		  * the Linux version of kmem_free ignores the len argument..
+		  */
+		kmem_free(bp->b_addr/*, bp->b_count_desired*/);
+		_xfs_buf_free_pages(bp);
+#endif
 	}
 
 	xfs_buf_deallocate(bp);
@@ -794,37 +808,84 @@ xfs_buf_get_noaddr(
 	size_t			len,
 	xfs_buftarg_t		*target)
 {
+#ifdef CONFIG_SYNO_PLX_PORTING
+	size_t			malloc_len = len;
+#else
 	unsigned long		page_count = PAGE_ALIGN(len) >> PAGE_SHIFT;
 	int			error, i;
+#endif
 	xfs_buf_t		*bp;
+#ifdef CONFIG_SYNO_PLX_PORTING
+	void			*data;
+	int			error;
+#endif
 
 	bp = xfs_buf_allocate(0);
 	if (unlikely(bp == NULL))
 		goto fail;
 	_xfs_buf_initialize(bp, target, 0, len, 0);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+try_again:
+	data = kmem_alloc(malloc_len, KM_SLEEP | KM_MAYFAIL | KM_LARGE);
+	if (unlikely(data == NULL))
+#else
 	error = _xfs_buf_get_pages(bp, page_count, 0);
 	if (error)
+#endif
 		goto fail_free_buf;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	/* check whether alignment matches.. */
+	if ((__psunsigned_t)data !=
+	    ((__psunsigned_t)data & ~target->bt_smask)) {
+		/* .. else double the size and try again */
+		kmem_free(data/*, malloc_len*/);
+		malloc_len <<= 1;
+		goto try_again;
+#else
 	for (i = 0; i < page_count; i++) {
 		bp->b_pages[i] = alloc_page(GFP_KERNEL);
 		if (!bp->b_pages[i])
 			goto fail_free_mem;
+#endif
 	}
-	bp->b_flags |= _XBF_PAGES;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	/* Clear the memory contents */
+	memset(data, 0, malloc_len);
+
+	error = xfs_buf_associate_memory(bp, data, len);
+	if (error)
+		goto fail_free_mem;
+	bp->b_flags |= _XBF_KMEM_ALLOC;
+#else
+	bp->b_flags |= _XBF_PAGES;
+ 
 	error = _xfs_buf_map_pages(bp, XBF_MAPPED);
 	if (unlikely(error)) {
 		printk(KERN_WARNING "%s: failed to map pages\n",
 				__func__);
 		goto fail_free_mem;
 	}
+#endif
 
 	xfs_buf_unlock(bp);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	XB_TRACE(bp, "no_daddr", data);
+#else
 	XB_TRACE(bp, "no_daddr", len);
+#endif
 	return bp;
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+fail_free_mem:
+	kmem_free(data/*, malloc_len*/);
+fail_free_buf:
+	xfs_buf_free(bp);
+fail:
+#else
 
  fail_free_mem:
 	while (--i >= 0)
@@ -833,6 +894,7 @@ xfs_buf_get_noaddr(
  fail_free_buf:
 	xfs_buf_deallocate(bp);
  fail:
+#endif
 	return NULL;
 }
 

@@ -993,7 +993,9 @@ int scsi_init_io(struct scsi_cmnd *cmd, gfp_t gfp_mask)
 								printk("%s[%d]:%s [%s], found badsector at %llu of %s curSector %llu\n",
 									   __FILE__, __LINE__, __FUNCTION__,
 									   "read",
-									   badSector, diskname, curSector);
+									   (unsigned long long)badSector, 
+									   diskname, 
+									   (unsigned long long)curSector);
 								return BLKPREP_KILL;
 							} else {
 								grgSdBadSectors[i].rgEnableSector[j] &= ~EN_BAD_SECTOR_READ;
@@ -1004,7 +1006,9 @@ int scsi_init_io(struct scsi_cmnd *cmd, gfp_t gfp_mask)
 								printk("%s[%d]:%s [%s], found badsector at %llu of %s curSector %llu\n",
 									   __FILE__, __LINE__, __FUNCTION__,
 									   "write",
-									   badSector, diskname, curSector);
+									   (unsigned long long)badSector, 
+									   diskname, 
+									   (unsigned long long)curSector);
 								return BLKPREP_KILL;
 							}
 						}

@@ -638,15 +638,26 @@ static int iscsi_post_login_handler(
 			stop_timer = 1;
 		}
 
+#ifdef MY_ABC_HERE
+		if( sess->sess_ops->SessionType ) {
+			printk(KERN_ERR "iSCSI - Discovery session from [%s]\n", ip);
+		} else {
+			printk(KERN_ERR "iSCSI - Client [%s] logged in from [%s] to [%s:%hu]\n",
+					sess->sess_ops->InitiatorName, ip, ip_np, np->np_port);
+		}
+#else
 		printk(KERN_INFO "iSCSI Login successful on CID: %hu from %s to"
 			" %s:%hu,%hu\n", conn->cid, ip, ip_np,
 				np->np_port, tpg->tpgt);
+#endif
 
 		list_add_tail(&conn->conn_list, &sess->sess_conn_list);
 		atomic_inc(&sess->nconn);
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "Incremented iSCSI Connection count to %hu"
 			" from node: %s\n", atomic_read(&sess->nconn),
 			SESS_OPS(sess)->InitiatorName);
+#endif
 		spin_unlock_bh(&sess->conn_lock);
 
 		iscsi_post_login_start_timers(conn);
@@ -673,22 +684,35 @@ static int iscsi_post_login_handler(
 	TRACE(TRACE_STATE, "Moving to TARG_SESS_STATE_LOGGED_IN.\n");
 	sess->session_state = TARG_SESS_STATE_LOGGED_IN;
 
+#ifdef MY_ABC_HERE
+	if( sess->sess_ops->SessionType ) {
+		printk(KERN_ERR "iSCSI - Discovery session from [%s]\n", ip);
+	} else {
+		printk(KERN_ERR "iSCSI - Client [%s] logged in from [%s] to [%s:%hu]\n",
+			sess->sess_ops->InitiatorName, ip, ip_np, np->np_port);
+	}
+#else
 	printk(KERN_INFO "iSCSI Login successful on CID: %hu from %s to %s:%hu,%hu\n",
 		conn->cid, ip, ip_np, np->np_port, tpg->tpgt);
+#endif
 
 	spin_lock_bh(&sess->conn_lock);
 	list_add_tail(&conn->conn_list, &sess->sess_conn_list);
 	atomic_inc(&sess->nconn);
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Incremented iSCSI Connection count to %hu from node:"
 		" %s\n", atomic_read(&sess->nconn),
 		SESS_OPS(sess)->InitiatorName);
+#endif
 	spin_unlock_bh(&sess->conn_lock);
 
 	sess->sid = tpg->sid++;
 	if (!sess->sid)
 		sess->sid = tpg->sid++;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Established iSCSI session from node: %s\n",
 			SESS_OPS(sess)->InitiatorName);
+#endif
 
 #ifdef MY_ABC_HERE
 	atomic_inc(&tpg->nr_sessions);
@@ -697,8 +721,10 @@ static int iscsi_post_login_handler(
 	if (tpg->tpg_tiqn)
 		tpg->tpg_tiqn->tiqn_nsessions++;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Incremented number of active iSCSI sessions to %u on"
 		" iSCSI Target Portal Group: %hu\n", tpg->nsessions, tpg->tpgt);
+#endif
 	spin_unlock_bh(&se_tpg->session_lock);
 
 	iscsi_post_login_start_timers(conn);
@@ -722,8 +748,13 @@ static void iscsi_handle_login_thread_timeout(unsigned long data)
 	spin_lock_bh(&np->np_thread_lock);
 	iscsi_ntoa2(buf_ipv4, np->np_ipv4);
 
+#ifdef MY_ABC_HERE
+	printk(KERN_ERR "iSCSI - Login timeout on Network Portal %s:%hu\n",
+			buf_ipv4, np->np_port);
+#else
 	printk(KERN_ERR "iSCSI Login timeout on Network Portal %s:%hu\n",
 			buf_ipv4, np->np_port);
+#endif
 
 	if (np->np_login_timer_flags & TPG_NP_TF_STOP) {
 		spin_unlock_bh(&np->np_thread_lock);
@@ -1198,10 +1229,12 @@ get_new_sock:
 	conn->local_port = np->np_port;
 #endif
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Received iSCSI login request from %s on %s Network"
 			" Portal %s:%hu\n", ip_init_buf,
 		(conn->network_transport == ISCSI_TCP) ? "TCP" : "SCTP",
 			ip, np->np_port);
+#endif
 
 	TRACE(TRACE_STATE, "Moving to TARG_CONN_STATE_IN_LOGIN.\n");
 	conn->conn_state	= TARG_CONN_STATE_IN_LOGIN;
@@ -1266,7 +1299,7 @@ get_new_sock:
 			spin_unlock_bh(&tpg->tpg_se_tpg->session_lock);
 			break;
 		} else if( i < MAX_LOGIN_RETRY ) {
-			u64 cur_jiffies = get_jiffies_64();
+			unsigned long cur_jiffies = (unsigned long)get_jiffies_64();
 			spin_unlock_bh(&tpg->tpg_se_tpg->session_lock);
 			while( time_is_after_jiffies(cur_jiffies + msecs_to_jiffies(100)) ) {
 				schedule();
@@ -1274,6 +1307,8 @@ get_new_sock:
 		} else {
 			spin_unlock_bh(&tpg->tpg_se_tpg->session_lock);
 			iscsi_tx_login_rsp(conn, STAT_CLASS_INITIATOR, STAT_DETAIL_TOO_MANY_CONNECTIONS);
+			printk(KERN_ERR "iSCSI - The number(%d) of current sessions will exceed the maximum number(%d).",
+					atomic_read(&tpg->nr_sessions), atomic_read(&tpg->max_nr_sessions));
 			goto new_sess_out;
 		}
 	}
@@ -1302,7 +1337,15 @@ get_new_sock:
 	goto get_new_sock;
 
 new_sess_out:
+#ifdef MY_ABC_HERE
+	if( ip ) {
+		printk(KERN_ERR "iSCSI - Login negotiation failed from [%s]\n", ip);
+	} else {
+		printk(KERN_ERR "iSCSI - Login negotiation failed.\n");
+	}
+#else
 	printk(KERN_ERR "iSCSI Login negotiation failed.\n");
+#endif
 #ifdef SNMP_SUPPORT
 	iscsi_collect_login_stats(conn, STAT_CLASS_INITIATOR,
 				  STAT_DETAIL_INIT_ERROR);

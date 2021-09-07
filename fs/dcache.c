@@ -908,6 +908,11 @@ static struct shrinker dcache_shrinker = {
 	.seeks = DEFAULT_SEEKS,
 };
 
+#ifdef MY_ABC_HERE
+static unsigned char UTF8DcacheDStrBuf[UNICODE_UTF8_BUFSIZE];
+extern spinlock_t Dcache_buf_lock;
+#endif
+
 /**
  * d_alloc	-	allocate a dcache entry
  * @parent: parent of entry to allocate
@@ -936,32 +941,11 @@ struct dentry *d_alloc(struct dentry * parent, const struct qstr *name)
 	 * We assume the length of uppercase name is the longest.
 	*/
 	if (parent && (DCACHE_CASELESS_COMPARE & parent->d_flags)) {
-		int needRecount = 0;
-		int len = name->len;
-		u_int8_t *from;
-
-		from = (u_int8_t *)name->name;
-		while (*from && len > 0) {
-			if (*from & 0x80 ) {
-				needRecount = 1;
-				break;
-			}
-			from++;
-			len--;
-		}
-		if (needRecount) {
-			unsigned char *UTF8DcacheDStrBuf;
-			UTF8DcacheDStrBuf = kmalloc(PATH_MAX, GFP_KERNEL);
-			if (!UTF8DcacheDStrBuf) {
-				return NULL;
-			}
-			upperlen = SYNOToUpper(UTF8DcacheDStrBuf, name->name,
-											  PATH_MAX - 1 , name->len, NULL);
-			if (upperlen < name->len) {
-				upperlen = name->len;
-			}
-			kfree(UTF8DcacheDStrBuf);
-		} else {
+		spin_lock(&Dcache_buf_lock);
+		upperlen = SYNOUnicodeUTF8toUpper(UTF8DcacheDStrBuf, name->name,
+										  UNICODE_UTF8_BUFSIZE - 1 , name->len, NULL);
+		spin_unlock(&Dcache_buf_lock);
+		if (upperlen < name->len) {
 			upperlen = name->len;
 		}
 	}else{

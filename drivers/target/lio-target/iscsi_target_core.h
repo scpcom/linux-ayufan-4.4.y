@@ -5,6 +5,10 @@
 #include <linux/configfs.h>
 #include <net/sock.h>
 #include <net/tcp.h>
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+#include <target/target_core_base.h>
+#include <scsi/scsi_cmnd.h>
+#endif
 #include <iscsi_linux_defs.h>
 #include <iscsi_target_version.h>	    /* get version definition */
 
@@ -16,7 +20,14 @@
 #define ISCSI_IQN_UNIQUENESS		14
 #define ISCSI_IQN_LEN			224
 #define ISCSI_TIQN_LEN			ISCSI_IQN_LEN
+#ifndef MY_ABC_HERE
+#define SECONDS_FOR_ASYNC_LOGOUT	3
+#else
 #define SECONDS_FOR_ASYNC_LOGOUT	10
+#endif
+#ifdef MY_ABC_HERE
+#define SECONDS_FOR_TEMP_INACTIVE	60
+#endif
 #define SECONDS_FOR_ASYNC_TEXT		10
 #define IPV6_ADDRESS_SPACE		48
 #define IPV4_ADDRESS_SPACE		4
@@ -28,6 +39,10 @@
 #define ISCSI_MAX_TPGS			64
 /* Size of the Network Device Name Buffer */
 #define ISCSI_NETDEV_NAME_SIZE		12
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+/* Size of iSCSI specific sense buffer */
+#define ISCSI_SENSE_BUFFER_LEN		TRANSPORT_SENSE_BUFFER + 2
+#endif
 
 #ifdef SNMP_SUPPORT
 #include <iscsi_target_mib.h>
@@ -45,7 +60,11 @@
 #define ISCSI_SCTP_VERSION		"v3.0"
 
 /* iscsi_node_attrib_t sanity values */
+#ifdef CONFIG_SYNO_LIO
+#define NA_DATAOUT_TIMEOUT		30
+#else
 #define NA_DATAOUT_TIMEOUT		3
+#endif
 #define NA_DATAOUT_TIMEOUT_MAX		60
 #define NA_DATAOUT_TIMEOUT_MIX		2
 #define NA_DATAOUT_TIMEOUT_RETRIES	5
@@ -74,7 +93,11 @@
 
 /* iscsi_tpg_attrib_t sanity values */
 #define TA_AUTHENTICATION		1
+#ifdef CONFIG_SYNO_LIO
+#define TA_LOGIN_TIMEOUT		30
+#else
 #define TA_LOGIN_TIMEOUT		15
+#endif
 #define TA_LOGIN_TIMEOUT_MAX		30
 #define TA_LOGIN_TIMEOUT_MIN		5
 #define TA_NETIF_TIMEOUT		2
@@ -116,12 +139,14 @@
 #define ISCSI_DEVATTRIB_ADD_LUN_ACL		3
 #define ISCSI_DEVATTRIB_DELETE_LUN_ACL		4
 
+#ifndef MY_ABC_HERE
 /* iscsi_cmd_t->data_direction, same values as target_core_base.h
    and se_cmd_t->data_direction  */
 #define ISCSI_NONE				0
 #define ISCSI_READ				1
 #define ISCSI_WRITE				2
 #define ISCSI_BIDI				3
+#endif
 
 /* iscsi_tiqn_t->tiqn_state */
 #define TIQN_STATE_ACTIVE			1
@@ -345,8 +370,10 @@ struct se_obj_lun_type_s;
 struct scatterlist;
 
 typedef struct iscsi_cmd_s {
+#ifndef MY_ABC_HERE
 	/* iSCSI data direction */
 	u8			data_direction;
+#endif
 	u8			dataout_timer_flags;
 	/* DataOUT timeout retries */
 	u8			dataout_timeout_retries;
@@ -435,6 +462,10 @@ typedef struct iscsi_cmd_s {
 	u32			tx_size;
 	/* Buffer used for various purposes */
 	void			*buf_ptr;
+#ifdef MY_ABC_HERE
+	/* See include/linux/dma-mapping.h */
+	enum dma_data_direction data_direction;
+#endif
 	/* iSCSI PDU Header + CRC */
 	unsigned char		pdu[ISCSI_HDR_LEN + CRC_LEN];
 	/* Number of times iscsi_cmd_t is present in immediate queue */
@@ -484,10 +515,21 @@ typedef struct iscsi_cmd_s {
 	struct iscsi_cmd_s	*t_next;
 	/* Previous command in DAS transport list */
 	struct iscsi_cmd_s	*t_prev;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	/* The TCM I/O descriptor that is accessed via container_of() */
+	struct se_cmd_s		se_cmd;
+	/* Sense buffer that will be mapped into outgoing status */
+	unsigned char		sense_buffer[ISCSI_SENSE_BUFFER_LEN];
+#else
 	struct se_cmd_s		*se_cmd;
+#endif
 }  ____cacheline_aligned iscsi_cmd_t;
 
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+#define SE_CMD(cmd)		(&(cmd)->se_cmd)
+#else
 #define SE_CMD(cmd)		((struct se_cmd_s *)(cmd)->se_cmd)
+#endif
 
 #include <iscsi_seq_and_pdu_list.h>
 
@@ -864,6 +906,9 @@ typedef struct iscsi_portal_group_s {
 	/* Spinlock for adding/removing Network Portals */
 	spinlock_t		tpg_np_lock;
 	spinlock_t		tpg_state_lock;
+#ifdef MY_ABC_HERE
+	struct timer_list	inactive_timer;
+#endif
 	struct se_portal_group_s *tpg_se_tpg;
 	struct config_group	tpg_np_group;
 	struct config_group	tpg_lun_group;

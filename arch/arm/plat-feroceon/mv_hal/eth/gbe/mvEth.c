@@ -2179,8 +2179,58 @@ MV_STATUS   mvEthUdpRxQueue(void* pPortHandle, int udpQueue)
 
 
 /******************************************************************************/
-/*                          Speed, Duplex, FlowControl routines               */
+/*                          Link, Speed, Duplex, FlowControl routines               */
 /******************************************************************************/
+
+/*******************************************************************************
+* mvEthForceLinkModeSet -
+*
+* DESCRIPTION:
+*       Sets "Force Link Pass" and "Force Link Fail" bits.
+* 	Note: This function should only be called when the port is disabled.
+*
+* INPUT:
+*       void    *pPortHandle    - Pointer to port specific handler;
+* 	MV_BOOL force_link_pass	- Force Link Pass
+* 	MV_BOOL force_link_fail - Force Link Failure
+*		0, 0 - normal state: detect link via PHY and connector
+*		1, 1 - prohibited state.
+*
+* RETURN:
+*******************************************************************************/
+MV_STATUS mvEthForceLinkModeSet(void* pPortHandle, MV_BOOL force_link_up, MV_BOOL force_link_down)
+{
+	ETH_PORT_CTRL   *pPortCtrl = (ETH_PORT_CTRL *)pPortHandle;
+	int             port = pPortCtrl->portNo;
+	MV_U32		portSerialCtrlReg;
+
+	if ((port < 0) || (port >= (int)mvCtrlEthMaxPortGet()))
+		return MV_OUT_OF_RANGE;
+
+	pPortCtrl = ethPortCtrl[port];
+	if (pPortCtrl == NULL)
+		return MV_NOT_FOUND;
+
+	/* Can't force link pass and link fail at the same time */
+	if ((force_link_up) && (force_link_down))
+		return MV_BAD_PARAM;
+
+	portSerialCtrlReg = MV_REG_READ(ETH_PORT_SERIAL_CTRL_REG(port));
+
+	if (force_link_up)
+		portSerialCtrlReg |= ETH_FORCE_LINK_PASS_MASK;
+	else
+		portSerialCtrlReg &= ~ETH_FORCE_LINK_PASS_MASK;
+
+	if (force_link_down)
+		portSerialCtrlReg &= ~ETH_DO_NOT_FORCE_LINK_FAIL_MASK;
+	else
+		portSerialCtrlReg |= ETH_DO_NOT_FORCE_LINK_FAIL_MASK;
+
+	MV_REG_WRITE(ETH_PORT_SERIAL_CTRL_REG(port), portSerialCtrlReg);
+
+	return MV_OK;
+}
 
 /*******************************************************************************
 * mvEthSpeedDuplexSet - Set Speed and Duplex of the port.

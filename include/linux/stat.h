@@ -9,11 +9,6 @@
 
 #if defined(__KERNEL__) || !defined(__GLIBC__) || (__GLIBC__ < 2)
 
-#ifdef CONFIG_FS_SYNO_ACL
-#define S_FORCE_CHMOD  40000000 //1 << 30
-#define S_IS_FORCE_CHMOD(m)	((m) & S_FORCE_CHMOD)
-#endif
-
 #define S_IFMT  00170000
 #define S_IFSOCK 0140000
 #define S_IFLNK	 0120000
@@ -70,6 +65,9 @@ struct kstat {
 	umode_t		mode;
 #ifdef MY_ABC_HERE
 	__u32		SynoMode;
+#endif
+#ifdef MY_ABC_HERE
+	__u32		syno_archive_version;
 #endif
 	unsigned int	nlink;
 	uid_t		uid;

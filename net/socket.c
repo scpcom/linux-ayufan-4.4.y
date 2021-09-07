@@ -115,6 +115,10 @@ static long compat_sock_ioctl(struct file *file,
 static int sock_fasync(int fd, struct file *filp, int on);
 static ssize_t sock_sendpage(struct file *file, struct page *page,
 			     int offset, size_t size, loff_t *ppos, int more);
+#ifdef CONFIG_SYNO_PLX_PORTING
+static ssize_t sock_sendpages(struct file *file, struct page **page,
+			     int offset, size_t size, loff_t *ppos, int more);
+#endif
 static ssize_t sock_splice_read(struct file *file, loff_t *ppos,
 			        struct pipe_inode_info *pipe, size_t len,
 				unsigned int flags);
@@ -139,6 +143,9 @@ static const struct file_operations socket_file_ops = {
 	.release =	sock_close,
 	.fasync =	sock_fasync,
 	.sendpage =	sock_sendpage,
+#ifdef CONFIG_SYNO_PLX_PORTING
+	.sendpages = sock_sendpages,
+#endif
 	.splice_write = generic_splice_sendpage,
 	.splice_read =	sock_splice_read,
 };
@@ -738,6 +745,23 @@ static ssize_t sock_sendpage(struct file *file, struct page *page,
 
 	return kernel_sendpage(sock, page, offset, size, flags);
 }
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+static ssize_t sock_sendpages(struct file *file, struct page **page,
+			     int offset, size_t size, loff_t *ppos, int more)
+{
+	struct socket *sock;
+	int flags;
+
+	sock = file->private_data;
+
+	flags = !(file->f_flags & O_NONBLOCK) ? 0 : MSG_DONTWAIT;
+	if (more)
+		flags |= MSG_MORE;
+
+	return sock->ops->sendpages(sock, page, offset, size, flags);
+}
+#endif
 
 static ssize_t sock_splice_read(struct file *file, loff_t *ppos,
 			        struct pipe_inode_info *pipe, size_t len,

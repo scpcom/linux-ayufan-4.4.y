@@ -75,6 +75,11 @@ static int ext4_freeze(struct super_block *sb);
 
 #ifdef MY_ABC_HERE
 extern struct dentry_operations ext4_dentry_operations;
+
+spinlock_t Ext4Namei_buf_lock;  /* lock for UTF8Ext4NameiStrBuf[] in fs/ext4/namei.c */
+spinlock_t Ext4Hash_buf_lock;   /* lock for UTF8Ext4HashStrBuf[] in fs/ext4/hash.c */
+static int Ext4Namei_lock_init = 0;
+static int Ext4Hash_lock_init = 0;
 #endif
 
 ext4_fsblk_t ext4_block_bitmap(struct super_block *sb,
@@ -234,21 +239,18 @@ handle_t *ext4_journal_start_sb(struct super_block *sb, int nblocks)
 	if (sb->s_flags & MS_RDONLY)
 		return ERR_PTR(-EROFS);
 
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	/* ext4 has no check of SB_FREEZE_WRITE. which mean it rely on fs
 	   blocking of write action. Other action such as inode delete will
 	   passby barrier in freeze_bdev(). We just add a workaround to
 	   avoid deadlock*/
 	if (!journal_current_handle()) {
-		vfs_check_frozen(sb, SB_FREEZE_TRANS);
+		vfs_check_frozen(sb, SB_FREEZE_WRITE);
 	}
-#else
-	vfs_check_frozen(sb, SB_FREEZE_TRANS);
-#endif
 #else
 	vfs_check_frozen(sb, SB_FREEZE_WRITE);
 #endif
+
 	/* Special case here: if the journal has aborted behind our
 	 * backs (eg. EIO in the commit thread), then we still need to
 	 * take the FS itself readonly cleanly. */
@@ -265,6 +267,39 @@ handle_t *ext4_journal_start_sb(struct super_block *sb, int nblocks)
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
 EXPORT_SYMBOL(ext4_journal_start_sb);
 #endif
+
+#ifdef MY_ABC_HERE
+handle_t *ext4_journal_start_sb_sync(struct super_block *sb, int nblocks)
+{
+	journal_t *journal;
+
+	if (sb->s_flags & MS_RDONLY)
+		return ERR_PTR(-EROFS);
+
+#if 1 // different part comparing to ext4_journal_start_sb()
+	/* This variant of ext4_journal_start_sb is used for sync_filesytem,
+	   which should only blocked by not be blocked by SB_FREEZE_TRANS,
+	   not SB_FREEZE_WRITE */
+	if (!journal_current_handle()) {
+		vfs_check_frozen(sb, SB_FREEZE_TRANS);
+	}
+#endif
+
+	/* Special case here: if the journal has aborted behind our
+	 * backs (eg. EIO in the commit thread), then we still need to
+	 * take the FS itself readonly cleanly. */
+	journal = EXT4_SB(sb)->s_journal;
+	if (journal) {
+		if (is_journal_aborted(journal)) {
+			ext4_abort(sb, __func__, "Detected aborted journal");
+			return ERR_PTR(-EROFS);
+		}
+		return jbd2_journal_start(journal, nblocks);
+	}
+	return ext4_get_nojournal();
+}
+#endif
+
 /*
  * The only special thing we need to do here is to make sure that all
  * jbd2_journal_stop calls result in the superblock being marked dirty, so
@@ -3031,6 +3066,9 @@ no_journal:
 	// root is mounted, attach our dentry operations
 	sb->s_root->d_op = &ext4_dentry_operations;
 #endif
+#ifdef MY_ABC_HERE
+	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
+#endif
 	ext4_setup_super(sb, es, sb->s_flags & MS_RDONLY);
 
 	/* determine the minimum size of new large inodes, if present */
@@ -3108,7 +3146,16 @@ no_journal:
 		descr = "out journal";
 
 	ext4_msg(sb, KERN_INFO, "mounted filesystem with%s", descr);
-
+#ifdef MY_ABC_HERE
+	if (!Ext4Namei_lock_init) {
+		spin_lock_init(&Ext4Namei_buf_lock);
+		Ext4Namei_lock_init=1;
+	}
+	if (!Ext4Hash_lock_init) {
+		spin_lock_init(&Ext4Hash_buf_lock);
+		Ext4Hash_lock_init=1;
+	}
+#endif
 	lock_kernel();
 	return 0;
 
@@ -3454,6 +3501,9 @@ static int ext4_commit_super(struct super_block *sb, int sync)
 					&EXT4_SB(sb)->s_freeblocks_counter));
 	es->s_free_inodes_count = cpu_to_le32(percpu_counter_sum_positive(
 					&EXT4_SB(sb)->s_freeinodes_counter));
+#ifdef MY_ABC_HERE
+	es->s_archive_version = cpu_to_le32(sb->s_archive_version);
+#endif
 	sb->s_dirt = 0;
 	BUFFER_TRACE(sbh, "marking dirty");
 	mark_buffer_dirty(sbh);
@@ -3555,6 +3605,8 @@ int ext4_force_commit(struct super_block *sb)
 	journal = EXT4_SB(sb)->s_journal;
 	if (journal) {
 #ifdef MY_ABC_HERE
+		/* This is for syncing file system and should not
+		   be blocked by SB_FREEZE_WRITE */
 		vfs_check_frozen(sb, SB_FREEZE_TRANS);
 #else
 		vfs_check_frozen(sb, SB_FREEZE_WRITE);
@@ -3901,8 +3953,13 @@ static int ext4_write_dquot(struct dquot *dquot)
 	struct inode *inode;
 
 	inode = dquot_to_inode(dquot);
+#ifdef MY_ABC_HERE
+	handle = ext4_journal_start_sb_sync(inode->i_sb,
+					EXT4_QUOTA_TRANS_BLOCKS(dquot->dq_sb));
+#else
 	handle = ext4_journal_start(inode,
 				    EXT4_QUOTA_TRANS_BLOCKS(dquot->dq_sb));
+#endif
 	if (IS_ERR(handle))
 		return PTR_ERR(handle);
 	ret = dquot_commit(dquot);
@@ -3965,7 +4022,11 @@ static int ext4_write_info(struct super_block *sb, int type)
 	handle_t *handle;
 
 	/* Data block + inode block */
+#ifdef MY_ABC_HERE
+	handle = ext4_journal_start_sb_sync(sb->s_root->d_inode->i_sb, 2);
+#else
 	handle = ext4_journal_start(sb->s_root->d_inode, 2);
+#endif
 	if (IS_ERR(handle))
 		return PTR_ERR(handle);
 	ret = dquot_commit_info(sb, type);

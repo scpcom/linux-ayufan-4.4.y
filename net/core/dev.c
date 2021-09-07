@@ -133,6 +133,9 @@
 #if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 #include <linux/synobios.h>
 extern char gszSynoHWVersion[16];
+#include <linux/pci.h>
+extern unsigned int gSwitchDev;
+extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
 
 /* Instead of increasing this, you should create a hash table. */
@@ -176,7 +179,7 @@ void convert_str_to_mac( char *source , char *dest )
 #define SYNO_VENDOR_MAC_FAIL        2
 int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
 {
-	extern unsigned char grgbLanMac[2][16];
+	extern unsigned char grgbLanMac[4][16];
 	int err = SYNO_VENDOR_MAC_FAIL;
 
 	if (!szMac || !szDev)
@@ -194,6 +197,18 @@ int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
 			goto ERR;
 		}
 		convert_str_to_mac(grgbLanMac[1], szMac);
+	} else if ( !memcmp(szDev, "eth2", 4) ) {
+		if (!strcmp(grgbLanMac[2], "")) {
+			err = SYNO_VENDOR_MAC_EMPTY;
+			goto ERR;
+		}
+		convert_str_to_mac(grgbLanMac[2], szMac);
+	} else if ( !memcmp(szDev, "eth3", 4) ) {
+		if (!strcmp(grgbLanMac[3], "")) {
+			err = SYNO_VENDOR_MAC_EMPTY;
+			goto ERR;
+		}
+		convert_str_to_mac(grgbLanMac[3], szMac);
 	} else {
 		goto ERR;
 	}
@@ -1152,57 +1167,6 @@ int dev_open(struct net_device *dev)
 	ret = notifier_to_errno(ret);
 	if (ret)
 		return ret;
-
-#ifdef MY_ABC_HERE
-	{
-		extern unsigned char grgbLanMac[2][16];
-		struct ifreq ifr;
-		unsigned char rgbLanMac[6];
-		unsigned char szMac[MAX_ADDR_LEN];
-		int changeMac = 0;
-
-		memset(rgbLanMac, 0, sizeof(rgbLanMac));
-		memset(szMac, 0, sizeof(szMac));
-
-		changeMac = syno_get_dev_vendor_mac(dev->name, szMac);
-		if ( SYNO_VENDOR_MAC_EMPTY == changeMac){
-			unsigned char szRandomMac[MAX_ADDR_LEN];
-
-			get_random_bytes(rgbLanMac, 6);
-			rgbLanMac[0] = 0x0;
-			snprintf(szRandomMac, sizeof(szRandomMac),
-				"%02x%02x%02x%02x%02x%02x",
-				rgbLanMac[0],
-				rgbLanMac[1],
-				rgbLanMac[2],
-				rgbLanMac[3],
-				rgbLanMac[4],
-				rgbLanMac[5]);
-			printk("Random MAC address "
-				"%02x:%02x:%02x:%02x:%02x:%02x\n",
-				rgbLanMac[0],
-				rgbLanMac[1],
-				rgbLanMac[2],
-				rgbLanMac[3],
-				rgbLanMac[4],
-				rgbLanMac[5]);
-			convert_str_to_mac(szRandomMac, szMac);
-		}
-
-		/* bonding will set eth0 mac addr to dev hwaddr before dev_open
-		 * if we set bonding and write hwaddr here, we will rewrite dev hwaddr
-		 * and bonding will not work correctly.
-		 * So, if this dev had added to slave, we should not write hwaddr here.
-		 */
-		if (!(dev->flags & IFF_SLAVE)) {
-			if ( SYNO_VENDOR_MAC_FAIL != changeMac ) {
-				memcpy(ifr.ifr_ifru.ifru_hwaddr.sa_data, szMac, ETH_ALEN);
-				ifr.ifr_ifru.ifru_hwaddr.sa_family = ARPHRD_ETHER;
-				dev_set_mac_address(dev, &ifr.ifr_ifru.ifru_hwaddr);
-			}
-		}
-	}
-#endif
 
 	/*
 	 *  Call device private open method
@@ -5070,6 +5034,26 @@ int register_netdev(struct net_device *dev)
 			if ( swapped == 0 && !strcmp(dev->name, "eth0") ) {
 				snprintf(dev->name, sizeof(dev->name), "eth1");
 				swapped = 1;
+			}
+		}
+		if (gSwitchDev > 0) {
+			struct pci_dev *pcid = to_pci_dev((dev)->dev.parent);
+			char *szPCIName = NULL;
+			char szPCIChangeName[16] = {0};
+			int i;
+
+			if (pcid == NULL) {
+				printk("synology:unable to get the pci device of the network interface: %s\n", dev->name);
+			} else {
+				szPCIName = (char *)pci_name(pcid);
+				for (i = 0 ; i < gSwitchDev ; i++) {
+					snprintf(szPCIChangeName, sizeof(szPCIChangeName), "0000:%c%c:%c%c.%c",
+						gDevPCIName[i][1],gDevPCIName[i][2],gDevPCIName[i][3],gDevPCIName[i][4],gDevPCIName[i][5]);
+					if (0 == strncmp(szPCIName, szPCIChangeName, strlen(szPCIName))) {
+						snprintf(dev->name, sizeof(dev->name), "eth%c", gDevPCIName[i][0]);
+						break;
+					}
+				}
 			}
 		}
 #endif

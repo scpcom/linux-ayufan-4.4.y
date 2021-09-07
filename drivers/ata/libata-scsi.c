@@ -55,8 +55,6 @@
 #endif
 
 #if defined(MY_ABC_HERE)
-//#define DBGMESG(x...)	printk(x)
-#define DBGMESG(x...)
 #include <linux/synosata.h>
 #include <linux/list.h>
 extern int (*funcSYNOSendHibernationEvent)(unsigned int, unsigned int);
@@ -66,6 +64,11 @@ DEFINE_SPINLOCK(PendingLock);
 static unsigned long CurPendingListSleep = 0;
 static unsigned long CurPendingListWaking = 0;
 static unsigned long int g_jiffies_lastwake = 0;
+#endif
+
+#if defined(CONFIG_SYNO_MV88F6281)
+extern unsigned char SYNOKirkwoodIsBoardNeedPowerUpHDD(u32);
+extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 #endif
 
 #define SECTOR_SIZE		512
@@ -80,8 +83,13 @@ typedef unsigned int (*ata_xlat_func_t)(struct ata_queued_cmd *qc);
 
 static struct ata_device *__ata_scsi_find_dev(struct ata_port *ap,
 					const struct scsi_device *scsidev);
+#ifdef MY_DEF_HERE
+struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
+					    const struct scsi_device *scsidev);
+#else
 static struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
 					    const struct scsi_device *scsidev);
+#endif
 static int ata_scsi_user_scan(struct Scsi_Host *shost, unsigned int channel,
 			      unsigned int id, unsigned int lun);
 
@@ -419,9 +427,9 @@ syno_gpio_read_with_sdev(struct ata_port *ap, char *buf, struct scsi_device *sde
 
 	if (syno_gpio_with_scmd(ap, sdev, &pm_pkg, READ)) {
 		len = -EIO;
-		sprintf(buf, "gpio=\"\"%s", "\n");
+		sprintf(buf, "%s=\"\"%s", EBOX_GPIO_KEY, "\n");
 	}else{
-		len = sprintf(buf, "gpio=\"0x%x\"%s", pm_pkg.var, "\n");
+		len = sprintf(buf, "%s=\"0x%x\"%s", EBOX_GPIO_KEY, pm_pkg.var, "\n");
 	}
 
 	return len;
@@ -446,9 +454,9 @@ WAIT:
 
 	if (task.blIsErr) {
 		len = -EIO;
-		sprintf(buf, "gpio=\"\"%s", "\n");
+		sprintf(buf, "%s=\"\"%s", EBOX_GPIO_KEY, "\n");
 	} else {
-		len = sprintf(buf, "gpio=\"0x%x\"%s", task.pm_pkg.var, "\n");
+		len = sprintf(buf, "%s=\"0x%x\"%s", EBOX_GPIO_KEY, task.pm_pkg.var, "\n");
 	}
 	return len;
 }
@@ -470,7 +478,7 @@ syno_pm_gpio_show(struct device *dev, struct device_attribute *attr, char *buf)
 	if (ap->nr_pmp_links &&
 		syno_is_synology_pm(ap)) {
 		if (defer_gpio_cmd(ap, 0, READ)) {
-			sprintf(buf, "%s%s", "gpio=\"\"", "\n");
+			sprintf(buf, "%s%s%s", EBOX_GPIO_KEY, "=\"\"", "\n");
 			return len;
 		} else if ((sdev = look_up_scsi_dev_from_ap(ap))) {
 			return syno_gpio_read_with_sdev(ap, buf, sdev);
@@ -478,7 +486,7 @@ syno_pm_gpio_show(struct device *dev, struct device_attribute *attr, char *buf)
 			return syno_gpio_read_no_sdev(ap, buf);
 		}
 	} else {
-		len = sprintf(buf, "%s%s", "gpio=\"\"", "\n");
+		len = sprintf(buf, "%s%s%s", EBOX_GPIO_KEY, "=\"\"", "\n");
 	}
 
 	return len;
@@ -564,7 +572,7 @@ syno_pm_gpio_store(struct device *dev, struct device_attribute *attr, const char
 	struct ata_port *ap = ata_shost_to_port(shost);
 	struct scsi_device *sdev = NULL;
 	/* please man 2 write */
-	size_t ret = -EIO;
+	ssize_t ret = -EIO;
 	u32 input;
 
 	sscanf(buf, "%x", &input);
@@ -619,18 +627,18 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 				strncat(szTmp1, szTmp, BDEVNAME_SIZE);
 			}
 		}
-		snprintf(buf, PAGE_SIZE, "%s%s%s", "syno_device_list=\"", szTmp1, "\"\n");
+		snprintf(buf, PAGE_SIZE, "%s%s%s%s", EBOX_INFO_DEV_LIST_KEY, "=\"", szTmp1, "\"\n");
 
 		/* vendor id and device id */
 		snprintf(szTmp,
 				 BDEVNAME_SIZE,
-				 "vendorid=%s0x%x%s", "\"",
+				 "%s=%s0x%x%s", EBOX_INFO_VENDOR_KEY, "\"",
 				 sata_pmp_gscr_vendor(ap->link.device->gscr),
 				 "\"\n");
 		snprintf(szTmp1, PAGE_SIZE, "%s", szTmp);
 		snprintf(szTmp,
 				 BDEVNAME_SIZE,
-				 "deviceid=%s%x%s", "\"",
+				 "%s=%s%x%s", EBOX_INFO_DEVICE_KEY, "\"",
 				 sata_pmp_gscr_devid(ap->link.device->gscr),
 				 "\"\n");
 		strncat(szTmp1, szTmp, BDEVNAME_SIZE);
@@ -638,15 +646,104 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 		/* error handle processing */
 		snprintf(szTmp,
 				 BDEVNAME_SIZE,
-				 "error_handle=%s%s%s", "\"",
+				 "%s=%s%s%s", EBOX_INFO_ERROR_HANDLE, "\"",
 				 ap->pflags ? "yes" : "no",
 				 "\"\n");
+		strncat(szTmp1, szTmp, BDEVNAME_SIZE);
+		
+		/* unique model name and EMID*/
+		if(IS_SYNOLOGY_RX410(ap->PMSynoUnique)){
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"0\"\n", 
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_RX410,
+					EBOX_INFO_EMID_KEY);
+		}else if(IS_SYNOLOGY_RX4(ap->PMSynoUnique)) {
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"0\"\n",
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_RX4,
+					EBOX_INFO_EMID_KEY);
+		}else if(IS_SYNOLOGY_DX510(ap->PMSynoUnique)) {
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"0\"\n", 
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_DX510,
+					EBOX_INFO_EMID_KEY);
+		}else if(IS_SYNOLOGY_DX5(ap->PMSynoUnique)) {
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"0\"\n",
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_DX5,
+					EBOX_INFO_EMID_KEY);
+		}else if(IS_SYNOLOGY_DXC(ap->PMSynoUnique)) {
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"%d\"\n",
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_DXC,
+					EBOX_INFO_EMID_KEY,
+					ap->PMSynoEMID);
+		}else if(IS_SYNOLOGY_RXC(ap->PMSynoUnique)) {
+
+			if(ap->PMSynoIsRP) {
+				snprintf(szTmp,
+						BDEVNAME_SIZE,
+						"%s=\"%s\"\n%s=\"%d\"\n",
+						EBOX_INFO_UNIQUE_KEY,
+						EBOX_INFO_UNIQUE_RXCRP,
+						EBOX_INFO_EMID_KEY,
+						ap->PMSynoEMID);
+			} else {
+				snprintf(szTmp,
+						BDEVNAME_SIZE,
+						"%s=\"%s\"\n%s=\"%d\"\n",
+						EBOX_INFO_UNIQUE_KEY,
+						EBOX_INFO_UNIQUE_RXC,
+						EBOX_INFO_EMID_KEY,
+						ap->PMSynoEMID);
+			}
+		}else if(IS_SYNOLOGY_DX212(ap->PMSynoUnique)){
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"%d\"\n",
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_DX212,
+					EBOX_INFO_EMID_KEY,
+					ap->PMSynoEMID);
+		}else {
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"Unknown\"\n%s=\"0\"\n", EBOX_INFO_UNIQUE_KEY, EBOX_INFO_EMID_KEY);
+		}
+		strncat(szTmp1, szTmp, BDEVNAME_SIZE);
+
+		/* Host Unique ID */
+		snprintf(szTmp,
+				BDEVNAME_SIZE,
+				"%s=\"%lx\"\n",
+				EBOX_INFO_SATAHOST_KEY,
+				(unsigned long)ap->host);
+
+		strncat(szTmp1, szTmp, BDEVNAME_SIZE);
+
+		/* ATA Port Number */
+		snprintf(szTmp,
+				BDEVNAME_SIZE,
+				"%s=\"%u\"\n",
+				EBOX_INFO_PORTNO_KEY,
+				ap->port_no);
+
 		strncat(szTmp1, szTmp, BDEVNAME_SIZE);
 
 		/* put it together */
 		len = snprintf(buf, PAGE_SIZE, "%s%s", buf, szTmp1);
 	} else {
-		len = snprintf(buf, PAGE_SIZE, "%s%s", "syno_device_list=\"\"", "\n");
+		len = snprintf(buf, PAGE_SIZE, "%s%s%s", EBOX_INFO_DEV_LIST_KEY, "=\"\"", "\n");
 	}
 
 	return len;
@@ -654,6 +751,143 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 
 DEVICE_ATTR(syno_pm_info, S_IRUGO, syno_pm_info_show, NULL);
 EXPORT_SYMBOL_GPL(dev_attr_syno_pm_info);
+#endif
+
+#ifdef MY_ABC_HERE
+static ssize_t syno_wcache_show(struct device *device,
+				  struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(device);
+	struct ata_port *ap;
+	struct ata_device *dev;
+	unsigned long flags;
+	int rc = 0;
+
+	ap = ata_shost_to_port(sdev->host);
+
+	spin_lock_irqsave(ap->lock, flags);
+	dev = ata_scsi_find_dev(ap, sdev);
+	if (!dev) {
+		rc = -ENODEV;
+		goto unlock;
+	}
+
+	if (dev->class != ATA_DEV_ATA) {
+		rc = -EOPNOTSUPP;
+		goto unlock;
+	}
+
+	if (dev->flags & ATA_DFLAG_NO_WCACHE) {
+		rc = snprintf(buf, 20, "%s\n", "wcache_disable");
+	} else {
+		rc = snprintf(buf, 20, "%s\n", "wcache_enable");
+	}
+
+unlock:
+	spin_unlock_irq(ap->lock);
+
+	return rc;
+}
+
+static ssize_t syno_wcache_store(struct device *device,
+				   struct device_attribute *attr,
+				   const char *buf, size_t len)
+{
+	unsigned char model_num[ATA_ID_PROD_LEN + 1];
+	unsigned char model_rev[ATA_ID_FW_REV_LEN + 1];
+	struct ata_blacklist_entry *ad = ata_device_blacklist;
+	struct scsi_device *sdev = to_scsi_device(device);
+	struct ata_port *ap;
+	struct ata_device *dev;
+	long int input;
+	unsigned long flags;
+	int rc;
+
+	rc = strict_strtol(buf, 10, &input);
+	if (rc)
+		return -EINVAL;
+
+	ap = ata_shost_to_port(sdev->host);
+
+	spin_lock_irqsave(ap->lock, flags);
+	dev = ata_scsi_find_dev(ap, sdev);
+	if (unlikely(!dev)) {
+		rc = -ENODEV;
+		goto unlock;
+	}
+	if (dev->class != ATA_DEV_ATA) {
+		rc = -EOPNOTSUPP;
+		goto unlock;
+	}
+
+	// update ata_device_blacklist
+	ata_id_c_string(dev->id, model_num, ATA_ID_PROD, sizeof(model_num));
+	ata_id_c_string(dev->id, model_rev, ATA_ID_FW_REV, sizeof(model_rev));
+	while (ad->model_num) {
+		if (!strn_pattern_cmp(ad->model_num, model_num, '*')) {
+			if (ad->model_rev == NULL || !strn_pattern_cmp(ad->model_rev, model_rev, '*')) {
+				if (input) {
+					ad->horkage &= ~ATA_HORKAGE_NOWCACHE;
+				} else {
+					ad->horkage |= ATA_HORKAGE_NOWCACHE;
+				}
+			}
+		}
+		ad++;
+	}
+
+	if (!input) {
+		if (dev->flags & ATA_DFLAG_NO_WCACHE) {
+			rc = 0;
+			goto unlock;
+		}
+
+		dev->link->eh_info.dev_action[dev->devno] |= ATA_EH_WCACHE_DISABLE;
+		dev->flags |= ATA_DFLAG_NO_WCACHE;
+		dev->horkage |= ATA_HORKAGE_NOWCACHE;
+		ata_port_schedule_eh(ap);
+	} else {
+		dev->flags &= ~ATA_DFLAG_NO_WCACHE;
+		dev->horkage &= ~ATA_HORKAGE_NOWCACHE;
+	}
+
+unlock:
+	spin_unlock_irqrestore(ap->lock, flags);
+
+	return rc ? rc : len;
+}
+DEVICE_ATTR(syno_wcache, S_IRUGO | S_IWUSR,
+	    syno_wcache_show, syno_wcache_store);
+EXPORT_SYMBOL_GPL(dev_attr_syno_wcache);
+#endif
+#ifdef MY_ABC_HERE
+static ssize_t
+syno_disk_serial_show(struct device *device,
+					  struct device_attribute *attr, char *buf)
+{
+	/* copy from ata_scsi_park_show to get ata_device */
+	struct scsi_device *sdev = to_scsi_device(device);
+	struct ata_port *ap = NULL;
+	struct ata_device *dev = NULL;
+	ssize_t len = 0;
+	char szDiskSerial[ATA_ID_SERNO_LEN + 1] = {'\0'};
+	char *szStripSerial = NULL;
+
+	ap = ata_shost_to_port(sdev->host);
+	dev = ata_scsi_find_dev(ap, sdev);
+	if (dev) {
+		ata_id_string(dev->id, szDiskSerial, ATA_ID_SERNO, ATA_ID_SERNO_LEN);
+		/* strip whitespace, user.agent no need to parase  */
+		szStripSerial = strstrip(szDiskSerial);
+		/* +2, '\0' and '\n' */
+		len = snprintf(buf, strlen(szStripSerial) + 2, "%s%s", szStripSerial, "\n");
+	}
+
+	return len;
+}
+
+DEVICE_ATTR(syno_disk_serial, S_IRUGO, syno_disk_serial_show, NULL);
+EXPORT_SYMBOL_GPL(dev_attr_syno_disk_serial);
 #endif
 static ssize_t ata_scsi_park_show(struct device *device,
 				  struct device_attribute *attr, char *buf)
@@ -843,6 +1077,12 @@ EXPORT_SYMBOL_GPL(dev_attr_sw_activity);
 
 struct device_attribute *ata_common_sdev_attrs[] = {
 	&dev_attr_unload_heads,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_disk_serial,
+#endif
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_wcache,
+#endif
 	NULL
 };
 EXPORT_SYMBOL_GPL(ata_common_sdev_attrs);
@@ -2271,9 +2511,10 @@ static void ata_scsi_qc_complete(struct ata_queued_cmd *qc)
 		qc->dev->lastcmd_when = jiffies;
 	}
 
-	if (ATA_CMD_IDLEIMMEDIATE == qc->tf.command ||
-		ATA_CMD_STANDBY == qc->tf.command ||
-		ATA_CMD_STANDBYNOW1 == qc->tf.command) {
+	if ((cdb[0] == ATA_16) && 
+		(ATA_CMD_IDLEIMMEDIATE == qc->tf.command ||
+		 ATA_CMD_STANDBY == qc->tf.command ||
+		 ATA_CMD_STANDBYNOW1 == qc->tf.command)) {
 		DBGMESG("disk %d set must_checkpw\n", ap->print_id);
 		qc->dev->must_checkpw = 1;
 	}
@@ -2292,9 +2533,10 @@ static int ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd,
 void ResubmitCommand(unsigned long data)
 {
 	struct ata_device *dev = (struct ata_device *)data;
+	struct ata_port *ap = dev->link->ap;
 	unsigned long flags;
 
-	spin_lock_irqsave(dev->link->ap->lock, flags);
+	spin_lock_irqsave(ap->lock, flags);
 	if (test_and_clear_bit(CHKPOWER_WAKING, &(dev->chkpower_pending))) {
 		/* remove this dev from list */
 		spin_lock(&PendingLock);
@@ -2304,7 +2546,7 @@ void ResubmitCommand(unsigned long data)
 			BUG();
 		}
 		list_del(&dev->pendinglh);
-		set_bit(dev->link->ap->print_id, &CurPendingListWaking);
+		set_bit(ap->print_id, &CurPendingListWaking);
 		if ((CurPendingListWaking == CurPendingListSleep) && list_empty(&PendingList)) {
 			CurPendingListWaking = CurPendingListSleep = 0;
 			DBGMESG("*** CurPendingListWaking == CurPendingListSleep Ok to start check power \n");
@@ -2312,8 +2554,8 @@ void ResubmitCommand(unsigned long data)
 		spin_unlock(&PendingLock);
 	}
 	clear_bit(CHKPOWER_TIMEOUT, &(dev->chkpower_pending));
-	DBGMESG("disk %d resubmit\n", dev->link->ap->print_id);
-	spin_unlock_irqrestore(dev->link->ap->lock, flags);
+
+	spin_unlock_irqrestore(ap->lock, flags);
 }
 
 static void SynoScheduleWakeUp(struct ata_device *dev,
@@ -3289,6 +3531,13 @@ static void atapi_request_sense(struct ata_queued_cmd *qc)
 
 	DPRINTK("ATAPI request sense\n");
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (ap->ops->acquire_hw && !ap->ops->acquire_hw(ap->port_no, 0, 0)) {
+		printk(KERN_WARNING "atapi_request_sense() Failed to acquire hardware\n");
+		return;
+	}
+#endif
+
 	/* FIXME: is this needed? */
 	memset(cmd->sense_buffer, 0, SCSI_SENSE_BUFFERSIZE);
 
@@ -3556,8 +3805,13 @@ static struct ata_device *__ata_scsi_find_dev(struct ata_port *ap,
  *	RETURNS:
  *	Associated ATA device, or %NULL if not found.
  */
+#ifdef MY_DEF_HERE
+struct ata_device *
+ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
+#else
 static struct ata_device *
 ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
+#endif
 {
 	struct ata_device *dev = __ata_scsi_find_dev(ap, scsidev);
 
@@ -3566,6 +3820,9 @@ ata_scsi_find_dev(struct ata_port *ap, const struct scsi_device *scsidev)
 
 	return dev;
 }
+#ifdef MY_DEF_HERE
+EXPORT_SYMBOL(ata_scsi_find_dev);
+#endif
 
 /*
  *	ata_scsi_map_proto - Map pass-thru protocol value to taskfile value.
@@ -3740,6 +3997,14 @@ static unsigned int ata_scsi_pass_thru(struct ata_queued_cmd *qc)
 	    tf->feature == SETFEATURES_XFER)
 		goto invalid_fld;
 
+#ifdef MY_ABC_HERE
+	if (ATA_CMD_SET_FEATURES == tf->command &&
+	    SETFEATURES_WC_ON == tf->feature &&
+		(dev->flags & ATA_DFLAG_NO_WCACHE)) {
+		goto skip_cmd;
+	}
+#endif
+
 	/*
 	 * Filter TPM commands by default. These provide an
 	 * essentially uncontrolled encrypted "back door" between
@@ -3764,6 +4029,15 @@ static unsigned int ata_scsi_pass_thru(struct ata_queued_cmd *qc)
 	ata_scsi_set_sense(scmd, ILLEGAL_REQUEST, 0x24, 0x00);
 	/* "Invalid field in cdb" */
 	return 1;
+
+#ifdef MY_ABC_HERE
+ skip_cmd:
+	ata_dev_printk(dev, KERN_ERR, "skip command 0x%x feature 0x%x", tf->command, tf->feature);
+	if (cdb[2] & 0x20) {
+		ata_gen_passthru_sense(qc);
+	}
+	return 1;
+#endif
 }
 
 /**
@@ -3872,6 +4146,7 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 /* As you see if MY_ABC_HERE is not ported, this is not work */
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	{
+
 		/* please refer synosata.h */
 		if (0 == g_internal_hd_num) {
 			/* no spin up delay */
@@ -4714,20 +4989,55 @@ int syno_is_reversed_scsi_host_model(int host_no)
 	return index;
 }
 
+#define SYNO_DISK_INDEX_MAP_FIGURE 2
+int syno_libata_index_get_by_map(struct ata_host *host)
+{
+	int ret = -1;
+	char szMapStr[SYNO_DISK_INDEX_MAP_FIGURE + 1] = {0};
+	int cStrCp;
+
+	cStrCp = snprintf(szMapStr, sizeof(szMapStr), "%s", &gszDiskIdxMap[SYNO_DISK_INDEX_MAP_FIGURE * host->host_no]);
+
+	if( SYNO_DISK_INDEX_MAP_FIGURE > cStrCp || SYNO_DISK_INDEX_MAP_FIGURE > strlen(szMapStr)) {
+		goto END;
+	}
+
+	sscanf(szMapStr, "%x", &ret);
+END:
+
+	return ret;
+}
+
 int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun)
 {
 	int index = 0;
+	struct ata_port *ap = ata_shost_to_port(host);
+	struct ata_host *pAtaHost = ap->host;
+	int mapped_idx = -1;
+
+	if(0 < strlen(gszDiskIdxMap)) {
+		mapped_idx = syno_libata_index_get_by_map(pAtaHost);
+	}
 
 #ifdef MY_ABC_HERE
-	struct ata_port *ap = ata_shost_to_port(host);
-
 	if (syno_is_synology_pm(ap)) {
-		index = ((host->host_no+1)*26) + channel; /* + 1 is for jumping to sdax */
+		if ( 0 > mapped_idx) {
+			mapped_idx = host->host_no;
+		}else {
+			mapped_idx += ap->print_id - pAtaHost->ports[0]->print_id;
+		}
+
+		index = ((mapped_idx+1)*26) + channel; /* + 1 is for jumping to sdax */
 	} else {
 #endif
 		if ( 0 > ( index = syno_is_reversed_scsi_host_model(host->host_no) ) ) {
+			if ( 0 > mapped_idx) {
+				mapped_idx = host->host_no;
+			} else {
+				mapped_idx += ap->print_id - pAtaHost->ports[0]->print_id;
+			}
 			/* treat other port multiplier as internal disk	*/
-			index = host->host_no;
+			index = mapped_idx;
 		}
 #ifdef MY_ABC_HERE
 	}
@@ -4738,25 +5048,43 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 #endif
 
 #ifdef MY_ABC_HERE
+/* this function will set the ata power
+ * TODO: You can't do spin_lock(ap) before you call this function 
+ * @param host [IN]  the scsi host
+ *        blPowerOn  1: set poweron 0: set poweroff
+ *
+ * @return 0: success 
+ *        -1: failed 
+ */
 int
 syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn)
 {
+#if defined(MY_ABC_HERE)
+	struct ata_port *pAp_master = NULL;
+#endif
 	struct ata_port *ap = ata_shost_to_port(host);
-	int ret = 0; /* there is no any error in ata now */
+	int iRet = -1;
 
+	DBGMESG("disk %d do pm control blPowerOn %d\n", ap->print_id, blPowerOn);
 	if (!ap->nr_pmp_links) {
-		/* hardware not support yet */
-		goto END;
-	} else {
+	}
 #ifdef MY_ABC_HERE
+	else {
 		if (!syno_is_synology_pm(ap)) {
 			goto END;
 		}
-
-		syno_libata_pm_power_ctl(ap, blPowerOn, 0);
-#endif
+		/* this port is a master , we no need to get master */
+		if(0 == ap->PMSynoEMID) {
+			if (0 != syno_libata_pm_power_ctl(ap, blPowerOn, 0)) {
+				goto END;
+			}
+		} 
 	}
+#endif
+	
+	iRet = 0;
+
 END:
-	return ret;
+	return iRet;
 }
 #endif

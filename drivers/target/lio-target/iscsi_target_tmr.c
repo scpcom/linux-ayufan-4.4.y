@@ -77,11 +77,13 @@ u8 iscsi_tmr_abort_task(
 			(hdr->ref_cmd_sn <= SESS(conn)->max_cmd_sn)) ?
 				FUNCTION_COMPLETE : TASK_DOES_NOT_EXIST;
 	}
+#ifndef SYNO_LIO_TRANSPORT_PATCHES
 	if (!(ref_cmd->se_cmd)) {
 		printk(KERN_ERR "ref_cmd->se_cmd for RefTaskTag: 0x%08x is"
 			" NULL!\n", hdr->ref_task_tag);
 		return TASK_DOES_NOT_EXIST;
 	}
+#endif
 	if (ref_cmd->cmd_sn != hdr->ref_cmd_sn) {
 		printk(KERN_ERR "RefCmdSN 0x%08x does not equal"
 			" task's CmdSN 0x%08x. Rejecting ABORT_TASK.\n",
@@ -90,7 +92,11 @@ u8 iscsi_tmr_abort_task(
 	}
 
 	se_tmr->ref_task_tag		= hdr->ref_task_tag;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	se_tmr->ref_cmd			= &ref_cmd->se_cmd;
+#else
 	se_tmr->ref_cmd			= ref_cmd->se_cmd;
+#endif
 	se_tmr->ref_task_lun		= hdr->lun;
 	tmr_req->ref_cmd_sn		= hdr->ref_cmd_sn;
 	tmr_req->exp_data_sn		= hdr->exp_data_sn;
@@ -188,10 +194,12 @@ u8 iscsi_tmr_task_reassign(
 			" connection recovery command list.\n",
 				hdr->ref_task_tag);
 		return TASK_DOES_NOT_EXIST;
+#ifndef SYNO_LIO_TRANSPORT_PATCHES
 	} else if (!(ref_cmd->se_cmd)) {
 		printk(KERN_ERR "ref_cmd->se_cmd for RefTaskTag: 0x%08x is"
 			" NULL!\n", hdr->ref_task_tag);
 		return TASK_DOES_NOT_EXIST;
+#endif
 	}
 	/*
 	 * Temporary check to prevent connection recovery for
@@ -206,7 +214,11 @@ u8 iscsi_tmr_task_reassign(
 	}
 
 	se_tmr->ref_task_tag		= hdr->ref_task_tag;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	se_tmr->ref_cmd			= &ref_cmd->se_cmd;
+#else
 	se_tmr->ref_cmd			= ref_cmd->se_cmd;
+#endif
 	se_tmr->ref_task_lun		= hdr->lun;
 	tmr_req->ref_cmd_sn		= hdr->ref_cmd_sn;
 	tmr_req->exp_data_sn		= hdr->exp_data_sn;
@@ -253,7 +265,11 @@ static int iscsi_task_reassign_complete_nop_out(
 {
 	se_tmr_req_t *se_tmr = tmr_req->se_tmr_req;
 	se_cmd_t *se_cmd = se_tmr->ref_cmd;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	struct iscsi_cmd_s *cmd = container_of(se_cmd, struct iscsi_cmd_s, se_cmd);
+#else
 	iscsi_cmd_t *cmd = (iscsi_cmd_t *)se_cmd->se_fabric_cmd_ptr;
+#endif
 	iscsi_conn_recovery_t *cr;
 
 	if (!cmd->cr) {
@@ -439,7 +455,11 @@ static int iscsi_task_reassign_complete_scsi_cmnd(
 {
 	se_tmr_req_t *se_tmr = tmr_req->se_tmr_req;
 	se_cmd_t *se_cmd = se_tmr->ref_cmd;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	struct iscsi_cmd_s *cmd = container_of(se_cmd, struct iscsi_cmd_s, se_cmd);
+#else
 	iscsi_cmd_t *cmd = (iscsi_cmd_t *)se_cmd->se_fabric_cmd_ptr;
+#endif
 	iscsi_conn_recovery_t *cr;
 
 	if (!cmd->cr) {
@@ -466,12 +486,21 @@ static int iscsi_task_reassign_complete_scsi_cmnd(
 	}
 
 	switch (cmd->data_direction) {
+#ifdef MY_ABC_HERE
+	case DMA_TO_DEVICE:
+		return iscsi_task_reassign_complete_write(cmd, tmr_req);
+	case DMA_FROM_DEVICE:
+		return iscsi_task_reassign_complete_read(cmd, tmr_req);
+	case DMA_NONE:
+		return iscsi_task_reassign_complete_none(cmd, tmr_req);
+#else
 	case ISCSI_WRITE:
 		return iscsi_task_reassign_complete_write(cmd, tmr_req);
 	case ISCSI_READ:
 		return iscsi_task_reassign_complete_read(cmd, tmr_req);
 	case ISCSI_NONE:
 		return iscsi_task_reassign_complete_none(cmd, tmr_req);
+#endif
 	default:
 		printk(KERN_ERR "Unknown cmd->data_direction: 0x%02x\n",
 				cmd->data_direction);
@@ -499,7 +528,11 @@ static int iscsi_task_reassign_complete(
 		return -1;
 	}
 	se_cmd = se_tmr->ref_cmd;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	cmd = container_of(se_cmd, struct iscsi_cmd_s, se_cmd);
+#else
 	cmd = se_cmd->se_fabric_cmd_ptr;
+#endif
 
 	cmd->conn = conn;
 
@@ -875,7 +908,11 @@ int iscsi_check_task_reassign_expdatasn(
 {
 	se_tmr_req_t *se_tmr = tmr_req->se_tmr_req;
 	se_cmd_t *se_cmd = se_tmr->ref_cmd;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	struct iscsi_cmd_s *ref_cmd = container_of(se_cmd, struct iscsi_cmd_s, se_cmd);
+#else
 	iscsi_cmd_t *ref_cmd = (iscsi_cmd_t *)se_cmd->se_fabric_cmd_ptr;
+#endif
 
 	if (ref_cmd->iscsi_opcode != ISCSI_INIT_SCSI_CMND)
 		return 0;
@@ -883,8 +920,13 @@ int iscsi_check_task_reassign_expdatasn(
 	if (se_cmd->se_cmd_flags & SCF_SENT_CHECK_CONDITION)
 		return 0;
 
+#ifdef MY_ABC_HERE
+	if (ref_cmd->data_direction == DMA_NONE)
+		return 0;
+#else
 	if (ref_cmd->data_direction == ISCSI_NONE)
 		return 0;
+#endif
 
 	/*
 	 * For READs the TMR TASK_REASSIGNs ExpDataSN contains the next DataSN
@@ -893,7 +935,11 @@ int iscsi_check_task_reassign_expdatasn(
 	 * Also check that the Initiator is not re-requesting DataIN that has
 	 * already been acknowledged with a DataAck SNACK.
 	 */
+#ifdef MY_ABC_HERE
+	if (ref_cmd->data_direction == DMA_FROM_DEVICE) {
+#else
 	if (ref_cmd->data_direction == ISCSI_READ) {
+#endif
 		if (tmr_req->exp_data_sn > ref_cmd->data_sn) {
 			printk(KERN_ERR "Received ExpDataSN: 0x%08x for READ"
 				" in TMR TASK_REASSIGN greater than command's"
@@ -919,7 +965,11 @@ int iscsi_check_task_reassign_expdatasn(
 	 *
 	 * Do the magic in iscsi_task_reassign_prepare_write().
 	 */
+#ifdef MY_ABC_HERE
+	if (ref_cmd->data_direction == DMA_TO_DEVICE) {
+#else
 	if (ref_cmd->data_direction == ISCSI_WRITE) {
+#endif
 		if (tmr_req->exp_data_sn > ref_cmd->r2t_sn) {
 			printk(KERN_ERR "Received ExpDataSN: 0x%08x for WRITE"
 				" in TMR TASK_REASSIGN greater than command's"

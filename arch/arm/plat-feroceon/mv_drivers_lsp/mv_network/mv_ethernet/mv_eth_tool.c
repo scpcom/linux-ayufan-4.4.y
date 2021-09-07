@@ -1071,7 +1071,7 @@ void mv_eth_tool_get_ethtool_stats(struct net_device *netdev,
 #ifdef MY_ABC_HERE
 MV_U32 syno_wol_support(mv_eth_priv *priv)
 {
-	if (MV_PHY_ID_1310 == priv->phy_chip) {
+	if (MV_PHY_ID_131X == priv->phy_chip) {
 		return WAKE_MAGIC;
 	}
 

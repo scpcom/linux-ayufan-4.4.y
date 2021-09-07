@@ -222,18 +222,18 @@ static int do_lo_send_aops(struct loop_device *lo, struct bio_vec *bvec,
 	bv_offs = bvec->bv_offset;
 	len = bvec->bv_len;
 	while (len > 0) {
-#ifdef MY_ABC_HERE
-		if (unlikely(!blSynostate(O_UNMOUNT_OK, file))) {
-			ret = -EIO;
-			goto fail;
-		}
-#endif
 		sector_t IV;
 		unsigned size, copied;
 		int transfer_result;
 		struct page *page;
 		void *fsdata;
 
+#ifdef MY_ABC_HERE
+		if (unlikely(!blSynostate(O_UNMOUNT_OK, file))) {
+			ret = -EIO;
+			goto fail;
+		}
+#endif
 		IV = ((sector_t)index << (PAGE_CACHE_SHIFT - 9))+(offset >> 9);
 		size = PAGE_CACHE_SIZE - offset;
 		if (size > len)

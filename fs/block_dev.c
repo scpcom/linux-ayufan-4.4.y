@@ -212,6 +212,37 @@ int fsync_bdev(struct block_device *bdev)
 }
 EXPORT_SYMBOL(fsync_bdev);
 
+#ifdef MY_ABC_HERE
+static int sync_wait_fs_sync(struct super_block *sb)
+{
+	int retry = 0;
+	do {
+		int cnt;
+		struct inode *tmp;
+
+		/* fail-safe protection*/
+		if (retry++ > SYNO_EXT4_SYNC_DALLOC_RETRY) {
+			printk(KERN_ERR"freeze_bdev retry sync more than %d times\n", retry);
+			break;
+		}
+
+		cnt = 0;
+		list_for_each_entry(tmp, &(sb->s_bdi->wb.b_dirty), i_list) {
+			if (tmp->i_sb == sb) {
+				cnt++;
+			}
+		}
+		if (0 == cnt) {
+			break;
+		}
+
+		printk(KERN_DEBUG"freeze_bdev still has %d dirty inode, sync again\n", cnt);
+		sync_filesystem(sb);
+	} while (1);
+
+	return 0;
+}
+#endif
 /**
  * freeze_bdev  --  lock a filesystem and force it into a consistent state
  * @bdev:	blockdevice to lock
@@ -256,6 +287,10 @@ struct super_block *freeze_bdev(struct block_device *bdev)
 	smp_wmb();
 
 	sync_filesystem(sb);
+
+#ifdef MY_ABC_HERE
+	sync_wait_fs_sync(sb);
+#endif
 
 	sb->s_frozen = SB_FREEZE_TRANS;
 	smp_wmb();
@@ -306,7 +341,11 @@ int thaw_bdev(struct block_device *bdev, struct super_block *sb)
 		goto out_unlock;
 
 	BUG_ON(sb->s_bdev != bdev);
+#ifdef MY_ABC_HERE
+	down_read(&sb->s_umount);
+#else
 	down_write(&sb->s_umount);
+#endif
 	if (sb->s_flags & MS_RDONLY)
 		goto out_unfrozen;
 
@@ -327,8 +366,14 @@ out_unfrozen:
 	smp_wmb();
 	wake_up(&sb->s_wait_unfrozen);
 
+#ifdef MY_ABC_HERE
+	if (sb)
+		deactivate_read_locked_super(sb);
+#else
 	if (sb)
 		deactivate_locked_super(sb);
+#endif
+
 out_unlock:
 	mutex_unlock(&bdev->bd_fsfreeze_mutex);
 	return 0;

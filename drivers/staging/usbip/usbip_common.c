@@ -643,7 +643,11 @@ EXPORT_SYMBOL_GPL(sockfd_to_socket);
 /* there may be more cases to tweak the flags. */
 static unsigned int tweak_transfer_flags(unsigned int flags)
 {
+#ifdef MY_ABC_HERE
+	flags &= ~URB_NO_TRANSFER_DMA_MAP;
+#else
 	flags &= ~(URB_NO_TRANSFER_DMA_MAP|URB_NO_SETUP_DMA_MAP);
+#endif
 	return flags;
 }
 

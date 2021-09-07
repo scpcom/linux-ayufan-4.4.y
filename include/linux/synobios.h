@@ -178,6 +178,10 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_EBOX_REFRESH      0x2300
 #endif
 
+#ifdef MY_DEF_HERE
+#define SYNO_EVENT_ECC_NOTIFICATION		0x2400
+#endif
+
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
 #define SYNO_EVENT_BACK_TEMP_HIGH       0x4003
 #define SYNO_EVENT_BACK_TEMP_HEAT       0x4002
@@ -289,6 +293,13 @@ typedef struct _SynoAutoPowerOn {
 typedef struct _SynoRtcPkt {
 	char    rg[16];          
 } SYNORTCPKT;
+
+typedef struct _SynoPWMCTL {
+	int blSetPWM;
+	int hz;
+	int duty_cycle;
+	int rpm;
+} SynoPWMCTL;
 
 typedef struct _tag_SynobiosEvent {
     unsigned int event;
@@ -421,6 +432,7 @@ typedef struct _tag_CAPABILITY {
 	int	support;
 } CAPABILITY;
 
+// FIXME: only 4 bits, and at most 16 kinds of type fan_t, so please be careful
 typedef enum {
 	FAN_UNKNOWN,
 	FAN_CPLD_SPEED_1LEVEL,
@@ -431,6 +443,9 @@ typedef enum {
 	FAN_MICROP_PWM,
 	FAN_MULTI_ALWAYS,
 	FAN_MICROP_PWM_WITH_CPUFAN,
+	FAN_MICROP_PWM_WITH_GPIO,
+	FAN_MICROP_PWM_WITH_CPUFAN_AND_GPIO,
+	FAN_MICROP_PWM_WITH_CPUFAN_AND_GPIO_TYPE2,
 } FAN_T;
 
 typedef enum {
@@ -612,11 +627,13 @@ typedef struct {
 #define HW_DS110jv20   "DS110jv20"     //"DS110jv20"
 #define HW_DS110jv30   "DS110jv30"     //"DS110jv30"
 #define HW_DS710p      "DS710+"        //"DS710+"
+#define HW_DS712p      "DS712+"        //"DS712+"
 #define HW_DS1010p     "DS1010+"       //"DS1010+"
 #define HW_DS110p      "DS110p"        //"DS110+"
 #define HW_DS210p      "DS210p"        //"DS210+"
 #define HW_DS410       "DS410"         //"DS410"
 #define HW_DS411p      "DS411+"        //"DS411+"
+#define HW_DS411pII    "DS411+II"      //"DS411+II"
 #define HW_RS810p      "RS810+"        //"RS810+"
 #define HW_RS810rpp    "RS810rp+"      //"RS810rp+"
 #define HW_DS211j      "DS211j"        //"DS211j"
@@ -628,6 +645,14 @@ typedef struct {
 #define HW_DS1511p     "DS1511+"       //"DS1511+"
 #define HW_DS211p      "DS211+"        //"DS211+"
 #define HW_RS411       "RS411"         //"RS411"
+#define HW_RS2211p     "RS2211+"       //"RS2211+"
+#define HW_RS2211rpp   "RS2211rp+"     //"RS2211rp+"
+#define HW_DS2411p     "DS2411+"       //"DS2411+"
+#define HW_RS3411rpxs  "RS3411rpxs"    //"RS3411rpxs"
+#define HW_RS3411xs    "RS3411xs"    //"RS3411xs"
+#define HW_DS3611xs    "DS3611xs"      //"DS3611xs"
+#define HW_DS111j      "DS111j"        //"DS111j"
+#define HW_DS212       "DS212"         //"DS212v10"
 
 #define HW_UNKNOWN     "DSUnknown"
 									    
@@ -673,10 +698,12 @@ typedef enum {
 	MODEL_DS210j,
 	MODEL_DS110j,
 	MODEL_DS710p,
+	MODEL_DS712p,
 	MODEL_DS1010p,
 	MODEL_DS210p,
 	MODEL_DS410,
 	MODEL_DS411p,
+	MODEL_DS411pII,
 	MODEL_DS110p,
 	MODEL_RS810p,
 	MODEL_RS810rpp,
@@ -689,7 +716,15 @@ typedef enum {
 	MODEL_DS411,
 	MODEL_DS1511p,
 	MODEL_DS211p,
+	MODEL_RS3411rpxs,
+	MODEL_RS3411xs,
+	MODEL_DS3611xs,
 	MODEL_RS411,
+	MODEL_DS111j,
+	MODEL_RS2211p,
+	MODEL_RS2211rpp,
+	MODEL_DS2411p,
+	MODEL_DS212,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
@@ -824,6 +859,7 @@ typedef struct _tag_SYNO_SYS_STATUS {
 #define SYNOIO_SET_PHY_LED     _IOWR(SYNOBIOS_IOC_MAGIC, 36, SYNO_LED)
 #define SYNOIO_SET_HDD_LED     _IOWR(SYNOBIOS_IOC_MAGIC, 37, SYNO_LED)
 #define SYNOIO_SET_PWR_LED     _IOWR(SYNOBIOS_IOC_MAGIC, 38, SYNO_LED)
+#define SYNOIO_PWM_CTL     _IOWR(SYNOBIOS_IOC_MAGIC, 39, SynoPWMCTL)
 
 #define SYNOIO_MANUTIL_MODE       _IOWR(SYNOBIOS_IOC_MAGIC, 128, int)
 #define SYNOIO_RECORD_EVENT       _IOWR(SYNOBIOS_IOC_MAGIC, 129, int)
@@ -1109,6 +1145,7 @@ struct synobios_ops {
 	int		(*set_cpu_fan_status)(FAN_STATUS, FAN_SPEED);
 	int             (*set_phy_led)(SYNO_LED);
 	int             (*set_hdd_led)(SYNO_LED);
+	int		(*pwm_ctl)(SynoPWMCTL *);
 };
 
 /**************************/

@@ -22,9 +22,30 @@
 #include <asm/cachetype.h>
 #include <asm/pgtable.h>
 #include <asm/tlbflush.h>
+#ifdef CONFIG_SYNO_PLX_PORTING
+#ifdef CONFIG_SMP_LAZY_DCACHE_FLUSH
+#include <mach/lazy-flush.h>
+#endif // CONFIG_SMP_LAZY_DCACHE_FLUSH
+#endif
 
 static unsigned long shared_pte_mask = L_PTE_MT_BUFFERABLE;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+#ifdef CONFIG_SMP_LAZY_DCACHE_FLUSH
+/*
+ *
+ */
+void remote_flush_dcache_page(void *info) {
+	struct address_space *mapping;
+	struct page *page= (struct page *)info;
+
+	mapping = page_mapping(page);
+	__flush_dcache_page(mapping, page);
+}
+#endif
+#endif
+
+#if !defined(CONFIG_SMP) || !defined(CONFIG_SYNO_PLX_PORTING)
 /*
  * We take the easy way out of this problem - we make the
  * PTE uncacheable.  However, we leave the write buffer on.
@@ -192,8 +213,10 @@ make_coherent(struct address_space *mapping, struct vm_area_struct *vma, unsigne
 #else
 		adjust_pte(vma, addr);
 #endif
+#ifndef CONFIG_SYNO_PLX_PORTING
 	else
 		flush_cache_page(vma, addr, pfn);
+#endif
 }
 
 /*
@@ -201,7 +224,11 @@ make_coherent(struct address_space *mapping, struct vm_area_struct *vma, unsigne
  * a page table, or changing an existing PTE.  Basically, there are two
  * things that we need to take care of:
  *
+#ifdef CONFIG_SYNO_PLX_PORTING
+ *  1. If PG_dcache_clean is not set for the page, we need to ensure
+#else
  *  1. If PG_dcache_dirty is set for the page, we need to ensure
+#endif
  *     that any cache entries for the kernels virtual memory
  *     range are written back to the page.
  *  2. If we have multiple shared mappings of the same space in
@@ -220,10 +247,15 @@ void update_mmu_cache(struct vm_area_struct *vma, unsigned long addr, pte_t pte)
 
 	page = pfn_to_page(pfn);
 	mapping = page_mapping(page);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (!test_and_set_bit(PG_dcache_clean, &page->flags))
+		__flush_dcache_page(mapping, page);
+#else // CONFIG_SYNO_PLX_PORTING
 #ifndef CONFIG_SMP
 	if (test_and_clear_bit(PG_dcache_dirty, &page->flags))
 		__flush_dcache_page(mapping, page);
 #endif
+#endif // CONFIG_SYNO_PLX_PORTING
 	if (mapping) {
 		if (cache_is_vivt())
 			make_coherent(mapping, vma, addr, pfn);
@@ -231,6 +263,8 @@ void update_mmu_cache(struct vm_area_struct *vma, unsigned long addr, pte_t pte)
 			__flush_icache_all();
 	}
 }
+
+#endif	/* !CONFIG_SMP */
 
 /*
  * Check whether the write buffer has physical address aliasing

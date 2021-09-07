@@ -817,7 +817,10 @@ int ecryptfs_truncate(struct dentry *dentry, loff_t new_length)
 	struct file fake_ecryptfs_file;
 	struct ecryptfs_crypt_stat *crypt_stat;
 	loff_t i_size = i_size_read(inode);
+#ifdef MY_ABC_HERE
+#else
 	loff_t lower_size_before_truncate;
+#endif
 	loff_t lower_size_after_truncate;
 
 	if (unlikely((new_length == i_size)))

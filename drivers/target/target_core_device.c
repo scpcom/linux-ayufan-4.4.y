@@ -58,20 +58,13 @@
 
 #if defined(CONFIG_SYNO_MV88F6281_USBSTATION)
 void SynoDisableRaid5Enhance(dev_t dev) { }
-#elif defined(MY_ABC_HERE)
-extern void SynoDisableRaid5Enhance(dev_t dev);
 #endif
 
 struct block_device *__linux_blockdevice_claim(
 	int major,
 	int minor,
 	void *claim_ptr,
-#ifdef MY_ABC_HERE
-	int *ret,
-	int raid5_enhance)
-#else
 	int *ret)
-#endif
 {
 	dev_t dev;
 	struct block_device *bd;
@@ -100,11 +93,6 @@ struct block_device *__linux_blockdevice_claim(
 		return bd;
 	}
 
-#ifdef MY_ABC_HERE
-	if( !raid5_enhance ) {
-		SynoDisableRaid5Enhance(dev);
-	}
-#endif
 
 	*ret = 1;
 	return bd;
@@ -113,12 +101,7 @@ struct block_device *__linux_blockdevice_claim(
 struct block_device *linux_blockdevice_claim(
 	int major,
 	int minor,
-#ifdef MY_ABC_HERE
-	void *claim_ptr,
-	int raid5_enhance)
-#else
 	void *claim_ptr)
-#endif
 {
 	dev_t dev;
 	struct block_device *bd;
@@ -141,12 +124,6 @@ struct block_device *linux_blockdevice_claim(
 		blkdev_put(bd, FMODE_WRITE|FMODE_READ);
 		return NULL;
 	}
-
-#ifdef MY_ABC_HERE
-	if( !raid5_enhance ) {
-		SynoDisableRaid5Enhance(dev);
-	}
-#endif
 
 	return bd;
 }
@@ -175,11 +152,7 @@ int linux_blockdevice_check(int major, int minor)
 {
 	struct block_device *bd;
 
-#ifdef MY_ABC_HERE
-	bd = linux_blockdevice_claim(major, minor, NULL, 1);
-#else
 	bd = linux_blockdevice_claim(major, minor, NULL);
-#endif
 	if (!(bd))
 		return -1;
 	/*
@@ -191,6 +164,7 @@ int linux_blockdevice_check(int major, int minor)
 }
 EXPORT_SYMBOL(linux_blockdevice_check);
 
+#ifndef MY_ABC_HERE
 int se_check_devices_access(se_hba_t *hba)
 {
 	se_device_t *dev;
@@ -209,6 +183,7 @@ int se_check_devices_access(se_hba_t *hba)
 
 	return ret;
 }
+#endif
 
 /*	se_disable_devices_for_hba():
  *
@@ -251,6 +226,9 @@ extern int __transport_get_lun_for_cmd(
 	se_session_t *se_sess = SE_SESS(se_cmd);
 	unsigned long flags;
 	int read_only = 0;
+#ifdef MY_ABC_HERE
+	int pre_read_only = 0;
+#endif
 
 	spin_lock_bh(&SE_NODE_ACL(se_sess)->device_list_lock);
 	deve = se_cmd->se_deve =
@@ -260,7 +238,17 @@ extern int __transport_get_lun_for_cmd(
 			deve->total_cmds++;
 			deve->total_bytes += se_cmd->data_length;
 
+#ifdef MY_ABC_HERE
+			if (se_cmd->data_direction == DMA_TO_DEVICE) {
+#else
 			if (se_cmd->data_direction == SE_DIRECTION_WRITE) {
+#endif
+#ifdef MY_ABC_HERE
+				if (deve->lun_flags & TRANSPORT_LUNFLAGS_PRE_READ_ONLY) {
+					pre_read_only = 1;
+					goto out;
+				} else 
+#endif
 				if (deve->lun_flags &
 						TRANSPORT_LUNFLAGS_READ_ONLY) {
 					read_only = 1;
@@ -270,7 +258,11 @@ extern int __transport_get_lun_for_cmd(
 				deve->write_bytes += se_cmd->data_length;
 #endif /* SNMP_SUPPORT */
 			} else if (se_cmd->data_direction ==
+#ifdef MY_ABC_HERE
+				   DMA_FROM_DEVICE) {
+#else
 				   SE_DIRECTION_READ) {
+#endif
 #ifdef SNMP_SUPPORT
 				deve->read_bytes += se_cmd->data_length;
 #endif /* SNMP_SUPPORT */
@@ -281,7 +273,9 @@ extern int __transport_get_lun_for_cmd(
 		se_lun = se_cmd->se_lun = deve->se_lun;
 		se_cmd->pr_res_key = deve->pr_res_key;
 		se_cmd->orig_fe_lun = unpacked_lun;
+#ifndef MY_ABC_HERE
 		se_cmd->se_orig_obj_api = SE_LUN(se_cmd)->lun_obj_api;
+#endif
 		se_cmd->se_orig_obj_ptr = SE_LUN(se_cmd)->lun_type_ptr;
 		se_cmd->se_cmd_flags |= SCF_SE_LUN_CMD;
 	}
@@ -289,14 +283,34 @@ out:
 	spin_unlock_bh(&SE_NODE_ACL(se_sess)->device_list_lock);
 
 	if (!se_lun) {
+#ifdef MY_ABC_HERE
+		if (pre_read_only) {
+			printk(KERN_ERR "iSCSI - Force READ ONLY\n");
+			spin_lock_bh(&deve->se_lun_acl->se_lun_nacl->device_list_lock);
+			deve->lun_flags &= ~TRANSPORT_LUNFLAGS_READ_WRITE;
+			deve->lun_flags &= ~TRANSPORT_LUNFLAGS_PRE_READ_ONLY;
+			deve->lun_flags |= TRANSPORT_LUNFLAGS_READ_ONLY;
+			spin_unlock_bh(&deve->se_lun_acl->se_lun_nacl->device_list_lock);
+			se_cmd->scsi_sense_reason = WRITE_PROTECTED;
+			se_cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
+			return PYX_TRANSPORT_PRE_WRITE_PROTECTED;
+		} else
+#endif
 		if (read_only) {
 			se_cmd->scsi_sense_reason = WRITE_PROTECTED;
 			se_cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
+#ifdef MY_ABC_HERE
+			if (printk_ratelimit())
+#endif
 			printk("TARGET_CORE[%s]: Detected WRITE_PROTECTED LUN"
 				" Access for 0x%08x\n",
 				CMD_TFO(se_cmd)->get_fabric_name(),
 				unpacked_lun);
+#ifdef MY_ABC_HERE
+			return PYX_TRANSPORT_WRITE_PROTECTED;
+#else
 			return -1;
+#endif
 		} else {
 			/*
 			 * Use the se_portal_group->tpg_virt_lun0 to allow for
@@ -315,19 +329,30 @@ out:
 			/*
 			 * Force WRITE PROTECT for virtual LUN 0
 			 */
+#ifdef MY_ABC_HERE
+			if ((se_cmd->data_direction != DMA_FROM_DEVICE) &&
+			    (se_cmd->data_direction != DMA_NONE)) {
+				se_cmd->scsi_sense_reason = WRITE_PROTECTED;
+				se_cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
+				return -1;
+			}
+#else
 			if ((se_cmd->data_direction != SE_DIRECTION_READ) &&
 			    (se_cmd->data_direction != SE_DIRECTION_NONE)) {
 				se_cmd->scsi_sense_reason = WRITE_PROTECTED;
 				se_cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
 				return -1;
 			}
+#endif
 #if 0				   
 			printk("TARGET_CORE[%s]: Using virtual LUN0! :-)\n",
 				CMD_TFO(se_cmd)->get_fabric_name());
 #endif
 			se_lun = se_cmd->se_lun = &se_sess->se_tpg->tpg_virt_lun0;	
 			se_cmd->orig_fe_lun = 0;
+#ifndef MY_ABC_HERE
 			se_cmd->se_orig_obj_api = SE_LUN(se_cmd)->lun_obj_api;
+#endif
 			se_cmd->se_orig_obj_ptr = SE_LUN(se_cmd)->lun_type_ptr;
 			se_cmd->se_cmd_flags |= SCF_SE_LUN_CMD;
 		}
@@ -336,7 +361,11 @@ out:
 	 * Determine if the se_lun_t is online.
 	 */
 /* #warning FIXME: Check for LUN_RESET + UNIT Attention */
+#ifdef MY_ABC_HERE
+	if (dev_obj_check_online(se_lun->lun_type_ptr) != 0) {
+#else
 	if (LUN_OBJ_API(se_lun)->check_online(se_lun->lun_type_ptr) != 0) {
+#endif
 		se_cmd->scsi_sense_reason = NON_EXISTENT_LUN;
 		se_cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
 		return -1;
@@ -347,10 +376,17 @@ out:
 	se_device_t *dev = se_lun->se_dev;
 	spin_lock(&dev->stats_lock);
 	dev->num_cmds++;
+#ifdef MY_ABC_HERE
+	if (se_cmd->data_direction == DMA_TO_DEVICE)
+		dev->write_bytes += se_cmd->data_length;
+	else if (se_cmd->data_direction == DMA_FROM_DEVICE)
+		dev->read_bytes += se_cmd->data_length;
+#else
 	if (se_cmd->data_direction == SE_DIRECTION_WRITE)
 		dev->write_bytes += se_cmd->data_length;
 	else if (se_cmd->data_direction == SE_DIRECTION_READ)
 		dev->read_bytes += se_cmd->data_length;
+#endif
 	spin_unlock(&dev->stats_lock);
 	}
 #endif /* SNMP_SUPPORT */
@@ -389,7 +425,9 @@ extern int transport_get_lun_for_tmr(
 		dev = se_tmr->tmr_dev = se_lun->se_dev;
 		se_cmd->pr_res_key = deve->pr_res_key;
 		se_cmd->orig_fe_lun = unpacked_lun;
+#ifndef MY_ABC_HERE
 		se_cmd->se_orig_obj_api = SE_LUN(se_cmd)->lun_obj_api;
+#endif
 		se_cmd->se_orig_obj_ptr = SE_LUN(se_cmd)->lun_type_ptr;
 /*		se_cmd->se_cmd_flags |= SCF_SE_LUN_CMD; */
 	}
@@ -407,7 +445,11 @@ extern int transport_get_lun_for_tmr(
 	 * Determine if the se_lun_t is online.
 	 */
 /* #warning FIXME: Check for LUN_RESET + UNIT Attention */
+#ifdef MY_ABC_HERE
+	if (dev_obj_check_online(se_lun->lun_type_ptr) != 0) {
+#else
 	if (LUN_OBJ_API(se_lun)->check_online(se_lun->lun_type_ptr) != 0) {
+#endif
 		se_cmd->se_cmd_flags |= SCF_SCSI_CDB_EXCEPTION;
 		return -1;
 	}
@@ -964,7 +1006,11 @@ void se_clear_dev_ports(se_device_t *dev)
 		}
 		spin_unlock(&lun->lun_sep_lock);
 
+#ifdef MY_ABC_HERE
+		core_dev_del_lun(tpg, lun->unpacked_lun);
+#else
 		LUN_OBJ_API(lun)->del_obj_from_lun(tpg, lun);
+#endif
 
 		spin_lock(&hba->device_lock);
 		spin_lock(&dev->se_port_lock);
@@ -996,8 +1042,13 @@ void se_dev_start(se_device_t *dev)
 	se_hba_t *hba = dev->se_hba;
 
 	spin_lock(&hba->device_lock);
+#ifdef MY_ABC_HERE
+	atomic_inc(&dev->dev_obj.obj_access_count);
+	if (atomic_read(&dev->dev_obj.obj_access_count) == 1) {
+#else
 	DEV_OBJ_API(dev)->inc_count(&dev->dev_obj);
 	if (DEV_OBJ_API(dev)->check_count(&dev->dev_obj) == 1) {
+#endif
 		if (dev->dev_status & TRANSPORT_DEVICE_DEACTIVATED) {
 			dev->dev_status &= ~TRANSPORT_DEVICE_DEACTIVATED;
 			dev->dev_status |= TRANSPORT_DEVICE_ACTIVATED;
@@ -1016,8 +1067,13 @@ void se_dev_stop(se_device_t *dev)
 	se_hba_t *hba = dev->se_hba;
 
 	spin_lock(&hba->device_lock);
+#ifdef MY_ABC_HERE
+	atomic_dec(&dev->dev_obj.obj_access_count);
+	if (atomic_read(&dev->dev_obj.obj_access_count) == 0) {
+#else
 	DEV_OBJ_API(dev)->dec_count(&dev->dev_obj);
 	if (DEV_OBJ_API(dev)->check_count(&dev->dev_obj) == 0) {
+#endif
 		if (dev->dev_status & TRANSPORT_DEVICE_ACTIVATED) {
 			dev->dev_status &= ~TRANSPORT_DEVICE_ACTIVATED;
 			dev->dev_status |= TRANSPORT_DEVICE_DEACTIVATED;
@@ -1092,6 +1148,15 @@ int se_dev_set_emulate_ua_intlck_ctrl(se_device_t *dev, int flag)
 		return -1;
 	}
 
+#ifdef MY_ABC_HERE
+	if (atomic_read(&dev->dev_export_obj.obj_access_count)) {
+		printk(KERN_ERR "dev[%p]: Unable to change SE Device"
+			" UA_INTRLCK_CTRL while dev_export_obj: %d count"
+			" exists\n", dev,
+			atomic_read(&dev->dev_export_obj.obj_access_count));
+		return -1;
+	}
+#else
 	if (DEV_OBJ_API(dev)->check_count(&dev->dev_export_obj)) {
 		printk(KERN_ERR "dev[%p]: Unable to change SE Device"
 			" UA_INTRLCK_CTRL while dev_export_obj: %d count"
@@ -1099,6 +1164,7 @@ int se_dev_set_emulate_ua_intlck_ctrl(se_device_t *dev, int flag)
 			DEV_OBJ_API(dev)->check_count(&dev->dev_export_obj));
 		return -1;
 	}
+#endif
 	DEV_ATTRIB(dev)->emulate_ua_intlck_ctrl = flag;
 	printk(KERN_INFO "dev[%p]: SE Device UA_INTRLCK_CTRL flag: %d\n",
 		dev, DEV_ATTRIB(dev)->emulate_ua_intlck_ctrl);
@@ -1113,12 +1179,21 @@ int se_dev_set_emulate_tas(se_device_t *dev, int flag)
 		return -1;
 	}
 
+#ifdef MY_ABC_HERE
+	if (atomic_read(&dev->dev_export_obj.obj_access_count)) {
+		printk(KERN_ERR "dev[%p]: Unable to change SE Device TAS while"
+			" dev_export_obj: %d count exists\n", dev,
+			atomic_read(&dev->dev_export_obj.obj_access_count));
+		return -1;
+	}
+#else
 	if (DEV_OBJ_API(dev)->check_count(&dev->dev_export_obj)) {
 		printk(KERN_ERR "dev[%p]: Unable to change SE Device TAS while"
 			" dev_export_obj: %d count exists\n", dev,
 			DEV_OBJ_API(dev)->check_count(&dev->dev_export_obj));
 		return -1;
 	}
+#endif
 	DEV_ATTRIB(dev)->emulate_tas = flag;
 	printk(KERN_INFO "dev[%p]: SE Device TASK_ABORTED status bit: %s\n",
 		dev, (DEV_ATTRIB(dev)->emulate_tas) ? "Enabled" : "Disabled");
@@ -1144,12 +1219,21 @@ int se_dev_set_queue_depth(se_device_t *dev, u32 queue_depth)
 {
 	u32 orig_queue_depth = dev->queue_depth;
 
+#ifdef MY_ABC_HERE
+	if (atomic_read(&dev->dev_export_obj.obj_access_count)) {
+		printk(KERN_ERR "dev[%p]: Unable to change SE Device TCQ while"
+			" dev_export_obj: %d count exists\n", dev,
+			atomic_read(&dev->dev_export_obj.obj_access_count));
+		return -1;
+	}
+#else
 	if (DEV_OBJ_API(dev)->check_count(&dev->dev_export_obj)) {
 		printk(KERN_ERR "dev[%p]: Unable to change SE Device TCQ while"
 			" dev_export_obj: %d count exists\n", dev,
 			DEV_OBJ_API(dev)->check_count(&dev->dev_export_obj));
 		return -1;
 	}
+#endif
 	if (!(queue_depth)) {
 		printk(KERN_ERR "dev[%p]: Illegal ZERO value for queue"
 			"_depth\n", dev);
@@ -1201,6 +1285,14 @@ int se_dev_set_max_sectors(se_device_t *dev, u32 max_sectors)
 {
 	int force = 0; /* Force setting for VDEVS */
 
+#ifdef MY_ABC_HERE
+	if (atomic_read(&dev->dev_export_obj.obj_access_count)) {
+		printk(KERN_ERR "dev[%p]: Unable to change SE Device"
+			" max_sectors while dev_export_obj: %d count exists\n",
+			dev, atomic_read(&dev->dev_export_obj.obj_access_count));
+		return -1;
+	}
+#else
 	if (DEV_OBJ_API(dev)->check_count(&dev->dev_export_obj)) {
 		printk(KERN_ERR "dev[%p]: Unable to change SE Device"
 			" max_sectors while dev_export_obj: %d count exists\n",
@@ -1208,6 +1300,7 @@ int se_dev_set_max_sectors(se_device_t *dev, u32 max_sectors)
 				&dev->dev_export_obj));
 		return -1;
 	}
+#endif
 	if (!(max_sectors)) {
 		printk(KERN_ERR "dev[%p]: Illegal ZERO value for"
 			" max_sectors\n", dev);
@@ -1254,12 +1347,21 @@ int se_dev_set_max_sectors(se_device_t *dev, u32 max_sectors)
 
 int se_dev_set_block_size(se_device_t *dev, u32 block_size)
 {
+#ifdef MY_ABC_HERE
+	if (atomic_read(&dev->dev_export_obj.obj_access_count)) {
+		printk(KERN_ERR "dev[%p]: Unable to change SE Device block_size"
+			" while dev_export_obj: %d count exists\n", dev,
+			atomic_read(&dev->dev_export_obj.obj_access_count));
+		return -1;
+	}
+#else
 	if (DEV_OBJ_API(dev)->check_count(&dev->dev_export_obj)) {
 		printk(KERN_ERR "dev[%p]: Unable to change SE Device block_size"
 			" while dev_export_obj: %d count exists\n", dev,
 			DEV_OBJ_API(dev)->check_count(&dev->dev_export_obj));
 		return -1;
 	}
+#endif
 
 	if ((block_size != 512) &&
 	    (block_size != 1024) &&
@@ -1293,16 +1395,35 @@ se_lun_t *core_dev_add_lun(
 	se_lun_t *lun_p;
 	u32 lun_access = 0;
 
+#ifdef MY_ABC_HERE
+	if (atomic_read(&dev->dev_access_obj.obj_access_count) != 0) {
+		printk(KERN_ERR "Unable to export se_device_t while dev_access_obj: %d\n",
+			atomic_read(&dev->dev_access_obj.obj_access_count));
+		return NULL;
+	}
+#else
 	if (DEV_OBJ_API(dev)->check_count(&dev->dev_access_obj) != 0) {
 		printk(KERN_ERR "Unable to export se_device_t while dev_access_obj: %d\n",
 			DEV_OBJ_API(dev)->check_count(&dev->dev_access_obj));
 		return NULL;
 	}
+#endif
 
 	lun_p = core_tpg_pre_addlun(tpg, lun);
 	if ((IS_ERR(lun_p)) || !(lun_p))
 		return NULL;
 
+#ifdef MY_ABC_HERE
+	if (dev->dev_flags & DF_READ_ONLY)
+		lun_access = TRANSPORT_LUNFLAGS_READ_ONLY;
+	else
+		lun_access = TRANSPORT_LUNFLAGS_READ_WRITE;
+
+	if (core_tpg_post_addlun(tpg, lun_p, TRANSPORT_LUN_TYPE_DEVICE,
+			lun_access, dev) < 0) {
+		return NULL;
+	}
+#else
 	if (DEV_OBJ_API(dev)->get_device_access((void *)dev) == 0)
 		lun_access = TRANSPORT_LUNFLAGS_READ_ONLY;
 	else
@@ -1312,6 +1433,7 @@ se_lun_t *core_dev_add_lun(
 			lun_access, dev, dev->dev_obj_api) < 0) {
 		return NULL;
 	}
+#endif
 
 #ifndef MY_ABC_HERE
 	printk(KERN_INFO "%s_TPG[%u]_LUN[%u] - Activated %s Logical Unit from"

@@ -647,6 +647,7 @@ int mvFpProcess(MV_U32 ifIndex, MV_PKT_INFO* pPkt, MV_FP_STATS* pFpStats)
     MV_NFP_SEC_SPD_RULE *pSpd;
     MV_NFP_SEC_SA_ENTRY* pSAEntry;	
     MV_ESP_HEADER* pEspHdr;
+    MV_STATUS status;
 #endif
 
     MV_NFP_STAT( pFpStats->process++ );

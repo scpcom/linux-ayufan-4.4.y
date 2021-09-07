@@ -30,6 +30,15 @@
 #define MCI_STATUS_PCC   (1ULL<<57)  /* processor context corrupt */
 #define MCI_STATUS_S	 (1ULL<<56)  /* Signaled machine check */
 #define MCI_STATUS_AR	 (1ULL<<55)  /* Action required */
+#ifdef MY_DEF_HERE /* reference: intel 253668-037US chapter15 & 253669-037US appendix E  */
+#define SYNO_MCI_STATUS_UECC_SHIFT 45
+#define SYNO_MCI_STATUS_CECC_SHIFT 46
+#define SYNO_MCI_STATUS_ECC_SYNDROME_SHIFT 47
+#define SYNO_MCI_STATUS_UECC (1ULL << SYNO_MCI_STATUS_UECC_SHIFT)	/* uncorrected ECC error */
+#define SYNO_MCI_STATUS_CECC (1ULL << SYNO_MCI_STATUS_CECC_SHIFT)	/* correctable ECC error */
+#define SYNO_MCI_STATUS_ECC (SYNO_MCI_STATUS_UECC | SYNO_MCI_STATUS_CECC)
+#define SYNO_MCI_STATUS_ECC_SYNDROME (0xffULL << SYNO_MCI_STATUS_ECC_SYNDROME_SHIFT) /* ECC syndrome */
+#endif
 
 /* MISC register defines */
 #define MCM_ADDR_SEGOFF  0	/* segment offset */

@@ -745,3 +745,26 @@ EXPORT_SYMBOL(generic_getxattr);
 EXPORT_SYMBOL(generic_listxattr);
 EXPORT_SYMBOL(generic_setxattr);
 EXPORT_SYMBOL(generic_removexattr);
+
+#ifdef MY_ABC_HERE
+/*
+ * Find the handler for the prefix and dispatch its set() operation.
+ */
+int
+syno_generic_setxattr(struct inode *inode, const char *name, const void *value, size_t size, int flags)
+{
+	struct xattr_handler *handler;
+
+	if (size == 0)
+		value = "";  /* empty EA, do not remove */
+
+	handler = xattr_resolve_name(inode->i_sb->s_xattr, &name);
+	if (!handler)
+		return -EOPNOTSUPP;
+
+	return handler->set(inode, name, value, size, flags);
+}
+
+EXPORT_SYMBOL(syno_generic_setxattr);
+
+#endif

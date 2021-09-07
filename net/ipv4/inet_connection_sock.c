@@ -690,7 +690,11 @@ void inet_csk_listen_stop(struct sock *sk)
 		acc_req = req->dl_next;
 
 		local_bh_disable();
+#ifdef CONFIG_SYNO_PLX_PORTING
+		bh_lock_wsock(child);
+#else
 		bh_lock_sock(child);
+#endif
 		WARN_ON(sock_owned_by_user(child));
 		sock_hold(child);
 
@@ -702,7 +706,11 @@ void inet_csk_listen_stop(struct sock *sk)
 
 		inet_csk_destroy_sock(child);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+		bh_unlock_wsock(child);
+#else
 		bh_unlock_sock(child);
+#endif
 		local_bh_enable();
 		sock_put(child);
 

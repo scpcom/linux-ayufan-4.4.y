@@ -1402,7 +1402,11 @@ void ip_send_reply(struct sock *sk, struct sk_buff *skb, struct ip_reply_arg *ar
 	   Note that it uses the fact, that this function is called
 	   with locally disabled BH and that sk cannot be already spinlocked.
 	 */
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock(sk);
+#else
 	bh_lock_sock(sk);
+#endif
 	inet->tos = ip_hdr(skb)->tos;
 	sk->sk_priority = skb->priority;
 	sk->sk_protocol = ip_hdr(skb)->protocol;
@@ -1418,7 +1422,11 @@ void ip_send_reply(struct sock *sk, struct sk_buff *skb, struct ip_reply_arg *ar
 		ip_push_pending_frames(sk);
 	}
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 
 	ip_rt_put(rt);
 }

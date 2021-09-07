@@ -93,8 +93,10 @@ const struct ata_port_operations sata_port_ops = {
 static unsigned int ata_dev_init_params(struct ata_device *dev,
 					u16 heads, u16 sectors);
 static unsigned int ata_dev_set_xfermode(struct ata_device *dev);
+#ifndef MY_ABC_HERE
 static unsigned int ata_dev_set_feature(struct ata_device *dev,
 					u8 enable, u8 feature);
+#endif
 static void ata_dev_xfermask(struct ata_device *dev);
 static unsigned long ata_dev_blacklisted(const struct ata_device *dev);
 
@@ -1825,6 +1827,8 @@ unsigned syno_ata_exec_internal_gpio(struct ata_device *dev,
 
 	rc = wait_for_completion_timeout(&wait, msecs_to_jiffies(timeout));
 
+	/* FIXME if irq off but timeout happened, the following code will do schedule eh.
+	 * This will cause panic */
 	if (!rc) {
 		spin_lock_irqsave(ap->lock, flags);
 
@@ -1928,6 +1932,16 @@ unsigned ata_exec_internal_sg(struct ata_device *dev,
 		spin_unlock_irqrestore(ap->lock, flags);
 		return AC_ERR_SYSTEM;
 	}
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (ap->ops->acquire_hw && !ap->ops->acquire_hw(ap->port_no, 0, 0)) {
+		spin_unlock_irqrestore(ap->lock, flags);
+		if (!ap->ops->acquire_hw(ap->port_no, 1, (2*HZ))) {
+			return AC_ERR_TIMEOUT;
+		}
+		spin_lock_irqsave(ap->lock, flags);
+	}
+#endif
 
 	/* initialize internal qc */
 
@@ -2707,6 +2721,21 @@ int ata_dev_configure(struct ata_device *dev)
 		}
 
 		dev->cdb_len = 16;
+#ifdef MY_ABC_HERE
+		if ((dev->horkage & ATA_HORKAGE_NOWCACHE) &&
+			!(dev->flags & ATA_DFLAG_NO_WCACHE)) {
+			unsigned int err_mask;
+
+			ata_dev_printk(dev, KERN_ERR, "Disable disk write cache");
+			dev->flags |= ATA_DFLAG_NO_WCACHE;
+
+			err_mask = ata_dev_set_feature(dev, SETFEATURES_WC_OFF, 0);
+			if (err_mask)
+				ata_dev_printk(dev, KERN_ERR,
+					"failed to dsiable write cache "
+					"(err_mask=0x%x)\n", err_mask);
+		}
+#endif
 	}
 
 	/* ATAPI-specific feature tests */
@@ -4281,8 +4310,27 @@ int ata_dev_reread_id(struct ata_device *dev, unsigned int readid_flags)
 	u16 *id = (void *)dev->link->ap->sector_buf;
 	int rc;
 
+#ifdef CONFIG_SATA_OX820
+	int tries = 5;
+	unsigned int old_flags = dev->link->ap->pflags;
+	/* Keep trying for until we're sure it's broken */
+	while (tries--) {
+	    /* If the port is frozen, reset it to the starting state so we
+	     * might try the identify command again
+	     */
+        if (dev->link->ap->pflags & ATA_PFLAG_FROZEN ) {
+            dev->link->ap->pflags = old_flags;
+        }
+
+	    /* read ID data */
+        rc = ata_dev_read_id(dev, &class, readid_flags, id);
+        if (rc == 0)
+            break;
+    }
+#else
 	/* read ID data */
 	rc = ata_dev_read_id(dev, &class, readid_flags, id);
+#endif
 	if (rc)
 		return rc;
 
@@ -4376,6 +4424,9 @@ int ata_dev_revalidate(struct ata_device *dev, unsigned int new_class,
 	return rc;
 }
 
+#ifdef MY_ABC_HERE
+struct ata_blacklist_entry ata_device_blacklist [] = {
+#else
 struct ata_blacklist_entry {
 	const char *model_num;
 	const char *model_rev;
@@ -4383,6 +4434,7 @@ struct ata_blacklist_entry {
 };
 
 static const struct ata_blacklist_entry ata_device_blacklist [] = {
+#endif
 	/* Devices with DMA related problems under Linux */
 	{ "WDC AC11000H",	NULL,		ATA_HORKAGE_NODMA },
 	{ "WDC AC22100H",	NULL,		ATA_HORKAGE_NODMA },
@@ -4547,12 +4599,36 @@ static const struct ata_blacklist_entry ata_device_blacklist [] = {
 	 * device and controller are SATA.
 	 */
 	{ "PIONEER DVD-RW  DVRTD08",	"1.00",	ATA_HORKAGE_NOSETXFER },
+#ifdef MY_ABC_HERE
+	//{ "SAMSUNG HD204UI",	"1AQ10001",		ATA_HORKAGE_NOWCACHE},
+#endif
+#ifdef MY_ABC_HERE
+	//Ultrastar 7K3000
+	{ "Hitachi HUA723030ALA640",	NULL,	ATA_HORKAGE_1_5_GBPS, },
+	{ "Hitachi HUA723030ALA641",	NULL,	ATA_HORKAGE_1_5_GBPS, },
+	{ "Hitachi HUA723020ALA640",	NULL,	ATA_HORKAGE_1_5_GBPS, },
+	{ "Hitachi HUA723020ALA641",	NULL,	ATA_HORKAGE_1_5_GBPS, },
+
+	//Deskstar 7K3000
+	{ "Hitachi HDS723030ALA640",	NULL,	ATA_HORKAGE_1_5_GBPS, },
+	{ "Hitachi HDS723020BLA642",	NULL,	ATA_HORKAGE_1_5_GBPS, },
+	{ "Hitachi HDS723015BLA642",	NULL,	ATA_HORKAGE_1_5_GBPS, },
+
+	//Deskstar 5K3000
+	{ "Hitachi HDS5C3030ALA630",	NULL,	ATA_HORKAGE_1_5_GBPS, },
+	{ "Hitachi HDS5C3020ALA632",	NULL,	ATA_HORKAGE_1_5_GBPS, },
+	{ "Hitachi HDS5C3015ALA632",	NULL,	ATA_HORKAGE_1_5_GBPS, },
+#endif
 
 	/* End Marker */
 	{ }
 };
 
+#ifdef MY_ABC_HERE
+int strn_pattern_cmp(const char *patt, const char *name, int wildchar)
+#else
 static int strn_pattern_cmp(const char *patt, const char *name, int wildchar)
+#endif
 {
 	const char *p;
 	int len;
@@ -4811,8 +4887,13 @@ static unsigned int ata_dev_set_xfermode(struct ata_device *dev)
  *	RETURNS:
  *	0 on success, AC_ERR_* mask otherwise.
  */
+#ifdef MY_ABC_HERE
+unsigned int ata_dev_set_feature(struct ata_device *dev, u8 enable,
+					u8 feature)
+#else
 static unsigned int ata_dev_set_feature(struct ata_device *dev, u8 enable,
 					u8 feature)
+#endif
 {
 	struct ata_taskfile tf;
 	unsigned int err_mask;
@@ -5057,6 +5138,11 @@ static struct ata_queued_cmd *ata_qc_new(struct ata_port *ap)
 	if (unlikely(ap->pflags & ATA_PFLAG_FROZEN))
 		return NULL;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (ap->ops->qc_new(ap))
+		return NULL;
+#endif
+
 	/* the last tag is reserved for internal command. */
 	for (i = 0; i < ATA_MAX_QUEUE - 1; i++)
 		if (!test_and_set_bit(i, &ap->qc_allocated)) {
@@ -5118,6 +5204,10 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 	if (likely(ata_tag_valid(tag))) {
 		qc->tag = ATA_TAG_POISON;
 		clear_bit(tag, &ap->qc_allocated);
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+		ap->ops->qc_free(qc);
+#endif
 	}
 }
 
@@ -5222,8 +5312,9 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 			/* always fill result TF for failed qc */
 			fill_result_tf(qc);
 
-#if defined(MY_ABC_HERE)
-			if (NULL == qc->scsicmd && ATA_CMD_CHK_POWER == qc->tf.command)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+			if (NULL == qc->scsicmd && 
+				(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_PMP_WRITE == qc->tf.command))
 				__ata_qc_complete(qc);
 			else if (!ata_tag_internal(qc->tag))
 #else
@@ -5982,6 +6073,15 @@ struct ata_host *ata_host_alloc(struct device *dev, int max_ports)
 	}
 
 	devres_remove_group(dev, NULL);
+
+#ifdef MY_ABC_HERE
+	host->host_no = gSynoSataHostCnt;	
+#endif
+
+#ifdef MY_ABC_HERE
+	gSynoSataHostCnt += 1;
+#endif
+
 	return host;
 
  err_out:
@@ -6268,6 +6368,7 @@ void ata_host_init(struct ata_host *host, struct device *dev,
 	host->ops = ops;
 }
 
+#ifndef CONFIG_ATA_SYNC_DISK_PROBE // CONFIG_SYNO_PLX_PORTING
 
 static void async_port_probe(void *data, async_cookie_t cookie)
 {
@@ -6323,6 +6424,16 @@ static void async_port_probe(void *data, async_cookie_t cookie)
 
 		/* wait for EH to finish */
 		ata_port_wait_eh(ap);
+#ifdef MY_ABC_HERE
+		spin_lock_irqsave(ap->lock, flags);
+		if (ap->pflags & ATA_PFLAG_PMP_DISCONNECT ||
+				 ap->pflags & ATA_PFLAG_PMP_CONNECT) {
+			/* Clear unused PMP event during boot probe */
+			ap->pflags &= ~ATA_PFLAG_PMP_DISCONNECT;
+			ap->pflags &= ~ATA_PFLAG_PMP_CONNECT;
+		}
+		spin_unlock_irqrestore(ap->lock, flags);
+#endif
 	} else {
 		DPRINTK("ata%u: bus probe begin\n", ap->print_id);
 		rc = ata_bus_probe(ap);
@@ -6345,6 +6456,7 @@ static void async_port_probe(void *data, async_cookie_t cookie)
 
 }
 
+#endif /* CONFIG_ATA_SYNC_DISK_PROBE */
 
 /**
  *	ata_host_register - register initialized ATA host
@@ -6436,28 +6548,119 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		}
 	}
 
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+	if (0 != g_internal_hd_num) {
+	/* get the async_enabled value, we will disalbe async_schedule, and restore its async_enabled value after probe disks */
+	async_enabled = syno_async_schedule_enabled_get();
+	/* disable async schedule to avoid parallel probe disks */
+	syno_async_schedule_enabled_set(0);
+	}
+#else	
 	/* get the async_enabled value, we will disalbe async_schedule, and restore its async_enabled value after probe disks */
 	async_enabled = syno_async_schedule_enabled_get();
 	/* disable async schedule to avoid parallel probe disks */
 	syno_async_schedule_enabled_set(0);
 #endif
+#endif
+#ifndef CONFIG_ATA_SYNC_DISK_PROBE // CONFIG_SYNO_PLX_PORTING
 	/* perform each probe asynchronously */
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+	if (0 == g_internal_hd_num) {
+		printk("Enable Synology sata fast booting\n");
+		for (i = 0; i < host->n_ports; i++) {
+			struct ata_port *ap = host->ports[i];
+			int class = 0;
+
+			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+			if(ap->ops->hardreset)
+				ap->ops->hardreset(&ap->link, &class, 0);
+		}
+	}
+#endif
+
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
 		async_schedule(async_port_probe, ap);
 	}
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
-	for (i = 0; i < host->n_ports; i++) {
-		struct ata_port *ap = host->ports[i];
-		ata_port_wait_eh(ap);
-		ata_scsi_scan_host(ap, 1);
-    }
+	if (0 != g_internal_hd_num) {
+		for (i = 0; i < host->n_ports; i++) {
+			struct ata_port *ap = host->ports[i];
+			ata_port_wait_eh(ap);
+			ata_scsi_scan_host(ap, 1);
+		}
+	}
 
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+	if (0 != g_internal_hd_num) {
+		/* restore async schedule enable value */
+		syno_async_schedule_enabled_set(async_enabled);
+	}
+#else
 	/* restore async schedule enable value */
 	syno_async_schedule_enabled_set(async_enabled);
+#endif
+
 	if (host->flags & ATA_HOST_LLD_SPINUP_DELAY) {
 		host->flags &= ~ATA_HOST_LLD_SPINUP_DELAY;
 	}
+#endif
+#else
+ 	/* perform each probe synchronously */
+ 	DPRINTK("probe begin\n");
+ 	for (i = 0; i < host->n_ports; i++) {
+ 		struct ata_port *ap = host->ports[i];
+     
+         /* probe */
+         if (ap->ops->error_handler) {
+             struct ata_eh_info *ehi = &ap->link.eh_info;
+             unsigned long flags;
+     
+             DPRINTK("ata%u: bus probe begin\n", ap->print_id);
+             ata_port_probe(ap);
+     
+             /* kick EH for boot probing */
+             spin_lock_irqsave(ap->lock, flags);
+     
+             ehi->probe_mask |= ATA_ALL_DEVICES;
+             ehi->action |= ATA_EH_RESET | ATA_EH_LPM;
+             ehi->flags |= ATA_EHI_NO_AUTOPSY | ATA_EHI_QUIET;
+     
+             ap->pflags &= ~ATA_PFLAG_INITIALIZING;
+             ap->pflags |= ATA_PFLAG_LOADING;
+             ata_port_schedule_eh(ap);
+     
+             spin_unlock_irqrestore(ap->lock, flags);
+     
+             /* wait for EH to finish */
+             DPRINTK("ata%u: bus probe wait\n", ap->print_id);
+             ata_port_wait_eh(ap);
+             DPRINTK("ata%u: bus probe end\n", ap->print_id);
+         } else {
+             DPRINTK("ata%u: bus probe begin\n", ap->print_id);
+             rc = ata_bus_probe(ap);
+             DPRINTK("ata%u: bus probe end\n", ap->print_id);
+     
+             if (rc) {
+                 /* FIXME: do something useful here?
+                  * Current libata behavior will
+                  * tear down everything when
+                  * the module is removed
+                  * or the h/w is unplugged.
+                  */
+             }
+         }
+ 	}
+ 	DPRINTK("probe end\n");
+ 
+ 	/* probes are done, now scan each port's disk(s) */
+ 	DPRINTK("partition table scan begin\n");
+ 	for (i = 0; i < host->n_ports; i++) {
+ 		struct ata_port *ap = host->ports[i];
+ 
+ 		ata_scsi_scan_host(ap, 1);
+ 	}
+ 	DPRINTK("partition table scan end\n");
 #endif
 	return 0;
 }
@@ -7143,14 +7346,11 @@ int (*funcSYNOSendHibernationEvent)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendHibernationEvent);
 #endif /* MY_ABC_HERE */
 
-/*
-#ifdef MY_ABC_HERE
-int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
-EXPORT_SYMBOL(funcSYNOGetHwCapability);
-#endif
-*/
-
 #ifdef MY_ABC_HERE
 int (*funcSYNOSendEboxRefreshEvent)(int portIndex) = NULL;
 EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
+#endif
+
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL_GPL(ata_dev_set_feature);
 #endif

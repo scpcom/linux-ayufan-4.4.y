@@ -95,7 +95,11 @@ void xscale_mc_copy_user_highpage(struct page *to, struct page *from,
 {
 	void *kto = kmap_atomic(to, KM_USER1);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (!test_and_set_bit(PG_dcache_clean, &from->flags))
+#else
 	if (test_and_clear_bit(PG_dcache_dirty, &from->flags))
+#endif
 		__flush_dcache_page(page_mapping(from), from);
 
 	spin_lock(&minicache_lock);

@@ -30,9 +30,12 @@
 #include <linux/dmaengine.h>
 #include <linux/hrtimer.h>
 
-#if defined(CONFIG_MV_SKB_HEADROOM)
-# define NET_SKB_PAD  CONFIG_MV_SKB_HEADROOM
+#ifdef CONFIG_ARCH_FEROCEON
+#if defined(CONFIG_NET_SKB_HEADROOM)
+# define NET_SKB_PAD  CONFIG_NET_SKB_HEADROOM
 #endif
+#endif /* CONFIG_ARCH_FEROCEON */
+
 /* Don't change this without changing skb_csum_unnecessary! */
 #define CHECKSUM_NONE 0
 #define CHECKSUM_UNNECESSARY 1
@@ -337,6 +340,10 @@ struct sk_buff {
 	unsigned int		len,
 				data_len;
 	__u16			mac_len,
+#ifdef CONFIG_SYNO_PLX_PORTING
+				ip_header_len,
+				tcp_header_len,
+#endif
 				hdr_len;
 	union {
 		__wsum		csum;
@@ -358,15 +365,18 @@ struct sk_buff {
 				peeked:1,
 				nf_trace:1;
 	__be16			protocol:16;
+#ifdef CONFIG_SYNO_PLX_PORTING
+ 	__u8		zcc:1;
+#endif
 	kmemcheck_bitfield_end(flags1);
 
 	void			(*destructor)(struct sk_buff *skb);
 #ifdef CONFIG_ARCH_FEROCEON
 #ifdef CONFIG_NET_SKB_RECYCLE
-	int			(*skb_recycle) (struct sk_buff *skb);
+	int			(*skb_recycle) (struct sk_buff *skb, int reject);
 	void			*hw_cookie;
 #endif /* CONFIG_NET_SKB_RECYCLE */
-#endif
+#endif /* CONFIG_ARCH_FEROCEON */
 
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	struct nf_conntrack	*nfct;
@@ -1695,8 +1705,15 @@ static inline int pskb_trim_rcsum(struct sk_buff *skb, unsigned int len)
 {
 	if (likely(len >= skb->len))
 		return 0;
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (skb->ip_summed == CHECKSUM_COMPLETE) {
+		printk("pskb_trim_rcsum() called to recompute csum for padded packet\n");
+		skb->ip_summed = CHECKSUM_NONE;
+	}
+#else
 	if (skb->ip_summed == CHECKSUM_COMPLETE)
 		skb->ip_summed = CHECKSUM_NONE;
+#endif
 	return __pskb_trim(skb, len);
 }
 

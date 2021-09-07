@@ -91,7 +91,7 @@ static int cp_stat64(struct stat64 __user *ubuf, struct kstat *stat)
 #endif
 	    __put_user(stat->mtime.tv_sec, &ubuf->st_mtime) ||
 #ifdef MY_ABC_HERE
-	    __put_user(stat->mtime.tv_nsec, &ubuf->st_SynoUnicodeStat) ||
+	    __put_user(stat->syno_archive_version, &ubuf->st_mtime_nsec) ||
 #else
 	    __put_user(stat->mtime.tv_nsec, &ubuf->st_mtime_nsec) ||
 #endif

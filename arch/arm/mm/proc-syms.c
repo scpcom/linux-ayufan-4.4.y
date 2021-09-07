@@ -27,7 +27,11 @@ EXPORT_SYMBOL(__cpuc_flush_kern_all);
 EXPORT_SYMBOL(__cpuc_flush_user_all);
 EXPORT_SYMBOL(__cpuc_flush_user_range);
 EXPORT_SYMBOL(__cpuc_coherent_kern_range);
+#ifdef CONFIG_SYNO_PLX_PORTING
+EXPORT_SYMBOL(__cpuc_flush_dcache_area);
+#else
 EXPORT_SYMBOL(__cpuc_flush_dcache_page);
+#endif
 EXPORT_SYMBOL(dmac_inv_range);  /* because of flush_ioremap_region() */
 #else
 EXPORT_SYMBOL(cpu_cache);

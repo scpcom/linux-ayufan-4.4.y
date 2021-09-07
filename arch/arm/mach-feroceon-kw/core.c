@@ -221,7 +221,7 @@ static struct mv64xxx_i2c_pdata kw_i2c_pdata = {
        .timeout        = 1000, /* Default timeout of 1 second */
 };
 
-static struct resource kw_i2c_resources[] = {
+static struct resource kw_i2c0_resources[] = {
        {
                .name   = "i2c base",
                .start  = INTER_REGS_BASE + TWSI_SLAVE_ADDR_REG(0),
@@ -230,21 +230,47 @@ static struct resource kw_i2c_resources[] = {
        },
        {
                .name   = "i2c irq",
-               .start  = IRQ_TWSI,
-               .end    = IRQ_TWSI,
+               .start  = IRQ_TWSI(0),
+               .end    = IRQ_TWSI(0),
                .flags  = IORESOURCE_IRQ,
        },
 };
 
-static struct platform_device kw_i2c = {
+static struct platform_device kw_i2c0 = {
        .name           = MV64XXX_I2C_CTLR_NAME,
        .id             = 0,
-       .num_resources  = ARRAY_SIZE(kw_i2c_resources),
-       .resource       = kw_i2c_resources,
+       .num_resources  = ARRAY_SIZE(kw_i2c0_resources),
+       .resource       = kw_i2c0_resources,
        .dev            = {
                .platform_data = &kw_i2c_pdata,
        },
 };
+
+static struct resource kw_i2c1_resources[] = {
+       {
+               .name   = "i2c base",
+               .start  = INTER_REGS_BASE + TWSI_SLAVE_ADDR_REG(1),
+               .end    = INTER_REGS_BASE + TWSI_SLAVE_ADDR_REG(1) + 0x20 -1,
+               .flags  = IORESOURCE_MEM,
+       },
+       {
+               .name   = "i2c irq",
+               .start  = IRQ_TWSI(1),
+               .end    = IRQ_TWSI(1),
+               .flags  = IORESOURCE_IRQ,
+       },
+};
+
+static struct platform_device kw_i2c1 = {
+       .name           = MV64XXX_I2C_CTLR_NAME,
+       .id             = 0,
+       .num_resources  = ARRAY_SIZE(kw_i2c1_resources),
+       .resource       = kw_i2c1_resources,
+       .dev            = {
+               .platform_data = &kw_i2c_pdata,
+       },
+};
+
 
 /*****************************************************************************
  * UART
@@ -328,7 +354,7 @@ static struct platform_device mv_uart1 = {
 static void serial_initialize(void)
 {
 	mv_uart0_data[0].uartclk = mv_uart1_data[0].uartclk = mvTclk;
-	if(mvBoardIdGet() == DB_88F6280A_BP_ID)
+	if((mvBoardIdGet() == DB_88F6280A_BP_ID) || (mvBoardIdGet() == RD_88F6282A_ID))
 	{
 		mv_uart.dev.platform_data = mv_uart1_data;
 		mv_uart.resource = mv_uart1_resources;
@@ -488,13 +514,13 @@ static struct dovefb_mach_info kw_lcd0_dmi = {
 	.io_pin_allocation	= IOPAD_DUMB24,
 	.panel_rgb_type		= DUMB24_RGB888_0,
 #else
-	.io_pin_allocation	= IOPAD_DUMB18GPIO,
-	.panel_rgb_type		= DUMB18_RGB666_0,
+	.io_pin_allocation	= IOPAD_DUMB24,
+	.panel_rgb_type		= DUMB24_RGB888_0,
 #endif
 	.panel_rgb_reverse_lanes= 0,
 	.gpio_output_data	= 3,
 	.gpio_output_mask	= 3,
-	.ddc_i2c_adapter	= 3,
+	.ddc_i2c_adapter	= 0,
 	.invert_composite_blank	= 0,
 	.invert_pix_val_ena	= 0,
 	.invert_pixclock	= 0,
@@ -507,8 +533,8 @@ static struct dovefb_mach_info kw_lcd0_dmi = {
 static struct dovefb_mach_info kw_lcd0_vid_dmi = {
 	.id_ovly		= "Video Layer 0",
 	.pix_fmt		= PIX_FMT_RGB888PACK,
-	.io_pin_allocation	= IOPAD_DUMB18GPIO,
-	.panel_rgb_type		= DUMB18_RGB666_0,
+	.io_pin_allocation	= IOPAD_DUMB24,
+	.panel_rgb_type		= DUMB24_RGB888_0,
 	.panel_rgb_reverse_lanes= 0,
 	.gpio_output_data	= 3,
 	.gpio_output_mask	= 3,
@@ -518,12 +544,14 @@ static struct dovefb_mach_info kw_lcd0_vid_dmi = {
 	.invert_pixclock	= 0,
 	.invert_vsync		= 0,
 	.invert_hsync		= 0,
-	.panel_rbswap		= 1,
-	.active			= 0,
+	.panel_rbswap		= 0,
+	.active			= 1,
 	.enable_lcd0		= 0,
 };
-#endif /* CONFIG_FB_DOVE */
 
+extern unsigned int lcd0_enable;
+
+#endif /* CONFIG_FB_DOVE */
 
 #endif /* #if defined(CONFIG_MV_INCLUDE_SDIO) */
 
@@ -547,6 +575,14 @@ static void __init kirkwood_l2_init(void)
 	MV_REG_BIT_RESET(CPU_L2_CONFIG_REG, 0x10);
 	feroceon_l2_init(0);
 #endif
+}
+
+/*****************************************************************************
+ * SoC hwmon Thermal Sensor
+ ****************************************************************************/
+void __init kw_hwmon_init(void)
+{
+	platform_device_register_simple("kw-temp", 0, NULL, 0);
 }
 
 /*****************************************************************************
@@ -802,7 +838,14 @@ static void __init mv_init(void)
 	mv_gpio_init();
 
 	/* I2C */
-	platform_device_register(&kw_i2c);
+#ifdef CONFIG_FB_DOVE 
+	/* LCD uses i2c 1 interface, while rest (like audio) uses i2c 0.
+	   Currently the i2c linux driver doesn't support 2 interfaces */
+	if(lcd0_enable == 1)
+		platform_device_register(&kw_i2c1);
+	else
+#endif
+		platform_device_register(&kw_i2c0);
 
 #if defined(CONFIG_MV_INCLUDE_SDIO)
        if (MV_TRUE == mvCtrlPwrClckGet(SDIO_UNIT_ID, 0)) 
@@ -859,12 +902,62 @@ static void __init mv_init(void)
 	synology_gpio_init();
 #endif
 
+#ifdef CONFIG_SENSORS_FEROCEON_KW
+	/* SoC hwmon Thermal Sensor */
+	if( mvBoardIdGet() == RD_88F6282A_ID ) {
+		kw_hwmon_init();
+	}
+#endif
+
 #ifdef CONFIG_FB_DOVE
+	if (MV_TRUE == mvCtrlPwrClckGet(LCD_UNIT_ID, 0))
 	clcd_platform_init(&kw_lcd0_dmi, &kw_lcd0_vid_dmi, NULL);
 #endif
     return;
 }
 
+#ifdef CONFIG_FB_DOVE_OPTIMIZED_FB_MEM_ALLOC
+/*
+ * This fixup function is used to reserve memory for the GPU and VPU engines
+ * as these drivers require large chunks of consecutive memory.
+ */
+
+void __init kw_tag_fixup_mem32(struct machine_desc *mdesc, struct tag *t,
+		char **from, struct meminfo *meminfo)
+{
+	struct tag *last_tag = NULL;
+	int total_size = PAGE_ALIGN(DEFAULT_FB_SIZE*4) * 2;
+	void **fb_mem = kw_lcd0_dmi.fb_mem;
+	unsigned int *fb_mem_size = kw_lcd0_dmi.fb_mem_size;
+	unsigned int bank_size;
+
+	for (; t->hdr.size; t = tag_next(t))
+		if ((t->hdr.tag == ATAG_MEM) && (t->u.mem.size >= total_size)) {
+			if ((last_tag == NULL) ||
+			    (t->u.mem.start > last_tag->u.mem.start))
+				last_tag = t;
+		}
+
+	if (last_tag == NULL) {
+		early_printk(KERN_WARNING "No suitable memory tag was found, "
+				"required memory %d MB.\n", total_size);
+		return;
+	}
+
+	/* Resereve memory from last tag for LCD usage.
+	** We assume that each tag is a different DRAM CS.
+	** Allocate GFX & OVLY memory from different DRAM banks.
+	** We assume that each bank is 1/8 of the DRAM.
+	*/
+	bank_size = last_tag->u.mem.size / 8;
+	if((total_size / 2) < bank_size)
+		total_size = bank_size * 2;
+	fb_mem[0] = (void*)last_tag->u.mem.start + last_tag->u.mem.size - total_size;
+	fb_mem[1] = (void*)last_tag->u.mem.start + last_tag->u.mem.size - (total_size / 2);
+	last_tag->u.mem.size = 0; //-= total_size;
+	fb_mem_size[0] = fb_mem_size[1] = (total_size / 2);
+}
+#endif
 MACHINE_START(SYNOLOGY_6282 ,"Synology 6282 board")
 	.phys_io = 0xf1000000,
 	.io_pg_offst = ((0xf1000000) >> 18) & 0xfffc,
@@ -884,5 +977,9 @@ MACHINE_START(FEROCEON_KW ,"Feroceon-KW")
     .init_irq = mv_init_irq,
     .timer = &mv_timer,
     .init_machine = mv_init,
+/* reserve memory for VMETA and GPU */
+#ifdef CONFIG_FB_DOVE_OPTIMIZED_FB_MEM_ALLOC
+    .fixup = kw_tag_fixup_mem32,
+#endif
 MACHINE_END
 

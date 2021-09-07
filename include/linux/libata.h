@@ -76,6 +76,14 @@
 
 #define BPRINTK(fmt, args...) if (ap->flags & ATA_FLAG_DEBUGMSG) printk(KERN_ERR "%s: " fmt, __func__, ## args)
 
+#ifdef MY_ABC_HERE
+extern int giSynoAtaDebug;
+#define DBGMESG(x...)	\
+	if (0 < giSynoAtaDebug) printk(x)
+#else
+#define DBGMESG(x...)
+#endif
+
 /* NEW: debug levels */
 #define HAVE_LIBATA_MSG 1
 
@@ -149,6 +157,9 @@ enum {
 	ATA_DFLAG_SLEEPING	= (1 << 15), /* device is sleeping */
 	ATA_DFLAG_DUBIOUS_XFER	= (1 << 16), /* data transfer not verified */
 	ATA_DFLAG_NO_UNLOAD	= (1 << 17), /* device doesn't support unload */
+#ifdef MY_ABC_HERE
+	ATA_DFLAG_NO_WCACHE	= (1 << 23), /* device doesn't support write cache */
+#endif
 	ATA_DFLAG_INIT_MASK	= (1 << 24) - 1,
 
 	ATA_DFLAG_DETACH	= (1 << 24),
@@ -240,6 +251,9 @@ enum {
 #endif
 #ifdef MY_ABC_HERE
 	ATA_PFLAG_PMP_PMOFF			= (1 << 25),
+#endif
+#ifdef MY_DEF_HERE
+	ATA_PFLAG_SYNO_BOOT_PROBE = (1 << 29),
 #endif
 
 	/* struct ata_queued_cmd flags */
@@ -349,6 +363,9 @@ enum {
 #endif
 	ATA_EH_LPM		= (1 << 4),  /* link power management action */
 	ATA_EH_PARK		= (1 << 5), /* unload heads and stop I/O */
+#ifdef MY_ABC_HERE
+	ATA_EH_WCACHE_DISABLE = (1 << 6), /* unload heads and stop I/O */
+#endif
 
 	ATA_EH_PERDEV_MASK	= ATA_EH_REVALIDATE | ATA_EH_PARK,
 	ATA_EH_ALL_ACTIONS	= ATA_EH_REVALIDATE | ATA_EH_RESET |
@@ -421,6 +438,9 @@ enum {
 	ATA_HORKAGE_1_5_GBPS	= (1 << 13),	/* force 1.5 Gbps */
 	ATA_HORKAGE_NOSETXFER	= (1 << 14),	/* skip SETXFER, SATA only */
 	ATA_HORKAGE_BROKEN_FPDMA_AA	= (1 << 15),	/* skip AA */
+#ifdef MY_ABC_HERE
+	ATA_HORKAGE_NOWCACHE	= (1 << 16),	/* skip Wcache */
+#endif
 
 	 /* DMA mask for user DMA control: User visible values; DO NOT
 	    renumber */
@@ -563,6 +583,9 @@ struct ata_host {
 	unsigned long		flags;
 #ifdef CONFIG_ATA_ACPI
 	acpi_handle		acpi_handle;
+#endif
+#ifdef MY_ABC_HERE
+	unsigned int            host_no;
 #endif
 	struct ata_port		*simplex_claimed;	/* channel owning the DMA */
 	struct ata_port		*ports[0];
@@ -833,6 +856,8 @@ struct ata_port {
 #ifdef MY_ABC_HERE
 	/* Synology port multiplier unique. greater than 0 is our expansion box. */
 	u8				PMSynoUnique;
+	u8				PMSynoEMID;
+	u8				PMSynoIsRP;
 #endif
 };
 
@@ -852,6 +877,10 @@ struct ata_port_operations {
 	void (*qc_prep)(struct ata_queued_cmd *qc);
 	unsigned int (*qc_issue)(struct ata_queued_cmd *qc);
 	bool (*qc_fill_rtf)(struct ata_queued_cmd *qc);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	int (*qc_new)(struct ata_port *ap);
+	void (*qc_free)(struct ata_queued_cmd *qc);
+#endif
 
 	/*
 	 * Configuration and exception handling
@@ -934,6 +963,10 @@ struct ata_port_operations {
 	void (*phy_reset)(struct ata_port *ap);
 	void (*eng_timeout)(struct ata_port *ap);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	int (*acquire_hw)(int port_no, int may_sleep, int timeout_jiffies);
+#endif
+
 	/*
 	 * ->inherits must be the last field and all the preceding
 	 * fields must be pointers.
@@ -970,6 +1003,12 @@ struct ata_timing {
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_pm_gpio;
 extern struct device_attribute dev_attr_syno_pm_info;
+#endif
+#ifdef MY_ABC_HERE
+extern struct device_attribute dev_attr_syno_wcache;
+#endif
+#ifdef MY_ABC_HERE
+extern struct device_attribute dev_attr_syno_disk_serial;
 #endif
 
 extern const unsigned long sata_deb_timing_normal[];
@@ -1099,6 +1138,10 @@ extern int ata_cable_unknown(struct ata_port *ap);
 
 extern void ata_pio_queue_task(struct ata_port *ap, void *data,
 			       unsigned long delay);
+#ifdef MY_ABC_HERE
+unsigned int ata_dev_set_feature(struct ata_device *dev,
+					u8 enable, u8 feature);
+#endif
 
 /* Timing helpers */
 extern unsigned int ata_pio_need_iordy(const struct ata_device *);
@@ -1210,10 +1253,11 @@ extern void ata_std_error_handler(struct ata_port *ap);
 #ifdef MY_ABC_HERE
 extern unsigned int syno_sata_pmp_read_gpio(struct ata_link *, SYNO_PM_PKG *);
 extern unsigned int syno_sata_pmp_write_gpio(struct ata_link *, SYNO_PM_PKG *);
-extern u8 syno_is_synology_pm(struct ata_port *ap);
+extern u8 syno_is_synology_pm(const struct ata_port *ap);
 extern u32 syno_pmp_ports_num(struct ata_port *ap);
 extern void syno_pm_device_info_set(struct ata_port *ap, u8 rw, SYNO_PM_PKG *pm_pkg);
-extern void syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo);
+extern int syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo);
+extern unsigned int syno_sata_pmp_is_rp(struct ata_port *ap);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -1250,6 +1294,19 @@ extern const struct ata_port_operations sata_port_ops;
 extern struct device_attribute *ata_common_sdev_attrs[];
 
 #ifdef MY_ABC_HERE
+extern char gszSataPortMap[8];
+extern unsigned int gSynoSataHostCnt;
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszDiskIdxMap[];
+#endif
+
+#ifdef MY_ABC_HERE
+extern long g_sata_led_special;
+#endif
+
+#ifdef MY_ABC_HERE
 #define SYNO_SATA_POWER_CTL_MACRO .syno_host_power_ctl = syno_libata_port_power_ctl,
 #else
 #define SYNO_SATA_POWER_CTL_MACRO
@@ -1266,6 +1323,7 @@ extern struct device_attribute *ata_common_sdev_attrs[];
 #else	
 #define SYNO_DISK_HIBERNATION_MACRO
 #endif
+
 
 #define ATA_BASE_SHT(drv_name)					\
 	.module			= THIS_MODULE,			\

@@ -135,10 +135,19 @@
 #endif
 
 /*
+#ifdef CONFIG_SYNO_PLX_PORTING
+ * This flag is used to indicate that the page pointed to by a pte is clean
+ * and does not require cleaning before returning it to the user.
+#else
  * This flag is used to indicate that the page pointed to by a pte
  * is dirty and requires cleaning before returning it to the user.
+#endif
  */
+#ifdef CONFIG_SYNO_PLX_PORTING
+#define PG_dcache_clean PG_arch_1
+#else
 #define PG_dcache_dirty PG_arch_1
+#endif
 
 /*
  *	MM Cache Management
@@ -211,7 +220,11 @@ struct cpu_cache_fns {
 
 	void (*coherent_kern_range)(unsigned long, unsigned long);
 	void (*coherent_user_range)(unsigned long, unsigned long);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	void (*flush_kern_dcache_area)(void *, size_t);
+#else
 	void (*flush_kern_dcache_page)(void *);
+#endif
 
 	void (*dma_inv_range)(const void *, const void *);
 	void (*dma_clean_range)(const void *, const void *);
@@ -256,7 +269,11 @@ extern struct cpu_cache_fns cpu_cache;
 #define __cpuc_flush_user_range		cpu_cache.flush_user_range
 #define __cpuc_coherent_kern_range	cpu_cache.coherent_kern_range
 #define __cpuc_coherent_user_range	cpu_cache.coherent_user_range
+#ifdef CONFIG_SYNO_PLX_PORTING
+#define __cpuc_flush_dcache_area	cpu_cache.flush_kern_dcache_area
+#else
 #define __cpuc_flush_dcache_page	cpu_cache.flush_kern_dcache_page
+#endif
 
 /*
  * These are private to the dma-mapping API.  Do not use directly.
@@ -275,14 +292,22 @@ extern struct cpu_cache_fns cpu_cache;
 #define __cpuc_flush_user_range		__glue(_CACHE,_flush_user_cache_range)
 #define __cpuc_coherent_kern_range	__glue(_CACHE,_coherent_kern_range)
 #define __cpuc_coherent_user_range	__glue(_CACHE,_coherent_user_range)
+#ifdef CONFIG_SYNO_PLX_PORTING
+#define __cpuc_flush_dcache_area	__glue(_CACHE,_flush_kern_dcache_area)
+#else
 #define __cpuc_flush_dcache_page	__glue(_CACHE,_flush_kern_dcache_page)
+#endif
 
 extern void __cpuc_flush_kern_all(void);
 extern void __cpuc_flush_user_all(void);
 extern void __cpuc_flush_user_range(unsigned long, unsigned long, unsigned int);
 extern void __cpuc_coherent_kern_range(unsigned long, unsigned long);
 extern void __cpuc_coherent_user_range(unsigned long, unsigned long);
+#ifdef CONFIG_SYNO_PLX_PORTING
+extern void __cpuc_flush_dcache_area(void *, size_t);
+#else
 extern void __cpuc_flush_dcache_page(void *);
+#endif
 
 /*
  * These are private to the dma-mapping API.  Do not use directly.
@@ -459,7 +484,11 @@ static inline void flush_kernel_dcache_page(struct page *page)
 {
 	/* highmem pages are always flushed upon kunmap already */
 	if ((cache_is_vivt() || cache_is_vipt_aliasing()) && !PageHighMem(page))
+#ifdef CONFIG_SYNO_PLX_PORTING
+		__cpuc_flush_dcache_area(page_address(page), PAGE_SIZE);
+#else
 		__cpuc_flush_dcache_page(page_address(page));
+#endif
 }
 
 #ifdef CONFIG_ARM_MARVELL_BSP_MM_ADD_API_FOR_DMA

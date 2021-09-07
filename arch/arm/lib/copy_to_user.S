@@ -16,11 +16,7 @@
 /*
  * Prototype:
  *
-#ifdef CONFIG_ARCH_FEROCEON
- *	size_t __arch_copy_to_user(void *to, const void *from, size_t n)
-#else
  *	size_t __copy_to_user(void *to, const void *from, size_t n)
-#endif
  *
  * Purpose:
  *
@@ -91,20 +87,12 @@
 
 	.text
 
-#ifdef CONFIG_ARCH_FEROCEON
-ENTRY(__arch_copy_to_user)
-#else
 ENTRY(__copy_to_user_std)
-#endif
 WEAK(__copy_to_user)
 
 #include "copy_template.S"
 
-#ifdef CONFIG_ARCH_FEROCEON
-ENDPROC(__arch_copy_to_user)
-#else
 ENDPROC(__copy_to_user)
-#endif
 
 	.section .fixup,"ax"
 	.align 0

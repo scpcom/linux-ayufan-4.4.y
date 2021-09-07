@@ -32,9 +32,6 @@ endif
 # using lib_ here won't override already available weak symbols
 obj-$(CONFIG_UACCESS_WITH_MEMCPY) += uaccess_with_memcpy.o
 
-ifeq ($(CONFIG_COPY_USER_MEMCPY),y)
-  mmu-y	+= uaccess_memcpy.o
-endif
 lib-$(CONFIG_MMU) += $(mmu-y)
 
 ifeq ($(CONFIG_CPU_32v3),y)

@@ -34,8 +34,10 @@ static struct cpufreq_frequency_table kw_freqs[] = {
  */
 static inline void kw_set_powersave(u8 on)
 {
+#ifndef MY_ABC_HERE
 	printk(KERN_DEBUG "cpufreq: Setting PowerSaveState to %s\n",
 		on ? "on" : "off");
+#endif 
 
 	if (on)
 		mvCtrlPwrSaveOn();
@@ -96,7 +98,9 @@ static int kw_cpufreq_target(struct cpufreq_policy *policy,
 	freqs.new = kw_freqs[index].frequency;
 	freqs.cpu = policy->cpu;
 
+#ifndef MY_ABC_HERE 
 	printk(KERN_DEBUG "cpufreq: Setting CPU Frequency to %u KHz\n",freqs.new);
+#endif
 
 	cpufreq_notify_transition(&freqs, CPUFREQ_PRECHANGE);
 

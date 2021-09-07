@@ -201,29 +201,29 @@ static int tweak_reset_device_cmd(struct urb *urb)
  * clear_halt, set_interface, and set_configuration require special tricks.
  */
 static void tweak_special_requests(struct urb *urb)
-{
+{	
 	if (!urb || !urb->setup_packet)
 		return;
-
+	
 	if (usb_pipetype(urb->pipe) != PIPE_CONTROL)
-		return;
+		return;	
 
-	if (is_clear_halt_cmd(urb))
+	if (is_clear_halt_cmd(urb)) 
 		/* tweak clear_halt */
-		 tweak_clear_halt_cmd(urb);
+		 tweak_clear_halt_cmd(urb);		 
 
-	else if (is_set_interface_cmd(urb))
+	else if (is_set_interface_cmd(urb)) 
 		/* tweak set_interface */
-		tweak_set_interface_cmd(urb);
+		tweak_set_interface_cmd(urb);		
 
 	else if (is_set_configuration_cmd(urb))
 		/* tweak set_configuration */
-		tweak_set_configuration_cmd(urb);
+		tweak_set_configuration_cmd(urb);		
 
-	else if (is_reset_device_cmd(urb))
-		tweak_reset_device_cmd(urb);
-	else
-		usbip_dbg_stub_rx("no need to tweak\n");
+	else if (is_reset_device_cmd(urb)) 
+		tweak_reset_device_cmd(urb);		
+	else 
+		usbip_dbg_stub_rx("no need to tweak\n"); 			
 }
 
 /*
@@ -387,8 +387,8 @@ static struct usb_host_endpoint *get_ep_from_epnum(struct usb_device *udev,
 			epnum = (ep->desc.bEndpointAddress & 0x7f);			
 
 			if (epnum == epnum0) {
-				/* usbip_uinfo("found epnum %d\n", epnum0);*/				
-				printk("found ep[%d]=epnum %d\n", j, epnum0);
+                /* usbip_uinfo("found epnum %d\n", epnum0);*/
+				printk("found ep[%d]=epnum %d\n", j, epnum0);				
 				found = 1;
 				break;
 			}
@@ -407,8 +407,15 @@ static int get_pipe(struct stub_device *sdev, int epnum, int dir)
 	struct usb_device *udev = interface_to_usbdev(sdev->interface);
 	struct usb_host_endpoint *ep;
 	struct usb_endpoint_descriptor *epd = NULL;
+#ifdef MY_ABC_HERE
+	if (dir == USBIP_DIR_IN)
+		ep = udev->ep_in[epnum & 0x7f];
+	else
+		ep = udev->ep_out[epnum & 0x7f];
+#else
+	ep = get_ep_from_epnum(udev, epnum);    
+#endif
 
-	ep = get_ep_from_epnum(udev, epnum);
 	if (!ep) {
 		dev_err(&sdev->interface->dev, "no such endpoint?, %d\n",
 			epnum);
@@ -460,6 +467,68 @@ static int get_pipe(struct stub_device *sdev, int epnum, int dir)
 	dev_err(&sdev->interface->dev, "get pipe, epnum %d\n", epnum);
 	return 0;
 }
+
+#ifdef MY_ABC_HERE
+static void masking_bogus_flags(struct urb *urb)
+{
+       int                             xfertype;
+       struct usb_device               *dev;
+       struct usb_host_endpoint        *ep;
+       int                             is_out;
+       unsigned int    allowed;
+
+       if (!urb || urb->hcpriv || !urb->complete)
+               return;
+       dev = urb->dev;
+       if ((!dev) || (dev->state < USB_STATE_UNAUTHENTICATED))
+               return;
+
+       ep = (usb_pipein(urb->pipe) ? dev->ep_in : dev->ep_out)
+                       [usb_pipeendpoint(urb->pipe)];
+       if (!ep)
+               return;
+
+       xfertype = usb_endpoint_type(&ep->desc);
+       if (xfertype == USB_ENDPOINT_XFER_CONTROL) {
+               struct usb_ctrlrequest *setup =
+                               (struct usb_ctrlrequest *) urb->setup_packet;
+
+               if (!setup)
+                       return;
+               is_out = !(setup->bRequestType & USB_DIR_IN) ||
+                               !setup->wLength;
+       } else {
+               is_out = usb_endpoint_dir_out(&ep->desc);
+       }
+       /* enforce simple/standard policy */
+       allowed = (URB_NO_TRANSFER_DMA_MAP | URB_NO_INTERRUPT |
+                  URB_DIR_MASK | URB_FREE_BUFFER);
+       switch (xfertype) {
+       case USB_ENDPOINT_XFER_BULK:
+               if (is_out) {
+	 				usbip_udbg("## USB_ENDPOINT_XFER_BULK: adding allow URB_ZERO_PACKET\n");
+                       allowed |= URB_ZERO_PACKET;
+			   }
+               /* FALLTHROUGH */
+	   case USB_ENDPOINT_XFER_CONTROL:
+				usbip_udbg("## USB_ENDPOINT_XFER_CONTROL: adding allow URB_NO_FSBR\n");
+               allowed |= URB_NO_FSBR; /* only affects UHCI */
+               /* FALLTHROUGH */
+       default:                        /* all non-iso endpoints */
+               if (!is_out) {
+				   usbip_udbg("## default: adding allow URB_SHORT_NOT_OK\n");
+                   allowed |= URB_SHORT_NOT_OK;
+			   }
+               break;
+	   case USB_ENDPOINT_XFER_ISOC:
+				usbip_udbg("## USB_ENDPOINT_XFER_ISOC: adding allow URB_ISO_ASAP\n");
+               allowed |= URB_ISO_ASAP;
+               break;
+       }
+       urb->transfer_flags &= allowed;
+}
+#endif
+
 
 static void stub_recv_cmd_submit(struct stub_device *sdev,
 				 struct usbip_header *pdu)
@@ -527,8 +596,11 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
 	/* no need to submit an intercepted request, but harmless? */
 	tweak_special_requests(priv->urb);
 
+#ifdef MY_ABC_HERE
+	masking_bogus_flags(priv->urb);	
+#endif
 	/* urb is now ready to submit */
-	ret = usb_submit_urb(priv->urb, GFP_KERNEL);
+	ret = usb_submit_urb(priv->urb, GFP_KERNEL);			
 
 	if (ret == 0)
 		usbip_dbg_stub_rx("submit urb ok, seqnum %u\n",
@@ -542,7 +614,12 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
 		 * Pessimistic.
 		 * This connection will be discarded.
 		 */
+#ifndef MY_ABC_HERE
+		/* SDEV_EVENT_ERROR_SUBMIT will not unbind driver(usbip) => then stop device		 
+		 * It is not the wanted error handling
+		 */
 		usbip_event_add(ud, SDEV_EVENT_ERROR_SUBMIT);
+#endif
 	}
 
 	usbip_dbg_stub_rx("Leave\n");

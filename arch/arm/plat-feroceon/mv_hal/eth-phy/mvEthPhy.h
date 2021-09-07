@@ -83,6 +83,7 @@ MV_VOID		mvEthE1112PhyBasicInit(MV_U32 ethPortNum);
 MV_VOID		mvEthE1112PhyPowerDown(MV_U32 ethPortNum);
 MV_VOID		mvEthE1112PhyPowerUp(MV_U32 ethPortNum);
 MV_VOID		mvEthE1116PhyBasicInit(MV_U32 ethPortNum);
+MV_VOID		mvEthE1310PhyBasicInit(MV_U32 ethPortNum);
 MV_VOID		mvEthE3016PhyBasicInit(MV_U32 ethPortNum);
 MV_VOID		mvEthE1011PhyBasicInit(MV_U32 ethPortNum);
 MV_VOID 	mvEthSgmiiToCopperPhyBasicInit(MV_U32 ethPortNum);

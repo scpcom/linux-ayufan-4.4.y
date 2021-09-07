@@ -606,7 +606,7 @@ static int mv_switch_init(int port)
     GT_LPORT            port_list[MAX_SWITCH_PORTS];
     struct mv_vlan_cfg  *nc;
     GT_JUMBO_MODE       jumbo_mode;
-
+    GT_DEV_EVENT        gt_event;
     /* printk("init switch layer... "); */
 
     memset((char*)&qd_cfg,0,sizeof(GT_SYS_CONFIG));
@@ -625,7 +625,7 @@ static int mv_switch_init(int port)
         qd_cfg.mode.scanMode = SMI_MANUAL_MODE;
     }
     else if (mvBoardSmiScanModeGet(port) == 2) {
-	qd_cfg.mode.baseAddr = 0xA;
+        qd_cfg.mode.baseAddr = mvBoardPhyAddrGet(port); /* was 0xA; */
         qd_cfg.mode.scanMode = SMI_MULTI_ADDR_MODE;
     }
     /* load switch sw package */
@@ -645,68 +645,32 @@ static int mv_switch_init(int port)
 	    gstpSetPortState(qd_dev, p, GT_PORT_DISABLE);
     }
 
+    /* set all ports to not modify the vlan tag on egress */
+    for(i=0; i<qd_dev->numOfPorts; i++) 
+    {
+        if(gprtSetEgressMode(qd_dev, i, GT_UNMODIFY_EGRESS) != GT_OK) {
+            printk("gprtSetEgressMode GT_UNMODIFY_EGRESS failed\n");
+	            return -1;
+	        }
+    }
+	
     /* initialize Switch according to Switch ID */
     switch (qd_dev->deviceId) 
     {
-	    case GT_88E6131:
-	    case GT_88E6108:
-	        /* enable external ports */
-	        ETH_DBG( ETH_DBG_LOAD, ("enable phy polling for external ports\n"));
-	        if(gsysSetPPUEn(qd_dev, GT_TRUE) != GT_OK) {
-		        printk("gsysSetPPUEn failed\n");
-		        return -1;
-	        }
-	        /* Note: The GbE unit in SoCs connected to these switches does not support Marvell Header Mode */
-	        /* so we always use VLAN tags here */
-	        /* set cpu-port with ingress double-tag mode */
-	        ETH_DBG( ETH_DBG_LOAD, ("cpu port ingress double-tag mode\n"));
-	        if(gprtSetDoubleTag(qd_dev, SWITCH_PORT_CPU, GT_TRUE) != GT_OK) {
-	            printk("gprtSetDoubleTag failed\n");
-	            return -1;
-	        }
-	        /* set cpu-port with egrees add-tag mode */
-	        ETH_DBG( ETH_DBG_LOAD, ("cpu port egrees add-tag mode\n"));
-	        if(gprtSetEgressMode(qd_dev, SWITCH_PORT_CPU, GT_ADD_TAG) != GT_OK) {
-		        printk("gprtSetEgressMode failed\n");
-		    return -1;
-	        }
-	        /* config the switch to use the double tag data (relevant to cpu-port only) */
-	        ETH_DBG( ETH_DBG_LOAD, ("use double-tag and remove\n"));
-	        if(gsysSetUseDoubleTagData(qd_dev,GT_TRUE) != GT_OK) {
-	            printk("gsysSetUseDoubleTagData failed\n");
-	            return -1;
-	        }
-	        /* set cpu-port with 802.1q secured mode */
-	        ETH_DBG( ETH_DBG_LOAD, ("cpu port-based 802.1q secure mode\n"));
-	        if(gvlnSetPortVlanDot1qMode(qd_dev,SWITCH_PORT_CPU,GT_SECURE) != GT_OK) {
-		        printk("gvlnSetPortVlanDot1qMode failed\n");
-	            return -1;
-	        }
-	        break;
-	
 	    case GT_88E6065:
 	        /* set CPU port number */
             if(gsysSetCPUPort(qd_dev, SWITCH_PORT_CPU) != GT_OK) {
 	            printk("gsysSetCPUPort failed\n");
 	            return -1;
 	        }
-
+            /* flush all counters for all ports */
 	        if(gstatsFlushAll(qd_dev) != GT_OK)
     	        printk("gstatsFlushAll failed\n");
-
-	        /* set all ports not to unmodify the vlan tag on egress */
-	        for(i=0; i<qd_dev->numOfPorts; i++) 
-            {
-		        if(gprtSetEgressMode(qd_dev, i, GT_UNMODIFY_EGRESS) != GT_OK) {
-		            printk("gprtSetEgressMode GT_UNMODIFY_EGRESS failed\n");
-		            return -1;
-		        }
-	        }
+            /* use Marvell Header mode */
 	        if(gprtSetHeaderMode(qd_dev, SWITCH_PORT_CPU, GT_TRUE) != GT_OK) {
 		        printk("gprtSetHeaderMode GT_TRUE failed\n");
 		        return -1;
 	        }
-
 	        /* init counters */
 	        if(gprtClearAllCtr(qd_dev) != GT_OK)
 	            printk("gprtClearAllCtr failed\n");
@@ -721,20 +685,11 @@ static int mv_switch_init(int port)
 	            printk("gsysSetCPUPort failed\n");
 	            return -1;
 	        }
-
-	        /* set all ports not to unmodify the vlan tag on egress */
-	        for(i=0; i<qd_dev->numOfPorts; i++) {
-		        if(gprtSetEgressMode(qd_dev, i, GT_UNMODIFY_EGRESS) != GT_OK) {
-		            printk("gprtSetEgressMode GT_UNMODIFY_EGRESS failed\n");
-		            return -1;
-		        }
-	        }
-	    
+            /* use Marvell Header mode */
             if(gprtSetHeaderMode(qd_dev,SWITCH_PORT_CPU,GT_TRUE) != GT_OK) {
 		        printk("gprtSetHeaderMode GT_TRUE failed\n");
 		        return -1;
 	        }   
-
 	        /* init counters */
 	        if(gprtClearAllCtr(qd_dev) != GT_OK)
 	            printk("gprtClearAllCtr failed\n");
@@ -745,23 +700,26 @@ static int mv_switch_init(int port)
 
 	    case GT_88E6161:
 	    case GT_88E6165:
+        case GT_88E6171:
+            /* flush all counters for all ports */
             if(gstatsFlushAll(qd_dev) != GT_OK) {
                 printk("gstatsFlushAll failed\n");
             }
-
-	        /* set all ports not to unmodify the vlan tag on egress */
-	        for(i=0; i<qd_dev->numOfPorts; i++) {
-		        if(gprtSetEgressMode(qd_dev, i, GT_UNMODIFY_EGRESS) != GT_OK) {
-		            printk("gprtSetEgressMode GT_UNMODIFY_EGRESS failed\n");
-		            return -1;
-		        }
-	        }
+            /* use Marvell Header mode */
 	        if(gprtSetHeaderMode(qd_dev,SWITCH_PORT_CPU,GT_TRUE) != GT_OK) {
 		        printk("gprtSetHeaderMode GT_TRUE failed\n");
 		        return -1;
 	        }
+            /* set all ports to work in Normal mode (non-DSA tag) */
+            for(i=0; i<qd_dev->numOfPorts; i++) 
+            {
+                if (gprtSetFrameMode(qd_dev, i, GT_FRAME_MODE_NORMAL) != GT_OK) {
+                    printk("gprtSetFrameMode to GT_FRAME_MODE_NORMAL on port %d failed\n", i);
+                    return -1;
+                }
+            }
 
-            	/* Setup jumbo frames mode.                         */
+            /* Setup jumbo frames mode */
 	        if( MV_RX_BUF_SIZE(gtw_config.mtu) <= 1522)
                 	jumbo_mode = GT_JUMBO_MODE_1522;
             	else if( MV_RX_BUF_SIZE(gtw_config.mtu) <= 2048)
@@ -775,10 +733,11 @@ static int mv_switch_init(int port)
                     		return -1;
                 	}
             	}
+
 	        break;	
 
 	    default:
-	        printk("Unsupported Switch. Switch ID is 0x%X.\n",qd_dev->deviceId);
+            printk("Unsupported Switch. Switch ID is 0x%X.\n", qd_dev->deviceId);
 	        return -1;
     }
 
@@ -872,7 +831,7 @@ static int mv_switch_init(int port)
         }
     }
     ETH_DBG( ETH_DBG_LOAD, ("\n"));
-    if( gvlnSetPortVlanPorts(qd_dev, SWITCH_PORT_CPU, port_list, cnt) != GT_OK) {
+    if(gvlnSetPortVlanPorts(qd_dev, SWITCH_PORT_CPU, port_list, cnt) != GT_OK) {
         printk("gvlnSetPortVlanPorts failed\n");
         return -1;
     }
@@ -903,7 +862,9 @@ static int mv_switch_init(int port)
 	    }
     }
 
-    if ((qd_dev->deviceId != GT_88E6161) && (qd_dev->deviceId != GT_88E6165)) {
+    if ((qd_dev->deviceId != GT_88E6161) && 
+        (qd_dev->deviceId != GT_88E6165) && 
+        (qd_dev->deviceId != GT_88E6171)) {
     	if (switch_irq != -1) {
             if(eventSetActive(qd_dev, GT_PHY_INTERRUPT) != GT_OK) {
 	    	    printk("eventSetActive failed\n");
@@ -911,7 +872,9 @@ static int mv_switch_init(int port)
     	}
     }
     else {
-	    GT_DEV_EVENT gt_event = {GT_DEV_INT_PHY, 0, 0x1F}; /* 0x1F is a bit mask for ports 0-4 */
+	    gt_event.event = GT_DEV_INT_PHY;
+        gt_event.portList = 0;
+        gt_event.phyList = 0x1F;            /* 0x1F is a bit mask for ports 0-4 */
 	    if (switch_irq != -1) {
 	        if(eventSetDevInt(qd_dev, &gt_event) != GT_OK) {
 		        printk("eventSetDevInt failed\n");
@@ -925,27 +888,10 @@ static int mv_switch_init(int port)
 
     /* Configure Ethernet related LEDs, currently according to Switch ID */
     switch (qd_dev->deviceId) {
-	    case GT_88E6131:
-	    case GT_88E6108:
-            /* config LEDs: Bi-Color Mode-4:  */
-            /* 1000 Mbps Link - Solid Green; 1000 Mbps Activity - Blinking Green */
-            /* 100 Mbps Link - Solid Red; 100 Mbps Activity - Blinking Red */
-            for(p=0; p<qd_dev->numOfPorts; p++) {	        
-                if( (p != SWITCH_PORT_CPU) && (SWITCH_IS_PORT_CONNECTED(p)) ) {
-			/* Configure Register 16 page 3 to 0x888F for mode 4 */
-	                if(gprtSetPagedPhyReg(qd_dev,p,16,3,0x888F)) { 
-		                printk("gprtSetPagedPhyReg failed (port=%d)\n", p);
-	                }
-			    /* Configure Register 17 page 3 to 0x4400 50% mixed LEDs */
-		            if(gprtSetPagedPhyReg(qd_dev,p,17,3,0x4400)) {
-		                printk("gprtSetPagedPhyReg failed (port=%d)\n", p);
-	                }
-	            }
-            }
-	        break;
 
 	    case GT_88E6161:
 	    case GT_88E6165:
+        case GT_88E6171:
 		    break; /* do nothing */
 
 	    default:
@@ -1127,11 +1073,11 @@ int mv_gtw_start( struct net_device *dev )
     mv_gtw_set_mac_addr_to_switch(broadcast, MV_GTW_VLAN_TO_GROUP(vlan_cfg->vlan_grp_id), 
 					vlan_cfg->ports_mask|(1<<SWITCH_PORT_CPU), 1);
 
-    if (priv->timer_flag == 0)
+    if (!(priv->flags & MV_ETH_F_TIMER))
     {
         priv->timer.expires = jiffies + ((HZ*CONFIG_MV_ETH_TIMER_PERIOD)/1000); /*ms*/
         add_timer( &(priv->timer) );
-        priv->timer_flag = 1;
+        priv->flags |= MV_ETH_F_TIMER;
     }
 
     if ( (priv->net_dev == dev) || !netif_running(priv->net_dev) )
@@ -1182,7 +1128,7 @@ int mv_gtw_stop( struct net_device *dev )
 	    napi_disable(&priv->napi);
 #endif
             mv_eth_mask_interrupts(priv);
-    	    priv->timer_flag = 0;
+    	    priv->flags &= ~MV_ETH_F_TIMER;
             del_timer(&priv->timer);
 
             free_irq( dev->irq, priv );
@@ -1232,13 +1178,23 @@ static void mv_gtw_update_link_status(unsigned int p, unsigned int link_up)
 
 static irqreturn_t mv_gtw_link_interrupt_handler(int irq , void *dev_id)
 {
-    unsigned short switch_cause, phy_cause, phys_port, p;
+    unsigned short switch_cause = 0, phy_cause, phys_port = 0, p;
     OUT GT_DEV_INT_STATUS devIntStatus;
 
     if (switch_irq != -1 ) {
-	    if ( (qd_dev->deviceId == GT_88E6161) || (qd_dev->deviceId == GT_88E6165) ) {
+	    if ((qd_dev->deviceId == GT_88E6161) || 
+            (qd_dev->deviceId == GT_88E6165) || 
+            (qd_dev->deviceId == GT_88E6171)) {
             /* required to clear the interrupt, and updates phys_port */
-	        geventGetDevIntStatus(qd_dev, &devIntStatus); 
+	        if (geventGetDevIntStatus(qd_dev, &devIntStatus) != GT_OK) {
+                printk("geventGetDevIntStatus failed, ignoring interrupt\n");
+                return IRQ_HANDLED;
+            }
+            if (devIntStatus.devIntCause != GT_DEV_INT_PHY) {
+                printk("devIntCause != GT_DEV_INT_PHY, igonring interrupt\n");
+                return IRQ_HANDLED;
+            }
+
 	        phys_port = devIntStatus.phyInt & 0xFF;
 	        if (phys_port)
 		        switch_cause = GT_PHY_INTERRUPT;
@@ -1255,7 +1211,9 @@ static irqreturn_t mv_gtw_link_interrupt_handler(int irq , void *dev_id)
     if(switch_cause & GT_PHY_INTERRUPT) {
 	    /* If we're using a 6161/6165 Switch and using the Switch interrupt, we already have phys_port updated above */
 	    /* If we're using any other Switch, or if we're using polling, we need to update phys_port now */
-	    if ( (qd_dev->deviceId == GT_88E6161) || (qd_dev->deviceId == GT_88E6165)) {
+	    if ((qd_dev->deviceId == GT_88E6161) || 
+            (qd_dev->deviceId == GT_88E6165) || 
+            (qd_dev->deviceId == GT_88E6171)) {
 		    if (switch_irq == -1) {
 			    geventGetDevIntStatus(qd_dev, &devIntStatus); 
 			    phys_port = devIntStatus.phyInt & 0xFF;

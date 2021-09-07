@@ -131,7 +131,11 @@ EXPORT_SYMBOL_GPL(usbip_start_eh);
 void usbip_stop_eh(struct usbip_device *ud)
 {
 	struct usbip_task *eh = &ud->eh;
-
+#ifdef MY_ABC_HERE
+	if(eh->thread == current) {
+		return;
+	}
+#endif
 	wait_for_completion(&eh->thread_done);
 	usbip_dbg_eh("usbip_eh has finished\n");
 }

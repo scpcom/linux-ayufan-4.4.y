@@ -1052,7 +1052,7 @@ static void fs_set_task_stop(struct vfsmount *mnt)
 	read_unlock_irq(&tasklist_lock);
 }
 
-static void fs_set_task_start()
+static void fs_set_task_start(void)
 {
 	int    do_start = 0;
 	struct task_struct *g, *t;

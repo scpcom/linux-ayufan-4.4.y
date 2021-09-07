@@ -2425,6 +2425,7 @@ int set_console(int nr)
 struct tty_driver *console_driver;
 
 #ifdef CONFIG_VT_CONSOLE
+#ifndef MY_DEF_HERE
 
 /*
  *	Console on virtual terminal
@@ -2536,6 +2537,7 @@ static struct console vt_console_driver = {
 	.flags		= CON_PRINTBUFFER,
 	.index		= -1,
 };
+#endif
 #endif
 
 /*

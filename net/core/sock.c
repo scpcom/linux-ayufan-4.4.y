@@ -324,9 +324,17 @@ int sk_receive_skb(struct sock *sk, struct sk_buff *skb, const int nested)
 	skb->dev = NULL;
 
 	if (nested)
+#ifdef CONFIG_SYNO_PLX_PORTING
+		bh_lock_wsock_nested(sk);
+#else
 		bh_lock_sock_nested(sk);
+#endif
 	else
+#ifdef CONFIG_SYNO_PLX_PORTING
+		bh_lock_wsock(sk);
+#else
 		bh_lock_sock(sk);
+#endif
 	if (!sock_owned_by_user(sk)) {
 		/*
 		 * trylock + unlock semantics:
@@ -338,7 +346,11 @@ int sk_receive_skb(struct sock *sk, struct sk_buff *skb, const int nested)
 		mutex_release(&sk->sk_lock.dep_map, 1, _RET_IP_);
 	} else
 		sk_add_backlog(sk, skb);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 out:
 	sock_put(sk);
 	return rc;
@@ -1042,9 +1054,20 @@ struct sock *sk_alloc(struct net *net, int family, gfp_t priority,
 }
 EXPORT_SYMBOL(sk_alloc);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+extern int sk_wrong_state_for_release(struct sock *sk);
+#endif
+
 static void __sk_free(struct sock *sk)
 {
 	struct sk_filter *filter;
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (sk_wrong_state_for_release(sk)) {
+		WARN(1, "Attempt to release stream socket (hopefully TCP) %p in state %d\n", sk, sk->sk_state);
+		return;
+	}
+#endif
 
 	if (sk->sk_destruct)
 		sk->sk_destruct(sk);
@@ -1112,7 +1135,11 @@ struct sock *sk_clone(const struct sock *sk, const gfp_t priority)
 		get_net(sock_net(newsk));
 		sk_node_init(&newsk->sk_node);
 		sock_lock_init(newsk);
+#ifdef CONFIG_SYNO_PLX_PORTING
+		bh_lock_wsock(newsk);
+#else
 		bh_lock_sock(newsk);
+#endif
 		newsk->sk_backlog.head	= newsk->sk_backlog.tail = NULL;
 
 		atomic_set(&newsk->sk_rmem_alloc, 0);
@@ -1481,9 +1508,17 @@ static void __lock_sock(struct sock *sk)
 	for (;;) {
 		prepare_to_wait_exclusive(&sk->sk_lock.wq, &wait,
 					TASK_UNINTERRUPTIBLE);
+#ifdef CONFIG_SYNO_PLX_PORTING
+		wspin_unlock_bh(&sk->sk_lock.slock);
+#else
 		spin_unlock_bh(&sk->sk_lock.slock);
+#endif
 		schedule();
+#ifdef CONFIG_SYNO_PLX_PORTING
+		wspin_lock_bh(&sk->sk_lock.slock);
+#else
 		spin_lock_bh(&sk->sk_lock.slock);
+#endif
 		if (!sock_owned_by_user(sk))
 			break;
 	}
@@ -1496,7 +1531,11 @@ static void __release_sock(struct sock *sk)
 
 	do {
 		sk->sk_backlog.head = sk->sk_backlog.tail = NULL;
+#ifdef CONFIG_SYNO_PLX_PORTING
+		bh_unlock_wsock(sk);
+#else
 		bh_unlock_sock(sk);
+#endif
 
 		do {
 			struct sk_buff *next = skb->next;
@@ -1515,7 +1554,11 @@ static void __release_sock(struct sock *sk)
 			skb = next;
 		} while (skb != NULL);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+		bh_lock_wsock(sk);
+#else
 		bh_lock_sock(sk);
+#endif
 	} while ((skb = sk->sk_backlog.head) != NULL);
 }
 
@@ -1899,11 +1942,19 @@ EXPORT_SYMBOL(sock_init_data);
 void lock_sock_nested(struct sock *sk, int subclass)
 {
 	might_sleep();
+#ifdef CONFIG_SYNO_PLX_PORTING
+	wspin_lock_bh(&sk->sk_lock.slock);
+#else
 	spin_lock_bh(&sk->sk_lock.slock);
+#endif
 	if (sk->sk_lock.owned)
 		__lock_sock(sk);
 	sk->sk_lock.owned = 1;
+#ifdef CONFIG_SYNO_PLX_PORTING
+	wspin_unlock(&sk->sk_lock.slock);
+#else
 	spin_unlock(&sk->sk_lock.slock);
+#endif
 	/*
 	 * The sk_lock has mutex_lock() semantics here:
 	 */
@@ -1919,13 +1970,21 @@ void release_sock(struct sock *sk)
 	 */
 	mutex_release(&sk->sk_lock.dep_map, 1, _RET_IP_);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	wspin_lock_bh(&sk->sk_lock.slock);
+#else
 	spin_lock_bh(&sk->sk_lock.slock);
+#endif
 	if (sk->sk_backlog.tail)
 		__release_sock(sk);
 	sk->sk_lock.owned = 0;
 	if (waitqueue_active(&sk->sk_lock.wq))
 		wake_up(&sk->sk_lock.wq);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	wspin_unlock_bh(&sk->sk_lock.slock);
+#else
 	spin_unlock_bh(&sk->sk_lock.slock);
+#endif
 }
 EXPORT_SYMBOL(release_sock);
 

@@ -53,6 +53,10 @@
 #define NAMEI_RA_INDEX(c,b)  (((c) * NAMEI_RA_BLOCKS) + (b))
 
 #ifdef MY_ABC_HERE
+//	there is the same variable in ext3, it will be used another place.  This is only for ext4.
+static unsigned char UTF8Ext4NameiStrBuf[UNICODE_UTF8_BUFSIZE];
+extern spinlock_t Ext4Namei_buf_lock;  /* init at ext4_fill_super() */
+
 unsigned int ext4_strhash(const unsigned char *name, unsigned int len)
 {
 	unsigned long hash = init_name_hash();
@@ -66,16 +70,15 @@ unsigned int ext4_strhash(const unsigned char *name, unsigned int len)
 static int ext4_dentry_hash(struct dentry *dentry, struct qstr *this)
 {
 	unsigned int upperlen;
-	unsigned char *UTF8Ext4NameiStrBuf;
 
-	UTF8Ext4NameiStrBuf = kmalloc(PATH_MAX, GFP_KERNEL);
-	if (!UTF8Ext4NameiStrBuf) {
-		return -ENOMEM;
-	}
-	upperlen = SYNOToUpper(UTF8Ext4NameiStrBuf,this->name, PATH_MAX, this->len, NULL);
+	spin_lock(&Ext4Namei_buf_lock);
+
+	upperlen = SYNOUnicodeUTF8toUpper(UTF8Ext4NameiStrBuf,this->name,
+									  UNICODE_UTF8_BUFSIZE - 1 , this->len, NULL);
 
 	this->hash = ext4_strhash(UTF8Ext4NameiStrBuf, upperlen);
-	kfree(UTF8Ext4NameiStrBuf);
+
+	spin_unlock(&Ext4Namei_buf_lock);
 
 	return 0;
 }
@@ -2132,7 +2135,7 @@ out_stop:
 		goto retry;
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (!err && IS_SYNOACL(dir) && !S_IS_FORCE_CHMOD(mode)) {
+	if (!err && IS_SYNOACL(dir)) {
 		ext4_mod_init_syno_acl(inode, dentry);
 	}
 #endif
@@ -2806,6 +2809,9 @@ const struct inode_operations ext4_dir_inode_operations = {
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
+#ifdef MY_ABC_HERE
+	.synosetxattr	= syno_generic_setxattr,
+#endif
 #endif
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
 	.getattr	= ext4_mod_dir_getattr,

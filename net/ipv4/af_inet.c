@@ -128,6 +128,13 @@ EXPORT_SYMBOL(ipv4_config);
 
 /* New destruction routine */
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+int sk_wrong_state_for_release(struct sock *sk)
+{
+	return (sk->sk_type == SOCK_STREAM && sk->sk_state != TCP_CLOSE);
+}
+#endif
+
 void inet_sock_destruct(struct sock *sk)
 {
 	struct inet_sock *inet = inet_sk(sk);
@@ -137,7 +144,11 @@ void inet_sock_destruct(struct sock *sk)
 
 	sk_mem_reclaim(sk);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+ 	if (sk_wrong_state_for_release(sk)) {
+#else
 	if (sk->sk_type == SOCK_STREAM && sk->sk_state != TCP_CLOSE) {
+#endif
 		pr_err("Attempt to release TCP socket in state %d %p\n",
 		       sk->sk_state, sk);
 		return;
@@ -868,6 +879,9 @@ const struct proto_ops inet_stream_ops = {
 	.recvmsg	   = sock_common_recvmsg,
 	.mmap		   = sock_no_mmap,
 	.sendpage	   = tcp_sendpage,
+#ifdef CONFIG_SYNO_PLX_PORTING
+	.sendpages	   = tcp_sendpages,
+#endif
 	.splice_read	   = tcp_splice_read,
 #ifdef CONFIG_COMPAT
 	.compat_setsockopt = compat_sock_common_setsockopt,

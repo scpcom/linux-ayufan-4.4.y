@@ -11,7 +11,7 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <asm/io.h>
-#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON)
+#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_PLX_PORTING)
 #include <asm-ppc/ppcboot.h>
 #else
 #include <linux/platform_device.h>
@@ -112,6 +112,40 @@ static struct mtd_partition synomtd_partitions[] = {
 		.size   = 0x00010000,           /* 64KB                                 */
 	},
 };
+#elif defined(CONFIG_SYNO_PLX_PORTING)
+extern struct resource physmap_flash_resource;
+static struct mtd_partition synomtd_partitions[] = {
+	{
+		.name   = "RedBoot",            /* u-boot               */
+		.offset = 0x00010000,
+		.size   = 0x00020000,           /* 128KB                */
+	},
+	{
+		.name   = "zImage",                     /* linux kernel image   */
+		.offset = 0x00030000,
+		.size   = 0x00240000,           /* 2.2 MB                                 */
+	},
+	{
+		.name   = "rd.gz",                      /* ramdisk image*/
+		.offset = 0x00270000,
+		.size   = 0x00170000,           /* 1.2 MB + 64k + 128k              */
+	},
+	{
+		.name   = "vendor",                     /* vendor specific data */
+		.offset = 0x003E0000,
+		.size   = 0x00010000,           /* 64KB                                 */
+	},
+	{
+		.name   = "RedBoot Config",     /* stage 1 loader   */
+		.offset = 0x00000000,
+		.size   = 0x00010000,           /* 64KB                                */
+	},
+	{
+		.name   = "FIS directory",      /* flash partition table*/
+		.offset = 0x003F0000,
+		.size   = 0x00010000,           /* 64KB                                 */
+	},
+};
 #else
 /* Partition definition for the first flash bank which is always present. */
 static struct mtd_partition synomtd_partitions[] = {
@@ -154,7 +188,7 @@ static int __init init_synomtd(void)
 	int idx = 0, ret = 0;
 	unsigned long flash_addr, flash_size, mtd_size = 0;
 
-#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON)
+#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_PLX_PORTING)
 	bd_t *bd = (bd_t *)__res;
 #endif
 
@@ -166,7 +200,7 @@ static int __init init_synomtd(void)
 #endif
 #endif
 
-#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON)
+#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(CONFIG_SYNO_PLX_PORTING)
 	flash_addr = physmap_flash_resource.start;
 	flash_size = physmap_flash_resource.end - physmap_flash_resource.start + 1;
 #else

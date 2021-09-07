@@ -820,6 +820,97 @@ MV_BOARD_INFO db88f6280AInfo = {
     DB_88F6280A_BOARD_NAND_CONTROL
 };
 
+#define RD_88F6282A_BOARD_PCI_IF_NUM            	0x0
+#define RD_88F6282A_BOARD_TWSI_DEF_NUM		0x0
+#define RD_88F6282A_BOARD_MAC_INFO_NUM		0x2
+#define RD_88F6282A_BOARD_GPP_INFO_NUM		0x5
+#define RD_88F6282A_BOARD_MPP_CONFIG_NUM		0x1
+#define RD_88F6282A_BOARD_MPP_GROUP_TYPE_NUM	0x1
+#define RD_88F6282A_BOARD_DEVICE_CONFIG_NUM	0x1
+#define RD_88F6282A_BOARD_NAND_READ_PARAMS	0x000C0282
+#define RD_88F6282A_BOARD_NAND_WRITE_PARAMS	0x00010305
+#define RD_88F6282A_BOARD_NAND_CONTROL		0x01c00541
+
+
+MV_BOARD_TWSI_INFO	rd88f6282aInfoBoardTwsiDev[] =
+	/* {{MV_BOARD_DEV_CLASS	devClass, MV_U8	twsiDevAddr, MV_U8 twsiDevAddrType}} */
+	{
+	};
+
+MV_BOARD_MAC_INFO rd88f6282aInfoBoardMacInfo[] = 
+	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+	{
+	{BOARD_MAC_SPEED_AUTO, 0x0},
+	{BOARD_MAC_SPEED_1000M, 0x10}
+	}; 
+
+MV_BOARD_MPP_TYPE_INFO rd88f6282aInfoBoardMppTypeInfo[] = 
+	/* {{MV_BOARD_MPP_TYPE_CLASS	boardMppGroup1,
+ 		MV_BOARD_MPP_TYPE_CLASS	boardMppGroup2}} */
+	{{MV_BOARD_RGMII, MV_BOARD_TDM}
+	}; 
+
+MV_BOARD_GPP_INFO rd88f6282aInfoBoardGppInfo[] = 
+	/* {{MV_BOARD_GPP_CLASS	devClass, MV_U8	gppPinNum}} */
+	{{BOARD_GPP_WPS_BUTTON, 29},
+	{BOARD_GPP_HDD_POWER, 35},
+    	{BOARD_GPP_FAN_POWER, 34},
+    	{BOARD_GPP_USB_VBUS, 37},
+    	{BOARD_GPP_USB_VBUS_EN, 37}
+	};
+
+MV_DEV_CS_INFO rd88f6282aInfoBoardDeCsInfo[] = 
+		/*{deviceCS, params, devType, devWidth}*/			   
+		 {{0, N_A, BOARD_DEV_NAND_FLASH, 8}};	   /* NAND DEV */         
+
+MV_BOARD_MPP_INFO	rd88f6282aInfoBoardMppConfigValue[] = 
+	{{{
+	RD_88F6282A_MPP0_7,		
+	RD_88F6282A_MPP8_15,		
+	RD_88F6282A_MPP16_23,		
+	RD_88F6282A_MPP24_31,		
+	RD_88F6282A_MPP32_39,		
+	RD_88F6282A_MPP40_47,		
+	RD_88F6282A_MPP48_55		
+	}}};
+
+
+MV_BOARD_SWITCH_INFO rd88f6282aInfoBoardSwitchInfo[] = 
+	/* MV_32 linkStatusIrq, {MV_32 qdPort0, MV_32 qdPort1, MV_32 qdPort2, MV_32 qdPort3, MV_32 qdPort4}, 
+		MV_32 qdCpuPort, MV_32 smiScanMode, MV_32 switchOnPort} */
+	 {{-1, {-1}, -1, -1, -1},
+	{38, {0, 1, 2, 3, -1}, 5, 2, 1}}; /* use -1 as linkStatusIrq for polling */
+
+MV_BOARD_INFO rd88f6282aInfo = {
+	"RD-88F6282A",					/* boardName[MAX_BOARD_NAME_LEN] */
+	RD_88F6282A_BOARD_MPP_GROUP_TYPE_NUM,		/* numBoardMppGroupType */
+	rd88f6282aInfoBoardMppTypeInfo,
+	RD_88F6282A_BOARD_MPP_CONFIG_NUM,		/* numBoardMppConfig */
+	rd88f6282aInfoBoardMppConfigValue,
+	0,						/* intsGppMaskLow */
+	BIT6,						/* intsGppMaskHigh */
+	RD_88F6282A_BOARD_DEVICE_CONFIG_NUM,		/* numBoardDevIf */
+	rd88f6282aInfoBoardDeCsInfo,
+	RD_88F6282A_BOARD_TWSI_DEF_NUM,			/* numBoardTwsiDev */
+	rd88f6282aInfoBoardTwsiDev,					
+	RD_88F6282A_BOARD_MAC_INFO_NUM,			/* numBoardMacInfo */
+	rd88f6282aInfoBoardMacInfo,
+	RD_88F6282A_BOARD_GPP_INFO_NUM,			/* numBoardGppInfo */
+	rd88f6282aInfoBoardGppInfo,
+	0,						/* activeLedsNumber */              
+	NULL,
+	0,						/* ledsPolarity */		
+	RD_88F6282A_OE_LOW,				/* gppOutEnLow */
+	RD_88F6282A_OE_HIGH,				/* gppOutEnHigh */
+	RD_88F6282A_OE_VAL_LOW,				/* gppOutValLow */
+	RD_88F6282A_OE_VAL_HIGH,				/* gppOutValHigh */
+	BIT29,						/* gppPolarityValLow */
+	BIT6, 						/* gppPolarityValHigh */
+	rd88f6282aInfoBoardSwitchInfo,			/* pSwitchInfo */
+    	RD_88F6282A_BOARD_NAND_READ_PARAMS,
+    	RD_88F6282A_BOARD_NAND_WRITE_PARAMS,
+    	RD_88F6282A_BOARD_NAND_CONTROL
+};
 
 #define DB_88F6282A_BOARD_PCI_IF_NUM            0x0
 #define DB_88F6282A_BOARD_TWSI_DEF_NUM		    0x7
@@ -1420,7 +1511,7 @@ MV_BOARD_MAC_INFO DS211InfoBoardMacInfo[] =
 {
 	{BOARD_MAC_SPEED_AUTO, 0x8},
     {BOARD_MAC_SPEED_AUTO, 0x9}
-}; 
+};
 
 /* GPIO define please refer synology-gpio.c */
 MV_BOARD_INFO SYNO_DS211_INFO = {
@@ -1696,7 +1787,81 @@ MV_BOARD_INFO SYNO_DS011_INFO = {
 	NULL                                          /* pSwitchInfo */
 };
 
-#endif
+
+#define DS411_BOARD_MAC_INFO_NUM 1
+MV_BOARD_MAC_INFO PhyAddr1BoardMacInfo[] = 
+	/* {{MV_BOARD_MAC_SPEED	boardMacSpeed, MV_U8 boardEthSmiAddr}} */
+{
+	{BOARD_MAC_SPEED_AUTO, 0x1}
+};
+/* GPIO define please refer synology-gpio.c */
+MV_BOARD_INFO SYNO_DS411_INFO = {
+	"Synology Disk Station",				/* boardName[MAX_BOARD_NAME_LEN] */
+	DB_88F6282A_BOARD_MPP_GROUP_TYPE_NUM,		/* numBoardMppGroupType */
+	db88f6282AInfoBoardMppTypeInfo,
+	DB_88F6282A_BOARD_MPP_CONFIG_NUM,		/* numBoardMppConfig */
+	DS_6282_4BayInfoBoardMppConfigValue,
+	0,						/* intsGppMaskLow */
+	0,						/* intsGppMaskHigh */
+	DB_88F6282A_BOARD_DEVICE_CONFIG_NUM,		/* numBoardDevIf */
+	db88f6282AInfoBoardDeCsInfo,
+	0,			/* numBoardTwsiDev */
+	NULL,
+	DS411_BOARD_MAC_INFO_NUM,			/* numBoardMacInfo */
+	PhyAddr1BoardMacInfo,
+	0,			/* numBoardGppInfo */
+	NULL,
+	0,			/* activeLedsNumber */
+	NULL,
+	0,						/* ledsPolarity */
+	0,				/* gppOutEnLow */
+	0,				/* gppOutEnHigh */
+	0,				/* gppOutValLow */
+	0,				/* gppOutValHigh */
+	0,						/* gppPolarityValLow */
+	0, 						/* gppPolarityValHigh */
+	NULL,						/* pSwitchInfo */
+    0,
+    0,
+    0
+};
+
+
+#define DS212_BOARD_MAC_INFO_NUM 1
+
+/* GPIO define please refer synology-gpio.c */
+MV_BOARD_INFO SYNO_DS212_INFO = {
+	"Synology Disk Station",				/* boardName[MAX_BOARD_NAME_LEN] */
+	DB_88F6282A_BOARD_MPP_GROUP_TYPE_NUM,		/* numBoardMppGroupType */
+	db88f6282AInfoBoardMppTypeInfo,
+	DB_88F6282A_BOARD_MPP_CONFIG_NUM,		/* numBoardMppConfig */
+	DS211InfoBoardMppConfigValue, //*Same as DS211*/
+	0,						/* intsGppMaskLow */
+	0,						/* intsGppMaskHigh */
+	DB_88F6282A_BOARD_DEVICE_CONFIG_NUM,		/* numBoardDevIf */
+	db88f6282AInfoBoardDeCsInfo,
+	0,			/* numBoardTwsiDev */
+	NULL,					
+	DS212_BOARD_MAC_INFO_NUM,			/* numBoardMacInfo */
+	PhyAddr1BoardMacInfo,
+	0,			/* numBoardGppInfo */
+	NULL,
+	0,			/* activeLedsNumber */              
+	NULL,
+	0,						/* ledsPolarity */		
+	0,				/* gppOutEnLow */
+	0,				/* gppOutEnHigh */
+	0,				/* gppOutValLow */
+	0,				/* gppOutValHigh */
+	0,						/* gppPolarityValLow */
+	0, 						/* gppPolarityValHigh */
+	NULL,						/* pSwitchInfo */
+    0,
+    0,
+    0
+};
+
+#endif //CONFIG_SYNO_MV88F6281
 
 
 MV_BOARD_INFO*	boardInfoTbl[] = 	{
@@ -1711,13 +1876,10 @@ MV_BOARD_INFO*	boardInfoTbl[] = 	{
                     &dbCustomerInfo,
                     &sheevaPlugInfo,
                     &db88f6280AInfo,
-#ifdef CONFIG_SYNO_MV88F6281
                     &db88f6282AInfo,
-#else
-                    &db88f6282AInfo
-#endif
+					&rd88f6282aInfo
 #ifdef CONFIG_SYNO_MV88F6281
-                    NULL,                           /* 0x0C */
+						,
                     NULL,                           /* 0x0D */
                     NULL,                           /* 0x0E */
                     NULL,                           /* 0x0F */
@@ -1731,5 +1893,7 @@ MV_BOARD_INFO*	boardInfoTbl[] = 	{
                     &SYNO_DS211_INFO,               /* SYNO_DS211_ID */
 					&SYNO_DS_6282_4BAY_INFO,		/* SYNO_DS411slim_ID */
 					&SYNO_RS_6282_INFO,				/* SYNO_RS_6282_ID */
+					&SYNO_DS411_INFO,				/* SYNO_DS411_ID */
+					&SYNO_DS212_INFO,               /* SYNO_DS212_ID */
 #endif
 					};

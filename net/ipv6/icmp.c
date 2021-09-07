@@ -98,7 +98,11 @@ static __inline__ struct sock *icmpv6_xmit_lock(struct net *net)
 	local_bh_disable();
 
 	sk = icmpv6_sk(net);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	if (unlikely(!wspin_trylock(&sk->sk_lock.slock))) {
+#else
 	if (unlikely(!spin_trylock(&sk->sk_lock.slock))) {
+#endif
 		/* This can happen if the output path (f.e. SIT or
 		 * ip6ip6 tunnel) signals dst_link_failure() for an
 		 * outgoing ICMP6 packet.
@@ -111,7 +115,11 @@ static __inline__ struct sock *icmpv6_xmit_lock(struct net *net)
 
 static __inline__ void icmpv6_xmit_unlock(struct sock *sk)
 {
+#ifdef CONFIG_SYNO_PLX_PORTING
+	wspin_unlock_bh(&sk->sk_lock.slock);
+#else
 	spin_unlock_bh(&sk->sk_lock.slock);
+#endif
 }
 
 /*

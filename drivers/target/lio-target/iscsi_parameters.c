@@ -1305,8 +1305,10 @@ static int iscsi_check_acceptor_state(iscsi_param_t *param, char *value)
 				return -1;
 		}
 
+#ifndef CONFIG_SYNO_LIO
 		if (!strcmp(param->name, MAXRECVDATASEGMENTLENGTH))
 			SET_PSTATE_REPLY_OPTIONAL(param);
+#endif
 	} else if (IS_TYPE_NUMBER_RANGE(param)) {
 		negoitated_value = iscsi_get_value_from_number_range(
 					param, value);
@@ -1932,49 +1934,69 @@ void iscsi_set_connection_parameters(
 	char *tmpptr;
 	iscsi_param_t *param;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "---------------------------------------------------"
 			"---------------\n");
+#endif
 	list_for_each_entry(param, &param_list->param_list, p_list) {
 		if (!IS_PSTATE_ACCEPTOR(param) && !IS_PSTATE_PROPOSER(param))
 			continue;
 		if (!strcmp(param->name, AUTHMETHOD)) {
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "AuthMethod:                   %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, HEADERDIGEST)) {
 			ops->HeaderDigest = !strcmp(param->value, CRC32C);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "HeaderDigest:                 %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, DATADIGEST)) {
 			ops->DataDigest = !strcmp(param->value, CRC32C);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "DataDigest:                   %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, MAXRECVDATASEGMENTLENGTH)) {
 			ops->MaxRecvDataSegmentLength =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "MaxRecvDataSegmentLength:     %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, OFMARKER)) {
 			ops->OFMarker = !strcmp(param->value, YES);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "OFMarker:                     %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, IFMARKER)) {
 			ops->IFMarker = !strcmp(param->value, YES);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "IFMarker:                     %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, OFMARKINT)) {
 			ops->OFMarkInt =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "OFMarkInt:                    %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, IFMARKINT)) {
 			ops->IFMarkInt =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "IFMarkInt:                    %s\n",
 				param->value);
+#endif
 		}
 	}
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "----------------------------------------------------"
 			"--------------\n");
+#endif
 }
 
 /*	iscsi_set_session_parameters():
@@ -1989,8 +2011,10 @@ void iscsi_set_session_parameters(
 	char *tmpptr;
 	iscsi_param_t *param;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "----------------------------------------------------"
 			"--------------\n");
+#endif
 	list_for_each_entry(param, &param_list->param_list, p_list) {
 		if (!IS_PSTATE_ACCEPTOR(param) && !IS_PSTATE_PROPOSER(param))
 			continue;
@@ -2001,16 +2025,20 @@ void iscsi_set_session_parameters(
 				snprintf(ops->InitiatorName,
 						sizeof(ops->InitiatorName),
 						"%s", param->value);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "InitiatorName:                %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, INITIATORALIAS)) {
 			if (!param->value)
 				continue;
 			snprintf(ops->InitiatorAlias,
 						sizeof(ops->InitiatorAlias),
 						"%s", param->value);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "InitiatorAlias:               %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, TARGETNAME)) {
 			if (!param->value)
 				continue;
@@ -2018,79 +2046,111 @@ void iscsi_set_session_parameters(
 				snprintf(ops->TargetName,
 						sizeof(ops->TargetName),
 						"%s", param->value);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "TargetName:                   %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, TARGETALIAS)) {
 			if (!param->value)
 				continue;
 			snprintf(ops->TargetAlias, sizeof(ops->TargetAlias),
 					"%s", param->value);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "TargetAlias:                  %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, TARGETPORTALGROUPTAG)) {
 			ops->TargetPortalGroupTag =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "TargetPortalGroupTag:         %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, MAXCONNECTIONS)) {
 			ops->MaxConnections =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "MaxConnections:               %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, INITIALR2T)) {
 			ops->InitialR2T = !strcmp(param->value, YES);
+#ifndef MY_ABC_HERE
 			 printk(KERN_INFO "InitialR2T:                   %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, IMMEDIATEDATA)) {
 			ops->ImmediateData = !strcmp(param->value, YES);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "ImmediateData:                %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, MAXBURSTLENGTH)) {
 			ops->MaxBurstLength =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "MaxBurstLength:               %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, FIRSTBURSTLENGTH)) {
 			ops->FirstBurstLength =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "FirstBurstLength:             %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, DEFAULTTIME2WAIT)) {
 			ops->DefaultTime2Wait =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "DefaultTime2Wait:             %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, DEFAULTTIME2RETAIN)) {
 			ops->DefaultTime2Retain =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "DefaultTime2Retain:           %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, MAXOUTSTANDINGR2T)) {
 			ops->MaxOutstandingR2T =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "MaxOutstandingR2T:            %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, DATAPDUINORDER)) {
 			ops->DataPDUInOrder = !strcmp(param->value, YES);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "DataPDUInOrder:               %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, DATASEQUENCEINORDER)) {
 			ops->DataSequenceInOrder = !strcmp(param->value, YES);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "DataSequenceInOrder:          %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, ERRORRECOVERYLEVEL)) {
 			ops->ErrorRecoveryLevel =
 				simple_strtoul(param->value, &tmpptr, 0);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "ErrorRecoveryLevel:           %s\n",
 				param->value);
+#endif
 		} else if (!strcmp(param->name, SESSIONTYPE)) {
 			ops->SessionType = !strcmp(param->value, DISCOVERY);
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "SessionType:                  %s\n",
 				param->value);
+#endif
 		}
 	}
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "----------------------------------------------------"
 			"--------------\n");
+#endif
 
 }
 

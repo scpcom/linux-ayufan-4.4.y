@@ -214,17 +214,34 @@ ENTRY(arm1022_coherent_user_range)
 	mov	pc, lr
 
 /*
+#ifdef CONFIG_SYNO_PLX_PORTING
+ *	flush_kern_dcache_area(void *addr, size_t size)
+#else
  *	flush_kern_dcache_page(void *page)
+#endif
  *
  *	Ensure no D cache aliasing occurs, either with itself or
  *	the I cache
  *
+#ifdef CONFIG_SYNO_PLX_PORTING
+ *	- addr	- kernel address
+ *	- size	- region size
+#else
  *	- page	- page aligned address
+#endif
  */
+#ifdef CONFIG_SYNO_PLX_PORTING
+ENTRY(arm1022_flush_kern_dcache_area)
+#else
 ENTRY(arm1022_flush_kern_dcache_page)
+#endif
 	mov	ip, #0
 #ifndef CONFIG_CPU_DCACHE_DISABLE
+#ifdef CONFIG_SYNO_PLX_PORTING
+	add	r1, r0, r1
+#else
 	add	r1, r0, #PAGE_SZ
+#endif
 1:	mcr	p15, 0, r0, c7, c14, 1		@ clean+invalidate D entry
 	add	r0, r0, #CACHE_DLINESIZE
 	cmp	r0, r1
@@ -310,7 +327,11 @@ ENTRY(arm1022_cache_fns)
 	.long	arm1022_flush_user_cache_range
 	.long	arm1022_coherent_kern_range
 	.long	arm1022_coherent_user_range
+#ifdef CONFIG_SYNO_PLX_PORTING
+	.long	arm1022_flush_kern_dcache_area
+#else
 	.long	arm1022_flush_kern_dcache_page
+#endif
 	.long	arm1022_dma_inv_range
 	.long	arm1022_dma_clean_range
 	.long	arm1022_dma_flush_range

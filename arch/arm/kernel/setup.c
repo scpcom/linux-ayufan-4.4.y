@@ -61,7 +61,7 @@ long g_egiga = 1;
 #endif
 
 #ifdef MY_ABC_HERE
-extern unsigned char grgbLanMac[2][16];
+extern unsigned char grgbLanMac[4][16];
 #endif
 
 #ifdef MY_ABC_HERE
@@ -74,6 +74,10 @@ extern long g_esata_7042;
 #endif
 #ifndef MEM_SIZE
 #define MEM_SIZE	(16*1024*1024)
+#endif
+
+#ifdef MY_ABC_HERE
+extern char gszDiskIdxMap[16];
 #endif
 
 #if defined(CONFIG_FPE_NWFPE) || defined(CONFIG_FPE_FASTFPE)
@@ -165,6 +169,26 @@ static int __init early_mac2(char *p)
 	return 1;
 }
 __setup("mac2=", early_mac2);
+
+static int __init early_mac3(char *p)
+{
+	snprintf(grgbLanMac[2], sizeof(grgbLanMac[2]), "%s", p);
+
+	printk("Mac3: %s\n", grgbLanMac[2]);
+
+	return 1;
+}
+__setup("mac3=", early_mac3);
+
+static int __init early_mac4(char *p)
+{
+	snprintf(grgbLanMac[3], sizeof(grgbLanMac[3]), "%s", p);
+
+	printk("Mac4: %s\n", grgbLanMac[3]);
+
+	return 1;
+}
+__setup("mac4=", early_mac4);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -197,6 +221,19 @@ static int __init early_esata_7042(char *p)
 __setup("esata_7042=", early_esata_7042);
 #endif
 
+#ifdef MY_ABC_HERE
+static int __init early_disk_idx_map(char *p)
+{
+	snprintf(gszDiskIdxMap, sizeof(gszDiskIdxMap), "%s", p);
+
+	if('\0' != gszDiskIdxMap[0]) {
+		printk("Disk Index Map: %s\n", gszDiskIdxMap);
+	}
+
+	return 1;
+}
+__setup("DiskIdxMap=", early_disk_idx_map);
+#endif
 
 extern void paging_init(struct machine_desc *desc);
 extern void reboot_setup(char *str);
@@ -243,6 +280,11 @@ struct stack {
 	u32 irq[3];
 	u32 abt[3];
 	u32 und[3];
+#ifdef CONFIG_SYNO_PLX_PORTING
+#if defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
+	u32 fiq[128];
+#endif
+#endif
 } ____cacheline_aligned;
 
 static struct stack stacks[NR_CPUS];
@@ -476,6 +518,8 @@ void cpu_init(void)
 	/*
 	 * setup stacks for re-entrant exception handlers
 	 */
+#ifdef CONFIG_SYNO_PLX_PORTING
+#if !defined(CONFIG_ARCH_OX820) || !defined(CONFIG_SMP)
 	__asm__ (
 	"msr	cpsr_c, %1\n\t"
 	"add	r14, %0, %2\n\t"
@@ -497,6 +541,54 @@ void cpu_init(void)
 	      "I" (offsetof(struct stack, und[0])),
 	      PLC (PSR_F_BIT | PSR_I_BIT | SVC_MODE)
 	    : "r14");
+#else
+    /* Same as the uniprocessor stacks, but with a FIQ stack added.*/
+	__asm__ (
+	"msr	cpsr_c, %1\n\t"
+	"add	sp, %0, %2\n\t"
+	"msr	cpsr_c, %3\n\t"
+	"add	sp, %0, %4\n\t"
+	"msr	cpsr_c, %5\n\t"
+	"add	sp, %0, %6\n\t"
+	"msr	cpsr_c, %7\n\t"
+	"add	sp, %0, %8\n\t"
+	"msr	cpsr_c, %9"
+	    :
+	    : "r" (stk),
+	      "I" (PSR_F_BIT | PSR_I_BIT | IRQ_MODE),
+	      "I" (offsetof(struct stack, irq[0])),
+	      "I" (PSR_F_BIT | PSR_I_BIT | ABT_MODE),
+	      "I" (offsetof(struct stack, abt[0])),
+	      "I" (PSR_F_BIT | PSR_I_BIT | UND_MODE),
+	      "I" (offsetof(struct stack, und[0])),
+	      "I" (PSR_F_BIT | PSR_I_BIT | FIQ_MODE),
+	      "I" (offsetof(struct stack, fiq[120])),
+	      "I" (PSR_F_BIT | PSR_I_BIT | SVC_MODE)
+	    : "r14");
+#endif
+#else
+	__asm__ (
+	"msr	cpsr_c, %1\n\t"
+	"add	r14, %0, %2\n\t"
+	"mov	sp, r14\n\t"
+	"msr	cpsr_c, %3\n\t"
+	"add	r14, %0, %4\n\t"
+	"mov	sp, r14\n\t"
+	"msr	cpsr_c, %5\n\t"
+	"add	r14, %0, %6\n\t"
+	"mov	sp, r14\n\t"
+	"msr	cpsr_c, %7"
+	    :
+	    : "r" (stk),
+	      PLC (PSR_F_BIT | PSR_I_BIT | IRQ_MODE),
+	      "I" (offsetof(struct stack, irq[0])),
+	      PLC (PSR_F_BIT | PSR_I_BIT | ABT_MODE),
+	      "I" (offsetof(struct stack, abt[0])),
+	      PLC (PSR_F_BIT | PSR_I_BIT | UND_MODE),
+	      "I" (offsetof(struct stack, und[0])),
+	      PLC (PSR_F_BIT | PSR_I_BIT | SVC_MODE)
+	    : "r14");
+#endif
 }
 
 static struct machine_desc * __init setup_machine(unsigned int nr)

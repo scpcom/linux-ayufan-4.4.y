@@ -1201,18 +1201,36 @@ static int ext3_write_begin(struct file *file, struct address_space *mapping,
 	to = from + len;
 
 retry:
+#ifndef MY_ABC_HERE
 	page = grab_cache_page_write_begin(mapping, index, flags);
 	if (!page)
 		return -ENOMEM;
 	*pagep = page;
+#endif
 
 	handle = ext3_journal_start(inode, needed_blocks);
 	if (IS_ERR(handle)) {
+#ifndef MY_ABC_HERE
 		unlock_page(page);
 		page_cache_release(page);
+#endif
 		ret = PTR_ERR(handle);
 		goto out;
 	}
+
+#ifdef MY_ABC_HERE
+	/*
+	    Avoid grab_cache_page_write_begin() to flush dirty inodes of other file system to hit J_ASSERT(handle->h_transaction->t_journal == journal) in journal_start().
+	*/	
+	flags |= AOP_FLAG_NOFS;
+	page = grab_cache_page_write_begin(mapping, index, flags);
+	if (!page) {
+		ext3_journal_stop(handle);
+		return -ENOMEM;
+	}
+	*pagep = page;
+#endif
+
 	ret = block_write_begin(file, mapping, pos, len, flags, pagep, fsdata,
 							ext3_get_block);
 	if (ret)
@@ -1549,6 +1567,9 @@ static int buffer_unmapped(handle_t *handle, struct buffer_head *bh)
  * AKPM2: if all the page's buffers are mapped to disk and !data=journal,
  * we don't need to open a transaction here.
  */
+#ifdef MY_ABC_HERE
+handle_t *ext3_journal_start_sb_sync(struct super_block *sb, int nblocks);
+#endif
 static int ext3_ordered_writepage(struct page *page,
 				struct writeback_control *wbc)
 {
@@ -1580,7 +1601,11 @@ static int ext3_ordered_writepage(struct page *page,
 			return block_write_full_page(page, NULL, wbc);
 		}
 	}
+#ifdef MY_ABC_HERE
+	handle = ext3_journal_start_sb_sync(inode->i_sb, ext3_writepage_trans_blocks(inode));
+#else
 	handle = ext3_journal_start(inode, ext3_writepage_trans_blocks(inode));
+#endif
 
 	if (IS_ERR(handle)) {
 		ret = PTR_ERR(handle);
@@ -1643,7 +1668,11 @@ static int ext3_writeback_writepage(struct page *page,
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	handle = ext3_journal_start_sb_sync(inode->i_sb, ext3_writepage_trans_blocks(inode));
+#else
 	handle = ext3_journal_start(inode, ext3_writepage_trans_blocks(inode));
+#endif
 	if (IS_ERR(handle)) {
 		ret = PTR_ERR(handle);
 		goto out_fail;
@@ -1676,7 +1705,11 @@ static int ext3_journalled_writepage(struct page *page,
 	if (ext3_journal_current_handle())
 		goto no_write;
 
+#ifdef MY_ABC_HERE
+	handle = ext3_journal_start_sb_sync(inode->i_sb, ext3_writepage_trans_blocks(inode));
+#else
 	handle = ext3_journal_start(inode, ext3_writepage_trans_blocks(inode));
+#endif
 	if (IS_ERR(handle)) {
 		ret = PTR_ERR(handle);
 		goto no_write;
@@ -2949,6 +2982,11 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	struct ext3_inode_info *ei;
 	struct buffer_head *bh;
 	struct inode *inode;
+#ifdef MY_ABC_HERE
+	struct syno_xattr_archive_version value;
+	int retval;
+#endif
+
 	journal_t *journal = EXT3_SB(sb)->s_journal;
 	transaction_t *transaction;
 	long ret;
@@ -3114,6 +3152,14 @@ struct inode *ext3_iget(struct super_block *sb, unsigned long ino)
 	}
 	brelse (iloc.bh);
 	ext3_set_inode_flags(inode);
+#ifdef MY_ABC_HERE
+	retval = ext3_xattr_get(inode, EXT3_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value));
+	if(retval>0) {
+		inode->i_archive_version = le32_to_cpu(value.v_archive_version);
+	} else {
+		inode->i_archive_version = 0;
+	}
+#endif
 	unlock_new_inode(inode);
 	return inode;
 

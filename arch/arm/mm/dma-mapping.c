@@ -533,6 +533,171 @@ static int __init consistent_init(void)
 
 core_initcall(consistent_init);
 
+#if defined(CONFIG_SYNO_PLX_PORTING) && defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
+#include <mach/rps-irq.h>
+#include <mach/ipi.h>
+
+/*
+ * PLX: IPI s/w broadcast of cache operations on MPCore in software does not
+ *      support outer cache operations at present. If we did then the inner
+ *      cache ops on all CPUs could happen in parallel, but the outer cache
+ *      ops would have to happen only from a single CPU once inner cache ops
+ *      had completed on all CPUs
+ */
+void dma_cache_maint(
+	const void *start,
+	size_t      size,
+	int         direction)
+{
+	unsigned long flags;
+	unsigned int  cpu;
+	cpumask_t     callmap;
+
+	/* Prevent re-entrance on this processor */
+	local_irq_save(flags);
+	cpu = get_cpu();
+	
+	/* We can support a maximum of 2 CPUs */
+	BUG_ON(cpu > 1);
+
+	/* Find the other CPU */
+	callmap = cpu_online_map;
+	cpu_clear(cpu, callmap);
+
+	/* If we're here when the other CPU is still processing a previous cache
+	   coherency operation then something is wrong */
+	BUG_ON(per_cpu(fiq_coherency_communication, cpu).nents);
+
+	/* Only do this if there is another CPU active */
+	if (!cpus_empty(callmap)) {
+		/* Prepare one memory range */
+		per_cpu(fiq_coherency_communication, cpu).type = CACHE_COHERENCY;
+		per_cpu(fiq_coherency_communication, cpu).message.cache_coherency.type = direction;
+		per_cpu(fiq_coherency_communication, cpu).message.cache_coherency.range[0].start = start;
+		per_cpu(fiq_coherency_communication, cpu).message.cache_coherency.range[0].end = start + size;
+		per_cpu(fiq_coherency_communication, cpu).nents = 1;
+		wmb();
+
+		/* Inform the other CPU that there's per-CPU data to examine */
+		OX820_RPS_trigger_fiq(!cpu);
+	}
+
+	/* Run the local operation in parallel with the other CPU */
+	switch (direction) {
+		case DMA_BIDIRECTIONAL:
+			dmac_flush_range(start, start + size);
+			break;
+		case DMA_TO_DEVICE:
+			dmac_clean_range(start, start + size);
+			break;
+		case DMA_FROM_DEVICE:
+			dmac_inv_range(start, start + size);
+			break;
+		default:
+			printk(KERN_WARNING "Unknown DMA direction %d\n", direction);
+	}
+
+	/* Rendezvous the two cpus here */
+	while (per_cpu(fiq_coherency_communication,cpu).nents) {
+		barrier();
+	}
+
+	put_cpu();
+	local_irq_restore(flags);
+}
+EXPORT_SYMBOL(dma_cache_maint);
+
+/*
+ * PLX: IPI s/w broadcast of cache operations on MPCore in software does not
+ *      support outer cache operations at present. If we did then the inner
+ *      cache ops on all CPUs could happen in parallel, but the outer cache
+ *      ops would have to happen only from a single CPU once inner cache ops
+ *      had completed on all CPUs
+ */
+static void dma_cache_maint_contiguous(
+	struct page  *page,
+	unsigned long offset,
+	size_t        size,
+	int           direction)
+{
+	void *vaddr;
+	int   himem = 0;
+
+	/* Get virtual mapping for page and offset */
+	if (!PageHighMem(page)) {
+		vaddr = page_address(page) + offset;
+	} else {
+		vaddr = kmap_high_get(page);
+		if (vaddr) {
+			himem = 1;
+			vaddr += offset;
+		}
+	}
+
+	/* Only do cache op if retrieved a virtual mapping for the page */
+	if (vaddr) {
+		unsigned long flags;
+		unsigned int  cpu;
+		cpumask_t     callmap;
+
+		/* Prevent re-entrance on this processor */
+		local_irq_save(flags);
+		cpu = get_cpu();
+	
+		/* We can support a maximum of 2 CPUs */
+		BUG_ON(cpu > 1);
+
+		/* Find the other CPU */
+		callmap = cpu_online_map;
+		cpu_clear(cpu, callmap);
+
+		/* If we're here when the other CPU is still processing a previous cache
+		   coherency operation then something is wrong */
+		BUG_ON(per_cpu(fiq_coherency_communication, cpu).nents);
+
+		/* Only do this if there is another CPU active */
+		if (!cpus_empty(callmap)) {
+			/* Prepare one memory range */
+			per_cpu(fiq_coherency_communication, cpu).type = CACHE_COHERENCY;
+			per_cpu(fiq_coherency_communication, cpu).message.cache_coherency.type = direction;
+			per_cpu(fiq_coherency_communication, cpu).message.cache_coherency.range[0].start = vaddr;
+			per_cpu(fiq_coherency_communication, cpu).message.cache_coherency.range[0].end = vaddr + size;
+			per_cpu(fiq_coherency_communication, cpu).nents = 1;
+			wmb();
+
+			/* Inform the other CPU that there's per-CPU data to examine */
+			OX820_RPS_trigger_fiq(!cpu);
+		}
+
+		/* Run the local operation in parallel with the other CPU */
+		switch (direction) {
+			case DMA_BIDIRECTIONAL:
+				dmac_flush_range(vaddr, vaddr + size);
+				break;
+			case DMA_TO_DEVICE:
+				dmac_clean_range(vaddr, vaddr + size);
+				break;
+			case DMA_FROM_DEVICE:
+				dmac_inv_range(vaddr, vaddr + size);
+				break;
+			default:
+				printk(KERN_WARNING "Unknown DMA direction %d\n", direction);
+		}
+
+		/* Rendezvous the two cpus here */
+		while (per_cpu(fiq_coherency_communication,cpu).nents) {
+			barrier();
+		}
+
+		put_cpu();
+		local_irq_restore(flags);
+	}
+
+	if (vaddr && himem) {
+		kunmap_high(page);
+	}
+}
+#else // defined(CONFIG_SYNO_PLX_PORTING) && defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
 /*
  * Make an area consistent for devices.
  * Note: Drivers should NOT use this function directly, as it will break
@@ -575,6 +740,9 @@ static void dma_cache_maint_contiguous(struct page *page, unsigned long offset,
 	unsigned long paddr;
 	void (*inner_op)(const void *, const void *);
 	void (*outer_op)(unsigned long, unsigned long);
+#ifdef CONFIG_SYNO_PLX_PORTING
+panic("Not expecting dma_cache_maint_contiguous() to be invoked\n");
+#endif
 
 	switch (direction) {
 	case DMA_FROM_DEVICE:		/* invalidate only */
@@ -608,6 +776,8 @@ static void dma_cache_maint_contiguous(struct page *page, unsigned long offset,
 	paddr = page_to_phys(page) + offset;
 	outer_op(paddr, paddr + size);
 }
+#endif // defined(CONFIG_SYNO_PLX_PORTING) && defined(CONFIG_ARCH_OX820) && defined(CONFIG_SMP)
+
 
 void dma_cache_maint_page(struct page *page, unsigned long offset,
 			  size_t size, int dir)
@@ -636,6 +806,7 @@ void dma_cache_maint_page(struct page *page, unsigned long offset,
 }
 EXPORT_SYMBOL(dma_cache_maint_page);
 
+#if !defined(CONFIG_ARCH_OX820) || !defined(CONFIG_SMP) // CONFIG_SYNO_PLX_PORTING
 /**
  * dma_map_sg - map a set of SG buffers for streaming mode DMA
  * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
@@ -672,6 +843,7 @@ int dma_map_sg(struct device *dev, struct scatterlist *sg, int nents,
 	return 0;
 }
 EXPORT_SYMBOL(dma_map_sg);
+#endif
 
 /**
  * dma_unmap_sg - unmap a set of SG buffers mapped by dma_map_sg

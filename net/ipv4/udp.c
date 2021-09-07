@@ -1171,12 +1171,20 @@ int udp_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 
 	rc = 0;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock(sk);
+#else
 	bh_lock_sock(sk);
+#endif
 	if (!sock_owned_by_user(sk))
 		rc = __udp_queue_rcv_skb(sk, skb);
 	else
 		sk_add_backlog(sk, skb);
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 
 	return rc;
 

@@ -172,13 +172,28 @@ static int tcp_write_timeout(struct sock *sk)
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+extern int sk_wrong_state_for_release(struct sock *sk);
+#endif
+
 static void tcp_delack_timer(unsigned long data)
 {
 	struct sock *sk = (struct sock *)data;
 	struct tcp_sock *tp = tcp_sk(sk);
 	struct inet_connection_sock *icsk = inet_csk(sk);
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock(sk);
+
+	if ((atomic_read(&sk->sk_refcnt) == 1) && sk_wrong_state_for_release(sk)) {
+		WARN(1, "Attempt to release TCP socket %p in state %d\n", sk, sk->sk_state);
+		bh_unlock_wsock(sk);
+		return;
+	}
+#else
 	bh_lock_sock(sk);
+#endif
+
 	if (sock_owned_by_user(sk)) {
 		/* Try again later. */
 		icsk->icsk_ack.blocked = 1;
@@ -229,7 +244,11 @@ out:
 	if (tcp_memory_pressure)
 		sk_mem_reclaim(sk);
 out_unlock:
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 	sock_put(sk);
 }
 
@@ -400,7 +419,18 @@ static void tcp_write_timer(unsigned long data)
 	struct inet_connection_sock *icsk = inet_csk(sk);
 	int event;
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock(sk);
+
+	if ((atomic_read(&sk->sk_refcnt) == 1) && sk_wrong_state_for_release(sk)) {
+		WARN(1, "Attempt to release TCP socket %p in state %d\n", sk, sk->sk_state);
+		bh_unlock_wsock(sk);
+		return;
+	}
+#else
 	bh_lock_sock(sk);
+#endif
+
 	if (sock_owned_by_user(sk)) {
 		/* Try again later */
 		sk_reset_timer(sk, &icsk->icsk_retransmit_timer, jiffies + (HZ / 20));
@@ -431,7 +461,11 @@ static void tcp_write_timer(unsigned long data)
 out:
 	sk_mem_reclaim(sk);
 out_unlock:
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 	sock_put(sk);
 }
 
@@ -465,7 +499,18 @@ static void tcp_keepalive_timer (unsigned long data)
 	__u32 elapsed;
 
 	/* Only process if socket is not in use. */
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_lock_wsock(sk);
+
+	if ((atomic_read(&sk->sk_refcnt) == 1) && sk_wrong_state_for_release(sk)) {
+		WARN(1, "Attempt to release TCP socket %p in state %d\n", sk, sk->sk_state);
+		bh_unlock_wsock(sk);
+		return;
+	}
+#else
 	bh_lock_sock(sk);
+#endif
+
 	if (sock_owned_by_user(sk)) {
 		/* Try again later. */
 		inet_csk_reset_keepalive_timer (sk, HZ/20);
@@ -532,6 +577,10 @@ death:
 	tcp_done(sk);
 
 out:
+#ifdef CONFIG_SYNO_PLX_PORTING
+	bh_unlock_wsock(sk);
+#else
 	bh_unlock_sock(sk);
+#endif
 	sock_put(sk);
 }

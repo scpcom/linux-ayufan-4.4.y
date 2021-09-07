@@ -123,6 +123,78 @@ syno_sata_pmp_read_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 	if (pPM_pkg->decode) {
 		pPM_pkg->decode(pPM_pkg, READ);
 	}
+
+END:
+	return res;
+}
+
+unsigned int
+syno_sata_pmp_is_rp(struct ata_port *ap)
+{
+#define GPI_3726_PSU1_STAT(GPIO)        ((1<<29)&GPIO)
+#define GPI_3726_PSU2_STAT(GPIO)        ((1<<31)&GPIO)
+	int res = 0;
+	SYNO_PM_PKG pm_pkg;
+
+	if(NULL == ap) {
+		goto END;
+	}
+
+	if(0 != ap->PMSynoEMID) {
+		goto END;
+	}
+
+	syno_pm_systemstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+							  sata_pmp_gscr_devid(ap->link.device->gscr),
+							  &pm_pkg);
+
+	syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
+
+	syno_pm_device_info_set(ap->link.ap, READ, &pm_pkg);
+
+	res = sata_pmp_read(&(ap->link), pm_pkg.gpio_addr, &(pm_pkg.var));
+	if (0 != res) {
+		goto END;
+	}
+
+	if(GPI_3726_PSU1_STAT(pm_pkg.var) || GPI_3726_PSU2_STAT(pm_pkg.var)) {
+		res = 1;
+	}
+
+END:
+	return res;
+}
+
+unsigned int
+syno_sata_pmp_read_emid(struct ata_port *ap)
+{
+#define GPI_3726_EMID_BIT1(GPIO)	((1<<10)&GPIO)>>10
+#define GPI_3726_EMID_BIT2(GPIO)	((1<<11)&GPIO)>>10
+#define GPI_3726_EMID_BIT3(GPIO)	((1<<12)&GPIO)>>10
+	int res = 0;
+	SYNO_PM_PKG pm_pkg;
+
+	if(NULL == ap) {
+		goto END;
+	}
+
+	syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
+							sata_pmp_gscr_devid(ap->link.device->gscr),
+							&pm_pkg);
+
+	syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
+
+	syno_pm_device_info_set(ap->link.ap, READ, &pm_pkg);
+
+	res = sata_pmp_read(&(ap->link), pm_pkg.gpio_addr, &(pm_pkg.var));
+	if (0 != res) {
+		goto END;
+	}
+
+	ap->PMSynoEMID  =	GPI_3726_EMID_BIT1(pm_pkg.var)|
+				GPI_3726_EMID_BIT2(pm_pkg.var)|
+				GPI_3726_EMID_BIT3(pm_pkg.var);
+
 END:
 	return res;
 }
@@ -140,7 +212,7 @@ syno_sata_pmp_write_gpio(struct ata_link *link, SYNO_PM_PKG *pPM_pkg)
 }
 
 static u8
-syno_pm_is_synology_3726(struct ata_port *ap)
+syno_pm_is_synology_3726(const struct ata_port *ap)
 {
 	u8 ret = 0;
 
@@ -154,7 +226,10 @@ syno_pm_is_synology_3726(struct ata_port *ap)
 	}
 
 	if (!IS_SYNOLOGY_RX4(ap->PMSynoUnique) &&
-		!IS_SYNOLOGY_DX5(ap->PMSynoUnique)) {
+		!IS_SYNOLOGY_DX5(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_DXC(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_RXC(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_DX212(ap->PMSynoUnique)) {
 		goto END;
 	}
 
@@ -164,7 +239,7 @@ END:
 }
 
 u8
-syno_is_synology_pm(struct ata_port *ap)
+syno_is_synology_pm(const struct ata_port *ap)
 {
 	u8 ret = 0;
 
@@ -221,14 +296,16 @@ syno_prepare_custom_info(struct ata_port *ap)
 	syno_libata_pm_power_ctl(ap, 1, 1);
 }
 
-void
+int
 syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 {
 	SYNO_PM_PKG pm_pkg;
-	unsigned long flags;
+	int iIsFail = 0;
+	int iRet = -1;
+	unsigned long flags = 0;
 
 	if (NULL == ap) {
-		return;
+		goto END;
 	}
 
 	syno_pm_unique_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
@@ -239,6 +316,13 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 
 	if (blCustomInfo) {
 		ap->PMSynoUnique = pm_pkg.var;
+	}
+
+	if(IS_SYNOLOGY_DXC(ap->PMSynoUnique) ||
+	   IS_SYNOLOGY_RXC(ap->PMSynoUnique)) {
+		if(0 != ap->PMSynoEMID) {
+			goto END;
+		}
 	}
 
 	if (blPowerOn ^ syno_pm_is_poweron(sata_pmp_gscr_vendor(ap->link.device->gscr),
@@ -253,7 +337,9 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		syno_pm_poweron_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 0);
-		syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
+		if ((iIsFail = syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg))) {
+			goto END_GPIO_WRITE;
+		}
 
 		if (blPowerOn) {
 			mdelay(5); /* don't do it too fast. Otherwise CPLD might not response */
@@ -264,7 +350,9 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		syno_pm_poweron_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
 								 sata_pmp_gscr_devid(ap->link.device->gscr),
 								 &pm_pkg, 1);
-		syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg);
+		if ((iIsFail = syno_sata_pmp_write_gpio(&(ap->link), &pm_pkg))) {
+			goto END_GPIO_WRITE;
+		}
 
 #ifdef MY_ABC_HERE
 		if (blPowerOn) {
@@ -272,12 +360,35 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 			ap->link.eh_context.i.action |= ATA_EH_SYNO_PWON;
 		}
 #endif
+
+END_GPIO_WRITE:
 		if (!blPowerOn) {
 			spin_lock_irqsave(ap->lock, flags);
 			ap->pflags &= ~ATA_PFLAG_PMP_PMOFF;
 			spin_unlock_irqrestore(ap->lock, flags);
 		}
+
+		if (iIsFail) {
+			goto END;
+		}
 	}
+
+	if (blCustomInfo && blPowerOn) {
+		syno_sata_pmp_read_emid(ap);
+
+		mdelay(1000);
+
+		if(syno_sata_pmp_is_rp(ap)) {
+			ap->PMSynoIsRP = 1;
+		}else{
+			ap->PMSynoIsRP = 0;
+		}
+	}
+
+	iRet = 0;
+
+END:
+	return iRet;
 }
 #endif
 
@@ -522,8 +633,12 @@ static void sata_pmp_quirks(struct ata_port *ap)
 			 * times out under certain configurations.
 			 */
 			if (link->pmp < 5)
+#ifdef MY_ABC_HERE
+				link->flags |= ATA_LFLAG_ASSUME_ATA;
+#else
 				link->flags |= ATA_LFLAG_NO_SRST |
 					       ATA_LFLAG_ASSUME_ATA;
+#endif
 
 			/* port 5 is for SEMB device and it doesn't like SRST */
 			if (link->pmp == 5)
@@ -626,6 +741,10 @@ int sata_pmp_attach(struct ata_device *dev)
 #ifdef MY_ABC_HERE
 	/* Get information for all PM we supported */
 	syno_prepare_custom_info(ap);
+	/* HW spec: when Power on dx212 must wait 7s */
+	if (IS_SYNOLOGY_DX212(ap->PMSynoUnique)) {
+		mdelay(7000); /* hardware spec */
+	}
 #endif
 
 	/* config PMP */
@@ -845,8 +964,6 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 #ifdef MY_ABC_HERE
 	if(funcSYNOSendEboxRefreshEvent) {
 		funcSYNOSendEboxRefreshEvent(ap->scsi_host->host_no);
-	}else{
-		printk("funcSYNOSendEboxRefreshEvent is NULL!!");
 	}
 #endif
 

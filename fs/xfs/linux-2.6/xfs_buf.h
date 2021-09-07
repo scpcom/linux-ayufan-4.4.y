@@ -63,7 +63,12 @@ typedef enum {
 
 	/* flags used only internally */
 	_XBF_PAGE_CACHE = (1 << 17),/* backed by pagecache		   */
+#ifndef CONFIG_SYNO_PLX_PORTING
 	_XBF_PAGES = (1 << 18),	    /* backed by refcounted pages	   */
+#endif
+#ifdef CONFIG_SYNO_PLX_PORTING
+	_XBF_KMEM_ALLOC = (1 << 18),/* backed by kmem_alloc() 		   */
+#endif
 	_XBF_RUN_QUEUES = (1 << 19),/* run block device task queue	   */
 	_XBF_DELWRI_Q = (1 << 21),   /* buffer on delwri queue		   */
 

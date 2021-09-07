@@ -214,7 +214,9 @@ iscsi_tiqn_t *core_add_tiqn(unsigned char *buf, int *ret)
 	list_add_tail(&tiqn->tiqn_list, &iscsi_global->g_tiqn_list);
 	spin_unlock(&iscsi_global->tiqn_lock);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[0] - Added iSCSI Target IQN: %s\n", tiqn->tiqn);
+#endif
 
 	return tiqn;
 
@@ -229,8 +231,10 @@ int __core_del_tiqn(iscsi_tiqn_t *tiqn)
 	list_del(&tiqn->tiqn_list);
 	spin_unlock(&iscsi_global->tiqn_lock);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[0] - Deleted iSCSI Target IQN: %s\n",
 			tiqn->tiqn);
+#endif
 	kfree(tiqn);
 
 	return 0;
@@ -468,12 +472,14 @@ int core_add_np_ex(
 	list_add_tail(&np_ex->np_ex_list, &np->np_nex_list);
 	spin_unlock(&np->np_ex_lock);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[0] - Added Network Portal: Internal %s:%hu"
 		" External %s:%hu on %s on network device: %s\n", ip_buf,
 		np->np_port, ip_ex_buf, port_ex,
 		(np->np_network_transport == ISCSI_TCP) ?
 		"TCP" : "SCTP", strlen(np->np_net_dev) ?
 			(char *)np->np_net_dev : "None");
+#endif
 
 	return 0;
 }
@@ -683,11 +689,13 @@ iscsi_np_t *core_add_np(
 	list_add_tail(&np->np_list, &iscsi_global->g_np_list);
 	spin_unlock(&iscsi_global->np_lock);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[0] - Added Network Portal: %s:%hu on %s on"
 		" network device: %s\n", ip_buf, np->np_port,
 		(np->np_network_transport == ISCSI_TCP) ?
 		"TCP" : "SCTP", (strlen(np->np_net_dev)) ?
 		(char *)np->np_net_dev : "None");
+#endif
 
 	*ret = 0;
 	return np;
@@ -787,11 +795,13 @@ int core_del_np(iscsi_np_t *np)
 		ip = &buf_ipv4[0];
 	}
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[0] - Removed Network Portal: %s:%hu on %s on"
 		" network device: %s\n", ip, np->np_port,
 		(np->np_network_transport == ISCSI_TCP) ?
 		"TCP" : "SCTP",  (strlen(np->np_net_dev)) ?
 		(char *)np->np_net_dev : "None");
+#endif
 
 	kfree(np);
 	return 0;
@@ -918,9 +928,11 @@ static int iscsi_target_detect(void)
 	int ret = 0;
 	struct proc_dir_entry *dir_entry, *name_entry, *ver_entry;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "%s iSCSI Target Core Stack "PYX_ISCSI_VERSION" on"
 		" %s/%s on "UTS_RELEASE"\n", PYX_ISCSI_VENDOR,
 		utsname()->sysname, utsname()->machine);
+#endif
 	/*
 	 * Clear out the struct kmem_cache pointers
 	 */
@@ -1078,7 +1090,9 @@ static int iscsi_target_detect(void)
 	if (core_load_discovery_tpg() < 0)
 		goto out;
 
+#ifndef MY_ABC_HERE
 	printk("Loading Complete.\n");
+#endif
 
 	return ret;
 out:
@@ -1191,7 +1205,9 @@ static int iscsi_target_release(void)
 #endif /* DEBUG_ERL */
 	kfree(iscsi_global);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Unloading Complete.\n");
+#endif
 
 	return ret;
 }
@@ -1212,12 +1228,23 @@ u8 iscsi_get_fabric_proto_ident(void)
 
 iscsi_cmd_t *iscsi_get_cmd(se_cmd_t *se_cmd)
 {
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	struct iscsi_cmd_s *cmd = container_of(se_cmd, struct iscsi_cmd_s, se_cmd);
+
+	return cmd;
+#else
 	return (iscsi_cmd_t *)se_cmd->se_fabric_cmd_ptr;
+#endif
 }
 
 u32 iscsi_get_task_tag(se_cmd_t *se_cmd)
 {
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	struct iscsi_cmd_s *cmd = container_of(se_cmd, struct iscsi_cmd_s, se_cmd);
+#else
 	iscsi_cmd_t *cmd = (iscsi_cmd_t *)se_cmd->se_fabric_cmd_ptr;
+#endif
+
 	return cmd->init_task_tag;
 }
 
@@ -1410,6 +1437,18 @@ int iscsi_add_reject_from_cmd(
 	return (!fail_conn) ? 0 : -1;
 }
 
+#ifdef MY_ABC_HERE
+static void active_tpg(unsigned long data)
+{
+	iscsi_portal_group_t* tpg = (iscsi_portal_group_t*)data;
+
+	if( tpg ) {
+		printk(KERN_ERR "iSCSI - Active target portal group\n");
+		iscsi_tpg_active_portal_group(tpg);
+	}
+}
+#endif
+
 /*	iscsi_handle_scsi_cmd():
  *
  *
@@ -1540,8 +1579,14 @@ done:
 			" with immediate bit set, aborting connection\n");
 		return iscsi_add_reject(REASON_INVALID_PDU_FIELD, 1, buf, conn);
 	}
+
+#ifdef MY_ABC_HERE
+	data_direction = (hdr->flags & W_BIT) ? DMA_TO_DEVICE:
+			 (hdr->flags & R_BIT) ? DMA_FROM_DEVICE: DMA_NONE;
+#else
 	data_direction = (hdr->flags & W_BIT) ? ISCSI_WRITE :
 			 (hdr->flags & R_BIT) ? ISCSI_READ : ISCSI_NONE;
+#endif
 
 	cmd = iscsi_allocate_se_cmd(conn, hdr->exp_xfer_len, data_direction,
 				(hdr->flags & SAM2_ATTR));
@@ -1574,7 +1619,11 @@ done:
 	cmd->exp_stat_sn	= hdr->exp_stat_sn;
 	cmd->first_burst_len	= hdr->length;
 
+#ifdef MY_ABC_HERE
+	if (cmd->data_direction == DMA_FROM_DEVICE) {
+#else
 	if (cmd->data_direction == ISCSI_READ) {
+#endif
 		iscsi_datain_req_t *dr;
 
 		dr = iscsi_allocate_datain_req();
@@ -1599,6 +1648,21 @@ done:
 			return iscsi_add_reject_from_cmd(
 					REASON_OUT_OF_RESOURCES,
 					1, 1, buf, cmd);
+
+#ifdef MY_ABC_HERE
+		if (ret == PYX_TRANSPORT_PRE_WRITE_PROTECTED) {
+			init_timer(&conn->tpg->inactive_timer);
+			setup_timer(&conn->tpg->inactive_timer, active_tpg, (unsigned long)conn->tpg);
+			mod_timer(&conn->tpg->inactive_timer, get_jiffies_64() + SECONDS_FOR_TEMP_INACTIVE * HZ);
+
+			printk(KERN_ERR "iSCSI - Deactive target portal group\n");
+			iscsi_tpg_deactive_portal_group(conn->tpg);
+			printk(KERN_ERR "iSCSI - Force initiator to logout\n");
+			iscsi_sess_force_logout(conn->sess);
+		} else if (ret == PYX_TRANSPORT_PRE_WRITE_PROTECTED) {
+			return iscsi_add_reject_from_cmd( REASON_OUT_OF_RESOURCES, 1, 1, buf, cmd);
+		}
+#endif
 
 		send_check_condition = 1;
 		goto attach_cmd;
@@ -1838,7 +1902,11 @@ static inline int iscsi_handle_data_out(iscsi_conn_t *conn, unsigned char *buf)
 		return iscsi_dump_data_payload(conn, hdr->length, 1);
 	}
 
+#ifdef MY_ABC_HERE
+	if (cmd->data_direction != DMA_TO_DEVICE) {
+#else
 	if (cmd->data_direction != ISCSI_WRITE) {
+#endif
 		printk(KERN_ERR "Command ITT: 0x%08x received DataOUT for a"
 			" NON-WRITE command.\n", cmd->init_task_tag);
 		return iscsi_add_reject_from_cmd(REASON_PROTOCOL_ERR,
@@ -1983,7 +2051,11 @@ static inline int iscsi_handle_data_out(iscsi_conn_t *conn, unsigned char *buf)
 	unmap_sg.fabric_cmd = (void *)cmd;
 	unmap_sg.se_cmd = SE_CMD(cmd);
 
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	iov_ret = transport_generic_set_iovec_ptrs(&map_sg, &unmap_sg);
+#else
 	iov_ret = SE_CMD(cmd)->transport_set_iovec_ptrs(&map_sg, &unmap_sg);
+#endif
 	if (iov_ret < 0)
 		return -1;
 
@@ -2029,8 +2101,12 @@ static inline int iscsi_handle_data_out(iscsi_conn_t *conn, unsigned char *buf)
 		map_sg.data_length = hdr->length;
 		map_sg.data_offset = hdr->offset;
 
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+		if (transport_generic_set_iovec_ptrs(&map_sg, &unmap_sg) < 0)
+#else
 		if (SE_CMD(cmd)->transport_set_iovec_ptrs(
 					&map_sg, &unmap_sg) < 0)
+#endif
 			return -1;
 
 		while (counter > 0) {
@@ -2180,7 +2256,11 @@ static inline int iscsi_handle_nop_out(
 		cmd->targ_xfer_tag	= 0xFFFFFFFF;
 		cmd->cmd_sn		= hdr->cmd_sn;
 		cmd->exp_stat_sn	= hdr->exp_stat_sn;
+#ifdef MY_ABC_HERE
+		cmd->data_direction	= DMA_NONE;
+#else
 		cmd->data_direction	= ISCSI_NONE;
+#endif
 	}
 
 	if (hdr->length && (hdr->targ_xfer_tag == 0xFFFFFFFF)) {
@@ -2653,7 +2733,11 @@ static inline int iscsi_handle_text_cmd(
 	cmd->targ_xfer_tag	= 0xFFFFFFFF;
 	cmd->cmd_sn		= hdr->cmd_sn;
 	cmd->exp_stat_sn	= hdr->exp_stat_sn;
+#ifdef MY_ABC_HERE
+	cmd->data_direction	= DMA_NONE;
+#else
 	cmd->data_direction	= ISCSI_NONE;
+#endif
 
 	iscsi_attach_cmd_to_queue(conn, cmd);
 	iscsi_ack_from_expstatsn(conn, hdr->exp_stat_sn);
@@ -2840,7 +2924,12 @@ static inline int iscsi_handle_logout_cmd(
 			hdr->init_task_tag, hdr->cmd_sn, hdr->exp_stat_sn,
 				reason_code, hdr->cid, conn->cid);
 
+#ifdef MY_ABC_HERE
+	if (conn->conn_state != TARG_CONN_STATE_LOGGED_IN &&
+		conn->conn_state != TARG_CONN_STATE_LOGOUT_REQUESTED ) {
+#else
 	if (conn->conn_state != TARG_CONN_STATE_LOGGED_IN) {
+#endif
 		printk(KERN_ERR "Received logout request on connection that"
 			" is not in logged in state, ignoring request.\n");
 		return 0;
@@ -2859,7 +2948,11 @@ static inline int iscsi_handle_logout_cmd(
 	cmd->exp_stat_sn        = hdr->exp_stat_sn;
 	cmd->logout_cid         = hdr->cid;
 	cmd->logout_reason      = reason_code;
+#ifdef MY_ABC_HERE
+	cmd->data_direction     = DMA_NONE;
+#else
 	cmd->data_direction     = ISCSI_NONE;
+#endif
 
 	/*
 	 * We need to sleep in these cases (by returning 1) until the Logout
@@ -2892,6 +2985,9 @@ static inline int iscsi_handle_logout_cmd(
 					1, 0, buf, cmd);
 		}
 	}
+#ifdef MY_ABC_HERE
+	printk(KERN_ERR "iSCSI - Client [%s] logged out\n", SESS(conn)->sess_ops->InitiatorName);
+#endif
 	/*
 	 * Immediate Logout Commands are executed, well, Immediately.
 	 */
@@ -2992,7 +3088,11 @@ static int iscsi_handle_immediate_data(
 	unmap_sg.fabric_cmd = (void *)cmd;
 	unmap_sg.se_cmd = SE_CMD(cmd);
 
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	iov_ret = transport_generic_set_iovec_ptrs(&map_sg, &unmap_sg);
+#else
 	iov_ret = SE_CMD(cmd)->transport_set_iovec_ptrs(&map_sg, &unmap_sg);
+#endif
 	if (iov_ret < 0)
 		return IMMEDIDATE_DATA_CANNOT_RECOVER;
 
@@ -3041,8 +3141,12 @@ static int iscsi_handle_immediate_data(
 		map_sg.data_length = length;
 		map_sg.data_offset = cmd->write_data_done;
 
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+		iov_ret = transport_generic_set_iovec_ptrs(&map_sg, &unmap_sg);
+#else
 		if (SE_CMD(cmd)->transport_set_iovec_ptrs(&map_sg,
 					&unmap_sg) < 0)
+#endif
 			return IMMEDIDATE_DATA_CANNOT_RECOVER;
 
 		while (counter > 0) {
@@ -3119,7 +3223,9 @@ int iscsi_send_async_msg(
 {
 	__u8 iscsi_hdr[ISCSI_HDR_LEN+CRC_LEN];
 	__u32 tx_send = ISCSI_HDR_LEN, tx_sent = 0;
+#ifndef MY_ABC_HERE
 	struct timer_list async_msg_timer;
+#endif
 	struct iscsi_targ_async_msg *hdr;
 	struct iovec iov;
 
@@ -3209,6 +3315,7 @@ int iscsi_send_async_msg(
 		return -1;
 	}
 
+#ifndef MY_ABC_HERE
 	if (async_event == ASYNC_EVENT_REQUEST_LOGOUT) {
 		init_timer(&async_msg_timer);
 		SETUP_TIMER(async_msg_timer, SECONDS_FOR_ASYNC_LOGOUT,
@@ -3227,6 +3334,7 @@ int iscsi_send_async_msg(
 			iscsi_free_session(SESS(conn));
 		}
 	}
+#endif
 	return 0;
 }
 
@@ -3450,7 +3558,11 @@ static inline int iscsi_send_data_in(
 	map_sg.data_length = datain.length;
 	map_sg.data_offset = datain.offset;
 
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	iov_ret = transport_generic_set_iovec_ptrs(&map_sg, unmap_sg);
+#else
 	iov_ret = SE_CMD(cmd)->transport_set_iovec_ptrs(&map_sg, unmap_sg);
+#endif
 	if (iov_ret < 0)
 		return -1;
 
@@ -4349,6 +4461,9 @@ int iscsi_target_tx_thread(void *arg)
 	iscsi_cmd_t *cmd = NULL;
 	iscsi_conn_t *conn;
 	iscsi_queue_req_t *qr = NULL;
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+	se_cmd_t *se_cmd;
+#endif
 	se_thread_set_t *ts = (se_thread_set_t *) arg;
 	se_unmap_sg_t unmap_sg;
 
@@ -4397,8 +4512,14 @@ get_immediate:
 			case ISTATE_REMOVE:
 				spin_unlock_bh(&cmd->istate_lock);
 
+#ifdef MY_ABC_HERE
+				if (cmd->data_direction == DMA_TO_DEVICE)
+					iscsi_stop_dataout_timer(cmd);
+
+#else
 				if (cmd->data_direction == ISCSI_WRITE)
 					iscsi_stop_dataout_timer(cmd);
+#endif
 
 				spin_lock_bh(&conn->cmd_lock);
 				iscsi_remove_cmd_from_conn_list(cmd, conn);
@@ -4407,11 +4528,18 @@ get_immediate:
 				 * Determine if a se_cmd_t is assoicated with
 				 * this iscsi_cmd_t.
 				 */
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+				if (!(SE_CMD(cmd)->se_cmd_flags & SCF_SE_LUN_CMD) && !(cmd->tmr_req))
+					iscsi_release_cmd_to_pool(cmd);
+				else
+					transport_generic_free_cmd(SE_CMD(cmd), 1, 1, 0);
+#else
 				if (!(SE_CMD(cmd)))
 					iscsi_release_cmd_to_pool(cmd);
 				else
 					transport_generic_free_cmd(
 							SE_CMD(cmd), 1, 1, 0);
+#endif
 				goto get_immediate;
 			case ISTATE_SEND_NOPIN_WANT_RESPONSE:
 				spin_unlock_bh(&cmd->istate_lock);
@@ -4546,8 +4674,15 @@ check_rsp_state:
 				goto transport_err;
 			}
 
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+			se_cmd = &cmd->se_cmd;
+
+			if (map_sg && !CONN_OPS(conn)->IFMarker &&
+				T_TASK(se_cmd)->t_task_se_num) {
+#else
 			if (map_sg && !CONN_OPS(conn)->IFMarker &&
 			    T_TASK(cmd->se_cmd)->t_task_se_num) {
+#endif
 				SE_CMD(cmd)->transport_map_SG_segments(&unmap_sg);
 				if (iscsi_fe_sendpage_sg(&unmap_sg, conn) < 0) {
 					conn->tx_response_queue = 0;
@@ -4857,6 +4992,9 @@ static void iscsi_release_commands_from_conn(iscsi_conn_t *conn)
 {
 	iscsi_cmd_t *cmd = NULL, *cmd_tmp = NULL;
 	iscsi_session_t *sess = SESS(conn);
+#ifdef MY_ABC_HERE
+	struct se_cmd_s *se_cmd;
+#endif
 
 	spin_lock_bh(&conn->cmd_lock);
 	list_for_each_entry_safe(cmd, cmd_tmp, &conn->conn_cmd_list, i_list) {
@@ -4866,6 +5004,33 @@ static void iscsi_release_commands_from_conn(iscsi_conn_t *conn)
 			list_del(&cmd->i_list);
 			spin_unlock_bh(&conn->cmd_lock);
 			iscsi_increment_maxcmdsn(cmd, sess);
+#ifdef SYNO_LIO_TRANSPORT_PATCHES
+			se_cmd = SE_CMD(cmd);
+			/*
+			 * Special cases for active iSCSI TMR, and
+			 * from iscsi_get_lun_for_cmd() in iscsi_handle_scsi_cmd().
+			 */
+			if (cmd->tmr_req && se_cmd->transport_wait_for_tasks)
+					se_cmd->transport_wait_for_tasks(se_cmd, 1, 1);
+			else if (SE_CMD(cmd)->se_cmd_flags & SCF_SE_LUN_CMD)
+				transport_release_cmd_to_pool(se_cmd);
+			else
+				__iscsi_release_cmd_to_pool(cmd, sess);
+#elif defined(MY_ABC_HERE)
+			se_cmd = SE_CMD(cmd);
+			/*
+			 * Special cases for active iSCSI TMR, and
+			 * from iscsi_get_lun_for_cmd() in
+			 * iscsi_handle_scsi_cmd().
+			 */
+			if (cmd->tmr_req && se_cmd &&
+				se_cmd->transport_wait_for_tasks)
+					se_cmd->transport_wait_for_tasks(se_cmd, 1, 1);
+			else if (se_cmd)
+				transport_release_cmd_to_pool(se_cmd);
+			else
+				__iscsi_release_cmd_to_pool(cmd, sess);
+#else
 			/*
 			 * Special case for transport_get_lun_for_cmd() failing
 			 * from iscsi_get_lun_for_cmd() in
@@ -4875,6 +5040,7 @@ static void iscsi_release_commands_from_conn(iscsi_conn_t *conn)
 				transport_release_cmd_to_pool(SE_CMD(cmd));
 			else
 				__iscsi_release_cmd_to_pool(cmd, sess);
+#endif
 
 			spin_lock_bh(&conn->cmd_lock);
 			continue;
@@ -4883,10 +5049,17 @@ static void iscsi_release_commands_from_conn(iscsi_conn_t *conn)
 		spin_unlock_bh(&conn->cmd_lock);
 
 		iscsi_increment_maxcmdsn(cmd, sess);
+#ifdef MY_ABC_HERE
+		se_cmd = SE_CMD(cmd);
+
+		if (se_cmd->transport_wait_for_tasks)
+			se_cmd->transport_wait_for_tasks(se_cmd, 1, 1);
+#else
 
 		if (SE_CMD(cmd)->transport_wait_for_tasks)
 			SE_CMD(cmd)->transport_wait_for_tasks(SE_CMD(cmd),
 						1, 1);
+#endif
 
 		spin_lock_bh(&conn->cmd_lock);
 	}
@@ -4904,8 +5077,13 @@ static void iscsi_stop_timers_for_cmds(
 
 	spin_lock_bh(&conn->cmd_lock);
 	list_for_each_entry(cmd, &conn->conn_cmd_list, i_list) {
+#ifdef MY_ABC_HERE
+		if (cmd->data_direction == DMA_TO_DEVICE)
+			iscsi_stop_dataout_timer(cmd);
+#else
 		if (cmd->data_direction == ISCSI_WRITE)
 			iscsi_stop_dataout_timer(cmd);
+#endif
 	}
 	spin_unlock_bh(&conn->cmd_lock);
 }
@@ -5039,9 +5217,11 @@ int iscsi_close_connection(
 
 	spin_lock_bh(&sess->conn_lock);
 	atomic_dec(&sess->nconn);
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Decremented iSCSI connection count to %hu from node:"
 		" %s\n", atomic_read(&sess->nconn),
 		SESS_OPS(sess)->InitiatorName);
+#endif
 	/*
 	 * Make sure that if one connection fails in an non ERL=2 iSCSI
 	 * Session that they all fail.
@@ -5184,14 +5364,18 @@ int iscsi_close_session(iscsi_session_t *sess)
 	spin_lock_bh(&se_tpg->session_lock);
 	TRACE(TRACE_STATE, "Moving to TARG_SESS_STATE_FREE.\n");
 	sess->session_state = TARG_SESS_STATE_FREE;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Released iSCSI session from node: %s\n",
 			SESS_OPS(sess)->InitiatorName);
+#endif
 	tpg->nsessions--;
 	if (tpg->tpg_tiqn)
 		tpg->tpg_tiqn->tiqn_nsessions--;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Decremented number of active iSCSI Sessions on"
 		" iSCSI TPG: %hu to %u\n", tpg->tpgt, tpg->nsessions);
+#endif
 
 	kfree(sess->sess_ops);
 	sess->sess_ops = NULL;

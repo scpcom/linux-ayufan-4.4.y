@@ -972,8 +972,10 @@ struct ext4_super_block {
 	__u8	s_reserved_char_pad2;
 	__le16  s_reserved_pad;
 	__le64	s_kbytes_written;	/* nr of lifetime kilobytes written */
-#ifdef MY_ABC_HERE
-	__u32	s_reserved[159];	/* Padding to the end of the block */
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	__u32	s_reserved[157];	/* Padding to the end of the block */
+	__le32	s_archive_version;	/* Last archived version */
+	__le32	s_syno_reserved;
 	__le32  s_syno_hash_magic;	/* Enable Htree if the magic is given */
 #else
 	__u32   s_reserved[160];        /* Padding to the end of the block */
@@ -1892,6 +1894,15 @@ extern int ext4_get_blocks(handle_t *handle, struct inode *inode,
 			   struct buffer_head *bh, int flags);
 extern int ext4_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 			__u64 start, __u64 len);
+#ifdef CONFIG_SYNO_PLX_PORTING
+extern int ext4_get_extents(struct inode *inode, loff_t size);
+extern int ext4_getbmapx(struct inode *inode, struct getbmapx *bmx);
+
+extern int ext4_preallocate(struct file *filp, loff_t offset, loff_t len);
+extern int ext4_unpreallocate(struct file *filp, loff_t offset, loff_t len);
+extern int ext4_resetpreallocate(struct file *filp, loff_t offset, loff_t len);
+#endif
+
 /* move_extent.c */
 extern int ext4_move_extents(struct file *o_filp, struct file *d_filp,
 			     __u64 start_orig, __u64 start_donor,

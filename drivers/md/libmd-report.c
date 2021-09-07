@@ -19,7 +19,7 @@ void SynoReportBadSector(sector_t sector, unsigned long rw,
 
 	if (printk_ratelimit()) {
 		printk("%s error, md%d, %s index [%d], sector %llu [%s]\n",
-					   rw ? "write" : "read", md_minor, b, index, sector, szFuncName);
+					   rw ? "write" : "read", md_minor, b, index, (unsigned long long)sector, szFuncName);
 	}
 
 	if (funcSYNOSendRaidEvent) {
@@ -38,7 +38,7 @@ void SynoReportCorrectBadSector(sector_t sector, int md_minor,
 	bdevname(bdev,b);
 
 	printk("read error corrected, md%d, %s index [%d], sector %llu [%s]\n",
-				   md_minor, b, index, sector, szFuncName);
+				   md_minor, b, index, (unsigned long long)sector, szFuncName);
 
 	if (funcSYNOSendRaidEvent) {
 		funcSYNOSendRaidEvent(MD_SECTOR_REWRITE_OK, md_minor, 

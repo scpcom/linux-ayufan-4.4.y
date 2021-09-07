@@ -765,6 +765,11 @@ void ata_scsi_error(struct Scsi_Host *host)
 		ap->pflags &= ~ATA_PFLAG_PMP_CONNECT;
 	}
 #endif
+#ifdef MY_DEF_HERE
+	if (ap->pflags & ATA_PFLAG_SYNO_BOOT_PROBE) {
+		ap->pflags &= ~ATA_PFLAG_SYNO_BOOT_PROBE;
+	}
+#endif
 
 	if (ap->pflags & ATA_PFLAG_RECOVERED)
 		ata_port_printk(ap, KERN_INFO, "EH complete\n");
@@ -1711,7 +1716,7 @@ syno_ata_writes_sector(struct ata_queued_cmd *qc)
 
 	ata_dev_printk(qc->dev, KERN_ERR, "%s unc at %llu\n",
 				   (qc->tf.flags & ATA_TFLAG_WRITE) ? "write" : "read",
-				   lba);
+				   (unsigned long long)lba);
 
 	if (!(qc->tf.flags & ATA_TFLAG_WRITE) &&
 		!blSectorNeedAutoRemap(qc->scsicmd, lba)) {
@@ -3573,6 +3578,18 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 			ehc->classes[dev->devno] = ATA_DEV_UNKNOWN;
 	}
 
+#ifdef MY_DEF_HERE
+	if (ap->nr_pmp_links &&
+		ap->pflags & ATA_PFLAG_SYNO_BOOT_PROBE) {
+		ata_port_printk(ap, KERN_INFO, "Apply Synology fast PMP boot\n");
+		ata_for_each_link(link, ap, EDGE) {
+			int class = 0;
+
+			if (ap->ops->pmp_hardreset)	
+				ap->ops->pmp_hardreset(link, &class, 0);
+		}
+	}
+#endif
 	/* reset */
 	ata_for_each_link(link, ap, EDGE) {
 		struct ata_eh_context *ehc = &link->eh_context;
@@ -3699,6 +3716,23 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 		if (ehc->i.action & ATA_EH_LPM)
 			ata_for_each_dev(dev, link, ALL)
 				ata_dev_enable_pm(dev, ap->pm_policy);
+
+#ifdef MY_ABC_HERE
+		if (ehc->i.action & ATA_EH_WCACHE_DISABLE) {
+			ata_for_each_dev(dev, link, ALL) {
+				unsigned int err_mask = 0;
+				if (dev->class != ATA_DEV_ATA || !(dev->flags & ATA_DFLAG_NO_WCACHE))
+					continue;
+
+				ata_dev_printk(dev, KERN_ERR, "Disable disk write cache in EH");
+				err_mask = ata_dev_set_feature(dev, SETFEATURES_WC_OFF, 0);
+				if (err_mask)
+					ata_dev_printk(dev, KERN_ERR,
+						"failed to dsiable write cache "
+						"(err_mask=0x%x)\n", err_mask);
+			}
+		}
+#endif
 
 		/* this link is okay now */
 		ehc->i.flags = 0;

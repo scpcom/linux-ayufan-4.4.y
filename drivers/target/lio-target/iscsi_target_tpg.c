@@ -555,7 +555,9 @@ int core_load_discovery_tpg(void)
 	spin_unlock(&tpg->tpg_state_lock);
 
 	iscsi_global->discovery_tpg = tpg;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[0] - Allocated Discovery TPG\n");
+#endif
 
 	return 0;
 out:
@@ -700,12 +702,14 @@ static void iscsi_tpg_free_network_portals(iscsi_portal_group_t *tpg)
 			ip = &buf_ipv4[0];
 		}
 
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "CORE[%s] - Removed Network Portal: %s:%hu,%hu"
 			" on %s on network device: %s\n", tpg->tpg_tiqn->tiqn,
 			ip, np->np_port, tpg->tpgt,
 			(np->np_network_transport == ISCSI_TCP) ?
 			"TCP" : "SCTP",  (strlen(np->np_net_dev)) ?
 			(char *)np->np_net_dev : "None");
+#endif
 
 		tpg_np->tpg_np = NULL;
 		kfree(tpg_np);
@@ -713,8 +717,10 @@ static void iscsi_tpg_free_network_portals(iscsi_portal_group_t *tpg)
 
 		spin_lock(&np->np_state_lock);
 		np->np_exports--;
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "CORE[%s]_TPG[%hu] - Decremented np_exports to %u\n",
 			tpg->tpg_tiqn->tiqn, tpg->tpgt, np->np_exports);
+#endif
 		spin_unlock(&np->np_state_lock);
 
 		spin_lock(&tpg->tpg_np_lock);
@@ -766,8 +772,10 @@ int iscsi_tpg_add_portal_group(iscsi_tiqn_t *tiqn, iscsi_portal_group_t *tpg)
 	spin_lock(&tiqn->tiqn_tpg_lock);
 	list_add_tail(&tpg->tpg_list, &tiqn->tiqn_tpg_list);
 	tiqn->tiqn_ntpgs++;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s]_TPG[%hu] - Added iSCSI Target Portal Group\n",
 			tiqn->tiqn, tpg->tpgt);
+#endif
 	spin_unlock(&tiqn->tiqn_tpg_lock);
 
 	spin_lock_bh(&iscsi_global->g_tpg_lock);
@@ -830,12 +838,30 @@ int iscsi_tpg_del_portal_group(
 	list_del(&tpg->tpg_list);
 	spin_unlock(&tiqn->tiqn_tpg_lock);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s]_TPG[%hu] - Deleted iSCSI Target Portal Group\n",
 			tiqn->tiqn, tpg->tpgt);
+#endif
 
 	kmem_cache_free(lio_tpg_cache, tpg);
 	return 0;
 }
+
+#ifdef MY_ABC_HERE
+void iscsi_tpg_active_portal_group(iscsi_portal_group_t* tpg)
+{
+	spin_lock(&tpg->tpg_state_lock);
+	tpg->tpg_state = TPG_STATE_ACTIVE;
+	spin_unlock(&tpg->tpg_state_lock);
+}
+
+void iscsi_tpg_deactive_portal_group(iscsi_portal_group_t* tpg)
+{
+	spin_lock(&tpg->tpg_state_lock);
+	tpg->tpg_state = TPG_STATE_INACTIVE;
+	spin_unlock(&tpg->tpg_state_lock);
+}
+#endif
 
 /*	iscsi_tpg_enable_portal_group():
  *
@@ -881,8 +907,10 @@ int iscsi_tpg_enable_portal_group(iscsi_portal_group_t *tpg)
 
 	spin_lock(&tiqn->tiqn_tpg_lock);
 	tiqn->tiqn_active_tpgs++;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Enabled iSCSI Target Portal Group\n",
 			tpg->tpgt);
+#endif
 	spin_unlock(&tiqn->tiqn_tpg_lock);
 
 	return 0;
@@ -899,8 +927,10 @@ int iscsi_tpg_disable_portal_group(iscsi_portal_group_t *tpg, int force)
 
 	spin_lock(&tpg->tpg_state_lock);
 	if (tpg->tpg_state == TPG_STATE_INACTIVE) {
+#ifndef MY_ABC_HERE
 		printk(KERN_ERR "iSCSI Target Portal Group: %hu is already"
 			" inactive, ignoring request.\n", tpg->tpgt);
+#endif
 		spin_unlock(&tpg->tpg_state_lock);
 		return -EINVAL;
 	}
@@ -921,8 +951,10 @@ int iscsi_tpg_disable_portal_group(iscsi_portal_group_t *tpg, int force)
 
 	spin_lock(&tiqn->tiqn_tpg_lock);
 	tiqn->tiqn_active_tpgs--;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Disabled iSCSI Target Portal Group\n",
 			tpg->tpgt);
+#endif
 	spin_unlock(&tiqn->tiqn_tpg_lock);
 
 	return 0;
@@ -1058,17 +1090,21 @@ iscsi_tpg_np_t *iscsi_tpg_add_network_portal(
 		spin_unlock(&tpg_np_parent->tpg_np_parent_lock);
 	}
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s] - Added Network Portal: %s:%hu,%hu on %s on"
 		" network device: %s\n", tpg->tpg_tiqn->tiqn, ip_buf,
 		np->np_port, tpg->tpgt,
 		(np->np_network_transport == ISCSI_TCP) ?
 		"TCP" : "SCTP", (strlen(np->np_net_dev)) ?
 		(char *)np->np_net_dev : "None");
+#endif
 
 	spin_lock(&np->np_state_lock);
 	np->np_exports++;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s]_TPG[%hu] - Incremented np_exports to %u\n",
 		tpg->tpg_tiqn->tiqn, tpg->tpgt, np->np_exports);
+#endif
 	spin_unlock(&np->np_state_lock);
 
 	return tpg_np;
@@ -1092,12 +1128,14 @@ static int iscsi_tpg_release_np(
 
 	iscsi_clear_tpg_np_login_thread(tpg_np, tpg, 1);
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s] - Removed Network Portal: %s:%hu,%hu on %s"
 		" on network device: %s\n", tpg->tpg_tiqn->tiqn, ip,
 		np->np_port, tpg->tpgt,
 		(np->np_network_transport == ISCSI_TCP) ?
 		"TCP" : "SCTP",  (strlen(np->np_net_dev)) ?
 		(char *)np->np_net_dev : "None");
+#endif
 
 	tpg_np->tpg_np = NULL;
 	tpg_np->tpg = NULL;
@@ -1109,8 +1147,10 @@ static int iscsi_tpg_release_np(
 	spin_lock(&np->np_state_lock);
 	if ((--np->np_exports == 0) && !(ISCSI_TPG_ATTRIB(tpg)->cache_core_nps))
 		atomic_set(&np->np_shutdown, 1);
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s]_TPG[%hu] - Decremented np_exports to %u\n",
 		tpg->tpg_tiqn->tiqn, tpg->tpgt, np->np_exports);
+#endif
 	spin_unlock(&np->np_state_lock);
 
 	if (atomic_read(&np->np_shutdown))
@@ -1245,8 +1285,10 @@ int iscsi_ta_authentication(iscsi_portal_group_t *tpg, u32 authentication)
 
 out:
 	a->authentication = authentication;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "%s iSCSI Authentication Methods for TPG: %hu.\n",
 		a->authentication ? "Enforcing" : "Disabling", tpg->tpgt);
+#endif
 
 	return 0;
 }
@@ -1319,8 +1361,10 @@ int iscsi_ta_generate_node_acls(
 	}
 
 	a->generate_node_acls = flag;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Generate Initiator Portal Group ACLs: %s\n",
 		tpg->tpgt, (a->generate_node_acls) ? "Enabled" : "Disabled");
+#endif
 
 	return 0;
 }
@@ -1344,8 +1388,10 @@ int iscsi_ta_default_cmdsn_depth(
 	}
 
 	a->default_cmdsn_depth = tcq_depth;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Set Default CmdSN TCQ Depth to %u\n",
 		tpg->tpgt, a->default_cmdsn_depth);
+#endif
 
 	return 0;
 }
@@ -1362,9 +1408,11 @@ int iscsi_ta_cache_dynamic_acls(
 	}
 
 	a->cache_dynamic_acls = flag;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Cache Dynamic Initiator Portal Group"
 		" ACLs %s\n", tpg->tpgt, (a->cache_dynamic_acls) ?
 		"Enabled" : "Disabled");
+#endif
 
 	return 0;
 }
@@ -1381,8 +1429,10 @@ int iscsi_ta_demo_mode_write_protect(
 	}
 
 	a->demo_mode_write_protect = flag;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Demo Mode Write Protect bit: %s\n",
 		tpg->tpgt, (a->demo_mode_write_protect) ? "ON" : "OFF");
+#endif
 
 	return 0;
 }
@@ -1399,9 +1449,11 @@ int iscsi_ta_prod_mode_write_protect(
 	}
 
 	a->prod_mode_write_protect = flag;
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Production Mode Write Protect bit:"
 		" %s\n", tpg->tpgt, (a->prod_mode_write_protect) ?
 		"ON" : "OFF");
+#endif
 
 	return 0;
 }

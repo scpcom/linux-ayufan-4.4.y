@@ -24,6 +24,10 @@ extern int SynoDebugFlag;
 extern int syno_hibernation_log_sec;
 #endif
 
+#ifdef CONFIG_OXNAS_FAST_WRITES
+extern inline loff_t i_tent_size_read(const struct inode *inode);
+#endif // CONFIG_OXNAS_FAST_WRITES
+
 void generic_fillattr(struct inode *inode, struct kstat *stat)
 {
 	stat->dev = inode->i_sb->s_dev;
@@ -31,6 +35,9 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 	stat->mode = inode->i_mode;
 #ifdef MY_ABC_HERE
 	stat->SynoMode = inode->i_mode2;
+#endif
+#ifdef MY_ABC_HERE
+	stat->syno_archive_version = inode->i_archive_version;
 #endif
 	stat->nlink = inode->i_nlink;
 	stat->uid = inode->i_uid;
@@ -43,6 +50,14 @@ void generic_fillattr(struct inode *inode, struct kstat *stat)
 	stat->SynoCreateTime = inode->i_CreateTime;
 #endif
 	stat->size = i_size_read(inode);
+#ifndef MY_DEF_HERE
+#ifdef CONFIG_OXNAS_FAST_WRITES
+	{
+		loff_t tent_size = i_tent_size_read(inode);
+		stat->size = (tent_size > stat->size) ? tent_size : stat->size;
+	}
+#endif //CONFIG_OXNAS_FAST_WRITES
+#endif
 	stat->blocks = inode->i_blocks;
 	stat->blksize = (1 << inode->i_blkbits);
 }
@@ -252,6 +267,9 @@ static int cp_new_stat(struct kstat *stat, struct stat __user *statbuf)
 #ifdef MY_ABC_HERE
 	tmp.st_SynoMode = stat->SynoMode;
 #endif
+#ifdef MY_ABC_HERE
+	tmp.st_syno_achv_ver = stat->syno_archive_version;
+#endif
 	tmp.st_blocks = stat->blocks;
 	tmp.st_blksize = stat->blksize;
 	return copy_to_user(statbuf,&tmp,sizeof(tmp)) ? -EFAULT : 0;
@@ -313,7 +331,7 @@ OUT_RELEASE:
 asmlinkage long sys_SYNODecryptName(char __user * root, char __user * src, char __user * dst)
 {
 	int                           err;
-	int                           plaintext_name_size = 0;
+	size_t                        plaintext_name_size = 0;
 	char                         *plaintext_name = NULL;
 	char                         *token = NULL;
 	char                         *szTarget = NULL;
@@ -487,7 +505,7 @@ int __SYNOCaselessStat(char __user * filename, struct kstat *stat, unsigned flag
 
 #ifdef MY_ABC_HERE
 	if (SynoDebugFlag) {
-		printk("%s(%d) orig name:[%s] len:[%d]\n", __FUNCTION__, __LINE__, filename, strlen(filename));
+		printk("%s(%d) orig name:[%s] len:[%u]\n", __FUNCTION__, __LINE__, filename, (unsigned int)strlen(filename));
 	}
 #endif
 	error = syno_user_path_at(AT_FDCWD, filename, flags, &path, &real_filename, &real_filename_len, lastComponent);
@@ -602,6 +620,9 @@ static long cp_new_stat64(struct kstat *stat, struct stat64 __user *statbuf)
 #endif
 #ifdef	MY_ABC_HERE
 	tmp.st_SynoMode = stat->SynoMode;
+#endif
+#ifdef MY_ABC_HERE
+	tmp.st_syno_achv_ver = stat->syno_archive_version;
 #endif
 	tmp.st_size = stat->size;
 	tmp.st_blocks = stat->blocks;

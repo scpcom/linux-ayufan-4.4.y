@@ -151,11 +151,7 @@ int pscsi_claim_sd(struct scsi_device *sd)
 		sd, disk->major, disk->first_minor);
 
 	bdev = linux_blockdevice_claim(disk->major, disk->first_minor,
-#ifdef MY_ABC_HERE
-				(void *)sd, 0);
-#else
 				(void *)sd);
-#endif
 	if (!(bdev))
 		return -1;
 
@@ -224,12 +220,14 @@ int pscsi_attach_hba(se_hba_t *hba, u32 host_id)
 	hba->hba_ptr = (void *)phv;
 	hba->transport = &pscsi_template;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_HBA[%d] - TCM SCSI HBA Driver %s on"
 		" Generic Target Core Stack %s\n", hba->hba_id,
 		PSCSI_VERSION, TARGET_CORE_MOD_VERSION);
 	printk(KERN_INFO "CORE_HBA[%d] - Attached SCSI HBA to Generic"
 		" Target Core with TCQ Depth: %d\n", hba->hba_id,
 		atomic_read(&hba->max_queue_depth));
+#endif
 
 	return 0;
 }
@@ -246,6 +244,7 @@ int pscsi_detach_hba(se_hba_t *hba)
 	if (scsi_host) {
 		scsi_host_put(scsi_host);
 
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "CORE_HBA[%d] - Detached SCSI HBA: %s from"
 			" Generic Target Core\n", hba->hba_id,
 			(scsi_host->hostt->name) ? (scsi_host->hostt->name) :
@@ -253,6 +252,9 @@ int pscsi_detach_hba(se_hba_t *hba)
 	} else
 		printk(KERN_INFO "CORE_HBA[%d] - Detached Virtual SCSI HBA"
 			" from Generic Target Core\n", hba->hba_id);
+#else
+	}
+#endif
 
 	kfree(phv);
 	hba->hba_ptr = NULL;
@@ -276,9 +278,11 @@ int pscsi_pmode_enable_hba(se_hba_t *hba, unsigned long mode_flag)
 		atomic_set(&hba->left_queue_depth, hba_depth);
 		atomic_set(&hba->max_queue_depth, hba_depth);
 
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "CORE_HBA[%d] - Disabled pSCSI HBA Passthrough"
 			" %s\n", hba->hba_id, (sh->hostt->name) ?
 			(sh->hostt->name) : "Unknown");
+#endif
 
 		scsi_host_put(sh);
 		return 0;
@@ -307,8 +311,10 @@ int pscsi_pmode_enable_hba(se_hba_t *hba, unsigned long mode_flag)
 	phv->phv_lld_host = sh;
 	phv->phv_mode = PHV_LLD_SCSI_HOST_NO;
 
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_HBA[%d] - Enabled pSCSI HBA Passthrough %s\n",
 		hba->hba_id, (sh->hostt->name) ? (sh->hostt->name) : "Unknown");
+#endif
 
 	return 1;
 }
@@ -397,9 +403,17 @@ se_device_t *pscsi_add_device_to_list(
 		cdb[0] = MODE_SENSE;
 		cdb[4] = 0x0c; /* 12 bytes */
 
+#ifdef MY_ABC_HERE
+		cmd = transport_allocate_passthrough(&cdb[0],
+				DMA_FROM_DEVICE, 0, NULL, 0, 12, dev);
+#elif defined(MY_ABC_HERE)
+		cmd = transport_allocate_passthrough(&cdb[0],
+				SE_DIRECTION_READ, 0, NULL, 0, 12, dev);
+#else
 		cmd = transport_allocate_passthrough(&cdb[0],
 				SE_DIRECTION_READ, 0, NULL, 0, 12,
 				DEV_OBJ_API(dev), dev);
+#endif
 		if (!(cmd)) {
 			printk(KERN_ERR "Unable to determine blocksize for"
 				" TYPE_TAPE\n");
@@ -1463,7 +1477,11 @@ int pscsi_map_task_SG(se_task_t *task)
 	int nr_pages = (task->task_size + task->task_sg[0].offset +
 			PAGE_SIZE - 1) >> PAGE_SHIFT;
 	int nr_vecs = 0, ret = 0;
+#ifdef MY_ABC_HERE
+	int rw = (TASK_CMD(task)->data_direction == DMA_TO_DEVICE);
+#else
 	int rw = (TASK_CMD(task)->data_direction == SE_DIRECTION_WRITE);
+#endif
 
 	if (!task->task_size)
 		return 0;

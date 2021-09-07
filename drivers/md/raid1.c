@@ -37,6 +37,9 @@
 #include "md.h"
 #include "raid1.h"
 #include "bitmap.h"
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+#include "hwraid.h"
+#endif
 
 #define DEBUG 0
 #if DEBUG
@@ -53,8 +56,13 @@
 
 static void unplug_slaves(mddev_t *mddev);
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+void raid1_allow_barrier(conf_t *conf);
+void raid1_lower_barrier(conf_t *conf);
+#else
 static void allow_barrier(conf_t *conf);
 static void lower_barrier(conf_t *conf);
+#endif
 
 #ifdef MY_ABC_HERE
 static unsigned char IsDiskErrorSet(mddev_t *mddev)
@@ -208,7 +216,11 @@ static void free_r1bio(r1bio_t *r1_bio)
 	 * Wake up any possible resync thread that waits for the device
 	 * to go idle.
 	 */
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	raid1_allow_barrier(conf);
+#else
 	allow_barrier(conf);
+#endif
 
 	put_all_bios(conf, r1_bio);
 	mempool_free(r1_bio, conf->r1bio_pool);
@@ -227,7 +239,11 @@ static void put_buf(r1bio_t *r1_bio)
 
 	mempool_free(r1_bio, conf->r1buf_pool);
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	raid1_lower_barrier(conf);
+#else
 	lower_barrier(conf);
+#endif
 }
 
 static void reschedule_retry(r1bio_t *r1_bio)
@@ -641,6 +657,18 @@ static void raid1_unplug(struct request_queue *q)
 
 	unplug_slaves(mddev);
 	md_wakeup_thread(mddev->thread);
+	
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	/* added to get the waiting request queue to re-examine the barrier */
+    if (mddev->hw_raid &&
+        blk_queue_stopped(q) )
+    {
+        unsigned long flags;
+        spin_lock_irqsave(q->queue_lock, flags);
+        blk_start_queue(q);
+        spin_unlock_irqrestore(q->queue_lock, flags);
+    }
+#endif
 }
 
 static int raid1_congested(void *data, int bits)
@@ -719,14 +747,27 @@ static int flush_pending_writes(conf_t *conf)
  *
  * So: regular IO calls 'wait_barrier'.  When that returns there
  *    is no backgroup IO happening,  It must arrange to call
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+ *    raid1_allow_barrier when it has finished its IO.
+ * backgroup IO calls must call raid1_raise_barrier.  Once that returns
+#else
  *    allow_barrier when it has finished its IO.
  * backgroup IO calls must call raise_barrier.  Once that returns
+#endif
  *    there is no normal IO happeing.  It must arrange to call
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+ *    raid1_lower_barrier when the particular background IO completes.
+#else
  *    lower_barrier when the particular background IO completes.
+#endif
  */
 #define RESYNC_DEPTH 32
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+void raid1_raise_barrier(conf_t *conf)
+#else
 static void raise_barrier(conf_t *conf)
+#endif
 {
 	spin_lock_irq(&conf->resync_lock);
 
@@ -747,16 +788,36 @@ static void raise_barrier(conf_t *conf)
 	spin_unlock_irq(&conf->resync_lock);
 }
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+void raid1_lower_barrier(conf_t *conf)
+#else
 static void lower_barrier(conf_t *conf)
+#endif
 {
 	unsigned long flags;
 	spin_lock_irqsave(&conf->resync_lock, flags);
 	conf->barrier--;
 	spin_unlock_irqrestore(&conf->resync_lock, flags);
 	wake_up(&conf->wait_barrier);
+	
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	/* added to get the waiting request queue to re-examine the barrier */
+    if (conf->mddev->hw_raid &&
+        blk_queue_stopped(conf->mddev->queue)) 
+    {
+        unsigned long flags;
+        spin_lock_irqsave(conf->mddev->queue->queue_lock, flags);
+        blk_start_queue(conf->mddev->queue);
+        spin_unlock_irqrestore(conf->mddev->queue->queue_lock, flags);
+    }
+#endif
 }
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+void raid1_wait_barrier(conf_t *conf)
+#else
 static void wait_barrier(conf_t *conf)
+#endif
 {
 	spin_lock_irq(&conf->resync_lock);
 	if (conf->barrier) {
@@ -770,7 +831,11 @@ static void wait_barrier(conf_t *conf)
 	spin_unlock_irq(&conf->resync_lock);
 }
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+void raid1_allow_barrier(conf_t *conf)
+#else
 static void allow_barrier(conf_t *conf)
+#endif
 {
 	unsigned long flags;
 	spin_lock_irqsave(&conf->resync_lock, flags);
@@ -894,7 +959,11 @@ static int make_request(struct request_queue *q, struct bio * bio)
 		return 0;
 	}
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	raid1_wait_barrier(conf);
+#else
 	wait_barrier(conf);
+#endif
 
 	bitmap = mddev->bitmap;
 
@@ -996,9 +1065,17 @@ static int make_request(struct request_queue *q, struct bio * bio)
 			if (r1_bio->bios[j])
 				rdev_dec_pending(conf->mirrors[j].rdev, mddev);
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+		raid1_allow_barrier(conf);
+#else
 		allow_barrier(conf);
+#endif
 		md_wait_for_blocked_rdev(blocked_rdev, mddev);
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+		raid1_wait_barrier(conf);
+#else
 		wait_barrier(conf);
+#endif
 		goto retry_write;
 	}
 
@@ -1148,6 +1225,12 @@ void syno_error_common(mddev_t *mddev, mdk_rdev_t *rdev)
 	printk(KERN_ALERT "raid1: Disk failure on %s, disabling device. \n"
 		"	Operation continuing on %d devices\n",
 		bdevname(rdev->bdev,b), conf->raid_disks - mddev->degraded);
+	
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	if (mddev->hw_raid) {
+	    hwraid1_error(mddev, rdev);
+	}
+#endif	
 }
 
 /**
@@ -1298,6 +1381,12 @@ static void error(mddev_t *mddev, mdk_rdev_t *rdev)
 	printk(KERN_ALERT "raid1: Disk failure on %s, disabling device.\n"
 		"raid1: Operation continuing on %d devices.\n",
 		bdevname(rdev->bdev,b), conf->raid_disks - mddev->degraded);
+
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	if (mddev->hw_raid) {
+	    hwraid1_error(mddev, rdev);
+	}
+#endif	
 }
 #endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
 
@@ -1328,8 +1417,13 @@ static void print_conf(conf_t *conf)
 
 static void close_sync(conf_t *conf)
 {
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	raid1_wait_barrier(conf);
+	raid1_allow_barrier(conf);
+#else
 	wait_barrier(conf);
 	allow_barrier(conf);
+#endif
 
 	mempool_destroy(conf->r1buf_pool);
 	conf->r1buf_pool = NULL;
@@ -1410,6 +1504,13 @@ static int raid1_add_disk(mddev_t *mddev, mdk_rdev_t *rdev)
 			rcu_assign_pointer(p->rdev, rdev);
 			break;
 		}
+
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	/* if hardware raid is involved, we need to notify it of the new disk */
+	if (!err && mddev->hw_raid) {
+	    err = hwraid1_add_disk(mddev, rdev);
+	}
+#endif	
 	md_integrity_add_rdev(rdev, mddev);
 	print_conf(conf);
 	return err;
@@ -1423,6 +1524,15 @@ static int raid1_remove_disk(mddev_t *mddev, int number)
 	mirror_info_t *p = conf->mirrors+ number;
 
 	print_conf(conf);
+	
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	if (mddev->hw_raid && hwraid_stop_new_commands() ) {
+	    printk(KERN_INFO"HW-RAID1: waiting for hwraid to go idle before removing disk\n");
+        err = -EBUSY;
+        goto abort;
+	}
+#endif
+
 	rdev = p->rdev;
 	if (rdev) {
 		if (test_bit(In_sync, &rdev->flags) ||
@@ -1448,6 +1558,11 @@ static int raid1_remove_disk(mddev_t *mddev, int number)
 		}
 		md_integrity_register(mddev);
 	}
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+    if (mddev->hw_raid) {
+        err = hwraid1_remove_disk(mddev, number, rdev);
+    }
+#endif	
 abort:
 
 	print_conf(conf);
@@ -2028,7 +2143,11 @@ static int init_resync(conf_t *conf)
  * that can be installed to exclude normal IO requests.
  */
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+static sector_t _sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, int go_faster)
+#else
 static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, int go_faster)
+#endif
 {
 	conf_t *conf = mddev->private;
 	r1bio_t *r1_bio;
@@ -2118,7 +2237,11 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 		msleep_interruptible(1000);
 
 	bitmap_cond_end_sync(mddev->bitmap, sector_nr);
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	raid1_raise_barrier(conf);
+#else
 	raise_barrier(conf);
+#endif
 
 	conf->next_resync = sector_nr;
 
@@ -2271,6 +2394,19 @@ static sector_t sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, i
 	return nr_sectors;
 }
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+static sector_t 
+sync_request(mddev_t *mddev, sector_t sector_nr, int *skipped, int go_faster)
+{
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+    if (mddev->hw_raid) {
+        return hwraid1_sync_request(mddev, sector_nr, skipped, go_faster);
+    }
+#endif
+    return _sync_request(mddev, sector_nr, skipped, go_faster);
+}
+#endif
+
 static sector_t raid1_size(mddev_t *mddev, sector_t sectors, int raid_disks)
 {
 	if (sectors)
@@ -2418,6 +2554,13 @@ static int run(mddev_t *mddev)
 	mddev->queue->backing_dev_info.congested_fn = raid1_congested;
 	mddev->queue->backing_dev_info.congested_data = mddev;
 	md_integrity_register(mddev);
+	
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	/* potentially involve this with hardware raid */
+	if (hwraid1_run(mddev, conf) < 0 ) {
+	    printk(KERN_ERR"Unable to use HW RAID accelleration.");
+	}
+#endif	
 	return 0;
 
 out_no_mem:
@@ -2453,12 +2596,29 @@ static int stop(mddev_t *mddev)
 		/* need to kick something here to make sure I/O goes? */
 	}
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	raid1_raise_barrier(conf);
+	raid1_lower_barrier(conf);
+#else
 	raise_barrier(conf);
 	lower_barrier(conf);
+#endif
 
 	md_unregister_thread(mddev->thread);
 	mddev->thread = NULL;
+
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	if (mddev->hw_raid) {
+	    hwraid1_stop(mddev);
+	} else
+#endif	    
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	{
+#endif
 	blk_sync_queue(mddev->queue); /* the unplug fn references 'conf'*/
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+	}
+#endif
 	if (conf->r1bio_pool)
 		mempool_destroy(conf->r1bio_pool);
 	kfree(conf->mirrors);
@@ -2572,9 +2732,18 @@ static int raid1_reshape(mddev_t *mddev)
 		return -ENOMEM;
 	}
 
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	raid1_raise_barrier(conf);
+#else
 	raise_barrier(conf);
+#endif
 
 	/* ok, everything is stopped */
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	if (mddev->hw_raid) {
+	    hwraid1_reshape_begin(mddev);
+	}
+#endif	
 	oldpool = conf->r1bio_pool;
 	conf->r1bio_pool = newpool;
 
@@ -2609,7 +2778,18 @@ static int raid1_reshape(mddev_t *mddev)
 	mddev->delta_disks = 0;
 
 	conf->last_used = 0; /* just make sure it is in-range */
+	
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	/* ok, everything is stopped */
+	if (mddev->hw_raid) {
+	    hwraid1_reshape_end(mddev);
+	}
+#endif	
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID                        
+	raid1_lower_barrier(conf);
+#else
 	lower_barrier(conf);
+#endif
 
 	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 	md_wakeup_thread(mddev->thread);
@@ -2624,10 +2804,18 @@ static void raid1_quiesce(mddev_t *mddev, int state)
 
 	switch(state) {
 	case 1:
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+		raid1_raise_barrier(conf);
+#else
 		raise_barrier(conf);
+#endif
 		break;
 	case 0:
+#ifdef CONFIG_SATA_OX820_DIRECT_HWRAID
+		raid1_lower_barrier(conf);
+#else
 		lower_barrier(conf);
+#endif
 		break;
 	}
 }

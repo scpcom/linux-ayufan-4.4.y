@@ -99,6 +99,9 @@ int kobject_uevent_env(struct kobject *kobj, enum kobject_action action,
 	u64 seq;
 	int i = 0;
 	int retval = 0;
+#ifdef MY_DEF_HERE
+	static u32 ullCount = 0;
+#endif
 
 	pr_debug("kobject: '%s' (%p): %s\n",
 		 kobject_name(kobj), kobj, __func__);
@@ -257,6 +260,12 @@ int kobject_uevent_env(struct kobject *kobj, enum kobject_action action,
 		if (retval)
 			goto exit;
 
+#ifdef MY_DEF_HERE
+		ullCount++;
+		if (0 == ullCount % 30 && subsystem && strstr((char *)subsystem, "block")) {
+			msleep(10000);
+		}
+#endif
 		retval = call_usermodehelper(argv[0], argv,
 					     env->envp, UMH_WAIT_EXEC);
 	}

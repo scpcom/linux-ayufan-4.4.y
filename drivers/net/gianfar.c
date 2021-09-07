@@ -92,6 +92,9 @@
 #include <linux/phy.h>
 #include <linux/phy_fixed.h>
 #include <linux/of.h>
+#ifdef MY_ABC_HERE
+#include <asm/fsl_errata.h>
+#endif /* MY_ABC_HERE */
 
 #include "gianfar.h"
 #include "fsl_pq_mdio.h"
@@ -348,7 +351,15 @@ static int gfar_probe(struct of_device *ofdev,
 	/* We need to delay at least 3 TX clocks */
 	udelay(2);
 
+#ifdef MY_ABC_HERE
+	if (MPC8548_ERRATA(2, 1))
+		tempval = MACCFG1_RX_FLOW;
+	else
+		tempval = (MACCFG1_TX_FLOW | MACCFG1_RX_FLOW);
+#else /* MY_ABC_HERE */
 	tempval = (MACCFG1_TX_FLOW | MACCFG1_RX_FLOW);
+#endif /* MY_ABC_HERE */
+
 	gfar_write(&priv->regs->maccfg1, tempval);
 
 #ifdef MY_ABC_HERE
@@ -447,10 +458,18 @@ static int gfar_probe(struct of_device *ofdev,
 	/* Enable most messages by default */
 	priv->msg_enable = (NETIF_MSG_IFUP << 1 ) - 1;
 
+#ifdef MY_ABC_HERE
+	err = register_netdev(dev);
+
+	/* Carrier starts down, phylib will bring it up */
+	/* put carrier_off after register_netdev, make link state synchronize with real status*/
+	netif_carrier_off(dev);
+#else
 	/* Carrier starts down, phylib will bring it up */
 	netif_carrier_off(dev);
 
 	err = register_netdev(dev);
+#endif
 
 	if (err) {
 		printk(KERN_ERR "%s: Cannot register net device, aborting.\n",

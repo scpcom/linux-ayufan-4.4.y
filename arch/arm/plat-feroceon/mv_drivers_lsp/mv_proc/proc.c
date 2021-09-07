@@ -433,3 +433,69 @@ module_init(start_soc_type);
 module_exit(stop_soc_type);
 
 
+
+#include <fs/read_write.h>
+
+#ifdef COLLECT_WRITE_SOCK_TO_FILE_STAT
+static struct proc_dir_entry *write_from_sock_stat;
+extern struct write_sock_to_file_stat write_from_sock;
+
+/********************************************************************
+*write_from_sock_read -
+*********************************************************************/
+int write_from_sock_read (char *buffer, char **buffer_location, off_t offset,
+                            int buffer_length, int *zero, void *ptr) {
+	int count = 0;
+	char tmp_buffer[1000] = {0};
+	if (offset > 0)
+		return 0;
+
+	count += sprintf(tmp_buffer + count, "Total errors               %ld\n", write_from_sock.errors);
+	count += sprintf(tmp_buffer + count, "Buffers up to 4K           %ld\n", write_from_sock.buf_4k);
+	count += sprintf(tmp_buffer + count, "Buffers from 4K to 8K      %ld\n", write_from_sock.buf_8k);
+	count += sprintf(tmp_buffer + count, "Buffers from 8K to 16K     %ld\n", write_from_sock.buf_16k);
+	count += sprintf(tmp_buffer + count, "Buffers from 16K to 32K    %ld\n", write_from_sock.buf_32k);
+	count += sprintf(tmp_buffer + count, "Buffers from 32K to 64K    %ld\n", write_from_sock.buf_64k);
+	count += sprintf(tmp_buffer + count, "Buffers greater than 64K   %ld\n", write_from_sock.buf_128k);
+
+	*(tmp_buffer+count) = '\0';
+	sprintf(buffer, "%s", tmp_buffer);
+
+	return count;
+}
+
+/********************************************************************
+* start_write_from_sock_stat -
+*********************************************************************/
+int __init start_write_from_sock_stat(void)
+{
+	struct proc_dir_entry *parent;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 26)
+	parent = &proc_root;
+#else
+	parent = NULL;
+#endif
+	write_from_sock_stat = create_proc_entry ("write_from_sock_stat" , 0666 , parent);
+	write_from_sock_stat->read_proc =write_from_sock_read;
+	write_from_sock_stat->write_proc = NULL;
+	write_from_sock_stat->nlink = 1;
+
+  return 0;
+}
+/********************************************************************
+* stop_write_from_sock_stat -
+*********************************************************************/
+void __exit stop_write_from_sock_stat(void)
+{
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 26)
+	remove_proc_entry("write_from_sock_stat",  &proc_root);
+#else
+	remove_proc_entry("write_from_sock_stat",  NULL);
+#endif
+	return;
+}
+ 
+module_init(start_write_from_sock_stat);
+module_exit(stop_write_from_sock_stat);
+#endif /* COLLECT_WRITE_SOCK_TO_FILE_STAT */
+

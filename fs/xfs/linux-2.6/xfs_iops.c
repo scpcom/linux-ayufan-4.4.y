@@ -675,6 +675,93 @@ xfs_vn_fiemap(
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+extern int					/* error code */
+xfs_k_getbmap(
+	xfs_inode_t		*ip,
+	struct getbmap	*bmv,	/* user bmap structure */
+	struct getbmapx	*bmx,	/* pointer to user's array */
+	int interface);			/* interface flags */
+
+STATIC int
+xfs_k_getbmapx(
+	struct inode    *inode,
+	struct getbmapx	*bmx)
+{
+	int			  iflags;
+	int			  error;
+
+	if (bmx->bmv_count < 2)
+		return -XFS_ERROR(EINVAL);
+
+	iflags = bmx->bmv_iflags;
+
+	/* Want to know about prealloc'ed regions except at the end of the file,
+	 * hopefully this will give me that */
+	iflags |= BMV_IF_PREALLOC;
+
+	if (iflags & (~BMV_IF_VALID))
+		return -XFS_ERROR(EINVAL);
+
+	error = xfs_k_getbmap(XFS_I(inode), (struct getbmap *)bmx, bmx+1, iflags);
+	if (error)
+		return -error;
+
+	return 0;
+}
+
+/* returns the number of extents */
+STATIC int
+xfs_k_get_extents(
+	struct inode *inode,	/* pointer to the file */
+	loff_t 		  size)		/* new size of the file */
+{
+	xfs_inode_t	*ip = XFS_I(inode);
+	int			 retval = 0;
+
+	xfs_ilock(ip, XFS_ILOCK_SHARED);
+
+	if (ip->i_df.if_flags & XFS_IFEXTENTS)
+		retval = ip->i_df.if_bytes / sizeof(xfs_bmbt_rec_t);
+	else
+		retval = ip->i_d.di_nextents;
+
+	xfs_iunlock(ip, XFS_ILOCK_SHARED);
+
+	return retval;
+}
+
+/* 1 implies updated and 0 implies not updated */
+/* check on xfs_setfilesize in xfs_aops.c for
+ * on disk file size update
+ */
+STATIC int 
+xfs_k_setsize(
+	struct inode *inode,	/* pointer to the file */
+	loff_t        size)		/* new size of the file */
+{
+	xfs_inode_t	*xip = XFS_I(inode);
+	int          retval = 0;
+
+	if (size > xip->i_size) {
+		xfs_ilock(xip, XFS_ILOCK_EXCL);
+		if (size > xip->i_size) {
+			xip->i_size = size;
+			xip->i_d.di_size = size;
+			xip->i_update_core = 1;
+#ifndef CONFIG_SYNO_PLX_PORTING
+			xip->i_update_size = 1;
+#endif
+		}
+
+		xfs_iunlock(xip, XFS_ILOCK_EXCL);
+		retval = 1;
+	}
+
+	return retval;
+}
+#endif
+
 static const struct inode_operations xfs_inode_operations = {
 	.check_acl		= xfs_check_acl,
 	.truncate		= xfs_vn_truncate,
@@ -686,6 +773,11 @@ static const struct inode_operations xfs_inode_operations = {
 	.listxattr		= xfs_vn_listxattr,
 	.fallocate		= xfs_vn_fallocate,
 	.fiemap			= xfs_vn_fiemap,
+#ifdef CONFIG_SYNO_PLX_PORTING
+	.get_extents	= xfs_k_get_extents,
+	.getbmapx		= xfs_k_getbmapx,
+	.setsize 		= xfs_k_setsize,
+#endif
 };
 
 static const struct inode_operations xfs_dir_inode_operations = {

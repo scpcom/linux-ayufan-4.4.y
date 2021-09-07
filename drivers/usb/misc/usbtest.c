@@ -1074,6 +1074,9 @@ test_ctrl_queue (struct usbtest_dev *dev, struct usbtest_param *param)
 
 		u->context = &context;
 		u->complete = ctrl_complete;
+#ifdef CONFIG_SYNO_PLX_PORTING
+		u->transfer_flags |= URB_NO_SETUP_DMA_MAP;
+#endif
 	}
 
 	/* queue the urbs */
@@ -1331,7 +1334,11 @@ static int halt_simple (struct usbtest_dev *dev)
 #ifdef CONFIG_MV_INCLUDE_USB
 	urb = simple_alloc_urb (testdev_to_usbdev (dev), 0, NULL, 512);
 #else
+#ifdef CONFIG_SYNO_PLX_PORTING
+ 	urb = simple_alloc_urb (testdev_to_usbdev (dev), 0, 256);
+#else
 	urb = simple_alloc_urb (testdev_to_usbdev (dev), 0, 512);
+#endif
 #endif
 	if (urb == NULL)
 		return -ENOMEM;
@@ -2304,6 +2311,12 @@ static struct usb_device_id id_table [] = {
 	/* EZ-USB devices which download firmware to replace (or in our
 	 * case augment) the default device implementation.
 	 */
+#ifdef CONFIG_SYNO_PLX_PORTING
+	/* generic EZ-USB FX controller */
+	{ USB_DEVICE (0x0547, 0x2131),
+		.driver_info = (unsigned long) &ez1_info,
+		},
+#endif
 
 	/* generic EZ-USB FX controller */
 	{ USB_DEVICE (0x0547, 0x2235),

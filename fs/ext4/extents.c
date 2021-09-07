@@ -2118,7 +2118,11 @@ ext4_ext_rm_leaf(handle_t *handle, struct inode *inode,
 	struct ext4_extent *ex;
 
 	/* the header must be checked already in ext4_ext_remove_space() */
+#ifdef MY_DEF_HERE
+	ext_debug("truncate inode [%lu] since %u in leaf\n", inode->i_ino, start);
+#else
 	ext_debug("truncate since %u in leaf\n", start);
+#endif
 	if (!path[depth].p_hdr)
 		path[depth].p_hdr = ext_block_hdr(path[depth].p_bh);
 	eh = path[depth].p_hdr;
@@ -2262,7 +2266,11 @@ static int ext4_ext_remove_space(struct inode *inode, ext4_lblk_t start)
 	handle_t *handle;
 	int i, err;
 
+#ifdef MY_DEF_HERE
+	ext_debug("truncate inode [%lu] since %u\n", inode->i_ino, start);
+#else
 	ext_debug("truncate since %u\n", start);
+#endif
 
 	/* probably first extent we're gonna free will be last in block */
 	handle = ext4_journal_start(inode, depth + 1);
@@ -2528,7 +2536,12 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 						struct inode *inode,
 						struct ext4_ext_path *path,
 						ext4_lblk_t iblock,
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+						unsigned int max_blocks,
+						int zeroout_flag)
+#else
 						unsigned int max_blocks)
+#endif
 {
 	struct ext4_extent *ex, newex, orig_ex;
 	struct ext4_extent *ex1 = NULL;
@@ -2563,6 +2576,20 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 	orig_ex.ee_block = ex->ee_block;
 	orig_ex.ee_len   = cpu_to_le16(ee_len);
 	ext4_ext_store_pblock(&orig_ex, ext_pblock(ex));
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+ 	if(!zeroout_flag) {
+ 		/* check whether the extent is inited and if so, return the end of the
+ 		 * inited extent - start block as the allocated extent so that the next
+ 		 * request will start from there
+ 		 */
+ //		printk(KERN_INFO "ext4_ext_convert_to_initialized: block - %u, length - %u, status - %d\n", iblock, max_blocks, ext4_ext_is_uninitialized(ex));
+ 
+ 		if(!ext4_ext_is_uninitialized(ex)) {
+ //			printk (KERN_INFO "allocating into a initialised extent - returing allocated - %u\n", (allocated > max_blocks) ? max_blocks : allocated);
+ 			return (allocated > max_blocks) ? max_blocks : allocated;
+ 		}
+ 	}
+#endif
 
 	/*
 	 * It is safe to convert extent to initialized via explicit
@@ -2575,9 +2602,15 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 		goto out;
 	/* If extent has less than 2*EXT4_EXT_ZERO_LEN zerout directly */
 	if (ee_len <= 2*EXT4_EXT_ZERO_LEN && may_zeroout) {
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+		if(zeroout_flag) {
+#endif
 		err =  ext4_ext_zeroout(inode, &orig_ex);
 		if (err)
 			goto fix_extent_len;
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+		}
+#endif
 		/* update the extent length and mark as initialized */
 		ex->ee_block = orig_ex.ee_block;
 		ex->ee_len   = orig_ex.ee_len;
@@ -2626,9 +2659,15 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 			err = ext4_ext_insert_extent(handle, inode, path,
 							ex3, 0);
 			if (err == -ENOSPC) {
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+				if(zeroout_flag) {
+#endif
 				err =  ext4_ext_zeroout(inode, &orig_ex);
 				if (err)
 					goto fix_extent_len;
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+				}
+#endif
 				ex->ee_block = orig_ex.ee_block;
 				ex->ee_len   = orig_ex.ee_len;
 				ext4_ext_store_pblock(ex, ext_pblock(&orig_ex));
@@ -2639,6 +2678,9 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 			} else if (err)
 				goto fix_extent_len;
 
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+			if(zeroout_flag) {
+#endif
 			/*
 			 * We need to zero out the second half because
 			 * an fallocate request can update file size and
@@ -2671,6 +2713,9 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 				ext4_ext_dirty(handle, inode, path + depth);
 				return err;
 			}
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+			}
+#endif
 
 			/* zeroed the second half */
 			return allocated;
@@ -2682,9 +2727,15 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 		ext4_ext_mark_uninitialized(ex3);
 		err = ext4_ext_insert_extent(handle, inode, path, ex3, 0);
 		if (err == -ENOSPC && may_zeroout) {
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+ 		if(zeroout_flag) {
+#endif
 			err =  ext4_ext_zeroout(inode, &orig_ex);
 			if (err)
 				goto fix_extent_len;
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+		}
+#endif
 			/* update the extent length and mark as initialized */
 			ex->ee_block = orig_ex.ee_block;
 			ex->ee_len   = orig_ex.ee_len;
@@ -2733,9 +2784,15 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 		 */
 		if (le16_to_cpu(orig_ex.ee_len) <= EXT4_EXT_ZERO_LEN &&
 			iblock != ee_block && may_zeroout) {
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+ 		if(zeroout_flag) {
+#endif
 			err =  ext4_ext_zeroout(inode, &orig_ex);
 			if (err)
 				goto fix_extent_len;
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+		}
+#endif
 			/* update the extent length and mark as initialized */
 			ex->ee_block = orig_ex.ee_block;
 			ex->ee_len   = orig_ex.ee_len;
@@ -2802,9 +2859,15 @@ static int ext4_ext_convert_to_initialized(handle_t *handle,
 insert:
 	err = ext4_ext_insert_extent(handle, inode, path, &newex, 0);
 	if (err == -ENOSPC && may_zeroout) {
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+		if(zeroout_flag) {
+#endif
 		err =  ext4_ext_zeroout(inode, &orig_ex);
 		if (err)
 			goto fix_extent_len;
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+		}
+#endif
 		/* update the extent length and mark as initialized */
 		ex->ee_block = orig_ex.ee_block;
 		ex->ee_len   = orig_ex.ee_len;
@@ -3153,9 +3216,15 @@ ext4_ext_handle_uninitialized_extents(handle_t *handle, struct inode *inode,
 	}
 
 	/* buffered write, writepage time, convert*/
+#if defined(CONFIG_SYNO_PLX_PORTING) && !defined(MY_DEF_HERE)
+	ret = ext4_ext_convert_to_initialized(handle, inode,
+						path, iblock,
+						max_blocks, 1);
+#else
 	ret = ext4_ext_convert_to_initialized(handle, inode,
 						path, iblock,
 						max_blocks);
+#endif
 	if (ret >= 0)
 		ext4_update_inode_fsync_trans(handle, inode, 1);
 out:
@@ -3384,8 +3453,13 @@ int ext4_ext_get_blocks(handle_t *handle, struct inode *inode,
 	newblock = ext4_mb_new_blocks(handle, &ar, &err);
 	if (!newblock)
 		goto out2;
+#ifdef MY_DEF_HERE
+	ext_debug("inode %llu allocate new block: goal %llu, found %llu/%u\n",
+		  inode->i_ino, ar.goal, newblock, allocated);
+#else
 	ext_debug("allocate new block: goal %llu, found %llu/%u\n",
-		  ar.goal, newblock, allocated);
+		ar.goal, newblock, allocated);
+#endif
 
 	/* try to insert new extent into found leaf and return */
 	ext4_ext_store_pblock(&newex, newblock);
@@ -3579,6 +3653,109 @@ static void ext4_falloc_update_inode(struct inode *inode,
 	}
 
 }
+
+#ifdef CONFIG_SYNO_PLX_PORTING
+int ext4_preallocate(
+	struct file	*filp,
+	loff_t		 offset,
+	loff_t		 len)
+{
+#ifdef MY_DEF_HERE
+	//printk("ext4_preallocate() filp %p, inode %p[%lu], offset %lld, len %lld\n", filp, filp->f_path.dentry->d_inode, filp->f_path.dentry->d_inode->i_ino, offset, len);
+	return ext4_fallocate(filp->f_path.dentry->d_inode, 0, offset, len);
+#else
+//printk("ext4_preallocate() filp %p, inode %p, offset %lld, len %lld\n", filp, filp->f_path.dentry->d_inode, offset, len);
+	return ext4_fallocate(filp->f_path.dentry->d_inode, FALLOC_FL_KEEP_SIZE, offset, len);
+#endif
+}
+
+int ext4_unpreallocate(
+	struct file	*filp,
+	loff_t		 offset,
+	loff_t		 len)
+{
+#ifdef MY_DEF_HERE
+    //printk("ext4_unpreallocate() filp %p, inode %p[%lu], offset %lld, len %lld\n", filp, filp->f_path.dentry->d_inode, filp->f_path.dentry->d_inode->i_ino, offset, len);
+#else
+//printk("ext4_unpreallocate() filp %p, inode %p, offset %lld, len %lld\n", filp, filp->f_path.dentry->d_inode, offset, len);
+#endif
+	ext4_truncate(filp->f_path.dentry->d_inode);
+	return 0;
+}
+
+int ext4_resetpreallocate(
+	struct file	*filp,
+	loff_t		 offset,
+	loff_t		 len)
+{
+	handle_t *handle = ext4_journal_current_handle();
+	struct inode * inode = filp->f_path.dentry->d_inode;
+	struct ext4_ext_path *path = NULL;
+	int ret, started = 0;
+	int reset_credits;
+	unsigned int blkbits = inode->i_sb->s_blocksize_bits;
+
+	ext4_lblk_t startblock = offset >> blkbits; /* in terms of FSBs*/
+	int num_of_blocks = len >> blkbits;; /* in terms of FSBs */
+
+//	printk (KERN_INFO "reset_preallocate - offset - %lld, length - %lld\n", offset, len);
+
+	if(num_of_blocks == 0) /* handle the case where a partial may give less than a FSB reset */
+		num_of_blocks = 1;
+
+	if (!handle) {
+		/* reset preallcoate */
+		reset_credits = ext4_chunk_trans_blocks(inode, num_of_blocks);
+		handle = ext4_journal_start(inode, reset_credits);
+		if (IS_ERR(handle)) {
+			ret = PTR_ERR(handle);
+			goto out;
+		}
+		started = 1;
+	}
+
+	down_write((&EXT4_I(inode)->i_data_sem));
+
+	do {
+		path = ext4_ext_find_extent(inode, startblock, path);
+		if (IS_ERR(path)) {
+			ret = PTR_ERR(path);
+			path = NULL;
+			goto out2;
+		}
+
+		/* find extent for this block */
+#ifdef MY_DEF_HERE
+		ret = ext4_ext_convert_to_initialized(handle, inode,
+												path, startblock,
+												num_of_blocks);
+#else
+		ret = ext4_ext_convert_to_initialized(handle, inode,
+												path, startblock,
+												num_of_blocks, 0);
+#endif
+//		printk ("after initializing extent - ret val - %d\n", ret);
+
+		if (ret < 0)
+			break;
+		startblock += ret;
+		num_of_blocks -= ret;
+	} while(num_of_blocks > 0);
+
+	if(path) {
+		ext4_ext_drop_refs(path);
+		kfree(path);
+	}
+
+	up_write((&EXT4_I(inode)->i_data_sem));
+
+out2:
+	if (started)
+		ext4_journal_stop(handle);
+out:
+	return ret;
+}
+#endif
 
 /*
  * preallocate space for a file. This implements ext4's fallocate inode
@@ -3809,7 +3986,11 @@ static int ext4_ext_fiemap_cb(struct inode *inode, struct ext4_ext_path *path,
 }
 
 /* fiemap flags we can handle specified here */
+#ifdef CONFIG_SYNO_PLX_PORTING
+#define EXT4_FIEMAP_FLAGS	(FIEMAP_FLAG_SYNC|FIEMAP_FLAG_XATTR|FIEMAP_KERNEL_READ)
+#else
 #define EXT4_FIEMAP_FLAGS	(FIEMAP_FLAG_SYNC|FIEMAP_FLAG_XATTR)
+#endif
 
 static int ext4_xattr_fiemap(struct inode *inode,
 				struct fiemap_extent_info *fieinfo)
@@ -3883,3 +4064,129 @@ int ext4_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 	return error;
 }
 
+#ifdef CONFIG_SYNO_PLX_PORTING
+#define BBSHIFT							9
+#define BBSIZE							(1<<BBSHIFT)
+#define BTOBB(bytes)					(((__u64)(bytes) + BBSIZE - 1) >> BBSHIFT)
+#define BMV_OF_LAST  					0x4
+#define GETBMAPX_BLOCK_HOLE             (-1LL)
+
+/* This function reads the filemap details as fiemap structure,
+ * converts it to the bmapx structure and returns to the user
+ * points to remember
+ * length -1 implies read to the end of the map
+ * fiemap structure doesnot account for holes in files but
+ * bmapx accounts for it. Have to think about it on covnersion
+ */
+int ext4_getbmapx(struct inode *inode, struct getbmapx *bmx)
+{
+	int			  count = 0;
+	int			  error = 0;
+	int 		  bmv_count;
+	struct fiemap_extent_info fileinfo;
+	struct getbmapx * map;
+	struct fiemap_extent * fie_map;
+	__u64 start = 0;
+	__u64 len = FIEMAP_MAX_OFFSET; /* assume that we always read the entire extent let */
+	__u64 cum_len = 0; /* in sectors */
+
+	if (bmx->bmv_count < 2)
+		return -EINVAL;
+
+	filemap_write_and_wait(inode->i_mapping);
+
+	bmv_count = bmx->bmv_count - 1;
+	/* create a filemap structure of the required size */
+	fileinfo.fi_extents_max = bmx->bmv_count - 1;
+	fileinfo.fi_flags = FIEMAP_KERNEL_READ;
+	fileinfo.fi_extents_mapped = 0;
+
+	fileinfo.fi_extents_start = kzalloc(sizeof(struct fiemap_extent) * (fileinfo.fi_extents_max), GFP_KERNEL);
+	if (!fileinfo.fi_extents_start) {
+#ifdef MY_DEF_HERE
+	printk (KERN_INFO "ext4_getbmapx - no memory, filemap_extent size:[%lu] extents_max:[%lu]\n", sizeof(struct fiemap_extent), fileinfo.fi_extents_max);
+#else
+	printk (KERN_INFO "ext4_getbmapx - no memory\n");
+#endif
+		return -ENOMEM;
+	}
+
+	/* read the fiemap of the file */
+	error = ext4_fiemap(inode, &fileinfo, start, len);
+
+//	printk (KERN_INFO "number of mapped extents - %d\n", fileinfo.fi_extents_mapped);
+
+	map = bmx;
+	fie_map = fileinfo.fi_extents_start;
+	map ++; /* the first one doensot store any map in it */
+	/* convert the fiemap to bmapx structure */
+	while ( (count < fileinfo.fi_extents_mapped) && (bmx->bmv_entries < bmv_count) ){
+		/* ext4 doesnot return a bmap for a hole in the file
+		 * additional check added to detect hole and pass it
+		 * to the caller with appropriate flags
+		 */
+		if(cum_len < BTOBB (fie_map->fe_logical)) {
+			printk(KERN_INFO "ext4 : found hole in filemap \n");
+			map->bmv_offset = cum_len;
+			map->bmv_length = (BTOBB (fie_map->fe_logical)) - cum_len;
+			map->bmv_block = GETBMAPX_BLOCK_HOLE;
+			cum_len += map->bmv_length;
+			bmx->bmv_entries ++;
+			map ++;
+			continue;
+		}
+
+		map->bmv_offset = BTOBB (fie_map->fe_logical);
+		map->bmv_block = BTOBB (fie_map->fe_physical);
+		map->bmv_length = BTOBB (fie_map->fe_length);
+
+		/* at present we care only for prealloc flag
+		 * all other flags are ignored
+		 */
+		if(fie_map->fe_flags & FIEMAP_EXTENT_UNWRITTEN)
+			map->bmv_oflags = GETBMAPX_OF_PREALLOC;
+
+		if(fie_map->fe_flags & FIEMAP_EXTENT_LAST)
+			map->bmv_oflags |= BMV_OF_LAST;
+
+//		printk(KERN_INFO "extent - %d -map offset - %lld, length - %lld, block - %lld\n", count+1, map->bmv_offset, map->bmv_length, map->bmv_block);
+
+		cum_len += map->bmv_length;
+		bmx->bmv_entries ++;
+		map ++;
+
+		fie_map ++;
+		count ++;
+	}
+
+	kfree(fileinfo.fi_extents_start);
+	fileinfo.fi_extents_start = NULL;
+	return error;
+}
+
+int ext4_get_extents(struct inode *inode, loff_t size)
+{
+	/* retrieve the fiemap with a structure of size 0
+	 * will provde the number of extents required to hold
+	 * the filemap of the entire file
+	 */
+	int			  retval = 0;
+	struct fiemap_extent_info fileinfo;
+	__u64 start = 0;
+	__u64 len = FIEMAP_MAX_OFFSET; /* assume that we always read the entire extent let */
+
+	fileinfo.fi_extents_max = 0; /* trick to retrive just the number of extents */
+	fileinfo.fi_flags = FIEMAP_KERNEL_READ;
+	fileinfo.fi_extents_mapped = 0;
+	fileinfo.fi_extents_start = NULL;
+
+	/* read the fiemap of the file */
+	retval = ext4_fiemap(inode, &fileinfo, start, len);
+
+	if(retval)
+		return -EINVAL;
+
+	retval = fileinfo.fi_extents_mapped;
+	return retval;
+}
+#endif

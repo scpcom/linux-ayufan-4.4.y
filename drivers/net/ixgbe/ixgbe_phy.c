@@ -135,6 +135,13 @@ static enum ixgbe_phy_type ixgbe_get_phy_type_from_id(u32 phy_id)
  **/
 s32 ixgbe_reset_phy_generic(struct ixgbe_hw *hw)
 {
+#ifdef MY_ABC_HERE
+	/* Don't reset PHY if it's shut down due to overtemp. */
+	if (!hw->phy.reset_if_overtemp &&
+	    (IXGBE_ERR_OVERTEMP == hw->phy.ops.check_overtemp(hw)))
+		return 0;
+
+#endif /* MY_ABC_HERE */
 	/*
 	 * Perform soft PHY reset to the PHY_XS.
 	 * This will cause a soft reset to the PHY
@@ -1319,3 +1326,30 @@ s32 ixgbe_get_phy_firmware_version_tnx(struct ixgbe_hw *hw,
 	return status;
 }
 
+#ifdef MY_ABC_HERE
+/**
+ *  ixgbe_tn_check_overtemp - Checks if an overtemp occured.
+ *  @hw: pointer to hardware structure
+ *
+ *  Checks if the LASI temp alarm status was triggered due to overtemp
+ **/
+s32 ixgbe_tn_check_overtemp(struct ixgbe_hw *hw)
+{
+	s32 status = 0;
+	u16 phy_data = 0;
+
+	if (hw->device_id != IXGBE_DEV_ID_82599_T3_LOM)
+		goto out;
+
+	/* Check that the LASI temp alarm status was triggered */
+	hw->phy.ops.read_reg(hw, IXGBE_TN_LASI_STATUS_REG,
+	                     MDIO_MMD_PMAPMD, &phy_data);
+
+	if (!(phy_data & IXGBE_TN_LASI_STATUS_TEMP_ALARM))
+		goto out;
+
+	status = IXGBE_ERR_OVERTEMP;
+out:
+	return status;
+}
+#endif /* MY_ABC_HERE */

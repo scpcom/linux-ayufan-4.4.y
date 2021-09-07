@@ -62,9 +62,11 @@ int mv_ial_lib_init_channel(struct IALAdapter *pAdapter, MV_U8 channelNum);
 
 void mv_ial_lib_free_channel(struct IALAdapter *pAdapter, MV_U8 channelNum);
 
-/* PRD Table Generation */
+/* PRD Table Generation, set to twice the size of SCSI sg_tablesize (64) */
+/* this is done for cases of buffers splitting (>64k) WA, also set the   */
+/* MRVL_SATA_BUFF_BOUNDARY to SATA minimal window size (according to CS) */
 #ifndef MV_PRD_TABLE_SIZE
- #define MV_PRD_TABLE_SIZE                  64 /* 64 entries max in PRD table */
+ #define MV_PRD_TABLE_SIZE                  128 /* 128 entries max in PRD table */
 #endif
 
 
