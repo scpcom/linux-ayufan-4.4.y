@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/powerpc/kernel/mpic.c
  *
@@ -209,7 +212,7 @@ static inline void _mpic_ipi_write(struct mpic *mpic, unsigned int ipi, u32 valu
 	_mpic_write(mpic->reg_type, &mpic->gregs, offset, value);
 }
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 static inline u32 _mpic_tm_read(struct mpic *mpic, unsigned int tm)
 {
 	unsigned int offset = MPIC_INFO(TIMER_VECTOR_PRI) +
@@ -282,7 +285,7 @@ static inline void _mpic_irq_write(struct mpic *mpic, unsigned int src_no,
 #define mpic_write(b,r,v)	_mpic_write(mpic->reg_type,&(b),(r),(v))
 #define mpic_ipi_read(i)	_mpic_ipi_read(mpic,(i))
 #define mpic_ipi_write(i,v)	_mpic_ipi_write(mpic,(i),(v))
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #define mpic_tm_read(i)		_mpic_tm_read(mpic,(i))
 #define mpic_tm_write(i,v)	_mpic_tm_write(mpic,(i),(v))
 #endif
@@ -585,19 +588,19 @@ static void __init mpic_scan_ht_pics(struct mpic *mpic)
 #endif /* CONFIG_MPIC_U3_HT_IRQS */
 
 #ifdef CONFIG_SMP
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 static int irq_choose_cpu(const cpumask_t *mask)
 #else
 static int irq_choose_cpu(unsigned int virt_irq)
 #endif
 {
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #else
 	cpumask_t mask;
 #endif
 	int cpuid;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	if (cpumask_equal(mask, cpu_all_mask)) {
 #else
 	cpumask_copy(&mask, irq_desc[virt_irq].affinity);
@@ -623,7 +626,7 @@ static int irq_choose_cpu(unsigned int virt_irq)
 
 		spin_unlock_irqrestore(&irq_rover_lock, flags);
 	} else {
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		cpuid = cpumask_first_and(mask, cpu_online_mask);
 		if (cpuid >= nr_cpu_ids)
 			goto do_round_robin;
@@ -642,7 +645,7 @@ static int irq_choose_cpu(unsigned int virt_irq)
 	return get_hard_smp_processor_id(cpuid);
 }
 #else
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 static int irq_choose_cpu(const cpumask_t *mask)
 #else
 static int irq_choose_cpu(unsigned int virt_irq)
@@ -671,7 +674,7 @@ static unsigned int mpic_is_ipi(struct mpic *mpic, unsigned int irq)
 	return (src >= mpic->ipi_vecs[0] && src <= mpic->ipi_vecs[3]);
 }
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 /* Determine if the linux irq is an timer IPI */
 static unsigned int mpic_is_tm(struct mpic *mpic, unsigned int irq)
 {
@@ -700,7 +703,7 @@ static inline struct mpic * mpic_from_ipi(unsigned int ipi)
 }
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 /* Get the mpic structure from the tm number */
 static inline struct mpic * mpic_from_tm(unsigned int tm)
 {
@@ -865,7 +868,7 @@ static void mpic_end_ipi(unsigned int irq)
 
 #endif /* CONFIG_SMP */
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 static void mpic_unmask_tm(unsigned int irq)
 {
 	struct mpic *mpic = mpic_from_tm(irq);
@@ -899,7 +902,7 @@ int mpic_set_affinity(unsigned int irq, const struct cpumask *cpumask)
 	unsigned int src = mpic_irq_to_hw(irq);
 
 	if (mpic->flags & MPIC_SINGLE_DEST_CPU) {
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		int cpuid = irq_choose_cpu(cpumask);
 #else
 		int cpuid = irq_choose_cpu(irq);
@@ -1012,7 +1015,7 @@ static struct irq_chip mpic_ipi_chip = {
 };
 #endif /* CONFIG_SMP */
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 static struct irq_chip mpic_tm_chip = {
 	.mask		= mpic_mask_tm,
 	.unmask		= mpic_unmask_tm,
@@ -1050,7 +1053,7 @@ static int mpic_host_map(struct irq_host *h, unsigned int virq,
 	if (mpic->protected && test_bit(hw, mpic->protected))
 		return -EINVAL;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	else if (hw >= mpic->timer_vecs[0] && hw <= mpic->timer_vecs[3]) {
 		WARN_ON(!(mpic->flags & MPIC_PRIMARY));
 
@@ -1182,7 +1185,7 @@ struct mpic * __init mpic_alloc(struct device_node *node,
 	mpic->hc_ipi.typename = name;
 #endif /* CONFIG_SMP */
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	mpic->hc_tm = mpic_tm_chip;
 	mpic->hc_tm.typename = name;
 #endif
@@ -1410,7 +1413,7 @@ void __init mpic_init(struct mpic *mpic)
 	for (i = 0; i < 4; i++) {
 		mpic_write(mpic->tmregs,
 			   i * MPIC_INFO(TIMER_STRIDE) +
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 			   MPIC_INFO(TIMER_DESTINATION),
 			   1 << hard_smp_processor_id());
 #else
@@ -1420,7 +1423,7 @@ void __init mpic_init(struct mpic *mpic)
 			   i * MPIC_INFO(TIMER_STRIDE) +
 			   MPIC_INFO(TIMER_VECTOR_PRI),
 			   MPIC_VECPRI_MASK |
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 			   (9 << MPIC_VECPRI_PRIORITY_SHIFT) |
 #endif
 			   (mpic->timer_vecs[0] + i));
@@ -1532,7 +1535,7 @@ void mpic_irq_set_priority(unsigned int irq, unsigned int pri)
 			~MPIC_VECPRI_PRIORITY_MASK;
 		mpic_ipi_write(src - mpic->ipi_vecs[0],
 			       reg | (pri << MPIC_VECPRI_PRIORITY_SHIFT));
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	} else if (mpic_is_tm(mpic, irq)) {
 		reg = mpic_tm_read(src - mpic->timer_vecs[0]) &
 			~MPIC_VECPRI_PRIORITY_MASK;
@@ -1548,7 +1551,7 @@ void mpic_irq_set_priority(unsigned int irq, unsigned int pri)
 	spin_unlock_irqrestore(&mpic_lock, flags);
 }
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 /*
  * Sets the External Interrrupt Destination Register when the device
  * is configured as an EP and is used to interrupt the host.

@@ -103,7 +103,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ctrlEnv/sys/mvSysTs.h"
 #endif
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 #include "gpp/mvGppRegs.h"
 #endif
 
@@ -259,7 +259,7 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
 	/* Update MPPs mux relevent only on Marvell DB */
 	if ((boardId == DB_88F6281A_BP_ID) ||
         (boardId == DB_88F6282A_BP_ID) ||
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 		(boardId == SYNO_DS409_ID) ||
 		(boardId == SYNO_DS109_ID) ||
 		(boardId == SYNO_DS409slim_ID) ||
@@ -348,7 +348,7 @@ MV_STATUS mvCtrlEnvInit(MV_VOID)
        mvBoardIdGet() == DB_88F6192A_BP_ID ||
        mvBoardIdGet() == DB_88F6701A_BP_ID ||
        mvBoardIdGet() == DB_88F6702A_BP_ID ||
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	   mvBoardIdGet() == SYNO_DS211_ID ||
 	   mvBoardIdGet() == SYNO_DS411slim_ID ||
 	   mvBoardIdGet() == SYNO_RS_6282_ID ||

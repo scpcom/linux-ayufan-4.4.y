@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Generic helpers for smp ipi calls
  *
@@ -376,7 +379,7 @@ void smp_call_function_many(const struct cpumask *mask,
 	 * send smp call function interrupt to this cpu and as such deadlocks
 	 * can't happen.
 	 */
-#ifndef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifndef MY_DEF_HERE
 	WARN_ON_ONCE(cpu_online(this_cpu) && irqs_disabled()
 		     && !oops_in_progress);
 #endif

@@ -109,7 +109,7 @@ void machine_shutdown(void)
 		ppc_md.machine_shutdown();
 }
 
-#if defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(CONFIG_SYNO_QORIQ)
+#if defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(MY_DEF_HERE)
 #define UART2_DCR       0x4611
 #define UART2_TX        0x4600
 #define UART2_LCR       0x4603
@@ -166,7 +166,7 @@ void machine_power_off(void)
 	} else {
 		printk("HW Settings Error: Failed to get immr_base\n");
 	}
-#elif defined(CONFIG_SYNO_QORIQ)
+#elif defined(MY_DEF_HERE)
 #undef UART2_TX
 #undef UART2_LCR
 

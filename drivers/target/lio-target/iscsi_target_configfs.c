@@ -2244,7 +2244,7 @@ static struct config_item_type lio_target_tpg_param_cit = {
 
 /* Start items for lio_target_tpg_cit */
 
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 static ssize_t lio_target_show_tpg_conn(void* p, char* page)
 {
 	ssize_t len = 0;
@@ -2452,7 +2452,7 @@ static struct lio_target_configfs_attribute lio_target_attr_tpg_enable = {
 static struct configfs_attribute *lio_target_tpg_attrs[] = {
 	&lio_target_attr_tpg_control.attr,
 	&lio_target_attr_tpg_enable.attr,
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 	&lio_target_attr_tpg_conn.attr,
 #endif
 #ifdef MY_ABC_HERE

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- mode: c; c-basic-offset: 8; -*-
  * vim: noexpandtab sw=8 ts=8 sts=0:
  *
@@ -200,7 +203,7 @@ int configfs_unlink(struct inode *dir, struct dentry *dentry)
 	parent_item = configfs_get_config_item(dentry->d_parent);
 	type = parent_item->ci_type;
 
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 	/*
 	 * See if the underlying struct config_item has dependent
 	 * symlinks, and should return -EPERM here.

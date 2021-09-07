@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/kernel/printk.c
  *
@@ -148,7 +151,7 @@ static char *log_buf = __log_buf;
 static int log_buf_len = __LOG_BUF_LEN;
 static unsigned logged_chars; /* Number of chars produced since last read+clear operation */
 
-#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
+#ifdef MY_DEF_HERE
 int syno_disable_kmsg = 0;
 #endif
 
@@ -296,7 +299,7 @@ int do_syslog(int type, char __user *buf, int len)
 	case 1:		/* Open log */
 		break;
 	case 2:		/* Read from log */
-#ifdef CONFIG_SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
+#ifdef MY_DEF_HERE
 		if (syno_disable_kmsg){
 			return -EAGAIN;
 		}

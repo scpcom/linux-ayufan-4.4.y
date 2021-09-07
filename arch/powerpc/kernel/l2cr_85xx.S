@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_QORIQ)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Copyright (C) 2009-2010 Freescale Semiconductor, Inc. All rights reserved.
  *	Scott Wood <scottwood@freescale.com>
@@ -52,4 +55,4 @@ _GLOBAL(invalidate_enable_L2)
 	mbar
 
 	blr
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

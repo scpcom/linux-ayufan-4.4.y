@@ -4018,7 +4018,7 @@ static inline void SYNOHWReset(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex){
 
 static void SYNOEstablishSataCommAll(MV_SATA_ADAPTER *pAdapter){
 	MV_U8 channelIndex;
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	MV_U32 poweron=1;
 	extern int SYNO_CTRL_HDD_POWERON(int index, int *pValue, int isWrite);
 #endif
@@ -4028,7 +4028,7 @@ static void SYNOEstablishSataCommAll(MV_SATA_ADAPTER *pAdapter){
 		for (channelIndex = 0 ; channelIndex < pAdapter->numberOfChannels ;
             channelIndex ++)
         {
-#ifdef CONFIG_SYNO_MV88F6281			
+#ifdef MY_ABC_HERE			
             if (pAdapter->chipIs62X1Z0) {
                 /* Only 6281 has this function */
                 if (0 == SYNO_CTRL_HDD_POWERON(channelIndex+1, &poweron, 1)) {

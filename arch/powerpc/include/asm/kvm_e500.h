@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2008 Freescale Semiconductor, Inc. All rights reserved.
  *
@@ -52,7 +55,7 @@ struct kvmppc_vcpu_e500 {
 	u32 mas5;
 	u32 mas6;
 	u32 mas7;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	u32 l1csr0;
 #endif
 	u32 l1csr1;

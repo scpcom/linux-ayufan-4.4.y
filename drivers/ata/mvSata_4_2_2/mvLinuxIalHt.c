@@ -180,7 +180,7 @@ static int __init mv_ial_init(void)
     }    
 #endif
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
     int ret = pci_register_driver(&mv_ial_pci_driver); 
 #endif
 
@@ -196,7 +196,7 @@ static int __init mv_ial_init(void)
 	}
 #endif
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
     return ret; 
 #else
     return (int)pci_register_driver(&mv_ial_pci_driver);

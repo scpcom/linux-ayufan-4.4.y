@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * SMP support for ppc.
  *
@@ -312,7 +315,7 @@ int generic_cpu_disable(void)
 	vdso_data->processorCount--;
 	fixup_irqs(cpu_online_map);
 #endif
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #if defined(CONFIG_PPC64) || defined(CONFIG_E500)
 	fixup_irqs(cpu_online_map);
 #endif
@@ -334,7 +337,7 @@ int generic_cpu_enable(unsigned int cpu)
 	while (!cpu_online(cpu))
 		cpu_relax();
 
-#if defined(CONFIG_PPC64) || (defined(CONFIG_E500) && defined(CONFIG_SYNO_QORIQ))
+#if defined(CONFIG_PPC64) || (defined(CONFIG_E500) && defined(MY_DEF_HERE))
 	fixup_irqs(cpu_online_map);
 	/* counter the irq disable in fixup_irqs */
 	local_irq_enable();

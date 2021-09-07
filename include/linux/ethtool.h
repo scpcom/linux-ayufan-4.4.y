@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ethtool.h: Defines for Linux ethtool.
  *
@@ -676,7 +679,7 @@ struct ethtool_ops {
 #define	AH_V6_FLOW	0x0b
 #define	ESP_V6_FLOW	0x0c
 #define	IP_USER_FLOW	0x0d
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #define IPV4_FLOW       0x10
 #define IPV6_FLOW       0x11
 #endif

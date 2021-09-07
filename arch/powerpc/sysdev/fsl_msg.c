@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * Copyright 2008-2009 Freescale Semiconductor, Inc.
  *
@@ -193,4 +196,4 @@ err:
 	return 0;
 }
 arch_initcall(fsl_init_msg);
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

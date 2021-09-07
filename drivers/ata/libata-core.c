@@ -132,12 +132,12 @@ static int ata_force_tbl_size;
 
 static char ata_force_param_buf[PAGE_SIZE] __initdata;
 
-#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_SYNO_MV88F6281)
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(MY_ABC_HERE)
 extern unsigned char SYNOKirkwoodIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 extern unsigned char SYNOQorIQIsBoardNeedPowerUpHDD(u32);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
@@ -6457,7 +6457,7 @@ static void DelayForHWCtl(struct ata_port *pAp)
 		goto END;
 	}
 
-#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(CONFIG_SYNO_MV88F6281)
+#if defined(CONFIG_MACH_SYNOLOGY_6281) || defined(MY_ABC_HERE)
 	if(SYNOKirkwoodIsBoardNeedPowerUpHDD(pAp->print_id)) {
 		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		SleepForLatency();
@@ -6465,7 +6465,7 @@ static void DelayForHWCtl(struct ata_port *pAp)
 	}
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	if(SYNOQorIQIsBoardNeedPowerUpHDD(pAp->print_id)) {
 		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		if (0 == SYNO_CHECK_HDD_PRESENT(pAp->print_id)) {
@@ -6803,7 +6803,7 @@ int ata_host_activate(struct ata_host *host, int irq,
 		      struct scsi_host_template *sht)
 {
 	int i, rc;
-#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+#ifdef MY_DEF_HERE
 	struct cpumask cpumask_msg_intrs;
 
 	cpumask_clear(&cpumask_msg_intrs);
@@ -6825,7 +6825,7 @@ int ata_host_activate(struct ata_host *host, int irq,
 	if (rc)
 		return rc;
 
-#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+#ifdef MY_DEF_HERE
 	irq_set_affinity(irq, &cpumask_msg_intrs);
 #endif
 
@@ -6966,7 +6966,7 @@ int ata_pci_device_do_resume(struct pci_dev *pdev)
 {
 	int rc;
 
-#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+#ifdef MY_DEF_HERE
 	rc = pci_set_power_state(pdev, PCI_D0);
 	while(rc) {
 		/* add delay to wait pci device */

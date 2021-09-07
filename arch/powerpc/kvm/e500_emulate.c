@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2008 Freescale Semiconductor, Inc. All rights reserved.
  *
@@ -98,7 +101,7 @@ int kvmppc_core_emulate_mtspr(struct kvm_vcpu *vcpu, int sprn, int rs)
 		vcpu_e500->mas6 = vcpu->arch.gpr[rs]; break;
 	case SPRN_MAS7:
 		vcpu_e500->mas7 = vcpu->arch.gpr[rs]; break;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	case SPRN_L1CSR0:
 		vcpu_e500->l1csr0 = vcpu->arch.gpr[rs];
 		vcpu_e500->l1csr0 &= ~(L1CSR0_DCFI | L1CSR0_CLFC);
@@ -176,7 +179,7 @@ int kvmppc_core_emulate_mfspr(struct kvm_vcpu *vcpu, int sprn, int rt)
 		vcpu->arch.gpr[rt] |= vcpu_e500->guest_tlb_size[1];
 		break;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	case SPRN_L1CSR0:
 		vcpu->arch.gpr[rt] = vcpu_e500->l1csr0; break;
 #endif

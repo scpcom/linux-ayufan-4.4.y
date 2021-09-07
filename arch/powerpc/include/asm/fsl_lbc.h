@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Freescale Local Bus Controller
  *
  * Copyright (c) 2006-2007 Freescale Semiconductor
@@ -27,7 +30,7 @@
 #include <linux/types.h>
 #include <linux/io.h>
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #include <linux/of_platform.h>
 #include <linux/interrupt.h>
 #endif
@@ -130,12 +133,12 @@ struct fsl_lbc_regs {
 #define LTESR_ATMW 0x00800000
 #define LTESR_ATMR 0x00400000
 #define LTESR_CS   0x00080000
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #define LTESR_UPM  0x00000002
 #endif
 #define LTESR_CC   0x00000001
 #define LTESR_NAND_MASK (LTESR_FCT | LTESR_PAR | LTESR_CC)
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #define LTESR_MASK      (LTESR_BM | LTESR_FCT | LTESR_PAR | LTESR_WP \
 			 | LTESR_ATMW | LTESR_ATMR | LTESR_CS | LTESR_UPM \
 			 | LTESR_CC)
@@ -252,7 +255,7 @@ struct fsl_upm {
 	int width;
 };
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 extern unsigned int convert_lbc_address(phys_addr_t addr_base);
 #endif
 extern int fsl_lbc_find(phys_addr_t addr_base);
@@ -285,7 +288,7 @@ static inline void fsl_upm_end_pattern(struct fsl_upm *upm)
 		cpu_relax();
 }
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 /* overview of the fsl lbc controller */
 
 struct fsl_lbc_ctrl {
@@ -304,7 +307,7 @@ struct fsl_lbc_ctrl {
 
 extern int fsl_upm_run_pattern(struct fsl_upm *upm, void __iomem *io_base,
 			       u32 mar);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 extern struct fsl_lbc_ctrl *fsl_lbc_ctrl_dev;
 #endif
 

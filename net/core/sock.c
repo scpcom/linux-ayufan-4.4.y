@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -1068,7 +1071,7 @@ static void __sk_free(struct sock *sk)
 	}
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_TCP_FAST_ACK
 	skb_queue_purge(&sk->sk_ack_queue);
 #endif
@@ -1089,7 +1092,7 @@ static void __sk_free(struct sock *sk)
 		printk(KERN_DEBUG "%s: optmem leakage (%d bytes) detected.\n",
 		       __func__, atomic_read(&sk->sk_omem_alloc));
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
 	if (sk->tcp_hw_channel) {
 		*((struct sock **)sk->tcp_hw_channel) = NULL;
@@ -1165,7 +1168,7 @@ struct sock *sk_clone(const struct sock *sk, const gfp_t priority)
 #ifdef CONFIG_NET_DMA
 		skb_queue_head_init(&newsk->sk_async_wait_queue);
 #endif
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_TCP_FAST_ACK
 		skb_queue_head_init(&newsk->sk_ack_queue);
 #endif
@@ -1183,7 +1186,7 @@ struct sock *sk_clone(const struct sock *sk, const gfp_t priority)
 		newsk->sk_send_head	= NULL;
 		newsk->sk_userlocks	= sk->sk_userlocks & ~SOCK_BINDPORT_LOCK;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
 		newsk->init_seq    = sk->init_seq;
 		newsk->tcp_hw_channel = NULL;
@@ -1903,7 +1906,7 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 #ifdef CONFIG_NET_DMA
 	skb_queue_head_init(&sk->sk_async_wait_queue);
 #endif
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_TCP_FAST_ACK
 	skb_queue_head_init(&sk->sk_ack_queue);
 #endif
@@ -1951,7 +1954,7 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 	sk->sk_rcvtimeo		=	MAX_SCHEDULE_TIMEOUT;
 	sk->sk_sndtimeo		=	MAX_SCHEDULE_TIMEOUT;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
 	sk->tcp_hw_channel	=	NULL;
 	sk->init_seq		=	0;

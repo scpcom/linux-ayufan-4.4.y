@@ -142,12 +142,12 @@ static int __init parse_tag_mv_uboot(const struct tag *tag)
 	mvIsUsbHost = tag->u.mv_uboot.isUsbHost;
 
         printk("Using UBoot passing parameters structure\n");
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	printk("Sys Clk = %d, Tclk = %d\n",mvSysclk ,mvTclk  );
 #endif
   
 	gBoardId =  (mvUbootVer & 0xff);
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	printk("Synology Board ID: %d\n",gBoardId);
 #endif
 	for (i = 0; i < CONFIG_MV_ETH_PORTS_NUM; i++) {
@@ -191,7 +191,7 @@ void print_board_info(void)
 {
     char name_buff[50];
 
-#ifndef CONFIG_SYNO_MV88F6281
+#ifndef MY_ABC_HERE
     printk("\n  Marvell Development Board (LSP Version %s)",LSP_VERSION);
 
     mvBoardNameGet(name_buff);
@@ -330,7 +330,7 @@ static struct platform_device mv_uart = {
 	.dev			= {
 		.platform_data	= mv_uart0_data,
 	},
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	.num_resources		= ARRAY_SIZE(mv_uart0_resources),
 #else
 	.num_resources		= 2, /*ARRAY_SIZE(mv_uart_resources),*/
@@ -338,7 +338,7 @@ static struct platform_device mv_uart = {
 	.resource		= mv_uart0_resources,
 };
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 static struct platform_device mv_uart1 = {
     .name           = "serial8250",
     .id         = PLAT8250_DEV_PLATFORM1,
@@ -359,12 +359,12 @@ static void serial_initialize(void)
 		mv_uart.resource = mv_uart1_resources;
 	}
 	platform_device_register(&mv_uart);
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	platform_device_register(&mv_uart1);
 #endif
 }
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 #ifdef MY_ABC_HERE
 extern void syno_mv_net_shutdown();
 #endif
@@ -391,7 +391,7 @@ static void synology_restart(char mode, const char *cmd)
 	 * I.e. USB Station. */
 	arm_machine_restart(mode, cmd);
 }
-#endif /* CONFIG_SYNO_MV88F6281 */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_MV_INCLUDE_AUDIO
 
@@ -775,7 +775,7 @@ void __init kirkwood_ehci_init(void)
 }
 #endif
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 void synology_gpio_init(void);
 #endif
 
@@ -891,7 +891,7 @@ static void __init mv_init(void)
     kirkwood_ehci_init();
 #endif
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
 	synology_gpio_init();

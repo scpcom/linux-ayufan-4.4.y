@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -81,7 +84,7 @@ extern "C" {
 #define PEX_CFG_ADDR_REG(pexIf)		((PEX_IF_BASE(pexIf)) + 0x18F8)
 #define PEX_CFG_DATA_REG(pexIf)		((PEX_IF_BASE(pexIf)) + 0x18FC)
 #define PEX_PHY_ACCESS_REG(pexIf)	((PEX_IF_BASE(pexIf)) + 0x1B00)
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 #define PEX_LINK_CONTROL_REG(pexIf)     ((PEX_IF_BASE(pexIf)) + 0x0070)
 #define PEX_LINK_STATUS_REG(pexIf)      ((PEX_IF_BASE(pexIf)) + 0x1A04)
 #endif

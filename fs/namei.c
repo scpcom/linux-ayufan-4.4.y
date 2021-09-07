@@ -1846,7 +1846,7 @@ out:
  * needs parent already locked. Doesn't follow mounts.
  * SMP-safe.
  */
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 extern struct dentry *lookup_hash(struct nameidata *nd)
 #else
 #ifdef CONFIG_AUFS_FS
@@ -3833,9 +3833,9 @@ EXPORT_SYMBOL(get_write_access); /* binfmt_aout */
 EXPORT_SYMBOL(getname);
 EXPORT_SYMBOL(lock_rename);
 EXPORT_SYMBOL(lookup_one_len);
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(lookup_hash);
-#else /* !CONFIG_SYNO_LIO */
+#else /* !MY_ABC_HERE */
 #ifdef CONFIG_AUFS_FS
 EXPORT_SYMBOL(lookup_hash);
 #endif /* SYNO_AUFS */

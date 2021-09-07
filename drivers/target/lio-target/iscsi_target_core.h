@@ -63,7 +63,7 @@
 #define ISCSI_SCTP_VERSION		"v3.0"
 
 /* iscsi_node_attrib_t sanity values */
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define NA_DATAOUT_TIMEOUT		30
 #else
 #define NA_DATAOUT_TIMEOUT		3
@@ -96,7 +96,7 @@
 
 /* iscsi_tpg_attrib_t sanity values */
 #define TA_AUTHENTICATION		1
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define TA_LOGIN_TIMEOUT		30
 #else
 #define TA_LOGIN_TIMEOUT		15

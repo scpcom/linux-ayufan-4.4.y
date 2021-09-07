@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <asm/types.h>
 #include "i2c-mv.h"
 #include "../rtc/rtc.h"
@@ -168,7 +171,7 @@ int mvI2CCharRead(int target, u8 *data, int length, int offset)
 	twsiSlave.moreThen256 = 0;
 #ifdef CONFIG_SYNO_MV88F5x8x
 	return mvTwsiRead (&twsiSlave, data, length);
-#elif CONFIG_SYNO_MV88F6281
+#elif MY_ABC_HERE
 	return mvTwsiRead (0, &twsiSlave, data, length);
 #endif
 }
@@ -184,7 +187,7 @@ int mvI2CCharWrite(int target, u8 *data, int length, int offset)
 	twsiSlave.moreThen256 = 0;
 #ifdef CONFIG_SYNO_MV88F5x8x
 	return mvTwsiWrite(&twsiSlave, data, length);
-#elif CONFIG_SYNO_MV88F6281
+#elif MY_ABC_HERE
 	return mvTwsiWrite(0, &twsiSlave, data, length);
 #endif
 }

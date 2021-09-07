@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Common pmac/prep/chrp pci routines. -- Cort
  */
@@ -53,7 +56,7 @@ static void
 fixup_hide_host_resource_fsl(struct pci_dev *dev)
 {
 	int i, class = dev->class >> 8;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	/*When configured as agent, programing interface = 1*/
 	int prog_if = dev->class & 0xf;
 #endif
@@ -61,7 +64,7 @@ fixup_hide_host_resource_fsl(struct pci_dev *dev)
 	if ((class == PCI_CLASS_PROCESSOR_POWERPC ||
 	     class == PCI_CLASS_BRIDGE_OTHER) &&
 		(dev->hdr_type == PCI_HEADER_TYPE_NORMAL) &&
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		(prog_if == 0) &&
 #endif
 		(dev->bus->parent == NULL)) {

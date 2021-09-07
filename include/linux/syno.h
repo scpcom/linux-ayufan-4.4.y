@@ -16,7 +16,7 @@
 #define SYNO_HAVE_GCC_VERSION(a,b) (__GNUC__ > (a) || (__GNUC__ == (a) && __GNUC_MINOR__ >= (b)))
 #define SYNO_HAVE_GLIBC_VERSION(a,b) ( __GLIBC__ > (a) || (__GLIBC__ == (a) && __GLIBC_MINOR__ >= (b)))
 
-#if defined(CONFIG_SYNO_MV88F6281)
+#if defined(MY_ABC_HERE)
 #define CONSISTENT_DMA_SIZE 0x00800000
 #endif
 
@@ -24,7 +24,7 @@
 #define SYNO_FAST_RW_FIX
 #endif
 
-#if defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE)
 #define SYNO_X86_AUTO_POWER_ON
 #endif
 
@@ -33,7 +33,7 @@
 #define SYNO_USB_FLASH_DEVICE_NAME  "synoboot"
 #define SYNO_USB_FLASH_DEVICE_PATH  "/dev/synoboot"
  
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define IS_SYNO_USBBOOT_ID_VENDOR(VENDOR) (0xF400 == (VENDOR) || 0xF401 == (VENDOR))
 #define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT) || 0xF401 == (PRODUCT))
 #else
@@ -43,21 +43,21 @@
  
 #endif  
 
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define SYNO_PCH_GPIO_CTRL
 #endif
 
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define SYNO_PINEVIEW_RTC
 #endif
 
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define SYNO_PINEVIEW_CORETEMP
 #define SYNO_BROMOLOW_CORETEMP
 #define SYNO_CEDARVIEW_CORETEMP
 #endif
 
-#if defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64) || defined(CONFIG_ARCH_FEROCEON)
+#if defined(CONFIG_SYNO_MPC854X) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_ARCH_FEROCEON)
 
 #ifdef MY_ABC_HERE
 #define SYNO_MAX_SWITCHABLE_NET_DEVICE 8
@@ -85,7 +85,7 @@
 
 #if	defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
  
-#if defined(CONFIG_SYNO_BROMOLOW)
+#if defined(MY_DEF_HERE)
 #define SYNO_MAX_INTERNAL_DISK 19
 #else
 #define SYNO_MAX_INTERNAL_DISK	15
@@ -93,7 +93,7 @@
 
 #endif
 
-#if defined(CONFIG_SYNO_MPC8533) || defined(CONFIG_SYNO_QORIQ)
+#if defined(CONFIG_SYNO_MPC8533) || defined(MY_DEF_HERE)
 #ifdef MY_ABC_HERE
 #ifdef MY_DEF_HERE
 #define SYNO_CREATE_TIME_SWAP_VERSION 3719
@@ -181,7 +181,7 @@
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)     
 #endif
 
-#ifdef CONFIG_SYNO_BROMOLOW
+#ifdef MY_DEF_HERE
  
 #define SYNO_SAS_MPT2_HOTPLUG_PHY
 

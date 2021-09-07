@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -292,7 +295,7 @@ disclaimer.
 #define DRAM_BUF_REG_DV 0
 
 /* System Mapping */
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 #define SDRAM_CS0_BASE  0x00000000
 #define SDRAM_CS0_SIZE  _128M
 
@@ -304,7 +307,7 @@ disclaimer.
 
 #define SDRAM_CS1_BASE  0x10000000
 #define SDRAM_CS1_SIZE  _256M
-#endif //CONFIG_SYNO_MV88F6281
+#endif //MY_ABC_HERE
 
 #define SDRAM_CS2_BASE  0x20000000
 #define SDRAM_CS2_SIZE  _256M
@@ -323,13 +326,13 @@ disclaimer.
 #define NFLASH_CS_BASE 0xfa000000
 #define NFLASH_CS_SIZE _2M
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 #define SPI_CS_BASE 0xf8000000
 #define SPI_CS_SIZE _4M
 #else
 #define SPI_CS_BASE 0xf4000000
 #define SPI_CS_SIZE _16M
-#endif // CONFIG_SYNO_MV88F6281
+#endif // MY_ABC_HERE
 
 #define CRYPT_ENG_BASE	0xf0000000
 #define CRYPT_ENG_SIZE	_2M

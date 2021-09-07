@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -77,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* Globals */
 static MV_SFLASH_DEVICE_PARAMS sflash[] = {
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	/* SPANSION S25FL032A0LMFI001 SPI flash, 4MB, 64 sectors of 64K each */
 	{
 	 MV_S25FL_WREN_CMND_OPCD,
@@ -175,7 +178,7 @@ static MV_SFLASH_DEVICE_PARAMS sflash[] = {
      MV_M25P128_MAX_FAST_SPI_FREQ,
      MV_M25P128_FAST_READ_DUMMY_BYTES
     },
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	 /* Macron N25Q032 SPI flash, 4MB, 64 sectors of 64K each */
 	{
 	MV_N25Q_WREN_CMND_OPCD,
@@ -266,7 +269,7 @@ static MV_SFLASH_DEVICE_PARAMS sflash[] = {
      MV_MX25L6405_SECTOR_SIZE,
      MV_MX25L6405_SECTOR_NUMBER,
      MV_MXIC_PAGE_SIZE,
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
     /* Macronix MXIC MX25L6406E/MX25L6445EM2I-10G SPI flash, 8MB, 128 blocks of 64K each */
      "MXIC MX25L6406E/MX25L6445EM2I-10G",
 #else
@@ -278,7 +281,7 @@ static MV_SFLASH_DEVICE_PARAMS sflash[] = {
      MV_MX25L6405_MAX_FAST_SPI_FREQ,
      MV_MX25L6405_FAST_READ_DUMMY_BYTES
     },
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
     /* SPANSION S25FL064P SPI flash, 8MB, 128 sectors of 64K each */
     {
      MV_S25FL_WREN_CMND_OPCD,
@@ -328,7 +331,7 @@ static MV_SFLASH_DEVICE_PARAMS sflash[] = {
      MV_M25P128_MAX_FAST_SPI_FREQ,
      MV_M25P128_FAST_READ_DUMMY_BYTES
     }
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
     ,
     /* SST SST25VF032B SPI Flash, 4MB,  64 sectors of 64KB each */
    {
@@ -1243,7 +1246,7 @@ MV_STATUS mvSFlashWpRegionSet (MV_SFLASH_INFO * pFlinfo, MV_SFLASH_WP_REGION wpR
                 return MV_BAD_PARAM;
         }
     }
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
     /* check if the manufacturer is SST then the WP is 3bits */
     else if (pFlinfo->manufacturerId == MV_SST_MANF_ID)
     {
@@ -1469,7 +1472,7 @@ MV_STATUS mvSFlashWpRegionGet (MV_SFLASH_INFO * pFlinfo, MV_SFLASH_WP_REGION * p
                 return MV_BAD_VALUE;
         }
     }
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
     /* Check if the chip is a SST flash; then WP supports only 3 bits */
     else if (pFlinfo->manufacturerId == MV_SST_MANF_ID)
     {

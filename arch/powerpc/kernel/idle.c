@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Idle daemon for PowerPC.  Idle daemon will handle any action
  * that needs to be taken when the system becomes idle.
@@ -73,7 +76,7 @@ void cpu_idle(void)
 				stop_critical_timings();
 
 				/* check again after disabling irqs */
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 				if (!need_resched() && !cpu_should_die()) {
 #if !defined(CONFIG_DEBUG_CW)
 					ppc_md.power_save();

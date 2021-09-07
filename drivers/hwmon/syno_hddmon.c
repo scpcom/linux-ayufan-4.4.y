@@ -5,7 +5,7 @@
 #include <linux/module.h>
 #include <linux/kthread.h>
 #include <linux/syno.h>
-#if !defined(CONFIG_SYNO_X64)
+#if !defined(MY_DEF_HERE)
 #include <linux/gpio.h>
 #endif
 
@@ -25,10 +25,10 @@ extern long g_internal_hd_num;
 extern long g_hdd_hotplug;
 #endif
 
-#if defined(CONFIG_SYNO_CEDARVIEW)
+#if defined(MY_DEF_HERE)
 static int PrzPinMap[]   = {33, 35, 49, 18};
 static int HddEnPinMap[] = {16, 20, 21, 32};
-#elif defined(CONFIG_SYNO_QORIQ)
+#elif defined(MY_DEF_HERE)
 static int PrzPinMap[]   = {70, 71, 72, 84};
 static int HddEnPinMap[] = {24, 25, 26, 27};
 #else
@@ -38,7 +38,7 @@ static int *HddEnPinMap = NULL;
 
 static u8 gblInversePresent = 0;
 
-#if defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE)
 extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
 #endif
 
@@ -134,7 +134,7 @@ static int syno_hddmon_unplug_monitor(void *args)
 				continue;
 			}
 
-#if defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE)
 			syno_pch_lpc_gpio_pin(pData->iHddPrzPinMap[iIdx], &iPrzPinVal, 0);
 #else
 		if (gblInversePresent)
@@ -147,7 +147,7 @@ static int syno_hddmon_unplug_monitor(void *args)
 				continue;
 			}
 
-#if defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE)
 			syno_pch_lpc_gpio_pin(pData->iHddEnPinMap[iIdx], &iPrzPinVal, 1);
 #else
 			gpio_set_value(pData->iHddEnPinMap[iIdx], iPrzPinVal);
@@ -183,7 +183,7 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 		pUnplugMonitor = NULL;
 		pData->iProcessingIdx = iIdx;
 
-#if defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE)
 		syno_pch_lpc_gpio_pin(pData->iHddPrzPinMap[iIdx], &iPrzPinVal, 0);
 #else
 		if (gblInversePresent)
@@ -198,7 +198,7 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 				pUnplugMonitor = kthread_run(syno_hddmon_unplug_monitor, pData, SYNO_HDDMON_UPLG_STR);
 			}
 
-#if defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE)
 			syno_pch_lpc_gpio_pin(pData->iHddEnPinMap[iIdx], &iPrzPinVal, 1);
 #else
 			gpio_set_value(pData->iHddEnPinMap[iIdx], iPrzPinVal);
@@ -235,7 +235,7 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 	for(iIdx = 0; iIdx < pData->iMaxHddNum; iIdx++) {
 		pData->iProcessingIdx = iIdx;
 
-#if defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE)
 		syno_pch_lpc_gpio_pin(pData->iHddPrzPinMap[iIdx], &iPrzPinVal, 0);
 #else
 		if (gblInversePresent)
@@ -247,7 +247,7 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 		 * so turns the pins to low if the hdds do not present.
 		 */
 		if(!iPrzPinVal) {
-#if defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE)
 			syno_pch_lpc_gpio_pin(pData->iHddEnPinMap[iIdx], &iPrzPinVal, 1);
 #else
 			gpio_set_value(pData->iHddEnPinMap[iIdx], iPrzPinVal);
@@ -297,7 +297,7 @@ static int __init syno_hddmon_init(void)
 {
 	int iRet = -1;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	gblInversePresent = 1;
 #endif
 

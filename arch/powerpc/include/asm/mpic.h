@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASM_POWERPC_MPIC_H
 #define _ASM_POWERPC_MPIC_H
 #ifdef __KERNEL__
@@ -271,7 +274,7 @@ struct mpic
 #ifdef CONFIG_SMP
 	struct irq_chip		hc_ipi;
 #endif
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	struct irq_chip         hc_tm;
 #endif
 	const char		*name;
@@ -503,7 +506,7 @@ void mpic_set_clk_ratio(struct mpic *mpic, u32 clock_ratio);
 /* Enable/Disable EPIC serial interrupt mode */
 void mpic_set_serial_int(struct mpic *mpic, int enable);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 /* Allow/Disallow the irq routing to IRQ_OUT under EP mode */
 extern void mpic_irq_set_ep(unsigned int irq, unsigned int ep);
 #endif

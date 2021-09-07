@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * Copyright (c) 2008-2010 Freescale Semiconductor, Inc. All rights reserved.
  * Dave Liu <daveliu@freescale.com>
@@ -253,4 +256,4 @@ static void __exit mpic_tm_exit(void)
 
 module_init(mpic_tm_init);
 module_exit(mpic_tm_exit);
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

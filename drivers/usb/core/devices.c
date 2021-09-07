@@ -489,8 +489,8 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 	if(usbdev && usbdev->bus) {
 		memset(buf, 0, sizeof(buf));
 		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath); 
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
-#if defined(CONFIG_SYNO_CEDARVIEW)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 		if(!strcmp(buf,"0000:00:1d.7-2")) {
 			return 1;
 		}
@@ -498,14 +498,14 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 		if(!strcmp(buf,"0000:00:1d.7-3") || !strcmp(buf,"0000:00:1d.1-1")) {
 			return 1;
 		}
-#endif /*CONFIG_SYNO_CEDARVIEW*/
+#endif /*MY_DEF_HERE*/
 #endif /*CONFIG_SYNO_X86 || CONFIG_SYNO_X64*/
 #ifdef CONFIG_SYNO_MV88F5x8x
 		if(0 == strcmp(buf,"ehci_marvell.4523-1.1")) {
 			return 1;
 		}
 #endif
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 		if(0 == strcmp(buf,"ehci_marvell.70059-1.3")) {
 			return 1;
 		}
@@ -530,7 +530,7 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 		if(!strcmp(buf,"fsl-ehci.0-1.2")) {
 			return 1;
 		}
@@ -553,7 +553,7 @@ int blIsCardReader(struct usb_device *usbdev)
 			return 1;
 		}
 #endif
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 		if(!strcmp(buf,"fsl-ehci.0-1.3")) {
 			return 1;
 		}

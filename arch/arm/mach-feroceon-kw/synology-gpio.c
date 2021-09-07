@@ -24,7 +24,7 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 
 #include <linux/gpio.h>
 #include <linux/synobios.h>
@@ -1410,4 +1410,4 @@ void synology_gpio_init(void)
 		break;
 	}
 }
-#endif /* CONFIG_SYNO_MV88F6281 */
+#endif /* MY_ABC_HERE */

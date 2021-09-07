@@ -32,7 +32,7 @@
 #include <linux/pagevec.h>
 #include <linux/blkdev.h>
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
 #include <linux/rmap.h>
 #endif
@@ -597,7 +597,7 @@ void end_page_writeback(struct page *page)
 
 	smp_mb__after_clear_bit();
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
 	clear_page_constant(page);
 #endif
@@ -607,7 +607,7 @@ void end_page_writeback(struct page *page)
 }
 EXPORT_SYMBOL(end_page_writeback);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_FSL_DMA_MEMCPY
 void clear_page_constant(struct page *page)
 {
@@ -2764,7 +2764,7 @@ done:
 					err = write_end_ret;
 				}
 			}
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 #else
 			cond_resched();
 #endif

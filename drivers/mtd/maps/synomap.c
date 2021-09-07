@@ -76,7 +76,7 @@ static struct mtd_partition synomtd_partitions[] = {
 		.size	= 0x00010000,		/* 64KB		*/
 	},
 };
-#elif defined(CONFIG_SYNO_MV88F6281)
+#elif defined(MY_ABC_HERE)
 #ifdef MY_ABC_HERE
 extern long gSynoFlashMemorySize;
 #endif
@@ -223,7 +223,7 @@ static int __init init_synomtd(void)
 	unsigned long flash_addr, flash_size, mtd_size = 0;
 	struct mtd_partition *pMtdPartition = NULL;
 
-#if !defined(CONFIG_SYNO_MV_COMMON) && !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_PLX_PORTING)
+#if !defined(MY_ABC_HERE) && !defined(CONFIG_SYNO_MPC85XX_COMMON) && !defined(CONFIG_SYNO_PLX_PORTING)
 	bd_t *bd = (bd_t *)__res;
 #endif
 
@@ -235,7 +235,7 @@ static int __init init_synomtd(void)
 #endif
 #endif
 
-#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(CONFIG_SYNO_PLX_PORTING)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_MPC85XX_COMMON) || defined(CONFIG_SYNO_PLX_PORTING)
 	flash_addr = physmap_flash_resource.start;
 	flash_size = physmap_flash_resource.end - physmap_flash_resource.start + 1;
 #else
@@ -285,7 +285,7 @@ static int __init init_synomtd(void)
 			(mtd_banks[idx-1] ? mtd_banks[idx-1]->size : 0) : 0);
 
 		/* start to probe flash chips */
-#if defined(CONFIG_SYNO_MV88F6281)
+#if defined(MY_ABC_HERE)
 		mtd_banks[idx] = do_map_probe("sflash", map_banks[idx]);
 #else
 		mtd_banks[idx] = do_map_probe("cfi_probe", map_banks[idx]);

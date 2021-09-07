@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -227,7 +230,7 @@ MV_VOID mvRtcInit(MV_VOID)
 	return;
 }
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 /* Export RTC get/set function for synobios */
 EXPORT_SYMBOL(mvRtcTimeSet);
 EXPORT_SYMBOL(mvRtcTimeGet);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Contains routines needed to support swiotlb for ppc.
  *
@@ -71,7 +74,7 @@ static int ppc_swiotlb_bus_notify(struct notifier_block *nb,
 	sd->max_direct_dma_addr = 0;
 
 	/* May need to bounce if the device can't address all of DRAM */
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	if ((dma_get_mask(dev) + 1) < lmb_end_of_DRAM())
 #else
 	if (dma_get_mask(dev) < lmb_end_of_DRAM())

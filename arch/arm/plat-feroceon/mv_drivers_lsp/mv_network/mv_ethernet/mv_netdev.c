@@ -183,7 +183,7 @@ static void eth_print_link_status( struct net_device *dev )
 	/* change log level to avoid writing to syslog,
 	 * which will stop hibernation
 	 */
-#if CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
     if(port_status & ETH_LINK_UP_MASK)
     {
 	    printk( KERN_INFO "%s: link up", dev->name );

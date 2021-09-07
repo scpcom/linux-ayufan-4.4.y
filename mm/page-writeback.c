@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/page-writeback.c
  *
@@ -534,7 +537,7 @@ static void balance_dirty_pages(struct address_space *mapping,
 		 * threshold otherwise wait until the disk writes catch
 		 * up.
 		 */
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
 		if (bdi_nr_reclaimable) {
 #else

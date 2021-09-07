@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Author: Andy Fleming <afleming@freescale.com>
  * 	   Kumar Gala <galak@kernel.crashing.org>
@@ -15,7 +18,7 @@
 #include <linux/init.h>
 #include <linux/delay.h>
 #include <linux/of.h>
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #include <linux/cpu.h>
 #endif
 
@@ -28,7 +31,7 @@
 
 #include <sysdev/fsl_soc.h>
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #define MPC85xx_BPTR_OFF		0x00020
 #define MPC85xx_ECM_EEBPCR_OFF		0x01010
 #define MPC85xx_PIC_PIR_OFF		0x41090
@@ -36,7 +39,7 @@
 extern void mpc85xx_cpu_down(void) __attribute__((noreturn));
 #endif
 extern void __early_start(void);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 extern void __secondary_start_page(void);
 extern volatile unsigned long __spin_table;
 
@@ -158,7 +161,7 @@ smp_85xx_kick_cpu(int nr)
 {
 	unsigned long flags;
 	const u64 *cpu_rel_addr;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	__iomem struct epapr_entry *epapr;
 #else
 	__iomem u32 *bptr_vaddr;
@@ -177,7 +180,7 @@ smp_85xx_kick_cpu(int nr)
 		printk(KERN_ERR "No cpu-release-addr for cpu %d\n", nr);
 		return;
 	}
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	/* FIXME: following part doesn't care 36-bit addr mode. */
 	if (epapr_tbl[nr] == 0)
 		epapr_tbl[nr] = PAGE_MASK | (u32)*cpu_rel_addr;
@@ -241,7 +244,7 @@ smp_85xx_kick_cpu(int nr)
 	pr_debug("waited %d msecs for CPU #%d.\n", n, nr);
 }
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 struct smp_ops_t smp_85xx_ops = {
 };
 #else
@@ -259,7 +262,7 @@ struct smp_ops_t smp_85xx_ops = {
 void __init mpc85xx_smp_init(void)
 {
 	struct device_node *np;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	int i;
 
 	for (i = 0; i < NR_CPUS; i++)
@@ -269,13 +272,13 @@ void __init mpc85xx_smp_init(void)
 	np = of_find_node_by_type(NULL, "open-pic");
 	if (np) {
 		smp_85xx_ops.probe = smp_mpic_probe;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		smp_85xx_ops.setup_cpu = smp_mpic_setup_cpu;
 #else
 		smp_85xx_ops.setup_cpu = smp_85xx_setup_cpu;
 #endif
 		smp_85xx_ops.message_pass = smp_mpic_message_pass;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		smp_85xx_ops.kick_cpu = smp_85xx_kick_cpu;
 #if defined(CONFIG_HOTPLUG_CPU)
 		smp_85xx_ops.give_timebase = smp_generic_give_timebase;

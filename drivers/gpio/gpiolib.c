@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -1338,7 +1341,7 @@ int __gpio_to_irq(unsigned gpio)
 }
 EXPORT_SYMBOL_GPL(__gpio_to_irq);
 
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 int gpio_hw_reset(unsigned gpio)
 {
 	struct gpio_chip	*chip;
@@ -1360,7 +1363,7 @@ END:
 EXPORT_SYMBOL_GPL(gpio_hw_reset);
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ_EN_DEEP_WAKE_PIN
+#ifdef MY_DEF_HERE
 /**
  * copy from __gpio_get_value()
  * iGpioInterruptClear() - clear gpio interrupt

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/readahead.c - address_space-level file readahead.
  *
@@ -26,7 +29,7 @@ file_ra_state_init(struct file_ra_state *ra, struct address_space *mapping)
 {
 	ra->ra_pages = mapping->backing_dev_info->ra_pages;
 	ra->prev_pos = -1;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	ra->delay_readahead = 0;
 #endif
 }

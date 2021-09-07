@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This file contains the routines for handling the MMU on those
  * PowerPC implementations where the MMU is not using the hash
@@ -352,7 +355,7 @@ static int __cpuinit mmu_context_cpu_notify(struct notifier_block *self,
 		read_lock(&tasklist_lock);
 		for_each_process(p) {
 			if (p->mm)
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 				cpumask_clear_cpu(cpu, mm_cpumask(p->mm));
 #else
 				cpu_mask_clear_cpu(cpu, mm_cpumask(p->mm));

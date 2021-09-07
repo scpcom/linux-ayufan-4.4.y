@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -191,7 +194,7 @@ typedef enum _devGppBoardClass
     BOARD_GPP_SDIO_WP,
 	BOARD_GPP_SWITCH_PHY_INT,
 	BOARD_GPP_TSU_DIRCTION,
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	/* DS011 */
 	SYNO_DS011_GPP_LED_USBDISK_ORANGE,
 	SYNO_DS011_GPP_LED_USBDISK_GREEN,

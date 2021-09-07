@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Watchdog timer for PowerPC Book-E systems
  *
@@ -44,7 +47,7 @@ u32 booke_wdt_period = WDT_PERIOD_DEFAULT;
 
 #ifdef	CONFIG_FSL_BOOKE
 #define WDTP(x)		((((x)&0x3)<<30)|(((x)&0x3c)<<15))
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #define WDTP_MASK	(WDTP(0xff))
 #else
 #define WDTP_MASK	(WDTP(0))
@@ -118,7 +121,7 @@ static void __booke_wdt_enable(void *data)
 	mtspr(SPRN_TCR, val);
 }
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 static void __booke_wdt_disable(void *data)
 {
 	u32 val;
@@ -222,7 +225,7 @@ static const struct file_operations booke_wdt_fops = {
 	.write = booke_wdt_write,
 	.unlocked_ioctl = booke_wdt_ioctl,
 	.open = booke_wdt_open,
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	.release = booke_wdt_release,
 #endif
 };

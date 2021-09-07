@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 /*
  * MTD SPI driver for ST M25Pxx (and similar) serial flash chips
  * only for Freescale eSPI controller
@@ -537,7 +537,7 @@ static struct flash_info __devinitdata m25p_data[] = {
 	{ "at26df161a", 0x1f4601, 0, 256, 64 * 1024, 32, SECT_4K, },
 	{ "at26df321",  0x1f4701, 0, 256, 64 * 1024, 64, SECT_4K, },
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	/* Macronix */
 	{ "mx25l8006e", 0xc22014, 0, 256, 64 * 1024, 16, },
 	{ "mx25l6445e", 0xc22017, 0, 256, 64 * 1024, 128, },
@@ -896,4 +896,4 @@ module_exit(m25p80_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Chen Gong <g.chen@freescale.com>");
 MODULE_DESCRIPTION("MTD SPI driver for ST M25Pxx flash chips");
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_MISCDEVICE_H
 #define _LINUX_MISCDEVICE_H
 #include <linux/module.h>
@@ -12,7 +15,7 @@
 #define APOLLO_MOUSE_MINOR	7
 #define PC110PAD_MINOR		9
 /*#define ADB_MOUSE_MINOR	10	FIXME OBSOLETE */
-#ifdef CONFIG_SYNO_USE_OCF_LINUX
+#ifdef MY_ABC_HERE
 #define CRYPTODEV_MINOR		70	/* /dev/crypto */
 #endif
 #ifdef CONFIG_ARCH_FEROCEON

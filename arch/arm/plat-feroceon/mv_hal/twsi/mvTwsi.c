@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -934,7 +937,7 @@ MV_STATUS mvTwsiRead(MV_U8 chanNum, MV_TWSI_SLAVE *pTwsiSlave, MV_U8 *pBlock, MV
 
 	return MV_OK;
 }
-#ifdef CONFIG_SYNO_MV_COMMON
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(mvTwsiRead);
 #endif
 
@@ -1010,6 +1013,6 @@ MV_STATUS mvTwsiWrite(MV_U8 chanNum, MV_TWSI_SLAVE *pTwsiSlave, MV_U8 *pBlock, M
 
 	return MV_OK;
 }
-#ifdef CONFIG_SYNO_MV_COMMON
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(mvTwsiWrite);
 #endif

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Freescale LBC and UPM routines.
  *
@@ -23,7 +26,7 @@
 #include <asm/fsl_lbc.h>
 
 static spinlock_t fsl_lbc_lock = __SPIN_LOCK_UNLOCKED(fsl_lbc_lock);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 struct fsl_lbc_ctrl *fsl_lbc_ctrl_dev;
 EXPORT_SYMBOL(fsl_lbc_ctrl_dev);
 
@@ -101,14 +104,14 @@ int fsl_lbc_find(phys_addr_t addr_base)
 {
 	int i;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	if (!fsl_lbc_ctrl_dev || !fsl_lbc_ctrl_dev->regs)
 #else
 	if (!fsl_lbc_regs)
 #endif
 		return -ENODEV;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	for (i = 0; i < ARRAY_SIZE(fsl_lbc_ctrl_dev->regs->bank); i++) {
 		__be32 br = in_be32(&fsl_lbc_ctrl_dev->regs->bank[i].br);
 		__be32 or = in_be32(&fsl_lbc_ctrl_dev->regs->bank[i].or);
@@ -147,7 +150,7 @@ int fsl_upm_find(phys_addr_t addr_base, struct fsl_upm *upm)
 	if (bank < 0)
 		return bank;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	if (!fsl_lbc_ctrl_dev || !fsl_lbc_ctrl_dev->regs)
 		return -ENODEV;
 
@@ -158,21 +161,21 @@ int fsl_upm_find(phys_addr_t addr_base, struct fsl_upm *upm)
 
 	switch (br & BR_MSEL) {
 	case BR_MS_UPMA:
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		upm->mxmr = &fsl_lbc_ctrl_dev->regs->mamr;
 #else
 		upm->mxmr = &fsl_lbc_regs->mamr;
 #endif
 		break;
 	case BR_MS_UPMB:
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		upm->mxmr = &fsl_lbc_ctrl_dev->regs->mbmr;
 #else
 		upm->mxmr = &fsl_lbc_regs->mbmr;
 #endif
 		break;
 	case BR_MS_UPMC:
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		upm->mxmr = &fsl_lbc_ctrl_dev->regs->mcmr;
 #else
 		upm->mxmr = &fsl_lbc_regs->mcmr;
@@ -215,14 +218,14 @@ int fsl_upm_run_pattern(struct fsl_upm *upm, void __iomem *io_base, u32 mar)
 	int ret = 0;
 	unsigned long flags;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	if (!fsl_lbc_ctrl_dev || !fsl_lbc_ctrl_dev->regs)
 		return -ENODEV;
 #endif
 
 	spin_lock_irqsave(&fsl_lbc_lock, flags);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	out_be32(&fsl_lbc_ctrl_dev->regs->mar, mar);
 #else
 	out_be32(&fsl_lbc_regs->mar, mar);
@@ -249,7 +252,7 @@ int fsl_upm_run_pattern(struct fsl_upm *upm, void __iomem *io_base, u32 mar)
 }
 EXPORT_SYMBOL(fsl_upm_run_pattern);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 static int __devinit fsl_lbc_ctrl_init(struct fsl_lbc_ctrl *ctrl)
 {
 	struct fsl_lbc_regs __iomem *lbc = ctrl->regs;

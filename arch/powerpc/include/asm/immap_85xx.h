@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /**
  * MPC85xx Internal Memory Map
  *
@@ -109,4 +112,4 @@ struct ccsr_guts {
 
 #endif /* __ASM_POWERPC_IMMAP_85XX_H__ */
 #endif /* __KERNEL__ */
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

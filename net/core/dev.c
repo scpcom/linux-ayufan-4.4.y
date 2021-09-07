@@ -217,7 +217,7 @@ ERR:
 EXPORT_SYMBOL(syno_get_dev_vendor_mac);
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_NET_GIANFAR_FP
 static void dev_do_clear_fastroute(struct net_device *dev);
 #endif
@@ -335,7 +335,7 @@ static RAW_NOTIFIER_HEAD(netdev_chain);
 DEFINE_PER_CPU(struct softnet_data, softnet_data);
 EXPORT_PER_CPU_SYMBOL(softnet_data);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_NET_GIANFAR_FP
 int netdev_fastroute;
 EXPORT_SYMBOL(netdev_fastroute);
@@ -434,7 +434,7 @@ static inline void netdev_set_addr_lockdep_class(struct net_device *dev)
 }
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_NET_GIANFAR_FP
 static void dev_do_clear_fastroute(struct net_device *dev)
 {
@@ -508,7 +508,7 @@ void dev_add_pack(struct packet_type *pt)
 	int hash;
 
 	spin_lock_bh(&ptype_lock);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_NET_GIANFAR_FP
 	if (pt->af_packet_priv) {
 		netdev_fastroute_obstacles++;
@@ -553,7 +553,7 @@ void __dev_remove_pack(struct packet_type *pt)
 
 	list_for_each_entry(pt1, head, list) {
 		if (pt == pt1) {
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_NET_GIANFAR_FP
 			if (pt->af_packet_priv)
 				netdev_fastroute_obstacles--;
@@ -1330,7 +1330,7 @@ int dev_close(struct net_device *dev)
 
 	dev->flags &= ~IFF_UP;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_NET_GIANFAR_FP
 	dev_clear_fastroute(dev);
 #endif
@@ -2157,7 +2157,7 @@ int netif_rx(struct sk_buff *skb)
 	queue = &__get_cpu_var(softnet_data);
 
 	__get_cpu_var(netdev_rx_stat).total++;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_NET_GIANFAR_FP
 	if (skb->pkt_type == PACKET_FASTROUTE)
 		return dev_queue_xmit(skb);
@@ -3541,7 +3541,7 @@ static int __dev_set_promiscuity(struct net_device *dev, int inc)
 		}
 	}
 	if (dev->flags != old_flags) {
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_NET_GIANFAR_FP
 		if (dev->flags & IFF_PROMISC) {
 			netdev_fastroute_obstacles++;
@@ -4934,7 +4934,7 @@ int register_netdevice(struct net_device *dev)
 	netdev_set_addr_lockdep_class(dev);
 	netdev_init_queue_locks(dev);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_NET_GIANFAR_FP
 	dev->fastpath_lock = __RW_LOCK_UNLOCKED();
 #endif

@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * P1022 DS Board Setup
  *
@@ -376,4 +379,4 @@ define_machine(p1022_ds) {
 	.calibrate_decr		= generic_calibrate_decr,
 	.progress		= udbg_progress,
 };
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * zl6100.c - driver for the Intersil zl2006 chip
  *
@@ -293,4 +296,4 @@ MODULE_LICENSE("GPL");
 
 module_init(zl6100_init);
 module_exit(zl6100_exit);
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) Freescale Semicondutor, Inc. 2006-2007. All rights reserved.
  *
@@ -149,7 +152,7 @@ static int mpc8568_mds_phy_fixups(struct phy_device *phydev)
 	return err;
 }
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PCI
 /*Host/agent status can be read from porbmsr in the global utilities*/
 static int get_p1021mds_host_agent(void)
@@ -204,7 +207,7 @@ static bool p1021mds_pci_is_host(u32 host_agent, resource_size_t res)
  * Setup the architecture
  *
  */
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SMP
 extern void __init mpc85xx_smp_init(void);
 #endif
@@ -216,7 +219,7 @@ static void __init mpc85xx_mds_setup_arch(void)
 	static u8 __iomem *bcsr_regs = NULL;
 #ifdef CONFIG_PCI
 	struct pci_controller *hose;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	u32 host_agent;
 #endif
 #endif
@@ -236,7 +239,7 @@ static void __init mpc85xx_mds_setup_arch(void)
 	}
 
 #ifdef CONFIG_PCI
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	host_agent = get_p1021mds_host_agent();
 #endif
 	for_each_node_by_type(np, "pci") {
@@ -244,7 +247,7 @@ static void __init mpc85xx_mds_setup_arch(void)
 		    of_device_is_compatible(np, "fsl,mpc8548-pcie")) {
 			struct resource rsrc;
 			of_address_to_resource(np, 0, &rsrc);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 			if (!p1021mds_pci_is_host(host_agent, rsrc.start))
 				continue;
 #endif
@@ -260,7 +263,7 @@ static void __init mpc85xx_mds_setup_arch(void)
 	}
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SMP
 	mpc85xx_smp_init();
 #endif
@@ -388,7 +391,7 @@ static int __init mpc85xx_publish_devices(void)
 machine_device_initcall(mpc8568_mds, mpc85xx_publish_devices);
 machine_device_initcall(mpc8569_mds, mpc85xx_publish_devices);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 static struct of_device_id p1021_ids[] = {
 	{ .type = "soc", },
 	{ .compatible = "soc", },
@@ -411,7 +414,7 @@ machine_device_initcall(p1021_mds, p1021_publish_devices);
 
 machine_arch_initcall(mpc8568_mds, swiotlb_setup_bus_notifier);
 machine_arch_initcall(mpc8569_mds, swiotlb_setup_bus_notifier);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 machine_arch_initcall(p1021_mds, swiotlb_setup_bus_notifier);
 #endif
 
@@ -432,7 +435,7 @@ static void __init mpc85xx_mds_pic_init(void)
 	}
 
 	mpic = mpic_alloc(np, r.start,
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 			MPIC_PRIMARY | MPIC_WANTS_RESET | MPIC_BIG_ENDIAN |
 			MPIC_BROKEN_FRR_NIRQS | MPIC_SINGLE_DEST_CPU,
 #else
@@ -499,7 +502,7 @@ define_machine(mpc8569_mds) {
 #endif
 };
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 static int __init p1021_mds_probe(void)
 {
 	unsigned long root = of_get_flat_dt_root();

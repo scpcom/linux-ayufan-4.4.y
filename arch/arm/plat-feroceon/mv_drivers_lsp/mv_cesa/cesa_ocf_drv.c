@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -81,7 +84,7 @@ extern u32 mv_crypto_base_get(void);
 #define CESA_OCF_SPLIT
 
 /* general defines */
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 #define CESA_OCF_MAX_SES 2048
 #else
 #define CESA_OCF_MAX_SES 128
@@ -1164,7 +1167,7 @@ cesa_ocf_freesession(device_t dev, u_int64_t tid)
         return 0;
 }
 
-#ifndef CONFIG_SYNO_MV88F6281
+#ifndef MY_ABC_HERE
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,30))
 extern int crypto_init(void);
 #endif
@@ -1176,7 +1179,7 @@ extern int crypto_init(void);
 static int
 cesa_ocf_init(void)
 {
-#ifndef CONFIG_SYNO_MV88F6281
+#ifndef MY_ABC_HERE
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,30))
 	crypto_init();
 #endif

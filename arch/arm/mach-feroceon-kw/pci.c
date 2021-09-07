@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +25,7 @@
 #include <linux/interrupt.h>
 #include <linux/spinlock.h>
 #include <linux/init.h>
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 #include <linux/synobios.h>
 #endif
                                                                                                                              
@@ -72,7 +75,7 @@ void __init mv_pci_preinit(void)
 
 	for (pciIf = 0; pciIf < maxif; pciIf++) 
 	{
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 		//this workaround is for 7042, DS212 does not have one, so it is not necessary.
 		//212+ attaches USB 3.0 on PCIe 0x1, so it cannot be reset.
 		if ( (syno_is_hw_version(HW_DS212pv10) || syno_is_hw_version(HW_DS212pv20)) && (0 == pciIf) ) {
@@ -135,7 +138,7 @@ skip_pcie_workaround:
 		//printk("writing %x tp %x \n",MV_PCI_MASK_ABCD, MV_PCI_MASK_REG(pciIf) );
 		MV_REG_WRITE(MV_PCI_MASK_REG(pciIf), MV_PCI_MASK_ABCD );
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 		//This Error handling can cause Kernel boot error if the CPU is not 6282A1, 
 		//The BoardID is checked to avoid this error.
 		if(MV_6282_A1_ID == mvCtrlModelRevGet())

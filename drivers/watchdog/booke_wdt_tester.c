@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * Watchdog timer tester for PowerPC Book-E systems
  *
@@ -30,4 +33,4 @@ module_init(wdt_tester_init);
 
 MODULE_AUTHOR("Jiang Yutang");
 MODULE_LICENSE("GPL");
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

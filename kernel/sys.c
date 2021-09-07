@@ -358,7 +358,7 @@ void kernel_power_off(void)
 #endif
 	if (pm_power_off_prepare)
 		pm_power_off_prepare();
-#ifdef CONFIG_SYNO_QORIQ_NO_DISABLE_NON_BOOT_CPU
+#ifdef MY_DEF_HERE
 #else
 	disable_nonboot_cpus();
 #endif
@@ -369,7 +369,7 @@ void kernel_power_off(void)
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
 #ifdef MY_DEF_HERE
-#ifdef CONFIG_SYNO_CEDARVIEW
+#ifdef MY_DEF_HERE
 #define UART_PORT1_IOBASE   0x2F8
 #else
 #define UART_PORT1_IOBASE   0x3F8

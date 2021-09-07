@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * Copyright (C) 2008 Freescale Semiconductor, Inc. All rights reserved.
  *
@@ -110,4 +113,4 @@ static int uli8259_suspend_init(void)
 }
 
 module_init(uli8259_suspend_init);
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

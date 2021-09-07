@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Procedures for creating, accessing and interpreting the device tree.
  *
@@ -447,7 +450,7 @@ struct of_modalias_table {
 static struct of_modalias_table of_modalias_table[] = {
 	{ "fsl,mcu-mpc8349emitx", "mcu-mpc8349emitx" },
 	{ "mmc-spi-slot", "mmc_spi" },
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	{ "fsl,espi-flash", "fsl_m25p80"},
 #endif
 };

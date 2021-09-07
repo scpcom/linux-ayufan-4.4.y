@@ -696,11 +696,11 @@ void ata_scsi_error(struct Scsi_Host *host)
 
 		/* invoke EH, skip if unloading or suspended */
 		if (!(ap->pflags & (ATA_PFLAG_UNLOADING | ATA_PFLAG_SUSPENDED)))
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 			if (PM_EVENT_SUSPEND != ap->pm_mesg.event)
 #endif
 			ap->ops->error_handler(ap);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 			else
 				DBGMESG("port %d is in SUSPEND mode, skip reset\n", ap->print_id);
 #endif

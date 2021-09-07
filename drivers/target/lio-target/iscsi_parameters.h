@@ -107,7 +107,7 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define INITIAL_AUTHMETHOD			CHAP
 #define INITIAL_HEADERDIGEST			"CRC32C,None"
 #define INITIAL_DATADIGEST			"CRC32C,None"
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define INITIAL_MAXCONNECTIONS			"2"
 #else
 #define INITIAL_MAXCONNECTIONS			"1"

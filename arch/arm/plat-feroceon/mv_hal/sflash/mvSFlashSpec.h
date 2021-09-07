@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -202,7 +205,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define     MV_S25FL128_SECTOR_SIZE            			0x40000 /* 256K */
 #define     MV_S25FL128_SECTOR_NUMBER          			64
 #define	    MV_S25FL_PAGE_SIZE			        	0x100   /* 256 byte */
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 #define     MV_S25FL032A_DEVICE_ID					0x0215
 #define     MV_S25FL032A_SECTOR_SIZE				0x10000 /* 64K */
 #define     MV_S25FL032A_SECTOR_NUMBER				64
@@ -250,7 +253,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* Sector Sizes and population per device model*/
 #define     MV_S25FL064_SECTOR_SIZE            			0x10000 /* 256K */
 #define     MV_S25FL064_SECTOR_NUMBER          			128
-#endif /*CONFIG_SYNO_MV88F6281*/
+#endif /*MY_ABC_HERE*/
 
 #define		MV_S25FL_WREN_CMND_OPCD			    0x06	/* Write Enable */
 #define		MV_S25FL_WRDI_CMND_OPCD			    0x04	/* Write Disable */
@@ -277,7 +280,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define     	MV_S25FL_STATUS_BP_1_OF_2           	(0x07 << MV_SFLASH_STATUS_REG_WP_OFFSET)
 #define     	MV_S25FL_STATUS_BP_ALL              	(0x0F << MV_SFLASH_STATUS_REG_WP_OFFSET)
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 /************************************/
 /*  SST SST25VF032B Device Specific  */
 /************************************/

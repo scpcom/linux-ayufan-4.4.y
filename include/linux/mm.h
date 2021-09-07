@@ -1187,9 +1187,9 @@ void task_dirty_inc(struct task_struct *tsk);
 
 /* readahead.c */
 #ifdef MY_ABC_HERE
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define VM_MAX_READAHEAD        192     /* kbytes */
-#elif defined(CONFIG_SYNO_MV88F6281)
+#elif defined(MY_ABC_HERE)
 #define VM_MAX_READAHEAD        2048     /* kbytes */
 #elif defined(CONFIG_SYNO_MPC854X) || defined(CONFIG_SYNO_MPC8533)
 #define VM_MAX_READAHEAD        256     /* kbytes */

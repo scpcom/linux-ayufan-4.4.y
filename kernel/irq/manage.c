@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/kernel/irq/manage.c
  *
@@ -137,7 +140,7 @@ int irq_set_affinity(unsigned int irq, const struct cpumask *cpumask)
 	spin_unlock_irqrestore(&desc->lock, flags);
 	return 0;
 }
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(irq_set_affinity);
 #endif
 

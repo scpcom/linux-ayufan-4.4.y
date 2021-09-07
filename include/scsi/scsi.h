@@ -119,7 +119,7 @@ struct scsi_cmnd;
 #define PERSISTENT_RESERVE_OUT 0x5f
 #define VARIABLE_LENGTH_CMD   0x7f
 #define REPORT_LUNS           0xa0
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define SECURITY_PROTOCOL_IN  0xa2
 #endif
 #define MAINTENANCE_IN        0xa3
@@ -128,20 +128,20 @@ struct scsi_cmnd;
 #define EXCHANGE_MEDIUM       0xa6
 #define READ_12               0xa8
 #define WRITE_12              0xaa
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define READ_MEDIA_SERIAL_NUMBER 0xab
 #endif
 #define WRITE_VERIFY_12       0xae
 #define SEARCH_HIGH_12        0xb0
 #define SEARCH_EQUAL_12       0xb1
 #define SEARCH_LOW_12         0xb2
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define SECURITY_PROTOCOL_OUT 0xb5
 #endif
 #define READ_ELEMENT_STATUS   0xb8
 #define SEND_VOLUME_TAG       0xb6
 #define WRITE_LONG_2          0xea
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define EXTENDED_COPY         0x83
 #define RECEIVE_COPY_RESULTS  0x84
 #define ACCESS_CONTROL_IN     0x86
@@ -149,7 +149,7 @@ struct scsi_cmnd;
 #endif
 #define READ_16               0x88
 #define WRITE_16              0x8a
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define READ_ATTRIBUTE        0x8c
 #define WRITE_ATTRIBUTE	      0x8d
 #endif
@@ -157,17 +157,17 @@ struct scsi_cmnd;
 #define SERVICE_ACTION_IN     0x9e
 /* values for service action in */
 #define	SAI_READ_CAPACITY_16  0x10
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 /* values for VARIABLE_LENGTH_CMD service action codes
  * see spc4r17 Section D.3.5, table D.7 and D.8 */
 #define VLC_SA_RECEIVE_CREDENTIAL 0x1800
 #endif
 /* values for maintenance in */
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define MI_REPORT_IDENTIFYING_INFORMATION 0x05
 #endif
 #define MI_REPORT_TARGET_PGS  0x0a
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define MI_REPORT_ALIASES     0x0b
 #define MI_REPORT_SUPPORTED_OPERATION_CODES 0x0c
 #define MI_REPORT_SUPPORTED_TASK_MANAGEMENT_FUNCTIONS 0x0d
@@ -176,11 +176,11 @@ struct scsi_cmnd;
 #define MI_MANAGEMENT_PROTOCOL_IN 0x10
 #endif
 /* values for maintenance out */
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define MO_SET_IDENTIFYING_INFORMATION 0x06
 #endif
 #define MO_SET_TARGET_PGS     0x0a
-#ifdef CONFIG_SYNO_LIO
+#ifdef MY_ABC_HERE
 #define MO_CHANGE_ALIASES     0x0b
 #define MO_SET_PRIORITY       0x0e
 #define MO_SET_TIMESTAMP      0x0f

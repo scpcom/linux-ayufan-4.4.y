@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_QORIQ)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Copyright 2008-2010 Freescale Semiconductor, Inc.
  * Kumar Gala <kumar.gala@freescale.com>
@@ -207,4 +210,4 @@ __secondary_start_code_end:
 
 __secondary_reset_vector:
 	b	__secondary_start_page
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

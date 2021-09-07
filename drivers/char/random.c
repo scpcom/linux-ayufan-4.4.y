@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * random.c -- A strong random number generator
  *
@@ -129,7 +132,7 @@
  *                                unsigned int value);
  * 	void add_interrupt_randomness(int irq);
  *
-#ifdef CONFIG_SYNO_USE_OCF_LINUX
+#ifdef MY_ABC_HERE
  *      void random_input_words(__u32 *buf, size_t wordcount, int ent_count)
  *      int random_input_wait(void);
  *
@@ -145,7 +148,7 @@
  * a better measure, since the timing of the disk interrupts are more
  * unpredictable.
  *
-#ifdef CONFIG_SYNO_USE_OCF_LINUX
+#ifdef MY_ABC_HERE
  * random_input_words() just provides a raw block of entropy to the input
  * pool, such as from a hardware entropy generator.
  *
@@ -728,7 +731,7 @@ void add_disk_randomness(struct gendisk *disk)
 }
 #endif
 
-#ifdef CONFIG_SYNO_USE_OCF_LINUX
+#ifdef MY_ABC_HERE
 /*
  * random_input_words - add bulk entropy to pool
  *

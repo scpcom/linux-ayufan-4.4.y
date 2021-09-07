@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -212,7 +215,7 @@ MV_CPU_DEC_WIN* mv_sys_map(void)
 	case DB_88F6281A_BP_ID:
 	case RD_88F6281A_ID:
 	case SHEEVA_PLUG_ID: 
-#if defined(CONFIG_SYNO_MV88F6281)
+#if defined(MY_ABC_HERE)
 	case SYNO_DS409_ID:
 	case SYNO_DS109_ID:
 	case SYNO_DS409slim_ID:
@@ -221,7 +224,7 @@ MV_CPU_DEC_WIN* mv_sys_map(void)
 		return SYSMAP_88F6281;
 	case DB_88F6282A_BP_ID:
 	case RD_88F6282A_ID:
-#if defined(CONFIG_SYNO_MV88F6281)
+#if defined(MY_ABC_HERE)
 	case SYNO_DS211_ID:
 	case SYNO_DS411slim_ID:
 	case SYNO_RS_6282_ID:
@@ -236,7 +239,7 @@ MV_CPU_DEC_WIN* mv_sys_map(void)
 	case RD_88F6192A_ID:
     case DB_88F6190A_BP_ID:
     case RD_88F6190A_ID:
-#if defined(CONFIG_SYNO_MV88F6281)
+#if defined(MY_ABC_HERE)
 	case SYNO_6702_1BAY_ID:
 #endif
 		return SYSMAP_88F6192;

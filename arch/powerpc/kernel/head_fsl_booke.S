@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Kernel execution entry point code.
  *
@@ -211,7 +214,7 @@ skpinv:	addi	r6,r6,1				/* Increment */
 
 	xori	r6,r4,1
 	slwi	r6,r6,5		/* setup new context with other address space */
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 #if defined(CONFIG_DEBUG_CW)
 	ori	r6, r6, 0x200	/* enable DE bit for MSR */
 #endif
@@ -390,7 +393,7 @@ skpinv:	addi	r6,r6,1				/* Increment */
 /*
  * Decide what sort of machine this is and initialize the MMU.
  */
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 #if defined(CONFIG_DEBUG_CW)
 	lis	r10, 0x1008 /* clear the V bit from the L2MMU_CAM8 register */
 	mtspr	SPRN_MAS0, r10
@@ -456,7 +459,7 @@ skpinv:	addi	r6,r6,1				/* Increment */
 	lwz	r11, 0(r12);		/* Get Linux PTE */
 #endif
 
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 _GLOBAL(flush_disable_L1)
 /*
  * Flush L1 d-cache, invalidate and disable d-cache,
@@ -686,7 +689,7 @@ interrupt_base:
 	rlwinm	r12,r12,0,16,1
 	mtspr	SPRN_MAS1,r12
 
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 	/* Make up the required permissions for kernel code */
 #ifdef CONFIG_PTE_64BIT
 	li	r13,_PAGE_PRESENT | _PAGE_BAP_SX
@@ -702,14 +705,14 @@ interrupt_base:
 	mfspr	r11,SPRN_SPRG_THREAD
 	lwz	r11,PGDIR(r11)
 
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 	/* Make up the required permissions for user code */
 #else
 4:
 	/* Make up the required permissions */
 #endif
 #ifdef CONFIG_PTE_64BIT
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 	li	r13,_PAGE_PRESENT | _PAGE_BAP_UX
 #else
 	li	r13,_PAGE_PRESENT | _PAGE_EXEC
@@ -719,7 +722,7 @@ interrupt_base:
 	li	r13,_PAGE_PRESENT | _PAGE_ACCESSED | _PAGE_EXEC
 #endif
 
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 4:
 #endif
 	FIND_PTE

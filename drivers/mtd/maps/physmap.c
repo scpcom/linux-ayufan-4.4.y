@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Normal mappings of chips in physical memory
  *
@@ -136,7 +139,7 @@ static int physmap_flash_probe(struct platform_device *dev)
 
 		simple_map_init(&info->map[i]);
 
-#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_MPC85XX_COMMON)
 		/* To avoid mapping the whole flash in mtd0 */
 		iounmap(info->map[i].virt);
 		return 0;
@@ -230,7 +233,7 @@ static struct physmap_flash_data physmap_flash_data = {
 	.width		= CONFIG_MTD_PHYSMAP_BANKWIDTH,
 };
 
-#if defined(CONFIG_SYNO_MV_COMMON) || defined(CONFIG_SYNO_MPC85XX_COMMON)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_MPC85XX_COMMON)
 struct resource physmap_flash_resource = {
 #else
 static struct resource physmap_flash_resource = {

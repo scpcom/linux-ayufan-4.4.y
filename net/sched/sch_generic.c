@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * net/sched/sch_generic.c	Generic packet scheduler routines.
  *
@@ -257,12 +260,12 @@ static void dev_watchdog(unsigned long arg)
 
 			if (some_queue_timedout) {
 				char drivername[64];
-#if defined(CONFIG_SYNO_QORIQ_TX_RESTART_HANG_FIX)
+#if defined(MY_DEF_HERE)
 				printk(KERN_DEBUG "[SYNO] NETDEV WATCHDOG: %s (%s): transmit queue %u timed out\n",dev->name, netdev_drivername(dev, drivername, 64), i);
 #else
 				WARN_ONCE(1, KERN_INFO "NETDEV WATCHDOG: %s (%s): transmit queue %u timed out\n",
 				       dev->name, netdev_drivername(dev, drivername, 64), i);
-#endif /* CONFIG_SYNO_QORIQ_TX_RESTART_HANG_FIX */
+#endif /* MY_DEF_HERE */
 				dev->netdev_ops->ndo_tx_timeout(dev);
 			}
 			if (!mod_timer(&dev->watchdog_timer,

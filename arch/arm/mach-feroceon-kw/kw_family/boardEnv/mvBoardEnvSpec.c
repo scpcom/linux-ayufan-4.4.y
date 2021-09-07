@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -1236,7 +1239,7 @@ MV_BOARD_INFO dbCustomerInfo = {
     DB_CUSTOMER_BOARD_NAND_CONTROL
 };
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 
 #define SYNO_DS109_BOARD_MPP_GROUP_TYPE_NUM  0x1
 MV_BOARD_MPP_TYPE_INFO SYNO_DS109InfoBoardMppTypeInfo[] =
@@ -2050,7 +2053,7 @@ MV_BOARD_INFO SYNO_6702_1BAY_INFO = {
 	0
 };
 
-#endif //CONFIG_SYNO_MV88F6281
+#endif //MY_ABC_HERE
 
 MV_BOARD_INFO*	boardInfoTbl[] = 	{
                     &db88f6281AInfo,
@@ -2068,7 +2071,7 @@ MV_BOARD_INFO*	boardInfoTbl[] = 	{
 					&rd88f6282aInfo,
                     &db88f6701AInfo,
                     &db88f6702AInfo
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 						,
                     NULL,                           /* 0x0F */
                     NULL,                           /* 0x10 */

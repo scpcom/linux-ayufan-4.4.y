@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	PCI Bus Services, see include/linux/pci.h for further explanation.
  *
@@ -553,7 +556,7 @@ static int pci_raw_set_power_state(struct pci_dev *dev, pci_power_t state)
  * 0 if device already is in the requested state.
  * 0 if device's power state has been successfully changed.
  */
-#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+#ifdef MY_DEF_HERE
 static int syno_pci_raw_set_power_state(struct pci_dev *dev, pci_power_t state)
 {
 	u16 pmcsr;
@@ -762,7 +765,7 @@ int pci_set_power_state(struct pci_dev *dev, pci_power_t state)
 	if (state == PCI_D3hot && (dev->dev_flags & PCI_DEV_FLAGS_NO_D3))
 		return 0;
 
-#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+#ifdef MY_DEF_HERE
 	error = syno_pci_raw_set_power_state(dev, state);
 #else
 	error = pci_raw_set_power_state(dev, state);
@@ -1008,7 +1011,7 @@ static int do_pci_enable_device(struct pci_dev *dev, int bars)
 	if (err < 0 && err != -EIO)
 		return err;
 
-#ifdef CONFIG_SYNO_QORIQ_CONTINUE_RESET_PCI_DEV_WHEN_RESUME_FAIL
+#ifdef MY_DEF_HERE
 	/*
 	 * In some case, if eanble pci device immediately after set power state
 	 * system will freeze at enable device, add 1 second delay to workaround

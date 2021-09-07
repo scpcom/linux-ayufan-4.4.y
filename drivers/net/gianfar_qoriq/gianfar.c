@@ -231,11 +231,11 @@ static const struct net_device_ops gfar_netdev_ops = {
 DEFINE_PER_CPU(struct gfar_cpu_dev, gfar_cpu_dev);
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 void free_bds(struct gfar_private *priv);
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+#ifdef MY_DEF_HERE
 static int syno_gianfar_drop_caches = 0;
 #endif
 
@@ -1185,7 +1185,7 @@ void gfar_cpu_dev_init(void)
 			goto irq_fail;
 		}
 		cpumask_clear(&cpumask_msg_intrs);
-#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+#ifdef MY_DEF_HERE
 		cpumask_set_cpu(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY, &cpumask_msg_intrs);
 #else
 		cpumask_set_cpu(i, &cpumask_msg_intrs);
@@ -1391,7 +1391,7 @@ static int gfar_probe(struct of_device *ofdev,
 	}
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+#ifdef MY_DEF_HERE
 	syno_gianfar_drop_caches = 1;
 #endif
 
@@ -1678,7 +1678,7 @@ static int gfar_probe(struct of_device *ofdev,
 		 printk(KERN_INFO "%s:TX BD ring size for Q[%d]: %d\n",
 			dev->name, i, priv->tx_queue[i]->tx_ring_size);
 
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 	priv->wbuf_addr = priv->wbuf_vaddr = priv->wbuf_size  = 0;
 	priv->bds_addr = priv->bds_vaddr = 0;
 #endif
@@ -1708,7 +1708,7 @@ static int gfar_remove(struct of_device *ofdev)
 	if (priv->tbi_node)
 		of_node_put(priv->tbi_node);
 
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 	dma_free_coherent(&priv->ofdev->dev,
 		   priv->wbuf_size, (void *)priv->wbuf_vaddr,
 		   priv->wbuf_addr);
@@ -1736,7 +1736,7 @@ static void gfar_enable_filer(struct net_device *dev)
 	temp |= RCTRL_FILREN;
 	temp &= ~RCTRL_FSQEN;
 	temp &= ~RCTRL_PRSDEP_MASK;
-#ifdef CONFIG_SYNO_QORIQ_WOL_SPECIFY_PATTERN
+#ifdef MY_DEF_HERE
 	temp |= RCTRL_PRSDEP_L2L3L4;
 #else
 	temp |= RCTRL_PRSDEP_L2L3;
@@ -1762,10 +1762,10 @@ static int gfar_get_ip(struct net_device *dev)
 	return -ENOENT;
 }
 
-#ifdef CONFIG_SYNO_IGNORE_NETBIOS_BROADCAST 
+#ifdef MY_DEF_HERE 
 extern int gSynoIgnoreNetBIOSBroadcast;
 #endif
-#ifdef CONFIG_SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
+#ifdef MY_DEF_HERE
 extern int g_default_gateway_mac_addr_h;
 extern int g_default_gateway_mac_addr_l;
 #endif
@@ -1811,7 +1811,7 @@ static void gfar_config_filer_table(struct net_device *dev)
 	rqfpr = FPR_FILER_MASK;
 	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
 
-#ifdef CONFIG_SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
+#ifdef MY_DEF_HERE
 	/* Ignore ARP packet from default gateway */
 	if (g_default_gateway_mac_addr_h != 0 && g_default_gateway_mac_addr_l != 0) {
 	rqfcr = (rqfcr_queue << 10) | RQFCR_CLE | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_SAH;
@@ -1843,7 +1843,7 @@ static void gfar_config_filer_table(struct net_device *dev)
 	rqfpr = dest_mac_addr_l;
 	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
 
-#ifdef CONFIG_SYNO_QORIQ_WOL_SPECIFY_PATTERN
+#ifdef MY_DEF_HERE
 	/****************Synology DS Assistant*******************************/
 	/* UDP packet */
 	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_L4P;
@@ -1862,7 +1862,7 @@ static void gfar_config_filer_table(struct net_device *dev)
 	mb();
 	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
 
-#ifdef CONFIG_SYNO_IGNORE_NETBIOS_BROADCAST 
+#ifdef MY_DEF_HERE 
 	if (0 == gSynoIgnoreNetBIOSBroadcast) {
 #endif /* SYNO_IGNORE_NETBIOS_BROADCAST */
 	/****************MS nmbd lookup*******************************/
@@ -1882,7 +1882,7 @@ static void gfar_config_filer_table(struct net_device *dev)
 	rqfpr = 0x00000089;
 	mb();
 	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
-#ifdef CONFIG_SYNO_IGNORE_NETBIOS_BROADCAST 
+#ifdef MY_DEF_HERE 
 	}
 #endif /* SYNO_IGNORE_NETBIOS_BROADCAST */
 #endif
@@ -1899,7 +1899,7 @@ static int gfar_arp_suspend(struct net_device *dev)
 
 	netif_device_detach(dev);
 
-#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+#ifdef MY_DEF_HERE
 	syno_gianfar_drop_caches = 0;
 #endif
 
@@ -2035,11 +2035,11 @@ static int gfar_arp_resume(struct net_device *dev)
 	netif_device_attach(dev);
 	enable_napi(priv);
 
-#ifdef CONFIG_SYNO_QORIQ_WOL_SPECIFY_PATTERN
+#ifdef MY_DEF_HERE
 	gfar_set_multi(dev);
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+#ifdef MY_DEF_HERE
 	syno_gianfar_drop_caches = 1;
 #endif
 
@@ -2308,7 +2308,7 @@ static void gfar_halt_nodisable(struct net_device *dev)
 		tempval |= (DMACTRL_GRS | DMACTRL_GTS);
 		gfar_write(&regs->dmactrl, tempval);
 
-#if defined(CONFIG_SYNO_QORIQ_TX_RESTART_HANG_FIX)
+#if defined(MY_DEF_HERE)
 		spin_event_timeout(((gfar_read(&regs->ievent) &
 						(IEVENT_GRSC | IEVENT_GTSC)) ==
 					(IEVENT_GRSC | IEVENT_GTSC)), 1000000, 0);
@@ -2317,7 +2317,7 @@ static void gfar_halt_nodisable(struct net_device *dev)
 			 (IEVENT_GRSC | IEVENT_GTSC))!=
 			 (IEVENT_GRSC | IEVENT_GTSC))
 			cpu_relax();
-#endif /* CONFIG_SYNO_QORIQ_TX_RESTART_HANG_FIX */
+#endif /* MY_DEF_HERE */
 		gfar_write(&regs->ievent, IEVENT_GRSC | IEVENT_GTSC);
 	}
 }
@@ -2443,7 +2443,7 @@ void free_bds(struct gfar_private *priv)
 			priv->tx_queue[0]->tx_bd_base,
 			gfar_read(&(priv->gfargrp[0].regs)->tbase0));
 #endif
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 	priv->bds_addr = priv->bds_vaddr = 0;
 #endif
 }
@@ -2484,7 +2484,7 @@ void stop_gfar(struct net_device *dev)
 	}
 
 	free_skb_resources(priv);
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 #else
 	free_bds(priv);
 #endif
@@ -2531,7 +2531,7 @@ void gfar_free_recycle_queue(struct gfar_skb_handler *sh, int lock_flag)
 	while (clist) {
 		skb = clist;
 		clist = clist->next;
-#ifdef CONFIG_SYNO_QORIQ_FIX_SKB_RECYCLE
+#ifdef MY_DEF_HERE
 		__kfree_skb_qoriq(skb);
 #else
 		dev_kfree_skb_any(skb);
@@ -2561,7 +2561,7 @@ static void free_skb_tx_queue(struct gfar_priv_tx_q *tx_queue)
 					txbdp->length, DMA_TO_DEVICE);
 		}
 		txbdp++;
-#ifdef CONFIG_SYNO_QORIQ_FIX_SKB_RECYCLE
+#ifdef MY_DEF_HERE
 		__kfree_skb_qoriq(tx_queue->tx_skbuff[i]);
 #else
 		dev_kfree_skb_any(tx_queue->tx_skbuff[i]);
@@ -2590,7 +2590,7 @@ static void free_skb_rx_queue(struct gfar_priv_rx_q *rx_queue)
 				rxbdp->bufPtr, priv->rx_buffer_size,
 					DMA_FROM_DEVICE);
 
-#ifdef CONFIG_SYNO_QORIQ_FIX_SKB_RECYCLE
+#ifdef MY_DEF_HERE
 				__kfree_skb_qoriq(rx_queue->rx_skbuff[i]);
 #else
 				dev_kfree_skb_any(rx_queue->rx_skbuff[i]);
@@ -2644,7 +2644,7 @@ static void free_skb_resources(struct gfar_private *priv)
 
 	if(( priv->device_flags & FSL_GIANFAR_DEV_HAS_ARP_PACKET)) {
 		rx_queue = priv->rx_queue[priv->num_rx_queues-1];
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 #else
 		dma_free_coherent(&priv->ofdev->dev,
 			   priv->wk_buffer_size * rx_queue->rx_ring_size \
@@ -2821,7 +2821,7 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 	struct cpumask cpumask_msg_intrs;
 #endif
 
-#if defined(CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY) && !defined(CONFIG_GFAR_SW_PKT_STEERING)
+#if defined(MY_DEF_HERE) && !defined(CONFIG_GFAR_SW_PKT_STEERING)
 	struct cpumask cpumask_msg_intrs;
 	cpumask_clear(&cpumask_msg_intrs);
 	cpumask_set_cpu(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY, &cpumask_msg_intrs);
@@ -2840,7 +2840,7 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 
 				goto err_irq_fail;
 		}
-#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+#ifdef MY_DEF_HERE
 		else {
 			irq_set_affinity(grp->interruptError, &cpumask_msg_intrs);
 		}
@@ -2853,7 +2853,7 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 					dev->name, grp->interruptTransmit);
 			goto tx_irq_fail;
 		}
-#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+#ifdef MY_DEF_HERE
 		else {
 			irq_set_affinity(grp->interruptTransmit, &cpumask_msg_intrs);
 		}
@@ -2866,7 +2866,7 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 					dev->name, grp->interruptReceive);
 			goto rx_irq_fail;
 		}
-#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+#ifdef MY_DEF_HERE
 		else {
 			irq_set_affinity(grp->interruptReceive, &cpumask_msg_intrs);
 		}
@@ -2879,7 +2879,7 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 					dev->name, grp->interruptTransmit);
 			goto err_irq_fail;
 		}
-#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+#ifdef MY_DEF_HERE
 		else {
 			irq_set_affinity(grp->interruptTransmit, &cpumask_msg_intrs);
 		}
@@ -2909,7 +2909,7 @@ static int register_grp_irqs(struct gfar_priv_grp *grp)
 				goto vtx_irq_fail;
 			}
 			cpumask_clear(&cpumask_msg_intrs);
-#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+#ifdef MY_DEF_HERE
 			cpumask_set_cpu(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY, &cpumask_msg_intrs);
 #else
 			cpumask_set_cpu(i, &cpumask_msg_intrs);
@@ -2963,7 +2963,7 @@ unsigned long alloc_bds(struct gfar_private *priv, dma_addr_t *addr)
 	return vaddr;
 }
 
-#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+#ifdef MY_DEF_HERE
 #include <linux/syno_qoriq.h>
 #include <linux/syscalls.h>
 extern void syno_drop_caches(unsigned int cache_type);
@@ -3005,7 +3005,7 @@ int startup_gfar(struct net_device *dev)
 		priv->total_rx_ring_size += priv->rx_queue[i]->rx_ring_size;
 
 	/* Allocate memory for the buffer descriptors */
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 	if (priv->bds_addr && priv->bds_vaddr) {
 		vaddr = priv->bds_vaddr;
 		addr = priv->bds_addr;
@@ -3057,7 +3057,7 @@ int startup_gfar(struct net_device *dev)
 		baddr   += 2;
 	}
 
-#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+#ifdef MY_DEF_HERE
 	/* before allocate new skbuff drop all fs cache to avoid allocate failed  */
 	if (syno_gianfar_drop_caches) {
 		sys_sync();
@@ -3204,7 +3204,7 @@ int startup_gfar(struct net_device *dev)
 	/* Alloc wake up rx buffer, wake up buffer need 64 bytes aligned */
 		rx_queue = priv->rx_queue[priv->num_rx_queues-1];
 		rx_queue->cur_rx = rx_queue->rx_bd_base;
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 		if (0 == priv->wbuf_size) {
 			priv->wbuf_vaddr = (unsigned long) dma_alloc_coherent(&priv->ofdev->dev, 
 					priv->wk_buffer_size * rx_queue->rx_ring_size \
@@ -3338,7 +3338,7 @@ int startup_gfar(struct net_device *dev)
 
 irq_fail:
 wk_buf_fail:
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 	priv->wbuf_addr = priv->wbuf_vaddr = priv->wbuf_size  = 0;
 #endif
 	dma_free_coherent(&priv->ofdev->dev,
@@ -3384,7 +3384,7 @@ static int gfar_enet_open(struct net_device *dev)
 
 	device_set_wakeup_enable(&priv->ofdev->dev, priv->wol_en);
 
-#ifdef CONFIG_SYNO_NET_INIT_OPERATION
+#ifdef MY_DEF_HERE
 	linkwatch_fire_event(dev);
 #endif
 
@@ -4868,7 +4868,7 @@ out:
 		mb();
 		/* Update to the next pointer */
 		if (bdp->status & RXBD_WRAP)
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 			bdp = priv->rx_queue[priv->num_rx_queues-1]->rx_bd_base;
 #else
 			bdp = priv->wk_bd_base;
@@ -5892,7 +5892,7 @@ END:
 EXPORT_SYMBOL(SynoQorIQWOLSet);
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ_PHY_LED_SET
+#ifdef MY_DEF_HERE
 int SynoQorIQSetPhyLed(SYNO_LED ledStatus)
 {
     struct device_node *pDevNode = NULL;

@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * Copyright 2009 Freescale Semiconductor, Inc.
  *
@@ -47,4 +50,4 @@ extern void *mpc85xx_cache_sram_alloc(unsigned int size,
 				  phys_addr_t *phys, unsigned int align);
 
 #endif /* __AMS_POWERPC_FSL_85XX_CACHE_SRAM_H__ */
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

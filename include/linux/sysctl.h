@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * sysctl.h: General linux system control interface
  *
@@ -281,7 +284,7 @@ enum
 	NET_CORE_AEVENT_ETIME=20,
 	NET_CORE_AEVENT_RSEQTH=21,
 	NET_CORE_WARNINGS=22,
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	RCV_PKT_STEERING = 23,
 #endif
 };

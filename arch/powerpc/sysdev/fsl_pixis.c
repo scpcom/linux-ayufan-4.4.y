@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * Freescale board control FPGA.
  *
@@ -596,4 +599,4 @@ MODULE_LICENSE("GPL");
 
 module_init(fsl_pixis_init);
 module_exit(fsl_pixis_exit);
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

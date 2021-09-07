@@ -328,7 +328,7 @@ struct sk_buff {
 	struct net_device	*dev;
 
 	unsigned long		_skb_dst;
-#if defined(CONFIG_SYNO_213AIR_KERNEL_PANIC_WORK_AROUND)
+#if defined(MY_ABC_HERE)
 	int			_syno_kernel_panic_work_around;
 #endif
 #ifdef CONFIG_XFRM
@@ -391,7 +391,7 @@ struct sk_buff {
 	struct nf_bridge_info	*nf_bridge;
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	void		*skb_owner;
 #endif
 
@@ -469,7 +469,7 @@ static inline struct rtable *skb_rtable(const struct sk_buff *skb)
 extern void kfree_skb(struct sk_buff *skb);
 extern void consume_skb(struct sk_buff *skb);
 extern void	       __kfree_skb(struct sk_buff *skb);
-#ifdef CONFIG_SYNO_QORIQ_FIX_SKB_RECYCLE
+#ifdef MY_DEF_HERE
 extern void  __kfree_skb_qoriq(struct sk_buff *skb);
 #endif
 extern struct sk_buff *__alloc_skb(unsigned int size,

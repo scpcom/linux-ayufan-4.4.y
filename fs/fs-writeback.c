@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * fs/fs-writeback.c
  *
@@ -616,7 +619,7 @@ static void writeback_inodes_wb(struct bdi_writeback *wb,
 	struct super_block *sb = wbc->sb, *pin_sb = NULL;
 	const int is_blkdev_sb = sb_is_blkdev_sb(sb);
 	const unsigned long start = jiffies;	/* livelock avoidance */
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
 	unsigned int find_same_bdi = 0;
 #endif
@@ -630,7 +633,7 @@ static void writeback_inodes_wb(struct bdi_writeback *wb,
 	while (!list_empty(&wb->b_io)) {
 		struct inode *inode = list_entry(wb->b_io.prev,
 						struct inode, i_list);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
 		struct inode *inode_tmp;
 #endif
@@ -687,7 +690,7 @@ static void writeback_inodes_wb(struct bdi_writeback *wb,
 			continue;
 		}
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
 		/*
 		 * Skip background writeback
@@ -726,7 +729,7 @@ static void writeback_inodes_wb(struct bdi_writeback *wb,
 		__iget(inode);
 		pages_skipped = wbc->pages_skipped;
 		writeback_single_inode(inode, wbc);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
 		find_same_bdi = 0;
 #endif
@@ -807,7 +810,7 @@ static long wb_writeback(struct bdi_writeback *wb,
 		.older_than_this	= NULL,
 		.for_kupdate		= args->for_kupdate,
 		.range_cyclic		= args->range_cyclic,
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
 		.nonblocking		= 1,
 #else
@@ -830,7 +833,7 @@ static long wb_writeback(struct bdi_writeback *wb,
 	}
 
 	for (;;) {
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
 		unsigned long background_thresh;
 		unsigned long dirty_thresh;
@@ -849,7 +852,7 @@ static long wb_writeback(struct bdi_writeback *wb,
 		if (args->for_background && !over_bground_thresh())
 			break;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_OPTIMIZE_SD_PERFORMANCE
 		/*
 		 * Check congestion state if dirty pages is less than thresh

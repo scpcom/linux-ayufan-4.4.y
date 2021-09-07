@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007-2008 Freescale Semiconductor, Inc. All rights reserved.
  *
@@ -32,12 +35,12 @@ struct fsl_msi {
 	u32 msi_addr_hi;
 	void __iomem *msi_regs;
 	u32 feature;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	int msi_virqs[NR_MSI_REG];
 #endif
 
 	struct msi_bitmap bitmap;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 
 	struct list_head list;          /* support multiple MSI banks */
 #endif

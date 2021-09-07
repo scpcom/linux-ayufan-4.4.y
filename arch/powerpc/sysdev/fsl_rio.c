@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Freescale MPC85xx/MPC86xx RapidIO support
  *
@@ -198,7 +201,7 @@ static int fsl_rio_doorbell_send(struct rio_mport *mport,
 		out_be16(priv->dbell_win, data);
 		break;
 	case RIO_PHY_SERIAL:
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		/* busy wait, replace with spin_event_timeout() later */
 		while (in_be32(&priv->msg_regs->odsr) & 0x4) {
 			cpu_relax();
@@ -212,7 +215,7 @@ static int fsl_rio_doorbell_send(struct rio_mport *mport,
 #endif
 		out_be32(&priv->msg_regs->odretcr, 0x00000004);
 		out_be32(&priv->msg_regs->oddpr, destid << 16);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		out_be32(&priv->msg_regs->oddatr, data | 0x20000000);
 		out_be32(&priv->msg_regs->odmr, 0x00000000);
 #else

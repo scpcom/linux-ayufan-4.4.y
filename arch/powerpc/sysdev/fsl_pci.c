@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * MPC83xx/85xx/86xx PCI/PCIE support routing.
  *
@@ -44,7 +47,7 @@ static void __init quirk_fsl_pcie_header(struct pci_dev *dev)
 	if (!pci_find_capability(dev, PCI_CAP_ID_EXP))
 		return;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	/*
 	 * We should only fix the PCIE when it's configured as RC.
 	 * When configured as EP, the header type is NORMAL
@@ -53,7 +56,7 @@ static void __init quirk_fsl_pcie_header(struct pci_dev *dev)
 #endif
 	dev->class = PCI_CLASS_BRIDGE_PCI << 8;
 	fsl_pcie_bus_fixup = 1;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	}
 #endif
 	return;

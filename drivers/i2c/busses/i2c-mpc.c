@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * (C) Copyright 2003-2004
  * Humboldt Solutions Ltd, adrian@humboldt.co.uk.
@@ -59,7 +62,7 @@ struct mpc_i2c {
 	wait_queue_head_t queue;
 	struct i2c_adapter adap;
 	int irq;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SUSPEND
 	u32 fdr, dfsrr;
 #endif
@@ -627,7 +630,7 @@ static const struct of_device_id mpc_i2c_of_match[] = {
 
 MODULE_DEVICE_TABLE(of, mpc_i2c_of_match);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SUSPEND
 static int mpc_i2c_suspend(struct of_device *op, pm_message_t state)
 {
@@ -654,7 +657,7 @@ static struct of_platform_driver mpc_i2c_driver = {
 	.match_table	= mpc_i2c_of_match,
 	.probe		= fsl_i2c_probe,
 	.remove		= __devexit_p(fsl_i2c_remove),
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SUSPEND
 	.suspend	= mpc_i2c_suspend,
 	.resume		= mpc_i2c_resume,

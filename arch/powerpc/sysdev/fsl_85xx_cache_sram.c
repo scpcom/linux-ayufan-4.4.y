@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * Copyright 2009-2010 Freescale Semiconductor, Inc.
  *
@@ -143,4 +146,4 @@ void remove_cache_sram(struct of_device *dev)
 
 	dev_info(&dev->dev, "MPC85xx Cache-SRAM driver unloaded\n");
 }
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Freescale MPC85xx, MPC83xx DMA Engine support
  *
@@ -49,7 +52,7 @@ static void dma_init(struct fsl_dma_chan *fsl_chan)
 		 * EOSIE - End of segments interrupt enable (basic mode)
 		 * EOLNIE - End of links interrupt enable
 		 */
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 		DMA_OUT(fsl_chan, &fsl_chan->reg_base->mr, FSL_DMA_MR_BWC
 				| FSL_DMA_MR_EIE | FSL_DMA_MR_EOLNIE
 				| FSL_DMA_MR_EOSIE, 32);
@@ -1205,7 +1208,7 @@ static int __devinit of_fsl_dma_probe(struct of_device *dev,
 						- fdev->reg.start + 1);
 
 	dma_cap_set(DMA_MEMCPY, fdev->common.cap_mask);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifndef	CONFIG_ASYNC_CORE
 	/*
 	 * The DMA_INTERRUPT async_tx is a NULL transfer, which will
@@ -1238,7 +1241,7 @@ static int __devinit of_fsl_dma_probe(struct of_device *dev,
 		}
 	}
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	dma_set_mask(&(dev->dev), DMA_BIT_MASK(36));
 #endif
 

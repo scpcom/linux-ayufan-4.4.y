@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * Copyright (C) 2008-2010 Freescale Semiconductor, Inc.
  * 	Dave Liu <daveliu@freescale.com>
@@ -247,4 +250,4 @@ module_exit(mpc85xx_cpufreq_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Dave Liu <daveliu@freescale.com>");
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

@@ -621,7 +621,7 @@ void __init setup_arch(char **cmdline_p)
 
 }
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 void cpu_die(void)
 {
 	if (ppc_md.cpu_die)

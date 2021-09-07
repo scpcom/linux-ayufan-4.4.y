@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -141,7 +144,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RD_88F6282A_ID		   		(BOARD_ID_BASE+0xC)
 #define DB_88F6701A_BP_ID			(BOARD_ID_BASE+0xD)
 #define DB_88F6702A_BP_ID			(BOARD_ID_BASE+0xE)
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 #define SYNO_DS409_ID				(BOARD_ID_BASE+0x13)
 #define SYNO_DS409slim_ID			(BOARD_ID_BASE+0x14)
 #define SYNO_DS109_ID				(BOARD_ID_BASE+0x15)

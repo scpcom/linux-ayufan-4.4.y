@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  This file contains work-arounds for many known PCI hardware
  *  bugs.  Devices present only on certain architectures (host
@@ -516,7 +519,7 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_ESB_1,		qui
 static u32 gpiobase = 0;
 static u32 *writable_pin = NULL;
 
-#if defined(CONFIG_SYNO_CEDARVIEW)
+#if defined(MY_DEF_HERE)
 static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 29, 30, 31, 32, 33, 34, 35, 36, 37, 45, 46, 47, 49, 55, 57, 0};
 #else
 static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 46, 47, 49, 55, 57, 0};

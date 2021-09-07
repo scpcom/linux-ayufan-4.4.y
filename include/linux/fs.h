@@ -1028,7 +1028,7 @@ struct file_ra_state {
 	unsigned int async_size;	/* do asynchronous readahead when
 					   there are only # of pages ahead */
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	unsigned int delay_readahead;	/* delay readahead*/
 #endif
 	unsigned int ra_pages;		/* Maximum readahead window */

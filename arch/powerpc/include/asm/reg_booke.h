@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Contains register definitions common to the Book E PowerPC
  * specification.  Notice that while the IBM-40x series of CPUs
@@ -30,7 +33,7 @@
 #define MSR_USER	(MSR_KERNEL|MSR_PR|MSR_EE)
 #else
 
-#if defined(CONFIG_DEBUG_CW) && defined(CONFIG_SYNO_QORIQ)
+#if defined(CONFIG_DEBUG_CW) && defined(MY_DEF_HERE)
 #define MSR_KERNEL      (MSR_ME|MSR_RI|MSR_CE|MSR_DE)
 #else
 #define MSR_KERNEL	(MSR_ME|MSR_RI|MSR_CE)

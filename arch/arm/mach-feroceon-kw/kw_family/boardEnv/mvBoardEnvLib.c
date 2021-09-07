@@ -125,7 +125,7 @@ MV_VOID mvBoardEnvInit(MV_VOID)
 
 	}
 
-#ifndef CONFIG_SYNO_MV_COMMON
+#ifndef MY_ABC_HERE
 	/* Set NAND interface access parameters */
 	MV_REG_WRITE(NAND_READ_PARAMS_REG, BOARD_INFO(boardId)->nandFlashReadParams);
 	MV_REG_WRITE(NAND_WRITE_PARAMS_REG, BOARD_INFO(boardId)->nandFlashWriteParams);
@@ -1508,7 +1508,7 @@ MV_32 mvBoardTdmSpiModeGet(MV_VOID)
 		case DB_88F6702A_BP_ID:
 		case DB_88F6282A_BP_ID:
 		case RD_88F6282A_ID:
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 		case SYNO_DS409_ID:
 		case SYNO_DS109_ID:
 		case SYNO_DS409slim_ID:
@@ -2179,7 +2179,7 @@ MV_U32 mvBoardIdGet(MV_VOID)
 		gBoardId = tmpBoardId;
 	}
 
-#ifndef CONFIG_SYNO_MV88F6281
+#ifndef MY_ABC_HERE
 	switch (gBoardId) {
 	case 0x13: // 4,5 bay
 	case 0x14: // slim
@@ -2359,7 +2359,7 @@ MV_32 mvBoardSlicGpioPinGet(MV_U32 slicNum)
 	case DB_88F6282A_BP_ID:
 	case RD_88F6281A_ID:
 	case RD_88F6282A_ID:
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	case SYNO_DS409_ID:
 	case SYNO_DS109_ID:
 	case SYNO_DS409slim_ID:

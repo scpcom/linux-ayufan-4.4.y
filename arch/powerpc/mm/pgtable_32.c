@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This file contains the routines setting up the linux page tables.
  *  -- paulus
@@ -144,7 +147,7 @@ ioremap_flags(phys_addr_t addr, unsigned long size, unsigned long flags)
 	/* we don't want to let _PAGE_USER and _PAGE_EXEC leak out */
 	flags &= ~(_PAGE_USER | _PAGE_EXEC);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #if defined(CONFIG_FSL_BOOKE) && defined(CONFIG_PTE_64BIT)
 	/* supervisor read permission has just been cleared, add back */
 	flags |= _PAGE_BAP_SR;

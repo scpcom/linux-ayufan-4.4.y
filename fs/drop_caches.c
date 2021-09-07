@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Implement the manual drop-all-pagecache function
  */
@@ -75,7 +78,7 @@ int drop_caches_sysctl_handler(ctl_table *table, int write,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE)
+#if defined(MY_DEF_HERE)
 
 #include <linux/syno_qoriq.h>
 

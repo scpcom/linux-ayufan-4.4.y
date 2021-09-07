@@ -142,7 +142,7 @@ EXPORT_SYMBOL(gSynoInstallFlag);
 #endif
 
 #ifdef MY_ABC_HERE
-#if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(CONFIG_SYNO_MV88F6281_USBSTATION)
 int gSynoHasDynModule = 1;
 #else
 int gSynoHasDynModule = 0;
@@ -178,7 +178,7 @@ unsigned char grgbLanMac[4][16];
 EXPORT_SYMBOL(grgbLanMac);
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
+#ifdef MY_DEF_HERE
 unsigned int g_default_gateway_mac_addr_h = 0;
 unsigned int g_default_gateway_mac_addr_l = 0;
 EXPORT_SYMBOL(g_default_gateway_mac_addr_h);
@@ -247,12 +247,12 @@ int (*funcSYNOWIFINotification)(void) = NULL;
 EXPORT_SYMBOL(funcSYNOWIFINotification);
 #endif
 
-#ifdef CONFIG_SYNO_IGNORE_NETBIOS_BROADCAST 
+#ifdef MY_DEF_HERE 
 int gSynoIgnoreNetBIOSBroadcast = 0;
 EXPORT_SYMBOL(gSynoIgnoreNetBIOSBroadcast);
 #endif
 
-#ifdef CONFIG_SYNO_DISPLAY_CPUINFO
+#ifdef MY_ABC_HERE
 unsigned int gSynoCPUInfoCore = 0;
 EXPORT_SYMBOL(gSynoCPUInfoCore);
 char gSynoCPUInfoClock[16];
@@ -1382,7 +1382,7 @@ static struct ctl_table kern_table[] = {
 		.strategy		= &sysctl_string,
 	},
 #endif
-#ifdef CONFIG_SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
+#ifdef MY_DEF_HERE
 	{
 		.ctl_name       = CTL_UNNUMBERED,
 		.procname       = "syno_default_gateway_mac_addr_h",
@@ -1486,7 +1486,7 @@ static struct ctl_table kern_table[] = {
             .proc_handler   = &proc_dointvec,
         },
 #endif
-#ifdef CONFIG_SYNO_IGNORE_NETBIOS_BROADCAST 
+#ifdef MY_DEF_HERE 
         {
             .ctl_name       = CTL_UNNUMBERED,
             .procname       = "syno_ignore_netbios_broadcast",
@@ -1496,7 +1496,7 @@ static struct ctl_table kern_table[] = {
             .proc_handler   = &proc_dointvec,
         },
 #endif
-#ifdef CONFIG_SYNO_DISPLAY_CPUINFO
+#ifdef MY_ABC_HERE
         {
             .procname       = "syno_CPU_info_core",
             .data           = &gSynoCPUInfoCore,

@@ -17,7 +17,7 @@
 #include <linux/kthread.h>
 #include <linux/stop_machine.h>
 #include <linux/mutex.h>
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #include <linux/suspend.h>
 #endif
 
@@ -459,7 +459,7 @@ static int alloc_frozen_cpus(void)
 }
 core_initcall(alloc_frozen_cpus);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 /*
  * Prevent regular CPU hotplug from racing with the freezer, by disabling CPU
  * hotplug when tasks are about to be frozen. Also, don't allow the freezer
@@ -529,7 +529,7 @@ int cpu_hotplug_pm_sync_init(void)
 	return 0;
 }
 core_initcall(cpu_hotplug_pm_sync_init);
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */
 #endif /* CONFIG_PM_SLEEP_SMP */
 
 /**

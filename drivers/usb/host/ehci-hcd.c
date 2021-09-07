@@ -233,7 +233,7 @@ static void tdi_reset (struct ehci_hcd *ehci)
 	tmp = ehci_readl(ehci, reg_ptr);
 	tmp |= USBMODE_CM_HC;
 
-#if defined(CONFIG_MV_INCLUDE_USB) || defined(CONFIG_SYNO_MV88F6281)
+#if defined(CONFIG_MV_INCLUDE_USB) || defined(MY_ABC_HERE)
 	tmp |= (1 << 4); //disable USB streamin
 #endif
 

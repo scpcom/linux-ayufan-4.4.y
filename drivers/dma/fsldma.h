@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Freescale Semiconductor, Inc. All rights reserved.
  *
@@ -36,7 +39,7 @@
 #define FSL_DMA_MR_DAHE		0x00002000
 #define FSL_DMA_MR_SAHE		0x00001000
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 /*
  * Bandwidth/pause control determines how many bytes a given
  * channel is allowed to transfer before the DMA engine pauses

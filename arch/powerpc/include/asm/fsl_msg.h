@@ -1,4 +1,7 @@
-#ifdef CONFIG_SYNO_QORIQ
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#ifdef MY_DEF_HERE
 /*
  * Copyright 2008-2009 Freescale Semiconductor, Inc.
  *
@@ -49,4 +52,4 @@ extern void fsl_read_msg(struct fsl_msg_unit *msg, u32 *message);
 #define FSL_NUM_MPIC_MSGS 4
 
 #endif /* _ASM_FSL_MSG_H */
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */

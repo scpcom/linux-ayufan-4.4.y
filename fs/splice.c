@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * "splice": joining two ropes together by interweaving their strands.
  *
@@ -30,7 +33,7 @@
 #include <linux/syscalls.h>
 #include <linux/uio.h>
 #include <linux/security.h>
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #include <linux/socket.h>
 #include <linux/net.h>
 #ifdef CONFIG_SEND_PAGES
@@ -50,7 +53,7 @@ extern struct write_sock_to_file_stat write_from_sock;
 #endif /* COLLECT_WRITE_SOCK_TO_FILE_STAT */
 #endif /*CONFIG_ARCH_FEROCEON*/
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SEND_PAGES
 extern int is_sock_file(struct file *f);
 #endif /*CONFIG_SEND_PAGES*/
@@ -390,7 +393,7 @@ __generic_file_splice_read(struct file *in, loff_t *ppos,
 		this_len = min_t(unsigned long, len, PAGE_CACHE_SIZE - loff);
 		page = pages[page_nr];
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_DELAY_ASYNC_READAHEAD
 		if (!in->f_ra.delay_readahead && PageReadahead(page))
 #else
@@ -675,7 +678,7 @@ err:
 }
 EXPORT_SYMBOL(default_file_splice_read);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SEND_PAGES
 static int pipe_to_sendpages(struct pipe_inode_info *pipe,
 			    struct pipe_buffer *buf, struct splice_desc *sd)
@@ -747,7 +750,7 @@ static int pipe_to_sendpages(struct pipe_inode_info *pipe,
 	return ret;
 }
 #endif/*CONFIG_SEND_PAGES*/
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */
 
 /*
  * Send 'sd->len' bytes to socket from 'sd->file' at position 'sd->pos'
@@ -760,7 +763,7 @@ static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 	loff_t pos = sd->pos;
 	int ret, more;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SEND_PAGES
 	struct socket *sock = file->private_data;
 
@@ -899,7 +902,7 @@ int splice_from_pipe_feed(struct pipe_inode_info *pipe, struct splice_desc *sd,
 			sd->len = sd->total_len;
 
 		ret = actor(pipe, buf, sd);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SEND_PAGES
 		if (!sd->total_len)
 			return 0;
@@ -1297,7 +1300,7 @@ ssize_t splice_direct_to_actor(struct file *in, struct splice_desc *sd,
 	umode_t i_mode;
 	size_t len;
 	int i, flags;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_DELAY_ASYNC_READAHEAD
 	int nr_pages, index;
 	struct page *pages[PIPE_BUFFERS];
@@ -1351,7 +1354,7 @@ ssize_t splice_direct_to_actor(struct file *in, struct splice_desc *sd,
 		size_t read_len;
 		loff_t pos = sd->pos, prev_pos = pos;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_DELAY_ASYNC_READAHEAD
 		/*disable async readahead in file splice read*/
 		if (in->f_op->splice_read == generic_file_splice_read)
@@ -1373,7 +1376,7 @@ ssize_t splice_direct_to_actor(struct file *in, struct splice_desc *sd,
 		 */
 		ret = actor(pipe, sd);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_DELAY_ASYNC_READAHEAD
 		/*do async readahead*/
 		if (in->f_ra.delay_readahead) {
@@ -1800,7 +1803,7 @@ static long vmsplice_to_user(struct file *file, const struct iovec __user *iov,
 	return ret;
 }
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 static int socket_to_file(struct socket *sock, struct file *file,
 		loff_t pos, size_t count)
 {
@@ -1908,7 +1911,7 @@ static int socket_to_file(struct socket *sock, struct file *file,
 
 	return err;
 }
-#endif /* CONFIG_SYNO_QORIQ */
+#endif /* MY_DEF_HERE */
 
 /*
  * vmsplice splices a user address range into a pipe. It can be thought of
@@ -1996,7 +1999,7 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 	struct file *in, *out;
 #endif
 	int fput_in, fput_out;
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	struct socket *sock = NULL;
 #endif
 
@@ -2021,7 +2024,7 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		return error;
 	}
 #else
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 	sock = sockfd_lookup(fd_in, &error);
 	if (sock) {
 		loff_t pos;

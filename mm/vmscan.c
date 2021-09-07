@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/mm/vmscan.c
  *
@@ -2156,7 +2159,7 @@ static int kswapd(void *p)
 
 	lockdep_set_current_reclaim_state(GFP_KERNEL);
 
-#ifdef CONFIG_SYNO_QORIQ_ENABLE_PREFIX_CPU_AFFINITY
+#ifdef MY_DEF_HERE
 	if (!cpumask_empty(cpumask)) {
 		set_cpus_allowed_ptr(tsk, cpumask_of(CONFIG_SYNO_QORIQ_DEFAULT_CPU_AFFINITY));
 	}

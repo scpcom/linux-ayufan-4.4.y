@@ -276,7 +276,7 @@ static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 	MV_SFLASH_INFO *sflash = map->fldrv_priv;
 /*	MV_SFLASH_INFO *sflash = mtd->priv;*/
 	MV_U32 fsec, lsec;
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	MV_U32 count, sleep_interval;
 #endif
 	int i;
@@ -314,10 +314,10 @@ static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 	DB(printk("\nINFO: %s - from sector %u to %u",__FUNCTION__, fsec, 
 		  lsec-1));
 
-#ifndef CONFIG_SYNO_MV88F6281
+#ifndef MY_ABC_HERE
 	sflash_disable_irqs(flags, sflash_in_irq);
 #endif
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 	count = lsec - fsec;
 	do_div(count, 4);
 	sleep_interval = fsec + count;
@@ -325,7 +325,7 @@ static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 	for (i=fsec; i<lsec; i++)
 	{
 
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 		if (i == sleep_interval) {
 			sleep_interval += count;
 			msleep(1000);
@@ -338,11 +338,11 @@ static int sflash_erase(struct mtd_info *mtd, struct erase_info *instr)
 			printk(KERN_NOTICE "\nError: %s - mvSFlashSectorErase on sector %d",__FUNCTION__, i);
 			return -1;
 		}
-#ifdef CONFIG_SYNO_MV88F6281
+#ifdef MY_ABC_HERE
 		sflash_enable_irqs(flags, sflash_in_irq);
 #endif
 	}
-#ifndef CONFIG_SYNO_MV88F6281
+#ifndef MY_ABC_HERE
 	sflash_enable_irqs(flags, sflash_in_irq);
 #endif
 	
@@ -370,7 +370,7 @@ static int sflash_lock (struct mtd_info *mtd, loff_t ofs, sflash_size_t len)
 	}
 	sflash_enable_irqs(flags, sflash_in_irq);
 
-#ifndef CONFIG_SYNO_MV88F6281
+#ifndef MY_ABC_HERE
 	printk("\nNotice: Serial SPI flash (%s) lock per sector is not supported!\n        Locking the whole device.", mtd->name);
 #endif
 		
@@ -395,7 +395,7 @@ static int sflash_unlock (struct mtd_info *mtd, loff_t ofs, sflash_size_t len)
 	}
 	sflash_enable_irqs(flags, sflash_in_irq);
 
-#ifndef CONFIG_SYNO_MV88F6281
+#ifndef MY_ABC_HERE
 	printk("\nNotice: Serial SPI flash (%s) unlock per sector is not supported!\n        Unlocking the whole device.", mtd->name);
 #endif
 	return 0;

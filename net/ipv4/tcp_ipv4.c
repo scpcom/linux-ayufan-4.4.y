@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -83,7 +86,7 @@
 int sysctl_tcp_tw_reuse __read_mostly;
 int sysctl_tcp_low_latency __read_mostly;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #define TCP_HWACCEL_THRESHOLD	(1024*1024) /*1M*/
 extern void gfar_setup_hwaccel_tcp4_receive(struct sock *sk, struct sk_buff *skb);
 #endif
@@ -575,7 +578,7 @@ int tcp_v4_gso_send_check(struct sk_buff *skb)
  *	Exception: precedence violation. We do not implement it in any case.
  */
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 void tcp_v4_send_reset(struct sock *sk, struct sk_buff *skb)
 #else
 static void tcp_v4_send_reset(struct sock *sk, struct sk_buff *skb)
@@ -1526,7 +1529,7 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 	if (sk->sk_state == TCP_ESTABLISHED) { /* Fast path */
 		TCP_CHECK_TIMER(sk);
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
 		if (sk->tcp_hw_channel == NULL &&
 			(TCP_SKB_CB(skb)->seq - sk->init_seq) > TCP_HWACCEL_THRESHOLD &&
@@ -1636,7 +1639,7 @@ skb->tcp_header_len = th->doff*4;
 	if (!sk)
 		goto no_tcp_socket;
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_GFAR_HW_TCP_RECEIVE_OFFLOAD
 	if (th->syn)
 		sk->init_seq = ntohl(th->seq);

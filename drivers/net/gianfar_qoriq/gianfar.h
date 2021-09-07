@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/net/gianfar.h
  *
@@ -1363,7 +1366,7 @@ struct gfar_private {
 	unsigned int skbuff_truesize;
 	struct gfar_skb_handler skb_handler;
 #endif
-#ifdef CONFIG_SYNO_QORIQ_FIX_DEEP_WAKE_FAIL
+#ifdef MY_DEF_HERE
 	unsigned long wbuf_vaddr;
 	unsigned long wbuf_addr;
 	unsigned long wbuf_size;

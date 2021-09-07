@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * spi_bitbang.c - polling/bitbanging SPI master controller driver utilities
  *
@@ -293,7 +296,7 @@ static void bitbang_work(struct work_struct *work)
 		list_for_each_entry (t, &m->transfers, transfer_list) {
 
 			/* override speed or wordsize? */
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 			if (t->speed_hz || t->bits_per_word ||
 					spi->bits_per_word)
 #else

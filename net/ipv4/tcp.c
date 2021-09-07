@@ -944,7 +944,7 @@ ssize_t tcp_sendpages(struct socket *sock, struct page **page, int offset,
 EXPORT_SYMBOL(tcp_sendpages);
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 ssize_t tcp_sendpages(struct socket *sock, struct page **pages, int offset,
 		     size_t size, int flags)
 {
@@ -1776,7 +1776,7 @@ do_prequeue:
 			} else
 #endif
 			{
-#if defined(MY_ABC_HERE) && !defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
 				if(msg->msg_flags & MSG_KERNSPACE)
 					err = skb_copy_datagram_iovec1(skb, offset, msg->msg_iov, used);
 				else
@@ -3511,7 +3511,7 @@ EXPORT_SYMBOL(tcp_recvmsg);
 EXPORT_SYMBOL(tcp_sendmsg);
 EXPORT_SYMBOL(tcp_splice_read);
 EXPORT_SYMBOL(tcp_sendpage);
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(tcp_sendpages);
 #endif
 EXPORT_SYMBOL(tcp_setsockopt);

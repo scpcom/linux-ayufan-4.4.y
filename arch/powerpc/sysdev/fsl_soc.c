@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * FSL SoC setup code
  *
@@ -438,7 +441,7 @@ err:
 arch_initcall(fsl_sec2_of_init);
 #endif
 
-#ifdef CONFIG_SYNO_QORIQ
+#ifdef MY_DEF_HERE
 #define UART2_TX        0x0
 #define UART2_LCR       0x3
 #define UART2_BASE      0x4600
@@ -450,7 +453,7 @@ arch_initcall(fsl_sec2_of_init);
 #endif
 void fsl_rstcr_restart(char *cmd)
 {
-#if defined(CONFIG_SYNO_QORIQ)
+#if defined(MY_DEF_HERE)
 	u32 __iomem *pUP = ioremap(get_immrbase() + UART2_BASE, 0x10);
 
 	if (pUP) {
