@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 
   Intel PRO/1000 Linux driver
@@ -76,7 +79,7 @@ char *e1000e_get_hw_dev_name(struct e1000_hw *hw)
 }
 #endif
 
-#ifdef SYNO_E1000E_LED_SWITCH
+#ifdef MY_ABC_HERE
 void e1000e_syno_led_switch(int iEnable)
 {
 	struct net_device *dev = NULL;
@@ -103,7 +106,7 @@ void e1000e_syno_led_switch(int iEnable)
 	}
 }
 EXPORT_SYMBOL(e1000e_syno_led_switch);
-#endif /*SYNO_E1000E_LED_SWITCH*/
+#endif /*MY_ABC_HERE*/
 
 /**
  * e1000_desc_unused - calculate if we have unused descriptors
@@ -3451,7 +3454,7 @@ void e1000e_update_stats(struct e1000_adapter *adapter)
 					      adapter->stats.roc;
 	adapter->net_stats.rx_crc_errors = adapter->stats.crcerrs;
 	adapter->net_stats.rx_frame_errors = adapter->stats.algnerrc;
-#ifdef SYNO_E1000E_RX_MISSED_FIX
+#ifdef MY_ABC_HERE
 	/*
 	 * The "/1000" operation is used to beautify the RX missed
 	 * errors in the "ifconfig" command.
@@ -5090,7 +5093,7 @@ static int __devinit e1000_probe(struct pci_dev *pdev,
 	netdev->netdev_ops		= &e1000e_netdev_ops;
 	e1000e_set_ethtool_ops(netdev);
 	netdev->watchdog_timeo		= 5 * HZ;
-#ifdef SYNO_E1000E_RX_MISSED_FIX
+#ifdef MY_ABC_HERE
 	netif_napi_add(netdev, &adapter->napi, e1000_clean, 256);
 #else
 	netif_napi_add(netdev, &adapter->napi, e1000_clean, 64);
@@ -5254,7 +5257,7 @@ static int __devinit e1000_probe(struct pci_dev *pdev,
 	adapter->wol = adapter->eeprom_wol;
 	device_set_wakeup_enable(&adapter->pdev->dev, adapter->wol);
 
-#if defined(SYNO_E1000E_WOL) && !defined(CONFIG_PM)
+#if defined(MY_ABC_HERE) && !defined(CONFIG_PM)
 	device_init_wakeup(&adapter->pdev->dev, adapter->wol);
 #endif
 

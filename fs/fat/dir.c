@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fat/dir.c
  *
@@ -1337,7 +1340,7 @@ found:
 			fat_fs_error(sb, "Odd directory size");
 			dir->i_size = (dir->i_size + sbi->cluster_size - 1)
 				& ~((loff_t)sbi->cluster_size - 1);
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 			err = -ECORRUPT;
 #endif
 		}

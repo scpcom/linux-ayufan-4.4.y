@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _RAID5_H
 #define _RAID5_H
 
@@ -311,7 +314,7 @@ struct r6_state {
 #define	STRIPE_COMPUTE_RUN	15
 #define	STRIPE_OPS_REQ_PENDING	16
 
-#ifdef SYNO_RAID_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 #define STRIPE_NORETRY		17
 #endif
 

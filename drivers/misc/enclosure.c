@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Enclosure Services
  *
@@ -27,7 +30,7 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/mutex.h>
-#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(SYNO_FIXED_DISK_NAME)
+#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(MY_ABC_HERE)
 #include <scsi/scsi_device.h>
 #endif
 
@@ -320,7 +323,7 @@ int enclosure_add_device(struct enclosure_device *edev, int component,
 			 struct device *dev)
 {
 	struct enclosure_component *cdev;
-#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(SYNO_FIXED_DISK_NAME)
+#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(MY_ABC_HERE)
 	struct scsi_device *scsi_dev;
 	struct scsi_device *scsi_enc;
 #endif
@@ -345,7 +348,7 @@ int enclosure_add_device(struct enclosure_device *edev, int component,
 		edev->cb->set_locate(edev, cdev, 1);
 	}
 #endif
-#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(SYNO_FIXED_DISK_NAME)
+#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(MY_ABC_HERE)
 	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
 		scsi_dev = to_scsi_device(dev);
 		scsi_enc = to_scsi_device(edev->edev.parent);
@@ -369,7 +372,7 @@ EXPORT_SYMBOL_GPL(enclosure_add_device);
 int enclosure_remove_device(struct enclosure_device *edev, struct device *dev)
 {
 	struct enclosure_component *cdev;
-#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(SYNO_FIXED_DISK_NAME)
+#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(MY_ABC_HERE)
 	struct scsi_device *scsi_dev;
 	struct scsi_device *scsi_enc;
 #endif
@@ -388,7 +391,7 @@ int enclosure_remove_device(struct enclosure_device *edev, struct device *dev)
 				edev->cb->set_locate(edev, cdev, 0);
 			}
 #endif
-#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(SYNO_FIXED_DISK_NAME)
+#if defined(SYNO_SAS_SHOW_DISK_PHY_INFO) && defined(MY_ABC_HERE)
 			if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
 				scsi_dev = to_scsi_device(dev);
 				scsi_enc = to_scsi_device(edev->edev.parent);

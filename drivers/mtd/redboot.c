@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Parse RedBoot-style Flash Image System (FIS) tables and
  * produce a Linux partition array to match.
@@ -10,7 +13,7 @@
 
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
-#ifdef SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 #include <linux/sched.h>
 #endif
 
@@ -191,7 +194,7 @@ static int parse_redboot_partitions(struct mtd_info *master,
 		/* I'm sure the JFFS2 code has done me permanent damage.
 		 * I now think the following is _normal_
 		 */
-#ifdef SYNO_MTD_PARTS_KEEP_ORDER
+#ifdef MY_ABC_HERE
 		if (i == 0) {
 			fl = new_fl;
 			tmp_fl = fl;
@@ -200,13 +203,13 @@ static int parse_redboot_partitions(struct mtd_info *master,
 			tmp_fl = new_fl;
 		}
 		new_fl->next = NULL;
-#else /* !SYNO_MTD_PARTS_KEEP_ORDER */
+#else /* !MY_ABC_HERE */
 		prev = &fl;
 		while(*prev && (*prev)->img->flash_base < new_fl->img->flash_base)
 			prev = &(*prev)->next;
 		new_fl->next = *prev;
 		*prev = new_fl;
-#endif /* SYNO_MTD_PARTS_KEEP_ORDER */
+#endif /* MY_ABC_HERE */
 
 		nrparts++;
 	}
@@ -303,7 +306,7 @@ static void __exit redboot_parser_exit(void)
 	deregister_mtd_parser(&redboot_parser);
 }
 
-#ifdef SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 static void mtd_erase_callback_in_redboot (struct erase_info *instr)
 {
 	wake_up((wait_queue_head_t *)instr->priv);
@@ -409,7 +412,7 @@ out:
 	kfree(buf);
 	return ret;
 }
-#endif /* SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */
 
 module_init(redboot_parser_init);
 module_exit(redboot_parser_exit);

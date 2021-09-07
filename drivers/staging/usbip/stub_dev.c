@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -25,7 +28,7 @@
 static int stub_probe(struct usb_interface *interface,
 				const struct usb_device_id *id);
 static void stub_disconnect(struct usb_interface *interface);
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 static void stub_syno_device_close_socket(struct usbip_device *ud);
 static void stub_syno_device_cleanup_urb(struct usbip_device *ud);
 #endif
@@ -118,7 +121,7 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 
 		spin_lock(&sdev->ud.lock);
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 		if (sdev->ud.status != SDEV_ST_AVAILABLE && SDEV_ST_USED != sdev->ud.status)
 #else
 		if (sdev->ud.status != SDEV_ST_AVAILABLE)
@@ -142,7 +145,7 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 #endif
 
 		sdev->ud.tcp_socket = socket;
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 		sdev->ud.sockfd = sockfd;
 		if(0 < sdev->ud.ideal_time) {
 			sdev->ud.get_socket_time = current_kernel_time();
@@ -155,7 +158,7 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 
 		spin_unlock(&sdev->ud.lock);
 
-#ifndef SYNO_USB_USBIP
+#ifndef MY_ABC_HERE
 		usbip_start_threads(&sdev->ud);
 #else
 		wake_up(&sdev->rx_waitq);
@@ -166,7 +169,7 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 		spin_unlock(&sdev->ud.lock);
 
 	} else {
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 		stub_syno_device_close_socket(&sdev->ud);
 		stub_syno_device_cleanup_urb(&sdev->ud);
 #else
@@ -187,7 +190,7 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 }
 static DEVICE_ATTR(usbip_sockfd, S_IWUSR, NULL, store_sockfd);
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 /*
  * usbip_ideal_time gets the ideal time limitation of this socket connection that
  * is used to force disconnect by kernel threads.
@@ -230,7 +233,7 @@ static int stub_add_files(struct device *dev)
 	if (err)
 		goto err_debug;
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	err = device_create_file(dev, &dev_attr_usbip_ideal_time);
 	if (err)
 		goto err_ideal_time;
@@ -241,7 +244,7 @@ static int stub_add_files(struct device *dev)
 err_debug:
 	device_remove_file(dev, &dev_attr_usbip_sockfd);
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 err_ideal_time:
 	device_remove_file(dev, &dev_attr_usbip_ideal_time);
 #endif
@@ -258,7 +261,7 @@ static void stub_remove_files(struct device *dev)
 	device_remove_file(dev, &dev_attr_usbip_status);
 	device_remove_file(dev, &dev_attr_usbip_sockfd);
 	device_remove_file(dev, &dev_attr_usbip_debug);
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	device_remove_file(dev, &dev_attr_usbip_ideal_time);
 #endif
 }
@@ -279,7 +282,7 @@ static void stub_shutdown_connection(struct usbip_device *ud)
 	 * sk_wait_data returned though stub_rx thread was already finished by
 	 * step 1?
 	 */
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	stub_syno_device_close_socket(ud);
 #else
 	if (ud->tcp_socket) {
@@ -301,7 +304,7 @@ static void stub_shutdown_connection(struct usbip_device *ud)
 		ud->tcp_socket = NULL;
 	}
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	stub_syno_device_cleanup_urb(ud);
 	if (del_match_busid((char *)dev_name(sdev->interface->dev.parent)) < 0) {
 		usbip_udbg("del busid(%s) failed", dev_name(sdev->interface->dev.parent));
@@ -333,7 +336,7 @@ static void stub_shutdown_connection(struct usbip_device *ud)
 #endif
 }
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 static void stub_syno_device_close_socket(struct usbip_device *ud)
 {
 	usbip_udbg("device close socket connection");
@@ -463,7 +466,7 @@ static struct stub_device *stub_device_alloc(struct usb_interface *interface)
 	/* sdev->ud.lock = SPIN_LOCK_UNLOCKED; */
 	spin_lock_init(&sdev->ud.lock);
 	sdev->ud.tcp_socket = NULL;
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	sdev->ud.sockfd = -1;
 	sdev->ud.ideal_time = 0;
 	init_timer(&sdev->ud.socket_timer);
@@ -478,20 +481,20 @@ static struct stub_device *stub_device_alloc(struct usb_interface *interface)
 	spin_lock_init(&sdev->priv_lock);
 
 	init_waitqueue_head(&sdev->tx_waitq);
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	init_waitqueue_head(&sdev->rx_waitq);
 #endif
 
 	sdev->ud.eh_ops.shutdown = stub_shutdown_connection;
 	sdev->ud.eh_ops.reset    = stub_device_reset;
 	sdev->ud.eh_ops.unusable = stub_device_unusable;
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	sdev->ud.eh_ops.close_connection = stub_syno_device_close_socket;
 	sdev->ud.eh_ops.cleanup_urb = stub_syno_device_cleanup_urb;
 #endif
 
 	usbip_start_eh(&sdev->ud);
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	usbip_start_threads(&sdev->ud);
 #endif
 
@@ -575,7 +578,7 @@ static int stub_probe(struct usb_interface *interface,
 	if (err) {
 		dev_err(&interface->dev, "create sysfs files for %s\n",
 			udev_busid);
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 		usb_set_intfdata(interface, NULL);        
 		stub_device_free(sdev);
 #endif

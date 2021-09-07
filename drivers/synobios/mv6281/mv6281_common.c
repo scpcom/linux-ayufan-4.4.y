@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2000-2009 Synology Inc. All rights reserved.
 
 #include <linux/syno.h>
@@ -12,7 +15,7 @@
 #include "../i2c/i2c-mv.h"
 #include "../rtc/rtc.h"
 
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 extern char gszSerialNum[];
 #endif
 
@@ -64,7 +67,7 @@ int GetBrand(void)
 	int Brand = -1;
 
 	//YMXX[Z]SSSSS
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 	if ( gszSerialNum[4] == 'M' ) {
 		Brand = BRAND_LOGITEC;
 	} else if ( gszSerialNum[4] == 'U' ) {

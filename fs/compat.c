@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/compat.c
  *
@@ -57,7 +60,7 @@
 #include <asm/ioctls.h>
 #include "internal.h"
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_sec;
 #endif
@@ -1329,7 +1332,7 @@ compat_sys_vmsplice(int fd, const struct compat_iovec __user *iov32,
 asmlinkage long
 compat_sys_open(const char __user *filename, int flags, int mode)
 {
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
         if(syno_hibernation_log_sec > 0) {
                 syno_do_hibernation_log(filename);
         }
@@ -2308,7 +2311,7 @@ asmlinkage long compat_sys_timerfd_gettime(int ufd,
 
 #endif /* CONFIG_TIMERFD */
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 
 asmlinkage ssize_t compat_sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, compat_size_t __user *rwbytes32)
 {
@@ -2339,9 +2342,9 @@ asmlinkage ssize_t compat_sys_recvfile(int fd, int s, loff_t *offset, size_t nby
 
 	return ret;
 }
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 /**
  * sys_SYNOUtime() is used to update create time.
  *

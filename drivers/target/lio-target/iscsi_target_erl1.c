@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  iscsi_target_erl1.c
  *
@@ -529,7 +532,7 @@ int iscsi_handle_recovery_datain_or_r2t(
 	 * FIXME: This will not work for bidi commands.
 	 */
 	switch (cmd->data_direction) {
-#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
+#ifdef MY_ABC_HERE
 	case DMA_TO_DEVICE:
 		return iscsi_handle_r2t_snack(cmd, buf, begrun, runlength);
 	case DMA_FROM_DEVICE:
@@ -1092,7 +1095,7 @@ int iscsi_execute_cmd(iscsi_cmd_t *cmd, int ooo)
 		 */
 		spin_unlock_bh(&cmd->istate_lock);
 
-#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
+#ifdef MY_ABC_HERE
 		if ((cmd->data_direction == DMA_TO_DEVICE) &&
 		    !(cmd->cmd_flags & ICF_NON_IMMEDIATE_UNSOLICITED_DATA)) {
 #else

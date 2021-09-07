@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/cifsfs.c
  *
@@ -60,7 +63,7 @@ unsigned int oplockEnabled = 1;
 unsigned int experimEnabled = 0;
 unsigned int linuxExtEnabled = 1;
 unsigned int lookupCacheEnabled = 1;
-#ifdef SYNO_CASELESS_CIFS_MOUNT
+#ifdef MY_ABC_HERE
 unsigned int SynoPosixSemanticsEnabled = 1;
 #endif
 unsigned int multiuser_mount = 0;

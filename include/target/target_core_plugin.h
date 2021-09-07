@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  target_core_plugin.h
  *
@@ -28,7 +31,7 @@
 #define TARGET_CORE_PLUGIN_H
 
 #define PLUGIN_TYPE_TRANSPORT	0
-#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifndef MY_ABC_HERE
 #define PLUGIN_TYPE_OBJ		1
 #endif
 

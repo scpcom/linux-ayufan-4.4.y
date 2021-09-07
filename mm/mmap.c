@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/mmap.c
  *
@@ -83,7 +86,7 @@ pgprot_t vm_get_page_prot(unsigned long vm_flags)
 }
 EXPORT_SYMBOL(vm_get_page_prot);
 
-#ifdef SYNO_MM_OVERCOMMIT_ALWAYS
+#ifdef MY_ABC_HERE
 int sysctl_overcommit_memory = OVERCOMMIT_ALWAYS;
 #else
 int sysctl_overcommit_memory = OVERCOMMIT_GUESS;  /* heuristic overcommit */

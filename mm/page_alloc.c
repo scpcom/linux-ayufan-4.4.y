@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/mm/page_alloc.c
  *
@@ -1925,7 +1928,7 @@ rebalance:
 	}
 
 nopage:
-#ifndef SYNO_HIDE_LOWMEM_WARNING
+#ifndef MY_ABC_HERE
 	if (!(gfp_mask & __GFP_NOWARN) && printk_ratelimit()) {
 		printk(KERN_WARNING "%s: page allocation failure."
 			" order:%d, mode:0x%x\n",
@@ -4646,7 +4649,7 @@ void setup_per_zone_wmarks(void)
 			zone->watermark[WMARK_MIN] = tmp;
 		}
 
-#ifdef SYNO_MMU_THRESHOLD_ADJUSTMENT
+#ifdef MY_ABC_HERE
 		if ( !strstr(zone->name, "Normal") || !tmp) {
 			/* Do not adjust DMA, DMA32, HighMem, Movable */
 			zone->watermark[WMARK_LOW]   = min_wmark_pages(zone) + (tmp >> 2);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/bfind.c
  *
@@ -96,7 +99,7 @@ int hfs_find_rec_by_key(struct hfs_bnode *bnode,
 }
 
 /* Find the record in bnode that best matches key (not greater than...)*/
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 int __hfs_brec_find(struct hfs_bnode *bnode, struct hfs_find_data *fd,
 					search_strategy_t rec_found)
 {

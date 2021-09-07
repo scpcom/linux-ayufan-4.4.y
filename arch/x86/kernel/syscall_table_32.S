@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/syno.h>
 
 ENTRY(sys_call_table)
@@ -338,7 +341,7 @@ ENTRY(sys_call_table)
 	.long sys_pwritev
 	.long sys_rt_tgsigqueueinfo	/* 335 */
 	.long sys_perf_event_open
-#ifdef SYNO_SYSTEM_CALL
+#ifdef MY_ABC_HERE
     .long sys_ni_syscall
     .long sys_ni_syscall
     .long sys_ni_syscall
@@ -404,23 +407,23 @@ ENTRY(sys_call_table)
     .long sys_ni_syscall
     .long sys_ni_syscall
     .long sys_ni_syscall
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
     .long sys_SYNOUtime		/* 402 */
 #else
     .long sys_ni_syscall
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
     .long sys_SYNOArchiveBit	/* 403 */
 #else
     .long sys_ni_syscall
 #endif
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
     .long sys_recvfile		/* 404 */
 #else
     .long sys_ni_syscall
 #endif
     .long sys_ni_syscall        /* 405 */
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
     .long sys_SYNOCaselessStat64    /* 406 */
     .long sys_SYNOCaselessLStat64   /* 407 */
     .long sys_SYNOCaselessStat      /* 408 */
@@ -431,7 +434,7 @@ ENTRY(sys_call_table)
     .long sys_ni_syscall
     .long sys_ni_syscall
 #endif
-#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
+#ifdef MY_ABC_HERE
     .long sys_SYNOEcryptName /* 410 */
     .long sys_SYNODecryptName /* 411 */
 #else
@@ -448,7 +451,7 @@ ENTRY(sys_call_table)
     .long sys_ni_syscall
 #endif
     .long sys_ni_syscall
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
     .long sys_SYNOStat                   /* 416 */
     .long sys_SYNOFStat                  /* 417 */
     .long sys_SYNOLStat                  /* 418 */
@@ -462,8 +465,8 @@ ENTRY(sys_call_table)
     .long sys_ni_syscall
     .long sys_ni_syscall
     .long sys_ni_syscall
-#endif /* SYNO_STAT */
-#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
     .long sys_ni_syscall
     .long sys_ni_syscall
     .long sys_ni_syscall

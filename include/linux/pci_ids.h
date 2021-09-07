@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	PCI Class, Vendor and Device IDs
  *
@@ -2721,7 +2724,7 @@
 #define PCI_DEVICE_ID_RME_DIGI32_PRO	0x9897
 #define PCI_DEVICE_ID_RME_DIGI32_8	0x9898
 
-#ifdef SYNO_USB3_PCI_ID_DEFINE
+#ifdef MY_ABC_HERE
 #define PCI_VENDOR_ID_ETRON   0x1b6f
 #define PCI_DEVICE_ID_ASROCK_P67  0x7023
 #endif

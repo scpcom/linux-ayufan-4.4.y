@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASM_GENERIC_ERRNO_H
 #define _ASM_GENERIC_ERRNO_H
 
@@ -108,7 +111,7 @@
 
 #define ERFKILL		132	/* Operation not possible due to RF-kill */
 
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 #define	ECORRUPT	140	/* corrupt file */
 #endif
 

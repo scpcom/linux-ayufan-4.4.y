@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/hfsplus/xattr.c
  *
@@ -8,7 +11,7 @@
 
 #include "hfsplus_fs.h"
 #include "xattr.h"
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 /* Zero out the date added field for the specified cnode */
 static void hfsplus_zero_dateadded(u16 entry_type, u8 *finderinfo) {
 
@@ -25,7 +28,7 @@ static void hfsplus_zero_dateadded(u16 entry_type, u8 *finderinfo) {
 }
 #endif
 
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 extern struct mutex syno_hfsplus_global_mutex;
 #endif
 
@@ -119,7 +122,7 @@ int __hfsplus_setxattr(struct inode *inode, const char *name,
 			err = -EOPNOTSUPP;
 			goto end_setxattr;
 		}
-#ifdef SYNO_HFSPLUS_EA // SOLVE GFP call trace
+#ifdef MY_ABC_HERE // SOLVE GFP call trace
 		cat_entry_type = hfs_bnode_read_u16(cat_fd.bnode, cat_fd.entryoffset);
 		if (cat_entry_type == HFSPLUS_FOLDER) {
 			hfs_bnode_read(cat_fd.bnode, &entry, cat_fd.entryoffset, sizeof(struct hfsplus_cat_folder));
@@ -305,7 +308,7 @@ ssize_t hfsplus_getxattr(struct dentry *dentry, const char *name,
 	hfsplus_attr_entry *entry;
 	__be32 xattr_record_type;
 	u32 record_type;
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	u32 record_length = 0;
 #else
 	u16 record_length = 0;
@@ -348,7 +351,7 @@ ssize_t hfsplus_getxattr(struct dentry *dentry, const char *name,
 			fd.entryoffset, sizeof(xattr_record_type));
 	record_type = be32_to_cpu(xattr_record_type);
 	if (record_type == HFSPLUS_ATTR_INLINE_DATA) {
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 		record_length = hfs_bnode_read_u32(fd.bnode,
 				fd.entryoffset +
 				offsetof(struct hfsplus_attr_inline_data,
@@ -411,7 +414,7 @@ static inline int can_list(const char *xattr_name)
 				capable(CAP_SYS_ADMIN);
 }
 
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 static ssize_t hfsplus_listxattr_rfork(struct dentry *dentry,
 						char *buffer, size_t size)
 {
@@ -492,7 +495,7 @@ static ssize_t hfsplus_listxattr_finder_info(struct dentry *dentry,
 				fd.entryoffset +
 				offsetof(struct hfsplus_cat_folder, user_info),
 				len);
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 		hfsplus_zero_dateadded(entry_type, folder_finder_info);
 #endif
 		found_bit = find_first_bit((void *)folder_finder_info, len*8);
@@ -502,7 +505,7 @@ static ssize_t hfsplus_listxattr_finder_info(struct dentry *dentry,
 				fd.entryoffset +
 				offsetof(struct hfsplus_cat_file, user_info),
 				len);
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 		hfsplus_zero_dateadded(entry_type, file_finder_info);
 #endif
 		found_bit = find_first_bit((void *)file_finder_info, len*8);
@@ -537,7 +540,7 @@ end_listxattr_finder_info:
 	return res;
 }
 
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 int
 hfsplus_syno_setxattr(struct dentry *dentry, const char *name, const void *value, size_t size, int flags)
 {
@@ -575,11 +578,11 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 				HFSPLUS_IS_RSRC(inode))
 		return -EOPNOTSUPP;
 
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	mutex_lock(&syno_hfsplus_global_mutex);
 #endif
 	res = hfsplus_listxattr_finder_info(dentry, buffer, size);
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	if (res < 0) {
 		mutex_unlock(&syno_hfsplus_global_mutex);
 		return res;
@@ -588,17 +591,17 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 	if (res < 0)
 		return res;
 #endif
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	res += hfsplus_listxattr_rfork(dentry, buffer + res, size);
 	if (res < 0) {
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 		mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
 		return res;
 	}
 #endif
 	else if (!HFSPLUS_SB(inode->i_sb).attr_tree) {
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 		mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
 		return (res == 0) ? -EOPNOTSUPP : res;
@@ -607,7 +610,7 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 	err = hfs_find_init(HFSPLUS_SB(inode->i_sb).attr_tree, &fd);
 	if (err) {
 		pr_err("can't init xattr find struct\n");
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 		mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
 		return err;
@@ -640,7 +643,7 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 			goto end_listxattr;
 
 		xattr_name_len = HFSPLUS_ATTR_MAX_STRLEN;
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 		if (hfsplus_attr_uni2asc(inode->i_sb,
 			(const struct hfsplus_unistr *)&fd.key->attr.key_name,
 					strbuf, &xattr_name_len)) {
@@ -675,7 +678,7 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 	}
 
 end_listxattr:
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
 	hfs_find_exit(&fd);
@@ -699,13 +702,13 @@ int hfsplus_removexattr(struct dentry *dentry, const char *name)
 
 	if (!HFSPLUS_SB(inode->i_sb).attr_tree)
 		return -EOPNOTSUPP;
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	mutex_lock(&syno_hfsplus_global_mutex);
 #endif
 
 	err = can_set_xattr(inode, name, NULL, 0);
 	if (err)
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	{
 		mutex_unlock(&syno_hfsplus_global_mutex);
 		return err;
@@ -715,7 +718,7 @@ int hfsplus_removexattr(struct dentry *dentry, const char *name)
 #endif
 
 	if (!strcmp_xattr_finder_info(name))
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	{
 		mutex_unlock(&syno_hfsplus_global_mutex);
 		return -EOPNOTSUPP;
@@ -727,7 +730,7 @@ int hfsplus_removexattr(struct dentry *dentry, const char *name)
 	err = hfs_find_init(HFSPLUS_SB(inode->i_sb).cat_tree, &cat_fd);
 	if (err) {
 		pr_err("can't init xattr find struct\n");
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 		mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
 		return err;
@@ -781,7 +784,7 @@ int hfsplus_removexattr(struct dentry *dentry, const char *name)
 
 end_removexattr:
 	hfs_find_exit(&cat_fd);
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
 	return err;

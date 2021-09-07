@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/buffer.c
  *
@@ -114,13 +117,13 @@ static int quiet_error(struct buffer_head *bh)
 static void buffer_io_error(struct buffer_head *bh)
 {
 	char b[BDEVNAME_SIZE];
-#ifdef SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 	if (printk_ratelimit()) {
 #endif
 	printk(KERN_ERR "Buffer I/O error on device %s, logical block %Lu\n",
 			bdevname(bh->b_bdev, b),
 			(unsigned long long)bh->b_blocknr);
-#ifdef SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 	}
 #endif
 }
@@ -1162,7 +1165,7 @@ __getblk_slow(struct block_device *bdev, sector_t block, int size)
  */
 void mark_buffer_dirty(struct buffer_head *bh)
 {
-#ifdef SYNO_SKIP_BH_WARNON
+#ifdef MY_ABC_HERE
 	static int SynoWarnings = 0;
 	if (!buffer_uptodate(bh) && !SynoWarnings) {
 		SynoWarnings = 1;
@@ -3393,7 +3396,7 @@ void __init buffer_init(void)
 	hotcpu_notifier(buffer_cpu_notify, 0);
 }
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 int generic_commit_write(struct file *file, struct page *page,
 		unsigned from, unsigned to)
 {

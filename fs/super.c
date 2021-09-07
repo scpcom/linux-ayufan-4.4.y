@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/super.c
  *
@@ -105,7 +108,7 @@ static struct super_block *alloc_super(struct file_system_type *type)
 		s->s_qcop = sb_quotactl_ops;
 		s->s_op = &default_op;
 		s->s_time_gran = 1000000000;
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 		mutex_init(&s->s_archive_mutex);
 		s->s_archive_version = 0;
 #endif
@@ -206,7 +209,7 @@ void deactivate_super(struct super_block *s)
 
 EXPORT_SYMBOL(deactivate_super);
 
-#ifdef SYNO_READ_LOCK_IN_THAW_BDEV
+#ifdef MY_ABC_HERE
 /** 
  * Modified from deactivate_locked_super() 
  *  

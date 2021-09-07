@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fat/cache.c
  *
@@ -244,7 +247,7 @@ int fat_get_cluster(struct inode *inode, int cluster, int *fclus, int *dclus)
 			fat_fs_error(sb, "%s: detected the cluster chain loop"
 				     " (i_pos %lld)", __func__,
 				     MSDOS_I(inode)->i_pos);
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 			nr = -ECORRUPT;
 #else
 			nr = -EIO;
@@ -259,7 +262,7 @@ int fat_get_cluster(struct inode *inode, int cluster, int *fclus, int *dclus)
 			fat_fs_error(sb, "%s: invalid cluster chain"
 				     " (i_pos %lld)", __func__,
 				     MSDOS_I(inode)->i_pos);
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 			nr = -ECORRUPT;
 #else
 			nr = -EIO;
@@ -295,7 +298,7 @@ static int fat_bmap_cluster(struct inode *inode, int cluster)
 	else if (ret == FAT_ENT_EOF) {
 		fat_fs_error(sb, "%s: request beyond EOF (i_pos %lld)",
 			     __func__, MSDOS_I(inode)->i_pos);
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 		return -ECORRUPT;
 #else
 		return -EIO;

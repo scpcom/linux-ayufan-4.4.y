@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef ISCSI_PARAMETERS_H
 #define ISCSI_PARAMETERS_H
 
@@ -110,7 +113,7 @@ extern void iscsi_set_session_parameters(iscsi_sess_ops_t *,
 #define INITIAL_MAXCONNECTIONS			"1"
 #endif
 #define INITIAL_SENDTARGETS			ALL
-#ifdef SYNO_LIO_VENDOR_ID
+#ifdef MY_ABC_HERE
 #define INITIAL_TARGETNAME			"SYNO.Target"
 #define INITIAL_INITIATORNAME			"SYNO.Initiator"
 #define INITIAL_TARGETALIAS			"Synology Target"

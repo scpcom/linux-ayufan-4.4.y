@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * List of powerpc syscalls. For the meaning of the _SPU suffix see
  * arch/powerpc/platforms/cell/spu_callbacks.c
@@ -326,7 +329,7 @@ SYSCALL_SPU(perf_event_open)
 COMPAT_SYS_SPU(preadv)		/* 320 */
 COMPAT_SYS_SPU(pwritev)
 COMPAT_SYS(rt_tgsigqueueinfo)
-#ifdef SYNO_SYSTEM_CALL
+#ifdef MY_ABC_HERE
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)			/* 325 */
@@ -406,27 +409,27 @@ SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 SYSCALL(SYNOUtime)             /* 402 */
 #else
 SYSCALL(ni_syscall)
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 SYSCALL(SYNOArchiveBit)        /* 403 */
 #else
 SYSCALL(ni_syscall)
 #endif
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 SYSCALL(recvfile)              /* 404 */
 #else
 SYSCALL(ni_syscall)
 #endif
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 SYSCALL(SYNOMTDAlloc)		/* 405 */
 #else
 SYSCALL(ni_syscall)
 #endif
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 SYSCALL(SYNOCaselessStat64)            /* 406 */
 SYSCALL(SYNOCaselessLStat64)           /* 407 */
 SYSCALL(SYNOCaselessStat)              /* 408 */
@@ -437,7 +440,7 @@ SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 #endif
-#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
+#ifdef MY_ABC_HERE
 SYSCALL(SYNOEcryptName)		/* 410 */
 SYSCALL(SYNODecryptName)	/* 411 */
 #else
@@ -448,7 +451,7 @@ SYSCALL(ni_syscall)			/* 412 */
 SYSCALL(ni_syscall)			
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
 SYSCALL(SYNOStat)            /* 416 */
 SYSCALL(SYNOFStat)           /* 417 */
 SYSCALL(SYNOLStat)           /* 418 */
@@ -462,13 +465,13 @@ SYSCALL(ni_syscall)          /* 418 */
 SYSCALL(ni_syscall)			 /* 419 */
 SYSCALL(ni_syscall)			 /* 420 */
 SYSCALL(ni_syscall)			 /* 421 */
-#endif /* SYNO_STAT */
+#endif /* MY_ABC_HERE */
 SYSCALL(ni_syscall)			/* 422 */
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)
 SYSCALL(ni_syscall)			/* 425 */
 SYSCALL(ni_syscall)
-#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
+#ifdef MY_ABC_HERE
 SYSCALL(SYNOArchiveOverwrite)        /* 427 */
 #else
 SYSCALL(ni_syscall)

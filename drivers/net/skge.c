@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * New driver for Marvell Yukon chipset and SysKonnect Gigabit
  * Ethernet adapters. Based on earlier sk98lin, e100 and
@@ -756,7 +759,7 @@ static void skge_led(struct skge_port *skge, enum led_mode mode)
 		case LED_MODE_ON:
 			gm_phy_write(hw, port, PHY_MARV_LED_CTRL,
 				     PHY_M_LED_PULS_DUR(PULS_170MS) |
-#ifdef SYNO_SK98_BLINK_BEHAVIOR
+#ifdef MY_ABC_HERE
 				     PHY_M_LED_BLINK_RT(BLINK_340MS) |
 #else
 				     PHY_M_LED_BLINK_RT(BLINK_84MS) |
@@ -2574,9 +2577,9 @@ static int skge_up(struct net_device *dev)
 	if (!is_valid_ether_addr(dev->dev_addr))
 		return -EINVAL;
 
-#ifdef SYNO_SKGE_LINKSTATE_FIX
+#ifdef MY_ABC_HERE
 	netif_carrier_off(dev);
-#endif /* SYNO_SKGE_LINKSTATE_FIX */
+#endif /* MY_ABC_HERE */
 
 	if (netif_msg_ifup(skge))
 		printk(KERN_INFO PFX "%s: enabling interface\n", dev->name);
@@ -2794,7 +2797,7 @@ static netdev_tx_t skge_xmit_frame(struct sk_buff *skb,
 			control = BMU_UDP_CHECK;
 
 		td->csum_offs = 0;
-#ifdef SYNO_SKGE_CSUM_FIX
+#ifdef MY_ABC_HERE
 		td->csum_start = offset + skb->csum_offset;
 		td->csum_write = offset;
 #else
@@ -3115,7 +3118,7 @@ static struct sk_buff *skge_rx_get(struct net_device *dev,
 
 	skb_put(skb, len);
 	if (skge->rx_csum) {
-#ifdef SYNO_SKGE_CSUM_FIX
+#ifdef MY_ABC_HERE
 		skb->csum = le16_to_cpu(csum);
 #else
 		skb->csum = csum;
@@ -3887,17 +3890,17 @@ static struct net_device *skge_devinit(struct skge_hw *hw, int port,
 		skge->rx_csum = 1;
 	}
 
-#ifndef SYNO_MAC_ADDRESS
+#ifndef MY_ABC_HERE
 	/* read the mac address */
 	memcpy_fromio(dev->dev_addr, hw->regs + B2_MAC_1 + port*8, ETH_ALEN);
 	memcpy(dev->perm_addr, dev->dev_addr, dev->addr_len);
 #endif
 
-#ifndef SYNO_SKGE_LINKSTATE_FIX
+#ifndef MY_ABC_HERE
 	/* device is off until link detection */
 	netif_carrier_off(dev);
 	netif_stop_queue(dev);
-#endif /* !SYNO_SKGE_LINKSTATE_FIX */
+#endif /* !MY_ABC_HERE */
 
 	return dev;
 }

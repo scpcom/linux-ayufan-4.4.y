@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Copyright (c) 2010 Synology Inc. All rights reserved. */
 
 #ifndef __SYNO_USER_H_
@@ -25,11 +28,11 @@
 /**
  * Dsc: This modify should sync with samba
  */
-#ifndef SYNO_UNICODE
+#ifndef MY_ABC_HERE
 #define SYNO_UNICODE
 #endif
 
-#ifdef SYNO_UNICODE
+#ifdef MY_ABC_HERE
 #define SYNO_MAXPATH    4095
 #define SYNO_MAXNAME    491
 #endif

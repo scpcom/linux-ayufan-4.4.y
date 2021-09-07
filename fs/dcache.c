@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * fs/dcache.c
  *
@@ -1376,7 +1379,7 @@ struct dentry * __d_lookup(struct dentry * parent, struct qstr * name)
 	struct dentry *found = NULL;
 	struct hlist_node *node;
 	struct dentry *dentry;
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 	int lockFound = 0;
 #endif
 
@@ -1412,7 +1415,7 @@ struct dentry * __d_lookup(struct dentry * parent, struct qstr * name)
 		if (parent->d_op && parent->d_op->d_compare) {
 			if (parent->d_op->d_compare(parent, qstr, name))
 				goto next;
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 			/* In caseless case, we should backup first dentry which be founded.
 			 * We backup it to "found". If all inode of founded dentries is NULL,
 			 * we can return it.
@@ -1441,7 +1444,7 @@ struct dentry * __d_lookup(struct dentry * parent, struct qstr * name)
 			if (memcmp(qstr->name, str, len))
 				goto next;
 		}
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 		// make sure "found" is unlocked
 		if (lockFound) {
 			atomic_dec(&found->d_count);
@@ -1457,7 +1460,7 @@ struct dentry * __d_lookup(struct dentry * parent, struct qstr * name)
 next:
 		spin_unlock(&dentry->d_lock);
  	}
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 	// make sure "found" is unlocked
 	if (lockFound) {
 		spin_unlock(&found->d_lock);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/bnode.c
  *
@@ -39,7 +42,7 @@ void hfs_bnode_read(struct hfs_bnode *node, void *buf, int off, int len)
 	}
 }
 
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 u32 hfs_bnode_read_u32(struct hfs_bnode *node, int off)
 {
 	__be32 data;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- mode: c; c-basic-offset: 8; -*-
  * vim: noexpandtab sw=8 ts=8 sts=0:
  *
@@ -5712,7 +5715,7 @@ int ocfs2_remove_btree_range(struct inode *inode,
 		goto out;
 	}
 
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	dquot_free_space_nodirty(inode,
 #else
 	vfs_dq_free_space_nodirty(inode,							 
@@ -6939,7 +6942,7 @@ static int ocfs2_do_truncate(struct ocfs2_super *osb,
 		goto bail;
 	}
 
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	dquot_free_space_nodirty(inode,
 #else
 	vfs_dq_free_space_nodirty(inode,
@@ -7308,7 +7311,7 @@ int ocfs2_convert_inline_data_to_extents(struct inode *inode,
 		unsigned int page_end;
 		u64 phys;
 
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		ret = dquot_alloc_space_nodirty(inode,
 				       ocfs2_clusters_to_bytes(osb->sb, 1));
 		if (ret) {
@@ -7394,7 +7397,7 @@ int ocfs2_convert_inline_data_to_extents(struct inode *inode,
 
 out_commit:
 	if (ret < 0 && did_quota)
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_space_nodirty(inode,
 #else
 		vfs_dq_free_space_nodirty(inode,

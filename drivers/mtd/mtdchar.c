@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Character-device access to raw MTD devices.
  *
@@ -20,9 +23,9 @@
 #include <linux/mtd/compatmac.h>
 
 #include <asm/uaccess.h>
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 #include <linux/semaphore.h>
-#endif /* SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 
 
 /*
@@ -138,7 +141,7 @@ static int mtd_close(struct inode *inode, struct file *file)
 /* FIXME: This _really_ needs to die. In 2.5, we should lock the
    userspace buffer down and use it directly with readv/writev.
 */
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 #define MAX_KMALLOC_SIZE 0x10000
 static int syno_write_buf_size = 0x1000;
 #else
@@ -238,7 +241,7 @@ static ssize_t mtd_read(struct file *file, char __user *buf, size_t count,loff_t
 	return total_retlen;
 } /* mtd_read */
 
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 #define MYDEBUG
 #ifdef MYDEBUG
 #define DBGMSG(x...) printk(KERN_NOTICE x);
@@ -320,14 +323,14 @@ End:
     up(&write_kbuf_sem);
     return retval;
 } /* sys_SYNOMTDAlloc() */
-#endif /* SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 
 
 static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count,loff_t *ppos)
 {
 	struct mtd_file_info *mfi = file->private_data;
 	struct mtd_info *mtd = mfi->mtd;
-#ifndef SYNO_MTD_ALLOC
+#ifndef MY_ABC_HERE
 	char *kbuf;
 #endif
 	size_t retlen;
@@ -336,7 +339,7 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 	int len;
 
 	DEBUG(MTD_DEBUG_LEVEL0,"MTD_write\n");
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 	if (syno_write_buf_size < mtd->writesize) {
 		printk(KERN_ERR "mtd kmalloc size small than mtd driver minimal write size !!\n");
 		WARN_ON(1);
@@ -357,7 +360,7 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 	if (!count)
 		return 0;
 
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 	if (!write_kbuf_len) {
 		ret = sys_SYNOMTDAlloc(TRUE);
 		if ( ret != 0 )
@@ -377,7 +380,7 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 #endif
 
 	while (count) {
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 		if (count > syno_write_buf_size)
 			len = syno_write_buf_size;
 #else
@@ -388,9 +391,9 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 			len = count;
 
 		if (copy_from_user(kbuf, buf, len)) {
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 			up(&write_kbuf_sem);
-#else /* !SYNO_MTD_ALLOC */
+#else /* !MY_ABC_HERE */
 			kfree(kbuf);
 #endif
 			return -EFAULT;
@@ -432,18 +435,18 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 			buf += retlen;
 		}
 		else {
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 			up(&write_kbuf_sem);
-#else /* !SYNO_MTD_ALLOC */
+#else /* !MY_ABC_HERE */
 			kfree(kbuf);
 #endif
 			return ret;
 		}
 	}
 
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 	up(&write_kbuf_sem);
-#else /* !SYNO_MTD_ALLOC */
+#else /* !MY_ABC_HERE */
 	kfree(kbuf);
 #endif
 	return total_retlen;
@@ -905,7 +908,7 @@ static int mtd_ioctl(struct inode *inode, struct file *file,
 	}
 #endif
 
-#ifdef  SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 	case MEMMODIFYPARTINFO:
 	{
 		unsigned long adrs[2];
@@ -938,7 +941,7 @@ static int mtd_ioctl(struct inode *inode, struct file *file,
 
 		break;
 	}
-#endif /* SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */
 
 	case ECCGETLAYOUT:
 	{
@@ -1133,12 +1136,12 @@ static int __init init_mtdchar(void)
 	}
 
 
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 	/* XXX
 	 * Allocate and buffer and init spinlock.
 	 */
 	sema_init(&write_kbuf_sem, 1);
-#endif /* SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 
 	return status;
 }

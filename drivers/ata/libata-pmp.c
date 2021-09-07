@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * libata-pmp.c - libata port multiplier support
  *
@@ -9,15 +12,15 @@
 
 #include <linux/kernel.h>
 #include <linux/libata.h>
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 #include <linux/sched.h>
 #endif
 #include "libata.h"
 
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 #include <linux/synobios.h>
 #endif
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
 
@@ -101,7 +104,7 @@ static unsigned int sata_pmp_write(struct ata_link *link, int reg, u32 val)
 				 SATA_PMP_RW_TIMEOUT);
 }
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 void
 syno_pm_device_info_set(struct ata_port *ap, u8 rw, SYNO_PM_PKG *pm_pkg)
 {
@@ -523,7 +526,7 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 		if (blPowerOn) {
 			DBGMESG("port %d delay 3000ms wait for HW ready\n", ap->print_id);
 			SleepForLatency();
-#ifdef SYNO_SATA_PM_SEAGATE_PROBE_TIME_FIX
+#ifdef MY_ABC_HERE
 			ata_port_printk(ap, KERN_INFO, "PMP Power control set ATA_EH_SYNO_PWON\n");
 			ap->link.eh_context.i.action |= ATA_EH_SYNO_PWON;
 #endif
@@ -584,7 +587,7 @@ END:
 	spin_unlock_irqrestore(ap->lock, flags);
 	return iRet;
 }
-#endif /* SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
 
 /**
@@ -751,7 +754,7 @@ static int sata_pmp_configure(struct ata_device *dev, int print_info)
 	const char *reason;
 	int nr_ports, rc;
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	nr_ports = syno_pmp_ports_num(ap);
 #else
 	nr_ports = sata_pmp_gscr_ports(gscr);
@@ -782,7 +785,7 @@ static int sata_pmp_configure(struct ata_device *dev, int print_info)
 	 * R_OK that was intended for the host. Symptom will be all
 	 * 5 drives under test will timeout, get reset, and recover.
 	 */
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/*our DX513 and DX213 use 3826 chip */
 	if (vendor == 0x1095 && (devid == 0x3726 || devid == 0x3826)) {
 #else
@@ -865,7 +868,7 @@ static void sata_pmp_quirks(struct ata_port *ap)
 	u16 devid = sata_pmp_gscr_devid(gscr);
 	struct ata_link *link;
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/*our DX513 and DX213 use 3826 chip */
 	if (vendor == 0x1095 && (devid == 0x3726 || devid == 0x3826)) {
 #else
@@ -877,7 +880,7 @@ static void sata_pmp_quirks(struct ata_port *ap)
 			 * times out under certain configurations.
 			 */
 			if (link->pmp < 5)
-#ifdef SYNO_SATA_3726_HOTPLUG_FIX
+#ifdef MY_ABC_HERE
 				link->flags |= ATA_LFLAG_ASSUME_ATA;
 #else
 				link->flags |= ATA_LFLAG_NO_SRST |
@@ -954,7 +957,7 @@ int sata_pmp_attach(struct ata_device *dev)
 	unsigned long flags;
 	struct ata_link *tlink;
 	int rc;
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	u32 target = 0, target_limit = 0;
 #endif
 
@@ -985,10 +988,10 @@ int sata_pmp_attach(struct ata_device *dev)
 	if (rc)
 		goto fail;
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/* Get information for all PM we supported */
 	syno_prepare_custom_info(ap);
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 	/*For DS1812+ with older version of DX510, the link should be limited to 1.5G*/
 	if (syno_is_hw_version(HW_DS1812p)) {
 		/* The old version should be b000 */
@@ -1042,7 +1045,7 @@ int sata_pmp_attach(struct ata_device *dev)
 	if (rc)
 		goto fail;
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	rc = sata_pmp_init_links(ap, syno_pmp_ports_num(ap));
 #else
 	rc = sata_pmp_init_links(ap, sata_pmp_gscr_ports(dev->gscr));
@@ -1056,7 +1059,7 @@ int sata_pmp_attach(struct ata_device *dev)
 	/* attach it */
 	spin_lock_irqsave(ap->lock, flags);
 	WARN_ON(ap->nr_pmp_links);
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	ap->nr_pmp_links = syno_pmp_ports_num(ap);
 #else
 	ap->nr_pmp_links = sata_pmp_gscr_ports(dev->gscr);
@@ -1073,7 +1076,7 @@ int sata_pmp_attach(struct ata_device *dev)
 
 	ata_acpi_associate_sata_port(ap);
 
-#ifdef SYNO_LIBATA_PMP_UEVENT
+#ifdef MY_ABC_HERE
 	ap->pflags |= ATA_PFLAG_PMP_CONNECT;
 #endif
 
@@ -1127,7 +1130,7 @@ static void sata_pmp_detach(struct ata_device *dev)
 		tlink->uiSflags = 0;
 	}
 #endif
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	ap->PMSynoUnique = 0;
 #endif
 
@@ -1143,7 +1146,7 @@ static void sata_pmp_detach(struct ata_device *dev)
 	spin_unlock_irqrestore(ap->lock, flags);
 
 	ata_acpi_associate_sata_port(ap);
-#ifdef SYNO_LIBATA_PMP_UEVENT
+#ifdef MY_ABC_HERE
 	ap->pflags |= ATA_PFLAG_PMP_DISCONNECT;
 #endif
 }
@@ -1167,7 +1170,7 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 	const u32 *old_gscr = dev->gscr;
 	u16 old_vendor, new_vendor, old_devid, new_devid;
 	int old_nr_ports, new_nr_ports;
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	struct ata_port *ap = dev->link->ap;
 	u32 old_syno_unique = ap->PMSynoUnique;
 #endif
@@ -1176,7 +1179,7 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 	new_vendor = sata_pmp_gscr_vendor(new_gscr);
 	old_devid = sata_pmp_gscr_devid(old_gscr);
 	new_devid = sata_pmp_gscr_devid(new_gscr);
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	new_nr_ports = old_nr_ports = syno_pmp_ports_num(ap);
 #else
 	old_nr_ports = sata_pmp_gscr_ports(old_gscr);
@@ -1204,7 +1207,7 @@ static int sata_pmp_same_pmp(struct ata_device *dev, const u32 *new_gscr)
 		return 0;
 	}
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/* power on and re-custom */
 	syno_prepare_custom_info(ap);
 	if (SYNO_UNIQUE(old_syno_unique) != SYNO_UNIQUE(ap->PMSynoUnique)) {
@@ -1237,7 +1240,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	struct ata_port *ap = link->ap;
 	u32 *gscr = (void *)ap->sector_buf;
 	int rc;
-#if defined(SYNO_SATA_EBOX_REFRESH) 
+#if defined(MY_ABC_HERE) 
 	struct ata_port *master_ap = NULL;
 #endif
 
@@ -1275,7 +1278,7 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 
 	ata_eh_done(link, NULL, ATA_EH_REVALIDATE);
 
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 	if(funcSYNOSendEboxRefreshEvent) {
 		master_ap = SynoEunitFindMaster(ap);
 		if (NULL != master_ap) {

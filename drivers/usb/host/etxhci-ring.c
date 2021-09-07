@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver
  *
@@ -1839,7 +1842,7 @@ static int process_ctrl_td(struct xhci_hcd *xhci, struct xhci_td *td,
 		}
 		break;
 	case COMP_SHORT_TX:
-#ifdef SYNO_USB3_SURPRESS_WARN
+#ifdef MY_ABC_HERE
 		xhci_dbg(xhci, "WARN: short transfer on control ep\n");
 #else
 		xhci_warn(xhci, "WARN: short transfer on control ep\n");
@@ -2176,7 +2179,7 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		xhci_dbg(xhci, "Stopped on No-op or Link TRB\n");
 		break;
 	case COMP_STALL:
-#ifdef SYNO_USB3_SURPRESS_WARN
+#ifdef MY_ABC_HERE
 		xhci_dbg(xhci, "WARN: Stalled endpoint\n");
 #else
 		xhci_warn(xhci, "WARN: Stalled endpoint\n");
@@ -2190,7 +2193,7 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		break;
 	case COMP_SPLIT_ERR:
 	case COMP_TX_ERR:
-#ifdef SYNO_USB3_SURPRESS_WARN
+#ifdef MY_ABC_HERE
 		xhci_dbg(xhci, "WARN: transfer error on endpoint\n");
 #else
 		xhci_warn(xhci, "WARN: transfer error on endpoint\n");
@@ -2198,7 +2201,7 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		status = -EPROTO;
 		break;
 	case COMP_BABBLE:
-#ifdef SYNO_USB3_SURPRESS_WARN
+#ifdef MY_ABC_HERE
 		xhci_dbg(xhci, "WARN: babble error on endpoint\n");
 #else
 		xhci_warn(xhci, "WARN: babble error on endpoint\n");
@@ -2269,7 +2272,7 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		 * TD list.
 		 */
 		if (list_empty(&ep_ring->td_list)) {
-#ifdef SYNO_USB3_SURPRESS_WARN
+#ifdef MY_ABC_HERE
 			xhci_dbg(xhci, "WARN Event TRB for slot %d ep %d "
 					"with no TDs queued?\n",
 				  TRB_TO_SLOT_ID(le32_to_cpu(event->flags)),

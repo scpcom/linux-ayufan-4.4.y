@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/super.c
  *
@@ -21,12 +24,12 @@ static void hfsplus_destroy_inode(struct inode *inode);
 
 #include "hfsplus_fs.h"
 
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 int syno_hfsplus_mutex_init = 0;
 struct mutex syno_hfsplus_global_mutex;
 #endif
 
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 // 3802 byte for 8K node_size
 static inline size_t hfsplus_get_maxinline_attrsize(struct hfs_btree *btree)
 {
@@ -247,7 +250,7 @@ static void hfsplus_put_super(struct super_block *sb)
 
 	hfs_btree_close(HFSPLUS_SB(sb).cat_tree);
 	hfs_btree_close(HFSPLUS_SB(sb).ext_tree);
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	hfs_btree_close(HFSPLUS_SB(sb).attr_tree);
 #endif
 	iput(HFSPLUS_SB(sb).alloc_file);
@@ -335,7 +338,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	struct qstr str;
 	struct nls_table *nls = NULL;
 	int err = -EINVAL;
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	size_t max_attr_size = 0;
 	size_t cached_size = 0;
 #endif
@@ -344,7 +347,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	if (!sbi)
 		return -ENOMEM;
 
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
     if (0 == syno_hfsplus_mutex_init) {
         syno_hfsplus_mutex_init = 1;
         mutex_init(&syno_hfsplus_global_mutex);
@@ -428,7 +431,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		printk(KERN_ERR "hfs: failed to load catalog file\n");
 		goto cleanup;
 	}
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	HFSPLUS_SB(sb).attr_tree = hfs_btree_open(sb, HFSPLUS_ATTR_CNID);
 	if (!HFSPLUS_SB(sb).attr_tree) {
 		printk(KERN_ERR "hfs: failed to load catalog file\n");

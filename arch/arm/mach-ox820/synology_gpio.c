@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  /* Copyright (C) 2010 Synology Inc
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,7 +31,7 @@
 
 static DEFINE_MUTEX(ox820_gpio_lock);
 
-#ifdef  SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 #include <linux/synobios.h>
 #endif
 

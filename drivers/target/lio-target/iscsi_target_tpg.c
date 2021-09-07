@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  iscsi_target_tpg.c
  *
@@ -442,7 +445,7 @@ void lio_set_default_node_attributes(se_node_acl_t *se_acl)
 	iscsi_set_default_node_attribues(acl);
 }
 
-#ifdef SYNO_LIO_DEFAULT_ACL
+#ifdef MY_ABC_HERE
 void lio_dup_node_attributes(se_node_acl_t* dst, se_node_acl_t* src)
 {
 	iscsi_node_acl_t* dst_acl = (iscsi_node_acl_t*)dst->fabric_acl_ptr;
@@ -482,7 +485,7 @@ iscsi_portal_group_t *core_alloc_portal_group(iscsi_tiqn_t *tiqn, u16 tpgt)
 		return NULL;
 	}
 
-#ifdef SYNO_LIO_MAX_SESSIONS
+#ifdef MY_ABC_HERE
 	atomic_set(&tpg->nr_sessions, 0);
 	atomic_set(&tpg->max_nr_sessions, 1);
 #endif
@@ -555,7 +558,7 @@ int core_load_discovery_tpg(void)
 	spin_unlock(&tpg->tpg_state_lock);
 
 	iscsi_global->discovery_tpg = tpg;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[0] - Allocated Discovery TPG\n");
 #endif
 
@@ -702,7 +705,7 @@ static void iscsi_tpg_free_network_portals(iscsi_portal_group_t *tpg)
 			ip = &buf_ipv4[0];
 		}
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "CORE[%s] - Removed Network Portal: %s:%hu,%hu"
 			" on %s on network device: %s\n", tpg->tpg_tiqn->tiqn,
 			ip, np->np_port, tpg->tpgt,
@@ -717,7 +720,7 @@ static void iscsi_tpg_free_network_portals(iscsi_portal_group_t *tpg)
 
 		spin_lock(&np->np_state_lock);
 		np->np_exports--;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "CORE[%s]_TPG[%hu] - Decremented np_exports to %u\n",
 			tpg->tpg_tiqn->tiqn, tpg->tpgt, np->np_exports);
 #endif
@@ -772,7 +775,7 @@ int iscsi_tpg_add_portal_group(iscsi_tiqn_t *tiqn, iscsi_portal_group_t *tpg)
 	spin_lock(&tiqn->tiqn_tpg_lock);
 	list_add_tail(&tpg->tpg_list, &tiqn->tiqn_tpg_list);
 	tiqn->tiqn_ntpgs++;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s]_TPG[%hu] - Added iSCSI Target Portal Group\n",
 			tiqn->tiqn, tpg->tpgt);
 #endif
@@ -838,7 +841,7 @@ int iscsi_tpg_del_portal_group(
 	list_del(&tpg->tpg_list);
 	spin_unlock(&tiqn->tiqn_tpg_lock);
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s]_TPG[%hu] - Deleted iSCSI Target Portal Group\n",
 			tiqn->tiqn, tpg->tpgt);
 #endif
@@ -847,7 +850,7 @@ int iscsi_tpg_del_portal_group(
 	return 0;
 }
 
-#ifdef SYNO_LIO_FORCE_READ_ONLY
+#ifdef MY_ABC_HERE
 void iscsi_tpg_active_portal_group(iscsi_portal_group_t* tpg)
 {
 	spin_lock_bh(&tpg->tpg_state_lock);
@@ -907,7 +910,7 @@ int iscsi_tpg_enable_portal_group(iscsi_portal_group_t *tpg)
 
 	spin_lock(&tiqn->tiqn_tpg_lock);
 	tiqn->tiqn_active_tpgs++;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Enabled iSCSI Target Portal Group\n",
 			tpg->tpgt);
 #endif
@@ -927,7 +930,7 @@ int iscsi_tpg_disable_portal_group(iscsi_portal_group_t *tpg, int force)
 
 	spin_lock(&tpg->tpg_state_lock);
 	if (tpg->tpg_state == TPG_STATE_INACTIVE) {
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 		printk(KERN_ERR "iSCSI Target Portal Group: %hu is already"
 			" inactive, ignoring request.\n", tpg->tpgt);
 #endif
@@ -951,7 +954,7 @@ int iscsi_tpg_disable_portal_group(iscsi_portal_group_t *tpg, int force)
 
 	spin_lock(&tiqn->tiqn_tpg_lock);
 	tiqn->tiqn_active_tpgs--;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Disabled iSCSI Target Portal Group\n",
 			tpg->tpgt);
 #endif
@@ -1090,7 +1093,7 @@ iscsi_tpg_np_t *iscsi_tpg_add_network_portal(
 		spin_unlock(&tpg_np_parent->tpg_np_parent_lock);
 	}
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s] - Added Network Portal: %s:%hu,%hu on %s on"
 		" network device: %s\n", tpg->tpg_tiqn->tiqn, ip_buf,
 		np->np_port, tpg->tpgt,
@@ -1101,7 +1104,7 @@ iscsi_tpg_np_t *iscsi_tpg_add_network_portal(
 
 	spin_lock(&np->np_state_lock);
 	np->np_exports++;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s]_TPG[%hu] - Incremented np_exports to %u\n",
 		tpg->tpg_tiqn->tiqn, tpg->tpgt, np->np_exports);
 #endif
@@ -1128,7 +1131,7 @@ static int iscsi_tpg_release_np(
 
 	iscsi_clear_tpg_np_login_thread(tpg_np, tpg, 1);
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s] - Removed Network Portal: %s:%hu,%hu on %s"
 		" on network device: %s\n", tpg->tpg_tiqn->tiqn, ip,
 		np->np_port, tpg->tpgt,
@@ -1147,7 +1150,7 @@ static int iscsi_tpg_release_np(
 	spin_lock(&np->np_state_lock);
 	if ((--np->np_exports == 0) && !(ISCSI_TPG_ATTRIB(tpg)->cache_core_nps))
 		atomic_set(&np->np_shutdown, 1);
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE[%s]_TPG[%hu] - Decremented np_exports to %u\n",
 		tpg->tpg_tiqn->tiqn, tpg->tpgt, np->np_exports);
 #endif
@@ -1285,7 +1288,7 @@ int iscsi_ta_authentication(iscsi_portal_group_t *tpg, u32 authentication)
 
 out:
 	a->authentication = authentication;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "%s iSCSI Authentication Methods for TPG: %hu.\n",
 		a->authentication ? "Enforcing" : "Disabling", tpg->tpgt);
 #endif
@@ -1361,7 +1364,7 @@ int iscsi_ta_generate_node_acls(
 	}
 
 	a->generate_node_acls = flag;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Generate Initiator Portal Group ACLs: %s\n",
 		tpg->tpgt, (a->generate_node_acls) ? "Enabled" : "Disabled");
 #endif
@@ -1388,7 +1391,7 @@ int iscsi_ta_default_cmdsn_depth(
 	}
 
 	a->default_cmdsn_depth = tcq_depth;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Set Default CmdSN TCQ Depth to %u\n",
 		tpg->tpgt, a->default_cmdsn_depth);
 #endif
@@ -1408,7 +1411,7 @@ int iscsi_ta_cache_dynamic_acls(
 	}
 
 	a->cache_dynamic_acls = flag;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Cache Dynamic Initiator Portal Group"
 		" ACLs %s\n", tpg->tpgt, (a->cache_dynamic_acls) ?
 		"Enabled" : "Disabled");
@@ -1429,7 +1432,7 @@ int iscsi_ta_demo_mode_write_protect(
 	}
 
 	a->demo_mode_write_protect = flag;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Demo Mode Write Protect bit: %s\n",
 		tpg->tpgt, (a->demo_mode_write_protect) ? "ON" : "OFF");
 #endif
@@ -1449,7 +1452,7 @@ int iscsi_ta_prod_mode_write_protect(
 	}
 
 	a->prod_mode_write_protect = flag;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "iSCSI_TPG[%hu] - Production Mode Write Protect bit:"
 		" %s\n", tpg->tpgt, (a->prod_mode_write_protect) ?
 		"ON" : "OFF");

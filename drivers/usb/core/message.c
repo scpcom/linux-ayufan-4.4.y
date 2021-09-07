@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * message.c - synchronous message handling
  */
@@ -1846,7 +1849,7 @@ free_interfaces:
 		intfc = cp->intf_cache[i];
 		intf->altsetting = intfc->altsetting;
 		intf->num_altsetting = intfc->num_altsetting;
-#ifndef SYNO_USB_DAC_DESCRIPTOR_FIX
+#ifndef MY_ABC_HERE
 		intf->intf_assoc = find_iad(dev, cp, i);
 #endif
 		kref_get(&intfc->ref);
@@ -1861,7 +1864,7 @@ free_interfaces:
 		if (!alt)
 			alt = &intf->altsetting[0];
 
-#ifdef SYNO_USB_DAC_DESCRIPTOR_FIX
+#ifdef MY_ABC_HERE
 		intf->intf_assoc =
 			find_iad(dev, cp, alt->desc.bInterfaceNumber);
 #endif

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 1991, 1992 Linus Torvalds
  * Copyright (C) 1994,      Karl Keyte: Added support for disk statistics
@@ -136,7 +139,7 @@ static void req_bio_endio(struct request *rq, struct bio *bio,
 	struct request_queue *q = rq->q;
 
 	if (&q->bar_rq != rq) {
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 		if (rq->cmd_flags & REQ_AUTO_REMAP){
 			set_bit(BIO_AUTO_REMAP, &bio->bi_flags);
 			rq->cmd_flags &= ~REQ_AUTO_REMAP;
@@ -1350,7 +1353,7 @@ static void handle_bad_sector(struct bio *bio)
 {
 	char b[BDEVNAME_SIZE];
 
-#ifdef SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG
+#ifdef MY_ABC_HERE
 	if (printk_ratelimit()) {
 #endif
 	printk(KERN_INFO "attempt to access beyond end of device\n");
@@ -1360,7 +1363,7 @@ static void handle_bad_sector(struct bio *bio)
 			(unsigned long long)bio->bi_sector + bio_sectors(bio),
 			(long long)(bio->bi_bdev->bd_inode->i_size >> 9));
 
-#ifdef SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG
+#ifdef MY_ABC_HERE
 	}
 #endif
 	set_bit(BIO_EOF, &bio->bi_flags);
@@ -2025,13 +2028,13 @@ bool blk_update_request(struct request *req, int error, unsigned int nr_bytes)
 		req->errors = 0;
 
 	if (error && (blk_fs_request(req) && !(req->cmd_flags & REQ_QUIET))) {
-#ifdef SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 	if (printk_ratelimit()) {
 #endif
 		printk(KERN_ERR "end_request: I/O error, dev %s, sector %llu\n",
 				req->rq_disk ? req->rq_disk->disk_name : "?",
 				(unsigned long long)blk_rq_pos(req));
-#ifdef SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 		}
 #endif
 

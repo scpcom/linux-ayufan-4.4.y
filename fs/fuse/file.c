@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   FUSE: Filesystem in Userspace
   Copyright (C) 2001-2008  Miklos Szeredi <miklos@szeredi.hu>
@@ -683,7 +686,7 @@ static size_t fuse_send_write(struct fuse_req *req, struct file *file,
 	return req->misc.write.out.size;
 }
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 /* copy from linux-2.6.23 */
 static int fuse_prepare_write(struct file *file, struct page *page,
                  unsigned offset, unsigned to)
@@ -2063,7 +2066,7 @@ static const struct file_operations fuse_direct_io_file_operations = {
 
 static const struct address_space_operations fuse_file_aops  = {
 	.readpage	= fuse_readpage,
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
     .prepare_write  = fuse_prepare_write,
     .commit_write   = fuse_commit_write,
 #endif

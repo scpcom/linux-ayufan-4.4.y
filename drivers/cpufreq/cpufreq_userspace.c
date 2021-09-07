@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 /*
  *  linux/drivers/cpufreq/cpufreq_userspace.c
@@ -197,7 +200,7 @@ struct cpufreq_governor cpufreq_gov_userspace = {
 	.show_setspeed	= show_speed,
 	.owner		= THIS_MODULE,
 };
-#ifdef SYNO_CPUFREQ_ADJUST
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(cpufreq_gov_userspace);
 #endif
 

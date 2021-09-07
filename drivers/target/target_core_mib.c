@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  target_core_mib.c
  *
@@ -881,7 +884,7 @@ static int scsi_lu_seq_show(struct seq_file *seq, void *v)
 
 	seq_printf(seq, " %u %s %s %llu %u %u %u %u %u %u\n",
 		/* scsiLuPeripheralType */
-#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifdef MY_ABC_HERE
 		   TRANSPORT(dev)->get_device_type(dev),
 #else
 		   dev->dev_obj_api->get_device_type((void *)dev),

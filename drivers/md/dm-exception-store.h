@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001-2002 Sistina Software (UK) Limited.
  * Copyright (C) 2008 Red Hat, Inc. All rights reserved.
@@ -162,7 +165,7 @@ static inline sector_t get_dev_size(struct block_device *bdev)
 static inline chunk_t sector_to_chunk(struct dm_exception_store *store,
 				      sector_t sector)
 {
-#ifdef SYNO_DM_SECTOR_TO_CHUNK_FIX
+#ifdef MY_ABC_HERE
 	return sector >> store->chunk_shift;
 #else
 	return (sector & ~store->chunk_mask) >> store->chunk_shift;

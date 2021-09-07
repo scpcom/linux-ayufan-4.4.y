@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  iscsi_target_erl2.c
  *
@@ -497,7 +500,7 @@ int iscsi_prepare_cmds_for_realligance(iscsi_conn_t *conn)
 		cmd->deferred_i_state = cmd->i_state;
 		cmd->i_state = ISTATE_IN_CONNECTION_RECOVERY;
 
-#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
+#ifdef MY_ABC_HERE
 		if (cmd->data_direction == DMA_TO_DEVICE)
 			iscsi_stop_dataout_timer(cmd);
 #else

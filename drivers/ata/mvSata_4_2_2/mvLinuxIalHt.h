@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -101,9 +104,9 @@ extern int mv_ial_ht_abort(struct scsi_cmnd *SCpnt);
 #define MRVL_SATA_BOUNDARY_MASK (MRVL_SATA_BUFF_BOUNDARY - 1)
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
-#if defined(SYNO_FIXED_DISK_NAME) || defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(SYNO_SATA_POWER_CTL)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(SYNO_SATA_POWER_CTL)
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 extern struct class_device_attribute *mvSata_shost_attrs[];
 #else
 #define mvSata_shost_attrs NULL
@@ -115,7 +118,7 @@ extern struct class_device_attribute *mvSata_shost_attrs[];
 #define SYNO_SHUTDOWN_PORT
 #endif
 
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 #define SYNO_INDEX_GET syno_index_get: syno_mvSata_index_get,
 #else
 #define SYNO_INDEX_GET

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  History:
  *  Started: Aug 9 by Lawrence Foard (entropy@world.std.com),
@@ -2489,7 +2492,7 @@ static int sg_proc_seq_show_devstrs(struct seq_file *s, void *v)
 	read_lock_irqsave(&sg_index_lock, iflags);
 	sdp = it ? sg_lookup_dev(it->index) : NULL;
 	if (sdp && (scsidp = sdp->device) && (!sdp->detached))
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 		seq_printf(s, "%8.8s\t%"SYNO_DISK_MODEL_LEN"."SYNO_DISK_MODEL_LEN"s\t%4.4s\n",
 #else
 		seq_printf(s, "%8.8s\t%16.16s\t%4.4s\n",

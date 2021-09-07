@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_BLKDEV_H
 #define _LINUX_BLKDEV_H
 
@@ -116,7 +119,7 @@ enum rq_flag_bits {
 	__REQ_IO_STAT,		/* account I/O stat */
 	__REQ_MIXED_MERGE,	/* merge of different types, fail separately */
 	__REQ_NR_BITS,		/* stops here */
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 	__REQ_AUTO_REMAP,	/* auto remap occurred */
 #endif
 };
@@ -147,7 +150,7 @@ enum rq_flag_bits {
 #define REQ_NOIDLE	(1 << __REQ_NOIDLE)
 #define REQ_IO_STAT	(1 << __REQ_IO_STAT)
 #define REQ_MIXED_MERGE	(1 << __REQ_MIXED_MERGE)
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 #define REQ_AUTO_REMAP (1 << __REQ_AUTO_REMAP)
 #endif
 

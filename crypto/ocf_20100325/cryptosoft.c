@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * An OCF module that uses the linux kernel cryptoapi, based on the
  * original cryptosoft for BSD by Angelos D. Keromytis (angelos@cis.upenn.edu)
@@ -565,7 +568,7 @@ static void swcr_process_callback(struct crypto_async_request *creq, int err)
 			return;
 		dprintk("%s() fail %d\n", __FUNCTION__, -err);
 		req->crp->crp_etype = -err;
-#ifdef SYNO_FIX_OCF_MEMORY_LEAK
+#ifdef MY_ABC_HERE
 		switch (req->sw->sw_type & SW_TYPE_ALG_AMASK) {
 		case SW_TYPE_AHMAC:
 		case SW_TYPE_AHASH:
@@ -857,7 +860,7 @@ static void swcr_process_req(struct swcr_req *req)
 		case 0:
 			dprintk("crypto OP %s %d\n", ret ? "failed" : "success", ret);
 			crp->crp_etype = ret;
-#ifdef SYNO_FIX_OCF_MEMORY_LEAK
+#ifdef MY_ABC_HERE
 			ablkcipher_request_free(req->crypto_req);
 #endif
 			goto done;

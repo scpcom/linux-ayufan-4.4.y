@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  tcm_loop_fabric_scsi.c
  *
@@ -326,7 +329,7 @@ static int tcm_loop_queuecommand(
 	tl_tpg = &tl_hba->tl_hba_tpgs[sc->device->id];
 	se_tpg = tl_tpg->tl_se_tpg;
 
-#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
+#ifdef MY_ABC_HERE
 	if (sc->sc_data_direction == DMA_TO_DEVICE)
 		data_direction = DMA_TO_DEVICE;
 	else if (sc->sc_data_direction == DMA_FROM_DEVICE)

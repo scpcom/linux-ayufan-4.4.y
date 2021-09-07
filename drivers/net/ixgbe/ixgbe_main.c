@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 
   Intel 10 Gigabit PCI Express Linux driver
@@ -104,10 +107,10 @@ static struct pci_device_id ixgbe_pci_tbl[] = {
 	 board_82599 },
 	{PCI_VDEVICE(INTEL, IXGBE_DEV_ID_82599_CX4),
 	 board_82599 },
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 	{PCI_VDEVICE(INTEL, IXGBE_DEV_ID_82599_T3_LOM),
 	 board_82599 },
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 	{PCI_VDEVICE(INTEL, IXGBE_DEV_ID_82599_COMBO_BACKPLANE),
 	 board_82599 },
 
@@ -1176,7 +1179,7 @@ static void ixgbe_set_itr_msix(struct ixgbe_q_vector *q_vector)
 	return;
 }
 
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 /**
  * ixgbe_check_overtemp_task - worker thread to check over tempurature
  * @work: pointer to work_struct containing our data
@@ -1219,7 +1222,7 @@ static void ixgbe_check_overtemp_task(struct work_struct *work)
 	}
 }
 
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 static void ixgbe_check_fan_failure(struct ixgbe_adapter *adapter, u32 eicr)
 {
 	struct ixgbe_hw *hw = &adapter->hw;
@@ -1287,12 +1290,12 @@ static irqreturn_t ixgbe_msix_lsc(int irq, void *data)
 
 	if (hw->mac.type == ixgbe_mac_82599EB) {
 		ixgbe_check_sfp_event(adapter, eicr);
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 		adapter->interrupt_event = eicr;
 		if ((adapter->flags2 & IXGBE_FLAG2_TEMP_SENSOR_CAPABLE) &&
 		    ((eicr & IXGBE_EICR_GPI_SDP0) || (eicr & IXGBE_EICR_LSC)))
 			schedule_work(&adapter->check_overtemp_task);
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 
 		/* Handle Flow Director Full threshold interrupt */
 		if (eicr & IXGBE_EICR_FLOW_DIR) {
@@ -1800,10 +1803,10 @@ static inline void ixgbe_irq_enable(struct ixgbe_adapter *adapter)
 	u32 mask;
 
 	mask = (IXGBE_EIMS_ENABLE_MASK & ~IXGBE_EIMS_RTX_QUEUE);
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 	if (adapter->flags2 & IXGBE_FLAG2_TEMP_SENSOR_CAPABLE)
 		mask |= IXGBE_EIMS_GPI_SDP0;
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 	if (adapter->flags & IXGBE_FLAG_FAN_FAIL_CAPABLE)
 		mask |= IXGBE_EIMS_GPI_SDP1;
 	if (adapter->hw.mac.type == ixgbe_mac_82599EB) {
@@ -1857,11 +1860,11 @@ static irqreturn_t ixgbe_intr(int irq, void *data)
 		ixgbe_check_sfp_event(adapter, eicr);
 
 	ixgbe_check_fan_failure(adapter, eicr);
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 	if ((adapter->flags2 & IXGBE_FLAG2_TEMP_SENSOR_CAPABLE) &&
 	    ((eicr & IXGBE_EICR_GPI_SDP0) || (eicr & IXGBE_EICR_LSC)))
 		schedule_work(&adapter->check_overtemp_task);
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 
 	if (napi_schedule_prep(&(q_vector->napi))) {
 		adapter->tx_ring[0].total_packets = 0;
@@ -2770,7 +2773,7 @@ static int ixgbe_up_complete(struct ixgbe_adapter *adapter)
 		IXGBE_WRITE_REG(hw, IXGBE_EIAM, IXGBE_EICS_RTX_QUEUE);
 	}
 
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 	/* Enable Thermal over heat sensor interrupt */
 	if (adapter->flags2 & IXGBE_FLAG2_TEMP_SENSOR_CAPABLE) {
 		gpie = IXGBE_READ_REG(hw, IXGBE_GPIE);
@@ -2778,7 +2781,7 @@ static int ixgbe_up_complete(struct ixgbe_adapter *adapter)
 		IXGBE_WRITE_REG(hw, IXGBE_GPIE, gpie);
 	}
 
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 	/* Enable fan failure interrupt if media type is copper */
 	if (adapter->flags & IXGBE_FLAG_FAN_FAIL_CAPABLE) {
 		gpie = IXGBE_READ_REG(hw, IXGBE_GPIE);
@@ -3118,11 +3121,11 @@ void ixgbe_down(struct ixgbe_adapter *adapter)
 	    adapter->flags & IXGBE_FLAG_FDIR_PERFECT_CAPABLE)
 		cancel_work_sync(&adapter->fdir_reinit_task);
 
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 	if (adapter->flags2 & IXGBE_FLAG2_TEMP_SENSOR_CAPABLE)
 		cancel_work_sync(&adapter->check_overtemp_task);
 
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 	/* disable transmits in the hardware now that interrupts are off */
 	for (i = 0; i < adapter->num_tx_queues; i++) {
 		j = adapter->tx_ring[i].reg_idx;
@@ -4013,10 +4016,10 @@ static int __devinit ixgbe_sw_init(struct ixgbe_adapter *adapter)
 		adapter->max_msix_q_vectors = MAX_MSIX_Q_VECTORS_82599;
 		adapter->flags2 |= IXGBE_FLAG2_RSC_CAPABLE;
 		adapter->flags2 |= IXGBE_FLAG2_RSC_ENABLED;
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 		if (hw->device_id == IXGBE_DEV_ID_82599_T3_LOM)
 			adapter->flags2 |= IXGBE_FLAG2_TEMP_SENSOR_CAPABLE;
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 		adapter->flags |= IXGBE_FLAG_FDIR_HASH_CAPABLE;
 		adapter->ring_feature[RING_F_FDIR].indices =
 		                                         IXGBE_MAX_FDIR_INDICES;
@@ -5764,13 +5767,13 @@ static int __devinit ixgbe_probe(struct pci_dev *pdev,
 	}
 
 	/* reset_hw fills in the perm_addr as well */
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 	hw->phy.reset_if_overtemp = true;
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 	err = hw->mac.ops.reset_hw(hw);
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 	hw->phy.reset_if_overtemp = false;
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 	if (err == IXGBE_ERR_SFP_NOT_PRESENT &&
 	    hw->mac.type == ixgbe_mac_82598EB) {
 		/*
@@ -5933,10 +5936,10 @@ static int __devinit ixgbe_probe(struct pci_dev *pdev,
 	    adapter->flags & IXGBE_FLAG_FDIR_PERFECT_CAPABLE)
 		INIT_WORK(&adapter->fdir_reinit_task, ixgbe_fdir_reinit_task);
 
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 	if (adapter->flags2 & IXGBE_FLAG2_TEMP_SENSOR_CAPABLE)
 		INIT_WORK(&adapter->check_overtemp_task, ixgbe_check_overtemp_task);
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_IXGBE_DCA
 	if (dca_add_requester(&pdev->dev) == 0) {
 		adapter->flags |= IXGBE_FLAG_DCA_ENABLED;

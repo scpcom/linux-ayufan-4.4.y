@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  scsi_lib.c Copyright (C) 1999 Eric Youngdale
  *
@@ -68,7 +71,7 @@ static struct scsi_host_sg_pool scsi_sg_pools[] = {
 };
 #undef SP
 
-#ifdef SYNO_BADSECTOR_TEST
+#ifdef MY_ABC_HERE
 SDBADSECTORS  grgSdBadSectors[SYNO_MAX_INTERNAL_DISK];
 int     gBadSectorTest = 0;
 #endif
@@ -971,7 +974,7 @@ int scsi_init_io(struct scsi_cmnd *cmd, gfp_t gfp_mask)
 	if (error)
 		goto err_exit;
 
-#ifdef SYNO_BADSECTOR_TEST
+#ifdef MY_ABC_HERE
 	if (gBadSectorTest > 0) {
 		sector_t    badSector, curSector;
 		int i;
@@ -1189,12 +1192,12 @@ int scsi_prep_state_check(struct scsi_device *sdev, struct request *req)
 			 * commands.  The device must be brought online
 			 * before trying any recovery commands.
 			 */
-#ifdef SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 			if (printk_ratelimit()) {
 #endif
 			sdev_printk(KERN_ERR, sdev,
 				    "rejecting I/O to offline device\n");
-#ifdef SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 			}
 #endif
 			ret = BLKPREP_KILL;
@@ -1544,12 +1547,12 @@ static void scsi_request_fn(struct request_queue *q)
 			break;
 
 		if (unlikely(!scsi_device_online(sdev))) {
-#ifdef SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 			if (printk_ratelimit()) {
 #endif
 			sdev_printk(KERN_ERR, sdev,
 				    "rejecting I/O to offline device\n");
-#ifdef SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 			}
 #endif
 			scsi_kill_request(req, q);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * talitos - Freescale Integrated Security Engine (SEC) device driver
  *
@@ -272,7 +275,7 @@ static int init_device(struct device *dev)
 	return 0;
 }
 
-#ifdef SYNO_TALITOS_CHANNEL_FIX
+#ifdef MY_ABC_HERE
 static void talitos_release_xor(struct device *dev, struct talitos_desc *hwdesc,
 				void *context, int error);
 #endif
@@ -304,7 +307,7 @@ static int talitos_submit(struct device *dev, struct talitos_desc *desc,
 	/* emulate SEC's round-robin channel fifo polling scheme */
 	ch = atomic_inc_return(&priv->last_chan) & (priv->num_channels - 1);
 
-#ifdef SYNO_TALITOS_CHANNEL_FIX
+#ifdef MY_ABC_HERE
 	// XOR engine always use channel 0 to prevent bug when combind with other engine
 	if (callback == talitos_release_xor) {
 		ch = 0;

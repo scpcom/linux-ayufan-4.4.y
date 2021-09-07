@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/ata/sata_fsl.c
  *
@@ -574,7 +577,7 @@ static void sata_fsl_pmp_attach(struct ata_port *ap)
 
 	temp = ioread32(hcr_base + HCONTROL);
 	iowrite32((temp | HCONTROL_PMP_ATTACHED), hcr_base + HCONTROL);
-#if defined SYNO_QORIQ_ESATA_LIMIT
+#if defined MY_ABC_HERE
 	if(ap->nr_pmp_links) {
 		if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) || IS_SYNOLOGY_DX513(ap->PMSynoUnique)) {
 			struct device *dev = ap->host->dev;
@@ -1067,10 +1070,10 @@ static void sata_fsl_error_intr(struct ata_port *ap)
 #else
 	if (hstatus & INT_ON_PHYRDY_CHG) {
 #endif
-#ifdef SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
-#ifdef SYNO_ATA_FAST_PROBE
+#ifdef MY_ABC_HERE
 		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 #endif
 		DPRINTK("SATA FSL: PHYRDY change indication\n");
@@ -1324,7 +1327,7 @@ static int sata_fsl_init_controller(struct ata_host *host)
 	return 0;
 }
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static struct device_attribute *fsl_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
@@ -1332,7 +1335,7 @@ static struct device_attribute *fsl_shost_attrs[] = {
 #ifdef SYNO_SATA_COMPATIBILITY
 	&dev_attr_syno_port_thaw,
 #endif
-#ifdef SYNO_TRANS_HOST_TO_DISK
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
 #endif
 	NULL
@@ -1372,7 +1375,7 @@ static struct scsi_host_template sata_fsl_sht = {
 	.can_queue = SATA_FSL_QUEUE_DEPTH,
 	.sg_tablesize = SATA_FSL_MAX_PRD_USABLE,
 	.dma_boundary = ATA_DMA_BOUNDARY,
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	.shost_attrs 		= fsl_shost_attrs,
 #endif
 };
@@ -1380,7 +1383,7 @@ static struct scsi_host_template sata_fsl_sht = {
 static struct ata_port_operations sata_fsl_ops = {
 	.inherits		= &sata_pmp_port_ops,
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	.qc_defer = sata_syno_fsl_defer_cmd,
 #else
 	.qc_defer = ata_std_qc_defer,
@@ -1549,7 +1552,7 @@ static int sata_fsl_resume(struct of_device *op)
 	iowrite32(temp | 0x80000700, hcr_base+HCONTROL);
 #endif
 
-#if defined SYNO_QORIQ_ESATA_LIMIT
+#if defined MY_ABC_HERE
 	if(ap->nr_pmp_links) {
 		if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) || IS_SYNOLOGY_DX513(ap->PMSynoUnique)) {
 			sata_fsl_scr_read(&ap->link, SCR_CONTROL, &temp);

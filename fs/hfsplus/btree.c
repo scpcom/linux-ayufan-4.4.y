@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/btree.c
  *
@@ -68,7 +71,7 @@ struct hfs_btree *hfs_btree_open(struct super_block *sb, u32 id)
 			tree->keycmp = hfsplus_cat_case_cmp_key;
 			HFSPLUS_SB(sb).flags |= HFSPLUS_SB_CASEFOLD;
 		}
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	} else if (id == HFSPLUS_ATTR_CNID) {
 		if (tree->max_key_len != HFSPLUS_ATTR_KEYLEN - sizeof(u16)) {
 			printk(KERN_ERR "invalid attributes max_key_len %d\n",

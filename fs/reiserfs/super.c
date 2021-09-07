@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2000 by Hans Reiser, licensing governed by reiserfs/README
  *
@@ -615,11 +618,11 @@ static int reiserfs_quota_on(struct super_block *, int, int, char *, int);
 static const struct dquot_operations reiserfs_quota_operations = {
 	.initialize = dquot_initialize,
 	.drop = dquot_drop,
-#ifndef SYNO_DQUOT_UPGRADE
+#ifndef MY_ABC_HERE
 	.alloc_space = dquot_alloc_space,
 #endif
 	.alloc_inode = dquot_alloc_inode,
-#ifndef SYNO_DQUOT_UPGRADE
+#ifndef MY_ABC_HERE
 	.free_space = dquot_free_space,
 #endif
 	.free_inode = dquot_free_inode,

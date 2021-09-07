@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -128,7 +131,7 @@ MV_U32 mvCpuPclkGet(MV_VOID)
 	return MV_DEFAULT_PCLK
 #endif
 }
-#ifdef SYNO_CPUFREQ_ADJUST
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(mvCpuPclkGet);
 #endif
 

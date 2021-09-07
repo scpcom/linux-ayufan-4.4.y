@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  iscsi_target_login.c
  *
@@ -638,7 +641,7 @@ static int iscsi_post_login_handler(
 			stop_timer = 1;
 		}
 
-#ifdef SYNO_LIO_REDUCE_MESSAGE
+#ifdef MY_ABC_HERE
 		if( sess->sess_ops->SessionType ) {
 			printk(KERN_ERR "iSCSI - Discovery session from [%s]\n", ip);
 		} else {
@@ -653,7 +656,7 @@ static int iscsi_post_login_handler(
 
 		list_add_tail(&conn->conn_list, &sess->sess_conn_list);
 		atomic_inc(&sess->nconn);
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "Incremented iSCSI Connection count to %hu"
 			" from node: %s\n", atomic_read(&sess->nconn),
 			SESS_OPS(sess)->InitiatorName);
@@ -684,7 +687,7 @@ static int iscsi_post_login_handler(
 	TRACE(TRACE_STATE, "Moving to TARG_SESS_STATE_LOGGED_IN.\n");
 	sess->session_state = TARG_SESS_STATE_LOGGED_IN;
 
-#ifdef SYNO_LIO_REDUCE_MESSAGE
+#ifdef MY_ABC_HERE
 	if( sess->sess_ops->SessionType ) {
 		printk(KERN_ERR "iSCSI - Discovery session from [%s]\n", ip);
 	} else {
@@ -699,7 +702,7 @@ static int iscsi_post_login_handler(
 	spin_lock_bh(&sess->conn_lock);
 	list_add_tail(&conn->conn_list, &sess->sess_conn_list);
 	atomic_inc(&sess->nconn);
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Incremented iSCSI Connection count to %hu from node:"
 		" %s\n", atomic_read(&sess->nconn),
 		SESS_OPS(sess)->InitiatorName);
@@ -709,19 +712,19 @@ static int iscsi_post_login_handler(
 	sess->sid = tpg->sid++;
 	if (!sess->sid)
 		sess->sid = tpg->sid++;
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Established iSCSI session from node: %s\n",
 			SESS_OPS(sess)->InitiatorName);
 #endif
 
-#ifdef SYNO_LIO_MAX_SESSIONS
+#ifdef MY_ABC_HERE
 	atomic_inc(&tpg->nr_sessions);
 #endif
 	tpg->nsessions++;
 	if (tpg->tpg_tiqn)
 		tpg->tpg_tiqn->tiqn_nsessions++;
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Incremented number of active iSCSI sessions to %u on"
 		" iSCSI Target Portal Group: %hu\n", tpg->nsessions, tpg->tpgt);
 #endif
@@ -748,7 +751,7 @@ static void iscsi_handle_login_thread_timeout(unsigned long data)
 	spin_lock_bh(&np->np_thread_lock);
 	iscsi_ntoa2(buf_ipv4, np->np_ipv4);
 
-#ifdef SYNO_LIO_REDUCE_MESSAGE
+#ifdef MY_ABC_HERE
 	printk(KERN_ERR "iSCSI - Login timeout on Network Portal %s:%hu\n",
 			buf_ipv4, np->np_port);
 #else
@@ -972,7 +975,7 @@ int iscsi_target_login_thread(void *arg)
 	struct iscsi_init_login_cmnd *pdu;
 	struct sockaddr_in sock_in;
 	struct sockaddr_in6 sock_in6;
-#ifdef SYNO_LIO_MAX_SESSIONS
+#ifdef MY_ABC_HERE
 	const size_t MAX_LOGIN_RETRY = 30;
 	size_t i = 0;
 #endif
@@ -1176,7 +1179,7 @@ get_new_sock:
 					STAT_DETAIL_TARG_ERROR);
 			goto new_sess_out;
 		}
-#ifdef SYNO_LIO_PRINTABLE_IPV6
+#ifdef MY_ABC_HERE
 		if (!(iscsi_ntop6((const unsigned char *)
 				&sock_in6.sin6_addr.in6_u,
 				(char *)&conn->ipv6_login_ip[0],
@@ -1229,7 +1232,7 @@ get_new_sock:
 	conn->local_port = np->np_port;
 #endif
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Received iSCSI login request from %s on %s Network"
 			" Portal %s:%hu\n", ip_init_buf,
 		(conn->network_transport == ISCSI_TCP) ? "TCP" : "SCTP",
@@ -1292,7 +1295,7 @@ get_new_sock:
 		}
 	}
 
-#ifdef SYNO_LIO_MAX_SESSIONS
+#ifdef MY_ABC_HERE
 	for( i = 0; i <= MAX_LOGIN_RETRY; ++i ) {
 		spin_lock_bh(&tpg->tpg_se_tpg->session_lock);
 		if( (SESS(conn) && SESS(conn)->sess_ops->SessionType) || // skip discovery session
@@ -1338,7 +1341,7 @@ get_new_sock:
 	goto get_new_sock;
 
 new_sess_out:
-#ifdef SYNO_LIO_REDUCE_MESSAGE
+#ifdef MY_ABC_HERE
 	if( ip ) {
 		printk(KERN_ERR "iSCSI - Login negotiation failed from [%s]\n", ip);
 	} else {

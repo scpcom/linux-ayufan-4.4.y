@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * (C) Copyright David Brownell 2000-2002
  *
@@ -185,7 +188,7 @@ void usb_hcd_pci_remove(struct pci_dev *dev)
 }
 EXPORT_SYMBOL_GPL(usb_hcd_pci_remove);
 
-#ifdef SYNO_USB_SHUTDOWN_FIX
+#ifdef MY_ABC_HERE
 #include <linux/kthread.h>
 extern struct task_struct *khubd_task;
 #endif
@@ -202,14 +205,14 @@ void usb_hcd_pci_shutdown(struct pci_dev *dev)
 	if (!hcd)
 		return;
 
-#ifdef SYNO_USB_SHUTDOWN_FIX
+#ifdef MY_ABC_HERE
 	if (khubd_task != NULL) {
 		kthread_stop(khubd_task);
 		khubd_task = NULL;
 	}
 #endif
 
-#ifdef SYNO_USB_SHUTDOWN_FIX
+#ifdef MY_ABC_HERE
 	if (hcd->irq >= 0) {
 		//disable_irq(hcd->irq);
 		free_irq(hcd->irq, hcd);

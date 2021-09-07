@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _RAID10_H
 #define _RAID10_H
 
@@ -112,8 +115,8 @@ struct r10bio_s {
 #define	R10BIO_IsSync	1
 #define	R10BIO_IsRecover 2
 #define	R10BIO_Degraded 3
-#ifdef SYNO_RAID_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 #define R10BIO_FIX_READ_ERROR 4
-#endif /* SYNO_RAID_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 
 #endif

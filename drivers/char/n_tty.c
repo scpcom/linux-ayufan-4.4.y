@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * n_tty.c --- implements the N_TTY line discipline.
  *
@@ -1969,13 +1972,13 @@ static ssize_t n_tty_write(struct tty_struct *tty, struct file *file,
 				tty->ops->flush_chars(tty);
 		} else {
 			while (nr > 0) {
-#ifdef SYNO_CVE_2014_0196
+#ifdef MY_ABC_HERE
 				mutex_lock(&tty->output_lock);
-#endif /* SYNO_CVE_2014_0196 */
+#endif /* MY_ABC_HERE */
 				c = tty->ops->write(tty, b, nr);
-#ifdef SYNO_CVE_2014_0196
+#ifdef MY_ABC_HERE
 				mutex_unlock(&tty->output_lock);
-#endif /* SYNO_CVE_2014_0196 */
+#endif /* MY_ABC_HERE */
 				if (c < 0) {
 					retval = c;
 					goto break_out;

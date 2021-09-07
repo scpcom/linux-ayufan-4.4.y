@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/mm/memory.c
  *
@@ -3378,7 +3381,7 @@ void might_fault(void)
 EXPORT_SYMBOL(might_fault);
 #endif
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 extern struct mm_struct *syno_get_task_mm(struct task_struct *task);
 int syno_access_process_vm(struct task_struct *tsk, unsigned long addr, void *buf, int len, int write)
 {
@@ -3442,4 +3445,4 @@ int syno_access_process_vm(struct task_struct *tsk, unsigned long addr, void *bu
 
 	return buf - old_buf;
 }
-#endif /* SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */

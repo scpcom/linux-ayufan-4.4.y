@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _SCSI_SCSI_HOST_H
 #define _SCSI_SCSI_HOST_H
 
@@ -43,13 +46,13 @@ struct blk_queue_tags;
 #define DISABLE_CLUSTERING 0
 #define ENABLE_CLUSTERING 1
 
-#if defined(SYNO_DISK_HIBERNATION) || defined(SYNO_FIXED_DISK_NAME)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 enum {
    	SYNO_PORT_TYPE_SATA = 1,
 	SYNO_PORT_TYPE_USB = 2,
 	SYNO_PORT_TYPE_SAS = 3,
 };
-#endif /* SYNO_DISK_HIBERNATION */
+#endif /* MY_ABC_HERE */
 
 struct scsi_host_template {
 	struct module *module;
@@ -494,7 +497,7 @@ struct scsi_host_template {
 	 */
 	struct list_head legacy_hosts;
 
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	/*
 	 * This is an optional routine that allow low level driver can deside
 	 * target start index in scsi layer.
@@ -504,7 +507,7 @@ struct scsi_host_template {
 	 */
 	int  (* syno_index_get)(struct Scsi_Host *host, uint channel, uint id, uint lun);
 #endif
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/*
 	 * This is an optional routine that could power off host power.
 	 *
@@ -513,7 +516,7 @@ struct scsi_host_template {
 	 */
 	int  (* syno_host_power_ctl)(struct Scsi_Host *host, u8 blPowerOn);
 #endif
-#if defined(SYNO_DISK_HIBERNATION) || defined(SYNO_FIXED_DISK_NAME)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	int  syno_port_type;
 #endif
 

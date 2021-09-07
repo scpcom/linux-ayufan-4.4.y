@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef ISCSI_TARGET_TPG_H
 #define ISCSI_TARGET_TPG_H
 
@@ -27,7 +30,7 @@ extern u32 lio_tpg_get_inst_index(struct se_portal_group_s *);
 #endif /* SNMP_SUPPORT */
 extern void lio_set_default_node_attributes(struct se_node_acl_s *);
 
-#ifdef SYNO_LIO_DEFAULT_ACL
+#ifdef MY_ABC_HERE
 extern void lio_dup_node_attributes(struct se_node_acl_s*, struct se_node_acl_s*);
 #endif
 
@@ -43,7 +46,7 @@ extern void iscsi_tpg_dump_params(iscsi_portal_group_t *);
 extern int iscsi_tpg_add_portal_group(iscsi_tiqn_t *, iscsi_portal_group_t *);
 extern int iscsi_tpg_del_portal_group(iscsi_tiqn_t *, iscsi_portal_group_t *,
 			int);
-#ifdef SYNO_LIO_FORCE_READ_ONLY
+#ifdef MY_ABC_HERE
 extern void iscsi_tpg_active_portal_group(iscsi_portal_group_t*);
 extern void iscsi_tpg_deactive_portal_group(iscsi_portal_group_t*);
 #endif

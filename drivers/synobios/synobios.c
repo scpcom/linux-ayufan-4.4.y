@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/syno.h>
 
 #include <linux/module.h>
@@ -18,7 +21,7 @@
 #include <linux/ioport.h>
 #include "mapping.h"
 
-#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 #include <linux/raid/libmd-report.h>
 #endif
 
@@ -45,10 +48,10 @@ struct sd_softc {
 static struct sd_softc scSynoBios;
 static SYNO_SYS_STATUS *pgSysStatus = NULL;
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 extern int (*funcSYNOGetHwCapability)(CAPABILITY *);
 #endif
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
 
@@ -90,7 +93,7 @@ static int synobios_record_shutdown_event(unsigned int type, SYNO_SHUTDOWN_LOG s
 	return ret;
 }
 
-#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 static int synobios_record_raid_event(unsigned int type, unsigned int raidno, unsigned int diskno, unsigned int sector)
 {
 	int ret;
@@ -109,7 +112,7 @@ static int synobios_record_raid_event(unsigned int type, unsigned int raidno, un
 }
 #endif
 
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 static int synobios_record_ebox_refresh_event(int portIndex)
 {
 	int ret = 0;
@@ -559,7 +562,7 @@ static int synobios_ioctl (struct inode *inode, struct file *filp,
 		}
     case SYNOIO_SET_UART2:
 		{
-#ifdef SYNO_TTYS_WRITE
+#ifdef MY_ABC_HERE
 			extern int syno_ttys_write(const int index, const char* szBuf);
 			char *cmd = (char *)arg;
 			char szBuf[16];
@@ -749,13 +752,13 @@ int synobios_init(void)
 	pgSysStatus->power_fail |= SIGNATURE_POWER_FAIL;
 	pgSysStatus->ebox_fan_fail |= SIGNATURE_EBOX_FAN_FAIL;
 
-#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 	funcSYNOSendRaidEvent = synobios_record_raid_event;
 #endif
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	funcSYNOGetHwCapability = GetHwCapability;
 #endif
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 	funcSYNOSendEboxRefreshEvent = synobios_record_ebox_refresh_event;
 #endif
 
@@ -771,13 +774,13 @@ int synobios_init(void)
 
 void synobios_cleanup(void)
 {
-#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 	funcSYNOSendRaidEvent = NULL;
 #endif
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	funcSYNOGetHwCapability = NULL;
 #endif
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 	funcSYNOSendEboxRefreshEvent = NULL;
 #endif
 

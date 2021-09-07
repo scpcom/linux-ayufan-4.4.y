@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/usb/driver.c - most of the driver model stuff for usb
  *
@@ -29,15 +32,15 @@
 #include "hcd.h"
 #include "usb.h"
 
-#ifdef SYNO_HAS_SDCARDREADER
+#ifdef MY_ABC_HERE
 #include <linux/synobios.h>
 #endif
 
-#ifdef SYNO_USB_COPY
+#ifdef MY_ABC_HERE
 extern int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev);
 #endif
 
-#ifdef SYNO_HAS_SDCARDREADER
+#ifdef MY_ABC_HERE
 extern int (*funcSYNOGetHwCapability)(CAPABILITY *);
 extern int blIsCardReader(struct usb_device *usbdev);
 
@@ -771,14 +774,14 @@ static int usb_uevent(struct device *dev, struct kobj_uevent_env *env)
 			   usb_dev->descriptor.bDeviceProtocol))
 		return -ENOMEM;
 
-#ifdef SYNO_USB_COPY
+#ifdef MY_ABC_HERE
 	if (blIsUSBDeviceAtFrontPort(usb_dev)) {
 		if (add_uevent_var(env, "FRONTPORT=1"))
 			return -ENOMEM;
 	}
 #endif
 
-#ifdef SYNO_HAS_SDCARDREADER
+#ifdef MY_ABC_HERE
 	if(has_cardreader()) {
 		if (blIsCardReader(usb_dev)) {
 			if (add_uevent_var(env, "CARDREADER=1"))

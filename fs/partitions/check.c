@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  fs/partitions/check.c
  *
@@ -135,7 +138,7 @@ char *disk_name(struct gendisk *hd, int partno, char *buf)
 
 const char *bdevname(struct block_device *bdev, char *buf)
 {
-#ifdef SYNO_BLOCK_DEVICE_RELEASE_NO_NAME
+#ifdef MY_ABC_HERE
 	if (!bdev || !bdev->bd_part) {
 		printk(KERN_ERR "bdevname: bdev data should not be NULL\n");
 		return buf;
@@ -267,7 +270,7 @@ ssize_t part_inflight_show(struct device *dev,
 	return sprintf(buf, "%8u %8u\n", p->in_flight[0], p->in_flight[1]);
 }
 
-#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
+#ifdef MY_ABC_HERE
 extern void
 PartitionRemapModeSet(struct gendisk *gd,
 							struct hd_struct *phd,
@@ -325,7 +328,7 @@ static DEVICE_ATTR(inflight, S_IRUGO, part_inflight_show, NULL);
 static struct device_attribute dev_attr_fail =
 	__ATTR(make-it-fail, S_IRUGO|S_IWUSR, part_fail_show, part_fail_store);
 #endif
-#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
+#ifdef MY_ABC_HERE
 	static DEVICE_ATTR(auto_remap, S_IRUGO|S_IWUSR, part_auto_remap_show, part_auto_remap_store);
 #endif
 
@@ -339,7 +342,7 @@ static struct attribute *part_attrs[] = {
 #ifdef CONFIG_FAIL_MAKE_REQUEST
 	&dev_attr_fail.attr,
 #endif
-#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
+#ifdef MY_ABC_HERE
 	&dev_attr_auto_remap.attr,
 #endif
 	NULL
@@ -486,7 +489,7 @@ struct hd_struct *add_partition(struct gendisk *disk, int partno,
 	if (!dev_get_uevent_suppress(ddev))
 		kobject_uevent(&pdev->kobj, KOBJ_ADD);
 
-#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
+#ifdef MY_ABC_HERE
 	PartitionRemapModeSet(disk, p, 0);
 #endif
 

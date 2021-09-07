@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +46,7 @@
 #include <linux/serial.h>
 #include <linux/serial_8250.h>
 #include <linux/serial_reg.h>
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
+#ifdef MY_ABC_HERE
 #include <linux/ata_platform.h>
 #endif
 #ifdef SYNO_6281_SPI_USE_OPENSOURCE
@@ -366,7 +369,7 @@ static void serial_initialize(void)
 }
 
 #ifdef CONFIG_SYNO_MV88F6281
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 extern void syno_mv_net_shutdown();
 #endif
 #define	UART1_REG(x)			(PORT1_BASE + ((UART_##x) << 2))
@@ -375,7 +378,7 @@ extern void syno_mv_net_shutdown();
 #define	SOFTWARE_REBOOT			0x43
 static void synology_power_off(void)
 {
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	/* platform driver will not shutdown when poweroff */
 	syno_mv_net_shutdown();
 #endif
@@ -702,7 +705,7 @@ static struct spi_board_info __initdata synology_spi_slave_info[] = {
 };
 #endif
 
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
+#ifdef MY_ABC_HERE
 /*****************************************************************************
  * SATA
  ****************************************************************************/
@@ -741,7 +744,7 @@ void __init kirkwood_sata_init()
 }
 #endif
 
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_USB
+#ifdef MY_ABC_HERE
 #include "../plat-orion/include/plat/ehci-orion.h"
 static struct orion_ehci_data kirkwood_ehci_data = {
     .phy_version    = EHCI_PHY_NA,
@@ -888,11 +891,11 @@ static void __init mv_init(void)
        /* WATCHDOG */
 	mv_wdt_init();
 
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
+#ifdef MY_ABC_HERE
 	kirkwood_sata_init();
 #endif
 
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_USB
+#ifdef MY_ABC_HERE
     kirkwood_ehci_init();
 #endif
 

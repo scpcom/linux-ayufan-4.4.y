@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fat/inode.c
  *
@@ -86,7 +89,7 @@ static inline int __fat_get_block(struct inode *inode, sector_t iblock,
 	if (iblock != MSDOS_I(inode)->mmu_private >> sb->s_blocksize_bits) {
 		fat_fs_error(sb, "corrupted file size (i_pos %lld, %lld)",
 			MSDOS_I(inode)->i_pos, MSDOS_I(inode)->mmu_private);
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 		return -ECORRUPT;
 #else
 		return -EIO;
@@ -158,13 +161,13 @@ static int fat_write_begin(struct file *file, struct address_space *mapping,
 			loff_t pos, unsigned len, unsigned flags,
 			struct page **pagep, void **fsdata)
 {
-#ifdef SYNO_ENHANCE_FAT_WRITE_BEGIN
+#ifdef MY_ABC_HERE
 	int ret;
 	*pagep = NULL;
 	ret = cont_write_begin(file, mapping, pos, len, flags, pagep, fsdata,
 						   fat_get_block,
 						   &MSDOS_I(mapping->host)->mmu_private);
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 	if (ret >= 0 && (flags & AOP_FLAG_RECVFILE)) {
 		if (pos+len > mapping->host->i_size) {
 			i_size_write(mapping->host, pos+len);
@@ -238,7 +241,7 @@ static sector_t _fat_bmap(struct address_space *mapping, sector_t block)
 	return blocknr;
 }
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 static int fat_prepare_write(struct file *file, struct page *page,
                 unsigned from, unsigned to)
 {
@@ -268,7 +271,7 @@ static const struct address_space_operations fat_aops = {
 	.sync_page	= block_sync_page,
 	.write_begin	= fat_write_begin,
 	.write_end	= fat_write_end,
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
     .prepare_write  = fat_prepare_write,
     .commit_write   = fat_commit_write,
 #endif
@@ -925,7 +928,7 @@ enum {
 	Opt_charset, Opt_shortname_lower, Opt_shortname_win95,
 	Opt_shortname_winnt, Opt_shortname_mixed, Opt_utf8_no, Opt_utf8_yes,
 	Opt_uni_xl_no, Opt_uni_xl_yes, Opt_nonumtail_no, Opt_nonumtail_yes,
-#ifdef SYNO_FAT_DEFAULT_MNT_FLUSH
+#ifdef MY_ABC_HERE
 	Opt_obsolate, Opt_flush, Opt_noflush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
 #else
 	Opt_obsolate, Opt_flush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
@@ -954,7 +957,7 @@ static const match_table_t fat_tokens = {
 	{Opt_debug, "debug"},
 	{Opt_immutable, "sys_immutable"},
 	{Opt_flush, "flush"},
-#ifdef SYNO_FAT_DEFAULT_MNT_FLUSH
+#ifdef MY_ABC_HERE
 	{Opt_noflush, "noflush"},
 #endif
 	{Opt_tz_utc, "tz=UTC"},
@@ -1042,7 +1045,7 @@ static int parse_options(char *options, int is_vfat, int silent, int *debug,
 	opts->usefree = opts->nocase = 0;
 	opts->tz_utc = 0;
 	opts->errors = FAT_ERRORS_RO;
-#ifdef SYNO_FAT_DEFAULT_MNT_FLUSH
+#ifdef MY_ABC_HERE
 	opts->flush = 1;
 #endif
 	*debug = 0;
@@ -1134,7 +1137,7 @@ static int parse_options(char *options, int is_vfat, int silent, int *debug,
 		case Opt_flush:
 			opts->flush = 1;
 			break;
-#ifdef SYNO_FAT_DEFAULT_MNT_FLUSH
+#ifdef MY_ABC_HERE
 		case Opt_noflush:
 			opts->flush = 0;
 			break;
@@ -1507,7 +1510,7 @@ int fat_fill_super(struct super_block *sb, void *data, int silent,
 	sprintf(buf, "cp%d", sbi->options.codepage);
 	sbi->nls_disk = load_nls(buf);
 	if (!sbi->nls_disk) {
-#ifdef SYNO_FAT_LOAD_DEF_NLS
+#ifdef MY_ABC_HERE
 		if(!silent) {
 			printk(KERN_ERR "FAT: nls_disk load default table\n");
 		}
@@ -1526,7 +1529,7 @@ int fat_fill_super(struct super_block *sb, void *data, int silent,
 	if (sbi->options.isvfat) {
 		sbi->nls_io = load_nls(sbi->options.iocharset);
 		if (!sbi->nls_io) {
-#ifdef SYNO_FAT_LOAD_DEF_NLS
+#ifdef MY_ABC_HERE
 			if(!silent) {
 				printk(KERN_ERR "FAT: nls_io load default table\n");
 			}

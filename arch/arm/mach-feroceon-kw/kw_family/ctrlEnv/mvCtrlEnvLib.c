@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -112,11 +115,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	#define DB(x)
 #endif	
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 extern long g_internal_netif_num;
 #endif
 
-#ifdef SYNO_MPPCTL_REG_W
+#ifdef MY_ABC_HERE
 MV_STATUS SYNOMppCtrlRegWrite(MV_U32 mppPin, MV_U32 mppVal)
 {
 	MV_U32 origVal;
@@ -460,7 +463,7 @@ MV_U32 mvCtrlEthMaxPortGet(MV_VOID)
 {
 	MV_U32 devId;
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 	if (g_internal_netif_num >= 0) {
 		return g_internal_netif_num;
 	}else{
@@ -1473,7 +1476,7 @@ MV_VOID   mvCtrlPwrSaveOn(MV_VOID)
 			     : "r" (old)
 			     : "memory");
 }
-#ifdef SYNO_CPUFREQ_ADJUST
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(mvCtrlPwrSaveOn);
 #endif
 
@@ -1512,7 +1515,7 @@ MV_VOID   mvCtrlPwrSaveOff(MV_VOID)
 			     : "r" (old)
 			     : "memory");
 }
-#ifdef SYNO_CPUFREQ_ADJUST
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(mvCtrlPwrSaveOff);
 #endif
 

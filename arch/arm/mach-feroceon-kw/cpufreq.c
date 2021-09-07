@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mach-kirkwood/cpufreq.c
  *
@@ -34,7 +37,7 @@ static struct cpufreq_frequency_table kw_freqs[] = {
  */
 static inline void kw_set_powersave(u8 on)
 {
-#ifndef SYNO_NO_PRINT_WHILE_SWITCH_CPUFREQ
+#ifndef MY_ABC_HERE
 	printk(KERN_DEBUG "cpufreq: Setting PowerSaveState to %s\n",
 		on ? "on" : "off");
 #endif 
@@ -98,7 +101,7 @@ static int kw_cpufreq_target(struct cpufreq_policy *policy,
 	freqs.new = kw_freqs[index].frequency;
 	freqs.cpu = policy->cpu;
 
-#ifndef SYNO_NO_PRINT_WHILE_SWITCH_CPUFREQ 
+#ifndef MY_ABC_HERE 
 	printk(KERN_DEBUG "cpufreq: Setting CPU Frequency to %u KHz\n",freqs.new);
 #endif
 

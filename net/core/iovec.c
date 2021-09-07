@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	iovec manipulation routines.
  *
@@ -97,7 +100,7 @@ int memcpy_toiovec(struct iovec *iov, unsigned char *kdata, int len)
 	return 0;
 }
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 /* this was removed in 2.6. Re-add it because we beed it in recvfile. */
 /*
  *	In kernel copy to iovec. Returns -EFAULT on error.
@@ -122,7 +125,7 @@ void memcpy_tokerneliovec(struct iovec *iov, unsigned char *kdata, int len)
 		iov++;
 	}
 }
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 /*
  *	Copy kernel to iovec. Returns -EFAULT on error.
  */

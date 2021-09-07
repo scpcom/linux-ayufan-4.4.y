@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _SCSI_IOCTL_H
 #define _SCSI_IOCTL_H 
 
@@ -8,12 +11,12 @@
 #define SCSI_IOCTL_START_UNIT 5
 #define SCSI_IOCTL_STOP_UNIT 6
 
-#ifdef SYNO_DISK_HIBERNATION
+#ifdef MY_ABC_HERE
 /* kernel alos defined other scsi ioctl in scsi.h. If you want add new scsi ioctl,
  * you must check scsi.h. too */
 #define SD_IOCTL_IDLE 4746
 #define SD_IOCTL_SUPPORT_SLEEP 4747
-#endif /* SYNO_DISK_HIBERNATION */
+#endif /* MY_ABC_HERE */
 
 /* The door lock/unlock constants are compatible with Sun constants for
    the cdrom */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2000-2004 by David Brownell
  *
@@ -1182,7 +1185,7 @@ MODULE_LICENSE ("GPL");
 #endif
 
 #if defined(CONFIG_ARCH_FEROCEON) || defined(CONFIG_MARVELL)
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_USB
+#ifdef MY_ABC_HERE
 #include "ehci-orion.c"
 #define	PLATFORM_DRIVER		ehci_orion_driver
 #else

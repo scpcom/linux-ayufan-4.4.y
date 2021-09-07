@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2000-2009 Synology Inc. All rights reserved.
 
 #include <linux/kernel.h> /* printk() */
@@ -7,7 +10,7 @@
 #include "../i2c/i2c-mv.h"
 #include "mv6281_common.h"
 
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 #include <linux/synobios.h>
 #endif
 
@@ -27,7 +30,7 @@ InitModuleType(struct synobios_ops *ops)
 
 	switch (model) {
 	case MODEL_DS210j:
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 		if (syno_is_hw_version(HW_DS210jv20)) {
 			pType = &type_210jv2;
 		} else if (syno_is_hw_version(HW_DS210jv30)) {

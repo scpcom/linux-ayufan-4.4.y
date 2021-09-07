@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/compiler.h>
 #include <linux/file.h>
 #include <linux/fs.h>
@@ -44,7 +47,7 @@ SYSCALL_DEFINE2(utime, char __user *, filename, struct utimbuf __user *, times)
 
 #endif
 
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 /**
  * sys_SYNOUtime() is used to update create time.
  *

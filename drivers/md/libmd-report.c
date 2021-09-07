@@ -1,5 +1,8 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2000-2008 Synology Inc. All rights reserved.
-#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 #include <linux/bio.h>
 #include <linux/synobios.h>
 #include <linux/synolib.h>
@@ -50,7 +53,7 @@ void SynoReportCorrectBadSector(sector_t sector, int md_minor,
 EXPORT_SYMBOL(SynoReportCorrectBadSector);
 EXPORT_SYMBOL(funcSYNOSendRaidEvent);
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 sector_t (*funcSYNOLvLgSectorCount)(void *, sector_t) = NULL;
 int (*funcSYNOSendAutoRemapRaidEvent)(unsigned int, unsigned long long, unsigned int) = NULL;
 int (*funcSYNOSendAutoRemapLVEvent)(const char*, unsigned long long, unsigned int) = NULL;
@@ -83,4 +86,4 @@ EXPORT_SYMBOL(funcSYNOLvLgSectorCount);
 EXPORT_SYMBOL(funcSYNOSendAutoRemapRaidEvent);
 EXPORT_SYMBOL(funcSYNOSendAutoRemapLVEvent);
 #endif
-#endif /* SYNO_RAID_SECTOR_STATUS_REPORT */
+#endif /* MY_ABC_HERE */

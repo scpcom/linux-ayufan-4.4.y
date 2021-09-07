@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/cifssmb.c
  *
@@ -164,7 +167,7 @@ cifs_reconnect_tcon(struct cifsTconInfo *tcon, int smb_command)
 	if (!ses->need_reconnect && !tcon->need_reconnect)
 		return 0;
 
-#ifdef SYNO_CIFS_TCON_RECONNECT_CODEPAGE_UTF8
+#ifdef MY_ABC_HERE
 	nls_codepage = load_nls("utf8");
 #else
 	nls_codepage = load_nls_default();
@@ -1268,7 +1271,7 @@ openRetry:
 	/* but it helps speed up case sensitive checks for other
 	servers such as Samba */
 	if ((tcon->ses->capabilities & CAP_UNIX)
-#ifdef SYNO_CASELESS_CIFS_MOUNT
+#ifdef MY_ABC_HERE
 		&& SynoPosixSemanticsEnabled
 #endif
 	)

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * super.c
  *
@@ -367,7 +370,7 @@ enum {
 	Opt_rootdir, Opt_utf8, Opt_iocharset,
 	Opt_err, Opt_uforget, Opt_uignore, Opt_gforget, Opt_gignore,
 	Opt_fmode, Opt_dmode
-#ifdef SYNO_FORCE_UDF_CASELESS
+#ifdef MY_ABC_HERE
 	, Opt_synocase
 #endif
 };
@@ -400,7 +403,7 @@ static const match_table_t tokens = {
 	{Opt_iocharset,	"iocharset=%s"},
 	{Opt_fmode,     "mode=%o"},
 	{Opt_dmode,     "dmode=%o"},
-#ifdef SYNO_FORCE_UDF_CASELESS
+#ifdef MY_ABC_HERE
 	{Opt_synocase,     "casesensitive"},
 #endif
 	{Opt_err,	NULL}
@@ -421,7 +424,7 @@ static int udf_parse_options(char *options, struct udf_options *uopt,
 	uopt->rootdir = 0xFFFFFFFF;
 	uopt->fileset = 0xFFFFFFFF;
 	uopt->nls_map = NULL;
-#ifdef SYNO_FORCE_UDF_CASELESS
+#ifdef MY_ABC_HERE
 	uopt->flags |= (1 << SYNO_UDF_FLAG_FORCE_CASELESS);
 #endif
 
@@ -553,7 +556,7 @@ static int udf_parse_options(char *options, struct udf_options *uopt,
 				return 0;
 			uopt->dmode = option & 0777;
 			break;
-#ifdef SYNO_FORCE_UDF_CASELESS
+#ifdef MY_ABC_HERE
 		case Opt_synocase:
 			uopt->flags &= ~(1 << SYNO_UDF_FLAG_FORCE_CASELESS);
 			break;

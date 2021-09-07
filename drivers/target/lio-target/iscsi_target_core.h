@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef ISCSI_TARGET_CORE_H
 #define ISCSI_TARGET_CORE_H
 
@@ -20,12 +23,12 @@
 #define ISCSI_IQN_UNIQUENESS		14
 #define ISCSI_IQN_LEN			224
 #define ISCSI_TIQN_LEN			ISCSI_IQN_LEN
-#ifndef SYNO_LIO_FORCE_LOGOUT
+#ifndef MY_ABC_HERE
 #define SECONDS_FOR_ASYNC_LOGOUT	3
 #else
 #define SECONDS_FOR_ASYNC_LOGOUT	10
 #endif
-#ifdef SYNO_LIO_FORCE_READ_ONLY
+#ifdef MY_ABC_HERE
 #define SECONDS_FOR_TEMP_INACTIVE	90
 #endif
 #define SECONDS_FOR_ASYNC_TEXT		10
@@ -70,14 +73,14 @@
 #define NA_DATAOUT_TIMEOUT_RETRIES	5
 #define NA_DATAOUT_TIMEOUT_RETRIES_MAX	15
 #define NA_DATAOUT_TIMEOUT_RETRIES_MIN	1
-#ifdef SYNO_LIO_NOPIN_TIMEOUT
+#ifdef MY_ABC_HERE
 #define NA_NOPIN_TIMEOUT		10
 #else
 #define NA_NOPIN_TIMEOUT		5
 #endif
 #define NA_NOPIN_TIMEOUT_MAX		60
 #define NA_NOPIN_TIMEOUT_MIN		3
-#ifdef SYNO_LIO_NOPIN_RESPONSE_TIMEOUT
+#ifdef MY_ABC_HERE
 #define NA_NOPIN_RESPONSE_TIMEOUT	10
 #else
 #define NA_NOPIN_RESPONSE_TIMEOUT	5
@@ -139,7 +142,7 @@
 #define ISCSI_DEVATTRIB_ADD_LUN_ACL		3
 #define ISCSI_DEVATTRIB_DELETE_LUN_ACL		4
 
-#ifndef SYNO_LIO_DMA_DIRECTION_PATCH
+#ifndef MY_ABC_HERE
 /* iscsi_cmd_t->data_direction, same values as target_core_base.h
    and se_cmd_t->data_direction  */
 #define ISCSI_NONE				0
@@ -370,7 +373,7 @@ struct se_obj_lun_type_s;
 struct scatterlist;
 
 typedef struct iscsi_cmd_s {
-#ifndef SYNO_LIO_DMA_DIRECTION_PATCH
+#ifndef MY_ABC_HERE
 	/* iSCSI data direction */
 	u8			data_direction;
 #endif
@@ -462,7 +465,7 @@ typedef struct iscsi_cmd_s {
 	u32			tx_size;
 	/* Buffer used for various purposes */
 	void			*buf_ptr;
-#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
+#ifdef MY_ABC_HERE
 	/* See include/linux/dma-mapping.h */
 	enum dma_data_direction data_direction;
 #endif
@@ -893,7 +896,7 @@ typedef struct iscsi_portal_group_s {
 	u16			ntsih;
 	/* Number of active sessions */
 	u32			nsessions;
-#ifdef SYNO_LIO_MAX_SESSIONS
+#ifdef MY_ABC_HERE
 	/* The same as nsessions, but is typed as atomic_t. */
 	atomic_t	nr_sessions;
 	/* Max number of active sessions */
@@ -906,7 +909,7 @@ typedef struct iscsi_portal_group_s {
 	/* Spinlock for adding/removing Network Portals */
 	spinlock_t		tpg_np_lock;
 	spinlock_t		tpg_state_lock;
-#ifdef SYNO_LIO_FORCE_READ_ONLY
+#ifdef MY_ABC_HERE
 	struct timer_list	inactive_timer;
 #endif
 	struct se_portal_group_s *tpg_se_tpg;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  fs/nfsd/nfs4proc.c
  *
@@ -457,7 +460,7 @@ static __be32
 nfsd4_access(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 	     struct nfsd4_access *access)
 {
-#ifdef SYNO_NFS4_DISABLE_UDP
+#ifdef MY_ABC_HERE
 	if (IPPROTO_UDP == rqstp->rq_prot) {
 		return nfserr_acces;
 	}

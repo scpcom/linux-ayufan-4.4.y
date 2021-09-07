@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_MM_H
 #define _LINUX_MM_H
 
@@ -807,7 +810,7 @@ static inline void unmap_shared_mapping_range(struct address_space *mapping,
 extern void truncate_pagecache(struct inode *inode, loff_t old, loff_t new);
 extern int vmtruncate(struct inode *inode, loff_t offset);
 extern int vmtruncate_range(struct inode *inode, loff_t offset, loff_t end);
-#ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+#ifdef MY_ABC_HERE
 extern int ecryptfs_vmtruncate(struct inode *inode, loff_t offset);
 #endif
 
@@ -1184,7 +1187,7 @@ int write_one_page(struct page *page, int wait);
 void task_dirty_inc(struct task_struct *tsk);
 
 /* readahead.c */
-#ifdef SYNO_INCREASE_READAHEAD
+#ifdef MY_ABC_HERE
 #if defined(CONFIG_SYNO_X86) || defined(CONFIG_SYNO_X64)
 #define VM_MAX_READAHEAD        192     /* kbytes */
 #elif defined(CONFIG_SYNO_MV88F6281)
@@ -1194,9 +1197,9 @@ void task_dirty_inc(struct task_struct *tsk);
 #else
 #define VM_MAX_READAHEAD	512	/* kbytes */
 #endif
-#else /* SYNO_INCREASE_READAHEAD */
+#else /* MY_ABC_HERE */
 #define VM_MAX_READAHEAD	128	/* kbytes */
-#endif /* SYNO_INCREASE_READAHEAD */
+#endif /* MY_ABC_HERE */
 #define VM_MIN_READAHEAD	16	/* kbytes (includes current page) */
 
 int force_page_cache_readahead(struct address_space *mapping, struct file *filp,

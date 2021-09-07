@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -171,7 +174,7 @@ struct usbip_header_basic {
 #define USBIP_RET_SUBMIT	0x0003
 #define USBIP_RET_UNLINK	0x0004
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 #define USBIP_RESET_DEV     0xFFFF
 #endif
 	__u32 command;
@@ -349,7 +352,7 @@ struct usbip_device {
 	spinlock_t lock;
 
 	struct socket *tcp_socket;
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	unsigned int sockfd;
 	long ideal_time;
 	struct timespec get_socket_time;
@@ -364,13 +367,13 @@ struct usbip_device {
 #define USBIP_EH_BYE		(1 << 1)
 #define USBIP_EH_RESET		(1 << 2)
 #define USBIP_EH_UNUSABLE	(1 << 3)
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 #define USBIP_EH_CLOSE_SOCKET	(1 << 4)
 #endif
 
 #define SDEV_EVENT_REMOVED   (USBIP_EH_SHUTDOWN | USBIP_EH_RESET | USBIP_EH_BYE)
 #define	SDEV_EVENT_DOWN		(USBIP_EH_SHUTDOWN | USBIP_EH_RESET)
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 #define	SDEV_EVENT_ERROR_TCP	(USBIP_EH_CLOSE_SOCKET)
 #else
 #define	SDEV_EVENT_ERROR_TCP	(USBIP_EH_SHUTDOWN | USBIP_EH_RESET)
@@ -391,7 +394,7 @@ struct usbip_device {
 		void (*shutdown)(struct usbip_device *);
 		void (*reset)(struct usbip_device *);
 		void (*unusable)(struct usbip_device *);
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 		void (*close_connection)(struct usbip_device *);
 		void (*cleanup_urb)(struct usbip_device *);
 #endif
@@ -415,7 +418,7 @@ int usbip_recv_xbuff(struct usbip_device *ud, struct urb *urb);
 /* some members of urb must be substituted before. */
 int usbip_recv_iso(struct usbip_device *ud, struct urb *urb);
 void *usbip_alloc_iso_desc_pdu(struct urb *urb, ssize_t *bufflen);
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 void syno_usbip_shutdown_connection(struct usbip_device *ud);
 void syno_usbip_timer_timeout(unsigned long param);
 
@@ -429,7 +432,7 @@ void usbip_stop_eh(struct usbip_device *ud);
 void usbip_event_add(struct usbip_device *ud, unsigned long event);
 int usbip_event_happened(struct usbip_device *ud);
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 int syno_usbip_event_happened(struct usbip_device *ud);
 #endif
 

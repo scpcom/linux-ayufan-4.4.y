@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001 Sistina Software (UK) Limited.
  * Copyright (C) 2004-2008 Red Hat, Inc. All rights reserved.
@@ -771,7 +774,7 @@ int dm_table_add_target(struct dm_table *t, const char *type,
 
 	t->highs[t->num_targets++] = tgt->begin + tgt->len - 1;
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 	if (tgt->type->lvinfoset){
 		tgt->type->lvinfoset(tgt);
 	}

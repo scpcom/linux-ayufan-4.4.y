@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/init.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
@@ -455,7 +458,7 @@ static char * __init unpack_to_rootfs(char *buf, unsigned len)
 					 compress_name);
 				message = msg_buf;
 			}
-#ifdef SYNO_INITRAMFS_DECOMPRESS_ONCE
+#ifdef MY_ABC_HERE
 		} else {
 			/* It's workaround. For backward supporting inaccurate size of rd
 			 * in boot arguments, eg.: initrd=0x2000040,4M */

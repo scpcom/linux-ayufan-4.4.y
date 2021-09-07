@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	linux/mm/filemap.c
  *
@@ -50,10 +53,10 @@
 
 #include <asm/mman.h>
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 #include <linux/tcp.h>
 #include <net/tcp.h>
-#endif /* SYNO_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 
 /*
@@ -2376,7 +2379,7 @@ int pagecache_write_end(struct file *file, struct address_space *mapping,
 }
 EXPORT_SYMBOL(pagecache_write_end);
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 #ifdef SYNO_OLD_RECVFILE
 int
 do_recvfile(struct file *file, struct socket *sock, loff_t * ppos,

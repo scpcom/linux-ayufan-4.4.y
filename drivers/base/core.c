@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/base/core.c - core driver model code (device registration, etc)
  *
@@ -23,9 +26,9 @@
 #include <linux/semaphore.h>
 #include <linux/mutex.h>
 #include <linux/async.h>
-#ifdef SYNO_LNX2_6_32_SHUTDOWN_FIX
+#ifdef MY_ABC_HERE
 #include <linux/pm_runtime.h>
-#endif /* SYNO_LNX2_6_32_SHUTDOWN_FIX */
+#endif /* MY_ABC_HERE */
 
 #include "base.h"
 #include "power/power.h"
@@ -188,7 +191,7 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 				add_uevent_var(env, "DEVMODE=%#o", mode & 0777);
 		}
 	}
-#ifdef SYNO_LIBATA_PMP_UEVENT
+#ifdef MY_ABC_HERE
 	/* host with dev->devt 0, if we want to get hotplug of CABLE_CONNECT/CABLE_DISCONNECT
 	 * we must add DEVNAME in env to pass it to hotplug.
 	 **/
@@ -203,7 +206,7 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 	if (dev->driver)
 		add_uevent_var(env, "DRIVER=%s", dev->driver->name);
 
-#if defined(CONFIG_SYSFS_DEPRECATED) || defined(SYNO_DEPRECATED_UEVENT_ENV)
+#if defined(CONFIG_SYSFS_DEPRECATED) || defined(MY_ABC_HERE)
 	if (dev->class) {
 		struct device *parent = dev->parent;
 
@@ -1738,7 +1741,7 @@ out:
 }
 EXPORT_SYMBOL_GPL(device_move);
 
-#ifdef SYNO_LNX2_6_32_SHUTDOWN_FIX
+#ifdef MY_ABC_HERE
 /**
  * These codes are copied from linux-3.x.
  *
@@ -1789,14 +1792,14 @@ void syno_device_shutdown(void)
 	kobject_put(dev_kobj);
 	async_synchronize_full();
 }
-#endif /* SYNO_LNX2_6_32_SHUTDOWN_FIX */
+#endif /* MY_ABC_HERE */
 
 /**
  * device_shutdown - call ->shutdown() on each device to shutdown.
  */
 void device_shutdown(void)
 {
-#ifdef SYNO_LNX2_6_32_SHUTDOWN_FIX
+#ifdef MY_ABC_HERE
 	syno_device_shutdown();
 #else
 	struct device *dev, *devn;
@@ -1815,5 +1818,5 @@ void device_shutdown(void)
 	kobject_put(sysfs_dev_block_kobj);
 	kobject_put(dev_kobj);
 	async_synchronize_full();
-#endif /* SYNO_LNX2_6_32_SHUTDOWN_FIX */
+#endif /* MY_ABC_HERE */
 }

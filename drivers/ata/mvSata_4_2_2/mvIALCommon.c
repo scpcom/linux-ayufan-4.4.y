@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -43,7 +46,7 @@ disclaimer.
 #include "mvIALCommonUtils.h"
 #include "mvStorageDev.h"
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 //#define DEBUGMSG(x...) printk(x)
 #define DEBUGMSG(x...)
 #endif
@@ -216,7 +219,7 @@ MV_BOOLEAN mvPMDisableSSC(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex);
 
 MV_BOOLEAN mvPMEnableLocking(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex);
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 static MV_BOOLEAN blSynoEHTypeRevalidate(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                              MV_SAL_ADAPTER_EXTENSION *scsiAdapterExtstruct,
                              MV_SATA_ADAPTER *pSataAdapter,
@@ -229,7 +232,7 @@ static MV_BOOLEAN blSynoEHDiskRevalidate(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt
                              MV_U8 PMPort,            
                              MV_U16_PTR identifyBuffer);
 #endif
-#if defined(SYNO_SATA_DETECT_FIX) || defined(SYNO_SATA_MV_EH)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 static void SynoClearEHInfo(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                 MV_U8 channelIndex,
                 MV_CHANNEL_STATE state);
@@ -285,13 +288,13 @@ MV_BOOLEAN mvAdapterStartInitialization(MV_SATA_ADAPTER *pSataAdapter,
         ialExt->IALChannelExt[channelIndex].bHotPlug = MV_FALSE;
         memset(&ialExt->IALChannelExt[channelIndex].drivesInfo, 0, sizeof(MV_DRIVES_INFO));
     }
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     SynoInitChannelEH(pSataAdapter->IALData, pSataAdapter);
 #endif
     return mvAdapterStateMachine(ialExt, scsiAdapterExt);
 }
 
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 extern int syno_mv_scsi_host_no_get(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex);
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
@@ -335,7 +338,7 @@ void mvRestartChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
             == MV_SATA_DEVICE_TYPE_PM)
         {
             bBusChangeNotify = MV_TRUE;
-#ifdef SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 			if(funcSYNOSendEboxRefreshEvent) {
 				funcSYNOSendEboxRefreshEvent(syno_mv_scsi_host_no_get(pSataAdapter, channelIndex));
 			}
@@ -426,11 +429,11 @@ void mvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     MV_SATA_ADAPTER *pSataAdapter = ialExt->pSataAdapter;
     MV_U16 drivesSnapshot =
     ialExt->IALChannelExt[channelIndex].drivesInfo.drivesSnapshotSaved;
-#ifdef SYNO_MV_PMP_UEVENT
+#ifdef MY_ABC_HERE
     MV_U32 old_eh_flags = ialExt->pSataAdapter->eh[channelIndex].flags;
 #endif
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     if (pSataAdapter &&
         pSataAdapter->eh[channelIndex].flags & EH_PROCESSING) {
         syno_eh_printk(pSataAdapter, channelIndex, 
@@ -460,19 +463,19 @@ void mvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     IALBusChangeNotify(pSataAdapter, channelIndex);
     if (drivesSnapshot != 0)
     {
-#ifdef SYNO_MV_PMP_UEVENT
+#ifdef MY_ABC_HERE
         IALBusChangeNotifyEx(pSataAdapter, channelIndex, drivesSnapshot, 0, old_eh_flags);
 #else
         IALBusChangeNotifyEx(pSataAdapter, channelIndex, drivesSnapshot, 0);
 #endif
     }
 
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
     mvSataSetInterfaceSpeed(pSataAdapter, channelIndex, MV_SATA_IF_SPEED_NO_LIMIT);
 #endif
 }
 
-#if defined(SYNO_BLOCK_REQUEST_ERROR_NODEV) || defined(SYNO_SATA_MV_EH) || defined(SYNO_SATA_DETECT_FIX)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 /**
  * This function is 
  * almost the same as mvStopChannel.
@@ -493,7 +496,7 @@ void SynomvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     MV_SATA_ADAPTER *pSataAdapter = ialExt->pSataAdapter;
     MV_U16 drivesSnapshot =
     ialExt->IALChannelExt[channelIndex].drivesInfo.drivesSnapshotSaved;
-#ifdef SYNO_MV_PMP_UEVENT
+#ifdef MY_ABC_HERE
     MV_U32 old_eh_flags = ialExt->pSataAdapter->eh[channelIndex].flags;
 #endif
 
@@ -523,14 +526,14 @@ void SynomvStopChannel(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     IALBusChangeNotify(pSataAdapter, channelIndex);    
     if (drivesSnapshot != 0)
     {
-#ifdef SYNO_MV_PMP_UEVENT
+#ifdef MY_ABC_HERE
         IALBusChangeNotifyEx(pSataAdapter, channelIndex, drivesSnapshot, 0, old_eh_flags);
 #else
         IALBusChangeNotifyEx(pSataAdapter, channelIndex, drivesSnapshot, 0);
 #endif
     }
 
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
     mvSataSetInterfaceSpeed(pSataAdapter, channelIndex, MV_SATA_IF_SPEED_NO_LIMIT);
 #endif
 }
@@ -716,7 +719,7 @@ static void mvDrivesInfoFlushAll(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 static void mvDrivesInfoFlushSingleDrive(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                          MV_U8 channelIndex, MV_U8 PMPort)
 {
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     if (ialExt->pSataAdapter->eh[channelIndex].flags & EH_PROCESSING) {
         syno_eh_printk(ialExt->pSataAdapter, channelIndex, "EH is going, do not clear driveSerialSaved PMPort %d", PMPort);
         return;
@@ -826,7 +829,7 @@ static void mvDrivesInfoGetChannelRescanParams(MV_IAL_COMMON_ADAPTER_EXTENSION *
                 & (1 << PMPort))
             {
                 *drivesToRemove |= (1 << PMPort);
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#ifdef MY_ABC_HERE
                 SynoIALSCSINotify(ialExt->pSataAdapter, *drivesToRemove, channelIndex);
 #endif
             }
@@ -1031,7 +1034,7 @@ static MV_BOOLEAN mvQueuePMAccessRegisterCommand(
     pCommandInfo->commandParams.NoneUdmaCommand.device = (MV_U8)PMPort;
     pCommandInfo->commandParams.NoneUdmaCommand.callBack =
     mvPMCommandCompletionCB;
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     pCommandInfo->commandParams.NoneUdmaCommand.SynoExtCallBack = NULL;
 #endif
 
@@ -1106,7 +1109,7 @@ static MV_BOOLEAN mvQueuePMAccessRegisterCommand(
     return MV_TRUE;
 }
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static MV_BOOLEAN SynoMVPMCommandCompletionCB(MV_SATA_ADAPTER *pSataAdapter,
                                           MV_U8 channelIndex,
                                           MV_COMPLETION_TYPE comp_type,
@@ -1461,7 +1464,7 @@ static MV_BOOLEAN mvPMDisableAsyncNotify(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt
 
 
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static inline void syno_prepare_custom_info(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt,
                                             MV_U8 channelIndex,
                                             MV_SATA_PM_DEVICE_INFO *PMInfo)
@@ -1548,7 +1551,7 @@ static MV_BOOLEAN mvConfigurePMDevice(
              PMInfo.numberOfPorts);
     ialExt->IALChannelExt[channelIndex].PMnumberOfPorts = PMInfo.numberOfPorts;
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     syno_prepare_custom_info(ialExt, channelIndex, &PMInfo);
     if (MV_FALSE == syno_mvSata_is_synology_pm(ialExt, channelIndex)) {
         ialExt->IALChannelExt[channelIndex].PMnumberOfPorts = 1;
@@ -1877,8 +1880,8 @@ static void mvSetChannelState(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 {
     if (ialExt->channelState[channelIndex] != state)
     {
-#if defined(SYNO_SATA_DETECT_FIX) || defined(SYNO_SATA_MV_EH)
-#ifdef SYNO_MV_PMP_UEVENT
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#ifdef MY_ABC_HERE
         MV_U32 old_eh_flags = ialExt->pSataAdapter->eh[channelIndex].flags;
 #endif
 
@@ -1914,7 +1917,7 @@ static void mvSetChannelState(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                 if (drivesToRemove != 0 || drivesToAdd != 0)
                 {
 
-#ifdef SYNO_MV_PMP_UEVENT
+#ifdef MY_ABC_HERE
                     IALBusChangeNotifyEx(ialExt->pSataAdapter, channelIndex, drivesToRemove, drivesToAdd, old_eh_flags);
 #else
                     IALBusChangeNotifyEx(ialExt->pSataAdapter,
@@ -2024,7 +2027,7 @@ static MV_BOOLEAN mvChannelSRSTFinished(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
         }
 
     }
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     if (MV_FALSE == blSynoEHTypeRevalidate(ialExt, scsiAdapterExt, pSataAdapter, channelIndex, deviceType)) {
         return MV_FALSE;
     }
@@ -2057,7 +2060,7 @@ static MV_BOOLEAN mvChannelSRSTFinished(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                          0);
             return MV_FALSE;
         }
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
         if (MV_FALSE == blSynoEHDiskRevalidate(ialExt, 
                                                scsiAdapterExt, 
                                                pSataAdapter, 
@@ -2305,7 +2308,7 @@ static MV_BOOLEAN mvChannelConnectedStateHandler(
 }
 
 
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
 extern MV_VOID handleDisconnect(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIndex);
 
 static MV_BOOLEAN 
@@ -2322,7 +2325,7 @@ blSynoReprobeProcessStop(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
         goto END;
     }
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     if (pSataAdapter->eh[channelIndex].flags & EH_PROCESSING) {
         if (MV_FALSE == mvSataIsStorageDeviceConnected(pSataAdapter, channelIndex, NULL)) {
             syno_eh_printk(pSataAdapter, channelIndex, "EH is on and device not here. Schedule EH");
@@ -2350,7 +2353,7 @@ blSynoReprobeProcessStop(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
 END:
     return res;
 }
-#endif /* SYNO_SATA_DETECT_FIX */
+#endif /* MY_ABC_HERE */
 MV_BOOLEAN mvChannelInSrstStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
                                        MV_U8 channelIndex,
                                        MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt)
@@ -2423,7 +2426,7 @@ MV_BOOLEAN mvChannelInSrstStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     }
     else
     {
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
         /* 
          * FIXME: Please use a new eh to handle reprobe. 
          * No matter what happend, retry probe until it really cannot be probed.
@@ -2485,7 +2488,7 @@ MV_BOOLEAN classifyAndInitDevice(MV_SAL_ADAPTER_EXTENSION *scsiAdapterExt,
 	  }
 	  else
 	  {
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
           if (MV_FALSE == blSynoEHDiskRevalidate(ialExt, 
                                                  scsiAdapterExt, 
                                                  pSataAdapter, 
@@ -2603,7 +2606,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
     MV_U32 SStatus;
     MV_STORAGE_DEVICE_REGISTERS *mvStorageDevRegisters = &channelExt->mvStorageDevRegisters;
     MV_BOOLEAN H2DReceived = MV_FALSE;
-#ifdef SYNO_SATA_MV422_PM_FIX
+#ifdef MY_ABC_HERE
     MV_U8 PMPort_tmp = 0;
 #endif
 
@@ -2636,7 +2639,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 			continue;
 	      }
 
-#ifdef SYNO_SATA_MV422_PM_FIX
+#ifdef MY_ABC_HERE
           if (((SStatus & 0xf) == 3) && (PMPort < ialExt->IALChannelExt[channelIndex].PMnumberOfPorts)) {
 #else
           if (((SStatus & 0xf) == 3) && (PMPort < 4)) {
@@ -2794,7 +2797,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 		  pSataAdapter->adapterId, channelIndex, PMPort, SError);
 
 	 /*check N bit*/
-#ifdef SYNO_SATA_MV422_PM_FIX
+#ifdef MY_ABC_HERE
      if (SError & MV_BIT16) {
          /* Some disk, 9410-HD-001, is always on this bit even mvSataChannelHardReset and mvRestartChannel is used.
           * So we just clear the spurious N bit.
@@ -2808,7 +2811,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
                  /* Device presence detected and Phy communication established */
                  if (mvStorageDevATASoftResetDevice(pSataAdapter, channelIndex,
                                                     MV_SATA_PM_CONTROL_PORT, NULL)== MV_TRUE){
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
                      if (MV_TRUE == classifyAndInitDevice(scsiAdapterExt, ialExt, channelIndex, PMPort)) {
                          printk("[%d %d %d]: reset success\n",
                                 pSataAdapter->adapterId, channelIndex, PMPort);
@@ -2840,7 +2843,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
              return MV_FALSE;
          }
      } else {
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
          if (MV_FALSE == classifyAndInitDevice(scsiAdapterExt, ialExt, channelIndex, PMPort)) {
              return MV_TRUE;
          }
@@ -2848,7 +2851,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
          classifyAndInitDevice(scsiAdapterExt, ialExt, channelIndex, PMPort);
 #endif
 	 }	 
-#else /* SYNO_SATA_MV422_PM_FIX */
+#else /* MY_ABC_HERE */
      if(SError & MV_BIT16)
 	 {
 	      mvLogMsg(MV_IAL_COMMON_LOG_ID, MV_DEBUG_INFO, "[%d %d %d]: "
@@ -2858,7 +2861,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 	      classifyAndInitDevice(scsiAdapterExt, ialExt,
 				    channelIndex, PMPort);
 	 }
-#endif /* SYNO_SATA_MV422_PM_FIX */
+#endif /* MY_ABC_HERE */
 	 /* next port*/
 	 if(++channelExt->devInSRST == channelExt->PMnumberOfPorts)
 	 {
@@ -2880,7 +2883,7 @@ static MV_BOOLEAN mvPMInitDevicesStateHandler(MV_IAL_COMMON_ADAPTER_EXTENSION *i
 	      return MV_FALSE;
 	 }
 #endif
-#ifdef SYNO_SATA_MV422_PM_FIX
+#ifdef MY_ABC_HERE
      for (PMPort_tmp = 0; PMPort_tmp < ialExt->IALChannelExt[channelIndex].PMnumberOfPorts; PMPort_tmp++)
      {
          MV_U32 SError = 0;
@@ -3207,7 +3210,7 @@ static MV_BOOLEAN mvGetDisksModes(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
     return MV_TRUE;
 }
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static inline void syno_pm_device_info_set(MV_SATA_ADAPTER *pSataAdapter, 
                                     MV_U8 channelIndex, 
                                     u8 rw, 
@@ -3357,9 +3360,9 @@ syno_mvSata_is_synology_pm(MV_IAL_COMMON_ADAPTER_EXTENSION *pIALExt, MV_U8 chann
 END:
     return ret;
 }
-#endif // SYNO_SATA_PM_DEVICE_GPIO
+#endif // MY_ABC_HERE
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 /**
  * Because we support shock protection.
  * So we need revalidate whether the device
@@ -3501,7 +3504,7 @@ blSynoEHDiskRevalidate(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
            0,
            sizeof(MV_DRIVE_SERIAL_NUMBER));
     SynoIALSCSINotify(pSataAdapter, (1<<PMPort), channel);
-#ifdef SYNO_MV_PMP_UEVENT
+#ifdef MY_ABC_HERE
     IALBusChangeNotifyEx(ialExt->pSataAdapter,
                          channel,
                          (1<<PMPort),
@@ -3588,7 +3591,7 @@ SynoChannelErrorHandle(struct work_struct *work)
 }
 #endif
 
-#if defined(SYNO_SATA_DETECT_FIX) || defined(SYNO_SATA_MV_EH)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 
 /**
  * Clear EH information when channel 
@@ -3610,13 +3613,13 @@ SynoClearEHInfo(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
         return;
     }    
 
-#ifdef SYNO_SATA_DETECT_FIX
+#ifdef MY_ABC_HERE
     if (CHANNEL_NOT_CONNECTED == state) {
         clear_bit(SYNO_PROBE_RETRY, &ialExt->pSataAdapter->flags[channelIndex]);
         clear_bit(SYNO_PROBE_LIMIT_TO_15, &ialExt->pSataAdapter->flags[channelIndex]);
     }
-#endif /* SYNO_SATA_DETECT_FIX */
-#ifdef SYNO_SATA_MV_EH
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
     if (CHANNEL_NOT_CONNECTED == state || CHANNEL_READY == state) {
         MV_U8 blflush = MV_FALSE;
 
@@ -3630,6 +3633,6 @@ SynoClearEHInfo(MV_IAL_COMMON_ADAPTER_EXTENSION *ialExt,
             channel_do_scsi_done(ialExt->pSataAdapter->IALData, ialExt->pSataAdapter, channelIndex);
         }
     }
-#endif /* SYNO_SATA_MV_EH */
+#endif /* MY_ABC_HERE */
 }
-#endif /* defined(SYNO_SATA_DETECT_FIX) || defined(SYNO_SATA_MV_EH) */
+#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */

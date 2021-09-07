@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * 2.5 block I/O model
  *
@@ -126,7 +129,7 @@ struct bio {
 #define BIO_NULL_MAPPED 9	/* contains invalid user pages */
 #define BIO_FS_INTEGRITY 10	/* fs owns integrity data, not block layer */
 #define BIO_QUIET	11	/* Make BIO Quiet */
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 #define BIO_AUTO_REMAP	12	/* record if auto-remap occurred */
 #endif
 #define bio_flagged(bio, flag)	((bio)->bi_flags & (1 << (flag)))

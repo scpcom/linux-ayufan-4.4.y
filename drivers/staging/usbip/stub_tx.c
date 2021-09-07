@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -342,7 +345,7 @@ void stub_tx_loop(struct usbip_task *ut)
 			break;
 		}
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 		if (syno_usbip_event_happened(ud))
 #else
 		if (usbip_event_happened(ud))

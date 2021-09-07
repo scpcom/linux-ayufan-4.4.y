@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * sata_mv.c - Marvell SATA support
  *
@@ -75,11 +78,11 @@
  * module options
  */
 
-#ifdef SYNO_SATA_88SX7042_MSI
+#ifdef MY_ABC_HERE
 static int msi = 1;
-#else /* SYNO_SATA_88SX7042_MSI */
+#else /* MY_ABC_HERE */
 static int msi;
-#endif /* SYNO_SATA_88SX7042_MSI */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_PCI
 module_param(msi, int, S_IRUGO);
 MODULE_PARM_DESC(msi, "Enable use of PCI MSI (0=off, 1=on)");
@@ -95,7 +98,7 @@ module_param(irq_coalescing_usecs, int, S_IRUGO);
 MODULE_PARM_DESC(irq_coalescing_usecs,
 		 "IRQ coalescing time threshold in usecs");
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 extern void sata_print_link_status(struct ata_link *link);
 #endif
 
@@ -139,7 +142,7 @@ enum {
 	FLASH_CTL		= 0x1046c,
 	GPIO_PORT_CTL		= 0x104f0,
 	RESET_CFG		= 0x180d8,
-#ifdef SYNO_SATA_MV_GPIO_RW
+#ifdef MY_ABC_HERE
 	GPIO_CTL_DATA		= 0x1809c,
 #endif
 
@@ -655,24 +658,24 @@ static u8 mv_sff_check_status(struct ata_port *ap);
 static void mv_err_intr(struct ata_port *ap);
 #endif
 
-#ifdef SYNO_SATA_MV_SHUTDOWN_PHY
+#ifdef MY_ABC_HERE
 static ssize_t
 syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count);
 DEVICE_ATTR(syno_phy_ctl, S_IWUGO, NULL, syno_mv_phy_ctl_store);
 #endif
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static struct device_attribute *sata_mv_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef SYNO_SATA_MV_SHUTDOWN_PHY
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_phy_ctl,
 #endif
 #ifdef SYNO_SATA_COMPATIBILITY
 	&dev_attr_syno_port_thaw,
 #endif
-#ifdef SYNO_TRANS_HOST_TO_DISK
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
 #endif
 	NULL
@@ -687,7 +690,7 @@ static struct scsi_host_template mv5_sht = {
 	ATA_BASE_SHT(DRV_NAME),
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	.syno_index_get         = syno_libata_index_get,
 #endif
 };
@@ -697,7 +700,7 @@ static struct scsi_host_template mv6_sht = {
 	.can_queue		= MV_MAX_Q_DEPTH - 1,
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	.shost_attrs		= sata_mv_shost_attrs,
 #endif
 };
@@ -1448,7 +1451,7 @@ static int mv_qc_defer(struct ata_queued_cmd *qc)
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 			return 0;
 		} else
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 		{
 			if (!ap->nr_active_links) {
 				/* Since we are here now, just preempt */
@@ -2717,10 +2720,10 @@ static void mv_err_intr(struct ata_port *ap)
 #else
 	if (edma_err_cause & (EDMA_ERR_DEV_DCON | EDMA_ERR_DEV_CON)) {
 #endif
-#ifdef SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
-#ifdef SYNO_ATA_FAST_PROBE
+#ifdef MY_ABC_HERE
 		if (edma_err_cause & EDMA_ERR_DEV_CON) {
 			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 		}
@@ -3364,13 +3367,13 @@ static void mv6_read_preamp(struct mv_host_priv *hpriv, int idx,
 
 static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 {
-#ifdef	SYNO_SATA_LED_SPECIAL
+#ifdef	MY_ABC_HERE
 	if(0 != g_sata_led_special) {
 		writel(0x00000050, mmio + GPIO_PORT_CTL);
 		writel(0x00000000, mmio + GPIO_CTL_DATA);
 	}else{
 #endif
-#ifdef	SYNO_OSS_SATA_LED
+#ifdef	MY_ABC_HERE
 		/* In order to make LED static when disk present and blinking when
 		 * disk active, we have to set the offset 0x104F0 bit 0-1 to 0x00 and
 		 * bit 2-3 to 1.
@@ -3385,7 +3388,7 @@ static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 #else
 		writel(0x00000060, mmio + GPIO_PORT_CTL);
 #endif
-#ifdef  SYNO_SATA_LED_SPECIAL
+#ifdef MY_ABC_HERE
 	}
 #endif
 }
@@ -3603,7 +3606,7 @@ static bool soc_is_65n(struct mv_host_priv *hpriv)
 	return false;
 }
 
-#ifdef SYNO_SATA_MV_SHUTDOWN_PHY
+#ifdef MY_ABC_HERE
 extern struct scsi_device *look_up_scsi_dev_from_ap(struct ata_port *ap);
 /**
  * Please refer arch/arm/plat-feroceon/mv_hal/sata/CoreDriver/mvSataSoc.c
@@ -3624,7 +3627,7 @@ static void syno_mv_phy_ctl(void __iomem *port_mmio, u8 blShutdown)
 	writelfl(ifcfg, port_mmio + SATA_IFCFG);
 }
 
-#ifdef SYNO_SATA_MV_GPIO_RW
+#ifdef MY_ABC_HERE
 /*FIXME - Too brutal and directly, should separate into levels*/
 void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
 {
@@ -3749,12 +3752,12 @@ static void mv_pmp_select(struct ata_port *ap, int pmp)
 static int mv_pmp_hardreset(struct ata_link *link, unsigned int *class,
 				unsigned long deadline)
 {
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	int iRet = 0;
 #endif
 
 	mv_pmp_select(link->ap, sata_srst_pmp(link));
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	iRet = sata_std_hardreset(link, class, deadline);
 	if (0 < giSynoAtaDebug) {
 		DBGMESG("-- Syno Debug Show pmp link status --\n");
@@ -4199,7 +4202,7 @@ static void mv_conf_mbus_windows(struct mv_host_priv *hpriv,
 	}
 }
 
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
+#ifdef MY_ABC_HERE
 extern int mvSataWinInit(void);
 #endif
 /**
@@ -4262,7 +4265,7 @@ static int mv_platform_probe(struct platform_device *pdev)
 	 */
 	if (mv_platform_data->dram != NULL)
 		mv_conf_mbus_windows(hpriv, mv_platform_data->dram);
-#ifdef SYNO_6281_SOC_USE_OPENSOURCE_SATA
+#ifdef MY_ABC_HERE
 	else
 		mvSataWinInit();
 #endif
@@ -4471,13 +4474,13 @@ static int mv_pci_init_one(struct pci_dev *pdev,
 		dev_printk(KERN_INFO, &pdev->dev, "version " DRV_VERSION "\n");
 
 	/* allocate host */
-#ifdef SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 	if(gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
 		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
 	}else{
 #endif
 		n_ports = mv_get_hc_count(ppi[0]->flags) * MV_PORTS_PER_HC;
-#ifdef SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 	}
 #endif
 
@@ -4565,7 +4568,7 @@ static int __devexit mv_platform_remove(struct platform_device *pdev);
 static int __init mv_init(void)
 {
 	int rc = -ENODEV;
-#if defined(SYNO_ESATA_7042)
+#if defined(MY_ABC_HERE)
 	extern long g_esata_7042;
 
 	/* 211p use 7042 as external sata device. So we need to reverse the register order. */

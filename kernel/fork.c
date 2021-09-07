@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/kernel/fork.c
  *
@@ -551,7 +554,7 @@ struct mm_struct *get_task_mm(struct task_struct *task)
 }
 EXPORT_SYMBOL_GPL(get_task_mm);
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 struct mm_struct *syno_get_task_mm(struct task_struct *task)
 {
 	struct mm_struct *mm;
@@ -572,7 +575,7 @@ struct mm_struct *syno_get_task_mm(struct task_struct *task)
 	return mm;
 }
 EXPORT_SYMBOL_GPL(syno_get_task_mm);
-#endif /* SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 /* Please note the differences between mmput and mm_release.
  * mmput is called whenever we stop holding onto a mm_struct,

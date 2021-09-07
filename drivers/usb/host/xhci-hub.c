@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver
  *
@@ -134,7 +137,7 @@ static u32 xhci_port_state_to_neutral(u32 state)
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 #include <linux/pci.h>
 
 extern int gSynoFactoryUSB3Disable;
@@ -169,7 +172,7 @@ static bool inline IS_USB2(unsigned int x)
 static void xhci_disable_port(struct xhci_hcd *xhci, u16 wIndex,
 		__le32 __iomem *addr, u32 port_status)
 {
-#ifdef SYNO_USB3_BACKPORT
+#ifdef MY_ABC_HERE
 	/* Don't allow the USB core to disable SuperSpeed ports. */
 	if (IS_USB3(wIndex)) {
 		xhci_dbg(xhci, "Ignoring request to disable "
@@ -185,7 +188,7 @@ static void xhci_disable_port(struct xhci_hcd *xhci, u16 wIndex,
 			wIndex, port_status);
 }
 
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 		u16 wIndex, __le32 __iomem *addr, __le32 __iomem *addr_map, u32 port_status)
 #else
@@ -195,12 +198,12 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 {
 	char *port_change_bit;
 	u32 status;
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 	u32 port_status_map;
 	int link_state_map;
 #endif
 
-#ifdef SYNO_USB3_Q
+#ifdef MY_ABC_HERE
 	int link_state;
 #endif
 
@@ -221,7 +224,7 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 		status = PORT_PEC;
 		port_change_bit = "enable/disable";
 		break;
-#ifdef SYNO_USB3_BACKPORT
+#ifdef MY_ABC_HERE
 	case USB_PORT_FEAT_C_BH_PORT_RESET:
 		status = PORT_WRC;
 		port_change_bit = "warm(BH) reset";
@@ -240,12 +243,12 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 	xhci_writel(xhci, port_status | status, addr);
 	port_status = xhci_readl(xhci, addr);
 
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 	port_status_map = xhci_readl(xhci, addr_map);
 	link_state_map = (port_status_map >> 5) & 0xf;
 #endif
 
-#ifdef SYNO_USB3_Q
+#ifdef MY_ABC_HERE
 	link_state = (port_status >> 5) & 0xf;
 
 	if (status == PORT_CSC) {
@@ -270,13 +273,13 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 		xhci_dbg(xhci, "link:%d. link_map:%d.\n", link_state, link_state_map);
 	}
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSB3Disable) {
 		goto skip_check_power;
 	}
 #endif
 
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 
 	// check port_power again, because "set PLS" may affect it.
 	port_status_map = xhci_readl(xhci, addr_map);
@@ -296,7 +299,7 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
 	}
 #endif
 
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 skip_check_power:
 #endif
 
@@ -309,7 +312,7 @@ skip_check_power:
 			port_change_bit, wIndex, port_status);
 }
 
-#ifdef SYNO_USB3_SPECIAL_RESET
+#ifdef MY_ABC_HERE
 extern enum XHCI_SPECIAL_RESET_MODE xhci_special_reset; // from hub.c
 #endif
 
@@ -320,16 +323,16 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	int ports;
 	unsigned long flags;
 	u32 temp, status;
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 	u32 temp_map;
 #endif
 	int retval = 0;
 	__le32 __iomem *addr;
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 	__le32 __iomem *addr_map;
 #endif
 
-#ifdef SYNO_USB3_DEBUG
+#ifdef MY_ABC_HERE
 	xhci_dbg(xhci, "xhci_hub_control.type:0x%x.wvalue:%d.\n", typeReq, wValue);
 #endif
 
@@ -353,7 +356,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		temp = xhci_readl(xhci, addr);
 		xhci_dbg(xhci, "get port status, actual port %d status = 0x%x\n", wIndex, temp);
 
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 		addr_map = &xhci->op_regs->port_status_base + NUM_PORT_REGS*((wIndex+1)%ports & 0xff);
 		temp_map = xhci_readl(xhci, addr_map);
 		xhci_dbg(xhci, "get port status, actual port %d status = 0x%x\n", (wIndex+1)%ports, temp_map);
@@ -365,7 +368,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		xhci_dbg(xhci, "get port status, actual port %d status = 0x%x\n", (wIndex+3)%ports, temp_map);
 #endif
 
-#ifdef SYNO_USB3_BACKPORT
+#ifdef MY_ABC_HERE
 		/* wPortChange bits */
 		if (temp & PORT_CSC)
 			status |= USB_PORT_STAT_C_CONNECTION << 16;
@@ -413,7 +416,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		}
 #endif
 
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 		if (((temp & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_COMP_MOD ||
 				(temp & USB_PORT_STAT_LINK_STATE) == USB_SS_PORT_LS_LOOPBACK) &&
 				(temp & PORT_POWER))
@@ -431,7 +434,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		addr = &xhci->op_regs->port_status_base + NUM_PORT_REGS*(wIndex & 0xff);
 		temp = xhci_readl(xhci, addr);
 		temp = xhci_port_state_to_neutral(temp);
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 		addr_map = &xhci->op_regs->port_status_base + NUM_PORT_REGS*((wIndex+ports/2)%ports & 0xff);
 		temp_map = xhci_readl(xhci, addr_map);
 		temp_map = xhci_port_state_to_neutral(temp_map);
@@ -444,7 +447,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
-#ifdef SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 			xhci_dbg(xhci, "set port power. usb%d.\n", wIndex);
 			if (1 == gSynoFactoryUSB3Disable && IS_USB3(wIndex))
 				xhci_writel(xhci, temp & ~PORT_POWER, addr);
@@ -467,7 +470,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		case USB_PORT_FEAT_RESET:
 			temp = (temp | PORT_RESET);
 
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 			// reset if connected, or mapping port is in test mode
 			if ((temp & PORT_CONNECT) || (temp_map & PORT_CONNECT) || // reset when connected // check this to prevent syno_nh trying to reset during disconnected
 				(IS_USB2(wIndex) && // no connection but
@@ -483,7 +486,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			temp = xhci_readl(xhci, addr);
 			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
 
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 			xhci_dbg(xhci, "set port reset map, actual port %d status  = 0x%x\n", (wIndex+ports/2)%ports, temp_map);
 
 			temp_map = xhci_readl(xhci, addr_map);
@@ -514,9 +517,9 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			xhci_dbg(xhci, "set port reset map, actual port %d status  = 0x%x\n", (wIndex+ports/2)%ports, temp_map);
 #endif
 			break;
-#ifdef SYNO_USB3_BACKPORT
+#ifdef MY_ABC_HERE
 		case USB_PORT_FEAT_BH_PORT_RESET:
-#ifdef SYNO_USB3_DEBUG
+#ifdef MY_ABC_HERE
 			xhci_dbg(xhci, "set USB_PORT_FEAT_BH_PORT_RESET.\n");
 #endif
 			temp |= PORT_WR;
@@ -538,7 +541,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			NUM_PORT_REGS*(wIndex & 0xff);
 		temp = xhci_readl(xhci, addr);
 		temp = xhci_port_state_to_neutral(temp);
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 		addr_map = &xhci->op_regs->port_status_base + NUM_PORT_REGS*((wIndex+ports/2)%ports & 0xff);
 		temp_map = xhci_readl(xhci, addr_map);
 		temp_map = xhci_port_state_to_neutral(temp_map);
@@ -548,11 +551,11 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		case USB_PORT_FEAT_C_CONNECTION:
 		case USB_PORT_FEAT_C_OVER_CURRENT:
 		case USB_PORT_FEAT_C_ENABLE:
-#ifdef SYNO_USB3_BACKPORT
+#ifdef MY_ABC_HERE
 		case USB_PORT_FEAT_C_BH_PORT_RESET:
 		case USB_PORT_FEAT_C_PORT_LINK_STATE:
 #endif
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 			xhci_clear_port_change_bit(xhci, wValue, wIndex,
 					addr, addr_map, temp);
 #else
@@ -561,7 +564,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 #endif
 			break;
 
-#ifdef SYNO_USB3_ERR_MONITOR
+#ifdef MY_ABC_HERE
 		case USB_PORT_FEAT_POWER:
 			xhci_dbg(xhci, "clear USB_PORT_FEAT_POWER.\n");
 			xhci_writel(xhci, temp & ~PORT_POWER, addr);

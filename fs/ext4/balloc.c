@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext4/balloc.c
  *
@@ -419,7 +422,7 @@ void ext4_add_groupblocks(handle_t *handle, struct super_block *sb,
 	    in_range(block, ext4_inode_table(sb, desc), sbi->s_itb_per_group) ||
 	    in_range(block + count - 1, ext4_inode_table(sb, desc),
 		     sbi->s_itb_per_group)) {
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit())
 #endif
 		ext4_error(sb, __func__,
@@ -501,7 +504,7 @@ error_return:
 	return;
 }
 
-#ifndef SYNO_DQUOT_UPGRADE
+#ifndef MY_ABC_HERE
 /**
  * ext4_free_blocks() -- Free given blocks and update quota
  * @handle:            handle for this transaction
@@ -655,7 +658,7 @@ ext4_fsblk_t ext4_new_meta_blocks(handle_t *handle, struct inode *inode,
 		spin_lock(&EXT4_I(inode)->i_block_reservation_lock);
 		EXT4_I(inode)->i_allocated_meta_blocks += ar.len;
 		spin_unlock(&EXT4_I(inode)->i_block_reservation_lock);
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_alloc_block_nofail(inode, ar.len);
 #endif
 	}

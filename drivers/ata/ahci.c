@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  ahci.c - AHCI SATA support
  *
@@ -80,7 +83,7 @@ enum{
 };
 #endif
 
-#ifdef SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 extern long g_ahci_switch;
 #endif
 
@@ -270,7 +273,7 @@ enum {
 	AHCI_HFLAG_SRST_TOUT_IS_OFFLINE	= (1 << 11), /* treat SRST timeout as
 							link offline */
 	AHCI_HFLAG_NO_SNTF		= (1 << 12), /* no sntf */
-#ifdef SYNO_LIBATA_JMB_BEHAVIOR
+#ifdef MY_ABC_HERE
 	AHCI_HFLAG_REPROBE		= (1 << 13),
 #endif
 
@@ -488,7 +491,7 @@ void sata_syno_ahci_diskled_set(int iDiskNo, int iPresent, int iFault)
 		goto RELEASESRC;
 	}
 
-#ifdef SYNO_ATA_AHCI_LED_SWITCH
+#ifdef MY_ABC_HERE
 	iPresent &= giSynoHddLedEnabled;
 	iFault &= giSynoHddLedEnabled;
 #endif
@@ -542,7 +545,7 @@ static struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_ahci_host_cap2,
 	&dev_attr_ahci_host_version,
 	&dev_attr_ahci_port_cmd,
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
@@ -550,7 +553,7 @@ static struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_syno_port_thaw,
 #endif
 #endif
-#ifdef SYNO_TRANS_HOST_TO_DISK
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
 #endif
 	NULL
@@ -559,16 +562,16 @@ static struct device_attribute *ahci_shost_attrs[] = {
 static struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_activity,
 	&dev_attr_unload_heads,
-#ifdef SYNO_SATA_WCACHE_DISABLE
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_wcache,
 #endif
-#ifdef SYNO_SATA_DISK_SERIAL
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_disk_serial,
 #endif
 #ifdef SYNO_SATA_COMPATIBILITY
 	&dev_attr_syno_fake_error_ctrl,
 	&dev_attr_syno_pwr_reset_count,
-#ifdef SYNO_SATA_ERROR_REPORT
+#ifdef MY_DEF_HERE
     &dev_attr_syno_sata_error_event_debug,
 #endif
 #endif
@@ -588,7 +591,7 @@ static struct scsi_host_template ahci_sht = {
 	.sdev_attrs		= ahci_sdev_attrs,
 };
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static int
 sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
 {
@@ -702,7 +705,7 @@ static const struct ata_port_info ahci_port_info[] = {
 		.flags		= AHCI_FLAG_COMMON,
 		.pio_mask	= ATA_PIO4,
 		.udma_mask	= ATA_UDMA6,
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 		.port_ops	= &ahci_pmp_ops,
 #else
 		.port_ops	= &ahci_ops,
@@ -1611,7 +1614,7 @@ static void ahci_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
-#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(SYNO_ATA_AHCI_LED_SWITCH)
+#if defined(SYNO_ATA_AHCI_LED_MSG) && defined(MY_ABC_HERE)
 	if (!giSynoHddLedEnabled) {
 		return;
 	}
@@ -2490,10 +2493,10 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 #else
 	if (irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) {
 #endif
-#ifdef SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
 #endif
-#ifdef SYNO_ATA_FAST_PROBE
+#ifdef MY_ABC_HERE
 		if (irq_stat & PORT_IRQ_CONNECT) {
 			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 		}
@@ -3350,7 +3353,7 @@ static inline void ahci_gtf_filter_workaround(struct ata_host *host)
 {}
 #endif
 
-#ifdef SYNO_LIBATA_JMB_BEHAVIOR
+#ifdef MY_ABC_HERE
 extern void ata_port_wait_eh(struct ata_port *ap);
 extern void ata_scsi_scan_host(struct ata_port *ap, int sync);
 #endif
@@ -3368,7 +3371,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	VPRINTK("ENTER\n");
 
-#ifdef SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 	if(0 == g_ahci_switch) {
 		printk("AHCI is disabled.\n");
 		return 0;
@@ -3502,13 +3505,13 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 * determining the maximum port number requires looking at
 	 * both CAP.NP and port_map.
 	 */
-#ifdef SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 	if(gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
 		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
 	}else{
 #endif
 	n_ports = max(ahci_nr_ports(hpriv->cap), fls(hpriv->port_map));
-#ifdef SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 	}
 #endif
 
@@ -3565,7 +3568,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	ahci_print_info(host);
 
 	pci_set_master(pdev);
-#ifdef SYNO_LIBATA_JMB_BEHAVIOR
+#ifdef MY_ABC_HERE
 	/* Only wait for JMiron in 6281 platform */
 	if (pdev->vendor != PCI_VENDOR_ID_JMICRON) {
 		rc = ata_host_activate(host, pdev->irq, ahci_interrupt, IRQF_SHARED,

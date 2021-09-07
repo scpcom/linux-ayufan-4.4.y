@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fcntl.c
  *
@@ -28,7 +31,7 @@
 #include "synoacl_int.h"
 #endif
 		 
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 
 #define ACL_MASK_NONE 0
 
@@ -124,7 +127,7 @@ static struct syno_archive_permission_mapping rgSynoArPermission[] = {
 };
 #endif //CONFIG_FS_SYNO_ACL
 
-#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
+#ifdef MY_ABC_HERE
 long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 {
 	struct inode *inode = dentry->d_inode;
@@ -224,7 +227,7 @@ unlock:
 	return err;
 }
 EXPORT_SYMBOL(__SYNOArchiveSet);
-#endif /* SYNO_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
 void set_close_on_exec(unsigned int fd, int flag)
 {
@@ -617,7 +620,7 @@ static long do_fcntl(int fd, unsigned int cmd, unsigned long arg,
 	case F_NOTIFY:
 		err = fcntl_dirnotify(fd, filp, arg);
 		break;
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	case SYNO_FCNTL_BASE ... SYNO_FCNTL_LAST:
 		err = __SYNOArchiveSet(filp->f_dentry, cmd);
 		break;

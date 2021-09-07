@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  iscsi_target_nodeattrib.c
  *
@@ -50,7 +53,7 @@
 static inline char *iscsi_na_get_initiatorname(
 	iscsi_node_acl_t *nacl)
 {
-#ifdef SYNO_LIO_REDUCE_MESSAGE
+#ifdef MY_ABC_HERE
 	// reduce compile-time warning messages
 	se_node_acl_t *se_nacl = nacl->se_node_acl;	
 #else

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001, 2002 Sistina Software (UK) Limited.
  * Copyright (C) 2004-2008 Red Hat, Inc. All rights reserved.
@@ -7,7 +10,7 @@
 
 #include "dm.h"
 #include "dm-uevent.h"
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 #include "md.h"
 #endif
 
@@ -33,9 +36,9 @@
  */
 #define DM_COOKIE_ENV_VAR_NAME "DM_COOKIE"
 #define DM_COOKIE_LENGTH 24
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 void SynoMDWakeUpDevices(void *md);
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 extern int SynoDebugFlag;
 #endif
 #endif
@@ -45,7 +48,7 @@ static const char *_name = DM_NAME;
 static unsigned int major = 0;
 static unsigned int _major = 0;
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 extern sector_t (*funcSYNOLvLgSectorCount)(void *private, sector_t sector);
 sector_t SynoLvLgSectorCount(void *, sector_t);
 #endif
@@ -203,7 +206,7 @@ struct mapped_device {
 
 	/* zero-length barrier that will be cloned and submitted to targets */
 	struct bio barrier_bio;
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	/* to record whether this LV is in active or not */
 	int blActive;
 
@@ -324,7 +327,7 @@ static int __init dm_init(void)
 			goto bad;
 	}
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 	funcSYNOLvLgSectorCount = SynoLvLgSectorCount;
 #endif
 
@@ -975,7 +978,7 @@ static sector_t max_io_len(struct mapped_device *md,
 	return len;
 }
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 sector_t SynoLvLgSectorCount(void *private, sector_t sector)
 {
 	struct dm_target *ti = (struct dm_target *)private;
@@ -1410,7 +1413,7 @@ static int dm_request_based(struct mapped_device *md)
 static int dm_request(struct request_queue *q, struct bio *bio)
 {
 	struct mapped_device *md = q->queuedata;
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	struct dm_dev_internal *dd = NULL;
 	struct dm_table *map = NULL;
 	char b[BDEVNAME_SIZE] = {'\0'};
@@ -1911,7 +1914,7 @@ static struct mapped_device *alloc_dev(int minor)
 	spin_unlock(&_minor_lock);
 
 	BUG_ON(old_md != MINOR_ALLOCED);
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	spin_lock_init(&md->ActLock);
 	md->blActive = 0;
 	md->ulLastReq = jiffies;
@@ -2698,7 +2701,7 @@ int dm_suspended(struct mapped_device *md)
 	return test_bit(DMF_SUSPENDED, &md->flags);
 }
 
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 int dm_active_get(struct mapped_device *md)
 {
 	unsigned char blActive = 0;

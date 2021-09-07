@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Scsi Host Layer for MPT (Message Passing Technology) based controllers
  *
@@ -9570,7 +9573,7 @@ static struct scsi_host_template scsih_driver_template = {
 	.use_clustering			= ENABLE_CLUSTERING,
 	.shost_attrs			= mpt2sas_host_attrs,
 	.sdev_attrs			= mpt2sas_dev_attrs,
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	.syno_port_type		= SYNO_PORT_TYPE_SAS,
 #endif
 };

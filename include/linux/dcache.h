@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __LINUX_DCACHE_H
 #define __LINUX_DCACHE_H
 
@@ -186,7 +189,7 @@ d_iput:		no		no		no       yes
 
 #define DCACHE_FSNOTIFY_PARENT_WATCHED	0x0080 /* Parent inode is watched by some fsnotify listener */
 
-#ifdef SYNO_KERNEL_UNICODE
+#ifdef MY_ABC_HERE
 #define DCACHE_CASELESS_COMPARE 0x0100 /* Do caseless compare */
 #endif
 

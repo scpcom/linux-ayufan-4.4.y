@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 
   Intel 10 Gigabit PCI Express Linux driver
@@ -334,9 +337,9 @@ struct ixgbe_adapter {
 	u32 flags2;
 #define IXGBE_FLAG2_RSC_CAPABLE                 (u32)(1)
 #define IXGBE_FLAG2_RSC_ENABLED                 (u32)(1 << 1)
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 #define IXGBE_FLAG2_TEMP_SENSOR_CAPABLE         (u32)(1 << 2)
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 /* default to trying for four seconds */
 #define IXGBE_TRY_LINK_TIMEOUT (4 * HZ)
 
@@ -382,11 +385,11 @@ struct ixgbe_adapter {
 	u64 rsc_count;
 	u32 wol;
 	u16 eeprom_version;
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 
 	struct work_struct check_overtemp_task;
 	u32 interrupt_event;
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 };
 
 enum ixbge_state_t {

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/net/phy/phy.c
  *
@@ -796,7 +799,7 @@ static void phy_state_machine(struct work_struct *work)
 			 * negotiation for now */
 			if (!phydev->link) {
 				phydev->state = PHY_NOLINK;
-#ifdef SYNO_NET_PHY_NOLINK_SPEED_INIT
+#ifdef MY_DEF_HERE
 				phydev->speed = 0;
 #endif
 				netif_carrier_off(phydev->attached_dev);
@@ -820,7 +823,7 @@ static void phy_state_machine(struct work_struct *work)
 				int idx;
 
 				needs_aneg = 1;
-#ifdef SYNO_NET_PHY_NOLINK_SPEED_INIT
+#ifdef MY_DEF_HERE
 				/* Fix bug #4712, #4713:
 				 * if network cable is not plugged in, system
 				 * will try slower speed to detect link. However, we
@@ -902,7 +905,7 @@ static void phy_state_machine(struct work_struct *work)
 				phydev->state = PHY_RUNNING;
 				netif_carrier_on(phydev->attached_dev);
 			} else {
-#ifdef SYNO_NET_PHY_NOLINK_SPEED_INIT
+#ifdef MY_DEF_HERE
 				phydev->speed = 0;
 #endif
 				phydev->state = PHY_NOLINK;

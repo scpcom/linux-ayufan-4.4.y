@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -286,7 +289,7 @@ int eth_mac_addr(struct net_device *dev, void *p)
 {
 	struct sockaddr *addr = p;
 
-#ifndef SYNO_MAC_ADDRESS
+#ifndef MY_ABC_HERE
 	if (netif_running(dev))
 		return -EBUSY;
 #endif

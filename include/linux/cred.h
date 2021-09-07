@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Credentials management - see Documentation/credentials.txt
  *
  * Copyright (C) 2008 Red Hat, Inc. All Rights Reserved.
@@ -153,7 +156,7 @@ struct cred {
 extern void __put_cred(struct cred *);
 extern void exit_creds(struct task_struct *);
 extern int copy_creds(struct task_struct *, unsigned long);
-#ifdef SYNO_GET_TASK_CRED
+#ifdef MY_ABC_HERE
 extern const struct cred *get_task_cred(struct task_struct *);
 #endif
 extern struct cred *cred_alloc_blank(void);
@@ -285,7 +288,7 @@ static inline void put_cred(const struct cred *_cred)
 #define __task_cred(task) \
 	((const struct cred *)(rcu_dereference((task)->real_cred)))
 
-#ifndef SYNO_GET_TASK_CRED
+#ifndef MY_ABC_HERE
 /**
  * get_task_cred - Get another task's objective credentials
  * @task: The task to query

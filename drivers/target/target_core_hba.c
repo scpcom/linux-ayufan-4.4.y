@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  target_core_hba.c
  *
@@ -120,7 +123,7 @@ int se_core_add_hba(
 	list_add_tail(&hba->hba_list, &se_global->g_hba_list);
 	spin_unlock(&se_global->hba_lock);
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_HBA[%d] - Attached HBA to Generic Target"
 			" Core\n", hba->hba_id);
 #endif
@@ -161,7 +164,7 @@ int se_core_del_hba(
 		return -EINVAL;
 	}
 
-#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifndef MY_ABC_HERE
 	/*
 	 * Do not allow the se_hba_t to be released if references exist to
 	 * from se_device_t->se_lun_t.
@@ -196,7 +199,7 @@ int se_core_del_hba(
 	hba->hba_status &= ~HBA_STATUS_ACTIVE;
 	hba->hba_status |= HBA_STATUS_FREE;
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_HBA[%d] - Detached HBA from Generic Target"
 			" Core\n", hba->hba_id);
 #endif

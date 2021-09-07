@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2000-2008 Synology Inc. All rights reserved.
 #include <linux/synolib.h>
 #include <linux/module.h>
@@ -185,7 +188,7 @@ asmlinkage int SynoPrintk(u8 direct_print, const char *fmt, ...)
 		va_end(args);
 		goto END;
 	}else{
-#ifdef  SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 		if(syno_temperature_debug) {
 			va_start(args, fmt);
 			r = vprintk(fmt, args);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -114,7 +117,7 @@ typedef enum _mvAccessRights
 	MAX_ACC_RIGHTS
 }MV_ACCESS_RIGHTS;
 
-#if defined(SYNO_MPPCTL_REG_W)
+#if defined(MY_ABC_HERE)
 MV_STATUS SYNOMppCtrlRegWrite(MV_U32 mppPin, MV_U32 mppVal);
 #endif
 

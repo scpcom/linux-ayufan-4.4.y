@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/ext4/xattr.c
  *
@@ -107,7 +110,7 @@ static struct xattr_handler *ext4_xattr_handler_map[] = {
 #ifdef CONFIG_EXT4_FS_SECURITY
 	[EXT4_XATTR_INDEX_SECURITY]	     = &ext4_xattr_security_handler,
 #endif
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 	[EXT4_XATTR_INDEX_SYNO]  = &ext4_xattr_syno_handler
 #endif
 };
@@ -122,7 +125,7 @@ struct xattr_handler *ext4_xattr_handlers[] = {
 #ifdef CONFIG_EXT4_FS_SECURITY
 	&ext4_xattr_security_handler,
 #endif
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 	&ext4_xattr_syno_handler,
 #endif
 	NULL
@@ -496,7 +499,7 @@ ext4_xattr_release_block(handle_t *handle, struct inode *inode,
 		error = ext4_handle_dirty_metadata(handle, inode, bh);
 		if (IS_SYNC(inode))
 			ext4_handle_sync(handle);
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_block(inode, 1);
 #else
 		vfs_dq_free_block(inode, 1);
@@ -793,7 +796,7 @@ inserted:
 			else {
 				/* The old block is released after updating
 				   the inode. */
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 				error = dquot_alloc_block(inode, 1);
 				if (error)
 #else
@@ -886,7 +889,7 @@ cleanup:
 	return error;
 
 cleanup_dquot:
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	dquot_free_block(inode, 1);
 #else
 	vfs_dq_free_block(inode, 1);
@@ -1626,7 +1629,7 @@ exit_ext4_xattr(void)
 	ext4_xattr_cache = NULL;
 }
 
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 
 static size_t
 ext4_xattr_syno_list(struct inode *inode, char *list, size_t list_size,

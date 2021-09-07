@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_GENHD_H
 #define _LINUX_GENHD_H
 
@@ -105,7 +108,7 @@ struct hd_struct {
 	struct disk_stats dkstats;
 #endif
 	struct rcu_head rcu_head;
-#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
+#ifdef MY_ABC_HERE
 	unsigned auto_remap;
 #endif
 };
@@ -170,7 +173,7 @@ struct gendisk {
 	struct blk_integrity *integrity;
 #endif
 	int node_id;
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	int systemDisk;
 #endif
 };

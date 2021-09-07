@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * scsi_scan.c
  *
@@ -46,7 +49,7 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-#if defined(SYNO_INQUIRY_STANDARD)
+#if defined(MY_ABC_HERE)
 #define SYNO_INQUIRY_TMP_LEN 32
 #define SZ_STAT_DISK_VENDOR "ATA     "
 #define SYNO_INQUIRY_VENDOR_LEN 8
@@ -61,7 +64,7 @@ SYNO_DISK_VENDOR gDiskVendor[] = {
 	{"Micron", 6},
 	{NULL, 0}
 };
-#if defined(SYNO_INCREASE_DISK_MODEL_NAME_LENGTH)
+#if defined(MY_ABC_HERE)
 #define SYNO_RESULT_LEN 512
 /* The IDENTIFY DEVICE command will get most 40 characters */
 #define SYNO_IDENTIFY_DEVICE_TMP_LEN 40
@@ -271,7 +274,7 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 		goto out;
 
 	sdev->vendor = scsi_null_device_strs;
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 #else
 	sdev->model = scsi_null_device_strs;
 #endif
@@ -576,7 +579,7 @@ static void sanitize_inquiry_string(unsigned char *s, int len)
 	}
 }
 
-#ifdef SYNO_INQUIRY_STANDARD
+#ifdef MY_ABC_HERE
 /**
  * ssyno_standard_inquiry_strin - refine the vendor and model strings of SATA disks 
  * @szInqStr: INQUIRY result string to be refined
@@ -685,7 +688,7 @@ END:
 }
 #endif
 
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 /**
  * Description:
  * 	The result of SCSI INQUIRY from a SATA disk might set vendor as "ATA"
@@ -861,7 +864,7 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	}
 
 	if (result == 0) {
-#ifdef SYNO_INQUIRY_STANDARD
+#ifdef MY_ABC_HERE
 		/*
 		 * Only transfering the strings that vendor is ATA.
 		 * vendor set as "ATA" means the disk is a SATA disk
@@ -997,7 +1000,7 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		int *bflags, int async)
 {
 	int ret;
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 	unsigned char szDiskModel[SYNO_DISK_MODEL_NUM + 4] = {'\0'};
 #endif
 
@@ -1028,7 +1031,7 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		return SCSI_SCAN_NO_RESPONSE;
 
 	sdev->vendor = (char *) (sdev->inquiry + 8);
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 	if(!(SYNO_PORT_TYPE_USB == sdev->host->hostt->syno_port_type)) {
 		scsi_ata_identify_device_get_model_name(sdev, (unsigned char *)&szDiskModel);
 	}
@@ -1122,7 +1125,7 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	if (inq_result[7] & 0x10)
 		sdev->sdtr = 1;
 
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 	sdev_printk(KERN_NOTICE, sdev, "%s %.8s %."SYNO_DISK_MODEL_LEN"s %.4s PQ: %d "
 #else
 	sdev_printk(KERN_NOTICE, sdev, "%s %.8s %.16s %.4s PQ: %d "

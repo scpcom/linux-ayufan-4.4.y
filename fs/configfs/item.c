@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- mode: c; c-basic-offset: 8; -*-
  * vim: noexpandtab sw=8 ts=8 sts=0:
  *
@@ -145,7 +148,7 @@ static void config_item_cleanup(struct config_item * item)
 	struct config_item * parent = item->ci_parent;
 
 	pr_debug("config_item %s: cleaning up\n",config_item_name(item));
-#ifndef SYNO_LIO_CONFIGFS_WORKAROUND
+#ifndef MY_ABC_HERE
 	if (item->ci_name != item->ci_namebuf)
 		kfree(item->ci_name);
 #endif

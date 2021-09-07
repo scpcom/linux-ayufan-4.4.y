@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   File: fs/ext3/xattr.h
 
@@ -22,7 +25,7 @@
 #define	EXT3_XATTR_INDEX_LUSTRE			5
 #define EXT3_XATTR_INDEX_SECURITY	        6
 
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 #define EXT3_XATTR_INDEX_SYNO	8
 #endif
 
@@ -67,7 +70,7 @@ extern struct xattr_handler ext3_xattr_trusted_handler;
 extern struct xattr_handler ext3_xattr_acl_access_handler;
 extern struct xattr_handler ext3_xattr_acl_default_handler;
 extern struct xattr_handler ext3_xattr_security_handler;
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 extern struct xattr_handler ext3_xattr_syno_handler;
 #endif
 

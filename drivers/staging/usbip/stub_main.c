@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -103,7 +106,7 @@ static int add_match_busid(char *busid)
 	return -1;
 }
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 int del_match_busid(char *busid)
 #else
 static int del_match_busid(char *busid)

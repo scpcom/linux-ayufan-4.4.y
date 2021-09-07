@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -31,7 +34,7 @@ static int event_handler(struct usbip_device *ud)
 		usbip_dbg_eh("pending event %lx\n", ud->event);
 
 		
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 		/*
 		 * USBIP_EH_CLOSE_SOCKET close socket/cleap up urb and 
 		 * leave stub_rx/stub_tx alive.
@@ -131,7 +134,7 @@ EXPORT_SYMBOL_GPL(usbip_start_eh);
 void usbip_stop_eh(struct usbip_device *ud)
 {
 	struct usbip_task *eh = &ud->eh;
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	if(eh->thread == current) {
 		return;
 	}
@@ -168,7 +171,7 @@ int usbip_event_happened(struct usbip_device *ud)
 }
 EXPORT_SYMBOL_GPL(usbip_event_happened);
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 int syno_usbip_event_happened(struct usbip_device *ud)
 {
 	int happened = 0;

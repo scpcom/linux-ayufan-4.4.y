@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright(c) 1999 - 2004 Intel Corporation. All rights reserved.
  *
@@ -370,7 +373,7 @@ static int rlb_arp_recv(struct sk_buff *skb, struct net_device *bond_dev, struct
 		goto out;
 	}
 
-#ifdef SYNO_NET_BOND_FIX_NONLINEAR_SKB
+#ifdef MY_ABC_HERE
 	if (!pskb_may_pull(skb, sizeof(struct lacpdu)))
 		goto out;
 
@@ -1784,7 +1787,7 @@ void bond_alb_clear_vlan(struct bonding *bond, unsigned short vlan_id)
 	}
 }
 
-#ifdef SYNO_NET_BOND
+#ifdef MY_ABC_HERE
 void bond_alb_info_show(struct seq_file *seq)
 {
 	struct bonding *bond = seq->private;

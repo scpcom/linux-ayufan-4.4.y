@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Common boot and setup code for both 32-bit and 64-bit.
  * Extracted from arch/powerpc/kernel/setup_64.c.
@@ -169,14 +172,14 @@ void machine_power_off(void)
 
 #define UART2_TX  0x0
 #define UART2_LCR 0x3
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	extern void SynoQorIQWOLSet(void);
 #endif
 	extern phys_addr_t get_immrbase(void);
 
 	u32 __iomem *pUP = ioremap((get_immrbase() + UART2_BASE), 0x10);
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	SynoQorIQWOLSet();
 #endif
 	if (pUP) {

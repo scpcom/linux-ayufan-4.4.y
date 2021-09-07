@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * eCryptfs: Linux filesystem encryption layer
  *
@@ -35,7 +38,7 @@
 #include <linux/scatterlist.h>
 #include <asm/unaligned.h>
 #include "ecryptfs_kernel.h"
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 wait_queue_head_t encrypt_waitq;
 static volatile u32 wake = 0;
 static atomic_t blocked;
@@ -45,7 +48,7 @@ static int
 ecryptfs_decrypt_page_offset(struct ecryptfs_crypt_stat *crypt_stat,
 			     struct page *dst_page, int dst_offset,
 			     struct page *src_page, int src_offset, int size,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 			     void *priv, int iv_size,
 #endif
 			     unsigned char *iv);
@@ -53,7 +56,7 @@ static int
 ecryptfs_encrypt_page_offset(struct ecryptfs_crypt_stat *crypt_stat,
 			     struct page *dst_page, int dst_offset,
 			     struct page *src_page, int src_offset, int size,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 			     void *priv, int iv_size,
 #endif
 			     unsigned char *iv);
@@ -252,8 +255,8 @@ void ecryptfs_destroy_crypt_stat(struct ecryptfs_crypt_stat *crypt_stat)
 {
 	struct ecryptfs_key_sig *key_sig, *key_sig_tmp;
 
-#ifndef SYNO_ECRYPTFS_OCF
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifndef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (crypt_stat->tfm) {
 		crypto_free_ablkcipher(crypt_stat->tfm);
 	}
@@ -341,7 +344,7 @@ int virt_to_scatterlist(const void *addr, int size, struct scatterlist *sg,
 	return i;
 }
 
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 static void ecryptfs_async_done(struct crypto_async_request *async_req,
 								int error)
 {
@@ -405,7 +408,7 @@ static void ecryptfs_async_wait(struct ecryptfs_request *ecryptfs_req,
 }
 #endif
 
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 struct ocf_wr_priv {
 	u32 encrypt_ocf_wr_completed; /* Num of wr completions */
 	u32 encrypt_ocf_wr_pending; /* Num of wr pendings */
@@ -549,15 +552,15 @@ static inline int encrypt_ocf_process(struct ecryptfs_crypt_stat *crypt_stat, st
 static int encrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 			       struct scatterlist *dest_sg,
 			       struct scatterlist *src_sg, int size,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 			       void *priv, int iv_size,
 #endif
 			       unsigned char *iv)
 {
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 	return encrypt_ocf_process(crypt_stat, dest_sg, src_sg, size, iv, iv_size, 1, priv);
 #else
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 	struct ecryptfs_request ecryptfs_req = {0};
 #else
 	struct blkcipher_desc desc = {
@@ -579,7 +582,7 @@ static int encrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 
 	/* Consider doing this once, when the file is opened */
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 	rc = ecryptfs_async_init(&ecryptfs_req, crypt_stat);
 	if (rc) {
 		mutex_unlock(&crypt_stat->cs_tfm_mutex);
@@ -587,7 +590,7 @@ static int encrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 	}
 #endif
 	if (!(crypt_stat->flags & ECRYPTFS_KEY_SET)) {
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 		rc = crypto_ablkcipher_setkey(crypt_stat->tfm, crypt_stat->key,
 					     crypt_stat->key_size);
 #else
@@ -604,7 +607,7 @@ static int encrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 		goto out;
 	}
 	ecryptfs_printk(KERN_DEBUG, "Encrypting [%d] bytes.\n", size);
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 	ablkcipher_request_set_crypt(ecryptfs_req.req, src_sg, dest_sg, size, iv);
 	ecryptfs_async_wait(&ecryptfs_req,
 						crypto_ablkcipher_encrypt(ecryptfs_req.req));
@@ -645,7 +648,7 @@ static void ecryptfs_lower_offset_for_extent(loff_t *offset, loff_t extent_num,
 static int ecryptfs_encrypt_extent(struct page *enc_extent_page,
 				   struct ecryptfs_crypt_stat *crypt_stat,
 				   struct page *page,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 				   void *priv,
 #endif
 				   unsigned long extent_offset)
@@ -677,7 +680,7 @@ static int ecryptfs_encrypt_extent(struct page *enc_extent_page,
 				  8);
 	}
 	rc = ecryptfs_encrypt_page_offset(crypt_stat, enc_extent_page, 0,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 					  page, (extent_offset * crypt_stat->extent_size),
 					  crypt_stat->extent_size,
 					  priv, crypt_stat->iv_bytes,
@@ -732,7 +735,7 @@ int ecryptfs_encrypt_page(struct page *page)
 	loff_t extent_offset;
 	int rc = 0;
 
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 	int fsession = 0;
 	long wr_timeout = 30000;
 	long wr_tm = 0;
@@ -751,7 +754,7 @@ int ecryptfs_encrypt_page(struct page *page)
 	crypt_stat =
 		&(ecryptfs_inode_to_private(ecryptfs_inode)->crypt_stat);
 	BUG_ON(!(crypt_stat->flags & ECRYPTFS_ENCRYPTED));
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 	if (crypto_newsession(&ocf_wr_priv->ocf_cryptoid, &crypt_stat->cr_dm, 0)) {
 		printk("%s:%s(%d) crypto_newsession failed, sid:[%u]\n"
 			, __FILE__, __FUNCTION__, __LINE__ , CRYPTO_SESID2LID(ocf_wr_priv->ocf_cryptoid));
@@ -774,7 +777,7 @@ int ecryptfs_encrypt_page(struct page *page)
 		loff_t offset;
 
 		rc = ecryptfs_encrypt_extent(enc_extent_page, crypt_stat, page,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 					     ocf_wr_priv,
 #endif
 					     extent_offset);
@@ -783,7 +786,7 @@ int ecryptfs_encrypt_page(struct page *page)
 			       "rc = [%d]\n", __func__, rc);
 			goto out;
 		}
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
         ocf_wr_priv->encrypt_ocf_wr_pending++;
         wr_tm = wait_event_timeout(ocf_wr_priv->encrypt_ocf_wr_queue,
 			(ocf_wr_priv->encrypt_ocf_wr_pending == ocf_wr_priv->encrypt_ocf_wr_completed),
@@ -801,7 +804,7 @@ int ecryptfs_encrypt_page(struct page *page)
 		rc = ecryptfs_write_lower(ecryptfs_inode, enc_extent_virt,
 					  offset, crypt_stat->extent_size);
 		if (rc < 0) {
-#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 			if (-EDQUOT != rc)
 #endif
 			ecryptfs_printk(KERN_ERR, "Error attempting "
@@ -812,7 +815,7 @@ int ecryptfs_encrypt_page(struct page *page)
 	}
 	rc = 0;
 out:
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 	if (fsession){
 		crypto_freesession(ocf_wr_priv->ocf_cryptoid);
 	}
@@ -828,7 +831,7 @@ out:
 static int ecryptfs_decrypt_extent(struct page *page,
 				   struct ecryptfs_crypt_stat *crypt_stat,
 				   struct page *enc_extent_page,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
                    void *priv,
 #endif
 				   unsigned long extent_offset)
@@ -860,7 +863,7 @@ static int ecryptfs_decrypt_extent(struct page *page,
 				  8);
 	}
 	rc = ecryptfs_decrypt_page_offset(crypt_stat, page,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 					  (extent_offset * crypt_stat->extent_size),
 					  enc_extent_page, 0, crypt_stat->extent_size,
 					  priv, crypt_stat->iv_bytes,
@@ -915,13 +918,13 @@ int ecryptfs_decrypt_page(struct page *page)
 	struct ecryptfs_crypt_stat *crypt_stat;
 	char *enc_extent_virt;
 	struct page *enc_extent_page = NULL;
-#ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+#ifdef MY_ABC_HERE
 	char *syno_zero_virt = NULL;
 #endif
 	unsigned long extent_offset;
 	int rc = 0;
 
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 	int fsession = 0;
 	long wr_timeout = 30000;
 	long wr_tm = 0;
@@ -940,7 +943,7 @@ int ecryptfs_decrypt_page(struct page *page)
 	crypt_stat =
 		&(ecryptfs_inode_to_private(ecryptfs_inode)->crypt_stat);
 	BUG_ON(!(crypt_stat->flags & ECRYPTFS_ENCRYPTED));
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 	if (crypto_newsession(&ocf_wr_priv->ocf_cryptoid, &crypt_stat->cr_dm, 0)) {
 		printk("%s:%s(%d) crypto_newsession failed, sid:[%u]\n"
                , __FILE__, __FUNCTION__, __LINE__ , CRYPTO_SESID2LID(ocf_wr_priv->ocf_cryptoid));
@@ -957,7 +960,7 @@ int ecryptfs_decrypt_page(struct page *page)
 		goto out;
 	}
 	enc_extent_virt = kmap(enc_extent_page);
-#ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+#ifdef MY_ABC_HERE
 	syno_zero_virt = kzalloc(PAGE_CACHE_SIZE, GFP_KERNEL);
 	if (!syno_zero_virt) {
 		rc = -ENOMEM;
@@ -984,7 +987,7 @@ int ecryptfs_decrypt_page(struct page *page)
 			goto out;
 		}
 
-#ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+#ifdef MY_ABC_HERE
 		// check pre 16 byte first, in order to filter unnecessary memcmp
 		if (!memcmp(enc_extent_virt, syno_zero_virt, 16) &&
 			!memcmp(enc_extent_virt+16, syno_zero_virt+16, PAGE_CACHE_SIZE-16)){
@@ -999,7 +1002,7 @@ int ecryptfs_decrypt_page(struct page *page)
 #endif
 
 		rc = ecryptfs_decrypt_extent(page, crypt_stat, enc_extent_page,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
                          ocf_wr_priv,
 #endif
 					     extent_offset);
@@ -1008,12 +1011,12 @@ int ecryptfs_decrypt_page(struct page *page)
 			       "rc = [%d]\n", __func__, rc);
 			goto out;
 		}
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
         ocf_wr_priv->encrypt_ocf_wr_pending++;
 #endif
 	}
 out:
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
     wr_tm = wait_event_timeout(ocf_wr_priv->encrypt_ocf_wr_queue,
                                (ocf_wr_priv->encrypt_ocf_wr_pending == ocf_wr_priv->encrypt_ocf_wr_completed),
                                msecs_to_jiffies(wr_timeout));
@@ -1031,7 +1034,7 @@ out:
 		kunmap(enc_extent_page);
 		__free_page(enc_extent_page);
 	}
-#ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+#ifdef MY_ABC_HERE
 	if (syno_zero_virt)
 		kfree(syno_zero_virt);
 #endif
@@ -1051,15 +1054,15 @@ out:
 static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 			       struct scatterlist *dest_sg,
 			       struct scatterlist *src_sg, int size,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 			       void *priv, int iv_size,
 #endif
 			       unsigned char *iv)
 {
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 	return encrypt_ocf_process(crypt_stat, dest_sg, src_sg, size, iv, iv_size, 0, priv);
 #else
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 	struct ecryptfs_request ecryptfs_req = {0};
 #else
 	struct blkcipher_desc desc = {
@@ -1073,14 +1076,14 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 
 	/* Consider doing this once, when the file is opened */
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 	rc = ecryptfs_async_init(&ecryptfs_req, crypt_stat);
 	if (rc) {
 		mutex_unlock(&crypt_stat->cs_tfm_mutex);
 		goto out;
 	}
 #endif
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 	if (!(crypt_stat->flags & ECRYPTFS_KEY_SET)) {
 		rc = crypto_ablkcipher_setkey(crypt_stat->tfm, crypt_stat->key,
 									  crypt_stat->key_size);
@@ -1098,7 +1101,7 @@ static int decrypt_scatterlist(struct ecryptfs_crypt_stat *crypt_stat,
 		goto out;
 	}
 	ecryptfs_printk(KERN_DEBUG, "Decrypting [%d] bytes.\n", size);
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 	ablkcipher_request_set_crypt(ecryptfs_req.req, src_sg, dest_sg, size, iv);
 	ecryptfs_async_wait(&ecryptfs_req,
 						crypto_ablkcipher_decrypt(ecryptfs_req.req));
@@ -1133,7 +1136,7 @@ static int
 ecryptfs_encrypt_page_offset(struct ecryptfs_crypt_stat *crypt_stat,
 			     struct page *dst_page, int dst_offset,
 			     struct page *src_page, int src_offset, int size,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 			     void *priv, int iv_size,
 #endif
 			     unsigned char *iv)
@@ -1146,7 +1149,7 @@ ecryptfs_encrypt_page_offset(struct ecryptfs_crypt_stat *crypt_stat,
 	sg_set_page(&src_sg, src_page, size, src_offset);
 	sg_set_page(&dst_sg, dst_page, size, dst_offset);
 
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 	return encrypt_scatterlist(crypt_stat, &dst_sg, &src_sg, size, priv, iv_size, iv);
 #else
 	return encrypt_scatterlist(crypt_stat, &dst_sg, &src_sg, size, iv);
@@ -1169,7 +1172,7 @@ static int
 ecryptfs_decrypt_page_offset(struct ecryptfs_crypt_stat *crypt_stat,
 			     struct page *dst_page, int dst_offset,
 			     struct page *src_page, int src_offset, int size,
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 			     void *priv, int iv_size,
 #endif
 			     unsigned char *iv)
@@ -1182,7 +1185,7 @@ ecryptfs_decrypt_page_offset(struct ecryptfs_crypt_stat *crypt_stat,
 	sg_init_table(&dst_sg, 1);
 	sg_set_page(&dst_sg, dst_page, size, dst_offset);
 
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 	return decrypt_scatterlist(crypt_stat, &dst_sg, &src_sg, size, priv, iv_size, iv);
 #else
 	return decrypt_scatterlist(crypt_stat, &dst_sg, &src_sg, size, iv);
@@ -1201,7 +1204,7 @@ ecryptfs_decrypt_page_offset(struct ecryptfs_crypt_stat *crypt_stat,
  * only init if needed
  */
 int ecryptfs_init_crypt_ctx(struct ecryptfs_crypt_stat *crypt_stat)
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 {
 	int rc = -EINVAL;
 
@@ -1262,7 +1265,7 @@ out_unlock:
 						    crypt_stat->cipher, "cbc");
 	if (rc)
 		goto out_unlock;
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 	crypt_stat->tfm = crypto_alloc_ablkcipher(full_alg_name, 0, 0);
 #else
 	crypt_stat->tfm = crypto_alloc_blkcipher(full_alg_name, 0,
@@ -1277,7 +1280,7 @@ out_unlock:
 				crypt_stat->cipher);
 		goto out_unlock;
 	}
-#ifdef SYNO_ECRYPTFS_WITH_ABLKCIPHER
+#ifdef MY_DEF_HERE
 	crypto_ablkcipher_set_flags(crypt_stat->tfm, CRYPTO_TFM_REQ_WEAK_KEY);
 #else
 	crypto_blkcipher_set_flags(crypt_stat->tfm, CRYPTO_TFM_REQ_WEAK_KEY);
@@ -1797,7 +1800,7 @@ ecryptfs_write_metadata_to_contents(struct dentry *ecryptfs_dentry,
 
 	rc = ecryptfs_write_lower(ecryptfs_dentry->d_inode, virt,
 				  0, virt_len);
-#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 	if (-EDQUOT == rc)
 		return rc;  // skip error msg
 #endif
@@ -1888,7 +1891,7 @@ int ecryptfs_write_metadata(struct dentry *ecryptfs_dentry)
 		rc = ecryptfs_write_metadata_to_contents(ecryptfs_dentry, virt,
 							 virt_len);
 	if (rc) {
-#ifdef SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 		if (-EDQUOT != rc)
 #endif
 		printk(KERN_ERR "%s: Error writing metadata out to lower file; "
@@ -2280,7 +2283,7 @@ struct kmem_cache *ecryptfs_key_tfm_cache;
 static struct list_head key_tfm_list;
 struct mutex key_tfm_list_mutex;
 
-#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
+#ifdef MY_ABC_HERE
 extern int (*fecryptfs_decode_and_decrypt_filename)(char **plaintext_name,
                                         size_t *plaintext_name_size,
                                         struct dentry *ecryptfs_dir_dentry,
@@ -2291,10 +2294,10 @@ int ecryptfs_init_crypto(void)
 {
 	mutex_init(&key_tfm_list_mutex);
 	INIT_LIST_HEAD(&key_tfm_list);
-#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
+#ifdef MY_ABC_HERE
 	fecryptfs_decode_and_decrypt_filename = &ecryptfs_decode_and_decrypt_filename;
 #endif
-#ifdef SYNO_ECRYPTFS_OCF
+#ifdef MY_ABC_HERE
 	init_waitqueue_head(&encrypt_waitq);
 	atomic_set(&blocked, 0);
 	printk("encryptfs using the OCF package.\n");
@@ -2312,7 +2315,7 @@ int ecryptfs_destroy_crypto(void)
 {
 	struct ecryptfs_key_tfm *key_tfm, *key_tfm_tmp;
 
-#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
+#ifdef MY_ABC_HERE
 	fecryptfs_decode_and_decrypt_filename = NULL;
 #endif
 	mutex_lock(&key_tfm_list_mutex);

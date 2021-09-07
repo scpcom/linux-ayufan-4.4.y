@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/ioctl.c
  *
@@ -92,7 +95,7 @@ setflags_out:
 	}
 }
 
-#ifndef SYNO_HFSPLUS_EA
+#ifndef MY_ABC_HERE
 int hfsplus_setxattr(struct dentry *dentry, const char *name,
 		     const void *value, size_t size, int flags)
 {

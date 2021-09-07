@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 1982, 1986 Regents of the University of California.
  * All rights reserved.
@@ -295,11 +298,11 @@ struct quota_format_ops {
 struct dquot_operations {
 	int (*initialize) (struct inode *, int);
 	int (*drop) (struct inode *);
-#ifndef SYNO_DQUOT_UPGRADE
+#ifndef MY_ABC_HERE
 	int (*alloc_space) (struct inode *, qsize_t, int);
 #endif
 	int (*alloc_inode) (const struct inode *, qsize_t);
-#ifndef SYNO_DQUOT_UPGRADE
+#ifndef MY_ABC_HERE
 	int (*free_space) (struct inode *, qsize_t);
 #endif
 	int (*free_inode) (const struct inode *, qsize_t);
@@ -311,7 +314,7 @@ struct dquot_operations {
 	int (*release_dquot) (struct dquot *);		/* Quota is going to be deleted from disk */
 	int (*mark_dirty) (struct dquot *);		/* Dquot is marked dirty */
 	int (*write_info) (struct super_block *, int);	/* Write of quota "superblock" */
-#ifndef SYNO_DQUOT_UPGRADE
+#ifndef MY_ABC_HERE
 	/* reserve quota for delayed block allocation */
 	int (*reserve_space) (struct inode *, qsize_t, int);
 	/* claim reserved quota for delayed alloc */

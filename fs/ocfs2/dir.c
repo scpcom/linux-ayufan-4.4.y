@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- mode: c; c-basic-offset: 8; -*-
  * vim: noexpandtab sw=8 ts=8 sts=0:
  *
@@ -2964,7 +2967,7 @@ static int ocfs2_expand_inline_dir(struct inode *dir, struct buffer_head *di_bh,
 		goto out;
 	}
 
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	ret = dquot_alloc_space_nodirty(dir,
 		ocfs2_clusters_to_bytes(osb->sb, alloc + dx_alloc));
 	if (ret) {
@@ -3184,7 +3187,7 @@ static int ocfs2_expand_inline_dir(struct inode *dir, struct buffer_head *di_bh,
 
 out_commit:
 	if (ret < 0 && did_quota)
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_space_nodirty(dir, bytes_allocated);
 #else
 		vfs_dq_free_space_nodirty(dir, bytes_allocated);
@@ -3231,7 +3234,7 @@ static int ocfs2_do_extend_dir(struct super_block *sb,
 	if (extend) {
 		u32 offset = OCFS2_I(dir)->ip_clusters;
 
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		status = dquot_alloc_space_nodirty(dir,
 					ocfs2_clusters_to_bytes(sb, 1));
 		if (status) {
@@ -3270,7 +3273,7 @@ static int ocfs2_do_extend_dir(struct super_block *sb,
 	status = 0;
 bail:
 	if (did_quota && status < 0)
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_space_nodirty(dir, ocfs2_clusters_to_bytes(sb, 1));
 #else
 		vfs_dq_free_space_nodirty(dir, ocfs2_clusters_to_bytes(sb, 1));
@@ -3909,7 +3912,7 @@ static int ocfs2_dx_dir_rebalance(struct ocfs2_super *osb, struct inode *dir,
 		goto out;
 	}
 
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	ret = dquot_alloc_space_nodirty(dir,
 				       ocfs2_clusters_to_bytes(dir->i_sb, 1));
 	if (ret) {
@@ -4009,7 +4012,7 @@ static int ocfs2_dx_dir_rebalance(struct ocfs2_super *osb, struct inode *dir,
 
 out_commit:
 	if (ret < 0 && did_quota)
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_space_nodirty(dir,
 #else
 		vfs_dq_free_space_nodirty(dir,
@@ -4195,7 +4198,7 @@ static int ocfs2_expand_inline_dx_root(struct inode *dir,
 		goto out;
 	}
 
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	ret = dquot_alloc_space_nodirty(dir,
 				       ocfs2_clusters_to_bytes(osb->sb, 1));
 	if (ret) {
@@ -4265,7 +4268,7 @@ static int ocfs2_expand_inline_dx_root(struct inode *dir,
 
 out_commit:
 	if (ret < 0 && did_quota)
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_space_nodirty(dir,
 #else
 		vfs_dq_free_space_nodirty(dir,

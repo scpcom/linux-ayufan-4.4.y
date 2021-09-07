@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -54,7 +57,7 @@ struct stub_device {
 
 
 	wait_queue_head_t tx_waitq;
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	wait_queue_head_t rx_waitq;
 #endif
 };
@@ -92,12 +95,12 @@ extern struct usb_driver stub_driver;
 /* stub_rx.c */
 void stub_rx_loop(struct usbip_task *);
 void stub_enqueue_ret_unlink(struct stub_device *, __u32, __u32);
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 int syno_socket_check(struct usbip_device *ud);
 #endif
 
 /* stub_main.c */
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 int del_match_busid(char *busid);
 #endif
 int match_busid(const char *busid);

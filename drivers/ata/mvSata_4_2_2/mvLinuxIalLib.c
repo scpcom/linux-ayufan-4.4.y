@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -52,9 +55,9 @@ disclaimer.
 #include "mvLinuxIalLib.h"
 #include "mvIALCommon.h"
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 extern void ResubmitMvCommand(unsigned long data);
-#endif /* SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
 #ifndef scsi_to_pci_dma_dir
     #define scsi_to_pci_dma_dir(scsi_dir) ((int)(scsi_dir))
@@ -72,7 +75,7 @@ struct rescan_wrapper
     MV_U8                  channelIndex;
     MV_U16                 targetsToRemove;
     MV_U16                 targetsToAdd;
-#ifdef SYNO_MV_PMP_UEVENT
+#ifdef MY_ABC_HERE
     MV_U32                 eh_flag;
 #endif
 };
@@ -219,7 +222,7 @@ void mv_ial_lib_add_done_queue (struct IALAdapter *pAdapter,
     }
 }
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 /**
  * Just for scsi_eh use. 
  * I don't why this driver do this originally. In order to make
@@ -263,7 +266,7 @@ struct scsi_cmnd * mv_ial_lib_get_first_cmnd (struct IALAdapter *pAdapter, MV_U8
     if (pAdapter->host[channel] != NULL)
     {
         struct scsi_cmnd *cmnd = pAdapter->host[channel]->scsi_cmnd_done_head;
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
         /* Do not clear command list while EH_PROCESSING. Otherwise the scsi command will lose.*/
         if (!(pAdapter->mvSataAdapter.eh[channel].flags & EH_PROCESSING)) {
             pAdapter->host[channel]->scsi_cmnd_done_head = NULL;
@@ -278,7 +281,7 @@ struct scsi_cmnd * mv_ial_lib_get_first_cmnd (struct IALAdapter *pAdapter, MV_U8
     return NULL;
 }
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 /**
  * Check whether we need block the softirq or not.
  * 
@@ -338,7 +341,7 @@ END:
  ******************************************************************************/
 void mv_ial_lib_do_done (struct scsi_cmnd *cmnd)
 {
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     if (MV_TRUE == blSynoEHBlockIRQ(cmnd)) {
         return;
     }
@@ -463,20 +466,20 @@ int mv_ial_lib_init_channel(IAL_ADAPTER_T *pAdapter, MV_U8 channelNum)
     mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "[%d,%d]: response queue allocated: 0x%p\n",
              pAdapter->mvSataAdapter.adapterId, channelNum,
              pMvSataChannel->responseQueue);
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	setup_timer(&pMvSataChannel->rstimer, ResubmitMvCommand, (unsigned long)pMvSataChannel);
 	INIT_LIST_HEAD(&pMvSataChannel->pendinglh);
 	pMvSataChannel->chkpower_flags = 0;
-#endif /* SYNO_SPINUP_DELAY */
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
     pMvSataChannel->PMSynoUnique = 0;
     pMvSataChannel->PMdeviceId = 0;
     pMvSataChannel->PMvendorId = 0;
 #endif
-#if defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(SYNO_SATA_MV_EH)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
     pMvSataChannel->oldDeviceType = MV_SATA_DEVICE_TYPE_UNKNOWN;
 #endif
-#ifdef SYNO_SATA_SSD_DETECT
+#ifdef MY_ABC_HERE
     pMvSataChannel->ssd_list = 0;
 #endif
     return 0;
@@ -670,7 +673,7 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
     MV_SATA_DEVICE_TYPE deviceType = pAdapter->ataScsiAdapterExt->ataDriveData[pHost->channelIndex][SCpnt->device->id].identifyInfo.deviceType;
     /*should be removed*/
 #ifndef   MV_SUPPORT_1MBYTE_IOS 
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
     if (SCpnt->sdb.length > (SCpnt->device->host->max_sectors << 9))
 #else
     if (SCpnt->request_bufflen > (SCpnt->device->host->max_sectors << 9))
@@ -681,7 +684,7 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
                pMvSataAdapter->pciConfigRevisionId);
     }
 #endif
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
     if (SCpnt->sdb.table.nents)
 #else
     if (SCpnt->use_sg)
@@ -690,21 +693,21 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
         unsigned int sg_count;
         unsigned int i;
 
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
         sg = (struct scatterlist *) SCpnt->sdb.table.sgl;
 #else
         sg = (struct scatterlist *) SCpnt->request_buffer;
 #endif
 
         sg_count = pci64_map_sg(pAdapter->pcidev, sg,
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
                                 SCpnt->sdb.table.nents,
 #else
                                 SCpnt->use_sg,
 #endif
                                 scsi_to_pci_dma_dir(SCpnt->sc_data_direction));
 
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
         if (sg_count != SCpnt->sdb.table.nents)
             printk("WARNING sg_count(%d) != SCpnt->sdb.table.nents(%d)\n",
                    (unsigned int)sg_count, SCpnt->sdb.table.nents);
@@ -739,7 +742,7 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
         {
             mvLogMsg(MV_IAL_LOG_ID,  MV_DEBUG_ERROR, "Failed to allocate PRD table, requested size=%d\n"
                      , prd_size);
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
             pci64_unmap_sg(pAdapter->pcidev, sg, SCpnt->sdb.table.nents,
                            scsi_to_pci_dma_dir(SCpnt->sc_data_direction));
 #else
@@ -767,7 +770,7 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
                          "prd_size=%d, prd_count=%d\n", prd_size,
                          prd_count);
                 pci64_unmap_sg(pAdapter->pcidev,
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
                                (struct scatterlist *)SCpnt->sdb.table.sgl,
                                SCpnt->sdb.table.nents,
 #else
@@ -784,14 +787,14 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
                                          MV_EDMA_PRD_ENTRY_SIZE * (prd_size),
                                          PCI_DMA_TODEVICE);
     }
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
     else if (SCpnt->sdb.length && SCpnt->sc_data_direction != PCI_DMA_NONE)
 #else
     else if (SCpnt->request_bufflen && SCpnt->sc_data_direction != PCI_DMA_NONE)
 #endif
     {
         if ((pAdapter->mvSataAdapter.sataAdapterGeneration >= MV_SATA_GEN_IIE)
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
             && (SCpnt->sdb.length <= 0x10000) &&
 #else
             && (SCpnt->request_bufflen <= 0x10000) &&
@@ -802,7 +805,7 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
             completion_info->cpu_PRDpnt = NULL;
             completion_info->dma_PRDpnt = 0;
             completion_info->allocated_entries = 0;
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
             busaddr = pci64_map_page(pAdapter->pcidev, SCpnt->sdb.table.sgl,
                                      SCpnt->sdb.length,
                                      scsi_to_pci_dma_dir(SCpnt->sc_data_direction));
@@ -814,7 +817,7 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
             completion_info->single_buff_busaddr = busaddr;
             completion_info->pSALBlock->PRDTableLowPhyAddress = pci64_dma_lo32(busaddr);
             completion_info->pSALBlock->PRDTableHighPhyAddress = pci64_dma_hi32(busaddr);
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
             completion_info->pSALBlock->byteCount = SCpnt->sdb.length;
 #else
             completion_info->pSALBlock->byteCount = SCpnt->request_bufflen;
@@ -834,7 +837,7 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
             return -1;
         }
 
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
         busaddr = pci64_map_page(pAdapter->pcidev, SCpnt->sdb.table.sgl,
                                  SCpnt->sdb.length,
                                  scsi_to_pci_dma_dir(SCpnt->sc_data_direction));
@@ -848,7 +851,7 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
                                                pPRD_table,
                                                prd_size,
                                                &prd_count, busaddr,
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
                                                SCpnt->sdb.length, 1))
 #else
                                                SCpnt->request_bufflen, 1))
@@ -856,7 +859,7 @@ int mv_ial_lib_generate_prd(MV_SATA_ADAPTER *pMvSataAdapter, struct scsi_cmnd *S
         {
 
             mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG_ERROR, " in building PRD table from buffer\n");
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
             pci64_unmap_page(pAdapter->pcidev, busaddr, SCpnt->sdb.length,
 #else
             pci64_unmap_page(pAdapter->pcidev, busaddr, SCpnt->request_bufflen,
@@ -943,7 +946,7 @@ static void mv_ial_unblock_requests(struct IALAdapter *pAdapter, MV_U8 channelIn
 
 
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 static inline void
 SynoEHEventCommon(IAL_ADAPTER_T *pAdapter,
                   MV_SATA_ADAPTER *pMvSataAdapter,
@@ -1129,10 +1132,10 @@ MV_BOOLEAN mv_ial_lib_event_notify(MV_SATA_ADAPTER *pMvSataAdapter, MV_EVENT_TYP
 
                 mvLogMsg(MV_IAL_LOG_ID,  MV_DEBUG, "[%d,%d]: device connected event received\n",
                          pMvSataAdapter->adapterId, channel);
-#ifdef SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
                 syno_eh_printk(pMvSataAdapter, channel, "Sata Cable Event: Connect");
 #endif
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
                 if (MV_FALSE == SynoEHConnectHandle(pAdapter, pMvSataAdapter, channel)) {
                     syno_eh_printk(pMvSataAdapter, channel, "SynoEHConnectHandle Error");
                 }
@@ -1146,26 +1149,26 @@ MV_BOOLEAN mv_ial_lib_event_notify(MV_SATA_ADAPTER *pMvSataAdapter, MV_EVENT_TYP
             {
                 mvLogMsg(MV_IAL_LOG_ID,  MV_DEBUG, "[%d,%d]: device disconnected event received \n",
                          pMvSataAdapter->adapterId, channel);
-#ifdef SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
                 syno_eh_printk(pMvSataAdapter, channel, "Sata Cable Event: Disconnect");
 #endif
                 if (mvSataIsStorageDeviceConnected(pMvSataAdapter, channel, NULL) ==
                     MV_FALSE)
                 {
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
                     if (MV_FALSE == SynoEHDisConnectHandle(pAdapter, pMvSataAdapter, channel)) {
                         syno_eh_printk(pMvSataAdapter, channel, 
                                        "SynoEHDisConnectHandle Error");
                     }
-#else /* SYNO_SATA_MV_EH */
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#else /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
                     SynomvStopChannel(&pAdapter->ialCommonExt, channel,
                                       pAdapter->ataScsiAdapterExt);
 #else
                     mvStopChannel(&pAdapter->ialCommonExt, channel,
                                   pAdapter->ataScsiAdapterExt);
 #endif
-#endif /* SYNO_SATA_MV_EH */
+#endif /* MY_ABC_HERE */
                 }
                 else
                 {
@@ -1176,7 +1179,7 @@ MV_BOOLEAN mv_ial_lib_event_notify(MV_SATA_ADAPTER *pMvSataAdapter, MV_EVENT_TYP
             }
             else if (param1 == MV_SATA_CABLE_EVENT_PM_HOT_PLUG)
             {
-#ifdef SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
                 syno_eh_printk(pMvSataAdapter, channel, "Sata Cable PM Event: HOT_PLUG");
 #endif
                 mvPMHotPlugDetected(&pAdapter->ialCommonExt, channel,
@@ -1208,7 +1211,7 @@ MV_BOOLEAN mv_ial_lib_event_notify(MV_SATA_ADAPTER *pMvSataAdapter, MV_EVENT_TYP
             mvLogMsg(MV_IAL_LOG_ID,  MV_DEBUG_ERROR,
                      " [%d %d] sata unrecoverable error occured, restart channel\n",
                      pMvSataAdapter->adapterId, channel);
-#ifdef SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
             if (pMvSataAdapter->sataChannel[channel] &&
                 MV_SATA_DEVICE_TYPE_PM == pMvSataAdapter->sataChannel[channel]->deviceType)
             {
@@ -1216,7 +1219,7 @@ MV_BOOLEAN mv_ial_lib_event_notify(MV_SATA_ADAPTER *pMvSataAdapter, MV_EVENT_TYP
             }
             syno_eh_printk(pMvSataAdapter, channel, "Sata Error Event: UNRECOVERABLE_COMMUNICATION_ERROR");
 #endif
-#ifdef SYNO_SATA_MV_EH            
+#ifdef MY_ABC_HERE            
             if (MV_FALSE == SynoEHUnCommunicationErrorHandle(pAdapter, pMvSataAdapter, channel)) {
                 syno_eh_printk(pMvSataAdapter, channel, "SynoEHUnCommunicationErrorHandle Error");
             }
@@ -1286,7 +1289,7 @@ void IALChannelCommandsQueueFlushed(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channel
 
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 static MV_BOOLEAN
 SynoRescheduleChannelRescan(struct rescan_wrapper* rescan,
                             MV_U16 newAdd,
@@ -1313,7 +1316,7 @@ static void channel_rescan(struct work_struct *work)
     struct Scsi_Host *host;
     struct scsi_device *sdev = NULL;
     MV_U16 target;
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     MV_U16 newAdd = rescan->targetsToAdd;
     MV_BOOLEAN blReschedule = MV_FALSE;
 #endif
@@ -1374,7 +1377,7 @@ static void channel_rescan(struct work_struct *work)
                          rescan->channelIndex,
                          target);
             }
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
             if (!error) {
                 if (NULL == (sdev = scsi_device_lookup(host, 0, target, 0))) {
                     /* Perhaps get wrong name */
@@ -1390,8 +1393,8 @@ static void channel_rescan(struct work_struct *work)
                     newAdd &= ~(1 << target);
                 }
             }
-#endif /* SYNO_SATA_MV_EH */
-#ifdef SYNO_SATA_SSD_DETECT
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
             if (!error) {
                 MV_SATA_CHANNEL *pSataChannel = rescan->pAdapter->mvSataAdapter.sataChannel[rescan->channelIndex];
 
@@ -1412,7 +1415,7 @@ static void channel_rescan(struct work_struct *work)
 #endif
         }
     }
-#ifdef SYNO_MV_PMP_UEVENT
+#ifdef MY_ABC_HERE
     if (EH_LINK_PMP & rescan->eh_flag ||
         MV_TRUE == syno_mvSata_is_synology_pm(&rescan->pAdapter->ialCommonExt, rescan->channelIndex)) {        
         char *envp[2];
@@ -1428,7 +1431,7 @@ static void channel_rescan(struct work_struct *work)
         kobject_uevent_env(&host->shost_dev.kobj, KOBJ_CHANGE, envp);
     }
 #endif
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 END:    
     if (MV_FALSE == blReschedule) {
         kfree(rescan);
@@ -1447,7 +1450,7 @@ MV_BOOLEAN IALBusChangeNotify(MV_SATA_ADAPTER *pSataAdapter,
     return MV_TRUE;
 }
 
-#ifdef SYNO_MV_PMP_UEVENT
+#ifdef MY_ABC_HERE
 MV_BOOLEAN IALBusChangeNotifyEx(MV_SATA_ADAPTER *pSataAdapter,
                                 MV_U8 channelIndex,
                                 MV_U16 targetsToRemove,
@@ -1473,7 +1476,7 @@ MV_BOOLEAN IALBusChangeNotifyEx(MV_SATA_ADAPTER *pSataAdapter,
             rescan->channelIndex = channelIndex;
             rescan->targetsToRemove = targetsToRemove;
             rescan->targetsToAdd = targetsToAdd;
-#ifdef SYNO_MV_PMP_UEVENT
+#ifdef MY_ABC_HERE
             rescan->eh_flag = eh_flag;
 #endif
             mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG_ERROR,
@@ -1577,7 +1580,7 @@ void release_ata_mem(struct mv_comp_info * pInfo)
 	{
 		struct scatterlist *sg;
 		MV_U8*		pBuffer;
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
 			sg = (struct scatterlist *) pInfo->SCpnt->sdb.table.sgl;
 #else
 			sg = (struct scatterlist *) pInfo->SCpnt->request_buffer;
@@ -1586,7 +1589,7 @@ void release_ata_mem(struct mv_comp_info * pInfo)
 		mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "SCpnt %p: copy data from temp"
 			 " buffer to command buffer, length %d \n", pInfo->SCpnt, sg->length);
 
-#ifdef SYNO_MV_MODIFY
+#ifdef MY_ABC_HERE
 		pBuffer = kmap_atomic(sg_page(sg), KM_IRQ0) + sg->offset;
 #else
 		pBuffer = kmap_atomic(sg->page, KM_IRQ0) + sg->offset;
@@ -1605,13 +1608,13 @@ void release_ata_mem(struct mv_comp_info * pInfo)
                             pInfo->allocated_entries,
                             pInfo->dma_PRDpnt,
                             pInfo->cpu_PRDpnt);
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
         if (pInfo->SCpnt->sdb.table.nents)
 #else
         if (pInfo->SCpnt->use_sg)
 #endif
         {
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
             pci64_unmap_sg(pAdapter->pcidev,
                            (struct scatterlist *)pInfo->SCpnt->sdb.table.sgl,
                            pInfo->SCpnt->sdb.table.nents,
@@ -1627,7 +1630,7 @@ void release_ata_mem(struct mv_comp_info * pInfo)
         {
             pci64_unmap_page(pAdapter->pcidev,
                              pInfo->single_buff_busaddr,
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
                              pInfo->SCpnt->sdb.length,
 #else
                              pInfo->SCpnt->request_bufflen,
@@ -1744,7 +1747,7 @@ void mv_ial_lib_free_edma_queues(IAL_ADAPTER_T *pAdapter)
                         pAdapter->requestsArrayBaseDmaAddr);
 }
 
-#if defined(SYNO_BLOCK_REQUEST_ERROR_NODEV) || defined(SYNO_SATA_MV_EH) || defined(SYNO_SATA_DETECT_FIX)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 /**
  * We use this function 
  * to tell scsi error handler that this 
@@ -1882,7 +1885,7 @@ MV_BOOLEAN IALCompletion(struct mvSataAdapter *pSataAdapter,
         pCmdBlock->pSenseBuffer[0] = 0;
     }
     pInfo->SCpnt->result = host_status << 16 | (pCmdBlock->ScsiStatus & 0x3f);
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
     scsi_set_resid(pInfo->SCpnt, pCmdBlock->dataBufferLength - pCmdBlock->dataTransfered);
     if(scsi_get_resid(pInfo->SCpnt))
 #else
@@ -1901,7 +1904,7 @@ MV_BOOLEAN IALCompletion(struct mvSataAdapter *pSataAdapter,
     return MV_TRUE;
 }
 
-#if defined(SYNO_SATA_EBOX_REFRESH) || defined(SYNO_SPINUP_DELAY)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 int syno_mv_scsi_host_no_get(MV_SATA_ADAPTER *pSataAdapter, MV_U8 channelIndex)
 {
     IAL_ADAPTER_T   *pAdapter = NULL;

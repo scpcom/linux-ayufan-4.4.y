@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/net/gianfar.c
  *
@@ -92,9 +95,9 @@
 #include <linux/phy.h>
 #include <linux/phy_fixed.h>
 #include <linux/of.h>
-#ifdef SYNO_MPC854X_ERRATA
+#ifdef MY_ABC_HERE
 #include <asm/fsl_errata.h>
-#endif /* SYNO_MPC854X_ERRATA */
+#endif /* MY_ABC_HERE */
 
 #include "gianfar.h"
 #include "fsl_pq_mdio.h"
@@ -103,7 +106,7 @@
 #undef BRIEF_GFAR_ERRORS
 #undef VERBOSE_GFAR_ERRORS
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 static int g_netif_count = 0;
 extern long g_internal_netif_num;
 #endif
@@ -319,7 +322,7 @@ static int gfar_probe(struct of_device *ofdev,
 	int err = 0;
 	int len_devname;
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 	g_netif_count++;
 	if ( g_internal_netif_num >= 0 &&
 		 g_netif_count > g_internal_netif_num )
@@ -362,32 +365,32 @@ static int gfar_probe(struct of_device *ofdev,
 	/* We need to delay at least 3 TX clocks */
 	udelay(2);
 
-#ifdef SYNO_MPC854X_ERRATA
+#ifdef MY_ABC_HERE
 	if (MPC8548_ERRATA(2, 1))
 		tempval = MACCFG1_RX_FLOW;
 	else
 		tempval = (MACCFG1_TX_FLOW | MACCFG1_RX_FLOW);
-#else /* SYNO_MPC854X_ERRATA */
+#else /* MY_ABC_HERE */
 	tempval = (MACCFG1_TX_FLOW | MACCFG1_RX_FLOW);
-#endif /* SYNO_MPC854X_ERRATA */
+#endif /* MY_ABC_HERE */
 
 	gfar_write(&priv->regs->maccfg1, tempval);
 
-#ifdef SYNO_TSEC_RGMII
+#ifdef MY_ABC_HERE
 	if (priv->regs->ecntrl & 0x00000010) {
 		/* RGMII mode */
 		gfar_write(&priv->regs->maccfg2, MACCFG2_INIT_SETTINGS_RGMII);
 		gfar_write(&priv->regs->ecntrl, ECNTRL_INIT_SETTINGS_RGMII);
 	} else {
-#endif /* SYNO_TSEC_RGMII */
+#endif /* MY_ABC_HERE */
 	/* Initialize MACCFG2. */
 	gfar_write(&priv->regs->maccfg2, MACCFG2_INIT_SETTINGS);
 
 	/* Initialize ECNTRL */
 	gfar_write(&priv->regs->ecntrl, ECNTRL_INIT_SETTINGS);
-#ifdef SYNO_TSEC_RGMII
+#ifdef MY_ABC_HERE
 	}
-#endif /* SYNO_TSEC_RGMII */
+#endif /* MY_ABC_HERE */
 
 	/* Set the dev->base_addr to the gfar reg region */
 	dev->base_addr = (unsigned long) (priv->regs);
@@ -469,7 +472,7 @@ static int gfar_probe(struct of_device *ofdev,
 	/* Enable most messages by default */
 	priv->msg_enable = (NETIF_MSG_IFUP << 1 ) - 1;
 
-#ifdef SYNO_GIANFAR_LINKSTATE_FIX
+#ifdef MY_ABC_HERE
 	err = register_netdev(dev);
 
 	/* Carrier starts down, phylib will bring it up */
@@ -721,7 +724,7 @@ static int init_phy(struct net_device *dev)
 	priv->phydev->supported &= (GFAR_SUPPORTED | gigabit_support);
 	priv->phydev->advertising = priv->phydev->supported;
 
-#ifdef SYNO_TSEC_RGMII
+#ifdef MY_ABC_HERE
 	phy_write(priv->phydev, 0x18, 0x4101);  		// set LED as Link/Active
 	if (priv->regs->ecntrl & 0x00000010) {		// RGMII mode
 		if ((0x001c != phy_read(priv->phydev, MII_PHYSID1)) ||
@@ -731,7 +734,7 @@ static int init_phy(struct net_device *dev)
 		phy_write(priv->phydev, 0x00, 0x9140);	// reset phy
 		udelay(1000);
 	}
-#endif /* SYNO_TSEC_RGMII */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }

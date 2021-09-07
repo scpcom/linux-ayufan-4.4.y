@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -407,7 +410,7 @@ static int get_pipe(struct stub_device *sdev, int epnum, int dir)
 	struct usb_device *udev = interface_to_usbdev(sdev->interface);
 	struct usb_host_endpoint *ep;
 	struct usb_endpoint_descriptor *epd = NULL;
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	if (dir == USBIP_DIR_IN)
 		ep = udev->ep_in[epnum & 0x7f];
 	else
@@ -468,7 +471,7 @@ static int get_pipe(struct stub_device *sdev, int epnum, int dir)
 	return 0;
 }
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 static void masking_bogus_flags(struct urb *urb)
 {
        int                             xfertype;
@@ -596,7 +599,7 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
 	/* no need to submit an intercepted request, but harmless? */
 	tweak_special_requests(priv->urb);
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	masking_bogus_flags(priv->urb);	
 #endif
 	/* urb is now ready to submit */
@@ -614,7 +617,7 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
 		 * Pessimistic.
 		 * This connection will be discarded.
 		 */
-#ifndef SYNO_USB_USBIP
+#ifndef MY_ABC_HERE
 		/* SDEV_EVENT_ERROR_SUBMIT will not unbind driver(usbip) => then stop device		 
 		 * It is not the wanted error handling
 		 */
@@ -646,7 +649,7 @@ static void stub_rx_pdu(struct usbip_device *ud)
 		return;
 	}
 
-#ifdef SYNO_USB_USBIP	
+#ifdef MY_ABC_HERE	
 	ud->get_socket_time = current_kernel_time();	
 #endif	
 
@@ -667,7 +670,7 @@ static void stub_rx_pdu(struct usbip_device *ud)
 		break;
 
 	case USBIP_CMD_SUBMIT:
-#ifdef SYNO_USB_USBIP	
+#ifdef MY_ABC_HERE	
 	case USBIP_RESET_DEV:				
 		if(pdu.base.command == USBIP_RESET_DEV) {
 			printk("reset device\n");
@@ -685,7 +688,7 @@ static void stub_rx_pdu(struct usbip_device *ud)
 
 }
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 int syno_socket_check(struct usbip_device *ud)
 {
 	if (-1 == ud->sockfd || NULL == ud->tcp_socket) {
@@ -699,7 +702,7 @@ int syno_socket_check(struct usbip_device *ud)
 void stub_rx_loop(struct usbip_task *ut)
 {
 	struct usbip_device *ud = container_of(ut, struct usbip_device, tcp_rx);
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	struct stub_device *sdev = container_of(ud, struct stub_device, ud);
 #endif
 
@@ -709,13 +712,13 @@ void stub_rx_loop(struct usbip_task *ut)
 			break;
 		}
 
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 		if (syno_usbip_event_happened(ud))
 #else
 		if (usbip_event_happened(ud))
 #endif
 			break;
-#ifdef SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 		wait_event_interruptible(sdev->rx_waitq, syno_socket_check(ud));
 #endif
 		stub_rx_pdu(ud);

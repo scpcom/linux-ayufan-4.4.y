@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -2135,7 +2138,7 @@ MV_BOOLEAN  mvStorageDevSetDeviceType(MV_SATA_ADAPTER *pAdapter, MV_U8 channelIn
     }
 
     pSataChannel->deviceType = deviceType;
-#if defined(SYNO_SATA_PM_DEVICE_GPIO) || defined(SYNO_SATA_MV_EH)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
     pSataChannel->oldDeviceType = deviceType;
 #endif
 

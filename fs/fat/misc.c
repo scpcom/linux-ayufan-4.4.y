@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fat/misc.c
  *
@@ -32,7 +35,7 @@ void fat_fs_error(struct super_block *s, const char *fmt, ...)
 	va_end(args);
 	printk("\n");
 
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 	s->s_flags |= MS_CORRUPT;
 #endif
 	if (opts->errors == FAT_ERRORS_PANIC)

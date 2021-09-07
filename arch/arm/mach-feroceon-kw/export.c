@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +61,7 @@ EXPORT_SYMBOL(mvCpuIfTargetWinGet);
 EXPORT_SYMBOL(mvMacStrToHex);
 EXPORT_SYMBOL(mvBoardTclkGet);
 EXPORT_SYMBOL(mvBoardMacSpeedGet);
-#ifdef SYNO_MPPCTL_REG_W
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(SYNOMppCtrlRegWrite);
 #endif
 

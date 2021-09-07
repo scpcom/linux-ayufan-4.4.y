@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2000-2008 Synology Inc. All rights reserved.
 #ifndef __SYNOLIB_H_
 #define __SYNOLIB_H_
@@ -9,7 +12,7 @@
 #include <linux/module.h>
 
 
-#ifdef  SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 extern int syno_temperature_debug;
 #endif
 
@@ -54,11 +57,11 @@ struct workqueue_struct *SynoCreateWorkqueue(const char *name);
 void SynoDestroyWorkqueue(struct workqueue_struct *wq);
 #endif /* CONFIG_SYNO_CROND */
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 void syno_do_hibernation_log(const char __user *filename);
 #endif
 
-#ifdef SYNO_SCSI_DEVICE_INDEX
+#ifdef MY_ABC_HERE
 #include <linux/fs.h>
 int SynoSCSIGetDeviceIndex(struct block_device *bdev); 
 #endif

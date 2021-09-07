@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   File: linux/xattr.h
 
@@ -33,12 +36,12 @@
 #define XATTR_USER_PREFIX "user."
 #define XATTR_USER_PREFIX_LEN (sizeof (XATTR_USER_PREFIX) - 1)
 
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_PREFIX "syno."
 #define XATTR_SYNO_PREFIX_LEN (sizeof (XATTR_SYNO_PREFIX) - 1)
 #endif
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_ARCHIVE_VERSION "archive_version"
 #endif
 
@@ -55,7 +58,7 @@ struct xattr_handler {
 		   size_t size, int flags);
 };
 
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 struct syno_xattr_archive_version {
 	__le16	v_magic;
 	__le16	v_struct_version;
@@ -75,7 +78,7 @@ ssize_t generic_listxattr(struct dentry *dentry, char *buffer, size_t buffer_siz
 int generic_setxattr(struct dentry *dentry, const char *name, const void *value, size_t size, int flags);
 int generic_removexattr(struct dentry *dentry, const char *name);
 
-#ifdef SYNO_XATTR
+#ifdef MY_ABC_HERE
 int syno_generic_setxattr(struct inode *inode, const char *name, const void *value, size_t size, int flags);
 #endif
 #endif  /*  __KERNEL__  */

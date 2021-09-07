@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	SUCS NET3:
  *
@@ -361,7 +364,7 @@ fault:
 	return -EFAULT;
 }
 
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 /**
  *	skb_copy_datagram_iovec - Copy a datagram to an iovec.
  *	@skb: buffer to copy

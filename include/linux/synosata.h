@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2003-2008 Synology Inc. All rights reserved.
 #ifndef __SYNO_SATA_H_
 #define __SYNO_SATA_H_
@@ -20,7 +23,7 @@
 *  0 : do not spinup delay
 * >0 : The number that we would delay
 */
-#if defined(SYNO_INTERNAL_HD_NUM) && defined(__KERNEL__)
+#if defined(MY_ABC_HERE) && defined(__KERNEL__)
 extern long g_internal_hd_num;
 extern long syno_boot_hd_count;
 
@@ -72,9 +75,9 @@ static inline void SleepForHW(int iDisk, int iIsDoLatency)
 	}
 	syno_boot_hd_count++;
 }
-#endif /* SYNO_INTERNAL_HD_NUM */
+#endif /* MY_ABC_HERE */
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 #include <linux/fs.h>
 
 #define GPIO_3XXX_CMD_POWER_CTL 0x40
@@ -370,7 +373,7 @@ END:
 	return ret;
 }
 
-#ifdef SYNO_EUNIT_POWERCTL_PIN
+#ifdef MY_ABC_HERE
 extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
 #endif
 extern char gszSynoHWVersion[16];
@@ -379,7 +382,7 @@ is_ebox_support(void)
 {
 	unsigned char ret = 0;
 
-#ifdef SYNO_EUNIT_POWERCTL_PIN
+#ifdef MY_ABC_HERE
 	if (funcSynoEunitPowerctlType) {
 		if (EUNIT_NOT_SUPPORT == funcSynoEunitPowerctlType()) {
 			goto END;
@@ -393,14 +396,14 @@ is_ebox_support(void)
 	 */
 
 	ret = 1;
-#ifdef SYNO_EUNIT_POWERCTL_PIN
+#ifdef MY_ABC_HERE
 END:
 #endif
 	return ret;
 }
 #endif
 
-#ifdef SYNO_SATA_SSD_DETECT
+#ifdef MY_ABC_HERE
 
 /* 
  *back porting from linux 2.6.28. add SYNO prefix in order to not mixed with libata
@@ -483,9 +486,9 @@ syno_ata_id_is_ssd(const unsigned short *id)
 END:
 	return res;
 }
-#endif /* SYNO_SATA_SSD_DETECT */
+#endif /* MY_ABC_HERE */
 
-#if defined(SYNO_LIBATA_PMP_UEVENT) || defined(SYNO_MV_PMP_UEVENT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #define SZK_PMP_UEVENT "SYNO_PMP_EVENT"
 #define SZV_PMP_CONNECT "CABLE_CONNECT"
 #define SZV_PMP_DISCONNECT "CABLE_DISCONNECT"

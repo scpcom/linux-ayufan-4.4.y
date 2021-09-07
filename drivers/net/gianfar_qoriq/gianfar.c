@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/net/gianfar.c
  *
@@ -118,7 +121,7 @@
 #undef BRIEF_GFAR_ERRORS
 #undef VERBOSE_GFAR_ERRORS
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 static int g_netif_count = 0;
 extern long g_internal_netif_num;
 #endif
@@ -1405,7 +1408,7 @@ static int gfar_probe(struct of_device *ofdev,
 	int cpus = num_online_cpus();
 #endif
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 	g_netif_count++;
 	if ( g_internal_netif_num >= 0 &&
 		 g_netif_count > g_internal_netif_num )
@@ -5708,7 +5711,7 @@ static irqreturn_t gfar_error(int irq, void *grp_id)
 	return IRQ_HANDLED;
 }
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 void SynoQorIQWOLSet(void) {
 	struct device_node *pDevNode = NULL;
 	struct of_device * ofdev = NULL;

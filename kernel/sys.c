@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/kernel/sys.c
  *
@@ -311,7 +314,7 @@ void kernel_restart(char *cmd)
 }
 EXPORT_SYMBOL_GPL(kernel_restart);
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO 
+#ifdef MY_ABC_HERE 
 extern void scsi_host_poweroff_all(void);
 #endif
 static void kernel_shutdown_prepare(enum system_states state)
@@ -320,7 +323,7 @@ static void kernel_shutdown_prepare(enum system_states state)
 		(state == SYSTEM_HALT)?SYS_HALT:SYS_POWER_OFF, NULL);
 	system_state = state;
 	device_shutdown();
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	scsi_host_poweroff_all();
 #endif
 }

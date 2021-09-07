@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _SCSI_DISK_H
 #define _SCSI_DISK_H
 
@@ -17,7 +20,7 @@
 /*
  * Time out in seconds for disks and Magneto-opticals (which are slower).
  */
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 #define SD_TIMEOUT		(60 * HZ)
 #else
 #define SD_TIMEOUT		(30 * HZ)
@@ -46,7 +49,7 @@ enum {
 	SD_MEMPOOL_SIZE = 2,	/* CDB pool size */
 };
 
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 // FIXME: we need share kernel devices type with user space,
 // so this enum must sync with libsynosdk/lib/fs/fs.h DISK_PORT_TYPE
 typedef enum __syno_disk_type {
@@ -68,7 +71,7 @@ struct scsi_disk {
 	unsigned int	openers;	/* protected by BKL for now, yuck */
 	sector_t	capacity;	/* size in 512-byte sectors */
 	u32		index;
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	SYNO_DISK_TYPE	synodisktype;
 #endif
 #ifdef SYNO_SAS_DISK_NAME

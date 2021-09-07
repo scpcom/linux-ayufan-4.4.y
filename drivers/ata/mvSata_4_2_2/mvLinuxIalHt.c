@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -164,7 +167,7 @@ static int __devinit mv_ial_init_soc_sata(void);
 #endif
 IAL_ADAPTER_T       *pSocAdapter = NULL;
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 struct workqueue_struct *mvSata_aux_wq;
 #endif
 
@@ -174,7 +177,7 @@ static int __init mv_ial_init(void)
     mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "mvSata init.\n");
     driver_template.module = THIS_MODULE;
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     mvSata_aux_wq = create_singlethread_workqueue("mvSata_aux");
     if (!mvSata_aux_wq) {
         printk("\n## Cannot create mvSata workqueue ##\n");
@@ -209,7 +212,7 @@ static int __init mv_ial_init(void)
 static void __exit mv_ial_exit(void)
 {
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     destroy_workqueue(mvSata_aux_wq);
 #endif
 #ifdef CONFIG_MV_INCLUDE_INTEG_SATA
@@ -328,7 +331,7 @@ static void mv_ial_free_scsi_hosts(IAL_ADAPTER_T *pAdapter, MV_BOOLEAN freeAdapt
     }
 }
 
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 /**
  * Call the scsi_done to trigger block layer softirq.
  * 
@@ -1300,7 +1303,7 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
     {
         build_prd_table = 1;
     }
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
     else if((pAdapter->ataScsiAdapterExt->ataDriveData[channel][SCpnt->device->id].identifyInfo.deviceType == MV_SATA_DEVICE_TYPE_ATAPI_DEVICE) && (SCpnt->sdb.table.nents))
 #else
     else if((pAdapter->ataScsiAdapterExt->ataDriveData[channel][SCpnt->device->id].identifyInfo.deviceType == MV_SATA_DEVICE_TYPE_ATAPI_DEVICE) && (SCpnt->use_sg))
@@ -1348,14 +1351,14 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
     }
     else
     {
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
         completion_info->pSALBlock->pDataBuffer = SCpnt->sdb.table.sgl;
 #else
         completion_info->pSALBlock->pDataBuffer = SCpnt->request_buffer;
 #endif
         completion_info->cpu_PRDpnt = NULL;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
 	if (SCpnt->sdb.table.nents)
 #else
 	if (SCpnt->use_sg)
@@ -1375,7 +1378,7 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
     completion_info->pSALBlock->pIalAdapterExtension = &pAdapter->ialCommonExt;
     completion_info->pSALBlock->completionCallBack = IALCompletion;
     completion_info->pSALBlock->IALData = SCpnt;
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
     completion_info->pSALBlock->dataBufferLength = SCpnt->sdb.length;
 #else
     completion_info->pSALBlock->dataBufferLength = SCpnt->request_bufflen;
@@ -1389,7 +1392,7 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
     if (completion_info->kmap_buffer)
     {
 	struct scatterlist *sg;
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
 	sg = (struct scatterlist *) SCpnt->sdb.table.sgl;
 #else
 	sg = (struct scatterlist *) SCpnt->request_buffer;
@@ -1414,14 +1417,14 @@ int mv_ial_ht_queuecommand (struct scsi_cmnd * SCpnt, void (*done) (struct scsi_
 	{
 		struct scatterlist *sg;
 	        MV_U8*          pBuffer;
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
 			sg = (struct scatterlist *) SCpnt->sdb.table.sgl;
 #else
 			sg = (struct scatterlist *) SCpnt->request_buffer;
 #endif
 
 		mvLogMsg(MV_IAL_LOG_ID, MV_DEBUG, "SCpnt %p, cmd %x kmap temp data buffer and copy data.lengh %d \n", SCpnt, *cmd ,sg->length);
-#ifdef SYNO_MV_MODIFY
+#ifdef MY_ABC_HERE
 	        pBuffer = kmap_atomic(sg_page(sg), KM_USER0) + sg->offset;
 #else
 	        pBuffer = kmap_atomic(sg->page, KM_USER0) + sg->offset;
@@ -1526,7 +1529,7 @@ int mv_ial_ht_bus_reset (struct scsi_cmnd *SCpnt)
         mv_ial_block_requests(pAdapter, channel);
     }
     /* don't call scsi done for the commands on this channel*/
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
     syno_ial_lib_clear_cmnd(pAdapter, channel);
 #else
     mv_ial_lib_get_first_cmnd(pAdapter, channel);
@@ -2073,12 +2076,12 @@ int mv_ial_ht_abort(struct scsi_cmnd *SCpnt)
     return FAILED;
 }
 
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 static int syno_mvSata_index_get(struct Scsi_Host *shost, uint channel, uint id, uint lun)
 {
     int index = 0;    
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
     IAL_HOST_T *ial_host = HOSTDATA(shost);
     IAL_ADAPTER_T *pAdapter = MV_IAL_ADAPTER(shost);
 
@@ -2091,7 +2094,7 @@ static int syno_mvSata_index_get(struct Scsi_Host *shost, uint channel, uint id,
 
     return index;
 }
-#endif // SYNO_FIXED_DISK_NAME
+#endif // MY_ABC_HERE
 
 #ifdef SYNO_SATA_POWER_CTL
 int
@@ -2112,7 +2115,7 @@ syno_mvSata_port_power_ctl(struct Scsi_Host *host, MV_U8 blPowerOn)
         /* hardware not support yet */
         goto END;
     } else {
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
         if (!syno_mvSata_is_synology_pm(&pAdapter->ialCommonExt, ial_host->channelIndex)) {
             goto END;
         }
@@ -2126,7 +2129,7 @@ END:
 }
 #endif // SYNO_SATA_POWER_CTL
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 
 static MV_U8 inline
 defer_gpio_cmd(MV_CHANNEL_STATE stat, MV_U32 input, MV_U8 rw)
@@ -2153,7 +2156,7 @@ END:
 	return ret;
 }
 
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
 static ssize_t
 syno_pm_gpio_show(struct device *dev, struct device_attribute *attr, char *buf)
 #else
@@ -2161,7 +2164,7 @@ static ssize_t
 syno_pm_gpio_show(struct class_device *class_dev, char *buf)
 #endif
 {
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
     struct Scsi_Host *shost = class_to_shost(dev);
 #else
     struct Scsi_Host *shost = class_to_shost(class_dev);
@@ -2189,7 +2192,7 @@ syno_pm_gpio_show(struct class_device *class_dev, char *buf)
     return len;
 }
 
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
 static ssize_t
 syno_pm_gpio_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 #else
@@ -2197,7 +2200,7 @@ static ssize_t
 syno_pm_gpio_store(struct class_device *class_dev, const char * buf, size_t count)
 #endif
 {
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
     struct Scsi_Host *shost = class_to_shost(dev);
 #else
     struct Scsi_Host *shost = class_to_shost(class_dev);
@@ -2220,13 +2223,13 @@ syno_pm_gpio_store(struct class_device *class_dev, const char * buf, size_t coun
     }
     return ret;
 }
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
 static DEVICE_ATTR(syno_pm_gpio, S_IRUGO | S_IWUGO, syno_pm_gpio_show, syno_pm_gpio_store);
 #else
 static CLASS_DEVICE_ATTR(syno_pm_gpio, S_IRUGO | S_IWUGO, syno_pm_gpio_show, syno_pm_gpio_store);
 #endif
 
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
 static ssize_t
 syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 #else
@@ -2234,7 +2237,7 @@ static ssize_t
 syno_pm_info_show(struct class_device *class_dev, char *buf)
 #endif
 {
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
     struct Scsi_Host *shost = class_to_shost(dev);
 #else
     struct Scsi_Host *shost = class_to_shost(class_dev);
@@ -2300,14 +2303,14 @@ syno_pm_info_show(struct class_device *class_dev, char *buf)
     return len;
 }
 
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
 static DEVICE_ATTR(syno_pm_info, S_IRUGO, syno_pm_info_show, NULL);
 #else
 static CLASS_DEVICE_ATTR(syno_pm_info, S_IRUGO, syno_pm_info_show, NULL);
 #endif
 
 struct class_device_attribute *mvSata_shost_attrs[] = {
-#ifdef SYNO_MV_MODIFY_32
+#ifdef MY_ABC_HERE
     &dev_attr_syno_pm_gpio.attr,
     &dev_attr_syno_pm_info.attr,
 #else
@@ -2316,9 +2319,9 @@ struct class_device_attribute *mvSata_shost_attrs[] = {
 #endif
     NULL
 };
-#endif // SYNO_SATA_PM_DEVICE_GPIO
+#endif // MY_ABC_HERE
 
-#if defined(SYNO_FIXED_DISK_NAME) || defined(SYNO_SATA_POWER_CTL) || defined(SYNO_SATA_PM_DEVICE_GPIO)
+#if defined(MY_ABC_HERE) || defined(SYNO_SATA_POWER_CTL) || defined(MY_ABC_HERE)
 Scsi_Host_Template driver_template = SynoMvSata;
 #else
 Scsi_Host_Template driver_template = mvSata;

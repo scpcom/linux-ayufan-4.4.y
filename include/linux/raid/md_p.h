@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
    md_p.h : physical layout of Linux RAID devices
           Copyright (C) 1996-98 Ingo Molnar, Gadi Oxman
@@ -82,7 +85,7 @@
 				   * read requests will only be sent here in
 				   * dire need
 				   */
-#ifdef SYNO_RAID_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 #define MD_DISK_ERROR		6 /* disk error in degraded mode */
 #endif
 

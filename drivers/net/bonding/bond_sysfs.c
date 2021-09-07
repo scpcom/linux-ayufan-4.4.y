@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright(c) 2004-2005 Intel Corporation. All rights reserved.
  *
@@ -277,7 +280,7 @@ static ssize_t bonding_store_slaves(struct device *d,
 		   the master's hardware address to be the same as the
 		   slave's. */
 		if (is_zero_ether_addr(bond->dev->dev_addr))
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 		{
 			unsigned char szMac[MAX_ADDR_LEN];
 			memset(szMac, 0, sizeof(szMac));

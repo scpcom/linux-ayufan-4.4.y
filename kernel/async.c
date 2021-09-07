@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * async.c: Asynchronous function calls for boot performance
  *
@@ -208,7 +211,7 @@ static async_cookie_t __async_schedule(async_func_ptr *ptr, void *data, struct l
 	return newcookie;
 }
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 static void __syno_async_schedule_enabled_set(int iValue)
 {
 	async_enabled = iValue;

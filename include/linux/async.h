@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * async.h: Asynchronous function calls for boot performance
  *
@@ -16,7 +19,7 @@
 typedef u64 async_cookie_t;
 typedef void (async_func_ptr) (void *data, async_cookie_t cookie);
 
-#ifdef SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 extern void syno_async_schedule_enabled_set(int iValue);
 extern int syno_async_schedule_enabled_get(void);
 #endif

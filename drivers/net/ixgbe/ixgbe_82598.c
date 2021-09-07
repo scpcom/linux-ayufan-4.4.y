@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 
   Intel 10 Gigabit PCI Express Linux driver
@@ -1176,9 +1179,9 @@ static struct ixgbe_phy_operations phy_ops_82598 = {
 	.setup_link		= &ixgbe_setup_phy_link_generic,
 	.setup_link_speed	= &ixgbe_setup_phy_link_speed_generic,
 	.read_i2c_eeprom	= &ixgbe_read_i2c_eeprom_82598,
-#ifdef SYNO_IXGBE_SUPPORT_T2
+#ifdef MY_ABC_HERE
 	.check_overtemp   = &ixgbe_tn_check_overtemp,
-#endif /* SYNO_IXGBE_SUPPORT_T2 */
+#endif /* MY_ABC_HERE */
 };
 
 struct ixgbe_info ixgbe_82598_info = {

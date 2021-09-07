@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/include/linux/hfsplus_fs.h
  *
@@ -231,7 +234,7 @@ struct hfsplus_readdir_data {
 #define hfs_bmap_alloc hfsplus_bmap_alloc
 #define hfs_bmap_free hfsplus_bmap_free
 #define hfs_bnode_read hfsplus_bnode_read
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 #define hfs_bnode_read_u32 hfsplus_bnode_read_u32
 #endif
 #define hfs_bnode_read_u16 hfsplus_bnode_read_u16
@@ -290,7 +293,7 @@ typedef int (*search_strategy_t)(struct hfs_bnode *,
 /* attributes.c */
 int hfsplus_create_attr_tree_cache(void);
 void hfsplus_destroy_attr_tree_cache(void);
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 int hfsplus_recreate_attr_tree_cache(size_t);
 size_t hfsplus_get_attr_tree_cache_size(void);
 #endif
@@ -422,7 +425,7 @@ int hfsplus_uni2asc(struct super_block *, const struct hfsplus_unistr *, char *,
 int hfsplus_asc2uni(struct super_block *, struct hfsplus_unistr *, const char *, int);
 int hfsplus_hash_dentry(struct dentry *dentry, struct qstr *str);
 int hfsplus_compare_dentry(struct dentry *dentry, struct qstr *s1, struct qstr *s2);
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 int hfsplus_attr_uni2asc(struct super_block *,
 		const struct hfsplus_unistr *, char *, int *);
 int hfsplus_attr_asc2uni(struct super_block *,

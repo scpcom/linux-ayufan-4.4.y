@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/char/tty_io.c
  *
@@ -2786,7 +2789,7 @@ void initialize_tty_struct(struct tty_struct *tty,
 
 int tty_put_char(struct tty_struct *tty, unsigned char ch)
 {
-#ifdef SYNO_FIX_MICROP_NOT_WRITE_IMMEDIATELY
+#ifdef MY_ABC_HERE
 	if (tty->ops->put_char && 0 != strcmp(tty->name, "ttyS1")) { 
 #else
 	if (tty->ops->put_char) { 
@@ -2797,7 +2800,7 @@ int tty_put_char(struct tty_struct *tty, unsigned char ch)
 }
 EXPORT_SYMBOL_GPL(tty_put_char);
 
-#ifdef SYNO_TTYS_WRITE
+#ifdef MY_ABC_HERE
 int syno_ttys_write(const int index, const char* szBuf)
 {
     size_t i = 0;

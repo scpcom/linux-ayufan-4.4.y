@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/mtd/maps/synomap.c
  *
@@ -74,7 +77,7 @@ static struct mtd_partition synomtd_partitions[] = {
 	},
 };
 #elif defined(CONFIG_SYNO_MV88F6281)
-#ifdef SYNO_FLASH_MEMORY_SIZE
+#ifdef MY_ABC_HERE
 extern long gSynoFlashMemorySize;
 #endif
 extern struct resource physmap_flash_resource;
@@ -326,7 +329,7 @@ static int __init init_synomtd(void)
 			 */
 			pMtdPartition = &synomtd_partitions;
 			n = ARRAY_SIZE(synomtd_partitions);
-#ifdef SYNO_FLASH_MEMORY_SIZE
+#ifdef MY_ABC_HERE
 			if (8 == gSynoFlashMemorySize) {
 				pMtdPartition = &synomtd_partitions_8M;
 				n = ARRAY_SIZE(synomtd_partitions_8M);

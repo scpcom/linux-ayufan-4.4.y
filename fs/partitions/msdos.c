@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  fs/partitions/msdos.c
  *
@@ -469,7 +472,7 @@ int msdos_partition(struct parsed_partitions *state, struct block_device *bdev)
 				put_dev_sector(sect);
 				return 1;
 			} else {
-#ifndef SYNO_FAT_SKIP_BOOT_INDICATOR_CHK
+#ifndef MY_ABC_HERE
 				put_dev_sector(sect);
 				return 0;
 #else

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2000-2009 Synology Inc. All rights reserved.
 
 #include <linux/kernel.h> /* printk() */
@@ -18,7 +21,7 @@ InitModuleType(struct synobios_ops *ops)
 
 	switch (model) {
 	case MODEL_DS110j:
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 		if (syno_is_hw_version(HW_DS110jv20)) {
 			pType = &type_110jv2;
 		} else if (syno_is_hw_version(HW_DS110jv30)) {

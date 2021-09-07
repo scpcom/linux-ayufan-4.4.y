@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  USB HID quirks support for Linux
  *
@@ -320,7 +323,7 @@
 #define USB_DEVICE_ID_MGE_UPS		0xffff
 #define USB_DEVICE_ID_MGE_UPS1		0x0001
 
-#ifdef SYNO_USB_UPS
+#ifdef MY_ABC_HERE
 #define USB_VENDOR_ID_APC               0x051d
 #define USB_DEVICE_ID_APC_UPS1          0x0002
 
@@ -341,7 +344,7 @@
 #define USB_DEVICE_ID_BELKIN_UPS4       0x0912
 #define USB_DEVICE_ID_BELKIN_UPS5       0x0551
 #define USB_DEVICE_ID_BELKIN_UPS6       0x0751
-#endif //SYNO_USB_UPS
+#endif //MY_ABC_HERE
 
 #define USB_VENDOR_ID_MICROCHIP		0x04d8
 #define USB_DEVICE_ID_PICKIT1		0x0032

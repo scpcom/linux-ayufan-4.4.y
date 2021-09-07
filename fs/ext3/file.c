@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext3/file.c
  *
@@ -70,7 +73,7 @@ const struct file_operations ext3_file_operations = {
 };
 
 const struct inode_operations ext3_file_inode_operations = {
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_get_archive_ver = syno_ext3_get_archive_ver,
 	.syno_set_archive_ver = syno_ext3_set_archive_ver,
 #endif

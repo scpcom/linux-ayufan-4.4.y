@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext4/resize.c
  *
@@ -921,7 +924,7 @@ int ext4_group_add(struct super_block *sb, struct ext4_new_group_data *input)
 
 	/* Update the reserved block counts only once the new group is
 	 * active. */
-#ifndef SYNO_EXT4_SKIP_ADD_RESERVED_BLOCKS
+#ifndef MY_ABC_HERE
 	ext4_r_blocks_count_set(es, ext4_r_blocks_count(es) +
 		input->reserved_blocks);
 #endif

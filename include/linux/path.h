@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_PATH_H
 #define _LINUX_PATH_H
 
@@ -7,7 +10,7 @@ struct vfsmount;
 struct path {
 	struct vfsmount *mnt;
 	struct dentry *dentry;
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 	int mounted;
 #endif
 };

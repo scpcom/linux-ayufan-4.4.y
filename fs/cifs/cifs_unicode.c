@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/cifs_unicode.c
  *
@@ -196,7 +199,7 @@ cifs_strtoUCS(__le16 *to, const char *from, int len,
 
 	for (i = 0; len && *from; i++, from += charlen, len -= charlen) {
 
-#ifdef SYNO_CIFS_SPECIAL_CHAR_CONVER
+#ifdef MY_ABC_HERE
 		if (0x0d == *from) {	//'\r'
 			to[i] = cpu_to_le16(0xf00d);
 			charlen = 1;
@@ -229,7 +232,7 @@ cifs_strtoUCS(__le16 *to, const char *from, int len,
 		/* works for 2.4.0 kernel or later */
 		charlen = codepage->char2uni(from, len, &wchar_to[i]);
 		if (charlen < 1) {
-#ifndef SYNO_CIFS_SPECIAL_CHAR_CONVER
+#ifndef MY_ABC_HERE
 			cERROR(1,
 			       ("strtoUCS: char2uni of %d returned %d",
 				(int)*from, charlen));
@@ -240,7 +243,7 @@ cifs_strtoUCS(__le16 *to, const char *from, int len,
 		} else
 			to[i] = cpu_to_le16(wchar_to[i]);
 
-#ifdef SYNO_CIFS_SPECIAL_CHAR_CONVER
+#ifdef MY_ABC_HERE
 		}
 #endif
 	}

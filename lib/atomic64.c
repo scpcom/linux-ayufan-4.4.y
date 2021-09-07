@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Generic implementation of 64-bit atomics using spinlocks,
  * useful on processors that don't have 64-bit atomic instructions.
@@ -16,7 +19,7 @@
 #include <linux/module.h>
 #include <asm/atomic.h>
 
-#ifdef SYNO_ARM_GENERIC_ATOMIC64
+#ifdef MY_ABC_HERE
 #include <asm-generic/atomic64.h>
 #endif
 

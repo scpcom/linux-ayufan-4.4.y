@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2003-2006, Cluster File Systems, Inc, info@clusterfs.com
  * Written by Alex Tomas <alex@clusterfs.com>
@@ -2060,11 +2063,11 @@ ext4_mb_regular_allocator(struct ext4_allocation_context *ac)
 	 */
 repeat:
 	for (; cr < 4 && ac->ac_status == AC_STATUS_CONTINUE; cr++) {
-#ifdef SYNO_MBALLOC_RANDOM
+#ifdef MY_ABC_HERE
 #define SYNO_MBALLOC_RANDOM_THRES 1024
 		ext4_group_t random_interval;
 		random_interval = ngroups / (SYNO_MBALLOC_RANDOM_THRES/2);
-#endif /* SYNO_MBALLOC_RANDOM */
+#endif /* MY_ABC_HERE */
 		ac->ac_criteria = cr;
 		/*
 		 * searching for the right group start
@@ -2073,7 +2076,7 @@ repeat:
 		group = ac->ac_g_ex.fe_group;
 
 		for (i = 0; i < ngroups; group++, i++) {
-#ifdef SYNO_MBALLOC_RANDOM
+#ifdef MY_ABC_HERE
 			if (0 == cr) { // only do it on cr==0 for safety
 				if (i >= SYNO_MBALLOC_RANDOM_THRES && 
 						ngroups > 2 * SYNO_MBALLOC_RANDOM_THRES) {
@@ -2091,10 +2094,10 @@ repeat:
 			if (group >= ngroups) {
 				group -= ngroups;
 			}
-#else /* !SYNO_MBALLOC_RANDOM */
+#else /* !MY_ABC_HERE */
 			if (group == ngroups)
 				group = 0;
-#endif /* SYNO_MBALLOC_RANDOM */
+#endif /* MY_ABC_HERE */
 
 			/* This now checks without needing the buddy page */
 			if (!ext4_mb_good_group(ac, group, cr))
@@ -4325,7 +4328,7 @@ ext4_fsblk_t ext4_mb_new_blocks(handle_t *handle,
 			return 0;
 		}
 		reserv_blks = ar->len;
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		while (ar->len && dquot_alloc_block(ar->inode, ar->len)) {
 #else
 		while (ar->len && vfs_dq_alloc_block(ar->inode, ar->len)) {
@@ -4406,7 +4409,7 @@ out2:
 	kmem_cache_free(ext4_ac_cachep, ac);
 out1:
 	if (inquota && ar->len < inquota)
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_block(ar->inode, inquota - ar->len);
 #else
 		vfs_dq_free_block(ar->inode, inquota - ar->len);
@@ -4527,7 +4530,7 @@ ext4_mb_free_metadata(handle_t *handle, struct ext4_buddy *e4b,
  * @count:		number of blocks to count
  * @metadata: 		Are these metadata blocks
  */
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 void ext4_free_blocks(handle_t *handle, struct inode *inode,
 		      ext4_fsblk_t block, unsigned long count,
 		      int metadata)
@@ -4542,7 +4545,7 @@ void ext4_mb_free_blocks(handle_t *handle, struct inode *inode,
 	struct ext4_allocation_context *ac = NULL;
 	struct ext4_group_desc *gdp;
 	struct ext4_super_block *es;
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	unsigned long freed = 0;
 #endif
 	unsigned int overflow;
@@ -4554,7 +4557,7 @@ void ext4_mb_free_blocks(handle_t *handle, struct inode *inode,
 	int err = 0;
 	int ret;
 
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	/* 
 	 * We need to make sure we don't reuse the freed block until
 	 * after the transaction is committed, which we can do by
@@ -4695,7 +4698,7 @@ do_more:
 
 	ext4_mb_unload_buddy(&e4b);
 
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	freed += count;
 #else
 	*freed += count;
@@ -4719,7 +4722,7 @@ do_more:
 	}
 	sb->s_dirt = 1;
 error_return:
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	if (freed)
 		dquot_free_block(inode, freed);
 #endif

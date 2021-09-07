@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2000-2006 Synology Inc. All rights reserved.
 #include <linux/syno.h>
 #include <linux/module.h>
@@ -187,18 +190,18 @@
 #define SYNO_MODEL_RS408	0x02    
 #define SYNO_MODEL_DS408	0x01
 
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 extern char gszSerialNum[];
 #endif
 
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 #endif
 
 static int Uninitialize(void);
 
 static int GetBrand(void)
 {
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 	int Brand = -1;
 
 	//YMXX[Z]SSSSS
@@ -630,7 +633,7 @@ static int SetFanStatus(FAN_STATUS status, FAN_SPEED speed)
 	case MODEL_DS209p:
 		break;
 	case MODEL_DS409p:
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 		if (syno_is_hw_version(HW_DS409pv20)) {
 			res = SetFanSpeedValue3bits(status, speed, FanStatusMapping409pv20);
 			goto END;

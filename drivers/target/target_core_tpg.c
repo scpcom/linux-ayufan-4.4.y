@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  target_core_tpg.c
  *
@@ -122,7 +125,7 @@ se_node_acl_t *__core_tpg_get_initiator_node_acl(
 	se_node_acl_t *acl;
 
 	list_for_each_entry(acl, &tpg->acl_node_list, acl_list) {
-#ifdef SYNO_LIO_DEFAULT_ACL
+#ifdef MY_ABC_HERE
 		if( !tpg->default_acl && !(strcmp(acl->initiatorname, SYNO_LIO_DEFAULT_ACL_INITIATOR)) ) {
 			tpg->default_acl = acl;
 		}
@@ -146,7 +149,7 @@ se_node_acl_t *core_tpg_get_initiator_node_acl(
 
 	spin_lock_bh(&tpg->acl_node_lock);
 	list_for_each_entry(acl, &tpg->acl_node_list, acl_list) {
-#ifdef SYNO_LIO_DEFAULT_ACL
+#ifdef MY_ABC_HERE
 		if( !tpg->default_acl && !(strcmp(acl->initiatorname, SYNO_LIO_DEFAULT_ACL_INITIATOR)) ) {
 			tpg->default_acl = acl;
 		}
@@ -173,7 +176,7 @@ void core_tpg_add_node_to_devs(
 	int i = 0;
 	u32 lun_access = 0;
 	se_lun_t *lun;
-#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifdef MY_ABC_HERE
 	struct se_device_s *dev;
 #endif
 
@@ -183,7 +186,7 @@ void core_tpg_add_node_to_devs(
 		if (lun->lun_status != TRANSPORT_LUN_STATUS_ACTIVE)
 			continue;
 
-#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifdef MY_ABC_HERE
 		dev = lun->se_dev;
 #endif
 		spin_unlock(&tpg->tpg_lun_lock);
@@ -192,7 +195,7 @@ void core_tpg_add_node_to_devs(
 		 * demo_mode_write_protect is ON, or READ_ONLY;
 		 */
 		if (!(TPG_TFO(tpg)->tpg_check_demo_mode_write_protect(tpg))) {
-#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifdef MY_ABC_HERE
 			if (dev->dev_flags & DF_READ_ONLY)
 				lun_access = TRANSPORT_LUNFLAGS_READ_ONLY;
 			else
@@ -214,7 +217,7 @@ void core_tpg_add_node_to_devs(
 			 * Allow only optical drives to issue R/W in default RO
 			 * demo mode.
 			 */
-#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifdef MY_ABC_HERE
 			if (TRANSPORT(dev)->get_device_type(dev) == TYPE_DISK)
 				lun_access = TRANSPORT_LUNFLAGS_READ_ONLY;
 			else
@@ -228,7 +231,7 @@ void core_tpg_add_node_to_devs(
 #endif
 		}
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "TARGET_CORE[%s]->TPG[%u]_LUN[%u] - Adding %s"
 			" access for LUN in Demo Mode\n",
 			TPG_TFO(tpg)->get_fabric_name(),
@@ -291,7 +294,7 @@ static int core_create_device_list_for_node(se_node_acl_t *nacl)
 	return 0;
 }
 
-#ifdef SYNO_LIO_DEFAULT_ACL
+#ifdef MY_ABC_HERE
 static void core_tpg_default_acl_dup_devs(se_node_acl_t* dst_acl, se_node_acl_t* src_acl, se_portal_group_t* tpg)
 {
 	size_t i = 0;
@@ -305,7 +308,7 @@ static void core_tpg_default_acl_dup_devs(se_node_acl_t* dst_acl, se_node_acl_t*
 			continue;
 		}
 
-#ifdef SYNO_LIO_REDUCE_MESSAGE
+#ifdef MY_ABC_HERE
 		// reduce complie-time warnning messages
 		if( (lun = src_acl->device_list[i].se_lun) ) {
 #else
@@ -321,7 +324,7 @@ static void core_tpg_default_acl_dup_devs(se_node_acl_t* dst_acl, se_node_acl_t*
 				lun_access = TRANSPORT_LUNFLAGS_READ_ONLY;
 			}
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 			printk(KERN_INFO "TARGET_CORE[%s]->TPG[%u]_LUN[%u] - Adding %s access for LUN\n",
 				TPG_TFO(tpg)->get_fabric_name(),
 				TPG_TFO(tpg)->tpg_get_tag(tpg), lun->unpacked_lun,
@@ -352,7 +355,7 @@ se_node_acl_t *core_tpg_check_initiator_node_acl(
 	if ((acl))
 		return acl;
 
-#ifdef SYNO_LIO_DEFAULT_ACL
+#ifdef MY_ABC_HERE
 	if( !tpg->default_acl && !(TPG_TFO(tpg)->tpg_check_demo_mode(tpg)) ) {
 			return NULL;
 	}
@@ -389,7 +392,7 @@ se_node_acl_t *core_tpg_check_initiator_node_acl(
 		return NULL;
 	}
 	TPG_TFO(tpg)->set_default_node_attributes(acl);
-#ifdef SYNO_LIO_DEFAULT_ACL
+#ifdef MY_ABC_HERE
 	if( tpg->default_acl && !(TPG_TFO(tpg)->tpg_check_demo_mode(tpg)) ) {
 		TPG_TFO(tpg)->dup_node_attributes(acl, tpg->default_acl);
 	}
@@ -408,7 +411,7 @@ se_node_acl_t *core_tpg_check_initiator_node_acl(
 		return NULL;
 	}
 
-#ifdef SYNO_LIO_DEFAULT_ACL
+#ifdef MY_ABC_HERE
 	if( tpg->default_acl && !(TPG_TFO(tpg)->tpg_check_demo_mode(tpg)) ) {
 		core_tpg_default_acl_dup_devs(acl, tpg->default_acl, tpg);
 	} else
@@ -420,7 +423,7 @@ se_node_acl_t *core_tpg_check_initiator_node_acl(
 	tpg->num_node_acls++;
 	spin_unlock_bh(&tpg->acl_node_lock);
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk("%s_TPG[%u] - Added DYNAMIC ACL with TCQ Depth: %d for %s"
 		" Initiator Node: %s\n", TPG_TFO(tpg)->get_fabric_name(),
 		TPG_TFO(tpg)->tpg_get_tag(tpg), acl->queue_depth,
@@ -476,7 +479,7 @@ void core_tpg_clear_object_luns(se_portal_group_t *tpg)
 			continue;
 
 		spin_unlock(&tpg->tpg_lun_lock);
-#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifdef MY_ABC_HERE
 		ret = core_dev_del_lun(tpg, lun->unpacked_lun);
 #else
 		ret = LUN_OBJ_API(lun)->del_obj_from_lun(tpg, lun);
@@ -565,7 +568,7 @@ se_node_acl_t *core_tpg_add_initiator_node_acl(
 	spin_unlock_bh(&tpg->acl_node_lock);
 
 done:
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "%s_TPG[%hu] - Added ACL with TCQ Depth: %d for %s"
 		" Initiator Node: %s\n", TPG_TFO(tpg)->get_fabric_name(),
 		TPG_TFO(tpg)->tpg_get_tag(tpg), acl->queue_depth,
@@ -626,7 +629,7 @@ int core_tpg_del_initiator_node_acl(
 	TPG_TFO(tpg)->tpg_release_fabric_acl(tpg, acl);
 	acl->fabric_acl_ptr = NULL;
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "%s_TPG[%hu] - Deleted ACL with TCQ Depth: %d for %s"
 		" Initiator Node: %s\n", TPG_TFO(tpg)->get_fabric_name(),
 		TPG_TFO(tpg)->tpg_get_tag(tpg), acl->queue_depth,
@@ -760,7 +763,7 @@ static int core_tpg_setup_virtual_lun0(struct se_portal_group_s *se_tpg)
 	lun->lun_type_ptr = NULL;
 	lun->lun_status = TRANSPORT_LUN_STATUS_FREE;
 	atomic_set(&lun->lun_acl_count, 0);
-#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
+#ifdef MY_ABC_HERE
 	init_completion(&lun->lun_shutdown_comp);
 #endif
 	INIT_LIST_HEAD(&lun->lun_acl_list);
@@ -769,7 +772,7 @@ static int core_tpg_setup_virtual_lun0(struct se_portal_group_s *se_tpg)
 	spin_lock_init(&lun->lun_cmd_lock);
 	spin_lock_init(&lun->lun_sep_lock);
 
-#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifdef MY_ABC_HERE
 	ret = core_tpg_post_addlun(se_tpg, lun, TRANSPORT_LUN_TYPE_DEVICE,
 			lun_access, dev);
 #else
@@ -819,7 +822,7 @@ se_portal_group_t *core_tpg_register(
 		lun->lun_type_ptr = NULL;
 		lun->lun_status = TRANSPORT_LUN_STATUS_FREE;
 		atomic_set(&lun->lun_acl_count, 0);
-#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
+#ifdef MY_ABC_HERE
 		init_completion(&lun->lun_shutdown_comp);
 #endif
 		INIT_LIST_HEAD(&lun->lun_acl_list);
@@ -851,7 +854,7 @@ se_portal_group_t *core_tpg_register(
 	list_add_tail(&se_tpg->se_tpg_list, &se_global->g_se_tpg_list);
 	spin_unlock_bh(&se_global->se_tpg_lock);
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "TARGET_CORE[%s]: Allocated %s se_portal_group_t for"
 		" endpoint: %s, Portal Tag: %u\n", tfo->get_fabric_name(),
 		(se_tpg->se_tpg_type == TRANSPORT_TPG_TYPE_NORMAL) ?
@@ -865,7 +868,7 @@ EXPORT_SYMBOL(core_tpg_register);
 
 int core_tpg_deregister(se_portal_group_t *se_tpg)
 {
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "TARGET_CORE[%s]: Deallocating %s se_portal_group_t"
 		" for endpoint: %s Portal Tag %u\n",
 		(se_tpg->se_tpg_type == TRANSPORT_TPG_TYPE_NORMAL) ?
@@ -922,7 +925,7 @@ se_lun_t *core_tpg_pre_addlun(
 }
 EXPORT_SYMBOL(core_tpg_pre_addlun);
 
-#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifdef MY_ABC_HERE
 int core_tpg_post_addlun(
 	se_portal_group_t *tpg,
 	se_lun_t *lun,
@@ -972,7 +975,7 @@ int core_tpg_post_addlun(
 #endif
 EXPORT_SYMBOL(core_tpg_post_addlun);
 
-#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
+#ifdef MY_ABC_HERE
 void core_tpg_shutdown_lun(
 	struct se_portal_group_s *tpg,
 	struct se_lun_s *lun)
@@ -1020,7 +1023,7 @@ se_lun_t *core_tpg_pre_dellun(
 	}
 	spin_unlock(&tpg->tpg_lun_lock);
 
-#ifndef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
+#ifndef MY_ABC_HERE
 	core_clear_lun_from_tpg(lun, tpg);
 #endif
 
@@ -1034,13 +1037,13 @@ int core_tpg_post_dellun(
 {
 	se_lun_acl_t *acl, *acl_tmp;
 
-#ifdef SYNO_LIO_ACTIVE_IO_SHUTDOWN_PATCH
+#ifdef MY_ABC_HERE
 	core_tpg_shutdown_lun(tpg, lun);
 #else
 	transport_clear_lun_from_sessions(lun);
 #endif
 
-#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifdef MY_ABC_HERE
 	dev_obj_unexport(lun->lun_type_ptr, tpg, lun);
 	transport_generic_release_phydevice(lun->lun_type_ptr, 1);
 #else

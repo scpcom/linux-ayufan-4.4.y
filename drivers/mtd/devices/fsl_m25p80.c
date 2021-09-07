@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifdef CONFIG_SYNO_QORIQ
 /*
  * MTD SPI driver for ST M25Pxx (and similar) serial flash chips
@@ -693,7 +696,7 @@ end:
 	return;
 }
 
-#ifdef SYNO_MTD_LOCK_UNLOCK
+#ifdef MY_ABC_HERE
 static int unlock_chip(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
         return 0;
@@ -703,7 +706,7 @@ static int lock_chip(struct mtd_info *mtd, loff_t ofs, size_t len)
 {
         return 0;
 }
-#endif /* SYNO_MTD_LOCK_UNLOCK */
+#endif /* MY_ABC_HERE */
 
 /*
  * board specific setup should have ensured the SPI clock used here
@@ -777,10 +780,10 @@ static int __devinit m25p_probe(struct spi_device *spi)
 	flash->mtd.erase = m25p80_erase;
 	flash->mtd.read = m25p80_read;
 	flash->mtd.write = m25p80_write;
-#ifdef SYNO_MTD_LOCK_UNLOCK
+#ifdef MY_ABC_HERE
 	flash->mtd.lock    = lock_chip;
 	flash->mtd.unlock  = unlock_chip;
-#endif /* SYNO_MTD_LOCK_UNLOCK */
+#endif /* MY_ABC_HERE */
 
 	/* prefer "small sector" erase if possible */
 	if (info->flags & SECT_4K) {

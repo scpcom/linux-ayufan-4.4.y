@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver PCI Bus Glue.
  *
@@ -28,7 +31,7 @@
 #define PCI_VENDOR_ID_FRESCO_LOGIC	0x1b73
 #define PCI_DEVICE_ID_FRESCO_LOGIC_PDK	0x1000
 
-#ifndef SYNO_USB3_PCI_ID_DEFINE // move to pci_id.h
+#ifndef MY_ABC_HERE // move to pci_id.h
 #define PCI_VENDOR_ID_ETRON   0x1b6f
 #define PCI_DEVICE_ID_ASROCK_P67  0x7023
 #else
@@ -88,7 +91,7 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	if (pdev->vendor == PCI_VENDOR_ID_NEC)
 		xhci->quirks |= XHCI_NEC_HOST;
 
-#ifdef SYNO_USB3_PCI_ID_DEFINE
+#ifdef MY_ABC_HERE
 	xhci_vendor = pdev->vendor;
 
   if (pdev->vendor == PCI_VENDOR_ID_ETRON &&

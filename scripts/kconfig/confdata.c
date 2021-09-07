@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2002 Roman Zippel <zippel@linux-m68k.org>
  * Released under the terms of the GNU GPL v2.0.
@@ -673,7 +676,7 @@ out:
 	return res;
 }
 
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 static int syno_autoconf_check(const char *name) 
 {
 	int ret; 
@@ -693,7 +696,7 @@ int conf_write_autoconf(void)
 	FILE *out, *out_h;
 	time_t now;
 	int i, l;
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 	FILE *syno_h;
 	int syno_write_string = 0;
 #endif
@@ -714,7 +717,7 @@ int conf_write_autoconf(void)
 		return 1;
 	}
 
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 	syno_h = fopen(".tmpsynoconfig.h", "w");
 	if (!syno_h) {
 		fclose(out);
@@ -740,7 +743,7 @@ int conf_write_autoconf(void)
 		       "#define AUTOCONF_INCLUDED\n",
 		       sym_get_string_value(sym), ctime(&now));
 
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 	fprintf(syno_h, "/*\n"
 		        " * Automatically generated C config: don't edit\n"
 		        " * Linux kernel version: %s\n"
@@ -764,7 +767,7 @@ int conf_write_autoconf(void)
 			case mod:
 				fprintf(out, "CONFIG_%s=m\n", sym->name);
 				fprintf(out_h, "#define CONFIG_%s_MODULE 1\n", sym->name);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 				if (syno_autoconf_check(sym->name)) {
 					fprintf(syno_h, "#define CONFIG_%s_MODULE 1\n", sym->name);
 				}
@@ -773,7 +776,7 @@ int conf_write_autoconf(void)
 			case yes:
 				fprintf(out, "CONFIG_%s=y\n", sym->name);
 				fprintf(out_h, "#define CONFIG_%s 1\n", sym->name);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 				if (syno_autoconf_check(sym->name)) {
 					fprintf(syno_h, "#define CONFIG_%s 1\n", sym->name);
 				}
@@ -785,7 +788,7 @@ int conf_write_autoconf(void)
 			str = sym_get_string_value(sym);
 			fprintf(out, "CONFIG_%s=\"", sym->name);
 			fprintf(out_h, "#define CONFIG_%s \"", sym->name);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 			syno_write_string = 0;
 			if (syno_autoconf_check(sym->name)) {
 				syno_write_string = 1;
@@ -798,7 +801,7 @@ int conf_write_autoconf(void)
 				if (l) {
 					fwrite(str, l, 1, out);
 					fwrite(str, l, 1, out_h);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 					if (syno_write_string) {
 						fwrite(str, l, 1, syno_h);
 					}
@@ -809,7 +812,7 @@ int conf_write_autoconf(void)
 					break;
 				fprintf(out, "\\%c", *str);
 				fprintf(out_h, "\\%c", *str);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 				if (syno_write_string) {
 					fprintf(syno_h, "\\%c", *str);
 				}
@@ -818,7 +821,7 @@ int conf_write_autoconf(void)
 			}
 			fputs("\"\n", out);
 			fputs("\"\n", out_h);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 			if (syno_write_string) {
 				fputs("\"\n", syno_h);
 			}
@@ -829,7 +832,7 @@ int conf_write_autoconf(void)
 			if (str[0] != '0' || (str[1] != 'x' && str[1] != 'X')) {
 				fprintf(out, "CONFIG_%s=%s\n", sym->name, str);
 				fprintf(out_h, "#define CONFIG_%s 0x%s\n", sym->name, str);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 				if (syno_autoconf_check(sym->name)) {
 					fprintf(syno_h, "#define CONFIG_%s 0x%s\n", sym->name, str);
 				}
@@ -840,7 +843,7 @@ int conf_write_autoconf(void)
 			str = sym_get_string_value(sym);
 			fprintf(out, "CONFIG_%s=%s\n", sym->name, str);
 			fprintf(out_h, "#define CONFIG_%s %s\n", sym->name, str);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 			if (syno_autoconf_check(sym->name)) {
 				fprintf(syno_h, "#define CONFIG_%s %s\n", sym->name, str);
 			}
@@ -852,7 +855,7 @@ int conf_write_autoconf(void)
 	}
 	fclose(out);
 	fclose(out_h);
-#ifdef SYNO_EXPORT_CONFIG
+#ifdef MY_ABC_HERE
 	fprintf(syno_h, "#endif /* __SYNO_AUTOCONF_H__ */\n");
 	fclose(syno_h);
 	if (rename(".tmpsynoconfig.h", "include/linux/syno_autoconf.h"))

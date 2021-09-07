@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Common Flash Interface support:
  *   AMD & Fujitsu Standard Vendor Command Set (ID 0x0002)
@@ -330,7 +333,7 @@ static void cfi_fixup_major_minor(struct cfi_private *cfi,
 		extp->MajorVersion = '1';
 }
 
-#ifdef SYNO_MTD_LOCK_UNLOCK
+#ifdef MY_ABC_HERE
 static int cfi_amdstd_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
 	return 0;
@@ -340,7 +343,7 @@ static int cfi_amdstd_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
 	return 0;
 }
-#endif /* SYNO_MTD_LOCK_UNLOCK */
+#endif /* MY_ABC_HERE */
 
 struct mtd_info *cfi_cmdset_0002(struct map_info *map, int primary)
 {
@@ -363,10 +366,10 @@ struct mtd_info *cfi_cmdset_0002(struct map_info *map, int primary)
 	mtd->sync    = cfi_amdstd_sync;
 	mtd->suspend = cfi_amdstd_suspend;
 	mtd->resume  = cfi_amdstd_resume;
-#ifdef SYNO_MTD_LOCK_UNLOCK
+#ifdef MY_ABC_HERE
 	mtd->lock    = cfi_amdstd_lock;
 	mtd->unlock  = cfi_amdstd_unlock;
-#endif /* SYNO_MTD_LOCK_UNLOCK */
+#endif /* MY_ABC_HERE */
 	mtd->flags   = MTD_CAP_NORFLASH;
 	mtd->name    = map->name;
 	mtd->writesize = 1;

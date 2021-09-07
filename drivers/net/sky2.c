@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * New driver for Marvell Yukon 2 chipset.
  * Based on earlier sk98lin, and skge driver.
@@ -1464,7 +1467,7 @@ static int sky2_up(struct net_device *dev)
 	u32 imask, ramsize;
 	int cap, err;
 	struct net_device *otherdev = hw->dev[sky2->port^1];
-#ifdef SYNO_SKY2_BLINK_BEHAVIOR
+#ifdef MY_ABC_HERE
 	u32 gphy_ctrl = 0;
 #endif
 
@@ -1491,7 +1494,7 @@ static int sky2_up(struct net_device *dev)
 	tx_init(sky2);
 
 	sky2_mac_init(hw, port);
-#ifdef SYNO_SKY2_BLINK_BEHAVIOR
+#ifdef MY_ABC_HERE
         gphy_ctrl = sky2_read32(hw, SK_REG(port, GPHY_CTRL));
 
 	//change linking behavior
@@ -2498,7 +2501,7 @@ static int sky2_status_intr(struct sky2_hw *hw, int to_do, u16 idx)
 			 */
 			if (likely(status >> 16 == (status & 0xffff))) {
 				skb = sky2->rx_ring[sky2->rx_next].skb;
-#ifdef SYNO_SKY2_CSUM_FIX
+#ifdef MY_ABC_HERE
 				skb->ip_summed = CHECKSUM_UNNECESSARY;
 #else
 				skb->ip_summed = CHECKSUM_COMPLETE;

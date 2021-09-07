@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/proc/array.c
  *
@@ -173,7 +176,7 @@ static inline void task_state(struct seq_file *m, struct pid_namespace *ns,
 		if (tracer)
 			tpid = task_pid_nr_ns(tracer, ns);
 	}
-#ifdef SYNO_GET_TASK_CRED
+#ifdef MY_ABC_HERE
 	cred = get_task_cred(p);
 #else
 	cred = get_cred((struct cred *) __task_cred(p));

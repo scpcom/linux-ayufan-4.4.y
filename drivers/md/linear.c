@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
    linear.c : Multiple Devices driver for Linux
 	      Copyright (C) 1994-96 Marc ZYNGIER
@@ -95,7 +98,7 @@ static void linear_unplug(struct request_queue *q)
 	rcu_read_lock();
 	conf = rcu_dereference(mddev->private);
 
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 	for (i=0; i < mddev->raid_disks; i++) {
 		struct request_queue *r_queue;
 		mdk_rdev_t *rdev = rcu_dereference(conf->disks[i].rdev);
@@ -130,7 +133,7 @@ static int linear_congested(void *data, int bits)
 	linear_conf_t *conf;
 	int i, ret = 0;
 
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 	if (mddev->degraded) {
 		return ret;
 	}
@@ -142,7 +145,7 @@ static int linear_congested(void *data, int bits)
 	rcu_read_lock();
 	conf = rcu_dereference(mddev->private);
 
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 	for (i = 0; i < mddev->raid_disks && !ret ; i++) {
 		mdk_rdev_t *rdev = rcu_dereference(conf->disks[i].rdev);
 		struct request_queue *q = NULL;
@@ -228,13 +231,13 @@ static linear_conf_t *linear_conf(mddev_t *mddev, int raid_disks)
 
 	}
 	if (cnt != raid_disks) {
-#ifdef SYNO_RAID_STATUS
+#ifdef MY_ABC_HERE
 		/* 
 		 * for Linear status consistense to other raid type
 		 * Let it can assemble.
 		 */
 		mddev->degraded = mddev->raid_disks - cnt;		
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#ifdef MY_ABC_HERE
 		mddev->nodev_and_crashed = 1;
 #endif
 		printk("linear: not enough drives present.\n");
@@ -269,7 +272,7 @@ static int linear_run (mddev_t *mddev)
 	if (md_check_no_bitmap(mddev))
 		return -EINVAL;
 	mddev->queue->queue_lock = &mddev->queue->__queue_lock;
-#ifdef SYNO_RAID_STATUS
+#ifdef MY_ABC_HERE
 	mddev->degraded = 0;
 #endif
 	conf = linear_conf(mddev, mddev->raid_disks);
@@ -343,7 +346,7 @@ static int linear_stop (mddev_t *mddev)
 	return 0;
 }
 
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 /**
  * This is end_io callback function.
  * We can use this for bad sector report and device error
@@ -372,11 +375,11 @@ SynoLinearEndRequest(struct bio *bio, int error)
 	bio->bi_private = data_bio->bi_private;
 
 	if (!uptodate) {
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#ifdef MY_ABC_HERE
 		if (IsDeviceDisappear(rdev->bdev)) {
 			syno_md_error(mddev, rdev);
 		}else{
-#ifdef SYNO_RAID_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);			
 #endif
 			md_error(mddev, rdev);
@@ -400,7 +403,7 @@ static int linear_make_request (struct request_queue *q, struct bio *bio)
 	dev_info_t *tmp_dev;
 	sector_t start_sector;
 	int cpu;
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 	struct bio *data_bio;
 #endif
 
@@ -409,12 +412,12 @@ static int linear_make_request (struct request_queue *q, struct bio *bio)
 		return 0;
 	}
 
-#ifdef SYNO_RAID_STATUS
+#ifdef MY_ABC_HERE
 	/**
 	* if there has any device offline, we don't make any request to
 	* our linear md array
 	*/
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#ifdef MY_ABC_HERE
 	if (mddev->nodev_and_crashed) {
 #else
 	if (mddev->degraded) {
@@ -473,7 +476,7 @@ static int linear_make_request (struct request_queue *q, struct bio *bio)
 	bio->bi_sector = bio->bi_sector - start_sector
 		+ tmp_dev->rdev->data_offset;
 
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 	data_bio = bio_clone(bio, GFP_NOIO);
 
 	if (data_bio) {
@@ -492,7 +495,7 @@ static int linear_make_request (struct request_queue *q, struct bio *bio)
 	return 1;
 }
 
-#ifdef SYNO_RAID_STATUS
+#ifdef MY_ABC_HERE
 
 static void
 syno_linear_status(struct seq_file *seq, mddev_t *mddev)
@@ -508,13 +511,13 @@ syno_linear_status(struct seq_file *seq, mddev_t *mddev)
 	for (j = 0; j < mddev->raid_disks; j++)
 	{
 		rdev = rcu_dereference(conf->disks[j].rdev);
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 		if(rdev &&
 		   !test_bit(Faulty, &rdev->flags)) {
 #else		
 		if(rdev) {
 #endif
-#ifdef SYNO_RAID_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 			seq_printf (seq, "%s", 
 						test_bit(In_sync, &rdev->flags) ? 
 						(test_bit(DiskError, &rdev->flags) ? "E" : "U") : "_");
@@ -528,16 +531,16 @@ syno_linear_status(struct seq_file *seq, mddev_t *mddev)
 	rcu_read_unlock();
 	seq_printf (seq, "]");
 }
-#else /* SYNO_RAID_STATUS */
+#else /* MY_ABC_HERE */
 static void linear_status (struct seq_file *seq, mddev_t *mddev)
 {
 
 	seq_printf(seq, " %dk rounding", mddev->chunk_sectors / 2);
 }
 
-#endif /* SYNO_RAID_STATUS */
+#endif /* MY_ABC_HERE */
 
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 int
 SynoLinearRemoveDisk(mddev_t *mddev, int number)
 {
@@ -588,11 +591,11 @@ SynoLinearError(mddev_t *mddev, mdk_rdev_t *rdev)
 		if (mddev->degraded < mddev->raid_disks) {
 			SYNO_UPDATE_SB_WORK *update_sb = NULL;
 			mddev->degraded++;
-#ifdef SYNO_BLOCK_REQUEST_ERROR_NODEV
+#ifdef MY_ABC_HERE
 			mddev->nodev_and_crashed = 1;
 #endif
 			set_bit(Faulty, &rdev->flags);
-#ifdef SYNO_RAID_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 			clear_bit(DiskError, &rdev->flags);
 #endif
 
@@ -629,7 +632,7 @@ END:
 static void
 SynoLinearErrorInternal(mddev_t *mddev, mdk_rdev_t *rdev)
 {
-#ifdef SYNO_RAID_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 	if (!test_bit(DiskError, &rdev->flags)) {
 		SYNO_UPDATE_SB_WORK *update_sb = NULL;
 
@@ -649,7 +652,7 @@ END:
 #endif
 	return;
 }
-#endif /* SYNO_RAID_DEVICE_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 static struct mdk_personality linear_personality =
 {
@@ -659,13 +662,13 @@ static struct mdk_personality linear_personality =
 	.make_request	= linear_make_request,
 	.run		= linear_run,
 	.stop		= linear_stop,
-#ifdef SYNO_RAID_STATUS
+#ifdef MY_ABC_HERE
 	.status		= syno_linear_status,
 #else
 	.status		= linear_status,
 #endif
 	.hot_add_disk	= linear_add,
-#ifdef SYNO_RAID_DEVICE_NOTIFY
+#ifdef MY_ABC_HERE
 	.hot_remove_disk	= SynoLinearRemoveDisk,
 	.error_handler		= SynoLinearErrorInternal,
 	.syno_error_handler	= SynoLinearError,

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -141,9 +144,9 @@ extern "C" {
 #define MV_ATA_COMMAND_FLUSH_CACHE              0xe7
 #define MV_ATA_COMMAND_FLUSH_CACHE_EXT          0xea
 
-#ifdef SYNO_MV_CHECK_HDD_POWER
+#ifdef MY_ABC_HERE
 #define MV_ATA_COMMAND_CHECK_POWER              0xe5
-#endif /* SYNO_MV_CHECK_HDD_POWER */
+#endif /* MY_ABC_HERE */
 
 #define MV_ATA_COMMAND_PM_READ_REG              0xe4
 #define MV_ATA_COMMAND_PM_WRITE_REG             0xe8
@@ -156,7 +159,7 @@ extern "C" {
 #define MV_SATA_GSCR_FEATURES_REG_NUM           64
 #define MV_SATA_GSCR_FEATURES_ENABLE_REG_NUM    96
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 #define MV_SATA_GSCR_3726_GPIO                  130
 #endif
 
@@ -226,7 +229,7 @@ extern "C" {
 
 /* Defines for parsing the IDENTIFY command results*/
 #define IDEN_SERIAL_NUM_OFFSET                  10
-#ifdef SYNO_SATA_MV_EH
+#ifdef MY_ABC_HERE
 /* mvSata use MV_U8 to declare the storage space to save serial.
    And also use memcpy or memcmp to compare.
    This is a dummy bug because they nerver meet this if they don't have software delayed EH.

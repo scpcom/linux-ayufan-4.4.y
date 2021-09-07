@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2000 by Hans Reiser, licensing governed by reiserfs/README
  */
@@ -425,7 +428,7 @@ static void _reiserfs_free_block(struct reiserfs_transaction_handle *th,
 
 	journal_mark_dirty(th, s, sbh);
 	if (for_unformatted)
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_block_nodirty(inode, 1);
 #else
 		vfs_dq_free_block_nodirty(inode, 1);
@@ -1053,7 +1056,7 @@ static inline int blocknrs_and_prealloc_arrays_from_search_start
 			       amount_needed, hint->inode->i_uid);
 #endif
 		quota_ret =
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		    dquot_alloc_block_nodirty(hint->inode, amount_needed);
 #else
 			vfs_dq_alloc_block_nodirty(hint->inode, amount_needed);
@@ -1066,7 +1069,7 @@ static inline int blocknrs_and_prealloc_arrays_from_search_start
 				       "reiserquota: allocating (prealloc) %d blocks id=%u",
 				       hint->prealloc_size, hint->inode->i_uid);
 #endif
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 			quota_ret = dquot_prealloc_block_nodirty(hint->inode,
 #else
 			quota_ret = vfs_dq_prealloc_block_nodirty(hint->inode,
@@ -1104,7 +1107,7 @@ static inline int blocknrs_and_prealloc_arrays_from_search_start
 					       hint->inode->i_uid);
 #endif
 				/* Free not allocated blocks */
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 				dquot_free_block_nodirty(hint->inode,
 #else
 				vfs_dq_free_block_nodirty(hint->inode,
@@ -1141,7 +1144,7 @@ static inline int blocknrs_and_prealloc_arrays_from_search_start
 			       REISERFS_I(hint->inode)->i_prealloc_count,
 			       hint->inode->i_uid);
 #endif
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_block_nodirty(hint->inode, amount_needed +
 #else
 		vfs_dq_free_block_nodirty(hint->inode, amount_needed +

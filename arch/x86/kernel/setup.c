@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (C) 1995  Linus Torvalds
  *
@@ -111,15 +114,15 @@
 #endif
 #include <asm/mce.h>
 
-#ifdef  SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 #include  <linux/synobios.h>
 #endif
 
-#ifdef SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 extern long g_internal_hd_num;
 #endif
 
-#ifdef SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 extern long g_internal_netif_num;
 #endif
 
@@ -127,40 +130,40 @@ extern long g_internal_netif_num;
 extern long g_is_sas_model;
 #endif
 
-#ifdef SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 extern long g_ahci_switch;
 #endif
 
-#ifdef SYNO_SATA_LED_SPECIAL
+#ifdef MY_ABC_HERE
 extern long g_sata_led_special;
 #endif
 
-#ifdef SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 extern long g_hdd_hotplug;
 #endif
 
-#ifdef SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 extern char gszSataPortMap[8];
 #endif
 
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[16];
 #endif
 
-#ifdef SYNO_SATA_DISK_SEQ_REVERSE
+#ifdef MY_ABC_HERE
 extern char giDiskSeqReverse[8];
 #endif
 
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[4][16];
 #endif
 
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
 #endif
 
-#ifdef SYNO_SWITCH_NET_DEVICE_NAME
+#ifdef MY_ABC_HERE
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif
@@ -535,7 +538,7 @@ static void __init reserve_early_setup_data(void)
 	}
 }
 
-#ifdef SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 static int __init early_hw_version(char *p)
 {
 	char *szPtr;
@@ -556,7 +559,7 @@ static int __init early_hw_version(char *p)
 __setup("syno_hw_version=", early_hw_version);
 #endif
 
-#ifdef SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 static int __init early_internal_hd_num(char *p)
 {
 	g_internal_hd_num = simple_strtol(p, NULL, 10);
@@ -568,7 +571,7 @@ static int __init early_internal_hd_num(char *p)
 __setup("ihd_num=", early_internal_hd_num);
 #endif
 
-#ifdef  SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);
@@ -596,7 +599,7 @@ static int __init early_SASmodel(char *p)
 __setup("SASmodel=", early_SASmodel);
 #endif
 
-#ifdef  SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 static int __init early_ahci_switch(char *p)
 {
         g_ahci_switch = simple_strtol(p, NULL, 10);
@@ -610,7 +613,7 @@ static int __init early_ahci_switch(char *p)
 __setup("ahci=", early_ahci_switch);
 #endif
 
-#ifdef SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 static int __init early_hdd_hotplug(char *p)
 {
 	g_hdd_hotplug = simple_strtol(p, NULL, 10);
@@ -624,7 +627,7 @@ static int __init early_hdd_hotplug(char *p)
 __setup("HddHotplug=", early_hdd_hotplug);
 #endif
 
-#ifdef SYNO_SATA_LED_SPECIAL
+#ifdef MY_ABC_HERE
 static int __init early_sataled_special(char *p)
 {
 	g_sata_led_special = simple_strtol(p, NULL, 10);
@@ -638,7 +641,7 @@ static int __init early_sataled_special(char *p)
 __setup("SataLedSpecial=", early_sataled_special);
 #endif
 
-#ifdef SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 static int __init early_sataport_map(char *p)
 {
 	snprintf(gszSataPortMap, sizeof(gszSataPortMap), "%s", p);
@@ -652,7 +655,7 @@ static int __init early_sataport_map(char *p)
 __setup("SataPortMap=", early_sataport_map);
 #endif
 
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 static int __init early_disk_idx_map(char *p)
 {
 	snprintf(gszDiskIdxMap, sizeof(gszDiskIdxMap), "%s", p);
@@ -666,7 +669,7 @@ static int __init early_disk_idx_map(char *p)
 __setup("DiskIdxMap=", early_disk_idx_map);
 #endif
 
-#ifdef SYNO_SATA_DISK_SEQ_REVERSE
+#ifdef MY_ABC_HERE
 static int __init early_disk_seq_reserve(char *p)
 {
 	snprintf(giDiskSeqReverse, sizeof(giDiskSeqReverse), "%s", p);
@@ -680,7 +683,7 @@ static int __init early_disk_seq_reserve(char *p)
 __setup("DiskSeqReverse=", early_disk_seq_reserve);
 #endif
 
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 static int __init early_mac1(char *p)
 {
 	snprintf(grgbLanMac[0], sizeof(grgbLanMac[0]), "%s", p);
@@ -722,7 +725,7 @@ static int __init early_mac4(char *p)
 __setup("mac4=", early_mac4);
 #endif
 
-#ifdef SYNO_SWITCH_NET_DEVICE_NAME
+#ifdef MY_ABC_HERE
 static int __init early_netif_seq(char *p)
 {
 	int len;
@@ -770,7 +773,7 @@ static int __init early_netif_seq(char *p)
 __setup("netif_seq=",early_netif_seq);
 #endif
 
-#ifdef SYNO_SERIAL
+#ifdef MY_ABC_HERE
 static int __init early_sn(char *p)
 {
         snprintf(gszSerialNum, sizeof(gszSerialNum), "%s", p);

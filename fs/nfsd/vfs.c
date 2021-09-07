@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #define MSNFS	/* HACK HACK */
 /*
  * linux/fs/nfsd/vfs.c
@@ -93,7 +96,7 @@ struct raparm_hbucket {
 #define RAPARM_HASH_MASK	(RAPARM_HASH_SIZE-1)
 static struct raparm_hbucket	raparm_hash[RAPARM_HASH_SIZE];
 
-#ifdef SYNO_NFSD_UNIX_PRI
+#ifdef MY_ABC_HERE
 extern u32 bl_unix_pri_enable;
 #endif
 

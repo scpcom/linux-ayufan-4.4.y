@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  target_core_seobj.h
  *
@@ -27,7 +30,7 @@
 #ifndef TARGET_CORE_SEOBJ_H
 #define TARGET_CORE_SEOBJ_H
 
-#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifndef MY_ABC_HERE
 extern struct se_obj_lun_type_s *se_obj_get_api(u32);
 extern int se_obj_load_plugins(void);
 
@@ -36,7 +39,7 @@ extern int se_obj_load_plugins(void);
 
 typedef int (*map_func_t)(struct se_task_s *, u32);
 
-#ifdef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifdef MY_ABC_HERE
 extern int dev_obj_export(void *, se_portal_group_t *, se_lun_t *);
 extern void dev_obj_unexport(void *, se_portal_group_t *, se_lun_t *);
 extern int dev_obj_max_sectors(void *);

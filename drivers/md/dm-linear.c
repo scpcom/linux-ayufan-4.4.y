@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001-2003 Sistina Software (UK) Limited.
  *
@@ -142,7 +145,7 @@ static int linear_iterate_devices(struct dm_target *ti,
 	return fn(ti, lc->dev, lc->start, ti->len, data);
 }
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 extern void SYNOLvInfoSet(struct block_device *bdev, void *private, const char *lv_name);
 static void linear_lv_info_set(struct dm_target *ti)
 {
@@ -174,7 +177,7 @@ static struct target_type linear_target = {
 	.status = linear_status,
 	.ioctl  = linear_ioctl,
 	.merge  = linear_merge,
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 	.lvinfoset = linear_lv_info_set,
 	.lg_sector_get = linear_lg_sector_get,
 #endif

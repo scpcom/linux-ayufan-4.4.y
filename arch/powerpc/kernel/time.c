@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Common time routines among all ppc machines.
  *
@@ -79,7 +82,7 @@
 #include <linux/clockchips.h>
 #include <linux/clocksource.h>
 
-#if defined(SYNO_HW_VERSION)
+#if defined(MY_ABC_HERE)
 #include <linux/synobios.h>
 #endif
 

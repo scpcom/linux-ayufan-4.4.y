@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  target_core_file.h
  *
@@ -32,7 +35,7 @@
 #define TARGET_CORE_FILE_H
 
 #include <linux/syno.h>
-#ifdef SYNO_LIO_LARGE_FILEIO
+#ifdef MY_ABC_HERE
 #   define SYNO_LIO_MAX_NR_FILES    64
 #   define SYNO_LIO_FILE_IDX_WIDTH  3
 #   define SYNO_LIO_FILE_SIZE_SHIFT 40     /* 1T = 2^40 */
@@ -156,7 +159,7 @@ typedef struct fd_dev_s {
 	u32		fd_table_count;
 	u32		fd_queue_depth;
 	unsigned long long fd_dev_size;
-#ifdef SYNO_LIO_LARGE_FILEIO
+#ifdef MY_ABC_HERE
 	int     nr_file;
 	struct file *fd_files[SYNO_LIO_MAX_NR_FILES];
 #else

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/include/linux/hfsplus_raw.h
  *
@@ -234,7 +237,7 @@ struct DInfo {
 } __packed;
 
 struct DXInfo {
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	__be32 point;
 	__be32 date_added;
 	__be16 extended_flags;
@@ -277,7 +280,7 @@ struct FInfo {
 } __packed;
 
 struct FXInfo {
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	__be32 reserved1;
 	__be32 date_added;
 	__be16 extended_flags;
@@ -355,7 +358,7 @@ struct hfsplus_ext_key {
 
 #define HFSPLUS_XATTR_FINDER_INFO_NAME "com.apple.FinderInfo"
 #define HFSPLUS_XATTR_ACL_NAME "com.apple.system.Security"
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 #define HFSPLUS_XATTR_RESOURCE_FORK_NAME "com.apple.ResourceFork"
 #endif
 
@@ -390,7 +393,7 @@ struct hfsplus_attr_extents {
 
 #define HFSPLUS_MAX_INLINE_DATA_SIZE 3802
 
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 /*
  * Atrributes B-tree Data Record
  *

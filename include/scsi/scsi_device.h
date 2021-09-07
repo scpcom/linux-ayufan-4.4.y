@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _SCSI_SCSI_DEVICE_H
 #define _SCSI_SCSI_DEVICE_H
 
@@ -94,10 +97,10 @@ struct scsi_device {
 					   could all be from the same event. */
 
 	unsigned int id, lun, channel;
-#ifdef SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	char syno_disk_name[BDEVNAME_SIZE];		/* name of major driver */
 #endif
-#ifdef SYNO_SATA_BAD_SECTOR_AUTO_REMAP
+#ifdef MY_ABC_HERE
 	unsigned char auto_remap;
 #endif
 #ifdef SYNO_SATA_COMPATIBILITY
@@ -175,11 +178,11 @@ struct scsi_device {
 	atomic_t iodone_cnt;
 	atomic_t ioerr_cnt;
 
-#ifdef SYNO_DISK_HIBERNATION
+#ifdef MY_ABC_HERE
 	unsigned long   idle;   /* scsi idle time in jiffers */
 	unsigned char   spindown;
 	unsigned char   nospindown;
-#endif /* SYNO_DISK_HIBERNATION */
+#endif /* MY_ABC_HERE */
 
 	struct device		sdev_gendev,
 				sdev_dev;
@@ -299,7 +302,7 @@ static inline struct scsi_target *scsi_target(struct scsi_device *sdev)
 #define starget_printk(prefix, starget, fmt, a...)	\
 	dev_printk(prefix, &(starget)->dev, fmt, ##a)
 
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 #define SYNO_DISK_MODEL_LEN "24"
 #endif
 

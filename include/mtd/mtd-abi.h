@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Portions of MTD ABI definition which are shared by kernel and user space
  */
@@ -30,7 +33,7 @@ struct mtd_oob_buf64 {
 	__u64 usr_ptr;
 };
 
-#ifdef  SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 struct SYNO_MTD_FIS_INFO {
 	unsigned char name[16]; // Null terminated name
 	u_int32_t offset;
@@ -41,7 +44,7 @@ struct SYNO_MTD_FIS_INFO {
 #define SYNO_MSYS_FLASH_BLOCK_SIZE  ( 16 * 1024 )
 #define SYNO_MSYS_PARTITION_NUMBER  8
 #define SYNO_MSYS_TOTAL_UNITS       967
-#endif /* SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */
 
 #define MTD_ABSENT		0
 #define MTD_RAM			1
@@ -122,7 +125,7 @@ struct otp_info {
 #define MTDFILEMODE		_IO('M', 19)
 #define MEMERASE64		_IOW('M', 20, struct erase_info_user64)
 #define MEMWRITEOOB64		_IOWR('M', 21, struct mtd_oob_buf64)
-#ifndef SYNO_MTD_INFO
+#ifndef MY_ABC_HERE
 #define MEMREADOOB64		_IOWR('M', 22, struct mtd_oob_buf64)
 #else
 #define MEMMODIFYPARTINFO   _IOW('M', 22, struct erase_info_user)
@@ -131,7 +134,7 @@ struct otp_info {
 #define MSYSMEMPARTITION    _IOW('M', 25, int*)
 #define MSYSMEMPARTITIONINFO    _IOR('M', 26, int*)
 #define MEMREADOOB64		_IOWR('M', 27, struct mtd_oob_buf64)
-#endif /* SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */
 
 /*
  * Obsolete legacy interface. Keep it in order not to break userspace

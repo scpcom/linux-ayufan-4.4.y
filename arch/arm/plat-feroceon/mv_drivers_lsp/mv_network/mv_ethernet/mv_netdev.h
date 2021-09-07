@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -76,7 +79,7 @@ disclaimer.
 #include "mv_eth_tool.h"
 #endif
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 #define MV_PHY_ID_131X 0x01410e90
 #endif
 
@@ -308,7 +311,7 @@ typedef struct _mv_eth_priv
     MV_U32	rx_coal_usec;
     MV_U32	tx_coal_usec;
 
-#ifdef SYNO_NET_MV_WOL_WITH_UP
+#ifdef MY_ABC_HERE
 	MV_U32	phy_chip;
 	MV_U32  wol;
 #endif

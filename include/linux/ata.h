@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 /*
  *  Copyright 2003-2004 Red Hat, Inc.  All rights reserved.
@@ -386,7 +389,7 @@ enum {
 	SATA_PMP_GSCR_ERROR_EN	= 33,
 	SATA_PMP_GSCR_FEAT	= 64,
 	SATA_PMP_GSCR_FEAT_EN	= 96,
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	SATA_PMP_GSCR_3XXX_GPIO	= 130,
 #endif
 

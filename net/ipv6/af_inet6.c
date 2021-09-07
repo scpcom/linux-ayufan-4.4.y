@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	PF_INET6 socket protocol family
  *	Linux INET6 implementation
@@ -325,7 +328,7 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 
 				/* Binding to link-local address requires an interface */
 				if (!sk->sk_bound_dev_if) {
-#ifdef SYNO_IPV6_LINKLOCAL
+#ifdef MY_ABC_HERE
 					unsigned flags;
 					for_each_netdev(net, dev) {
 						flags = dev_get_flags(dev);

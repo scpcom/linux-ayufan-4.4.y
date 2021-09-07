@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/hfsplus/attributes.c
  *
@@ -14,19 +17,19 @@
 #endif
 
 static struct kmem_cache *hfsplus_attr_tree_cachep;
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 static size_t hfsplus_attr_cached_size = sizeof(hfsplus_attr_entry);
 #endif
 
 int hfsplus_create_attr_tree_cache(void)
 {
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	size_t cached_size = hfsplus_get_attr_tree_cache_size();
 #endif
 	if (hfsplus_attr_tree_cachep)
 		return -EEXIST;
 
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	hfsplus_attr_tree_cachep =
 		kmem_cache_create("hfsplus_attr_cache",
 			cached_size, 0,
@@ -43,7 +46,7 @@ int hfsplus_create_attr_tree_cache(void)
 	return 0;
 }
 
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 void hfsplus_set_attr_tree_cache_size(size_t record_size)
 {
 	if (record_size < sizeof(hfsplus_attr_entry)) {
@@ -92,7 +95,7 @@ END:
 void hfsplus_destroy_attr_tree_cache(void)
 {
 	kmem_cache_destroy(hfsplus_attr_tree_cachep);
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	hfsplus_attr_tree_cachep = NULL;
 #endif
 }
@@ -125,7 +128,7 @@ int hfsplus_attr_build_key(struct super_block *sb, hfsplus_btree_key *key,
 			pr_err("invalid xattr name's length\n");
 			return -EINVAL;
 		}
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 		hfsplus_attr_asc2uni(sb,
 				(struct hfsplus_unistr *)&key->attr.key_name,
 				HFSPLUS_ATTR_MAX_STRLEN, name, len);
@@ -210,7 +213,7 @@ static int hfsplus_attr_build_record(hfsplus_attr_entry *entry, int record_type,
 		memset(entry, 0, sizeof(*entry));
 		return sizeof(struct hfsplus_attr_extents);
 	} else if (record_type == HFSPLUS_ATTR_INLINE_DATA) {
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 		u32 len;
 #else
 		u16 len;
@@ -222,7 +225,7 @@ static int hfsplus_attr_build_record(hfsplus_attr_entry *entry, int record_type,
 			len = size;
 		else
 			return HFSPLUS_INVALID_ATTR_RECORD;
-#ifdef SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 		entry->inline_data.length = cpu_to_be32(len);
 #else
 		entry->inline_data.length = cpu_to_be16(len);

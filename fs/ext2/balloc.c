@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext2/balloc.c
  *
@@ -570,7 +573,7 @@ do_more:
 error_return:
 	brelse(bitmap_bh);
 	release_blocks(sb, freed);
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	dquot_free_block(inode, freed);
 #else
 	vfs_dq_free_block(inode, freed);
@@ -1240,7 +1243,7 @@ ext2_fsblk_t ext2_new_blocks(struct inode *inode, ext2_fsblk_t goal,
 	unsigned short windowsz = 0;
 	unsigned long ngroups;
 	unsigned long num = *count;
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	int ret;
 #endif
 
@@ -1254,7 +1257,7 @@ ext2_fsblk_t ext2_new_blocks(struct inode *inode, ext2_fsblk_t goal,
 	/*
 	 * Check quota for allocation of this block.
 	 */
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	ret = dquot_alloc_block(inode, num);
 	if (ret) {
 		*errp = ret;
@@ -1422,7 +1425,7 @@ allocated:
 
 	*errp = 0;
 	brelse(bitmap_bh);
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	dquot_free_block(inode, *count-num);
 #else
 	vfs_dq_free_block(inode, *count-num);
@@ -1437,7 +1440,7 @@ out:
 	 * Undo the block allocation
 	 */
 	if (!performed_allocation)
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_block(inode, *count);
 #else
 		vfs_dq_free_block(inode, *count);

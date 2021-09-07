@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  hosts.c Copyright (C) 1992 Drew Eckhardt
  *          Copyright (C) 1993, 1994, 1995 Eric Youngdale
@@ -486,7 +489,7 @@ struct Scsi_Host *scsi_host_lookup(unsigned short hostnum)
 }
 EXPORT_SYMBOL(scsi_host_lookup);
 
-#ifdef SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 int __syno_host_power_ctl_work(struct device *dev, void *data)
 {
 	struct Scsi_Host *shost = NULL;
@@ -516,7 +519,7 @@ scsi_host_poweroff_all(void)
 	class_for_each_device(&shost_class, NULL, NULL, __syno_host_power_ctl_work);
 }
 EXPORT_SYMBOL(scsi_host_poweroff_all);
-#endif /* SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
 /**
  * scsi_host_get - inc a Scsi_Host ref count

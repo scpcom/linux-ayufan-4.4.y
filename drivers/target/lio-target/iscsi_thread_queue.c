@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  iscsi_thread_queue.c
  *
@@ -168,7 +171,7 @@ extern int iscsi_allocate_thread_sets(u32 thread_pair_count, int role)
 		allocated_thread_pair_count++;
 	}
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "Spawned %d thread set(s) (%d total threads).\n",
 		allocated_thread_pair_count, allocated_thread_pair_count * 2);
 #endif
@@ -207,7 +210,7 @@ extern void iscsi_deallocate_thread_sets(int role)
 		kfree(ts);
 	}
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	if (released_count)
 		printk(KERN_INFO "Stopped %d thread set(s) (%d total threads)."
 			"\n", released_count, released_count * 2);
@@ -252,7 +255,7 @@ static void iscsi_deallocate_extra_thread_sets(int role)
 		kfree(ts);
 	}
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	if (released_count) {
 		printk(KERN_INFO "Stopped %d thread set(s) (%d total threads)."
 			"\n", released_count, released_count * 2);

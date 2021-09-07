@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- mode: c; c-basic-offset: 8; -*-
  * vim: noexpandtab sw=8 ts=8 sts=0:
  *
@@ -1790,7 +1793,7 @@ int ocfs2_write_begin_nolock(struct address_space *mapping,
 
 	wc->w_handle = handle;
 
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 	if (clusters_to_alloc) {
 		ret = dquot_alloc_space_nodirty(inode,
 			ocfs2_clusters_to_bytes(osb->sb, clusters_to_alloc));
@@ -1843,7 +1846,7 @@ success:
 	return 0;
 out_quota:
 	if (clusters_to_alloc)
-#ifdef SYNO_DQUOT_UPGRADE
+#ifdef MY_ABC_HERE
 		dquot_free_space(inode,
 #else
 		vfs_dq_free_space(inode,

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  target_core_device.h
  *
@@ -34,7 +37,7 @@ extern struct block_device *__linux_blockdevice_claim(int, int, void *, int *);
 extern struct block_device *linux_blockdevice_claim(int, int, void *);
 extern int linux_blockdevice_release(int, int, struct block_device *);
 extern int linux_blockdevice_check(int, int);
-#ifndef SYNO_LIO_REMOVE_OBJLUN_PATCH
+#ifndef MY_ABC_HERE
 extern int se_check_devices_access(se_hba_t *);
 #endif
 extern void se_disable_devices_for_hba(se_hba_t *);
@@ -61,7 +64,7 @@ extern void se_clear_dev_ports(se_device_t *);
 extern int se_free_virtual_device(se_device_t *, se_hba_t *);
 extern void se_dev_start(se_device_t *);
 extern void se_dev_stop(se_device_t *);
-#ifdef SYNO_LIO_FORCE_READ_ONLY
+#ifdef MY_ABC_HERE
 extern void se_deve_force_readonly(struct se_dev_entry_s *);
 #endif
 extern void se_dev_set_default_attribs(se_device_t *);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/namespace.c
  *
@@ -43,11 +46,11 @@ __cacheline_aligned_in_smp DEFINE_SPINLOCK(vfsmount_lock);
 EXPORT_SYMBOL(vfsmount_lock);
 #endif /* SYNO_AUFS */
 
-#ifdef SYNO_INSTALL_FLAG
+#ifdef MY_ABC_HERE
 extern int gSynoHasDynModule;
 #endif
 
-#ifdef SYNO_EXT4_ERROR_FS_REPORT
+#ifdef MY_ABC_HERE
 extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
 #endif
 
@@ -759,7 +762,7 @@ static int show_sb_opts(struct seq_file *m, struct super_block *sb)
 		{ MS_SYNCHRONOUS, ",sync" },
 		{ MS_DIRSYNC, ",dirsync" },
 		{ MS_MANDLOCK, ",mand" },
-#ifdef SYNO_FAT_ERR_HANDLE
+#ifdef MY_ABC_HERE
 		{ MS_CORRUPT, ",corrupt" },
 #endif
 		{ 0, NULL }
@@ -1760,7 +1763,7 @@ static int do_new_mount(struct path *path, char *type, int flags,
 	unlock_kernel();
 	if (IS_ERR(mnt))
 		return PTR_ERR(mnt);
-#ifdef SYNO_EXT4_ERROR_FS_REPORT
+#ifdef MY_ABC_HERE
 	if (!strcmp(type, "ext4")) {
 		char buf[SYNO_EXT4_MOUNT_PATH_LEN] = {'\0'};
 		ext4_fill_mount_path(mnt->mnt_sb, d_path(path, buf, sizeof(buf)));
@@ -2022,7 +2025,7 @@ long do_mount(char *dev_name, char *dir_name, char *type_page,
 	struct path path;
 	int retval = 0;
 	int mnt_flags = 0;
-#if defined(SYNO_INSTALL_FLAG)
+#if defined(MY_ABC_HERE)
 	extern int gSynoInstallFlag;
 	if ( 0 == gSynoInstallFlag &&
 			NULL != dev_name &&

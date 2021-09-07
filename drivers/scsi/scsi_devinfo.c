@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 #include <linux/blkdev.h>
 #include <linux/init.h>
@@ -560,7 +563,7 @@ static int devinfo_seq_show(struct seq_file *m, void *v)
 	    devinfo_table->name)
 		seq_printf(m, "[%s]:\n", devinfo_table->name);
 
-#ifdef SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 	seq_printf(m, "'%.8s' '%."SYNO_DISK_MODEL_LEN"s' 0x%x\n",
 #else
 	seq_printf(m, "'%.8s' '%.16s' 0x%x\n",

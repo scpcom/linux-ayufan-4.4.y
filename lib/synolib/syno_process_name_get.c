@@ -1,10 +1,13 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Copyright (c) 2000-2008 Synology Inc. All rights reserved. */
 #include <linux/sched.h>
 #include <linux/module.h>
 #include <linux/jiffies.h>
 #include <asm/page.h>
 
-#ifdef SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 
 #define PS_BUF_LEN 32
 extern int syno_hibernation_log_sec;
@@ -140,4 +143,4 @@ END:
 	}
 	return res;
 }
-#endif //SYNO_DEBUG_FLAG
+#endif //MY_ABC_HERE

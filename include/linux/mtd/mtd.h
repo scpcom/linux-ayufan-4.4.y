@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 1999-2003 David Woodhouse <dwmw2@infradead.org> et al.
  *
@@ -344,12 +347,12 @@ static inline void mtd_erase_callback(struct erase_info *instr)
 
 #endif /* CONFIG_MTD_DEBUG */
 
-#ifdef SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 /* written in synopart.c */
 int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length);
 
 /* written in redboot.c */
 int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdFisInfo);
-#endif /* SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */
 
 #endif /* __MTD_MTD_H__ */

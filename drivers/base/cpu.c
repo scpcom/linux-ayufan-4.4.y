@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/base/cpu.c - basic CPU class support
  */
@@ -13,7 +16,7 @@
 
 #include "base.h"
 
-#if defined(SYNO_LIMIT_CPU_CORES) && defined(SYNO_HW_VERSION)
+#if defined(SYNO_LIMIT_CPU_CORES) && defined(MY_ABC_HERE)
 #include <linux/synobios.h>
 #endif
 

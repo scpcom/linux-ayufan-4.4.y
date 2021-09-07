@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * originally based on the dummy device.
  *
@@ -588,7 +591,7 @@ out:
 
 /*------------------------------- Link status -------------------------------*/
 
-#ifdef SYNO_BONDING_INIT_STATUS
+#ifdef MY_ABC_HERE
 static void default_operstate(struct net_device *dev)
 {
 	if (!netif_carrier_ok(dev)) {
@@ -1531,7 +1534,7 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	 * that need it, and for restoring it upon release, and then
 	 * set it to the master's address
 	 */
-#ifdef SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 	{
 		unsigned char szMac[MAX_ADDR_LEN];
 		memset(szMac, 0, sizeof(szMac));
@@ -1771,7 +1774,7 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	write_unlock_bh(&bond->curr_slave_lock);
 
 	bond_set_carrier(bond);
-#ifdef SYNO_BONDING_INIT_STATUS
+#ifdef MY_ABC_HERE
 	default_operstate(bond->dev);
 #endif
 
@@ -2490,7 +2493,7 @@ void bond_mii_monitor(struct work_struct *work)
 
 	if (bond_miimon_inspect(bond)) {
 		read_unlock(&bond->lock);
-#ifdef SYNO_BOND_UNBIND_DEADLOCK
+#ifdef MY_ABC_HERE
 		/* Race avoidance with bond_close flush of workqueue */
 		if (!rtnl_trylock()) {
 			read_lock(&bond->lock);
@@ -2498,7 +2501,7 @@ void bond_mii_monitor(struct work_struct *work)
 		}
 #else
 		rtnl_lock();
-#endif /* SYNO_BOND_UNBIND_DEADLOCK */
+#endif /* MY_ABC_HERE */
 		read_lock(&bond->lock);
 
 		bond_miimon_commit(bond);
@@ -3310,7 +3313,7 @@ static void bond_info_show_master(struct seq_file *seq)
 			seq_printf(seq, "\tPartner Mac Address: %pM\n",
 				   ad_info.partner_system);
 		}
-#ifdef SYNO_NET_BOND
+#ifdef MY_ABC_HERE
 	} else if (bond->params.mode == BOND_MODE_ALB) {
 		bond_alb_info_show(seq);
 #endif
@@ -3323,7 +3326,7 @@ static void bond_info_show_slave(struct seq_file *seq,
 	struct bonding *bond = seq->private;
 
 	seq_printf(seq, "\nSlave Interface: %s\n", slave->dev->name);
-#ifdef SYNO_NET_BOND
+#ifdef MY_ABC_HERE
 	seq_printf(seq, "Speed: %d\n", slave->speed);
 	seq_printf(seq, "Duplex: %s\n",
 		   (slave->duplex == DUPLEX_FULL) ? "full" : "half");
@@ -4540,7 +4543,7 @@ static void bond_ethtool_get_drvinfo(struct net_device *bond_dev,
 	snprintf(drvinfo->fw_version, 32, "%d", BOND_ABI_VERSION);
 }
 
-#ifdef SYNO_NET_BOND
+#ifdef MY_ABC_HERE
 static int bond_ethtool_get_settings(struct net_device *bond_dev,
 				    struct ethtool_cmd *cmd)
 {
@@ -4587,7 +4590,7 @@ out:
 #endif
 
 static const struct ethtool_ops bond_ethtool_ops = {
-#ifdef SYNO_NET_BOND
+#ifdef MY_ABC_HERE
 	.get_settings		= bond_ethtool_get_settings,
 #endif
 	.get_drvinfo		= bond_ethtool_get_drvinfo,

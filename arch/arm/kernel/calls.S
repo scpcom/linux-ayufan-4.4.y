@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/calls.S
  *
@@ -375,7 +378,7 @@
 		CALL(sys_pwritev)
 		CALL(sys_rt_tgsigqueueinfo)
 		CALL(sys_perf_event_open)
-#ifdef SYNO_SYSTEM_CALL
+#ifdef MY_ABC_HERE
 #ifdef CONFIG_SYNO_PLX_PORTING
 /* 365 */	CALL(sys_ni_syscall)
  		CALL(sys_ni_syscall)
@@ -450,27 +453,27 @@
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 		CALL(sys_SYNOUtime)	/* 402 */
 #else
 		CALL(sys_ni_syscall)
 #endif
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 		CALL(sys_SYNOArchiveBit)	/* 403 */
 #else
 		CALL(sys_ni_syscall)
 #endif
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 		CALL(sys_recvfile)	/* 404 */
 #else
 		CALL(sys_ni_syscall)
 #endif
-#ifdef SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 		CALL(sys_SYNOMTDAlloc)  	/* 405 */
 #else
 		CALL(sys_ni_syscall)
 #endif
-#ifdef SYNO_UNICODE_STAT
+#ifdef MY_ABC_HERE
 		CALL(sys_SYNOCaselessStat64)	/* 406 */
 		CALL(sys_SYNOCaselessLStat64)	/* 407 */
 		CALL(sys_SYNOCaselessStat)	/* 408 */
@@ -481,7 +484,7 @@
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 #endif
-#ifdef SYNO_ECRYPTFS_FILENAME_SYSCALL
+#ifdef MY_ABC_HERE
 		CALL(sys_SYNOEcryptName) /* 410 */
 		CALL(sys_SYNODecryptName) /* 411 */
 #else
@@ -499,7 +502,7 @@
 		CALL(sys_ni_syscall)
 #endif
 		CALL(sys_ni_syscall)
-#ifdef SYNO_STAT
+#ifdef MY_ABC_HERE
         CALL(sys_SYNOStat)                   /* 416 */
         CALL(sys_SYNOFStat)                  /* 417 */
         CALL(sys_SYNOLStat)                  /* 418 */
@@ -513,9 +516,9 @@
         CALL(sys_ni_syscall)
         CALL(sys_ni_syscall)
         CALL(sys_ni_syscall)
-#endif /* SYNO_STAT */
+#endif /* MY_ABC_HERE */
 
-#ifdef SYNO_ARCHIVE_SET_ALL_SYSCALL
+#ifdef MY_ABC_HERE
         CALL(sys_ni_syscall)
         CALL(sys_ni_syscall)
         CALL(sys_ni_syscall)

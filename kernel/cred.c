@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Task credentials management - see Documentation/credentials.txt
  *
  * Copyright (C) 2008 Red Hat, Inc. All Rights Reserved.
@@ -208,7 +211,7 @@ void exit_creds(struct task_struct *tsk)
 		put_cred(cred);
 	}
 }
-#ifdef SYNO_GET_TASK_CRED
+#ifdef MY_ABC_HERE
 /**
  * get_task_cred - Get another task's objective credentials
  * @task: The task to query

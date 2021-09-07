@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
  * Filename:  target_core_pscsi.c
  *
@@ -220,7 +223,7 @@ int pscsi_attach_hba(se_hba_t *hba, u32 host_id)
 	hba->hba_ptr = (void *)phv;
 	hba->transport = &pscsi_template;
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_HBA[%d] - TCM SCSI HBA Driver %s on"
 		" Generic Target Core Stack %s\n", hba->hba_id,
 		PSCSI_VERSION, TARGET_CORE_MOD_VERSION);
@@ -244,7 +247,7 @@ int pscsi_detach_hba(se_hba_t *hba)
 	if (scsi_host) {
 		scsi_host_put(scsi_host);
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "CORE_HBA[%d] - Detached SCSI HBA: %s from"
 			" Generic Target Core\n", hba->hba_id,
 			(scsi_host->hostt->name) ? (scsi_host->hostt->name) :
@@ -278,7 +281,7 @@ int pscsi_pmode_enable_hba(se_hba_t *hba, unsigned long mode_flag)
 		atomic_set(&hba->left_queue_depth, hba_depth);
 		atomic_set(&hba->max_queue_depth, hba_depth);
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 		printk(KERN_INFO "CORE_HBA[%d] - Disabled pSCSI HBA Passthrough"
 			" %s\n", hba->hba_id, (sh->hostt->name) ?
 			(sh->hostt->name) : "Unknown");
@@ -311,7 +314,7 @@ int pscsi_pmode_enable_hba(se_hba_t *hba, unsigned long mode_flag)
 	phv->phv_lld_host = sh;
 	phv->phv_mode = PHV_LLD_SCSI_HOST_NO;
 
-#ifndef SYNO_LIO_REDUCE_MESSAGE
+#ifndef MY_ABC_HERE
 	printk(KERN_INFO "CORE_HBA[%d] - Enabled pSCSI HBA Passthrough %s\n",
 		hba->hba_id, (sh->hostt->name) ? (sh->hostt->name) : "Unknown");
 #endif
@@ -403,10 +406,10 @@ se_device_t *pscsi_add_device_to_list(
 		cdb[0] = MODE_SENSE;
 		cdb[4] = 0x0c; /* 12 bytes */
 
-#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
+#ifdef MY_ABC_HERE
 		cmd = transport_allocate_passthrough(&cdb[0],
 				DMA_FROM_DEVICE, 0, NULL, 0, 12, dev);
-#elif defined(SYNO_LIO_REMOVE_OBJLUN_PATCH)
+#elif defined(MY_ABC_HERE)
 		cmd = transport_allocate_passthrough(&cdb[0],
 				SE_DIRECTION_READ, 0, NULL, 0, 12, dev);
 #else
@@ -831,7 +834,7 @@ int pscsi_transport_complete(se_task_t *task)
 			buf[4] = 0x2; /* ASCII */
 			buf[5] = 0x1;
 			buf[6] = 0x0;
-#ifdef SYNO_LIO_VENDOR_ID
+#ifdef MY_ABC_HERE
 			len += sprintf((unsigned char *)&buf[8], "SYNO");
 #else
 			len += sprintf((unsigned char *)&buf[8], "LIO-ORG");
@@ -1477,7 +1480,7 @@ int pscsi_map_task_SG(se_task_t *task)
 	int nr_pages = (task->task_size + task->task_sg[0].offset +
 			PAGE_SIZE - 1) >> PAGE_SHIFT;
 	int nr_vecs = 0, ret = 0;
-#ifdef SYNO_LIO_DMA_DIRECTION_PATCH
+#ifdef MY_ABC_HERE
 	int rw = (TASK_CMD(task)->data_direction == DMA_TO_DEVICE);
 #else
 	int rw = (TASK_CMD(task)->data_direction == SE_DIRECTION_WRITE);

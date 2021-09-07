@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- mode: c; c-basic-offset: 8; -*-
  * vim: noexpandtab sw=8 ts=8 sts=0:
  *
@@ -44,7 +47,7 @@
 
 #include <asm/atomic.h>
 
-#ifdef SYNO_LIO_CONFIGFS_WORKAROUND
+#ifdef MY_ABC_HERE
 #define CONFIGFS_ITEM_NAME_LEN	256
 #else
 #define CONFIGFS_ITEM_NAME_LEN	20

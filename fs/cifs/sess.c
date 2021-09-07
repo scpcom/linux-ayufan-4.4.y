@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/sess.c
  *
@@ -165,7 +168,7 @@ unicode_oslm_strings(char **pbcc_area, const struct nls_table *nls_cp)
 	int bytes_ret = 0;
 
 	/* Copy OS version */
-#ifdef SYNO_REPLACE_SMB_NATIVE_OS
+#ifdef MY_ABC_HERE
 	bytes_ret = cifs_strtoUCS((__le16 *)bcc_ptr, "Synology Linux version ", 32,
 				  nls_cp);
 #else
@@ -271,7 +274,7 @@ static void ascii_ssetup_strings(char **pbcc_area, struct cifsSesInfo *ses,
 
 	/* BB check for overflow here */
 
-#ifdef SYNO_REPLACE_SMB_NATIVE_OS
+#ifdef MY_ABC_HERE
 	strcpy(bcc_ptr, "Synology Linux version ");
 	bcc_ptr += strlen("Synology Linux version ");
 #else

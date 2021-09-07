@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001 Sistina Software (UK) Limited.
  * Copyright (C) 2004-2008 Red Hat, Inc. All rights reserved.
@@ -101,7 +104,7 @@ typedef void (*dm_io_hints_fn) (struct dm_target *ti,
  */
 typedef int (*dm_busy_fn) (struct dm_target *ti);
 
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 typedef void (*dm_lvinfoset_fn) (struct dm_target *ti);
 typedef sector_t (*dm_lg_sector_get_fn) (sector_t sector, struct dm_target *ti);
 #endif
@@ -160,7 +163,7 @@ struct target_type {
 	dm_busy_fn busy;
 	dm_iterate_devices_fn iterate_devices;
 	dm_io_hints_fn io_hints;
-#ifdef SYNO_AUTO_REMAP_REPORT
+#ifdef MY_ABC_HERE
 	dm_lvinfoset_fn lvinfoset;
 	dm_lg_sector_get_fn lg_sector_get;
 #endif
@@ -229,7 +232,7 @@ void *dm_get_mdptr(struct mapped_device *md);
  */
 int dm_suspend(struct mapped_device *md, unsigned suspend_flags);
 int dm_resume(struct mapped_device *md);
-#ifdef SYNO_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 int dm_active_get(struct mapped_device *md);
 int dm_active_set(struct mapped_device *md, int value);
 #endif

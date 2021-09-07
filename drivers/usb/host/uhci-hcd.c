@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Universal Host Controller Interface driver for USB.
  *
@@ -563,7 +566,7 @@ static void uhci_shutdown(struct pci_dev *pdev)
 {
 	struct usb_hcd *hcd = (struct usb_hcd *) pci_get_drvdata(pdev);
 
-#ifdef SYNO_USB_SHUTDOWN_FIX
+#ifdef MY_ABC_HERE
 	if (hcd->irq >= 0) {
 		//disable_irq(hcd->irq);
 		free_irq(hcd->irq, hcd);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 struct target_core_fabric_ops {
 	struct configfs_subsystem *tf_subsys;
 	char *(*get_fabric_name)(void);
@@ -52,7 +55,7 @@ struct target_core_fabric_ops {
 	int (*write_pending)(struct se_cmd_s *);
 	int (*write_pending_status)(struct se_cmd_s *);
 	void (*set_default_node_attributes)(struct se_node_acl_s *);
-#ifdef SYNO_LIO_DEFAULT_ACL
+#ifdef MY_ABC_HERE
 	void (*dup_node_attributes)(struct se_node_acl_s*, struct se_node_acl_s*);
 #endif
 	u32 (*get_task_tag)(struct se_cmd_s *);

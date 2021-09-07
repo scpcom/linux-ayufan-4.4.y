@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   FUSE: Filesystem in Userspace
   Copyright (C) 2001-2008  Miklos Szeredi <miklos@szeredi.hu>
@@ -783,14 +786,14 @@ static void fuse_fillattr(struct inode *inode, struct fuse_attr *attr,
 	stat->size = attr->size;
 	stat->blocks = attr->blocks;
 	stat->blksize = (1 << inode->i_blkbits);
-#ifdef SYNO_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	stat->SynoMode = 0;
 #endif
-#ifdef SYNO_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	/* we don't support syno archive version in fuse by now */
 	stat->syno_archive_version = 0;
 #endif
-#ifdef SYNO_CREATE_TIME
+#ifdef MY_ABC_HERE
 	stat->SynoCreateTime.tv_sec = 0;
 	stat->SynoCreateTime.tv_nsec = 0;
 #endif

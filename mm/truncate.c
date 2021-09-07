@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/truncate.c - code for taking down pages from address_spaces
  *
@@ -575,7 +578,7 @@ int vmtruncate(struct inode *inode, loff_t offset)
 }
 EXPORT_SYMBOL(vmtruncate);
 
-#ifdef SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+#ifdef MY_ABC_HERE
 /* Copied from vmtruncate() */
 int ecryptfs_vmtruncate(struct inode *inode, loff_t offset)
 {

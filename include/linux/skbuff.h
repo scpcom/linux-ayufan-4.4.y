@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	Definitions for the 'struct sk_buff' memory handlers.
  *
@@ -1777,7 +1780,7 @@ extern unsigned int    datagram_poll(struct file *file, struct socket *sock,
 extern int	       skb_copy_datagram_iovec(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);
-#ifdef SYNO_RECVFILE
+#ifdef MY_ABC_HERE
 extern int	       skb_copy_datagram_iovec1(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);
