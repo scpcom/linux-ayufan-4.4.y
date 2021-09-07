@@ -2589,7 +2589,7 @@ int ata_dev_configure(struct ata_device *dev)
 	dev->horkage |= ata_dev_blacklisted(dev);
 #if defined(SYNO_SATA_PM_DEVICE_GPIO) && defined(MY_ABC_HERE)
 	if(ap->nr_pmp_links) {
-		if (0 == strncmp(gszSynoHWVersion, HW_DS1812p, strlen(HW_DS1812p)) &&
+		if (syno_is_hw_version(HW_DS1812p) &&
 				IS_SYNOLOGY_DX510(ap->PMSynoUnique) && (1 == ap->PMSynoCpldVer)) {
 
 			if (!(dev->horkage & ATA_HORKAGE_1_5_GBPS)) {
@@ -2601,15 +2601,28 @@ int ata_dev_configure(struct ata_device *dev)
 
 		/*For DS412+, qoriq, 6282 with DX513, the link should be limited to 1.5G*/
 		} else if (IS_SYNOLOGY_DX513(ap->PMSynoUnique) &&
-				(0 == strncmp(gszSynoHWVersion, HW_DS412p, strlen(HW_DS412p)) ||
-				 0 == strncmp(gszSynoHWVersion, HW_DS112 , strlen(HW_DS112)) ||
-				 0 == strncmp(gszSynoHWVersion, HW_DS112pv10, strlen(HW_DS112pv10)) ||
-				 0 == strncmp(gszSynoHWVersion, HW_DS413, strlen(HW_DS413)) ||
-				 0 == strncmp(gszSynoHWVersion, HW_DS212pv10, strlen(HW_DS212pv10)) ||
-				 0 == strncmp(gszSynoHWVersion, HW_DS212pv20, strlen(HW_DS212pv20)))) {
+				(syno_is_hw_version(HW_DS412p) ||
+				 syno_is_hw_version(HW_DS112) ||
+				 syno_is_hw_version(HW_DS112pv10) ||
+				 syno_is_hw_version(HW_DS212pv10) ||
+				 syno_is_hw_version(HW_DS212pv20))) {
 			if (!(dev->horkage & ATA_HORKAGE_1_5_GBPS)) {
 				ata_dev_printk(dev, KERN_ERR,
 						"DX513 workaround, limit the speed to 1.5 GBPS\n");
+
+				dev->horkage |= ATA_HORKAGE_1_5_GBPS;
+				//we set the host sata speed to 1.5G
+				sata_down_spd_limit(&ap->link, 0x1);
+				sata_set_spd(&ap->link);
+			}
+		/*For DS412+, qoriq, DS212+ with DX213, the link should be limited to 1.5G*/
+		} else if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) &&
+				(syno_is_hw_version(HW_DS412p) ||
+				 syno_is_hw_version(HW_DS212pv10) ||
+				 syno_is_hw_version(HW_DS212pv20))) {
+			if (!(dev->horkage & ATA_HORKAGE_1_5_GBPS)) {
+				ata_dev_printk(dev, KERN_ERR,
+						"DX213 workaround, limit the speed to 1.5 GBPS\n");
 
 				dev->horkage |= ATA_HORKAGE_1_5_GBPS;
 				//we set the host sata speed to 1.5G
@@ -5967,6 +5980,10 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 	link->hw_sata_spd_limit = UINT_MAX;
 #ifdef MY_ABC_HERE
 	link->uiSflags = 0x0;
+#ifdef MY_ABC_HERE
+    INIT_WORK(&link->SendSataErrEventTask, SendSataErrEvent);
+#endif
+
 #endif
 
 	/* can't use iterator, ap isn't initialized yet */
@@ -6010,7 +6027,11 @@ int sata_link_init_spd(struct ata_link *link)
 		return rc;
 
 	spd = (link->saved_scontrol >> 4) & 0xf;
+#ifdef MY_ABC_HERE
+	if (spd && !(link->ap->PMSynoUnique && IS_SYNOLOGY_RX410(link->ap->PMSynoUnique)))
+#else
 	if (spd)
+#endif
 		link->hw_sata_spd_limit &= (1 << spd) - 1;
 
 	ata_force_link_limits(link);
@@ -6508,10 +6529,10 @@ static void DelayForHWCtl(struct ata_port *pAp)
 
 #ifdef CONFIG_SYNO_QORIQ
 	if(SYNOQorIQIsBoardNeedPowerUpHDD(pAp->print_id)) {
+		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		if (0 == SYNO_CHECK_HDD_PRESENT(pAp->print_id)) {
 			goto END;
 		}
-		SYNO_CTRL_HDD_POWERON(pAp->print_id, 1);
 		SleepForLatency();
 		iIsDoLatency = 1;
 	}
@@ -6523,12 +6544,12 @@ static void DelayForHWCtl(struct ata_port *pAp)
 		SleepForHD(pAp->print_id);
 #else
 		    /* 710+, 411+ is also power on each HD ports every 7s, so we use old delay 10s */
-		if (0 == strncmp(gszSynoHWVersion, HW_DS710p, strlen(HW_DS710p)) ||
-			0 == strncmp(gszSynoHWVersion, HW_DS411p, strlen(HW_DS411p)) ||
-			0 == strncmp(gszSynoHWVersion, HW_DS411pII, strlen(HW_DS411pII)) ||
-			0 == strncmp(gszSynoHWVersion, HW_DS409, strlen(HW_DS409)) ||
-			0 == strncmp(gszSynoHWVersion, HW_DS410j, strlen(HW_DS410j)) ||
-			0 == strncmp(gszSynoHWVersion, HW_DS411j, strlen(HW_DS411j))) {
+		if (syno_is_hw_version(HW_DS710p) ||
+			syno_is_hw_version(HW_DS411p) ||
+			syno_is_hw_version(HW_DS411pII) ||
+			syno_is_hw_version(HW_DS409) ||
+			syno_is_hw_version(HW_DS410j) ||
+			syno_is_hw_version(HW_DS411j)) {
 			SleepForHD(pAp->print_id);
 		} else {
 			/* New model needn't dely 10s, so we speed it up useing new SleepForHW function */
@@ -7512,6 +7533,10 @@ int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendDiskResetPwrEvent);
 int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendDiskPortDisEvent);
+#ifdef MY_ABC_HERE
+int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNOSataErrorReport);
+#endif
 #endif /* MY_ABC_HERE */
 
 #ifdef MY_DEF_HERE
@@ -7522,3 +7547,6 @@ EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
 #ifdef MY_ABC_HERE
 EXPORT_SYMBOL_GPL(ata_dev_set_feature);
 #endif
+
+int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODeepSleepEvent);

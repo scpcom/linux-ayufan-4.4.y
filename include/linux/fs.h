@@ -13,9 +13,6 @@
 #include <linux/net.h>
 #endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_FS_SYNO_ACL
-#include <linux/syno_acl.h>
-#endif
 /*
  * It's silly to have NR_OPEN bigger than NR_FILE, but you can change
  * the file limit at runtime and only root can increase the per-process
@@ -238,7 +235,7 @@ struct inodes_stat_t {
 #ifdef CONFIG_FS_SYNO_ACL  
 #define MS_SYNOACL	(1<<27)	/* Synology ACL */
 #endif
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #define MS_UNMOUNT_WAIT	(1<<28)	/* force unmount in process */
 #endif
 #ifdef MY_ABC_HERE
@@ -300,7 +297,7 @@ struct inodes_stat_t {
 #define IS_NOQUOTA(inode)	((inode)->i_flags & S_NOQUOTA)
 #define IS_APPEND(inode)	((inode)->i_flags & S_APPEND)
 #define IS_IMMUTABLE(inode)	((inode)->i_flags & S_IMMUTABLE)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #define IS_UMOUNTED_FILE(inode)	((inode)->i_flags & S_SYNO_FORCE_UMOUNT)
 #endif
 #define IS_POSIXACL(inode)	__IS_FLG(inode, MS_POSIXACL)
@@ -498,9 +495,6 @@ typedef void (dio_iodone_t)(struct kiocb *iocb, loff_t offset,
 #define ATTR_KILL_PRIV	(1 << 14)
 #define ATTR_OPEN	(1 << 15) /* Truncating from open(O_TRUNC) */
 #define ATTR_TIMES_SET	(1 << 16)
-#ifdef MY_ABC_HERE
-#define ATTR_CREATE_TIME (1 << 17)
-#endif
 
 /*
  * This is the Inode Attributes structure, used for notify_change().  It
@@ -797,6 +791,9 @@ static inline int mapping_writably_mapped(struct address_space *mapping)
 #endif
 
 struct posix_acl;
+#ifdef CONFIG_FS_SYNO_ACL
+struct syno_acl;
+#endif
 #define ACL_NOT_CACHED ((void *)(-1))
 
 #ifdef CONFIG_SYNO_PLX_PORTING
@@ -1060,7 +1057,7 @@ struct file {
 	const struct file_operations	*f_op;
 	spinlock_t		f_lock;  /* f_ep_links, f_flags, no IRQ */
 	atomic_long_t		f_count;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	unsigned int		f_synostate;
 	spinlock_t			f_synostate_lock;
 #endif
@@ -1105,7 +1102,7 @@ struct file {
 #endif //CONFIG_OXNAS_BACKUP
 
 };
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 static inline int blSynostate(int flag, struct file *f)
 {
 	spin_lock(&f->f_synostate_lock);
@@ -1735,15 +1732,27 @@ struct inode_operations {
 	int (*permission) (struct inode *, int);
 	int (*check_acl)(struct inode *, int);
 #ifdef CONFIG_FS_SYNO_ACL
-	int (*syno_acl_get)(struct dentry *, int cmd, void *value, size_t size);
+	struct syno_acl * (*syno_acl_get)(struct inode *);
+	int (*syno_acl_set)(struct inode *, struct syno_acl *);
+	int (*syno_acl_xattr_get)(struct dentry *, int, void *, size_t);
 	int (*syno_permission)(struct dentry *, int);
 	int (*syno_exec_permission)(struct dentry *);
-	int (*syno_access)(struct dentry *, int);
-	int (*syno_permission_get)(struct dentry *, unsigned int *, unsigned int *);
+	int (*syno_acl_access)(struct dentry *, int);
 	int (*syno_inode_change_ok)(struct dentry *, struct iattr *);
+	int (*syno_arbit_chg_ok)(struct dentry *, unsigned int cmd, int tag, int mask);
+	int (*syno_setattr_post)(struct dentry *, struct iattr *);
+	int (*syno_acl_init)(struct dentry *, struct inode *);
+	void (*syno_acl_to_mode)(struct dentry *, struct kstat *);
 #endif /* CONFIG_FS_SYNO_ACL */
 #ifdef MY_ABC_HERE
-	int (*set_archive)(struct dentry *, int);
+	int (*syno_set_archive_bit)(struct dentry *, unsigned int);
+#endif
+#ifdef MY_ABC_HERE
+	int (*syno_set_crtime)(struct dentry *, struct timespec *);
+#endif
+#ifdef MY_ABC_HERE
+	int (*syno_get_archive_ver)(struct dentry *, u32 *);
+	int (*syno_set_archive_ver)(struct dentry *, u32);
 #endif
 	int (*setattr) (struct dentry *, struct iattr *);
 	int (*getattr) (struct vfsmount *mnt, struct dentry *, struct kstat *);
@@ -1751,9 +1760,6 @@ struct inode_operations {
 	ssize_t (*getxattr) (struct dentry *, const char *, void *, size_t);
 	ssize_t (*listxattr) (struct dentry *, char *, size_t);
 	int (*removexattr) (struct dentry *, const char *);
-#ifdef MY_ABC_HERE
-	int (*synosetxattr) (struct inode *, const char *,const void *,size_t,int);
-#endif
 	void (*truncate_range)(struct inode *, loff_t, loff_t);
 	long (*fallocate)(struct inode *inode, int mode, loff_t offset,
 			  loff_t len);
@@ -1781,6 +1787,10 @@ extern ssize_t vfs_writev(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
 
 struct super_operations {
+#ifdef MY_ABC_HERE
+	int (*syno_get_sb_archive_ver)(struct super_block *sb, u32 *version);
+	int (*syno_set_sb_archive_ver)(struct super_block *sb, u32 version);
+#endif
    	struct inode *(*alloc_inode)(struct super_block *sb);
 	void (*destroy_inode)(struct inode *);
 
@@ -2736,6 +2746,65 @@ int __init get_filesystem_list(char *buf);
 int SYNOUnicodeUTF8Strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int clenUtf8Str1, int clenUtf8Str2, u_int16_t *upcasetable);
 int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable);
 #endif /*MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *time)
+{
+	int error = 0;
+	struct inode *inode = dentry->d_inode;
+
+	mutex_lock(&inode->i_mutex);
+
+	if (inode->i_op->syno_set_crtime) {
+		error = inode->i_op->syno_set_crtime(dentry, time);
+	} else {
+		inode->i_CreateTime = timespec_trunc(*time, inode->i_sb->s_time_gran);
+		mark_inode_dirty(inode);
+	}
+
+	mutex_unlock(&inode->i_mutex);
+	return error;
+}
+#endif
+
+#ifdef MY_ABC_HERE
+static inline int syno_op_get_archive_bit(struct dentry *dentry, unsigned int *pArbit)
+{
+	*pArbit = dentry->d_inode->i_mode2;
+	return 0;
+}
+
+static inline int syno_op_set_archive_bit_nolock(struct dentry *dentry, unsigned int arbit)
+{
+	int err = 0;
+	struct inode *inode = dentry->d_inode;
+
+	if (inode->i_op->syno_set_archive_bit) {
+		err = inode->i_op->syno_set_archive_bit(dentry, arbit);
+	} else {
+		inode->i_mode2 = arbit;
+		mark_inode_dirty_sync(inode);
+	}
+
+	return err;
+}
+
+static inline int syno_op_set_archive_bit(struct dentry *dentry, unsigned int arbit)
+{
+	int err = 0;
+	struct inode *inode = dentry->d_inode;
+
+	mutex_lock(&inode->i_syno_mutex);
+	err = syno_op_set_archive_bit_nolock(dentry, arbit);
+	mutex_unlock(&inode->i_syno_mutex);
+	return err;
+}
+
+#endif //MY_ABC_HERE
+
+#ifdef MY_ABC_HERE
+#define SYNO_EXT4_MOUNT_PATH_LEN 128
+#endif
 
 #endif /* __KERNEL__ */
 #endif /* _LINUX_FS_H */

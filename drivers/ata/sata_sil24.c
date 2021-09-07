@@ -1367,6 +1367,9 @@ static void sil24_init_controller(struct ata_host *host)
 
 		/* configure port */
 		sil24_config_port(ap);
+#ifdef MY_ABC_HERE
+		mdelay(1000);
+#endif
 	}
 
 	/* Turn on interrupts */

@@ -360,7 +360,7 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 #ifdef CONFIG_FS_SYNO_ACL
 		if (delta < MAX_TOUCH_TIME_ERROR) {
 			if (IS_SYNOACL(inode)) {
-				if (0 > inode->i_op->syno_inode_change_ok(dentry, iap)) {
+				if (0 > synoacl_op_inode_chg_ok(dentry, iap)) {
 					iap->ia_valid &= ~BOTH_TIME_SET;
 				}
 			} else if (0 > inode_change_ok(inode, iap)){
@@ -729,7 +729,7 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 #ifdef CONFIG_FS_SYNO_ACL
 			if (isInodeInACLMode){
 				if (inode->i_op) {
-					err2 = nfserrno(inode->i_op->syno_permission(dentry, map->how));
+					err2 = nfserrno(synoacl_op_perm(dentry, map->how));
 				} else {//impossible case
 					printk(KERN_WARNING "nfsd: (%s) is in acl mode but has no operator \n", dentry->d_iname);
 					err2 = nfs_ok;
@@ -783,7 +783,7 @@ nfsd_open(struct svc_rqst *rqstp, struct svc_fh *fhp, int type,
 	__be32		err;
 	int		host_err;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (fhp->fh_export && (fhp->fh_export->ex_path.mnt->mnt_sb->s_flags & MS_UNMOUNT_WAIT)) {
 		return -EIO;
 	}
@@ -1009,7 +1009,7 @@ nfsd_vfs_read(struct svc_rqst *rqstp, struct svc_fh *fhp, struct file *file,
 	__be32		err;
 	int		host_err;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (file->f_path.mnt->mnt_sb->s_flags & MS_UNMOUNT_WAIT) {
 		return -EIO;
 	}
@@ -1125,7 +1125,7 @@ nfsd_vfs_write(struct svc_rqst *rqstp, struct svc_fh *fhp, struct file *file,
 	int			stable = *stablep;
 	int			use_wgather;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (file->f_path.mnt->mnt_sb->s_flags & MS_UNMOUNT_WAIT) {
 		return -EIO;
 	}
@@ -2254,7 +2254,7 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 		if (acc & NFSD_MAY_SYNO_NOP) {
 			return 0;
 		}
-		err = inode->i_op->syno_permission(dentry, syno_acl_nfs_perm_switch(inode, acc));
+		err = synoacl_op_perm(dentry, syno_acl_nfs_perm_switch(inode, acc));
 	} else {
 #endif /* CONFIG_FS_SYNO_ACL */
 
@@ -2274,7 +2274,7 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 #ifdef CONFIG_FS_SYNO_ACL
 	{
 		if (IS_SYNOACL(inode))
-			err = inode->i_op->syno_permission(dentry, MAY_EXEC);
+			err = synoacl_op_perm(dentry, MAY_EXEC);
 		else {
 			err = inode_permission(inode, MAY_EXEC);
 		}

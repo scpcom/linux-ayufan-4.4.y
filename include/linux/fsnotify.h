@@ -22,9 +22,14 @@
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 static inline void SYNO_ArchiveModify(struct inode * TargetInode, int blSetSMBArchive)
 {
+	struct dentry *dentry;
 #ifdef MY_ABC_HERE
-	int old_version;
-	int new_version;
+	u32 new_archive_bit;
+#endif
+#ifdef MY_ABC_HERE
+	u32 old_version;
+	u32 new_version;
+	int err;
 #endif
 	if (NULL == TargetInode) {
 		printk("%s %d: Set backup archive bit on null inode!\n", __FUNCTION__, __LINE__);
@@ -34,31 +39,43 @@ static inline void SYNO_ArchiveModify(struct inode * TargetInode, int blSetSMBAr
 		S_ISFIFO(TargetInode->i_mode) || S_ISSOCK(TargetInode->i_mode)) {
 		return;
 	}
+	dentry = d_find_alias(TargetInode);
+	if (!dentry)
+		return;
+
 #ifdef MY_ABC_HERE
 	mutex_lock(&TargetInode->i_syno_mutex);
 	if (blSetSMBArchive) {
-		TargetInode->i_mode2 |= (S2_SMB_ARCHIVE|ALL_IARCHIVE);
+		new_archive_bit = TargetInode->i_mode2 | (S2_SMB_ARCHIVE|ALL_IARCHIVE);
 	} else {
-		TargetInode->i_mode2 |= ALL_IARCHIVE;
+		new_archive_bit = TargetInode->i_mode2 | ALL_IARCHIVE;
 	}
+	if (new_archive_bit == TargetInode->i_mode2)
+		goto next;
+	syno_op_set_archive_bit_nolock(dentry, new_archive_bit);
+next:
 	mutex_unlock(&TargetInode->i_syno_mutex);
 #endif
 #ifdef MY_ABC_HERE
-	old_version = TargetInode->i_archive_version;
-	new_version = TargetInode->i_sb->s_archive_version + 1;
-	if (old_version != new_version) {
-		TargetInode->i_archive_version = new_version;
-		if (TargetInode->i_op->synosetxattr) {
-			struct syno_xattr_archive_version value;
-			value.v_magic = cpu_to_le16(0x2552);
-			value.v_struct_version = cpu_to_le16(1);
-			value.v_archive_version = cpu_to_le32(new_version);
-			TargetInode->i_op->synosetxattr(TargetInode, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value), 0);
-		}
-	}
-#endif
+	if (!TargetInode->i_op->syno_get_archive_ver)
+		goto out;
 
-	mark_inode_dirty_sync(TargetInode);
+	err = TargetInode->i_op->syno_get_archive_ver(dentry, &old_version);
+	if (err)
+		goto out;
+
+	TargetInode->i_sb->s_op->syno_get_sb_archive_ver(TargetInode->i_sb, &new_version);
+	if (err)
+		goto out;
+
+	new_version += 1;
+	if (new_version != old_version)
+		TargetInode->i_op->syno_set_archive_ver(dentry, new_version);
+out:
+#endif
+	if (dentry) {
+		dput(dentry);
+	}
 }
 #endif
 

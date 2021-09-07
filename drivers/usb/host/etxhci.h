@@ -708,7 +708,7 @@ struct xhci_stream_ctx {
 };
 
 /* Stream Context Types (section 6.4.1) - bits 3:1 of stream ctx deq ptr */
-#define	SCT_FOR_CTX(p)		(((p) << 1) & 0x7)
+#define	SCT_FOR_CTX(p)		(((p) & 0x7) << 1)
 /* Secondary stream array type, dequeue pointer is to a transfer ring */
 #define	SCT_SEC_TR		0
 /* Primary stream array type, dequeue pointer is to a transfer ring */
@@ -720,6 +720,10 @@ struct xhci_stream_ctx {
 #define SCT_SSA_64		5
 #define SCT_SSA_128		6
 #define SCT_SSA_256		7
+
+/* deq bitmasks */
+#define STREAM_CTX_CYCLE_MASK		(1 << 0)
+#define STREAM_CTX_SCT_MASK		(0x7 << 1)
 
 /* Assume no secondary streams for now */
 struct xhci_stream_info {
@@ -1149,6 +1153,7 @@ struct xhci_ring {
 	unsigned int		num_trbs_free;
 	unsigned int		num_trbs_free_temp;
 	enum xhci_ring_type	type;
+	struct radix_tree_root *trb_address_map;
 };
 
 struct xhci_erst_entry {
@@ -1224,6 +1229,7 @@ struct xhci_hcd {
 	__u32		hcs_params2;
 	__u32		hcs_params3;
 	__u32		hcc_params;
+	__u32		hcc_params1;
 
 	spinlock_t	lock;
 
@@ -1304,6 +1310,7 @@ struct xhci_hcd {
 #define XHCI_BROKEN_MSI		(1 << 6)
 #define XHCI_RESET_ON_RESUME	(1 << 7)
 #define XHCI_HUB_INFO_QUIRK	(1 << 13)
+#define XHCI_EP_INFO_QUIRK	(1 << 14)
 	/* port suspend change*/
 	u32 		port_c_suspend;
 	/* which ports are suspended */
@@ -1317,6 +1324,11 @@ struct xhci_hcd {
 	/* Array of pointers to USB 2.0 PORTSC registers */
 	__le32 __iomem		**usb2_ports;
 	unsigned int		num_usb2_ports;
+};
+
+struct table_item {
+	int offset;
+	u32 value;
 };
 
 /* convert between an HCD pointer and the corresponding EHCI_HCD */
@@ -1347,6 +1359,16 @@ static inline struct usb_hcd *xhci_to_hcd(struct xhci_hcd *xhci)
 
 /* TODO: copied from ehci.h - can be refactored? */
 /* xHCI spec says all registers are little endian */
+static inline u8 xhci_readb(const struct xhci_hcd *xhci,
+		__le32 __iomem *regs)
+{
+	return readb(regs);
+}
+static inline void xhci_writeb(struct xhci_hcd *xhci,
+		const u8 val, __le32 __iomem *regs)
+{
+	writeb(val, regs);
+}
 static inline unsigned int xhci_readl(const struct xhci_hcd *xhci,
 		__le32 __iomem *regs)
 {
@@ -1409,6 +1431,8 @@ char *etxhci_get_slot_state(struct xhci_hcd *xhci,
 void etxhci_dbg_ep_rings(struct xhci_hcd *xhci,
 		unsigned int slot_id, unsigned int ep_index,
 		struct xhci_virt_ep *ep);
+void etxhci_dbg_stream_info(struct xhci_hcd *xhci,
+		unsigned int ep_index, struct xhci_stream_info *stream_info);
 
 /* xHCI memory management */
 void etxhci_mem_cleanup(struct xhci_hcd *xhci);
@@ -1468,7 +1492,7 @@ void etxhci_free_command(struct xhci_hcd *xhci,
 /* xHCI PCI glue */
 int etxhci_register_pci(void);
 void etxhci_unregister_pci(void);
-void xhci_init_ej168(struct xhci_hcd *xhci);
+void xhci_init_ejxxx(struct xhci_hcd *xhci);
 #endif
 
 /* xHCI host controller glue */

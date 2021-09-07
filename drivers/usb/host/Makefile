@@ -14,7 +14,7 @@ fhci-objs += fhci-dbg.o
 endif
 xhci-hcd-objs := xhci.o xhci-mem.o xhci-pci.o xhci-ring.o xhci-hub.o xhci-dbg.o
 
-etxhci-hcd-objs := etxhci.o etxhci-mem.o etxhci-pci.o etxhci-ring.o etxhci-hub.o etxhci-dbg.o etxhci-ej168.o
+etxhci-hcd-objs := etxhci.o etxhci-mem.o etxhci-pci.o etxhci-ring.o etxhci-hub.o etxhci-dbg.o etxhci-ejxxx.o
 
 obj-$(CONFIG_USB_WHCI_HCD)	+= whci/
 

@@ -138,7 +138,7 @@ invalidate_complete_page(struct address_space *mapping, struct page *page)
 
 int truncate_inode_page(struct address_space *mapping, struct page *page)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #define MAX_FORCE_UNMAP_RETRY 100000
 	int cRetry = 0;
 

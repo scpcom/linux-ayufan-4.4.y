@@ -52,6 +52,14 @@
 #define SDCOPY_PORT_LOCATION 98
 #endif
 
+#if (1)
+#define SYNO_USB_BACKPORT_BY_ETRON
+#endif
+
+#if (1)
+#define SYNO_FIX_IN_ETRON
+#endif
+
 #ifdef MY_ABC_HERE
 #define CHECKINTERVAL (7UL*HZ)
 #endif
@@ -67,6 +75,10 @@
 
 #if 1 && defined(MY_ABC_HERE)
 #define SYNO_SATA_PM_DEVICE_GPIO
+#endif
+
+#ifdef MY_ABC_HERE
+#define SYNO_SATA_RETRY_TIMES 1
 #endif
 
 #if 0
@@ -96,25 +108,29 @@
 
 #endif
 
-#define F_CLEAR_ARCHIVE     513
-#define F_SETSMB_ARCHIVE    514
-#define F_SETSMB_HIDDEN     515
-#define F_SETSMB_SYSTEM     516
-#define F_CLRSMB_ARCHIVE    517
-#define F_CLRSMB_HIDDEN     518
-#define F_CLRSMB_SYSTEM     519
-#define F_CLEAR_S3_ARCHIVE  520
+#define SYNO_FCNTL_BASE             513
+#define F_CLEAR_ARCHIVE             (SYNO_FCNTL_BASE + 0)
+#define F_SETSMB_ARCHIVE            (SYNO_FCNTL_BASE + 1)
+#define F_SETSMB_HIDDEN             (SYNO_FCNTL_BASE + 2)
+#define F_SETSMB_SYSTEM             (SYNO_FCNTL_BASE + 3)
+#define F_CLRSMB_ARCHIVE            (SYNO_FCNTL_BASE + 4)
+#define F_CLRSMB_HIDDEN             (SYNO_FCNTL_BASE + 5)
+#define F_CLRSMB_SYSTEM             (SYNO_FCNTL_BASE + 6)
+#define F_CLEAR_S3_ARCHIVE          (SYNO_FCNTL_BASE + 7)
 #ifdef MY_ABC_HERE
-#define F_CLRSMB_READONLY   		521
-#define F_SETSMB_READONLY   		522
-#define F_CLRACL_INHERIT    		523
-#define F_SETACL_INHERIT    		524
-#define F_CLRACL_HAS_ACL   			525
-#define F_SETACL_HAS_ACL   			526
-#define F_CLRACL_SUPPORT   			527
-#define F_SETACL_SUPPORT   			528
-#define F_CLRACL_OWNER_IS_GROUP   	529
-#define F_SETACL_OWNER_IS_GROUP   	530
+#define F_CLRSMB_READONLY           (SYNO_FCNTL_BASE + 8)
+#define F_SETSMB_READONLY           (SYNO_FCNTL_BASE + 9)
+#define F_CLRACL_INHERIT            (SYNO_FCNTL_BASE + 10)
+#define F_SETACL_INHERIT            (SYNO_FCNTL_BASE + 11)
+#define F_CLRACL_HAS_ACL            (SYNO_FCNTL_BASE + 12)
+#define F_SETACL_HAS_ACL            (SYNO_FCNTL_BASE + 13)
+#define F_CLRACL_SUPPORT            (SYNO_FCNTL_BASE + 14)
+#define F_SETACL_SUPPORT            (SYNO_FCNTL_BASE + 15)
+#define F_CLRACL_OWNER_IS_GROUP     (SYNO_FCNTL_BASE + 16)
+#define F_SETACL_OWNER_IS_GROUP     (SYNO_FCNTL_BASE + 17)
+#define SYNO_FCNTL_LAST             F_SETACL_OWNER_IS_GROUP
+#else
+#define SYNO_FCNTL_LAST             F_CLEAR_S3_ARCHIVE
 #endif
 
 #endif

@@ -222,15 +222,3 @@ SYSCALL_DEFINE1(uname, struct new_utsname __user *, name)
 	return err ? -EFAULT : 0;
 }
 
-#ifdef MY_ABC_HERE
-SYSCALL_DEFINE1(SYNOmmap, SYNO_MMAP_ARG __user *, arg)
-{
-	long error = -EFAULT;
-	SYNO_MMAP_ARG a;
-
-	if (copy_from_user(&a, arg, sizeof(a)))
-		return error;
-
-	return sys_mmap(a.addr, a.len, a.prot, a.flags, a.fd, a.pgoff << PAGE_SHIFT);
-}
-#endif

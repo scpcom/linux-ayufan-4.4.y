@@ -398,7 +398,7 @@ ENDPROC(__pabt_svc)
 	.endm
 
 	.macro	kuser_cmpxchg_check
-#if __LINUX_ARM_ARCH__ < 6 && !defined(CONFIG_NEEDS_SYSCALL_FOR_CMPXCHG)
+#if !defined(CONFIG_CPU_32v6K) && !defined(CONFIG_NEEDS_SYSCALL_FOR_CMPXCHG)
 #ifndef CONFIG_MMU
 #warning "NPTL on non MMU needs fixing"
 #else
@@ -407,7 +407,7 @@ ENDPROC(__pabt_svc)
 	@ perform a quick test inline since it should be false
 	@ 99.9999% of the time.  The rest is done out of line.
 	cmp	r2, #TASK_SIZE
-	blhs	kuser_cmpxchg_fixup
+	blhs	kuser_cmpxchg64_fixup
 #endif
 #endif
 	.endm
@@ -767,31 +767,12 @@ ENDPROC(__switch_to)
 /*
  * User helpers.
  *
- * These are segment of kernel provided user code reachable from user space
- * at a fixed address in kernel memory.  This is used to provide user space
- * with some operations which require kernel help because of unimplemented
- * native feature and/or instructions in many ARM CPUs. The idea is for
- * this code to be executed directly in user mode for best efficiency but
- * which is too intimate with the kernel counter part to be left to user
- * libraries.  In fact this code might even differ from one CPU to another
- * depending on the available  instruction set and restrictions like on
- * SMP systems.  In other words, the kernel reserves the right to change
- * this code as needed without warning. Only the entry points and their
- * results are guaranteed to be stable.
- *
  * Each segment is 32-byte aligned and will be moved to the top of the high
  * vector page.  New segments (if ever needed) must be added in front of
  * existing ones.  This mechanism should be used only for things that are
  * really small and justified, and not be abused freely.
  *
- * User space is expected to implement those things inline when optimizing
- * for a processor that has the necessary native support, but only if such
- * resulting binaries are already to be incompatible with earlier ARM
- * processors due to the use of unsupported instructions other than what
- * is provided here.  In other words don't make binaries unable to run on
- * earlier processors just for the sake of not using these kernel helpers
- * if your compiled code is not going to use the new instructions for other
- * purpose.
+ * See Documentation/arm/kernel_user_helpers.txt for formal definitions.
  */
  THUMB(	.arm	)
 
@@ -838,6 +819,99 @@ __kuser_helper_start:
  *         asm volatile ( "mov r0, #0xffff0fff; mov lr, pc; sub pc, r0, #95" \
  *	        : : : "r0", "lr","cc" )
  */
+
+/*
+ * Due to the length of some sequences, __kuser_cmpxchg64 spans 2 regular
+ * kuser "slots", therefore 0xffff0f80 is not used as a valid entry point.
+ */
+
+__kuser_cmpxchg64:				@ 0xffff0f60
+
+#if defined(CONFIG_NEEDS_SYSCALL_FOR_CMPXCHG)
+
+	/*
+	 * Poor you.  No fast solution possible...
+	 * The kernel itself must perform the operation.
+	 * A special ghost syscall is used for that (see traps.c).
+	 */
+	stmfd	sp!, {r7, lr}
+	ldr	r7, 1f			@ it's 20 bits
+	swi	__ARM_NR_cmpxchg64
+	ldmfd	sp!, {r7, pc}
+1:	.word	__ARM_NR_cmpxchg64
+
+#elif defined(CONFIG_CPU_32v6K)
+
+	stmfd	sp!, {r4, r5, r6, r7}
+	ldrd	r4, r5, [r0]			@ load old val
+	ldrd	r6, r7, [r1]			@ load new val
+	smp_dmb	arm
+1:	ldrexd	r0, r1, [r2]			@ load current val
+	eors	r3, r0, r4			@ compare with oldval (1)
+	eoreqs	r3, r1, r5			@ compare with oldval (2)
+	strexdeq r3, r6, r7, [r2]		@ store newval if eq
+	teqeq	r3, #1				@ success?
+	beq	1b				@ if no then retry
+	smp_dmb	arm
+	rsbs	r0, r3, #0			@ set returned val and C flag
+	ldmfd	sp!, {r4, r5, r6, r7}
+	bx	lr
+
+#elif !defined(CONFIG_SMP)
+
+#ifdef CONFIG_MMU
+
+	/*
+	 * The only thing that can break atomicity in this cmpxchg64
+	 * implementation is either an IRQ or a data abort exception
+	 * causing another process/thread to be scheduled in the middle of
+	 * the critical sequence.  The same strategy as for cmpxchg is used.
+	 */
+	stmfd	sp!, {r4, r5, r6, lr}
+	ldmia	r0, {r4, r5}			@ load old val
+	ldmia	r1, {r6, lr}			@ load new val
+1:	ldmia	r2, {r0, r1}			@ load current val
+	eors	r3, r0, r4			@ compare with oldval (1)
+	eoreqs	r3, r1, r5			@ compare with oldval (2)
+2:	stmeqia	r2, {r6, lr}			@ store newval if eq
+	rsbs	r0, r3, #0			@ set return val and C flag
+	ldmfd	sp!, {r4, r5, r6, pc}
+
+	.text
+kuser_cmpxchg64_fixup:
+	@ Called from kuser_cmpxchg_fixup.
+	@ r2 = address of interrupted insn (must be preserved).
+	@ sp = saved regs. r7 and r8 are clobbered.
+	@ 1b = first critical insn, 2b = last critical insn.
+	@ If r2 >= 1b and r2 <= 2b then saved pc_usr is set to 1b.
+	mov	r7, #0xffff0fff
+	sub	r7, r7, #(0xffff0fff - (0xffff0f60 + (1b - __kuser_cmpxchg64)))
+	subs	r8, r2, r7
+	rsbcss	r8, r8, #(2b - 1b)
+	strcs	r7, [sp, #S_PC]
+#if __LINUX_ARM_ARCH__ < 6
+	bcc	kuser_cmpxchg32_fixup
+#endif
+	mov	pc, lr
+	.previous
+
+#else
+#warning "NPTL on non MMU needs fixing"
+	mov	r0, #-1
+	adds	r0, r0, #0
+	usr_ret	lr
+#endif
+
+#else
+#error "incoherent kernel configuration"
+#endif
+
+	/* pad to next slot */
+	.rept	(16 - (. - __kuser_cmpxchg64)/4)
+	.word	0
+	.endr
+
+	.align	5
 
 __kuser_memory_barrier:				@ 0xffff0fa0
 	smp_dmb
@@ -934,7 +1008,7 @@ __kuser_cmpxchg:				@ 0xffff0fc0
 	usr_ret	lr
 
 	.text
-kuser_cmpxchg_fixup:
+kuser_cmpxchg32_fixup:
 	@ Called from kuser_cmpxchg_check macro.
 	@ r2 = address of interrupted insn (must be preserved).
 	@ sp = saved regs. r7 and r8 are clobbered.
@@ -977,39 +1051,6 @@ kuser_cmpxchg_fixup:
 
 	.align	5
 
-/*
- * Reference prototype:
- *
- *	int __kernel_get_tls(void)
- *
- * Input:
- *
- *	lr = return address
- *
- * Output:
- *
- *	r0 = TLS value
- *
- * Clobbered:
- *
- *	none
- *
- * Definition and user space usage example:
- *
- *	typedef int (__kernel_get_tls_t)(void);
- *	#define __kernel_get_tls (*(__kernel_get_tls_t *)0xffff0fe0)
- *
- * Get the TLS value as previously set via the __ARM_NR_set_tls syscall.
- *
- * This could be used as follows:
- *
- * #define __kernel_get_tls() \
- *	({ register unsigned int __val asm("r0"); \
- *         asm( "mov r0, #0xffff0fff; mov lr, pc; sub pc, r0, #31" \
- *	        : "=r" (__val) : : "lr","cc" ); \
- *	   __val; })
- */
-
 __kuser_get_tls:				@ 0xffff0fe0
 
 #if !defined(CONFIG_HAS_TLS_REG) && !defined(CONFIG_TLS_REG_EMUL)
@@ -1022,19 +1063,6 @@ __kuser_get_tls:				@ 0xffff0fe0
 	.rep	5
 	.word	0			@ pad up to __kuser_helper_version
 	.endr
-
-/*
- * Reference declaration:
- *
- *	extern unsigned int __kernel_helper_version;
- *
- * Definition and user space usage example:
- *
- *	#define __kernel_helper_version (*(unsigned int *)0xffff0ffc)
- *
- * User space may read this to determine the curent number of helpers
- * available.
- */
 
 __kuser_helper_version:				@ 0xffff0ffc
 	.word	((__kuser_helper_end - __kuser_helper_start) >> 5)

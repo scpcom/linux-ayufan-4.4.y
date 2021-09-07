@@ -47,6 +47,10 @@ EXPORT_SYMBOL(vfsmount_lock);
 extern int gSynoHasDynModule;
 #endif
 
+#ifdef MY_ABC_HERE
+extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
+#endif
+
 static int event;
 static DEFINE_IDA(mnt_id_ida);
 static DEFINE_IDA(mnt_group_ida);
@@ -1033,7 +1037,7 @@ void umount_tree(struct vfsmount *mnt, int propagate, struct list_head *kill)
 
 static void shrink_submounts(struct vfsmount *mnt, struct list_head *umounts);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #include <linux/fdtable.h>
 static void fs_set_task_stop(struct vfsmount *mnt)
 {
@@ -1116,7 +1120,7 @@ static int do_umount(struct vfsmount *mnt, int flags)
 		if (!xchg(&mnt->mnt_expiry_mark, 1))
 			return -EAGAIN;
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	// close all file before we really do force umount.
 	if (flags & MNT_DETACH) {
 		extern void fs_set_all_files_umount(struct super_block *);
@@ -1196,7 +1200,7 @@ static int do_umount(struct vfsmount *mnt, int flags)
  * unixes. Our API is identical to OSF/1 to avoid making a mess of AMD
  */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #define MAX_FORCE_UMOUNT_RETRY 5
 #endif
 SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
@@ -1218,7 +1222,7 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 		goto dput_and_out;
 
 	retval = do_umount(path.mnt, flags);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
     if(flags & MNT_DETACH) {
 		int cRetry = 0;
 		while ((atomic_read(&path.mnt->mnt_count) > 1) && 
@@ -1237,7 +1241,7 @@ dput_and_out:
 	/* we mustn't call path_put() as that would clear mnt_expiry_mark */
 	dput(path.dentry);
 	mntput_no_expire(path.mnt);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if(flags & MNT_DETACH) {
 		fs_set_task_start();
 	}
@@ -1756,6 +1760,12 @@ static int do_new_mount(struct path *path, char *type, int flags,
 	unlock_kernel();
 	if (IS_ERR(mnt))
 		return PTR_ERR(mnt);
+#ifdef MY_ABC_HERE
+	if (!strcmp(type, "ext4")) {
+		char buf[SYNO_EXT4_MOUNT_PATH_LEN] = {'\0'};
+		ext4_fill_mount_path(mnt->mnt_sb, d_path(path, buf, sizeof(buf)));
+	}
+#endif
 
 	return do_add_mount(mnt, path, mnt_flags, NULL);
 }

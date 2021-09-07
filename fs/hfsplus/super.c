@@ -26,6 +26,22 @@ int syno_hfsplus_mutex_init = 0;
 struct mutex syno_hfsplus_global_mutex;
 #endif
 
+#ifdef MY_ABC_HERE
+// 3802 byte for 8K node_size
+static inline size_t hfsplus_get_maxinline_attrsize(struct hfs_btree *btree)
+{
+       unsigned int maxsize = btree->node_size;
+       // Copied from Apple open source /xnu-1699.26.8/bsd/hfs/hfs_xattr.c:2169
+       maxsize -= sizeof(struct hfs_bnode_desc);       /* minus node descriptor */
+       maxsize -= 3 * sizeof(u16);                     /* minus 3 index slots */
+       maxsize /= 2;                            /* 2 key/rec pairs minumum */
+       maxsize -= sizeof(struct hfsplus_attr_key);       /* minus maximum key size */
+       maxsize -= sizeof(struct hfsplus_attr_data) - 2;  /* minus data header */
+       maxsize &= 0xFFFFFFFE;                   /* multiple of 2 bytes */
+       return maxsize;
+}
+#endif
+
 struct inode *hfsplus_iget(struct super_block *sb, unsigned long ino)
 {
 	struct hfs_find_data fd;
@@ -319,6 +335,10 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	struct qstr str;
 	struct nls_table *nls = NULL;
 	int err = -EINVAL;
+#ifdef MY_ABC_HERE
+	size_t max_attr_size = 0;
+	size_t cached_size = 0;
+#endif
 
 	sbi = kzalloc(sizeof(*sbi), GFP_KERNEL);
 	if (!sbi)
@@ -414,6 +434,15 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		printk(KERN_ERR "hfs: failed to load catalog file\n");
 		goto cleanup;
 	}
+	max_attr_size = hfsplus_get_maxinline_attrsize(HFSPLUS_SB(sb).attr_tree);
+	cached_size = offsetof(struct hfsplus_attr_inline_data, raw_bytes) + max_attr_size;
+	if (cached_size > hfsplus_get_attr_tree_cache_size()) {
+		err = hfsplus_recreate_attr_tree_cache(cached_size);
+		if (err) {
+			goto cleanup;
+		}
+	}
+	err = -EINVAL;
 #endif
 
 	inode = hfsplus_iget(sb, HFSPLUS_ALLOC_CNID);

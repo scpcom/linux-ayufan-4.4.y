@@ -20,8 +20,7 @@
 *  0 : do not spinup delay
 * >0 : The number that we would delay
 */
-#ifdef MY_ABC_HERE
-
+#if defined(MY_ABC_HERE) && defined(__KERNEL__)
 extern long g_internal_hd_num;
 extern long syno_boot_hd_count;
 

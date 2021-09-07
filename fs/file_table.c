@@ -25,7 +25,7 @@
 
 #include <asm/atomic.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #include <linux/fs_struct.h>
 #endif
 
@@ -131,7 +131,7 @@ struct file *get_empty_filp(void)
 	INIT_LIST_HEAD(&f->f_u.fu_list);
 	atomic_long_set(&f->f_count, 1);
 	rwlock_init(&f->f_owner.lock);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	spin_lock_init(&f->f_synostate_lock);
 	f->f_synostate = O_UNMOUNT_OK;
 #endif
@@ -229,13 +229,13 @@ int init_file(struct file *file, struct vfsmount *mnt, struct dentry *dentry,
 }
 EXPORT_SYMBOL(init_file);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #include <linux/namei.h>
 #endif
 
 void fput(struct file *file)
 {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	int doForce = 0;
 	struct nameidata nd;
 
@@ -342,7 +342,7 @@ void __fput(struct file *file)
 	struct vfsmount *mnt = file->f_path.mnt;
 	struct inode *inode = dentry->d_inode;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (blSynostate(O_UNMOUNT_DONE, file)) {
 		fops_put(file->f_op);
 		path_put(&file->f_path);
@@ -468,7 +468,7 @@ void file_kill(struct file *file)
 	}
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #define MAX_FORCE_UNMOUNT_LIMIT 100000
 void fs_set_all_files_umount(struct super_block *sb)
 {

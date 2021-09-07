@@ -890,11 +890,6 @@ __syscall_return(type,__res); \
 #define __ARCH_WANT_COMPAT_SYS_TIME
 #endif	/* __NO_STUBS */
 
-#ifdef MY_ABC_HERE
-#define __NR_SYNOmmap							400
-#define SYNOmmap(x)								syscall(__NR_SYNOmmap, x)
-__SYSCALL(__NR_SYNOmmap, sys_SYNOmmap)
-#endif
 
 #ifdef __KERNEL__
 

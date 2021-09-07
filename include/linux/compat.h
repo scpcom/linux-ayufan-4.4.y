@@ -309,16 +309,5 @@ asmlinkage long compat_sys_newfstatat(unsigned int dfd, char __user * filename,
 asmlinkage long compat_sys_openat(unsigned int dfd, const char __user *filename,
 				  int flags, int mode);
 
-#ifdef MY_ABC_HERE
-typedef struct compat_tag_mmap_arg_struct {
-	u32 addr;
-	u32 len;
-	u32 prot;
-	u32 flags;
-	u32 fd;
-	u32 pgoff;
-} compat_SYNO_MMAP_ARG;
-#endif
-
 #endif /* CONFIG_COMPAT */
 #endif /* _LINUX_COMPAT_H */

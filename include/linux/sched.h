@@ -1763,7 +1763,7 @@ extern cputime_t task_gtime(struct task_struct *p);
 #define PF_FREEZER_SKIP	0x40000000	/* Freezer should not count it as freezeable */
 #define PF_FREEZER_NOSIG 0x80000000	/* Freezer won't send signals to it */
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #define PF_FORCE_UMOUNT_TASK   0x00000020
 #endif
 /*

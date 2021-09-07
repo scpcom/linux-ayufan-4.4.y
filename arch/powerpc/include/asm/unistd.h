@@ -350,11 +350,6 @@
 #define __NR_pwritev		321
 #define __NR_rt_tgsigqueueinfo	322
 
-#ifdef MY_ABC_HERE
-#define __NR_SYNOmmap				400
-#define SYNOmmap(x)					syscall(__NR_SYNOmmap, x)
-#endif
-
 #ifdef SYNO_MTD_ALLOC
 #define __NR_SYNOMTDAlloc			405
 #define SYNOMTDAlloc(x)				syscall(__NR_SYNOMTDAlloc, x)

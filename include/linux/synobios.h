@@ -3,6 +3,10 @@
 #define __SYNOBIOS_OEM_H_
 
 #include <linux/syno.h>
+#ifdef MY_ABC_HERE
+#include <linux/string.h>
+extern char gszSynoHWVersion[];
+#endif
 
 #ifndef BCD_TO_BIN
 #define BCD_TO_BIN(val) ((val)=((val)&15) + ((val)>>4)*10)
@@ -186,6 +190,14 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_ERROR_FS 0x2900
 #endif
 
+#ifdef MY_ABC_HERE
+#define SYNO_EVENT_SATA_ERROR_REPORT 0x2a00
+#endif
+
+#ifdef MY_ABC_HERE
+#define SYNO_EVENT_WAKE_FROM_DEEP_SLEEP 0x2b00
+#endif
+
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
 #define SYNO_EVENT_BACK_TEMP_HIGH       0x4003
 #define SYNO_EVENT_BACK_TEMP_HEAT       0x4002
@@ -353,7 +365,6 @@ typedef enum {
 	DISK_LED_ORANGE_SOLID,
 	DISK_LED_ORANGE_BLINK,
 	DISK_LED_GREEN_BLINK,
-	DISK_LED_BLUE,
 } SYNO_DISK_LED;
 
 typedef struct _tag_DiskLedStatus {
@@ -429,7 +440,9 @@ typedef struct _tag_FanStatus {
 #define FAN_SPEED_SHIFT_DUTY_GET(speed)		  (((speed) - FAN_SPEED_PWM_FORMAT_SHIFT) & 0xFF) /* duty cycle is set in the first 8bit, so get it in first 8bit */
 
 /* if curspeed is stop and nxtspeed is lower than "high", return true. else return false*/
-#define IS_FAN_NEED_TO_SPIN_FASTER_FIRST(NxtSpeed, CurSpeed) (((NxtSpeed) < FAN_SPEED_PWM_FORMAT_SHIFT) ? ( FAN_SPEED_HIGH > (NxtSpeed) && FAN_SPEED_STOP == (CurSpeed) ) : (65 > FAN_SPEED_SHIFT_DUTY_GET(NxtSpeed) && (0 == FAN_SPEED_SHIFT_DUTY_GET(CurSpeed) ||  FAN_SPEED_STOP == CurSpeed)))
+#define IS_FAN_NEED_TO_SPIN_FASTER_FIRST(NxtSpeed, CurSpeed) (((NxtSpeed) < FAN_SPEED_PWM_FORMAT_SHIFT) ? ( (FAN_SPEED_HIGH > (NxtSpeed) && FAN_SPEED_STOP == (CurSpeed) ) || (FAN_SPEED_TEST_5 > (NxtSpeed) && FAN_SPEED_TEST_0 == (CurSpeed) ) ) : (65 > FAN_SPEED_SHIFT_DUTY_GET(NxtSpeed) && (0 == FAN_SPEED_SHIFT_DUTY_GET(CurSpeed) ||  IS_FAN_SET_TO_STOP(CurSpeed))))
+
+#define IS_FAN_SET_TO_STOP(CurSpeed) ((FAN_SPEED_STOP == CurSpeed) || (FAN_SPEED_TEST_0 == CurSpeed))
 
 // Synology Disk Station Brand
 enum {
@@ -560,13 +573,6 @@ typedef enum _tag_RTC_TYPE {
 	RTC_MV,
 }RTC_TYPE;
 
-//Support 
-typedef enum {
-	S_LED_UNKNOWN,
-	S_LED_NORMAL,
-	S_LED_BREATH,
-}STATUS_LED_T;
-
 typedef enum {
 	FAN_RPM_RPT_UNKNOWN,
 	FAN_RPM_RPT_YES,
@@ -580,8 +586,9 @@ typedef enum {
 }LCM_T;
 
 typedef enum {
-	WIFI_WPS_NO = 0x00,
+	WIFI_WPS_214air = 0x0, /* GPIO PIN 0  */
 	WIFI_WPS_213air = 0x28, /* GPIO PIN 40  */
+	WIFI_WPS_NO = 0xFE,
 	WIFI_WPS_UNKNOWN = 0xFF
 }WIFI_WPS_T;
 
@@ -605,10 +612,15 @@ typedef enum {
 
 typedef enum {
 	HIBER_LED_UNKNOWN,
-	HIBER_LED_NORMAL,
-	HIBER_LED_ALLOUT,
-	HIBER_LED_EXCEPTPWR,
+	HIBER_LED_STATUS_OFF,    /* status led off, others don't care */
+	HIBER_LED_STATUS_BREATH, /* status led breathing */
+	HIBER_LED_POWER_ONLY,    /* power led on, others off */
 }HIBERNATE_LED_T;
+
+//For backward compatibility
+#define HIBER_LED_NORMAL HIBER_LED_STATUS_OFF
+#define HIBER_LED_ALLOUT HIBER_LED_STATUS_BREATH
+#define HIBER_LED_EXCEPTPWR HIBER_LED_POWER_ONLY
 
 typedef enum {
 	RTC_NOT_NEED_TO_CORRECT = 0x00,
@@ -616,11 +628,6 @@ typedef enum {
 	RTC_SEIKO_CORR_106B1    = 0x57,
 	RTC_RICOH_CORR_DEFAULT  = 0x0F,
 }RTC_CORRECTION_T;
-
-typedef enum {
-	FAN_FAIL_ADJUST_NO,
-	FAN_FAIL_ADJUST_FULL,
-}FAN_FAIL_ADJUST_T;
 
 typedef enum {
 	MICROP_ID_710p = 0x31, /* '1' */
@@ -654,9 +661,11 @@ typedef enum {
 	MICROP_ID_RS814p = 0x55, /* 'U' */
 	MICROP_ID_RS814rpp = 0x56, /* 'V' */
 	MICROP_ID_RS3614xsp = 0x57, /* 'W' RS3614xsp */
-	MICROP_ID_RS3614xs = 0x57, /* 'W' RS3614xs */
-	MICROP_ID_RS3614rpxs = 0x57, /* 'W' RS3614rpxs */
-	MICROP_ID_1814p = 0x58, /* 'X' */
+	MICROP_ID_RS3614xs = 0x5B, /* 'W' RS3614xs */
+	MICROP_ID_RS3614rpxs = 0x5C, /* 'W' RS3614rpxs */
+	MICROP_ID_9615xsp = 0x4d, /* 'M' Temporarily using the same microp ID as 10613 */
+	MICROP_ID_9615vmxsp = 0x4d, /* 'M' Temporarily using the same microp ID as 10613 */
+	MICROP_ID_DS2414xs = 0x57, /* 'W' DS2414xs */
 	MICROP_ID_UNKNOW = 0xFF,
 } SYNO_MICROP_ID;
 
@@ -672,6 +681,27 @@ typedef enum {
 	FOUR_DISK_DENO_SEVEN = 0x47,  /* if the model is >=8bay, you must use this */
 	UNKNOW_DISK_DENO = 0x00,
 } GROUP_WAKE_CONFIG_T;
+
+typedef enum {
+	CPU_UNKNOWN,
+	CPU_E3_1230v2,
+	CPU_I3_2100,
+	CPU_I3_4130,
+	CPU_D410,
+	CPU_D425,
+	CPU_D510,
+	CPU_D525,
+	CPU_D2700,
+	CPU_CE5335,
+	CPU_88F6281,
+	CPU_88F6282,
+	CPU_88F6702,
+	CPU_88F6707,
+	CPU_MV78230,
+	CPU_8533e,
+	CPU_P1022,
+	CPU_C2000,
+} CPU_ARCH_INFO_T;
 
 /**
  * This structure is used to store types of each module
@@ -692,7 +722,6 @@ typedef struct {
 	POWER_IN_SEQ   pis_type          :4;
 	RTC_TYPE       rtc_type          :4;
 	CPUTMP_T       cputmp_type       :2;
-	STATUS_LED_T   status_led_type   :2;
 	FAN_RPM_RPT_T  fan_rpm_rpt_type  :2;
 	LCM_T          lcm_type		 :2;
 	WIFI_WPS_T		wifi_wps_type	 :8;
@@ -700,9 +729,9 @@ typedef struct {
 	CARDREADER_T   has_cardreader    :2;
 	HIBERNATE_LED_T  hibernate_led   :2;
 	RTC_CORRECTION_T rtc_corr_value  :8;
-	FAN_FAIL_ADJUST_T fan_fail_adjust:2;
 	SYNO_MICROP_ID microp_id         :8;
 	GROUP_WAKE_CONFIG_T group_wake_config :8;
+	CPU_ARCH_INFO_T cpu_arch_info    :8;
 } __attribute__((packed)) module_t;
 
 #define HW_DS107e      "DS107e"
@@ -779,6 +808,7 @@ typedef struct {
 #define HW_RS3614xs    "RS3614xs"      //"RS3614xs"
 #define HW_RS3614rpxs    "RS3614rpxs"      //"RS3614rpxs"
 #define HW_RS3614xsp    "RS3614xs+"      //"RS3614xs+"
+#define HW_DS2414xs    "DS2414xs"      //"DS2414xs"
 #define HW_DS111j      "DS111j"        //"DS111j"
 #define HW_DS212       "DS212"         //"DS212v10"
 #define HW_DS413       "DS413"         //"DS413"
@@ -793,6 +823,7 @@ typedef struct {
 #define HW_RS2414p     "RS2414+"       //"RS2414+"
 #define HW_RS2414rpp   "RS2414rp+"     //"RS2414rp+"
 #define HW_DS2413p     "DS2413+"       //"DS2413+"
+#define HW_DS2414p     "DS2414+"       //"DS2414+"
 #define HW_RS212       "RS212"         //"RS212"
 #define HW_DS212jv10   "DS212j"        //"DS212j"
 #define HW_DS212jv20   "DS212jv20"     //"DS212j"
@@ -807,6 +838,7 @@ typedef struct {
 #define HW_DS112slim   "DS112slim"     //"DS112slim"
 #define HW_DS413jv10   "DS413jv10"     //"DS413jv10"
 #define HW_DS414jv10   "DS414jv10"     //"DS414jv10"
+#define HW_DS214airv10   "DS214airv10"     //"DS214airv10"
 #define HW_DS213pv10   "DS213pv10"     //"DS213pv10"
 #define HW_DS213airv10 "DS213airv10"   //"DS213airv10"
 #define HW_DS213v10    "DS213v10"      //"DS213v10"
@@ -824,11 +856,13 @@ typedef struct {
 #define HW_DS414v10    "DS414v10"
 #define HW_RS814v10    "RS814v10"
 #define HW_DS114p      "DS114+"      //"DS114+"
+#define HW_RS9615xsp  "RS9615xs+"    //"RS9615xs+"
+#define HW_RS9615vmxsp  "RS9615vmxs+"    //"RS9615vmxs+"
 #define HW_DS714v10    "DS714v10"
 #define HW_RS814p      "RS814+"        //"RS814+"
 #define HW_RS814rpp    "RS814rp+"      //"RS814rp+"
-#define HW_DS1814p     "DS1814+"       //"DS1814+"
 #define HW_DS214play      "DS214play"
+#define HW_DS414slim   "DS414slim"    //DS414slim
 #define HW_UNKNOWN     "DSUnknown"
 									    
 typedef struct _tag_HwCapability {
@@ -902,6 +936,7 @@ typedef enum {
 	MODEL_RS3614xs,
 	MODEL_RS3614rpxs,
 	MODEL_RS3614xsp,
+	MODEL_DS2414xs,
 	MODEL_RS411,
 	MODEL_DS111j,
 	MODEL_RS2211p,
@@ -930,6 +965,7 @@ typedef enum {
 	MODEL_DS112slim,
 	MODEL_DS413j,	//90
 	MODEL_DS414j,
+	MODEL_DS214air,
 	MODEL_DS213p,
 	MODEL_DS213air,
 	MODEL_DS213,
@@ -948,12 +984,15 @@ typedef enum {
 	MODEL_DS414,
 	MODEL_RS814,
 	MODEL_DS114p,
+	MODEL_RS9615xsp,  //110
+	MODEL_RS9615vmxsp,
 	MODEL_DS714,
-	MODEL_DS214se,
 	MODEL_RS814p,
 	MODEL_RS814rpp,
-	MODEL_DS1814p,
+	MODEL_DS214se,
 	MODEL_DS214play,
+	MODEL_DS2414p,
+	MODEL_DS414slim,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
@@ -1328,7 +1367,8 @@ typedef struct _tag_SYNO_CPU_INFO {
 #define SYNO_SYS_BOOT                   0x4001
 #define SYNO_SYS_RUN                    0x4002
 #define SYNO_SYS_SHUTDOWN               0x4003
-#define SYNO_SYS_NODISK                 0x4004
+#define SYNO_SYS_NO_SYSTEM              0x4004
+#define SYNO_SYS_NODISK                 SYNO_SYS_NO_SYSTEM  // NODISK is alias of NO_SYSTEM
 #define SYNO_SYS_WAIT_RESET             0x4005
 #define SYNO_SYS_FACTORY_DEFAULT        0x4006
 #define SYNO_LED_USB_COPY_NONE          0x5100
@@ -1453,6 +1493,19 @@ struct synobios_ops {
 
 
 PRODUCT_MODEL synobios_getmodel(void);
+#ifdef MY_ABC_HERE
+static inline int syno_is_hw_version(const char *hw_version)
+{
+	if (NULL == hw_version) {
+		return 0;
+	}
 
+	if (0 == strncmp(gszSynoHWVersion, hw_version, strlen(hw_version))) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+#endif
 #endif
 

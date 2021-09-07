@@ -101,7 +101,11 @@ extern unsigned int guiWakeupDisksNum;
 #ifdef MY_ABC_HERE
 extern int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int);
 extern int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int);
+#ifdef MY_ABC_HERE
+extern int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
 #endif
+#endif
+
 
 /* The following table determines how we sequence resets.  Each entry
  * represents timeout for that try.  The first try can be soft or
@@ -567,6 +571,22 @@ void SendPortDisEvent(struct work_struct *work)
 	return;
 }
 
+#ifdef MY_ABC_HERE
+void SendSataErrEvent(struct work_struct *work)
+{
+    int iStartIdx = 0;
+    struct ata_link *link = container_of(work, struct ata_link, SendSataErrEventTask);
+    struct ata_port *ap = link->ap;
+
+    iStartIdx = syno_libata_index_get(ap->scsi_host, 0, 0, 0);
+
+    if (funcSYNOSataErrorReport) {
+        funcSYNOSataErrorReport(iStartIdx, ap->nr_pmp_links, link->pmp, link->uiSError, link->uiError);
+    }
+
+    return;
+}
+#endif
 #endif
 
 /**
@@ -586,7 +606,7 @@ void ata_scsi_error(struct Scsi_Host *host)
 	struct ata_port *ap = ata_shost_to_port(host);
 	int i;
 #ifdef MY_ABC_HERE
-	int iDetectTries = ATA_EH_PMP_TRIES;
+	int iDetectTries = SYNO_SATA_RETRY_TIMES;
 	int iForceDetect = 0;
 	unsigned int uiStatStart = 0x0;
 	unsigned int uiStatEnd = 0x0;
@@ -2692,6 +2712,10 @@ static void ata_eh_link_report(struct ata_link *link)
 		  ehc->i.serror & SERR_DEV_XCHG ? "DevExch " : "");
 #endif
 
+#ifdef MY_ABC_HERE
+    link->uiSError = ehc->i.serror;
+#endif
+
 	for (tag = 0; tag < ATA_MAX_QUEUE; tag++) {
 		struct ata_queued_cmd *qc = __ata_qc_from_tag(ap, tag);
 		struct ata_taskfile *cmd = &qc->tf, *res = &qc->result_tf;
@@ -2782,7 +2806,16 @@ static void ata_eh_link_report(struct ata_link *link)
 			  res->feature & ATA_IDNF ? "IDNF " : "",
 			  res->feature & ATA_ABORTED ? "ABRT " : "");
 #endif
+#ifdef MY_ABC_HERE
+		if (cmd->command != ATA_CMD_PACKET &&
+			(res->feature & (ATA_ICRC | ATA_UNC | ATA_IDNF | ATA_ABORTED))) {
+			link->uiError = res->feature & (ATA_ICRC | ATA_UNC | ATA_IDNF | ATA_ABORTED);
+		}
+#endif
 	}
+#ifdef MY_ABC_HERE
+	schedule_work(&(link->SendSataErrEventTask));
+#endif
 }
 
 /**

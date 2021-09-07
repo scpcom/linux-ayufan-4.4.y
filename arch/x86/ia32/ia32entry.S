@@ -905,11 +905,7 @@ ia32_sys_call_table:
 	.quad sys_ni_syscall
 	.quad sys_ni_syscall
 	.quad sys_ni_syscall
-#ifdef MY_ABC_HERE
-	.quad compat_sys_SYNOmmap  /* 400 */
-#else
 	.quad sys_ni_syscall
-#endif
 	.quad sys_ni_syscall
 #ifdef MY_ABC_HERE
 	.quad compat_sys_SYNOUtime		/* 402 */

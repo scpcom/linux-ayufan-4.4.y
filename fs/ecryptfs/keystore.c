@@ -45,7 +45,7 @@ static int process_request_key_err(long err_code)
 
 	switch (err_code) {
 	case -ENOKEY:
-#ifdef SYNO_ECRYPTFS_SKIP_AUTH_WARNING
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit())
 #endif
 		ecryptfs_printk(KERN_WARNING, "No key\n");
@@ -613,6 +613,9 @@ ecryptfs_write_tag_70_packet(char *dest, size_t *remaining_bytes,
 		printk(KERN_ERR "%s: Error attempting to find auth tok for "
 		       "fnek sig [%s]; rc = [%d]\n", __func__,
 		       mount_crypt_stat->global_default_fnek_sig, rc);
+#ifdef MY_ABC_HERE
+		mount_crypt_stat->flags |= ECRYPTFS_SYNO_ERROR_REPORT;
+#endif
 		goto out_free_unlock;
 	}
 	/* TODO: Support other key modules than passphrase for
@@ -913,12 +916,15 @@ ecryptfs_parse_tag_70_packet(char **filename, size_t *filename_size,
 	rc = ecryptfs_find_auth_tok_for_sig(&s->auth_tok, mount_crypt_stat,
 					    s->fnek_sig_hex);
 	if (rc) {
-#ifdef SYNO_ECRYPTFS_SKIP_AUTH_WARNING
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit())
 #endif
 		printk(KERN_ERR "%s: Error attempting to find auth tok for "
 		       "fnek sig [%s]; rc = [%d]\n", __func__, s->fnek_sig_hex,
 		       rc);
+#ifdef MY_ABC_HERE
+		mount_crypt_stat->flags |= ECRYPTFS_SYNO_ERROR_REPORT;
+#endif
 		goto out_free_unlock;
 	}
 	/* TODO: Support other key modules than passphrase for
@@ -1545,7 +1551,7 @@ int ecryptfs_keyring_auth_tok_for_sig(struct key **auth_tok_key,
 
 	(*auth_tok_key) = request_key(&key_type_user, sig, NULL);
 	if (!(*auth_tok_key) || IS_ERR(*auth_tok_key)) {
-#ifdef SYNO_ECRYPTFS_SKIP_AUTH_WARNING
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit())
 #endif
 		printk(KERN_ERR "Could not find key with description: [%s]\n",

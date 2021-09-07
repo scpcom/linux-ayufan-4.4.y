@@ -466,81 +466,74 @@ static int file_ioctl(struct file *filp, unsigned int cmd,
 
 
 #ifdef MY_ABC_HERE
-static int ioctl_get_version(struct file *filp, unsigned int *p_ver)
+static int archive_check_capable(struct inode *inode)
 {
-	struct super_block *sb;
-
-	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
-		(!filp->f_path.dentry->d_inode->i_sb))
-		return -EPERM;
-
-	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
+	if ((!S_ISDIR(inode->i_mode)) && (!S_ISREG(inode->i_mode)))
 		return -EPERM;
 	
-	sb = filp->f_path.dentry->d_inode->i_sb;
-
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
 
-	/* If a blockdevice-backed filesystem isn't specified, return. */
-	if (sb->s_bdev == NULL)
+	if (!inode->i_sb->s_op->syno_set_sb_archive_ver)
+		return -EINVAL;
+	if (!inode->i_sb->s_op->syno_get_sb_archive_ver)
 		return -EINVAL;
 
-	*p_ver = sb->s_archive_version;
 	return 0;
 }
 
-static int ioctl_set_version(struct file * filp, unsigned int version)
+static int ioctl_get_version(struct inode *inode, unsigned int *p_ver)
 {
-	struct super_block *sb;
+	int error;
+	struct super_block *sb = inode->i_sb;
 
-	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
-		(!filp->f_path.dentry->d_inode->i_sb))
-		return -EPERM;
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
 
-	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
-		return -EPERM;
-
-	sb = filp->f_path.dentry->d_inode->i_sb;
-
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
-
-	/* If a blockdevice-backed filesystem isn't specified, return. */
-	if (sb->s_bdev == NULL)
-		return -EINVAL;
-
-	sb->s_archive_version = version;
-	return 0;
+	error = sb->s_op->syno_get_sb_archive_ver(sb, p_ver);
+	return error;
 }
 
-static int ioctl_inc_version(struct file *filp)
+static int ioctl_set_version(struct inode *inode, unsigned int version)
 {
-	struct super_block *sb;
+	int error;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+	if ((UINT_MAX - 1) <= version) {
+		return -EPERM;
+	}
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_set_sb_archive_ver(sb, version);
+	mutex_unlock(&sb->s_archive_mutex);
+	return error;
+}
+
+static int ioctl_inc_version(struct inode *inode)
+{
 	unsigned int ver;
 	int error;
-	
-	if((!filp)||(!filp->f_path.dentry)||(!filp->f_path.dentry->d_inode)||
-		(!filp->f_path.dentry->d_inode->i_sb))
-		return -EPERM;
+	struct super_block *sb = inode->i_sb;
 
-	if((!S_ISDIR(filp->f_path.dentry->d_inode->i_mode)) &&(!S_ISREG(filp->f_path.dentry->d_inode->i_mode)))
-		return -EPERM;
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
 
-	sb = filp->f_path.dentry->d_inode->i_sb;
 	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_get_sb_archive_ver(sb, &ver);
+	if (error)
+		goto unlock;
 
-	error = ioctl_get_version(filp, &ver);
-	if (error) {
-		goto out;
-	}
-	if (ver+1 < ver) {
-		/* overflow */
+	// archive ver of inode = archive ver of sb + 1
+	if ((UINT_MAX - 1) <= (ver + 1)) {
 		error = -EPERM;
-		goto out;
+		goto unlock;
 	}
-	error = ioctl_set_version(filp, ver+1);
-out:
+	error = sb->s_op->syno_set_sb_archive_ver(sb, ver + 1);
+unlock:
 	mutex_unlock(&sb->s_archive_mutex);
 	return error;
 }
@@ -692,20 +685,20 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 	}
 
 #ifdef MY_ABC_HERE
-		case FIGETVERSION:
-			error = ioctl_get_version(filp, &ver);
-			if (!error) {
-				error = put_user(ver, (unsigned int __user *)arg) ? -EFAULT : 0;
-			}
+	case FIGETVERSION:
+		error = ioctl_get_version(filp->f_path.dentry->d_inode, &ver);
+		if (!error) {
+			error = put_user(ver, (unsigned int __user *)arg) ? -EFAULT : 0;
+		}
+		break;
+	case FISETVERSION:
+		if ((error = get_user(ver, (unsigned int __user *)arg)) != 0)
 			break;
-		case FISETVERSION:
-			if ((error = get_user(ver, (unsigned int __user *)arg)) != 0)
-				break;
-			error = ioctl_set_version(filp, ver);
-			break;
-		case FIINCVERSION:
-			error = ioctl_inc_version(filp);
-			break;
+		error = ioctl_set_version(filp->f_path.dentry->d_inode, ver);
+		break;
+	case FIINCVERSION:
+		error = ioctl_inc_version(filp->f_path.dentry->d_inode);
+		break;
 #endif
 
 	default:

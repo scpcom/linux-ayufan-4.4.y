@@ -594,6 +594,47 @@ sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const c
 }
 static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
 #endif
+
+#ifdef MY_ABC_HERE
+/* FIXME: We don't know why SAS disks led blinking when open it, so we add a sysfs interface to prevent it
+ * The following code is copied from "case SD_IOCTL_IDLE: " ind "sd.c" */
+static ssize_t
+sdev_show_syno_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf (buf, 20, "%lu\n", (jiffies - sdev->idle) / HZ + 1);
+
+END:
+	return iRet;
+}
+
+static ssize_t
+sdev_store_syno_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	unsigned long idletime;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	sscanf(buf, "%lu", &idletime);
+	// idletime = (jiffies - sdev->idle) / HZ + 1
+	sdev->idle = jiffies - (idletime -1) * HZ;
+
+END:
+	return count;
+}
+
+static DEVICE_ATTR(syno_idle_time, S_IRUGO | S_IWUSR, sdev_show_syno_idle_time, sdev_store_syno_idle_time);
+#endif
+
 /*
  * Create the actual show/store functions and data structures.
  */
@@ -806,6 +847,7 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_auto_remap.attr,
 #endif
 #ifdef MY_ABC_HERE
+	&dev_attr_syno_idle_time.attr,
 	&dev_attr_syno_spindown.attr,
 #endif
 	REF_EVT(media_change),

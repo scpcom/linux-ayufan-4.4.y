@@ -100,10 +100,6 @@ MODULE_ALIAS_SCSI_DEVICE(TYPE_RBC);
 #endif
 
 #ifdef MY_ABC_HERE
-extern int syno_hibernation_log_sec;
-#endif
-
-#ifdef MY_ABC_HERE
 extern int gSynoHasDynModule;
 #endif
 
@@ -425,77 +421,6 @@ static void sd_prot_op(struct scsi_cmnd *scmd, unsigned int dif)
 	scsi_set_prot_type(scmd, dif);
 }
 
-#ifdef MY_ABC_HERE
-/* the function is used for update hdd hibernation timer
- * @param sdp: SCSI device 
- * @param SCpnt: SCSI command
- * @param disk: the device logical disk name(ex: sdX)
- **/
-static void syno_hibernation_timer_update(struct scsi_device *sdp, struct scsi_cmnd *SCpnt, struct gendisk *disk)
-{
-	if(NULL == sdp || NULL == SCpnt ){
-		printk("%s[%d]:%s(), bad parameter", __FILE__, __LINE__, __FUNCTION__);
-		goto out;
-	}
-
-	/*the following command which for eunit chip shouldn't wake up hdd, so ignore it */
-	if (ATA_16 == SCpnt->cmnd[0] && (ATA_CMD_PMP_WRITE == SCpnt->cmnd[14] ||ATA_CMD_PMP_READ == SCpnt->cmnd[14])){
-		goto out;
-	}
-
-	/* When spindown or not SMART command(noly marvell vendor unique command and ATA_16 command)
-	 * Update idle-since time
-	 * Ignore SMART command because we will use SAMRT to read temperature periodically.
-	 * But if it's in spindown, we always update the idle timer */
-	if (sdp->spindown || (0x0C != SCpnt->cmnd[0] && ATA_16 != SCpnt->cmnd[0])) {
-		sdp->idle = jiffies;
-		/* only sata port into this case, usb case is in the following code */
-		if(SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type && sdp->spindown) {
-			if(syno_hibernation_log_sec > 0) {
-				/*our SMART read command (SCpnt[0]:ATA_16, SCpnt[14]: 0xb0), it's "disk" is null, so we must check it.*/
-				if (NULL == disk) {
-					printk(KERN_WARNING"%s[%d]:%s(), <NULL>: cmd 0x%x spin up by pid=%d, comm=%s\n",
-						   __FILE__, __LINE__, __FUNCTION__, SCpnt->cmnd[0], current->pid, current->comm);
-				} else {
-					printk(KERN_WARNING"%s[%d]:%s(), %s: cmd 0x%x spin up by pid=%d, comm=%s\n",
-						   __FILE__, __LINE__, __FUNCTION__,
-						   disk->disk_name, SCpnt->cmnd[0], current->pid, current->comm);
-				}
-			}
-			sdp->spindown = 0;
-		}
-	}
-	/* usb device case  */
-	if (sdp->spindown) {
-		if(syno_hibernation_log_sec > 0) {
-			char szBuf[128];
-			struct mm_struct *mm;
-			int len;
-			if (current) {
-				mm = current->mm;
-				if (mm) {
-					len = mm->arg_end - mm->arg_start;
-					memset(szBuf, 0, sizeof(szBuf));
-					memcpy(szBuf, (unsigned char *)mm->arg_start, len);
-					printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid=%d, name=%s\n",
-						   __FILE__, __LINE__, __FUNCTION__,
-						   disk->disk_name, current->pid, szBuf);
-				} else {
-					printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid = %d, current->mm = NULL\n",
-						   __FILE__, __LINE__, __FUNCTION__,
-						   disk->disk_name, current->pid);
-				}
-			} else {
-				printk(KERN_WARNING"%s[%d]:%s(), current = NULL\n",
-					   __FILE__, __LINE__, __FUNCTION__);
-			}
-		}
-		sdp->spindown = 0;
-	}
-out:
-	return;
-}
-#endif
 /**
  *	sd_init_command - build a scsi (read or write) command from
  *	information in the request structure.
@@ -518,21 +443,6 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 
 	if (rq->cmd_type == REQ_TYPE_BLOCK_PC) {
 		ret = scsi_setup_blk_pc_cmnd(sdp, rq);
-#ifdef MY_ABC_HERE
-	if(BLKPREP_OK == ret) {
-		SCpnt = rq->special;
-		if(NULL != SCpnt && NULL != SCpnt->cmnd){
-			if(START_STOP == SCpnt->cmnd[0] && 0 == SCpnt->cmnd[4]) {
-				if(SYNO_PORT_TYPE_SATA != sdp->host->hostt->syno_port_type) {
-					sdp->spindown = 1;
-				}
-			}
-			if (TEST_UNIT_READY != SCpnt->cmnd[0]) {
-				syno_hibernation_timer_update(sdp, SCpnt, disk);
-			}
-		}
-	}
-#endif
 		goto out;
 	} else if (rq->cmd_type != REQ_TYPE_FS) {
 		ret = BLKPREP_KILL;
@@ -553,10 +463,6 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
 					"count=%d\n",
 					(unsigned long long)block,
 					this_count));
-
-#ifdef MY_ABC_HERE
-	syno_hibernation_timer_update(sdp, SCpnt, disk);
-#endif
 
 	if (!sdp || !scsi_device_online(sdp) ||
 	    block + blk_rq_sectors(rq) > get_capacity(disk)) {
@@ -995,9 +901,6 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 #ifdef MY_ABC_HERE
 		case SD_IOCTL_IDLE:
 		{
-			/* idle_original would set back to idle when standby
-			 * because scemd would query this variable before hibernation */
-			sdp->idle_original = sdp->idle;
 			return (jiffies - sdp->idle) / HZ + 1;
 		}
 		case SD_IOCTL_SUPPORT_SLEEP:
@@ -1006,27 +909,8 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 			*pCanSleep = sdp->nospindown ? 0 : 1;
 			return 0;
 		}
-		case SCSI_IOCTL_STOP_UNIT:
-		{
-			error = 0;
-			if (sdp->nospindown == 0) {
-				if ((error = scsi_ioctl(sdp, cmd, p)) == 0) {
-					sdp->spindown = 1;
-				}
-			}
-			return error;
-		}
-		case SCSI_IOCTL_START_UNIT:
-		{
-			error = 0;
-			if (sdp->nospindown == 0) {
-				if ((error = scsi_ioctl(sdp, cmd, p)) == 0) {
-					sdp->spindown = 0;
-				}
-			}
-			return error;
-		}
 #endif /* MY_ABC_HERE */
+
 		default:
 			error = scsi_cmd_ioctl(disk->queue, disk, mode, cmd, p);
 			if (error != -ENOTTY)
@@ -2050,6 +1934,37 @@ void sd_read_app_tag_own(struct scsi_disk *sdkp, unsigned char *buffer)
 	return;
 }
 
+#if defined(MY_ABC_HERE)
+/**
+ * syno_get_ata_identity - Get ATA IDENTITY via ATA PASS-THRU command
+ * @sdev: the disk you want to get ata identity
+ * @id: ata identity result will stored in here
+ *
+ * return 0: if it's SAS disk or failed
+ *        1: success
+ */
+int
+syno_get_ata_identity(struct scsi_device *sdev, u16 *id)
+{
+	unsigned char scsi_cmd[MAX_COMMAND_SIZE] = {0};
+
+	/* ATA IDENTIFY DEVICE via ATA PASS-THRU(16)*/
+	scsi_cmd[0] = ATA_16;
+	scsi_cmd[1] = 0x08; /* PIO Data-in */
+	scsi_cmd[2] = 0x0e; /* T_DIR=1, BYT_BLOK=1, T_LENGTH=2 */
+	scsi_cmd[14] = ATA_CMD_ID_ATA;
+
+	/* if it's SAS disk, ATA PASS-THRU will fail. Return -1 */
+	if (scsi_execute_req(sdev, scsi_cmd, DMA_FROM_DEVICE,
+		id, 512, NULL, 10 * HZ, 5, NULL)) {
+		return 0;
+	}
+
+	return 1;
+}
+EXPORT_SYMBOL(syno_get_ata_identity);
+#endif
+
 /**
  * sd_read_block_limits - Query disk device for preferred I/O sizes.
  * @disk: disk to query
@@ -2474,10 +2389,10 @@ static int sd_probe(struct device *dev)
 #endif
 
 #ifdef MY_ABC_HERE
-		if (SYNO_DISK_USB == sdkp->synodisktype) {
-			sdp->nospindown = 0;
-		}
-#endif
+		sdp->idle = jiffies;
+		sdp->nospindown = 0;
+		sdp->spindown = 0;
+#endif /* MY_ABC_HERE */
 
 		spin_lock(&sd_index_lock);
 

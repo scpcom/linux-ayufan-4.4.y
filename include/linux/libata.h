@@ -709,9 +709,8 @@ struct ata_device {
 	int			  iCheckPwr;
 
 	/* bit definitions */
-	#define CHKPOWER_CHECKING 0
-	#define CHKPOWER_FIRST_CMD 1
-	#define CHKPOWER_FIRST_WAIT 2
+	#define CHKPOWER_FIRST_CMD 0x0
+	#define CHKPOWER_FIRST_WAIT 0x1
 #endif
 	/* n_sector is CLEAR_BEGIN, read comment above CLEAR_BEGIN */
 	u64			n_sectors;	/* size of device, if ATA */
@@ -808,6 +807,11 @@ struct ata_link {
 	unsigned int		flags;		/* ATA_LFLAG_xxx */
 #ifdef MY_ABC_HERE
 	unsigned int		uiSflags;		/* ATA_SYNO_FLAG_xxx, the same as ata_port */
+#ifdef MY_ABC_HERE
+	unsigned int		uiSError;
+	unsigned int		uiError;
+	struct work_struct	SendSataErrEventTask;
+#endif
 #endif
 
 	u32			saved_scontrol;	/* SControl on probe */
@@ -1076,6 +1080,9 @@ extern struct device_attribute dev_attr_syno_pm_info;
 extern struct device_attribute dev_attr_syno_port_thaw;
 extern struct device_attribute dev_attr_syno_fake_error_ctrl;
 extern struct device_attribute dev_attr_syno_pwr_reset_count;
+#ifdef MY_ABC_HERE
+extern struct device_attribute dev_attr_syno_sata_error_event_debug;
+#endif
 #endif
 #endif
 #ifdef MY_ABC_HERE
@@ -1356,7 +1363,7 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 
 #ifdef MY_ABC_HERE
 #define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
-			(ATA_CMD_CHK_POWER == qc->tf.command || ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
+			(ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
 			 ATA_CMD_READ_EXT == qc->tf.command || ATA_CMD_PIO_READ == qc->tf.command || ATA_CMD_PIO_READ_EXT == qc->tf.command || \
 			 ATA_CMD_READ_MULTI == qc->tf.command || ATA_CMD_READ_MULTI_EXT == qc->tf.command))
 #endif

@@ -655,7 +655,7 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 		do {
 			struct inode *inode;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 			if (atomic_read(&dentry->d_count) != 0 && strcmp(dentry->d_name.name, "forceumount")) {
 #else
 			if (atomic_read(&dentry->d_count) != 0) {
@@ -671,7 +671,7 @@ static void shrink_dcache_for_umount_subtree(struct dentry *dentry)
 				       atomic_read(&dentry->d_count),
 				       dentry->d_sb->s_type->name,
 				       dentry->d_sb->s_id);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 				dump_stack();
 				goto out;
 #else

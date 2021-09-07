@@ -108,15 +108,15 @@ int GetModel(void)
 {
 	int model = MODEL_DS710p;
 
-	if ( !strncmp(gszSynoHWVersion, HW_DS710p, strlen(HW_DS710p) ) ) {
+	if (syno_is_hw_version(HW_DS710p)) {
 		model = MODEL_DS710p;
-	} else if ( !strncmp(gszSynoHWVersion, HW_DS1010p, strlen(HW_DS1010p) ) ) {
+	} else if (syno_is_hw_version(HW_DS1010p)) {
 		model = MODEL_DS1010p;
-	} else if ( !strncmp(gszSynoHWVersion, HW_DS410p, strlen(HW_DS410p) ) ) {
+	} else if (syno_is_hw_version(HW_DS410p)) {
 		model = MODEL_DS410p;
-	} else if ( !strncmp(gszSynoHWVersion, HW_RS810p, strlen(HW_RS810p) ) ) {
+	} else if (syno_is_hw_version(HW_RS810p)){
 		model = MODEL_RS810p;
-	} else if ( !strncmp(gszSynoHWVersion, HW_RS810rpp, strlen(HW_RS810rpp) ) ) {
+	} else if (syno_is_hw_version(HW_RS810rpp)) {
 		model = MODEL_RS810rpp;
 	}
 

@@ -15,6 +15,10 @@
 #include <linux/quotaops.h>
 #include <linux/security.h>
 
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
+#endif
+
 /* Taken over from the old code... */
 
 /* POSIX UID/GID verification for setting inode attributes. */
@@ -129,12 +133,6 @@ int inode_setattr(struct inode * inode, struct iattr * attr)
 	if (ia_valid & ATTR_CTIME)
 		inode->i_ctime = timespec_trunc(attr->ia_ctime,
 						inode->i_sb->s_time_gran);
-#ifdef MY_ABC_HERE
-	if (ia_valid & ATTR_CREATE_TIME) {
-		inode->i_CreateTime = timespec_trunc(attr->ia_ctime,
-						inode->i_sb->s_time_gran);
-	}
-#endif
 	if (ia_valid & ATTR_MODE) {
 		umode_t mode = attr->ia_mode;
 
@@ -160,7 +158,7 @@ int notify_change(struct dentry * dentry, struct iattr * attr)
 		if (IS_IMMUTABLE(inode) || IS_APPEND(inode))
 			return -EPERM;
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (IS_UMOUNTED_FILE(inode)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 		printk("%s(%d) force umount hit.\n", __func__, __LINE__);
@@ -222,6 +220,14 @@ int notify_change(struct dentry * dentry, struct iattr * attr)
 	if (ia_valid & ATTR_SIZE)
 		down_write(&dentry->d_inode->i_alloc_sem);
 
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_SYNOACL(inode)) {
+		error = synoacl_op_inode_chg_ok(dentry, attr);
+		if (error) {
+		       return error;
+		}
+	}
+#endif
 	if (inode->i_op && inode->i_op->setattr) {
 		error = inode->i_op->setattr(dentry, attr);
 	} else {
@@ -240,7 +246,16 @@ int notify_change(struct dentry * dentry, struct iattr * attr)
 		up_write(&dentry->d_inode->i_alloc_sem);
 
 	if (!error)
+#ifdef CONFIG_FS_SYNO_ACL
+	{
+		if (IS_SYNOACL(inode)) {
+			synoacl_op_setattr_post(dentry, attr);
+		}
+#endif
 		fsnotify_change(dentry, ia_valid);
+#ifdef CONFIG_FS_SYNO_ACL
+	}
+#endif
 
 	return error;
 }

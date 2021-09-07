@@ -568,6 +568,9 @@ static struct device_attribute *ahci_sdev_attrs[] = {
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_fake_error_ctrl,
 	&dev_attr_syno_pwr_reset_count,
+#ifdef MY_ABC_HERE
+    &dev_attr_syno_sata_error_event_debug,
+#endif
 #endif
 #ifdef MY_DEF_HERE
 	&dev_attr_sw_locate,

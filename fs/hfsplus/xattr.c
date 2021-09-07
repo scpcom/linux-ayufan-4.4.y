@@ -353,17 +353,23 @@ ssize_t hfsplus_getxattr(struct dentry *dentry, const char *name,
 				fd.entryoffset +
 				offsetof(struct hfsplus_attr_inline_data,
 				length));
+		if ((offsetof(struct hfsplus_attr_inline_data,
+						raw_bytes) + record_length) > hfsplus_get_attr_tree_cache_size()) {
+			pr_err("invalid xattr record size\n");
+			res = -EIO;
+			goto out;
+		}
 #else
 		record_length = hfs_bnode_read_u16(fd.bnode,
 				fd.entryoffset +
 				offsetof(struct hfsplus_attr_inline_data,
 				length));
-#endif
 		if (record_length > HFSPLUS_MAX_INLINE_DATA_SIZE) {
 			pr_err("invalid xattr record size\n");
 			res = -EIO;
 			goto out;
 		}
+#endif
 	} else if (record_type == HFSPLUS_ATTR_FORK_DATA ||
 			record_type == HFSPLUS_ATTR_EXTENTS) {
 		pr_err("only inline data xattr are supported\n");

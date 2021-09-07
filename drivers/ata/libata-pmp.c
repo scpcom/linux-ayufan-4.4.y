@@ -14,6 +14,9 @@
 #endif
 #include "libata.h"
 
+#ifdef MY_ABC_HERE
+#include <linux/synobios.h>
+#endif
 #ifdef MY_DEF_HERE
 extern int (*funcSYNOSendEboxRefreshEvent)(int portIndex);
 #endif
@@ -25,7 +28,6 @@ const struct ata_port_operations sata_pmp_port_ops = {
 	.pmp_postreset		= ata_std_postreset,
 	.error_handler		= sata_pmp_error_handler,
 };
-
 
 /**
  *	sata_pmp_read - read PMP register
@@ -987,7 +989,7 @@ int sata_pmp_attach(struct ata_device *dev)
 	syno_prepare_custom_info(ap);
 #ifdef MY_ABC_HERE
 	/*For DS1812+ with older version of DX510, the link should be limited to 1.5G*/
-	if (0 == strncmp(gszSynoHWVersion, HW_DS1812p, strlen(HW_DS1812p))) {
+	if (syno_is_hw_version(HW_DS1812p)) {
 		/* The old version should be b000 */
 		if(IS_SYNOLOGY_DX510(ap->PMSynoUnique) && (1 == ap->PMSynoCpldVer)) {
 			target = 1;
@@ -1002,18 +1004,31 @@ int sata_pmp_attach(struct ata_device *dev)
 		}
 	/*For DS412+, qoriq, 6282 with DX513, the link should be limited to 1.5G*/
 	} else if (IS_SYNOLOGY_DX513(ap->PMSynoUnique) &&
-			(0 == strncmp(gszSynoHWVersion, HW_DS412p, strlen(HW_DS412p)) ||
-			 0 == strncmp(gszSynoHWVersion, HW_DS112 , strlen(HW_DS112)) ||
-			 0 == strncmp(gszSynoHWVersion, HW_DS112pv10, strlen(HW_DS112pv10)) ||
-			 0 == strncmp(gszSynoHWVersion, HW_DS413, strlen(HW_DS413)) ||
-			 0 == strncmp(gszSynoHWVersion, HW_DS212pv10, strlen(HW_DS212pv10)) ||
-			 0 == strncmp(gszSynoHWVersion, HW_DS212pv20, strlen(HW_DS212pv20)))) {
+			(syno_is_hw_version(HW_DS412p) ||
+			 syno_is_hw_version(HW_DS112) ||
+			 syno_is_hw_version(HW_DS112pv10) ||
+			 syno_is_hw_version(HW_DS212pv10) ||
+			 syno_is_hw_version(HW_DS212pv20))) {
 		target = 1;
 		target_limit = (1 << target) - 1;
 
 		if(link->sata_spd_limit != target_limit) {
 			ata_dev_printk(dev, KERN_ERR,
 					"DX513 workaround, limit the speed to 1.5 GBPS\n");
+
+			link->sata_spd_limit = target_limit;
+		}
+	/*For DS412+, qoriq, 212p with and DX213, the link should be limited to 1.5G*/
+	} else if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) &&
+			(syno_is_hw_version(HW_DS412p) ||
+			 syno_is_hw_version(HW_DS212pv10) ||
+			 syno_is_hw_version(HW_DS212pv20))) {
+		target = 1;
+		target_limit = (1 << target) - 1;
+
+		if(link->sata_spd_limit != target_limit) {
+			ata_dev_printk(dev, KERN_ERR,
+					"DX213 workaround, limit the speed to 1.5 GBPS\n");
 
 			link->sata_spd_limit = target_limit;
 		}

@@ -254,7 +254,7 @@ void fsnotify_clear_marks_by_inode(struct inode *inode)
 	struct hlist_node *pos, *n;
 	LIST_HEAD(free_list);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (IS_UMOUNTED_FILE(inode)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 		printk("%s(%d) force umount hit.\n", __func__, __LINE__);

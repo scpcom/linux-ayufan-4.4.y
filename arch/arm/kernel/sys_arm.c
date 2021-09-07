@@ -28,21 +28,6 @@
 #include <linux/ipc.h>
 #include <linux/uaccess.h>
 
-#ifdef MY_ABC_HERE
-asmlinkage int sys_SYNOmmap(SYNO_MMAP_ARG __user *arg)
-{
-	int error = -EFAULT;
-	SYNO_MMAP_ARG a;
-
-	if (copy_from_user(&a, arg, sizeof(a)))
-		goto out;;
-
-	error = sys_mmap_pgoff(a.addr, a.len, a.prot, a.flags, a.fd, a.pgoff);
-out:
-	return error;
-}
-#endif
-
 struct mmap_arg_struct {
 	unsigned long addr;
 	unsigned long len;

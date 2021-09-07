@@ -170,15 +170,17 @@ static int __init early_internal_netif_num(char *p)
 }
 __setup("netif_num=", early_internal_netif_num);
 
-static void __init early_egiga(char *p)
+static int __init early_egiga(char *p)
 {
 	g_egiga = simple_strtol(p, NULL, 10);
 
 	if ( g_egiga == 0 ) {
 		printk("egiga port is disabled\n");
 	}
+
+	return 1;
 }
-__early_param("egiga=", early_egiga);
+__setup("egiga=", early_egiga);
 #endif
 
 #ifdef MY_ABC_HERE
@@ -378,7 +380,6 @@ static int __init early_flash_memory_size(char *p)
 
 	printk("Flash Memory Size: %d MB\n", (int)gSynoFlashMemorySize);
 
-END:
 	return 1;
 }
 __setup("flash_size=", early_flash_memory_size);

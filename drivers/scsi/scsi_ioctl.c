@@ -226,10 +226,8 @@ int scsi_ioctl(struct scsi_device *sdev, int cmd, void __user *arg)
 	case SCSI_IOCTL_SYNC:
 	case SCSI_IOCTL_START_UNIT:
 	case SCSI_IOCTL_STOP_UNIT:
-#ifndef MY_ABC_HERE
 		printk(KERN_WARNING "program %s is using a deprecated SCSI "
 		       "ioctl, please convert it to SG_IO\n", current->comm);
-#endif /* MY_ABC_HERE */
 		break;
 	default:
 		break;

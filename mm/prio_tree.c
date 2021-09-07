@@ -14,7 +14,7 @@
 #include <linux/mm.h>
 #include <linux/prio_tree.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #include <linux/fcntl.h>
 #include <linux/fs.h>
 #endif
@@ -185,7 +185,7 @@ struct vm_area_struct *vma_prio_tree_next(struct vm_area_struct *vma,
 		} else
 			return NULL;
 	}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (vma->vm_file) {
 			if (!blSynostate(O_UNMOUNT_OK, vma->vm_file)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT

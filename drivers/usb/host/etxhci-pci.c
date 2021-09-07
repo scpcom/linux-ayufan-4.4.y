@@ -29,11 +29,11 @@
 #define PCI_DEVICE_ID_ETRON_EJ168	0x7023
 #define PCI_DEVICE_ID_ETRON_EJ188	0x7052
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_IN_ETRON
 extern unsigned short xhci_vendor;
 #endif
 
-static const char hcd_name[] = "etxhci_hcd_121130";
+static const char hcd_name[] = "etxhci_hcd_130207";
 
 /* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
@@ -63,6 +63,30 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	/* Accept arbitrarily long scatter-gather lists */
 	hcd->self.sg_tablesize = ~0;
 
+	/* Look for vendor-specific quirks */
+	hcd->chip_id = HCD_CHIP_ID_UNKNOWN;
+	if (pdev->vendor == PCI_VENDOR_ID_ETRON) {
+		pci_read_config_dword(pdev, 0x58, &xhci->hcc_params1);
+		xhci->hcc_params1 &= 0xffff;
+		xhci_init_ejxxx(xhci);
+
+		if (pdev->device == PCI_DEVICE_ID_ETRON_EJ168)
+			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ168;
+		else if (pdev->device == PCI_DEVICE_ID_ETRON_EJ188)
+			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ188;
+
+		xhci_dbg(xhci, "Etron chip ID %02x\n", hcd->chip_id);
+		xhci->quirks |= XHCI_BROKEN_MSI;
+		xhci->quirks |= XHCI_HUB_INFO_QUIRK;
+		xhci->quirks |= XHCI_RESET_ON_RESUME;
+		xhci_dbg(xhci, "QUIRK: Resetting on resume\n");
+	}
+
+	if (((xhci->hcc_params1 & 0xff) == 0x30) ||
+		((xhci->hcc_params1 & 0xff) == 0x40)) {
+		xhci->quirks |= XHCI_EP_INFO_QUIRK;
+	}
+
 	xhci->cap_regs = hcd->regs;
 	xhci->op_regs = hcd->regs +
 		HC_LENGTH(xhci_readl(xhci, &xhci->cap_regs->hc_capbase));
@@ -77,27 +101,7 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	xhci->hcc_params = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
 	etxhci_print_registers(xhci);
 
-	/* Look for vendor-specific quirks */
-	hcd->chip_id = HCD_CHIP_ID_UNKNOWN;
-	if (pdev->vendor == PCI_VENDOR_ID_ETRON) {
-		if (pdev->device == PCI_DEVICE_ID_ETRON_EJ168) {
-			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ168;
-			xhci_init_ej168(xhci);
-
-			temp = xhci_readl(xhci, hcd->regs + 0x4074);
-			temp |= 0x8000;
-			xhci_writel(xhci, temp, hcd->regs + 0x4074);
-		} else if (pdev->device == PCI_DEVICE_ID_ETRON_EJ188)
-			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ188;
-
-		xhci_dbg(xhci, "Etron chip ID %02x\n", hcd->chip_id);
-		xhci->quirks |= XHCI_BROKEN_MSI;
-		xhci->quirks |= XHCI_HUB_INFO_QUIRK;
-		xhci->quirks |= XHCI_RESET_ON_RESUME;
-		xhci_dbg(xhci, "QUIRK: Resetting on resume\n");
-	}
-
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_IN_ETRON
 	xhci_vendor = pdev->vendor;
 #endif
 
@@ -202,10 +206,8 @@ static const struct hc_driver xhci_pci_hc_driver = {
 	.urb_dequeue =		etxhci_urb_dequeue,
 	.alloc_dev =		etxhci_alloc_dev,
 	.free_dev =		etxhci_free_dev,
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,35))
 	.alloc_streams =	etxhci_alloc_streams,
 	.free_streams =		etxhci_free_streams,
-#endif
 	.add_endpoint =		etxhci_add_endpoint,
 	.drop_endpoint =	etxhci_drop_endpoint,
 	.endpoint_reset =	etxhci_endpoint_reset,

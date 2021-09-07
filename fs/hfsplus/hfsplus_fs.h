@@ -290,6 +290,10 @@ typedef int (*search_strategy_t)(struct hfs_bnode *,
 /* attributes.c */
 int hfsplus_create_attr_tree_cache(void);
 void hfsplus_destroy_attr_tree_cache(void);
+#ifdef MY_ABC_HERE
+int hfsplus_recreate_attr_tree_cache(size_t);
+size_t hfsplus_get_attr_tree_cache_size(void);
+#endif
 hfsplus_attr_entry *hfsplus_alloc_attr_entry(void);
 void hfsplus_destroy_attr_entry(hfsplus_attr_entry *entry_p);
 int hfsplus_attr_bin_cmp_key(const hfsplus_btree_key *,

@@ -13,7 +13,7 @@
  * you must check scsi.h. too */
 #define SD_IOCTL_IDLE 4746
 #define SD_IOCTL_SUPPORT_SLEEP 4747
-#endif
+#endif /* MY_ABC_HERE */
 
 /* The door lock/unlock constants are compatible with Sun constants for
    the cdrom */

@@ -228,6 +228,10 @@ static const struct net_device_ops gfar_netdev_ops = {
 DEFINE_PER_CPU(struct gfar_cpu_dev, gfar_cpu_dev);
 #endif
 
+#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+static int syno_gianfar_drop_caches = 0;
+#endif
+
 static struct net_device_stats *gfar_get_stats(struct net_device *dev)
 {
 	struct gfar_private *priv = netdev_priv(dev);
@@ -1410,6 +1414,10 @@ static int gfar_probe(struct of_device *ofdev,
 	}
 #endif
 
+#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+	syno_gianfar_drop_caches = 1;
+#endif
+
 	err = gfar_of_init(ofdev, &dev);
 
 	if (err)
@@ -1763,6 +1771,10 @@ static int gfar_get_ip(struct net_device *dev)
 	return -ENOENT;
 }
 
+#ifdef CONFIG_SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
+extern int g_default_gateway_mac_addr_h;
+extern int g_default_gateway_mac_addr_l;
+#endif
 
 static void gfar_config_filer_table(struct net_device *dev)
 {
@@ -1772,6 +1784,7 @@ static void gfar_config_filer_table(struct net_device *dev)
 	u32 rqfpr = 0x0;
 	u32 rqfcr = RQFCR_RJE | RQFCR_CMP_MATCH;
 	u8  rqfcr_queue = priv->num_rx_queues-1;
+	int n_rule = 0;
 	int i;
 
 	if (gfar_get_ip(dev))
@@ -1794,30 +1807,47 @@ static void gfar_config_filer_table(struct net_device *dev)
 	/* ARP request filer, filling the packet to queue #1 */
 	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_MASK;
 	rqfpr = RQFPR_ARQ;
-	gfar_write_filer(priv, 0, rqfcr, rqfpr);
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
 
 	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_PARSE;
 	rqfpr = RQFPR_ARQ;
-	gfar_write_filer(priv, 1, rqfcr, rqfpr);
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
 
-	/* DEST_IP address in ARP packet, filling it to queue #1 */
 	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_MASK;
 	rqfpr = FPR_FILER_MASK;
-	gfar_write_filer(priv, 2, rqfcr, rqfpr);
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
 
+#ifdef CONFIG_SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
+	/* Ignore ARP packet from default gateway */
+	if (g_default_gateway_mac_addr_h != 0 && g_default_gateway_mac_addr_l != 0) {
+	rqfcr = (rqfcr_queue << 10) | RQFCR_CLE | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_SAH;
+	rqfpr = g_default_gateway_mac_addr_h;
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
+
+	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_SAL;
+	rqfpr = g_default_gateway_mac_addr_l;
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
+
+	rqfcr = (rqfcr_queue << 10) | RQFCR_CLE | RQFCR_RJE | RQFCR_CMP_EXACT;
+	rqfpr = 0x0;
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
+	}
+#endif
+
+	/* DEST_IP address in ARP packet, filling it to queue #1 */
 	rqfcr = RQFCR_GPI | (rqfcr_queue << 10) | RQFCR_CMP_EXACT | RQFCR_PID_DIA;
 	rqfpr = wakeup_ip;
-	gfar_write_filer(priv, 3, rqfcr, rqfpr);
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
 
 	/* Unicast packet, filling it to queue #1 */
 	rqfcr = (rqfcr_queue << 10) | RQFCR_AND | RQFCR_CMP_EXACT | RQFCR_PID_DAH;
 	rqfpr = dest_mac_addr_h;
-	gfar_write_filer(priv, 4, rqfcr, rqfpr);
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
 
 	rqfcr = RQFCR_GPI | (rqfcr_queue << 10) | RQFCR_CMP_EXACT | RQFCR_PID_DAL;
 	mb();
 	rqfpr = dest_mac_addr_l;
-	gfar_write_filer(priv, 5, rqfcr, rqfpr);
+	gfar_write_filer(priv, n_rule++, rqfcr, rqfpr);
 
 	unlock_rx_qs(priv);
 }
@@ -1830,6 +1860,10 @@ static int gfar_arp_suspend(struct net_device *dev)
 	u32 tempval;
 
 	netif_device_detach(dev);
+
+#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+	syno_gianfar_drop_caches = 0;
+#endif
 
 	if (netif_running(dev)) {
 		local_irq_save(flags);
@@ -1963,6 +1997,9 @@ static int gfar_arp_resume(struct net_device *dev)
 	netif_device_attach(dev);
 	enable_napi(priv);
 
+#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+	syno_gianfar_drop_caches = 1;
+#endif
 
 	return 0;
 }
@@ -2830,6 +2867,12 @@ unsigned long alloc_bds(struct gfar_private *priv, dma_addr_t *addr)
 	return vaddr;
 }
 
+#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+#include <linux/syno_qoriq.h>
+#include <linux/syscalls.h>
+extern void syno_drop_caches(unsigned int cache_type);
+#endif
+
 /* Bring the controller up and running */
 int startup_gfar(struct net_device *dev)
 {
@@ -2906,6 +2949,18 @@ int startup_gfar(struct net_device *dev)
 		vaddr   += sizeof (struct rxbd8) * rx_queue->rx_ring_size;
 		baddr   += 2;
 	}
+
+#ifdef CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE
+	/* before allocate new skbuff drop all fs cache to avoid allocate failed  */
+	if (syno_gianfar_drop_caches) {
+		sys_sync();
+		msleep(500);
+		syno_drop_caches(SYNO_DROP_CACHE_PAGE | SYNO_DROP_CACHE_SLAB);
+		printk("%s: flush cache before startup\n", dev->name);
+	} else {
+		printk("%s: Resume gianfar device, skip flush cache\n", dev->name);
+	}
+#endif
 
 	/* Setup the skbuff rings */
 	for (i = 0; i < priv->num_tx_queues; i++) {
@@ -5718,6 +5773,11 @@ END:
 EXPORT_SYMBOL(SynoQorIQWOLSet);
 #endif
 
+int SynoQorIQSetPhyLed(SYNO_LED ledStatus)
+{
+	return 0;
+}
+EXPORT_SYMBOL(SynoQorIQSetPhyLed);
 
 static struct of_device_id gfar_match[] =
 {

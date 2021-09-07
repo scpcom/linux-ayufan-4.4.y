@@ -1582,9 +1582,6 @@ fsm_start:
 unsigned int ata_sff_qc_issue(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
-#ifdef MY_ABC_HERE
-	u8 status;
-#endif
 
 	/* Use polling pio if the LLD doesn't handle
 	 * interrupt driven pio and atapi CDB interrupt.
@@ -1619,31 +1616,7 @@ unsigned int ata_sff_qc_issue(struct ata_queued_cmd *qc)
 		ata_tf_to_host(ap, &qc->tf);
 		ap->hsm_task_state = HSM_ST_LAST;
 
-#ifdef MY_ABC_HERE
-		/* copy from ata_pio_task() to send chkpwr cmd directly to prevent work queue timeout issue
-		 * Now we only find sata_mv have timeout issue, so we only on ATA_TFLAG_DIRECT in sata_mv */
-		if (ATA_TFLAG_DIRECT & qc->tf.flags) {
-			DBGMESG("ata%u: try to use directly issue cmd 0x%x\n", ap->print_id, qc->tf.command);
-			qc->tf.flags &= ~ATA_TFLAG_DIRECT;
-			status = ata_sff_busy_wait(ap, ATA_BUSY, 5);
-			if (status & ATA_BUSY) {
-				mdelay(2);
-				status = ata_sff_busy_wait(ap, ATA_BUSY, 10);
-				if (status & ATA_BUSY) {
-					/*if the status is still BUSY, we use original way ata_pio_queue_task() */
-					ata_pio_queue_task(ap, qc, 0);
-					DBGMESG("ata%u: directly issue cmd 0x%x fail, using queue_task\n", ap->print_id, qc->tf.command);
-				} else {
-					ata_sff_hsm_move(ap, qc, status, 0);
-				}
-			} else {
-				ata_sff_hsm_move(ap, qc, status, 0);
-			}
-		}
-		else if (qc->tf.flags & ATA_TFLAG_POLLING)
-#else
 		if (qc->tf.flags & ATA_TFLAG_POLLING)
-#endif
 			ata_pio_queue_task(ap, qc, 0);
 
 		break;

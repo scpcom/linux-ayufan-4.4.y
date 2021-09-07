@@ -79,7 +79,6 @@
 
 #if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
 #include <linux/synobios.h>
-extern char gszSynoHWVersion[];
 #endif
 
 #ifdef CONFIG_IPV6_PRIVACY
@@ -1771,9 +1770,9 @@ static struct inet6_dev *addrconf_add_dev(struct net_device *dev)
 #if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
 void SYNO_IPV6_ready_timer_workaround(__u32 *valid_lft, __u32 *prefered_lft)
 {
-	if(!strncmp(gszSynoHWVersion, HW_DS110p, strlen(HW_DS110p)) ||
-		!strncmp(gszSynoHWVersion, HW_DS210p, strlen(HW_DS210p)) ||
-		!strncmp(gszSynoHWVersion, HW_DS410, strlen(HW_DS410))) {
+	if(syno_is_hw_version(HW_DS110p) ||
+	   syno_is_hw_version(HW_DS210p) ||
+	   syno_is_hw_version(HW_DS410)) {
 		*valid_lft -= (*valid_lft)/400;
 		*prefered_lft -= (*prefered_lft)/400;
 	}

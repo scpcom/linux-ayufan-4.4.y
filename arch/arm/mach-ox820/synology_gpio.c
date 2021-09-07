@@ -29,7 +29,7 @@
 static DEFINE_MUTEX(ox820_gpio_lock);
 
 #ifdef  MY_ABC_HERE
-extern char gszSynoHWVersion[];
+#include <linux/synobios.h>
 #endif
 
 typedef struct _SYNO_PLX_GPIO {
@@ -74,7 +74,7 @@ static void ds111j_gpio_set(SYNO_PLX_GPIO *pGpio)
 static int gpio_setup(void)
 {
 
-	if (!strncmp(gszSynoHWVersion, HW_DS111j, strlen(HW_DS111j))) {
+	if (syno_is_hw_version(HW_DS111j)) {
 		ds111j_gpio_set(&gPLXGPIO);
 		printk("Apply DS111j gpio setting\n");
 	} else {

@@ -177,10 +177,9 @@ struct scsi_device {
 
 #ifdef MY_ABC_HERE
 	unsigned long   idle;   /* scsi idle time in jiffers */
-	unsigned long   idle_original; /* updated when get scsi idle time(SD_IOCTL_IDLE) */
 	unsigned char   spindown;
 	unsigned char   nospindown;
-#endif
+#endif /* MY_ABC_HERE */
 
 	struct device		sdev_gendev,
 				sdev_dev;

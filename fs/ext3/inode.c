@@ -816,7 +816,7 @@ int ext3_get_blocks_handle(handle_t *handle, struct inode *inode,
 	int count = 0;
 	ext3_fsblk_t first_block = 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (!EXT3_SB(inode->i_sb)) {
 		/* if target force umount, we will get /proc/invalidfile (procfs).
 		 * there has no ext3 super block private data.  It will hit null
@@ -3438,6 +3438,30 @@ err_out:
 	return error;
 }
 
+
+#ifdef MY_ABC_HERE
+int syno_ext3_set_archive_ver(struct dentry *dentry, u32 version)
+{
+	struct inode *inode = dentry->d_inode;
+	struct syno_xattr_archive_version value;
+	int err;
+
+	value.v_magic = cpu_to_le16(0x2552);
+	value.v_struct_version = cpu_to_le16(1);
+	value.v_archive_version = cpu_to_le32(version);
+	err = ext3_xattr_set(inode, EXT3_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value), 0);
+	if (!err) {
+		inode->i_archive_version = version;
+	}
+	return err;
+}
+
+int syno_ext3_get_archive_ver(struct dentry *dentry, u32 *version)
+{
+	*version = dentry->d_inode->i_archive_version;
+	return 0;
+}
+#endif
 
 /*
  * How many blocks doth make a writepage()?

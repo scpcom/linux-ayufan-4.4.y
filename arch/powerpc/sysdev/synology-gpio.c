@@ -39,15 +39,10 @@
 #define DISK_LED_ORANGE_SOLID	2
 #define DISK_LED_ORANGE_BLINK	3
 #define DISK_LED_GREEN_BLINK    4
-#define DISK_LED_BLUE			5
 
 #define SYNO_LED_OFF		0
 #define SYNO_LED_ON			1
 #define SYNO_LED_BLINKING	2
-
-#ifdef  MY_ABC_HERE
-extern char gszSynoHWVersion[];
-#endif
 
 typedef struct __tag_SYNO_QORIQ_HDD_PM_GPIO {
 	u8 hdd1_pm;
@@ -165,8 +160,7 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	//note: hd led is active low
 	if ( DISK_LED_OFF == status ) {
 		fail_led = 1;
-	} else if ( DISK_LED_GREEN_SOLID == status ||
-				DISK_LED_BLUE == status) {
+	} else if ( DISK_LED_GREEN_SOLID == status ) {
 		fail_led = 1;
 	} else if ( DISK_LED_ORANGE_SOLID == status ||
 		DISK_LED_ORANGE_BLINK == status ) {
@@ -205,7 +199,6 @@ SYNO_CTRL_EXT_CHIP_HDD_LED_SET(int index, int status)
 			break;
 		case DISK_LED_GREEN_BLINK:
 		case DISK_LED_GREEN_SOLID:
-		case DISK_LED_BLUE:
 			bit1 = 0;
 			bit2 = 1;
 			break;
@@ -363,12 +356,12 @@ u8 SYNOQorIQIsBoardNeedPowerUpHDD(u32 disk_id)
 {
 	u8 ret = 0;
 
-	if (0 == strncmp(HW_DS413, gszSynoHWVersion, strlen(HW_DS413))) {
+	if (syno_is_hw_version(HW_DS413)) {
 		if ( 4 >= disk_id )
 			ret = 1;
 	}
 
-	if (0 == strncmp(HW_DS213pv10, gszSynoHWVersion, strlen(HW_DS213pv10))) {
+	if (syno_is_hw_version(HW_DS213pv10)) {
 		if ( 2 >= disk_id )
 			ret = 1;
 	}
@@ -704,22 +697,22 @@ QORIQ_rs213p_GPIO_init(SYNO_QORIQ_GENERIC_GPIO *global_gpio)
 }
 int __init synology_gpio_init(void)
 {
-	if (0 == strncmp(HW_DS413, gszSynoHWVersion, strlen(HW_DS413))) {
+	if (syno_is_hw_version(HW_DS413)) {
 		printk("Apply DS 413 GPIO\n");
 		QORIQ_413_GPIO_init(&generic_gpio);
 	}
 
-    if (0 == strncmp(HW_DS213pv10, gszSynoHWVersion, strlen(HW_DS213pv10))) {
+    if (syno_is_hw_version(HW_DS213pv10)) {
         printk("Apply DS 213+ GPIO\n");
         QORIQ_213p_GPIO_init(&generic_gpio);
     }
 
-	if (0 == strncmp(HW_RS813, gszSynoHWVersion, strlen(HW_RS813))) {
+	if (syno_is_hw_version(HW_RS813)) {
 		printk("Apply RS 813 GPIO\n");
 		QORIQ_813_GPIO_init(&generic_gpio);
 	}
 
-	if (0 == strncmp(HW_RS213p, gszSynoHWVersion, strlen(HW_RS213p))) {
+	if (syno_is_hw_version(HW_RS213p)) {
 		printk("Apply RS 213+ GPIO\n");
 		QORIQ_rs213p_GPIO_init(&generic_gpio);
 	}

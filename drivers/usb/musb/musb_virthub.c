@@ -306,7 +306,7 @@ int musb_hub_control(
 		desc->bHubContrCurrent = 0;
 
 		/* workaround bogus struct definition */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 		desc->bitmap[0] = 0x02; /* port 1 */
 		desc->bitmap[1] = 0xff;
 #else

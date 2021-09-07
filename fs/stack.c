@@ -47,11 +47,3 @@ void fsstack_copy_attr_all(struct inode *dest, const struct inode *src,
 		dest->i_nlink = (*get_nlinks)(dest);
 }
 EXPORT_SYMBOL_GPL(fsstack_copy_attr_all);
-
-#ifdef MY_ABC_HERE
-void fsstack_copy_syno_archive(struct inode *dest, const struct inode *src)
-{
-	dest->i_mode2 = src->i_mode2;
-}
-EXPORT_SYMBOL_GPL(fsstack_copy_syno_archive);
-#endif

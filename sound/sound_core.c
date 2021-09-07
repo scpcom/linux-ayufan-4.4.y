@@ -593,6 +593,7 @@ static int soundcore_open(struct inode *inode, struct file *file)
 	if (preclaim_oss && !new_fops) {
 		spin_unlock(&sound_loader_lock);
 
+#ifndef MY_ABC_HERE
 		/*
 		 *  Please, don't change this order or code.
 		 *  For ALSA slot means soundcard and OSS emulation code
@@ -612,6 +613,7 @@ static int soundcore_open(struct inode *inode, struct file *file)
 		 */
 		if (request_module("char-major-%d-%d", SOUND_MAJOR, unit) > 0)
 			request_module("char-major-%d", SOUND_MAJOR);
+#endif
 
 		spin_lock(&sound_loader_lock);
 		s = __look_for_unit(chain, unit);

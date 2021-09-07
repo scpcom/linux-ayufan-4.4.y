@@ -348,11 +348,6 @@
 #define __NR_perf_event_open	336
 
 #ifdef MY_ABC_HERE
-#define __NR_SYNOmmap		400
-#define SYNOmmap(x)		syscall(__NR_SYNOmmap, x)
-#endif
-
-#ifdef MY_ABC_HERE
 #define __NR_SYNOUtime                          402
 #define SYNOUtime(arg1, arg2)                   syscall(__NR_SYNOUtime, arg1, arg2)
 #endif

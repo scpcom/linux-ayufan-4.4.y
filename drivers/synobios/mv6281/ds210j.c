@@ -8,7 +8,7 @@
 #include "mv6281_common.h"
 
 #ifdef MY_ABC_HERE
-extern char gszSynoHWVersion[16];
+#include <linux/synobios.h>
 #endif
 
 int GetModel(void)
@@ -28,9 +28,9 @@ InitModuleType(struct synobios_ops *ops)
 	switch (model) {
 	case MODEL_DS210j:
 #ifdef MY_ABC_HERE
-		if (!strncmp(gszSynoHWVersion, HW_DS210jv20, strlen(HW_DS210jv20))) {
+		if (syno_is_hw_version(HW_DS210jv20)) {
 			pType = &type_210jv2;
-		} else if (!strncmp(gszSynoHWVersion, HW_DS210jv30, strlen(HW_DS210jv30))) {
+		} else if (syno_is_hw_version(HW_DS210jv30)) {
 			pType = &type_210jv3;
 		} else {
 			pType = &type_210jv1;

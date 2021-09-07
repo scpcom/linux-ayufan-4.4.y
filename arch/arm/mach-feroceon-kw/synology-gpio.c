@@ -54,15 +54,10 @@
 #define DISK_LED_ORANGE_SOLID	2
 #define DISK_LED_ORANGE_BLINK	3
 #define DISK_LED_GREEN_BLINK    4
-#define DISK_LED_BLUE			5
 
 #define SYNO_LED_OFF		0
 #define SYNO_LED_ON			1
 #define SYNO_LED_BLINKING	2
-
-#ifdef  MY_ABC_HERE
-extern char gszSynoHWVersion[];
-#endif
 
 typedef struct __tag_SYNO_KW_HDD_PM_GPIO {
 	u8 hdd1_pm;
@@ -219,8 +214,7 @@ SYNO_CTRL_INTERNAL_HDD_LED_SET(int index, int status)
 	//note: hd led is active low
 	if ( DISK_LED_OFF == status ) {
 		fail_led = 1;
-	} else if ( DISK_LED_GREEN_SOLID == status ||
-				DISK_LED_BLUE == status) {
+	} else if ( DISK_LED_GREEN_SOLID == status ) {
 		fail_led = 1;
 	} else if ( DISK_LED_ORANGE_SOLID == status ||
 		DISK_LED_ORANGE_BLINK == status ) {
@@ -324,7 +318,6 @@ SYNO_CTRL_USB_HDD_LED_SET(int status)
 		blink2 = 0;
 		break;
 	case DISK_LED_GREEN_SOLID:
-	case DISK_LED_BLUE:
 		bit1 = 0;
 		bit2 = 1;
 		blink1 = 0;
@@ -516,13 +509,13 @@ MV_U8 SYNOKirkwoodIsBoardNeedPowerUpHDD(MV_U32 disk_id) {
 
 	switch(boardId) {
 	case SYNO_DS109_ID:
-		if ((0 == strncmp(HW_DS212jv10, gszSynoHWVersion, strlen(HW_DS212jv10)) || 0 == strncmp(HW_DS212jv20, gszSynoHWVersion, strlen(HW_DS212jv20))) && 2 >= disk_id)
+		if ((syno_is_hw_version(HW_DS212jv10) || syno_is_hw_version(HW_DS212jv20)) && 2 >= disk_id)
 			ret = 1;
 		else if (2 == disk_id)
 			ret = 1;
 		break;
 	case SYNO_DS212_ID:
-		if ((0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112)) || 0 == strncmp(HW_DS112pv10, gszSynoHWVersion, strlen(HW_DS112pv10))) && 1 == disk_id ) {
+		if ((syno_is_hw_version(HW_DS112) || syno_is_hw_version(HW_DS112pv10)) && 1 == disk_id ) {
 			ret = 1;
 		} else if (2 >= disk_id ) {
 			ret = 1;
@@ -1355,7 +1348,7 @@ void synology_gpio_init(void)
 	switch(boardId) {
 	case SYNO_DS109_ID:
 		printk("Synology 6281 1, 2 bay GPIO Init\n");
-		if (0 == strncmp(HW_DS212jv10, gszSynoHWVersion, strlen(HW_DS212jv10)) || 0 == strncmp(HW_DS212jv20, gszSynoHWVersion, strlen(HW_DS212jv20))) {
+		if (syno_is_hw_version(HW_DS212jv10) || syno_is_hw_version(HW_DS212jv20)) {
 			KW_6281_212j_GPIO_init(&generic_gpio);
 		} else {
 			KW_6281_109_GPIO_init(&generic_gpio);
@@ -1390,10 +1383,10 @@ void synology_gpio_init(void)
 		KW_6180_011_GPIO_init(&generic_gpio);
 		break;
 	case SYNO_DS212_ID:
-		if (0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112))) {
+		if (syno_is_hw_version(HW_DS112)) {
 			KW_6282_112_GPIO_init(&generic_gpio);
 			printk("Synology 6282 DS112 GPIO Init\n");
-		} else if (0 == strncmp(HW_DS112pv10, gszSynoHWVersion, strlen(HW_DS112pv10))) {
+		} else if (syno_is_hw_version(HW_DS112pv10)) {
 			KW_6282_112p_GPIO_init(&generic_gpio);
 			printk("Synology 6282 DS112+ GPIO Init\n");
 		} else {

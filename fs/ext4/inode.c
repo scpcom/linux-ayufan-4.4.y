@@ -48,7 +48,7 @@
 #include "ext4_extents.h"
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-#include "synoacl_int.h"
+#include "syno_acl.h"
 #endif
 
 #include <trace/events/ext4.h>
@@ -5488,13 +5488,14 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 	const unsigned int ia_valid = attr->ia_valid;
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_inode_change_ok(dentry, attr);
-	} else 
+	if (!IS_SYNOACL(inode)) {
 #endif
 	error = inode_change_ok(inode, attr);
 	if (error)
 		return error;
+#ifdef CONFIG_EXT4_FS_SYNO_ACL
+	}
+#endif
 
 	if ((ia_valid & ATTR_UID && attr->ia_uid != inode->i_uid) ||
 		(ia_valid & ATTR_GID && attr->ia_gid != inode->i_gid)) {
@@ -5516,16 +5517,7 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 		/* Update corresponding info in inode so that everything is in
 		 * one transaction */
 		if (attr->ia_valid & ATTR_UID)
-#if defined(MY_ABC_HERE) && defined(CONFIG_EXT4_FS_SYNO_ACL)
-		{
 			inode->i_uid = attr->ia_uid;
-			if (IS_SYNOACL_OWNER_IS_GROUP(inode)) {
-				ext4_mod_syno_archive_safe_clean(inode, S2_SYNO_ACL_IS_OWNER_GROUP);
-			}
-		}
-#else
-			inode->i_uid = attr->ia_uid;
-#endif
 		if (attr->ia_valid & ATTR_GID)
 			inode->i_gid = attr->ia_gid;
 		error = ext4_mark_inode_dirty(handle, inode);
@@ -5591,17 +5583,7 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 		ext4_orphan_del(NULL, inode);
 
 	if (!rc && (ia_valid & ATTR_MODE))
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	{
-		if (IS_SYNOACL(inode)) {
-			rc = ext4_mod_syno_acl_chmod(inode);
-		} else {
-			rc = ext4_acl_chmod(inode);
-		}
-	}
-#else
-	rc = ext4_acl_chmod(inode);
-#endif
+		rc = ext4_acl_chmod(inode);
 
 err_out:
 	ext4_std_error(inode->i_sb, error);
@@ -5619,11 +5601,6 @@ int ext4_getattr(struct vfsmount *mnt, struct dentry *dentry,
 	inode = dentry->d_inode;
 	generic_fillattr(inode, stat);
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (IS_SYNOACL(inode)) {
-		ext4_mod_synoacl_to_mode(dentry, inode, stat);
-	}
-#endif //CONFIG_EXT4_FS_SYNO_ACL
 	/*
 	 * We can't update i_blocks if the block allocation is delayed
 	 * otherwise in the case of system crash before the real block
@@ -5666,6 +5643,30 @@ static int ext4_indirect_trans_blocks(struct inode *inode, int nrblocks,
 	indirects = nrblocks * 2 + 1;
 	return indirects;
 }
+
+#ifdef MY_ABC_HERE
+int syno_ext4_set_archive_ver(struct dentry *dentry, u32 version)
+{
+	struct inode *inode = dentry->d_inode;
+	struct syno_xattr_archive_version value;
+	int err;
+
+	value.v_magic = cpu_to_le16(0x2552);
+	value.v_struct_version = cpu_to_le16(1);
+	value.v_archive_version = cpu_to_le32(version);
+	err = ext4_xattr_set(inode, EXT4_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value), 0);
+	if (!err) {
+		inode->i_archive_version = version;
+	}
+	return err;
+}
+
+int syno_ext4_get_archive_ver(struct dentry *dentry, u32 *version)
+{
+	*version = dentry->d_inode->i_archive_version;
+	return 0;
+}
+#endif
 
 static int ext4_index_trans_blocks(struct inode *inode, int nrblocks, int chunk)
 {
@@ -5875,7 +5876,7 @@ int ext4_mark_inode_dirty(handle_t *handle, struct inode *inode)
 	int err, ret;
 
 	might_sleep();
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (IS_UMOUNTED_FILE(inode)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 		printk("%s(%d) force umount hit.\n", __func__, __LINE__);

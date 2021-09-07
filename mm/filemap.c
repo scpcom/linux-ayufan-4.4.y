@@ -1497,7 +1497,7 @@ generic_file_aio_read(struct kiocb *iocb, const struct iovec *iov,
 	size_t count;
 	loff_t *ppos = &iocb->ki_pos;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (!blSynostate(O_UNMOUNT_OK, filp)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 		printk("%s: force unmount hit\n", __FUNCTION__);
@@ -1766,7 +1766,7 @@ int filemap_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
 	pgoff_t size;
 	int ret = 0;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (!blSynostate(O_UNMOUNT_OK, file)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 		printk("%s: force unmount hit\n", __FUNCTION__);
@@ -2279,7 +2279,7 @@ inline int generic_write_checks(struct file *file, loff_t *pos, size_t *count, i
         if (unlikely(*pos < 0))
                 return -EINVAL;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (!blSynostate(O_UNMOUNT_OK, file)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 		printk("%s: force unmount hit\n", __FUNCTION__);
@@ -2782,7 +2782,6 @@ done1:
 		return bytes_received;
 	}
 }
-
 #endif
 #endif
 
@@ -2933,7 +2932,7 @@ again:
 			break;
 		}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 		if (!blSynostate(O_UNMOUNT_OK, file)) {
 			status = -EIO;
 			break;

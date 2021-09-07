@@ -574,6 +574,21 @@ static void sata_fsl_pmp_attach(struct ata_port *ap)
 
 	temp = ioread32(hcr_base + HCONTROL);
 	iowrite32((temp | HCONTROL_PMP_ATTACHED), hcr_base + HCONTROL);
+#if defined MY_ABC_HERE
+	if(ap->nr_pmp_links) {
+		if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) || IS_SYNOLOGY_DX513(ap->PMSynoUnique)) {
+			struct device *dev = ap->host->dev;
+			sata_fsl_scr_read(&ap->link, SCR_CONTROL, &temp);
+			temp &= ~(0xF << 4);
+			temp |= (0x1 << 4);
+			sata_fsl_scr_write(&ap->link, SCR_CONTROL, temp);
+
+			sata_fsl_scr_read(&ap->link, SCR_CONTROL, &temp);
+			dev_printk(KERN_WARNING, dev, "DX213 or DX513 speed limited to %x\n",
+					temp);
+		}
+	}
+#endif
 }
 
 static void sata_fsl_pmp_detach(struct ata_port *ap)
@@ -646,7 +661,7 @@ static int sata_fsl_port_start(struct ata_port *ap)
 	VPRINTK("HControl = 0x%x\n", ioread32(hcr_base + HCONTROL));
 	VPRINTK("CHBA  = 0x%x\n", ioread32(hcr_base + CHBA));
 
-#if defined MY_ABC_HERE || defined CONFIG_MPC8315_DS
+#ifdef CONFIG_MPC8315_DS
 	/*
 	 * Workaround for 8315DS board 3gbps link-up issue,
 	 * currently limit SATA port to GEN1 speed
@@ -1534,6 +1549,20 @@ static int sata_fsl_resume(struct of_device *op)
 	iowrite32(temp | 0x80000700, hcr_base+HCONTROL);
 #endif
 
+#if defined MY_ABC_HERE
+	if(ap->nr_pmp_links) {
+		if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) || IS_SYNOLOGY_DX513(ap->PMSynoUnique)) {
+			sata_fsl_scr_read(&ap->link, SCR_CONTROL, &temp);
+			temp &= ~(0xF << 4);
+			temp |= (0x1 << 4);
+			sata_fsl_scr_write(&ap->link, SCR_CONTROL, temp);
+
+			sata_fsl_scr_read(&ap->link, SCR_CONTROL, &temp);
+			dev_printk(KERN_WARNING, &op->dev, "DX213 or DX513 speed limited to %x\n",
+					temp);
+		}
+	}
+#endif
 	ata_host_resume(host);
 	return 0;
 }

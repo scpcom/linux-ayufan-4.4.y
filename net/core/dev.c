@@ -132,7 +132,6 @@
 
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 #include <linux/synobios.h>
-extern char gszSynoHWVersion[16];
 #include <linux/pci.h>
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
@@ -5119,9 +5118,9 @@ int register_netdev(struct net_device *dev)
 		if (err < 0)
 			goto out;
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
-		if ( 0 == strncmp(gszSynoHWVersion, HW_DS508, strlen(HW_DS508)) ||
-			 0 == strncmp(gszSynoHWVersion, HW_DS1010p, strlen(HW_DS1010p)) ||
-			 0 == strncmp(gszSynoHWVersion, HW_DS1511p, strlen(HW_DS1511p))) {
+		if (syno_is_hw_version(HW_DS508) ||
+			syno_is_hw_version(HW_DS1010p) ||
+			syno_is_hw_version(HW_DS1511p)) {
 			static int swapped = 0;
 			if ( swapped == 0 && !strcmp(dev->name, "eth0") ) {
 				snprintf(dev->name, sizeof(dev->name), "eth1");

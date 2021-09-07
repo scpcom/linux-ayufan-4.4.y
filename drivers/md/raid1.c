@@ -2110,11 +2110,18 @@ static void raid1d(mddev_t *mddev)
 						   (unsigned long long)r1_bio->sector);
 				}else
 #endif
+#ifdef MY_ABC_HERE
+				printk(KERN_ALERT "raid1: unrecoverable I/O"
+				       " read error for block %llu\n",
+				       (unsigned long long)r1_bio->sector);
+				raid_end_bio_io(r1_bio);
+#else
 				printk(KERN_ALERT "raid1: %s: unrecoverable I/O"
 				       " read error for block %llu\n",
 				       bdevname(bio->bi_bdev,b),
 				       (unsigned long long)r1_bio->sector);
 				raid_end_bio_io(r1_bio);
+#endif
 			} else {
 				const bool do_sync = bio_rw_flagged(r1_bio->master_bio, BIO_RW_SYNCIO);
 				r1_bio->bios[r1_bio->read_disk] =

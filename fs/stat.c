@@ -18,6 +18,10 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
+#endif
+
 #ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int SynoDebugFlag;
@@ -72,6 +76,21 @@ int vfs_getattr(struct vfsmount *mnt, struct dentry *dentry, struct kstat *stat)
 	retval = security_inode_getattr(mnt, dentry);
 	if (retval)
 		return retval;
+
+#ifdef CONFIG_FS_SYNO_ACL
+	if (IS_SYNOACL(inode)) {
+		if (inode->i_op->getattr) {
+			if (0 != (retval = inode->i_op->getattr(mnt, dentry, stat)))
+				return retval;
+		} else {
+			generic_fillattr(inode, stat);
+		}
+
+		synoacl_op_to_mode(dentry, stat);
+
+		return 0;
+	}
+#endif //CONFIG_FS_SYNO_ACL
 
 	if (inode->i_op->getattr)
 		return inode->i_op->getattr(mnt, dentry, stat);
@@ -288,6 +307,7 @@ SYSCALL_DEFINE2(SYNOArchiveOverwrite, unsigned int, fd, unsigned int, flags)
 	if (!file) {
 		return ret;
 	}
+
 	ret = __SYNOArchiveOverwrite(file->f_path.dentry, flags);
 	fput_light(file, fput_needed);
 	return ret;

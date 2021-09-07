@@ -1982,11 +1982,18 @@ static void raid10d(mddev_t *mddev)
 						   (unsigned long long)r10_bio->sector);
 				}else
 #endif
+#ifdef MY_ABC_HERE
+				printk(KERN_ALERT "raid10: unrecoverable I/O"
+				       " read error for block %llu\n",
+				       (unsigned long long)r10_bio->sector);
+				raid_end_bio_io(r10_bio);
+#else
 				printk(KERN_ALERT "raid10: %s: unrecoverable I/O"
 				       " read error for block %llu\n",
 				       bdevname(bio->bi_bdev,b),
 				       (unsigned long long)r10_bio->sector);
 				raid_end_bio_io(r10_bio);
+#endif
 				bio_put(bio);
 			} else {
 				const bool do_sync = bio_rw_flagged(r10_bio->master_bio, BIO_RW_SYNCIO);

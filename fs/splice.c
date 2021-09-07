@@ -1248,7 +1248,7 @@ static long do_splice_to(struct file *in, loff_t *ppos,
 			       struct pipe_inode_info *, size_t, unsigned int);
 	int ret;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (!blSynostate(O_UNMOUNT_OK, in)) {
 		return -EBADF;
 	}

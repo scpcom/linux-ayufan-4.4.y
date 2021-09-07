@@ -2706,6 +2706,10 @@ end_rename:
  * directories can handle most operations...
  */
 const struct inode_operations ext3_dir_inode_operations = {
+#ifdef MY_ABC_HERE
+	.syno_get_archive_ver = syno_ext3_get_archive_ver,
+	.syno_set_archive_ver = syno_ext3_set_archive_ver,
+#endif
 	.create		= ext3_create,
 	.lookup		= ext3_lookup,
 #ifdef MY_ABC_HERE
@@ -2725,13 +2729,14 @@ const struct inode_operations ext3_dir_inode_operations = {
 	.listxattr	= ext3_listxattr,
 	.removexattr	= generic_removexattr,
 #endif
-#ifdef MY_ABC_HERE
-	.synosetxattr	= syno_generic_setxattr,
-#endif
 	.check_acl	= ext3_check_acl,
 };
 
 const struct inode_operations ext3_special_inode_operations = {
+#ifdef MY_ABC_HERE
+	.syno_get_archive_ver = syno_ext3_get_archive_ver,
+	.syno_set_archive_ver = syno_ext3_set_archive_ver,
+#endif
 	.setattr	= ext3_setattr,
 #ifdef CONFIG_EXT3_FS_XATTR
 	.setxattr	= generic_setxattr,

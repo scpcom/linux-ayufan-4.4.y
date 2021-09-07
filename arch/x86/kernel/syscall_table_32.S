@@ -402,11 +402,7 @@ ENTRY(sys_call_table)
     .long sys_ni_syscall
     .long sys_ni_syscall
     .long sys_ni_syscall
-#ifdef MY_ABC_HERE
-    .long sys_SYNOmmap			/* 400 */
-#else
     .long sys_ni_syscall
-#endif
     .long sys_ni_syscall
 #ifdef MY_ABC_HERE
     .long sys_SYNOUtime		/* 402 */

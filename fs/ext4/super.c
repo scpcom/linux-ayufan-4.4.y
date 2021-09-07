@@ -48,7 +48,7 @@
 #include "mballoc.h"
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-#include <linux/syno_acl_xattr_ds.h>
+#include <linux/syno_acl.h>
 #endif
 
 #define CREATE_TRACE_POINTS
@@ -264,9 +264,6 @@ handle_t *ext4_journal_start_sb(struct super_block *sb, int nblocks)
 	}
 	return ext4_get_nojournal();
 }
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-EXPORT_SYMBOL(ext4_journal_start_sb);
-#endif
 
 #ifdef MY_ABC_HERE
 handle_t *ext4_journal_start_sb_sync(struct super_block *sb, int nblocks)
@@ -326,9 +323,6 @@ int __ext4_journal_stop(const char *where, handle_t *handle)
 		__ext4_std_error(sb, where, err);
 	return err;
 }
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-EXPORT_SYMBOL(__ext4_journal_stop);
-#endif
 
 void ext4_journal_abort_handle(const char *caller, const char *err_fn,
 		struct buffer_head *bh, handle_t *handle, int err)
@@ -753,6 +747,11 @@ static void ext4_put_super(struct super_block *sb)
 	for (i = 0; i < MAXQUOTAS; i++)
 		kfree(sbi->s_qf_names[i]);
 #endif
+#ifdef MY_ABC_HERE
+	if (sbi->s_mount_path) {
+		kfree(sbi->s_mount_path);
+	}
+#endif
 
 	/* Debugging code just in case the in-memory inode orphan list
 	 * isn't empty.  The on-disk one can be non-empty if we've
@@ -974,10 +973,8 @@ static int ext4_show_options(struct seq_file *seq, struct vfsmount *vfs)
 #endif
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (test_opt(sb, SYNO_ACL) && !(def_mount_opts & EXT4_DEFM_ACL))
+	if (test_opt(sb, SYNO_ACL))
 		seq_puts(seq, ","SYNO_ACL_MNT_OPT);
-	if (!test_opt(sb, SYNO_ACL) && (def_mount_opts & EXT4_DEFM_ACL))
-		seq_puts(seq, ","SYNO_ACL_NOT_MNT_OPT);
 #elif defined(CONFIG_EXT4_FS_POSIX_ACL)
 	if (test_opt(sb, POSIX_ACL) && !(def_mount_opts & EXT4_DEFM_ACL))
 		seq_puts(seq, ",acl");
@@ -1113,6 +1110,47 @@ static int bdev_try_to_free_page(struct super_block *sb, struct page *page,
 	return try_to_free_buffers(page);
 }
 
+#ifdef MY_ABC_HERE
+static int syno_ext4_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
+{
+	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
+	handle_t *handle;
+	int err = 0;
+	int err2;
+
+	sb->s_archive_version = archive_ver;
+	es->s_archive_version = cpu_to_le32(sb->s_archive_version);
+
+	if (!EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_HAS_JOURNAL)) {
+		err = ext4_commit_super(sb, 1);
+		goto exit;
+	}
+	handle = ext4_journal_start_sb(sb, 1);
+	if (IS_ERR(handle)) {
+		err = PTR_ERR(handle);
+		goto exit;
+	}
+	err = ext4_journal_get_write_access(handle, EXT4_SB(sb)->s_sbh);
+	if (err) {
+		goto exit_journal;
+	}
+	err = ext4_handle_dirty_metadata(handle, NULL, EXT4_SB(sb)->s_sbh);
+
+exit_journal:
+	if ((err2 = ext4_journal_stop(handle)) && !err) {
+		err = err2;
+	}
+exit:
+	return err;
+}
+
+static int syno_ext4_get_sb_archive_ver(struct super_block *sb, u32 *version)
+{
+	*version = sb->s_archive_version;
+	return 0;
+}
+#endif
+
 #ifdef CONFIG_QUOTA
 #define QTYPE2NAME(t) ((t) == USRQUOTA ? "user" : "group")
 #define QTYPE2MOPT(on, t) ((t) == USRQUOTA?((on)##USRJQUOTA):((on)##GRPJQUOTA))
@@ -1169,6 +1207,10 @@ static const struct quotactl_ops ext4_qctl_operations = {
 #endif
 
 static const struct super_operations ext4_sops = {
+#ifdef MY_ABC_HERE
+	.syno_get_sb_archive_ver = syno_ext4_get_sb_archive_ver,
+	.syno_set_sb_archive_ver = syno_ext4_set_sb_archive_ver,
+#endif
 	.alloc_inode	= ext4_alloc_inode,
 	.destroy_inode	= ext4_destroy_inode,
 	.write_inode	= ext4_write_inode,
@@ -1190,6 +1232,10 @@ static const struct super_operations ext4_sops = {
 };
 
 static const struct super_operations ext4_nojournal_sops = {
+#ifdef MY_ABC_HERE
+	.syno_get_sb_archive_ver = syno_ext4_get_sb_archive_ver,
+	.syno_set_sb_archive_ver = syno_ext4_set_sb_archive_ver,
+#endif
 	.alloc_inode	= ext4_alloc_inode,
 	.destroy_inode	= ext4_destroy_inode,
 	.write_inode	= ext4_write_inode,
@@ -2325,7 +2371,7 @@ static ssize_t syno_fs_error_new_event_flag_store(struct ext4_attr *a,
 static ssize_t syno_fs_error_mounted_show(struct ext4_attr *a,
 				       struct ext4_sb_info *sbi, char *buf)
 {
-	return snprintf(buf, PAGE_SIZE, "%s\n", sbi->s_es->s_last_mounted);
+	return snprintf(buf, PAGE_SIZE, "%s\n", sbi->s_mount_path);
 }
 #endif
 
@@ -2532,75 +2578,6 @@ static int ext4_feature_set_ok(struct super_block *sb, int readonly)
 	return 1;
 }
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-static int SYNOACLModuleStatusGet(const char *szModName)
-{
-	int st = -1;
-	struct module *mod = NULL;
-
-	mutex_lock(&module_mutex);
-
-	if (NULL == (mod = find_module(szModName))){
-		goto Err;
-	}
-
-	st = mod->state;
-Err:
-	mutex_unlock(&module_mutex);
-
-	return st;
-}
-
-static void UseACLModule(const char *szModName, int isGet)
-{
-	struct module *mod = NULL;
-
-	mutex_lock(&module_mutex);
-
-	if (NULL == (mod = find_module(szModName))){
-		printk("synoacl module [%s] is not loaded \n", szModName);
-		goto Err;
-	}
-
-	if (isGet) {
-		try_module_get(mod);
-	} else {
-		module_put(mod);
-	}
-Err:
-	mutex_unlock(&module_mutex);
-}
-
-static void SYNOACLModuleGet(const char *szModName)
-{
-	UseACLModule(szModName, 1);
-}
-static void SYNOACLModulePut(const char *szModName)
-{
-	UseACLModule(szModName, 0);
-}
-
-static void SYNOACLFlagSet(struct super_block *psb, unsigned long *ps_flags, unsigned int *ps_mount_opt)
-{
-	if (!psb || !ps_flags || !ps_mount_opt) {
-		return;
-	}
-
-	*ps_flags &= ~MS_SYNOACL;
-	if (*ps_mount_opt & EXT4_MOUNT_SYNO_ACL) {
-		if (MODULE_STATE_LIVE != SYNOACLModuleStatusGet("synoacl_ext4") ||
-			MODULE_STATE_LIVE != SYNOACLModuleStatusGet("synoacl_vfs")) {
-			ext4_msg(psb, KERN_ERR, "synoacl module has not been loaded. Unable to mount with synoacl, vfs_mod status=%d, ext4_mod status=%d", SYNOACLModuleStatusGet("synoacl_vfs"), SYNOACLModuleStatusGet("synoacl_ext4"));
-			*ps_mount_opt &= ~EXT4_MOUNT_SYNO_ACL;
-		} else {
-			*ps_flags |= MS_SYNOACL;
-			SYNOACLModuleGet("synoacl_ext4");
-			SYNOACLModuleGet("synoacl_vfs");
-		}
-	}
-}
-#endif
-
 static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 				__releases(kernel_lock)
 				__acquires(kernel_lock)
@@ -2695,10 +2672,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	if (def_mount_opts & EXT4_DEFM_XATTR_USER)
 		set_opt(sbi->s_mount_opt, XATTR_USER);
 #endif
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (def_mount_opts & EXT4_DEFM_ACL)
-		set_opt(sbi->s_mount_opt, SYNO_ACL);
-#elif defined(CONFIG_EXT4_FS_POSIX_ACL)
+#ifdef CONFIG_EXT4_FS_POSIX_ACL
 	if (def_mount_opts & EXT4_DEFM_ACL)
 		set_opt(sbi->s_mount_opt, POSIX_ACL);
 #endif
@@ -2739,7 +2713,16 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		goto failed_mount;
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL 
-	SYNOACLFlagSet(sb, &sb->s_flags, &sbi->s_mount_opt);
+	if (test_opt(sb, SYNO_ACL)) {
+		int st = SYNOACLModuleStatusGet("synoacl_vfs");
+		if (MODULE_STATE_LIVE != st) {
+			ext4_msg(sb, KERN_ERR, "synoacl module has not been loaded. Unable to mount with synoacl, vfs_mod status=%d", st);
+			clear_opt(sbi->s_mount_opt, SYNO_ACL);
+		} else {
+			sb->s_flags |= MS_SYNOACL;
+			SYNOACLModuleGet("synoacl_vfs");
+		}
+	}
 #else
 	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
 		((sbi->s_mount_opt & EXT4_MOUNT_POSIX_ACL) ? MS_POSIXACL : 0);
@@ -3595,9 +3578,6 @@ static int ext4_commit_super(struct super_block *sb, int sync)
 					&EXT4_SB(sb)->s_freeblocks_counter));
 	es->s_free_inodes_count = cpu_to_le32(percpu_counter_sum_positive(
 					&EXT4_SB(sb)->s_freeinodes_counter));
-#ifdef MY_ABC_HERE
-	es->s_archive_version = cpu_to_le32(sb->s_archive_version);
-#endif
 	sb->s_dirt = 0;
 	BUFFER_TRACE(sbh, "marking dirty");
 	mark_buffer_dirty(sbh);
@@ -3830,7 +3810,19 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 		ext4_abort(sb, __func__, "Abort forced by user");
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL  
-	SYNOACLFlagSet(sb, &sb->s_flags, &sbi->s_mount_opt);
+	if ((sb->s_flags & MS_SYNOACL) && !test_opt(sb, SYNO_ACL)) {
+		sb->s_flags = sb->s_flags & ~MS_SYNOACL;
+		SYNOACLModulePut("synoacl_vfs");
+	} else if((!(sb->s_flags & MS_SYNOACL)) && test_opt(sb, SYNO_ACL)) {
+		int st = SYNOACLModuleStatusGet("synoacl_vfs");
+		if (MODULE_STATE_LIVE != st) {
+			ext4_msg(sb, KERN_ERR, "synoacl module has not been loaded. Unable to remount with synoacl, vfs_mod status=%d", st);
+			clear_opt(sbi->s_mount_opt, SYNO_ACL);
+		} else {
+			sb->s_flags |= MS_SYNOACL;
+			SYNOACLModuleGet("synoacl_vfs");
+		}
+	}
 #else
 	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
 		((sbi->s_mount_opt & EXT4_MOUNT_POSIX_ACL) ? MS_POSIXACL : 0);
@@ -4318,9 +4310,26 @@ static int ext4_get_sb(struct file_system_type *fs_type, int flags,
 static void ext4_kill_sb(struct super_block *sb)
 {
 	kill_block_super(sb);
-	SYNOACLModulePut("synoacl_ext4");
-	SYNOACLModulePut("synoacl_vfs");
+
+	if (MS_SYNOACL & sb->s_flags) {
+		SYNOACLModulePut("synoacl_vfs");
+	}
 }
+#endif
+
+#ifdef MY_ABC_HERE
+void ext4_fill_mount_path(struct super_block *sb, char *szPath)
+{
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+
+	if (sbi->s_mount_path) {
+		strncpy(sbi->s_mount_path, szPath, SYNO_EXT4_MOUNT_PATH_LEN);
+	} else {
+		sbi->s_mount_path = kmemdup(szPath, SYNO_EXT4_MOUNT_PATH_LEN, GFP_KERNEL);
+	}
+	sbi->s_mount_path[SYNO_EXT4_MOUNT_PATH_LEN - 1] = '\0';
+}
+EXPORT_SYMBOL(ext4_fill_mount_path);
 #endif
 
 static struct file_system_type ext4_fs_type = {

@@ -14,7 +14,7 @@
 
 #include <asm/atomic.h>
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 #include <linux/fs.h>
 #endif
 
@@ -83,7 +83,7 @@ static inline struct file * fcheck_files(struct files_struct *files, unsigned in
 
 	if (fd < fdt->max_fds)
 		file = rcu_dereference(fdt->fd[fd]);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if(file && !blSynostate(O_UNMOUNT_OK, file)) {
 		return NULL;
 	}

@@ -29,7 +29,7 @@
 #include "acl.h"
 
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-#include "synoacl_int.h"
+#include "syno_acl.h"
 #endif
 
 /*
@@ -256,6 +256,10 @@ const struct file_operations ext4_file_operations = {
 };
 
 const struct inode_operations ext4_file_inode_operations = {
+#ifdef MY_ABC_HERE
+	.syno_get_archive_ver = syno_ext4_get_archive_ver,
+	.syno_set_archive_ver = syno_ext4_set_archive_ver,
+#endif
 	.truncate	= ext4_truncate,
 	.setattr	= ext4_setattr,
 	.getattr	= ext4_getattr,
@@ -264,19 +268,13 @@ const struct inode_operations ext4_file_inode_operations = {
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
-#ifdef MY_ABC_HERE
-	.synosetxattr	= syno_generic_setxattr,
-#endif
 #endif
 #ifdef CONFIG_EXT4_FS_SYNO_ACL
-	.syno_acl_get = ext4_mod_get_syno_acl_inherit,
-	.syno_access = ext4_mod_syno_access,
-	.syno_permission = ext4_mod_syno_permission,
-	.syno_exec_permission = ext4_mod_syno_exec_permission,
-	.syno_permission_get = ext4_mod_get_syno_permission,
-	.syno_inode_change_ok = ext4_mod_syno_inode_change_ok,
-#endif
+	.syno_acl_get   = ext4_get_syno_acl,
+	.syno_acl_set   = ext4_set_syno_acl,
+#else
 	.check_acl	= ext4_check_acl,
+#endif
 	.fallocate	= ext4_fallocate,
 	.fiemap		= ext4_fiemap,
 #ifdef CONFIG_SYNO_PLX_PORTING

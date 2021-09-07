@@ -135,6 +135,12 @@ char *disk_name(struct gendisk *hd, int partno, char *buf)
 
 const char *bdevname(struct block_device *bdev, char *buf)
 {
+#ifdef MY_ABC_HERE
+	if (!bdev || !bdev->bd_part) {
+		printk(KERN_ERR "bdevname: bdev data should not be NULL\n");
+		return buf;
+	}
+#endif
 	return disk_name(bdev->bd_disk, bdev->bd_part->partno, buf);
 }
 

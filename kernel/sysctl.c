@@ -170,6 +170,13 @@ unsigned char grgbLanMac[4][16];
 EXPORT_SYMBOL(grgbLanMac);
 #endif
 
+#ifdef CONFIG_SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
+unsigned int g_default_gateway_mac_addr_h = 0;
+unsigned int g_default_gateway_mac_addr_l = 0;
+EXPORT_SYMBOL(g_default_gateway_mac_addr_h);
+EXPORT_SYMBOL(g_default_gateway_mac_addr_l);
+#endif
+
 #ifdef MY_ABC_HERE
 unsigned int gSwitchDev = 0;
 char gDevPCIName[SYNO_MAX_SWITCHABLE_NET_DEVICE][SYNO_NET_DEVICE_ENCODING_LENGTH];
@@ -206,6 +213,9 @@ EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 #endif
 
 #endif
+
+int (*funcSYNOWIFINotification)(void) = NULL;
+EXPORT_SYMBOL(funcSYNOWIFINotification);
 
 #ifdef CONFIG_SYNO_DISPLAY_CPUINFO
 unsigned int gSynoCPUInfoCore = 0;
@@ -1335,6 +1345,24 @@ static struct ctl_table kern_table[] = {
 		.mode			= 0444,
 		.proc_handler	= &proc_dostring,
 		.strategy		= &sysctl_string,
+	},
+#endif
+#ifdef CONFIG_SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
+	{
+		.ctl_name       = CTL_UNNUMBERED,
+		.procname       = "syno_default_gateway_mac_addr_h",
+		.data           = &g_default_gateway_mac_addr_h,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+	{
+		.ctl_name       = CTL_UNNUMBERED,
+		.procname       = "syno_default_gateway_mac_addr_l",
+		.data           = &g_default_gateway_mac_addr_l,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
 	},
 #endif
 #ifdef MY_ABC_HERE

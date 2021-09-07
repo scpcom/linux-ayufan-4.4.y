@@ -196,7 +196,7 @@ void dnotify_flush(struct file *filp, fl_owner_t id)
 	struct dnotify_struct **prev;
 	struct inode *inode;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (blSynostate(O_UNMOUNT_DONE, filp)) {
 		return;
 	}

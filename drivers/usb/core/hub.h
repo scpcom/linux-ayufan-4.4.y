@@ -28,7 +28,7 @@
 #define HUB_GET_TT_STATE	10
 #define HUB_STOP_TT		11
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 /*
  * Hub class additional requests defined by USB 3.0 spec
  * See USB 3.0 spec Table 10-6
@@ -219,11 +219,11 @@ struct usb_hub_status {
  */
 
 #define USB_DT_HUB			(USB_TYPE_CLASS | 0x09)
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 #define USB_DT_SS_HUB       (USB_TYPE_CLASS | 0x0a)
 #endif
 #define USB_DT_HUB_NONVAR_SIZE		7
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 #define USB_DT_SS_HUB_SIZE          12
 #endif
 
@@ -234,7 +234,7 @@ struct usb_hub_descriptor {
 	__le16 wHubCharacteristics;
 	__u8  bPwrOn2PwrGood;
 	__u8  bHubContrCurrent;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 	/* 2.0 and 3.0 hubs differ here */
 	union {
 		struct {

@@ -25,6 +25,10 @@
 #include "vfs.h"
 #include "auth.h"
 
+#ifdef CONFIG_FS_SYNO_ACL
+#include "../synoacl_int.h"
+#endif
+
 #define NFSDDBG_FACILITY		NFSDDBG_FH
 
 /*
@@ -50,7 +54,7 @@ static int nfsd_acceptable(void *expv, struct dentry *dentry)
 		parent = dget_parent(tdentry);
 #ifdef CONFIG_FS_SYNO_ACL
 		if (IS_SYNOACL(parent->d_inode)) {
-			err = parent->d_inode->i_op->syno_permission(parent, MAY_EXEC);
+			err = synoacl_op_perm(parent, MAY_EXEC);
 		} else 
 #endif /* CONFIG_FS_SYNO_ACL */
 		err = inode_permission(parent->d_inode, MAY_EXEC);

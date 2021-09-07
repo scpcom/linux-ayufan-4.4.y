@@ -2407,11 +2407,6 @@ static unsigned int mv_qc_issue(struct ata_queued_cmd *qc)
 		if (IS_GEN_II(hpriv))
 			return mv_qc_issue_fis(qc);
 	}
-#ifdef MY_ABC_HERE
-	if (NULL == qc->scsicmd && ATA_CMD_CHK_POWER == qc->tf.command) {
-		qc->tf.flags |= ATA_TFLAG_DIRECT;
-	}
-#endif
 	return ata_sff_qc_issue(qc);
 }
 

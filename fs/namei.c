@@ -42,15 +42,11 @@
 #define ACC_MODE(x) ("\000\004\002\006"[(x)&O_ACCMODE])
 
 #ifdef MY_ABC_HERE
-inline int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n);
-int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n);
-inline int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
-int SYNOUnicodeUTF16StrToUTF8Str(u_int8_t *s, const u_int16_t *pwcs, int maxlen);
+int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n);
+int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen);
 u_int16_t *SYNOUnicodeGenerateDefaultUpcaseTable(void);
 u_int16_t *DefUpcaseTable(void);
 
-static u_int16_t UTF16NameiStrBuf1[UNICODE_UTF16_BUFSIZE];
-extern spinlock_t Namei_buf_lock_1;  /* init at alloc_super() */
 
 /*
  * Sample implementation from Unicode home page.
@@ -75,7 +71,7 @@ static struct utf8_table utf8_table[] =
     {0,						       /* end of table    */}
 };
 
-inline int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
+int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
 {
 	long l;
 	int c0, c, nc;
@@ -104,40 +100,7 @@ inline int SYNOUnicodeUTF8ChrToUTF16Chr(u_int16_t *p, const u_int8_t *s, int n)
 	return -1;
 }
 
-int SYNOUnicodeUTF8StrToUTF16Str(u_int16_t *pwcs, const u_int8_t *s, int n)
-{
-	u_int16_t *op;
-	const u_int8_t *ip;
-	int size;
-
-	op = pwcs;
-	ip = s;
-	while (n > 0 && *ip) {
-		if (*ip & 0x80) {
-			size = SYNOUnicodeUTF8ChrToUTF16Chr(op, ip, n);
-			if (size == -1) {
-				/* Ignore character and move on */
-				ip++;
-				n--;
-			} else {
-				op++;
-				ip += size;
-				n -= size;
-			}
-		} else {
-			*op++ = *ip++;
-			n--;
-		}
-	}
-	*op = 0;
-#ifdef SYNO_DEBUG_BUILD
-	if((op - pwcs) >= UNICODE_UTF16_BUFSIZE)
-		panic("SYNOUnicodeUTF8StrToUTF16Str: UTF8 string too long\n");
-#endif
-	return (op - pwcs);
-}
-
-inline int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
+int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
 {
 	long l;
 	int c, nc;
@@ -163,34 +126,6 @@ inline int SYNOUnicodeUTF16ChrToUTF8Chr(u_int8_t *s, u_int16_t wc, int maxlen)
 	}
 	return -1;
 }
-
-int SYNOUnicodeUTF16StrToUTF8Str(u_int8_t *s, const u_int16_t *pwcs, int maxlen)
-{
-	const u_int16_t *ip;
-	u_int8_t *op;
-	int size;
-
-	op = s;
-	ip = pwcs;
-	while (*ip && maxlen > 0) {
-		if (*ip > 0x7f) {
-			size = SYNOUnicodeUTF16ChrToUTF8Chr(op, *ip, maxlen);
-			if (size == -1) {
-				/* Ignore character and move on */
-				maxlen--;
-			} else {
-				op += size;
-				maxlen -= size;
-			}
-		} else {
-			*op++ = (u_int8_t) *ip;
-		}
-		ip++;
-	}
-	*op = 0;
-	return (op - s);
-}
-
 
 
 /*
@@ -324,24 +259,34 @@ u_int16_t *DefUpcaseTable()
 
 int SYNOUnicodeUTF8toUpper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable)
 {
-	u_int16_t *UpcaseTbl;
-	int clenUtf16;
-	int i;
-	int err;
+        u_int16_t *UpcaseTbl;
+        u_int16_t wc;
+        u_int8_t *op;
+        int size;
 
-	spin_lock(&Namei_buf_lock_1);
+        UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
 
-	UpcaseTbl = (upcasetable==NULL) ? DefUpcaseTable() : upcasetable;
-	clenUtf16 = SYNOUnicodeUTF8StrToUTF16Str(UTF16NameiStrBuf1, from, clenfrom);
-
-	for(i = 0; i < clenUtf16; i++)
-		UTF16NameiStrBuf1[i] = UpcaseTbl[UTF16NameiStrBuf1[i]];
-
-	UTF16NameiStrBuf1[clenUtf16] = 0;
-	err = SYNOUnicodeUTF16StrToUTF8Str(to, UTF16NameiStrBuf1, maxlen);
-	spin_unlock(&Namei_buf_lock_1);
-	return err;
-
+        op = to;
+        while (clenfrom && maxlen) {
+                size = SYNOUnicodeUTF8ChrToUTF16Chr(&wc, from, clenfrom);
+                if (size == -1) {
+                        from++;
+                        clenfrom--;
+                        continue;
+                } else {
+                        from += size;
+                        clenfrom -= size;
+                }
+                size = SYNOUnicodeUTF16ChrToUTF8Chr(op, UpcaseTbl[wc], maxlen);
+                if (size == -1) {
+                        continue;
+                } else {
+                        op += size;
+                        maxlen -= size;
+                }
+        }
+        *op = 0;
+        return (op - to);
 }
 EXPORT_SYMBOL(SYNOUnicodeUTF8toUpper);
 
@@ -665,7 +610,7 @@ int file_permission(struct file *file, int mask)
 #ifdef CONFIG_FS_SYNO_ACL
 	struct inode * inode = file->f_path.dentry->d_inode;
 	if (IS_SYNOACL(inode)) {
-		return inode->i_op->syno_permission(file->f_path.dentry, mask);
+		return synoacl_op_perm(file->f_path.dentry, mask);
 	}
 	return inode_permission(inode, mask);
 #else 
@@ -1317,7 +1262,7 @@ static int __link_path_walk(const char *name, struct nameidata *nd)
 	if (!*name)
 		goto return_reval;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (NULL == nd->path.dentry) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 		printk("%s: force unmount hit\n", __FUNCTION__);
@@ -1353,7 +1298,7 @@ static int __link_path_walk(const char *name, struct nameidata *nd)
 		nd->flags |= LOOKUP_CONTINUE;
 #ifdef CONFIG_FS_SYNO_ACL
 		if (IS_SYNOACL(inode)) {
-			err = inode->i_op->syno_exec_permission(nd->path.dentry);
+			err = synoacl_op_exec_perm(nd->path.dentry, inode);
 		} else
 #endif
 		err = exec_permission_lite(inode);
@@ -1917,7 +1862,7 @@ static struct dentry *lookup_hash(struct nameidata *nd)
 	struct inode *inode = nd->path.dentry->d_inode;
 
 	if (IS_SYNOACL(inode)) {
-		err = inode->i_op->syno_permission(nd->path.dentry, MAY_EXEC);
+		err = synoacl_op_exec_perm(nd->path.dentry, inode);
 	} else {
 		err = inode_permission(inode, MAY_EXEC);
 	}
@@ -1982,7 +1927,7 @@ struct dentry * lookup_hash1(struct nameidata *nd)
 	struct inode *inode = nd->path.dentry->d_inode;
 
 	if (IS_SYNOACL(inode)) {
-		err = inode->i_op->syno_permission(nd->path.dentry, MAY_EXEC);
+		err = synoacl_op_exec_perm(nd->path.dentry, inode);
 	} else {
 		err = inode_permission(inode, MAY_EXEC);
 	}
@@ -2049,7 +1994,7 @@ struct dentry *lookup_one_len(const char *name, struct dentry *base, int len)
 
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_SYNOACL(base->d_inode)) {
-		err = base->d_inode->i_op->syno_permission(base, MAY_EXEC);
+		err = synoacl_op_exec_perm(base, base->d_inode);
 	} else 
 #endif /* CONFIG_FS_SYNO_ACL */
 	err = inode_permission(base->d_inode, MAY_EXEC);
@@ -2245,7 +2190,7 @@ static inline int may_create(struct inode *dir, struct dentry *child)
 
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_SYNOACL(dir)) {
-		return dir->i_op->syno_permission(child->d_parent, (S_ISDIR(mode)?MAY_APPEND:MAY_WRITE) | MAY_EXEC);
+		return synoacl_op_perm(child->d_parent, (S_ISDIR(mode)?MAY_APPEND:MAY_WRITE) | MAY_EXEC);
 	} 
 #endif /* CONFIG_FS_SYNO_ACL */
 	return inode_permission(dir, MAY_WRITE | MAY_EXEC);
@@ -2332,6 +2277,12 @@ int vfs_create(struct inode *dir, struct dentry *dentry, int mode,
 	error = dir->i_op->create(dir, dentry, mode, nd);
 	if (!error)
 		fsnotify_create(dir, dentry);
+#ifdef CONFIG_FS_SYNO_ACL
+	if (!error && IS_SYNOACL(dir)) {
+		//We assume that inode has been attached to dentry by d_instantiate().
+		synoacl_op_init(dentry);
+	}
+#endif
 	return error;
 }
 
@@ -2364,7 +2315,7 @@ int may_open(struct path *path, int acc_mode, int flag)
 
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(dentry, acc_mode);
+		error = synoacl_op_perm(dentry, acc_mode);
 	} else
 #endif /* CONFIG_FS_SYNO_ACL */
 	error = inode_permission(inode, acc_mode);
@@ -2949,6 +2900,12 @@ int vfs_mkdir(struct inode *dir, struct dentry *dentry, int mode)
 	error = dir->i_op->mkdir(dir, dentry, mode);
 	if (!error)
 		fsnotify_mkdir(dir, dentry);
+#ifdef CONFIG_FS_SYNO_ACL
+	if (!error && IS_SYNOACL(dir)) {
+		//We assume that inode has been attached to dentry by d_instantiate().
+		synoacl_op_init(dentry);
+	}
+#endif
 	return error;
 }
 
@@ -2994,7 +2951,7 @@ SYSCALL_DEFINE2(mkdir, const char __user *, pathname, int, mode)
 	return sys_mkdirat(AT_FDCWD, pathname, mode);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 /**
  * This function will create a new folder /tmp/forceumount in mode 0.
  * It will keep this dir's mnt&dentry and do mntget() and dget() to input value.

@@ -81,7 +81,6 @@
 
 #if defined(MY_ABC_HERE)
 #include <linux/synobios.h>
-extern char gszSynoHWVersion[];
 #endif
 
 static cycle_t rtc_read(struct clocksource *);
@@ -751,9 +750,9 @@ void start_cpu_decrementer(void)
 #if defined(CONFIG_SYNO_MPC8533_TIMEBASE_FREQ) && (0 != CONFIG_SYNO_MPC8533_TIMEBASE_FREQ)
 static inline void SYNOChangeMPC853xTimebaseFreq(void)
 {
-	if (0 == strncmp(gszSynoHWVersion, HW_DS110p, strlen(HW_DS110p)) ||
-		0 == strncmp(gszSynoHWVersion, HW_DS210p, strlen(HW_DS210p)) ||
-		0 == strncmp(gszSynoHWVersion, HW_DS410, strlen(HW_DS410))) {
+	if (syno_is_hw_version(HW_DS110p) ||
+		syno_is_hw_version(HW_DS210p) ||
+		syno_is_hw_version(HW_DS410)) {
 		ppc_tb_freq = CONFIG_SYNO_MPC8533_TIMEBASE_FREQ;
 	}
 }

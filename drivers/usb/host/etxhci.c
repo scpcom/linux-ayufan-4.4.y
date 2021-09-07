@@ -393,12 +393,12 @@ static void xhci_event_ring_work(unsigned long arg)
 }
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_IN_ETRON
 extern int gSynoFactoryUSBFastReset;
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_IN_ETRON
 extern int gSynoFactoryUSB3Disable;
 #endif
 
@@ -506,13 +506,13 @@ legacy_irq:
 
 	xhci_dbg(xhci, "Finished xhci_run\n");
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_IN_ETRON
 	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
 #endif
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_IN_ETRON
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
@@ -562,7 +562,7 @@ void etxhci_stop(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FIX_IN_ETRON
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
@@ -2062,6 +2062,27 @@ static void xhci_calculate_streams_entries(struct xhci_hcd *xhci,
 	}
 }
 
+static int xhci_ss_max_streams(struct xhci_hcd *xhci,
+	struct usb_host_endpoint *ep)
+{
+	int max_streams;
+	struct usb_ss_ep_comp_descriptor *desc;
+
+	if (!ep)
+		return 0;
+
+	desc = &ep->ss_ep_comp;
+
+	max_streams = desc->bmAttributes & 0x1f;
+
+	if (!max_streams)
+		return 0;
+
+	max_streams = 1 << max_streams;
+
+	return max_streams;
+}
+
 /* Returns an error code if one of the endpoint already has streams.
  * This does not change any data structures, it only checks and gathers
  * information.
@@ -2082,8 +2103,7 @@ static int xhci_calculate_streams_and_bitmask(struct xhci_hcd *xhci,
 		if (ret < 0)
 			return ret;
 
-		max_streams = USB_SS_MAX_STREAMS(
-				eps[i]->ss_ep_comp.bmAttributes);
+		max_streams = xhci_ss_max_streams(xhci, eps[i]);
 		if (max_streams < (*num_streams - 1)) {
 			xhci_dbg(xhci, "Ep 0x%x only supports %u stream IDs.\n",
 					eps[i]->desc.bEndpointAddress,
@@ -2164,10 +2184,11 @@ int etxhci_alloc_streams(struct usb_hcd *hcd, struct usb_device *udev,
 	struct xhci_hcd *xhci;
 	struct xhci_virt_device *vdev;
 	struct xhci_command *config_cmd;
+	struct xhci_slot_ctx *slot_ctx;
 	unsigned int ep_index;
 	unsigned int num_stream_ctxs;
 	unsigned long flags;
-	u32 changed_ep_bitmask = 0;
+	u32 changed_ep_bitmask = 0, temp;
 
 	if (!eps)
 		return -EINVAL;
@@ -2233,6 +2254,7 @@ int etxhci_alloc_streams(struct usb_hcd *hcd, struct usb_device *udev,
 		/* Set maxPstreams in endpoint context and update deq ptr to
 		 * point to stream context array. FIXME
 		 */
+		etxhci_dbg_stream_info(xhci, ep_index, vdev->eps[ep_index].stream_info);
 	}
 
 	/* Set up the input context for a configure endpoint command. */
@@ -2264,6 +2286,11 @@ int etxhci_alloc_streams(struct usb_hcd *hcd, struct usb_device *udev,
 	if (ret < 0)
 		goto cleanup;
 
+	xhci_dbg(xhci, "Output context after successful config ep cmd:\n");
+	slot_ctx = etxhci_get_slot_ctx(xhci, vdev->out_ctx);
+	etxhci_dbg_ctx(xhci, vdev->out_ctx,
+		     LAST_CTX_TO_EP_NUM(le32_to_cpu(slot_ctx->dev_info)));
+
 	spin_lock_irqsave(&xhci->lock, flags);
 	for (i = 0; i < num_eps; i++) {
 		ep_index = etxhci_get_endpoint_index(&eps[i]->desc);
@@ -2273,6 +2300,15 @@ int etxhci_alloc_streams(struct usb_hcd *hcd, struct usb_device *udev,
 		vdev->eps[ep_index].ep_state |= EP_HAS_STREAMS;
 	}
 	etxhci_free_command(xhci, config_cmd);
+
+	if (!xhci->hcc_params1 || ((xhci->hcc_params1 & 0xff) == 0x30)) {
+		temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40c0);
+		temp = (temp & 0xffffff00) | 0x00;
+		xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40c0);
+		temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40cc);
+		temp = (temp & 0xffffff00) | 0xc2;
+		xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40cc);
+	}
 	spin_unlock_irqrestore(&xhci->lock, flags);
 
 	/* Subtract 1 for stream 0, which drivers can't use */
@@ -2311,7 +2347,7 @@ int etxhci_free_streams(struct usb_hcd *hcd, struct usb_device *udev,
 	struct xhci_command *command;
 	unsigned int ep_index;
 	unsigned long flags;
-	u32 changed_ep_bitmask;
+	u32 changed_ep_bitmask, temp;
 
 	xhci = hcd_to_xhci(hcd);
 	vdev = xhci->devs[udev->slot_id];
@@ -2370,6 +2406,15 @@ int etxhci_free_streams(struct usb_hcd *hcd, struct usb_device *udev,
 		 */
 		vdev->eps[ep_index].ep_state &= ~EP_GETTING_NO_STREAMS;
 		vdev->eps[ep_index].ep_state &= ~EP_HAS_STREAMS;
+	}
+
+	if (!xhci->hcc_params1 || ((xhci->hcc_params1 & 0xff) == 0x30)) {
+		temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40c0);
+		temp = (temp & 0xffffff00) | 0x0e;
+		xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40c0);
+		temp = xhci_readl(xhci, (void __iomem *)xhci->cap_regs + 0x40cc);
+		temp = (temp & 0xffffff00) | 0xc0;
+		xhci_writel(xhci, temp, (void __iomem *)xhci->cap_regs + 0x40cc);
 	}
 	spin_unlock_irqrestore(&xhci->lock, flags);
 

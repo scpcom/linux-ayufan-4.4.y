@@ -400,7 +400,7 @@ static void __oom_kill_task(struct task_struct *p, int verbose)
 	force_sig(SIGKILL, p);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 void SYNO_stop_task(struct task_struct *p)
 {
 	if (is_global_init(p) && !p->mm) {

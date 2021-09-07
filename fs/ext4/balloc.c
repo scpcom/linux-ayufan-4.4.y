@@ -619,9 +619,6 @@ int ext4_should_retry_alloc(struct super_block *sb, int *retries)
 
 	return jbd2_journal_force_commit_nested(EXT4_SB(sb)->s_journal);
 }
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-EXPORT_SYMBOL(ext4_should_retry_alloc);
-#endif
 
 /*
  * ext4_new_meta_blocks() -- allocate block for meta data (indexing) blocks

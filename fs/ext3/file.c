@@ -70,6 +70,10 @@ const struct file_operations ext3_file_operations = {
 };
 
 const struct inode_operations ext3_file_inode_operations = {
+#ifdef MY_ABC_HERE
+	.syno_get_archive_ver = syno_ext3_get_archive_ver,
+	.syno_set_archive_ver = syno_ext3_set_archive_ver,
+#endif
 	.truncate	= ext3_truncate,
 	.setattr	= ext3_setattr,
 #ifdef CONFIG_EXT3_FS_XATTR
@@ -77,9 +81,6 @@ const struct inode_operations ext3_file_inode_operations = {
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext3_listxattr,
 	.removexattr	= generic_removexattr,
-#endif
-#ifdef MY_ABC_HERE
-	.synosetxattr	= syno_generic_setxattr,
 #endif
 	.check_acl	= ext3_check_acl,
 	.fiemap		= ext3_fiemap,

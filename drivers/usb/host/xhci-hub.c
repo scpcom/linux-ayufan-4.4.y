@@ -42,7 +42,7 @@ static void xhci_hub_descriptor(struct xhci_hcd *xhci,
 	desc->bDescLength = 7 + 2 * temp;
 
 	/* Why does core/hcd.h define bitmap?  It's just confusing. */
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 	memset(&desc->bitmap[0], 0, temp);
 	memset(&desc->bitmap[temp], 0xff, temp);
 #else

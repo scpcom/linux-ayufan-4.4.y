@@ -975,7 +975,7 @@ struct ext4_super_block {
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	__u32	s_reserved[157];	/* Padding to the end of the block */
 	__le32	s_archive_version;	/* Last archived version */
-	__le32	s_syno_reserved;
+	__le32	s_archive_version_obsoleted;
 	__le32  s_syno_hash_magic;	/* Enable Htree if the magic is given */
 #else
 	__u32   s_reserved[160];        /* Padding to the end of the block */
@@ -1119,6 +1119,7 @@ struct ext4_sb_info {
 
 #ifdef MY_ABC_HERE
 	int s_new_error_fs_event_flag;
+	char *s_mount_path;
 #endif
 #ifdef MY_DEF_HERE
 	int s_swap_create_time;
@@ -1591,6 +1592,12 @@ extern qsize_t *ext4_get_reserved_space(struct inode *inode);
 extern int flush_aio_dio_completed_IO(struct inode *inode);
 extern void ext4_da_update_reserve_space(struct inode *inode,
 					int used, int quota_claim);
+
+#ifdef MY_ABC_HERE
+extern int syno_ext4_get_archive_ver(struct dentry *d, u32 *);
+extern int syno_ext4_set_archive_ver(struct dentry *d, u32);
+#endif
+
 /* ioctl.c */
 extern long ext4_ioctl(struct file *, unsigned int, unsigned long);
 extern long ext4_compat_ioctl(struct file *, unsigned int, unsigned long);

@@ -54,10 +54,6 @@ static int __init mv_map_irq_1(struct pci_dev *dev, u8 slot, u8 pin);
 void mv_pci_error_init(u32 pciIf);
 static irqreturn_t pex_error_interrupt(int irq, void *dev_id);
 
-#ifdef CONFIG_SYNO_MV88F6281
-extern char gszSynoHWVersion[];
-#endif
-
 static struct pex_if_error {
 	MV_8 irq_name[PCI_ERR_NAME_LEN];
 	MV_U32 ifNumber;
@@ -79,14 +75,18 @@ void __init mv_pci_preinit(void)
 #ifdef CONFIG_SYNO_MV88F6281
 		//this workaround is for 7042, DS212 does not have one, so it is not necessary.
 		//212+ attaches USB 3.0 on PCIe 0x1, so it cannot be reset.
-		if ( 0 == strncmp(HW_DS212, gszSynoHWVersion, strlen(HW_DS212))) {
-			if( ((0 == strncmp(HW_DS212pv10, gszSynoHWVersion, strlen(HW_DS212pv10))) || (0 == strncmp(HW_DS212pv20, gszSynoHWVersion, strlen(HW_DS212pv20)))) && (0 == pciIf) )
-				    goto apply_pcie_workaround;
-			else 
-					goto skip_pcie_workaround;
-		} else if ((0 == strncmp(HW_DS112, gszSynoHWVersion, strlen(HW_DS112))) || (0 == strncmp(HW_DS112pv10, gszSynoHWVersion, strlen(HW_DS112pv10)))
-				|| (0 == strncmp(HW_DS213airv10, gszSynoHWVersion, strlen(HW_DS213airv10)))
-				|| (0 == strncmp(HW_DS213v10, gszSynoHWVersion, strlen(HW_DS213v10)))) {
+		if ( (syno_is_hw_version(HW_DS212pv10) || syno_is_hw_version(HW_DS212pv20)) && (0 == pciIf) ) {
+			goto apply_pcie_workaround;
+
+		} else if (syno_is_hw_version(HW_DS212) ||
+				   syno_is_hw_version(HW_DS212jv10) ||
+				   syno_is_hw_version(HW_DS212jv20)) {
+			goto skip_pcie_workaround;
+
+		} else if (syno_is_hw_version(HW_DS112)       ||
+				   syno_is_hw_version(HW_DS112pv10)   ||
+				   syno_is_hw_version(HW_DS213airv10) ||
+				   syno_is_hw_version(HW_DS213v10)) {
 			goto skip_pcie_workaround;
 		}
 apply_pcie_workaround:

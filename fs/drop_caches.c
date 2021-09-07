@@ -74,3 +74,22 @@ int drop_caches_sysctl_handler(ctl_table *table, int write,
 	}
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_QORIQ_GIANFAR_DROP_CACHE)
+
+#include <linux/syno_qoriq.h>
+
+void syno_drop_caches(unsigned int cache_type)
+{
+	if (cache_type & SYNO_DROP_CACHE_PAGE) {
+		drop_pagecache();
+	}
+
+	if (cache_type & SYNO_DROP_CACHE_SLAB) {
+		drop_slab();
+	}
+}
+
+EXPORT_SYMBOL(syno_drop_caches);
+
+#endif

@@ -31,8 +31,8 @@
 #include <linux/falloc.h>
 #include <linux/fs_struct.h>
 
-#ifdef MY_ABC_HERE
-extern long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd);
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
 #endif
 
 int vfs_statfs(struct dentry *dentry, struct kstatfs *buf)
@@ -271,7 +271,7 @@ static long do_sys_truncate(const char __user *pathname, loff_t length)
 		goto dput_and_out;
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(path.dentry, MAY_WRITE);
+		error = synoacl_op_perm(path.dentry, MAY_WRITE);
 	} else
 #endif
 	error = inode_permission(inode, MAY_WRITE);
@@ -568,7 +568,7 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
 	}
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_SYNOACL(inode)) {
-		res = inode->i_op->syno_access(path.dentry, mode | MAY_ACCESS);
+		res = synoacl_op_access(path.dentry, mode | MAY_ACCESS);
 	} else
 #endif
 	res = inode_permission(inode, mode | MAY_ACCESS);
@@ -616,7 +616,7 @@ SYSCALL_DEFINE1(chdir, const char __user *, filename)
 #ifdef CONFIG_FS_SYNO_ACL
 	inode = path.dentry->d_inode;
 	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(path.dentry, MAY_EXEC | MAY_ACCESS);
+		error = synoacl_op_perm(path.dentry, MAY_EXEC | MAY_ACCESS);
 	} else {
 		error = inode_permission(inode, MAY_EXEC | MAY_ACCESS);
 	}
@@ -653,7 +653,7 @@ SYSCALL_DEFINE1(fchdir, unsigned int, fd)
 
 #ifdef CONFIG_FS_SYNO_ACL
 	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(file->f_path.dentry, MAY_EXEC | MAY_ACCESS);
+		error = synoacl_op_perm(file->f_path.dentry, MAY_EXEC | MAY_ACCESS);
 	} else
 #endif
 	error = inode_permission(inode, MAY_EXEC | MAY_ACCESS);
@@ -680,7 +680,7 @@ SYSCALL_DEFINE1(chroot, const char __user *, filename)
 #ifdef CONFIG_FS_SYNO_ACL
 	inode = path.dentry->d_inode;
 	if (IS_SYNOACL(inode)) {
-		error = inode->i_op->syno_permission(path.dentry, MAY_EXEC | MAY_ACCESS);
+		error = synoacl_op_perm(path.dentry, MAY_EXEC | MAY_ACCESS);
 	} else {
 		error = inode_permission(inode, MAY_EXEC | MAY_ACCESS);
 	}
@@ -796,39 +796,24 @@ static int chown_common(struct dentry * dentry, uid_t user, gid_t group)
 }
 
 #ifdef	MY_ABC_HERE
+extern long __SYNOArchiveSet(struct dentry *, unsigned int cmd);
+
 asmlinkage long sys_SYNOArchiveBit(const char * filename, int cmd)
 {
-	int isPathGet = 0;
 	struct path path;
-	struct inode * inode = NULL;
-	long error = -EINVAL;
+	long error;
+
+	if (SYNO_FCNTL_BASE > cmd || SYNO_FCNTL_LAST < cmd) {
+		printk(KERN_WARNING "Archive bit cmd:%x not implement.\n", cmd);
+		return -EINVAL;
+	}
 
 	error = user_path_at(AT_FDCWD, filename, LOOKUP_FOLLOW, &path);
 	if (error)
-		goto out;
+		return error;
 
-	isPathGet = 1;
-
-	if (path.dentry && path.dentry->d_inode) {
-		inode = path.dentry->d_inode;
-	} else {
-		goto out;
-	}
-
-	if (inode->i_op && inode->i_op->set_archive) {
-		error = inode->i_op->set_archive(path.dentry, cmd);
-	} else {
-		error = __SYNOArchiveSet(path.dentry, cmd);
-	}
-	if (error) {
-		goto out;
-	}
-
-	error = 0;
-out:
-	if (isPathGet) {
-		path_put(&path);
-	}
+	error = __SYNOArchiveSet(path.dentry, cmd);
+	path_put(&path);
 	return error;
 }
 #endif //MY_ABC_HERE
@@ -1268,7 +1253,7 @@ int filp_close(struct file *filp, fl_owner_t id)
 		return 0;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (blSynostate(O_UNMOUNT_DONE, filp)) {
 		fput(filp);
 		return retval;

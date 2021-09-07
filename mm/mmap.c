@@ -221,7 +221,7 @@ void unlink_file_vma(struct vm_area_struct *vma)
 
 	if (file) {
 		struct address_space *mapping = file->f_mapping;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 		if (!blSynostate(O_UNMOUNT_OK, file)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 			printk("%s: force unmount hit\n", __FUNCTION__);
@@ -429,7 +429,7 @@ static void __vma_link_file(struct vm_area_struct *vma)
 	if (file) {
 		struct address_space *mapping = file->f_mapping;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 		if (!blSynostate(O_UNMOUNT_OK, file)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 			printk("%s: force unmount hit\n", __FUNCTION__);
@@ -467,7 +467,7 @@ static void vma_link(struct mm_struct *mm, struct vm_area_struct *vma,
 {
 	struct address_space *mapping = NULL;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (vma->vm_file && !blSynostate(O_UNMOUNT_OK, vma->vm_file)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 		printk("%s: force unmount hit\n", __FUNCTION__);
@@ -951,7 +951,7 @@ printk("do_mmap_pgoff() File %p denying due to FAST mode\n", file);
 	}
 #endif // CONFIG_OXNAS_FAST_READS_AND_WRITES
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (file) {
 		if (!blSynostate(O_UNMOUNT_OK, file)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
@@ -1217,7 +1217,7 @@ munmap_back:
 
 	if (file) {
 		error = -EINVAL;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 		if (!blSynostate(O_UNMOUNT_OK, file)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 			printk("%s: force unmount hit\n", __FUNCTION__);
@@ -1259,7 +1259,7 @@ munmap_back:
 		vma->vm_page_prot = vm_get_page_prot(vm_flags & ~VM_SHARED);
 
 	vma_link(mm, vma, prev, rb_link, rb_parent);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 		if (vma->vm_file && !blSynostate(O_UNMOUNT_OK, vma->vm_file)) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 			printk("%s: force unmount hit\n", __FUNCTION__);

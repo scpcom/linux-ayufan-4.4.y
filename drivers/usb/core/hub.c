@@ -1670,7 +1670,6 @@ void usb_disconnect(struct usb_device **pdev)
 {
 	struct usb_device	*udev = *pdev;
 	int			i;
-	struct usb_hcd          *hcd = bus_to_hcd(udev->bus);
 
 #if defined(CONFIG_USB_ETRON_HUB)
 	if (usb_is_etron_hcd(*pdev))
@@ -1702,9 +1701,7 @@ void usb_disconnect(struct usb_device **pdev)
 	 * so that the hardware is now fully quiesced.
 	 */
 	dev_dbg (&udev->dev, "unregistering device\n");
-	mutex_lock(hcd->bandwidth_mutex);
 	usb_disable_device(udev, 0);
-	mutex_unlock(hcd->bandwidth_mutex);
 	usb_hcd_synchronize_unlinks(udev);
 
 	usb_remove_ep_devs(&udev->ep0);
@@ -4244,7 +4241,7 @@ static int usb_reset_and_verify_device(struct usb_device *udev)
 			usb_enable_interface(udev, intf, true);
 			ret = 0;
 		} else {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 			/* Let the bandwidth allocation function know that this
 			 * device has been reset, and it will have to use
 			 * alternate setting 0 as the current alternate setting.
@@ -4265,7 +4262,7 @@ static int usb_reset_and_verify_device(struct usb_device *udev)
 #endif
 			ret = usb_set_interface(udev, desc->bInterfaceNumber,
 					desc->bAlternateSetting);
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 			intf->resetting_device = 0;
 #endif
 		}

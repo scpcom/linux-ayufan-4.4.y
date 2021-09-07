@@ -64,7 +64,7 @@ static inline int __fat_get_block(struct inode *inode, sector_t iblock,
 	sector_t phys;
 	int err, offset;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if(sb->s_flags & MS_UNMOUNT_WAIT) {
 #ifdef SYNO_DEBUG_FORCE_UNMOUNT
 		printk("%s: force unmount hit\n", __FUNCTION__);

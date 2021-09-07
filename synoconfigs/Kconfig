@@ -16,6 +16,13 @@ config SYNO_QORIQ_FSL_SATA_NRESET
 	help
 		Say Y here to disable software reset for ATA_DEV_ATA class
 
+config SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
+	bool "support for ignoring default gateway's ARP packet, which will wake up the machine"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to support ignoring default gateway's ARP packet.
+
 config SYNO_QORIQ_FIX_OCF_RACE
 	bool "fix ocf race"
 	depends on SYNO_QORIQ
@@ -58,6 +65,10 @@ config SYNO_MPC8533_TIMEBASE_FREQ
     default 0
     help
         Overwrite default timebase frequency
+
+config SYNO_QORIQ_GIANFAR_DROP_CACHE
+	bool "Drop cache before gianfar device start up"
+	depends on SYNO_QORIQ
 
 config SYNO_DISPLAY_CPUINFO
     bool "Support display CPU Infomation"

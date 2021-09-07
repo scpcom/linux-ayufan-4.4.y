@@ -111,9 +111,8 @@
 #endif
 #include <asm/mce.h>
 
-
 #ifdef  MY_ABC_HERE
-extern char gszSynoHWVersion[];
+#include  <linux/synobios.h>
 #endif
 
 #ifdef MY_ABC_HERE

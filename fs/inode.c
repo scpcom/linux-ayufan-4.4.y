@@ -290,7 +290,7 @@ void __destroy_inode(struct inode *inode)
 	fsnotify_inode_delete(inode);
 #ifdef CONFIG_FS_SYNO_ACL
 	if (inode->i_syno_acl && inode->i_syno_acl != ACL_NOT_CACHED)
-		synoacl_mod_release(inode->i_syno_acl);
+		syno_acl_release(inode->i_syno_acl);
 #elif defined(CONFIG_FS_POSIX_ACL)
 	if (inode->i_acl && inode->i_acl != ACL_NOT_CACHED)
 		posix_acl_release(inode->i_acl);

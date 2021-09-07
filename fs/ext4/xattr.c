@@ -333,9 +333,6 @@ ext4_xattr_get(struct inode *inode, int name_index, const char *name,
 	up_read(&EXT4_I(inode)->xattr_sem);
 	return error;
 }
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-EXPORT_SYMBOL(ext4_xattr_get);
-#endif
 
 static int
 ext4_xattr_list_entries(struct inode *inode, struct ext4_xattr_entry *entry,
@@ -1092,9 +1089,6 @@ cleanup:
 	up_write(&EXT4_I(inode)->xattr_sem);
 	return error;
 }
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-EXPORT_SYMBOL(ext4_xattr_set_handle);
-#endif
 
 /*
  * ext4_xattr_set()

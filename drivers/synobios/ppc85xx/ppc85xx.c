@@ -192,7 +192,6 @@ extern char gszSerialNum[];
 #endif
 
 #ifdef MY_ABC_HERE
-extern char gszSynoHWVersion[16];
 #endif
 
 static int Uninitialize(void);
@@ -632,7 +631,7 @@ static int SetFanStatus(FAN_STATUS status, FAN_SPEED speed)
 		break;
 	case MODEL_DS409p:
 #ifdef MY_ABC_HERE
-		if (!strncmp(HW_DS409pv20, gszSynoHWVersion, strlen(HW_DS409pv20))) {
+		if (syno_is_hw_version(HW_DS409pv20)) {
 			res = SetFanSpeedValue3bits(status, speed, FanStatusMapping409pv20);
 			goto END;
 		}

@@ -1276,13 +1276,16 @@ static int map_urb_for_dma(struct usb_hcd *hcd, struct urb *urb,
 
 	if (usb_endpoint_xfer_control(&urb->ep->desc)
 	    && !(urb->transfer_flags & URB_NO_SETUP_DMA_MAP)) {
-		if (hcd->self.uses_dma)
+		if (hcd->self.uses_dma) {
 			urb->setup_dma = dma_map_single(
 					hcd->self.controller,
 					urb->setup_packet,
 					sizeof(struct usb_ctrlrequest),
 					DMA_TO_DEVICE);
-		else if (hcd->driver->flags & HCD_LOCAL_MEM)
+			if (dma_mapping_error(hcd->self.controller,
+						urb->setup_dma))
+				return -EAGAIN;
+		} else if (hcd->driver->flags & HCD_LOCAL_MEM)
 			ret = hcd_alloc_coherent(
 					urb->dev->bus, mem_flags,
 					&urb->setup_dma,
@@ -1294,13 +1297,28 @@ static int map_urb_for_dma(struct usb_hcd *hcd, struct urb *urb,
 	dir = usb_urb_dir_in(urb) ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
 	if (ret == 0 && urb->transfer_buffer_length != 0
 	    && !(urb->transfer_flags & URB_NO_TRANSFER_DMA_MAP)) {
-		if (hcd->self.uses_dma)
+		if (hcd->self.uses_dma) {
+			if (urb->num_sgs) {
+				int n = dma_map_sg(
+						hcd->self.controller,
+						urb->sg->sg,
+						urb->num_sgs,
+						dir);
+				if (n <= 0)
+					ret = -EAGAIN;
+				if (n != urb->num_sgs)
+					urb->num_sgs = n;
+			} else {
 			urb->transfer_dma = dma_map_single (
 					hcd->self.controller,
 					urb->transfer_buffer,
 					urb->transfer_buffer_length,
 					dir);
-		else if (hcd->driver->flags & HCD_LOCAL_MEM) {
+				if (dma_mapping_error(hcd->self.controller,
+							urb->transfer_dma))
+					return -EAGAIN;
+			}
+		} else if (hcd->driver->flags & HCD_LOCAL_MEM) {
 			ret = hcd_alloc_coherent(
 					urb->dev->bus, mem_flags,
 					&urb->transfer_dma,
@@ -1343,12 +1361,19 @@ static void unmap_urb_for_dma(struct usb_hcd *hcd, struct urb *urb)
 	dir = usb_urb_dir_in(urb) ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
 	if (urb->transfer_buffer_length != 0
 	    && !(urb->transfer_flags & URB_NO_TRANSFER_DMA_MAP)) {
-		if (hcd->self.uses_dma)
+		if (hcd->self.uses_dma) {
+			if (urb->num_sgs > 0) {
+				dma_unmap_sg(hcd->self.controller,
+					urb->sg->sg,
+					urb->num_sgs,
+					dir);
+			} else {
 			dma_unmap_single(hcd->self.controller,
 					urb->transfer_dma,
 					urb->transfer_buffer_length,
 					dir);
-		else if (hcd->driver->flags & HCD_LOCAL_MEM)
+			}
+		} else if (hcd->driver->flags & HCD_LOCAL_MEM)
 			hcd_free_coherent(urb->dev->bus, &urb->transfer_dma,
 					&urb->transfer_buffer,
 					urb->transfer_buffer_length,
@@ -1681,7 +1706,7 @@ int usb_hcd_alloc_bandwidth(struct usb_device *udev,
 		}
 	}
 	if (cur_alt && new_alt) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 		struct usb_interface *iface = usb_ifnum_to_if(udev,
 				cur_alt->desc.bInterfaceNumber);
 
@@ -1962,7 +1987,7 @@ irqreturn_t usb_hcd_irq (int irq, void *__hcd)
 	local_irq_restore(flags);
 	return rc;
 }
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 EXPORT_SYMBOL_GPL(usb_hcd_irq);
 #endif
 

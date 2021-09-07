@@ -44,10 +44,6 @@
 LIST_HEAD(super_blocks);
 DEFINE_SPINLOCK(sb_lock);
 
-#ifdef MY_ABC_HERE
-spinlock_t Namei_buf_lock_1;  /* lock for UTF16NameiStrBuf1[] in fs/namei.c */
-static int lock_1_init = 0;
-#endif
 
 /**
  *	alloc_super	-	create new superblock
@@ -113,13 +109,6 @@ static struct super_block *alloc_super(struct file_system_type *type)
 		mutex_init(&s->s_archive_mutex);
 		s->s_archive_version = 0;
 #endif
-#ifdef MY_ABC_HERE
-		if (!lock_1_init) {
-			spin_lock_init(&Namei_buf_lock_1);
-			lock_1_init=1;
-		}
-#endif
-
 	}
 out:
 	return s;

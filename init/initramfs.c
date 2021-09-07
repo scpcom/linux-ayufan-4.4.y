@@ -455,7 +455,14 @@ static char * __init unpack_to_rootfs(char *buf, unsigned len)
 					 compress_name);
 				message = msg_buf;
 			}
+#ifdef MY_ABC_HERE
+		} else {
+			/* It's workaround. For backward supporting inaccurate size of rd
+			 * in boot arguments, eg.: initrd=0x2000040,4M */
+			break;
+#endif
 		}
+
 		if (state != Reset)
 			error("junk in compressed archive");
 		this_header = saved_offset + my_inptr;

@@ -228,7 +228,7 @@ static int do_lo_send_aops(struct loop_device *lo, struct bio_vec *bvec,
 		struct page *page;
 		void *fsdata;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 		if (unlikely(!blSynostate(O_UNMOUNT_OK, file))) {
 			ret = -EIO;
 			goto fail;
@@ -285,7 +285,7 @@ static int __do_lo_send_write(struct file *file,
 	ssize_t bw;
 	mm_segment_t old_fs = get_fs();
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (unlikely(!blSynostate(O_UNMOUNT_OK, file))) {
 		return -EIO;
 	}
@@ -486,7 +486,7 @@ static int do_bio_filebacked(struct loop_device *lo, struct bio *bio)
 
 	pos = ((loff_t) bio->bi_sector << 9) + lo->lo_offset;
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 	if (unlikely(!blSynostate(O_UNMOUNT_OK, lo->lo_backing_file))) {
 		ret = -EIO;
 		goto out;

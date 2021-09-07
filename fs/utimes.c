@@ -10,6 +10,11 @@
 #include <linux/syscalls.h>
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
+
+#ifdef CONFIG_FS_SYNO_ACL
+#include "synoacl_int.h"
+#endif
+
 #ifdef __ARCH_WANT_SYS_UTIME
 
 /*
@@ -53,7 +58,7 @@ asmlinkage long sys_SYNOUtime(char * filename, struct timespec * pCtime)
 	int error;
 	struct path path;
 	struct inode *inode = NULL;
-	struct iattr newattrs;
+	struct timespec time;
 
 	if (!pCtime) {
 		return -EINVAL;
@@ -68,21 +73,26 @@ asmlinkage long sys_SYNOUtime(char * filename, struct timespec * pCtime)
 	if (IS_RDONLY(inode))
 		goto dput_and_out;
 
-	error = copy_from_user(&newattrs.ia_ctime, pCtime, sizeof(struct timespec));
+	error = copy_from_user(&time, pCtime, sizeof(struct timespec));
 	if (error)
 		goto dput_and_out;
 
-	newattrs.ia_valid = ATTR_CREATE_TIME;
-	mutex_lock(&inode->i_mutex);
-	if (inode->i_op && inode->i_op->setattr)  {
-		error = inode->i_op->setattr(path.dentry, &newattrs);
-	} else {
-		error = inode_change_ok(inode, &newattrs);
-		if (!error) {
-			error = inode_setattr(inode, &newattrs);
+	if (!capable(CAP_FOWNER)) {
+#ifdef CONFIG_FS_SYNO_ACL
+		if (IS_SYNOACL(inode)) {
+			error = synoacl_op_perm(path.dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
+			if (error)
+				goto dput_and_out;
+		} else {
+#endif
+			error = -EPERM;
+			goto dput_and_out;
+#ifdef CONFIG_FS_SYNO_ACL
 		}
+#endif
 	}
-	mutex_unlock(&inode->i_mutex);
+
+	error = syno_op_set_crtime(path.dentry, &time);
 
 dput_and_out:
 	path_put(&path);
@@ -148,7 +158,7 @@ static int utimes_common(struct path *path, struct timespec *times)
 
 #ifdef CONFIG_FS_SYNO_ACL
 		if (IS_SYNOACL(inode)) {
-			if (inode->i_op->syno_permission(path->dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR)) {
+			if (synoacl_op_perm(path->dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR)) {
 				goto mnt_drop_write_and_out;
 			}
 		} else

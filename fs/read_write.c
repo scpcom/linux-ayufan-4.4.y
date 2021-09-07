@@ -363,7 +363,7 @@ ssize_t vfs_write(struct file *file, const char __user *buf, size_t count, loff_
 		else
 			ret = do_sync_write(file, buf, count, pos);
 		if (ret > 0) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 			if (!blSynostate(O_UNMOUNT_OK, file)) {
 				return -EINVAL;
 			}
@@ -625,7 +625,7 @@ asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, si
 	/* check fd for regular file */
 	file = fget(fd);
 	if (!file) {
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 		ret = -EPIPE;
 #else
 		ret = -EBADF;
@@ -675,7 +675,7 @@ asmlinkage ssize_t sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, si
 				bytes_written += cBytewritten;
 				break;
 			}
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 			if (!blSynostate(O_UNMOUNT_OK, file)) {
 				printk("recvfile: force unmount hit\n");
 				ret = -EPIPE;

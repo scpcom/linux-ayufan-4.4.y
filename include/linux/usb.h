@@ -179,7 +179,7 @@ struct usb_interface {
 	unsigned needs_altsetting0:1;	/* switch to altsetting 0 is pending */
 	unsigned needs_binding:1;	/* needs delayed unbind/rebind */
 	unsigned reset_running:1;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 	unsigned resetting_device:1;    /* true: bandwidth alloc after reset */
 #endif
 
@@ -1381,7 +1381,7 @@ static inline void usb_fill_int_urb(struct urb *urb,
 	urb->transfer_buffer_length = buffer_length;
 	urb->complete = complete_fn;
 	urb->context = context;
-#ifdef MY_ABC_HERE
+#ifdef SYNO_USB_BACKPORT_BY_ETRON
 	if (dev->speed == USB_SPEED_HIGH || dev->speed == USB_SPEED_SUPER)
 #else
 	if (dev->speed == USB_SPEED_HIGH)
@@ -1612,6 +1612,14 @@ static inline unsigned int __create_pipe(struct usb_device *dev,
 	((PIPE_INTERRUPT << 30) | __create_pipe(dev, endpoint))
 #define usb_rcvintpipe(dev,endpoint)	\
 	((PIPE_INTERRUPT << 30) | __create_pipe(dev, endpoint) | USB_DIR_IN)
+
+static inline struct usb_host_endpoint *
+usb_pipe_endpoint(struct usb_device *dev, unsigned int pipe)
+{
+	struct usb_host_endpoint **eps;
+	eps = usb_pipein(pipe) ? dev->ep_in : dev->ep_out;
+	return eps[usb_pipeendpoint(pipe)];
+}
 
 /*-------------------------------------------------------------------------*/
 

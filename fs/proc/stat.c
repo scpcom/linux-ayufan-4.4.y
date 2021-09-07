@@ -171,7 +171,7 @@ static int __init proc_stat_init(void)
 }
 module_init(proc_stat_init);
 
-#ifdef MY_ABC_HERE
+#ifdef SYNO_FORCE_UNMOUNT
 static const struct file_operations proc_invalidfile = {
 };
 
