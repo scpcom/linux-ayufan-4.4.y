@@ -103,6 +103,7 @@ extern int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int);
 extern int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int);
 #ifdef MY_ABC_HERE
 extern int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+extern int (*funcSYNODiskRetryReport)(unsigned int, unsigned int);
 #endif
 #endif
 
@@ -586,6 +587,17 @@ void SendSataErrEvent(struct work_struct *work)
 
     return;
 }
+
+void SendDiskRetryEvent(struct work_struct *work)
+{
+	struct ata_port *ap = container_of(work, struct ata_port, SendDiskRetryEventTask);
+
+	if (funcSYNODiskRetryReport) {
+		funcSYNODiskRetryReport(syno_libata_index_get(ap->scsi_host, 0, 0, 0), ap->nr_pmp_links);
+	}
+
+	return;
+}
 #endif
 #endif
 
@@ -874,6 +886,15 @@ void ata_scsi_error(struct Scsi_Host *host)
 		if (SYNO_ERROR_TILL_TO_FORCE == ap->iFakeError) {
 			DBGMESG("port %d unset Fake Error\n", ap->print_id);
 			ap->iFakeError = 0;
+		}
+#ifdef SYNO_SATA_IRQ_OFF
+		if (SYNO_SATA_RETRY_TIMES == iDetectTries &&
+				SYNO_SATA_RETRY_TIMES == iDeepTries) {
+#else
+		if (SYNO_SATA_RETRY_TIMES == iDetectTries) {
+#endif
+			/* First time the port enter our retry mechanism */
+			schedule_work(&(ap->SendDiskRetryEventTask));
 		}
 		if (0 < iDetectTries) {
 			ata_port_printk(ap, KERN_ERR, "do detect tries %d\n", iDetectTries);

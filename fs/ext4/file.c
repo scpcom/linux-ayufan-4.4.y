@@ -28,9 +28,6 @@
 #include "xattr.h"
 #include "acl.h"
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-#include "syno_acl.h"
-#endif
 
 /*
  * Called when an inode is released. Note that this is different
@@ -269,12 +266,7 @@ const struct inode_operations ext4_file_inode_operations = {
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
 #endif
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	.syno_acl_get   = ext4_get_syno_acl,
-	.syno_acl_set   = ext4_set_syno_acl,
-#else
 	.check_acl	= ext4_check_acl,
-#endif
 	.fallocate	= ext4_fallocate,
 	.fiemap		= ext4_fiemap,
 #ifdef CONFIG_SYNO_PLX_PORTING

@@ -48,6 +48,7 @@
  *   per device, not per bus
  */
 
+#include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/slab.h>
@@ -559,6 +560,7 @@ int blIsCardReader(struct usb_device *usbdev)
 	}
 	return 0;
 }
+EXPORT_SYMBOL(blIsCardReader);
 #endif
 
 /*****************************************************************/

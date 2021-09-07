@@ -850,6 +850,9 @@ struct ata_port {
 						   to prevent port freeze issue */
 	struct work_struct	SendPwrResetEventTask;
 	struct work_struct	SendPortDisEventTask;
+#ifdef MY_ABC_HERE
+	struct work_struct      SendDiskRetryEventTask;
+#endif
 #endif
 	unsigned int		print_id; /* user visible unique port ID */
 	unsigned int		port_no; /* 0 based port no. inside the host */

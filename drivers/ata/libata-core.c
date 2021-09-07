@@ -6112,6 +6112,9 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 	ap->iDetectStat = 0;
 	INIT_WORK(&ap->SendPwrResetEventTask, SendPwrResetEvent);
 	INIT_WORK(&ap->SendPortDisEventTask, SendPortDisEvent);
+#ifdef MY_ABC_HERE
+	INIT_WORK(&ap->SendDiskRetryEventTask, SendDiskRetryEvent);
+#endif
 #endif
 	return ap;
 }
@@ -7536,6 +7539,8 @@ EXPORT_SYMBOL(funcSYNOSendDiskPortDisEvent);
 #ifdef MY_ABC_HERE
 int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSataErrorReport);
+int (*funcSYNODiskRetryReport)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODiskRetryReport);
 #endif
 #endif /* MY_ABC_HERE */
 

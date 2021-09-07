@@ -24,7 +24,7 @@ extern char gszSynoHWVersion[];
 #define SYNOBIOS_MAJOR    201
 #define SYNOBIOS_NEVENTS  128
 
-/* 
+/*
  * SynoBios Hardware status structure is as following
  * ThermalStage:	0~3: Normal, Warm, Hot, Critical, four stages
  * MemEccCount:		0~X: the count of Memory ECC
@@ -35,7 +35,7 @@ extern char gszSynoHWVersion[];
 /*#define LCD_STR_LEN		40
 typedef struct _Synohw {
 	unsigned long	AcPowerStatus;
-	unsigned long	ThermalStage;	
+	unsigned long	ThermalStage;
 	unsigned long	MemEccCount;
 	unsigned long	ButtonStatus;
 	unsigned long	HardDiskStatus;
@@ -49,39 +49,41 @@ typedef struct _Synohw {
 
 typedef struct _Synohw_custom {
 	unsigned long	obj_1;
-	unsigned long	obj_2;	
-	unsigned long	obj_3;	
-	unsigned long	obj_4;	
-	unsigned long	obj_5;	
-	unsigned long	obj_6;	
-	unsigned long	obj_7;	
-	unsigned long	obj_8;	
-	unsigned long	obj_9;	
-	unsigned long	obj_10;	
-	unsigned long	obj_11;	
-	unsigned long	obj_12;	
-	unsigned long	obj_13;	
-	unsigned long	obj_14;	
-	unsigned long	obj_15;	
-	unsigned long	obj_16;	
-	unsigned long	obj_17;	
-	unsigned long	obj_18;	
-	unsigned long	obj_19;	
-	unsigned long	obj_20;	
-	unsigned long	obj_21;	
-	unsigned long	obj_22;	
-	unsigned long	obj_23;	
-	unsigned long	obj_24;	
-	unsigned long	obj_25;	
-	unsigned long	obj_26;	
-	unsigned long	obj_27;	
-	unsigned long	obj_28;	
-	unsigned long	obj_29;	
-	unsigned long	obj_30;	
-	unsigned long	obj_31;	
-	unsigned long	obj_32;	
+	unsigned long	obj_2;
+	unsigned long	obj_3;
+	unsigned long	obj_4;
+	unsigned long	obj_5;
+	unsigned long	obj_6;
+	unsigned long	obj_7;
+	unsigned long	obj_8;
+	unsigned long	obj_9;
+	unsigned long	obj_10;
+	unsigned long	obj_11;
+	unsigned long	obj_12;
+	unsigned long	obj_13;
+	unsigned long	obj_14;
+	unsigned long	obj_15;
+	unsigned long	obj_16;
+	unsigned long	obj_17;
+	unsigned long	obj_18;
+	unsigned long	obj_19;
+	unsigned long	obj_20;
+	unsigned long	obj_21;
+	unsigned long	obj_22;
+	unsigned long	obj_23;
+	unsigned long	obj_24;
+	unsigned long	obj_25;
+	unsigned long	obj_26;
+	unsigned long	obj_27;
+	unsigned long	obj_28;
+	unsigned long	obj_29;
+	unsigned long	obj_30;
+	unsigned long	obj_31;
+	unsigned long	obj_32;
 } SYNOHW_CUSTOM;
 */
+
+extern struct proc_dir_entry *proc_synobios_root;
 
 typedef struct _SynoMsgPkt {
 	long	usNum;
@@ -167,7 +169,7 @@ typedef struct _SynoMsgPkt {
 
 #define SYNO_EVENT_IOERR_HD0            0x1700
 
-#define SYNO_EVENT_USB_ERROR            0x1800
+#define SYNO_EVENT_DETECT_CARD_CHANGE   0x1800
 
 #define SYNO_EVENT_RAID                 0x1900
 
@@ -196,6 +198,10 @@ typedef struct _SynoMsgPkt {
 
 #ifdef MY_ABC_HERE
 #define SYNO_EVENT_WAKE_FROM_DEEP_SLEEP 0x2b00
+#endif
+
+#ifdef MY_ABC_HERE
+#define SYNO_EVENT_DISK_RETRY_REPORT 0x2c00
 #endif
 
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
@@ -266,7 +272,7 @@ typedef struct _tag_SYNO_MEM_ACCESS {
 #define MAX_CPU 2
 typedef struct _SynoCpuTemp {
 	unsigned char blSurface;
-	int cpu_num;	
+	int cpu_num;
 	int cpu_temp[MAX_CPU];
 } SYNOCPUTEMP;
 
@@ -325,7 +331,7 @@ typedef struct _SynoAutoPowerOn {
 
 /*for test only*/
 typedef struct _SynoRtcPkt {
-	char    rg[16];          
+	char    rg[16];
 } SYNORTCPKT;
 
 typedef struct _SynoPWMCTL {
@@ -356,7 +362,7 @@ typedef enum {
 typedef enum {
 	SYNO_LED_OFF = 0,
 	SYNO_LED_ON,
-	SYNO_LED_BLINKING,	
+	SYNO_LED_BLINKING,
 } SYNO_LED;
 
 typedef enum {
@@ -604,7 +610,7 @@ typedef enum {
 	CARDREADER_NO,
 }CARDREADER_T;
 
-typedef enum { 
+typedef enum {
 	MICROP_PWM_UNKNOWN,
 	MICROP_PWM_YES,
 	MICROP_PWM_NO,
@@ -698,6 +704,7 @@ typedef enum {
 	CPU_88F6702,
 	CPU_88F6707,
 	CPU_MV78230,
+	CPU_8241,
 	CPU_8533e,
 	CPU_P1022,
 	CPU_C2000,
@@ -755,8 +762,8 @@ typedef struct {
 #define HW_DS209p      "DS209p"        //"DS209p"
 #define HW_DS209pII    "DS209pII"      //"DS209pII"
 #define HW_DS209pIIr1  "DS209pIIr1"    //"DS209pIIr1"
-#define HW_DS108jv10   "DS108jv10"     //"DS108jv10" 
-#define HW_DS108jv20   "DS108jv20"     //"DS108jv20" 
+#define HW_DS108jv10   "DS108jv10"     //"DS108jv10"
+#define HW_DS108jv20   "DS108jv20"     //"DS108jv20"
 #define HW_DS109j      "DS109jv10"     //"DS109jv10"
 #define HW_DS209j      "DS209jv10"     //"DS209jv10"
 #define HW_DS109       "DS109"         //"DS109"
@@ -862,9 +869,10 @@ typedef struct {
 #define HW_RS814p      "RS814+"        //"RS814+"
 #define HW_RS814rpp    "RS814rp+"      //"RS814rp+"
 #define HW_DS214play      "DS214play"
+#define HW_DS414play      "DS414play"   //"DS414play"
 #define HW_DS414slim   "DS414slim"    //DS414slim
 #define HW_UNKNOWN     "DSUnknown"
-									    
+
 typedef struct _tag_HwCapability {
 	char*           szHwVersion;
 	CAPABILITY      capability[MAX_CAPABILITY];
@@ -993,6 +1001,7 @@ typedef enum {
 	MODEL_DS214play,
 	MODEL_DS2414p,
 	MODEL_DS414slim,
+	MODEL_DS414play,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
@@ -1030,11 +1039,11 @@ typedef enum {
 } SYNO_NET_LINK_EVENT;
 
 
-/** 
- * from first 0 bit to 6th bit is signature 
- * 7th bit indicate component status, true is compoent fail 
+/**
+ * from first 0 bit to 6th bit is signature
+ * 7th bit indicate component status, true is compoent fail
  * the others bits are id
- */ 
+ */
 typedef unsigned int sys_comp_stat_t;
 #define COMP_STAT_BITS						sizeof(sys_comp_stat_t)*8
 
@@ -1060,7 +1069,7 @@ typedef unsigned int sys_comp_stat_t;
  * This is the primaty key for look up SYNO_SYS_STATUS.
  * When we want add a new component status. You must add a new
  * signature too
- */ 
+ */
 typedef enum {
 	SIGNATURE_FAN_FAIL = 0x1,
 	SIGNATURE_VOLUME_DEGRADE = 0x2,
@@ -1071,9 +1080,9 @@ typedef enum {
 } SYNO_SYS_STAT_SIGNATURE;
 
 /**
- * These are system components stat, we don't use array here. 
- * Because it still need hard code signature in synobios.c 
- */ 
+ * These are system components stat, we don't use array here.
+ * Because it still need hard code signature in synobios.c
+ */
 typedef struct _tag_SYNO_SYS_STATUS {
 	sys_comp_stat_t fan_fail;
 	sys_comp_stat_t volume_degrade;
@@ -1448,7 +1457,7 @@ struct synobios_ops {
 	void		(*get_cpu_info)(SYNO_CPU_INFO*, const unsigned int);
 };
 
-/* TODO: Because user space also need this define, so we define them here. 
+/* TODO: Because user space also need this define, so we define them here.
  * But userspace didn't have a common define like SYNO_SATA_PM_DEVICE_GPIO include
  * kernel space. So we can't define it inside some define */
 #define EBOX_GPIO_KEY			"gpio"

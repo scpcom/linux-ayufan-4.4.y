@@ -23,6 +23,13 @@ config SYNO_QORIQ_IGNORE_DEFAULT_GATEWAY_ARP
 	help
 	  Say Y here to support ignoring default gateway's ARP packet.
 
+config SYNO_QORIQ_DISABLE_KMSG_BEFORE_SYSSLEEP
+	bool "Disable /proc/kmsg to prevent disk wakeup before system deepsleep, see bug <DSM> #55224"
+	depends on SYNO_QORIQ
+	default y
+	help
+	  Say Y here to disable /proc/kmsg to prevent disk wakeup before system deepsleep, see bug <DSM> #55224
+
 config SYNO_QORIQ_FIX_OCF_RACE
 	bool "fix ocf race"
 	depends on SYNO_QORIQ

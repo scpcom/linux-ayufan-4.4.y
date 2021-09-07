@@ -181,6 +181,7 @@ extern void SendPwrResetEvent(struct work_struct *work);
 extern void SendPortDisEvent(struct work_struct *work);
 #ifdef MY_ABC_HERE
 extern void SendSataErrEvent(struct work_struct *work);
+extern void SendDiskRetryEvent(struct work_struct *work);
 #endif
 #endif
 #ifdef SYNO_SATA_IRQ_OFF

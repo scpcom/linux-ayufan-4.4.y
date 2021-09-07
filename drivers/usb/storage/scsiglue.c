@@ -544,8 +544,28 @@ static ssize_t store_max_sectors(struct device *dev, struct device_attribute *at
 static DEVICE_ATTR(max_sectors, S_IRUGO | S_IWUSR, show_max_sectors,
 		store_max_sectors);
 
+#ifdef MY_ABC_HERE
+extern int blIsCardReader(struct usb_device *usbdev);
+static ssize_t show_syno_cardreader(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdp = to_scsi_device(dev);
+	struct us_data *us = host_to_us(sdp->host);
+	struct usb_device *usbdev = us->pusb_dev;
+
+	if (blIsCardReader(usbdev)) {
+		return sprintf(buf, "1");
+	} else {
+		return sprintf(buf, "0");
+	}
+}
+static DEVICE_ATTR(syno_cardreader, S_IRUGO | S_IWUSR, show_syno_cardreader, NULL);
+#endif
+
 static struct device_attribute *sysfs_device_attr_list[] = {
 		&dev_attr_max_sectors,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_cardreader,
+#endif
 		NULL,
 		};
 

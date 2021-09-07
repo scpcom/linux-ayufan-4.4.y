@@ -47,10 +47,6 @@
 #include "acl.h"
 #include "ext4_extents.h"
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-#include "syno_acl.h"
-#endif
-
 #include <trace/events/ext4.h>
 
 #define MPAGE_DA_EXTENT_TAIL 0x01
@@ -5487,15 +5483,9 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 	int error, rc = 0;
 	const unsigned int ia_valid = attr->ia_valid;
 
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	if (!IS_SYNOACL(inode)) {
-#endif
 	error = inode_change_ok(inode, attr);
 	if (error)
 		return error;
-#ifdef CONFIG_EXT4_FS_SYNO_ACL
-	}
-#endif
 
 	if ((ia_valid & ATTR_UID && attr->ia_uid != inode->i_uid) ||
 		(ia_valid & ATTR_GID && attr->ia_gid != inode->i_gid)) {

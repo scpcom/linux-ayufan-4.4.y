@@ -35,6 +35,9 @@
 	extern u32 nfs_udp_f_rtpref;
 	extern u32 nfs_udp_f_wtpref;
 #endif /*MY_ABC_HERE*/
+#ifdef MY_ABC_HERE
+extern u32 bl_unix_pri_enable;
+#endif
 
 static int	nfs3_ftypes[] = {
 	0,			/* NF3NON */
@@ -95,6 +98,7 @@ nfsd3_proc_setattr(struct svc_rqst *rqstp, struct nfsd3_sattrargs *argp,
 				SVCFH_fmt(&argp->fh));
 
 	fh_copy(&resp->fh, &argp->fh);
+
 	nfserr = nfsd_setattr(rqstp, &resp->fh, &argp->attrs,
 			      argp->check_guard, argp->guardtime);
 	RETURN_STATUS(nfserr);

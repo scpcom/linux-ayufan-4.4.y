@@ -444,15 +444,9 @@ SYSCALL(SYNODecryptName)	/* 411 */
 SYSCALL(ni_syscall)			/* 410 */
 SYSCALL(ni_syscall)
 #endif
-#ifdef MY_ABC_HERE
-SYSCALL(SYNOACLCheckPerm)		/* 412 */
-SYSCALL(SYNOACLIsSupport)		/* 413 */
-SYSCALL(SYNOACLGetPerm)		    /* 414 */
-#else
 SYSCALL(ni_syscall)			/* 412 */	
 SYSCALL(ni_syscall)			
 SYSCALL(ni_syscall)
-#endif
 SYSCALL(ni_syscall)
 #ifdef MY_ABC_HERE
 SYSCALL(SYNOStat)            /* 416 */
