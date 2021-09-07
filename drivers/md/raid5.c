@@ -4152,7 +4152,7 @@ static int make_request(struct request_queue *q, struct bio * bi)
 	if (mddev->degraded > conf->max_degraded) {
 #endif
 		 
-		bio_endio(bi, 0);
+		bio_endio(bi, -EIO);
 		return 0;
 	}
 #endif  

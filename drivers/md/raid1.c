@@ -763,7 +763,7 @@ static int make_request(struct request_queue *q, struct bio * bio)
 	if (0 == conf->raid_disks - mddev->degraded) {
 #endif
 		 
-		bio_endio(bio, 0);
+		bio_endio(bio, -EIO);
 		return 0;
 	}
 #endif  

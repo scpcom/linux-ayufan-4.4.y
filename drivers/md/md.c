@@ -6351,6 +6351,9 @@ void md_do_sync(mddev_t *mddev)
 #else
 	printk(KERN_INFO "md: %s of RAID array %s\n", desc, mdname(mddev));
 #endif
+#ifdef MY_ABC_HERE
+	SynoReportSyncStatus(desc, 0, 0, mddev->md_minor);
+#endif  
 	printk(KERN_INFO "md: minimum _guaranteed_  speed:"
 		" %d KB/sec/disk.\n", speed_min(mddev));
 	printk(KERN_INFO "md: using maximum available idle IO bandwidth "
@@ -6485,6 +6488,10 @@ void md_do_sync(mddev_t *mddev)
 	blk_unplug(mddev->queue);
 
 	wait_event(mddev->recovery_wait, !atomic_read(&mddev->recovery_active));
+
+#ifdef MY_ABC_HERE
+	SynoReportSyncStatus(desc, 1, (test_bit(MD_RECOVERY_INTR, &mddev->recovery) ? 1 : 0), mddev->md_minor);
+#endif  
 
 	mddev->pers->sync_request(mddev, max_sectors, &skipped, 1);
 

@@ -286,6 +286,9 @@ static int linear_stop (mddev_t *mddev)
 	rcu_barrier();
 	blk_sync_queue(mddev->queue);  
 	kfree(conf);
+#ifdef MY_ABC_HERE
+	mddev->private = NULL;
+#endif  
 
 	return 0;
 }
@@ -353,7 +356,7 @@ static int linear_make_request (struct request_queue *q, struct bio *bio)
 #else
 	if (mddev->degraded) {
 #endif
-		bio_endio(bio, 0);
+		bio_endio(bio, -EIO);
 		return 0;
 	}
 #endif

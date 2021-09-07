@@ -657,7 +657,7 @@ static int make_request(struct request_queue *q, struct bio * bio)
 #else
 	if (!blRaid10Enough(conf, NULL)) {
 #endif
-		bio_endio(bio, 0);
+		bio_endio(bio, -EIO);
 		return 0;
 	}
 #endif  
